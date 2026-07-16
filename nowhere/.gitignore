@@ -1,0 +1,14 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+export_credentials.cfg
+
+# Exported builds
+/build/
+/builds/
+/web/
+*.pck
+*.exe
+*.x86_64
+*.dmg
+*.app
