@@ -25,7 +25,13 @@
         if (!response.ok) throw new Error(`Version request failed: ${response.status}`);
         return response.json();
       })
-      .then(({ page }) => location.replace(new URL(`${page}?v=${Date.now()}`, location.href)))
+      .then(({ page, pack, packSize }) => {
+        const target = new URL(page, location.href);
+        target.searchParams.set("pack", pack);
+        target.searchParams.set("size", packSize);
+        target.searchParams.set("build", pack);
+        location.replace(target);
+      })
       .catch((error) => {
         console.error(error);
         document.body.textContent = "Unable to load the latest build.";

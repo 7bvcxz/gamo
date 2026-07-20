@@ -22,7 +22,7 @@
 - GitHub Pages는 `main` 브랜치의 `docs/`를 서비스한다.
 - 새 게임을 추가할 때 `export_presets.cfg`의 Web preset을 반드시 포함한다.
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
-- Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙이고, 고정 `index.html`이 GitHub 저장소 API에서 최신 `version.json`을 읽어 최신 빌드로 이동한다. 생성된 해시 파일명이나 로더를 수동으로 되돌리지 않는다.
+- Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙인다. 고정 `index.html`은 GitHub 저장소 API에서 최신 manifest를 읽고, 고정 `runner.html`은 해시 PCK를 저장소 원본 경로에서 직접 내려받는다. 생성된 해시 파일명, manifest, 로더, runner를 수동으로 되돌리지 않는다.
 
 ## 실수와 교훈
 
@@ -36,3 +36,4 @@
 - 2026-07-20: GitHub Pages의 약 10분 브라우저 캐시 때문에 같은 URL에서 이전 Web 빌드가 계속 보였다. HTTP 캐시 헤더는 저장소에서 제어할 수 없으므로 배포 시 내용 해시 파일명과 cache-busting 버전 로더를 사용한다.
 - 2026-07-20: 컨베이어를 고정 `Area2D`로 구현해 플레이어와 겹칠 수 있었고 갈색 상자처럼 밀리지 않았다. 물리 블록 요구가 있으면 고체 충돌/중력/감쇠/밀기 동작과 효과 감지 영역을 별도로 설계해 모두 확인한다.
 - 2026-07-20: GitHub Pages의 `version.json`에 시간 쿼리를 붙이면 캐시가 분리될 것으로 예상했지만 Pages CDN은 쿼리를 무시하고 동일 캐시를 최대 10분 제공했다. Pages의 최신 버전 판단에는 GitHub Contents API를 사용하고, 실제 공개 경로와 HeyDive iframe 양쪽에서 검증한다.
+- 2026-07-20: 저장소 API로 최신 해시를 즉시 알아도 GitHub Pages 배포 전에 새 해시 URL을 조회해 404가 캐시됐다. 업데이트된 PCK는 Pages 준비 여부를 미리 조회하지 말고, 고정 runner가 저장소의 고유 해시 PCK를 직접 다운로드하게 한다.

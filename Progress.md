@@ -32,6 +32,7 @@
   - 0.0.6: 컨베이어는 주변 사물을 표시 방향으로 계속 밀도록 별도 감지 영역 유지
   - 0.0.6: 월드의 각 5×5 구역마다 갈색 상자와 무작위 방향 컨베이어를 각각 1개씩 배치
   - 0.0.7: GitHub Pages가 쿼리를 무시하고 버전 파일을 캐시하는 문제를 피해 GitHub Contents API 기반 최신 빌드 로더 적용
+  - 0.0.8: Pages 배포 전 새 URL의 404까지 캐시되는 문제를 피해 고정 runner가 저장소의 해시 PCK를 직접 로드하도록 변경
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음
@@ -51,5 +52,5 @@
 ## 운영 규칙
 
 - 앞으로 새 게임의 완료 범위에는 Godot 구현, Web export, GitHub push, HeyDive 게임 등록 및 실행 확인을 모두 포함한다.
-- Web 배포는 내용 해시가 붙은 게임 파일과 GitHub Contents API 기반 최신 버전 로더를 생성해 브라우저와 Pages CDN의 이전 빌드 캐시를 우회한다.
+- Web 배포는 GitHub Contents API 기반 manifest와 고정 runner를 사용하고, 해시 PCK는 저장소에서 직접 받아 브라우저/Pages CDN 캐시와 Pages 배포 지연을 우회한다.
 - Motorio는 push 직전에 patch 버전을 0.0.1 올리며, minor/major는 사용자 요청이 있을 때만 변경한다.
