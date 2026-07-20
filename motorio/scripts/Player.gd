@@ -2,6 +2,7 @@ extends CharacterBody2D
 
 const SPEED := 220.0
 const RADIUS := 11.0
+const PUSH_FORCE := 2200.0
 
 var world_bounds := Rect2()
 
@@ -12,10 +13,18 @@ func _physics_process(_delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * SPEED
 	move_and_slide()
+	_push_rigid_bodies()
 
 	# Keep the complete character inside the 100 × 100 tile world.
 	position.x = clamp(position.x, world_bounds.position.x + RADIUS, world_bounds.end.x - RADIUS)
 	position.y = clamp(position.y, world_bounds.position.y + RADIUS, world_bounds.end.y - RADIUS)
+
+func _push_rigid_bodies() -> void:
+	for index in get_slide_collision_count():
+		var collision := get_slide_collision(index)
+		var body := collision.get_collider() as RigidBody2D
+		if body:
+			body.apply_central_force(-collision.get_normal() * PUSH_FORCE)
 
 func _draw() -> void:
 	# Compact industrial rover/engineer marker, readable against every terrain tile.

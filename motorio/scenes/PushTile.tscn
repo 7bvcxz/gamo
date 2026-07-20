@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/PushTile.gd" id="1_tile"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_tile"]
+size = Vector2(31, 31)
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tile"]
+friction = 0.8
+rough = true
+
+[node name="PushTile" type="RigidBody2D"]
+mass = 1.4
+physics_material_override = SubResource("PhysicsMaterial_tile")
+lock_rotation = true
+linear_damp = 12.0
+linear_damp_mode = 1
+script = ExtResource("1_tile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape_tile")

@@ -18,6 +18,10 @@
   - `godot --headless --path motorio --quit-after 3` 런타임 오류 없음
   - `./deploy-web.sh motorio` Web export 성공
   - GitHub Pages의 `/gamo/motorio/` HTTP 200 응답 확인
+  - Noto Sans CJK 폰트를 프로젝트에 포함하고 UI에 명시 적용해 Web 한글 깨짐 수정
+  - 1×1 크기의 갈색 물리 타일 추가: 플레이어 충돌 시 밀리고 선형 감쇠로 정지
+  - 플레이어 충돌체와 월드 외곽 물리 벽 추가
+  - 한글/물리 타일 변경 후 headless 실행 및 Web export 재검증
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음
