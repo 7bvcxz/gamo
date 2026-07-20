@@ -3,20 +3,22 @@ extends Node2D
 const TILE_SIZE := 32
 const WORLD_TILES := 100
 const WORLD_SIZE := TILE_SIZE * WORLD_TILES
+const REGION_SIZE := 5
+const SPAWN_SEED := 20260720
+const PUSH_TILE_SCENE := preload("res://scenes/PushTile.tscn")
+const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
+const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 
 @onready var player: CharacterBody2D = $Player
-@onready var push_tile: RigidBody2D = $PushTile
-@onready var conveyor: Area2D = $Conveyor
 @onready var info: Label = $UI/Info
 @onready var version_label: Label = $UI/Version
 
 func _ready() -> void:
 	player.position = Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
-	push_tile.position = player.position + Vector2(TILE_SIZE * 2, 0)
-	conveyor.position = player.position + Vector2(0, TILE_SIZE * 3)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
 	_create_world_walls()
+	_populate_world()
 	var camera := player.get_node("Camera2D") as Camera2D
 	camera.limit_left = 0
 	camera.limit_top = 0
@@ -24,6 +26,49 @@ func _ready() -> void:
 	camera.limit_bottom = WORLD_SIZE
 	camera.limit_smoothed = true
 	queue_redraw()
+
+func _populate_world() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = SPAWN_SEED
+	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
+
+	for region_y in range(0, WORLD_TILES, REGION_SIZE):
+		for region_x in range(0, WORLD_TILES, REGION_SIZE):
+			var occupied: Dictionary[Vector2i, bool] = {}
+			var box_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile)
+			occupied[box_cell] = true
+			var belt_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile)
+
+			var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D
+			box.position = _cell_center(box_cell)
+			add_child(box)
+
+			var belt := CONVEYOR_SCENE.instantiate() as ConveyorBlock
+			belt.direction = CARDINAL_DIRECTIONS[rng.randi_range(0, CARDINAL_DIRECTIONS.size() - 1)]
+			belt.position = _cell_center(belt_cell)
+			add_child(belt)
+
+func _random_free_cell(
+	rng: RandomNumberGenerator,
+	region_x: int,
+	region_y: int,
+	occupied: Dictionary[Vector2i, bool],
+	center_tile: Vector2i
+) -> Vector2i:
+	while true:
+		var cell := Vector2i(
+			region_x + rng.randi_range(0, REGION_SIZE - 1),
+			region_y + rng.randi_range(0, REGION_SIZE - 1)
+		)
+		if occupied.has(cell):
+			continue
+		if abs(cell.x - center_tile.x) <= 2 and abs(cell.y - center_tile.y) <= 2:
+			continue
+		return cell
+	return Vector2i(region_x, region_y)
+
+func _cell_center(cell: Vector2i) -> Vector2:
+	return Vector2(cell * TILE_SIZE) + Vector2.ONE * (TILE_SIZE / 2.0)
 
 func _process(_delta: float) -> void:
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
