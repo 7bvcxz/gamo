@@ -6,7 +6,7 @@
 size = Vector2(31, 31)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_detector"]
-size = Vector2(36, 36)
+size = Vector2(32, 32)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_conveyor"]
 friction = 0.8

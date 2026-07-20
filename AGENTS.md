@@ -42,3 +42,4 @@
 - 2026-07-20: 모바일 컨트롤 테스트에서 배열 원소와 동적 씬 인스턴스의 GDScript 타입 추론 오류가 발생했다. 상수 배열에서 꺼내는 값과 `load().instantiate()` 결과는 명시적으로 타입을 지정하고, 정적 `Node`의 사용자 정의 속성은 `get()`으로 검증한다.
 - 2026-07-20: cache-busting runner에서 `Engine.start()` 전에 `Engine.init(executable)`을 호출하지 않아 브라우저에서 “A base path must be provided” 오류가 발생했다. Web runner는 엔진 초기화 → PCK preload → start 순서를 지키고, Node 문법 검사뿐 아니라 실제 브라우저 실행 테스트를 필수로 한다.
 - 2026-07-20: `npx -p playwright node -e`가 임시 Playwright 모듈을 Node 검색 경로에 제공할 것으로 가정해 브라우저 테스트 실행이 실패했다. 일회성 브라우저 테스트는 명시적 임시 prefix에 패키지를 설치하고 해당 `node_modules`를 `NODE_PATH`로 지정한다.
+- 2026-07-20: 컨베이어 화살표 wrap 계산이 32×32 블록 범위를 벗어났고, 효과 감지 영역을 충돌체보다 크게 만들어 외곽선 접촉만으로 이동이 적용됐다. 애니메이션 점의 최대 범위와 엄격한 내부 판정을 각각 자동 테스트한다.

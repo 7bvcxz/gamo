@@ -4,6 +4,8 @@ class_name ConveyorBlock
 const TILE_SIZE := 32.0
 const BELT_SPEED := 72.0
 const PUSH_FORCE := 1300.0
+const EFFECT_HALF_EXTENT := 12.0
+const ARROW_CYCLE := 20.0
 
 @export var direction := Vector2.RIGHT
 var animation_offset := 0.0
@@ -11,6 +13,8 @@ var animation_offset := 0.0
 func _physics_process(delta: float) -> void:
 	for body in $Detector.get_overlapping_bodies():
 		if body == self:
+			continue
+		if not contains_effect_point(body.global_position):
 			continue
 		if body is RigidBody2D:
 			body.apply_central_force(direction * PUSH_FORCE)
@@ -22,8 +26,20 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		state.linear_velocity = Vector2.ZERO
 
 func _process(delta: float) -> void:
-	animation_offset = fmod(animation_offset + delta * BELT_SPEED, 12.0)
+	animation_offset = fmod(animation_offset + delta * BELT_SPEED, ARROW_CYCLE)
 	queue_redraw()
+
+func contains_effect_point(global_point: Vector2) -> bool:
+	var local_point := to_local(global_point)
+	return abs(local_point.x) < EFFECT_HALF_EXTENT and abs(local_point.y) < EFFECT_HALF_EXTENT
+
+func get_arrow_points(index: int) -> PackedVector2Array:
+	var x := fmod(index * 10.0 + animation_offset + 8.0, ARROW_CYCLE) - 8.0
+	return PackedVector2Array([
+		Vector2(x - 3.0, -5.0),
+		Vector2(x + 2.0, 0.0),
+		Vector2(x - 3.0, 5.0),
+	])
 
 func _draw() -> void:
 	var tile_rect := Rect2(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0, TILE_SIZE, TILE_SIZE)
@@ -32,12 +48,6 @@ func _draw() -> void:
 
 	# Three moving chevrons indicate the belt direction.
 	draw_set_transform(Vector2.ZERO, direction.angle())
-	for index in range(-2, 3):
-		var x := -12.0 + index * 12.0 + animation_offset
-		if x > 16.0:
-			x -= 48.0
-		var arrow := PackedVector2Array([
-			Vector2(x - 4, -6), Vector2(x + 3, 0), Vector2(x - 4, 6)
-		])
-		draw_polyline(arrow, Color("e0a83d"), 3.0)
+	for index in range(2):
+		draw_polyline(get_arrow_points(index), Color("e0a83d"), 2.5)
 	draw_set_transform(Vector2.ZERO)
