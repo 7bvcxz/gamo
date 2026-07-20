@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 const SPEED := 220.0
+const SPRINT_MULTIPLIER := 1.8
 const RADIUS := 11.0
 const PUSH_FORCE := 2200.0
 
@@ -18,7 +19,8 @@ func _physics_process(delta: float) -> void:
 		walk_phase += delta * 12.0
 	else:
 		walk_phase = 0.0
-	velocity = direction * SPEED
+	var speed_multiplier := SPRINT_MULTIPLIER if Input.is_action_pressed("sprint") else 1.0
+	velocity = direction * SPEED * speed_multiplier
 	move_and_slide()
 	_push_rigid_bodies()
 	queue_redraw()
