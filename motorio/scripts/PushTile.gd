@@ -5,6 +5,11 @@ const TILE_SIZE := 32.0
 func _ready() -> void:
 	queue_redraw()
 
+func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
+	# Remove tiny residual motion once the player is no longer pushing.
+	if state.linear_velocity.length_squared() < 4.0:
+		state.linear_velocity = Vector2.ZERO
+
 func _draw() -> void:
 	var tile_rect := Rect2(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0, TILE_SIZE, TILE_SIZE)
 	draw_rect(tile_rect, Color("7a4f2a"))

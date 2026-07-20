@@ -23,7 +23,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
-	info.text = "WASD / 방향키로 이동 · 갈색 타일을 밀어보세요\n위치  %d, %d" % [tile.x, tile.y]
+	info.text = "POS  %d, %d" % [tile.x, tile.y]
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0
