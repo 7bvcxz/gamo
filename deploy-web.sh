@@ -33,6 +33,34 @@ for proj in "$ROOT"/*/; do
   mkdir -p "$OUT/$name"
   rm -f "$OUT/$name"/index.* 2>/dev/null || true
   "$GODOT" --headless --path "$proj" --export-release "Web" "$OUT/$name/index.html"
+
+  # GitHub Pages applies browser caching headers that this repository cannot
+  # override. Give every executable and game pack a content-addressed URL, then
+  # leave a tiny stable loader at index.html that discovers the latest build.
+  engine_hash="$(sha256sum "$OUT/$name/index.wasm" | cut -c1-12)"
+  pack_hash="$(sha256sum "$OUT/$name/index.pck" | cut -c1-12)"
+  engine_base="engine-${engine_hash}"
+  pack_name="game-${pack_hash}.pck"
+  page_name="game-${pack_hash}.html"
+
+  mv "$OUT/$name/index.js" "$OUT/$name/${engine_base}.js"
+  mv "$OUT/$name/index.wasm" "$OUT/$name/${engine_base}.wasm"
+  mv "$OUT/$name/index.audio.worklet.js" "$OUT/$name/${engine_base}.audio.worklet.js"
+  mv "$OUT/$name/index.audio.position.worklet.js" "$OUT/$name/${engine_base}.audio.position.worklet.js"
+  mv "$OUT/$name/index.pck" "$OUT/$name/$pack_name"
+  mv "$OUT/$name/index.html" "$OUT/$name/$page_name"
+
+  sed -i \
+    -e "s|src=\"index.js\"|src=\"${engine_base}.js\"|" \
+    -e "s|\"args\":\[\]|\"args\":[],\"mainPack\":\"${pack_name}\"|" \
+    -e "s|\"executable\":\"index\"|\"executable\":\"${engine_base}\"|" \
+    -e "s|\"index.pck\":|\"${pack_name}\":|" \
+    -e "s|\"index.wasm\":|\"${engine_base}.wasm\":|" \
+    "$OUT/$name/$page_name"
+
+  cp "$ROOT/web-index-loader.html" "$OUT/$name/index.html"
+  cp "$ROOT/web-version.json" "$OUT/$name/version.json"
+  sed -i "s|__BUILD_PAGE__|${page_name}|" "$OUT/$name/version.json"
   built+=("$name")
 done
 

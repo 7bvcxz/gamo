@@ -20,6 +20,7 @@
 - GitHub Pages는 `main` 브랜치의 `docs/`를 서비스한다.
 - 새 게임을 추가할 때 `export_presets.cfg`의 Web preset을 반드시 포함한다.
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
+- Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙이고, 고정 `index.html`이 cache-busting된 `version.json`을 통해 최신 빌드로 이동한다. 생성된 해시 파일명이나 로더를 수동으로 되돌리지 않는다.
 
 ## 실수와 교훈
 
@@ -30,3 +31,4 @@
 - 2026-07-20: 탑다운 게임의 `RigidBody2D` 갈색 타일에 기본 중력이 적용되어 아래로 계속 움직였다. 평면 탑뷰 물체는 `gravity_scale = 0`을 명시하고, 정지 요구가 있으면 감쇠와 저속 임계 정지를 함께 검증한다.
 - 2026-07-20: 불필요해진 폰트 파일을 `rm -f`로 삭제하려다 안전 정책에 의해 명령이 거부됐다. 이미 추적 중인 파일은 패치로 삭제하고, 큰 바이너리는 정확한 단일 경로를 확인한 뒤 `unlink`를 사용한다.
 - 2026-07-20: 걷기 모션의 삼항 조건식에서 GDScript가 `bob`의 타입을 추론하지 못해 파싱 오류가 발생했다. 수치 애니메이션 지역 변수에는 `float` 타입을 명시한다. 또한 Godot headless가 스크립트 오류에도 종료 코드 0을 반환할 수 있으므로 명령 성공 여부뿐 아니라 출력의 `SCRIPT ERROR`/`ERROR`도 확인한다.
+- 2026-07-20: GitHub Pages의 약 10분 브라우저 캐시 때문에 같은 URL에서 이전 Web 빌드가 계속 보였다. HTTP 캐시 헤더는 저장소에서 제어할 수 없으므로 배포 시 내용 해시 파일명과 cache-busting 버전 로더를 사용한다.
