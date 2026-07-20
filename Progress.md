@@ -36,6 +36,8 @@
   - 0.0.9: 모바일 우측 아래 이동 휠과 좌측 아래 RUN/A/B 버튼 3개 추가
   - 0.0.9: 이동 휠을 실제 이동에, RUN 버튼을 달리기에 연결하고 터치 자동 테스트 추가
   - 0.0.9 검증: 버튼 3개/좌우 배치/휠 이동/휠 해제 정지/RUN press·release 자동 테스트 통과
+  - 0.0.10: Web runner의 엔진 base path 초기화 누락 수정 및 캐시된 runner를 피하는 v2 경로 적용
+  - 0.0.10 검증: 모바일 Chromium에서 runner-v2 엔진 초기화, 원격 PCK 로드, 390×844 캔버스 실행 및 터치 UI 렌더링 확인
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음

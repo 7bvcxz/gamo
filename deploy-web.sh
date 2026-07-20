@@ -11,6 +11,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 GODOT="${GODOT:-godot}"
 OUT="$ROOT/docs"
 ONLY="${1:-}"
+RUNNER_PAGE="runner-v2.html"
 
 command -v "$GODOT" >/dev/null 2>&1 || { echo "godot 실행파일을 찾을 수 없습니다 (GODOT 환경변수로 지정)"; exit 1; }
 
@@ -58,10 +59,10 @@ for proj in "$ROOT"/*/; do
     -e "s|\"index.wasm\":|\"${engine_base}.wasm\":|" \
     "$OUT/$name/$page_name"
 
-  # runner.html is stable and may be cached. It reads the requested content-
+  # The runner is stable and may be cached. It reads the requested content-
   # hashed PCK name from its query string and downloads that unique file
   # directly from the repository, avoiding the GitHub Pages deployment delay.
-  cp "$OUT/$name/$page_name" "$OUT/$name/runner.html"
+  cp "$OUT/$name/$page_name" "$OUT/$name/$RUNNER_PAGE"
   sed -i \
     -e "/const engine = new Engine/i\\
 const RUNNER_PARAMS = new URLSearchParams(location.search);\\
@@ -70,14 +71,15 @@ const REQUESTED_PACK_SIZE = Number(RUNNER_PARAMS.get('size')) || GODOT_CONFIG.fi
 const REMOTE_PACK = \`https://raw.githubusercontent.com/7bvcxz/gamo/main/docs/${name}/\${REQUESTED_PACK}\`;\\
 GODOT_CONFIG.fileSizes[REMOTE_PACK] = REQUESTED_PACK_SIZE;\\
     GODOT_CONFIG.args = ['--main-pack', REQUESTED_PACK].concat(GODOT_CONFIG.args);" \
-    -e "s|engine.startGame({|engine.preloadFile(REMOTE_PACK, REQUESTED_PACK).then(() => engine.start({|" \
-    -e "/engine.preloadFile(REMOTE_PACK/,/setStatusMode('hidden')/ s|^[[:space:]]*}).then(() => {$|\t\t})).then(() => {|" \
-    "$OUT/$name/runner.html"
+    -e "s|engine.startGame({|engine.init(GODOT_CONFIG.executable).then(() => engine.preloadFile(REMOTE_PACK, REQUESTED_PACK)).then(() => engine.start({|" \
+    -e "/engine.init(GODOT_CONFIG.executable)/,/setStatusMode('hidden')/ s|^[[:space:]]*}).then(() => {$|\t\t})).then(() => {|" \
+    "$OUT/$name/$RUNNER_PAGE"
 
   cp "$ROOT/web-index-loader.html" "$OUT/$name/index.html"
   cp "$ROOT/web-version.json" "$OUT/$name/version.json"
   pack_size="$(stat -c%s "$OUT/$name/$pack_name")"
   sed -i \
+    -e "s|__RUNNER_PAGE__|${RUNNER_PAGE}|" \
     -e "s|__PACK_NAME__|${pack_name}|" \
     -e "s|__PACK_SIZE__|${pack_size}|" \
     "$OUT/$name/version.json"

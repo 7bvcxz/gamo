@@ -10,6 +10,8 @@
 - 기존 사용자의 변경은 덮어쓰거나 되돌리지 않는다.
 - Godot 프로젝트는 가능하면 외부 에셋 없이도 처음 clone한 상태에서 실행되어야 한다.
 - 완료 전 `godot --headless --path <게임 폴더> --editor --quit`로 로드 오류를 확인하고, 가능하면 Web export도 검증한다.
+- Web 배포 로더나 runner를 변경하면 정적 검사만으로 완료하지 않는다. 실제 브라우저에서 공개 또는 로컬 HTTP URL을 열어 Godot 캔버스가 초기화되고 오류 화면이 없으며 게임 프레임이 실행되는지 자동 브라우저 테스트로 확인한다.
+- 기능 작업은 관련 자동 테스트와 실제 실행 검증이 모두 통과하기 전에는 완료로 보고하거나 push하지 않는다. 실행 환경을 준비할 수 없다면 완료라고 하지 말고 차단 상태와 필요한 검증을 보고한다.
 - 새 게임을 추가하면 Web 배포 후 HeyDive 관리자 화면/API에도 게임명, 설명, 태그, `Release` 상태, 배포된 절대 `embedUrl`을 등록하고 실제 목록 노출과 실행을 확인한다.
 - HeyDive 등록에 인증이나 서버 접근 권한이 필요해 자동 완료할 수 없다면, 정적 배포 완료와 HeyDive 등록 미완료를 명확히 구분해 보고하고 사용자에게 필요한 최소 작업을 요청한다.
 - 완료된 변경은 관련 파일만 커밋하고 `main` 브랜치를 원격에 push한다.
@@ -38,3 +40,5 @@
 - 2026-07-20: GitHub Pages의 `version.json`에 시간 쿼리를 붙이면 캐시가 분리될 것으로 예상했지만 Pages CDN은 쿼리를 무시하고 동일 캐시를 최대 10분 제공했다. Pages의 최신 버전 판단에는 GitHub Contents API를 사용하고, 실제 공개 경로와 HeyDive iframe 양쪽에서 검증한다.
 - 2026-07-20: 저장소 API로 최신 해시를 즉시 알아도 GitHub Pages 배포 전에 새 해시 URL을 조회해 404가 캐시됐다. 업데이트된 PCK는 Pages 준비 여부를 미리 조회하지 말고, 고정 runner가 저장소의 고유 해시 PCK를 직접 다운로드하게 한다.
 - 2026-07-20: 모바일 컨트롤 테스트에서 배열 원소와 동적 씬 인스턴스의 GDScript 타입 추론 오류가 발생했다. 상수 배열에서 꺼내는 값과 `load().instantiate()` 결과는 명시적으로 타입을 지정하고, 정적 `Node`의 사용자 정의 속성은 `get()`으로 검증한다.
+- 2026-07-20: cache-busting runner에서 `Engine.start()` 전에 `Engine.init(executable)`을 호출하지 않아 브라우저에서 “A base path must be provided” 오류가 발생했다. Web runner는 엔진 초기화 → PCK preload → start 순서를 지키고, Node 문법 검사뿐 아니라 실제 브라우저 실행 테스트를 필수로 한다.
+- 2026-07-20: `npx -p playwright node -e`가 임시 Playwright 모듈을 Node 검색 경로에 제공할 것으로 가정해 브라우저 테스트 실행이 실패했다. 일회성 브라우저 테스트는 명시적 임시 prefix에 패키지를 설치하고 해당 `node_modules`를 `NODE_PATH`로 지정한다.
