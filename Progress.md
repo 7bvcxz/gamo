@@ -17,6 +17,11 @@
   - `godot --headless --path motorio --editor --quit` 성공
   - `godot --headless --path motorio --quit-after 3` 런타임 오류 없음
   - `./deploy-web.sh motorio` Web export 성공
+  - GitHub Pages의 `/gamo/motorio/` HTTP 200 응답 확인
+- 연동 조사:
+  - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
+  - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음
+  - Motorio를 노출하려면 HeyDive 관리자 화면/API에 외부 embed URL을 별도로 등록하거나 자동 동기화 기능을 구현해야 함
 
 ## 다음 작업
 

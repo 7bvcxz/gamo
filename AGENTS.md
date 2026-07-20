@@ -20,4 +20,4 @@
 
 ## 실수와 교훈
 
-- 아직 기록된 실수 없음.
+- 2026-07-20: GitHub Pages Web export 배포를 HeyDive 게임 목록 등록과 같은 것으로 간주했다. `gamo`의 push는 정적 파일만 배포하며, 현재 HeyDive 목록은 별도 서버 DB에서 관리된다. 이후 배포 완료를 보고할 때 정적 URL 응답과 HeyDive API 등록 여부를 각각 확인한다.
