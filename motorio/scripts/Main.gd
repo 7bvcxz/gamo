@@ -12,11 +12,13 @@ const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2
 @onready var player: CharacterBody2D = $Player
 @onready var info: Label = $UI/Info
 @onready var version_label: Label = $UI/Version
+@onready var touch_controls: TouchControls = $UI/TouchControls
 
 func _ready() -> void:
 	player.position = Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
+	touch_controls.player = player
 	_create_world_walls()
 	_populate_world()
 	var camera := player.get_node("Camera2D") as Camera2D

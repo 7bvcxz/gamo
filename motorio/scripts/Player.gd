@@ -8,18 +8,23 @@ const PUSH_FORCE := 2200.0
 var world_bounds := Rect2()
 var facing := Vector2.DOWN
 var walk_phase := 0.0
+var touch_direction := Vector2.ZERO
+var touch_sprint := false
 
 func _ready() -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if not touch_direction.is_zero_approx():
+		direction = touch_direction
 	if not direction.is_zero_approx():
 		facing = direction.normalized()
 		walk_phase += delta * 12.0
 	else:
 		walk_phase = 0.0
-	var speed_multiplier := SPRINT_MULTIPLIER if Input.is_action_pressed("sprint") else 1.0
+	var sprinting := Input.is_action_pressed("sprint") or touch_sprint
+	var speed_multiplier := SPRINT_MULTIPLIER if sprinting else 1.0
 	velocity = direction * SPEED * speed_multiplier
 	move_and_slide()
 	_push_rigid_bodies()
