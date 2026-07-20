@@ -8,12 +8,14 @@ const WORLD_SIZE := TILE_SIZE * WORLD_TILES
 @onready var push_tile: RigidBody2D = $PushTile
 @onready var conveyor: Area2D = $Conveyor
 @onready var info: Label = $UI/Info
+@onready var version_label: Label = $UI/Version
 
 func _ready() -> void:
 	player.position = Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	push_tile.position = player.position + Vector2(TILE_SIZE * 2, 0)
 	conveyor.position = player.position + Vector2(0, TILE_SIZE * 3)
+	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
 	_create_world_walls()
 	var camera := player.get_node("Camera2D") as Camera2D
 	camera.limit_left = 0
