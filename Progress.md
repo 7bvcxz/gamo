@@ -25,6 +25,11 @@
 
 ## 다음 작업
 
+- Motorio를 HeyDive 게임 목록에 `Release` 상태로 등록
 - 자원 종류와 채집 방식 설계
 - 인벤토리 및 핫바 구현
 - 첫 생산 설비 배치와 운송 시스템 구현
+
+## 운영 규칙
+
+- 앞으로 새 게임의 완료 범위에는 Godot 구현, Web export, GitHub push, HeyDive 게임 등록 및 실행 확인을 모두 포함한다.
