@@ -13,12 +13,19 @@
 <body>
   <span>Loading...</span>
   <script>
-    fetch(`version.json?t=${Date.now()}`, { cache: "no-store" })
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const gameName = pathParts.at(-1) === "index.html" ? pathParts.at(-2) : pathParts.at(-1);
+    const versionApi = `https://api.github.com/repos/7bvcxz/gamo/contents/docs/${gameName}/version.json?ref=main&t=${Date.now()}`;
+
+    fetch(versionApi, {
+      cache: "no-store",
+      headers: { Accept: "application/vnd.github.raw+json" },
+    })
       .then((response) => {
         if (!response.ok) throw new Error(`Version request failed: ${response.status}`);
         return response.json();
       })
-      .then(({ page }) => location.replace(new URL(page, location.href)))
+      .then(({ page }) => location.replace(new URL(`${page}?v=${Date.now()}`, location.href)))
       .catch((error) => {
         console.error(error);
         document.body.textContent = "Unable to load the latest build.";
