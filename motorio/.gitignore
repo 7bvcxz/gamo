@@ -1,0 +1,14 @@
+# Godot 4+ generated files
+.godot/
+.import/
+export_credentials.cfg
+
+# Local exports
+/build/
+/builds/
+/web/
+*.pck
+*.exe
+*.x86_64
+*.dmg
+*.app
