@@ -33,11 +33,12 @@
   - `heydive-server` 시작 시 Motorio를 URL 기준으로 중복 없이 `Release` 등록하는 시드 구현 및 `main` push
   - 등록 URL: `https://7bvcxz.github.io/gamo/motorio/index.html`
   - Motorio HTML/WASM HTTP 200 및 CORS 허용 확인
-  - 인증 세션이 필요한 HeyDive 게임 목록의 실제 노출 확인은 서버 재배포 후 필요
+  - HeyDive 서버 Docker 이미지를 재빌드·재기동하고 운영 DB 등록 완료
+  - localhost 및 `api.heydive.in`의 `/api/games` 응답에서 Motorio `Release` 노출 확인
+  - `heydive-client` 프로덕션 빌드와 `https://www.heydive.in/game` HTTP 200 확인
 
 ## 다음 작업
 
-- HeyDive 서버 재배포 후 로그인 상태에서 Motorio 목록 노출과 실행 확인
 - 자원 종류와 채집 방식 설계
 - 인벤토리 및 핫바 구현
 - 첫 생산 설비 배치와 운송 시스템 구현
