@@ -28,11 +28,14 @@
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음
-  - Motorio를 노출하려면 HeyDive 관리자 화면/API에 외부 embed URL을 별도로 등록하거나 자동 동기화 기능을 구현해야 함
+  - `heydive-server` 시작 시 Motorio를 URL 기준으로 중복 없이 `Release` 등록하는 시드 구현 및 `main` push
+  - 등록 URL: `https://7bvcxz.github.io/gamo/motorio/index.html`
+  - Motorio HTML/WASM HTTP 200 및 CORS 허용 확인
+  - 인증 세션이 필요한 HeyDive 게임 목록의 실제 노출 확인은 서버 재배포 후 필요
 
 ## 다음 작업
 
-- Motorio를 HeyDive 게임 목록에 `Release` 상태로 등록
+- HeyDive 서버 재배포 후 로그인 상태에서 Motorio 목록 노출과 실행 확인
 - 자원 종류와 채집 방식 설계
 - 인벤토리 및 핫바 구현
 - 첫 생산 설비 배치와 운송 시스템 구현
