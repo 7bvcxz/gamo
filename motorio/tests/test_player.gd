@@ -15,7 +15,7 @@ func _initialize() -> void:
 	_assert(_action_has_key("move_down", KEY_DOWN), "down arrow is mapped to move_down")
 	_assert(player.get("mode_light_color") == player.MODE_IN_LIGHT, "IN mode uses a blue front light")
 	player.facing = Vector2.LEFT
-	_assert(player.call("get_mode_light_position") == Vector2.LEFT * 32.0, "mode light follows the facing cell")
+	_assert(player.call("get_mode_light_position") == Vector2.LEFT * 22.0, "mode light stays close and follows the facing direction")
 	player.call("set_out_mode_light", true)
 	_assert(player.get("mode_light_color") == player.MODE_OUT_LIGHT, "OUT mode uses a red front light")
 	player.facing = Vector2.DOWN

@@ -23,6 +23,10 @@ func _run() -> void:
 		for arrow_index in range(2):
 			for point in conveyor.get_arrow_points(arrow_index):
 				_assert(abs(point.x) <= 14.0 and abs(point.y) <= 14.0, "arrow stays inside block")
+	conveyor.animation_offset = 0.0
+	conveyor._process(0.5)
+	_assert(is_equal_approx(conveyor.animation_offset, 18.0), "arrow animation runs at half belt speed")
+	_assert(conveyor.BELT_SPEED == 72.0, "slower animation does not change transport speed")
 
 	await _test_box_transport(conveyor)
 	await _test_player_collision()

@@ -7,6 +7,7 @@ const PUSH_FORCE := 2200.0
 const SPRITE_SCALE := 0.115
 const FRAME_CENTER := Vector2(181.0, 181.0)
 const TARGET_FOOT := Vector2(0.0, 13.0)
+const MODE_LIGHT_DISTANCE := 22.0
 const MODE_IN_LIGHT := Color(0.2, 0.72, 1.0, 0.34)
 const MODE_OUT_LIGHT := Color(1.0, 0.22, 0.18, 0.34)
 const FRAME_FOOT_ANCHORS := [
@@ -108,7 +109,7 @@ func get_mode_light_position() -> Vector2:
 		direction = Vector2(sign(direction.x), 0.0)
 	else:
 		direction = Vector2(0.0, sign(direction.y))
-	return direction * 32.0
+	return direction * MODE_LIGHT_DISTANCE
 
 func _draw() -> void:
 	# A soft light marks the interaction cell directly in front of the player.

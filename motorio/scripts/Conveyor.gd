@@ -3,6 +3,7 @@ class_name ConveyorBlock
 
 const TILE_SIZE := 32.0
 const BELT_SPEED := 72.0
+const ARROW_ANIMATION_SPEED := BELT_SPEED * 0.5
 const PUSH_FORCE := 1300.0
 # The visual outline occupies x/y 13..15, so only the area inside 13 moves items.
 const EFFECT_HALF_EXTENT := 13.0
@@ -31,7 +32,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 		state.linear_velocity = Vector2.ZERO
 
 func _process(delta: float) -> void:
-	animation_offset = fmod(animation_offset + delta * BELT_SPEED, ARROW_CYCLE)
+	animation_offset = fmod(animation_offset + delta * ARROW_ANIMATION_SPEED, ARROW_CYCLE)
 	queue_redraw()
 
 func contains_effect_point(global_point: Vector2) -> bool:
