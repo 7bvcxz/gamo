@@ -16,6 +16,13 @@ func _initialize() -> void:
 	_assert(sprite.frame >= 4 and sprite.frame <= 7, "walk animation row")
 	player.call("_update_character_animation", 0.0, Vector2.DOWN, true)
 	_assert(sprite.frame >= 8 and sprite.frame <= 11, "run animation row")
+	var idle_feet: Array[Vector2] = []
+	var anchors := [Vector2(249.0, 339.0), Vector2(193.5, 339.0), Vector2(199.0, 339.0), Vector2(91.5, 339.0)]
+	for frame_index in range(4):
+		player.call("_set_character_frame", frame_index)
+		idle_feet.append(sprite.position + (anchors[frame_index] - Vector2(181.0, 181.0)) * 0.115)
+	for foot in idle_feet:
+		_assert(foot.distance_to(Vector2(0.0, 13.0)) < 0.01, "idle frames share one foot anchor")
 
 	if failures == 0:
 		print("PLAYER_TEST: PASS")
