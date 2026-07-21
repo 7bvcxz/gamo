@@ -7,6 +7,7 @@ const ENTRANCE_DIRECTIONS := [Vector2.UP, Vector2.RIGHT, Vector2.LEFT]
 const EXIT_DIRECTION := Vector2.DOWN
 
 signal box_received(box: RigidBody2D)
+signal mineral_received(resource: RigidBody2D)
 
 func _ready() -> void:
 	_create_entrances()
@@ -29,12 +30,17 @@ func _create_entrances() -> void:
 		add_child(entrance)
 
 func _on_entrance_body_entered(body: Node2D) -> void:
-	var box := body as RigidBody2D
-	if box == null or not box.is_in_group("box_block") or box.has_meta("base_received"):
+	var resource := body as RigidBody2D
+	if resource == null or resource.has_meta("base_received"):
 		return
-	box.set_meta("base_received", true)
-	box_received.emit(box)
-	box.queue_free()
+	if resource.is_in_group("box_block"):
+		resource.set_meta("base_received", true)
+		box_received.emit(resource)
+		resource.queue_free()
+	elif resource.is_in_group("mined_resource"):
+		resource.set_meta("base_received", true)
+		mineral_received.emit(resource)
+		resource.queue_free()
 
 func _draw() -> void:
 	# Compact circular hub with a raised industrial center.

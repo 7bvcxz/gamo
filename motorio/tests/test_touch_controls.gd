@@ -17,12 +17,23 @@ func _run() -> void:
 	_assert(controls.get_button_count() == 4, "RUN, Z, X, and MODE buttons exist")
 	_assert(controls.joystick_center.x > controls.size.x * 0.5, "movement wheel is on the right")
 	_assert(controls.button_centers[0].x < controls.size.x * 0.5, "action buttons are on the left")
+	var mouse_motion := InputEventMouseMotion.new()
+	mouse_motion.position = Vector2(300, 300)
+	controls._input(mouse_motion)
+	_assert(not controls.visible, "mouse input hides mobile controls")
+	var keyboard_press := InputEventKey.new()
+	keyboard_press.keycode = KEY_RIGHT
+	keyboard_press.pressed = true
+	controls.set_controls_visible(true)
+	controls._input(keyboard_press)
+	_assert(not controls.visible, "keyboard input hides mobile controls")
 
 	var move_press := InputEventScreenTouch.new()
 	move_press.index = 1
 	move_press.position = controls.joystick_center + Vector2(controls.JOYSTICK_RADIUS, 0)
 	move_press.pressed = true
 	controls._input(move_press)
+	_assert(controls.visible, "touch input restores mobile controls")
 	var move_direction: Vector2 = player.get("touch_direction")
 	_assert(move_direction.x > 0.95, "wheel produces right movement")
 	controls._end_touch(1)

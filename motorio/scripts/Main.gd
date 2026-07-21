@@ -43,6 +43,7 @@ func _ready() -> void:
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
 	base.position = world_center
 	base.connect("box_received", _on_base_box_received)
+	base.connect("mineral_received", _on_base_mineral_received)
 	player.position = world_center + Vector2(0, TILE_SIZE * 3)
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
@@ -66,6 +67,10 @@ func _ready() -> void:
 func _on_base_box_received(_box: RigidBody2D) -> void:
 	box_count += 1
 	box_label.text = "BOX  %d" % box_count
+
+func _on_base_mineral_received(_resource: RigidBody2D) -> void:
+	mineral_count += 1
+	mineral_label.text = "MINERAL  %d" % mineral_count
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey

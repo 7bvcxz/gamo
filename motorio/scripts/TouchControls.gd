@@ -47,6 +47,13 @@ func _update_layout() -> void:
 	queue_redraw()
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
+		if visible:
+			set_controls_visible(false)
+		return
+	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		if not visible:
+			set_controls_visible(true)
 	if not visible:
 		return
 	if event is InputEventScreenTouch:
