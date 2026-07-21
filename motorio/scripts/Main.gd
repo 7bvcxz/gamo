@@ -10,6 +10,7 @@ const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
 const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
 const PILLAR_BLOCK_SCENE := preload("res://scenes/PillarBlock.tscn")
 const BOX_GENERATOR_SCENE := preload("res://scenes/BoxGenerator.tscn")
+const SPLITTER_SCENE := preload("res://scenes/Splitter.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
@@ -26,6 +27,8 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var minimap: Control = $UI/Minimap
 @onready var version_label: Label = $UI/Version
 @onready var touch_controls: TouchControls = $UI/TouchControls
+@onready var throughput_label: Label = $UI/Throughput
+@onready var quest_ui: Control = $UI/Quest
 
 var box_count := 0
 var mineral_count := 0
@@ -41,6 +44,15 @@ var collect_action_held := false
 var placement_action_held := false
 var placement_hold_elapsed := 0.0
 var placement_rotated_during_hold := false
+var quest_step := 0
+var automated_boxes_delivered := 0
+var base_level := 1
+var elapsed_time := 0.0
+var automated_delivery_times: Array[float] = []
+var celebration_remaining := 0.0
+var celebration_text := ""
+var cat_crafted := false
+var generator_crafted := false
 
 func _ready() -> void:
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0 + Vector2.ONE * (TILE_SIZE / 2.0)
@@ -54,6 +66,7 @@ func _ready() -> void:
 	touch_controls.main_controller = self
 	inventory_ui.main_controller = self
 	base_menu.main_controller = self
+	quest_ui.main_controller = self
 	minimap.main_controller = self
 	_update_interaction_ui()
 	_create_world_walls()
@@ -70,10 +83,19 @@ func _ready() -> void:
 func _on_base_box_received(_box: RigidBody2D) -> void:
 	box_count += 1
 	box_label.text = "BOX  %d" % box_count
+	if quest_step == 0:
+		_advance_quest("FIRST DELIVERY")
+	if _box.get_meta("automated_box", false):
+		automated_boxes_delivered += 1
+		automated_delivery_times.append(elapsed_time)
+		if quest_step == 4 and automated_boxes_delivered >= 3:
+			base_level = 2
+			_advance_quest("BASE LEVEL 2 - SPLITTER UNLOCKED")
 
 func _on_base_mineral_received(_resource: RigidBody2D) -> void:
 	mineral_count += 1
 	mineral_label.text = "MINERAL  %d" % mineral_count
+	_check_mineral_quest()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
@@ -166,6 +188,8 @@ func _pick_up_front_block() -> void:
 		item = {"type": "pillar"}
 	elif closest is BoxGenerator:
 		item = {"type": "box_generator", "direction": (closest as BoxGenerator).direction}
+	elif closest is SplitterBlock:
+		item = {"type": "splitter", "direction": (closest as SplitterBlock).direction}
 	inventory.append(item)
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
@@ -197,6 +221,10 @@ func _place_selected_block() -> void:
 		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
 		generator.direction = place_direction
 		block = generator
+	elif item["type"] == "splitter":
+		var splitter := SPLITTER_SCENE.instantiate() as SplitterBlock
+		splitter.direction = place_direction
+		block = splitter
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target + place_direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
@@ -228,6 +256,8 @@ func _sync_placement_preview() -> void:
 		(placement_preview as CatBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 	elif placement_preview is BoxGenerator:
 		(placement_preview as BoxGenerator).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	elif placement_preview is SplitterBlock:
+		(placement_preview as SplitterBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 	placement_preview.position = _preview_position(item_type)
 	placement_preview.queue_redraw()
 
@@ -243,6 +273,8 @@ func _create_placement_preview(item_type: String) -> RigidBody2D:
 		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 	elif item_type == "box_generator":
 		block = BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
+	elif item_type == "splitter":
+		block = SPLITTER_SCENE.instantiate() as SplitterBlock
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.set_meta("placement_preview", true)
@@ -315,13 +347,24 @@ func _close_base_menu() -> void:
 	base_menu.queue_redraw()
 
 func _cycle_fabricator_recipe() -> void:
-	fabricator_selection = (fabricator_selection + 1) % 3
+	fabricator_selection = (fabricator_selection + 1) % 4
 	_update_fabricator_status()
 	base_menu.queue_redraw()
 
 func _craft_selected_block() -> void:
 	var block: RigidBody2D
-	if fabricator_selection == 2:
+	if fabricator_selection == 3:
+		if base_level < 2:
+			fabricator_status = "LOCKED - COMPLETE AUTOMATION"
+			return
+		if box_count < 5:
+			fabricator_status = "NOT ENOUGH BOX"
+			return
+		box_count -= 5
+		box_label.text = "BOX  %d" % box_count
+		block = SPLITTER_SCENE.instantiate() as SplitterBlock
+		fabricator_status = "SPLITTER CREATED"
+	elif fabricator_selection == 2:
 		if mineral_count < 10:
 			fabricator_status = "NOT ENOUGH MINERAL"
 			return
@@ -346,12 +389,18 @@ func _craft_selected_block() -> void:
 		cat.active_on_ready = false
 		block = cat
 		fabricator_status = "CAT BLOCK CREATED"
+		cat_crafted = true
+	elif fabricator_selection == 2:
+		generator_crafted = true
+	_refresh_quest_progress()
 	block.position = _find_fabricator_output_position(block)
 	add_child(block)
 	base_menu.queue_redraw()
 
 func _update_fabricator_status() -> void:
-	if fabricator_selection == 2:
+	if fabricator_selection == 3:
+		fabricator_status = ("READY" if box_count >= 5 else "NEED %d MORE BOX" % (5 - box_count)) if base_level >= 2 else "LOCKED - COMPLETE AUTOMATION"
+	elif fabricator_selection == 2:
 		fabricator_status = "READY" if mineral_count >= 10 else "NEED %d MORE MINERAL" % (10 - mineral_count)
 	else:
 		fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
@@ -384,6 +433,7 @@ func _populate_world() -> void:
 	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
 	var player_tile := Vector2i(player.position / TILE_SIZE)
 	var occupied: Dictionary[Vector2i, bool] = {}
+	_populate_starter_zone(occupied, center_tile)
 
 	for region_y in range(0, WORLD_TILES, REGION_SIZE):
 		for region_x in range(0, WORLD_TILES, REGION_SIZE):
@@ -403,7 +453,7 @@ func _populate_world() -> void:
 	_populate_minerals(rng, occupied, center_tile, player_tile)
 
 func _populate_minerals(rng: RandomNumberGenerator, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> void:
-	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 120.0))
+	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 120.0)) - 4
 	var isolated_count := int(round(target_count * 0.2))
 	var mineral_cells: Array[Vector2i] = []
 	while mineral_cells.size() < isolated_count:
@@ -427,6 +477,32 @@ func _populate_minerals(rng: RandomNumberGenerator, occupied: Dictionary[Vector2
 		if not _is_free_mineral_cell(cell, occupied, center_tile, player_tile):
 			continue
 		_add_mineral(cell, true, occupied, mineral_cells)
+
+func _populate_starter_zone(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
+	var box_offsets: Array[Vector2i] = [Vector2i(4, -1), Vector2i(4, 0), Vector2i(4, 1)]
+	for offset: Vector2i in box_offsets:
+		var cell: Vector2i = center_tile + offset
+		occupied[cell] = true
+		var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D
+		box.position = _cell_center(cell)
+		add_child(box)
+	var belt_offsets: Array[Vector2i] = [Vector2i(5, -2), Vector2i(5, -1), Vector2i(5, 0), Vector2i(5, 1), Vector2i(5, 2), Vector2i(4, 2)]
+	for offset: Vector2i in belt_offsets:
+		var cell: Vector2i = center_tile + offset
+		occupied[cell] = true
+		var belt := CONVEYOR_SCENE.instantiate() as ConveyorBlock
+		belt.position = _cell_center(cell)
+		belt.direction = Vector2.LEFT
+		add_child(belt)
+	var mineral_offsets: Array[Vector2i] = [Vector2i(6, -1), Vector2i(7, -1), Vector2i(6, 0), Vector2i(7, 0)]
+	for index in mineral_offsets.size():
+		var cell: Vector2i = center_tile + mineral_offsets[index]
+		occupied[cell] = true
+		var mineral := MINERAL_SCENE.instantiate() as MineralBlock
+		mineral.position = _cell_center(cell)
+		mineral.set_meta("clustered_spawn", index > 0)
+		mineral.set_meta("starter_mineral", true)
+		add_child(mineral)
 
 func _is_free_mineral_cell(cell: Vector2i, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < WORLD_TILES and cell.y < WORLD_TILES and not occupied.has(cell) and not (abs(cell.x - center_tile.x) <= 4 and abs(cell.y - center_tile.y) <= 4) and not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
@@ -465,6 +541,11 @@ func _cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell * TILE_SIZE) + Vector2.ONE * (TILE_SIZE / 2.0)
 
 func _process(delta: float) -> void:
+	elapsed_time += delta
+	celebration_remaining = maxf(0.0, celebration_remaining - delta)
+	while not automated_delivery_times.is_empty() and automated_delivery_times[0] < elapsed_time - 60.0:
+		automated_delivery_times.pop_front()
+	throughput_label.text = "BASE LV.%d\nBOX/MIN  %d" % [base_level, automated_delivery_times.size()]
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
 	info.text = "POS  %d, %d" % [tile.x, tile.y]
 	if placement_action_held and not base_menu_open:
@@ -473,7 +554,8 @@ func _process(delta: float) -> void:
 			placement_hold_elapsed -= PLACEMENT_ROTATE_INTERVAL
 			_rotate_placement()
 	if preview_visible and is_instance_valid(placement_preview):
-		placement_preview.position = _front_cell_center()
+		var preview_type: String = placement_preview.get_meta("preview_type", "box")
+		placement_preview.position = _preview_position(preview_type)
 	if collect_action_held:
 		_collect_nearby_mineral_resources()
 
@@ -488,6 +570,42 @@ func _collect_nearby_mineral_resources() -> void:
 		resource.queue_free()
 		mineral_count += 1
 		mineral_label.text = "MINERAL  %d" % mineral_count
+	_check_mineral_quest()
+
+func _check_mineral_quest() -> void:
+	if quest_step == 2 and mineral_count >= 10:
+		_advance_quest("MATERIALS READY")
+
+func _advance_quest(message: String) -> void:
+	quest_step = mini(quest_step + 1, 5)
+	celebration_text = message
+	celebration_remaining = 2.5
+	quest_ui.queue_redraw()
+	_refresh_quest_progress()
+
+func _refresh_quest_progress() -> void:
+	if quest_step == 1 and cat_crafted:
+		_advance_quest("MINER ONLINE")
+	elif quest_step == 2 and mineral_count >= 10:
+		_advance_quest("MATERIALS READY")
+	elif quest_step == 3 and generator_crafted:
+		_advance_quest("GENERATOR ONLINE")
+	elif quest_step == 4 and automated_boxes_delivered >= 3:
+		base_level = 2
+		_advance_quest("BASE LEVEL 2 - SPLITTER UNLOCKED")
+
+func quest_title() -> String:
+	return ["1  FIRST DELIVERY", "2  BUILD A MINER", "3  GATHER MATERIAL", "4  BUILD A GENERATOR", "5  AUTOMATE DELIVERY", "FACTORY ONLINE"][quest_step]
+
+func quest_detail() -> String:
+	return [
+		"Bring 1 box into any base intake.",
+		"Craft a CAT BLOCK at the base (3 BOX).",
+		"Collect 10 MINERAL.",
+		"Craft a BOX GENERATOR at the base (10 MIN).",
+		"Deliver %d/3 generated boxes to the base." % automated_boxes_delivered,
+		"Splitter unlocked. Improve your BOX/MIN.",
+	][quest_step]
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0

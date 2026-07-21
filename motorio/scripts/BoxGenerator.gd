@@ -12,6 +12,8 @@ const BOX_SCENE := preload("res://scenes/PushTile.tscn")
 
 var stored_minerals := 0
 var pending_boxes := 0
+var production_flash := 0.0
+var press_phase := 0.0
 
 func _ready() -> void:
 	add_to_group("pickup_block")
@@ -22,9 +24,12 @@ func _ready() -> void:
 	$MineralInput.body_entered.connect(_on_mineral_entered)
 	queue_redraw()
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	press_phase = fmod(press_phase + delta * (5.0 if stored_minerals > 0 or pending_boxes > 0 else 1.0), TAU)
+	production_flash = maxf(0.0, production_flash - delta)
 	if pending_boxes > 0:
 		_try_output_box()
+	queue_redraw()
 
 func _on_mineral_entered(body: Node2D) -> void:
 	var resource := body as RigidBody2D
@@ -55,8 +60,10 @@ func _try_output_box() -> void:
 		return
 	var box := BOX_SCENE.instantiate() as RigidBody2D
 	box.global_position = output_position
+	box.set_meta("automated_box", true)
 	get_parent().add_child(box)
 	pending_boxes -= 1
+	production_flash = 0.45
 	queue_redraw()
 
 func input_position() -> Vector2:
@@ -75,9 +82,12 @@ func _draw() -> void:
 	draw_rect(Rect2(-29, -13, 58, 26), Color("587077"), false, 3.0)
 	draw_rect(Rect2(-24, -9, 18, 18), Color("18363b"))
 	draw_circle(Vector2(-15, 0), 5.0, Color("8ee4df"))
-	draw_rect(Rect2(5, -10, 20, 20), Color("79502e"))
+	var press_offset := sin(press_phase) * 1.5 if stored_minerals > 0 or pending_boxes > 0 else 0.0
+	draw_rect(Rect2(5 + press_offset, -10, 20, 20), Color("79502e"))
 	draw_line(Vector2(8, -7), Vector2(22, 7), Color("c39455"), 2.0)
 	draw_line(Vector2(22, -7), Vector2(8, 7), Color("c39455"), 2.0)
 	draw_polygon(PackedVector2Array([Vector2(30, 0), Vector2(22, -6), Vector2(22, 6)]), PackedColorArray([Color("f0bd4f")]))
+	if production_flash > 0.0:
+		draw_circle(Vector2(30, 0), 10.0 + production_flash * 10.0, Color(1.0, 0.82, 0.3, production_flash), false, 3.0)
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(-3, 11), "%d/3" % stored_minerals, HORIZONTAL_ALIGNMENT_CENTER, 8, 9, Color.WHITE)

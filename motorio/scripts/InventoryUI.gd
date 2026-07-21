@@ -39,6 +39,11 @@ func _draw() -> void:
 				draw_circle(inner.position + Vector2(7, inner.size.y / 2.0), 4.0, Color("8ee4df"))
 				draw_rect(Rect2(inner.position + Vector2(12, 5), Vector2(10, 12)), Color("8b5a30"))
 				draw_polygon(PackedVector2Array([inner.position + Vector2(25, 11), inner.position + Vector2(20, 7), inner.position + Vector2(20, 15)]), PackedColorArray([Color("f0bd4f")]))
+			elif item["type"] == "splitter":
+				draw_rect(inner, Color("46555b"))
+				draw_line(inner.position + Vector2(4, 11), inner.position + Vector2(12, 11), Color("efb94c"), 2.0)
+				draw_line(inner.position + Vector2(12, 11), inner.position + Vector2(21, 4), Color("efb94c"), 2.0)
+				draw_line(inner.position + Vector2(12, 11), inner.position + Vector2(21, 18), Color("efb94c"), 2.0)
 			else:
 				draw_rect(inner, Color("8b5a30"))
 				draw_line(inner.position, inner.end, Color("4f2f19"), 2.0)

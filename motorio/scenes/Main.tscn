@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/InventoryUI.gd" id="5_inventory"]
 [ext_resource type="Script" path="res://scripts/BaseMenu.gd" id="6_base_menu"]
 [ext_resource type="Script" path="res://scripts/MinimapUI.gd" id="7_minimap"]
+[ext_resource type="Script" path="res://scripts/QuestUI.gd" id="8_quest"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -81,6 +82,28 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 14
 text = "MINERAL  0"
 
+[node name="Throughput" type="Label" parent="UI"]
+offset_left = 16.0
+offset_top = 130.0
+offset_right = 180.0
+offset_bottom = 174.0
+theme_override_colors/font_color = Color(0.65, 0.88, 0.7, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 12
+text = "BASE LV.1\nBOX/MIN  0"
+
+[node name="Quest" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("8_quest")
+
 [node name="Inventory" type="Control" parent="UI"]
 layout_mode = 3
 anchors_preset = 15
@@ -129,7 +152,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
-text = "v0.1.13"
+text = "v0.2.0"
 horizontal_alignment = 2
 
 [node name="TouchControls" type="Control" parent="UI"]

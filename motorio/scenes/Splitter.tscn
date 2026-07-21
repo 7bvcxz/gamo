@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/Splitter.gd" id="1_splitter"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_detector"]
+size = Vector2(30, 30)
+
+[node name="Splitter" type="RigidBody2D"]
+z_index = 0
+gravity_scale = 0.0
+collision_layer = 0
+collision_mask = 0
+freeze = true
+script = ExtResource("1_splitter")
+
+[node name="Detector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+monitoring = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Detector"]
+shape = SubResource("RectangleShape_detector")
