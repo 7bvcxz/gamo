@@ -12,7 +12,7 @@ const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
 const RESOURCE_COLLECT_RADIUS := TILE_SIZE * 1.5
-const PLACEMENT_ROTATE_INTERVAL := 1.0
+const PLACEMENT_ROTATE_INTERVAL := 0.7
 
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
