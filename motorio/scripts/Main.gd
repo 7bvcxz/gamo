@@ -13,11 +13,13 @@ const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2
 const INVENTORY_CAPACITY := 5
 const MODE_IN := 0
 const MODE_OUT := 1
+const RESOURCE_COLLECT_RADIUS := TILE_SIZE * 1.5
 
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
 @onready var info: Label = $UI/Info
 @onready var box_label: Label = $UI/BoxCount
+@onready var mineral_label: Label = $UI/MineralCount
 @onready var mode_label: Label = $UI/Mode
 @onready var inventory_ui: Control = $UI/Inventory
 @onready var base_menu: Control = $UI/BaseMenu
@@ -26,6 +28,7 @@ const MODE_OUT := 1
 @onready var touch_controls: TouchControls = $UI/TouchControls
 
 var box_count := 0
+var mineral_count := 0
 var interaction_mode := MODE_IN
 var inventory: Array[Dictionary] = []
 var selected_slot := 0
@@ -33,6 +36,7 @@ var preview_visible := false
 var placement_rotation := 0
 var base_menu_open := false
 var fabricator_status := "3 BOX REQUIRED"
+var collect_action_held := false
 
 func _ready() -> void:
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
@@ -63,13 +67,18 @@ func _on_base_box_received(_box: RigidBody2D) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
-	if key == null or not key.pressed or key.echo:
+	if key == null or key.echo:
+		return
+	if key.physical_keycode == KEY_Z:
+		collect_action_held = key.pressed
+		if key.pressed:
+			primary_action()
+		return
+	if not key.pressed:
 		return
 	match key.physical_keycode:
 		KEY_C:
 			toggle_interaction_mode()
-		KEY_Z:
-			primary_action()
 		KEY_X:
 			preview_action()
 		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
@@ -315,6 +324,20 @@ func _process(_delta: float) -> void:
 	info.text = "POS  %d, %d" % [tile.x, tile.y]
 	if preview_visible:
 		queue_redraw()
+	if collect_action_held:
+		_collect_nearby_mineral_resources()
+
+func _collect_nearby_mineral_resources() -> void:
+	for node in get_tree().get_nodes_in_group("mined_resource"):
+		var resource := node as RigidBody2D
+		if resource == null or resource.has_meta("collected"):
+			continue
+		if resource.global_position.distance_to(player.global_position) > RESOURCE_COLLECT_RADIUS:
+			continue
+		resource.set_meta("collected", true)
+		resource.queue_free()
+		mineral_count += 1
+		mineral_label.text = "MINERAL  %d" % mineral_count
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0

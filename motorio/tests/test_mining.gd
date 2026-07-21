@@ -32,6 +32,20 @@ func _run() -> void:
 	box_scene.free()
 
 	var player := world_player
+	var nearby_resource := load("res://scenes/MinedResource.tscn").instantiate() as RigidBody2D
+	nearby_resource.position = player.position + Vector2(40, 0)
+	main.add_child(nearby_resource)
+	var far_resource := load("res://scenes/MinedResource.tscn").instantiate() as RigidBody2D
+	far_resource.position = player.position + Vector2(49, 0)
+	main.add_child(far_resource)
+	main.collect_action_held = true
+	main.call("_collect_nearby_mineral_resources")
+	await process_frame
+	_assert(main.mineral_count == 1, "Z hold collects resources within 1.5 tiles")
+	_assert(not is_instance_valid(nearby_resource), "collected mineral resource is removed")
+	_assert(is_instance_valid(far_resource), "resource outside 1.5 tiles remains")
+	_assert((main.get_node("UI/MineralCount") as Label).text == "MINERAL  1", "mineral count appears in top-right UI")
+	main.collect_action_held = false
 	player.facing = Vector2.UP
 	main.box_count = 3
 	main.get_node("UI/BoxCount").text = "BOX  3"

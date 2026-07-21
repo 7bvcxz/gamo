@@ -37,6 +37,15 @@ func _run() -> void:
 	controls._end_touch(2)
 	_assert(not bool(player.get("touch_sprint")), "RUN release disables sprint")
 
+	var collect_press := InputEventScreenTouch.new()
+	collect_press.index = 4
+	collect_press.position = controls.button_centers[1]
+	collect_press.pressed = true
+	controls._input(collect_press)
+	_assert(bool(main.get("collect_action_held")), "Z touch starts resource collection hold")
+	controls._end_touch(4)
+	_assert(not bool(main.get("collect_action_held")), "Z touch release stops resource collection hold")
+
 	var previous_mode: int = main.get("interaction_mode")
 	var mode_press := InputEventScreenTouch.new()
 	mode_press.index = 3

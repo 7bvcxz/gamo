@@ -71,6 +71,7 @@ func _begin_touch(touch_id: int, position: Vector2) -> void:
 			action_pressed[index] = true
 			if main_controller:
 				if index == 1:
+					main_controller.collect_action_held = true
 					main_controller.primary_action()
 				elif index == 2:
 					main_controller.preview_action()
@@ -92,6 +93,8 @@ func _end_touch(touch_id: int) -> void:
 		var index: int = button_touches[touch_id]
 		button_touches.erase(touch_id)
 		action_pressed[index] = false
+		if main_controller and index == 1:
+			main_controller.collect_action_held = false
 		_sync_player()
 		queue_redraw()
 
@@ -116,6 +119,8 @@ func _reset_inputs() -> void:
 	if player:
 		player.touch_direction = Vector2.ZERO
 		player.touch_sprint = false
+	if main_controller:
+		main_controller.collect_action_held = false
 	queue_redraw()
 
 func _draw() -> void:

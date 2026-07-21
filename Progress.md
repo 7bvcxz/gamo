@@ -69,6 +69,8 @@
   - 0.0.25 검증: 월드 모서리/중앙 좌표 변환·크기·우측 상단 배치 자동 테스트와 전체 회귀 테스트 통과, 데스크톱 및 iPhone 13 Chromium에서 모든 범례·화면 범위·플레이어 표시 렌더링과 오류 없는 실행 확인
   - 0.0.26: 회수 불가·모든 블록 및 주인공과 겹침 불가인 Fixed 특성 추가, 미네랄 원석을 Fixed로 변경하고 설치 충돌 검사에 Fixed 레이어 포함
   - 0.0.26 검증: Fixed 그룹/회수 제외/레이어·마스크, 주인공·Solid·Machine 충돌 및 OUT 설치 차단 자동 테스트와 전체 회귀 테스트 통과, iPhone 13 Chromium 이동·렌더링 및 오류 없는 실행 확인
+  - 0.0.27: Z 홀드 중 주인공 반경 1.5칸의 미네랄 자원 자동 회수 및 우측 상단 MINERAL 누적 수치 추가, 모바일 Z 홀드 press/release 연결
+  - 0.0.27 검증: 40px 자원 회수/49px 자원 유지/중복 방지/UI 증가 및 모바일 Z press/release 자동 테스트와 전체 회귀 테스트 통과, iPhone 13 Chromium Z 홀드·MINERAL UI 렌더링 및 오류 없는 실행 확인
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음
