@@ -37,6 +37,8 @@ func _run() -> void:
 
 	var water := get_nodes_in_group("water_tile")[0] as WaterTile
 	_assert(water.position.distance_to(main.base.position) > 14.0 * main.TILE_SIZE, "water does not surround the warm starting area")
+	_assert(water.z_index >= 0, "water renders above the snow terrain")
+	_assert(water.WATER_COLOR.get_luminance() < 0.45 and water.WAVE_COLOR.get_luminance() > 0.65, "water has strong dark-water and bright-wave contrast")
 	_assert(not (water.get_node("CollisionShape2D") as CollisionShape2D).disabled, "water starts impassable")
 	var bridge := load("res://scenes/Bridge.tscn").instantiate() as BridgeBlock
 	bridge.position = water.position
