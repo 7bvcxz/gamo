@@ -13,6 +13,13 @@ func _initialize() -> void:
 	_assert(_action_has_key("move_right", KEY_RIGHT), "right arrow is mapped to move_right")
 	_assert(_action_has_key("move_up", KEY_UP), "up arrow is mapped to move_up")
 	_assert(_action_has_key("move_down", KEY_DOWN), "down arrow is mapped to move_down")
+	_assert(player.get("mode_light_color") == player.MODE_IN_LIGHT, "IN mode uses a blue front light")
+	player.facing = Vector2.LEFT
+	_assert(player.call("get_mode_light_position") == Vector2.LEFT * 32.0, "mode light follows the facing cell")
+	player.call("set_out_mode_light", true)
+	_assert(player.get("mode_light_color") == player.MODE_OUT_LIGHT, "OUT mode uses a red front light")
+	player.facing = Vector2.DOWN
+	player.call("set_out_mode_light", false)
 
 	player.call("_update_character_animation", 0.0, Vector2.ZERO, false)
 	_assert(sprite.frame == 0, "idle keeps one registered source frame")

@@ -286,6 +286,7 @@ func _craft_cat_block() -> void:
 
 func _update_interaction_ui() -> void:
 	mode_label.text = "MODE  %s" % ("IN" if interaction_mode == MODE_IN else "OUT")
+	player.set_out_mode_light(interaction_mode == MODE_OUT)
 	inventory_ui.queue_redraw()
 	queue_redraw()
 

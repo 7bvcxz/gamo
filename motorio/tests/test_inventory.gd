@@ -25,6 +25,7 @@ func _run() -> void:
 
 	main.call("toggle_interaction_mode")
 	_assert(main.interaction_mode == main.MODE_OUT, "C toggles to OUT mode")
+	_assert(player.mode_light_color == player.MODE_OUT_LIGHT, "OUT mode changes the front light to red")
 	_assert(main.preview_visible, "OUT mode always shows placement preview")
 	var box_preview := main.get("placement_preview") as RigidBody2D
 	_assert(box_preview != null and box_preview.get_script() == load("res://scripts/PushTile.gd"), "preview uses the actual selected block")
@@ -40,6 +41,8 @@ func _run() -> void:
 	placed.queue_free()
 	await process_frame
 	main.interaction_mode = main.MODE_IN
+	main.call("_update_interaction_ui")
+	_assert(player.mode_light_color == player.MODE_IN_LIGHT, "IN mode changes the front light to blue")
 	main.inventory.clear()
 	for index in range(5):
 		main.inventory.append({"type": "box"})
