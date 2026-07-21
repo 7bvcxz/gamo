@@ -12,7 +12,7 @@ func _draw() -> void:
 	var panel := Rect2(Vector2((size.x - width) / 2.0, 270.0), Vector2(width, 64.0))
 	draw_rect(panel, Color(0.035, 0.065, 0.055, 0.9))
 	draw_rect(panel, Color("6e8f72"), false, 2.0)
-	var font := ThemeDB.fallback_font
+	var font := UIFont.FONT
 	draw_string(font, panel.position + Vector2(14, 22), main_controller.quest_title(), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 28.0, 13, Color("f1c653"))
 	draw_string(font, panel.position + Vector2(14, 47), main_controller.quest_detail(), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 28.0, 12, Color("e2ece4"))
 	if main_controller.celebration_remaining > 0.0:

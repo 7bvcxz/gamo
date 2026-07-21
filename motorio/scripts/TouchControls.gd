@@ -4,7 +4,7 @@ class_name TouchControls
 const JOYSTICK_RADIUS := 64.0
 const KNOB_RADIUS := 25.0
 const BUTTON_RADIUS := 28.0
-const BUTTON_LABELS := ["RUN", "Z", "X"]
+const BUTTON_LABELS := ["달리기", "Z", "X"]
 const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
 var player
@@ -163,7 +163,7 @@ func _draw_action_button(index: int) -> void:
 	draw_circle(button_centers[index], BUTTON_RADIUS, fill)
 	draw_arc(button_centers[index], BUTTON_RADIUS, 0.0, TAU, 32, Color(0.9, 0.92, 0.86, 0.65), 2.0)
 	var label: String = BUTTON_LABELS[index]
-	var font: Font = ThemeDB.fallback_font
+	var font: Font = UIFont.FONT
 	var font_size := 11 if index == 0 else 16
 	var text_size: Vector2 = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	draw_string(font, button_centers[index] - Vector2(text_size.x / 2.0, -text_size.y / 3.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)

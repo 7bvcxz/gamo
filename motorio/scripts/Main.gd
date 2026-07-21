@@ -48,7 +48,7 @@ var preview_visible := false
 var placement_rotation := 0
 var placement_preview: RigidBody2D
 var base_menu_open := false
-var fabricator_status := "3 BOX REQUIRED"
+var fabricator_status := "상자 3개 필요"
 var fabricator_selection := 0
 var collect_action_held := false
 var placement_action_held := false
@@ -119,21 +119,21 @@ func _ready() -> void:
 
 func _on_base_box_received(_box: RigidBody2D) -> void:
 	box_count += 1
-	box_label.text = "BOX  %d" % box_count
+	box_label.text = "상자  %d" % box_count
 	tutorial_delivered = true
 	_refresh_tutorial()
 	if quest_step == 0:
-		_advance_quest("FIRST DELIVERY")
+		_advance_quest("첫 납품 완료")
 	if _box.get_meta("automated_box", false):
 		automated_boxes_delivered += 1
 		automated_delivery_times.append(elapsed_time)
 		if quest_step == 4 and automated_boxes_delivered >= 3:
 			base_level = 2
-			_advance_quest("BASE LEVEL 2 - SPLITTER UNLOCKED")
+			_advance_quest("기지 2단계 - 분배기 해금")
 
 func _on_base_mineral_received(_resource: RigidBody2D) -> void:
 	mineral_count += 1
-	mineral_label.text = "MINERAL  %d" % mineral_count
+	mineral_label.text = "미네랄  %d" % mineral_count
 	_check_mineral_quest()
 
 func _on_base_resource_received(_resource: RigidBody2D, resource_type: String) -> void:
@@ -516,7 +516,7 @@ func _enter_shelter(rescued: bool) -> void:
 	player.controls_locked = true
 	player.position = base.global_position + base.SHELTER_DIRECTION * 118.0
 	if rescued:
-		celebration_text = "THE CATS BROUGHT YOU HOME"
+		celebration_text = "고양이들이 기지로 데려왔어요"
 		celebration_remaining = 3.0
 	shelter_ui.queue_redraw()
 
@@ -531,7 +531,7 @@ func _sleep_until_morning() -> void:
 		var cat := node as CatBlock
 		if cat:
 			cat.hunger = minf(100.0, cat.hunger + 25.0)
-	celebration_text = "DAY %d - STAY WARM" % day_number
+	celebration_text = "%d일차 - 체온을 유지하세요" % day_number
 	celebration_remaining = 2.5
 	shelter_ui.queue_redraw()
 
@@ -560,11 +560,11 @@ func _cycle_fabricator_recipe() -> void:
 
 func _craft_selected_block() -> void:
 	if fabricator_selection == 3 and base_level < 2:
-		fabricator_status = "LOCKED - COMPLETE AUTOMATION"
+		fabricator_status = "잠김 - 자동화를 먼저 완료하세요"
 		return
 	var cost := recipe_cost(fabricator_selection)
 	if not _can_afford(cost):
-		fabricator_status = "NOT ENOUGH RESOURCES"
+		fabricator_status = "자원이 부족합니다"
 		return
 	_spend_cost(cost)
 	if fabricator_selection >= 12:
@@ -572,7 +572,7 @@ func _craft_selected_block() -> void:
 		base_menu.queue_redraw()
 		return
 	var block := _create_recipe_block(fabricator_selection)
-	fabricator_status = "%s CREATED" % recipe_label(fabricator_selection)
+	fabricator_status = "%s 제작 완료" % recipe_label(fabricator_selection)
 	if fabricator_selection == 0:
 		cat_crafted = true
 	elif fabricator_selection == 2:
@@ -586,15 +586,15 @@ func _craft_selected_block() -> void:
 
 func _update_fabricator_status() -> void:
 	if fabricator_selection == 3 and base_level < 2:
-		fabricator_status = "LOCKED - COMPLETE AUTOMATION"
+		fabricator_status = "잠김 - 자동화를 먼저 완료하세요"
 	else:
-		fabricator_status = "READY" if _can_afford(recipe_cost(fabricator_selection)) else "NEED %s" % recipe_cost_text(fabricator_selection)
+		fabricator_status = "제작 가능" if _can_afford(recipe_cost(fabricator_selection)) else "%s 필요" % recipe_cost_text(fabricator_selection)
 
 func fabricator_recipe_count() -> int:
 	return 15
 
 func recipe_label(index: int) -> String:
-	return ["CAT BLOCK", "PILLAR", "BOX GENERATOR", "SPLITTER", "BRIDGE", "CONVEYOR", "POWER GENERATOR", "ELECTRIC CAT", "PRESSURE CAT", "CHEESE FIELD", "COOK CAT", "SERVER CAT", "HEAT TECH", "POWER TECH", "FOOD TECH"][index]
+	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "치즈 밭", "요리 고양이", "서빙 고양이", "열 기술", "전력 기술", "식량 기술"][index]
 
 func recipe_cost(index: int) -> Dictionary:
 	var standard: Array[Dictionary] = [
@@ -612,8 +612,9 @@ func recipe_cost(index: int) -> Dictionary:
 
 func recipe_cost_text(index: int) -> String:
 	var parts: Array[String] = []
+	var names := {"box": "상자", "mineral": "미네랄", "copper": "구리", "coal": "석탄", "crystal": "수정", "oil": "석유", "uranium": "우라늄", "cheese": "치즈"}
 	for key in recipe_cost(index):
-		parts.append("%d %s" % [recipe_cost(index)[key], str(key).to_upper().substr(0, 3)])
+		parts.append("%s %d" % [names.get(key, key), recipe_cost(index)[key]])
 	return " + ".join(parts)
 
 func _can_afford(cost: Dictionary) -> bool:
@@ -633,20 +634,20 @@ func _spend_cost(cost: Dictionary) -> void:
 		elif key == "mineral": mineral_count -= cost[key]
 		elif key == "cheese": cheese -= cost[key]
 		else: resource_counts[key] -= cost[key]
-	box_label.text = "BOX  %d" % box_count
-	mineral_label.text = "MINERAL  %d" % mineral_count
+	box_label.text = "상자  %d" % box_count
+	mineral_label.text = "미네랄  %d" % mineral_count
 	economy_ui.queue_redraw()
 
 func _apply_technology(index: int) -> void:
 	if index == 12:
 		heat_tech += 1
-		fabricator_status = "HEAT TECH LV.%d" % heat_tech
+		fabricator_status = "열 기술 %d단계" % heat_tech
 	elif index == 13:
 		power_tech += 1
-		fabricator_status = "POWER TECH LV.%d" % power_tech
+		fabricator_status = "전력 기술 %d단계" % power_tech
 	else:
 		food_tech += 1
-		fabricator_status = "FOOD TECH LV.%d" % food_tech
+		fabricator_status = "식량 기술 %d단계" % food_tech
 	celebration_text = fabricator_status
 	celebration_remaining = 2.5
 
@@ -850,9 +851,9 @@ func _process(delta: float) -> void:
 	celebration_remaining = maxf(0.0, celebration_remaining - delta)
 	while not automated_delivery_times.is_empty() and automated_delivery_times[0] < elapsed_time - 60.0:
 		automated_delivery_times.pop_front()
-	throughput_label.text = "BASE LV.%d\nBOX/MIN  %d" % [base_level, automated_delivery_times.size()]
+	throughput_label.text = "기지 %d단계\n분당 상자  %d" % [base_level, automated_delivery_times.size()]
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
-	info.text = "POS  %d, %d" % [tile.x, tile.y]
+	info.text = "위치  %d, %d" % [tile.x, tile.y]
 	if not tutorial_moved and player.position.distance_to(tutorial_start_position) >= 20.0:
 		tutorial_moved = true
 		_refresh_tutorial()
@@ -879,7 +880,7 @@ func _update_survival(delta: float) -> void:
 			temperature = minf(100.0, temperature + delta * 5.0)
 		if day_time >= 660.0 and not night_warning_shown:
 			night_warning_shown = true
-			celebration_text = "NIGHT FALLS - RETURN HOME"
+			celebration_text = "밤이 옵니다 - 기지로 돌아가세요"
 			celebration_remaining = 4.0
 		if day_time >= 720.0:
 			_enter_shelter(true)
@@ -887,9 +888,9 @@ func _update_survival(delta: float) -> void:
 		temperature = 100.0
 	var minute := int(day_time) / 60
 	var second := int(day_time) % 60
-	survival_status.text = "DAY %d  %02d:%02d   TEMP %d   WARM %d" % [day_number, minute, second, int(temperature), safe_radius_tiles()]
+	survival_status.text = "%d일  %02d:%02d   체온 %d   온기 %d" % [day_number, minute, second, int(temperature), safe_radius_tiles()]
 	if ui_stage() >= 3:
-		survival_status.text += "\nPWR +%d/m   FOOD +%d/m   HEAT %d" % [power_per_minute(), food_per_minute(), heat_per_minute()]
+		survival_status.text += "\n전력 +%d/분   식량 +%d/분   열 %d" % [power_per_minute(), food_per_minute(), heat_per_minute()]
 	if temperature < 35.0:
 		survival_status.modulate = Color("ff9d8a")
 	else:
@@ -920,13 +921,13 @@ func _collect_nearby_mineral_resources() -> void:
 			economy_ui.queue_redraw()
 		else:
 			mineral_count += 1
-			mineral_label.text = "MINERAL  %d" % mineral_count
+			mineral_label.text = "미네랄  %d" % mineral_count
 	_check_mineral_quest()
 	_refresh_quest_progress()
 
 func _check_mineral_quest() -> void:
 	if quest_step == 2 and mineral_count >= 10:
-		_advance_quest("MATERIALS READY")
+		_advance_quest("재료 준비 완료")
 
 func _advance_quest(message: String) -> void:
 	quest_step = mini(quest_step + 1, 12)
@@ -937,63 +938,63 @@ func _advance_quest(message: String) -> void:
 
 func _refresh_quest_progress() -> void:
 	if quest_step == 1 and cat_crafted:
-		_advance_quest("MINER ONLINE")
+		_advance_quest("채굴 고양이 가동")
 	elif quest_step == 2 and mineral_count >= 10:
-		_advance_quest("MATERIALS READY")
+		_advance_quest("재료 준비 완료")
 	elif quest_step == 3 and generator_crafted:
-		_advance_quest("GENERATOR ONLINE")
+		_advance_quest("상자 생성기 가동")
 	elif quest_step == 4 and automated_boxes_delivered >= 3:
 		base_level = 2
-		_advance_quest("BASE LEVEL 2 - SPLITTER UNLOCKED")
+		_advance_quest("기지 2단계 - 분배기 해금")
 	elif quest_step == 5 and resource_counts["copper"] >= 3:
-		_advance_quest("COPPER TOOLS ONLINE")
+		_advance_quest("구리 도구 해금")
 	elif quest_step == 6 and bridge_crafted:
-		_advance_quest("OUTER WORLD OPEN")
+		_advance_quest("외부 지역 개방")
 	elif quest_step == 7 and cheese >= 5:
-		_advance_quest("CATS FED")
+		_advance_quest("고양이 식사 완료")
 	elif quest_step == 8 and electricity >= 10:
-		_advance_quest("POWER GRID ONLINE")
+		_advance_quest("전력망 가동")
 	elif quest_step == 9 and resource_counts["crystal"] >= 5:
-		_advance_quest("CRYSTAL AGE")
+		_advance_quest("수정 시대 개막")
 	elif quest_step == 10 and resource_counts["oil"] >= 5:
-		_advance_quest("PRESSURE NETWORK ONLINE")
+		_advance_quest("압력망 가동")
 	elif quest_step == 11 and resource_counts["uranium"] >= 1:
-		_advance_quest("DEEP FACTORY COMPLETE")
+		_advance_quest("심층 공장 완성")
 
 func quest_title() -> String:
-	return ["1  FIRST DELIVERY", "2  BUILD A MINER", "3  GATHER MATERIAL", "4  BUILD A GENERATOR", "5  AUTOMATE DELIVERY", "6  COPPER AGE", "7  CROSS THE WATER", "8  FEED THE CATS", "9  POWER GRID", "10  CRYSTAL AGE", "11  OIL PRESSURE", "12  DEEP ENERGY", "CAMPAIGN COMPLETE"][quest_step]
+	return ["1  첫 상자 납품", "2  채굴 고양이 제작", "3  미네랄 수집", "4  상자 생성기 제작", "5  상자 자동화", "6  구리 시대", "7  물길 건너기", "8  고양이 먹이", "9  전력망", "10  수정 시대", "11  석유 압력", "12  심층 에너지", "모든 목표 완료"][quest_step]
 
 func quest_detail() -> String:
 	return [
-		"Bring 1 box into any base intake.",
-		"Craft a CAT BLOCK at the base (3 BOX).",
-		"Collect 10 MINERAL.",
-		"Craft a BOX GENERATOR at the base (10 MIN).",
-		"Deliver %d/3 generated boxes to the base." % automated_boxes_delivered,
-		"Mine and deliver %d/3 COPPER." % mini(resource_counts["copper"], 3),
-		"Craft a BRIDGE (3 COP) and cross the water.",
-		"Build FIELD + COOK + SERVER. Store %d/5 CHEESE." % mini(cheese, 5),
-		"Feed a miner for COAL. Build POWER + ELECTRIC CAT (%d/10)." % mini(electricity, 10),
-		"Powered mining: deliver %d/5 CRYSTAL." % mini(resource_counts["crystal"], 5),
-		"Use a PRESSURE CAT. Deliver %d/5 OIL." % mini(resource_counts["oil"], 5),
-		"Spend POWER + OIL to deliver 1 URANIUM.",
-		"All systems online. Raise BOX/MIN and expand freely.",
+		"상자 1개를 기지의 금색 투입구로 미세요.",
+		"기지에서 채굴 고양이를 만드세요. (상자 3개)",
+		"미네랄 10개를 모으세요.",
+		"기지에서 상자 생성기를 만드세요. (미네랄 10개)",
+		"생성된 상자를 기지에 납품하세요. %d/3" % automated_boxes_delivered,
+		"구리를 채굴해 납품하세요. %d/3" % mini(resource_counts["copper"], 3),
+		"다리를 만들고 물길을 건너세요. (구리 3개)",
+		"치즈 밭·요리·서빙 고양이를 배치하세요. 치즈 %d/5" % mini(cheese, 5),
+		"고양이에게 먹이를 주고 발전기와 전기 고양이를 만드세요. %d/10" % mini(electricity, 10),
+		"전력을 사용해 수정을 납품하세요. %d/5" % mini(resource_counts["crystal"], 5),
+		"압력 고양이로 석유를 납품하세요. %d/5" % mini(resource_counts["oil"], 5),
+		"전력과 석유를 사용해 우라늄 1개를 납품하세요.",
+		"모든 설비가 가동 중입니다. 자유롭게 자동화를 확장하세요.",
 	][quest_step]
 
 func tutorial_complete() -> bool:
 	return tutorial_step >= 6
 
 func tutorial_title() -> String:
-	return ["MOVE THE MECHANIC", "PICK UP A BLOCK", "ROTATE BEFORE PLACING", "PLACE THE BLOCK", "DELIVER TO THE BASE", "OPEN THE FABRICATOR"][tutorial_step]
+	return ["정비공 이동", "블록 줍기", "설치 방향 회전", "블록 설치", "기지에 납품", "제작 메뉴 열기"][tutorial_step]
 
 func tutorial_detail() -> String:
 	return [
-		"WASD / ARROWS, or drag the RIGHT movement wheel.",
-		"Face a 1x1 block and press Z (left Z button on mobile).",
-		"Hold X for 0.7 sec. Each tick turns the preview 90 degrees.",
-		"Tap X to place it in the highlighted front grid position.",
-		"Push a brown BOX into a gold IN port. Green OUT creates items.",
-		"Face the base + Z. In menu: X SELECT, Z CRAFT, RUN/Esc CLOSE.",
+		"WASD·방향키 또는 오른쪽 이동 휠을 드래그하세요.",
+		"1×1 블록을 바라보고 Z를 누르세요. 모바일은 왼쪽 Z 버튼입니다.",
+		"X를 0.7초 누를 때마다 설치 방향이 90도 회전합니다.",
+		"X를 짧게 눌러 앞쪽의 표시된 칸에 설치하세요.",
+		"갈색 상자를 금색 투입구로 미세요. 초록색 출구에서 물건이 나옵니다.",
+		"기지를 보고 Z를 누르세요. X 선택·Z 제작·RUN 또는 Esc 닫기입니다.",
 	][tutorial_step]
 
 func _refresh_tutorial() -> void:
@@ -1005,7 +1006,7 @@ func _refresh_tutorial() -> void:
 			break
 		tutorial_step += 1
 	if before < 6 and tutorial_step >= 6:
-		celebration_text = "BASICS COMPLETE - AUTOMATION STARTS NOW"
+		celebration_text = "기초 완료 - 이제 자동화를 시작하세요"
 		celebration_remaining = 3.0
 	tutorial_ui.queue_redraw()
 	quest_ui.queue_redraw()

@@ -80,22 +80,22 @@ func _draw() -> void:
 		PackedColorArray([Color("f0c04f")])
 	)
 
+	var entrance_font := UIFont.FONT
 	for direction in ENTRANCE_DIRECTIONS:
 		var center: Vector2 = direction * ENTRANCE_DISTANCE
 		var entrance_rect := Rect2(center - Vector2.ONE * TILE_SIZE / 2.0, Vector2.ONE * TILE_SIZE)
 		draw_rect(entrance_rect, Color("36434a"))
 		draw_rect(entrance_rect.grow(-3.0), Color("d69b35"), false, 3.0)
 		draw_rect(entrance_rect.grow(-8.0), Color("101b1d"))
-		var entrance_font := ThemeDB.fallback_font
-		draw_string(entrance_font, center + Vector2(-8, 4), "IN", HORIZONTAL_ALIGNMENT_CENTER, 16, 8, Color("f4d58b"))
+		draw_string(entrance_font, center + Vector2(-12, 4), "투입", HORIZONTAL_ALIGNMENT_CENTER, 24, 7, Color("f4d58b"))
 	var exit_center := EXIT_DIRECTION * ENTRANCE_DISTANCE
 	var exit_rect := Rect2(exit_center - Vector2.ONE * TILE_SIZE / 2.0, Vector2.ONE * TILE_SIZE)
 	draw_rect(exit_rect, Color("335d58"))
 	draw_rect(exit_rect.grow(-3.0), Color("6ed0b0"), false, 3.0)
 	draw_polygon(PackedVector2Array([exit_center + Vector2(-7, -5), exit_center + Vector2(7, -5), exit_center + Vector2(0, 8)]), PackedColorArray([Color("b8f0cf")]))
-	var exit_font := ThemeDB.fallback_font
-	draw_string(exit_font, exit_center + Vector2(-12, 14), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 24, 8, Color("d2ffea"))
+	var exit_font := UIFont.FONT
+	draw_string(exit_font, exit_center + Vector2(-12, 14), "출구", HORIZONTAL_ALIGNMENT_CENTER, 24, 7, Color("d2ffea"))
 	var shelter_center := SHELTER_DIRECTION * SHELTER_DISTANCE
 	draw_circle(shelter_center, 15.0, Color("713f35"))
 	draw_arc(shelter_center, 15.0, PI, TAU, 20, Color("f0bd4f"), 3.0)
-	draw_string(exit_font, shelter_center + Vector2(-16, 25), "HOME", HORIZONTAL_ALIGNMENT_CENTER, 32, 8, Color("ffd9a0"))
+	draw_string(exit_font, shelter_center + Vector2(-16, 25), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 32, 8, Color("ffd9a0"))

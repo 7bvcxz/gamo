@@ -45,11 +45,11 @@ func _run() -> void:
 	_assert(main.mineral_count == 1, "Z hold collects resources within 1.5 tiles")
 	_assert(not is_instance_valid(nearby_resource), "collected mineral resource is removed")
 	_assert(is_instance_valid(far_resource), "resource outside 1.5 tiles remains")
-	_assert((main.get_node("UI/MineralCount") as Label).text == "MINERAL  1", "mineral count appears in top-left UI")
+	_assert((main.get_node("UI/MineralCount") as Label).text == "미네랄  1", "mineral count appears in top-left UI")
 	main.collect_action_held = false
 	player.facing = Vector2.UP
 	main.box_count = 6
-	main.get_node("UI/BoxCount").text = "BOX  6"
+	main.get_node("UI/BoxCount").text = "상자  6"
 	main.call("primary_action")
 	_assert(main.base_menu_open, "Z facing base opens fabricator menu")
 	_assert(player.controls_locked, "fabricator menu locks movement")
@@ -76,7 +76,7 @@ func _run() -> void:
 	_assert(crafted_pillar.is_in_group("pickup_block") and not crafted_pillar.is_in_group("fixed"), "pillar remains Z-pickable rather than Fixed")
 	_assert(crafted_pillar.position.y > (crafted_cats[0] as CatBlock).position.y, "successive blocked outputs continue downward")
 	main.mineral_count = 10
-	main.get_node("UI/MineralCount").text = "MINERAL  10"
+	main.get_node("UI/MineralCount").text = "미네랄  10"
 	main.call("begin_placement_action")
 	main.call("end_placement_action")
 	_assert(main.fabricator_selection == 2, "X selects the box generator recipe")

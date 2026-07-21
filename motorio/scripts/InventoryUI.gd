@@ -55,5 +55,5 @@ func _draw() -> void:
 			else:
 				draw_rect(inner, Color("8b5a30"))
 				draw_line(inner.position, inner.end, Color("4f2f19"), 2.0)
-		var font: Font = ThemeDB.fallback_font
+		var font: Font = UIFont.FONT
 		draw_string(font, rect.position + Vector2(3, 11), str(index + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.9, 0.92, 0.88))

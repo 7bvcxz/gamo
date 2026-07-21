@@ -9,7 +9,7 @@ func _run() -> void:
 	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
 	root.add_child(main)
 	await physics_frame
-	_assert(main.quest_step == 0 and main.quest_title() == "1  FIRST DELIVERY", "onboarding starts with one clear delivery goal")
+	_assert(main.quest_step == 0 and main.quest_title() == "1  첫 상자 납품", "onboarding starts with one clear delivery goal")
 	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 1, "starter zone introduces one clear mineral")
 	var base_position: Vector2 = main.base.position
 	var in_start_view := func(node): return abs(node.position.x - base_position.x) <= 20.0 * main.TILE_SIZE and abs(node.position.y - base_position.y) <= 20.0 * main.TILE_SIZE
@@ -46,7 +46,7 @@ func _run() -> void:
 	_assert(main.quest_step == 5 and main.base_level == 2, "three generated deliveries complete the factory and upgrade the base")
 	_assert(main.automated_delivery_times.size() == 3, "generated deliveries feed the rolling throughput counter")
 	main.call("_process", 0.0)
-	_assert((main.get_node("UI/Throughput") as Label).text.contains("BOX/MIN  3"), "BOX per minute is visible")
+	_assert((main.get_node("UI/Throughput") as Label).text.contains("분당 상자  3"), "BOX per minute is visible")
 
 	main.box_count = 5
 	main.fabricator_selection = 3

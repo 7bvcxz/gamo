@@ -10,7 +10,7 @@ func _run() -> void:
 	root.add_child(main)
 	await physics_frame
 	_assert(main.tutorial_step == 0 and not main.tutorial_complete(), "new players start in quick start instead of the campaign")
-	_assert(main.tutorial_detail().contains("WASD") and main.tutorial_detail().contains("RIGHT"), "movement lesson covers keyboard and mobile wheel")
+	_assert(main.tutorial_detail().contains("WASD") and main.tutorial_detail().contains("오른쪽 이동 휠"), "movement lesson covers keyboard and mobile wheel")
 	main.call("_update_survival", 60.0)
 	_assert(main.day_time == 0.0 and main.temperature == 100.0, "the survival clock and cold wait until quick start is complete")
 	main.tutorial_picked = true
@@ -21,19 +21,19 @@ func _run() -> void:
 	_assert(main.tutorial_step == 2 and main.tutorial_detail().contains("0.7"), "movement and pickup lead to the timed rotation lesson")
 	main.tutorial_rotated = true
 	main.call("_refresh_tutorial")
-	_assert(main.tutorial_step == 3 and main.tutorial_detail().contains("Tap X"), "rotation leads to short-X placement")
+	_assert(main.tutorial_step == 3 and main.tutorial_detail().contains("X를 짧게"), "rotation leads to short-X placement")
 	main.tutorial_placed = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 4, "placement leads to base port education")
-	_assert(main.tutorial_detail().contains("gold IN") and main.tutorial_detail().contains("Green OUT"), "base lesson explains input and output colors")
+	_assert(main.tutorial_detail().contains("금색 투입구") and main.tutorial_detail().contains("초록색 출구"), "base lesson explains input and output colors")
 	main.tutorial_delivered = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 5, "delivery leads to fabricator controls")
-	_assert(main.tutorial_detail().contains("X SELECT") and main.tutorial_detail().contains("Z CRAFT") and main.tutorial_detail().contains("RUN/Esc CLOSE"), "fabricator lesson explains every menu action")
+	_assert(main.tutorial_detail().contains("X 선택") and main.tutorial_detail().contains("Z 제작") and main.tutorial_detail().contains("Esc 닫기"), "fabricator lesson explains every menu action")
 	main.tutorial_menu_opened = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_complete(), "opening the fabricator completes quick start")
-	_assert(main.celebration_text.contains("BASICS COMPLETE"), "completion clearly hands off to automation campaign")
+	_assert(main.celebration_text.contains("기초 완료"), "completion clearly hands off to automation campaign")
 	if failures == 0:
 		print("TUTORIAL_TEST: PASS")
 	quit(failures)

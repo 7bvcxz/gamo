@@ -27,9 +27,9 @@ func _draw() -> void:
 		draw_polygon(PackedVector2Array([cat_position + Vector2(-10, -7), cat_position + Vector2(-6, -17), cat_position + Vector2(-2, -7)]), PackedColorArray([Color("f0c47a")]))
 		draw_polygon(PackedVector2Array([cat_position + Vector2(2, -7), cat_position + Vector2(6, -17), cat_position + Vector2(10, -7)]), PackedColorArray([Color("f0c47a")]))
 		if int(meow_phase + index) % 4 == 0:
-			var font := ThemeDB.fallback_font
-			draw_string(font, cat_position + Vector2(-18, -23), "MEOW", HORIZONTAL_ALIGNMENT_CENTER, 36, 9, Color("fff0cf"))
-	var font := ThemeDB.fallback_font
-	draw_string(font, Vector2(0, 44), "NIGHT %d  •  HOME WITH THE CATS" % main_controller.day_number, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color("f4d18a"))
-	draw_string(font, Vector2(0, size.y - 54), "Z / TAP Z  —  SLEEP UNTIL MORNING", HORIZONTAL_ALIGNMENT_CENTER, size.x, 15, Color.WHITE)
-	draw_string(font, Vector2(0, size.y - 28), "Tomorrow the warm frontier grows again.", HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, Color("aebdb7"))
+			var font := UIFont.FONT
+			draw_string(font, cat_position + Vector2(-18, -23), "야옹", HORIZONTAL_ALIGNMENT_CENTER, 36, 9, Color("fff0cf"))
+	var font := UIFont.FONT
+	draw_string(font, Vector2(0, 44), "%d일차 밤  •  고양이들과 함께" % main_controller.day_number, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color("f4d18a"))
+	draw_string(font, Vector2(0, size.y - 54), "Z 또는 Z 버튼  —  아침까지 자기", HORIZONTAL_ALIGNMENT_CENTER, size.x, 15, Color.WHITE)
+	draw_string(font, Vector2(0, size.y - 28), "내일은 따뜻한 영역을 더 넓혀 보세요.", HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, Color("aebdb7"))

@@ -7,7 +7,7 @@ config_version=5
 
 config/name="Motorio"
 config/description="A top-down automation game prototype"
-config/version="0.4.1"
+config/version="0.4.2"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
@@ -19,6 +19,10 @@ window/size/window_width_override=640
 window/size/window_height_override=640
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom="res://ui_theme.tres"
 
 [input]
 

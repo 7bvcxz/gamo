@@ -45,7 +45,7 @@ func _run() -> void:
 	_assert(main.get("box_count") == 1, "entering box increments count once")
 	_assert(not is_instance_valid(box), "received box is removed")
 	var box_label := main.get_node("UI/BoxCount") as Label
-	_assert(box_label.text == "BOX  1" and box_label.position.x == 16.0, "box count is shown with collected resources at top-left")
+	_assert(box_label.text == "상자  1" and box_label.position.x == 16.0, "box count is shown with collected resources at top-left")
 	var mineral_resource := load("res://scenes/MinedResource.tscn").instantiate() as RigidBody2D
 	mineral_resource.position = base.position + Vector2.RIGHT * 96.0
 	main.add_child(mineral_resource)
@@ -54,7 +54,7 @@ func _run() -> void:
 	_assert(main.get("mineral_count") == 1, "base entrance counts a mined mineral resource")
 	_assert(not is_instance_valid(mineral_resource), "received mineral resource is removed")
 	var mineral_label := main.get_node("UI/MineralCount") as Label
-	_assert(mineral_label.text == "MINERAL  1", "base mineral count updates the UI")
+	_assert(mineral_label.text == "미네랄  1", "base mineral count updates the UI")
 	_assert(mineral_label.position.x == 16.0, "mineral count is positioned at top-left")
 	var cat := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
 	cat.active_on_ready = false

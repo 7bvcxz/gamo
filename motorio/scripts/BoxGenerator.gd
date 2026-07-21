@@ -89,5 +89,5 @@ func _draw() -> void:
 	draw_polygon(PackedVector2Array([Vector2(30, 0), Vector2(22, -6), Vector2(22, 6)]), PackedColorArray([Color("f0bd4f")]))
 	if production_flash > 0.0:
 		draw_circle(Vector2(30, 0), 10.0 + production_flash * 10.0, Color(1.0, 0.82, 0.3, production_flash), false, 3.0)
-	var font := ThemeDB.fallback_font
+	var font := UIFont.FONT
 	draw_string(font, Vector2(-3, 11), "%d/3" % stored_minerals, HORIZONTAL_ALIGNMENT_CENTER, 8, 9, Color.WHITE)
