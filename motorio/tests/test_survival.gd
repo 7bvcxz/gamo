@@ -53,10 +53,7 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 20.0
 	main.temperature = 0.1
 	main.call("_update_survival", 1.0)
-	_assert(main.shelter_open and player.controls_locked, "freezing causes the cats to rescue the player home")
-	var previous_day: int = main.day_number
-	main.call("primary_action")
-	_assert(not main.shelter_open and main.day_number == previous_day + 1 and main.temperature == 100.0, "Z at the campfire sleeps until a warm morning")
+	_assert(not main.shelter_open and main.temperature == 0.0 and not player.controls_locked, "freezing slows but never forcibly returns the player")
 	main.day_time = 659.5
 	main.call("_update_survival", 1.0)
 	_assert(main.night_warning_shown and main.cats_should_rest(), "cats stop work and the return warning starts at minute eleven")

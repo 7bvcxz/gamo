@@ -3,7 +3,8 @@ extends Node2D
 const TILE_SIZE := 32
 const WORLD_TILES := 100
 const WORLD_SIZE := TILE_SIZE * WORLD_TILES
-const REGION_SIZE := 5
+const REGION_SIZE := 10
+const START_CLEAR_RADIUS := 20
 const SPAWN_SEED := 20260720
 const PUSH_TILE_SCENE := preload("res://scenes/PushTile.tscn")
 const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
@@ -703,8 +704,12 @@ func _populate_world() -> void:
 	for region_y in range(0, WORLD_TILES, REGION_SIZE):
 		for region_x in range(0, WORLD_TILES, REGION_SIZE):
 			var box_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile, player_tile)
+			if box_cell.x < 0:
+				continue
 			occupied[box_cell] = true
 			var belt_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile, player_tile)
+			if belt_cell.x < 0:
+				continue
 			occupied[belt_cell] = true
 
 			var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D
@@ -718,7 +723,7 @@ func _populate_world() -> void:
 	_populate_minerals(rng, occupied, center_tile, player_tile)
 
 func _populate_minerals(rng: RandomNumberGenerator, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> void:
-	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 120.0)) - 4
+	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 240.0)) - 1
 	var isolated_count := int(round(target_count * 0.2))
 	var mineral_cells: Array[Vector2i] = []
 	while mineral_cells.size() < isolated_count:
@@ -751,15 +756,7 @@ func _populate_starter_zone(occupied: Dictionary[Vector2i, bool], center_tile: V
 		var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D
 		box.position = _cell_center(cell)
 		add_child(box)
-	var belt_offsets: Array[Vector2i] = [Vector2i(5, -2), Vector2i(5, -1), Vector2i(5, 0), Vector2i(5, 1), Vector2i(5, 2), Vector2i(4, 2)]
-	for offset: Vector2i in belt_offsets:
-		var cell: Vector2i = center_tile + offset
-		occupied[cell] = true
-		var belt := CONVEYOR_SCENE.instantiate() as ConveyorBlock
-		belt.position = _cell_center(cell)
-		belt.direction = Vector2.LEFT
-		add_child(belt)
-	var mineral_offsets: Array[Vector2i] = [Vector2i(6, -1), Vector2i(7, -1), Vector2i(6, 0), Vector2i(7, 0)]
+	var mineral_offsets: Array[Vector2i] = [Vector2i(6, 0)]
 	for index in mineral_offsets.size():
 		var cell: Vector2i = center_tile + mineral_offsets[index]
 		occupied[cell] = true
@@ -770,27 +767,24 @@ func _populate_starter_zone(occupied: Dictionary[Vector2i, bool], center_tile: V
 		add_child(mineral)
 
 func _populate_water_ring(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
-	const WATER_RADIUS := 12
-	for offset in range(-WATER_RADIUS, WATER_RADIUS + 1):
-		for cell in [
-			center_tile + Vector2i(offset, -WATER_RADIUS),
-			center_tile + Vector2i(offset, WATER_RADIUS),
-			center_tile + Vector2i(-WATER_RADIUS, offset),
-			center_tile + Vector2i(WATER_RADIUS, offset),
-		]:
-			if occupied.has(cell):
-				continue
-			occupied[cell] = true
-			var water := WATER_TILE_SCENE.instantiate() as WaterTile
-			water.position = _cell_center(cell)
-			add_child(water)
+	# A distant broken river teaches bridges without forming a prison.
+	for offset in range(-35, 36):
+		if abs(offset) <= 3 or (abs(offset) >= 16 and abs(offset) <= 19):
+			continue
+		var cell := center_tile + Vector2i(24, offset)
+		if occupied.has(cell):
+			continue
+		occupied[cell] = true
+		var water := WATER_TILE_SCENE.instantiate() as WaterTile
+		water.position = _cell_center(cell)
+		add_child(water)
 
 func _populate_tier_resources(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
-	_spawn_resource_tier(occupied, center_tile, "copper", 8, 14, "miner", 0, 0, false)
-	_spawn_resource_tier(occupied, center_tile, "coal", 10, 10, "miner", 0, 0, true)
-	_spawn_resource_tier(occupied, center_tile, "crystal", 17, 8, "miner", 2, 0, true)
-	_spawn_resource_tier(occupied, center_tile, "oil", 26, 5, "pressure", 0, 0, true)
-	_spawn_resource_tier(occupied, center_tile, "uranium", 39, 3, "miner", 8, 2, true)
+	_spawn_resource_tier(occupied, center_tile, "copper", 30, 7, "miner", 0, 0, false)
+	_spawn_resource_tier(occupied, center_tile, "coal", 34, 5, "miner", 0, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "crystal", 38, 4, "miner", 2, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "oil", 42, 3, "pressure", 0, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "uranium", 46, 2, "miner", 8, 2, true)
 
 func _spawn_resource_tier(
 	occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, resource_type: String,
@@ -814,7 +808,7 @@ func _spawn_resource_tier(
 		add_child(deposit)
 
 func _is_free_mineral_cell(cell: Vector2i, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> bool:
-	return cell.x >= 0 and cell.y >= 0 and cell.x < WORLD_TILES and cell.y < WORLD_TILES and not occupied.has(cell) and not (abs(cell.x - center_tile.x) <= 4 and abs(cell.y - center_tile.y) <= 4) and not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
+	return cell.x >= 0 and cell.y >= 0 and cell.x < WORLD_TILES and cell.y < WORLD_TILES and not occupied.has(cell) and not (abs(cell.x - center_tile.x) <= START_CLEAR_RADIUS and abs(cell.y - center_tile.y) <= START_CLEAR_RADIUS) and not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
 
 func _add_mineral(cell: Vector2i, clustered: bool, occupied: Dictionary[Vector2i, bool], mineral_cells: Array[Vector2i]) -> void:
 	var mineral := MINERAL_SCENE.instantiate() as MineralBlock
@@ -832,19 +826,19 @@ func _random_free_cell(
 	center_tile: Vector2i,
 	player_tile: Vector2i
 ) -> Vector2i:
-	while true:
+	for attempt in 200:
 		var cell := Vector2i(
 			region_x + rng.randi_range(0, REGION_SIZE - 1),
 			region_y + rng.randi_range(0, REGION_SIZE - 1)
 		)
 		if occupied.has(cell):
 			continue
-		if abs(cell.x - center_tile.x) <= 3 and abs(cell.y - center_tile.y) <= 3:
+		if abs(cell.x - center_tile.x) <= START_CLEAR_RADIUS and abs(cell.y - center_tile.y) <= START_CLEAR_RADIUS:
 			continue
 		if abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1:
 			continue
 		return cell
-	return Vector2i(region_x, region_y)
+	return Vector2i(-1, -1)
 
 func _cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell * TILE_SIZE) + Vector2.ONE * (TILE_SIZE / 2.0)
@@ -883,10 +877,6 @@ func _update_survival(delta: float) -> void:
 			temperature = maxf(0.0, temperature - delta * exposure * 2.2)
 		else:
 			temperature = minf(100.0, temperature + delta * 5.0)
-		if temperature <= 0.0:
-			day_time = minf(720.0, day_time + 30.0)
-			temperature = 45.0
-			_enter_shelter(true)
 		if day_time >= 660.0 and not night_warning_shown:
 			night_warning_shown = true
 			celebration_text = "NIGHT FALLS - RETURN HOME"
@@ -1041,8 +1031,8 @@ func _create_world_walls() -> void:
 		add_child(wall)
 
 func _draw() -> void:
-	# Base terrain.
-	draw_rect(Rect2(0, 0, WORLD_SIZE, WORLD_SIZE), Color("243b32"))
+	# Snow terrain.
+	draw_rect(Rect2(0, 0, WORLD_SIZE, WORLD_SIZE), Color("edf1f2"))
 
 	# Deterministic patches break up the grid and hint at future resource fields.
 	for y in range(WORLD_TILES):
@@ -1050,14 +1040,14 @@ func _draw() -> void:
 			var noise_value := (x * 37 + y * 73 + x * y * 3) % 97
 			if noise_value < 8:
 				var cell := Rect2(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-				draw_rect(cell, Color("29473a"))
+				draw_rect(cell, Color("e4eaec"))
 
 	# One-pixel grid: 100 × 100 cells.
-	var grid_color := Color(0.42, 0.58, 0.47, 0.18)
+	var grid_color := Color(0.42, 0.49, 0.52, 0.18)
 	for i in range(WORLD_TILES + 1):
 		var p := float(i * TILE_SIZE)
 		draw_line(Vector2(p, 0), Vector2(p, WORLD_SIZE), grid_color, 1.0)
 		draw_line(Vector2(0, p), Vector2(WORLD_SIZE, p), grid_color, 1.0)
 
 	# World border.
-	draw_rect(Rect2(1, 1, WORLD_SIZE - 2, WORLD_SIZE - 2), Color("9abd78"), false, 3.0)
+	draw_rect(Rect2(1, 1, WORLD_SIZE - 2, WORLD_SIZE - 2), Color("788a91"), false, 3.0)

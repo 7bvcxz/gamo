@@ -16,6 +16,18 @@ func _ready() -> void:
 	_create_entrances()
 	queue_redraw()
 
+func _physics_process(_delta: float) -> void:
+	# Keep intake reliable for small, sleeping rigid bodies on low mobile frame rates.
+	for group_name in ["box_block", "mined_resource", "world_resource"]:
+		for body in get_tree().get_nodes_in_group(group_name):
+			if body is not RigidBody2D or body.has_meta("base_received"):
+				continue
+			for direction in ENTRANCE_DIRECTIONS:
+				var center: Vector2 = global_position + direction * ENTRANCE_DISTANCE
+				if body.global_position.distance_to(center) < 14.0:
+					_on_entrance_body_entered(body)
+					break
+
 func _create_entrances() -> void:
 	for index in ENTRANCE_DIRECTIONS.size():
 		var entrance := Area2D.new()

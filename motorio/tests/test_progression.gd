@@ -10,7 +10,13 @@ func _run() -> void:
 	root.add_child(main)
 	await physics_frame
 	_assert(main.quest_step == 0 and main.quest_title() == "1  FIRST DELIVERY", "onboarding starts with one clear delivery goal")
-	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 4, "starter zone has a reliable mineral cluster")
+	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 1, "starter zone introduces one clear mineral")
+	var base_position: Vector2 = main.base.position
+	var in_start_view := func(node): return abs(node.position.x - base_position.x) <= 20.0 * main.TILE_SIZE and abs(node.position.y - base_position.y) <= 20.0 * main.TILE_SIZE
+	_assert(get_nodes_in_group("box_block").filter(in_start_view).size() == 3, "start view contains only three teaching boxes")
+	_assert(get_nodes_in_group("transport_floor").filter(in_start_view).is_empty(), "start view has no unexplained conveyor clutter")
+	_assert(get_nodes_in_group("resource_deposit").filter(in_start_view).is_empty(), "tier resources begin beyond the first view")
+	_assert(get_nodes_in_group("water_tile").filter(in_start_view).is_empty(), "water begins beyond the first view")
 
 	var first_delivery := RigidBody2D.new()
 	main.call("_on_base_box_received", first_delivery)

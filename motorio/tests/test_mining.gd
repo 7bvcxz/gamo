@@ -14,7 +14,8 @@ func _run() -> void:
 	for mineral in minerals:
 		if mineral.get_meta("clustered_spawn", false):
 			clustered += 1
-	_assert(abs(minerals.size() - 83) <= 1, "mineral density is one quarter of the original amount")
+	_assert(abs(minerals.size() - 42) <= 1, "mineral density is halved for a calmer world")
+	_assert(minerals.filter(func(node): return node.get_meta("starter_mineral", false)).size() == 1, "the starting view has one mineral deposit")
 	var clustered_ratio := float(clustered) / float(minerals.size())
 	_assert(abs(clustered_ratio - 0.8) < 0.02, "about 80 percent of minerals spawn attached")
 	var fixed_mineral := minerals[0] as MineralBlock

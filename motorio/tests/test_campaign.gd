@@ -9,7 +9,7 @@ func _run() -> void:
 	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
 	root.add_child(main)
 	await physics_frame
-	var expected := {"copper": 14, "coal": 10, "crystal": 8, "oil": 5, "uranium": 3}
+	var expected := {"copper": 7, "coal": 5, "crystal": 4, "oil": 3, "uranium": 2}
 	var last_radius := 0
 	for resource_type in expected:
 		var deposits := get_nodes_in_group("deposit_%s" % resource_type)
@@ -36,6 +36,7 @@ func _run() -> void:
 	_assert(main.electricity == 0 and main.resource_counts["oil"] == 0, "uranium consumes both late-game inputs")
 
 	var water := get_nodes_in_group("water_tile")[0] as WaterTile
+	_assert(water.position.distance_to(main.base.position) > 14.0 * main.TILE_SIZE, "water does not surround the warm starting area")
 	_assert(not (water.get_node("CollisionShape2D") as CollisionShape2D).disabled, "water starts impassable")
 	var bridge := load("res://scenes/Bridge.tscn").instantiate() as BridgeBlock
 	bridge.position = water.position
