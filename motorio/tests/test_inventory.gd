@@ -25,10 +25,12 @@ func _run() -> void:
 
 	main.call("toggle_interaction_mode")
 	_assert(main.interaction_mode == main.MODE_OUT, "C toggles to OUT mode")
+	_assert(main.preview_visible, "OUT mode always shows placement preview")
+	var box_preview := main.get("placement_preview") as RigidBody2D
+	_assert(box_preview != null and box_preview.get_script() == load("res://scripts/PushTile.gd"), "preview uses the actual selected block")
+	_assert(is_equal_approx(box_preview.modulate.a, 0.5), "actual block preview is 50 percent transparent")
 	main.call("preview_action")
-	_assert(main.preview_visible and main.placement_rotation == 0, "first X shows preview")
-	main.call("preview_action")
-	_assert(main.placement_rotation == 1, "next X rotates preview 90 degrees")
+	_assert(main.preview_visible and main.placement_rotation == 1, "X rotates always-visible preview 90 degrees")
 	main.call("primary_action")
 	await physics_frame
 	_assert(main.inventory.is_empty(), "OUT Z consumes selected inventory block")
@@ -62,7 +64,7 @@ func _run() -> void:
 	main.interaction_mode = main.MODE_OUT
 	main.preview_visible = false
 	main.placement_rotation = 0
-	main.call("preview_action")
+	main.call("_sync_placement_preview")
 	main.call("preview_action")
 	main.call("primary_action")
 	await physics_frame

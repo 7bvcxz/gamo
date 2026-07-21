@@ -34,6 +34,7 @@ var inventory: Array[Dictionary] = []
 var selected_slot := 0
 var preview_visible := false
 var placement_rotation := 0
+var placement_preview: RigidBody2D
 var base_menu_open := false
 var fabricator_status := "3 BOX REQUIRED"
 var collect_action_held := false
@@ -90,8 +91,8 @@ func toggle_interaction_mode() -> void:
 		_close_base_menu()
 		return
 	interaction_mode = MODE_OUT if interaction_mode == MODE_IN else MODE_IN
-	preview_visible = false
 	placement_rotation = 0
+	_sync_placement_preview()
 	_update_interaction_ui()
 
 func primary_action() -> void:
@@ -112,15 +113,13 @@ func preview_action() -> void:
 		return
 	if interaction_mode != MODE_OUT or inventory.is_empty():
 		return
-	if preview_visible:
-		placement_rotation = (placement_rotation + 1) % 4
-	else:
-		preview_visible = true
-	queue_redraw()
+	placement_rotation = (placement_rotation + 1) % 4
+	_sync_placement_preview()
 
 func select_inventory_slot(slot: int) -> void:
 	selected_slot = clampi(slot, 0, INVENTORY_CAPACITY - 1)
 	placement_rotation = 0
+	_sync_placement_preview()
 	_update_interaction_ui()
 
 func _pick_up_front_block() -> void:
@@ -147,6 +146,7 @@ func _pick_up_front_block() -> void:
 	inventory.append(item)
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
+	_sync_placement_preview()
 	_update_interaction_ui()
 
 func _place_selected_block() -> void:
@@ -172,9 +172,59 @@ func _place_selected_block() -> void:
 	add_child(block)
 	inventory.remove_at(selected_slot)
 	selected_slot = clampi(selected_slot, 0, maxi(0, inventory.size() - 1))
-	preview_visible = false
 	placement_rotation = 0
+	_sync_placement_preview()
 	_update_interaction_ui()
+
+func _sync_placement_preview() -> void:
+	var should_show := interaction_mode == MODE_OUT and selected_slot < inventory.size() and not base_menu_open
+	preview_visible = should_show
+	if not should_show:
+		if is_instance_valid(placement_preview):
+			placement_preview.queue_free()
+		placement_preview = null
+		return
+	var item: Dictionary = inventory[selected_slot]
+	var item_type: String = item["type"]
+	if is_instance_valid(placement_preview) and placement_preview.get_meta("preview_type", "") != item_type:
+		placement_preview.free()
+		placement_preview = null
+	if not is_instance_valid(placement_preview):
+		placement_preview = _create_placement_preview(item_type)
+	placement_preview.position = _front_cell_center()
+	if placement_preview is ConveyorBlock:
+		(placement_preview as ConveyorBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	elif placement_preview is CatBlock:
+		(placement_preview as CatBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	placement_preview.queue_redraw()
+
+func _create_placement_preview(item_type: String) -> RigidBody2D:
+	var block: RigidBody2D
+	if item_type == "conveyor":
+		block = CONVEYOR_SCENE.instantiate() as RigidBody2D
+	elif item_type == "cat":
+		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
+		cat.active_on_ready = false
+		block = cat
+	else:
+		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
+	block.set_meta("placement_preview", true)
+	block.set_meta("preview_type", item_type)
+	block.modulate.a = 0.5
+	block.z_index = 20
+	block.collision_layer = 0
+	block.collision_mask = 0
+	block.freeze = true
+	add_child(block)
+	for group_name in ["pickup_block", "solid", "machine", "box_block"]:
+		block.remove_from_group(group_name)
+	for child in block.find_children("*", "CollisionShape2D", true, false):
+		(child as CollisionShape2D).disabled = true
+	var detector := block.get_node_or_null("Detector") as Area2D
+	if detector:
+		detector.monitoring = false
+	block.process_mode = Node.PROCESS_MODE_DISABLED
+	return block
 
 func _can_place_at(target: Vector2) -> bool:
 	var shape := RectangleShape2D.new()
@@ -202,7 +252,7 @@ func _is_base_in_front() -> bool:
 
 func _open_base_menu() -> void:
 	base_menu_open = true
-	preview_visible = false
+	_sync_placement_preview()
 	fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
 	player.controls_locked = true
 	base_menu.queue_redraw()
@@ -323,8 +373,8 @@ func _cell_center(cell: Vector2i) -> Vector2:
 func _process(_delta: float) -> void:
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
 	info.text = "POS  %d, %d" % [tile.x, tile.y]
-	if preview_visible:
-		queue_redraw()
+	if preview_visible and is_instance_valid(placement_preview):
+		placement_preview.position = _front_cell_center()
 	if collect_action_held:
 		_collect_nearby_mineral_resources()
 
@@ -381,12 +431,3 @@ func _draw() -> void:
 
 	# World border.
 	draw_rect(Rect2(1, 1, WORLD_SIZE - 2, WORLD_SIZE - 2), Color("9abd78"), false, 3.0)
-
-	if preview_visible and interaction_mode == MODE_OUT and not inventory.is_empty():
-		var target := _front_cell_center()
-		var valid := _can_place_at(target)
-		var color := Color(0.3, 0.9, 0.55, 0.45) if valid else Color(0.95, 0.25, 0.22, 0.45)
-		draw_rect(Rect2(target - Vector2.ONE * 15.0, Vector2.ONE * 30.0), color)
-		if inventory[selected_slot]["type"] == "conveyor" or inventory[selected_slot]["type"] == "cat":
-			var direction := Vector2.RIGHT.rotated(placement_rotation * PI / 2.0)
-			draw_line(target - direction * 8.0, target + direction * 8.0, Color.WHITE, 3.0)
