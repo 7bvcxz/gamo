@@ -11,6 +11,9 @@ const ARROW_CYCLE := 20.0
 @export var direction := Vector2.RIGHT
 var animation_offset := 0.0
 
+func _ready() -> void:
+	add_to_group("pickup_block")
+
 func _physics_process(delta: float) -> void:
 	for body in $Detector.get_overlapping_bodies():
 		if body == self:
