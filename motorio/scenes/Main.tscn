@@ -42,10 +42,13 @@ theme_override_font_sizes/font_size = 14
 text = "POS  51, 51"
 
 [node name="WorldSize" type="Label" parent="UI"]
-offset_left = 428.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -212.0
 offset_top = 162.0
-offset_right = 624.0
+offset_right = -16.0
 offset_bottom = 188.0
+grow_horizontal = 0
 theme_override_colors/font_color = Color(0.78, 0.83, 0.74, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
@@ -55,10 +58,13 @@ text = "WORLD 100 × 100"
 horizontal_alignment = 2
 
 [node name="BoxCount" type="Label" parent="UI"]
-offset_left = 428.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -212.0
 offset_top = 188.0
-offset_right = 624.0
+offset_right = -16.0
 offset_bottom = 214.0
+grow_horizontal = 0
 theme_override_colors/font_color = Color(0.9, 0.69, 0.32, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
@@ -112,16 +118,22 @@ mouse_filter = 2
 script = ExtResource("7_minimap")
 
 [node name="Version" type="Label" parent="UI"]
-offset_left = 536.0
-offset_top = 606.0
-offset_right = 624.0
-offset_bottom = 630.0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -104.0
+offset_top = -34.0
+offset_right = -16.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
 theme_override_colors/font_color = Color(0.62, 0.68, 0.63, 0.8)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
-text = "v0.1.8"
+text = "v0.1.9"
 horizontal_alignment = 2
 
 [node name="TouchControls" type="Control" parent="UI"]
