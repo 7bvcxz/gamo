@@ -52,10 +52,7 @@ func _update_character_animation(delta: float, direction: Vector2, sprinting: bo
 	if direction.is_zero_approx():
 		_set_idle_animation()
 	else:
-		var row := 2 if sprinting else 1
-		var frames_per_second := 14.0 if sprinting else 9.0
-		character.scale = Vector2.ONE * SPRITE_SCALE
-		_set_character_frame(row * 4 + int(animation_time * frames_per_second) % 4)
+		_set_motion_animation(sprinting)
 	if abs(facing.x) > 0.15:
 		character.flip_h = facing.x < 0.0
 
@@ -66,10 +63,21 @@ func _set_idle_animation() -> void:
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
 	_set_character_frame(0)
 
-func _set_character_frame(frame_index: int) -> void:
+func _set_motion_animation(sprinting: bool) -> void:
+	# Generated action frames do not share a continuous silhouette. Animate one
+	# registered pose per state so movement stays readable without lateral jumps.
+	var rate: float = 13.0 if sprinting else 8.5
+	var phase: float = animation_time * rate
+	var stretch: float = sin(phase) * (0.028 if sprinting else 0.018)
+	var squash: float = -stretch * 0.45
+	var bounce: float = abs(sin(phase)) * (2.2 if sprinting else 1.2)
+	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
+	_set_character_frame(8 if sprinting else 4, TARGET_FOOT - Vector2(0.0, bounce))
+
+func _set_character_frame(frame_index: int, target_foot: Vector2 = TARGET_FOOT) -> void:
 	character.frame = frame_index
 	var foot_anchor: Vector2 = FRAME_FOOT_ANCHORS[frame_index]
-	character.position = TARGET_FOOT - (foot_anchor - FRAME_CENTER) * character.scale
+	character.position = target_foot - (foot_anchor - FRAME_CENTER) * character.scale
 
 func _push_rigid_bodies() -> void:
 	for index in get_slide_collision_count():
