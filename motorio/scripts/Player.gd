@@ -8,10 +8,14 @@ const PUSH_FORCE := 2200.0
 var world_bounds := Rect2()
 var facing := Vector2.DOWN
 var walk_phase := 0.0
+var animation_time := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
 
+@onready var character: Sprite2D = $Character
+
 func _ready() -> void:
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
@@ -26,6 +30,7 @@ func _physics_process(delta: float) -> void:
 	var sprinting := Input.is_action_pressed("sprint") or touch_sprint
 	var speed_multiplier := SPRINT_MULTIPLIER if sprinting else 1.0
 	velocity = direction * SPEED * speed_multiplier
+	_update_character_animation(delta, direction, sprinting)
 	move_and_slide()
 	_push_rigid_bodies()
 	queue_redraw()
@@ -33,6 +38,17 @@ func _physics_process(delta: float) -> void:
 	# Keep the complete character inside the 100 × 100 tile world.
 	position.x = clamp(position.x, world_bounds.position.x + RADIUS, world_bounds.end.x - RADIUS)
 	position.y = clamp(position.y, world_bounds.position.y + RADIUS, world_bounds.end.y - RADIUS)
+
+func _update_character_animation(delta: float, direction: Vector2, sprinting: bool) -> void:
+	var row := 0
+	var frames_per_second := 4.0
+	if not direction.is_zero_approx():
+		row = 2 if sprinting else 1
+		frames_per_second = 14.0 if sprinting else 9.0
+	animation_time += delta
+	character.frame = row * 4 + int(animation_time * frames_per_second) % 4
+	if abs(facing.x) > 0.15:
+		character.flip_h = facing.x < 0.0
 
 func _push_rigid_bodies() -> void:
 	for index in get_slide_collision_count():
@@ -42,21 +58,7 @@ func _push_rigid_bodies() -> void:
 			body.apply_central_force(-collision.get_normal() * PUSH_FORCE)
 
 func _draw() -> void:
-	var walking := not velocity.is_zero_approx()
-	var step: float = sin(walk_phase) * 2.5 if walking else 0.0
-	var bob: float = abs(sin(walk_phase)) * 1.2 if walking else 0.0
-	var body_origin := Vector2(0, -2.0 - bob)
-
-	# Isometric-style ground shadow and alternating feet, all inside one tile.
+	# Isometric-style ground shadow beneath the animated character.
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
 	draw_circle(Vector2(0, 15), 10.0, Color(0.02, 0.03, 0.025, 0.45))
 	draw_set_transform(Vector2.ZERO)
-	draw_line(Vector2(-4 + step, 5), Vector2(-5 + step, 11), Color("283746"), 4.0)
-	draw_line(Vector2(4 - step, 5), Vector2(5 - step, 11), Color("283746"), 4.0)
-
-	# Body, head and a bright visor indicating the current facing direction.
-	draw_circle(body_origin + Vector2(0, 2), 9.0, Color("d59a32"))
-	draw_circle(body_origin + Vector2(0, -6), 7.0, Color("f2b84b"))
-	var visor_center := body_origin + Vector2(0, -6) + facing * 3.0
-	draw_circle(visor_center, 3.0, Color("8ed3d8"))
-	draw_arc(body_origin + Vector2(0, -6), 7.0, 0.0, TAU, 20, Color("fff0ad"), 1.5)

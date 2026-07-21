@@ -43,3 +43,5 @@
 - 2026-07-20: cache-busting runner에서 `Engine.start()` 전에 `Engine.init(executable)`을 호출하지 않아 브라우저에서 “A base path must be provided” 오류가 발생했다. Web runner는 엔진 초기화 → PCK preload → start 순서를 지키고, Node 문법 검사뿐 아니라 실제 브라우저 실행 테스트를 필수로 한다.
 - 2026-07-20: `npx -p playwright node -e`가 임시 Playwright 모듈을 Node 검색 경로에 제공할 것으로 가정해 브라우저 테스트 실행이 실패했다. 일회성 브라우저 테스트는 명시적 임시 prefix에 패키지를 설치하고 해당 `node_modules`를 `NODE_PATH`로 지정한다.
 - 2026-07-20: 컨베이어 화살표 wrap 계산이 32×32 블록 범위를 벗어났고, 효과 감지 영역을 충돌체보다 크게 만들어 외곽선 접촉만으로 이동이 적용됐다. 애니메이션 점의 최대 범위와 엄격한 내부 판정을 각각 자동 테스트한다.
+- 2026-07-21: 탑뷰 캐릭터에 `CharacterBody2D` 기본 `GROUNDED` 모드를 사용해 아래쪽의 움직이는 상자를 바닥 플랫폼처럼 인식하고 속도를 전달받았다. 중력 없는 평면 이동 캐릭터는 `MOTION_MODE_FLOATING`을 명시하고 방향별 밀기 동작을 검증한다.
+- 2026-07-21: SceneTree 초기화 테스트에서 `@onready` 변수가 준비됐다고 가정해 애니메이션 테스트가 Nil 오류를 냈고, 개별 assertion에서 `quit(1)`을 예약한 뒤 마지막에 `quit()`으로 성공 코드를 덮었다. 초기화 전 직접 호출 테스트는 노드 의존성을 명시적으로 연결하고, 실패 수를 모아 마지막에 한 번만 종료 코드를 결정한다.
