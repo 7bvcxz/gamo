@@ -21,18 +21,27 @@ func _initialize() -> void:
 		_assert(idle_foot.distance_to(Vector2(0.0, 13.0)) < 0.01, "idle breathing keeps feet fixed")
 	player.call("_update_character_animation", 0.0, Vector2.DOWN, false)
 	_assert(sprite.frame == 4, "walk keeps one registered source frame")
-	var walk_x := sprite.position.x
+	var walk_rotation_min := sprite.rotation
+	var walk_rotation_max := sprite.rotation
 	for step in range(1, 13):
 		player.call("_update_character_animation", 1.0 / 60.0, Vector2.DOWN, false)
 		_assert(sprite.frame == 4, "walk source frame remains stable")
-		_assert(abs(sprite.position.x - walk_x) < 0.35, "walk has no lateral frame jump")
+		walk_rotation_min = min(walk_rotation_min, sprite.rotation)
+		walk_rotation_max = max(walk_rotation_max, sprite.rotation)
+	_assert(walk_rotation_max - walk_rotation_min > 0.05, "walk animation has visible body motion")
 	player.call("_update_character_animation", 0.0, Vector2.DOWN, true)
 	_assert(sprite.frame == 8, "run keeps one registered source frame")
-	var run_x := sprite.position.x
 	for step in range(1, 13):
 		player.call("_update_character_animation", 1.0 / 60.0, Vector2.DOWN, true)
 		_assert(sprite.frame == 8, "run source frame remains stable")
-		_assert(abs(sprite.position.x - run_x) < 0.55, "run has no lateral frame jump")
+
+	player.set("facing", Vector2.RIGHT)
+	player.call("_update_character_animation", 0.0, Vector2.RIGHT, false)
+	var right_foot := _sprite_foot(sprite, Vector2(249.0, 321.0))
+	player.set("facing", Vector2.LEFT)
+	player.call("_update_character_animation", 0.0, Vector2.LEFT, false)
+	var left_foot := _sprite_foot(sprite, Vector2(249.0, 321.0))
+	_assert(right_foot.distance_to(left_foot) < 0.01, "left-right flip keeps the same foot anchor")
 	if failures == 0:
 		print("PLAYER_TEST: PASS")
 	quit(failures)
@@ -41,3 +50,9 @@ func _assert(condition: bool, label: String) -> void:
 	if not condition:
 		push_error("PLAYER_TEST failed: %s" % label)
 		failures += 1
+
+func _sprite_foot(sprite: Sprite2D, anchor: Vector2) -> Vector2:
+	var delta := anchor - Vector2(181.0, 181.0)
+	if sprite.flip_h:
+		delta.x = -delta.x
+	return sprite.position + (delta * sprite.scale).rotated(sprite.rotation)

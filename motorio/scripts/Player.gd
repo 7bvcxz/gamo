@@ -49,17 +49,18 @@ func _physics_process(delta: float) -> void:
 
 func _update_character_animation(delta: float, direction: Vector2, sprinting: bool) -> void:
 	animation_time += delta
+	if abs(facing.x) > 0.15:
+		character.flip_h = facing.x < 0.0
 	if direction.is_zero_approx():
 		_set_idle_animation()
 	else:
 		_set_motion_animation(sprinting)
-	if abs(facing.x) > 0.15:
-		character.flip_h = facing.x < 0.0
 
 func _set_idle_animation() -> void:
 	# Keep one registered drawing for idle. A tiny vertical scale pulse creates
 	# breathing without swapping differently composed generated frames.
 	var breath := 1.0 + sin(animation_time * 3.2) * 0.012
+	character.rotation = 0.0
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
 	_set_character_frame(0)
 
@@ -68,16 +69,21 @@ func _set_motion_animation(sprinting: bool) -> void:
 	# registered pose per state so movement stays readable without lateral jumps.
 	var rate: float = 13.0 if sprinting else 8.5
 	var phase: float = animation_time * rate
-	var stretch: float = sin(phase) * (0.028 if sprinting else 0.018)
+	var stretch: float = sin(phase) * (0.045 if sprinting else 0.035)
 	var squash: float = -stretch * 0.45
-	var bounce: float = abs(sin(phase)) * (2.2 if sprinting else 1.2)
+	var bounce: float = abs(sin(phase)) * (3.0 if sprinting else 2.0)
+	character.rotation = sin(phase) * (0.075 if sprinting else 0.055)
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
 	_set_character_frame(8 if sprinting else 4, TARGET_FOOT - Vector2(0.0, bounce))
 
 func _set_character_frame(frame_index: int, target_foot: Vector2 = TARGET_FOOT) -> void:
 	character.frame = frame_index
 	var foot_anchor: Vector2 = FRAME_FOOT_ANCHORS[frame_index]
-	character.position = target_foot - (foot_anchor - FRAME_CENTER) * character.scale
+	var foot_delta := foot_anchor - FRAME_CENTER
+	if character.flip_h:
+		foot_delta.x = -foot_delta.x
+	foot_delta = (foot_delta * character.scale).rotated(character.rotation)
+	character.position = target_foot - foot_delta
 
 func _push_rigid_bodies() -> void:
 	for index in get_slide_collision_count():
