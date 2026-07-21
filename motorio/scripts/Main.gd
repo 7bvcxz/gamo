@@ -21,6 +21,7 @@ const MODE_OUT := 1
 @onready var mode_label: Label = $UI/Mode
 @onready var inventory_ui: Control = $UI/Inventory
 @onready var base_menu: Control = $UI/BaseMenu
+@onready var minimap: Control = $UI/Minimap
 @onready var version_label: Label = $UI/Version
 @onready var touch_controls: TouchControls = $UI/TouchControls
 
@@ -44,6 +45,7 @@ func _ready() -> void:
 	touch_controls.main_controller = self
 	inventory_ui.main_controller = self
 	base_menu.main_controller = self
+	minimap.main_controller = self
 	_update_interaction_ui()
 	_create_world_walls()
 	_populate_world()

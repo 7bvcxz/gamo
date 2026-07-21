@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/Base.tscn" id="4_base"]
 [ext_resource type="Script" path="res://scripts/InventoryUI.gd" id="5_inventory"]
 [ext_resource type="Script" path="res://scripts/BaseMenu.gd" id="6_base_menu"]
+[ext_resource type="Script" path="res://scripts/MinimapUI.gd" id="7_minimap"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -42,9 +43,9 @@ text = "POS  51, 51"
 
 [node name="WorldSize" type="Label" parent="UI"]
 offset_left = 428.0
-offset_top = 18.0
+offset_top = 162.0
 offset_right = 624.0
-offset_bottom = 46.0
+offset_bottom = 188.0
 theme_override_colors/font_color = Color(0.78, 0.83, 0.74, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
@@ -55,9 +56,9 @@ horizontal_alignment = 2
 
 [node name="BoxCount" type="Label" parent="UI"]
 offset_left = 428.0
-offset_top = 46.0
+offset_top = 188.0
 offset_right = 624.0
-offset_bottom = 72.0
+offset_bottom = 214.0
 theme_override_colors/font_color = Color(0.9, 0.69, 0.32, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
@@ -68,9 +69,9 @@ horizontal_alignment = 2
 
 [node name="Mode" type="Label" parent="UI"]
 offset_left = 428.0
-offset_top = 72.0
+offset_top = 214.0
 offset_right = 624.0
-offset_bottom = 98.0
+offset_bottom = 240.0
 theme_override_colors/font_color = Color(0.42, 0.86, 0.78, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
@@ -99,6 +100,18 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_base_menu")
 
+[node name="Minimap" type="Control" parent="UI"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -156.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 156.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("7_minimap")
+
 [node name="Version" type="Label" parent="UI"]
 offset_left = 536.0
 offset_top = 606.0
@@ -109,7 +122,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
-text = "v0.0.24"
+text = "v0.0.25"
 horizontal_alignment = 2
 
 [node name="TouchControls" type="Control" parent="UI"]
