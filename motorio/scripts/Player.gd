@@ -48,20 +48,28 @@ func _physics_process(delta: float) -> void:
 	position.y = clamp(position.y, world_bounds.position.y + RADIUS, world_bounds.end.y - RADIUS)
 
 func _update_character_animation(delta: float, direction: Vector2, sprinting: bool) -> void:
-	var row := 0
-	var frames_per_second := 4.0
-	if not direction.is_zero_approx():
-		row = 2 if sprinting else 1
-		frames_per_second = 14.0 if sprinting else 9.0
 	animation_time += delta
-	_set_character_frame(row * 4 + int(animation_time * frames_per_second) % 4)
+	if direction.is_zero_approx():
+		_set_idle_animation()
+	else:
+		var row := 2 if sprinting else 1
+		var frames_per_second := 14.0 if sprinting else 9.0
+		character.scale = Vector2.ONE * SPRITE_SCALE
+		_set_character_frame(row * 4 + int(animation_time * frames_per_second) % 4)
 	if abs(facing.x) > 0.15:
 		character.flip_h = facing.x < 0.0
+
+func _set_idle_animation() -> void:
+	# Keep one registered drawing for idle. A tiny vertical scale pulse creates
+	# breathing without swapping differently composed generated frames.
+	var breath := 1.0 + sin(animation_time * 3.2) * 0.012
+	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
+	_set_character_frame(0)
 
 func _set_character_frame(frame_index: int) -> void:
 	character.frame = frame_index
 	var foot_anchor: Vector2 = FRAME_FOOT_ANCHORS[frame_index]
-	character.position = TARGET_FOOT - (foot_anchor - FRAME_CENTER) * SPRITE_SCALE
+	character.position = TARGET_FOOT - (foot_anchor - FRAME_CENTER) * character.scale
 
 func _push_rigid_bodies() -> void:
 	for index in get_slide_collision_count():

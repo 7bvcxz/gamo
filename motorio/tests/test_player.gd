@@ -11,19 +11,18 @@ func _initialize() -> void:
 	_assert(sprite.hframes == 4 and sprite.vframes == 3, "character has a 4x3 animation sheet")
 
 	player.call("_update_character_animation", 0.0, Vector2.ZERO, false)
-	_assert(sprite.frame >= 0 and sprite.frame <= 3, "idle animation row")
+	_assert(sprite.frame == 0, "idle keeps one registered source frame")
+	var idle_x := sprite.position.x
+	for step in range(1, 13):
+		player.call("_update_character_animation", 1.0 / 60.0, Vector2.ZERO, false)
+		_assert(sprite.frame == 0, "idle source frame remains stable")
+		_assert(abs(sprite.position.x - idle_x) < 0.001, "idle has no horizontal jitter")
+		var idle_foot := sprite.position + (Vector2(249.0, 339.0) - Vector2(181.0, 181.0)) * sprite.scale
+		_assert(idle_foot.distance_to(Vector2(0.0, 13.0)) < 0.01, "idle breathing keeps feet fixed")
 	player.call("_update_character_animation", 0.0, Vector2.DOWN, false)
 	_assert(sprite.frame >= 4 and sprite.frame <= 7, "walk animation row")
 	player.call("_update_character_animation", 0.0, Vector2.DOWN, true)
 	_assert(sprite.frame >= 8 and sprite.frame <= 11, "run animation row")
-	var idle_feet: Array[Vector2] = []
-	var anchors := [Vector2(249.0, 339.0), Vector2(193.5, 339.0), Vector2(199.0, 339.0), Vector2(91.5, 339.0)]
-	for frame_index in range(4):
-		player.call("_set_character_frame", frame_index)
-		idle_feet.append(sprite.position + (anchors[frame_index] - Vector2(181.0, 181.0)) * 0.115)
-	for foot in idle_feet:
-		_assert(foot.distance_to(Vector2(0.0, 13.0)) < 0.01, "idle frames share one foot anchor")
-
 	if failures == 0:
 		print("PLAYER_TEST: PASS")
 	quit(failures)
