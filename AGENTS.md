@@ -17,6 +17,7 @@
 - 완료된 변경은 관련 파일만 커밋하고 `main` 브랜치를 원격에 push한다.
 - `motorio`를 push하기 직전에 `motorio/project.godot`의 `application/config/version` patch 값을 `0.0.1` 올리고, 게임 우측 아래 표시와 Web export가 같은 버전을 사용하는지 확인한다.
 - minor 또는 major 버전은 사용자가 명시적으로 요청할 때만 올린다. 사용자 요청 없이 patch 증가를 minor/major 증가로 대체하지 않는다.
+- Motorio 배포 시 `motorio/release.md`에 해당 버전과 핵심 변경 사항을 간략히 추가한다.
 
 ## 배포
 
@@ -64,3 +65,4 @@
 - 2026-07-21: 충돌 마스크만 확인하려고 씬을 instantiate한 테스트 노드를 트리에 넣지도 해제하지도 않아 종료 시 물리 RID 누수 경고가 발생했다. 트리 밖 임시 노드는 assertion 직후 `free()`하고, 테스트 출력의 leak 경고도 실패와 동일하게 처리한다.
 - 2026-07-21: 미니맵이 매 프레임 1,000개 이상의 그룹 노드를 다시 검색하고 개별 점을 그리게 구현해 모바일 렌더링 부하를 만들었다. 미니맵·통계 UI는 프레임 단위 갱신을 피하고, 저주기 캐시와 공간 버킷 집계로 표시 밀도를 제한한다.
 - 2026-07-21: Playwright 모듈이 있는 임시 디렉터리에서 로컬 Web 검증을 실행하면서 저장소 manifest를 상대 경로로 읽어 pack 이름이 비었는데도 기본 pack으로 게임이 실행됐다. 배포 검증은 manifest 절대 경로를 사용하고, 실행 URL에 기대한 해시 pack이 포함됐는지 assertion한다.
+- 2026-07-21: 기존 InputMap의 좌·우 화살표 숫자가 실제로는 Home/Page Up 키였는데 화살표 코드라고 가정했다. 특수 키 매핑은 숫자를 추측하지 말고 `KEY_LEFT` 같은 Godot 상수와 `InputMap.action_get_events()`를 비교하는 자동 테스트로 검증한다.

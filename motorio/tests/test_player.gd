@@ -9,6 +9,10 @@ func _initialize() -> void:
 	player.set("character", sprite)
 	_assert(player.motion_mode == CharacterBody2D.MOTION_MODE_FLOATING, "player uses floating top-down motion")
 	_assert(sprite.hframes == 4 and sprite.vframes == 3, "character has a 4x3 animation sheet")
+	_assert(_action_has_key("move_left", KEY_LEFT), "left arrow is mapped to move_left")
+	_assert(_action_has_key("move_right", KEY_RIGHT), "right arrow is mapped to move_right")
+	_assert(_action_has_key("move_up", KEY_UP), "up arrow is mapped to move_up")
+	_assert(_action_has_key("move_down", KEY_DOWN), "down arrow is mapped to move_down")
 
 	player.call("_update_character_animation", 0.0, Vector2.ZERO, false)
 	_assert(sprite.frame == 0, "idle keeps one registered source frame")
@@ -56,3 +60,10 @@ func _sprite_foot(sprite: Sprite2D, anchor: Vector2) -> Vector2:
 	if sprite.flip_h:
 		delta.x = -delta.x
 	return sprite.position + (delta * sprite.scale).rotated(sprite.rotation)
+
+func _action_has_key(action: StringName, keycode: Key) -> bool:
+	for event in InputMap.action_get_events(action):
+		var key_event := event as InputEventKey
+		if key_event and key_event.keycode == keycode:
+			return true
+	return false
