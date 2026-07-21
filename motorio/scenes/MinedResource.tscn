@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/MinedResource.gd" id="1_resource"]
+
+[sub_resource type="CircleShape2D" id="CircleShape_resource"]
+radius = 7.0
+
+[node name="MinedResource" type="StaticBody2D"]
+collision_layer = 64
+collision_mask = 4
+script = ExtResource("1_resource")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape_resource")

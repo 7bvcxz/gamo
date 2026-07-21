@@ -7,6 +7,8 @@ const REGION_SIZE := 5
 const SPAWN_SEED := 20260720
 const PUSH_TILE_SCENE := preload("res://scenes/PushTile.tscn")
 const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
+const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
+const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
 const MODE_IN := 0
@@ -18,6 +20,7 @@ const MODE_OUT := 1
 @onready var box_label: Label = $UI/BoxCount
 @onready var mode_label: Label = $UI/Mode
 @onready var inventory_ui: Control = $UI/Inventory
+@onready var base_menu: Control = $UI/BaseMenu
 @onready var version_label: Label = $UI/Version
 @onready var touch_controls: TouchControls = $UI/TouchControls
 
@@ -27,6 +30,8 @@ var inventory: Array[Dictionary] = []
 var selected_slot := 0
 var preview_visible := false
 var placement_rotation := 0
+var base_menu_open := false
+var fabricator_status := "3 BOX REQUIRED"
 
 func _ready() -> void:
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
@@ -38,6 +43,7 @@ func _ready() -> void:
 	touch_controls.player = player
 	touch_controls.main_controller = self
 	inventory_ui.main_controller = self
+	base_menu.main_controller = self
 	_update_interaction_ui()
 	_create_world_walls()
 	_populate_world()
@@ -68,18 +74,30 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			select_inventory_slot(int(key.physical_keycode - KEY_1))
 
 func toggle_interaction_mode() -> void:
+	if base_menu_open:
+		_close_base_menu()
+		return
 	interaction_mode = MODE_OUT if interaction_mode == MODE_IN else MODE_IN
 	preview_visible = false
 	placement_rotation = 0
 	_update_interaction_ui()
 
 func primary_action() -> void:
+	if base_menu_open:
+		_craft_cat_block()
+		return
 	if interaction_mode == MODE_IN:
-		_pick_up_front_block()
+		if _is_base_in_front():
+			_open_base_menu()
+		else:
+			_pick_up_front_block()
 	else:
 		_place_selected_block()
 
 func preview_action() -> void:
+	if base_menu_open:
+		_close_base_menu()
+		return
 	if interaction_mode != MODE_OUT or inventory.is_empty():
 		return
 	if preview_visible:
@@ -112,6 +130,8 @@ func _pick_up_front_block() -> void:
 	var item := {"type": "box"}
 	if closest is ConveyorBlock:
 		item = {"type": "conveyor", "direction": (closest as ConveyorBlock).direction}
+	elif closest is CatBlock:
+		item = {"type": "cat", "direction": (closest as CatBlock).direction}
 	inventory.append(item)
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
@@ -129,6 +149,11 @@ func _place_selected_block() -> void:
 		var conveyor := CONVEYOR_SCENE.instantiate() as ConveyorBlock
 		conveyor.direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 		block = conveyor
+	elif item["type"] == "cat":
+		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
+		cat.direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+		cat.active_on_ready = true
+		block = cat
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target
@@ -159,6 +184,39 @@ func _front_cell_center() -> Vector2:
 	var player_cell := Vector2i(player.position / TILE_SIZE)
 	return _cell_center(player_cell + Vector2i(_front_direction()))
 
+func _is_base_in_front() -> bool:
+	var toward_base := player.global_position.direction_to(base.global_position)
+	return player.global_position.distance_to(base.global_position) <= 128.0 and _front_direction().dot(toward_base) > 0.55
+
+func _open_base_menu() -> void:
+	base_menu_open = true
+	preview_visible = false
+	fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
+	player.controls_locked = true
+	base_menu.queue_redraw()
+
+func _close_base_menu() -> void:
+	base_menu_open = false
+	player.controls_locked = false
+	base_menu.queue_redraw()
+
+func _craft_cat_block() -> void:
+	if box_count < 3:
+		fabricator_status = "NOT ENOUGH BOX"
+		return
+	var exit_position := base.global_position + Vector2.DOWN * 104.0
+	if not _can_place_at(exit_position):
+		fabricator_status = "EXIT BLOCKED"
+		return
+	box_count -= 3
+	box_label.text = "BOX  %d" % box_count
+	var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
+	cat.direction = Vector2.DOWN
+	cat.active_on_ready = false
+	cat.position = exit_position
+	add_child(cat)
+	fabricator_status = "CAT BLOCK CREATED"
+
 func _update_interaction_ui() -> void:
 	mode_label.text = "MODE  %s" % ("IN" if interaction_mode == MODE_IN else "OUT")
 	inventory_ui.queue_redraw()
@@ -169,13 +227,14 @@ func _populate_world() -> void:
 	rng.seed = SPAWN_SEED
 	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
 	var player_tile := Vector2i(player.position / TILE_SIZE)
+	var occupied: Dictionary[Vector2i, bool] = {}
 
 	for region_y in range(0, WORLD_TILES, REGION_SIZE):
 		for region_x in range(0, WORLD_TILES, REGION_SIZE):
-			var occupied: Dictionary[Vector2i, bool] = {}
 			var box_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile, player_tile)
 			occupied[box_cell] = true
 			var belt_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile, player_tile)
+			occupied[belt_cell] = true
 
 			var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D
 			box.position = _cell_center(box_cell)
@@ -185,6 +244,44 @@ func _populate_world() -> void:
 			belt.direction = CARDINAL_DIRECTIONS[rng.randi_range(0, CARDINAL_DIRECTIONS.size() - 1)]
 			belt.position = _cell_center(belt_cell)
 			add_child(belt)
+	_populate_minerals(rng, occupied, center_tile, player_tile)
+
+func _populate_minerals(rng: RandomNumberGenerator, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> void:
+	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 30.0))
+	var isolated_count := int(round(target_count * 0.2))
+	var mineral_cells: Array[Vector2i] = []
+	while mineral_cells.size() < isolated_count:
+		var cell := Vector2i(rng.randi_range(0, WORLD_TILES - 1), rng.randi_range(0, WORLD_TILES - 1))
+		if not _is_free_mineral_cell(cell, occupied, center_tile, player_tile):
+			continue
+		var touches_existing := false
+		for direction in [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]:
+			if mineral_cells.has(cell + direction):
+				touches_existing = true
+				break
+		if touches_existing:
+			continue
+		_add_mineral(cell, false, occupied, mineral_cells)
+	var attempts := 0
+	while mineral_cells.size() < target_count and attempts < target_count * 40:
+		attempts += 1
+		var parent: Vector2i = mineral_cells[rng.randi_range(0, mineral_cells.size() - 1)]
+		var direction: Vector2i = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP][rng.randi_range(0, 3)]
+		var cell := parent + direction
+		if not _is_free_mineral_cell(cell, occupied, center_tile, player_tile):
+			continue
+		_add_mineral(cell, true, occupied, mineral_cells)
+
+func _is_free_mineral_cell(cell: Vector2i, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> bool:
+	return cell.x >= 0 and cell.y >= 0 and cell.x < WORLD_TILES and cell.y < WORLD_TILES and not occupied.has(cell) and not (abs(cell.x - center_tile.x) <= 4 and abs(cell.y - center_tile.y) <= 4) and not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
+
+func _add_mineral(cell: Vector2i, clustered: bool, occupied: Dictionary[Vector2i, bool], mineral_cells: Array[Vector2i]) -> void:
+	var mineral := MINERAL_SCENE.instantiate() as MineralBlock
+	mineral.position = _cell_center(cell)
+	mineral.set_meta("clustered_spawn", clustered)
+	add_child(mineral)
+	occupied[cell] = true
+	mineral_cells.append(cell)
 
 func _random_free_cell(
 	rng: RandomNumberGenerator,
@@ -264,6 +361,6 @@ func _draw() -> void:
 		var valid := _can_place_at(target)
 		var color := Color(0.3, 0.9, 0.55, 0.45) if valid else Color(0.95, 0.25, 0.22, 0.45)
 		draw_rect(Rect2(target - Vector2.ONE * 15.0, Vector2.ONE * 30.0), color)
-		if inventory[selected_slot]["type"] == "conveyor":
+		if inventory[selected_slot]["type"] == "conveyor" or inventory[selected_slot]["type"] == "cat":
 			var direction := Vector2.RIGHT.rotated(placement_rotation * PI / 2.0)
 			draw_line(target - direction * 8.0, target + direction * 8.0, Color.WHITE, 3.0)

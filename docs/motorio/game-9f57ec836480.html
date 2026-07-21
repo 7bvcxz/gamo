@@ -113,12 +113,6 @@ body {
 		<script>
 const GODOT_CONFIG = {"args":[],"mainPack":"game-9f57ec836480.pck","canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"engine-7eda98958eb0","experimentalVK":false,"fileSizes":{"game-9f57ec836480.pck":1008396,"engine-7eda98958eb0.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
-const RUNNER_PARAMS = new URLSearchParams(location.search);
-const REQUESTED_PACK = RUNNER_PARAMS.get('pack') || GODOT_CONFIG.mainPack;
-const REQUESTED_PACK_SIZE = Number(RUNNER_PARAMS.get('size')) || GODOT_CONFIG.fileSizes[GODOT_CONFIG.mainPack];
-const REMOTE_PACK = `https://raw.githubusercontent.com/7bvcxz/gamo/main/docs/motorio/${REQUESTED_PACK}`;
-GODOT_CONFIG.fileSizes[REMOTE_PACK] = REQUESTED_PACK_SIZE;
-    GODOT_CONFIG.args = ['--main-pack', REQUESTED_PACK].concat(GODOT_CONFIG.args);
 const engine = new Engine(GODOT_CONFIG);
 
 (function () {
@@ -205,7 +199,7 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 	} else {
 		setStatusMode('progress');
-		engine.init(GODOT_CONFIG.executable).then(() => engine.preloadFile(REMOTE_PACK, REQUESTED_PACK)).then(() => engine.start({
+		engine.startGame({
 			'onProgress': function (current, total) {
 				if (current > 0 && total > 0) {
 					statusProgress.value = current;
@@ -215,7 +209,7 @@ const engine = new Engine(GODOT_CONFIG);
 					statusProgress.removeAttribute('max');
 				}
 			},
-		})).then(() => {
+		}).then(() => {
 			setStatusMode('hidden');
 		}, displayFailureNotice);
 	}

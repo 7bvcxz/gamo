@@ -19,6 +19,7 @@ var walk_phase := 0.0
 var animation_time := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
+var controls_locked := false
 
 @onready var character: Sprite2D = $Character
 
@@ -28,8 +29,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	if controls_locked:
+		direction = Vector2.ZERO
 	if not touch_direction.is_zero_approx():
-		direction = touch_direction
+		direction = Vector2.ZERO if controls_locked else touch_direction
 	if not direction.is_zero_approx():
 		facing = direction.normalized()
 		walk_phase += delta * 12.0

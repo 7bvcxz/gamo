@@ -26,6 +26,10 @@ func _draw() -> void:
 			if item["type"] == "conveyor":
 				draw_rect(inner, Color("46535b"))
 				draw_polyline(PackedVector2Array([inner.position + Vector2(5, 4), inner.get_center(), inner.position + Vector2(5, inner.size.y - 4)]), Color("e0a83d"), 2.0)
+			elif item["type"] == "cat":
+				draw_rect(inner, Color("d99a56"))
+				draw_circle(inner.get_center(), 7.0, Color("fff0cf"))
+				draw_circle(inner.get_center() + Vector2(2, -2), 1.2, Color("382c2a"))
 			else:
 				draw_rect(inner, Color("8b5a30"))
 				draw_line(inner.position, inner.end, Color("4f2f19"), 2.0)

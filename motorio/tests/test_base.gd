@@ -22,7 +22,7 @@ func _run() -> void:
 	_assert(circle.radius * 2.0 <= TILE_SIZE * 5.0, "base fits inside 5x5 tiles")
 	_assert(player.position.distance_to(base.position) > circle.radius + 11.0, "player starts outside base")
 	var entrances := base.find_children("Entrance*", "Area2D", false, false)
-	_assert(entrances.size() == 4, "base has four entrances")
+	_assert(entrances.size() == 3, "base has three intake entrances and one output")
 	for entrance in entrances:
 		var entrance_shape := entrance.get_child(0) as CollisionShape2D
 		var rectangle := entrance_shape.shape as RectangleShape2D
