@@ -11,6 +11,10 @@ const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
 const PILLAR_BLOCK_SCENE := preload("res://scenes/PillarBlock.tscn")
 const BOX_GENERATOR_SCENE := preload("res://scenes/BoxGenerator.tscn")
 const SPLITTER_SCENE := preload("res://scenes/Splitter.tscn")
+const RESOURCE_DEPOSIT_SCENE := preload("res://scenes/ResourceDeposit.tscn")
+const WATER_TILE_SCENE := preload("res://scenes/WaterTile.tscn")
+const BRIDGE_SCENE := preload("res://scenes/Bridge.tscn")
+const FACILITY_SCENE := preload("res://scenes/FacilityBlock.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
@@ -29,6 +33,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var touch_controls: TouchControls = $UI/TouchControls
 @onready var throughput_label: Label = $UI/Throughput
 @onready var quest_ui: Control = $UI/Quest
+@onready var economy_ui: Control = $UI/Economy
 
 var box_count := 0
 var mineral_count := 0
@@ -53,12 +58,18 @@ var celebration_remaining := 0.0
 var celebration_text := ""
 var cat_crafted := false
 var generator_crafted := false
+var bridge_crafted := false
+var resource_counts := {"copper": 0, "coal": 0, "crystal": 0, "oil": 0, "uranium": 0}
+var electricity := 0
+var cheese := 0
 
 func _ready() -> void:
+	add_to_group("main_controller")
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0 + Vector2.ONE * (TILE_SIZE / 2.0)
 	base.position = world_center
 	base.connect("box_received", _on_base_box_received)
 	base.connect("mineral_received", _on_base_mineral_received)
+	base.connect("resource_received", _on_base_resource_received)
 	player.position = world_center + Vector2(0, TILE_SIZE * 4)
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
@@ -67,6 +78,7 @@ func _ready() -> void:
 	inventory_ui.main_controller = self
 	base_menu.main_controller = self
 	quest_ui.main_controller = self
+	economy_ui.main_controller = self
 	minimap.main_controller = self
 	_update_interaction_ui()
 	_create_world_walls()
@@ -96,6 +108,48 @@ func _on_base_mineral_received(_resource: RigidBody2D) -> void:
 	mineral_count += 1
 	mineral_label.text = "MINERAL  %d" % mineral_count
 	_check_mineral_quest()
+
+func _on_base_resource_received(_resource: RigidBody2D, resource_type: String) -> void:
+	if resource_counts.has(resource_type):
+		resource_counts[resource_type] += 1
+		economy_ui.queue_redraw()
+		_refresh_quest_progress()
+
+func consume_resource(resource_type: String, amount: int) -> bool:
+	if not resource_counts.has(resource_type) or resource_counts[resource_type] < amount:
+		return false
+	resource_counts[resource_type] -= amount
+	economy_ui.queue_redraw()
+	return true
+
+func add_electricity(amount: int) -> void:
+	electricity += amount
+	economy_ui.queue_redraw()
+	_refresh_quest_progress()
+
+func add_cheese(amount: int) -> void:
+	cheese += amount
+	economy_ui.queue_redraw()
+	_refresh_quest_progress()
+
+func consume_cheese(amount: int) -> bool:
+	if cheese < amount:
+		return false
+	cheese -= amount
+	economy_ui.queue_redraw()
+	return true
+
+func try_mine_deposit(deposit: ResourceDeposit, worker_type: String, cat_hunger: float) -> bool:
+	if deposit.required_worker != worker_type:
+		return false
+	if deposit.requires_fed_cat and cat_hunger < 35.0:
+		return false
+	if electricity < deposit.power_cost or resource_counts["oil"] < deposit.oil_cost:
+		return false
+	electricity -= deposit.power_cost
+	resource_counts["oil"] -= deposit.oil_cost
+	economy_ui.queue_redraw()
+	return true
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
@@ -183,13 +237,17 @@ func _pick_up_front_block() -> void:
 	if closest is ConveyorBlock:
 		item = {"type": "conveyor", "direction": (closest as ConveyorBlock).direction}
 	elif closest is CatBlock:
-		item = {"type": "cat", "direction": (closest as CatBlock).direction}
+		item = {"type": "cat", "direction": (closest as CatBlock).direction, "worker": (closest as CatBlock).worker_type, "hunger": (closest as CatBlock).hunger}
 	elif closest is PillarBlock:
 		item = {"type": "pillar"}
 	elif closest is BoxGenerator:
 		item = {"type": "box_generator", "direction": (closest as BoxGenerator).direction}
 	elif closest is SplitterBlock:
 		item = {"type": "splitter", "direction": (closest as SplitterBlock).direction}
+	elif closest is BridgeBlock:
+		item = {"type": "bridge"}
+	elif closest is FacilityBlock:
+		item = {"type": "facility", "facility": (closest as FacilityBlock).facility_type}
 	inventory.append(item)
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
@@ -214,6 +272,8 @@ func _place_selected_block() -> void:
 		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
 		cat.direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 		cat.active_on_ready = true
+		cat.worker_type = item.get("worker", "miner")
+		cat.hunger = item.get("hunger", 100.0)
 		block = cat
 	elif item["type"] == "pillar":
 		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
@@ -225,6 +285,12 @@ func _place_selected_block() -> void:
 		var splitter := SPLITTER_SCENE.instantiate() as SplitterBlock
 		splitter.direction = place_direction
 		block = splitter
+	elif item["type"] == "bridge":
+		block = BRIDGE_SCENE.instantiate() as BridgeBlock
+	elif item["type"] == "facility":
+		var facility := FACILITY_SCENE.instantiate() as FacilityBlock
+		facility.facility_type = item.get("facility", "power_generator")
+		block = facility
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target + place_direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
@@ -248,12 +314,14 @@ func _sync_placement_preview() -> void:
 		placement_preview.free()
 		placement_preview = null
 	if not is_instance_valid(placement_preview):
-		placement_preview = _create_placement_preview(item_type)
+		placement_preview = _create_placement_preview(item)
 	placement_preview.position = _front_cell_center()
 	if placement_preview is ConveyorBlock:
 		(placement_preview as ConveyorBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 	elif placement_preview is CatBlock:
-		(placement_preview as CatBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+		var preview_cat := placement_preview as CatBlock
+		preview_cat.direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+		preview_cat.worker_type = item.get("worker", "miner")
 	elif placement_preview is BoxGenerator:
 		(placement_preview as BoxGenerator).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 	elif placement_preview is SplitterBlock:
@@ -261,7 +329,8 @@ func _sync_placement_preview() -> void:
 	placement_preview.position = _preview_position(item_type)
 	placement_preview.queue_redraw()
 
-func _create_placement_preview(item_type: String) -> RigidBody2D:
+func _create_placement_preview(item: Dictionary) -> RigidBody2D:
+	var item_type: String = item["type"]
 	var block: RigidBody2D
 	if item_type == "conveyor":
 		block = CONVEYOR_SCENE.instantiate() as RigidBody2D
@@ -275,6 +344,12 @@ func _create_placement_preview(item_type: String) -> RigidBody2D:
 		block = BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
 	elif item_type == "splitter":
 		block = SPLITTER_SCENE.instantiate() as SplitterBlock
+	elif item_type == "bridge":
+		block = BRIDGE_SCENE.instantiate() as BridgeBlock
+	elif item_type == "facility":
+		var facility := FACILITY_SCENE.instantiate() as FacilityBlock
+		facility.facility_type = item.get("facility", "power_generator")
+		block = facility
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.set_meta("placement_preview", true)
@@ -308,7 +383,15 @@ func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) 
 	query.collision_mask = 63
 	query.collide_with_areas = false
 	query.exclude = [player.get_rid()]
-	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
+	var results := get_world_2d().direct_space_state.intersect_shape(query, 8)
+	if item_type == "bridge":
+		if results.is_empty():
+			return false
+		for result in results:
+			if not (result["collider"] is WaterTile):
+				return false
+		return true
+	return results.is_empty()
 
 func _preview_position(item_type: String) -> Vector2:
 	var target := _front_cell_center()
@@ -347,63 +430,91 @@ func _close_base_menu() -> void:
 	base_menu.queue_redraw()
 
 func _cycle_fabricator_recipe() -> void:
-	fabricator_selection = (fabricator_selection + 1) % 4
+	fabricator_selection = (fabricator_selection + 1) % fabricator_recipe_count()
 	_update_fabricator_status()
 	base_menu.queue_redraw()
 
 func _craft_selected_block() -> void:
-	var block: RigidBody2D
-	if fabricator_selection == 3:
-		if base_level < 2:
-			fabricator_status = "LOCKED - COMPLETE AUTOMATION"
-			return
-		if box_count < 5:
-			fabricator_status = "NOT ENOUGH BOX"
-			return
-		box_count -= 5
-		box_label.text = "BOX  %d" % box_count
-		block = SPLITTER_SCENE.instantiate() as SplitterBlock
-		fabricator_status = "SPLITTER CREATED"
-	elif fabricator_selection == 2:
-		if mineral_count < 10:
-			fabricator_status = "NOT ENOUGH MINERAL"
-			return
-		mineral_count -= 10
-		mineral_label.text = "MINERAL  %d" % mineral_count
-		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
-		generator.direction = Vector2.DOWN
-		block = generator
-		fabricator_status = "BOX GENERATOR CREATED"
-	else:
-		if box_count < 3:
-			fabricator_status = "NOT ENOUGH BOX"
-			return
-		box_count -= 3
-		box_label.text = "BOX  %d" % box_count
-	if fabricator_selection == 1:
-		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
-		fabricator_status = "PILLAR CREATED"
-	elif fabricator_selection == 0:
-		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
-		cat.direction = Vector2.DOWN
-		cat.active_on_ready = false
-		block = cat
-		fabricator_status = "CAT BLOCK CREATED"
+	if fabricator_selection == 3 and base_level < 2:
+		fabricator_status = "LOCKED - COMPLETE AUTOMATION"
+		return
+	var cost := recipe_cost(fabricator_selection)
+	if not _can_afford(cost):
+		fabricator_status = "NOT ENOUGH RESOURCES"
+		return
+	_spend_cost(cost)
+	var block := _create_recipe_block(fabricator_selection)
+	fabricator_status = "%s CREATED" % recipe_label(fabricator_selection)
+	if fabricator_selection == 0:
 		cat_crafted = true
 	elif fabricator_selection == 2:
 		generator_crafted = true
+	elif fabricator_selection == 4:
+		bridge_crafted = true
 	_refresh_quest_progress()
 	block.position = _find_fabricator_output_position(block)
 	add_child(block)
 	base_menu.queue_redraw()
 
 func _update_fabricator_status() -> void:
-	if fabricator_selection == 3:
-		fabricator_status = ("READY" if box_count >= 5 else "NEED %d MORE BOX" % (5 - box_count)) if base_level >= 2 else "LOCKED - COMPLETE AUTOMATION"
-	elif fabricator_selection == 2:
-		fabricator_status = "READY" if mineral_count >= 10 else "NEED %d MORE MINERAL" % (10 - mineral_count)
+	if fabricator_selection == 3 and base_level < 2:
+		fabricator_status = "LOCKED - COMPLETE AUTOMATION"
 	else:
-		fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
+		fabricator_status = "READY" if _can_afford(recipe_cost(fabricator_selection)) else "NEED %s" % recipe_cost_text(fabricator_selection)
+
+func fabricator_recipe_count() -> int:
+	return 12
+
+func recipe_label(index: int) -> String:
+	return ["CAT BLOCK", "PILLAR", "BOX GENERATOR", "SPLITTER", "BRIDGE", "CONVEYOR", "POWER GENERATOR", "ELECTRIC CAT", "PRESSURE CAT", "CHEESE FIELD", "COOK CAT", "SERVER CAT"][index]
+
+func recipe_cost(index: int) -> Dictionary:
+	return [
+		{"box": 3}, {"box": 3}, {"mineral": 10}, {"box": 5}, {"copper": 3}, {"copper": 1},
+		{"copper": 8, "coal": 5}, {"box": 5, "copper": 5}, {"box": 5, "copper": 6},
+		{"copper": 5}, {"box": 4, "copper": 3}, {"box": 4, "copper": 3},
+	][index]
+
+func recipe_cost_text(index: int) -> String:
+	var parts: Array[String] = []
+	for key in recipe_cost(index):
+		parts.append("%d %s" % [recipe_cost(index)[key], str(key).to_upper().substr(0, 3)])
+	return " + ".join(parts)
+
+func _can_afford(cost: Dictionary) -> bool:
+	for key in cost:
+		var available: int = box_count if key == "box" else (mineral_count if key == "mineral" else resource_counts.get(key, 0))
+		if available < cost[key]:
+			return false
+	return true
+
+func _spend_cost(cost: Dictionary) -> void:
+	for key in cost:
+		if key == "box": box_count -= cost[key]
+		elif key == "mineral": mineral_count -= cost[key]
+		else: resource_counts[key] -= cost[key]
+	box_label.text = "BOX  %d" % box_count
+	mineral_label.text = "MINERAL  %d" % mineral_count
+	economy_ui.queue_redraw()
+
+func _create_recipe_block(index: int) -> RigidBody2D:
+	if index == 0 or index in [7, 8, 10, 11]:
+		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
+		cat.direction = Vector2.DOWN
+		cat.active_on_ready = false
+		cat.worker_type = {7: "electric", 8: "pressure", 10: "cook", 11: "server"}.get(index, "miner")
+		return cat
+	if index == 1: return PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
+	if index == 2:
+		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
+		generator.direction = Vector2.DOWN
+		return generator
+	if index == 3: return SPLITTER_SCENE.instantiate() as SplitterBlock
+	if index == 4: return BRIDGE_SCENE.instantiate() as BridgeBlock
+	if index == 5: return CONVEYOR_SCENE.instantiate() as ConveyorBlock
+	var facility := FACILITY_SCENE.instantiate() as FacilityBlock
+	facility.facility_type = "power_generator" if index == 6 else "cheese_field"
+	return facility
 
 func _find_fabricator_output_position(block: RigidBody2D = null) -> Vector2:
 	var output := base.global_position + Vector2.DOWN * (TILE_SIZE * 4.0)
@@ -433,7 +544,9 @@ func _populate_world() -> void:
 	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
 	var player_tile := Vector2i(player.position / TILE_SIZE)
 	var occupied: Dictionary[Vector2i, bool] = {}
+	_populate_water_ring(occupied, center_tile)
 	_populate_starter_zone(occupied, center_tile)
+	_populate_tier_resources(occupied, center_tile)
 
 	for region_y in range(0, WORLD_TILES, REGION_SIZE):
 		for region_x in range(0, WORLD_TILES, REGION_SIZE):
@@ -504,6 +617,50 @@ func _populate_starter_zone(occupied: Dictionary[Vector2i, bool], center_tile: V
 		mineral.set_meta("starter_mineral", true)
 		add_child(mineral)
 
+func _populate_water_ring(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
+	const WATER_RADIUS := 12
+	for offset in range(-WATER_RADIUS, WATER_RADIUS + 1):
+		for cell in [
+			center_tile + Vector2i(offset, -WATER_RADIUS),
+			center_tile + Vector2i(offset, WATER_RADIUS),
+			center_tile + Vector2i(-WATER_RADIUS, offset),
+			center_tile + Vector2i(WATER_RADIUS, offset),
+		]:
+			if occupied.has(cell):
+				continue
+			occupied[cell] = true
+			var water := WATER_TILE_SCENE.instantiate() as WaterTile
+			water.position = _cell_center(cell)
+			add_child(water)
+
+func _populate_tier_resources(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
+	_spawn_resource_tier(occupied, center_tile, "copper", 8, 14, "miner", 0, 0, false)
+	_spawn_resource_tier(occupied, center_tile, "coal", 10, 10, "miner", 0, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "crystal", 17, 8, "miner", 2, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "oil", 26, 5, "pressure", 0, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "uranium", 39, 3, "miner", 8, 2, true)
+
+func _spawn_resource_tier(
+	occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, resource_type: String,
+	radius: int, count: int, worker: String, power_cost: int, oil_cost: int, fed: bool
+) -> void:
+	for index in count:
+		var angle := TAU * float(index) / float(count) + float(radius % 5) * 0.13
+		var offset := Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		var cell := center_tile + offset
+		while occupied.has(cell):
+			cell += Vector2i.RIGHT
+		occupied[cell] = true
+		var deposit := RESOURCE_DEPOSIT_SCENE.instantiate() as ResourceDeposit
+		deposit.resource_type = resource_type
+		deposit.required_worker = worker
+		deposit.power_cost = power_cost
+		deposit.oil_cost = oil_cost
+		deposit.requires_fed_cat = fed
+		deposit.position = _cell_center(cell)
+		deposit.set_meta("tier_radius", radius)
+		add_child(deposit)
+
 func _is_free_mineral_cell(cell: Vector2i, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> bool:
 	return cell.x >= 0 and cell.y >= 0 and cell.x < WORLD_TILES and cell.y < WORLD_TILES and not occupied.has(cell) and not (abs(cell.x - center_tile.x) <= 4 and abs(cell.y - center_tile.y) <= 4) and not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
 
@@ -560,7 +717,8 @@ func _process(delta: float) -> void:
 		_collect_nearby_mineral_resources()
 
 func _collect_nearby_mineral_resources() -> void:
-	for node in get_tree().get_nodes_in_group("mined_resource"):
+	var collectable := get_tree().get_nodes_in_group("mined_resource") + get_tree().get_nodes_in_group("world_resource")
+	for node in collectable:
 		var resource := node as RigidBody2D
 		if resource == null or resource.has_meta("collected"):
 			continue
@@ -568,16 +726,22 @@ func _collect_nearby_mineral_resources() -> void:
 			continue
 		resource.set_meta("collected", true)
 		resource.queue_free()
-		mineral_count += 1
-		mineral_label.text = "MINERAL  %d" % mineral_count
+		if resource.is_in_group("world_resource"):
+			var resource_type: String = resource.get("resource_type")
+			resource_counts[resource_type] += 1
+			economy_ui.queue_redraw()
+		else:
+			mineral_count += 1
+			mineral_label.text = "MINERAL  %d" % mineral_count
 	_check_mineral_quest()
+	_refresh_quest_progress()
 
 func _check_mineral_quest() -> void:
 	if quest_step == 2 and mineral_count >= 10:
 		_advance_quest("MATERIALS READY")
 
 func _advance_quest(message: String) -> void:
-	quest_step = mini(quest_step + 1, 5)
+	quest_step = mini(quest_step + 1, 12)
 	celebration_text = message
 	celebration_remaining = 2.5
 	quest_ui.queue_redraw()
@@ -593,9 +757,23 @@ func _refresh_quest_progress() -> void:
 	elif quest_step == 4 and automated_boxes_delivered >= 3:
 		base_level = 2
 		_advance_quest("BASE LEVEL 2 - SPLITTER UNLOCKED")
+	elif quest_step == 5 and resource_counts["copper"] >= 3:
+		_advance_quest("COPPER TOOLS ONLINE")
+	elif quest_step == 6 and bridge_crafted:
+		_advance_quest("OUTER WORLD OPEN")
+	elif quest_step == 7 and cheese >= 5:
+		_advance_quest("CATS FED")
+	elif quest_step == 8 and electricity >= 10:
+		_advance_quest("POWER GRID ONLINE")
+	elif quest_step == 9 and resource_counts["crystal"] >= 5:
+		_advance_quest("CRYSTAL AGE")
+	elif quest_step == 10 and resource_counts["oil"] >= 5:
+		_advance_quest("PRESSURE NETWORK ONLINE")
+	elif quest_step == 11 and resource_counts["uranium"] >= 1:
+		_advance_quest("DEEP FACTORY COMPLETE")
 
 func quest_title() -> String:
-	return ["1  FIRST DELIVERY", "2  BUILD A MINER", "3  GATHER MATERIAL", "4  BUILD A GENERATOR", "5  AUTOMATE DELIVERY", "FACTORY ONLINE"][quest_step]
+	return ["1  FIRST DELIVERY", "2  BUILD A MINER", "3  GATHER MATERIAL", "4  BUILD A GENERATOR", "5  AUTOMATE DELIVERY", "6  COPPER AGE", "7  CROSS THE WATER", "8  FEED THE CATS", "9  POWER GRID", "10  CRYSTAL AGE", "11  OIL PRESSURE", "12  DEEP ENERGY", "CAMPAIGN COMPLETE"][quest_step]
 
 func quest_detail() -> String:
 	return [
@@ -604,7 +782,14 @@ func quest_detail() -> String:
 		"Collect 10 MINERAL.",
 		"Craft a BOX GENERATOR at the base (10 MIN).",
 		"Deliver %d/3 generated boxes to the base." % automated_boxes_delivered,
-		"Splitter unlocked. Improve your BOX/MIN.",
+		"Mine and deliver %d/3 COPPER." % mini(resource_counts["copper"], 3),
+		"Craft a BRIDGE (3 COP) and cross the water.",
+		"Build FIELD + COOK + SERVER. Store %d/5 CHEESE." % mini(cheese, 5),
+		"Feed a miner for COAL. Build POWER + ELECTRIC CAT (%d/10)." % mini(electricity, 10),
+		"Powered mining: deliver %d/5 CRYSTAL." % mini(resource_counts["crystal"], 5),
+		"Use a PRESSURE CAT. Deliver %d/5 OIL." % mini(resource_counts["oil"], 5),
+		"Spend POWER + OIL to deliver 1 URANIUM.",
+		"All systems online. Raise BOX/MIN and expand freely.",
 	][quest_step]
 
 func _create_world_walls() -> void:

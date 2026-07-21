@@ -5,15 +5,19 @@ const TILE_SIZE := 32.0
 const MINE_INTERVAL := 3.0
 const SPARK_DURATION := 0.45
 const RESOURCE_SCENE := preload("res://scenes/MinedResource.tscn")
+const WORLD_RESOURCE_SCENE := preload("res://scenes/WorldResource.tscn")
 
 @export var direction := Vector2.RIGHT
 @export var active_on_ready := true
+@export var worker_type := "miner"
 var mine_elapsed := 0.0
 var spark_remaining := 0.0
+var hunger := 100.0
 
 func _ready() -> void:
 	add_to_group("pickup_block")
 	add_to_group("solid")
+	add_to_group("cat_worker")
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
@@ -23,17 +27,25 @@ func _physics_process(delta: float) -> void:
 	if spark_remaining > 0.0:
 		spark_remaining = maxf(0.0, spark_remaining - delta)
 		queue_redraw()
-	while mine_elapsed >= MINE_INTERVAL:
-		mine_elapsed -= MINE_INTERVAL
+	var work_interval := MINE_INTERVAL * (3.0 if hunger <= 0.0 else (1.8 if hunger < 35.0 else 1.0))
+	while mine_elapsed >= work_interval:
+		mine_elapsed -= work_interval
 		spark_remaining = SPARK_DURATION
-		_mine_front_mineral()
+		if worker_type == "electric":
+			_generate_power()
+		elif worker_type == "cook":
+			_cook_cheese()
+		elif worker_type == "server":
+			_serve_cheese()
+		else:
+			_mine_front_resource()
 		queue_redraw()
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 	if state.linear_velocity.length_squared() < 4.0:
 		state.linear_velocity = Vector2.ZERO
 
-func _mine_front_mineral() -> void:
+func _mine_front_resource() -> void:
 	var target := global_position + direction * TILE_SIZE
 	var mineral: MineralBlock = null
 	for node in get_tree().get_nodes_in_group("mineral_block"):
@@ -41,15 +53,70 @@ func _mine_front_mineral() -> void:
 		if candidate and candidate.global_position.distance_to(target) < 18.0:
 			mineral = candidate
 			break
-	if mineral == null:
+	if mineral:
+		_drop_resource("mineral", RESOURCE_SCENE)
+		_consume_hunger(5.0)
 		return
-	var resource := RESOURCE_SCENE.instantiate() as RigidBody2D
+	for node in get_tree().get_nodes_in_group("resource_deposit"):
+		var deposit := node as ResourceDeposit
+		if deposit == null or deposit.global_position.distance_to(target) >= 18.0:
+			continue
+		var main := get_tree().get_first_node_in_group("main_controller")
+		if main and main.try_mine_deposit(deposit, worker_type, hunger):
+			var resource := WORLD_RESOURCE_SCENE.instantiate() as WorldResource
+			resource.resource_type = deposit.resource_type
+			_drop_resource(deposit.resource_type, resource)
+			_consume_hunger(7.0)
+		return
+
+func _drop_resource(_type: String, scene_or_node) -> void:
+	var resource: RigidBody2D
+	if scene_or_node is PackedScene:
+		resource = scene_or_node.instantiate() as RigidBody2D
+	else:
+		resource = scene_or_node as RigidBody2D
 	resource.global_position = global_position - direction * 24.0
 	get_parent().add_child(resource)
 
+func _generate_power() -> void:
+	if not _has_nearby_facility("power_generator"):
+		return
+	var main := get_tree().get_first_node_in_group("main_controller")
+	if main and main.consume_resource("coal", 1):
+		main.add_electricity(5)
+		_consume_hunger(5.0)
+
+func _cook_cheese() -> void:
+	if not _has_nearby_facility("cheese_field"):
+		return
+	var main := get_tree().get_first_node_in_group("main_controller")
+	if main:
+		main.add_cheese(2)
+		_consume_hunger(4.0)
+
+func _serve_cheese() -> void:
+	var main := get_tree().get_first_node_in_group("main_controller")
+	if main == null or not main.consume_cheese(1):
+		return
+	for node in get_tree().get_nodes_in_group("cat_worker"):
+		var cat := node as CatBlock
+		if cat and cat != self and cat.global_position.distance_to(global_position) <= TILE_SIZE * 4.0:
+			cat.hunger = minf(100.0, cat.hunger + 35.0)
+	hunger = minf(100.0, hunger + 20.0)
+
+func _has_nearby_facility(group_name: String) -> bool:
+	for node in get_tree().get_nodes_in_group(group_name):
+		if (node as Node2D).global_position.distance_to(global_position) <= TILE_SIZE * 1.5:
+			return true
+	return false
+
+func _consume_hunger(amount: float) -> void:
+	hunger = maxf(0.0, hunger - amount)
+
 func _draw() -> void:
 	var rect := Rect2(Vector2.ONE * -16.0, Vector2.ONE * 32.0)
-	draw_rect(rect, Color("d99a56"))
+	var body_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "cook": Color("e7a5a0"), "server": Color("78b589")}.get(worker_type, Color("d99a56"))
+	draw_rect(rect, body_color)
 	draw_rect(rect.grow(-2.0), Color("f0c47a"), false, 2.0)
 	draw_set_transform(Vector2.ZERO, direction.angle())
 	draw_polygon(PackedVector2Array([Vector2(12, 0), Vector2(4, -6), Vector2(4, 6)]), PackedColorArray([Color("70452f")]))
@@ -59,6 +126,8 @@ func _draw() -> void:
 	draw_circle(Vector2(-1, -3), 1.5, Color("382c2a"))
 	draw_circle(Vector2(-1, 3), 1.5, Color("382c2a"))
 	draw_set_transform(Vector2.ZERO)
+	draw_rect(Rect2(-14, 12, 28, 3), Color("252b29"))
+	draw_rect(Rect2(-14, 12, 28.0 * hunger / 100.0, 3), Color("8ee36b") if hunger >= 35.0 else Color("e36b52"))
 	if spark_remaining > 0.0:
 		var spark_center := direction * TILE_SIZE
 		var pulse := 1.0 + spark_remaining / SPARK_DURATION

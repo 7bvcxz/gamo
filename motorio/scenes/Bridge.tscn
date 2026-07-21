@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/Bridge.gd" id="1_bridge"]
+
+[node name="Bridge" type="RigidBody2D"]
+z_index = 0
+gravity_scale = 0.0
+collision_layer = 0
+collision_mask = 0
+freeze = true
+script = ExtResource("1_bridge")

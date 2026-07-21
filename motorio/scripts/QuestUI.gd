@@ -9,7 +9,7 @@ func _draw() -> void:
 	if main_controller == null:
 		return
 	var width := minf(390.0, size.x - 32.0)
-	var panel := Rect2(Vector2((size.x - width) / 2.0, 184.0), Vector2(width, 64.0))
+	var panel := Rect2(Vector2((size.x - width) / 2.0, 270.0), Vector2(width, 64.0))
 	draw_rect(panel, Color(0.035, 0.065, 0.055, 0.9))
 	draw_rect(panel, Color("6e8f72"), false, 2.0)
 	var font := ThemeDB.fallback_font

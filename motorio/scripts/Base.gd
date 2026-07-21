@@ -8,6 +8,7 @@ const EXIT_DIRECTION := Vector2.DOWN
 
 signal box_received(box: RigidBody2D)
 signal mineral_received(resource: RigidBody2D)
+signal resource_received(resource: RigidBody2D, resource_type: String)
 
 func _ready() -> void:
 	_create_entrances()
@@ -40,6 +41,10 @@ func _on_entrance_body_entered(body: Node2D) -> void:
 	elif resource.is_in_group("mined_resource"):
 		resource.set_meta("base_received", true)
 		mineral_received.emit(resource)
+		resource.queue_free()
+	elif resource.is_in_group("world_resource"):
+		resource.set_meta("base_received", true)
+		resource_received.emit(resource, resource.get("resource_type"))
 		resource.queue_free()
 
 func _draw() -> void:

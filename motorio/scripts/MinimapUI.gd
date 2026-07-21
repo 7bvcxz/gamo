@@ -11,6 +11,7 @@ var main_controller
 var refresh_elapsed := 0.0
 var refresh_count := 0
 var mineral_points: Array[Vector2] = []
+var water_points: Array[Vector2] = []
 var block_points: Array[Vector2] = []
 var cached_player_position := Vector2.ZERO
 
@@ -24,7 +25,8 @@ func _process(delta: float) -> void:
 func refresh_snapshot() -> void:
 	if main_controller == null:
 		return
-	mineral_points = _collect_coarse_points(["mineral_block"], MINERAL_BUCKET_SIZE)
+	mineral_points = _collect_coarse_points(["mineral_block", "resource_deposit"], MINERAL_BUCKET_SIZE)
+	water_points = _collect_coarse_points(["water_tile"], 64.0)
 	block_points = _collect_coarse_points(["solid", "machine", "transport_floor"], BLOCK_BUCKET_SIZE)
 	cached_player_position = main_controller.player.global_position
 	refresh_count += 1
@@ -54,6 +56,8 @@ func _draw() -> void:
 	draw_rect(panel, Color(0.035, 0.055, 0.05, 0.9))
 	draw_rect(panel, Color("9caf9f"), false, 2.0)
 	draw_rect(inner, Color("1a3028"))
+	for point in water_points:
+		draw_circle(world_to_map(point), 1.2, Color("397f94"))
 
 	for point in mineral_points:
 		draw_circle(world_to_map(point), 1.5, Color("6ec8d5"))

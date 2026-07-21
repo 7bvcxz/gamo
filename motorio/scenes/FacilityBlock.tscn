@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/FacilityBlock.gd" id="1_facility"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_facility"]
+size = Vector2(30, 30)
+
+[node name="FacilityBlock" type="RigidBody2D"]
+z_index = 1
+gravity_scale = 0.0
+collision_layer = 4
+collision_mask = 125
+freeze = true
+lock_rotation = true
+script = ExtResource("1_facility")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape_facility")

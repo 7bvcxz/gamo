@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ResourceDeposit.gd" id="1_resource"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_resource"]
+size = Vector2(30, 30)
+
+[node name="ResourceDeposit" type="StaticBody2D"]
+z_index = 1
+collision_layer = 32
+collision_mask = 63
+script = ExtResource("1_resource")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape_resource")
