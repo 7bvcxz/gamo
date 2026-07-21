@@ -1,11 +1,14 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scripts/TouchControls.gd" id="3_touch"]
+[ext_resource type="PackedScene" path="res://scenes/Base.tscn" id="4_base"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
+
+[node name="Base" parent="." instance=ExtResource("4_base")]
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 
@@ -58,7 +61,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
-text = "v0.0.13"
+text = "v0.0.14"
 horizontal_alignment = 2
 
 [node name="TouchControls" type="Control" parent="UI"]

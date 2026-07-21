@@ -10,12 +10,15 @@ const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 
 @onready var player: CharacterBody2D = $Player
+@onready var base: StaticBody2D = $Base
 @onready var info: Label = $UI/Info
 @onready var version_label: Label = $UI/Version
 @onready var touch_controls: TouchControls = $UI/TouchControls
 
 func _ready() -> void:
-	player.position = Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
+	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
+	base.position = world_center
+	player.position = world_center + Vector2(0, TILE_SIZE * 3)
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
 	touch_controls.player = player
@@ -33,13 +36,14 @@ func _populate_world() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = SPAWN_SEED
 	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
+	var player_tile := Vector2i(player.position / TILE_SIZE)
 
 	for region_y in range(0, WORLD_TILES, REGION_SIZE):
 		for region_x in range(0, WORLD_TILES, REGION_SIZE):
 			var occupied: Dictionary[Vector2i, bool] = {}
-			var box_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile)
+			var box_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile, player_tile)
 			occupied[box_cell] = true
-			var belt_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile)
+			var belt_cell := _random_free_cell(rng, region_x, region_y, occupied, center_tile, player_tile)
 
 			var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D
 			box.position = _cell_center(box_cell)
@@ -55,7 +59,8 @@ func _random_free_cell(
 	region_x: int,
 	region_y: int,
 	occupied: Dictionary[Vector2i, bool],
-	center_tile: Vector2i
+	center_tile: Vector2i,
+	player_tile: Vector2i
 ) -> Vector2i:
 	while true:
 		var cell := Vector2i(
@@ -65,6 +70,8 @@ func _random_free_cell(
 		if occupied.has(cell):
 			continue
 		if abs(cell.x - center_tile.x) <= 2 and abs(cell.y - center_tile.y) <= 2:
+			continue
+		if abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1:
 			continue
 		return cell
 	return Vector2i(region_x, region_y)
