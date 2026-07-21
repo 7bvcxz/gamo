@@ -25,7 +25,7 @@ func refresh_snapshot() -> void:
 	if main_controller == null:
 		return
 	mineral_points = _collect_coarse_points(["mineral_block"], MINERAL_BUCKET_SIZE)
-	block_points = _collect_coarse_points(["solid", "machine"], BLOCK_BUCKET_SIZE)
+	block_points = _collect_coarse_points(["solid", "machine", "transport_floor"], BLOCK_BUCKET_SIZE)
 	cached_player_position = main_controller.player.global_position
 	refresh_count += 1
 	queue_redraw()

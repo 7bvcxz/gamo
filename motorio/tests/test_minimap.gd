@@ -14,7 +14,7 @@ func _run() -> void:
 	_assert(minimap.position.x >= 480.0 and minimap.position.y == 16.0, "minimap is positioned at top-right")
 	var box_label := main.get_node("UI/BoxCount") as Label
 	var version_label := main.get_node("UI/Version") as Label
-	_assert(box_label.anchor_left == 1.0 and box_label.anchor_right == 1.0, "status UI stays anchored to the right edge")
+	_assert(box_label.position.x == 16.0 and box_label.position.y == 100.0, "collected box resource stays at top-left")
 	_assert(version_label.anchor_left == 1.0 and version_label.anchor_top == 1.0, "version stays anchored to the bottom-right")
 	var world_origin: Vector2 = minimap.call("world_to_map", Vector2.ZERO)
 	var world_end: Vector2 = minimap.call("world_to_map", Vector2.ONE * 3200.0)

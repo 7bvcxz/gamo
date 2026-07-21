@@ -30,8 +30,11 @@
 ## Motorio 블록 특성 용어
 
 - `Solid`: 주인공 및 다른 Solid 블록과 서로 겹칠 수 없는 고체 블록. `solid` 그룹과 Solid 공용 충돌 레이어를 사용한다. 일반 상자, 고양이 블록, 미네랄 자원이 해당한다.
-- `Machine`: 주인공과는 겹칠 수 없지만 Solid를 포함한 다른 블록과는 겹칠 수 있는 기계 블록. `machine` 그룹과 Machine 공용 충돌 레이어를 사용한다. 컨베이어 벨트가 해당한다.
-- `Fixed`: IN 모드로 회수할 수 없고 주인공, Solid, Machine, 다른 Fixed를 포함한 어떤 블록과도 겹칠 수 없는 고정 블록. `fixed` 그룹과 Fixed 공용 충돌 레이어를 사용한다. 미네랄 원석 블록이 해당한다.
+- `Machine`: 주인공과는 겹칠 수 없지만 Solid를 포함한 다른 블록과는 겹칠 수 있는 기계 블록. `machine` 그룹과 Machine 공용 충돌 레이어를 사용한다. 현재 해당 블록은 없다.
+- `TransportFloor`: 주인공과 모든 블록이 위에 겹칠 수 있고 운송 효과만 주는 최하단 바닥 블록. `transport_floor` 그룹을 사용하며 컨베이어 벨트가 해당한다.
+- `Fixed`: Z로 회수할 수 없고 TransportFloor를 제외한 주인공, Solid, Machine, 다른 Fixed와 겹칠 수 없는 고정 블록. `fixed` 그룹과 Fixed 공용 충돌 레이어를 사용한다. 미네랄 원석 블록이 해당한다.
+- X로 설치한 블록은 `installed` 메타데이터와 freeze 상태로 밀리지 않게 고정하지만, 이는 회수 불가인 `Fixed` 특성과는 다르다.
+- BOX, MINERAL 및 앞으로 추가할 수집 자원 수치는 좌측 상단에 모아서 표시한다.
 - 기지의 상자 투입구는 Solid 전체가 아니라 `box_block` 그룹의 일반 상자만 회수한다.
 
 ## 실수와 교훈

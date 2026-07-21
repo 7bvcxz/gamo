@@ -75,6 +75,7 @@ func _run() -> void:
 	var rotated := _find_block_at(target) as ConveyorBlock
 	_assert(rotated != null, "rotated conveyor is installed")
 	_assert(rotated.direction == Vector2.DOWN, "remembered rotation is applied to conveyor direction")
+	_assert(rotated.freeze and rotated.get_meta("installed", false), "X-placed block cannot be pushed")
 	_assert(main.placement_rotation == 1, "rotation remains after conveyor placement")
 	player.position += Vector2.RIGHT * 32.0
 	var next_target: Vector2 = main.call("_front_cell_center")
@@ -84,6 +85,7 @@ func _run() -> void:
 	await physics_frame
 	var next_rotated := _find_block_at(next_target) as ConveyorBlock
 	_assert(next_rotated != null and next_rotated.direction == Vector2.DOWN, "next block defaults to the remembered rotation")
+	_assert(next_rotated.freeze, "every X-placed block stays immovable")
 
 	if failures == 0:
 		print("INVENTORY_TEST: PASS")

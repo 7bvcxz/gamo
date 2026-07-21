@@ -14,7 +14,7 @@ var animation_offset := 0.0
 
 func _ready() -> void:
 	add_to_group("pickup_block")
-	add_to_group("machine")
+	add_to_group("transport_floor")
 
 func _physics_process(delta: float) -> void:
 	for body in $Detector.get_overlapping_bodies():

@@ -27,9 +27,14 @@ func _run() -> void:
 	conveyor._process(0.5)
 	_assert(is_equal_approx(conveyor.animation_offset, 18.0), "arrow animation runs at half belt speed")
 	_assert(conveyor.BELT_SPEED == 72.0, "slower animation does not change transport speed")
+	var visual_box := load("res://scenes/PushTile.tscn").instantiate() as RigidBody2D
+	var visual_cat := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
+	_assert(conveyor.z_index < visual_box.z_index and conveyor.z_index < visual_cat.z_index, "conveyor renders below every solid block")
+	visual_box.free()
+	visual_cat.free()
 
 	await _test_box_transport(conveyor)
-	await _test_player_collision()
+	await _test_player_overlap()
 
 	print("CONVEYOR_TEST: PASS")
 	quit(0)
@@ -66,7 +71,7 @@ func _test_box_transport(conveyor: ConveyorBlock) -> void:
 	_assert(outline_box.linear_velocity.length() < 0.1, "outline-only overlap receives no force")
 	outline_box.free()
 
-func _test_player_collision() -> void:
+func _test_player_overlap() -> void:
 	var conveyor_scene: PackedScene = load("res://scenes/Conveyor.tscn")
 	var solid_conveyor := conveyor_scene.instantiate() as ConveyorBlock
 	solid_conveyor.position = Vector2(400, 400)
@@ -80,8 +85,9 @@ func _test_player_collision() -> void:
 	await physics_frame
 
 	var collision := player.move_and_collide(Vector2(20, 0), true)
-	_assert(collision != null, "player cannot overlap conveyor")
-	_assert(collision.get_collider() == solid_conveyor, "player collides with conveyor body")
+	_assert(collision == null, "player can walk over conveyor")
+	_assert(solid_conveyor.collision_layer == 0 and solid_conveyor.collision_mask == 0, "conveyor has no solid body collision")
+	_assert(solid_conveyor.is_in_group("transport_floor") and not solid_conveyor.is_in_group("machine"), "conveyor uses TransportFloor instead of Machine")
 	player.queue_free()
 	solid_conveyor.queue_free()
 

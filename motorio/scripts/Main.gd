@@ -182,6 +182,8 @@ func _place_selected_block() -> void:
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target
+	block.freeze = true
+	block.set_meta("installed", true)
 	add_child(block)
 	inventory.remove_at(selected_slot)
 	selected_slot = clampi(selected_slot, 0, maxi(0, inventory.size() - 1))
@@ -228,7 +230,7 @@ func _create_placement_preview(item_type: String) -> RigidBody2D:
 	block.collision_mask = 0
 	block.freeze = true
 	add_child(block)
-	for group_name in ["pickup_block", "solid", "machine", "box_block"]:
+	for group_name in ["pickup_block", "solid", "machine", "transport_floor", "box_block"]:
 		block.remove_from_group(group_name)
 	for child in block.find_children("*", "CollisionShape2D", true, false):
 		(child as CollisionShape2D).disabled = true

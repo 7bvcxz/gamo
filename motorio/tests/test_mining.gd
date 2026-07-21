@@ -25,7 +25,7 @@ func _run() -> void:
 	var world_player := main.get_node("Player") as CharacterBody2D
 	_assert((world_player.collision_mask & 32) != 0, "player collides with Fixed blocks")
 	var conveyor_scene := load("res://scenes/Conveyor.tscn").instantiate() as ConveyorBlock
-	_assert((conveyor_scene.collision_mask & 32) != 0, "Machine collides with Fixed blocks")
+	_assert(conveyor_scene.collision_layer == 0 and conveyor_scene.collision_mask == 0, "TransportFloor can overlap Fixed blocks")
 	var box_scene := load("res://scenes/PushTile.tscn").instantiate() as RigidBody2D
 	_assert((box_scene.collision_mask & 32) != 0, "Solid collides with Fixed blocks")
 	conveyor_scene.free()
@@ -93,9 +93,9 @@ func _run() -> void:
 	await process_frame
 	_assert(_stage_resources(mining_stage).size() == 2, "cat produces another resource every three seconds")
 	_assert(cat.is_in_group("solid") and cat.collision_layer == 4, "cat block has Solid trait")
-	var machine := load("res://scenes/Conveyor.tscn").instantiate() as ConveyorBlock
-	mining_stage.add_child(machine)
-	_assert(machine.is_in_group("machine") and machine.collision_layer == 2, "conveyor keeps Machine trait")
+	var transport_floor := load("res://scenes/Conveyor.tscn").instantiate() as ConveyorBlock
+	mining_stage.add_child(transport_floor)
+	_assert(transport_floor.is_in_group("transport_floor") and transport_floor.collision_layer == 0, "conveyor has TransportFloor trait")
 
 	if failures == 0:
 		print("MINING_TEST: PASS")

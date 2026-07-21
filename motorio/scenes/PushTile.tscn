@@ -10,6 +10,7 @@ friction = 0.8
 rough = true
 
 [node name="PushTile" type="RigidBody2D"]
+z_index = 1
 mass = 1.4
 physics_material_override = SubResource("PhysicsMaterial_tile")
 gravity_scale = 0.0

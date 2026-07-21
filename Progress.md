@@ -93,6 +93,8 @@
   - 0.1.8 검증: 0.69초 무회전·0.70초 90도 회전 자동 테스트와 전체 회귀 테스트 통과, iPhone 13 Chromium 새 Web 빌드 실행 및 오류 없음 확인
   - 0.1.9: 화면 왜곡 없이 모바일 세로 화면과 PC 브라우저 전체를 채우는 expand 비율 적용, 우측 상태·미니맵·버전·터치 조작 UI를 화면 모서리 기준 반응형 배치로 변경
   - 0.1.9 검증: expand 설정·900×1200 터치 UI·상태/버전 앵커 자동 테스트와 전체 회귀 테스트 통과, iPhone 13 390×664 및 PC 1280×720 Chromium에서 캔버스 전체 채움·모서리 UI·오류 없음 확인
+  - 0.1.10: 컨베이어를 Machine에서 모든 물체와 겹치는 최하단 TransportFloor로 변경, BOX/MINERAL 수집 자원 UI를 좌측 상단에 통합, X로 설치한 모든 블록을 밀리지 않는 freeze 상태로 고정
+  - 0.1.10 검증: 컨베이어 무충돌·플레이어 통과·TransportFloor 그룹·Solid보다 낮은 렌더 순서, X 설치 freeze 및 자원 UI 위치 자동 테스트와 전체 회귀 테스트 통과, iPhone 13 Chromium 좌측 상단 MINERAL/BOX 표시·오류 없음 확인
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음

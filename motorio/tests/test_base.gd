@@ -41,7 +41,7 @@ func _run() -> void:
 	_assert(main.get("box_count") == 1, "entering box increments count once")
 	_assert(not is_instance_valid(box), "received box is removed")
 	var box_label := main.get_node("UI/BoxCount") as Label
-	_assert(box_label.text == "BOX  1", "box count is shown in top-right UI")
+	_assert(box_label.text == "BOX  1" and box_label.position.x == 16.0, "box count is shown with collected resources at top-left")
 	var mineral_resource := load("res://scenes/MinedResource.tscn").instantiate() as RigidBody2D
 	mineral_resource.position = base.position + Vector2.RIGHT * 72.0
 	main.add_child(mineral_resource)
