@@ -19,6 +19,15 @@ func _run() -> void:
 	var center: Vector2 = minimap.call("world_to_map", Vector2.ONE * 1600.0)
 	_assert(center.distance_to(Vector2.ONE * 70.0) < 0.01, "world center maps to minimap center")
 	_assert(get_nodes_in_group("mineral_block").size() > 300, "minimap has mineral data to render")
+	_assert(minimap.get("mineral_points").size() < 160, "mineral markers are coarsely aggregated")
+	_assert(minimap.get("block_points").size() < 200, "block markers are coarsely aggregated")
+	var initial_refreshes: int = minimap.get("refresh_count")
+	minimap.set("refresh_elapsed", 0.0)
+	for frame in range(59):
+		minimap.call("_process", 1.0 / 60.0)
+	_assert(minimap.get("refresh_count") == initial_refreshes, "minimap does not redraw every frame")
+	minimap.call("_process", 1.0 / 60.0)
+	_assert(minimap.get("refresh_count") == initial_refreshes + 1, "minimap refreshes once per second")
 	if failures == 0:
 		print("MINIMAP_TEST: PASS")
 	quit(failures)

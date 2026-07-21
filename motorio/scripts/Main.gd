@@ -53,6 +53,7 @@ func _ready() -> void:
 	_update_interaction_ui()
 	_create_world_walls()
 	_populate_world()
+	minimap.refresh_snapshot()
 	var camera := player.get_node("Camera2D") as Camera2D
 	camera.limit_left = 0
 	camera.limit_top = 0
