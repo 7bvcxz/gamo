@@ -7,7 +7,7 @@ config_version=5
 
 config/name="Motorio"
 config/description="A top-down automation game prototype"
-config/version="0.0.25"
+config/version="0.0.26"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 

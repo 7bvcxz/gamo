@@ -5,6 +5,7 @@ const TILE_SIZE := 32.0
 
 func _ready() -> void:
 	add_to_group("mineral_block")
+	add_to_group("fixed")
 	queue_redraw()
 
 func _draw() -> void:

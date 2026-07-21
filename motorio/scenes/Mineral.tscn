@@ -7,7 +7,7 @@ size = Vector2(31, 31)
 
 [node name="Mineral" type="StaticBody2D"]
 collision_layer = 32
-collision_mask = 4
+collision_mask = 63
 script = ExtResource("1_mineral")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

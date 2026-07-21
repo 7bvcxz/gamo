@@ -172,7 +172,7 @@ func _can_place_at(target: Vector2) -> bool:
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
 	query.transform = Transform2D(0.0, target)
-	query.collision_mask = 31
+	query.collision_mask = 63
 	query.collide_with_areas = false
 	query.exclude = [player.get_rid()]
 	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()

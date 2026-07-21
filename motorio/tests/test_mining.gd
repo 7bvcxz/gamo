@@ -17,8 +17,21 @@ func _run() -> void:
 	_assert(abs(minerals.size() - 333) <= 1, "mineral density averages one per 30 cells")
 	var clustered_ratio := float(clustered) / float(minerals.size())
 	_assert(abs(clustered_ratio - 0.8) < 0.02, "about 80 percent of minerals spawn attached")
+	var fixed_mineral := minerals[0] as MineralBlock
+	_assert(fixed_mineral.is_in_group("fixed"), "mineral block has Fixed trait")
+	_assert(not fixed_mineral.is_in_group("pickup_block"), "Fixed mineral cannot be picked up in IN mode")
+	_assert(fixed_mineral.collision_layer == 32 and fixed_mineral.collision_mask == 63, "Fixed mineral collides with every block category")
+	_assert(not main.call("_can_place_at", fixed_mineral.global_position), "Fixed mineral blocks OUT placement")
+	var world_player := main.get_node("Player") as CharacterBody2D
+	_assert((world_player.collision_mask & 32) != 0, "player collides with Fixed blocks")
+	var conveyor_scene := load("res://scenes/Conveyor.tscn").instantiate() as ConveyorBlock
+	_assert((conveyor_scene.collision_mask & 32) != 0, "Machine collides with Fixed blocks")
+	var box_scene := load("res://scenes/PushTile.tscn").instantiate() as RigidBody2D
+	_assert((box_scene.collision_mask & 32) != 0, "Solid collides with Fixed blocks")
+	conveyor_scene.free()
+	box_scene.free()
 
-	var player := main.get_node("Player") as CharacterBody2D
+	var player := world_player
 	player.facing = Vector2.UP
 	main.box_count = 3
 	main.get_node("UI/BoxCount").text = "BOX  3"
