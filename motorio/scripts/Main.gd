@@ -86,6 +86,8 @@ func _create_world_walls() -> void:
 	]
 	for wall_data in walls:
 		var wall := StaticBody2D.new()
+		wall.collision_layer = 8
+		wall.collision_mask = 7
 		var collision := CollisionShape2D.new()
 		var shape := RectangleShape2D.new()
 		shape.size = wall_data[1]
