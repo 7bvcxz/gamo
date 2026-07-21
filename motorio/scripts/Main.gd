@@ -9,6 +9,7 @@ const PUSH_TILE_SCENE := preload("res://scenes/PushTile.tscn")
 const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
 const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
 const PILLAR_BLOCK_SCENE := preload("res://scenes/PillarBlock.tscn")
+const BOX_GENERATOR_SCENE := preload("res://scenes/BoxGenerator.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
@@ -163,6 +164,8 @@ func _pick_up_front_block() -> void:
 		item = {"type": "cat", "direction": (closest as CatBlock).direction}
 	elif closest is PillarBlock:
 		item = {"type": "pillar"}
+	elif closest is BoxGenerator:
+		item = {"type": "box_generator", "direction": (closest as BoxGenerator).direction}
 	inventory.append(item)
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
@@ -173,9 +176,11 @@ func _place_selected_block() -> void:
 	if inventory.is_empty() or selected_slot >= inventory.size():
 		return
 	var target := _front_cell_center()
-	if not _can_place_at(target):
-		return
 	var item := inventory[selected_slot]
+	var item_type: String = item["type"]
+	var place_direction := Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	if not _can_place_item_at(target, item_type, place_direction):
+		return
 	var block: RigidBody2D
 	if item["type"] == "conveyor":
 		var conveyor := CONVEYOR_SCENE.instantiate() as ConveyorBlock
@@ -188,9 +193,13 @@ func _place_selected_block() -> void:
 		block = cat
 	elif item["type"] == "pillar":
 		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
+	elif item["type"] == "box_generator":
+		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
+		generator.direction = place_direction
+		block = generator
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
-	block.position = target
+	block.position = target + place_direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
 	add_child(block)
 	inventory.remove_at(selected_slot)
 	selected_slot = clampi(selected_slot, 0, maxi(0, inventory.size() - 1))
@@ -217,6 +226,9 @@ func _sync_placement_preview() -> void:
 		(placement_preview as ConveyorBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 	elif placement_preview is CatBlock:
 		(placement_preview as CatBlock).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	elif placement_preview is BoxGenerator:
+		(placement_preview as BoxGenerator).direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	placement_preview.position = _preview_position(item_type)
 	placement_preview.queue_redraw()
 
 func _create_placement_preview(item_type: String) -> RigidBody2D:
@@ -229,6 +241,8 @@ func _create_placement_preview(item_type: String) -> RigidBody2D:
 		block = cat
 	elif item_type == "pillar":
 		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
+	elif item_type == "box_generator":
+		block = BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.set_meta("placement_preview", true)
@@ -250,15 +264,26 @@ func _create_placement_preview(item_type: String) -> RigidBody2D:
 	return block
 
 func _can_place_at(target: Vector2) -> bool:
+	return _can_place_item_at(target, "box", Vector2.RIGHT)
+
+func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) -> bool:
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2.ONE * 30.0
+	shape.size = Vector2(62.0, 30.0) if item_type == "box_generator" else Vector2.ONE * 30.0
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
-	query.transform = Transform2D(0.0, target)
+	var center := target + direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
+	query.transform = Transform2D(direction.angle() if item_type == "box_generator" else 0.0, center)
 	query.collision_mask = 63
 	query.collide_with_areas = false
 	query.exclude = [player.get_rid()]
 	return get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty()
+
+func _preview_position(item_type: String) -> Vector2:
+	var target := _front_cell_center()
+	if item_type != "box_generator":
+		return target
+	var direction := Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
+	return target + direction * (TILE_SIZE * 0.5)
 
 func _front_direction() -> Vector2:
 	if abs(player.facing.x) > abs(player.facing.y):
@@ -276,7 +301,7 @@ func _is_base_in_front() -> bool:
 func _open_base_menu() -> void:
 	base_menu_open = true
 	_sync_placement_preview()
-	fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
+	_update_fabricator_status()
 	player.controls_locked = true
 	base_menu.queue_redraw()
 
@@ -290,44 +315,64 @@ func _close_base_menu() -> void:
 	base_menu.queue_redraw()
 
 func _cycle_fabricator_recipe() -> void:
-	fabricator_selection = (fabricator_selection + 1) % 2
-	fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
+	fabricator_selection = (fabricator_selection + 1) % 3
+	_update_fabricator_status()
 	base_menu.queue_redraw()
 
 func _craft_selected_block() -> void:
-	if box_count < 3:
-		fabricator_status = "NOT ENOUGH BOX"
-		return
-	box_count -= 3
-	box_label.text = "BOX  %d" % box_count
 	var block: RigidBody2D
+	if fabricator_selection == 2:
+		if mineral_count < 10:
+			fabricator_status = "NOT ENOUGH MINERAL"
+			return
+		mineral_count -= 10
+		mineral_label.text = "MINERAL  %d" % mineral_count
+		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
+		generator.direction = Vector2.DOWN
+		block = generator
+		fabricator_status = "BOX GENERATOR CREATED"
+	else:
+		if box_count < 3:
+			fabricator_status = "NOT ENOUGH BOX"
+			return
+		box_count -= 3
+		box_label.text = "BOX  %d" % box_count
 	if fabricator_selection == 1:
 		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 		fabricator_status = "PILLAR CREATED"
-	else:
+	elif fabricator_selection == 0:
 		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
 		cat.direction = Vector2.DOWN
 		cat.active_on_ready = false
 		block = cat
 		fabricator_status = "CAT BLOCK CREATED"
-	block.position = _find_fabricator_output_position()
+	block.position = _find_fabricator_output_position(block)
 	add_child(block)
 	base_menu.queue_redraw()
 
-func _find_fabricator_output_position() -> Vector2:
+func _update_fabricator_status() -> void:
+	if fabricator_selection == 2:
+		fabricator_status = "READY" if mineral_count >= 10 else "NEED %d MORE MINERAL" % (10 - mineral_count)
+	else:
+		fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
+
+func _find_fabricator_output_position(block: RigidBody2D = null) -> Vector2:
 	var output := base.global_position + Vector2.DOWN * (TILE_SIZE * 4.0)
 	for step in range(WORLD_TILES):
 		var candidate := output + Vector2.DOWN * (TILE_SIZE * step)
 		var shape := RectangleShape2D.new()
-		shape.size = Vector2.ONE * 30.0
+		var is_generator := block is BoxGenerator
+		shape.size = Vector2(62.0, 30.0) if is_generator else Vector2.ONE * 30.0
+		var center := candidate + Vector2.DOWN * (TILE_SIZE * 0.5) if is_generator else candidate
 		var query := PhysicsShapeQueryParameters2D.new()
 		query.shape = shape
-		query.transform = Transform2D(0.0, candidate)
+		query.transform = Transform2D(PI / 2.0 if is_generator else 0.0, center)
 		query.collision_mask = 63
 		query.collide_with_areas = false
 		if get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
-			return candidate
-	return output + Vector2.DOWN * (TILE_SIZE * (WORLD_TILES - 1))
+			return center
+	var fallback := output + Vector2.DOWN * (TILE_SIZE * (WORLD_TILES - 1))
+	return fallback + Vector2.DOWN * (TILE_SIZE * 0.5) if block is BoxGenerator else fallback
 
 func _update_interaction_ui() -> void:
 	inventory_ui.queue_redraw()

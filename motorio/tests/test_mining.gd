@@ -74,6 +74,18 @@ func _run() -> void:
 	_assert(crafted_pillar.freeze and crafted_pillar.is_in_group("solid"), "crafted pillar is an immovable Solid")
 	_assert(crafted_pillar.is_in_group("pickup_block") and not crafted_pillar.is_in_group("fixed"), "pillar remains Z-pickable rather than Fixed")
 	_assert(crafted_pillar.position.y > (crafted_cats[0] as CatBlock).position.y, "successive blocked outputs continue downward")
+	main.mineral_count = 10
+	main.get_node("UI/MineralCount").text = "MINERAL  10"
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
+	_assert(main.fabricator_selection == 2, "X selects the box generator recipe")
+	main.call("primary_action")
+	await physics_frame
+	_assert(main.mineral_count == 0, "box generator crafting consumes ten minerals")
+	var crafted_generators := get_nodes_in_group("box_generator")
+	_assert(crafted_generators.size() == 1, "fabricator outputs one box generator")
+	var crafted_generator := crafted_generators[0] as BoxGenerator
+	_assert(crafted_generator.freeze and crafted_generator.direction == Vector2.DOWN, "crafted generator is immovable and faces the base exit")
 	main.call("close_base_menu_action")
 	_assert(not main.base_menu_open and not player.controls_locked, "fabricator can be closed explicitly")
 

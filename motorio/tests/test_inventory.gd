@@ -101,6 +101,25 @@ func _run() -> void:
 	_assert(pillar != null and pillar.freeze, "X places an immovable pillar")
 	_assert(pillar.is_in_group("solid") and pillar.is_in_group("pickup_block"), "pillar is a pickup-capable Solid")
 	_assert(not pillar.is_in_group("fixed"), "pillar is not Fixed")
+	pillar.queue_free()
+	await process_frame
+	main.inventory.clear()
+	main.inventory.append({"type": "box_generator", "direction": Vector2.RIGHT})
+	main.selected_slot = 0
+	main.call("_sync_placement_preview")
+	var generator_preview := main.placement_preview as BoxGenerator
+	_assert(generator_preview != null and generator_preview.direction == Vector2.DOWN, "generator preview uses remembered rotation")
+	_assert(generator_preview.position.distance_to(next_target + Vector2.DOWN * 16.0) < 0.1, "2x1 preview is centered across two grid cells")
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
+	await physics_frame
+	var generators := get_nodes_in_group("box_generator")
+	_assert(generators.size() == 1, "X places the box generator")
+	var generator := generators[0] as BoxGenerator
+	_assert(generator.direction == Vector2.DOWN and generator.position.distance_to(next_target + Vector2.DOWN * 16.0) < 0.1, "placed generator keeps direction and grid footprint")
+	main.call("primary_action")
+	await process_frame
+	_assert(main.inventory.size() == 1 and main.inventory[0]["type"] == "box_generator", "Z picks the generator back up")
 
 	if failures == 0:
 		print("INVENTORY_TEST: PASS")

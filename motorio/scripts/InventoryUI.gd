@@ -34,6 +34,11 @@ func _draw() -> void:
 				draw_rect(inner, Color("777f82"))
 				draw_rect(inner.grow(-4.0), Color("b8c0be"))
 				draw_line(inner.position + Vector2(7, 5), inner.position + Vector2(7, inner.size.y - 5), Color(1, 1, 1, 0.4), 2.0)
+			elif item["type"] == "box_generator":
+				draw_rect(inner, Color("405b61"))
+				draw_circle(inner.position + Vector2(7, inner.size.y / 2.0), 4.0, Color("8ee4df"))
+				draw_rect(Rect2(inner.position + Vector2(12, 5), Vector2(10, 12)), Color("8b5a30"))
+				draw_polygon(PackedVector2Array([inner.position + Vector2(25, 11), inner.position + Vector2(20, 7), inner.position + Vector2(20, 15)]), PackedColorArray([Color("f0bd4f")]))
 			else:
 				draw_rect(inner, Color("8b5a30"))
 				draw_line(inner.position, inner.end, Color("4f2f19"), 2.0)
