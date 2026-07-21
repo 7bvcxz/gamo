@@ -5,6 +5,8 @@ const TILE_SIZE := 32.0
 const ENTRANCE_DISTANCE := TILE_SIZE * 3.0
 const ENTRANCE_DIRECTIONS := [Vector2.UP, Vector2.RIGHT, Vector2.LEFT]
 const EXIT_DIRECTION := Vector2.DOWN
+const SHELTER_DIRECTION := Vector2(-0.70710678, 0.70710678)
+const SHELTER_DISTANCE := 92.0
 
 signal box_received(box: RigidBody2D)
 signal mineral_received(resource: RigidBody2D)
@@ -81,3 +83,7 @@ func _draw() -> void:
 	draw_polygon(PackedVector2Array([exit_center + Vector2(-7, -5), exit_center + Vector2(7, -5), exit_center + Vector2(0, 8)]), PackedColorArray([Color("b8f0cf")]))
 	var exit_font := ThemeDB.fallback_font
 	draw_string(exit_font, exit_center + Vector2(-12, 14), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 24, 8, Color("d2ffea"))
+	var shelter_center := SHELTER_DIRECTION * SHELTER_DISTANCE
+	draw_circle(shelter_center, 15.0, Color("713f35"))
+	draw_arc(shelter_center, 15.0, PI, TAU, 20, Color("f0bd4f"), 3.0)
+	draw_string(exit_font, shelter_center + Vector2(-16, 25), "HOME", HORIZONTAL_ALIGNMENT_CENTER, 32, 8, Color("ffd9a0"))

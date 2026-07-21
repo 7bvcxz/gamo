@@ -80,6 +80,22 @@ func _run() -> void:
 	controls._end_touch(3)
 	_assert(not bool(main.get("placement_action_held")), "X touch release ends placement hold")
 
+	main.set("shelter_open", true)
+	player.set("controls_locked", true)
+	var shelter_wheel := InputEventScreenTouch.new()
+	shelter_wheel.index = 7
+	shelter_wheel.position = controls.joystick_center
+	shelter_wheel.pressed = true
+	controls._input(shelter_wheel)
+	_assert(controls.joystick_touch_id == -1, "night shelter hides and disables the unnecessary movement wheel")
+	var shelter_z := InputEventScreenTouch.new()
+	shelter_z.index = 8
+	shelter_z.position = controls.button_centers[1]
+	shelter_z.pressed = true
+	controls._input(shelter_z)
+	_assert(not bool(main.get("shelter_open")), "the single mobile Z action sleeps until morning")
+	controls._end_touch(8)
+
 	print("TOUCH_CONTROLS_TEST: PASS")
 	quit(0)
 

@@ -11,6 +11,8 @@ func _run() -> void:
 	await physics_frame
 	_assert(main.tutorial_step == 0 and not main.tutorial_complete(), "new players start in quick start instead of the campaign")
 	_assert(main.tutorial_detail().contains("WASD") and main.tutorial_detail().contains("RIGHT"), "movement lesson covers keyboard and mobile wheel")
+	main.call("_update_survival", 60.0)
+	_assert(main.day_time == 0.0 and main.temperature == 100.0, "the survival clock and cold wait until quick start is complete")
 	main.tutorial_picked = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 0, "actions done early are remembered without skipping the current lesson")

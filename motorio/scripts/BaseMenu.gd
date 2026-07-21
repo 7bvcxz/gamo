@@ -13,9 +13,12 @@ func _draw() -> void:
 	draw_rect(panel, Color("d7a33f"), false, 3.0)
 	var font: Font = ThemeDB.fallback_font
 	var page: int = main_controller.fabricator_selection / 4
-	draw_string(font, panel.position + Vector2(22, 34), "BASE FABRICATOR   %d/3" % (page + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("f2d38a"))
+	var page_count: int = ceili(float(main_controller.fabricator_recipe_count()) / 4.0)
+	draw_string(font, panel.position + Vector2(22, 34), "BASE FABRICATOR   %d/%d" % [page + 1, page_count], HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("f2d38a"))
 	for row in range(4):
 		var recipe_index := page * 4 + row
+		if recipe_index >= main_controller.fabricator_recipe_count():
+			continue
 		_draw_recipe(font, panel, recipe_index, 72.0 + row * 36.0)
 	var status: String = main_controller.fabricator_status
 	draw_string(font, panel.position + Vector2(22, 230), status, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("8dd9cb"))

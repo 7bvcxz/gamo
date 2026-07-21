@@ -76,11 +76,14 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _begin_touch(touch_id: int, position: Vector2) -> void:
-	if position.x >= size.x * 0.5 and joystick_touch_id == -1:
+	var in_shelter: bool = main_controller != null and main_controller.shelter_open
+	if not in_shelter and position.x >= size.x * 0.5 and joystick_touch_id == -1:
 		joystick_touch_id = touch_id
 		_update_joystick(position)
 		return
 	for index in button_centers.size():
+		if in_shelter and index != 1:
+			continue
 		if position.distance_to(button_centers[index]) <= BUTTON_RADIUS * 1.25:
 			button_touches[touch_id] = index
 			action_pressed[index] = true
@@ -143,6 +146,9 @@ func _reset_inputs() -> void:
 	queue_redraw()
 
 func _draw() -> void:
+	if main_controller != null and main_controller.shelter_open:
+		_draw_action_button(1)
+		return
 	# Movement wheel on the lower right.
 	draw_circle(joystick_center, JOYSTICK_RADIUS, Color(0.05, 0.07, 0.065, 0.62))
 	draw_arc(joystick_center, JOYSTICK_RADIUS, 0.0, TAU, 48, Color(0.82, 0.88, 0.82, 0.55), 3.0)
@@ -150,11 +156,14 @@ func _draw() -> void:
 
 	# Three action buttons on the lower left.
 	for index in button_centers.size():
-		var fill := Color(0.84, 0.49, 0.18, 0.88) if action_pressed[index] else Color(0.16, 0.21, 0.19, 0.72)
-		draw_circle(button_centers[index], BUTTON_RADIUS, fill)
-		draw_arc(button_centers[index], BUTTON_RADIUS, 0.0, TAU, 32, Color(0.9, 0.92, 0.86, 0.65), 2.0)
-		var label: String = BUTTON_LABELS[index]
-		var font: Font = ThemeDB.fallback_font
-		var font_size := 11 if index == 0 else 16
-		var text_size: Vector2 = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-		draw_string(font, button_centers[index] - Vector2(text_size.x / 2.0, -text_size.y / 3.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)
+		_draw_action_button(index)
+
+func _draw_action_button(index: int) -> void:
+	var fill := Color(0.84, 0.49, 0.18, 0.88) if action_pressed[index] else Color(0.16, 0.21, 0.19, 0.72)
+	draw_circle(button_centers[index], BUTTON_RADIUS, fill)
+	draw_arc(button_centers[index], BUTTON_RADIUS, 0.0, TAU, 32, Color(0.9, 0.92, 0.86, 0.65), 2.0)
+	var label: String = BUTTON_LABELS[index]
+	var font: Font = ThemeDB.fallback_font
+	var font_size := 11 if index == 0 else 16
+	var text_size: Vector2 = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	draw_string(font, button_centers[index] - Vector2(text_size.x / 2.0, -text_size.y / 3.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)

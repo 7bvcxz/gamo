@@ -23,6 +23,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not active_on_ready:
 		return
+	var main := get_tree().get_first_node_in_group("main_controller")
+	if main and main.cats_should_rest():
+		return
 	mine_elapsed += delta
 	if spark_remaining > 0.0:
 		spark_remaining = maxf(0.0, spark_remaining - delta)
@@ -79,19 +82,15 @@ func _drop_resource(_type: String, scene_or_node) -> void:
 	get_parent().add_child(resource)
 
 func _generate_power() -> void:
-	if not _has_nearby_facility("power_generator"):
-		return
 	var main := get_tree().get_first_node_in_group("main_controller")
-	if main and main.consume_resource("coal", 1):
-		main.add_electricity(5)
+	if main and main.worker_has_equipment_slot(self, "electric", "power_generator") and main.consume_resource("coal", 1):
+		main.add_electricity(main.power_output_amount())
 		_consume_hunger(5.0)
 
 func _cook_cheese() -> void:
-	if not _has_nearby_facility("cheese_field"):
-		return
 	var main := get_tree().get_first_node_in_group("main_controller")
-	if main:
-		main.add_cheese(2)
+	if main and main.worker_has_equipment_slot(self, "cook", "cheese_field"):
+		main.add_cheese(main.food_output_amount())
 		_consume_hunger(4.0)
 
 func _serve_cheese() -> void:

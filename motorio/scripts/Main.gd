@@ -35,6 +35,9 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var quest_ui: Control = $UI/Quest
 @onready var economy_ui: Control = $UI/Economy
 @onready var tutorial_ui: Control = $UI/Tutorial
+@onready var survival_status: Label = $UI/SurvivalStatus
+@onready var shelter_ui: Control = $UI/Shelter
+@onready var climate_ui: Control = $UI/Climate
 
 var box_count := 0
 var mineral_count := 0
@@ -71,6 +74,14 @@ var tutorial_rotated := false
 var tutorial_placed := false
 var tutorial_delivered := false
 var tutorial_menu_opened := false
+var day_number := 1
+var day_time := 0.0
+var temperature := 100.0
+var shelter_open := false
+var night_warning_shown := false
+var heat_tech := 0
+var power_tech := 0
+var food_tech := 0
 
 func _ready() -> void:
 	add_to_group("main_controller")
@@ -89,6 +100,8 @@ func _ready() -> void:
 	quest_ui.main_controller = self
 	economy_ui.main_controller = self
 	tutorial_ui.main_controller = self
+	shelter_ui.main_controller = self
+	climate_ui.main_controller = self
 	tutorial_start_position = player.position
 	minimap.main_controller = self
 	_update_interaction_ui()
@@ -145,6 +158,59 @@ func add_cheese(amount: int) -> void:
 	economy_ui.queue_redraw()
 	_refresh_quest_progress()
 
+func power_output_amount() -> int:
+	return 5 + power_tech * 2
+
+func food_output_amount() -> int:
+	return 2 + food_tech
+
+func safe_radius_tiles() -> int:
+	return 10 + heat_tech * 4 + mini(_facility_count("power_generator"), _cat_count("electric")) * 2
+
+func power_per_minute() -> int:
+	return mini(_facility_count("power_generator"), _cat_count("electric")) * power_output_amount() * 20
+
+func food_per_minute() -> int:
+	return mini(_facility_count("cheese_field"), _cat_count("cook")) * food_output_amount() * 20
+
+func heat_per_minute() -> int:
+	return safe_radius_tiles() * 2
+
+func _facility_count(group_name: String) -> int:
+	return get_tree().get_nodes_in_group(group_name).size()
+
+func _cat_count(role: String) -> int:
+	var count := 0
+	for node in get_tree().get_nodes_in_group("cat_worker"):
+		if (node as CatBlock).worker_type == role:
+			count += 1
+	return count
+
+func worker_has_equipment_slot(cat: CatBlock, role: String, facility_group: String) -> bool:
+	var equipment_count := _facility_count(facility_group)
+	if equipment_count <= 0:
+		return false
+	var earlier_workers := 0
+	for node in get_tree().get_nodes_in_group("cat_worker"):
+		var other := node as CatBlock
+		if other and other.worker_type == role and other._has_nearby_facility(facility_group) and other.get_instance_id() < cat.get_instance_id():
+			earlier_workers += 1
+	return earlier_workers < equipment_count
+
+func ui_stage() -> int:
+	if not tutorial_complete():
+		return 0
+	if quest_step < 5:
+		return 1
+	if quest_step < 8:
+		return 2
+	if quest_step < 10:
+		return 3
+	return 4
+
+func cats_should_rest() -> bool:
+	return day_time >= 660.0 or shelter_open
+
 func consume_cheese(amount: int) -> bool:
 	if cheese < amount:
 		return false
@@ -189,10 +255,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			select_inventory_slot(int(key.physical_keycode - KEY_1))
 
 func primary_action() -> void:
+	if shelter_open:
+		_sleep_until_morning()
+		return
 	if base_menu_open:
 		_craft_selected_block()
 		return
-	if _is_base_in_front():
+	if day_time >= 660.0 and _is_shelter_nearby():
+		_enter_shelter(false)
+	elif _is_base_in_front():
 		_open_base_menu()
 	else:
 		_pick_up_front_block()
@@ -432,6 +503,37 @@ func _is_base_in_front() -> bool:
 	var toward_base := player.global_position.direction_to(base.global_position)
 	return player.global_position.distance_to(base.global_position) <= 128.0 and _front_direction().dot(toward_base) > 0.55
 
+func _is_shelter_nearby() -> bool:
+	var shelter_position: Vector2 = base.global_position + base.SHELTER_DIRECTION * base.SHELTER_DISTANCE
+	return player.global_position.distance_to(shelter_position) <= 58.0
+
+func _enter_shelter(rescued: bool) -> void:
+	if shelter_open:
+		return
+	shelter_open = true
+	base_menu_open = false
+	player.controls_locked = true
+	player.position = base.global_position + base.SHELTER_DIRECTION * 118.0
+	if rescued:
+		celebration_text = "THE CATS BROUGHT YOU HOME"
+		celebration_remaining = 3.0
+	shelter_ui.queue_redraw()
+
+func _sleep_until_morning() -> void:
+	day_number += 1
+	day_time = 0.0
+	temperature = 100.0
+	night_warning_shown = false
+	shelter_open = false
+	player.controls_locked = false
+	for node in get_tree().get_nodes_in_group("cat_worker"):
+		var cat := node as CatBlock
+		if cat:
+			cat.hunger = minf(100.0, cat.hunger + 25.0)
+	celebration_text = "DAY %d - STAY WARM" % day_number
+	celebration_remaining = 2.5
+	shelter_ui.queue_redraw()
+
 func _open_base_menu() -> void:
 	base_menu_open = true
 	_sync_placement_preview()
@@ -464,6 +566,10 @@ func _craft_selected_block() -> void:
 		fabricator_status = "NOT ENOUGH RESOURCES"
 		return
 	_spend_cost(cost)
+	if fabricator_selection >= 12:
+		_apply_technology(fabricator_selection)
+		base_menu.queue_redraw()
+		return
 	var block := _create_recipe_block(fabricator_selection)
 	fabricator_status = "%s CREATED" % recipe_label(fabricator_selection)
 	if fabricator_selection == 0:
@@ -484,17 +590,24 @@ func _update_fabricator_status() -> void:
 		fabricator_status = "READY" if _can_afford(recipe_cost(fabricator_selection)) else "NEED %s" % recipe_cost_text(fabricator_selection)
 
 func fabricator_recipe_count() -> int:
-	return 12
+	return 15
 
 func recipe_label(index: int) -> String:
-	return ["CAT BLOCK", "PILLAR", "BOX GENERATOR", "SPLITTER", "BRIDGE", "CONVEYOR", "POWER GENERATOR", "ELECTRIC CAT", "PRESSURE CAT", "CHEESE FIELD", "COOK CAT", "SERVER CAT"][index]
+	return ["CAT BLOCK", "PILLAR", "BOX GENERATOR", "SPLITTER", "BRIDGE", "CONVEYOR", "POWER GENERATOR", "ELECTRIC CAT", "PRESSURE CAT", "CHEESE FIELD", "COOK CAT", "SERVER CAT", "HEAT TECH", "POWER TECH", "FOOD TECH"][index]
 
 func recipe_cost(index: int) -> Dictionary:
-	return [
+	var standard: Array[Dictionary] = [
 		{"box": 3}, {"box": 3}, {"mineral": 10}, {"box": 5}, {"copper": 3}, {"copper": 1},
 		{"copper": 8, "coal": 5}, {"box": 5, "copper": 5}, {"box": 5, "copper": 6},
 		{"copper": 5}, {"box": 4, "copper": 3}, {"box": 4, "copper": 3},
-	][index]
+	]
+	if index < standard.size():
+		return standard[index]
+	if index == 12:
+		return {"copper": 5 + heat_tech * 2, "crystal": 2 + heat_tech}
+	if index == 13:
+		return {"copper": 5 + power_tech * 2, "crystal": 3 + power_tech * 2}
+	return {"copper": 4 + food_tech * 2, "cheese": 5 + food_tech * 3}
 
 func recipe_cost_text(index: int) -> String:
 	var parts: Array[String] = []
@@ -504,7 +617,11 @@ func recipe_cost_text(index: int) -> String:
 
 func _can_afford(cost: Dictionary) -> bool:
 	for key in cost:
-		var available: int = box_count if key == "box" else (mineral_count if key == "mineral" else resource_counts.get(key, 0))
+		var available: int
+		if key == "box": available = box_count
+		elif key == "mineral": available = mineral_count
+		elif key == "cheese": available = cheese
+		else: available = resource_counts.get(key, 0)
 		if available < cost[key]:
 			return false
 	return true
@@ -513,10 +630,24 @@ func _spend_cost(cost: Dictionary) -> void:
 	for key in cost:
 		if key == "box": box_count -= cost[key]
 		elif key == "mineral": mineral_count -= cost[key]
+		elif key == "cheese": cheese -= cost[key]
 		else: resource_counts[key] -= cost[key]
 	box_label.text = "BOX  %d" % box_count
 	mineral_label.text = "MINERAL  %d" % mineral_count
 	economy_ui.queue_redraw()
+
+func _apply_technology(index: int) -> void:
+	if index == 12:
+		heat_tech += 1
+		fabricator_status = "HEAT TECH LV.%d" % heat_tech
+	elif index == 13:
+		power_tech += 1
+		fabricator_status = "POWER TECH LV.%d" % power_tech
+	else:
+		food_tech += 1
+		fabricator_status = "FOOD TECH LV.%d" % food_tech
+	celebration_text = fabricator_status
+	celebration_remaining = 2.5
 
 func _create_recipe_block(index: int) -> RigidBody2D:
 	if index == 0 or index in [7, 8, 10, 11]:
@@ -720,6 +851,8 @@ func _cell_center(cell: Vector2i) -> Vector2:
 
 func _process(delta: float) -> void:
 	elapsed_time += delta
+	_update_survival(delta)
+	_update_staged_ui()
 	celebration_remaining = maxf(0.0, celebration_remaining - delta)
 	while not automated_delivery_times.is_empty() and automated_delivery_times[0] < elapsed_time - 60.0:
 		automated_delivery_times.pop_front()
@@ -739,6 +872,47 @@ func _process(delta: float) -> void:
 		placement_preview.position = _preview_position(preview_type)
 	if collect_action_held:
 		_collect_nearby_mineral_resources()
+
+func _update_survival(delta: float) -> void:
+	if not shelter_open and tutorial_complete():
+		day_time += delta
+		var distance_tiles := player.global_position.distance_to(base.global_position) / TILE_SIZE
+		var warm_radius := float(safe_radius_tiles())
+		if distance_tiles > warm_radius:
+			var exposure := 1.0 + (distance_tiles - warm_radius) * 0.18
+			temperature = maxf(0.0, temperature - delta * exposure * 2.2)
+		else:
+			temperature = minf(100.0, temperature + delta * 5.0)
+		if temperature <= 0.0:
+			day_time = minf(720.0, day_time + 30.0)
+			temperature = 45.0
+			_enter_shelter(true)
+		if day_time >= 660.0 and not night_warning_shown:
+			night_warning_shown = true
+			celebration_text = "NIGHT FALLS - RETURN HOME"
+			celebration_remaining = 4.0
+		if day_time >= 720.0:
+			_enter_shelter(true)
+	elif not tutorial_complete():
+		temperature = 100.0
+	var minute := int(day_time) / 60
+	var second := int(day_time) % 60
+	survival_status.text = "DAY %d  %02d:%02d   TEMP %d   WARM %d" % [day_number, minute, second, int(temperature), safe_radius_tiles()]
+	if ui_stage() >= 3:
+		survival_status.text += "\nPWR +%d/m   FOOD +%d/m   HEAT %d" % [power_per_minute(), food_per_minute(), heat_per_minute()]
+	if temperature < 35.0:
+		survival_status.modulate = Color("ff9d8a")
+	else:
+		survival_status.modulate = Color.WHITE
+
+func _update_staged_ui() -> void:
+	var stage := ui_stage()
+	box_label.visible = stage >= 1
+	mineral_label.visible = stage >= 1
+	throughput_label.visible = stage >= 1
+	economy_ui.visible = stage >= 2
+	minimap.visible = stage >= 2
+	$UI/WorldSize.visible = stage >= 2
 
 func _collect_nearby_mineral_resources() -> void:
 	var collectable := get_tree().get_nodes_in_group("mined_resource") + get_tree().get_nodes_in_group("world_resource")
