@@ -34,6 +34,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var throughput_label: Label = $UI/Throughput
 @onready var quest_ui: Control = $UI/Quest
 @onready var economy_ui: Control = $UI/Economy
+@onready var tutorial_ui: Control = $UI/Tutorial
 
 var box_count := 0
 var mineral_count := 0
@@ -62,6 +63,14 @@ var bridge_crafted := false
 var resource_counts := {"copper": 0, "coal": 0, "crystal": 0, "oil": 0, "uranium": 0}
 var electricity := 0
 var cheese := 0
+var tutorial_step := 0
+var tutorial_start_position := Vector2.ZERO
+var tutorial_moved := false
+var tutorial_picked := false
+var tutorial_rotated := false
+var tutorial_placed := false
+var tutorial_delivered := false
+var tutorial_menu_opened := false
 
 func _ready() -> void:
 	add_to_group("main_controller")
@@ -79,6 +88,8 @@ func _ready() -> void:
 	base_menu.main_controller = self
 	quest_ui.main_controller = self
 	economy_ui.main_controller = self
+	tutorial_ui.main_controller = self
+	tutorial_start_position = player.position
 	minimap.main_controller = self
 	_update_interaction_ui()
 	_create_world_walls()
@@ -95,6 +106,8 @@ func _ready() -> void:
 func _on_base_box_received(_box: RigidBody2D) -> void:
 	box_count += 1
 	box_label.text = "BOX  %d" % box_count
+	tutorial_delivered = true
+	_refresh_tutorial()
 	if quest_step == 0:
 		_advance_quest("FIRST DELIVERY")
 	if _box.get_meta("automated_box", false):
@@ -209,6 +222,8 @@ func _rotate_placement() -> void:
 	if inventory.is_empty() or selected_slot >= inventory.size():
 		return
 	placement_rotation = (placement_rotation + 1) % 4
+	tutorial_rotated = true
+	_refresh_tutorial()
 	placement_rotated_during_hold = true
 	_sync_placement_preview()
 
@@ -249,6 +264,8 @@ func _pick_up_front_block() -> void:
 	elif closest is FacilityBlock:
 		item = {"type": "facility", "facility": (closest as FacilityBlock).facility_type}
 	inventory.append(item)
+	tutorial_picked = true
+	_refresh_tutorial()
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
 	_sync_placement_preview()
@@ -295,6 +312,8 @@ func _place_selected_block() -> void:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target + place_direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
 	add_child(block)
+	tutorial_placed = true
+	_refresh_tutorial()
 	inventory.remove_at(selected_slot)
 	selected_slot = clampi(selected_slot, 0, maxi(0, inventory.size() - 1))
 	_sync_placement_preview()
@@ -418,6 +437,8 @@ func _open_base_menu() -> void:
 	_sync_placement_preview()
 	_update_fabricator_status()
 	player.controls_locked = true
+	tutorial_menu_opened = true
+	_refresh_tutorial()
 	base_menu.queue_redraw()
 
 func close_base_menu_action() -> void:
@@ -705,6 +726,9 @@ func _process(delta: float) -> void:
 	throughput_label.text = "BASE LV.%d\nBOX/MIN  %d" % [base_level, automated_delivery_times.size()]
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
 	info.text = "POS  %d, %d" % [tile.x, tile.y]
+	if not tutorial_moved and player.position.distance_to(tutorial_start_position) >= 20.0:
+		tutorial_moved = true
+		_refresh_tutorial()
 	if placement_action_held and not base_menu_open:
 		placement_hold_elapsed += delta
 		while placement_hold_elapsed >= PLACEMENT_ROTATE_INTERVAL:
@@ -791,6 +815,36 @@ func quest_detail() -> String:
 		"Spend POWER + OIL to deliver 1 URANIUM.",
 		"All systems online. Raise BOX/MIN and expand freely.",
 	][quest_step]
+
+func tutorial_complete() -> bool:
+	return tutorial_step >= 6
+
+func tutorial_title() -> String:
+	return ["MOVE THE MECHANIC", "PICK UP A BLOCK", "ROTATE BEFORE PLACING", "PLACE THE BLOCK", "DELIVER TO THE BASE", "OPEN THE FABRICATOR"][tutorial_step]
+
+func tutorial_detail() -> String:
+	return [
+		"WASD / ARROWS, or drag the RIGHT movement wheel.",
+		"Face a 1x1 block and press Z (left Z button on mobile).",
+		"Hold X for 0.7 sec. Each tick turns the preview 90 degrees.",
+		"Tap X to place it in the highlighted front grid position.",
+		"Push a brown BOX into a gold IN port. Green OUT creates items.",
+		"Face the base + Z. In menu: X SELECT, Z CRAFT, RUN/Esc CLOSE.",
+	][tutorial_step]
+
+func _refresh_tutorial() -> void:
+	var before := tutorial_step
+	while tutorial_step < 6:
+		var tutorial_flags: Array[bool] = [tutorial_moved, tutorial_picked, tutorial_rotated, tutorial_placed, tutorial_delivered, tutorial_menu_opened]
+		var done: bool = tutorial_flags[tutorial_step]
+		if not done:
+			break
+		tutorial_step += 1
+	if before < 6 and tutorial_step >= 6:
+		celebration_text = "BASICS COMPLETE - AUTOMATION STARTS NOW"
+		celebration_remaining = 3.0
+	tutorial_ui.queue_redraw()
+	quest_ui.queue_redraw()
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0

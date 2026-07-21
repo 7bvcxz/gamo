@@ -6,7 +6,7 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	if main_controller == null:
+	if main_controller == null or not main_controller.tutorial_complete():
 		return
 	var width := minf(390.0, size.x - 32.0)
 	var panel := Rect2(Vector2((size.x - width) / 2.0, 270.0), Vector2(width, 64.0))

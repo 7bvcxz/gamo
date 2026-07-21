@@ -72,8 +72,12 @@ func _draw() -> void:
 		draw_rect(entrance_rect, Color("36434a"))
 		draw_rect(entrance_rect.grow(-3.0), Color("d69b35"), false, 3.0)
 		draw_rect(entrance_rect.grow(-8.0), Color("101b1d"))
+		var entrance_font := ThemeDB.fallback_font
+		draw_string(entrance_font, center + Vector2(-8, 4), "IN", HORIZONTAL_ALIGNMENT_CENTER, 16, 8, Color("f4d58b"))
 	var exit_center := EXIT_DIRECTION * ENTRANCE_DISTANCE
 	var exit_rect := Rect2(exit_center - Vector2.ONE * TILE_SIZE / 2.0, Vector2.ONE * TILE_SIZE)
 	draw_rect(exit_rect, Color("335d58"))
 	draw_rect(exit_rect.grow(-3.0), Color("6ed0b0"), false, 3.0)
 	draw_polygon(PackedVector2Array([exit_center + Vector2(-7, -5), exit_center + Vector2(7, -5), exit_center + Vector2(0, 8)]), PackedColorArray([Color("b8f0cf")]))
+	var exit_font := ThemeDB.fallback_font
+	draw_string(exit_font, exit_center + Vector2(-12, 14), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 24, 8, Color("d2ffea"))
