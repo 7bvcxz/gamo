@@ -259,7 +259,7 @@ func _populate_world() -> void:
 	_populate_minerals(rng, occupied, center_tile, player_tile)
 
 func _populate_minerals(rng: RandomNumberGenerator, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> void:
-	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 30.0))
+	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 120.0))
 	var isolated_count := int(round(target_count * 0.2))
 	var mineral_cells: Array[Vector2i] = []
 	while mineral_cells.size() < isolated_count:

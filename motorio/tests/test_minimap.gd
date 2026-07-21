@@ -18,7 +18,7 @@ func _run() -> void:
 	_assert(world_end.distance_to(Vector2.ONE * 134.0) < 0.01, "world end maps inside minimap border")
 	var center: Vector2 = minimap.call("world_to_map", Vector2.ONE * 1600.0)
 	_assert(center.distance_to(Vector2.ONE * 70.0) < 0.01, "world center maps to minimap center")
-	_assert(get_nodes_in_group("mineral_block").size() > 300, "minimap has mineral data to render")
+	_assert(get_nodes_in_group("mineral_block").size() >= 80, "minimap has reduced mineral data to render")
 	_assert(minimap.get("mineral_points").size() < 160, "mineral markers are coarsely aggregated")
 	_assert(minimap.get("block_points").size() < 200, "block markers are coarsely aggregated")
 	var initial_refreshes: int = minimap.get("refresh_count")
