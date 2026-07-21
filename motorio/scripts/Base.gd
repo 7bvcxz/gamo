@@ -30,7 +30,7 @@ func _create_entrances() -> void:
 
 func _on_entrance_body_entered(body: Node2D) -> void:
 	var box := body as RigidBody2D
-	if box == null or box.has_meta("base_received"):
+	if box == null or not box.is_in_group("box_block") or box.has_meta("base_received"):
 		return
 	box.set_meta("base_received", true)
 	box_received.emit(box)

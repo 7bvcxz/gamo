@@ -43,11 +43,14 @@ func _run() -> void:
 	cat.direction = Vector2.RIGHT
 	cat.active_on_ready = true
 	mining_stage.add_child(cat)
+	cat._physics_process(2.9)
+	_assert(_stage_resources(mining_stage).is_empty(), "cat waits for three-second mining interval")
+	cat._physics_process(0.2)
 	await process_frame
-	await process_frame
-	_assert(not is_instance_valid(mineral), "installed cat mines mineral one cell ahead")
+	_assert(is_instance_valid(mineral), "mineral deposit remains after mining")
+	_assert(cat.spark_remaining > 0.0, "cat shows a sparkle on the front cell")
 	var resources := mining_stage.get_tree().get_nodes_in_group("mined_resource")
-	var dropped: StaticBody2D = null
+	var dropped: RigidBody2D = null
 	for resource in resources:
 		if resource.get_parent() == mining_stage:
 			dropped = resource
@@ -56,7 +59,15 @@ func _run() -> void:
 		_assert(dropped.position.distance_to(Vector2(176, 200)) < 0.1, "resource drops behind cat block")
 		var shape := dropped.get_node("CollisionShape2D").shape as CircleShape2D
 		_assert(shape.radius <= 8.0, "resource fits within half a tile")
-		_assert(dropped.collision_layer == 64 and dropped.collision_mask == 4, "resource overlaps everything except boxes")
+		_assert(dropped.is_in_group("solid"), "mined resource has Solid trait")
+		_assert(dropped.collision_layer == 4 and dropped.collision_mask == 125, "mined resource collides as Solid")
+	cat._physics_process(3.0)
+	await process_frame
+	_assert(_stage_resources(mining_stage).size() == 2, "cat produces another resource every three seconds")
+	_assert(cat.is_in_group("solid") and cat.collision_layer == 4, "cat block has Solid trait")
+	var machine := load("res://scenes/Conveyor.tscn").instantiate() as ConveyorBlock
+	mining_stage.add_child(machine)
+	_assert(machine.is_in_group("machine") and machine.collision_layer == 2, "conveyor keeps Machine trait")
 
 	if failures == 0:
 		print("MINING_TEST: PASS")
@@ -66,3 +77,6 @@ func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("MINING_TEST: FAIL - " + message)
 		failures += 1
+
+func _stage_resources(stage: Node2D) -> Array:
+	return get_nodes_in_group("mined_resource").filter(func(node): return node.get_parent() == stage)

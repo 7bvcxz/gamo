@@ -4,6 +4,8 @@ const TILE_SIZE := 32.0
 
 func _ready() -> void:
 	add_to_group("pickup_block")
+	add_to_group("solid")
+	add_to_group("box_block")
 	queue_redraw()
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:

@@ -5,9 +5,14 @@
 [sub_resource type="CircleShape2D" id="CircleShape_resource"]
 radius = 7.0
 
-[node name="MinedResource" type="StaticBody2D"]
-collision_layer = 64
-collision_mask = 4
+[node name="MinedResource" type="RigidBody2D"]
+mass = 0.35
+gravity_scale = 0.0
+collision_layer = 4
+collision_mask = 125
+lock_rotation = true
+linear_damp = 14.0
+linear_damp_mode = 1
 script = ExtResource("1_resource")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

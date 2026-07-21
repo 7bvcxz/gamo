@@ -26,6 +26,12 @@
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
 - Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙인다. 고정 `index.html`은 GitHub 저장소 API에서 최신 manifest를 읽고, 고정 `runner.html`은 해시 PCK를 저장소 원본 경로에서 직접 내려받는다. 생성된 해시 파일명, manifest, 로더, runner를 수동으로 되돌리지 않는다.
 
+## Motorio 블록 특성 용어
+
+- `Solid`: 주인공 및 다른 Solid 블록과 서로 겹칠 수 없는 고체 블록. `solid` 그룹과 Solid 공용 충돌 레이어를 사용한다. 일반 상자, 고양이 블록, 미네랄 자원이 해당한다.
+- `Machine`: 주인공과는 겹칠 수 없지만 Solid를 포함한 다른 블록과는 겹칠 수 있는 기계 블록. `machine` 그룹과 Machine 공용 충돌 레이어를 사용한다. 컨베이어 벨트가 해당한다.
+- 기지의 상자 투입구는 Solid 전체가 아니라 `box_block` 그룹의 일반 상자만 회수한다.
+
 ## 실수와 교훈
 
 - 2026-07-20: GitHub Pages Web export 배포를 HeyDive 게임 목록 등록과 같은 것으로 간주했다. `gamo`의 push는 정적 파일만 배포하며, 현재 HeyDive 목록은 별도 서버 DB에서 관리된다. 이후 배포 완료를 보고할 때 정적 URL 응답과 HeyDive API 등록 여부를 각각 확인한다.

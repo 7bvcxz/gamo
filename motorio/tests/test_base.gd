@@ -42,6 +42,13 @@ func _run() -> void:
 	_assert(not is_instance_valid(box), "received box is removed")
 	var box_label := main.get_node("UI/BoxCount") as Label
 	_assert(box_label.text == "BOX  1", "box count is shown in top-right UI")
+	var cat := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
+	cat.active_on_ready = false
+	cat.position = base.position + Vector2.UP * 72.0
+	main.add_child(cat)
+	await physics_frame
+	await process_frame
+	_assert(main.get("box_count") == 1 and is_instance_valid(cat), "base intake ignores non-box Solid blocks")
 
 	print("BASE_TEST: PASS")
 	quit(0)
