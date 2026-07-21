@@ -40,11 +40,11 @@ var placement_hold_elapsed := 0.0
 var placement_rotated_during_hold := false
 
 func _ready() -> void:
-	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
+	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0 + Vector2.ONE * (TILE_SIZE / 2.0)
 	base.position = world_center
 	base.connect("box_received", _on_base_box_received)
 	base.connect("mineral_received", _on_base_mineral_received)
-	player.position = world_center + Vector2(0, TILE_SIZE * 3)
+	player.position = world_center + Vector2(0, TILE_SIZE * 4)
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
 	touch_controls.player = player
@@ -280,7 +280,7 @@ func _craft_cat_block() -> void:
 	if box_count < 3:
 		fabricator_status = "NOT ENOUGH BOX"
 		return
-	var exit_position := base.global_position + Vector2.DOWN * 104.0
+	var exit_position := base.global_position + Vector2.DOWN * (TILE_SIZE * 4.0)
 	if not _can_place_at(exit_position):
 		fabricator_status = "EXIT BLOCKED"
 		return

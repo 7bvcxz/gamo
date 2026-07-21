@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/Base.gd" id="1_base"]
 
 [sub_resource type="CircleShape2D" id="CircleShape_base"]
-radius = 72.0
+radius = 96.0
 
 [node name="Base" type="StaticBody2D"]
 z_index = 1
