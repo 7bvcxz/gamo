@@ -12,12 +12,16 @@ const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
 @onready var info: Label = $UI/Info
+@onready var box_label: Label = $UI/BoxCount
 @onready var version_label: Label = $UI/Version
 @onready var touch_controls: TouchControls = $UI/TouchControls
+
+var box_count := 0
 
 func _ready() -> void:
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
 	base.position = world_center
+	base.connect("box_received", _on_base_box_received)
 	player.position = world_center + Vector2(0, TILE_SIZE * 3)
 	player.world_bounds = Rect2(0.0, 0.0, WORLD_SIZE, WORLD_SIZE)
 	version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0.0.0")
@@ -31,6 +35,10 @@ func _ready() -> void:
 	camera.limit_bottom = WORLD_SIZE
 	camera.limit_smoothed = true
 	queue_redraw()
+
+func _on_base_box_received(_box: RigidBody2D) -> void:
+	box_count += 1
+	box_label.text = "BOX  %d" % box_count
 
 func _populate_world() -> void:
 	var rng := RandomNumberGenerator.new()
@@ -69,7 +77,7 @@ func _random_free_cell(
 		)
 		if occupied.has(cell):
 			continue
-		if abs(cell.x - center_tile.x) <= 2 and abs(cell.y - center_tile.y) <= 2:
+		if abs(cell.x - center_tile.x) <= 3 and abs(cell.y - center_tile.y) <= 3:
 			continue
 		if abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1:
 			continue
