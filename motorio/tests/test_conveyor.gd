@@ -10,9 +10,13 @@ func _run() -> void:
 	await process_frame
 
 	_assert(conveyor.contains_effect_point(Vector2.ZERO), "center is inside")
-	_assert(conveyor.contains_effect_point(Vector2(11.9, 0)), "inner point is inside")
-	_assert(not conveyor.contains_effect_point(Vector2(12.0, 0)), "effect boundary is excluded")
+	_assert(conveyor.contains_effect_point(Vector2(12.9, 0)), "inner point is inside")
+	_assert(not conveyor.contains_effect_point(Vector2(13.0, 0)), "outline inner boundary is excluded")
 	_assert(not conveyor.contains_effect_point(Vector2(16.0, 0)), "block outline is excluded")
+	var box_half_extent := Vector2(15.5, 15.5)
+	_assert(conveyor.overlaps_effect_rect(Vector2(28.4, 0), box_half_extent), "tiny box overlap with interior is included")
+	_assert(not conveyor.overlaps_effect_rect(Vector2(28.5, 0), box_half_extent), "box touching interior boundary is excluded")
+	_assert(not conveyor.overlaps_effect_rect(Vector2(30.0, 0), box_half_extent), "box overlapping outline only is excluded")
 
 	for offset_step in range(20):
 		conveyor.animation_offset = float(offset_step)
@@ -40,7 +44,23 @@ func _test_box_transport(conveyor: ConveyorBlock) -> void:
 	_assert(box.position.x > 202.0, "box slides in conveyor direction")
 	_assert(abs(box.position.y - conveyor.position.y) < 2.0, "box remains aligned while sliding")
 	_assert(conveyor.position.distance_to(Vector2(200, 200)) < 1.0, "box does not push conveyor")
-	box.queue_free()
+	box.free()
+
+	var edge_box := box_scene.instantiate() as RigidBody2D
+	edge_box.position = conveyor.position + Vector2(28.4, 0)
+	root.add_child(edge_box)
+	for _frame in range(3):
+		await physics_frame
+	_assert(edge_box.linear_velocity.x > 0.1, "tiny interior overlap receives conveyor force")
+	edge_box.free()
+
+	var outline_box := box_scene.instantiate() as RigidBody2D
+	outline_box.position = conveyor.position + Vector2(28.5, 0)
+	root.add_child(outline_box)
+	for _frame in range(3):
+		await physics_frame
+	_assert(outline_box.linear_velocity.length() < 0.1, "outline-only overlap receives no force")
+	outline_box.free()
 
 func _test_player_collision() -> void:
 	var conveyor_scene: PackedScene = load("res://scenes/Conveyor.tscn")
