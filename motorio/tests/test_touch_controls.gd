@@ -36,6 +36,9 @@ func _run() -> void:
 	_assert(controls.visible, "touch input restores mobile controls")
 	var move_direction: Vector2 = player.get("touch_direction")
 	_assert(move_direction.x > 0.95, "wheel produces right movement")
+	controls._input(mouse_motion)
+	_assert(controls.visible, "synthetic mouse input after touch does not hide controls")
+	_assert((player.get("touch_direction") as Vector2).x > 0.95, "synthetic mouse input does not reset joystick movement")
 	controls._end_touch(1)
 	_assert(player.get("touch_direction") == Vector2.ZERO, "wheel release stops movement")
 

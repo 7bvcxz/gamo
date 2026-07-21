@@ -5,6 +5,7 @@ const JOYSTICK_RADIUS := 64.0
 const KNOB_RADIUS := 25.0
 const BUTTON_RADIUS := 28.0
 const BUTTON_LABELS := ["RUN", "Z", "X", "MODE"]
+const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
 var player
 var main_controller
@@ -14,6 +15,7 @@ var joystick_touch_id := -1
 var button_centers: Array[Vector2] = []
 var button_touches: Dictionary[int, int] = {}
 var action_pressed := [false, false, false, false]
+var last_touch_input_msec := -10000
 
 func _ready() -> void:
 	resized.connect(_update_layout)
@@ -47,11 +49,18 @@ func _update_layout() -> void:
 	queue_redraw()
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey or event is InputEventMouseButton or event is InputEventMouseMotion:
+	if event is InputEventKey:
+		if visible:
+			set_controls_visible(false)
+		return
+	if event is InputEventMouseButton or event is InputEventMouseMotion:
+		if Time.get_ticks_msec() - last_touch_input_msec < SYNTHETIC_MOUSE_GUARD_MSEC:
+			return
 		if visible:
 			set_controls_visible(false)
 		return
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
+		last_touch_input_msec = Time.get_ticks_msec()
 		if not visible:
 			set_controls_visible(true)
 	if not visible:
