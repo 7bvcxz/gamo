@@ -7,9 +7,6 @@ const PUSH_FORCE := 2200.0
 const SPRITE_SCALE := 0.115
 const FRAME_CENTER := Vector2(181.0, 181.0)
 const TARGET_FOOT := Vector2(0.0, 13.0)
-const MODE_LIGHT_DISTANCE := 22.0
-const MODE_IN_LIGHT := Color(0.2, 0.72, 1.0, 0.34)
-const MODE_OUT_LIGHT := Color(1.0, 0.22, 0.18, 0.34)
 const FRAME_FOOT_ANCHORS := [
 	Vector2(249.0, 339.0), Vector2(193.5, 339.0), Vector2(199.0, 339.0), Vector2(91.5, 339.0),
 	Vector2(249.0, 321.0), Vector2(195.5, 321.0), Vector2(202.0, 320.0), Vector2(91.5, 321.0),
@@ -23,7 +20,6 @@ var animation_time := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
 var controls_locked := false
-var mode_light_color := MODE_IN_LIGHT
 
 @onready var character: Sprite2D = $Character
 
@@ -99,26 +95,7 @@ func _push_rigid_bodies() -> void:
 		if body:
 			body.apply_central_force(-collision.get_normal() * PUSH_FORCE)
 
-func set_out_mode_light(out_mode: bool) -> void:
-	mode_light_color = MODE_OUT_LIGHT if out_mode else MODE_IN_LIGHT
-	queue_redraw()
-
-func get_mode_light_position() -> Vector2:
-	var direction := facing.normalized()
-	if abs(direction.x) > abs(direction.y):
-		direction = Vector2(sign(direction.x), 0.0)
-	else:
-		direction = Vector2(0.0, sign(direction.y))
-	return direction * MODE_LIGHT_DISTANCE
-
 func _draw() -> void:
-	# A soft light marks the interaction cell directly in front of the player.
-	var light_position := get_mode_light_position()
-	draw_set_transform(light_position, 0.0, Vector2(1.0, 0.55))
-	draw_circle(Vector2.ZERO, 15.0, Color(mode_light_color, mode_light_color.a * 0.22))
-	draw_circle(Vector2.ZERO, 10.0, Color(mode_light_color, mode_light_color.a * 0.48))
-	draw_circle(Vector2.ZERO, 5.0, mode_light_color)
-	draw_set_transform(Vector2.ZERO)
 	# Isometric-style ground shadow beneath the animated character.
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
 	draw_circle(Vector2(0, 15), 10.0, Color(0.02, 0.03, 0.025, 0.45))

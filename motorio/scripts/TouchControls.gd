@@ -4,7 +4,7 @@ class_name TouchControls
 const JOYSTICK_RADIUS := 64.0
 const KNOB_RADIUS := 25.0
 const BUTTON_RADIUS := 28.0
-const BUTTON_LABELS := ["RUN", "Z", "X", "MODE"]
+const BUTTON_LABELS := ["RUN", "Z", "X"]
 const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
 var player
@@ -14,7 +14,7 @@ var joystick_knob := Vector2.ZERO
 var joystick_touch_id := -1
 var button_centers: Array[Vector2] = []
 var button_touches: Dictionary[int, int] = {}
-var action_pressed := [false, false, false, false]
+var action_pressed := [false, false, false]
 var last_touch_input_msec := -10000
 
 func _ready() -> void:
@@ -44,7 +44,6 @@ func _update_layout() -> void:
 		Vector2(68.0, size.y - 76.0),
 		Vector2(132.0, size.y - 116.0),
 		Vector2(154.0, size.y - 52.0),
-		Vector2(74.0, size.y - 148.0),
 	]
 	queue_redraw()
 
@@ -90,9 +89,7 @@ func _begin_touch(touch_id: int, position: Vector2) -> void:
 					main_controller.collect_action_held = true
 					main_controller.primary_action()
 				elif index == 2:
-					main_controller.preview_action()
-				elif index == 3:
-					main_controller.toggle_interaction_mode()
+					main_controller.begin_placement_action()
 			_sync_player()
 			queue_redraw()
 			return
@@ -111,6 +108,8 @@ func _end_touch(touch_id: int) -> void:
 		action_pressed[index] = false
 		if main_controller and index == 1:
 			main_controller.collect_action_held = false
+		elif main_controller and index == 2:
+			main_controller.end_placement_action()
 		_sync_player()
 		queue_redraw()
 
@@ -130,13 +129,14 @@ func _sync_player() -> void:
 func _reset_inputs() -> void:
 	joystick_touch_id = -1
 	button_touches.clear()
-	action_pressed = [false, false, false, false]
+	action_pressed = [false, false, false]
 	joystick_knob = joystick_center
 	if player:
 		player.touch_direction = Vector2.ZERO
 		player.touch_sprint = false
 	if main_controller:
 		main_controller.collect_action_held = false
+		main_controller.cancel_placement_action()
 	queue_redraw()
 
 func _draw() -> void:

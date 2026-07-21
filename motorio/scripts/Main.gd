@@ -11,16 +11,14 @@ const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
-const MODE_IN := 0
-const MODE_OUT := 1
 const RESOURCE_COLLECT_RADIUS := TILE_SIZE * 1.5
+const PLACEMENT_ROTATE_INTERVAL := 1.0
 
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
 @onready var info: Label = $UI/Info
 @onready var box_label: Label = $UI/BoxCount
 @onready var mineral_label: Label = $UI/MineralCount
-@onready var mode_label: Label = $UI/Mode
 @onready var inventory_ui: Control = $UI/Inventory
 @onready var base_menu: Control = $UI/BaseMenu
 @onready var minimap: Control = $UI/Minimap
@@ -29,7 +27,6 @@ const RESOURCE_COLLECT_RADIUS := TILE_SIZE * 1.5
 
 var box_count := 0
 var mineral_count := 0
-var interaction_mode := MODE_IN
 var inventory: Array[Dictionary] = []
 var selected_slot := 0
 var preview_visible := false
@@ -38,6 +35,9 @@ var placement_preview: RigidBody2D
 var base_menu_open := false
 var fabricator_status := "3 BOX REQUIRED"
 var collect_action_held := false
+var placement_action_held := false
+var placement_hold_elapsed := 0.0
+var placement_rotated_during_hold := false
 
 func _ready() -> void:
 	var world_center := Vector2(WORLD_SIZE, WORLD_SIZE) / 2.0
@@ -81,49 +81,57 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if key.pressed:
 			primary_action()
 		return
+	if key.physical_keycode == KEY_X:
+		if key.pressed:
+			begin_placement_action()
+		else:
+			end_placement_action()
+		return
 	if not key.pressed:
 		return
 	match key.physical_keycode:
-		KEY_C:
-			toggle_interaction_mode()
-		KEY_X:
-			preview_action()
 		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
 			select_inventory_slot(int(key.physical_keycode - KEY_1))
-
-func toggle_interaction_mode() -> void:
-	if base_menu_open:
-		_close_base_menu()
-		return
-	interaction_mode = MODE_OUT if interaction_mode == MODE_IN else MODE_IN
-	placement_rotation = 0
-	_sync_placement_preview()
-	_update_interaction_ui()
 
 func primary_action() -> void:
 	if base_menu_open:
 		_craft_cat_block()
 		return
-	if interaction_mode == MODE_IN:
-		if _is_base_in_front():
-			_open_base_menu()
-		else:
-			_pick_up_front_block()
+	if _is_base_in_front():
+		_open_base_menu()
 	else:
-		_place_selected_block()
+		_pick_up_front_block()
 
-func preview_action() -> void:
+func begin_placement_action() -> void:
+	placement_action_held = true
+	placement_hold_elapsed = 0.0
+	placement_rotated_during_hold = false
+
+func end_placement_action() -> void:
+	if not placement_action_held:
+		return
+	placement_action_held = false
+	placement_hold_elapsed = 0.0
 	if base_menu_open:
 		_close_base_menu()
 		return
-	if interaction_mode != MODE_OUT or inventory.is_empty():
+	if not placement_rotated_during_hold:
+		_place_selected_block()
+
+func cancel_placement_action() -> void:
+	placement_action_held = false
+	placement_hold_elapsed = 0.0
+	placement_rotated_during_hold = false
+
+func _rotate_placement() -> void:
+	if inventory.is_empty() or selected_slot >= inventory.size():
 		return
 	placement_rotation = (placement_rotation + 1) % 4
+	placement_rotated_during_hold = true
 	_sync_placement_preview()
 
 func select_inventory_slot(slot: int) -> void:
 	selected_slot = clampi(slot, 0, INVENTORY_CAPACITY - 1)
-	placement_rotation = 0
 	_sync_placement_preview()
 	_update_interaction_ui()
 
@@ -177,12 +185,11 @@ func _place_selected_block() -> void:
 	add_child(block)
 	inventory.remove_at(selected_slot)
 	selected_slot = clampi(selected_slot, 0, maxi(0, inventory.size() - 1))
-	placement_rotation = 0
 	_sync_placement_preview()
 	_update_interaction_ui()
 
 func _sync_placement_preview() -> void:
-	var should_show := interaction_mode == MODE_OUT and selected_slot < inventory.size() and not base_menu_open
+	var should_show := selected_slot < inventory.size() and not base_menu_open
 	preview_visible = should_show
 	if not should_show:
 		if is_instance_valid(placement_preview):
@@ -285,8 +292,6 @@ func _craft_cat_block() -> void:
 	fabricator_status = "CAT BLOCK CREATED"
 
 func _update_interaction_ui() -> void:
-	mode_label.text = "MODE  %s" % ("IN" if interaction_mode == MODE_IN else "OUT")
-	player.set_out_mode_light(interaction_mode == MODE_OUT)
 	inventory_ui.queue_redraw()
 	queue_redraw()
 
@@ -376,9 +381,14 @@ func _random_free_cell(
 func _cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell * TILE_SIZE) + Vector2.ONE * (TILE_SIZE / 2.0)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
 	info.text = "POS  %d, %d" % [tile.x, tile.y]
+	if placement_action_held and not base_menu_open:
+		placement_hold_elapsed += delta
+		while placement_hold_elapsed >= PLACEMENT_ROTATE_INTERVAL:
+			placement_hold_elapsed -= PLACEMENT_ROTATE_INTERVAL
+			_rotate_placement()
 	if preview_visible and is_instance_valid(placement_preview):
 		placement_preview.position = _front_cell_center()
 	if collect_action_held:

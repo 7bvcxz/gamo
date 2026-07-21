@@ -14,7 +14,7 @@ func _run() -> void:
 	controls.set_controls_visible(true)
 	await process_frame
 
-	_assert(controls.get_button_count() == 4, "RUN, Z, X, and MODE buttons exist")
+	_assert(controls.get_button_count() == 3, "RUN, Z, and X buttons exist without MODE")
 	_assert(controls.joystick_center.x > controls.size.x * 0.5, "movement wheel is on the right")
 	_assert(controls.button_centers[0].x < controls.size.x * 0.5, "action buttons are on the left")
 	var mouse_motion := InputEventMouseMotion.new()
@@ -60,14 +60,14 @@ func _run() -> void:
 	controls._end_touch(4)
 	_assert(not bool(main.get("collect_action_held")), "Z touch release stops resource collection hold")
 
-	var previous_mode: int = main.get("interaction_mode")
-	var mode_press := InputEventScreenTouch.new()
-	mode_press.index = 3
-	mode_press.position = controls.button_centers[3]
-	mode_press.pressed = true
-	controls._input(mode_press)
-	_assert(main.get("interaction_mode") != previous_mode, "MODE button toggles interaction mode")
+	var place_press := InputEventScreenTouch.new()
+	place_press.index = 3
+	place_press.position = controls.button_centers[2]
+	place_press.pressed = true
+	controls._input(place_press)
+	_assert(bool(main.get("placement_action_held")), "X touch begins placement hold")
 	controls._end_touch(3)
+	_assert(not bool(main.get("placement_action_held")), "X touch release ends placement hold")
 
 	print("TOUCH_CONTROLS_TEST: PASS")
 	quit(0)

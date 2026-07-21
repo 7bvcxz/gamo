@@ -57,7 +57,8 @@ func _run() -> void:
 	_assert(main.box_count == 0, "cat block crafting consumes three boxes")
 	var crafted_cats := get_nodes_in_group("pickup_block").filter(func(node): return node is CatBlock and not node.active_on_ready)
 	_assert(crafted_cats.size() == 1, "fabricator outputs one inactive cat block")
-	main.call("preview_action")
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
 	_assert(not main.base_menu_open and not player.controls_locked, "X closes fabricator menu")
 
 	var mining_stage := Node2D.new()

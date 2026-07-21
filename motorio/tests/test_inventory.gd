@@ -23,26 +23,27 @@ func _run() -> void:
 	_assert(main.inventory[0]["type"] == "box", "picked box keeps its type")
 	_assert(not is_instance_valid(box), "picked world block is removed")
 
-	main.call("toggle_interaction_mode")
-	_assert(main.interaction_mode == main.MODE_OUT, "C toggles to OUT mode")
-	_assert(player.mode_light_color == player.MODE_OUT_LIGHT, "OUT mode changes the front light to red")
-	_assert(main.preview_visible, "OUT mode always shows placement preview")
+	_assert(main.preview_visible, "picked inventory block always shows placement preview")
 	var box_preview := main.get("placement_preview") as RigidBody2D
 	_assert(box_preview != null and box_preview.get_script() == load("res://scripts/PushTile.gd"), "preview uses the actual selected block")
 	_assert(is_equal_approx(box_preview.modulate.a, 0.5), "actual block preview is 50 percent transparent")
-	main.call("preview_action")
-	_assert(main.preview_visible and main.placement_rotation == 1, "X rotates always-visible preview 90 degrees")
-	main.call("primary_action")
+	main.call("begin_placement_action")
+	main.call("_process", 0.5)
+	_assert(main.placement_rotation == 0, "X hold waits one second before rotating")
+	main.call("_process", 0.5)
+	_assert(main.placement_rotation == 1, "X hold rotates preview 90 degrees after one second")
+	main.call("end_placement_action")
+	_assert(main.inventory.size() == 1, "long X rotates without placing a block")
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
 	await physics_frame
-	_assert(main.inventory.is_empty(), "OUT Z consumes selected inventory block")
-	_assert(_find_block_at(target) != null, "OUT Z installs block in front")
+	_assert(main.inventory.is_empty(), "short X consumes selected inventory block")
+	_assert(_find_block_at(target) != null, "short X installs block in front")
+	_assert(main.placement_rotation == 1, "placing a block preserves the remembered rotation")
 
 	var placed := _find_block_at(target)
 	placed.queue_free()
 	await process_frame
-	main.interaction_mode = main.MODE_IN
-	main.call("_update_interaction_ui")
-	_assert(player.mode_light_color == player.MODE_IN_LIGHT, "IN mode changes the front light to blue")
 	main.inventory.clear()
 	for index in range(5):
 		main.inventory.append({"type": "box"})
@@ -57,23 +58,32 @@ func _run() -> void:
 
 	main.call("select_inventory_slot", 3)
 	_assert(main.selected_slot == 3, "number selection chooses requested slot")
-	_assert((main.get_node("UI/Mode") as Label).text.begins_with("MODE"), "mode appears in UI")
+	_assert(main.placement_rotation == 1, "slot selection preserves remembered rotation")
+	_assert(main.get_node_or_null("UI/Mode") == null, "mode UI is removed")
 
 	extra.queue_free()
 	await process_frame
 	main.inventory.clear()
 	main.inventory.append({"type": "conveyor", "direction": Vector2.RIGHT})
+	main.inventory.append({"type": "conveyor", "direction": Vector2.RIGHT})
 	main.selected_slot = 0
-	main.interaction_mode = main.MODE_OUT
 	main.preview_visible = false
-	main.placement_rotation = 0
 	main.call("_sync_placement_preview")
-	main.call("preview_action")
-	main.call("primary_action")
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
 	await physics_frame
 	var rotated := _find_block_at(target) as ConveyorBlock
 	_assert(rotated != null, "rotated conveyor is installed")
-	_assert(rotated.direction == Vector2.DOWN, "X rotation is applied to conveyor direction")
+	_assert(rotated.direction == Vector2.DOWN, "remembered rotation is applied to conveyor direction")
+	_assert(main.placement_rotation == 1, "rotation remains after conveyor placement")
+	player.position += Vector2.RIGHT * 32.0
+	var next_target: Vector2 = main.call("_front_cell_center")
+	main.call("_sync_placement_preview")
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
+	await physics_frame
+	var next_rotated := _find_block_at(next_target) as ConveyorBlock
+	_assert(next_rotated != null and next_rotated.direction == Vector2.DOWN, "next block defaults to the remembered rotation")
 
 	if failures == 0:
 		print("INVENTORY_TEST: PASS")
