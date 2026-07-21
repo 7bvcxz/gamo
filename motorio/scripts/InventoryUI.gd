@@ -30,6 +30,10 @@ func _draw() -> void:
 				draw_rect(inner, Color("d99a56"))
 				draw_circle(inner.get_center(), 7.0, Color("fff0cf"))
 				draw_circle(inner.get_center() + Vector2(2, -2), 1.2, Color("382c2a"))
+			elif item["type"] == "pillar":
+				draw_rect(inner, Color("777f82"))
+				draw_rect(inner.grow(-4.0), Color("b8c0be"))
+				draw_line(inner.position + Vector2(7, 5), inner.position + Vector2(7, inner.size.y - 5), Color(1, 1, 1, 0.4), 2.0)
 			else:
 				draw_rect(inner, Color("8b5a30"))
 				draw_line(inner.position, inner.end, Color("4f2f19"), 2.0)

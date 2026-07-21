@@ -85,7 +85,10 @@ func _begin_touch(touch_id: int, position: Vector2) -> void:
 			button_touches[touch_id] = index
 			action_pressed[index] = true
 			if main_controller:
-				if index == 1:
+				if index == 0 and main_controller.base_menu_open:
+					action_pressed[index] = false
+					main_controller.close_base_menu_action()
+				elif index == 1:
 					main_controller.collect_action_held = true
 					main_controller.primary_action()
 				elif index == 2:
@@ -124,7 +127,7 @@ func _update_joystick(position: Vector2) -> void:
 
 func _sync_player() -> void:
 	if player:
-		player.touch_sprint = action_pressed[0]
+		player.touch_sprint = action_pressed[0] and (main_controller == null or not main_controller.base_menu_open)
 
 func _reset_inputs() -> void:
 	joystick_touch_id = -1

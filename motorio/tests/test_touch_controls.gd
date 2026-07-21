@@ -55,6 +55,12 @@ func _run() -> void:
 	_assert(bool(player.get("touch_sprint")), "RUN button enables sprint")
 	controls._end_touch(2)
 	_assert(not bool(player.get("touch_sprint")), "RUN release disables sprint")
+	main.set("base_menu_open", true)
+	player.set("controls_locked", true)
+	controls._input(run_press)
+	_assert(not bool(main.get("base_menu_open")), "RUN closes the fabricator menu on touch devices")
+	_assert(not bool(player.get("touch_sprint")), "closing the menu does not start sprinting")
+	controls._end_touch(2)
 
 	var collect_press := InputEventScreenTouch.new()
 	collect_press.index = 4

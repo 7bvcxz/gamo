@@ -44,22 +44,38 @@ func _run() -> void:
 	_assert(main.mineral_count == 1, "Z hold collects resources within 1.5 tiles")
 	_assert(not is_instance_valid(nearby_resource), "collected mineral resource is removed")
 	_assert(is_instance_valid(far_resource), "resource outside 1.5 tiles remains")
-	_assert((main.get_node("UI/MineralCount") as Label).text == "MINERAL  1", "mineral count appears in top-right UI")
+	_assert((main.get_node("UI/MineralCount") as Label).text == "MINERAL  1", "mineral count appears in top-left UI")
 	main.collect_action_held = false
 	player.facing = Vector2.UP
-	main.box_count = 3
-	main.get_node("UI/BoxCount").text = "BOX  3"
+	main.box_count = 6
+	main.get_node("UI/BoxCount").text = "BOX  6"
 	main.call("primary_action")
 	_assert(main.base_menu_open, "Z facing base opens fabricator menu")
 	_assert(player.controls_locked, "fabricator menu locks movement")
+	var blocked_output := load("res://scenes/PushTile.tscn").instantiate() as RigidBody2D
+	blocked_output.position = main.base.position + Vector2.DOWN * 160.0
+	main.add_child(blocked_output)
+	await physics_frame
 	main.call("primary_action")
-	await process_frame
-	_assert(main.box_count == 0, "cat block crafting consumes three boxes")
+	await physics_frame
+	_assert(main.box_count == 3, "cat block crafting consumes three boxes")
 	var crafted_cats := get_nodes_in_group("pickup_block").filter(func(node): return node is CatBlock and not node.active_on_ready)
 	_assert(crafted_cats.size() == 1, "fabricator outputs one inactive cat block")
+	_assert((crafted_cats[0] as CatBlock).position.y > blocked_output.position.y, "blocked exit ejects a crafted block farther downward")
 	main.call("begin_placement_action")
 	main.call("end_placement_action")
-	_assert(not main.base_menu_open and not player.controls_locked, "X closes fabricator menu")
+	_assert(main.base_menu_open and main.fabricator_selection == 1, "X selects the pillar recipe without closing the menu")
+	main.call("primary_action")
+	await physics_frame
+	_assert(main.box_count == 0, "pillar crafting consumes three boxes")
+	var crafted_pillars := get_nodes_in_group("pillar_block")
+	_assert(crafted_pillars.size() == 1, "fabricator outputs one pillar")
+	var crafted_pillar := crafted_pillars[0] as PillarBlock
+	_assert(crafted_pillar.freeze and crafted_pillar.is_in_group("solid"), "crafted pillar is an immovable Solid")
+	_assert(crafted_pillar.is_in_group("pickup_block") and not crafted_pillar.is_in_group("fixed"), "pillar remains Z-pickable rather than Fixed")
+	_assert(crafted_pillar.position.y > (crafted_cats[0] as CatBlock).position.y, "successive blocked outputs continue downward")
+	main.call("close_base_menu_action")
+	_assert(not main.base_menu_open and not player.controls_locked, "fabricator can be closed explicitly")
 
 	var mining_stage := Node2D.new()
 	root.add_child(mining_stage)

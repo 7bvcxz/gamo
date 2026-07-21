@@ -8,6 +8,7 @@ const SPAWN_SEED := 20260720
 const PUSH_TILE_SCENE := preload("res://scenes/PushTile.tscn")
 const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
 const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
+const PILLAR_BLOCK_SCENE := preload("res://scenes/PillarBlock.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
@@ -34,6 +35,7 @@ var placement_rotation := 0
 var placement_preview: RigidBody2D
 var base_menu_open := false
 var fabricator_status := "3 BOX REQUIRED"
+var fabricator_selection := 0
 var collect_action_held := false
 var placement_action_held := false
 var placement_hold_elapsed := 0.0
@@ -87,6 +89,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		else:
 			end_placement_action()
 		return
+	if key.pressed and key.keycode == KEY_ESCAPE and base_menu_open:
+		_close_base_menu()
+		return
 	if not key.pressed:
 		return
 	match key.physical_keycode:
@@ -95,7 +100,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func primary_action() -> void:
 	if base_menu_open:
-		_craft_cat_block()
+		_craft_selected_block()
 		return
 	if _is_base_in_front():
 		_open_base_menu()
@@ -113,7 +118,7 @@ func end_placement_action() -> void:
 	placement_action_held = false
 	placement_hold_elapsed = 0.0
 	if base_menu_open:
-		_close_base_menu()
+		_cycle_fabricator_recipe()
 		return
 	if not placement_rotated_during_hold:
 		_place_selected_block()
@@ -156,6 +161,8 @@ func _pick_up_front_block() -> void:
 		item = {"type": "conveyor", "direction": (closest as ConveyorBlock).direction}
 	elif closest is CatBlock:
 		item = {"type": "cat", "direction": (closest as CatBlock).direction}
+	elif closest is PillarBlock:
+		item = {"type": "pillar"}
 	inventory.append(item)
 	closest.queue_free()
 	selected_slot = 0 if inventory.size() == 1 else selected_slot
@@ -179,11 +186,11 @@ func _place_selected_block() -> void:
 		cat.direction = Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 		cat.active_on_ready = true
 		block = cat
+	elif item["type"] == "pillar":
+		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target
-	block.freeze = true
-	block.set_meta("installed", true)
 	add_child(block)
 	inventory.remove_at(selected_slot)
 	selected_slot = clampi(selected_slot, 0, maxi(0, inventory.size() - 1))
@@ -220,6 +227,8 @@ func _create_placement_preview(item_type: String) -> RigidBody2D:
 		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
 		cat.active_on_ready = false
 		block = cat
+	elif item_type == "pillar":
+		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.set_meta("placement_preview", true)
@@ -271,27 +280,54 @@ func _open_base_menu() -> void:
 	player.controls_locked = true
 	base_menu.queue_redraw()
 
+func close_base_menu_action() -> void:
+	if base_menu_open:
+		_close_base_menu()
+
 func _close_base_menu() -> void:
 	base_menu_open = false
 	player.controls_locked = false
 	base_menu.queue_redraw()
 
-func _craft_cat_block() -> void:
+func _cycle_fabricator_recipe() -> void:
+	fabricator_selection = (fabricator_selection + 1) % 2
+	fabricator_status = "READY" if box_count >= 3 else "NEED %d MORE BOX" % (3 - box_count)
+	base_menu.queue_redraw()
+
+func _craft_selected_block() -> void:
 	if box_count < 3:
 		fabricator_status = "NOT ENOUGH BOX"
 		return
-	var exit_position := base.global_position + Vector2.DOWN * (TILE_SIZE * 4.0)
-	if not _can_place_at(exit_position):
-		fabricator_status = "EXIT BLOCKED"
-		return
 	box_count -= 3
 	box_label.text = "BOX  %d" % box_count
-	var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
-	cat.direction = Vector2.DOWN
-	cat.active_on_ready = false
-	cat.position = exit_position
-	add_child(cat)
-	fabricator_status = "CAT BLOCK CREATED"
+	var block: RigidBody2D
+	if fabricator_selection == 1:
+		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
+		fabricator_status = "PILLAR CREATED"
+	else:
+		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
+		cat.direction = Vector2.DOWN
+		cat.active_on_ready = false
+		block = cat
+		fabricator_status = "CAT BLOCK CREATED"
+	block.position = _find_fabricator_output_position()
+	add_child(block)
+	base_menu.queue_redraw()
+
+func _find_fabricator_output_position() -> Vector2:
+	var output := base.global_position + Vector2.DOWN * (TILE_SIZE * 4.0)
+	for step in range(WORLD_TILES):
+		var candidate := output + Vector2.DOWN * (TILE_SIZE * step)
+		var shape := RectangleShape2D.new()
+		shape.size = Vector2.ONE * 30.0
+		var query := PhysicsShapeQueryParameters2D.new()
+		query.shape = shape
+		query.transform = Transform2D(0.0, candidate)
+		query.collision_mask = 63
+		query.collide_with_areas = false
+		if get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+			return candidate
+	return output + Vector2.DOWN * (TILE_SIZE * (WORLD_TILES - 1))
 
 func _update_interaction_ui() -> void:
 	inventory_ui.queue_redraw()

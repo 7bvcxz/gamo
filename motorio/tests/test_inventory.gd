@@ -75,7 +75,7 @@ func _run() -> void:
 	var rotated := _find_block_at(target) as ConveyorBlock
 	_assert(rotated != null, "rotated conveyor is installed")
 	_assert(rotated.direction == Vector2.DOWN, "remembered rotation is applied to conveyor direction")
-	_assert(rotated.freeze and rotated.get_meta("installed", false), "X-placed block cannot be pushed")
+	_assert(not rotated.freeze and not rotated.has_meta("installed"), "ordinary X-placed block keeps its native mobility")
 	_assert(main.placement_rotation == 1, "rotation remains after conveyor placement")
 	player.position += Vector2.RIGHT * 32.0
 	var next_target: Vector2 = main.call("_front_cell_center")
@@ -85,7 +85,22 @@ func _run() -> void:
 	await physics_frame
 	var next_rotated := _find_block_at(next_target) as ConveyorBlock
 	_assert(next_rotated != null and next_rotated.direction == Vector2.DOWN, "next block defaults to the remembered rotation")
-	_assert(next_rotated.freeze, "every X-placed block stays immovable")
+	_assert(not next_rotated.freeze, "later ordinary placements also remain movable")
+
+	for block in [rotated, next_rotated]:
+		block.queue_free()
+	await process_frame
+	main.inventory.clear()
+	main.inventory.append({"type": "pillar"})
+	main.selected_slot = 0
+	main.call("_sync_placement_preview")
+	main.call("begin_placement_action")
+	main.call("end_placement_action")
+	await physics_frame
+	var pillar := _find_block_at(next_target) as PillarBlock
+	_assert(pillar != null and pillar.freeze, "X places an immovable pillar")
+	_assert(pillar.is_in_group("solid") and pillar.is_in_group("pickup_block"), "pillar is a pickup-capable Solid")
+	_assert(not pillar.is_in_group("fixed"), "pillar is not Fixed")
 
 	if failures == 0:
 		print("INVENTORY_TEST: PASS")

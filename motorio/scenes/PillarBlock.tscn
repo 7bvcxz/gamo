@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/PillarBlock.gd" id="1_pillar"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_pillar"]
+size = Vector2(24, 30)
+
+[node name="PillarBlock" type="RigidBody2D"]
+z_index = 1
+mass = 4.0
+gravity_scale = 0.0
+collision_layer = 4
+collision_mask = 125
+freeze = true
+lock_rotation = true
+script = ExtResource("1_pillar")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape_pillar")
