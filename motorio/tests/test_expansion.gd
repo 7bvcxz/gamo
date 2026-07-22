@@ -49,6 +49,7 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 	main.fish = 3
 	_assert(main.economy_ui.visible_resource_indices() == [1, 3, 8], "left resource list hides zero values and keeps every collected resource in vertical order")
 	_assert(not main.get_node("UI/UIRoot/Title").visible and not main.get_node("UI/UIRoot/Info").visible, "Motorio title and coordinate text are removed from the HUD")
+	_assert(not main.get_node("UI/UIRoot/WorldSize").visible and not main.throughput_label.visible, "world size and base throughput labels are removed")
 	for step in range(13):
 		main.quest_step = step
 		_assert(main.quest_unlock_help().length() >= 18, "quest %d explains the required feature" % (step + 1))
@@ -71,6 +72,7 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 	_assert(main.cold_world_fog.fog_alpha_for_cell(cold_cell) >= 0.88 and main.cold_world_fog.fog_alpha_for_cell(warm_cell) == 0.0, "world fog hides cold cells even while the player is warm")
 
 func _test_developer_tutorial_button(main: Node2D) -> void:
+	_assert(main.tutorial_previous_button.anchor_left == 1.0 and main.tutorial_previous_button.position.y >= main.minimap.position.y + main.minimap.size.y, "developer tutorial controls sit at the upper-right below the minimap")
 	main.tutorial_step = 0
 	main.tutorial_moved = false
 	_assert(main.tutorial_previous_button.disabled and not main.tutorial_next_button.disabled, "developer buttons start with only previous disabled")

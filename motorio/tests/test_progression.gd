@@ -46,7 +46,7 @@ func _run() -> void:
 	_assert(main.quest_step == 5 and main.base_level == 1, "three generated deliveries unlock the manual base upgrade")
 	_assert(main.automated_delivery_times.size() == 3, "generated deliveries feed the rolling throughput counter")
 	main.call("_process", 0.0)
-	_assert((main.get_node("UI/UIRoot/Throughput") as Label).text.contains("분당 상자  3"), "BOX per minute is visible")
+	_assert(not (main.get_node("UI/UIRoot/Throughput") as Label).visible, "base level and BOX throughput summary stay removed")
 
 	main.box_count = 5
 	main.fabricator_selection = 13

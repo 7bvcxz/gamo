@@ -9,7 +9,7 @@ func _draw() -> void:
 	if main_controller == null or main_controller.tutorial_complete():
 		return
 	var width := minf(390.0, size.x - 24.0)
-	var panel := Rect2(Vector2(size.x - width - 16.0, 214.0), Vector2(width, 104.0))
+	var panel := Rect2(Vector2(size.x - width - 16.0, 204.0), Vector2(width, 104.0))
 	draw_rect(panel, Color(0.025, 0.05, 0.043, 0.96))
 	draw_rect(panel, Color("f0bd4f"), false, 3.0)
 	var font := UIFont.FONT

@@ -90,13 +90,15 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _is_top_tutorial_control(position: Vector2) -> bool:
-	return position.y <= 132.0 and position.x >= size.x * 0.5 - 170.0 and position.x <= size.x * 0.5 + 170.0
+	var top_tools := position.y <= 132.0 and position.x >= size.x * 0.5 - 170.0 and position.x <= size.x * 0.5 + 170.0
+	var right_tutorial := position.y >= 152.0 and position.y <= 204.0 and position.x >= size.x - 170.0
+	return top_tools or right_tutorial
 
 func _activate_top_tutorial_control(position: Vector2) -> void:
 	if main_controller == null:
 		return
-	if position.y <= 50.0:
-		if position.x < size.x * 0.5:
+	if position.y >= 152.0:
+		if position.x < size.x - 86.0:
 			main_controller._developer_previous_tutorial()
 		else:
 			main_controller._developer_advance_tutorial()

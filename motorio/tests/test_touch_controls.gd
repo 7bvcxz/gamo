@@ -17,12 +17,12 @@ func _run() -> void:
 	await process_frame
 
 	_assert(controls.get_button_count() == 3, "RUN, Z, and X buttons exist without MODE")
-	_assert(controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 31.0)), "top tutorial buttons are excluded from joystick capture")
+	_assert(controls._is_top_tutorial_control(Vector2(controls.size.x - 50.0, 179.0)), "right-side tutorial buttons below the minimap are excluded from joystick capture")
 	_assert(controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 110.0)), "save button area is excluded from joystick capture")
 	_assert(not controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 145.0)), "regular play area remains available to touch controls")
 	var tutorial_next_touch := InputEventScreenTouch.new()
 	tutorial_next_touch.index = 20
-	tutorial_next_touch.position = Vector2(controls.size.x * 0.5 + 80.0, 31.0)
+	tutorial_next_touch.position = Vector2(controls.size.x - 50.0, 179.0)
 	tutorial_next_touch.pressed = true
 	controls._input(tutorial_next_touch)
 	_assert(int(main.get("tutorial_step")) == 1 and controls.joystick_touch_id == -1, "top-right touch directly advances tutorial without starting joystick")
@@ -30,7 +30,7 @@ func _run() -> void:
 	controls._input(tutorial_next_touch)
 	var tutorial_previous_touch := InputEventScreenTouch.new()
 	tutorial_previous_touch.index = 21
-	tutorial_previous_touch.position = Vector2(controls.size.x * 0.5 - 80.0, 31.0)
+	tutorial_previous_touch.position = Vector2(controls.size.x - 120.0, 179.0)
 	tutorial_previous_touch.pressed = true
 	controls._input(tutorial_previous_touch)
 	_assert(int(main.get("tutorial_step")) == 0, "top-left touch directly rewinds tutorial")

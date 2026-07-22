@@ -1227,10 +1227,10 @@ func _update_staged_ui() -> void:
 	var stage := ui_stage()
 	box_label.visible = false
 	mineral_label.visible = false
-	throughput_label.visible = stage >= 1
+	throughput_label.visible = false
 	economy_ui.visible = true
 	minimap.visible = stage >= 2
-	$UI/UIRoot/WorldSize.visible = stage >= 2
+	$UI/UIRoot/WorldSize.visible = false
 
 func _collect_nearby_mineral_resources() -> void:
 	var collectable := get_tree().get_nodes_in_group("mined_resource") + get_tree().get_nodes_in_group("world_resource")

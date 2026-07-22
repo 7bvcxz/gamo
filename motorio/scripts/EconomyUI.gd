@@ -32,12 +32,14 @@ func _draw() -> void:
 	if shown.is_empty():
 		return
 	var panel := Rect2(10, 12, 138, 14 + shown.size() * 22)
-	draw_rect(panel, Color(0.025, 0.05, 0.042, 0.84))
-	draw_rect(panel, Color("658374"), false, 1.0)
+	draw_rect(panel, Color(0.025, 0.05, 0.042, 0.42))
+	draw_rect(panel, Color(0.40, 0.56, 0.48, 0.48), false, 1.0)
 	var font := UIFont.FONT
 	for row in shown.size():
 		var index: int = shown[row]
 		var position := Vector2(18, 32 + row * 22)
-		draw_circle(position + Vector2(5, -5), 5.0, RESOURCE_COLORS[index])
-		draw_circle(position + Vector2(4, -6), 1.5, RESOURCE_COLORS[index].lightened(0.45))
-		draw_string(font, position + Vector2(16, 0), "%s  %d" % [RESOURCE_NAMES[index], values[index]], HORIZONTAL_ALIGNMENT_LEFT, 102, 12, Color("edf5ef"))
+		var resource_color: Color = RESOURCE_COLORS[index]
+		resource_color.a = 0.78
+		draw_circle(position + Vector2(5, -5), 5.0, resource_color)
+		draw_circle(position + Vector2(4, -6), 1.5, Color(1.0, 1.0, 1.0, 0.48))
+		draw_string(font, position + Vector2(16, 0), "%s  %d" % [RESOURCE_NAMES[index], values[index]], HORIZONTAL_ALIGNMENT_LEFT, 102, 12, Color(0.93, 0.97, 0.94, 0.78))
