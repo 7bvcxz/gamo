@@ -48,8 +48,9 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	main.call("_update_survival", 5.0)
 	_assert(main.temperature < 90.0, "temperature falls beyond the warm radius")
 	player.position = base.position
+	var frozen_temperature: float = main.temperature
 	main.call("_update_survival", 2.0)
-	_assert(main.temperature > 80.0, "temperature recovers near the base")
+	_assert(main.temperature > frozen_temperature, "temperature recovers near the base")
 	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 20.0
 	main.temperature = 0.1
 	main.call("_update_survival", 1.0)
@@ -74,16 +75,16 @@ func _test_scaling_and_technology(main: Node2D) -> void:
 		electric.position = generator.position + Vector2.RIGHT * 32.0
 		main.add_child(electric)
 		var field := load("res://scenes/FacilityBlock.tscn").instantiate() as FacilityBlock
-		field.facility_type = "cheese_field"
+		field.facility_type = "fishing_spot"
 		field.position = Vector2(300 + index * 96, 500)
 		main.add_child(field)
-		var cook := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
-		cook.worker_type = "cook"
-		cook.position = field.position + Vector2.RIGHT * 32.0
-		main.add_child(cook)
+		var fisher := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
+		fisher.worker_type = "fisher"
+		fisher.position = field.position + Vector2.RIGHT * 32.0
+		main.add_child(fisher)
 	await process_frame
 	_assert(main.power_per_minute() == 200 and main.food_per_minute() == 80, "each additional cat-equipment pair raises power and food throughput")
-	_assert(main.safe_radius_tiles() == 14, "electric equipment pairs expand the warm frontier")
+	_assert(main.safe_radius_tiles() == 15, "base level and electric equipment pairs expand the warm frontier")
 	var extra_electric := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
 	extra_electric.worker_type = "electric"
 	extra_electric.position = Vector2(332, 300)
@@ -92,6 +93,7 @@ func _test_scaling_and_technology(main: Node2D) -> void:
 	_assert(not main.worker_has_equipment_slot(extra_electric, "electric", "power_generator"), "a cat without additional equipment cannot add production")
 	main.resource_counts["copper"] = 20
 	main.resource_counts["crystal"] = 20
+	main.base_level = 5
 	main.fabricator_selection = 12
 	var radius_before: int = main.safe_radius_tiles()
 	main.call("_craft_selected_block")
@@ -100,10 +102,10 @@ func _test_scaling_and_technology(main: Node2D) -> void:
 	main.fabricator_selection = 13
 	main.call("_craft_selected_block")
 	_assert(main.power_tech == 1 and main.power_output_amount() == 7, "POWER TECH increases each equipment pair output")
-	main.cheese = 20
+	main.fish = 20
 	main.fabricator_selection = 14
 	main.call("_craft_selected_block")
-	_assert(main.food_tech == 1 and main.food_output_amount() == 3, "FOOD TECH increases cooking output")
+	_assert(main.food_tech == 1 and main.food_output_amount() == 3, "FOOD TECH increases fishing output")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

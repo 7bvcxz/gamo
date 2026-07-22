@@ -24,4 +24,4 @@ func _draw() -> void:
 		draw_circle(position + Vector2(5, -4), 4.0, RESOURCE_COLORS[index])
 		draw_string(font, position + Vector2(14, 0), "%s %d" % [RESOURCE_NAMES[index], main_controller.resource_counts[RESOURCE_ORDER[index]]], HORIZONTAL_ALIGNMENT_LEFT, 86, 11, Color("e2ebe4"))
 	if stage >= 3:
-		draw_string(font, Vector2(16, 224 if stage == 3 else 242), "전력 %d   치즈 %d" % [main_controller.electricity, main_controller.cheese], HORIZONTAL_ALIGNMENT_LEFT, 210, 11, Color("f1d86a"))
+		draw_string(font, Vector2(16, 224 if stage == 3 else 242), "전력 %d   물고기 %d" % [main_controller.electricity, main_controller.fish], HORIZONTAL_ALIGNMENT_LEFT, 210, 11, Color("f1d86a"))

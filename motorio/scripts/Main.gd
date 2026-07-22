@@ -66,7 +66,7 @@ var generator_crafted := false
 var bridge_crafted := false
 var resource_counts := {"copper": 0, "coal": 0, "crystal": 0, "oil": 0, "uranium": 0}
 var electricity := 0
-var cheese := 0
+var fish := 0
 var tutorial_step := 0
 var tutorial_start_position := Vector2.ZERO
 var tutorial_moved := false
@@ -128,8 +128,7 @@ func _on_base_box_received(_box: RigidBody2D) -> void:
 		automated_boxes_delivered += 1
 		automated_delivery_times.append(elapsed_time)
 		if quest_step == 4 and automated_boxes_delivered >= 3:
-			base_level = 2
-			_advance_quest("기지 2단계 - 분배기 해금")
+			_advance_quest("자동화 완료 - 기지 업그레이드 가능")
 
 func _on_base_mineral_received(_resource: RigidBody2D) -> void:
 	mineral_count += 1
@@ -154,8 +153,8 @@ func add_electricity(amount: int) -> void:
 	economy_ui.queue_redraw()
 	_refresh_quest_progress()
 
-func add_cheese(amount: int) -> void:
-	cheese += amount
+func add_fish(amount: int) -> void:
+	fish += amount
 	economy_ui.queue_redraw()
 	_refresh_quest_progress()
 
@@ -166,13 +165,17 @@ func food_output_amount() -> int:
 	return 2 + food_tech
 
 func safe_radius_tiles() -> int:
-	return 10 + heat_tech * 4 + mini(_facility_count("power_generator"), _cat_count("electric")) * 2
+	return 8 + base_level * 3 + heat_tech * 4 + mini(_facility_count("power_generator"), _cat_count("electric")) * 2
+
+func cold_exposure() -> float:
+	var distance_tiles: float = player.global_position.distance_to(base.global_position) / TILE_SIZE
+	return clampf((distance_tiles - float(safe_radius_tiles())) / 6.0, 0.0, 1.0)
 
 func power_per_minute() -> int:
 	return mini(_facility_count("power_generator"), _cat_count("electric")) * power_output_amount() * 20
 
 func food_per_minute() -> int:
-	return mini(_facility_count("cheese_field"), _cat_count("cook")) * food_output_amount() * 20
+	return mini(_facility_count("fishing_spot"), _cat_count("fisher")) * food_output_amount() * 20
 
 func heat_per_minute() -> int:
 	return safe_radius_tiles() * 2
@@ -212,10 +215,10 @@ func ui_stage() -> int:
 func cats_should_rest() -> bool:
 	return day_time >= 660.0 or shelter_open
 
-func consume_cheese(amount: int) -> bool:
-	if cheese < amount:
+func consume_fish(amount: int) -> bool:
+	if fish < amount:
 		return false
-	cheese -= amount
+	fish -= amount
 	economy_ui.queue_redraw()
 	return true
 
@@ -383,6 +386,8 @@ func _place_selected_block() -> void:
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.position = target + place_direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
+	if _is_base_entrance_cell(target):
+		block.add_collision_exception_with(base)
 	add_child(block)
 	tutorial_placed = true
 	_refresh_tutorial()
@@ -465,6 +470,8 @@ func _can_place_at(target: Vector2) -> bool:
 	return _can_place_item_at(target, "box", Vector2.RIGHT)
 
 func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) -> bool:
+	if item_type in ["conveyor", "splitter"]:
+		return true
 	var shape := RectangleShape2D.new()
 	shape.size = Vector2(62.0, 30.0) if item_type == "box_generator" else Vector2.ONE * 30.0
 	var query := PhysicsShapeQueryParameters2D.new()
@@ -482,7 +489,15 @@ func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) 
 			if not (result["collider"] is WaterTile):
 				return false
 		return true
+	if _is_base_entrance_cell(target):
+		results = results.filter(func(result): return result["collider"] != base)
 	return results.is_empty()
+
+func _is_base_entrance_cell(target: Vector2) -> bool:
+	for direction in base.ENTRANCE_DIRECTIONS:
+		if target.distance_to(base.global_position + direction * base.ENTRANCE_DISTANCE) < 2.0:
+			return true
+	return false
 
 func _preview_position(item_type: String) -> Vector2:
 	var target := _front_cell_center()
@@ -559,14 +574,18 @@ func _cycle_fabricator_recipe() -> void:
 	base_menu.queue_redraw()
 
 func _craft_selected_block() -> void:
-	if fabricator_selection == 3 and base_level < 2:
-		fabricator_status = "잠김 - 자동화를 먼저 완료하세요"
+	if not recipe_unlocked(fabricator_selection):
+		fabricator_status = "잠김 - 기지 %d단계 필요" % recipe_unlock_level(fabricator_selection)
 		return
 	var cost := recipe_cost(fabricator_selection)
 	if not _can_afford(cost):
 		fabricator_status = "자원이 부족합니다"
 		return
 	_spend_cost(cost)
+	if fabricator_selection == 15:
+		_upgrade_base()
+		base_menu.queue_redraw()
+		return
 	if fabricator_selection >= 12:
 		_apply_technology(fabricator_selection)
 		base_menu.queue_redraw()
@@ -585,16 +604,22 @@ func _craft_selected_block() -> void:
 	base_menu.queue_redraw()
 
 func _update_fabricator_status() -> void:
-	if fabricator_selection == 3 and base_level < 2:
-		fabricator_status = "잠김 - 자동화를 먼저 완료하세요"
+	if not recipe_unlocked(fabricator_selection):
+		fabricator_status = "잠김 - 기지 %d단계 필요" % recipe_unlock_level(fabricator_selection)
 	else:
 		fabricator_status = "제작 가능" if _can_afford(recipe_cost(fabricator_selection)) else "%s 필요" % recipe_cost_text(fabricator_selection)
 
 func fabricator_recipe_count() -> int:
-	return 15
+	return 16
 
 func recipe_label(index: int) -> String:
-	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "치즈 밭", "요리 고양이", "서빙 고양이", "열 기술", "전력 기술", "식량 기술"][index]
+	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "낚시장", "낚시 고양이", "서빙 고양이", "열 기술", "전력 기술", "식량 기술", "기지 업그레이드"][index]
+
+func recipe_unlock_level(index: int) -> int:
+	return [1, 1, 1, 2, 3, 2, 5, 5, 7, 4, 4, 4, 3, 5, 4, 1][index]
+
+func recipe_unlocked(index: int) -> bool:
+	return base_level >= recipe_unlock_level(index) and not (index == 15 and base_level >= 7)
 
 func recipe_cost(index: int) -> Dictionary:
 	var standard: Array[Dictionary] = [
@@ -604,15 +629,27 @@ func recipe_cost(index: int) -> Dictionary:
 	]
 	if index < standard.size():
 		return standard[index]
+	if index == 15:
+		return base_upgrade_cost()
 	if index == 12:
 		return {"copper": 5 + heat_tech * 2, "crystal": 2 + heat_tech}
 	if index == 13:
 		return {"copper": 5 + power_tech * 2, "crystal": 3 + power_tech * 2}
-	return {"copper": 4 + food_tech * 2, "cheese": 5 + food_tech * 3}
+	return {"copper": 4 + food_tech * 2, "fish": 5 + food_tech * 3}
+
+func base_upgrade_cost() -> Dictionary:
+	return [{"box": 5}, {"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25}][clampi(base_level - 1, 0, 5)]
+
+func _upgrade_base() -> void:
+	base_level = mini(base_level + 1, 7)
+	fabricator_status = "기지 %d단계 완료 · 온기 %d칸" % [base_level, safe_radius_tiles()]
+	celebration_text = fabricator_status
+	celebration_remaining = 4.0
+	queue_redraw()
 
 func recipe_cost_text(index: int) -> String:
 	var parts: Array[String] = []
-	var names := {"box": "상자", "mineral": "미네랄", "copper": "구리", "coal": "석탄", "crystal": "수정", "oil": "석유", "uranium": "우라늄", "cheese": "치즈"}
+	var names := {"box": "상자", "mineral": "미네랄", "copper": "구리", "coal": "석탄", "crystal": "수정", "oil": "석유", "uranium": "우라늄", "fish": "물고기"}
 	for key in recipe_cost(index):
 		parts.append("%s %d" % [names.get(key, key), recipe_cost(index)[key]])
 	return " + ".join(parts)
@@ -622,7 +659,7 @@ func _can_afford(cost: Dictionary) -> bool:
 		var available: int
 		if key == "box": available = box_count
 		elif key == "mineral": available = mineral_count
-		elif key == "cheese": available = cheese
+		elif key == "fish": available = fish
 		else: available = resource_counts.get(key, 0)
 		if available < cost[key]:
 			return false
@@ -632,7 +669,7 @@ func _spend_cost(cost: Dictionary) -> void:
 	for key in cost:
 		if key == "box": box_count -= cost[key]
 		elif key == "mineral": mineral_count -= cost[key]
-		elif key == "cheese": cheese -= cost[key]
+		elif key == "fish": fish -= cost[key]
 		else: resource_counts[key] -= cost[key]
 	box_label.text = "상자  %d" % box_count
 	mineral_label.text = "미네랄  %d" % mineral_count
@@ -656,7 +693,7 @@ func _create_recipe_block(index: int) -> RigidBody2D:
 		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
 		cat.direction = Vector2.DOWN
 		cat.active_on_ready = false
-		cat.worker_type = {7: "electric", 8: "pressure", 10: "cook", 11: "server"}.get(index, "miner")
+		cat.worker_type = {7: "electric", 8: "pressure", 10: "fisher", 11: "server"}.get(index, "miner")
 		return cat
 	if index == 1: return PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 	if index == 2:
@@ -667,7 +704,7 @@ func _create_recipe_block(index: int) -> RigidBody2D:
 	if index == 4: return BRIDGE_SCENE.instantiate() as BridgeBlock
 	if index == 5: return CONVEYOR_SCENE.instantiate() as ConveyorBlock
 	var facility := FACILITY_SCENE.instantiate() as FacilityBlock
-	facility.facility_type = "power_generator" if index == 6 else "cheese_field"
+	facility.facility_type = "power_generator" if index == 6 else "fishing_spot"
 	return facility
 
 func _find_fabricator_output_position(block: RigidBody2D = null) -> Vector2:
@@ -874,8 +911,8 @@ func _update_survival(delta: float) -> void:
 		var distance_tiles := player.global_position.distance_to(base.global_position) / TILE_SIZE
 		var warm_radius := float(safe_radius_tiles())
 		if distance_tiles > warm_radius:
-			var exposure := 1.0 + (distance_tiles - warm_radius) * 0.18
-			temperature = maxf(0.0, temperature - delta * exposure * 2.2)
+			var exposure := 1.0 + (distance_tiles - warm_radius) * 0.45
+			temperature = maxf(0.0, temperature - delta * exposure * 8.0)
 		else:
 			temperature = minf(100.0, temperature + delta * 5.0)
 		if day_time >= 660.0 and not night_warning_shown:
@@ -944,13 +981,12 @@ func _refresh_quest_progress() -> void:
 	elif quest_step == 3 and generator_crafted:
 		_advance_quest("상자 생성기 가동")
 	elif quest_step == 4 and automated_boxes_delivered >= 3:
-		base_level = 2
-		_advance_quest("기지 2단계 - 분배기 해금")
+		_advance_quest("자동화 완료 - 기지 업그레이드 가능")
 	elif quest_step == 5 and resource_counts["copper"] >= 3:
 		_advance_quest("구리 도구 해금")
 	elif quest_step == 6 and bridge_crafted:
 		_advance_quest("외부 지역 개방")
-	elif quest_step == 7 and cheese >= 5:
+	elif quest_step == 7 and fish >= 5:
 		_advance_quest("고양이 식사 완료")
 	elif quest_step == 8 and electricity >= 10:
 		_advance_quest("전력망 가동")
@@ -973,12 +1009,29 @@ func quest_detail() -> String:
 		"생성된 상자를 기지에 납품하세요. %d/3" % automated_boxes_delivered,
 		"구리를 채굴해 납품하세요. %d/3" % mini(resource_counts["copper"], 3),
 		"다리를 만들고 물길을 건너세요. (구리 3개)",
-		"치즈 밭·요리·서빙 고양이를 배치하세요. 치즈 %d/5" % mini(cheese, 5),
+		"낚시장 옆에 낚시 고양이를, 작업 고양이 옆에 서빙 고양이를 두세요. 물고기 %d/5" % mini(fish, 5),
 		"고양이에게 먹이를 주고 발전기와 전기 고양이를 만드세요. %d/10" % mini(electricity, 10),
 		"전력을 사용해 수정을 납품하세요. %d/5" % mini(resource_counts["crystal"], 5),
 		"압력 고양이로 석유를 납품하세요. %d/5" % mini(resource_counts["oil"], 5),
 		"전력과 석유를 사용해 우라늄 1개를 납품하세요.",
 		"모든 설비가 가동 중입니다. 자유롭게 자동화를 확장하세요.",
+	][quest_step]
+
+func quest_unlock_help() -> String:
+	return [
+		"채굴 고양이는 앞 1칸의 미네랄을 캐서 뒤로 자원을 놓습니다.",
+		"기지 제작소에서 채굴 고양이를 만들고 원석을 바라보게 설치하세요.",
+		"Z를 누르고 있으면 주변의 작은 미네랄 자원을 회수합니다.",
+		"상자 생성기는 뒤로 미네랄 3개를 받아 앞에서 상자를 만듭니다.",
+		"기지 업그레이드로 분배기·컨베이어 등 다음 제작법을 여세요.",
+		"구리 원석 앞에 채굴 고양이를 두면 별도 전력 없이 채굴합니다.",
+		"다리는 물 타일 위에 겹쳐 설치하며 그 한 칸의 통행을 엽니다.",
+		"낚시장 옆 낚시 고양이가 물고기를 만들고 서빙 고양이가 배식합니다.",
+		"석탄과 발전기 옆 전기 고양이가 전력을 생산합니다.",
+		"수정은 채굴할 때 전력이 필요합니다. 발전 설비를 먼저 늘리세요.",
+		"석유는 압력 고양이만 채굴할 수 있습니다.",
+		"우라늄 채굴은 전력과 석유를 함께 소비합니다.",
+		"기지 레벨과 기술을 높여 온기와 생산량을 계속 확장하세요.",
 	][quest_step]
 
 func tutorial_complete() -> bool:
@@ -1042,6 +1095,12 @@ func _draw() -> void:
 			if noise_value < 8:
 				var cell := Rect2(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 				draw_rect(cell, Color("e4eaec"))
+
+	# Warm ground glow communicates the safe radius before the fog boundary.
+	var warm_radius := float(safe_radius_tiles() * TILE_SIZE)
+	for ring in range(8, 0, -1):
+		var ratio := float(ring) / 8.0
+		draw_circle(base.position, warm_radius * ratio, Color(1.0, 0.55, 0.18, 0.018 + (1.0 - ratio) * 0.018))
 
 	# One-pixel grid: 100 × 100 cells.
 	var grid_color := Color(0.42, 0.49, 0.52, 0.18)

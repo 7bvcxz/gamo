@@ -33,7 +33,7 @@ func _draw_recipe(font: Font, panel: Rect2, index: int, y: float) -> void:
 	draw_string(font, panel.position + Vector2(42, y), main_controller.recipe_label(index), HORIZONTAL_ALIGNMENT_LEFT, 190, 15, color)
 	var cost: String = main_controller.recipe_cost_text(index)
 	var cost_color := Color("73d7df") if index >= 4 else Color("e7aa45")
-	if index == 3 and main_controller.base_level < 2:
-		cost = "잠김"
+	if not main_controller.recipe_unlocked(index):
+		cost = "%d단계" % main_controller.recipe_unlock_level(index)
 		cost_color = Color("8a9290")
 	draw_string(font, panel.position + Vector2(240, y), cost, HORIZONTAL_ALIGNMENT_LEFT, 90, 11, cost_color)

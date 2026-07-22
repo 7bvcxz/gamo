@@ -50,6 +50,7 @@ func _run() -> void:
 	_assert(not (water.get_node("CollisionShape2D") as CollisionShape2D).disabled, "removing a bridge restores water collision")
 
 	main.resource_counts["copper"] = 1
+	main.base_level = 2
 	main.fabricator_selection = 5
 	var conveyor_count := get_nodes_in_group("transport_floor").size()
 	main.call("_craft_selected_block")
@@ -64,16 +65,16 @@ func _run() -> void:
 
 func _test_cat_support_loop(main: Node2D) -> void:
 	var field := load("res://scenes/FacilityBlock.tscn").instantiate() as FacilityBlock
-	field.facility_type = "cheese_field"
+	field.facility_type = "fishing_spot"
 	field.position = Vector2(300, 300)
 	main.add_child(field)
-	var cook := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
-	cook.worker_type = "cook"
-	cook.position = Vector2(332, 300)
-	main.add_child(cook)
+	var fisher := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
+	fisher.worker_type = "fisher"
+	fisher.position = Vector2(332, 300)
+	main.add_child(fisher)
 	await process_frame
-	cook._physics_process(3.1)
-	_assert(main.cheese == 2 and cook.hunger < 100.0, "cook cat turns farm access into cheese and gets hungry")
+	fisher._physics_process(3.1)
+	_assert(main.fish == 2 and fisher.hunger < 100.0, "fishing cat catches fish and gets hungry")
 	var hungry_cat := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
 	hungry_cat.hunger = 10.0
 	hungry_cat.position = Vector2(360, 300)
@@ -84,7 +85,7 @@ func _test_cat_support_loop(main: Node2D) -> void:
 	main.add_child(server)
 	await process_frame
 	server._physics_process(3.1)
-	_assert(hungry_cat.hunger > 10.0 and main.cheese == 1, "server cat spends cheese to restore nearby workers")
+	_assert(hungry_cat.hunger > 10.0 and main.fish == 1, "server cat spends fish to restore nearby workers")
 	var power := load("res://scenes/FacilityBlock.tscn").instantiate() as FacilityBlock
 	power.facility_type = "power_generator"
 	power.position = Vector2(500, 300)

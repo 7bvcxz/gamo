@@ -43,7 +43,8 @@ func _physics_process(delta: float) -> void:
 	var main_nodes := get_tree().get_nodes_in_group("main_controller")
 	if not main_nodes.is_empty():
 		var cold_ratio: float = clampf(float(main_nodes[0].temperature) / 100.0, 0.0, 1.0)
-		speed_multiplier *= lerpf(0.28, 1.0, cold_ratio)
+		var exposure: float = float(main_nodes[0].cold_exposure())
+		speed_multiplier *= minf(lerpf(0.22, 1.0, cold_ratio), lerpf(0.45, 1.0, 1.0 - exposure))
 	velocity = direction * SPEED * speed_multiplier
 	_update_character_animation(delta, direction, sprinting)
 	move_and_slide()

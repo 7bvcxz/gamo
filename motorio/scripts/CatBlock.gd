@@ -36,10 +36,10 @@ func _physics_process(delta: float) -> void:
 		spark_remaining = SPARK_DURATION
 		if worker_type == "electric":
 			_generate_power()
-		elif worker_type == "cook":
-			_cook_cheese()
+		elif worker_type == "fisher":
+			_catch_fish()
 		elif worker_type == "server":
-			_serve_cheese()
+			_serve_fish()
 		else:
 			_mine_front_resource()
 		queue_redraw()
@@ -87,15 +87,15 @@ func _generate_power() -> void:
 		main.add_electricity(main.power_output_amount())
 		_consume_hunger(5.0)
 
-func _cook_cheese() -> void:
+func _catch_fish() -> void:
 	var main := get_tree().get_first_node_in_group("main_controller")
-	if main and main.worker_has_equipment_slot(self, "cook", "cheese_field"):
-		main.add_cheese(main.food_output_amount())
+	if main and main.worker_has_equipment_slot(self, "fisher", "fishing_spot"):
+		main.add_fish(main.food_output_amount())
 		_consume_hunger(4.0)
 
-func _serve_cheese() -> void:
+func _serve_fish() -> void:
 	var main := get_tree().get_first_node_in_group("main_controller")
-	if main == null or not main.consume_cheese(1):
+	if main == null or not main.consume_fish(1):
 		return
 	for node in get_tree().get_nodes_in_group("cat_worker"):
 		var cat := node as CatBlock
@@ -114,7 +114,7 @@ func _consume_hunger(amount: float) -> void:
 
 func _draw() -> void:
 	var rect := Rect2(Vector2.ONE * -16.0, Vector2.ONE * 32.0)
-	var body_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "cook": Color("e7a5a0"), "server": Color("78b589")}.get(worker_type, Color("d99a56"))
+	var body_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "fisher": Color("69b9cf"), "server": Color("78b589")}.get(worker_type, Color("d99a56"))
 	draw_rect(rect, body_color)
 	draw_rect(rect.grow(-2.0), Color("f0c47a"), false, 2.0)
 	draw_set_transform(Vector2.ZERO, direction.angle())

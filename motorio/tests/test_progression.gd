@@ -43,17 +43,32 @@ func _run() -> void:
 		main.elapsed_time = float(index + 1)
 		main.call("_on_base_box_received", automated_box)
 		automated_box.free()
-	_assert(main.quest_step == 5 and main.base_level == 2, "three generated deliveries complete the factory and upgrade the base")
+	_assert(main.quest_step == 5 and main.base_level == 1, "three generated deliveries unlock the manual base upgrade")
 	_assert(main.automated_delivery_times.size() == 3, "generated deliveries feed the rolling throughput counter")
 	main.call("_process", 0.0)
 	_assert((main.get_node("UI/Throughput") as Label).text.contains("분당 상자  3"), "BOX per minute is visible")
 
+	main.box_count = 5
+	main.fabricator_selection = 15
+	main.call("_craft_selected_block")
+	_assert(main.base_level == 2 and main.box_count == 0, "five boxes upgrade the base to level two")
 	main.box_count = 5
 	main.fabricator_selection = 3
 	main.call("_craft_selected_block")
 	await process_frame
 	_assert(main.box_count == 0, "unlocked splitter costs five boxes")
 	_assert(get_nodes_in_group("splitter_block").size() == 1, "base level two can craft a splitter")
+	_assert(main.recipe_unlock_level(4) == 3 and main.recipe_unlock_level(9) == 4 and main.recipe_unlock_level(6) == 5 and main.recipe_unlock_level(8) == 7, "rarer production recipes unlock at higher base levels")
+	main.base_level = 2
+	_assert(main.base_upgrade_cost() == {"box": 25}, "level three requires twenty-five boxes")
+	main.base_level = 3
+	_assert(main.base_upgrade_cost() == {"mineral": 100}, "level four requires one hundred minerals")
+	main.base_level = 4
+	_assert(main.base_upgrade_cost() == {"copper": 5}, "level five introduces copper")
+	main.base_level = 5
+	_assert(main.base_upgrade_cost() == {"copper": 25}, "level six raises the copper requirement")
+	main.base_level = 6
+	_assert(main.base_upgrade_cost() == {"fish": 25}, "level seven requires the mature fishing loop")
 	main.elapsed_time = 70.0
 	main.call("_process", 0.0)
 	_assert(main.automated_delivery_times.is_empty(), "throughput discards deliveries older than sixty seconds")

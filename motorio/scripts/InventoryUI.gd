@@ -27,7 +27,7 @@ func _draw() -> void:
 				draw_rect(inner, Color("46535b"))
 				draw_polyline(PackedVector2Array([inner.position + Vector2(5, 4), inner.get_center(), inner.position + Vector2(5, inner.size.y - 4)]), Color("e0a83d"), 2.0)
 			elif item["type"] == "cat":
-				var cat_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "cook": Color("e7a5a0"), "server": Color("78b589")}.get(item.get("worker", "miner"), Color("d99a56"))
+				var cat_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "fisher": Color("69b9cf"), "server": Color("78b589")}.get(item.get("worker", "miner"), Color("d99a56"))
 				draw_rect(inner, cat_color)
 				draw_circle(inner.get_center(), 7.0, Color("fff0cf"))
 				draw_circle(inner.get_center() + Vector2(2, -2), 1.2, Color("382c2a"))
@@ -50,7 +50,7 @@ func _draw() -> void:
 				for plank_y in [5.0, 11.0, 17.0]:
 					draw_line(inner.position + Vector2(2, plank_y), inner.position + Vector2(22, plank_y), Color("c28d51"), 4.0)
 			elif item["type"] == "facility":
-				draw_rect(inner, Color("655033") if item.get("facility") == "cheese_field" else Color("52636c"))
+				draw_rect(inner, Color("236f86") if item.get("facility") == "fishing_spot" else Color("52636c"))
 				draw_circle(inner.get_center(), 5.0, Color("efd65b"))
 			else:
 				draw_rect(inner, Color("8b5a30"))

@@ -16,6 +16,10 @@ func _draw() -> void:
 	var cold: float = clampf((55.0 - main_controller.temperature) / 55.0, 0.0, 1.0)
 	var distance_tiles: float = main_controller.player.global_position.distance_to(main_controller.base.global_position) / main_controller.TILE_SIZE
 	var exposure: float = clampf((distance_tiles - main_controller.safe_radius_tiles()) / 10.0, 0.0, 1.0)
+	if distance_tiles > main_controller.safe_radius_tiles():
+		var immediate_exposure: float = clampf((distance_tiles - main_controller.safe_radius_tiles()) / 6.0, 0.0, 1.0)
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.78, 0.87, 0.92, 0.58 + immediate_exposure * 0.34))
+		exposure = maxf(exposure, 0.7 + immediate_exposure * 0.3)
 	var snow_strength: float = maxf(cold, exposure * 0.65)
 	if snow_strength > 0.0:
 		var flake_count := int(12.0 + snow_strength * 34.0)
