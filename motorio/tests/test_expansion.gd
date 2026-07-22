@@ -59,11 +59,17 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 func _test_developer_tutorial_button(main: Node2D) -> void:
 	main.tutorial_step = 0
 	main.tutorial_moved = false
+	_assert(main.tutorial_previous_button.disabled and not main.tutorial_next_button.disabled, "developer buttons start with only previous disabled")
 	main.tutorial_next_button.emit_signal("pressed")
-	_assert(main.tutorial_step == 1 and main.tutorial_next_button.visible, "developer button advances one tutorial step")
+	_assert(main.tutorial_step == 1 and not main.tutorial_previous_button.disabled, "next developer button advances one tutorial step")
+	main.tutorial_previous_button.emit_signal("pressed")
+	_assert(main.tutorial_step == 0 and not main.tutorial_moved and main.tutorial_previous_button.disabled, "previous developer button rewinds the step and its completion flag")
+	main.tutorial_next_button.emit_signal("pressed")
 	for step in range(5):
 		main.tutorial_next_button.emit_signal("pressed")
-	_assert(main.tutorial_complete() and not main.tutorial_next_button.visible, "developer button completes and then hides")
+	_assert(main.tutorial_complete() and main.tutorial_next_button.disabled and not main.tutorial_previous_button.disabled, "next disables at completion while previous remains available")
+	main.tutorial_previous_button.emit_signal("pressed")
+	_assert(main.tutorial_step == 5 and not main.tutorial_menu_opened and not main.tutorial_next_button.disabled, "previous can reopen the final tutorial step after completion")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

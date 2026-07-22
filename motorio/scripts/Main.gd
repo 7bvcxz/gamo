@@ -39,6 +39,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var survival_status: Label = $UI/SurvivalStatus
 @onready var shelter_ui: Control = $UI/Shelter
 @onready var climate_ui: Control = $UI/Climate
+@onready var tutorial_previous_button: Button = $UI/TutorialPrevious
 @onready var tutorial_next_button: Button = $UI/TutorialNext
 
 var box_count := 0
@@ -104,7 +105,9 @@ func _ready() -> void:
 	tutorial_ui.main_controller = self
 	shelter_ui.main_controller = self
 	climate_ui.main_controller = self
+	tutorial_previous_button.pressed.connect(_developer_previous_tutorial)
 	tutorial_next_button.pressed.connect(_developer_advance_tutorial)
+	_update_tutorial_developer_buttons()
 	tutorial_start_position = player.position
 	minimap.main_controller = self
 	_update_interaction_ui()
@@ -1064,24 +1067,40 @@ func _refresh_tutorial() -> void:
 		celebration_remaining = 3.0
 	tutorial_ui.queue_redraw()
 	quest_ui.queue_redraw()
-	tutorial_next_button.visible = not tutorial_complete()
+	_update_tutorial_developer_buttons()
+
+func _update_tutorial_developer_buttons() -> void:
+	tutorial_previous_button.disabled = tutorial_step <= 0
+	tutorial_next_button.disabled = tutorial_complete()
+
+func _set_tutorial_flag(step: int, value: bool) -> void:
+	match step:
+		0:
+			tutorial_moved = value
+		1:
+			tutorial_picked = value
+		2:
+			tutorial_rotated = value
+		3:
+			tutorial_placed = value
+		4:
+			tutorial_delivered = value
+		5:
+			tutorial_menu_opened = value
+
+func _developer_previous_tutorial() -> void:
+	if tutorial_step <= 0:
+		return
+	tutorial_step -= 1
+	_set_tutorial_flag(tutorial_step, false)
+	tutorial_ui.queue_redraw()
+	quest_ui.queue_redraw()
+	_update_tutorial_developer_buttons()
 
 func _developer_advance_tutorial() -> void:
 	if tutorial_complete():
 		return
-	match tutorial_step:
-		0:
-			tutorial_moved = true
-		1:
-			tutorial_picked = true
-		2:
-			tutorial_rotated = true
-		3:
-			tutorial_placed = true
-		4:
-			tutorial_delivered = true
-		5:
-			tutorial_menu_opened = true
+	_set_tutorial_flag(tutorial_step, true)
 	_refresh_tutorial()
 
 func _create_world_walls() -> void:
