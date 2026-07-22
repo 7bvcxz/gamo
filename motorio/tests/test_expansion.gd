@@ -39,6 +39,15 @@ func _test_base_levels(main: Node2D) -> void:
 		_assert(main.base_upgrade_cost() == expected[level - 2], "base level %d uses its planned rarity cost" % level)
 
 func _test_guidance_and_cold(main: Node2D) -> void:
+	main.box_count = 0
+	main.mineral_count = 4
+	for resource_type in main.resource_counts:
+		main.resource_counts[resource_type] = 0
+	main.resource_counts["coal"] = 2
+	main.electricity = 0
+	main.fish = 3
+	_assert(main.economy_ui.visible_resource_indices() == [1, 3, 8], "left resource list hides zero values and keeps every collected resource in vertical order")
+	_assert(not main.get_node("UI/Title").visible and not main.get_node("UI/Info").visible, "Motorio title and coordinate text are removed from the HUD")
 	for step in range(13):
 		main.quest_step = step
 		_assert(main.quest_unlock_help().length() >= 18, "quest %d explains the required feature" % (step + 1))
@@ -76,6 +85,26 @@ func _test_developer_tutorial_button(main: Node2D) -> void:
 	_assert(main.tutorial_step == 7 and not main.tutorial_base_three and not main.tutorial_next_button.disabled, "previous can reopen the final tutorial step after completion")
 	main._open_base_menu()
 	main.fabricator_selection = 5
+	var up_key := InputEventKey.new()
+	up_key.physical_keycode = KEY_UP
+	up_key.pressed = true
+	main._unhandled_key_input(up_key)
+	_assert(main.fabricator_selection == 4, "keyboard Up selects the previous base recipe")
+	var s_key := InputEventKey.new()
+	s_key.physical_keycode = KEY_S
+	s_key.pressed = true
+	main._unhandled_key_input(s_key)
+	_assert(main.fabricator_selection == 5, "keyboard S selects the next base recipe")
+	var w_key := InputEventKey.new()
+	w_key.physical_keycode = KEY_W
+	w_key.pressed = true
+	main._unhandled_key_input(w_key)
+	_assert(main.fabricator_selection == 4, "keyboard W selects the previous base recipe")
+	var down_key := InputEventKey.new()
+	down_key.physical_keycode = KEY_DOWN
+	down_key.pressed = true
+	main._unhandled_key_input(down_key)
+	_assert(main.fabricator_selection == 5, "keyboard Down selects the next base recipe")
 	main.begin_placement_action()
 	main.end_placement_action()
 	_assert(not main.base_menu_open and main.fabricator_selection == 5, "X exits the base menu without changing its joystick-selected recipe")

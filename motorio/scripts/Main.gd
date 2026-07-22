@@ -29,7 +29,6 @@ const SAVE_PATH := "user://motorio_save.cfg"
 
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
-@onready var info: Label = $UI/Info
 @onready var box_label: Label = $UI/BoxCount
 @onready var mineral_label: Label = $UI/MineralCount
 @onready var inventory_ui: Control = $UI/Inventory
@@ -271,6 +270,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or key.echo:
 		return
+	if key.pressed and any_menu_open():
+		if key.physical_keycode in [KEY_UP, KEY_W]:
+			if base_menu_open: move_fabricator_selection(-1)
+			else: move_research_selection(-1)
+			return
+		if key.physical_keycode in [KEY_DOWN, KEY_S]:
+			if base_menu_open: move_fabricator_selection(1)
+			else: move_research_selection(1)
+			return
 	if freeze_countdown >= 0.0 and key.physical_keycode in [KEY_Z, KEY_X]:
 		collect_action_held = false
 		cancel_placement_action()
@@ -609,6 +617,7 @@ func _enter_shelter(rescued: bool) -> void:
 	base_menu_open = false
 	research_menu_open = false
 	player.controls_locked = true
+	_set_top_tools_visible(false)
 	player.position = base.global_position + base.SHELTER_DIRECTION * 118.0
 	if rescued:
 		celebration_text = "고양이들이 기지로 데려왔어요"
@@ -622,6 +631,7 @@ func _sleep_until_morning() -> void:
 	night_warning_shown = false
 	shelter_open = false
 	player.controls_locked = false
+	_set_top_tools_visible(true)
 	for node in get_tree().get_nodes_in_group("cat_worker"):
 		var cat := node as CatBlock
 		if cat:
@@ -629,6 +639,13 @@ func _sleep_until_morning() -> void:
 	celebration_text = "%d일차 - 체온을 유지하세요" % day_number
 	celebration_remaining = 2.5
 	shelter_ui.queue_redraw()
+
+func _set_top_tools_visible(value: bool) -> void:
+	tutorial_previous_button.visible = value
+	tutorial_next_button.visible = value
+	developer_money_button.visible = value
+	developer_minute_button.visible = value
+	save_game_button.visible = value
 
 func _open_base_menu() -> void:
 	research_menu_open = false
@@ -1121,8 +1138,6 @@ func _process(delta: float) -> void:
 	while not automated_delivery_times.is_empty() and automated_delivery_times[0] < elapsed_time - 60.0:
 		automated_delivery_times.pop_front()
 	throughput_label.text = "기지 %d단계\n분당 상자  %d" % [base_level, automated_delivery_times.size()]
-	var tile := Vector2i(player.position / TILE_SIZE) + Vector2i.ONE
-	info.text = "위치  %d, %d" % [tile.x, tile.y]
 	if not tutorial_moved and player.position.distance_to(tutorial_start_position) >= 20.0:
 		tutorial_moved = true
 		_refresh_tutorial()
@@ -1198,10 +1213,10 @@ func _respawn_after_freeze() -> void:
 
 func _update_staged_ui() -> void:
 	var stage := ui_stage()
-	box_label.visible = stage >= 1
-	mineral_label.visible = stage >= 1
+	box_label.visible = false
+	mineral_label.visible = false
 	throughput_label.visible = stage >= 1
-	economy_ui.visible = stage >= 2
+	economy_ui.visible = true
 	minimap.visible = stage >= 2
 	$UI/WorldSize.visible = stage >= 2
 

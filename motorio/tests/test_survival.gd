@@ -32,8 +32,8 @@ func _test_ui_stages(main: Node2D) -> void:
 	main.tutorial_base_three = true
 	main.call("_refresh_tutorial")
 	main.call("_update_staged_ui")
-	_assert(main.ui_stage() == 1 and main.get_node("UI/BoxCount").visible, "basic automation reveals BOX and MINERAL")
-	_assert(not main.get_node("UI/Economy").visible, "advanced economy remains hidden during basic automation")
+	_assert(main.ui_stage() == 1 and not main.get_node("UI/BoxCount").visible and main.get_node("UI/Economy").visible, "basic automation keeps all resources in the unified economy list")
+	_assert(main.economy_ui.visible_resource_indices().is_empty(), "uncollected zero-value resources remain hidden")
 	main.quest_step = 5
 	main.call("_update_staged_ui")
 	_assert(main.ui_stage() == 2 and main.get_node("UI/Minimap").visible and main.get_node("UI/Economy").visible, "outer exploration reveals map and early resources")
@@ -67,9 +67,9 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	_assert(main.night_warning_shown and main.cats_should_rest(), "cats stop work and the return warning starts at minute eleven")
 	player.position = base.position + base.SHELTER_DIRECTION * base.SHELTER_DISTANCE
 	main.call("primary_action")
-	_assert(main.shelter_open, "southwest HOME entrance opens the night shelter")
+	_assert(main.shelter_open and not main.developer_money_button.visible and not main.save_game_button.visible, "southwest HOME entrance opens an uncluttered night shelter")
 	main.call("primary_action")
-	_assert(not main.shelter_open and main.day_time == 0.0, "sleep begins the next twelve-minute day")
+	_assert(not main.shelter_open and main.day_time == 0.0 and main.developer_money_button.visible and main.save_game_button.visible, "sleep begins the next day and restores top controls")
 
 func _test_scaling_and_technology(main: Node2D) -> void:
 	for index in range(2):

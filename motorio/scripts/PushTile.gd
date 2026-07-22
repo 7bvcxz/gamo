@@ -19,3 +19,11 @@ func _draw() -> void:
 	draw_rect(tile_rect.grow(-3.0), Color("9a6938"), false, 2.0)
 	draw_line(Vector2(-10, -10), Vector2(10, 10), Color(0.33, 0.19, 0.09, 0.7), 2.0)
 	draw_line(Vector2(10, -10), Vector2(-10, 10), Color(0.33, 0.19, 0.09, 0.7), 2.0)
+	# Cream cat inspection sticker on the crate lid.
+	draw_circle(Vector2(0, -3), 7.0, Color("f5dfaa"))
+	draw_polygon(PackedVector2Array([Vector2(-6, -7), Vector2(-4, -13), Vector2(-1, -8)]), PackedColorArray([Color("f5dfaa")]))
+	draw_polygon(PackedVector2Array([Vector2(1, -8), Vector2(4, -13), Vector2(6, -7)]), PackedColorArray([Color("f5dfaa")]))
+	draw_circle(Vector2(-2.5, -4), 1.0, Color("473426"))
+	draw_circle(Vector2(2.5, -4), 1.0, Color("473426"))
+	draw_line(Vector2(-2, 0), Vector2(0, 1), Color("9a5f54"), 1.0)
+	draw_line(Vector2(0, 1), Vector2(2, 0), Color("9a5f54"), 1.0)

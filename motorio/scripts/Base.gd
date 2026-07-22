@@ -62,23 +62,35 @@ func _on_entrance_body_entered(body: Node2D) -> void:
 		resource.queue_free()
 
 func _draw() -> void:
-	# Compact circular hub with a raised industrial center.
-	draw_circle(Vector2(4, 7), RADIUS, Color(0.02, 0.03, 0.025, 0.42))
-	draw_circle(Vector2.ZERO, RADIUS, Color("53605b"))
-	draw_circle(Vector2.ZERO, 87.0, Color("283b35"))
-	draw_arc(Vector2.ZERO, 87.0, 0.0, TAU, 64, Color("d69b35"), 4.0)
+	# Layered polar habitat: insulated hull, window ring, roof panels and warm core.
+	draw_circle(Vector2(7, 10), RADIUS + 3.0, Color(0.02, 0.03, 0.025, 0.4))
+	draw_circle(Vector2.ZERO, RADIUS, Color("44535a"))
+	draw_circle(Vector2.ZERO, 91.0, Color("91a4a8"))
+	draw_circle(Vector2.ZERO, 86.0, Color("263b3b"))
+	draw_arc(Vector2.ZERO, 88.0, 0.0, TAU, 72, Color("e3aa43"), 4.0)
+	draw_arc(Vector2.ZERO, 80.0, 0.0, TAU, 72, Color("71888a"), 2.0)
+	for panel_index in range(8):
+		var panel_angle := panel_index * TAU / 8.0 + PI / 8.0
+		var panel_center := Vector2.from_angle(panel_angle) * 62.0
+		draw_circle(panel_center, 13.0, Color("30494a"))
+		draw_arc(panel_center, 10.0, 0.0, TAU, 16, Color("79a4a2"), 2.0)
+		if panel_index % 2 == 0:
+			draw_circle(panel_center, 5.0, Color("f2c35b"))
 
 	for angle_index in range(8):
 		var angle := angle_index * TAU / 8.0
 		var bolt_position := Vector2.from_angle(angle) * 78.0
 		draw_circle(bolt_position, 4.0, Color("d9c99d"))
 
-	draw_circle(Vector2.ZERO, 44.0, Color("192722"))
-	draw_circle(Vector2.ZERO, 32.0, Color("be7e2c"))
+	draw_circle(Vector2.ZERO, 47.0, Color("162526"))
+	draw_arc(Vector2.ZERO, 43.0, 0.0, TAU, 48, Color("6f8f8c"), 3.0)
+	draw_circle(Vector2.ZERO, 34.0, Color("8e542b"))
+	draw_circle(Vector2.ZERO, 27.0, Color("e4a13d"))
 	draw_polygon(
-		PackedVector2Array([Vector2(0, -22), Vector2(19, 13), Vector2(-19, 13)]),
-		PackedColorArray([Color("f0c04f")])
+		PackedVector2Array([Vector2(0, -23), Vector2(20, 14), Vector2(-20, 14)]),
+		PackedColorArray([Color("ffd65c")])
 	)
+	draw_circle(Vector2(-8, -5), 4.0, Color(1, 0.93, 0.65, 0.7))
 
 	var entrance_font := UIFont.FONT
 	for direction in ENTRANCE_DIRECTIONS:
