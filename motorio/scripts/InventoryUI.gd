@@ -52,6 +52,10 @@ func _draw() -> void:
 			elif item["type"] == "facility":
 				draw_rect(inner, Color("236f86") if item.get("facility") == "fishing_spot" else Color("52636c"))
 				draw_circle(inner.get_center(), 5.0, Color("efd65b"))
+			elif item["type"] == "research_lab":
+				draw_rect(inner, Color("284d59"))
+				draw_circle(inner.get_center(), 7.0, Color("71d9e3"))
+				draw_line(inner.position + Vector2(5, 17), inner.position + Vector2(19, 5), Color("d7fbff"), 2.0)
 			else:
 				draw_rect(inner, Color("8b5a30"))
 				draw_line(inner.position, inner.end, Color("4f2f19"), 2.0)

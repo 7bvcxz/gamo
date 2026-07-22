@@ -16,6 +16,7 @@ const RESOURCE_DEPOSIT_SCENE := preload("res://scenes/ResourceDeposit.tscn")
 const WATER_TILE_SCENE := preload("res://scenes/WaterTile.tscn")
 const BRIDGE_SCENE := preload("res://scenes/Bridge.tscn")
 const FACILITY_SCENE := preload("res://scenes/FacilityBlock.tscn")
+const RESEARCH_LAB_SCENE := preload("res://scenes/ResearchLab.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
@@ -29,6 +30,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var mineral_label: Label = $UI/MineralCount
 @onready var inventory_ui: Control = $UI/Inventory
 @onready var base_menu: Control = $UI/BaseMenu
+@onready var research_menu: Control = $UI/ResearchMenu
 @onready var minimap: Control = $UI/Minimap
 @onready var version_label: Label = $UI/Version
 @onready var touch_controls: TouchControls = $UI/TouchControls
@@ -51,6 +53,7 @@ var preview_visible := false
 var placement_rotation := 0
 var placement_preview: RigidBody2D
 var base_menu_open := false
+var research_menu_open := false
 var fabricator_status := "상자 3개 필요"
 var fabricator_selection := 0
 var collect_action_held := false
@@ -88,6 +91,10 @@ var night_warning_shown := false
 var heat_tech := 0
 var power_tech := 0
 var food_tech := 0
+var research_selection := 0
+var active_research := -1
+var research_remaining := 0.0
+var research_total := 0.0
 var freeze_countdown := -1.0
 
 func _ready() -> void:
@@ -104,6 +111,7 @@ func _ready() -> void:
 	touch_controls.main_controller = self
 	inventory_ui.main_controller = self
 	base_menu.main_controller = self
+	research_menu.main_controller = self
 	quest_ui.main_controller = self
 	economy_ui.main_controller = self
 	tutorial_ui.main_controller = self
@@ -266,6 +274,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if key.pressed and key.keycode == KEY_ESCAPE and base_menu_open:
 		_close_base_menu()
 		return
+	if key.pressed and key.keycode == KEY_ESCAPE and research_menu_open:
+		_close_research_menu()
+		return
 	if not key.pressed:
 		return
 	match key.physical_keycode:
@@ -278,11 +289,16 @@ func primary_action() -> void:
 	if shelter_open:
 		_sleep_until_morning()
 		return
+	if research_menu_open:
+		_start_selected_research()
+		return
 	if base_menu_open:
 		_craft_selected_block()
 		return
 	if day_time >= 660.0 and _is_shelter_nearby():
 		_enter_shelter(false)
+	elif _research_lab_in_front() != null:
+		_open_research_menu()
 	elif _is_base_in_front():
 		_open_base_menu()
 	else:
@@ -305,6 +321,9 @@ func end_placement_action() -> void:
 	placement_hold_elapsed = 0.0
 	if base_menu_open:
 		_cycle_fabricator_recipe()
+		return
+	if research_menu_open:
+		move_research_selection(1)
 		return
 	if not placement_rotated_during_hold:
 		_place_selected_block()
@@ -338,8 +357,11 @@ func _pick_up_front_block() -> void:
 		var block := node as RigidBody2D
 		if block == null or block.has_meta("base_received"):
 			continue
+		if block is ResearchLab and (block as ResearchLab).installed:
+			continue
 		var distance := block.global_position.distance_to(target)
-		if distance < closest_distance:
+		var pickup_distance: float = 52.0 if block is ResearchLab else 26.0
+		if distance < pickup_distance and (closest == null or distance < closest_distance):
 			closest = block
 			closest_distance = distance
 	if closest == null:
@@ -359,6 +381,8 @@ func _pick_up_front_block() -> void:
 		item = {"type": "bridge"}
 	elif closest is FacilityBlock:
 		item = {"type": "facility", "facility": (closest as FacilityBlock).facility_type}
+	elif closest is ResearchLab:
+		item = {"type": "research_lab"}
 	inventory.append(item)
 	tutorial_picked = true
 	_refresh_tutorial()
@@ -404,10 +428,14 @@ func _place_selected_block() -> void:
 		var facility := FACILITY_SCENE.instantiate() as FacilityBlock
 		facility.facility_type = item.get("facility", "power_generator")
 		block = facility
+	elif item["type"] == "research_lab":
+		var lab := RESEARCH_LAB_SCENE.instantiate() as ResearchLab
+		lab.installed = true
+		block = lab
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
-	block.position = target + place_direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
-	if _is_base_entrance_cell(target):
+	block.position = _preview_position(item_type)
+	if item_type != "research_lab" and _is_base_entrance_cell(target):
 		block.add_collision_exception_with(base)
 	add_child(block)
 	tutorial_placed = true
@@ -418,7 +446,7 @@ func _place_selected_block() -> void:
 	_update_interaction_ui()
 
 func _sync_placement_preview() -> void:
-	var should_show := selected_slot < inventory.size() and not base_menu_open
+	var should_show := selected_slot < inventory.size() and not any_menu_open()
 	preview_visible = should_show
 	if not should_show:
 		if is_instance_valid(placement_preview):
@@ -467,6 +495,8 @@ func _create_placement_preview(item: Dictionary) -> RigidBody2D:
 		var facility := FACILITY_SCENE.instantiate() as FacilityBlock
 		facility.facility_type = item.get("facility", "power_generator")
 		block = facility
+	elif item_type == "research_lab":
+		block = RESEARCH_LAB_SCENE.instantiate() as ResearchLab
 	else:
 		block = PUSH_TILE_SCENE.instantiate() as RigidBody2D
 	block.set_meta("placement_preview", true)
@@ -494,10 +524,10 @@ func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) 
 	if item_type in ["conveyor", "splitter"]:
 		return true
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2(62.0, 30.0) if item_type == "box_generator" else Vector2.ONE * 30.0
+	shape.size = Vector2.ONE * 94.0 if item_type == "research_lab" else (Vector2(62.0, 30.0) if item_type == "box_generator" else Vector2.ONE * 30.0)
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
-	var center := target + direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target
+	var center := target + direction * TILE_SIZE if item_type == "research_lab" else (target + direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target)
 	query.transform = Transform2D(direction.angle() if item_type == "box_generator" else 0.0, center)
 	query.collision_mask = 63
 	query.collide_with_areas = false
@@ -510,7 +540,7 @@ func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) 
 			if not (result["collider"] is WaterTile):
 				return false
 		return true
-	if _is_base_entrance_cell(target):
+	if item_type != "research_lab" and _is_base_entrance_cell(target):
 		results = results.filter(func(result): return result["collider"] != base)
 	return results.is_empty()
 
@@ -522,10 +552,10 @@ func _is_base_entrance_cell(target: Vector2) -> bool:
 
 func _preview_position(item_type: String) -> Vector2:
 	var target := _front_cell_center()
-	if item_type != "box_generator":
+	if item_type not in ["box_generator", "research_lab"]:
 		return target
 	var direction := Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
-	return target + direction * (TILE_SIZE * 0.5)
+	return target + direction * (TILE_SIZE if item_type == "research_lab" else TILE_SIZE * 0.5)
 
 func _front_direction() -> Vector2:
 	if abs(player.facing.x) > abs(player.facing.y):
@@ -540,6 +570,19 @@ func _is_base_in_front() -> bool:
 	var toward_base := player.global_position.direction_to(base.global_position)
 	return player.global_position.distance_to(base.global_position) <= 128.0 and _front_direction().dot(toward_base) > 0.55
 
+func _research_lab_in_front() -> ResearchLab:
+	var closest: ResearchLab = null
+	var closest_distance := 112.0
+	for node in get_tree().get_nodes_in_group("research_lab"):
+		var lab := node as ResearchLab
+		if lab == null or not lab.installed or lab.has_meta("placement_preview"):
+			continue
+		var distance: float = player.global_position.distance_to(lab.global_position)
+		if distance < closest_distance and _front_direction().dot(player.global_position.direction_to(lab.global_position)) > 0.35:
+			closest = lab
+			closest_distance = distance
+	return closest
+
 func _is_shelter_nearby() -> bool:
 	var shelter_position: Vector2 = base.global_position + base.SHELTER_DIRECTION * base.SHELTER_DISTANCE
 	return player.global_position.distance_to(shelter_position) <= 58.0
@@ -549,6 +592,7 @@ func _enter_shelter(rescued: bool) -> void:
 		return
 	shelter_open = true
 	base_menu_open = false
+	research_menu_open = false
 	player.controls_locked = true
 	player.position = base.global_position + base.SHELTER_DIRECTION * 118.0
 	if rescued:
@@ -572,6 +616,7 @@ func _sleep_until_morning() -> void:
 	shelter_ui.queue_redraw()
 
 func _open_base_menu() -> void:
+	research_menu_open = false
 	base_menu_open = true
 	_sync_placement_preview()
 	_update_fabricator_status()
@@ -581,13 +626,30 @@ func _open_base_menu() -> void:
 	base_menu.queue_redraw()
 
 func close_base_menu_action() -> void:
+	close_active_menu_action()
+
+func close_active_menu_action() -> void:
 	if base_menu_open:
 		_close_base_menu()
+	elif research_menu_open:
+		_close_research_menu()
 
 func _close_base_menu() -> void:
 	base_menu_open = false
 	player.controls_locked = freeze_countdown >= 0.0
 	base_menu.queue_redraw()
+
+func _open_research_menu() -> void:
+	base_menu_open = false
+	research_menu_open = true
+	_sync_placement_preview()
+	player.controls_locked = true
+	research_menu.queue_redraw()
+
+func _close_research_menu() -> void:
+	research_menu_open = false
+	player.controls_locked = freeze_countdown >= 0.0
+	research_menu.queue_redraw()
 
 func _cycle_fabricator_recipe() -> void:
 	fabricator_selection = (fabricator_selection + 1) % fabricator_recipe_count()
@@ -601,6 +663,84 @@ func move_fabricator_selection(direction: int) -> void:
 	_update_fabricator_status()
 	base_menu.queue_redraw()
 
+func move_research_selection(direction: int) -> void:
+	if not research_menu_open or direction == 0:
+		return
+	research_selection = posmod(research_selection + direction, research_count())
+	research_menu.queue_redraw()
+
+func any_menu_open() -> bool:
+	return base_menu_open or research_menu_open
+
+func research_count() -> int:
+	return 3
+
+func research_label(index: int) -> String:
+	return ["열 보존 연구", "전력 증폭 연구", "식량 보존 연구"][index]
+
+func research_level(index: int) -> int:
+	return [heat_tech, power_tech, food_tech][index]
+
+func research_duration(index: int) -> float:
+	return float([600, 1200, 1800][index] + research_level(index) * 600)
+
+func research_duration_text(index: int) -> String:
+	return "%d분" % int(research_duration(index) / 60.0)
+
+func research_cost(index: int) -> Dictionary:
+	if index == 0:
+		return {"copper": 5 + heat_tech * 2, "crystal": 2 + heat_tech}
+	if index == 1:
+		return {"copper": 5 + power_tech * 2, "crystal": 3 + power_tech * 2}
+	return {"copper": 4 + food_tech * 2, "fish": 5 + food_tech * 3}
+
+func research_status_text() -> String:
+	if active_research >= 0:
+		return "%s 진행 중 · %s 남음" % [research_label(active_research), _format_research_time(research_remaining)]
+	var cost: Dictionary = research_cost(research_selection)
+	return "%s · %s" % [_cost_text(cost), "시작 가능" if _can_afford(cost) else "자원 부족"]
+
+func _format_research_time(seconds: float) -> String:
+	var total_seconds := ceili(maxf(0.0, seconds))
+	return "%02d:%02d" % [total_seconds / 60, total_seconds % 60]
+
+func _start_selected_research() -> void:
+	if active_research >= 0:
+		celebration_text = "이미 연구가 진행 중입니다"
+		celebration_remaining = 2.0
+		return
+	var cost: Dictionary = research_cost(research_selection)
+	if not _can_afford(cost):
+		celebration_text = "%s 연구 자원이 부족합니다" % research_label(research_selection)
+		celebration_remaining = 2.0
+		return
+	_spend_cost(cost)
+	active_research = research_selection
+	research_total = research_duration(active_research)
+	research_remaining = research_total
+	celebration_text = "%s 시작 · %s" % [research_label(active_research), research_duration_text(active_research)]
+	celebration_remaining = 3.0
+	research_menu.queue_redraw()
+
+func _update_research(delta: float) -> void:
+	if active_research < 0:
+		return
+	research_remaining = maxf(0.0, research_remaining - delta)
+	if research_remaining > 0.0:
+		return
+	var completed: int = active_research
+	active_research = -1
+	if completed == 0:
+		heat_tech += 1
+	elif completed == 1:
+		power_tech += 1
+	else:
+		food_tech += 1
+	celebration_text = "%s 완료 · %d단계" % [research_label(completed), research_level(completed)]
+	celebration_remaining = 4.0
+	queue_redraw()
+	research_menu.queue_redraw()
+
 func _craft_selected_block() -> void:
 	if not recipe_unlocked(fabricator_selection):
 		fabricator_status = "잠김 - 기지 %d단계 필요" % recipe_unlock_level(fabricator_selection)
@@ -610,12 +750,8 @@ func _craft_selected_block() -> void:
 		fabricator_status = "자원이 부족합니다"
 		return
 	_spend_cost(cost)
-	if fabricator_selection == 15:
+	if fabricator_selection == 13:
 		_upgrade_base()
-		base_menu.queue_redraw()
-		return
-	if fabricator_selection >= 12:
-		_apply_technology(fabricator_selection)
 		base_menu.queue_redraw()
 		return
 	var block := _create_recipe_block(fabricator_selection)
@@ -638,16 +774,16 @@ func _update_fabricator_status() -> void:
 		fabricator_status = "제작 가능" if _can_afford(recipe_cost(fabricator_selection)) else "%s 필요" % recipe_cost_text(fabricator_selection)
 
 func fabricator_recipe_count() -> int:
-	return 16
+	return 14
 
 func recipe_label(index: int) -> String:
-	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "낚시장", "낚시 고양이", "서빙 고양이", "열 기술", "전력 기술", "식량 기술", "기지 업그레이드"][index]
+	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "낚시장", "낚시 고양이", "서빙 고양이", "연구소", "기지 업그레이드"][index]
 
 func recipe_unlock_level(index: int) -> int:
-	return [1, 1, 1, 2, 3, 2, 5, 5, 7, 4, 4, 4, 3, 5, 4, 1][index]
+	return [1, 1, 1, 2, 3, 2, 5, 5, 7, 4, 4, 4, 3, 1][index]
 
 func recipe_unlocked(index: int) -> bool:
-	return base_level >= recipe_unlock_level(index) and not (index == 15 and base_level >= 7)
+	return base_level >= recipe_unlock_level(index) and not (index == 13 and base_level >= 7)
 
 func recipe_cost(index: int) -> Dictionary:
 	var standard: Array[Dictionary] = [
@@ -657,13 +793,11 @@ func recipe_cost(index: int) -> Dictionary:
 	]
 	if index < standard.size():
 		return standard[index]
-	if index == 15:
+	if index == 13:
 		return base_upgrade_cost()
 	if index == 12:
-		return {"copper": 5 + heat_tech * 2, "crystal": 2 + heat_tech}
-	if index == 13:
-		return {"copper": 5 + power_tech * 2, "crystal": 3 + power_tech * 2}
-	return {"copper": 4 + food_tech * 2, "fish": 5 + food_tech * 3}
+		return {"mineral": 30, "copper": 8}
+	return {}
 
 func base_upgrade_cost() -> Dictionary:
 	return [{"box": 5}, {"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25}][clampi(base_level - 1, 0, 5)]
@@ -677,15 +811,20 @@ func _upgrade_base() -> void:
 	_ensure_base_level_components()
 	_refresh_tutorial()
 	fabricator_status = "기지 %d단계 완료 · 온기 %d칸" % [base_level, safe_radius_tiles()]
+	if base_level == 3:
+		fabricator_status += " · 연구소 제작 해금"
 	celebration_text = fabricator_status
 	celebration_remaining = 4.0
 	queue_redraw()
 
 func recipe_cost_text(index: int) -> String:
+	return _cost_text(recipe_cost(index))
+
+func _cost_text(cost: Dictionary) -> String:
 	var parts: Array[String] = []
 	var names := {"box": "상자", "mineral": "미네랄", "copper": "구리", "coal": "석탄", "crystal": "수정", "oil": "석유", "uranium": "우라늄", "fish": "물고기"}
-	for key in recipe_cost(index):
-		parts.append("%s %d" % [names.get(key, key), recipe_cost(index)[key]])
+	for key in cost:
+		parts.append("%s %d" % [names.get(key, key), cost[key]])
 	return " + ".join(parts)
 
 func _can_afford(cost: Dictionary) -> bool:
@@ -709,19 +848,6 @@ func _spend_cost(cost: Dictionary) -> void:
 	mineral_label.text = "미네랄  %d" % mineral_count
 	economy_ui.queue_redraw()
 
-func _apply_technology(index: int) -> void:
-	if index == 12:
-		heat_tech += 1
-		fabricator_status = "열 기술 %d단계" % heat_tech
-	elif index == 13:
-		power_tech += 1
-		fabricator_status = "전력 기술 %d단계" % power_tech
-	else:
-		food_tech += 1
-		fabricator_status = "식량 기술 %d단계" % food_tech
-	celebration_text = fabricator_status
-	celebration_remaining = 2.5
-
 func _create_recipe_block(index: int) -> RigidBody2D:
 	if index == 0 or index in [7, 8, 10, 11]:
 		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
@@ -737,6 +863,10 @@ func _create_recipe_block(index: int) -> RigidBody2D:
 	if index == 3: return SPLITTER_SCENE.instantiate() as SplitterBlock
 	if index == 4: return BRIDGE_SCENE.instantiate() as BridgeBlock
 	if index == 5: return CONVEYOR_SCENE.instantiate() as ConveyorBlock
+	if index == 12:
+		var lab := RESEARCH_LAB_SCENE.instantiate() as ResearchLab
+		lab.installed = false
+		return lab
 	var facility := FACILITY_SCENE.instantiate() as FacilityBlock
 	facility.facility_type = "power_generator" if index == 6 else "fishing_spot"
 	return facility
@@ -747,8 +877,9 @@ func _find_fabricator_output_position(block: RigidBody2D = null) -> Vector2:
 		var candidate := output + Vector2.DOWN * (TILE_SIZE * step)
 		var shape := RectangleShape2D.new()
 		var is_generator := block is BoxGenerator
-		shape.size = Vector2(62.0, 30.0) if is_generator else Vector2.ONE * 30.0
-		var center := candidate + Vector2.DOWN * (TILE_SIZE * 0.5) if is_generator else candidate
+		var is_lab := block is ResearchLab
+		shape.size = Vector2.ONE * 94.0 if is_lab else (Vector2(62.0, 30.0) if is_generator else Vector2.ONE * 30.0)
+		var center := candidate + Vector2.DOWN * TILE_SIZE if is_lab else (candidate + Vector2.DOWN * (TILE_SIZE * 0.5) if is_generator else candidate)
 		var query := PhysicsShapeQueryParameters2D.new()
 		query.shape = shape
 		query.transform = Transform2D(PI / 2.0 if is_generator else 0.0, center)
@@ -757,7 +888,7 @@ func _find_fabricator_output_position(block: RigidBody2D = null) -> Vector2:
 		if get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
 			return center
 	var fallback := output + Vector2.DOWN * (TILE_SIZE * (WORLD_TILES - 1))
-	return fallback + Vector2.DOWN * (TILE_SIZE * 0.5) if block is BoxGenerator else fallback
+	return fallback + Vector2.DOWN * TILE_SIZE if block is ResearchLab else (fallback + Vector2.DOWN * (TILE_SIZE * 0.5) if block is BoxGenerator else fallback)
 
 func _update_interaction_ui() -> void:
 	inventory_ui.queue_redraw()
@@ -961,6 +1092,7 @@ func _cell_center(cell: Vector2i) -> Vector2:
 
 func _process(delta: float) -> void:
 	elapsed_time += delta
+	_update_research(delta)
 	_update_survival(delta)
 	_update_staged_ui()
 	celebration_remaining = maxf(0.0, celebration_remaining - delta)
@@ -972,7 +1104,7 @@ func _process(delta: float) -> void:
 	if not tutorial_moved and player.position.distance_to(tutorial_start_position) >= 20.0:
 		tutorial_moved = true
 		_refresh_tutorial()
-	if placement_action_held and not base_menu_open:
+	if placement_action_held and not any_menu_open():
 		placement_hold_elapsed += delta
 		while placement_hold_elapsed >= PLACEMENT_ROTATE_INTERVAL:
 			placement_hold_elapsed -= PLACEMENT_ROTATE_INTERVAL
@@ -1026,6 +1158,9 @@ func _start_freeze_countdown() -> void:
 	if base_menu_open:
 		base_menu_open = false
 		base_menu.queue_redraw()
+	if research_menu_open:
+		research_menu_open = false
+		research_menu.queue_redraw()
 	player.controls_locked = true
 	celebration_text = "완전 동결 - 3초 후 기지에서 구조됩니다"
 	celebration_remaining = 3.0

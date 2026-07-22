@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/ShelterUI.gd" id="11_shelter"]
 [ext_resource type="Script" path="res://scripts/ClimateUI.gd" id="12_climate"]
 [ext_resource type="Script" path="res://scripts/ColdWorldFog.gd" id="13_cold_world_fog"]
+[ext_resource type="Script" path="res://scripts/ResearchMenu.gd" id="14_research_menu"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -208,6 +209,16 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("6_base_menu")
+
+[node name="ResearchMenu" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("14_research_menu")
 
 [node name="Minimap" type="Control" parent="UI"]
 layout_mode = 0

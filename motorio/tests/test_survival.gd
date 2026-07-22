@@ -101,17 +101,25 @@ func _test_scaling_and_technology(main: Node2D) -> void:
 	main.resource_counts["copper"] = 20
 	main.resource_counts["crystal"] = 20
 	main.base_level = 5
-	main.fabricator_selection = 12
 	var radius_before: int = main.safe_radius_tiles()
-	main.call("_craft_selected_block")
+	main.research_selection = 0
+	main.call("_start_selected_research")
+	_assert(main.active_research == 0 and main.heat_tech == 0 and main.research_remaining == 600.0, "HEAT research takes ten minutes and does not finish immediately")
+	main.call("_update_research", 599.0)
+	_assert(main.heat_tech == 0, "research remains pending until its full duration")
+	main.call("_update_research", 1.0)
 	_assert(main.heat_tech == 1 and main.safe_radius_tiles() == radius_before + 4, "HEAT TECH expands exploration radius")
-	_assert(main.recipe_cost(12)["copper"] == 7, "repeat technology becomes progressively more expensive")
-	main.fabricator_selection = 13
-	main.call("_craft_selected_block")
+	_assert(main.research_cost(0)["copper"] == 7 and main.research_duration(0) == 1200.0, "repeat research becomes more expensive and ten minutes longer")
+	main.research_selection = 1
+	main.call("_start_selected_research")
+	_assert(main.research_remaining == 1200.0, "POWER research starts at twenty minutes")
+	main.call("_update_research", 1200.0)
 	_assert(main.power_tech == 1 and main.power_output_amount() == 7, "POWER TECH increases each equipment pair output")
 	main.fish = 20
-	main.fabricator_selection = 14
-	main.call("_craft_selected_block")
+	main.research_selection = 2
+	main.call("_start_selected_research")
+	_assert(main.research_remaining == 1800.0, "FOOD research starts at thirty minutes")
+	main.call("_update_research", 1800.0)
 	_assert(main.food_tech == 1 and main.food_output_amount() == 3, "FOOD TECH increases fishing output")
 
 func _assert(condition: bool, message: String) -> void:

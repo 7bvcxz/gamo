@@ -115,9 +115,9 @@ func _begin_touch(touch_id: int, position: Vector2) -> void:
 			button_touches[touch_id] = index
 			action_pressed[index] = true
 			if main_controller:
-				if index == 0 and main_controller.base_menu_open:
+				if index == 0 and main_controller.any_menu_open():
 					action_pressed[index] = false
-					main_controller.close_base_menu_action()
+					main_controller.close_active_menu_action()
 				elif index == 1:
 					main_controller.collect_action_held = true
 					main_controller.primary_action()
@@ -152,7 +152,7 @@ func _update_joystick(position: Vector2) -> void:
 	if offset.length() > JOYSTICK_RADIUS:
 		offset = offset.normalized() * JOYSTICK_RADIUS
 	joystick_knob = joystick_center + offset
-	if main_controller != null and main_controller.base_menu_open:
+	if main_controller != null and main_controller.any_menu_open():
 		if player:
 			player.touch_direction = Vector2.ZERO
 		var next_axis := 0
@@ -161,7 +161,10 @@ func _update_joystick(position: Vector2) -> void:
 		elif offset.y >= JOYSTICK_RADIUS * 0.32:
 			next_axis = 1
 		if next_axis != 0 and next_axis != menu_navigation_axis:
-			main_controller.move_fabricator_selection(next_axis)
+			if main_controller.base_menu_open:
+				main_controller.move_fabricator_selection(next_axis)
+			else:
+				main_controller.move_research_selection(next_axis)
 		menu_navigation_axis = next_axis
 		queue_redraw()
 		return
@@ -177,7 +180,7 @@ func snap_to_eight_directions(direction: Vector2) -> Vector2:
 
 func _sync_player() -> void:
 	if player:
-		player.touch_sprint = action_pressed[0] and (main_controller == null or not main_controller.base_menu_open)
+		player.touch_sprint = action_pressed[0] and (main_controller == null or not main_controller.any_menu_open())
 
 func _reset_inputs() -> void:
 	joystick_touch_id = -1

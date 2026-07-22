@@ -67,7 +67,8 @@ func _run() -> void:
 	controls._input(mouse_motion)
 	_assert(controls.visible, "synthetic mouse input after touch does not hide controls")
 	_assert((player.get("touch_direction") as Vector2).x > 0.95, "synthetic mouse input does not reset joystick movement")
-	controls._end_touch(1)
+	move_press.pressed = false
+	controls._input(move_press)
 	_assert(player.get("touch_direction") == Vector2.ZERO, "wheel release stops movement")
 	main.set("base_menu_open", true)
 	player.set("controls_locked", true)
@@ -79,6 +80,13 @@ func _run() -> void:
 	controls._update_joystick(controls.joystick_center + Vector2.DOWN * controls.JOYSTICK_RADIUS)
 	_assert(int(main.get("fabricator_selection")) == 5, "joystick down selects the next fabricator item")
 	main.call("_close_base_menu")
+	main.set("research_menu_open", true)
+	player.set("controls_locked", true)
+	main.set("research_selection", 1)
+	controls.menu_navigation_axis = 0
+	controls._update_joystick(controls.joystick_center + Vector2.DOWN * controls.JOYSTICK_RADIUS)
+	_assert(int(main.get("research_selection")) == 2, "joystick navigates research choices without moving the player")
+	main.call("_close_research_menu")
 
 	var run_press := InputEventScreenTouch.new()
 	run_press.index = 2
@@ -86,14 +94,17 @@ func _run() -> void:
 	run_press.pressed = true
 	controls._input(run_press)
 	_assert(bool(player.get("touch_sprint")), "RUN button enables sprint")
-	controls._end_touch(2)
+	run_press.pressed = false
+	controls._input(run_press)
 	_assert(not bool(player.get("touch_sprint")), "RUN release disables sprint")
 	main.set("base_menu_open", true)
 	player.set("controls_locked", true)
+	run_press.pressed = true
 	controls._input(run_press)
 	_assert(not bool(main.get("base_menu_open")), "RUN closes the fabricator menu on touch devices")
 	_assert(not bool(player.get("touch_sprint")), "closing the menu does not start sprinting")
-	controls._end_touch(2)
+	run_press.pressed = false
+	controls._input(run_press)
 
 	var collect_press := InputEventScreenTouch.new()
 	collect_press.index = 4
@@ -101,7 +112,8 @@ func _run() -> void:
 	collect_press.pressed = true
 	controls._input(collect_press)
 	_assert(bool(main.get("collect_action_held")), "Z touch starts resource collection hold")
-	controls._end_touch(4)
+	collect_press.pressed = false
+	controls._input(collect_press)
 	_assert(not bool(main.get("collect_action_held")), "Z touch release stops resource collection hold")
 
 	var place_press := InputEventScreenTouch.new()
@@ -110,7 +122,8 @@ func _run() -> void:
 	place_press.pressed = true
 	controls._input(place_press)
 	_assert(bool(main.get("placement_action_held")), "X touch begins placement hold")
-	controls._end_touch(3)
+	place_press.pressed = false
+	controls._input(place_press)
 	_assert(not bool(main.get("placement_action_held")), "X touch release ends placement hold")
 
 	main.set("shelter_open", true)
@@ -127,7 +140,8 @@ func _run() -> void:
 	shelter_z.pressed = true
 	controls._input(shelter_z)
 	_assert(not bool(main.get("shelter_open")), "the single mobile Z action sleeps until morning")
-	controls._end_touch(8)
+	shelter_z.pressed = false
+	controls._input(shelter_z)
 
 	if failures == 0:
 		print("TOUCH_CONTROLS_TEST: PASS")

@@ -28,7 +28,7 @@ func _test_placement(main: Node2D) -> void:
 func _test_base_levels(main: Node2D) -> void:
 	var radius_level_one: int = main.safe_radius_tiles()
 	main.box_count = 5
-	main.fabricator_selection = 15
+	main.fabricator_selection = 13
 	main._craft_selected_block()
 	_assert(main.base_level == 2 and main.safe_radius_tiles() == radius_level_one + 3, "base upgrade expands warmth by three tiles")
 	_assert(main.recipe_unlocked(3) and not main.recipe_unlocked(4), "level two unlocks splitter but keeps bridge locked")

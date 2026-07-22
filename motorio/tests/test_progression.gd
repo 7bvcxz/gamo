@@ -49,14 +49,24 @@ func _run() -> void:
 	_assert((main.get_node("UI/Throughput") as Label).text.contains("분당 상자  3"), "BOX per minute is visible")
 
 	main.box_count = 5
-	main.fabricator_selection = 15
+	main.fabricator_selection = 13
 	main.call("_craft_selected_block")
 	_assert(main.base_level == 2 and main.box_count == 0, "five boxes upgrade the base to level two")
 	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 3, "level two base guarantees three nearby minerals")
 	main.box_count = 25
-	main.fabricator_selection = 15
+	main.fabricator_selection = 13
 	main.call("_craft_selected_block")
 	_assert(main.base_level == 3 and get_nodes_in_group("deposit_copper").any(func(node): return node.get_meta("base_level_component", 0) == 3), "level three base guarantees one nearby copper deposit")
+	main.mineral_count = 30
+	main.resource_counts["copper"] = 8
+	main.fabricator_selection = 12
+	main.call("_craft_selected_block")
+	await physics_frame
+	var labs: Array[Node] = get_nodes_in_group("research_lab")
+	_assert(labs.size() == 1 and not (labs[0] as ResearchLab).installed, "level three base crafts one movable 3x3 research lab")
+	var lab_shape := (labs[0].get_node("CollisionShape2D") as CollisionShape2D).shape as RectangleShape2D
+	_assert(lab_shape.size == Vector2(94, 94), "research lab collision occupies a three-by-three tile footprint")
+	_assert(main.mineral_count == 0 and main.resource_counts["copper"] == 0, "research lab consumes its listed resources")
 	main.base_level = 2
 	main.box_count = 5
 	main.fabricator_selection = 3
