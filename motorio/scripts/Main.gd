@@ -39,6 +39,7 @@ const SAVE_PATH := "user://motorio_save.cfg"
 @onready var version_label: Label = $UI/UIRoot/Version
 @onready var touch_controls: TouchControls = $UI/UIRoot/TouchControls
 @onready var throughput_label: Label = $UI/UIRoot/Throughput
+@onready var hud_chrome: Control = $UI/UIRoot/HudChrome
 @onready var quest_ui: Control = $UI/UIRoot/Quest
 @onready var economy_ui: Control = $UI/UIRoot/Economy
 @onready var tutorial_ui: Control = $UI/UIRoot/Tutorial
@@ -107,6 +108,7 @@ var freeze_countdown := -1.0
 var autosave_elapsed := 0.0
 var save_feedback_remaining := 0.0
 var automatic_persistence_enabled := OS.has_feature("web") or OS.has_feature("release")
+var cat_direction_gallery: Array[CatBlock] = []
 
 func _ready() -> void:
 	add_to_group("main_controller")
@@ -129,6 +131,7 @@ func _ready() -> void:
 	shelter_ui.main_controller = self
 	climate_ui.main_controller = self
 	cold_world_fog.main_controller = self
+	hud_chrome.main_controller = self
 	tutorial_previous_button.pressed.connect(_developer_previous_tutorial)
 	tutorial_next_button.pressed.connect(_developer_advance_tutorial)
 	developer_money_button.pressed.connect(_developer_add_resources)
@@ -281,6 +284,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or key.echo:
 		return
+	if key.pressed and key.physical_keycode == KEY_F9:
+		_toggle_cat_direction_gallery()
+		return
 	if key.pressed and any_menu_open():
 		if key.physical_keycode in [KEY_UP, KEY_W]:
 			if base_menu_open: move_fabricator_selection(-1)
@@ -316,6 +322,28 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	match key.physical_keycode:
 		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
 			select_inventory_slot(int(key.physical_keycode - KEY_1))
+
+func _toggle_cat_direction_gallery() -> void:
+	if not cat_direction_gallery.is_empty():
+		for cat in cat_direction_gallery:
+			if is_instance_valid(cat):
+				cat.queue_free()
+		cat_direction_gallery.clear()
+		return
+	var directions: Array[Vector2] = [Vector2.DOWN, Vector2.UP, Vector2.LEFT, Vector2.RIGHT]
+	var offsets: Array[Vector2] = [Vector2(-110, -65), Vector2(110, -65), Vector2(-110, 80), Vector2(110, 80)]
+	for index in directions.size():
+		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock
+		cat.direction = directions[index]
+		cat.active_on_ready = false
+		cat.freeze = true
+		cat.collision_layer = 0
+		cat.collision_mask = 0
+		cat.scale = Vector2.ONE * 2.4
+		cat.z_index = 24
+		cat.position = player.position + offsets[index]
+		add_child(cat)
+		cat_direction_gallery.append(cat)
 
 func primary_action() -> void:
 	if freeze_countdown >= 0.0:
@@ -1612,30 +1640,31 @@ func _create_world_walls() -> void:
 
 func _draw() -> void:
 	# Snow terrain.
-	draw_rect(Rect2(0, 0, WORLD_SIZE, WORLD_SIZE), Color("edf1f2"))
+	draw_rect(Rect2(0, 0, WORLD_SIZE, WORLD_SIZE), Color("f2f5f5"))
 
-	# Deterministic patches break up the grid and hint at future resource fields.
+	# Deterministic wind-swept snow marks avoid square tile patches.
 	for y in range(WORLD_TILES):
 		for x in range(WORLD_TILES):
 			var noise_value := (x * 37 + y * 73 + x * y * 3) % 97
 			if noise_value < 8:
-				var cell := Rect2(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-				draw_rect(cell, Color("e4eaec"))
+				var drift_center := Vector2(x * TILE_SIZE + 9 + noise_value * 1.7, y * TILE_SIZE + 12 + noise_value)
+				draw_arc(drift_center, 7.0 + float(noise_value) * 0.6, PI * 1.08, PI * 1.86, 9, Color(0.64, 0.76, 0.78, 0.11), 1.0)
+				draw_circle(drift_center + Vector2(8, 3), 1.2, Color(1.0, 1.0, 1.0, 0.65))
 
-	# Saturated warm rings make the safe frontier unmistakable against snow.
+	# A restrained cream warmth wash keeps the habitat as the focal point.
 	var warm_radius := float(safe_radius_tiles() * TILE_SIZE)
-	for ring in range(12, 0, -1):
-		var ratio := float(ring) / 12.0
-		var alpha := 0.035 + (1.0 - ratio) * 0.055
-		draw_circle(base.position, warm_radius * ratio, Color(1.0, 0.42, 0.08, alpha))
-	draw_arc(base.position, warm_radius, 0.0, TAU, 128, Color(0.98, 0.58, 0.20, 0.42), 3.0)
+	for ring in range(16, 0, -1):
+		var ratio := float(ring) / 16.0
+		var alpha := 0.012 + (1.0 - ratio) * 0.035
+		draw_circle(base.position, warm_radius * ratio, Color(1.0, 0.66, 0.29, alpha))
+	draw_arc(base.position, warm_radius, 0.0, TAU, 128, Color(0.91, 0.64, 0.30, 0.28), 2.0)
 
 	# One-pixel grid: 100 × 100 cells.
-	var grid_color := Color(0.42, 0.49, 0.52, 0.18)
+	var grid_color := Color(0.37, 0.48, 0.52, 0.09)
 	for i in range(WORLD_TILES + 1):
 		var p := float(i * TILE_SIZE)
 		draw_line(Vector2(p, 0), Vector2(p, WORLD_SIZE), grid_color, 1.0)
 		draw_line(Vector2(0, p), Vector2(WORLD_SIZE, p), grid_color, 1.0)
 
 	# World border.
-	draw_rect(Rect2(1, 1, WORLD_SIZE - 2, WORLD_SIZE - 2), Color("788a91"), false, 3.0)
+	draw_rect(Rect2(1, 1, WORLD_SIZE - 2, WORLD_SIZE - 2), Color("8fa1a6"), false, 2.0)

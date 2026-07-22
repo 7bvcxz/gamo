@@ -63,11 +63,17 @@ func get_arrow_points(index: int) -> PackedVector2Array:
 
 func _draw() -> void:
 	var tile_rect := Rect2(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0, TILE_SIZE, TILE_SIZE)
-	draw_rect(tile_rect, Color("303941"))
-	draw_rect(tile_rect.grow(-2.0), Color("59636a"), false, 2.0)
+	draw_rect(tile_rect, Color(0.09, 0.16, 0.18, 0.32))
+	draw_rect(tile_rect.grow(-2.0), Color("24454b"))
+	draw_rect(tile_rect.grow(-4.0), Color("3d6267"))
+	draw_line(Vector2(-12, -10), Vector2(12, -10), Color(0.72, 0.90, 0.89, 0.42), 1.0)
+	draw_line(Vector2(-12, 10), Vector2(12, 10), Color(0.04, 0.10, 0.11, 0.55), 2.0)
+	for roller_x in [-9.0, 0.0, 9.0]:
+		draw_circle(Vector2(roller_x, -12), 1.5, Color("d5b45a"))
+		draw_circle(Vector2(roller_x, 12), 1.5, Color("d5b45a"))
 
 	# Three moving chevrons indicate the belt direction.
 	draw_set_transform(Vector2.ZERO, direction.angle())
 	for index in range(2):
-		draw_polyline(get_arrow_points(index), Color("e0a83d"), 2.5)
+		draw_polyline(get_arrow_points(index), Color("ffd067"), 2.4)
 	draw_set_transform(Vector2.ZERO)

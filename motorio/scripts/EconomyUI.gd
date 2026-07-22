@@ -31,15 +31,15 @@ func _draw() -> void:
 	var shown := visible_resource_indices()
 	if shown.is_empty():
 		return
-	var panel := Rect2(10, 12, 138, 14 + shown.size() * 22)
-	draw_rect(panel, Color(0.025, 0.05, 0.042, 0.42))
-	draw_rect(panel, Color(0.40, 0.56, 0.48, 0.48), false, 1.0)
+	var panel := Rect2(10, 12, 142, 16 + shown.size() * 23)
+	UIVisuals.draw_panel(self, panel, Color(0.04, 0.11, 0.115, 0.58), Color(0.45, 0.67, 0.63, 0.48), 12, 1)
 	var font := UIFont.FONT
 	for row in shown.size():
 		var index: int = shown[row]
-		var position := Vector2(18, 32 + row * 22)
+		var position := Vector2(18, 34 + row * 23)
 		var resource_color: Color = RESOURCE_COLORS[index]
 		resource_color.a = 0.78
-		draw_circle(position + Vector2(5, -5), 5.0, resource_color)
+		draw_circle(position + Vector2(5, -5), 6.0, Color(0.02, 0.08, 0.09, 0.6))
+		draw_circle(position + Vector2(5, -5), 4.2, resource_color)
 		draw_circle(position + Vector2(4, -6), 1.5, Color(1.0, 1.0, 1.0, 0.48))
 		draw_string(font, position + Vector2(16, 0), "%s  %d" % [RESOURCE_NAMES[index], values[index]], HORIZONTAL_ALIGNMENT_LEFT, 102, 12, Color(0.93, 0.97, 0.94, 0.78))

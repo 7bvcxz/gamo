@@ -16,10 +16,10 @@ func set_bridged(value: bool) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	draw_rect(Rect2(-16, -16, 32, 32), WATER_COLOR)
-	draw_rect(Rect2(-15, -15, 30, 30), EDGE_COLOR, false, 2.0)
+	draw_rect(Rect2(-16, -16, 32, 32), Color("1d6c80"))
+	draw_rect(Rect2(-16, -16, 32, 32), Color(0.46, 0.85, 0.91, 0.22), false, 1.0)
 	var wave := WAVE_COLOR if not get_meta("bridged", false) else Color("376a70")
-	draw_line(Vector2(-12, -6), Vector2(3, -6), wave, 2.0)
-	draw_line(Vector2(-3, 6), Vector2(12, 6), wave, 2.0)
+	draw_arc(Vector2(-5, -5), 8.0, PI * 1.1, PI * 1.75, 8, wave, 1.5)
+	draw_arc(Vector2(5, 7), 8.0, PI * 0.1, PI * 0.75, 8, wave, 1.5)
 	draw_line(Vector2(-14, 14), Vector2(-5, 5), Color(0.72, 0.94, 1.0, 0.55), 1.0)
 	draw_line(Vector2(14, -14), Vector2(6, -6), Color(0.72, 0.94, 1.0, 0.55), 1.0)

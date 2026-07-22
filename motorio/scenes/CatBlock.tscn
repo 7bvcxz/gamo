@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/CatBlock.gd" id="1_cat"]
-[ext_resource type="Texture2D" path="res://assets/characters/worker_cat_sheet.png" id="2_cat_texture"]
+[ext_resource type="Texture2D" path="res://assets/characters/worker_cat_directional.png" id="2_cat_texture"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape_cat"]
 size = Vector2(31, 31)
@@ -27,7 +27,7 @@ texture_filter = 1
 texture = ExtResource("2_cat_texture")
 hframes = 2
 vframes = 2
-scale = Vector2(0.07, 0.07)
+scale = Vector2(0.068, 0.068)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape_cat")

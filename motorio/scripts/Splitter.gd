@@ -23,12 +23,12 @@ func _on_body_entered(body: Node2D) -> void:
 
 func _draw() -> void:
 	var tile := Rect2(-16, -16, 32, 32)
-	draw_rect(tile, Color("38464c"))
-	draw_rect(tile.grow(-2), Color("718087"), false, 2.0)
+	draw_rect(tile, Color(0.03, 0.10, 0.11, 0.32))
+	UIVisuals.draw_panel(self, tile.grow(-2), Color("31565c"), Color("6f9293"), 5, 2)
 	draw_set_transform(Vector2.ZERO, direction.angle())
-	draw_line(Vector2(-12, 0), Vector2(-2, 0), Color("efb94c"), 3.0)
-	draw_line(Vector2(-2, 0), Vector2(8, -9), Color("efb94c"), 3.0)
-	draw_line(Vector2(-2, 0), Vector2(8, 9), Color("efb94c"), 3.0)
+	draw_line(Vector2(-12, 0), Vector2(-2, 0), Color("ffd067"), 3.0)
+	draw_line(Vector2(-2, 0), Vector2(8, -9), Color("ffd067"), 3.0)
+	draw_line(Vector2(-2, 0), Vector2(8, 9), Color("ffd067"), 3.0)
 	draw_polygon(PackedVector2Array([Vector2(11, -9), Vector2(5, -13), Vector2(5, -5)]), PackedColorArray([Color("efb94c")]))
 	draw_polygon(PackedVector2Array([Vector2(11, 9), Vector2(5, 5), Vector2(5, 13)]), PackedColorArray([Color("efb94c")]))
 	draw_set_transform(Vector2.ZERO)

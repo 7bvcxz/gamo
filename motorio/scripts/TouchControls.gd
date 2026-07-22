@@ -210,18 +210,26 @@ func _draw() -> void:
 		_draw_action_button(1)
 		return
 	# Movement wheel on the lower right.
-	draw_circle(joystick_center, JOYSTICK_RADIUS, Color(0.05, 0.07, 0.065, 0.62))
-	draw_arc(joystick_center, JOYSTICK_RADIUS, 0.0, TAU, 48, Color(0.82, 0.88, 0.82, 0.55), 3.0)
-	draw_circle(joystick_knob, KNOB_RADIUS, Color(0.84, 0.67, 0.25, 0.78))
+	draw_circle(joystick_center, JOYSTICK_RADIUS + 4.0, Color(0.02, 0.07, 0.08, 0.28))
+	draw_circle(joystick_center, JOYSTICK_RADIUS, Color(0.035, 0.12, 0.13, 0.62))
+	draw_arc(joystick_center, JOYSTICK_RADIUS, 0.0, TAU, 48, Color(0.50, 0.72, 0.68, 0.55), 2.0)
+	for tick in range(8):
+		var tick_direction := Vector2.from_angle(float(tick) * TAU / 8.0)
+		draw_line(joystick_center + tick_direction * 47.0, joystick_center + tick_direction * 54.0, Color(0.73, 0.86, 0.81, 0.42), 2.0)
+	draw_circle(joystick_knob + Vector2(2, 3), KNOB_RADIUS + 1.0, Color(0.03, 0.08, 0.08, 0.38))
+	draw_circle(joystick_knob, KNOB_RADIUS, Color(0.90, 0.65, 0.24, 0.9))
+	draw_circle(joystick_knob + Vector2(-6, -7), 6.0, Color(1.0, 0.86, 0.48, 0.42))
 
 	# Three action buttons on the lower left.
 	for index in button_centers.size():
 		_draw_action_button(index)
 
 func _draw_action_button(index: int) -> void:
-	var fill := Color(0.84, 0.49, 0.18, 0.88) if action_pressed[index] else Color(0.16, 0.21, 0.19, 0.72)
+	var fill := Color(0.88, 0.52, 0.18, 0.94) if action_pressed[index] else Color(0.04, 0.14, 0.15, 0.78)
+	draw_circle(button_centers[index] + Vector2(2, 3), BUTTON_RADIUS + 1.0, Color(0.02, 0.06, 0.07, 0.35))
 	draw_circle(button_centers[index], BUTTON_RADIUS, fill)
-	draw_arc(button_centers[index], BUTTON_RADIUS, 0.0, TAU, 32, Color(0.9, 0.92, 0.86, 0.65), 2.0)
+	draw_arc(button_centers[index], BUTTON_RADIUS, 0.0, TAU, 32, Color(0.55, 0.76, 0.71, 0.75), 2.0)
+	draw_arc(button_centers[index], BUTTON_RADIUS - 4.0, PI * 1.05, PI * 1.75, 14, Color(1.0, 0.91, 0.67, 0.35), 2.0)
 	var label: String = BUTTON_LABELS[index]
 	var font: Font = UIFont.FONT
 	var font_size := 11 if index == 0 else 16

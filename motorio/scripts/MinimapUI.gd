@@ -53,9 +53,8 @@ func _draw() -> void:
 		return
 	var panel := Rect2(Vector2.ZERO, size)
 	var inner := panel.grow(-MAP_PADDING)
-	draw_rect(panel, Color(0.035, 0.055, 0.05, 0.9))
-	draw_rect(panel, Color("9caf9f"), false, 2.0)
-	draw_rect(inner, Color("1a3028"))
+	UIVisuals.draw_panel(self, panel, Color(0.035, 0.10, 0.105, 0.91), Color(0.48, 0.70, 0.67, 0.72), 14, 2)
+	UIVisuals.draw_panel(self, inner, Color("142d31"), Color(0.76, 0.90, 0.86, 0.2), 9, 1)
 	for point in water_points:
 		draw_circle(world_to_map(point), 1.2, Color("397f94"))
 

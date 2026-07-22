@@ -31,8 +31,27 @@ func _run() -> void:
 	var visual_cat := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
 	_assert(visual_cat.get_node_or_null("Sprite2D") != null, "worker cats use the illustrated character sprite")
 	_assert(conveyor.z_index < visual_box.z_index and conveyor.z_index < visual_cat.z_index, "conveyor renders below every solid block")
+	root.add_child(visual_cat)
+	await process_frame
+	var cat_sprite := visual_cat.get_node("Sprite2D") as Sprite2D
+	for direction_and_frame in [[Vector2.DOWN, 0], [Vector2.UP, 1], [Vector2.LEFT, 2], [Vector2.RIGHT, 3]]:
+		visual_cat.direction = direction_and_frame[0]
+		visual_cat._update_sprite_animation()
+		_assert(cat_sprite.frame == direction_and_frame[1], "cat direction maps to a distinct cardinal sprite frame")
 	visual_box.free()
 	visual_cat.free()
+	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	main._toggle_cat_direction_gallery()
+	_assert(main.cat_direction_gallery.size() == 4, "F9 visual gallery uses four real CatBlock instances")
+	for index in main.cat_direction_gallery.size():
+		var gallery_cat: CatBlock = main.cat_direction_gallery[index]
+		gallery_cat._update_sprite_animation()
+		_assert((gallery_cat.get_node("Sprite2D") as Sprite2D).frame == index, "visual gallery preserves down, up, left, right frame order")
+	main._toggle_cat_direction_gallery()
+	_assert(main.cat_direction_gallery.is_empty(), "F9 visual gallery cleans up all preview cats")
+	main.free()
 
 	await _test_box_transport(conveyor)
 	await _test_player_overlap()

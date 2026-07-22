@@ -119,16 +119,22 @@ func _consume_hunger(amount: float) -> void:
 func _update_sprite_animation() -> void:
 	if cat_sprite == null:
 		return
-	cat_sprite.flip_h = direction.x < -0.1
-	cat_sprite.frame = 1 if fmod(animation_elapsed, 4.0) > 3.72 else 0
+	cat_sprite.flip_h = false
+	if absf(direction.x) > absf(direction.y):
+		cat_sprite.frame = 3 if direction.x > 0.0 else 2
+	else:
+		cat_sprite.frame = 0 if direction.y > 0.0 else 1
+	var breathe := 1.0 + sin(animation_elapsed * 2.2) * 0.012
+	cat_sprite.scale = Vector2(0.068 / breathe, 0.068 * breathe)
 
 func _draw() -> void:
 	var body_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "fisher": Color("69b9cf"), "server": Color("78b589")}.get(worker_type, Color("d99a56"))
 	# Small role badge keeps worker types readable without tinting the illustrated fur.
-	draw_circle(Vector2(10, 10), 4.0, Color(0.05, 0.06, 0.07, 0.82))
-	draw_circle(Vector2(10, 10), 2.6, body_color)
-	draw_rect(Rect2(-13, 13, 26, 3), Color("252b29"))
-	draw_rect(Rect2(-13, 13, 26.0 * hunger / 100.0, 3), Color("8ee36b") if hunger >= 35.0 else Color("e36b52"))
+	draw_circle(Vector2(8, 9), 3.0, Color(0.05, 0.08, 0.08, 0.78))
+	draw_circle(Vector2(8, 9), 1.9, body_color)
+	if hunger < 70.0:
+		UIVisuals.draw_panel(self, Rect2(-10, 14, 20, 3), Color(0.05, 0.09, 0.09, 0.72), Color(0.35, 0.48, 0.45, 0.45), 2, 1)
+		draw_rect(Rect2(-9, 15, 18.0 * hunger / 100.0, 1), Color("e3bd52") if hunger >= 35.0 else Color("df6655"))
 	if spark_remaining > 0.0:
 		var spark_center := direction * TILE_SIZE
 		var pulse := 1.0 + spark_remaining / SPARK_DURATION

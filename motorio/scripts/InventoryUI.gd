@@ -17,9 +17,10 @@ func _draw() -> void:
 	var items: Array = main_controller.inventory
 	for index in SLOT_COUNT:
 		var rect := Rect2(start + Vector2(index * (SLOT_SIZE + SLOT_GAP), 0.0), Vector2.ONE * SLOT_SIZE)
-		draw_rect(rect, Color(0.07, 0.1, 0.09, 0.82))
 		var selected: bool = index == main_controller.selected_slot
-		draw_rect(rect, Color("f2bd45") if selected else Color("7e9187"), false, 3.0 if selected else 1.0)
+		UIVisuals.draw_panel(self, rect, Color(0.035, 0.10, 0.105, 0.88), Color("f2bd45") if selected else Color(0.43, 0.58, 0.56, 0.65), 8, 3 if selected else 1)
+		if selected:
+			draw_rect(Rect2(rect.position + Vector2(8, -3), Vector2(rect.size.x - 16, 3)), Color("f2bd45"))
 		if index < items.size():
 			var item: Dictionary = items[index]
 			var inner: Rect2 = rect.grow(-7.0)

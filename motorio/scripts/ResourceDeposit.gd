@@ -24,9 +24,13 @@ func resource_color() -> Color:
 
 func _draw() -> void:
 	var color := resource_color()
+	draw_set_transform(Vector2(2, 11), 0.0, Vector2(1.0, 0.36))
+	draw_circle(Vector2.ZERO, 14.0, Color(0.04, 0.09, 0.11, 0.24))
+	draw_set_transform(Vector2.ZERO)
 	draw_polygon(PackedVector2Array([Vector2(-14, 10), Vector2(-10, -8), Vector2(0, -15), Vector2(12, -9), Vector2(15, 9), Vector2(4, 14)]), PackedColorArray([color.darkened(0.28)]))
 	draw_polygon(PackedVector2Array([Vector2(-9, 7), Vector2(-6, -5), Vector2(1, -11), Vector2(9, -6), Vector2(11, 7), Vector2(3, 10)]), PackedColorArray([color]))
-	draw_circle(Vector2(-3, -3), 3.0, color.lightened(0.35))
+	draw_polygon(PackedVector2Array([Vector2(-6, 3), Vector2(-4, -4), Vector2(0, -9), Vector2(-1, 2)]), PackedColorArray([Color(color.lightened(0.42), 0.72)]))
+	draw_circle(Vector2(-3, -3), 2.0, color.lightened(0.48))
 	if power_cost > 0:
 		draw_line(Vector2(-4, 13), Vector2(0, 7), Color("f6dc58"), 2.0)
 		draw_line(Vector2(0, 7), Vector2(4, 13), Color("f6dc58"), 2.0)

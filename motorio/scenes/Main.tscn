@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="2_player"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://scripts/ClimateUI.gd" id="12_climate"]
 [ext_resource type="Script" path="res://scripts/ColdWorldFog.gd" id="13_cold_world_fog"]
 [ext_resource type="Script" path="res://scripts/ResearchMenu.gd" id="14_research_menu"]
+[ext_resource type="Script" path="res://scripts/HudChrome.gd" id="15_hud_chrome"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -126,8 +127,18 @@ theme_override_colors/font_color = Color(0.65, 0.88, 0.7, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "기지 1단계\n분당 상자  0"
+
+[node name="HudChrome" type="Control" parent="UI/UIRoot"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("15_hud_chrome")
 
 [node name="SurvivalStatus" type="Label" parent="UI/UIRoot"]
 anchor_left = 0.5
@@ -137,10 +148,10 @@ offset_top = 132.0
 offset_right = 156.0
 offset_bottom = 168.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.83, 0.93, 0.96, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
+theme_override_colors/font_color = Color(0.89, 0.96, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0.02, 0.08, 0.09, 0.92)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 12
 text = "1일  00:00   체온 100   온기 10"
 horizontal_alignment = 1
@@ -157,7 +168,7 @@ grow_horizontal = 0
 theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
 theme_override_colors/font_hover_color = Color(1, 0.84, 0.4, 1)
 theme_override_font_sizes/font_size = 13
-text = "개발: 이전 단계"
+text = "‹ 이전"
 disabled = true
 
 [node name="TutorialNext" type="Button" parent="UI/UIRoot"]
@@ -172,7 +183,7 @@ grow_horizontal = 0
 theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
 theme_override_colors/font_hover_color = Color(1, 0.84, 0.4, 1)
 theme_override_font_sizes/font_size = 13
-text = "개발: 다음 단계"
+text = "다음 ›"
 
 [node name="DeveloperMoney" type="Button" parent="UI/UIRoot"]
 z_index = 30
@@ -186,7 +197,7 @@ grow_horizontal = 2
 theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
 theme_override_colors/font_hover_color = Color(1, 0.84, 0.4, 1)
 theme_override_font_sizes/font_size = 13
-text = "Money +10"
+text = "+10 자원"
 
 [node name="DeveloperMinute" type="Button" parent="UI/UIRoot"]
 z_index = 30
@@ -200,7 +211,7 @@ grow_horizontal = 2
 theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
 theme_override_colors/font_hover_color = Color(1, 0.84, 0.4, 1)
 theme_override_font_sizes/font_size = 13
-text = "+1분"
+text = "+1분 시간"
 
 [node name="SaveGame" type="Button" parent="UI/UIRoot"]
 z_index = 30

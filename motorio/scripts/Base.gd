@@ -62,30 +62,42 @@ func _on_entrance_body_entered(body: Node2D) -> void:
 		resource.queue_free()
 
 func _draw() -> void:
-	# Layered polar habitat: insulated hull, window ring, roof panels and warm core.
-	draw_circle(Vector2(7, 10), RADIUS + 3.0, Color(0.02, 0.03, 0.025, 0.4))
-	draw_circle(Vector2.ZERO, RADIUS, Color("44535a"))
-	draw_circle(Vector2.ZERO, 91.0, Color("91a4a8"))
-	draw_circle(Vector2.ZERO, 86.0, Color("263b3b"))
-	draw_arc(Vector2.ZERO, 88.0, 0.0, TAU, 72, Color("e3aa43"), 4.0)
-	draw_arc(Vector2.ZERO, 80.0, 0.0, TAU, 72, Color("71888a"), 2.0)
+	# Cohesive arctic brass habitat: soft snow footing, insulated teal hull and warm core.
+	draw_set_transform(Vector2(7, 12), 0.0, Vector2(1.0, 0.55))
+	draw_circle(Vector2.ZERO, RADIUS + 5.0, Color(0.06, 0.13, 0.15, 0.28))
+	draw_set_transform(Vector2.ZERO)
+	draw_circle(Vector2.ZERO, RADIUS + 4.0, Color("d9e4e3"))
+	draw_arc(Vector2.ZERO, RADIUS + 2.0, PI * 0.1, PI * 0.9, 72, Color(1.0, 1.0, 1.0, 0.75), 5.0)
+	draw_circle(Vector2.ZERO, RADIUS - 3.0, Color("294b50"))
+	draw_circle(Vector2.ZERO, 87.0, Color("17363a"))
+	draw_arc(Vector2.ZERO, 91.0, 0.0, TAU, 72, Color("dcae55"), 4.0)
+	draw_arc(Vector2.ZERO, 82.0, 0.0, TAU, 72, Color(0.55, 0.76, 0.76, 0.75), 2.0)
+	for seam_index in range(12):
+		var seam_angle := seam_index * TAU / 12.0
+		var seam_start := Vector2.from_angle(seam_angle) * 84.0
+		var seam_end := Vector2.from_angle(seam_angle) * 93.0
+		draw_line(seam_start, seam_end, Color("9fb6b3"), 2.0)
 	for panel_index in range(8):
 		var panel_angle := panel_index * TAU / 8.0 + PI / 8.0
 		var panel_center := Vector2.from_angle(panel_angle) * 62.0
-		draw_circle(panel_center, 13.0, Color("30494a"))
-		draw_arc(panel_center, 10.0, 0.0, TAU, 16, Color("79a4a2"), 2.0)
+		draw_circle(panel_center + Vector2(1, 2), 13.0, Color(0.02, 0.08, 0.09, 0.55))
+		draw_circle(panel_center, 12.0, Color("31565a"))
+		draw_arc(panel_center, 9.0, 0.0, TAU, 20, Color("89b8b5"), 2.0)
 		if panel_index % 2 == 0:
 			draw_circle(panel_center, 5.0, Color("f2c35b"))
+			draw_circle(panel_center + Vector2(-1.5, -1.5), 1.8, Color(1.0, 0.95, 0.70, 0.9))
 
 	for angle_index in range(8):
 		var angle := angle_index * TAU / 8.0
 		var bolt_position := Vector2.from_angle(angle) * 78.0
 		draw_circle(bolt_position, 4.0, Color("d9c99d"))
 
-	draw_circle(Vector2.ZERO, 47.0, Color("162526"))
-	draw_arc(Vector2.ZERO, 43.0, 0.0, TAU, 48, Color("6f8f8c"), 3.0)
-	draw_circle(Vector2.ZERO, 34.0, Color("8e542b"))
-	draw_circle(Vector2.ZERO, 27.0, Color("e4a13d"))
+	draw_circle(Vector2(2, 4), 48.0, Color(0.01, 0.04, 0.05, 0.6))
+	draw_circle(Vector2.ZERO, 47.0, Color("10292c"))
+	draw_arc(Vector2.ZERO, 43.0, 0.0, TAU, 48, Color("80aaa5"), 3.0)
+	draw_circle(Vector2.ZERO, 35.0, Color("714124"))
+	draw_circle(Vector2.ZERO, 29.0, Color("d98730"))
+	draw_circle(Vector2(-4, -5), 23.0, Color(1.0, 0.68, 0.24, 0.32))
 	draw_polygon(
 		PackedVector2Array([Vector2(0, -23), Vector2(20, 14), Vector2(-20, 14)]),
 		PackedColorArray([Color("ffd65c")])
@@ -96,18 +108,18 @@ func _draw() -> void:
 	for direction in ENTRANCE_DIRECTIONS:
 		var center: Vector2 = direction * ENTRANCE_DISTANCE
 		var entrance_rect := Rect2(center - Vector2.ONE * TILE_SIZE / 2.0, Vector2.ONE * TILE_SIZE)
-		draw_rect(entrance_rect, Color("36434a"))
-		draw_rect(entrance_rect.grow(-3.0), Color("d69b35"), false, 3.0)
-		draw_rect(entrance_rect.grow(-8.0), Color("101b1d"))
-		draw_string(entrance_font, center + Vector2(-12, 4), "IN", HORIZONTAL_ALIGNMENT_CENTER, 24, 8, Color("f4d58b"))
+		UIVisuals.draw_panel(self, entrance_rect, Color("173236"), Color("d8aa51"), 5, 2)
+		draw_circle(center, 10.0, Color(0.03, 0.11, 0.12, 0.88))
+		draw_string(entrance_font, center + Vector2(-12, 4), "IN", HORIZONTAL_ALIGNMENT_CENTER, 24, 9, Color("ffd46c"))
 	var exit_center := EXIT_DIRECTION * ENTRANCE_DISTANCE
 	var exit_rect := Rect2(exit_center - Vector2.ONE * TILE_SIZE / 2.0, Vector2.ONE * TILE_SIZE)
-	draw_rect(exit_rect, Color("335d58"))
-	draw_rect(exit_rect.grow(-3.0), Color("6ed0b0"), false, 3.0)
+	UIVisuals.draw_panel(self, exit_rect, Color("173a3a"), Color("70d5b5"), 5, 2)
 	draw_polygon(PackedVector2Array([exit_center + Vector2(-7, -5), exit_center + Vector2(7, -5), exit_center + Vector2(0, 8)]), PackedColorArray([Color("b8f0cf")]))
 	var exit_font := UIFont.FONT
 	draw_string(exit_font, exit_center + Vector2(-12, 14), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 24, 8, Color("d2ffea"))
 	var shelter_center := SHELTER_DIRECTION * SHELTER_DISTANCE
-	draw_circle(shelter_center, 15.0, Color("713f35"))
-	draw_arc(shelter_center, 15.0, PI, TAU, 20, Color("f0bd4f"), 3.0)
-	draw_string(exit_font, shelter_center + Vector2(-16, 25), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 32, 8, Color("ffd9a0"))
+	draw_circle(shelter_center + Vector2(1, 2), 16.0, Color(0.10, 0.05, 0.04, 0.38))
+	draw_circle(shelter_center, 15.0, Color("6f3f32"))
+	draw_arc(shelter_center, 14.0, PI, TAU, 20, Color("f0bd4f"), 3.0)
+	draw_circle(shelter_center + Vector2(0, 3), 4.0, Color("ffb13d"))
+	draw_string(exit_font, shelter_center + Vector2(-16, 25), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 32, 8, Color("8a563c"))

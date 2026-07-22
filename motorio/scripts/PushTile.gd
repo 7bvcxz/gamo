@@ -15,10 +15,13 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 
 func _draw() -> void:
 	var tile_rect := Rect2(-TILE_SIZE / 2.0, -TILE_SIZE / 2.0, TILE_SIZE, TILE_SIZE)
-	draw_rect(tile_rect, Color("7a4f2a"))
-	draw_rect(tile_rect.grow(-3.0), Color("9a6938"), false, 2.0)
-	draw_line(Vector2(-10, -10), Vector2(10, 10), Color(0.33, 0.19, 0.09, 0.7), 2.0)
-	draw_line(Vector2(10, -10), Vector2(-10, 10), Color(0.33, 0.19, 0.09, 0.7), 2.0)
+	draw_rect(Rect2(tile_rect.position + Vector2(2, 3), tile_rect.size), Color(0.12, 0.07, 0.03, 0.3))
+	UIVisuals.draw_panel(self, tile_rect, Color("9b6736"), Color("5b361d"), 4, 2)
+	draw_rect(Rect2(-13, -12, 26, 5), Color("b97c40"))
+	draw_line(Vector2(-11, 10), Vector2(11, 10), Color("5f391f"), 2.0)
+	draw_line(Vector2(-11, -10), Vector2(-11, 11), Color(1.0, 0.78, 0.43, 0.28), 1.0)
+	for rivet in [Vector2(-11, -10), Vector2(11, -10), Vector2(-11, 10), Vector2(11, 10)]:
+		draw_circle(rivet, 1.3, Color("e2b35c"))
 	# Ginger-and-cream worker cat sticker matching the illustrated cat family.
 	draw_circle(Vector2(0, -3), 8.0, Color("fff0cf"))
 	draw_polygon(PackedVector2Array([Vector2(-7, -7), Vector2(-5, -14), Vector2(-1, -9)]), PackedColorArray([Color("f3a34d")]))

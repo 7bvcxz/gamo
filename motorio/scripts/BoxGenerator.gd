@@ -78,15 +78,16 @@ func _cardinal(value: Vector2) -> Vector2:
 	return Vector2(0.0, signf(value.y))
 
 func _draw() -> void:
-	draw_rect(Rect2(-31, -15, 62, 30), Color("344b50"))
-	draw_rect(Rect2(-29, -13, 58, 26), Color("587077"), false, 3.0)
-	draw_rect(Rect2(-24, -9, 18, 18), Color("18363b"))
-	draw_circle(Vector2(-15, 0), 5.0, Color("8ee4df"))
+	draw_rect(Rect2(-29, -12, 62, 30), Color(0.03, 0.09, 0.10, 0.28))
+	UIVisuals.draw_panel(self, Rect2(-31, -15, 62, 30), Color("294d53"), Color("779598"), 6, 2)
+	UIVisuals.draw_panel(self, Rect2(-25, -10, 19, 20), Color("123338"), Color("5d8586"), 5, 1)
+	draw_circle(Vector2(-15, 0), 6.0, Color("67c8c7"))
+	draw_circle(Vector2(-17, -2), 2.0, Color(0.86, 1.0, 0.98, 0.65))
 	var press_offset := sin(press_phase) * 1.5 if stored_minerals > 0 or pending_boxes > 0 else 0.0
-	draw_rect(Rect2(5 + press_offset, -10, 20, 20), Color("79502e"))
+	UIVisuals.draw_panel(self, Rect2(5 + press_offset, -10, 20, 20), Color("976237"), Color("d2a259"), 3, 1)
 	draw_line(Vector2(8, -7), Vector2(22, 7), Color("c39455"), 2.0)
 	draw_line(Vector2(22, -7), Vector2(8, 7), Color("c39455"), 2.0)
-	draw_polygon(PackedVector2Array([Vector2(30, 0), Vector2(22, -6), Vector2(22, 6)]), PackedColorArray([Color("f0bd4f")]))
+	draw_polygon(PackedVector2Array([Vector2(30, 0), Vector2(22, -6), Vector2(22, 6)]), PackedColorArray([Color("ffd067")]))
 	if production_flash > 0.0:
 		draw_circle(Vector2(30, 0), 10.0 + production_flash * 10.0, Color(1.0, 0.82, 0.3, production_flash), false, 3.0)
 	var font := UIFont.FONT
