@@ -44,6 +44,8 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var cold_world_fog: Node2D = $ColdWorldFog
 @onready var tutorial_previous_button: Button = $UI/TutorialPrevious
 @onready var tutorial_next_button: Button = $UI/TutorialNext
+@onready var developer_money_button: Button = $UI/DeveloperMoney
+@onready var developer_minute_button: Button = $UI/DeveloperMinute
 
 var box_count := 0
 var mineral_count := 0
@@ -120,6 +122,8 @@ func _ready() -> void:
 	cold_world_fog.main_controller = self
 	tutorial_previous_button.pressed.connect(_developer_previous_tutorial)
 	tutorial_next_button.pressed.connect(_developer_advance_tutorial)
+	developer_money_button.pressed.connect(_developer_add_resources)
+	developer_minute_button.pressed.connect(_developer_advance_minute)
 	_update_tutorial_developer_buttons()
 	tutorial_start_position = player.position
 	minimap.main_controller = self
@@ -1115,9 +1119,9 @@ func _process(delta: float) -> void:
 	if collect_action_held and freeze_countdown < 0.0:
 		_collect_nearby_mineral_resources()
 
-func _update_survival(delta: float) -> void:
+func _update_survival(delta: float, force_clock: bool = false) -> void:
 	if not shelter_open:
-		if tutorial_complete():
+		if tutorial_complete() or force_clock:
 			day_time += delta
 		var distance_tiles := player.global_position.distance_to(base.global_position) / TILE_SIZE
 		var warm_radius := float(safe_radius_tiles())
@@ -1346,6 +1350,36 @@ func _developer_advance_tutorial() -> void:
 		return
 	_set_tutorial_flag(tutorial_step, true)
 	_refresh_tutorial()
+
+func _developer_add_resources() -> void:
+	box_count += 10
+	mineral_count += 10
+	for resource_type in resource_counts:
+		resource_counts[resource_type] += 10
+	electricity += 10
+	fish += 10
+	box_label.text = "상자  %d" % box_count
+	mineral_label.text = "미네랄  %d" % mineral_count
+	economy_ui.queue_redraw()
+	_check_mineral_quest()
+	_refresh_quest_progress()
+	celebration_text = "개발 자원: 모든 자원 +10"
+	celebration_remaining = 2.0
+
+func _developer_advance_minute() -> void:
+	for second in range(60):
+		for node in get_tree().get_nodes_in_group("cat_worker"):
+			var cat := node as CatBlock
+			if cat:
+				cat._physics_process(1.0)
+		elapsed_time += 1.0
+		_update_research(1.0)
+		_update_survival(1.0, true)
+	celebration_text = "개발 시간: 생산과 세계 시간 +1분"
+	celebration_remaining = 2.0
+	_update_staged_ui()
+	economy_ui.queue_redraw()
+	research_menu.queue_redraw()
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0

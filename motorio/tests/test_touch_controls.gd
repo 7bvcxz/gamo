@@ -18,7 +18,7 @@ func _run() -> void:
 
 	_assert(controls.get_button_count() == 3, "RUN, Z, and X buttons exist without MODE")
 	_assert(controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 31.0)), "top tutorial buttons are excluded from joystick capture")
-	_assert(not controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 90.0)), "regular play area remains available to touch controls")
+	_assert(not controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 110.0)), "regular play area remains available to touch controls")
 	var tutorial_next_touch := InputEventScreenTouch.new()
 	tutorial_next_touch.index = 20
 	tutorial_next_touch.position = Vector2(controls.size.x * 0.5 + 80.0, 31.0)
@@ -35,6 +35,24 @@ func _run() -> void:
 	_assert(int(main.get("tutorial_step")) == 0, "top-left touch directly rewinds tutorial")
 	tutorial_previous_touch.pressed = false
 	controls._input(tutorial_previous_touch)
+	var resources_before: int = main.box_count
+	var money_touch := InputEventScreenTouch.new()
+	money_touch.index = 22
+	money_touch.position = Vector2(controls.size.x * 0.5 - 80.0, 70.0)
+	money_touch.pressed = true
+	controls._input(money_touch)
+	_assert(main.box_count == resources_before + 10 and controls.joystick_touch_id == -1, "mobile Money touch adds resources without capturing the joystick")
+	money_touch.pressed = false
+	controls._input(money_touch)
+	var day_before: float = main.day_time
+	var minute_touch := InputEventScreenTouch.new()
+	minute_touch.index = 23
+	minute_touch.position = Vector2(controls.size.x * 0.5 + 80.0, 70.0)
+	minute_touch.pressed = true
+	controls._input(minute_touch)
+	_assert(main.day_time == day_before + 60.0 and controls.joystick_touch_id == -1, "mobile +1 minute touch advances time without capturing the joystick")
+	minute_touch.pressed = false
+	controls._input(minute_touch)
 	controls.last_touch_input_msec = -10000
 	_assert(controls.joystick_center.x > controls.size.x * 0.5, "movement wheel is on the right")
 	_assert(controls.button_centers[0].x < controls.size.x * 0.5, "action buttons are on the left")

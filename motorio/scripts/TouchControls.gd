@@ -90,15 +90,20 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _is_top_tutorial_control(position: Vector2) -> bool:
-	return position.y <= 64.0 and position.x >= size.x * 0.5 - 170.0 and position.x <= size.x * 0.5 + 170.0
+	return position.y <= 94.0 and position.x >= size.x * 0.5 - 170.0 and position.x <= size.x * 0.5 + 170.0
 
 func _activate_top_tutorial_control(position: Vector2) -> void:
 	if main_controller == null:
 		return
-	if position.x < size.x * 0.5:
-		main_controller._developer_previous_tutorial()
+	if position.y <= 50.0:
+		if position.x < size.x * 0.5:
+			main_controller._developer_previous_tutorial()
+		else:
+			main_controller._developer_advance_tutorial()
+	elif position.x < size.x * 0.5:
+		main_controller._developer_add_resources()
 	else:
-		main_controller._developer_advance_tutorial()
+		main_controller._developer_advance_minute()
 
 func _begin_touch(touch_id: int, position: Vector2) -> void:
 	var in_shelter: bool = main_controller != null and main_controller.shelter_open

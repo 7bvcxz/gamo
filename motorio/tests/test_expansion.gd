@@ -12,6 +12,7 @@ func _run() -> void:
 	_test_placement(main)
 	_test_base_levels(main)
 	_test_developer_tutorial_button(main)
+	_test_developer_resources_and_time(main)
 	_test_guidance_and_cold(main)
 	if failures == 0:
 		print("EXPANSION_TEST: PASS")
@@ -73,6 +74,35 @@ func _test_developer_tutorial_button(main: Node2D) -> void:
 	_assert(main.tutorial_complete() and main.tutorial_next_button.disabled and not main.tutorial_previous_button.disabled, "next disables at completion while previous remains available")
 	main.tutorial_previous_button.emit_signal("pressed")
 	_assert(main.tutorial_step == 7 and not main.tutorial_base_three and not main.tutorial_next_button.disabled, "previous can reopen the final tutorial step after completion")
+
+func _test_developer_resources_and_time(main: Node2D) -> void:
+	var before_box: int = main.box_count
+	var before_mineral: int = main.mineral_count
+	var before_electricity: int = main.electricity
+	var before_fish: int = main.fish
+	var before_resources: Dictionary = main.resource_counts.duplicate()
+	main.developer_money_button.emit_signal("pressed")
+	_assert(main.box_count == before_box + 10 and main.mineral_count == before_mineral + 10, "Money adds ten boxes and minerals")
+	_assert(main.electricity == before_electricity + 10 and main.fish == before_fish + 10, "Money adds ten electricity and fish")
+	for resource_type in before_resources:
+		_assert(main.resource_counts[resource_type] == before_resources[resource_type] + 10, "Money adds ten %s" % resource_type)
+	var fishing_spot := load("res://scenes/FacilityBlock.tscn").instantiate() as FacilityBlock
+	fishing_spot.facility_type = "fishing_spot"
+	fishing_spot.position = Vector2(300, 300)
+	main.add_child(fishing_spot)
+	var fisher := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
+	fisher.worker_type = "fisher"
+	fisher.position = Vector2(332, 300)
+	main.add_child(fisher)
+	main.day_time = 100.0
+	main.active_research = 0
+	main.research_remaining = 120.0
+	main.research_total = 120.0
+	var fish_before_minute: int = main.fish
+	main.developer_minute_button.emit_signal("pressed")
+	_assert(main.day_time == 160.0, "+1 minute advances the day clock even during developer tutorial")
+	_assert(main.research_remaining == 60.0 and main.active_research == 0, "+1 minute advances active research by sixty seconds")
+	_assert(main.fish > fish_before_minute and fisher.hunger < 100.0, "+1 minute simulates one minute of cat production and hunger")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:
