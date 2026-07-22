@@ -14,6 +14,7 @@ func _run() -> void:
 	_test_developer_tutorial_button(main)
 	_test_developer_resources_and_time(main)
 	_test_guidance_and_cold(main)
+	_test_ui_scale_and_reset(main)
 	if failures == 0:
 		print("EXPANSION_TEST: PASS")
 	quit(failures)
@@ -47,7 +48,7 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 	main.electricity = 0
 	main.fish = 3
 	_assert(main.economy_ui.visible_resource_indices() == [1, 3, 8], "left resource list hides zero values and keeps every collected resource in vertical order")
-	_assert(not main.get_node("UI/Title").visible and not main.get_node("UI/Info").visible, "Motorio title and coordinate text are removed from the HUD")
+	_assert(not main.get_node("UI/UIRoot/Title").visible and not main.get_node("UI/UIRoot/Info").visible, "Motorio title and coordinate text are removed from the HUD")
 	for step in range(13):
 		main.quest_step = step
 		_assert(main.quest_unlock_help().length() >= 18, "quest %d explains the required feature" % (step + 1))
@@ -137,6 +138,18 @@ func _test_developer_resources_and_time(main: Node2D) -> void:
 	_assert(main.day_time == 160.0, "+1 minute advances the day clock even during developer tutorial")
 	_assert(main.research_remaining == 60.0 and main.active_research == 0, "+1 minute advances active research by sixty seconds")
 	_assert(main.fish > fish_before_minute and fisher.hunger < 100.0, "+1 minute simulates one minute of cat production and hunger")
+
+func _test_ui_scale_and_reset(main: Node2D) -> void:
+	main._configure_ui_scale(false)
+	_assert(main.ui_root.scale.is_equal_approx(Vector2.ONE / 3.0), "desktop shrinks the complete UI to one third")
+	_assert(main.ui_root.size.is_equal_approx(main.get_viewport_rect().size * 3.0), "desktop keeps corner-anchored UI on the full browser area")
+	main._configure_ui_scale(true)
+	_assert(main.ui_root.scale == Vector2.ONE and main.ui_root.size == main.get_viewport_rect().size, "touch devices retain full-size mobile UI")
+	_assert(main.tutorial_ui.get_script().resource_path.ends_with("TutorialUI.gd"), "tutorial panel remains available below the minimap")
+	var reset_path := "user://motorio_reset_test.cfg"
+	_assert(main.save_game(false, reset_path), "reset test creates a save")
+	_assert(FileAccess.file_exists(reset_path), "reset target exists before reset")
+	_assert(main.reset_game(reset_path, false) and not FileAccess.file_exists(reset_path), "reset removes the selected save without requiring a reload in tests")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

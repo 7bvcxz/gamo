@@ -29,6 +29,7 @@ func _run() -> void:
 	_assert(conveyor.BELT_SPEED == 72.0, "slower animation does not change transport speed")
 	var visual_box := load("res://scenes/PushTile.tscn").instantiate() as RigidBody2D
 	var visual_cat := load("res://scenes/CatBlock.tscn").instantiate() as CatBlock
+	_assert(visual_cat.get_node_or_null("Sprite2D") != null, "worker cats use the illustrated character sprite")
 	_assert(conveyor.z_index < visual_box.z_index and conveyor.z_index < visual_cat.z_index, "conveyor renders below every solid block")
 	visual_box.free()
 	visual_cat.free()

@@ -12,7 +12,7 @@ func _run() -> void:
 	await process_frame
 
 	var player: Node = main.get_node("Player")
-	var controls := main.get_node("UI/TouchControls") as TouchControls
+	var controls := main.get_node("UI/UIRoot/TouchControls") as TouchControls
 	controls.set_controls_visible(true)
 	await process_frame
 

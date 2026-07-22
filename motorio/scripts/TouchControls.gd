@@ -104,6 +104,8 @@ func _activate_top_tutorial_control(position: Vector2) -> void:
 		main_controller._developer_add_resources()
 	elif position.y <= 90.0:
 		main_controller._developer_advance_minute()
+	elif position.x > size.x * 0.5:
+		main_controller.call_deferred("reset_game")
 	else:
 		main_controller.save_game()
 

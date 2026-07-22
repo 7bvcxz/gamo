@@ -15,7 +15,7 @@ func _run() -> void:
 	_assert(main.tutorial_detail().contains("오른쪽 이동 휠"), "mobile movement help is Korean")
 	_assert(main.quest_title() == "1  첫 상자 납품", "campaign title is Korean")
 	_assert(main.quest_detail().contains("금색 IN"), "campaign instructions identify the base IN port")
-	_assert((main.get_node("UI/SurvivalStatus") as Label).text.contains("체온"), "survival status is Korean")
+	_assert((main.get_node("UI/UIRoot/SurvivalStatus") as Label).text.contains("체온"), "survival status is Korean")
 	_assert(main.recipe_label(12) == "연구소" and main.research_label(0) == "열 보존 연구", "research lab and technology names are Korean")
 	_assert(UIFont.FONT.has_char("연".unicode_at(0)) and UIFont.FONT.has_char("구".unicode_at(0)), "embedded font contains research menu glyphs")
 	_assert(not (main.tutorial_title() + main.tutorial_detail() + main.quest_title() + main.quest_detail()).contains("�"), "descriptions contain no replacement glyph")

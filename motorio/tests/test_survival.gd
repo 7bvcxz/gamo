@@ -20,8 +20,8 @@ func _test_ui_stages(main: Node2D) -> void:
 	main.call("_update_staged_ui")
 	main.call("_update_survival", 0.0)
 	_assert(main.ui_stage() == 0, "quick start is the minimal UI stage")
-	_assert(not main.get_node("UI/BoxCount").visible and not main.get_node("UI/Minimap").visible, "new players are not shown resource statistics or minimap")
-	_assert(not (main.get_node("UI/SurvivalStatus") as Label).text.contains("PWR"), "advanced production rates stay hidden during quick start")
+	_assert(not main.get_node("UI/UIRoot/BoxCount").visible and not main.get_node("UI/UIRoot/Minimap").visible, "new players are not shown resource statistics or minimap")
+	_assert(not (main.get_node("UI/UIRoot/SurvivalStatus") as Label).text.contains("PWR"), "advanced production rates stay hidden during quick start")
 	main.tutorial_moved = true
 	main.tutorial_picked = true
 	main.tutorial_rotated = true
@@ -32,11 +32,11 @@ func _test_ui_stages(main: Node2D) -> void:
 	main.tutorial_base_three = true
 	main.call("_refresh_tutorial")
 	main.call("_update_staged_ui")
-	_assert(main.ui_stage() == 1 and not main.get_node("UI/BoxCount").visible and main.get_node("UI/Economy").visible, "basic automation keeps all resources in the unified economy list")
+	_assert(main.ui_stage() == 1 and not main.get_node("UI/UIRoot/BoxCount").visible and main.get_node("UI/UIRoot/Economy").visible, "basic automation keeps all resources in the unified economy list")
 	_assert(main.economy_ui.visible_resource_indices().is_empty(), "uncollected zero-value resources remain hidden")
 	main.quest_step = 5
 	main.call("_update_staged_ui")
-	_assert(main.ui_stage() == 2 and main.get_node("UI/Minimap").visible and main.get_node("UI/Economy").visible, "outer exploration reveals map and early resources")
+	_assert(main.ui_stage() == 2 and main.get_node("UI/UIRoot/Minimap").visible and main.get_node("UI/UIRoot/Economy").visible, "outer exploration reveals map and early resources")
 	main.quest_step = 8
 	_assert(main.ui_stage() == 3, "power era reveals energy and food information")
 	main.quest_step = 10
@@ -67,9 +67,9 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	_assert(main.night_warning_shown and main.cats_should_rest(), "cats stop work and the return warning starts at minute eleven")
 	player.position = base.position + base.SHELTER_DIRECTION * base.SHELTER_DISTANCE
 	main.call("primary_action")
-	_assert(main.shelter_open and not main.developer_money_button.visible and not main.save_game_button.visible, "southwest HOME entrance opens an uncluttered night shelter")
+	_assert(main.shelter_open and not main.developer_money_button.visible and not main.save_game_button.visible and not main.reset_game_button.visible, "southwest HOME entrance opens an uncluttered night shelter")
 	main.call("primary_action")
-	_assert(not main.shelter_open and main.day_time == 0.0 and main.developer_money_button.visible and main.save_game_button.visible, "sleep begins the next day and restores top controls")
+	_assert(not main.shelter_open and main.day_time == 0.0 and main.developer_money_button.visible and main.save_game_button.visible and main.reset_game_button.visible, "sleep begins the next day and restores top controls")
 
 func _test_scaling_and_technology(main: Node2D) -> void:
 	for index in range(2):

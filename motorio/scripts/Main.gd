@@ -27,29 +27,31 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 const AUTOSAVE_INTERVAL := 30.0
 const SAVE_PATH := "user://motorio_save.cfg"
 
+@onready var ui_root: Control = $UI/UIRoot
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
-@onready var box_label: Label = $UI/BoxCount
-@onready var mineral_label: Label = $UI/MineralCount
-@onready var inventory_ui: Control = $UI/Inventory
-@onready var base_menu: Control = $UI/BaseMenu
-@onready var research_menu: Control = $UI/ResearchMenu
-@onready var minimap: Control = $UI/Minimap
-@onready var version_label: Label = $UI/Version
-@onready var touch_controls: TouchControls = $UI/TouchControls
-@onready var throughput_label: Label = $UI/Throughput
-@onready var quest_ui: Control = $UI/Quest
-@onready var economy_ui: Control = $UI/Economy
-@onready var tutorial_ui: Control = $UI/Tutorial
-@onready var survival_status: Label = $UI/SurvivalStatus
-@onready var shelter_ui: Control = $UI/Shelter
-@onready var climate_ui: Control = $UI/Climate
+@onready var box_label: Label = $UI/UIRoot/BoxCount
+@onready var mineral_label: Label = $UI/UIRoot/MineralCount
+@onready var inventory_ui: Control = $UI/UIRoot/Inventory
+@onready var base_menu: Control = $UI/UIRoot/BaseMenu
+@onready var research_menu: Control = $UI/UIRoot/ResearchMenu
+@onready var minimap: Control = $UI/UIRoot/Minimap
+@onready var version_label: Label = $UI/UIRoot/Version
+@onready var touch_controls: TouchControls = $UI/UIRoot/TouchControls
+@onready var throughput_label: Label = $UI/UIRoot/Throughput
+@onready var quest_ui: Control = $UI/UIRoot/Quest
+@onready var economy_ui: Control = $UI/UIRoot/Economy
+@onready var tutorial_ui: Control = $UI/UIRoot/Tutorial
+@onready var survival_status: Label = $UI/UIRoot/SurvivalStatus
+@onready var shelter_ui: Control = $UI/UIRoot/Shelter
+@onready var climate_ui: Control = $UI/UIRoot/Climate
 @onready var cold_world_fog: Node2D = $ColdWorldFog
-@onready var tutorial_previous_button: Button = $UI/TutorialPrevious
-@onready var tutorial_next_button: Button = $UI/TutorialNext
-@onready var developer_money_button: Button = $UI/DeveloperMoney
-@onready var developer_minute_button: Button = $UI/DeveloperMinute
-@onready var save_game_button: Button = $UI/SaveGame
+@onready var tutorial_previous_button: Button = $UI/UIRoot/TutorialPrevious
+@onready var tutorial_next_button: Button = $UI/UIRoot/TutorialNext
+@onready var developer_money_button: Button = $UI/UIRoot/DeveloperMoney
+@onready var developer_minute_button: Button = $UI/UIRoot/DeveloperMinute
+@onready var save_game_button: Button = $UI/UIRoot/SaveGame
+@onready var reset_game_button: Button = $UI/UIRoot/ResetGame
 
 var box_count := 0
 var mineral_count := 0
@@ -132,6 +134,9 @@ func _ready() -> void:
 	developer_money_button.pressed.connect(_developer_add_resources)
 	developer_minute_button.pressed.connect(_developer_advance_minute)
 	save_game_button.pressed.connect(save_game)
+	reset_game_button.pressed.connect(reset_game)
+	get_viewport().size_changed.connect(_configure_ui_scale)
+	_configure_ui_scale()
 	_update_tutorial_developer_buttons()
 	tutorial_start_position = player.position
 	minimap.main_controller = self
@@ -148,6 +153,12 @@ func _ready() -> void:
 	camera.limit_bottom = WORLD_SIZE
 	camera.limit_smoothed = true
 	queue_redraw()
+
+func _configure_ui_scale(force_touch: Variant = null) -> void:
+	var touch_device: bool = touch_controls._is_touch_device() if force_touch == null else bool(force_touch)
+	var ui_scale := 1.0 if touch_device else 1.0 / 3.0
+	ui_root.scale = Vector2.ONE * ui_scale
+	ui_root.size = get_viewport_rect().size / ui_scale
 
 func _on_base_box_received(_box: RigidBody2D) -> void:
 	box_count += 1
@@ -646,6 +657,7 @@ func _set_top_tools_visible(value: bool) -> void:
 	developer_money_button.visible = value
 	developer_minute_button.visible = value
 	save_game_button.visible = value
+	reset_game_button.visible = value
 
 func _open_base_menu() -> void:
 	research_menu_open = false
@@ -1218,7 +1230,7 @@ func _update_staged_ui() -> void:
 	throughput_label.visible = stage >= 1
 	economy_ui.visible = true
 	minimap.visible = stage >= 2
-	$UI/WorldSize.visible = stage >= 2
+	$UI/UIRoot/WorldSize.visible = stage >= 2
 
 func _collect_nearby_mineral_resources() -> void:
 	var collectable := get_tree().get_nodes_in_group("mined_resource") + get_tree().get_nodes_in_group("world_resource")
@@ -1428,6 +1440,17 @@ func save_game(show_feedback: bool = true, path: String = SAVE_PATH) -> bool:
 	else:
 		save_game_button.text = "자동 저장됨"
 		save_feedback_remaining = 1.2
+	return true
+
+func reset_game(path: String = SAVE_PATH, reload_scene: bool = true) -> bool:
+	var absolute_path := ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(path):
+		var error := DirAccess.remove_absolute(absolute_path)
+		if error != OK:
+			reset_game_button.text = "초기화 실패"
+			return false
+	if reload_scene:
+		get_tree().reload_current_scene()
 	return true
 
 func load_game(path: String = SAVE_PATH) -> bool:

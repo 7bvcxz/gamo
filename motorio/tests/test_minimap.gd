@@ -9,11 +9,11 @@ func _run() -> void:
 	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
 	root.add_child(main)
 	await process_frame
-	var minimap := main.get_node("UI/Minimap") as Control
+	var minimap := main.get_node("UI/UIRoot/Minimap") as Control
 	_assert(minimap.size == Vector2(140, 140), "minimap has expected top-right size")
 	_assert(minimap.position.x >= 480.0 and minimap.position.y == 16.0, "minimap is positioned at top-right")
-	var box_label := main.get_node("UI/BoxCount") as Label
-	var version_label := main.get_node("UI/Version") as Label
+	var box_label := main.get_node("UI/UIRoot/BoxCount") as Label
+	var version_label := main.get_node("UI/UIRoot/Version") as Label
 	_assert(box_label.position.x == 16.0 and box_label.position.y == 100.0, "collected box resource stays at top-left")
 	_assert(version_label.anchor_left == 1.0 and version_label.anchor_top == 1.0, "version stays anchored to the bottom-right")
 	var world_origin: Vector2 = minimap.call("world_to_map", Vector2.ZERO)

@@ -13,6 +13,8 @@ const WORLD_RESOURCE_SCENE := preload("res://scenes/WorldResource.tscn")
 var mine_elapsed := 0.0
 var spark_remaining := 0.0
 var hunger := 100.0
+var animation_elapsed := 0.0
+@onready var cat_sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
 	add_to_group("pickup_block")
@@ -21,6 +23,8 @@ func _ready() -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	animation_elapsed += delta
+	_update_sprite_animation()
 	if not active_on_ready:
 		return
 	var main := get_tree().get_first_node_in_group("main_controller")
@@ -112,32 +116,17 @@ func _has_nearby_facility(group_name: String) -> bool:
 func _consume_hunger(amount: float) -> void:
 	hunger = maxf(0.0, hunger - amount)
 
+func _update_sprite_animation() -> void:
+	if cat_sprite == null:
+		return
+	cat_sprite.flip_h = direction.x < -0.1
+	cat_sprite.frame = 1 if fmod(animation_elapsed, 4.0) > 3.72 else 0
+
 func _draw() -> void:
 	var body_color: Color = {"miner": Color("d99a56"), "pressure": Color("6686a3"), "electric": Color("d7bd4f"), "fisher": Color("69b9cf"), "server": Color("78b589")}.get(worker_type, Color("d99a56"))
-	var fur := Color("f3c983")
-	draw_circle(Vector2(3, 5), 13.0, Color(0.02, 0.025, 0.025, 0.32))
-	draw_set_transform(Vector2.ZERO, direction.angle())
-	# Curled tail, soft body, role-colored winter vest and forward-facing head.
-	draw_arc(Vector2(-7, 6), 8.0, 0.15, PI * 1.45, 14, fur.darkened(0.18), 4.0)
-	draw_circle(Vector2(-3, 0), 11.0, fur)
-	draw_circle(Vector2(-5, -7), 3.5, fur.lightened(0.08))
-	draw_circle(Vector2(-5, 7), 3.5, fur.lightened(0.08))
-	draw_rect(Rect2(-9, -8, 12, 16), body_color)
-	draw_rect(Rect2(-7, -6, 10, 12), body_color.lightened(0.15), false, 2.0)
-	draw_circle(Vector2(7, 0), 8.5, Color("fff0cf"))
-	draw_polygon(PackedVector2Array([Vector2(2, -5), Vector2(4, -13), Vector2(8, -7)]), PackedColorArray([Color("fff0cf")]))
-	draw_polygon(PackedVector2Array([Vector2(8, -7), Vector2(12, -13), Vector2(13, -4)]), PackedColorArray([Color("fff0cf")]))
-	draw_polygon(PackedVector2Array([Vector2(4, -7), Vector2(5, -10), Vector2(7, -7)]), PackedColorArray([Color("e9a8a0")]))
-	draw_polygon(PackedVector2Array([Vector2(9, -7), Vector2(11, -10), Vector2(11, -6)]), PackedColorArray([Color("e9a8a0")]))
-	draw_circle(Vector2(9, -3), 1.25, Color("332c2b"))
-	draw_circle(Vector2(9, 3), 1.25, Color("332c2b"))
-	draw_circle(Vector2(13, 0), 1.2, Color("d27f7b"))
-	draw_line(Vector2(13, 0), Vector2(15, -2), Color("694b45"), 1.0)
-	draw_line(Vector2(13, 0), Vector2(15, 2), Color("694b45"), 1.0)
-	draw_line(Vector2(5, -1), Vector2(1, -2), Color("8b6856"), 1.0)
-	draw_line(Vector2(5, 1), Vector2(1, 2), Color("8b6856"), 1.0)
-	draw_circle(Vector2(1, 0), 2.0, Color("f0d35d"))
-	draw_set_transform(Vector2.ZERO)
+	# Small role badge keeps worker types readable without tinting the illustrated fur.
+	draw_circle(Vector2(10, 10), 4.0, Color(0.05, 0.06, 0.07, 0.82))
+	draw_circle(Vector2(10, 10), 2.6, body_color)
 	draw_rect(Rect2(-13, 13, 26, 3), Color("252b29"))
 	draw_rect(Rect2(-13, 13, 26.0 * hunger / 100.0, 3), Color("8ee36b") if hunger >= 35.0 else Color("e36b52"))
 	if spark_remaining > 0.0:
