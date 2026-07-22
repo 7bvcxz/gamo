@@ -18,10 +18,14 @@ const BRIDGE_SCENE := preload("res://scenes/Bridge.tscn")
 const FACILITY_SCENE := preload("res://scenes/FacilityBlock.tscn")
 const RESEARCH_LAB_SCENE := preload("res://scenes/ResearchLab.tscn")
 const MINERAL_SCENE := preload("res://scenes/Mineral.tscn")
+const MINED_RESOURCE_SCENE := preload("res://scenes/MinedResource.tscn")
+const WORLD_RESOURCE_SCENE := preload("res://scenes/WorldResource.tscn")
 const CARDINAL_DIRECTIONS := [Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT, Vector2.UP]
 const INVENTORY_CAPACITY := 5
 const RESOURCE_COLLECT_RADIUS := TILE_SIZE * 1.5
 const PLACEMENT_ROTATE_INTERVAL := 0.7
+const AUTOSAVE_INTERVAL := 30.0
+const SAVE_PATH := "user://motorio_save.cfg"
 
 @onready var player: CharacterBody2D = $Player
 @onready var base: StaticBody2D = $Base
@@ -46,6 +50,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var tutorial_next_button: Button = $UI/TutorialNext
 @onready var developer_money_button: Button = $UI/DeveloperMoney
 @onready var developer_minute_button: Button = $UI/DeveloperMinute
+@onready var save_game_button: Button = $UI/SaveGame
 
 var box_count := 0
 var mineral_count := 0
@@ -98,6 +103,9 @@ var active_research := -1
 var research_remaining := 0.0
 var research_total := 0.0
 var freeze_countdown := -1.0
+var autosave_elapsed := 0.0
+var save_feedback_remaining := 0.0
+var automatic_persistence_enabled := OS.has_feature("web") or OS.has_feature("release")
 
 func _ready() -> void:
 	add_to_group("main_controller")
@@ -124,12 +132,15 @@ func _ready() -> void:
 	tutorial_next_button.pressed.connect(_developer_advance_tutorial)
 	developer_money_button.pressed.connect(_developer_add_resources)
 	developer_minute_button.pressed.connect(_developer_advance_minute)
+	save_game_button.pressed.connect(save_game)
 	_update_tutorial_developer_buttons()
 	tutorial_start_position = player.position
 	minimap.main_controller = self
 	_update_interaction_ui()
 	_create_world_walls()
 	_populate_world()
+	if automatic_persistence_enabled:
+		load_game()
 	minimap.refresh_snapshot()
 	var camera := player.get_node("Camera2D") as Camera2D
 	camera.limit_left = 0
@@ -1096,6 +1107,13 @@ func _cell_center(cell: Vector2i) -> Vector2:
 
 func _process(delta: float) -> void:
 	elapsed_time += delta
+	autosave_elapsed += delta
+	save_feedback_remaining = maxf(0.0, save_feedback_remaining - delta)
+	if save_feedback_remaining <= 0.0 and save_game_button.text != "저장":
+		save_game_button.text = "저장"
+	if automatic_persistence_enabled and autosave_elapsed >= AUTOSAVE_INTERVAL:
+		autosave_elapsed = fmod(autosave_elapsed, AUTOSAVE_INTERVAL)
+		save_game(false)
 	_update_research(delta)
 	_update_survival(delta)
 	_update_staged_ui()
@@ -1379,6 +1397,160 @@ func _developer_advance_minute() -> void:
 	_update_staged_ui()
 	economy_ui.queue_redraw()
 	research_menu.queue_redraw()
+
+func save_game(show_feedback: bool = true, path: String = SAVE_PATH) -> bool:
+	var config := ConfigFile.new()
+	config.set_value("motorio", "state", _build_save_state())
+	var error := config.save(path)
+	if error != OK:
+		if show_feedback:
+			save_game_button.text = "저장 실패"
+			save_feedback_remaining = 2.0
+		return false
+	if show_feedback:
+		save_game_button.text = "저장 완료"
+		save_feedback_remaining = 2.0
+	else:
+		save_game_button.text = "자동 저장됨"
+		save_feedback_remaining = 1.2
+	return true
+
+func load_game(path: String = SAVE_PATH) -> bool:
+	var config := ConfigFile.new()
+	if config.load(path) != OK:
+		return false
+	var state: Dictionary = config.get_value("motorio", "state", {})
+	if int(state.get("schema", 0)) != 1:
+		return false
+	_apply_save_state(state)
+	return true
+
+func _build_save_state() -> Dictionary:
+	return {
+		"schema": 1,
+		"player_position": player.position,
+		"player_facing": player.facing,
+		"box_count": box_count, "mineral_count": mineral_count,
+		"inventory": inventory.duplicate(true), "selected_slot": selected_slot, "placement_rotation": placement_rotation,
+		"quest_step": quest_step, "automated_boxes_delivered": automated_boxes_delivered,
+		"base_level": base_level, "elapsed_time": elapsed_time,
+		"cat_crafted": cat_crafted, "generator_crafted": generator_crafted, "bridge_crafted": bridge_crafted,
+		"resource_counts": resource_counts.duplicate(true), "electricity": electricity, "fish": fish,
+		"tutorial_step": tutorial_step,
+		"tutorial_flags": [tutorial_moved, tutorial_picked, tutorial_rotated, tutorial_placed, tutorial_delivered, tutorial_menu_opened, tutorial_base_two, tutorial_base_three],
+		"day_number": day_number, "day_time": day_time, "temperature": temperature,
+		"heat_tech": heat_tech, "power_tech": power_tech, "food_tech": food_tech,
+		"research_selection": research_selection, "active_research": active_research,
+		"research_remaining": research_remaining, "research_total": research_total,
+		"world_objects": _serialize_world_objects(),
+	}
+
+func _apply_save_state(state: Dictionary) -> void:
+	player.position = state.get("player_position", player.position)
+	player.facing = state.get("player_facing", player.facing)
+	box_count = int(state.get("box_count", 0))
+	mineral_count = int(state.get("mineral_count", 0))
+	inventory.clear()
+	for item in state.get("inventory", []):
+		inventory.append((item as Dictionary).duplicate(true))
+	selected_slot = clampi(int(state.get("selected_slot", 0)), 0, INVENTORY_CAPACITY - 1)
+	placement_rotation = int(state.get("placement_rotation", 0))
+	quest_step = int(state.get("quest_step", 0))
+	automated_boxes_delivered = int(state.get("automated_boxes_delivered", 0))
+	base_level = int(state.get("base_level", 1))
+	elapsed_time = float(state.get("elapsed_time", 0.0))
+	cat_crafted = bool(state.get("cat_crafted", false))
+	generator_crafted = bool(state.get("generator_crafted", false))
+	bridge_crafted = bool(state.get("bridge_crafted", false))
+	resource_counts = (state.get("resource_counts", resource_counts) as Dictionary).duplicate(true)
+	electricity = int(state.get("electricity", 0))
+	fish = int(state.get("fish", 0))
+	tutorial_step = int(state.get("tutorial_step", 0))
+	var flags: Array = state.get("tutorial_flags", [])
+	if flags.size() >= 8:
+		tutorial_moved = flags[0]; tutorial_picked = flags[1]; tutorial_rotated = flags[2]; tutorial_placed = flags[3]
+		tutorial_delivered = flags[4]; tutorial_menu_opened = flags[5]; tutorial_base_two = flags[6]; tutorial_base_three = flags[7]
+	day_number = int(state.get("day_number", 1))
+	day_time = float(state.get("day_time", 0.0))
+	temperature = float(state.get("temperature", 100.0))
+	heat_tech = int(state.get("heat_tech", 0)); power_tech = int(state.get("power_tech", 0)); food_tech = int(state.get("food_tech", 0))
+	research_selection = int(state.get("research_selection", 0)); active_research = int(state.get("active_research", -1))
+	research_remaining = float(state.get("research_remaining", 0.0)); research_total = float(state.get("research_total", 0.0))
+	_restore_world_objects(state.get("world_objects", []))
+	box_label.text = "상자  %d" % box_count
+	mineral_label.text = "미네랄  %d" % mineral_count
+	_update_tutorial_developer_buttons()
+	_sync_placement_preview()
+	_update_staged_ui()
+	economy_ui.queue_redraw()
+	quest_ui.queue_redraw()
+
+func _serialize_world_objects() -> Array[Dictionary]:
+	var entries: Array[Dictionary] = []
+	var seen: Dictionary[int, bool] = {}
+	var nodes: Array = get_tree().get_nodes_in_group("pickup_block") + get_tree().get_nodes_in_group("mined_resource") + get_tree().get_nodes_in_group("world_resource")
+	for node in nodes:
+		var body := node as RigidBody2D
+		if body == null or body.has_meta("placement_preview") or seen.has(body.get_instance_id()):
+			continue
+		seen[body.get_instance_id()] = true
+		var entry := _serialize_world_object(body)
+		if not entry.is_empty():
+			entries.append(entry)
+	return entries
+
+func _serialize_world_object(body: RigidBody2D) -> Dictionary:
+	var entry := {"position": body.position}
+	if body is ConveyorBlock: entry.merge({"type": "conveyor", "direction": body.direction})
+	elif body is CatBlock: entry.merge({"type": "cat", "direction": body.direction, "worker": body.worker_type, "active": body.active_on_ready, "hunger": body.hunger, "elapsed": body.mine_elapsed})
+	elif body is PillarBlock: entry["type"] = "pillar"
+	elif body is BoxGenerator: entry.merge({"type": "box_generator", "direction": body.direction, "stored": body.stored_minerals, "pending": body.pending_boxes})
+	elif body is SplitterBlock: entry.merge({"type": "splitter", "direction": body.direction, "send_left": body.send_left})
+	elif body is BridgeBlock: entry["type"] = "bridge"
+	elif body is FacilityBlock: entry.merge({"type": "facility", "facility": body.facility_type})
+	elif body is ResearchLab: entry.merge({"type": "research_lab", "installed": body.installed})
+	elif body is WorldResource: entry.merge({"type": "world_resource", "resource": body.resource_type})
+	elif body.is_in_group("mined_resource"): entry["type"] = "mined_resource"
+	elif body.is_in_group("box_block"): entry.merge({"type": "box", "automated": body.get_meta("automated_box", false)})
+	else: return {}
+	return entry
+
+func _restore_world_objects(entries: Array) -> void:
+	var existing: Array = get_tree().get_nodes_in_group("pickup_block") + get_tree().get_nodes_in_group("mined_resource") + get_tree().get_nodes_in_group("world_resource")
+	var freed: Dictionary[int, bool] = {}
+	for node in existing:
+		if node is RigidBody2D and not freed.has(node.get_instance_id()):
+			freed[node.get_instance_id()] = true
+			node.free()
+	for value in entries:
+		var entry := value as Dictionary
+		var body := _create_saved_world_object(entry)
+		if body:
+			body.position = entry.get("position", Vector2.ZERO)
+			add_child(body)
+
+func _create_saved_world_object(entry: Dictionary) -> RigidBody2D:
+	var type: String = entry.get("type", "")
+	if type == "conveyor":
+		var conveyor := CONVEYOR_SCENE.instantiate() as ConveyorBlock; conveyor.direction = entry.get("direction", Vector2.RIGHT); return conveyor
+	if type == "cat":
+		var cat := CAT_BLOCK_SCENE.instantiate() as CatBlock; cat.direction = entry.get("direction", Vector2.RIGHT); cat.worker_type = entry.get("worker", "miner"); cat.active_on_ready = entry.get("active", true); cat.hunger = entry.get("hunger", 100.0); cat.mine_elapsed = entry.get("elapsed", 0.0); return cat
+	if type == "pillar": return PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
+	if type == "box_generator":
+		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator; generator.direction = entry.get("direction", Vector2.RIGHT); generator.stored_minerals = entry.get("stored", 0); generator.pending_boxes = entry.get("pending", 0); return generator
+	if type == "splitter":
+		var splitter := SPLITTER_SCENE.instantiate() as SplitterBlock; splitter.direction = entry.get("direction", Vector2.RIGHT); splitter.send_left = entry.get("send_left", true); return splitter
+	if type == "bridge": return BRIDGE_SCENE.instantiate() as BridgeBlock
+	if type == "facility":
+		var facility := FACILITY_SCENE.instantiate() as FacilityBlock; facility.facility_type = entry.get("facility", "power_generator"); return facility
+	if type == "research_lab":
+		var lab := RESEARCH_LAB_SCENE.instantiate() as ResearchLab; lab.installed = entry.get("installed", false); return lab
+	if type == "world_resource":
+		var resource := WORLD_RESOURCE_SCENE.instantiate() as WorldResource; resource.resource_type = entry.get("resource", "copper"); return resource
+	if type == "mined_resource": return MINED_RESOURCE_SCENE.instantiate() as RigidBody2D
+	if type == "box":
+		var box := PUSH_TILE_SCENE.instantiate() as RigidBody2D; box.set_meta("automated_box", entry.get("automated", false)); return box
+	return null
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0
