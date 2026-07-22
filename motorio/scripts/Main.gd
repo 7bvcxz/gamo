@@ -39,6 +39,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var survival_status: Label = $UI/SurvivalStatus
 @onready var shelter_ui: Control = $UI/Shelter
 @onready var climate_ui: Control = $UI/Climate
+@onready var tutorial_next_button: Button = $UI/TutorialNext
 
 var box_count := 0
 var mineral_count := 0
@@ -103,6 +104,7 @@ func _ready() -> void:
 	tutorial_ui.main_controller = self
 	shelter_ui.main_controller = self
 	climate_ui.main_controller = self
+	tutorial_next_button.pressed.connect(_developer_advance_tutorial)
 	tutorial_start_position = player.position
 	minimap.main_controller = self
 	_update_interaction_ui()
@@ -906,8 +908,9 @@ func _process(delta: float) -> void:
 		_collect_nearby_mineral_resources()
 
 func _update_survival(delta: float) -> void:
-	if not shelter_open and tutorial_complete():
-		day_time += delta
+	if not shelter_open:
+		if tutorial_complete():
+			day_time += delta
 		var distance_tiles := player.global_position.distance_to(base.global_position) / TILE_SIZE
 		var warm_radius := float(safe_radius_tiles())
 		if distance_tiles > warm_radius:
@@ -921,8 +924,6 @@ func _update_survival(delta: float) -> void:
 			celebration_remaining = 4.0
 		if day_time >= 720.0:
 			_enter_shelter(true)
-	elif not tutorial_complete():
-		temperature = 100.0
 	var minute := int(day_time) / 60
 	var second := int(day_time) % 60
 	survival_status.text = "%d일  %02d:%02d   체온 %d   온기 %d" % [day_number, minute, second, int(temperature), safe_radius_tiles()]
@@ -1063,6 +1064,25 @@ func _refresh_tutorial() -> void:
 		celebration_remaining = 3.0
 	tutorial_ui.queue_redraw()
 	quest_ui.queue_redraw()
+	tutorial_next_button.visible = not tutorial_complete()
+
+func _developer_advance_tutorial() -> void:
+	if tutorial_complete():
+		return
+	match tutorial_step:
+		0:
+			tutorial_moved = true
+		1:
+			tutorial_picked = true
+		2:
+			tutorial_rotated = true
+		3:
+			tutorial_placed = true
+		4:
+			tutorial_delivered = true
+		5:
+			tutorial_menu_opened = true
+	_refresh_tutorial()
 
 func _create_world_walls() -> void:
 	var half_world := WORLD_SIZE / 2.0
@@ -1096,11 +1116,13 @@ func _draw() -> void:
 				var cell := Rect2(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
 				draw_rect(cell, Color("e4eaec"))
 
-	# Warm ground glow communicates the safe radius before the fog boundary.
+	# Saturated warm rings make the safe frontier unmistakable against snow.
 	var warm_radius := float(safe_radius_tiles() * TILE_SIZE)
-	for ring in range(8, 0, -1):
-		var ratio := float(ring) / 8.0
-		draw_circle(base.position, warm_radius * ratio, Color(1.0, 0.55, 0.18, 0.018 + (1.0 - ratio) * 0.018))
+	for ring in range(12, 0, -1):
+		var ratio := float(ring) / 12.0
+		var alpha := 0.035 + (1.0 - ratio) * 0.055
+		draw_circle(base.position, warm_radius * ratio, Color(1.0, 0.42, 0.08, alpha))
+	draw_arc(base.position, warm_radius, 0.0, TAU, 128, Color(0.98, 0.58, 0.20, 0.42), 3.0)
 
 	# One-pixel grid: 100 × 100 cells.
 	var grid_color := Color(0.42, 0.49, 0.52, 0.18)

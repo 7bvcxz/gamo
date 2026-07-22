@@ -3,6 +3,10 @@ extends Control
 var main_controller
 var snow_time := 0.0
 
+func cold_fog_alpha(distance_tiles: float) -> float:
+	var edge_distance: float = maxf(0.0, distance_tiles - float(main_controller.safe_radius_tiles()))
+	return 0.72 + clampf(edge_distance / 6.0, 0.0, 1.0) * 0.23
+
 func _process(delta: float) -> void:
 	snow_time += delta
 	queue_redraw()
@@ -18,7 +22,7 @@ func _draw() -> void:
 	var exposure: float = clampf((distance_tiles - main_controller.safe_radius_tiles()) / 10.0, 0.0, 1.0)
 	if distance_tiles > main_controller.safe_radius_tiles():
 		var immediate_exposure: float = clampf((distance_tiles - main_controller.safe_radius_tiles()) / 6.0, 0.0, 1.0)
-		draw_rect(Rect2(Vector2.ZERO, size), Color(0.78, 0.87, 0.92, 0.58 + immediate_exposure * 0.34))
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.96, 0.98, 1.0, cold_fog_alpha(distance_tiles)))
 		exposure = maxf(exposure, 0.7 + immediate_exposure * 0.3)
 	var snow_strength: float = maxf(cold, exposure * 0.65)
 	if snow_strength > 0.0:

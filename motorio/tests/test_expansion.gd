@@ -11,6 +11,7 @@ func _run() -> void:
 	await physics_frame
 	_test_placement(main)
 	_test_base_levels(main)
+	_test_developer_tutorial_button(main)
 	_test_guidance_and_cold(main)
 	if failures == 0:
 		print("EXPANSION_TEST: PASS")
@@ -52,6 +53,17 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 	main.temperature = 100.0
 	main._update_survival(1.0)
 	_assert(main.cold_exposure() > 0.0 and main.temperature < 92.0, "crossing the warmth edge immediately starts severe cold")
+	var distance_tiles: float = main.safe_radius_tiles() + 0.01
+	_assert(main.climate_ui.cold_fog_alpha(distance_tiles) >= 0.72, "cold frontier immediately applies dense white fog")
+
+func _test_developer_tutorial_button(main: Node2D) -> void:
+	main.tutorial_step = 0
+	main.tutorial_moved = false
+	main.tutorial_next_button.emit_signal("pressed")
+	_assert(main.tutorial_step == 1 and main.tutorial_next_button.visible, "developer button advances one tutorial step")
+	for step in range(5):
+		main.tutorial_next_button.emit_signal("pressed")
+	_assert(main.tutorial_complete() and not main.tutorial_next_button.visible, "developer button completes and then hides")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:
