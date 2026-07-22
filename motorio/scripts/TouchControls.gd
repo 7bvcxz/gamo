@@ -16,6 +16,7 @@ var button_centers: Array[Vector2] = []
 var button_touches: Dictionary[int, int] = {}
 var action_pressed := [false, false, false]
 var last_touch_input_msec := -10000
+var ui_passthrough_touches: Dictionary[int, bool] = {}
 
 func _ready() -> void:
 	resized.connect(_update_layout)
@@ -65,15 +66,38 @@ func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event is InputEventScreenTouch:
+		if event.pressed and _is_top_tutorial_control(event.position):
+			ui_passthrough_touches[event.index] = true
+			_activate_top_tutorial_control(event.position)
+			get_viewport().set_input_as_handled()
+			return
+		if ui_passthrough_touches.has(event.index):
+			if not event.pressed:
+				ui_passthrough_touches.erase(event.index)
+			get_viewport().set_input_as_handled()
+			return
 		if event.pressed:
 			_begin_touch(event.index, event.position)
 		else:
 			_end_touch(event.index)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventScreenDrag:
+		if ui_passthrough_touches.has(event.index):
+			return
 		if event.index == joystick_touch_id:
 			_update_joystick(event.position)
 			get_viewport().set_input_as_handled()
+
+func _is_top_tutorial_control(position: Vector2) -> bool:
+	return position.y <= 64.0 and position.x >= size.x * 0.5 - 170.0 and position.x <= size.x * 0.5 + 170.0
+
+func _activate_top_tutorial_control(position: Vector2) -> void:
+	if main_controller == null:
+		return
+	if position.x < size.x * 0.5:
+		main_controller._developer_previous_tutorial()
+	else:
+		main_controller._developer_advance_tutorial()
 
 func _begin_touch(touch_id: int, position: Vector2) -> void:
 	var in_shelter: bool = main_controller != null and main_controller.shelter_open
@@ -134,6 +158,7 @@ func _sync_player() -> void:
 
 func _reset_inputs() -> void:
 	joystick_touch_id = -1
+	ui_passthrough_touches.clear()
 	button_touches.clear()
 	action_pressed = [false, false, false]
 	joystick_knob = joystick_center

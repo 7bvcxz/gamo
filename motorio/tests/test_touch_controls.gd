@@ -1,5 +1,7 @@
 extends SceneTree
 
+var failures := 0
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -15,6 +17,25 @@ func _run() -> void:
 	await process_frame
 
 	_assert(controls.get_button_count() == 3, "RUN, Z, and X buttons exist without MODE")
+	_assert(controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 31.0)), "top tutorial buttons are excluded from joystick capture")
+	_assert(not controls._is_top_tutorial_control(Vector2(controls.size.x * 0.5, 90.0)), "regular play area remains available to touch controls")
+	var tutorial_next_touch := InputEventScreenTouch.new()
+	tutorial_next_touch.index = 20
+	tutorial_next_touch.position = Vector2(controls.size.x * 0.5 + 80.0, 31.0)
+	tutorial_next_touch.pressed = true
+	controls._input(tutorial_next_touch)
+	_assert(int(main.get("tutorial_step")) == 1 and controls.joystick_touch_id == -1, "top-right touch directly advances tutorial without starting joystick")
+	tutorial_next_touch.pressed = false
+	controls._input(tutorial_next_touch)
+	var tutorial_previous_touch := InputEventScreenTouch.new()
+	tutorial_previous_touch.index = 21
+	tutorial_previous_touch.position = Vector2(controls.size.x * 0.5 - 80.0, 31.0)
+	tutorial_previous_touch.pressed = true
+	controls._input(tutorial_previous_touch)
+	_assert(int(main.get("tutorial_step")) == 0, "top-left touch directly rewinds tutorial")
+	tutorial_previous_touch.pressed = false
+	controls._input(tutorial_previous_touch)
+	controls.last_touch_input_msec = -10000
 	_assert(controls.joystick_center.x > controls.size.x * 0.5, "movement wheel is on the right")
 	_assert(controls.button_centers[0].x < controls.size.x * 0.5, "action buttons are on the left")
 	_assert(ProjectSettings.get_setting("display/window/stretch/aspect") == "expand", "game expands to fill the device aspect ratio")
@@ -96,10 +117,11 @@ func _run() -> void:
 	_assert(not bool(main.get("shelter_open")), "the single mobile Z action sleeps until morning")
 	controls._end_touch(8)
 
-	print("TOUCH_CONTROLS_TEST: PASS")
-	quit(0)
+	if failures == 0:
+		print("TOUCH_CONTROLS_TEST: PASS")
+	quit(failures)
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("TOUCH_CONTROLS_TEST: FAIL - " + message)
-		quit(1)
+		failures += 1
