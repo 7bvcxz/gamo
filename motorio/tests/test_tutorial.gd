@@ -11,8 +11,9 @@ func _run() -> void:
 	await physics_frame
 	_assert(main.tutorial_step == 0 and not main.tutorial_complete(), "new players start in quick start instead of the campaign")
 	_assert(main.tutorial_detail().contains("WASD") and main.tutorial_detail().contains("오른쪽 이동 휠"), "movement lesson covers keyboard and mobile wheel")
+	var day_before: float = main.day_time
 	main.call("_update_survival", 60.0)
-	_assert(main.day_time == 0.0 and main.temperature == 100.0, "the survival clock and cold wait until quick start is complete")
+	_assert(is_equal_approx(main.day_time, day_before + 60.0) and main.temperature == 100.0, "the natural day clock advances during quick start while base warmth preserves temperature")
 	main.tutorial_picked = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 0, "actions done early are remembered without skipping the current lesson")
@@ -25,11 +26,11 @@ func _run() -> void:
 	main.tutorial_placed = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 4, "placement leads to base port education")
-	_assert(main.tutorial_detail().contains("금색 투입구") and main.tutorial_detail().contains("초록색 출구"), "base lesson explains input and output colors")
+	_assert(main.tutorial_detail().contains("금색 IN") and main.tutorial_detail().contains("초록색 OUT"), "base lesson explains IN and OUT colors")
 	main.tutorial_delivered = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 5, "delivery leads to fabricator controls")
-	_assert(main.tutorial_detail().contains("X 선택") and main.tutorial_detail().contains("Z 제작") and main.tutorial_detail().contains("Esc 닫기"), "fabricator lesson explains every menu action")
+	_assert(main.tutorial_detail().contains("이동으로 선택") and main.tutorial_detail().contains("Z 제작") and main.tutorial_detail().contains("X 또는 Esc"), "fabricator lesson explains selection, crafting, and exit controls")
 	main.tutorial_menu_opened = true
 	main.call("_refresh_tutorial")
 	_assert(main.tutorial_step == 6 and main.tutorial_title().contains("2단계"), "fabricator lesson leads to the first base upgrade")

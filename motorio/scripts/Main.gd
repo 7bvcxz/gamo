@@ -324,10 +324,10 @@ func end_placement_action() -> void:
 	placement_action_held = false
 	placement_hold_elapsed = 0.0
 	if base_menu_open:
-		_cycle_fabricator_recipe()
+		_close_base_menu()
 		return
 	if research_menu_open:
-		move_research_selection(1)
+		_close_research_menu()
 		return
 	if not placement_rotated_during_hold:
 		_place_selected_block()
@@ -1119,10 +1119,9 @@ func _process(delta: float) -> void:
 	if collect_action_held and freeze_countdown < 0.0:
 		_collect_nearby_mineral_resources()
 
-func _update_survival(delta: float, force_clock: bool = false) -> void:
+func _update_survival(delta: float, _force_clock: bool = false) -> void:
 	if not shelter_open:
-		if tutorial_complete() or force_clock:
-			day_time += delta
+		day_time += delta
 		var distance_tiles := player.global_position.distance_to(base.global_position) / TILE_SIZE
 		var warm_radius := float(safe_radius_tiles())
 		if distance_tiles > warm_radius:
@@ -1248,7 +1247,7 @@ func quest_title() -> String:
 
 func quest_detail() -> String:
 	return [
-		"상자 1개를 기지의 금색 투입구로 미세요.",
+		"상자 1개를 기지의 금색 IN으로 미세요.",
 		"기지에서 채굴 고양이를 만드세요. (상자 3개)",
 		"미네랄 10개를 모으세요.",
 		"기지에서 상자 생성기를 만드세요. (미네랄 10개)",
@@ -1292,8 +1291,8 @@ func tutorial_detail() -> String:
 		"1×1 블록을 바라보고 Z를 누르세요. 모바일은 왼쪽 Z 버튼입니다.",
 		"X를 0.7초 누를 때마다 설치 방향이 90도 회전합니다.",
 		"X를 짧게 눌러 앞쪽의 표시된 칸에 설치하세요.",
-		"갈색 상자를 금색 투입구로 미세요. 초록색 출구에서 물건이 나옵니다.",
-		"기지를 보고 Z를 누르세요. X 선택·Z 제작·RUN 또는 Esc 닫기입니다.",
+		"갈색 상자를 금색 IN으로 미세요. 초록색 OUT에서 물건이 나옵니다.",
+		"기지를 보고 Z를 누르세요. 이동으로 선택·Z 제작·X 또는 Esc로 닫습니다.",
 		"제작소의 기지 업그레이드를 선택해 상자 5개로 기지를 2단계로 만드세요.",
 		"자동화를 늘려 상자 25개를 모은 뒤 기지를 3단계로 올리세요. 구리 원석이 열립니다.",
 	][tutorial_step]

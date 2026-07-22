@@ -4,7 +4,7 @@ class_name TouchControls
 const JOYSTICK_RADIUS := 64.0
 const KNOB_RADIUS := 25.0
 const BUTTON_RADIUS := 28.0
-const BUTTON_LABELS := ["달리기", "Z", "X"]
+const BUTTON_LABELS := ["Run", "Z", "X"]
 const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
 var player
@@ -120,10 +120,7 @@ func _begin_touch(touch_id: int, position: Vector2) -> void:
 			button_touches[touch_id] = index
 			action_pressed[index] = true
 			if main_controller:
-				if index == 0 and main_controller.any_menu_open():
-					action_pressed[index] = false
-					main_controller.close_active_menu_action()
-				elif index == 1:
+				if index == 1:
 					main_controller.collect_action_held = true
 					main_controller.primary_action()
 				elif index == 2:

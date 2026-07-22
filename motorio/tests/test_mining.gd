@@ -63,9 +63,8 @@ func _run() -> void:
 	var crafted_cats := get_nodes_in_group("pickup_block").filter(func(node): return node is CatBlock and not node.active_on_ready)
 	_assert(crafted_cats.size() == 1, "fabricator outputs one inactive cat block")
 	_assert((crafted_cats[0] as CatBlock).position.y > blocked_output.position.y, "blocked exit ejects a crafted block farther downward")
-	main.call("begin_placement_action")
-	main.call("end_placement_action")
-	_assert(main.base_menu_open and main.fabricator_selection == 1, "X selects the pillar recipe without closing the menu")
+	main.call("move_fabricator_selection", 1)
+	_assert(main.base_menu_open and main.fabricator_selection == 1, "movement selection chooses the pillar recipe without closing the menu")
 	main.call("primary_action")
 	await physics_frame
 	_assert(main.box_count == 0, "pillar crafting consumes three boxes")
@@ -77,9 +76,8 @@ func _run() -> void:
 	_assert(crafted_pillar.position.y > (crafted_cats[0] as CatBlock).position.y, "successive blocked outputs continue downward")
 	main.mineral_count = 10
 	main.get_node("UI/MineralCount").text = "미네랄  10"
-	main.call("begin_placement_action")
-	main.call("end_placement_action")
-	_assert(main.fabricator_selection == 2, "X selects the box generator recipe")
+	main.call("move_fabricator_selection", 1)
+	_assert(main.fabricator_selection == 2, "movement selection chooses the box generator recipe")
 	main.call("primary_action")
 	await physics_frame
 	_assert(main.mineral_count == 0, "box generator crafting consumes ten minerals")

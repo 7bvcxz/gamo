@@ -74,6 +74,11 @@ func _test_developer_tutorial_button(main: Node2D) -> void:
 	_assert(main.tutorial_complete() and main.tutorial_next_button.disabled and not main.tutorial_previous_button.disabled, "next disables at completion while previous remains available")
 	main.tutorial_previous_button.emit_signal("pressed")
 	_assert(main.tutorial_step == 7 and not main.tutorial_base_three and not main.tutorial_next_button.disabled, "previous can reopen the final tutorial step after completion")
+	main._open_base_menu()
+	main.fabricator_selection = 5
+	main.begin_placement_action()
+	main.end_placement_action()
+	_assert(not main.base_menu_open and main.fabricator_selection == 5, "X exits the base menu without changing its joystick-selected recipe")
 
 func _test_developer_resources_and_time(main: Node2D) -> void:
 	var before_box: int = main.box_count

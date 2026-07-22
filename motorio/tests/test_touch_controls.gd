@@ -50,7 +50,8 @@ func _run() -> void:
 	minute_touch.position = Vector2(controls.size.x * 0.5 + 80.0, 70.0)
 	minute_touch.pressed = true
 	controls._input(minute_touch)
-	_assert(main.day_time == day_before + 60.0 and controls.joystick_touch_id == -1, "mobile +1 minute touch advances time without capturing the joystick")
+	var minute_advanced: float = main.day_time - day_before
+	_assert(minute_advanced >= 60.0 and minute_advanced < 61.0 and controls.joystick_touch_id == -1, "mobile +1 minute touch advances time without capturing the joystick")
 	minute_touch.pressed = false
 	controls._input(minute_touch)
 	controls.last_touch_input_msec = -10000
@@ -119,10 +120,18 @@ func _run() -> void:
 	player.set("controls_locked", true)
 	run_press.pressed = true
 	controls._input(run_press)
-	_assert(not bool(main.get("base_menu_open")), "RUN closes the fabricator menu on touch devices")
-	_assert(not bool(player.get("touch_sprint")), "closing the menu does not start sprinting")
+	_assert(bool(main.get("base_menu_open")), "Run has no effect in the fabricator menu")
+	_assert(not bool(player.get("touch_sprint")), "Run does not start sprinting while a menu is open")
 	run_press.pressed = false
 	controls._input(run_press)
+	var menu_exit_press := InputEventScreenTouch.new()
+	menu_exit_press.index = 24
+	menu_exit_press.position = controls.button_centers[2]
+	menu_exit_press.pressed = true
+	controls._input(menu_exit_press)
+	menu_exit_press.pressed = false
+	controls._input(menu_exit_press)
+	_assert(not bool(main.get("base_menu_open")), "X exits the fabricator menu on touch devices")
 
 	var collect_press := InputEventScreenTouch.new()
 	collect_press.index = 4

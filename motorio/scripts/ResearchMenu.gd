@@ -24,4 +24,4 @@ func _draw() -> void:
 		draw_string(font, panel.position + Vector2(215, y), main_controller.research_duration_text(index), HORIZONTAL_ALIGNMENT_LEFT, 125, 12, Color("79dce6"))
 	var status: String = main_controller.research_status_text()
 	draw_string(font, panel.position + Vector2(22, 238), status, HORIZONTAL_ALIGNMENT_LEFT, 325, 13, Color("f0c96c"))
-	draw_string(font, panel.position + Vector2(22, 270), "Z 연구 시작   X 선택   RUN 닫기", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("becbce"))
+	draw_string(font, panel.position + Vector2(22, 270), "이동 선택   Z 연구   X 나가기", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("becbce"))

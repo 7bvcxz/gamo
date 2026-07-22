@@ -18,6 +18,6 @@ func _draw() -> void:
 	draw_string(font, panel.position + Vector2(16, 78), main_controller.tutorial_detail(), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32.0, 12, Color("cbd9cf"))
 	if main_controller.tutorial_step == 4:
 		draw_rect(Rect2(panel.position + Vector2(16, 86), Vector2(12, 8)), Color("d69b35"))
-		draw_string(font, panel.position + Vector2(34, 95), "투입", HORIZONTAL_ALIGNMENT_LEFT, 36, 10, Color("f0d18b"))
+		draw_string(font, panel.position + Vector2(34, 95), "IN", HORIZONTAL_ALIGNMENT_LEFT, 36, 10, Color("f0d18b"))
 		draw_rect(Rect2(panel.position + Vector2(72, 86), Vector2(12, 8)), Color("6ed0b0"))
-		draw_string(font, panel.position + Vector2(90, 95), "출구", HORIZONTAL_ALIGNMENT_LEFT, 36, 10, Color("b8f0cf"))
+		draw_string(font, panel.position + Vector2(90, 95), "OUT", HORIZONTAL_ALIGNMENT_LEFT, 36, 10, Color("b8f0cf"))
