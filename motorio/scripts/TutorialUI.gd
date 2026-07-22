@@ -13,7 +13,7 @@ func _draw() -> void:
 	draw_rect(panel, Color(0.025, 0.05, 0.043, 0.96))
 	draw_rect(panel, Color("f0bd4f"), false, 3.0)
 	var font := UIFont.FONT
-	draw_string(font, panel.position + Vector2(16, 25), "빠른 시작  %d/6" % (main_controller.tutorial_step + 1), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32.0, 15, Color("f0bd4f"))
+	draw_string(font, panel.position + Vector2(16, 25), "빠른 시작  %d/8" % (main_controller.tutorial_step + 1), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32.0, 15, Color("f0bd4f"))
 	draw_string(font, panel.position + Vector2(16, 52), main_controller.tutorial_title(), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32.0, 16, Color.WHITE)
 	draw_string(font, panel.position + Vector2(16, 78), main_controller.tutorial_detail(), HORIZONTAL_ALIGNMENT_LEFT, panel.size.x - 32.0, 12, Color("cbd9cf"))
 	if main_controller.tutorial_step == 4:

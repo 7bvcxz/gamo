@@ -39,6 +39,7 @@ const PLACEMENT_ROTATE_INTERVAL := 0.7
 @onready var survival_status: Label = $UI/SurvivalStatus
 @onready var shelter_ui: Control = $UI/Shelter
 @onready var climate_ui: Control = $UI/Climate
+@onready var cold_world_fog: Node2D = $ColdWorldFog
 @onready var tutorial_previous_button: Button = $UI/TutorialPrevious
 @onready var tutorial_next_button: Button = $UI/TutorialNext
 
@@ -77,6 +78,8 @@ var tutorial_rotated := false
 var tutorial_placed := false
 var tutorial_delivered := false
 var tutorial_menu_opened := false
+var tutorial_base_two := false
+var tutorial_base_three := false
 var day_number := 1
 var day_time := 0.0
 var temperature := 100.0
@@ -85,6 +88,7 @@ var night_warning_shown := false
 var heat_tech := 0
 var power_tech := 0
 var food_tech := 0
+var freeze_countdown := -1.0
 
 func _ready() -> void:
 	add_to_group("main_controller")
@@ -105,6 +109,7 @@ func _ready() -> void:
 	tutorial_ui.main_controller = self
 	shelter_ui.main_controller = self
 	climate_ui.main_controller = self
+	cold_world_fog.main_controller = self
 	tutorial_previous_button.pressed.connect(_developer_previous_tutorial)
 	tutorial_next_button.pressed.connect(_developer_advance_tutorial)
 	_update_tutorial_developer_buttons()
@@ -243,6 +248,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	if key == null or key.echo:
 		return
+	if freeze_countdown >= 0.0 and key.physical_keycode in [KEY_Z, KEY_X]:
+		collect_action_held = false
+		cancel_placement_action()
+		return
 	if key.physical_keycode == KEY_Z:
 		collect_action_held = key.pressed
 		if key.pressed:
@@ -264,6 +273,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			select_inventory_slot(int(key.physical_keycode - KEY_1))
 
 func primary_action() -> void:
+	if freeze_countdown >= 0.0:
+		return
 	if shelter_open:
 		_sleep_until_morning()
 		return
@@ -277,7 +288,12 @@ func primary_action() -> void:
 	else:
 		_pick_up_front_block()
 
+func interaction_locked() -> bool:
+	return freeze_countdown >= 0.0
+
 func begin_placement_action() -> void:
+	if freeze_countdown >= 0.0:
+		return
 	placement_action_held = true
 	placement_hold_elapsed = 0.0
 	placement_rotated_during_hold = false
@@ -570,11 +586,18 @@ func close_base_menu_action() -> void:
 
 func _close_base_menu() -> void:
 	base_menu_open = false
-	player.controls_locked = false
+	player.controls_locked = freeze_countdown >= 0.0
 	base_menu.queue_redraw()
 
 func _cycle_fabricator_recipe() -> void:
 	fabricator_selection = (fabricator_selection + 1) % fabricator_recipe_count()
+	_update_fabricator_status()
+	base_menu.queue_redraw()
+
+func move_fabricator_selection(direction: int) -> void:
+	if not base_menu_open or direction == 0:
+		return
+	fabricator_selection = posmod(fabricator_selection + direction, fabricator_recipe_count())
 	_update_fabricator_status()
 	base_menu.queue_redraw()
 
@@ -647,6 +670,12 @@ func base_upgrade_cost() -> Dictionary:
 
 func _upgrade_base() -> void:
 	base_level = mini(base_level + 1, 7)
+	if base_level >= 2:
+		tutorial_base_two = true
+	if base_level >= 3:
+		tutorial_base_three = true
+	_ensure_base_level_components()
+	_refresh_tutorial()
 	fabricator_status = "기지 %d단계 완료 · 온기 %d칸" % [base_level, safe_radius_tiles()]
 	celebration_text = fabricator_status
 	celebration_remaining = 4.0
@@ -807,7 +836,51 @@ func _populate_starter_zone(occupied: Dictionary[Vector2i, bool], center_tile: V
 		mineral.position = _cell_center(cell)
 		mineral.set_meta("clustered_spawn", index > 0)
 		mineral.set_meta("starter_mineral", true)
+		mineral.set_meta("base_level_component", 1)
 		add_child(mineral)
+
+func _ensure_base_level_components() -> void:
+	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
+	var mineral_offsets: Array[Vector2i] = [Vector2i(6, -1), Vector2i(6, 1)]
+	if base_level >= 2:
+		var starter_count: int = get_tree().get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size()
+		for index in mineral_offsets.size():
+			if starter_count >= 3:
+				break
+			var mineral := MINERAL_SCENE.instantiate() as MineralBlock
+			mineral.position = _cell_center(center_tile + mineral_offsets[index])
+			mineral.set_meta("starter_mineral", true)
+			mineral.set_meta("base_level_component", 2)
+			add_child(mineral)
+			starter_count += 1
+	var tier_components: Array[Dictionary] = [
+		{"level": 3, "type": "copper", "offset": Vector2i(-6, 0), "worker": "miner", "power": 0, "oil": 0, "fed": false},
+		{"level": 4, "type": "coal", "offset": Vector2i(-6, -1), "worker": "miner", "power": 0, "oil": 0, "fed": true},
+		{"level": 5, "type": "crystal", "offset": Vector2i(0, -6), "worker": "miner", "power": 2, "oil": 0, "fed": true},
+		{"level": 6, "type": "oil", "offset": Vector2i(1, -6), "worker": "pressure", "power": 0, "oil": 0, "fed": true},
+		{"level": 7, "type": "uranium", "offset": Vector2i(-1, -6), "worker": "miner", "power": 8, "oil": 2, "fed": true},
+	]
+	for data: Dictionary in tier_components:
+		var required_level: int = data["level"]
+		if base_level < required_level or _has_base_level_component(required_level, data["type"]):
+			continue
+		var deposit := RESOURCE_DEPOSIT_SCENE.instantiate() as ResourceDeposit
+		deposit.resource_type = data["type"]
+		deposit.required_worker = data["worker"]
+		deposit.power_cost = data["power"]
+		deposit.oil_cost = data["oil"]
+		deposit.requires_fed_cat = data["fed"]
+		deposit.position = _cell_center(center_tile + data["offset"])
+		deposit.set_meta("base_level_component", required_level)
+		add_child(deposit)
+
+func _has_base_level_component(level: int, resource_type: String) -> bool:
+	for node in get_tree().get_nodes_in_group("mineral_block" if resource_type == "mineral" else "resource_deposit"):
+		if int(node.get_meta("base_level_component", 0)) != level:
+			continue
+		if resource_type == "mineral" or (node as ResourceDeposit).resource_type == resource_type:
+			return true
+	return false
 
 func _populate_water_ring(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
 	# A distant broken river teaches bridges without forming a prison.
@@ -907,7 +980,7 @@ func _process(delta: float) -> void:
 	if preview_visible and is_instance_valid(placement_preview):
 		var preview_type: String = placement_preview.get_meta("preview_type", "box")
 		placement_preview.position = _preview_position(preview_type)
-	if collect_action_held:
+	if collect_action_held and freeze_countdown < 0.0:
 		_collect_nearby_mineral_resources()
 
 func _update_survival(delta: float) -> void:
@@ -921,6 +994,13 @@ func _update_survival(delta: float) -> void:
 			temperature = maxf(0.0, temperature - delta * exposure * 8.0)
 		else:
 			temperature = minf(100.0, temperature + delta * 5.0)
+		if temperature <= 0.0:
+			if freeze_countdown < 0.0:
+				_start_freeze_countdown()
+			else:
+				freeze_countdown = maxf(0.0, freeze_countdown - delta)
+				if freeze_countdown <= 0.0:
+					_respawn_after_freeze()
 		if day_time >= 660.0 and not night_warning_shown:
 			night_warning_shown = true
 			celebration_text = "밤이 옵니다 - 기지로 돌아가세요"
@@ -930,12 +1010,35 @@ func _update_survival(delta: float) -> void:
 	var minute := int(day_time) / 60
 	var second := int(day_time) % 60
 	survival_status.text = "%d일  %02d:%02d   체온 %d   온기 %d" % [day_number, minute, second, int(temperature), safe_radius_tiles()]
+	if freeze_countdown >= 0.0:
+		survival_status.text += "\n동결 구조까지 %.1f초" % freeze_countdown
 	if ui_stage() >= 3:
 		survival_status.text += "\n전력 +%d/분   식량 +%d/분   열 %d" % [power_per_minute(), food_per_minute(), heat_per_minute()]
 	if temperature < 35.0:
 		survival_status.modulate = Color("ff9d8a")
 	else:
 		survival_status.modulate = Color.WHITE
+
+func _start_freeze_countdown() -> void:
+	freeze_countdown = 3.0
+	collect_action_held = false
+	cancel_placement_action()
+	if base_menu_open:
+		base_menu_open = false
+		base_menu.queue_redraw()
+	player.controls_locked = true
+	celebration_text = "완전 동결 - 3초 후 기지에서 구조됩니다"
+	celebration_remaining = 3.0
+
+func _respawn_after_freeze() -> void:
+	player.global_position = base.global_position + Vector2.DOWN * TILE_SIZE * 4.0
+	player.velocity = Vector2.ZERO
+	player.touch_direction = Vector2.ZERO
+	temperature = 60.0
+	freeze_countdown = -1.0
+	player.controls_locked = false
+	celebration_text = "기지 구조 완료 - 체온을 회복하세요"
+	celebration_remaining = 3.0
 
 func _update_staged_ui() -> void:
 	var stage := ui_stage()
@@ -1039,10 +1142,10 @@ func quest_unlock_help() -> String:
 	][quest_step]
 
 func tutorial_complete() -> bool:
-	return tutorial_step >= 6
+	return tutorial_step >= 8
 
 func tutorial_title() -> String:
-	return ["정비공 이동", "블록 줍기", "설치 방향 회전", "블록 설치", "기지에 납품", "제작 메뉴 열기"][tutorial_step]
+	return ["정비공 이동", "블록 줍기", "설치 방향 회전", "블록 설치", "기지에 납품", "제작 메뉴 열기", "기지 2단계 업그레이드", "기지 3단계 업그레이드"][tutorial_step]
 
 func tutorial_detail() -> String:
 	return [
@@ -1052,17 +1155,19 @@ func tutorial_detail() -> String:
 		"X를 짧게 눌러 앞쪽의 표시된 칸에 설치하세요.",
 		"갈색 상자를 금색 투입구로 미세요. 초록색 출구에서 물건이 나옵니다.",
 		"기지를 보고 Z를 누르세요. X 선택·Z 제작·RUN 또는 Esc 닫기입니다.",
+		"제작소의 기지 업그레이드를 선택해 상자 5개로 기지를 2단계로 만드세요.",
+		"자동화를 늘려 상자 25개를 모은 뒤 기지를 3단계로 올리세요. 구리 원석이 열립니다.",
 	][tutorial_step]
 
 func _refresh_tutorial() -> void:
 	var before := tutorial_step
-	while tutorial_step < 6:
-		var tutorial_flags: Array[bool] = [tutorial_moved, tutorial_picked, tutorial_rotated, tutorial_placed, tutorial_delivered, tutorial_menu_opened]
+	while tutorial_step < 8:
+		var tutorial_flags: Array[bool] = [tutorial_moved, tutorial_picked, tutorial_rotated, tutorial_placed, tutorial_delivered, tutorial_menu_opened, tutorial_base_two, tutorial_base_three]
 		var done: bool = tutorial_flags[tutorial_step]
 		if not done:
 			break
 		tutorial_step += 1
-	if before < 6 and tutorial_step >= 6:
+	if before < 8 and tutorial_step >= 8:
 		celebration_text = "기초 완료 - 이제 자동화를 시작하세요"
 		celebration_remaining = 3.0
 	tutorial_ui.queue_redraw()
@@ -1087,6 +1192,10 @@ func _set_tutorial_flag(step: int, value: bool) -> void:
 			tutorial_delivered = value
 		5:
 			tutorial_menu_opened = value
+		6:
+			tutorial_base_two = value
+		7:
+			tutorial_base_three = value
 
 func _developer_previous_tutorial() -> void:
 	if tutorial_step <= 0:

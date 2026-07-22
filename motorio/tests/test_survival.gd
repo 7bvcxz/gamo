@@ -28,6 +28,8 @@ func _test_ui_stages(main: Node2D) -> void:
 	main.tutorial_placed = true
 	main.tutorial_delivered = true
 	main.tutorial_menu_opened = true
+	main.tutorial_base_two = true
+	main.tutorial_base_three = true
 	main.call("_refresh_tutorial")
 	main.call("_update_staged_ui")
 	_assert(main.ui_stage() == 1 and main.get_node("UI/BoxCount").visible, "basic automation reveals BOX and MINERAL")
@@ -45,7 +47,7 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	var player := main.get_node("Player") as CharacterBody2D
 	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 15.0
 	main.temperature = 100.0
-	main.call("_update_survival", 5.0)
+	main.call("_update_survival", 1.0)
 	_assert(main.temperature < 90.0, "temperature falls beyond the warm radius")
 	player.position = base.position
 	var frozen_temperature: float = main.temperature
@@ -54,7 +56,12 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 20.0
 	main.temperature = 0.1
 	main.call("_update_survival", 1.0)
-	_assert(not main.shelter_open and main.temperature == 0.0 and not player.controls_locked, "freezing slows but never forcibly returns the player")
+	_assert(main.temperature == 0.0 and player.controls_locked and main.freeze_countdown == 3.0, "zero temperature starts a three-second frozen countdown")
+	main.call("primary_action")
+	main.call("begin_placement_action")
+	_assert(not main.collect_action_held and not main.placement_action_held, "Z and X interactions stay disabled while frozen")
+	main.call("_update_survival", 3.1)
+	_assert(main.freeze_countdown < 0.0 and not player.controls_locked and player.position.distance_to(base.position) <= main.TILE_SIZE * 4.1 and main.temperature == 60.0, "countdown respawns the player warm near base")
 	main.day_time = 659.5
 	main.call("_update_survival", 1.0)
 	_assert(main.night_warning_shown and main.cats_should_rest(), "cats stop work and the return warning starts at minute eleven")

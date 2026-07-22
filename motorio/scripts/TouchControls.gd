@@ -17,6 +17,7 @@ var button_touches: Dictionary[int, int] = {}
 var action_pressed := [false, false, false]
 var last_touch_input_msec := -10000
 var ui_passthrough_touches: Dictionary[int, bool] = {}
+var menu_navigation_axis := 0
 
 func _ready() -> void:
 	resized.connect(_update_layout)
@@ -109,6 +110,8 @@ func _begin_touch(touch_id: int, position: Vector2) -> void:
 		if in_shelter and index != 1:
 			continue
 		if position.distance_to(button_centers[index]) <= BUTTON_RADIUS * 1.25:
+			if main_controller != null and main_controller.interaction_locked() and index in [1, 2]:
+				return
 			button_touches[touch_id] = index
 			action_pressed[index] = true
 			if main_controller:
@@ -130,6 +133,7 @@ func _end_touch(touch_id: int) -> void:
 		joystick_knob = joystick_center
 		if player:
 			player.touch_direction = Vector2.ZERO
+		menu_navigation_axis = 0
 		queue_redraw()
 		return
 	if button_touches.has(touch_id):
@@ -148,9 +152,28 @@ func _update_joystick(position: Vector2) -> void:
 	if offset.length() > JOYSTICK_RADIUS:
 		offset = offset.normalized() * JOYSTICK_RADIUS
 	joystick_knob = joystick_center + offset
+	if main_controller != null and main_controller.base_menu_open:
+		if player:
+			player.touch_direction = Vector2.ZERO
+		var next_axis := 0
+		if offset.y <= -JOYSTICK_RADIUS * 0.32:
+			next_axis = -1
+		elif offset.y >= JOYSTICK_RADIUS * 0.32:
+			next_axis = 1
+		if next_axis != 0 and next_axis != menu_navigation_axis:
+			main_controller.move_fabricator_selection(next_axis)
+		menu_navigation_axis = next_axis
+		queue_redraw()
+		return
 	if player:
-		player.touch_direction = offset / JOYSTICK_RADIUS
+		player.touch_direction = snap_to_eight_directions(offset / JOYSTICK_RADIUS)
 	queue_redraw()
+
+func snap_to_eight_directions(direction: Vector2) -> Vector2:
+	if direction.length() < 0.12:
+		return Vector2.ZERO
+	var snapped_angle := roundf(direction.angle() / (PI / 4.0)) * (PI / 4.0)
+	return Vector2.from_angle(snapped_angle) * clampf(direction.length(), 0.0, 1.0)
 
 func _sync_player() -> void:
 	if player:
@@ -159,6 +182,7 @@ func _sync_player() -> void:
 func _reset_inputs() -> void:
 	joystick_touch_id = -1
 	ui_passthrough_touches.clear()
+	menu_navigation_axis = 0
 	button_touches.clear()
 	action_pressed = [false, false, false]
 	joystick_knob = joystick_center

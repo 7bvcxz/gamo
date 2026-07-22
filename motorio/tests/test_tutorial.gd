@@ -32,7 +32,13 @@ func _run() -> void:
 	_assert(main.tutorial_detail().contains("X 선택") and main.tutorial_detail().contains("Z 제작") and main.tutorial_detail().contains("Esc 닫기"), "fabricator lesson explains every menu action")
 	main.tutorial_menu_opened = true
 	main.call("_refresh_tutorial")
-	_assert(main.tutorial_complete(), "opening the fabricator completes quick start")
+	_assert(main.tutorial_step == 6 and main.tutorial_title().contains("2단계"), "fabricator lesson leads to the first base upgrade")
+	main.tutorial_base_two = true
+	main.call("_refresh_tutorial")
+	_assert(main.tutorial_step == 7 and main.tutorial_title().contains("3단계"), "level two leads to the second base upgrade")
+	main.tutorial_base_three = true
+	main.call("_refresh_tutorial")
+	_assert(main.tutorial_complete(), "level three completes quick start")
 	_assert(main.celebration_text.contains("기초 완료"), "completion clearly hands off to automation campaign")
 	if failures == 0:
 		print("TUTORIAL_TEST: PASS")

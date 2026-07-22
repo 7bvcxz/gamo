@@ -52,6 +52,12 @@ func _run() -> void:
 	main.fabricator_selection = 15
 	main.call("_craft_selected_block")
 	_assert(main.base_level == 2 and main.box_count == 0, "five boxes upgrade the base to level two")
+	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 3, "level two base guarantees three nearby minerals")
+	main.box_count = 25
+	main.fabricator_selection = 15
+	main.call("_craft_selected_block")
+	_assert(main.base_level == 3 and get_nodes_in_group("deposit_copper").any(func(node): return node.get_meta("base_level_component", 0) == 3), "level three base guarantees one nearby copper deposit")
+	main.base_level = 2
 	main.box_count = 5
 	main.fabricator_selection = 3
 	main.call("_craft_selected_block")

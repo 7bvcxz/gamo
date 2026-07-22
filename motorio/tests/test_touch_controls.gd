@@ -38,6 +38,8 @@ func _run() -> void:
 	controls.last_touch_input_msec = -10000
 	_assert(controls.joystick_center.x > controls.size.x * 0.5, "movement wheel is on the right")
 	_assert(controls.button_centers[0].x < controls.size.x * 0.5, "action buttons are on the left")
+	var diagonal: Vector2 = controls.snap_to_eight_directions(Vector2(0.8, 0.45))
+	_assert(abs(diagonal.normalized().x - 0.7071) < 0.01 and abs(diagonal.normalized().y - 0.7071) < 0.01, "mobile movement snaps diagonal input to one of eight directions")
 	_assert(ProjectSettings.get_setting("display/window/stretch/aspect") == "expand", "game expands to fill the device aspect ratio")
 	controls.size = Vector2(900, 1200)
 	controls._update_layout()
@@ -67,6 +69,16 @@ func _run() -> void:
 	_assert((player.get("touch_direction") as Vector2).x > 0.95, "synthetic mouse input does not reset joystick movement")
 	controls._end_touch(1)
 	_assert(player.get("touch_direction") == Vector2.ZERO, "wheel release stops movement")
+	main.set("base_menu_open", true)
+	player.set("controls_locked", true)
+	main.set("fabricator_selection", 5)
+	controls.menu_navigation_axis = 0
+	controls._update_joystick(controls.joystick_center + Vector2.UP * controls.JOYSTICK_RADIUS)
+	_assert(int(main.get("fabricator_selection")) == 4 and player.get("touch_direction") == Vector2.ZERO, "joystick up selects the previous fabricator item without moving")
+	controls._update_joystick(controls.joystick_center)
+	controls._update_joystick(controls.joystick_center + Vector2.DOWN * controls.JOYSTICK_RADIUS)
+	_assert(int(main.get("fabricator_selection")) == 5, "joystick down selects the next fabricator item")
+	main.call("_close_base_menu")
 
 	var run_press := InputEventScreenTouch.new()
 	run_press.index = 2
