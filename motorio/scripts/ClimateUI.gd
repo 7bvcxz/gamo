@@ -4,8 +4,10 @@ var main_controller
 var snow_time := 0.0
 
 func cold_fog_alpha(distance_tiles: float) -> float:
+	# Cold has to read as dangerous without blinding the player: crossing the edge
+	# is a haze, and only a long trip out turns the screen genuinely white.
 	var edge_distance: float = maxf(0.0, distance_tiles - float(main_controller.safe_radius_tiles()))
-	return 0.72 + clampf(edge_distance / 6.0, 0.0, 1.0) * 0.23
+	return 0.14 + clampf(edge_distance / 12.0, 0.0, 1.0) * 0.34
 
 func _process(delta: float) -> void:
 	snow_time += delta

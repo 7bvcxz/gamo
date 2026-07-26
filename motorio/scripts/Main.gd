@@ -5,6 +5,13 @@ const WORLD_TILES := 100
 const WORLD_SIZE := TILE_SIZE * WORLD_TILES
 const REGION_SIZE := 10
 const START_CLEAR_RADIUS := 20
+# Every resource sits at a fixed world position from the first frame. Base levels
+# never spawn resources; they widen the warm radius (8 + 3 per level) until the
+# next ring below is safely reachable.
+const MINERAL_MIN_RADIUS := 9
+const MINERAL_MAX_RADIUS := 34
+const MINERAL_SEED_RADII: Array[int] = [10, 12, 14, 17, 20, 24, 28, 32]
+const TIER_RING_RADII := {"copper": 19, "coal": 22, "crystal": 25, "oil": 27, "uranium": 29}
 const SPAWN_SEED := 20260720
 const PUSH_TILE_SCENE := preload("res://scenes/PushTile.tscn")
 const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
@@ -880,7 +887,6 @@ func _upgrade_base() -> void:
 		tutorial_base_two = true
 	if base_level >= 3:
 		tutorial_base_three = true
-	_ensure_base_level_components()
 	_refresh_tutorial()
 	fabricator_status = "기지 %d단계 완료 · 온기 %d칸" % [base_level, safe_radius_tiles()]
 	if base_level == 3:
@@ -1001,16 +1007,14 @@ func _populate_minerals(rng: RandomNumberGenerator, occupied: Dictionary[Vector2
 	var target_count := int(round(float(WORLD_TILES * WORLD_TILES) / 240.0)) - 1
 	var isolated_count := int(round(target_count * 0.2))
 	var mineral_cells: Array[Vector2i] = []
-	while mineral_cells.size() < isolated_count:
-		var cell := Vector2i(rng.randi_range(0, WORLD_TILES - 1), rng.randi_range(0, WORLD_TILES - 1))
-		if not _is_free_mineral_cell(cell, occupied, center_tile, player_tile):
-			continue
-		var touches_existing := false
-		for direction in [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]:
-			if mineral_cells.has(cell + direction):
-				touches_existing = true
-				break
-		if touches_existing:
+	# Seed one patch per radius band so every base level opens a mineral field
+	# that is actually within its warm radius, instead of leaving the near world empty.
+	var seed_index := 0
+	while mineral_cells.size() < isolated_count and seed_index < isolated_count * 12:
+		var band_radius: int = MINERAL_SEED_RADII[mini(mineral_cells.size(), MINERAL_SEED_RADII.size() - 1)]
+		seed_index += 1
+		var cell := _mineral_seed_cell(rng, band_radius, occupied, center_tile, player_tile, mineral_cells)
+		if cell.x < 0:
 			continue
 		_add_mineral(cell, false, occupied, mineral_cells)
 	var attempts := 0
@@ -1039,51 +1043,7 @@ func _populate_starter_zone(occupied: Dictionary[Vector2i, bool], center_tile: V
 		mineral.position = _cell_center(cell)
 		mineral.set_meta("clustered_spawn", index > 0)
 		mineral.set_meta("starter_mineral", true)
-		mineral.set_meta("base_level_component", 1)
 		add_child(mineral)
-
-func _ensure_base_level_components() -> void:
-	var center_tile := Vector2i(WORLD_TILES / 2, WORLD_TILES / 2)
-	var mineral_offsets: Array[Vector2i] = [Vector2i(6, -1), Vector2i(6, 1)]
-	if base_level >= 2:
-		var starter_count: int = get_tree().get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size()
-		for index in mineral_offsets.size():
-			if starter_count >= 3:
-				break
-			var mineral := MINERAL_SCENE.instantiate() as MineralBlock
-			mineral.position = _cell_center(center_tile + mineral_offsets[index])
-			mineral.set_meta("starter_mineral", true)
-			mineral.set_meta("base_level_component", 2)
-			add_child(mineral)
-			starter_count += 1
-	var tier_components: Array[Dictionary] = [
-		{"level": 3, "type": "copper", "offset": Vector2i(-6, 0), "worker": "miner", "power": 0, "oil": 0, "fed": false},
-		{"level": 4, "type": "coal", "offset": Vector2i(-6, -1), "worker": "miner", "power": 0, "oil": 0, "fed": true},
-		{"level": 5, "type": "crystal", "offset": Vector2i(0, -6), "worker": "miner", "power": 2, "oil": 0, "fed": true},
-		{"level": 6, "type": "oil", "offset": Vector2i(1, -6), "worker": "pressure", "power": 0, "oil": 0, "fed": true},
-		{"level": 7, "type": "uranium", "offset": Vector2i(-1, -6), "worker": "miner", "power": 8, "oil": 2, "fed": true},
-	]
-	for data: Dictionary in tier_components:
-		var required_level: int = data["level"]
-		if base_level < required_level or _has_base_level_component(required_level, data["type"]):
-			continue
-		var deposit := RESOURCE_DEPOSIT_SCENE.instantiate() as ResourceDeposit
-		deposit.resource_type = data["type"]
-		deposit.required_worker = data["worker"]
-		deposit.power_cost = data["power"]
-		deposit.oil_cost = data["oil"]
-		deposit.requires_fed_cat = data["fed"]
-		deposit.position = _cell_center(center_tile + data["offset"])
-		deposit.set_meta("base_level_component", required_level)
-		add_child(deposit)
-
-func _has_base_level_component(level: int, resource_type: String) -> bool:
-	for node in get_tree().get_nodes_in_group("mineral_block" if resource_type == "mineral" else "resource_deposit"):
-		if int(node.get_meta("base_level_component", 0)) != level:
-			continue
-		if resource_type == "mineral" or (node as ResourceDeposit).resource_type == resource_type:
-			return true
-	return false
 
 func _populate_water_ring(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
 	# A distant broken river teaches bridges without forming a prison.
@@ -1099,11 +1059,16 @@ func _populate_water_ring(occupied: Dictionary[Vector2i, bool], center_tile: Vec
 		add_child(water)
 
 func _populate_tier_resources(occupied: Dictionary[Vector2i, bool], center_tile: Vector2i) -> void:
-	_spawn_resource_tier(occupied, center_tile, "copper", 30, 7, "miner", 0, 0, false)
-	_spawn_resource_tier(occupied, center_tile, "coal", 34, 5, "miner", 0, 0, true)
-	_spawn_resource_tier(occupied, center_tile, "crystal", 38, 4, "miner", 2, 0, true)
-	_spawn_resource_tier(occupied, center_tile, "oil", 42, 3, "pressure", 0, 0, true)
-	_spawn_resource_tier(occupied, center_tile, "uranium", 46, 2, "miner", 8, 2, true)
+	_spawn_resource_tier(occupied, center_tile, "copper", TIER_RING_RADII["copper"], 7, "miner", 0, 0, false)
+	_spawn_resource_tier(occupied, center_tile, "coal", TIER_RING_RADII["coal"], 5, "miner", 0, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "crystal", TIER_RING_RADII["crystal"], 4, "miner", 2, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "oil", TIER_RING_RADII["oil"], 3, "pressure", 0, 0, true)
+	_spawn_resource_tier(occupied, center_tile, "uranium", TIER_RING_RADII["uranium"], 2, "miner", 8, 2, true)
+
+func base_level_for_radius(radius: float) -> int:
+	# Inverse of safe_radius_tiles() at zero research: the base level whose warm
+	# radius first covers this distance. Used to explain why a ring is still cold.
+	return clampi(int(ceil((radius - 8.0) / 3.0)), 1, 7)
 
 func _spawn_resource_tier(
 	occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, resource_type: String,
@@ -1126,8 +1091,39 @@ func _spawn_resource_tier(
 		deposit.set_meta("tier_radius", radius)
 		add_child(deposit)
 
+func _mineral_seed_cell(
+	rng: RandomNumberGenerator,
+	band_radius: int,
+	occupied: Dictionary[Vector2i, bool],
+	center_tile: Vector2i,
+	player_tile: Vector2i,
+	mineral_cells: Array[Vector2i]
+) -> Vector2i:
+	for attempt in 90:
+		var angle := rng.randf() * TAU
+		var radius := float(band_radius) + rng.randf_range(-1.0, 1.0)
+		var cell := center_tile + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if not _is_free_mineral_cell(cell, occupied, center_tile, player_tile):
+			continue
+		var touches_existing := false
+		for direction: Vector2i in [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]:
+			if mineral_cells.has(cell + direction):
+				touches_existing = true
+				break
+		if touches_existing:
+			continue
+		return cell
+	return Vector2i(-1, -1)
+
 func _is_free_mineral_cell(cell: Vector2i, occupied: Dictionary[Vector2i, bool], center_tile: Vector2i, player_tile: Vector2i) -> bool:
-	return cell.x >= 0 and cell.y >= 0 and cell.x < WORLD_TILES and cell.y < WORLD_TILES and not occupied.has(cell) and not (abs(cell.x - center_tile.x) <= START_CLEAR_RADIUS and abs(cell.y - center_tile.y) <= START_CLEAR_RADIUS) and not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
+	if cell.x < 0 or cell.y < 0 or cell.x >= WORLD_TILES or cell.y >= WORLD_TILES:
+		return false
+	if occupied.has(cell):
+		return false
+	var distance: float = Vector2(cell - center_tile).length()
+	if distance < float(MINERAL_MIN_RADIUS) or distance > float(MINERAL_MAX_RADIUS):
+		return false
+	return not (abs(cell.x - player_tile.x) <= 1 and abs(cell.y - player_tile.y) <= 1)
 
 func _add_mineral(cell: Vector2i, clustered: bool, occupied: Dictionary[Vector2i, bool], mineral_cells: Array[Vector2i]) -> void:
 	var mineral := MINERAL_SCENE.instantiate() as MineralBlock
@@ -1198,7 +1194,9 @@ func _update_survival(delta: float, _force_clock: bool = false) -> void:
 		var distance_tiles := player.global_position.distance_to(base.global_position) / TILE_SIZE
 		var warm_radius := float(safe_radius_tiles())
 		if distance_tiles > warm_radius:
-			var exposure := 1.0 + (distance_tiles - warm_radius) * 0.45
+			# A round trip into the visible ring beyond the warm edge has to be
+			# survivable; only a deep push into the white world is fatal.
+			var exposure := 0.4 + (distance_tiles - warm_radius) * 0.12
 			temperature = maxf(0.0, temperature - delta * exposure * 8.0)
 		else:
 			temperature = minf(100.0, temperature + delta * 5.0)

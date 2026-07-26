@@ -48,7 +48,15 @@ func _test_cold_and_sleep(main: Node2D) -> void:
 	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 15.0
 	main.temperature = 100.0
 	main.call("_update_survival", 1.0)
-	_assert(main.temperature < 90.0, "temperature falls beyond the warm radius")
+	var near_edge_loss: float = 100.0 - main.temperature
+	_assert(near_edge_loss > 0.0 and main.temperature > 85.0, "a short trip past the warm radius costs heat without being fatal")
+	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 40.0
+	main.temperature = 100.0
+	main.call("_update_survival", 1.0)
+	_assert(100.0 - main.temperature > near_edge_loss * 2.0, "pushing deep into the white world drains heat far faster")
+	player.position = base.position + Vector2.RIGHT * main.TILE_SIZE * 15.0
+	main.temperature = 100.0
+	main.call("_update_survival", 1.0)
 	player.position = base.position
 	var frozen_temperature: float = main.temperature
 	main.call("_update_survival", 2.0)

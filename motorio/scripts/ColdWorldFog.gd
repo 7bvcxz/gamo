@@ -12,14 +12,27 @@ func _process(_delta: float) -> void:
 		last_radius = radius
 		queue_redraw()
 
+const PREVIEW_BAND_TILES := 9.0
+
+func fog_strength(distance_tiles: float) -> float:
+	# The ring just past the warm edge stays readable on purpose: seeing the next
+	# resource field is what makes a base upgrade worth saving for.
+	if main_controller == null:
+		return 0.0
+	var beyond: float = distance_tiles - float(main_controller.safe_radius_tiles())
+	if beyond <= 0.0:
+		return 0.0
+	return clampf(beyond / PREVIEW_BAND_TILES, 0.0, 1.0)
+
 func fog_alpha_for_cell(cell: Vector2i) -> float:
 	if main_controller == null:
 		return 0.0
 	var center := Vector2(main_controller.WORLD_TILES / 2, main_controller.WORLD_TILES / 2)
 	var distance_tiles := (Vector2(cell) + Vector2(0.5, 0.5)).distance_to(center + Vector2(0.5, 0.5))
-	if distance_tiles <= float(main_controller.safe_radius_tiles()):
+	var strength := fog_strength(distance_tiles)
+	if strength <= 0.0:
 		return 0.0
-	return 0.88 + clampf((distance_tiles - float(main_controller.safe_radius_tiles())) / 12.0, 0.0, 1.0) * 0.08
+	return 0.16 + strength * 0.76
 
 func _draw() -> void:
 	if main_controller == null:
@@ -36,7 +49,8 @@ func _draw() -> void:
 			var puff_center := Vector2(float(grid_x) * spacing, float(grid_y) * spacing) + wobble
 			if puff_center.distance_to(center) <= warm_radius + cloud_radius * 0.42:
 				continue
-			draw_circle(puff_center, cloud_radius, Color(0.94, 0.975, 1.0, 0.66))
+			var puff_strength: float = fog_strength(puff_center.distance_to(center) / tile_size)
+			draw_circle(puff_center, cloud_radius, Color(0.94, 0.975, 1.0, 0.10 + puff_strength * 0.56))
 	# A soft, scalloped cloud bank marks the warm frontier.
 	var puff_count := maxi(28, int(TAU * warm_radius / (tile_size * 1.35)))
 	for index in range(puff_count):

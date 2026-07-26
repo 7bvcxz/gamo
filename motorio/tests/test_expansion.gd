@@ -64,12 +64,18 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 	main.player.position = main.base.position + Vector2.RIGHT * (main.safe_radius_tiles() + 0.25) * main.TILE_SIZE
 	main.temperature = 100.0
 	main._update_survival(1.0)
-	_assert(main.cold_exposure() > 0.0 and main.temperature < 92.0, "crossing the warmth edge immediately starts severe cold")
+	_assert(main.cold_exposure() > 0.0 and main.temperature < 100.0, "crossing the warmth edge starts draining heat")
+	_assert(main.temperature > 94.0, "the warm edge is a gradient, not an instant death line")
 	var distance_tiles: float = main.safe_radius_tiles() + 0.01
-	_assert(main.climate_ui.cold_fog_alpha(distance_tiles) >= 0.72, "cold frontier immediately applies dense white fog")
-	var cold_cell := Vector2i(main.WORLD_TILES / 2 + main.safe_radius_tiles() + 2, main.WORLD_TILES / 2)
+	var edge_alpha: float = main.climate_ui.cold_fog_alpha(distance_tiles)
+	var deep_alpha: float = main.climate_ui.cold_fog_alpha(distance_tiles + 14.0)
+	_assert(edge_alpha <= 0.25 and deep_alpha > edge_alpha, "crossing the edge hazes the screen instead of blinding the player")
+	var preview_cell := Vector2i(main.WORLD_TILES / 2 + main.safe_radius_tiles() + 2, main.WORLD_TILES / 2)
+	var deep_cell := Vector2i(main.WORLD_TILES / 2 + main.safe_radius_tiles() + 12, main.WORLD_TILES / 2)
 	var warm_cell := Vector2i(main.WORLD_TILES / 2, main.WORLD_TILES / 2)
-	_assert(main.cold_world_fog.fog_alpha_for_cell(cold_cell) >= 0.88 and main.cold_world_fog.fog_alpha_for_cell(warm_cell) == 0.0, "world fog hides cold cells even while the player is warm")
+	_assert(main.cold_world_fog.fog_alpha_for_cell(warm_cell) == 0.0, "the warm radius stays completely clear")
+	_assert(main.cold_world_fog.fog_alpha_for_cell(preview_cell) <= 0.45, "the ring past the warm edge stays readable so the next field is visible")
+	_assert(main.cold_world_fog.fog_alpha_for_cell(deep_cell) >= 0.85, "the far world stays hidden until the base grows")
 
 func _test_developer_tutorial_button(main: Node2D) -> void:
 	_assert(main.tutorial_previous_button.anchor_left == 1.0 and main.tutorial_previous_button.position.y >= main.minimap.position.y + main.minimap.size.y, "developer tutorial controls sit at the upper-right below the minimap")

@@ -18,6 +18,23 @@ func _run() -> void:
 		_assert(radius > last_radius, "%s appears farther from the base than the prior resource" % resource_type)
 		last_radius = radius
 
+	# Resources are fixed at world generation; base levels only widen the warm
+	# radius until each ring becomes reachable.
+	var base_position: Vector2 = main.base.position
+	for resource_type in expected:
+		var ring_deposit: Node2D = get_nodes_in_group("deposit_%s" % resource_type)[0]
+		var ring_radius: float = float(ring_deposit.get_meta("tier_radius"))
+		var unlock_level: int = main.base_level_for_radius(ring_radius)
+		main.base_level = 1
+		_assert(float(main.safe_radius_tiles()) < ring_radius, "%s stays outside the level one warm radius" % resource_type)
+		main.base_level = unlock_level
+		_assert(float(main.safe_radius_tiles()) >= ring_radius, "base level %d warms the whole %s ring" % [unlock_level, resource_type])
+	main.base_level = 1
+	var near_minerals: int = get_nodes_in_group("mineral_block").filter(
+		func(node): return not node.get_meta("starter_mineral", false) and node.position.distance_to(base_position) <= 14.0 * main.TILE_SIZE
+	).size()
+	_assert(near_minerals >= 2, "mineral fields exist inside the early warm radius instead of an empty near world")
+
 	var copper := get_nodes_in_group("deposit_copper")[0] as ResourceDeposit
 	var coal := get_nodes_in_group("deposit_coal")[0] as ResourceDeposit
 	var crystal := get_nodes_in_group("deposit_crystal")[0] as ResourceDeposit

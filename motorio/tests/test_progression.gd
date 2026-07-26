@@ -12,7 +12,8 @@ func _run() -> void:
 	_assert(main.quest_step == 0 and main.quest_title() == "1  첫 상자 납품", "onboarding starts with one clear delivery goal")
 	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 1, "starter zone introduces one clear mineral")
 	var base_position: Vector2 = main.base.position
-	var in_start_view := func(node): return abs(node.position.x - base_position.x) <= 20.0 * main.TILE_SIZE and abs(node.position.y - base_position.y) <= 20.0 * main.TILE_SIZE
+	# The camera shows 20x20 tiles, so the opening screen is 10 tiles each way.
+	var in_start_view := func(node): return abs(node.position.x - base_position.x) <= 12.0 * main.TILE_SIZE and abs(node.position.y - base_position.y) <= 12.0 * main.TILE_SIZE
 	_assert(get_nodes_in_group("box_block").filter(in_start_view).size() == 3, "start view contains only three teaching boxes")
 	_assert(get_nodes_in_group("transport_floor").filter(in_start_view).is_empty(), "start view has no unexplained conveyor clutter")
 	_assert(get_nodes_in_group("resource_deposit").filter(in_start_view).is_empty(), "tier resources begin beyond the first view")
@@ -51,12 +52,14 @@ func _run() -> void:
 	main.box_count = 5
 	main.fabricator_selection = 13
 	main.call("_craft_selected_block")
+	var minerals_before_upgrade: int = get_nodes_in_group("mineral_block").size()
+	var deposits_before_upgrade: int = get_nodes_in_group("resource_deposit").size()
 	_assert(main.base_level == 2 and main.box_count == 0, "five boxes upgrade the base to level two")
-	_assert(get_nodes_in_group("mineral_block").filter(func(node): return node.get_meta("starter_mineral", false)).size() == 3, "level two base guarantees three nearby minerals")
+	_assert(get_nodes_in_group("mineral_block").size() == minerals_before_upgrade, "upgrading the base never spawns new minerals")
 	main.box_count = 25
 	main.fabricator_selection = 13
 	main.call("_craft_selected_block")
-	_assert(main.base_level == 3 and get_nodes_in_group("deposit_copper").any(func(node): return node.get_meta("base_level_component", 0) == 3), "level three base guarantees one nearby copper deposit")
+	_assert(main.base_level == 3 and get_nodes_in_group("resource_deposit").size() == deposits_before_upgrade, "upgrading the base never spawns new deposits")
 	main.mineral_count = 30
 	main.resource_counts["copper"] = 8
 	main.fabricator_selection = 12

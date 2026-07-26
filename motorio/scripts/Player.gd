@@ -44,7 +44,9 @@ func _physics_process(delta: float) -> void:
 	if not main_nodes.is_empty():
 		var cold_ratio: float = clampf(float(main_nodes[0].temperature) / 100.0, 0.0, 1.0)
 		var exposure: float = float(main_nodes[0].cold_exposure())
-		speed_multiplier *= minf(lerpf(0.22, 1.0, cold_ratio), lerpf(0.45, 1.0, 1.0 - exposure))
+		# Slowing a freezing player used to make retreat impossible, so the floor
+		# stays high enough that walking home is always faster than dying.
+		speed_multiplier *= minf(lerpf(0.6, 1.0, cold_ratio), lerpf(0.8, 1.0, 1.0 - exposure))
 	velocity = direction * SPEED * speed_multiplier
 	_update_character_animation(delta, direction, sprinting)
 	move_and_slide()
