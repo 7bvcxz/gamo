@@ -2,6 +2,8 @@
 
 이 저장소는 여러 Godot 게임을 한곳에서 관리한다. 각 게임은 루트 바로 아래의 독립 폴더이며, `project.godot`와 Web export preset을 포함해야 한다.
 
+이 파일이 공동 작업 규칙의 단일 원본이다. Codex는 이 파일을, Claude Code는 `CLAUDE.md`를 자동으로 읽으며 `CLAUDE.md`는 `@AGENTS.md` import로 이 내용을 그대로 가져온다. 규칙을 바꿀 때는 이 파일만 편집하고 `CLAUDE.md`에 본문을 복사하지 않는다.
+
 ## 작업 원칙
 
 - 작업을 시작하기 전에 이 파일과 루트의 `Progress.md`를 확인한다.

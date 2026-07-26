@@ -187,12 +187,13 @@
 
 ## 다음 작업
 
-- 자원 종류와 채집 방식 설계
-- 인벤토리 및 핫바 구현
-- 첫 생산 설비 배치와 운송 시스템 구현
+- 다음 기능 방향은 사용자와 함께 정한다. (기존에 적혀 있던 자원 설계·인벤토리·운송 항목은 0.2.x~0.4.x에서 모두 구현 완료되어 2026-07-26에 정리)
+- 유지보수 후보: `docs/motorio/`에 누적된 60개 해시 빌드 정리 정책, 1,670줄 `Main.gd`의 서브시스템 분리
+- 테스트 정리 후보: `test_base.gd`, `test_conveyor.gd`가 아직 실패 시 즉시 `quit(1)`을 예약하는 구식 패턴을 사용한다
 
 ## 운영 규칙
 
+- 공동 작업 규칙의 단일 원본은 `AGENTS.md`이며, Claude Code용 `CLAUDE.md`는 `@AGENTS.md` import만 두고 본문을 복사하지 않는다.
 - 앞으로 새 게임의 완료 범위에는 Godot 구현, Web export, GitHub push, HeyDive 게임 등록 및 실행 확인을 모두 포함한다.
 - Web 배포는 GitHub Contents API 기반 manifest와 고정 runner를 사용하고, 해시 PCK는 저장소에서 직접 받아 브라우저/Pages CDN 캐시와 Pages 배포 지연을 우회한다.
 - Motorio는 push 직전에 patch 버전을 0.0.1 올리며, minor/major는 사용자 요청이 있을 때만 변경한다.
