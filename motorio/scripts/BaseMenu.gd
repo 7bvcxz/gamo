@@ -24,6 +24,7 @@ func _draw() -> void:
 		_draw_recipe(font, panel, recipe_index, 72.0 + row * 36.0)
 	var status: String = main_controller.fabricator_status
 	draw_string(font, panel.position + Vector2(22, 230), status, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("8dd9cb"))
+	draw_string(font, panel.position + Vector2(22, 250), main_controller.base_upgrade_reach_text(), HORIZONTAL_ALIGNMENT_LEFT, 300, 11, Color("d7b775"))
 	draw_string(font, panel.position + Vector2(22, 272), "이동 선택   Z 제작   X 나가기", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("b9c5be"))
 
 func _draw_recipe(font: Font, panel: Rect2, index: int, y: float) -> void:

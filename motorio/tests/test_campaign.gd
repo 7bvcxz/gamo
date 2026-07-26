@@ -34,6 +34,12 @@ func _run() -> void:
 		func(node): return not node.get_meta("starter_mineral", false) and node.position.distance_to(base_position) <= 14.0 * main.TILE_SIZE
 	).size()
 	_assert(near_minerals >= 2, "mineral fields exist inside the early warm radius instead of an empty near world")
+	main.base_level = 3
+	var reach_text: String = main.base_upgrade_reach_text()
+	_assert(reach_text.contains("17") and reach_text.contains("20") and reach_text.contains("구리"), "the fabricator explains that the next level reaches the copper ring")
+	main.base_level = 7
+	_assert(main.base_upgrade_reach_text().contains("최대"), "the final level reports that no further warmth is coming")
+	main.base_level = 1
 
 	var copper := get_nodes_in_group("deposit_copper")[0] as ResourceDeposit
 	var coal := get_nodes_in_group("deposit_coal")[0] as ResourceDeposit

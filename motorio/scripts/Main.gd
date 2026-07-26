@@ -878,6 +878,25 @@ func recipe_cost(index: int) -> Dictionary:
 		return {"mineral": 30, "copper": 8}
 	return {}
 
+func base_upgrade_reach_text() -> String:
+	# Upgrades no longer hand out resources, so the panel has to say what the
+	# extra warmth actually reaches.
+	var current: int = safe_radius_tiles()
+	if base_level >= 7:
+		return "기지 최대 단계 · 온기 %d칸" % current
+	var next_radius: int = current + 3
+	var ring_order: Array[String] = ["copper", "coal", "crystal", "oil", "uranium"]
+	var ring_names: Dictionary = {"copper": "구리", "coal": "석탄", "crystal": "수정", "oil": "석유", "uranium": "우라늄"}
+	var opened: Array[String] = []
+	for resource_type: String in ring_order:
+		var ring: int = int(TIER_RING_RADII[resource_type])
+		if ring > current and ring <= next_radius:
+			opened.append(str(ring_names[resource_type]))
+	var text: String = "다음 단계 온기 %d칸 → %d칸" % [current, next_radius]
+	if not opened.is_empty():
+		text += " · %s 지대 도달" % ", ".join(opened)
+	return text
+
 func base_upgrade_cost() -> Dictionary:
 	return [{"box": 5}, {"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25}][clampi(base_level - 1, 0, 5)]
 
