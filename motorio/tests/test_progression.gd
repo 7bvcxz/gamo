@@ -87,7 +87,7 @@ func _run() -> void:
 	main.base_level = 5
 	_assert(main.base_upgrade_cost() == {"copper": 25}, "level six raises the copper requirement")
 	main.base_level = 6
-	_assert(main.base_upgrade_cost() == {"fish": 25}, "level seven requires the mature fishing loop")
+	_assert(main.base_upgrade_cost() == {"fish": 25, "plate": 10}, "level seven requires both the fishing loop and the smelting chain")
 	main.elapsed_time = 70.0
 	main.call("_process", 0.0)
 	_assert(main.automated_delivery_times.is_empty(), "throughput discards deliveries older than sixty seconds")

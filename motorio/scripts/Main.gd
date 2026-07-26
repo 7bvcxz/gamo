@@ -18,6 +18,7 @@ const CONVEYOR_SCENE := preload("res://scenes/Conveyor.tscn")
 const CAT_BLOCK_SCENE := preload("res://scenes/CatBlock.tscn")
 const PILLAR_BLOCK_SCENE := preload("res://scenes/PillarBlock.tscn")
 const BOX_GENERATOR_SCENE := preload("res://scenes/BoxGenerator.tscn")
+const SMELTER_SCENE := preload("res://scenes/Smelter.tscn")
 const SPLITTER_SCENE := preload("res://scenes/Splitter.tscn")
 const RESOURCE_DEPOSIT_SCENE := preload("res://scenes/ResourceDeposit.tscn")
 const WATER_TILE_SCENE := preload("res://scenes/WaterTile.tscn")
@@ -86,7 +87,7 @@ var celebration_text := ""
 var cat_crafted := false
 var generator_crafted := false
 var bridge_crafted := false
-var resource_counts := {"copper": 0, "coal": 0, "crystal": 0, "oil": 0, "uranium": 0}
+var resource_counts := {"copper": 0, "coal": 0, "crystal": 0, "oil": 0, "uranium": 0, "plate": 0}
 var electricity := 0
 var fish := 0
 var tutorial_step := 0
@@ -444,6 +445,8 @@ func _pick_up_front_block() -> void:
 		item = {"type": "pillar"}
 	elif closest is BoxGenerator:
 		item = {"type": "box_generator", "direction": (closest as BoxGenerator).direction}
+	elif closest is Smelter:
+		item = {"type": "smelter", "direction": (closest as Smelter).direction}
 	elif closest is SplitterBlock:
 		item = {"type": "splitter", "direction": (closest as SplitterBlock).direction}
 	elif closest is BridgeBlock:
@@ -487,6 +490,10 @@ func _place_selected_block() -> void:
 		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
 		generator.direction = place_direction
 		block = generator
+	elif item["type"] == "smelter":
+		var smelter := SMELTER_SCENE.instantiate() as Smelter
+		smelter.direction = place_direction
+		block = smelter
 	elif item["type"] == "splitter":
 		var splitter := SPLITTER_SCENE.instantiate() as SplitterBlock
 		splitter.direction = place_direction
@@ -556,6 +563,8 @@ func _create_placement_preview(item: Dictionary) -> RigidBody2D:
 		block = PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 	elif item_type == "box_generator":
 		block = BOX_GENERATOR_SCENE.instantiate() as BoxGenerator
+	elif item_type == "smelter":
+		block = SMELTER_SCENE.instantiate() as Smelter
 	elif item_type == "splitter":
 		block = SPLITTER_SCENE.instantiate() as SplitterBlock
 	elif item_type == "bridge":
@@ -593,11 +602,12 @@ func _can_place_item_at(target: Vector2, item_type: String, direction: Vector2) 
 	if item_type in ["conveyor", "splitter"]:
 		return true
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2.ONE * 94.0 if item_type == "research_lab" else (Vector2(62.0, 30.0) if item_type == "box_generator" else Vector2.ONE * 30.0)
+	var double_tile: bool = _is_double_tile_item(item_type)
+	shape.size = Vector2.ONE * 94.0 if item_type == "research_lab" else (Vector2(62.0, 30.0) if double_tile else Vector2.ONE * 30.0)
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
-	var center := target + direction * TILE_SIZE if item_type == "research_lab" else (target + direction * (TILE_SIZE * 0.5) if item_type == "box_generator" else target)
-	query.transform = Transform2D(direction.angle() if item_type == "box_generator" else 0.0, center)
+	var center := target + direction * TILE_SIZE if item_type == "research_lab" else (target + direction * (TILE_SIZE * 0.5) if double_tile else target)
+	query.transform = Transform2D(direction.angle() if double_tile else 0.0, center)
 	query.collision_mask = 63
 	query.collide_with_areas = false
 	query.exclude = [player.get_rid()]
@@ -619,9 +629,12 @@ func _is_base_entrance_cell(target: Vector2) -> bool:
 			return true
 	return false
 
+func _is_double_tile_item(item_type: String) -> bool:
+	return item_type == "box_generator" or item_type == "smelter"
+
 func _preview_position(item_type: String) -> Vector2:
 	var target := _front_cell_center()
-	if item_type not in ["box_generator", "research_lab"]:
+	if not _is_double_tile_item(item_type) and item_type != "research_lab":
 		return target
 	var direction := Vector2.RIGHT.rotated(placement_rotation * PI / 2.0).round()
 	return target + direction * (TILE_SIZE if item_type == "research_lab" else TILE_SIZE * 0.5)
@@ -853,13 +866,13 @@ func _update_fabricator_status() -> void:
 		fabricator_status = "제작 가능" if _can_afford(recipe_cost(fabricator_selection)) else "%s 필요" % recipe_cost_text(fabricator_selection)
 
 func fabricator_recipe_count() -> int:
-	return 14
+	return 15
 
 func recipe_label(index: int) -> String:
-	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "낚시장", "낚시 고양이", "서빙 고양이", "연구소", "기지 업그레이드"][index]
+	return ["채굴 고양이", "기둥", "상자 생성기", "분배기", "다리", "컨베이어", "발전기", "전기 고양이", "압력 고양이", "낚시장", "낚시 고양이", "서빙 고양이", "연구소", "기지 업그레이드", "제련소"][index]
 
 func recipe_unlock_level(index: int) -> int:
-	return [1, 1, 1, 2, 3, 2, 5, 5, 7, 4, 4, 4, 3, 1][index]
+	return [1, 1, 1, 2, 3, 2, 5, 5, 7, 4, 4, 4, 3, 1, 5][index]
 
 func recipe_unlocked(index: int) -> bool:
 	return base_level >= recipe_unlock_level(index) and not (index == 13 and base_level >= 7)
@@ -876,6 +889,8 @@ func recipe_cost(index: int) -> Dictionary:
 		return base_upgrade_cost()
 	if index == 12:
 		return {"mineral": 30, "copper": 8}
+	if index == 14:
+		return {"mineral": 20, "copper": 6}
 	return {}
 
 func base_upgrade_reach_text() -> String:
@@ -898,7 +913,7 @@ func base_upgrade_reach_text() -> String:
 	return text
 
 func base_upgrade_cost() -> Dictionary:
-	return [{"box": 5}, {"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25}][clampi(base_level - 1, 0, 5)]
+	return [{"box": 5}, {"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25, "plate": 10}][clampi(base_level - 1, 0, 5)]
 
 func _upgrade_base() -> void:
 	base_level = mini(base_level + 1, 7)
@@ -960,6 +975,10 @@ func _create_recipe_block(index: int) -> RigidBody2D:
 	if index == 3: return SPLITTER_SCENE.instantiate() as SplitterBlock
 	if index == 4: return BRIDGE_SCENE.instantiate() as BridgeBlock
 	if index == 5: return CONVEYOR_SCENE.instantiate() as ConveyorBlock
+	if index == 14:
+		var smelter := SMELTER_SCENE.instantiate() as Smelter
+		smelter.direction = Vector2.DOWN
+		return smelter
 	if index == 12:
 		var lab := RESEARCH_LAB_SCENE.instantiate() as ResearchLab
 		lab.installed = false
@@ -1178,6 +1197,7 @@ func _cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell * TILE_SIZE) + Vector2.ONE * (TILE_SIZE / 2.0)
 
 func _process(delta: float) -> void:
+	WorldView.update_from_camera(player.global_position, get_viewport_rect().size)
 	elapsed_time += delta
 	autosave_elapsed += delta
 	save_feedback_remaining = maxf(0.0, save_feedback_remaining - delta)
@@ -1588,6 +1608,7 @@ func _serialize_world_object(body: RigidBody2D) -> Dictionary:
 	elif body is CatBlock: entry.merge({"type": "cat", "direction": body.direction, "worker": body.worker_type, "active": body.active_on_ready, "hunger": body.hunger, "elapsed": body.mine_elapsed})
 	elif body is PillarBlock: entry["type"] = "pillar"
 	elif body is BoxGenerator: entry.merge({"type": "box_generator", "direction": body.direction, "stored": body.stored_minerals, "pending": body.pending_boxes})
+	elif body is Smelter: entry.merge({"type": "smelter", "direction": body.direction, "stored": body.stored_minerals, "coal": body.stored_coal, "pending": body.pending_plates})
 	elif body is SplitterBlock: entry.merge({"type": "splitter", "direction": body.direction, "send_left": body.send_left})
 	elif body is BridgeBlock: entry["type"] = "bridge"
 	elif body is FacilityBlock: entry.merge({"type": "facility", "facility": body.facility_type})
@@ -1621,6 +1642,8 @@ func _create_saved_world_object(entry: Dictionary) -> RigidBody2D:
 	if type == "pillar": return PILLAR_BLOCK_SCENE.instantiate() as PillarBlock
 	if type == "box_generator":
 		var generator := BOX_GENERATOR_SCENE.instantiate() as BoxGenerator; generator.direction = entry.get("direction", Vector2.RIGHT); generator.stored_minerals = entry.get("stored", 0); generator.pending_boxes = entry.get("pending", 0); return generator
+	if type == "smelter":
+		var smelter := SMELTER_SCENE.instantiate() as Smelter; smelter.direction = entry.get("direction", Vector2.RIGHT); smelter.stored_minerals = entry.get("stored", 0); smelter.stored_coal = entry.get("coal", 0); smelter.pending_plates = entry.get("pending", 0); return smelter
 	if type == "splitter":
 		var splitter := SPLITTER_SCENE.instantiate() as SplitterBlock; splitter.direction = entry.get("direction", Vector2.RIGHT); splitter.send_left = entry.get("send_left", true); return splitter
 	if type == "bridge": return BRIDGE_SCENE.instantiate() as BridgeBlock

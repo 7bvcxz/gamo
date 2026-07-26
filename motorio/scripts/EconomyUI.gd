@@ -1,8 +1,8 @@
 extends Control
 
-const RESOURCE_ORDER := ["box", "mineral", "copper", "coal", "crystal", "oil", "uranium", "electricity", "fish"]
-const RESOURCE_COLORS := [Color("d69b4b"), Color("67c2d1"), Color("e58b4f"), Color("879198"), Color("c4a2ff"), Color("61769e"), Color("9bef67"), Color("f3d650"), Color("72cfe5")]
-const RESOURCE_NAMES := ["상자", "미네랄", "구리", "석탄", "수정", "석유", "우라늄", "전력", "물고기"]
+const RESOURCE_ORDER := ["box", "mineral", "copper", "coal", "plate", "crystal", "oil", "uranium", "electricity", "fish"]
+const RESOURCE_COLORS := [Color("d69b4b"), Color("67c2d1"), Color("e58b4f"), Color("879198"), Color("cfd8dc"), Color("c4a2ff"), Color("61769e"), Color("9bef67"), Color("f3d650"), Color("72cfe5")]
+const RESOURCE_NAMES := ["상자", "미네랄", "구리", "석탄", "금속판", "수정", "석유", "우라늄", "전력", "물고기"]
 var main_controller
 
 func _process(_delta: float) -> void:
@@ -10,7 +10,7 @@ func _process(_delta: float) -> void:
 
 func resource_values() -> Array[int]:
 	var values: Array[int] = [main_controller.box_count, main_controller.mineral_count]
-	for resource_type in ["copper", "coal", "crystal", "oil", "uranium"]:
+	for resource_type in ["copper", "coal", "plate", "crystal", "oil", "uranium"]:
 		values.append(main_controller.resource_counts[resource_type])
 	values.append(main_controller.electricity)
 	values.append(main_controller.fish)

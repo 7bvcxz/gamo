@@ -33,7 +33,8 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
 
 func _process(delta: float) -> void:
 	animation_offset = fmod(animation_offset + delta * ARROW_ANIMATION_SPEED, ARROW_CYCLE)
-	queue_redraw()
+	if WorldView.is_on_screen(global_position):
+		queue_redraw()
 
 func contains_effect_point(global_point: Vector2) -> bool:
 	var local_point := to_local(global_point)

@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/Smelter.gd" id="1_smelter"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_body"]
+size = Vector2(62, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape_input"]
+size = Vector2(24, 24)
+
+[node name="Smelter" type="RigidBody2D"]
+z_index = 1
+gravity_scale = 0.0
+collision_layer = 4
+collision_mask = 125
+freeze = true
+lock_rotation = true
+script = ExtResource("1_smelter")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape_body")
+
+[node name="ResourceInput" type="Area2D" parent="."]
+position = Vector2(-48, 0)
+collision_layer = 0
+collision_mask = 4
+monitoring = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ResourceInput"]
+shape = SubResource("RectangleShape_input")

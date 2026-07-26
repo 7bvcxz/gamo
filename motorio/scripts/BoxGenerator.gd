@@ -29,7 +29,8 @@ func _physics_process(delta: float) -> void:
 	production_flash = maxf(0.0, production_flash - delta)
 	if pending_boxes > 0:
 		_try_output_box()
-	queue_redraw()
+	if WorldView.is_on_screen(global_position):
+		queue_redraw()
 
 func _on_mineral_entered(body: Node2D) -> void:
 	var resource := body as RigidBody2D

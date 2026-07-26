@@ -34,7 +34,7 @@ func _test_base_levels(main: Node2D) -> void:
 	main._craft_selected_block()
 	_assert(main.base_level == 2 and main.safe_radius_tiles() == radius_level_one + 3, "base upgrade expands warmth by three tiles")
 	_assert(main.recipe_unlocked(3) and not main.recipe_unlocked(4), "level two unlocks splitter but keeps bridge locked")
-	var expected := [{"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25}]
+	var expected := [{"box": 25}, {"mineral": 100}, {"copper": 5}, {"copper": 25}, {"fish": 25, "plate": 10}]
 	for level in range(2, 7):
 		main.base_level = level
 		_assert(main.base_upgrade_cost() == expected[level - 2], "base level %d uses its planned rarity cost" % level)
@@ -47,7 +47,7 @@ func _test_guidance_and_cold(main: Node2D) -> void:
 	main.resource_counts["coal"] = 2
 	main.electricity = 0
 	main.fish = 3
-	_assert(main.economy_ui.visible_resource_indices() == [1, 3, 8], "left resource list hides zero values and keeps every collected resource in vertical order")
+	_assert(main.economy_ui.visible_resource_indices() == [1, 3, 9], "left resource list hides zero values and keeps every collected resource in vertical order")
 	_assert(not main.get_node("UI/UIRoot/Title").visible and not main.get_node("UI/UIRoot/Info").visible, "Motorio title and coordinate text are removed from the HUD")
 	_assert(not main.get_node("UI/UIRoot/WorldSize").visible and not main.throughput_label.visible, "world size and base throughput labels are removed")
 	for step in range(13):
