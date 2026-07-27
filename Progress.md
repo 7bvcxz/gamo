@@ -188,6 +188,8 @@
   - 0.4.19 검증: 편집기 로드와 전체 17개 자동 테스트 통과(신규 `test_smelter`·`test_scale` 포함, 300개 컨베이어 동시 존재 및 화면 밖 시뮬레이션 지속 확인), 로컬 해시 Web 빌드를 PC 1280×720 Chromium에서 실행해 제작소 4/4 페이지의 `제련소` 항목과 자원 HUD의 `금속판` 행이 한글로 정상 표시되는 것과 콘솔 오류 없음 확인
   - 설계 문서화: `motorio/design/`에 게임 정체성·레벨 디자인·자동화 디자인 3개 문서를 작성하고 각 항목에 `[확정]`/`[초안]`/`[질문]` 상태를 부여. 구현 전 문서에서 합의하고 문서를 코드보다 먼저 갱신하는 절차로 전환
   - 설계 문서 뷰어: `docs/design/index.html`을 추가해 `https://7bvcxz.github.io/gamo/design/` 고정 URL에서 조회. Pages CDN이 수 분간 캐시하는 문제를 피해 GitHub 저장소 API(실패 시 raw 호스트)로 원문을 직접 읽고, 외부 CDN 의존 없이 자체 마크다운 렌더러를 내장
+  - 고정 URL 재생: runner가 쿼리스트링을 읽은 뒤 `history.replaceState`로 주소를 `/gamo/<게임명>/`로 되돌리도록 `deploy-web.sh`를 수정. 접속 주소가 해시 runner 링크로 바뀌지 않으면서 항상 최신 빌드를 실행한다
+  - 고정 URL 검증: 로컬 HTTP로 `/motorio/` 진입 후 실제 Chromium에서 최종 URL이 `/motorio/`로 유지되고 캔버스 1000×640으로 게임이 정상 실행되며 콘솔 오류가 없음을 확인. 게임 파일 변경이 없어 PCK 해시가 동일하므로 새 빌드 파일은 생성되지 않았고 motorio 버전도 올리지 않음
 - 연동 조사:
   - HeyDive 게임 목록은 `heydive-server`의 PostgreSQL `game` 테이블에서 조회됨
   - `gamo` push를 감지하거나 새 게임을 자동 등록하는 webhook/워크플로는 현재 없음

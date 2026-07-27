@@ -62,6 +62,11 @@ for proj in "$ROOT"/*/; do
   # The runner is stable and may be cached. It reads the requested content-
   # hashed PCK name from its query string and downloads that unique file
   # directly from the repository, avoiding the GitHub Pages deployment delay.
+  #
+  # After the query string has been read into constants the runner rewrites the
+  # address back to the game directory, so players keep one shareable URL
+  # (/gamo/<game>/) instead of seeing a hashed runner link. Both documents live
+  # in the same directory, so relative engine/wasm requests resolve identically.
   cp "$OUT/$name/$page_name" "$OUT/$name/$RUNNER_PAGE"
   sed -i \
     -e "/const engine = new Engine/i\\
@@ -69,6 +74,7 @@ const RUNNER_PARAMS = new URLSearchParams(location.search);\\
 const REQUESTED_PACK = RUNNER_PARAMS.get('pack') || GODOT_CONFIG.mainPack;\\
 const REQUESTED_PACK_SIZE = Number(RUNNER_PARAMS.get('size')) || GODOT_CONFIG.fileSizes[GODOT_CONFIG.mainPack];\\
 const REMOTE_PACK = \`https://raw.githubusercontent.com/7bvcxz/gamo/main/docs/${name}/\${REQUESTED_PACK}\`;\\
+try { history.replaceState(null, '', './'); } catch (e) { console.warn('URL tidy skipped', e); }\\
 GODOT_CONFIG.fileSizes[REMOTE_PACK] = REQUESTED_PACK_SIZE;\\
     GODOT_CONFIG.args = ['--main-pack', REQUESTED_PACK].concat(GODOT_CONFIG.args);" \
     -e "s|engine.startGame({|engine.init(GODOT_CONFIG.executable).then(() => engine.preloadFile(REMOTE_PACK, REQUESTED_PACK)).then(() => engine.start({|" \

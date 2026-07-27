@@ -31,6 +31,7 @@
 - 새 게임을 추가할 때 `export_presets.cfg`의 Web preset을 반드시 포함한다.
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
 - Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙인다. 고정 `index.html`은 GitHub 저장소 API에서 최신 manifest를 읽고, 고정 `runner.html`은 해시 PCK를 저장소 원본 경로에서 직접 내려받는다. 생성된 해시 파일명, manifest, 로더, runner를 수동으로 되돌리지 않는다.
+- runner는 쿼리스트링을 상수로 읽은 직후 `history.replaceState`로 주소를 게임 디렉터리(`/gamo/<게임명>/`)로 되돌린다. 플레이어와 HeyDive `embedUrl`이 항상 같은 주소를 쓰게 하기 위한 것이며, index와 runner가 같은 디렉터리에 있으므로 상대 경로 해석은 바뀌지 않는다. runner 위치를 다른 디렉터리로 옮기면 이 처리를 함께 재검토한다.
 
 ## Motorio 블록 특성 용어
 
