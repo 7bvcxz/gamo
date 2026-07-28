@@ -41,7 +41,9 @@ func setup(seed_value: int) -> void:
 	total_heat = 0
 	delivered = {Defs.ITEM_FROST: 0, Defs.ITEM_EMBER: 0, Defs.ITEM_ALLOY: 0}
 	warm_radius = Defs.WARM_BASE
-	_cached_radius = -1.0
+	# Seed the cache so the opening frame does not announce a radius that has
+	# not actually changed yet.
+	_cached_radius = warm_radius
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell

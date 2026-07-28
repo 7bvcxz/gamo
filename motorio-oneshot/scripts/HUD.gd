@@ -81,6 +81,18 @@ func _draw_status() -> void:
 	_text(panel.position + Vector2(112, 78), "온기 %.1f칸" % sim.warm_radius, 12, Defs.COL_TEXT_DIM)
 
 	_draw_warmth_row(panel)
+	_draw_objective(panel)
+
+## The next useful action, always on screen. This is the whole onboarding: no
+## modal tutorial, no text wall, just one line that keeps up with the player.
+func _draw_objective(panel: Rect2) -> void:
+	var text: String = main.objective()
+	var width: float = _text_width(text, 12) + 26.0
+	var box := Rect2(panel.position.x, panel.end.y + 10.0, width, 24.0)
+	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.88),
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.45))
+	draw_rect(Rect2(box.position, Vector2(3, box.size.y)), Defs.COL_CORE)
+	_text(box.position + Vector2(12, 16), text, 12, Defs.COL_TEXT)
 
 ## Docked into the status panel and always present, so it can never pop in and
 ## shift the layout at the exact moment the player is in danger.
@@ -140,7 +152,7 @@ func _draw_message() -> void:
 	if main.message_life <= 0.0:
 		return
 	var alpha: float = clampf(main.message_life, 0.0, 1.0)
-	var box := Rect2(0, 150, size.x, 20)
+	var box := Rect2(0, 196, size.x, 20)
 	_text_in(box, main.message, 15, Color(message_color.r, message_color.g, message_color.b, alpha))
 
 # --- Overlays ----------------------------------------------------------------

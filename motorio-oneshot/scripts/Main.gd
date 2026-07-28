@@ -55,6 +55,21 @@ func _start_run() -> void:
 	message = ""
 	message_life = 0.0
 
+## A single line that always names the next useful action. Derived from world
+## state rather than a script, so it stays correct however the player plays.
+func objective() -> String:
+	if sim.machine_count(Defs.M_MINER) == 0:
+		return "1  광맥 위에 채굴 고양이를 설치하세요  (1 선택 → R 로 코어 방향 → Z)"
+	if sim.total_heat == 0:
+		return "2  벨트로 채굴 고양이와 코어를 이으세요  (2 선택 → Z)"
+	if sim.delivered.get(Defs.ITEM_EMBER, 0) == 0 and sim.machine_count(Defs.M_FURNACE) == 0:
+		return "3  열을 모아 온기를 넓히고 잉걸광석까지 닿으세요"
+	if sim.machine_count(Defs.M_FURNACE) == 0:
+		return "4  제련로에 서리광석과 잉걸광석을 함께 넣어 합금을 만드세요"
+	if sim.delivered.get(Defs.ITEM_ALLOY, 0) == 0:
+		return "5  제련로 출력을 코어까지 이으세요"
+	return "남은 시간 동안 생산을 늘리세요"
+
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
 
