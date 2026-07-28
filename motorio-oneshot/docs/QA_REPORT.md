@@ -65,6 +65,7 @@ moving, camera following) at 960×540.
 | Before optimisation | 86.1 ms | 11.6 | 83.3 | 116.6 | 133.3 | 166.6 |
 | Layer repaint throttled to 30 Hz | 68.6 ms | 14.6 | 66.7 | 83.4 | 100.0 | 116.7 |
 | Warm pool baked to a texture | **39.1 ms** | **25.6** | 33.4 | 50.1 | 66.6 | 83.3 |
+| Final build (machine outlines added) | 44.0 ms | 22.7 | 49.9 | 66.7 | 66.7 | 83.4 |
 
 JS heap stayed at 31–48 MB with no upward drift across runs.
 

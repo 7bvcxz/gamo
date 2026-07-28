@@ -88,12 +88,18 @@ Measured by sampling `requestAnimationFrame` deltas during active gameplay at 96
 | First playable | 86.1 ms | 11.6 |
 | Repaint throttled to 30 Hz | 68.6 ms | 14.6 |
 | Warm pool baked to a texture | 41.0 ms | 24.4 |
+| Final build (machine outlines added) | 44.0 ms | 22.7 |
 
 The middle row is the useful one: throttling repaints changed nothing, which proved the
 cost was fill rate rather than script time. The warm pool had been forty concentric filled
 circles — about 2.9M pixels of fill per frame, re-rasterised every frame because Godot
 rebuilds draw commands regardless of `queue_redraw()`. Baking the scale-invariant ramp into
 a 192×192 texture drawn as one quad halved the frame time.
+
+The final row is a deliberate trade: outlining every machine cost about 3 ms per frame
+and bought the readability fix that had the miner cat sitting at 1.19:1 against its own
+ground. The cost scales with machine count, so a very large factory would pay more; that
+has not been measured.
 
 **These numbers come from SwiftShader, a CPU software rasteriser, and are a worst case.**
 No GPU was available in this environment. The comparison between stages is valid because
