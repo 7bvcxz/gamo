@@ -12,17 +12,11 @@ const TILE := 32
 const COL_VOID := Color("0e1320")
 const COL_SNOW_COLD := Color("222c44")
 
-## The warm pool must never pass through a neutral or blue stop: the premise is
-## "warmth is the only colour", and a grey mid-radius contradicts it on frame one.
-## Sampled saturation stays above 0.22 at every stop.
-const WARM_RAMP: Array[Color] = [
-	Color8(255, 236, 190),   # at the core
-	Color8(214, 158, 96),
-	Color8(168, 116, 80),
-	Color8(120, 82, 66),
-	Color8(84, 58, 50),      # still warm; the texture alpha does the blending
-]
-const COL_GRID := Color("38445f")
+## The ramp is computed in HSV rather than interpolated in RGB. A straight RGB
+## lerp toward the navy night rotated the hue through red into magenta and
+## dropped saturation to 0.17, which is what made the outer pool read as mud.
+## Hue and saturation are held; only value and alpha fall off.
+const COL_GRID := Color8(74, 92, 128)
 const COL_CORE := Color("ffb347")
 const COL_CORE_DEEP := Color("e0702a")
 const COL_BRASS := Color("d8a34a")
@@ -57,7 +51,10 @@ const ITEM_ALLOY := 2
 const ITEM_NAMES := ["서리광석", "잉걸광석", "합금"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
-const ITEM_COLORS := [Color8(127, 212, 232), Color8(198, 124, 66), Color8(255, 217, 138)]
+## Ember sat at 1.99:1 against the night and shared a hue band with the warm
+## ground, so it vanished exactly when the player was told to go find it.
+const ITEM_COLORS := [Color8(127, 212, 232), Color8(232, 132, 58), Color8(255, 217, 138)]
+const EMBER_CORE := Color8(255, 214, 150)
 const ORE_OUTLINE := Color8(12, 16, 26)
 const ITEM_VALUES := [3, 6, 22]
 
@@ -110,10 +107,11 @@ static func machine_color(type: int) -> Color:
 
 ## Samples the amber ramp. `k` is 0 at the core and 1 at the frontier.
 static func warm_tint(k: float) -> Color:
-	var span: float = float(WARM_RAMP.size() - 1)
-	var scaled: float = clampf(k, 0.0, 1.0) * span
-	var index: int = clampi(int(floor(scaled)), 0, WARM_RAMP.size() - 2)
-	return WARM_RAMP[index].lerp(WARM_RAMP[index + 1], scaled - float(index))
+	var t: float = clampf(k, 0.0, 1.0)
+	var hue: float = lerpf(38.0, 27.0, t) / 360.0
+	var sat: float = lerpf(0.30, 0.62, t)
+	var val: float = lerpf(1.0, 0.22, pow(t, 0.82))
+	return Color.from_hsv(hue, sat, val)
 
 static func warm_radius(total_heat: int) -> float:
 	return minf(WARM_BASE + float(total_heat) * WARM_PER_HEAT, WARM_MAX)

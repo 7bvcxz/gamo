@@ -50,9 +50,28 @@ func _draw() -> void:
 			_draw_palette()
 			_draw_pause_card()
 		_:
+			_draw_cold_vignette()
 			_draw_status()
 			_draw_palette()
 			_draw_message()
+
+## Losing body heat used to be expressed only by an 8px bar in the corner, which
+## a player walking through the dark will never look at. The screen itself now
+## closes in as warmth drops.
+func _draw_cold_vignette() -> void:
+	var chill: float = clampf((60.0 - main.player.warmth) / 60.0, 0.0, 1.0)
+	if chill <= 0.0:
+		return
+	var pulse: float = 1.0
+	if main.player.warmth < 30.0:
+		pulse = 0.88 + sin(float(Time.get_ticks_msec()) / 106.0) * 0.12
+	var bands := 14
+	for index in bands:
+		var k: float = float(index) / float(bands)
+		var inset: float = k * minf(size.x, size.y) * 0.42
+		var alpha: float = chill * pulse * 0.40 * pow(1.0 - k, 1.7)
+		draw_rect(Rect2(inset, inset, size.x - inset * 2.0, size.y - inset * 2.0),
+			Color(0.35, 0.55, 0.82, alpha), false, maxf(6.0, minf(size.x, size.y) * 0.03))
 
 # --- In-run UI ---------------------------------------------------------------
 
@@ -149,8 +168,7 @@ func _draw_palette() -> void:
 	# Right-aligned inside an explicit box with a real margin, so nothing is ever
 	# clipped by the viewport edge.
 	_text_in(Rect2(size.x - 420.0 - MARGIN, MARGIN + 4.0, 420.0, 16),
-		"Z 설치   X 회수   R 회전   Esc 일시정지", 12,
-		Color(Defs.COL_TEXT_DIM.r, Defs.COL_TEXT_DIM.g, Defs.COL_TEXT_DIM.b, 0.85), HORIZONTAL_ALIGNMENT_RIGHT)
+		"Z 설치   X 회수   R 회전   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 func _draw_message() -> void:
 	if main.message_life <= 0.0:

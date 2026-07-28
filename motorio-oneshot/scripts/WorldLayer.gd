@@ -40,7 +40,7 @@ func _draw() -> void:
 func _draw_grid(tile: float) -> void:
 	var start := Vector2i((view_rect.position / tile).floor())
 	var end := Vector2i((view_rect.end / tile).ceil())
-	var grid := Color(Defs.COL_GRID.r, Defs.COL_GRID.g, Defs.COL_GRID.b, 0.20)
+	var grid := Color(Defs.COL_GRID.r, Defs.COL_GRID.g, Defs.COL_GRID.b, 0.34)
 	for x in range(start.x, end.x + 1):
 		var px: float = float(x) * tile
 		draw_line(Vector2(px, view_rect.position.y), Vector2(px, view_rect.end.y), grid, 1.0)
@@ -75,7 +75,11 @@ func _draw_ore(tile: float) -> void:
 			centre + Vector2(9, 1), centre + Vector2(7, 8)])
 		draw_colored_polygon(shard2, tint)
 		draw_line(centre + Vector2(-4, -7), centre + Vector2(-1, 2), tint.lightened(0.5), 1.5)
-		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.55 if warm else 0.35))
+		# A bright inner core keeps ore readable on the amber pool as well as the
+		# night; ember previously shared a hue band with the warm ground.
+		if item_type == Defs.ITEM_EMBER:
+			draw_circle(centre + Vector2(1, -1), 3.0, Defs.EMBER_CORE)
+		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.7 if warm else 0.5))
 		if not warm:
 			# A slow glint pulls the eye toward ore the player cannot reach yet.
 			var glint: float = maxf(0.0, sin(pulse * 0.8 + float(cell.x + cell.y)))

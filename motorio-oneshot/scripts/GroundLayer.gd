@@ -34,8 +34,9 @@ func _bake_pool() -> ImageTexture:
 				image.set_pixel(x, y, Color(0, 0, 0, 0))
 				continue
 			var col: Color = Defs.warm_tint(d)
-			# Feather only the last few percent so the frontier keeps a hard step.
-			col.a = 1.0 if d < 0.96 else clampf((1.0 - d) / 0.04, 0.0, 1.0)
+			# A wide feather, but the ramp is already dark by the time alpha drops,
+			# so blending toward the night never produces a mid-tone mud band.
+			col.a = 1.0 if d < 0.74 else clampf((1.0 - d) / 0.26, 0.0, 1.0)
 			image.set_pixel(x, y, col)
 	return ImageTexture.create_from_image(image)
 
