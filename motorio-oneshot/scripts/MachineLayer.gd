@@ -85,7 +85,10 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var dig: float = sin(pulse * 9.0) * 1.6 * (1.0 - frost)
 
 	draw_circle(c + Vector2(0, 9), 10.0, Color(0.02, 0.04, 0.08, 0.32))
-	# Body then head: a chunky silhouette survives being 32px tall.
+	# The cat body measured 1.19:1 against the warm pool with no outline, so the
+	# building the player just paid for was the least visible thing on screen.
+	draw_rect(Rect2(c.x - 11, c.y - 5 + dig, 22, 16), Defs.ORE_OUTLINE)
+	draw_circle(c + Vector2(0, -6 + dig), 9.6, Defs.ORE_OUTLINE)
 	draw_rect(Rect2(c.x - 9, c.y - 3 + dig, 18, 12), fur)
 	draw_circle(c + Vector2(0, -6 + dig), 8.0, fur)
 	draw_circle(c + Vector2(0, -5 + dig), 5.5, face)
@@ -111,6 +114,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
 	draw_circle(c + Vector2(0, 9), 11.0, Color(0.02, 0.04, 0.08, 0.32))
+	draw_rect(Rect2(c.x - 14, c.y - 14, 28, 28), Defs.ORE_OUTLINE)
 	draw_rect(Rect2(c.x - 12, c.y - 12, 24, 24), body.darkened(0.4))
 	draw_rect(Rect2(c.x - 10, c.y - 10, 20, 20), body)
 	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Color(1.0, 0.55, 0.2, glow))
@@ -138,6 +142,7 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# Glow first so it reads as light spilling out from under the machine.
 	draw_circle(c, 19.0, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
 		0.30 * (1.0 - frost) + 0.05))
+	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.ORE_OUTLINE)
 	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), body)
 	# The rim must be lighter than the pool it sits in, or it disappears into it.
 	var rim: Color = Defs.COL_BELT_RIM if frost <= 0.0 else Defs.COL_BELT_RIM.lerp(body, 0.6)

@@ -103,6 +103,7 @@ static func machine_color(type: int) -> Color:
 		M_CORE: return COL_CORE
 		M_MINER: return COL_CAT_FUR
 		M_FURNACE: return Color("8e5ac0")
+		M_BELT: return COL_BELT_RIM
 		_: return COL_MACHINE
 
 ## Samples the amber ramp. `k` is 0 at the core and 1 at the frontier.

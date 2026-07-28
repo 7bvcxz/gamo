@@ -237,10 +237,10 @@ func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
 	audio.call("play", "alloy" if item_type == Defs.ITEM_ALLOY else "deliver")
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
-	_notify(reason, Defs.COL_DANGER)
-	# Anchor the reason to the tile the player actually aimed at; a message 170px
-	# away in a fixed slot simply does not get read.
-	fx.popup(Vector2(cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, -6.0), reason, Defs.COL_DANGER)
+	# One channel only. Showing the same reason both here and in the centre
+	# banner produced two overlapping copies of the same string.
+	fx.popup(Vector2(cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, -8.0), reason,
+		Color8(255, 154, 143), true)
 	fx.ring(Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5, Defs.COL_DANGER, 14.0)
 	audio.call("play", "deny")
 

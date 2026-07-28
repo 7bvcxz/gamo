@@ -206,9 +206,10 @@ func _draw_title() -> void:
 	_text_in(full.call(size.y * 0.30 + 32), "O N E   S H O T", 17, Defs.COL_MACHINE_EDGE)
 	_text_in(full.call(size.y * 0.52), "하룻밤 안에 공장을 세워 열을 최대한 모으세요.", 16, Defs.COL_TEXT)
 	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.", 13, Defs.COL_TEXT_DIM)
-	var blink: float = 0.55 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.45
+	# Never let the one call to action fall below a readable floor.
+	var blink: float = 0.82 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.18
 	_text_in(full.call(size.y * 0.72), "아무 키나 눌러 시작", 18,
-		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, blink))
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, blink))
 	_text_in(full.call(size.y * 0.84), "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택", 12, Defs.COL_TEXT_DIM)
 
 func _draw_pause_card() -> void:

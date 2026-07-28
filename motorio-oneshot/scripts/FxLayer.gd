@@ -28,10 +28,19 @@ func _advance(pool: Array[Dictionary], delta: float) -> void:
 			pool[index] = fx
 		index -= 1
 
-func popup(at: Vector2, text: String, color: Color) -> void:
+func popup(at: Vector2, text: String, color: Color, plated: bool = false) -> void:
 	if _labels.size() >= MAX_EFFECTS:
 		return
-	_labels.append({"pos": at, "text": text, "color": color, "life": 0.9, "max": 0.9})
+	# Repeating the same message spawned a second copy at a slight offset, which
+	# overlapped into unreadable glyph soup. Refresh the existing one instead.
+	for index in _labels.size():
+		if String(_labels[index]["text"]) == text:
+			var existing: Dictionary = _labels[index]
+			existing["life"] = float(existing["max"])
+			existing["pos"] = at
+			_labels[index] = existing
+			return
+	_labels.append({"pos": at, "text": text, "color": color, "life": 0.9, "max": 0.9, "plate": plated})
 
 func ring(at: Vector2, color: Color, radius: float = 26.0) -> void:
 	if _rings.size() >= MAX_EFFECTS:
@@ -66,7 +75,12 @@ func _draw() -> void:
 		var at: Vector2 = Vector2(fx["pos"]) + Vector2(0, -26.0 * k)
 		var col: Color = fx["color"]
 		var alpha: float = clampf(1.0 - k * k, 0.0, 1.0)
-		draw_string(font, at + Vector2(1, 1), String(fx["text"]), HORIZONTAL_ALIGNMENT_CENTER, -1, 15,
-			Color(0.02, 0.03, 0.06, alpha * 0.8))
-		draw_string(font, at, String(fx["text"]), HORIZONTAL_ALIGNMENT_CENTER, -1, 15,
+		var body: String = String(fx["text"])
+		var width: float = font.get_string_size(body, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+		# Text over the amber pool measured 1.38:1; a plate is the only way to
+		# hold contrast against a background that can be any colour.
+		if bool(fx.get("plate", false)):
+			draw_rect(Rect2(at.x - width * 0.5 - 8.0, at.y - 15.0, width + 16.0, 21.0),
+				Color(0.06, 0.08, 0.12, alpha * 0.92))
+		draw_string(font, at - Vector2(width * 0.5, 0), body, HORIZONTAL_ALIGNMENT_LEFT, -1, 15,
 			Color(col.r, col.g, col.b, alpha))
