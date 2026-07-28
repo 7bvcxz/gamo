@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://bmo1oneshotmain"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/Sim.gd" id="2_sim"]
+[ext_resource type="Script" path="res://scripts/WorldLayer.gd" id="3_world"]
+[ext_resource type="Script" path="res://scripts/MachineLayer.gd" id="4_machines"]
+[ext_resource type="Script" path="res://scripts/FxLayer.gd" id="5_fx"]
+[ext_resource type="Script" path="res://scripts/PlayerActor.gd" id="6_player"]
+[ext_resource type="Script" path="res://scripts/HUD.gd" id="7_hud"]
+[ext_resource type="Script" path="res://scripts/Audio.gd" id="8_audio"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Sim" type="Node" parent="."]
+script = ExtResource("2_sim")
+
+[node name="World" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("3_world")
+
+[node name="Machines" type="Node2D" parent="."]
+z_index = 0
+script = ExtResource("4_machines")
+
+[node name="Player" type="Node2D" parent="."]
+z_index = 5
+script = ExtResource("6_player")
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+position_smoothing_enabled = true
+position_smoothing_speed = 9.0
+
+[node name="Fx" type="Node2D" parent="."]
+z_index = 20
+script = ExtResource("5_fx")
+
+[node name="Audio" type="Node" parent="."]
+script = ExtResource("8_audio")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="HUD" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("7_hud")

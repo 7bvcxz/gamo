@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Loading game</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #09110e; color: #dce9df; }
+    body { display: grid; place-items: center; font: 14px sans-serif; }
+  </style>
+</head>
+<body>
+  <span>Loading...</span>
+  <script>
+    const pathParts = location.pathname.split("/").filter(Boolean);
+    const gameName = pathParts.at(-1) === "index.html" ? pathParts.at(-2) : pathParts.at(-1);
+    const versionApi = `https://api.github.com/repos/7bvcxz/gamo/contents/docs/${gameName}/version.json?ref=main&t=${Date.now()}`;
+
+    fetch(versionApi, {
+      cache: "no-store",
+      headers: { Accept: "application/vnd.github.raw+json" },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Version request failed: ${response.status}`);
+        return response.json();
+      })
+      .then(({ page, pack, packSize }) => {
+        const target = new URL(page, location.href);
+        target.searchParams.set("pack", pack);
+        target.searchParams.set("size", packSize);
+        target.searchParams.set("build", pack);
+        location.replace(target);
+      })
+      .catch((error) => {
+        console.error(error);
+        document.body.textContent = "Unable to load the latest build.";
+      });
+  </script>
+</body>
+</html>
