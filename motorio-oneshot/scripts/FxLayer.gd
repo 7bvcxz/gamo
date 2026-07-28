@@ -49,7 +49,8 @@ func burst(at: Vector2, color: Color, count: int = 7) -> void:
 		})
 
 func _draw() -> void:
-	var font: Font = ThemeDB.fallback_font
+	# The fallback font has no CJK glyphs, so Korean popups rendered as boxes.
+	var font: Font = UIFont.FONT
 	for fx: Dictionary in _rings:
 		var k: float = 1.0 - float(fx["life"]) / float(fx["max"])
 		var col: Color = fx["color"]

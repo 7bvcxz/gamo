@@ -48,11 +48,23 @@ func setup(seed_value: int) -> void:
 	machines[core_cell] = core
 	_generate_ore(seed_value)
 
+## Cells kept clear so the guaranteed opening always has a belt route home.
+## A single row, not a block: a square patch would put ore directly in front of
+## the miner's output and the guaranteed opening would dead-end.
+const STARTER_PATCH: Array[Vector2i] = [Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3)]
+const STARTER_LANE: Array[Vector2i] = [Vector2i(0, 1), Vector2i(0, 2)]
+
 func _generate_ore(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
+	# A guaranteed first patch just south of the core. The opening minute should
+	# be about learning the miner-belt-core sentence, not about searching.
+	for offset: Vector2i in STARTER_PATCH:
+		ore[core_cell + offset] = Defs.ITEM_FROST
 	_scatter_ore(rng, Defs.ITEM_FROST, Defs.FROST_RING, 7, 4)
 	_scatter_ore(rng, Defs.ITEM_EMBER, Defs.EMBER_RING, 6, 5)
+	for offset: Vector2i in STARTER_LANE:
+		ore.erase(core_cell + offset)
 
 ## Ore arrives in patches so the player reads them as destinations rather than
 ## noise, and so a single miner placement decision matters.

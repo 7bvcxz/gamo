@@ -10,15 +10,35 @@ const TILE := 32
 # A cold navy world so that anything warm reads as valuable. Every warm hue in
 # the game belongs to the player's factory; the environment never uses them.
 const COL_VOID := Color("0e1320")
-const COL_SNOW_WARM := Color("dfe7f2")
 const COL_SNOW_COLD := Color("222c44")
+
+## The warm pool must never pass through a neutral or blue stop: the premise is
+## "warmth is the only colour", and a grey mid-radius contradicts it on frame one.
+## Sampled saturation stays above 0.22 at every stop.
+const WARM_RAMP: Array[Color] = [
+	Color8(255, 236, 190),   # at the core
+	Color8(214, 158, 96),
+	Color8(168, 116, 80),
+	Color8(112, 78, 72),
+	Color8(62, 54, 66),      # meeting the cold ground
+]
 const COL_GRID := Color("38445f")
 const COL_CORE := Color("ffb347")
 const COL_CORE_DEEP := Color("e0702a")
 const COL_BRASS := Color("d8a34a")
 const COL_MACHINE := Color("2f6d72")
+## Machines are self-lit so they never rely on the ground for contrast.
+const COL_BELT_BODY := Color8(58, 66, 86)
+const COL_BELT_RIM := Color8(196, 138, 84)
+const COL_BELT_CHEVRON := Color8(255, 196, 120)
+const COL_FROZEN_CHEVRON := Color8(120, 140, 160)
+const COL_VALID := Color8(120, 220, 140)
+const COL_PANEL := Color8(16, 21, 34)
+const COL_PANEL_EDGE := Color8(70, 82, 108)
+const COL_CLOCK := Color8(150, 164, 190)
+const COL_CLOCK_FILL := Color8(120, 150, 190)
 const COL_MACHINE_EDGE := Color("6fd2c8")
-const COL_CAT_FUR := Color("e79a4f")
+const COL_CAT_FUR := Color("f0a75c")
 const COL_CAT_FACE := Color("f7e6cd")
 const COL_DANGER := Color("e8574c")
 const COL_TEXT := Color("e6eef7")
@@ -30,7 +50,10 @@ const ITEM_EMBER := 1
 const ITEM_ALLOY := 2
 
 const ITEM_NAMES := ["서리광석", "잉걸광석", "합금"]
-const ITEM_COLORS := [Color("7fd4e8"), Color("f0894a"), Color("ffd98a")]
+## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
+## valuable metal and clears 6:1.
+const ITEM_COLORS := [Color8(127, 212, 232), Color8(198, 124, 66), Color8(255, 217, 138)]
+const ORE_OUTLINE := Color8(12, 16, 26)
 const ITEM_VALUES := [3, 6, 22]
 
 # --- Machines ----------------------------------------------------------------
@@ -79,6 +102,13 @@ static func machine_color(type: int) -> Color:
 		M_MINER: return COL_CAT_FUR
 		M_FURNACE: return Color("8e5ac0")
 		_: return COL_MACHINE
+
+## Samples the amber ramp. `k` is 0 at the core and 1 at the frontier.
+static func warm_tint(k: float) -> Color:
+	var span: float = float(WARM_RAMP.size() - 1)
+	var scaled: float = clampf(k, 0.0, 1.0) * span
+	var index: int = clampi(int(floor(scaled)), 0, WARM_RAMP.size() - 2)
+	return WARM_RAMP[index].lerp(WARM_RAMP[index + 1], scaled - float(index))
 
 static func warm_radius(total_heat: int) -> float:
 	return minf(WARM_BASE + float(total_heat) * WARM_PER_HEAT, WARM_MAX)

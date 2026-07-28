@@ -9,6 +9,7 @@ var preview_type: int = Defs.M_MINER
 var preview_cell := Vector2i.ZERO
 var preview_dir := Vector2i.RIGHT
 var preview_valid := true
+var preview_affordable := true
 var pulse: float = 0.0
 
 func _process(delta: float) -> void:
@@ -53,14 +54,18 @@ func _frost(machine: Sim.Machine) -> float:
 func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var beat: float = 1.0 + sin(pulse * 2.2) * 0.05 + machine.flash * 0.5
-	draw_circle(c, 26.0 * beat, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.14))
-	draw_circle(c, 19.0, Defs.COL_MACHINE.darkened(0.35))
-	draw_circle(c, 16.0, Defs.COL_CORE_DEEP)
-	draw_circle(c, 11.0 * beat, Defs.COL_CORE)
-	draw_circle(c, 6.0 * beat, Color("fff0c9"))
-	for index in 8:
-		var angle: float = TAU * float(index) / 8.0 + pulse * 0.25
-		draw_circle(c + Vector2.from_angle(angle) * 21.0, 2.2, Defs.COL_BRASS)
+	# The core is the emotional centre of the run, so it is drawn large enough to
+	# outrank the HUD clock in the visual hierarchy.
+	draw_circle(c, 52.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
+	draw_circle(c, 38.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
+	draw_circle(c, 30.0, Defs.COL_MACHINE.darkened(0.4))
+	draw_circle(c, 26.0, Defs.COL_CORE_DEEP)
+	draw_circle(c, 18.0 * beat, Defs.COL_CORE)
+	draw_circle(c, 10.0 * beat, Color("fff0c9"))
+	for index in 10:
+		var angle: float = TAU * float(index) / 10.0 + pulse * 0.25
+		draw_circle(c + Vector2.from_angle(angle) * 33.0, 2.6, Defs.COL_BRASS)
+	draw_arc(c, 44.0, 0.0, TAU, 64, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
 
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
@@ -120,8 +125,12 @@ func _draw_pip(at: Vector2, item_type: int, count: int) -> void:
 func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var body: Color = Color("2b3550").lerp(Color("1d2740"), frost)
+	var body: Color = Defs.COL_BELT_BODY.lerp(Color8(40, 48, 66), frost)
+	# A warm bloom beneath powered machinery: belts should emit light, not absorb
+	# it, and dropping the bloom is how the frost penalty reads visually.
+	draw_circle(c, 17.0, Color(0.94, 0.59, 0.27, 0.35 * (1.0 - frost) + 0.06))
 	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), body)
+	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, 2.0), Defs.COL_BELT_RIM.lerp(body, frost))
 	var dir := Vector2(machine.dir)
 	var perp := Vector2(-dir.y, dir.x)
 	# Scrolling chevrons: the cheapest possible "this is moving" signal.
@@ -130,9 +139,9 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var along: float = (offset - 0.5) * tile
 		var head: Vector2 = c + dir * (along + 5.0)
 		var tail: Vector2 = c + dir * (along - 2.0)
-		var col := Color(Defs.COL_MACHINE_EDGE.r, Defs.COL_MACHINE_EDGE.g, Defs.COL_MACHINE_EDGE.b, 0.45 - frost * 0.2)
-		draw_line(tail + perp * 5.0, head, col, 1.6)
-		draw_line(tail - perp * 5.0, head, col, 1.6)
+		var chev: Color = Defs.COL_BELT_CHEVRON if frost <= 0.0 else Defs.COL_FROZEN_CHEVRON
+		draw_line(tail + perp * 5.0, head, chev, 2.0)
+		draw_line(tail - perp * 5.0, head, chev, 2.0)
 
 func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
@@ -148,7 +157,9 @@ func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 
 func _draw_preview(tile: float) -> void:
 	var px: Vector2 = Vector2(preview_cell) * tile
-	var col: Color = Defs.machine_color(preview_type) if preview_valid else Defs.COL_DANGER
+	# Three explicit states. A ghost that is always red teaches nothing.
+	var col: Color = Defs.COL_VALID if preview_valid else (
+		Color8(150, 160, 180) if not preview_affordable else Defs.COL_DANGER)
 	var alpha: float = 0.55 + sin(pulse * 5.0) * 0.12
 	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, 0.16))
 	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, alpha), false, 2.0)

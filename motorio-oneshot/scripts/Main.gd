@@ -43,7 +43,7 @@ func _start_run() -> void:
 	run_seed = randi()
 	sim.setup(run_seed)
 	time_left = Defs.DAY_SECONDS
-	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(0, Defs.TILE * 3)
+	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, Defs.TILE * 4.5)
 	player.warmth = 100.0
 	player.locked = false
 	player.velocity = Vector2.ZERO
@@ -120,7 +120,9 @@ func _update_preview() -> void:
 	machine_layer.preview_cell = cell
 	machine_layer.preview_type = selected_type()
 	machine_layer.preview_dir = build_dir
-	machine_layer.preview_valid = sim.can_build(selected_type(), cell) == ""
+	var reason: String = sim.can_build(selected_type(), cell)
+	machine_layer.preview_valid = reason == ""
+	machine_layer.preview_affordable = sim.heat >= Defs.MACHINE_COSTS[selected_type()]
 
 func _view_rect() -> Rect2:
 	var size: Vector2 = get_viewport_rect().size / maxf(camera.zoom.x, 0.01)
@@ -162,16 +164,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
-	if Input.is_action_just_pressed("rotate"):
+	# Test the event itself rather than the Input singleton. is_action_just_pressed
+	# is frame-scoped, so inside an event handler it can silently drop a press
+	# when two arrive in one frame -- which reads to the player as a dead key.
+	if event.is_action_pressed("rotate"):
 		build_dir = Vector2i(-build_dir.y, build_dir.x)
 		audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
-	if Input.is_action_just_pressed("build"):
+	if event.is_action_pressed("build"):
 		_try_build()
 		get_viewport().set_input_as_handled()
 		return
-	if Input.is_action_just_pressed("demolish"):
+	if event.is_action_pressed("demolish"):
 		_try_demolish()
 		get_viewport().set_input_as_handled()
 
@@ -207,6 +212,9 @@ func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	_notify(reason, Defs.COL_DANGER)
+	# Anchor the reason to the tile the player actually aimed at; a message 170px
+	# away in a fixed slot simply does not get read.
+	fx.popup(Vector2(cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, -6.0), reason, Defs.COL_DANGER)
 	fx.ring(Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5, Defs.COL_DANGER, 14.0)
 	audio.call("play", "deny")
 
