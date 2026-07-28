@@ -10,7 +10,13 @@ const PANEL_W := 232.0
 var main
 var message_color: Color = Defs.COL_TEXT
 
-func _process(_delta: float) -> void:
+var _repaint := 0.0
+
+func _process(delta: float) -> void:
+	_repaint += delta
+	if _repaint < 1.0 / 30.0:
+		return
+	_repaint = 0.0
 	queue_redraw()
 
 func _panel(rect: Rect2, fill: Color, edge: Color, width: float = 1.0) -> void:

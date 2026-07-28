@@ -9,9 +9,14 @@ var view_rect := Rect2()
 var night: float = 0.0        ## 0 = dusk, 1 = deep night
 var pulse: float = 0.0
 
+var _repaint := 0.0
+
 func _process(delta: float) -> void:
 	pulse += delta
-	queue_redraw()
+	_repaint += delta
+	if _repaint >= 1.0 / 24.0:
+		_repaint = 0.0
+		queue_redraw()
 
 func set_view(rect: Rect2) -> void:
 	view_rect = rect
@@ -23,30 +28,11 @@ func _draw() -> void:
 	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
 	var warm_px: float = sim.warm_radius * tile
 
-	# Ground. Two flat fills plus a radial warmth pool reads cleaner than a
-	# noisy texture and keeps the palette disciplined.
-	var cold := Defs.COL_SNOW_COLD.lerp(Defs.COL_VOID, night * 0.55)
-	draw_rect(view_rect, cold)
-
-	# Many thin rings plus a small per-ring dither removes the onion banding that
-	# a coarse gradient produces, and the ramp stays on amber the whole way out.
-	var rings := 64
-	for index in range(rings, 0, -1):
-		var f: float = float(index) / float(rings)
-		var warm: Color = Defs.warm_tint(f)
-		var jitter: float = (float((index * 7) % 3) - 1.0) / 255.0 * 2.0
-		warm = Color(warm.r + jitter, warm.g + jitter, warm.b + jitter, 1.0)
-		# Only the outermost sliver blends into the night, so the boundary keeps
-		# a real value step instead of fading out to nothing.
-		if f > 0.97:
-			warm = warm.lerp(cold, (f - 0.97) / 0.03)
-		draw_circle(core_px, warm_px * f, warm)
-
-	# The frontier: crossing it halves machine speed and drains the player, so it
-	# gets a thick warm line plus an inner falloff rather than a 2px hairline.
+	# Ground and warm pool are drawn by GroundLayer beneath this one; here we
+	# only add what animates: the frontier, the grid and the ore.
 	var edge_alpha: float = 0.85 + sin(pulse * 1.6) * 0.10
-	draw_arc(core_px, warm_px - 5.0, 0.0, TAU, 96, Color(1.0, 0.69, 0.36, 0.22), 10.0, true)
-	draw_arc(core_px, warm_px, 0.0, TAU, 120, Color(1.0, 0.69, 0.36, edge_alpha), 3.0, true)
+	draw_arc(core_px, warm_px - 5.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, 0.22), 10.0, false)
+	draw_arc(core_px, warm_px, 0.0, TAU, 72, Color(1.0, 0.69, 0.36, edge_alpha), 3.0, true)
 
 	_draw_grid(tile)
 	_draw_ore(tile)

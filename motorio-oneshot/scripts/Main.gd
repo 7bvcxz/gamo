@@ -9,6 +9,7 @@ const SHAKE_DECAY := 7.0
 const RESCUE_SECONDS := 1.6
 
 @onready var sim: Sim = $Sim
+@onready var ground_layer: GroundLayer = $Ground
 @onready var world_layer: WorldLayer = $World
 @onready var machine_layer: MachineLayer = $Machines
 @onready var fx: FxLayer = $Fx
@@ -34,6 +35,7 @@ func _ready() -> void:
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
 	world_layer.sim = sim
+	ground_layer.sim = sim
 	machine_layer.sim = sim
 	hud.set("main", self)
 	_start_run()
@@ -63,6 +65,8 @@ func _process(delta: float) -> void:
 	var view := _view_rect()
 	world_layer.set_view(view)
 	world_layer.night = day_fraction()
+	ground_layer.night = day_fraction()
+	ground_layer.view_rect = view
 	machine_layer.view_rect = view
 
 	message_life = maxf(0.0, message_life - delta)

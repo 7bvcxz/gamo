@@ -12,8 +12,14 @@ var preview_valid := true
 var preview_affordable := true
 var pulse: float = 0.0
 
+var _repaint := 0.0
+
 func _process(delta: float) -> void:
 	pulse += delta
+	_repaint += delta
+	if _repaint < 1.0 / 30.0:
+		return
+	_repaint = 0.0
 	queue_redraw()
 
 func _draw() -> void:
