@@ -172,7 +172,17 @@ func _card(height: float) -> Rect2:
 	return card
 
 func _draw_title() -> void:
-	_dim(0.74)
+	# A light overall dim so the amber core still glows through as the hero
+	# image, plus a darker band only where the copy sits.
+	_dim(0.42)
+	var band := Rect2(0, size.y * 0.46, size.x, size.y * 0.42)
+	draw_rect(band, Color(0.02, 0.03, 0.06, 0.55))
+	# Feather both edges so the band does not read as a hard seam across the art.
+	for step in 7:
+		var k: float = float(step) / 7.0
+		var a: float = 0.55 * (1.0 - k)
+		draw_rect(Rect2(0, band.position.y - float(step + 1) * 3.0, size.x, 3.0), Color(0.02, 0.03, 0.06, a))
+		draw_rect(Rect2(0, band.end.y + float(step) * 3.0, size.x, 3.0), Color(0.02, 0.03, 0.06, a))
 	var full := func(y: float) -> Rect2: return Rect2(0, y, size.x, 40)
 	_text_in(full.call(size.y * 0.30), "MOTORIO", 56, Defs.COL_CORE)
 	_text_in(full.call(size.y * 0.30 + 32), "O N E   S H O T", 17, Defs.COL_MACHINE_EDGE)
