@@ -53,8 +53,8 @@ const ITEM_NAMES := ["서리광석", "잉걸광석", "합금"]
 ## valuable metal and clears 6:1.
 ## Ember sat at 1.99:1 against the night and shared a hue band with the warm
 ## ground, so it vanished exactly when the player was told to go find it.
-const ITEM_COLORS := [Color8(127, 212, 232), Color8(232, 132, 58), Color8(255, 217, 138)]
-const EMBER_CORE := Color8(255, 214, 150)
+const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138)]
+const EMBER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(12, 16, 26)
 const ITEM_VALUES := [3, 6, 22]
 

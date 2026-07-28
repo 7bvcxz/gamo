@@ -99,6 +99,23 @@ findings that were implemented and re-verified:
 - Ember ore was lifted from 1.99:1 to a hotter copper with a bright inner core; the build
   grid was raised from 1.13:1; the control legend from 4.30:1.
 
+## Cycle 5 and a regression I introduced
+
+The fifth review measured that widening the pool's edge feather from 4% to 26% of the
+radius had **reintroduced** the mud band it was meant to remove: alpha-blending amber over
+navy leaves the warm gamut wherever the blend sits mid-way, so a wide transition is a wide
+smear. The reviewer also noted this made 36% of the mechanically-warm area render as
+night, so machines running at full speed looked like they were outside the radius.
+
+Narrowing the feather to 12% recovered most of it. Measured over 11,267 radial samples of
+the same scene, before and after: pixels below saturation 0.30 fell **17.3% → 11.1%**, and
+pixels outside the 15–50 degree hue band fell **19.1% → 10.7%**. Ember ore was also pushed
+to a hotter, redder key to separate it from the warm floor it was disappearing into.
+
+A transition band cannot be eliminated entirely while the pool is composited over the night
+with alpha; removing the last of it needs the ground and pool drawn as one shader rather
+than two layers. That is not done.
+
 ## Furnace verification
 
 The furnace was built in a scripted play session and captured: the machine renders, the

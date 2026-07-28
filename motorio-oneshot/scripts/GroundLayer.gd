@@ -34,9 +34,12 @@ func _bake_pool() -> ImageTexture:
 				image.set_pixel(x, y, Color(0, 0, 0, 0))
 				continue
 			var col: Color = Defs.warm_tint(d)
-			# A wide feather, but the ramp is already dark by the time alpha drops,
-			# so blending toward the night never produces a mid-tone mud band.
-			col.a = 1.0 if d < 0.74 else clampf((1.0 - d) / 0.26, 0.0, 1.0)
+			# Alpha-blending amber over navy leaves the warm gamut wherever the
+			# blend sits mid-way, so a wide feather reintroduced the mud ring it
+			# was meant to remove (25.3% of the disc out of gamut, hue reaching
+			# 330 degrees). Keep the transition narrow: the ramp is already dark
+			# by this point, so a short blend is not a visible cliff.
+			col.a = 1.0 if d < 0.88 else clampf((1.0 - d) / 0.12, 0.0, 1.0)
 			image.set_pixel(x, y, col)
 	return ImageTexture.create_from_image(image)
 
