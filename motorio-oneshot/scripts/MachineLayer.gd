@@ -11,6 +11,7 @@ var preview_dir := Vector2i.RIGHT
 var preview_valid := true
 var preview_affordable := true
 var show_preview := true
+var preview_occupied := false
 var pulse: float = 0.0
 
 var _repaint := 0.0
@@ -171,6 +172,18 @@ func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 
 func _draw_preview(tile: float) -> void:
 	var px: Vector2 = Vector2(preview_cell) * tile
+	# A tile that already holds a machine is not an error, it is a reclaim target.
+	# Stamping a red box over the player's own building hid the machine and read
+	# as a fault.
+	if preview_occupied:
+		var mark := Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, 0.5 + sin(pulse * 4.0) * 0.12)
+		for corner in [Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)]:
+			var origin: Vector2 = px + Vector2(corner.x * (tile - 1.0), corner.y * (tile - 1.0))
+			var dx: float = -7.0 if corner.x > 0.0 else 7.0
+			var dy: float = -7.0 if corner.y > 0.0 else 7.0
+			draw_line(origin, origin + Vector2(dx, 0), mark, 2.0)
+			draw_line(origin, origin + Vector2(0, dy), mark, 2.0)
+		return
 	# Three explicit states. A ghost that is always red teaches nothing.
 	var col: Color = Defs.COL_VALID if preview_valid else (
 		Color8(150, 160, 180) if not preview_affordable else Defs.COL_DANGER)

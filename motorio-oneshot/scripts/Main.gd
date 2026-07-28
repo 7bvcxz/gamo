@@ -148,6 +148,7 @@ func _update_preview() -> void:
 	var reason: String = sim.can_build(selected_type(), cell)
 	machine_layer.preview_valid = reason == ""
 	machine_layer.preview_affordable = sim.heat >= Defs.MACHINE_COSTS[selected_type()]
+	machine_layer.preview_occupied = sim.machine_at(cell) != null
 
 func _view_rect() -> Rect2:
 	var size: Vector2 = get_viewport_rect().size / maxf(camera.zoom.x, 0.01)
