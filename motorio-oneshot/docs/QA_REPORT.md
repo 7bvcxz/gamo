@@ -78,9 +78,40 @@ The middle row is the useful diagnostic: throttling repaints changed almost noth
 which is what proved the cost was fill rate rather than script time and pointed at the
 gradient.
 
+## Later cycles
+
+Three further independent review cycles ran after the table above. Each produced measured
+findings that were implemented and re-verified:
+
+- **Cycle 2** found belts still sitting at hue 222 — the same family as the cold they
+  fight — reading 1.13:1 against cold ground. Moved to hue 23 with a rim light and glow;
+  re-measured at hue 23, separated from the ground by value rather than colour.
+- **Cycle 2** also caught a regression I introduced: fixing text centring moved the warm
+  radius label onto the Heat Core at 1.22:1. The label was removed entirely.
+- **Cycle 3** found the warm pool still rotating to hue 315 (magenta) at saturation 0.17
+  because the ramp was interpolated in RGB. Rebuilt in HSV holding hue and saturation and
+  falling off with value and alpha only. Re-measured: hue 28-31 and saturation >= 0.46 out
+  to radius 200, where it had been hue 0 at saturation 0.26.
+- **Cycle 3** found freezing had no screen-level expression at all — centre and corner
+  pixels were byte-identical at 14% body temperature. A cold vignette now closes in below
+  60% warmth and pulses below 30%.
+- Ember ore was lifted from 1.99:1 to a hotter copper with a bright inner core; the build
+  grid was raised from 1.13:1; the control legend from 4.30:1.
+
+## Furnace verification
+
+The furnace was built in a scripted play session and captured: the machine renders, the
+hotbar shows its recipe, and the objective line advanced correctly to "제련로 출력을
+코어까지 이으세요". A complete frost-plus-ember-to-alloy chain has been proven headlessly
+in `test_sim.gd` but has **not** been captured end to end in the browser, because routing
+two ore bands into one building requires a longer scripted play than the harness reliably
+performs.
+
 ## Known remaining limitations
 
 - No hardware-GPU performance measurement (see caveat above).
 - No save system, no settings screen, no audio volume control.
 - The result screen reports totals but no rate, so comparing runs takes mental effort.
-- Automated play drives fixed key timings; it cannot detect subtle feel problems.
+- Automated play drives fixed key timings; it cannot detect subtle feel problems, and its
+  movement is fragile enough that a capture occasionally lands the player on the wrong tile.
+- The full alloy chain is proven in simulation but not in a browser capture (see above).
