@@ -59,26 +59,30 @@ func _draw() -> void:
 func _draw_status() -> void:
 	var sim = main.sim
 	var panel := Rect2(MARGIN, MARGIN, PANEL_W, 108)
-	_panel(panel, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
-		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.85))
+	# Fully opaque: ore silhouettes were crawling behind the temperature row.
+	_panel(panel, Defs.COL_PANEL, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
 
 	# The clock is the cold pressure, so it is rendered cold and never outranks
 	# the core in brightness.
 	var seconds: int = int(ceil(main.time_left))
 	var urgent: bool = seconds <= 45
-	var clock: Color = Defs.COL_DANGER if urgent else Defs.COL_CLOCK
-	_text(panel.position + Vector2(14, 34), "%02d:%02d" % [seconds / 60, seconds % 60], 21, clock)
-	var track := Rect2(panel.position + Vector2(88, 22), Vector2(128, 6))
+	# In a five-minute one-shot the clock is the game; it gets the top of the
+	# hierarchy back, while its caption drops well below it.
+	var clock: Color = Defs.COL_DANGER if urgent else Color8(226, 236, 248)
+	_text(panel.position + Vector2(14, 38), "%02d:%02d" % [seconds / 60, seconds % 60], 26, clock)
+	var track := Rect2(panel.position + Vector2(104, 22), Vector2(112, 6))
 	draw_rect(track, Color8(28, 36, 54))
 	var fill: float = clampf(main.time_left / Defs.DAY_SECONDS, 0.0, 1.0)
 	draw_rect(Rect2(track.position, Vector2(track.size.x * fill, track.size.y)),
 		Defs.COL_DANGER if urgent else Defs.COL_CLOCK_FILL)
-	_text(panel.position + Vector2(88, 44), "남은 시간", 11, Defs.COL_TEXT_DIM)
+	_text(panel.position + Vector2(104, 44), "남은 시간", 11, Defs.COL_CLOCK)
 
 	# Heat is the score, the currency and the map key, so it gets the warm accent.
-	_text(panel.position + Vector2(14, 66), "열 %d" % sim.heat, 19, Defs.COL_CORE)
-	_text(panel.position + Vector2(112, 62), "누적 %d" % sim.total_heat, 12, Defs.COL_TEXT_DIM)
-	_text(panel.position + Vector2(112, 78), "온기 %.1f칸" % sim.warm_radius, 12, Defs.COL_TEXT_DIM)
+	_text(panel.position + Vector2(14, 70), "열 %d" % sim.heat, 19, Defs.COL_CORE)
+	_text_in(Rect2(panel.position + Vector2(104, 58), Vector2(112, 16)), "누적 %d" % sim.total_heat, 12,
+		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
+	_text_in(Rect2(panel.position + Vector2(104, 74), Vector2(112, 16)), "온기 %.1f칸" % sim.warm_radius, 12,
+		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
 
 	_draw_warmth_row(panel)
 	_draw_objective(panel)

@@ -91,9 +91,15 @@ func _process(delta: float) -> void:
 	else:
 		camera.offset = Vector2.ZERO
 
+	# The title is a hero shot: no player, no placement ghost, nothing that reads
+	# as leftover debug UI in the one frame that sells the game.
+	var in_run: bool = state != State.TITLE
+	player.visible = in_run
+	machine_layer.show_preview = state == State.PLAY
+
 	match state:
 		State.PLAY: _process_play(delta)
-		State.TITLE: _update_preview()
+		State.TITLE: pass
 		State.PAUSED, State.RESULT: pass
 
 func _process_play(delta: float) -> void:
@@ -145,7 +151,7 @@ func _update_preview() -> void:
 
 func _view_rect() -> Rect2:
 	var size: Vector2 = get_viewport_rect().size / maxf(camera.zoom.x, 0.01)
-	return Rect2(player.global_position - size * 0.5, size)
+	return Rect2(camera.get_screen_center_position() - size * 0.5, size)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.is_pressed() or event.is_echo():
@@ -240,7 +246,10 @@ func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 func _on_warmth_changed(radius: float) -> void:
 	if state != State.PLAY:
 		return
-	_notify("온기 반경 %.1f칸" % radius, Defs.COL_CORE)
+	# The panel already carries this number. Printing it in the world drew it
+	# straight across the core at 1.22:1, defacing the one hero object.
+	fx.ring(Vector2(sim.core_cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5,
+		Defs.COL_CORE, radius * float(Defs.TILE) * 0.12)
 
 func _notify(text: String, color: Color) -> void:
 	message = text

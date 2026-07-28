@@ -19,8 +19,8 @@ const WARM_RAMP: Array[Color] = [
 	Color8(255, 236, 190),   # at the core
 	Color8(214, 158, 96),
 	Color8(168, 116, 80),
-	Color8(112, 78, 72),
-	Color8(62, 54, 66),      # meeting the cold ground
+	Color8(120, 82, 66),
+	Color8(84, 58, 50),      # still warm; the texture alpha does the blending
 ]
 const COL_GRID := Color("38445f")
 const COL_CORE := Color("ffb347")
@@ -28,8 +28,13 @@ const COL_CORE_DEEP := Color("e0702a")
 const COL_BRASS := Color("d8a34a")
 const COL_MACHINE := Color("2f6d72")
 ## Machines are self-lit so they never rely on the ground for contrast.
-const COL_BELT_BODY := Color8(58, 66, 86)
-const COL_BELT_RIM := Color8(196, 138, 84)
+## The belt used to sit at hue 222 - the same family as the cold it is fighting -
+## so every belt read as a hole punched in the warm floor. It now shares the
+## factory's warm hue and is separated from the ground by value, not colour.
+const COL_BELT_BODY := Color8(90, 68, 54)
+const COL_BELT_BODY_COLD := Color8(58, 46, 40)
+const COL_BELT_RIM := Color8(255, 217, 160)
+const COL_BELT_GLOW := Color8(255, 154, 60)
 const COL_BELT_CHEVRON := Color8(255, 196, 120)
 const COL_FROZEN_CHEVRON := Color8(120, 140, 160)
 const COL_VALID := Color8(120, 220, 140)

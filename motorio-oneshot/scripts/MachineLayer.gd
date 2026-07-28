@@ -10,6 +10,7 @@ var preview_cell := Vector2i.ZERO
 var preview_dir := Vector2i.RIGHT
 var preview_valid := true
 var preview_affordable := true
+var show_preview := true
 var pulse: float = 0.0
 
 var _repaint := 0.0
@@ -49,7 +50,8 @@ func _draw() -> void:
 		if machine.type != Defs.M_BELT or not _visible(cell, tile):
 			continue
 		_draw_belt_items(machine, Vector2(cell) * tile, tile)
-	_draw_preview(tile)
+	if show_preview:
+		_draw_preview(tile)
 
 func _visible(cell: Vector2i, tile: float) -> bool:
 	return view_rect.grow(tile * 2.0).has_point(Vector2(cell) * tile + Vector2.ONE * tile * 0.5)
@@ -131,12 +133,15 @@ func _draw_pip(at: Vector2, item_type: int, count: int) -> void:
 func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var body: Color = Defs.COL_BELT_BODY.lerp(Color8(40, 48, 66), frost)
-	# A warm bloom beneath powered machinery: belts should emit light, not absorb
-	# it, and dropping the bloom is how the frost penalty reads visually.
-	draw_circle(c, 17.0, Color(0.94, 0.59, 0.27, 0.35 * (1.0 - frost) + 0.06))
+	var body: Color = Defs.COL_BELT_BODY if frost <= 0.0 else Defs.COL_BELT_BODY_COLD
+	# Glow first so it reads as light spilling out from under the machine.
+	draw_circle(c, 19.0, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
+		0.30 * (1.0 - frost) + 0.05))
 	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), body)
-	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, 2.0), Defs.COL_BELT_RIM.lerp(body, frost))
+	# The rim must be lighter than the pool it sits in, or it disappears into it.
+	var rim: Color = Defs.COL_BELT_RIM if frost <= 0.0 else Defs.COL_BELT_RIM.lerp(body, 0.6)
+	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, 2.5), rim)
+	draw_rect(Rect2(px.x + 2, px.y + 2, 2.5, tile - 4), Color(rim.r, rim.g, rim.b, 0.6))
 	var dir := Vector2(machine.dir)
 	var perp := Vector2(-dir.y, dir.x)
 	# Scrolling chevrons: the cheapest possible "this is moving" signal.
@@ -156,10 +161,13 @@ func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var t: float = float(item["t"])
 		var at: Vector2 = c + dir * (t - 0.5) * tile
 		var col: Color = Defs.ITEM_COLORS[int(item["type"])]
-		draw_circle(at + Vector2(0, 2), 5.0, Color(0.02, 0.04, 0.08, 0.35))
-		draw_circle(at, 4.6, col.darkened(0.35))
-		draw_circle(at, 3.4, col)
-		draw_circle(at + Vector2(-1, -1), 1.2, Color(1, 1, 1, 0.6))
+		# Payloads were too small to see, so a working line looked identical to a
+		# broken one. These are deliberately chunky with a dark outline.
+		draw_circle(at + Vector2(0, 2), 7.0, Color(0.02, 0.04, 0.08, 0.4))
+		draw_circle(at, 6.6, Defs.ORE_OUTLINE)
+		draw_circle(at, 5.2, col.darkened(0.3))
+		draw_circle(at, 3.8, col)
+		draw_circle(at + Vector2(-1.4, -1.4), 1.6, Color(1, 1, 1, 0.7))
 
 func _draw_preview(tile: float) -> void:
 	var px: Vector2 = Vector2(preview_cell) * tile
