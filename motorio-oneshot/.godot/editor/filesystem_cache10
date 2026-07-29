@@ -20,7 +20,7 @@ AUTONOMOUS_PROGRESS.md::TextFile::-1::1785250591::0::1::::<><><>0<>0<><>::
 FINAL_REPORT.md::TextFile::-1::1785252391::0::1::::<><><>0<>0<><>::
 GAME_AUDIT.md::TextFile::-1::1785248658::0::1::::<><><>0<>0<><>::
 GAME_DESIGN.md::TextFile::-1::1785248703::0::1::::<><><>0<>0<><>::
-QA_REPORT.md::TextFile::-1::1785252872::0::1::::<><><>0<>0<><>::
+QA_REPORT.md::TextFile::-1::1785285286::0::1::::<><><>0<>0<><>::
 UPGRADE_PLAN.md::TextFile::-1::1785250276::0::1::::<><><>0<>0<><>::
 ::res://scenes/::1785248354
 Main.tscn::PackedScene::4490656475088090925::1785249825::0::1::::<><><>0<>0<><>::res://scripts/Main.gd<>res://scripts/Sim.gd<>res://scripts/WorldLayer.gd<>res://scripts/GroundLayer.gd<>res://scripts/MachineLayer.gd<>res://scripts/FxLayer.gd<>res://scripts/PlayerActor.gd<>res://scripts/HUD.gd<>res://scripts/Audio.gd
