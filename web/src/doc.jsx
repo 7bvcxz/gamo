@@ -2,14 +2,21 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import { WhatIsGamo } from './pages/WhatIsGamo.jsx';
+import { LevelDesign } from './pages/LevelDesign.jsx';
+import { KeyFactor } from './pages/KeyFactor.jsx';
 
-// The sidebar is data-driven so adding a page is one entry plus one component.
-// Only one page exists today by design; the grouping is already in place so the
-// structure does not need rewriting when the second one lands.
+// The sidebar is data-driven: adding a page is one entry plus one component.
 const NAV = [
   {
     group: 'START',
     items: [{ id: 'what-is-gamo', label: 'What is Gamo?', render: () => <WhatIsGamo /> }],
+  },
+  {
+    group: 'MOTORIO',
+    items: [
+      { id: 'level-design', label: 'Level Design', render: () => <LevelDesign /> },
+      { id: 'key-factor', label: 'Key Factor', render: () => <KeyFactor /> },
+    ],
   },
 ];
 

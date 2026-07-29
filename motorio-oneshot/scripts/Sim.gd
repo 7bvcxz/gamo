@@ -168,7 +168,7 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 	if machine.progress < Defs.MINER_PERIOD:
 		return
 	var item_type: int = ore.get(machine.cell, Defs.ITEM_FROST)
-	if _push_into(machine.cell + machine.dir, item_type):
+	if _push_into(machine.cell + machine.dir, item_type, machine.cell):
 		machine.progress = 0.0
 		machine.flash = 0.35
 		machine.stalled = false
@@ -192,7 +192,7 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 	if float(head["t"]) < 1.0:
 		machine.stalled = false
 		return
-	if _push_into(machine.cell + machine.dir, int(head["type"])):
+	if _push_into(machine.cell + machine.dir, int(head["type"]), machine.cell):
 		machine.items.remove_at(0)
 		machine.stalled = false
 	else:
@@ -207,7 +207,7 @@ func _tick_furnace(machine: Machine, delta: float) -> void:
 	machine.progress += delta
 	if machine.progress < Defs.FURNACE_PERIOD:
 		return
-	if not _push_into(machine.cell + machine.dir, Defs.ITEM_ALLOY):
+	if not _push_into(machine.cell + machine.dir, Defs.ITEM_ALLOY, machine.cell):
 		machine.progress = Defs.FURNACE_PERIOD
 		machine.stalled = true
 		return
@@ -217,8 +217,9 @@ func _tick_furnace(machine: Machine, delta: float) -> void:
 	machine.progress = 0.0
 	machine.flash = 0.5
 
-## Returns true when the destination accepted the item.
-func _push_into(cell: Vector2i, item_type: int) -> bool:
+## Returns true when the destination accepted the item. `from` is the cell the
+## item is arriving from, which is what lets a machine refuse a face.
+func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 9999)) -> bool:
 	var target: Machine = machines.get(cell, null)
 	if target == null:
 		return false
@@ -236,6 +237,10 @@ func _push_into(cell: Vector2i, item_type: int) -> bool:
 			return true
 		Defs.M_FURNACE:
 			if item_type == Defs.ITEM_ALLOY:
+				return false
+			# Every face except the output takes ore. Feeding the mouth the
+			# furnace pours out of would let a line quietly eat its own product.
+			if from == target.cell + target.dir:
 				return false
 			var held: int = int(target.buffer.get(item_type, 0))
 			if held >= 4:

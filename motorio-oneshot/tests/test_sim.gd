@@ -12,6 +12,7 @@ func _run() -> void:
 	_test_generation()
 	_test_build_rules()
 	_test_miner_to_core()
+	_test_miner_rate()
 	_test_belt_transport()
 	_test_furnace_alloy()
 	_test_economy_and_warmth()
@@ -118,10 +119,26 @@ func _test_miner_to_core() -> void:
 	sim.heat = 100
 	_assert(sim.build(Defs.M_MINER, cell, Vector2i.RIGHT), "miner placed next to the core")
 	var before: int = sim.total_heat
-	for step in 40:
-		sim.tick(0.1)
+	for step in 80:
+		sim.tick(0.1)     # comfortably longer than one mining period
 	_assert(sim.total_heat > before, "a miner pointed at the core earns heat")
 	_assert(sim.delivered[Defs.ITEM_FROST] > 0, "delivered frost ore is counted")
+	sim.free()
+
+func _test_miner_rate() -> void:
+	# One cat is deliberately a trickle; the number is load-bearing for balance.
+	var sim := Sim.new()
+	sim.setup(555)
+	sim.heat = 200
+	var cell := Vector2i(-1, 0)
+	sim.ore[cell] = Defs.ITEM_FROST
+	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
+	for step in 50:
+		sim.tick(0.1)     # five seconds
+	_assert(sim.delivered[Defs.ITEM_FROST] == 0, "a miner produces nothing within five seconds")
+	for step in 20:
+		sim.tick(0.1)     # seven seconds total
+	_assert(sim.delivered[Defs.ITEM_FROST] == 1, "a miner delivers its first ore just after its period")
 	sim.free()
 
 func _test_belt_transport() -> void:
@@ -134,7 +151,7 @@ func _test_belt_transport() -> void:
 	_assert(sim.build(Defs.M_BELT, Vector2i(-2, 0), Vector2i.RIGHT), "first belt built")
 	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "second belt built")
 	var saw_item := false
-	for step in 60:
+	for step in 120:
 		sim.tick(0.1)
 		if sim.items_in_transit() > 0:
 			saw_item = true
@@ -156,6 +173,19 @@ func _test_furnace_alloy() -> void:
 	for step in 40:
 		sim.tick(0.1)
 	_assert(sim.delivered[Defs.ITEM_ALLOY] == 0, "a furnace with one ore type produces nothing")
+
+	# Input may arrive on any face except the one the furnace outputs from.
+	var out_cell: Vector2i = furnace_cell + Vector2i.RIGHT
+	var side_cell: Vector2i = furnace_cell + Vector2i.UP
+	var back_cell: Vector2i = furnace_cell + Vector2i.LEFT
+	_assert(sim._push_into(furnace_cell, Defs.ITEM_EMBER, side_cell),
+		"the furnace accepts ore pushed in from the side")
+	_assert(sim._push_into(furnace_cell, Defs.ITEM_EMBER, back_cell),
+		"the furnace accepts ore pushed in from behind")
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_EMBER, out_cell),
+		"the furnace refuses ore pushed in from its own output face")
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_ALLOY, side_cell),
+		"the furnace never takes its own product as input")
 
 	furnace.buffer[Defs.ITEM_EMBER] = 2
 	for step in 80:
@@ -222,12 +252,13 @@ func _test_blocked_output_preserves_work() -> void:
 	var sim := Sim.new()
 	sim.setup(2468)
 	sim.heat = 200
-	# Miner facing empty ground: nothing accepts its output.
-	var cell := Vector2i(6, 6)
+	# Miner facing empty ground: nothing accepts its output. Kept inside the warm
+	# radius so the frost throttle is not a second variable in this test.
+	var cell := Vector2i(3, 3)
 	sim.ore[cell] = Defs.ITEM_FROST
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	var machine: Sim.Machine = sim.machine_at(cell)
-	for step in 40:
+	for step in 80:
 		sim.tick(0.1)
 	_assert(is_equal_approx(machine.progress, Defs.MINER_PERIOD),
 		"a blocked miner holds its finished item instead of discarding it")
@@ -236,7 +267,7 @@ func _test_blocked_output_preserves_work() -> void:
 
 	# Give it somewhere to send the ore and the warning must clear on its own.
 	sim.build(Defs.M_BELT, cell + Vector2i.RIGHT, Vector2i.RIGHT)
-	for step in 20:
+	for step in 40:
 		sim.tick(0.1)
 	_assert(not machine.stalled, "the stall warning clears once the output is unblocked")
 

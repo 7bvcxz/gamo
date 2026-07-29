@@ -85,7 +85,9 @@ const MACHINE_HINTS := [
 ## enough that the dusk-to-dawn arc is felt several times in a sitting.
 const DAY_SECONDS := 180.0
 const START_HEAT := 30
-const MINER_PERIOD := 1.15
+## Deliberately slow: one cat is a trickle, so throughput has to come from more
+## miners and better routing rather than from a single well-placed worker.
+const MINER_PERIOD := 5.75
 const FURNACE_PERIOD := 2.2
 const BELT_SPEED := 2.6           # tiles per second
 const BELT_CAPACITY := 3
