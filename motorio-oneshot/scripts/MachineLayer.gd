@@ -97,19 +97,23 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		c + Vector2(-8, -10 + dig), c + Vector2(-4, -15 + dig), c + Vector2(-2, -9 + dig)]), fur)
 	draw_colored_polygon(PackedVector2Array([
 		c + Vector2(8, -10 + dig), c + Vector2(4, -15 + dig), c + Vector2(2, -9 + dig)]), fur)
-	draw_circle(c + Vector2(-2, -6 + dig), 1.1, Color("2b2030"))
-	draw_circle(c + Vector2(2, -6 + dig), 1.1, Color("2b2030"))
+	draw_circle(c + Vector2(-2, -6 + dig), 1.2, Color8(38, 26, 24))
+	draw_circle(c + Vector2(2, -6 + dig), 1.2, Color8(38, 26, 24))
+	# A warm rim tells the player this unit is theirs without flattening it into
+	# the amber floor the way a fully warm body did.
+	draw_rect(Rect2(c.x - 9, c.y - 3 + dig, 18, 2), Defs.COL_BELT_RIM.lerp(fur, frost))
 	# Output direction and a progress arc, so throughput is legible at a glance.
 	var tip: Vector2 = c + Vector2(machine.dir) * 15.0
 	draw_circle(tip, 2.6, Defs.COL_BRASS)
 	draw_arc(c, 13.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.5), 2.0, true)
 	if machine.flash > 0.0:
 		draw_circle(c, 15.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
+	_draw_stall(machine, c)
 
 func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var body: Color = Color("8e5ac0").lerp(Color("5c6a92"), frost)
+	var body: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
 	var ready: bool = int(machine.buffer.get(Defs.ITEM_FROST, 0)) > 0 and int(machine.buffer.get(Defs.ITEM_EMBER, 0)) > 0
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
@@ -118,14 +122,27 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_rect(Rect2(c.x - 12, c.y - 12, 24, 24), body.darkened(0.4))
 	draw_rect(Rect2(c.x - 10, c.y - 10, 20, 20), body)
 	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Color(1.0, 0.55, 0.2, glow))
-	draw_rect(Rect2(c.x - 10, c.y - 12, 20, 4), Defs.COL_BRASS.lerp(body, 0.3))
+	draw_rect(Rect2(c.x - 10, c.y - 12, 20, 3), Defs.COL_BELT_RIM.lerp(body, frost * 0.7))
 	var tip: Vector2 = c + Vector2(machine.dir) * 15.0
 	draw_circle(tip, 2.6, Defs.COL_BRASS)
+	_draw_stall(machine, c)
 	# Two input pips tell the player exactly what the recipe is still missing.
 	_draw_pip(c + Vector2(-6, 12), Defs.ITEM_FROST, int(machine.buffer.get(Defs.ITEM_FROST, 0)))
 	_draw_pip(c + Vector2(6, 12), Defs.ITEM_EMBER, int(machine.buffer.get(Defs.ITEM_EMBER, 0)))
 	if machine.flash > 0.0:
 		draw_circle(c, 16.0 + machine.flash * 14.0, Color(1, 0.9, 0.7, machine.flash * 0.55), false, 2.0)
+
+## A backed-up machine is the single most common way a factory silently stops
+## paying. It gets an unmissable pulsing marker rather than nothing at all.
+func _draw_stall(machine: Sim.Machine, c: Vector2) -> void:
+	if not machine.stalled:
+		return
+	var beat: float = 0.55 + sin(pulse * 5.0) * 0.45
+	var at: Vector2 = c + Vector2(0, -18)
+	draw_circle(at, 7.0, Color(0.06, 0.08, 0.12, 0.85))
+	draw_circle(at, 6.0, Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.45 + beat * 0.5))
+	draw_rect(Rect2(at.x - 1.0, at.y - 3.5, 2.0, 4.5), Color(1, 1, 1, 0.9))
+	draw_rect(Rect2(at.x - 1.0, at.y + 2.0, 2.0, 2.0), Color(1, 1, 1, 0.9))
 
 func _draw_pip(at: Vector2, item_type: int, count: int) -> void:
 	var col: Color = Defs.ITEM_COLORS[item_type]
@@ -159,6 +176,7 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var chev: Color = Defs.COL_BELT_CHEVRON if frost <= 0.0 else Defs.COL_FROZEN_CHEVRON
 		draw_line(tail + perp * 5.0, head, chev, 2.0)
 		draw_line(tail - perp * 5.0, head, chev, 2.0)
+	_draw_stall(machine, c)
 
 func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5

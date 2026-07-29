@@ -63,6 +63,20 @@ func _test_generation() -> void:
 			"the belt lane home stays clear at %s" % offset)
 		_assert(sim.can_build(Defs.M_BELT, sim.core_cell + offset) == "",
 			"a belt can always be placed in the starter lane at %s" % offset)
+
+	# The alloy chain must be buildable in every run, not only when the scatter
+	# is kind: a guaranteed ember seam plus a clear column back to the core.
+	for offset: Vector2i in Sim.STARTER_EMBER:
+		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_EMBER,
+			"guaranteed ember seam exists at %s" % offset)
+	for step in range(1, 9):
+		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, -step)
+		_assert(sim.can_build(Defs.M_BELT, lane_cell) == "",
+			"the ember column home is clear at %s" % lane_cell)
+	_assert(Vector2(Sim.STARTER_EMBER[0]).length() > Defs.WARM_BASE,
+		"the ember seam starts outside the opening warm radius, so it must be earned")
+	_assert(Vector2(Sim.STARTER_EMBER[0]).length() < Defs.WARM_MAX,
+		"the ember seam is reachable within a single run")
 	sim.free()
 
 	# The opening is deterministic across different world seeds.
@@ -218,6 +232,22 @@ func _test_blocked_output_preserves_work() -> void:
 	_assert(is_equal_approx(machine.progress, Defs.MINER_PERIOD),
 		"a blocked miner holds its finished item instead of discarding it")
 	_assert(sim.delivered[Defs.ITEM_FROST] == 0, "a blocked miner delivers nothing")
+	_assert(machine.stalled, "a blocked miner reports itself stalled so the player can see it")
+
+	# Give it somewhere to send the ore and the warning must clear on its own.
+	sim.build(Defs.M_BELT, cell + Vector2i.RIGHT, Vector2i.RIGHT)
+	for step in 20:
+		sim.tick(0.1)
+	_assert(not machine.stalled, "the stall warning clears once the output is unblocked")
+
+	# A belt whose head has nowhere to go backs up and reports it too.
+	var dead_end := Vector2i(20, 20)
+	sim.build(Defs.M_BELT, dead_end, Vector2i.RIGHT)
+	var belt: Sim.Machine = sim.machine_at(dead_end)
+	for index in Defs.BELT_CAPACITY:
+		belt.items.append({"type": Defs.ITEM_FROST, "t": 1.0})
+	sim.tick(0.2)
+	_assert(belt.stalled, "a full belt with no destination reports itself stalled")
 	sim.free()
 
 func _assert(condition: bool, message: String) -> void:

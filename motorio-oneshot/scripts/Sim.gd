@@ -18,6 +18,9 @@ class Machine extends RefCounted:
 	var dir: Vector2i = Vector2i.RIGHT
 	var progress: float = 0.0
 	var flash: float = 0.0
+	## True when this machine has finished work it cannot hand on. Surfacing it is
+	## the only way a player can tell a mis-aimed belt line from a working one.
+	var stalled: bool = false
 	## Belts: [{ "type": int, "t": float }] ordered from the front of the tile.
 	var items: Array[Dictionary] = []
 	## Furnace input buffer keyed by item type.
@@ -55,6 +58,12 @@ func setup(seed_value: int) -> void:
 ## the miner's output and the guaranteed opening would dead-end.
 const STARTER_PATCH: Array[Vector2i] = [Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3)]
 const STARTER_LANE: Array[Vector2i] = [Vector2i(0, 1), Vector2i(0, 2)]
+## A guaranteed ember seam due north, just outside the opening warm radius, with
+## a clear column back to the core. Without it the alloy recipe -- the design's
+## payoff -- depends on where the scatter happened to drop ember, which made the
+## mid-game beat unreliable and left the headline mechanic unreachable in a
+## five-minute run.
+const STARTER_EMBER: Array[Vector2i] = [Vector2i(1, -9), Vector2i(0, -9), Vector2i(2, -9)]
 
 func _generate_ore(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -65,8 +74,15 @@ func _generate_ore(seed_value: int) -> void:
 		ore[core_cell + offset] = Defs.ITEM_FROST
 	_scatter_ore(rng, Defs.ITEM_FROST, Defs.FROST_RING, 7, 4)
 	_scatter_ore(rng, Defs.ITEM_EMBER, Defs.EMBER_RING, 6, 5)
+	for offset: Vector2i in STARTER_EMBER:
+		ore[core_cell + offset] = Defs.ITEM_EMBER
 	for offset: Vector2i in STARTER_LANE:
 		ore.erase(core_cell + offset)
+	# Two clear columns home: one from the frost row, one from the ember seam.
+	for step in range(1, 9):
+		ore.erase(core_cell + Vector2i(1, -step))
+	for step in range(1, 3):
+		ore.erase(core_cell + Vector2i(1, step))
 
 ## Ore arrives in patches so the player reads them as destinations rather than
 ## noise, and so a single miner placement decision matters.
@@ -155,9 +171,11 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 	if _push_into(machine.cell + machine.dir, item_type):
 		machine.progress = 0.0
 		machine.flash = 0.35
+		machine.stalled = false
 	else:
 		# Hold the finished item instead of losing it when the output is blocked.
 		machine.progress = Defs.MINER_PERIOD
+		machine.stalled = true
 
 func _tick_belt(machine: Machine, delta: float) -> void:
 	var step: float = Defs.BELT_SPEED * delta
@@ -172,9 +190,13 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 		return
 	var head: Dictionary = machine.items[0]
 	if float(head["t"]) < 1.0:
+		machine.stalled = false
 		return
 	if _push_into(machine.cell + machine.dir, int(head["type"])):
 		machine.items.remove_at(0)
+		machine.stalled = false
+	else:
+		machine.stalled = machine.items.size() >= Defs.BELT_CAPACITY
 
 func _tick_furnace(machine: Machine, delta: float) -> void:
 	var frost: int = int(machine.buffer.get(Defs.ITEM_FROST, 0))
@@ -187,7 +209,9 @@ func _tick_furnace(machine: Machine, delta: float) -> void:
 		return
 	if not _push_into(machine.cell + machine.dir, Defs.ITEM_ALLOY):
 		machine.progress = Defs.FURNACE_PERIOD
+		machine.stalled = true
 		return
+	machine.stalled = false
 	machine.buffer[Defs.ITEM_FROST] = frost - Defs.FROST_COST_ALLOY
 	machine.buffer[Defs.ITEM_EMBER] = ember - Defs.EMBER_COST_ALLOY
 	machine.progress = 0.0

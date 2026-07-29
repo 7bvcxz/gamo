@@ -97,10 +97,12 @@ func _draw_status() -> void:
 	_text(panel.position + Vector2(104, 44), "남은 시간", 11, Defs.COL_CLOCK)
 
 	# Heat is the score, the currency and the map key, so it gets the warm accent.
+	# The warm radius is what the run is actually about, so it is promoted above
+	# the running totals rather than tucked into the panel's dead corner.
 	_text(panel.position + Vector2(14, 70), "열 %d" % sim.heat, 19, Defs.COL_CORE)
-	_text_in(Rect2(panel.position + Vector2(104, 58), Vector2(112, 16)), "누적 %d" % sim.total_heat, 12,
-		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
-	_text_in(Rect2(panel.position + Vector2(104, 74), Vector2(112, 16)), "온기 %.1f칸" % sim.warm_radius, 12,
+	_text_in(Rect2(panel.position + Vector2(96, 58), Vector2(120, 20)), "온기 %.1f칸" % sim.warm_radius, 15,
+		Defs.COL_MACHINE_EDGE, HORIZONTAL_ALIGNMENT_RIGHT)
+	_text_in(Rect2(panel.position + Vector2(96, 76), Vector2(120, 16)), "누적 %d" % sim.total_heat, 11,
 		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
 
 	_draw_warmth_row(panel)
@@ -124,7 +126,9 @@ func _draw_warmth_row(panel: Rect2) -> void:
 	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
 	var origin: Vector2 = panel.position + Vector2(14, 88)
 	_text(origin + Vector2(0, 10), "체온", 11, Defs.COL_TEXT_DIM)
-	var track := Rect2(origin + Vector2(40, 2), Vector2(162, 9))
+	_text_in(Rect2(origin + Vector2(166, -2), Vector2(36, 16)), "%d%%" % int(round(warmth)), 11,
+		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER, HORIZONTAL_ALIGNMENT_RIGHT)
+	var track := Rect2(origin + Vector2(40, 2), Vector2(122, 9))
 	draw_rect(track, Color8(28, 36, 54))
 	var col: Color = Defs.COL_CORE.lerp(Defs.COL_DANGER, 1.0 - k)
 	if k < 0.25:

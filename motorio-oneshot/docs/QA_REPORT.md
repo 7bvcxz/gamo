@@ -116,14 +116,34 @@ A transition band cannot be eliminated entirely while the pool is composited ove
 with alpha; removing the last of it needs the ground and pool drawn as one shader rather
 than two layers. That is not done.
 
+## Final pass
+
+Scripting the full alloy chain exposed a defect worth more than the capture itself: a belt
+line aimed the wrong way backs up silently. Items visibly stack, the run earns nothing, and
+heat drains to zero with no indication of why. Machines now carry a `stalled` flag that is
+set when finished work cannot be handed on, surfaced as a pulsing red marker above the
+machine, and cleared automatically when the output unblocks. Three tests cover it: a blocked
+miner reports stalled, the warning clears once a belt is placed, and a full belt with no
+destination reports too.
+
+Also in this pass, following the fifth review: machine bodies moved to cool steel with warm
+emissive accents (the earlier all-warm belt was correct about hue ownership but left the
+machine at 1.5-3.5:1 against a warm floor), the miner's fur was deepened for value
+separation, the furnace violet was brought inside the colour law, ore shadows changed from
+cold blue-black to warm, the pool seam was narrowed to 4%, the warm radius was promoted
+above the running totals in the HUD, and body temperature gained a numeric readout.
+
 ## Furnace verification
 
 The furnace was built in a scripted play session and captured: the machine renders, the
 hotbar shows its recipe, and the objective line advanced correctly to "제련로 출력을
-코어까지 이으세요". A complete frost-plus-ember-to-alloy chain has been proven headlessly
-in `test_sim.gd` but has **not** been captured end to end in the browser, because routing
-two ore bands into one building requires a longer scripted play than the harness reliably
-performs.
+코어까지 이으세요". A guaranteed ember seam and a clear column home were added so the alloy chain is reachable
+in every run rather than depending on where the scatter dropped ember. The complete
+frost-plus-ember-to-alloy chain is proven headlessly in `test_sim.gd`, and the furnace has
+been built and photographed in a real build, but the **full two-input chain has still not
+been captured end to end in the browser**: the scripted attempt mis-aimed a belt line, which
+is what surfaced the stall defect above. The harness needs a way to read game state rather
+than dead-reckon tile positions before this can be made reliable.
 
 ## Known remaining limitations
 

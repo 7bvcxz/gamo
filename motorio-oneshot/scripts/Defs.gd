@@ -16,7 +16,7 @@ const COL_SNOW_COLD := Color("222c44")
 ## lerp toward the navy night rotated the hue through red into magenta and
 ## dropped saturation to 0.17, which is what made the outer pool read as mud.
 ## Hue and saturation are held; only value and alpha fall off.
-const COL_GRID := Color8(74, 92, 128)
+const COL_GRID := Color8(96, 116, 156)
 const COL_CORE := Color("ffb347")
 const COL_CORE_DEEP := Color("e0702a")
 const COL_BRASS := Color("d8a34a")
@@ -25,9 +25,14 @@ const COL_MACHINE := Color("2f6d72")
 ## The belt used to sit at hue 222 - the same family as the cold it is fighting -
 ## so every belt read as a hole punched in the warm floor. It now shares the
 ## factory's warm hue and is separated from the ground by value, not colour.
-const COL_BELT_BODY := Color8(90, 68, 54)
-const COL_BELT_BODY_COLD := Color8(58, 46, 40)
-const COL_BELT_RIM := Color8(255, 217, 160)
+## Two reviews pulled in opposite directions here. Making the belt warm fixed it
+## reading as "the enemy's colour" but left it at 1.5-3.5:1 against a warm floor.
+## The resolution is a cool steel body -- which separates from the amber ground by
+## hue and value -- carrying warm emissive accents, so the light still belongs to
+## the player while the object stays readable on both grounds.
+const COL_BELT_BODY := Color8(56, 67, 79)
+const COL_BELT_BODY_COLD := Color8(38, 46, 56)
+const COL_BELT_RIM := Color8(255, 211, 160)
 const COL_BELT_GLOW := Color8(255, 154, 60)
 const COL_BELT_CHEVRON := Color8(255, 196, 120)
 const COL_FROZEN_CHEVRON := Color8(120, 140, 160)
@@ -37,8 +42,8 @@ const COL_PANEL_EDGE := Color8(70, 82, 108)
 const COL_CLOCK := Color8(150, 164, 190)
 const COL_CLOCK_FILL := Color8(120, 150, 190)
 const COL_MACHINE_EDGE := Color("6fd2c8")
-const COL_CAT_FUR := Color("f0a75c")
-const COL_CAT_FACE := Color("f7e6cd")
+const COL_CAT_FUR := Color8(168, 90, 36)
+const COL_CAT_FACE := Color8(250, 226, 190)
 const COL_DANGER := Color("e8574c")
 const COL_TEXT := Color("e6eef7")
 const COL_TEXT_DIM := Color("8fa0bd")
@@ -55,7 +60,7 @@ const ITEM_NAMES := ["서리광석", "잉걸광석", "합금"]
 ## ground, so it vanished exactly when the player was told to go find it.
 const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138)]
 const EMBER_CORE := Color8(255, 238, 205)
-const ORE_OUTLINE := Color8(12, 16, 26)
+const ORE_OUTLINE := Color8(28, 20, 18)
 const ITEM_VALUES := [3, 6, 22]
 
 # --- Machines ----------------------------------------------------------------
@@ -102,7 +107,7 @@ static func machine_color(type: int) -> Color:
 	match type:
 		M_CORE: return COL_CORE
 		M_MINER: return COL_CAT_FUR
-		M_FURNACE: return Color("8e5ac0")
+		M_FURNACE: return Color8(210, 120, 52)
 		M_BELT: return COL_BELT_RIM
 		_: return COL_MACHINE
 

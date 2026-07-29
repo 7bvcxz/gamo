@@ -39,7 +39,7 @@ func _bake_pool() -> ImageTexture:
 			# was meant to remove (25.3% of the disc out of gamut, hue reaching
 			# 330 degrees). Keep the transition narrow: the ramp is already dark
 			# by this point, so a short blend is not a visible cliff.
-			col.a = 1.0 if d < 0.88 else clampf((1.0 - d) / 0.12, 0.0, 1.0)
+			col.a = 1.0 if d < 0.96 else clampf((1.0 - d) / 0.04, 0.0, 1.0)
 			image.set_pixel(x, y, col)
 	return ImageTexture.create_from_image(image)
 
