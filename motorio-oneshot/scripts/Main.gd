@@ -3,6 +3,8 @@ extends Node2D
 ## Orchestrator: owns game state, input routing, camera and the run timer.
 ## Simulation lives in Sim, drawing lives in the layers, so this file stays thin.
 
+## RESULT is the end of a day, not the end of the game: the world, the factory
+## and the warm radius all carry into the next morning.
 enum State { TITLE, PLAY, PAUSED, RESULT }
 
 const SHAKE_DECAY := 7.0
@@ -10,6 +12,7 @@ const RESCUE_SECONDS := 1.6
 
 @onready var sim: Sim = $Sim
 @onready var ground_layer: GroundLayer = $Ground
+@onready var cold_fog: ColdFog = $ColdFog
 @onready var world_layer: WorldLayer = $World
 @onready var machine_layer: MachineLayer = $Machines
 @onready var fx: FxLayer = $Fx
@@ -26,6 +29,9 @@ var shake: float = 0.0
 var rescue_timer: float = -1.0
 var run_seed: int = 0
 var best_heat: int = 0
+var day_number: int = 1
+var day_start_heat: int = 0
+var best_day_heat: int = 0
 var message: String = ""
 var message_life: float = 0.0
 
@@ -36,6 +42,7 @@ func _ready() -> void:
 	sim.warmth_changed.connect(_on_warmth_changed)
 	world_layer.sim = sim
 	ground_layer.sim = sim
+	cold_fog.sim = sim
 	machine_layer.sim = sim
 	hud.set("main", self)
 	_start_run()
@@ -44,6 +51,9 @@ func _ready() -> void:
 func _start_run() -> void:
 	run_seed = randi()
 	sim.setup(run_seed)
+	day_number = 1
+	day_start_heat = 0
+	best_day_heat = 0
 	time_left = Defs.DAY_SECONDS
 	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, Defs.TILE * 4.5)
 	player.warmth = 100.0
@@ -82,6 +92,8 @@ func _process(delta: float) -> void:
 	world_layer.night = day_fraction()
 	ground_layer.night = day_fraction()
 	ground_layer.view_rect = view
+	cold_fog.view_rect = view
+	cold_fog.night = day_fraction()
 	machine_layer.view_rect = view
 
 	message_life = maxf(0.0, message_life - delta)
@@ -168,6 +180,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		State.RESULT:
 			if key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER or key.keycode == KEY_SPACE:
+				_begin_next_day()
+				get_viewport().set_input_as_handled()
+			elif key.keycode == KEY_N:
 				_start_run()
 				state = State.PLAY
 				audio.call("play", "confirm")
@@ -257,9 +272,27 @@ func _notify(text: String, color: Color) -> void:
 	message_life = 2.0
 	hud.set("message_color", color)
 
+func day_heat() -> int:
+	return sim.total_heat - day_start_heat
+
+## Dusk, not game over. The factory keeps everything it built.
 func _finish_run() -> void:
 	state = State.RESULT
 	best_heat = maxi(best_heat, sim.total_heat)
+	best_day_heat = maxi(best_day_heat, day_heat())
 	player.locked = true
 	shake = 4.0
 	audio.call("play", "finish")
+
+func _begin_next_day() -> void:
+	day_number += 1
+	day_start_heat = sim.total_heat
+	time_left = Defs.DAY_SECONDS
+	player.locked = false
+	player.warmth = 100.0
+	# Morning starts at the shelter beside the core, as it does in Motorio.
+	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, Defs.TILE * 2.5)
+	state = State.PLAY
+	_notify("%d일차 아침" % day_number, Defs.COL_CORE)
+	fx.ring(player.position, Defs.COL_CORE, 46.0)
+	audio.call("play", "confirm")

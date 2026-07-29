@@ -81,7 +81,9 @@ const MACHINE_HINTS := [
 ]
 
 # --- Economy -----------------------------------------------------------------
-const DAY_SECONDS := 300.0
+## Days repeat and accumulate rather than ending the game, so one day is short
+## enough that the dusk-to-dawn arc is felt several times in a sitting.
+const DAY_SECONDS := 180.0
 const START_HEAT := 30
 const MINER_PERIOD := 1.15
 const FURNACE_PERIOD := 2.2

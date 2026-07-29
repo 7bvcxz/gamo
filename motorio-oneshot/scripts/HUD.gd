@@ -57,9 +57,19 @@ func _draw() -> void:
 
 ## Losing body heat used to be expressed only by an 8px bar in the corner, which
 ## a player walking through the dark will never look at. The screen itself now
-## closes in as warmth drops.
+## closes in as warmth drops. Snow, frost border and ice corners are carried
+## over from Motorio's climate layer.
 func _draw_cold_vignette() -> void:
+	var dusk: float = clampf((main.day_fraction() - 0.55) / 0.45, 0.0, 1.0)
+	if dusk > 0.0:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.035, 0.07, 0.16, dusk * 0.38))
+
+	var exposure: float = 0.0
+	if main.sim != null:
+		var distance: float = Vector2(main.player.cell() - main.sim.core_cell).length()
+		exposure = clampf((distance - main.sim.warm_radius) / 8.0, 0.0, 1.0)
 	var chill: float = clampf((60.0 - main.player.warmth) / 60.0, 0.0, 1.0)
+	_draw_snow(maxf(chill, exposure * 0.7))
 	if chill <= 0.0:
 		return
 	var pulse: float = 1.0
@@ -72,6 +82,29 @@ func _draw_cold_vignette() -> void:
 		var alpha: float = chill * pulse * 0.40 * pow(1.0 - k, 1.7)
 		draw_rect(Rect2(inset, inset, size.x - inset * 2.0, size.y - inset * 2.0),
 			Color(0.35, 0.55, 0.82, alpha), false, maxf(6.0, minf(size.x, size.y) * 0.03))
+	# Frost creeping in from the frame edge, then ice in the corners at the end.
+	var thickness: float = 10.0 + chill * 22.0
+	var frost := Color(0.55, 0.9, 1.0, 0.10 + chill * 0.30)
+	draw_rect(Rect2(0, 0, size.x, thickness), frost)
+	draw_rect(Rect2(0, size.y - thickness, size.x, thickness), frost)
+	draw_rect(Rect2(0, thickness, thickness, size.y - thickness * 2.0), frost)
+	draw_rect(Rect2(size.x - thickness, thickness, thickness, size.y - thickness * 2.0), frost)
+	if main.player.warmth <= 14.0:
+		var ice := Color(0.7, 0.91, 1.0, 0.22)
+		for corner in [Vector2.ZERO, Vector2(size.x, 0), Vector2(0, size.y), size]:
+			draw_circle(corner, 54.0, ice)
+
+func _draw_snow(strength: float) -> void:
+	if strength <= 0.0:
+		return
+	var t: float = float(Time.get_ticks_msec()) / 1000.0
+	var flakes: int = int(12.0 + strength * 34.0)
+	for index in flakes:
+		var seed: float = float(index * 79 + 17)
+		var x: float = fmod(seed * 13.7 + t * (22.0 + fmod(seed, 15.0)), size.x + 24.0) - 12.0
+		var y: float = fmod(seed * 7.3 + t * (38.0 + fmod(seed, 21.0)), size.y + 24.0) - 12.0
+		draw_circle(Vector2(x, y), 1.2 + fmod(seed, 3.0) * 0.45,
+			Color(0.92, 0.98, 1.0, 0.28 + strength * 0.45))
 
 # --- In-run UI ---------------------------------------------------------------
 
@@ -94,7 +127,7 @@ func _draw_status() -> void:
 	var fill: float = clampf(main.time_left / Defs.DAY_SECONDS, 0.0, 1.0)
 	draw_rect(Rect2(track.position, Vector2(track.size.x * fill, track.size.y)),
 		Defs.COL_DANGER if urgent else Defs.COL_CLOCK_FILL)
-	_text(panel.position + Vector2(104, 44), "남은 시간", 11, Defs.COL_CLOCK)
+	_text(panel.position + Vector2(104, 44), "%d일차 · 해질녘까지" % main.day_number, 11, Defs.COL_CLOCK)
 
 	# Heat is the score, the currency and the map key, so it gets the warm accent.
 	# The warm radius is what the run is actually about, so it is promoted above
@@ -137,7 +170,8 @@ func _draw_warmth_row(panel: Rect2) -> void:
 	draw_rect(Rect2(track.position, Vector2(track.size.x * k, track.size.y)), col)
 	draw_rect(track, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.6), false, 1.0)
 	if main.rescue_timer >= 0.0:
-		_text_in(Rect2(0, size.y * 0.5, size.x, 20), "코어로 복귀 중…", 19, Defs.COL_DANGER)
+		# Below the character, never across her.
+		_text_in(Rect2(0, size.y * 0.64, size.x, 20), "코어로 복귀 중…", 19, Defs.COL_DANGER)
 
 func _draw_palette() -> void:
 	var count: int = Defs.BUILDABLE.size()
@@ -147,6 +181,7 @@ func _draw_palette() -> void:
 
 	# The hint sits above the hotbar in its own plate; it used to run through the
 	# cards and over their cost labels.
+	_draw_direction_chip(origin.y)
 	var hint: String = Defs.MACHINE_HINTS[Defs.BUILDABLE[main.selected_index]]
 	var hint_w: float = _text_width(hint, 12) + 20.0
 	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 28.0, hint_w, 22.0)
@@ -173,6 +208,28 @@ func _draw_palette() -> void:
 	# clipped by the viewport edge.
 	_text_in(Rect2(size.x - 420.0 - MARGIN, MARGIN + 4.0, 420.0, 16),
 		"Z 설치   X 회수   R 회전   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+
+## R rotates the output direction, but until now nothing on screen said which
+## way was currently selected, so the key felt like it did nothing.
+func _draw_direction_chip(hotbar_y: float) -> void:
+	var dir: Vector2i = main.build_dir
+	var names := {
+		Vector2i.UP: "위", Vector2i.DOWN: "아래",
+		Vector2i.LEFT: "왼쪽", Vector2i.RIGHT: "오른쪽",
+	}
+	var label: String = "R 출력 방향  %s" % String(names.get(dir, "오른쪽"))
+	var width: float = _text_width(label, 12) + 44.0
+	var box := Rect2(size.x * 0.5 - width * 0.5, hotbar_y - 58.0, width, 24.0)
+	_panel(box, Defs.COL_PANEL, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
+	_text(box.position + Vector2(12, 16), label, 12, Defs.COL_TEXT)
+	# The same arrow the world preview draws, so the two read as one statement.
+	var at: Vector2 = box.position + Vector2(box.size.x - 20.0, 12.0)
+	var d := Vector2(dir)
+	var perp := Vector2(-d.y, d.x)
+	var tip: Vector2 = at + d * 7.0
+	draw_line(at - d * 6.0, tip - d * 3.0, Defs.COL_CORE, 2.5)
+	draw_colored_polygon(PackedVector2Array([
+		tip, tip - d * 5.0 + perp * 3.6, tip - d * 5.0 - perp * 3.6]), Defs.COL_CORE)
 
 func _draw_message() -> void:
 	if main.message_life <= 0.0:
@@ -224,25 +281,28 @@ func _draw_pause_card() -> void:
 func _draw_result() -> void:
 	_dim(0.82)
 	var sim = main.sim
-	var card := _card(330.0)
+	var card := _card(340.0)
 	var w: float = card.size.x
-	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), "밤이 내렸습니다", 24, Defs.COL_TEXT)
-	_text_in(Rect2(card.position + Vector2(0, 108), Vector2(w, 70)), "%d" % sim.total_heat, 58, Defs.COL_CORE)
-	_text_in(Rect2(card.position + Vector2(0, 132), Vector2(w, 20)), "누적 열", 13, Defs.COL_TEXT_DIM)
+	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), "%d일차 해가 졌습니다" % main.day_number, 23, Defs.COL_TEXT)
+	_text_in(Rect2(card.position + Vector2(0, 106), Vector2(w, 70)), "+%d" % main.day_heat(), 52, Defs.COL_CORE)
+	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "오늘 모은 열", 13, Defs.COL_TEXT_DIM)
 
 	var rows := [
-		["서리광석", int(sim.delivered.get(Defs.ITEM_FROST, 0)), Defs.ITEM_COLORS[Defs.ITEM_FROST]],
-		["잉걸광석", int(sim.delivered.get(Defs.ITEM_EMBER, 0)), Defs.ITEM_COLORS[Defs.ITEM_EMBER]],
-		["합금", int(sim.delivered.get(Defs.ITEM_ALLOY, 0)), Defs.ITEM_COLORS[Defs.ITEM_ALLOY]],
+		["누적 열", "%d" % sim.total_heat, Defs.COL_CORE],
+		["온기 반경", "%.1f칸" % sim.warm_radius, Defs.COL_MACHINE_EDGE],
+		["최고 하루", "%d" % main.best_day_heat, Defs.COL_TEXT_DIM],
 	]
 	var y: float = 176.0
 	for row in rows:
-		draw_circle(card.position + Vector2(74, y - 5), 5.0, row[2])
-		_text(card.position + Vector2(88, y), String(row[0]), 14, Defs.COL_TEXT)
-		_text_in(Rect2(card.position + Vector2(w - 160, y - 14), Vector2(100, 18)), "%d" % int(row[1]), 14,
-			Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+		_text(card.position + Vector2(74, y), String(row[0]), 14, Defs.COL_TEXT_DIM)
+		_text_in(Rect2(card.position + Vector2(w - 174, y - 14), Vector2(100, 18)), String(row[1]), 14,
+			row[2], HORIZONTAL_ALIGNMENT_RIGHT)
 		y += 24.0
-	_text_in(Rect2(card.position + Vector2(0, y + 14), Vector2(w, 20)), "최고 기록 %d" % main.best_heat, 13, Defs.COL_MACHINE_EDGE)
-	var blink: float = 0.55 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.45
-	_text_in(Rect2(card.position + Vector2(0, card.size.y - 22), Vector2(w, 20)), "Enter 로 다시 도전", 16,
+
+	# The factory survives the night; that is the whole reason to keep going.
+	_text_in(Rect2(card.position + Vector2(0, y + 16), Vector2(w, 20)),
+		"공장과 온기는 그대로 남습니다", 12, Defs.COL_TEXT_DIM)
+	var blink: float = 0.72 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.28
+	_text_in(Rect2(card.position + Vector2(0, card.size.y - 42), Vector2(w, 20)), "Enter — %d일차 시작" % (main.day_number + 1), 16,
 		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, blink))
+	_text_in(Rect2(card.position + Vector2(0, card.size.y - 20), Vector2(w, 20)), "N — 새로 시작", 12, Defs.COL_TEXT_DIM)

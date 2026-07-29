@@ -42,27 +42,40 @@ func _run() -> void:
 	_press(main, KEY_R)
 	_assert(main.build_dir != before_dir, "R rotates the build direction")
 
-	# End of run.
+	# End of the first day.
+	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
 	main.sim.total_heat = 140
 	main.time_left = 0.05
 	main._process(0.2)
-	_assert(main.state == main.State.RESULT, "the run ends when the clock reaches zero")
-	_assert(main.best_heat == 140, "the session best records the finished run")
-	_assert(main.player.locked, "the player is locked once the run is over")
+	_assert(main.state == main.State.RESULT, "the day ends when the clock reaches zero")
+	_assert(main.day_heat() == 140, "the summary reports what this day earned")
+	_assert(main.player.locked, "the player is locked while the day summary is up")
 
-	# Restart.
+	# Continuing must carry the world forward, not restart it: that is the whole
+	# point of days accumulating.
+	var radius_before: float = main.sim.warm_radius
 	_press(main, KEY_ENTER)
-	_assert(main.state == main.State.PLAY, "Enter starts a fresh run")
-	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the new run has a full clock")
-	_assert(main.sim.total_heat == 0 and main.sim.heat == Defs.START_HEAT, "the economy resets")
-	_assert(not main.player.locked, "the player can move again")
-	_assert(main.best_heat == 140, "the session best survives a restart")
+	_assert(main.state == main.State.PLAY, "Enter begins the next morning")
+	_assert(main.day_number == 2, "the day counter advances")
+	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the new day has a full clock")
+	_assert(main.sim.total_heat == 140, "cumulative heat carries into the next day")
+	_assert(is_equal_approx(main.sim.warm_radius, radius_before), "the warm radius carries over")
+	_assert(main.sim.machine_at(Vector2i(0, 2)) != null, "the factory survives the night")
+	_assert(not main.player.locked, "the player can move again in the morning")
+	_assert(main.day_heat() == 0, "the daily total starts fresh each morning")
 
-	# A second, worse run must not lower the recorded best.
-	main.sim.total_heat = 20
+	# A weaker second day must not lower the recorded best day.
+	main.sim.total_heat = 160
 	main.time_left = 0.05
 	main._process(0.2)
-	_assert(main.best_heat == 140, "a worse run does not overwrite the best score")
+	_assert(main.day_heat() == 20, "the second day counts only its own earnings")
+	_assert(main.best_day_heat == 140, "a worse day does not overwrite the best day")
+
+	# N starts a genuinely fresh game.
+	_press(main, KEY_N)
+	_assert(main.state == main.State.PLAY and main.day_number == 1, "N restarts at day one")
+	_assert(main.sim.total_heat == 0 and main.sim.heat == Defs.START_HEAT, "a fresh game resets the economy")
+	_assert(main.sim.machine_at(Vector2i(0, 2)) == null, "a fresh game clears the old factory")
 
 	if failures == 0:
 		print("FLOW_TEST: PASS")

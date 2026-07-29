@@ -3,6 +3,11 @@ class_name MachineLayer
 
 ## Draws machines, the items flowing between them, and the build preview.
 
+## Carried over from Motorio: a 2x2 directional sheet, one frame per facing.
+const CAT_SHEET: Texture2D = preload("res://assets/characters/worker_cat_directional.png")
+const CAT_FRAME := 627.0
+const CAT_DRAW := 44.0
+
 var sim: Sim
 var view_rect := Rect2()
 var preview_type: int = Defs.M_MINER
@@ -76,38 +81,49 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		draw_circle(c + Vector2.from_angle(angle) * 33.0, 2.6, Defs.COL_BRASS)
 	draw_arc(c, 44.0, 0.0, TAU, 64, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
 
+## One arrow shape used by previews and by placed machines, so "which way does
+## this face" is answered the same way everywhere.
+func _draw_arrow(from: Vector2, dir: Vector2i, length: float, col: Color, width: float = 3.0) -> void:
+	var d := Vector2(dir)
+	var perp := Vector2(-d.y, d.x)
+	var tip: Vector2 = from + d * length
+	draw_line(from, tip - d * 5.0, col, width)
+	draw_colored_polygon(PackedVector2Array([
+		tip, tip - d * 7.0 + perp * 4.5, tip - d * 7.0 - perp * 4.5]), col)
+
+func _cat_frame(dir: Vector2i) -> Vector2:
+	# Sheet layout: 0 down, 1 up, 2 left, 3 right.
+	var index: int = 0
+	if dir.x != 0:
+		index = 3 if dir.x > 0 else 2
+	else:
+		index = 0 if dir.y > 0 else 1
+	return Vector2(float(index % 2) * CAT_FRAME, float(index / 2) * CAT_FRAME)
+
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var fur: Color = Defs.COL_CAT_FUR.lerp(Color("7f93b8"), frost)
-	var face: Color = Defs.COL_CAT_FACE.lerp(Color("aebdd6"), frost)
 	var work: float = clampf(machine.progress / Defs.MINER_PERIOD, 0.0, 1.0)
-	var dig: float = sin(pulse * 9.0) * 1.6 * (1.0 - frost)
+	# A small breathing squash keeps the worker alive without swapping frames.
+	var breathe: float = 1.0 + sin(pulse * 2.6 + float(machine.cell.x)) * 0.02
+	var dig: float = sin(pulse * 9.0) * 1.4 * (1.0 - frost)
 
-	draw_circle(c + Vector2(0, 9), 10.0, Color(0.02, 0.04, 0.08, 0.32))
-	# The cat body measured 1.19:1 against the warm pool with no outline, so the
-	# building the player just paid for was the least visible thing on screen.
-	draw_rect(Rect2(c.x - 11, c.y - 5 + dig, 22, 16), Defs.ORE_OUTLINE)
-	draw_circle(c + Vector2(0, -6 + dig), 9.6, Defs.ORE_OUTLINE)
-	draw_rect(Rect2(c.x - 9, c.y - 3 + dig, 18, 12), fur)
-	draw_circle(c + Vector2(0, -6 + dig), 8.0, fur)
-	draw_circle(c + Vector2(0, -5 + dig), 5.5, face)
-	# Ears.
-	draw_colored_polygon(PackedVector2Array([
-		c + Vector2(-8, -10 + dig), c + Vector2(-4, -15 + dig), c + Vector2(-2, -9 + dig)]), fur)
-	draw_colored_polygon(PackedVector2Array([
-		c + Vector2(8, -10 + dig), c + Vector2(4, -15 + dig), c + Vector2(2, -9 + dig)]), fur)
-	draw_circle(c + Vector2(-2, -6 + dig), 1.2, Color8(38, 26, 24))
-	draw_circle(c + Vector2(2, -6 + dig), 1.2, Color8(38, 26, 24))
-	# A warm rim tells the player this unit is theirs without flattening it into
-	# the amber floor the way a fully warm body did.
-	draw_rect(Rect2(c.x - 9, c.y - 3 + dig, 18, 2), Defs.COL_BELT_RIM.lerp(fur, frost))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
+	draw_circle(Vector2(c.x, (c.y + 11.0) / 0.45), 9.0, Color(0.02, 0.04, 0.08, 0.34))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
+	var target := Rect2(c - size * 0.5 + Vector2(0.0, dig - 3.0), size)
+	# Frozen workers desaturate toward the cold instead of being recoloured.
+	var tint: Color = Color.WHITE.lerp(Color(0.62, 0.72, 0.95), frost)
+	draw_texture_rect_region(CAT_SHEET, target,
+		Rect2(_cat_frame(machine.dir), Vector2(CAT_FRAME, CAT_FRAME)), tint)
+
 	# Output direction and a progress arc, so throughput is legible at a glance.
-	var tip: Vector2 = c + Vector2(machine.dir) * 15.0
-	draw_circle(tip, 2.6, Defs.COL_BRASS)
-	draw_arc(c, 13.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.5), 2.0, true)
+	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 10.0, Defs.COL_BELT_RIM, 2.5)
+	draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
 	if machine.flash > 0.0:
-		draw_circle(c, 15.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
+		draw_circle(c, 17.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
 	_draw_stall(machine, c)
 
 func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
@@ -213,8 +229,13 @@ func _draw_preview(tile: float) -> void:
 	var alpha: float = 0.55 + sin(pulse * 5.0) * 0.12
 	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, 0.16))
 	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, alpha), false, 2.0)
-	if preview_type != Defs.M_MINER:
-		var c: Vector2 = px + Vector2.ONE * tile * 0.5
-		var dir := Vector2(preview_dir)
-		draw_line(c - dir * 8.0, c + dir * 10.0, Color(col.r, col.g, col.b, alpha), 2.0)
-		draw_circle(c + dir * 11.0, 2.6, Color(col.r, col.g, col.b, alpha))
+	# Direction is the most-missed piece of information when placing: R changes it
+	# invisibly unless the preview states it outright.
+	var c: Vector2 = px + Vector2.ONE * tile * 0.5
+	var arrow := Color(col.r, col.g, col.b, minf(1.0, alpha + 0.3))
+	var dir := Vector2(preview_dir)
+	draw_circle(c - dir * 12.0, 3.0, Color(arrow.r, arrow.g, arrow.b, 0.55))
+	_draw_arrow(c - dir * 6.0, preview_dir, 22.0, arrow, 3.0)
+	var font := UIFont.FONT
+	draw_string(font, c + dir * 20.0 + Vector2(-14.0, -12.0), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 28.0, 9,
+		Color(arrow.r, arrow.g, arrow.b, 0.9))
