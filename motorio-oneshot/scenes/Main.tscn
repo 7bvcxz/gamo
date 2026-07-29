@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://bmo1oneshotmain"]
+[gd_scene load_steps=12 format=3 uid="uid://bmo1oneshotmain"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/Sim.gd" id="2_sim"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/Audio.gd" id="8_audio"]
 [ext_resource type="Texture2D" path="res://assets/characters/mechanic_sheet.png" id="10_mechanic"]
 [ext_resource type="Script" path="res://scripts/ColdFog.gd" id="11_fog"]
+[ext_resource type="Script" path="res://scripts/TouchControls.gd" id="12_touch"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -57,6 +58,13 @@ script = ExtResource("5_fx")
 script = ExtResource("8_audio")
 
 [node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TouchControls" type="Control" parent="UI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("12_touch")
 
 [node name="HUD" type="Control" parent="UI"]
 anchors_preset = 15

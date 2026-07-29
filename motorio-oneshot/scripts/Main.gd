@@ -20,6 +20,7 @@ const RESCUE_SECONDS := 1.6
 @onready var camera: Camera2D = $Player/Camera2D
 @onready var hud: Control = $UI/HUD
 @onready var audio: Node = $Audio
+@onready var touch: TouchControls = $UI/TouchControls
 
 var state: int = State.TITLE
 var time_left: float = Defs.DAY_SECONDS
@@ -32,8 +33,10 @@ var best_heat: int = 0
 var day_number: int = 1
 var day_start_heat: int = 0
 var best_day_heat: int = 0
+var rescued_tonight: bool = false
 var message: String = ""
 var message_life: float = 0.0
+var night_warned: bool = false
 
 func _ready() -> void:
 	randomize()
@@ -45,6 +48,8 @@ func _ready() -> void:
 	cold_fog.sim = sim
 	machine_layer.sim = sim
 	hud.set("main", self)
+	touch.main_controller = self
+	touch.player = player
 	_start_run()
 	state = State.TITLE
 
@@ -60,6 +65,8 @@ func _start_run() -> void:
 	player.locked = false
 	player.velocity = Vector2.ZERO
 	rescue_timer = -1.0
+	night_warned = false
+	rescued_tonight = false
 	selected_index = 0
 	shake = 0.0
 	message = ""
@@ -68,6 +75,10 @@ func _start_run() -> void:
 ## A single line that always names the next useful action. Derived from world
 ## state rather than a script, so it stays correct however the player plays.
 func objective() -> String:
+	if is_night():
+		return "밤입니다  숙소로 돌아가 Z로 취침하세요  (기지 옆 남서쪽)"
+	if is_dusk():
+		return "해가 기울고 있습니다  곧 숙소로 돌아가야 합니다"
 	if sim.machine_count(Defs.M_MINER) == 0:
 		return "1  광맥 위에 채굴 고양이를 설치하세요  (1 선택 → R 로 코어 방향 → Z)"
 	if sim.total_heat == 0:
@@ -86,6 +97,18 @@ func selected_type() -> int:
 func day_fraction() -> float:
 	return clampf(1.0 - time_left / Defs.DAY_SECONDS, 0.0, 1.0)
 
+func is_night() -> bool:
+	return time_left <= Defs.NIGHT_SECONDS
+
+func is_dusk() -> bool:
+	return time_left <= Defs.DUSK_SECONDS
+
+func shelter_position() -> Vector2:
+	return Vector2(sim.core_cell) * float(Defs.TILE) + Defs.SHELTER_OFFSET * float(Defs.TILE)
+
+func shelter_nearby() -> bool:
+	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
+
 func _process(delta: float) -> void:
 	var view := _view_rect()
 	world_layer.set_view(view)
@@ -95,6 +118,7 @@ func _process(delta: float) -> void:
 	cold_fog.view_rect = view
 	cold_fog.night = day_fraction()
 	machine_layer.view_rect = view
+	machine_layer.night = day_fraction()
 
 	message_life = maxf(0.0, message_life - delta)
 	if shake > 0.0:
@@ -119,8 +143,13 @@ func _process_play(delta: float) -> void:
 	sim.tick(delta)
 	_update_warmth(delta)
 	_update_preview()
+	if not night_warned and is_night():
+		night_warned = true
+		_notify("밤이 옵니다 — 숙소로 돌아가 Z로 취침하세요", Defs.COL_DANGER)
+		audio.call("play", "alarm")
+	# Running out of night entirely means the cats come and get you.
 	if time_left <= 0.0:
-		_finish_run()
+		_carried_home()
 
 func _update_warmth(delta: float) -> void:
 	if rescue_timer >= 0.0:
@@ -128,12 +157,24 @@ func _update_warmth(delta: float) -> void:
 		if rescue_timer <= 0.0:
 			_complete_rescue()
 		return
-	if sim.is_warm(player.cell()):
+	var warm: bool = sim.is_warm(player.cell())
+	if warm and not is_night():
 		player.warmth = minf(100.0, player.warmth + Defs.COLD_RECOVER * delta)
-	else:
-		player.warmth = maxf(0.0, player.warmth - Defs.COLD_DRAIN * delta)
+	elif warm:
+		# The core still helps at night, but it no longer keeps you alive: this is
+		# what makes going indoors a decision rather than an option.
+		var shelter_help: float = 0.35 if shelter_nearby() else 1.0
+		player.warmth = maxf(0.0, player.warmth - Defs.NIGHT_DRAIN * shelter_help * delta)
 		if player.warmth <= 0.0:
-			_begin_rescue()
+			_carried_home()
+	else:
+		var night_extra: float = Defs.NIGHT_DRAIN if is_night() else 0.0
+		player.warmth = maxf(0.0, player.warmth - (Defs.COLD_DRAIN + night_extra) * delta)
+		if player.warmth <= 0.0:
+			if is_night():
+				_carried_home()
+			else:
+				_begin_rescue()
 
 func _begin_rescue() -> void:
 	rescue_timer = RESCUE_SECONDS
@@ -214,12 +255,39 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("build"):
-		_try_build()
+		if sleep_available():
+			_sleep()
+		else:
+			_try_build()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("demolish"):
 		_try_demolish()
 		get_viewport().set_input_as_handled()
+
+## Entry points for the mobile buttons, so touch and keyboard run through the
+## same code rather than drifting apart.
+func touch_primary() -> void:
+	match state:
+		State.TITLE:
+			state = State.PLAY
+			audio.call("play", "confirm")
+		State.RESULT:
+			_begin_next_day()
+		State.PAUSED:
+			state = State.PLAY
+		State.PLAY:
+			if sleep_available():
+				_sleep()
+			else:
+				_try_build()
+
+func touch_secondary() -> void:
+	match state:
+		State.PLAY:
+			_try_demolish()
+		State.PAUSED:
+			state = State.PLAY
 
 func _try_build() -> void:
 	if player.locked:
@@ -275,6 +343,25 @@ func _notify(text: String, color: Color) -> void:
 func day_heat() -> int:
 	return sim.total_heat - day_start_heat
 
+## Falling asleep outside: the cats bring you in, and the night ends anyway, but
+## the day is scored as it stood.
+func _carried_home() -> void:
+	rescued_tonight = true
+	_sleep()
+
+func sleep_available() -> bool:
+	return state == State.PLAY and is_night() and shelter_nearby()
+
+func _sleep() -> void:
+	if state != State.PLAY:
+		return
+	player.locked = true
+	player.velocity = Vector2.ZERO
+	player.position = shelter_position()
+	audio.call("play", "confirm")
+	fx.ring(shelter_position(), Defs.COL_CORE, 52.0)
+	_finish_run()
+
 ## Dusk, not game over. The factory keeps everything it built.
 func _finish_run() -> void:
 	state = State.RESULT
@@ -288,6 +375,8 @@ func _begin_next_day() -> void:
 	day_number += 1
 	day_start_heat = sim.total_heat
 	time_left = Defs.DAY_SECONDS
+	night_warned = false
+	rescued_tonight = false
 	player.locked = false
 	player.warmth = 100.0
 	# Morning starts at the shelter beside the core, as it does in Motorio.

@@ -27,6 +27,8 @@ var facing := Vector2i.RIGHT
 var warmth := 100.0
 var locked := false
 var animation_time := 0.0
+var touch_direction := Vector2.ZERO
+var touch_sprint := false
 
 @onready var character: Sprite2D = $Character
 
@@ -39,7 +41,9 @@ func _physics_process(delta: float) -> void:
 		)
 		if input.length() > 1.0:
 			input = input.normalized()
-	var sprinting: bool = Input.is_action_pressed("sprint") and not locked
+		if not touch_direction.is_zero_approx():
+			input = touch_direction
+	var sprinting: bool = (Input.is_action_pressed("sprint") or touch_sprint) and not locked
 	var target: Vector2 = input * SPEED * (SPRINT if sprinting else 1.0)
 	if input == Vector2.ZERO:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)

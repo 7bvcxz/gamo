@@ -42,12 +42,28 @@ func _run() -> void:
 	_press(main, KEY_R)
 	_assert(main.build_dir != before_dir, "R rotates the build direction")
 
-	# End of the first day.
+	# Night: the warm pool alone must stop being enough, which is what sends the
+	# player indoors instead of camping next to the core.
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
+	main.time_left = Defs.NIGHT_SECONDS - 1.0
+	_assert(main.is_night(), "night begins before the clock runs out")
+	main.player.position = Vector2(main.sim.core_cell) * float(Defs.TILE)
+	_assert(main.sim.is_warm(main.player.cell()), "the test stands the player inside the warm radius")
+	main.player.warmth = 100.0
+	main._update_warmth(1.0)
+	_assert(main.player.warmth < 100.0, "at night even the warm radius loses body heat")
+
+	# Standing at the shelter slows the loss but does not stop it.
+	main.player.position = main.shelter_position()
+	_assert(main.shelter_nearby(), "the shelter is reachable beside the core")
+	var near_loss: float = main.player.warmth
+	main._update_warmth(1.0)
+	_assert(main.player.warmth < near_loss, "the shelter porch is still cold")
+	_assert(main.sleep_available(), "Z offers sleep once night has fallen and you are home")
+
 	main.sim.total_heat = 140
-	main.time_left = 0.05
-	main._process(0.2)
-	_assert(main.state == main.State.RESULT, "the day ends when the clock reaches zero")
+	main._sleep()
+	_assert(main.state == main.State.RESULT, "sleeping ends the day")
 	_assert(main.day_heat() == 140, "the summary reports what this day earned")
 	_assert(main.player.locked, "the player is locked while the day summary is up")
 
@@ -63,6 +79,14 @@ func _run() -> void:
 	_assert(main.sim.machine_at(Vector2i(0, 2)) != null, "the factory survives the night")
 	_assert(not main.player.locked, "the player can move again in the morning")
 	_assert(main.day_heat() == 0, "the daily total starts fresh each morning")
+
+	# Daytime inside the warm radius must still recover heat, or the night rule
+	# would simply be a permanent drain.
+	main.player.position = Vector2(main.sim.core_cell) * float(Defs.TILE)
+	main.player.warmth = 50.0
+	main._update_warmth(1.0)
+	_assert(main.player.warmth > 50.0, "daylight inside the warm radius restores body heat")
+	_assert(not main.sleep_available(), "you cannot go to bed in the middle of the day")
 
 	# A weaker second day must not lower the recorded best day.
 	main.sim.total_heat = 160

@@ -99,6 +99,14 @@ const WARM_PER_HEAT := 0.022
 const WARM_MAX := 22.0
 
 const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
+## Night is the reason to go home. Once it falls the warm pool is no longer
+## enough on its own, so standing next to the core all night is not a strategy:
+## the shelter is.
+const NIGHT_SECONDS := 50.0
+const DUSK_SECONDS := 95.0
+const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when warm
+const SHELTER_OFFSET := Vector2(-2.5, 2.5)
+const SHELTER_REACH := 62.0
 const COLD_RECOVER := 26.0
 const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
 

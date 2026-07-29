@@ -251,17 +251,9 @@ func _card(height: float) -> Rect2:
 	return card
 
 func _draw_title() -> void:
-	# A light overall dim so the amber core still glows through as the hero
-	# image, plus a darker band only where the copy sits.
-	_dim(0.42)
-	var band := Rect2(0, size.y * 0.46, size.x, size.y * 0.42)
-	draw_rect(band, Color(0.02, 0.03, 0.06, 0.55))
-	# Feather both edges so the band does not read as a hard seam across the art.
-	for step in 7:
-		var k: float = float(step) / 7.0
-		var a: float = 0.55 * (1.0 - k)
-		draw_rect(Rect2(0, band.position.y - float(step + 1) * 3.0, size.x, 3.0), Color(0.02, 0.03, 0.06, a))
-		draw_rect(Rect2(0, band.end.y + float(step) * 3.0, size.x, 3.0), Color(0.02, 0.03, 0.06, a))
+	# A single even dim. The banded version read as a hard seam across the art on
+	# tall phone screens, where the band edge landed in open sky.
+	_dim(0.55)
 	var full := func(y: float) -> Rect2: return Rect2(0, y, size.x, 40)
 	_text_in(full.call(size.y * 0.30), "MOTORIO", 56, Defs.COL_CORE)
 	_text_in(full.call(size.y * 0.30 + 32), "O N E   S H O T", 17, Defs.COL_MACHINE_EDGE)
@@ -271,7 +263,10 @@ func _draw_title() -> void:
 	var blink: float = 0.82 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.18
 	_text_in(full.call(size.y * 0.72), "아무 키나 눌러 시작", 18,
 		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, blink))
-	_text_in(full.call(size.y * 0.84), "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택", 12, Defs.COL_TEXT_DIM)
+	var touch_pad: bool = main.touch != null and main.touch.visible
+	var controls: String = "휠 이동   Z 설치   X 회수   Run 달리기" if touch_pad \
+		else "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택"
+	_text_in(full.call(size.y * 0.84), controls, 12, Defs.COL_TEXT_DIM)
 
 func _draw_pause_card() -> void:
 	var card := _card(150.0)
@@ -283,7 +278,9 @@ func _draw_result() -> void:
 	var sim = main.sim
 	var card := _card(340.0)
 	var w: float = card.size.x
-	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), "%d일차 해가 졌습니다" % main.day_number, 23, Defs.COL_TEXT)
+	var headline: String = "%d일차 · 고양이들이 데려왔습니다" % main.day_number if main.rescued_tonight else "%d일차 · 숙소에서 잤습니다" % main.day_number
+	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), headline, 21,
+		Defs.COL_DANGER if main.rescued_tonight else Defs.COL_TEXT)
 	_text_in(Rect2(card.position + Vector2(0, 106), Vector2(w, 70)), "+%d" % main.day_heat(), 52, Defs.COL_CORE)
 	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "오늘 모은 열", 13, Defs.COL_TEXT_DIM)
 

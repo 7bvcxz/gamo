@@ -18,6 +18,7 @@ var preview_affordable := true
 var show_preview := true
 var preview_occupied := false
 var pulse: float = 0.0
+var night: float = 0.0
 
 var _repaint := 0.0
 
@@ -56,8 +57,25 @@ func _draw() -> void:
 		if machine.type != Defs.M_BELT or not _visible(cell, tile):
 			continue
 		_draw_belt_items(machine, Vector2(cell) * tile, tile)
+	_draw_shelter(tile)
 	if show_preview:
 		_draw_preview(tile)
+
+## A hut beside the core: the destination the night pushes you toward.
+func _draw_shelter(tile: float) -> void:
+	var at: Vector2 = Vector2(sim.core_cell) * tile + Defs.SHELTER_OFFSET * tile + Vector2.ONE * tile * 0.5
+	var lit: float = 0.35 + night * 0.65
+	draw_circle(at + Vector2(0, 12), 15.0, Color(0.02, 0.04, 0.08, 0.34))
+	draw_circle(at, 17.0, Color(1.0, 0.62, 0.24, 0.10 + night * 0.22))
+	# Timber hut with a lit doorway that grows brighter as the night comes in.
+	draw_colored_polygon(PackedVector2Array([
+		at + Vector2(-16, 2), at + Vector2(0, -15), at + Vector2(16, 2)]), Color8(96, 58, 44))
+	draw_rect(Rect2(at.x - 13, at.y + 1, 26, 14), Color8(74, 46, 36))
+	draw_rect(Rect2(at.x - 5, at.y + 4, 10, 11), Color(1.0, 0.72, 0.34, lit))
+	draw_rect(Rect2(at.x - 16, at.y - 1, 32, 3), Defs.COL_BELT_RIM.darkened(0.25))
+	var font := UIFont.FONT
+	draw_string(font, at + Vector2(-20, 30), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 40.0, 10,
+		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.55 + night * 0.4))
 
 func _visible(cell: Vector2i, tile: float) -> bool:
 	return view_rect.grow(tile * 2.0).has_point(Vector2(cell) * tile + Vector2.ONE * tile * 0.5)

@@ -46,10 +46,11 @@ func _bake_pool() -> ImageTexture:
 func _draw() -> void:
 	if sim == null or _texture == null:
 		return
-	draw_rect(view_rect, Defs.COL_SNOW_COLD.lerp(Defs.COL_VOID, night * 0.55))
+	# A real 2.5x drop in ground value across the day, so dusk is unmistakable.
+	draw_rect(view_rect, Defs.COL_SNOW_COLD.lerp(Color8(9, 12, 20), pow(night, 1.4)))
 	var tile := float(Defs.TILE)
 	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
 	var radius: float = sim.warm_radius * tile
 	# Night darkens the pool through modulation rather than a second fill pass.
-	var tint: Color = Color.WHITE.lerp(Color(0.55, 0.5, 0.6, 1.0), night * 0.5)
+	var tint: Color = Color.WHITE.lerp(Color(0.42, 0.36, 0.48, 1.0), pow(night, 1.3) * 0.72)
 	draw_texture_rect(_texture, Rect2(core_px - Vector2.ONE * radius, Vector2.ONE * radius * 2.0), false, tint)
