@@ -1,0 +1,14 @@
+# Godot 4 generated state. The editor rewrites these constantly and they carry
+# absolute local paths, so they must never be committed.
+.godot/
+.import/
+export_credentials.cfg
+
+# Local exports; the shipped web build lives in the repository's docs/ folder.
+/build/
+/builds/
+/web/
+*.exe
+*.x86_64
+*.dmg
+*.app
