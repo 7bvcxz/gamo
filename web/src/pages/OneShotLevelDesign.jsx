@@ -1,9 +1,9 @@
 import React from 'react';
 
-export function LevelDesign() {
+export function OneShotLevelDesign() {
   return (
     <>
-      <h1>Level Design</h1>
+      <h1>One Shot — Level Design</h1>
       <p className="lede">
         Motorio: One Shot의 월드는 하나의 규칙으로 배치됩니다. 자원은 처음부터 정해진 자리에 있고,
         기지는 자원을 만들어내지 않습니다. 대신 온기 반경이 자라면서 그 자리에 <b>닿을 수 있게</b>{' '}

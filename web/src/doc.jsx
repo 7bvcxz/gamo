@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import { WhatIsGamo } from './pages/WhatIsGamo.jsx';
-import { LevelDesign } from './pages/LevelDesign.jsx';
-import { KeyFactor } from './pages/KeyFactor.jsx';
+import { MotorioLevelDesign } from './pages/MotorioLevelDesign.jsx';
+import { MotorioKeyFactor } from './pages/MotorioKeyFactor.jsx';
+import { OneShotLevelDesign } from './pages/OneShotLevelDesign.jsx';
+import { OneShotKeyFactor } from './pages/OneShotKeyFactor.jsx';
 
 // The sidebar is data-driven: adding a page is one entry plus one component.
 const NAV = [
@@ -14,8 +16,15 @@ const NAV = [
   {
     group: 'MOTORIO',
     items: [
-      { id: 'level-design', label: 'Level Design', render: () => <LevelDesign /> },
-      { id: 'key-factor', label: 'Key Factor', render: () => <KeyFactor /> },
+      { id: 'motorio-level-design', label: 'Level Design', render: () => <MotorioLevelDesign /> },
+      { id: 'motorio-key-factor', label: 'Key Factor', render: () => <MotorioKeyFactor /> },
+    ],
+  },
+  {
+    group: 'MOTORIO: ONE SHOT',
+    items: [
+      { id: 'oneshot-level-design', label: 'Level Design', render: () => <OneShotLevelDesign /> },
+      { id: 'oneshot-key-factor', label: 'Key Factor', render: () => <OneShotKeyFactor /> },
     ],
   },
 ];

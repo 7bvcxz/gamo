@@ -1,9 +1,9 @@
 import React from 'react';
 
-export function KeyFactor() {
+export function OneShotKeyFactor() {
   return (
     <>
-      <h1>Key Factor</h1>
+      <h1>One Shot — Key Factor</h1>
       <p className="lede">
         이 게임을 지탱하는 결정들. 하나를 바꾸면 나머지가 따라 흔들리는 것들만 모았습니다.
       </p>
