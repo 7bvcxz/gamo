@@ -42,6 +42,24 @@ func _run() -> void:
 	_press(main, KEY_R)
 	_assert(main.build_dir != before_dir, "R rotates the build direction")
 
+	# Mobile: a tap must be able to start the game, pick a machine and rotate it.
+	# Without these the pad has no way to reach half the verbs.
+	main.state = main.State.TITLE
+	_assert(main.touch_anywhere_starts(), "a tap anywhere leaves the title on a phone")
+	main.touch_primary()
+	_assert(main.state == main.State.PLAY, "touch start actually begins the run")
+	main._process(0.0)
+	_assert(main.hud.hotbar_rects.size() == Defs.BUILDABLE.size(), "the HUD publishes a rect per machine slot")
+	main.selected_index = 0
+	_assert(main.touch_hud((main.hud.hotbar_rects[2] as Rect2).get_center()),
+		"tapping a hotbar card is handled")
+	_assert(main.selected_index == 2, "tapping a hotbar card selects that machine")
+	var dir_before: Vector2i = main.build_dir
+	_assert(main.touch_hud((main.hud.direction_rect as Rect2).get_center()),
+		"tapping the direction chip is handled")
+	_assert(main.build_dir != dir_before, "tapping the direction chip rotates the output")
+	_assert(not main.touch_hud(Vector2(-500, -500)), "taps outside the HUD fall through to the pad")
+
 	# Night: the warm pool alone must stop being enough, which is what sends the
 	# player indoors instead of camping next to the core.
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)

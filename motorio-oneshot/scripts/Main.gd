@@ -265,6 +265,27 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_demolish()
 		get_viewport().set_input_as_handled()
 
+## True on any screen where the only sensible action is "continue", so a tap
+## anywhere is accepted instead of demanding a precise button press.
+func touch_anywhere_starts() -> bool:
+	return state == State.TITLE or state == State.RESULT or state == State.PAUSED
+
+## Touch handling for the on-screen HUD: picking a machine and rotating it are
+## keyboard-only otherwise, which left the game unplayable on a phone.
+func touch_hud(position: Vector2) -> bool:
+	if state != State.PLAY:
+		return false
+	for index in hud.hotbar_rects.size():
+		if (hud.hotbar_rects[index] as Rect2).has_point(position):
+			selected_index = index
+			audio.call("play", "select")
+			return true
+	if (hud.direction_rect as Rect2).has_point(position):
+		build_dir = Vector2i(-build_dir.y, build_dir.x)
+		audio.call("play", "select")
+		return true
+	return false
+
 ## Entry points for the mobile buttons, so touch and keyboard run through the
 ## same code rather than drifting apart.
 func touch_primary() -> void:

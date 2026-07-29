@@ -80,6 +80,15 @@ func _input(event: InputEvent) -> void:
 			set_controls_visible(false)
 
 func _begin_touch(touch_id: int, position: Vector2) -> void:
+	# On a menu screen the whole display is the button. Requiring a player to
+	# find the small Z pad to get past the title is why the game looked broken
+	# on a phone: the prompt said "press any key" and a phone has none.
+	if main_controller != null and main_controller.call("touch_anywhere_starts"):
+		main_controller.call("touch_primary")
+		return
+	# The HUD owns machine selection and rotation; give it first refusal.
+	if main_controller != null and main_controller.call("touch_hud", position):
+		return
 	for index in button_centers.size():
 		if position.distance_to(button_centers[index]) <= BUTTON_RADIUS + 12.0:
 			button_touch[touch_id] = index

@@ -9,15 +9,36 @@ const PANEL_W := 232.0
 
 var main
 var message_color: Color = Defs.COL_TEXT
+## Rectangles published for the touch layer, so the pad hit-tests exactly what
+## was drawn rather than recomputing the layout and drifting out of sync.
+var hotbar_rects: Array[Rect2] = []
+var direction_rect := Rect2()
 
 var _repaint := 0.0
 
 func _process(delta: float) -> void:
+	if main != null:
+		_layout()
 	_repaint += delta
 	if _repaint < 1.0 / 30.0:
 		return
 	_repaint = 0.0
 	queue_redraw()
+
+func hotbar_origin() -> Vector2:
+	var slot := Vector2(118, 48)
+	var total: float = float(Defs.BUILDABLE.size()) * (slot.x + 10) - 10
+	return Vector2(size.x * 0.5 - total * 0.5, size.y - slot.y - MARGIN)
+
+func _layout() -> void:
+	var slot := Vector2(118, 48)
+	var origin: Vector2 = hotbar_origin()
+	hotbar_rects.clear()
+	for index in Defs.BUILDABLE.size():
+		hotbar_rects.append(Rect2(origin + Vector2(float(index) * (slot.x + 10), 0), slot))
+	var label: String = "R 출력 방향  오른쪽"
+	var width: float = _text_width(label, 12) + 44.0
+	direction_rect = Rect2(size.x * 0.5 - width * 0.5, origin.y - 58.0, width, 24.0)
 
 func _panel(rect: Rect2, fill: Color, edge: Color, width: float = 1.0) -> void:
 	draw_rect(rect, fill)
@@ -191,8 +212,9 @@ func _draw_palette() -> void:
 
 	for index in count:
 		var type: int = Defs.BUILDABLE[index]
-		var at: Vector2 = origin + Vector2(float(index) * (slot.x + 10), 0)
-		var rect := Rect2(at, slot)
+		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() \
+			else Rect2(origin + Vector2(float(index) * (slot.x + 10), 0), slot)
+		var at: Vector2 = rect.position
 		var chosen: bool = index == main.selected_index
 		var afford: bool = main.sim.heat >= Defs.MACHINE_COSTS[type]
 		var edge: Color = Defs.COL_CORE if chosen else Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9)
@@ -206,8 +228,10 @@ func _draw_palette() -> void:
 
 	# Right-aligned inside an explicit box with a real margin, so nothing is ever
 	# clipped by the viewport edge.
-	_text_in(Rect2(size.x - 420.0 - MARGIN, MARGIN + 4.0, 420.0, 16),
-		"Z 설치   X 회수   R 회전   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+	# On a phone the keyboard legend is noise; the pad already carries the verbs.
+	if main.touch == null or not main.touch.visible:
+		_text_in(Rect2(size.x - 420.0 - MARGIN, MARGIN + 4.0, 420.0, 16),
+			"Z 설치   X 회수   R 회전   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.
@@ -219,7 +243,8 @@ func _draw_direction_chip(hotbar_y: float) -> void:
 	}
 	var label: String = "R 출력 방향  %s" % String(names.get(dir, "오른쪽"))
 	var width: float = _text_width(label, 12) + 44.0
-	var box := Rect2(size.x * 0.5 - width * 0.5, hotbar_y - 58.0, width, 24.0)
+	var box: Rect2 = direction_rect if direction_rect.size.x > 0.0 \
+		else Rect2(size.x * 0.5 - width * 0.5, hotbar_y - 58.0, width, 24.0)
 	_panel(box, Defs.COL_PANEL, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
 	_text(box.position + Vector2(12, 16), label, 12, Defs.COL_TEXT)
 	# The same arrow the world preview draws, so the two read as one statement.
@@ -255,15 +280,15 @@ func _draw_title() -> void:
 	# tall phone screens, where the band edge landed in open sky.
 	_dim(0.55)
 	var full := func(y: float) -> Rect2: return Rect2(0, y, size.x, 40)
+	var touch_pad: bool = main.touch != null and main.touch.visible
 	_text_in(full.call(size.y * 0.30), "MOTORIO", 56, Defs.COL_CORE)
 	_text_in(full.call(size.y * 0.30 + 32), "O N E   S H O T", 17, Defs.COL_MACHINE_EDGE)
 	_text_in(full.call(size.y * 0.52), "하룻밤 안에 공장을 세워 열을 최대한 모으세요.", 16, Defs.COL_TEXT)
 	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.", 13, Defs.COL_TEXT_DIM)
 	# Never let the one call to action fall below a readable floor.
 	var blink: float = 0.82 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.18
-	_text_in(full.call(size.y * 0.72), "아무 키나 눌러 시작", 18,
+	_text_in(full.call(size.y * 0.72), "화면을 눌러 시작" if touch_pad else "아무 키나 눌러 시작", 18,
 		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, blink))
-	var touch_pad: bool = main.touch != null and main.touch.visible
 	var controls: String = "휠 이동   Z 설치   X 회수   Run 달리기" if touch_pad \
 		else "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택"
 	_text_in(full.call(size.y * 0.84), controls, 12, Defs.COL_TEXT_DIM)
@@ -300,6 +325,9 @@ func _draw_result() -> void:
 	_text_in(Rect2(card.position + Vector2(0, y + 16), Vector2(w, 20)),
 		"공장과 온기는 그대로 남습니다", 12, Defs.COL_TEXT_DIM)
 	var blink: float = 0.72 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.28
-	_text_in(Rect2(card.position + Vector2(0, card.size.y - 42), Vector2(w, 20)), "Enter — %d일차 시작" % (main.day_number + 1), 16,
+	var touch_pad: bool = main.touch != null and main.touch.visible
+	var next_label: String = "화면을 눌러 %d일차 시작" % (main.day_number + 1) if touch_pad \
+		else "Enter — %d일차 시작" % (main.day_number + 1)
+	_text_in(Rect2(card.position + Vector2(0, card.size.y - 42), Vector2(w, 20)), next_label, 16,
 		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, blink))
 	_text_in(Rect2(card.position + Vector2(0, card.size.y - 20), Vector2(w, 20)), "N — 새로 시작", 12, Defs.COL_TEXT_DIM)
