@@ -27,6 +27,8 @@
 ## 배포
 
 - `./deploy-web.sh <게임명>`은 게임을 `docs/<게임명>/`에 Web export한다.
+- 저장소 웹사이트는 `web/`의 React + Vite 소스이며 `cd web && npm run build`로 `docs/`에 함께 빌드된다. 랜딩은 `/gamo/`, 문서는 `/gamo/doc/`이다.
+- Vite 설정의 `emptyOutDir`은 반드시 `false`로 유지한다. `true`가 되면 빌드가 `docs/`를 비우면서 모든 게임의 Web export를 삭제한다.
 - GitHub Pages는 `main` 브랜치의 `docs/`를 서비스한다.
 - 새 게임을 추가할 때 `export_presets.cfg`의 Web preset을 반드시 포함한다.
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
