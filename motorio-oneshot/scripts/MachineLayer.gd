@@ -156,22 +156,36 @@ func _draw_cats() -> void:
 		if not view_rect.grow(64.0).has_point(cat.pos):
 			continue
 		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02
+		# Eating gets its own motion: a quick repeated dip toward the bowl, so a
+		# feeding cat is obviously busy rather than idle.
+		var munch: float = 0.0
+		if cat.state == Defs.CAT_EATING:
+			munch = absf(sin(pulse * 7.0)) * 4.0
+			breathe = 1.0 + sin(pulse * 7.0) * 0.05
 		var heading: Vector2 = Vector2.DOWN
 		if cat.state == Defs.CAT_TO_MINER and sim.machines.has(cat.assigned):
 			heading = sim.cell_centre(cat.assigned) - cat.pos
 		elif cat.state == Defs.CAT_TO_FOOD:
 			heading = sim.cell_centre(sim.food_cell) - cat.pos
+		elif cat.state == Defs.CAT_EATING:
+			heading = Vector2.DOWN
 		var view: Dictionary = Defs.facing_view(Defs.facing_index(heading))
 		var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
 		if bool(view["flip"]):
 			size.x = -size.x
-		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4), size)
+		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4 + munch), size)
 		if bool(view["flip"]):
 			target.position.x += absf(size.x)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
 		draw_circle(Vector2(cat.pos.x, (cat.pos.y + 10.0) / 0.45), 8.0, Color(0.02, 0.04, 0.08, 0.32))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		draw_texture_rect_region(CAT_SHEET, target, _cat_region(String(view["view"])), Color.WHITE)
+		if cat.state == Defs.CAT_EATING:
+			# Crumbs kicking up from the bowl.
+			for crumb in 3:
+				var phase: float = fmod(pulse * 2.2 + float(crumb) * 0.33, 1.0)
+				var at: Vector2 = cat.pos + Vector2(sin(float(crumb) * 2.1) * 9.0, 6.0 - phase * 9.0)
+				draw_circle(at, 1.6 * (1.0 - phase), Color(0.95, 0.82, 0.55, 1.0 - phase))
 		# Hunger only appears once it matters, so a healthy crew stays clean.
 		if cat.hunger < 0.5:
 			var bar := Rect2(cat.pos.x - 11, cat.pos.y - 26, 22, 3)

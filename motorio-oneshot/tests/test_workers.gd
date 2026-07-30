@@ -121,10 +121,17 @@ func _test_morning_dispatch() -> void:
 	_assert(not sim.machine_at(Vector2i(-1, 0)).operated, "and the machine stops")
 	sim.drop_cat(sim.cell_centre(Vector2i(4, 4)))
 
-	# Morning sends assigned cats back to their own machine, on foot.
+	# Morning turns everyone out of the shelter, and assigned cats set off on foot.
 	sim.dispatch_cats()
+	var doorstep: Vector2 = sim.cell_centre(sim.shelter_cell)
+	for cat: Sim.Cat in sim.cats:
+		_assert(cat.pos.distance_to(doorstep) < float(Defs.TILE) * 2.5,
+			"every cat comes out of the shelter at first light")
+	var spots: Array[float] = []
+	for cat: Sim.Cat in sim.cats:
+		spots.append(cat.pos.x)
+	_assert(absf(spots[0] - spots[1]) > 1.0, "cats stand apart rather than stacking on one tile")
 	_assert(second.state == Defs.CAT_TO_MINER, "an assigned cat walks back each morning")
-	second.pos = sim.cell_centre(sim.shelter_cell)
 	sim.tick(0.05)
 	_assert(not sim.machine_at(Vector2i(0, -1)).operated, "mining waits for arrival")
 	for step in 300:

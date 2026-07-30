@@ -66,6 +66,21 @@ const ORE_OUTLINE := Color8(28, 20, 18)
 const ITEM_VALUES := [3, 6, 22]
 const COUNTED_ITEMS: Array[int] = [ITEM_COPPER, ITEM_IRON]
 
+# --- Tile attributes ---------------------------------------------------------
+## Attributes describe what a tile *is*, independent of what sits on it. They are
+## flags so a tile can eventually carry several at once; STRUCTURE is the first.
+##
+## STRUCTURE: solid terrain. The player cannot walk through it and cannot pick it
+## up with Z. Ore seams are structures -- they are part of the landscape, not
+## loose objects.
+const ATTR_NONE := 0
+const ATTR_STRUCTURE := 1 << 0
+
+const ATTR_NAMES := {ATTR_STRUCTURE: "구조물"}
+
+## How much of a tile the player's body occupies, used for collision.
+const PLAYER_RADIUS := 9.0
+
 # --- Machines ----------------------------------------------------------------
 const M_CORE := 0
 const M_MINER := 1

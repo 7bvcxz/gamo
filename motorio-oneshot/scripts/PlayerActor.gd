@@ -48,6 +48,9 @@ var touch_direction := Vector2.ZERO
 var touch_sprint := false
 ## Set by Main while a cat is being carried, so it rides along in her arms.
 var carrying_cat := false
+## Set by Main. Structures block movement, so the actor needs to ask the world
+## whether a tile is passable before it commits to a step.
+var blocked: Callable = func(_cell: Vector2i) -> bool: return false
 
 @onready var character: Sprite2D = $Character
 
@@ -75,10 +78,31 @@ func _physics_process(delta: float) -> void:
 			facing = Vector2i(signi(int(signf(input.x))), 0)
 		elif absf(input.y) > 0.25:
 			facing = Vector2i(0, signi(int(signf(input.y))))
-	position += velocity * delta
+	_move(velocity * delta)
 
 	_animate(delta, input, sprinting)
 	queue_redraw()
+
+## Axis-separated movement: try each axis on its own so sliding along a wall
+## works instead of sticking the moment one direction is blocked.
+func _move(step: Vector2) -> void:
+	if not _free_at(Vector2(position.x + step.x, position.y)):
+		step.x = 0.0
+		velocity.x = 0.0
+	position.x += step.x
+	if not _free_at(Vector2(position.x, position.y + step.y)):
+		step.y = 0.0
+		velocity.y = 0.0
+	position.y += step.y
+
+## The body is a small box, so a corner cannot clip into a structure.
+func _free_at(at: Vector2) -> bool:
+	var r: float = Defs.PLAYER_RADIUS
+	for corner: Vector2 in [Vector2(-r, -r), Vector2(r, -r), Vector2(-r, r), Vector2(r, r)]:
+		var cell := Vector2i(((at + corner) / float(Defs.TILE)).floor())
+		if blocked.call(cell):
+			return false
+	return true
 
 func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	animation_time += delta

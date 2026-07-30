@@ -234,6 +234,27 @@ func _generate_cat_boxes(seed_value: int) -> void:
 			continue
 		cat_boxes[cell] = true
 
+## --- Tile attributes ------------------------------------------------------
+## Ore is terrain, so every ore tile carries the STRUCTURE attribute. Keeping
+## this as a lookup rather than a stored grid means adding an attribute later is
+## one branch here, not a migration of every save.
+func tile_attributes(cell: Vector2i) -> int:
+	var attrs: int = Defs.ATTR_NONE
+	if ore.has(cell):
+		attrs |= Defs.ATTR_STRUCTURE
+	return attrs
+
+func has_attribute(cell: Vector2i, attribute: int) -> bool:
+	return (tile_attributes(cell) & attribute) != 0
+
+func is_structure(cell: Vector2i) -> bool:
+	return has_attribute(cell, Defs.ATTR_STRUCTURE)
+
+## Structures stop the player's body. Machines do not: the player walks over
+## belts and stands on their own miners.
+func blocks_player(cell: Vector2i) -> bool:
+	return is_structure(cell)
+
 func _ring_distance(cell: Vector2i) -> float:
 	return Vector2(cell - core_cell).length()
 
@@ -328,15 +349,21 @@ func idle_miner_cells() -> Array[Vector2i]:
 ## Cats without an assignment simply wait at the shelter to be carried somewhere:
 ## the game never picks a job for them.
 func dispatch_cats() -> void:
+	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0, float(Defs.TILE) * 0.85)
+	var index := 0
 	for cat: Cat in cats:
 		if cat == carried_cat:
 			continue
+		# Everyone comes out of the shelter at first light, spread across the
+		# doorstep rather than stacked on one tile.
+		var lane: float = (float(index) - float(cats.size() - 1) * 0.5) * 16.0
+		cat.pos = doorstep + Vector2(lane, 0.0)
+		index += 1
 		if cat.has_job() and machines.has(cat.assigned):
 			cat.state = Defs.CAT_TO_MINER
 			continue
 		cat.assigned = Vector2i(9999, 9999)
 		cat.state = Defs.CAT_IDLE
-		cat.pos = cell_centre(shelter_cell)
 
 func machine_at(cell: Vector2i) -> Machine:
 	return machines.get(cell, null)

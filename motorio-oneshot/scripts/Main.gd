@@ -53,6 +53,7 @@ func _ready() -> void:
 	cold_fog.sim = sim
 	machine_layer.sim = sim
 	hud.set("main", self)
+	player.blocked = func(cell: Vector2i) -> bool: return sim.blocks_player(cell)
 	touch.main_controller = self
 	touch.player = player
 	_start_run()
@@ -423,6 +424,10 @@ func _primary_action() -> void:
 		elif sim.drop_cat(sim.cell_centre(cell)):
 			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
+		return
+	if sim.is_structure(cell) and sim.machine_at(cell) == null:
+		_notify("구조물은 들 수 없습니다", Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
 		return
 	if sim.pick_up_cat(cell):
 		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
