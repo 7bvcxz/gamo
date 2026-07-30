@@ -18,12 +18,23 @@ var _repaint := 0.0
 
 func _process(delta: float) -> void:
 	if main != null:
+		_apply_scale()
 		_layout()
 	_repaint += delta
 	if _repaint < 1.0 / 30.0:
 		return
 	_repaint = 0.0
 	queue_redraw()
+
+## Desktop players sit close to a large screen, so the HUD is drawn at half
+## size there; touch keeps full size because the buttons must stay thumb-sized.
+func _apply_scale() -> void:
+	var touch_pad: bool = main.touch != null and main.touch.visible
+	var want: float = 1.0 if touch_pad else 0.5
+	if is_equal_approx(scale.x, want):
+		return
+	scale = Vector2(want, want)
+	size = get_viewport_rect().size / want
 
 func hotbar_origin() -> Vector2:
 	var slot := Vector2(118, 48)
@@ -173,14 +184,15 @@ func _draw_status() -> void:
 	_text(materials + Vector2(93, 0), "철 %d" % int(sim.delivered.get(Defs.ITEM_IRON, 0)), 12, Defs.COL_TEXT)
 
 	_draw_warmth_row(panel)
-	_draw_objective(panel)
+	_draw_objective()
 
 ## The next useful action, always on screen. This is the whole onboarding: no
 ## modal tutorial, no text wall, just one line that keeps up with the player.
-func _draw_objective(panel: Rect2) -> void:
+func _draw_objective() -> void:
 	var text: String = main.objective()
 	var width: float = _text_width(text, 12) + 26.0
-	var box := Rect2(panel.position.x, panel.end.y + 10.0, width, 24.0)
+	# Pinned to the top right, away from the status panel and the hotbar.
+	var box := Rect2(size.x - width - MARGIN, MARGIN + 26.0, width, 24.0)
 	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.88),
 		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.45))
 	draw_rect(Rect2(box.position, Vector2(3, box.size.y)), Defs.COL_CORE)
@@ -245,8 +257,8 @@ func _draw_palette() -> void:
 	# clipped by the viewport edge.
 	# On a phone the keyboard legend is noise; the pad already carries the verbs.
 	if main.touch == null or not main.touch.visible:
-		_text_in(Rect2(size.x - 420.0 - MARGIN, MARGIN + 4.0, 420.0, 16),
-			"Z 설치   X 회수   R 회전   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+		_text_in(Rect2(size.x - 460.0 - MARGIN, MARGIN + 2.0, 460.0, 16),
+			"Z 짧게 설치 · 길게 회전   X 회수   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.
@@ -256,7 +268,7 @@ func _draw_direction_chip(hotbar_y: float) -> void:
 		Vector2i.UP: "위", Vector2i.DOWN: "아래",
 		Vector2i.LEFT: "왼쪽", Vector2i.RIGHT: "오른쪽",
 	}
-	var label: String = "R 출력 방향  %s" % String(names.get(dir, "오른쪽"))
+	var label: String = "출력 방향  %s" % String(names.get(dir, "오른쪽"))
 	var width: float = _text_width(label, 12) + 44.0
 	var box: Rect2 = direction_rect if direction_rect.size.x > 0.0 \
 		else Rect2(size.x * 0.5 - width * 0.5, hotbar_y - 58.0, width, 24.0)

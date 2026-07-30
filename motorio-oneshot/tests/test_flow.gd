@@ -60,6 +60,24 @@ func _run() -> void:
 	_assert(main.build_dir != dir_before, "tapping the direction chip rotates the output")
 	_assert(not main.touch_hud(Vector2(-500, -500)), "taps outside the HUD fall through to the pad")
 
+	# Z is tap-to-build, hold-to-rotate on PC. Nothing may happen on press alone,
+	# or a held key would build and rotate at once.
+	main.state = main.State.PLAY
+	var dir_start: Vector2i = main.build_dir
+	main.build_held = true
+	main.build_hold_time = 0.0
+	main.build_rotated = false
+	main._update_build_hold(0.2)
+	_assert(main.build_dir == dir_start, "a short hold has not rotated yet")
+	_assert(not main.build_rotated, "and the tap is still eligible to build")
+	main._update_build_hold(0.25)
+	_assert(main.build_dir != dir_start, "passing the threshold rotates the output")
+	_assert(main.build_rotated, "a rotated hold is marked so release does not also build")
+	var dir_after: Vector2i = main.build_dir
+	main._update_build_hold(1.0)
+	_assert(main.build_dir == dir_after, "holding longer does not keep spinning")
+	main.build_held = false
+
 	# Night: the warm pool alone must stop being enough, which is what sends the
 	# player indoors instead of camping next to the core.
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)

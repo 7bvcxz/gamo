@@ -37,6 +37,9 @@ var rescued_tonight: bool = false
 var message: String = ""
 var message_life: float = 0.0
 var night_warned: bool = false
+var build_held: bool = false
+var build_hold_time: float = 0.0
+var build_rotated: bool = false
 
 func _ready() -> void:
 	randomize()
@@ -81,9 +84,9 @@ func objective() -> String:
 	if is_dusk():
 		return "해가 기울고 있습니다  곧 숙소로 돌아가야 합니다"
 	if sim.machine_count(Defs.M_MINER) == 0:
-		return "1  광맥 위에 채굴 고양이를 설치하세요  (1 선택 → R 로 코어 방향 → Z)"
+		return "1  광맥 위에 채굴기를 설치하세요  (1 선택 → Z 길게 눌러 코어 방향 → Z)"
 	if sim.total_heat == 0:
-		return "2  벨트로 채굴 고양이와 코어를 이으세요  (2 선택 → Z)"
+		return "2  벨트로 채굴기와 코어를 이으세요  (2 선택 → Z)"
 	if sim.delivered.get(Defs.ITEM_COPPER, 0) == 0 and sim.machine_count(Defs.M_FURNACE) == 0:
 		return "3  열을 모아 온기를 넓히고 구리 광맥까지 닿으세요"
 	if sim.machine_count(Defs.M_FURNACE) == 0:
@@ -122,6 +125,7 @@ func _process(delta: float) -> void:
 	machine_layer.night = day_fraction()
 
 	message_life = maxf(0.0, message_life - delta)
+	_update_build_hold(delta)
 	if shake > 0.0:
 		shake = maxf(0.0, shake - SHAKE_DECAY * delta)
 		camera.offset = Vector2(randf_range(-shake, shake), randf_range(-shake, shake))
@@ -138,6 +142,20 @@ func _process(delta: float) -> void:
 		State.PLAY: _process_play(delta)
 		State.TITLE: pass
 		State.PAUSED, State.RESULT: pass
+
+## Holding the build key past the threshold rotates instead of building, so PC
+## players never need a second key for direction.
+const BUILD_HOLD_ROTATE := 0.4
+
+func _update_build_hold(delta: float) -> void:
+	if not build_held:
+		return
+	build_hold_time += delta
+	if build_rotated or build_hold_time < BUILD_HOLD_ROTATE:
+		return
+	build_rotated = true
+	build_dir = Vector2i(-build_dir.y, build_dir.x)
+	audio.call("play", "select")
 
 func _process_play(delta: float) -> void:
 	time_left = maxf(0.0, time_left - delta)
@@ -228,6 +246,15 @@ func _view_rect() -> Rect2:
 	return Rect2(camera.get_screen_center_position() - size * 0.5, size)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and not event.is_pressed() and event.is_action_released("build"):
+		if build_held and not build_rotated:
+			if sleep_available():
+				_sleep()
+			else:
+				_try_build()
+		build_held = false
+		get_viewport().set_input_as_handled()
+		return
 	if not (event is InputEventKey) or not event.is_pressed() or event.is_echo():
 		return
 	var key := event as InputEventKey
@@ -275,10 +302,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("build"):
-		if sleep_available():
-			_sleep()
-		else:
-			_try_build()
+		# Held, Z rotates; tapped, it builds. Handled on release so the hold can
+		# be measured, which is why nothing happens here.
+		build_held = true
+		build_hold_time = 0.0
+		build_rotated = false
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("demolish"):
