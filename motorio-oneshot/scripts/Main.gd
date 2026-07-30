@@ -40,6 +40,7 @@ var night_warned: bool = false
 var build_held: bool = false
 var build_hold_time: float = 0.0
 var build_rotated: bool = false
+var autosave_elapsed: float = 0.0
 
 func _ready() -> void:
 	randomize()
@@ -54,6 +55,8 @@ func _ready() -> void:
 	touch.main_controller = self
 	touch.player = player
 	_start_run()
+	if load_game():
+		_notify("이어서 진행합니다", Defs.COL_CORE)
 	state = State.TITLE
 
 func _start_run() -> void:
@@ -130,6 +133,11 @@ func _process(delta: float) -> void:
 
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
+	if state == State.PLAY:
+		autosave_elapsed += delta
+		if autosave_elapsed >= AUTOSAVE_INTERVAL:
+			autosave_elapsed = 0.0
+			save_game(false)
 	if shake > 0.0:
 		shake = maxf(0.0, shake - SHAKE_DECAY * delta)
 		camera.offset = Vector2(randf_range(-shake, shake), randf_range(-shake, shake))
@@ -150,6 +158,9 @@ func _process(delta: float) -> void:
 ## Holding the build key past the threshold rotates instead of building, so PC
 ## players never need a second key for direction.
 const BUILD_HOLD_ROTATE := 0.4
+const SAVE_PATH := "user://motorio_oneshot_save.cfg"
+const SAVE_SCHEMA := 1
+const AUTOSAVE_INTERVAL := 30.0
 
 func _update_build_hold(delta: float) -> void:
 	if not build_held:
@@ -291,6 +302,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_begin_next_day()
 				get_viewport().set_input_as_handled()
 			elif key.keycode == KEY_N:
+				clear_save()
 				_start_run()
 				state = State.PLAY
 				audio.call("play", "confirm")
@@ -429,6 +441,59 @@ func _notify(text: String, color: Color) -> void:
 	message_life = 2.0
 	hud.set("message_color", color)
 
+## --- Persistence ----------------------------------------------------------
+## The run seed is stored, so the same world is rebuilt and only the player's
+## changes need to travel in the file.
+func save_game(announce: bool = true) -> bool:
+	var config := ConfigFile.new()
+	config.set_value("motorio_oneshot", "schema", SAVE_SCHEMA)
+	config.set_value("motorio_oneshot", "state", {
+		"seed": run_seed,
+		"day": day_number,
+		"time_left": time_left,
+		"day_start_heat": day_start_heat,
+		"best_day_heat": best_day_heat,
+		"best_heat": best_heat,
+		"px": player.position.x,
+		"py": player.position.y,
+		"warmth": player.warmth,
+		"sim": sim.to_save(),
+	})
+	if config.save(SAVE_PATH) != OK:
+		return false
+	if announce:
+		_notify("저장했습니다", Defs.COL_CORE)
+	return true
+
+func load_game() -> bool:
+	var config := ConfigFile.new()
+	if config.load(SAVE_PATH) != OK:
+		return false
+	# A schema change means the shape of the data moved; starting fresh is safer
+	# than half-restoring a run into a game that no longer matches it.
+	if int(config.get_value("motorio_oneshot", "schema", -1)) != SAVE_SCHEMA:
+		return false
+	var data: Dictionary = config.get_value("motorio_oneshot", "state", {})
+	if data.is_empty():
+		return false
+	run_seed = int(data.get("seed", run_seed))
+	sim.setup(run_seed)
+	sim.from_save(data.get("sim", {}))
+	day_number = int(data.get("day", 1))
+	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
+	day_start_heat = int(data.get("day_start_heat", 0))
+	best_day_heat = int(data.get("best_day_heat", 0))
+	best_heat = int(data.get("best_heat", 0))
+	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
+	player.warmth = float(data.get("warmth", 100.0))
+	player.locked = false
+	player.collapse = 0.0
+	collapse_timer = -1.0
+	return true
+
+func clear_save() -> void:
+	DirAccess.remove_absolute(SAVE_PATH)
+
 func day_heat() -> int:
 	return sim.total_heat - day_start_heat
 
@@ -457,6 +522,7 @@ func _finish_run() -> void:
 	best_heat = maxi(best_heat, sim.total_heat)
 	best_day_heat = maxi(best_day_heat, day_heat())
 	player.locked = true
+	save_game(false)
 	shake = 4.0
 	audio.call("play", "finish")
 

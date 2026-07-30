@@ -60,6 +60,77 @@ var warm_radius: float = Defs.WARM_BASE
 
 var _cached_radius := -1.0
 
+## --- Persistence ----------------------------------------------------------
+## Terrain is not stored: it is regenerated from the seed, so the save only has
+## to carry what the player changed. That keeps the file small and means a
+## world-generation tweak cannot corrupt an existing save's geometry.
+func to_save() -> Dictionary:
+	var machine_rows: Array = []
+	for cell: Vector2i in machines:
+		var machine: Machine = machines[cell]
+		if machine.type == Defs.M_CORE:
+			continue
+		machine_rows.append({
+			"x": cell.x, "y": cell.y, "type": machine.type,
+			"dx": machine.dir.x, "dy": machine.dir.y,
+			"progress": machine.progress, "items": machine.items.duplicate(true),
+			"buffer": machine.buffer.duplicate(true),
+		})
+	var cat_rows: Array = []
+	for cat: Cat in cats:
+		cat_rows.append({
+			"px": cat.pos.x, "py": cat.pos.y, "state": cat.state,
+			"ax": cat.assigned.x, "ay": cat.assigned.y,
+			"hunger": cat.hunger, "eat": cat.eat_timer,
+		})
+	var box_rows: Array = []
+	for cell: Vector2i in cat_boxes:
+		box_rows.append([cell.x, cell.y])
+	var delivered_rows: Dictionary = {}
+	for key: int in delivered:
+		delivered_rows[str(key)] = int(delivered[key])
+	return {
+		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
+		"machines": machine_rows, "cats": cat_rows, "boxes": box_rows,
+		"carried": carried_boxes, "food": food,
+	}
+
+func from_save(data: Dictionary) -> void:
+	heat = int(data.get("heat", Defs.START_HEAT))
+	total_heat = int(data.get("total_heat", 0))
+	var delivered_rows: Dictionary = data.get("delivered", {})
+	for key: String in delivered_rows:
+		delivered[int(key)] = int(delivered_rows[key])
+	carried_boxes = int(data.get("carried", 0))
+	food = int(data.get("food", Defs.FOOD_START))
+
+	for row: Dictionary in data.get("machines", []):
+		var cell := Vector2i(int(row["x"]), int(row["y"]))
+		var machine := Machine.new()
+		machine.type = int(row["type"])
+		machine.cell = cell
+		machine.dir = Vector2i(int(row["dx"]), int(row["dy"]))
+		machine.progress = float(row.get("progress", 0.0))
+		machine.buffer = (row.get("buffer", {}) as Dictionary).duplicate(true)
+		for item: Dictionary in row.get("items", []):
+			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
+		machines[cell] = machine
+
+	cat_boxes.clear()
+	for row: Array in data.get("boxes", []):
+		cat_boxes[Vector2i(int(row[0]), int(row[1]))] = true
+
+	cats.clear()
+	for row: Dictionary in data.get("cats", []):
+		var cat := Cat.new()
+		cat.pos = Vector2(float(row["px"]), float(row["py"]))
+		cat.state = int(row.get("state", Defs.CAT_IDLE))
+		cat.assigned = Vector2i(int(row["ax"]), int(row["ay"]))
+		cat.hunger = float(row.get("hunger", 1.0))
+		cat.eat_timer = float(row.get("eat", 0.0))
+		cats.append(cat)
+	_refresh_radius()
+
 func setup(seed_value: int) -> void:
 	ore.clear()
 	machines.clear()
