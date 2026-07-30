@@ -397,10 +397,10 @@ func touch_primary() -> void:
 		State.PAUSED:
 			state = State.PLAY
 		State.PLAY:
-			if sleep_available():
-				_sleep()
-			else:
-				_try_build()
+			# Route through the same entry point the keyboard uses. Calling
+			# _try_build directly meant touch players could never pick up or
+			# place a cat, which makes the game unplayable on a phone.
+			_primary_action()
 
 func touch_secondary() -> void:
 	match state:

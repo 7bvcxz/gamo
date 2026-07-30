@@ -60,6 +60,20 @@ func _run() -> void:
 	_assert(main.build_dir != dir_before, "tapping the direction chip rotates the output")
 	_assert(not main.touch_hud(Vector2(-500, -500)), "taps outside the HUD fall through to the pad")
 
+	# Touch and keyboard must share one interaction path, or a verb added for the
+	# keyboard silently goes missing on phones.
+	main.state = main.State.PLAY
+	main.sim.carried_boxes = Defs.BOXES_PER_CAT
+	main.sim.adopt_cats()
+	_assert(main.sim.cats.size() >= 1, "a cat exists to be carried")
+	var kitty = main.sim.cats[0]
+	# Interaction targets the faced tile, not the one underfoot.
+	kitty.pos = main.sim.cell_centre(main.player.facing_cell())
+	main.touch_primary()
+	_assert(main.sim.carried_cat == kitty, "a touch tap can pick up a cat")
+	main.touch_primary()
+	_assert(main.sim.carried_cat == null, "a second tap puts it down again")
+
 	# Z is tap-to-build, hold-to-rotate on PC. Nothing may happen on press alone,
 	# or a held key would build and rotate at once.
 	main.state = main.State.PLAY
