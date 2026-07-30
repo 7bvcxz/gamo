@@ -83,9 +83,17 @@ func _draw() -> void:
 			_draw_pause_card()
 		_:
 			_draw_cold_vignette()
+			_draw_blackout()
 			_draw_status()
 			_draw_palette()
 			_draw_message()
+
+## After the fall the world goes out entirely, so the cut to morning reads as
+## losing consciousness rather than as a scene change.
+func _draw_blackout() -> void:
+	if main.blackout <= 0.0:
+		return
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, clampf(main.blackout, 0.0, 1.0)))
 
 ## Losing body heat used to be expressed only by an 8px bar in the corner, which
 ## a player walking through the dark will never look at. The screen itself now

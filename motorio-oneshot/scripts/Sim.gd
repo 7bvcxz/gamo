@@ -49,6 +49,9 @@ var core_cell := Vector2i.ZERO
 var cats: Array[Cat] = []
 var cat_boxes: Dictionary[Vector2i, bool] = {}
 var carried_boxes: int = 0
+## The cat currently in the player's arms. Cats are placed on machines by hand;
+## there is no automatic assignment, so the player decides who works where.
+var carried_cat: Cat = null
 var food: int = Defs.FOOD_START
 var shelter_cell := Vector2i.ZERO
 var food_cell := Vector2i.ZERO
@@ -148,6 +151,7 @@ func setup(seed_value: int) -> void:
 	cats.clear()
 	cat_boxes.clear()
 	carried_boxes = 0
+	carried_cat = null
 	food = Defs.FOOD_START
 	shelter_cell = core_cell + Vector2i(Defs.SHELTER_OFFSET.round())
 	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
@@ -258,6 +262,54 @@ func adopt_cats() -> int:
 	cat_adopted.emit(cats.size())
 	return adopted
 
+## Picking a cat up takes it off its machine; the machine stops immediately.
+func pick_up_cat(cell: Vector2i) -> bool:
+	if carried_cat != null:
+		return false
+	var reach: float = float(Defs.TILE) * 0.9
+	var centre: Vector2 = cell_centre(cell)
+	var best: Cat = null
+	var best_distance: float = reach
+	for cat: Cat in cats:
+		var distance: float = cat.pos.distance_to(centre)
+		if distance <= best_distance:
+			best = cat
+			best_distance = distance
+	if best == null:
+		return false
+	if best.has_job() and machines.has(best.assigned):
+		machines[best.assigned].operated = false
+	best.assigned = Vector2i(9999, 9999)
+	best.state = Defs.CAT_IDLE
+	carried_cat = best
+	return true
+
+## Putting a cat down on a miner assigns it to that machine for good; it will
+## return there every morning and after every meal.
+func place_cat(cell: Vector2i) -> bool:
+	if carried_cat == null:
+		return false
+	var machine: Machine = machines.get(cell, null)
+	if machine == null or machine.type != Defs.M_MINER:
+		return false
+	for cat: Cat in cats:
+		if cat != carried_cat and cat.assigned == cell:
+			return false
+	carried_cat.assigned = cell
+	carried_cat.pos = cell_centre(cell)
+	carried_cat.state = Defs.CAT_WORKING
+	carried_cat = null
+	return true
+
+## Dropping a cat anywhere else simply leaves it standing there.
+func drop_cat(at: Vector2) -> bool:
+	if carried_cat == null:
+		return false
+	carried_cat.pos = at
+	carried_cat.state = Defs.CAT_IDLE
+	carried_cat = null
+	return true
+
 func idle_miner_cells() -> Array[Vector2i]:
 	var free: Array[Vector2i] = []
 	for cell: Vector2i in machines:
@@ -272,21 +324,19 @@ func idle_miner_cells() -> Array[Vector2i]:
 			free.append(cell)
 	return free
 
-## Each morning every cat is sent to a miner and walks there; mining only starts
-## once it arrives.
+## Each morning every cat walks back to the machine the player assigned it to.
+## Cats without an assignment simply wait at the shelter to be carried somewhere:
+## the game never picks a job for them.
 func dispatch_cats() -> void:
 	for cat: Cat in cats:
+		if cat == carried_cat:
+			continue
 		if cat.has_job() and machines.has(cat.assigned):
 			cat.state = Defs.CAT_TO_MINER
 			continue
 		cat.assigned = Vector2i(9999, 9999)
 		cat.state = Defs.CAT_IDLE
-	var free: Array[Vector2i] = idle_miner_cells()
-	for cat: Cat in cats:
-		if cat.has_job() or free.is_empty():
-			continue
-		cat.assigned = free.pop_front()
-		cat.state = Defs.CAT_TO_MINER
+		cat.pos = cell_centre(shelter_cell)
 
 func machine_at(cell: Vector2i) -> Machine:
 	return machines.get(cell, null)

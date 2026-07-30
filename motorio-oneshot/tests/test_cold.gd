@@ -24,6 +24,10 @@ func _run() -> void:
 	_assert(is_equal_approx(speeds[0], 1.0), "full warmth means full speed")
 	_assert(speeds[4] <= 0.11, "zero warmth is roughly a ninety percent slowdown")
 
+	# The blackout only runs after the fall, and it must actually reach full dark
+	# before the day is handed over.
+	_assert(main.blackout <= 0.0, "the screen is clear while the player is upright")
+
 	# Three frost stages, and they must be ordered.
 	_assert(Defs.FROST_STAGES.size() == 3, "there are three frost stages")
 	for index in range(1, 3):
@@ -62,12 +66,14 @@ func _run() -> void:
 			break
 		main._update_collapse(0.1)
 	_assert(main.state == main.State.RESULT, "collapsing ends the day")
+	_assert(main.blackout >= 1.0, "the world had gone fully dark before the day ended")
 	_assert(main.rescued_tonight, "the summary records that the player was carried in")
 
 	# Morning restores an upright, warm player at the shelter.
 	main._begin_next_day()
 	_assert(is_equal_approx(main.player.warmth, 100.0), "the player wakes warm")
 	_assert(is_zero_approx(main.player.collapse) and not main.player.locked, "the player wakes upright")
+	_assert(is_zero_approx(main.blackout), "and the screen is clear again")
 	_assert(main.player.position.distance_to(main.shelter_position()) < 1.0, "the player wakes at the shelter")
 
 	if failures == 0:

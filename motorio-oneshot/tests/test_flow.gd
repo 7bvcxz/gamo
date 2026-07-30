@@ -73,9 +73,14 @@ func _run() -> void:
 	main._update_build_hold(0.25)
 	_assert(main.build_dir != dir_start, "passing the threshold rotates the output")
 	_assert(main.build_rotated, "a rotated hold is marked so release does not also build")
+	# Holding keeps turning: one quarter turn per interval, so the far side is
+	# reachable without four separate presses.
 	var dir_after: Vector2i = main.build_dir
-	main._update_build_hold(1.0)
-	_assert(main.build_dir == dir_after, "holding longer does not keep spinning")
+	main._update_build_hold(0.4)
+	_assert(main.build_dir != dir_after, "holding past another interval turns again")
+	# Three more quarter turns complete the circle back to where it was.
+	main._update_build_hold(1.2)
+	_assert(main.build_dir == dir_after, "four intervals bring the direction full circle")
 	main.build_held = false
 
 	# Night: the warm pool alone must stop being enough, which is what sends the

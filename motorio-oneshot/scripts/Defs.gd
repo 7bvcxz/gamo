@@ -144,6 +144,7 @@ const COLD_SPEED_FLOOR := 0.10    # movement multiplier at zero warmth
 const FROST_STAGES: Array[float] = [80.0, 50.0, 20.0]
 const COLLAPSE_GRACE := 5.0       # seconds upright at zero warmth
 const COLLAPSE_FALL := 2.0        # seconds of the collapse animation
+const BLACKOUT_SECONDS := 2.2     # the world fading out after the fall
 
 const FROST_RING := Vector2(4.0, 9.5)
 const COPPER_RING := Vector2(11.0, 17.0)

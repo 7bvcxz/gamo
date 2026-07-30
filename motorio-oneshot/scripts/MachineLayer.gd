@@ -151,6 +151,8 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## the food bin, so they are drawn from their own positions.
 func _draw_cats() -> void:
 	for cat: Sim.Cat in sim.cats:
+		if cat == sim.carried_cat:
+			continue      # drawn in the player's arms by PlayerActor
 		if not view_rect.grow(64.0).has_point(cat.pos):
 			continue
 		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02

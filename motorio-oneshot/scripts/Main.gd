@@ -41,6 +41,7 @@ var build_held: bool = false
 var build_hold_time: float = 0.0
 var build_rotated: bool = false
 var autosave_elapsed: float = 0.0
+var blackout: float = 0.0
 
 func _ready() -> void:
 	randomize()
@@ -72,6 +73,7 @@ func _start_run() -> void:
 	player.velocity = Vector2.ZERO
 	collapse_timer = -1.0
 	player.collapse = 0.0
+	blackout = 0.0
 	night_warned = false
 	rescued_tonight = false
 	selected_index = 0
@@ -90,6 +92,10 @@ func objective() -> String:
 		return "고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)" % [Defs.BOXES_PER_CAT, sim.carried_boxes]
 	if sim.cats.is_empty():
 		return "숙소로 가서 고양이를 입양하세요"
+	if sim.carried_cat != null:
+		return "고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요"
+	if _unassigned_cats() > 0 and sim.machine_count(Defs.M_MINER) > 0:
+		return "숙소의 고양이에게 Z 로 안아서 채굴기에 올려놓으세요"
 	if sim.machine_count(Defs.M_MINER) == 0:
 		return "1  광맥 위에 채굴기를 설치하세요  (1 선택 → Z 길게 눌러 코어 방향 → Z)"
 	if sim.total_heat == 0:
@@ -101,6 +107,13 @@ func objective() -> String:
 	if sim.delivered.get(Defs.ITEM_IRON, 0) == 0:
 		return "5  제련로 출력을 코어까지 이으세요"
 	return "남은 시간 동안 생산을 늘리세요"
+
+func _unassigned_cats() -> int:
+	var count := 0
+	for cat in sim.cats:
+		if not cat.has_job():
+			count += 1
+	return count
 
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
@@ -133,6 +146,7 @@ func _process(delta: float) -> void:
 
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
+	player.carrying_cat = sim.carried_cat != null
 	if state == State.PLAY:
 		autosave_elapsed += delta
 		if autosave_elapsed >= AUTOSAVE_INTERVAL:
@@ -166,11 +180,13 @@ func _update_build_hold(delta: float) -> void:
 	if not build_held:
 		return
 	build_hold_time += delta
-	if build_rotated or build_hold_time < BUILD_HOLD_ROTATE:
-		return
-	build_rotated = true
-	build_dir = Vector2i(-build_dir.y, build_dir.x)
-	audio.call("play", "select")
+	# Keeps turning for as long as the key is down, one quarter turn per
+	# interval, so reaching the far side does not need four separate presses.
+	while build_hold_time >= BUILD_HOLD_ROTATE:
+		build_hold_time -= BUILD_HOLD_ROTATE
+		build_rotated = true
+		build_dir = Vector2i(-build_dir.y, build_dir.x)
+		audio.call("play", "select")
 
 func _process_play(delta: float) -> void:
 	time_left = maxf(0.0, time_left - delta)
@@ -252,13 +268,18 @@ func _update_collapse(delta: float) -> void:
 	player.locked = true
 	player.velocity = Vector2.ZERO
 	player.collapse = clampf(player.collapse + delta / Defs.COLLAPSE_FALL, 0.0, 1.0)
-	if player.collapse >= 1.0:
-		collapse_timer = -1.0
-		player.collapse = 0.0
-		rescued_tonight = true
-		var lost: int = sim.spend_rescue()
-		_notify("쓰러졌습니다 · 열 %d 손실" % lost, Defs.COL_DANGER)
-		_finish_run()
+	if player.collapse < 1.0:
+		return
+	# Down, and the world darkens before the morning arrives.
+	blackout = clampf(blackout + delta / Defs.BLACKOUT_SECONDS, 0.0, 1.0)
+	if blackout < 1.0:
+		return
+	collapse_timer = -1.0
+	player.collapse = 0.0
+	rescued_tonight = true
+	var lost: int = sim.spend_rescue()
+	_notify("쓰러졌습니다 · 열 %d 손실" % lost, Defs.COL_DANGER)
+	_finish_run()
 
 
 
@@ -279,10 +300,7 @@ func _view_rect() -> Rect2:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and not event.is_pressed() and event.is_action_released("build"):
 		if build_held and not build_rotated:
-			if sleep_available():
-				_sleep()
-			else:
-				_try_build()
+			_primary_action()
 		build_held = false
 		get_viewport().set_input_as_handled()
 		return
@@ -389,6 +407,29 @@ func touch_secondary() -> void:
 			_try_demolish()
 		State.PAUSED:
 			state = State.PLAY
+
+## One key, in priority order. Carrying a cat takes precedence over building so
+## a full-handed player can always put the cat down.
+func _primary_action() -> void:
+	if sleep_available():
+		_sleep()
+		return
+	var cell: Vector2i = player.facing_cell()
+	if sim.carried_cat != null:
+		if sim.place_cat(cell):
+			_notify("고양이를 채굴기에 배치했습니다", Defs.COL_CORE)
+			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
+			audio.call("play", "build")
+		elif sim.drop_cat(sim.cell_centre(cell)):
+			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
+			audio.call("play", "remove")
+		return
+	if sim.pick_up_cat(cell):
+		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
+		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
+		audio.call("play", "select")
+		return
+	_try_build()
 
 func _try_build() -> void:
 	if player.locked:
@@ -533,6 +574,9 @@ func _begin_next_day() -> void:
 	night_warned = false
 	rescued_tonight = false
 	player.locked = false
+	player.collapse = 0.0
+	collapse_timer = -1.0
+	blackout = 0.0
 	player.warmth = 100.0
 	# Morning starts at the shelter beside the core, as it does in Motorio.
 	player.position = shelter_position()

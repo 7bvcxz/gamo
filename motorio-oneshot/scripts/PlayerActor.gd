@@ -6,7 +6,9 @@ class_name PlayerActor
 ## foot anchor, because the generated sheet's frames do not share a continuous
 ## silhouette and cross-fading them made the character jitter sideways.
 
-const SPEED := 168.0
+## Halved: the world is small and the cold is the pressure, so covering ground
+## should be a decision rather than something you do incidentally.
+const SPEED := 84.0
 const SPRINT := 1.7
 const ACCEL := 1500.0
 const FRICTION := 1900.0
@@ -44,6 +46,8 @@ var _lean := 0.0
 var collapse := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
+## Set by Main while a cat is being carried, so it rides along in her arms.
+var carrying_cat := false
 
 @onready var character: Sprite2D = $Character
 

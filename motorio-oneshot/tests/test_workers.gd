@@ -83,38 +83,55 @@ func _test_morning_dispatch() -> void:
 	sim.ore[Vector2i(0, -1)] = Defs.ITEM_FROST
 	sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
 	sim.build(Defs.M_MINER, Vector2i(0, -1), Vector2i.DOWN)
-	sim.carried_boxes = Defs.BOXES_PER_CAT * 3
+	sim.carried_boxes = Defs.BOXES_PER_CAT * 2
 	sim.adopt_cats()
-	_assert(sim.cats.size() == 3, "three cats adopted")
+	_assert(sim.cats.size() == 2, "two cats adopted")
 
+	# Nothing is assigned automatically: the player carries each cat to a machine.
 	sim.dispatch_cats()
-	var assigned := 0
-	var idle := 0
 	for cat: Sim.Cat in sim.cats:
-		if cat.has_job():
-			assigned += 1
-			_assert(cat.state == Defs.CAT_TO_MINER, "an assigned cat sets off walking")
-		else:
-			idle += 1
-	_assert(assigned == 2, "one cat per miner, no doubling up")
-	_assert(idle == 1, "the spare cat stays at the shelter")
+		_assert(not cat.has_job(), "the game never picks a job for a cat")
 
-	# Nothing is produced until the walk finishes.
+	# Carrying: picking up and placing on a miner assigns it for good.
+	var cat_cell: Vector2i = Vector2i((sim.cats[0].pos / float(Defs.TILE)).floor())
+	_assert(sim.pick_up_cat(cat_cell), "a cat standing nearby can be picked up")
+	_assert(sim.carried_cat != null, "the cat is now carried")
+	# Both cats start on the same tile, so hold the reference that was actually
+	# picked up rather than assuming an index.
+	var first: Sim.Cat = sim.carried_cat
+	_assert(not sim.pick_up_cat(cat_cell), "only one cat can be carried at a time")
+	_assert(not sim.place_cat(Vector2i(5, 5)), "a cat cannot be placed on bare ground as a worker")
+	_assert(sim.place_cat(Vector2i(-1, 0)), "a cat can be placed on a miner")
+	_assert(sim.carried_cat == null, "the player's arms are free again")
+	_assert(first.assigned == Vector2i(-1, 0), "the cat is bound to that machine")
+	_assert(first.state == Defs.CAT_WORKING, "and starts working immediately")
+
+	# One machine, one cat.
+	var second: Sim.Cat = sim.cats[0] if sim.cats[0] != first else sim.cats[1]
+	var second_cell: Vector2i = Vector2i((second.pos / float(Defs.TILE)).floor())
+	sim.pick_up_cat(second_cell)
+	_assert(not sim.place_cat(Vector2i(-1, 0)), "a taken machine refuses a second cat")
+	_assert(sim.place_cat(Vector2i(0, -1)), "the free machine accepts it")
+
+	# Picking a worker back up stops its machine at once.
+	sim.tick(0.1)
+	_assert(sim.machine_at(Vector2i(-1, 0)).operated, "the staffed machine is running")
+	_assert(sim.pick_up_cat(Vector2i(-1, 0)), "the working cat can be collected again")
+	sim.tick(0.1)
+	_assert(not sim.machine_at(Vector2i(-1, 0)).operated, "and the machine stops")
+	sim.drop_cat(sim.cell_centre(Vector2i(4, 4)))
+
+	# Morning sends assigned cats back to their own machine, on foot.
+	sim.dispatch_cats()
+	_assert(second.state == Defs.CAT_TO_MINER, "an assigned cat walks back each morning")
+	second.pos = sim.cell_centre(sim.shelter_cell)
 	sim.tick(0.05)
-	_assert(sim.machine_at(Vector2i(-1, 0)).operated == false, "mining waits for arrival")
-	for step in 200:
+	_assert(not sim.machine_at(Vector2i(0, -1)).operated, "mining waits for arrival")
+	for step in 300:
 		sim.tick(0.1)
-		var all_there := true
-		for cat: Sim.Cat in sim.cats:
-			if cat.has_job() and cat.state != Defs.CAT_WORKING:
-				all_there = false
-		if all_there:
+		if second.state == Defs.CAT_WORKING:
 			break
-	for cat: Sim.Cat in sim.cats:
-		if cat.has_job():
-			_assert(cat.state == Defs.CAT_WORKING, "cats reach their machine and start work")
-			_assert(cat.pos.distance_to(sim.cell_centre(cat.assigned)) <= Defs.CAT_ARRIVE,
-				"a working cat is actually standing at its machine")
+	_assert(second.state == Defs.CAT_WORKING, "the cat reaches its machine and resumes")
 	sim.free()
 
 # --- 5-4 -------------------------------------------------------------------
@@ -127,10 +144,10 @@ func _test_hunger_and_feeding() -> void:
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	sim.carried_boxes = Defs.BOXES_PER_CAT
 	sim.adopt_cats()
-	sim.dispatch_cats()
+	# Assignment is manual now, so staff the machine the way a player would.
 	var cat: Sim.Cat = sim.cats[0]
-	cat.pos = sim.cell_centre(cell)
-	cat.state = Defs.CAT_WORKING
+	sim.carried_cat = cat
+	_assert(sim.place_cat(cell), "the cat is placed on the miner by hand")
 
 	# Working costs 1/18 of a belly every ten seconds.
 	var before: float = cat.hunger
