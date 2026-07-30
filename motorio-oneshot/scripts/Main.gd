@@ -83,6 +83,10 @@ func objective() -> String:
 		return "밤입니다  숙소로 돌아가 Z로 취침하세요  (기지 옆 남서쪽)"
 	if is_dusk():
 		return "해가 기울고 있습니다  곧 숙소로 돌아가야 합니다"
+	if sim.cats.is_empty() and sim.carried_boxes < Defs.BOXES_PER_CAT:
+		return "고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)" % [Defs.BOXES_PER_CAT, sim.carried_boxes]
+	if sim.cats.is_empty():
+		return "숙소로 가서 고양이를 입양하세요"
 	if sim.machine_count(Defs.M_MINER) == 0:
 		return "1  광맥 위에 채굴기를 설치하세요  (1 선택 → Z 길게 눌러 코어 방향 → Z)"
 	if sim.total_heat == 0:
@@ -160,6 +164,7 @@ func _update_build_hold(delta: float) -> void:
 func _process_play(delta: float) -> void:
 	time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
+	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_preview()
 	if not night_warned and is_night():
@@ -169,6 +174,21 @@ func _process_play(delta: float) -> void:
 	# Running out of night entirely means the cats come and get you.
 	if time_left <= 0.0:
 		_carried_home()
+
+## Crates are picked up simply by walking over them, and carrying three to the
+## shelter adopts a cat. No extra verb to learn.
+func _collect_and_adopt() -> void:
+	if sim.collect_box_at(player.cell()):
+		fx.popup(player.position + Vector2(0, -22), "고양이 상자 %d/%d" % [sim.carried_boxes, Defs.BOXES_PER_CAT],
+			Defs.COL_BELT_RIM, true)
+		fx.ring(player.position, Defs.COL_BELT_RIM, 20.0)
+		audio.call("play", "select")
+	if shelter_nearby() and sim.carried_boxes >= Defs.BOXES_PER_CAT:
+		var adopted: int = sim.adopt_cats()
+		if adopted > 0:
+			_notify("고양이 %d마리를 입양했습니다" % adopted, Defs.COL_CORE)
+			fx.ring(shelter_position(), Defs.COL_CORE, 48.0)
+			audio.call("play", "alloy")
 
 func _update_warmth(delta: float) -> void:
 	_update_collapse(delta)

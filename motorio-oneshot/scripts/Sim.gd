@@ -11,6 +11,20 @@ signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
 signal build_rejected(reason: String, cell: Vector2i)
 signal warmth_changed(radius: float)
+signal cat_adopted(total: int)
+signal box_collected(carried: int)
+
+## A cat worker. Miners cannot run without one standing at them, so the number
+## of cats -- not the amount of heat -- is what gates automation.
+class Cat extends RefCounted:
+	var pos := Vector2.ZERO
+	var state: int = Defs.CAT_IDLE
+	var assigned := Vector2i(9999, 9999)   ## the miner cell this cat works
+	var hunger: float = 1.0
+	var eat_timer: float = 0.0
+
+	func has_job() -> bool:
+		return assigned != Vector2i(9999, 9999)
 
 class Machine extends RefCounted:
 	var type: int = Defs.M_BELT
@@ -25,10 +39,19 @@ class Machine extends RefCounted:
 	var items: Array[Dictionary] = []
 	## Furnace input buffer keyed by item type.
 	var buffer: Dictionary = {}
+	## Miners only run while a cat is standing here.
+	var operated: bool = false
 
 var ore: Dictionary[Vector2i, int] = {}
 var machines: Dictionary[Vector2i, Machine] = {}
 var core_cell := Vector2i.ZERO
+
+var cats: Array[Cat] = []
+var cat_boxes: Dictionary[Vector2i, bool] = {}
+var carried_boxes: int = 0
+var food: int = Defs.FOOD_START
+var shelter_cell := Vector2i.ZERO
+var food_cell := Vector2i.ZERO
 
 var heat: int = Defs.START_HEAT
 var total_heat: int = 0
@@ -51,7 +74,14 @@ func setup(seed_value: int) -> void:
 	core.type = Defs.M_CORE
 	core.cell = core_cell
 	machines[core_cell] = core
+	cats.clear()
+	cat_boxes.clear()
+	carried_boxes = 0
+	food = Defs.FOOD_START
+	shelter_cell = core_cell + Vector2i(Defs.SHELTER_OFFSET.round())
+	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
 	_generate_ore(seed_value)
+	_generate_cat_boxes(seed_value)
 
 ## Cells kept clear so the guaranteed opening always has a belt route home.
 ## A single row, not a block: a square patch would put ore directly in front of
@@ -103,11 +133,89 @@ func _scatter_ore(rng: RandomNumberGenerator, item_type: int, ring: Vector2, pat
 				placed += 1
 			cursor = origin + Vector2i(rng.randi_range(-1, 1), rng.randi_range(-1, 1)) * (1 + placed / 3)
 
+## Crates are strewn across the map at roughly one per hundred tiles, plus a
+## guaranteed three inside the opening warm radius so the first cat is always
+## reachable. Walking further is what buys more workers.
+func _generate_cat_boxes(seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 7717
+	for index in Defs.STARTER_CAT_BOXES:
+		var angle: float = TAU * float(index) / float(Defs.STARTER_CAT_BOXES) + 0.6
+		var radius: float = Defs.WARM_BASE - 2.0
+		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if not ore.has(cell) and cell != core_cell:
+			cat_boxes[cell] = true
+	var reach: float = Defs.WARM_MAX + 8.0
+	var target: int = int((PI * reach * reach) / Defs.CAT_BOX_PER_TILES)
+	var attempts := 0
+	while cat_boxes.size() < target + Defs.STARTER_CAT_BOXES and attempts < target * 30:
+		attempts += 1
+		var angle: float = rng.randf() * TAU
+		var radius: float = sqrt(rng.randf()) * reach
+		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if cat_boxes.has(cell) or ore.has(cell) or machines.has(cell):
+			continue
+		if _ring_distance(cell) < Defs.WARM_BASE - 1.0:
+			continue
+		cat_boxes[cell] = true
+
 func _ring_distance(cell: Vector2i) -> float:
 	return Vector2(cell - core_cell).length()
 
 func is_warm(cell: Vector2i) -> bool:
 	return _ring_distance(cell) <= warm_radius
+
+## Walking over a crate picks it up; three carried crates become a cat when the
+## player reaches the shelter.
+func collect_box_at(cell: Vector2i) -> bool:
+	if not cat_boxes.has(cell):
+		return false
+	cat_boxes.erase(cell)
+	carried_boxes += 1
+	box_collected.emit(carried_boxes)
+	return true
+
+func adopt_cats() -> int:
+	var adopted: int = carried_boxes / Defs.BOXES_PER_CAT
+	if adopted <= 0:
+		return 0
+	carried_boxes -= adopted * Defs.BOXES_PER_CAT
+	for index in adopted:
+		var cat := Cat.new()
+		cat.pos = Vector2(shelter_cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+		cats.append(cat)
+	cat_adopted.emit(cats.size())
+	return adopted
+
+func idle_miner_cells() -> Array[Vector2i]:
+	var free: Array[Vector2i] = []
+	for cell: Vector2i in machines:
+		if machines[cell].type != Defs.M_MINER:
+			continue
+		var taken := false
+		for cat: Cat in cats:
+			if cat.assigned == cell:
+				taken = true
+				break
+		if not taken:
+			free.append(cell)
+	return free
+
+## Each morning every cat is sent to a miner and walks there; mining only starts
+## once it arrives.
+func dispatch_cats() -> void:
+	for cat: Cat in cats:
+		if cat.has_job() and machines.has(cat.assigned):
+			cat.state = Defs.CAT_TO_MINER
+			continue
+		cat.assigned = Vector2i(9999, 9999)
+		cat.state = Defs.CAT_IDLE
+	var free: Array[Vector2i] = idle_miner_cells()
+	for cat: Cat in cats:
+		if cat.has_job() or free.is_empty():
+			continue
+		cat.assigned = free.pop_front()
+		cat.state = Defs.CAT_TO_MINER
 
 func machine_at(cell: Vector2i) -> Machine:
 	return machines.get(cell, null)
@@ -149,15 +257,84 @@ func demolish(cell: Vector2i) -> bool:
 	return true
 
 func tick(delta: float) -> void:
+	_tick_cats(delta)
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
 		machine.flash = maxf(0.0, machine.flash - delta)
 		var speed: float = 1.0 if is_warm(cell) else 0.45
+		if machine.type == Defs.M_MINER:
+			speed *= _operator_rate(cell)
 		match machine.type:
 			Defs.M_MINER: _tick_miner(machine, delta * speed)
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
 			Defs.M_FURNACE: _tick_furnace(machine, delta * speed)
 	_refresh_radius()
+
+func cell_centre(cell: Vector2i) -> Vector2:
+	return Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+
+## Work rate contributed by whichever cat is standing at this miner. Zero means
+## nobody is home; a starving cat still works, at a third of the pace.
+func _operator_rate(cell: Vector2i) -> float:
+	for cat: Cat in cats:
+		if cat.assigned == cell and cat.state == Defs.CAT_WORKING:
+			return 1.0 if cat.hunger > 0.0 else Defs.HUNGER_STARVED_RATE
+	return 0.0
+
+func _tick_cats(delta: float) -> void:
+	for cell: Vector2i in machines:
+		if machines[cell].type == Defs.M_MINER:
+			machines[cell].operated = false
+	for cat: Cat in cats:
+		match cat.state:
+			Defs.CAT_TO_MINER: _cat_walk_to_miner(cat, delta)
+			Defs.CAT_WORKING: _cat_work(cat, delta)
+			Defs.CAT_TO_FOOD: _cat_walk_to_food(cat, delta)
+			Defs.CAT_EATING: _cat_eat(cat, delta)
+
+func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
+	var to_goal: Vector2 = goal - cat.pos
+	var step: float = Defs.CAT_SPEED * delta
+	if to_goal.length() <= maxf(step, Defs.CAT_ARRIVE):
+		cat.pos = goal
+		return true
+	cat.pos += to_goal.normalized() * step
+	return false
+
+func _cat_walk_to_miner(cat: Cat, delta: float) -> void:
+	if not cat.has_job() or not machines.has(cat.assigned):
+		cat.state = Defs.CAT_IDLE
+		return
+	if _step_toward(cat, cell_centre(cat.assigned), delta):
+		cat.state = Defs.CAT_WORKING
+
+func _cat_work(cat: Cat, delta: float) -> void:
+	if not cat.has_job() or not machines.has(cat.assigned):
+		cat.state = Defs.CAT_IDLE
+		return
+	machines[cat.assigned].operated = true
+	cat.hunger = maxf(0.0, cat.hunger - Defs.HUNGER_PER_SECOND * delta)
+	if cat.hunger <= 0.0 and food > 0:
+		cat.state = Defs.CAT_TO_FOOD
+
+func _cat_walk_to_food(cat: Cat, delta: float) -> void:
+	if _step_toward(cat, cell_centre(food_cell), delta):
+		cat.state = Defs.CAT_EATING
+		cat.eat_timer = 0.0
+
+## Eating is slow on purpose: one unit every five seconds, a third of a belly
+## each. A hungry workforce is a real interruption, not a formality.
+func _cat_eat(cat: Cat, delta: float) -> void:
+	if food <= 0:
+		cat.state = Defs.CAT_TO_MINER
+		return
+	cat.eat_timer += delta
+	while cat.eat_timer >= Defs.FOOD_SECONDS_PER_UNIT and food > 0 and cat.hunger < 1.0:
+		cat.eat_timer -= Defs.FOOD_SECONDS_PER_UNIT
+		food -= 1
+		cat.hunger = minf(1.0, cat.hunger + Defs.FOOD_HUNGER_PER_UNIT)
+	if cat.hunger >= 1.0:
+		cat.state = Defs.CAT_TO_MINER
 
 func _refresh_radius() -> void:
 	warm_radius = Defs.warm_radius(total_heat)
@@ -166,6 +343,11 @@ func _refresh_radius() -> void:
 		warmth_changed.emit(warm_radius)
 
 func _tick_miner(machine: Machine, delta: float) -> void:
+	# A miner is inert without a cat standing at it. This is the whole point of
+	# the worker system: heat buys the machine, cats buy the output.
+	if not machine.operated:
+		machine.stalled = false
+		return
 	machine.progress += delta
 	if machine.progress < Defs.MINER_PERIOD:
 		return

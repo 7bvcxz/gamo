@@ -74,11 +74,11 @@ const M_FURNACE := 3
 
 const BUILDABLE: Array[int] = [M_MINER, M_BELT, M_FURNACE]
 
-const MACHINE_NAMES := ["열 코어", "채굴 고양이", "벨트", "제련로"]
+const MACHINE_NAMES := ["열 코어", "채굴기", "벨트", "제련로"]
 const MACHINE_COSTS := [0, 12, 2, 30]
 const MACHINE_HINTS := [
 	"",
-	"광맥 위에 설치하면 광석을 캐냅니다",
+	"광맥 위에 설치하고 고양이가 와야 돌아갑니다",
 	"광석을 바라보는 방향으로 옮깁니다",
 	"서리광석과 구리를 철로 제련합니다",
 ]
@@ -112,6 +112,30 @@ const DUSK_SECONDS := 95.0
 const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when warm
 const SHELTER_OFFSET := Vector2(-2.5, 2.5)
 const SHELTER_REACH := 62.0
+const FOOD_OFFSET := Vector2(-4.5, 2.5)
+
+# --- Cat workers -------------------------------------------------------------
+## A miner is a machine, not a worker. It only runs while a cat stands at it,
+## so automation is gated on adopting cats rather than on spending heat.
+const CAT_SPEED := 46.0            # pixels per second while walking
+const CAT_ARRIVE := 10.0           # how close counts as "at the machine"
+const BOXES_PER_CAT := 3
+const CAT_BOX_PER_TILES := 100.0   # one crate per hundred tiles of world
+const STARTER_CAT_BOXES := 3
+
+## Hunger runs 0..1. Working costs 1/18 every ten seconds, so a fed cat works
+## about three real minutes before it needs the food bin.
+const HUNGER_PER_SECOND := (1.0 / 18.0) / 10.0
+const HUNGER_STARVED_RATE := 1.0 / 3.0    # work speed multiplier at zero hunger
+const FOOD_START := 200
+const FOOD_SECONDS_PER_UNIT := 5.0
+const FOOD_HUNGER_PER_UNIT := 1.0 / 3.0
+
+const CAT_IDLE := 0
+const CAT_TO_MINER := 1
+const CAT_WORKING := 2
+const CAT_TO_FOOD := 3
+const CAT_EATING := 4
 const COLD_RECOVER := 26.0
 const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
 ## Cold is a slope, not a cliff: movement degrades the whole way down so the

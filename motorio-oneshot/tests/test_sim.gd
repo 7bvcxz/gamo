@@ -22,6 +22,16 @@ func _run() -> void:
 		print("SIM_TEST: PASS")
 	quit(failures)
 
+## Miners are inert without an operator, so any test about mining output has to
+## staff the machine first.
+func _staff(sim: Sim, cell: Vector2i) -> Sim.Cat:
+	var cat := Sim.Cat.new()
+	cat.assigned = cell
+	cat.state = Defs.CAT_WORKING
+	cat.pos = sim.cell_centre(cell)
+	sim.cats.append(cat)
+	return cat
+
 func _fresh() -> Sim:
 	var sim := Sim.new()
 	sim.setup(12345)
@@ -121,6 +131,7 @@ func _test_miner_to_core() -> void:
 	sim.ore[cell] = Defs.ITEM_FROST
 	sim.heat = 100
 	_assert(sim.build(Defs.M_MINER, cell, Vector2i.RIGHT), "miner placed next to the core")
+	_staff(sim, cell)
 	var before: int = sim.total_heat
 	for step in 80:
 		sim.tick(0.1)     # comfortably longer than one mining period
@@ -136,6 +147,7 @@ func _test_miner_rate() -> void:
 	var cell := Vector2i(-1, 0)
 	sim.ore[cell] = Defs.ITEM_FROST
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
+	_staff(sim, cell)
 	for step in 50:
 		sim.tick(0.1)     # five seconds
 	_assert(sim.delivered[Defs.ITEM_FROST] == 0, "a miner produces nothing within five seconds")
@@ -151,6 +163,7 @@ func _test_belt_transport() -> void:
 	# miner at (-3,0) -> belts at (-2,0) and (-1,0) -> core at (0,0)
 	sim.ore[Vector2i(-3, 0)] = Defs.ITEM_FROST
 	_assert(sim.build(Defs.M_MINER, Vector2i(-3, 0), Vector2i.RIGHT), "miner built")
+	_staff(sim, Vector2i(-3, 0))
 	_assert(sim.build(Defs.M_BELT, Vector2i(-2, 0), Vector2i.RIGHT), "first belt built")
 	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "second belt built")
 	var saw_item := false
@@ -260,6 +273,7 @@ func _test_blocked_output_preserves_work() -> void:
 	var cell := Vector2i(3, 3)
 	sim.ore[cell] = Defs.ITEM_FROST
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
+	_staff(sim, cell)
 	var machine: Sim.Machine = sim.machine_at(cell)
 	for step in 80:
 		sim.tick(0.1)

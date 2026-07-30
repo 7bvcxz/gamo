@@ -58,6 +58,9 @@ func _draw() -> void:
 			continue
 		_draw_belt_items(machine, Vector2(cell) * tile, tile)
 	_draw_shelter(tile)
+	_draw_food_bin(tile)
+	_draw_boxes(tile)
+	_draw_cats()
 	if show_preview:
 		_draw_preview(tile)
 
@@ -120,40 +123,81 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
 	var work: float = clampf(machine.progress / Defs.MINER_PERIOD, 0.0, 1.0)
-	# A small breathing squash keeps the worker alive without swapping frames.
-	var breathe: float = 1.0 + sin(pulse * 2.6 + float(machine.cell.x)) * 0.02
-	var dig: float = sin(pulse * 9.0) * 1.4 * (1.0 - frost)
+	var body: Color = Color8(74, 86, 100).lerp(Color8(48, 56, 68), frost)
 
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
-	draw_circle(Vector2(c.x, (c.y + 11.0) / 0.45), 9.0, Color(0.02, 0.04, 0.08, 0.34))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-	# Eight facings from four drawn views: diagonals borrow the front or back view
-	# and lean, so north-east and north-west are told apart.
-	var facing: int = Defs.facing_index(Vector2(machine.dir))
-	var view: Dictionary = Defs.facing_view(facing)
-	var lean: float = float(view["lean"])
-	var flip: bool = bool(view["flip"])
-	var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
-	if flip:
-		size.x = -size.x
-	var target := Rect2(c - Vector2(absf(size.x), size.y) * 0.5 + Vector2(lean * 3.0, dig - 3.0), size)
-	if flip:
-		target.position.x += absf(size.x)
-	# Frozen workers desaturate toward the cold instead of being recoloured.
-	var tint: Color = Color.WHITE.lerp(Color(0.62, 0.72, 0.95), frost)
-	draw_set_transform(c + Vector2(lean * 3.0, 0.0), lean * 0.10, Vector2.ONE)
-	draw_texture_rect_region(CAT_SHEET,
-		Rect2(target.position - c - Vector2(lean * 3.0, 0.0), target.size),
-		_cat_region(String(view["view"])), tint)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-	# Output direction and a progress arc, so throughput is legible at a glance.
+	draw_circle(c + Vector2(0, 11), 10.0, Color(0.02, 0.04, 0.08, 0.34))
+	draw_rect(Rect2(c.x - 13, c.y - 13, 26, 26), Defs.ORE_OUTLINE)
+	draw_rect(Rect2(c.x - 11, c.y - 11, 22, 22), body)
+	draw_rect(Rect2(c.x - 11, c.y - 11, 22, 2.5), Defs.COL_BELT_RIM.lerp(body, frost))
+	# A drill head that only turns while a cat is operating it.
+	var spin: float = pulse * (5.0 if machine.operated else 0.0)
+	for index in 3:
+		var angle: float = spin + TAU * float(index) / 3.0
+		draw_line(c, c + Vector2.from_angle(angle) * 7.0,
+			Defs.COL_BELT_CHEVRON if machine.operated else Color8(120, 132, 148), 2.0)
 	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 10.0, Defs.COL_BELT_RIM, 2.5)
-	draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
+	if machine.operated:
+		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
+	else:
+		# Idle machines say so plainly: this is the most common reason a new
+		# player sees no output at all.
+		var blink: float = 0.45 + sin(pulse * 3.0) * 0.3
+		draw_arc(c, 15.0, 0.0, TAU, 28, Color(0.75, 0.78, 0.85, blink), 1.5, true)
 	if machine.flash > 0.0:
 		draw_circle(c, 17.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
 	_draw_stall(machine, c)
+
+## Cats are agents, not tiles: they walk between the shelter, their machine and
+## the food bin, so they are drawn from their own positions.
+func _draw_cats() -> void:
+	for cat: Sim.Cat in sim.cats:
+		if not view_rect.grow(64.0).has_point(cat.pos):
+			continue
+		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02
+		var heading: Vector2 = Vector2.DOWN
+		if cat.state == Defs.CAT_TO_MINER and sim.machines.has(cat.assigned):
+			heading = sim.cell_centre(cat.assigned) - cat.pos
+		elif cat.state == Defs.CAT_TO_FOOD:
+			heading = sim.cell_centre(sim.food_cell) - cat.pos
+		var view: Dictionary = Defs.facing_view(Defs.facing_index(heading))
+		var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
+		if bool(view["flip"]):
+			size.x = -size.x
+		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4), size)
+		if bool(view["flip"]):
+			target.position.x += absf(size.x)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
+		draw_circle(Vector2(cat.pos.x, (cat.pos.y + 10.0) / 0.45), 8.0, Color(0.02, 0.04, 0.08, 0.32))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_texture_rect_region(CAT_SHEET, target, _cat_region(String(view["view"])), Color.WHITE)
+		# Hunger only appears once it matters, so a healthy crew stays clean.
+		if cat.hunger < 0.5:
+			var bar := Rect2(cat.pos.x - 11, cat.pos.y - 26, 22, 3)
+			draw_rect(bar, Color(0.06, 0.08, 0.12, 0.85))
+			draw_rect(Rect2(bar.position, Vector2(bar.size.x * cat.hunger, bar.size.y)),
+				Defs.COL_DANGER if cat.hunger <= 0.0 else Defs.COL_BELT_RIM)
+
+## Crates lying in the snow, and the food bin beside the shelter.
+func _draw_boxes(tile: float) -> void:
+	for cell: Vector2i in sim.cat_boxes:
+		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		if not view_rect.grow(tile).has_point(at):
+			continue
+		draw_circle(at + Vector2(0, 9), 8.0, Color(0.02, 0.04, 0.08, 0.30))
+		draw_rect(Rect2(at.x - 10, at.y - 8, 20, 17), Defs.ORE_OUTLINE)
+		draw_rect(Rect2(at.x - 8, at.y - 6, 16, 13), Color8(146, 102, 62))
+		draw_rect(Rect2(at.x - 8, at.y - 1, 16, 3), Color8(196, 146, 92))
+		draw_circle(at + Vector2(0, -2), 2.6, Defs.COL_CAT_FACE)
+
+func _draw_food_bin(tile: float) -> void:
+	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
+	draw_circle(at + Vector2(0, 10), 10.0, Color(0.02, 0.04, 0.08, 0.30))
+	draw_rect(Rect2(at.x - 12, at.y - 9, 24, 19), Defs.ORE_OUTLINE)
+	draw_rect(Rect2(at.x - 10, at.y - 7, 20, 15), Color8(84, 96, 112))
+	draw_rect(Rect2(at.x - 10, at.y - 7, 20, 3), Defs.COL_BELT_RIM)
+	var font := UIFont.FONT
+	draw_string(font, at + Vector2(-20, 24), "사료 %d" % sim.food, HORIZONTAL_ALIGNMENT_CENTER, 40.0, 10,
+		Defs.COL_TEXT)
 
 func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
