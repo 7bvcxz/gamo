@@ -77,8 +77,8 @@ func _draw_ore(tile: float) -> void:
 		draw_line(centre + Vector2(-4, -7), centre + Vector2(-1, 2), tint.lightened(0.5), 1.5)
 		# A bright inner core keeps ore readable on the amber pool as well as the
 		# night; ember previously shared a hue band with the warm ground.
-		if item_type == Defs.ITEM_EMBER:
-			draw_circle(centre + Vector2(1, -1), 3.0, Defs.EMBER_CORE)
+		if item_type == Defs.ITEM_COPPER:
+			draw_circle(centre + Vector2(1, -1), 3.0, Defs.COPPER_CORE)
 		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.7 if warm else 0.5))
 		if not warm:
 			# A slow glint pulls the eye toward ore the player cannot reach yet.

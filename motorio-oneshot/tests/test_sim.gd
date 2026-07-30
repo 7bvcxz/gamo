@@ -30,14 +30,17 @@ func _fresh() -> Sim:
 func _test_generation() -> void:
 	var sim := _fresh()
 	var frost := 0
-	var ember := 0
+	var copper := 0
 	for cell: Vector2i in sim.ore:
 		if sim.ore[cell] == Defs.ITEM_FROST:
 			frost += 1
 		else:
-			ember += 1
-	_assert(frost > 10, "the map generates a workable amount of frost ore")
-	_assert(ember > 10, "the map generates a workable amount of ember ore")
+			copper += 1
+	# Ore is a fifth as dense as it was: scarcity is the point, but the guaranteed
+	# seams must still make the opening and the iron recipe reachable.
+	_assert(frost >= 6, "frost ore exists in workable but scarce amounts")
+	_assert(copper >= 6, "copper ore exists in workable but scarce amounts")
+	_assert(frost < 20 and copper < 20, "ore density stays scarce after the reduction")
 	_assert(not sim.ore.has(sim.core_cell), "ore never spawns under the core")
 
 	# Frost must be reachable at the opening radius or the first 45 seconds stall.
@@ -48,11 +51,11 @@ func _test_generation() -> void:
 	_assert(reachable > 0, "some frost ore sits inside the starting warm radius")
 
 	# Ember must NOT be reachable at the start, or the progression has no arc.
-	var early_ember := 0
+	var early_copper := 0
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_EMBER and Vector2(cell).length() <= Defs.WARM_BASE:
-			early_ember += 1
-	_assert(early_ember == 0, "ember ore starts outside the warm radius")
+		if sim.ore[cell] == Defs.ITEM_COPPER and Vector2(cell).length() <= Defs.WARM_BASE:
+			early_copper += 1
+	_assert(early_copper == 0, "copper ore starts outside the warm radius")
 
 	# The opening must be identical every run: a patch south of the core plus a
 	# clear two-tile lane to belt through. Otherwise the first minute is a search.
@@ -67,17 +70,17 @@ func _test_generation() -> void:
 
 	# The alloy chain must be buildable in every run, not only when the scatter
 	# is kind: a guaranteed ember seam plus a clear column back to the core.
-	for offset: Vector2i in Sim.STARTER_EMBER:
-		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_EMBER,
-			"guaranteed ember seam exists at %s" % offset)
+	for offset: Vector2i in Sim.STARTER_COPPER:
+		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_COPPER,
+			"guaranteed copper seam exists at %s" % offset)
 	for step in range(1, 9):
 		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, -step)
 		_assert(sim.can_build(Defs.M_BELT, lane_cell) == "",
-			"the ember column home is clear at %s" % lane_cell)
-	_assert(Vector2(Sim.STARTER_EMBER[0]).length() > Defs.WARM_BASE,
-		"the ember seam starts outside the opening warm radius, so it must be earned")
-	_assert(Vector2(Sim.STARTER_EMBER[0]).length() < Defs.WARM_MAX,
-		"the ember seam is reachable within a single run")
+			"the copper column home is clear at %s" % lane_cell)
+	_assert(Vector2(Sim.STARTER_COPPER[0]).length() > Defs.WARM_BASE,
+		"the copper seam starts outside the opening warm radius, so it must be earned")
+	_assert(Vector2(Sim.STARTER_COPPER[0]).length() < Defs.WARM_MAX,
+		"the copper seam is reachable within a single run")
 	sim.free()
 
 	# The opening is deterministic across different world seeds.
@@ -172,26 +175,26 @@ func _test_furnace_alloy() -> void:
 	furnace.buffer[Defs.ITEM_FROST] = 2
 	for step in 40:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_ALLOY] == 0, "a furnace with one ore type produces nothing")
+	_assert(sim.delivered[Defs.ITEM_IRON] == 0, "a furnace with one ore type produces nothing")
 
 	# Input may arrive on any face except the one the furnace outputs from.
 	var out_cell: Vector2i = furnace_cell + Vector2i.RIGHT
 	var side_cell: Vector2i = furnace_cell + Vector2i.UP
 	var back_cell: Vector2i = furnace_cell + Vector2i.LEFT
-	_assert(sim._push_into(furnace_cell, Defs.ITEM_EMBER, side_cell),
+	_assert(sim._push_into(furnace_cell, Defs.ITEM_COPPER, side_cell),
 		"the furnace accepts ore pushed in from the side")
-	_assert(sim._push_into(furnace_cell, Defs.ITEM_EMBER, back_cell),
+	_assert(sim._push_into(furnace_cell, Defs.ITEM_COPPER, back_cell),
 		"the furnace accepts ore pushed in from behind")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_EMBER, out_cell),
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_COPPER, out_cell),
 		"the furnace refuses ore pushed in from its own output face")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_ALLOY, side_cell),
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_IRON, side_cell),
 		"the furnace never takes its own product as input")
 
-	furnace.buffer[Defs.ITEM_EMBER] = 2
+	furnace.buffer[Defs.ITEM_COPPER] = 2
 	for step in 80:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_ALLOY] > 0, "frost plus ember yields alloy at the core")
-	_assert(Defs.ITEM_VALUES[Defs.ITEM_ALLOY] > Defs.ITEM_VALUES[Defs.ITEM_FROST] + Defs.ITEM_VALUES[Defs.ITEM_EMBER],
+	_assert(sim.delivered[Defs.ITEM_IRON] > 0, "frost plus ember yields alloy at the core")
+	_assert(Defs.ITEM_VALUES[Defs.ITEM_IRON] > Defs.ITEM_VALUES[Defs.ITEM_FROST] + Defs.ITEM_VALUES[Defs.ITEM_COPPER],
 		"alloy is worth more than its inputs, so the routing puzzle pays off")
 	sim.free()
 
@@ -200,11 +203,11 @@ func _test_economy_and_warmth() -> void:
 	var start_radius: float = sim.warm_radius
 	sim.heat = 0
 	sim.total_heat = 0
-	sim._deliver(Defs.ITEM_ALLOY, sim.core_cell)
-	_assert(sim.heat == Defs.ITEM_VALUES[Defs.ITEM_ALLOY], "delivery credits spendable heat")
-	_assert(sim.total_heat == Defs.ITEM_VALUES[Defs.ITEM_ALLOY], "delivery credits lifetime heat")
+	sim._deliver(Defs.ITEM_IRON, sim.core_cell)
+	_assert(sim.heat == Defs.ITEM_VALUES[Defs.ITEM_IRON], "delivery credits spendable heat")
+	_assert(sim.total_heat == Defs.ITEM_VALUES[Defs.ITEM_IRON], "delivery credits lifetime heat")
 	for step in 400:
-		sim._deliver(Defs.ITEM_ALLOY, sim.core_cell)
+		sim._deliver(Defs.ITEM_IRON, sim.core_cell)
 	sim.tick(0.016)
 	_assert(sim.warm_radius > start_radius, "lifetime heat expands the warm radius")
 	_assert(sim.warm_radius <= Defs.WARM_MAX, "the warm radius is capped")

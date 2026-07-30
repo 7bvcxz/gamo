@@ -50,18 +50,21 @@ const COL_TEXT_DIM := Color("8fa0bd")
 
 # --- Items -------------------------------------------------------------------
 const ITEM_FROST := 0
-const ITEM_EMBER := 1
-const ITEM_ALLOY := 2
+const ITEM_COPPER := 1
+const ITEM_IRON := 2
 
-const ITEM_NAMES := ["서리광석", "잉걸광석", "합금"]
+const ITEM_NAMES := ["서리광석", "구리", "철"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
-## Ember sat at 1.99:1 against the night and shared a hue band with the warm
+## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
 ## ground, so it vanished exactly when the player was told to go find it.
 const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138)]
-const EMBER_CORE := Color8(255, 238, 205)
+const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
+## Heat is still the currency that widens the warm radius; copper and iron are
+## counted separately as materials.
 const ITEM_VALUES := [3, 6, 22]
+const COUNTED_ITEMS: Array[int] = [ITEM_COPPER, ITEM_IRON]
 
 # --- Machines ----------------------------------------------------------------
 const M_CORE := 0
@@ -77,7 +80,7 @@ const MACHINE_HINTS := [
 	"",
 	"광맥 위에 설치하면 광석을 캐냅니다",
 	"광석을 바라보는 방향으로 옮깁니다",
-	"서리+잉걸 광석을 합금으로 제련합니다",
+	"서리광석과 구리를 철로 제련합니다",
 ]
 
 # --- Economy -----------------------------------------------------------------
@@ -91,8 +94,8 @@ const MINER_PERIOD := 5.75
 const FURNACE_PERIOD := 2.2
 const BELT_SPEED := 2.6           # tiles per second
 const BELT_CAPACITY := 3
-const FROST_COST_ALLOY := 1
-const EMBER_COST_ALLOY := 1
+const FROST_COST_IRON := 1
+const COPPER_COST_IRON := 1
 
 ## Warmth grows with everything the core has ever received, so investing in the
 ## factory is what expands the map rather than hoarding.
@@ -113,7 +116,7 @@ const COLD_RECOVER := 26.0
 const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
 
 const FROST_RING := Vector2(4.0, 9.5)
-const EMBER_RING := Vector2(11.0, 17.0)
+const COPPER_RING := Vector2(11.0, 17.0)
 
 ## Eight-direction facing. The source art only contains four views (and the
 ## engineer's sheet only one), so a diagonal is rendered as its nearest real view

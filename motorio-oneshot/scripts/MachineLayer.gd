@@ -159,7 +159,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
 	var body: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
-	var ready: bool = int(machine.buffer.get(Defs.ITEM_FROST, 0)) > 0 and int(machine.buffer.get(Defs.ITEM_EMBER, 0)) > 0
+	var ready: bool = int(machine.buffer.get(Defs.ITEM_FROST, 0)) > 0 and int(machine.buffer.get(Defs.ITEM_COPPER, 0)) > 0
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
 	draw_circle(c + Vector2(0, 9), 11.0, Color(0.02, 0.04, 0.08, 0.32))
@@ -173,7 +173,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	_draw_stall(machine, c)
 	# Two input pips tell the player exactly what the recipe is still missing.
 	_draw_pip(c + Vector2(-6, 12), Defs.ITEM_FROST, int(machine.buffer.get(Defs.ITEM_FROST, 0)))
-	_draw_pip(c + Vector2(6, 12), Defs.ITEM_EMBER, int(machine.buffer.get(Defs.ITEM_EMBER, 0)))
+	_draw_pip(c + Vector2(6, 12), Defs.ITEM_COPPER, int(machine.buffer.get(Defs.ITEM_COPPER, 0)))
 	if machine.flash > 0.0:
 		draw_circle(c, 16.0 + machine.flash * 14.0, Color(1, 0.9, 0.7, machine.flash * 0.55), false, 2.0)
 

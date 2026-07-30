@@ -83,11 +83,11 @@ func objective() -> String:
 		return "1  광맥 위에 채굴 고양이를 설치하세요  (1 선택 → R 로 코어 방향 → Z)"
 	if sim.total_heat == 0:
 		return "2  벨트로 채굴 고양이와 코어를 이으세요  (2 선택 → Z)"
-	if sim.delivered.get(Defs.ITEM_EMBER, 0) == 0 and sim.machine_count(Defs.M_FURNACE) == 0:
-		return "3  열을 모아 온기를 넓히고 잉걸광석까지 닿으세요"
+	if sim.delivered.get(Defs.ITEM_COPPER, 0) == 0 and sim.machine_count(Defs.M_FURNACE) == 0:
+		return "3  열을 모아 온기를 넓히고 구리 광맥까지 닿으세요"
 	if sim.machine_count(Defs.M_FURNACE) == 0:
-		return "4  제련로에 서리광석과 잉걸광석을 함께 넣어 합금을 만드세요"
-	if sim.delivered.get(Defs.ITEM_ALLOY, 0) == 0:
+		return "4  제련로에 서리광석과 구리를 함께 넣어 철을 만드세요"
+	if sim.delivered.get(Defs.ITEM_IRON, 0) == 0:
 		return "5  제련로 출력을 코어까지 이으세요"
 	return "남은 시간 동안 생산을 늘리세요"
 
@@ -337,8 +337,8 @@ func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.COL_CORE, 18.0)
-	shake = maxf(shake, 0.9 if item_type != Defs.ITEM_ALLOY else 3.0)
-	audio.call("play", "alloy" if item_type == Defs.ITEM_ALLOY else "deliver")
+	shake = maxf(shake, 0.9 if item_type != Defs.ITEM_IRON else 3.0)
+	audio.call("play", "alloy" if item_type == Defs.ITEM_IRON else "deliver")
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	# One channel only. Showing the same reason both here and in the centre

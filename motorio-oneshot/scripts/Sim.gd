@@ -42,7 +42,7 @@ func setup(seed_value: int) -> void:
 	machines.clear()
 	heat = Defs.START_HEAT
 	total_heat = 0
-	delivered = {Defs.ITEM_FROST: 0, Defs.ITEM_EMBER: 0, Defs.ITEM_ALLOY: 0}
+	delivered = {Defs.ITEM_FROST: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_IRON: 0}
 	warm_radius = Defs.WARM_BASE
 	# Seed the cache so the opening frame does not announce a radius that has
 	# not actually changed yet.
@@ -63,7 +63,7 @@ const STARTER_LANE: Array[Vector2i] = [Vector2i(0, 1), Vector2i(0, 2)]
 ## payoff -- depends on where the scatter happened to drop ember, which made the
 ## mid-game beat unreliable and left the headline mechanic unreachable in a
 ## five-minute run.
-const STARTER_EMBER: Array[Vector2i] = [Vector2i(1, -9), Vector2i(0, -9), Vector2i(2, -9)]
+const STARTER_COPPER: Array[Vector2i] = [Vector2i(1, -9), Vector2i(0, -9), Vector2i(2, -9)]
 
 func _generate_ore(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -72,10 +72,12 @@ func _generate_ore(seed_value: int) -> void:
 	# be about learning the miner-belt-core sentence, not about searching.
 	for offset: Vector2i in STARTER_PATCH:
 		ore[core_cell + offset] = Defs.ITEM_FROST
-	_scatter_ore(rng, Defs.ITEM_FROST, Defs.FROST_RING, 7, 4)
-	_scatter_ore(rng, Defs.ITEM_EMBER, Defs.EMBER_RING, 6, 5)
-	for offset: Vector2i in STARTER_EMBER:
-		ore[core_cell + offset] = Defs.ITEM_EMBER
+	# Ore is deliberately scarce: a fifth of the earlier density. Finding a seam
+	# should be an event, and a single miner should be worth protecting.
+	_scatter_ore(rng, Defs.ITEM_FROST, Defs.FROST_RING, 3, 2)
+	_scatter_ore(rng, Defs.ITEM_COPPER, Defs.COPPER_RING, 3, 2)
+	for offset: Vector2i in STARTER_COPPER:
+		ore[core_cell + offset] = Defs.ITEM_COPPER
 	for offset: Vector2i in STARTER_LANE:
 		ore.erase(core_cell + offset)
 	# Two clear columns home: one from the frost row, one from the ember seam.
@@ -200,20 +202,20 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 
 func _tick_furnace(machine: Machine, delta: float) -> void:
 	var frost: int = int(machine.buffer.get(Defs.ITEM_FROST, 0))
-	var ember: int = int(machine.buffer.get(Defs.ITEM_EMBER, 0))
-	if frost < Defs.FROST_COST_ALLOY or ember < Defs.EMBER_COST_ALLOY:
+	var ember: int = int(machine.buffer.get(Defs.ITEM_COPPER, 0))
+	if frost < Defs.FROST_COST_IRON or ember < Defs.COPPER_COST_IRON:
 		machine.progress = 0.0
 		return
 	machine.progress += delta
 	if machine.progress < Defs.FURNACE_PERIOD:
 		return
-	if not _push_into(machine.cell + machine.dir, Defs.ITEM_ALLOY, machine.cell):
+	if not _push_into(machine.cell + machine.dir, Defs.ITEM_IRON, machine.cell):
 		machine.progress = Defs.FURNACE_PERIOD
 		machine.stalled = true
 		return
 	machine.stalled = false
-	machine.buffer[Defs.ITEM_FROST] = frost - Defs.FROST_COST_ALLOY
-	machine.buffer[Defs.ITEM_EMBER] = ember - Defs.EMBER_COST_ALLOY
+	machine.buffer[Defs.ITEM_FROST] = frost - Defs.FROST_COST_IRON
+	machine.buffer[Defs.ITEM_COPPER] = ember - Defs.COPPER_COST_IRON
 	machine.progress = 0.0
 	machine.flash = 0.5
 
@@ -236,7 +238,7 @@ func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 
 			target.items.append({"type": item_type, "t": 0.0})
 			return true
 		Defs.M_FURNACE:
-			if item_type == Defs.ITEM_ALLOY:
+			if item_type == Defs.ITEM_IRON:
 				return false
 			# Every face except the output takes ore. Feeding the mouth the
 			# furnace pours out of would let a line quietly eat its own product.

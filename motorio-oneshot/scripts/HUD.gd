@@ -131,7 +131,7 @@ func _draw_snow(strength: float) -> void:
 
 func _draw_status() -> void:
 	var sim = main.sim
-	var panel := Rect2(MARGIN, MARGIN, PANEL_W, 108)
+	var panel := Rect2(MARGIN, MARGIN, PANEL_W, 128)
 	# Fully opaque: ore silhouettes were crawling behind the temperature row.
 	_panel(panel, Defs.COL_PANEL, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
 
@@ -158,6 +158,12 @@ func _draw_status() -> void:
 		Defs.COL_MACHINE_EDGE, HORIZONTAL_ALIGNMENT_RIGHT)
 	_text_in(Rect2(panel.position + Vector2(96, 76), Vector2(120, 16)), "누적 %d" % sim.total_heat, 11,
 		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
+	# Copper and iron are materials, not currency, so they get their own row.
+	var materials: Vector2 = panel.position + Vector2(14, 92)
+	draw_circle(materials + Vector2(4, -4), 4.5, Defs.ITEM_COLORS[Defs.ITEM_COPPER])
+	_text(materials + Vector2(13, 0), "구리 %d" % int(sim.delivered.get(Defs.ITEM_COPPER, 0)), 12, Defs.COL_TEXT)
+	draw_circle(materials + Vector2(84, -4), 4.5, Defs.ITEM_COLORS[Defs.ITEM_IRON])
+	_text(materials + Vector2(93, 0), "철 %d" % int(sim.delivered.get(Defs.ITEM_IRON, 0)), 12, Defs.COL_TEXT)
 
 	_draw_warmth_row(panel)
 	_draw_objective(panel)
@@ -178,7 +184,7 @@ func _draw_objective(panel: Rect2) -> void:
 func _draw_warmth_row(panel: Rect2) -> void:
 	var warmth: float = main.player.warmth
 	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
-	var origin: Vector2 = panel.position + Vector2(14, 88)
+	var origin: Vector2 = panel.position + Vector2(14, 108)
 	_text(origin + Vector2(0, 10), "체온", 11, Defs.COL_TEXT_DIM)
 	_text_in(Rect2(origin + Vector2(166, -2), Vector2(36, 16)), "%d%%" % int(round(warmth)), 11,
 		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER, HORIZONTAL_ALIGNMENT_RIGHT)

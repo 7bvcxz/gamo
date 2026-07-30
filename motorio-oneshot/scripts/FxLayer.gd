@@ -40,7 +40,7 @@ func popup(at: Vector2, text: String, color: Color, plated: bool = false) -> voi
 			existing["pos"] = at
 			_labels[index] = existing
 			return
-	_labels.append({"pos": at, "text": text, "color": color, "life": 0.9, "max": 0.9, "plate": plated})
+	_labels.append({"pos": at, "text": text, "color": color, "life": 0.9, "max": 0.9, "iron": plated})
 
 func ring(at: Vector2, color: Color, radius: float = 26.0) -> void:
 	if _rings.size() >= MAX_EFFECTS:
@@ -79,7 +79,7 @@ func _draw() -> void:
 		var width: float = font.get_string_size(body, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
 		# Text over the amber pool measured 1.38:1; a plate is the only way to
 		# hold contrast against a background that can be any colour.
-		if bool(fx.get("plate", false)):
+		if bool(fx.get("iron", false)):
 			draw_rect(Rect2(at.x - width * 0.5 - 8.0, at.y - 15.0, width + 16.0, 21.0),
 				Color(0.06, 0.08, 0.12, alpha * 0.92))
 		draw_string(font, at - Vector2(width * 0.5, 0), body, HORIZONTAL_ALIGNMENT_LEFT, -1, 15,
