@@ -115,6 +115,47 @@ const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
 const FROST_RING := Vector2(4.0, 9.5)
 const EMBER_RING := Vector2(11.0, 17.0)
 
+## Eight-direction facing. The source art only contains four views (and the
+## engineer's sheet only one), so a diagonal is rendered as its nearest real view
+## plus a lean. That is enough to read direction at a glance without inventing
+## artwork that does not exist.
+const DIR_S := 0
+const DIR_SE := 1
+const DIR_E := 2
+const DIR_NE := 3
+const DIR_N := 4
+const DIR_NW := 5
+const DIR_W := 6
+const DIR_SW := 7
+
+const DIR_VECTORS: Array[Vector2] = [
+	Vector2(0, 1), Vector2(0.7071, 0.7071), Vector2(1, 0), Vector2(0.7071, -0.7071),
+	Vector2(0, -1), Vector2(-0.7071, -0.7071), Vector2(-1, 0), Vector2(-0.7071, 0.7071),
+]
+
+static func facing_index(direction: Vector2) -> int:
+	if direction.is_zero_approx():
+		return DIR_S
+	var step: float = TAU / 8.0
+	# Screen space has +y pointing south. Index 0 is south and the index rises as
+	# the heading sweeps south -> east -> north -> west, which is why the angle is
+	# measured down from south rather than up from east.
+	var angle: float = fposmod(PI * 0.5 - direction.angle(), TAU)
+	return int(round(angle / step)) % 8
+
+## Which of the four drawn views a facing should use, and whether it is mirrored.
+## Diagonals borrow the front or back view and lean, so NE and NW differ.
+static func facing_view(index: int) -> Dictionary:
+	match index:
+		DIR_S: return {"view": "front", "flip": false, "lean": 0.0}
+		DIR_SE: return {"view": "front", "flip": false, "lean": 1.0}
+		DIR_E: return {"view": "right", "flip": false, "lean": 0.0}
+		DIR_NE: return {"view": "back", "flip": false, "lean": 1.0}
+		DIR_N: return {"view": "back", "flip": false, "lean": 0.0}
+		DIR_NW: return {"view": "back", "flip": true, "lean": -1.0}
+		DIR_W: return {"view": "left", "flip": false, "lean": 0.0}
+		_: return {"view": "front", "flip": true, "lean": -1.0}
+
 static func machine_color(type: int) -> Color:
 	match type:
 		M_CORE: return COL_CORE

@@ -24,9 +24,13 @@ const FRAME_FOOT_ANCHORS := [
 
 var velocity := Vector2.ZERO
 var facing := Vector2i.RIGHT
+## Eight-way facing for the artwork and the shadow lean. Build targeting stays
+## on the four cardinals because belts and machine outputs are cardinal.
+var facing8: int = Defs.DIR_S
 var warmth := 100.0
 var locked := false
 var animation_time := 0.0
+var _lean := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
 
@@ -49,6 +53,7 @@ func _physics_process(delta: float) -> void:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 	else:
 		velocity = velocity.move_toward(target, ACCEL * delta)
+		facing8 = Defs.facing_index(input)
 		if absf(input.x) > 0.25:
 			facing = Vector2i(signi(int(signf(input.x))), 0)
 		elif absf(input.y) > 0.25:
@@ -60,8 +65,12 @@ func _physics_process(delta: float) -> void:
 
 func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	animation_time += delta
-	if absf(input.x) > 0.15:
-		character.flip_h = input.x < 0.0
+	# The generated sheet is a single front-facing view, so heading is expressed
+	# by mirroring and by a lean rather than by a different drawing.
+	var view: Dictionary = Defs.facing_view(facing8)
+	var lean: float = float(view["lean"])
+	character.flip_h = bool(view["flip"]) or (absf(input.x) > 0.15 and input.x < 0.0)
+	_lean = lerpf(_lean, lean, minf(1.0, delta * 9.0))
 	# Cold drains the colour out of her the same way it does the world.
 	var chill: float = clampf(1.0 - warmth / 100.0, 0.0, 1.0)
 	character.modulate = Color.WHITE.lerp(Color(0.70, 0.80, 1.0), chill * 0.65)
@@ -72,9 +81,11 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 
 func _idle() -> void:
 	var breath: float = 1.0 + sin(animation_time * 3.2) * 0.012
-	character.rotation = 0.0
+	character.rotation = _lean * 0.05
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
-	_set_frame(0)
+	# The idle row's four frames share a silhouette, so they can actually cycle;
+	# only the action rows had the discontinuity that forced a single pose.
+	_set_frame(int(animation_time * 2.2) % 4)
 
 func _moving(sprinting: bool) -> void:
 	var rate: float = 13.0 if sprinting else 8.5
@@ -82,9 +93,13 @@ func _moving(sprinting: bool) -> void:
 	var stretch: float = sin(phase) * (0.045 if sprinting else 0.035)
 	var squash: float = -stretch * 0.45
 	var bounce: float = absf(sin(phase)) * (3.0 if sprinting else 2.0)
-	character.rotation = sin(phase) * (0.075 if sprinting else 0.055)
+	character.rotation = sin(phase) * (0.075 if sprinting else 0.055) + _lean * 0.06
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
-	_set_frame(8 if sprinting else 4, TARGET_FOOT - Vector2(0.0, bounce))
+	# Walk and run now cycle their four drawn frames instead of holding one. The
+	# foot anchor per frame is what keeps the character from sliding sideways.
+	var row: int = 8 if sprinting else 4
+	var step: int = int(animation_time * (9.0 if sprinting else 6.5)) % 4
+	_set_frame(row + step, TARGET_FOOT - Vector2(0.0, bounce))
 
 func _set_frame(frame_index: int, target_foot: Vector2 = TARGET_FOOT) -> void:
 	character.frame = frame_index
@@ -106,5 +121,8 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
 	draw_circle(Vector2(0, 26), 9.0, Color(0.02, 0.04, 0.08, 0.38))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	# The facing pip is the whole build-targeting contract, so it stays.
+	# Two markers: the cardinal pip is the build-targeting contract, the smaller
+	# eight-way arc shows which way she is actually heading.
+	var heading: Vector2 = Defs.DIR_VECTORS[facing8]
+	draw_circle(heading * 20.0, 1.8, Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.6))
 	draw_circle(Vector2(facing.x, facing.y) * 15.0, 2.4, Defs.COL_CORE)

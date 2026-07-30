@@ -109,14 +109,12 @@ func _draw_arrow(from: Vector2, dir: Vector2i, length: float, col: Color, width:
 	draw_colored_polygon(PackedVector2Array([
 		tip, tip - d * 7.0 + perp * 4.5, tip - d * 7.0 - perp * 4.5]), col)
 
-func _cat_frame(dir: Vector2i) -> Vector2:
-	# Sheet layout: 0 down, 1 up, 2 left, 3 right.
-	var index: int = 0
-	if dir.x != 0:
-		index = 3 if dir.x > 0 else 2
-	else:
-		index = 0 if dir.y > 0 else 1
-	return Vector2(float(index % 2) * CAT_FRAME, float(index / 2) * CAT_FRAME)
+const CAT_VIEW_FRAME := {"front": 0, "back": 1, "left": 2, "right": 3}
+
+func _cat_region(view: String) -> Rect2:
+	var index: int = int(CAT_VIEW_FRAME.get(view, 0))
+	return Rect2(Vector2(float(index % 2) * CAT_FRAME, float(index / 2) * CAT_FRAME),
+		Vector2(CAT_FRAME, CAT_FRAME))
 
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
@@ -130,12 +128,25 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(Vector2(c.x, (c.y + 11.0) / 0.45), 9.0, Color(0.02, 0.04, 0.08, 0.34))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
+	# Eight facings from four drawn views: diagonals borrow the front or back view
+	# and lean, so north-east and north-west are told apart.
+	var facing: int = Defs.facing_index(Vector2(machine.dir))
+	var view: Dictionary = Defs.facing_view(facing)
+	var lean: float = float(view["lean"])
+	var flip: bool = bool(view["flip"])
 	var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
-	var target := Rect2(c - size * 0.5 + Vector2(0.0, dig - 3.0), size)
+	if flip:
+		size.x = -size.x
+	var target := Rect2(c - Vector2(absf(size.x), size.y) * 0.5 + Vector2(lean * 3.0, dig - 3.0), size)
+	if flip:
+		target.position.x += absf(size.x)
 	# Frozen workers desaturate toward the cold instead of being recoloured.
 	var tint: Color = Color.WHITE.lerp(Color(0.62, 0.72, 0.95), frost)
-	draw_texture_rect_region(CAT_SHEET, target,
-		Rect2(_cat_frame(machine.dir), Vector2(CAT_FRAME, CAT_FRAME)), tint)
+	draw_set_transform(c + Vector2(lean * 3.0, 0.0), lean * 0.10, Vector2.ONE)
+	draw_texture_rect_region(CAT_SHEET,
+		Rect2(target.position - c - Vector2(lean * 3.0, 0.0), target.size),
+		_cat_region(String(view["view"])), tint)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 	# Output direction and a progress arc, so throughput is legible at a glance.
 	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 10.0, Defs.COL_BELT_RIM, 2.5)
