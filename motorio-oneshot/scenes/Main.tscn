@@ -39,8 +39,8 @@ script = ExtResource("6_player")
 texture_filter = 1
 texture = ExtResource("10_mechanic")
 scale = Vector2(0.105, 0.105)
-hframes = 4
-vframes = 3
+region_enabled = true
+region_rect = Rect2(155, 42, 187, 297)
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 position_smoothing_enabled = true

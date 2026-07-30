@@ -12,14 +12,23 @@ const ACCEL := 1500.0
 const FRICTION := 1900.0
 
 const SPRITE_SCALE := 0.105
-const FRAME_CENTER := Vector2(181.0, 181.0)
 const TARGET_FOOT := Vector2(0.0, 12.0)
-## Where the feet sit inside each generated frame. Aligning to these instead of
-## the frame centre is what stops the character sliding when the pose changes.
-const FRAME_FOOT_ANCHORS := [
-	Vector2(249.0, 339.0), Vector2(193.5, 339.0), Vector2(199.0, 339.0), Vector2(91.5, 339.0),
-	Vector2(249.0, 321.0), Vector2(195.5, 321.0), Vector2(202.0, 320.0), Vector2(91.5, 321.0),
-	Vector2(250.0, 301.0), Vector2(200.0, 289.0), Vector2(202.5, 304.0), Vector2(105.0, 306.0),
+
+## The sheet is NOT a clean 4x3 grid. Measured from the image: each row's four
+## drawings sit at different offsets inside their cells (drifting ~50px left per
+## column) and the fourth drawing crosses the cell boundary entirely. Slicing by
+## hframes/vframes therefore shifted the character between frames -- the visible
+## "teleport" -- and clipped the last pose. These are the real pixel bounds of
+## each drawing, and the foot anchor measured inside each one.
+const FRAME_REGIONS: Array[Rect2] = [
+	Rect2(155, 42, 187, 297), Rect2(462, 42, 187, 297), Rect2(760, 35, 214, 304), Rect2(1062, 40, 207, 299),
+	Rect2(154, 381, 190, 302), Rect2(462, 381, 191, 302), Rect2(766, 382, 193, 300), Rect2(1078, 382, 191, 301),
+	Rect2(147, 728, 206, 297), Rect2(457, 729, 211, 284), Rect2(767, 727, 211, 301), Rect2(1084, 732, 211, 298),
+]
+const FRAME_FOOT: Array[Vector2] = [
+	Vector2(81.9, 296), Vector2(80.9, 296), Vector2(90.7, 303), Vector2(95.8, 298),
+	Vector2(117.8, 301), Vector2(121.3, 301), Vector2(129.9, 299), Vector2(126.9, 300),
+	Vector2(115.2, 296), Vector2(152.4, 283), Vector2(142.6, 300), Vector2(139.4, 297),
 ]
 
 var velocity := Vector2.ZERO
@@ -101,13 +110,23 @@ func _moving(sprinting: bool) -> void:
 	var step: int = int(animation_time * (9.0 if sprinting else 6.5)) % 4
 	_set_frame(row + step, TARGET_FOOT - Vector2(0.0, bounce))
 
+## Places the drawing so its measured foot lands exactly on `target_foot`,
+## whatever the frame's own size and offset are. This is what removes the jitter.
 func _set_frame(frame_index: int, target_foot: Vector2 = TARGET_FOOT) -> void:
-	character.frame = frame_index
-	var foot_delta: Vector2 = FRAME_FOOT_ANCHORS[frame_index] - FRAME_CENTER
-	if character.flip_h:
-		foot_delta.x = -foot_delta.x
-	foot_delta = (foot_delta * character.scale).rotated(character.rotation)
-	character.position = target_foot - foot_delta
+	var region: Rect2 = FRAME_REGIONS[frame_index]
+	character.region_enabled = true
+	character.region_rect = region
+	character.position = target_foot - foot_offset(frame_index, character.scale, character.rotation, character.flip_h)
+
+## Offset from the sprite's own origin to its anchor, in parent space.
+## Horizontally the anchor is the drawing's centre, not its feet: in a run cycle
+## the feet legitimately swing about 3.6px, and anchoring to them makes the torso
+## wobble instead. Vertically the anchor is the measured foot, which is what
+## keeps every pose standing on the same ground line.
+static func foot_offset(frame_index: int, scale: Vector2, rotation: float, _flipped: bool) -> Vector2:
+	var region: Rect2 = FRAME_REGIONS[frame_index]
+	var delta := Vector2(0.0, FRAME_FOOT[frame_index].y - region.size.y * 0.5)
+	return (delta * scale).rotated(rotation)
 
 func facing_cell() -> Vector2i:
 	return Vector2i((position / float(Defs.TILE)).floor()) + facing
