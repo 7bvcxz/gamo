@@ -89,9 +89,16 @@ func _draw_cold_vignette() -> void:
 	if main.sim != null:
 		var distance: float = Vector2(main.player.cell() - main.sim.core_cell).length()
 		exposure = clampf((distance - main.sim.warm_radius) / 8.0, 0.0, 1.0)
-	var chill: float = clampf((60.0 - main.player.warmth) / 60.0, 0.0, 1.0)
+	# Three named stages rather than a smooth fade, so the player can feel the
+	# moment their situation gets worse.
+	var warmth: float = main.player.warmth
+	var stage: int = 0
+	for threshold: float in Defs.FROST_STAGES:
+		if warmth <= threshold:
+			stage += 1
+	var chill: float = float(stage) / float(Defs.FROST_STAGES.size())
 	_draw_snow(maxf(chill, exposure * 0.7))
-	if chill <= 0.0:
+	if stage <= 0:
 		return
 	var pulse: float = 1.0
 	if main.player.warmth < 30.0:
@@ -196,9 +203,11 @@ func _draw_warmth_row(panel: Rect2) -> void:
 		col = Defs.COL_DANGER.lerp(Color.WHITE, pulse * 0.35)
 	draw_rect(Rect2(track.position, Vector2(track.size.x * k, track.size.y)), col)
 	draw_rect(track, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.6), false, 1.0)
-	if main.rescue_timer >= 0.0:
+	if main.collapse_timer >= 0.0:
 		# Below the character, never across her.
-		_text_in(Rect2(0, size.y * 0.64, size.x, 20), "코어로 복귀 중…", 19, Defs.COL_DANGER)
+		var label: String = "쓰러지는 중…" if main.player.collapse > 0.0 \
+			else "의식이 흐려집니다  %.1f초" % maxf(0.0, main.collapse_timer)
+		_text_in(Rect2(0, size.y * 0.64, size.x, 20), label, 19, Defs.COL_DANGER)
 
 func _draw_palette() -> void:
 	var count: int = Defs.BUILDABLE.size()

@@ -27,7 +27,7 @@ var time_left: float = Defs.DAY_SECONDS
 var selected_index: int = 0
 var build_dir := Vector2i.RIGHT
 var shake: float = 0.0
-var rescue_timer: float = -1.0
+var collapse_timer: float = -1.0
 var run_seed: int = 0
 var best_heat: int = 0
 var day_number: int = 1
@@ -64,7 +64,8 @@ func _start_run() -> void:
 	player.warmth = 100.0
 	player.locked = false
 	player.velocity = Vector2.ZERO
-	rescue_timer = -1.0
+	collapse_timer = -1.0
+	player.collapse = 0.0
 	night_warned = false
 	rescued_tonight = false
 	selected_index = 0
@@ -152,11 +153,7 @@ func _process_play(delta: float) -> void:
 		_carried_home()
 
 func _update_warmth(delta: float) -> void:
-	if rescue_timer >= 0.0:
-		rescue_timer -= delta
-		if rescue_timer <= 0.0:
-			_complete_rescue()
-		return
+	_update_collapse(delta)
 	var warm: bool = sim.is_warm(player.cell())
 	if warm and not is_night():
 		player.warmth = minf(100.0, player.warmth + Defs.COLD_RECOVER * delta)
@@ -176,22 +173,45 @@ func _update_warmth(delta: float) -> void:
 			else:
 				_begin_rescue()
 
+## Warmth hitting zero does not end anything immediately. The player stays on
+## their feet for a few seconds -- long enough to run for the shelter -- and only
+## then collapses and is carried home.
 func _begin_rescue() -> void:
-	rescue_timer = RESCUE_SECONDS
-	player.locked = true
-	player.velocity = Vector2.ZERO
-	shake = 5.0
-	var lost: int = sim.spend_rescue()
-	_notify("동상! 열 %d 손실" % lost, Defs.COL_DANGER)
+	if collapse_timer >= 0.0:
+		return
+	collapse_timer = Defs.COLLAPSE_GRACE
+	shake = 3.0
+	_notify("의식이 흐려집니다  %.0f초 안에 숙소로" % Defs.COLLAPSE_GRACE, Defs.COL_DANGER)
 	fx.ring(player.position, Defs.COL_DANGER, 44.0)
 	audio.call("play", "alarm")
 
-func _complete_rescue() -> void:
-	rescue_timer = -1.0
-	player.locked = false
-	player.warmth = 65.0
-	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(0, Defs.TILE * 2)
-	fx.ring(player.position, Defs.COL_CORE, 40.0)
+func _update_collapse(delta: float) -> void:
+	# Once the fall has begun the grace timer is already negative, so the guard
+	# has to consider both: checking the timer alone froze the player mid-fall.
+	var falling: bool = player.collapse > 0.0
+	if collapse_timer < 0.0 and not falling:
+		return
+	if player.warmth > 0.0 and not falling:
+		# Made it somewhere warm in time.
+		collapse_timer = -1.0
+		_notify("체온을 되찾았습니다", Defs.COL_CORE)
+		return
+	collapse_timer -= delta
+	if collapse_timer > 0.0:
+		return
+	# Grace is over: fall, then wake up in the morning.
+	player.locked = true
+	player.velocity = Vector2.ZERO
+	player.collapse = clampf(player.collapse + delta / Defs.COLLAPSE_FALL, 0.0, 1.0)
+	if player.collapse >= 1.0:
+		collapse_timer = -1.0
+		player.collapse = 0.0
+		rescued_tonight = true
+		var lost: int = sim.spend_rescue()
+		_notify("쓰러졌습니다 · 열 %d 손실" % lost, Defs.COL_DANGER)
+		_finish_run()
+
+
 
 func _update_preview() -> void:
 	var cell: Vector2i = player.facing_cell()
@@ -401,7 +421,7 @@ func _begin_next_day() -> void:
 	player.locked = false
 	player.warmth = 100.0
 	# Morning starts at the shelter beside the core, as it does in Motorio.
-	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, Defs.TILE * 2.5)
+	player.position = shelter_position()
 	state = State.PLAY
 	_notify("%d일차 아침" % day_number, Defs.COL_CORE)
 	fx.ring(player.position, Defs.COL_CORE, 46.0)

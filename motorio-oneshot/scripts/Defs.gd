@@ -114,6 +114,12 @@ const SHELTER_OFFSET := Vector2(-2.5, 2.5)
 const SHELTER_REACH := 62.0
 const COLD_RECOVER := 26.0
 const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
+## Cold is a slope, not a cliff: movement degrades the whole way down so the
+## player feels the danger long before the number reaches zero.
+const COLD_SPEED_FLOOR := 0.10    # movement multiplier at zero warmth
+const FROST_STAGES: Array[float] = [80.0, 50.0, 20.0]
+const COLLAPSE_GRACE := 5.0       # seconds upright at zero warmth
+const COLLAPSE_FALL := 2.0        # seconds of the collapse animation
 
 const FROST_RING := Vector2(4.0, 9.5)
 const COPPER_RING := Vector2(11.0, 17.0)

@@ -40,6 +40,8 @@ var warmth := 100.0
 var locked := false
 var animation_time := 0.0
 var _lean := 0.0
+## 0 upright, 1 fully collapsed. Driven by Main once warmth runs out.
+var collapse := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
 
@@ -57,7 +59,9 @@ func _physics_process(delta: float) -> void:
 		if not touch_direction.is_zero_approx():
 			input = touch_direction
 	var sprinting: bool = (Input.is_action_pressed("sprint") or touch_sprint) and not locked
-	var target: Vector2 = input * SPEED * (SPRINT if sprinting else 1.0)
+	# Cold slows the whole way down to a crawl rather than only at the end.
+	var chill_speed: float = lerpf(Defs.COLD_SPEED_FLOOR, 1.0, clampf(warmth / 100.0, 0.0, 1.0))
+	var target: Vector2 = input * SPEED * (SPRINT if sprinting else 1.0) * chill_speed
 	if input == Vector2.ZERO:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 	else:
@@ -83,10 +87,19 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	# Cold drains the colour out of her the same way it does the world.
 	var chill: float = clampf(1.0 - warmth / 100.0, 0.0, 1.0)
 	character.modulate = Color.WHITE.lerp(Color(0.70, 0.80, 1.0), chill * 0.65)
-	if input.is_zero_approx():
+	if collapse > 0.0:
+		_collapsed()
+	elif input.is_zero_approx():
 		_idle()
 	else:
 		_moving(sprinting)
+
+func _collapsed() -> void:
+	# Sinks to the ground and tips over rather than freezing mid-pose.
+	var fall: float = clampf(collapse, 0.0, 1.0)
+	character.rotation = fall * (PI * 0.42) * (-1.0 if character.flip_h else 1.0)
+	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * lerpf(1.0, 0.86, fall))
+	_set_frame(0, TARGET_FOOT + Vector2(0.0, fall * 7.0))
 
 func _idle() -> void:
 	var breath: float = 1.0 + sin(animation_time * 3.2) * 0.012
