@@ -13,6 +13,10 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	# Main loads any save it finds on _ready, and sibling tests leave them behind.
+	# Absolute day numbers and a clean factory both depend on starting fresh.
+	main.clear_save()
+	main._start_run()
 	main.state = main.State.PLAY
 
 	# Movement degrades continuously, not only at zero.
@@ -75,6 +79,46 @@ func _run() -> void:
 	_assert(is_zero_approx(main.player.collapse) and not main.player.locked, "the player wakes upright")
 	_assert(is_zero_approx(main.blackout), "and the screen is clear again")
 	_assert(main.player.position.distance_to(main.shelter_position()) < 1.0, "the player wakes at the shelter")
+
+	# --- The real per-frame path ---------------------------------------------
+	# Everything above drives _update_collapse directly, which is why it never
+	# caught this: _update_warmth runs the collapse *and then* re-checks warmth,
+	# and the re-check used to re-arm the grace timer because it had gone
+	# negative. The player fell for one frame every five seconds, forever.
+	main._begin_next_day()
+	main.state = main.State.PLAY
+	main.player.locked = false
+	main.player.collapse = 0.0
+	main.collapse_timer = -1.0
+	main.blackout = 0.0
+	main.rescued_tonight = false
+	# Far outside the warm radius, in daylight, with no warmth left.
+	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(60, 0))
+	main.player.warmth = 0.0
+	main.time_left = Defs.DAY_SECONDS
+
+	var rearmed := 0
+	var elapsed := 0.0
+	var last_timer: float = main.collapse_timer
+	while elapsed < 60.0 and main.state == main.State.PLAY:
+		var falling_before: bool = main.player.collapse > 0.0
+		main._update_warmth(0.1)
+		elapsed += 0.1
+		# A re-arm is the grace timer jumping back to a positive value while the
+		# player is already going down. The first arm and the reset at the end of
+		# the collapse are both legitimate and must not be counted.
+		if falling_before and main.collapse_timer > 0.0 and main.collapse_timer > last_timer:
+			rearmed += 1
+		last_timer = main.collapse_timer
+	_assert(rearmed == 0, "the grace timer is never re-armed once the fall begins (%d times)" % rearmed)
+	_assert(main.state == main.State.RESULT,
+		"freezing outside actually ends the day instead of looping (%.1fs)" % elapsed)
+	_assert(elapsed < Defs.COLLAPSE_GRACE + Defs.COLLAPSE_FALL + Defs.BLACKOUT_SECONDS + 2.0,
+		"and it takes about grace + fall + blackout, not longer (%.1fs)" % elapsed)
+
+	main._begin_next_day()
+	_assert(main.player.position.distance_to(main.shelter_position()) < 1.0,
+		"the player wakes at the shelter after freezing")
 
 	if failures == 0:
 		print("COLD_TEST: PASS")

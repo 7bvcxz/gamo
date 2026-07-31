@@ -14,6 +14,10 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	# Main loads any save it finds on _ready, and sibling tests leave them behind.
+	# Absolute day numbers and a clean factory both depend on starting fresh.
+	main.clear_save()
+	main._start_run()
 
 	_assert(main.state == main.State.TITLE, "the game opens on the title screen")
 	_assert(main.hud.get("main") == main, "the HUD is wired to the orchestrator")

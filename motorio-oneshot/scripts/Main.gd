@@ -349,7 +349,12 @@ func _update_warmth(delta: float) -> void:
 ## their feet for a few seconds -- long enough to run for the shelter -- and only
 ## then collapses and is carried home.
 func _begin_rescue() -> void:
-	if collapse_timer >= 0.0:
+	# Guarding on the timer alone was not enough. Once the fall starts the timer
+	# is already negative, and _update_warmth re-checks warmth every frame right
+	# after running the collapse -- so it re-armed the full grace period the
+	# instant the player went down. The result was one frame of falling every
+	# five seconds and a day that never ended.
+	if collapse_timer >= 0.0 or player.collapse > 0.0 or blackout > 0.0:
 		return
 	collapse_timer = Defs.COLLAPSE_GRACE
 	shake = 3.0
