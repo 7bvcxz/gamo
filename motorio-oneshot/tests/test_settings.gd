@@ -1,0 +1,159 @@
+extends SceneTree
+
+## The settings panel and the UI scale behind it. This exists because the HUD is
+## sized in logical pixels, which on a phone are roughly 0.4 of a physical one --
+## so the numbers below are not cosmetic, they are the difference between a
+## readable HUD and a 5 CSS px one.
+
+var failures := 0
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	await process_frame
+
+	# --- Scale maths ---------------------------------------------------------
+	_assert(Defs.UI_SCALE_TOUCH_BASE == 2.0, "touch starts at twice the logical size")
+	_assert(Defs.UI_SCALE_TOUCH_BASE > Defs.UI_SCALE_DESKTOP_BASE,
+		"a phone gets a larger base than a desktop")
+	_assert(is_equal_approx(Defs.quantise_ui_scale(1.234), 1.25), "scale snaps to the step")
+	_assert(is_equal_approx(Defs.quantise_ui_scale(99.0), Defs.UI_SCALE_MAX), "scale clamps high")
+	_assert(is_equal_approx(Defs.quantise_ui_scale(-5.0), Defs.UI_SCALE_MIN), "scale clamps low")
+
+	# --- The gear owns the top-left corner ------------------------------------
+	_tick(main)
+	var gear: Rect2 = main.hud.settings_button_rect
+	_assert(gear.size.x > 0.0, "the settings button has a rect")
+	_assert(gear.position.x < main.hud.size.x * 0.25 and gear.position.y < main.hud.size.y * 0.25,
+		"the settings button sits in the top-left corner")
+	_assert(main.hud.status_top() >= gear.position.y + gear.size.y,
+		"the status panel starts below the gear instead of under it")
+
+	# --- Opening and closing ---------------------------------------------------
+	main.state = main.State.PLAY
+	_tick(main)
+	_assert(main.touch_hud(gear.get_center() * main.hud.scale.x), "tapping the gear is handled")
+	_assert(main.state == main.State.SETTINGS, "tapping the gear opens settings")
+
+	# Sizing the UI must not cost the player warmth or daylight.
+	var frozen: float = main.time_left
+	main._process(0.5)
+	_assert(is_equal_approx(main.time_left, frozen), "the clock stops while settings are open")
+
+	# --- The slider -------------------------------------------------------------
+	_tick(main)
+	var track: Rect2 = main.hud.slider_track_rect
+	_assert(track.size.x > 0.0, "the slider has a track")
+	_assert((main.hud.slider_hit_rect as Rect2).size.y > track.size.y * 3.0,
+		"the slider hit area is far taller than the drawn bar")
+	_assert(is_equal_approx(main.hud.slider_value_at(track.position.x), Defs.UI_SCALE_MIN),
+		"the left end of the track is the minimum scale")
+	_assert(is_equal_approx(main.hud.slider_value_at(track.position.x + track.size.x),
+		Defs.UI_SCALE_MAX), "the right end of the track is the maximum scale")
+
+	var before: float = main.ui_scale
+	var right_end := Vector2(track.position.x + track.size.x, track.get_center().y)
+	_assert(main.touch_hud(right_end * main.hud.scale.x), "touching the slider is handled")
+	_assert(main.ui_scale > before, "dragging the slider right enlarges the UI")
+	_assert(is_equal_approx(main.ui_scale, Defs.UI_SCALE_MAX), "the far right end is the maximum")
+
+	# The HUD must actually resize, not just record a number.
+	var scale_before: float = main.hud.scale.x
+	_tick(main)
+	_assert(main.hud.scale.x > scale_before, "raising the setting scales the HUD up")
+	_assert(is_equal_approx(main.hud.scale.x,
+		Defs.UI_SCALE_DESKTOP_BASE * main.ui_scale), "HUD scale is base times the setting")
+
+	# Nothing may run off the screen at the largest setting.
+	var slot: Vector2 = main.hud.hotbar_slot()
+	var row: float = float(Defs.BUILDABLE.size()) * (slot.x + main.hud.SLOT_GAP) - main.hud.SLOT_GAP
+	_assert(row <= main.hud.size.x, "the hotbar still fits across the screen at maximum scale")
+	_assert(main.hud.hotbar_origin().x >= 0.0, "the hotbar does not start off the left edge")
+
+	main.set_ui_scale(Defs.UI_SCALE_MIN)
+	_tick(main)
+	_assert(is_equal_approx(main.ui_scale, Defs.UI_SCALE_MIN), "the slider can come back down")
+
+	# --- The layout has to survive every scale, not just the default ------------
+	# Scaling the UI up shrinks the logical screen, so panels that sat comfortably
+	# side by side start colliding. These are the two collisions that actually
+	# cost the player something: an unreadable objective and an untappable card.
+	main.state = main.State.PLAY
+	main.touch.visible = true
+	for value: float in [Defs.UI_SCALE_MIN, Defs.UI_SCALE_DEFAULT, Defs.UI_SCALE_MAX]:
+		main.set_ui_scale(value)
+		_tick(main)
+		var percent: int = int(round(value * 100.0))
+		var objective: Rect2 = main.hud.objective_rect(main.objective())
+		_assert(not objective.intersects(main.hud.status_rect()),
+			"the objective clears the status panel at %d%%" % percent)
+		_assert(objective.position.x >= 0.0
+			and objective.position.x + objective.size.x <= main.hud.size.x + 0.5,
+			"the objective stays on screen at %d%%" % percent)
+		var card: Rect2 = main.hud.hotbar_rects[0]
+		var hotbar_bottom: float = (card.position.y + card.size.y) * main.hud.scale.x
+		var pad_top: float = main.get_viewport_rect().size.y - main.touch.reserved_height()
+		_assert(hotbar_bottom <= pad_top + 0.5,
+			"the hotbar clears the touch pad at %d%%" % percent)
+		_assert(main.hud.hotbar_origin().y > main.hud.status_rect().end.y,
+			"the hotbar stays below the status panel at %d%%" % percent)
+	main.touch.visible = false
+
+	# --- The pad scales with it -------------------------------------------------
+	main.touch.set_pad_scale(1.0)
+	var centres: Array[Vector2] = main.touch.button_centers
+	_assert(centres.size() == 3, "the pad lays out three action buttons")
+	var hit: float = main.touch.button_hit_radius()
+	for a in centres.size():
+		for b in range(a + 1, centres.size()):
+			_assert(centres[a].distance_to(centres[b]) >= hit * 2.0,
+				"action button hit areas do not overlap")
+	var small: float = main.touch.wheel_radius()
+	main.touch.set_pad_scale(Defs.UI_SCALE_MAX)
+	_assert(main.touch.wheel_radius() > small, "the wheel grows with the setting")
+
+	# --- Closing restores the screen underneath ---------------------------------
+	main.close_settings()
+	_assert(main.state == main.State.PLAY, "closing settings returns to the run")
+	main.state = main.State.TITLE
+	_tick(main)
+	_assert(main.touch_hud(gear.get_center() * main.hud.scale.x), "the gear works on the title too")
+	_assert(main.state == main.State.SETTINGS, "settings open from the title screen")
+	_assert(not main.player.visible, "the title hero shot stays clean behind the panel")
+	main.close_settings()
+	_assert(main.state == main.State.TITLE, "closing returns to the title, not into the run")
+
+	# --- Persistence -------------------------------------------------------------
+	# A preference about the player's eyes must outlive both a new game and a
+	# save-schema bump, so it lives in its own file.
+	main.set_ui_scale(1.35)
+	_assert(main.save_settings(), "settings are written to disk")
+	main.ui_scale = Defs.UI_SCALE_DEFAULT
+	main.load_settings()
+	_assert(is_equal_approx(main.ui_scale, 1.35), "the scale survives a reload")
+	main.clear_save()
+	main.load_settings()
+	_assert(is_equal_approx(main.ui_scale, 1.35), "clearing the run save keeps the UI setting")
+
+	main.set_ui_scale(Defs.UI_SCALE_DEFAULT)
+	main.save_settings()
+
+	if failures == 0:
+		print("SETTINGS_TEST: PASS")
+	quit(failures)
+
+## The HUD is its own node, so ticking the orchestrator alone leaves its layout
+## and scale a frame behind. Both have to run for a layout assertion to mean
+## anything.
+func _tick(main: Node2D) -> void:
+	main._process(0.0)
+	main.hud._process(0.0)
+
+func _assert(condition: bool, message: String) -> void:
+	if not condition:
+		push_error("SETTINGS_TEST: FAIL - " + message)
+		failures += 1

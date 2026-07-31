@@ -6,6 +6,16 @@ extends Control
 
 const MARGIN := 20.0
 const PANEL_W := 232.0
+const SETTINGS_BUTTON := 34.0
+## Smallest logical canvas the layout is designed to hold. The height is not a
+## round number: it is the status panel (190) plus the hotbar and its chip (154)
+## plus the space the touch pad claims along the bottom (~180), which is the
+## stack that has to coexist before anything is allowed to scale further.
+const MIN_LOGICAL := Vector2(340.0, 520.0)
+const SLOT_GAP := 10.0
+const SLOT_MAX_W := 118.0
+const SLOT_MIN_W := 54.0
+const SLOT_H := 48.0
 
 var main
 var message_color: Color = Defs.COL_TEXT
@@ -13,6 +23,12 @@ var message_color: Color = Defs.COL_TEXT
 ## was drawn rather than recomputing the layout and drifting out of sync.
 var hotbar_rects: Array[Rect2] = []
 var direction_rect := Rect2()
+var settings_button_rect := Rect2()
+var settings_close_rect := Rect2()
+var slider_track_rect := Rect2()
+## Deliberately taller than the track it drives: a 8px bar is not a touch target.
+var slider_hit_rect := Rect2()
+var slider_dragging := false
 
 var _repaint := 0.0
 
@@ -26,30 +42,93 @@ func _process(delta: float) -> void:
 	_repaint = 0.0
 	queue_redraw()
 
-## Desktop players sit close to a large screen, so the HUD is drawn at half
-## size there; touch keeps full size because the buttons must stay thumb-sized.
+## Two multipliers. The base is the platform's: desktop players sit close to a
+## large screen and want the HUD out of the way, while a phone reports a logical
+## viewport far wider than its physical one and needs everything enlarged just to
+## stay legible. On top of that sits the player's own setting.
 func _apply_scale() -> void:
 	var touch_pad: bool = main.touch != null and main.touch.visible
-	var want: float = 1.0 if touch_pad else 0.5
-	if is_equal_approx(scale.x, want):
+	var base: float = Defs.UI_SCALE_TOUCH_BASE if touch_pad else Defs.UI_SCALE_DESKTOP_BASE
+	var want: float = base * float(main.ui_scale)
+	# A scale the screen cannot hold is worse than a small one: the status panel
+	# and the hotbar start overlapping and the player loses the cards entirely.
+	# Cap it at the largest value that still leaves a workable canvas.
+	var view: Vector2 = get_viewport_rect().size
+	want = minf(want, minf(view.x / MIN_LOGICAL.x, view.y / MIN_LOGICAL.y))
+	want = maxf(want, 0.1)
+	var wanted_size: Vector2 = view / want
+	# Compare the size too, so a rotation or resize is picked up even when the
+	# scale itself has not moved.
+	if is_equal_approx(scale.x, want) and size.is_equal_approx(wanted_size):
 		return
 	scale = Vector2(want, want)
-	size = get_viewport_rect().size / want
+	size = wanted_size
+
+## The row shrinks rather than running off the screen once the player scales the
+## UI up, which is the whole point of letting them scale it up.
+func hotbar_slot() -> Vector2:
+	var count: float = float(Defs.BUILDABLE.size())
+	var available: float = size.x - MARGIN * 2.0 - (count - 1.0) * SLOT_GAP
+	return Vector2(clampf(available / count, SLOT_MIN_W, SLOT_MAX_W), SLOT_H)
 
 func hotbar_origin() -> Vector2:
-	var slot := Vector2(118, 48)
-	var total: float = float(Defs.BUILDABLE.size()) * (slot.x + 10) - 10
-	return Vector2(size.x * 0.5 - total * 0.5, size.y - slot.y - MARGIN)
+	var slot: Vector2 = hotbar_slot()
+	var total: float = float(Defs.BUILDABLE.size()) * (slot.x + SLOT_GAP) - SLOT_GAP
+	# Lifted clear of the thumb controls rather than sharing the bottom strip
+	# with them, which at large UI scales buried a card under the X button.
+	var bottom: float = size.y - slot.y - MARGIN - bottom_reserved()
+	return Vector2(size.x * 0.5 - total * 0.5, bottom)
+
+## Everything above the status panel, so the gear owns the very top-left corner.
+func status_top() -> float:
+	return MARGIN + SETTINGS_BUTTON + 8.0
+
+## Below the gear, and never wider than the screen it is drawn on.
+func status_rect() -> Rect2:
+	return Rect2(MARGIN, status_top(), minf(PANEL_W, size.x - MARGIN * 2.0), 128)
+
+## Screen space the touch pad occupies along the bottom, in HUD-local units. The
+## pad is laid out in viewport pixels and the HUD in scaled ones, so the two only
+## agree once this crosses the scale -- and if they disagree the hotbar ends up
+## drawn underneath the thumb buttons.
+func bottom_reserved() -> float:
+	if main.touch == null or not main.touch.visible:
+		return 0.0
+	return float(main.touch.reserved_height()) / maxf(scale.x, 0.01) + 10.0
 
 func _layout() -> void:
-	var slot := Vector2(118, 48)
+	var slot: Vector2 = hotbar_slot()
 	var origin: Vector2 = hotbar_origin()
 	hotbar_rects.clear()
 	for index in Defs.BUILDABLE.size():
-		hotbar_rects.append(Rect2(origin + Vector2(float(index) * (slot.x + 10), 0), slot))
+		hotbar_rects.append(Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot))
 	var label: String = "R 출력 방향  오른쪽"
 	var width: float = _text_width(label, 12) + 44.0
 	direction_rect = Rect2(size.x * 0.5 - width * 0.5, origin.y - 58.0, width, 24.0)
+	settings_button_rect = Rect2(MARGIN, MARGIN, SETTINGS_BUTTON, SETTINGS_BUTTON)
+	_layout_settings()
+
+const SETTINGS_CARD_H := 250.0
+
+func _layout_settings() -> void:
+	var card: Rect2 = _card_rect(SETTINGS_CARD_H)
+	slider_track_rect = Rect2(card.position + Vector2(34.0, 142.0), Vector2(card.size.x - 68.0, 8.0))
+	slider_hit_rect = Rect2(slider_track_rect.position - Vector2(26.0, 30.0),
+		slider_track_rect.size + Vector2(52.0, 64.0))
+	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 62.0),
+		Vector2(144.0, 42.0))
+
+## Maps a horizontal position on the slider to a scale value.
+func slider_value_at(x: float) -> float:
+	var span: float = maxf(slider_track_rect.size.x, 1.0)
+	var t: float = clampf((x - slider_track_rect.position.x) / span, 0.0, 1.0)
+	return Defs.UI_SCALE_MIN + t * (Defs.UI_SCALE_MAX - Defs.UI_SCALE_MIN)
+
+func begin_slider_drag() -> void:
+	slider_dragging = true
+
+func end_slider_drag() -> void:
+	slider_dragging = false
 
 func _panel(rect: Rect2, fill: Color, edge: Color, width: float = 1.0) -> void:
 	draw_rect(rect, fill)
@@ -81,12 +160,22 @@ func _draw() -> void:
 			_draw_status()
 			_draw_palette()
 			_draw_pause_card()
+		main.State.SETTINGS:
+			# Draw the screen it was opened over, so the player can see their
+			# change land on the real HUD instead of on an empty backdrop.
+			if main.state_before_settings == main.State.TITLE:
+				_draw_title()
+			else:
+				_draw_status()
+				_draw_palette()
+			_draw_settings_card()
 		_:
 			_draw_cold_vignette()
 			_draw_blackout()
 			_draw_status()
 			_draw_palette()
 			_draw_message()
+	_draw_settings_button()
 
 ## After the fall the world goes out entirely, so the cut to morning reads as
 ## losing consciousness rather than as a scene change.
@@ -157,7 +246,7 @@ func _draw_snow(strength: float) -> void:
 
 func _draw_status() -> void:
 	var sim = main.sim
-	var panel := Rect2(MARGIN, MARGIN, PANEL_W, 128)
+	var panel: Rect2 = status_rect()
 	# Fully opaque: ore silhouettes were crawling behind the temperature row.
 	_panel(panel, Defs.COL_PANEL, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
 
@@ -196,11 +285,24 @@ func _draw_status() -> void:
 
 ## The next useful action, always on screen. This is the whole onboarding: no
 ## modal tutorial, no text wall, just one line that keeps up with the player.
-func _draw_objective() -> void:
-	var text: String = main.objective()
-	var width: float = _text_width(text, 12) + 26.0
+## Split out from the drawing so the placement can be asserted directly; the
+## overlap this avoids only appears at scales a test has to drive deliberately.
+func objective_rect(text: String) -> Rect2:
+	# The trailing pad has to clear the last glyph's advance, not just sit flush
+	# against it, or the closing bracket lands on the plate border.
+	var width: float = minf(_text_width(text, 12) + 34.0, size.x - MARGIN * 2.0)
 	# Pinned to the top right, away from the status panel and the hotbar.
 	var box := Rect2(size.x - width - MARGIN, MARGIN + 26.0, width, 24.0)
+	# Once the UI is scaled up there is no longer room for both across the top,
+	# so the objective drops underneath the panel instead of across it.
+	var panel: Rect2 = status_rect()
+	if box.position.x < panel.position.x + panel.size.x + 8.0:
+		box.position.y = panel.position.y + panel.size.y + 8.0
+	return box
+
+func _draw_objective() -> void:
+	var text: String = main.objective()
+	var box: Rect2 = objective_rect(text)
 	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.88),
 		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.45))
 	draw_rect(Rect2(box.position, Vector2(3, box.size.y)), Defs.COL_CORE)
@@ -231,9 +333,8 @@ func _draw_warmth_row(panel: Rect2) -> void:
 
 func _draw_palette() -> void:
 	var count: int = Defs.BUILDABLE.size()
-	var slot := Vector2(118, 48)
-	var total: float = float(count) * (slot.x + 10) - 10
-	var origin := Vector2(size.x * 0.5 - total * 0.5, size.y - slot.y - MARGIN)
+	var slot: Vector2 = hotbar_slot()
+	var origin: Vector2 = hotbar_origin()
 
 	# The hint sits above the hotbar in its own plate; it used to run through the
 	# cards and over their cost labels.
@@ -248,7 +349,7 @@ func _draw_palette() -> void:
 	for index in count:
 		var type: int = Defs.BUILDABLE[index]
 		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() \
-			else Rect2(origin + Vector2(float(index) * (slot.x + 10), 0), slot)
+			else Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot)
 		var at: Vector2 = rect.position
 		var chosen: bool = index == main.selected_index
 		var afford: bool = main.sim.heat >= Defs.MACHINE_COSTS[type]
@@ -303,8 +404,14 @@ func _draw_message() -> void:
 func _dim(alpha: float) -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.06, alpha))
 
+## Geometry only, so the settings layout can be computed without drawing. Narrows
+## on small screens rather than hanging off both edges.
+func _card_rect(height: float) -> Rect2:
+	var width: float = minf(420.0, size.x - MARGIN * 2.0)
+	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
+
 func _card(height: float) -> Rect2:
-	var card := Rect2(size.x * 0.5 - 210.0, size.y * 0.5 - height * 0.5, 420.0, height)
+	var card: Rect2 = _card_rect(height)
 	_panel(card, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.96),
 		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
 	draw_rect(Rect2(card.position, Vector2(card.size.x, 3)), Defs.COL_CORE)
@@ -327,6 +434,49 @@ func _draw_title() -> void:
 	var controls: String = "휠 이동   Z 설치   X 회수   Run 달리기" if touch_pad \
 		else "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택"
 	_text_in(full.call(size.y * 0.84), controls, 12, Defs.COL_TEXT_DIM)
+
+## Top-left corner, on every screen including the title. A player whose HUD is
+## too small to read has to be able to find this without reading anything, so it
+## is an icon in a fixed corner rather than an entry in a menu.
+func _draw_settings_button() -> void:
+	var rect: Rect2 = settings_button_rect
+	if rect.size.x <= 0.0:
+		return
+	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
+	var centre: Vector2 = rect.position + rect.size * 0.5
+	var radius: float = rect.size.x * 0.24
+	var tint: Color = Defs.COL_CORE if main.state == main.State.SETTINGS else Defs.COL_TEXT
+	for tooth in 8:
+		var dir := Vector2.from_angle(float(tooth) * TAU / 8.0)
+		draw_line(centre + dir * radius, centre + dir * (radius + rect.size.x * 0.14), tint, 2.0)
+	draw_arc(centre, radius, 0.0, TAU, 24, tint, 2.2)
+	draw_circle(centre, radius * 0.38, tint)
+
+func _draw_settings_card() -> void:
+	_dim(0.72)
+	var card: Rect2 = _card(SETTINGS_CARD_H)
+	var w: float = card.size.x
+	_text_in(Rect2(card.position + Vector2(0, 48), Vector2(w, 30)), "설정", 26, Defs.COL_TEXT)
+	_text_in(Rect2(card.position + Vector2(0, 88), Vector2(w, 22)), "화면 UI 크기", 14, Defs.COL_TEXT_DIM)
+	_text_in(Rect2(card.position + Vector2(0, 122), Vector2(w, 26)),
+		"%d%%" % int(round(float(main.ui_scale) * 100.0)), 22, Defs.COL_CORE)
+
+	var span: float = Defs.UI_SCALE_MAX - Defs.UI_SCALE_MIN
+	var t: float = clampf((float(main.ui_scale) - Defs.UI_SCALE_MIN) / maxf(span, 0.001), 0.0, 1.0)
+	var track: Rect2 = slider_track_rect
+	draw_rect(track, Color8(28, 36, 54))
+	draw_rect(Rect2(track.position, Vector2(track.size.x * t, track.size.y)), Defs.COL_CORE)
+	var knob := Vector2(track.position.x + track.size.x * t, track.position.y + track.size.y * 0.5)
+	draw_circle(knob, 15.0, Defs.COL_CORE)
+	draw_circle(knob, 15.0, Color(0.02, 0.03, 0.06, 0.45), false, 1.6)
+
+	var touch_pad: bool = main.touch != null and main.touch.visible
+	_text_in(Rect2(card.position + Vector2(0, 182), Vector2(w, 18)),
+		"슬라이더를 드래그하세요" if touch_pad else "← → 키 또는 드래그", 12, Defs.COL_TEXT_DIM)
+	var close: Rect2 = settings_close_rect
+	_panel(close, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18), Defs.COL_CORE)
+	_text_in(Rect2(close.position + Vector2(0, 28), Vector2(close.size.x, 22)), "닫기", 16, Defs.COL_TEXT)
 
 func _draw_pause_card() -> void:
 	var card := _card(150.0)

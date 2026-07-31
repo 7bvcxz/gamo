@@ -5,7 +5,9 @@ extends Node2D
 
 ## RESULT is the end of a day, not the end of the game: the world, the factory
 ## and the warm radius all carry into the next morning.
-enum State { TITLE, PLAY, PAUSED, RESULT }
+## SETTINGS is a state rather than an overlay flag so that opening it stops the
+## clock: sizing the UI should never cost the player warmth.
+enum State { TITLE, PLAY, PAUSED, RESULT, SETTINGS }
 
 const SHAKE_DECAY := 7.0
 const RESCUE_SECONDS := 1.6
@@ -42,6 +44,9 @@ var build_hold_time: float = 0.0
 var build_rotated: bool = false
 var autosave_elapsed: float = 0.0
 var blackout: float = 0.0
+## Player's UI size multiplier, applied on top of the per-platform base.
+var ui_scale: float = Defs.UI_SCALE_DEFAULT
+var state_before_settings: int = State.TITLE
 
 func _ready() -> void:
 	randomize()
@@ -56,6 +61,7 @@ func _ready() -> void:
 	player.blocked = func(cell: Vector2i) -> bool: return sim.blocks_player(cell)
 	touch.main_controller = self
 	touch.player = player
+	load_settings()
 	_start_run()
 	if load_game():
 		_notify("이어서 진행합니다", Defs.COL_CORE)
@@ -161,14 +167,17 @@ func _process(delta: float) -> void:
 
 	# The title is a hero shot: no player, no placement ghost, nothing that reads
 	# as leftover debug UI in the one frame that sells the game.
-	var in_run: bool = state != State.TITLE
+	# Opening settings from the title must not spoil the hero shot, so visibility
+	# follows the screen the panel was opened over rather than the panel itself.
+	var showing: int = state_before_settings if state == State.SETTINGS else state
+	var in_run: bool = showing != State.TITLE
 	player.visible = in_run
 	machine_layer.show_preview = state == State.PLAY
 
 	match state:
 		State.PLAY: _process_play(delta)
 		State.TITLE: pass
-		State.PAUSED, State.RESULT: pass
+		State.PAUSED, State.RESULT, State.SETTINGS: pass
 
 ## Holding the build key past the threshold rotates instead of building, so PC
 ## players never need a second key for direction.
@@ -299,6 +308,24 @@ func _view_rect() -> Rect2:
 	return Rect2(camera.get_screen_center_position() - size * 0.5, size)
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Mouse first: the settings gear and its slider are the only pointer targets
+	# in the game, and a desktop player has no pad to route them through.
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index == MOUSE_BUTTON_LEFT:
+			if button.pressed:
+				if touch_hud(button.position):
+					get_viewport().set_input_as_handled()
+					return
+			else:
+				touch_hud_release()
+		if state == State.SETTINGS:
+			get_viewport().set_input_as_handled()
+			return
+	if event is InputEventMouseMotion and hud.slider_dragging:
+		touch_hud_drag((event as InputEventMouseMotion).position)
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventKey and not event.is_pressed() and event.is_action_released("build"):
 		if build_held and not build_rotated:
 			_primary_action()
@@ -308,6 +335,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.is_pressed() or event.is_echo():
 		return
 	var key := event as InputEventKey
+	# The panel is modal: while it is open the only keys that mean anything are
+	# the ones that close it and the ones that nudge the slider.
+	if state == State.SETTINGS:
+		if key.keycode == KEY_ESCAPE or key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
+			close_settings()
+		elif key.keycode == KEY_LEFT or key.keycode == KEY_MINUS:
+			set_ui_scale(ui_scale - Defs.UI_SCALE_STEP)
+		elif key.keycode == KEY_RIGHT or key.keycode == KEY_EQUAL:
+			set_ui_scale(ui_scale + Defs.UI_SCALE_STEP)
+		get_viewport().set_input_as_handled()
+		return
 	match state:
 		State.TITLE:
 			if key.keycode == KEY_ESCAPE:
@@ -372,18 +410,48 @@ func touch_anywhere_starts() -> bool:
 ## Touch handling for the on-screen HUD: picking a machine and rotating it are
 ## keyboard-only otherwise, which left the game unplayable on a phone.
 func touch_hud(position: Vector2) -> bool:
+	# The HUD draws itself scaled, so its published rects are in its own space.
+	# Hit-testing raw viewport coordinates against them silently misses by the
+	# scale factor, which is exactly the bug that made the pad feel dead.
+	var local: Vector2 = hud_local(position)
+	if state == State.SETTINGS:
+		# While the panel is up it owns every touch, so a stray tap cannot fall
+		# through onto the world behind it.
+		if (hud.settings_close_rect as Rect2).has_point(local):
+			close_settings()
+		elif (hud.slider_hit_rect as Rect2).has_point(local):
+			hud.call("begin_slider_drag")
+			set_ui_scale(hud.call("slider_value_at", local.x))
+		return true
+	if (hud.settings_button_rect as Rect2).has_point(local):
+		open_settings()
+		return true
 	if state != State.PLAY:
 		return false
 	for index in hud.hotbar_rects.size():
-		if (hud.hotbar_rects[index] as Rect2).has_point(position):
+		if (hud.hotbar_rects[index] as Rect2).has_point(local):
 			selected_index = index
 			audio.call("play", "select")
 			return true
-	if (hud.direction_rect as Rect2).has_point(position):
+	if (hud.direction_rect as Rect2).has_point(local):
 		build_dir = Vector2i(-build_dir.y, build_dir.x)
 		audio.call("play", "select")
 		return true
 	return false
+
+## Viewport coordinates into HUD-local ones.
+func hud_local(position: Vector2) -> Vector2:
+	return position / maxf(hud.scale.x, 0.01)
+
+## Dragging the slider keeps updating the value; the pad forwards drags here.
+func touch_hud_drag(position: Vector2) -> bool:
+	if state != State.SETTINGS or not hud.slider_dragging:
+		return false
+	set_ui_scale(hud.call("slider_value_at", hud_local(position).x))
+	return true
+
+func touch_hud_release() -> void:
+	hud.call("end_slider_drag")
 
 ## Entry points for the mobile buttons, so touch and keyboard run through the
 ## same code rather than drifting apart.
@@ -396,6 +464,8 @@ func touch_primary() -> void:
 			_begin_next_day()
 		State.PAUSED:
 			state = State.PLAY
+		State.SETTINGS:
+			close_settings()
 		State.PLAY:
 			# Route through the same entry point the keyboard uses. Calling
 			# _try_build directly meant touch players could never pick up or
@@ -408,6 +478,8 @@ func touch_secondary() -> void:
 			_try_demolish()
 		State.PAUSED:
 			state = State.PLAY
+		State.SETTINGS:
+			close_settings()
 
 ## One key, in priority order. Carrying a cat takes precedence over building so
 ## a full-handed player can always put the cat down.
@@ -539,6 +611,48 @@ func load_game() -> bool:
 
 func clear_save() -> void:
 	DirAccess.remove_absolute(SAVE_PATH)
+
+## --- Settings -------------------------------------------------------------
+## Kept in its own file, deliberately. UI size is a property of the player's
+## screen, not of the run, so it must survive both "new game" and a save schema
+## bump -- neither of which should ever hand someone back an unreadable HUD.
+const SETTINGS_PATH := "user://motorio_oneshot_settings.cfg"
+
+func set_ui_scale(value: float) -> void:
+	var wanted: float = Defs.quantise_ui_scale(value)
+	if is_equal_approx(wanted, ui_scale):
+		return
+	ui_scale = wanted
+	touch.set_pad_scale(ui_scale)
+	save_settings()
+
+func save_settings() -> bool:
+	var config := ConfigFile.new()
+	config.set_value("settings", "ui_scale", ui_scale)
+	return config.save(SETTINGS_PATH) == OK
+
+func load_settings() -> void:
+	var config := ConfigFile.new()
+	if config.load(SETTINGS_PATH) == OK:
+		ui_scale = Defs.quantise_ui_scale(
+			float(config.get_value("settings", "ui_scale", Defs.UI_SCALE_DEFAULT)))
+	touch.set_pad_scale(ui_scale)
+
+func open_settings() -> void:
+	if state == State.SETTINGS:
+		return
+	state_before_settings = state
+	state = State.SETTINGS
+	build_held = false
+	touch.release_all()
+	audio.call("play", "select")
+
+func close_settings() -> void:
+	if state != State.SETTINGS:
+		return
+	state = state_before_settings
+	hud.call("end_slider_drag")
+	audio.call("play", "confirm")
 
 func day_heat() -> int:
 	return sim.total_heat - day_start_heat

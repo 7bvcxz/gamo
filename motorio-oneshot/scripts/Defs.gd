@@ -164,6 +164,25 @@ const BLACKOUT_SECONDS := 2.2     # the world fading out after the fall
 const FROST_RING := Vector2(4.0, 9.5)
 const COPPER_RING := Vector2(11.0, 17.0)
 
+## UI scale. The web export renders at the device pixel ratio, so a phone that is
+## physically 390 CSS px wide reports a ~960 px logical viewport: every constant
+## below lands at roughly 0.4 of the physical size it was drawn for, which made
+## the HUD text about 5 CSS px tall. Touch therefore starts at 2x and desktop at
+## half, and the player can trim either from the settings panel.
+const UI_SCALE_TOUCH_BASE := 2.0
+const UI_SCALE_DESKTOP_BASE := 0.5
+const UI_SCALE_MIN := 0.6
+const UI_SCALE_MAX := 1.6
+const UI_SCALE_DEFAULT := 1.0
+
+## Rounded to this step so the slider lands on repeatable values and the label
+## never shows a number the player cannot get back to.
+const UI_SCALE_STEP := 0.05
+
+static func quantise_ui_scale(value: float) -> float:
+	var clamped: float = clampf(value, UI_SCALE_MIN, UI_SCALE_MAX)
+	return snappedf(clamped, UI_SCALE_STEP)
+
 ## Eight-direction facing. The source art only contains four views (and the
 ## engineer's sheet only one), so a diagonal is rendered as its nearest real view
 ## plus a lean. That is enough to read direction at a glance without inventing

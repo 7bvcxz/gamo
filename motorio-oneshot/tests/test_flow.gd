@@ -51,11 +51,19 @@ func _run() -> void:
 	main._process(0.0)
 	_assert(main.hud.hotbar_rects.size() == Defs.BUILDABLE.size(), "the HUD publishes a rect per machine slot")
 	main.selected_index = 0
-	_assert(main.touch_hud((main.hud.hotbar_rects[2] as Rect2).get_center()),
+	# The pad reports raw viewport coordinates while the HUD publishes rects in
+	# its own scaled space, so every tap has to cross that boundary. Feeding the
+	# rects back in unconverted is what used to hide the bug.
+	var to_view := func(rect: Rect2) -> Vector2: return rect.get_center() * main.hud.scale.x
+	_assert(main.hud.scale.x > 0.0, "the HUD reports a usable scale")
+	_assert(main.hud_local(to_view.call(main.hud.direction_rect))
+		.distance_to((main.hud.direction_rect as Rect2).get_center()) < 0.5,
+		"viewport coordinates convert back to HUD space")
+	_assert(main.touch_hud(to_view.call(main.hud.hotbar_rects[2])),
 		"tapping a hotbar card is handled")
 	_assert(main.selected_index == 2, "tapping a hotbar card selects that machine")
 	var dir_before: Vector2i = main.build_dir
-	_assert(main.touch_hud((main.hud.direction_rect as Rect2).get_center()),
+	_assert(main.touch_hud(to_view.call(main.hud.direction_rect)),
 		"tapping the direction chip is handled")
 	_assert(main.build_dir != dir_before, "tapping the direction chip rotates the output")
 	_assert(not main.touch_hud(Vector2(-500, -500)), "taps outside the HUD fall through to the pad")
