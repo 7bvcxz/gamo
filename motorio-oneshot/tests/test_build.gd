@@ -77,6 +77,61 @@ func _run() -> void:
 	_assert(last_reason.find("이미") >= 0,
 		"pressing Z again reports the tile is occupied: '%s'" % last_reason)
 
+	# --- Carrying a cat --------------------------------------------------------
+	# The carry has to be visible and exclusive: the cat rides just in front of
+	# her facing the same way, and both hands are full while it does.
+	main.sim.carried_boxes = Defs.BOXES_PER_CAT
+	main.sim.adopt_cats()
+	_assert(main.sim.cats.size() >= 1, "a cat exists to carry")
+	var kitty = main.sim.cats[0]
+	kitty.pos = main.sim.cell_centre(main.player.facing_cell())
+	main._primary_action()
+	_assert(main.sim.carried_cat == kitty, "the cat is picked up")
+
+	for heading: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
+		main.player.facing = heading
+		main._process(0.0)
+		var ahead: Vector2 = main.player.position + Vector2(heading) * float(Defs.TILE) * Defs.CARRY_AHEAD
+		_assert(kitty.pos.distance_to(ahead) < 0.5,
+			"the carried cat sits ahead facing %s" % heading)
+		_assert(kitty.heading == Vector2(heading), "and looks the same way she does: %s" % heading)
+		_assert(main.player.carried_cat_heading == Vector2(heading),
+			"the actor is told which way to draw it: %s" % heading)
+	_assert(main.player.carrying_cat, "the actor knows a cat is being carried")
+
+	# The carried cat is drawn on its own canvas item because a Node2D paints
+	# before its children: drawn in the actor's own _draw it would come out
+	# behind the character sprite. Assert the wiring, since a headless renderer
+	# cannot be screenshotted to check the result.
+	var layer: Node2D = main.player.carry_layer
+	_assert(layer != null, "the actor has a canvas item for the carried cat")
+	_assert(layer.get_parent() == main.player, "it rides with the player")
+	_assert(layer.z_index > main.player.character.z_index,
+		"and is stacked above the character sprite, not behind it")
+	_assert(layer.draw.is_connected(main.player._draw_carried_cat),
+		"its draw pass is connected, so the cat is actually painted")
+	_assert(main.player.carried_cat_pos.distance_to(kitty.pos) < 0.5,
+		"and it paints from the cat's own position")
+
+	# Both hands full: no picking anything else up.
+	main.player.facing = Vector2i.UP
+	main.player.position = main.sim.cell_centre(seam + Vector2i(0, 1))
+	_assert(main.sim.machine_at(seam) != null, "there is a machine that could be removed")
+	main._try_demolish()
+	_assert(main.sim.machine_at(seam) != null,
+		"a machine cannot be removed while carrying a cat")
+
+	var others: int = main.sim.cats.size()
+	main._primary_action()   # facing the miner -> places the cat on it
+	_assert(main.sim.carried_cat == null, "placing the cat releases the carry")
+	_assert(main.sim.cats.size() == others, "and no cat was lost doing it")
+	main._process(0.0)
+	_assert(not main.player.carrying_cat, "the actor stops drawing it once released")
+
+	# Released, the hands are free again.
+	main._try_demolish()
+	_assert(main.sim.machine_at(seam) == null, "and machines can be removed again")
+
 	if failures == 0:
 		print("BUILD_TEST: PASS")
 	quit(failures)

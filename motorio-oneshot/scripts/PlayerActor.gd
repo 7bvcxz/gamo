@@ -47,12 +47,27 @@ var collapse := 0.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
 ## Set by Main while a cat is being carried, so it rides along in her arms.
+## The position and heading come from the cat itself rather than being recomputed
+## here, so the drawing cannot drift from where the simulation put it.
 var carrying_cat := false
+var carried_cat_pos := Vector2.ZERO
+var carried_cat_heading := Vector2.DOWN
 ## Set by Main. Structures block movement, so the actor needs to ask the world
 ## whether a tile is passable before it commits to a step.
 var blocked: Callable = func(_cell: Vector2i) -> bool: return false
 
 @onready var character: Sprite2D = $Character
+
+## The carried cat is drawn on its own canvas item stacked above the character
+## sprite. Drawing it in this node's _draw would put it *behind* Character,
+## because a Node2D paints before its children.
+var carry_layer: Node2D
+
+func _ready() -> void:
+	carry_layer = Node2D.new()
+	carry_layer.z_index = 1
+	add_child(carry_layer)
+	carry_layer.draw.connect(_draw_carried_cat)
 
 func _physics_process(delta: float) -> void:
 	var input := Vector2.ZERO
@@ -82,6 +97,8 @@ func _physics_process(delta: float) -> void:
 
 	_animate(delta, input, sprinting)
 	queue_redraw()
+	if carry_layer != null:
+		carry_layer.queue_redraw()
 
 ## Axis-separated movement: try each axis on its own so sliding along a wall
 ## works instead of sticking the moment one direction is blocked.
@@ -192,3 +209,22 @@ func _draw() -> void:
 	var heading: Vector2 = Defs.DIR_VECTORS[facing8]
 	draw_circle(heading * 20.0, 1.8, Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.6))
 	draw_circle(Vector2(facing.x, facing.y) * 15.0, 2.4, Defs.COL_CORE)
+
+## Drawn in world space relative to the player, from the cat's own position, so
+## what is on screen and what the simulation believes are the same thing.
+func _draw_carried_cat() -> void:
+	if not carrying_cat:
+		return
+	var offset: Vector2 = carried_cat_pos - global_position
+	var view: Dictionary = Defs.facing_view(Defs.facing_index(carried_cat_heading))
+	var size := Vector2(MachineLayer.CAT_DRAW, MachineLayer.CAT_DRAW)
+	if bool(view["flip"]):
+		size.x = -size.x
+	var target := Rect2(offset - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -6), size)
+	if bool(view["flip"]):
+		target.position.x += absf(size.x)
+	var index: int = int(MachineLayer.CAT_VIEW_FRAME.get(String(view["view"]), 0))
+	var region := Rect2(
+		Vector2(float(index % 2) * MachineLayer.CAT_FRAME, float(index / 2) * MachineLayer.CAT_FRAME),
+		Vector2(MachineLayer.CAT_FRAME, MachineLayer.CAT_FRAME))
+	carry_layer.draw_texture_rect_region(MachineLayer.CAT_SHEET, target, region, Color.WHITE)

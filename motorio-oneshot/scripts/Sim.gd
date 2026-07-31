@@ -18,6 +18,9 @@ signal box_collected(carried: int)
 ## of cats -- not the amount of heat -- is what gates automation.
 class Cat extends RefCounted:
 	var pos := Vector2.ZERO
+	## Which way the cat is drawn facing. Only set while carried; a walking cat
+	## derives its heading from where it is going.
+	var heading := Vector2.DOWN
 	var state: int = Defs.CAT_IDLE
 	var assigned := Vector2i(9999, 9999)   ## the miner cell this cat works
 	var hunger: float = 1.0
@@ -309,6 +312,17 @@ func pick_up_cat(cell: Vector2i) -> bool:
 	best.state = Defs.CAT_IDLE
 	carried_cat = best
 	return true
+
+## Where a carried cat rides. Its real position is moved to just in front of the
+## player rather than the renderer drawing it at an offset, so "being carried" is
+## a fact about the world -- one place to read it from, and dropping the cat
+## leaves it exactly where it looked like it was.
+func carry_at(origin: Vector2, heading: Vector2) -> void:
+	if carried_cat == null:
+		return
+	var direction: Vector2 = heading if not heading.is_zero_approx() else Vector2.DOWN
+	carried_cat.pos = origin + direction.normalized() * float(Defs.TILE) * Defs.CARRY_AHEAD
+	carried_cat.heading = direction
 
 ## Putting a cat down on a miner assigns it to that machine for good; it will
 ## return there every morning and after every meal.

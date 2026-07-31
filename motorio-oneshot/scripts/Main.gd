@@ -161,6 +161,12 @@ func _process(delta: float) -> void:
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
 	player.carrying_cat = sim.carried_cat != null
+	# The carried cat rides in front of her, turning as she turns. Driven from
+	# here because the sim does not know where the player is standing.
+	if sim.carried_cat != null:
+		sim.carry_at(player.position, Vector2(player.facing))
+		player.carried_cat_pos = sim.carried_cat.pos
+		player.carried_cat_heading = sim.carried_cat.heading
 	if state == State.PLAY:
 		autosave_elapsed += delta
 		if autosave_elapsed >= AUTOSAVE_INTERVAL:
@@ -551,6 +557,12 @@ func _try_build() -> void:
 
 func _try_demolish() -> void:
 	if player.locked:
+		return
+	# Both hands are busy. Letting X pull up a machine while a cat is being
+	# carried was the one way to hold two things at once.
+	if sim.carried_cat != null:
+		_notify("고양이를 안고 있어 회수할 수 없습니다", Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
 		return
 	var cell: Vector2i = player.facing_cell()
 	if sim.demolish(cell):

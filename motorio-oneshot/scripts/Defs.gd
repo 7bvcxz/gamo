@@ -125,6 +125,11 @@ const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
 const NIGHT_SECONDS := 50.0
 const DUSK_SECONDS := 95.0
 const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when warm
+## How far in front of the player a carried cat rides, in tiles. Small enough to
+## read as "in her arms" rather than as a cat standing on the next tile, but far
+## enough that the carry is visible at a glance.
+const CARRY_AHEAD := 0.3
+
 const SHELTER_OFFSET := Vector2(-2.5, 2.5)
 const SHELTER_REACH := 62.0
 const FOOD_OFFSET := Vector2(-4.5, 2.5)
