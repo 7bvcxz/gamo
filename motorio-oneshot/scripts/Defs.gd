@@ -57,6 +57,8 @@ const ITEM_COPPER := 1
 const ITEM_ENERGY := 2
 
 const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정"]
+## Short forms for the status panel, where three counters share one row.
+const ITEM_SHORT := ["수정", "구리", "에너지"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
@@ -121,6 +123,9 @@ const M_GENERATOR := 4
 const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_GENERATOR]
 
 const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "수정에너지교환기", "발전기"]
+## Hotbar cards are one slot wide and the full names do not fit beside the colour
+## swatch. The long name still appears in the hint line above the row.
+const MACHINE_SHORT := ["코어", "채굴기", "벨트", "교환기", "발전기"]
 ## Machines are bought with materials now, never with heat.
 const MACHINE_COSTS := [
 	{},
@@ -228,8 +233,13 @@ const COPPER_RING := Vector2(11.0, 17.0)
 ## the HUD text about 5 CSS px tall. Touch therefore starts at 2x and desktop at
 ## half, and the player can trim either from the settings panel.
 const UI_SCALE_TOUCH_BASE := 2.0
-const UI_SCALE_DESKTOP_BASE := 0.5
-const UI_SCALE_MIN := 0.6
+## Desktop was set to half size back when the HUD held a clock and two numbers.
+## Measured on a 1100x760 window that put body text at about 7 device pixels --
+## legible in a screenshot, not on a monitor -- and the rebuilt economy put far
+## more on the panel. The floor of the slider is lowered to match, so anyone who
+## preferred the small HUD can still reach it.
+const UI_SCALE_DESKTOP_BASE := 0.9
+const UI_SCALE_MIN := 0.45
 const UI_SCALE_MAX := 1.6
 const UI_SCALE_DEFAULT := 1.0
 

@@ -313,8 +313,10 @@ func _draw_status() -> void:
 	for item_type: int in Defs.COUNTED_ITEMS:
 		var held: int = int(sim.stock.get(item_type, 0))
 		draw_circle(materials + Vector2(slot_x + 5, -4), 4.0, Defs.ITEM_COLORS[item_type])
-		_text(materials + Vector2(slot_x + 13, 0), "%d" % held, 12, Defs.COL_TEXT)
-		slot_x += 52.0
+		var short: String = Defs.ITEM_SHORT[item_type]
+		_text(materials + Vector2(slot_x + 13, 0), "%s %d" % [short, held], 12,
+			Defs.COL_TEXT if held > 0 else Defs.COL_TEXT_DIM)
+		slot_x += 68.0
 
 	_draw_warmth_row(panel)
 	_draw_objective()
@@ -393,22 +395,26 @@ func _draw_palette() -> void:
 		var edge: Color = Defs.COL_CORE if chosen else Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9)
 		# Opaque so world sprites can never bleed through the card.
 		_panel(rect, Defs.COL_PANEL, edge, 2.0 if chosen else 1.0)
-		if locked:
-			# A locked slot still shows what is coming: the shape of the tech
-			# tree is a reason to keep playing.
-			draw_rect(rect, Color(0.02, 0.03, 0.06, 0.62))
-			_text_in(Rect2(rect.position + Vector2(0, 30), Vector2(rect.size.x, 16)),
-				"잠김", 12, Defs.COL_TEXT_DIM)
-			continue
+
 		var label: Color = Defs.COL_TEXT if afford else Defs.COL_TEXT_DIM
-		_text(at + Vector2(11, 21), "%d  %s" % [index + 1, Defs.MACHINE_NAMES[type]], 13, label)
-		var cost_text := ""
-		for item_type: int in Defs.MACHINE_COSTS[type]:
-			cost_text += "%s %d  " % [Defs.ITEM_NAMES[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
-		if type == Defs.M_BELT:
-			cost_text += "· 전력 %.1f" % Defs.BELT_POWER_DRAW
-		_text(at + Vector2(11, 39), cost_text.strip_edges(), 11,
-			Defs.COL_CORE if afford else Defs.COL_DANGER)
+		if locked:
+			label = Defs.COL_TEXT_DIM
+		_text(at + Vector2(11, 21), "%d  %s" % [index + 1, Defs.MACHINE_SHORT[type]], 13, label)
+		if locked:
+			# Say what opens it. A locked slot the player cannot work toward is
+			# just a hole in the row.
+			var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
+			_text(at + Vector2(11, 39), "%s 를 찾으면 해금" % Defs.ITEM_NAMES[key_item], 11,
+				Defs.COL_TEXT_DIM)
+			draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
+		else:
+			var cost_text := ""
+			for item_type: int in Defs.MACHINE_COSTS[type]:
+				cost_text += "%s %d  " % [Defs.ITEM_NAMES[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
+			if type == Defs.M_BELT:
+				cost_text += "· 전력 %.1f" % Defs.BELT_POWER_DRAW
+			_text(at + Vector2(11, 39), cost_text.strip_edges(), 11,
+				Defs.COL_CORE if afford else Defs.COL_DANGER)
 		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Defs.machine_color(type))
 		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Color(0, 0, 0, 0.35), false, 1.0)
 
@@ -417,7 +423,7 @@ func _draw_palette() -> void:
 	# On a phone the keyboard legend is noise; the pad already carries the verbs.
 	if main.touch == null or not main.touch.visible:
 		_text_in(Rect2(size.x - 460.0 - MARGIN, MARGIN + 2.0, 460.0, 16),
-			"Z 짧게 설치 · 길게 회전   X 회수   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+			"C 채굴   Z 짧게 설치 · 길게 회전   X 회수   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.
