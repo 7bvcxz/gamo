@@ -42,6 +42,9 @@ var warmth := 100.0
 var locked := false
 var animation_time := 0.0
 var _lean := 0.0
+## Which way she is drawn horizontally. Remembered rather than derived from the
+## current input, so standing still keeps the direction she was last walking.
+var _face_left := false
 ## 0 upright, 1 fully collapsed. Driven by Main once warmth runs out.
 var collapse := 0.0
 var touch_direction := Vector2.ZERO
@@ -133,7 +136,14 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	# by mirroring and by a lean rather than by a different drawing.
 	var view: Dictionary = Defs.facing_view(facing8)
 	var lean: float = float(view["lean"])
-	character.flip_h = bool(view["flip"]) or (absf(input.x) > 0.15 and input.x < 0.0)
+	# Her sheet is a single right-facing drawing, so west is a mirror. The flip in
+	# Defs.facing_view belongs to the cat sheet, which really does have a left
+	# frame, and following it snapped her back to facing right the moment she
+	# stopped after walking west. The last horizontal heading is kept instead;
+	# walking straight up or down leaves it alone.
+	if absf(input.x) > 0.15:
+		_face_left = input.x < 0.0
+	character.flip_h = _face_left
 	_lean = lerpf(_lean, lean, minf(1.0, delta * 9.0))
 	# Cold drains the colour out of her the same way it does the world.
 	var chill: float = clampf(1.0 - warmth / 100.0, 0.0, 1.0)
