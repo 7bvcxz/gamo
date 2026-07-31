@@ -110,7 +110,7 @@ th { background: var(--sidebar); font-weight: 600; }
 }
 .tag-add, .tag-next { background: var(--accent-soft); color: var(--accent); }
 .tag-fix { background: var(--code); color: var(--text); }
-.tag-change, .tag-improve, .tag-todo { background: var(--code); color: var(--muted); }
+.tag-change, .tag-improve, .tag-todo, .tag-doc { background: var(--code); color: var(--muted); }
 
 .release { margin-bottom: 8px; }
 .release h2 { display: flex; align-items: baseline; gap: 12px; }

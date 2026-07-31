@@ -86,6 +86,12 @@ func _physics_process(delta: float) -> void:
 ## Axis-separated movement: try each axis on its own so sliding along a wall
 ## works instead of sticking the moment one direction is blocked.
 func _move(step: Vector2) -> void:
+	# Already inside a structure? Suspend collision until the body is clear. A
+	# save written before a tile gained the attribute can leave the player here,
+	# and blocking every way out would seal them in permanently.
+	if not _free_at(position):
+		position += step
+		return
 	if not _free_at(Vector2(position.x + step.x, position.y)):
 		step.x = 0.0
 		velocity.x = 0.0

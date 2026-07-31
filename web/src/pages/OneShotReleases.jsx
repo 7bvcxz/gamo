@@ -7,9 +7,19 @@ import React from 'react';
 
 const RELEASES = [
   {
-    version: '0.5.0',
+    version: '0.5.1',
     date: '2026-07-31',
     current: true,
+    headline: '코어에 구조물 속성',
+    items: [
+      ['변경', '코어가 구조물이 되어 주인공이 통과할 수 없다. 회수는 원래부터 불가능했다'],
+      ['수정', '구조물 안에 있는 상태로 저장이 복원되면 빠져나올 수 없던 문제'],
+      ['문서', '채굴기는 광맥 위에만 놓을 수 있고, 광맥이 구조물이라 채굴기 칸도 계속 몸을 막는다는 점을 Level Design에 명시'],
+    ],
+  },
+  {
+    version: '0.5.0',
+    date: '2026-07-31',
     headline: '모바일 가독성과 화면 크기 설정',
     items: [
       ['추가', '좌측 최상단 설정 버튼과 UI 크기 · 게임 화면 크기 슬라이더 (60–160%)'],
@@ -71,7 +81,13 @@ const RELEASES = [
   },
 ];
 
-const TAG_CLASS = { 추가: 'tag-add', 수정: 'tag-fix', 변경: 'tag-change', 개선: 'tag-improve' };
+const TAG_CLASS = {
+  추가: 'tag-add',
+  수정: 'tag-fix',
+  변경: 'tag-change',
+  개선: 'tag-improve',
+  문서: 'tag-doc',
+};
 
 export function OneShotReleases() {
   return (
