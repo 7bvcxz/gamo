@@ -525,15 +525,16 @@ func _primary_action() -> void:
 			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
 		return
-	if sim.is_structure(cell) and sim.machine_at(cell) == null:
-		_notify("구조물은 들 수 없습니다", Defs.COL_TEXT_DIM)
-		audio.call("play", "deny")
-		return
 	if sim.pick_up_cat(cell):
 		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
 		audio.call("play", "select")
 		return
+	# Nothing here refuses the press for facing a structure. A miner is built
+	# *onto* ore, and ore is a structure, so a "구조물은 들 수 없습니다" guard
+	# ahead of this line made the game's central placement impossible. Ore has no
+	# pick-up verb to protect anyway -- Z takes cats, X takes machines -- so
+	# can_build's own reason is both sufficient and more useful.
 	_try_build()
 
 func _try_build() -> void:
