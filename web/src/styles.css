@@ -71,6 +71,60 @@ table { border-collapse: collapse; width: 100%; font-size: 15px; }
 th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; }
 th { background: var(--sidebar); font-weight: 600; }
 
+/* --- diagrams ---
+   The figure is one inline SVG so it scales with the column and follows the
+   light/dark variables. Everything is sized in the SVG's own user units; only
+   colour and weight live here. */
+.figure { margin: 26px 0 34px; }
+.figure svg { width: 100%; height: auto; display: block; }
+.figure figcaption { color: var(--muted); font-size: 13px; margin-top: 10px; }
+
+.fig-ring-max { fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 6 7; opacity: .55; }
+.fig-warm { fill: var(--accent); opacity: .18; }
+.fig-warm-edge { fill: none; stroke: var(--accent); stroke-width: 2; opacity: .8; }
+.fig-core { fill: var(--accent); }
+.fig-core-halo { fill: var(--accent); opacity: .35; }
+.fig-shelter { fill: var(--muted); }
+.fig-leader { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 4; opacity: .65; }
+.fig-dot { fill: var(--muted); }
+
+.fig-label { fill: var(--text); font-size: 15px; font-weight: 600; }
+.fig-note { fill: var(--muted); font-size: 13px; font-weight: 400; }
+.fig-body { fill: var(--text); font-size: 14px; }
+.fig-caption { fill: var(--muted); font-size: 14px; }
+.fig-key { fill: var(--accent); font-size: 15px; font-weight: 700; }
+.fig-row { font-size: 15px; }
+
+.fig-card { fill: var(--sidebar); stroke: var(--line); stroke-width: 1; }
+.fig-card-title { fill: var(--text); font-size: 16px; font-weight: 700; }
+.fig-day { fill: var(--accent); opacity: .55; }
+.fig-dusk { fill: var(--accent); opacity: .3; }
+.fig-night { fill: var(--muted); opacity: .55; }
+.fig-arrow { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: none; }
+
+/* --- releases & todo --- */
+.tag {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  padding: 2px 7px; border-radius: 5px; margin-right: 9px; vertical-align: 2px;
+  white-space: nowrap;
+}
+.tag-add, .tag-next { background: var(--accent-soft); color: var(--accent); }
+.tag-fix { background: var(--code); color: var(--text); }
+.tag-change, .tag-improve, .tag-todo { background: var(--code); color: var(--muted); }
+
+.release { margin-bottom: 8px; }
+.release h2 { display: flex; align-items: baseline; gap: 12px; }
+.release-current {
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px;
+  background: var(--accent); color: #fff; letter-spacing: .02em;
+}
+.release-date { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: auto; }
+.release-headline { color: var(--muted); margin: 0 0 12px; }
+.release-list, .todo-list { list-style: none; padding-left: 0; }
+.release-list li, .todo-list li { margin: 9px 0; line-height: 1.6; }
+.todo-list li { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.todo-body { display: block; color: var(--muted); font-size: 14px; margin-top: 3px; }
+
 /* --- landing --- */
 .hero { max-width: 900px; margin: 0 auto; padding: 96px 32px 40px; }
 .hero h1 { font-size: 52px; margin: 0 0 12px; letter-spacing: -.03em; }

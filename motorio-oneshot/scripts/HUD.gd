@@ -465,6 +465,14 @@ func _draw_title() -> void:
 	var controls: String = "휠 이동   Z 설치   X 회수   Run 달리기" if touch_pad \
 		else "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택"
 	_text_in(full.call(size.y * 0.84), controls, 12, Defs.COL_TEXT_DIM)
+	# So a player can say which build they are on without opening anything.
+	_text_in(Rect2(0, size.y - MARGIN, size.x - MARGIN, 16), "v%s" % version_string(), 11,
+		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+
+## Read from the project settings rather than duplicated here, so the number on
+## screen can never disagree with the one that was shipped.
+func version_string() -> String:
+	return str(ProjectSettings.get_setting("application/config/version", "0.0.0"))
 
 ## Top-left corner, on every screen including the title. A player whose HUD is
 ## too small to read has to be able to find this without reading anything, so it

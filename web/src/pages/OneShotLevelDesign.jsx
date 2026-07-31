@@ -1,4 +1,5 @@
 import React from 'react';
+import { OneShotLevelMap } from './OneShotLevelMap.jsx';
 
 export function OneShotLevelDesign() {
   return (
@@ -8,6 +9,8 @@ export function OneShotLevelDesign() {
         얼어붙은 고원에서 하루를 버티며 공장을 키운다. 진행을 가로막는 것은 돈이 아니라{' '}
         <b>온기 · 일손 · 시간</b> 세 가지이고, 레벨 디자인은 이 셋을 서로 묶는 일이다.
       </p>
+
+      <OneShotLevelMap />
 
       <h2>세 가지 관문</h2>
       <div className="table-wrap">

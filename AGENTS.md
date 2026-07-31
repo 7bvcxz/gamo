@@ -21,8 +21,10 @@
 - HeyDive 등록에 인증이나 서버 접근 권한이 필요해 자동 완료할 수 없다면, 정적 배포 완료와 HeyDive 등록 미완료를 명확히 구분해 보고하고 사용자에게 필요한 최소 작업을 요청한다.
 - 완료된 변경은 관련 파일만 커밋하고 `main` 브랜치를 원격에 push한다.
 - `motorio`를 push하기 직전에 `motorio/project.godot`의 `application/config/version` patch 값을 `0.0.1` 올리고, 게임 우측 아래 표시와 Web export가 같은 버전을 사용하는지 확인한다.
+- `motorio-oneshot`도 같은 규칙을 따른다. 개발이 한 번 끝나 push하기 직전에 `motorio-oneshot/project.godot`의 `application/config/version` patch 값을 `0.0.1` 올리고, 타이틀 화면 우측 아래 표시가 같은 버전인지 확인한다. `0.5.0`이 최초로 기록된 버전이다.
 - minor 또는 major 버전은 사용자가 명시적으로 요청할 때만 올린다. 사용자 요청 없이 patch 증가를 minor/major 증가로 대체하지 않는다.
 - Motorio 배포 시 `motorio/release.md`에 해당 버전과 핵심 변경 사항을 간략히 추가한다.
+- `motorio-oneshot`의 변경 사항은 `web/src/pages/OneShotReleases.jsx`에 버전별로 추가하고, 끝난 작업은 `OneShotTodo.jsx`에서 지운다. 두 문서는 `https://7bvcxz.github.io/gamo/doc/`의 MOTORIO: ONE SHOT 섹션에서 조회한다.
 
 ## 배포
 
