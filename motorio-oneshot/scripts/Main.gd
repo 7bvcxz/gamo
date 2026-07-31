@@ -46,6 +46,9 @@ var autosave_elapsed: float = 0.0
 var blackout: float = 0.0
 ## Player's UI size multiplier, applied on top of the per-platform base.
 var ui_scale: float = Defs.UI_SCALE_DEFAULT
+## The same idea for the world: how large the game itself is drawn, which is the
+## camera's zoom rather than anything the HUD does.
+var game_scale: float = Defs.GAME_SCALE_DEFAULT
 var state_before_settings: int = State.TITLE
 
 func _ready() -> void:
@@ -141,6 +144,10 @@ func shelter_nearby() -> bool:
 	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
 
 func _process(delta: float) -> void:
+	# Re-applied every frame because the platform base follows the touch pad,
+	# which appears and disappears as the player switches between thumb and
+	# keyboard mid-session.
+	_apply_camera_zoom()
 	var view := _view_rect()
 	world_layer.set_view(view)
 	world_layer.night = day_fraction()
@@ -322,7 +329,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if state == State.SETTINGS:
 			get_viewport().set_input_as_handled()
 			return
-	if event is InputEventMouseMotion and hud.slider_dragging:
+	if event is InputEventMouseMotion and hud.dragging_slider >= 0:
 		touch_hud_drag((event as InputEventMouseMotion).position)
 		get_viewport().set_input_as_handled()
 		return
@@ -338,12 +345,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	# The panel is modal: while it is open the only keys that mean anything are
 	# the ones that close it and the ones that nudge the slider.
 	if state == State.SETTINGS:
+		var rows: int = hud.slider_track_rects.size()
 		if key.keycode == KEY_ESCAPE or key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
 			close_settings()
+		elif key.keycode == KEY_UP or key.keycode == KEY_DOWN:
+			var step: int = -1 if key.keycode == KEY_UP else 1
+			hud.settings_row = posmod(int(hud.settings_row) + step, rows)
+			audio.call("play", "select")
 		elif key.keycode == KEY_LEFT or key.keycode == KEY_MINUS:
-			set_ui_scale(ui_scale - Defs.UI_SCALE_STEP)
+			_nudge_slider(int(hud.settings_row), -Defs.UI_SCALE_STEP)
 		elif key.keycode == KEY_RIGHT or key.keycode == KEY_EQUAL:
-			set_ui_scale(ui_scale + Defs.UI_SCALE_STEP)
+			_nudge_slider(int(hud.settings_row), Defs.UI_SCALE_STEP)
 		get_viewport().set_input_as_handled()
 		return
 	match state:
@@ -419,9 +431,11 @@ func touch_hud(position: Vector2) -> bool:
 		# through onto the world behind it.
 		if (hud.settings_close_rect as Rect2).has_point(local):
 			close_settings()
-		elif (hud.slider_hit_rect as Rect2).has_point(local):
-			hud.call("begin_slider_drag")
-			set_ui_scale(hud.call("slider_value_at", local.x))
+			return true
+		var row: int = int(hud.call("slider_at", local))
+		if row >= 0:
+			hud.call("begin_slider_drag", row)
+			_apply_slider(row, local.x)
 		return true
 	if (hud.settings_button_rect as Rect2).has_point(local):
 		open_settings()
@@ -443,11 +457,25 @@ func touch_hud(position: Vector2) -> bool:
 func hud_local(position: Vector2) -> Vector2:
 	return position / maxf(hud.scale.x, 0.01)
 
+func _nudge_slider(row: int, delta: float) -> void:
+	if row == 0:
+		set_ui_scale(ui_scale + delta)
+	else:
+		set_game_scale(game_scale + delta)
+
+## One row's worth of slider, so touch, drag and the keyboard share a path.
+func _apply_slider(row: int, local_x: float) -> void:
+	var value: float = float(hud.call("slider_value_at", row, local_x))
+	if row == 0:
+		set_ui_scale(value)
+	else:
+		set_game_scale(value)
+
 ## Dragging the slider keeps updating the value; the pad forwards drags here.
 func touch_hud_drag(position: Vector2) -> bool:
-	if state != State.SETTINGS or not hud.slider_dragging:
+	if state != State.SETTINGS or hud.dragging_slider < 0:
 		return false
-	set_ui_scale(hud.call("slider_value_at", hud_local(position).x))
+	_apply_slider(hud.dragging_slider, hud_local(position).x)
 	return true
 
 func touch_hud_release() -> void:
@@ -626,9 +654,29 @@ func set_ui_scale(value: float) -> void:
 	touch.set_pad_scale(ui_scale)
 	save_settings()
 
+func set_game_scale(value: float) -> void:
+	var wanted: float = Defs.quantise_game_scale(value)
+	if is_equal_approx(wanted, game_scale):
+		return
+	game_scale = wanted
+	# Applied immediately rather than on the next frame, so dragging the slider
+	# shows the world resizing under the panel while the finger is still down.
+	_apply_camera_zoom()
+	save_settings()
+
+## Touch and desktop want different amounts of world on screen: the phone's
+## logical viewport is three times taller than the layout was drawn for, so at
+## 1:1 it shows a vast area at postage-stamp size.
+func _apply_camera_zoom() -> void:
+	var touch_pad: bool = touch != null and touch.visible
+	var base: float = Defs.GAME_SCALE_TOUCH_BASE if touch_pad else Defs.GAME_SCALE_DESKTOP_BASE
+	var zoom: float = maxf(base * game_scale, 0.05)
+	camera.zoom = Vector2(zoom, zoom)
+
 func save_settings() -> bool:
 	var config := ConfigFile.new()
 	config.set_value("settings", "ui_scale", ui_scale)
+	config.set_value("settings", "game_scale", game_scale)
 	return config.save(SETTINGS_PATH) == OK
 
 func load_settings() -> void:
@@ -636,7 +684,10 @@ func load_settings() -> void:
 	if config.load(SETTINGS_PATH) == OK:
 		ui_scale = Defs.quantise_ui_scale(
 			float(config.get_value("settings", "ui_scale", Defs.UI_SCALE_DEFAULT)))
+		game_scale = Defs.quantise_game_scale(
+			float(config.get_value("settings", "game_scale", Defs.GAME_SCALE_DEFAULT)))
 	touch.set_pad_scale(ui_scale)
+	_apply_camera_zoom()
 
 func open_settings() -> void:
 	if state == State.SETTINGS:

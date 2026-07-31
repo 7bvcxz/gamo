@@ -44,29 +44,72 @@ func _run() -> void:
 	main._process(0.5)
 	_assert(is_equal_approx(main.time_left, frozen), "the clock stops while settings are open")
 
-	# --- The slider -------------------------------------------------------------
+	# --- The sliders ------------------------------------------------------------
 	_tick(main)
-	var track: Rect2 = main.hud.slider_track_rect
-	_assert(track.size.x > 0.0, "the slider has a track")
-	_assert((main.hud.slider_hit_rect as Rect2).size.y > track.size.y * 3.0,
-		"the slider hit area is far taller than the drawn bar")
-	_assert(is_equal_approx(main.hud.slider_value_at(track.position.x), Defs.UI_SCALE_MIN),
-		"the left end of the track is the minimum scale")
-	_assert(is_equal_approx(main.hud.slider_value_at(track.position.x + track.size.x),
-		Defs.UI_SCALE_MAX), "the right end of the track is the maximum scale")
+	_assert(main.hud.slider_track_rects.size() == 2, "the panel has a UI row and a game row")
+	for row in 2:
+		var t: Rect2 = main.hud.slider_track_rects[row]
+		_assert(t.size.x > 0.0, "slider row %d has a track" % row)
+		_assert((main.hud.slider_hit_rects[row] as Rect2).size.y > t.size.y * 3.0,
+			"slider row %d has a hit area far taller than the drawn bar" % row)
+		var range: Vector2 = main.hud.slider_range(row)
+		_assert(is_equal_approx(main.hud.slider_value_at(row, t.position.x), range.x),
+			"the left end of row %d is its minimum" % row)
+		_assert(is_equal_approx(main.hud.slider_value_at(row, t.position.x + t.size.x), range.y),
+			"the right end of row %d is its maximum" % row)
+	# The two rows must not claim each other's touches, or the player drags one
+	# slider and watches the other move.
+	_assert(not (main.hud.slider_hit_rects[0] as Rect2).intersects(main.hud.slider_hit_rects[1]),
+		"the two slider hit areas do not overlap")
+	_assert(main.hud.slider_at((main.hud.slider_track_rects[1] as Rect2).get_center()) == 1,
+		"a point on the game row resolves to the game row")
 
+	var track: Rect2 = main.hud.slider_track_rects[0]
 	var before: float = main.ui_scale
 	var right_end := Vector2(track.position.x + track.size.x, track.get_center().y)
 	_assert(main.touch_hud(right_end * main.hud.scale.x), "touching the slider is handled")
 	_assert(main.ui_scale > before, "dragging the slider right enlarges the UI")
 	_assert(is_equal_approx(main.ui_scale, Defs.UI_SCALE_MAX), "the far right end is the maximum")
+	_assert(main.hud.dragging_slider == 0, "the UI row is the one being dragged")
 
-	# The HUD must actually resize, not just record a number.
+	# The HUD must actually resize, not just record a number. Checked here, before
+	# anything else ticks, or the change has already been applied and the
+	# assertion passes on a HUD that never moved.
 	var scale_before: float = main.hud.scale.x
 	_tick(main)
 	_assert(main.hud.scale.x > scale_before, "raising the setting scales the HUD up")
 	_assert(is_equal_approx(main.hud.scale.x,
 		Defs.UI_SCALE_DESKTOP_BASE * main.ui_scale), "HUD scale is base times the setting")
+
+	# --- The game-view row drives the camera, not the HUD ------------------------
+	var ui_kept: float = main.ui_scale
+	var game_track: Rect2 = main.hud.slider_track_rects[1]
+	var zoom_before: float = main.camera.zoom.x
+	_assert(main.touch_hud(Vector2(game_track.position.x, game_track.get_center().y)
+		* main.hud.scale.x), "touching the game row is handled")
+	_assert(is_equal_approx(main.game_scale, Defs.GAME_SCALE_MIN),
+		"the left end of the game row is its minimum")
+	_assert(is_equal_approx(main.ui_scale, ui_kept), "the game row leaves the UI size alone")
+	_assert(main.camera.zoom.x < zoom_before, "shrinking the game view zooms the camera out")
+	main.set_game_scale(Defs.GAME_SCALE_MAX)
+	_assert(main.camera.zoom.x > zoom_before, "enlarging the game view zooms the camera in")
+	# Applied on the spot so a drag resizes the world under the player's finger.
+	_assert(is_equal_approx(main.camera.zoom.x,
+		Defs.GAME_SCALE_DESKTOP_BASE * Defs.GAME_SCALE_MAX),
+		"camera zoom is the platform base times the setting")
+	main.set_game_scale(Defs.GAME_SCALE_DEFAULT)
+
+	# A phone shows a viewport far taller than the layout was drawn for, so it
+	# needs to start closer in than a desktop does.
+	_assert(Defs.GAME_SCALE_TOUCH_BASE > Defs.GAME_SCALE_DESKTOP_BASE,
+		"touch starts more zoomed in than desktop")
+	_assert(is_equal_approx(Defs.GAME_SCALE_TOUCH_BASE, 1.6), "touch starts at 160% of desktop")
+	main.touch.visible = true
+	main._apply_camera_zoom()
+	_assert(is_equal_approx(main.camera.zoom.x, Defs.GAME_SCALE_TOUCH_BASE * main.game_scale),
+		"the touch base applies once the pad is showing")
+	main.touch.visible = false
+	main._apply_camera_zoom()
 
 	# Nothing may run off the screen at the largest setting.
 	var slot: Vector2 = main.hud.hotbar_slot()
@@ -131,15 +174,20 @@ func _run() -> void:
 	# A preference about the player's eyes must outlive both a new game and a
 	# save-schema bump, so it lives in its own file.
 	main.set_ui_scale(1.35)
+	main.set_game_scale(0.85)
 	_assert(main.save_settings(), "settings are written to disk")
 	main.ui_scale = Defs.UI_SCALE_DEFAULT
+	main.game_scale = Defs.GAME_SCALE_DEFAULT
 	main.load_settings()
-	_assert(is_equal_approx(main.ui_scale, 1.35), "the scale survives a reload")
+	_assert(is_equal_approx(main.ui_scale, 1.35), "the UI scale survives a reload")
+	_assert(is_equal_approx(main.game_scale, 0.85), "the game scale survives a reload")
 	main.clear_save()
 	main.load_settings()
 	_assert(is_equal_approx(main.ui_scale, 1.35), "clearing the run save keeps the UI setting")
+	_assert(is_equal_approx(main.game_scale, 0.85), "clearing the run save keeps the game setting")
 
 	main.set_ui_scale(Defs.UI_SCALE_DEFAULT)
+	main.set_game_scale(Defs.GAME_SCALE_DEFAULT)
 	main.save_settings()
 
 	if failures == 0:

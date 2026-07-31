@@ -179,9 +179,24 @@ const UI_SCALE_DEFAULT := 1.0
 ## never shows a number the player cannot get back to.
 const UI_SCALE_STEP := 0.05
 
+## How large the world itself is drawn, independent of the HUD. The camera has no
+## authored zoom, so on a phone it shows a 960x1634 logical slice of the world at
+## 1:1 -- an enormous area rendered into a small screen, which is why the player
+## and the ore read as smudges. Touch therefore starts 60% zoomed in.
+const GAME_SCALE_TOUCH_BASE := 1.6
+const GAME_SCALE_DESKTOP_BASE := 1.0
+const GAME_SCALE_MIN := 0.6
+const GAME_SCALE_MAX := 1.6
+const GAME_SCALE_DEFAULT := 1.0
+
+static func quantise_scale(value: float, low: float, high: float) -> float:
+	return snappedf(clampf(value, low, high), UI_SCALE_STEP)
+
 static func quantise_ui_scale(value: float) -> float:
-	var clamped: float = clampf(value, UI_SCALE_MIN, UI_SCALE_MAX)
-	return snappedf(clamped, UI_SCALE_STEP)
+	return quantise_scale(value, UI_SCALE_MIN, UI_SCALE_MAX)
+
+static func quantise_game_scale(value: float) -> float:
+	return quantise_scale(value, GAME_SCALE_MIN, GAME_SCALE_MAX)
 
 ## Eight-direction facing. The source art only contains four views (and the
 ## engineer's sheet only one), so a diagonal is rendered as its nearest real view

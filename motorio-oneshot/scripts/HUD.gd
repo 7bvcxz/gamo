@@ -25,10 +25,14 @@ var hotbar_rects: Array[Rect2] = []
 var direction_rect := Rect2()
 var settings_button_rect := Rect2()
 var settings_close_rect := Rect2()
-var slider_track_rect := Rect2()
-## Deliberately taller than the track it drives: a 8px bar is not a touch target.
-var slider_hit_rect := Rect2()
-var slider_dragging := false
+## One entry per settings row: 0 is the HUD size, 1 is the world's.
+var slider_track_rects: Array[Rect2] = [Rect2(), Rect2()]
+## Deliberately taller than the tracks they drive: an 8px bar is not a touch
+## target, and the two rows must not steal each other's misses.
+var slider_hit_rects: Array[Rect2] = [Rect2(), Rect2()]
+var dragging_slider: int = -1
+## Which row the keyboard is on, for players without a pointer.
+var settings_row: int = 0
 
 var _repaint := 0.0
 
@@ -108,27 +112,54 @@ func _layout() -> void:
 	settings_button_rect = Rect2(MARGIN, MARGIN, SETTINGS_BUTTON, SETTINGS_BUTTON)
 	_layout_settings()
 
-const SETTINGS_CARD_H := 250.0
+const SETTINGS_CARD_H := 346.0
+const SETTINGS_ROW_H := 92.0
+const SETTINGS_ROW_TOP := 96.0
+const SLIDER_LABELS := ["화면 UI 크기", "게임 화면 크기"]
 
 func _layout_settings() -> void:
 	var card: Rect2 = _card_rect(SETTINGS_CARD_H)
-	slider_track_rect = Rect2(card.position + Vector2(34.0, 142.0), Vector2(card.size.x - 68.0, 8.0))
-	slider_hit_rect = Rect2(slider_track_rect.position - Vector2(26.0, 30.0),
-		slider_track_rect.size + Vector2(52.0, 64.0))
+	for index in SLIDER_LABELS.size():
+		var top: float = SETTINGS_ROW_TOP + float(index) * SETTINGS_ROW_H
+		var track := Rect2(card.position + Vector2(34.0, top + 46.0), Vector2(card.size.x - 68.0, 8.0))
+		slider_track_rects[index] = track
+		# Half a row of slop above and below, so the two rows tile the card
+		# without overlapping and every pixel between them belongs to someone.
+		slider_hit_rects[index] = Rect2(track.position - Vector2(26.0, 34.0),
+			track.size + Vector2(52.0, 68.0))
 	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 62.0),
 		Vector2(144.0, 42.0))
 
-## Maps a horizontal position on the slider to a scale value.
-func slider_value_at(x: float) -> float:
-	var span: float = maxf(slider_track_rect.size.x, 1.0)
-	var t: float = clampf((x - slider_track_rect.position.x) / span, 0.0, 1.0)
-	return Defs.UI_SCALE_MIN + t * (Defs.UI_SCALE_MAX - Defs.UI_SCALE_MIN)
+## The value range a row spans. Kept here rather than in the caller so drawing,
+## hit-testing and the keyboard all read the same numbers.
+func slider_range(index: int) -> Vector2:
+	return Vector2(Defs.UI_SCALE_MIN, Defs.UI_SCALE_MAX) if index == 0 \
+		else Vector2(Defs.GAME_SCALE_MIN, Defs.GAME_SCALE_MAX)
 
-func begin_slider_drag() -> void:
-	slider_dragging = true
+func slider_current(index: int) -> float:
+	return float(main.ui_scale) if index == 0 else float(main.game_scale)
+
+## Maps a horizontal position on a row's track to that row's scale value.
+func slider_value_at(index: int, x: float) -> float:
+	var track: Rect2 = slider_track_rects[index]
+	var span: float = maxf(track.size.x, 1.0)
+	var t: float = clampf((x - track.position.x) / span, 0.0, 1.0)
+	var range: Vector2 = slider_range(index)
+	return range.x + t * (range.y - range.x)
+
+## Which row a point falls in, or -1.
+func slider_at(point: Vector2) -> int:
+	for index in slider_hit_rects.size():
+		if (slider_hit_rects[index] as Rect2).has_point(point):
+			return index
+	return -1
+
+func begin_slider_drag(index: int) -> void:
+	dragging_slider = index
+	settings_row = index
 
 func end_slider_drag() -> void:
-	slider_dragging = false
+	dragging_slider = -1
 
 func _panel(rect: Rect2, fill: Color, edge: Color, width: float = 1.0) -> void:
 	draw_rect(rect, fill)
@@ -458,25 +489,35 @@ func _draw_settings_card() -> void:
 	var card: Rect2 = _card(SETTINGS_CARD_H)
 	var w: float = card.size.x
 	_text_in(Rect2(card.position + Vector2(0, 48), Vector2(w, 30)), "설정", 26, Defs.COL_TEXT)
-	_text_in(Rect2(card.position + Vector2(0, 88), Vector2(w, 22)), "화면 UI 크기", 14, Defs.COL_TEXT_DIM)
-	_text_in(Rect2(card.position + Vector2(0, 122), Vector2(w, 26)),
-		"%d%%" % int(round(float(main.ui_scale) * 100.0)), 22, Defs.COL_CORE)
-
-	var span: float = Defs.UI_SCALE_MAX - Defs.UI_SCALE_MIN
-	var t: float = clampf((float(main.ui_scale) - Defs.UI_SCALE_MIN) / maxf(span, 0.001), 0.0, 1.0)
-	var track: Rect2 = slider_track_rect
-	draw_rect(track, Color8(28, 36, 54))
-	draw_rect(Rect2(track.position, Vector2(track.size.x * t, track.size.y)), Defs.COL_CORE)
-	var knob := Vector2(track.position.x + track.size.x * t, track.position.y + track.size.y * 0.5)
-	draw_circle(knob, 15.0, Defs.COL_CORE)
-	draw_circle(knob, 15.0, Color(0.02, 0.03, 0.06, 0.45), false, 1.6)
+	for index in SLIDER_LABELS.size():
+		_draw_settings_row(card, index)
 
 	var touch_pad: bool = main.touch != null and main.touch.visible
-	_text_in(Rect2(card.position + Vector2(0, 182), Vector2(w, 18)),
-		"슬라이더를 드래그하세요" if touch_pad else "← → 키 또는 드래그", 12, Defs.COL_TEXT_DIM)
+	_text_in(Rect2(card.position + Vector2(0, SETTINGS_CARD_H - 76.0), Vector2(w, 18)),
+		"슬라이더를 드래그하세요" if touch_pad else "↑ ↓ 로 선택, ← → 로 조절", 12, Defs.COL_TEXT_DIM)
 	var close: Rect2 = settings_close_rect
 	_panel(close, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18), Defs.COL_CORE)
 	_text_in(Rect2(close.position + Vector2(0, 28), Vector2(close.size.x, 22)), "닫기", 16, Defs.COL_TEXT)
+
+func _draw_settings_row(card: Rect2, index: int) -> void:
+	var w: float = card.size.x
+	var top: float = SETTINGS_ROW_TOP + float(index) * SETTINGS_ROW_H
+	var focused: bool = settings_row == index and (main.touch == null or not main.touch.visible)
+	_text_in(Rect2(card.position + Vector2(0, top), Vector2(w, 22)),
+		SLIDER_LABELS[index], 14, Defs.COL_TEXT if focused else Defs.COL_TEXT_DIM)
+	_text_in(Rect2(card.position + Vector2(0, top + 30.0), Vector2(w, 26)),
+		"%d%%" % int(round(slider_current(index) * 100.0)), 22, Defs.COL_CORE)
+
+	var range: Vector2 = slider_range(index)
+	var span: float = maxf(range.y - range.x, 0.001)
+	var t: float = clampf((slider_current(index) - range.x) / span, 0.0, 1.0)
+	var track: Rect2 = slider_track_rects[index]
+	draw_rect(track, Color8(28, 36, 54))
+	draw_rect(Rect2(track.position, Vector2(track.size.x * t, track.size.y)), Defs.COL_CORE)
+	var knob := Vector2(track.position.x + track.size.x * t, track.position.y + track.size.y * 0.5)
+	var held: bool = dragging_slider == index
+	draw_circle(knob, 17.0 if held else 15.0, Defs.COL_CORE)
+	draw_circle(knob, 17.0 if held else 15.0, Color(0.02, 0.03, 0.06, 0.45), false, 1.6)
 
 func _draw_pause_card() -> void:
 	var card := _card(150.0)
