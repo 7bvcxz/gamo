@@ -24,7 +24,7 @@ func _run() -> void:
 
 	# Machines are not structures, so a belt can be laid across a walking route.
 	# A miner is a different story -- see the placement rules below.
-	sim.heat = 300
+	_open(sim)
 	sim.build(Defs.M_BELT, empty, Vector2i.RIGHT)
 	_assert(not sim.blocks_player(empty), "a belt does not block the player")
 
@@ -41,7 +41,7 @@ func _run() -> void:
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) == "", "a miner may be built on ore")
 	_assert(sim.can_build(Defs.M_MINER, empty) != "", "a miner may not be built off ore")
 	_assert(sim.can_build(Defs.M_BELT, ore_cell) != "", "a belt may not be built on ore")
-	_assert(sim.can_build(Defs.M_FURNACE, ore_cell) != "", "a furnace may not be built on ore")
+	_assert(sim.can_build(Defs.M_EXCHANGER, ore_cell) != "", "a furnace may not be built on ore")
 	_assert(sim.can_build(Defs.M_BELT, sim.core_cell) != "", "nothing may be built on the core")
 
 	# And the consequence of the two rules meeting: because a miner always sits
@@ -142,3 +142,12 @@ func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("TILES_TEST: FAIL - " + message)
 		failures += 1
+
+## Machines are bought with materials from an unlocked hotbar, so a test that
+## wants to build has to open and fund the base first.
+func _open(sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
+	sim.stock[Defs.ITEM_ENERGY] = 500

@@ -53,6 +53,8 @@ var touch_sprint := false
 ## The position and heading come from the cat itself rather than being recomputed
 ## here, so the drawing cannot drift from where the simulation put it.
 var carrying_cat := false
+## 0..1 while working a seam by hand, for the swing animation and the ring.
+var mining: float = 0.0
 var carried_cat_pos := Vector2.ZERO
 var carried_cat_heading := Vector2.DOWN
 ## Set by Main. Structures block movement, so the actor needs to ask the world

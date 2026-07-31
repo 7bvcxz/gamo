@@ -49,11 +49,14 @@ const COL_TEXT := Color("e6eef7")
 const COL_TEXT_DIM := Color("8fa0bd")
 
 # --- Items -------------------------------------------------------------------
-const ITEM_FROST := 0
+## Three materials, in the order the player meets them. Crystal is hand-mined
+## from the first minute; copper needs a miner and the warmth to reach it; energy
+## is the only thing the core turns into heat.
+const ITEM_CRYSTAL := 0
 const ITEM_COPPER := 1
-const ITEM_IRON := 2
+const ITEM_ENERGY := 2
 
-const ITEM_NAMES := ["서리광석", "구리", "철"]
+const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
@@ -61,10 +64,35 @@ const ITEM_NAMES := ["서리광석", "구리", "철"]
 const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138)]
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
-## Heat is still the currency that widens the warm radius; copper and iron are
-## counted separately as materials.
-const ITEM_VALUES := [3, 6, 22]
-const COUNTED_ITEMS: Array[int] = [ITEM_COPPER, ITEM_IRON]
+## Only energy crystals become heat. Crystal and copper are materials: they go
+## into the base's stock and are spent on machines. Splitting the build currency
+## from the progress meter is what gives the player something to decide -- heat
+## buys distance, materials buy production, and the exchanger is where you choose
+## between them.
+##
+## Five was derived, not guessed. Reaching copper at radius 11 needs 182 heat;
+## two miners over three days produce about 72 crystal, which is 36 energy at the
+## 2:1 exchange, so each energy crystal has to be worth 182/36 ~= 5.
+const ITEM_VALUES := [0, 0, 5]
+const COUNTED_ITEMS: Array[int] = [ITEM_CRYSTAL, ITEM_COPPER, ITEM_ENERGY]
+
+## Hand mining. Deliberately slow: it is the floor the whole factory is measured
+## against, and it has to stay worth replacing.
+const HAND_MINE_PERIOD := 10.0
+## Crystal in, energy out. Two-to-one at five seconds means one exchanger keeps
+## up with four miners, so miners stay the bottleneck rather than the converter.
+const CRYSTAL_COST_ENERGY := 2
+const EXCHANGER_PERIOD := 5.0
+const COPPER_PERIOD := 20.0
+
+# --- Electricity -------------------------------------------------------------
+## Power is a rate, not a stock: it never accumulates, so there is no battery to
+## manage. A generator burns one energy crystal every ten seconds to sustain one
+## unit of capacity, and machines reserve a share of it. Running out does not
+## break anything -- everything drawing power simply slows in proportion.
+const GENERATOR_PERIOD := 10.0
+const GENERATOR_OUTPUT := 1.0
+const BELT_POWER_DRAW := 0.1
 
 # --- Tile attributes ---------------------------------------------------------
 ## Attributes describe what a tile *is*, independent of what sits on it. They are
@@ -85,18 +113,33 @@ const PLAYER_RADIUS := 9.0
 const M_CORE := 0
 const M_MINER := 1
 const M_BELT := 2
-const M_FURNACE := 3
+const M_EXCHANGER := 3
+const M_GENERATOR := 4
 
-const BUILDABLE: Array[int] = [M_MINER, M_BELT, M_FURNACE]
+## Hotbar order is the order they unlock, so the row grows left to right as the
+## player earns it rather than showing four greyed slots on the first frame.
+const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_GENERATOR]
 
-const MACHINE_NAMES := ["열 코어", "채굴기", "벨트", "제련로"]
-const MACHINE_COSTS := [0, 12, 2, 30]
+const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "수정에너지교환기", "발전기"]
+## Machines are bought with materials now, never with heat.
+const MACHINE_COSTS := [
+	{},
+	{ITEM_CRYSTAL: 5},
+	{ITEM_COPPER: 3},
+	{ITEM_CRYSTAL: 20},
+	{ITEM_COPPER: 10},
+]
 const MACHINE_HINTS := [
 	"",
-	"광맥 위에 설치하고 고양이가 와야 돌아갑니다",
-	"광석을 바라보는 방향으로 옮깁니다",
-	"서리광석과 구리를 철로 제련합니다",
+	"수정 광맥 위에 설치하고 고양이를 올려놓으세요",
+	"자원을 기지까지 끊김 없이 나릅니다 · 전력 0.1 필요",
+	"수정조각 2개를 에너지결정 1개로 바꿉니다",
+	"에너지결정을 태워 전력 1.0을 공급합니다",
 ]
+
+## What each machine needs before it appears in the hotbar. The first crystal in
+## hand opens the crystal line; the first copper opens the power line.
+const MACHINE_UNLOCK_ITEM := [-1, ITEM_CRYSTAL, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER]
 
 # --- Economy -----------------------------------------------------------------
 ## Days repeat and accumulate rather than ending the game, so one day is short
@@ -105,7 +148,11 @@ const DAY_SECONDS := 180.0
 const START_HEAT := 30
 ## Deliberately slow: one cat is a trickle, so throughput has to come from more
 ## miners and better routing rather than from a single well-placed worker.
-const MINER_PERIOD := 5.75
+## Matched to hand mining on purpose. A miner is not faster than the player --
+## it is somewhere else while the player is here, which makes the first one read
+## as parallelism rather than as a speed upgrade. It also makes one exchanger
+## exactly absorb four miners.
+const MINER_PERIOD := 10.0
 const FURNACE_PERIOD := 2.2
 const BELT_SPEED := 2.6           # tiles per second
 const BELT_CAPACITY := 3
@@ -150,6 +197,12 @@ const HUNGER_STARVED_RATE := 1.0 / 3.0    # work speed multiplier at zero hunger
 const FOOD_START := 200
 const FOOD_SECONDS_PER_UNIT := 5.0
 const FOOD_HUNGER_PER_UNIT := 1.0 / 3.0
+
+## An idle cat is not decoration: it looks for loose items and walks them to the
+## base, one at a time. Slow and single-file on purpose -- it clears the floor
+## before belts exist, and it degrades with distance so belts stay worth building.
+const CAT_HAUL_TO_ITEM := 5
+const CAT_HAUL_TO_BASE := 6
 
 const CAT_IDLE := 0
 const CAT_TO_MINER := 1
@@ -248,7 +301,8 @@ static func machine_color(type: int) -> Color:
 	match type:
 		M_CORE: return COL_CORE
 		M_MINER: return COL_CAT_FUR
-		M_FURNACE: return Color8(210, 120, 52)
+		M_EXCHANGER: return Color8(210, 120, 52)
+		M_GENERATOR: return Color8(120, 190, 235)
 		M_BELT: return COL_BELT_RIM
 		_: return COL_MACHINE
 

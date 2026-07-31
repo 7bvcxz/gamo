@@ -32,17 +32,36 @@ func _staff(sim: Sim, cell: Vector2i) -> Sim.Cat:
 	sim.cats.append(cat)
 	return cat
 
+## Most tests are about placement rules and machine behaviour, not about earning
+## the tech tree, so this hands them an opened, funded base. The unlock and cost
+## rules get their own explicit test.
 func _fresh() -> Sim:
 	var sim := Sim.new()
 	sim.setup(12345)
+	_open(sim)
+	_power(sim)
 	return sim
+
+## Belts draw power, so any test that wants one to move has to energise the grid
+## first. A fuelled generator is the whole grid.
+func _power(sim: Sim) -> void:
+	var cell := Vector2i(6, 6)
+	sim.build(Defs.M_GENERATOR, cell, Vector2i.RIGHT)
+	sim.machine_at(cell).buffer[Defs.ITEM_ENERGY] = 4
+
+func _open(sim: Sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
+	sim.stock[Defs.ITEM_ENERGY] = 500
 
 func _test_generation() -> void:
 	var sim := _fresh()
 	var frost := 0
 	var copper := 0
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_FROST:
+		if sim.ore[cell] == Defs.ITEM_CRYSTAL:
 			frost += 1
 		else:
 			copper += 1
@@ -56,7 +75,7 @@ func _test_generation() -> void:
 	# Frost must be reachable at the opening radius or the first 45 seconds stall.
 	var reachable := 0
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_FROST and Vector2(cell).length() <= Defs.WARM_BASE:
+		if sim.ore[cell] == Defs.ITEM_CRYSTAL and Vector2(cell).length() <= Defs.WARM_BASE:
 			reachable += 1
 	_assert(reachable > 0, "some frost ore sits inside the starting warm radius")
 
@@ -70,7 +89,7 @@ func _test_generation() -> void:
 	# The opening must be identical every run: a patch south of the core plus a
 	# clear two-tile lane to belt through. Otherwise the first minute is a search.
 	for offset: Vector2i in Sim.STARTER_PATCH:
-		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_FROST,
+		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_CRYSTAL,
 			"guaranteed starter ore exists at %s" % offset)
 	for offset: Vector2i in Sim.STARTER_LANE:
 		_assert(not sim.ore.has(sim.core_cell + offset),
@@ -97,30 +116,50 @@ func _test_generation() -> void:
 	var other := Sim.new()
 	other.setup(90210)
 	for offset: Vector2i in Sim.STARTER_PATCH:
-		_assert(other.ore.get(other.core_cell + offset, -1) == Defs.ITEM_FROST,
+		_assert(other.ore.get(other.core_cell + offset, -1) == Defs.ITEM_CRYSTAL,
 			"the starter patch does not depend on the run seed")
 	other.free()
 
 func _test_build_rules() -> void:
-	var sim := _fresh()
+	var sim := Sim.new()
+	sim.setup(12345)
 	var ore_cell: Vector2i = sim.ore.keys()[0]
+	var empty := Vector2i(2, 0)
+
+	# Nothing is buildable until the matching resource has been held once. The
+	# hotbar is the tech tree, so it starts closed.
+	_assert(not sim.is_unlocked(Defs.M_MINER), "the miner starts locked")
+	_assert(sim.can_build(Defs.M_MINER, ore_cell) != "", "and cannot be built while locked")
+	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	_assert(sim.is_unlocked(Defs.M_MINER), "the first crystal opens the miner")
+	_assert(sim.is_unlocked(Defs.M_EXCHANGER), "and the exchanger with it")
+	_assert(not sim.is_unlocked(Defs.M_BELT), "but not the copper line")
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	_assert(sim.is_unlocked(Defs.M_BELT) and sim.is_unlocked(Defs.M_GENERATOR),
+		"the first copper opens belts and generators")
+
+	# Machines are bought with materials out of the base stock.
+	sim.stock[Defs.ITEM_CRYSTAL] = 100
+	sim.stock[Defs.ITEM_COPPER] = 100
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) == "", "a miner may be placed on ore")
 	_assert(sim.can_build(Defs.M_BELT, ore_cell) != "", "a belt may not be placed on ore")
-	var empty := Vector2i(2, 0)
 	_assert(sim.can_build(Defs.M_MINER, empty) != "", "a miner may not be placed off ore")
 	_assert(sim.can_build(Defs.M_BELT, empty) == "", "a belt may be placed on bare ground")
 	_assert(sim.can_build(Defs.M_BELT, sim.core_cell) != "", "nothing may overwrite the core")
 
-	var before: int = sim.heat
+	var cost: int = int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER])
+	var before: int = int(sim.stock[Defs.ITEM_COPPER])
+	var heat_before: int = sim.heat
 	_assert(sim.build(Defs.M_BELT, empty, Vector2i.RIGHT), "building a belt succeeds")
-	_assert(sim.heat == before - Defs.MACHINE_COSTS[Defs.M_BELT], "building spends heat")
+	_assert(int(sim.stock[Defs.ITEM_COPPER]) == before - cost, "building spends materials")
+	_assert(sim.heat == heat_before, "and never spends heat")
 	_assert(not sim.build(Defs.M_BELT, empty, Vector2i.RIGHT), "a filled cell rejects a second build")
 	_assert(sim.demolish(empty), "a placed machine can be reclaimed")
-	_assert(sim.heat > before - Defs.MACHINE_COSTS[Defs.M_BELT], "reclaiming refunds part of the cost")
+	_assert(int(sim.stock[Defs.ITEM_COPPER]) > before - cost, "reclaiming refunds part of the cost")
 	_assert(not sim.demolish(sim.core_cell), "the core can never be demolished")
 
-	sim.heat = 0
-	_assert(sim.can_build(Defs.M_FURNACE, empty) != "", "an unaffordable machine is rejected")
+	sim.stock[Defs.ITEM_CRYSTAL] = 0
+	_assert(sim.can_build(Defs.M_EXCHANGER, empty) != "", "an unaffordable machine is rejected")
 	sim.free()
 
 func _test_miner_to_core() -> void:
@@ -128,40 +167,45 @@ func _test_miner_to_core() -> void:
 	var sim := Sim.new()
 	sim.setup(999)
 	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_FROST
-	sim.heat = 100
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
+	_open(sim)
+	_power(sim)
 	_assert(sim.build(Defs.M_MINER, cell, Vector2i.RIGHT), "miner placed next to the core")
 	_staff(sim, cell)
-	var before: int = sim.total_heat
-	for step in 80:
+	var before: int = int(sim.stock[Defs.ITEM_CRYSTAL])
+	for step in 200:
 		sim.tick(0.1)     # comfortably longer than one mining period
-	_assert(sim.total_heat > before, "a miner pointed at the core earns heat")
-	_assert(sim.delivered[Defs.ITEM_FROST] > 0, "delivered frost ore is counted")
+	_assert(int(sim.stock[Defs.ITEM_CRYSTAL]) > before, "a miner pointed at the core banks material")
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] > 0, "delivered crystal is counted")
 	sim.free()
 
 func _test_miner_rate() -> void:
 	# One cat is deliberately a trickle; the number is load-bearing for balance.
 	var sim := Sim.new()
 	sim.setup(555)
-	sim.heat = 200
+	_open(sim)
+	_power(sim)
 	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_FROST
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	_staff(sim, cell)
 	for step in 50:
 		sim.tick(0.1)     # five seconds
-	_assert(sim.delivered[Defs.ITEM_FROST] == 0, "a miner produces nothing within five seconds")
-	for step in 20:
-		sim.tick(0.1)     # seven seconds total
-	_assert(sim.delivered[Defs.ITEM_FROST] == 1, "a miner delivers its first ore just after its period")
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 0, "a miner produces nothing before its period")
+	# Derived from the constant rather than a hardcoded tick count, so retuning
+	# the mining rate does not silently turn this into a test of nothing.
+	for step in int(Defs.MINER_PERIOD / 0.1) + 6:
+		sim.tick(0.1)
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 1, "a miner delivers its first ore just after its period")
 	sim.free()
 
 func _test_belt_transport() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
-	sim.heat = 200
+	_open(sim)
+	_power(sim)
 	# miner at (-3,0) -> belts at (-2,0) and (-1,0) -> core at (0,0)
-	sim.ore[Vector2i(-3, 0)] = Defs.ITEM_FROST
+	sim.ore[Vector2i(-3, 0)] = Defs.ITEM_CRYSTAL
 	_assert(sim.build(Defs.M_MINER, Vector2i(-3, 0), Vector2i.RIGHT), "miner built")
 	_staff(sim, Vector2i(-3, 0))
 	_assert(sim.build(Defs.M_BELT, Vector2i(-2, 0), Vector2i.RIGHT), "first belt built")
@@ -172,43 +216,48 @@ func _test_belt_transport() -> void:
 		if sim.items_in_transit() > 0:
 			saw_item = true
 	_assert(saw_item, "items visibly occupy the belt while travelling")
-	_assert(sim.delivered[Defs.ITEM_FROST] > 0, "a two-tile belt run reaches the core")
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] > 0, "a two-tile belt run reaches the core")
 	sim.free()
 
 func _test_furnace_alloy() -> void:
 	var sim := Sim.new()
 	sim.setup(777)
-	sim.heat = 500
+	_open(sim)
+	_power(sim)
 	var furnace_cell := Vector2i(-2, 0)
-	_assert(sim.build(Defs.M_FURNACE, furnace_cell, Vector2i.RIGHT), "furnace built")
+	_assert(sim.build(Defs.M_EXCHANGER, furnace_cell, Vector2i.RIGHT), "furnace built")
 	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "furnace output belt built")
 	var furnace: Sim.Machine = sim.machine_at(furnace_cell)
 
-	# Only one input type present: nothing may be produced.
-	furnace.buffer[Defs.ITEM_FROST] = 2
+	_power(sim)
+	# Below the recipe threshold: nothing may be produced.
+	furnace.buffer[Defs.ITEM_CRYSTAL] = Defs.CRYSTAL_COST_ENERGY - 1
 	for step in 40:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_IRON] == 0, "a furnace with one ore type produces nothing")
+	_assert(sim.delivered[Defs.ITEM_ENERGY] == 0, "an exchanger below the recipe produces nothing")
 
 	# Input may arrive on any face except the one the furnace outputs from.
 	var out_cell: Vector2i = furnace_cell + Vector2i.RIGHT
 	var side_cell: Vector2i = furnace_cell + Vector2i.UP
 	var back_cell: Vector2i = furnace_cell + Vector2i.LEFT
-	_assert(sim._push_into(furnace_cell, Defs.ITEM_COPPER, side_cell),
-		"the furnace accepts ore pushed in from the side")
-	_assert(sim._push_into(furnace_cell, Defs.ITEM_COPPER, back_cell),
-		"the furnace accepts ore pushed in from behind")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_COPPER, out_cell),
-		"the furnace refuses ore pushed in from its own output face")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_IRON, side_cell),
-		"the furnace never takes its own product as input")
+	_assert(sim._push_into(furnace_cell, Defs.ITEM_CRYSTAL, side_cell),
+		"the exchanger accepts crystal pushed in from the side")
+	_assert(sim._push_into(furnace_cell, Defs.ITEM_CRYSTAL, back_cell),
+		"the exchanger accepts crystal pushed in from behind")
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_CRYSTAL, out_cell),
+		"the exchanger refuses input pushed in from its own output face")
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_ENERGY, side_cell),
+		"the exchanger never takes its own product as input")
+	_assert(not sim._push_into(furnace_cell, Defs.ITEM_COPPER, side_cell),
+		"and never takes copper, which has no recipe here")
 
-	furnace.buffer[Defs.ITEM_COPPER] = 2
-	for step in 80:
+	furnace.buffer[Defs.ITEM_CRYSTAL] = 6
+	for step in 120:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_IRON] > 0, "frost plus ember yields alloy at the core")
-	_assert(Defs.ITEM_VALUES[Defs.ITEM_IRON] > Defs.ITEM_VALUES[Defs.ITEM_FROST] + Defs.ITEM_VALUES[Defs.ITEM_COPPER],
-		"alloy is worth more than its inputs, so the routing puzzle pays off")
+	_assert(sim.delivered[Defs.ITEM_ENERGY] > 0, "crystal becomes energy at the core")
+	_assert(Defs.ITEM_VALUES[Defs.ITEM_ENERGY] > 0
+		and Defs.ITEM_VALUES[Defs.ITEM_CRYSTAL] == 0,
+		"energy is the only thing the core turns into heat")
 	sim.free()
 
 func _test_economy_and_warmth() -> void:
@@ -216,11 +265,11 @@ func _test_economy_and_warmth() -> void:
 	var start_radius: float = sim.warm_radius
 	sim.heat = 0
 	sim.total_heat = 0
-	sim._deliver(Defs.ITEM_IRON, sim.core_cell)
-	_assert(sim.heat == Defs.ITEM_VALUES[Defs.ITEM_IRON], "delivery credits spendable heat")
-	_assert(sim.total_heat == Defs.ITEM_VALUES[Defs.ITEM_IRON], "delivery credits lifetime heat")
+	sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
+	_assert(sim.heat == Defs.ITEM_VALUES[Defs.ITEM_ENERGY], "delivery credits spendable heat")
+	_assert(sim.total_heat == Defs.ITEM_VALUES[Defs.ITEM_ENERGY], "delivery credits lifetime heat")
 	for step in 400:
-		sim._deliver(Defs.ITEM_IRON, sim.core_cell)
+		sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
 	sim.tick(0.016)
 	_assert(sim.warm_radius > start_radius, "lifetime heat expands the warm radius")
 	_assert(sim.warm_radius <= Defs.WARM_MAX, "the warm radius is capped")
@@ -241,7 +290,8 @@ func _test_frost_throttle() -> void:
 	# the same elapsed time the frozen belt must have carried its item less far.
 	var sim := Sim.new()
 	sim.setup(31337)
-	sim.heat = 500
+	_open(sim)
+	_power(sim)
 	var warm_cell := Vector2i(2, 0)
 	var cold_cell := Vector2i(int(Defs.WARM_MAX) + 8, 0)
 	_assert(sim.is_warm(warm_cell), "the warm test cell is inside the radius")
@@ -253,8 +303,8 @@ func _test_frost_throttle() -> void:
 	var cold_belt: Sim.Machine = sim.machine_at(cold_cell)
 	# Facing UP into empty ground, so neither can hand its item off and both
 	# simply accumulate travel along their own tile.
-	warm_belt.items.append({"type": Defs.ITEM_FROST, "t": 0.0})
-	cold_belt.items.append({"type": Defs.ITEM_FROST, "t": 0.0})
+	warm_belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 0.0})
+	cold_belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 0.0})
 	for step in 3:
 		sim.tick(0.05)
 	var warm_t: float = float(warm_belt.items[0]["t"])
@@ -267,22 +317,28 @@ func _test_frost_throttle() -> void:
 func _test_blocked_output_preserves_work() -> void:
 	var sim := Sim.new()
 	sim.setup(2468)
-	sim.heat = 200
+	_open(sim)
+	_power(sim)
 	# Miner facing empty ground: nothing accepts its output. Kept inside the warm
 	# radius so the frost throttle is not a second variable in this test.
 	var cell := Vector2i(3, 3)
-	sim.ore[cell] = Defs.ITEM_FROST
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
+	# The output tile is ore as well, so there is nowhere to push and nowhere to
+	# drop: a miner only stalls once the floor in front of it is unavailable too.
+	sim.ore[cell + Vector2i.RIGHT] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	_staff(sim, cell)
 	var machine: Sim.Machine = sim.machine_at(cell)
-	for step in 80:
+	for step in 200:
 		sim.tick(0.1)
 	_assert(is_equal_approx(machine.progress, Defs.MINER_PERIOD),
 		"a blocked miner holds its finished item instead of discarding it")
-	_assert(sim.delivered[Defs.ITEM_FROST] == 0, "a blocked miner delivers nothing")
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 0, "a blocked miner delivers nothing")
 	_assert(machine.stalled, "a blocked miner reports itself stalled so the player can see it")
 
 	# Give it somewhere to send the ore and the warning must clear on its own.
+	# The blocking ore has to go first: a belt may not sit on a seam.
+	sim.ore.erase(cell + Vector2i.RIGHT)
 	sim.build(Defs.M_BELT, cell + Vector2i.RIGHT, Vector2i.RIGHT)
 	for step in 40:
 		sim.tick(0.1)
@@ -293,7 +349,7 @@ func _test_blocked_output_preserves_work() -> void:
 	sim.build(Defs.M_BELT, dead_end, Vector2i.RIGHT)
 	var belt: Sim.Machine = sim.machine_at(dead_end)
 	for index in Defs.BELT_CAPACITY:
-		belt.items.append({"type": Defs.ITEM_FROST, "t": 1.0})
+		belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 1.0})
 	sim.tick(0.2)
 	_assert(belt.stalled, "a full belt with no destination reports itself stalled")
 	sim.free()

@@ -23,6 +23,9 @@ class Cat extends RefCounted:
 	var heading := Vector2.DOWN
 	var state: int = Defs.CAT_IDLE
 	var assigned := Vector2i(9999, 9999)   ## the miner cell this cat works
+	## Hauling: which loose item it is going for, and what it is carrying.
+	var haul_target := Vector2i(9999, 9999)
+	var carrying: int = -1
 	var hunger: float = 1.0
 	var eat_timer: float = 0.0
 
@@ -62,6 +65,22 @@ var food_cell := Vector2i.ZERO
 var heat: int = Defs.START_HEAT
 var total_heat: int = 0
 var delivered: Dictionary[int, int] = {}
+## Materials banked at the base. Machines are bought out of this, so hauling is
+## what funds construction rather than a separate abstract currency.
+var stock: Dictionary[int, int] = {}
+## Loose items lying in the world, one per cell. A miner with nowhere to push
+## drops here, hand mining drops here, and cats carry from here to the base.
+var ground: Dictionary[Vector2i, int] = {}
+## Which machines the player has earned. Seeing a resource for the first time is
+## what opens its line, so the hotbar grows as the world does.
+var unlocked: Dictionary[int, bool] = {}
+## Power is a rate. Capacity is what running generators sustain; draw is what
+## powered machines ask for. Neither is ever stored.
+var power_capacity: float = 0.0
+var power_draw: float = 0.0
+## Where the player is currently swinging, and how far through the swing.
+var hand_cell := Vector2i(9999, 9999)
+var hand_progress: float = 0.0
 var warm_radius: float = Defs.WARM_BASE
 
 var _cached_radius := -1.0
@@ -95,10 +114,21 @@ func to_save() -> Dictionary:
 	var delivered_rows: Dictionary = {}
 	for key: int in delivered:
 		delivered_rows[str(key)] = int(delivered[key])
+	var stock_rows: Dictionary = {}
+	for key: int in stock:
+		stock_rows[str(key)] = int(stock[key])
+	var ground_rows: Array = []
+	for cell: Vector2i in ground:
+		ground_rows.append([cell.x, cell.y, int(ground[cell])])
+	var unlocked_rows: Array = []
+	for key: int in unlocked:
+		if bool(unlocked[key]):
+			unlocked_rows.append(int(key))
 	return {
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
 		"machines": machine_rows, "cats": cat_rows, "boxes": box_rows,
 		"carried": carried_boxes, "food": food,
+		"stock": stock_rows, "ground": ground_rows, "unlocked": unlocked_rows,
 	}
 
 func from_save(data: Dictionary) -> void:
@@ -109,6 +139,15 @@ func from_save(data: Dictionary) -> void:
 		delivered[int(key)] = int(delivered_rows[key])
 	carried_boxes = int(data.get("carried", 0))
 	food = int(data.get("food", Defs.FOOD_START))
+	var stock_rows: Dictionary = data.get("stock", {})
+	for key: String in stock_rows:
+		stock[int(key)] = int(stock_rows[key])
+	ground.clear()
+	for row: Array in data.get("ground", []):
+		ground[Vector2i(int(row[0]), int(row[1]))] = int(row[2])
+	unlocked.clear()
+	for type: int in data.get("unlocked", []):
+		unlocked[int(type)] = true
 
 	for row: Dictionary in data.get("machines", []):
 		var cell := Vector2i(int(row["x"]), int(row["y"]))
@@ -142,7 +181,12 @@ func setup(seed_value: int) -> void:
 	machines.clear()
 	heat = Defs.START_HEAT
 	total_heat = 0
-	delivered = {Defs.ITEM_FROST: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_IRON: 0}
+	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0}
+	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0}
+	ground.clear()
+	unlocked.clear()
+	power_capacity = 0.0
+	power_draw = 0.0
 	warm_radius = Defs.WARM_BASE
 	# Seed the cache so the opening frame does not announce a radius that has
 	# not actually changed yet.
@@ -179,10 +223,10 @@ func _generate_ore(seed_value: int) -> void:
 	# A guaranteed first patch just south of the core. The opening minute should
 	# be about learning the miner-belt-core sentence, not about searching.
 	for offset: Vector2i in STARTER_PATCH:
-		ore[core_cell + offset] = Defs.ITEM_FROST
+		ore[core_cell + offset] = Defs.ITEM_CRYSTAL
 	# Ore is deliberately scarce: a fifth of the earlier density. Finding a seam
 	# should be an event, and a single miner should be worth protecting.
-	_scatter_ore(rng, Defs.ITEM_FROST, Defs.FROST_RING, 3, 2)
+	_scatter_ore(rng, Defs.ITEM_CRYSTAL, Defs.FROST_RING, 3, 2)
 	_scatter_ore(rng, Defs.ITEM_COPPER, Defs.COPPER_RING, 3, 2)
 	for offset: Vector2i in STARTER_COPPER:
 		ore[core_cell + offset] = Defs.ITEM_COPPER
@@ -387,16 +431,51 @@ func dispatch_cats() -> void:
 func machine_at(cell: Vector2i) -> Machine:
 	return machines.get(cell, null)
 
+## What a machine costs, as a material dictionary.
+func cost_of(type: int) -> Dictionary:
+	return Defs.MACHINE_COSTS[type]
+
+## A machine is only offered once the player has held the resource that defines
+## its line, so the hotbar teaches the tech tree by growing.
+func is_unlocked(type: int) -> bool:
+	return bool(unlocked.get(type, false))
+
+## Called whenever a material reaches the player. Returns the machines this
+## unlocked, so the caller can announce them.
+func note_resource_seen(item_type: int) -> Array[int]:
+	var opened: Array[int] = []
+	for type in Defs.BUILDABLE:
+		if is_unlocked(type):
+			continue
+		if Defs.MACHINE_UNLOCK_ITEM[type] == item_type:
+			unlocked[type] = true
+			opened.append(type)
+	return opened
+
+func can_afford(type: int) -> bool:
+	for item_type: int in cost_of(type):
+		if int(stock.get(item_type, 0)) < int(cost_of(type)[item_type]):
+			return false
+	return true
+
 func can_build(type: int, cell: Vector2i) -> String:
 	if machines.has(cell):
 		return "이미 설비가 있습니다"
-	if heat < Defs.MACHINE_COSTS[type]:
-		return "열이 부족합니다"
+	if not is_unlocked(type):
+		return "아직 해금되지 않았습니다"
+	if not can_afford(type):
+		return "%s가 부족합니다" % _missing_label(type)
 	if type == Defs.M_MINER and not ore.has(cell):
 		return "광맥 위에만 설치할 수 있습니다"
 	if type != Defs.M_MINER and ore.has(cell):
 		return "광맥 위에는 설치할 수 없습니다"
 	return ""
+
+func _missing_label(type: int) -> String:
+	for item_type: int in cost_of(type):
+		if int(stock.get(item_type, 0)) < int(cost_of(type)[item_type]):
+			return String(Defs.ITEM_NAMES[item_type])
+	return "자원"
 
 func build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
 	var reason := can_build(type, cell)
@@ -409,7 +488,8 @@ func build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
 	machine.dir = dir
 	machine.flash = 0.45
 	machines[cell] = machine
-	heat -= Defs.MACHINE_COSTS[type]
+	for item_type: int in cost_of(type):
+		stock[item_type] = int(stock.get(item_type, 0)) - int(cost_of(type)[item_type])
 	machine_built.emit(cell, type)
 	return true
 
@@ -419,23 +499,52 @@ func demolish(cell: Vector2i) -> bool:
 		return false
 	machines.erase(cell)
 	# Refund most of the cost so experimenting with layouts stays cheap.
-	heat += int(round(float(Defs.MACHINE_COSTS[machine.type]) * 0.75))
+	for item_type: int in cost_of(machine.type):
+		var back: int = int(round(float(cost_of(machine.type)[item_type]) * 0.75))
+		stock[item_type] = int(stock.get(item_type, 0)) + back
 	machine_removed.emit(cell, machine.type)
 	return true
 
 func tick(delta: float) -> void:
 	_tick_cats(delta)
+	_recount_power()
+	# Under-supplied power slows every drawing machine in proportion rather than
+	# switching some off: a brown-out you can see is easier to diagnose than a
+	# machine that silently stopped.
+	var supply: float = 1.0 if power_draw <= 0.0 else clampf(power_capacity / power_draw, 0.0, 1.0)
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
 		machine.flash = maxf(0.0, machine.flash - delta)
 		var speed: float = 1.0 if is_warm(cell) else 0.45
 		if machine.type == Defs.M_MINER:
 			speed *= _operator_rate(cell)
+		if machine.type == Defs.M_BELT:
+			speed *= supply
 		match machine.type:
 			Defs.M_MINER: _tick_miner(machine, delta * speed)
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
-			Defs.M_FURNACE: _tick_furnace(machine, delta * speed)
+			Defs.M_EXCHANGER: _tick_exchanger(machine, delta * speed)
+			Defs.M_GENERATOR: _tick_generator(machine, delta)
 	_refresh_radius()
+
+## Capacity is whatever the fed generators sustain; draw is what the powered
+## machines ask for. Recomputed each tick so building or losing either is felt
+## immediately.
+func _recount_power() -> void:
+	var capacity: float = 0.0
+	var draw: float = 0.0
+	for cell: Vector2i in machines:
+		var machine: Machine = machines[cell]
+		# Read the fuel, not last frame's flag: deriving capacity from state the
+		# same tick removes an order dependency between counting power and
+		# spending it, which showed up as a generator that supplied nothing for
+		# one frame after being fed.
+		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.ITEM_ENERGY, 0)) > 0:
+			capacity += Defs.GENERATOR_OUTPUT
+		elif machine.type == Defs.M_BELT:
+			draw += Defs.BELT_POWER_DRAW
+	power_capacity = capacity
+	power_draw = draw
 
 func cell_centre(cell: Vector2i) -> Vector2:
 	return Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
@@ -448,6 +557,58 @@ func _operator_rate(cell: Vector2i) -> float:
 			return 1.0 if cat.hunger > 0.0 else Defs.HUNGER_STARVED_RATE
 	return 0.0
 
+## --- Hand mining ----------------------------------------------------------
+## The player can work a seam themselves from the first minute. It is slow on
+## purpose: it is the baseline every machine is measured against, and the reason
+## the first miner feels like relief rather than a sidegrade. Returns the item
+## produced this tick, or -1.
+func hand_mine(cell: Vector2i, delta: float) -> int:
+	if not ore.has(cell):
+		hand_progress = 0.0
+		hand_cell = Vector2i(9999, 9999)
+		return -1
+	if cell != hand_cell:
+		hand_cell = cell
+		hand_progress = 0.0
+	hand_progress += delta
+	if hand_progress < Defs.HAND_MINE_PERIOD:
+		return -1
+	hand_progress = 0.0
+	return int(ore[cell])
+
+## 0..1 across the current swing, for the progress ring the player watches.
+func hand_fraction() -> float:
+	return clampf(hand_progress / Defs.HAND_MINE_PERIOD, 0.0, 1.0)
+
+func cancel_hand_mine() -> void:
+	hand_progress = 0.0
+	hand_cell = Vector2i(9999, 9999)
+
+## Walking over a loose item pockets it straight into the base stock. Immediate,
+## because bending down for something you are standing on should not need a
+## second verb.
+func collect_ground_at(cell: Vector2i) -> int:
+	if not ground.has(cell):
+		return -1
+	var item_type: int = int(ground[cell])
+	ground.erase(cell)
+	stock[item_type] = int(stock.get(item_type, 0)) + 1
+	if item_type == Defs.ITEM_ENERGY:
+		heat += Defs.ITEM_VALUES[item_type]
+		total_heat += Defs.ITEM_VALUES[item_type]
+	return item_type
+
+## The nearest loose item, or a sentinel. Used by idle cats looking for work.
+func nearest_ground(from: Vector2) -> Vector2i:
+	var best := Vector2i(9999, 9999)
+	var best_distance: float = 1e20
+	for cell: Vector2i in ground:
+		var distance: float = cell_centre(cell).distance_to(from)
+		if distance < best_distance:
+			best_distance = distance
+			best = cell
+	return best
+
 func _tick_cats(delta: float) -> void:
 	for cell: Vector2i in machines:
 		if machines[cell].type == Defs.M_MINER:
@@ -458,6 +619,9 @@ func _tick_cats(delta: float) -> void:
 			Defs.CAT_WORKING: _cat_work(cat, delta)
 			Defs.CAT_TO_FOOD: _cat_walk_to_food(cat, delta)
 			Defs.CAT_EATING: _cat_eat(cat, delta)
+			Defs.CAT_HAUL_TO_ITEM: _cat_fetch(cat, delta)
+			Defs.CAT_HAUL_TO_BASE: _cat_deliver(cat, delta)
+			Defs.CAT_IDLE: _cat_look_for_work(cat)
 
 func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 	var to_goal: Vector2 = goal - cat.pos
@@ -467,6 +631,39 @@ func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 		return true
 	cat.pos += to_goal.normalized() * step
 	return false
+
+## An unassigned cat with something to fetch goes and fetches it.
+func _cat_look_for_work(cat: Cat) -> void:
+	if cat == carried_cat or cat.has_job() or ground.is_empty():
+		return
+	var target: Vector2i = nearest_ground(cat.pos)
+	if target == Vector2i(9999, 9999):
+		return
+	cat.haul_target = target
+	cat.state = Defs.CAT_HAUL_TO_ITEM
+
+func _cat_fetch(cat: Cat, delta: float) -> void:
+	if cat == carried_cat:
+		return
+	# The item may have been walked over by the player on the way.
+	if not ground.has(cat.haul_target):
+		cat.state = Defs.CAT_IDLE
+		return
+	if not _step_toward(cat, cell_centre(cat.haul_target), delta):
+		return
+	cat.carrying = int(ground[cat.haul_target])
+	ground.erase(cat.haul_target)
+	cat.state = Defs.CAT_HAUL_TO_BASE
+
+func _cat_deliver(cat: Cat, delta: float) -> void:
+	if cat == carried_cat:
+		return
+	if not _step_toward(cat, cell_centre(core_cell), delta):
+		return
+	if cat.carrying >= 0:
+		_deliver(cat.carrying, core_cell)
+		cat.carrying = -1
+	cat.state = Defs.CAT_IDLE
 
 func _cat_walk_to_miner(cat: Cat, delta: float) -> void:
 	if not cat.has_job() or not machines.has(cat.assigned):
@@ -515,18 +712,41 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 	if not machine.operated:
 		machine.stalled = false
 		return
+	var item_type: int = ore.get(machine.cell, Defs.ITEM_CRYSTAL)
+	var period: float = mine_period(item_type)
 	machine.progress += delta
-	if machine.progress < Defs.MINER_PERIOD:
+	if machine.progress < period:
 		return
-	var item_type: int = ore.get(machine.cell, Defs.ITEM_FROST)
-	if _push_into(machine.cell + machine.dir, item_type, machine.cell):
+	if _emit_from(machine, item_type):
 		machine.progress = 0.0
 		machine.flash = 0.35
 		machine.stalled = false
 	else:
 		# Hold the finished item instead of losing it when the output is blocked.
-		machine.progress = Defs.MINER_PERIOD
+		machine.progress = period
 		machine.stalled = true
+
+## Copper is deliberately slower than crystal: it arrives later and is worth
+## more per unit, so the same miner produces fewer of them.
+func mine_period(item_type: int) -> float:
+	return Defs.COPPER_PERIOD if item_type == Defs.ITEM_COPPER else Defs.MINER_PERIOD
+
+## Output goes onto a belt if one is facing, and onto the floor otherwise. The
+## floor is not a failure state -- it is how the game works before belts exist,
+## because cats pick up from there.
+func _emit_from(machine: Machine, item_type: int) -> bool:
+	var ahead: Vector2i = machine.cell + machine.dir
+	if _push_into(ahead, item_type, machine.cell):
+		return true
+	return drop_item(ahead, item_type)
+
+## Puts a loose item on the floor. One per cell keeps the world readable and
+## stops a stalled miner from burying its own tile.
+func drop_item(cell: Vector2i, item_type: int) -> bool:
+	if ground.has(cell) or machines.has(cell) or ore.has(cell):
+		return false
+	ground[cell] = item_type
+	return true
 
 func _tick_belt(machine: Machine, delta: float) -> void:
 	var step: float = Defs.BELT_SPEED * delta
@@ -549,22 +769,42 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 	else:
 		machine.stalled = machine.items.size() >= Defs.BELT_CAPACITY
 
-func _tick_furnace(machine: Machine, delta: float) -> void:
-	var frost: int = int(machine.buffer.get(Defs.ITEM_FROST, 0))
-	var ember: int = int(machine.buffer.get(Defs.ITEM_COPPER, 0))
-	if frost < Defs.FROST_COST_IRON or ember < Defs.COPPER_COST_IRON:
+## Two crystal shards become one energy crystal. This is the only route from
+## material to heat, so it is also the player's throttle on how fast the world
+## opens up.
+func _tick_exchanger(machine: Machine, delta: float) -> void:
+	var shards: int = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0))
+	if shards < Defs.CRYSTAL_COST_ENERGY:
 		machine.progress = 0.0
+		machine.stalled = false
 		return
 	machine.progress += delta
-	if machine.progress < Defs.FURNACE_PERIOD:
+	if machine.progress < Defs.EXCHANGER_PERIOD:
 		return
-	if not _push_into(machine.cell + machine.dir, Defs.ITEM_IRON, machine.cell):
-		machine.progress = Defs.FURNACE_PERIOD
+	if not _emit_from(machine, Defs.ITEM_ENERGY):
+		machine.progress = Defs.EXCHANGER_PERIOD
 		machine.stalled = true
 		return
 	machine.stalled = false
-	machine.buffer[Defs.ITEM_FROST] = frost - Defs.FROST_COST_IRON
-	machine.buffer[Defs.ITEM_COPPER] = ember - Defs.COPPER_COST_IRON
+	machine.buffer[Defs.ITEM_CRYSTAL] = shards - Defs.CRYSTAL_COST_ENERGY
+	machine.progress = 0.0
+	machine.flash = 0.5
+
+## A generator burns one energy crystal every ten seconds. `operated` doubles as
+## "currently supplying", which is what _recount_power reads.
+func _tick_generator(machine: Machine, delta: float) -> void:
+	var fuel: int = int(machine.buffer.get(Defs.ITEM_ENERGY, 0))
+	if fuel <= 0:
+		machine.operated = false
+		machine.stalled = true
+		machine.progress = 0.0
+		return
+	machine.stalled = false
+	machine.operated = true
+	machine.progress += delta
+	if machine.progress < Defs.GENERATOR_PERIOD:
+		return
+	machine.buffer[Defs.ITEM_ENERGY] = fuel - 1
 	machine.progress = 0.0
 	machine.flash = 0.5
 
@@ -586,25 +826,38 @@ func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 
 				return false
 			target.items.append({"type": item_type, "t": 0.0})
 			return true
-		Defs.M_FURNACE:
-			if item_type == Defs.ITEM_IRON:
+		Defs.M_EXCHANGER:
+			if item_type != Defs.ITEM_CRYSTAL:
 				return false
-			# Every face except the output takes ore. Feeding the mouth the
-			# furnace pours out of would let a line quietly eat its own product.
+			# Every face except the output takes crystal. Feeding the mouth it
+			# pours out of would let a line quietly eat its own product.
 			if from == target.cell + target.dir:
 				return false
 			var held: int = int(target.buffer.get(item_type, 0))
-			if held >= 4:
+			if held >= 6:
 				return false
 			target.buffer[item_type] = held + 1
 			target.flash = 0.25
 			return true
+		Defs.M_GENERATOR:
+			if item_type != Defs.ITEM_ENERGY:
+				return false
+			var fuel: int = int(target.buffer.get(item_type, 0))
+			if fuel >= 4:
+				return false
+			target.buffer[item_type] = fuel + 1
+			target.flash = 0.25
+			return true
 	return false
 
+## Everything that reaches the core is banked as material; energy crystals are
+## additionally burned for heat. One doorway for every resource keeps the rule
+## the player learns in minute one true for the rest of the game.
 func _deliver(item_type: int, cell: Vector2i) -> void:
 	var value: int = Defs.ITEM_VALUES[item_type]
 	heat += value
 	total_heat += value
+	stock[item_type] = int(stock.get(item_type, 0)) + 1
 	delivered[item_type] = int(delivered.get(item_type, 0)) + 1
 	var core: Machine = machines.get(core_cell, null)
 	if core != null:

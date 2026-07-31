@@ -19,7 +19,8 @@ func _run() -> void:
 	# Build a distinctive state: a staffed miner, a belt with cargo, materials,
 	# crates in hand, a part-eaten food bin and a second day in progress.
 	var seed_before: int = main.run_seed
-	main.sim.ore[Vector2i(-1, 0)] = Defs.ITEM_FROST
+	main.sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
+	_open(main.sim)
 	main.sim.heat = 400
 	main.sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
@@ -29,7 +30,7 @@ func _run() -> void:
 	main.sim.carried_boxes = 2
 	main.sim.food = 137
 	main.sim.delivered[Defs.ITEM_COPPER] = 9
-	main.sim.delivered[Defs.ITEM_IRON] = 4
+	main.sim.delivered[Defs.ITEM_ENERGY] = 4
 	main.sim.total_heat = 321
 	main.sim.carried_boxes = 2
 	main.sim.cats.clear()
@@ -57,7 +58,7 @@ func _run() -> void:
 	_assert(is_equal_approx(main.time_left, 88.0), "time left in the day survives")
 	_assert(main.sim.heat == 250 and main.sim.total_heat == 321, "the economy survives")
 	_assert(int(main.sim.delivered[Defs.ITEM_COPPER]) == 9, "copper count survives")
-	_assert(int(main.sim.delivered[Defs.ITEM_IRON]) == 4, "iron count survives")
+	_assert(int(main.sim.delivered[Defs.ITEM_ENERGY]) == 4, "iron count survives")
 	_assert(main.sim.food == 137, "the food bin level survives")
 	_assert(main.sim.carried_boxes == 2, "crates in hand survive")
 
@@ -78,10 +79,10 @@ func _run() -> void:
 	_assert(main.player.position.distance_to(Vector2(123, 456)) < 0.5, "the player is where they left off")
 
 	# A restored miner must actually resume producing.
-	var produced_before: int = int(main.sim.delivered[Defs.ITEM_FROST])
-	for step in 100:
+	var produced_before: int = int(main.sim.delivered[Defs.ITEM_CRYSTAL])
+	for step in int(Defs.MINER_PERIOD / 0.1) * 3:
 		main.sim.tick(0.1)
-	_assert(int(main.sim.delivered[Defs.ITEM_FROST]) > produced_before,
+	_assert(int(main.sim.delivered[Defs.ITEM_CRYSTAL]) > produced_before,
 		"the restored factory keeps running")
 
 	# An unknown schema must be refused rather than half-applied.
@@ -102,3 +103,12 @@ func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("SAVE_TEST: FAIL - " + message)
 		failures += 1
+
+## Machines are bought with materials from an unlocked hotbar, so a test that
+## wants to build has to open and fund the base first.
+func _open(sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
+	sim.stock[Defs.ITEM_ENERGY] = 500

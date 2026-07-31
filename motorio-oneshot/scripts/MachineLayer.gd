@@ -51,7 +51,8 @@ func _draw() -> void:
 		match machine.type:
 			Defs.M_CORE: _draw_core(machine, Vector2(cell) * tile, tile)
 			Defs.M_MINER: _draw_miner(machine, Vector2(cell) * tile, tile)
-			Defs.M_FURNACE: _draw_furnace(machine, Vector2(cell) * tile, tile)
+			Defs.M_EXCHANGER: _draw_furnace(machine, Vector2(cell) * tile, tile)
+			Defs.M_GENERATOR: _draw_generator(machine, Vector2(cell) * tile, tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if machine.type != Defs.M_BELT or not _visible(cell, tile):
@@ -60,6 +61,7 @@ func _draw() -> void:
 	_draw_shelter(tile)
 	_draw_food_bin(tile)
 	_draw_boxes(tile)
+	_draw_ground()
 	_draw_cats()
 	if show_preview:
 		_draw_preview(tile)
@@ -147,6 +149,40 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		draw_circle(c, 17.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
 	_draw_stall(machine, c)
 
+## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
+## reads as "come and get me" rather than as scenery.
+func _draw_ground() -> void:
+	var tile := float(Defs.TILE)
+	for cell: Vector2i in sim.ground:
+		if not _visible(cell, tile):
+			continue
+		var item_type: int = int(sim.ground[cell])
+		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var bob: float = sin(pulse * 3.0 + float(cell.x + cell.y)) * 1.6
+		var colour: Color = Defs.ITEM_COLORS[item_type]
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
+		draw_circle(Vector2(at.x, (at.y + 7.0) / 0.45), 5.0, Color(0.02, 0.04, 0.08, 0.30))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_circle(at + Vector2(0, bob), 7.0, Color(colour.r, colour.g, colour.b, 0.28))
+		draw_circle(at + Vector2(0, bob), 4.2, colour)
+		draw_circle(at + Vector2(0, bob), 4.2, Defs.ORE_OUTLINE, false, 1.0)
+
+## A generator reads as a lit drum: the glow is tied to whether it is actually
+## supplying, so an unfuelled one is visibly dark rather than silently idle.
+func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
+	var body := Rect2(px + Vector2(4, 4), Vector2(tile - 8.0, tile - 8.0))
+	var live: bool = machine.operated
+	draw_rect(body, Defs.COL_BELT_BODY)
+	draw_rect(body, Defs.machine_color(Defs.M_GENERATOR), false, 2.0)
+	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
+	var beat: float = 0.6 + sin(pulse * 4.0) * 0.25 if live else 0.18
+	draw_circle(centre, tile * 0.22, Color(0.47, 0.75, 0.92, beat))
+	draw_circle(centre, tile * 0.11, Color(0.85, 0.96, 1.0, beat))
+	var fuel: int = int(machine.buffer.get(Defs.ITEM_ENERGY, 0))
+	for index in fuel:
+		draw_circle(px + Vector2(6.0 + float(index) * 6.0, tile - 5.0), 2.0,
+			Defs.ITEM_COLORS[Defs.ITEM_ENERGY])
+
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
 func _draw_cats() -> void:
@@ -180,6 +216,12 @@ func _draw_cats() -> void:
 		draw_circle(Vector2(cat.pos.x, (cat.pos.y + 10.0) / 0.45), 8.0, Color(0.02, 0.04, 0.08, 0.32))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		draw_texture_rect_region(CAT_SHEET, target, _cat_region(String(view["view"])), Color.WHITE)
+		if cat.carrying >= 0:
+			# What the cat is carrying rides above its head, so a line of hauling
+			# cats reads as a slow, visible conveyor.
+			var load_colour: Color = Defs.ITEM_COLORS[cat.carrying]
+			draw_circle(cat.pos + Vector2(0, -22), 5.0, Color(load_colour.r, load_colour.g, load_colour.b, 0.30))
+			draw_circle(cat.pos + Vector2(0, -22), 3.2, load_colour)
 		if cat.state == Defs.CAT_EATING:
 			# Crumbs kicking up from the bowl.
 			for crumb in 3:
@@ -219,7 +261,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
 	var body: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
-	var ready: bool = int(machine.buffer.get(Defs.ITEM_FROST, 0)) > 0 and int(machine.buffer.get(Defs.ITEM_COPPER, 0)) > 0
+	var ready: bool = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)) > 0 and int(machine.buffer.get(Defs.ITEM_COPPER, 0)) > 0
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
 	draw_circle(c + Vector2(0, 9), 11.0, Color(0.02, 0.04, 0.08, 0.32))
@@ -232,7 +274,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(tip, 2.6, Defs.COL_BRASS)
 	_draw_stall(machine, c)
 	# Two input pips tell the player exactly what the recipe is still missing.
-	_draw_pip(c + Vector2(-6, 12), Defs.ITEM_FROST, int(machine.buffer.get(Defs.ITEM_FROST, 0)))
+	_draw_pip(c + Vector2(-6, 12), Defs.ITEM_CRYSTAL, int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)))
 	_draw_pip(c + Vector2(6, 12), Defs.ITEM_COPPER, int(machine.buffer.get(Defs.ITEM_COPPER, 0)))
 	if machine.flash > 0.0:
 		draw_circle(c, 16.0 + machine.flash * 14.0, Color(1, 0.9, 0.7, machine.flash * 0.55), false, 2.0)

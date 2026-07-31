@@ -44,6 +44,8 @@ var build_hold_time: float = 0.0
 var build_rotated: bool = false
 var autosave_elapsed: float = 0.0
 var blackout: float = 0.0
+## True while the mine key is held. Hand mining is a hold, not a tap.
+var mine_held: bool = false
 ## Player's UI size multiplier, applied on top of the per-platform base.
 var ui_scale: float = Defs.UI_SCALE_DEFAULT
 ## The same idea for the world: how large the game itself is drawn, which is the
@@ -98,25 +100,36 @@ func objective() -> String:
 		return "밤입니다  숙소로 돌아가 Z로 취침하세요  (기지 옆 남서쪽)"
 	if is_dusk():
 		return "해가 기울고 있습니다  곧 숙소로 돌아가야 합니다"
+	if sim.carried_cat != null:
+		return "고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요"
+	# Lv1 -- do it with your hands, then hire someone to do it for you.
+	if int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 0 and sim.ground.is_empty():
+		return "수정 광맥을 바라보고 C 를 눌러 직접 캐세요"
 	if sim.cats.is_empty() and sim.carried_boxes < Defs.BOXES_PER_CAT:
 		return "고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)" % [Defs.BOXES_PER_CAT, sim.carried_boxes]
 	if sim.cats.is_empty():
 		return "숙소로 가서 고양이를 입양하세요"
-	if sim.carried_cat != null:
-		return "고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요"
-	if _unassigned_cats() > 0 and sim.machine_count(Defs.M_MINER) > 0:
-		return "숙소의 고양이에게 Z 로 안아서 채굴기에 올려놓으세요"
+	# Lv2 -- crystal automation, then the exchanger that turns it into distance.
 	if sim.machine_count(Defs.M_MINER) == 0:
-		return "1  광맥 위에 채굴기를 설치하세요  (1 선택 → Z 길게 눌러 코어 방향 → Z)"
-	if sim.total_heat == 0:
-		return "2  벨트로 채굴기와 코어를 이으세요  (2 선택 → Z)"
-	if sim.delivered.get(Defs.ITEM_COPPER, 0) == 0 and sim.machine_count(Defs.M_FURNACE) == 0:
-		return "3  열을 모아 온기를 넓히고 구리 광맥까지 닿으세요"
-	if sim.machine_count(Defs.M_FURNACE) == 0:
-		return "4  제련로에 서리광석과 구리를 함께 넣어 철을 만드세요"
-	if sim.delivered.get(Defs.ITEM_IRON, 0) == 0:
-		return "5  제련로 출력을 코어까지 이으세요"
-	return "남은 시간 동안 생산을 늘리세요"
+		return "1  수정 광맥 위에 채굴기를 설치하세요  (수정조각 %d)" % int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_CRYSTAL])
+	if _unassigned_cats() > 0:
+		return "고양이를 Z 로 안아 채굴기에 올려놓으세요"
+	if sim.machine_count(Defs.M_EXCHANGER) == 0:
+		return "2  수정에너지교환기를 지으세요  (수정조각 %d)" % int(Defs.MACHINE_COSTS[Defs.M_EXCHANGER][Defs.ITEM_CRYSTAL])
+	if int(sim.delivered.get(Defs.ITEM_ENERGY, 0)) == 0:
+		return "3  교환기에 수정조각을 넣고 에너지결정을 기지로 가져가세요"
+	if sim.warm_radius < Defs.COPPER_RING.x:
+		return "4  에너지결정으로 온기를 넓히세요  (구리까지 %.1f칸)" % (Defs.COPPER_RING.x - sim.warm_radius)
+	# Lv3 -- copper, power, logistics.
+	if int(sim.stock.get(Defs.ITEM_COPPER, 0)) == 0:
+		return "5  구리 광맥에 채굴기를 놓아 구리광석을 캐세요"
+	if sim.machine_count(Defs.M_GENERATOR) == 0:
+		return "6  발전기를 지어 전력을 만드세요  (구리광석 %d)" % int(Defs.MACHINE_COSTS[Defs.M_GENERATOR][Defs.ITEM_COPPER])
+	if sim.machine_count(Defs.M_BELT) == 0:
+		return "7  컨테이너 벨트로 채굴기와 기지를 이으세요  (구리광석 %d)" % int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER])
+	if sim.power_draw > sim.power_capacity:
+		return "전력이 부족합니다  발전기를 늘리거나 에너지결정을 공급하세요"
+	return "생산을 늘려 온기를 더 넓히세요"
 
 func _unassigned_cats() -> int:
 	var count := 0
@@ -160,6 +173,7 @@ func _process(delta: float) -> void:
 
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
+	_update_hand_mining(delta)
 	player.carrying_cat = sim.carried_cat != null
 	# The carried cat rides in front of her, turning as she turns. Driven from
 	# here because the sim does not know where the player is standing.
@@ -196,7 +210,7 @@ func _process(delta: float) -> void:
 ## players never need a second key for direction.
 const BUILD_HOLD_ROTATE := 0.4
 const SAVE_PATH := "user://motorio_oneshot_save.cfg"
-const SAVE_SCHEMA := 1
+const SAVE_SCHEMA := 2
 const AUTOSAVE_INTERVAL := 30.0
 
 func _update_build_hold(delta: float) -> void:
@@ -227,7 +241,60 @@ func _process_play(delta: float) -> void:
 
 ## Crates are picked up simply by walking over them, and carrying three to the
 ## shelter adopts a cat. No extra verb to learn.
+## Picked up simply by walking over it. Announced with the running stock so the
+## player learns that loose items and the base ledger are the same thing.
+func _collect_ground() -> void:
+	var item_type: int = sim.collect_ground_at(player.cell())
+	if item_type < 0:
+		return
+	var held: int = int(sim.stock.get(item_type, 0))
+	fx.popup(player.position + Vector2(0, -22),
+		"%s %d" % [Defs.ITEM_NAMES[item_type], held], Defs.ITEM_COLORS[item_type], true)
+	fx.ring(player.position, Defs.ITEM_COLORS[item_type], 16.0)
+	audio.call("play", "deliver")
+	_announce_unlocks(sim.note_resource_seen(item_type))
+
+## A new machine appearing in the hotbar is a real milestone, so it gets the
+## banner and the confirm sting rather than a silent slot.
+func _announce_unlocks(opened: Array[int]) -> void:
+	for type: int in opened:
+		_notify("%s 해금!" % Defs.MACHINE_NAMES[type], Defs.COL_CORE)
+		fx.ring(player.position, Defs.COL_CORE, 54.0)
+		audio.call("play", "finish")
+		shake = maxf(shake, 2.2)
+
+## Working a seam by hand. Held rather than tapped, so the player feels the ten
+## seconds they are about to automate away.
+func _update_hand_mining(delta: float) -> void:
+	if state != State.PLAY or player.locked or sim.carried_cat != null:
+		sim.cancel_hand_mine()
+		player.mining = 0.0
+		return
+	var facing: Vector2i = player.facing_cell()
+	if not mine_held or not sim.ore.has(facing):
+		sim.cancel_hand_mine()
+		player.mining = 0.0
+		return
+	var produced: int = sim.hand_mine(facing, delta)
+	player.mining = sim.hand_fraction()
+	if produced < 0:
+		return
+	# Drops at the player's feet rather than into an invisible pocket, so the
+	# thing they made is a thing in the world that a cat can come and fetch.
+	var at: Vector2i = player.cell()
+	if not sim.drop_item(at, produced):
+		at = facing + (facing - player.cell())
+		if not sim.drop_item(at, produced):
+			sim.stock[produced] = int(sim.stock.get(produced, 0)) + 1
+	fx.popup(sim.cell_centre(facing) + Vector2(0, -18),
+		"+1 %s" % Defs.ITEM_NAMES[produced], Defs.ITEM_COLORS[produced], true)
+	fx.burst(sim.cell_centre(facing), Defs.ITEM_COLORS[produced], 7)
+	audio.call("play", "build")
+	shake = maxf(shake, 1.2)
+	_announce_unlocks(sim.note_resource_seen(produced))
+
 func _collect_and_adopt() -> void:
+	_collect_ground()
 	if sim.collect_box_at(player.cell()):
 		fx.popup(player.position + Vector2(0, -22), "고양이 상자 %d/%d" % [sim.carried_boxes, Defs.BOXES_PER_CAT],
 			Defs.COL_BELT_RIM, true)
@@ -313,7 +380,7 @@ func _update_preview() -> void:
 	machine_layer.preview_dir = build_dir
 	var reason: String = sim.can_build(selected_type(), cell)
 	machine_layer.preview_valid = reason == ""
-	machine_layer.preview_affordable = sim.heat >= Defs.MACHINE_COSTS[selected_type()]
+	machine_layer.preview_affordable = sim.can_afford(selected_type()) and sim.is_unlocked(selected_type())
 	machine_layer.preview_occupied = sim.machine_at(cell) != null
 
 func _view_rect() -> Rect2:
@@ -321,6 +388,12 @@ func _view_rect() -> Rect2:
 	return Rect2(camera.get_screen_center_position() - size * 0.5, size)
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Mining is a hold, so both edges matter and neither should be swallowed by
+	# the state machine below.
+	if event.is_action_pressed("mine"):
+		mine_held = true
+	elif event.is_action_released("mine"):
+		mine_held = false
 	# Mouse first: the settings gear and its slider are the only pointer targets
 	# in the game, and a desktop player has no pad to route them through.
 	if event is InputEventMouseButton:
@@ -576,8 +649,8 @@ func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.COL_CORE, 18.0)
-	shake = maxf(shake, 0.9 if item_type != Defs.ITEM_IRON else 3.0)
-	audio.call("play", "alloy" if item_type == Defs.ITEM_IRON else "deliver")
+	shake = maxf(shake, 0.9 if item_type != Defs.ITEM_ENERGY else 3.0)
+	audio.call("play", "alloy" if item_type == Defs.ITEM_ENERGY else "deliver")
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	# One channel only. Showing the same reason both here and in the centre

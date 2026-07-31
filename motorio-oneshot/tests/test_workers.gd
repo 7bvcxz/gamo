@@ -20,7 +20,7 @@ func _run() -> void:
 func _sim() -> Sim:
 	var sim := Sim.new()
 	sim.setup(31415)
-	sim.heat = 400
+	_open(sim)
 	return sim
 
 # --- 5-1 -------------------------------------------------------------------
@@ -28,11 +28,11 @@ func _sim() -> Sim:
 func _test_miner_needs_operator() -> void:
 	var sim := _sim()
 	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_FROST
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
 	_assert(sim.build(Defs.M_MINER, cell, Vector2i.RIGHT), "a miner can be built on ore")
 	for step in 100:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_FROST] == 0, "an unstaffed miner produces nothing at all")
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 0, "an unstaffed miner produces nothing at all")
 	_assert(not sim.machine_at(cell).operated, "and it reports itself unoperated")
 
 	var cat := Sim.Cat.new()
@@ -40,9 +40,9 @@ func _test_miner_needs_operator() -> void:
 	cat.state = Defs.CAT_WORKING
 	cat.pos = sim.cell_centre(cell)
 	sim.cats.append(cat)
-	for step in 100:
+	for step in int(Defs.MINER_PERIOD / 0.1) * 2:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_FROST] > 0, "a staffed miner produces")
+	_assert(sim.delivered[Defs.ITEM_CRYSTAL] > 0, "a staffed miner produces")
 	_assert(sim.machine_at(cell).operated, "and reports itself operated")
 	sim.free()
 
@@ -79,8 +79,8 @@ func _test_crates_and_adoption() -> void:
 
 func _test_morning_dispatch() -> void:
 	var sim := _sim()
-	sim.ore[Vector2i(-1, 0)] = Defs.ITEM_FROST
-	sim.ore[Vector2i(0, -1)] = Defs.ITEM_FROST
+	sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
+	sim.ore[Vector2i(0, -1)] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
 	sim.build(Defs.M_MINER, Vector2i(0, -1), Vector2i.DOWN)
 	sim.carried_boxes = Defs.BOXES_PER_CAT * 2
@@ -147,7 +147,7 @@ func _test_hunger_and_feeding() -> void:
 	var sim := _sim()
 	_assert(sim.food == Defs.FOOD_START, "the food bin starts stocked")
 	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_FROST
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	sim.carried_boxes = Defs.BOXES_PER_CAT
 	sim.adopt_cats()
@@ -183,3 +183,12 @@ func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("WORKERS_TEST: FAIL - " + message)
 		failures += 1
+
+## Machines are bought with materials from an unlocked hotbar, so a test that
+## wants to build has to open and fund the base first.
+func _open(sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
+	sim.stock[Defs.ITEM_ENERGY] = 500

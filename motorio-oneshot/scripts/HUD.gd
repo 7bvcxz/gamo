@@ -307,9 +307,14 @@ func _draw_status() -> void:
 	# Copper and iron are materials, not currency, so they get their own row.
 	var materials: Vector2 = panel.position + Vector2(14, 92)
 	draw_circle(materials + Vector2(4, -4), 4.5, Defs.ITEM_COLORS[Defs.ITEM_COPPER])
-	_text(materials + Vector2(13, 0), "구리 %d" % int(sim.delivered.get(Defs.ITEM_COPPER, 0)), 12, Defs.COL_TEXT)
-	draw_circle(materials + Vector2(84, -4), 4.5, Defs.ITEM_COLORS[Defs.ITEM_IRON])
-	_text(materials + Vector2(93, 0), "철 %d" % int(sim.delivered.get(Defs.ITEM_IRON, 0)), 12, Defs.COL_TEXT)
+	# Stock, not lifetime totals: this is the number the player spends, so it is
+	# the number that has to be on screen.
+	var slot_x: float = 0.0
+	for item_type: int in Defs.COUNTED_ITEMS:
+		var held: int = int(sim.stock.get(item_type, 0))
+		draw_circle(materials + Vector2(slot_x + 5, -4), 4.0, Defs.ITEM_COLORS[item_type])
+		_text(materials + Vector2(slot_x + 13, 0), "%d" % held, 12, Defs.COL_TEXT)
+		slot_x += 52.0
 
 	_draw_warmth_row(panel)
 	_draw_objective()
@@ -383,13 +388,27 @@ func _draw_palette() -> void:
 			else Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot)
 		var at: Vector2 = rect.position
 		var chosen: bool = index == main.selected_index
-		var afford: bool = main.sim.heat >= Defs.MACHINE_COSTS[type]
+		var afford: bool = main.sim.can_afford(type)
+		var locked: bool = not main.sim.is_unlocked(type)
 		var edge: Color = Defs.COL_CORE if chosen else Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9)
 		# Opaque so world sprites can never bleed through the card.
 		_panel(rect, Defs.COL_PANEL, edge, 2.0 if chosen else 1.0)
+		if locked:
+			# A locked slot still shows what is coming: the shape of the tech
+			# tree is a reason to keep playing.
+			draw_rect(rect, Color(0.02, 0.03, 0.06, 0.62))
+			_text_in(Rect2(rect.position + Vector2(0, 30), Vector2(rect.size.x, 16)),
+				"잠김", 12, Defs.COL_TEXT_DIM)
+			continue
 		var label: Color = Defs.COL_TEXT if afford else Defs.COL_TEXT_DIM
 		_text(at + Vector2(11, 21), "%d  %s" % [index + 1, Defs.MACHINE_NAMES[type]], 13, label)
-		_text(at + Vector2(11, 39), "열 %d" % Defs.MACHINE_COSTS[type], 12, Defs.COL_CORE if afford else Defs.COL_DANGER)
+		var cost_text := ""
+		for item_type: int in Defs.MACHINE_COSTS[type]:
+			cost_text += "%s %d  " % [Defs.ITEM_NAMES[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
+		if type == Defs.M_BELT:
+			cost_text += "· 전력 %.1f" % Defs.BELT_POWER_DRAW
+		_text(at + Vector2(11, 39), cost_text.strip_edges(), 11,
+			Defs.COL_CORE if afford else Defs.COL_DANGER)
 		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Defs.machine_color(type))
 		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Color(0, 0, 0, 0.35), false, 1.0)
 

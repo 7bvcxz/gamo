@@ -37,7 +37,7 @@ func _run() -> void:
 
 	# Build selection and rotation are reflected in the preview.
 	_press(main, KEY_2)
-	_assert(main.selected_type() == Defs.M_BELT, "number keys pick a machine")
+	_assert(main.selected_type() == Defs.BUILDABLE[1], "number keys pick a machine")
 	var before_dir: Vector2i = main.build_dir
 	_press(main, KEY_R)
 	_assert(main.build_dir != before_dir, "R rotates the build direction")
@@ -107,6 +107,7 @@ func _run() -> void:
 
 	# Night: the warm pool alone must stop being enough, which is what sends the
 	# player indoors instead of camping next to the core.
+	_open(main.sim)
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
 	main.time_left = Defs.NIGHT_SECONDS - 1.0
 	_assert(main.is_night(), "night begins before the clock runs out")
@@ -179,3 +180,12 @@ func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("FLOW_TEST: FAIL - " + message)
 		failures += 1
+
+## Machines are bought with materials from an unlocked hotbar, so a test that
+## wants to build has to open and fund the base first.
+func _open(sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
+	sim.stock[Defs.ITEM_ENERGY] = 500
