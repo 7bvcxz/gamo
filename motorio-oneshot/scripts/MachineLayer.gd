@@ -62,6 +62,7 @@ func _draw() -> void:
 	_draw_food_bin(tile)
 	_draw_boxes(tile)
 	_draw_ground()
+	_draw_hand_progress()
 	_draw_cats()
 	if show_preview:
 		_draw_preview(tile)
@@ -148,6 +149,37 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	if machine.flash > 0.0:
 		draw_circle(c, 17.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
 	_draw_stall(machine, c)
+
+## The swing. Ten seconds is a long time to hold a key with nothing to look at,
+## so the seam being worked wears a filling arc and shakes a little harder as it
+## approaches. Drawn on the seam rather than on the player because the seam is
+## what the player is aiming at.
+func _draw_hand_progress() -> void:
+	if sim.hand_cell == Vector2i(9999, 9999):
+		return
+	var fraction: float = sim.hand_fraction()
+	if fraction <= 0.0:
+		return
+	var tile := float(Defs.TILE)
+	var centre: Vector2 = Vector2(sim.hand_cell) * tile + Vector2.ONE * tile * 0.5
+	var jitter: float = fraction * 1.6
+	centre += Vector2(randf_range(-jitter, jitter), randf_range(-jitter, jitter))
+	var radius: float = tile * 0.52
+	# The seam sits on warm amber ground, and an amber arc on amber reads as
+	# nothing. Dark track, near-white fill: the contrast has to survive the
+	# brightest floor in the game.
+	draw_arc(centre, radius, 0.0, TAU, 40, Color(0.02, 0.04, 0.08, 0.72), 6.0)
+	draw_arc(centre, radius, -PI * 0.5, -PI * 0.5 + TAU * fraction, 40,
+		Color(1.0, 0.97, 0.90, 0.95), 5.0)
+	draw_arc(centre, radius, -PI * 0.5, -PI * 0.5 + TAU * fraction, 40,
+		Defs.COL_CORE, 2.0)
+	# Chips fly off as the swing lands.
+	if fraction > 0.75:
+		var spark: float = (fraction - 0.75) / 0.25
+		for index in 4:
+			var angle: float = TAU * float(index) / 4.0 + pulse * 2.0
+			draw_circle(centre + Vector2.from_angle(angle) * radius * (0.7 + spark * 0.5),
+				2.2, Color(1.0, 0.95, 0.85, spark))
 
 ## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
 ## reads as "come and get me" rather than as scenery.

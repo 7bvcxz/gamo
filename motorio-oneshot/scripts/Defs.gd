@@ -224,6 +224,22 @@ const COLLAPSE_GRACE := 5.0       # seconds upright at zero warmth
 const COLLAPSE_FALL := 2.0        # seconds of the collapse animation
 const BLACKOUT_SECONDS := 2.2     # the world fading out after the fall
 
+## Feedback hierarchy. The most frequent event has to be the quietest or the
+## game becomes exhausting, and the rarest has to be the loudest or milestones do
+## not land. Call sites pick from this scale instead of inventing a number, which
+## is how placing a belt ended up shaking the screen almost as hard as finishing
+## a tech.
+const FX_QUIET := 0.0        ## routine and constant: an item stepping onto a belt
+const FX_SMALL := 0.6        ## frequent and expected: picking something up
+const FX_MEDIUM := 1.3       ## a deliberate action: placing a machine
+const FX_LARGE := 2.4        ## a real gain: energy reaching the core
+const FX_MILESTONE := 3.6    ## rare and structural: a machine unlocking
+
+const RING_SMALL := 15.0
+const RING_MEDIUM := 24.0
+const RING_LARGE := 40.0
+const RING_MILESTONE := 58.0
+
 const FROST_RING := Vector2(4.0, 9.5)
 const COPPER_RING := Vector2(11.0, 17.0)
 

@@ -171,6 +171,7 @@ func _process(delta: float) -> void:
 	machine_layer.view_rect = view
 	machine_layer.night = day_fraction()
 
+	_update_ambience(delta)
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
 	_update_hand_mining(delta)
@@ -205,6 +206,20 @@ func _process(delta: float) -> void:
 		State.PLAY: _process_play(delta)
 		State.TITLE: pass
 		State.PAUSED, State.RESULT, State.SETTINGS: pass
+
+## Wind is always there and swells at night; the cold layer tracks how exposed
+## the player actually is, so the ear learns the danger before the screen does.
+func _update_ambience(delta: float) -> void:
+	if state == State.TITLE:
+		audio.call("set_bed", "wind", 0.35, delta)
+		audio.call("set_bed", "cold", 0.0, delta)
+		return
+	var night: float = day_fraction()
+	audio.call("set_bed", "wind", 0.45 + night * 0.45, delta)
+	var exposure: float = clampf(1.0 - player.warmth / 100.0, 0.0, 1.0)
+	if sim != null and not sim.is_warm(player.cell()):
+		exposure = maxf(exposure, 0.45)
+	audio.call("set_bed", "cold", exposure, delta)
 
 ## Holding the build key past the threshold rotates instead of building, so PC
 ## players never need a second key for direction.
@@ -250,7 +265,7 @@ func _collect_ground() -> void:
 	var held: int = int(sim.stock.get(item_type, 0))
 	fx.popup(player.position + Vector2(0, -22),
 		"%s %d" % [Defs.ITEM_NAMES[item_type], held], Defs.ITEM_COLORS[item_type], true)
-	fx.ring(player.position, Defs.ITEM_COLORS[item_type], 16.0)
+	fx.ring(player.position, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
 	audio.call("play", "deliver")
 	_announce_unlocks(sim.note_resource_seen(item_type))
 
@@ -259,9 +274,10 @@ func _collect_ground() -> void:
 func _announce_unlocks(opened: Array[int]) -> void:
 	for type: int in opened:
 		_notify("%s 해금!" % Defs.MACHINE_NAMES[type], Defs.COL_CORE)
-		fx.ring(player.position, Defs.COL_CORE, 54.0)
+		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MILESTONE)
+		fx.burst(player.position, Defs.COL_CORE, 14)
 		audio.call("play", "finish")
-		shake = maxf(shake, 2.2)
+		shake = maxf(shake, Defs.FX_MILESTONE)
 
 ## Working a seam by hand. Held rather than tapped, so the player feels the ten
 ## seconds they are about to automate away.
@@ -288,9 +304,10 @@ func _update_hand_mining(delta: float) -> void:
 			sim.stock[produced] = int(sim.stock.get(produced, 0)) + 1
 	fx.popup(sim.cell_centre(facing) + Vector2(0, -18),
 		"+1 %s" % Defs.ITEM_NAMES[produced], Defs.ITEM_COLORS[produced], true)
-	fx.burst(sim.cell_centre(facing), Defs.ITEM_COLORS[produced], 7)
+	fx.burst(sim.cell_centre(facing), Defs.ITEM_COLORS[produced], 9)
+	fx.ring(sim.cell_centre(facing), Defs.ITEM_COLORS[produced], Defs.RING_SMALL)
 	audio.call("play", "build")
-	shake = maxf(shake, 1.2)
+	shake = maxf(shake, Defs.FX_SMALL)
 	_announce_unlocks(sim.note_resource_seen(produced))
 
 func _collect_and_adopt() -> void:
@@ -298,13 +315,13 @@ func _collect_and_adopt() -> void:
 	if sim.collect_box_at(player.cell()):
 		fx.popup(player.position + Vector2(0, -22), "고양이 상자 %d/%d" % [sim.carried_boxes, Defs.BOXES_PER_CAT],
 			Defs.COL_BELT_RIM, true)
-		fx.ring(player.position, Defs.COL_BELT_RIM, 20.0)
+		fx.ring(player.position, Defs.COL_BELT_RIM, Defs.RING_MEDIUM)
 		audio.call("play", "select")
 	if shelter_nearby() and sim.carried_boxes >= Defs.BOXES_PER_CAT:
 		var adopted: int = sim.adopt_cats()
 		if adopted > 0:
 			_notify("고양이 %d마리를 입양했습니다" % adopted, Defs.COL_CORE)
-			fx.ring(shelter_position(), Defs.COL_CORE, 48.0)
+			fx.ring(shelter_position(), Defs.COL_CORE, Defs.RING_LARGE)
 			audio.call("play", "alloy")
 
 func _update_warmth(delta: float) -> void:
@@ -623,9 +640,9 @@ func _try_build() -> void:
 	var type: int = selected_type()
 	if sim.build(type, cell, build_dir):
 		var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
-		fx.ring(at, Defs.machine_color(type), 22.0)
-		fx.burst(at, Defs.machine_color(type), 6)
-		shake = maxf(shake, 1.6)
+		fx.ring(at, Defs.machine_color(type), Defs.RING_MEDIUM)
+		fx.burst(at, Defs.machine_color(type), 8)
+		shake = maxf(shake, Defs.FX_MEDIUM)
 		audio.call("play", "build")
 
 func _try_demolish() -> void:
@@ -648,8 +665,9 @@ func _try_demolish() -> void:
 func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
-	fx.ring(at, Defs.COL_CORE, 18.0)
-	shake = maxf(shake, 0.9 if item_type != Defs.ITEM_ENERGY else 3.0)
+	var energy: bool = item_type == Defs.ITEM_ENERGY
+	fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE if energy else Defs.RING_SMALL)
+	shake = maxf(shake, Defs.FX_LARGE if energy else Defs.FX_QUIET)
 	audio.call("play", "alloy" if item_type == Defs.ITEM_ENERGY else "deliver")
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
