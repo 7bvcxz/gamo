@@ -99,7 +99,7 @@ export function OneShotLevelMap() {
           to={[735, 120]}
           side="right"
           title="구리 광맥 · 북쪽 9칸"
-          note="보장 배치 · 값 6"
+          note="보장 배치 · 채굴기 전용"
         />
         <Callout
           from={[CX + t(14.5), CY - t(4)]}
@@ -126,14 +126,14 @@ export function OneShotLevelMap() {
           from={[CX - t(7.5), CY - t(3)]}
           to={[225, 150]}
           side="left"
-          title="서리광석 지대 · 4–9.5칸"
-          note="값 3"
+          title="수정 광맥 · 4–9.5칸"
+          note="손으로 캘 수 있는 유일한 자원"
         />
         <Callout
           from={[CX, CY + t(3)]}
           to={[225, 330]}
           side="left"
-          title="시작 서리광석 · 남쪽 3칸"
+          title="시작 수정 · 남쪽 3칸"
           note="모든 시드에서 보장"
         />
         <Callout
@@ -194,24 +194,24 @@ export function OneShotLevelMap() {
 
         {/* ---------- production chain ---------- */}
         <Card x="640" title="생산 체인">
-          <circle cx="672" cy="650" r="11" fill={FROST} />
-          <text x="694" y="655" className="fig-body">
-            서리광석 <tspan className="fig-note">값 3</tspan>
+          <circle cx="672" cy="646" r="11" fill={FROST} />
+          <text x="694" y="651" className="fig-body">
+            수정조각 <tspan className="fig-note">×2</tspan>
           </text>
-          <text x="672" y="690" textAnchor="middle" className="fig-note">
-            +
+          <path d="M 672 662 L 672 686" className="fig-arrow" />
+          <circle cx="672" cy="706" r="11" fill={IRON} />
+          <text x="694" y="711" className="fig-body">
+            에너지결정 <tspan className="fig-note">열 5</tspan>
           </text>
-          <circle cx="672" cy="716" r="11" fill={COPPER} />
-          <text x="694" y="721" className="fig-body">
-            구리 <tspan className="fig-note">값 6</tspan>
+          <text x="660" y="742" className="fig-note">
+            교환기 5초 · 채굴기 4대와 맞물린다
           </text>
-          <path d="M 672 736 L 672 764" className="fig-arrow" />
-          <circle cx="672" cy="784" r="11" fill={IRON} />
-          <text x="694" y="789" className="fig-body">
-            철 <tspan className="fig-note">값 22</tspan>
+          <circle cx="672" cy="776" r="11" fill={COPPER} />
+          <text x="694" y="781" className="fig-body">
+            구리광석 <tspan className="fig-note">발전기 · 벨트</tspan>
           </text>
-          <text x="660" y="820" className="fig-note">
-            제련로는 출력면을 뺀 모든 면으로 받는다
+          <text x="660" y="812" className="fig-note">
+            열은 오직 에너지결정에서만 나온다
           </text>
         </Card>
       </svg>

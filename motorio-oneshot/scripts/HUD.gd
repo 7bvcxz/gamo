@@ -404,7 +404,7 @@ func _draw_palette() -> void:
 			# Say what opens it. A locked slot the player cannot work toward is
 			# just a hole in the row.
 			var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
-			_text(at + Vector2(11, 39), "%s 를 찾으면 해금" % Defs.ITEM_NAMES[key_item], 11,
+			_text(at + Vector2(11, 39), "%s을 찾으면 해금" % Defs.ITEM_NAMES[key_item], 11,
 				Defs.COL_TEXT_DIM)
 			draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
 		else:
