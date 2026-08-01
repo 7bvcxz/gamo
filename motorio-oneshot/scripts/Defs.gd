@@ -66,6 +66,32 @@ const ITEM_SHORT := ["수정", "구리", "에너지"]
 const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138)]
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
+
+# --- Object drawing language --------------------------------------------------
+## An audit of the world layer found nine objects using three different shadow
+## styles, body footprints from 20 to 28 px, twelve one-off colours and no shared
+## light direction. That is what makes a scene look assembled rather than
+## designed, so every object now obeys the same four rules:
+##
+##   1. Light comes from the top-left. A raised body lightens its top and left
+##      faces and darkens its bottom and right ones.
+##   2. Anything standing on the plateau casts the same squashed shadow, at its
+##      base, in one colour.
+##   3. Every body carries the same near-black outline. Outlines are never
+##      coloured -- colour is for identity, not for edges.
+##   4. Objects that lie flat on the ground (belts, dropped items) are inset and
+##      shadowless; objects that stand up are raised and cast one.
+##
+## Warm hues stay reserved for the player's factory and its light; the
+## environment is never warm.
+const OUTLINE := Color8(16, 20, 28)
+const SHADOW := Color(0.02, 0.04, 0.08, 0.34)
+const SHADOW_SQUASH := 0.42
+## One footprint for every machine, so they read as one class of object.
+const MACHINE_BODY := 23.0
+const FACE_LIGHT := 0.20
+const FACE_DARK := 0.24
+const FACE_BAND := 3.0
 ## Only energy crystals become heat. Crystal and copper are materials: they go
 ## into the base's stock and are spent on machines. Splitting the build currency
 ## from the progress meter is what gives the player something to decide -- heat

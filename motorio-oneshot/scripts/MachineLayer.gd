@@ -83,9 +83,7 @@ func _draw_shelter(tile: float) -> void:
 	# Warm pool, so it reads as a destination rather than a prop.
 	draw_circle(at, 30.0 * flicker, Color(1.0, 0.62, 0.26, 0.05 + night * 0.16))
 	draw_circle(at, 20.0 * flicker, Color(1.0, 0.66, 0.30, 0.07 + night * 0.20))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.42))
-	draw_circle(Vector2(at.x, (at.y + 13.0) / 0.42), 13.0, Color(0.02, 0.04, 0.08, 0.36))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	_shadow(at + Vector2(0, 13), 13.0)
 
 	var wall := Color8(84, 52, 40)
 	var wall_lit := Color8(104, 66, 50)
@@ -139,6 +137,9 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var beat: float = 1.0 + sin(pulse * 2.2) * 0.05 + machine.flash * 0.5
 	# The core is the emotional centre of the run, so it is drawn large enough to
 	# outrank the HUD clock in the visual hierarchy.
+	# The core had no shadow, so the one object the whole base points at was the
+	# only thing not standing on the ground.
+	_shadow(c + Vector2(0, 22), 20.0)
 	draw_circle(c, 52.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
 	draw_circle(c, 38.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
 	draw_circle(c, 30.0, Defs.COL_MACHINE.darkened(0.4))
@@ -149,6 +150,29 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var angle: float = TAU * float(index) / 10.0 + pulse * 0.25
 		draw_circle(c + Vector2.from_angle(angle) * 33.0, 2.6, Defs.COL_BRASS)
 	draw_arc(c, 44.0, 0.0, TAU, 64, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
+
+## Every object standing on the plateau casts the same shadow: one squash, one
+## colour, always at the object's base. Three different shadow styles was the
+## single loudest inconsistency in the old world layer.
+func _shadow(base: Vector2, radius: float) -> void:
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+	draw_circle(Vector2(base.x, base.y / Defs.SHADOW_SQUASH), radius, Defs.SHADOW)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## Every raised body: one footprint, one outline, light from the top-left.
+## Returns the inner rect so each machine can put its own identity inside it.
+func _body(centre: Vector2, size: float, base: Color) -> Rect2:
+	var rect := Rect2(centre - Vector2.ONE * size * 0.5, Vector2.ONE * size)
+	draw_rect(rect.grow(2.0), Defs.OUTLINE)
+	draw_rect(rect, base)
+	var band: float = Defs.FACE_BAND
+	draw_rect(Rect2(rect.position, Vector2(rect.size.x, band)), base.lightened(Defs.FACE_LIGHT))
+	draw_rect(Rect2(rect.position, Vector2(band, rect.size.y)), base.lightened(Defs.FACE_LIGHT * 0.55))
+	draw_rect(Rect2(rect.position + Vector2(0.0, rect.size.y - band), Vector2(rect.size.x, band)),
+		base.darkened(Defs.FACE_DARK))
+	draw_rect(Rect2(rect.position + Vector2(rect.size.x - band, 0.0), Vector2(band, rect.size.y)),
+		base.darkened(Defs.FACE_DARK * 0.55))
+	return rect
 
 ## One arrow shape used by previews and by placed machines, so "which way does
 ## this face" is answered the same way everywhere.
@@ -173,10 +197,11 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var work: float = clampf(machine.progress / Defs.MINER_PERIOD, 0.0, 1.0)
 	var body: Color = Color8(74, 86, 100).lerp(Color8(48, 56, 68), frost)
 
-	draw_circle(c + Vector2(0, 11), 10.0, Color(0.02, 0.04, 0.08, 0.34))
-	draw_rect(Rect2(c.x - 13, c.y - 13, 26, 26), Defs.ORE_OUTLINE)
-	draw_rect(Rect2(c.x - 11, c.y - 11, 22, 22), body)
-	draw_rect(Rect2(c.x - 11, c.y - 11, 22, 2.5), Defs.COL_BELT_RIM.lerp(body, frost))
+	_shadow(c + Vector2(0, 12), 11.0)
+	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body)
+	# The warm lip is the machine's identity light, drawn over the shared faces.
+	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
+		Defs.COL_BELT_RIM.lerp(body, frost))
 	# A drill head that only turns while a cat is operating it.
 	var spin: float = pulse * (5.0 if machine.operated else 0.0)
 	for index in 3:
@@ -237,28 +262,32 @@ func _draw_ground() -> void:
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
 		var bob: float = sin(pulse * 3.0 + float(cell.x + cell.y)) * 1.6
 		var colour: Color = Defs.ITEM_COLORS[item_type]
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
-		draw_circle(Vector2(at.x, (at.y + 7.0) / 0.45), 5.0, Color(0.02, 0.04, 0.08, 0.30))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		_shadow(at + Vector2(0, 7), 5.0)
 		draw_circle(at + Vector2(0, bob), 7.0, Color(colour.r, colour.g, colour.b, 0.28))
 		draw_circle(at + Vector2(0, bob), 4.2, colour)
-		draw_circle(at + Vector2(0, bob), 4.2, Defs.ORE_OUTLINE, false, 1.0)
+		draw_circle(at + Vector2(0, bob), 4.2, Defs.OUTLINE, false, 1.0)
+		# A single highlight, in the same top-left place as every other object.
+		draw_circle(at + Vector2(-1.4, bob - 1.4), 1.2, Color(1, 1, 1, 0.55))
 
 ## A generator reads as a lit drum: the glow is tied to whether it is actually
 ## supplying, so an unfuelled one is visibly dark rather than silently idle.
 func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
-	var body := Rect2(px + Vector2(4, 4), Vector2(tile - 8.0, tile - 8.0))
-	var live: bool = machine.operated
-	draw_rect(body, Defs.COL_BELT_BODY)
-	draw_rect(body, Defs.machine_color(Defs.M_GENERATOR), false, 2.0)
 	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
-	var beat: float = 0.6 + sin(pulse * 4.0) * 0.25 if live else 0.18
-	draw_circle(centre, tile * 0.22, Color(0.47, 0.75, 0.92, beat))
-	draw_circle(centre, tile * 0.11, Color(0.85, 0.96, 1.0, beat))
-	var fuel: int = int(machine.buffer.get(Defs.ITEM_ENERGY, 0))
-	for index in fuel:
-		draw_circle(px + Vector2(6.0 + float(index) * 6.0, tile - 5.0), 2.0,
-			Defs.ITEM_COLORS[Defs.ITEM_ENERGY])
+	var live: bool = machine.operated
+	var frost: float = _frost(machine)
+	var base: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
+	_shadow(centre + Vector2(0, 12), 11.0)
+	_body(centre, Defs.MACHINE_BODY, base)
+	# A lit drum. Cool light, because power is infrastructure rather than warmth,
+	# and it beats only while the generator is actually supplying.
+	var beat: float = (0.65 + sin(pulse * 4.0) * 0.25) if live else 0.16
+	draw_circle(centre, 7.5, Color(0.30, 0.58, 0.78, beat * 0.7))
+	draw_circle(centre, 5.0, Color(0.55, 0.82, 0.98, beat))
+	draw_circle(centre, 2.2, Color(0.92, 0.99, 1.0, beat))
+	draw_circle(centre, 7.5, Defs.OUTLINE, false, 1.0)
+	# Fuel sits in the same pip row every other machine uses.
+	_draw_pip(centre + Vector2(0, 13), Defs.ITEM_ENERGY, int(machine.buffer.get(Defs.ITEM_ENERGY, 0)))
+	_draw_stall(machine, centre)
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
@@ -289,9 +318,7 @@ func _draw_cats() -> void:
 		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4 + munch), size)
 		if bool(view["flip"]):
 			target.position.x += absf(size.x)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
-		draw_circle(Vector2(cat.pos.x, (cat.pos.y + 10.0) / 0.45), 8.0, Color(0.02, 0.04, 0.08, 0.32))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		_shadow(cat.pos + Vector2(0, 10), 8.0)
 		draw_texture_rect_region(CAT_SHEET, target, _cat_region(String(view["view"])), Color.WHITE)
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling
@@ -318,18 +345,25 @@ func _draw_boxes(tile: float) -> void:
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
 		if not view_rect.grow(tile).has_point(at):
 			continue
-		draw_circle(at + Vector2(0, 9), 8.0, Color(0.02, 0.04, 0.08, 0.30))
-		draw_rect(Rect2(at.x - 10, at.y - 8, 20, 17), Defs.ORE_OUTLINE)
-		draw_rect(Rect2(at.x - 8, at.y - 6, 16, 13), Color8(146, 102, 62))
-		draw_rect(Rect2(at.x - 8, at.y - 1, 16, 3), Color8(196, 146, 92))
-		draw_circle(at + Vector2(0, -2), 2.6, Defs.COL_CAT_FACE)
+		_shadow(at + Vector2(0, 9), 9.0)
+		var crate: Rect2 = _body(at, 17.0, Color8(146, 102, 62))
+		# A slatted lid and a pawprint: the crate has to read as "a cat is in
+		# here" from a screen away.
+		draw_rect(Rect2(crate.position.x, crate.get_center().y - 1.5, crate.size.x, 3.0),
+			Color8(196, 146, 92))
+		draw_circle(at + Vector2(0, -3), 2.4, Defs.COL_CAT_FACE)
+		draw_circle(at + Vector2(-3, -5), 1.1, Defs.COL_CAT_FACE)
+		draw_circle(at + Vector2(3, -5), 1.1, Defs.COL_CAT_FACE)
 
 func _draw_food_bin(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
-	draw_circle(at + Vector2(0, 10), 10.0, Color(0.02, 0.04, 0.08, 0.30))
-	draw_rect(Rect2(at.x - 12, at.y - 9, 24, 19), Defs.ORE_OUTLINE)
-	draw_rect(Rect2(at.x - 10, at.y - 7, 20, 15), Color8(84, 96, 112))
-	draw_rect(Rect2(at.x - 10, at.y - 7, 20, 3), Defs.COL_BELT_RIM)
+	_shadow(at + Vector2(0, 10), 10.0)
+	var bin: Rect2 = _body(at, 19.0, Color8(84, 96, 112))
+	# An open hopper mouth, so the bin reads as something you take from.
+	draw_rect(Rect2(bin.position + Vector2(3.0, 3.0), Vector2(bin.size.x - 6.0, 5.0)),
+		Color8(46, 54, 66))
+	draw_rect(Rect2(bin.position + Vector2(3.0, 3.0), Vector2(bin.size.x - 6.0, 5.0)),
+		Defs.OUTLINE, false, 1.0)
 	var font := UIFont.FONT
 	draw_string(font, at + Vector2(-20, 24), "사료 %d" % sim.food, HORIZONTAL_ALIGNMENT_CENTER, 40.0, 10,
 		Defs.COL_TEXT)
@@ -338,21 +372,23 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
 	var body: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
-	var ready: bool = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)) > 0 and int(machine.buffer.get(Defs.ITEM_COPPER, 0)) > 0
+	# The recipe is crystal-only. This still asked for copper, left over from the
+	# old smelter, so the window never lit no matter how well the line ran.
+	var held: int = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0))
+	var ready: bool = held >= Defs.CRYSTAL_COST_ENERGY
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
-	draw_circle(c + Vector2(0, 9), 11.0, Color(0.02, 0.04, 0.08, 0.32))
-	draw_rect(Rect2(c.x - 14, c.y - 14, 28, 28), Defs.ORE_OUTLINE)
-	draw_rect(Rect2(c.x - 12, c.y - 12, 24, 24), body.darkened(0.4))
-	draw_rect(Rect2(c.x - 10, c.y - 10, 20, 20), body)
+	_shadow(c + Vector2(0, 12), 11.0)
+	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body)
+	# A lit conversion window, warm because the light belongs to the factory.
 	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Color(1.0, 0.55, 0.2, glow))
-	draw_rect(Rect2(c.x - 10, c.y - 12, 20, 3), Defs.COL_BELT_RIM.lerp(body, frost * 0.7))
-	var tip: Vector2 = c + Vector2(machine.dir) * 15.0
-	draw_circle(tip, 2.6, Defs.COL_BRASS)
+	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Defs.OUTLINE, false, 1.0)
+	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
+		Defs.COL_BELT_RIM.lerp(body, frost * 0.7))
+	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 9.0, Defs.COL_BRASS, 2.2)
 	_draw_stall(machine, c)
-	# Two input pips tell the player exactly what the recipe is still missing.
-	_draw_pip(c + Vector2(-6, 12), Defs.ITEM_CRYSTAL, int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)))
-	_draw_pip(c + Vector2(6, 12), Defs.ITEM_COPPER, int(machine.buffer.get(Defs.ITEM_COPPER, 0)))
+	# One pip row for the one input the recipe actually takes.
+	_draw_pip(c + Vector2(0, 13), Defs.ITEM_CRYSTAL, held)
 	if machine.flash > 0.0:
 		draw_circle(c, 16.0 + machine.flash * 14.0, Color(1, 0.9, 0.7, machine.flash * 0.55), false, 2.0)
 
@@ -383,7 +419,7 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# Glow first so it reads as light spilling out from under the machine.
 	draw_circle(c, 19.0, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
 		0.30 * (1.0 - frost) + 0.05))
-	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.ORE_OUTLINE)
+	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.OUTLINE)
 	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), body)
 	# The rim must be lighter than the pool it sits in, or it disappears into it.
 	var rim: Color = Defs.COL_BELT_RIM if frost <= 0.0 else Defs.COL_BELT_RIM.lerp(body, 0.6)

@@ -59,13 +59,15 @@ func _draw_ore(tile: float) -> void:
 		var warm: bool = sim.is_warm(cell)
 		var tint: Color = base if warm else base.lerp(Defs.COL_SNOW_COLD, 0.18)
 
-		draw_circle(centre + Vector2(0, 3), 11.0, Color(0.02, 0.04, 0.08, 0.30))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+		draw_circle(Vector2(centre.x, (centre.y + 8.0) / Defs.SHADOW_SQUASH), 10.0, Defs.SHADOW)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		# A dark outline keeps the silhouette on both the amber ground and the
 		# night, so ore never depends on the terrain for contrast.
 		var outline := PackedVector2Array([
 			centre + Vector2(-10, 7), centre + Vector2(-5, -9),
 			centre + Vector2(4, -8), centre + Vector2(10, 2), centre + Vector2(8, 9)])
-		draw_colored_polygon(outline, Defs.ORE_OUTLINE)
+		draw_colored_polygon(outline, Defs.OUTLINE)
 		var shard := PackedVector2Array([
 			centre + Vector2(-9, 6), centre + Vector2(-4, -8),
 			centre + Vector2(2, -3), centre + Vector2(0, 8)])
