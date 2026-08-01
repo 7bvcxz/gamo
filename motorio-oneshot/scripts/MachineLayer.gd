@@ -68,20 +68,65 @@ func _draw() -> void:
 		_draw_preview(tile)
 
 ## A hut beside the core: the destination the night pushes you toward.
+## The shelter is the other end of the run from the core: the core is where heat
+## comes from, this is where the day survives to. So it is built to the same
+## finish -- it sits on its own tile, carries a warm pool of its own, and its
+## window is the one light that answers the core across the base.
 func _draw_shelter(tile: float) -> void:
-	var at: Vector2 = Vector2(sim.core_cell) * tile + Defs.SHELTER_OFFSET * tile + Vector2.ONE * tile * 0.5
-	var lit: float = 0.35 + night * 0.65
-	draw_circle(at + Vector2(0, 12), 15.0, Color(0.02, 0.04, 0.08, 0.34))
-	draw_circle(at, 17.0, Color(1.0, 0.62, 0.24, 0.10 + night * 0.22))
-	# Timber hut with a lit doorway that grows brighter as the night comes in.
+	var origin: Vector2 = Vector2(sim.shelter_cell) * tile
+	var at: Vector2 = origin + Vector2.ONE * tile * 0.5
+	# Firelight rises with the night, which is exactly when the player needs to
+	# find this building from across the plateau.
+	var lit: float = 0.30 + night * 0.70
+	var flicker: float = 1.0 + sin(pulse * 5.3) * 0.06 + sin(pulse * 2.1) * 0.04
+
+	# Warm pool, so it reads as a destination rather than a prop.
+	draw_circle(at, 30.0 * flicker, Color(1.0, 0.62, 0.26, 0.05 + night * 0.16))
+	draw_circle(at, 20.0 * flicker, Color(1.0, 0.66, 0.30, 0.07 + night * 0.20))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.42))
+	draw_circle(Vector2(at.x, (at.y + 13.0) / 0.42), 13.0, Color(0.02, 0.04, 0.08, 0.36))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	var wall := Color8(84, 52, 40)
+	var wall_lit := Color8(104, 66, 50)
+	var roof := Color8(58, 38, 32)
+	var roof_lit := Color8(74, 50, 40)
+	var trim: Color = Defs.COL_BRASS
+
+	# Body, with the left face a shade lighter so the hut has a light direction
+	# instead of reading flat.
+	var body := Rect2(at.x - 12.0, at.y - 2.0, 24.0, 16.0)
+	draw_rect(body, wall)
+	draw_rect(Rect2(body.position, Vector2(body.size.x * 0.42, body.size.y)), wall_lit)
+	draw_rect(body, Color(0.02, 0.03, 0.05, 0.55), false, 1.0)
+
+	# Roof: two slopes rather than one triangle, so the ridge catches the light.
 	draw_colored_polygon(PackedVector2Array([
-		at + Vector2(-16, 2), at + Vector2(0, -15), at + Vector2(16, 2)]), Color8(96, 58, 44))
-	draw_rect(Rect2(at.x - 13, at.y + 1, 26, 14), Color8(74, 46, 36))
-	draw_rect(Rect2(at.x - 5, at.y + 4, 10, 11), Color(1.0, 0.72, 0.34, lit))
-	draw_rect(Rect2(at.x - 16, at.y - 1, 32, 3), Defs.COL_BELT_RIM.darkened(0.25))
+		at + Vector2(-15, -1), at + Vector2(0, -15), at + Vector2(0, -1)]), roof_lit)
+	draw_colored_polygon(PackedVector2Array([
+		at + Vector2(0, -15), at + Vector2(15, -1), at + Vector2(0, -1)]), roof)
+	draw_line(at + Vector2(-15, -1), at + Vector2(15, -1), trim.darkened(0.35), 1.6)
+	draw_line(at + Vector2(0, -15), at + Vector2(0, -1), Color(0.02, 0.03, 0.05, 0.35), 1.0)
+
+	# The window is the whole point: one warm rectangle that brightens into the
+	# night and spills a little onto the snow below the sill.
+	var window := Rect2(at.x - 4.0, at.y + 2.0, 8.0, 8.0)
+	draw_rect(window.grow(1.5), Color(0.02, 0.03, 0.05, 0.60))
+	draw_rect(window, Color(1.0, 0.74, 0.36, lit))
+	draw_rect(Rect2(window.position, Vector2(window.size.x, 2.0)),
+		Color(1.0, 0.90, 0.62, lit))
+	draw_circle(at + Vector2(0, 7), 9.0 * flicker, Color(1.0, 0.70, 0.32, 0.10 * lit))
+
+	# A chimney with smoke, so the building is alive even when nobody is home.
+	draw_rect(Rect2(at.x + 6.0, at.y - 15.0, 4.0, 7.0), roof)
+	for index in 3:
+		var rise: float = fmod(pulse * 0.5 + float(index) * 0.34, 1.0)
+		draw_circle(at + Vector2(8.0 + sin(rise * 4.0 + float(index)) * 3.0, -17.0 - rise * 13.0),
+			1.4 + rise * 1.8, Color(0.86, 0.88, 0.92, (1.0 - rise) * 0.22))
+
 	var font := UIFont.FONT
-	draw_string(font, at + Vector2(-20, 30), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 40.0, 10,
-		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.55 + night * 0.4))
+	draw_string(font, at + Vector2(-24, 27), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 48.0, 10,
+		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.50 + night * 0.45))
 
 func _visible(cell: Vector2i, tile: float) -> bool:
 	return view_rect.grow(tile * 2.0).has_point(Vector2(cell) * tile + Vector2.ONE * tile * 0.5)

@@ -70,9 +70,12 @@ func _test_crates_and_adoption() -> void:
 	_assert(sim.adopt_cats() == 2, "six crates adopt two cats")
 	_assert(sim.cats.size() == 2, "the cats exist")
 	_assert(sim.carried_boxes == 0, "the crates are spent")
+	# The hut is solid, so cats stand at its door rather than inside it.
+	var door: Vector2 = sim.cell_centre(sim.shelter_cell) + Vector2(0.0, float(Defs.TILE))
 	for cat: Sim.Cat in sim.cats:
-		_assert(cat.pos.distance_to(sim.cell_centre(sim.shelter_cell)) < 1.0,
-			"a new cat starts at the shelter")
+		_assert(cat.pos.distance_to(door) < 1.0, "a new cat starts at the shelter door")
+		_assert(not sim.blocks_player(Vector2i((cat.pos / float(Defs.TILE)).floor())),
+			"and not standing inside the building")
 	sim.free()
 
 # --- 5-3 -------------------------------------------------------------------

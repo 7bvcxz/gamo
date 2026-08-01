@@ -200,7 +200,7 @@ func setup(seed_value: int) -> void:
 	carried_boxes = 0
 	carried_cat = null
 	food = Defs.FOOD_START
-	shelter_cell = core_cell + Vector2i(Defs.SHELTER_OFFSET.round())
+	shelter_cell = core_cell + Defs.SHELTER_CELL
 	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
 	_generate_ore(seed_value)
 	_generate_cat_boxes(seed_value)
@@ -294,6 +294,9 @@ func tile_attributes(cell: Vector2i) -> int:
 	var machine: Machine = machines.get(cell, null)
 	if machine != null and machine.type == Defs.M_CORE:
 		attrs |= Defs.ATTR_STRUCTURE
+	# The shelter is a building on the grid, not a decal painted over it.
+	if cell == shelter_cell:
+		attrs |= Defs.ATTR_STRUCTURE
 	return attrs
 
 func has_attribute(cell: Vector2i, attribute: int) -> bool:
@@ -330,7 +333,7 @@ func adopt_cats() -> int:
 	carried_boxes -= adopted * Defs.BOXES_PER_CAT
 	for index in adopted:
 		var cat := Cat.new()
-		cat.pos = Vector2(shelter_cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+		cat.pos = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
 		cats.append(cat)
 	cat_adopted.emit(cats.size())
 	return adopted

@@ -36,6 +36,18 @@ func _run() -> void:
 	_assert(not sim.demolish(sim.core_cell), "the core cannot be picked up")
 	_assert(sim.machine_at(sim.core_cell) != null, "the core survives the attempt")
 
+	# The shelter is a building on the grid too, so it blocks and cannot be built
+	# over. It also has to stay reachable: a hut you cannot stand next to is a hut
+	# you can never sleep in.
+	_assert(sim.is_structure(sim.shelter_cell), "the shelter is a structure")
+	_assert(sim.blocks_player(sim.shelter_cell), "the shelter blocks the player")
+	_assert(sim.shelter_cell != sim.core_cell, "and it is its own tile, not the core's")
+	var open_sides := 0
+	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+		if not sim.blocks_player(sim.shelter_cell + step):
+			open_sides += 1
+	_assert(open_sides >= 2, "the shelter has approaches on at least two sides (%d)" % open_sides)
+
 	# Where each machine may go. The miner is the only one that may sit on ore,
 	# and the only one that is required to.
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) == "", "a miner may be built on ore")
@@ -114,6 +126,27 @@ func _run() -> void:
 	_assert(main.player.cell() != core, "the player cannot walk into the core")
 	_assert(main.player.position.distance_to(approached_from) > 1.0,
 		"but does travel up to it")
+
+	# Walking into the shelter. Same real-movement check as the core: the hut is a
+	# building now, so the body has to stop at its wall.
+	var hut: Vector2i = main.sim.shelter_cell
+	var hut_lane := Vector2.ZERO
+	for approach: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
+		var clear := true
+		for distance in [1, 2, 3]:
+			if main.sim.is_structure(hut - Vector2i(approach) * distance):
+				clear = false
+		if clear:
+			hut_lane = approach
+			break
+	_assert(hut_lane != Vector2.ZERO, "the shelter has a clear approach")
+	main.player.position = main.sim.cell_centre(hut) - hut_lane * float(Defs.TILE) * 2.5
+	var walked_from: Vector2 = main.player.position
+	for step in 40:
+		main.player._move(hut_lane * 6.0)
+	_assert(main.player.cell() != hut, "the player cannot walk into the shelter")
+	_assert(main.player.position.distance_to(walked_from) > 1.0, "but does walk up to its door")
+	_assert(main.shelter_nearby(), "and standing at the wall is close enough to sleep")
 
 	# A save written before a tile became a structure can drop the player inside
 	# one. Collision must let them walk out rather than sealing them in.

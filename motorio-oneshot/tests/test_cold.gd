@@ -78,7 +78,10 @@ func _run() -> void:
 	_assert(is_equal_approx(main.player.warmth, 100.0), "the player wakes warm")
 	_assert(is_zero_approx(main.player.collapse) and not main.player.locked, "the player wakes upright")
 	_assert(is_zero_approx(main.blackout), "and the screen is clear again")
-	_assert(main.player.position.distance_to(main.shelter_position()) < 1.0, "the player wakes at the shelter")
+	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0, "the player wakes at the shelter door")
+	_assert(not main.sim.blocks_player(main.player.cell()),
+		"and never inside the hut itself")
+	_assert(main.shelter_nearby(), "close enough to the door to sleep again")
 
 	# --- The real per-frame path ---------------------------------------------
 	# Everything above drives _update_collapse directly, which is why it never
@@ -117,8 +120,9 @@ func _run() -> void:
 		"and it takes about grace + fall + blackout, not longer (%.1fs)" % elapsed)
 
 	main._begin_next_day()
-	_assert(main.player.position.distance_to(main.shelter_position()) < 1.0,
-		"the player wakes at the shelter after freezing")
+	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0,
+		"the player wakes at the shelter door after freezing")
+	_assert(not main.sim.blocks_player(main.player.cell()), "and not inside the hut")
 
 	if failures == 0:
 		print("COLD_TEST: PASS")

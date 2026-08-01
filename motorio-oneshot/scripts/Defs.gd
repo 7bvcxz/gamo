@@ -182,7 +182,12 @@ const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when wa
 ## enough that the carry is visible at a glance.
 const CARRY_AHEAD := 0.3
 
-const SHELTER_OFFSET := Vector2(-2.5, 2.5)
+## Whole tiles, not a half-tile offset. The shelter is a building that occupies
+## one cell of the grid exactly, like the core, so it can be a structure the
+## player walks around rather than a decal they walk through.
+const SHELTER_CELL := Vector2i(-3, 3)
+## Measured from the cell centre, so standing on any of the four neighbouring
+## tiles counts as being at the door.
 const SHELTER_REACH := 62.0
 const FOOD_OFFSET := Vector2(-4.5, 2.5)
 

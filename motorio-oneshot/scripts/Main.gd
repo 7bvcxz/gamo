@@ -151,7 +151,12 @@ func is_dusk() -> bool:
 	return time_left <= Defs.DUSK_SECONDS
 
 func shelter_position() -> Vector2:
-	return Vector2(sim.core_cell) * float(Defs.TILE) + Defs.SHELTER_OFFSET * float(Defs.TILE)
+	return sim.cell_centre(sim.shelter_cell)
+
+## Where the player stands when they wake: the doorstep, since the hut itself is
+## solid and putting them inside it would leave them clipped into a structure.
+func shelter_doorstep() -> Vector2:
+	return shelter_position() + Vector2(0.0, float(Defs.TILE))
 
 func shelter_nearby() -> bool:
 	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
@@ -831,7 +836,7 @@ func _sleep() -> void:
 		return
 	player.locked = true
 	player.velocity = Vector2.ZERO
-	player.position = shelter_position()
+	player.position = shelter_doorstep()
 	audio.call("play", "confirm")
 	fx.ring(shelter_position(), Defs.COL_CORE, 52.0)
 	_finish_run()
@@ -858,7 +863,7 @@ func _begin_next_day() -> void:
 	blackout = 0.0
 	player.warmth = 100.0
 	# Morning starts at the shelter beside the core, as it does in Motorio.
-	player.position = shelter_position()
+	player.position = shelter_doorstep()
 	state = State.PLAY
 	_notify("%d일차 아침" % day_number, Defs.COL_CORE)
 	fx.ring(player.position, Defs.COL_CORE, 46.0)
