@@ -30,6 +30,11 @@ const NAV = [
       { id: 'oneshot-todo', label: 'Todo', render: () => <OneShotTodo /> },
       { id: 'oneshot-releases', label: 'Releases', render: () => <OneShotReleases /> },
     ],
+    links: [
+      { href: '/gamo/motorio-oneshot/graphic/', label: '그래픽 →' },
+      { href: '/gamo/motorio-oneshot/graphic/proposals/', label: '그래픽 제안 →' },
+      { href: '/gamo/motorio-oneshot/', label: '플레이 →' },
+    ],
   },
 ];
 
@@ -66,6 +71,11 @@ function Doc() {
               >
                 {item.label}
               </button>
+            ))}
+            {(section.links ?? []).map((link) => (
+              <a className="nav-item" key={link.href} href={link.href}>
+                {link.label}
+              </a>
             ))}
           </div>
         ))}

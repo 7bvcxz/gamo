@@ -8,6 +8,11 @@ const GAMES = [
     path: '/gamo/motorio-oneshot/',
     blurb:
       '얼어붙은 고원에서 고양이 작업자와 공장을 세웁니다. 하루가 끝나면 그날 모은 열이 정산되고, 공장과 온기는 다음 날로 이어집니다.',
+    extra: [
+      { href: '/gamo/motorio-oneshot/graphic/', label: '그래픽' },
+      { href: '/gamo/motorio-oneshot/graphic/proposals/', label: '그래픽 제안' },
+      { href: '/gamo/doc/#oneshot-level-design', label: '레벨 디자인' },
+    ],
   },
   {
     name: 'Motorio',
@@ -39,10 +44,21 @@ function Home() {
       <section className="games">
         <div className="cards">
           {GAMES.map((game) => (
-            <a className="card" href={game.path} key={game.path}>
-              <b>{game.name}</b>
-              <span>{game.blurb}</span>
-            </a>
+            <div className="card" key={game.path}>
+              <a href={game.path}>
+                <b>{game.name}</b>
+                <span>{game.blurb}</span>
+              </a>
+              {game.extra && (
+                <p className="card-links">
+                  {game.extra.map((link) => (
+                    <a key={link.href} href={link.href}>
+                      {link.label}
+                    </a>
+                  ))}
+                </p>
+              )}
+            </div>
           ))}
         </div>
       </section>

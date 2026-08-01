@@ -16,6 +16,10 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         doc: resolve(__dirname, 'doc/index.html'),
+        // The game itself owns /gamo/motorio-oneshot/, so its pages live in
+        // subdirectories under it rather than replacing it.
+        graphic: resolve(__dirname, 'motorio-oneshot/graphic/index.html'),
+        proposals: resolve(__dirname, 'motorio-oneshot/graphic/proposals/index.html'),
       },
     },
   },
