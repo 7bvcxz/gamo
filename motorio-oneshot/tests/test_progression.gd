@@ -207,6 +207,51 @@ func _run() -> void:
 		"with every material returned, so rebuilding is free")
 	grade_sim.free()
 
+	# --- Power scales the factory, cats no longer cap it ----------------------
+	# The ratio the game now advertises (one exchanger to four miners) is useless
+	# if four miners need four cats and cats come from walking. Electricity is
+	# what turns factory scale back into an engineering problem.
+	var grid := Sim.new()
+	grid.setup(9090)
+	grid.note_resource_seen(Defs.ITEM_CRYSTAL)
+	grid.note_resource_seen(Defs.ITEM_COPPER)
+	grid.stock[Defs.ITEM_CRYSTAL] = 200
+	grid.stock[Defs.ITEM_COPPER] = 200
+	var seam2 := Vector2i(grid.core_cell.x + 4, grid.core_cell.y + 4)
+	grid.ore[seam2] = Defs.ITEM_CRYSTAL
+	grid._assign_purity()
+	_assert(grid.build(Defs.M_MINER, seam2, Vector2i.RIGHT), "a miner goes down")
+
+	var idle_before: int = int(grid.delivered.get(Defs.ITEM_CRYSTAL, 0))
+	for step in int(Defs.MINER_PERIOD / 0.1) * 2:
+		grid.tick(0.1)
+	_assert(not grid.miner_on_power(seam2), "an unstaffed miner with no grid is not on power")
+	_assert(grid.ground.is_empty() and int(grid.delivered.get(Defs.ITEM_CRYSTAL, 0)) == idle_before,
+		"and produces nothing at all")
+
+	var gen2 := Vector2i(grid.core_cell.x + 8, grid.core_cell.y + 8)
+	grid.ore.erase(gen2)
+	_assert(grid.build(Defs.M_GENERATOR, gen2, Vector2i.RIGHT), "a generator goes down")
+	grid.machine_at(gen2).buffer[Defs.ITEM_ENERGY] = 4
+	grid.tick(0.02)
+	_assert(grid.miner_on_power(seam2), "with power the miner runs itself")
+	_assert(grid.power_draw >= Defs.MINER_POWER_DRAW, "and pays the grid for it")
+	for step in int(Defs.MINER_PERIOD / 0.1) * 2:
+		grid.tick(0.1)
+	_assert(not grid.ground.is_empty() or int(grid.delivered.get(Defs.ITEM_CRYSTAL, 0)) > idle_before,
+		"a grid-run miner actually produces")
+
+	var worker = Sim.Cat.new()
+	worker.assigned = seam2
+	worker.state = Defs.CAT_WORKING
+	worker.pos = grid.cell_centre(seam2)
+	grid.cats.append(worker)
+	grid.tick(0.02)
+	_assert(not grid.miner_on_power(seam2), "a staffed miner stops drawing from the grid")
+	print("POWER: unstaffed miner draws %.1f, one generator carries %.0f" % [
+		Defs.MINER_POWER_DRAW, Defs.GENERATOR_OUTPUT / Defs.MINER_POWER_DRAW])
+	grid.free()
+
 	sim.free()
 	if failures == 0:
 		print("PROGRESSION_TEST: PASS")

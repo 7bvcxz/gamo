@@ -129,7 +129,18 @@ func objective() -> String:
 		return "7  컨테이너 벨트로 채굴기와 기지를 이으세요  (구리광석 %d)" % int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER])
 	if sim.power_draw > sim.power_capacity:
 		return "전력이 부족합니다  발전기를 늘리거나 에너지결정을 공급하세요"
-	return "생산을 늘려 온기를 더 넓히세요"
+	if _unstaffed_miners() > 0 and sim.power_capacity <= 0.0:
+		return "발전기를 지으면 고양이 없이도 채굴기가 돕니다"
+	return "%s  ·  더 지을수록 온기가 빨라집니다" % Defs.ratio_hint()
+
+## Miners standing idle for want of a worker. Once power exists these run
+## themselves, so this is the number that tells the player to electrify.
+func _unstaffed_miners() -> int:
+	var count := 0
+	for cell: Vector2i in sim.machines:
+		if sim.machines[cell].type == Defs.M_MINER and not sim.machines[cell].operated:
+			count += 1
+	return count
 
 func _unassigned_cats() -> int:
 	var count := 0

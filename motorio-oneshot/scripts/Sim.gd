@@ -547,7 +547,12 @@ func tick(delta: float) -> void:
 		machine.flash = maxf(0.0, machine.flash - delta)
 		var speed: float = 1.0 if is_warm(cell) else 0.45
 		if machine.type == Defs.M_MINER:
-			speed *= _operator_rate(cell)
+			var rate: float = _operator_rate(cell, supply)
+			speed *= rate
+			# The drill spin and the progress ring both read `operated`, and a
+			# machine running on the grid is just as much running.
+			if rate > 0.0:
+				machine.operated = true
 		if machine.type == Defs.M_BELT:
 			speed *= supply
 		match machine.type:
@@ -573,20 +578,26 @@ func _tick_rate(delta: float) -> void:
 ## Capacity is whatever the fed generators sustain; draw is what the powered
 ## machines ask for. Recomputed each tick so building or losing either is felt
 ## immediately.
+## Two passes on purpose. Supply has to be known before demand is measured,
+## because whether a miner is drawing at all depends on whether the grid exists
+## -- and reading last frame's capacity to answer that gave a one-tick lag, the
+## same bug that once made a freshly fuelled generator supply nothing.
 func _recount_power() -> void:
 	var capacity: float = 0.0
+	for cell: Vector2i in machines:
+		var machine: Machine = machines[cell]
+		# Read the fuel, not a flag set later in the tick.
+		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.ITEM_ENERGY, 0)) > 0:
+			capacity += Defs.GENERATOR_OUTPUT
+	power_capacity = capacity
+
 	var draw: float = 0.0
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
-		# Read the fuel, not last frame's flag: deriving capacity from state the
-		# same tick removes an order dependency between counting power and
-		# spending it, which showed up as a generator that supplied nothing for
-		# one frame after being fed.
-		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.ITEM_ENERGY, 0)) > 0:
-			capacity += Defs.GENERATOR_OUTPUT
-		elif machine.type == Defs.M_BELT:
+		if machine.type == Defs.M_BELT:
 			draw += Defs.BELT_POWER_DRAW
-	power_capacity = capacity
+		elif machine.type == Defs.M_MINER and miner_on_power(cell):
+			draw += Defs.MINER_POWER_DRAW
 	power_draw = draw
 
 func cell_centre(cell: Vector2i) -> Vector2:
@@ -594,11 +605,28 @@ func cell_centre(cell: Vector2i) -> Vector2:
 
 ## Work rate contributed by whichever cat is standing at this miner. Zero means
 ## nobody is home; a starving cat still works, at a third of the pace.
-func _operator_rate(cell: Vector2i) -> float:
+## How fast a miner runs. A cat at the machine is the early answer; once the grid
+## can pay for it, the machine runs itself. Power never beats a fed cat -- it
+## matches one -- so electrifying is about scale, not about replacing workers
+## with something better.
+func _operator_rate(cell: Vector2i, supply: float) -> float:
 	for cat: Cat in cats:
 		if cat.assigned == cell and cat.state == Defs.CAT_WORKING:
 			return 1.0 if cat.hunger > 0.0 else Defs.HUNGER_STARVED_RATE
-	return 0.0
+	return supply if power_capacity > 0.0 else 0.0
+
+## True when this miner is running on the grid rather than on a worker, which is
+## what the drill colour and the power ledger both need to know.
+func miner_on_power(cell: Vector2i) -> bool:
+	var machine: Machine = machines.get(cell, null)
+	if machine == null or machine.type != Defs.M_MINER:
+		return false
+	if power_capacity <= 0.0:
+		return false
+	for cat: Cat in cats:
+		if cat.assigned == cell and cat.state == Defs.CAT_WORKING:
+			return false
+	return true
 
 ## --- Hand mining ----------------------------------------------------------
 ## The player can work a seam themselves from the first minute. It is slow on

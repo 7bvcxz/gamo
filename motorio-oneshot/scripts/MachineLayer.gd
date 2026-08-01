@@ -252,8 +252,13 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var spin: float = pulse * (5.0 if machine.operated else 0.0)
 	for index in 3:
 		var angle: float = spin + TAU * float(index) / 3.0
-		draw_line(c, c + Vector2.from_angle(angle) * 7.0,
-			Defs.COL_BELT_CHEVRON if machine.operated else Color8(120, 132, 148), 2.0)
+		var on_grid: bool = sim.miner_on_power(machine.cell)
+		var drill: Color = Color8(120, 132, 148)
+		if machine.operated:
+			# Cool for the grid, warm for a worker: the player can see at a glance
+			# which miners still cost them a cat.
+			drill = Defs.machine_color(Defs.M_GENERATOR) if on_grid else Defs.COL_BELT_CHEVRON
+		draw_line(c, c + Vector2.from_angle(angle) * 7.0, drill, 2.0)
 	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 10.0, Defs.COL_BELT_RIM, 2.5)
 	if machine.operated:
 		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)

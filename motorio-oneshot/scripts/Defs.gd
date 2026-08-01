@@ -126,7 +126,7 @@ static func per_minute(seconds: float) -> float:
 static func throughput_line(type: int) -> String:
 	match type:
 		M_MINER:
-			return "수정 %.0f/분 · 구리 %.0f/분" % [per_minute(MINER_PERIOD), per_minute(COPPER_PERIOD)]
+			return "수정 %.0f/분 · 고양이 또는 전력 %.1f" % [per_minute(MINER_PERIOD), MINER_POWER_DRAW]
 		M_EXCHANGER:
 			return "수정 %.0f/분 → 에너지 %.0f/분" % [
 				per_minute(EXCHANGER_PERIOD) * float(CRYSTAL_COST_ENERGY),
@@ -155,6 +155,13 @@ static func ratio_hint() -> String:
 const GENERATOR_PERIOD := 10.0
 const GENERATOR_OUTPUT := 1.0
 const BELT_POWER_DRAW := 0.1
+## What an unstaffed miner asks of the grid. This is the moment electricity stops
+## being a tax on belts and becomes the thing that scales the factory: early on a
+## miner needs a cat, and a cat comes from exploring, so the factory is capped by
+## how far the player has walked rather than by anything they can engineer. Once
+## power exists, a miner can run on it instead -- and the freed cat goes back to
+## hauling, which is its other job.
+const MINER_POWER_DRAW := 0.5
 
 # --- Tile attributes ---------------------------------------------------------
 ## Attributes describe what a tile *is*, independent of what sits on it. They are
