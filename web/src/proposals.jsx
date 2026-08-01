@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
-import { PROPOSALS } from './graphics/proposals.js';
+import { PROPOSALS, DECIDED } from './graphics/proposals.js';
 import { ObjectCanvas } from './graphics/Canvas.jsx';
 
 // Where I put the graphic decisions I could not settle myself. Each question is
@@ -77,9 +77,36 @@ function Proposals() {
         </p>
       </header>
 
-      {PROPOSALS.map((p) => (
-        <Proposal key={p.id} proposal={p} picked={picks[p.id]} onPick={pick} />
-      ))}
+      {PROPOSALS.length === 0 ? (
+        <section className="prop">
+          <h2>지금은 열린 질문이 없습니다</h2>
+          <p className="prop-why">
+            그래픽을 바꿀 만한 지점이 생기고 제가 어느 쪽이 나은지 판단하지 못하면 여기에 다섯 가지
+            선택지로 올라옵니다.
+          </p>
+        </section>
+      ) : (
+        PROPOSALS.map((p) => (
+          <Proposal key={p.id} proposal={p} picked={picks[p.id]} onPick={pick} />
+        ))
+      )}
+
+      <section className="prop">
+        <h2>결정된 것</h2>
+        <p className="prop-why">
+          고른 결과와, 그 선택이 무엇을 바꿨는지입니다. 나중에 이 결정을 뒤집을 때 무엇을 뒤집는
+          것인지 알 수 있도록 남겨 둡니다.
+        </p>
+        <ul className="todo-list">
+          {DECIDED.map((d) => (
+            <li key={d.title}>
+              <span className="tag tag-add">{d.choice}</span>
+              <b>{d.title}</b>
+              <span className="todo-body">{d.note}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section className="prop-summary">
         <h2>고른 것</h2>

@@ -8,6 +8,7 @@ import { OneShotLevelDesign } from './pages/OneShotLevelDesign.jsx';
 import { OneShotKeyFactor } from './pages/OneShotKeyFactor.jsx';
 import { OneShotTodo } from './pages/OneShotTodo.jsx';
 import { OneShotReleases } from './pages/OneShotReleases.jsx';
+import { SatisfactoryLevelDesign } from './pages/SatisfactoryLevelDesign.jsx';
 
 // The sidebar is data-driven: adding a page is one entry plus one component.
 const NAV = [
@@ -20,6 +21,16 @@ const NAV = [
     items: [
       { id: 'motorio-level-design', label: 'Level Design', render: () => <MotorioLevelDesign /> },
       { id: 'motorio-key-factor', label: 'Key Factor', render: () => <MotorioKeyFactor /> },
+    ],
+  },
+  {
+    group: 'REFERENCE',
+    items: [
+      {
+        id: 'satisfactory-level-design',
+        label: 'Satisfactory 레벨 디자인',
+        render: () => <SatisfactoryLevelDesign />,
+      },
     ],
   },
   {

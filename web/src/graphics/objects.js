@@ -31,6 +31,12 @@ export const PALETTE = {
   danger: '#e8574c',
 };
 
+export const MACHINE_EDGE = {
+  miner: 'rgb(168,90,36)',
+  exchanger: 'rgb(210,120,52)',
+  generator: 'rgb(120,190,235)',
+};
+
 export const ITEM_COLORS = ['rgb(127,212,232)', 'rgb(252,104,46)', 'rgb(255,217,138)'];
 export const ITEM_NAMES = ['수정조각', '구리광석', '에너지결정'];
 
@@ -59,7 +65,7 @@ export function shadow(ctx, x, y, radius) {
 }
 
 // One footprint, one outline, light from the top-left.
-export function body(ctx, cx, cy, size, base) {
+export function body(ctx, cx, cy, size, base, edge = null) {
   const half = size / 2;
   const x = cx - half;
   const y = cy - half;
@@ -75,6 +81,12 @@ export function body(ctx, cx, cy, size, base) {
   ctx.fillRect(x, y + size - FACE_BAND, size, FACE_BAND);
   ctx.fillStyle = shade(base, -FACE_DARK * 0.55);
   ctx.fillRect(x + size - FACE_BAND, y, FACE_BAND, size);
+  // Identity rim, inside the shared black outline rather than replacing it.
+  if (edge) {
+    ctx.strokeStyle = edge;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x + 1, y + 1, size - 2, size - 2);
+  }
   return { x, y, size };
 }
 
@@ -176,13 +188,13 @@ export const OBJECTS = [
     id: 'miner',
     name: '채굴기',
     kind: '설비',
-    note: '광맥 위에만 설치할 수 있고, 고양이가 올라가야 돈다. 드릴은 가동 중에만 회전한다.',
+    note: '광맥 위에만 설치할 수 있고, 고양이가 올라가야 돈다. 테두리 색이 설비 종류를 구분한다.',
     states: ['가동', '정지'],
     draw(ctx, t, state) {
       const operated = state === 0;
       const base = 'rgb(74,86,100)';
       shadow(ctx, 0, 12, 11);
-      const plate = body(ctx, 0, 0, MACHINE_BODY, base);
+      const plate = body(ctx, 0, 0, MACHINE_BODY, base, MACHINE_EDGE.miner);
       ctx.fillStyle = PALETTE.beltRim;
       ctx.fillRect(plate.x, plate.y, plate.size, 2.5);
       const spin = operated ? t * 5 : 0;
@@ -216,7 +228,7 @@ export const OBJECTS = [
       const base = 'rgb(64,76,90)';
       const glow = ready ? 0.45 + Math.sin(t * 6) * 0.25 : 0.12;
       shadow(ctx, 0, 12, 11);
-      const plate = body(ctx, 0, 0, MACHINE_BODY, base);
+      const plate = body(ctx, 0, 0, MACHINE_BODY, base, MACHINE_EDGE.exchanger);
       ctx.fillStyle = `rgba(255,140,51,${glow})`;
       ctx.fillRect(-6, -4, 12, 10);
       ctx.strokeStyle = PALETTE.outline;
@@ -236,7 +248,7 @@ export const OBJECTS = [
     draw(ctx, t, state) {
       const live = state === 0;
       shadow(ctx, 0, 12, 11);
-      body(ctx, 0, 0, MACHINE_BODY, 'rgb(64,76,90)');
+      body(ctx, 0, 0, MACHINE_BODY, 'rgb(64,76,90)', MACHINE_EDGE.generator);
       const beat = live ? 0.65 + Math.sin(t * 4) * 0.25 : 0.16;
       circle(ctx, 0, 0, 7.5, `rgba(77,148,199,${beat * 0.7})`);
       circle(ctx, 0, 0, 5, `rgba(140,209,250,${beat})`);
@@ -315,16 +327,19 @@ export const OBJECTS = [
     id: 'crate',
     name: '고양이 상자',
     kind: '수집물',
-    note: '3개를 숙소로 가져가면 고양이 한 마리. 100칸당 하나 놓인다.',
+    note: '3개를 숙소로 가져가면 고양이 한 마리. 귀가 실루엣을 깨서 사료통과 헷갈리지 않는다.',
     states: ['기본'],
     draw(ctx) {
       shadow(ctx, 0, 9, 9);
+      ctx.fillStyle = PALETTE.outline;
+      ctx.beginPath();
+      ctx.moveTo(-7, -8); ctx.lineTo(-4, -13); ctx.lineTo(-1, -8);
+      ctx.moveTo(7, -8); ctx.lineTo(4, -13); ctx.lineTo(1, -8);
+      ctx.fill();
       const crate = body(ctx, 0, 0, 17, 'rgb(146,102,62)');
       ctx.fillStyle = 'rgb(196,146,92)';
       ctx.fillRect(crate.x, -1.5, crate.size, 3);
-      circle(ctx, 0, -3, 2.4, PALETTE.catFace);
-      circle(ctx, -3, -5, 1.1, PALETTE.catFace);
-      circle(ctx, 3, -5, 1.1, PALETTE.catFace);
+      circle(ctx, 0, -2, 2.2, PALETTE.catFace);
     },
   },
   {

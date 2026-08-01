@@ -161,7 +161,7 @@ func _shadow(base: Vector2, radius: float) -> void:
 
 ## Every raised body: one footprint, one outline, light from the top-left.
 ## Returns the inner rect so each machine can put its own identity inside it.
-func _body(centre: Vector2, size: float, base: Color) -> Rect2:
+func _body(centre: Vector2, size: float, base: Color, edge: Color = Color(0, 0, 0, 0)) -> Rect2:
 	var rect := Rect2(centre - Vector2.ONE * size * 0.5, Vector2.ONE * size)
 	draw_rect(rect.grow(2.0), Defs.OUTLINE)
 	draw_rect(rect, base)
@@ -172,6 +172,11 @@ func _body(centre: Vector2, size: float, base: Color) -> Rect2:
 		base.darkened(Defs.FACE_DARK))
 	draw_rect(Rect2(rect.position + Vector2(rect.size.x - band, 0.0), Vector2(band, rect.size.y)),
 		base.darkened(Defs.FACE_DARK * 0.55))
+	# Identity rim. Three machines now share one footprint, so the silhouette can
+	# no longer tell them apart; the rim does it instead. Drawn *inside* the black
+	# outline rather than replacing it, so the shared silhouette rule survives.
+	if edge.a > 0.0:
+		draw_rect(rect, edge, false, 2.0)
 	return rect
 
 ## One arrow shape used by previews and by placed machines, so "which way does
@@ -198,7 +203,7 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var body: Color = Color8(74, 86, 100).lerp(Color8(48, 56, 68), frost)
 
 	_shadow(c + Vector2(0, 12), 11.0)
-	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body)
+	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body, Defs.machine_color(Defs.M_MINER))
 	# The warm lip is the machine's identity light, drawn over the shared faces.
 	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
 		Defs.COL_BELT_RIM.lerp(body, frost))
@@ -277,7 +282,7 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var frost: float = _frost(machine)
 	var base: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
 	_shadow(centre + Vector2(0, 12), 11.0)
-	_body(centre, Defs.MACHINE_BODY, base)
+	_body(centre, Defs.MACHINE_BODY, base, Defs.machine_color(Defs.M_GENERATOR))
 	# A lit drum. Cool light, because power is infrastructure rather than warmth,
 	# and it beats only while the generator is actually supplying.
 	var beat: float = (0.65 + sin(pulse * 4.0) * 0.25) if live else 0.16
@@ -346,14 +351,16 @@ func _draw_boxes(tile: float) -> void:
 		if not view_rect.grow(tile).has_point(at):
 			continue
 		_shadow(at + Vector2(0, 9), 9.0)
+		# Ears break the square silhouette. A pawprint on a brown box read as a
+		# food bin from a screen away; a shape with ears cannot be mistaken.
+		draw_colored_polygon(PackedVector2Array([
+			at + Vector2(-7, -8), at + Vector2(-4, -13), at + Vector2(-1, -8)]), Defs.OUTLINE)
+		draw_colored_polygon(PackedVector2Array([
+			at + Vector2(7, -8), at + Vector2(4, -13), at + Vector2(1, -8)]), Defs.OUTLINE)
 		var crate: Rect2 = _body(at, 17.0, Color8(146, 102, 62))
-		# A slatted lid and a pawprint: the crate has to read as "a cat is in
-		# here" from a screen away.
 		draw_rect(Rect2(crate.position.x, crate.get_center().y - 1.5, crate.size.x, 3.0),
 			Color8(196, 146, 92))
-		draw_circle(at + Vector2(0, -3), 2.4, Defs.COL_CAT_FACE)
-		draw_circle(at + Vector2(-3, -5), 1.1, Defs.COL_CAT_FACE)
-		draw_circle(at + Vector2(3, -5), 1.1, Defs.COL_CAT_FACE)
+		draw_circle(at + Vector2(0, -2), 2.2, Defs.COL_CAT_FACE)
 
 func _draw_food_bin(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
@@ -379,7 +386,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
 	_shadow(c + Vector2(0, 12), 11.0)
-	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body)
+	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body, Defs.machine_color(Defs.M_EXCHANGER))
 	# A lit conversion window, warm because the light belongs to the factory.
 	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Color(1.0, 0.55, 0.2, glow))
 	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Defs.OUTLINE, false, 1.0)

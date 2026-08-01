@@ -14,7 +14,32 @@ function ring(ctx, x, y, r, stroke, w = 1) {
   ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
 }
 
-export const PROPOSALS = [
+// Answered on 2026-08-01 and shipped in 0.7.1. Kept here as a record of what was
+// asked and what was chosen, so a later change knows what it is overturning.
+export const DECIDED = [
+  {
+    title: '고양이 상자를 무엇으로 읽히게 할까',
+    choice: '3. 귀 달린 상자',
+    note: '실루엣에 귀를 붙였습니다. 사료통과 헷갈리던 문제가 형태 단계에서 해결됩니다.',
+  },
+  {
+    title: '설비 세 종류를 무엇으로 구분할까',
+    choice: '3. 테두리 색',
+    note:
+      '바깥 검정 외곽선은 그대로 두고 그 안쪽에 설비 고유색 테두리를 넣었습니다. 공유 실루엣 규칙을 깨지 않으면서 구분이 생깁니다.',
+  },
+  {
+    title: '바닥에 떨어진 자원을 얼마나 눈에 띄게 할까',
+    choice: '1. 현재 — 떠 있는 구슬',
+    note: '변경 없음. 현재 강도가 적절하다고 판단되었습니다.',
+  },
+];
+
+export const PROPOSALS = [];
+
+// Retired options are kept below so a future question can reuse the drawings.
+const RETIRED = [
+
   {
     id: 'crate-read',
     title: '고양이 상자를 무엇으로 읽히게 할까',
