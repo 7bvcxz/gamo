@@ -175,6 +175,7 @@ func _process(delta: float) -> void:
 	cold_fog.night = day_fraction()
 	machine_layer.view_rect = view
 	machine_layer.night = day_fraction()
+	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
 
 	_update_ambience(delta)
 	message_life = maxf(0.0, message_life - delta)

@@ -82,6 +82,16 @@ func _draw_ore(tile: float) -> void:
 		if item_type == Defs.ITEM_COPPER:
 			draw_circle(centre + Vector2(1, -1), 3.0, Defs.COPPER_CORE)
 		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.7 if warm else 0.5))
+		# Richness is drawn, not just tracked: extra shards and a brighter heart,
+		# so "that one is worth the walk" is readable from across the plateau.
+		var grade: int = sim.purity_of(cell)
+		if grade > 0:
+			for index in grade:
+				var angle: float = -1.1 + float(index) * 0.9
+				draw_circle(centre + Vector2.from_angle(angle) * 9.0, 2.2, tint.lightened(0.35))
+				draw_circle(centre + Vector2.from_angle(angle) * 9.0, 2.2, Defs.OUTLINE, false, 1.0)
+			draw_circle(centre, 2.0 + float(grade) * 0.8,
+				Color(1, 1, 1, 0.35 + float(grade) * 0.2))
 		if not warm:
 			# A slow glint pulls the eye toward ore the player cannot reach yet.
 			var glint: float = maxf(0.0, sin(pulse * 0.8 + float(cell.x + cell.y)))

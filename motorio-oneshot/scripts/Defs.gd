@@ -113,6 +113,40 @@ const CRYSTAL_COST_ENERGY := 2
 const EXCHANGER_PERIOD := 5.0
 const COPPER_PERIOD := 20.0
 
+## --- Throughput ---------------------------------------------------------------
+## Published on purpose. The pleasure in this genre is making numbers line up,
+## and a number the player cannot see is a number they cannot plan around: it
+## turns ratio design into trial and error. Every rate below is derived from the
+## periods above rather than typed twice.
+static func per_minute(seconds: float) -> float:
+	return 60.0 / maxf(seconds, 0.001)
+
+## One line per machine describing what it does per minute, for the hotbar and
+## for the readout over a machine the player is facing.
+static func throughput_line(type: int) -> String:
+	match type:
+		M_MINER:
+			return "수정 %.0f/분 · 구리 %.0f/분" % [per_minute(MINER_PERIOD), per_minute(COPPER_PERIOD)]
+		M_EXCHANGER:
+			return "수정 %.0f/분 → 에너지 %.0f/분" % [
+				per_minute(EXCHANGER_PERIOD) * float(CRYSTAL_COST_ENERGY),
+				per_minute(EXCHANGER_PERIOD)]
+		M_GENERATOR:
+			return "에너지 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
+		M_BELT:
+			return "최대 %.0f/분 · 전력 %.1f" % [BELT_SPEED / 0.34 * 60.0, BELT_POWER_DRAW]
+		M_SPLITTER:
+			return "들어온 것을 출구에 번갈아 나눔"
+		M_CORE:
+			return "에너지결정 1개 = 열 %d" % ITEM_VALUES[ITEM_ENERGY]
+	return ""
+
+## The ratio that actually matters, stated plainly. One exchanger keeps up with
+## four miners; a player who knows that builds in fours.
+static func ratio_hint() -> String:
+	var miners: float = (per_minute(EXCHANGER_PERIOD) * float(CRYSTAL_COST_ENERGY)) / per_minute(MINER_PERIOD)
+	return "교환기 1대 = 채굴기 %.0f대" % miners
+
 # --- Electricity -------------------------------------------------------------
 ## Power is a rate, not a stock: it never accumulates, so there is no battery to
 ## manage. A generator burns one energy crystal every ten seconds to sustain one
@@ -143,15 +177,16 @@ const M_MINER := 1
 const M_BELT := 2
 const M_EXCHANGER := 3
 const M_GENERATOR := 4
+const M_SPLITTER := 5
 
 ## Hotbar order is the order they unlock, so the row grows left to right as the
 ## player earns it rather than showing four greyed slots on the first frame.
-const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_GENERATOR]
+const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_SPLITTER, M_GENERATOR]
 
-const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "수정에너지교환기", "발전기"]
+const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "수정에너지교환기", "발전기", "분배기"]
 ## Hotbar cards are one slot wide and the full names do not fit beside the colour
 ## swatch. The long name still appears in the hint line above the row.
-const MACHINE_SHORT := ["코어", "채굴기", "벨트", "교환기", "발전기"]
+const MACHINE_SHORT := ["코어", "채굴기", "벨트", "교환기", "발전기", "분배기"]
 ## Machines are bought with materials now, never with heat.
 const MACHINE_COSTS := [
 	{},
@@ -159,6 +194,7 @@ const MACHINE_COSTS := [
 	{ITEM_COPPER: 3},
 	{ITEM_CRYSTAL: 20},
 	{ITEM_COPPER: 10},
+	{ITEM_COPPER: 2},
 ]
 const MACHINE_HINTS := [
 	"",
@@ -166,11 +202,12 @@ const MACHINE_HINTS := [
 	"자원을 기지까지 끊김 없이 나릅니다 · 전력 0.1 필요",
 	"수정조각 2개를 에너지결정 1개로 바꿉니다",
 	"에너지결정을 태워 전력 1.0을 공급합니다",
+	"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
 ]
 
 ## What each machine needs before it appears in the hotbar. The first crystal in
 ## hand opens the crystal line; the first copper opens the power line.
-const MACHINE_UNLOCK_ITEM := [-1, ITEM_CRYSTAL, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER]
+const MACHINE_UNLOCK_ITEM := [-1, ITEM_CRYSTAL, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER, ITEM_COPPER]
 
 # --- Economy -----------------------------------------------------------------
 ## Days repeat and accumulate rather than ending the game, so one day is short
@@ -187,6 +224,10 @@ const MINER_PERIOD := 10.0
 const FURNACE_PERIOD := 2.2
 const BELT_SPEED := 2.6           # tiles per second
 const BELT_CAPACITY := 3
+## A splitter holds a little so a momentary block on one branch does not stall
+## the line feeding it.
+const SPLITTER_CAPACITY := 3
+const SPLITTER_PERIOD := 0.25
 const FROST_COST_IRON := 1
 const COPPER_COST_IRON := 1
 
@@ -270,6 +311,19 @@ const RING_SMALL := 15.0
 const RING_MEDIUM := 24.0
 const RING_LARGE := 40.0
 const RING_MILESTONE := 58.0
+
+## --- Node purity --------------------------------------------------------------
+## Borrowed straight from Satisfactory: the same resource is worth more at some
+## nodes than others, and the good ones are further out. It converts "walk
+## further" from a chore into a trade, and it gives the fixed map a terrain of
+## value rather than a uniform field.
+const PURITY_NORMAL := 0
+const PURITY_RICH := 1
+const PURITY_PURE := 2
+const PURITY_RATE: Array[float] = [1.0, 1.5, 2.0]
+const PURITY_NAMES := ["보통", "풍부", "순수"]
+const PURITY_RICH_RING := 11.0
+const PURITY_PURE_RING := 17.0
 
 const FROST_RING := Vector2(4.0, 9.5)
 const COPPER_RING := Vector2(11.0, 17.0)
@@ -360,6 +414,7 @@ static func machine_color(type: int) -> Color:
 		M_MINER: return COL_CAT_FUR
 		M_EXCHANGER: return Color8(210, 120, 52)
 		M_GENERATOR: return Color8(120, 190, 235)
+		M_SPLITTER: return Color8(150, 210, 160)
 		M_BELT: return COL_BELT_RIM
 		_: return COL_MACHINE
 

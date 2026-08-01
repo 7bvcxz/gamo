@@ -14,6 +14,8 @@ var preview_type: int = Defs.M_MINER
 var preview_cell := Vector2i.ZERO
 var preview_dir := Vector2i.RIGHT
 var preview_valid := true
+## Which machine the player is facing, for the rate readout.
+var focus_cell := Vector2i(9999, 9999)
 var preview_affordable := true
 var show_preview := true
 var preview_occupied := false
@@ -53,6 +55,7 @@ func _draw() -> void:
 			Defs.M_MINER: _draw_miner(machine, Vector2(cell) * tile, tile)
 			Defs.M_EXCHANGER: _draw_furnace(machine, Vector2(cell) * tile, tile)
 			Defs.M_GENERATOR: _draw_generator(machine, Vector2(cell) * tile, tile)
+			Defs.M_SPLITTER: _draw_splitter(machine, Vector2(cell) * tile, tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if machine.type != Defs.M_BELT or not _visible(cell, tile):
@@ -63,6 +66,7 @@ func _draw() -> void:
 	_draw_boxes(tile)
 	_draw_ground()
 	_draw_hand_progress()
+	_draw_focus_readout()
 	_draw_cats()
 	if show_preview:
 		_draw_preview(tile)
@@ -125,6 +129,43 @@ func _draw_shelter(tile: float) -> void:
 	var font := UIFont.FONT
 	draw_string(font, at + Vector2(-24, 27), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 48.0, 10,
 		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.50 + night * 0.45))
+
+## The machine the player is standing in front of states its own rate. Numbers
+## the player cannot see cannot be planned around, which turns ratio design into
+## trial and error -- and ratio design is the point of the genre.
+func _draw_focus_readout() -> void:
+	if focus_cell == Vector2i(9999, 9999):
+		return
+	var machine: Sim.Machine = sim.machine_at(focus_cell)
+	var name := ""
+	var line := ""
+	if machine != null:
+		name = Defs.MACHINE_NAMES[machine.type]
+		line = Defs.throughput_line(machine.type)
+		# A miner reports what this particular seam gives it, not the generic
+		# rate: the whole point of purity is that seams differ.
+		if machine.type == Defs.M_MINER and sim.ore.has(focus_cell):
+			var grade: int = sim.purity_of(focus_cell)
+			line = "%s 광맥 · %.0f/분" % [Defs.PURITY_NAMES[grade],
+				Defs.per_minute(sim.seam_period(focus_cell))]
+	elif sim.ore.has(focus_cell):
+		var grade: int = sim.purity_of(focus_cell)
+		name = "%s %s 광맥" % [Defs.PURITY_NAMES[grade], Defs.ITEM_NAMES[int(sim.ore[focus_cell])]]
+		line = "채굴기 설치 시 %.0f/분" % Defs.per_minute(sim.seam_period(focus_cell))
+	if line == "":
+		return
+	var tile := float(Defs.TILE)
+	var at: Vector2 = Vector2(focus_cell) * tile + Vector2(tile * 0.5, -6.0)
+	var font: Font = UIFont.FONT
+	var width: float = maxf(font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x,
+		font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x) + 12.0
+	var box := Rect2(at + Vector2(-width * 0.5, -24.0), Vector2(width, 24.0))
+	draw_rect(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92))
+	draw_rect(box, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.45), false, 1.0)
+	draw_string(font, box.position + Vector2(6, 10), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
+		Defs.COL_TEXT)
+	draw_string(font, box.position + Vector2(6, 20), line, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
+		Defs.COL_CORE)
 
 func _visible(cell: Vector2i, tile: float) -> bool:
 	return view_rect.grow(tile * 2.0).has_point(Vector2(cell) * tile + Vector2.ONE * tile * 0.5)
@@ -255,6 +296,31 @@ func _draw_hand_progress() -> void:
 			var angle: float = TAU * float(index) / 4.0 + pulse * 2.0
 			draw_circle(centre + Vector2.from_angle(angle) * radius * (0.7 + spark * 0.5),
 				2.2, Color(1.0, 0.95, 0.85, spark))
+
+## A splitter is a floor piece like the belt -- items pass over it, so it must
+## not look like something you walk around. Four lit lanes out of a dark hub, and
+## the lane it will feed next is the bright one, so the round-robin is visible
+## rather than inferred.
+func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
+	var c: Vector2 = px + Vector2.ONE * tile * 0.5
+	var frost: float = _frost(machine)
+	var base: Color = Defs.COL_BELT_BODY if frost <= 0.0 else Defs.COL_BELT_BODY_COLD
+	var edge: Color = Defs.machine_color(Defs.M_SPLITTER)
+	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.OUTLINE)
+	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), base)
+	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), edge, false, 2.0)
+	var sides: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
+	for index in sides.size():
+		var dir := Vector2(sides[index])
+		var next: bool = index == machine.next_out
+		var lane: Color = edge if next else Color(edge.r, edge.g, edge.b, 0.32)
+		draw_line(c + dir * 4.0, c + dir * 13.0, lane, 3.0 if next else 2.0)
+	draw_circle(c, 5.0, base.darkened(0.35))
+	draw_circle(c, 5.0, Defs.OUTLINE, false, 1.0)
+	for entry: Dictionary in machine.items:
+		draw_circle(c, 2.6, Defs.ITEM_COLORS[int(entry["type"])])
+		break
+	_draw_stall(machine, c)
 
 ## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
 ## reads as "come and get me" rather than as scenery.

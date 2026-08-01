@@ -15,7 +15,7 @@ const MIN_LOGICAL := Vector2(340.0, 520.0)
 const SLOT_GAP := 10.0
 const SLOT_MAX_W := 118.0
 const SLOT_MIN_W := 54.0
-const SLOT_H := 48.0
+const SLOT_H := 56.0
 
 var main
 var message_color: Color = Defs.COL_TEXT
@@ -302,6 +302,8 @@ func _draw_status() -> void:
 	_text(panel.position + Vector2(14, 70), "열 %d" % sim.heat, 19, Defs.COL_CORE)
 	_text_in(Rect2(panel.position + Vector2(96, 58), Vector2(120, 20)), "온기 %.1f칸" % sim.warm_radius, 15,
 		Defs.COL_MACHINE_EDGE, HORIZONTAL_ALIGNMENT_RIGHT)
+	_text(panel.position + Vector2(70, 70), "%+.0f/분" % sim.heat_rate, 13,
+		Defs.COL_CORE if sim.heat_rate > 0.0 else Defs.COL_TEXT_DIM)
 	_text_in(Rect2(panel.position + Vector2(96, 76), Vector2(120, 16)), "누적 %d" % sim.total_heat, 11,
 		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
 	# Copper and iron are materials, not currency, so they get their own row.
@@ -377,7 +379,10 @@ func _draw_palette() -> void:
 	# The hint sits above the hotbar in its own plate; it used to run through the
 	# cards and over their cost labels.
 	_draw_direction_chip(origin.y)
-	var hint: String = Defs.MACHINE_HINTS[Defs.BUILDABLE[main.selected_index]]
+	var selected: int = Defs.BUILDABLE[main.selected_index]
+	var hint: String = Defs.MACHINE_HINTS[selected]
+	if selected == Defs.M_EXCHANGER or selected == Defs.M_MINER:
+		hint += "   ·   " + Defs.ratio_hint()
 	var hint_w: float = _text_width(hint, 12) + 20.0
 	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 28.0, hint_w, 22.0)
 	_panel(hint_box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.88),
@@ -413,8 +418,10 @@ func _draw_palette() -> void:
 				cost_text += "%s %d  " % [Defs.ITEM_NAMES[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
 			if type == Defs.M_BELT:
 				cost_text += "· 전력 %.1f" % Defs.BELT_POWER_DRAW
-			_text(at + Vector2(11, 39), cost_text.strip_edges(), 11,
+			_text(at + Vector2(11, 37), cost_text.strip_edges(), 11,
 				Defs.COL_CORE if afford else Defs.COL_DANGER)
+			# The rate is what makes a machine plannable rather than a mystery.
+			_text(at + Vector2(11, 47), Defs.throughput_line(type), 9, Defs.COL_TEXT_DIM)
 		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Defs.machine_color(type))
 		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Color(0, 0, 0, 0.35), false, 1.0)
 

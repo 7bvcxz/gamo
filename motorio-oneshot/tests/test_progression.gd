@@ -105,6 +105,108 @@ func _run() -> void:
 	_assert(int(sim.machine_at(gen_cell).buffer[Defs.ITEM_ENERGY]) < fuel_before,
 		"a running generator burns its fuel")
 
+	# --- Splitters: the grammar for writing a ratio down ----------------------
+	# Without one you can only build 1:1 lines, so this is the piece that makes
+	# the published rates worth knowing.
+	var split_sim := Sim.new()
+	split_sim.setup(31337)
+	split_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	split_sim.note_resource_seen(Defs.ITEM_COPPER)
+	split_sim.stock[Defs.ITEM_COPPER] = 200
+	split_sim.stock[Defs.ITEM_CRYSTAL] = 200
+
+	var hub := Vector2i(20, 20)
+	for around: Vector2i in [hub, hub + Vector2i.RIGHT, hub + Vector2i.DOWN, hub + Vector2i.UP]:
+		split_sim.ore.erase(around)
+		split_sim.machines.erase(around)
+	_assert(split_sim.build(Defs.M_SPLITTER, hub, Vector2i.RIGHT), "a splitter goes down")
+	_assert(split_sim.build(Defs.M_BELT, hub + Vector2i.RIGHT, Vector2i.RIGHT), "east branch")
+	_assert(split_sim.build(Defs.M_BELT, hub + Vector2i.DOWN, Vector2i.DOWN), "south branch")
+
+	var east: Sim.Machine = split_sim.machine_at(hub + Vector2i.RIGHT)
+	var south: Sim.Machine = split_sim.machine_at(hub + Vector2i.DOWN)
+	var seen_east := 0
+	var seen_south := 0
+	for round_index in 10:
+		_assert(split_sim._push_into(hub, Defs.ITEM_CRYSTAL, hub + Vector2i.LEFT),
+			"the splitter accepts from behind")
+		for step in 30:
+			split_sim.tick(0.05)
+			if east.items.size() > 0:
+				seen_east += 1
+				east.items.clear()
+				break
+			if south.items.size() > 0:
+				seen_south += 1
+				south.items.clear()
+				break
+	_assert(seen_east + seen_south >= 8,
+		"nearly every item came out somewhere (%d)" % (seen_east + seen_south))
+	_assert(absf(float(seen_east - seen_south)) <= 2.0,
+		"and the split is even: %d east, %d south" % [seen_east, seen_south])
+	print("SPLITTER: %d east / %d south" % [seen_east, seen_south])
+
+	# A blocked branch must not stop the other one, or a splitter is just a fork.
+	south.items.clear()
+	for fill in Defs.BELT_CAPACITY:
+		south.items.append({"type": Defs.ITEM_CRYSTAL, "t": 0.1})
+	var got_east := 0
+	for round_index in 6:
+		split_sim._push_into(hub, Defs.ITEM_CRYSTAL, hub + Vector2i.LEFT)
+		for step in 30:
+			split_sim.tick(0.05)
+			if east.items.size() > 0:
+				got_east += 1
+				east.items.clear()
+				break
+	_assert(got_east >= 4,
+		"a backed-up branch is skipped rather than stalling the line (%d)" % got_east)
+	split_sim.free()
+
+	# --- The published numbers have to be the real ones ----------------------
+	_assert(Defs.throughput_line(Defs.M_MINER).find("6/분") >= 0,
+		"the miner advertises its real rate: %s" % Defs.throughput_line(Defs.M_MINER))
+	_assert(Defs.ratio_hint().find("4") >= 0,
+		"and the exchanger ratio is stated: %s" % Defs.ratio_hint())
+
+	# --- Purity: distance buys richness --------------------------------------
+	var grade_sim := Sim.new()
+	grade_sim.setup(20260801)
+	var near_best := 0
+	var far_best := 0
+	for cell: Vector2i in grade_sim.ore:
+		var distance: float = Vector2(cell - grade_sim.core_cell).length()
+		if distance < Defs.PURITY_RICH_RING:
+			near_best = maxi(near_best, grade_sim.purity_of(cell))
+		if distance >= Defs.PURITY_PURE_RING:
+			far_best = maxi(far_best, grade_sim.purity_of(cell))
+	_assert(near_best == Defs.PURITY_NORMAL, "seams beside the base are ordinary")
+	if far_best > 0:
+		_assert(far_best > near_best, "and the far ones are richer (%d vs %d)" % [far_best, near_best])
+	# A richer seam must actually mine faster, or the grade is decoration.
+	var plain := Vector2i(grade_sim.core_cell.x + 5, grade_sim.core_cell.y)
+	var rich := Vector2i(grade_sim.core_cell.x + int(Defs.PURITY_PURE_RING) + 2, grade_sim.core_cell.y)
+	grade_sim.ore[plain] = Defs.ITEM_CRYSTAL
+	grade_sim.ore[rich] = Defs.ITEM_CRYSTAL
+	grade_sim._assign_purity()
+	_assert(grade_sim.seam_period(rich) < grade_sim.seam_period(plain),
+		"a pure seam yields faster: %.1fs vs %.1fs" % [grade_sim.seam_period(rich), grade_sim.seam_period(plain)])
+	print("PURITY: %.1fs plain / %.1fs pure" % [grade_sim.seam_period(plain), grade_sim.seam_period(rich)])
+
+	# --- Full refund: tearing down must cost nothing --------------------------
+	grade_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	grade_sim.stock[Defs.ITEM_CRYSTAL] = 50
+	var before_stock: int = int(grade_sim.stock[Defs.ITEM_CRYSTAL])
+	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6)
+	grade_sim.ore.erase(spot)
+	grade_sim.machines.erase(spot)
+	_assert(grade_sim.build(Defs.M_EXCHANGER, spot, Vector2i.RIGHT), "an exchanger goes down")
+	_assert(int(grade_sim.stock[Defs.ITEM_CRYSTAL]) < before_stock, "and costs materials")
+	_assert(grade_sim.demolish(spot), "and comes back up")
+	_assert(int(grade_sim.stock[Defs.ITEM_CRYSTAL]) == before_stock,
+		"with every material returned, so rebuilding is free")
+	grade_sim.free()
+
 	sim.free()
 	if failures == 0:
 		print("PROGRESSION_TEST: PASS")

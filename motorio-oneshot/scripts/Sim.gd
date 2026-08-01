@@ -33,6 +33,10 @@ class Cat extends RefCounted:
 		return assigned != Vector2i(9999, 9999)
 
 class Machine extends RefCounted:
+	## Splitters only: which output to try first, and where the last item came
+	## from so it is never sent straight back.
+	var next_out: int = 0
+	var source := Vector2i(9999, 9999)
 	var type: int = Defs.M_BELT
 	var cell: Vector2i = Vector2i.ZERO
 	var dir: Vector2i = Vector2i.RIGHT
@@ -49,6 +53,8 @@ class Machine extends RefCounted:
 	var operated: bool = false
 
 var ore: Dictionary[Vector2i, int] = {}
+## Per-seam richness. Same key space as `ore`.
+var purity: Dictionary[Vector2i, int] = {}
 var machines: Dictionary[Vector2i, Machine] = {}
 var core_cell := Vector2i.ZERO
 
@@ -78,6 +84,11 @@ var unlocked: Dictionary[int, bool] = {}
 ## powered machines ask for. Neither is ever stored.
 var power_capacity: float = 0.0
 var power_draw: float = 0.0
+## Heat arriving at the core, averaged, in heat per minute. This is the score the
+## player is actually optimising, so it belongs on the panel next to the total.
+var heat_rate: float = 0.0
+var _heat_accum: float = 0.0
+var _rate_clock: float = 0.0
 ## Where the player is currently swinging, and how far through the swing.
 var hand_cell := Vector2i(9999, 9999)
 var hand_progress: float = 0.0
@@ -232,11 +243,26 @@ func _generate_ore(seed_value: int) -> void:
 		ore[core_cell + offset] = Defs.ITEM_COPPER
 	for offset: Vector2i in STARTER_LANE:
 		ore.erase(core_cell + offset)
+	_assign_purity()
 	# Two clear columns home: one from the frost row, one from the ember seam.
 	for step in range(1, 9):
 		ore.erase(core_cell + Vector2i(1, -step))
 	for step in range(1, 3):
 		ore.erase(core_cell + Vector2i(1, step))
+
+## Distance buys richness. The seams beside the base are ordinary; the ones out
+## past the frontier are worth the walk. This is what stops the map from being a
+## uniform field where one seam is as good as any other.
+func _assign_purity() -> void:
+	purity.clear()
+	for cell: Vector2i in ore:
+		var distance: float = _ring_distance(cell)
+		if distance >= Defs.PURITY_PURE_RING:
+			purity[cell] = Defs.PURITY_PURE
+		elif distance >= Defs.PURITY_RICH_RING:
+			purity[cell] = Defs.PURITY_RICH
+		else:
+			purity[cell] = Defs.PURITY_NORMAL
 
 ## Ore arrives in patches so the player reads them as destinations rather than
 ## noise, and so a single miner placement decision matters.
@@ -501,10 +527,11 @@ func demolish(cell: Vector2i) -> bool:
 	if machine == null or machine.type == Defs.M_CORE:
 		return false
 	machines.erase(cell)
-	# Refund most of the cost so experimenting with layouts stays cheap.
+	# Full refund. In a game with no combat and no fail state, the engine of the
+	# fun is the freedom to tear it down and build it better -- and a 25% tax on
+	# being wrong is exactly the thing that stops players experimenting.
 	for item_type: int in cost_of(machine.type):
-		var back: int = int(round(float(cost_of(machine.type)[item_type]) * 0.75))
-		stock[item_type] = int(stock.get(item_type, 0)) + back
+		stock[item_type] = int(stock.get(item_type, 0)) + int(cost_of(machine.type)[item_type])
 	machine_removed.emit(cell, machine.type)
 	return true
 
@@ -528,7 +555,20 @@ func tick(delta: float) -> void:
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
 			Defs.M_EXCHANGER: _tick_exchanger(machine, delta * speed)
 			Defs.M_GENERATOR: _tick_generator(machine, delta)
+			Defs.M_SPLITTER: _tick_splitter(machine, delta * speed)
 	_refresh_radius()
+	_tick_rate(delta)
+
+## A slow average rather than an instant reading: heat arrives in lumps of five,
+## and a number that jumps between 0 and 300 tells the player nothing.
+func _tick_rate(delta: float) -> void:
+	_rate_clock += delta
+	if _rate_clock < 1.0:
+		return
+	var per_minute: float = _heat_accum * 60.0 / _rate_clock
+	heat_rate = lerpf(heat_rate, per_minute, 0.35)
+	_heat_accum = 0.0
+	_rate_clock = 0.0
 
 ## Capacity is whatever the fed generators sustain; draw is what the powered
 ## machines ask for. Recomputed each tick so building or losing either is felt
@@ -716,7 +756,7 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 		machine.stalled = false
 		return
 	var item_type: int = ore.get(machine.cell, Defs.ITEM_CRYSTAL)
-	var period: float = mine_period(item_type)
+	var period: float = seam_period(machine.cell)
 	machine.progress += delta
 	if machine.progress < period:
 		return
@@ -733,6 +773,20 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 ## more per unit, so the same miner produces fewer of them.
 func mine_period(item_type: int) -> float:
 	return Defs.COPPER_PERIOD if item_type == Defs.ITEM_COPPER else Defs.MINER_PERIOD
+
+## Node purity, keyed by distance from the core. Rich seams sit further out, so
+## "walk further for a better node" becomes a real decision instead of every
+## seam being interchangeable. Fixed at generation like everything else, so the
+## map is the level design.
+func purity_of(cell: Vector2i) -> int:
+	if not ore.has(cell):
+		return Defs.PURITY_NORMAL
+	return int(purity.get(cell, Defs.PURITY_NORMAL))
+
+## Seconds per item at this seam, purity included.
+func seam_period(cell: Vector2i) -> float:
+	var base: float = mine_period(int(ore.get(cell, Defs.ITEM_CRYSTAL)))
+	return base / Defs.PURITY_RATE[purity_of(cell)]
 
 ## Output goes onto a belt if one is facing, and onto the floor otherwise. The
 ## floor is not a failure state -- it is how the game works before belts exist,
@@ -793,6 +847,37 @@ func _tick_exchanger(machine: Machine, delta: float) -> void:
 	machine.progress = 0.0
 	machine.flash = 0.5
 
+## Round-robin across every neighbour that will actually accept the item, which
+## is what lets a player write a ratio down and then build it. Blocked outputs
+## are skipped rather than stalling the line, so one backed-up branch does not
+## stop the others -- that behaviour is the whole reason a splitter is a tool
+## and not just a fork in a pipe.
+func _tick_splitter(machine: Machine, delta: float) -> void:
+	if machine.items.is_empty():
+		machine.stalled = false
+		return
+	machine.progress += delta
+	if machine.progress < Defs.SPLITTER_PERIOD:
+		return
+	var item_type: int = int(machine.items[0]["type"])
+	var sides: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
+	for attempt in sides.size():
+		var index: int = (machine.next_out + attempt) % sides.size()
+		var target: Vector2i = machine.cell + sides[index]
+		# Never push back where it came from, or two splitters face to face
+		# would bounce one item between them forever.
+		if target == machine.source:
+			continue
+		if _push_into(target, item_type, machine.cell) or drop_item(target, item_type):
+			machine.items.remove_at(0)
+			machine.next_out = (index + 1) % sides.size()
+			machine.progress = 0.0
+			machine.flash = 0.25
+			machine.stalled = false
+			return
+	machine.progress = Defs.SPLITTER_PERIOD
+	machine.stalled = true
+
 ## A generator burns one energy crystal every ten seconds. `operated` doubles as
 ## "currently supplying", which is what _recount_power reads.
 func _tick_generator(machine: Machine, delta: float) -> void:
@@ -842,6 +927,13 @@ func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 
 			target.buffer[item_type] = held + 1
 			target.flash = 0.25
 			return true
+		Defs.M_SPLITTER:
+			if target.items.size() >= Defs.SPLITTER_CAPACITY:
+				return false
+			target.items.append({"type": item_type, "t": 0.0})
+			target.source = from
+			target.flash = 0.2
+			return true
 		Defs.M_GENERATOR:
 			if item_type != Defs.ITEM_ENERGY:
 				return false
@@ -860,6 +952,7 @@ func _deliver(item_type: int, cell: Vector2i) -> void:
 	var value: int = Defs.ITEM_VALUES[item_type]
 	heat += value
 	total_heat += value
+	_heat_accum += float(value)
 	stock[item_type] = int(stock.get(item_type, 0)) + 1
 	delivered[item_type] = int(delivered.get(item_type, 0)) + 1
 	var core: Machine = machines.get(core_cell, null)
