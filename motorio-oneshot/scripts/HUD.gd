@@ -430,7 +430,7 @@ func _draw_palette() -> void:
 	# On a phone the keyboard legend is noise; the pad already carries the verbs.
 	if main.touch == null or not main.touch.visible:
 		_text_in(Rect2(size.x - 460.0 - MARGIN, MARGIN + 2.0, 460.0, 16),
-			"C 채굴   Z 짧게 설치 · 길게 회전   X 회수   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+			"C 채굴   Z 설치   X 회수   R 회전   F 제법   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.

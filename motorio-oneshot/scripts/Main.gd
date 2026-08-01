@@ -528,6 +528,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		build_rotated = false
 		get_viewport().set_input_as_handled()
 		return
+	if event.is_action_pressed("recipe"):
+		_cycle_recipe()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("demolish"):
 		_try_demolish()
 		get_viewport().set_input_as_handled()
@@ -666,6 +670,26 @@ func _try_build() -> void:
 		fx.burst(at, Defs.machine_color(type), 8)
 		shake = maxf(shake, Defs.FX_MEDIUM)
 		audio.call("play", "build")
+
+## Switching a machine to its other recipe. Per machine rather than global, so a
+## player with spare copper on one line and none on another can run both.
+func _cycle_recipe() -> void:
+	if player.locked:
+		return
+	var cell: Vector2i = player.facing_cell()
+	var machine = sim.machine_at(cell)
+	if machine == null or machine.type != Defs.M_EXCHANGER:
+		return
+	if not sim.recipe_unlocked(Defs.RECIPE_ALLOY):
+		_notify("구리광석을 손에 넣으면 다른 제법이 열립니다", Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+		return
+	var picked: int = sim.cycle_recipe(cell)
+	if picked < 0:
+		return
+	_notify("%s 제법 · %s" % [Defs.RECIPES[picked]["name"], Defs.recipe_line(picked)], Defs.COL_CORE)
+	fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+	audio.call("play", "select")
 
 func _try_demolish() -> void:
 	if player.locked:

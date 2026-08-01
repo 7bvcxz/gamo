@@ -110,6 +110,40 @@ const HAND_MINE_PERIOD := 10.0
 ## Crystal in, energy out. Two-to-one at five seconds means one exchanger keeps
 ## up with four miners, so miners stay the bottleneck rather than the converter.
 const CRYSTAL_COST_ENERGY := 2
+
+## --- Exchanger recipes --------------------------------------------------------
+## The device this genre uses to turn efficiency from an answer into a choice.
+## Neither of these is a straight upgrade: the second stretches crystal much
+## further and produces more, but it eats copper -- and copper is also what
+## generators, belts and splitters are made of, and it mines at half the rate.
+## So the right recipe depends on which resource your map and your factory have
+## spare, which is exactly the question a dominant strategy would erase.
+const RECIPE_PLAIN := 0
+const RECIPE_ALLOY := 1
+const RECIPES := [
+	{"in": {ITEM_CRYSTAL: 2}, "out": 1, "period": 5.0, "name": "기본"},
+	{"in": {ITEM_CRYSTAL: 2, ITEM_COPPER: 1}, "out": 3, "period": 10.0, "name": "구리 촉매"},
+]
+
+## Recipes open the same way machines do: by holding the resource once.
+const RECIPE_UNLOCK_ITEM := [-1, ITEM_COPPER]
+
+static func recipe_line(index: int) -> String:
+	var recipe: Dictionary = RECIPES[index]
+	var parts: Array[String] = []
+	for item_type: int in recipe["in"]:
+		parts.append("%s %d" % [ITEM_SHORT[item_type], int(recipe["in"][item_type])])
+	return "%s → 에너지 %d · %.0f초" % [" + ".join(parts), int(recipe["out"]), float(recipe["period"])]
+
+## Energy per minute for a recipe, and crystal spent per energy produced. The
+## second number is the one that makes the trade legible.
+static func recipe_rate(index: int) -> float:
+	var recipe: Dictionary = RECIPES[index]
+	return float(recipe["out"]) * per_minute(float(recipe["period"]))
+
+static func recipe_crystal_cost(index: int) -> float:
+	var recipe: Dictionary = RECIPES[index]
+	return float(recipe["in"].get(ITEM_CRYSTAL, 0)) / float(recipe["out"])
 const EXCHANGER_PERIOD := 5.0
 const COPPER_PERIOD := 20.0
 

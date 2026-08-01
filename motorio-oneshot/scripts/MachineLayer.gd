@@ -144,6 +144,11 @@ func _draw_focus_readout() -> void:
 		line = Defs.throughput_line(machine.type)
 		# A miner reports what this particular seam gives it, not the generic
 		# rate: the whole point of purity is that seams differ.
+		if machine.type == Defs.M_EXCHANGER:
+			line = "%s · %s" % [Defs.RECIPES[machine.recipe]["name"],
+				Defs.recipe_line(machine.recipe)]
+			if sim.recipe_unlocked(Defs.RECIPE_ALLOY):
+				name += "   F 제법 전환"
 		if machine.type == Defs.M_MINER and sim.ore.has(focus_cell):
 			var grade: int = sim.purity_of(focus_cell)
 			line = "%s 광맥 · %.0f/분" % [Defs.PURITY_NAMES[grade],
@@ -464,6 +469,11 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
 		Defs.COL_BELT_RIM.lerp(body, frost * 0.7))
 	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 9.0, Defs.COL_BRASS, 2.2)
+	# A copper stud marks the alloy recipe, so two exchangers side by side on
+	# different recipes are told apart without selecting either.
+	if machine.recipe != Defs.RECIPE_PLAIN:
+		draw_circle(c + Vector2(0, -9), 2.4, Defs.ITEM_COLORS[Defs.ITEM_COPPER])
+		draw_circle(c + Vector2(0, -9), 2.4, Defs.OUTLINE, false, 1.0)
 	_draw_stall(machine, c)
 	# One pip row for the one input the recipe actually takes.
 	_draw_pip(c + Vector2(0, 13), Defs.ITEM_CRYSTAL, held)

@@ -252,6 +252,52 @@ func _run() -> void:
 		Defs.MINER_POWER_DRAW, Defs.GENERATOR_OUTPUT / Defs.MINER_POWER_DRAW])
 	grid.free()
 
+	# --- Alternate recipe: efficiency becomes a choice ------------------------
+	# The test that matters is that neither recipe wins outright. If one is
+	# strictly better the choice is decoration.
+	var plain_rate: float = Defs.recipe_rate(Defs.RECIPE_PLAIN)
+	var alloy_rate: float = Defs.recipe_rate(Defs.RECIPE_ALLOY)
+	var plain_cost: float = Defs.recipe_crystal_cost(Defs.RECIPE_PLAIN)
+	var alloy_cost: float = Defs.recipe_crystal_cost(Defs.RECIPE_ALLOY)
+	_assert(alloy_cost < plain_cost,
+		"the alloy recipe stretches crystal further (%.2f vs %.2f per energy)" % [alloy_cost, plain_cost])
+	_assert(Defs.RECIPES[Defs.RECIPE_ALLOY]["in"].has(Defs.ITEM_COPPER),
+		"and pays for it with copper, which is also what machines are made of")
+	_assert(Defs.COPPER_PERIOD > Defs.MINER_PERIOD,
+		"copper being slower to mine is what makes that a real cost")
+	print("RECIPES: 기본 %.0f/분 @ %.2f수정, 촉매 %.0f/분 @ %.2f수정" % [
+		plain_rate, plain_cost, alloy_rate, alloy_cost])
+
+	var rec := Sim.new()
+	rec.setup(5150)
+	rec.note_resource_seen(Defs.ITEM_CRYSTAL)
+	rec.stock[Defs.ITEM_CRYSTAL] = 100
+	var ex := Vector2i(rec.core_cell.x + 7, rec.core_cell.y + 7)
+	rec.ore.erase(ex)
+	_assert(rec.build(Defs.M_EXCHANGER, ex, Vector2i.RIGHT), "an exchanger goes down")
+	_assert(not rec.recipe_unlocked(Defs.RECIPE_ALLOY), "the second recipe starts locked")
+	_assert(rec.cycle_recipe(ex) == Defs.RECIPE_PLAIN, "and cycling does nothing while locked")
+	_assert(not rec._push_into(ex, Defs.ITEM_COPPER, ex + Vector2i.UP),
+		"a plain exchanger refuses copper it has no use for")
+
+	rec.note_resource_seen(Defs.ITEM_COPPER)
+	_assert(rec.recipe_unlocked(Defs.RECIPE_ALLOY), "holding copper opens the second recipe")
+	_assert(rec.cycle_recipe(ex) == Defs.RECIPE_ALLOY, "and the machine can switch to it")
+	_assert(rec._push_into(ex, Defs.ITEM_COPPER, ex + Vector2i.UP),
+		"which then accepts copper")
+
+	# The batch of three must not be silently destroyed when the output is full.
+	var machine_ref: Sim.Machine = rec.machine_at(ex)
+	machine_ref.buffer[Defs.ITEM_CRYSTAL] = 2
+	machine_ref.buffer[Defs.ITEM_COPPER] = 1
+	for around: Vector2i in [ex + Vector2i.RIGHT]:
+		rec.ore[around] = Defs.ITEM_CRYSTAL      # block the output entirely
+	for step in int(float(Defs.RECIPES[Defs.RECIPE_ALLOY]["period"]) / 0.1) + 8:
+		rec.tick(0.1)
+	_assert(int(machine_ref.buffer.get(Defs.ITEM_CRYSTAL, 0)) == 2,
+		"a blocked alloy batch keeps its inputs rather than eating them")
+	rec.free()
+
 	sim.free()
 	if failures == 0:
 		print("PROGRESSION_TEST: PASS")
