@@ -144,6 +144,9 @@ func _draw_focus_readout() -> void:
 		line = Defs.throughput_line(machine.type)
 		# A miner reports what this particular seam gives it, not the generic
 		# rate: the whole point of purity is that seams differ.
+		if machine.type == Defs.M_BELT:
+			line = "%s · %.0f배 속도 · F로 등급 변경" % [Defs.BELT_TIERS[machine.tier]["name"],
+				Defs.BELT_TIERS[machine.tier]["speed"]]
 		if machine.type == Defs.M_EXCHANGER:
 			line = "%s · %s" % [Defs.RECIPES[machine.recipe]["name"],
 				Defs.recipe_line(machine.recipe)]
@@ -319,17 +322,25 @@ func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.OUTLINE)
 	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), base)
 	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), edge, false, 2.0)
-	var sides: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
+	# Only the two lanes it actually feeds, and the one that is next is bright, so
+	# the alternation is visible rather than inferred.
+	var sides: Array[Vector2i] = sim.splitter_outputs(machine)
 	for index in sides.size():
 		var dir := Vector2(sides[index])
 		var next: bool = index == machine.next_out
 		var lane: Color = edge if next else Color(edge.r, edge.g, edge.b, 0.32)
 		draw_line(c + dir * 4.0, c + dir * 13.0, lane, 3.0 if next else 2.0)
+	# And a dim stub showing where input is expected.
+	draw_line(c - Vector2(machine.dir) * 13.0, c - Vector2(machine.dir) * 5.0,
+		Color(edge.r, edge.g, edge.b, 0.20), 2.0)
 	draw_circle(c, 5.0, base.darkened(0.35))
 	draw_circle(c, 5.0, Defs.OUTLINE, false, 1.0)
 	for entry: Dictionary in machine.items:
 		draw_circle(c, 2.6, Defs.ITEM_COLORS[int(entry["type"])])
 		break
+	# Grade pips on the rim, so an upgraded belt is legible without selecting it.
+	for index in machine.tier:
+		draw_circle(px + Vector2(6.0 + float(index) * 5.0, tile - 4.0), 1.7, Defs.COL_BELT_RIM)
 	_draw_stall(machine, c)
 
 ## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
@@ -516,8 +527,9 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var dir := Vector2(machine.dir)
 	var perp := Vector2(-dir.y, dir.x)
 	# Scrolling chevrons: the cheapest possible "this is moving" signal.
+	var grade: float = float(Defs.BELT_TIERS[machine.tier]["speed"])
 	for index in 2:
-		var offset: float = fmod(pulse * Defs.BELT_SPEED * 0.5 + float(index) * 0.5, 1.0)
+		var offset: float = fmod(pulse * Defs.BELT_SPEED * grade * 0.5 + float(index) * 0.5, 1.0)
 		var along: float = (offset - 0.5) * tile
 		var head: Vector2 = c + dir * (along + 5.0)
 		var tail: Vector2 = c + dir * (along - 2.0)

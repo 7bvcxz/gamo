@@ -115,15 +115,22 @@ func _run() -> void:
 	split_sim.stock[Defs.ITEM_COPPER] = 200
 	split_sim.stock[Defs.ITEM_CRYSTAL] = 200
 
+	# One into two: a splitter facing east splits north and south, and takes its
+	# input from the west. R turns that axis.
 	var hub := Vector2i(20, 20)
-	for around: Vector2i in [hub, hub + Vector2i.RIGHT, hub + Vector2i.DOWN, hub + Vector2i.UP]:
+	for around: Vector2i in [hub, hub + Vector2i.RIGHT, hub + Vector2i.DOWN,
+			hub + Vector2i.UP, hub + Vector2i.LEFT]:
 		split_sim.ore.erase(around)
 		split_sim.machines.erase(around)
 	_assert(split_sim.build(Defs.M_SPLITTER, hub, Vector2i.RIGHT), "a splitter goes down")
-	_assert(split_sim.build(Defs.M_BELT, hub + Vector2i.RIGHT, Vector2i.RIGHT), "east branch")
+	var outs: Array[Vector2i] = split_sim.splitter_outputs(split_sim.machine_at(hub))
+	_assert(outs.size() == 2, "it has exactly two outputs")
+	_assert(not outs.has(Vector2i.RIGHT) and not outs.has(Vector2i.LEFT),
+		"and they are perpendicular to the way it faces")
+	_assert(split_sim.build(Defs.M_BELT, hub + Vector2i.UP, Vector2i.UP), "north branch")
 	_assert(split_sim.build(Defs.M_BELT, hub + Vector2i.DOWN, Vector2i.DOWN), "south branch")
 
-	var east: Sim.Machine = split_sim.machine_at(hub + Vector2i.RIGHT)
+	var east: Sim.Machine = split_sim.machine_at(hub + Vector2i.UP)
 	var south: Sim.Machine = split_sim.machine_at(hub + Vector2i.DOWN)
 	var seen_east := 0
 	var seen_south := 0
@@ -143,8 +150,8 @@ func _run() -> void:
 	_assert(seen_east + seen_south >= 8,
 		"nearly every item came out somewhere (%d)" % (seen_east + seen_south))
 	_assert(absf(float(seen_east - seen_south)) <= 2.0,
-		"and the split is even: %d east, %d south" % [seen_east, seen_south])
-	print("SPLITTER: %d east / %d south" % [seen_east, seen_south])
+		"and the split is even: %d north, %d south" % [seen_east, seen_south])
+	print("SPLITTER: %d north / %d south" % [seen_east, seen_south])
 
 	# A blocked branch must not stop the other one, or a splitter is just a fork.
 	south.items.clear()
@@ -297,6 +304,38 @@ func _run() -> void:
 	_assert(int(machine_ref.buffer.get(Defs.ITEM_CRYSTAL, 0)) == 2,
 		"a blocked alloy batch keeps its inputs rather than eating them")
 	rec.free()
+
+	# --- Belt grades are a convenience, never a gate --------------------------
+	_assert(Defs.BELT_TIERS.size() == 3, "three grades, no more")
+	_assert(is_equal_approx(Defs.belt_speed(0), Defs.BELT_SPEED), "grade 1 is the baseline")
+	_assert(is_equal_approx(Defs.belt_speed(1), Defs.BELT_SPEED * 3.0), "grade 2 is three times")
+	_assert(is_equal_approx(Defs.belt_speed(2), Defs.BELT_SPEED * 10.0), "grade 3 is ten times")
+	# The point of the design: even the slowest belt outruns the best possible
+	# miner by a wide margin, so nobody is ever forced to upgrade a working line.
+	var belt_rate: float = Defs.BELT_SPEED / 0.34 * 60.0
+	var fastest_miner: float = Defs.per_minute(Defs.MINER_PERIOD / Defs.PURITY_RATE[Defs.PURITY_PURE])
+	_assert(belt_rate > fastest_miner * 20.0,
+		"grade 1 carries %.0f/min against a best miner's %.0f, so it is never the bottleneck"
+			% [belt_rate, fastest_miner])
+
+	var belt_sim := Sim.new()
+	belt_sim.setup(777888)
+	belt_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
+	belt_sim.note_resource_seen(Defs.ITEM_COPPER)
+	belt_sim.stock[Defs.ITEM_COPPER] = 100
+	var lane := Vector2i(belt_sim.core_cell.x + 9, belt_sim.core_cell.y + 9)
+	belt_sim.ore.erase(lane)
+	_assert(belt_sim.build(Defs.M_BELT, lane, Vector2i.RIGHT), "a belt goes down at grade 1")
+	_assert(belt_sim.machine_at(lane).tier == 0, "starting at the base grade")
+	var copper_before: int = int(belt_sim.stock[Defs.ITEM_COPPER])
+	_assert(belt_sim.cycle_belt_tier(lane) == 1, "F upgrades it")
+	_assert(int(belt_sim.stock[Defs.ITEM_COPPER]) < copper_before, "and charges the difference")
+	_assert(belt_sim.cycle_belt_tier(lane) == 2, "and again")
+	_assert(belt_sim.cycle_belt_tier(lane) == 0, "then wraps back to the base grade")
+	belt_sim.stock[Defs.ITEM_COPPER] = 0
+	_assert(belt_sim.cycle_belt_tier(lane) < 0, "an upgrade you cannot afford is refused")
+	print("BELTS: %.0f/min at grade 1 vs a pure seam's %.0f/min" % [belt_rate, fastest_miner])
+	belt_sim.free()
 
 	sim.free()
 	if failures == 0:

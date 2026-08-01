@@ -11,7 +11,11 @@ class_name TouchControls
 const JOYSTICK_RADIUS := 64.0
 const KNOB_RADIUS := 25.0
 const BUTTON_RADIUS := 28.0
-const BUTTON_LABELS := ["Run", "Z", "X"]
+## Mine got its own button rather than sharing one. It is the first verb the
+## game teaches and it is a hold, not a tap, so overloading it onto Z would have
+## made both worse -- and until now a phone player simply could not hand-mine,
+## which is where the whole game now starts.
+const BUTTON_LABELS := ["Run", "Z", "X", "캐기"]
 const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
 var main_controller
@@ -88,9 +92,13 @@ func _update_layout() -> void:
 	# overlap and the first match in draw order silently wins the tap.
 	var gap: float = button_hit_radius() * 2.0 + 4.0
 	var base := Vector2(edge + radius, view.y - edge - radius)
+	# A 2x2 block. Adding a fourth button as a third row grew the pad upward and
+	# shoved the hotbar over the status panel at large UI scales, so the grid is
+	# what keeps the pad exactly as tall as it was with three.
 	button_centers.append(base + Vector2(0.0, -gap))              # Run
-	button_centers.append(base + Vector2(gap, -gap * 0.30))       # Z
+	button_centers.append(base + Vector2(gap, 0.0))               # Z
 	button_centers.append(base)                                   # X
+	button_centers.append(base + Vector2(gap, -gap))              # 캐기
 	queue_redraw()
 
 ## How far up the screen the pad reaches, so the HUD can keep its own controls
@@ -197,6 +205,9 @@ func snap_to_eight_directions(direction: Vector2) -> Vector2:
 func _press_button(index: int, pressed: bool) -> void:
 	if player != null and index == 0:
 		player.touch_sprint = pressed
+	# Mining is held, so this button reports both edges rather than only presses.
+	if index == 3 and main_controller != null:
+		main_controller.call("touch_mine", pressed)
 	if main_controller == null or not pressed:
 		return
 	match index:
@@ -210,6 +221,8 @@ func release_all() -> void:
 	queue_redraw()
 
 func _reset_inputs() -> void:
+	if main_controller != null:
+		main_controller.call("touch_mine", false)
 	joystick_touch = -1
 	joystick_knob = joystick_center
 	button_touch.clear()
@@ -245,7 +258,7 @@ func _draw_action_button(index: int) -> void:
 	draw_arc(at, radius, 0.0, TAU, 32, Color(0.85, 0.65, 0.30, 0.85 if held else 0.55), 2.0 * _effective)
 	var label: String = BUTTON_LABELS[index]
 	var font: Font = UIFont.FONT
-	var glyph: int = int(round(16.0 * _effective))
+	var glyph: int = int(round((12.0 if label.length() > 2 else 16.0) * _effective))
 	var width: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, glyph).x
 	draw_string(font, at + Vector2(-width * 0.5, 6.0 * _effective), label, HORIZONTAL_ALIGNMENT_LEFT,
 		-1, glyph, Color(0.95, 0.98, 0.96, 0.92))

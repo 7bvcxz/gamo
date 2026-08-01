@@ -39,6 +39,8 @@ class Machine extends RefCounted:
 	var source := Vector2i(9999, 9999)
 	## Exchangers only: which recipe this one is set to.
 	var recipe: int = Defs.RECIPE_PLAIN
+	## Belts only: which speed grade this one is.
+	var tier: int = 0
 	var type: int = Defs.M_BELT
 	var cell: Vector2i = Vector2i.ZERO
 	var dir: Vector2i = Vector2i.RIGHT
@@ -115,6 +117,7 @@ func to_save() -> Dictionary:
 			"dx": machine.dir.x, "dy": machine.dir.y,
 			"progress": machine.progress, "items": machine.items.duplicate(true),
 			"buffer": machine.buffer.duplicate(true), "recipe": machine.recipe,
+			"tier": machine.tier,
 		})
 	var cat_rows: Array = []
 	for cat: Cat in cats:
@@ -177,6 +180,7 @@ func from_save(data: Dictionary) -> void:
 		machine.progress = float(row.get("progress", 0.0))
 		machine.buffer = (row.get("buffer", {}) as Dictionary).duplicate(true)
 		machine.recipe = int(row.get("recipe", Defs.RECIPE_PLAIN))
+		machine.tier = int(row.get("tier", 0))
 		for item: Dictionary in row.get("items", []):
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
 		machines[cell] = machine
@@ -847,7 +851,7 @@ func drop_item(cell: Vector2i, item_type: int) -> bool:
 	return true
 
 func _tick_belt(machine: Machine, delta: float) -> void:
-	var step: float = Defs.BELT_SPEED * delta
+	var step: float = Defs.belt_speed(machine.tier) * delta
 	for index in range(machine.items.size()):
 		var item: Dictionary = machine.items[index]
 		var limit: float = 1.0
@@ -902,6 +906,24 @@ func recipe_unlocked(index: int) -> bool:
 		return true
 	return bool(unlocked_recipes.get(index, false))
 
+## Upgrades a belt to the next grade, charging the difference. Grades are a
+## convenience rather than a requirement -- grade 1 already outruns every miner
+## in the game by a wide margin -- so this is an option the player can ignore.
+## Returns the new tier, or -1.
+func cycle_belt_tier(cell: Vector2i) -> int:
+	var machine: Machine = machines.get(cell, null)
+	if machine == null or machine.type != Defs.M_BELT:
+		return -1
+	var wanted: int = (machine.tier + 1) % Defs.BELT_TIERS.size()
+	var have: int = int(stock.get(Defs.ITEM_COPPER, 0))
+	var delta_cost: int = int(Defs.BELT_TIERS[wanted]["cost"]) - int(Defs.BELT_TIERS[machine.tier]["cost"])
+	if delta_cost > 0 and have < delta_cost:
+		return -1
+	stock[Defs.ITEM_COPPER] = have - delta_cost
+	machine.tier = wanted
+	machine.flash = 0.4
+	return wanted
+
 ## Cycles a machine to its next available recipe. Returns the new index, or -1.
 func cycle_recipe(cell: Vector2i) -> int:
 	var machine: Machine = machines.get(cell, null)
@@ -928,7 +950,11 @@ func _tick_splitter(machine: Machine, delta: float) -> void:
 	if machine.progress < Defs.SPLITTER_PERIOD:
 		return
 	var item_type: int = int(machine.items[0]["type"])
-	var sides: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]
+	# A one-into-two splitter, not a four-way hub. Two outputs is the smallest
+	# thing that can express a ratio, chains cleanly into 1:4 and 1:8, and stays
+	# readable on a 32px tile -- a four-way version mostly produced lines the
+	# player had not asked for.
+	var sides: Array[Vector2i] = splitter_outputs(machine)
 	for attempt in sides.size():
 		var index: int = (machine.next_out + attempt) % sides.size()
 		var target: Vector2i = machine.cell + sides[index]
@@ -945,6 +971,13 @@ func _tick_splitter(machine: Machine, delta: float) -> void:
 			return
 	machine.progress = Defs.SPLITTER_PERIOD
 	machine.stalled = true
+
+## The two cells a splitter feeds: the pair perpendicular to the way it faces, so
+## R turns the split axis and the input side stays behind it.
+func splitter_outputs(machine: Machine) -> Array[Vector2i]:
+	var dir: Vector2i = machine.dir
+	var perp := Vector2i(-dir.y, dir.x)
+	return [perp, -perp]
 
 ## A generator burns one energy crystal every ten seconds. `operated` doubles as
 ## "currently supplying", which is what _recount_power reads.

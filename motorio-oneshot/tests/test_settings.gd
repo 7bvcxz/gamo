@@ -149,7 +149,10 @@ func _run() -> void:
 	# --- The pad scales with it -------------------------------------------------
 	main.touch.set_pad_scale(1.0)
 	var centres: Array[Vector2] = main.touch.button_centers
-	_assert(centres.size() == 3, "the pad lays out three action buttons")
+	_assert(centres.size() == 4, "the pad lays out four action buttons")
+	# Mining is the first verb the game teaches, and for a while the pad had no
+	# way to do it at all.
+	_assert(main.touch.BUTTON_LABELS.has("캐기"), "one of them mines")
 	var hit: float = main.touch.button_hit_radius()
 	for a in centres.size():
 		for b in range(a + 1, centres.size()):

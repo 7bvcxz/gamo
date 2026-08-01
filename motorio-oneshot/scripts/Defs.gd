@@ -168,9 +168,9 @@ static func throughput_line(type: int) -> String:
 		M_GENERATOR:
 			return "에너지 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
 		M_BELT:
-			return "최대 %.0f/분 · 전력 %.1f" % [BELT_SPEED / 0.34 * 60.0, BELT_POWER_DRAW]
+			return "%.0f/분 · 전력 %.1f · F로 등급 변경" % [BELT_SPEED / 0.34 * 60.0, BELT_POWER_DRAW]
 		M_SPLITTER:
-			return "들어온 것을 출구에 번갈아 나눔"
+			return "한 줄을 두 줄로 · R로 나뉘는 축 회전"
 		M_CORE:
 			return "에너지결정 1개 = 열 %d" % ITEM_VALUES[ITEM_ENERGY]
 	return ""
@@ -264,6 +264,21 @@ const START_HEAT := 30
 const MINER_PERIOD := 10.0
 const FURNACE_PERIOD := 2.2
 const BELT_SPEED := 2.6           # tiles per second
+
+## --- Belt grades --------------------------------------------------------------
+## Deliberately not a throughput gate. Grade 1 already carries far more than
+## every miner in the game put together, so grades buy latency -- how fast a
+## thing you just made reaches the core -- and nothing else. That makes them a
+## convenience the player may ignore entirely, which is the intent: this game
+## should never make you rebuild a working line to keep up.
+const BELT_TIERS := [
+	{"name": "벨트", "speed": 1.0, "cost": 3},
+	{"name": "고속 벨트", "speed": 3.0, "cost": 9},
+	{"name": "초고속 벨트", "speed": 10.0, "cost": 30},
+]
+
+static func belt_speed(tier: int) -> float:
+	return BELT_SPEED * float(BELT_TIERS[clampi(tier, 0, BELT_TIERS.size() - 1)]["speed"])
 const BELT_CAPACITY := 3
 ## A splitter holds a little so a momentary block on one branch does not stall
 ## the line feeding it.

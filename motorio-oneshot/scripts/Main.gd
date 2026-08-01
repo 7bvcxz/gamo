@@ -622,6 +622,10 @@ func touch_primary() -> void:
 			# place a cat, which makes the game unplayable on a phone.
 			_primary_action()
 
+## The pad's mine button. Held rather than tapped, so it forwards both edges.
+func touch_mine(pressed: bool) -> void:
+	mine_held = pressed and state == State.PLAY
+
 func touch_secondary() -> void:
 	match state:
 		State.PLAY:
@@ -678,7 +682,20 @@ func _cycle_recipe() -> void:
 		return
 	var cell: Vector2i = player.facing_cell()
 	var machine = sim.machine_at(cell)
-	if machine == null or machine.type != Defs.M_EXCHANGER:
+	if machine == null:
+		return
+	if machine.type == Defs.M_BELT:
+		var tier: int = sim.cycle_belt_tier(cell)
+		if tier < 0:
+			_notify("구리광석이 부족합니다", Defs.COL_DANGER)
+			audio.call("play", "deny")
+			return
+		_notify("%s · %.0f배 속도" % [Defs.BELT_TIERS[tier]["name"], Defs.BELT_TIERS[tier]["speed"]],
+			Defs.COL_CORE)
+		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, Defs.RING_MEDIUM)
+		audio.call("play", "build")
+		return
+	if machine.type != Defs.M_EXCHANGER:
 		return
 	if not sim.recipe_unlocked(Defs.RECIPE_ALLOY):
 		_notify("구리광석을 손에 넣으면 다른 제법이 열립니다", Defs.COL_TEXT_DIM)
