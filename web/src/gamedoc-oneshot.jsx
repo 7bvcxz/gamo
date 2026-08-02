@@ -5,6 +5,7 @@ import { DocShell } from './DocShell.jsx';
 import { Identity } from './pages/oneshot/Identity.jsx';
 import { Economy } from './pages/oneshot/Economy.jsx';
 import { Automation } from './pages/oneshot/Automation.jsx';
+import { DevTools } from './pages/oneshot/DevTools.jsx';
 import { OneShotLevelDesign } from './pages/OneShotLevelDesign.jsx';
 import { OneShotTodo } from './pages/OneShotTodo.jsx';
 import { OneShotReleases } from './pages/OneShotReleases.jsx';
@@ -31,6 +32,10 @@ const NAV = [
       { id: 'todo', label: 'Todo', render: () => <OneShotTodo /> },
       { id: 'releases', label: 'Releases', render: () => <OneShotReleases /> },
     ],
+  },
+  {
+    group: '개발',
+    items: [{ id: 'devtools', label: '개발 도구', render: () => <DevTools /> }],
   },
   {
     group: '그래픽',

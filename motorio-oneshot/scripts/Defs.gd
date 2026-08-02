@@ -212,6 +212,19 @@ const ATTR_NAMES := {ATTR_STRUCTURE: "구조물"}
 ## How much of a tile the player's body occupies, used for collision.
 const PLAYER_RADIUS := 9.0
 
+# --- Debug ---------------------------------------------------------------------
+## Time multipliers for testing. A day is three minutes and the progression is
+## measured in days, so watching a run reach copper honestly takes ten minutes of
+## real time -- which makes "play it to the end and see how it feels" a thing
+## nobody does. This exists so that check is cheap enough to actually perform.
+##
+## Applied through Engine.time_scale rather than by scaling the sim tick, so it
+## moves everything at once: machines, cats, the day clock, warmth, the player,
+## and every animation that accumulates delta. A speed-up that left one system
+## running at normal rate would be worse than none, because it would silently
+## change the balance being observed.
+const DEBUG_SPEEDS: Array[float] = [1.0, 4.0, 10.0]
+
 # --- Machines ----------------------------------------------------------------
 const M_CORE := 0
 const M_MINER := 1

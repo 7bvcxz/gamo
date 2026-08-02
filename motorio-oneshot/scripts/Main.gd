@@ -46,6 +46,9 @@ var autosave_elapsed: float = 0.0
 var blackout: float = 0.0
 ## True while the mine key is held. Hand mining is a hold, not a tap.
 var mine_held: bool = false
+## Which entry of Defs.DEBUG_SPEEDS is active. Never persisted: a save that came
+## back at ten times speed would be a very confusing bug report.
+var speed_index: int = 0
 ## Player's UI size multiplier, applied on top of the per-platform base.
 var ui_scale: float = Defs.UI_SCALE_DEFAULT
 ## The same idea for the world: how large the game itself is drawn, which is the
@@ -55,6 +58,10 @@ var state_before_settings: int = State.TITLE
 
 func _ready() -> void:
 	randomize()
+	# Engine.time_scale is global and survives a scene reload, so a run that ends
+	# while sped up would hand the next one a ten-times world.
+	Engine.time_scale = 1.0
+	speed_index = 0
 	sim.heat_gained.connect(_on_heat_gained)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
@@ -528,6 +535,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		build_rotated = false
 		get_viewport().set_input_as_handled()
 		return
+	if event.is_action_pressed("debug_speed"):
+		cycle_debug_speed()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("recipe"):
 		_cycle_recipe()
 		get_viewport().set_input_as_handled()
@@ -677,6 +688,19 @@ func _try_build() -> void:
 
 ## Switching a machine to its other recipe. Per machine rather than global, so a
 ## player with spare copper on one line and none on another can run both.
+## Steps through the debug time multipliers. Engine.time_scale is global, so this
+## moves the whole game at once rather than just the simulation.
+func cycle_debug_speed() -> int:
+	speed_index = (speed_index + 1) % Defs.DEBUG_SPEEDS.size()
+	Engine.time_scale = Defs.DEBUG_SPEEDS[speed_index]
+	_notify("디버그 %.0f배속" % Defs.DEBUG_SPEEDS[speed_index],
+		Defs.COL_DANGER if speed_index > 0 else Defs.COL_TEXT_DIM)
+	audio.call("play", "select")
+	return speed_index
+
+func debug_speed() -> float:
+	return Defs.DEBUG_SPEEDS[speed_index]
+
 func _cycle_recipe() -> void:
 	if player.locked:
 		return

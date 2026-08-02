@@ -207,6 +207,7 @@ func _draw() -> void:
 			_draw_palette()
 			_draw_message()
 	_draw_settings_button()
+	_draw_debug_badge()
 
 ## After the fall the world goes out entirely, so the cut to morning reads as
 ## losing consciousness rather than as a scene change.
@@ -509,6 +510,19 @@ func version_string() -> String:
 ## Top-left corner, on every screen including the title. A player whose HUD is
 ## too small to read has to be able to find this without reading anything, so it
 ## is an icon in a fixed corner rather than an entry in a menu.
+## Unmissable while it is on. A sped-up run that looks like a normal one is how
+## you end up drawing balance conclusions from a game running at ten times rate.
+func _draw_debug_badge() -> void:
+	if main.speed_index <= 0:
+		return
+	var label: String = "DEBUG  %.0f배속  (F2)" % main.debug_speed()
+	var width: float = _text_width(label, 12) + 22.0
+	var box := Rect2(size.x * 0.5 - width * 0.5, MARGIN, width, 24.0)
+	_panel(box, Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.22),
+		Defs.COL_DANGER, 2.0)
+	_text_in(Rect2(box.position + Vector2(0, 16), Vector2(box.size.x, 16)), label, 12,
+		Defs.COL_DANGER)
+
 func _draw_settings_button() -> void:
 	var rect: Rect2 = settings_button_rect
 	if rect.size.x <= 0.0:

@@ -253,6 +253,9 @@
 
 ## 운영 규칙
 
+- 게임별 진행 기록은 각 게임의 문서 사이트로 옮겼다. One Shot은 `/gamo/motorio-oneshot/doc/`의
+  Releases·Todo·개발 도구가 단일 원본이며(소스는 `web/src/pages/OneShot*.jsx`,
+  `web/src/pages/oneshot/`), 이 파일에는 저장소 전체에 걸친 사항만 남긴다.
 - 공동 작업 규칙의 단일 원본은 `AGENTS.md`이며, Claude Code용 `CLAUDE.md`는 `@AGENTS.md` import만 두고 본문을 복사하지 않는다.
 - 앞으로 새 게임의 완료 범위에는 Godot 구현, Web export, GitHub push, HeyDive 게임 등록 및 실행 확인을 모두 포함한다.
 - Web 배포는 GitHub Contents API 기반 manifest와 고정 runner를 사용하고, 해시 PCK는 저장소에서 직접 받아 브라우저/Pages CDN 캐시와 Pages 배포 지연을 우회한다.

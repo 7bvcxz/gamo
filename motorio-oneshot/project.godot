@@ -7,7 +7,7 @@ config_version=5
 
 config/name="Motorio: One Shot"
 config/description="A single-run frozen automation game. Build a cat-powered factory and hoard heat before the night takes the plateau."
-config/version="0.10.1"
+config/version="0.11.0"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
@@ -62,6 +62,10 @@ mine={
 recipe={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":70)]
+}
+debug_speed={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194333)]
 }
 pause={
 "deadzone": 0.5,
