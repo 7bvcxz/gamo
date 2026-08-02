@@ -131,7 +131,12 @@ func _run() -> void:
 
 	main.sim.total_heat = 140
 	main._sleep()
-	_assert(main.state == main.State.RESULT, "sleeping ends the day")
+	# Bedtime is a sequence now, not a cut: the workforce walks home and the hut
+	# lights up before the summary appears.
+	_assert(main.state == main.State.NIGHTFALL, "sleeping starts the night sequence")
+	_assert(main.indoors() or main.night_phase == main.Phase.GATHER,
+		"and it opens with everyone still walking home")
+	_assert(_settle(main, main.State.RESULT), "the night sequence ends on the day summary")
 	_assert(main.day_heat() == 140, "the summary reports what this day earned")
 	_assert(main.player.locked, "the player is locked while the day summary is up")
 
@@ -139,7 +144,13 @@ func _run() -> void:
 	# point of days accumulating.
 	var radius_before: float = main.sim.warm_radius
 	_press(main, KEY_ENTER)
-	_assert(main.state == main.State.PLAY, "Enter begins the next morning")
+	_assert(main.state == main.State.DAYBREAK, "Enter opens the morning sequence")
+	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS),
+		"the clock is already reset while the sun comes up")
+	_assert(main.night_level() > 0.5,
+		"but the world is still dark, because the clock cannot say what the sky is doing")
+	_assert(_settle(main, main.State.PLAY), "and hands control back once it is morning")
+	_assert(is_zero_approx(main.night_level()), "morning is fully lit")
 	_assert(main.day_number == 2, "the day counter advances")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the new day has a full clock")
 	_assert(main.sim.total_heat == 140, "cumulative heat carries into the next day")
@@ -161,6 +172,7 @@ func _run() -> void:
 	main.time_left = 0.05
 	main._process(0.2)
 	_assert(main.day_heat() == 20, "the second day counts only its own earnings")
+	_assert(_settle(main, main.State.RESULT), "running out of time also plays the night out")
 	_assert(main.best_day_heat == 140, "a worse day does not overwrite the best day")
 
 	# N starts a genuinely fresh game.
@@ -172,6 +184,17 @@ func _run() -> void:
 	if failures == 0:
 		print("FLOW_TEST: PASS")
 	quit(failures)
+
+## Runs the night sequence forward until it reaches the state being waited for.
+## The sequence advances on _process, so a test cannot skip it by calling the
+## transition directly -- and it must not be able to, since the point of every
+## phase having a timeout is that the sequence always terminates.
+func _settle(main: Node2D, want: int) -> bool:
+	for step in 500:
+		if main.state == want:
+			return true
+		main._process(0.05)
+	return main.state == want
 
 func _press(main: Node2D, keycode: Key) -> void:
 	var event := InputEventKey.new()

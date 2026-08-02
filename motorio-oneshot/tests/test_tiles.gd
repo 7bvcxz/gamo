@@ -73,6 +73,13 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	# A fixed seed, because the world is generated from a random one and this test
+	# needs a seam with three clear tiles on all four sides. Most maps have one;
+	# some do not, and the test failed about one run in ten on nothing but the
+	# roll. A flaky test is worse than no test -- it teaches you to re-run.
+	main.clear_save()
+	main._start_run()
+	main.sim.setup(4242)
 	# Ore generates in clusters, so pick a seam whose approaches are clear or the
 	# test would be starting the player inside a different structure.
 	var target := Vector2i(9999, 9999)

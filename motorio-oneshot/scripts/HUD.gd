@@ -191,6 +191,14 @@ func _draw() -> void:
 			_draw_status()
 			_draw_palette()
 			_draw_pause_card()
+		main.State.NIGHTFALL, main.State.DAYBREAK:
+			# The sequence is the one moment the game is not asking for anything,
+			# so the hotbar, the objective and the placement ghost all get out of
+			# the way. The sky stays -- it is the point of the scene -- but the
+			# frost vignette does not, because indoors is exactly where the player
+			# is no longer in danger of freezing.
+			_draw_dusk_wash()
+			_draw_night_caption()
 		main.State.SETTINGS:
 			# Draw the screen it was opened over, so the player can see their
 			# change land on the real HUD instead of on an empty backdrop.
@@ -221,10 +229,17 @@ func _draw_blackout() -> void:
 ## a player walking through the dark will never look at. The screen itself now
 ## closes in as warmth drops. Snow, frost border and ice corners are carried
 ## over from Motorio's climate layer.
-func _draw_cold_vignette() -> void:
-	var dusk: float = clampf((main.day_fraction() - 0.55) / 0.45, 0.0, 1.0)
+## Most of the night is drawn here rather than by the world layers, so anything
+## that shows the world has to draw it or the sky snaps back to noon. It reads
+## night_level rather than the clock: during the night sequence the clock is at
+## zero and then at a full day while the sun is still coming up.
+func _draw_dusk_wash() -> void:
+	var dusk: float = clampf((main.night_level() - 0.55) / 0.45, 0.0, 1.0)
 	if dusk > 0.0:
 		draw_rect(Rect2(Vector2.ZERO, size), Color(0.035, 0.07, 0.16, dusk * 0.38))
+
+func _draw_cold_vignette() -> void:
+	_draw_dusk_wash()
 
 	var exposure: float = 0.0
 	if main.sim != null:
@@ -523,6 +538,25 @@ func _draw_debug_badge() -> void:
 		Defs.COL_DANGER, 2.0)
 	_text_in(Rect2(box.position + Vector2(0, 16), Vector2(box.size.x, 16)), label, 12,
 		Defs.COL_DANGER)
+
+## One line at the foot of the screen naming what is happening, so the sequence
+## is legible the first time rather than a few seconds of the game apparently
+## ignoring the player.
+func _draw_night_caption() -> void:
+	var text: String = ""
+	match main.night_phase:
+		main.Phase.GATHER: text = "고양이들이 숙소로 돌아옵니다"
+		main.Phase.GLOW: text = "%d일차 밤 · 모두 숙소에 들어왔습니다" % main.day_number
+		main.Phase.DAWN: text = "아침이 밝아옵니다"
+		main.Phase.SPILL: text = "%d일차 아침" % main.day_number
+	if text == "":
+		return
+	var width: float = _text_width(text, 14) + 40.0
+	var box := Rect2(size.x * 0.5 - width * 0.5, size.y * 0.78, width, 30.0)
+	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.80),
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.40))
+	_text_in(Rect2(box.position + Vector2(0, 20), Vector2(box.size.x, 18)), text, 14,
+		Defs.COL_TEXT)
 
 # --- Throughput panel --------------------------------------------------------
 ## Rates are quoted per minute, matching every other number in the game. Per

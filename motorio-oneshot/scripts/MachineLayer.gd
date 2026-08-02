@@ -20,6 +20,10 @@ var focus_cell := Vector2i(9999, 9999)
 ## as in the panel, because the panel is on the far side of the screen and a
 ## reading with no visible subject is easy to attribute to the wrong machine.
 var meter_cell := Vector2i(9999, 9999)
+## 0 while the hut is just a building, 1 while it is full and lit for the night.
+var shelter_glow: float = 0.0
+## How many are inside, player included. Decides how many shadows go on the wall.
+var shelter_sleepers: int = 1
 var preview_affordable := true
 var show_preview := true
 var preview_occupied := false
@@ -123,6 +127,7 @@ func _draw_shelter(tile: float) -> void:
 	draw_rect(Rect2(window.position, Vector2(window.size.x, 2.0)),
 		Color(1.0, 0.90, 0.62, lit))
 	draw_circle(at + Vector2(0, 7), 9.0 * flicker, Color(1.0, 0.70, 0.32, 0.10 * lit))
+	_draw_shelter_occupied(at, body, flicker)
 
 	# A chimney with smoke, so the building is alive even when nobody is home.
 	draw_rect(Rect2(at.x + 6.0, at.y - 15.0, 4.0, 7.0), roof)
@@ -134,6 +139,55 @@ func _draw_shelter(tile: float) -> void:
 	var font := UIFont.FONT
 	draw_string(font, at + Vector2(-24, 27), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 48.0, 10,
 		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.50 + night * 0.45))
+
+## The hut with everyone inside it. Nobody is drawn in the world during the night
+## sequence, so this is the only place the player can see that the workforce made
+## it home: the wall becomes a lit screen and their shadows move on it.
+##
+## Drawn on the wall rather than only inside the window because at one tile across
+## an 8px window can hold about two pixels of anything. The whole front face is
+## the lantern screen.
+func _draw_shelter_occupied(at: Vector2, body: Rect2, flicker: float) -> void:
+	if shelter_glow <= 0.0:
+		return
+	var glow: float = clampf(shelter_glow, 0.0, 1.0)
+
+	# Light escaping the building: a halo on the hut, and a wedge thrown forward
+	# onto the snow from under the door.
+	draw_circle(at, 52.0 * flicker, Color(1.0, 0.72, 0.34, 0.09 * glow))
+	draw_circle(at, 30.0 * flicker, Color(1.0, 0.78, 0.42, 0.13 * glow))
+	draw_colored_polygon(PackedVector2Array([
+		at + Vector2(-7, 13), at + Vector2(7, 13),
+		at + Vector2(20, 36), at + Vector2(-20, 36)]),
+		Color(1.0, 0.80, 0.46, 0.16 * glow))
+
+	# The wall lights up from behind.
+	var panel := Rect2(body.position + Vector2(1.5, 1.5), body.size - Vector2(3.0, 3.0))
+	draw_rect(panel, Color(1.0, 0.78, 0.42, 0.62 * glow * flicker))
+
+	# One shadow each, the tall one first for the player. Capped: past four the
+	# wall is a solid dark band and the count stops meaning anything.
+	var count: int = clampi(shelter_sleepers, 1, 4)
+	var ink := Color(0.14, 0.07, 0.06, 0.82 * glow)
+	for index in count:
+		var slot: float = (float(index) + 0.5) / float(count)
+		var x: float = panel.position.x + panel.size.x * slot
+		var tall: bool = index == 0
+		var height: float = 9.0 if tall else 6.0
+		# Each shadow breathes on its own offset, so the group reads as several
+		# sleepers rather than one shape repeated.
+		var breathe: float = sin(pulse * 1.9 + float(index) * 2.1) * 0.9
+		var base: float = panel.position.y + panel.size.y - 1.0
+		var head: float = base - height + breathe
+		draw_rect(Rect2(x - 2.0, head + 1.0, 4.0, height - 1.0 - breathe), ink)
+		draw_circle(Vector2(x, head), 2.2 if tall else 1.9, ink)
+		if not tall:
+			# Ears, so the small ones are cats and not a row of fence posts.
+			draw_circle(Vector2(x - 1.6, head - 1.6), 0.8, ink)
+			draw_circle(Vector2(x + 1.6, head - 1.6), 0.8, ink)
+
+	# Frame the panel again on top, or the lit wall bleeds over the hut's outline.
+	draw_rect(body, Color(0.02, 0.03, 0.05, 0.55), false, 1.0)
 
 ## A bracket around the machine the panel is reporting on. Corners rather than a
 ## full box, so it reads as a measuring frame and never hides the machine's own
@@ -424,6 +478,8 @@ func _draw_cats() -> void:
 	for cat: Sim.Cat in sim.cats:
 		if cat == sim.carried_cat:
 			continue      # drawn in the player's arms by PlayerActor
+		if cat.state == Defs.CAT_ASLEEP:
+			continue      # indoors: a shadow on the shelter wall instead
 		if not view_rect.grow(64.0).has_point(cat.pos):
 			continue
 		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02
@@ -438,6 +494,8 @@ func _draw_cats() -> void:
 			heading = sim.cell_centre(cat.assigned) - cat.pos
 		elif cat.state == Defs.CAT_TO_FOOD:
 			heading = sim.cell_centre(sim.food_cell) - cat.pos
+		elif cat.state == Defs.CAT_TO_SHELTER:
+			heading = sim.cell_centre(sim.shelter_cell) - cat.pos
 		elif cat.state == Defs.CAT_EATING:
 			heading = Vector2.DOWN
 		var view: Dictionary = Defs.facing_view(Defs.facing_index(heading))

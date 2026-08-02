@@ -867,6 +867,8 @@ func _tick_cats(delta: float) -> void:
 			Defs.CAT_HAUL_TO_ITEM: _cat_fetch(cat, delta)
 			Defs.CAT_HAUL_TO_BASE: _cat_deliver(cat, delta)
 			Defs.CAT_IDLE: _cat_look_for_work(cat)
+			Defs.CAT_TO_SHELTER: _cat_walk_home(cat, delta)
+			Defs.CAT_ASLEEP: pass
 
 func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 	var to_goal: Vector2 = goal - cat.pos
@@ -909,6 +911,64 @@ func _cat_deliver(cat: Cat, delta: float) -> void:
 		_deliver(cat.carrying, core_cell)
 		cat.carrying = -1
 	cat.state = Defs.CAT_IDLE
+
+# --- Going to bed ------------------------------------------------------------
+## The workforce walks home rather than blinking out at the end of the day. It
+## is also the moment the factory visibly stops: _tick_cats clears `operated` on
+## every miner each frame, so a miner whose cat has left for the hut goes quiet
+## on its own without anything having to switch it off.
+
+## Calls everyone home. Whatever they were carrying comes with them -- dropping
+## it on the way would lose the last minute of the day's haul for no reason the
+## player could see.
+func send_cats_home() -> void:
+	carried_cat = null
+	for cat: Cat in cats:
+		cat.state = Defs.CAT_TO_SHELTER
+
+## True once every cat has reached the hut.
+func cats_all_home() -> bool:
+	for cat: Cat in cats:
+		if cat.state != Defs.CAT_ASLEEP:
+			return false
+	return true
+
+## The end of the gathering phase, for the stragglers. A cat that cannot reach
+## the hut -- boxed in by a factory built around it, or simply too far out -- must
+## not be able to hold the night open, so the sequence closes the door on time
+## and they are indoors regardless.
+func force_cats_home() -> void:
+	for cat: Cat in cats:
+		cat.pos = cell_centre(shelter_cell)
+		cat.state = Defs.CAT_ASLEEP
+
+## Morning. Everyone starts on the doorstep and walks back to the post they had,
+## which is what makes the assignments the player made visible as a thing that
+## survives the night.
+func wake_cats(doorstep: Vector2) -> void:
+	var count: int = maxi(cats.size(), 1)
+	for index in cats.size():
+		var cat: Cat = cats[index]
+		# Fanned across the doorstep rather than stacked on one pixel, so a
+		# workforce of six reads as six cats leaving a hut.
+		var spread: float = (float(index) - float(count - 1) * 0.5) * 9.0
+		cat.pos = doorstep + Vector2(spread, 0.0)
+		# Anything still in a cat's mouth at bedtime is handed in rather than
+		# deleted. Silently losing the last minute of the day's haul is the kind
+		# of thing a player notices only as a number that does not add up.
+		if cat.carrying >= 0:
+			_deliver(cat.carrying, core_cell)
+			cat.carrying = -1
+		cat.haul_target = Vector2i(9999, 9999)
+		if cat.has_job() and machines.has(cat.assigned):
+			cat.state = Defs.CAT_TO_MINER
+		else:
+			cat.assigned = Vector2i(9999, 9999)
+			cat.state = Defs.CAT_IDLE
+
+func _cat_walk_home(cat: Cat, delta: float) -> void:
+	if _step_toward(cat, cell_centre(shelter_cell), delta):
+		cat.state = Defs.CAT_ASLEEP
 
 func _cat_walk_to_miner(cat: Cat, delta: float) -> void:
 	if not cat.has_job() or not machines.has(cat.assigned):

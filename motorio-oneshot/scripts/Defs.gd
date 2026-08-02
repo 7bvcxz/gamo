@@ -365,6 +365,26 @@ const CAT_TO_MINER := 1
 const CAT_WORKING := 2
 const CAT_TO_FOOD := 3
 const CAT_EATING := 4
+## Nightfall: everyone walks back to the hut and stays there until morning.
+const CAT_TO_SHELTER := 7
+const CAT_ASLEEP := 8
+
+## --- The night sequence ------------------------------------------------------
+## The day does not simply cut to a summary card. The workforce walks home, the
+## lamp goes on, and the hut spends five seconds turning from night to morning.
+## It is the one moment the game is not asking the player to do anything, which
+## is what makes the factory they built visible to them.
+##
+## Every phase is bounded. A cinematic that can wait indefinitely for a cat that
+## got stuck is a cinematic that will eventually hang the game.
+const NIGHT_GATHER_MAX := 7.0      ## after this the stragglers are simply home
+const NIGHT_GLOW_SECONDS := 2.2    ## lamp lit, silhouettes on the wall
+const DAWN_SECONDS := 5.0          ## night -> morning
+const DAWN_SPILL_SECONDS := 1.4    ## the door opens and everyone walks out
+## How much closer the camera pulls in while the sequence plays. The hut is one
+## tile across, so at normal zoom the silhouettes in the window are a few pixels.
+const NIGHT_CAMERA_ZOOM := 1.7
+const NIGHT_CAMERA_LERP := 2.6     ## per second, toward the target zoom
 const COLD_RECOVER := 26.0
 const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
 ## Cold is a slope, not a cliff: movement degrades the whole way down so the

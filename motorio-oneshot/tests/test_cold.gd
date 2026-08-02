@@ -73,8 +73,17 @@ func _run() -> void:
 	_assert(main.blackout >= 1.0, "the world had gone fully dark before the day ended")
 	_assert(main.rescued_tonight, "the summary records that the player was carried in")
 
-	# Morning restores an upright, warm player at the shelter.
+	# Morning restores an upright, warm player at the shelter. It is a five-second
+	# sequence -- the sun comes up, then everyone walks out of the hut -- so
+	# control comes back at the end of it rather than the instant it starts.
 	main._begin_next_day()
+	_assert(main.state == main.State.DAYBREAK, "the morning opens with the daybreak sequence")
+	_assert(main.player.locked, "and holds the player until the sun is actually up")
+	var morning_steps := 0
+	while main.state != main.State.PLAY and morning_steps < 500:
+		main._process(0.05)
+		morning_steps += 1
+	_assert(main.state == main.State.PLAY, "which always terminates and hands control back")
 	_assert(is_equal_approx(main.player.warmth, 100.0), "the player wakes warm")
 	_assert(is_zero_approx(main.player.collapse) and not main.player.locked, "the player wakes upright")
 	_assert(is_zero_approx(main.blackout), "and the screen is clear again")

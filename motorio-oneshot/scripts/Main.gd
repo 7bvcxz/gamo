@@ -7,7 +7,10 @@ extends Node2D
 ## and the warm radius all carry into the next morning.
 ## SETTINGS is a state rather than an overlay flag so that opening it stops the
 ## clock: sizing the UI should never cost the player warmth.
-enum State { TITLE, PLAY, PAUSED, RESULT, SETTINGS }
+enum State { TITLE, PLAY, PAUSED, RESULT, SETTINGS, NIGHTFALL, DAYBREAK }
+## Phases inside NIGHTFALL and DAYBREAK. Both run on one timer rather than a
+## handful of booleans, so there is one place to read what the sequence is doing.
+enum Phase { GATHER, GLOW, DAWN, SPILL }
 
 const SHAKE_DECAY := 7.0
 const RESCUE_SECONDS := 1.6
@@ -50,6 +53,15 @@ var mine_held: bool = false
 ## a cell rather than following what the player faces, so the numbers hold still
 ## while they are being read.
 var meter_cell := Vector2i(9999, 9999)
+## The nightfall/daybreak sequence.
+var night_phase: int = Phase.GATHER
+var night_timer: float = 0.0
+## While this is >= 0 it decides how dark the world is drawn. The clock cannot:
+## it is pinned at zero all through the sequence and back at a full day before
+## the sun has actually come up.
+var night_override: float = -1.0
+## Extra camera pull-in during the sequence, eased rather than snapped.
+var cinema_zoom: float = 1.0
 ## Which entry of Defs.DEBUG_SPEEDS is active. Never persisted: a save that came
 ## back at ten times speed would be a very confusing bug report.
 var speed_index: int = 0
@@ -99,6 +111,12 @@ func _start_run() -> void:
 	blackout = 0.0
 	night_warned = false
 	meter_cell = Vector2i(9999, 9999)
+	# A run that was reloaded or restarted mid-sequence would otherwise keep the
+	# sky pinned at night and the player locked indoors.
+	night_override = -1.0
+	night_phase = Phase.GATHER
+	night_timer = 0.0
+	cinema_zoom = 1.0
 	rescued_tonight = false
 	selected_index = 0
 	shake = 0.0
@@ -167,6 +185,37 @@ func selected_type() -> int:
 func day_fraction() -> float:
 	return clampf(1.0 - time_left / Defs.DAY_SECONDS, 0.0, 1.0)
 
+## How dark to draw the world, 0 morning to 1 deep night. Normally the clock
+## decides, but the night sequence has to hold the sky at night while the clock
+## reads zero and then walk it back to morning while the clock reads a full day.
+func night_level() -> float:
+	return night_override if night_override >= 0.0 else day_fraction()
+
+## True while the player is inside the hut: asleep, or waiting for the sun. They
+## are a silhouette on the shelter wall then, not a figure standing in the snow.
+func indoors() -> bool:
+	match state:
+		State.NIGHTFALL:
+			return night_phase == Phase.GLOW
+		State.DAYBREAK:
+			return night_phase == Phase.DAWN
+		State.RESULT:
+			# The summary card sits inside the sequence, with the lit hut behind it.
+			return night_override >= 0.0
+	return false
+
+## Whether the camera leans in on the hut. Deliberately not the same as being
+## indoors: the summary card is a full-screen panel that lands squarely on the
+## shelter, so holding a close-up behind it would frame the one thing the card
+## covers. The camera is out for the card and leans back in for the sunrise.
+func cinema() -> bool:
+	match state:
+		State.NIGHTFALL:
+			return night_phase == Phase.GLOW
+		State.DAYBREAK:
+			return night_phase == Phase.DAWN
+	return false
+
 func is_night() -> bool:
 	return time_left <= Defs.NIGHT_SECONDS
 
@@ -188,16 +237,19 @@ func _process(delta: float) -> void:
 	# Re-applied every frame because the platform base follows the touch pad,
 	# which appears and disappears as the player switches between thumb and
 	# keyboard mid-session.
-	_apply_camera_zoom()
+	_apply_camera_zoom(delta)
 	var view := _view_rect()
+	var dark: float = night_level()
 	world_layer.set_view(view)
-	world_layer.night = day_fraction()
-	ground_layer.night = day_fraction()
+	world_layer.night = dark
+	ground_layer.night = dark
 	ground_layer.view_rect = view
 	cold_fog.view_rect = view
-	cold_fog.night = day_fraction()
+	cold_fog.night = dark
 	machine_layer.view_rect = view
-	machine_layer.night = day_fraction()
+	machine_layer.night = dark
+	machine_layer.shelter_glow = shelter_glow()
+	machine_layer.shelter_sleepers = sim.cats.size() + 1
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
 	# A panel pinned to a machine the player has since demolished would keep
 	# reporting a machine that no longer exists.
@@ -233,12 +285,14 @@ func _process(delta: float) -> void:
 	# follows the screen the panel was opened over rather than the panel itself.
 	var showing: int = state_before_settings if state == State.SETTINGS else state
 	var in_run: bool = showing != State.TITLE
-	player.visible = in_run
+	player.visible = in_run and not indoors()
 	machine_layer.show_preview = state == State.PLAY
 
 	match state:
 		State.PLAY: _process_play(delta)
 		State.TITLE: pass
+		State.NIGHTFALL: _process_nightfall(delta)
+		State.DAYBREAK: _process_daybreak(delta)
 		State.PAUSED, State.RESULT, State.SETTINGS: pass
 
 ## Wind is always there and swells at night; the cold layer tracks how exposed
@@ -518,6 +572,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				state = State.PLAY
 				audio.call("play", "confirm")
 				get_viewport().set_input_as_handled()
+			return
+		State.NIGHTFALL, State.DAYBREAK:
+			# The sequence plays itself and is over in seconds. Only the debug
+			# speed stays live, so a tester who has watched it forty times can
+			# wind it forward instead of sitting through it.
+			if event.is_action_pressed("debug_speed"):
+				cycle_debug_speed()
+			get_viewport().set_input_as_handled()
 			return
 
 	if key.keycode == KEY_ESCAPE:
@@ -892,10 +954,18 @@ func set_game_scale(value: float) -> void:
 ## Touch and desktop want different amounts of world on screen: the phone's
 ## logical viewport is three times taller than the layout was drawn for, so at
 ## 1:1 it shows a vast area at postage-stamp size.
-func _apply_camera_zoom() -> void:
+func _apply_camera_zoom(delta: float = 0.0) -> void:
 	var touch_pad: bool = touch != null and touch.visible
 	var base: float = Defs.GAME_SCALE_TOUCH_BASE if touch_pad else Defs.GAME_SCALE_DESKTOP_BASE
-	var zoom: float = maxf(base * game_scale, 0.05)
+	# The hut is a single tile, so at play zoom the shadows in its window are a
+	# few pixels. The sequence leans in; eased rather than snapped, because a cut
+	# in zoom reads as a glitch where a push reads as attention.
+	var want: float = Defs.NIGHT_CAMERA_ZOOM if cinema() else 1.0
+	if delta > 0.0:
+		cinema_zoom = lerpf(cinema_zoom, want, clampf(delta * Defs.NIGHT_CAMERA_LERP, 0.0, 1.0))
+	else:
+		cinema_zoom = want
+	var zoom: float = maxf(base * game_scale * cinema_zoom, 0.05)
 	camera.zoom = Vector2(zoom, zoom)
 
 func save_settings() -> bool:
@@ -950,7 +1020,88 @@ func _sleep() -> void:
 	player.position = shelter_doorstep()
 	audio.call("play", "confirm")
 	fx.ring(shelter_position(), Defs.COL_CORE, 52.0)
-	_finish_run()
+	_begin_nightfall()
+
+# --- The night sequence ------------------------------------------------------
+## Bedtime is not a cut to a summary card. The workforce walks home, the lamp
+## goes on with everyone's shadows on the wall, and the hut spends five seconds
+## turning from night to morning. It is the only moment the game asks nothing of
+## the player, which is what makes it the moment they see what they built.
+##
+## Both halves are strictly bounded. Every phase advances on a timer as well as
+## on its condition, so a cat that cannot reach the hut cannot hold the night
+## open forever.
+
+func _begin_nightfall() -> void:
+	state = State.NIGHTFALL
+	night_phase = Phase.GATHER
+	night_timer = 0.0
+	night_override = 1.0
+	meter_cell = Vector2i(9999, 9999)
+	player.locked = true
+	player.velocity = Vector2.ZERO
+	player.position = shelter_doorstep()
+	sim.send_cats_home()
+
+func _process_nightfall(delta: float) -> void:
+	# The factory keeps running while its workers walk out on it. _tick_cats
+	# clears `operated` every frame, so the machines go quiet one at a time as
+	# each cat leaves -- the day ending is something the player watches happen
+	# rather than something that is announced.
+	sim.tick(delta)
+	night_timer += delta
+	match night_phase:
+		Phase.GATHER:
+			if sim.cats_all_home() or night_timer >= Defs.NIGHT_GATHER_MAX:
+				sim.force_cats_home()
+				night_phase = Phase.GLOW
+				night_timer = 0.0
+				fx.ring(shelter_position(), Defs.COL_CORE, 40.0)
+				audio.call("play", "confirm")
+		Phase.GLOW:
+			if night_timer >= Defs.NIGHT_GLOW_SECONDS:
+				_finish_run()
+
+## 0 when the hut is just a building, 1 when it is full and lit. Drives the
+## window, the light spilling onto the snow and the shadows on the wall.
+func shelter_glow() -> float:
+	match state:
+		State.NIGHTFALL:
+			if night_phase != Phase.GLOW:
+				return 0.0
+			return clampf(night_timer / 0.5, 0.0, 1.0)
+		State.RESULT:
+			return 1.0 if night_override >= 0.0 else 0.0
+		State.DAYBREAK:
+			if night_phase != Phase.DAWN:
+				return 0.0
+			# Fades out as the sun comes up: a lamp still burning at dawn reads as
+			# a bug rather than as a light.
+			return clampf(1.0 - night_timer / Defs.DAWN_SECONDS, 0.0, 1.0)
+	return 0.0
+
+func _process_daybreak(delta: float) -> void:
+	sim.tick(delta)
+	night_timer += delta
+	match night_phase:
+		Phase.DAWN:
+			night_override = clampf(1.0 - night_timer / Defs.DAWN_SECONDS, 0.0, 1.0)
+			if night_timer >= Defs.DAWN_SECONDS:
+				night_phase = Phase.SPILL
+				night_timer = 0.0
+				night_override = 0.0
+				# Everyone spills out of the door at once and walks back to the
+				# post they had. The assignments the player made are the thing
+				# that survives the night, so morning is where they are visible.
+				sim.wake_cats(shelter_doorstep())
+				_notify("%d일차 아침" % day_number, Defs.COL_CORE)
+				fx.ring(shelter_doorstep(), Defs.COL_CORE, 46.0)
+				audio.call("play", "confirm")
+		Phase.SPILL:
+			if night_timer >= Defs.DAWN_SPILL_SECONDS:
+				night_override = -1.0
+				player.locked = false
+				state = State.PLAY
 
 ## Dusk, not game over. The factory keeps everything it built.
 func _finish_run() -> void:
@@ -968,14 +1119,16 @@ func _begin_next_day() -> void:
 	time_left = Defs.DAY_SECONDS
 	night_warned = false
 	rescued_tonight = false
-	player.locked = false
 	player.collapse = 0.0
 	collapse_timer = -1.0
 	blackout = 0.0
 	player.warmth = 100.0
 	# Morning starts at the shelter beside the core, as it does in Motorio.
 	player.position = shelter_doorstep()
-	state = State.PLAY
-	_notify("%d일차 아침" % day_number, Defs.COL_CORE)
-	fx.ring(player.position, Defs.COL_CORE, 46.0)
-	audio.call("play", "confirm")
+	# Still locked and still indoors: the clock has been reset to a full day but
+	# the sun has not come up yet, which is exactly what night_override is for.
+	player.locked = true
+	night_override = 1.0
+	state = State.DAYBREAK
+	night_phase = Phase.DAWN
+	night_timer = 0.0
