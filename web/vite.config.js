@@ -18,6 +18,10 @@ export default defineConfig({
         doc: resolve(__dirname, 'doc/index.html'),
         // The game itself owns /gamo/motorio-oneshot/, so its pages live in
         // subdirectories under it rather than replacing it.
+        // Each game owns its documentation under its own path, so restructuring
+        // one game's docs never touches another's.
+        oneshotDoc: resolve(__dirname, 'motorio-oneshot/doc/index.html'),
+        motorioDoc: resolve(__dirname, 'motorio/doc/index.html'),
         graphic: resolve(__dirname, 'motorio-oneshot/graphic/index.html'),
         proposals: resolve(__dirname, 'motorio-oneshot/graphic/proposals/index.html'),
       },

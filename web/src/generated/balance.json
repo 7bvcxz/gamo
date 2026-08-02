@@ -1,0 +1,196 @@
+{
+  "belts": [
+    {
+      "copper": 3,
+      "items_per_minute": 45.8823529411765,
+      "multiplier": 1.0,
+      "name": "벨트",
+      "seconds_per_tile": 3.84615384615385,
+      "ten_tile_seconds": 38.4615384615385,
+      "tiles_per_second": 0.26
+    },
+    {
+      "copper": 9,
+      "items_per_minute": 137.647058823529,
+      "multiplier": 3.0,
+      "name": "고속 벨트",
+      "seconds_per_tile": 1.28205128205128,
+      "ten_tile_seconds": 12.8205128205128,
+      "tiles_per_second": 0.78
+    },
+    {
+      "copper": 30,
+      "items_per_minute": 458.823529411765,
+      "multiplier": 10.0,
+      "name": "초고속 벨트",
+      "seconds_per_tile": 0.384615384615385,
+      "ten_tile_seconds": 3.84615384615385,
+      "tiles_per_second": 2.6
+    }
+  ],
+  "cats": {
+    "boxes_per_cat": 3,
+    "food_start": 200,
+    "speed": 46.0,
+    "tiles_per_box": 100.0
+  },
+  "day": {
+    "dusk_seconds": 95.0,
+    "night_seconds": 50.0,
+    "seconds": 180.0
+  },
+  "gate_to_copper": {
+    "crystal": 72.7272727272727,
+    "days_two_miners": 3.03030303030303,
+    "energy": 36.3636363636364,
+    "heat": 181.818181818182
+  },
+  "generated_by": "motorio-oneshot/tools/dump_balance.gd",
+  "items": {
+    "heat_value": [
+      0,
+      0,
+      5
+    ],
+    "names": [
+      "수정조각",
+      "구리광석",
+      "에너지결정"
+    ]
+  },
+  "machines": [
+    {
+      "cost": [
+        {
+          "count": 5,
+          "item": "수정조각"
+        }
+      ],
+      "hint": "수정 광맥 위에 설치하고 고양이를 올려놓으세요",
+      "name": "채굴기",
+      "short": "채굴기",
+      "throughput": "수정 6/분 · 고양이 또는 전력 0.5",
+      "unlock": "수정조각"
+    },
+    {
+      "cost": [
+        {
+          "count": 20,
+          "item": "수정조각"
+        }
+      ],
+      "hint": "수정조각 2개를 에너지결정 1개로 바꿉니다",
+      "name": "수정에너지교환기",
+      "short": "교환기",
+      "throughput": "수정 24/분 → 에너지 12/분",
+      "unlock": "수정조각"
+    },
+    {
+      "cost": [
+        {
+          "count": 3,
+          "item": "구리광석"
+        }
+      ],
+      "hint": "자원을 기지까지 끊김 없이 나릅니다 · 전력 0.1 필요",
+      "name": "컨테이너 벨트",
+      "short": "벨트",
+      "throughput": "46/분 · 칸당 3.8초 · F로 등급",
+      "unlock": "구리광석"
+    },
+    {
+      "cost": [
+        {
+          "count": 2,
+          "item": "구리광석"
+        }
+      ],
+      "hint": "한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
+      "name": "분배기",
+      "short": "분배기",
+      "throughput": "한 줄을 두 줄로 · R로 나뉘는 축 회전",
+      "unlock": "구리광석"
+    },
+    {
+      "cost": [
+        {
+          "count": 10,
+          "item": "구리광석"
+        }
+      ],
+      "hint": "에너지결정을 태워 전력 1.0을 공급합니다",
+      "name": "발전기",
+      "short": "발전기",
+      "throughput": "에너지 6/분 → 전력 1.0",
+      "unlock": "구리광석"
+    }
+  ],
+  "power": {
+    "belt_draw": 0.1,
+    "generator_output": 1.0,
+    "miner_draw": 0.5,
+    "miners_per_generator": 2.0
+  },
+  "purity": [
+    {
+      "crystal_per_minute": 6.0,
+      "multiplier": 1.0,
+      "name": "보통"
+    },
+    {
+      "crystal_per_minute": 9.0,
+      "multiplier": 1.5,
+      "name": "풍부"
+    },
+    {
+      "crystal_per_minute": 12.0,
+      "multiplier": 2.0,
+      "name": "순수"
+    }
+  ],
+  "rates": {
+    "copper_seconds": 20.0,
+    "crystal_per_energy": 2,
+    "exchanger_seconds": 5.0,
+    "generator_seconds": 10.0,
+    "hand_mine_seconds": 10.0,
+    "miner_seconds": 10.0,
+    "ratio_hint": "교환기 1대 = 채굴기 4대"
+  },
+  "recipes": [
+    {
+      "crystal_per_energy": 2.0,
+      "energy_per_minute": 12.0,
+      "line": "수정 2 → 에너지 1 · 5초",
+      "name": "기본"
+    },
+    {
+      "crystal_per_energy": 0.666666666666667,
+      "energy_per_minute": 18.0,
+      "line": "수정 2 + 구리 1 → 에너지 3 · 10초",
+      "name": "구리 촉매"
+    }
+  ],
+  "rings": {
+    "copper": [
+      11.0,
+      17.0
+    ],
+    "crystal": [
+      4.0,
+      9.5
+    ],
+    "purity_pure": 17.0,
+    "purity_rich": 11.0
+  },
+  "version": "0.10.1",
+  "warmth": {
+    "base_radius": 7.0,
+    "cold_drain": 13.0,
+    "collapse_grace": 5.0,
+    "max_radius": 22.0,
+    "night_drain": 7.5,
+    "outside_speed": 0.45,
+    "per_heat": 0.022
+  }
+}

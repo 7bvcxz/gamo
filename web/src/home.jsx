@@ -11,13 +11,14 @@ const GAMES = [
     extra: [
       { href: '/gamo/motorio-oneshot/graphic/', label: '그래픽' },
       { href: '/gamo/motorio-oneshot/graphic/proposals/', label: '그래픽 제안' },
-      { href: '/gamo/doc/#oneshot-level-design', label: '레벨 디자인' },
+      { href: '/gamo/motorio-oneshot/doc/', label: '문서' },
     ],
   },
   {
     name: 'Motorio',
     path: '/gamo/motorio/',
     blurb: '기지를 키워 온기 반경을 넓히고 더 먼 자원에 닿는 장기 진행형 자동화 게임.',
+    extra: [{ href: '/gamo/motorio/doc/', label: '문서' }],
   },
   {
     name: 'Nowhere',
