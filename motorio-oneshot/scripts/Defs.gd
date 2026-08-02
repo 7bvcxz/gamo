@@ -168,7 +168,7 @@ static func throughput_line(type: int) -> String:
 		M_GENERATOR:
 			return "에너지 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
 		M_BELT:
-			return "%.0f/분 · 전력 %.1f · F로 등급 변경" % [BELT_SPEED / 0.34 * 60.0, BELT_POWER_DRAW]
+			return "%.0f/분 · 칸당 %.1f초 · F로 등급" % [BELT_SPEED / 0.34 * 60.0, 1.0 / BELT_SPEED]
 		M_SPLITTER:
 			return "한 줄을 두 줄로 · R로 나뉘는 축 회전"
 		M_CORE:
@@ -263,7 +263,12 @@ const START_HEAT := 30
 ## exactly absorb four miners.
 const MINER_PERIOD := 10.0
 const FURNACE_PERIOD := 2.2
-const BELT_SPEED := 2.6           # tiles per second
+## Deliberately slow. A tenth of what it used to be, which puts a ten-tile run at
+## about 38 seconds: never a hard throughput gate -- it still carries nearly four
+## times a pure seam's output -- but slow enough that a long line starts to feel
+## like something you would rather not wait for. That feeling is what makes the
+## grades worth having, and grade 3 restores exactly the old speed.
+const BELT_SPEED := 0.26          # tiles per second
 
 ## --- Belt grades --------------------------------------------------------------
 ## Deliberately not a throughput gate. Grade 1 already carries far more than

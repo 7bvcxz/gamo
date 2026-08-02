@@ -210,8 +210,12 @@ func _test_belt_transport() -> void:
 	_staff(sim, Vector2i(-3, 0))
 	_assert(sim.build(Defs.M_BELT, Vector2i(-2, 0), Vector2i.RIGHT), "first belt built")
 	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "second belt built")
+	# Derived from the constants rather than a fixed count: mining one item, then
+	# walking it two tiles, both got an order of magnitude slower at different
+	# times, and a hardcoded 120 ticks silently stopped covering the journey.
+	var journey: float = Defs.MINER_PERIOD + 2.0 / Defs.BELT_SPEED + 2.0
 	var saw_item := false
-	for step in 120:
+	for step in int(journey / 0.1):
 		sim.tick(0.1)
 		if sim.items_in_transit() > 0:
 			saw_item = true

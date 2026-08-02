@@ -145,8 +145,9 @@ func _draw_focus_readout() -> void:
 		# A miner reports what this particular seam gives it, not the generic
 		# rate: the whole point of purity is that seams differ.
 		if machine.type == Defs.M_BELT:
-			line = "%s · %.0f배 속도 · F로 등급 변경" % [Defs.BELT_TIERS[machine.tier]["name"],
-				Defs.BELT_TIERS[machine.tier]["speed"]]
+			line = "%s · 칸당 %.1f초 · %.0f/분" % [Defs.BELT_TIERS[machine.tier]["name"],
+				1.0 / Defs.belt_speed(machine.tier),
+				Defs.belt_speed(machine.tier) / 0.34 * 60.0]
 		if machine.type == Defs.M_EXCHANGER:
 			line = "%s · %s" % [Defs.RECIPES[machine.recipe]["name"],
 				Defs.recipe_line(machine.recipe)]

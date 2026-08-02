@@ -310,13 +310,21 @@ func _run() -> void:
 	_assert(is_equal_approx(Defs.belt_speed(0), Defs.BELT_SPEED), "grade 1 is the baseline")
 	_assert(is_equal_approx(Defs.belt_speed(1), Defs.BELT_SPEED * 3.0), "grade 2 is three times")
 	_assert(is_equal_approx(Defs.belt_speed(2), Defs.BELT_SPEED * 10.0), "grade 3 is ten times")
-	# The point of the design: even the slowest belt outruns the best possible
-	# miner by a wide margin, so nobody is ever forced to upgrade a working line.
+	# Two properties, pulling against each other, and both have to hold.
+	# Throughput: even the slowest belt must carry more than the best single
+	# miner, so a one-to-one line never chokes and nobody is forced to upgrade.
+	# Latency: it must still be slow enough to be felt on a long run, or the
+	# grades are buying nothing and may as well not exist.
 	var belt_rate: float = Defs.BELT_SPEED / 0.34 * 60.0
 	var fastest_miner: float = Defs.per_minute(Defs.MINER_PERIOD / Defs.PURITY_RATE[Defs.PURITY_PURE])
-	_assert(belt_rate > fastest_miner * 20.0,
-		"grade 1 carries %.0f/min against a best miner's %.0f, so it is never the bottleneck"
+	_assert(belt_rate > fastest_miner * 2.0,
+		"grade 1 carries %.0f/min against a best miner's %.0f, so one line never chokes"
 			% [belt_rate, fastest_miner])
+	var ten_tiles: float = 10.0 / Defs.BELT_SPEED
+	_assert(ten_tiles > 20.0,
+		"a ten-tile run takes %.0fs at grade 1, which is long enough to want better" % ten_tiles)
+	_assert(10.0 / Defs.belt_speed(2) < 6.0,
+		"and grade 3 makes the same run barely noticeable (%.1fs)" % (10.0 / Defs.belt_speed(2)))
 
 	var belt_sim := Sim.new()
 	belt_sim.setup(777888)
@@ -334,7 +342,8 @@ func _run() -> void:
 	_assert(belt_sim.cycle_belt_tier(lane) == 0, "then wraps back to the base grade")
 	belt_sim.stock[Defs.ITEM_COPPER] = 0
 	_assert(belt_sim.cycle_belt_tier(lane) < 0, "an upgrade you cannot afford is refused")
-	print("BELTS: %.0f/min at grade 1 vs a pure seam's %.0f/min" % [belt_rate, fastest_miner])
+	print("BELTS: grade1 %.0f/min, 10 tiles in %.0fs -> grade3 %.0f/min, %.1fs" % [
+		belt_rate, ten_tiles, Defs.belt_speed(2) / 0.34 * 60.0, 10.0 / Defs.belt_speed(2)])
 	belt_sim.free()
 
 	sim.free()
