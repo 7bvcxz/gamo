@@ -302,6 +302,11 @@ const BELT_CAPACITY := 3
 ## the line feeding it.
 const SPLITTER_CAPACITY := 3
 const SPLITTER_PERIOD := 0.25
+## Seconds the throughput meter averages over. Long enough that a miner on a
+## ten-second cycle contributes several items -- a window shorter than a couple
+## of cycles reports a square wave rather than a rate -- and short enough that
+## fixing a starved line shows up while the player is still standing there.
+const METER_WINDOW := 30.0
 const FROST_COST_IRON := 1
 const COPPER_COST_IRON := 1
 

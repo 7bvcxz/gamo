@@ -205,6 +205,7 @@ func _draw() -> void:
 			_draw_blackout()
 			_draw_status()
 			_draw_palette()
+			_draw_meter_card()
 			_draw_message()
 	_draw_settings_button()
 	_draw_debug_badge()
@@ -522,6 +523,107 @@ func _draw_debug_badge() -> void:
 		Defs.COL_DANGER, 2.0)
 	_text_in(Rect2(box.position + Vector2(0, 16), Vector2(box.size.x, 16)), label, 12,
 		Defs.COL_DANGER)
+
+# --- Throughput panel --------------------------------------------------------
+## Rates are quoted per minute, matching every other number in the game. Per
+## second would read 0.10 and 0.03 for machines on ten- and twenty-second cycles,
+## which is a worse unit for the same information.
+const METER_W := 244.0
+const METER_ROW := 19.0
+const METER_HEAD := 52.0
+const METER_FOOT := 40.0
+
+## Sized to its contents, then placed where it will not sit on top of anything
+## the player also needs: under the objective chip, above the hotbar.
+func meter_rect() -> Rect2:
+	var machine = main.sim.machine_at(main.meter_cell)
+	if machine == null:
+		return Rect2()
+	var rows: int = main.sim.meter_items(machine, false).size() \
+		+ main.sim.meter_items(machine, true).size()
+	var sections: int = 0
+	if not main.sim.meter_items(machine, false).is_empty():
+		sections += 1
+	if not main.sim.meter_items(machine, true).is_empty():
+		sections += 1
+	var height: float = METER_HEAD + float(sections) * 20.0 + float(rows) * METER_ROW + METER_FOOT
+	var width: float = minf(METER_W, size.x - MARGIN * 2.0)
+	var box := Rect2(size.x - width - MARGIN, status_top(), width, height)
+	var objective: Rect2 = objective_rect(main.objective())
+	box.position.y = objective.position.y + objective.size.y + 8.0
+	# The hotbar and the touch pad own the bottom of the screen. If the card no
+	# longer fits between them, it rides up rather than being drawn underneath.
+	var floor_y: float = hotbar_origin().y - 10.0
+	if box.position.y + box.size.y > floor_y:
+		box.position.y = maxf(status_top(), floor_y - box.size.y)
+	return box
+
+func _draw_meter_card() -> void:
+	if main.meter_cell == Vector2i(9999, 9999):
+		return
+	var sim = main.sim
+	var machine = sim.machine_at(main.meter_cell)
+	if machine == null:
+		return
+	var box: Rect2 = meter_rect()
+	_panel(box, Defs.COL_PANEL, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.65), 2.0)
+	var origin: Vector2 = box.position
+
+	_text(origin + Vector2(14, 22), Defs.MACHINE_NAMES[machine.type], 15, Defs.COL_TEXT)
+	_text_in(Rect2(origin + Vector2(box.size.x - 74, 12), Vector2(62, 14)), "C 닫기", 11,
+		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	var status: String = sim.meter_status(machine)
+	# The status line is the diagnosis, so it is coloured by whether anything is
+	# wrong rather than being one more grey caption.
+	var healthy: bool = status.begins_with("가동") or status == "운반 중" or status == "반입구"
+	_text(origin + Vector2(14, 40), status, 12, Defs.COL_CORE if healthy else Defs.COL_DANGER)
+
+	var y: float = METER_HEAD
+	y = _draw_meter_side(machine, box, y, false)
+	y = _draw_meter_side(machine, box, y, true)
+
+	draw_line(origin + Vector2(12, y + 4), origin + Vector2(box.size.x - 12, y + 4),
+		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.7), 1.0)
+	_text(origin + Vector2(14, y + 22), sim.meter_buffer(machine), 11, Defs.COL_TEXT_DIM)
+	var span: float = sim.meter_span(machine)
+	var note: String = "측정 중…" if span < Defs.METER_WINDOW else "최근 %d초 평균" % int(Defs.METER_WINDOW)
+	# On the same baseline as the buffer line: at y+12 the note's ascenders ran
+	# through the divider rule above it.
+	_text_in(Rect2(origin + Vector2(box.size.x - 116, y + 22), Vector2(104, 14)), note, 11,
+		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+
+## One half of the card. Returns the y it finished at, so the two sides stack
+## without either needing to know how many rows the other drew.
+func _draw_meter_side(machine, box: Rect2, y: float, outgoing: bool) -> float:
+	var sim = main.sim
+	var items: Array[int] = sim.meter_items(machine, outgoing)
+	if items.is_empty():
+		return y
+	var origin: Vector2 = box.position
+	var rated: Dictionary = sim.design_rates(machine)[("out" if outgoing else "in")]
+	_text(origin + Vector2(14, y + 12), "출력" if outgoing else "입력", 11, Defs.COL_MACHINE_EDGE)
+	_text_in(Rect2(origin + Vector2(box.size.x - 150, y + 2), Vector2(138, 14)),
+		"실측 / 설계 (개/분)", 10, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	y += 20.0
+	for item_type: int in items:
+		var measured: float = sim.meter_rate(machine, item_type, outgoing)
+		# Belts and splitters are rated for a throughput, not for a material, so
+		# their figure is filed under -1 and applies to whatever passes through.
+		var design: float = float(rated.get(item_type, rated.get(-1, 0.0)))
+		draw_circle(origin + Vector2(19, y + 8), 4.0, Defs.ITEM_COLORS[item_type])
+		_text(origin + Vector2(28, y + 12), Defs.ITEM_SHORT[item_type], 12, Defs.COL_TEXT)
+		# Falling short of the rated figure is the whole reason to open this panel,
+		# so the measured number carries the warning colour and the rated one stays
+		# quiet -- the rated number is never the problem.
+		var short: bool = design > 0.0 and measured < design * 0.9
+		_text_in(Rect2(origin + Vector2(box.size.x - 150, y + 12), Vector2(80, 14)),
+			"%.1f" % measured, 13, Defs.COL_DANGER if short else Defs.COL_CORE,
+			HORIZONTAL_ALIGNMENT_RIGHT)
+		var design_label: String = "/ %.1f" % design if design > 0.0 else "/ —"
+		_text_in(Rect2(origin + Vector2(box.size.x - 66, y + 12), Vector2(54, 14)),
+			design_label, 12, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+		y += METER_ROW
+	return y
 
 func _draw_settings_button() -> void:
 	var rect: Rect2 = settings_button_rect

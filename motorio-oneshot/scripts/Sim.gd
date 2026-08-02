@@ -55,6 +55,16 @@ class Machine extends RefCounted:
 	var buffer: Dictionary = {}
 	## Miners only run while a cat is standing here.
 	var operated: bool = false
+	## What this machine has actually moved, in items, kept in two buckets so the
+	## readout averages over a window instead of reporting the gap between two
+	## cycles. Rolled over rather than accumulated forever, so a machine that was
+	## starved an hour ago does not drag its current reading down.
+	var meter_in: Dictionary = {}
+	var meter_out: Dictionary = {}
+	var meter_in_old: Dictionary = {}
+	var meter_out_old: Dictionary = {}
+	var meter_span: float = 0.0
+	var meter_span_old: float = 0.0
 
 var ore: Dictionary[Vector2i, int] = {}
 ## Per-seam richness. Same key space as `ore`.
@@ -562,6 +572,7 @@ func tick(delta: float) -> void:
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
 		machine.flash = maxf(0.0, machine.flash - delta)
+		_advance_meter(machine, delta)
 		var speed: float = 1.0 if is_warm(cell) else 0.45
 		if machine.type == Defs.M_MINER:
 			var rate: float = _operator_rate(cell, supply)
@@ -591,6 +602,152 @@ func _tick_rate(delta: float) -> void:
 	heat_rate = lerpf(heat_rate, per_minute, 0.35)
 	_heat_accum = 0.0
 	_rate_clock = 0.0
+
+# --- Throughput meter --------------------------------------------------------
+## What a machine is *actually* moving, as opposed to what it could move.
+##
+## Design rates are already on screen, and on their own they mislead: a miner
+## rated at 6/min reads as a working miner whether or not it has ever produced
+## anything. The gap between the rated number and the measured one is the only
+## thing that points at a bottleneck, so both are shown side by side.
+##
+## The window is real seconds, not simulation-adjusted ones. A machine crawling
+## at half speed in the cold is producing genuinely fewer items per minute and
+## the reading should say so.
+
+## Rolls the sample buckets. Two of them: the older one keeps the reading alive
+## while the newer one fills, so the number never drops to zero the instant a
+## window boundary passes.
+func _advance_meter(machine: Machine, delta: float) -> void:
+	machine.meter_span += delta
+	if machine.meter_span < Defs.METER_WINDOW:
+		return
+	machine.meter_in_old = machine.meter_in
+	machine.meter_out_old = machine.meter_out
+	machine.meter_span_old = machine.meter_span
+	machine.meter_in = {}
+	machine.meter_out = {}
+	machine.meter_span = 0.0
+
+func _note_in(machine: Machine, item_type: int) -> void:
+	machine.meter_in[item_type] = int(machine.meter_in.get(item_type, 0)) + 1
+
+func _note_out(machine: Machine, item_type: int) -> void:
+	machine.meter_out[item_type] = int(machine.meter_out.get(item_type, 0)) + 1
+
+## Items per minute across the sampled window. Returns 0 until there is enough of
+## a window to divide by, because a rate computed over half a second is noise
+## dressed up as a measurement.
+func meter_rate(machine: Machine, item_type: int, outgoing: bool) -> float:
+	var span: float = machine.meter_span + machine.meter_span_old
+	if span < 2.0:
+		return 0.0
+	var recent: Dictionary = machine.meter_out if outgoing else machine.meter_in
+	var older: Dictionary = machine.meter_out_old if outgoing else machine.meter_in_old
+	var total: float = float(int(recent.get(item_type, 0)) + int(older.get(item_type, 0)))
+	return total * 60.0 / span
+
+## How long the reading covers, so the panel can say "still measuring" instead of
+## presenting a one-second sample as if it were settled.
+func meter_span(machine: Machine) -> float:
+	return machine.meter_span + machine.meter_span_old
+
+## The rated throughput, per item type. Separate from the measurement on purpose:
+## this is what the machine promises, and it comes from the constants rather than
+## from anything that happened.
+func design_rates(machine: Machine) -> Dictionary:
+	var into: Dictionary = {}
+	var out: Dictionary = {}
+	match machine.type:
+		Defs.M_MINER:
+			if ore.has(machine.cell):
+				out[int(ore[machine.cell])] = Defs.per_minute(seam_period(machine.cell))
+		Defs.M_EXCHANGER:
+			var recipe: Dictionary = Defs.RECIPES[machine.recipe]
+			var period: float = float(recipe["period"])
+			for item_type: int in recipe["in"]:
+				into[item_type] = Defs.per_minute(period) * float(recipe["in"][item_type])
+			out[Defs.ITEM_ENERGY] = Defs.per_minute(period) * float(recipe["out"])
+		Defs.M_GENERATOR:
+			into[Defs.ITEM_ENERGY] = Defs.per_minute(Defs.GENERATOR_PERIOD)
+		Defs.M_BELT:
+			# A belt has no recipe, so its rated figure is its capacity: the most
+			# it could carry if something fed it that fast.
+			var cap: float = Defs.belt_speed(machine.tier) / 0.34 * 60.0
+			into[-1] = cap
+			out[-1] = cap
+		Defs.M_SPLITTER:
+			var split: float = Defs.per_minute(Defs.SPLITTER_PERIOD)
+			into[-1] = split
+			out[-1] = split
+	return {"in": into, "out": out}
+
+## Every item type worth listing on one side of the panel: whatever the machine
+## is rated for, plus anything it has actually handled. The second half matters
+## because a mis-aimed belt feeds machines things they were never rated for, and
+## a panel that hid those would hide the mistake.
+func meter_items(machine: Machine, outgoing: bool) -> Array[int]:
+	var seen: Array[int] = []
+	var rated: Dictionary = design_rates(machine)[("out" if outgoing else "in")]
+	for item_type: int in rated:
+		if item_type >= 0 and not seen.has(item_type):
+			seen.append(item_type)
+	for source: Dictionary in [
+		machine.meter_out if outgoing else machine.meter_in,
+		machine.meter_out_old if outgoing else machine.meter_in_old,
+	]:
+		for item_type: int in source:
+			if not seen.has(int(item_type)):
+				seen.append(int(item_type))
+	seen.sort()
+	return seen
+
+## One phrase for why the machine is not at its rated number. Ordered by what the
+## player should fix first: no worker beats no input beats no room.
+func meter_status(machine: Machine) -> String:
+	match machine.type:
+		Defs.M_MINER:
+			if not machine.operated:
+				return "일손 없음 · 고양이 또는 전력"
+			if machine.stalled:
+				return "출력 막힘"
+			return "가동 중"
+		Defs.M_EXCHANGER:
+			var recipe: Dictionary = Defs.RECIPES[machine.recipe]
+			for item_type: int in recipe["in"]:
+				if int(machine.buffer.get(item_type, 0)) < int(recipe["in"][item_type]):
+					return "입력 부족 · %s" % Defs.ITEM_SHORT[item_type]
+			if machine.stalled:
+				return "출력 막힘"
+			return "가동 중"
+		Defs.M_GENERATOR:
+			if int(machine.buffer.get(Defs.ITEM_ENERGY, 0)) <= 0:
+				return "연료 없음"
+			return "가동 중 · 전력 %.1f" % Defs.GENERATOR_OUTPUT
+		Defs.M_BELT, Defs.M_SPLITTER:
+			if machine.stalled:
+				return "가득 참 · 앞이 막힘"
+			if machine.items.is_empty():
+				return "비어 있음"
+			return "운반 중"
+		Defs.M_CORE:
+			return "반입구"
+	return ""
+
+## What the machine is holding right now, as "구리 2 · 수정 1". A rate alone does
+## not explain a machine that stopped a moment ago; its buffer does.
+func meter_buffer(machine: Machine) -> String:
+	var parts: Array[String] = []
+	if machine.type == Defs.M_BELT or machine.type == Defs.M_SPLITTER:
+		var capacity: int = Defs.BELT_CAPACITY if machine.type == Defs.M_BELT else Defs.SPLITTER_CAPACITY
+		return "적재 %d/%d" % [machine.items.size(), capacity]
+	for item_type: int in machine.buffer:
+		var held: int = int(machine.buffer[item_type])
+		if held > 0:
+			parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], held])
+	if parts.is_empty():
+		return "보관 없음"
+	return "보관 " + " · ".join(parts)
 
 ## Capacity is whatever the fed generators sustain; draw is what the powered
 ## machines ask for. Recomputed each tick so building or losing either is felt
@@ -838,9 +995,13 @@ func seam_period(cell: Vector2i) -> float:
 ## because cats pick up from there.
 func _emit_from(machine: Machine, item_type: int) -> bool:
 	var ahead: Vector2i = machine.cell + machine.dir
-	if _push_into(ahead, item_type, machine.cell):
+	# The floor counts as output. It is where everything goes before belts exist,
+	# and a meter that only counted belted items would read zero for a perfectly
+	# productive early-game miner.
+	if _push_into(ahead, item_type, machine.cell) or drop_item(ahead, item_type):
+		_note_out(machine, item_type)
 		return true
-	return drop_item(ahead, item_type)
+	return false
 
 ## Puts a loose item on the floor. One per cell keeps the world readable and
 ## stops a stalled miner from burying its own tile.
@@ -867,6 +1028,7 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 		return
 	if _push_into(machine.cell + machine.dir, int(head["type"]), machine.cell):
 		machine.items.remove_at(0)
+		_note_out(machine, int(head["type"]))
 		machine.stalled = false
 	else:
 		machine.stalled = machine.items.size() >= Defs.BELT_CAPACITY
@@ -964,6 +1126,7 @@ func _tick_splitter(machine: Machine, delta: float) -> void:
 			continue
 		if _push_into(target, item_type, machine.cell) or drop_item(target, item_type):
 			machine.items.remove_at(0)
+			_note_out(machine, item_type)
 			machine.next_out = (index + 1) % sides.size()
 			machine.progress = 0.0
 			machine.flash = 0.25
@@ -999,7 +1162,19 @@ func _tick_generator(machine: Machine, delta: float) -> void:
 
 ## Returns true when the destination accepted the item. `from` is the cell the
 ## item is arriving from, which is what lets a machine refuse a face.
+##
+## Every accepted item is metered here rather than in each branch, so a machine
+## added later cannot forget to count its own input. The core is the exception:
+## cats hand it items without going through this path, so it counts in _deliver.
 func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 9999)) -> bool:
+	if not _accept_into(cell, item_type, from):
+		return false
+	var target: Machine = machines.get(cell, null)
+	if target != null and target.type != Defs.M_CORE:
+		_note_in(target, item_type)
+	return true
+
+func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 	var target: Machine = machines.get(cell, null)
 	if target == null:
 		return false
@@ -1059,6 +1234,7 @@ func _deliver(item_type: int, cell: Vector2i) -> void:
 	var core: Machine = machines.get(core_cell, null)
 	if core != null:
 		core.flash = 0.4
+		_note_in(core, item_type)
 	heat_gained.emit(value, cell, item_type)
 
 func spend_rescue() -> int:

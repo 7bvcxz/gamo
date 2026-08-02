@@ -13,47 +13,52 @@ import { OneShotReleases } from './pages/OneShotReleases.jsx';
 // One Shot's own documentation, independent of every other game's. Split by how
 // often each part changes: identity almost never, level design when the map
 // moves, balance constantly -- and balance is generated rather than written.
+//
+// The nav is in English while the pages themselves are in Korean. Deliberate:
+// these are short category labels sitting next to Todo, Releases and the item
+// ids, and translating half of them produced a sidebar that read as a mix. The
+// English words are also the ones the design conversation actually uses.
 const NAV = [
   {
-    group: '설계',
+    group: 'Design',
     items: [
-      { id: 'identity', label: '정체성', render: () => <Identity /> },
-      { id: 'level-design', label: '레벨 디자인', render: () => <OneShotLevelDesign /> },
-      { id: 'automation', label: '자동화 설계', render: () => <Automation /> },
+      { id: 'identity', label: 'Identity', render: () => <Identity /> },
+      { id: 'level-design', label: 'Level Design', render: () => <OneShotLevelDesign /> },
+      { id: 'automation', label: 'Automation', render: () => <Automation /> },
     ],
   },
   {
-    group: '수치',
-    items: [{ id: 'economy', label: '경제 · 밸런스', render: () => <Economy /> }],
+    group: 'Numbers',
+    items: [{ id: 'economy', label: 'Economy & Balance', render: () => <Economy /> }],
   },
   {
-    group: '진행',
+    group: 'Progress',
     items: [
       { id: 'todo', label: 'Todo', render: () => <OneShotTodo /> },
       { id: 'releases', label: 'Releases', render: () => <OneShotReleases /> },
     ],
   },
   {
-    group: '개발',
-    items: [{ id: 'devtools', label: '개발 도구', render: () => <DevTools /> }],
+    group: 'Development',
+    items: [{ id: 'devtools', label: 'Debug Tools', render: () => <DevTools /> }],
   },
   {
-    group: '그래픽',
+    group: 'Graphics',
     links: [
-      { href: '/gamo/motorio-oneshot/graphic/', label: '오브젝트 갤러리 →' },
-      { href: '/gamo/motorio-oneshot/graphic/proposals/', label: '그래픽 제안 →' },
+      { href: '/gamo/motorio-oneshot/graphic/', label: 'Object Gallery →' },
+      { href: '/gamo/motorio-oneshot/graphic/proposals/', label: 'Graphic Proposals →' },
     ],
   },
   {
-    group: '링크',
+    group: 'Links',
     links: [
-      { href: '/gamo/motorio-oneshot/', label: '플레이 →' },
-      { href: '/gamo/doc/', label: '저장소 문서 →' },
-      { href: '/gamo/', label: '게임 목록 →' },
+      { href: '/gamo/motorio-oneshot/', label: 'Play →' },
+      { href: '/gamo/doc/', label: 'Repo Docs →' },
+      { href: '/gamo/', label: 'All Games →' },
     ],
   },
 ];
 
 createRoot(document.getElementById('root')).render(
-  <DocShell brand="One Shot" subtitle="문서" nav={NAV} home="/gamo/motorio-oneshot/" />
+  <DocShell brand="One Shot" subtitle="Docs" nav={NAV} home="/gamo/motorio-oneshot/" />
 );

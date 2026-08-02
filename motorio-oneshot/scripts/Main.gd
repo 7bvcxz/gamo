@@ -46,6 +46,10 @@ var autosave_elapsed: float = 0.0
 var blackout: float = 0.0
 ## True while the mine key is held. Hand mining is a hold, not a tap.
 var mine_held: bool = false
+## The machine whose throughput panel is open, or the invalid sentinel. Pinned to
+## a cell rather than following what the player faces, so the numbers hold still
+## while they are being read.
+var meter_cell := Vector2i(9999, 9999)
 ## Which entry of Defs.DEBUG_SPEEDS is active. Never persisted: a save that came
 ## back at ten times speed would be a very confusing bug report.
 var speed_index: int = 0
@@ -94,6 +98,7 @@ func _start_run() -> void:
 	player.collapse = 0.0
 	blackout = 0.0
 	night_warned = false
+	meter_cell = Vector2i(9999, 9999)
 	rescued_tonight = false
 	selected_index = 0
 	shake = 0.0
@@ -194,6 +199,11 @@ func _process(delta: float) -> void:
 	machine_layer.view_rect = view
 	machine_layer.night = day_fraction()
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
+	# A panel pinned to a machine the player has since demolished would keep
+	# reporting a machine that no longer exists.
+	if meter_cell != Vector2i(9999, 9999) and sim.machine_at(meter_cell) == null:
+		meter_cell = Vector2i(9999, 9999)
+	machine_layer.meter_cell = meter_cell
 
 	_update_ambience(delta)
 	message_life = maxf(0.0, message_life - delta)
@@ -437,7 +447,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Mining is a hold, so both edges matter and neither should be swallowed by
 	# the state machine below.
 	if event.is_action_pressed("mine"):
-		mine_held = true
+		if not toggle_meter():
+			mine_held = true
 	elif event.is_action_released("mine"):
 		mine_held = false
 	# Mouse first: the settings gear and its slider are the only pointer targets
@@ -635,7 +646,30 @@ func touch_primary() -> void:
 
 ## The pad's mine button. Held rather than tapped, so it forwards both edges.
 func touch_mine(pressed: bool) -> void:
+	if pressed and toggle_meter():
+		return
 	mine_held = pressed and state == State.PLAY
+
+## The mine key does double duty: on a seam it digs, and on a machine it opens
+## that machine's throughput panel. The two never overlap in practice -- a cell
+## with a miner on it is one the player has already stopped digging by hand --
+## and giving the readout its own key would have meant a sixth binding to teach.
+##
+## Returns true when the press was spent on the panel, so the caller knows not to
+## start a dig with it.
+func toggle_meter() -> bool:
+	if meter_cell != Vector2i(9999, 9999):
+		meter_cell = Vector2i(9999, 9999)
+		audio.call("play", "select")
+		return true
+	if state != State.PLAY or player.locked:
+		return false
+	var cell: Vector2i = player.facing_cell()
+	if sim.machine_at(cell) == null:
+		return false
+	meter_cell = cell
+	audio.call("play", "select")
+	return true
 
 func touch_secondary() -> void:
 	match state:

@@ -16,6 +16,10 @@ var preview_dir := Vector2i.RIGHT
 var preview_valid := true
 ## Which machine the player is facing, for the rate readout.
 var focus_cell := Vector2i(9999, 9999)
+## Which machine the throughput panel is pinned to. Marked in the world as well
+## as in the panel, because the panel is on the far side of the screen and a
+## reading with no visible subject is easy to attribute to the wrong machine.
+var meter_cell := Vector2i(9999, 9999)
 var preview_affordable := true
 var show_preview := true
 var preview_occupied := false
@@ -66,6 +70,7 @@ func _draw() -> void:
 	_draw_boxes(tile)
 	_draw_ground()
 	_draw_hand_progress()
+	_draw_meter_marker(tile)
 	_draw_focus_readout()
 	_draw_cats()
 	if show_preview:
@@ -129,6 +134,37 @@ func _draw_shelter(tile: float) -> void:
 	var font := UIFont.FONT
 	draw_string(font, at + Vector2(-24, 27), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 48.0, 10,
 		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.50 + night * 0.45))
+
+## A bracket around the machine the panel is reporting on. Corners rather than a
+## full box, so it reads as a measuring frame and never hides the machine's own
+## border colour -- which is how the player identifies the machine type.
+func _draw_meter_marker(tile: float) -> void:
+	if meter_cell == Vector2i(9999, 9999):
+		return
+	var machine: Sim.Machine = sim.machine_at(meter_cell)
+	if machine == null:
+		return
+	var origin: Vector2 = Vector2(meter_cell) * tile
+	var span: Vector2 = Vector2(tile, tile)
+	if machine.type == Defs.M_CORE:
+		origin -= Vector2(tile, tile)
+		span = Vector2(tile * 3.0, tile * 3.0)
+	var box := Rect2(origin - Vector2(3, 3), span + Vector2(6, 6))
+	var arm: float = tile * 0.34
+	var glow: float = 0.55 + sin(pulse * 4.0) * 0.25
+	var col := Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, glow)
+	var corners: Array[Vector2] = [
+		box.position,
+		box.position + Vector2(box.size.x, 0.0),
+		box.position + Vector2(0.0, box.size.y),
+		box.position + box.size,
+	]
+	var steps: Array[Vector2] = [Vector2(1, 1), Vector2(-1, 1), Vector2(1, -1), Vector2(-1, -1)]
+	for index in corners.size():
+		var at: Vector2 = corners[index]
+		var step: Vector2 = steps[index]
+		draw_line(at, at + Vector2(arm * step.x, 0.0), col, 2.0)
+		draw_line(at, at + Vector2(0.0, arm * step.y), col, 2.0)
 
 ## The machine the player is standing in front of states its own rate. Numbers
 ## the player cannot see cannot be planned around, which turns ratio design into
