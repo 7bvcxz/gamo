@@ -7,9 +7,20 @@ import React from 'react';
 
 const RELEASES = [
   {
+    version: '0.13.1',
+    date: '2026-08-03',
+    current: true,
+    headline: '모바일 로딩 28MB → 12MB',
+    items: [
+      ['개선', '한글 폰트를 소스에 실제로 쓰이는 236자로 서브셋 — 18.58MB → 90KB. PCK가 18.2MB → 2.0MB'],
+      ['개선', 'PCK를 Pages(CDN)에서 받고 raw.githubusercontent는 폴백으로. 배포 직후 몇 분간만 폴백을 타며, 확인 요청은 wasm 다운로드와 겹쳐 실행돼 지연이 0이다'],
+      ['참고', '남은 10MB는 Godot Web 엔진 wasm이며 저장소에서 줄일 수 없다. ETag 재검증이라 재방문 시 0바이트'],
+      ['추가', '`test_font`가 소스의 모든 문자가 폰트에 있는지 검사한다. 새 문구를 쓰고 폰트를 다시 만들지 않으면 두부 글자 대신 테스트가 실패한다'],
+    ],
+  },
+  {
     version: '0.13.0',
     date: '2026-08-02',
-    current: true,
     headline: '밤이 아침이 되는 장면',
     items: [
       ['추가', '잠들면 일하던 고양이들이 걸어서 숙소로 돌아온다. 공장은 별도 처리 없이 일꾼이 나가면서 멈춘다'],
