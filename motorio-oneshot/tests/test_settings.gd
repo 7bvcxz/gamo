@@ -231,8 +231,27 @@ func _test_resource_ledger(main: Node2D) -> void:
 	sim.tick(1.05)
 	names = _row_names(main)
 	_assert(names.has("구리"), "holding a resource puts it on the ledger")
+	# The exact text the player reads. Per minute, like every other rate the game
+	# quotes: a miner is 6/min, and the same figure written as 0.10/s is the same
+	# information in a form nobody can plan against.
+	var copper: Array = _row(main, "구리")
+	_assert(copper[1] == "4", "the amount column is the plain count: '%s'" % copper[1])
+	_assert(String(copper[2]).ends_with("/분"),
+		"and the rate column is per minute: '%s'" % copper[2])
+	_assert(String(copper[2]).begins_with("+"),
+		"marked as income rather than a bare number: '%s'" % copper[2])
+	# Four items in one second is 240 a minute, smoothed toward that by the same
+	# lerp heat uses, so this checks the unit rather than the exact reading.
+	_assert(float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)) > 10.0,
+		"four items in a second reads as a per-minute figure, not a per-second one: %.1f"
+		% float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)))
+	# Heat is quoted from the same unit, so the two rows cannot disagree.
+	sim.heat_rate = 12.0
+	_assert(_row(main, "열")[2] == "+12/분", "heat reads per minute too: '%s'" % _row(main, "열")[2])
+	sim.heat_rate = 0.0
+	_assert(_row(main, "열")[2] == "", "and a resource producing nothing shows no rate")
 	_assert(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0) > 0.0,
-		"and what arrived is counted as income: %.2f/s" % float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)))
+		"and what arrived is counted as income: %.1f/min" % float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)))
 
 	# Spending is not negative production. A row that dipped below zero every
 	# time the player built something would be reporting on the wrong thing.
@@ -261,6 +280,13 @@ func _test_resource_ledger(main: Node2D) -> void:
 		_assert(ledger.position.y + ledger.size.y <= main.hud.hotbar_origin().y + 0.5,
 			"and clear of the hotbar at UI %.2f" % scale_value)
 	main.ui_scale = Defs.UI_SCALE_DEFAULT
+
+## The ledger row with this name, or an empty row.
+func _row(main: Node2D, name: String) -> Array:
+	for row: Array in main.hud.resource_rows():
+		if String(row[0]) == name:
+			return row
+	return ["", "", "", Color.WHITE]
 
 func _row_names(main: Node2D) -> Array[String]:
 	var names: Array[String] = []

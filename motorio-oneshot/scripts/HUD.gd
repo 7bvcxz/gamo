@@ -375,7 +375,7 @@ func resource_rect() -> Rect2:
 func resource_rows() -> Array[Array]:
 	var sim = main.sim
 	var rows: Array[Array] = []
-	rows.append(["열", "%d" % sim.heat, _rate_text(sim.heat_rate / 60.0), Defs.COL_CORE])
+	rows.append(["열", "%d" % sim.heat, _rate_text(sim.heat_rate), Defs.COL_CORE])
 	for item_type: int in Defs.COUNTED_ITEMS:
 		var held: int = int(sim.stock.get(item_type, 0))
 		var seen: bool = held > 0 or int(sim.delivered.get(item_type, 0)) > 0
@@ -390,12 +390,15 @@ func resource_rows() -> Array[Array]:
 			Defs.COL_MACHINE_EDGE])
 	return rows
 
-func _rate_text(per_second: float) -> String:
-	if per_second <= 0.0005:
+## Per minute, like every other rate the game quotes. Machines are rated in
+## tens-of-seconds cycles, so the same numbers per second are 0.10 and 0.03 --
+## the same information in a form nobody can plan against.
+func _rate_text(each_minute: float) -> String:
+	if each_minute < 0.05:
 		return ""
-	if per_second >= 10.0:
-		return "+%.0f/s" % per_second
-	return "+%.1f/s" % per_second
+	if each_minute >= 10.0:
+		return "+%.0f/분" % each_minute
+	return "+%.1f/분" % each_minute
 
 func _draw_resources() -> void:
 	var rows: Array[Array] = resource_rows()
@@ -411,9 +414,11 @@ func _draw_resources() -> void:
 		_text(box.position + Vector2(24.0, y + 9.0), String(row[0]), 12, Defs.COL_TEXT)
 		# Amount and rate are right-aligned in their own columns, so the eye can
 		# run down either one without reading the other.
-		_text_in(Rect2(box.position + Vector2(box.size.x - 138.0, y + 9.0), Vector2(72.0, 14)),
+		_text_in(Rect2(box.position + Vector2(box.size.x - 146.0, y + 9.0), Vector2(70.0, 14)),
 			String(row[1]), 13, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
-		_text_in(Rect2(box.position + Vector2(box.size.x - 62.0, y + 9.0), Vector2(50.0, 14)),
+		# Wider than it was: "+12.3/분" needs more room than the per-second form
+		# it replaced, and a clipped rate is worse than no rate.
+		_text_in(Rect2(box.position + Vector2(box.size.x - 70.0, y + 9.0), Vector2(58.0, 14)),
 			String(row[2]), 11, tint, HORIZONTAL_ALIGNMENT_RIGHT)
 		y += RESOURCE_ROW
 

@@ -108,7 +108,10 @@ var power_draw: float = 0.0
 ## player is actually optimising, so it belongs on the panel next to the total.
 var heat_rate: float = 0.0
 var _heat_accum: float = 0.0
-## Income per material, in items per second, averaged the same slow way heat is.
+## Income per material, in items per minute, averaged the same slow way heat is.
+## Per minute rather than per second because everything else the game quotes is
+## per minute -- a miner is 6/min, and the same figure written as 0.10/s is the
+## same information in a form nobody can plan against.
 ## Only gains count: spending copper on a machine is not negative production, and
 ## a resource row that dipped below zero every time the player built something
 ## would be reporting on the wrong thing.
@@ -611,8 +614,8 @@ func _tick_rate(delta: float) -> void:
 	var per_minute: float = _heat_accum * 60.0 / _rate_clock
 	heat_rate = lerpf(heat_rate, per_minute, 0.35)
 	for item_type: int in Defs.COUNTED_ITEMS:
-		var per_second: float = float(_gain_accum.get(item_type, 0.0)) / _rate_clock
-		gain_rate[item_type] = lerpf(float(gain_rate.get(item_type, 0.0)), per_second, 0.35)
+		var each_minute: float = float(_gain_accum.get(item_type, 0.0)) * 60.0 / _rate_clock
+		gain_rate[item_type] = lerpf(float(gain_rate.get(item_type, 0.0)), each_minute, 0.35)
 		_gain_accum[item_type] = 0.0
 	_heat_accum = 0.0
 	_rate_clock = 0.0
