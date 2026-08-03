@@ -60,8 +60,17 @@ for proj in "$ROOT"/*/; do
     "$OUT/$name/$page_name"
 
   # The runner is stable and may be cached. It reads the requested content-
-  # hashed PCK name from its query string and downloads that unique file
-  # directly from the repository, avoiding the GitHub Pages deployment delay.
+  # hashed PCK name from its query string and downloads that unique file.
+  #
+  # Pages first, the repository second. Pages serves the pack gzipped from a CDN
+  # edge, while raw.githubusercontent sends it uncompressed from a third host
+  # that costs another DNS lookup and TLS handshake -- expensive on a phone. The
+  # repository copy still has to exist as a fallback, because for the first few
+  # minutes after a deploy Pages has not published the new hash yet and answers
+  # 404 (and caches that 404, which is why this probes rather than assumes).
+  #
+  # The probe is started before engine.init and awaited after it, so it overlaps
+  # the ten-megabyte wasm download and costs no wall-clock time at all.
   #
   # After the query string has been read into constants the runner rewrites the
   # address back to the game directory, so players keep one shareable URL
@@ -74,10 +83,13 @@ const RUNNER_PARAMS = new URLSearchParams(location.search);\\
 const REQUESTED_PACK = RUNNER_PARAMS.get('pack') || GODOT_CONFIG.mainPack;\\
 const REQUESTED_PACK_SIZE = Number(RUNNER_PARAMS.get('size')) || GODOT_CONFIG.fileSizes[GODOT_CONFIG.mainPack];\\
 const REMOTE_PACK = \`https://raw.githubusercontent.com/7bvcxz/gamo/main/docs/${name}/\${REQUESTED_PACK}\`;\\
+const LOCAL_PACK = new URL(REQUESTED_PACK, location.href).href;\\
 try { history.replaceState(null, '', './'); } catch (e) { console.warn('URL tidy skipped', e); }\\
 GODOT_CONFIG.fileSizes[REMOTE_PACK] = REQUESTED_PACK_SIZE;\\
+GODOT_CONFIG.fileSizes[LOCAL_PACK] = REQUESTED_PACK_SIZE;\\
+const PACK_SOURCE = fetch(LOCAL_PACK, { method: 'HEAD' }).then((r) => (r.ok ? LOCAL_PACK : REMOTE_PACK)).catch(() => REMOTE_PACK);\\
     GODOT_CONFIG.args = ['--main-pack', REQUESTED_PACK].concat(GODOT_CONFIG.args);" \
-    -e "s|engine.startGame({|engine.init(GODOT_CONFIG.executable).then(() => engine.preloadFile(REMOTE_PACK, REQUESTED_PACK)).then(() => engine.start({|" \
+    -e "s|engine.startGame({|engine.init(GODOT_CONFIG.executable).then(() => PACK_SOURCE).then((packUrl) => engine.preloadFile(packUrl, REQUESTED_PACK)).then(() => engine.start({|" \
     -e "/engine.init(GODOT_CONFIG.executable)/,/setStatusMode('hidden')/ s|^[[:space:]]*}).then(() => {$|\t\t})).then(() => {|" \
     "$OUT/$name/$RUNNER_PAGE"
 
