@@ -108,6 +108,12 @@ var power_draw: float = 0.0
 ## player is actually optimising, so it belongs on the panel next to the total.
 var heat_rate: float = 0.0
 var _heat_accum: float = 0.0
+## Income per material, in items per second, averaged the same slow way heat is.
+## Only gains count: spending copper on a machine is not negative production, and
+## a resource row that dipped below zero every time the player built something
+## would be reporting on the wrong thing.
+var gain_rate: Dictionary[int, float] = {}
+var _gain_accum: Dictionary[int, float] = {}
 var _rate_clock: float = 0.0
 ## Where the player is currently swinging, and how far through the swing.
 var hand_cell := Vector2i(9999, 9999)
@@ -604,8 +610,19 @@ func _tick_rate(delta: float) -> void:
 		return
 	var per_minute: float = _heat_accum * 60.0 / _rate_clock
 	heat_rate = lerpf(heat_rate, per_minute, 0.35)
+	for item_type: int in Defs.COUNTED_ITEMS:
+		var per_second: float = float(_gain_accum.get(item_type, 0.0)) / _rate_clock
+		gain_rate[item_type] = lerpf(float(gain_rate.get(item_type, 0.0)), per_second, 0.35)
+		_gain_accum[item_type] = 0.0
 	_heat_accum = 0.0
 	_rate_clock = 0.0
+
+## Every route by which a material reaches the base stock. Routed through one
+## function so the income rate cannot miss one: cats delivering, belts feeding
+## the core and the player walking over a dropped item are all production.
+func _gain(item_type: int, amount: int) -> void:
+	stock[item_type] = int(stock.get(item_type, 0)) + amount
+	_gain_accum[item_type] = float(_gain_accum.get(item_type, 0.0)) + float(amount)
 
 # --- Throughput meter --------------------------------------------------------
 ## What a machine is *actually* moving, as opposed to what it could move.
@@ -786,10 +803,22 @@ func cell_centre(cell: Vector2i) -> Vector2:
 ## matches one -- so electrifying is about scale, not about replacing workers
 ## with something better.
 func _operator_rate(cell: Vector2i, supply: float) -> float:
-	for cat: Cat in cats:
-		if cat.assigned == cell and cat.state == Defs.CAT_WORKING:
-			return 1.0 if cat.hunger > 0.0 else Defs.HUNGER_STARVED_RATE
+	var worker: Cat = worker_at(cell)
+	if worker != null:
+		return 1.0 if worker.hunger > 0.0 else Defs.HUNGER_STARVED_RATE
 	return supply if power_capacity > 0.0 else 0.0
+
+## The cat actually standing at this machine, or null. Carried cats are excluded
+## here rather than at each call site: a cat in the player's arms was still
+## counted as working, so picking one up left its miner running on a worker who
+## was several tiles away in mid-air.
+func worker_at(cell: Vector2i) -> Cat:
+	for cat: Cat in cats:
+		if cat == carried_cat:
+			continue
+		if cat.assigned == cell and cat.state == Defs.CAT_WORKING:
+			return cat
+	return null
 
 ## True when this miner is running on the grid rather than on a worker, which is
 ## what the drill colour and the power ledger both need to know.
@@ -799,10 +828,7 @@ func miner_on_power(cell: Vector2i) -> bool:
 		return false
 	if power_capacity <= 0.0:
 		return false
-	for cat: Cat in cats:
-		if cat.assigned == cell and cat.state == Defs.CAT_WORKING:
-			return false
-	return true
+	return worker_at(cell) == null
 
 ## --- Hand mining ----------------------------------------------------------
 ## The player can work a seam themselves from the first minute. It is slow on
@@ -839,7 +865,7 @@ func collect_ground_at(cell: Vector2i) -> int:
 		return -1
 	var item_type: int = int(ground[cell])
 	ground.erase(cell)
-	stock[item_type] = int(stock.get(item_type, 0)) + 1
+	_gain(item_type, 1)
 	if item_type == Defs.ITEM_ENERGY:
 		heat += Defs.ITEM_VALUES[item_type]
 		total_heat += Defs.ITEM_VALUES[item_type]
@@ -861,6 +887,15 @@ func _tick_cats(delta: float) -> void:
 		if machines[cell].type == Defs.M_MINER:
 			machines[cell].operated = false
 	for cat: Cat in cats:
+		# A cat in the player's arms is not a cat that is doing anything. Its
+		# position belongs to carry_at, and letting a handler run alongside that
+		# means the two write to it in the same frame: the sprite jumps between
+		# the player's hands and wherever the cat was walking. It could also
+		# change its own state in mid-air, and go on running a miner from up
+		# there. Three of the nine handlers used to check this individually,
+		# which is exactly how the other six came to be missing it.
+		if cat == carried_cat:
+			continue
 		match cat.state:
 			Defs.CAT_TO_MINER: _cat_walk_to_miner(cat, delta)
 			Defs.CAT_WORKING: _cat_work(cat, delta)
@@ -872,14 +907,20 @@ func _tick_cats(delta: float) -> void:
 			Defs.CAT_TO_SHELTER: _cat_walk_home(cat, delta)
 			Defs.CAT_ASLEEP: pass
 
+## Walks a cat toward a point. Returns true once it is close enough to count as
+## arrived -- which is not the same as being exactly on the spot. Snapping the
+## last ten pixels onto the goal covered a fifth of a second of walking in a
+## single frame, and the sprite and its shadow visibly jumped to get there.
+## Stopping a few pixels short reads as a cat standing next to the bowl, which is
+## what a cat would do anyway.
 func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 	var to_goal: Vector2 = goal - cat.pos
 	var step: float = Defs.CAT_SPEED * delta
-	if to_goal.length() <= maxf(step, Defs.CAT_ARRIVE):
+	if to_goal.length() <= step:
 		cat.pos = goal
 		return true
 	cat.pos += to_goal.normalized() * step
-	return false
+	return to_goal.length() <= Defs.CAT_ARRIVE
 
 ## An unassigned cat with something to fetch goes and fetches it.
 func _cat_look_for_work(cat: Cat) -> void:
@@ -1306,7 +1347,7 @@ func _deliver(item_type: int, cell: Vector2i) -> void:
 	heat += value
 	total_heat += value
 	_heat_accum += float(value)
-	stock[item_type] = int(stock.get(item_type, 0)) + 1
+	_gain(item_type, 1)
 	delivered[item_type] = int(delivered.get(item_type, 0)) + 1
 	var core: Machine = machines.get(core_cell, null)
 	if core != null:

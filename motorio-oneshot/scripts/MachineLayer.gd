@@ -189,6 +189,12 @@ func _draw_shelter_occupied(at: Vector2, body: Rect2, flicker: float) -> void:
 	# Frame the panel again on top, or the lit wall bleeds over the hut's outline.
 	draw_rect(body, Color(0.02, 0.03, 0.05, 0.55), false, 1.0)
 
+## Carried cats ride in the player's arms and are painted by PlayerActor; sleeping
+## ones are a shadow on the shelter wall. Both would otherwise be drawn twice.
+func _cat_hidden(cat: Sim.Cat) -> bool:
+	return cat == sim.carried_cat or cat.state == Defs.CAT_ASLEEP \
+		or not view_rect.grow(64.0).has_point(cat.pos)
+
 ## A bracket around the machine the panel is reporting on. Corners rather than a
 ## full box, so it reads as a measuring frame and never hides the machine's own
 ## border colour -- which is how the player identifies the machine type.
@@ -475,12 +481,15 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
 func _draw_cats() -> void:
+	# Every shadow first, then every body. Drawn per cat, the next cat's shadow
+	# lands on top of the previous cat's feet, and a group crossing paths reads as
+	# shadows sliding around independently of the cats casting them.
 	for cat: Sim.Cat in sim.cats:
-		if cat == sim.carried_cat:
-			continue      # drawn in the player's arms by PlayerActor
-		if cat.state == Defs.CAT_ASLEEP:
-			continue      # indoors: a shadow on the shelter wall instead
-		if not view_rect.grow(64.0).has_point(cat.pos):
+		if _cat_hidden(cat):
+			continue
+		_shadow(cat.pos + Vector2(0, 10), 8.0)
+	for cat: Sim.Cat in sim.cats:
+		if _cat_hidden(cat):
 			continue
 		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02
 		# Eating gets its own motion: a quick repeated dip toward the bowl, so a
@@ -505,7 +514,6 @@ func _draw_cats() -> void:
 		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4 + munch), size)
 		if bool(view["flip"]):
 			target.position.x += absf(size.x)
-		_shadow(cat.pos + Vector2(0, 10), 8.0)
 		draw_texture_rect_region(CAT_SHEET, target, _cat_region(String(view["view"])), Color.WHITE)
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling

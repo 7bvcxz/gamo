@@ -193,6 +193,8 @@ func _run() -> void:
 	main.set_game_scale(Defs.GAME_SCALE_DEFAULT)
 	main.save_settings()
 
+	_test_resource_ledger(main)
+
 	if failures == 0:
 		print("SETTINGS_TEST: PASS")
 	quit(failures)
@@ -203,6 +205,68 @@ func _run() -> void:
 func _tick(main: Node2D) -> void:
 	main._process(0.0)
 	main.hud._process(0.0)
+
+## --- The resource ledger ------------------------------------------------------
+## Split out of the status panel: that box is about the player's own situation
+## (time, daylight, warmth, body heat) and this one is about what they own. They
+## were one box, and every resource added to the game made the clock harder to
+## read.
+func _test_resource_ledger(main: Node2D) -> void:
+	var sim = main.sim
+	main.state = main.State.PLAY
+	sim.stock.clear()
+	sim.delivered.clear()
+	sim.gain_rate.clear()
+	main.hud._apply_scale()
+	main.hud._layout()
+
+	var names: Array[String] = _row_names(main)
+	_assert(names.has("열"), "heat is always on the ledger, since it is the score")
+	_assert(not names.has("구리"),
+		"a resource never seen is not listed: a row reading zero teaches nothing")
+
+	# Gaining one is what puts it on the list, and the rate comes from the same
+	# accounting rather than from a second counter that could disagree.
+	sim._gain(Defs.ITEM_COPPER, 4)
+	sim.tick(1.05)
+	names = _row_names(main)
+	_assert(names.has("구리"), "holding a resource puts it on the ledger")
+	_assert(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0) > 0.0,
+		"and what arrived is counted as income: %.2f/s" % float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)))
+
+	# Spending is not negative production. A row that dipped below zero every
+	# time the player built something would be reporting on the wrong thing.
+	var before: float = float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0))
+	sim.stock[Defs.ITEM_COPPER] = 1
+	sim.tick(1.05)
+	_assert(float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)) <= before + 0.001,
+		"spending never registers as income")
+
+	# Power reads as used-of-available rather than as a stock, and only appears
+	# once something generates it.
+	_assert(not _row_names(main).has("전기"), "no power row before a generator exists")
+
+	# The two boxes must not overlap each other, the screen edge or the hotbar,
+	# at any scale the player can choose.
+	for scale_value: float in [Defs.UI_SCALE_MIN, Defs.UI_SCALE_DEFAULT, Defs.UI_SCALE_MAX]:
+		main.ui_scale = scale_value
+		main.hud._apply_scale()
+		main.hud._layout()
+		var status: Rect2 = main.hud.status_rect()
+		var ledger: Rect2 = main.hud.resource_rect()
+		_assert(ledger.position.y >= status.position.y + status.size.y,
+			"the ledger sits below the status panel at UI %.2f" % scale_value)
+		_assert(ledger.position.x >= 0.0 and ledger.position.x + ledger.size.x <= main.hud.size.x + 0.5,
+			"and stays on screen at UI %.2f" % scale_value)
+		_assert(ledger.position.y + ledger.size.y <= main.hud.hotbar_origin().y + 0.5,
+			"and clear of the hotbar at UI %.2f" % scale_value)
+	main.ui_scale = Defs.UI_SCALE_DEFAULT
+
+func _row_names(main: Node2D) -> Array[String]:
+	var names: Array[String] = []
+	for row: Array in main.hud.resource_rows():
+		names.append(String(row[0]))
+	return names
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

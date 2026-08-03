@@ -352,7 +352,10 @@ const FOOD_OFFSET := Vector2(-4.5, 2.5)
 const CAT_SPEED := 46.0            # pixels per second while walking
 const CAT_ARRIVE := 10.0           # how close counts as "at the machine"
 const BOXES_PER_CAT := 3
-const CAT_BOX_PER_TILES := 100.0   # one crate per hundred tiles of world
+## Crate density: one per this many tiles of world. Raised by half on request --
+## cats are what gate automation, so how many crates the map holds is the pace at
+## which the factory is allowed to grow.
+const CAT_BOX_PER_TILES := 66.7
 const STARTER_CAT_BOXES := 3
 
 ## Hunger runs 0..1. Working costs 1/18 every ten seconds, so a fed cat works

@@ -7,7 +7,7 @@ extends Node2D
 ## and the warm radius all carry into the next morning.
 ## SETTINGS is a state rather than an overlay flag so that opening it stops the
 ## clock: sizing the UI should never cost the player warmth.
-enum State { TITLE, PLAY, PAUSED, RESULT, SETTINGS, NIGHTFALL, DAYBREAK }
+enum State { TITLE, PLAY, RESULT, SETTINGS, NIGHTFALL, DAYBREAK }
 ## Phases inside NIGHTFALL and DAYBREAK. Both run on one timer rather than a
 ## handful of booleans, so there is one place to read what the sequence is doing.
 enum Phase { GATHER, GLOW, DAWN, SPILL }
@@ -293,7 +293,7 @@ func _process(delta: float) -> void:
 		State.TITLE: pass
 		State.NIGHTFALL: _process_nightfall(delta)
 		State.DAYBREAK: _process_daybreak(delta)
-		State.PAUSED, State.RESULT, State.SETTINGS: pass
+		State.RESULT, State.SETTINGS: pass
 
 ## Wind is always there and swells at night; the cold layer tracks how exposed
 ## the player actually is, so the ear learns the danger before the screen does.
@@ -546,6 +546,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_nudge_slider(int(hud.settings_row), -Defs.UI_SCALE_STEP)
 		elif key.keycode == KEY_RIGHT or key.keycode == KEY_EQUAL:
 			_nudge_slider(int(hud.settings_row), Defs.UI_SCALE_STEP)
+		elif key.keycode == KEY_N:
+			settings_restart()
+		elif key.keycode == KEY_S:
+			settings_save()
 		get_viewport().set_input_as_handled()
 		return
 	match state:
@@ -567,12 +571,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				audio.call("play", "confirm")
 				get_viewport().set_input_as_handled()
 			return
-		State.PAUSED:
-			if key.keycode == KEY_ESCAPE:
-				state = State.PLAY
-				audio.call("play", "confirm")
-				get_viewport().set_input_as_handled()
-			return
 		State.NIGHTFALL, State.DAYBREAK:
 			# The sequence plays itself and is over in seconds. Only the debug
 			# speed stays live, so a tester who has watched it forty times can
@@ -583,8 +581,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if key.keycode == KEY_ESCAPE:
-		state = State.PAUSED
-		audio.call("play", "confirm")
+		# Settings, not a separate pause screen. Opening settings already stops
+		# the world, so a second stopped screen was one more thing to build,
+		# explain and keep consistent for no behaviour anyone was missing.
+		open_settings()
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + Defs.BUILDABLE.size():
@@ -623,7 +623,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## True on any screen where the only sensible action is "continue", so a tap
 ## anywhere is accepted instead of demanding a precise button press.
 func touch_anywhere_starts() -> bool:
-	return state == State.TITLE or state == State.RESULT or state == State.PAUSED
+	return state == State.TITLE or state == State.RESULT
 
 ## Touch handling for the on-screen HUD: picking a machine and rotating it are
 ## keyboard-only otherwise, which left the game unplayable on a phone.
@@ -637,6 +637,12 @@ func touch_hud(position: Vector2) -> bool:
 		# through onto the world behind it.
 		if (hud.settings_close_rect as Rect2).has_point(local):
 			close_settings()
+			return true
+		if (hud.settings_restart_rect as Rect2).has_point(local):
+			settings_restart()
+			return true
+		if (hud.settings_save_rect as Rect2).has_point(local):
+			settings_save()
 			return true
 		var row: int = int(hud.call("slider_at", local))
 		if row >= 0:
@@ -696,8 +702,6 @@ func touch_primary() -> void:
 			audio.call("play", "confirm")
 		State.RESULT:
 			_begin_next_day()
-		State.PAUSED:
-			state = State.PLAY
 		State.SETTINGS:
 			close_settings()
 		State.PLAY:
@@ -737,8 +741,6 @@ func touch_secondary() -> void:
 	match state:
 		State.PLAY:
 			_try_demolish()
-		State.PAUSED:
-			state = State.PLAY
 		State.SETTINGS:
 			close_settings()
 
@@ -993,9 +995,34 @@ func open_settings() -> void:
 	touch.release_all()
 	audio.call("play", "select")
 
+## Wipes the save and starts a fresh day one. Asked twice on purpose: it is the
+## only button in the game that can destroy hours of factory, it now sits on the
+## panel Esc opens rather than behind a menu, and a mis-tap has no undo.
+func settings_restart() -> void:
+	if hud.restart_armed <= 0.0:
+		hud.restart_armed = 4.0
+		audio.call("play", "select")
+		return
+	hud.restart_armed = 0.0
+	clear_save()
+	_start_run()
+	state = State.PLAY
+	state_before_settings = State.PLAY
+	hud.call("end_slider_drag")
+	_notify("처음부터 시작합니다", Defs.COL_DANGER)
+	audio.call("play", "confirm")
+
+func settings_save() -> void:
+	if save_game(false):
+		hud.saved_flash = 2.0
+		audio.call("play", "confirm")
+	else:
+		_notify("저장에 실패했습니다", Defs.COL_DANGER)
+
 func close_settings() -> void:
 	if state != State.SETTINGS:
 		return
+	hud.restart_armed = 0.0
 	state = state_before_settings
 	hud.call("end_slider_drag")
 	audio.call("play", "confirm")

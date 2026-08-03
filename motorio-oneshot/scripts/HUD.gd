@@ -25,6 +25,13 @@ var hotbar_rects: Array[Rect2] = []
 var direction_rect := Rect2()
 var settings_button_rect := Rect2()
 var settings_close_rect := Rect2()
+var settings_restart_rect := Rect2()
+var settings_save_rect := Rect2()
+## Restart is one tap from erasing a factory, so it asks once. Seconds remaining
+## on the confirmation; zero means the button is in its normal state.
+var restart_armed: float = 0.0
+## Brief acknowledgement after a manual save, so the button visibly did something.
+var saved_flash: float = 0.0
 ## One entry per settings row: 0 is the HUD size, 1 is the world's.
 var slider_track_rects: Array[Rect2] = [Rect2(), Rect2()]
 ## Deliberately taller than the tracks they drive: an 8px bar is not a touch
@@ -40,6 +47,10 @@ func _process(delta: float) -> void:
 	if main != null:
 		_apply_scale()
 		_layout()
+	# Both of these are short-lived button states rather than game state, so they
+	# live and expire here rather than in the orchestrator.
+	restart_armed = maxf(0.0, restart_armed - delta)
+	saved_flash = maxf(0.0, saved_flash - delta)
 	_repaint += delta
 	if _repaint < 1.0 / 30.0:
 		return
@@ -89,7 +100,7 @@ func status_top() -> float:
 
 ## Below the gear, and never wider than the screen it is drawn on.
 func status_rect() -> Rect2:
-	return Rect2(MARGIN, status_top(), minf(PANEL_W, size.x - MARGIN * 2.0), 128)
+	return Rect2(MARGIN, status_top(), minf(PANEL_W, size.x - MARGIN * 2.0), 108)
 
 ## Screen space the touch pad occupies along the bottom, in HUD-local units. The
 ## pad is laid out in viewport pixels and the HUD in scaled ones, so the two only
@@ -112,7 +123,10 @@ func _layout() -> void:
 	settings_button_rect = Rect2(MARGIN, MARGIN, SETTINGS_BUTTON, SETTINGS_BUTTON)
 	_layout_settings()
 
-const SETTINGS_CARD_H := 346.0
+## Two sliders, then a row of two actions, then close. Taller than it was because
+## Esc opens this panel now: it is the only stopped screen, so everything a
+## player wants while stopped has to be reachable from it.
+const SETTINGS_CARD_H := 424.0
 const SETTINGS_ROW_H := 92.0
 const SETTINGS_ROW_TOP := 96.0
 const SLIDER_LABELS := ["화면 UI 크기", "게임 화면 크기"]
@@ -127,6 +141,12 @@ func _layout_settings() -> void:
 		# without overlapping and every pixel between them belongs to someone.
 		slider_hit_rects[index] = Rect2(track.position - Vector2(26.0, 34.0),
 			track.size + Vector2(52.0, 68.0))
+	var gap := 12.0
+	var action_w: float = (card.size.x - 68.0 - gap) * 0.5
+	var action_y: float = card.size.y - 134.0
+	settings_restart_rect = Rect2(card.position + Vector2(34.0, action_y), Vector2(action_w, 44.0))
+	settings_save_rect = Rect2(card.position + Vector2(34.0 + action_w + gap, action_y),
+		Vector2(action_w, 44.0))
 	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 62.0),
 		Vector2(144.0, 42.0))
 
@@ -184,13 +204,6 @@ func _draw() -> void:
 	match main.state:
 		main.State.TITLE: _draw_title()
 		main.State.RESULT: _draw_result()
-		main.State.PAUSED:
-			# Dim the world only. Pause is when the player stops to read the HUD,
-			# so the HUD itself must stay at full brightness.
-			draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.06, 0.55))
-			_draw_status()
-			_draw_palette()
-			_draw_pause_card()
 		main.State.NIGHTFALL, main.State.DAYBREAK:
 			# The sequence is the one moment the game is not asking for anything,
 			# so the hotbar, the objective and the placement ghost all get out of
@@ -206,12 +219,14 @@ func _draw() -> void:
 				_draw_title()
 			else:
 				_draw_status()
+				_draw_resources()
 				_draw_palette()
 			_draw_settings_card()
 		_:
 			_draw_cold_vignette()
 			_draw_blackout()
 			_draw_status()
+			_draw_resources()
 			_draw_palette()
 			_draw_meter_card()
 			_draw_message()
@@ -293,52 +308,114 @@ func _draw_snow(strength: float) -> void:
 # --- In-run UI ---------------------------------------------------------------
 
 func _draw_status() -> void:
-	var sim = main.sim
 	var panel: Rect2 = status_rect()
 	# Fully opaque: ore silhouettes were crawling behind the temperature row.
 	_panel(panel, Defs.COL_PANEL, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
 
-	# The clock is the cold pressure, so it is rendered cold and never outranks
-	# the core in brightness.
+	# Time, daylight, warmth, body heat. Everything in this box is about the
+	# player's own situation; what they own moved to the ledger below it, because
+	# a box that grew a row per resource was slowly burying the clock.
 	var seconds: int = int(ceil(main.time_left))
 	var urgent: bool = seconds <= 45
-	# In a five-minute one-shot the clock is the game; it gets the top of the
-	# hierarchy back, while its caption drops well below it.
 	var clock: Color = Defs.COL_DANGER if urgent else Color8(226, 236, 248)
-	_text(panel.position + Vector2(14, 38), "%02d:%02d" % [seconds / 60, seconds % 60], 26, clock)
-	var track := Rect2(panel.position + Vector2(104, 22), Vector2(112, 6))
-	draw_rect(track, Color8(28, 36, 54))
-	var fill: float = clampf(main.time_left / Defs.DAY_SECONDS, 0.0, 1.0)
-	draw_rect(Rect2(track.position, Vector2(track.size.x * fill, track.size.y)),
-		Defs.COL_DANGER if urgent else Defs.COL_CLOCK_FILL)
-	_text(panel.position + Vector2(104, 44), "%d일차 · 해질녘까지" % main.day_number, 11, Defs.COL_CLOCK)
-
-	# Heat is the score, the currency and the map key, so it gets the warm accent.
-	# The warm radius is what the run is actually about, so it is promoted above
-	# the running totals rather than tucked into the panel's dead corner.
-	_text(panel.position + Vector2(14, 70), "열 %d" % sim.heat, 19, Defs.COL_CORE)
-	_text_in(Rect2(panel.position + Vector2(96, 58), Vector2(120, 20)), "온기 %.1f칸" % sim.warm_radius, 15,
-		Defs.COL_MACHINE_EDGE, HORIZONTAL_ALIGNMENT_RIGHT)
-	_text(panel.position + Vector2(70, 70), "%+.0f/분" % sim.heat_rate, 13,
-		Defs.COL_CORE if sim.heat_rate > 0.0 else Defs.COL_TEXT_DIM)
-	_text_in(Rect2(panel.position + Vector2(96, 76), Vector2(120, 16)), "누적 %d" % sim.total_heat, 11,
-		Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_RIGHT)
-	# Copper and iron are materials, not currency, so they get their own row.
-	var materials: Vector2 = panel.position + Vector2(14, 92)
-	draw_circle(materials + Vector2(4, -4), 4.5, Defs.ITEM_COLORS[Defs.ITEM_COPPER])
-	# Stock, not lifetime totals: this is the number the player spends, so it is
-	# the number that has to be on screen.
-	var slot_x: float = 0.0
-	for item_type: int in Defs.COUNTED_ITEMS:
-		var held: int = int(sim.stock.get(item_type, 0))
-		draw_circle(materials + Vector2(slot_x + 5, -4), 4.0, Defs.ITEM_COLORS[item_type])
-		var short: String = Defs.ITEM_SHORT[item_type]
-		_text(materials + Vector2(slot_x + 13, 0), "%s %d" % [short, held], 12,
-			Defs.COL_TEXT if held > 0 else Defs.COL_TEXT_DIM)
-		slot_x += 68.0
+	_text(panel.position + Vector2(14, 40), "%02d:%02d" % [seconds / 60, seconds % 60], 26, clock)
+	# The phase rides on the day line rather than under the arc: a caption there
+	# lands exactly on the body-temperature readout at the panel's right edge.
+	var phase: String = "밤" if main.is_night() else ("해질녘" if main.is_dusk() else "낮")
+	_text(panel.position + Vector2(14, 56), "%d일차 · %s" % [main.day_number, phase], 11,
+		Defs.COL_DANGER if main.is_night() else Defs.COL_CLOCK)
+	_draw_day_arc(panel)
+	_text(panel.position + Vector2(14, 76), "온기 %.1f칸" % main.sim.warm_radius, 14,
+		Defs.COL_MACHINE_EDGE)
 
 	_draw_warmth_row(panel)
 	_draw_objective()
+
+## Daylight as a half circle the sun crosses, left to right. A bar told the
+## player how much time was left as a number they had to convert; an arc tells
+## them where in the day they are at a glance, which is the thing they actually
+## act on. The stretch that is already dusk is marked, so "how long until I have
+## to walk home" is read rather than calculated.
+func _draw_day_arc(panel: Rect2) -> void:
+	var centre: Vector2 = panel.position + Vector2(panel.size.x - 54.0, 68.0)
+	var radius := 30.0
+	draw_arc(centre, radius, PI, TAU, 32, Color8(28, 36, 54), 5.0, true)
+	var dusk_at: float = 1.0 - Defs.DUSK_SECONDS / Defs.DAY_SECONDS
+	draw_arc(centre, radius, PI + PI * dusk_at, TAU, 20,
+		Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.45), 5.0, true)
+
+	var travelled: float = clampf(main.day_fraction(), 0.0, 1.0)
+	var angle: float = PI + PI * travelled
+	if travelled > 0.005:
+		draw_arc(centre, radius, PI, angle, 28, Defs.COL_CLOCK_FILL, 5.0, true)
+	var at: Vector2 = centre + Vector2.from_angle(angle) * radius
+	var night: bool = main.is_night()
+	var marker: Color = Color8(196, 212, 240) if night else Defs.COL_CORE
+	draw_circle(at, 9.0, Color(marker.r, marker.g, marker.b, 0.22))
+	draw_circle(at, 5.0, marker)
+	if night:
+		# Bitten with the panel colour rather than drawn as an arc: a crescent is
+		# what tells the player at a glance that the sun is no longer up.
+		draw_circle(at + Vector2(2.6, -1.8), 3.8, Defs.COL_PANEL)
+
+# --- Resource ledger ----------------------------------------------------------
+const RESOURCE_ROW := 17.0
+
+## What the player owns and how fast it is arriving, one row each. Separate from
+## the status panel: they answer different questions, and every resource added to
+## the game used to make the clock above it harder to read.
+func resource_rect() -> Rect2:
+	var panel: Rect2 = status_rect()
+	return Rect2(panel.position + Vector2(0.0, panel.size.y + 8.0),
+		Vector2(panel.size.x, 12.0 + float(resource_rows().size()) * RESOURCE_ROW))
+
+## [name, amount, rate text, colour]. Heat first because it is the score; power
+## last and only once something generates it, since a row reading zero of zero
+## teaches nothing.
+func resource_rows() -> Array[Array]:
+	var sim = main.sim
+	var rows: Array[Array] = []
+	rows.append(["열", "%d" % sim.heat, _rate_text(sim.heat_rate / 60.0), Defs.COL_CORE])
+	for item_type: int in Defs.COUNTED_ITEMS:
+		var held: int = int(sim.stock.get(item_type, 0))
+		var seen: bool = held > 0 or int(sim.delivered.get(item_type, 0)) > 0
+		if not seen:
+			continue
+		rows.append([Defs.ITEM_SHORT[item_type], "%d" % held,
+			_rate_text(float(sim.gain_rate.get(item_type, 0.0))), Defs.ITEM_COLORS[item_type]])
+	if sim.power_capacity > 0.0 or sim.machine_count(Defs.M_GENERATOR) > 0:
+		# Power is a rate on both sides, so it reads as used-of-available rather
+		# than as a stock with an income.
+		rows.append(["전기", "%.1f/%.1f" % [sim.power_draw, sim.power_capacity], "",
+			Defs.COL_MACHINE_EDGE])
+	return rows
+
+func _rate_text(per_second: float) -> String:
+	if per_second <= 0.0005:
+		return ""
+	if per_second >= 10.0:
+		return "+%.0f/s" % per_second
+	return "+%.1f/s" % per_second
+
+func _draw_resources() -> void:
+	var rows: Array[Array] = resource_rows()
+	if rows.is_empty():
+		return
+	var box: Rect2 = resource_rect()
+	_panel(box, Defs.COL_PANEL,
+		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
+	var y: float = 10.0
+	for row: Array in rows:
+		var tint: Color = row[3]
+		draw_circle(box.position + Vector2(15.0, y + 5.0), 3.6, tint)
+		_text(box.position + Vector2(24.0, y + 9.0), String(row[0]), 12, Defs.COL_TEXT)
+		# Amount and rate are right-aligned in their own columns, so the eye can
+		# run down either one without reading the other.
+		_text_in(Rect2(box.position + Vector2(box.size.x - 138.0, y + 9.0), Vector2(72.0, 14)),
+			String(row[1]), 13, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+		_text_in(Rect2(box.position + Vector2(box.size.x - 62.0, y + 9.0), Vector2(50.0, 14)),
+			String(row[2]), 11, tint, HORIZONTAL_ALIGNMENT_RIGHT)
+		y += RESOURCE_ROW
 
 ## The next useful action, always on screen. This is the whole onboarding: no
 ## modal tutorial, no text wall, just one line that keeps up with the player.
@@ -370,7 +447,7 @@ func _draw_objective() -> void:
 func _draw_warmth_row(panel: Rect2) -> void:
 	var warmth: float = main.player.warmth
 	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
-	var origin: Vector2 = panel.position + Vector2(14, 108)
+	var origin: Vector2 = panel.position + Vector2(14, 88)
 	_text(origin + Vector2(0, 10), "체온", 11, Defs.COL_TEXT_DIM)
 	_text_in(Rect2(origin + Vector2(166, -2), Vector2(36, 16)), "%d%%" % int(round(warmth)), 11,
 		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER, HORIZONTAL_ALIGNMENT_RIGHT)
@@ -445,7 +522,7 @@ func _draw_palette() -> void:
 	# On a phone the keyboard legend is noise; the pad already carries the verbs.
 	if main.touch == null or not main.touch.visible:
 		_text_in(Rect2(size.x - 460.0 - MARGIN, MARGIN + 2.0, 460.0, 16),
-			"C 채굴   Z 설치   X 회수   R 회전   F 제법   Esc 일시정지", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+			"C 채굴   Z 설치   X 회수   R 회전   F 제법   Esc 설정", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.
@@ -680,12 +757,30 @@ func _draw_settings_card() -> void:
 	for index in SLIDER_LABELS.size():
 		_draw_settings_row(card, index)
 
+	_draw_settings_action(settings_restart_rect,
+		"정말 처음부터?" if restart_armed > 0.0 else "처음부터",
+		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
+	_draw_settings_action(settings_save_rect,
+		"저장했습니다" if saved_flash > 0.0 else "저장하기",
+		Defs.COL_CORE if saved_flash > 0.0 else Defs.COL_TEXT_DIM)
+
 	var touch_pad: bool = main.touch != null and main.touch.visible
-	_text_in(Rect2(card.position + Vector2(0, SETTINGS_CARD_H - 76.0), Vector2(w, 18)),
-		"슬라이더를 드래그하세요" if touch_pad else "↑ ↓ 로 선택, ← → 로 조절", 12, Defs.COL_TEXT_DIM)
+	var hint: String = "한 번 더 누르면 지금까지의 공장이 사라집니다" if restart_armed > 0.0 \
+		else ("슬라이더를 드래그하세요" if touch_pad else "↑ ↓ 로 선택, ← → 로 조절")
+	_text_in(Rect2(card.position + Vector2(0, SETTINGS_CARD_H - 76.0), Vector2(w, 18)), hint, 12,
+		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
 	var close: Rect2 = settings_close_rect
 	_panel(close, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18), Defs.COL_CORE)
 	_text_in(Rect2(close.position + Vector2(0, 28), Vector2(close.size.x, 22)), "닫기", 16, Defs.COL_TEXT)
+
+## One of the two action buttons. Outlined rather than filled, so neither of them
+## competes with the close button for being the obvious thing to press.
+func _draw_settings_action(rect: Rect2, label: String, tint: Color) -> void:
+	if rect.size.x <= 0.0:
+		return
+	_panel(rect, Color(tint.r, tint.g, tint.b, 0.12), Color(tint.r, tint.g, tint.b, 0.75))
+	_text_in(Rect2(rect.position + Vector2(0, rect.size.y * 0.5 + 6.0), Vector2(rect.size.x, 20)),
+		label, 15, Defs.COL_TEXT)
 
 func _draw_settings_row(card: Rect2, index: int) -> void:
 	var w: float = card.size.x
@@ -706,11 +801,6 @@ func _draw_settings_row(card: Rect2, index: int) -> void:
 	var held: bool = dragging_slider == index
 	draw_circle(knob, 17.0 if held else 15.0, Defs.COL_CORE)
 	draw_circle(knob, 17.0 if held else 15.0, Color(0.02, 0.03, 0.06, 0.45), false, 1.6)
-
-func _draw_pause_card() -> void:
-	var card := _card(150.0)
-	_text_in(Rect2(card.position + Vector2(0, 62), Vector2(card.size.x, 40)), "일시정지", 32, Defs.COL_TEXT)
-	_text_in(Rect2(card.position + Vector2(0, 104), Vector2(card.size.x, 20)), "Esc 로 계속", 14, Defs.COL_TEXT_DIM)
 
 func _draw_result() -> void:
 	_dim(0.82)

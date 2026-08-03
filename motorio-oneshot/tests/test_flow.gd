@@ -28,16 +28,32 @@ func _run() -> void:
 	_assert(main.state == main.State.PLAY, "any key leaves the title screen")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the run starts with a full day")
 
-	# Pause and resume.
+	# Esc opens settings. There is no separate pause screen: settings already
+	# stops the world, so a second stopped screen was one more thing to build and
+	# keep consistent for behaviour nobody was missing.
 	_press(main, KEY_ESCAPE)
-	_assert(main.state == main.State.PAUSED, "Esc pauses")
+	_assert(main.state == main.State.SETTINGS, "Esc opens the settings panel")
 	var frozen: float = main.time_left
 	main._process(0.5)
-	_assert(is_equal_approx(main.time_left, frozen), "the clock stops while paused")
+	_assert(is_equal_approx(main.time_left, frozen), "and the clock stops while it is up")
 	_press(main, KEY_ESCAPE)
-	_assert(main.state == main.State.PLAY, "Esc resumes")
+	_assert(main.state == main.State.PLAY, "Esc closes it again")
 	main._process(0.25)
-	_assert(main.time_left < frozen, "the clock runs again after resuming")
+	_assert(main.time_left < frozen, "the clock runs again afterwards")
+
+	# The two actions the panel now carries. Saving is immediate; restarting asks
+	# once, because it is the only button in the game that can destroy a factory
+	# and a mis-tap has no undo.
+	_press(main, KEY_ESCAPE)
+	main.settings_save()
+	_assert(main.hud.saved_flash > 0.0, "저장하기 reports that it saved")
+	main.settings_restart()
+	_assert(main.state == main.State.SETTINGS, "처음부터 does not fire on the first press")
+	_assert(main.hud.restart_armed > 0.0, "it arms itself and says so")
+	main.settings_restart()
+	_assert(main.state == main.State.PLAY, "the second press starts a new run")
+	_assert(main.day_number == 1, "at day one")
+	_assert(is_zero_approx(main.hud.restart_armed), "and disarms itself afterwards")
 
 	# Build selection and rotation are reflected in the preview.
 	_press(main, KEY_2)
