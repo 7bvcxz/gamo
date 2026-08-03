@@ -126,7 +126,6 @@
     }
   ],
   "power": {
-    "belt_draw": 0.1,
     "generator_output": 1.0,
     "miner_draw": 0.5,
     "miners_per_generator": 2.0
@@ -183,7 +182,7 @@
     "purity_pure": 17.0,
     "purity_rich": 11.0
   },
-  "version": "0.10.1",
+  "version": "0.13.2",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

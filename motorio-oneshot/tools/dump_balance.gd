@@ -101,7 +101,6 @@ func _initialize() -> void:
 		},
 		"power": {
 			"generator_output": Defs.GENERATOR_OUTPUT,
-			"belt_draw": Defs.BELT_POWER_DRAW,
 			"miner_draw": Defs.MINER_POWER_DRAW,
 			"miners_per_generator": Defs.GENERATOR_OUTPUT / Defs.MINER_POWER_DRAW,
 		},

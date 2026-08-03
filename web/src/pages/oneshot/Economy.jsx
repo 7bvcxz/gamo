@@ -147,7 +147,6 @@ export function Economy() {
           <thead><tr><th>항목</th><th>값</th></tr></thead>
           <tbody>
             <tr><td>발전기 공급</td><td>{n(balance.power.generator_output, 1)}</td></tr>
-            <tr><td>벨트 소비</td><td>{n(balance.power.belt_draw, 1)}</td></tr>
             <tr><td>고양이 없는 채굴기 소비</td><td>{n(balance.power.miner_draw, 1)}</td></tr>
             <tr><td>발전기 1대가 감당하는 채굴기</td><td>{n(balance.power.miners_per_generator)}대</td></tr>
           </tbody>

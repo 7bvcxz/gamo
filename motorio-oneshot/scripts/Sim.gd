@@ -53,6 +53,10 @@ class Machine extends RefCounted:
 	var items: Array[Dictionary] = []
 	## Furnace input buffer keyed by item type.
 	var buffer: Dictionary = {}
+	## Finished output the machine has not managed to hand on yet. A recipe that
+	## makes three at once cannot put all three on one belt tile in the same
+	## instant, and the remainder is owed rather than lost.
+	var pending: int = 0
 	## Miners only run while a cat is standing here.
 	var operated: bool = false
 	## What this machine has actually moved, in items, kept in two buckets so the
@@ -127,6 +131,7 @@ func to_save() -> Dictionary:
 			"dx": machine.dir.x, "dy": machine.dir.y,
 			"progress": machine.progress, "items": machine.items.duplicate(true),
 			"buffer": machine.buffer.duplicate(true), "recipe": machine.recipe,
+			"pending": machine.pending,
 			"tier": machine.tier,
 		})
 	var cat_rows: Array = []
@@ -190,6 +195,7 @@ func from_save(data: Dictionary) -> void:
 		machine.progress = float(row.get("progress", 0.0))
 		machine.buffer = (row.get("buffer", {}) as Dictionary).duplicate(true)
 		machine.recipe = int(row.get("recipe", Defs.RECIPE_PLAIN))
+		machine.pending = int(row.get("pending", 0))
 		machine.tier = int(row.get("tier", 0))
 		for item: Dictionary in row.get("items", []):
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
@@ -581,8 +587,6 @@ func tick(delta: float) -> void:
 			# machine running on the grid is just as much running.
 			if rate > 0.0:
 				machine.operated = true
-		if machine.type == Defs.M_BELT:
-			speed *= supply
 		match machine.type:
 			Defs.M_MINER: _tick_miner(machine, delta * speed)
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
@@ -768,9 +772,7 @@ func _recount_power() -> void:
 	var draw: float = 0.0
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
-		if machine.type == Defs.M_BELT:
-			draw += Defs.BELT_POWER_DRAW
-		elif machine.type == Defs.M_MINER and miner_on_power(cell):
+		if machine.type == Defs.M_MINER and miner_on_power(cell):
 			draw += Defs.MINER_POWER_DRAW
 	power_draw = draw
 
@@ -1097,6 +1099,18 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 ## material to heat, so it is also the player's throttle on how fast the world
 ## opens up.
 func _tick_exchanger(machine: Machine, delta: float) -> void:
+	# Anything the last batch could not hand on is still owed, and is paid before
+	# a new batch starts. A three-output recipe cannot put all three on one belt
+	# tile at once -- a belt wants a third of a tile of clearance between items --
+	# and the old code consumed the whole batch's inputs, placed whatever fitted
+	# and dropped the rest. Two of every three alloy crystals were destroyed the
+	# moment the output was a belt, which is a loss the player cannot see happen
+	# and cannot account for afterwards.
+	if machine.pending > 0:
+		_flush_pending(machine)
+		machine.stalled = machine.pending > 0
+		if machine.stalled:
+			return
 	var recipe: Dictionary = Defs.RECIPES[machine.recipe]
 	for item_type: int in recipe["in"]:
 		if int(machine.buffer.get(item_type, 0)) < int(recipe["in"][item_type]):
@@ -1106,21 +1120,24 @@ func _tick_exchanger(machine: Machine, delta: float) -> void:
 	machine.progress += delta
 	if machine.progress < float(recipe["period"]):
 		return
-	# Everything the batch makes has to have somewhere to go before any of it is
-	# consumed, or a three-output recipe would quietly destroy two of them.
-	var pending: int = int(recipe["out"])
-	var placed := 0
-	while placed < pending and _emit_from(machine, Defs.ITEM_ENERGY):
-		placed += 1
-	if placed == 0:
+	# At least one output has to land before anything is consumed, so a machine
+	# facing a wall keeps its materials instead of eating them.
+	if not _emit_from(machine, Defs.ITEM_ENERGY):
 		machine.progress = float(recipe["period"])
 		machine.stalled = true
 		return
-	machine.stalled = false
 	for item_type: int in recipe["in"]:
 		machine.buffer[item_type] = int(machine.buffer[item_type]) - int(recipe["in"][item_type])
+	machine.pending = int(recipe["out"]) - 1
+	_flush_pending(machine)
+	machine.stalled = machine.pending > 0
 	machine.progress = 0.0
 	machine.flash = 0.5
+
+## Hands on as much of the owed output as the destination will take right now.
+func _flush_pending(machine: Machine) -> void:
+	while machine.pending > 0 and _emit_from(machine, Defs.ITEM_ENERGY):
+		machine.pending -= 1
 
 ## Which recipes this base has earned.
 func recipe_unlocked(index: int) -> bool:

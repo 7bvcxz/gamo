@@ -433,8 +433,6 @@ func _draw_palette() -> void:
 			var cost_text := ""
 			for item_type: int in Defs.MACHINE_COSTS[type]:
 				cost_text += "%s %d  " % [Defs.ITEM_NAMES[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
-			if type == Defs.M_BELT:
-				cost_text += "· 전력 %.1f" % Defs.BELT_POWER_DRAW
 			_text(at + Vector2(11, 37), cost_text.strip_edges(), 11,
 				Defs.COL_CORE if afford else Defs.COL_DANGER)
 			# The rate is what makes a machine plannable rather than a mystery.

@@ -188,7 +188,16 @@ static func ratio_hint() -> String:
 ## break anything -- everything drawing power simply slows in proportion.
 const GENERATOR_PERIOD := 10.0
 const GENERATOR_OUTPUT := 1.0
-const BELT_POWER_DRAW := 0.1
+## Belts do not draw power, and must not. They used to, at 0.1 each, which meant
+## that before the first generator existed the grid had capacity zero against a
+## non-zero draw -- and the supply ratio that every belt multiplied its speed by
+## came out at exactly zero. Belts placed in the ordinary early game simply never
+## moved, and whatever fed them reported a blocked output. The belt unlocks on
+## the first copper and the generator needs ten of it plus crystals to burn, so
+## requiring power to run a belt inverts the progression: logistics would depend
+## on the tier that logistics is supposed to lead to.
+## Power's job is stated in the design doc and is only this: it runs a miner that
+## has no cat. Nothing else asks the grid for anything.
 ## What an unstaffed miner asks of the grid. This is the moment electricity stops
 ## being a tax on belts and becomes the thing that scales the factory: early on a
 ## miner needs a cat, and a cat comes from exploring, so the factory is capped by

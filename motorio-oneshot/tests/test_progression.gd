@@ -86,7 +86,10 @@ func _run() -> void:
 	var belt_cell := Vector2i(5, 5)
 	_assert(sim.build(Defs.M_BELT, belt_cell, Vector2i.LEFT), "a belt goes down")
 	sim.tick(0.01)
-	_assert(is_equal_approx(sim.power_draw, Defs.BELT_POWER_DRAW), "and draws power")
+	# A belt asks the grid for nothing. It used to draw 0.1, which with no
+	# generator yet made the supply ratio zero and froze every belt in the early
+	# game -- the tier belts are supposed to lead to was required to run them.
+	_assert(is_equal_approx(sim.power_draw, 0.0), "a belt draws no power")
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "with nothing supplying it yet")
 
 	var gen_cell := Vector2i(5, 7)
