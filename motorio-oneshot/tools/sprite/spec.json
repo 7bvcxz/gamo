@@ -1,0 +1,130 @@
+{
+  "_why": [
+    "The single source of truth for what a sprite in this game is. Everything in",
+    "the pipeline reads this file: the generator prompts, the normaliser, the",
+    "validator, the proposals page and the Godot importer. Hand-copied numbers",
+    "rot -- the belt speed changed by a factor of ten while three doc pages went",
+    "on quoting the old value -- and a sprite spec that has drifted produces art",
+    "that is subtly wrong in a way nobody can point at.",
+    "",
+    "The measurement that produced these numbers: the game currently draws a",
+    "300-pixel illustration of the player at 20x31 game pixels, a 0.105 downscale",
+    "with a nearest filter and no mipmaps. That means the renderer keeps one",
+    "source pixel in ninety and throws the rest away, and *which* one it keeps",
+    "depends on the character's sub-pixel position. Thin details appear and",
+    "vanish between frames; the silhouette itself changes when the character",
+    "moves half a pixel. That is the shimmer this repository has recorded twice",
+    "as an animation bug and tried to fix twice at the anchor level.",
+    "",
+    "So the rule underneath every number below is: stored resolution equals",
+    "displayed resolution. No downscale at draw time, therefore no sub-sampling,",
+    "therefore the whole class of problem is gone rather than mitigated."
+  ],
+
+  "tile": 32,
+
+  "cells": {
+    "character": {
+      "size": [64, 64],
+      "foot_anchor": [32, 52],
+      "body_height": [28, 36],
+      "_why": [
+        "64 rather than 32 so an action pose has somewhere to go: a mining swing",
+        "raises the arms above the head and a carried cat sits in front of the",
+        "chest, and both were cropped by a tight cell. The body occupies about",
+        "half the cell; the space above is for the pose and the space below is",
+        "for the shadow, which is drawn in-engine and must not be baked in.",
+        "The foot anchor is where the character touches the ground, and it is",
+        "the number that every frame is aligned to. It is not the cell centre."
+      ]
+    },
+    "machine": { "size": [32, 32], "foot_anchor": [16, 28] },
+    "building": { "size": [96, 96], "foot_anchor": [48, 84] },
+    "item": { "size": [16, 16], "foot_anchor": [8, 13] }
+  },
+
+  "directions": ["s", "se", "e", "ne", "n", "nw", "w", "sw"],
+  "_directions_why": [
+    "Eight for the artwork; the game's build targeting stays on four cardinals",
+    "because belts and machine outputs are cardinal. The west-side frames are",
+    "mirrored from the east in-engine rather than drawn, which halves the",
+    "generation cost and makes left/right symmetry exact instead of nearly."
+  ],
+  "mirrored_from_east": ["w", "nw", "sw"],
+
+  "animations": {
+    "idle":  { "frames": 4,  "fps": 6,  "loop": true },
+    "walk":  { "frames": 8,  "fps": 10, "loop": true },
+    "run":   { "frames": 8,  "fps": 14, "loop": true },
+    "mine":  { "frames": 6,  "fps": 10, "loop": true },
+    "carry": { "frames": 8,  "fps": 10, "loop": true },
+    "sleep": { "frames": 2,  "fps": 2,  "loop": true }
+  },
+
+  "palette_max": 32,
+  "_palette_why": [
+    "A locked palette is the cheapest consistency check there is. Drift that is",
+    "invisible in a 24-bit image -- a highlight two units warmer than it was in",
+    "the previous frame -- becomes a hard failure the moment the only legal",
+    "colours are these. It is also what makes a generated frame and a",
+    "hand-touched frame belong to the same game.",
+    "Sampled from Defs.gd so the sprites and the drawn machines cannot disagree."
+  ],
+  "palette": [
+    "#0e1320", "#10141c", "#222c44", "#46526c", "#607498",
+    "#8fa0bd", "#e6eef7", "#eee2d1", "#8893a3",
+    "#ffb347", "#e0702a", "#d8a34a", "#ffd39f", "#ff9a3c",
+    "#2f6d72", "#6fd2c8", "#384347", "#262e38",
+    "#7fd4e8", "#fc682e", "#ffd98a", "#ffeecd",
+    "#1c1412", "#e8574c", "#78dc8c",
+
+    "#f8c898", "#e0a878", "#b07850",
+    "#7a1c2c", "#5a1424", "#3a0c18",
+    "#286868", "#1a4a4c",
+    "#a85a24", "#faE2be"
+  ],
+  "_palette_families": {
+    "world": "Defs.gd -- the machines, the UI and the ground. Sprites and drawn objects must not disagree about what this game's colours are.",
+    "skin": ["#f8c898", "#e0a878", "#b07850"],
+    "hair": ["#7a1c2c", "#5a1424", "#3a0c18"],
+    "cloth": ["#286868", "#1a4a4c"],
+    "_why": [
+      "The world colours alone were not enough and the pipeline said so on its",
+      "first real run: quantising the existing character against them turned",
+      "auburn hair near-black, because nothing in the machine palette is a warm",
+      "dark red. These three ramps are sampled from the shipped character art",
+      "-- the families that actually cover it, not invented ones -- so the",
+      "character stays the character while still being unable to drift."
+    ]
+  },
+
+  "background": [0, 0, 0, 0],
+  "alpha_threshold": 128,
+  "_alpha_why": [
+    "Sprites are hard-edged: a pixel is either in the sprite or it is not.",
+    "Semi-transparent edges are what make a nearest-filtered sprite look like a",
+    "photograph of a sprite, and they defeat the silhouette measurement the",
+    "validator uses to check that a character is not wobbling."
+  ],
+
+  "validation": {
+    "max_anchor_drift_px": 0.5,
+    "max_centroid_jump_px": 3.0,
+    "max_area_change_ratio": 0.25,
+    "require_palette_conformance": true,
+    "_why": [
+      "Half a pixel, and not because half a pixel of slop is acceptable. The foot",
+      "is the mean of the sprite's bottom row, so on a bottom row of even width",
+      "it lands between two pixels, and no integer placement can put it exactly",
+      "on the anchor. 0.5 is the grid's own quantisation. Anything above it is",
+      "the normaliser failing to place the sprite, which is a bug rather than a",
+      "tolerance -- the first run of this pipeline reported 0.5 and that is how",
+      "the distinction got found. The centroid and area limits",
+      "catch the failure this repository actually hit: frames that are each",
+      "individually fine but do not belong to the same walk cycle, so the",
+      "character's mass jumps around between them. Numbers are per adjacent",
+      "frame pair, not against the first frame -- a cycle is allowed to travel,",
+      "it is not allowed to jerk."
+    ]
+  }
+}
