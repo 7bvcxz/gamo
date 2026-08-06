@@ -295,6 +295,69 @@ def cmd_sheet(args, spec, palette) -> int:
     return 0
 
 
+# The repository root, four levels up from tools/sprite/sprite_tool.py. Counted
+# rather than assumed: parents[2] is the game folder, and the first run of
+# publish quietly created motorio-oneshot/docs and motorio-oneshot/web instead of
+# writing into the real ones.
+REPO = Path(__file__).resolve().parents[3]
+PUBLISH_DIR = REPO / "docs" / "sprite-candidates"
+MANIFEST = REPO / "web" / "src" / "generated" / "sprites.json"
+
+
+def cmd_publish(args, spec, palette) -> int:
+    """Put a validated sequence where the proposals page can play it.
+
+    Validation runs again here rather than being trusted from an earlier
+    invocation. Publishing is the step that puts something in front of a person
+    to choose from, and a candidate that reaches that page has, by being there,
+    made a claim about itself. Re-checking costs milliseconds.
+
+    The sheet goes to docs/, which this repository already publishes, so a
+    candidate is reachable at a URL the moment it is pushed -- no upload, no
+    second host, and the same mechanism that serves the game serves its parts.
+    """
+    cell = spec["cells"][args.cell]
+    frames = load_frames(args.dir)
+    problems = validate(frames, cell, spec, palette)
+    if problems:
+        for problem in problems:
+            print(f"SPRITE_FAIL: {problem}")
+        print("PUBLISH: refused -- a candidate has to pass before anyone is asked about it")
+        return 1
+
+    PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
+    name = f"{args.request}-{args.candidate}.png"
+    width, height = frames[0][1].size
+    sheet = Image.new("RGBA", (width * len(frames), height), (0, 0, 0, 0))
+    for index, (_, image) in enumerate(frames):
+        sheet.paste(image, (index * width, 0))
+    sheet.save(PUBLISH_DIR / name)
+
+    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    data = {"requests": []}
+    if MANIFEST.exists():
+        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    request = next((r for r in data["requests"] if r["id"] == args.request), None)
+    if request is None:
+        request = {"id": args.request, "motion": args.motion, "facing": args.facing,
+                   "cell": list(cell["size"]), "candidates": []}
+        data["requests"].append(request)
+    request["candidates"] = [c for c in request["candidates"] if c["id"] != args.candidate]
+    request["candidates"].append({
+        "id": args.candidate,
+        "sheet": f"/gamo/sprite-candidates/{name}",
+        "frames": len(frames),
+        "fps": int(spec["animations"].get(args.motion, {}).get("fps", 10)),
+        "closure": round(args.closure, 4),
+        "seed": args.seed,
+        "note": args.note,
+    })
+    request["candidates"].sort(key=lambda c: c["id"])
+    MANIFEST.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"PUBLISH: {args.request}/{args.candidate} -- {len(frames)} frames -> {name}")
+    return 0
+
+
 def cmd_inspect(args, spec, palette) -> int:
     image = Image.open(args.image).convert("RGBA")
     shape = silhouette(image, spec["alpha_threshold"])
@@ -332,6 +395,18 @@ def main() -> int:
     p.add_argument("dir", type=Path)
     p.add_argument("out", type=Path)
     p.set_defaults(run=cmd_sheet)
+
+    p = subs.add_parser("publish")
+    p.add_argument("dir", type=Path)
+    p.add_argument("--request", required=True, help="e.g. mechanic-walk-s")
+    p.add_argument("--candidate", required=True, help="e.g. a")
+    p.add_argument("--motion", default="walk")
+    p.add_argument("--facing", default="s")
+    p.add_argument("--closure", type=float, default=0.0)
+    p.add_argument("--seed", type=int, default=-1)
+    p.add_argument("--note", default="")
+    p.add_argument("--cell", default="character", choices=sorted(spec["cells"]))
+    p.set_defaults(run=cmd_publish)
 
     p = subs.add_parser("inspect")
     p.add_argument("image", type=Path)

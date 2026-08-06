@@ -205,3 +205,32 @@ th { background: var(--sidebar); font-weight: 600; }
 .card-links { margin: 12px 0 0; display: flex; gap: 14px; flex-wrap: wrap; }
 .card-links a { font-size: 13px; color: var(--accent); text-decoration: none; }
 .card-links a:hover { text-decoration: underline; }
+
+/* --- Sprite candidates ---------------------------------------------------- */
+/* Dark plate behind every sprite: these are drawn for a night-time snow world
+   and judging one against a white page is judging it against a background it
+   will never be on. */
+.sprite-anim,
+.sprite-strip {
+  display: block;
+  background: #222c44;
+  border-radius: 4px;
+  image-rendering: pixelated;
+}
+.sprite-anim { margin: 0 auto 10px; }
+.sprite-missing { padding: 24px; color: #e8574c; font-size: 13px; }
+.sprite-strip-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+.sprite-strip-row > span {
+  font-weight: 700;
+  color: #8fa0bd;
+  font-size: 12px;
+  flex: none;
+}
+.prop-note { color: #8fa0bd; font-size: 11px; }
+.prop-section { margin: 32px 0 4px; }
