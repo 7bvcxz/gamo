@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Loading game</title>
   <style>
     html, body { height: 100%; margin: 0; background: #09110e; color: #dce9df; }
@@ -12,30 +11,32 @@
 </head>
 <body>
   <span>Loading...</span>
-  <script>
-    const pathParts = location.pathname.split("/").filter(Boolean);
-    const gameName = pathParts.at(-1) === "index.html" ? pathParts.at(-2) : pathParts.at(-1);
-    const versionApi = `https://api.github.com/repos/7bvcxz/gamo/contents/docs/${gameName}/version.json?ref=main&t=${Date.now()}`;
+  <!--
+    The build this page was published with, written in at deploy time.
 
-    fetch(versionApi, {
-      cache: "no-store",
-      headers: { Accept: "application/vnd.github.raw+json" },
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error(`Version request failed: ${response.status}`);
-        return response.json();
-      })
-      .then(({ page, pack, packSize }) => {
-        const target = new URL(page, location.href);
-        target.searchParams.set("pack", pack);
-        target.searchParams.set("size", packSize);
-        target.searchParams.set("build", pack);
-        location.replace(target);
-      })
-      .catch((error) => {
-        console.error(error);
-        document.body.textContent = "Unable to load the latest build.";
-      });
+    This used to ask api.github.com which build was current, to get around Pages
+    caching the manifest for ten minutes. That put a rate-limited third party on
+    the critical path of every single load: sixty requests an hour per IP, shared
+    across everyone behind the same carrier NAT, and when it runs out the answer
+    is a 403 and the game does not start at all. Ten minutes of staleness is
+    invisible to a player; a game that refuses to open is not.
+
+    Staying correct without asking: the pack name below is content-hashed, deploy
+    keeps the previous build, and if a cached copy of this page ever does point
+    at a pack that is gone, the runner resolves the current one itself.
+  -->
+  <script>
+    const params = new URLSearchParams(location.search);
+    const target = new URL("__RUNNER_PAGE__", location.href);
+    target.searchParams.set("pack", "__PACK_NAME__");
+    target.searchParams.set("size", "__PACK_SIZE__");
+    target.searchParams.set("build", "__PACK_NAME__");
+    // Anything already on the address survives the hop, so a link with its own
+    // query string is not silently dropped on the way through.
+    for (const [key, value] of params) {
+      if (!target.searchParams.has(key)) target.searchParams.set(key, value);
+    }
+    location.replace(target);
   </script>
 </body>
 </html>

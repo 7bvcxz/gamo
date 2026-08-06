@@ -35,9 +35,12 @@ for proj in "$ROOT"/*/; do
   rm -f "$OUT/$name"/index.* 2>/dev/null || true
   "$GODOT" --headless --path "$proj" --export-release "Web" "$OUT/$name/index.html"
 
-  # GitHub Pages applies browser caching headers that this repository cannot
-  # override. Give every executable and game pack a content-addressed URL, then
-  # leave a tiny stable loader at index.html that discovers the latest build.
+  # GitHub Pages applies browser caching headers this repository cannot override.
+  # Give every executable and game pack a content-addressed URL, and let the
+  # stable index.html carry the current names, written in at deploy time. Pages
+  # caches that page for ten minutes, so a new build can take that long to reach
+  # a player -- which is invisible, and much cheaper than what it replaced: a
+  # rate-limited GitHub API call on the critical path of every single load.
   engine_hash="$(sha256sum "$OUT/$name/index.wasm" | cut -c1-12)"
   pack_hash="$(sha256sum "$OUT/$name/index.pck" | cut -c1-12)"
   engine_base="engine-${engine_hash}"
@@ -62,8 +65,9 @@ for proj in "$ROOT"/*/; do
   # The runner is stable and may be cached. It reads the requested content-
   # hashed PCK name from its query string and downloads that unique file.
   #
-  # Pages first, the repository second. Pages serves the pack gzipped from a CDN
-  # edge, while raw.githubusercontent sends it uncompressed from a third host
+  # Pages first, the repository second, the manifest last. Pages serves the pack
+  # gzipped from a CDN edge, while raw.githubusercontent sends it uncompressed
+  # from a third host
   # that costs another DNS lookup and TLS handshake -- expensive on a phone. The
   # repository copy still has to exist as a fallback, because for the first few
   # minutes after a deploy Pages has not published the new hash yet and answers
@@ -83,7 +87,7 @@ const RUNNER_PARAMS = new URLSearchParams(location.search);\\
 const REQUESTED_PACK = RUNNER_PARAMS.get('pack') || GODOT_CONFIG.mainPack;\\
 const REQUESTED_PACK_SIZE = Number(RUNNER_PARAMS.get('size')) || GODOT_CONFIG.fileSizes[GODOT_CONFIG.mainPack];\\
 const REMOTE_BASE = 'https://raw.githubusercontent.com/7bvcxz/gamo/main/docs/${name}/';\\
-const VERSION_API = 'https://api.github.com/repos/7bvcxz/gamo/contents/docs/${name}/version.json?ref=main';\\
+const VERSION_MANIFEST = new URL('version.json', location.href).href;\\
 try { history.replaceState(null, '', './'); } catch (e) { console.warn('URL tidy skipped', e); }\\
     GODOT_CONFIG.args = ['--main-pack', REQUESTED_PACK].concat(GODOT_CONFIG.args);\\
 const PHASE = document.createElement('div');\\
@@ -108,9 +112,20 @@ async function resolvePack() {\\
   for (const url of candidates) {\\
     try { if ((await fetch(url, { method: 'HEAD' })).ok) { return { url: url, name: REQUESTED_PACK }; } } catch (e) { /* try the next one */ }\\
   }\\
-  const current = await (await fetch(VERSION_API, { cache: 'no-store', headers: { Accept: 'application/vnd.github.raw+json' } })).json();\\
-  console.warn('pack', REQUESTED_PACK, 'is gone; falling back to', current.pack);\\
-  return { url: new URL(current.pack, location.href).href, name: current.pack };\\
+  /* Both gone: this runner was loaded with a stale pack name. The manifest\\
+     beside it says what is current. Served from Pages, not from a rate-limited\\
+     API -- an unauthenticated GitHub API call is sixty an hour per IP, and when\\
+     that runs out it answers 403 and the game does not start at all. */\\
+  try {\\
+    const current = await (await fetch(VERSION_MANIFEST, { cache: 'no-store' })).json();\\
+    if (current && current.pack) {\\
+      console.warn('pack', REQUESTED_PACK, 'is gone; falling back to', current.pack);\\
+      return { url: new URL(current.pack, location.href).href, name: current.pack };\\
+    }\\
+  } catch (e) { console.warn('manifest unavailable', e); }\\
+  /* Last resort: the pack this runner was built alongside, which is on the same\\
+     host by definition. */\\
+  return { url: new URL(GODOT_CONFIG.mainPack, location.href).href, name: GODOT_CONFIG.mainPack };\\
 }\\
 /* Drop the --main-pack pair the line above just added: start() supplies its own\\
    and passing both would leave the engine picking between two pack names. */\\
@@ -142,11 +157,16 @@ const PACK_SOURCE = resolvePack().then((pack) => {\\
   cp "$ROOT/web-index-loader.html" "$OUT/$name/index.html"
   cp "$ROOT/web-version.json" "$OUT/$name/version.json"
   pack_size="$(stat -c%s "$OUT/$name/$pack_name")"
-  sed -i \
-    -e "s|__RUNNER_PAGE__|${RUNNER_PAGE}|" \
-    -e "s|__PACK_NAME__|${pack_name}|" \
-    -e "s|__PACK_SIZE__|${pack_size}|" \
-    "$OUT/$name/version.json"
+  # The same three values into both: index.html redirects with them, and
+  # version.json stays as the manifest the runner falls back to if a cached
+  # index ever points at a build that has since been pruned.
+  for target in "$OUT/$name/version.json" "$OUT/$name/index.html"; do
+    sed -i \
+      -e "s|__RUNNER_PAGE__|${RUNNER_PAGE}|" \
+      -e "s|__PACK_NAME__|${pack_name}|" \
+      -e "s|__PACK_SIZE__|${pack_size}|" \
+      "$target"
+  done
   built+=("$name")
 done
 

@@ -111,13 +111,13 @@ body {
 
 		<script src="engine-7eda98958eb0.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"mainPack":"game-d6ce2b813f12.pck","canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"engine-7eda98958eb0","experimentalVK":false,"fileSizes":{"game-d6ce2b813f12.pck":2000856,"engine-7eda98958eb0.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"mainPack":"game-62bf47b93d91.pck","canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"engine-7eda98958eb0","experimentalVK":false,"fileSizes":{"game-62bf47b93d91.pck":2000856,"engine-7eda98958eb0.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const RUNNER_PARAMS = new URLSearchParams(location.search);
 const REQUESTED_PACK = RUNNER_PARAMS.get('pack') || GODOT_CONFIG.mainPack;
 const REQUESTED_PACK_SIZE = Number(RUNNER_PARAMS.get('size')) || GODOT_CONFIG.fileSizes[GODOT_CONFIG.mainPack];
 const REMOTE_BASE = 'https://raw.githubusercontent.com/7bvcxz/gamo/main/docs/motorio-oneshot/';
-const VERSION_API = 'https://api.github.com/repos/7bvcxz/gamo/contents/docs/motorio-oneshot/version.json?ref=main';
+const VERSION_MANIFEST = new URL('version.json', location.href).href;
 try { history.replaceState(null, '', './'); } catch (e) { console.warn('URL tidy skipped', e); }
     GODOT_CONFIG.args = ['--main-pack', REQUESTED_PACK].concat(GODOT_CONFIG.args);
 const PHASE = document.createElement('div');
@@ -142,9 +142,20 @@ async function resolvePack() {
   for (const url of candidates) {
     try { if ((await fetch(url, { method: 'HEAD' })).ok) { return { url: url, name: REQUESTED_PACK }; } } catch (e) { /* try the next one */ }
   }
-  const current = await (await fetch(VERSION_API, { cache: 'no-store', headers: { Accept: 'application/vnd.github.raw+json' } })).json();
-  console.warn('pack', REQUESTED_PACK, 'is gone; falling back to', current.pack);
-  return { url: new URL(current.pack, location.href).href, name: current.pack };
+  /* Both gone: this runner was loaded with a stale pack name. The manifest
+     beside it says what is current. Served from Pages, not from a rate-limited
+     API -- an unauthenticated GitHub API call is sixty an hour per IP, and when
+     that runs out it answers 403 and the game does not start at all. */
+  try {
+    const current = await (await fetch(VERSION_MANIFEST, { cache: 'no-store' })).json();
+    if (current && current.pack) {
+      console.warn('pack', REQUESTED_PACK, 'is gone; falling back to', current.pack);
+      return { url: new URL(current.pack, location.href).href, name: current.pack };
+    }
+  } catch (e) { console.warn('manifest unavailable', e); }
+  /* Last resort: the pack this runner was built alongside, which is on the same
+     host by definition. */
+  return { url: new URL(GODOT_CONFIG.mainPack, location.href).href, name: GODOT_CONFIG.mainPack };
 }
 /* Drop the --main-pack pair the line above just added: start() supplies its own
    and passing both would leave the engine picking between two pack names. */

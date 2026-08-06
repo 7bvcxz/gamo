@@ -34,7 +34,8 @@
 - GitHub Pages는 `main` 브랜치의 `docs/`를 서비스한다.
 - 새 게임을 추가할 때 `export_presets.cfg`의 Web preset을 반드시 포함한다.
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
-- Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙인다. 고정 `index.html`은 GitHub 저장소 API에서 최신 manifest를 읽고, 고정 `runner.html`은 해시 PCK를 저장소 원본 경로에서 직접 내려받는다. 생성된 해시 파일명, manifest, 로더, runner를 수동으로 되돌리지 않는다.
+- Web export 후 `deploy-web.sh`가 엔진/PCK/게임 HTML에 내용 해시를 붙인다. 고정 `index.html`에는 배포 시점의 PCK 이름·크기가 직접 기록되고, 추가 요청 없이 즉시 runner로 넘긴다. runner는 PCK를 Pages → raw.githubusercontent → 같은 디렉터리의 `version.json` → 자기 빌드의 mainPack 순으로 해결한다. 생성된 해시 파일명, manifest, 로더, runner를 수동으로 되돌리지 않는다.
+- **게임 로딩 경로에 `api.github.com`을 쓰지 않는다.** 비인증 GitHub API는 IP당 시간당 60회이고, 모바일 캐리어 NAT처럼 IP를 공유하면 쉽게 소진되며, 소진되면 403이라 게임이 아예 열리지 않는다. Pages CDN의 10분 캐시로 인한 지연은 플레이어에게 보이지 않지만, 열리지 않는 게임은 보인다. 최신 빌드를 즉시 확인해야 하면 API가 아니라 해시가 붙은 `game-*.html`을 직접 연다.
 - runner는 쿼리스트링을 상수로 읽은 직후 `history.replaceState`로 주소를 게임 디렉터리(`/gamo/<게임명>/`)로 되돌린다. 플레이어와 HeyDive `embedUrl`이 항상 같은 주소를 쓰게 하기 위한 것이며, index와 runner가 같은 디렉터리에 있으므로 상대 경로 해석은 바뀌지 않는다. runner 위치를 다른 디렉터리로 옮기면 이 처리를 함께 재검토한다.
 
 ## Motorio 블록 특성 용어
