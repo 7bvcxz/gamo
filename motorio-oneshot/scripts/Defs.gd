@@ -530,12 +530,22 @@ static func machine_color(type: int) -> Color:
 		_: return COL_MACHINE
 
 ## Samples the amber ramp. `k` is 0 at the core and 1 at the frontier.
+## Sunlit snow, not soil. The old ramp drove saturation up and value down as it
+## went outward -- 0.62 saturation at 0.22 value -- which is the recipe for mud:
+## the warm pool read as a patch of dug earth rather than as ground with a fire
+## on it. The ground is snow at every distance, so it stays high-value and
+## low-saturation everywhere; what changes across the pool is the colour of the
+## light falling on it, warm at the core and cold out at the frontier.
+##
+## Interpolated in RGB rather than swept through HSV hue. Between two colours
+## this desaturated there is barely any hue to rotate, so the midpoint cannot go
+## muddy the way an amber-to-navy sweep did -- and a hue lerp from warm to cold
+## would pass straight through green on the way.
+const SNOW_LIT := Color8(238, 226, 209)
+const SNOW_SHADE := Color8(136, 147, 163)
+
 static func warm_tint(k: float) -> Color:
-	var t: float = clampf(k, 0.0, 1.0)
-	var hue: float = lerpf(38.0, 27.0, t) / 360.0
-	var sat: float = lerpf(0.30, 0.62, t)
-	var val: float = lerpf(1.0, 0.22, pow(t, 0.82))
-	return Color.from_hsv(hue, sat, val)
+	return SNOW_LIT.lerp(SNOW_SHADE, pow(clampf(k, 0.0, 1.0), 0.85))
 
 static func warm_radius(total_heat: int) -> float:
 	return minf(WARM_BASE + float(total_heat) * WARM_PER_HEAT, WARM_MAX)

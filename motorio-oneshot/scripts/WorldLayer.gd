@@ -40,7 +40,11 @@ func _draw() -> void:
 func _draw_grid(tile: float) -> void:
 	var start := Vector2i((view_rect.position / tile).floor())
 	var end := Vector2i((view_rect.end / tile).ceil())
-	var grid := Color(Defs.COL_GRID.r, Defs.COL_GRID.g, Defs.COL_GRID.b, 0.34)
+	# Barely there. The grid is for judging alignment when a player stops to look,
+	# not something to read the world through, and at 0.34 it was drawing a cage
+	# over every frame. Lifted a little at night so it survives the darker ground
+	# rather than disappearing exactly when the pool is dimmest.
+	var grid := Color(Defs.COL_GRID.r, Defs.COL_GRID.g, Defs.COL_GRID.b, 0.09 + night * 0.07)
 	for x in range(start.x, end.x + 1):
 		var px: float = float(x) * tile
 		draw_line(Vector2(px, view_rect.position.y), Vector2(px, view_rect.end.y), grid, 1.0)
