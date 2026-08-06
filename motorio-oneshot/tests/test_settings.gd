@@ -286,7 +286,7 @@ func _row(main: Node2D, name: String) -> Array:
 	for row: Array in main.hud.resource_rows():
 		if String(row[0]) == name:
 			return row
-	return ["", "", "", Color.WHITE]
+	return ["", "", "", Color.WHITE, -1]
 
 func _row_names(main: Node2D) -> Array[String]:
 	var names: Array[String] = []

@@ -282,6 +282,14 @@ func _generate_ore(seed_value: int) -> void:
 		ore[core_cell + offset] = Defs.ITEM_COPPER
 	for offset: Vector2i in STARTER_LANE:
 		ore.erase(core_cell + offset)
+	# The shelter, its doorstep and the food bin are cleared last, after every
+	# scatter. Ore blocks the player, and the doorstep is where they are put down
+	# every single morning: a seam rolled onto that tile woke them up standing
+	# inside a wall. It showed up as a test failing one run in five, which is the
+	# shape a seeded world bug always takes -- the map is different every run and
+	# most maps are fine.
+	for reserved: Vector2i in [shelter_cell, shelter_cell + Vector2i(0, 1), food_cell]:
+		ore.erase(reserved)
 	_assign_purity()
 	# Two clear columns home: one from the frost row, one from the ember seam.
 	for step in range(1, 9):

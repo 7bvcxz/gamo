@@ -174,9 +174,30 @@ func _run() -> void:
 	_assert(not main.sim.blocks_player(main.player.cell()),
 		"but cannot re-enter it now that collision is live again")
 
+	_test_reserved_tiles_across_seeds()
+
 	if failures == 0:
 		print("TILES_TEST: PASS")
 	quit(failures)
+
+## The shelter doorstep is where the player is put down every single morning, and
+## the food bin is where cats queue. Neither may ever be a tile you cannot stand
+## on. Ore is scattered from the seed, so a bad roll only ruins some worlds --
+## which is why this sweeps seeds rather than checking one. It was found as a
+## sibling test failing about one run in five, the shape a seeded-world bug
+## always takes: the map is different every run and most maps are fine.
+func _test_reserved_tiles_across_seeds() -> void:
+	var blocked: Array[String] = []
+	for seed_value in range(300):
+		var sim := Sim.new()
+		sim.setup(seed_value)
+		for cell: Vector2i in [sim.shelter_cell + Vector2i(0, 1), sim.food_cell]:
+			if sim.blocks_player(cell):
+				blocked.append("seed %d at %s" % [seed_value, cell])
+		sim.free()
+	_assert(blocked.is_empty(),
+		"the doorstep and the food bin are walkable on every seed. Blocked on %d: %s"
+		% [blocked.size(), ", ".join(blocked.slice(0, 4))])
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

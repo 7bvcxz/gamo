@@ -123,45 +123,64 @@ func _start_run() -> void:
 	message = ""
 	message_life = 0.0
 
-## A single line that always names the next useful action. Derived from world
-## state rather than a script, so it stays correct however the player plays.
-func objective() -> String:
+## The next useful action, as text plus a picture of the thing it is about.
+##
+## Both come out of the same branch on purpose. They were going to be two
+## functions -- one returning the sentence, one returning an icon for it -- and
+## that is a pair that drifts: add a step, update one, and the panel ends up
+## showing a generator next to a line about cats. One branch, one answer.
+##
+## Derived from world state rather than a script, so it stays correct however the
+## player plays.
+func objective_data() -> Dictionary:
 	if is_night():
-		return "밤입니다  숙소로 돌아가 Z로 취침하세요  (기지 옆 남서쪽)"
+		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
 	if is_dusk():
-		return "해가 기울고 있습니다  곧 숙소로 돌아가야 합니다"
+		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
 	if sim.carried_cat != null:
-		return "고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요"
+		return _goal("고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요", "thing", Icons.THING_CAT)
 	# Lv1 -- do it with your hands, then hire someone to do it for you.
 	if int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 0 and sim.ground.is_empty():
-		return "수정 광맥을 바라보고 C 를 눌러 직접 캐세요"
+		return _goal("수정 광맥을 바라보고 C 를 눌러 직접 캐세요", "thing", Icons.THING_SEAM)
 	if sim.cats.is_empty() and sim.carried_boxes < Defs.BOXES_PER_CAT:
-		return "고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)" % [Defs.BOXES_PER_CAT, sim.carried_boxes]
+		return _goal("고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)"
+			% [Defs.BOXES_PER_CAT, sim.carried_boxes], "thing", Icons.THING_CAT_BOX)
 	if sim.cats.is_empty():
-		return "숙소로 가서 고양이를 입양하세요"
+		return _goal("숙소로 가서 고양이를 입양하세요", "thing", Icons.THING_SHELTER)
 	# Lv2 -- crystal automation, then the exchanger that turns it into distance.
 	if sim.machine_count(Defs.M_MINER) == 0:
-		return "1  수정 광맥 위에 채굴기를 설치하세요  (수정조각 %d)" % int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_CRYSTAL])
+		return _goal("수정 광맥 위에 채굴기를 설치하세요  (수정조각 %d)"
+			% int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_CRYSTAL]), "machine", Defs.M_MINER)
 	if _unassigned_cats() > 0:
-		return "고양이를 Z 로 안아 채굴기에 올려놓으세요"
+		return _goal("고양이를 Z 로 안아 채굴기에 올려놓으세요", "thing", Icons.THING_CAT)
 	if sim.machine_count(Defs.M_EXCHANGER) == 0:
-		return "2  수정에너지교환기를 지으세요  (수정조각 %d)" % int(Defs.MACHINE_COSTS[Defs.M_EXCHANGER][Defs.ITEM_CRYSTAL])
+		return _goal("수정에너지교환기를 지으세요  (수정조각 %d)"
+			% int(Defs.MACHINE_COSTS[Defs.M_EXCHANGER][Defs.ITEM_CRYSTAL]), "machine", Defs.M_EXCHANGER)
 	if int(sim.delivered.get(Defs.ITEM_ENERGY, 0)) == 0:
-		return "3  교환기에 수정조각을 넣고 에너지결정을 기지로 가져가세요"
+		return _goal("교환기에 수정조각을 넣고 에너지결정을 기지로 가져가세요", "item", Defs.ITEM_ENERGY)
 	if sim.warm_radius < Defs.COPPER_RING.x:
-		return "4  에너지결정으로 온기를 넓히세요  (구리까지 %.1f칸)" % (Defs.COPPER_RING.x - sim.warm_radius)
+		return _goal("에너지결정으로 온기를 넓히세요  (구리까지 %.1f칸)"
+			% (Defs.COPPER_RING.x - sim.warm_radius), "item", Defs.ITEM_ENERGY)
 	# Lv3 -- copper, power, logistics.
 	if int(sim.stock.get(Defs.ITEM_COPPER, 0)) == 0:
-		return "5  구리 광맥에 채굴기를 놓아 구리광석을 캐세요"
+		return _goal("구리 광맥에 채굴기를 놓아 구리광석을 캐세요", "item", Defs.ITEM_COPPER)
 	if sim.machine_count(Defs.M_GENERATOR) == 0:
-		return "6  발전기를 지어 전력을 만드세요  (구리광석 %d)" % int(Defs.MACHINE_COSTS[Defs.M_GENERATOR][Defs.ITEM_COPPER])
+		return _goal("발전기를 지어 전력을 만드세요  (구리광석 %d)"
+			% int(Defs.MACHINE_COSTS[Defs.M_GENERATOR][Defs.ITEM_COPPER]), "machine", Defs.M_GENERATOR)
 	if sim.machine_count(Defs.M_BELT) == 0:
-		return "7  컨테이너 벨트로 채굴기와 기지를 이으세요  (구리광석 %d)" % int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER])
+		return _goal("벨트로 채굴기와 기지를 이으세요  (구리광석 %d)"
+			% int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER]), "machine", Defs.M_BELT)
 	if sim.power_draw > sim.power_capacity:
-		return "전력이 부족합니다  발전기를 늘리거나 에너지결정을 공급하세요"
+		return _goal("전력이 부족합니다  발전기를 늘리세요", "machine", Defs.M_GENERATOR)
 	if _unstaffed_miners() > 0 and sim.power_capacity <= 0.0:
-		return "발전기를 지으면 고양이 없이도 채굴기가 돕니다"
-	return "%s  ·  더 지을수록 온기가 빨라집니다" % Defs.ratio_hint()
+		return _goal("발전기를 지으면 고양이 없이도 채굴기가 돕니다", "machine", Defs.M_GENERATOR)
+	return _goal("%s  ·  더 지을수록 온기가 빨라집니다" % Defs.ratio_hint(), "machine", Defs.M_EXCHANGER)
+
+func _goal(text: String, kind: String, id) -> Dictionary:
+	return {"text": text, "kind": kind, "id": id}
+
+func objective() -> String:
+	return String(objective_data()["text"])
 
 ## Miners standing idle for want of a worker. Once power exists these run
 ## themselves, so this is the number that tells the player to electrify.

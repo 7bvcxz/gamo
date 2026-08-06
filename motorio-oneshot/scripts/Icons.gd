@@ -1,0 +1,205 @@
+extends RefCounted
+class_name Icons
+
+## Icons for the UI, drawn rather than imported.
+##
+## Three places need a picture of a thing: the build menu, the objective line and
+## the save-slot list. Sprite sheets for those would be three more assets to keep
+## in step with the world art every time a machine changes shape, and the pack is
+## already the thing that decides how long a phone waits before the title screen.
+## These are a few draw calls each and cost nothing to ship.
+##
+## They obey the same four rules as everything in the world (Defs, "object drawing
+## language"): light from the top-left, one near-black outline, one squashed
+## shadow under anything that stands up, flat things inset and shadowless. An icon
+## that lit itself differently from the machine it depicts would be a worse
+## picture of it, however pretty on its own.
+##
+## Every icon fills the rect it is handed. Callers pass a square; nothing here
+## assumes a size, so the same code draws a 20px hotbar chip and a 48px menu tile.
+
+## Things the objective line can point at that are not machines or items.
+const THING_CAT_BOX := "cat_box"
+const THING_CAT := "cat"
+const THING_SHELTER := "shelter"
+const THING_CORE := "core"
+const THING_SEAM := "seam"
+const THING_FOOD := "food"
+
+static func _outline_width(rect: Rect2) -> float:
+	return maxf(1.0, rect.size.x / 22.0)
+
+## The shared shadow, scaled to the icon rather than to the world.
+static func _shadow(canvas: CanvasItem, rect: Rect2) -> void:
+	var at := Vector2(rect.get_center().x, rect.position.y + rect.size.y * 0.86)
+	canvas.draw_set_transform(at, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+	canvas.draw_circle(Vector2.ZERO, rect.size.x * 0.30, Defs.SHADOW)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## A raised body with the light on its top-left, which is what makes every
+## machine in this game read as the same class of object.
+static func _body(canvas: CanvasItem, box: Rect2, base: Color, edge: Color, width: float) -> void:
+	canvas.draw_rect(box, base)
+	canvas.draw_rect(Rect2(box.position, Vector2(box.size.x * 0.42, box.size.y)),
+		base.lightened(Defs.FACE_LIGHT))
+	canvas.draw_rect(Rect2(box.position + Vector2(0.0, box.size.y * 0.72),
+		Vector2(box.size.x, box.size.y * 0.28)), base.darkened(Defs.FACE_DARK))
+	canvas.draw_rect(box, edge, false, width)
+	canvas.draw_rect(box, Defs.OUTLINE, false, width * 0.6)
+
+## An arrow along the machine's output face, so a glance at the icon says which
+## way the thing points. The build menu is where a player learns that machines
+## have a facing at all.
+static func _arrow(canvas: CanvasItem, rect: Rect2, tint: Color) -> void:
+	var right: float = rect.position.x + rect.size.x * 0.90
+	var mid: float = rect.get_center().y
+	var span: float = rect.size.x * 0.10
+	canvas.draw_colored_polygon(PackedVector2Array([
+		Vector2(right, mid), Vector2(right - span, mid - span), Vector2(right - span, mid + span)]),
+		tint)
+
+static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
+	var tint: Color = Defs.machine_color(type)
+	var width: float = _outline_width(rect)
+	match type:
+		Defs.M_CORE:
+			var centre: Vector2 = rect.get_center()
+			var radius: float = rect.size.x * 0.34
+			_shadow(canvas, rect)
+			canvas.draw_circle(centre, radius * 1.35, Color(1.0, 0.67, 0.31, 0.16))
+			canvas.draw_circle(centre, radius, Defs.COL_MACHINE.darkened(0.4))
+			canvas.draw_circle(centre, radius * 0.82, Defs.COL_CORE_DEEP)
+			canvas.draw_circle(centre, radius * 0.54, Defs.COL_CORE)
+			canvas.draw_circle(centre, radius * 0.28, Color("fff0c9"))
+		Defs.M_MINER:
+			_shadow(canvas, rect)
+			_body(canvas, rect.grow(-rect.size.x * 0.16), Defs.COL_MACHINE, tint, width)
+			# The drill, pointing down into the seam it stands on.
+			var centre: Vector2 = rect.get_center()
+			var drill: float = rect.size.x * 0.13
+			canvas.draw_colored_polygon(PackedVector2Array([
+				centre + Vector2(-drill, -drill), centre + Vector2(drill, -drill),
+				centre + Vector2(0.0, drill * 1.8)]), Defs.COL_BRASS)
+			_arrow(canvas, rect, tint)
+		Defs.M_EXCHANGER:
+			_shadow(canvas, rect)
+			_body(canvas, rect.grow(-rect.size.x * 0.14), Defs.COL_MACHINE, tint, width)
+			# The window it pours light out of, which is the part that lights up
+			# in the world when it is actually converting.
+			var window := Rect2(rect.position + rect.size * Vector2(0.32, 0.30),
+				rect.size * Vector2(0.36, 0.30))
+			canvas.draw_rect(window, Color(1.0, 0.74, 0.36, 0.90))
+			canvas.draw_rect(window, Defs.OUTLINE, false, width * 0.6)
+			_arrow(canvas, rect, tint)
+		Defs.M_BELT:
+			# Flat on the ground: inset, no shadow, chevrons showing travel.
+			var lane := Rect2(rect.position + Vector2(0.0, rect.size.y * 0.24),
+				Vector2(rect.size.x, rect.size.y * 0.52))
+			canvas.draw_rect(lane, Defs.COL_BELT_BODY)
+			canvas.draw_rect(lane, Defs.OUTLINE, false, width * 0.6)
+			for index in 3:
+				var x: float = lane.position.x + lane.size.x * (0.22 + 0.26 * float(index))
+				var wing: float = lane.size.y * 0.24
+				canvas.draw_line(Vector2(x - wing, lane.get_center().y - wing),
+					Vector2(x, lane.get_center().y), Defs.COL_BELT_CHEVRON, width)
+				canvas.draw_line(Vector2(x - wing, lane.get_center().y + wing),
+					Vector2(x, lane.get_center().y), Defs.COL_BELT_CHEVRON, width)
+		Defs.M_SPLITTER:
+			var lane := Rect2(rect.position + Vector2(0.0, rect.size.y * 0.30),
+				Vector2(rect.size.x * 0.62, rect.size.y * 0.40))
+			canvas.draw_rect(lane, Defs.COL_BELT_BODY)
+			canvas.draw_rect(lane, Defs.OUTLINE, false, width * 0.6)
+			# One line in, two out: the whole point of the machine in one shape.
+			var fork: Vector2 = lane.position + Vector2(lane.size.x, lane.size.y * 0.5)
+			canvas.draw_line(fork, fork + rect.size * Vector2(0.26, -0.26), tint, width * 1.6)
+			canvas.draw_line(fork, fork + rect.size * Vector2(0.26, 0.26), tint, width * 1.6)
+		Defs.M_GENERATOR:
+			_shadow(canvas, rect)
+			_body(canvas, rect.grow(-rect.size.x * 0.16), Defs.COL_MACHINE, tint, width)
+			var centre: Vector2 = rect.get_center()
+			canvas.draw_circle(centre, rect.size.x * 0.17, Color(1.0, 0.78, 0.36, 0.85))
+			# A bolt, because "this is the electricity one" has to survive being
+			# 20 pixels wide on a hotbar chip.
+			var unit: float = rect.size.x * 0.09
+			canvas.draw_colored_polygon(PackedVector2Array([
+				centre + Vector2(unit * 0.4, -unit * 1.6), centre + Vector2(-unit * 0.8, unit * 0.2),
+				centre + Vector2(unit * 0.1, unit * 0.2), centre + Vector2(-unit * 0.4, unit * 1.6),
+				centre + Vector2(unit * 0.9, -unit * 0.2), centre + Vector2(0.0, -unit * 0.2)]),
+				Defs.OUTLINE)
+		_:
+			_body(canvas, rect, Defs.COL_MACHINE, tint, width)
+
+## A loose material, drawn the way it looks lying on the ground.
+static func draw_item(canvas: CanvasItem, rect: Rect2, item_type: int) -> void:
+	var centre: Vector2 = rect.get_center()
+	var radius: float = rect.size.x * 0.30
+	var colour: Color = Defs.ITEM_COLORS[item_type]
+	_shadow(canvas, rect)
+	canvas.draw_circle(centre, radius * 1.5, Color(colour.r, colour.g, colour.b, 0.26))
+	canvas.draw_circle(centre, radius, colour)
+	canvas.draw_circle(centre, radius, Defs.OUTLINE, false, _outline_width(rect))
+	canvas.draw_circle(centre - Vector2(radius * 0.34, radius * 0.34), radius * 0.26,
+		Color(1, 1, 1, 0.55))
+
+## Things the objective can ask for that are neither machine nor material.
+static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
+	var width: float = _outline_width(rect)
+	match key:
+		THING_CAT_BOX, THING_FOOD:
+			_shadow(canvas, rect)
+			var box := rect.grow(-rect.size.x * 0.18)
+			var crate: Color = Color8(150, 104, 62) if key == THING_CAT_BOX else Color8(96, 108, 128)
+			_body(canvas, box, crate, crate.lightened(0.25), width)
+			if key == THING_CAT_BOX:
+				# Ears. The crate and the food bin are the same silhouette
+				# otherwise, and telling them apart at a glance is the reason the
+				# ears were added to the world art in the first place.
+				var ear: float = rect.size.x * 0.10
+				for side: float in [-1.0, 1.0]:
+					var tip: Vector2 = Vector2(box.get_center().x + side * box.size.x * 0.30,
+						box.position.y)
+					canvas.draw_colored_polygon(PackedVector2Array([
+						tip + Vector2(-ear, 0.0), tip + Vector2(ear, 0.0),
+						tip + Vector2(side * ear * 0.4, -ear * 1.7)]), crate)
+			else:
+				canvas.draw_rect(Rect2(box.position + Vector2(0.0, box.size.y * 0.30),
+					Vector2(box.size.x, box.size.y * 0.16)), crate.darkened(0.3))
+		THING_CAT:
+			_shadow(canvas, rect)
+			var centre: Vector2 = rect.get_center()
+			var body: float = rect.size.x * 0.26
+			canvas.draw_circle(centre + Vector2(0.0, body * 0.4), body, Defs.COL_CAT_FUR)
+			canvas.draw_circle(centre + Vector2(0.0, -body * 0.5), body * 0.72, Defs.COL_CAT_FUR)
+			for side: float in [-1.0, 1.0]:
+				var tip: Vector2 = centre + Vector2(side * body * 0.5, -body * 1.05)
+				canvas.draw_colored_polygon(PackedVector2Array([
+					tip + Vector2(-body * 0.26, body * 0.3), tip + Vector2(body * 0.26, body * 0.3),
+					tip + Vector2(side * body * 0.1, -body * 0.42)]), Defs.COL_CAT_FUR)
+			canvas.draw_circle(centre + Vector2(0.0, -body * 0.45), body * 0.34, Defs.COL_CAT_FACE)
+		THING_SHELTER:
+			_shadow(canvas, rect)
+			var walls := Rect2(rect.position + rect.size * Vector2(0.16, 0.44),
+				rect.size * Vector2(0.68, 0.40))
+			var ridge: Vector2 = Vector2(rect.get_center().x, rect.position.y + rect.size.y * 0.16)
+			canvas.draw_colored_polygon(PackedVector2Array([
+				Vector2(walls.position.x - rect.size.x * 0.06, walls.position.y), ridge,
+				Vector2(walls.end.x + rect.size.x * 0.06, walls.position.y)]), Color8(66, 44, 36))
+			_body(canvas, walls, Color8(84, 52, 40), Color8(104, 66, 50), width)
+			var window := Rect2(walls.get_center() - walls.size * Vector2(0.18, 0.10),
+				walls.size * Vector2(0.36, 0.44))
+			canvas.draw_rect(window, Color(1.0, 0.74, 0.36, 0.95))
+		THING_CORE:
+			draw_machine(canvas, rect, Defs.M_CORE)
+		THING_SEAM:
+			# A seam is ore in the ground: two shards, inset, no shadow.
+			var colour: Color = Defs.ITEM_COLORS[Defs.ITEM_CRYSTAL]
+			for offset: Vector2 in [Vector2(-0.14, 0.06), Vector2(0.16, -0.02)]:
+				var at: Vector2 = rect.get_center() + rect.size * offset
+				var size: float = rect.size.x * (0.20 if offset.x < 0.0 else 0.26)
+				canvas.draw_colored_polygon(PackedVector2Array([
+					at + Vector2(0.0, -size), at + Vector2(size * 0.8, size * 0.5),
+					at + Vector2(-size * 0.8, size * 0.5)]), colour)
+				canvas.draw_polyline(PackedVector2Array([
+					at + Vector2(0.0, -size), at + Vector2(size * 0.8, size * 0.5),
+					at + Vector2(-size * 0.8, size * 0.5), at + Vector2(0.0, -size)]),
+					Defs.ORE_OUTLINE, width)

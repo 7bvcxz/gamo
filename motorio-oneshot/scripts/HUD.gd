@@ -185,6 +185,46 @@ func _panel(rect: Rect2, fill: Color, edge: Color, width: float = 1.0) -> void:
 	draw_rect(rect, fill)
 	draw_rect(rect, edge, false, width)
 
+# --- Panel language -----------------------------------------------------------
+## One frame for every panel in the game.
+##
+## The HUD had grown a different box for every purpose: some outlined, some not,
+## edges in four colours, no shared spacing, nothing to tell the eye that two
+## panels belonged to the same interface. The genre this game is aiming at --
+## Factorio, Satisfactory, Planet Crafter -- gets a lot of its readability from
+## the opposite: every window is obviously the same window, and the only thing
+## that changes is the accent colour saying what kind of thing you are looking
+## at. So there is one function, and everything goes through it.
+##
+## Four parts: a drop shadow so the panel sits above the world rather than being
+## painted on it, a near-opaque body because ore silhouettes crawling behind text
+## is what made the old status panel unreadable, a bright accent rule along the
+## top edge, and corner ticks. The ticks are the cheapest way to make a plain
+## rectangle read as a machined object instead of a div.
+const FRAME_PAD := 10.0
+const FRAME_HEADER := 22.0
+
+func _frame(rect: Rect2, accent: Color, title: String = "") -> void:
+	draw_rect(Rect2(rect.position + Vector2(2.0, 3.0), rect.size), Color(0.02, 0.03, 0.06, 0.35))
+	draw_rect(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.97))
+	# A hairline inside the border catches the light and gives the edge depth
+	# without a second colour.
+	draw_rect(rect.grow(-1.0), Color(1, 1, 1, 0.045), false, 1.0)
+	draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.55), false, 1.0)
+	draw_rect(Rect2(rect.position, Vector2(rect.size.x, 2.0)), accent)
+	var tick: float = minf(9.0, rect.size.x * 0.16)
+	for corner: Array in [[rect.position + Vector2(0.0, rect.size.y), Vector2(1.0, -1.0)],
+			[rect.end, Vector2(-1.0, -1.0)]]:
+		var at: Vector2 = corner[0]
+		var step: Vector2 = corner[1]
+		draw_line(at, at + Vector2(tick * step.x, 0.0), Color(accent.r, accent.g, accent.b, 0.8), 2.0)
+		draw_line(at, at + Vector2(0.0, tick * step.y), Color(accent.r, accent.g, accent.b, 0.8), 2.0)
+	if title != "":
+		_text(rect.position + Vector2(FRAME_PAD, 16.0), title, 11, Color(accent.r, accent.g, accent.b, 0.95))
+		draw_line(rect.position + Vector2(FRAME_PAD, FRAME_HEADER),
+			rect.position + Vector2(rect.size.x - FRAME_PAD, FRAME_HEADER),
+			Color(accent.r, accent.g, accent.b, 0.22), 1.0)
+
 ## Godot ignores horizontal alignment unless a width is supplied, so every
 ## centred string here spans an explicit box rather than a bare position.
 func _text(at: Vector2, body: String, size: int, color: Color) -> void:
@@ -309,8 +349,7 @@ func _draw_snow(strength: float) -> void:
 
 func _draw_status() -> void:
 	var panel: Rect2 = status_rect()
-	# Fully opaque: ore silhouettes were crawling behind the temperature row.
-	_panel(panel, Defs.COL_PANEL, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
+	_frame(panel, Defs.COL_CLOCK_FILL)
 
 	# Time, daylight, warmth, body heat. Everything in this box is about the
 	# player's own situation; what they own moved to the ledger below it, because
@@ -367,7 +406,7 @@ const RESOURCE_ROW := 17.0
 func resource_rect() -> Rect2:
 	var panel: Rect2 = status_rect()
 	return Rect2(panel.position + Vector2(0.0, panel.size.y + 8.0),
-		Vector2(panel.size.x, 12.0 + float(resource_rows().size()) * RESOURCE_ROW))
+		Vector2(panel.size.x, FRAME_HEADER + 14.0 + float(resource_rows().size()) * RESOURCE_ROW))
 
 ## [name, amount, rate text, colour]. Heat first because it is the score; power
 ## last and only once something generates it, since a row reading zero of zero
@@ -375,19 +414,20 @@ func resource_rect() -> Rect2:
 func resource_rows() -> Array[Array]:
 	var sim = main.sim
 	var rows: Array[Array] = []
-	rows.append(["열", "%d" % sim.heat, _rate_text(sim.heat_rate), Defs.COL_CORE])
+	rows.append(["열", "%d" % sim.heat, _rate_text(sim.heat_rate), Defs.COL_CORE, -1])
 	for item_type: int in Defs.COUNTED_ITEMS:
 		var held: int = int(sim.stock.get(item_type, 0))
 		var seen: bool = held > 0 or int(sim.delivered.get(item_type, 0)) > 0
 		if not seen:
 			continue
 		rows.append([Defs.ITEM_SHORT[item_type], "%d" % held,
-			_rate_text(float(sim.gain_rate.get(item_type, 0.0))), Defs.ITEM_COLORS[item_type]])
+			_rate_text(float(sim.gain_rate.get(item_type, 0.0))), Defs.ITEM_COLORS[item_type],
+			item_type])
 	if sim.power_capacity > 0.0 or sim.machine_count(Defs.M_GENERATOR) > 0:
 		# Power is a rate on both sides, so it reads as used-of-available rather
 		# than as a stock with an income.
 		rows.append(["전기", "%.1f/%.1f" % [sim.power_draw, sim.power_capacity], "",
-			Defs.COL_MACHINE_EDGE])
+			Defs.COL_MACHINE_EDGE, -1])
 	return rows
 
 ## Per minute, like every other rate the game quotes. Machines are rated in
@@ -405,13 +445,16 @@ func _draw_resources() -> void:
 	if rows.is_empty():
 		return
 	var box: Rect2 = resource_rect()
-	_panel(box, Defs.COL_PANEL,
-		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
-	var y: float = 10.0
+	_frame(box, Defs.COL_CORE, "자원")
+	var y: float = FRAME_HEADER + 2.0
 	for row: Array in rows:
 		var tint: Color = row[3]
-		draw_circle(box.position + Vector2(15.0, y + 5.0), 3.6, tint)
-		_text(box.position + Vector2(24.0, y + 9.0), String(row[0]), 12, Defs.COL_TEXT)
+		if int(row[4]) >= 0:
+			Icons.draw_item(self, Rect2(box.position + Vector2(FRAME_PAD, y - 2.0),
+				Vector2(15.0, 15.0)), int(row[4]))
+		else:
+			draw_circle(box.position + Vector2(FRAME_PAD + 7.0, y + 5.0), 3.6, tint)
+		_text(box.position + Vector2(FRAME_PAD + 20.0, y + 9.0), String(row[0]), 12, Defs.COL_TEXT)
 		# Amount and rate are right-aligned in their own columns, so the eye can
 		# run down either one without reading the other.
 		_text_in(Rect2(box.position + Vector2(box.size.x - 146.0, y + 9.0), Vector2(70.0, 14)),
@@ -426,12 +469,18 @@ func _draw_resources() -> void:
 ## modal tutorial, no text wall, just one line that keeps up with the player.
 ## Split out from the drawing so the placement can be asserted directly; the
 ## overlap this avoids only appears at scales a test has to drive deliberately.
+## The mission card: a header, a picture of the thing being asked for, and the
+## line. The picture is the point -- "고양이 상자 3개를 모으세요" means nothing until
+## you know what a cat crate looks like, and the genre's answer to that has always
+## been to put the item next to the sentence rather than to describe it.
+const OBJECTIVE_ICON := 44.0
+const OBJECTIVE_H := 68.0
+
 func objective_rect(text: String) -> Rect2:
 	# The trailing pad has to clear the last glyph's advance, not just sit flush
 	# against it, or the closing bracket lands on the plate border.
-	var width: float = minf(_text_width(text, 12) + 34.0, size.x - MARGIN * 2.0)
-	# Pinned to the top right, away from the status panel and the hotbar.
-	var box := Rect2(size.x - width - MARGIN, MARGIN + 26.0, width, 24.0)
+	var width: float = minf(_text_width(text, 12) + OBJECTIVE_ICON + 50.0, size.x - MARGIN * 2.0)
+	var box := Rect2(size.x - width - MARGIN, MARGIN, width, OBJECTIVE_H)
 	# Once the UI is scaled up there is no longer room for both across the top,
 	# so the objective drops underneath the panel instead of across it.
 	var panel: Rect2 = status_rect()
@@ -440,12 +489,25 @@ func objective_rect(text: String) -> Rect2:
 	return box
 
 func _draw_objective() -> void:
-	var text: String = main.objective()
+	var goal: Dictionary = main.objective_data()
+	var text: String = String(goal["text"])
 	var box: Rect2 = objective_rect(text)
-	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.88),
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.45))
-	draw_rect(Rect2(box.position, Vector2(3, box.size.y)), Defs.COL_CORE)
-	_text(box.position + Vector2(12, 16), text, 12, Defs.COL_TEXT)
+	_frame(box, Defs.COL_CORE, "목표")
+	var slot := Rect2(box.position + Vector2(FRAME_PAD, FRAME_HEADER + 7.0),
+		Vector2(OBJECTIVE_ICON, OBJECTIVE_ICON) * 0.76)
+	# The icon sits in its own recessed well, which is what stops a drawn object
+	# from reading as debris that happened to land on the panel.
+	draw_rect(slot.grow(3.0), Color(0, 0, 0, 0.28))
+	draw_rect(slot.grow(3.0), Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.30), false, 1.0)
+	_draw_goal_icon(slot, goal)
+	_text(box.position + Vector2(FRAME_PAD + OBJECTIVE_ICON * 0.76 + 16.0, FRAME_HEADER + 27.0),
+		text, 12, Defs.COL_TEXT)
+
+func _draw_goal_icon(rect: Rect2, goal: Dictionary) -> void:
+	match String(goal["kind"]):
+		"machine": Icons.draw_machine(self, rect, int(goal["id"]))
+		"item": Icons.draw_item(self, rect, int(goal["id"]))
+		_: Icons.draw_thing(self, rect, String(goal["id"]))
 
 ## Docked into the status panel and always present, so it can never pop in and
 ## shift the layout at the exact moment the player is in danger.
@@ -483,10 +545,9 @@ func _draw_palette() -> void:
 	if selected == Defs.M_EXCHANGER or selected == Defs.M_MINER:
 		hint += "   ·   " + Defs.ratio_hint()
 	var hint_w: float = _text_width(hint, 12) + 20.0
-	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 28.0, hint_w, 22.0)
-	_panel(hint_box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.88),
-		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.5))
-	_text_in(Rect2(hint_box.position + Vector2(0, 15), Vector2(hint_box.size.x, 16)), hint, 12, Defs.COL_TEXT_DIM)
+	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 30.0, hint_w, 24.0)
+	_frame(hint_box, Defs.COL_PANEL_EDGE)
+	_text_in(Rect2(hint_box.position + Vector2(0, 16), Vector2(hint_box.size.x, 16)), hint, 12, Defs.COL_TEXT_DIM)
 
 	for index in count:
 		var type: int = Defs.BUILDABLE[index]
@@ -526,8 +587,12 @@ func _draw_palette() -> void:
 	# clipped by the viewport edge.
 	# On a phone the keyboard legend is noise; the pad already carries the verbs.
 	if main.touch == null or not main.touch.visible:
-		_text_in(Rect2(size.x - 460.0 - MARGIN, MARGIN + 2.0, 460.0, 16),
-			"C 채굴   Z 설치   X 회수   R 회전   F 제법   Esc 설정", 12, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
+		# Under the hotbar, not across the top: the top right belongs to the
+		# mission card now, and a key legend printed over it read as one long
+		# unparseable line.
+		_text_in(Rect2(size.x - 460.0 - MARGIN, origin.y + slot.y + 16.0, 460.0, 16),
+			"C 채굴   Z 설치   X 회수   R 회전   F 제법   Esc 설정", 11, Defs.COL_TEXT_DIM,
+			HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.
@@ -570,11 +635,11 @@ func _card_rect(height: float) -> Rect2:
 	var width: float = minf(420.0, size.x - MARGIN * 2.0)
 	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
 
+## Every full-screen card -- title, day summary, settings -- through the same
+## frame as every corner panel, so the interface reads as one object.
 func _card(height: float) -> Rect2:
 	var card: Rect2 = _card_rect(height)
-	_panel(card, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.96),
-		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9))
-	draw_rect(Rect2(card.position, Vector2(card.size.x, 3)), Defs.COL_CORE)
+	_frame(card, Defs.COL_CORE)
 	return card
 
 func _draw_title() -> void:
@@ -631,11 +696,10 @@ func _draw_night_caption() -> void:
 		main.Phase.SPILL: text = "%d일차 아침" % main.day_number
 	if text == "":
 		return
-	var width: float = _text_width(text, 14) + 40.0
-	var box := Rect2(size.x * 0.5 - width * 0.5, size.y * 0.78, width, 30.0)
-	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.80),
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.40))
-	_text_in(Rect2(box.position + Vector2(0, 20), Vector2(box.size.x, 18)), text, 14,
+	var width: float = _text_width(text, 14) + 48.0
+	var box := Rect2(size.x * 0.5 - width * 0.5, size.y * 0.78, width, 34.0)
+	_frame(box, Defs.COL_CORE)
+	_text_in(Rect2(box.position + Vector2(0, 23), Vector2(box.size.x, 18)), text, 14,
 		Defs.COL_TEXT)
 
 # --- Throughput panel --------------------------------------------------------
@@ -644,7 +708,7 @@ func _draw_night_caption() -> void:
 ## which is a worse unit for the same information.
 const METER_W := 244.0
 const METER_ROW := 19.0
-const METER_HEAD := 52.0
+const METER_HEAD := 70.0
 const METER_FOOT := 40.0
 
 ## Sized to its contents, then placed where it will not sit on top of anything
@@ -680,17 +744,21 @@ func _draw_meter_card() -> void:
 	if machine == null:
 		return
 	var box: Rect2 = meter_rect()
-	_panel(box, Defs.COL_PANEL, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.65), 2.0)
+	_frame(box, Defs.machine_color(machine.type), "처리량")
 	var origin: Vector2 = box.position
 
-	_text(origin + Vector2(14, 22), Defs.MACHINE_NAMES[machine.type], 15, Defs.COL_TEXT)
-	_text_in(Rect2(origin + Vector2(box.size.x - 74, 12), Vector2(62, 14)), "C 닫기", 11,
+	var chip := Rect2(origin + Vector2(FRAME_PAD, FRAME_HEADER + 4.0), Vector2(20.0, 20.0))
+	Icons.draw_machine(self, chip, machine.type)
+	_text(origin + Vector2(FRAME_PAD + 26.0, FRAME_HEADER + 19.0),
+		Defs.MACHINE_NAMES[machine.type], 15, Defs.COL_TEXT)
+	_text_in(Rect2(origin + Vector2(box.size.x - 74, 16), Vector2(62, 14)), "C 닫기", 11,
 		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 	var status: String = sim.meter_status(machine)
 	# The status line is the diagnosis, so it is coloured by whether anything is
 	# wrong rather than being one more grey caption.
 	var healthy: bool = status.begins_with("가동") or status == "운반 중" or status == "반입구"
-	_text(origin + Vector2(14, 40), status, 12, Defs.COL_CORE if healthy else Defs.COL_DANGER)
+	_text(origin + Vector2(FRAME_PAD, FRAME_HEADER + 36.0), status, 12,
+		Defs.COL_CORE if healthy else Defs.COL_DANGER)
 
 	var y: float = METER_HEAD
 	y = _draw_meter_side(machine, box, y, false)
@@ -698,7 +766,7 @@ func _draw_meter_card() -> void:
 
 	draw_line(origin + Vector2(12, y + 4), origin + Vector2(box.size.x - 12, y + 4),
 		Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.7), 1.0)
-	_text(origin + Vector2(14, y + 22), sim.meter_buffer(machine), 11, Defs.COL_TEXT_DIM)
+	_text(origin + Vector2(FRAME_PAD, y + 22), sim.meter_buffer(machine), 11, Defs.COL_TEXT_DIM)
 	var span: float = sim.meter_span(machine)
 	var note: String = "측정 중…" if span < Defs.METER_WINDOW else "최근 %d초 평균" % int(Defs.METER_WINDOW)
 	# On the same baseline as the buffer line: at y+12 the note's ascenders ran
@@ -715,7 +783,7 @@ func _draw_meter_side(machine, box: Rect2, y: float, outgoing: bool) -> float:
 		return y
 	var origin: Vector2 = box.position
 	var rated: Dictionary = sim.design_rates(machine)[("out" if outgoing else "in")]
-	_text(origin + Vector2(14, y + 12), "출력" if outgoing else "입력", 11, Defs.COL_MACHINE_EDGE)
+	_text(origin + Vector2(FRAME_PAD, y + 12), "출력" if outgoing else "입력", 11, Defs.COL_MACHINE_EDGE)
 	_text_in(Rect2(origin + Vector2(box.size.x - 150, y + 2), Vector2(138, 14)),
 		"실측 / 설계 (개/분)", 10, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 	y += 20.0
@@ -724,8 +792,8 @@ func _draw_meter_side(machine, box: Rect2, y: float, outgoing: bool) -> float:
 		# Belts and splitters are rated for a throughput, not for a material, so
 		# their figure is filed under -1 and applies to whatever passes through.
 		var design: float = float(rated.get(item_type, rated.get(-1, 0.0)))
-		draw_circle(origin + Vector2(19, y + 8), 4.0, Defs.ITEM_COLORS[item_type])
-		_text(origin + Vector2(28, y + 12), Defs.ITEM_SHORT[item_type], 12, Defs.COL_TEXT)
+		Icons.draw_item(self, Rect2(origin + Vector2(FRAME_PAD, y), Vector2(16.0, 16.0)), item_type)
+		_text(origin + Vector2(FRAME_PAD + 20.0, y + 12), Defs.ITEM_SHORT[item_type], 12, Defs.COL_TEXT)
 		# Falling short of the rated figure is the whole reason to open this panel,
 		# so the measured number carries the warning colour and the rated one stays
 		# quiet -- the rated number is never the problem.
