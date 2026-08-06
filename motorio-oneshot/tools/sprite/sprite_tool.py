@@ -90,16 +90,85 @@ def _foot(pixels: list) -> tuple:
 
 # --- normalisation ------------------------------------------------------------
 
-def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list) -> Image.Image:
-    """One raw frame into one conforming sprite.
+def sequence_scale(images: list, cell: dict, spec: dict) -> float:
+    """One scale factor for a whole sequence, from the median silhouette height.
+
+    This is a sequence-level decision and it took shipping the bug to see why.
+    The first version scaled every frame on its own so that each one's bounding
+    box came out the target height -- which sounds like exactly what "make them
+    the same size" means, and is the opposite of it. A bounding box is not the
+    character: in a walk cycle it grows when an arm swings up and shrinks when
+    the pose compacts. Normalising it away makes the *character* change size to
+    keep the box constant.
+
+    Measured on the first real clip: the generator was consistent to within 4%
+    across eight frames, and one frame whose box was 11% taller came out with a
+    character 10% smaller than its neighbours. A person spotted it on the
+    proposals page immediately. The pipeline had manufactured the exact defect
+    it exists to catch.
+
+    Median rather than mean or max: one frame reaching upward should not set the
+    scale for the other seven, and with eight frames a single outlier cannot
+    move the median at all.
+    """
+    heights = []
+    for image in images:
+        keyed = strip_background(image.convert("RGBA"), spec)
+        span = body_rows(keyed, spec["alpha_threshold"])
+        if span is not None:
+            heights.append(span[1] - span[0])
+    if not heights:
+        return 1.0
+    heights.sort()
+    median = heights[len(heights) // 2]
+    # The middle of the allowed band: aiming at the top of it leaves nothing for
+    # a pose that reaches, and aiming at the bottom wastes the resolution this
+    # whole exercise is about.
+    low, high = cell["body_height"]
+    return ((low + high) // 2) / median
+
+
+def body_rows(image: Image.Image, threshold: int) -> tuple:
+    """The longest unbroken run of rows containing sprite, or None.
+
+    Not the full bounding box, because a keyed frame is not always only the
+    character. One frame of the first real clip had a twelve-pixel speck stuck
+    to the top edge -- a scrap of background the chroma key did not catch -- and
+    it made that frame's box eleven percent taller than its neighbours. That fed
+    the scale calculation and would have made the character eleven percent
+    smaller if the median had not absorbed it. Median survives one bad frame in
+    eight; it does not survive a systematic one.
+
+    The longest contiguous run is the cheapest thing that ignores debris without
+    needing connected components: a speck at the frame edge is separated from
+    the character by empty rows, and the character is always the longer run.
+    """
+    alpha = image.getchannel("A").load()
+    width, height = image.size
+    filled = [any(alpha[x, y] >= threshold for x in range(width)) for y in range(height)]
+    best = None
+    start = None
+    for y in range(height + 1):
+        if y < height and filled[y]:
+            if start is None:
+                start = y
+        elif start is not None:
+            if best is None or y - start > best[1] - best[0]:
+                best = (start, y)
+            start = None
+    return best
+
+
+def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list,
+                    scale: float) -> Image.Image:
+    """One raw frame into one conforming sprite, at a scale set by its sequence.
 
     Order matters and is the whole trick:
       1. cut the background out, so the silhouette is real before anything is
          measured off it;
-      2. scale by the sprite's own height rather than by the frame, so a video
-         that drifts closer to the camera does not produce a character who
-         grows;
-      3. place it by its foot, so the ground stays put;
+      2. resize by the shared scale -- never by this frame's own height, see
+         sequence_scale;
+      3. place it by its foot, so the ground stays put while the pose moves;
       4. quantise last, once the pixel grid is final -- resampling after
          quantising reintroduces colours that are not in the palette.
     """
@@ -112,14 +181,8 @@ def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list) -
 
     left, top, right, bottom = shape["bounds"]
     cropped = image.crop((left, top, right, bottom))
-
-    # Target height is the middle of the allowed band: aiming at the top of it
-    # leaves nothing for a pose that reaches, and aiming at the bottom wastes
-    # the resolution the whole exercise is about.
-    low, high = cell["body_height"]
-    target_h = (low + high) // 2
-    scale = target_h / cropped.height
     target_w = max(1, round(cropped.width * scale))
+    target_h = max(1, round(cropped.height * scale))
     # BOX is an area average: every source pixel contributes. NEAREST here would
     # be the original sin all over again, picking one pixel in ninety.
     cropped = cropped.resize((target_w, target_h), Image.Resampling.BOX)
@@ -262,10 +325,12 @@ def cmd_normalize(args, spec, palette) -> int:
     if not frames:
         print(f"SPRITE: no frames in {args.in_dir}", file=sys.stderr)
         return 1
+    scale = sequence_scale([image for _, image in frames], cell, spec)
     for name, image in frames:
-        out = normalize_frame(image, cell, spec, palette)
+        out = normalize_frame(image, cell, spec, palette, scale)
         out.save(args.out_dir / (Path(name).stem + ".png"))
-    print(f"SPRITE: normalised {len(frames)} frames -> {args.out_dir}")
+    print(f"SPRITE: normalised {len(frames)} frames at one shared scale "
+          f"{scale:.4f} -> {args.out_dir}")
     return 0
 
 

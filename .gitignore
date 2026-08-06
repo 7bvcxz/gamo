@@ -10,3 +10,7 @@
 *.secrets.env
 secrets.env
 **/api_key*
+
+# Python bytecode from the sprite tools.
+__pycache__/
+*.pyc

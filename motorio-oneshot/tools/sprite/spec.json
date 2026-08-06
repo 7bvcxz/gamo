@@ -110,7 +110,7 @@
   "validation": {
     "max_anchor_drift_px": 0.5,
     "max_centroid_jump_px": 3.0,
-    "max_area_change_ratio": 0.25,
+    "max_area_change_ratio": 0.12,
     "require_palette_conformance": true,
     "_why": [
       "Half a pixel, and not because half a pixel of slop is acceptable. The foot",
@@ -122,7 +122,11 @@
       "the distinction got found. The centroid and area limits",
       "catch the failure this repository actually hit: frames that are each",
       "individually fine but do not belong to the same walk cycle, so the",
-      "character's mass jumps around between them. Numbers are per adjacent",
+      "character's mass jumps around between them. The area limit was 0.25 and",
+      "let a 21% jump through -- a frame the eye caught at a glance on the",
+      "proposals page. With one shared scale across a sequence the real spread",
+      "is a few percent, so 0.12 is loose enough for a pose and tight enough to",
+      "catch a character resizing. Numbers are per adjacent",
       "frame pair, not against the first frame -- a cycle is allowed to travel,",
       "it is not allowed to jerk."
     ]
