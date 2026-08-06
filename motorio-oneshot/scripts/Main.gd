@@ -1205,12 +1205,19 @@ func save_settings() -> bool:
 	return config.save(SETTINGS_PATH) == OK
 
 func load_settings() -> void:
+	# Defaults are per platform: a phone needs everything enlarged just to be
+	# legible, a desktop wants the HUD out of the way of the factory. Chosen from
+	# the same test the pad uses to decide whether to show itself, so the two can
+	# never disagree about which kind of device this is.
+	var touch_device: bool = touch != null and touch.visible
+	ui_scale = Defs.UI_SCALE_DEFAULT if touch_device else Defs.UI_SCALE_DEFAULT_DESKTOP
+	game_scale = Defs.GAME_SCALE_DEFAULT if touch_device else Defs.GAME_SCALE_DEFAULT_DESKTOP
 	var config := ConfigFile.new()
 	if config.load(SETTINGS_PATH) == OK:
 		ui_scale = Defs.quantise_ui_scale(
-			float(config.get_value("settings", "ui_scale", Defs.UI_SCALE_DEFAULT)))
+			float(config.get_value("settings", "ui_scale", ui_scale)))
 		game_scale = Defs.quantise_game_scale(
-			float(config.get_value("settings", "game_scale", Defs.GAME_SCALE_DEFAULT)))
+			float(config.get_value("settings", "game_scale", game_scale)))
 	touch.set_pad_scale(ui_scale)
 	_apply_camera_zoom()
 

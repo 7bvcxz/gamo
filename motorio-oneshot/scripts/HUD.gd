@@ -955,7 +955,9 @@ func _draw_settings_card() -> void:
 	var touch_pad: bool = main.touch != null and main.touch.visible
 	var hint: String = "한 번 더 누르면 지금까지의 공장이 사라집니다" if restart_armed > 0.0 \
 		else ("슬라이더를 드래그하세요" if touch_pad else "↑ ↓ 로 선택, ← → 로 조절")
-	_text_in(Rect2(card.position + Vector2(0, SETTINGS_CARD_H - 76.0), Vector2(w, 18)), hint, 12,
+	# Above the buttons, not between them and 닫기: at the bottom it sat exactly on
+	# the edge of 처음부터 and the two read as one smudged line.
+	_text_in(Rect2(card.position + Vector2(0, SETTINGS_CARD_H - 200.0), Vector2(w, 18)), hint, 12,
 		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
 	var close: Rect2 = settings_close_rect
 	_panel(close, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18), Defs.COL_CORE)

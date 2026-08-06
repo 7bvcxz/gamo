@@ -481,7 +481,13 @@ const UI_SCALE_TOUCH_BASE := 2.0
 const UI_SCALE_DESKTOP_BASE := 0.9
 const UI_SCALE_MIN := 0.45
 const UI_SCALE_MAX := 1.6
+## What the sliders read on a fresh install. Per platform, because the two are
+## not the same question: a phone reports a logical viewport far wider than its
+## physical one and needs everything enlarged just to be legible, while on a
+## desktop the HUD is competing with the factory for the screen and wants to get
+## out of the way.
 const UI_SCALE_DEFAULT := 1.0
+const UI_SCALE_DEFAULT_DESKTOP := 0.70
 
 ## Rounded to this step so the slider lands on repeatable values and the label
 ## never shows a number the player cannot get back to.
@@ -496,6 +502,7 @@ const GAME_SCALE_DESKTOP_BASE := 1.0
 const GAME_SCALE_MIN := 0.6
 const GAME_SCALE_MAX := 1.6
 const GAME_SCALE_DEFAULT := 1.0
+const GAME_SCALE_DEFAULT_DESKTOP := 0.90
 
 static func quantise_scale(value: float, low: float, high: float) -> float:
 	return snappedf(clampf(value, low, high), UI_SCALE_STEP)
