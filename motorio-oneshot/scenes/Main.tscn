@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bmo1oneshotmain"]
+[gd_scene load_steps=15 format=3 uid="uid://bmo1oneshotmain"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/Sim.gd" id="2_sim"]
@@ -12,6 +12,16 @@
 [ext_resource type="Texture2D" path="res://assets/characters/mechanic_sheet.png" id="10_mechanic"]
 [ext_resource type="Script" path="res://scripts/ColdFog.gd" id="11_fog"]
 [ext_resource type="Script" path="res://scripts/TouchControls.gd" id="12_touch"]
+[ext_resource type="Script" path="res://scripts/Atmosphere.gd" id="13_atmos"]
+[ext_resource type="Shader" path="res://assets/atmosphere.gdshader" id="14_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_atmos"]
+shader = ExtResource("14_shader")
+shader_parameter/night = 0.0
+shader_parameter/vignette_strength = 0.28
+shader_parameter/edge_tint = Color(0.05, 0.07, 0.13, 1)
+shader_parameter/sky_tint = Color(0.42, 0.55, 0.86, 1)
+
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -56,6 +66,17 @@ script = ExtResource("5_fx")
 
 [node name="Audio" type="Node" parent="."]
 script = ExtResource("8_audio")
+
+[node name="Grade" type="CanvasLayer" parent="."]
+layer = 0
+
+[node name="Atmosphere" type="ColorRect" parent="Grade"]
+material = SubResource("ShaderMaterial_atmos")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("13_atmos")
 
 [node name="UI" type="CanvasLayer" parent="."]
 

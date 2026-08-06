@@ -26,6 +26,7 @@ const RESCUE_SECONDS := 1.6
 @onready var hud: Control = $UI/HUD
 @onready var audio: Node = $Audio
 @onready var touch: TouchControls = $UI/TouchControls
+@onready var atmosphere: ColorRect = $Grade/Atmosphere
 
 var state: int = State.TITLE
 var time_left: float = Defs.DAY_SECONDS
@@ -97,6 +98,7 @@ func _ready() -> void:
 	player.blocked = func(cell: Vector2i) -> bool: return sim.blocks_player(cell)
 	touch.main_controller = self
 	touch.player = player
+	atmosphere.set("main", self)
 	load_settings()
 	_start_run()
 	if load_game():
