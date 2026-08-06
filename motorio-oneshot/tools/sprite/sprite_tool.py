@@ -104,7 +104,7 @@ def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list) -
          quantising reintroduces colours that are not in the palette.
     """
     image = image.convert("RGBA")
-    image = _strip_background(image, spec)
+    image = strip_background(image, spec)
 
     shape = silhouette(image, spec["alpha_threshold"])
     if shape["empty"]:
@@ -135,7 +135,7 @@ def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list) -
     return _quantise(canvas, palette, spec["alpha_threshold"])
 
 
-def _strip_background(image: Image.Image, spec: dict) -> Image.Image:
+def strip_background(image: Image.Image, spec: dict) -> Image.Image:
     """Remove a flat background by colour, keyed off the corners.
 
     A video model asked for a character on a solid backdrop gives back a
