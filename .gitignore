@@ -1,0 +1,12 @@
+# Credentials never live in this repository. It is published to GitHub Pages, so
+# anything committed here is public the moment it is pushed. The sprite pipeline
+# reads its keys from the environment; the file they are kept in lives outside
+# the working tree entirely (~/.config/gamo/secrets.env, mode 600).
+#
+# These patterns are a backstop, not the mechanism. If a key ends up matching one
+# of them inside the repo, something has already gone wrong upstream of here.
+.env
+.env.*
+*.secrets.env
+secrets.env
+**/api_key*
