@@ -66,6 +66,8 @@ var cinema_zoom: float = 1.0
 ## Which entry of Defs.DEBUG_SPEEDS is active. Never persisted: a save that came
 ## back at ten times speed would be a very confusing bug report.
 var speed_index: int = 0
+## Debug: whether the generated sprite candidate is drawn beside the player.
+var show_candidate: bool = false
 ## Player's UI size multiplier, applied on top of the per-platform base.
 var ui_scale: float = Defs.UI_SCALE_DEFAULT
 ## The same idea for the world: how large the game itself is drawn, which is the
@@ -337,6 +339,10 @@ func _process(delta: float) -> void:
 	cold_fog.night = dark
 	machine_layer.view_rect = view
 	machine_layer.night = dark
+	# Two tiles to the player's right, on the same ground line, so the generated
+	# candidate and the character it would replace can be compared at real size.
+	machine_layer.candidate_at = (player.position + Vector2(float(Defs.TILE) * 2.0, 12.0)) \
+		if show_candidate else Vector2(9999, 9999)
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
@@ -717,6 +723,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("debug_unlock"):
 		debug_unlock_all()
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("debug_candidate"):
+		show_candidate = not show_candidate
+		_notify("생성 후보 %s" % ("표시" if show_candidate else "숨김"), Defs.COL_DANGER)
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode == KEY_B:
