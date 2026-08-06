@@ -56,6 +56,28 @@ func _run() -> void:
 	_assert(main.hud.saved_flash > 0.0, "confirming a slot writes it")
 	var cards: Array[Dictionary] = main.slot_cards()
 	_assert(cards.size() == main.SAVE_SLOTS, "the list has a row per slot")
+	_assert(main.SAVE_SLOTS >= 31, "thirty manual slots plus the autosave")
+	# Thirty-one rows do not fit on a card, so the list is a window that follows
+	# the cursor. Every visible row has to map back to the right slot number --
+	# an off-by-one here overwrites the wrong save, which is unrecoverable.
+	main.hud.slot_index = 0
+	main.hud.slot_scroll = 0
+	main.hud._layout_slots()
+	_assert(main.hud.slot_rects.size() == main.hud.slot_page(),
+		"the list publishes a rect per visible row, not per slot")
+	_assert(main.hud.slot_row_at((main.hud.slot_rects[0] as Rect2).get_center()) == 0,
+		"the top row is slot 0 while the window is at the top")
+	main.hud.slot_index = main.SAVE_SLOTS - 1
+	main.hud._layout_slots()
+	_assert(main.hud.slot_scroll > 0, "selecting the last slot scrolls the window")
+	var last_row: int = main.hud.slot_rects.size() - 1
+	_assert(main.hud.slot_row_at((main.hud.slot_rects[last_row] as Rect2).get_center())
+		== main.SAVE_SLOTS - 1,
+		"and the bottom row now maps to the last slot")
+	_assert(main.hud.slot_row_at(Vector2(-500, -500)) == -1, "a point off the list hits nothing")
+	main.hud.slot_index = 1
+	main.hud.slot_scroll = 0
+	main.hud._layout_slots()
 	_assert(bool(cards[2]["exists"]), "slot 2 now holds a save")
 	_assert(int(cards[2]["day"]) == main.day_number, "carrying the day it was written on")
 	_assert(float(cards[2]["saved_at"]) > 0.0, "and when")

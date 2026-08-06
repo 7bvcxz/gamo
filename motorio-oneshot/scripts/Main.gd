@@ -408,7 +408,11 @@ const BUILD_HOLD_ROTATE := 0.4
 ## Slot 0 is the autosave, so the timed write can never land on a slot the player
 ## put something in deliberately. clear_save() still empties every slot, because
 ## the thing it exists for -- 처음부터 -- means all of it.
-const SAVE_SLOTS := 4
+##
+## Thirty of them plus the autosave. More than fit on a card, so the list
+## scrolls; the cost of an unused slot is a file that was never written, which is
+## nothing.
+const SAVE_SLOTS := 31
 const SAVE_PATH := "user://motorio_oneshot_save.cfg"
 const SAVE_SCHEMA := 3
 

@@ -33,6 +33,8 @@ var settings_load_rect := Rect2()
 ## you need whether you are about to write over it or read it.
 var slot_picker: int = 0
 var slot_index: int = 1
+## First slot shown in the window onto the list.
+var slot_scroll: int = 0
 var slot_rects: Array[Rect2] = []
 ## Restart is one tap from erasing a factory, so it asks once. Seconds remaining
 ## on the confirmation; zero means the button is in its normal state.
@@ -134,7 +136,7 @@ func _layout() -> void:
 ## Esc opens this panel now: it is the only stopped screen, so everything a
 ## player wants while stopped has to be reachable from it.
 const SETTINGS_CARD_H := 476.0
-const SLOT_CARD_H := 320.0
+const SLOT_CARD_H := 372.0
 const SETTINGS_ROW_H := 92.0
 const SETTINGS_ROW_TOP := 96.0
 const SLIDER_LABELS := ["화면 UI 크기", "게임 화면 크기"]
@@ -162,19 +164,34 @@ func _layout_settings() -> void:
 	_layout_slots()
 
 # --- Save slots ---------------------------------------------------------------
+## Thirty-one slots do not fit on a card, so the list shows a window onto them and
+## the window follows the cursor. The rects published here are the visible rows;
+## slot_scroll is what turns one into a slot number, and everything that hit-tests
+## or draws goes through that so the two can never disagree about which row is
+## which.
 const SLOT_ROW := 62.0
+const SLOT_VISIBLE := 5
+
+func slot_page() -> int:
+	return mini(SLOT_VISIBLE, main.SAVE_SLOTS)
 
 func _layout_slots() -> void:
 	var card: Rect2 = _card_rect(SLOT_CARD_H)
+	# Keep the cursor on screen with a row of lead where there is one, so moving
+	# through the list never parks the selection against the edge.
+	var page: int = slot_page()
+	slot_scroll = clampi(slot_scroll, maxi(0, slot_index - page + 1), slot_index)
+	slot_scroll = clampi(slot_scroll, 0, maxi(0, main.SAVE_SLOTS - page))
 	slot_rects.clear()
-	for index in main.SAVE_SLOTS:
-		slot_rects.append(Rect2(card.position + Vector2(14.0, FRAME_HEADER + 12.0 + float(index) * SLOT_ROW),
-			Vector2(card.size.x - 28.0, SLOT_ROW - 6.0)))
+	for row in page:
+		slot_rects.append(Rect2(card.position + Vector2(14.0, FRAME_HEADER + 12.0 + float(row) * SLOT_ROW),
+			Vector2(card.size.x - 40.0, SLOT_ROW - 6.0)))
 
+## The slot a point falls on, or -1. Returns the slot number, not the row.
 func slot_row_at(point: Vector2) -> int:
-	for index in slot_rects.size():
-		if (slot_rects[index] as Rect2).has_point(point):
-			return index
+	for row in slot_rects.size():
+		if (slot_rects[row] as Rect2).has_point(point):
+			return slot_scroll + row
 	return -1
 
 ## The value range a row spans. Kept here rather than in the caller so drawing,
@@ -981,15 +998,35 @@ func _draw_slot_picker() -> void:
 	_text_in(Rect2(card.position + Vector2(0, 30.0), Vector2(card.size.x, 22)),
 		"저장할 슬롯" if slot_picker == 1 else "불러올 슬롯", 17, Defs.COL_TEXT)
 	var cards: Array[Dictionary] = main.slot_cards()
-	for index in cards.size():
-		_draw_slot_row(index, cards[index])
+	for row in slot_rects.size():
+		var index: int = slot_scroll + row
+		if index < cards.size():
+			_draw_slot_row(row, index, cards[index])
+	_draw_slot_scrollbar(card)
 	_text_in(Rect2(card.position + Vector2(0, card.size.y - 16.0), Vector2(card.size.x, 16)),
-		"↑ ↓ 선택 · Z 확인 · Esc 취소", 11, Defs.COL_TEXT_DIM)
+		"↑ ↓ 선택 · Z 확인 · Esc 취소     %d / %d" % [slot_index, main.SAVE_SLOTS - 1], 11,
+		Defs.COL_TEXT_DIM)
 
-func _draw_slot_row(index: int, card: Dictionary) -> void:
-	if index >= slot_rects.size():
+## Where in the list the window is. With thirty-one slots a player needs to know
+## whether they are near the top or the bottom, and a scrollbar says it without
+## costing a row.
+func _draw_slot_scrollbar(card: Rect2) -> void:
+	var page: int = slot_page()
+	if main.SAVE_SLOTS <= page:
 		return
-	var rect: Rect2 = slot_rects[index]
+	var track := Rect2(card.position + Vector2(card.size.x - 20.0, FRAME_HEADER + 12.0),
+		Vector2(4.0, float(page) * SLOT_ROW - 6.0))
+	draw_rect(track, Color(1, 1, 1, 0.07))
+	var span: float = float(page) / float(main.SAVE_SLOTS)
+	var at: float = float(slot_scroll) / float(main.SAVE_SLOTS)
+	draw_rect(Rect2(track.position + Vector2(0.0, track.size.y * at),
+		Vector2(track.size.x, maxf(12.0, track.size.y * span))),
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
+
+func _draw_slot_row(row: int, index: int, card: Dictionary) -> void:
+	if row >= slot_rects.size():
+		return
+	var rect: Rect2 = slot_rects[row]
 	var on_cursor: bool = index == slot_index
 	var exists: bool = bool(card["exists"])
 	var accent: Color = Defs.COL_CORE if slot_picker == 1 else Defs.COL_MACHINE_EDGE
