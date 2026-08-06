@@ -181,8 +181,21 @@ def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list,
     if shape["empty"]:
         return Image.new("RGBA", tuple(cell["size"]), tuple(spec["background"]))
 
-    left, top, right, bottom = shape["bounds"]
-    cropped = image.crop((left, top, right, bottom))
+    # Bound the crop by the body, not by the outermost surviving pixel. Chroma
+    # keying leaves specks -- one frame here kept a 12px sliver along the top
+    # edge -- and cropping to raw bounds carries them into the cell, where they
+    # stretch that frame's silhouette and make the character look a different
+    # size. At 64 the sliver averaged below the alpha threshold and vanished, so
+    # this was invisible until the same frames were cut at 128 and frame four
+    # came out 71px against everything else's 64. The defect was always there;
+    # the smaller cell was hiding it.
+    top, bottom = body_rows(image, spec["alpha_threshold"])
+    band = image.crop((0, top, image.width, bottom))
+    band_shape = silhouette(band, spec["alpha_threshold"])
+    if band_shape["empty"]:
+        return Image.new("RGBA", tuple(cell["size"]), tuple(spec["background"]))
+    left, _, right, _ = band_shape["bounds"]
+    cropped = band.crop((left, 0, right, band.height))
     target_w = max(1, round(cropped.width * scale))
     target_h = max(1, round(cropped.height * scale))
     # BOX is an area average: every source pixel contributes. NEAREST here would
@@ -284,6 +297,23 @@ def validate(frames: list, cell: dict, spec: dict, palette: list) -> list:
                 f"{name}: foot at ({foot_x:.1f}, {foot_y:.1f}), anchor is "
                 f"{tuple(cell['foot_anchor'])} -- drift {drift:.1f}px. The normaliser "
                 f"places this, so any drift is a pipeline bug, not a tolerance")
+
+        # Pixels that are not attached to the body. A chroma speck riding along
+        # the top edge passed every check here -- anchor, palette, centroid, area
+        # -- because it is small, still, and the right colour, and it only became
+        # visible when the same frames were cut at a larger cell. Comparing the
+        # full silhouette against the longest unbroken run of body rows names the
+        # defect directly, and does not care that a mining swing is legitimately
+        # taller than a walk, which any height-spread rule would have to.
+        band = body_rows(image, spec["alpha_threshold"])
+        if band is not None:
+            detached = (band[0] - shape["bounds"][1]) + (shape["bounds"][3] - band[1])
+            if detached > 0:
+                problems.append(
+                    f"{name}: {detached}px of the silhouette is detached from the body "
+                    f"(rows {shape['bounds'][1]}-{shape['bounds'][3]}, body "
+                    f"{band[0]}-{band[1]}). Keying leftovers, and they stretch this "
+                    f"frame so the character reads as a different size")
 
         if rules["require_palette_conformance"]:
             stray = {p[:3] for p in image.getdata() if p[3] >= spec["alpha_threshold"]} - legal

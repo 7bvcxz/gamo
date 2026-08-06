@@ -11,12 +11,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/gamo/sprite-candidates/mechanic-walk-s-a-40c19cc520da.png",
+          "sheet": "/gamo/sprite-candidates/mechanic-walk-s-a-a9ee2549dc0b.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0118,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 480p · 4s · 0.224 USD"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · 0.224 USD"
         }
       ],
       "source_video": "/gamo/sprite-candidates/source-e95379285a44.mp4"
@@ -32,7 +32,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/gamo/sprite-candidates/mechanic-walk-s-128-a-c4e9279518a2.png",
+          "sheet": "/gamo/sprite-candidates/mechanic-walk-s-128-a-783f6a9f611a.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0118,
