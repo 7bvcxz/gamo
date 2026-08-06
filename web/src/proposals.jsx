@@ -61,6 +61,30 @@ function SpriteRequest({ request, picked, onPick }) {
           </button>
         ))}
       </div>
+      {request.mirrors && (
+        // The direction this one covers for free. Shown because the decision to
+        // mirror rather than generate is only sound if the mirrored result is
+        // actually usable, and that is a thing to look at, not to assume.
+        <div className="sprite-mirror">
+          <span>{request.mirrors} 방향 — 같은 시트의 좌우반전</span>
+          <div className="sprite-mirror-pair">
+            {request.candidates.map((candidate) => (
+              <SpriteAnimation
+                key={candidate.id}
+                sheet={candidate.sheet}
+                frames={candidate.frames}
+                fps={candidate.fps}
+                zoom={zoom}
+                mirrored
+              />
+            ))}
+          </div>
+          <p>
+            별도 시트를 만들지 않습니다. 발 기준점이 셀의 세로 중심선 위에 있어서 반전해도
+            기준점이 자기 자신으로 옮겨가고, 사본을 두면 언젠가 원본과 어긋나기 때문입니다.
+          </p>
+        </div>
+      )}
       {request.candidates.map((candidate) => (
         <div className="sprite-strip-row" key={candidate.id}>
           <span>{candidate.id.toUpperCase()}</span>

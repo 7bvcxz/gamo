@@ -232,6 +232,34 @@ th { background: var(--sidebar); font-weight: 600; }
   font-size: 12px;
   flex: none;
 }
+.sprite-mirror {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sprite-mirror > span {
+  font-weight: 700;
+  color: #8fa0bd;
+  font-size: 12px;
+}
+.sprite-mirror-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.sprite-mirror-pair canvas {
+  background: #131a26;
+  border: 1px solid #2a3446;
+  border-radius: 3px;
+}
+.sprite-mirror p {
+  margin: 0;
+  color: #8fa0bd;
+  font-size: 12px;
+  line-height: 1.6;
+  max-width: 62ch;
+}
 .sprite-source {
   margin-top: 16px;
   padding-top: 14px;

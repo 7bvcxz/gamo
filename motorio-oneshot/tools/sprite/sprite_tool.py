@@ -85,9 +85,26 @@ def silhouette(image: Image.Image, threshold: int) -> dict:
 
 
 def _foot(pixels: list) -> tuple:
+    """Where the character stands, in edge coordinates.
+
+    Both numbers name a point on the pixel grid rather than a pixel: the y is the
+    bottom edge of the lowest occupied row, and the x is the mean of the occupied
+    pixels' centres, which is x + 0.5 for a pixel at index x.
+
+    The half matters and its absence was a bug. With plain indices the two axes
+    used different conventions, so a sprite placed at the anchor x=64 of a
+    128-wide cell was actually half a pixel right of the cell's true centre,
+    63.5. Reflecting about the centre then landed the foot at 63 and the
+    character stepped sideways the moment it turned -- which is the bug this
+    repository already recorded once, from the other end, when a flip was applied
+    to the drawing but not to the anchor arithmetic. In edge coordinates a
+    reflection maps x to width - x, so a foot on the centre maps onto itself and
+    a foot half a pixel off maps to half a pixel off the other way, which is
+    correct rather than merely tolerable.
+    """
     bottom = max(p[1] for p in pixels)
     row = [p[0] for p in pixels if p[1] == bottom]
-    return (sum(row) / len(row), bottom + 1)
+    return (sum(x + 0.5 for x in row) / len(row), bottom + 1)
 
 
 # --- normalisation ------------------------------------------------------------
@@ -267,7 +284,8 @@ def _quantise(image: Image.Image, palette: list, threshold: int) -> Image.Image:
 
 # --- validation ---------------------------------------------------------------
 
-def validate(frames: list, cell: dict, spec: dict, palette: list) -> list:
+def validate(frames: list, cell: dict, spec: dict, palette: list,
+             motion: str = "") -> list:
     """Every reason this sequence is not usable. Empty means it is.
 
     Deliberately returns all of them rather than the first: a candidate that
@@ -275,6 +293,14 @@ def validate(frames: list, cell: dict, spec: dict, palette: list) -> list:
     and the second is worth a second attempt.
     """
     rules = spec["validation"]
+    # Scaled to the cell, so the rule means the same thing at 64 and at 128.
+    body = cell.get("body_height")
+    body_mid = sum(body) / 2 if body else cell["size"][1] / 2
+    # A motion may raise its own ceiling; see _animation_jump_why in the spec.
+    fraction = rules["max_centroid_jump_body"]
+    if motion:
+        fraction = spec["animations"].get(motion, {}).get("max_centroid_jump_body", fraction)
+    jump_limit = fraction * body_mid
     legal = set(palette)
     problems = []
     previous = None
@@ -324,11 +350,12 @@ def validate(frames: list, cell: dict, spec: dict, palette: list) -> list:
         if previous is not None:
             jump = ((shape["centroid"][0] - previous["centroid"][0]) ** 2
                     + (shape["centroid"][1] - previous["centroid"][1]) ** 2) ** 0.5
-            if jump > rules["max_centroid_jump_px"]:
+            if jump > jump_limit:
                 problems.append(
                     f"{name}: silhouette centre jumped {jump:.1f}px from the previous "
-                    f"frame (limit {rules['max_centroid_jump_px']}). This is the frames "
-                    f"not belonging to one cycle -- the exact failure that shipped twice")
+                    f"frame (limit {jump_limit:.1f} = {rules['max_centroid_jump_body']} "
+                    f"of a {body_mid:.0f}px body{', ' + motion if motion else ''}). This is the frames not belonging to "
+                    f"one cycle -- the exact failure that shipped twice")
             ratio = abs(shape["area"] - previous["area"]) / max(previous["area"], 1)
             if ratio > rules["max_area_change_ratio"]:
                 problems.append(
@@ -369,7 +396,7 @@ def cmd_normalize(args, spec, palette) -> int:
 def cmd_validate(args, spec, palette) -> int:
     cell = spec["cells"][args.cell]
     frames = load_frames(args.dir)
-    problems = validate(frames, cell, spec, palette)
+    problems = validate(frames, cell, spec, palette, args.motion)
     for problem in problems:
         print(f"SPRITE_FAIL: {problem}")
     if problems:
@@ -401,6 +428,48 @@ PUBLISH_DIR = REPO / "docs" / "sprite-candidates"
 MANIFEST = REPO / "web" / "src" / "generated" / "sprites.json"
 
 
+def cmd_mirror(args, spec, palette) -> int:
+    """A west-facing sequence from an east-facing one, by reflection.
+
+    The game does this at draw time and never ships the flipped frames -- that is
+    what mirrored_from_east means, and it is why only five of eight directions
+    are ever generated. This command exists to prove the reflection is exact and
+    to let a person look at the result before trusting it.
+
+    It is exact because the foot anchor sits on the cell's vertical centre line
+    (32 of 64, 64 of 128). Reflect about that line and the anchor maps onto
+    itself, so a mirrored frame needs no compensation. An earlier sheet in this
+    game had an off-centre anchor, the flip was applied to the drawing but not to
+    the anchor arithmetic, and the character jumped sideways the instant it
+    turned. Centring the anchor is what removed that whole class of bug; this
+    checks the property still holds rather than assuming it.
+    """
+    cell = spec["cells"][args.cell]
+    anchor_x = cell["foot_anchor"][0]
+    if anchor_x * 2 != cell["size"][0]:
+        print(f"MIRROR: refused -- foot anchor x is {anchor_x} but the cell is "
+              f"{cell['size'][0]} wide, so the centre is {cell['size'][0] / 2}. "
+              f"Reflection would move the anchor and every frame would step sideways "
+              f"on turning.", file=sys.stderr)
+        return 1
+
+    frames = load_frames(args.dir)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    flipped = []
+    for name, image in frames:
+        out = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+        out.save(args.out_dir / name)
+        flipped.append((name, out))
+
+    problems = validate(flipped, cell, spec, palette, args.motion)
+    for problem in problems:
+        print(f"SPRITE_FAIL: {problem}")
+    if problems:
+        return 1
+    print(f"MIRROR: {len(flipped)} frames reflected about x={anchor_x} -> {args.out_dir}")
+    return 0
+
+
 def cmd_publish(args, spec, palette) -> int:
     """Put a validated sequence where the proposals page can play it.
 
@@ -415,7 +484,7 @@ def cmd_publish(args, spec, palette) -> int:
     """
     cell = spec["cells"][args.cell]
     frames = load_frames(args.dir)
-    problems = validate(frames, cell, spec, palette)
+    problems = validate(frames, cell, spec, palette, args.motion)
     if problems:
         for problem in problems:
             print(f"SPRITE_FAIL: {problem}")
@@ -469,6 +538,14 @@ def cmd_publish(args, spec, palette) -> int:
         (PUBLISH_DIR / video_name).write_bytes(video_bytes)
         request["source_video"] = f"/gamo/sprite-candidates/{video_name}"
         print(f"PUBLISH: source {video_name} ({len(video_bytes)} bytes)")
+
+    # Which direction this one covers by reflection. Recorded rather than
+    # rendered: the flipped frames are never stored, in the manifest or in the
+    # game, because the reflection is exact and a second copy could only ever
+    # drift from the first. The page flips the same sheet on its canvas.
+    mirror = {"e": "w", "ne": "nw", "se": "sw"}.get(args.facing)
+    if mirror and mirror in spec.get("mirrored_from_east", []):
+        request["mirrors"] = mirror
 
     request["candidates"] = [c for c in request["candidates"] if c["id"] != args.candidate]
     request["candidates"].append({
@@ -527,6 +604,8 @@ def main() -> int:
     p = subs.add_parser("validate")
     p.add_argument("dir", type=Path)
     p.add_argument("--cell", default="character", choices=sorted(spec["cells"]))
+    p.add_argument("--motion", default="", choices=[""] + sorted(spec["animations"]),
+                   help="lets a motion apply its own centroid tolerance")
     p.set_defaults(run=cmd_validate)
 
     p = subs.add_parser("sheet")
@@ -547,6 +626,14 @@ def main() -> int:
     p.add_argument("--source-video", type=Path,
                    help="the clip these frames were cut from, published beside the sheet")
     p.set_defaults(run=cmd_publish)
+
+    p = subs.add_parser("mirror")
+    p.add_argument("dir", type=Path)
+    p.add_argument("out_dir", type=Path)
+    p.add_argument("--cell", default="character", choices=sorted(spec["cells"]))
+    p.add_argument("--motion", default="", choices=[""] + sorted(spec["animations"]),
+                   help="lets a motion apply its own centroid tolerance")
+    p.set_defaults(run=cmd_mirror)
 
     p = subs.add_parser("inspect")
     p.add_argument("image", type=Path)

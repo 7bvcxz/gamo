@@ -59,7 +59,14 @@ STAGING = (
 MOTION_PROMPTS = {
     "walk": "The character from image 1 walks in place, facing the viewer, a simple looping walk cycle at a steady pace.",
     "run": "The character from image 1 runs in place, facing the viewer, a looping run cycle, leaning slightly forward.",
-    "mine": "The character from image 1 swings a pickaxe downward and back up in a steady repeating rhythm, facing the viewer, feet planted.",
+    # Spelled out as a full arc with a count, because the short version did not
+    # work. "Swings a pickaxe downward and back up in a steady repeating rhythm"
+    # produced four seconds of a character holding a pickaxe and shifting it
+    # about with no strike in it at all -- no cycle to find, and the clip was
+    # unusable. A swing has to be described as travel between two named
+    # extremes, and asking for a specific number of repetitions is what makes
+    # the period short enough that a cycle fits inside the clip.
+    "mine": "The character from image 1 mines with a pickaxe: raises it high above the head with both hands, then swings it down hard to strike the ground in front of the feet, then lifts it back overhead, repeating this complete swing three times at a steady rhythm. The swing is large and obvious, the pickaxe travelling all the way from above the head to the ground and back on every repetition. Facing the viewer, feet planted, the body staying in place.",
     "idle": "The character from image 1 stands still and breathes, facing the viewer, only a small idle sway.",
 }
 
@@ -117,6 +124,8 @@ def main() -> int:
     parser.add_argument("--motion", default="walk", choices=sorted(MOTION_PROMPTS))
     parser.add_argument("--facing", default="toward the viewer",
                         help="which way the character faces, e.g. 'to the right'")
+    parser.add_argument("--subject", default="The character from image 1",
+                        help="who is moving, e.g. 'The bipedal cat character from image 1'")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--duration", type=int, default=4, help="seconds; 4 is the API minimum")
     parser.add_argument("--resolution", default="480p")
@@ -129,7 +138,13 @@ def main() -> int:
     if not args.ref and not args.ref_url:
         parser.error("give at least one --ref or --ref-url")
 
-    prompt = (MOTION_PROMPTS[args.motion].replace("facing the viewer", f"facing {args.facing}")
+    # The subject is swapped rather than kept generic. "The character from image 1"
+    # is enough when image 1 is a person, but the cat is a bipedal animal in
+    # clothes, and naming that is the difference between it walking upright as it
+    # does in the game and it dropping onto four legs.
+    prompt = (MOTION_PROMPTS[args.motion]
+              .replace("The character from image 1", args.subject)
+              .replace("facing the viewer", f"facing {args.facing}")
               + " " + STAGING)
     payload = {
         "model": args.model,

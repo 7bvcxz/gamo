@@ -13,7 +13,8 @@ import React, { useEffect, useRef, useState } from 'react';
 // showing something the player will never see, and smoothing is exactly what
 // hides a one-pixel jitter.
 
-export function SpriteAnimation({ sheet, frames, fps, zoom = 4, playing = true }) {
+export function SpriteAnimation({ sheet, frames, fps, zoom = 4, playing = true,
+  mirrored = false }) {
   const canvasRef = useRef(null);
   const [image, setImage] = useState(null);
   const [error, setError] = useState(false);
@@ -35,6 +36,15 @@ export function SpriteAnimation({ sheet, frames, fps, zoom = 4, playing = true }
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
+    // West is east reflected, so the flipped frames are never stored -- not in
+    // the repository, not in the game. The reflection is exact because the foot
+    // anchor sits on the cell's vertical centre line, so it maps onto itself.
+    // Two sheets for one animation could only ever drift apart.
+    if (mirrored) {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+
     let frame = 0;
     let raf = 0;
     let last = 0;
@@ -53,7 +63,7 @@ export function SpriteAnimation({ sheet, frames, fps, zoom = 4, playing = true }
     };
     raf = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(raf);
-  }, [image, frames, fps, zoom, playing]);
+  }, [image, frames, fps, zoom, playing, mirrored]);
 
   if (error) return <div className="sprite-missing">시트를 불러오지 못했습니다</div>;
   return <canvas ref={canvasRef} className="sprite-anim" />;

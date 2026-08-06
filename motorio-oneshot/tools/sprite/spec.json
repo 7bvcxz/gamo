@@ -51,9 +51,19 @@
         "frames at both sizes and looking at them side by side is the only",
         "honest way to see what the smaller cell costs.",
         "",
-        "Not the game's cell. The game draws at 1:1, so a 128 character would",
-        "stand four tiles tall -- a different game, not a sharper one. Adopting",
-        "it would mean re-cutting every tile and machine to match."
+        "An earlier version of this note said a 128 character would stand four",
+        "tiles tall and that adopting it meant re-cutting every tile. Both were",
+        "wrong, and worth leaving corrected here rather than quietly deleted.",
+        "The world is drawn procedurally -- 95 draw_rect and 90 draw_circle",
+        "calls, three PNGs in the whole game and all of them characters -- so",
+        "tiles have no resolution to match. And the cell does not set the",
+        "character's size in the world; the draw scale does. A 128 sheet drawn",
+        "at half scale occupies exactly the space a 64 sheet does at full.",
+        "",
+        "What the cell actually decides is texels per logical pixel. The body",
+        "spans about 32 logical pixels and a 1920x1080 window is twice the",
+        "960x540 viewport, so 64 lands at 2x and shows its grid while 128 lands",
+        "at 1:1. 256 is the same argument for 4K."
       ]
     },
     "machine": { "size": [32, 32], "foot_anchor": [16, 28] },
@@ -74,10 +84,30 @@
     "idle":  { "frames": 4,  "fps": 6,  "loop": true },
     "walk":  { "frames": 8,  "fps": 10, "loop": true },
     "run":   { "frames": 8,  "fps": 14, "loop": true },
-    "mine":  { "frames": 6,  "fps": 10, "loop": true },
+    "mine":  { "frames": 6,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20 },
     "carry": { "frames": 8,  "fps": 10, "loop": true },
     "sleep": { "frames": 2,  "fps": 2,  "loop": true }
   },
+
+  "_animation_jump_why": [
+    "mine carries its own centroid tolerance because how much a silhouette may",
+    "change between two frames is a property of the motion, not of the game. A",
+    "pickaxe travels from above the head to the ground and back inside six",
+    "frames; the tool alone crosses roughly a body height in about three of",
+    "them, so the centre of the silhouette genuinely moves several pixels per",
+    "frame. Measured on a swing that was checked by eye first: 10.9px of a 64px",
+    "body, which is 0.17. 0.20 leaves room without inventing any.",
+    "",
+    "It is per motion rather than a raised global limit because raising the",
+    "global limit was tried and is wrong. The two things that needed separating",
+    "were a real swing at 10.9px and a walk clip whose chroma key had failed,",
+    "leaving a background block drifting behind the character at 9.0px. Magnitude",
+    "alone cannot tell those apart -- and neither can any shape statistic, both",
+    "of which were measured: the faulty clip's detour ratio was 1.3, lower than",
+    "a clean run cycle's 3.2, because the block moved smoothly. What separates",
+    "them is that one is a swing and the other is a walk, and the spec already",
+    "knows which is which."
+  ],
 
   "palette_max": 32,
   "_palette_why": [
@@ -127,7 +157,23 @@
 
   "validation": {
     "max_anchor_drift_px": 0.5,
-    "max_centroid_jump_px": 3.0,
+    "max_centroid_jump_body": 0.094,
+    "_max_centroid_jump_why": [
+      "A fraction of the body height, not a pixel count, because the same motion",
+      "measures twice as far in a cell twice as large. This was 3.0 absolute",
+      "pixels, chosen when 64 was the only cell; adding character128 silently",
+      "halved the tolerance and rejected sequences that had passed. 0.094 of the",
+      "body height is 3.0px at 64 and 6.0px at 128 -- the same rule, stated in a",
+      "way that survives a change of cell.",
+      "",
+      "Deliberately still an absolute ceiling rather than a multiple of the",
+      "sequence's own median jump. That alternative was measured and is worse:",
+      "on a clip where a failed chroma key left a background block wobbling",
+      "behind the character every single frame, the jumps were uniformly large,",
+      "so the ratio to the median came out 1.6 -- lower than a clean run cycle's",
+      "2.3. A rule that compares a sequence against itself cannot see a fault",
+      "that affects every frame equally."
+    ],
     "max_area_change_ratio": 0.12,
     "require_palette_conformance": true,
     "_why": [
