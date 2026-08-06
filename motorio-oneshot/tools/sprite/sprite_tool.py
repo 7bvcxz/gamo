@@ -425,6 +425,21 @@ def cmd_publish(args, spec, palette) -> int:
         request = {"id": args.request, "motion": args.motion, "facing": args.facing,
                    "cell": list(cell["size"]), "candidates": []}
         data["requests"].append(request)
+    # The footage the sheet was cut from, published beside it. Eight frames say
+    # whether the cycle registers; they cannot say whether the generator gave us
+    # a good performance or whether the reduction to the cell is where the
+    # quality went. Only the source answers that, and it is 1.4MB -- cheap next
+    # to asking for another clip because nobody could tell which step was wrong.
+    # Named by content alone, with no request in the name, so one clip cut at two
+    # cell sizes is stored once rather than twice. The first version keyed the
+    # name to the request and published the identical 1.4MB file under two names.
+    if args.source_video:
+        video_bytes = args.source_video.read_bytes()
+        video_name = "source-" + hashlib.sha256(video_bytes).hexdigest()[:12] + ".mp4"
+        (PUBLISH_DIR / video_name).write_bytes(video_bytes)
+        request["source_video"] = f"/gamo/sprite-candidates/{video_name}"
+        print(f"PUBLISH: source {video_name} ({len(video_bytes)} bytes)")
+
     request["candidates"] = [c for c in request["candidates"] if c["id"] != args.candidate]
     request["candidates"].append({
         "id": args.candidate,
@@ -437,6 +452,16 @@ def cmd_publish(args, spec, palette) -> int:
     })
     request["candidates"].sort(key=lambda c: c["id"])
     MANIFEST.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    # Clips no request points at any more. Shared names mean this cannot be
+    # decided per request -- only the finished manifest knows what is still in
+    # use -- so it is checked here, against the file that was just written.
+    referenced = {r.get("source_video", "").rsplit("/", 1)[-1] for r in data["requests"]}
+    for stale in PUBLISH_DIR.glob("source-*.mp4"):
+        if stale.name not in referenced:
+            stale.unlink()
+            print(f"PUBLISH: dropped unreferenced {stale.name}")
+
     print(f"PUBLISH: {args.request}/{args.candidate} -- {len(frames)} frames -> {name}")
     return 0
 
@@ -489,6 +514,8 @@ def main() -> int:
     p.add_argument("--seed", type=int, default=-1)
     p.add_argument("--note", default="")
     p.add_argument("--cell", default="character", choices=sorted(spec["cells"]))
+    p.add_argument("--source-video", type=Path,
+                   help="the clip these frames were cut from, published beside the sheet")
     p.set_defaults(run=cmd_publish)
 
     p = subs.add_parser("inspect")

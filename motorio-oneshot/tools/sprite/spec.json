@@ -38,6 +38,24 @@
         "the number that every frame is aligned to. It is not the cell centre."
       ]
     },
+    "character128": {
+      "size": [128, 128],
+      "foot_anchor": [64, 104],
+      "body_height": [56, 72],
+      "_why": [
+        "Every number here is character doubled, and it exists to answer one",
+        "question before the game commits to a sprite size: what does the",
+        "generated footage actually contain, and how much of it survives the",
+        "reduction to 64? The source is 480p of a character about 530 pixels",
+        "tall, so 128 throws away far less than 64 does. Normalising the same",
+        "frames at both sizes and looking at them side by side is the only",
+        "honest way to see what the smaller cell costs.",
+        "",
+        "Not the game's cell. The game draws at 1:1, so a 128 character would",
+        "stand four tiles tall -- a different game, not a sharper one. Adopting",
+        "it would mean re-cutting every tile and machine to match."
+      ]
+    },
     "machine": { "size": [32, 32], "foot_anchor": [16, 28] },
     "building": { "size": [96, 96], "foot_anchor": [48, 84] },
     "item": { "size": [16, 16], "foot_anchor": [8, 13] }

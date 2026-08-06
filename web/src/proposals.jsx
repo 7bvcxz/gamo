@@ -24,6 +24,12 @@ const SPRITE_STORE = 'motorio-oneshot.sprite-picks';
 // measured, which is exactly why the remaining question needs a person: whether
 // it reads as the right character doing the right thing is not a number.
 function SpriteRequest({ request, picked, onPick }) {
+  // Zoom is derived from the cell so a 64 and a 128 sheet appear the same size
+  // on screen. Comparing cell sizes is the whole point of showing both, and a
+  // fixed zoom would render the 128 one twice as large and settle the question
+  // by presentation instead of by pixels.
+  const zoom = Math.max(1, Math.round(256 / request.cell[0]));
+  const stripZoom = Math.max(1, Math.round(128 / request.cell[0]));
   return (
     <section className="prop">
       <h2>{request.id}</h2>
@@ -44,7 +50,7 @@ function SpriteRequest({ request, picked, onPick }) {
               sheet={candidate.sheet}
               frames={candidate.frames}
               fps={candidate.fps}
-              zoom={4}
+              zoom={zoom}
             />
             <b>{candidate.id.toUpperCase()}</b>
             <span>
@@ -58,9 +64,24 @@ function SpriteRequest({ request, picked, onPick }) {
       {request.candidates.map((candidate) => (
         <div className="sprite-strip-row" key={candidate.id}>
           <span>{candidate.id.toUpperCase()}</span>
-          <SpriteStrip sheet={candidate.sheet} frames={candidate.frames} zoom={2} />
+          <SpriteStrip sheet={candidate.sheet} frames={candidate.frames} zoom={stripZoom} />
         </div>
       ))}
+      {request.source_video && (
+        // The footage the sheet was cut from. Without it there is no telling a
+        // weak generation from a good one the pipeline then damaged, and those
+        // two want opposite fixes: ask the model again, or fix the normaliser.
+        <div className="sprite-source">
+          <span>원본 영상</span>
+          <video src={request.source_video} controls loop muted playsInline preload="metadata" />
+          <p>
+            생성 결과 그대로입니다. 640×640 · 4초 · 캐릭터 키 약 530px(480p로 요청했지만
+            실제로는 640이 왔습니다). 위 스프라이트는 여기서 8프레임을 골라 {request.cell[0]}px
+            셀로 줄인 것이라, 둘을 비교하면 화질이 생성 단계에서 정해진 것인지 축소에서 잃은
+            것인지 구분됩니다.
+          </p>
+        </div>
+      )}
     </section>
   );
 }
