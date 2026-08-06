@@ -71,6 +71,14 @@ var ui_scale: float = Defs.UI_SCALE_DEFAULT
 ## camera's zoom rather than anything the HUD does.
 var game_scale: float = Defs.GAME_SCALE_DEFAULT
 var state_before_settings: int = State.TITLE
+## The build gun's menu. Not a State: the world keeps running behind it, the way
+## this genre's build menus do, and movement is on WASD so the arrow keys the
+## menu wants are free.
+var build_menu_open: bool = false
+## Which entry of Defs.BUILDABLE the cursor is on. Separate from selected_index,
+## which is what the gun is actually loaded with -- browsing must not change what
+## a stray Z would build.
+var menu_index: int = 0
 
 func _ready() -> void:
 	randomize()
@@ -111,6 +119,9 @@ func _start_run() -> void:
 	blackout = 0.0
 	night_warned = false
 	meter_cell = Vector2i(9999, 9999)
+	build_menu_open = false
+	menu_index = 0
+	tool_index = 0
 	# A run that was reloaded or restarted mid-sequence would otherwise keep the
 	# sky pinned at night and the player locked indoors.
 	night_override = -1.0
@@ -198,8 +209,65 @@ func _unassigned_cats() -> int:
 			count += 1
 	return count
 
+## The toolbar. One tool for now -- the build gun -- but it is a list because the
+## slot it lives in is a tool slot, not a machine slot: that is the whole point of
+## the change. What the gun is loaded with is chosen in its menu, not by which
+## number key was pressed last.
+const TOOL_BUILD_GUN := 0
+const TOOLS: Array[int] = [TOOL_BUILD_GUN]
+const TOOL_NAMES := ["건물건설총"]
+
+var tool_index: int = 0
+
+func holding_build_gun() -> bool:
+	return TOOLS[tool_index] == TOOL_BUILD_GUN
+
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
+
+## B opens and closes it, and so does Esc. Toggling rather than a separate close
+## key because a menu that opens with one press and needs a different one to
+## leave is a menu players get stuck in.
+func toggle_build_menu() -> bool:
+	if state != State.PLAY:
+		return false
+	build_menu_open = not build_menu_open
+	if build_menu_open:
+		menu_index = selected_index
+		meter_cell = Vector2i(9999, 9999)
+	audio.call("play", "select")
+	return true
+
+func _build_menu_key(key: InputEventKey) -> void:
+	var count: int = Defs.BUILDABLE.size()
+	match key.keycode:
+		KEY_ESCAPE, KEY_B:
+			build_menu_open = false
+			audio.call("play", "select")
+		KEY_UP, KEY_LEFT, KEY_W, KEY_A:
+			menu_index = posmod(menu_index - 1, count)
+			audio.call("play", "select")
+		KEY_DOWN, KEY_RIGHT, KEY_S, KEY_D:
+			menu_index = posmod(menu_index + 1, count)
+			audio.call("play", "select")
+		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
+			_load_build_gun(menu_index)
+	if key.keycode >= KEY_1 and key.keycode < KEY_1 + count:
+		_load_build_gun(key.keycode - KEY_1)
+
+## Loading the gun. A locked machine can be looked at in the menu -- seeing what
+## is coming is half of why the menu exists -- but it cannot be loaded.
+func _load_build_gun(index: int) -> void:
+	var type: int = Defs.BUILDABLE[index]
+	if not sim.is_unlocked(type):
+		_notify("%s은 아직 해금되지 않았습니다" % Defs.MACHINE_NAMES[type], Defs.COL_DANGER)
+		audio.call("play", "select")
+		return
+	selected_index = index
+	menu_index = index
+	build_menu_open = false
+	_notify("%s 장전" % Defs.MACHINE_NAMES[type], Defs.COL_CORE)
+	audio.call("play", "confirm")
 
 func day_fraction() -> float:
 	return clampf(1.0 - time_left / Defs.DAY_SECONDS, 0.0, 1.0)
@@ -571,6 +639,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			settings_save()
 		get_viewport().set_input_as_handled()
 		return
+	# The build menu owns the keyboard while it is up. Placed before the state
+	# match so a keypress cannot both move the cursor and build something.
+	if build_menu_open and state == State.PLAY:
+		_build_menu_key(key)
+		get_viewport().set_input_as_handled()
+		return
+
 	match state:
 		State.TITLE:
 			if key.keycode == KEY_ESCAPE:
@@ -606,8 +681,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		open_settings()
 		get_viewport().set_input_as_handled()
 		return
-	if key.keycode >= KEY_1 and key.keycode < KEY_1 + Defs.BUILDABLE.size():
-		selected_index = key.keycode - KEY_1
+	if event.is_action_pressed("debug_unlock"):
+		debug_unlock_all()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_B:
+		toggle_build_menu()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode >= KEY_1 and key.keycode < KEY_1 + TOOLS.size():
+		tool_index = key.keycode - KEY_1
 		audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
@@ -673,6 +756,16 @@ func touch_hud(position: Vector2) -> bool:
 		return true
 	if state != State.PLAY:
 		return false
+	if build_menu_open:
+		# The menu owns the screen while it is up: a tap picks a row or closes it,
+		# and nothing falls through to the world behind.
+		var row: int = int(hud.call("build_menu_row_at", local))
+		if row >= 0:
+			_load_build_gun(row)
+		else:
+			build_menu_open = false
+			audio.call("play", "select")
+		return true
 	for index in hud.hotbar_rects.size():
 		if (hud.hotbar_rects[index] as Rect2).has_point(local):
 			selected_index = index
@@ -789,6 +882,8 @@ func _primary_action() -> void:
 	# ahead of this line made the game's central placement impossible. Ore has no
 	# pick-up verb to protect anyway -- Z takes cats, X takes machines -- so
 	# can_build's own reason is both sufficient and more useful.
+	if not holding_build_gun():
+		return
 	_try_build()
 
 func _try_build() -> void:
@@ -817,6 +912,20 @@ func cycle_debug_speed() -> int:
 
 func debug_speed() -> float:
 	return Defs.DEBUG_SPEEDS[speed_index]
+
+## Opens everything and fills the bank. The second debug tool, and the one that
+## makes the mid-game reachable for inspection at all: half the interface only
+## exists once a machine is unlocked, so screens like the build list could not be
+## looked at without playing to them first.
+func debug_unlock_all() -> void:
+	for type: int in Defs.BUILDABLE:
+		sim.unlocked[type] = true
+	for index in Defs.RECIPES.size():
+		sim.unlocked_recipes[index] = true
+	for item_type: int in Defs.COUNTED_ITEMS:
+		sim.stock[item_type] = 500
+	_notify("디버그 전체 해금", Defs.COL_DANGER)
+	audio.call("play", "confirm")
 
 func _cycle_recipe() -> void:
 	if player.locked:

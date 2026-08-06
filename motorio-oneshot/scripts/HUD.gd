@@ -82,13 +82,13 @@ func _apply_scale() -> void:
 ## The row shrinks rather than running off the screen once the player scales the
 ## UI up, which is the whole point of letting them scale it up.
 func hotbar_slot() -> Vector2:
-	var count: float = float(Defs.BUILDABLE.size())
+	var count: float = float(main.TOOLS.size()) if main != null else 1.0
 	var available: float = size.x - MARGIN * 2.0 - (count - 1.0) * SLOT_GAP
 	return Vector2(clampf(available / count, SLOT_MIN_W, SLOT_MAX_W), SLOT_H)
 
 func hotbar_origin() -> Vector2:
 	var slot: Vector2 = hotbar_slot()
-	var total: float = float(Defs.BUILDABLE.size()) * (slot.x + SLOT_GAP) - SLOT_GAP
+	var total: float = float(main.TOOLS.size()) * (slot.x + SLOT_GAP) - SLOT_GAP
 	# Lifted clear of the thumb controls rather than sharing the bottom strip
 	# with them, which at large UI scales buried a card under the X button.
 	var bottom: float = size.y - slot.y - MARGIN - bottom_reserved()
@@ -115,7 +115,7 @@ func _layout() -> void:
 	var slot: Vector2 = hotbar_slot()
 	var origin: Vector2 = hotbar_origin()
 	hotbar_rects.clear()
-	for index in Defs.BUILDABLE.size():
+	for index in main.TOOLS.size():
 		hotbar_rects.append(Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot))
 	var label: String = "R 출력 방향  오른쪽"
 	var width: float = _text_width(label, 12) + 44.0
@@ -269,6 +269,7 @@ func _draw() -> void:
 			_draw_resources()
 			_draw_palette()
 			_draw_meter_card()
+			_draw_build_menu()
 			_draw_message()
 	_draw_settings_button()
 	_draw_debug_badge()
@@ -532,67 +533,150 @@ func _draw_warmth_row(panel: Rect2) -> void:
 			else "의식이 흐려집니다  %.1f초" % maxf(0.0, main.collapse_timer)
 		_text_in(Rect2(0, size.y * 0.64, size.x, 20), label, 19, Defs.COL_DANGER)
 
+## The toolbar. One card, holding the build gun, showing what it is loaded with.
+##
+## It used to be five machine slots picked with the number keys. That put the
+## whole buildable list permanently across the bottom of the screen and left no
+## room to ever say what any of them did -- the cards were down to a name, a cost
+## and a nine-pixel rate line. The gun moves the choice into a menu that has room
+## to explain itself, and the bar goes back to being about what is in your hands.
 func _draw_palette() -> void:
-	var count: int = Defs.BUILDABLE.size()
 	var slot: Vector2 = hotbar_slot()
 	var origin: Vector2 = hotbar_origin()
-
-	# The hint sits above the hotbar in its own plate; it used to run through the
-	# cards and over their cost labels.
 	_draw_direction_chip(origin.y)
-	var selected: int = Defs.BUILDABLE[main.selected_index]
-	var hint: String = Defs.MACHINE_HINTS[selected]
-	if selected == Defs.M_EXCHANGER or selected == Defs.M_MINER:
+
+	var loaded: int = main.selected_type()
+	var hint: String = Defs.MACHINE_HINTS[loaded]
+	if loaded == Defs.M_EXCHANGER or loaded == Defs.M_MINER:
 		hint += "   ·   " + Defs.ratio_hint()
-	var hint_w: float = _text_width(hint, 12) + 20.0
+	var hint_w: float = _text_width(hint, 12) + 24.0
 	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 30.0, hint_w, 24.0)
 	_frame(hint_box, Defs.COL_PANEL_EDGE)
-	_text_in(Rect2(hint_box.position + Vector2(0, 16), Vector2(hint_box.size.x, 16)), hint, 12, Defs.COL_TEXT_DIM)
+	_text_in(Rect2(hint_box.position + Vector2(0, 16), Vector2(hint_box.size.x, 16)), hint, 12,
+		Defs.COL_TEXT_DIM)
 
-	for index in count:
-		var type: int = Defs.BUILDABLE[index]
+	for index in main.TOOLS.size():
 		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() \
 			else Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot)
-		var at: Vector2 = rect.position
-		var chosen: bool = index == main.selected_index
-		var afford: bool = main.sim.can_afford(type)
-		var locked: bool = not main.sim.is_unlocked(type)
-		var edge: Color = Defs.COL_CORE if chosen else Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.9)
-		# Opaque so world sprites can never bleed through the card.
-		_panel(rect, Defs.COL_PANEL, edge, 2.0 if chosen else 1.0)
+		var chosen: bool = index == main.tool_index
+		_frame(rect, Defs.COL_CORE if chosen else Defs.COL_PANEL_EDGE)
+		_text(rect.position + Vector2(FRAME_PAD, 16.0), "%d  %s" % [index + 1, main.TOOL_NAMES[index]],
+			11, Defs.COL_CORE if chosen else Defs.COL_TEXT_DIM)
+		# What the gun is loaded with, as the thing itself rather than its name.
+		var chip := Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
+			Vector2(24.0, 24.0))
+		Icons.draw_machine(self, chip, loaded)
+		var afford: bool = main.sim.can_afford(loaded)
+		_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
+			Defs.MACHINE_SHORT[loaded], 13, Defs.COL_TEXT if afford else Defs.COL_DANGER)
+		var cost_text := ""
+		for item_type: int in Defs.MACHINE_COSTS[loaded]:
+			cost_text += "%s %d " % [Defs.ITEM_SHORT[item_type], int(Defs.MACHINE_COSTS[loaded][item_type])]
+		_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0), cost_text.strip_edges(),
+			10, Defs.COL_CORE if afford else Defs.COL_DANGER)
+		_text_in(Rect2(rect.position + Vector2(0.0, rect.size.y - 6.0), Vector2(rect.size.x - FRAME_PAD, 12)),
+			"B 목록", 10, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 
-		var label: Color = Defs.COL_TEXT if afford else Defs.COL_TEXT_DIM
-		if locked:
-			label = Defs.COL_TEXT_DIM
-		_text(at + Vector2(11, 21), "%d  %s" % [index + 1, Defs.MACHINE_SHORT[type]], 13, label)
-		if locked:
-			# Say what opens it. A locked slot the player cannot work toward is
-			# just a hole in the row.
-			var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
-			_text(at + Vector2(11, 39), "%s을 찾으면 해금" % Defs.ITEM_NAMES[key_item], 11,
-				Defs.COL_TEXT_DIM)
-			draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
-		else:
-			var cost_text := ""
-			for item_type: int in Defs.MACHINE_COSTS[type]:
-				cost_text += "%s %d  " % [Defs.ITEM_NAMES[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
-			_text(at + Vector2(11, 37), cost_text.strip_edges(), 11,
-				Defs.COL_CORE if afford else Defs.COL_DANGER)
-			# The rate is what makes a machine plannable rather than a mystery.
-			_text(at + Vector2(11, 47), Defs.throughput_line(type), 9, Defs.COL_TEXT_DIM)
-		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Defs.machine_color(type))
-		draw_circle(at + Vector2(slot.x - 17, 24), 7.5, Color(0, 0, 0, 0.35), false, 1.0)
-
-	# Right-aligned inside an explicit box with a real margin, so nothing is ever
-	# clipped by the viewport edge.
-	# On a phone the keyboard legend is noise; the pad already carries the verbs.
 	if main.touch == null or not main.touch.visible:
 		# Under the hotbar, not across the top: the top right belongs to the
 		# mission card now, and a key legend printed over it read as one long
 		# unparseable line.
-		_text_in(Rect2(size.x - 460.0 - MARGIN, origin.y + slot.y + 16.0, 460.0, 16),
-			"C 채굴   Z 설치   X 회수   R 회전   F 제법   Esc 설정", 11, Defs.COL_TEXT_DIM,
+		_text_in(Rect2(size.x - 480.0 - MARGIN, origin.y + slot.y + 16.0, 480.0, 16),
+			"C 채굴   Z 설치   X 회수   R 회전   B 목록   Esc 설정", 11, Defs.COL_TEXT_DIM,
 			HORIZONTAL_ALIGNMENT_RIGHT)
+
+# --- Build menu ---------------------------------------------------------------
+## What the gun can be loaded with, with room to say what each thing does.
+##
+## The old hotbar had a name, a cost and a nine-pixel throughput line per machine
+## and no space for anything else, so a player met the splitter as the word
+## "분배기" and had to build one to find out. Here every entry gets its picture,
+## its cost, and three lines saying what goes in, what comes out and what is
+## peculiar about it -- which is the information the genre runs on.
+const MENU_ROW := 74.0
+const MENU_W := 500.0
+
+func build_menu_rect() -> Rect2:
+	var rows: float = float(Defs.BUILDABLE.size())
+	var height: float = FRAME_HEADER + 12.0 + rows * MENU_ROW + 30.0
+	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
+	height = minf(height, size.y - MARGIN * 2.0)
+	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
+
+func build_menu_row_rect(index: int) -> Rect2:
+	var card: Rect2 = build_menu_rect()
+	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + 8.0 + float(index) * MENU_ROW),
+		Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+
+## Which row a point falls in, or -1. Used by touch, which has no arrow keys.
+func build_menu_row_at(point: Vector2) -> int:
+	if not main.build_menu_open:
+		return -1
+	for index in Defs.BUILDABLE.size():
+		if build_menu_row_rect(index).has_point(point):
+			return index
+	return -1
+
+func _draw_build_menu() -> void:
+	if not main.build_menu_open:
+		return
+	_dim(0.45)
+	var card: Rect2 = build_menu_rect()
+	_frame(card, Defs.COL_CORE, "건설 목록   ↑↓ 선택 · Z 장전 · B 닫기")
+	for index in Defs.BUILDABLE.size():
+		_draw_build_row(index)
+
+func _draw_build_row(index: int) -> void:
+	var type: int = Defs.BUILDABLE[index]
+	var rect: Rect2 = build_menu_row_rect(index)
+	var on_cursor: bool = index == main.menu_index
+	var loaded: bool = index == main.selected_index
+	var locked: bool = not main.sim.is_unlocked(type)
+	var accent: Color = Defs.machine_color(type)
+
+	if on_cursor:
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
+		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
+	else:
+		draw_rect(rect, Color(1, 1, 1, 0.022))
+
+	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
+	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
+	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
+	Icons.draw_machine(self, icon, type)
+
+	var text_x: float = rect.position.x + 62.0
+	# The three input/output lines stack down the right half rather than sitting
+	# in three columns across the row. Laid out horizontally they were about 145
+	# pixels of text in a 124 pixel column, so every one of them ran into the
+	# next -- measured, not guessed, after the first version did exactly that.
+	var io_x: float = rect.position.x + rect.size.x - 196.0
+	_text(Vector2(text_x, rect.position.y + 20.0), Defs.MACHINE_NAMES[type], 14,
+		Defs.COL_TEXT_DIM if locked else Defs.COL_TEXT)
+	if loaded:
+		_text(Vector2(text_x, rect.position.y + 58.0), "장전됨", 11, accent)
+
+	if locked:
+		# Locked entries stay visible and say what opens them. Seeing what is
+		# coming is half of why a build list exists at all.
+		var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
+		_text(Vector2(text_x, rect.position.y + 38.0),
+			"%s을 손에 넣으면 해금됩니다" % Defs.ITEM_NAMES[key_item], 11, Defs.COL_TEXT_DIM)
+		draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
+		return
+
+	_text(Vector2(text_x, rect.position.y + 38.0), Defs.MACHINE_HINTS[type], 10, Defs.COL_TEXT_DIM)
+	if not loaded:
+		var cost := ""
+		for item_type: int in Defs.MACHINE_COSTS[type]:
+			cost += "%s %d  " % [Defs.ITEM_SHORT[item_type], int(Defs.MACHINE_COSTS[type][item_type])]
+		_text(Vector2(text_x, rect.position.y + 58.0), cost.strip_edges(), 11,
+			Defs.COL_CORE if main.sim.can_afford(type) else Defs.COL_DANGER)
+	var lines: Array[String] = Defs.machine_io(type)
+	for line_index in lines.size():
+		_text(Vector2(io_x, rect.position.y + 20.0 + float(line_index) * 15.0),
+			lines[line_index], 9, Defs.COL_MACHINE_EDGE)
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.

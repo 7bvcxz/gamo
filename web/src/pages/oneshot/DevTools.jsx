@@ -26,6 +26,11 @@ export function DevTools() {
               <td>배속 순환 — 1배 → 4배 → 10배 → 1배</td>
               <td>배속 중에는 화면 상단에 빨간 <code>DEBUG</code> 배지</td>
             </tr>
+            <tr>
+              <td><code>F3</code></td>
+              <td>전체 해금 — 모든 설비·제법을 열고 자원을 500씩 지급</td>
+              <td>인터페이스의 절반은 설비가 해금돼야 존재한다. 건설 목록 같은 화면을 그 지점까지 플레이하지 않고 확인하기 위한 것</td>
+            </tr>
           </tbody>
         </table>
       </div>

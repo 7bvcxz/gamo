@@ -55,9 +55,43 @@ func _run() -> void:
 	_assert(main.day_number == 1, "at day one")
 	_assert(is_zero_approx(main.hud.restart_armed), "and disarms itself afterwards")
 
-	# Build selection and rotation are reflected in the preview.
-	_press(main, KEY_2)
-	_assert(main.selected_type() == Defs.BUILDABLE[1], "number keys pick a machine")
+	# The build gun. Slot 1 is a tool, not a machine, and what it is loaded with
+	# is chosen from its menu -- the old five-machine hotbar had no room to say
+	# what any of them did.
+	_assert(main.holding_build_gun(), "the run opens with the build gun in hand")
+	_press(main, KEY_B)
+	_assert(main.build_menu_open, "B opens the build menu")
+	var browse_from: int = main.selected_index
+	_press(main, KEY_DOWN)
+	_assert(main.menu_index != browse_from, "arrows move the cursor")
+	_assert(main.selected_index == browse_from,
+		"but browsing does not change what the gun is loaded with")
+	_press(main, KEY_B)
+	_assert(not main.build_menu_open, "B closes it again")
+	_press(main, KEY_B)
+	_press(main, KEY_ESCAPE)
+	_assert(not main.build_menu_open, "and so does Esc")
+
+	# Loading. Everything is unlocked here so the pick is allowed to land.
+	_open(main.sim)
+	main.build_menu_open = true
+	main.menu_index = 1
+	_press(main, KEY_Z)
+	_assert(main.selected_type() == Defs.BUILDABLE[1], "Z loads the machine under the cursor")
+	_assert(not main.build_menu_open, "and closes the menu")
+
+	# A locked machine can be looked at but not loaded: seeing what is coming is
+	# half of why the list exists.
+	main.sim.unlocked.clear()
+	var was: int = main.selected_index
+	main.build_menu_open = true
+	main.menu_index = 0
+	_press(main, KEY_Z)
+	_assert(main.selected_index == was, "a locked machine cannot be loaded")
+	_assert(main.build_menu_open,
+		"and the menu stays open, so the player can pick something else")
+	main.build_menu_open = false
+	_open(main.sim)
 	var before_dir: Vector2i = main.build_dir
 	_press(main, KEY_R)
 	_assert(main.build_dir != before_dir, "R rotates the build direction")
@@ -69,7 +103,7 @@ func _run() -> void:
 	main.touch_primary()
 	_assert(main.state == main.State.PLAY, "touch start actually begins the run")
 	main._process(0.0)
-	_assert(main.hud.hotbar_rects.size() == Defs.BUILDABLE.size(), "the HUD publishes a rect per machine slot")
+	_assert(main.hud.hotbar_rects.size() == main.TOOLS.size(), "the HUD publishes a rect per tool slot")
 	main.selected_index = 0
 	# The pad reports raw viewport coordinates while the HUD publishes rects in
 	# its own scaled space, so every tap has to cross that boundary. Feeding the
@@ -79,9 +113,15 @@ func _run() -> void:
 	_assert(main.hud_local(to_view.call(main.hud.direction_rect))
 		.distance_to((main.hud.direction_rect as Rect2).get_center()) < 0.5,
 		"viewport coordinates convert back to HUD space")
-	_assert(main.touch_hud(to_view.call(main.hud.hotbar_rects[2])),
-		"tapping a hotbar card is handled")
-	_assert(main.selected_index == 2, "tapping a hotbar card selects that machine")
+	# Touch has no B key, so the menu has to be reachable by tapping. Every row
+	# is a target; a tap anywhere else closes it.
+	main.build_menu_open = true
+	main._process(0.0)
+	var row: Rect2 = main.hud.build_menu_row_rect(1)
+	_assert(main.hud.build_menu_row_at(row.get_center()) == 1, "menu rows are hit-testable")
+	_assert(main.touch_hud(row.get_center() * main.hud.scale.x), "tapping a row is handled")
+	_assert(main.selected_index == 1, "and loads that machine")
+	_assert(not main.build_menu_open, "closing the menu behind it")
 	var dir_before: Vector2i = main.build_dir
 	_assert(main.touch_hud(to_view.call(main.hud.direction_rect)),
 		"tapping the direction chip is handled")

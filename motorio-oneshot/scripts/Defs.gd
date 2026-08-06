@@ -262,11 +262,39 @@ const MACHINE_COSTS := [
 const MACHINE_HINTS := [
 	"",
 	"수정 광맥 위에 설치하고 고양이를 올려놓으세요",
-	"자원을 기지까지 끊김 없이 나릅니다 · 전력 0.1 필요",
+	"자원을 기지까지 끊김 없이 나릅니다",
 	"수정조각 2개를 에너지결정 1개로 바꿉니다",
 	"에너지결정을 태워 전력 1.0을 공급합니다",
 	"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
 ]
+
+## What goes in and what comes out, for the build menu. A machine with nothing
+## going in states the property that defines it instead: for a belt the useful
+## sentence is that it never needs power, not an empty input line.
+static func machine_io(type: int) -> Array[String]:
+	match type:
+		M_MINER:
+			return ["입력   없음 · 광맥 위에만 설치",
+				"출력   광맥의 자원 %.0f/분" % per_minute(MINER_PERIOD),
+				"일손   고양이 1마리 또는 전력 %.1f" % MINER_POWER_DRAW]
+		M_EXCHANGER:
+			var recipe: Dictionary = RECIPES[RECIPE_PLAIN]
+			return ["입력   수정조각 %d" % int(recipe["in"][ITEM_CRYSTAL]),
+				"출력   에너지결정 %d · %.0f초마다" % [int(recipe["out"]), float(recipe["period"])],
+				"제법   F로 전환 · 구리 촉매는 한 번에 3개"]
+		M_BELT:
+			return ["입력   뒤쪽에서 받음",
+				"출력   앞쪽으로 %.0f/분" % (BELT_SPEED / 0.34 * 60.0),
+				"특성   전력이 필요 없음 · F로 등급 변경"]
+		M_SPLITTER:
+			return ["입력   한 줄",
+				"출력   좌우 두 줄로 번갈아",
+				"특성   막힌 쪽은 건너뜀 · R로 축 회전"]
+		M_GENERATOR:
+			return ["입력   에너지결정 1 · %.0f초마다" % GENERATOR_PERIOD,
+				"출력   전력 %.1f" % GENERATOR_OUTPUT,
+				"특성   전력은 저장되지 않는 비율"]
+	return []
 
 ## What each machine needs before it appears in the hotbar. The first crystal in
 ## hand opens the crystal line; the first copper opens the power line.
