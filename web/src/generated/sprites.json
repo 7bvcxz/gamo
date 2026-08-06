@@ -11,12 +11,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/gamo/sprite-candidates/mechanic-walk-s-a.png",
+          "sheet": "/gamo/sprite-candidates/mechanic-walk-s-a-40c19cc520da.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0118,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 480p · 4s · 0.224 USD · 공유 배율 수정본"
+          "note": "Seedance 2.0 Mini · 480p · 4s · 0.224 USD"
         }
       ]
     }

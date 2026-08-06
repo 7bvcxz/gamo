@@ -25,6 +25,8 @@ Everything reads spec.json. Nothing here has a number of its own.
 """
 
 import argparse
+import hashlib
+import io
 import json
 import sys
 from pathlib import Path
@@ -391,12 +393,28 @@ def cmd_publish(args, spec, palette) -> int:
         return 1
 
     PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
-    name = f"{args.request}-{args.candidate}.png"
     width, height = frames[0][1].size
     sheet = Image.new("RGBA", (width * len(frames), height), (0, 0, 0, 0))
     for index, (_, image) in enumerate(frames):
         sheet.paste(image, (index * width, 0))
-    sheet.save(PUBLISH_DIR / name)
+
+    # The filename carries a hash of the contents, the same way the game's packs
+    # do, and for the same reason. Pages serves these with max-age=600, so a
+    # sheet republished under its old name keeps showing the old picture to
+    # anyone who already loaded it -- which is exactly what happened the first
+    # time a candidate was corrected: the fix was pushed, the page still showed
+    # the defect, and the obvious conclusion was that the fix had not worked.
+    # A changed sheet is a different URL, so a stale one cannot be served.
+    buffer = io.BytesIO()
+    sheet.save(buffer, format="PNG")
+    digest = hashlib.sha256(buffer.getvalue()).hexdigest()[:12]
+    name = f"{args.request}-{args.candidate}-{digest}.png"
+    # Older revisions of this same candidate are removed; only the current one
+    # is reachable, and nothing accumulates.
+    for old in PUBLISH_DIR.glob(f"{args.request}-{args.candidate}-*.png"):
+        if old.name != name:
+            old.unlink()
+    (PUBLISH_DIR / name).write_bytes(buffer.getvalue())
 
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     data = {"requests": []}
