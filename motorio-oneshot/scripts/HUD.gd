@@ -27,6 +27,13 @@ var settings_button_rect := Rect2()
 var settings_close_rect := Rect2()
 var settings_restart_rect := Rect2()
 var settings_save_rect := Rect2()
+var settings_load_rect := Rect2()
+## Which slot list is up, if any: 0 none, 1 saving, 2 loading. One list serving
+## both is deliberate -- the picture of what is in each slot is exactly the thing
+## you need whether you are about to write over it or read it.
+var slot_picker: int = 0
+var slot_index: int = 1
+var slot_rects: Array[Rect2] = []
 ## Restart is one tap from erasing a factory, so it asks once. Seconds remaining
 ## on the confirmation; zero means the button is in its normal state.
 var restart_armed: float = 0.0
@@ -126,7 +133,8 @@ func _layout() -> void:
 ## Two sliders, then a row of two actions, then close. Taller than it was because
 ## Esc opens this panel now: it is the only stopped screen, so everything a
 ## player wants while stopped has to be reachable from it.
-const SETTINGS_CARD_H := 424.0
+const SETTINGS_CARD_H := 476.0
+const SLOT_CARD_H := 320.0
 const SETTINGS_ROW_H := 92.0
 const SETTINGS_ROW_TOP := 96.0
 const SLIDER_LABELS := ["화면 UI 크기", "게임 화면 크기"]
@@ -143,12 +151,31 @@ func _layout_settings() -> void:
 			track.size + Vector2(52.0, 68.0))
 	var gap := 12.0
 	var action_w: float = (card.size.x - 68.0 - gap) * 0.5
-	var action_y: float = card.size.y - 134.0
-	settings_restart_rect = Rect2(card.position + Vector2(34.0, action_y), Vector2(action_w, 44.0))
-	settings_save_rect = Rect2(card.position + Vector2(34.0 + action_w + gap, action_y),
+	var action_y: float = card.size.y - 186.0
+	settings_save_rect = Rect2(card.position + Vector2(34.0, action_y), Vector2(action_w, 44.0))
+	settings_load_rect = Rect2(card.position + Vector2(34.0 + action_w + gap, action_y),
 		Vector2(action_w, 44.0))
+	settings_restart_rect = Rect2(card.position + Vector2(34.0, action_y + 56.0),
+		Vector2(card.size.x - 68.0, 44.0))
 	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 62.0),
 		Vector2(144.0, 42.0))
+	_layout_slots()
+
+# --- Save slots ---------------------------------------------------------------
+const SLOT_ROW := 62.0
+
+func _layout_slots() -> void:
+	var card: Rect2 = _card_rect(SLOT_CARD_H)
+	slot_rects.clear()
+	for index in main.SAVE_SLOTS:
+		slot_rects.append(Rect2(card.position + Vector2(14.0, FRAME_HEADER + 12.0 + float(index) * SLOT_ROW),
+			Vector2(card.size.x - 28.0, SLOT_ROW - 6.0)))
+
+func slot_row_at(point: Vector2) -> int:
+	for index in slot_rects.size():
+		if (slot_rects[index] as Rect2).has_point(point):
+			return index
+	return -1
 
 ## The value range a row spans. Kept here rather than in the caller so drawing,
 ## hit-testing and the keyboard all read the same numbers.
@@ -261,7 +288,10 @@ func _draw() -> void:
 				_draw_status()
 				_draw_resources()
 				_draw_palette()
-			_draw_settings_card()
+			if slot_picker > 0:
+				_draw_slot_picker()
+			else:
+				_draw_settings_card()
 		_:
 			_draw_cold_vignette()
 			_draw_blackout()
@@ -914,12 +944,13 @@ func _draw_settings_card() -> void:
 	for index in SLIDER_LABELS.size():
 		_draw_settings_row(card, index)
 
-	_draw_settings_action(settings_restart_rect,
-		"정말 처음부터?" if restart_armed > 0.0 else "처음부터",
-		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
 	_draw_settings_action(settings_save_rect,
 		"저장했습니다" if saved_flash > 0.0 else "저장하기",
 		Defs.COL_CORE if saved_flash > 0.0 else Defs.COL_TEXT_DIM)
+	_draw_settings_action(settings_load_rect, "불러오기", Defs.COL_MACHINE_EDGE)
+	_draw_settings_action(settings_restart_rect,
+		"정말 처음부터?" if restart_armed > 0.0 else "처음부터",
+		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
 
 	var touch_pad: bool = main.touch != null and main.touch.visible
 	var hint: String = "한 번 더 누르면 지금까지의 공장이 사라집니다" if restart_armed > 0.0 \
@@ -938,6 +969,71 @@ func _draw_settings_action(rect: Rect2, label: String, tint: Color) -> void:
 	_panel(rect, Color(tint.r, tint.g, tint.b, 0.12), Color(tint.r, tint.g, tint.b, 0.75))
 	_text_in(Rect2(rect.position + Vector2(0, rect.size.y * 0.5 + 6.0), Vector2(rect.size.x, 20)),
 		label, 15, Defs.COL_TEXT)
+
+## The slot list, used for both saving and loading. Each row carries its number,
+## when it was written, how far that run got, and a small drawing of the factory
+## itself -- which is the thing that actually tells two saves apart.
+func _draw_slot_picker() -> void:
+	_dim(0.72)
+	var card: Rect2 = _card(SLOT_CARD_H)
+	_text_in(Rect2(card.position + Vector2(0, 30.0), Vector2(card.size.x, 22)),
+		"저장할 슬롯" if slot_picker == 1 else "불러올 슬롯", 17, Defs.COL_TEXT)
+	var cards: Array[Dictionary] = main.slot_cards()
+	for index in cards.size():
+		_draw_slot_row(index, cards[index])
+	_text_in(Rect2(card.position + Vector2(0, card.size.y - 16.0), Vector2(card.size.x, 16)),
+		"↑ ↓ 선택 · Z 확인 · Esc 취소", 11, Defs.COL_TEXT_DIM)
+
+func _draw_slot_row(index: int, card: Dictionary) -> void:
+	if index >= slot_rects.size():
+		return
+	var rect: Rect2 = slot_rects[index]
+	var on_cursor: bool = index == slot_index
+	var exists: bool = bool(card["exists"])
+	var accent: Color = Defs.COL_CORE if slot_picker == 1 else Defs.COL_MACHINE_EDGE
+	if on_cursor:
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
+	else:
+		draw_rect(rect, Color(1, 1, 1, 0.025))
+
+	var shot := Rect2(rect.position + Vector2(8.0, 6.0), Vector2(72.0, SLOT_ROW - 18.0))
+	draw_rect(shot, Color(0.04, 0.05, 0.09, 0.9))
+	draw_rect(shot, Color(accent.r, accent.g, accent.b, 0.25), false, 1.0)
+	_draw_slot_thumbnail(shot, card["machines"])
+
+	var label: String = "자동 저장" if index == 0 else "슬롯 %d" % index
+	_text(rect.position + Vector2(92.0, 24.0), label, 13,
+		Defs.COL_TEXT if exists else Defs.COL_TEXT_DIM)
+	if exists:
+		_text(rect.position + Vector2(92.0, 42.0),
+			"%d일차 · 누적 열 %d" % [int(card["day"]), int(card["heat"])], 11, Defs.COL_TEXT_DIM)
+		_text_in(Rect2(rect.position + Vector2(rect.size.x - 180.0, 42.0), Vector2(170.0, 14)),
+			main.slot_when(float(card["saved_at"])), 11, Defs.COL_TEXT_DIM,
+			HORIZONTAL_ALIGNMENT_RIGHT)
+	else:
+		_text(rect.position + Vector2(92.0, 42.0), "비어 있음", 11, Defs.COL_TEXT_DIM)
+
+## The factory, drawn from the cells the save recorded. The core sits in the
+## middle and everything else is placed relative to it, so the picture is of the
+## shape the player built rather than of wherever the camera happened to be.
+func _draw_slot_thumbnail(rect: Rect2, cells) -> void:
+	var list: Array = cells as Array
+	if list.is_empty():
+		return
+	var span := 26.0
+	var scale: float = minf(rect.size.x, rect.size.y) / span
+	var centre: Vector2 = rect.get_center()
+	var dot: float = maxf(1.0, scale * 0.9)
+	for entry in list:
+		var row: Array = entry as Array
+		if row.size() < 3:
+			continue
+		var at: Vector2 = centre + Vector2(float(row[0]), float(row[1])) * scale
+		if not rect.has_point(at):
+			continue
+		draw_rect(Rect2(at - Vector2(dot, dot) * 0.5, Vector2(dot, dot)),
+			Defs.machine_color(int(row[2])))
 
 func _draw_settings_row(card: Rect2, index: int) -> void:
 	var w: float = card.size.x

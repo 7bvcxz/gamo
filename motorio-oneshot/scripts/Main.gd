@@ -399,8 +399,19 @@ func _update_ambience(delta: float) -> void:
 ## Holding the build key past the threshold rotates instead of building, so PC
 ## players never need a second key for direction.
 const BUILD_HOLD_ROTATE := 0.4
+## Slots, not one file. A single save meant every session overwrote the last one
+## and a bad decision was permanent; three is enough to keep a known-good run
+## while trying something.
+##
+## Slot 0 is the autosave, so the timed write can never land on a slot the player
+## put something in deliberately. clear_save() still empties every slot, because
+## the thing it exists for -- 처음부터 -- means all of it.
+const SAVE_SLOTS := 4
 const SAVE_PATH := "user://motorio_oneshot_save.cfg"
-const SAVE_SCHEMA := 2
+const SAVE_SCHEMA := 3
+
+static func slot_path(slot: int) -> String:
+	return SAVE_PATH if slot <= 0 else "user://motorio_oneshot_save_%d.cfg" % slot
 const AUTOSAVE_INTERVAL := 30.0
 
 func _update_build_hold(delta: float) -> void:
@@ -621,6 +632,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key := event as InputEventKey
 	# The panel is modal: while it is open the only keys that mean anything are
 	# the ones that close it and the ones that nudge the slider.
+	if state == State.SETTINGS and int(hud.slot_picker) > 0:
+		# The slot list owns the panel while it is up.
+		match key.keycode:
+			KEY_ESCAPE:
+				close_slot_picker()
+			KEY_UP, KEY_W:
+				hud.slot_index = posmod(int(hud.slot_index) - 1, SAVE_SLOTS)
+				audio.call("play", "select")
+			KEY_DOWN, KEY_S:
+				hud.slot_index = posmod(int(hud.slot_index) + 1, SAVE_SLOTS)
+				audio.call("play", "select")
+			KEY_Z, KEY_ENTER, KEY_KP_ENTER:
+				confirm_slot(int(hud.slot_index))
+		get_viewport().set_input_as_handled()
+		return
 	if state == State.SETTINGS:
 		var rows: int = hud.slider_track_rects.size()
 		if key.keycode == KEY_ESCAPE or key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
@@ -637,6 +663,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			settings_restart()
 		elif key.keycode == KEY_S:
 			settings_save()
+		elif key.keycode == KEY_L:
+			settings_load()
 		get_viewport().set_input_as_handled()
 		return
 	# The build menu owns the keyboard while it is up. Placed before the state
@@ -734,11 +762,22 @@ func touch_hud(position: Vector2) -> bool:
 	# Hit-testing raw viewport coordinates against them silently misses by the
 	# scale factor, which is exactly the bug that made the pad feel dead.
 	var local: Vector2 = hud_local(position)
+	if state == State.SETTINGS and int(hud.slot_picker) > 0:
+		var slot: int = int(hud.call("slot_row_at", local))
+		if slot >= 0:
+			hud.slot_index = slot
+			confirm_slot(slot)
+		else:
+			close_slot_picker()
+		return true
 	if state == State.SETTINGS:
 		# While the panel is up it owns every touch, so a stray tap cannot fall
 		# through onto the world behind it.
 		if (hud.settings_close_rect as Rect2).has_point(local):
 			close_settings()
+			return true
+		if (hud.settings_load_rect as Rect2).has_point(local):
+			settings_load()
 			return true
 		if (hud.settings_restart_rect as Rect2).has_point(local):
 			settings_restart()
@@ -1007,9 +1046,17 @@ func _notify(text: String, color: Color) -> void:
 ## --- Persistence ----------------------------------------------------------
 ## The run seed is stored, so the same world is rebuilt and only the player's
 ## changes need to travel in the file.
-func save_game(announce: bool = true) -> bool:
+func save_game(announce: bool = true, slot: int = 0) -> bool:
 	var config := ConfigFile.new()
 	config.set_value("motorio_oneshot", "schema", SAVE_SCHEMA)
+	# The slot list has to be readable without loading a run, so what the picker
+	# shows lives beside the state rather than inside it.
+	config.set_value("motorio_oneshot", "card", {
+		"saved_at": Time.get_unix_time_from_system(),
+		"day": day_number,
+		"heat": sim.total_heat,
+		"machines": _slot_thumbnail(),
+	})
 	config.set_value("motorio_oneshot", "state", {
 		"seed": run_seed,
 		"day": day_number,
@@ -1022,15 +1069,65 @@ func save_game(announce: bool = true) -> bool:
 		"warmth": player.warmth,
 		"sim": sim.to_save(),
 	})
-	if config.save(SAVE_PATH) != OK:
+	if config.save(slot_path(slot)) != OK:
 		return false
 	if announce:
 		_notify("저장했습니다", Defs.COL_CORE)
 	return true
 
-func load_game() -> bool:
+## The picture on a save slot: the factory's own shape, as cells and colours.
+##
+## Not a screenshot. Capturing the viewport needs a renderer, which headless has
+## none of -- the repository already has a lesson about assuming otherwise -- and
+## a PNG of a screen is kilobytes per slot. The factory layout is the thing that
+## actually distinguishes one run from another, and it is already in the save;
+## this is a few dozen bytes and draws itself.
+func _slot_thumbnail() -> Array:
+	var cells: Array = []
+	for cell: Vector2i in sim.machines:
+		var machine = sim.machines[cell]
+		var offset: Vector2i = cell - sim.core_cell
+		# Only what fits the little window, so a distant outpost cannot stretch
+		# the drawing until the base is a single dot.
+		if absf(float(offset.x)) > 24.0 or absf(float(offset.y)) > 24.0:
+			continue
+		cells.append([offset.x, offset.y, machine.type])
+		if cells.size() >= 220:
+			break
+	return cells
+
+## What is in each slot, for the picker. Empty slots come back with exists false
+## rather than being skipped, so the list always shows every slot a player has.
+func slot_cards() -> Array[Dictionary]:
+	var cards: Array[Dictionary] = []
+	for slot in SAVE_SLOTS:
+		var config := ConfigFile.new()
+		var card := {"slot": slot, "exists": false, "day": 0, "heat": 0,
+			"saved_at": 0.0, "machines": []}
+		if config.load(slot_path(slot)) == OK \
+				and int(config.get_value("motorio_oneshot", "schema", -1)) == SAVE_SCHEMA:
+			var stored: Dictionary = config.get_value("motorio_oneshot", "card", {})
+			card["exists"] = true
+			card["day"] = int(stored.get("day", 0))
+			card["heat"] = int(stored.get("heat", 0))
+			card["saved_at"] = float(stored.get("saved_at", 0.0))
+			card["machines"] = stored.get("machines", [])
+		cards.append(card)
+	return cards
+
+## "8월 6일 14:32". Local time, because a player reading their own save list is
+## not thinking in UTC.
+static func slot_when(saved_at: float) -> String:
+	if saved_at <= 0.0:
+		return ""
+	var when: Dictionary = Time.get_datetime_dict_from_unix_time(
+		int(saved_at) + Time.get_time_zone_from_system().get("bias", 0) * 60)
+	return "%d월 %d일  %02d:%02d" % [int(when["month"]), int(when["day"]),
+		int(when["hour"]), int(when["minute"])]
+
+func load_game(slot: int = 0) -> bool:
 	var config := ConfigFile.new()
-	if config.load(SAVE_PATH) != OK:
+	if config.load(slot_path(slot)) != OK:
 		return false
 	# A schema change means the shape of the data moved; starting fresh is safer
 	# than half-restoring a run into a game that no longer matches it.
@@ -1055,7 +1152,8 @@ func load_game() -> bool:
 	return true
 
 func clear_save() -> void:
-	DirAccess.remove_absolute(SAVE_PATH)
+	for slot in SAVE_SLOTS:
+		DirAccess.remove_absolute(slot_path(slot))
 
 ## --- Settings -------------------------------------------------------------
 ## Kept in its own file, deliberately. UI size is a property of the player's
@@ -1140,17 +1238,57 @@ func settings_restart() -> void:
 	_notify("처음부터 시작합니다", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
+## Both buttons open the same list. Which slot holds what is exactly the thing
+## you need to see whether you are about to write over one or read one.
 func settings_save() -> void:
-	if save_game(false):
-		hud.saved_flash = 2.0
-		audio.call("play", "confirm")
-	else:
-		_notify("저장에 실패했습니다", Defs.COL_DANGER)
+	_open_slot_picker(1)
+
+func settings_load() -> void:
+	_open_slot_picker(2)
+
+func _open_slot_picker(mode: int) -> void:
+	hud.slot_picker = mode
+	hud.restart_armed = 0.0
+	# Never start on the autosave: for saving it is the slot the timer owns, and
+	# for loading it is the one the player did not choose.
+	hud.slot_index = 1
+	audio.call("play", "select")
+
+func close_slot_picker() -> void:
+	hud.slot_picker = 0
+	audio.call("play", "select")
+
+## Confirming a slot. Saving writes and stays put so the list visibly updates;
+## loading drops straight into the restored run, because a menu you have to close
+## yourself after it has already done the thing is a menu in the way.
+func confirm_slot(slot: int) -> void:
+	if hud.slot_picker == 1:
+		if save_game(false, slot):
+			hud.saved_flash = 2.0
+			audio.call("play", "confirm")
+		else:
+			_notify("저장에 실패했습니다", Defs.COL_DANGER)
+		return
+	if not load_game(slot):
+		_notify("빈 슬롯입니다", Defs.COL_DANGER)
+		audio.call("play", "select")
+		return
+	hud.slot_picker = 0
+	hud.call("end_slider_drag")
+	build_menu_open = false
+	meter_cell = Vector2i(9999, 9999)
+	night_override = -1.0
+	cinema_zoom = 1.0
+	state = State.PLAY
+	state_before_settings = State.PLAY
+	_notify("%d일차부터 이어서 진행합니다" % day_number, Defs.COL_CORE)
+	audio.call("play", "confirm")
 
 func close_settings() -> void:
 	if state != State.SETTINGS:
 		return
 	hud.restart_armed = 0.0
+	hud.slot_picker = 0
 	state = state_before_settings
 	hud.call("end_slider_drag")
 	audio.call("play", "confirm")

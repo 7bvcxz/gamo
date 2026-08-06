@@ -45,8 +45,31 @@ func _run() -> void:
 	# once, because it is the only button in the game that can destroy a factory
 	# and a mis-tap has no undo.
 	_press(main, KEY_ESCAPE)
+	# Saving and loading both go through a slot list. Which slot holds what is
+	# exactly what you need to see whether you are about to write over one or
+	# read one, so one list serves both.
 	main.settings_save()
-	_assert(main.hud.saved_flash > 0.0, "저장하기 reports that it saved")
+	_assert(main.hud.slot_picker == 1, "저장하기 opens the slot list")
+	_assert(main.hud.slot_index != 0,
+		"and never starts on the autosave, which the timer owns")
+	main.confirm_slot(2)
+	_assert(main.hud.saved_flash > 0.0, "confirming a slot writes it")
+	var cards: Array[Dictionary] = main.slot_cards()
+	_assert(cards.size() == main.SAVE_SLOTS, "the list has a row per slot")
+	_assert(bool(cards[2]["exists"]), "slot 2 now holds a save")
+	_assert(int(cards[2]["day"]) == main.day_number, "carrying the day it was written on")
+	_assert(float(cards[2]["saved_at"]) > 0.0, "and when")
+	_assert(main.slot_when(float(cards[2]["saved_at"])) != "", "which reads as a date")
+	_assert(not bool(cards[3]["exists"]), "an untouched slot reports empty rather than vanishing")
+
+	# Loading drops straight back into play: a menu that has already done the
+	# thing and still needs closing is a menu in the way.
+	main.settings_load()
+	_assert(main.hud.slot_picker == 2, "불러오기 opens the same list")
+	main.confirm_slot(2)
+	_assert(main.state == main.State.PLAY, "loading a slot resumes the run")
+	_assert(main.hud.slot_picker == 0, "and closes the list")
+	_press(main, KEY_ESCAPE)
 	main.settings_restart()
 	_assert(main.state == main.State.SETTINGS, "처음부터 does not fire on the first press")
 	_assert(main.hud.restart_armed > 0.0, "it arms itself and says so")
