@@ -245,6 +245,83 @@
 - 남은 사항:
   - 게임 화면을 크게 하면 월드 좌표 라벨(예: `사료 200`)이 화면 밖으로 나갈 수 있다
 
+### 스프라이트 파이프라인 — 중단 시점 인수인계 (2026-08-07)
+
+여기서 motorio-oneshot 개발을 멈췄다. 다시 시작할 때 이 절만 읽으면 상태가 복원된다.
+
+**무엇을 만들고 있었나.** 생성 영상에서 캐릭터 스프라이트를 뽑는 파이프라인. 게임 코드는
+건드리지 않았고, 후보를 제안 페이지에 올려 사람이 고르는 단계까지 와 있다. **채택은 아직
+안 했다** — 게임은 여전히 기존 일러스트(`SPRITE_SCALE 0.105`로 축소)를 쓴다.
+
+**도구** (`motorio-oneshot/tools/sprite/`)
+
+| 파일 | 역할 |
+|---|---|
+| `spec.json` | 단일 원본. 셀 크기·기준점·팔레트·검증 허용치 |
+| `generate.py` | Atlas Cloud Seedance 2.0 호출. `--dry-run` 먼저 |
+| `extract_frames.cjs` | Playwright로 영상→프레임 (ffmpeg 없이) |
+| `loopfind.py` | 조밀한 프레임에서 사이클 찾기 |
+| `sprite_tool.py` | normalize / validate / mirror / sheet / publish / inspect |
+| `pipeline.py` | 위를 한 명령으로 엮음 |
+
+한 번에 도는 명령:
+
+```
+SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <clip.mp4> \
+  --request mechanic-run-s --motion run --facing s --cell character128 --work <scratch>
+```
+
+**발행된 후보 6개** (전부 `web/public/sprite-candidates/`, 목록은 `web/lib/generated/sprites.json`)
+
+- `mechanic-walk-s` (64 셀) / `mechanic-walk-s-128` — 같은 영상, 셀 크기 비교용
+- `mechanic-run-s`, `mechanic-walk-e`(→ `w` 반전), `mechanic-mine-s`, `cat-walk-s`
+
+**결정된 것**
+
+- 셀은 **128**. 몸통이 논리 32px을 차지하고 1920×1080 창은 논리 960×540의 2배라, 128이
+  1:1로 떨어진다. 64는 2배 확대돼 계단이 보인다. 256은 4K용.
+- 셀 크기는 게임 축척과 무관하다. 세계가 전부 코드로 그려지고(`draw_rect` 95, `draw_circle`
+  90, PNG는 캐릭터 3개뿐) 타일에는 해상도가 없다. 캐릭터 크기는 셀이 아니라 그리는 배율이
+  정한다.
+- 서쪽은 시트를 만들지 않고 동쪽을 뒤집는다. 기준점 x가 셀 정중앙이라 반전이 정확하다.
+- 정렬은 **시퀀스 단위**다. 크롭 창 하나·오프셋 하나를 전 프레임에 적용한다. 프레임마다
+  자기 발 위치로 맞추면 안 된다 — 걷기에서 최하단 행은 그때 땅에 닿은 발 것이라 보폭 따라
+  좌우로 움직인다. 원본은 몸통 중심이 640px 중 4~8px만 움직이는데 발 중심은 29~288px
+  요동친다.
+
+**확인 안 된 것 — 다시 시작하면 여기부터**
+
+- 채굴만 몸통 중심 좌우 편차가 6.5px로 남아 있다(다른 것은 0.5~1.5px). 곡괭이가 실루엣을
+  가로지르는 것으로 보이지만 **육안 확인을 못 했다.** 몸이 흔들리는 것이면 다시 손봐야 한다.
+- 후보 품질에 대한 사용자 판단이 아직 없다. 채택하면 `MachineLayer._draw_candidate()`가
+  아니라 `PlayerActor`의 실제 렌더 경로로 옮겨야 한다.
+
+**지출**: $1.568 / $25 (Atlas Cloud). 이 중 $0.448은 두 번 낸 값 — 고양이 레퍼런스를 투명
+배경으로 만들어 크로마키가 실패했고, 채굴 프롬프트가 약해 스윙 없는 영상이 나왔다.
+
+**남은 설계 결정**: 구리광석 이후 레벨 디자인(사용자가 공유 예정), Lv4 방향(지하 벨트 추천,
+회로판 기각), 오버클럭 여부.
+
+### 웹 호스팅 재편 (2026-08-07)
+
+게임과 사이트가 호스트를 나눴다. 이유는 종류가 아니라 **크기와 변경 빈도**다.
+
+| 대상 | 호스트 | 이유 |
+|---|---|---|
+| 사이트 | Vercel (`gam0.vercel.app`) | 수백 KB, 하루에 여러 번 바뀜 |
+| 게임 3종 | GitHub Pages | 150MB. Vercel Hobby는 업로드 100MB·전송 100GB 한도 |
+| 미러 | 이 머신 nginx (`gamo-api.heydive.in`) | 빌드 대기 없음. `./deploy/publish.sh` 반환 시점에 live |
+
+- `web/`은 Next.js App Router **정적 export**다. 서버 코드가 없어서(`fetch` 0건) 세 호스트가
+  같은 파일로 동작한다. `npm run build`가 Vercel용(base `/`), `npm run build:pages`가
+  Pages용(base `/gamo`, `docs/`로 복사).
+- 경로를 소스에 적지 않는다. `web/lib/links.js`의 `site()`·`game()`을 쓴다.
+- 이 머신 컨테이너는 `gamo-gateway:8088`이다. 다른 5개 터널 항목과 이름 형태를 맞췄다.
+- Cloudflare 터널은 토큰 방식이라 공개 호스트명이 대시보드에만 있다. 절차는 `deploy/README.md`.
+
+**주의**: `web/`의 경로를 옮기면 `sprite_tool.py`의 `PUBLISH_DIR`과 `MANIFEST` **둘 다**
+확인한다. 한쪽만 고쳐서 "파일은 다 있는데 시트를 못 불러오는" 상태를 만든 적이 있다.
+
 ## 다음 작업
 
 - 다음 기능 방향은 사용자와 함께 정한다. (기존에 적혀 있던 자원 설계·인벤토리·운송 항목은 0.2.x~0.4.x에서 모두 구현 완료되어 2026-07-26에 정리)
@@ -254,9 +331,9 @@
 ## 운영 규칙
 
 - 게임별 진행 기록은 각 게임의 문서 사이트로 옮겼다. One Shot은 `/gamo/motorio-oneshot/doc/`의
-  Releases·Todo·개발 도구가 단일 원본이며(소스는 `web/src/pages/OneShot*.jsx`,
-  `web/src/pages/oneshot/`), 이 파일에는 저장소 전체에 걸친 사항만 남긴다.
+  Releases·Todo·개발 도구가 단일 원본이며(소스는 `web/components/content/OneShot*.jsx`,
+  `web/components/content/oneshot/`), 이 파일에는 저장소 전체에 걸친 사항만 남긴다.
 - 공동 작업 규칙의 단일 원본은 `AGENTS.md`이며, Claude Code용 `CLAUDE.md`는 `@AGENTS.md` import만 두고 본문을 복사하지 않는다.
 - 앞으로 새 게임의 완료 범위에는 Godot 구현, Web export, GitHub push, HeyDive 게임 등록 및 실행 확인을 모두 포함한다.
-- Web 배포는 GitHub Contents API 기반 manifest와 고정 runner를 사용하고, 해시 PCK는 저장소에서 직접 받아 브라우저/Pages CDN 캐시와 Pages 배포 지연을 우회한다.
+- Web 배포는 고정 runner와 해시 PCK를 사용한다. GitHub Contents API는 게임 로딩 경로에서 제거했다(비인증 시간당 60회 제한으로 403이 나면 게임이 아예 열리지 않는다).
 - Motorio는 push 직전에 patch 버전을 0.0.1 올리며, minor/major는 사용자 요청이 있을 때만 변경한다.
