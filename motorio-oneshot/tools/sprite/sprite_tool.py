@@ -485,7 +485,12 @@ REPO = Path(__file__).resolve().parents[3]
 # it belongs on whichever host redeploys in seconds. The games stayed in docs/
 # for the opposite reason -- 150MB that changes rarely.
 PUBLISH_DIR = REPO / "web" / "public" / "sprite-candidates"
-MANIFEST = REPO / "web" / "src" / "generated" / "sprites.json"
+# Where the site reads it. This lagged behind the move to Next.js by a day: the
+# sheets were being published to the new location while the manifest naming them
+# kept going to the old one, so every PNG deployed correctly and the page went on
+# asking for the previous build's filenames -- which had just been deleted. The
+# symptom was "sheet failed to load" on a site whose files were all present.
+MANIFEST = REPO / "web" / "lib" / "generated" / "sprites.json"
 
 
 def cmd_mirror(args, spec, palette) -> int:
@@ -575,7 +580,17 @@ def cmd_publish(args, spec, palette) -> int:
             old.unlink()
     (PUBLISH_DIR / name).write_bytes(buffer.getvalue())
 
-    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    # Required to exist rather than created. mkdir(parents=True) is what made the
+    # path bug silent: when the site moved from Vite to Next and generated/ moved
+    # with it, this happily created the old directory again and wrote a manifest
+    # nothing imports, while the sheets went to the right place. Everything looked
+    # published and the page asked for the previous build's filenames.
+    if not MANIFEST.parent.is_dir():
+        print(f"PUBLISH: {MANIFEST.parent} does not exist. The site reads the "
+              f"manifest from there, so this is the path being stale, not a "
+              f"missing directory -- check where the app imports it from.",
+              file=sys.stderr)
+        return 1
     data = {"requests": []}
     if MANIFEST.exists():
         data = json.loads(MANIFEST.read_text(encoding="utf-8"))

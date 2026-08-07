@@ -11,12 +11,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/mechanic-walk-s-a-a9ee2549dc0b.png",
+          "sheet": "/sprite-candidates/mechanic-walk-s-a-5dc419ca4c38.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0118,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · 0.224 USD"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · 64 셀"
         }
       ],
       "source_video": "/sprite-candidates/source-e95379285a44.mp4"
@@ -32,7 +32,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/mechanic-walk-s-128-a-783f6a9f611a.png",
+          "sheet": "/sprite-candidates/mechanic-walk-s-128-a-bc34b4f7ba6a.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0118,
@@ -53,10 +53,10 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/mechanic-run-s-a-be3866cb50d4.png",
+          "sheet": "/sprite-candidates/mechanic-run-s-a-352f5dfc9b82.png",
           "frames": 8,
           "fps": 14,
-          "closure": 0.0025,
+          "closure": 0.0118,
           "seed": 4242,
           "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
@@ -74,37 +74,16 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/mechanic-walk-e-a-41f8d5253d3f.png",
+          "sheet": "/sprite-candidates/mechanic-walk-e-a-e45e9548dfb3.png",
           "frames": 8,
           "fps": 10,
-          "closure": 0.002,
+          "closure": 0.0118,
           "seed": 4242,
           "note": "Seedance 2.0 Mini · 640×640 · 4s · 측면"
         }
       ],
       "source_video": "/sprite-candidates/source-a626f11597d6.mp4",
       "mirrors": "w"
-    },
-    {
-      "id": "cat-walk-s",
-      "motion": "walk",
-      "facing": "s",
-      "cell": [
-        128,
-        128
-      ],
-      "candidates": [
-        {
-          "id": "a",
-          "sheet": "/sprite-candidates/cat-walk-s-a-3042a909f8c3.png",
-          "frames": 8,
-          "fps": 10,
-          "closure": 0.0191,
-          "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · 고양이"
-        }
-      ],
-      "source_video": "/sprite-candidates/source-5d3e0d5ec4d7.mp4"
     },
     {
       "id": "mechanic-mine-s",
@@ -117,15 +96,36 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/mechanic-mine-s-a-7b07bdd8887b.png",
+          "sheet": "/sprite-candidates/mechanic-mine-s-a-ca3a5d8887fb.png",
           "frames": 6,
           "fps": 10,
-          "closure": 0.0219,
+          "closure": 0.0118,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · 재생성"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-cc1549e144c6.mp4"
+    },
+    {
+      "id": "cat-walk-s",
+      "motion": "walk",
+      "facing": "s",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/cat-walk-s-a-b924b9c8c1da.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0118,
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · 고양이"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-5d3e0d5ec4d7.mp4"
     }
   ]
 }
