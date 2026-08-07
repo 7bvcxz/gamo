@@ -24,13 +24,16 @@
 - `motorio-oneshot`도 같은 규칙을 따른다. 개발이 한 번 끝나 push하기 직전에 `motorio-oneshot/project.godot`의 `application/config/version` patch 값을 `0.0.1` 올리고, 타이틀 화면 우측 아래 표시가 같은 버전인지 확인한다. `0.5.0`이 최초로 기록된 버전이다.
 - minor 또는 major 버전은 사용자가 명시적으로 요청할 때만 올린다. 사용자 요청 없이 patch 증가를 minor/major 증가로 대체하지 않는다.
 - Motorio 배포 시 `motorio/release.md`에 해당 버전과 핵심 변경 사항을 간략히 추가한다.
-- `motorio-oneshot`의 변경 사항은 `web/src/pages/OneShotReleases.jsx`에 버전별로 추가하고, 끝난 작업은 `OneShotTodo.jsx`에서 지운다. 두 문서는 `https://7bvcxz.github.io/gamo/doc/`의 MOTORIO: ONE SHOT 섹션에서 조회한다.
+- `motorio-oneshot`의 변경 사항은 `web/components/content/OneShotReleases.jsx`에 버전별로 추가하고, 끝난 작업은 `OneShotTodo.jsx`에서 지운다. 두 문서는 `https://7bvcxz.github.io/gamo/doc/`의 MOTORIO: ONE SHOT 섹션에서 조회한다.
 
 ## 배포
 
 - `./deploy-web.sh <게임명>`은 게임을 `docs/<게임명>/`에 Web export한다.
-- 저장소 웹사이트는 `web/`의 React + Vite 소스이며 `cd web && npm run build`로 `docs/`에 함께 빌드된다. 랜딩은 `/gamo/`, 문서는 `/gamo/doc/`이다.
-- Vite 설정의 `emptyOutDir`은 반드시 `false`로 유지한다. `true`가 되면 빌드가 `docs/`를 비우면서 모든 게임의 Web export를 삭제한다.
+- 저장소 웹사이트는 `web/`의 Next.js(App Router, 정적 export) 소스다. 서버 코드는 없으며 `output: 'export'`라 Vercel·GitHub Pages·`deploy/`의 nginx 어디서든 같은 파일이 동작한다.
+- 사이트 빌드는 대상이 둘이다. `npm run build`는 base가 `/`인 Vercel용이고, `npm run build:pages`는 base가 `/gamo`인 Pages용으로 `docs/`에 넣는다. 게임과 사이트는 호스트가 갈렸다 — 게임 150MB는 Vercel Hobby의 100MB 업로드 한도를 넘어 Pages에 남고, 사이트는 초 단위로 재배포되는 쪽으로 간다.
+- 경로를 소스에 통째로 적지 않는다. 사이트 내부 링크는 `site()`, 게임 링크는 `game()`을 쓴다(`web/lib/links.js`). 호스트가 갈렸기 때문에 이 둘은 서로 다른 값이 된다.
+- 스프라이트 후보는 `web/public/sprite-candidates/`에 발행된다. 사이트와 함께 배포되는 자주 바뀌는 콘텐츠이기 때문이며, 게임 바이너리가 `docs/`에 남는 것과 정확히 반대 이유다.
+- `web/scripts/to-docs.mjs`는 `docs/` 안에서 `motorio`·`motorio-oneshot`·`nowhere`만 남기고 사이트 파일을 교체한다. 이 목록을 지우거나 디렉터리를 통째로 비우면 게임 Web export 150MB가 사라진다. (Vite 시절 `emptyOutDir: false`가 막던 것과 같은 함정이다.)
 - GitHub Pages는 `main` 브랜치의 `docs/`를 서비스한다.
 - 새 게임을 추가할 때 `export_presets.cfg`의 Web preset을 반드시 포함한다.
 - 새 게임의 배포 URL은 `https://7bvcxz.github.io/gamo/<게임명>/index.html` 형식이며, 이 절대 URL을 HeyDive의 `embedUrl`로 사용한다.
@@ -167,5 +170,5 @@
 - 2026-08-03: 전력 소비를 붙일 때는 그 설비가 발전기보다 먼저 해금되는지 확인한다. 벨트(첫 구리)에 소비를 붙였더니 발전기가 없는 동안 `capacity / draw = 0 / 0.1 = 0`이 되어 속도가 0이 됐다. 비율로 감속시키는 설계에서 분자가 0이 될 수 있으면 감속이 아니라 정지다.
 - 2026-08-03: 모바일 첫 접속이 몇 분 걸리는 원인이 `NotoSansCJK-Regular.ttc` 19MB였다. Godot은 폰트를 통째로 export에 넣으므로 PCK 18.2MB 중 16.3MB(90%)가 이 게임이 한 번도 그리지 않는 일본어·중국어 글리프였다. 한글 UI 게임에는 전체 CJK 폰트를 넣지 말고 소스에서 문자 집합을 추출해 서브셋한다(`motorio-oneshot/tools/build_font.cjs`, 19MB→90KB). 원본은 export에서 제외되는 `tools/`에 두고 저장소에는 남긴다. 손으로 문자 목록을 적으면 반드시 낡으므로, 소스의 모든 비ASCII 문자가 폰트에 있는지 검사하는 테스트(`test_font.gd`)를 함께 둔다.
 - Web 용량은 추측하지 말고 실제로 잰다. `ls -la docs/<게임>/`로 파일 크기, `curl -sI -H 'Accept-Encoding: gzip'`로 전송 크기와 `content-encoding`, Playwright `requestfinished` + `request.sizes()`로 요청별 시각과 바이트를 확인한다. Godot Web의 엔진 wasm 약 10MB(gzip)는 템플릿 고정값이라 저장소에서 줄일 수 없고, ETag 재검증으로 재방문 시 0바이트다 — 줄일 수 있는 것은 PCK뿐이다.
-- 게임 문서는 게임별로 `web/{게임}/doc/`에 독립적으로 둔다. `/gamo/doc/`은 저장소 수준 문서와 레퍼런스만 담고, 각 게임 문서로 링크만 한다. 문서 레이아웃은 `web/src/DocShell.jsx`를 공유한다.
-- `motorio-oneshot`의 밸런스 수치는 문서에 손으로 적지 않는다. `godot --headless --path motorio-oneshot --script res://tools/dump_balance.gd`로 `web/src/generated/balance.json`을 생성하고 문서 페이지가 그것을 읽는다. 수치를 바꾸면 같은 커밋에서 반드시 다시 생성한다. 손으로 적은 수치는 반드시 낡는다 — 벨트 속도가 10배 바뀌었는데 레벨 디자인 페이지가 세 버전 동안 옛 값을 말하고 있었다.
+- 게임 문서는 게임별로 `web/app/{게임}/doc/`에 독립적으로 둔다. `/gamo/doc/`은 저장소 수준 문서와 레퍼런스만 담고, 각 게임 문서로 링크만 한다. 문서 레이아웃은 `web/components/DocShell.jsx`를 공유한다.
+- `motorio-oneshot`의 밸런스 수치는 문서에 손으로 적지 않는다. `godot --headless --path motorio-oneshot --script res://tools/dump_balance.gd`로 `web/lib/generated/balance.json`을 생성하고 문서 페이지가 그것을 읽는다. 수치를 바꾸면 같은 커밋에서 반드시 다시 생성한다. 손으로 적은 수치는 반드시 낡는다 — 벨트 속도가 10배 바뀌었는데 레벨 디자인 페이지가 세 버전 동안 옛 값을 말하고 있었다.

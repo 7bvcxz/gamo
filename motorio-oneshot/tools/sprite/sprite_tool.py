@@ -424,7 +424,11 @@ def cmd_sheet(args, spec, palette) -> int:
 # publish quietly created motorio-oneshot/docs and motorio-oneshot/web instead of
 # writing into the real ones.
 REPO = Path(__file__).resolve().parents[3]
-PUBLISH_DIR = REPO / "docs" / "sprite-candidates"
+# Under the site's own public/ rather than docs/, because a candidate is site
+# content: it changes several times an hour while a decision is being made, and
+# it belongs on whichever host redeploys in seconds. The games stayed in docs/
+# for the opposite reason -- 150MB that changes rarely.
+PUBLISH_DIR = REPO / "web" / "public" / "sprite-candidates"
 MANIFEST = REPO / "web" / "src" / "generated" / "sprites.json"
 
 
@@ -536,7 +540,7 @@ def cmd_publish(args, spec, palette) -> int:
         video_bytes = args.source_video.read_bytes()
         video_name = "source-" + hashlib.sha256(video_bytes).hexdigest()[:12] + ".mp4"
         (PUBLISH_DIR / video_name).write_bytes(video_bytes)
-        request["source_video"] = f"/gamo/sprite-candidates/{video_name}"
+        request["source_video"] = f"/sprite-candidates/{video_name}"
         print(f"PUBLISH: source {video_name} ({len(video_bytes)} bytes)")
 
     # Which direction this one covers by reflection. Recorded rather than
@@ -550,7 +554,7 @@ def cmd_publish(args, spec, palette) -> int:
     request["candidates"] = [c for c in request["candidates"] if c["id"] != args.candidate]
     request["candidates"].append({
         "id": args.candidate,
-        "sheet": f"/gamo/sprite-candidates/{name}",
+        "sheet": f"/sprite-candidates/{name}",
         "frames": len(frames),
         "fps": int(spec["animations"].get(args.motion, {}).get("fps", 10)),
         "closure": round(args.closure, 4),

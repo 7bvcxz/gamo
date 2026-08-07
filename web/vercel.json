@@ -1,0 +1,12 @@
+{
+  "regions": ["icn1"],
+  "redirects": [
+    {
+      "source": "/motorio-oneshot",
+      "destination": "https://7bvcxz.github.io/gamo/motorio-oneshot/",
+      "permanent": false
+    },
+    { "source": "/motorio", "destination": "https://7bvcxz.github.io/gamo/motorio/", "permanent": false },
+    { "source": "/nowhere", "destination": "https://7bvcxz.github.io/gamo/nowhere/", "permanent": false }
+  ]
+}

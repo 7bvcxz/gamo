@@ -11,10 +11,10 @@ extends SceneTree
 ##
 ##   godot --headless --path motorio-oneshot --script res://tools/dump_balance.gd
 ##
-## Output: web/src/generated/balance.json, committed alongside the change that
+## Output: web/lib/generated/balance.json, committed alongside the change that
 ## moved the number.
 
-const OUT := "res://../web/src/generated/balance.json"
+const OUT := "res://../web/lib/generated/balance.json"
 
 func _initialize() -> void:
 	var machines: Array = []

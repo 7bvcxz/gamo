@@ -14,18 +14,10 @@ SERVE="${GAMO_SERVE_ROOT:-$HOME/srv/gamo}"
 
 if [[ "${1:-}" != "--no-build" ]]; then
   echo "── build"
-  (cd "$REPO/web" && npm run build >/dev/null)
-  # Bundles nothing references any more. Repeated because deleting an entry
-  # point is what orphans its chunks, so one pass is never enough.
-  for _ in 1 2 3; do
-    before=$(ls "$REPO/docs/site-assets" | wc -l)
-    refs=$(grep -rho "site-assets/[A-Za-z0-9._-]*" "$REPO/docs" \
-      --include=*.html --include=*.js --include=*.css | sed 's|site-assets/||' | sort -u)
-    for f in "$REPO/docs/site-assets"/*; do
-      echo "$refs" | grep -qx "$(basename "$f")" || rm -f "$f"
-    done
-    [[ "$before" == "$(ls "$REPO/docs/site-assets" | wc -l)" ]] && break
-  done
+  # The Pages-shaped build: base /gamo, output copied into docs/ beside the
+  # games. This host serves the same files GitHub Pages does, which is what lets
+  # either be switched off without a rebuild.
+  (cd "$REPO/web" && npm run build:pages >/dev/null)
 fi
 
 echo "── copy"
