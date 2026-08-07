@@ -178,56 +178,90 @@ def body_rows(image: Image.Image, threshold: int) -> tuple:
     return best
 
 
-def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list,
-                    scale: float) -> Image.Image:
-    """One raw frame into one conforming sprite, at a scale set by its sequence.
+def sequence_window(images: list, spec: dict) -> tuple:
+    """One crop rectangle, in source pixels, used for every frame.
 
-    Order matters and is the whole trick:
-      1. cut the background out, so the silhouette is real before anything is
-         measured off it;
-      2. resize by the shared scale -- never by this frame's own height, see
-         sequence_scale;
-      3. place it by its foot, so the ground stays put while the pose moves;
-      4. quantise last, once the pixel grid is final -- resampling after
+    This is the alignment, and getting it wrong is what made the character
+    shuffle sideways. The first version cropped each frame to its own body and
+    then placed it by its own foot -- the horizontal middle of its lowest row.
+    In a walk that row belongs to whichever foot is currently down, so the
+    reference point swings with the stride. Measured on the four clips: the
+    generator held the body centre to within 4-8 pixels of 640 across a whole
+    cycle, while the foot midpoint moved 29, 56, 97 and in the cat's case 288.
+    Aligning to the steadiest thing available would have been right; aligning to
+    the least steady thing produced up to 11.5px of lateral wobble in a 128 cell,
+    which is what a person watching it reported.
+
+    So nothing is measured per frame any more. The clips come from a model asked
+    for a locked camera and it delivered one, which means the frames are already
+    in register with each other -- the only way to keep that is to apply the
+    same rectangle to all of them and let whatever moves inside it move.
+
+    The rectangle is the union of the per-frame body bands, so no pose is
+    clipped, and it is the same width and height for every frame by
+    construction.
+    """
+    left = top = 10 ** 9
+    right = bottom = -1
+    for image in images:
+        keyed = strip_background(image.convert("RGBA"), spec)
+        band = body_rows(keyed, spec["alpha_threshold"])
+        if band is None:
+            continue
+        strip = keyed.crop((0, band[0], keyed.width, band[1]))
+        shape = silhouette(strip, spec["alpha_threshold"])
+        if shape["empty"]:
+            continue
+        left = min(left, shape["bounds"][0])
+        right = max(right, shape["bounds"][2])
+        top = min(top, band[0])
+        bottom = max(bottom, band[1])
+    if right < 0:
+        return None
+    return (left, top, right, bottom)
+
+
+def normalize_frame(image: Image.Image, cell: dict, spec: dict, palette: list,
+                    scale: float, window: tuple, offset: tuple) -> Image.Image:
+    """One raw frame into one conforming sprite.
+
+    Every number here belongs to the sequence rather than to this frame: the
+    scale, the crop rectangle and the placement are all computed once and passed
+    in. That is the point -- a frame that decides anything for itself is a frame
+    that can disagree with its neighbours, and the eye reads that disagreement as
+    the character moving when it should be still.
+
+    Order still matters:
+      1. cut the background out, so nothing keyed is carried into the cell;
+      2. crop with the shared rectangle -- never this frame's own bounds;
+      3. resize by the shared scale;
+      4. paste at the shared offset;
+      5. quantise last, once the pixel grid is final, because resampling after
          quantising reintroduces colours that are not in the palette.
     """
-    image = image.convert("RGBA")
-    image = strip_background(image, spec)
-
-    shape = silhouette(image, spec["alpha_threshold"])
-    if shape["empty"]:
-        return Image.new("RGBA", tuple(cell["size"]), tuple(spec["background"]))
-
-    # Bound the crop by the body, not by the outermost surviving pixel. Chroma
-    # keying leaves specks -- one frame here kept a 12px sliver along the top
-    # edge -- and cropping to raw bounds carries them into the cell, where they
-    # stretch that frame's silhouette and make the character look a different
-    # size. At 64 the sliver averaged below the alpha threshold and vanished, so
-    # this was invisible until the same frames were cut at 128 and frame four
-    # came out 71px against everything else's 64. The defect was always there;
-    # the smaller cell was hiding it.
-    top, bottom = body_rows(image, spec["alpha_threshold"])
-    band = image.crop((0, top, image.width, bottom))
-    band_shape = silhouette(band, spec["alpha_threshold"])
-    if band_shape["empty"]:
-        return Image.new("RGBA", tuple(cell["size"]), tuple(spec["background"]))
-    left, _, right, _ = band_shape["bounds"]
-    cropped = band.crop((left, 0, right, band.height))
-    target_w = max(1, round(cropped.width * scale))
-    target_h = max(1, round(cropped.height * scale))
+    image = strip_background(image.convert("RGBA"), spec)
+    cropped = image.crop(window)
+    target = (max(1, round(cropped.width * scale)), max(1, round(cropped.height * scale)))
     # BOX is an area average: every source pixel contributes. NEAREST here would
     # be the original sin all over again, picking one pixel in ninety.
-    cropped = cropped.resize((target_w, target_h), Image.Resampling.BOX)
+    cropped = cropped.resize(target, Image.Resampling.BOX)
 
     canvas = Image.new("RGBA", tuple(cell["size"]), tuple(spec["background"]))
-    anchor_x, anchor_y = cell["foot_anchor"]
-    shape = silhouette(cropped, spec["alpha_threshold"])
-    if shape["empty"]:
-        return canvas
-    foot_x, foot_y = shape["foot"]
-    canvas.alpha_composite(cropped, (round(anchor_x - foot_x), round(anchor_y - foot_y)))
-
+    canvas.alpha_composite(cropped, offset)
     return _quantise(canvas, palette, spec["alpha_threshold"])
+
+
+def sequence_offset(window: tuple, scale: float, cell: dict) -> tuple:
+    """Where the shared crop is pasted, once, for every frame.
+
+    Horizontally the crop's centre goes on the anchor's x, vertically its bottom
+    goes on the anchor's y. Both are properties of the rectangle rather than of
+    any frame, so the whole sequence moves together or not at all.
+    """
+    width = max(1, round((window[2] - window[0]) * scale))
+    height = max(1, round((window[3] - window[1]) * scale))
+    anchor_x, anchor_y = cell["foot_anchor"]
+    return (round(anchor_x - width / 2), round(anchor_y - height))
 
 
 def strip_background(image: Image.Image, spec: dict) -> Image.Image:
@@ -304,6 +338,7 @@ def validate(frames: list, cell: dict, spec: dict, palette: list,
     legal = set(palette)
     problems = []
     previous = None
+    feet = []
 
     for index, (name, image) in enumerate(frames):
         if tuple(image.size) != tuple(cell["size"]):
@@ -315,14 +350,15 @@ def validate(frames: list, cell: dict, spec: dict, palette: list,
             previous = None
             continue
 
-        foot_x, foot_y = shape["foot"]
-        anchor_x, anchor_y = cell["foot_anchor"]
-        drift = max(abs(foot_x - anchor_x), abs(foot_y - anchor_y))
-        if drift > rules["max_anchor_drift_px"]:
-            problems.append(
-                f"{name}: foot at ({foot_x:.1f}, {foot_y:.1f}), anchor is "
-                f"{tuple(cell['foot_anchor'])} -- drift {drift:.1f}px. The normaliser "
-                f"places this, so any drift is a pipeline bug, not a tolerance")
+        # No per-frame anchor check any more, and its removal is the fix rather
+        # than a relaxation. It used to require every frame's foot -- the middle
+        # of its lowest row -- to sit on the anchor, which forced the normaliser
+        # to shove each frame sideways to satisfy it. In a walk that row belongs
+        # to whichever foot is down, so the requirement was to align to the one
+        # measurement in the frame that swings with the stride, and the character
+        # visibly shuffled. Placement is now a property of the sequence, checked
+        # once below.
+        feet.append(shape["foot"])
 
         # Pixels that are not attached to the body. A chroma speck riding along
         # the top edge passed every check here -- anchor, palette, centroid, area
@@ -366,6 +402,20 @@ def validate(frames: list, cell: dict, spec: dict, palette: list,
 
     if len(frames) < 2:
         problems.append("a sequence needs at least two frames to be checked as one")
+    # The sequence sits where it should. The crop's bottom edge is pasted on the
+    # anchor, so the frame that reaches lowest must land exactly there and no
+    # frame may go below it. This checks the placement arithmetic without asking
+    # any single frame to hold still, which is the distinction that was wrong
+    # before.
+    if feet:
+        anchor_y = cell["foot_anchor"][1]
+        lowest = max(y for _, y in feet)
+        if abs(lowest - anchor_y) > rules["max_anchor_drift_px"]:
+            problems.append(
+                f"sequence: lowest foot is at y={lowest}, anchor is {anchor_y}. "
+                f"The whole sequence is placed by one offset, so this is the offset "
+                f"being wrong, not a frame drifting")
+
     return problems
 
 
@@ -384,12 +434,18 @@ def cmd_normalize(args, spec, palette) -> int:
     if not frames:
         print(f"SPRITE: no frames in {args.in_dir}", file=sys.stderr)
         return 1
-    scale = sequence_scale([image for _, image in frames], cell, spec)
+    images = [image for _, image in frames]
+    scale = sequence_scale(images, cell, spec)
+    window = sequence_window(images, spec)
+    if window is None:
+        print(f"SPRITE: every frame in {args.in_dir} is empty", file=sys.stderr)
+        return 1
+    offset = sequence_offset(window, scale, cell)
     for name, image in frames:
-        out = normalize_frame(image, cell, spec, palette, scale)
+        out = normalize_frame(image, cell, spec, palette, scale, window, offset)
         out.save(args.out_dir / (Path(name).stem + ".png"))
     print(f"SPRITE: normalised {len(frames)} frames at one shared scale "
-          f"{scale:.4f} -> {args.out_dir}")
+          f"{scale:.4f}, one window {window} -> {args.out_dir}")
     return 0
 
 
