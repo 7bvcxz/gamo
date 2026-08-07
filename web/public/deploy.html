@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gamo 자체 호스팅 — 어떤 원리로 가능한가</title>
+<meta name="description" content="포트를 열지 않고도 이 컴퓨터가 gamo를 공개 서빙하게 된 원리.">
+</head>
+<body>
+
+<style>
+  /* Cold industrial palette borrowed from the game itself: ember amber for the
+     path that carries traffic, ice blue for the one that used to. Neutrals lean
+     blue so they read as chosen rather than defaulted. */
+  :root {
+    color-scheme: light;
+    --ground: #eff2f6;
+    --panel: #ffffff;
+    --sunk: #e4e9f0;
+    --line: #ccd5e0;
+    --ink: #101519;
+    --muted: #58646f;
+    --ember: #c4720f;
+    --ember-soft: rgba(196, 114, 15, 0.12);
+    --ice: #2a7fa4;
+    --ice-soft: rgba(42, 127, 164, 0.10);
+    --ok: #1c7f57;
+    --bad: #b93a3a;
+    --shadow: 0 1px 2px rgba(16, 21, 25, 0.05), 0 10px 28px rgba(16, 21, 25, 0.07);
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: ui-sans-serif, system-ui, "Segoe UI", "Noto Sans KR", sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --ground: #0f1318;
+      --panel: #171d24;
+      --sunk: #0a0d11;
+      --line: #29323d;
+      --ink: #e5eaf0;
+      --muted: #808c9b;
+      --ember: #ffb347;
+      --ember-soft: rgba(255, 179, 71, 0.12);
+      --ice: #6fc9e8;
+      --ice-soft: rgba(111, 201, 232, 0.10);
+      --ok: #5fd3a0;
+      --bad: #ff7a7a;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 34px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --ground: #eff2f6; --panel: #ffffff; --sunk: #e4e9f0; --line: #ccd5e0;
+    --ink: #101519; --muted: #58646f; --ember: #c4720f;
+    --ember-soft: rgba(196, 114, 15, 0.12); --ice: #2a7fa4;
+    --ice-soft: rgba(42, 127, 164, 0.10); --ok: #1c7f57; --bad: #b93a3a;
+    --shadow: 0 1px 2px rgba(16, 21, 25, 0.05), 0 10px 28px rgba(16, 21, 25, 0.07);
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0f1318; --panel: #171d24; --sunk: #0a0d11; --line: #29323d;
+    --ink: #e5eaf0; --muted: #808c9b; --ember: #ffb347;
+    --ember-soft: rgba(255, 179, 71, 0.12); --ice: #6fc9e8;
+    --ice-soft: rgba(111, 201, 232, 0.10); --ok: #5fd3a0; --bad: #ff7a7a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 34px rgba(0, 0, 0, 0.35);
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 4vw, 2rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.75rem, 4vw, 2.75rem);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 0.6rem;
+  }
+
+  h1 {
+    font-size: clamp(1.7rem, 4.4vw, 2.4rem);
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 0.7rem;
+    font-weight: 650;
+  }
+
+  .lede { margin: 0; max-width: 58ch; color: var(--muted); }
+
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    padding: clamp(1rem, 3vw, 1.6rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  h2 {
+    font-size: 0.78rem;
+    font-family: var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  p.note { margin: 0; font-size: 0.9rem; color: var(--muted); max-width: 64ch; }
+  p.note b { color: var(--ink); font-weight: 600; }
+
+  .figure { overflow-x: auto; }
+  svg { display: block; min-width: 40rem; width: 100%; height: auto; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--muted);
+  }
+  .legend i { display: inline-block; width: 1.6rem; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 0.4rem; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 0.86rem; }
+  th, td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  .table-box { overflow-x: auto; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--sunk);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 0.05em 0.32em;
+  }
+
+  .callout { border-left: 2px solid var(--ember); padding-left: 0.9rem; }
+  .prose p { margin: 0 0 0.7rem; max-width: 64ch; font-size: 0.92rem; }
+  .prose p:last-child { margin-bottom: 0; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">gamo · 배포 구조</p>
+    <h1>왜 이 컴퓨터가 공개 웹 서버가 될 수 있나</h1>
+    <p class="lede">
+      공유기에 포트를 하나도 열지 않았고, 고정 IP도 없어. 그런데도 밖에서 접속이 돼.
+      핵심은 연결을 <b>받는</b> 게 아니라 <b>거는</b> 데 있어.
+    </p>
+  </header>
+
+  <section>
+    <h2>전과 후</h2>
+    <div class="figure">
+      <svg viewBox="0 0 940 400" role="img"
+           aria-label="GitHub Pages 경로와 자체 호스팅 경로 비교 다이어그램">
+        <defs>
+          <marker id="ember" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+            <path d="M0,0 L7,3.2 L0,6.4 Z" fill="var(--ember)" />
+          </marker>
+          <marker id="ice" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+            <path d="M0,0 L7,3.2 L0,6.4 Z" fill="var(--ice)" />
+          </marker>
+        </defs>
+
+        <!-- ── before ─────────────────────────────────────────────── -->
+        <text x="0" y="16" fill="var(--muted)" font-family="var(--mono)" font-size="12"
+              letter-spacing="1.4">BEFORE — GITHUB PAGES</text>
+
+        <g font-family="var(--sans)" font-size="13">
+          <rect x="0" y="30" width="150" height="52" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="12" y="52" fill="var(--ink)">내 컴퓨터</text>
+          <text x="12" y="70" fill="var(--muted)" font-size="11">git push</text>
+
+          <rect x="205" y="30" width="150" height="52" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="217" y="52" fill="var(--ink)">GitHub 저장소</text>
+          <text x="217" y="70" fill="var(--muted)" font-size="11">파일 도착 — 즉시</text>
+
+          <rect x="410" y="30" width="170" height="52" rx="3" fill="var(--ice-soft)" stroke="var(--ice)" />
+          <text x="422" y="52" fill="var(--ink)">Pages 빌드</text>
+          <text x="422" y="70" fill="var(--bad)" font-size="11">언제 끝날지 모름</text>
+
+          <rect x="635" y="30" width="150" height="52" rx="3" fill="var(--ice-soft)" stroke="var(--ice)" />
+          <text x="647" y="52" fill="var(--ink)">CDN 캐시</text>
+          <text x="647" y="70" fill="var(--bad)" font-size="11">max-age 10분 고정</text>
+
+          <rect x="840" y="30" width="100" height="52" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="852" y="60" fill="var(--ink)">플레이어</text>
+        </g>
+
+        <g stroke="var(--ice)" stroke-width="2" fill="none" marker-end="url(#ice)">
+          <line x1="152" y1="56" x2="200" y2="56" />
+          <line x1="357" y1="56" x2="405" y2="56" />
+          <line x1="582" y1="56" x2="630" y2="56" />
+          <line x1="787" y1="56" x2="835" y2="56" />
+        </g>
+        <text x="410" y="102" fill="var(--bad)" font-family="var(--mono)" font-size="11">
+          8월 6일: 이 구간에서 4시간 넘게 멈춤 — 그동안 옛 파일이 계속 200으로 응답
+        </text>
+
+        <line x1="0" y1="128" x2="940" y2="128" stroke="var(--line)" stroke-width="1" />
+
+        <!-- ── after ──────────────────────────────────────────────── -->
+        <text x="0" y="156" fill="var(--muted)" font-family="var(--mono)" font-size="12"
+              letter-spacing="1.4">AFTER — 이 컴퓨터에서 직접</text>
+
+        <!-- home box -->
+        <rect x="0" y="172" width="405" height="185" rx="4"
+              fill="none" stroke="var(--line)" stroke-dasharray="4 3" />
+        <text x="12" y="190" fill="var(--muted)" font-family="var(--mono)" font-size="11">
+          집 · 공유기 뒤 (NAT) · 열린 포트 없음
+        </text>
+
+        <g font-family="var(--sans)" font-size="13">
+          <rect x="16" y="202" width="170" height="56" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="28" y="224" fill="var(--ink)">publish.sh</text>
+          <text x="28" y="242" fill="var(--muted)" font-size="11">빌드 → 복사 → 압축</text>
+
+          <rect x="16" y="278" width="170" height="60" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="28" y="300" fill="var(--ink)">~/srv/gamo</text>
+          <text x="28" y="318" fill="var(--muted)" font-size="11">정적 파일 77개 · 161MB</text>
+
+          <rect x="222" y="240" width="165" height="60" rx="3" fill="var(--ember-soft)" stroke="var(--ember)" />
+          <text x="234" y="262" fill="var(--ink)">nginx</text>
+          <text x="234" y="280" fill="var(--muted)" font-size="11">gamo-web:80</text>
+        </g>
+
+        <g stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#ember)">
+          <line x1="101" y1="260" x2="101" y2="273" />
+        </g>
+        <g stroke="var(--ember)" stroke-width="2" fill="none" marker-end="url(#ember)">
+          <line x1="188" y1="300" x2="217" y2="285" />
+        </g>
+
+        <!-- tunnel -->
+        <g font-family="var(--sans)" font-size="13">
+          <rect x="222" y="172" width="165" height="52" rx="3" fill="var(--ember-soft)" stroke="var(--ember)" />
+          <text x="234" y="194" fill="var(--ink)">cloudflared</text>
+          <text x="234" y="212" fill="var(--muted)" font-size="11">heydive-tunnel</text>
+
+          <rect x="470" y="215" width="180" height="66" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="482" y="239" fill="var(--ink)">Cloudflare 엣지</text>
+          <text x="482" y="257" fill="var(--muted)" font-size="11">gamo.heydive.in</text>
+          <text x="482" y="273" fill="var(--muted)" font-size="11">TLS 종료</text>
+
+          <rect x="740" y="215" width="150" height="66" rx="3" fill="var(--sunk)" stroke="var(--line)" />
+          <text x="752" y="248" fill="var(--ink)">플레이어</text>
+          <text x="752" y="266" fill="var(--muted)" font-size="11">브라우저</text>
+        </g>
+
+        <!-- docker network link -->
+        <g stroke="var(--ember)" stroke-width="2" fill="none" marker-end="url(#ember)">
+          <line x1="304" y1="238" x2="304" y2="226" />
+        </g>
+        <text x="312" y="236" fill="var(--muted)" font-family="var(--mono)" font-size="10">
+          도커 네트워크
+        </text>
+
+        <!-- outbound tunnel: the key arrow, pointing OUT -->
+        <path d="M389 198 C 430 198, 440 232, 466 240" stroke="var(--ember)" stroke-width="2.5"
+              fill="none" marker-end="url(#ember)" />
+        <text x="398" y="188" fill="var(--ember)" font-family="var(--mono)" font-size="11" font-weight="600">
+          바깥으로 거는 연결
+        </text>
+
+        <!-- traffic returns down the same pipe -->
+        <path d="M466 262 C 440 270, 430 262, 391 258" stroke="var(--ember)" stroke-width="1.5"
+              fill="none" stroke-dasharray="5 3" marker-end="url(#ember)" />
+        <text x="398" y="290" fill="var(--muted)" font-family="var(--mono)" font-size="10">
+          요청은 이 통로를 되돌아 들어옴
+        </text>
+
+        <g stroke="var(--ember)" stroke-width="2" fill="none" marker-end="url(#ember)">
+          <line x1="652" y1="248" x2="735" y2="248" />
+        </g>
+
+        <text x="470" y="308" fill="var(--muted)" font-family="var(--mono)" font-size="11">
+          캐시 헤더는 nginx가 정함 — 해시 파일 1년, HTML no-cache
+        </text>
+        <text x="470" y="326" fill="var(--ok)" font-family="var(--mono)" font-size="11">
+          publish.sh가 끝나면 이미 live
+        </text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i style="border-color: var(--ember)"></i>지금 트래픽이 흐르는 길</span>
+      <span><i style="border-color: var(--ice)"></i>Pages 경로 (그대로 살아 있음)</span>
+      <span><i style="border-color: var(--ember); border-top-style: dashed"></i>같은 연결의 응답 방향</span>
+    </div>
+  </section>
+
+  <section class="prose">
+    <h2>핵심 — 왜 포트를 안 열어도 되나</h2>
+    <p class="callout">
+      보통 서버는 밖에서 오는 연결을 <b>받는다</b>. 그러려면 공인 IP와 열린 포트가 필요하고,
+      공유기 뒤에 있으면 불가능해. 터널은 방향을 뒤집어.
+    </p>
+    <p>
+      <code>cloudflared</code> 컨테이너가 켜지자마자 <b>자기가 먼저</b> Cloudflare로 나가는
+      연결을 열고 그대로 붙잡고 있어. 이건 브라우저가 웹사이트에 접속하는 것과 똑같은
+      평범한 아웃바운드 연결이라, 공유기가 아무 설정 없이 통과시켜.
+    </p>
+    <p>
+      누군가 <code>gamo.heydive.in</code>에 접속하면 요청은 Cloudflare 엣지에 도착하고,
+      엣지는 이미 열려 있는 그 연결을 <b>거꾸로 타고 내려와</b> 이 컴퓨터의 nginx에 닿아.
+      바깥에서 이 집을 향해 새로 연결을 시도하는 순간은 한 번도 없어. 그래서 포트도,
+      고정 IP도, DDNS도 필요 없어.
+    </p>
+    <p>
+      nginx는 <code>gamo-web</code>이라는 이름으로 불려. 컨테이너를 HeyDive 스택이 쓰던
+      도커 네트워크에 같이 넣었기 때문이야 — 터널 입장에서는 옆방에 있는 셈이고,
+      그래서 설정이 <code>http://gamo-web:80</code> 한 줄로 끝나.
+    </p>
+  </section>
+
+  <section>
+    <h2>무엇이 실제로 달라졌나</h2>
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr><th></th><th>GitHub Pages</th><th>이 컴퓨터</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>푸시 후 반영</td>
+            <td class="num">보통 수 분 · 8월 6일 4시간+</td>
+            <td class="num">초 단위 (스크립트 종료 시점)</td>
+          </tr>
+          <tr>
+            <td>캐시 수명</td>
+            <td class="num">max-age=600 고정</td>
+            <td class="num">해시 파일 1년 / HTML no-cache</td>
+          </tr>
+          <tr>
+            <td>엔진 wasm 전송</td>
+            <td class="num">10.24 MB gzip</td>
+            <td class="num">10.08 MB gzip (배포 시 1회 압축)</td>
+          </tr>
+          <tr>
+            <td>게임 부팅</td>
+            <td class="num">—</td>
+            <td class="num">3.3초 · 오류 0 (실측)</td>
+          </tr>
+          <tr>
+            <td>서버 코드</td>
+            <td class="num">없음</td>
+            <td class="num">없음 — nginx 설정 한 장뿐</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Pages는 끄지 않았어. 사이트가 <code>/gamo/</code> base를 그대로 쓰기 때문에 두 호스트가
+      <b>바이트 단위로 같은 파일</b>을 주고, 어느 쪽이든 재빌드 없이 꺼도 돼.
+    </p>
+  </section>
+
+  <section class="prose">
+    <h2>왜 Next.js도 Spring Boot도 안 넣었나</h2>
+    <p>
+      <code>web/src</code> 전체에 <code>fetch</code> 호출도 <code>/api</code> 참조도 <b>한 건도 없어</b>.
+      사이트는 정적 파일 77개고 그중 150MB가 Godot 엔진과 팩 바이너리야. 서버가 계산할 게
+      없는데 런타임을 앞에 두면 유지보수 대상만 하나 늘고, 느렸던 배포는 그대로야 —
+      느린 건 프레임워크가 아니라 <b>누가 파일을 언제 공개하느냐</b>였으니까.
+    </p>
+    <p>
+      Next.js가 맞는 순간은 따로 있어. 제안 페이지의 선택을 지금처럼 localStorage에 담아
+      복붙하는 대신 서버에 저장하고 싶다거나, HeyDive 등록을 한곳에서 관리하고 싶어질 때.
+      그건 배포 속도 문제의 해법이 아니라 별개의 결정이고, 그때 붙여도 늦지 않아.
+    </p>
+  </section>
+
+  <section class="prose">
+    <h2>남은 한 단계</h2>
+    <p>
+      터널이 토큰 방식이라 공개 호스트명은 저장소가 아니라 Cloudflare 대시보드에 있어.
+      <b>Zero Trust → Networks → Tunnels → heydive 터널 → Public Hostname → Add</b>에서
+      서브도메인 <code>gamo</code>, 서비스 <code>HTTP</code> → <code>gamo-web:80</code>으로 추가하면 끝이야.
+    </p>
+    <p class="note">
+      도커 네트워크 안에서 <code>curl http://gamo-web/gamo/</code>가 200을 주는 것까지는 확인해 뒀어.
+      즉 터널이 닿을 수 있는 상태고, 남은 건 "이 이름으로 오는 요청을 저기로 보내라"는
+      한 줄뿐이야.
+    </p>
+  </section>
+</div>
+
+</body>
+</html>
