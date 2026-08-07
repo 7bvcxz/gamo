@@ -1,25 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["icn1"],
-
-  "//ignoreCommand": [
-    "Most commits to this repository are game work, not site work: a Godot",
-    "export changes 18MB of pack and never touches web/. Without this, every one",
-    "of them would spend a Vercel build, and Hobby allows 100 deployments a day.",
-    "Run from the Root Directory, so ./ is web/ and everything the site is built",
-    "from -- pages, components, generated balance and sprite JSON, and the",
-    "candidate sheets in public/ -- is inside it.",
-    "Exit 0 means ignore the build, exit 1 means continue; git diff --quiet exits",
-    "0 when nothing changed, which is exactly the case worth skipping."
-  ],
   "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
-
-  "//redirects": [
-    "The games are not deployed here -- 150MB exceeds the 100MB static upload",
-    "limit on Hobby -- so a guessed URL is sent to the host that does have them.",
-    "Temporary, not permanent: if the games ever move, a 308 cached in browsers",
-    "would outlive the decision."
-  ],
   "redirects": [
     {
       "source": "/motorio-oneshot",
