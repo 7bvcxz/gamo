@@ -33,6 +33,11 @@ for proj in "$ROOT"/*/; do
   "$GODOT" --headless --path "$proj" --import >/dev/null 2>&1 || true
   mkdir -p "$OUT/$name"
   rm -f "$OUT/$name"/index.* 2>/dev/null || true
+  # Engine copies left in the game folder by deploys made before the engine was
+  # shared. Without this they linger forever: the export only ever writes
+  # index.*, so the renamed engine-* files from an older run are never touched
+  # again and quietly keep 38MB each in docs/.
+  rm -f "$OUT/$name"/engine-*.js "$OUT/$name"/engine-*.wasm 2>/dev/null || true
   "$GODOT" --headless --path "$proj" --export-release "Web" "$OUT/$name/index.html"
 
   # GitHub Pages applies browser caching headers this repository cannot override.
@@ -47,19 +52,37 @@ for proj in "$ROOT"/*/; do
   pack_name="game-${pack_hash}.pck"
   page_name="game-${pack_hash}.html"
 
-  mv "$OUT/$name/index.js" "$OUT/$name/${engine_base}.js"
-  mv "$OUT/$name/index.wasm" "$OUT/$name/${engine_base}.wasm"
-  mv "$OUT/$name/index.audio.worklet.js" "$OUT/$name/${engine_base}.audio.worklet.js"
-  mv "$OUT/$name/index.audio.position.worklet.js" "$OUT/$name/${engine_base}.audio.position.worklet.js"
+  # The engine lives once, in docs/engine/, and every game points at it.
+  #
+  # It used to be copied into each game's folder. The file is byte-identical
+  # across all of them -- same md5, same content hash, so even the same filename
+  # -- but four different URLs are four different cache entries, so a player who
+  # had finished one game still downloaded ten megabytes to open the next. That
+  # is the whole load time for a game whose own pack is eight kilobytes.
+  #
+  # Sharing it means the second game anyone opens starts almost immediately, and
+  # docs/ loses three redundant copies of a 38MB file.
+  mkdir -p "$OUT/engine"
+  for part in js wasm audio.worklet.js audio.position.worklet.js; do
+    src="$OUT/$name/index.${part}"
+    dst="$OUT/engine/${engine_base}.${part}"
+    # Content-addressed, so an existing file with this name is this file.
+    if [[ -f "$dst" ]]; then rm -f "$src"; else mv "$src" "$dst"; fi
+  done
   mv "$OUT/$name/index.pck" "$OUT/$name/$pack_name"
   mv "$OUT/$name/index.html" "$OUT/$name/$page_name"
 
+  # Paths are relative to the game page, which sits one directory below the
+  # shared engine. Godot resolves the wasm and the worklets from `executable`,
+  # so that one string carries the rest.
+  engine_url="../engine/${engine_base}"
+
   sed -i \
-    -e "s|src=\"index.js\"|src=\"${engine_base}.js\"|" \
+    -e "s|src=\"index.js\"|src=\"${engine_url}.js\"|" \
     -e "s|\"args\":\[\]|\"args\":[],\"mainPack\":\"${pack_name}\"|" \
-    -e "s|\"executable\":\"index\"|\"executable\":\"${engine_base}\"|" \
+    -e "s|\"executable\":\"index\"|\"executable\":\"${engine_url}\"|" \
     -e "s|\"index.pck\":|\"${pack_name}\":|" \
-    -e "s|\"index.wasm\":|\"${engine_base}.wasm\":|" \
+    -e "s|\"index.wasm\":|\"${engine_url}.wasm\":|" \
     "$OUT/$name/$page_name"
 
   # The runner is stable and may be cached. It reads the requested content-
