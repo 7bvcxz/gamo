@@ -200,7 +200,7 @@ func _idle() -> void:
 	var breath: float = 1.0 + sin(animation_time * 2.4) * 0.028
 	character.rotation = _lean * 0.05
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
-	_set_frame(IDLE_SHEET, int(animation_time * IDLE_FPS) % IDLE_FRAMES)
+	_set_frame(IDLE_SHEET, _ping_pong(int(animation_time * IDLE_FPS), IDLE_FRAMES))
 
 func _moving(sprinting: bool) -> void:
 	var rate: float = 13.0 if sprinting else 8.5
@@ -218,6 +218,24 @@ func _moving(sprinting: bool) -> void:
 	var sideways: bool = absf(_walk_input.x) > absf(_walk_input.y)
 	_set_frame(WALK_E_SHEET if sideways else WALK_SHEET, step,
 		TARGET_FOOT - Vector2(0.0, bounce))
+
+## Out and back, rather than round and round.
+##
+## A walk cycle loops: its last frame flows into its first, so playing 0,1,2,3
+## repeatedly is right. An idle does not. The four frames are consecutive footage
+## -- a third of a second out of a slow breath -- so they progress in one
+## direction, and looping them ran the breath forward and then snapped back to
+## the start. The end pose got no time at all before the jump, which is exactly
+## what a person watching it described: the third beat appearing for an instant
+## instead of being held like the others.
+##
+## The endpoints are repeated rather than passed through, so every frame gets the
+## same two slots. A plain ping-pong (0,1,2,3,2,1) would hand the two ends half
+## the time of the middle and swap one uneven rhythm for another.
+static func _ping_pong(step: int, frames: int) -> int:
+	var span: int = frames * 2
+	var position: int = step % span
+	return position if position < frames else span - 1 - position
 
 ## Places the cell so its anchor lands on `target_foot`. Every frame uses the
 ## same rectangle size and the same anchor, so this is one subtraction rather

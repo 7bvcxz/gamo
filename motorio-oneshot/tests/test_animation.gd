@@ -36,6 +36,25 @@ func _run() -> void:
 	_assert(PlayerActor.FOOT_ANCHOR.y < PlayerActor.CELL,
 		"the anchor is inside the cell")
 
+	# The idle plays out and back, and every pose is held the same length.
+	#
+	# Its four frames are consecutive footage rather than a cycle -- a third of a
+	# second out of a slow breath -- so looping them ran the breath forward and
+	# snapped back to the start, and the end pose was gone before it registered.
+	# A person watching it described the rhythm as 111 222 3 222 111, which is
+	# exactly what a sawtooth over a one-way progression sounds like.
+	var order: Array[int] = []
+	for step in 8:
+		order.append(PlayerActor._ping_pong(step, PlayerActor.IDLE_FRAMES))
+	var want: Array[int] = [0, 1, 2, 3, 3, 2, 1, 0]
+	_assert(order == want, "the idle runs out and back, holding both ends")
+
+	var held := {0: 0, 1: 0, 2: 0, 3: 0}
+	for step in 800:
+		held[PlayerActor._ping_pong(step, PlayerActor.IDLE_FRAMES)] += 1
+	for frame in held:
+		_assert(held[frame] == 200, "idle frame %d is held as long as the others" % frame)
+
 	# Half scale, so a 128 cell draws as a 64-pixel figure about one tile tall.
 	# If this drifts the character silently changes size relative to the world.
 	_assert(is_equal_approx(PlayerActor.SPRITE_SCALE, 0.5),
