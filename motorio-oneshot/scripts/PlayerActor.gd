@@ -43,6 +43,11 @@ const TARGET_FOOT := Vector2(0.0, 12.0)
 
 const IDLE_SHEET: Texture2D = preload("res://assets/characters/grim_idle_s.png")
 const WALK_SHEET: Texture2D = preload("res://assets/characters/grim_walk_s.png")
+## Walking sideways is a different drawing, not the front view turned: the legs
+## cross and the satchel swings, which a mirror of the front view cannot show.
+## West is this flipped, because the foot anchor is on the cell's centre line and
+## the reflection is therefore exact.
+const WALK_E_SHEET: Texture2D = preload("res://assets/characters/grim_walk_e.png")
 const IDLE_FRAMES := 4
 const WALK_FRAMES := 8
 ## From spec.json's animations. Walk carries the run as well: Grim has no run
@@ -60,6 +65,9 @@ var warmth := 100.0
 var locked := false
 var animation_time := 0.0
 var _lean := 0.0
+## The movement the current frame is being chosen for, so the drawing routines
+## can ask which way she is going without it being threaded through each call.
+var _walk_input := Vector2.ZERO
 ## Which way she is drawn horizontally. Remembered rather than derived from the
 ## current input, so standing still keeps the direction she was last walking.
 var _face_left := false
@@ -168,6 +176,7 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	# Cold drains the colour out of her the same way it does the world.
 	var chill: float = clampf(1.0 - warmth / 100.0, 0.0, 1.0)
 	character.modulate = Color.WHITE.lerp(Color(0.70, 0.80, 1.0), chill * 0.65)
+	_walk_input = input
 	if collapse > 0.0:
 		_collapsed()
 	elif input.is_zero_approx():
@@ -183,7 +192,12 @@ func _collapsed() -> void:
 	_set_frame(IDLE_SHEET, 0, TARGET_FOOT + Vector2(0.0, fall * 7.0))
 
 func _idle() -> void:
-	var breath: float = 1.0 + sin(animation_time * 3.2) * 0.012
+	# The clip's own breathing was about six pixels at 640, which is under one
+	# pixel once the sheet is 128 and drawn at half scale -- it rounds away, and
+	# the four idle frames differ only in shading. So the rise and fall is done
+	# here, where it can be given an amplitude that survives. Small on purpose:
+	# she is standing still, and anything larger reads as bobbing.
+	var breath: float = 1.0 + sin(animation_time * 2.4) * 0.028
 	character.rotation = _lean * 0.05
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
 	_set_frame(IDLE_SHEET, int(animation_time * IDLE_FPS) % IDLE_FRAMES)
@@ -198,7 +212,12 @@ func _moving(sprinting: bool) -> void:
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
 	var fps: float = RUN_FPS if sprinting else WALK_FPS
 	var step: int = int(animation_time * fps) % WALK_FRAMES
-	_set_frame(WALK_SHEET, step, TARGET_FOOT - Vector2(0.0, bounce))
+	# Sideways when she is mostly going sideways, front otherwise. Comparing the
+	# two components rather than testing for a pure axis keeps a diagonal on the
+	# side view, which is where it reads better.
+	var sideways: bool = absf(_walk_input.x) > absf(_walk_input.y)
+	_set_frame(WALK_E_SHEET if sideways else WALK_SHEET, step,
+		TARGET_FOOT - Vector2(0.0, bounce))
 
 ## Places the cell so its anchor lands on `target_foot`. Every frame uses the
 ## same rectangle size and the same anchor, so this is one subtraction rather

@@ -81,13 +81,27 @@
   "mirrored_from_east": ["w", "nw", "sw"],
 
   "animations": {
-    "idle":  { "frames": 4,  "fps": 6,  "loop": true },
+    "idle":  { "frames": 4,  "fps": 6,  "loop": true, "feet_planted": true },
     "walk":  { "frames": 8,  "fps": 10, "loop": true },
     "run":   { "frames": 8,  "fps": 14, "loop": true },
     "mine":  { "frames": 6,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20 },
     "carry": { "frames": 8,  "fps": 10, "loop": true },
     "sleep": { "frames": 2,  "fps": 2,  "loop": true }
   },
+
+  "_feet_planted_why": [
+    "An idle is defined by the feet not moving. The cycle finder does not know",
+    "that -- it scores how well a window closes and how little it repeats -- so",
+    "on a four second clip of someone standing still it happily picked frames",
+    "where the character shifted her weight, and at six frames a second that",
+    "read as very slow walking. A person watching it said so immediately.",
+    "",
+    "Measured on that clip: across all 48 frames the boots moved 140px, but the",
+    "steadiest eight-frame window moved 4px while the head still rose and fell",
+    "6px. The breathing was there the whole time, in a window the finder had no",
+    "reason to prefer. This flag makes the pipeline pick for planted feet first",
+    "and closure second, for the motions where standing still is the point."
+  ],
 
   "_animation_jump_why": [
     "mine carries its own centroid tolerance because how much a silhouette may",

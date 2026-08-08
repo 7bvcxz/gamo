@@ -24,6 +24,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from PIL import Image
+
 import loopfind
 import sprite_tool
 
@@ -32,6 +34,57 @@ HERE = Path(__file__).resolve().parent
 # 400MB browser used by the frame extractor and by the browser tests, and it has
 # no business in a game repo. The extractor cannot run without it.
 NODE_PATH = os.environ.get("SPRITE_NODE_PATH", "")
+
+
+def planted_window(paths: list, want: int, spec: dict) -> dict:
+    """The stretch of frames where the feet move least.
+
+    For an idle, the feet not moving *is* the animation, and the cycle finder has
+    no way to know that: it scores closure and repetition, both of which a
+    weight-shift satisfies perfectly well. On a clip of Grim standing still it
+    chose frames where she shifted her stance, and at six frames a second that
+    read as very slow walking.
+
+    So this picks on the property that defines the motion instead. Measured on
+    that clip: the boots moved 140px across all 48 frames and 4px inside the
+    steadiest window, while the head still rose and fell 6px in both -- the
+    breathing was never the problem, and it survives the choice.
+
+    Stride 1 always, because an idle has no cycle to span; consecutive frames are
+    what makes the breathing continuous.
+    """
+    threshold = spec["alpha_threshold"]
+    stance = []
+    for path in paths:
+        keyed = sprite_tool.strip_background(Image.open(path).convert("RGBA"), spec)
+        shape = sprite_tool.silhouette(keyed, threshold)
+        if shape["empty"]:
+            stance.append(None)
+            continue
+        left, top, right, bottom = shape["bounds"]
+        # The bottom eighth of the body is boots, and its horizontal extent is
+        # the stance. The full silhouette would be dominated by the coat.
+        band = keyed.crop((0, bottom - max(1, (bottom - top) // 8), keyed.width, bottom))
+        feet = sprite_tool.silhouette(band, threshold)
+        stance.append(None if feet["empty"] else (feet["bounds"][0], feet["bounds"][2]))
+
+    best = None
+    for start in range(len(paths) - want + 1):
+        window = stance[start:start + want]
+        if any(v is None for v in window):
+            continue
+        spread = max(
+            max(v[0] for v in window) - min(v[0] for v in window),
+            max(v[1] for v in window) - min(v[1] for v in window),
+        )
+        if best is None or spread < best[0]:
+            best = (spread, start)
+    if best is None:
+        return {}
+    spread, start = best
+    print(f"   planted: feet move {spread}px across frames {start}-{start + want - 1}")
+    return {"start": start, "stride": 1, "closure": 0.0, "repeat": 0.0,
+            "frames": [str(paths[start + i]) for i in range(want)]}
 
 
 def run(label: str, command: list, **kwargs) -> None:
@@ -77,7 +130,10 @@ def main() -> int:
 
     paths = sorted(dense.glob("*.png"))
     print(f"\n── cycle: {len(paths)} frames in, looking for {want}")
-    best = loopfind.pick([str(p) for p in paths], want, spec)
+    if spec["animations"][args.motion].get("feet_planted"):
+        best = planted_window(paths, want, spec)
+    else:
+        best = loopfind.pick([str(p) for p in paths], want, spec)
     if not best:
         raise SystemExit("PIPELINE: no cycle found -- the clip does not loop")
     print(f"   start {best['start']} stride {best['stride']} "
