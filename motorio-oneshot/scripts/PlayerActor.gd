@@ -48,12 +48,13 @@ const WALK_SHEET: Texture2D = preload("res://assets/characters/grim_walk_s.png")
 ## West is this flipped, because the foot anchor is on the cell's centre line and
 ## the reflection is therefore exact.
 const WALK_E_SHEET: Texture2D = preload("res://assets/characters/grim_walk_e.png")
-const IDLE_FRAMES := 4
-const WALK_FRAMES := 8
-## From spec.json's animations. Walk carries the run as well: Grim has no run
-## sheet yet, so sprinting plays the same cycle faster rather than inventing one.
-const IDLE_FPS := 6.0
-const WALK_FPS := 10.0
+## Eight frames at ten a second, for every motion. The spec settles on one shape
+## rather than a count per motion: what differs between a walk and an idle is
+## what happens inside the cycle, not how many slots it is cut into.
+const FRAMES := 8
+const FPS := 10.0
+## Grim has no run sheet, so sprinting plays the walk faster rather than
+## inventing one.
 const RUN_FPS := 14.0
 
 var velocity := Vector2.ZERO
@@ -200,7 +201,7 @@ func _idle() -> void:
 	var breath: float = 1.0 + sin(animation_time * 2.4) * 0.028
 	character.rotation = _lean * 0.05
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
-	_set_frame(IDLE_SHEET, _ping_pong(int(animation_time * IDLE_FPS), IDLE_FRAMES))
+	_set_frame(IDLE_SHEET, int(animation_time * FPS) % FRAMES)
 
 func _moving(sprinting: bool) -> void:
 	var rate: float = 13.0 if sprinting else 8.5
@@ -210,8 +211,8 @@ func _moving(sprinting: bool) -> void:
 	var bounce: float = absf(sin(phase)) * (3.0 if sprinting else 2.0)
 	character.rotation = sin(phase) * (0.075 if sprinting else 0.055) + _lean * 0.06
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
-	var fps: float = RUN_FPS if sprinting else WALK_FPS
-	var step: int = int(animation_time * fps) % WALK_FRAMES
+	var fps: float = RUN_FPS if sprinting else FPS
+	var step: int = int(animation_time * fps) % FRAMES
 	# Sideways when she is mostly going sideways, front otherwise. Comparing the
 	# two components rather than testing for a pure axis keeps a diagonal on the
 	# side view, which is where it reads better.
@@ -219,24 +220,11 @@ func _moving(sprinting: bool) -> void:
 	_set_frame(WALK_E_SHEET if sideways else WALK_SHEET, step,
 		TARGET_FOOT - Vector2(0.0, bounce))
 
-## Out and back, rather than round and round.
-##
-## A walk cycle loops: its last frame flows into its first, so playing 0,1,2,3
-## repeatedly is right. An idle does not. The four frames are consecutive footage
-## -- a third of a second out of a slow breath -- so they progress in one
-## direction, and looping them ran the breath forward and then snapped back to
-## the start. The end pose got no time at all before the jump, which is exactly
-## what a person watching it described: the third beat appearing for an instant
-## instead of being held like the others.
-##
-## The endpoints are repeated rather than passed through, so every frame gets the
-## same two slots. A plain ping-pong (0,1,2,3,2,1) would hand the two ends half
-## the time of the middle and swap one uneven rhythm for another.
-static func _ping_pong(step: int, frames: int) -> int:
-	var span: int = frames * 2
-	var position: int = step % span
-	return position if position < frames else span - 1 - position
-
+## Playback is a plain loop for every motion, and the ping-pong that used to be
+## here is gone. It existed because the idle's frames were a one-way slice of a
+## breath rather than a cycle, so looping them snapped from the end back to the
+## start. The pipeline now samples every motion across one full period, so the
+## last frame leads into the first on its own and there is nothing left to hide.
 ## Places the cell so its anchor lands on `target_foot`. Every frame uses the
 ## same rectangle size and the same anchor, so this is one subtraction rather
 ## than a per-frame lookup.

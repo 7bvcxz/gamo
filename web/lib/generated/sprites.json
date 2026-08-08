@@ -32,12 +32,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-idle-s-a-e3d5f304fd97.png",
-          "frames": 4,
-          "fps": 6,
+          "sheet": "/sprite-candidates/grim-idle-s-a-aedcc33dbfff.png",
+          "frames": 8,
+          "fps": 10,
           "closure": 0.0,
           "seed": 7777,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 대기(재생성)"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
         }
       ],
       "source_video": "/sprite-candidates/source-3b3d872e9d0a.mp4"
@@ -53,10 +53,10 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-s-a-13a11bd5e55e.png",
+          "sheet": "/sprite-candidates/grim-walk-s-a-bdf44580275d.png",
           "frames": 8,
           "fps": 10,
-          "closure": 0.005,
+          "closure": 0.0,
           "seed": 4242,
           "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
         }
@@ -74,12 +74,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-e-a-2c9d4eefd02c.png",
+          "sheet": "/sprite-candidates/grim-walk-e-a-9930a25f8d42.png",
           "frames": 8,
           "fps": 10,
-          "closure": 0.0132,
+          "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 측면"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
         }
       ],
       "source_video": "/sprite-candidates/source-817b0655836d.mp4",

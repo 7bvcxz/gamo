@@ -80,13 +80,22 @@
   ],
   "mirrored_from_east": ["w", "nw", "sw"],
 
+  "_animations_why": [
+    "Eight frames at ten a second for every motion, deliberately uniform. The",
+    "counts used to differ per motion and bought nothing: a six-frame mine and",
+    "an eight-frame walk still have to be sampled across one full cycle, and the",
+    "sheet layout, the engine's frame arithmetic and the tests all get simpler",
+    "when there is one answer. What differs between motions is what happens",
+    "inside the cycle, not how many slots it is cut into."
+  ],
+
   "animations": {
-    "idle":  { "frames": 4,  "fps": 6,  "loop": true, "feet_planted": true },
+    "idle":  { "frames": 8,  "fps": 10, "loop": true, "feet_planted": true },
     "walk":  { "frames": 8,  "fps": 10, "loop": true },
-    "run":   { "frames": 8,  "fps": 14, "loop": true },
-    "mine":  { "frames": 6,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20 },
+    "run":   { "frames": 8,  "fps": 10, "loop": true },
+    "mine":  { "frames": 8,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20 },
     "carry": { "frames": 8,  "fps": 10, "loop": true },
-    "sleep": { "frames": 2,  "fps": 2,  "loop": true }
+    "sleep": { "frames": 8,  "fps": 10, "loop": true }
   },
 
   "_feet_planted_why": [

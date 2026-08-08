@@ -36,55 +36,119 @@ HERE = Path(__file__).resolve().parent
 NODE_PATH = os.environ.get("SPRITE_NODE_PATH", "")
 
 
-def planted_window(paths: list, want: int, spec: dict) -> dict:
-    """The stretch of frames where the feet move least.
+def cycle_period(signatures: list) -> int:
+    """How many source frames one repetition of the motion takes.
 
-    For an idle, the feet not moving *is* the animation, and the cycle finder has
-    no way to know that: it scores closure and repetition, both of which a
-    weight-shift satisfies perfectly well. On a clip of Grim standing still it
-    chose frames where she shifted her stance, and at six frames a second that
-    read as very slow walking.
+    Found by asking, for each candidate lag, how similar every frame is to the
+    frame that many later. The motion repeats at the lag where that similarity
+    peaks, and for a locked-camera clip of a cycle it peaks sharply.
 
-    So this picks on the property that defines the motion instead. Measured on
-    that clip: the boots moved 140px across all 48 frames and 4px inside the
-    steadiest window, while the head still rose and fell 6px in both -- the
-    breathing was never the problem, and it survives the choice.
-
-    Stride 1 always, because an idle has no cycle to span; consecutive frames are
-    what makes the breathing continuous.
+    This is what the old selection was missing. It took `want` consecutive
+    frames, which on a walk whose cycle runs ten frames meant eight of them --
+    eighty percent of a stride, looped. The last fifth never played, so the arm
+    reached the back of its swing and instantly restarted instead of lingering
+    there. Someone watching it described exactly that, and the autocorrelation
+    says the same thing in numbers: the peak is at ten, and eight was chosen.
     """
-    threshold = spec["alpha_threshold"]
-    stance = []
-    for path in paths:
-        keyed = sprite_tool.strip_background(Image.open(path).convert("RGBA"), spec)
-        shape = sprite_tool.silhouette(keyed, threshold)
-        if shape["empty"]:
-            stance.append(None)
-            continue
-        left, top, right, bottom = shape["bounds"]
-        # The bottom eighth of the body is boots, and its horizontal extent is
-        # the stance. The full silhouette would be dominated by the coat.
-        band = keyed.crop((0, bottom - max(1, (bottom - top) // 8), keyed.width, bottom))
-        feet = sprite_tool.silhouette(band, threshold)
-        stance.append(None if feet["empty"] else (feet["bounds"][0], feet["bounds"][2]))
+    best_lag = 0
+    best_score = None
+    # Below four frames a "cycle" is noise; above a third of the clip there is
+    # not enough overlap left to average honestly.
+    for lag in range(4, max(5, len(signatures) // 3 + 1)):
+        pairs = [loopfind.distance(signatures[i], signatures[i + lag])
+                 for i in range(len(signatures) - lag)]
+        score = sum(pairs) / len(pairs)
+        if best_score is None or score < best_score:
+            best_score, best_lag = score, lag
+    return best_lag
 
-    best = None
-    for start in range(len(paths) - want + 1):
-        window = stance[start:start + want]
-        if any(v is None for v in window):
-            continue
-        spread = max(
-            max(v[0] for v in window) - min(v[0] for v in window),
-            max(v[1] for v in window) - min(v[1] for v in window),
-        )
-        if best is None or spread < best[0]:
-            best = (spread, start)
-    if best is None:
-        return {}
-    spread, start = best
-    print(f"   planted: feet move {spread}px across frames {start}-{start + want - 1}")
-    return {"start": start, "stride": 1, "closure": 0.0, "repeat": 0.0,
-            "frames": [str(paths[start + i]) for i in range(want)]}
+
+def signal_period(series: list) -> int:
+    """The period of a one-dimensional oscillation, by autocorrelation.
+
+    Used for motions where the whole silhouette barely changes and only one
+    measurement carries the rhythm -- an idle, where the head rises and falls
+    with the breath while everything else holds still.
+    """
+    mean = sum(series) / len(series)
+    centred = [v - mean for v in series]
+    best_lag = 0
+    best_score = None
+    for lag in range(4, max(5, len(series) // 2 + 1)):
+        pairs = [centred[i] * centred[i + lag] for i in range(len(series) - lag)]
+        score = sum(pairs) / len(pairs)
+        if best_score is None or score > best_score:
+            best_score, best_lag = score, lag
+    return best_lag
+
+
+def cycle_window(paths: list, want: int, spec: dict, planted: bool) -> dict:
+    """`want` frames spread evenly across exactly one repetition.
+
+    Evenly across the period, not consecutively: the period rarely divides by the
+    frame count -- ten frames into eight -- so the samples land on fractional
+    positions and get rounded. That is correct. Taking consecutive frames instead
+    covers only part of the cycle and drops the rest.
+
+    Because the result is a whole cycle, it loops on its own. An earlier fix
+    played the idle out and back to hide the fact that its frames were a one-way
+    slice; with a full period there is nothing to hide and the playback is a
+    plain loop again for every motion.
+    """
+    signatures = [loopfind.signature(Image.open(p), spec) for p in paths]
+    threshold = spec["alpha_threshold"]
+    keyed = [sprite_tool.strip_background(Image.open(p).convert("RGBA"), spec) for p in paths]
+    shapes = [sprite_tool.silhouette(k, threshold) for k in keyed]
+
+    if planted:
+        # A standing clip has no cycle for the image comparison to find: every
+        # lag looks equally good, so it returns the smallest one it is allowed
+        # and the samples come out duplicated. What repeats in an idle is the
+        # breath, and the breath is visible as the top of the head rising and
+        # falling -- a one-dimensional signal with a clear period where the whole
+        # frame has none.
+        bob = [float(s["bounds"][1]) if not s["empty"] else 0.0 for s in shapes]
+        period = signal_period(bob)
+        print(f"   breathing period {period} frames ({period / 12:.2f}s)")
+    else:
+        period = cycle_period(signatures)
+        print(f"   period {period} frames ({period / 12:.2f}s), sampling {want} across it")
+    def sample(start: int) -> list:
+        return [(start + round(i * period / want)) % len(paths) for i in range(want)]
+
+    starts = range(len(paths))
+    if planted:
+        # An idle is defined by the feet not moving, which the closure score
+        # cannot see: a weight shift closes a loop perfectly well. Pick the start
+        # whose sampled frames keep the boots in one place.
+        stance = []
+        for image, shape in zip(keyed, shapes):
+            if shape["empty"]:
+                stance.append(None)
+                continue
+            left, top, right, bottom = shape["bounds"]
+            band = image.crop((0, bottom - max(1, (bottom - top) // 8), image.width, bottom))
+            feet = sprite_tool.silhouette(band, threshold)
+            stance.append(None if feet["empty"] else (feet["bounds"][0], feet["bounds"][2]))
+
+        def cost(start: int) -> float:
+            window = [stance[i] for i in sample(start)]
+            if any(v is None for v in window):
+                return 1e9
+            return float(max(max(v[0] for v in window) - min(v[0] for v in window),
+                             max(v[1] for v in window) - min(v[1] for v in window)))
+    else:
+        def cost(start: int) -> float:
+            # How well the last sampled frame leads back into the first.
+            window = sample(start)
+            return loopfind.distance(signatures[window[-1]], signatures[window[0]])
+
+    best = min(starts, key=cost)
+    chosen = sample(best)
+    print(f"   start {best}, frames {chosen}, cost {cost(best):.4f}")
+    return {"start": best, "stride": 0, "closure": 0.0, "repeat": 0.0,
+            "frames": [paths[i] if isinstance(paths[i], str) else str(paths[i])
+                       for i in chosen]}
 
 
 def run(label: str, command: list, **kwargs) -> None:
@@ -130,14 +194,10 @@ def main() -> int:
 
     paths = sorted(dense.glob("*.png"))
     print(f"\n── cycle: {len(paths)} frames in, looking for {want}")
-    if spec["animations"][args.motion].get("feet_planted"):
-        best = planted_window(paths, want, spec)
-    else:
-        best = loopfind.pick([str(p) for p in paths], want, spec)
+    best = cycle_window(paths, want, spec,
+                        bool(spec["animations"][args.motion].get("feet_planted")))
     if not best:
         raise SystemExit("PIPELINE: no cycle found -- the clip does not loop")
-    print(f"   start {best['start']} stride {best['stride']} "
-          f"closure {best['closure']:.4f} repeat {best['repeat']:.4f}")
     for index, source in enumerate(best["frames"]):
         shutil.copy(source, cycle / f"f{index:02d}.png")
 
