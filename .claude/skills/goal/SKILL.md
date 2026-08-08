@@ -9,6 +9,20 @@ Argument: a game folder at the repository root, e.g. `/goal gunslinger`.
 
 Everything below is about **one** folder. Do not touch another game's files.
 
+## How far this loop actually reaches
+
+It runs while a turn is running and stops when the turn ends. There is no
+background process; the next cycle happens when the user says something.
+
+Say so, and act accordingly:
+
+- Do as many cycles as you can in one turn. Every stop costs the user a message.
+- When you do stop, say which condition you are on and what is next, so the
+  answer to "is it still going?" is already on the screen.
+- Do not open by describing what is missing. Reporting "PROGRESS.md does not
+  exist" as the first thing reads as nothing having happened; create it and
+  report the first condition instead.
+
 ## 1. Read before doing anything
 
 - `<folder>/GOAL.md` — the target. Its checkboxes are the definition of done.
@@ -47,6 +61,10 @@ it.
 
 ## 4. Verify
 
+Two checks, and the first one alone is never enough.
+
+**The project still loads:**
+
 ```
 godot --headless --path <folder> --quit-after 5
 ```
@@ -55,6 +73,31 @@ Read the **output**, not just the exit code. Godot exits 0 with a broken script,
 so treat any `SCRIPT ERROR`, `ERROR`, or parse failure in the output as a
 failure even when the command "succeeded". Leaked-resource warnings at shutdown
 count too.
+
+**The condition is actually true.** Loading proves the script parses. It does
+not prove the flow cycles, the wait is random, the reaction is measured, or the
+match ends at two wins -- and ticking a box on a clean load is how a goal gets
+declared met without evidence. Write a `tests/test_<thing>.gd` that drives the
+thing and asserts it, run it, and cite it when you tick the box.
+
+Two real bugs in one game came from this and neither was findable by playing:
+a rival that never fired if the player pressed nothing, because that only
+reproduces when you sit still; and a tap counting twice on a phone, which turned
+the next round into an instant foul the player did not cause.
+
+**Anything visual or exported: look at it.** Take a screenshot at the size it
+will be used -- a phone viewport for a touch condition -- and read it. One export
+"succeeded" while the game drew into the top 40% of a phone screen and left the
+rest grey, and the export log said nothing about that. For a web export also
+measure how long it takes to become *playable*, not merely to exist: wait for the
+canvas to contain more than one colour, because engines create their canvas long
+before they can draw into it.
+
+Expect earlier tests to break as conditions accumulate: the foul rule made "an
+early press is ignored" false, best-of-three made "the result always leads to a
+duel" false. That happened four times in nine conditions and none were
+regressions. When one breaks, decide which is stale -- the test or the code --
+and say which in `PROGRESS.md`. Once it was the test that had the game wrong.
 
 On failure: fix and run again. **Three attempts on one condition, then stop
 attempting it** — record under `## 막힌 것`:
