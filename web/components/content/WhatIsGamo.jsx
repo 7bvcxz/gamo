@@ -34,6 +34,13 @@ export function WhatIsGamo() {
             자동화 게임입니다.
           </span>
         </a>
+        <a className="card" href={game('/gunslinger/')}>
+          <b>Gunslinger</b>
+          <span>
+            서부 총잡이 1대1 한방 대결. &ldquo;대기 → 신호 → 순간 반응&rdquo;이 반복
+            플레이할 만큼 재미있는지 한 가지만 확인하려고 만든 프로토타입입니다.
+          </span>
+        </a>
         <a className="card" href={game('/nowhere/')}>
           <b>Nowhere</b>
           <span>

@@ -22,6 +22,13 @@ const GAMES = [
     extra: [{ href: site('/motorio/doc/'), label: '문서' }],
   },
   {
+    name: 'Gunslinger',
+    path: game('/gunslinger/'),
+    blurb:
+      '서부 총잡이 1대1 한방 대결. 2~6초 뒤 신호가 뜨고, 먼저 뽑은 쪽이 이깁니다. 먼저 움직이면 반칙패.',
+    extra: [{ href: site('/gunslinger/doc/'), label: '문서' }],
+  },
+  {
     name: 'Nowhere',
     path: game('/nowhere/'),
     blurb: '방과 방을 오가는 실험용 프로토타입.',

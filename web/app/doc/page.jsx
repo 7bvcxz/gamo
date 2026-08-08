@@ -30,6 +30,7 @@ const NAV = [
     links: [
       { href: site('/motorio-oneshot/doc/'), label: 'Motorio: One Shot →' },
       { href: site('/motorio/doc/'), label: 'Motorio →' },
+      { href: site('/gunslinger/doc/'), label: 'Gunslinger →' },
     ],
   },
   {
