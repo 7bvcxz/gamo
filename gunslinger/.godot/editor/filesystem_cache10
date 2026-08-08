@@ -1,0 +1,17 @@
+78098b89c88a74ebe8c20117b8754620
+::res://::1786154270
+export_presets.cfg::TextFile::-1::1786154270::0::1::::<><><>0<>0<><>::
+GOAL.md::TextFile::-1::1786154230::0::1::::<><><>0<>0<><>::
+PROGRESS.md::TextFile::-1::1786154230::0::1::::<><><>0<>0<><>::
+::res://scenes/::1786117368
+Main.tscn::PackedScene::-1::1786117368::0::1::::<><><>0<>0<><>::res://scripts/Main.gd
+::res://scripts/::1786154276
+Main.gd::GDScript::5401616799579528653::1786154160::0::1::::<>Node2D<><>0<>0<><>::
+::res://tests/::1786154276
+test_difficulty.gd::GDScript::9198767174078835769::1786154056::0::1::::<>SceneTree<><>0<>0<><>::
+test_flow.gd::GDScript::2497133868041215226::1786154209::0::1::::<>SceneTree<><>0<>0<><>::
+test_foul.gd::GDScript::4595612432540851238::1786154209::0::1::::<>SceneTree<><>0<>0<><>::
+test_match.gd::GDScript::3643104436138625227::1786154179::0::1::::<>SceneTree<><>0<>0<><>::
+test_reaction.gd::GDScript::1083264319409980530::1786154209::0::1::::<>SceneTree<><>0<>0<><>::
+test_signal.gd::GDScript::546356290310864862::1786154005::0::1::::<>SceneTree<><>0<>0<><>::
+test_staging.gd::GDScript::763765276227717980::1786154132::0::1::::<>SceneTree<><>0<>0<><>::

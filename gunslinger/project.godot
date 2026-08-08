@@ -1,0 +1,51 @@
+; Gunslinger — 서부 총잡이 한방 대결 POC
+;
+; 목적은 "대기 → 신호 → 순간 반응"이 재미있는지 하나를 확인하는 것이다.
+; 아트는 도형과 색만 쓰고, 화면 문자열은 영문으로 둔다 — 이 저장소는 Godot 기본
+; 폰트가 한글을 그리지 못해 UI가 깨진 적이 있고, 서부극에 영문은 어차피 어울린다.
+
+config_version=5
+
+[application]
+
+config/name="Gunslinger"
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.1.0"
+
+[display]
+
+; keep, not expand. The duel is a fixed horizontal composition -- two figures
+; facing each other across a 960x540 frame -- and with "expand" a tall phone got
+; a viewport far taller than the drawing, so the game filled the top 40% of the
+; screen and left the rest empty grey. "keep" letterboxes instead, and the bars
+; are painted the same colour as the sky so they read as more sky rather than as
+; a broken screen.
+
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[input_devices]
+
+; Off, and this one matters here more than in most games. With emulation on, a
+; single tap arrives as a touch *and* as a synthetic mouse click, so one press
+; would advance twice -- on the result screen that means the next round starts
+; and is instantly fouled by the second event. The player would see themselves
+; drawing early without having touched anything.
+pointing/emulate_mouse_from_touch=false
+
+[input]
+
+draw={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":32,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.169, 0.106, 0.180, 1)
+textures/canvas_textures/default_texture_filter=0
