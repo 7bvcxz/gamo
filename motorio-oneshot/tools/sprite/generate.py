@@ -48,8 +48,13 @@ USER_AGENT = "gamo-sprite-pipeline/1.0 (+https://github.com/7bvcxz/gamo)"
 # not a shot, and these are the differences between the two.
 STAGING = (
     "The camera is completely locked: no panning, no zooming, no dolly, no shake. "
+    # "walking on the spot" was in here, applied to every motion, which meant the
+    # idle prompt said do not walk and then this said walk on the spot. The model
+    # obeyed the last instruction and produced four seconds of stepping. Shared
+    # staging has to be neutral about what the motion is; it only says the
+    # character does not leave the frame.
     "The character stays exactly the same size in frame for the whole clip and "
-    "stays centred, walking on the spot rather than travelling. "
+    "stays centred, staying in one spot rather than travelling across the frame. "
     "Full body always visible including both feet, feet never cropped. "
     "Flat solid chroma green background, one uniform colour, no gradient, no "
     "shadow on the ground, no scenery, no props, no other characters. "
@@ -67,7 +72,28 @@ MOTION_PROMPTS = {
     # extremes, and asking for a specific number of repetitions is what makes
     # the period short enough that a cycle fits inside the clip.
     "mine": "The character from image 1 mines with a pickaxe: raises it high above the head with both hands, then swings it down hard to strike the ground in front of the feet, then lifts it back overhead, repeating this complete swing three times at a steady rhythm. The swing is large and obvious, the pickaxe travelling all the way from above the head to the ground and back on every repetition. Facing the viewer, feet planted, the body staying in place.",
-    "idle": "The character from image 1 stands still and breathes, facing the viewer, only a small idle sway.",
+    # Spelled out as an absence, because the short version did not work. "Stands
+    # still and breathes ... only a small idle sway" produced four seconds of
+    # walking on the spot: the boots stepped, the gap between them opened and
+    # closed, and the coat hem swung. Every frame of it was a walk pose, so no
+    # choice of frames could make an idle out of it -- the best window was just a
+    # walk held still, which is what a person watching it said.
+    #
+    # What a model will not infer is that the motion it should produce is nearly
+    # none. So the things that must not happen are listed, the one thing that
+    # should is bounded as a percentage, and the number of breaths is given for
+    # the same reason the mining prompt gives a number of swings: it fixes how
+    # much can happen inside four seconds.
+    "idle": (
+        "The character from image 1 stands completely still and does NOT walk. "
+        "Both feet stay flat on the ground in exactly the same spot for the whole "
+        "clip -- they never lift, never step, never slide apart or together. No "
+        "weight shifting from one leg to the other, no swaying side to side, no "
+        "turning, no leaning. The arms hang still. The ONLY movement is quiet "
+        "breathing: the chest and shoulders rise and fall by about two percent of "
+        "the body height, roughly three slow breaths across the clip, and the hair "
+        "settles very slightly with it. Facing the viewer, a calm standing pose."
+    ),
 }
 
 

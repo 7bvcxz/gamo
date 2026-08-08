@@ -32,15 +32,15 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-idle-s-a-9fd0404d95e5.png",
+          "sheet": "/sprite-candidates/grim-idle-s-a-e3d5f304fd97.png",
           "frames": 4,
           "fps": 6,
           "closure": 0.0,
-          "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "seed": 7777,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 대기(재생성)"
         }
       ],
-      "source_video": "/sprite-candidates/source-5d25552dedad.mp4"
+      "source_video": "/sprite-candidates/source-3b3d872e9d0a.mp4"
     },
     {
       "id": "grim-walk-s",
