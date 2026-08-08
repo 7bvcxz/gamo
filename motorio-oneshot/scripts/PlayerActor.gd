@@ -48,13 +48,22 @@ const WALK_SHEET: Texture2D = preload("res://assets/characters/grim_walk_s.png")
 ## West is this flipped, because the foot anchor is on the cell's centre line and
 ## the reflection is therefore exact.
 const WALK_E_SHEET: Texture2D = preload("res://assets/characters/grim_walk_e.png")
+const RUN_SHEET: Texture2D = preload("res://assets/characters/grim_run_s.png")
 ## Eight frames at ten a second, for every motion. The spec settles on one shape
 ## rather than a count per motion: what differs between a walk and an idle is
 ## what happens inside the cycle, not how many slots it is cut into.
 const FRAMES := 8
 const FPS := 10.0
-## Grim has no run sheet, so sprinting plays the walk faster rather than
-## inventing one.
+## The run plays faster than everything else, and the number is not a taste
+## decision. Its source cycle is seven frames of twelve-per-second footage, so a
+## stride takes 0.58s; eight frames at ten a second would stretch that to 0.80s
+## and the run would arrive slower than it was generated. Fourteen puts it back
+## at 0.57s. The walk needs no such correction -- its cycle is 0.83s and eight
+## frames at ten is 0.80s, which is the same stride.
+##
+## Sideways sprinting still uses the side walk sped up: there is no side run
+## sheet, and the front run turned sideways would be wrong in a way a faster
+## walk is not.
 const RUN_FPS := 14.0
 
 var velocity := Vector2.ZERO
@@ -65,7 +74,6 @@ var facing8: int = Defs.DIR_S
 var warmth := 100.0
 var locked := false
 var animation_time := 0.0
-var _lean := 0.0
 ## The movement the current frame is being chosen for, so the drawing routines
 ## can ask which way she is going without it being threaded through each call.
 var _walk_input := Vector2.ZERO
@@ -164,7 +172,6 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	# The generated sheet is a single front-facing view, so heading is expressed
 	# by mirroring and by a lean rather than by a different drawing.
 	var view: Dictionary = Defs.facing_view(facing8)
-	var lean: float = float(view["lean"])
 	# Her sheet is a single right-facing drawing, so west is a mirror. The flip in
 	# Defs.facing_view belongs to the cat sheet, which really does have a left
 	# frame, and following it snapped her back to facing right the moment she
@@ -173,7 +180,6 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	if absf(input.x) > 0.15:
 		_face_left = input.x < 0.0
 	character.flip_h = _face_left
-	_lean = lerpf(_lean, lean, minf(1.0, delta * 9.0))
 	# Cold drains the colour out of her the same way it does the world.
 	var chill: float = clampf(1.0 - warmth / 100.0, 0.0, 1.0)
 	character.modulate = Color.WHITE.lerp(Color(0.70, 0.80, 1.0), chill * 0.65)
@@ -199,17 +205,27 @@ func _idle() -> void:
 	# here, where it can be given an amplitude that survives. Small on purpose:
 	# she is standing still, and anything larger reads as bobbing.
 	var breath: float = 1.0 + sin(animation_time * 2.4) * 0.028
-	character.rotation = _lean * 0.05
+	# Upright. The lean was a tilt for the diagonal facings, which mattered when
+	# one drawing had to stand in for eight directions; standing still now means
+	# standing still.
+	character.rotation = 0.0
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
 	_set_frame(IDLE_SHEET, int(animation_time * FPS) % FRAMES)
 
 func _moving(sprinting: bool) -> void:
+	# No rotation while moving, and that is a removal rather than an oversight.
+	# The body used to rock left and right in time with the stride, which was
+	# added when the walk was four discontinuous drawings that did not move on
+	# their own. The sheet now contains a real cycle with the lean already in it,
+	# so rocking it again put two swings on top of each other and read as a
+	# wobble.
 	var rate: float = 13.0 if sprinting else 8.5
 	var phase: float = animation_time * rate
 	var stretch: float = sin(phase) * (0.045 if sprinting else 0.035)
 	var squash: float = -stretch * 0.45
+	# Kept: this is vertical, the footfall, and it does not fight the drawing.
 	var bounce: float = absf(sin(phase)) * (3.0 if sprinting else 2.0)
-	character.rotation = sin(phase) * (0.075 if sprinting else 0.055) + _lean * 0.06
+	character.rotation = 0.0
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
 	var fps: float = RUN_FPS if sprinting else FPS
 	var step: int = int(animation_time * fps) % FRAMES
@@ -217,8 +233,8 @@ func _moving(sprinting: bool) -> void:
 	# two components rather than testing for a pure axis keeps a diagonal on the
 	# side view, which is where it reads better.
 	var sideways: bool = absf(_walk_input.x) > absf(_walk_input.y)
-	_set_frame(WALK_E_SHEET if sideways else WALK_SHEET, step,
-		TARGET_FOOT - Vector2(0.0, bounce))
+	var sheet: Texture2D = WALK_E_SHEET if sideways else (RUN_SHEET if sprinting else WALK_SHEET)
+	_set_frame(sheet, step, TARGET_FOOT - Vector2(0.0, bounce))
 
 ## Playback is a plain loop for every motion, and the ping-pong that used to be
 ## here is gone. It existed because the idle's frames were a one-way slice of a

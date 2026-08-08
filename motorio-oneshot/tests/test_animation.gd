@@ -21,6 +21,7 @@ func _run() -> void:
 		[PlayerActor.IDLE_SHEET, PlayerActor.FRAMES, "idle"],
 		[PlayerActor.WALK_SHEET, PlayerActor.FRAMES, "walk"],
 		[PlayerActor.WALK_E_SHEET, PlayerActor.FRAMES, "walk east"],
+		[PlayerActor.RUN_SHEET, PlayerActor.FRAMES, "run"],
 	]:
 		var texture: Texture2D = sheet_info[0]
 		var frames: int = sheet_info[1]
@@ -40,6 +41,11 @@ func _run() -> void:
 	# Every motion is the same shape now, and the sheets have to agree with it.
 	_assert(PlayerActor.FRAMES == 8, "eight frames")
 	_assert(is_equal_approx(PlayerActor.FPS, 10.0), "ten a second")
+	# The run is faster on purpose: its source stride is 0.58s and eight frames at
+	# ten would stretch it to 0.80s, arriving slower than it was generated.
+	_assert(PlayerActor.RUN_FPS > PlayerActor.FPS, "the run plays faster than the walk")
+	var stride: float = PlayerActor.FRAMES / PlayerActor.RUN_FPS
+	_assert(stride > 0.5 and stride < 0.65, "a run stride lands near its source 0.58s (%.2f)" % stride)
 
 	# Half scale, so a 128 cell draws as a 64-pixel figure about one tile tall.
 	# If this drifts the character silently changes size relative to the world.
@@ -68,6 +74,22 @@ func _run() -> void:
 	await process_frame
 	await process_frame
 	var actor: PlayerActor = main.player
+
+	# No rocking, standing or moving. The body used to tilt left and right in time
+	# with the stride -- added when the walk was four drawings that did not move on
+	# their own -- and the sheet carries that lean itself now, so doing it again
+	# reads as a wobble. Driven rather than read off a constant, because the
+	# rotation is assigned in three places and any of them could put it back.
+	actor.animation_time = 0.4
+	actor._idle()
+	_assert(is_zero_approx(actor.character.rotation), "standing still does not tilt")
+	for t: float in [0.0, 0.12, 0.31, 0.55, 0.78]:
+		actor.animation_time = t
+		actor._moving(false)
+		_assert(is_zero_approx(actor.character.rotation), "walking does not rock at t=%.2f" % t)
+		actor._moving(true)
+		_assert(is_zero_approx(actor.character.rotation), "running does not rock at t=%.2f" % t)
+
 
 	actor._animate(0.1, Vector2.LEFT, false)
 	_assert(actor.character.flip_h, "walking left mirrors her")
