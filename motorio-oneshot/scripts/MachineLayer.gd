@@ -25,17 +25,6 @@ var shelter_glow: float = 0.0
 ## How many are inside, player included. Decides how many shadows go on the wall.
 var shelter_sleepers: int = 1
 
-## Debug: a generated sprite candidate played beside the player at 1:1.
-##
-## The pipeline can prove a sequence is aligned, palette-locked and continuous,
-## and none of that answers whether it reads as a walk at sixty-four pixels on
-## this ground. That question needs the game, at the real size, next to the
-## character it would replace -- a preview page on a white background cannot
-## settle it. Off unless F4 is pressed, and it touches nothing else.
-const CANDIDATE_SHEET: Texture2D = preload("res://assets/characters/walk_s_candidate.png")
-const CANDIDATE_FRAMES := 8
-const CANDIDATE_FPS := 10.0
-var candidate_at := Vector2(9999, 9999)
 var preview_affordable := true
 var show_preview := true
 var preview_occupied := false
@@ -86,7 +75,6 @@ func _draw() -> void:
 	_draw_boxes(tile)
 	_draw_ground()
 	_draw_hand_progress()
-	_draw_candidate()
 	_draw_meter_marker(tile)
 	_draw_focus_readout()
 	_draw_cats()
@@ -208,29 +196,6 @@ func _cat_hidden(cat: Sim.Cat) -> bool:
 	return cat == sim.carried_cat or cat.state == Defs.CAT_ASLEEP \
 		or not view_rect.grow(64.0).has_point(cat.pos)
 
-## The candidate sprite, drawn at 1:1 beside the player.
-##
-## No scaling at all: the sheet is authored at the size the game draws it, which
-## is the entire point of the 64-pixel spec, and any zoom here would be
-## measuring something else. The cell is placed by its foot anchor so it stands
-## on the same ground line as the character it is being compared against.
-func _draw_candidate() -> void:
-	if candidate_at.x > 9000.0:
-		return
-	var cell := 64.0
-	var frame: int = int(pulse * CANDIDATE_FPS) % CANDIDATE_FRAMES
-	# The anchor from spec.json: where the sprite's feet are inside its cell.
-	var anchor := Vector2(32.0, 52.0)
-	var at: Vector2 = candidate_at - anchor
-	draw_texture_rect_region(CANDIDATE_SHEET, Rect2(at, Vector2(cell, cell)),
-		Rect2(Vector2(float(frame) * cell, 0.0), Vector2(cell, cell)))
-	var font := UIFont.FONT
-	draw_string(font, candidate_at + Vector2(-30, 14), "생성 후보", HORIZONTAL_ALIGNMENT_CENTER,
-		60.0, 8, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85))
-
-## A bracket around the machine the panel is reporting on. Corners rather than a
-## full box, so it reads as a measuring frame and never hides the machine's own
-## border colour -- which is how the player identifies the machine type.
 func _draw_meter_marker(tile: float) -> void:
 	if meter_cell == Vector2i(9999, 9999):
 		return

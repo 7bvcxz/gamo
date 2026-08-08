@@ -1,9 +1,11 @@
 extends SceneTree
 
 ## The reported bug was the character "teleporting" slightly between animation
-## frames. The sheet's drawings sit at different offsets inside their cells, so
-## any fixed slicing shifts them. This proves every frame's foot lands on the
-## same spot, which is the property the player actually sees.
+## frames, and the fix was to stop hand-measuring a sheet that was never in
+## register. Grim's sheets come out of tools/sprite normalised -- uniform cells,
+## one anchor -- so what is checked here changed with them: not twelve
+## measurements agreeing, but that the sheets really are uniform and the one
+## anchor really is where the pipeline promised.
 
 var failures := 0
 
@@ -13,42 +15,44 @@ func _initialize() -> void:
 func _run() -> void:
 	var scale := Vector2(PlayerActor.SPRITE_SCALE, PlayerActor.SPRITE_SCALE)
 
-	_assert(PlayerActor.FRAME_REGIONS.size() == 12, "every sheet frame has a measured region")
-	_assert(PlayerActor.FRAME_FOOT.size() == 12, "every sheet frame has a measured foot anchor")
+	# The sheets are exactly as wide as their frame count says. A sheet and a
+	# count that disagree show a sliver of the next frame, or clip the last one.
+	for sheet_info: Array in [
+		[PlayerActor.IDLE_SHEET, PlayerActor.IDLE_FRAMES, "idle"],
+		[PlayerActor.WALK_SHEET, PlayerActor.WALK_FRAMES, "walk"],
+	]:
+		var texture: Texture2D = sheet_info[0]
+		var frames: int = sheet_info[1]
+		var label: String = sheet_info[2]
+		_assert(texture.get_height() == int(PlayerActor.CELL),
+			"%s sheet is one cell tall" % label)
+		_assert(texture.get_width() == frames * int(PlayerActor.CELL),
+			"%s sheet is %d cells wide" % [label, frames])
 
-	# No region may overlap another, or a frame would show part of its neighbour.
-	for a in 12:
-		var ra: Rect2 = PlayerActor.FRAME_REGIONS[a]
-		_assert(ra.size.x > 0.0 and ra.size.y > 0.0, "frame %d has a real region" % a)
-		var foot: Vector2 = PlayerActor.FRAME_FOOT[a]
-		_assert(foot.x >= 0.0 and foot.x <= ra.size.x, "frame %d foot sits inside its region" % a)
-		_assert(foot.y >= 0.0 and foot.y <= ra.size.y, "frame %d foot is on its own drawing" % a)
-		for b in range(a + 1, 12):
-			var rb: Rect2 = PlayerActor.FRAME_REGIONS[b]
-			_assert(not ra.intersects(rb), "frames %d and %d do not share pixels" % [a, b])
+	# The anchor is inside the cell and below its middle, which is what makes it
+	# a foot rather than a centre.
+	_assert(PlayerActor.FOOT_ANCHOR.y > PlayerActor.CELL * 0.5,
+		"the anchor is in the lower half of the cell")
+	_assert(PlayerActor.FOOT_ANCHOR.y < PlayerActor.CELL,
+		"the anchor is inside the cell")
 
-	# Vertical consistency: the drawn bottom edge must sit at the same height for
-	# every frame, or the character bobs when the pose changes.
-	for row in 3:
-		var bottoms: Array[float] = []
-		for column in 4:
-			var index: int = row * 4 + column
-			var region: Rect2 = PlayerActor.FRAME_REGIONS[index]
-			var offset: Vector2 = PlayerActor.foot_offset(index, scale, 0.0, false)
-			var placed_y: float = PlayerActor.TARGET_FOOT.y - offset.y
-			bottoms.append(placed_y + region.size.y * 0.5 * scale.y)
-		for column in range(1, 4):
-			_assert(absf(bottoms[column] - bottoms[0]) < 2.0,
-				"row %d frame %d keeps the same ground line" % [row, column])
+	# Half scale, so a 128 cell draws as a 64-pixel figure about one tile tall.
+	# If this drifts the character silently changes size relative to the world.
+	_assert(is_equal_approx(PlayerActor.SPRITE_SCALE, 0.5),
+		"the sheet is drawn at half scale")
 
-	# Horizontal anchoring is by drawing centre, so no frame may introduce any
-	# sideways offset at all. The previous cell-grid slicing spread the idle row
-	# by 16.5px on screen, which is the teleport the player reported.
-	for index in 12:
-		var offset: Vector2 = PlayerActor.foot_offset(index, scale, 0.0, false)
-		_assert(is_zero_approx(offset.x), "frame %d introduces no horizontal shift" % index)
-		var mirrored: Vector2 = PlayerActor.foot_offset(index, scale, 0.0, true)
-		_assert(mirrored.is_equal_approx(offset), "frame %d anchors identically when mirrored" % index)
+	# The anchor no longer depends on the frame at all, which is the point of
+	# normalising the sheets: every cell is the same size and puts the feet in the
+	# same place, so there is one offset rather than twelve measurements. The old
+	# per-frame table existed to paper over a sheet whose drawings sat at
+	# different offsets, and it spread the idle row 16.5px across the screen.
+	var offset: Vector2 = PlayerActor.foot_offset(scale, 0.0)
+	_assert(is_zero_approx(offset.x), "the anchor introduces no horizontal shift")
+	_assert(offset.y > 0.0, "the anchor sits below the cell centre")
+	# Mirroring is exact because the anchor is on the cell's centre line; nothing
+	# has to be compensated when she turns.
+	_assert(is_zero_approx(PlayerActor.FOOT_ANCHOR.x - PlayerActor.CELL * 0.5),
+		"the anchor is on the cell centre line, so a flip is exact")
 
 	# --- Which way she is drawn --------------------------------------------------
 	# Standing still used to snap her back to facing right, because the flip came

@@ -13,25 +13,43 @@ const SPRINT := 1.7
 const ACCEL := 1500.0
 const FRICTION := 1900.0
 
-const SPRITE_SCALE := 0.105
+## The character is Grim, and her sheets come out of tools/sprite already
+## normalised: uniform 128-pixel cells, one shared scale across a sequence, and
+## the foot placed on the same anchor in every frame.
+##
+## That replaced twelve hand-measured rectangles and twelve hand-measured foot
+## positions. The old sheet was a set of drawings that happened to share a file:
+## each sat at a different offset inside its cell, one crossed the cell boundary
+## entirely, and slicing it by hframes/vframes teleported the character between
+## frames. All of that arithmetic existed to compensate for a sheet that was
+## never in register. This one is, so there is nothing left to compensate for.
+const CELL := 128.0
+## Where the feet are inside a cell, from tools/sprite/spec.json. The pipeline
+## guarantees it, and the validator fails a sequence that does not honour it.
+const FOOT_ANCHOR := Vector2(64.0, 104.0)
+
+## Half, so a 128-pixel cell draws as a 64-pixel figure whose body spans about
+## 32 logical pixels -- one tile, and the size the previous character was drawn
+## at. The cell does not decide how big she is in the world; this does.
+##
+## Half is also the number that makes a 1920x1080 window land one texel on one
+## screen pixel, since the viewport is 960x540. That is the whole reason the
+## sheets are 128 rather than 64.
+const SPRITE_SCALE := 0.5
+
+## Where her feet sit relative to the actor's origin. The actor's position is the
+## point the simulation moves; this is how far below it the drawing stands.
 const TARGET_FOOT := Vector2(0.0, 12.0)
 
-## The sheet is NOT a clean 4x3 grid. Measured from the image: each row's four
-## drawings sit at different offsets inside their cells (drifting ~50px left per
-## column) and the fourth drawing crosses the cell boundary entirely. Slicing by
-## hframes/vframes therefore shifted the character between frames -- the visible
-## "teleport" -- and clipped the last pose. These are the real pixel bounds of
-## each drawing, and the foot anchor measured inside each one.
-const FRAME_REGIONS: Array[Rect2] = [
-	Rect2(155, 42, 187, 297), Rect2(462, 42, 187, 297), Rect2(760, 35, 214, 304), Rect2(1062, 40, 207, 299),
-	Rect2(154, 381, 190, 302), Rect2(462, 381, 191, 302), Rect2(766, 382, 193, 300), Rect2(1078, 382, 191, 301),
-	Rect2(147, 728, 206, 297), Rect2(457, 729, 211, 284), Rect2(767, 727, 211, 301), Rect2(1084, 732, 211, 298),
-]
-const FRAME_FOOT: Array[Vector2] = [
-	Vector2(81.9, 296), Vector2(80.9, 296), Vector2(90.7, 303), Vector2(95.8, 298),
-	Vector2(117.8, 301), Vector2(121.3, 301), Vector2(129.9, 299), Vector2(126.9, 300),
-	Vector2(115.2, 296), Vector2(152.4, 283), Vector2(142.6, 300), Vector2(139.4, 297),
-]
+const IDLE_SHEET: Texture2D = preload("res://assets/characters/grim_idle_s.png")
+const WALK_SHEET: Texture2D = preload("res://assets/characters/grim_walk_s.png")
+const IDLE_FRAMES := 4
+const WALK_FRAMES := 8
+## From spec.json's animations. Walk carries the run as well: Grim has no run
+## sheet yet, so sprinting plays the same cycle faster rather than inventing one.
+const IDLE_FPS := 6.0
+const WALK_FPS := 10.0
+const RUN_FPS := 14.0
 
 var velocity := Vector2.ZERO
 var facing := Vector2i.RIGHT
@@ -162,15 +180,13 @@ func _collapsed() -> void:
 	var fall: float = clampf(collapse, 0.0, 1.0)
 	character.rotation = fall * (PI * 0.42) * (-1.0 if character.flip_h else 1.0)
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * lerpf(1.0, 0.86, fall))
-	_set_frame(0, TARGET_FOOT + Vector2(0.0, fall * 7.0))
+	_set_frame(IDLE_SHEET, 0, TARGET_FOOT + Vector2(0.0, fall * 7.0))
 
 func _idle() -> void:
 	var breath: float = 1.0 + sin(animation_time * 3.2) * 0.012
 	character.rotation = _lean * 0.05
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
-	# The idle row's four frames share a silhouette, so they can actually cycle;
-	# only the action rows had the discontinuity that forced a single pose.
-	_set_frame(int(animation_time * 2.2) % 4)
+	_set_frame(IDLE_SHEET, int(animation_time * IDLE_FPS) % IDLE_FRAMES)
 
 func _moving(sprinting: bool) -> void:
 	var rate: float = 13.0 if sprinting else 8.5
@@ -180,28 +196,27 @@ func _moving(sprinting: bool) -> void:
 	var bounce: float = absf(sin(phase)) * (3.0 if sprinting else 2.0)
 	character.rotation = sin(phase) * (0.075 if sprinting else 0.055) + _lean * 0.06
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
-	# Walk and run now cycle their four drawn frames instead of holding one. The
-	# foot anchor per frame is what keeps the character from sliding sideways.
-	var row: int = 8 if sprinting else 4
-	var step: int = int(animation_time * (9.0 if sprinting else 6.5)) % 4
-	_set_frame(row + step, TARGET_FOOT - Vector2(0.0, bounce))
+	var fps: float = RUN_FPS if sprinting else WALK_FPS
+	var step: int = int(animation_time * fps) % WALK_FRAMES
+	_set_frame(WALK_SHEET, step, TARGET_FOOT - Vector2(0.0, bounce))
 
-## Places the drawing so its measured foot lands exactly on `target_foot`,
-## whatever the frame's own size and offset are. This is what removes the jitter.
-func _set_frame(frame_index: int, target_foot: Vector2 = TARGET_FOOT) -> void:
-	var region: Rect2 = FRAME_REGIONS[frame_index]
+## Places the cell so its anchor lands on `target_foot`. Every frame uses the
+## same rectangle size and the same anchor, so this is one subtraction rather
+## than a per-frame lookup.
+func _set_frame(sheet: Texture2D, frame_index: int, target_foot: Vector2 = TARGET_FOOT) -> void:
+	character.texture = sheet
 	character.region_enabled = true
-	character.region_rect = region
-	character.position = target_foot - foot_offset(frame_index, character.scale, character.rotation, character.flip_h)
+	character.region_rect = Rect2(frame_index * CELL, 0.0, CELL, CELL)
+	character.position = target_foot - foot_offset(character.scale, character.rotation)
 
-## Offset from the sprite's own origin to its anchor, in parent space.
-## Horizontally the anchor is the drawing's centre, not its feet: in a run cycle
-## the feet legitimately swing about 3.6px, and anchoring to them makes the torso
-## wobble instead. Vertically the anchor is the measured foot, which is what
-## keeps every pose standing on the same ground line.
-static func foot_offset(frame_index: int, scale: Vector2, rotation: float, _flipped: bool) -> Vector2:
-	var region: Rect2 = FRAME_REGIONS[frame_index]
-	var delta := Vector2(0.0, FRAME_FOOT[frame_index].y - region.size.y * 0.5)
+## Offset from the sprite's centre to the foot anchor, in parent space.
+##
+## Horizontally there is nothing to correct: the anchor sits on the cell's
+## vertical centre line, which is also what makes mirroring west from east exact.
+## Vertically it is the distance from the middle of the cell down to the anchor.
+## No frame index, because every frame answers the same.
+static func foot_offset(scale: Vector2, rotation: float) -> Vector2:
+	var delta := Vector2(0.0, FOOT_ANCHOR.y - CELL * 0.5)
 	return (delta * scale).rotated(rotation)
 
 func facing_cell() -> Vector2i:

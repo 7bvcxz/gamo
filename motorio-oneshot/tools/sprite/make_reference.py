@@ -32,11 +32,32 @@ def is_background(pixel: tuple) -> bool:
     return all(channel >= 255 - TOLERANCE for channel in pixel[:3])
 
 
+def from_alpha(image: Image.Image) -> Image.Image:
+    """Composite a cut-out drawing onto the chroma green.
+
+    Preferred whenever the source already has real transparency: the artist has
+    already decided what is background, and no keying heuristic can beat that.
+    """
+    flat = Image.new("RGB", image.size, CHROMA)
+    flat.paste(image, (0, 0), image)
+    return flat
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         print(__doc__)
         return 2
-    source = Image.open(sys.argv[1]).convert("RGB")
+    original = Image.open(sys.argv[1])
+
+    # A cut-out says outright which pixels are background, so use that and skip
+    # the guessing entirely.
+    if original.mode in ("RGBA", "LA") and original.getchannel("A").getextrema()[0] < 250:
+        source = from_alpha(original.convert("RGBA"))
+        print("REFERENCE: composited from the source's own alpha")
+        width, height = source.size
+        return finish(source, width, height, sys.argv[2])
+
+    source = original.convert("RGB")
     width, height = source.size
     pixels = source.load()
 
@@ -63,6 +84,11 @@ def main() -> int:
         filled += 1
         queue.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
 
+    print(f"REFERENCE: filled {filled} background pixels by flood fill")
+    return finish(source, width, height, sys.argv[2])
+
+
+def finish(source: Image.Image, width: int, height: int, out_path: str) -> int:
     # Square, so the model is not handed an aspect ratio to reinterpret, and
     # padded rather than cropped so nothing is cut off.
     side = max(width, height)
@@ -70,13 +96,12 @@ def main() -> int:
     out.paste(source, ((side - width) // 2, (side - height) // 2))
     out = out.resize((512, 512), Image.LANCZOS)
 
-    destination = Path(sys.argv[2])
+    destination = Path(out_path)
     destination.parent.mkdir(parents=True, exist_ok=True)
     out.save(destination)
 
     corners = [out.getpixel(p) for p in ((3, 3), (508, 3), (3, 508), (508, 508))]
-    print(f"REFERENCE: {destination} 512x512 RGB")
-    print(f"REFERENCE: filled {filled} background pixels, corners {corners}")
+    print(f"REFERENCE: {destination} 512x512 RGB, corners {corners}")
     if not all(c == CHROMA for c in corners):
         print("REFERENCE: corners are not pure chroma -- the key will fail", file=sys.stderr)
         return 1
