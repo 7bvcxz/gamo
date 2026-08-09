@@ -61,6 +61,12 @@ const RUN_E_SHEET: Texture2D = preload("res://assets/characters/grim_run_e.png")
 ## north while looking south.
 const WALK_N_SHEET: Texture2D = preload("res://assets/characters/grim_walk_n.png")
 const RUN_N_SHEET: Texture2D = preload("res://assets/characters/grim_run_n.png")
+## Swinging a pickaxe. `mining` is already driven by the simulation -- it is the
+## fraction of the way through working a seam by hand -- and until now only fed
+## a progress ring. The character stood there doing nothing while she mined.
+const MINE_SHEET: Texture2D = preload("res://assets/characters/grim_mine_s.png")
+const MINE_E_SHEET: Texture2D = preload("res://assets/characters/grim_mine_e.png")
+const MINE_N_SHEET: Texture2D = preload("res://assets/characters/grim_mine_n.png")
 ## Eight frames at ten a second, for every motion. The spec settles on one shape
 ## rather than a count per motion: what differs between a walk and an idle is
 ## what happens inside the cycle, not how many slots it is cut into.
@@ -195,6 +201,10 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	_walk_input = input
 	if collapse > 0.0:
 		_collapsed()
+	elif mining > 0.0 and input.is_zero_approx():
+		# Only while standing: walking away from a seam stops the work anyway, and
+		# a swing played over a stride would be two animations at once.
+		_mining()
 	elif input.is_zero_approx():
 		_idle()
 	else:
@@ -206,6 +216,22 @@ func _collapsed() -> void:
 	character.rotation = fall * (PI * 0.42) * (-1.0 if character.flip_h else 1.0)
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * lerpf(1.0, 0.86, fall))
 	_set_frame(IDLE_SHEET, 0, TARGET_FOOT + Vector2(0.0, fall * 7.0))
+
+## The swing, facing whichever way she is working. Which direction that is comes
+## from `facing`, not from movement input -- she is standing still, so there is no
+## input to read.
+func _mining() -> void:
+	character.rotation = 0.0
+	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
+	var step: int = int(animation_time * FPS) % FRAMES
+	var sheet: Texture2D
+	if facing.x != 0:
+		sheet = MINE_E_SHEET
+	elif facing.y < 0:
+		sheet = MINE_N_SHEET
+	else:
+		sheet = MINE_SHEET
+	_set_frame(sheet, step)
 
 func _idle() -> void:
 	# The clip's own breathing was about six pixels at 640, which is under one
@@ -222,31 +248,20 @@ func _idle() -> void:
 	_set_frame(IDLE_SHEET, int(animation_time * FPS) % FRAMES)
 
 func _moving(sprinting: bool) -> void:
-	# No rotation while moving, and that is a removal rather than an oversight.
-	# The body used to rock left and right in time with the stride, which was
-	# added when the walk was four discontinuous drawings that did not move on
-	# their own. The sheet now contains a real cycle with the lean already in it,
-	# so rocking it again put two swings on top of each other and read as a
-	# wobble.
-	var rate: float = 13.0 if sprinting else 8.5
-	var phase: float = animation_time * rate
-	var stretch: float = sin(phase) * (0.045 if sprinting else 0.035)
-	var squash: float = -stretch * 0.45
-	# Vertical only -- the footfall -- so it does not fight the drawing the way the
-	# rocking did. The run gets more of it than the walk, and deliberately: what
-	# separates the two is a moment with neither foot down, and the generator
-	# would not produce one. Asked explicitly for it and measured the result, the
-	# body's lowest point moved 4px in a 500px frame, the same as walking. The
-	# knees do lift and the head travels half again as far, so the drawing carries
-	# most of the difference; this supplies the hop the footage is missing.
-	var bounce: float = absf(sin(phase)) * (5.0 if sprinting else 2.0)
+	# Nothing procedural. No rocking, no squash, no hop -- the sheet is played and
+	# that is all.
+	#
+	# All three were added when the walk was four drawings that did not move on
+	# their own, so the engine had to supply the motion. Every one of them has
+	# since been caught fighting the artwork: the rocking put a second swing on
+	# top of the drawn lean, and the vertical hop bounced a character whose feet
+	# the drawing already lifts. Compensation that outlives what it compensated
+	# for is just noise on top of the thing it was hiding.
 	character.rotation = 0.0
-	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
+	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
+
 	var fps: float = RUN_FPS if sprinting else FPS
 	var step: int = int(animation_time * fps) % FRAMES
-	# Sideways when she is mostly going sideways, front otherwise. Comparing the
-	# two components rather than testing for a pure axis keeps a diagonal on the
-	# side view, which is where it reads better.
 	# Ties go sideways, and the tie is not a rare case: a keyboard diagonal is
 	# exactly 0.707 on both axes, so `>` sent every diagonal to the front view
 	# while the comment here claimed otherwise.
@@ -260,7 +275,7 @@ func _moving(sprinting: bool) -> void:
 		sheet = RUN_N_SHEET if sprinting else WALK_N_SHEET
 	else:
 		sheet = RUN_SHEET if sprinting else WALK_SHEET
-	_set_frame(sheet, step, TARGET_FOOT - Vector2(0.0, bounce))
+	_set_frame(sheet, step)
 
 ## Playback is a plain loop for every motion, and the ping-pong that used to be
 ## here is gone. It existed because the idle's frames were a one-way slice of a

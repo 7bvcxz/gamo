@@ -26,5 +26,28 @@ func _init() -> void:
 			print("  FAIL: ", case[3]); failures += 1
 		else:
 			print("  ok  : ", case[3])
+	# Mining, which plays only while standing and reads its direction from
+	# `facing` rather than from movement -- there is no movement to read.
+	actor.set("_walk_input", Vector2.ZERO)
+	actor.mining = 0.5
+	for m in [[Vector2i.RIGHT, PlayerActor.MINE_E_SHEET, "오른쪽 채굴 -> 측면 채굴"],
+			  [Vector2i.LEFT, PlayerActor.MINE_E_SHEET, "왼쪽 채굴 -> 측면 채굴(반전)"],
+			  [Vector2i.UP, PlayerActor.MINE_N_SHEET, "위쪽 채굴 -> 뒷모습 채굴"],
+			  [Vector2i.DOWN, PlayerActor.MINE_SHEET, "아래쪽 채굴 -> 정면 채굴"]]:
+		actor.facing = m[0]
+		actor._mining()
+		if actor.character.texture != m[1]:
+			print("  FAIL: ", m[2]); failures += 1
+		else:
+			print("  ok  : ", m[2])
+
+	# And standing still without a seam is idle, not a swing frozen mid-air.
+	actor.mining = 0.0
+	actor._idle()
+	if actor.character.texture != PlayerActor.IDLE_SHEET:
+		print("  FAIL:  채굴이 끝나면 대기로"); failures += 1
+	else:
+		print("  ok  :  채굴이 끝나면 대기로")
+
 	print("SHEETS: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
 	quit(failures)

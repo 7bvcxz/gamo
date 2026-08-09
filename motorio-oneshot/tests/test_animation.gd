@@ -83,6 +83,23 @@ func _run() -> void:
 	# their own -- and the sheet carries that lean itself now, so doing it again
 	# reads as a wobble. Driven rather than read off a constant, because the
 	# rotation is assigned in three places and any of them could put it back.
+	# Moving plays the sheet and nothing else: no rocking, no squash, no hop. Each
+	# of those was added for a sheet that could not move on its own and each was
+	# later caught fighting the drawing, so the absence is asserted rather than
+	# assumed. Sampled across a cycle because a single instant would pass even if
+	# the motion were still there.
+	var flat := Vector2(PlayerActor.SPRITE_SCALE, PlayerActor.SPRITE_SCALE)
+	actor.set("_walk_input", Vector2(0, 1))
+	for t: float in [0.0, 0.09, 0.17, 0.26, 0.38, 0.51, 0.66]:
+		actor.animation_time = t
+		for sprinting: bool in [false, true]:
+			actor._moving(sprinting)
+			_assert(actor.character.scale.is_equal_approx(flat),
+				"moving does not squash or stretch at t=%.2f" % t)
+			_assert(actor.character.position.is_equal_approx(
+				PlayerActor.TARGET_FOOT - PlayerActor.foot_offset(flat, 0.0)),
+				"moving does not hop at t=%.2f" % t)
+
 	actor.animation_time = 0.4
 	actor._idle()
 	_assert(is_zero_approx(actor.character.rotation), "standing still does not tilt")

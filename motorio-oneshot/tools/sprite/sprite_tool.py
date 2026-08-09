@@ -335,6 +335,11 @@ def validate(frames: list, cell: dict, spec: dict, palette: list,
     if motion:
         fraction = spec["animations"].get(motion, {}).get("max_centroid_jump_body", fraction)
     jump_limit = fraction * body_mid
+    # Area has the same shape of exception: how much of the silhouette may change
+    # between frames is a property of the motion. See _animation_area_why.
+    area_limit = rules["max_area_change_ratio"]
+    if motion:
+        area_limit = spec["animations"].get(motion, {}).get("max_area_change_ratio", area_limit)
     legal = set(palette)
     problems = []
     previous = None
@@ -393,9 +398,10 @@ def validate(frames: list, cell: dict, spec: dict, palette: list,
                     f"of a {body_mid:.0f}px body{', ' + motion if motion else ''}). This is the frames not belonging to "
                     f"one cycle -- the exact failure that shipped twice")
             ratio = abs(shape["area"] - previous["area"]) / max(previous["area"], 1)
-            if ratio > rules["max_area_change_ratio"]:
+            if ratio > area_limit:
                 problems.append(
-                    f"{name}: sprite area changed {ratio:.0%} in one frame "
+                    f"{name}: sprite area changed {ratio:.0%} in one frame (limit "
+                    f"{area_limit:.0%}{', ' + motion if motion else ''}) "
                     f"(limit {rules['max_area_change_ratio']:.0%}) -- the character is "
                     f"changing size, not moving")
         previous = shape

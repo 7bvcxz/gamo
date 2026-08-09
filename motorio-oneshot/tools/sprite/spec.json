@@ -93,7 +93,7 @@
     "idle":  { "frames": 8,  "fps": 10, "loop": true, "feet_planted": true },
     "walk":  { "frames": 8,  "fps": 10, "loop": true },
     "run":   { "frames": 8,  "fps": 10, "loop": true },
-    "mine":  { "frames": 8,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20 },
+    "mine":  { "frames": 8,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20, "max_area_change_ratio": 0.20 },
     "carry": { "frames": 8,  "fps": 10, "loop": true },
     "sleep": { "frames": 8,  "fps": 10, "loop": true }
   },
@@ -110,6 +110,18 @@
     "6px. The breathing was there the whole time, in a window the finder had no",
     "reason to prefer. This flag makes the pipeline pick for planted feet first",
     "and closure second, for the motions where standing still is the point."
+  ],
+
+  "_animation_area_why": [
+    "mine also carries its own area tolerance, for the same reason and with the",
+    "same kind of evidence. A pickaxe entering and leaving the silhouette",
+    "changes how much of it there is, and by an order of magnitude more than a",
+    "stride does. Measured across finished sequences: walking and running change",
+    "area by at most 1% between frames, while the three mining directions change",
+    "by 9%, 9% and 13%. The front view is the largest because the tool swings",
+    "toward and away from the camera there, changing apparent size as well as",
+    "position. 0.20 clears the observed 13% without approaching anything a walk",
+    "could produce."
   ],
 
   "_animation_jump_why": [

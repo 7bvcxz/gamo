@@ -129,6 +129,29 @@ def cycle_window(paths: list, want: int, spec: dict, planted: bool) -> dict:
     def sample(start: int) -> list:
         return [(start + round(i * period / want)) % len(paths) for i in range(want)]
 
+    # Frames carrying pixels detached from the body. Chroma keying leaves specks
+    # -- an eleven-pixel dot above her head in one mining frame -- and the
+    # validator rejects any sequence containing one, correctly. The pipeline
+    # knows that rule, so it should not hand over a window it can already tell
+    # will fail: on the front mining clip 19 of 48 frames had debris and 29 did
+    # not, and the first attempt picked one of the 19.
+    dirty = set()
+    for index, (image, shape) in enumerate(zip(keyed, shapes)):
+        if shape["empty"]:
+            dirty.add(index)
+            continue
+        band = sprite_tool.body_rows(image, threshold)
+        if band is None:
+            dirty.add(index)
+            continue
+        if (band[0] - shape["bounds"][1]) + (shape["bounds"][3] - band[1]) > 0:
+            dirty.add(index)
+    if len(dirty) == len(paths):
+        print("   every frame has keying debris; picking on cost alone")
+        dirty = set()
+    else:
+        print(f"   {len(dirty)}/{len(paths)} frames carry keying debris and are avoided")
+
     starts = range(len(paths))
     if planted:
         # An idle is defined by the feet not moving, which the closure score
@@ -156,7 +179,14 @@ def cycle_window(paths: list, want: int, spec: dict, planted: bool) -> dict:
             window = sample(start)
             return loopfind.distance(signatures[window[-1]], signatures[window[0]])
 
-    best = min(starts, key=cost)
+    # A window containing a frame the validator will reject is not a candidate,
+    # whatever it scores.
+    def penalised(start: int) -> float:
+        return cost(start) + (1e6 if any(i in dirty for i in sample(start)) else 0.0)
+
+    best = min(starts, key=penalised)
+    if any(i in dirty for i in sample(best)):
+        print("   no window avoids the debris; the validator will have the last word")
     chosen = sample(best)
     print(f"   start {best}, frames {chosen}, cost {cost(best):.4f}")
     return {"start": best, "stride": 0, "closure": 0.0, "repeat": 0.0,
@@ -216,8 +246,12 @@ def main() -> int:
 
     run("normalize", [sys.executable, str(HERE / "sprite_tool.py"), "normalize",
                       str(cycle), str(normal), "--cell", args.cell])
+    # --motion matters: a motion may raise its own centroid tolerance, and mining
+    # does because a pickaxe crossing the silhouette moves its centre several
+    # pixels a frame. Without it the validator used the default and rejected a
+    # correct swing, reporting a limit the spec does not set for mining.
     run("validate", [sys.executable, str(HERE / "sprite_tool.py"), "validate",
-                     str(normal), "--cell", args.cell])
+                     str(normal), "--cell", args.cell, "--motion", args.motion])
     run("publish", [sys.executable, str(HERE / "sprite_tool.py"), "publish", str(normal),
                     "--request", args.request, "--candidate", args.candidate,
                     "--motion", args.motion, "--facing", args.facing,
