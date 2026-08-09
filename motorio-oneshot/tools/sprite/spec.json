@@ -94,6 +94,8 @@
     "walk":  { "frames": 8,  "fps": 10, "loop": true },
     "run":   { "frames": 8,  "fps": 10, "loop": true },
     "mine":  { "frames": 8,  "fps": 10, "loop": true, "carries_tool": true, "max_centroid_jump_body": 0.20, "max_area_change_ratio": 0.20 },
+    "eat":   { "frames": 8,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.16 },
+    "work":  { "frames": 8,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.16 },
     "carry": { "frames": 8,  "fps": 10, "loop": true },
     "sleep": { "frames": 8,  "fps": 10, "loop": true }
   },

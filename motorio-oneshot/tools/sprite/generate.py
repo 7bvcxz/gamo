@@ -112,6 +112,41 @@ MOTION_PROMPTS = {
     # should is bounded as a percentage, and the number of breaths is given for
     # the same reason the mining prompt gives a number of swings: it fixes how
     # much can happen inside four seconds.
+    # Eating. Not a single object noun in it, which is the whole difference
+    # between this and the first attempt: that one said "eating from a bowl" and
+    # got a bowl, painted into the frame, overlapping the paws and impossible to
+    # key out. The game draws its own food bin and a sprite carrying a second one
+    # would stand next to it. So the motion is described as the head going down
+    # and coming back up, and nothing is named that could be drawn.
+    #
+    # The count is there for the same reason mining's is: four seconds with no
+    # number comes back as one continuous pose, and a clip with no repeat has no
+    # eight frames to take.
+    "eat": (
+        "The character from image 1 lowers its head all the way down to its own "
+        "front paws, holds it there for a moment while its jaw moves as if "
+        "chewing, then lifts its head back up to chest height -- repeating this "
+        "complete down and up four times at a steady rhythm. The head travels the "
+        "full distance down to the paws and back up on every repetition. Both "
+        "feet stay flat on the ground in exactly the same spot the whole time: it "
+        "does not step, walk, turn or shift its weight. Only the head, neck, jaw "
+        "and tail move."
+    ),
+    # Working. Also object-free, and the negation is gone with the objects: the
+    # first attempt said "no machine, no lever, no crank and no object of any
+    # kind" and came back with a metal rod held in both paws. Naming a thing in
+    # order to forbid it is still naming it. The game draws the miner; the cat
+    # only has to look busy in front of it.
+    "work": (
+        "The character from image 1 raises both front paws to chest height, then "
+        "pushes them forward and down away from its body until the front legs are "
+        "straight, then draws them back up to its chest -- repeating this complete "
+        "push and pull four times at a steady rhythm. The paws travel the full "
+        "distance away from the body and back on every repetition, and the "
+        "shoulders lean into each push. Its paws are empty and open the whole "
+        "time. Both feet stay flat on the ground in exactly the same spot: it does "
+        "not step, walk or turn."
+    ),
     "idle": (
         "The character from image 1 stands completely still and does NOT walk. "
         "Both feet stay flat on the ground in exactly the same spot for the whole "

@@ -339,6 +339,48 @@
         }
       ],
       "source_video": "/sprite-candidates/source-c4be677849fd.mp4"
+    },
+    {
+      "id": "catorg-eat-s",
+      "motion": "eat",
+      "facing": "s",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/catorg-eat-s-a-d7209cf38d9e.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-85092b37f872.mp4"
+    },
+    {
+      "id": "catorg-work-s",
+      "motion": "work",
+      "facing": "s",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/catorg-work-s-a-d3bb4676d3dd.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-c512d89b4d8e.mp4"
     }
   ]
 }

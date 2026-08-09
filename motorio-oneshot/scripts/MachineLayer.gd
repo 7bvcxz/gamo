@@ -12,6 +12,11 @@ const CAT_IDLE_SHEET: Texture2D = preload("res://assets/characters/cat_idle_s.pn
 const CAT_WALK_SHEET: Texture2D = preload("res://assets/characters/cat_walk_s.png")
 const CAT_WALK_E_SHEET: Texture2D = preload("res://assets/characters/cat_walk_e.png")
 const CAT_WALK_N_SHEET: Texture2D = preload("res://assets/characters/cat_walk_n.png")
+## Eating and working, both front-facing only. A cat at the bowl faces it, and a
+## cat at a miner is drawn in front of the machine the game draws itself -- there
+## is no second angle either of them is ever seen from.
+const CAT_EAT_SHEET: Texture2D = preload("res://assets/characters/cat_eat_s.png")
+const CAT_WORK_SHEET: Texture2D = preload("res://assets/characters/cat_work_s.png")
 const CAT_CELL := 128.0
 const CAT_FRAMES := 8
 const CAT_FPS := 10.0
@@ -534,6 +539,12 @@ static func cat_sheet(state: int, heading: Vector2) -> Array:
 	# Standing still gets the idle sheet; anything with somewhere to be walks. A
 	# cat that has arrived and is working should not keep striding on the spot,
 	# and one crossing the map should not glide.
+	# The two sheets that are neither walking nor standing. Both are front-facing
+	# only, so neither reads the heading.
+	if state == Defs.CAT_EATING:
+		return [CAT_EAT_SHEET, false]
+	if state == Defs.CAT_WORKING:
+		return [CAT_WORK_SHEET, false]
 	if state not in Defs.CAT_WALKING_STATES:
 		return [CAT_IDLE_SHEET, false]
 	if absf(heading.x) >= absf(heading.y):
@@ -556,10 +567,10 @@ func _draw_cats() -> void:
 		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02
 		# Eating gets its own motion: a quick repeated dip toward the bowl, so a
 		# feeding cat is obviously busy rather than idle.
+		# No procedural dip any more: the eating sheet does the leaning down, and
+		# adding a bounce underneath it is two motions fighting. Kept as a
+		# parameter because carrying still has nothing of its own.
 		var munch: float = 0.0
-		if cat.state == Defs.CAT_EATING:
-			munch = absf(sin(pulse * 7.0)) * 4.0
-			breathe = 1.0 + sin(pulse * 7.0) * 0.05
 		# Whichever way it last moved, from the one place that moves it. Eating
 		# faces the bowl, which is the one pose that is not about travel.
 		var heading: Vector2 = Vector2.DOWN if cat.state == Defs.CAT_EATING else cat.heading
