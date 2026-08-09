@@ -36,7 +36,7 @@
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 7777,
+          "seed": 4242,
           "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
         }
       ],
@@ -100,8 +100,8 @@
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 3131,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 달리기(재생성)"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
         }
       ],
       "source_video": "/sprite-candidates/source-a20b4852f5ef.mp4"
@@ -121,12 +121,54 @@
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 3131,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 측면 달리기"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
         }
       ],
       "source_video": "/sprite-candidates/source-2f35d24fcdcb.mp4",
       "mirrors": "w"
+    },
+    {
+      "id": "grim-walk-n",
+      "motion": "walk",
+      "facing": "n",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/grim-walk-n-a-18f738ce813f.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-879ae577437f.mp4"
+    },
+    {
+      "id": "grim-run-n",
+      "motion": "run",
+      "facing": "n",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/grim-run-n-a-9b441ba78c3a.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-1fe12789c81c.mp4"
     }
   ]
 }

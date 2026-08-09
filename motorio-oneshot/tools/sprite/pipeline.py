@@ -40,26 +40,39 @@ def cycle_period(signatures: list) -> int:
     """How many source frames one repetition of the motion takes.
 
     Found by asking, for each candidate lag, how similar every frame is to the
-    frame that many later. The motion repeats at the lag where that similarity
-    peaks, and for a locked-camera clip of a cycle it peaks sharply.
+    frame that many later -- and then taking the most *prominent* dip rather than
+    the lowest value. The distinction is the whole function.
 
-    This is what the old selection was missing. It took `want` consecutive
-    frames, which on a walk whose cycle runs ten frames meant eight of them --
-    eighty percent of a stride, looped. The last fifth never played, so the arm
-    reached the back of its swing and instantly restarted instead of lingering
-    there. Someone watching it described exactly that, and the autocorrelation
-    says the same thing in numbers: the peak is at ten, and eight was chosen.
+    On a side walk the true period is an obvious well: lag 10 scores 0.0135 with
+    neighbours at 0.022 and 0.016. On the same walk seen from behind, where the
+    arms are hidden and the silhouette barely changes, the curve slopes gently
+    upward from the shortest lag allowed -- 0.0119 at four, 0.0120 at five --
+    and the real period is a shallow dip at ten. Taking the minimum picked four,
+    which is not a period at all; sampling eight frames across it produced
+    duplicates.
+
+    Prominence is how far a dip sits below the ridges on either side of it, which
+    is small for noise on a slope and large for a genuine repeat.
     """
-    best_lag = 0
-    best_score = None
-    # Below four frames a "cycle" is noise; above a third of the clip there is
-    # not enough overlap left to average honestly.
-    for lag in range(4, max(5, len(signatures) // 3 + 1)):
+    lags = list(range(4, max(6, len(signatures) // 3 + 1)))
+    scores = {}
+    for lag in lags:
         pairs = [loopfind.distance(signatures[i], signatures[i + lag])
                  for i in range(len(signatures) - lag)]
-        score = sum(pairs) / len(pairs)
-        if best_score is None or score < best_score:
-            best_score, best_lag = score, lag
+        scores[lag] = sum(pairs) / len(pairs)
+
+    best_lag = lags[0]
+    best_prominence = -1.0
+    for index in range(1, len(lags) - 1):
+        lag = lags[index]
+        if scores[lag] > scores[lag - 1] or scores[lag] > scores[lag + 1]:
+            continue
+        # The ridge each way: how far the curve climbs before it turns back down.
+        left = max(scores[l] for l in lags[:index + 1])
+        right = max(scores[l] for l in lags[index:])
+        prominence = min(left, right) - scores[lag]
+        if prominence > best_prominence:
+            best_prominence, best_lag = prominence, lag
     return best_lag
 
 

@@ -55,6 +55,12 @@ const RUN_SHEET: Texture2D = preload("res://assets/characters/grim_run_s.png")
 ## the footage, the side run leans 2.7 degrees forward against the side walk's
 ## 0.9 back -- a 3.6 degree difference between walking and running.
 const RUN_E_SHEET: Texture2D = preload("res://assets/characters/grim_run_e.png")
+## Walking away. Drawn rather than derived, because a back view shares nothing
+## with a front one: no face, the satchel strap crosses the other shoulder, and
+## the coat hangs differently. Up used to play the front sheet, so she walked
+## north while looking south.
+const WALK_N_SHEET: Texture2D = preload("res://assets/characters/grim_walk_n.png")
+const RUN_N_SHEET: Texture2D = preload("res://assets/characters/grim_run_n.png")
 ## Eight frames at ten a second, for every motion. The spec settles on one shape
 ## rather than a count per motion: what differs between a walk and an idle is
 ## what happens inside the cycle, not how many slots it is cut into.
@@ -245,9 +251,13 @@ func _moving(sprinting: bool) -> void:
 	# exactly 0.707 on both axes, so `>` sent every diagonal to the front view
 	# while the comment here claimed otherwise.
 	var sideways: bool = absf(_walk_input.x) >= absf(_walk_input.y)
+	# Three views: sideways, away, and toward. Up is its own drawing now rather
+	# than the front one played while moving north.
 	var sheet: Texture2D
 	if sideways:
 		sheet = RUN_E_SHEET if sprinting else WALK_E_SHEET
+	elif _walk_input.y < 0.0:
+		sheet = RUN_N_SHEET if sprinting else WALK_N_SHEET
 	else:
 		sheet = RUN_SHEET if sprinting else WALK_SHEET
 	_set_frame(sheet, step, TARGET_FOOT - Vector2(0.0, bounce))

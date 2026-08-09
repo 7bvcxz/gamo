@@ -14,6 +14,9 @@ func _init() -> void:
 		[Vector2(1, 0), true, PlayerActor.RUN_E_SHEET, "옆으로 달리기 -> 측면 달리기"],
 		[Vector2(-1, 0), true, PlayerActor.RUN_E_SHEET, "왼쪽 달리기 -> 측면 달리기(반전)"],
 		[Vector2(0.7, 0.7), true, PlayerActor.RUN_E_SHEET, "대각 달리기 -> 측면 달리기"],
+		[Vector2(0, -1), false, PlayerActor.WALK_N_SHEET, "위로 걷기 -> 뒷모습 걷기"],
+		[Vector2(0, -1), true, PlayerActor.RUN_N_SHEET, "위로 달리기 -> 뒷모습 달리기"],
+		[Vector2(0.3, -1), false, PlayerActor.WALK_N_SHEET, "위쪽 대각 걷기 -> 뒷모습"],
 	]
 	var failures := 0
 	for case in cases:
