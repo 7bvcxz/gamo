@@ -407,9 +407,13 @@ func adopt_cats() -> int:
 	if adopted <= 0:
 		return 0
 	carried_boxes -= adopted * Defs.BOXES_PER_CAT
+	# Spread across the doorstep rather than stacked on one tile, the same way
+	# they come out in the morning. Three cats on the same pixel look like one
+	# cat, right up until they walk off in different directions.
+	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
 	for index in adopted:
 		var cat := Cat.new()
-		cat.pos = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
+		cat.pos = doorstep + Vector2((float(index) - float(adopted - 1) * 0.5) * Defs.CAT_LANE, 0.0)
 		cats.append(cat)
 	cat_adopted.emit(cats.size())
 	return adopted
@@ -498,7 +502,7 @@ func dispatch_cats() -> void:
 			continue
 		# Everyone comes out of the shelter at first light, spread across the
 		# doorstep rather than stacked on one tile.
-		var lane: float = (float(index) - float(cats.size() - 1) * 0.5) * 16.0
+		var lane: float = (float(index) - float(cats.size() - 1) * 0.5) * Defs.CAT_LANE
 		cat.pos = doorstep + Vector2(lane, 0.0)
 		index += 1
 		if cat.has_job() and machines.has(cat.assigned):
@@ -1010,7 +1014,7 @@ func wake_cats(doorstep: Vector2) -> void:
 		var cat: Cat = cats[index]
 		# Fanned across the doorstep rather than stacked on one pixel, so a
 		# workforce of six reads as six cats leaving a hut.
-		var spread: float = (float(index) - float(count - 1) * 0.5) * 9.0
+		var spread: float = (float(index) - float(count - 1) * 0.5) * Defs.CAT_LANE
 		cat.pos = doorstep + Vector2(spread, 0.0)
 		# Anything still in a cat's mouth at bedtime is handed in rather than
 		# deleted. Silently losing the last minute of the day's haul is the kind

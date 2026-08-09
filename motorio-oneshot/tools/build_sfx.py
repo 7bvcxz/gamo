@@ -83,6 +83,15 @@ SOUNDS = {
     "finish":  dict(seconds=0.600, f0=248, f1=184,  peak=0.44, decay=1.05,
                     partials=[(1.5, 0.50), (2.0, 0.35), (3.0, 0.15)], noise=0.150,
                     seed=11),
+    # Steel on stone, once per swing. Short, low and mostly noise -- a struck
+    # rock has almost no pitch in it, and the little that is there falls.
+    "pick":    dict(seconds=0.130, f0=230, f1=88,   peak=0.46, decay=1.30,
+                    partials=[(2.0, 0.30)], noise=0.55, seed=31),
+    # A cat taking a bite. Quiet on purpose: it repeats every half second while
+    # a cat eats and there can be several of them at the bowl, so it has to be
+    # something heard rather than something listened to.
+    "nibble":  dict(seconds=0.045, f0=940, f1=610,  peak=0.13, decay=1.40,
+                    noise=0.35, seed=37),
     # Not an effect: the one note the music is played from. Music.gd triggers it
     # at different pitch_scales, which is why there is one sample and not a
     # score's worth. A rendered title theme would have been the largest file in

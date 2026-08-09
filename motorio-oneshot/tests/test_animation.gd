@@ -161,6 +161,40 @@ func _run() -> void:
 		"고양이는 Grim의 0.9배로 그려진다")
 	_assert(MachineLayer.CAT_HEAD_FRACTION < MachineLayer.CAT_FOOT_FRACTION,
 		"머리는 발보다 위에 있다")
+
+	# The cat, its shadow and everything hung above it come from one function, so
+	# they cannot drift apart. This is checked rather than assumed because they
+	# did drift: the cat in her arms kept a centre offset from when a cat was 44
+	# pixels tall while the ones on the ground moved to anchoring on the feet.
+	var stand: Vector2 = Vector2(300.0, 200.0)
+	for puff: float in [0.96, 1.0, 1.04]:
+		var box: Rect2 = MachineLayer.cat_rect(stand, puff, false, 0.0)
+		var feet: float = box.position.y + MachineLayer.CAT_FOOT_FRACTION * box.size.y
+		_assert(is_equal_approx(feet, MachineLayer.cat_shadow_at(stand).y),
+			"숨을 쉬어도 발이 그림자 위에 있다 (%.2f)" % puff)
+		_assert(is_equal_approx(box.get_center().x, stand.x), "좌우 중심이 맞는다")
+		_assert(MachineLayer.cat_head_y(box) < feet, "머리가 발 위에 온다")
+	# Mirrored, the sprite occupies the same span; only the texture is reversed.
+	var right: Rect2 = MachineLayer.cat_rect(stand, 1.0, false, 0.0)
+	var left: Rect2 = MachineLayer.cat_rect(stand, 1.0, true, 0.0)
+	_assert(is_equal_approx(left.position.x + left.size.x, right.position.x),
+		"반전해도 같은 자리를 덮는다")
+	_assert(is_equal_approx(left.position.y, right.position.y), "반전이 높이를 바꾸지 않는다")
+	# Cats standing in a line must not stand inside each other. The failure this
+	# guards is indirect and that is why it needs stating: overlapping cats put
+	# one cat's body over the next one's shadow and hunger bar, and what a player
+	# sees then is not crowding, it is sprites that have come loose from their
+	# own shadows.
+	var apart: Rect2 = MachineLayer.cat_rect(stand + Vector2(Defs.CAT_LANE, 0.0), 1.0, false, 0.0)
+	var overlap: float = (right.position.x + right.size.x) - apart.position.x
+	_assert(overlap < MachineLayer.CAT_DRAW * 0.5,
+		"옆 고양이와 절반 넘게 겹치지 않는다 (%.0fpx)" % overlap)
+	_assert(Defs.CAT_LANE > MachineLayer.CAT_DRAW * 0.4,
+		"간격이 그려지는 크기에 비례한다")
+
+	# Chewing is the one thing allowed to move it off the shadow.
+	var chew: Rect2 = MachineLayer.cat_rect(stand, 1.0, false, 4.0)
+	_assert(chew.position.y > right.position.y, "먹을 때만 그림자에서 살짝 내려온다")
 	# The sprite has to reach above the cat's world position by most of its
 	# height, or the shadow is drawn on top of the body instead of under it.
 	_assert(MachineLayer.CAT_FOOT_FRACTION * MachineLayer.CAT_DRAW > MachineLayer.CAT_GROUND * 3.0,

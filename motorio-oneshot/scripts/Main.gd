@@ -47,6 +47,18 @@ var night_warned: bool = false
 var build_held: bool = false
 var build_hold_time: float = 0.0
 var build_rotated: bool = false
+## True once a held Z has actually been swinging at a seam. Without it, letting
+## go after mining runs the tap action -- and standing at the shelter mining the
+## seam beside it would put her to bed.
+var mine_swung: bool = false
+## The swing frame the last time we looked, so the impact sound fires on the
+## crossing rather than for every frame the pickaxe spends at the bottom.
+var last_mine_frame: int = -1
+## Cats at the bowl get a bite sound on a slow timer of their own. Tying it to
+## the chewing animation would fire three and a half times a second per cat,
+## which is not a sound, it is a texture.
+var nibble_timer: float = 0.0
+const NIBBLE_INTERVAL := 0.44
 var autosave_elapsed: float = 0.0
 var blackout: float = 0.0
 ## True while the mine key is held. Hand mining is a hold, not a tap.
@@ -217,13 +229,17 @@ func _unassigned_cats() -> int:
 ## the change. What the gun is loaded with is chosen in its menu, not by which
 ## number key was pressed last.
 const TOOL_BUILD_GUN := 0
-const TOOLS: Array[int] = [TOOL_BUILD_GUN]
-const TOOL_NAMES := ["건물건설총"]
+const TOOL_PICKAXE := 1
+const TOOLS: Array[int] = [TOOL_BUILD_GUN, TOOL_PICKAXE]
+const TOOL_NAMES := ["건물건설총", "곡괭이"]
 
 var tool_index: int = 0
 
 func holding_build_gun() -> bool:
 	return TOOLS[tool_index] == TOOL_BUILD_GUN
+
+func holding_pickaxe() -> bool:
+	return TOOLS[tool_index] == TOOL_PICKAXE
 
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
@@ -424,7 +440,10 @@ static func slot_path(slot: int) -> String:
 const AUTOSAVE_INTERVAL := 30.0
 
 func _update_build_hold(delta: float) -> void:
-	if not build_held:
+	# Holding Z turns the ghost, but only when the build gun is out. With the
+	# pickaxe it is the swing, and a swing that spun the build direction every
+	# quarter second would be a key doing two unrelated things at once.
+	if not build_held or not holding_build_gun():
 		return
 	build_hold_time += delta
 	# Keeps turning for as long as the key is down, one quarter turn per
@@ -438,6 +457,7 @@ func _update_build_hold(delta: float) -> void:
 func _process_play(delta: float) -> void:
 	time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
+	_update_nibbles(delta)
 	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_preview()
@@ -476,16 +496,43 @@ func _announce_unlocks(opened: Array[int]) -> void:
 
 ## Working a seam by hand. Held rather than tapped, so the player feels the ten
 ## seconds they are about to automate away.
+## A bite from whoever is at the bowl. One sound however many cats are eating --
+## the voice pool would happily play four at once and the result is not four cats
+## eating, it is a noise.
+func _update_nibbles(delta: float) -> void:
+	var eating := false
+	for cat: Sim.Cat in sim.cats:
+		if cat.state == Defs.CAT_EATING:
+			eating = true
+			break
+	if not eating:
+		nibble_timer = 0.0
+		return
+	nibble_timer -= delta
+	if nibble_timer > 0.0:
+		return
+	nibble_timer = NIBBLE_INTERVAL * randf_range(0.85, 1.25)
+	audio.call("play", "nibble", 0.18)
+
 func _update_hand_mining(delta: float) -> void:
 	if state != State.PLAY or player.locked or sim.carried_cat != null:
 		sim.cancel_hand_mine()
 		player.mining = 0.0
+		last_mine_frame = -1
 		return
 	var facing: Vector2i = player.facing_cell()
-	if not mine_held or not sim.ore.has(facing):
+	if not holding_pickaxe() or not mine_held or not sim.ore.has(facing):
 		sim.cancel_hand_mine()
 		player.mining = 0.0
+		last_mine_frame = -1
 		return
+	mine_swung = true
+	# Steel on stone, once per swing, on the frame the head reaches the ground.
+	var frame: int = int(player.mine_frame)
+	if frame == PlayerActor.MINE_IMPACT_FRAME and last_mine_frame != frame:
+		audio.call("play", "pick")
+		fx.burst(sim.cell_centre(facing), Defs.ITEM_COLORS[int(sim.ore[facing])], 3)
+	last_mine_frame = frame
 	var produced: int = sim.hand_mine(facing, delta)
 	player.mining = sim.hand_fraction()
 	if produced < 0:
@@ -591,6 +638,11 @@ func _update_collapse(delta: float) -> void:
 
 
 func _update_preview() -> void:
+	# The placement ghost belongs to the build gun. Holding the pickaxe and still
+	# being shown where a miner would go says Z will place one, and it will not.
+	if not holding_build_gun():
+		machine_layer.preview_cell = Vector2i(9999, 9999)
+		return
 	var cell: Vector2i = player.facing_cell()
 	machine_layer.preview_cell = cell
 	machine_layer.preview_type = selected_type()
@@ -606,12 +658,15 @@ func _view_rect() -> Rect2:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Mining is a hold, so both edges matter and neither should be swallowed by
-	# the state machine below.
-	if event.is_action_pressed("mine"):
-		if not toggle_meter():
-			mine_held = true
-	elif event.is_action_released("mine"):
+	# the state machine below. It hangs off the build key, because mining is now
+	# what the build key does while the pickaxe is the held tool -- C only opens
+	# the meter.
+	if event.is_action_pressed("build"):
+		mine_held = true
+	elif event.is_action_released("build"):
 		mine_held = false
+	if event.is_action_pressed("mine"):
+		toggle_meter()
 	# Mouse first: the settings gear and its slider are the only pointer targets
 	# in the game, and a desktop player has no pad to route them through.
 	if event is InputEventMouseButton:
@@ -631,7 +686,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and not event.is_pressed() and event.is_action_released("build"):
-		if build_held and not build_rotated:
+		# The pickaxe still puts a carried cat down -- being unable to let go of
+		# a cat because of which tool is selected would be a trap -- but it does
+		# not build.
+		if build_held and not build_rotated and not mine_swung:
 			_primary_action()
 		build_held = false
 		get_viewport().set_input_as_handled()
@@ -745,6 +803,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		build_held = true
 		build_hold_time = 0.0
 		build_rotated = false
+		mine_swung = false
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("debug_speed"):
@@ -972,6 +1031,13 @@ func debug_unlock_all() -> void:
 		sim.unlocked_recipes[index] = true
 	for item_type: int in Defs.COUNTED_ITEMS:
 		sim.stock[item_type] = 500
+	# And a crew. Everything else this key grants can be checked from a
+	# screenshot the moment it is pressed; cats cannot, because getting one takes
+	# carrying three crates to the shelter and that is most of a twelve minute
+	# day. Verifying anything about how a cat is drawn meant playing the game to
+	# the point of having one, several times, and the day kept running out first.
+	sim.carried_boxes += Defs.BOXES_PER_CAT * maxi(0, Defs.DEBUG_CATS - sim.cats.size())
+	sim.adopt_cats()
 	_notify("디버그 전체 해금", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 

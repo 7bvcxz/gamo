@@ -70,12 +70,18 @@ func _test_crates_and_adoption() -> void:
 	_assert(sim.adopt_cats() == 2, "six crates adopt two cats")
 	_assert(sim.cats.size() == 2, "the cats exist")
 	_assert(sim.carried_boxes == 0, "the crates are spent")
-	# The hut is solid, so cats stand at its door rather than inside it.
+	# The hut is solid, so cats stand at its door rather than inside it -- and
+	# beside each other rather than on top of each other. Adopting two at once
+	# used to put both on the same pixel, which reads as one cat until they walk
+	# away in different directions.
 	var door: Vector2 = sim.cell_centre(sim.shelter_cell) + Vector2(0.0, float(Defs.TILE))
 	for cat: Sim.Cat in sim.cats:
-		_assert(cat.pos.distance_to(door) < 1.0, "a new cat starts at the shelter door")
+		_assert(is_equal_approx(cat.pos.y, door.y), "a new cat starts on the shelter doorstep")
+		_assert(absf(cat.pos.x - door.x) <= float(Defs.TILE), "and within a tile of the door")
 		_assert(not sim.blocks_player(Vector2i((cat.pos / float(Defs.TILE)).floor())),
 			"and not standing inside the building")
+	_assert(sim.cats[0].pos.distance_to(sim.cats[1].pos) > 4.0,
+		"two cats adopted together do not land on the same spot")
 	sim.free()
 
 # --- 5-3 -------------------------------------------------------------------

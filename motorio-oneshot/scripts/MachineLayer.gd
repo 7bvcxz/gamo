@@ -494,6 +494,36 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
+## Where a cat's sprite goes on screen, given where the cat is.
+##
+## One function because there are two callers -- this layer for the cats on the
+## ground, PlayerActor for the one in her arms -- and while they each did their
+## own arithmetic they disagreed. The arms kept a centre offset tuned when a cat
+## was drawn 44 pixels tall; the ground had moved to anchoring on the feet at
+## 57.6. Anchoring on the feet is the part that matters: `breathe` scales the
+## sprite every frame, and a cat anchored by its middle lifts off its own shadow
+## every time it inhales.
+##
+## `dip` is the chewing motion, which is the one thing allowed to move the cat
+## off its shadow, because it is a cat leaning down to a bowl.
+static func cat_rect(at: Vector2, breathe: float, flip: bool, dip: float) -> Rect2:
+	var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
+	if flip:
+		size.x = -size.x
+	var rect := Rect2(at.x - absf(size.x) * 0.5,
+		at.y + CAT_GROUND - CAT_FOOT_FRACTION * size.y + dip, size.x, size.y)
+	if flip:
+		rect.position.x += absf(size.x)
+	return rect
+
+## The top of the cat's head, for whatever hangs above it.
+static func cat_head_y(rect: Rect2) -> float:
+	return rect.position.y + CAT_HEAD_FRACTION * absf(rect.size.y)
+
+## Where the shadow goes. Same input as cat_rect, so the two cannot drift.
+static func cat_shadow_at(at: Vector2) -> Vector2:
+	return at + Vector2(0.0, CAT_GROUND)
+
 ## Which sheet a cat plays, and whether it is mirrored. Pulled out of the draw
 ## call so it can be tested: a screenshot cannot tell a front walk from an idle
 ## at 44 pixels, and cats only exist after boxes have been carried to the
@@ -519,7 +549,7 @@ func _draw_cats() -> void:
 	for cat: Sim.Cat in sim.cats:
 		if _cat_hidden(cat):
 			continue
-		_shadow(cat.pos + Vector2(0, CAT_GROUND), CAT_DRAW * 0.18)
+		_shadow(cat_shadow_at(cat.pos), CAT_DRAW * 0.18)
 	for cat: Sim.Cat in sim.cats:
 		if _cat_hidden(cat):
 			continue
@@ -543,18 +573,9 @@ func _draw_cats() -> void:
 		# reads as one animation playing on several bodies.
 		var step: int = int(pulse * CAT_FPS + cat.pos.x * 0.7) % CAT_FRAMES
 		var region := Rect2(float(step) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
-		var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
-		if flip:
-			size.x = -size.x
-		# Anchored on the feet, not on the middle of the cell: breathing scales
-		# the sprite, and a cat anchored by its centre lifts off the ground every
-		# time it inhales.
-		var top: float = cat.pos.y + CAT_GROUND - CAT_FOOT_FRACTION * size.y + munch
-		var target := Rect2(cat.pos.x - absf(size.x) * 0.5, top, size.x, size.y)
-		if flip:
-			target.position.x += absf(size.x)
+		var target: Rect2 = cat_rect(cat.pos, breathe, flip, munch)
 		draw_texture_rect_region(sheet, target, region, Color.WHITE)
-		var head: float = top + CAT_HEAD_FRACTION * size.y
+		var head: float = cat_head_y(target)
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling
 			# cats reads as a slow, visible conveyor.

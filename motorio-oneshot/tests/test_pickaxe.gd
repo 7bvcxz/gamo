@@ -1,0 +1,97 @@
+extends SceneTree
+## Mining moved from its own key onto the tool slot, and the two things that can
+## go wrong are both invisible.
+##
+## The first is that Z now means several things and which one it means depends on
+## what is in her hands: with the gun it builds, with the pickaxe it swings, and
+## with a cat in her arms it puts the cat down whichever tool is selected. The
+## second is the release: mining is a hold, and letting go used to run the tap
+## action -- so mining the seam beside the shelter put her to bed.
+
+var failures := 0
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	await process_frame
+	main.clear_save()
+	main._start_run()
+	main.state = main.State.PLAY
+	await process_frame
+
+	_assert(main.TOOLS.size() == 2, "도구가 둘이다")
+	main.tool_index = 0
+	_assert(main.holding_build_gun() and not main.holding_pickaxe(), "1번은 건설총")
+	main.tool_index = 1
+	_assert(main.holding_pickaxe() and not main.holding_build_gun(), "2번은 곡괭이")
+
+	# Put a seam where she is facing, and make sure she is facing it.
+	var seam: Vector2i = main.player.facing_cell()
+	main.sim.ore[seam] = Defs.ITEM_CRYSTAL
+	main.sim.machines.erase(seam)
+
+	# The gun does not mine, however long Z is held.
+	main.tool_index = 0
+	main.mine_held = true
+	main.player.mining = 0.0
+	main._update_hand_mining(0.5)
+	_assert(is_equal_approx(main.player.mining, 0.0), "건설총으로는 캐지지 않는다")
+	_assert(not main.mine_swung, "건설총이면 스윙도 없다")
+
+	# The pickaxe does.
+	main.tool_index = 1
+	main._update_hand_mining(0.5)
+	_assert(main.player.mining > 0.0, "곡괭이로는 캐진다")
+	_assert(main.mine_swung, "곡괭이 스윙이 기록된다")
+
+	# Ten seconds of it produces one, on the ground rather than in a pocket.
+	var before: int = main.sim.ground.size()
+	for step in 24:
+		main._update_hand_mining(0.5)
+	_assert(main.sim.ground.size() > before, "충분히 캐면 바닥에 자원이 떨어진다")
+
+	# Letting go of the seam stops it, and the swing frame resets so the impact
+	# sound cannot fire from a stale value on the next seam.
+	main.mine_held = false
+	main._update_hand_mining(0.1)
+	_assert(is_equal_approx(main.player.mining, 0.0), "손을 떼면 멈춘다")
+	_assert(int(main.last_mine_frame) == -1, "스윙 프레임이 초기화된다")
+
+	# Holding Z with the pickaxe must not spin the build direction.
+	main.tool_index = 1
+	main.build_held = true
+	main.build_rotated = false
+	var direction: Vector2i = main.build_dir
+	for step in 20:
+		main._update_build_hold(0.1)
+	_assert(main.build_dir == direction, "곡괭이를 들고 Z를 눌러도 방향이 돌지 않는다")
+	main.tool_index = 0
+	for step in 20:
+		main._update_build_hold(0.1)
+	_assert(main.build_dir != direction, "건설총을 들면 Z 홀드가 방향을 돌린다")
+	main.build_held = false
+
+	# The animation runs at the speed the sheets were cut at. Eight frames at ten
+	# a second is 0.8s, and the mining clips repeat every 1.4 to 1.7 seconds --
+	# playing them at the walk's rate made the swing twice as fast as it was
+	# filmed.
+	_assert(PlayerActor.MINE_FPS < PlayerActor.FPS, "채굴은 걷기보다 느리게 재생된다")
+	var swing: float = float(PlayerActor.FRAMES) / PlayerActor.MINE_FPS
+	_assert(swing > 1.3 and swing < 1.9, "스윙 한 번이 1.3~1.9초 (%.2f초)" % swing)
+	_assert(PlayerActor.MINE_IMPACT_FRAME >= 0
+		and PlayerActor.MINE_IMPACT_FRAME < PlayerActor.FRAMES,
+		"충돌 프레임이 시트 안에 있다")
+
+	main.queue_free()
+	if failures == 0:
+		print("PICKAXE_TEST: PASS")
+	quit(failures)
+
+func _assert(condition: bool, message: String) -> void:
+	if not condition:
+		print("  FAIL: ", message)
+		failures += 1

@@ -593,8 +593,13 @@ func _draw_palette() -> void:
 	_draw_direction_chip(origin.y)
 
 	var loaded: int = main.selected_type()
+	# The hint line belongs to whatever is in her hands. With the pickaxe out the
+	# machine the gun happens to be loaded with is not what Z will do, and saying
+	# so anyway is how a player learns the wrong thing about their own keys.
 	var hint: String = Defs.MACHINE_HINTS[loaded]
-	if loaded == Defs.M_EXCHANGER or loaded == Defs.M_MINER:
+	if main.holding_pickaxe():
+		hint = "광맥을 바라보고 Z를 누르고 있으면 직접 캡니다"
+	elif loaded == Defs.M_EXCHANGER or loaded == Defs.M_MINER:
 		hint += "   ·   " + Defs.ratio_hint()
 	var hint_w: float = _text_width(hint, 12) + 24.0
 	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 30.0, hint_w, 24.0)
@@ -609,6 +614,16 @@ func _draw_palette() -> void:
 		_frame(rect, Defs.COL_CORE if chosen else Defs.COL_PANEL_EDGE)
 		_text(rect.position + Vector2(FRAME_PAD, 16.0), "%d  %s" % [index + 1, main.TOOL_NAMES[index]],
 			11, Defs.COL_CORE if chosen else Defs.COL_TEXT_DIM)
+		# The pickaxe holds nothing, so its slot says what it is for instead of
+		# borrowing the gun's magazine.
+		if main.TOOLS[index] == main.TOOL_PICKAXE:
+			Icons.draw_pickaxe(self, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
+				Vector2(24.0, 24.0)))
+			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
+				"직접 채굴", 13, Defs.COL_TEXT)
+			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
+				"%.0f초/개" % Defs.HAND_MINE_PERIOD, 10, Defs.COL_TEXT_DIM)
+			continue
 		# What the gun is loaded with, as the thing itself rather than its name.
 		var chip := Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
 			Vector2(24.0, 24.0))
@@ -629,7 +644,7 @@ func _draw_palette() -> void:
 		# mission card now, and a key legend printed over it read as one long
 		# unparseable line.
 		_text_in(Rect2(size.x - 480.0 - MARGIN, origin.y + slot.y + 16.0, 480.0, 16),
-			"C 채굴   Z 설치   X 회수   R 회전   B 목록   Esc 설정", 11, Defs.COL_TEXT_DIM,
+			"Z 사용   X 회수   R 회전   C 계기   B 목록   Esc 설정", 11, Defs.COL_TEXT_DIM,
 			HORIZONTAL_ALIGNMENT_RIGHT)
 
 # --- Build menu ---------------------------------------------------------------

@@ -233,6 +233,19 @@ const PLAYER_RADIUS := 9.0
 ## running at normal rate would be worse than none, because it would silently
 ## change the balance being observed.
 const DEBUG_SPEEDS: Array[float] = [1.0, 4.0, 10.0]
+## How many cats the debug unlock tops the crew up to. Three, because one cat
+## tells you nothing about whether a line of them steps in unison.
+const DEBUG_CATS := 3
+
+## How far apart cats stand when they line up on the doorstep.
+##
+## A cat is drawn about 58 pixels wide now, of which roughly 30 is body. At 16 --
+## the old value, from when a cat was drawn 44 wide and mostly padding -- three
+## of them standing together overlap almost completely, and each one's body
+## covers the next one's shadow and hunger bar. What that looks like in the game
+## is not "cats are close together", it is "the cats have come loose from their
+## own shadows", which is how it was reported.
+const CAT_LANE := 30.0
 
 # --- Machines ----------------------------------------------------------------
 const M_CORE := 0

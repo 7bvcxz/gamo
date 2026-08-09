@@ -83,8 +83,21 @@ const FPS := 10.0
 ## frames at ten is 0.80s, which is the same stride.
 ##
 const RUN_FPS := 14.0
+## A swing is slower than a stride, and the sheets say by how much. The mining
+## clips repeat every 17, 20 and 20 source frames at twelve a second -- about a
+## second and two thirds -- while a walk repeats every ten, which is 0.83s. Eight
+## frames at ten a second is 0.8s, so walking played at its own speed and mining
+## played at twice its own. It read as frantic, which is what a person watching
+## it said.
+const MINE_FPS := 5.0
+## Which frame of the swing the pickaxe is at the ground. Used for the impact
+## sound, so the sound lands with the hit rather than on a timer of its own.
+const MINE_IMPACT_FRAME := 4
 
 var velocity := Vector2.ZERO
+## Which frame the swing is on, so the game can put a sound on the impact. -1
+## when she is not mining.
+var mine_frame: int = -1
 var facing := Vector2i.RIGHT
 ## Eight-way facing for the artwork and the shadow lean. Build targeting stays
 ## on the four cardinals because belts and machine outputs are cardinal.
@@ -226,7 +239,8 @@ func _collapsed() -> void:
 func _mining() -> void:
 	character.rotation = 0.0
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
-	var step: int = int(animation_time * FPS) % FRAMES
+	var step: int = int(animation_time * MINE_FPS) % FRAMES
+	mine_frame = step
 	var sheet: Texture2D
 	if facing.x != 0:
 		sheet = MINE_W_SHEET
@@ -241,6 +255,7 @@ func _mining() -> void:
 	_set_frame(sheet, step)
 
 func _idle() -> void:
+	mine_frame = -1
 	# The clip's own breathing was about six pixels at 640, which is under one
 	# pixel once the sheet is 128 and drawn at half scale -- it rounds away, and
 	# the four idle frames differ only in shading. So the rise and fall is done
@@ -255,6 +270,7 @@ func _idle() -> void:
 	_set_frame(IDLE_SHEET, int(animation_time * FPS) % FRAMES)
 
 func _moving(sprinting: bool) -> void:
+	mine_frame = -1
 	# Nothing procedural. No rocking, no squash, no hop -- the sheet is played and
 	# that is all.
 	#
@@ -333,12 +349,10 @@ func _draw_carried_cat() -> void:
 		return
 	var offset: Vector2 = carried_cat_pos - global_position
 	var view: Dictionary = Defs.facing_view(Defs.facing_index(carried_cat_heading))
-	var size := Vector2(MachineLayer.CAT_DRAW, MachineLayer.CAT_DRAW)
-	if bool(view["flip"]):
-		size.x = -size.x
-	var target := Rect2(offset - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -6), size)
-	if bool(view["flip"]):
-		target.position.x += absf(size.x)
+	# Same arithmetic as a cat standing on the ground, only measured from her
+	# position instead of the world's. Doing it separately here is what let the
+	# two drift apart when the cat's drawn size changed.
+	var target: Rect2 = MachineLayer.cat_rect(offset, 1.0, bool(view["flip"]), 0.0)
 	# The idle sheet: a cat in her arms is not walking, and the old directional
 	# sheet it used to index into no longer exists.
 	var step: int = int(animation_time * MachineLayer.CAT_FPS) % MachineLayer.CAT_FRAMES
