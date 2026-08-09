@@ -65,7 +65,10 @@ const RUN_N_SHEET: Texture2D = preload("res://assets/characters/grim_run_n.png")
 ## fraction of the way through working a seam by hand -- and until now only fed
 ## a progress ring. The character stood there doing nothing while she mined.
 const MINE_SHEET: Texture2D = preload("res://assets/characters/grim_mine_s.png")
-const MINE_E_SHEET: Texture2D = preload("res://assets/characters/grim_mine_e.png")
+## West rather than east, because the clip that reads as a side view faces left.
+## East is this mirrored, which is exact -- the anchor sits on the cell's centre
+## line -- and is the same trade the walk and run make for their west frames.
+const MINE_W_SHEET: Texture2D = preload("res://assets/characters/grim_mine_w.png")
 const MINE_N_SHEET: Texture2D = preload("res://assets/characters/grim_mine_n.png")
 ## Eight frames at ten a second, for every motion. The spec settles on one shape
 ## rather than a count per motion: what differs between a walk and an idle is
@@ -226,7 +229,11 @@ func _mining() -> void:
 	var step: int = int(animation_time * FPS) % FRAMES
 	var sheet: Texture2D
 	if facing.x != 0:
-		sheet = MINE_E_SHEET
+		sheet = MINE_W_SHEET
+		# Mining reads its direction from `facing`, so the flip has to come from
+		# there too. flip_h is otherwise set from the last walking input, which is
+		# whatever she happened to be doing before she stopped to work.
+		character.flip_h = facing.x > 0
 	elif facing.y < 0:
 		sheet = MINE_N_SHEET
 	else:

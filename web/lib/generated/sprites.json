@@ -37,7 +37,7 @@
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-3b3d872e9d0a.mp4"
@@ -53,12 +53,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-s-a-bdf44580275d.png",
+          "sheet": "/sprite-candidates/grim-walk-s-a-e780d39d61d6.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-eb681851e26e.mp4"
@@ -79,7 +79,7 @@
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-817b0655836d.mp4",
@@ -96,12 +96,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-s-a-bebb11382b7b.png",
+          "sheet": "/sprite-candidates/grim-run-s-a-a02b4da28658.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-a20b4852f5ef.mp4"
@@ -117,12 +117,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-e-a-be92a8b48640.png",
+          "sheet": "/sprite-candidates/grim-run-e-a-27b9aa5f959a.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-2f35d24fcdcb.mp4",
@@ -139,12 +139,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-n-a-18f738ce813f.png",
+          "sheet": "/sprite-candidates/grim-walk-n-a-5a09688c12b6.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-879ae577437f.mp4"
@@ -160,12 +160,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-n-a-9b441ba78c3a.png",
+          "sheet": "/sprite-candidates/grim-run-n-a-7455e8da37cb.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
           "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim"
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-1fe12789c81c.mp4"
@@ -203,15 +203,15 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-n-a-93d28efabc6e.png",
+          "sheet": "/sprite-candidates/grim-mine-n-a-f1ed80e2aa99.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 6262,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 채굴"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
-      "source_video": "/sprite-candidates/source-f287003bbaed.mp4"
+      "source_video": "/sprite-candidates/source-3e2b0a085e42.mp4"
     },
     {
       "id": "grim-mine-s",
@@ -224,15 +224,15 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-s-a-2910a37d5764.png",
+          "sheet": "/sprite-candidates/grim-mine-s-a-37890cfa3531.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 6262,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 채굴"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
-      "source_video": "/sprite-candidates/source-c4be677849fd.mp4"
+      "source_video": "/sprite-candidates/source-56c952df4739.mp4"
     },
     {
       "id": "catorg-idle-s",
@@ -245,12 +245,12 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/catorg-idle-s-a-b966466877b4.png",
+          "sheet": "/sprite-candidates/catorg-idle-s-a-d9c0db152cad.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 8484,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-953767a4823a.mp4"
@@ -270,8 +270,8 @@
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 8484,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-361a58cb759c.mp4"
@@ -291,8 +291,8 @@
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 8484,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-b22071df9458.mp4",
@@ -309,15 +309,36 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/catorg-walk-n-a-f597e6194a5c.png",
+          "sheet": "/sprite-candidates/catorg-walk-n-a-3e6c698a8c9b.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 9595,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
         }
       ],
       "source_video": "/sprite-candidates/source-b1175ecef120.mp4"
+    },
+    {
+      "id": "grim-mine-w",
+      "motion": "mine",
+      "facing": "w",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/grim-mine-w-a-f0b9dbe806b8.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 4242,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-c4be677849fd.mp4"
     }
   ]
 }

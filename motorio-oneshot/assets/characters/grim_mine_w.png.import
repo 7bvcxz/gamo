@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w76dbt6fd8w2"
-path="res://.godot/imported/grim_mine_e.png-7d444e1dc58177d4ba57fa2d85c3bb71.ctex"
+uid="uid://vrt3w07r7ahh"
+path="res://.godot/imported/grim_mine_w.png-c8194e2a8f91cb65316b5f700b79e5aa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/grim_mine_e.png"
-dest_files=["res://.godot/imported/grim_mine_e.png-7d444e1dc58177d4ba57fa2d85c3bb71.ctex"]
+source_file="res://assets/characters/grim_mine_w.png"
+dest_files=["res://.godot/imported/grim_mine_w.png-c8194e2a8f91cb65316b5f700b79e5aa.ctex"]
 
 [params]
 

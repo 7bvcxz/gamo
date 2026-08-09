@@ -144,6 +144,39 @@
     "knows which is which."
   ],
 
+  "subjects": {
+    "_why": [
+      "How tall a character is, in source pixels, measured once from clips where",
+      "its hands are empty. Every clip of that character normalises against this",
+      "number instead of against its own silhouette.",
+      "",
+      "The mining sheets are why this exists. The normaliser sized each sequence",
+      "by the longest unbroken run of rows containing pixels, which it calls the",
+      "body -- and a raised pickaxe is held in the hands, so it is part of that",
+      "run. Measured across Grim's clips: walking 486, idling 482, side walk 480,",
+      "running 492, all within 2.5% of each other; the three mining clips",
+      "measured 530, 434 and 558. The pipeline dutifully scaled each of those to",
+      "the same cell height, so Grim grew 10% when she mined facing away and",
+      "shrank 15% when she mined to the side. A player watching it said she got",
+      "smaller when she started mining, which is exactly what happened.",
+      "",
+      "Note the cell did not need to change. The character128 anchor puts the",
+      "feet at y=104, leaving 104 pixels above them for a body of about 64 -- a",
+      "raised tool at a fixed scale reaches 74 and fits with room to spare. The",
+      "problem was never that the tool had nowhere to go; it was that the tool",
+      "was being counted as part of the character."
+    ],
+    "grim": { "source_body": 484 },
+    "catorg": { "source_body": 595 },
+    "_catorg_why": [
+      "595 is the median of the three walking clips (595, 595, 573). The idle",
+      "clip measures 640, which is the full height of the frame -- the keying",
+      "leaves something touching both edges there, so its own measurement is not",
+      "the cat. Sizing it against the walks is what keeps a standing cat the same",
+      "size as a walking one."
+    ]
+  },
+
   "palette_max": 32,
   "_palette_why": [
     "A locked palette is the cheapest consistency check there is. Drift that is",

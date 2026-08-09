@@ -70,7 +70,7 @@ STAGING = (
 )
 
 MOTION_PROMPTS = {
-    "walk": "The character from image 1 walks in place, facing the viewer, a simple looping walk cycle at a steady pace.",
+    "walk": "The character from image 1 walks in place, a simple looping walk cycle at a steady pace.",
     # What separates a run from a fast walk is not speed, and asking for speed
     # does not produce one: "runs in place, leaning slightly forward" came back
     # as brisk walking with no lean worth measuring. A run is a specific set of
@@ -82,8 +82,8 @@ MOTION_PROMPTS = {
     # Kept deliberately light: this is a small round character in a heavy coat,
     # and a sprinter's form would look wrong on her. Bouncy rather than driving.
     "run": (
-        "The character from image 1 runs in place at a happy bouncy pace, facing "
-        "the viewer. The whole body leans forward about ten degrees and stays "
+        "The character from image 1 runs in place at a happy bouncy pace. "
+        "The whole body leans forward about ten degrees and stays "
         "leaning for the entire clip. Each stride: one knee lifts high in front so "
         "the thigh comes up toward the chest, then that foot drives down as the "
         "other knee lifts, and at the fastest part of each stride BOTH feet are "
@@ -99,7 +99,7 @@ MOTION_PROMPTS = {
     # unusable. A swing has to be described as travel between two named
     # extremes, and asking for a specific number of repetitions is what makes
     # the period short enough that a cycle fits inside the clip.
-    "mine": "The character from image 1 mines with a pickaxe: raises it high above the head with both hands, then swings it down hard to strike the ground in front of the feet, then lifts it back overhead, repeating this complete swing three times at a steady rhythm. The swing is large and obvious, the pickaxe travelling all the way from above the head to the ground and back on every repetition. Facing the viewer, feet planted, the body staying in place.",
+    "mine": "The character from image 1 mines with a pickaxe: raises it high above the head with both hands, then swings it down hard to strike the ground in front of the feet, then lifts it back overhead, repeating this complete swing three times at a steady rhythm. The swing is large and obvious, the pickaxe travelling all the way from above the head to the ground and back on every repetition. Feet planted, the body staying in place.",
     # Spelled out as an absence, because the short version did not work. "Stands
     # still and breathes ... only a small idle sway" produced four seconds of
     # walking on the spot: the boots stepped, the gap between them opened and
@@ -120,7 +120,7 @@ MOTION_PROMPTS = {
         "turning, no leaning. The arms hang still. The ONLY movement is quiet "
         "breathing: the chest and shoulders rise and fall by about two percent of "
         "the body height, roughly three slow breaths across the clip, and the hair "
-        "settles very slightly with it. Facing the viewer, a calm standing pose."
+        "settles very slightly with it. A calm standing pose."
     ),
 }
 
@@ -196,9 +196,15 @@ def main() -> int:
     # is enough when image 1 is a person, but the cat is a bipedal animal in
     # clothes, and naming that is the difference between it walking upright as it
     # does in the game and it dropping onto four legs.
-    prompt = (MOTION_PROMPTS[args.motion]
-              .replace("The character from image 1", args.subject)
-              .replace("facing the viewer", f"facing {args.facing}")
+    # The direction is its own sentence rather than a phrase spliced into the
+    # motion text. It used to be substituted by matching "facing the viewer",
+    # which two of the six motions did not contain in that exact case -- mine and
+    # idle end with a capital "Facing the viewer" -- so their direction argument
+    # was silently dropped and every mining clip was generated facing front,
+    # whatever was asked for. Three of them were, and only the back view made it
+    # obvious. Nothing here matches on prose any more.
+    prompt = (MOTION_PROMPTS[args.motion].replace("The character from image 1", args.subject)
+              + f" The character is facing {args.facing}."
               + " " + STAGING)
     payload = {
         "model": args.model,

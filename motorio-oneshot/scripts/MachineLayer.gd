@@ -15,9 +15,21 @@ const CAT_WALK_N_SHEET: Texture2D = preload("res://assets/characters/cat_walk_n.
 const CAT_CELL := 128.0
 const CAT_FRAMES := 8
 const CAT_FPS := 10.0
-## Drawn smaller than the player: the cats are workers in her factory and reading
-## the scene depends on her being the largest thing moving in it.
-const CAT_DRAW := 44.0
+## Drawn a little smaller than Grim, who is one 128 cell at half scale -- so her
+## cell covers 64 world pixels and a cat covers nine tenths of that. Written as
+## the arithmetic rather than as 57.6, because the number that matters is the
+## ratio and it should survive the player's cell changing.
+const CAT_DRAW := PlayerActor.CELL * PlayerActor.SPRITE_SCALE * 0.9
+## Where the feet and the top of the head sit inside the cell, as fractions of
+## it. The sheets are normalised to the character128 cell, whose foot anchor is
+## at y=104 of 128 and whose body starts around y=36. Everything hung off the
+## cat -- its shadow, its load, its hunger bar -- is positioned from these, so
+## changing CAT_DRAW moves them all together instead of leaving the cat standing
+## beside its own shadow.
+const CAT_FOOT_FRACTION := 104.0 / 128.0
+const CAT_HEAD_FRACTION := 36.0 / 128.0
+## The feet, relative to the cat's world position.
+const CAT_GROUND := 10.0
 
 var sim: Sim
 var view_rect := Rect2()
@@ -482,6 +494,24 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
+## Which sheet a cat plays, and whether it is mirrored. Pulled out of the draw
+## call so it can be tested: a screenshot cannot tell a front walk from an idle
+## at 44 pixels, and cats only exist after boxes have been carried to the
+## shelter, so a running game will not show one for a long while.
+##
+## Returns [Texture2D, flip].
+static func cat_sheet(state: int, heading: Vector2) -> Array:
+	# Standing still gets the idle sheet; anything with somewhere to be walks. A
+	# cat that has arrived and is working should not keep striding on the spot,
+	# and one crossing the map should not glide.
+	if state not in Defs.CAT_WALKING_STATES:
+		return [CAT_IDLE_SHEET, false]
+	if absf(heading.x) >= absf(heading.y):
+		return [CAT_WALK_E_SHEET, heading.x < 0.0]
+	if heading.y < 0.0:
+		return [CAT_WALK_N_SHEET, false]
+	return [CAT_WALK_SHEET, false]
+
 func _draw_cats() -> void:
 	# Every shadow first, then every body. Drawn per cat, the next cat's shadow
 	# lands on top of the previous cat's feet, and a group crossing paths reads as
@@ -489,7 +519,7 @@ func _draw_cats() -> void:
 	for cat: Sim.Cat in sim.cats:
 		if _cat_hidden(cat):
 			continue
-		_shadow(cat.pos + Vector2(0, 10), 8.0)
+		_shadow(cat.pos + Vector2(0, CAT_GROUND), CAT_DRAW * 0.18)
 	for cat: Sim.Cat in sim.cats:
 		if _cat_hidden(cat):
 			continue
@@ -500,29 +530,15 @@ func _draw_cats() -> void:
 		if cat.state == Defs.CAT_EATING:
 			munch = absf(sin(pulse * 7.0)) * 4.0
 			breathe = 1.0 + sin(pulse * 7.0) * 0.05
-		var heading: Vector2 = Vector2.DOWN
-		if cat.state == Defs.CAT_TO_MINER and sim.machines.has(cat.assigned):
-			heading = sim.cell_centre(cat.assigned) - cat.pos
-		elif cat.state == Defs.CAT_TO_FOOD:
-			heading = sim.cell_centre(sim.food_cell) - cat.pos
-		elif cat.state == Defs.CAT_TO_SHELTER:
-			heading = sim.cell_centre(sim.shelter_cell) - cat.pos
-		elif cat.state == Defs.CAT_EATING:
-			heading = Vector2.DOWN
+		# Whichever way it last moved, from the one place that moves it. Eating
+		# faces the bowl, which is the one pose that is not about travel.
+		var heading: Vector2 = Vector2.DOWN if cat.state == Defs.CAT_EATING else cat.heading
 		# Standing still gets the idle sheet; anything with somewhere to be walks.
 		# A cat that has arrived and is working should not keep striding on the
 		# spot, and one crossing the map should not glide.
-		var walking: bool = cat.state in [Defs.CAT_TO_MINER, Defs.CAT_TO_FOOD, Defs.CAT_TO_SHELTER]
-		var sheet: Texture2D = CAT_IDLE_SHEET
-		var flip := false
-		if walking:
-			if absf(heading.x) >= absf(heading.y):
-				sheet = CAT_WALK_E_SHEET
-				flip = heading.x < 0.0
-			elif heading.y < 0.0:
-				sheet = CAT_WALK_N_SHEET
-			else:
-				sheet = CAT_WALK_SHEET
+		var chosen: Array = cat_sheet(cat.state, heading)
+		var sheet: Texture2D = chosen[0]
+		var flip: bool = chosen[1]
 		# Offset by position so a line of cats does not step in unison, which
 		# reads as one animation playing on several bodies.
 		var step: int = int(pulse * CAT_FPS + cat.pos.x * 0.7) % CAT_FRAMES
@@ -530,16 +546,22 @@ func _draw_cats() -> void:
 		var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
 		if flip:
 			size.x = -size.x
-		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4 + munch), size)
+		# Anchored on the feet, not on the middle of the cell: breathing scales
+		# the sprite, and a cat anchored by its centre lifts off the ground every
+		# time it inhales.
+		var top: float = cat.pos.y + CAT_GROUND - CAT_FOOT_FRACTION * size.y + munch
+		var target := Rect2(cat.pos.x - absf(size.x) * 0.5, top, size.x, size.y)
 		if flip:
 			target.position.x += absf(size.x)
 		draw_texture_rect_region(sheet, target, region, Color.WHITE)
+		var head: float = top + CAT_HEAD_FRACTION * size.y
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling
 			# cats reads as a slow, visible conveyor.
 			var load_colour: Color = Defs.ITEM_COLORS[cat.carrying]
-			draw_circle(cat.pos + Vector2(0, -22), 5.0, Color(load_colour.r, load_colour.g, load_colour.b, 0.30))
-			draw_circle(cat.pos + Vector2(0, -22), 3.2, load_colour)
+			var carried_at := Vector2(cat.pos.x, head - 7.0)
+			draw_circle(carried_at, 5.0, Color(load_colour.r, load_colour.g, load_colour.b, 0.30))
+			draw_circle(carried_at, 3.2, load_colour)
 		if cat.state == Defs.CAT_EATING:
 			# Crumbs kicking up from the bowl.
 			for crumb in 3:
@@ -548,7 +570,7 @@ func _draw_cats() -> void:
 				draw_circle(at, 1.6 * (1.0 - phase), Color(0.95, 0.82, 0.55, 1.0 - phase))
 		# Hunger only appears once it matters, so a healthy crew stays clean.
 		if cat.hunger < 0.5:
-			var bar := Rect2(cat.pos.x - 11, cat.pos.y - 26, 22, 3)
+			var bar := Rect2(cat.pos.x - 11, head - 14.0, 22, 3)
 			draw_rect(bar, Color(0.06, 0.08, 0.12, 0.85))
 			draw_rect(Rect2(bar.position, Vector2(bar.size.x * cat.hunger, bar.size.y)),
 				Defs.COL_DANGER if cat.hunger <= 0.0 else Defs.COL_BELT_RIM)

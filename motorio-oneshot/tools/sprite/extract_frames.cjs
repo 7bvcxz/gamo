@@ -47,6 +47,17 @@ async function main() {
   const body = fs.readFileSync(path.resolve(source));
   const type = source.endsWith('.webm') ? 'video/webm' : 'video/mp4';
   const server = http.createServer((req, res) => {
+    // The page itself is served, rather than pushed in with setContent after a
+    // navigation to a 404. That was a race -- the navigation and the content
+    // injection could land in either order, and when they landed wrong the run
+    // died with "execution context was destroyed". One document, one load.
+    if (req.url === '/' || req.url === '/index.html') {
+      const html = '<body style="margin:0;background:#000">'
+        + '<video src="/clip" preload="auto"></video></body>';
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(html);
+      return;
+    }
     if (req.url !== '/clip') { res.writeHead(404).end(); return; }
     // Range support: Chromium asks for byte ranges when seeking, and a server
     // that answers 200 with the whole body to every range request makes seeks
@@ -72,21 +83,40 @@ async function main() {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const port = server.address().port;
 
-  const browser = await chromium.launch();
+  // Not every Playwright install can decode H.264, and the generated clips are
+  // all avc1. A build without the codec does not fail -- the <video> simply
+  // never reaches loadedmetadata, so this script sat for ten minutes printing
+  // nothing before anyone thought to check. SPRITE_CHROME points at a build that
+  // has it; the check below turns the hang into a sentence.
+  const browser = await chromium.launch(
+    process.env.SPRITE_CHROME ? { executablePath: process.env.SPRITE_CHROME } : {});
   const page = await browser.newPage({ viewport: { width: 1280, height: 1280 } });
-  await page.goto(`http://127.0.0.1:${port}/`).catch(() => {});
-  await page.setContent(
-    `<body style="margin:0;background:#000"><video src="/clip" preload="auto"></video></body>`);
+  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'domcontentloaded' });
 
   const meta = await page.evaluate(async () => {
     const video = document.querySelector('video');
     if (!video) return null;
     if (Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
-      await new Promise((resolve) => video.addEventListener('loadedmetadata', resolve, { once: true }));
+      const how = await Promise.race([
+        new Promise((r) => video.addEventListener('loadedmetadata', () => r('ok'), { once: true })),
+        new Promise((r) => video.addEventListener('error', () => r('error'), { once: true })),
+        new Promise((r) => setTimeout(() => r('timeout'), 20000)),
+      ]);
+      if (how !== 'ok') {
+        return { failed: how, codec: video.canPlayType('video/mp4; codecs="avc1.42E01E"') };
+      }
     }
     video.pause();
     return { duration: video.duration, width: video.videoWidth, height: video.videoHeight };
   });
+  if (meta && meta.failed) {
+    console.error(`EXTRACT_FAIL: this browser did not decode the clip (${meta.failed}).` +
+      (meta.codec ? '' : ' It has no H.264 decoder -- set SPRITE_CHROME to a Chromium' +
+        ' build that does; Playwright ships some with the codec and some without.'));
+    await browser.close();
+    server.close();
+    process.exit(1);
+  }
   if (!meta) {
     console.error('EXTRACT: no <video> element -- is this a video file?');
     await browser.close();

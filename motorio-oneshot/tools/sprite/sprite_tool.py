@@ -109,7 +109,21 @@ def _foot(pixels: list) -> tuple:
 
 # --- normalisation ------------------------------------------------------------
 
-def sequence_scale(images: list, cell: dict, spec: dict) -> float:
+def source_body_height(images: list, spec: dict) -> float:
+    """The character's height in source pixels, as the median across frames."""
+    heights = []
+    for image in images:
+        keyed = strip_background(image.convert("RGBA"), spec)
+        span = body_rows(keyed, spec["alpha_threshold"])
+        if span is not None:
+            heights.append(span[1] - span[0])
+    if not heights:
+        return 0.0
+    heights.sort()
+    return float(heights[len(heights) // 2])
+
+
+def sequence_scale(images: list, cell: dict, spec: dict, source_body: float = 0.0) -> float:
     """One scale factor for a whole sequence, from the median silhouette height.
 
     This is a sequence-level decision and it took shipping the bug to see why.
@@ -129,17 +143,19 @@ def sequence_scale(images: list, cell: dict, spec: dict) -> float:
     Median rather than mean or max: one frame reaching upward should not set the
     scale for the other seven, and with eight frames a single outlier cannot
     move the median at all.
+
+    `source_body` overrides the measurement, and the mining sheets are why. A
+    raised pickaxe is connected to the hands, so it is part of the same unbroken
+    run of rows the measurement calls the body -- the swing measured 25% taller
+    than a walk and the character was scaled down to compensate. In the game
+    Grim visibly shrank the moment she started mining. How tall a character is
+    is a property of the character, not of what it is holding, so every clip of
+    one character normalises against a single number measured once from a clip
+    with nothing in its hands.
     """
-    heights = []
-    for image in images:
-        keyed = strip_background(image.convert("RGBA"), spec)
-        span = body_rows(keyed, spec["alpha_threshold"])
-        if span is not None:
-            heights.append(span[1] - span[0])
-    if not heights:
+    median = source_body if source_body > 0.0 else source_body_height(images, spec)
+    if median <= 0.0:
         return 1.0
-    heights.sort()
-    median = heights[len(heights) // 2]
     # The middle of the allowed band: aiming at the top of it leaves nothing for
     # a pose that reaches, and aiming at the bottom wastes the resolution this
     # whole exercise is about.
@@ -441,7 +457,7 @@ def cmd_normalize(args, spec, palette) -> int:
         print(f"SPRITE: no frames in {args.in_dir}", file=sys.stderr)
         return 1
     images = [image for _, image in frames]
-    scale = sequence_scale(images, cell, spec)
+    scale = sequence_scale(images, cell, spec, args.source_body)
     window = sequence_window(images, spec)
     if window is None:
         print(f"SPRITE: every frame in {args.in_dir} is empty", file=sys.stderr)
@@ -450,8 +466,26 @@ def cmd_normalize(args, spec, palette) -> int:
     for name, image in frames:
         out = normalize_frame(image, cell, spec, palette, scale, window, offset)
         out.save(args.out_dir / (Path(name).stem + ".png"))
+    measured = source_body_height(images, spec)
     print(f"SPRITE: normalised {len(frames)} frames at one shared scale "
           f"{scale:.4f}, one window {window} -> {args.out_dir}")
+    if args.source_body > 0.0:
+        print(f"   character height {args.source_body:.0f}px as given; this clip "
+              f"measures {measured:.0f}px on its own")
+    else:
+        print(f"   character height {measured:.0f}px, measured from this clip")
+    return 0
+
+
+def cmd_measure(args, spec, palette) -> int:
+    frames = load_frames(args.in_dir)
+    if not frames:
+        print(f"SPRITE: no frames in {args.in_dir}", file=sys.stderr)
+        return 1
+    images = [image for _, image in frames]
+    height = source_body_height(images, spec)
+    print(f"SPRITE: {args.in_dir.name} -- character height {height:.0f} source px "
+          f"across {len(frames)} frames")
     return 0
 
 
@@ -680,6 +714,10 @@ def main() -> int:
     p.add_argument("in_dir", type=Path)
     p.add_argument("out_dir", type=Path)
     p.add_argument("--cell", default="character", choices=sorted(spec["cells"]))
+    p.add_argument("--source-body", type=float, default=0.0,
+                   help="the character's height in source pixels. Given, it replaces "
+                        "the measurement, so a pose holding a raised tool does not "
+                        "shrink the character to make room for it.")
     p.set_defaults(run=cmd_normalize)
 
     p = subs.add_parser("validate")
@@ -715,6 +753,11 @@ def main() -> int:
     p.add_argument("--motion", default="", choices=[""] + sorted(spec["animations"]),
                    help="lets a motion apply its own centroid tolerance")
     p.set_defaults(run=cmd_mirror)
+
+    p = subs.add_parser("measure")
+    p.add_argument("in_dir", type=Path,
+                   help="extracted frames; prints the character's source height")
+    p.set_defaults(run=cmd_measure)
 
     p = subs.add_parser("inspect")
     p.add_argument("image", type=Path)

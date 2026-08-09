@@ -218,6 +218,11 @@ def main() -> int:
                              "the animation keeps, so this is deliberately above it")
     parser.add_argument("--seed", type=int, default=-1)
     parser.add_argument("--note", default="")
+    parser.add_argument("--subject-height", default="",
+                        help="a name from spec.subjects, or a number. The character's "
+                             "height in source pixels, used instead of measuring this "
+                             "clip -- so a pose holding a raised tool does not shrink "
+                             "the character to make room for it.")
     args = parser.parse_args()
 
     want = int(spec["animations"][args.motion]["frames"])
@@ -244,8 +249,16 @@ def main() -> int:
     for index, source in enumerate(best["frames"]):
         shutil.copy(source, cycle / f"f{index:02d}.png")
 
+    source_body = 0.0
+    if args.subject_height:
+        subjects = spec.get("subjects", {})
+        if args.subject_height in subjects:
+            source_body = float(subjects[args.subject_height]["source_body"])
+        else:
+            source_body = float(args.subject_height)
     run("normalize", [sys.executable, str(HERE / "sprite_tool.py"), "normalize",
-                      str(cycle), str(normal), "--cell", args.cell])
+                      str(cycle), str(normal), "--cell", args.cell,
+                      "--source-body", str(source_body)])
     # --motion matters: a motion may raise its own centroid tolerance, and mining
     # does because a pickaxe crossing the silhouette moves its centre several
     # pixels a frame. Without it the validator used the default and rejected a

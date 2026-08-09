@@ -18,8 +18,11 @@ signal box_collected(carried: int)
 ## of cats -- not the amount of heat -- is what gates automation.
 class Cat extends RefCounted:
 	var pos := Vector2.ZERO
-	## Which way the cat is drawn facing. Only set while carried; a walking cat
-	## derives its heading from where it is going.
+	## Which way the cat is drawn facing. Maintained by _step_toward, so it is
+	## whatever direction the cat last actually moved in. It used to be derived
+	## at draw time from a chain of "if the state is this, the goal is that",
+	## which had to list every travelling state and did not: two of the five were
+	## missing and those cats walked wherever they liked while facing front.
 	var heading := Vector2.DOWN
 	var state: int = Defs.CAT_IDLE
 	var assigned := Vector2i(9999, 9999)   ## the miner cell this cat works
@@ -930,7 +933,9 @@ func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 	if to_goal.length() <= step:
 		cat.pos = goal
 		return true
-	cat.pos += to_goal.normalized() * step
+	var direction: Vector2 = to_goal.normalized()
+	cat.heading = direction
+	cat.pos += direction * step
 	return to_goal.length() <= Defs.CAT_ARRIVE
 
 ## An unassigned cat with something to fetch goes and fetches it.

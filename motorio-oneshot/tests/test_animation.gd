@@ -26,7 +26,7 @@ func _run() -> void:
 		[PlayerActor.WALK_N_SHEET, PlayerActor.FRAMES, "walk north"],
 		[PlayerActor.RUN_N_SHEET, PlayerActor.FRAMES, "run north"],
 		[PlayerActor.MINE_SHEET, PlayerActor.FRAMES, "mine"],
-		[PlayerActor.MINE_E_SHEET, PlayerActor.FRAMES, "mine east"],
+		[PlayerActor.MINE_W_SHEET, PlayerActor.FRAMES, "mine west"],
 		[PlayerActor.MINE_N_SHEET, PlayerActor.FRAMES, "mine north"],
 		[MachineLayer.CAT_IDLE_SHEET, MachineLayer.CAT_FRAMES, "cat idle"],
 		[MachineLayer.CAT_WALK_SHEET, MachineLayer.CAT_FRAMES, "cat walk"],
@@ -151,6 +151,20 @@ func _run() -> void:
 	_assert(actor.character.flip_h, "sprinting left faces left")
 	actor._animate(0.1, Vector2.ZERO, false)
 	_assert(actor.character.flip_h, "and idling after a sprint keeps it")
+
+	# The cat is drawn at nine tenths of Grim, and its shadow sits under its feet
+	# rather than under the middle of its cell. Both used to be loose numbers --
+	# 44 pixels tall and a shadow four pixels out of place -- and neither could
+	# survive changing the other.
+	var grim_height: float = PlayerActor.CELL * PlayerActor.SPRITE_SCALE
+	_assert(is_equal_approx(MachineLayer.CAT_DRAW, grim_height * 0.9),
+		"고양이는 Grim의 0.9배로 그려진다")
+	_assert(MachineLayer.CAT_HEAD_FRACTION < MachineLayer.CAT_FOOT_FRACTION,
+		"머리는 발보다 위에 있다")
+	# The sprite has to reach above the cat's world position by most of its
+	# height, or the shadow is drawn on top of the body instead of under it.
+	_assert(MachineLayer.CAT_FOOT_FRACTION * MachineLayer.CAT_DRAW > MachineLayer.CAT_GROUND * 3.0,
+		"몸이 그림자 위로 충분히 올라온다")
 
 	if failures == 0:
 		print("ANIMATION_TEST: PASS")

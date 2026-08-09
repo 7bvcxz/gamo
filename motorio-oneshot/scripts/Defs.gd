@@ -409,6 +409,16 @@ const CAT_EATING := 4
 const CAT_TO_SHELTER := 7
 const CAT_ASLEEP := 8
 
+## The states in which a cat is crossing the ground. Kept here rather than
+## written out at the one place that draws it, because it was written out there
+## and two of the five were missing: a cat fetching a dropped rock and carrying
+## it back to the core covers most of the map on its own legs, and did it
+## playing the standing sheet. Anything that calls _step_toward belongs in this
+## list, and there are exactly five such handlers.
+const CAT_WALKING_STATES: Array[int] = [
+	CAT_TO_MINER, CAT_TO_FOOD, CAT_TO_SHELTER, CAT_HAUL_TO_ITEM, CAT_HAUL_TO_BASE,
+]
+
 ## --- The night sequence ------------------------------------------------------
 ## The day does not simply cut to a summary card. The workforce walks home, the
 ## lamp goes on, and the hut spends five seconds turning from night to morning.
