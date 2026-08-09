@@ -83,6 +83,18 @@ SOUNDS = {
     "finish":  dict(seconds=0.600, f0=248, f1=184,  peak=0.44, decay=1.05,
                     partials=[(1.5, 0.50), (2.0, 0.35), (3.0, 0.15)], noise=0.150,
                     seed=11),
+    # Not an effect: the one note the music is played from. Music.gd triggers it
+    # at different pitch_scales, which is why there is one sample and not a
+    # score's worth. A rendered title theme would have been the largest file in
+    # the game by a wide margin -- twenty-four seconds at this rate is a
+    # megabyte, against half a megabyte for everything else put together -- and
+    # a sampler costs twenty-two kilobytes and can be rewritten by editing a
+    # list of numbers.
+    #
+    # Tuned to A4. Music.gd's semitones are relative to that, so pitch_scale is
+    # just 2**(semitone/12) with nothing to look up.
+    "note":    dict(seconds=1.000, f0=440, f1=440,  peak=0.50, decay=2.00,
+                    partials=[(2.0, 0.32), (3.0, 0.14), (4.0, 0.06)]),
 }
 
 # The two looping beds. These are not tones but filtered noise, and they are

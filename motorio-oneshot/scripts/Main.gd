@@ -25,6 +25,7 @@ const RESCUE_SECONDS := 1.6
 @onready var camera: Camera2D = $Player/Camera2D
 @onready var hud: Control = $UI/HUD
 @onready var audio: Node = $Audio
+@onready var music: Node = $Music
 @onready var touch: TouchControls = $UI/TouchControls
 @onready var atmosphere: ColorRect = $Grade/Atmosphere
 
@@ -323,6 +324,7 @@ func shelter_nearby() -> bool:
 	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
 
 func _process(delta: float) -> void:
+	_follow_music()
 	# Re-applied every frame because the platform base follows the touch pad,
 	# which appears and disappears as the player switches between thumb and
 	# keyboard mid-session.
@@ -1409,6 +1411,19 @@ func _process_daybreak(delta: float) -> void:
 				night_override = -1.0
 				player.locked = false
 				state = State.PLAY
+
+## Which score belongs to the screen that is showing, decided in one place.
+##
+## Driven from the state each frame instead of from the transitions. There are
+## eleven assignments to `state` in this file and a hook added to each of them is
+## a hook that will be missing from the twelfth -- the same shape of bug as the
+## cat walking states, which were listed at the draw call and were short by two.
+func _follow_music() -> void:
+	var showing: int = state_before_settings if state == State.SETTINGS else state
+	match showing:
+		State.TITLE: music.call("play_score", "title")
+		State.RESULT: music.call("play_score", "result")
+		_: music.call("stop")
 
 ## Dusk, not game over. The factory keeps everything it built.
 func _finish_run() -> void:

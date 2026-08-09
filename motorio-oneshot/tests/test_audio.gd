@@ -29,6 +29,11 @@ func _init() -> void:
 		referenced[name] = true
 		_assert(Audio.BED_CEILING.has(name), "%s 에 베드 상한이 지정돼 있다" % name)
 
+	# The music sampler holds one more, outside the effects bank.
+	const Music := preload("res://scripts/Music.gd")
+	_assert(Music.NOTE != null, "음악 샘플이 있다")
+	referenced[(Music.NOTE as Resource).resource_path.get_file().get_basename()] = true
+
 	# Nothing on disk that nobody plays.
 	var directory := DirAccess.open("res://assets/sfx")
 	_assert(directory != null, "assets/sfx 를 열 수 있다")
@@ -38,7 +43,7 @@ func _init() -> void:
 				continue
 			var stem: String = file.get_basename()
 			_assert(referenced.has(stem),
-				"%s 를 재생하는 곳이 있다 (Audio.gd 에 없으면 파일을 지우거나 뱅크에 넣는다)" % file)
+				"%s 를 재생하는 곳이 있다 (Audio.gd 뱅크나 Music.gd 에 없으면 파일을 지운다)" % file)
 
 	# Every sound the builder makes is 22050Hz mono, and the beds are the only
 	# long ones. A one-shot that grew to a second is a one-shot that overlaps
