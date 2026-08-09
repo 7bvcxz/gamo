@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ngdssdu50vv3"
-path="res://.godot/imported/worker_cat_directional.png-2450e8d3e7374d823dba4e58336ccce2.ctex"
+uid="uid://dbsaeeb3qjq7y"
+path="res://.godot/imported/cat_cozy.png-9836a1fb1ba9e3a009444bd0a7f040a0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/worker_cat_directional.png"
-dest_files=["res://.godot/imported/worker_cat_directional.png-2450e8d3e7374d823dba4e58336ccce2.ctex"]
+source_file="res://tools/sprite/refs/cat_cozy.png"
+dest_files=["res://.godot/imported/cat_cozy.png-9836a1fb1ba9e3a009444bd0a7f040a0.ctex"]
 
 [params]
 

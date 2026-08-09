@@ -55,6 +55,14 @@ STAGING = (
     # character does not leave the frame.
     "The character stays exactly the same size in frame for the whole clip and "
     "stays centred, staying in one spot rather than travelling across the frame. "
+    # Depth had to be said outright. "Travelling across the frame" reads as
+    # sideways, and a back view walking away from the camera is the obvious
+    # reading of walking -- so the cat's back walk shrank steadily for four
+    # seconds. Nothing repeats in a clip like that: the similarity curve just
+    # gets worse with distance and there is no cycle to find.
+    "It does NOT walk toward the camera or away from the camera: it stays at the "
+    "same distance and the same size the entire time, never getting bigger or "
+    "smaller, marching on the spot. "
     "Full body always visible including both feet, feet never cropped. "
     "Flat solid chroma green background, one uniform colour, no gradient, no "
     "shadow on the ground, no scenery, no props, no other characters. "

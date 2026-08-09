@@ -4,8 +4,19 @@ class_name MachineLayer
 ## Draws machines, the items flowing between them, and the build preview.
 
 ## Carried over from Motorio: a 2x2 directional sheet, one frame per facing.
-const CAT_SHEET: Texture2D = preload("res://assets/characters/worker_cat_directional.png")
-const CAT_FRAME := 627.0
+## cat_org, animated. The previous sheet was four still drawings in a 2x2 grid,
+## one per direction, so a cat crossing the map slid along without moving its
+## legs. These come out of tools/sprite normalised the same way the player's do:
+## uniform 128 cells, one shared scale, the feet on a fixed anchor.
+const CAT_IDLE_SHEET: Texture2D = preload("res://assets/characters/cat_idle_s.png")
+const CAT_WALK_SHEET: Texture2D = preload("res://assets/characters/cat_walk_s.png")
+const CAT_WALK_E_SHEET: Texture2D = preload("res://assets/characters/cat_walk_e.png")
+const CAT_WALK_N_SHEET: Texture2D = preload("res://assets/characters/cat_walk_n.png")
+const CAT_CELL := 128.0
+const CAT_FRAMES := 8
+const CAT_FPS := 10.0
+## Drawn smaller than the player: the cats are workers in her factory and reading
+## the scene depends on her being the largest thing moving in it.
 const CAT_DRAW := 44.0
 
 var sim: Sim
@@ -333,13 +344,6 @@ func _draw_arrow(from: Vector2, dir: Vector2i, length: float, col: Color, width:
 	draw_colored_polygon(PackedVector2Array([
 		tip, tip - d * 7.0 + perp * 4.5, tip - d * 7.0 - perp * 4.5]), col)
 
-const CAT_VIEW_FRAME := {"front": 0, "back": 1, "left": 2, "right": 3}
-
-func _cat_region(view: String) -> Rect2:
-	var index: int = int(CAT_VIEW_FRAME.get(view, 0))
-	return Rect2(Vector2(float(index % 2) * CAT_FRAME, float(index / 2) * CAT_FRAME),
-		Vector2(CAT_FRAME, CAT_FRAME))
-
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
@@ -505,14 +509,31 @@ func _draw_cats() -> void:
 			heading = sim.cell_centre(sim.shelter_cell) - cat.pos
 		elif cat.state == Defs.CAT_EATING:
 			heading = Vector2.DOWN
-		var view: Dictionary = Defs.facing_view(Defs.facing_index(heading))
+		# Standing still gets the idle sheet; anything with somewhere to be walks.
+		# A cat that has arrived and is working should not keep striding on the
+		# spot, and one crossing the map should not glide.
+		var walking: bool = cat.state in [Defs.CAT_TO_MINER, Defs.CAT_TO_FOOD, Defs.CAT_TO_SHELTER]
+		var sheet: Texture2D = CAT_IDLE_SHEET
+		var flip := false
+		if walking:
+			if absf(heading.x) >= absf(heading.y):
+				sheet = CAT_WALK_E_SHEET
+				flip = heading.x < 0.0
+			elif heading.y < 0.0:
+				sheet = CAT_WALK_N_SHEET
+			else:
+				sheet = CAT_WALK_SHEET
+		# Offset by position so a line of cats does not step in unison, which
+		# reads as one animation playing on several bodies.
+		var step: int = int(pulse * CAT_FPS + cat.pos.x * 0.7) % CAT_FRAMES
+		var region := Rect2(float(step) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
 		var size := Vector2(CAT_DRAW / breathe, CAT_DRAW * breathe)
-		if bool(view["flip"]):
+		if flip:
 			size.x = -size.x
 		var target := Rect2(cat.pos - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -4 + munch), size)
-		if bool(view["flip"]):
+		if flip:
 			target.position.x += absf(size.x)
-		draw_texture_rect_region(CAT_SHEET, target, _cat_region(String(view["view"])), Color.WHITE)
+		draw_texture_rect_region(sheet, target, region, Color.WHITE)
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling
 			# cats reads as a slow, visible conveyor.

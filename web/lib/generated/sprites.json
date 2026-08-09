@@ -233,6 +233,91 @@
         }
       ],
       "source_video": "/sprite-candidates/source-c4be677849fd.mp4"
+    },
+    {
+      "id": "catorg-idle-s",
+      "motion": "idle",
+      "facing": "s",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/catorg-idle-s-a-b966466877b4.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 8484,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-953767a4823a.mp4"
+    },
+    {
+      "id": "catorg-walk-s",
+      "motion": "walk",
+      "facing": "s",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/catorg-walk-s-a-d3379e82bf2e.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 8484,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-361a58cb759c.mp4"
+    },
+    {
+      "id": "catorg-walk-e",
+      "motion": "walk",
+      "facing": "e",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/catorg-walk-e-a-7a31d6ee6d1a.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 8484,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-b22071df9458.mp4",
+      "mirrors": "w"
+    },
+    {
+      "id": "catorg-walk-n",
+      "motion": "walk",
+      "facing": "n",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/catorg-walk-n-a-f597e6194a5c.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 9595,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · cat_org"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-b1175ecef120.mp4"
     }
   ]
 }

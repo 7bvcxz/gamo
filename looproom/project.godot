@@ -1,0 +1,39 @@
+; looproom — 좁은 화면 탐험 + 회귀 POC
+;
+; 확인하려는 것은 하나다: 새 방을 발견하는 재미와 회귀당하는 긴장이 함께 있을 때
+; "한 번 더"가 나오는가. 미니맵이 없는 것이 결함이 아니라 가설이다 — 지도는
+; 플레이어 머릿속에 그려져야 한다.
+
+config_version=5
+
+[application]
+
+config/name="Looproom"
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.1.0"
+
+[display]
+
+; 방 하나가 정확히 뷰포트 하나다. 16x9 타일 x 60px = 960x540.
+;
+; keep, not expand. `_draw`가 960x540 상수로 그리는데 expand는 세로 폰에서 그보다
+; 훨씬 큰 뷰포트를 준다 — gunslinger가 그렇게 해서 화면 위 40%만 게임이고 나머지가
+; 회색이 됐다. keep은 레터박스를 두는 대신 구도를 지킨다. 그리고 이 게임에서는
+; 구도가 곧 규칙이다: 한 화면이 한 방이라는 것이 첫 번째 완료 조건이다.
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[input_devices]
+
+; 탭 한 번이 터치와 합성 마우스 클릭 두 번으로 도착하면 입력이 두 번 먹는다.
+; gunslinger에서 결과 화면의 다음 라운드가 즉시 반칙패로 끝나는 형태로 나타났다.
+pointing/emulate_mouse_from_touch=false
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.055, 0.051, 0.075, 1)
+textures/canvas_textures/default_texture_filter=0

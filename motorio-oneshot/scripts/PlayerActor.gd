@@ -332,8 +332,9 @@ func _draw_carried_cat() -> void:
 	var target := Rect2(offset - Vector2(absf(size.x), size.y) * 0.5 + Vector2(0, -6), size)
 	if bool(view["flip"]):
 		target.position.x += absf(size.x)
-	var index: int = int(MachineLayer.CAT_VIEW_FRAME.get(String(view["view"]), 0))
-	var region := Rect2(
-		Vector2(float(index % 2) * MachineLayer.CAT_FRAME, float(index / 2) * MachineLayer.CAT_FRAME),
-		Vector2(MachineLayer.CAT_FRAME, MachineLayer.CAT_FRAME))
-	carry_layer.draw_texture_rect_region(MachineLayer.CAT_SHEET, target, region, Color.WHITE)
+	# The idle sheet: a cat in her arms is not walking, and the old directional
+	# sheet it used to index into no longer exists.
+	var step: int = int(animation_time * MachineLayer.CAT_FPS) % MachineLayer.CAT_FRAMES
+	var region := Rect2(float(step) * MachineLayer.CAT_CELL, 0.0,
+		MachineLayer.CAT_CELL, MachineLayer.CAT_CELL)
+	carry_layer.draw_texture_rect_region(MachineLayer.CAT_IDLE_SHEET, target, region, Color.WHITE)

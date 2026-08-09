@@ -25,10 +25,19 @@ func _run() -> void:
 		[PlayerActor.RUN_E_SHEET, PlayerActor.FRAMES, "run east"],
 		[PlayerActor.WALK_N_SHEET, PlayerActor.FRAMES, "walk north"],
 		[PlayerActor.RUN_N_SHEET, PlayerActor.FRAMES, "run north"],
+		[PlayerActor.MINE_SHEET, PlayerActor.FRAMES, "mine"],
+		[PlayerActor.MINE_E_SHEET, PlayerActor.FRAMES, "mine east"],
+		[PlayerActor.MINE_N_SHEET, PlayerActor.FRAMES, "mine north"],
+		[MachineLayer.CAT_IDLE_SHEET, MachineLayer.CAT_FRAMES, "cat idle"],
+		[MachineLayer.CAT_WALK_SHEET, MachineLayer.CAT_FRAMES, "cat walk"],
+		[MachineLayer.CAT_WALK_E_SHEET, MachineLayer.CAT_FRAMES, "cat walk east"],
+		[MachineLayer.CAT_WALK_N_SHEET, MachineLayer.CAT_FRAMES, "cat walk north"],
 	]:
 		var texture: Texture2D = sheet_info[0]
 		var frames: int = sheet_info[1]
 		var label: String = sheet_info[2]
+		# Cells are the same size for the cat as for the player; only the size it
+		# is drawn at differs.
 		_assert(texture.get_height() == int(PlayerActor.CELL),
 			"%s sheet is one cell tall" % label)
 		_assert(texture.get_width() == frames * int(PlayerActor.CELL),
