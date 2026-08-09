@@ -93,7 +93,7 @@
     "idle":  { "frames": 8,  "fps": 10, "loop": true, "feet_planted": true },
     "walk":  { "frames": 8,  "fps": 10, "loop": true },
     "run":   { "frames": 8,  "fps": 10, "loop": true },
-    "mine":  { "frames": 8,  "fps": 10, "loop": true, "max_centroid_jump_body": 0.20, "max_area_change_ratio": 0.20 },
+    "mine":  { "frames": 8,  "fps": 10, "loop": true, "carries_tool": true, "max_centroid_jump_body": 0.20, "max_area_change_ratio": 0.20 },
     "carry": { "frames": 8,  "fps": 10, "loop": true },
     "sleep": { "frames": 8,  "fps": 10, "loop": true }
   },
@@ -168,6 +168,20 @@
     ],
     "grim": { "source_body": 484 },
     "catorg": { "source_body": 595 },
+    "_when_it_applies": [
+      "Only to motions marked carries_tool. Everywhere else the clip's own",
+      "measurement is better, and applying this to all of them was a mistake",
+      "worth writing down. The generator does not draw a character at exactly",
+      "one size across clips -- Grim came out 480 to 492 and the cat 573 to 640",
+      "-- and measuring each clip is what absorbs that: each one is scaled so",
+      "the character lands on the cell's body height, whatever it started at.",
+      "Forcing a shared number instead *reintroduces* the drift. The standing",
+      "cat, whose clip is 640 and which was told it was 595, rendered 7.5%",
+      "larger than the walking one, and it was visible in the game.",
+      "",
+      "So the rule is narrow: use this when the measurement includes something",
+      "that is not the character, and only then."
+    ],
     "_catorg_why": [
       "595 is the median of the three walking clips (595, 595, 573). The idle",
       "clip measures 640, which is the full height of the frame -- the keying",

@@ -280,6 +280,90 @@ def sequence_offset(window: tuple, scale: float, cell: dict) -> tuple:
     return (round(anchor_x - width / 2), round(anchor_y - height))
 
 
+def despeckle(image: Image.Image, threshold: int, keep_ratio: float = 0.05) -> Image.Image:
+    """Erase specks left behind by the chroma key.
+
+    Keying a generated clip leaves flecks -- a few pixels of green above the
+    head, a scatter of dirt at the point where a pickaxe hits the ground. They
+    are small and they are not the character, but every measurement here works
+    on the silhouette, so they set the crop, they move the centroid, and the
+    validator rejects the frame for having pixels detached from the body. On the
+    side-facing mining clip 19 of 48 frames carried them, which is more than any
+    choice of window can avoid: with a 20 frame cycle and 8 samples there is no
+    start that misses them all. The pipeline was doing the best that selection
+    can do, and selection was the wrong tool.
+
+    So: find the connected pieces of the silhouette and drop the ones far
+    smaller than the largest. A ratio rather than a pixel count, because the same
+    clip is measured at source resolution and again in the cell. A tool held out
+    at arm's length is a fifth of the body and survives; a fleck is under a
+    hundredth and does not.
+
+    Runs per row rather than per pixel: a 640x640 frame has a few hundred runs
+    and four hundred thousand pixels, and this is called for every frame several
+    times over.
+    """
+    alpha = image.getchannel("A")
+    width, height = image.size
+    data = alpha.tobytes()
+
+    parent = []
+    def find(a: int) -> int:
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+    def union(a: int, b: int) -> None:
+        a, b = find(a), find(b)
+        if a != b:
+            parent[b] = a
+
+    runs = []            # (start_x, end_x_exclusive, label) per row
+    previous: list = []
+    for y in range(height):
+        row = data[y * width:(y + 1) * width]
+        current = []
+        x = 0
+        while x < width:
+            if row[x] < threshold:
+                x += 1
+                continue
+            start = x
+            while x < width and row[x] >= threshold:
+                x += 1
+            label = len(parent)
+            parent.append(label)
+            # Touching or overlapping the row above joins the same piece; the
+            # extra pixel each way makes it 8-connected rather than 4.
+            for before in previous:
+                if before[0] <= x and start <= before[1]:
+                    union(before[2], label)
+            current.append((start, x, label))
+            runs.append((y, start, x, label))
+        previous = current
+
+    if not runs:
+        return image
+    areas: dict = {}
+    for _, start, end, label in runs:
+        root = find(label)
+        areas[root] = areas.get(root, 0) + (end - start)
+    biggest = max(areas.values())
+    doomed = {root for root, area in areas.items() if area < biggest * keep_ratio}
+    if not doomed:
+        return image
+
+    out = image.copy()
+    pixels = out.load()
+    for y, start, end, label in runs:
+        if find(label) not in doomed:
+            continue
+        for x in range(start, end):
+            r, g, b, _ = pixels[x, y]
+            pixels[x, y] = (r, g, b, 0)
+    return out
+
+
 def strip_background(image: Image.Image, spec: dict) -> Image.Image:
     """Remove a flat background by colour, keyed off the corners.
 
@@ -289,7 +373,7 @@ def strip_background(image: Image.Image, spec: dict) -> Image.Image:
     exact match. If the image already has real transparency it is left alone.
     """
     if image.getchannel("A").getextrema()[0] < 255:
-        return image
+        return despeckle(image, spec["alpha_threshold"])
     width, height = image.size
     corners = [image.getpixel(p)[:3] for p in
                [(0, 0), (width - 1, 0), (0, height - 1), (width - 1, height - 1)]]
@@ -302,7 +386,7 @@ def strip_background(image: Image.Image, spec: dict) -> Image.Image:
             r, g, b, a = pixels[x, y]
             if abs(r - key[0]) + abs(g - key[1]) + abs(b - key[2]) <= tolerance:
                 pixels[x, y] = (r, g, b, 0)
-    return out
+    return despeckle(out, spec["alpha_threshold"])
 
 
 def _quantise(image: Image.Image, palette: list, threshold: int) -> Image.Image:

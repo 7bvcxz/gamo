@@ -32,7 +32,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-idle-s-a-aedcc33dbfff.png",
+          "sheet": "/sprite-candidates/grim-idle-s-a-415fbf3181ee.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -53,7 +53,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-s-a-e780d39d61d6.png",
+          "sheet": "/sprite-candidates/grim-walk-s-a-bb87160fcad6.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -74,7 +74,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-e-a-9930a25f8d42.png",
+          "sheet": "/sprite-candidates/grim-walk-e-a-5e49d0247beb.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -96,7 +96,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-s-a-a02b4da28658.png",
+          "sheet": "/sprite-candidates/grim-run-s-a-a20950f8ded6.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -117,7 +117,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-e-a-27b9aa5f959a.png",
+          "sheet": "/sprite-candidates/grim-run-e-a-b834543291c7.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -139,7 +139,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-walk-n-a-5a09688c12b6.png",
+          "sheet": "/sprite-candidates/grim-walk-n-a-5a00f843bc1e.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -160,7 +160,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-n-a-7455e8da37cb.png",
+          "sheet": "/sprite-candidates/grim-run-n-a-75e8648b3585.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -181,15 +181,15 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-e-a-51285ecf40db.png",
+          "sheet": "/sprite-candidates/grim-mine-e-a-0fa287f719de.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 6262,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 채굴"
+          "seed": 4242,
+          "note": "grim-mine-w의 좌우 반전 · 원본 생성 없음"
         }
       ],
-      "source_video": "/sprite-candidates/source-56c952df4739.mp4",
+      "source_video": "/sprite-candidates/source-c4be677849fd.mp4",
       "mirrors": "w"
     },
     {
@@ -203,7 +203,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-n-a-f1ed80e2aa99.png",
+          "sheet": "/sprite-candidates/grim-mine-n-a-094808a58e0a.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -224,7 +224,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-s-a-37890cfa3531.png",
+          "sheet": "/sprite-candidates/grim-mine-s-a-0b90f4ed61af.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -245,7 +245,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/catorg-idle-s-a-d9c0db152cad.png",
+          "sheet": "/sprite-candidates/catorg-idle-s-a-3b57975a2196.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -266,7 +266,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/catorg-walk-s-a-d3379e82bf2e.png",
+          "sheet": "/sprite-candidates/catorg-walk-s-a-bd1aa3d56b92.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -287,7 +287,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/catorg-walk-e-a-7a31d6ee6d1a.png",
+          "sheet": "/sprite-candidates/catorg-walk-e-a-19489ae1c03b.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -309,7 +309,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/catorg-walk-n-a-3e6c698a8c9b.png",
+          "sheet": "/sprite-candidates/catorg-walk-n-a-e91fcfd96deb.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
@@ -330,7 +330,7 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-w-a-f0b9dbe806b8.png",
+          "sheet": "/sprite-candidates/grim-mine-w-a-f71535d22777.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,

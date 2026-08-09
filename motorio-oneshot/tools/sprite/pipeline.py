@@ -54,7 +54,18 @@ def cycle_period(signatures: list) -> int:
     Prominence is how far a dip sits below the ridges on either side of it, which
     is small for noise on a slope and large for a genuine repeat.
     """
-    lags = list(range(4, max(6, len(signatures) // 3 + 1)))
+    # Up to half the clip. A third was not enough and the back-facing mining clip
+    # is the proof: three full swings in 48 frames put its repeat at lag 20, the
+    # search stopped at 16, and the prominence scan skips the endpoints -- so the
+    # right answer was not merely missed, it could not be returned. What came
+    # back was 4, the shortest lag allowed, and eight frames sampled across four
+    # source frames are the same picture eight times. The clip was fine; a person
+    # watching the sheet said Grim was standing still, and she was.
+    #
+    # Half is the ceiling that means anything: at lag n the score averages only
+    # len-n pairs, so beyond half the clip the measurement thins out faster than
+    # it informs.
+    lags = list(range(4, max(6, len(signatures) // 2 + 1)))
     scores = {}
     for lag in lags:
         pairs = [loopfind.distance(signatures[i], signatures[i + lag])
@@ -220,9 +231,10 @@ def main() -> int:
     parser.add_argument("--note", default="")
     parser.add_argument("--subject-height", default="",
                         help="a name from spec.subjects, or a number. The character's "
-                             "height in source pixels, used instead of measuring this "
-                             "clip -- so a pose holding a raised tool does not shrink "
-                             "the character to make room for it.")
+                             "height in source pixels. Used instead of measuring this "
+                             "clip, but only for motions the spec marks carries_tool -- "
+                             "elsewhere the clip's own measurement is the better number "
+                             "and this is ignored.")
     args = parser.parse_args()
 
     want = int(spec["animations"][args.motion]["frames"])
@@ -249,8 +261,9 @@ def main() -> int:
     for index, source in enumerate(best["frames"]):
         shutil.copy(source, cycle / f"f{index:02d}.png")
 
+    # Only for motions that put a tool in the silhouette. See spec.subjects.
     source_body = 0.0
-    if args.subject_height:
+    if args.subject_height and spec["animations"][args.motion].get("carries_tool"):
         subjects = spec.get("subjects", {})
         if args.subject_height in subjects:
             source_body = float(subjects[args.subject_height]["source_body"])
