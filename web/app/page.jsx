@@ -29,6 +29,13 @@ const GAMES = [
     extra: [{ href: site('/gunslinger/doc/'), label: '문서' }],
   },
   {
+    name: 'looproom',
+    path: game('/looproom/'),
+    blurb:
+      '한 화면에 한 방. 미니맵 없이 18개의 방을 머릿속 지도로 찾아갑니다. 가짜 문을 지나면 시작 방으로 돌아갑니다.',
+    extra: [{ href: site('/looproom/doc/'), label: '문서' }],
+  },
+  {
     name: 'Nowhere',
     path: game('/nowhere/'),
     blurb: '방과 방을 오가는 실험용 프로토타입.',

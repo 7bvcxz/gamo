@@ -19,6 +19,11 @@
       "permanent": false
     },
     {
+      "source": "/looproom",
+      "destination": "https://7bvcxz.github.io/gamo/looproom/",
+      "permanent": false
+    },
+    {
       "source": "/nowhere",
       "destination": "https://7bvcxz.github.io/gamo/nowhere/",
       "permanent": false

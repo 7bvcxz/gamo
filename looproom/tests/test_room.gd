@@ -13,6 +13,10 @@ func _init() -> void:
 	var failures: int = 0
 	var main: Node2D = MainScene.instantiate()
 	root.add_child(main)
+	# `_init` 시점에는 root Window 자체가 아직 트리에 없어서 `_ready`가 다음 프레임으로
+	# 미뤄진다. 테스트는 그 프레임까지 가지 않고 끝나므로 직접 부른다 -- 이걸 빼면
+	# `_ready`가 하는 초기화(시작 방 발견, 시작 위치)가 통째로 검사되지 않는다.
+	main._ready()
 
 	# 방 = 고정 크기 그리드. 그리고 그 크기가 곧 화면 하나다.
 	var rect: Rect2 = Rooms.room_rect()

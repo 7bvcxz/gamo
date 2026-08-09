@@ -41,6 +41,13 @@ export function WhatIsGamo() {
             플레이할 만큼 재미있는지 한 가지만 확인하려고 만든 프로토타입입니다.
           </span>
         </a>
+        <a className="card" href={game('/looproom/')}>
+          <b>looproom</b>
+          <span>
+            한 화면에 한 방. 발견하는 재미와 회귀당하는 긴장이 함께 있을 때
+            &ldquo;한 번 더&rdquo;가 나오는지 확인하려고 만든 프로토타입입니다.
+          </span>
+        </a>
         <a className="card" href={game('/nowhere/')}>
           <b>Nowhere</b>
           <span>

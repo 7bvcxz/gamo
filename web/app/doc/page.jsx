@@ -31,6 +31,7 @@ const NAV = [
       { href: site('/motorio-oneshot/doc/'), label: 'Motorio: One Shot →' },
       { href: site('/motorio/doc/'), label: 'Motorio →' },
       { href: site('/gunslinger/doc/'), label: 'Gunslinger →' },
+      { href: site('/looproom/doc/'), label: 'looproom →' },
     ],
   },
   {
