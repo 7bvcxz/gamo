@@ -96,15 +96,15 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-run-s-a-086fd1ad87b6.png",
+          "sheet": "/sprite-candidates/grim-run-s-a-bebb11382b7b.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 달리기"
+          "seed": 3131,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 달리기(재생성)"
         }
       ],
-      "source_video": "/sprite-candidates/source-50a795a3a32f.mp4"
+      "source_video": "/sprite-candidates/source-a20b4852f5ef.mp4"
     }
   ]
 }

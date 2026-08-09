@@ -223,8 +223,14 @@ func _moving(sprinting: bool) -> void:
 	var phase: float = animation_time * rate
 	var stretch: float = sin(phase) * (0.045 if sprinting else 0.035)
 	var squash: float = -stretch * 0.45
-	# Kept: this is vertical, the footfall, and it does not fight the drawing.
-	var bounce: float = absf(sin(phase)) * (3.0 if sprinting else 2.0)
+	# Vertical only -- the footfall -- so it does not fight the drawing the way the
+	# rocking did. The run gets more of it than the walk, and deliberately: what
+	# separates the two is a moment with neither foot down, and the generator
+	# would not produce one. Asked explicitly for it and measured the result, the
+	# body's lowest point moved 4px in a 500px frame, the same as walking. The
+	# knees do lift and the head travels half again as far, so the drawing carries
+	# most of the difference; this supplies the hop the footage is missing.
+	var bounce: float = absf(sin(phase)) * (5.0 if sprinting else 2.0)
 	character.rotation = 0.0
 	character.scale = Vector2(SPRITE_SCALE * (1.0 + squash), SPRITE_SCALE * (1.0 + stretch))
 	var fps: float = RUN_FPS if sprinting else FPS

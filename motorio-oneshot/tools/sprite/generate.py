@@ -63,7 +63,27 @@ STAGING = (
 
 MOTION_PROMPTS = {
     "walk": "The character from image 1 walks in place, facing the viewer, a simple looping walk cycle at a steady pace.",
-    "run": "The character from image 1 runs in place, facing the viewer, a looping run cycle, leaning slightly forward.",
+    # What separates a run from a fast walk is not speed, and asking for speed
+    # does not produce one: "runs in place, leaning slightly forward" came back
+    # as brisk walking with no lean worth measuring. A run is a specific set of
+    # shapes -- the torso pitched forward, the knee driven up in front, the elbows
+    # bent and pumping, and above all a moment where neither foot is touching the
+    # ground. That flight phase is the whole tell; a walk always has a foot down.
+    # So they are named, and the lean is given a number rather than "slightly".
+    #
+    # Kept deliberately light: this is a small round character in a heavy coat,
+    # and a sprinter's form would look wrong on her. Bouncy rather than driving.
+    "run": (
+        "The character from image 1 runs in place at a happy bouncy pace, facing "
+        "the viewer. The whole body leans forward about ten degrees and stays "
+        "leaning for the entire clip. Each stride: one knee lifts high in front so "
+        "the thigh comes up toward the chest, then that foot drives down as the "
+        "other knee lifts, and at the fastest part of each stride BOTH feet are "
+        "off the ground at the same time with the body lifted slightly higher. "
+        "The arms are bent at the elbow and pump forward and back, opposite to the "
+        "legs. Four complete strides across the clip. Light and cute and springy, "
+        "not a heavy or aggressive sprint -- she is small and bundled in a coat."
+    ),
     # Spelled out as a full arc with a count, because the short version did not
     # work. "Swings a pickaxe downward and back up in a steady repeating rhythm"
     # produced four seconds of a character holding a pickaxe and shifting it
