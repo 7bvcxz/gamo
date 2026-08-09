@@ -22,6 +22,7 @@ func _run() -> void:
 		[PlayerActor.WALK_SHEET, PlayerActor.FRAMES, "walk"],
 		[PlayerActor.WALK_E_SHEET, PlayerActor.FRAMES, "walk east"],
 		[PlayerActor.RUN_SHEET, PlayerActor.FRAMES, "run"],
+		[PlayerActor.RUN_E_SHEET, PlayerActor.FRAMES, "run east"],
 	]:
 		var texture: Texture2D = sheet_info[0]
 		var frames: int = sheet_info[1]

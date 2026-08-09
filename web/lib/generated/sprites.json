@@ -105,6 +105,28 @@
         }
       ],
       "source_video": "/sprite-candidates/source-a20b4852f5ef.mp4"
+    },
+    {
+      "id": "grim-run-e",
+      "motion": "run",
+      "facing": "e",
+      "cell": [
+        128,
+        128
+      ],
+      "candidates": [
+        {
+          "id": "a",
+          "sheet": "/sprite-candidates/grim-run-e-a-be92a8b48640.png",
+          "frames": 8,
+          "fps": 10,
+          "closure": 0.0,
+          "seed": 3131,
+          "note": "Seedance 2.0 Mini · 640×640 · 4s · Grim 측면 달리기"
+        }
+      ],
+      "source_video": "/sprite-candidates/source-2f35d24fcdcb.mp4",
+      "mirrors": "w"
     }
   ]
 }

@@ -49,6 +49,12 @@ const WALK_SHEET: Texture2D = preload("res://assets/characters/grim_walk_s.png")
 ## the reflection is therefore exact.
 const WALK_E_SHEET: Texture2D = preload("res://assets/characters/grim_walk_e.png")
 const RUN_SHEET: Texture2D = preload("res://assets/characters/grim_run_s.png")
+## The side run, where the forward lean is finally visible. Front-on it is not:
+## a body pitched toward the camera foreshortens into nothing, which is why the
+## front run reads as a run through the knees and the bounce instead. Measured on
+## the footage, the side run leans 2.7 degrees forward against the side walk's
+## 0.9 back -- a 3.6 degree difference between walking and running.
+const RUN_E_SHEET: Texture2D = preload("res://assets/characters/grim_run_e.png")
 ## Eight frames at ten a second, for every motion. The spec settles on one shape
 ## rather than a count per motion: what differs between a walk and an idle is
 ## what happens inside the cycle, not how many slots it is cut into.
@@ -61,9 +67,6 @@ const FPS := 10.0
 ## at 0.57s. The walk needs no such correction -- its cycle is 0.83s and eight
 ## frames at ten is 0.80s, which is the same stride.
 ##
-## Sideways sprinting still uses the side walk sped up: there is no side run
-## sheet, and the front run turned sideways would be wrong in a way a faster
-## walk is not.
 const RUN_FPS := 14.0
 
 var velocity := Vector2.ZERO
@@ -238,8 +241,15 @@ func _moving(sprinting: bool) -> void:
 	# Sideways when she is mostly going sideways, front otherwise. Comparing the
 	# two components rather than testing for a pure axis keeps a diagonal on the
 	# side view, which is where it reads better.
-	var sideways: bool = absf(_walk_input.x) > absf(_walk_input.y)
-	var sheet: Texture2D = WALK_E_SHEET if sideways else (RUN_SHEET if sprinting else WALK_SHEET)
+	# Ties go sideways, and the tie is not a rare case: a keyboard diagonal is
+	# exactly 0.707 on both axes, so `>` sent every diagonal to the front view
+	# while the comment here claimed otherwise.
+	var sideways: bool = absf(_walk_input.x) >= absf(_walk_input.y)
+	var sheet: Texture2D
+	if sideways:
+		sheet = RUN_E_SHEET if sprinting else WALK_E_SHEET
+	else:
+		sheet = RUN_SHEET if sprinting else WALK_SHEET
 	_set_frame(sheet, step, TARGET_FOOT - Vector2(0.0, bounce))
 
 ## Playback is a plain loop for every motion, and the ping-pong that used to be
