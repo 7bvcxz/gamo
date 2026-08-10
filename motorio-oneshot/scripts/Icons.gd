@@ -227,3 +227,67 @@ static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
 					at + Vector2(0.0, -size), at + Vector2(size * 0.8, size * 0.5),
 					at + Vector2(-size * 0.8, size * 0.5), at + Vector2(0.0, -size)]),
 					Defs.ORE_OUTLINE, width)
+
+## The SSR cat, which is a pig.
+##
+## Drawn, not generated. Every other cat plays an eight-frame sheet cut out of a
+## video, and one more sheet is a generation run plus a pipeline pass. A pig is a
+## shape this drawing language can state exactly -- round body, two soft ears, a
+## snout with two nostrils, a curl of tail -- so it is stated, built on the cat
+## icon's own proportions so the two stand in a line together without one of them
+## looking like it wandered in from another game.
+##
+## Front-facing always. The pig has no side view and inventing one out of the
+## same primitives would be a worse picture than the one that works, so a walking
+## pig is a pig walking toward you. `step` drives the legs; pass 0 to stand still.
+##
+## Fills the rect it is handed, like every icon here, which is what lets the same
+## function draw a 40px result tile and a 58px animal in the snow.
+static func draw_pig(canvas: CanvasItem, rect: Rect2, step: float = 0.0) -> void:
+	var box: Rect2 = rect.abs()
+	if box.size.x <= 0.0 or box.size.y <= 0.0:
+		return
+	var centre_x: float = box.position.x + box.size.x * 0.5
+	var line: float = maxf(1.0, box.size.x / 26.0)
+	var body: float = minf(box.size.x * 0.40, box.size.y * 0.30)
+	var body_at := Vector2(centre_x, box.position.y + box.size.y * 0.66)
+	var head: float = body * 0.82
+	var head_at := Vector2(centre_x, box.position.y + box.size.y * 0.29)
+
+	# Legs first, so the body sits on top of them rather than beside them.
+	for side: float in [-1.0, 1.0]:
+		var phase: float = step
+		if side > 0.0:
+			phase = step + PI
+		var swing: float = sin(phase) * box.size.y * 0.045
+		var leg := Rect2(centre_x + side * body * 0.54 - box.size.x * 0.06,
+			body_at.y + body * 0.46 + swing, box.size.x * 0.12, box.size.y * 0.15)
+		canvas.draw_rect(leg, Defs.COL_PIG_SNOUT)
+		canvas.draw_rect(leg, Defs.OUTLINE, false, line * 0.7)
+	# The curl. One detail carries the whole reading: without it a pink circle is
+	# a pink circle, and with it nobody has to be told what they pulled.
+	canvas.draw_arc(Vector2(centre_x - body * 1.05, body_at.y - body * 0.26), body * 0.30,
+		-PI * 0.45, PI * 1.45, 16, Defs.COL_PIG_SNOUT, line * 1.2)
+
+	canvas.draw_circle(body_at, body, Defs.COL_PIG_BODY)
+	canvas.draw_circle(body_at - Vector2(body * 0.30, body * 0.34), body * 0.42,
+		Defs.COL_PIG_BODY.lightened(Defs.FACE_LIGHT))
+	# Ears behind the head, the way the cat icon does it.
+	for side: float in [-1.0, 1.0]:
+		var tip: Vector2 = head_at + Vector2(side * head * 0.70, -head * 0.60)
+		canvas.draw_colored_polygon(PackedVector2Array([
+			tip + Vector2(-head * 0.30, head * 0.34), tip + Vector2(head * 0.30, head * 0.34),
+			tip + Vector2(side * head * 0.16, -head * 0.46)]), Defs.COL_PIG_SNOUT)
+	canvas.draw_circle(head_at, head, Defs.COL_PIG_BODY)
+	canvas.draw_circle(head_at - Vector2(head * 0.28, head * 0.30), head * 0.40,
+		Defs.COL_PIG_BODY.lightened(Defs.FACE_LIGHT))
+	for side: float in [-1.0, 1.0]:
+		canvas.draw_circle(head_at + Vector2(side * head * 0.40, -head * 0.16),
+			maxf(1.0, head * 0.12), Defs.OUTLINE)
+	var snout := Rect2(head_at.x - head * 0.40, head_at.y + head * 0.16,
+		head * 0.80, head * 0.52)
+	canvas.draw_rect(snout, Defs.COL_PIG_SNOUT)
+	canvas.draw_rect(snout, Defs.OUTLINE, false, line * 0.7)
+	for side: float in [-1.0, 1.0]:
+		canvas.draw_circle(snout.get_center() + Vector2(side * snout.size.x * 0.20, 0.0),
+			maxf(0.8, snout.size.x * 0.11), Defs.OUTLINE)

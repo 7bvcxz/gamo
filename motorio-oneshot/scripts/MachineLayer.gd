@@ -525,6 +525,19 @@ static func cat_rect(at: Vector2, breathe: float, flip: bool, dip: float) -> Rec
 static func cat_head_y(rect: Rect2) -> float:
 	return rect.position.y + CAT_HEAD_FRACTION * absf(rect.size.y)
 
+## The animal's own box inside the sprite cell.
+##
+## The sheets are normalised to a 128 cell with the feet at 104 and the top of
+## the head around 36, so most of that rect is empty padding. Anything drawn in
+## place of a sheet has to land in the same band or it stands beside its own
+## shadow -- which is exactly the failure this file already has a lesson about.
+static func cat_body_rect(rect: Rect2) -> Rect2:
+	var box: Rect2 = rect.abs()
+	var top: float = box.position.y + CAT_HEAD_FRACTION * box.size.y
+	var bottom: float = box.position.y + CAT_FOOT_FRACTION * box.size.y
+	var width: float = box.size.x * 0.62
+	return Rect2(box.get_center().x - width * 0.5, top, width, bottom - top)
+
 ## Where the shadow goes. Same input as cat_rect, so the two cannot drift.
 static func cat_shadow_at(at: Vector2) -> Vector2:
 	return at + Vector2(0.0, CAT_GROUND)
@@ -553,6 +566,25 @@ static func cat_sheet(state: int, heading: Vector2) -> Array:
 		return [CAT_WALK_N_SHEET, false]
 	return [CAT_WALK_SHEET, false]
 
+## A ring on the ground under the graded ones.
+##
+## Colour on the floor rather than on the animal. Tinting the sprite would fight
+## the sheets the pipeline spent a week getting right, and a badge over the head
+## would collide with the hunger bar and the carried item that already live
+## there. Only R and above get one, so the ninety-three percent of cats that are
+## ordinary look exactly as they always did.
+func _rarity_ring(cat: Sim.Cat) -> void:
+	if cat.rarity < Defs.RARITY_R:
+		return
+	var tint: Color = Defs.RARITY_COLORS[cat.rarity]
+	var at: Vector2 = cat_shadow_at(cat.pos)
+	# Squashed the same way the shadow is, so the ring reads as lying on the snow
+	# rather than as a hoop standing up around the cat.
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+	draw_arc(Vector2(at.x, at.y / Defs.SHADOW_SQUASH), CAT_DRAW * 0.26, 0.0, TAU, 24,
+		Color(tint.r, tint.g, tint.b, 0.85), 2.0)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
 func _draw_cats() -> void:
 	# Every shadow first, then every body. Drawn per cat, the next cat's shadow
 	# lands on top of the previous cat's feet, and a group crossing paths reads as
@@ -561,6 +593,7 @@ func _draw_cats() -> void:
 		if _cat_hidden(cat):
 			continue
 		_shadow(cat_shadow_at(cat.pos), CAT_DRAW * 0.18)
+		_rarity_ring(cat)
 	for cat: Sim.Cat in sim.cats:
 		if _cat_hidden(cat):
 			continue
@@ -585,7 +618,16 @@ func _draw_cats() -> void:
 		var step: int = int(pulse * CAT_FPS + cat.pos.x * 0.7) % CAT_FRAMES
 		var region := Rect2(float(step) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
 		var target: Rect2 = cat_rect(cat.pos, breathe, flip, munch)
-		draw_texture_rect_region(sheet, target, region, Color.WHITE)
+		if cat.rarity == Defs.RARITY_SSR:
+			# There is no pig sheet, so the pig is drawn. It goes in the animal's
+			# own band inside the cell, which is what keeps it on the shadow, the
+			# hunger bar and the carried-item dot that the sheets are aligned to.
+			var gait: float = 0.0
+			if cat.state in Defs.CAT_WALKING_STATES:
+				gait = pulse * 7.0
+			Icons.draw_pig(self, cat_body_rect(target), gait)
+		else:
+			draw_texture_rect_region(sheet, target, region, Color.WHITE)
 		var head: float = cat_head_y(target)
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling

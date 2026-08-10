@@ -31,6 +31,9 @@ class Cat extends RefCounted:
 	var carrying: int = -1
 	var hunger: float = 1.0
 	var eat_timer: float = 0.0
+	## Which grade this cat is. Everything adopted out of a crate is an O, so the
+	## default is what the game produced before the gacha existed.
+	var rarity: int = Defs.RARITY_O
 
 	func has_job() -> bool:
 		return assigned != Vector2i(9999, 9999)
@@ -88,6 +91,15 @@ var carried_cat: Cat = null
 var food: int = Defs.FOOD_START
 var shelter_cell := Vector2i.ZERO
 var food_cell := Vector2i.ZERO
+## Coins, spent one per pull at the slot machine. Nothing else in the game reads
+## them, which is why they are a plain counter rather than a `stock` entry: the
+## materials in `stock` are all things a belt can carry.
+var coins: int = 0
+## The gacha's own generator, seeded from the run. Separate from world
+## generation on purpose -- a pull must not depend on how much terrain has been
+## rolled since -- and seeded rather than global so a test can ask for a
+## thousand pulls and get the same thousand every time.
+var gacha_rng := RandomNumberGenerator.new()
 
 var heat: int = Defs.START_HEAT
 var total_heat: int = 0
@@ -152,6 +164,7 @@ func to_save() -> Dictionary:
 			"px": cat.pos.x, "py": cat.pos.y, "state": cat.state,
 			"ax": cat.assigned.x, "ay": cat.assigned.y,
 			"hunger": cat.hunger, "eat": cat.eat_timer,
+			"rarity": cat.rarity,
 		})
 	var box_rows: Array = []
 	for cell: Vector2i in cat_boxes:
@@ -172,7 +185,7 @@ func to_save() -> Dictionary:
 	return {
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
 		"machines": machine_rows, "cats": cat_rows, "boxes": box_rows,
-		"carried": carried_boxes, "food": food,
+		"carried": carried_boxes, "food": food, "coins": coins,
 		"stock": stock_rows, "ground": ground_rows, "unlocked": unlocked_rows,
 		"recipes": unlocked_recipes.keys(),
 	}
@@ -185,6 +198,9 @@ func from_save(data: Dictionary) -> void:
 		delivered[int(key)] = int(delivered_rows[key])
 	carried_boxes = int(data.get("carried", 0))
 	food = int(data.get("food", Defs.FOOD_START))
+	# Defaulted rather than required, so a save written before the slot machine
+	# existed loads as a run that has simply never pulled.
+	coins = int(data.get("coins", 0))
 	var stock_rows: Dictionary = data.get("stock", {})
 	for key: String in stock_rows:
 		stock[int(key)] = int(stock_rows[key])
@@ -225,6 +241,7 @@ func from_save(data: Dictionary) -> void:
 		cat.assigned = Vector2i(int(row["ax"]), int(row["ay"]))
 		cat.hunger = float(row.get("hunger", 1.0))
 		cat.eat_timer = float(row.get("eat", 0.0))
+		cat.rarity = int(row.get("rarity", Defs.RARITY_O))
 		cats.append(cat)
 	_refresh_radius()
 
@@ -252,6 +269,11 @@ func setup(seed_value: int) -> void:
 	cat_boxes.clear()
 	carried_boxes = 0
 	carried_cat = null
+	coins = 0
+	# Derived from the run seed rather than randomised, so replaying a seed
+	# replays the pulls too. Shifted off the world seed so two sims that generate
+	# the same terrain do not also hand out the same first cat.
+	gacha_rng.seed = seed_value ^ 0x9E3779B9
 	food = Defs.FOOD_START
 	shelter_cell = core_cell + Defs.SHELTER_CELL
 	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
@@ -407,16 +429,51 @@ func adopt_cats() -> int:
 	if adopted <= 0:
 		return 0
 	carried_boxes -= adopted * Defs.BOXES_PER_CAT
-	# Spread across the doorstep rather than stacked on one tile, the same way
-	# they come out in the morning. Three cats on the same pixel look like one
-	# cat, right up until they walk off in different directions.
-	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
-	for index in adopted:
-		var cat := Cat.new()
-		cat.pos = doorstep + Vector2((float(index) - float(adopted - 1) * 0.5) * Defs.CAT_LANE, 0.0)
-		cats.append(cat)
+	var grades: Array[int] = []
+	for _index in adopted:
+		grades.append(Defs.RARITY_O)
+	_spawn_cats(grades)
 	cat_adopted.emit(cats.size())
 	return adopted
+
+## Puts new cats on the shelter doorstep, spread across it rather than stacked on
+## one tile, the same way they come out in the morning. Three cats on the same
+## pixel look like one cat, right up until they walk off in different directions.
+##
+## Shared by the two ways a cat arrives -- crates and the slot machine -- because
+## the second one can deliver ten at once, and ten cats on one pixel is not a
+## reward, it is a rendering bug the player will report.
+func _spawn_cats(grades: Array[int]) -> void:
+	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	for index in grades.size():
+		var cat := Cat.new()
+		cat.rarity = grades[index]
+		cat.pos = doorstep + Vector2((float(index) - float(grades.size() - 1) * 0.5) * Defs.CAT_LANE, 0.0)
+		cats.append(cat)
+
+## --- The slot machine ---------------------------------------------------------
+## Split in two on purpose. The reels spin for three seconds, and the coins have
+## to leave the purse at the moment the player presses the button rather than
+## when the animation happens to end -- otherwise closing the window mid-spin, or
+## a lag spike, is a free pull. So `begin_gacha` charges and `pull_gacha` decides;
+## the orchestrator calls the second one when the reels stop.
+func begin_gacha(count: int) -> bool:
+	if count <= 0 or coins < count:
+		return false
+	coins -= count
+	return true
+
+## Rolls `count` grades, puts that many cats on the doorstep and returns what
+## came out. Takes no payment: begin_gacha already did.
+func pull_gacha(count: int) -> Array[int]:
+	var grades: Array[int] = []
+	for _index in maxi(count, 0):
+		grades.append(Defs.roll_rarity(gacha_rng.randf() * 100.0))
+	if grades.is_empty():
+		return grades
+	_spawn_cats(grades)
+	cat_adopted.emit(cats.size())
+	return grades
 
 ## Picking a cat up takes it off its machine; the machine stops immediately.
 func pick_up_cat(cell: Vector2i) -> bool:
@@ -823,7 +880,11 @@ func cell_centre(cell: Vector2i) -> Vector2:
 func _operator_rate(cell: Vector2i, supply: float) -> float:
 	var worker: Cat = worker_at(cell)
 	if worker != null:
-		return 1.0 if worker.hunger > 0.0 else Defs.HUNGER_STARVED_RATE
+		# The grade multiplies the work, and hunger still cuts it. An O cat is
+		# exactly 1.0, so this is the same number it always was for every cat the
+		# game produced before the slot machine existed.
+		var grade: float = Defs.RARITY_WORK_RATE[clampi(worker.rarity, 0, Defs.RARITY_WORK_RATE.size() - 1)]
+		return grade if worker.hunger > 0.0 else grade * Defs.HUNGER_STARVED_RATE
 	return supply if power_capacity > 0.0 else 0.0
 
 ## The cat actually standing at this machine, or null. Carried cats are excluded

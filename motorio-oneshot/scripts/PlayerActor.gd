@@ -123,6 +123,8 @@ var carrying_cat := false
 var mining: float = 0.0
 var carried_cat_pos := Vector2.ZERO
 var carried_cat_heading := Vector2.DOWN
+## Which grade is in her arms, because the SSR is drawn rather than played.
+var carried_cat_rarity: int = Defs.RARITY_O
 ## Set by Main. Structures block movement, so the actor needs to ask the world
 ## whether a tile is passable before it commits to a step.
 var blocked: Callable = func(_cell: Vector2i) -> bool: return false
@@ -353,6 +355,13 @@ func _draw_carried_cat() -> void:
 	# position instead of the world's. Doing it separately here is what let the
 	# two drift apart when the cat's drawn size changed.
 	var target: Rect2 = MachineLayer.cat_rect(offset, 1.0, bool(view["flip"]), 0.0)
+	# The SSR is a pig and has no sheet to index into. Handled here as well as in
+	# the machine layer because a cat is drawn in two places -- on the ground and
+	# in her arms -- and the last time those two disagreed the carried one drifted
+	# off its own anchor for a release.
+	if carried_cat_rarity == Defs.RARITY_SSR:
+		Icons.draw_pig(carry_layer, MachineLayer.cat_body_rect(target), 0.0)
+		return
 	# The idle sheet: a cat in her arms is not walking, and the old directional
 	# sheet it used to index into no longer exists.
 	var step: int = int(animation_time * MachineLayer.CAT_FPS) % MachineLayer.CAT_FRAMES

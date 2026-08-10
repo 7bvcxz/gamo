@@ -24,6 +24,12 @@ var message_color: Color = Defs.COL_TEXT
 var hotbar_rects: Array[Rect2] = []
 var direction_rect := Rect2()
 var settings_button_rect := Rect2()
+## The slot machine: the corner button that opens it, the card, and its three
+## price buttons. Published the same way every other target is, so touch
+## hit-tests exactly what was drawn instead of recomputing the layout.
+var gacha_button_rect := Rect2()
+var gacha_card_rect := Rect2()
+var gacha_pull_rects: Array[Rect2] = []
 var settings_close_rect := Rect2()
 var settings_restart_rect := Rect2()
 var settings_save_rect := Rect2()
@@ -101,7 +107,13 @@ func hotbar_origin() -> Vector2:
 	# Lifted clear of the thumb controls rather than sharing the bottom strip
 	# with them, which at large UI scales buried a card under the X button.
 	var bottom: float = size.y - slot.y - MARGIN - bottom_reserved()
-	return Vector2(size.x * 0.5 - total * 0.5, bottom)
+	# And never over the gacha button, which owns the bottom-left corner. On any
+	# real screen the centred row is nowhere near it; on the narrowest canvas the
+	# layout supports, centring puts the first card straight on top of it, and a
+	# button that cannot be pressed is worse than a row that is slightly off
+	# centre.
+	var left_limit: float = MARGIN + GACHA_BUTTON.x + SLOT_GAP
+	return Vector2(maxf(size.x * 0.5 - total * 0.5, left_limit), bottom)
 
 ## Everything above the status panel, so the gear owns the very top-left corner.
 func status_top() -> float:
@@ -130,7 +142,44 @@ func _layout() -> void:
 	var width: float = _text_width(label, 12) + 44.0
 	direction_rect = Rect2(size.x * 0.5 - width * 0.5, origin.y - 58.0, width, 24.0)
 	settings_button_rect = Rect2(MARGIN, MARGIN, SETTINGS_BUTTON, SETTINGS_BUTTON)
+	# Bottom-left, bottom-aligned with the hotbar row so the two read as one
+	# strip, and above whatever the touch pad claims -- on a phone that corner is
+	# four thumb buttons and a button drawn under them can never be pressed.
+	var floor_y: float = size.y - MARGIN - bottom_reserved()
+	gacha_button_rect = Rect2(MARGIN, floor_y - GACHA_BUTTON.y, GACHA_BUTTON.x, GACHA_BUTTON.y)
+	_layout_gacha()
 	_layout_settings()
+
+## --- The slot machine ---------------------------------------------------------
+## Tall enough for two rows of text with the second one's descenders inside the
+## panel. At 44 the word sat on the border, which reads as a rendering fault
+## rather than as a button.
+const GACHA_BUTTON := Vector2(78.0, 48.0)
+const GACHA_CARD_H := 396.0
+const GACHA_PULL_H := 46.0
+const GACHA_REEL := 56.0
+
+func _layout_gacha() -> void:
+	gacha_card_rect = _card_rect(GACHA_CARD_H)
+	var card: Rect2 = gacha_card_rect
+	var gap := 10.0
+	var width: float = (card.size.x - 44.0 - gap * 2.0) / float(Defs.GACHA_COUNTS.size())
+	var top: float = card.size.y - 112.0
+	gacha_pull_rects.clear()
+	for index in Defs.GACHA_COUNTS.size():
+		gacha_pull_rects.append(Rect2(
+			card.position + Vector2(22.0 + float(index) * (width + gap), top),
+			Vector2(width, GACHA_PULL_H)))
+
+## Which price button a point falls on, or -1. Used by touch, which has no
+## arrow keys to move the cursor with.
+func gacha_button_at(point: Vector2) -> int:
+	if not main.gacha_open:
+		return -1
+	for index in gacha_pull_rects.size():
+		if (gacha_pull_rects[index] as Rect2).has_point(point):
+			return index
+	return -1
 
 ## Two sliders, then a row of two actions, then close. Taller than it was because
 ## Esc opens this panel now: it is the only stopped screen, so everything a
@@ -316,7 +365,9 @@ func _draw() -> void:
 			_draw_resources()
 			_draw_palette()
 			_draw_meter_card()
+			_draw_gacha_button()
 			_draw_build_menu()
+			_draw_gacha_card()
 			_draw_message()
 	_draw_settings_button()
 	_draw_debug_badge()
@@ -952,6 +1003,164 @@ func _draw_meter_side(machine, box: Rect2, y: float, outgoing: bool) -> float:
 			design_label, 12, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 		y += METER_ROW
 	return y
+
+# --- The slot machine ---------------------------------------------------------
+
+## The coin, drawn once and reused everywhere a number of them appears, so the
+## corner button and the card cannot end up depicting different currencies.
+func _coin(at: Vector2, radius: float) -> void:
+	var gold: Color = Defs.RARITY_COLORS[Defs.RARITY_SSR]
+	draw_circle(at, radius, gold)
+	draw_circle(at - Vector2(radius * 0.28, radius * 0.30), radius * 0.42, gold.lightened(0.35))
+	draw_arc(at, radius, 0.0, TAU, 18, Defs.OUTLINE, maxf(1.0, radius * 0.16))
+
+## The corner button. Coin, count, word: the icon alone does not say what the
+## machine gives you and the word alone does not say it costs something.
+func _draw_gacha_button() -> void:
+	var rect: Rect2 = gacha_button_rect
+	if rect.size.x <= 0.0:
+		return
+	var accent: Color = Defs.RARITY_COLORS[Defs.RARITY_SSR]
+	var edge: float = 0.55
+	if main.gacha_open:
+		edge = 0.95
+	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
+		Color(accent.r, accent.g, accent.b, edge))
+	_coin(rect.position + Vector2(17.0, 18.0), 7.0)
+	_text(rect.position + Vector2(29.0, 23.0), "%d" % main.sim.coins, 14, Defs.COL_TEXT)
+	_text_in(Rect2(rect.position + Vector2(0.0, 39.0), Vector2(rect.size.x, 14.0)),
+		"가챠", 11, accent)
+	# While the reels turn with the window shut, the corner still says so.
+	if main.gacha_spin >= 0.0 and not main.gacha_open:
+		var sweep: float = clampf(1.0 - main.gacha_spin / Defs.GACHA_SPIN_SECONDS, 0.0, 1.0)
+		draw_arc(rect.position + Vector2(17.0, 17.0), 12.0, -PI * 0.5,
+			-PI * 0.5 + TAU * sweep, 24, accent, 2.0)
+
+func _draw_gacha_card() -> void:
+	if not main.gacha_open:
+		return
+	_dim(0.45)
+	var card: Rect2 = gacha_card_rect
+	var accent: Color = Defs.RARITY_COLORS[Defs.RARITY_SSR]
+	_frame(card, accent, "가챠 슬롯머신   ← → 선택 · Z 돌리기 · G 닫기")
+	# The purse, top right, because every button below is priced in it.
+	_coin(card.position + Vector2(card.size.x - 62.0, FRAME_HEADER + 24.0), 9.0)
+	_text(card.position + Vector2(card.size.x - 46.0, FRAME_HEADER + 30.0),
+		"%d" % main.sim.coins, 16, Defs.COL_TEXT)
+	_draw_gacha_stage(card)
+	_draw_gacha_odds(card)
+	for index in gacha_pull_rects.size():
+		_draw_gacha_pull(index)
+
+## The window inside the window: three reels while they turn, and what came out
+## once they stop. One area for both, because the result *is* what the reels
+## landed on -- a separate result panel would give the machine two places to look
+## at exactly the moment the player is looking hardest.
+func _draw_gacha_stage(card: Rect2) -> void:
+	var area := Rect2(card.position + Vector2(22.0, FRAME_HEADER + 44.0),
+		Vector2(card.size.x - 44.0, 150.0))
+	draw_rect(area, Color(0.02, 0.03, 0.06, 0.55))
+	draw_rect(area, Color(1, 1, 1, 0.06), false, 1.0)
+	if main.gacha_spin >= 0.0:
+		_draw_gacha_reels(area)
+		return
+	if main.gacha_results.is_empty():
+		_text_in(Rect2(area.position + Vector2(0.0, area.size.y * 0.5 + 6.0),
+			Vector2(area.size.x, 22.0)), "코인을 넣고 돌리세요", 14, Defs.COL_TEXT_DIM)
+		return
+	_draw_gacha_results(area)
+
+## Three reels, each a little slower than the last and all of them easing down,
+## so they settle one after another instead of stopping in unison.
+func _draw_gacha_reels(area: Rect2) -> void:
+	var elapsed: float = Defs.GACHA_SPIN_SECONDS - maxf(main.gacha_spin, 0.0)
+	var brake: float = 1.0 - clampf(elapsed / Defs.GACHA_SPIN_SECONDS, 0.0, 1.0) * 0.88
+	var gap := 14.0
+	var tile: float = minf(GACHA_REEL, (area.size.x - gap * 4.0) / 3.0)
+	var top: float = area.position.y + area.size.y * 0.5 - tile * 0.5 - 8.0
+	for reel in 3:
+		var box := Rect2(area.get_center().x + (float(reel) - 1.0) * (tile + gap) - tile * 0.5,
+			top, tile, tile)
+		var face: int = int(elapsed * (24.0 - float(reel) * 6.0) * brake) % Defs.RARITY_NAMES.size()
+		var tint: Color = Defs.RARITY_COLORS[face]
+		draw_rect(box, Color(tint.r, tint.g, tint.b, 0.16))
+		draw_rect(box, Color(tint.r, tint.g, tint.b, 0.7), false, 1.0)
+		_text_in(Rect2(box.position + Vector2(0.0, box.size.y * 0.5 + 9.0),
+			Vector2(box.size.x, 24.0)), Defs.RARITY_NAMES[face], 22, tint)
+	_text_in(Rect2(area.position + Vector2(0.0, area.size.y - 16.0), Vector2(area.size.x, 18.0)),
+		"돌리는 중", 12, Defs.COL_TEXT_DIM)
+
+## What came out, one tile per cat, five to a row so a ten-pull is two tidy rows
+## rather than a list nobody reads.
+func _draw_gacha_results(area: Rect2) -> void:
+	var pulls: Array[int] = main.gacha_results
+	var columns: int = clampi(pulls.size(), 1, 5)
+	var rows: int = int(ceil(float(pulls.size()) / float(columns)))
+	var gap := 8.0
+	var tile: float = minf((area.size.x - gap * float(columns + 1)) / float(columns),
+		(area.size.y - 30.0 - gap * float(rows + 1)) / float(rows))
+	var block_w: float = float(columns) * tile + float(columns - 1) * gap
+	var origin := Vector2(area.get_center().x - block_w * 0.5, area.position.y + 10.0)
+	var counts: Array[int] = []
+	for _grade in Defs.RARITY_NAMES.size():
+		counts.append(0)
+	for index in pulls.size():
+		var grade: int = pulls[index]
+		counts[grade] += 1
+		var column: int = index % columns
+		var row: int = index / columns
+		var box := Rect2(origin + Vector2(float(column) * (tile + gap), float(row) * (tile + gap)),
+			Vector2(tile, tile))
+		var tint: Color = Defs.RARITY_COLORS[grade]
+		draw_rect(box, Color(tint.r, tint.g, tint.b, 0.18))
+		draw_rect(box, Color(tint.r, tint.g, tint.b, 0.85), false, 1.0)
+		# The animal gets the top of the tile and the grade gets a band of its own
+		# underneath. Centred in the whole tile, the letter landed on the cat's
+		# paws and on the border at the same time.
+		var art := Rect2(box.position + Vector2(tile * 0.10, tile * 0.04),
+			Vector2(tile * 0.80, tile * 0.66))
+		if grade == Defs.RARITY_SSR:
+			Icons.draw_pig(self, art)
+		else:
+			Icons.draw_thing(self, art, Icons.THING_CAT)
+		_text_in(Rect2(box.position + Vector2(0.0, box.size.y - 5.0), Vector2(box.size.x, 14.0)),
+			Defs.RARITY_NAMES[grade], 11, tint)
+	var parts: Array[String] = []
+	for grade in Defs.RARITY_NAMES.size():
+		if counts[grade] > 0:
+			parts.append("%s %d" % [Defs.RARITY_NAMES[grade], counts[grade]])
+	_text_in(Rect2(area.position + Vector2(0.0, area.size.y - 12.0), Vector2(area.size.x, 16.0)),
+		" · ".join(parts), 12, Defs.COL_TEXT)
+
+## The table itself, on the machine. A gacha that will not show its own numbers
+## is asking to be trusted about the one thing the player cannot check.
+func _draw_gacha_odds(card: Rect2) -> void:
+	var row := Rect2(card.position + Vector2(22.0, card.size.y - 156.0),
+		Vector2(card.size.x - 44.0, 16.0))
+	var width: float = row.size.x / float(Defs.RARITY_NAMES.size())
+	for grade in Defs.RARITY_NAMES.size():
+		var tint: Color = Defs.RARITY_COLORS[grade]
+		var box := Rect2(row.position + Vector2(float(grade) * width, 0.0),
+			Vector2(width, row.size.y))
+		_text_in(box, Defs.RARITY_NAMES[grade], 12, tint)
+		_text_in(Rect2(box.position + Vector2(0.0, 15.0), Vector2(box.size.x, 14.0)),
+			"%.1f%%" % Defs.RARITY_PERCENT[grade], 10, Defs.COL_TEXT_DIM)
+
+func _draw_gacha_pull(index: int) -> void:
+	var rect: Rect2 = gacha_pull_rects[index]
+	var count: int = Defs.GACHA_COUNTS[index]
+	var ready: bool = main.sim.coins >= count and main.gacha_spin < 0.0
+	var tint: Color = Defs.COL_CORE
+	if not ready:
+		tint = Defs.COL_TEXT_DIM
+	var fill: float = 0.10
+	if index == main.gacha_index:
+		fill = 0.24
+	_panel(rect, Color(tint.r, tint.g, tint.b, fill), Color(tint.r, tint.g, tint.b, 0.8))
+	_coin(rect.position + Vector2(16.0, 19.0), 6.0)
+	_text(rect.position + Vector2(26.0, 24.0), "%d" % count, 16, Defs.COL_TEXT)
+	_text_in(Rect2(rect.position + Vector2(0.0, rect.size.y - 6.0), Vector2(rect.size.x, 14.0)),
+		"%d마리" % count, 10, Defs.COL_TEXT_DIM)
 
 func _draw_settings_button() -> void:
 	var rect: Rect2 = settings_button_rect

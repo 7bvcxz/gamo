@@ -44,6 +44,11 @@ const COL_CLOCK_FILL := Color8(120, 150, 190)
 const COL_MACHINE_EDGE := Color("6fd2c8")
 const COL_CAT_FUR := Color8(168, 90, 36)
 const COL_CAT_FACE := Color8(250, 226, 190)
+## The SSR cat, which is a pig. Warm, like everything the player earns, but a
+## pink that no machine and no ore uses, so half a second of it on screen is
+## unmistakably the rare thing rather than another amber light.
+const COL_PIG_BODY := Color8(242, 168, 186)
+const COL_PIG_SNOUT := Color8(212, 118, 144)
 const COL_DANGER := Color("e8574c")
 const COL_TEXT := Color("e6eef7")
 const COL_TEXT_DIM := Color("8fa0bd")
@@ -246,6 +251,60 @@ const DEBUG_CATS := 3
 ## is not "cats are close together", it is "the cats have come loose from their
 ## own shadows", which is how it was reported.
 const CAT_LANE := 30.0
+
+# --- Gacha -------------------------------------------------------------------
+## Cats have grades now, and the slot machine is where the rare ones come from.
+##
+## The five grades are the player's own table, kept in exactly the order and the
+## numbers they were promised. Cumulative thresholds would be the same
+## information, but nobody can read "60 / 93 / 98 / 99.5" and check it against
+## what the window says -- so the percentages that roll are the percentages that
+## are drawn, and roll_rarity is what turns one into the other.
+const RARITY_O := 0
+const RARITY_N := 1
+const RARITY_R := 2
+const RARITY_SR := 3
+const RARITY_SSR := 4
+
+const RARITY_NAMES: Array[String] = ["O", "N", "R", "SR", "SSR"]
+const RARITY_PERCENT: Array[float] = [60.0, 33.0, 5.0, 1.5, 0.5]
+## Cool for the common ones and warm for the rare ones, which is the same rule
+## the rest of the game follows: warmth belongs to what the player earned.
+const RARITY_COLORS: Array[Color] = [
+	Color8(140, 154, 178), Color8(190, 204, 224), Color8(120, 220, 140),
+	Color8(186, 138, 246), Color8(255, 196, 84),
+]
+
+## What a grade is worth at a miner, as a multiplier on the work it does.
+##
+## O is exactly one, and that is deliberate: a cat carried home in a crate is an
+## O cat, so the whole existing economy stays where it was and the gacha can only
+## ever add. A grade is not a different job -- it is the same cat, faster -- so
+## this is the only number a grade changes. Hunger still bites on top of it:
+## a starving SSR works at three times a third, not at three.
+const RARITY_WORK_RATE: Array[float] = [1.0, 1.2, 1.5, 2.0, 3.0]
+
+## One coin, one cat. The three buttons are just three of them at once, which is
+## why there is one price rather than a discount for volume: a bulk rate would
+## make the single pull a mistake, and the single pull is the one that teaches
+## the player what the machine does.
+const GACHA_COUNTS: Array[int] = [1, 3, 10]
+const GACHA_SPIN_SECONDS := 3.0
+## What the debug key tops the purse up to. Enough for three ten-pulls, so the
+## rare end of the table can actually be seen without playing for it.
+const DEBUG_COINS := 30
+
+## Which grade a 0..100 roll lands on. Walks the published percentages in order,
+## so the table on screen and the table that decides are the same array.
+static func roll_rarity(roll: float) -> int:
+	var edge: float = 0.0
+	for index in RARITY_PERCENT.size():
+		edge += RARITY_PERCENT[index]
+		if roll < edge:
+			return index
+	# Only reachable through floating-point slop at the very top of the range,
+	# where the rarest grade is what the player was owed.
+	return RARITY_PERCENT.size() - 1
 
 # --- Machines ----------------------------------------------------------------
 const M_CORE := 0

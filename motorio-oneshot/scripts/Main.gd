@@ -94,6 +94,23 @@ var build_menu_open: bool = false
 ## a stray Z would build.
 var menu_index: int = 0
 
+## --- The slot machine ---------------------------------------------------------
+## A modal over the world like the build list, not a State: the factory should
+## keep running while a player watches the reels, and stopping it would make a
+## three-second animation into a three-second pause in production.
+var gacha_open: bool = false
+## Which of Defs.GACHA_COUNTS the cursor is on.
+var gacha_index: int = 0
+## Seconds of reel left, or negative when they are not turning. The pull has
+## already been paid for by the time this is positive.
+var gacha_spin: float = -1.0
+## How many cats the turning reels owe, so the roll can happen when they stop
+## rather than being decided and then hidden for three seconds.
+var gacha_pending: int = 0
+## What the last pull produced, oldest first. Stays on screen until the next
+## pull, which is what makes the reel area the result window as well.
+var gacha_results: Array[int] = []
+
 func _ready() -> void:
 	randomize()
 	# Engine.time_scale is global and survives a scene reload, so a run that ends
@@ -148,6 +165,11 @@ func _start_run() -> void:
 	shake = 0.0
 	message = ""
 	message_life = 0.0
+	gacha_open = false
+	gacha_index = 0
+	gacha_spin = -1.0
+	gacha_pending = 0
+	gacha_results.clear()
 
 ## The next useful action, as text plus a picture of the thing it is about.
 ##
@@ -254,6 +276,7 @@ func toggle_build_menu() -> bool:
 	if build_menu_open:
 		menu_index = selected_index
 		meter_cell = Vector2i(9999, 9999)
+		gacha_open = false
 	audio.call("play", "select")
 	return true
 
@@ -273,6 +296,91 @@ func _build_menu_key(key: InputEventKey) -> void:
 			_load_build_gun(menu_index)
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + count:
 		_load_build_gun(key.keycode - KEY_1)
+
+## --- The slot machine ---------------------------------------------------------
+## G opens and closes it, and so does Esc, for the same reason B does the build
+## list: a window you enter with one key and leave with another is a window
+## players get stuck in.
+func toggle_gacha() -> bool:
+	if state != State.PLAY:
+		return false
+	if gacha_open:
+		close_gacha()
+		return true
+	gacha_open = true
+	# Two modals over the same world would both claim the keyboard.
+	build_menu_open = false
+	meter_cell = Vector2i(9999, 9999)
+	audio.call("play", "select")
+	return true
+
+## Closing mid-spin is allowed and costs nothing extra: the coins are already
+## gone, and the reels finish in the background so the cats still arrive. A
+## window that refuses to close is worse than one that resolves without you.
+func close_gacha() -> void:
+	if not gacha_open:
+		return
+	gacha_open = false
+	audio.call("play", "select")
+
+## Presses one of the three buttons. Charges immediately -- see Sim.begin_gacha
+## for why -- and starts the reels; the grades are rolled when they stop.
+func start_gacha(index: int) -> bool:
+	if not gacha_open or gacha_spin >= 0.0:
+		return false
+	if index < 0 or index >= Defs.GACHA_COUNTS.size():
+		return false
+	gacha_index = index
+	var count: int = Defs.GACHA_COUNTS[index]
+	if not sim.begin_gacha(count):
+		_notify("코인이 부족합니다", Defs.COL_DANGER)
+		audio.call("play", "deny")
+		return false
+	gacha_pending = count
+	gacha_spin = Defs.GACHA_SPIN_SECONDS
+	gacha_results.clear()
+	audio.call("play", "confirm")
+	return true
+
+## Runs whether or not the window is open, so closing it mid-spin still delivers.
+func _update_gacha(delta: float) -> void:
+	if gacha_spin < 0.0:
+		return
+	gacha_spin -= delta
+	if gacha_spin > 0.0:
+		return
+	gacha_spin = -1.0
+	gacha_results = sim.pull_gacha(gacha_pending)
+	gacha_pending = 0
+	var best: int = Defs.RARITY_O
+	for grade: int in gacha_results:
+		best = maxi(best, grade)
+	# The rarest thing in the pull is what the moment is about, so the feedback
+	# scales with it rather than with how many cats came out.
+	if best >= Defs.RARITY_SR:
+		_notify("%s 고양이!" % Defs.RARITY_NAMES[best], Defs.RARITY_COLORS[best])
+		fx.ring(player.position, Defs.RARITY_COLORS[best], Defs.RING_MILESTONE)
+		shake = maxf(shake, Defs.FX_LARGE)
+		audio.call("play", "finish")
+	else:
+		_notify("고양이 %d마리를 맞이했습니다" % gacha_results.size(), Defs.COL_CORE)
+		audio.call("play", "deliver")
+
+## Keyboard while the window is up. Left and right pick the amount, Z pulls;
+## the same three buttons the pointer taps, reachable without one.
+func _gacha_key(key: InputEventKey) -> void:
+	var count: int = Defs.GACHA_COUNTS.size()
+	match key.keycode:
+		KEY_ESCAPE, KEY_G:
+			close_gacha()
+		KEY_LEFT, KEY_A, KEY_UP, KEY_W:
+			gacha_index = posmod(gacha_index - 1, count)
+			audio.call("play", "select")
+		KEY_RIGHT, KEY_D, KEY_DOWN, KEY_S:
+			gacha_index = posmod(gacha_index + 1, count)
+			audio.call("play", "select")
+		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
+			start_gacha(gacha_index)
 
 ## Loading the gun. A locked machine can be looked at in the menu -- seeing what
 ## is coming is half of why the menu exists -- but it cannot be loaded.
@@ -376,6 +484,7 @@ func _process(delta: float) -> void:
 		sim.carry_at(player.position, Vector2(player.facing))
 		player.carried_cat_pos = sim.carried_cat.pos
 		player.carried_cat_heading = sim.carried_cat.heading
+		player.carried_cat_rarity = sim.carried_cat.rarity
 	if state == State.PLAY:
 		autosave_elapsed += delta
 		if autosave_elapsed >= AUTOSAVE_INTERVAL:
@@ -458,6 +567,7 @@ func _process_play(delta: float) -> void:
 	time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
 	_update_nibbles(delta)
+	_update_gacha(delta)
 	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_preview()
@@ -740,6 +850,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_build_menu_key(key)
 		get_viewport().set_input_as_handled()
 		return
+	# And so does the slot machine, for the same reason: Z pulls in there, and a
+	# Z that both pulled and placed a belt would be a key doing two jobs.
+	if gacha_open and state == State.PLAY:
+		_gacha_key(key)
+		get_viewport().set_input_as_handled()
+		return
 
 	match state:
 		State.TITLE:
@@ -782,6 +898,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode == KEY_B:
 		toggle_build_menu()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_G:
+		toggle_gacha()
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + TOOLS.size():
@@ -872,6 +992,18 @@ func touch_hud(position: Vector2) -> bool:
 		else:
 			build_menu_open = false
 			audio.call("play", "select")
+		return true
+	if gacha_open:
+		# Same contract as the build list: the window owns every tap while it is
+		# up, so a miss closes it rather than building something underneath.
+		var pull: int = int(hud.call("gacha_button_at", local))
+		if pull >= 0:
+			start_gacha(pull)
+		elif not (hud.gacha_card_rect as Rect2).has_point(local):
+			close_gacha()
+		return true
+	if (hud.gacha_button_rect as Rect2).has_point(local):
+		toggle_gacha()
 		return true
 	for index in hud.hotbar_rects.size():
 		if (hud.hotbar_rects[index] as Rect2).has_point(local):
@@ -1038,6 +1170,10 @@ func debug_unlock_all() -> void:
 	# the point of having one, several times, and the day kept running out first.
 	sim.carried_boxes += Defs.BOXES_PER_CAT * maxi(0, Defs.DEBUG_CATS - sim.cats.size())
 	sim.adopt_cats()
+	# And coins. There is no way to earn one yet, so without this the slot machine
+	# is a window with three buttons that all refuse -- and a 0.5% grade cannot be
+	# looked at by anyone at all.
+	sim.coins = maxi(sim.coins, Defs.DEBUG_COINS)
 	_notify("디버그 전체 해금", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
