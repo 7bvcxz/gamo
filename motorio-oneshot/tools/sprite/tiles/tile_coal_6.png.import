@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b8vg8scyw0u71"
-path="res://.godot/imported/tile_rock_47.png-f8ec8a44c05d4081c430b3312987fdc2.ctex"
+uid="uid://crf7wot54eyh"
+path="res://.godot/imported/tile_coal_6.png-f37d449d0c6ef5dd9b8382a73652e728.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tools/sprite/tile_rock_47.png"
-dest_files=["res://.godot/imported/tile_rock_47.png-f8ec8a44c05d4081c430b3312987fdc2.ctex"]
+source_file="res://tools/sprite/tiles/tile_coal_6.png"
+dest_files=["res://.godot/imported/tile_coal_6.png-f37d449d0c6ef5dd9b8382a73652e728.ctex"]
 
 [params]
 

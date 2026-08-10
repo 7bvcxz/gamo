@@ -34,23 +34,12 @@ func _draw() -> void:
 	draw_arc(core_px, warm_px - 5.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, 0.22), 10.0, false)
 	draw_arc(core_px, warm_px, 0.0, TAU, 72, Color(1.0, 0.69, 0.36, edge_alpha), 3.0, true)
 
-	_draw_grid(tile)
+	# The grid used to be drawn here as faint lines. The ground is painted tiles
+	# now, one per cell, and each carries its own outline at exactly this pitch --
+	# so the lines landed on top of the tile edges and the floor read as two grids
+	# fighting, one soft and one ruled. What the lines were for, judging alignment
+	# when a player stops to look, is what the tile edges do.
 	_draw_ore(tile)
-
-func _draw_grid(tile: float) -> void:
-	var start := Vector2i((view_rect.position / tile).floor())
-	var end := Vector2i((view_rect.end / tile).ceil())
-	# Barely there. The grid is for judging alignment when a player stops to look,
-	# not something to read the world through, and at 0.34 it was drawing a cage
-	# over every frame. Lifted a little at night so it survives the darker ground
-	# rather than disappearing exactly when the pool is dimmest.
-	var grid := Color(Defs.COL_GRID.r, Defs.COL_GRID.g, Defs.COL_GRID.b, 0.09 + night * 0.07)
-	for x in range(start.x, end.x + 1):
-		var px: float = float(x) * tile
-		draw_line(Vector2(px, view_rect.position.y), Vector2(px, view_rect.end.y), grid, 1.0)
-	for y in range(start.y, end.y + 1):
-		var py: float = float(y) * tile
-		draw_line(Vector2(view_rect.position.x, py), Vector2(view_rect.end.x, py), grid, 1.0)
 
 func _draw_ore(tile: float) -> void:
 	for cell: Vector2i in sim.ore:
