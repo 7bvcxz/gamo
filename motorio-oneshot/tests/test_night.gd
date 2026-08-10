@@ -82,6 +82,22 @@ func _run() -> void:
 		"halfway through the dawn the sky is halfway lit: %.2f" % halfway)
 	_assert(main.indoors(), "and everyone is still inside while it happens")
 
+	# The door opens on the frame the phase turns, not the frame after. Visibility
+	# used to be decided before the state machine ran, so on the step from DAWN to
+	# SPILL she was still being hidden by a phase that had just ended -- the door
+	# opened on an empty doorstep for one frame, and a playtest screenshot landed
+	# on exactly that frame.
+	var stepped_into_spill := false
+	for _frame in 200:
+		main._process(0.05)
+		if main.night_phase == main.Phase.SPILL and main.state == main.State.DAYBREAK:
+			stepped_into_spill = true
+			_assert(not main.indoors(), "the spill is outdoors by definition")
+			_assert(main.player.visible,
+				"and she is drawn on the very frame the door opens")
+			break
+	_assert(stepped_into_spill, "the sequence reaches the spill")
+
 	_assert(_settle(main, main.State.PLAY), "the morning ends in play")
 	_assert(is_zero_approx(main.night_level()), "fully lit")
 	_assert(not main.player.locked, "and the player has control")

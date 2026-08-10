@@ -523,6 +523,20 @@ func _process(delta: float) -> void:
 	else:
 		camera.offset = Vector2.ZERO
 
+	match state:
+		State.PLAY: _process_play(delta)
+		State.TITLE: pass
+		State.NIGHTFALL: _process_nightfall(delta)
+		State.DAYBREAK: _process_daybreak(delta)
+		State.RESULT, State.SETTINGS: pass
+
+	# After the state machine, not before it. These two read the state, and
+	# setting them first means they describe the frame that has just gone rather
+	# than the one about to be drawn: on the frame the sequence steps from DAWN
+	# to SPILL, the door opens on an empty doorstep because she was still being
+	# hidden by the phase that ended a few lines ago. One frame, and a playtest
+	# screenshot landed on it.
+	#
 	# The title is a hero shot: no player, no placement ghost, nothing that reads
 	# as leftover debug UI in the one frame that sells the game.
 	# Opening settings from the title must not spoil the hero shot, so visibility
@@ -531,13 +545,6 @@ func _process(delta: float) -> void:
 	var in_run: bool = showing != State.TITLE
 	player.visible = in_run and not indoors()
 	machine_layer.show_preview = state == State.PLAY
-
-	match state:
-		State.PLAY: _process_play(delta)
-		State.TITLE: pass
-		State.NIGHTFALL: _process_nightfall(delta)
-		State.DAYBREAK: _process_daybreak(delta)
-		State.RESULT, State.SETTINGS: pass
 
 ## Wind is always there and swells at night; the cold layer tracks how exposed
 ## the player actually is, so the ear learns the danger before the screen does.

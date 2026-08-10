@@ -700,8 +700,9 @@ func _draw_palette() -> void:
 ## On a panel, and that is not decoration. It used to be dim grey text laid
 ## straight onto the world, which over snow is grey on grey -- a playtest
 ## screenshot of it is barely legible, and the ground it sits on changes colour
-## all day. Sized to the text so it never clips at large UI scales, which a
-## fixed 480-wide box did.
+## all day. The panel is sized to the text because a panel has to hug what it is
+## backing: the line measures 321 units against the 480 the old box reserved, and
+## a plate with 159 units of empty tail reads as a misplaced rectangle.
 ##
 ## Two keys were missing from it: G, which opens the gacha, and the zoom pair,
 ## both added recently. A legend is a list that goes stale the moment someone
