@@ -13,6 +13,8 @@ func _init() -> void:
 	_atlas()
 	_regions()
 	_variants()
+	_rock_atlas()
+	_rock_field()
 	print("GROUND: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
 	quit(failures)
 
@@ -130,6 +132,92 @@ func _variants() -> void:
 					down += 1
 			_check(down < 45,
 				"열이 %d칸마다 반복되지 않는다 (x=%d): 60칸 중 %d칸 일치" % [period, x, down])
+
+## The boulder atlas. Six tiles with no relationship to each other, so the only
+## things that can be wrong are arithmetic: a region off the edge shows as a
+## hairline of the neighbouring tile, and a variant nobody picks is art that
+## never appears.
+func _rock_atlas() -> void:
+	var atlas: Texture2D = GroundLayer.ROCK_ATLAS
+	_check(atlas != null, "돌 아틀라스가 로드된다")
+	if atlas == null:
+		return
+	var cell: int = atlas.get_width() / GroundLayer.ROCK_COLUMNS
+	_check(cell == 64, "돌 타일 한 칸이 64픽셀이다: %d" % cell)
+	_check(atlas.get_width() == GroundLayer.ROCK_COLUMNS * cell
+		and atlas.get_height() == cell * 2, "3x2 아틀라스다: %dx%d"
+		% [atlas.get_width(), atlas.get_height()])
+	var bounds := Rect2(0.0, 0.0, float(atlas.get_width()), float(atlas.get_height()))
+	var seen: Dictionary = {}
+	for variant in GroundLayer.ROCK_VARIANTS:
+		var region: Rect2 = GroundLayer.rock_region(variant)
+		_check(bounds.encloses(region), "%d번 돌 영역이 아틀라스 안이다: %s" % [variant, region])
+		seen["%d,%d" % [int(region.position.x), int(region.position.y)]] = true
+	_check(seen.size() == GroundLayer.ROCK_VARIANTS, "여섯 자리를 전부 쓴다: %d" % seen.size())
+	_check(GroundLayer.rock_region(-3) == GroundLayer.rock_region(0), "범위 아래는 0번으로")
+	_check(GroundLayer.rock_region(99)
+		== GroundLayer.rock_region(GroundLayer.ROCK_VARIANTS - 1), "범위 위는 마지막으로")
+
+## Where the boulders land. The two numbers the request pinned down were a
+## twentieth of the ground and clumps of one to twelve, and neither is visible in
+## a screenshot: a floor that is 2% rock and one that is 9% rock both look like
+## "some rocks".
+func _rock_field() -> void:
+	var ground := GroundLayer.new()
+	var span: int = 220
+	ground._ensure_rock(Vector2i(-span / 2, -span / 2), Vector2i(span / 2, span / 2))
+	var inside: Dictionary[Vector2i, bool] = {}
+	for y in range(-span / 2, span / 2):
+		for x in range(-span / 2, span / 2):
+			if ground.is_rock(Vector2i(x, y)):
+				inside[Vector2i(x, y)] = true
+	var share: float = float(inside.size()) * 100.0 / float(span * span)
+	_check(share >= 3.5 and share <= 6.5, "돌이 바닥의 5%% 안팎이다: %.1f%%" % share)
+
+	var seen: Dictionary[Vector2i, bool] = {}
+	var sizes: Array[int] = []
+	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	for cell: Vector2i in inside:
+		if seen.has(cell):
+			continue
+		var queue: Array[Vector2i] = [cell]
+		seen[cell] = true
+		var count: int = 0
+		while not queue.is_empty():
+			var at: Vector2i = queue.pop_back()
+			count += 1
+			for step: Vector2i in steps:
+				var next: Vector2i = at + step
+				if inside.has(next) and not seen.has(next):
+					seen[next] = true
+					queue.append(next)
+		sizes.append(count)
+	sizes.sort()
+	var median: int = sizes[sizes.size() / 2]
+	_check(sizes.size() > 80, "덩어리가 충분히 많다: %d개" % sizes.size())
+	_check(median >= 2 and median <= 12, "덩어리 중앙값이 1~12 안이다: %d" % median)
+	var over: int = 0
+	for size: int in sizes:
+		if size > 12:
+			over += 1
+	# Clumps from neighbouring blocks can touch and merge. That is not a bug, but
+	# a field where it is the norm is not "clumps of one to twelve" any more.
+	_check(float(over) / float(sizes.size()) < 0.2,
+		"12칸을 넘는 덩어리는 드물다: %d / %d (최대 %d)"
+		% [over, sizes.size(), sizes[sizes.size() - 1]])
+
+	# Every one of the six appears, and no cell is left without a tile.
+	var used: Dictionary[int, bool] = {}
+	for cell: Vector2i in inside:
+		var variant: int = GroundLayer.rock_variant(cell)
+		_check(variant >= 0 and variant < GroundLayer.ROCK_VARIANTS,
+			"%s 돌 변형이 범위 안이다: %d" % [cell, variant])
+		used[variant] = true
+	_check(used.size() == GroundLayer.ROCK_VARIANTS,
+		"여섯 종류가 모두 쓰인다: %d" % used.size())
+	print("GROUND: 돌 %.1f%% · 덩어리 %d개 · 중앙값 %d · 최대 %d"
+		% [share, sizes.size(), median, sizes[sizes.size() - 1]])
+	ground.free()
 
 func _check(condition: bool, message: String) -> void:
 	if condition:

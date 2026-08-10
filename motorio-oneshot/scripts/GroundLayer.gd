@@ -32,6 +32,10 @@ var _texture: ImageTexture
 ## It is a child node because blend mode belongs to a CanvasItem, not to a draw
 ## call, and the ground's other two passes must stay ordinary.
 var _tile_layer: Node2D
+## Which cells carry boulders, worked out once per block and kept. The floor
+## never changes, so the alternative is deciding it again every frame.
+var _rock: Dictionary[Vector2i, bool] = {}
+var _blocks: Dictionary[Vector2i, bool] = {}
 
 func _ready() -> void:
 	_texture = _bake_pool()
@@ -112,6 +116,96 @@ static func tile_region(variant: int) -> Rect2:
 	return Rect2(float(index % TILE_COLUMNS) * size, float(index / TILE_COLUMNS) * size,
 		size, size)
 
+## --- Boulders ------------------------------------------------------------------
+## Six tiles of snow with rocks lying on it. They have nothing to do with each
+## other: there is no autotiling, no neighbour mask, and a cell simply picks one
+## of the six. That is what makes this sheet work where the last one did not --
+## a tile that never has to agree with its neighbour cannot disagree with it.
+##
+## Still decoration and nothing else: not in the simulation, not in the save, and
+## walked straight over, so it stays a pure function of the coordinates.
+const ROCK_ATLAS: Texture2D = preload("res://assets/tiles/rock_6.png")
+const ROCK_COLUMNS := 3
+const ROCK_VARIANTS := 6
+
+## A twentieth of the ground, in clumps of one to twelve. One clump is seeded per
+## block of ROCK_BLOCK cells, so the share is the average clump over the block:
+## 6.5 over 11x11 is 5.4%, and clumps from neighbouring blocks overlapping brings
+## the measured figure down to about five.
+const ROCK_BLOCK := 11
+const ROCK_MIN := 1
+const ROCK_MAX := 12
+## How far a clump can reach out of the block that seeded it. Twelve cells grown
+## from one seed cannot travel further, so the blocks around a cell are the only
+## ones that can claim it.
+const ROCK_REACH := 1
+
+## The cells one block's clump claims. Grown by filling its own concavities
+## rather than by walking, which keeps clumps close to round -- a random walk
+## produces strings one cell wide, and a line of separate boulder tiles reads as
+## a dotted line rather than as a scatter of rocks.
+static func rock_clump(block: Vector2i) -> Array[Vector2i]:
+	var size: int = ROCK_MIN + _mix(block.x, block.y, 7) % (ROCK_MAX - ROCK_MIN + 1)
+	var origin := Vector2i(
+		block.x * ROCK_BLOCK + _mix(block.x, block.y, 11) % ROCK_BLOCK,
+		block.y * ROCK_BLOCK + _mix(block.x, block.y, 13) % ROCK_BLOCK)
+	var cells: Array[Vector2i] = [origin]
+	var have: Dictionary[Vector2i, bool] = {origin: true}
+	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	while cells.size() < size:
+		var best: Array[Vector2i] = []
+		var best_score: int = -1
+		for from: Vector2i in cells:
+			for step: Vector2i in steps:
+				var candidate: Vector2i = from + step
+				if have.has(candidate):
+					continue
+				var score: int = 0
+				for around: Vector2i in steps:
+					if have.has(candidate + around):
+						score += 1
+				if score > best_score:
+					best_score = score
+					best = [candidate]
+				elif score == best_score and not best.has(candidate):
+					best.append(candidate)
+		if best.is_empty():
+			break
+		var pick: Vector2i = best[_mix(block.x, block.y, 300 + cells.size()) % best.size()]
+		cells.append(pick)
+		have[pick] = true
+	return cells
+
+## Fills the cache for every block that could reach into this range. Called once
+## per frame with the visible range rather than per cell.
+func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
+	var low := Vector2i(floori(float(start.x) / ROCK_BLOCK) - ROCK_REACH,
+		floori(float(start.y) / ROCK_BLOCK) - ROCK_REACH)
+	var high := Vector2i(floori(float(end.x) / ROCK_BLOCK) + ROCK_REACH,
+		floori(float(end.y) / ROCK_BLOCK) + ROCK_REACH)
+	for by in range(low.y, high.y + 1):
+		for bx in range(low.x, high.x + 1):
+			var block := Vector2i(bx, by)
+			if _blocks.has(block):
+				continue
+			_blocks[block] = true
+			for cell: Vector2i in rock_clump(block):
+				_rock[cell] = true
+
+func is_rock(cell: Vector2i) -> bool:
+	return _rock.has(cell)
+
+## Which of the six, on a different salt from the snow so a cell that turns to
+## rock does not inherit its snow variant's number.
+static func rock_variant(cell: Vector2i) -> int:
+	return _mix(cell.x, cell.y, 29) % ROCK_VARIANTS
+
+static func rock_region(variant: int) -> Rect2:
+	var index: int = clampi(variant, 0, ROCK_VARIANTS - 1)
+	var size: float = float(ROCK_ATLAS.get_width()) / float(ROCK_COLUMNS)
+	return Rect2(float(index % ROCK_COLUMNS) * size, float(index / ROCK_COLUMNS) * size,
+		size, size)
+
 ## One quad per visible cell, culled to the camera the way everything else is, so
 ## the cost follows the screen rather than the map.
 func _draw_tiles() -> void:
@@ -120,9 +214,23 @@ func _draw_tiles() -> void:
 	var tile := float(Defs.TILE)
 	var start := Vector2i((view_rect.position / tile).floor())
 	var end := Vector2i((view_rect.end / tile).ceil())
+	_ensure_rock(start, end)
+	# Two passes, one texture each. Interleaving them would break the batch at
+	# every switch, and a boulder cell must not be drawn over a snow one: both
+	# passes multiply, so a cell painted twice comes out twice as dark.
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
+			if _rock.has(cell):
+				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
 				tile_region(tile_variant(cell)))
+	for y in range(start.y, end.y + 1):
+		for x in range(start.x, end.x + 1):
+			var cell := Vector2i(x, y)
+			if not _rock.has(cell):
+				continue
+			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
+				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
+				rock_region(rock_variant(cell)))

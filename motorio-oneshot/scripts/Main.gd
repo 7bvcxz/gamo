@@ -896,6 +896,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_unlock_all()
 		get_viewport().set_input_as_handled()
 		return
+	if _zoom_key(key):
+		get_viewport().set_input_as_handled()
+		return
 	if key.keycode == KEY_B:
 		toggle_build_menu()
 		get_viewport().set_input_as_handled()
@@ -1141,6 +1144,38 @@ func _try_build() -> void:
 ## player with spare copper on one line and none on another can run both.
 ## Steps through the debug time multipliers. Engine.time_scale is global, so this
 ## moves the whole game at once rather than just the simulation.
+## --- Zoom keys -----------------------------------------------------------------
+## The two keys next to each other on every layout: minus shrinks, equals grows.
+## Shift moves the same pair from the world to the HUD, which is why they are one
+## function -- the pair has to stay a pair, and splitting it across two handlers
+## is how one of them ends up bound and the other forgotten.
+##
+## Read from `physical_keycode`, not `keycode`. Shift turns minus into underscore
+## and equals into plus, so the character the key produces is not the key: a
+## handler written against KEY_MINUS simply stops firing the moment Shift is
+## held, which is exactly when the HUD binding is wanted. The numpad's own pair
+## is accepted too, and it does not change under Shift.
+##
+## One step is the same step the settings sliders move in, so nudging with the
+## keyboard and dragging the slider land on the same values.
+func _zoom_key(key: InputEventKey) -> bool:
+	var physical: int = key.physical_keycode
+	var direction: float = 0.0
+	if physical == KEY_MINUS or physical == KEY_KP_SUBTRACT:
+		direction = -Defs.UI_SCALE_STEP
+	elif physical == KEY_EQUAL or physical == KEY_KP_ADD:
+		direction = Defs.UI_SCALE_STEP
+	else:
+		return false
+	if key.shift_pressed:
+		set_ui_scale(ui_scale + direction)
+		_notify("화면 UI 크기 %d%%" % int(round(ui_scale * 100.0)), Defs.COL_MACHINE_EDGE)
+	else:
+		set_game_scale(game_scale + direction)
+		_notify("게임 화면 크기 %d%%" % int(round(game_scale * 100.0)), Defs.COL_MACHINE_EDGE)
+	audio.call("play", "select")
+	return true
+
 func cycle_debug_speed() -> int:
 	speed_index = (speed_index + 1) % Defs.DEBUG_SPEEDS.size()
 	Engine.time_scale = Defs.DEBUG_SPEEDS[speed_index]
