@@ -691,12 +691,37 @@ func _draw_palette() -> void:
 			"B 목록", 10, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 
 	if main.touch == null or not main.touch.visible:
-		# Under the hotbar, not across the top: the top right belongs to the
-		# mission card now, and a key legend printed over it read as one long
-		# unparseable line.
-		_text_in(Rect2(size.x - 480.0 - MARGIN, origin.y + slot.y + 16.0, 480.0, 16),
-			"Z 사용   X 회수   R 회전   C 계기   B 목록   Esc 설정", 11, Defs.COL_TEXT_DIM,
-			HORIZONTAL_ALIGNMENT_RIGHT)
+		_draw_key_legend()
+
+## The key legend, under the hotbar rather than across the top: the top right
+## belongs to the mission card, and a legend printed over it read as one long
+## unparseable line.
+##
+## On a panel, and that is not decoration. It used to be dim grey text laid
+## straight onto the world, which over snow is grey on grey -- a playtest
+## screenshot of it is barely legible, and the ground it sits on changes colour
+## all day. Sized to the text so it never clips at large UI scales, which a
+## fixed 480-wide box did.
+##
+## Two keys were missing from it: G, which opens the gacha, and the zoom pair,
+## both added recently. A legend is a list that goes stale the moment someone
+## adds a key and forgets it, so the game's own hint hangs off the same place the
+## keys do -- there is a test that reads this string.
+const KEY_LEGEND := "Z 사용   X 회수   R 회전   C 계기   B 목록   G 가챠   -/= 크기   Esc 설정"
+
+## Anchored to the bottom of the screen rather than measured down from the
+## hotbar. The first version took the hotbar's baseline and used it as the top of
+## the plate -- but `_text_in` treats its y as a baseline and `draw_rect` treats
+## its y as a top edge, so the plate hung fourteen pixels off the bottom of the
+## window and took its own text with it. The legend had been readable before I
+## put it on a plate.
+func _draw_key_legend() -> void:
+	var width: float = minf(_text_width(KEY_LEGEND, 11) + 20.0, size.x - MARGIN * 2.0)
+	var floor_y: float = size.y - 4.0 - bottom_reserved()
+	var box := Rect2(size.x - width - MARGIN, floor_y - 18.0, width, 18.0)
+	draw_rect(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.55))
+	_text_in(Rect2(box.position + Vector2(0.0, 13.0), Vector2(box.size.x, 14.0)),
+		KEY_LEGEND, 11, Defs.COL_TEXT_DIM)
 
 # --- Build menu ---------------------------------------------------------------
 ## What the gun can be loaded with, with room to say what each thing does.
@@ -775,7 +800,9 @@ func _draw_build_row(index: int) -> void:
 		# coming is half of why a build list exists at all.
 		var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
 		_text(Vector2(text_x, rect.position.y + 38.0),
-			"%s을 손에 넣으면 해금됩니다" % Defs.ITEM_NAMES[key_item], 11, Defs.COL_TEXT_DIM)
+			"%s%s 손에 넣으면 해금됩니다"
+				% [Defs.ITEM_NAMES[key_item], Defs.object_of(Defs.ITEM_NAMES[key_item])],
+				11, Defs.COL_TEXT_DIM)
 		draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
 		return
 
@@ -814,12 +841,25 @@ func _draw_direction_chip(hotbar_y: float) -> void:
 	draw_colored_polygon(PackedVector2Array([
 		tip, tip - d * 5.0 + perp * 3.6, tip - d * 5.0 - perp * 3.6]), Defs.COL_CORE)
 
+## Every notification the game gives goes through here -- a machine unlocking, a
+## warning that night is coming, a purchase it cannot afford.
+##
+## On a plate, because it was floating text and over snow it was very nearly
+## invisible. A playtest screenshot of "아직 해금되지 않았습니다" is a grey smear on
+## a pale floor; the text had a one-pixel shadow, which is enough against the
+## night and nothing at all against the ground the game spends most of its time
+## on. The plate fades with the message, so nothing lingers.
 func _draw_message() -> void:
 	if main.message_life <= 0.0:
 		return
 	var alpha: float = clampf(main.message_life, 0.0, 1.0)
-	var box := Rect2(0, 196, size.x, 20)
-	_text_in(box, main.message, 15, Color(message_color.r, message_color.g, message_color.b, alpha))
+	var width: float = minf(_text_width(main.message, 15) + 32.0, size.x - MARGIN * 2.0)
+	var plate := Rect2(size.x * 0.5 - width * 0.5, 192.0, width, 26.0)
+	draw_rect(plate, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.82 * alpha))
+	draw_rect(plate, Color(message_color.r, message_color.g, message_color.b, 0.55 * alpha),
+		false, 1.0)
+	_text_in(Rect2(plate.position + Vector2(0.0, 18.0), Vector2(plate.size.x, 20.0)),
+		main.message, 15, Color(message_color.r, message_color.g, message_color.b, alpha))
 
 # --- Overlays ----------------------------------------------------------------
 

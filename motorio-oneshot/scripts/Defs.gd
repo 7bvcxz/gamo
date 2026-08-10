@@ -636,6 +636,46 @@ static func facing_view(index: int) -> Dictionary:
 		DIR_W: return {"view": "left", "flip": false, "lean": 0.0}
 		_: return {"view": "front", "flip": true, "lean": -1.0}
 
+## --- Korean particles ----------------------------------------------------------
+## 은/는, 을/를 and 이/가 are chosen by whether the preceding word ends in a final
+## consonant, so a sentence built with "%s" and a fixed particle is right for
+## some words and wrong for others -- and nothing about it looks wrong in the
+## source.
+##
+## Both of the sentences that did this were wrong for every word they could ever
+## receive. Every machine name in the game ends in a vowel, so "%s은 아직
+## 해금되지 않았습니다" read "컨테이너 벨트은"; every material ends in a consonant, so
+## "%s가 부족합니다" read "수정조각가 부족합니다" -- which is what a player sees the
+## first time they try to build something they cannot afford.
+##
+## A Hangul syllable is 0xAC00 + (initial * 588) + (vowel * 28) + final, so the
+## remainder modulo 28 is the final consonant and zero means there is none.
+static func has_final(word: String) -> bool:
+	if word.is_empty():
+		return false
+	var code: int = word.unicode_at(word.length() - 1)
+	if code < 0xAC00 or code > 0xD7A3:
+		return false
+	return (code - 0xAC00) % 28 != 0
+
+## Topic: 은 after a consonant, 는 after a vowel.
+static func topic(word: String) -> String:
+	if has_final(word):
+		return "은"
+	return "는"
+
+## Object: 을 / 를.
+static func object_of(word: String) -> String:
+	if has_final(word):
+		return "을"
+	return "를"
+
+## Subject: 이 / 가.
+static func subject(word: String) -> String:
+	if has_final(word):
+		return "이"
+	return "가"
+
 static func machine_color(type: int) -> Color:
 	match type:
 		M_CORE: return COL_CORE

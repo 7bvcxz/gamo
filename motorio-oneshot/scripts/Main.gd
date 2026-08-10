@@ -180,7 +180,32 @@ func _start_run() -> void:
 ##
 ## Derived from world state rather than a script, so it stays correct however the
 ## player plays.
+## How to mine, in the words of whichever device is holding the game.
+##
+## This line said "press C" for eight versions after C stopped mining. It is the
+## first instruction a new player is given and it named a key that opens the
+## throughput meter, so the opening minute of the game was a player pressing a
+## key and watching nothing happen. Mining moved onto the pickaxe in 0.20.22 and
+## the sentence describing it did not move with it.
+##
+## Two devices, two sentences, because they genuinely differ: a phone has no Z to
+## hold and a desktop has no 캐기 button to press. Both need the pickaxe first --
+## hand mining checks holding_pickaxe() before anything else -- which is the part
+## the old line never mentioned at all.
+func _mining_hint() -> String:
+	if touch != null and touch.visible:
+		return "곡괭이를 고르고 수정 광맥을 바라보며 캐기 버튼을 누르세요"
+	return "2번 곡괭이를 들고 수정 광맥을 바라보며 Z 를 누르고 계세요"
+
 func objective_data() -> Dictionary:
+	# Freezing comes before everything, including nightfall. A playtest caught the
+	# card reading "고양이 상자를 3개 모아 숙소로 가져가세요" over a screen at 0% warmth
+	# with "의식이 흐려집니다 1.4초" written across it. The objective is the largest
+	# text on screen and it was calmly discussing errands. Night is a fifty second
+	# warning; this is seconds from a blackout that costs a quarter of the run's
+	# heat, so it outranks it.
+	if not indoors() and player.warmth <= Defs.FROST_STAGES[2]:
+		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
 	if is_night():
 		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
 	if is_dusk():
@@ -189,7 +214,7 @@ func objective_data() -> Dictionary:
 		return _goal("고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요", "thing", Icons.THING_CAT)
 	# Lv1 -- do it with your hands, then hire someone to do it for you.
 	if int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 0 and sim.ground.is_empty():
-		return _goal("수정 광맥을 바라보고 C 를 눌러 직접 캐세요", "thing", Icons.THING_SEAM)
+		return _goal(_mining_hint(), "thing", Icons.THING_SEAM)
 	if sim.cats.is_empty() and sim.carried_boxes < Defs.BOXES_PER_CAT:
 		return _goal("고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)"
 			% [Defs.BOXES_PER_CAT, sim.carried_boxes], "thing", Icons.THING_CAT_BOX)
@@ -387,7 +412,9 @@ func _gacha_key(key: InputEventKey) -> void:
 func _load_build_gun(index: int) -> void:
 	var type: int = Defs.BUILDABLE[index]
 	if not sim.is_unlocked(type):
-		_notify("%s은 아직 해금되지 않았습니다" % Defs.MACHINE_NAMES[type], Defs.COL_DANGER)
+		_notify("%s%s 아직 해금되지 않았습니다"
+			% [Defs.MACHINE_NAMES[type], Defs.topic(Defs.MACHINE_NAMES[type])],
+			Defs.COL_DANGER)
 		audio.call("play", "select")
 		return
 	selected_index = index

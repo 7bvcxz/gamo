@@ -607,7 +607,8 @@ func can_build(type: int, cell: Vector2i) -> String:
 	if not is_unlocked(type):
 		return "아직 해금되지 않았습니다"
 	if not can_afford(type):
-		return "%s가 부족합니다" % _missing_label(type)
+		var missing: String = _missing_label(type)
+		return "%s%s 부족합니다" % [missing, Defs.subject(missing)]
 	if type == Defs.M_MINER and not ore.has(cell):
 		return "광맥 위에만 설치할 수 있습니다"
 	if type != Defs.M_MINER and ore.has(cell):
