@@ -106,7 +106,7 @@ func _draw() -> void:
 	_draw_meter_marker(tile)
 	_draw_focus_readout()
 	_draw_cats()
-	_draw_stalls(tile)
+	_draw_machine_marks(tile)
 	if show_preview:
 		_draw_preview(tile)
 
@@ -384,7 +384,7 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 			# which miners still cost them a cat.
 			drill = Defs.machine_color(Defs.M_GENERATOR) if on_grid else Defs.COL_BELT_CHEVRON
 		draw_line(c, c + Vector2.from_angle(angle) * 7.0, drill, 2.0)
-	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 10.0, Defs.COL_BELT_RIM, 2.5)
+	# The output arrow is drawn after the cats, not here -- see _draw_machine_marks.
 	if machine.operated:
 		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
 	else:
@@ -714,12 +714,23 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## a player their miner is dead was hidden by the animal that makes it work. Two
 ## miners on adjacent seams produced nothing for six minutes in a playtest and
 ## the screen said so nowhere.
-func _draw_stalls(tile: float) -> void:
+## The miner's output arrow is here for the same reason. It sits fifteen pixels
+## from the centre in the direction of travel, and a cat is nearly sixty pixels
+## tall standing on that centre -- so a north-facing miner's arrow was entirely
+## behind its worker. Which way a miner points is the difference between a
+## factory and two machines emitting into each other, and it was invisible in
+## exactly the case where a miner is running.
+func _draw_machine_marks(tile: float) -> void:
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
-		if not machine.stalled or not _visible(cell, tile):
+		if not _visible(cell, tile):
 			continue
-		_draw_stall(machine, Vector2(cell) * tile + Vector2.ONE * tile * 0.5)
+		var centre: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		if machine.type == Defs.M_MINER:
+			_draw_arrow(centre + Vector2(machine.dir) * 15.0, machine.dir, 10.0,
+				Defs.COL_BELT_RIM, 2.5)
+		if machine.stalled:
+			_draw_stall(machine, centre)
 
 ## A backed-up machine is the single most common way a factory silently stops
 ## paying. It gets an unmissable pulsing marker rather than nothing at all.

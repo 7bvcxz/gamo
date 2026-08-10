@@ -200,6 +200,32 @@ func _run() -> void:
 	_assert(MachineLayer.CAT_FOOT_FRACTION * MachineLayer.CAT_DRAW > MachineLayer.CAT_GROUND * 3.0,
 		"몸이 그림자 위로 충분히 올라온다")
 
+	# --- What a machine is doing is drawn above the animal doing it -------------
+	# A cat is nearly sixty pixels tall standing on a thirty-two pixel cell, so
+	# anything a machine draws near its own centre is behind its worker. That hid
+	# both of the miner's readouts in exactly the case they exist for: the stall
+	# marker, because a miner only stalls while a cat is on it, and the output
+	# arrow, because a north-facing miner points straight into the cat. Two miners
+	# emitting into each other produced nothing for six minutes in a playtest and
+	# the screen said so nowhere.
+	#
+	# Checked against the source: draw order is not observable from a headless
+	# run, and the invariant is exactly "these calls come after that one".
+	var layer: String = FileAccess.get_file_as_string("res://scripts/MachineLayer.gd")
+	_assert(layer != "", "MachineLayer.gd를 읽었다")
+	var cats_at: int = layer.find("\t_draw_cats()")
+	var marks_at: int = layer.find("\t_draw_machine_marks(")
+	_assert(cats_at >= 0 and marks_at > cats_at,
+		"기계 표시가 고양이보다 뒤에 그려진다 (%d < %d)" % [cats_at, marks_at])
+	var miner_body: String = layer.substr(layer.find("func _draw_miner"))
+	miner_body = miner_body.substr(0, miner_body.find("\nfunc "))
+	_assert(miner_body.find("_draw_arrow(") < 0,
+		"채굴기 본체는 출력 화살표를 직접 그리지 않는다")
+	var marks_body: String = layer.substr(marks_at)
+	marks_body = marks_body.substr(0, marks_body.find("\nfunc _draw_stall"))
+	_assert(marks_body.find("_draw_arrow(") > 0 and marks_body.find("_draw_stall(") > 0,
+		"화살표와 정지 표시가 같은 패스에 있다")
+
 	if failures == 0:
 		print("ANIMATION_TEST: PASS")
 	quit(failures)
