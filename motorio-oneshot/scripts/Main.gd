@@ -1044,7 +1044,22 @@ func touch_hud(position: Vector2) -> bool:
 		return true
 	for index in hud.hotbar_rects.size():
 		if (hud.hotbar_rects[index] as Rect2).has_point(local):
-			selected_index = index
+			# The row holds tools, so a tap picks a tool. It used to hold machines
+			# and this line still set selected_index -- which is the machine the
+			# build gun is loaded with, indexed into a different and longer list.
+			# The keyboard was moved to tool_index when the pickaxe arrived and
+			# this was not, so on a phone the pickaxe could not be picked up at
+			# all: the first thing the game asks for is crystal, hand mining
+			# checks holding_pickaxe() before anything else, and there was no way
+			# to hold it. Tapping also silently re-loaded the gun.
+			#
+			# Tapping the tool you already hold opens what that tool chooses from,
+			# which for the gun is the build list -- otherwise a phone has no way
+			# to reach it, there being no B key to press.
+			if tool_index == index and index == TOOL_BUILD_GUN:
+				toggle_build_menu()
+				return true
+			tool_index = index
 			audio.call("play", "select")
 			return true
 	if (hud.direction_rect as Rect2).has_point(local):

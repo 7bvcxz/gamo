@@ -106,6 +106,7 @@ func _draw() -> void:
 	_draw_meter_marker(tile)
 	_draw_focus_readout()
 	_draw_cats()
+	_draw_stalls(tile)
 	if show_preview:
 		_draw_preview(tile)
 
@@ -393,7 +394,6 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		draw_arc(c, 15.0, 0.0, TAU, 28, Color(0.75, 0.78, 0.85, blink), 1.5, true)
 	if machine.flash > 0.0:
 		draw_circle(c, 17.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
-	_draw_stall(machine, c)
 
 ## The swing. Ten seconds is a long time to hold a key with nothing to look at,
 ## so the seam being worked wears a filling arc and shakes a little harder as it
@@ -457,7 +457,6 @@ func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# Grade pips on the rim, so an upgraded belt is legible without selecting it.
 	for index in machine.tier:
 		draw_circle(px + Vector2(6.0 + float(index) * 5.0, tile - 4.0), 1.7, Defs.COL_BELT_RIM)
-	_draw_stall(machine, c)
 
 ## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
 ## reads as "come and get me" rather than as scenery.
@@ -495,7 +494,6 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(centre, 7.5, Defs.OUTLINE, false, 1.0)
 	# Fuel sits in the same pip row every other machine uses.
 	_draw_pip(centre + Vector2(0, 13), Defs.ITEM_ENERGY, int(machine.buffer.get(Defs.ITEM_ENERGY, 0)))
-	_draw_stall(machine, centre)
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
@@ -703,11 +701,25 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	if machine.recipe != Defs.RECIPE_PLAIN:
 		draw_circle(c + Vector2(0, -9), 2.4, Defs.ITEM_COLORS[Defs.ITEM_COPPER])
 		draw_circle(c + Vector2(0, -9), 2.4, Defs.OUTLINE, false, 1.0)
-	_draw_stall(machine, c)
 	# One pip row for the one input the recipe actually takes.
 	_draw_pip(c + Vector2(0, 13), Defs.ITEM_CRYSTAL, held)
 	if machine.flash > 0.0:
 		draw_circle(c, 16.0 + machine.flash * 14.0, Color(1, 0.9, 0.7, machine.flash * 0.55), false, 2.0)
+
+## Every stalled machine, drawn after the cats.
+##
+## The marker used to go up inside each machine's own drawing, which put it
+## underneath the cat standing on it -- and a miner only stalls while it is
+## running, which is to say while a cat is standing on it. The one thing telling
+## a player their miner is dead was hidden by the animal that makes it work. Two
+## miners on adjacent seams produced nothing for six minutes in a playtest and
+## the screen said so nowhere.
+func _draw_stalls(tile: float) -> void:
+	for cell: Vector2i in sim.machines:
+		var machine: Sim.Machine = sim.machines[cell]
+		if not machine.stalled or not _visible(cell, tile):
+			continue
+		_draw_stall(machine, Vector2(cell) * tile + Vector2.ONE * tile * 0.5)
 
 ## A backed-up machine is the single most common way a factory silently stops
 ## paying. It gets an unmissable pulsing marker rather than nothing at all.
@@ -754,7 +766,6 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var chev: Color = Defs.COL_BELT_CHEVRON if frost <= 0.0 else Defs.COL_FROZEN_CHEVRON
 		draw_line(tail + perp * 5.0, head, chev, 2.0)
 		draw_line(tail - perp * 5.0, head, chev, 2.0)
-	_draw_stall(machine, c)
 
 func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
