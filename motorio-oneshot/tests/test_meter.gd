@@ -210,6 +210,41 @@ func _run() -> void:
 	_assert(main.meter_cell == Vector2i(9999, 9999),
 		"removing the machine closes the panel instead of reporting a ghost")
 
+	# --- The income figure has to settle ---------------------------------------
+	# Not "is it roughly right on average" -- it was, before. Production arrives
+	# in whole items, one every five seconds at the rate two staffed miners run
+	# at, and the window used to be one second: 60/min on the second an item
+	# landed and 0 for the four after. The average of that is correct and the
+	# reading is useless, because the player reads one frame at a time and sees
+	# a number bouncing between 0.1 and 20 while nothing changes.
+	var rate_sim = main.sim
+	rate_sim.setup(4242)
+	var arrivals: float = 0.0
+	var samples: Array[float] = []
+	for tick in 1800:                      # sixty seconds at thirty a second
+		arrivals += 1.0 / 30.0
+		if arrivals >= 5.0:                # one crystal every five seconds
+			arrivals -= 5.0
+			rate_sim._gain(Defs.ITEM_CRYSTAL, 1)
+		rate_sim._tick_rate(1.0 / 30.0)
+		if tick > 900:                     # once the window has filled
+			samples.append(float(rate_sim.gain_rate.get(Defs.ITEM_CRYSTAL, 0.0)))
+	var low: float = samples[0]
+	var high: float = samples[0]
+	for value: float in samples:
+		low = minf(low, value)
+		high = maxf(high, value)
+	var mean: float = 0.0
+	for value: float in samples:
+		mean += value
+	mean /= float(samples.size())
+	_assert(absf(mean - 12.0) < 1.0,
+		"꾸준한 12/분을 12/분이라고 읽는다: 평균 %.1f" % mean)
+	# The spread is the part that matters. The player reads one frame, not an
+	# average of sixty.
+	_assert(high - low < 5.0,
+		"그리고 널뛰지 않는다: %.1f~%.1f (폭 %.1f)" % [low, high, high - low])
+
 	main.clear_save()
 	if failures == 0:
 		print("METER_TEST: PASS")

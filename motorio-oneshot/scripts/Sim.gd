@@ -133,6 +133,15 @@ var _heat_accum: float = 0.0
 var gain_rate: Dictionary[int, float] = {}
 var _gain_accum: Dictionary[int, float] = {}
 var _rate_clock: float = 0.0
+## A second of production at a time, kept for this long and averaged whole.
+## Production is not continuous: two staffed miners are a steady twelve a minute,
+## which is one crystal every five seconds, so a one second window reads 60 on
+## the second one lands and 0 on the four after it. Smoothing that only spread
+## the spike -- the panel swung between 0.1 and 20 while nothing about the
+## factory changed. A number that never settles cannot be read as income, and
+## the player has no other way to tell whether a machine is worth building.
+const RATE_WINDOW := 20.0
+var _rate_history: Array[Dictionary] = []
 ## Where the player is currently swinging, and how far through the swing.
 var hand_cell := Vector2i(9999, 9999)
 var hand_progress: float = 0.0
@@ -257,6 +266,14 @@ func setup(seed_value: int) -> void:
 	unlocked_recipes.clear()
 	power_capacity = 0.0
 	power_draw = 0.0
+	# Or a new run opens quoting the income of the one before it, for as long as
+	# the window takes to roll over.
+	_rate_history.clear()
+	_gain_accum.clear()
+	gain_rate.clear()
+	heat_rate = 0.0
+	_heat_accum = 0.0
+	_rate_clock = 0.0
 	warm_radius = Defs.WARM_BASE
 	# Seed the cache so the opening frame does not announce a radius that has
 	# not actually changed yet.
@@ -684,11 +701,28 @@ func _tick_rate(delta: float) -> void:
 	_rate_clock += delta
 	if _rate_clock < 1.0:
 		return
-	var per_minute: float = _heat_accum * 60.0 / _rate_clock
-	heat_rate = lerpf(heat_rate, per_minute, 0.35)
+	_rate_history.append({"dt": _rate_clock, "heat": _heat_accum, "items": _gain_accum.duplicate()})
+	var span: float = 0.0
+	for entry: Dictionary in _rate_history:
+		span += float(entry["dt"])
+	# Trimmed by time rather than by count, so this holds fifteen seconds however
+	# long a frame took to arrive.
+	while _rate_history.size() > 1 and span - float(_rate_history[0]["dt"]) >= RATE_WINDOW:
+		span -= float(_rate_history[0]["dt"])
+		_rate_history.remove_at(0)
+	var heat_sum: float = 0.0
+	var item_sums: Dictionary[int, float] = {}
+	for entry: Dictionary in _rate_history:
+		heat_sum += float(entry["heat"])
+		var items: Dictionary = entry["items"]
+		for item_type: int in items:
+			item_sums[item_type] = float(item_sums.get(item_type, 0.0)) + float(items[item_type])
+	# The average over the window is the smoothing. Running a lerp on top would
+	# put the lag back without the honesty: this figure is exactly what arrived
+	# in the last fifteen seconds, scaled to a minute.
+	heat_rate = heat_sum * 60.0 / maxf(span, 0.001)
 	for item_type: int in Defs.COUNTED_ITEMS:
-		var each_minute: float = float(_gain_accum.get(item_type, 0.0)) * 60.0 / _rate_clock
-		gain_rate[item_type] = lerpf(float(gain_rate.get(item_type, 0.0)), each_minute, 0.35)
+		gain_rate[item_type] = float(item_sums.get(item_type, 0.0)) * 60.0 / maxf(span, 0.001)
 		_gain_accum[item_type] = 0.0
 	_heat_accum = 0.0
 	_rate_clock = 0.0
