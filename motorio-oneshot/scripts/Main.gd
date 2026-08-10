@@ -1175,7 +1175,18 @@ func _primary_action() -> void:
 			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
 		return
-	if sim.pick_up_cat(cell):
+	# ...unless she is holding the pickaxe and aiming at a bare seam, in which
+	# case the press is a swing. Z lifts cats before it does anything else, and
+	# the third cat in a working factory spends its whole day walking between the
+	# miners and the core -- across the seams. Pressing Z to mine while it passed
+	# lifted it instead, and _update_hand_mining cancels the swing outright while
+	# a cat is being carried, so the player got no progress, an armful of cat and
+	# an objective card telling them to go put it somewhere.
+	#
+	# Only bare ore. A cat standing on a miner is standing on ore too, and taking
+	# it off to reassign it has to keep working.
+	var mining_here: bool = holding_pickaxe() and sim.ore.has(cell) and not sim.machines.has(cell)
+	if not mining_here and sim.pick_up_cat(cell):
 		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
 		audio.call("play", "select")

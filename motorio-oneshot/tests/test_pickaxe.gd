@@ -86,6 +86,42 @@ func _run() -> void:
 		and PlayerActor.MINE_IMPACT_FRAME < PlayerActor.FRAMES,
 		"충돌 프레임이 시트 안에 있다")
 
+	# --- A passing cat does not eat the swing ----------------------------------
+	# Z lifts cats before it swings, and a cat hauling crystal to the core walks
+	# over the seams all day. Standing at a seam with the pickaxe out and pressing
+	# Z used to hand you the cat -- and carrying one cancels mining, so the press
+	# cost progress and gave nothing.
+	var bare_sim = main.sim
+	var bare := Vector2i(9999, 9999)
+	for cell: Vector2i in bare_sim.ore:
+		if not bare_sim.machines.has(cell) and not bare_sim.is_structure(cell + Vector2i(0, 1)):
+			bare = cell
+			break
+	_assert(bare != Vector2i(9999, 9999), "맨 광맥이 하나 있다")
+	bare_sim.cats.clear()
+	var passer = bare_sim.Cat.new()
+	passer.pos = bare_sim.cell_centre(bare)
+	bare_sim.cats.append(passer)
+	main.player.position = bare_sim.cell_centre(bare + Vector2i(0, 1))
+	main.player.facing = Vector2i.UP
+	main.tool_index = main.TOOL_PICKAXE
+	main._primary_action()
+	_assert(bare_sim.carried_cat == null, "곡괭이로 광맥을 볼 때 Z는 고양이를 들지 않는다")
+	main.mine_held = true
+	main._update_hand_mining(0.2)
+	_assert(main.player.mining > 0.0, "그리고 실제로 곡괭이질이 시작된다")
+	main.mine_held = false
+
+	# But taking a cat off a miner still has to work, and that cat is standing on
+	# ore as well -- the miner was built onto the seam.
+	bare_sim.unlocked[Defs.M_MINER] = true
+	bare_sim.stock[Defs.ITEM_CRYSTAL] = 500
+	_assert(bare_sim.build(Defs.M_MINER, bare, Vector2i(0, -1)), "광맥 위에 채굴기를 세운다")
+	passer.pos = bare_sim.cell_centre(bare)
+	main._primary_action()
+	_assert(bare_sim.carried_cat == passer, "채굴기 위의 고양이는 곡괭이를 들고도 안을 수 있다")
+	main._primary_action()
+
 	main.queue_free()
 	if failures == 0:
 		print("PICKAXE_TEST: PASS")
