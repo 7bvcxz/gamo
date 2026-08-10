@@ -196,6 +196,31 @@ th { background: var(--sidebar); font-weight: 600; }
   border-radius: 4px; background: var(--code); color: var(--muted);
 }
 .prop-picked { color: var(--accent); margin-top: 12px; }
+
+/* Source artwork. Wider cells than the proposal options because these are
+   pictures to look at rather than options to compare, and a sheet of sixteen
+   tiles at 160px is sixteen thumbnails nobody can judge. */
+.art-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.art-piece {
+  margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 11px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+/* Checkerboard, so a cat with a transparent background does not read as a cat
+   on a white one -- which is the difference that ruined a generation run. */
+/* One square box for every piece, whatever shape the file is. The set mixes
+   1:1 and 2:3, and letting each image set its own height made the grid step up
+   and down across a row for reasons that have nothing to do with the art. */
+.art-piece img {
+  width: 100%; aspect-ratio: 1; object-fit: contain; display: block; border-radius: 7px;
+  background-color: #1b2130;
+  background-image:
+    linear-gradient(45deg, #232a3c 25%, transparent 25%, transparent 75%, #232a3c 75%),
+    linear-gradient(45deg, #232a3c 25%, transparent 25%, transparent 75%, #232a3c 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+.art-piece figcaption { display: flex; flex-direction: column; gap: 4px; }
+.art-piece figcaption span { color: var(--muted); font-size: 13px; }
 .prop-summary { border-top: 1px solid var(--line); padding-top: 26px; margin-top: 36px; }
 .prop-summary pre {
   background: var(--code); padding: 14px 16px; border-radius: 9px;

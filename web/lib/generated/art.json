@@ -1,0 +1,204 @@
+{
+ "tiles": [
+  {
+   "id": "tile_org_16",
+   "label": "기본 눈 바닥 · 4×4",
+   "note": "게임에서 사용 중입니다. tools/sprite/build_tiles.py가 64px 아틀라스로 잘라 바닥 전체를 이걸로 그립니다.",
+   "source": [
+    1254,
+    1254
+   ],
+   "bytes": 1680870,
+   "image": "/art/tile_org_16-63431aa899c0.png"
+  },
+  {
+   "id": "tile_rock_47",
+   "label": "바위 · 47블롭",
+   "note": "아직 사용하지 않습니다. 47칸은 이웃 여덟 방향의 조합마다 다른 모서리를 주는 표준 배치라, 벽이나 절벽처럼 서로 이어지는 지형에 씁니다.",
+   "source": [
+    1448,
+    1086
+   ],
+   "bytes": 2540189,
+   "image": "/art/tile_rock_47-59b97e2c9db9.png"
+  },
+  {
+   "id": "tile_crystal_6",
+   "label": "수정 광맥 · 6단계",
+   "note": "아직 사용하지 않습니다. 현재 광맥은 코드로 그린 결정 조각입니다.",
+   "source": [
+    1536,
+    1024
+   ],
+   "bytes": 2466987,
+   "image": "/art/tile_crystal_6-e332cd3070f2.png"
+  },
+  {
+   "id": "tile_copper_6",
+   "label": "구리 광맥 · 6단계",
+   "note": "아직 사용하지 않습니다.",
+   "source": [
+    1536,
+    1024
+   ],
+   "bytes": 2495935,
+   "image": "/art/tile_copper_6-70f9769ea8de.png"
+  },
+  {
+   "id": "tile_coal_6",
+   "label": "석탄 광맥 · 6단계",
+   "note": "아직 사용하지 않습니다. 석탄은 One Shot에 없는 자원입니다.",
+   "source": [
+    1536,
+    1024
+   ],
+   "bytes": 2445552,
+   "image": "/art/tile_coal_6-7ac9b4fe2c88.png"
+  },
+  {
+   "id": "tile_iron_6",
+   "label": "철 광맥 · 6단계",
+   "note": "아직 사용하지 않습니다. 철은 One Shot에 없는 자원입니다.",
+   "source": [
+    1536,
+    1024
+   ],
+   "bytes": 2529273,
+   "image": "/art/tile_iron_6-d72d1500ab97.png"
+  },
+  {
+   "id": "tile_gold_6",
+   "label": "금 광맥 · 6단계",
+   "note": "아직 사용하지 않습니다.",
+   "source": [
+    1536,
+    1024
+   ],
+   "bytes": 2517659,
+   "image": "/art/tile_gold_6-3d235b2cce8d.png"
+  },
+  {
+   "id": "tile_uranium_6",
+   "label": "우라늄 광맥 · 6단계",
+   "note": "아직 사용하지 않습니다.",
+   "source": [
+    1536,
+    1024
+   ],
+   "bytes": 2532521,
+   "image": "/art/tile_uranium_6-c631552f8ef3.png"
+  }
+ ],
+ "cats": [
+  {
+   "id": "cat_baby",
+   "grade": "N",
+   "note": "밝은 주황 · 빨간 목도리.",
+   "source": [
+    1254,
+    1254
+   ],
+   "bytes": 1747782,
+   "image": "/art/cat_baby-c9feffb5d8f9.png"
+  },
+  {
+   "id": "cat_green",
+   "grade": "R",
+   "note": "연두 · 리본.",
+   "source": [
+    1024,
+    1536
+   ],
+   "bytes": 2292041,
+   "image": "/art/cat_green-4ea08180e5c2.png"
+  },
+  {
+   "id": "cat_org",
+   "grade": "O",
+   "note": "주황 태비 · 빨간 모자.",
+   "source": [
+    1254,
+    1254
+   ],
+   "bytes": 1634788,
+   "image": "/art/cat_org-efced16c1feb.png"
+  },
+  {
+   "id": "cat_pink",
+   "grade": "SR",
+   "note": "보라 태비 · 연두 리본.",
+   "source": [
+    1024,
+    1536
+   ],
+   "bytes": 2292167,
+   "image": "/art/cat_pink-4c17d346c980.png"
+  },
+  {
+   "id": "cat_artist",
+   "grade": "",
+   "note": "주황 태비 · 베레모.",
+   "source": [
+    1024,
+    1536
+   ],
+   "bytes": 2398495,
+   "image": "/art/cat_artist-964f24e243b7.png"
+  },
+  {
+   "id": "cat_black",
+   "grade": "",
+   "note": "턱시도 · 나비넥타이.",
+   "source": [
+    1254,
+    1254
+   ],
+   "bytes": 1722079,
+   "image": "/art/cat_black-8e9820deac5d.png"
+  },
+  {
+   "id": "cat_calm",
+   "grade": "",
+   "note": "회색 태비 · 파란 스카프.",
+   "source": [
+    1024,
+    1536
+   ],
+   "bytes": 2427702,
+   "image": "/art/cat_calm-fc4f09db9898.png"
+  },
+  {
+   "id": "cat_cozy",
+   "grade": "",
+   "note": "흰 장모 · 귀마개 · 오드아이.",
+   "source": [
+    1254,
+    1254
+   ],
+   "bytes": 1524072,
+   "image": "/art/cat_cozy-2b000b5973d1.png"
+  },
+  {
+   "id": "cat_cute",
+   "grade": "",
+   "note": "삼색 · 검은 귀.",
+   "source": [
+    1254,
+    1254
+   ],
+   "bytes": 1661021,
+   "image": "/art/cat_cute-1a35bfd42063.png"
+  },
+  {
+   "id": "cat_fisher",
+   "grade": "",
+   "note": "샴 · 털모자.",
+   "source": [
+    1024,
+    1536
+   ],
+   "bytes": 2453468,
+   "image": "/art/cat_fisher-7aef37373bc6.png"
+  }
+ ]
+}
