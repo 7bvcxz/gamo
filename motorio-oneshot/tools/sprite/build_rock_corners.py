@@ -70,16 +70,53 @@ def piece_for(mask: int, quadrant: str, first: str, second: str) -> str:
     return "OUTER"
 
 
-def load_pieces(path: Path) -> dict:
+## Turning one quadrant's piece into another's. The outer corner is what moves:
+## SE's is bottom-right, NW's is top-left, and so on, so the transform is
+## whichever flip or turn carries one corner onto the other.
+TO_QUADRANT = {
+    ("SE", "NW"): [Image.ROTATE_180], ("SE", "NE"): [Image.FLIP_TOP_BOTTOM],
+    ("SE", "SW"): [Image.FLIP_LEFT_RIGHT], ("SE", "SE"): [],
+    ("NW", "SE"): [Image.ROTATE_180], ("NW", "NE"): [Image.FLIP_LEFT_RIGHT],
+    ("NW", "SW"): [Image.FLIP_TOP_BOTTOM], ("NW", "NW"): [],
+    ("NE", "SW"): [Image.ROTATE_180], ("NE", "NW"): [Image.FLIP_LEFT_RIGHT],
+    ("NE", "SE"): [Image.FLIP_TOP_BOTTOM], ("NE", "NE"): [],
+    ("SW", "NE"): [Image.ROTATE_180], ("SW", "SE"): [Image.FLIP_LEFT_RIGHT],
+    ("SW", "NW"): [Image.FLIP_TOP_BOTTOM], ("SW", "SW"): [],
+}
+
+
+def load_pieces(path: Path, only: str = "") -> dict:
+    """Cuts the sheet into twenty pieces.
+
+    `only` names a quadrant column to take as the whole truth: that column's
+    five pieces are used and the other three quadrants are derived by turning
+    them. The request offers this as its fallback -- five pieces beat twenty
+    that disagree -- and it is what a sheet needs when some columns are drawn
+    correctly and others are not.
+    """
     sheet = Image.open(path).convert("RGB")
     wide = sheet.size[0] / len(QUADRANTS)
     tall = sheet.size[1] / len(ROWS)
+    # A hairline often separates the cells; sampling it reads as snow and can
+    # flip an edge. Two percent in from every side clears it without touching
+    # the midpoint the whole construction depends on.
+    inset_x, inset_y = wide * 0.02, tall * 0.02
+
+    def cut(row: int, column: int) -> Image.Image:
+        box = (round(column * wide + inset_x), round(row * tall + inset_y),
+               round((column + 1) * wide - inset_x), round((row + 1) * tall - inset_y))
+        return sheet.crop(box).resize((PIECE, PIECE), Image.LANCZOS)
+
     pieces = {}
     for row, name in enumerate(ROWS):
         for column, (quadrant, _a, _b) in enumerate(QUADRANTS):
-            box = (round(column * wide), round(row * tall),
-                   round((column + 1) * wide), round((row + 1) * tall))
-            pieces[(name, quadrant)] = sheet.crop(box).resize((PIECE, PIECE), Image.LANCZOS)
+            if not only:
+                pieces[(name, quadrant)] = cut(row, column)
+                continue
+            source = cut(row, [q for q, _a, _b in QUADRANTS].index(only))
+            for step in TO_QUADRANT[(only, quadrant)]:
+                source = source.transpose(step)
+            pieces[(name, quadrant)] = source
     return pieces
 
 
@@ -213,11 +250,13 @@ def _gdscript(lookup: list, count: int, source: str) -> str:
 def main() -> None:
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     synthetic = "--synthetic" in sys.argv
+    only = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--quadrant=")), "")
     if synthetic:
         pieces, source = synthetic_pieces(), "the synthetic proof pieces"
     elif args:
         path = Path(args[0])
-        pieces, source = load_pieces(path), path.name
+        pieces = load_pieces(path, only)
+        source = path.name + (" (%s column, turned)" % only if only else "")
     else:
         raise SystemExit(__doc__)
 
