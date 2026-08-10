@@ -13,8 +13,8 @@ class_name RockTiles
 ## directly and two masks that must look the same cannot drift apart.
 ##
 ## The source sheet does not contain all 47 configurations -- see the
-## tool's header -- so 7 of them are exact and the rest are the closest
-## shape it does contain. Agreement against the ideal runs 0.74 to 0.95.
+## tool's header -- so 5 of them are exact and the rest are the closest
+## shape it does contain. Agreement against the ideal runs 0.53 to 0.95.
 const ATLAS: Texture2D = preload("res://assets/tiles/rock_47.png")
 const ATLAS_COLUMNS := 8
 const CELL := 64.0

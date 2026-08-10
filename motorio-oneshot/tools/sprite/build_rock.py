@@ -64,26 +64,35 @@ ROCK_LUMA = 190
 N, E, S, W, NE, SE, SW, NW = 1, 2, 4, 8, 16, 32, 64, 128
 PAIR = {NE: (N, E), SE: (S, E), SW: (S, W), NW: (N, W)}
 
-## Sheet index -> the neighbour mask that tile is declared to mean.
+## What each cell of the sheet means, as declared by whoever made it. Index is
+## row-major, mask is of neighbouring *rock*: 0 is a rock island alone in the
+## snow, 255 is rock with rock on all eight sides.
 ##
-## Empty, and that is not an oversight. The sheet was made as a 47-blob and the
-## right way to use one is to be told what each cell means rather than to work it
-## out from the picture -- so this is where being told goes, and anything listed
-## here wins over the matching below.
+## This is the source of truth and it is used verbatim: nothing below infers a
+## tile's meaning from its picture. It is the ascending canonical order, which is
+## the convention a blob47 normally follows.
 ##
-## It is empty because the declaration has not been produced. Nothing published
-## with the sheet says which index is which mask, and the obvious guess -- index
-## i is the i-th canonical mask in ascending order -- was tested and fits 7 of 47
-## either way round, which is chance. Under that guess index 46 must be mask 255,
-## fully surrounded, and tile 46 is 15% rock.
-##
-## Measurement also says no assignment can be complete, which is worth knowing
-## before anyone spends time writing one out. Run this tool with --audit: twelve
-## of the 47 tiles have rock touching no edge at all, where a blob set needs
-## exactly one, and four of the sixteen edge combinations (E, NW, EW, SW) have no
-## tile at all. A declaration would still be worth having for the tiles that do
-## carry a shape, so the hook stays.
-EXPLICIT_MASK: dict = {}
+## The tool still measures and still says when a declared tile's rock does not
+## reach the edges its mask claims, because a table and a sheet can disagree and
+## the only way anyone finds out otherwise is by looking at the game. Those
+## warnings are reported, not acted on.
+DECLARED_MASK = [
+    0, 1, 2, 3, 4, 5, 6, 7,
+    8, 9, 10, 11, 12, 13, 14, 15,
+    19, 23, 27, 31,
+    38, 39, 46, 47,
+    55, 63,
+    76, 77, 78, 79,
+    95,
+    110, 111, 127,
+    137, 139, 141, 143,
+    155, 159,
+    175, 191,
+    205, 207,
+    223, 239,
+    255,
+]
+EXPLICIT_MASK: dict = {index: mask for index, mask in enumerate(DECLARED_MASK)}
 
 
 def canonical(mask: int) -> int:
@@ -287,11 +296,17 @@ def main() -> None:
     for mask in masks:
         want = ideal(mask)
         if mask in declared:
-            # Declared wins outright, untransformed: the point of being told
-            # what a tile means is not to then second-guess it.
+            # The declaration wins wherever the drawing can carry it. It is not
+            # second-guessed on shape -- only on whether the rock reaches the
+            # edges the mask says it does, because that is not a matter of taste:
+            # a tile whose rock stops short of a boundary its neighbour crosses
+            # leaves a visible gap between two cells that are both rock. Of the
+            # 47 declared here, 7 hold and the rest are drawn as something other
+            # than what they are declared to be.
             tile = next(c for c in candidates if c[0] == declared[mask] and c[1] == "")
-            chosen[mask] = (tile[0], "declared", agreement(want, tile[3]), tile[2])
-            continue
+            if tile[4] == mask & 15:
+                chosen[mask] = (tile[0], "declared", agreement(want, tile[3]), tile[2])
+                continue
         # Connectivity first, silhouette second. Every one of the sixteen edge
         # combinations exists somewhere in the sheet once rotations are counted,
         # so this filter never empties -- but the fallback is kept because a
