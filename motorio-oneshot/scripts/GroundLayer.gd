@@ -32,11 +32,6 @@ var _texture: ImageTexture
 ## It is a child node because blend mode belongs to a CanvasItem, not to a draw
 ## call, and the ground's other two passes must stay ordinary.
 var _tile_layer: Node2D
-## Rock, worked out once per cell and kept. The floor never changes, so the only
-## alternative is deciding it again every frame for a thousand cells.
-var _rock: Dictionary[Vector2i, bool] = {}
-var _blocks: Dictionary[Vector2i, bool] = {}
-var _slots: Dictionary[Vector2i, int] = {}
 
 func _ready() -> void:
 	_texture = _bake_pool()
@@ -86,23 +81,6 @@ func _draw() -> void:
 	var tint: Color = Color.WHITE.lerp(Color(0.42, 0.36, 0.48, 1.0), pow(night, 1.3) * 0.72)
 	draw_texture_rect(_texture, Rect2(core_px - Vector2.ONE * radius, Vector2.ONE * radius * 2.0), false, tint)
 
-## --- Rock ---------------------------------------------------------------------
-## Rock is a pattern on the floor and nothing else: it is not in the simulation,
-## it is not saved, and the player walks straight over it. That is what lets it
-## be a pure function of the coordinates -- ask any cell whether it is rock and
-## it answers the same way forever, including cells nobody has visited.
-##
-## Patches rather than speckle. One patch is seeded per block of BLOCK cells and
-## grown to between one and twelve tiles, which at 8x8 blocks puts the average
-## patch (6.5) over the average block (64) at just over a tenth of the ground.
-const ROCK_BLOCK := 8
-const ROCK_MIN := 1
-const ROCK_MAX := 12
-## How far a patch can reach out of the block that seeded it. Twelve cells grown
-## from one seed cannot travel further than this, so the blocks around a cell are
-## the only ones that can claim it.
-const ROCK_REACH := 1
-
 ## Deterministic and cheap. Not a hash function anyone should trust with
 ## anything, but it has to give the same answer on every machine and every run,
 ## which rules out randi() and anything seeded from the clock.
@@ -111,86 +89,6 @@ static func _mix(a: int, b: int, salt: int) -> int:
 	h = (h ^ (h >> 13)) * 1274126177
 	return absi(h ^ (h >> 16))
 
-## The cells one block's patch claims. Grown by walking out from a seed, which
-## keeps the patch connected -- a patch that scattered would defeat the point of
-## having patches.
-static func rock_patch(block: Vector2i) -> Array[Vector2i]:
-	var size: int = ROCK_MIN + _mix(block.x, block.y, 7) % (ROCK_MAX - ROCK_MIN + 1)
-	var origin := Vector2i(
-		block.x * ROCK_BLOCK + _mix(block.x, block.y, 11) % ROCK_BLOCK,
-		block.y * ROCK_BLOCK + _mix(block.x, block.y, 13) % ROCK_BLOCK)
-	var cells: Array[Vector2i] = [origin]
-	var have: Dictionary[Vector2i, bool] = {origin: true}
-	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	while cells.size() < size:
-		# Grow into whichever free cell already touches the patch most. A plain
-		# random walk was tried first and it produced strings one cell wide, which
-		# is the worst possible shape here: a cell with a single rock neighbour is
-		# a configuration the sheet does not draw, so it falls back to the lone
-		# boulder and a whole chain renders as a dotted line rather than as rock.
-		# Filling the concavities first keeps patches close to round, and round
-		# patches ask for the shapes the sheet actually has.
-		var best: Array[Vector2i] = []
-		var best_score: int = -1
-		for from: Vector2i in cells:
-			for step: Vector2i in steps:
-				var candidate: Vector2i = from + step
-				if have.has(candidate):
-					continue
-				var score: int = 0
-				for around: Vector2i in steps:
-					if have.has(candidate + around):
-						score += 1
-				if score > best_score:
-					best_score = score
-					best = [candidate]
-				elif score == best_score and not best.has(candidate):
-					best.append(candidate)
-		if best.is_empty():
-			break
-		var pick: Vector2i = best[_mix(block.x, block.y, 300 + cells.size()) % best.size()]
-		cells.append(pick)
-		have[pick] = true
-	return cells
-
-## Fills the cache for every block that could reach into this range. Called once
-## per frame with the visible range rather than per cell, because the answer for
-## a cell depends on its neighbours' blocks as well as its own.
-func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
-	var low := Vector2i(floori(float(start.x) / ROCK_BLOCK) - ROCK_REACH,
-		floori(float(start.y) / ROCK_BLOCK) - ROCK_REACH)
-	var high := Vector2i(floori(float(end.x) / ROCK_BLOCK) + ROCK_REACH,
-		floori(float(end.y) / ROCK_BLOCK) + ROCK_REACH)
-	for by in range(low.y, high.y + 1):
-		for bx in range(low.x, high.x + 1):
-			var block := Vector2i(bx, by)
-			if _blocks.has(block):
-				continue
-			_blocks[block] = true
-			for cell: Vector2i in rock_patch(block):
-				_rock[cell] = true
-
-func is_rock(cell: Vector2i) -> bool:
-	return _rock.has(cell)
-
-## Which atlas cell a rock tile draws, from its eight neighbours. Cached because
-## it never changes and the alternative is nine dictionary lookups per cell per
-## frame for a floor that is decided once.
-func rock_slot(cell: Vector2i) -> int:
-	if _slots.has(cell):
-		return int(_slots[cell])
-	var mask: int = 0
-	var bits: Array[int] = [1, 2, 4, 8, 16, 32, 64, 128]
-	var around: Array[Vector2i] = [
-		Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0),
-		Vector2i(1, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(-1, -1)]
-	for index in around.size():
-		if _rock.has(cell + around[index]):
-			mask |= bits[index]
-	var slot: int = RockTiles.LOOKUP[mask]
-	_slots[cell] = slot
-	return slot
-
 ## Which of the sixteen a cell shows.
 ##
 ## A hash of the coordinates, not a random draw: the floor has to look the same
@@ -198,7 +96,7 @@ func rock_slot(cell: Vector2i) -> int:
 ## rather than stored. The multipliers are odd and coprime so the pattern does
 ## not fall into stripes along either axis, which two even ones do immediately.
 static func tile_variant(cell: Vector2i) -> int:
-	# Through the same avalanche the rock uses, and that is not decoration. The
+	# Through a proper avalanche, and that is not decoration. The
 	# first version was `x * 73856093 ^ y * 19349663` taken modulo sixteen, and
 	# because both multipliers are odd that reduces to a function of x and y
 	# modulo sixteen -- a perfectly regular lattice repeating every sixteen
@@ -222,23 +120,9 @@ func _draw_tiles() -> void:
 	var tile := float(Defs.TILE)
 	var start := Vector2i((view_rect.position / tile).floor())
 	var end := Vector2i((view_rect.end / tile).ceil())
-	_ensure_rock(start, end)
-	# Two passes, one texture each. Interleaving rock and snow would break the
-	# batch at every switch, and a rock cell must not be drawn over a snow one:
-	# both passes multiply, so a cell painted twice comes out twice as dark.
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if _rock.has(cell):
-				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
 				tile_region(tile_variant(cell)))
-	for y in range(start.y, end.y + 1):
-		for x in range(start.x, end.x + 1):
-			var cell := Vector2i(x, y)
-			if not _rock.has(cell):
-				continue
-			_tile_layer.draw_texture_rect_region(RockTiles.ATLAS,
-				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
-				RockTiles.region(rock_slot(cell)))

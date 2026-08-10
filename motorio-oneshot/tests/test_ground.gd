@@ -13,8 +13,6 @@ func _init() -> void:
 	_atlas()
 	_regions()
 	_variants()
-	_rock_table()
-	_rock_field()
 	print("GROUND: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
 	quit(failures)
 
@@ -132,115 +130,6 @@ func _variants() -> void:
 					down += 1
 			_check(down < 45,
 				"열이 %d칸마다 반복되지 않는다 (x=%d): 60칸 중 %d칸 일치" % [period, x, down])
-
-## The generated lookup. It is 256 entries standing in for 47, and the whole
-## point of generating it is that two neighbour masks which must look identical
-## cannot drift apart -- so that is what gets checked, rather than the numbers.
-func _rock_table() -> void:
-	_check(RockTiles.LOOKUP.size() == 256, "표가 256칸이다: %d" % RockTiles.LOOKUP.size())
-	_check(RockTiles.ATLAS != null, "돌 아틀라스가 로드된다")
-	var slots: Dictionary = {}
-	for slot: int in RockTiles.LOOKUP:
-		slots[slot] = true
-	_check(slots.size() == 47, "아틀라스 칸 47개를 전부 쓴다: %d" % slots.size())
-	if RockTiles.ATLAS != null:
-		var rows: int = int(ceil(47.0 / float(RockTiles.ATLAS_COLUMNS)))
-		var bounds := Rect2(0.0, 0.0, float(RockTiles.ATLAS.get_width()),
-			float(RockTiles.ATLAS.get_height()))
-		_check(RockTiles.ATLAS.get_width() == RockTiles.ATLAS_COLUMNS * int(RockTiles.CELL),
-			"아틀라스 폭이 8칸이다: %d" % RockTiles.ATLAS.get_width())
-		_check(RockTiles.ATLAS.get_height() >= rows * int(RockTiles.CELL), "높이가 충분하다")
-		for slot: int in slots:
-			_check(bounds.encloses(RockTiles.region(slot)),
-				"%d번 칸이 아틀라스 안이다" % slot)
-
-	# A diagonal neighbour can only change the picture when both of its
-	# orthogonals are rock. Every other pair of masks that differ by one diagonal
-	# has to land on the same tile, or a lone diagonal would visibly flicker the
-	# floor for no reason a player could see.
-	var pairs: Array[Array] = [[16, 1, 2], [32, 4, 2], [64, 4, 8], [128, 1, 8]]
-	var drifted: int = 0
-	for mask in 256:
-		for pair: Array in pairs:
-			var bit: int = pair[0]
-			if mask & bit:
-				continue
-			var both: bool = (mask & pair[1]) != 0 and (mask & pair[2]) != 0
-			var same: bool = RockTiles.LOOKUP[mask] == RockTiles.LOOKUP[mask | bit]
-			if not both and not same:
-				drifted += 1
-	_check(drifted == 0, "직교 이웃 없는 대각선은 그림을 바꾸지 않는다: 어긋남 %d건" % drifted)
-
-## Where the rock actually lands. The two things the request pinned down were a
-## tenth of the ground and clumps of one to twelve, and neither is visible in a
-## screenshot -- a floor that is 4% rock and one that is 16% rock both look like
-## "some rocks".
-func _rock_field() -> void:
-	var ground := GroundLayer.new()
-	# 200x200 cells: large enough that the block seeding averages out, small
-	# enough to stay instant.
-	var span: int = 200
-	ground._ensure_rock(Vector2i(-span / 2, -span / 2), Vector2i(span / 2, span / 2))
-	var rocks: int = 0
-	var inside: Dictionary[Vector2i, bool] = {}
-	for y in range(-span / 2, span / 2):
-		for x in range(-span / 2, span / 2):
-			var cell := Vector2i(x, y)
-			if ground.is_rock(cell):
-				rocks += 1
-				inside[cell] = true
-	var share: float = float(rocks) * 100.0 / float(span * span)
-	_check(share >= 8.0 and share <= 12.0, "돌이 바닥의 10%% 안팎이다: %.1f%%" % share)
-
-	# Clumps, measured by flooding the field rather than by trusting the
-	# generator: patches from neighbouring blocks can merge, and merged clumps
-	# are the ones that would quietly grow past twelve.
-	var seen: Dictionary[Vector2i, bool] = {}
-	var sizes: Array[int] = []
-	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	for cell: Vector2i in inside:
-		if seen.has(cell):
-			continue
-		var queue: Array[Vector2i] = [cell]
-		seen[cell] = true
-		var count: int = 0
-		while not queue.is_empty():
-			var at: Vector2i = queue.pop_back()
-			count += 1
-			for step: Vector2i in steps:
-				var next: Vector2i = at + step
-				if inside.has(next) and not seen.has(next):
-					seen[next] = true
-					queue.append(next)
-		sizes.append(count)
-	sizes.sort()
-	var largest: int = sizes[sizes.size() - 1]
-	var median: int = sizes[sizes.size() / 2]
-	_check(sizes.size() > 100, "덩어리가 충분히 많다: %d개" % sizes.size())
-	_check(median >= 2 and median <= 12, "덩어리 중앙값이 1~12 안이다: %d" % median)
-	# Merged clumps are allowed to exceed twelve -- two patches touching is not a
-	# bug -- but a field where that is the norm is not "clumps of one to twelve".
-	var over: int = 0
-	for size: int in sizes:
-		if size > 12:
-			over += 1
-	_check(float(over) / float(sizes.size()) < 0.25,
-		"12칸을 넘는 덩어리는 드물다: %d / %d (최대 %d)" % [over, sizes.size(), largest])
-	print("GROUND: 돌 %.1f%% · 덩어리 %d개 · 중앙값 %d · 최대 %d"
-		% [share, sizes.size(), median, largest])
-
-	# The same question twice gets the same answer, which is what makes the floor
-	# stable without saving it.
-	var other := GroundLayer.new()
-	other._ensure_rock(Vector2i(-20, -20), Vector2i(20, 20))
-	var mismatch: int = 0
-	for y in range(-18, 18):
-		for x in range(-18, 18):
-			if other.is_rock(Vector2i(x, y)) != ground.is_rock(Vector2i(x, y)):
-				mismatch += 1
-	_check(mismatch == 0, "다른 인스턴스가 같은 바닥을 만든다: 불일치 %d칸" % mismatch)
-	ground.free()
-	other.free()
 
 func _check(condition: bool, message: String) -> void:
 	if condition:

@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """Assembles the 47 rock tiles out of a 20-piece corner sheet.
 
-    python3 tools/sprite/build_rock_corners.py tools/sprite/tiles/rock_corners.png
+    python3 tools/sprite/build_rock_corners.py tools/sprite/tiles/tile_rock_20.png --quadrant=SE
     python3 tools/sprite/build_rock_corners.py --synthetic     # proof, no sheet needed
 
-Writes assets/tiles/rock_47.png and scripts/RockTiles.gd, the same two files
-build_rock.py writes, so the game does not care which route the atlas came from.
+**The game does not draw rock.** It did for a few versions and the ground read
+worse for it -- dark slabs on a snowfield, which is not what the plateau wants
+to look like -- so the floor is snow again. This tool and the sheets it reads
+are kept because the work in them is the hard part and none of it is wrong: it
+assembles a mathematically complete 47-blob and proves the seams. If rock comes
+back, run it and wire assets/tiles/rock_47.png and scripts/RockTiles.gd back
+into GroundLayer -- both are generated here, and both were deleted when the
+feature was.
 
 Why this exists is in CORNER_TILESET_REQUEST.md. Briefly: a tile is 2x2
 quadrants, a quadrant's picture depends only on its two adjacent orthogonal
