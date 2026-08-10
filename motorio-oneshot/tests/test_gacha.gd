@@ -28,6 +28,7 @@ func _init() -> void:
 	_purse(sim)
 	_grades_reach_the_miner(sim)
 	_crates_stay_ordinary(sim)
+	_portraits()
 	_saving(main, sim)
 	_reels(main, sim)
 	_layout(main)
@@ -171,6 +172,35 @@ func _crates_stay_ordinary(sim: Sim) -> void:
 	for cat: Sim.Cat in sim.cats:
 		_check(cat.rarity == Defs.RARITY_O, "상자에서 온 고양이는 O 등급")
 	sim.cats.clear()
+
+## Every grade has a picture, and the pig is the one that has none.
+##
+## The portrait table is a second list running alongside the grade table, and two
+## lists in step is exactly the arrangement that goes out of step: add a grade,
+## forget the artwork, and the new grade quietly renders as a pig. Nothing on
+## screen would say so -- an SSR is meant to be a pig.
+func _portraits() -> void:
+	_check(Icons.GRADE_PORTRAITS.size() == Defs.RARITY_NAMES.size() - 1,
+		"초상은 SSR을 뺀 등급 수만큼 있다: %d개" % Icons.GRADE_PORTRAITS.size())
+	for grade in Icons.GRADE_PORTRAITS.size():
+		var art: Texture2D = Icons.GRADE_PORTRAITS[grade]
+		_check(art != null, "%s 초상이 로드된다" % Defs.RARITY_NAMES[grade])
+		if art != null:
+			_check(art.get_width() > 0 and art.get_height() > 0,
+				"%s 초상에 픽셀이 있다: %dx%d" % [Defs.RARITY_NAMES[grade], art.get_width(), art.get_height()])
+	# The grade that falls off the end of the table is the pig, and it has to be
+	# the last one rather than "any index nobody supplied artwork for".
+	_check(Defs.RARITY_SSR == Defs.RARITY_NAMES.size() - 1,
+		"돼지 자리는 표의 마지막 등급이다")
+	# Four distinct animals, not the same file copied. A duplicated portrait
+	# would pass every check above and still make two grades look identical.
+	var seen: Dictionary = {}
+	for grade in Icons.GRADE_PORTRAITS.size():
+		var art: Texture2D = Icons.GRADE_PORTRAITS[grade]
+		if art != null:
+			seen[art.resource_path] = true
+	_check(seen.size() == Icons.GRADE_PORTRAITS.size(),
+		"등급마다 서로 다른 그림이다: %d개" % seen.size())
 
 ## Coins and grades survive a save. Both are new fields, and a save written
 ## before either existed has to keep loading as a run that has never pulled.

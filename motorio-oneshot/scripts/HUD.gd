@@ -1115,14 +1115,14 @@ func _draw_gacha_results(area: Rect2) -> void:
 		draw_rect(box, Color(tint.r, tint.g, tint.b, 0.18))
 		draw_rect(box, Color(tint.r, tint.g, tint.b, 0.85), false, 1.0)
 		# The animal gets the top of the tile and the grade gets a band of its own
-		# underneath. Centred in the whole tile, the letter landed on the cat's
-		# paws and on the border at the same time.
-		var art := Rect2(box.position + Vector2(tile * 0.10, tile * 0.04),
-			Vector2(tile * 0.80, tile * 0.66))
-		if grade == Defs.RARITY_SSR:
-			Icons.draw_pig(self, art)
-		else:
-			Icons.draw_thing(self, art, Icons.THING_CAT)
+		# underneath. The band is a text height rather than a fraction, because
+		# the letter does not shrink with the tile: at ten pulls the tiles are
+		# half the size and a proportional band put the letter back on the cat's
+		# paws, which is the thing it was moved out of.
+		var band: float = minf(15.0, tile * 0.34)
+		var art := Rect2(box.position + Vector2(tile * 0.06, tile * 0.03),
+			Vector2(tile * 0.88, box.size.y - band - tile * 0.05))
+		Icons.draw_grade(self, art, grade)
 		_text_in(Rect2(box.position + Vector2(0.0, box.size.y - 5.0), Vector2(box.size.x, 14.0)),
 			Defs.RARITY_NAMES[grade], 11, tint)
 	var parts: Array[String] = []

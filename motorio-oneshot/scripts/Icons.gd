@@ -228,6 +228,42 @@ static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
 					at + Vector2(-size * 0.8, size * 0.5), at + Vector2(0.0, -size)]),
 					Defs.ORE_OUTLINE, width)
 
+## What each grade looks like, as artwork rather than as a letter and a colour.
+##
+## Still images, which is not a compromise in the place they are used: the gacha
+## result is a card, and a card is exactly where a drawing of an animal standing
+## still is the right picture. The world is a different question and is not
+## answered here -- there a cat has to walk in three directions, eat and work,
+## which is six generated clips per grade. Until those exist every grade plays
+## cat_org's sheets in the world and is told apart by the ring on the ground.
+##
+## SSR has no entry because the SSR is a pig, and the pig is drawn.
+const GRADE_PORTRAITS: Array[Texture2D] = [
+	preload("res://assets/portraits/o.png"),
+	preload("res://assets/portraits/n.png"),
+	preload("res://assets/portraits/r.png"),
+	preload("res://assets/portraits/sr.png"),
+]
+
+## The one place that knows what a grade looks like. Everything that shows a
+## pulled cat goes through here, so the pig can never end up being the only
+## thing that remembers it is not a cat.
+static func draw_grade(canvas: CanvasItem, rect: Rect2, grade: int) -> void:
+	if grade < 0 or grade >= GRADE_PORTRAITS.size():
+		draw_pig(canvas, rect)
+		return
+	var art: Texture2D = GRADE_PORTRAITS[grade]
+	var source: Vector2 = Vector2(art.get_size())
+	if source.x <= 0.0 or source.y <= 0.0:
+		return
+	# Fitted rather than stretched, and stood on the floor of the rect: these are
+	# animals on their feet, and centring them vertically leaves them hovering.
+	var fit: float = minf(rect.size.x / source.x, rect.size.y / source.y)
+	var drawn: Vector2 = source * fit
+	canvas.draw_texture_rect(art, Rect2(
+		rect.position + Vector2((rect.size.x - drawn.x) * 0.5, rect.size.y - drawn.y),
+		drawn), false)
+
 ## The SSR cat, which is a pig.
 ##
 ## Drawn, not generated. Every other cat plays an eight-frame sheet cut out of a
