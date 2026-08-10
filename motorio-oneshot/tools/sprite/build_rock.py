@@ -64,6 +64,27 @@ ROCK_LUMA = 190
 N, E, S, W, NE, SE, SW, NW = 1, 2, 4, 8, 16, 32, 64, 128
 PAIR = {NE: (N, E), SE: (S, E), SW: (S, W), NW: (N, W)}
 
+## Sheet index -> the neighbour mask that tile is declared to mean.
+##
+## Empty, and that is not an oversight. The sheet was made as a 47-blob and the
+## right way to use one is to be told what each cell means rather than to work it
+## out from the picture -- so this is where being told goes, and anything listed
+## here wins over the matching below.
+##
+## It is empty because the declaration has not been produced. Nothing published
+## with the sheet says which index is which mask, and the obvious guess -- index
+## i is the i-th canonical mask in ascending order -- was tested and fits 7 of 47
+## either way round, which is chance. Under that guess index 46 must be mask 255,
+## fully surrounded, and tile 46 is 15% rock.
+##
+## Measurement also says no assignment can be complete, which is worth knowing
+## before anyone spends time writing one out. Run this tool with --audit: twelve
+## of the 47 tiles have rock touching no edge at all, where a blob set needs
+## exactly one, and four of the sixteen edge combinations (E, NW, EW, SW) have no
+## tile at all. A declaration would still be worth having for the tiles that do
+## carry a shape, so the hook stays.
+EXPLICIT_MASK: dict = {}
+
 
 def canonical(mask: int) -> int:
     """A diagonal only counts when both of its orthogonals do, because that is
@@ -181,8 +202,74 @@ def touches(grid: list) -> int:
     return mask
 
 
+def _check_declaration(candidates: list, masks: list) -> dict:
+    """Turns EXPLICIT_MASK into mask -> index, refusing anything incoherent.
+
+    Verifying is not the same as inferring. Nothing here decides what a tile
+    means; it only checks that a declaration is usable -- indices in range, no
+    two tiles claiming the same configuration, masks that survive
+    canonicalisation -- and says out loud when a declared tile's rock does not
+    reach the edges its mask claims, because a table nobody checked is how a
+    field ends up full of rock that does not join up.
+    """
+    if not EXPLICIT_MASK:
+        return {}
+    by_mask: dict = {}
+    for index, mask in sorted(EXPLICIT_MASK.items()):
+        if index in BLANK or not 0 <= index < COLUMNS * ROWS:
+            raise SystemExit("declared index %d is not a tile" % index)
+        if canonical(mask) != mask:
+            raise SystemExit("declared mask %d for tile %d is not canonical (%d)"
+                             % (mask, index, canonical(mask)))
+        if mask in by_mask:
+            raise SystemExit("mask %d declared twice: tiles %d and %d"
+                             % (mask, by_mask[mask], index))
+        by_mask[mask] = index
+    unknown = [m for m in by_mask if m not in masks]
+    if unknown:
+        raise SystemExit("declared masks that are not blob configurations: %s" % unknown)
+    disagree = []
+    for mask, index in by_mask.items():
+        tile = next(c for c in candidates if c[0] == index and c[1] == "")
+        if tile[4] != mask & 15:
+            disagree.append((index, mask, tile[4]))
+    print("ROCK: declaration covers %d of %d configurations" % (len(by_mask), len(masks)))
+    if disagree:
+        print("ROCK: %d declared tiles do not reach the edges their mask claims"
+              % len(disagree))
+        for index, mask, reached in disagree[:10]:
+            print("      tile %2d declared %3d (edges %s) but rock reaches %s"
+                  % (index, mask, _edges(mask & 15), _edges(reached)))
+    return by_mask
+
+
+def _edges(mask: int) -> str:
+    return "".join(c for c, bit in zip("NESW", (N, E, S, W)) if mask & bit) or "-"
+
+
+def audit(sheet: Image.Image) -> None:
+    """What the sheet actually contains, printed rather than argued about."""
+    seen: dict = {}
+    for index in range(COLUMNS * ROWS):
+        if index in BLANK:
+            continue
+        grid = binarise(tile_image(sheet, index))
+        seen.setdefault(touches(grid), []).append(index)
+    print("ROCK AUDIT: %d tiles" % (COLUMNS * ROWS - len(BLANK)))
+    for reached in sorted(seen, key=lambda m: (bin(m).count("1"), m)):
+        print("  edges %-5s %2d tiles  %s" % (_edges(reached), len(seen[reached]), seen[reached]))
+    missing = [_edges(m) for m in range(16) if m not in seen]
+    print("  edge combinations with no tile: %s" % (", ".join(missing) or "none"))
+    print("  tiles whose rock touches no edge: %d (a blob set needs exactly one)"
+          % len(seen.get(0, [])))
+
+
 def main() -> None:
+    import sys
     sheet = Image.open(SOURCE).convert("RGB")
+    if "--audit" in sys.argv:
+        audit(sheet)
+        return
     candidates = []
     for index in range(COLUMNS * ROWS):
         if index in BLANK:
@@ -194,9 +281,17 @@ def main() -> None:
             candidates.append((index, name, image, grid, touches(grid)))
 
     masks = sorted({canonical(m) for m in range(256)})
+    declared = _check_declaration(candidates, masks)
+
     chosen = {}
     for mask in masks:
         want = ideal(mask)
+        if mask in declared:
+            # Declared wins outright, untransformed: the point of being told
+            # what a tile means is not to then second-guess it.
+            tile = next(c for c in candidates if c[0] == declared[mask] and c[1] == "")
+            chosen[mask] = (tile[0], "declared", agreement(want, tile[3]), tile[2])
+            continue
         # Connectivity first, silhouette second. Every one of the sixteen edge
         # combinations exists somewhere in the sheet once rotations are counted,
         # so this filter never empties -- but the fallback is kept because a
