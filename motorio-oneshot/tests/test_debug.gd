@@ -54,6 +54,46 @@ func _run() -> void:
 		"and it carries no trace of the debug speed")
 
 	Engine.time_scale = 1.0
+
+	# The scenario key. This is the arrangement TESTS.md calls `real test`, and
+	# the thing worth holding is the facing: on adjacent seams a miner pointed
+	# east emits into its neighbour and jams, which is a legal build that
+	# produces nothing, so a rig that quietly builds it would spend twelve
+	# minutes proving the game is broken.
+	main.debug_scenario()
+	var miners: Array[Vector2i] = []
+	for cell: Vector2i in main.sim.machines:
+		if main.sim.machines[cell].type == Defs.M_MINER:
+			miners.append(cell)
+	_assert(miners.size() >= 2, "두 대가 섰다: %d" % miners.size())
+	for cell: Vector2i in miners:
+		_assert(main.sim.machines[cell].dir == Vector2i(0, -1),
+			"출력이 위를 본다: %s" % str(main.sim.machines[cell].dir))
+		_assert(main.sim.ore.has(cell), "광맥 위에 섰다: %s" % str(cell))
+
+	# Two working, one idle, and the two not on the same machine. The third cat
+	# is part of the scenario rather than a spare: it is the one that hauls what
+	# the miners drop, so a rig that assigns all three tests a different game.
+	var jobs: Array[Vector2i] = []
+	var idle := 0
+	for cat: Sim.Cat in main.sim.cats:
+		if cat.has_job():
+			jobs.append(cat.assigned)
+		else:
+			idle += 1
+	_assert(jobs.size() == 2, "두 마리가 일한다: %d" % jobs.size())
+	_assert(jobs.size() < 2 or jobs[0] != jobs[1], "같은 채굴기에 겹치지 않는다")
+	_assert(idle >= 1, "한 마리는 놀고 있다: %d" % idle)
+
+	# And pressing it twice is the same arrangement, because a tester who is not
+	# sure whether the key registered will press it again.
+	main.debug_scenario()
+	var again := 0
+	for cell: Vector2i in main.sim.machines:
+		if main.sim.machines[cell].type == Defs.M_MINER:
+			again += 1
+	_assert(again == miners.size(), "두 번 눌러도 그대로다: %d" % again)
+
 	main.clear_save()
 
 	if failures == 0:

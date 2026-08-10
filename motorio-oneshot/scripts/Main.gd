@@ -224,7 +224,15 @@ func objective_data() -> Dictionary:
 	if sim.machine_count(Defs.M_MINER) == 0:
 		return _goal("수정 광맥 위에 채굴기를 설치하세요  (수정조각 %d)"
 			% int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_CRYSTAL]), "machine", Defs.M_MINER)
-	if _unassigned_cats() > 0:
+	# Only while there is somewhere to put one. A spare cat and no free miner is a
+	# normal thing to own -- the gacha hands out cats faster than seams appear,
+	# and the third cat in the standard scenario exists precisely to haul what the
+	# other two dig. Asking for it anyway names an action with no target, and
+	# because this rung sits early in the ladder it also hides every rung after
+	# it: the player never gets told about the exchanger, copper or power for as
+	# long as one cat is idle. A wrong instruction is bad; a wrong instruction
+	# that silences the correct one for the rest of the run is worse.
+	if _unassigned_cats() > 0 and not sim.idle_miner_cells().is_empty():
 		return _goal("고양이를 Z 로 안아 채굴기에 올려놓으세요", "thing", Icons.THING_CAT)
 	if sim.machine_count(Defs.M_EXCHANGER) == 0:
 		return _goal("수정에너지교환기를 지으세요  (수정조각 %d)"
@@ -930,6 +938,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_unlock_all()
 		get_viewport().set_input_as_handled()
 		return
+	if event.is_action_pressed("debug_scenario"):
+		debug_scenario()
+		get_viewport().set_input_as_handled()
+		return
 	if _zoom_key(key):
 		get_viewport().set_input_as_handled()
 		return
@@ -1259,6 +1271,43 @@ func debug_unlock_all() -> void:
 	# looked at by anyone at all.
 	sim.coins = maxi(sim.coins, Defs.DEBUG_COINS)
 	_notify("디버그 전체 해금", Defs.COL_DANGER)
+	audio.call("play", "confirm")
+
+## The standard scenario in one key: two miners on the first two starter seams
+## facing north, a cat working each, a third left idle. TESTS.md calls this
+## `real test`, and building it by hand is a dozen timed key holds -- one hold
+## that lands Grim a cell off puts a cat on the ore instead of the miner, and the
+## run afterwards looks exactly like a game that will not produce. A test rig
+## that fails the way a bug fails is worse than no rig.
+##
+## North matters and is the reason this key exists at all rather than a scatter
+## of miners. A miner emits into the cell it faces; on adjacent seams facing east
+## the left one emits into the right one and the right one into the third seam,
+## so both jam. Facing north they drop onto open floor for the idle cat to haul.
+func debug_scenario() -> void:
+	debug_unlock_all()
+	# Whatever Grim was holding goes down first, or assigning it below would drop
+	# it silently and leave the player carrying a cat that is standing elsewhere.
+	if sim.carried_cat != null:
+		sim.drop_cat(player.position)
+	var north := Vector2i(0, -1)
+	for index in 2:
+		var cell: Vector2i = sim.core_cell + Sim.STARTER_PATCH[index]
+		if not sim.machines.has(cell):
+			sim.build(Defs.M_MINER, cell, north)
+	# Through the same door the player uses, so this cannot drift away from what
+	# carrying a cat over and putting it down actually does.
+	for cell: Vector2i in sim.idle_miner_cells():
+		var spare: Sim.Cat = null
+		for cat: Sim.Cat in sim.cats:
+			if not cat.has_job():
+				spare = cat
+				break
+		if spare == null:
+			break
+		sim.carried_cat = spare
+		sim.place_cat(cell)
+	_notify("디버그 시나리오 · 채굴기 2대 · 고양이 배치", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
 func _cycle_recipe() -> void:

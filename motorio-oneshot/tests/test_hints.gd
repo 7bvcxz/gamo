@@ -124,6 +124,35 @@ func _objectives(main: Node2D) -> void:
 				"목표 문구가 묶이지 않은 키를 말하지 않는다: '%s' 안의 %s" % [line, letter])
 	print("HINTS: 목표 문구 %d줄 확인" % seen.size())
 
+	# A rung must not ask for something with no target. Owning a spare cat is
+	# normal -- the gacha gives them out and the standard scenario keeps one on
+	# purpose to haul -- and while this rung was unconditional it both named an
+	# impossible action and, sitting early in the ladder, hid every rung after it
+	# for the rest of the run.
+	var place := "고양이를 Z 로 안아 채굴기에 올려놓으세요"
+	for cat: Sim.Cat in sim.cats:
+		cat.assigned = Vector2i(9999, 9999)
+	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.unlocked[Defs.M_MINER] = true
+	var seam_a: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
+	var seam_b: Vector2i = sim.core_cell + Sim.STARTER_PATCH[1]
+	_check(sim.build(Defs.M_MINER, seam_a, Vector2i(0, -1)), "채굴기가 섰다")
+	while sim.cats.size() < 2:
+		sim._spawn_cats([Defs.RARITY_O] as Array[int])
+	_check(String(main.objective_data()["text"]) == place,
+		"빈 채굴기가 있으면 고양이를 올리라고 한다")
+
+	sim.carried_cat = sim.cats[0]
+	sim.place_cat(seam_a)
+	_check(main._unassigned_cats() > 0, "아직 노는 고양이가 있다")
+	_check(String(main.objective_data()["text"]) != place,
+		"올려놓을 자리가 없으면 올리라고 하지 않는다: %s" % main.objective())
+
+	# And it comes back the moment a seat opens.
+	_check(sim.build(Defs.M_MINER, seam_b, Vector2i(0, -1)), "두 번째 채굴기가 섰다")
+	_check(String(main.objective_data()["text"]) == place,
+		"자리가 생기면 다시 올리라고 한다")
+
 ## The key legend lists every key the game answers to on a desktop. It is a
 ## hand-written list, which is the kind that goes stale the moment someone adds
 ## a key -- G and the zoom pair were both missing from it, and both were added
