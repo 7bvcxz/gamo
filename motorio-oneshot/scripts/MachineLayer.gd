@@ -727,6 +727,12 @@ func _draw_machine_marks(tile: float) -> void:
 			continue
 		var centre: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
 		if machine.type == Defs.M_MINER:
+			# Outlined, because it is now drawn over the cat rather than under it.
+			# Cream on snow read as a mark; cream on a cream cat read as a party
+			# hat, and an output direction that looks like part of the animal is
+			# not much better than one hidden behind it.
+			_draw_arrow(centre + Vector2(machine.dir) * 15.0, machine.dir, 10.0,
+				Defs.OUTLINE, 5.0)
 			_draw_arrow(centre + Vector2(machine.dir) * 15.0, machine.dir, 10.0,
 				Defs.COL_BELT_RIM, 2.5)
 		if machine.stalled:
