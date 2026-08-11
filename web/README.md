@@ -36,14 +36,28 @@ The schema sets `additionalProperties: false`, so the file cannot carry comments
 — not even `//`-prefixed keys, which Vercel rejects with *"should NOT have
 additional property"*. The reasoning lives here instead.
 
-**`ignoreCommand: git diff --quiet HEAD^ HEAD ./`** — most commits to this
-repository are game work. A Godot export rewrites 18MB of pack and never touches
-`web/`, and without this each one would spend one of Hobby's 100 daily
-deployments rebuilding an unchanged site. The command runs from the Root
-Directory, so `./` is `web/`, and everything the site is built from is inside it:
-pages, components, the generated balance and sprite JSON, and the candidate
-sheets in `public/`. Exit 0 ignores the build, exit 1 continues it, and
-`git diff --quiet` exits 0 when nothing changed.
+**No `ignoreCommand`.** There was one — `git diff --quiet HEAD^ HEAD ./` — to
+keep a Godot export, which rewrites 18MB of pack and never touches `web/`, from
+spending one of Hobby's 100 daily deployments on an unchanged site. It compared
+one commit against its parent, and this repository's own habit made that
+comparison lie.
+
+Site work lands as a pair: the change, then `web: rebuild docs/ after publish`,
+which touches only `docs/`. Both go up in one push, so the commit Vercel
+evaluates is always the second one — and it reports, correctly, that nothing
+under `web/` changed. Exit 0 skips the build. The real change sat one commit
+back, where nothing looked.
+
+The site went seven hours and two pushes without deploying, and the failure is
+invisible from this side: the push succeeds, the working tree is clean, the
+build passes locally, and the deployed page is simply old. There is nothing to
+notice until someone opens the URL and reads yesterday's content.
+
+A build is about forty seconds and the site is a few hundred KB. That is a much
+smaller price than a deployment that silently does not happen, so every push
+builds now. If the daily limit ever becomes the binding constraint, the fix is
+a comparison against the last *deployed* commit rather than against `HEAD^` —
+not a smarter guess about which single commit mattered.
 
 **`redirects`, temporary rather than permanent** — the games are not deployed
 here, so a guessed URL is sent to the host that has them. A 308 would be cached
