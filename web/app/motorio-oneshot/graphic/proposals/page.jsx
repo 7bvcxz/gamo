@@ -7,6 +7,7 @@ import { ObjectCanvas } from '../../../../components/graphics/Canvas.jsx';
 import { SpriteAnimation, SpriteStrip } from '../../../../components/graphics/SpriteAnimation.jsx';
 import sprites from '../../../../lib/generated/sprites.json';
 import art from '../../../../lib/generated/art.json';
+import objects from '../../../../lib/generated/objects.json';
 
 // Where I put the graphic decisions I could not settle myself. Each question is
 // five drawable options rather than five adjectives, because "warmer" and
@@ -17,6 +18,7 @@ import art from '../../../../lib/generated/art.json';
 
 const STORE = 'motorio-oneshot.graphic-picks';
 const SPRITE_STORE = 'motorio-oneshot.sprite-picks';
+const OBJECT_STORE = 'motorio-oneshot.object-picks';
 
 // Generated animations waiting on a decision, grouped by who is in them.
 //
@@ -241,6 +243,101 @@ function SpriteCharacters({ requests, picks, onPick }) {
   );
 }
 
+// Object candidates: buildings and machines, three or six of each.
+//
+// Generated renders rather than drawings, waiting on the same kind of decision
+// the animations are waiting on -- which one is worth turning into pixels. Shown
+// at 128 and at 64 because that is the question: 128 is what a pixel pass traces
+// from, 64 is nearer what the game shows, and several of these read at one and
+// turn to mush at the other.
+//
+// Everything here comes from web/lib/generated/objects.json, written by
+// tools/sprite/build_objects.py out of the originals in tools/sprite/objects/.
+const OBJECT_NAME = {
+  base: '기지 코어',
+  home: '숙소',
+  feedbox: '밥통',
+  miner: '채굴 기계',
+  mine: '채굴장',
+};
+const OBJECT_NOTE = {
+  base: '월드 한가운데의 열 코어. 지금은 코드로 그린 한 칸짜리 원입니다.',
+  home: '남서쪽 숙소. 밤에 들어가 자고, 고양이도 여기로 돌아옵니다.',
+  feedbox: '숙소 옆 사료통. 허기진 고양이가 여기로 와서 먹습니다.',
+  miner:
+    '광맥 위에 놓는 기계. 고양이가 올라서면 돌아가며, 위를 보게 놓으면 위 칸으로 뱉습니다. ' +
+    '고양이 앞에 놓고 위아래로 떨게 하려면 세로로 긴 그림은 고양이를 가립니다.',
+  mine:
+    '캘 수 있는 자리. 지금 후보 셋은 광산 시설 건물이라 게임에 그런 것이 없습니다 — ' +
+    '바닥의 광맥과 그 위의 기계뿐이므로 이 묶음은 다시 만들어야 합니다.',
+};
+
+function ObjectSubject({ subject, picks, onPick }) {
+  const [active, setActive] = useState(subject.candidates[0].id);
+  const candidate = subject.candidates.find((c) => c.id === active) || subject.candidates[0];
+  return (
+    <section className="prop">
+      <h2>{OBJECT_NAME[subject.id] || subject.id}</h2>
+      <p className="prop-why">
+        후보 {subject.candidates.length}개. {OBJECT_NOTE[subject.id]}
+      </p>
+      <div className="sprite-tabs" role="tablist" aria-label={subject.id}>
+        {subject.candidates.map((c) => (
+          <button
+            key={c.id}
+            role="tab"
+            type="button"
+            className="sprite-tab"
+            aria-selected={c.id === active}
+            onClick={() => setActive(c.id)}
+          >
+            {c.id}
+            {picks[subject.id] === c.id && <i className="sprite-tab-dot" aria-label="고름" />}
+          </button>
+        ))}
+      </div>
+      <div className="sprite-panel">
+        <div className="sprite-block">
+          <span className="sprite-label">128 — 픽셀로 옮길 원본 크기</span>
+          <div className="object-row">
+            <img className="object-shot object-128" src={site(candidate.sizes['128'])} alt={candidate.id} />
+            <div className="object-side">
+              <span className="sprite-label">64 — 게임에 가까운 크기</span>
+              <img className="object-shot object-64" src={site(candidate.sizes['64'])} alt={candidate.id} />
+            </div>
+          </div>
+        </div>
+        <button
+          className="btn"
+          type="button"
+          aria-pressed={picks[subject.id] === candidate.id}
+          onClick={() => onPick(subject.id, candidate.id)}
+        >
+          {picks[subject.id] === candidate.id ? `${candidate.id} 선택됨` : `${candidate.id} 고르기`}
+        </button>
+        <p className="sprite-note">
+          원본 {candidate.source[0]}×{candidate.source[1]}. 정사각형에 넣을 때 비율을 지키고 아래쪽에
+          맞췄습니다 — 전부 타일 위에 놓이는 물건이라, 자기 발자국보다 떠 있으면 아트가 아니라 게임
+          버그처럼 보입니다.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ObjectCandidates({ picks, onPick }) {
+  const subjects = objects.subjects || [];
+  if (subjects.length === 0) return null;
+  return (
+    <>
+      <h2 className="prop-section">오브젝트 후보</h2>
+      {subjects.map((subject) => (
+        <ObjectSubject key={subject.id} subject={subject} picks={picks} onPick={onPick} />
+      ))}
+    </>
+  );
+}
+
 // The artwork the repository owns, most of which is not in the game.
 //
 // About 39 MB of it, and until now the only way to look at it was to open the
@@ -362,17 +459,34 @@ function Proposals() {
     localStorage.setItem(SPRITE_STORE, JSON.stringify(spritePicks));
   }, [spritePicks]);
 
+  const [objectPicks, setObjectPicks] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(OBJECT_STORE) || '{}');
+    } catch {
+      return {};
+    }
+  });
+  useEffect(() => {
+    localStorage.setItem(OBJECT_STORE, JSON.stringify(objectPicks));
+  }, [objectPicks]);
+
   const pick = (id, index) => setPicks((p) => ({ ...p, [id]: index }));
+  const pickObject = (id, candidate) => setObjectPicks((p) => ({ ...p, [id]: candidate }));
   const pickSprite = (id, candidate) => setSpritePicks((p) => ({ ...p, [id]: candidate }));
   const spriteRequests = sprites.requests || [];
   const spriteSummary = spriteRequests
     .filter((r) => spritePicks[r.id])
     .map((r) => `${r.id} → ${spritePicks[r.id]}`)
     .join('\n');
+  const objectSummary = (objects.subjects || [])
+    .filter((s) => objectPicks[s.id])
+    .map((s) => `${OBJECT_NAME[s.id] || s.id} → ${objectPicks[s.id]}`)
+    .join('\n');
   const chosen = PROPOSALS.filter((p) => picks[p.id] != null);
   const summary = [
     ...chosen.map((p) => `${p.title} → ${picks[p.id] + 1}. ${p.options[picks[p.id]].name}`),
     ...(spriteSummary ? [spriteSummary] : []),
+    ...(objectSummary ? [objectSummary] : []),
   ].join('\n');
 
   return (
@@ -391,6 +505,8 @@ function Proposals() {
       </header>
 
       <SpriteCharacters requests={spriteRequests} picks={spritePicks} onPick={pickSprite} />
+
+      <ObjectCandidates picks={objectPicks} onPick={pickObject} />
 
       <SourceArt />
 
@@ -427,7 +543,7 @@ function Proposals() {
 
       <section className="prop-summary">
         <h2>고른 것</h2>
-        {chosen.length === 0 && !spriteSummary ? (
+        {chosen.length === 0 && !spriteSummary && !objectSummary ? (
           <p>아직 고른 것이 없습니다.</p>
         ) : (
           <>

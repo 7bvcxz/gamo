@@ -1,0 +1,353 @@
+{
+ "subjects": [
+  {
+   "id": "base",
+   "candidates": [
+    {
+     "id": "base1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/base1-128-ed83ef4e3733.png",
+      "64": "/object-candidates/base1-64-5f27b6283355.png"
+     },
+     "source": [
+      999,
+      997
+     ]
+    },
+    {
+     "id": "base2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/base2-128-bfbd48131284.png",
+      "64": "/object-candidates/base2-64-91f3db2fa59c.png"
+     },
+     "source": [
+      983,
+      865
+     ]
+    },
+    {
+     "id": "base3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/base3-128-39d89d3939fa.png",
+      "64": "/object-candidates/base3-64-82ea151e378a.png"
+     },
+     "source": [
+      961,
+      868
+     ]
+    },
+    {
+     "id": "base4",
+     "number": 4,
+     "sizes": {
+      "128": "/object-candidates/base4-128-e60188b20e93.png",
+      "64": "/object-candidates/base4-64-9cde88824c66.png"
+     },
+     "source": [
+      980,
+      1005
+     ]
+    },
+    {
+     "id": "base5",
+     "number": 5,
+     "sizes": {
+      "128": "/object-candidates/base5-128-8e91860c3670.png",
+      "64": "/object-candidates/base5-64-5443646bf386.png"
+     },
+     "source": [
+      985,
+      978
+     ]
+    },
+    {
+     "id": "base6",
+     "number": 6,
+     "sizes": {
+      "128": "/object-candidates/base6-128-a6f359c2f0b4.png",
+      "64": "/object-candidates/base6-64-491dce646a00.png"
+     },
+     "source": [
+      1004,
+      1008
+     ]
+    }
+   ]
+  },
+  {
+   "id": "feedbox",
+   "candidates": [
+    {
+     "id": "feedbox1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/feedbox1-128-f969629f1584.png",
+      "64": "/object-candidates/feedbox1-64-dbb8f9df885b.png"
+     },
+     "source": [
+      820,
+      855
+     ]
+    },
+    {
+     "id": "feedbox2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/feedbox2-128-f7fca727c2b7.png",
+      "64": "/object-candidates/feedbox2-64-e93c8bcd2532.png"
+     },
+     "source": [
+      955,
+      897
+     ]
+    },
+    {
+     "id": "feedbox3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/feedbox3-128-7da3c76afe9a.png",
+      "64": "/object-candidates/feedbox3-64-e25a0defc92b.png"
+     },
+     "source": [
+      697,
+      868
+     ]
+    },
+    {
+     "id": "feedbox4",
+     "number": 4,
+     "sizes": {
+      "128": "/object-candidates/feedbox4-128-4e0e3bfcf059.png",
+      "64": "/object-candidates/feedbox4-64-9928da701de5.png"
+     },
+     "source": [
+      1283,
+      891
+     ]
+    },
+    {
+     "id": "feedbox5",
+     "number": 5,
+     "sizes": {
+      "128": "/object-candidates/feedbox5-128-c2a20d4f186e.png",
+      "64": "/object-candidates/feedbox5-64-526608dd4136.png"
+     },
+     "source": [
+      1141,
+      1155
+     ]
+    },
+    {
+     "id": "feedbox6",
+     "number": 6,
+     "sizes": {
+      "128": "/object-candidates/feedbox6-128-2cad42efbcd6.png",
+      "64": "/object-candidates/feedbox6-64-4f00fd0125ac.png"
+     },
+     "source": [
+      1092,
+      1189
+     ]
+    }
+   ]
+  },
+  {
+   "id": "home",
+   "candidates": [
+    {
+     "id": "home1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/home1-128-832e80d6e00b.png",
+      "64": "/object-candidates/home1-64-19994404e0c3.png"
+     },
+     "source": [
+      863,
+      938
+     ]
+    },
+    {
+     "id": "home2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/home2-128-b6333494ddaf.png",
+      "64": "/object-candidates/home2-64-a1cbb78212be.png"
+     },
+     "source": [
+      941,
+      1082
+     ]
+    },
+    {
+     "id": "home3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/home3-128-3f4b4a5255f8.png",
+      "64": "/object-candidates/home3-64-d2cb4a112fb8.png"
+     },
+     "source": [
+      961,
+      958
+     ]
+    },
+    {
+     "id": "home4",
+     "number": 4,
+     "sizes": {
+      "128": "/object-candidates/home4-128-184e6dd52a6f.png",
+      "64": "/object-candidates/home4-64-9b298ad359e5.png"
+     },
+     "source": [
+      1322,
+      1014
+     ]
+    },
+    {
+     "id": "home5",
+     "number": 5,
+     "sizes": {
+      "128": "/object-candidates/home5-128-09f738566092.png",
+      "64": "/object-candidates/home5-64-a3976e2e614e.png"
+     },
+     "source": [
+      1314,
+      1003
+     ]
+    },
+    {
+     "id": "home6",
+     "number": 6,
+     "sizes": {
+      "128": "/object-candidates/home6-128-c9a17188773b.png",
+      "64": "/object-candidates/home6-64-391b8c95d2b6.png"
+     },
+     "source": [
+      1180,
+      996
+     ]
+    }
+   ]
+  },
+  {
+   "id": "mine",
+   "candidates": [
+    {
+     "id": "mine1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/mine1-128-64aa7643a649.png",
+      "64": "/object-candidates/mine1-64-86fc7f033407.png"
+     },
+     "source": [
+      982,
+      1096
+     ]
+    },
+    {
+     "id": "mine2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/mine2-128-9dd881df87bf.png",
+      "64": "/object-candidates/mine2-64-ffb0ba0eb5f1.png"
+     },
+     "source": [
+      1038,
+      979
+     ]
+    },
+    {
+     "id": "mine3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/mine3-128-88ba3bbe650e.png",
+      "64": "/object-candidates/mine3-64-93b8817bbca0.png"
+     },
+     "source": [
+      990,
+      914
+     ]
+    }
+   ]
+  },
+  {
+   "id": "miner",
+   "candidates": [
+    {
+     "id": "miner1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/miner1-128-a501294e0aa7.png",
+      "64": "/object-candidates/miner1-64-926476530ad3.png"
+     },
+     "source": [
+      392,
+      909
+     ]
+    },
+    {
+     "id": "miner2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/miner2-128-8170a5fd690e.png",
+      "64": "/object-candidates/miner2-64-f12f6b1963e8.png"
+     },
+     "source": [
+      521,
+      992
+     ]
+    },
+    {
+     "id": "miner3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/miner3-128-515314369cde.png",
+      "64": "/object-candidates/miner3-64-6966872d5942.png"
+     },
+     "source": [
+      452,
+      925
+     ]
+    },
+    {
+     "id": "miner4",
+     "number": 4,
+     "sizes": {
+      "128": "/object-candidates/miner4-128-ab9153884e71.png",
+      "64": "/object-candidates/miner4-64-40aca38a02c5.png"
+     },
+     "source": [
+      987,
+      997
+     ]
+    },
+    {
+     "id": "miner5",
+     "number": 5,
+     "sizes": {
+      "128": "/object-candidates/miner5-128-fd6f4d682b26.png",
+      "64": "/object-candidates/miner5-64-dbbc42710049.png"
+     },
+     "source": [
+      937,
+      944
+     ]
+    },
+    {
+     "id": "miner6",
+     "number": 6,
+     "sizes": {
+      "128": "/object-candidates/miner6-128-453e3769a9c9.png",
+      "64": "/object-candidates/miner6-64-4c22216a238c.png"
+     },
+     "source": [
+      1234,
+      943
+     ]
+    }
+   ]
+  }
+ ]
+}

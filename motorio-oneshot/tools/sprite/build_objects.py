@@ -1,4 +1,4 @@
-"""Object art: cutouts in, square proposals out, one comparison sheet per subject.
+"""Object art: cutouts in, square candidates out, published for the proposals page.
 
 The subjects here are buildings and machines rather than characters -- the base,
 the food bin, the shelter, an ore seam, a miner -- so they do not go through the
@@ -20,15 +20,21 @@ edge as a halo. So alpha is cleared below the threshold and the image is
 premultiplied for the resize and unpremultiplied after.
 
     python3 motorio-oneshot/tools/sprite/build_objects.py
+
+Writes web/public/object-candidates/ and web/lib/generated/objects.json, which
+is what /motorio-oneshot/graphic/proposals reads.
 """
 from __future__ import annotations
 
+import hashlib
+import io
+import json
 import re
 import shutil
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFont
+from PIL import Image, ImageChops
 
 REPO = Path(__file__).resolve().parents[3]
 INBOX = Path.home() / "Workspace" / "Download"
@@ -36,7 +42,12 @@ INBOX = Path.home() / "Workspace" / "Download"
 # tools/, so the originals stay in the repository without riding along in a Web
 # export.
 OBJECTS = REPO / "motorio-oneshot" / "tools" / "sprite" / "objects"
-PROPOSALS = REPO / "graphic" / "proposals"
+# Published beside the sprite candidates, because that is where the page that
+# shows them reads from. The first version of this wrote a graphic/proposals/
+# directory at the repository root, which nothing serves -- the name refers to
+# the page at /motorio-oneshot/graphic/proposals, not to a folder.
+PUBLISH_DIR = REPO / "web" / "public" / "object-candidates"
+MANIFEST = REPO / "web" / "lib" / "generated" / "objects.json"
 
 ## Anything at or below this is matting residue rather than art.
 ALPHA_FLOOR = 16
@@ -49,8 +60,6 @@ BOTTOM_MARGIN = 3
 ## those up would move them somewhere they do not belong and only be noticed the
 ## next time a tileset failed to load.
 INCOMING = re.compile(r"^([a-z]+)(\d+)(-Photoroom)?$")
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
 
 def clean(image: Image.Image) -> Image.Image:
@@ -114,50 +123,32 @@ def _unpremultiply(channel: Image.Image, alpha: Image.Image) -> Image.Image:
     return out
 
 
-def checker(size: tuple[int, int], step: int = 8) -> Image.Image:
-    """A neutral ground for the sheet, so transparency is visible as transparency."""
-    tile = Image.new("RGBA", size, (58, 62, 72, 255))
-    draw = ImageDraw.Draw(tile)
-    for y in range(0, size[1], step):
-        for x in range(0, size[0], step):
-            if (x // step + y // step) % 2:
-                draw.rectangle([x, y, x + step - 1, y + step - 1], (68, 73, 84, 255))
-    return tile
+def publish(image: Image.Image, name: str) -> str:
+    """One content-hashed copy, returning the path the page asks for.
 
-
-def sheet(name: str, members: list[tuple[str, Image.Image, Image.Image]]) -> Image.Image:
-    """One subject, its candidates side by side, each at 128 and at 64.
-
-    Both sizes on purpose. The 128 is what a pixel pass would be traced from and
-    the 64 is closer to what the game will actually show, and a design that reads
-    at 128 and turns to mush at 64 is exactly what this sheet is for.
+    Hashed for the same reason every other generated file here is: republishing
+    under the old name keeps showing the old picture to anyone who already loaded
+    it, and the candidate sheets learned that the hard way -- a corrected sheet
+    sat behind a ten minute cache while the report said the fix had not landed.
     """
-    column, pad, title = 300, 16, 44
-    big, small = 256, 128
-    height = title + big + 26 + small + 30
-    canvas = Image.new("RGBA", (column * len(members) + pad, height), (30, 32, 38, 255))
-    draw = ImageDraw.Draw(canvas)
-    head = ImageFont.truetype(FONT_BOLD, 22)
-    label = ImageFont.truetype(FONT, 15)
-    draw.text((pad, 12), name, font=head, fill=(236, 214, 168))
-
-    for index, (member, art128, art64) in enumerate(members):
-        x = pad + index * column
-        for art, box, top in ((art128, big, title), (art64, small, title + big + 26)):
-            ground = checker((box, box))
-            ground.alpha_composite(art.resize((box, box), Image.NEAREST))
-            canvas.alpha_composite(ground, (x, top))
-            draw.rectangle([x, top, x + box - 1, top + box - 1], outline=(90, 96, 108))
-        draw.text((x, title + big + 6), member, font=label, fill=(240, 240, 240))
-        draw.text((x + small + 12, title + big + 26 + small - 18), "64",
-                  font=label, fill=(150, 156, 168))
-        draw.text((x + big - 24, title + 6), "128", font=label, fill=(150, 156, 168))
-    return canvas
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG", optimize=True)
+    payload = buffer.getvalue()
+    filename = f"{name}-{hashlib.sha256(payload).hexdigest()[:12]}.png"
+    for old in PUBLISH_DIR.glob(f"{name}-*.png"):
+        if old.name != filename:
+            old.unlink()
+    (PUBLISH_DIR / filename).write_bytes(payload)
+    return "/object-candidates/" + filename
 
 
 def main() -> int:
     OBJECTS.mkdir(parents=True, exist_ok=True)
-    PROPOSALS.mkdir(parents=True, exist_ok=True)
+    PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
+    if not MANIFEST.parent.is_dir():
+        print(f"{MANIFEST.parent}가 없습니다. 사이트가 매니페스트를 읽는 곳이므로 "
+              f"디렉터리를 만들 것이 아니라 경로가 낡은 것입니다.", file=sys.stderr)
+        return 1
 
     incoming = sorted(path for path in INBOX.glob("*.png") if INCOMING.match(path.stem))
     for source in incoming:
@@ -169,26 +160,44 @@ def main() -> int:
         print("새 파일 없음 -- 기존 원본으로 다시 그립니다")
 
     # Everything in objects/, not only what arrived today. A subject that gained
-    # three new candidates needs its sheet redrawn with all six on it, and a run
-    # that only knows about the new ones would quietly publish a sheet missing
-    # half its options.
-    groups: dict[str, list[tuple[str, Image.Image, Image.Image]]] = {}
+    # three new candidates needs its entry rewritten with all six, and a run that
+    # only knew about the new ones would publish a list missing half its options.
+    subjects: dict[str, list[dict]] = {}
     for path in sorted(OBJECTS.glob("*.png")):
         match = INCOMING.match(path.stem)
         if match is None:
             print("건너뜀 (이름 규칙 밖): %s" % path.name)
             continue
         art = clean(Image.open(path))
-        renders = {size: fit(art, size) for size in SIZES}
-        for size, image in renders.items():
-            image.save(PROPOSALS / f"{path.stem}-{size}.png")
-        groups.setdefault(match.group(1), []).append((path.stem, renders[128], renders[64]))
+        box = content_box(art)
+        subjects.setdefault(match.group(1), []).append({
+            "id": path.stem,
+            "number": int(match.group(2)),
+            "sizes": {str(size): publish(fit(art, size), f"{path.stem}-{size}")
+                      for size in SIZES},
+            "source": [box[2] - box[0], box[3] - box[1]],
+        })
 
-    for subject, members in sorted(groups.items()):
-        members.sort(key=lambda item: int(INCOMING.match(item[0]).group(2)))
-        sheet(subject, members).convert("RGB").save(PROPOSALS / f"_{subject}.png")
-        print("시트: graphic/proposals/_%s.png (%d개: %s)"
-              % (subject, len(members), ", ".join(name for name, _, _ in members)))
+    manifest = {"subjects": []}
+    for subject, members in sorted(subjects.items()):
+        members.sort(key=lambda item: item["number"])
+        manifest["subjects"].append({"id": subject, "candidates": members})
+        print("%-8s %d개: %s" % (subject, len(members),
+                                 ", ".join(m["id"] for m in members)))
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n",
+                        encoding="utf-8")
+
+    # Files no candidate points at any more, so a retired subject does not leave
+    # its renders published and unreachable.
+    referenced = {url.rsplit("/", 1)[-1]
+                  for entry in manifest["subjects"]
+                  for candidate in entry["candidates"]
+                  for url in candidate["sizes"].values()}
+    for stale in PUBLISH_DIR.glob("*.png"):
+        if stale.name not in referenced:
+            stale.unlink()
+            print("정리: %s" % stale.name)
+    print("매니페스트: %s" % MANIFEST.relative_to(REPO))
     return 0
 
 
