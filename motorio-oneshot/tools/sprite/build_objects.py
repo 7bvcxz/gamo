@@ -23,6 +23,7 @@ premultiplied for the resize and unpremultiplied after.
 """
 from __future__ import annotations
 
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -42,6 +43,12 @@ ALPHA_FLOOR = 16
 SIZES = (128, 64)
 ## A little air under the subject so it does not sit flush against the frame.
 BOTTOM_MARGIN = 3
+## What counts as object art in the inbox: a bare subject name and a number, with
+## or without the cutout tool's suffix. Deliberately narrow -- the same folder
+## holds tile sheets like tile_rock_20.png, and a glob loose enough to sweep
+## those up would move them somewhere they do not belong and only be noticed the
+## next time a tileset failed to load.
+INCOMING = re.compile(r"^([a-z]+)(\d+)(-Photoroom)?$")
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 
@@ -149,34 +156,39 @@ def sheet(name: str, members: list[tuple[str, Image.Image, Image.Image]]) -> Ima
 
 
 def main() -> int:
-    incoming = sorted(INBOX.glob("*-Photoroom.png"))
-    if not incoming:
-        print("옮길 파일이 없습니다: %s" % INBOX)
-        return 1
     OBJECTS.mkdir(parents=True, exist_ok=True)
     PROPOSALS.mkdir(parents=True, exist_ok=True)
 
-    groups: dict[str, list[tuple[str, Image.Image, Image.Image]]] = {}
+    incoming = sorted(path for path in INBOX.glob("*.png") if INCOMING.match(path.stem))
     for source in incoming:
-        stem = source.stem.replace("-Photoroom", "")
-        target = OBJECTS / f"{stem}.png"
+        subject_name, number, _ = INCOMING.match(source.stem).groups()
+        target = OBJECTS / f"{subject_name}{number}.png"
         shutil.move(str(source), target)
+        print("옮김: %s -> %s" % (source.name, target.relative_to(REPO)))
+    if not incoming:
+        print("새 파일 없음 -- 기존 원본으로 다시 그립니다")
 
-        art = clean(Image.open(target))
+    # Everything in objects/, not only what arrived today. A subject that gained
+    # three new candidates needs its sheet redrawn with all six on it, and a run
+    # that only knows about the new ones would quietly publish a sheet missing
+    # half its options.
+    groups: dict[str, list[tuple[str, Image.Image, Image.Image]]] = {}
+    for path in sorted(OBJECTS.glob("*.png")):
+        match = INCOMING.match(path.stem)
+        if match is None:
+            print("건너뜀 (이름 규칙 밖): %s" % path.name)
+            continue
+        art = clean(Image.open(path))
         renders = {size: fit(art, size) for size in SIZES}
         for size, image in renders.items():
-            image.save(PROPOSALS / f"{stem}-{size}.png")
-
-        subject = stem.rstrip("0123456789") or stem
-        groups.setdefault(subject, []).append((stem, renders[128], renders[64]))
-        box = content_box(art)
-        print("%-10s -> %s  원본 내용 %dx%d"
-              % (stem, target.relative_to(REPO), box[2] - box[0], box[3] - box[1]))
+            image.save(PROPOSALS / f"{path.stem}-{size}.png")
+        groups.setdefault(match.group(1), []).append((path.stem, renders[128], renders[64]))
 
     for subject, members in sorted(groups.items()):
-        members.sort(key=lambda item: item[0])
+        members.sort(key=lambda item: int(INCOMING.match(item[0]).group(2)))
         sheet(subject, members).convert("RGB").save(PROPOSALS / f"_{subject}.png")
-        print("시트: graphic/proposals/_%s.png (%d개)" % (subject, len(members)))
+        print("시트: graphic/proposals/_%s.png (%d개: %s)"
+              % (subject, len(members), ", ".join(name for name, _, _ in members)))
     return 0
 
 
