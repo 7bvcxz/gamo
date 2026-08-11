@@ -45,6 +45,20 @@ func _run() -> void:
 	_assert(is_equal_approx(main.collapse_timer, Defs.COLLAPSE_GRACE), "hitting zero starts the grace timer")
 	_assert(not main.player.locked, "the player can still run during the grace period")
 
+	# And it has to name the place that actually saves you. This is the daytime
+	# path -- _update_warmth calls it only when it is not night -- and what
+	# cancels the collapse is warmth above zero, which the whole warm radius
+	# restores. It said "숙소로" while the objective card, on screen at the same
+	# instant, said "온기 반경 안으로": the two most urgent lines in the game
+	# pointing at different places, at the one moment there is no time to read
+	# twice.
+	_assert(String(main.message).find("숙소") < 0,
+		"낮의 동결 경고가 숙소를 가리키지 않는다: '%s'" % main.message)
+	_assert(String(main.message).find("온기 반경") >= 0,
+		"온기 반경을 가리킨다: '%s'" % main.message)
+	_assert(String(main.objective()).find("온기 반경") >= 0,
+		"목표 카드도 같은 곳을 가리킨다: '%s'" % main.objective())
+
 	# Reaching warmth again inside the window cancels the collapse.
 	main.player.warmth = 30.0
 	main._update_collapse(0.5)

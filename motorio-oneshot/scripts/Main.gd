@@ -752,7 +752,15 @@ func _begin_rescue() -> void:
 		return
 	collapse_timer = Defs.COLLAPSE_GRACE
 	shake = 3.0
-	_notify("의식이 흐려집니다  %.0f초 안에 숙소로" % Defs.COLLAPSE_GRACE, Defs.COL_DANGER)
+	# The warm radius, not the shelter. This is the daytime path -- _update_warmth
+	# only calls it when it is not night -- and what cancels the collapse is
+	# warmth above zero, which the radius restores at 26 a second from anywhere
+	# inside it. The shelter is one building at one end of that circle, and in
+	# daylight running for it is usually the longer way to the same rescue. The
+	# objective card was already saying "온기 반경 안으로 돌아가세요" at the same
+	# moment, so the two most urgent lines on screen named different places.
+	_notify("의식이 흐려집니다  %.0f초 안에 온기 반경 안으로" % Defs.COLLAPSE_GRACE,
+		Defs.COL_DANGER)
 	fx.ring(player.position, Defs.COL_DANGER, 44.0)
 	audio.call("play", "alarm")
 
