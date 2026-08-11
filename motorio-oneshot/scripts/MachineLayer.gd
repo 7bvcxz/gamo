@@ -35,6 +35,36 @@ const CAT_FOOT_FRACTION := 104.0 / 128.0
 const CAT_HEAD_FRACTION := 36.0 / 128.0
 ## The feet, relative to the cat's world position.
 const CAT_GROUND := 10.0
+## What hangs over a cat, and how high.
+##
+## Both used to be higher: the bar at 14 above the head and the load at 7, which
+## overlapped each other by a pixel and, worse, put the bar squarely inside the
+## item lying on the tile above. That is not a coincidence to be nudged around --
+## a miner facing north drops into the cell above it, and its worker's gauge hung
+## in exactly that cell. The recommended arrangement guaranteed the collision.
+##
+## So the bar hugs the head, below anything the next tile can hold, and the load
+## rides above the bar. test_animation holds both gaps.
+const CAT_BAR_LIFT := 5.0
+const CAT_BAR_SIZE := Vector2(22.0, 3.0)
+const CAT_LOAD_LIFT := 13.0
+const CAT_LOAD_RADIUS := 5.0
+## A loose item on the ground: how big it draws and how far it bobs. Constants
+## because the cat layout above is measured against them.
+const GROUND_ITEM_RADIUS := 4.2
+const GROUND_ITEM_BOB := 1.6
+## The miner's output arrow, measured from the machine centre outwards.
+##
+## Three things stack over a working miner -- whatever lies on the next tile, the
+## worker's gauge, and this -- inside about sixteen pixels, so they cannot all be
+## given clear air. Pulling the arrow down to 11 to clear the gauge put it inside
+## the cat's head, where its outline read as a second pair of eyes and it stopped
+## being an arrow at all; an output direction that is not recognisable is the
+## thing this arrow was moved above the cats to fix in the first place. At 15 its
+## tip touches the top of the gauge by about two pixels and both stay perfectly
+## legible, which is the trade worth making. The test bounds that contact.
+const MINER_ARROW_LIFT := 15.0
+const MINER_ARROW_LENGTH := 10.0
 
 var sim: Sim
 var view_rect := Rect2()
@@ -467,12 +497,12 @@ func _draw_ground() -> void:
 			continue
 		var item_type: int = int(sim.ground[cell])
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
-		var bob: float = sin(pulse * 3.0 + float(cell.x + cell.y)) * 1.6
+		var bob: float = sin(pulse * 3.0 + float(cell.x + cell.y)) * GROUND_ITEM_BOB
 		var colour: Color = Defs.ITEM_COLORS[item_type]
 		_shadow(at + Vector2(0, 7), 5.0)
 		draw_circle(at + Vector2(0, bob), 7.0, Color(colour.r, colour.g, colour.b, 0.28))
-		draw_circle(at + Vector2(0, bob), 4.2, colour)
-		draw_circle(at + Vector2(0, bob), 4.2, Defs.OUTLINE, false, 1.0)
+		draw_circle(at + Vector2(0, bob), GROUND_ITEM_RADIUS, colour)
+		draw_circle(at + Vector2(0, bob), GROUND_ITEM_RADIUS, Defs.OUTLINE, false, 1.0)
 		# A single highlight, in the same top-left place as every other object.
 		draw_circle(at + Vector2(-1.4, bob - 1.4), 1.2, Color(1, 1, 1, 0.55))
 
@@ -535,6 +565,16 @@ static func cat_body_rect(rect: Rect2) -> Rect2:
 	var bottom: float = box.position.y + CAT_FOOT_FRACTION * box.size.y
 	var width: float = box.size.x * 0.62
 	return Rect2(box.get_center().x - width * 0.5, top, width, bottom - top)
+
+## The hunger gauge and the carried load, from the same rect as everything else.
+## Exposed rather than written inline so the gaps between them, and between them
+## and the tile above, can be measured instead of eyeballed.
+static func cat_hunger_bar(at: Vector2, rect: Rect2) -> Rect2:
+	return Rect2(at.x - CAT_BAR_SIZE.x * 0.5, cat_head_y(rect) - CAT_BAR_LIFT,
+		CAT_BAR_SIZE.x, CAT_BAR_SIZE.y)
+
+static func cat_load_at(at: Vector2, rect: Rect2) -> Vector2:
+	return Vector2(at.x, cat_head_y(rect) - CAT_LOAD_LIFT)
 
 ## Where the shadow goes. Same input as cat_rect, so the two cannot drift.
 static func cat_shadow_at(at: Vector2) -> Vector2:
@@ -631,8 +671,9 @@ func _draw_cats() -> void:
 			# What the cat is carrying rides above its head, so a line of hauling
 			# cats reads as a slow, visible conveyor.
 			var load_colour: Color = Defs.ITEM_COLORS[cat.carrying]
-			var carried_at := Vector2(cat.pos.x, head - 7.0)
-			draw_circle(carried_at, 5.0, Color(load_colour.r, load_colour.g, load_colour.b, 0.30))
+			var carried_at: Vector2 = cat_load_at(cat.pos, target)
+			draw_circle(carried_at, CAT_LOAD_RADIUS,
+				Color(load_colour.r, load_colour.g, load_colour.b, 0.30))
 			draw_circle(carried_at, 3.2, load_colour)
 		if cat.state == Defs.CAT_EATING:
 			# Crumbs kicking up from the bowl.
@@ -642,7 +683,7 @@ func _draw_cats() -> void:
 				draw_circle(at, 1.6 * (1.0 - phase), Color(0.95, 0.82, 0.55, 1.0 - phase))
 		# Hunger only appears once it matters, so a healthy crew stays clean.
 		if cat.hunger < 0.5:
-			var bar := Rect2(cat.pos.x - 11, head - 14.0, 22, 3)
+			var bar: Rect2 = cat_hunger_bar(cat.pos, target)
 			draw_rect(bar, Color(0.06, 0.08, 0.12, 0.85))
 			draw_rect(Rect2(bar.position, Vector2(bar.size.x * cat.hunger, bar.size.y)),
 				Defs.COL_DANGER if cat.hunger <= 0.0 else Defs.COL_BELT_RIM)
@@ -731,10 +772,9 @@ func _draw_machine_marks(tile: float) -> void:
 			# Cream on snow read as a mark; cream on a cream cat read as a party
 			# hat, and an output direction that looks like part of the animal is
 			# not much better than one hidden behind it.
-			_draw_arrow(centre + Vector2(machine.dir) * 15.0, machine.dir, 10.0,
-				Defs.OUTLINE, 5.0)
-			_draw_arrow(centre + Vector2(machine.dir) * 15.0, machine.dir, 10.0,
-				Defs.COL_BELT_RIM, 2.5)
+			var tail: Vector2 = centre + Vector2(machine.dir) * MINER_ARROW_LIFT
+			_draw_arrow(tail, machine.dir, MINER_ARROW_LENGTH, Defs.OUTLINE, 5.0)
+			_draw_arrow(tail, machine.dir, MINER_ARROW_LENGTH, Defs.COL_BELT_RIM, 2.5)
 		if machine.stalled:
 			_draw_stall(machine, centre)
 

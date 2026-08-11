@@ -200,6 +200,46 @@ func _run() -> void:
 	_assert(MachineLayer.CAT_FOOT_FRACTION * MachineLayer.CAT_DRAW > MachineLayer.CAT_GROUND * 3.0,
 		"몸이 그림자 위로 충분히 올라온다")
 
+	# --- What hangs over a cat has to clear the tile above it -------------------
+	# A miner facing north drops its output into the cell above itself, and the
+	# worker's hunger bar hung in that same cell -- so the recommended arrangement
+	# guaranteed a gauge with a crystal through it. The load rode into the bar as
+	# well. Measured against the item's own radius and bob rather than eyeballed,
+	# so changing either moves this check with it.
+	var at := Vector2(400.0, 400.0)
+	var body: Rect2 = MachineLayer.cat_rect(at, 1.0, false, 0.0)
+	var gauge: Rect2 = MachineLayer.cat_hunger_bar(at, body)
+	var load: Vector2 = MachineLayer.cat_load_at(at, body)
+	var item_bottom: float = at.y - float(Defs.TILE) \
+		+ MachineLayer.GROUND_ITEM_RADIUS + MachineLayer.GROUND_ITEM_BOB
+	_assert(gauge.position.y >= item_bottom,
+		"허기 막대가 위 칸의 산출물 아래에 있다 (%.1f >= %.1f)" % [gauge.position.y, item_bottom])
+	_assert(load.y + MachineLayer.CAT_LOAD_RADIUS <= gauge.position.y,
+		"짐 표시가 허기 막대와 겹치지 않는다 (%.1f <= %.1f)"
+		% [load.y + MachineLayer.CAT_LOAD_RADIUS, gauge.position.y])
+	# And still attached to the animal: a gauge that clears everything by floating
+	# away belongs to nobody.
+	_assert(gauge.position.y + gauge.size.y <= MachineLayer.cat_head_y(body),
+		"막대는 머리 위에 있다")
+	_assert(MachineLayer.cat_head_y(body) - gauge.position.y < 12.0,
+		"머리에 붙어 있다 (%.1f)" % (MachineLayer.cat_head_y(body) - gauge.position.y))
+	_assert(is_equal_approx(gauge.get_center().x, at.x), "막대가 몸 중심에 온다")
+
+	# Three things stack over a working miner and the cell is 32 pixels tall:
+	# the item on the next tile, the gauge, and the output arrow. The first fix
+	# for this moved the gauge out of the item and straight into the arrow, which
+	# is not a fix, so all three gaps are checked at once.
+	# The arrow cannot be given clear air -- pulling it down far enough put it
+	# inside the cat's head, where its outline read as a second pair of eyes and
+	# it stopped being an arrow. So it is allowed to touch the gauge, and bounded
+	# instead: a couple of pixels of contact leaves both readable, a machine's
+	# worth of overlap does not.
+	var arrow_tip: float = at.y - MachineLayer.MINER_ARROW_LIFT - MachineLayer.MINER_ARROW_LENGTH
+	var arrow_tail: float = at.y - MachineLayer.MINER_ARROW_LIFT
+	var touch: float = minf(arrow_tail, gauge.position.y + gauge.size.y) \
+		- maxf(arrow_tip, gauge.position.y)
+	_assert(touch <= 3.0, "출력 화살표가 허기 막대를 덮지 않는다 (%.1f픽셀)" % touch)
+
 	# --- What a machine is doing is drawn above the animal doing it -------------
 	# A cat is nearly sixty pixels tall standing on a thirty-two pixel cell, so
 	# anything a machine draws near its own centre is behind its worker. That hid
