@@ -18,51 +18,86 @@ import art from '../../../../lib/generated/art.json';
 const STORE = 'motorio-oneshot.graphic-picks';
 const SPRITE_STORE = 'motorio-oneshot.sprite-picks';
 
-// Generated animations waiting on a decision.
+// Generated animations waiting on a decision, grouped by who is in them.
 //
 // These are not drawings I made and cannot judge between; they are candidates a
 // video model produced that already passed validation -- foot anchored, palette
 // locked, silhouette continuous frame to frame. Everything measurable has been
 // measured, which is exactly why the remaining question needs a person: whether
 // it reads as the right character doing the right thing is not a number.
-function SpriteRequest({ request, picked, onPick }) {
+//
+// Eighteen of them in one column meant scrolling past Grim's four mining
+// directions to reach the cat, and comparing two of a character's states meant
+// remembering the first one. One character at a time, one state at a time.
+
+// Ordering only. Anything not listed still appears, after the ones that are, so
+// a state added tomorrow shows up without this file being edited -- a hand-kept
+// list that silently drops entries is the failure this ordering is trying to
+// avoid, not one to import.
+const MOTION_ORDER = ['idle', 'walk', 'run', 'mine', 'eat', 'work'];
+const FACING_ORDER = ['s', 'e', 'n', 'w', 'se', 'sw', 'ne', 'nw'];
+const FACING_NAME = { s: '정면', e: '오른쪽', w: '왼쪽', n: '뒤', se: '오른쪽 앞', sw: '왼쪽 앞', ne: '오른쪽 뒤', nw: '왼쪽 뒤' };
+const CHARACTER_NAME = { grim: 'Grim — 주인공', catorg: 'cat_org — 고양이' };
+// What each motion is for in the game, so the thing being judged is whether the
+// clip does that job rather than whether it looks nice on its own.
+const MOTION_NOTE = {
+  idle: '가만히 서 있을 때. 대부분의 시간을 이 시트로 보내므로, 눈에 띄는 동작보다 호흡이 끊기지 않는 쪽이 중요합니다.',
+  walk: '이동 중. 발이 미끄러지지 않고 한 주기가 매끄럽게 이어지는지가 전부입니다.',
+  run: '달릴 때. 걷기보다 빠르게 재생되므로 같은 보폭이면 오히려 어색해집니다.',
+  mine: '곡괭이질. 한 스윙이 약 1.5초이고, 머리가 지면에 닿는 프레임에 소리와 파편이 붙습니다.',
+  eat: '밥통 앞에서 먹을 때. 정면 하나뿐이며, 게임이 밥그릇을 따로 그리므로 클립 안에 그릇이 있으면 두 개가 됩니다.',
+  work: '채굴기 위에서 일할 때. 정면 하나뿐이고, 기계 앞에 서 있는 모습으로 그려집니다.',
+};
+
+function splitId(id) {
+  const [character, ...rest] = id.split('-');
+  const state = rest.join('-');
+  const [motion, facing] = [rest[0] || '', rest[1] || ''];
+  return { character, state, motion, facing };
+}
+
+function rank(list, value) {
+  const index = list.indexOf(value);
+  return index < 0 ? list.length : index;
+}
+
+function SpritePanel({ request, picked, onPick }) {
   // Zoom is derived from the cell so a 64 and a 128 sheet appear the same size
   // on screen. Comparing cell sizes is the whole point of showing both, and a
   // fixed zoom would render the 128 one twice as large and settle the question
   // by presentation instead of by pixels.
   const zoom = Math.max(1, Math.round(256 / request.cell[0]));
   const stripZoom = Math.max(1, Math.round(128 / request.cell[0]));
+  const { motion, facing } = splitId(request.id);
   return (
-    <section className="prop">
-      <h2>{request.id}</h2>
-      <p className="prop-why">
-        {request.motion} · {request.facing} 방향 · {request.cell[0]}×{request.cell[1]} ·
-        후보 {request.candidates.length}개. 정지 화면으로는 판단할 수 없어서 실제로
-        재생합니다. 아래 띠는 같은 시트를 펼친 것으로, 어느 프레임이 틀렸는지 볼 때 씁니다.
-      </p>
-      <div className="prop-options">
-        {request.candidates.map((candidate) => (
-          <button
-            key={candidate.id}
-            className="prop-option"
-            aria-pressed={picked === candidate.id}
-            onClick={() => onPick(request.id, candidate.id)}
-          >
-            <SpriteAnimation
-              sheet={site(candidate.sheet)}
-              frames={candidate.frames}
-              fps={candidate.fps}
-              zoom={zoom}
-            />
-            <b>{candidate.id.toUpperCase()}</b>
-            <span>
-              {candidate.frames}프레임 · {candidate.fps}fps · 이음매 {candidate.closure}
-              {candidate.seed >= 0 && <> · seed {candidate.seed}</>}
-            </span>
-            {candidate.note && <span className="prop-note">{candidate.note}</span>}
-          </button>
-        ))}
+    <div className="sprite-panel">
+      <div className="sprite-block">
+        <span className="sprite-label">애니메이션</span>
+        <div className="prop-options">
+          {request.candidates.map((candidate) => (
+            <button
+              key={candidate.id}
+              className="prop-option"
+              aria-pressed={picked === candidate.id}
+              onClick={() => onPick(request.id, candidate.id)}
+            >
+              <SpriteAnimation
+                sheet={site(candidate.sheet)}
+                frames={candidate.frames}
+                fps={candidate.fps}
+                zoom={zoom}
+              />
+              <b>{candidate.id.toUpperCase()}</b>
+              <span>
+                {candidate.frames}프레임 · {candidate.fps}fps · 이음매 {candidate.closure}
+                {candidate.seed >= 0 && <> · seed {candidate.seed}</>}
+              </span>
+              {candidate.note && <span className="prop-note">{candidate.note}</span>}
+            </button>
+          ))}
+        </div>
       </div>
+
       {request.mirrors && (
         // The direction this one covers for free. Shown because the decision to
         // mirror rather than generate is only sound if the mirrored result is
@@ -87,28 +122,122 @@ function SpriteRequest({ request, picked, onPick }) {
           </p>
         </div>
       )}
-      {request.candidates.map((candidate) => (
-        <div className="sprite-strip-row" key={candidate.id}>
-          <span>{candidate.id.toUpperCase()}</span>
-          <SpriteStrip sheet={site(candidate.sheet)} frames={candidate.frames} zoom={stripZoom} />
-        </div>
-      ))}
+
+      <div className="sprite-block">
+        <span className="sprite-label">사진 — 펼친 프레임</span>
+        {request.candidates.map((candidate) => (
+          <div className="sprite-strip-row" key={candidate.id}>
+            <span>{candidate.id.toUpperCase()}</span>
+            <SpriteStrip sheet={site(candidate.sheet)} frames={candidate.frames} zoom={stripZoom} />
+          </div>
+        ))}
+        <p className="sprite-note">
+          같은 시트를 펼친 것입니다. 재생만으로는 어느 프레임이 튀는지 짚을 수 없어서, 잘못된
+          한 장을 지목할 때 이쪽을 봅니다.
+        </p>
+      </div>
+
       {request.source_video && (
         // The footage the sheet was cut from. Without it there is no telling a
         // weak generation from a good one the pipeline then damaged, and those
         // two want opposite fixes: ask the model again, or fix the normaliser.
-        <div className="sprite-source">
-          <span>원본 영상</span>
-          <video src={site(request.source_video)} controls loop muted playsInline preload="metadata" />
-          <p>
-            생성 결과 그대로입니다. 640×640 · 4초 · 캐릭터 키 약 530px(480p로 요청했지만
-            실제로는 640이 왔습니다). 위 스프라이트는 여기서 8프레임을 골라 {request.cell[0]}px
-            셀로 줄인 것이라, 둘을 비교하면 화질이 생성 단계에서 정해진 것인지 축소에서 잃은
-            것인지 구분됩니다.
-          </p>
+        <div className="sprite-block">
+          <span className="sprite-label">원본 영상</span>
+          <div className="sprite-source">
+            <video src={site(request.source_video)} controls loop muted playsInline preload="metadata" />
+            <p>
+              생성 결과 그대로입니다. 640×640 · 4초 · 캐릭터 키 약 530px(480p로 요청했지만
+              실제로는 640이 왔습니다). 위 스프라이트는 여기서 {request.candidates[0]?.frames ?? 8}프레임을
+              골라 {request.cell[0]}px 셀로 줄인 것이라, 둘을 비교하면 화질이 생성 단계에서 정해진
+              것인지 축소에서 잃은 것인지 구분됩니다.
+            </p>
+          </div>
         </div>
       )}
+
+      <div className="sprite-block">
+        <span className="sprite-label">설명</span>
+        <p className="sprite-note">
+          <b>{request.motion}</b> · {FACING_NAME[request.facing] || request.facing} 방향 ·{' '}
+          {request.cell[0]}×{request.cell[1]} 셀 · 후보 {request.candidates.length}개.
+        </p>
+        {MOTION_NOTE[motion] && <p className="sprite-note">{MOTION_NOTE[motion]}</p>}
+        <p className="sprite-note">
+          이음매 숫자는 마지막 프레임과 첫 프레임의 차이입니다. 0에 가까울수록 반복이 끊기지
+          않으며, 여기 있는 것은 전부 발 기준점·팔레트·실루엣 검사를 이미 통과했습니다. 남은
+          판단은 <b>이 캐릭터가 이 동작을 하는 것으로 보이는가</b> 하나뿐이고, 그건 숫자로 잴 수
+          없어서 여기 올라와 있습니다.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CharacterSprites({ name, requests, picks, onPick }) {
+  const [active, setActive] = useState(requests[0].id);
+  const request = requests.find((r) => r.id === active) || requests[0];
+  return (
+    <section className="prop">
+      <h2>{CHARACTER_NAME[name] || name}</h2>
+      <p className="prop-why">
+        상태 {requests.length}개. 탭을 고르면 그 동작의 애니메이션과 펼친 프레임, 잘라낸 원본
+        영상을 함께 봅니다.
+      </p>
+      <div className="sprite-tabs" role="tablist" aria-label={name}>
+        {requests.map((r) => (
+          <button
+            key={r.id}
+            role="tab"
+            type="button"
+            className="sprite-tab"
+            aria-selected={r.id === active}
+            onClick={() => setActive(r.id)}
+          >
+            {splitId(r.id).state}
+            {picks[r.id] && <i className="sprite-tab-dot" aria-label="고름" />}
+          </button>
+        ))}
+      </div>
+      <SpritePanel request={request} picked={picks[request.id]} onPick={onPick} />
     </section>
+  );
+}
+
+function SpriteCharacters({ requests, picks, onPick }) {
+  if (requests.length === 0) return null;
+  const groups = new Map();
+  for (const request of requests) {
+    const { character } = splitId(request.id);
+    if (!groups.has(character)) groups.set(character, []);
+    groups.get(character).push(request);
+  }
+  for (const list of groups.values()) {
+    list.sort((a, b) => {
+      const left = splitId(a.id);
+      const right = splitId(b.id);
+      return (
+        rank(MOTION_ORDER, left.motion) - rank(MOTION_ORDER, right.motion) ||
+        rank(FACING_ORDER, left.facing) - rank(FACING_ORDER, right.facing) ||
+        a.id.localeCompare(b.id)
+      );
+    });
+  }
+  const order = [...groups.keys()].sort(
+    (a, b) => rank(Object.keys(CHARACTER_NAME), a) - rank(Object.keys(CHARACTER_NAME), b) || a.localeCompare(b),
+  );
+  return (
+    <>
+      <h2 className="prop-section">애니메이션 후보</h2>
+      {order.map((name) => (
+        <CharacterSprites
+          key={name}
+          name={name}
+          requests={groups.get(name)}
+          picks={picks}
+          onPick={onPick}
+        />
+      ))}
+    </>
   );
 }
 
@@ -261,19 +390,7 @@ function Proposals() {
         </p>
       </header>
 
-      {spriteRequests.length > 0 && (
-        <>
-          <h2 className="prop-section">애니메이션 후보</h2>
-          {spriteRequests.map((r) => (
-            <SpriteRequest
-              key={r.id}
-              request={r}
-              picked={spritePicks[r.id]}
-              onPick={pickSprite}
-            />
-          ))}
-        </>
-      )}
+      <SpriteCharacters requests={spriteRequests} picks={spritePicks} onPick={pickSprite} />
 
       <SourceArt />
 

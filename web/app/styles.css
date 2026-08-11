@@ -314,3 +314,56 @@ th { background: var(--sidebar); font-weight: 600; }
 }
 .prop-note { color: #8fa0bd; font-size: 11px; }
 .prop-section { margin: 32px 0 4px; }
+
+/* One character at a time, one state at a time. Eighteen animations in a single
+   column meant scrolling past Grim's four mining directions to reach the cat. */
+.sprite-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.sprite-tab {
+  position: relative;
+  font: inherit;
+  font-size: 13px;
+  color: #8fa0bd;
+  background: #131a26;
+  border: 1px solid #2a3446;
+  border-radius: 3px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.sprite-tab:hover { border-color: var(--accent); color: #d7e0f0; }
+.sprite-tab[aria-selected="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: #f2f5fb;
+  font-weight: 700;
+}
+/* A tab whose state already has a pick, so the ones still open are countable
+   without opening each. */
+.sprite-tab-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+}
+.sprite-panel { display: flex; flex-direction: column; gap: 18px; }
+.sprite-block { display: flex; flex-direction: column; gap: 8px; }
+.sprite-label {
+  font-weight: 700;
+  color: #8fa0bd;
+  font-size: 12px;
+}
+.sprite-note {
+  margin: 0;
+  color: #8fa0bd;
+  font-size: 12px;
+  line-height: 1.6;
+  max-width: 62ch;
+}
+.sprite-note b { color: #d7e0f0; }

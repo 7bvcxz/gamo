@@ -772,6 +772,40 @@ def cmd_publish(args, spec, palette) -> int:
     return 0
 
 
+def cmd_unpublish(args, spec, palette) -> int:
+    """Take a request off the page, and take its files with it.
+
+    The manifest accumulates -- every publish appends to what is already there --
+    so there is no regenerate step that would drop a retired request on its own.
+    Editing the JSON by hand leaves the sheets and the clip behind, published and
+    unreachable, and the next person to look at the directory cannot tell those
+    from the ones still in use. This is the other half of publish.
+    """
+    if not MANIFEST.exists():
+        print("UNPUBLISH: no manifest", file=sys.stderr)
+        return 1
+    data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    request = next((r for r in data["requests"] if r["id"] == args.request), None)
+    if request is None:
+        print(f"UNPUBLISH: {args.request} is not in the manifest", file=sys.stderr)
+        return 1
+    data["requests"] = [r for r in data["requests"] if r["id"] != args.request]
+    MANIFEST.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    for sheet in PUBLISH_DIR.glob(f"{args.request}-*.png"):
+        sheet.unlink()
+        print(f"UNPUBLISH: dropped {sheet.name}")
+    # Clips are named by content and shared between requests, so this can only be
+    # decided against the manifest as it now stands.
+    referenced = {r.get("source_video", "").rsplit("/", 1)[-1] for r in data["requests"]}
+    for stale in PUBLISH_DIR.glob("source-*.mp4"):
+        if stale.name not in referenced:
+            stale.unlink()
+            print(f"UNPUBLISH: dropped unreferenced {stale.name}")
+    print(f"UNPUBLISH: {args.request} removed, {len(data['requests'])} requests left")
+    return 0
+
+
 def cmd_inspect(args, spec, palette) -> int:
     image = Image.open(args.image).convert("RGBA")
     shape = silhouette(image, spec["alpha_threshold"])
@@ -842,6 +876,10 @@ def main() -> int:
     p.add_argument("in_dir", type=Path,
                    help="extracted frames; prints the character's source height")
     p.set_defaults(run=cmd_measure)
+
+    p = subs.add_parser("unpublish")
+    p.add_argument("--request", required=True)
+    p.set_defaults(run=cmd_unpublish)
 
     p = subs.add_parser("inspect")
     p.add_argument("image", type=Path)
