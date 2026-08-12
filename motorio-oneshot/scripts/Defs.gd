@@ -318,6 +318,19 @@ const M_SPLITTER := 5
 ## player earns it rather than showing four greyed slots on the first frame.
 const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_SPLITTER, M_GENERATOR]
 
+## The machines you can walk over. Everything else is a solid object standing on
+## the plateau, which is what a picture of a drill or a furnace already says.
+##
+## Written as the exceptions rather than as the list of things that block, so a
+## machine added later blocks by default. That is the safe direction to be wrong
+## in: a new machine you cannot walk through is a moment's annoyance, and one you
+## can walk through is a player strolling out of the middle of a furnace.
+##
+## Belts and splitters are floor. They are laid along routes people and cats use,
+## and the whole point of a belt is to run between places rather than to stand
+## between them.
+const WALKABLE_MACHINES: Array[int] = [M_BELT, M_SPLITTER]
+
 const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "수정에너지교환기", "발전기", "분배기"]
 ## Hotbar cards are one slot wide and the full names do not fit beside the colour
 ## swatch. The long name still appears in the hint line above the row.

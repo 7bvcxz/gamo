@@ -453,13 +453,15 @@ func tile_attributes(cell: Vector2i) -> int:
 	# Ore used to be a structure and is terrain now: a seam is a tile you walk
 	# over, drawn with the floor rather than standing on it.
 	#
-	# A miner takes its place. Building one onto a seam is the game's central
-	# placement and the machine is a solid object once it is there, so the cell
-	# stops being walkable at the moment it stops being bare ground. Belts and
-	# everything else stay walkable, which is what lets a belt be laid across a
-	# route the player uses.
+	# A machine takes its place. Building onto a seam is the game's central
+	# placement and a machine is a solid object once it is there, so the cell
+	# stops being walkable at the moment it stops being bare ground.
+	#
+	# Belts and splitters are the exceptions and they are named in Defs, not
+	# here, so that the question "can I walk on this" has one answer in one place
+	# -- and so a machine added later blocks until someone decides otherwise.
 	var machine: Machine = machines.get(cell, null)
-	if machine != null and (machine.type == Defs.M_CORE or machine.type == Defs.M_MINER):
+	if machine != null and machine.type not in Defs.WALKABLE_MACHINES:
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
 	if cell == shelter_cell:

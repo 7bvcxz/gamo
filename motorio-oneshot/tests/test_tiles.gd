@@ -24,9 +24,32 @@ func _run() -> void:
 	_assert(not sim.is_structure(empty), "bare ground is not a structure")
 	_assert(not sim.blocks_player(empty), "bare ground does not block")
 
-	# Machines are not structures, so a belt can be laid across a walking route.
-	# A miner is a different story -- see the placement rules below.
+	# Every machine is a solid object except the two that are floor. A belt is
+	# laid *along* a route -- the whole point of one is to run between places
+	# rather than to stand between them -- and a splitter is a belt with a fork
+	# in it. Everything else is a drill or a furnace, and walking through the
+	# middle of a furnace is what a picture of one already forbids.
+	#
+	# Checked as a table over every buildable type rather than as the two cases
+	# that were interesting today, because the rule is "which of these can I walk
+	# on" and a machine added later has to answer it too.
 	_open(sim)
+	for kind: int in Defs.BUILDABLE:
+		var spot: Vector2i = sim.core_cell + Vector2i(9, 9)
+		sim.machines.erase(spot)
+		sim.ore.erase(spot)
+		if kind == Defs.M_MINER:
+			sim.ore[spot] = Defs.ITEM_CRYSTAL
+		sim.unlocked[kind] = true
+		_assert(sim.build(kind, spot, Vector2i.RIGHT), "%s를 세운다" % Defs.MACHINE_NAMES[kind])
+		var walkable: bool = kind in Defs.WALKABLE_MACHINES
+		_assert(sim.blocks_player(spot) != walkable,
+			"%s: 통행 %s" % [Defs.MACHINE_NAMES[kind], "가능" if walkable else "불가"])
+		sim.machines.erase(spot)
+		sim.ore.erase(spot)
+	_assert(Defs.M_BELT in Defs.WALKABLE_MACHINES and Defs.M_SPLITTER in Defs.WALKABLE_MACHINES,
+		"걸어갈 수 있는 것은 벨트와 분배기뿐이다")
+	_assert(Defs.WALKABLE_MACHINES.size() == 2, "그 둘뿐이다")
 	sim.build(Defs.M_BELT, empty, Vector2i.RIGHT)
 	_assert(not sim.blocks_player(empty), "a belt does not block the player")
 

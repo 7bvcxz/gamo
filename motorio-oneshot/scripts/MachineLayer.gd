@@ -39,7 +39,9 @@ const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
 ## animal does instead of beside it.
 const CAT_TOOL_ART: Texture2D = preload("res://assets/objects/cat_tool.png")
 const CAT_TOOL_DRAW := 30.0
-const CAT_TOOL_BOB := 3.5
+const CAT_TOOL_BOB := 0.875
+## How many times the drill goes up and down per turn of the work animation.
+const CAT_TOOL_BEATS := 2.0
 
 const CORE_DRAW := 2.7 * float(Defs.TILE)
 ## 2.2 tiles. Same form as the core's, for the same reason: the number that

@@ -105,7 +105,9 @@ func sync(source: Sim.Cat, time: float, visible_now: bool) -> void:
 
 	_tool.visible = cat.state == Defs.CAT_WORKING
 	if _tool.visible:
-		var swing: float = float(frame) / float(FRAMES)
+		# Twice a cycle, a quarter as far. A drill swinging the height of the cat
+		# reads as the animal waving it about; a short fast tap reads as work.
+		var swing: float = float(frame) / float(FRAMES) * MachineLayer.CAT_TOOL_BEATS
 		_tool.position = Vector2(0.0, 9.0 + sin(swing * TAU) * MachineLayer.CAT_TOOL_BOB)
 
 	_shadow.queue_redraw()

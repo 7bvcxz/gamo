@@ -250,6 +250,18 @@ func _run() -> void:
 	_assert(view._shadow.z_index < 0, "그림자는 몸보다 먼저 그려진다")
 	view.queue_free()
 
+	# The drill. It swung nearly four pixels once a work cycle, which at a cat's
+	# size reads as the animal waving the thing about rather than using it. A
+	# quarter of the travel, twice as often.
+	_assert(MachineLayer.CAT_TOOL_BOB < 1.2,
+		"드릴이 크게 흔들리지 않는다 (%.2fpx)" % MachineLayer.CAT_TOOL_BOB)
+	_assert(is_equal_approx(MachineLayer.CAT_TOOL_BEATS, 2.0),
+		"작업 한 주기에 두 번 오르내린다")
+	# A whole number of beats, or the drill jumps at the seam between animation
+	# loops instead of arriving back where it started.
+	_assert(is_equal_approx(MachineLayer.CAT_TOOL_BEATS,
+		floorf(MachineLayer.CAT_TOOL_BEATS)), "주기가 정수배라 이음매에서 튀지 않는다")
+
 	# --- What a machine is doing is drawn above the animal doing it -------------
 	# A cat is nearly sixty pixels tall on a thirty-two pixel cell, so anything a
 	# machine draws near its own centre is behind its worker. That hid both of a
