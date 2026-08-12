@@ -397,17 +397,21 @@ func _generate_cat_boxes(seed_value: int) -> void:
 		cat_boxes[cell] = true
 
 ## --- Tile attributes ------------------------------------------------------
-## Ore is terrain and the core is a building, so both carry STRUCTURE. Keeping
-## this as a lookup rather than a stored grid means adding an attribute later is
-## one branch here, not a migration of every save.
+## Buildings carry STRUCTURE; terrain does not. Keeping this as a lookup rather
+## than a stored grid means adding an attribute later is one branch here, not a
+## migration of every save.
 func tile_attributes(cell: Vector2i) -> int:
 	var attrs: int = Defs.ATTR_NONE
-	if ore.has(cell):
-		attrs |= Defs.ATTR_STRUCTURE
-	# The core is the one machine that is a structure. Everything else the player
-	# builds is walkable, which is what lets belts be laid across a route.
+	# Ore used to be a structure and is terrain now: a seam is a tile you walk
+	# over, drawn with the floor rather than standing on it.
+	#
+	# A miner takes its place. Building one onto a seam is the game's central
+	# placement and the machine is a solid object once it is there, so the cell
+	# stops being walkable at the moment it stops being bare ground. Belts and
+	# everything else stay walkable, which is what lets a belt be laid across a
+	# route the player uses.
 	var machine: Machine = machines.get(cell, null)
-	if machine != null and machine.type == Defs.M_CORE:
+	if machine != null and (machine.type == Defs.M_CORE or machine.type == Defs.M_MINER):
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
 	if cell == shelter_cell:

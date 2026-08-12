@@ -12,11 +12,13 @@ func _run() -> void:
 	var sim := Sim.new()
 	sim.setup(24680)
 
-	# Ore is terrain, so every ore tile is a structure.
+	# Ore is terrain, and terrain is walked over. A seam is a floor tile with a
+	# crystal painted into it, not an obstacle standing on the floor, and the
+	# player crosses it the way they cross snow.
 	var ore_cell: Vector2i = sim.ore.keys()[0]
-	_assert(sim.is_structure(ore_cell), "an ore tile is a structure")
-	_assert(sim.has_attribute(ore_cell, Defs.ATTR_STRUCTURE), "the attribute flag is set")
-	_assert(sim.blocks_player(ore_cell), "a structure blocks the player")
+	_assert(not sim.is_structure(ore_cell), "광맥은 구조물이 아니다")
+	_assert(not sim.has_attribute(ore_cell, Defs.ATTR_STRUCTURE), "구조물 비트가 없다")
+	_assert(not sim.blocks_player(ore_cell), "광맥 위를 걸어갈 수 있다")
 
 	var empty := Vector2i(1, 1)
 	_assert(not sim.is_structure(empty), "bare ground is not a structure")
@@ -34,6 +36,23 @@ func _run() -> void:
 	_assert(sim.tile_attributes(sim.core_cell) & Defs.ATTR_STRUCTURE,
 		"the core carries the structure bit")
 	_assert(not sim.demolish(sim.core_cell), "the core cannot be picked up")
+
+	# And the miner takes over what the seam gave up. Building one is the game's
+	# central placement, and once it is standing there the cell is a machine
+	# rather than ground -- so the tile that was walkable a moment ago stops
+	# being walkable, and picking the machine back up hands it over again.
+	var seam: Vector2i = Vector2i(9999, 9999)
+	for cell: Vector2i in sim.ore:
+		if not sim.machines.has(cell):
+			seam = cell
+			break
+	_assert(seam != Vector2i(9999, 9999), "빈 광맥이 있다")
+	_assert(not sim.blocks_player(seam), "설치 전에는 지나갈 수 있다")
+	sim.unlocked[Defs.M_MINER] = true
+	_assert(sim.build(Defs.M_MINER, seam, Vector2i(0, -1)), "광맥 위에 채굴기를 세운다")
+	_assert(sim.blocks_player(seam), "채굴기가 선 칸은 지나갈 수 없다")
+	_assert(sim.demolish(seam), "채굴기는 회수할 수 있다")
+	_assert(not sim.blocks_player(seam), "회수하면 다시 지나갈 수 있다")
 	_assert(sim.machine_at(sim.core_cell) != null, "the core survives the attempt")
 
 	# The shelter is a building on the grid too, so it blocks and cannot be built

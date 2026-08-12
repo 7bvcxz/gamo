@@ -124,6 +124,14 @@ static func tile_region(variant: int) -> Rect2:
 ##
 ## Still decoration and nothing else: not in the simulation, not in the save, and
 ## walked straight over, so it stays a pure function of the coordinates.
+## Crystal seams, six of them, picked at random the same way boulders are. Ore
+## moved in here when it stopped being an obstacle and became terrain: it is a
+## thing the player walks over now, so it is drawn with the other things the
+## player walks over, in the same batched pass.
+const CRYSTAL_ATLAS: Texture2D = preload("res://assets/tiles/crystal_6.png")
+const CRYSTAL_COLUMNS := 3
+const CRYSTAL_VARIANTS := 6
+
 const ROCK_ATLAS: Texture2D = preload("res://assets/tiles/rock_6.png")
 const ROCK_COLUMNS := 3
 const ROCK_VARIANTS := 6
@@ -192,6 +200,12 @@ func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
 			for cell: Vector2i in rock_clump(block):
 				_rock[cell] = true
 
+## Only crystal has a sheet so far. Copper still draws as the painted shard in
+## WorldLayer, which is why this asks the item type rather than just "is there
+## ore here".
+func _is_crystal(cell: Vector2i) -> bool:
+	return sim != null and int(sim.ore.get(cell, -1)) == Defs.ITEM_CRYSTAL
+
 func is_rock(cell: Vector2i) -> bool:
 	return _rock.has(cell)
 
@@ -205,6 +219,17 @@ static func rock_region(variant: int) -> Rect2:
 	var size: float = float(ROCK_ATLAS.get_width()) / float(ROCK_COLUMNS)
 	return Rect2(float(index % ROCK_COLUMNS) * size, float(index / ROCK_COLUMNS) * size,
 		size, size)
+
+## Which of the six a seam shows. Its own salt, so a cell does not inherit the
+## number its snow or its boulder would have had.
+static func crystal_variant(cell: Vector2i) -> int:
+	return _mix(cell.x, cell.y, 61) % CRYSTAL_VARIANTS
+
+static func crystal_region(variant: int) -> Rect2:
+	var index: int = clampi(variant, 0, CRYSTAL_VARIANTS - 1)
+	var size: float = float(CRYSTAL_ATLAS.get_width()) / float(CRYSTAL_COLUMNS)
+	return Rect2(float(index % CRYSTAL_COLUMNS) * size,
+		float(index / CRYSTAL_COLUMNS) * size, size, size)
 
 ## One quad per visible cell, culled to the camera the way everything else is, so
 ## the cost follows the screen rather than the map.
@@ -221,7 +246,7 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if _rock.has(cell):
+			if _rock.has(cell) or _is_crystal(cell):
 				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
@@ -229,8 +254,19 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if not _rock.has(cell):
+			if not _rock.has(cell) or _is_crystal(cell):
 				continue
 			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
 				rock_region(rock_variant(cell)))
+	# A third pass for the same reason there are two: one texture each, and a
+	# seam cell must be painted once. Both of the passes above multiply, so a
+	# cell drawn twice comes out twice as dark.
+	for y in range(start.y, end.y + 1):
+		for x in range(start.x, end.x + 1):
+			var cell := Vector2i(x, y)
+			if not _is_crystal(cell):
+				continue
+			_tile_layer.draw_texture_rect_region(CRYSTAL_ATLAS,
+				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
+				crystal_region(crystal_variant(cell)))

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Cuts the six scattered-boulder tiles into the atlas the game draws.
+"""Cuts a six-tile sheet into the atlas the game draws.
 
-    python3 tools/sprite/build_rock6.py
+    python3 tools/sprite/build_rock6.py            # every sheet below
+    python3 tools/sprite/build_rock6.py crystal    # just one
 
 The output is committed. Re-run it when the source sheet changes.
 
@@ -22,13 +23,21 @@ the camera stops at 2.56, so 82 device pixels is the most a tile is ever drawn
 at, and the art is soft enough that more is paid for and thrown away.
 """
 
+import sys
 from pathlib import Path
 
 from PIL import Image
 
 GAME = Path(__file__).resolve().parent.parent.parent
-SOURCE = GAME / "tools" / "sprite" / "tiles" / "tile_rock_6.png"
-OUTPUT = GAME / "assets" / "tiles" / "rock_6.png"
+TILES = GAME / "tools" / "sprite" / "tiles"
+ASSETS = GAME / "assets" / "tiles"
+## Every sheet cut the same way. Ore joined boulders here when ore stopped being
+## a structure the player walks around and became terrain they walk over -- the
+## same kind of thing, so the same tool rather than a second copy of it.
+SHEETS = {
+    "rock": ("tile_rock_6.png", "rock_6.png"),
+    "crystal": ("tile_crystal_6.png", "crystal_6.png"),
+}
 
 COLUMNS = 3
 ROWS = 2
@@ -54,8 +63,8 @@ def bounds(sheet: Image.Image, column: int, row: int, pitch_x: float, pitch_y: f
     return (x0 + left, y0 + top, x0 + width - right, y0 + height - bottom)
 
 
-def main() -> None:
-    sheet = Image.open(SOURCE).convert("RGB")
+def cut(source: Path, output: Path) -> None:
+    sheet = Image.open(source).convert("RGB")
     pitch_x = sheet.size[0] / COLUMNS
     pitch_y = sheet.size[1] / ROWS
     atlas = Image.new("RGB", (CELL * COLUMNS, CELL * ROWS))
@@ -66,15 +75,28 @@ def main() -> None:
             sizes.append((box[2] - box[0], box[3] - box[1]))
             atlas.paste(sheet.crop(box).resize((CELL, CELL), Image.LANCZOS),
                         (column * CELL, row * CELL))
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    atlas.save(OUTPUT, optimize=True)
+    atlas.save(output, optimize=True)
     spread = max(max(s) for s in sizes) - min(min(s) for s in sizes)
     print("TILES: %s -> %s  %dx%d, %d tiles of %d, %d bytes"
-          % (SOURCE.name, OUTPUT.relative_to(GAME), atlas.size[0], atlas.size[1],
-             COLUMNS * ROWS, CELL, OUTPUT.stat().st_size))
+          % (source.name, output.relative_to(GAME), atlas.size[0], atlas.size[1],
+             COLUMNS * ROWS, CELL, output.stat().st_size))
     print("TILES: source tiles measured %s, spread %d px"
           % (" ".join("%dx%d" % s for s in sizes), spread))
 
 
+def main() -> int:
+    wanted = sys.argv[1:] or sorted(SHEETS)
+    unknown = [name for name in wanted if name not in SHEETS]
+    if unknown:
+        print("모르는 시트: %s (아는 것: %s)" % (", ".join(unknown), ", ".join(sorted(SHEETS))),
+              file=sys.stderr)
+        return 1
+    ASSETS.mkdir(parents=True, exist_ok=True)
+    for name in wanted:
+        source, output = SHEETS[name]
+        cut(TILES / source, ASSETS / output)
+    return 0
+
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

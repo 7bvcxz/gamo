@@ -52,6 +52,20 @@ func _draw_ore(tile: float) -> void:
 		var warm: bool = sim.is_warm(cell)
 		var tint: Color = base if warm else base.lerp(Defs.COL_SNOW_COLD, 0.18)
 
+		# Crystal is a floor tile now, drawn by GroundLayer with the rest of the
+		# terrain, so only what the tile cannot say is drawn here: how rich the
+		# seam is, and the glint that pulls the eye to one the player cannot
+		# reach yet. Copper has no sheet and still gets the painted shard.
+		if item_type != Defs.ITEM_CRYSTAL:
+			_draw_shard(centre, tint, item_type, warm)
+		_draw_purity(cell, centre, tint)
+		if not warm:
+			# A slow glint pulls the eye toward ore the player cannot reach yet.
+			var glint: float = maxf(0.0, sin(pulse * 0.8 + float(cell.x + cell.y)))
+			if glint > 0.9:
+				draw_circle(centre + Vector2(-3, -5), 2.4, Color(1, 1, 1, (glint - 0.9) * 5.0))
+
+func _draw_shard(centre: Vector2, tint: Color, item_type: int, warm: bool) -> void:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
 		draw_circle(Vector2(centre.x, (centre.y + 8.0) / Defs.SHADOW_SQUASH), 10.0, Defs.SHADOW)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -75,18 +89,18 @@ func _draw_ore(tile: float) -> void:
 		if item_type == Defs.ITEM_COPPER:
 			draw_circle(centre + Vector2(1, -1), 3.0, Defs.COPPER_CORE)
 		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.7 if warm else 0.5))
-		# Richness is drawn, not just tracked: extra shards and a brighter heart,
-		# so "that one is worth the walk" is readable from across the plateau.
-		var grade: int = sim.purity_of(cell)
-		if grade > 0:
-			for index in grade:
-				var angle: float = -1.1 + float(index) * 0.9
-				draw_circle(centre + Vector2.from_angle(angle) * 9.0, 2.2, tint.lightened(0.35))
-				draw_circle(centre + Vector2.from_angle(angle) * 9.0, 2.2, Defs.OUTLINE, false, 1.0)
-			draw_circle(centre, 2.0 + float(grade) * 0.8,
-				Color(1, 1, 1, 0.35 + float(grade) * 0.2))
-		if not warm:
-			# A slow glint pulls the eye toward ore the player cannot reach yet.
-			var glint: float = maxf(0.0, sin(pulse * 0.8 + float(cell.x + cell.y)))
-			if glint > 0.9:
-				draw_circle(centre + Vector2(-3, -5), 2.4, Color(1, 1, 1, (glint - 0.9) * 5.0))
+
+## Richness is drawn, not just tracked: extra shards and a brighter heart, so
+## "that one is worth the walk" is readable from across the plateau. It sits over
+## whichever way the seam itself is drawn, because purity is a number about the
+## cell rather than a thing in the picture.
+func _draw_purity(cell: Vector2i, centre: Vector2, tint: Color) -> void:
+	var grade: int = sim.purity_of(cell)
+	if grade <= 0:
+		return
+	for index in grade:
+		var angle: float = -1.1 + float(index) * 0.9
+		draw_circle(centre + Vector2.from_angle(angle) * 9.0, 2.2, tint.lightened(0.35))
+		draw_circle(centre + Vector2.from_angle(angle) * 9.0, 2.2, Defs.OUTLINE, false, 1.0)
+	draw_circle(centre, 2.0 + float(grade) * 0.8,
+		Color(1, 1, 1, 0.35 + float(grade) * 0.2))
