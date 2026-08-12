@@ -83,6 +83,18 @@ SOUNDS = {
     "finish":  dict(seconds=0.600, f0=248, f1=184,  peak=0.44, decay=1.05,
                     partials=[(1.5, 0.50), (2.0, 0.35), (3.0, 0.15)], noise=0.150,
                     seed=11),
+    # A boot in snow, twice per walk cycle. The quietest thing in the game and
+    # by far the most frequent -- it plays four times a second while she moves,
+    # so anything with a pitch in it becomes a tune within seconds. Almost pure
+    # noise under a fast decay, which is what packed snow actually is.
+    "step":    dict(seconds=0.075, f0=132, f1=74,   peak=0.30, decay=1.55,
+                    noise=0.86, seed=57),
+    # Running. Shorter and a little brighter, because the difference the player
+    # has to hear is the cadence, not the sound -- fourteen frames a second
+    # against ten already carries it, and a louder sound would only make the
+    # faster one tiring.
+    "step_run": dict(seconds=0.065, f0=158, f1=86,  peak=0.34, decay=1.70,
+                    noise=0.90, seed=58),
     # Steel on stone, once per swing. Short, low and mostly noise -- a struck
     # rock has almost no pitch in it, and the little that is there falls.
     "pick":    dict(seconds=0.130, f0=230, f1=88,   peak=0.46, decay=1.30,

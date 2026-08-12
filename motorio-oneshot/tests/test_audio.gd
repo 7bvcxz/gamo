@@ -56,6 +56,30 @@ func _init() -> void:
 		_assert(seconds > 0.0 and seconds <= 0.75,
 			"%s 길이 %.3f초는 한 방 소리 범위 안" % [name, seconds])
 
+	# Footsteps: the only sound that plays continuously, so it is the one where a
+	# wrong level or a wrong cadence is not a detail. Two frames of the eight put
+	# a boot down, and one sound per cycle would be a limp.
+	_assert(Audio.BANK.has("step") and Audio.BANK.has("step_run"), "발소리 두 개가 뱅크에 있다")
+	_assert(PlayerActor.STEP_FRAMES.size() == 2,
+		"한 주기에 발이 두 번 닿는다 (%d)" % PlayerActor.STEP_FRAMES.size())
+	for frame: int in PlayerActor.STEP_FRAMES:
+		_assert(frame >= 0 and frame < PlayerActor.FRAMES,
+			"발 닿는 프레임이 시트 안에 있다: %d" % frame)
+	_assert(PlayerActor.STEP_FRAMES[0] != PlayerActor.STEP_FRAMES[1],
+		"두 프레임이 서로 다르다")
+	# Quieter than everything else, because it repeats four times a second while
+	# every other sound is an event.
+	var loudest: float = -99.0
+	for name: String in Audio.VOLUMES:
+		if name == "step" or name == "step_run":
+			continue
+		loudest = maxf(loudest, float(Audio.VOLUMES[name]))
+	_assert(float(Audio.VOLUMES["step"]) < loudest - 6.0,
+		"걷기 소리가 다른 어떤 소리보다 충분히 작다 (%.0f vs %.0f)"
+		% [float(Audio.VOLUMES["step"]), loudest])
+	_assert(float(Audio.VOLUMES["step_run"]) >= float(Audio.VOLUMES["step"]),
+		"달릴 때가 걸을 때보다 작지 않다")
+
 	if failures == 0:
 		print("AUDIO_TEST: PASS")
 	quit(failures)

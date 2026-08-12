@@ -54,6 +54,8 @@ var mine_swung: bool = false
 ## The swing frame the last time we looked, so the impact sound fires on the
 ## crossing rather than for every frame the pickaxe spends at the bottom.
 var last_mine_frame: int = -1
+## The walk frame a footfall was last played on, so one frame makes one sound.
+var last_step_frame: int = -1
 ## Cats at the bowl get a bite sound on a slow timer of their own. Tying it to
 ## the chewing animation would fire three and a half times a second per cat,
 ## which is not a sound, it is a texture.
@@ -606,6 +608,7 @@ func _update_build_hold(delta: float) -> void:
 		audio.call("play", "select")
 
 func _process_play(delta: float) -> void:
+	_update_footsteps()
 	time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
 	_update_nibbles(delta)
@@ -682,6 +685,23 @@ func _hand_target() -> Vector2i:
 	if sim.ore.has(facing):
 		return facing
 	return player.cell()
+
+## A boot landing, on the frames where the drawing puts one down.
+##
+## Fired on the frame changing rather than on a timer: the cadence has to be the
+## legs', and a timer drifts against them the moment the run plays at fourteen
+## frames a second instead of ten. Indoors and out of play are silent -- she is
+## not on the snow then.
+func _update_footsteps() -> void:
+	var frame: int = player.step_frame
+	if state != State.PLAY or indoors() or frame < 0:
+		last_step_frame = -1
+		return
+	if frame == last_step_frame:
+		return
+	last_step_frame = frame
+	if frame in PlayerActor.STEP_FRAMES:
+		audio.call("play", "step_run" if player.step_running else "step")
 
 func _update_hand_mining(delta: float) -> void:
 	if state != State.PLAY or player.locked or sim.carried_cat != null:

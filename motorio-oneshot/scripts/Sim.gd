@@ -1065,7 +1065,12 @@ func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 	var direction: Vector2 = to_goal.normalized()
 	cat.heading = direction
 	cat.pos += direction * step
-	return to_goal.length() <= Defs.CAT_ARRIVE
+	# Arrived means standing on it, not near it. This used to report arrival from
+	# ten pixels out, which left a cat working ten pixels off the middle of its
+	# own machine -- and then anything that put it where it was supposed to be
+	# moved it those ten pixels in one frame, which is a teleport. The only snap
+	# left is the branch above, and that one is bounded by a single step.
+	return false
 
 ## An unassigned cat with something to fetch goes and fetches it.
 func _cat_look_for_work(cat: Cat) -> void:
@@ -1127,6 +1132,8 @@ func cats_all_home() -> bool:
 ## and they are indoors regardless.
 func force_cats_home() -> void:
 	for cat: Cat in cats:
+		if cat.state == Defs.CAT_ASLEEP:
+			continue          # already in, and moving it would be a jump for nothing
 		cat.pos = cell_centre(shelter_cell)
 		cat.state = Defs.CAT_ASLEEP
 

@@ -16,11 +16,16 @@ const BANK := {
 	"finish": preload("res://assets/sfx/finish.wav"),
 	"pick": preload("res://assets/sfx/pick.wav"),
 	"nibble": preload("res://assets/sfx/nibble.wav"),
+	"step": preload("res://assets/sfx/step.wav"),
+	"step_run": preload("res://assets/sfx/step_run.wav"),
 }
 const VOLUMES := {
 	"build": -6.0, "remove": -12.0, "select": -16.0, "confirm": -8.0,
 	"deliver": -12.0, "alloy": -6.0, "deny": -10.0, "alarm": -6.0, "finish": -4.0,
 	"pick": -7.0, "nibble": -21.0,
+	# Under everything. Footsteps are the only sound that plays continuously, so
+	# what would be a reasonable level for a one-shot is a drone here.
+	"step": -24.0, "step_run": -21.0,
 }
 
 ## Two looping beds rather than music: a wind floor that is always there, and a

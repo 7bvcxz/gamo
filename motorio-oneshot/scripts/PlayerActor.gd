@@ -95,6 +95,17 @@ const MINE_FPS := 5.0
 const MINE_IMPACT_FRAME := 4
 
 var velocity := Vector2.ZERO
+## Which frame the walk or run is on, and whether she is running, so the game can
+## put a footfall on the frames where a boot lands. -1 when she is not moving,
+## for the same reason mine_frame is -1 when she is not swinging: the sound has
+## to fire on a change of frame, and a stale number fires on the first step of
+## the next walk instead of the right one.
+var step_frame: int = -1
+var step_running := false
+## Which frames of the eight a foot is down on. Two, because a walk cycle is two
+## steps -- one sound per cycle sounds like a limp.
+const STEP_FRAMES: Array[int] = [1, 5]
+
 ## Which frame the swing is on, so the game can put a sound on the impact. -1
 ## when she is not mining.
 var mine_frame: int = -1
@@ -258,6 +269,7 @@ func _mining() -> void:
 
 func _idle() -> void:
 	mine_frame = -1
+	step_frame = -1
 	# The clip's own breathing was about six pixels at 640, which is under one
 	# pixel once the sheet is 128 and drawn at half scale -- it rounds away, and
 	# the four idle frames differ only in shading. So the rise and fall is done
@@ -287,6 +299,11 @@ func _moving(sprinting: bool) -> void:
 
 	var fps: float = RUN_FPS if sprinting else FPS
 	var step: int = int(animation_time * fps) % FRAMES
+	# Read by Main, which plays the footfall. Kept here because this is the one
+	# place that knows which frame is showing, and a sound timed against anything
+	# else drifts away from the legs it is supposed to belong to.
+	step_frame = step
+	step_running = sprinting
 	# Ties go sideways, and the tie is not a rare case: a keyboard diagonal is
 	# exactly 0.707 on both axes, so `>` sent every diagonal to the front view
 	# while the comment here claimed otherwise.

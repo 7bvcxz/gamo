@@ -85,7 +85,7 @@ func _run() -> void:
 	# onto the goal, which at a cat's walking pace is a fifth of a second of
 	# travel appearing in one frame -- visible as the sprite jumping.
 	cat.state = Defs.CAT_TO_MINER
-	cat.pos = sim.cell_centre(seam) + Vector2(Defs.CAT_ARRIVE + 1.0, 0.0)
+	cat.pos = sim.cell_centre(seam) + Vector2(Defs.CAT_AWAY + 1.0, 0.0)
 	var step_limit: float = Defs.CAT_SPEED * 0.05 + 0.01
 	var previous: Vector2 = cat.pos
 	var worst: float = 0.0

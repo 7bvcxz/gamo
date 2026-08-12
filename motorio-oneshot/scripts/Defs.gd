@@ -450,7 +450,10 @@ const FOOD_OFFSET := Vector2(-4.5, 2.5)
 ## A miner is a machine, not a worker. It only runs while a cat stands at it,
 ## so automation is gated on adopting cats rather than on spending heat.
 const CAT_SPEED := 46.0            # pixels per second while walking
-const CAT_ARRIVE := 10.0           # how close counts as "at the machine"
+## No longer an arrival threshold: a cat arrives by standing on the spot. Kept as
+## a name for "comfortably away from it", which is what tests need when they want
+## a cat that has not got there yet.
+const CAT_AWAY := 10.0
 const BOXES_PER_CAT := 3
 ## Crate density: one per this many tiles of world. Raised by half on request --
 ## cats are what gate automation, so how many crates the map holds is the pace at
