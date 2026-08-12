@@ -112,6 +112,44 @@ func _run() -> void:
 	_assert(main.player.mining > 0.0, "그리고 실제로 곡괭이질이 시작된다")
 	main.mine_held = false
 
+	# Standing on a seam mines it. Ore is terrain now, so walking at one puts you
+	# on top of it rather than stopping you in front -- which is what the game
+	# asks a new player to do first, and what silently stopped working when ore
+	# became walkable.
+	bare_sim.cats.clear()
+	main.player.position = bare_sim.cell_centre(bare)
+	main.player.facing = Vector2i.UP
+	_assert(not bare_sim.ore.has(main.player.facing_cell()),
+		"바라보는 칸에는 광맥이 없다")
+	main.tool_index = main.TOOL_PICKAXE
+	main.mine_held = true
+	main.player.mining = 0.0
+	main._update_hand_mining(0.2)
+	_assert(main.player.mining > 0.0, "광맥 위에 서서 캘 수 있다")
+	main.mine_held = false
+
+	# And facing still wins, so a player standing on one seam can reach across to
+	# the next one deliberately.
+	var neighbour: Vector2i = Vector2i(9999, 9999)
+	for cell: Vector2i in bare_sim.ore:
+		if cell != bare and not bare_sim.machines.has(cell):
+			neighbour = cell
+			break
+	if neighbour != Vector2i(9999, 9999):
+		main.player.position = bare_sim.cell_centre(neighbour - (neighbour - bare).sign())
+		main.player.facing = (neighbour - bare).sign()
+		if bare_sim.ore.has(main.player.facing_cell()):
+			_assert(main._hand_target() == main.player.facing_cell(),
+				"바라보는 광맥이 발밑보다 우선한다")
+
+	# Back to the state the next section expects. Two sections sharing one
+	# instance is how a passing test starts depending on the order it happens to
+	# run in, and this file has been bitten by exactly that before.
+	bare_sim.cats.clear()
+	bare_sim.cats.append(passer)
+	main.player.position = bare_sim.cell_centre(bare + Vector2i(0, 1))
+	main.player.facing = Vector2i.UP
+
 	# But taking a cat off a miner still has to work, and that cat is standing on
 	# ore as well -- the miner was built onto the seam.
 	bare_sim.unlocked[Defs.M_MINER] = true

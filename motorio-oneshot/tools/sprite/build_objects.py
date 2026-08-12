@@ -62,9 +62,12 @@ MANIFEST = REPO / "web" / "lib" / "generated" / "objects.json"
 ## keys without turning the art to noise.
 ADOPTED = {
     "core": ("base6", 86.4),        # 2.7 tiles
-    "shelter": ("home6", 48),
+    "shelter": ("home6", 70.4),     # 2.2 tiles
     "food_bin": ("feedbox5", 36),
     "miner": ("miner5", 36),
+    # The drill a working cat holds. One of the machine candidates rather than a
+    # separate drawing, so the thing in its paws is the thing it is standing on.
+    "cat_tool": ("miner3", 30),
 }
 GAME_ART = REPO / "motorio-oneshot" / "assets" / "objects"
 

@@ -194,8 +194,8 @@ func _start_run() -> void:
 ## the old line never mentioned at all.
 func _mining_hint() -> String:
 	if touch != null and touch.visible:
-		return "곡괭이를 고르고 수정 광맥을 바라보며 캐기 버튼을 누르세요"
-	return "2번 곡괭이를 들고 수정 광맥을 바라보며 Z 를 누르고 계세요"
+		return "곡괭이를 고르고 수정 광맥 위에서 캐기 버튼을 누르세요"
+	return "2번 곡괭이를 들고 수정 광맥 위에서 Z 를 누르고 계세요"
 
 func objective_data() -> Dictionary:
 	# Freezing comes before everything, including nightfall. A playtest caught the
@@ -666,13 +666,30 @@ func _update_nibbles(delta: float) -> void:
 	nibble_timer = NIBBLE_INTERVAL * randf_range(0.85, 1.25)
 	audio.call("play", "nibble", 0.18)
 
+## Which seam a swing lands on: the one being faced, or the one underfoot.
+##
+## Ore used to be solid, so walking into a seam stopped you against it and left
+## you facing it -- "face a seam and hold Z" described what happened by itself.
+## It is terrain now and you walk onto it instead, which put the first thing the
+## game asks for out of reach: press W at the starting seam and you are standing
+## on it, facing the empty tile beyond. Thirteen seconds of holding Z did
+## nothing, and the objective card sat there repeating the instruction.
+##
+## Facing still wins, so a player standing on one seam can deliberately mine the
+## next one over.
+func _hand_target() -> Vector2i:
+	var facing: Vector2i = player.facing_cell()
+	if sim.ore.has(facing):
+		return facing
+	return player.cell()
+
 func _update_hand_mining(delta: float) -> void:
 	if state != State.PLAY or player.locked or sim.carried_cat != null:
 		sim.cancel_hand_mine()
 		player.mining = 0.0
 		last_mine_frame = -1
 		return
-	var facing: Vector2i = player.facing_cell()
+	var facing: Vector2i = _hand_target()
 	if not holding_pickaxe() or not mine_held or not sim.ore.has(facing):
 		sim.cancel_hand_mine()
 		player.mining = 0.0
@@ -946,6 +963,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_unlock_all()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_F5:
+		debug_crowd()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("debug_scenario"):
 		debug_scenario()
 		get_viewport().set_input_as_handled()
@@ -1193,7 +1214,9 @@ func _primary_action() -> void:
 	#
 	# Only bare ore. A cat standing on a miner is standing on ore too, and taking
 	# it off to reassign it has to keep working.
-	var mining_here: bool = holding_pickaxe() and sim.ore.has(cell) and not sim.machines.has(cell)
+	var target: Vector2i = _hand_target()
+	var mining_here: bool = holding_pickaxe() and sim.ore.has(target) \
+		and not sim.machines.has(target)
 	if not mining_here and sim.pick_up_cat(cell):
 		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
@@ -1328,6 +1351,38 @@ func debug_scenario() -> void:
 		sim.place_cat(cell)
 	_notify("디버그 시나리오 · 채굴기 2대 · 고양이 배치", Defs.COL_DANGER)
 	audio.call("play", "confirm")
+
+## The crowded version: eight cats and a miner on every seam that will take one.
+##
+## The standard scenario is three cats, which is the arrangement to watch when
+## asking whether a factory runs. It is the wrong one for asking whether cats
+## come apart while they walk -- that needs traffic, several animals crossing at
+## once, some working and some off to eat. Separate key rather than a bigger
+## `debug_scenario`, because `real test` is defined as three.
+func debug_crowd() -> void:
+	debug_unlock_all()
+	if sim.carried_cat != null:
+		sim.drop_cat(player.position)
+	var north := Vector2i(0, -1)
+	for cell: Vector2i in sim.ore.keys():
+		if int(sim.ore[cell]) != Defs.ITEM_CRYSTAL or sim.machines.has(cell):
+			continue
+		if Vector2(cell - sim.core_cell).length() > 6.0:
+			continue
+		sim.build(Defs.M_MINER, cell, north)
+	sim.carried_boxes += Defs.BOXES_PER_CAT * maxi(0, 8 - sim.cats.size())
+	sim.adopt_cats()
+	for cell: Vector2i in sim.idle_miner_cells():
+		var spare: Sim.Cat = null
+		for cat: Sim.Cat in sim.cats:
+			if not cat.has_job():
+				spare = cat
+				break
+		if spare == null:
+			break
+		sim.carried_cat = spare
+		sim.place_cat(cell)
+	_notify("디버그 혼잡 · 고양이 %d마리" % sim.cats.size(), Defs.COL_DANGER)
 
 func _cycle_recipe() -> void:
 	if player.locked:

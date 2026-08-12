@@ -58,6 +58,8 @@ func _draw_ore(tile: float) -> void:
 		# reach yet. Copper has no sheet and still gets the painted shard.
 		if item_type != Defs.ITEM_CRYSTAL:
 			_draw_shard(centre, tint, item_type, warm)
+		else:
+			_draw_sparkle(cell, centre, tint)
 		_draw_purity(cell, centre, tint)
 		if not warm:
 			# A slow glint pulls the eye toward ore the player cannot reach yet.
@@ -89,6 +91,22 @@ func _draw_shard(centre: Vector2, tint: Color, item_type: int, warm: bool) -> vo
 		if item_type == Defs.ITEM_COPPER:
 			draw_circle(centre + Vector2(1, -1), 3.0, Defs.COPPER_CORE)
 		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.7 if warm else 0.5))
+
+## A slow catch of light in the middle of a seam.
+##
+## The tile is a still picture and a crystal that never moves reads as a stain on
+## the floor, so the one thing it cannot do for itself is done here. Offset by
+## the cell rather than shared, or a field of seams blinks in unison and stops
+## looking like light and starts looking like a warning.
+func _draw_sparkle(cell: Vector2i, centre: Vector2, tint: Color) -> void:
+	var phase: float = pulse * 1.3 + float(cell.x) * 1.7 + float(cell.y) * 2.9
+	var wave: float = sin(phase)
+	if wave <= 0.0:
+		return
+	var strength: float = wave * wave        # squared, so it is dark most of the time
+	draw_circle(centre, 3.0 + strength * 3.5, Color(1, 1, 1, 0.10 * strength))
+	draw_circle(centre, 1.6 + strength * 1.4,
+		Color(1, 1, 1, 0.30 * strength).lerp(tint.lightened(0.6), 0.35))
 
 ## Richness is drawn, not just tracked: extra shards and a brighter heart, so
 ## "that one is worth the walk" is readable from across the plateau. It sits over

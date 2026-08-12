@@ -29,6 +29,17 @@ class Cat extends RefCounted:
 	## Hauling: which loose item it is going for, and what it is carrying.
 	var haul_target := Vector2i(9999, 9999)
 	var carrying: int = -1
+	## A constant, and the reason it is stored rather than derived from where the
+	## cat happens to be standing.
+	##
+	## Two cats side by side must not breathe and step in unison, so the animation
+	## needs an offset per animal. That offset used to be the cat's x position,
+	## which made it change as the cat walked: breathing scales the sprite,
+	## anything hanging over the cat is positioned from the scaled height, and the
+	## shadow is not scaled at all -- so a cat crossing the map had its hunger bar
+	## drifting against its own shadow, and its walk frames advancing by position
+	## as well as by time. An offset that moves is not an offset.
+	var phase: float = 0.0
 	var hunger: float = 1.0
 	var eat_timer: float = 0.0
 	## Which grade this cat is. Everything adopted out of a crate is an O, so the
@@ -245,6 +256,7 @@ func from_save(data: Dictionary) -> void:
 	cats.clear()
 	for row: Dictionary in data.get("cats", []):
 		var cat := Cat.new()
+		cat.phase = _next_phase()
 		cat.pos = Vector2(float(row["px"]), float(row["py"]))
 		cat.state = int(row.get("state", Defs.CAT_IDLE))
 		cat.assigned = Vector2i(int(row["ax"]), int(row["ay"]))
@@ -467,6 +479,12 @@ func adopt_cats() -> int:
 ## one tile, the same way they come out in the morning. Three cats on the same
 ## pixel look like one cat, right up until they walk off in different directions.
 ##
+## Successive cats, spread as far apart as a sequence can be spread. Derived from
+## the crew size rather than stored in the save: cats are rebuilt in the order
+## they were written, so the same cat gets the same number back.
+func _next_phase() -> float:
+	return fmod(float(cats.size()) * 0.61803398875, 1.0)
+
 ## Shared by the two ways a cat arrives -- crates and the slot machine -- because
 ## the second one can deliver ten at once, and ten cats on one pixel is not a
 ## reward, it is a rendering bug the player will report.
@@ -474,6 +492,7 @@ func _spawn_cats(grades: Array[int]) -> void:
 	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
 	for index in grades.size():
 		var cat := Cat.new()
+		cat.phase = _next_phase()
 		cat.rarity = grades[index]
 		cat.pos = doorstep + Vector2((float(index) - float(grades.size() - 1) * 0.5) * Defs.CAT_LANE, 0.0)
 		cats.append(cat)

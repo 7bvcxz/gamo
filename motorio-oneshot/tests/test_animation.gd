@@ -200,6 +200,48 @@ func _run() -> void:
 	_assert(MachineLayer.CAT_FOOT_FRACTION * MachineLayer.CAT_DRAW > MachineLayer.CAT_GROUND * 3.0,
 		"몸이 그림자 위로 충분히 올라온다")
 
+	# --- A walking cat does not come apart --------------------------------------
+	# The reported symptom was the gauge, the body and the shadow drifting from
+	# each other whenever a cat crossed the map -- to eat, to go home. All three
+	# are positioned from the same cat, so the only way they can disagree is if
+	# something in the chain depends on *where* the cat is. Something did: the
+	# breathing phase and the walk frame were both offset by cat.pos.x, so a cat
+	# that moved breathed and stepped as a function of its own travel. Breathing
+	# scales the sprite, the gauge hangs off the scaled height, and the shadow is
+	# not scaled -- so the gauge slid against the shadow at walking speed.
+	#
+	# Measured across a walk rather than asserted about the source, because what
+	# matters is the gap the player sees.
+	var walker = Sim.Cat.new()
+	walker.phase = 0.37
+	var clock: float = 3.2
+	var gaps: Array[float] = []
+	var heights: Array[float] = []
+	var frames: Array[int] = []
+	for tick in 60:
+		walker.pos = Vector2(120.0 + float(tick) * 7.3, 240.0 + float(tick) * 1.9)
+		var puff: float = MachineLayer.cat_breathe(walker, clock)
+		var shape: Rect2 = MachineLayer.cat_rect(walker.pos, puff, false, 0.0)
+		var gauge2: Rect2 = MachineLayer.cat_hunger_bar(walker.pos, shape)
+		gaps.append(MachineLayer.cat_shadow_at(walker.pos).y - gauge2.position.y)
+		heights.append(absf(shape.size.y))
+		frames.append(MachineLayer.cat_frame(walker, clock))
+	var gap_spread: float = gaps.max() - gaps.min()
+	var height_spread: float = heights.max() - heights.min()
+	_assert(gap_spread < 0.01,
+		"걷는 동안 게이지와 그림자 간격이 그대로다 (편차 %.3fpx)" % gap_spread)
+	_assert(height_spread < 0.01,
+		"걷는 동안 몸 높이가 그대로다 (편차 %.3fpx)" % height_spread)
+	_assert(frames.min() == frames.max(),
+		"같은 시각이면 어디에 있든 같은 프레임이다 (%d~%d)" % [frames.min(), frames.max()])
+
+	# And the offset still does its job: two cats must not move as one.
+	var other = Sim.Cat.new()
+	other.phase = 0.91
+	other.pos = walker.pos
+	_assert(not is_equal_approx(MachineLayer.cat_breathe(walker, clock),
+		MachineLayer.cat_breathe(other, clock)), "두 고양이는 따로 호흡한다")
+
 	# --- What hangs over a cat has to clear the tile above it -------------------
 	# A miner facing north drops its output into the cell above itself, and the
 	# worker's hunger bar hung in that same cell -- so the recommended arrangement

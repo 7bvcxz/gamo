@@ -34,8 +34,17 @@ const FOOD_BIN_ART: Texture2D = preload("res://assets/objects/food_bin.png")
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
 ## 2.7 tiles across. Written as the multiple rather than as 86.4, because the
 ## number that matters is how many cells of the world it covers.
+## The drill a cat holds while it works, and how far it travels. Tied to the work
+## sheet's own frame rather than to the clock, so the tool comes down when the
+## animal does instead of beside it.
+const CAT_TOOL_ART: Texture2D = preload("res://assets/objects/cat_tool.png")
+const CAT_TOOL_DRAW := 30.0
+const CAT_TOOL_BOB := 3.5
+
 const CORE_DRAW := 2.7 * float(Defs.TILE)
-const SHELTER_DRAW := 48.0
+## 2.2 tiles. Same form as the core's, for the same reason: the number that
+## matters is how many cells of the world the building covers.
+const SHELTER_DRAW := 2.2 * float(Defs.TILE)
 const FOOD_BIN_DRAW := 36.0
 const MINER_DRAW := 36.0
 
@@ -194,9 +203,9 @@ func _draw_shelter(tile: float) -> void:
 		draw_circle(at + Vector2(8.0 + sin(rise * 4.0 + float(index)) * 3.0, -17.0 - rise * 13.0),
 			1.4 + rise * 1.8, Color(0.86, 0.88, 0.92, (1.0 - rise) * 0.22))
 
-	var font := UIFont.FONT
-	draw_string(font, at + Vector2(-24, 27), "숙소", HORIZONTAL_ALIGNMENT_CENTER, 48.0, 10,
-		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.50 + night * 0.45))
+	# No caption. A snowed-in hut with a lit window and smoke on its chimney does
+	# not need the word 숙소 written under it, and the label was a leftover from
+	# when the building was two rectangles.
 
 ## The hut with everyone inside it. Nobody is drawn in the world during the night
 ## sequence, so this is the only place the player can see that the workforce made
@@ -541,6 +550,16 @@ static func cat_body_rect(rect: Rect2) -> Rect2:
 	var width: float = box.size.x * 0.62
 	return Rect2(box.get_center().x - width * 0.5, top, width, bottom - top)
 
+## Breathing, and which frame is showing. Both read the cat's own constant offset
+## and the clock, and neither reads where the cat is standing -- see Cat.phase for
+## what happened when they did. Exposed so the thing that matters can be measured
+## rather than looked at: a walking cat's gauge must not move against its shadow.
+static func cat_breathe(cat: Sim.Cat, time: float) -> float:
+	return 1.0 + sin(time * 2.6 + cat.phase * TAU) * 0.02
+
+static func cat_frame(cat: Sim.Cat, time: float) -> int:
+	return int(time * CAT_FPS + cat.phase * float(CAT_FRAMES)) % CAT_FRAMES
+
 ## The hunger gauge and the carried load, from the same rect as everything else.
 ## Exposed rather than written inline so the gaps between them, and between them
 ## and the tile above, can be measured instead of eyeballed.
@@ -610,7 +629,7 @@ func _draw_cats() -> void:
 	for cat: Sim.Cat in sim.cats:
 		if _cat_hidden(cat):
 			continue
-		var breathe: float = 1.0 + sin(pulse * 2.6 + cat.pos.x * 0.05) * 0.02
+		var breathe: float = cat_breathe(cat, pulse)
 		# Eating gets its own motion: a quick repeated dip toward the bowl, so a
 		# feeding cat is obviously busy rather than idle.
 		# No procedural dip any more: the eating sheet does the leaning down, and
@@ -628,7 +647,7 @@ func _draw_cats() -> void:
 		var flip: bool = chosen[1]
 		# Offset by position so a line of cats does not step in unison, which
 		# reads as one animation playing on several bodies.
-		var step: int = int(pulse * CAT_FPS + cat.pos.x * 0.7) % CAT_FRAMES
+		var step: int = cat_frame(cat, pulse)
 		var region := Rect2(float(step) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
 		var target: Rect2 = cat_rect(cat.pos, breathe, flip, munch)
 		if cat.rarity == Defs.RARITY_SSR:
@@ -641,6 +660,12 @@ func _draw_cats() -> void:
 			Icons.draw_pig(self, cat_body_rect(target), gait)
 		else:
 			draw_texture_rect_region(sheet, target, region, Color.WHITE)
+		if cat.state == Defs.CAT_WORKING:
+			# In front of the cat, which in a view from above is below it, and
+			# after the body so it reads as held rather than stood behind.
+			var swing: float = float(step) / float(CAT_FRAMES)
+			_object_art(CAT_TOOL_ART, cat.pos + Vector2(0.0, 9.0 + sin(swing * TAU) * CAT_TOOL_BOB),
+				CAT_TOOL_DRAW)
 		var head: float = cat_head_y(target)
 		if cat.carrying >= 0:
 			# What the cat is carrying rides above its head, so a line of hauling
@@ -685,9 +710,7 @@ func _draw_food_bin(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	_shadow(at + Vector2(0, 10), 10.0)
 	_object_art(FOOD_BIN_ART, at, FOOD_BIN_DRAW)
-	var font := UIFont.FONT
-	draw_string(font, at + Vector2(-20, 24), "사료 %d" % sim.food, HORIZONTAL_ALIGNMENT_CENTER, 40.0, 10,
-		Defs.COL_TEXT)
+	# The count is drawn after the animals -- see _draw_machine_marks.
 
 func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
@@ -732,6 +755,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## factory and two machines emitting into each other, and it was invisible in
 ## exactly the case where a miner is running.
 func _draw_machine_marks(tile: float) -> void:
+	_draw_food_count(tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if not _visible(cell, tile):
@@ -747,6 +771,26 @@ func _draw_machine_marks(tile: float) -> void:
 			_draw_arrow(tail, machine.dir, MINER_ARROW_LENGTH, Defs.COL_BELT_RIM, 2.5)
 		if machine.stalled:
 			_draw_stall(machine, centre)
+
+## How much food is left, over the bin, with no word in front of it: what the
+## number counts is obvious from the crate of fish it is sitting on.
+##
+## Drawn here rather than with the bin because a crate lands on the tile above it
+## and the cats queue in front, and both are drawn later -- so the number was
+## painted and then covered. On a plate, because it lands on snow, on wood and on
+## a cat depending on the minute, and thin light text survives none of those.
+func _draw_food_count(tile: float) -> void:
+	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
+	if not view_rect.grow(tile * 2.0).has_point(at):
+		return
+	var label: String = str(sim.food)
+	var font: Font = UIFont.FONT
+	var width: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10).x
+	var top: float = at.y - FOOD_BIN_DRAW * 0.5 - 12.0
+	draw_rect(Rect2(at.x - width * 0.5 - 3.0, top, width + 6.0, 12.0),
+		Color(0.06, 0.08, 0.12, 0.72))
+	draw_string(font, Vector2(at.x - width * 0.5, top + 9.0), label,
+		HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Defs.COL_TEXT)
 
 ## A backed-up machine is the single most common way a factory silently stops
 ## paying. It gets an unmissable pulsing marker rather than nothing at all.
