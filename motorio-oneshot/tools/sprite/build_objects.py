@@ -49,6 +49,25 @@ OBJECTS = REPO / "motorio-oneshot" / "tools" / "sprite" / "objects"
 PUBLISH_DIR = REPO / "web" / "public" / "object-candidates"
 MANIFEST = REPO / "web" / "lib" / "generated" / "objects.json"
 
+## The candidates that were chosen, and the size the game draws each at.
+##
+## Written down here rather than by copying a file into assets/ by hand, so the
+## decision is recorded next to the thing that acts on it and a re-run cannot
+## quietly disagree with what shipped.
+##
+## Exported at twice the drawn size, which is the convention the ground already
+## follows: the snow atlas is stored at 64 and drawn at 32. The project filters
+## textures with NEAREST, so an asset stored much larger than it is drawn throws
+## most of its pixels away at a hard edge; twice leaves headroom for the zoom
+## keys without turning the art to noise.
+ADOPTED = {
+    "core": ("base6", 64),
+    "shelter": ("home6", 48),
+    "food_bin": ("feedbox5", 36),
+    "miner": ("miner5", 36),
+}
+GAME_ART = REPO / "motorio-oneshot" / "assets" / "objects"
+
 ## Anything at or below this is matting residue rather than art.
 ALPHA_FLOOR = 16
 SIZES = (128, 64)
@@ -198,6 +217,16 @@ def main() -> int:
             stale.unlink()
             print("정리: %s" % stale.name)
     print("매니페스트: %s" % MANIFEST.relative_to(REPO))
+
+    # And the ones that were chosen, into the game.
+    GAME_ART.mkdir(parents=True, exist_ok=True)
+    for role, (candidate, draw) in sorted(ADOPTED.items()):
+        source = OBJECTS / f"{candidate}.png"
+        if not source.exists():
+            print("채택본 없음: %s -> %s" % (role, source.name), file=sys.stderr)
+            return 1
+        fit(clean(Image.open(source)), draw * 2).save(GAME_ART / f"{role}.png")
+        print("게임: %-9s <- %-9s %dpx (그릴 크기 %d)" % (role, candidate, draw * 2, draw))
     return 0
 
 

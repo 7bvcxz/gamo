@@ -17,6 +17,26 @@ const CAT_WALK_N_SHEET: Texture2D = preload("res://assets/characters/cat_walk_n.
 ## is no second angle either of them is ever seen from.
 const CAT_EAT_SHEET: Texture2D = preload("res://assets/characters/cat_eat_s.png")
 const CAT_WORK_SHEET: Texture2D = preload("res://assets/characters/cat_work_s.png")
+## Adopted object art, drawn from directly above.
+##
+## These replace bodies that were drawn in code. What is drawn over them is
+## still drawn: the stall marker, the work arc, the warm pools, the night glow.
+## A picture says what a thing is; it cannot say what the thing is doing, and
+## every one of those overlays exists because a player could not tell.
+##
+## Each file is stored at twice the size it is drawn at, matching the ground:
+## the snow atlas is 64 and lands on a 32 cell. The project filters with NEAREST,
+## so a texture stored far larger than it is drawn discards most of its pixels at
+## a hard edge.
+const CORE_ART: Texture2D = preload("res://assets/objects/core.png")
+const SHELTER_ART: Texture2D = preload("res://assets/objects/shelter.png")
+const FOOD_BIN_ART: Texture2D = preload("res://assets/objects/food_bin.png")
+const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
+const CORE_DRAW := 64.0
+const SHELTER_DRAW := 48.0
+const FOOD_BIN_DRAW := 36.0
+const MINER_DRAW := 36.0
+
 const CAT_CELL := 128.0
 const CAT_FRAMES := 8
 const CAT_FPS := 10.0
@@ -158,39 +178,15 @@ func _draw_shelter(tile: float) -> void:
 	draw_circle(at, 20.0 * flicker, Color(1.0, 0.66, 0.30, 0.07 + night * 0.20))
 	_shadow(at + Vector2(0, 13), 13.0)
 
-	var wall := Color8(84, 52, 40)
-	var wall_lit := Color8(104, 66, 50)
-	var roof := Color8(58, 38, 32)
-	var roof_lit := Color8(74, 50, 40)
-	var trim: Color = Defs.COL_BRASS
-
-	# Body, with the left face a shade lighter so the hut has a light direction
-	# instead of reading flat.
-	var body := Rect2(at.x - 12.0, at.y - 2.0, 24.0, 16.0)
-	draw_rect(body, wall)
-	draw_rect(Rect2(body.position, Vector2(body.size.x * 0.42, body.size.y)), wall_lit)
-	draw_rect(body, Color(0.02, 0.03, 0.05, 0.55), false, 1.0)
-
-	# Roof: two slopes rather than one triangle, so the ridge catches the light.
-	draw_colored_polygon(PackedVector2Array([
-		at + Vector2(-15, -1), at + Vector2(0, -15), at + Vector2(0, -1)]), roof_lit)
-	draw_colored_polygon(PackedVector2Array([
-		at + Vector2(0, -15), at + Vector2(15, -1), at + Vector2(0, -1)]), roof)
-	draw_line(at + Vector2(-15, -1), at + Vector2(15, -1), trim.darkened(0.35), 1.6)
-	draw_line(at + Vector2(0, -15), at + Vector2(0, -1), Color(0.02, 0.03, 0.05, 0.35), 1.0)
-
-	# The window is the whole point: one warm rectangle that brightens into the
-	# night and spills a little onto the snow below the sill.
-	var window := Rect2(at.x - 4.0, at.y + 2.0, 8.0, 8.0)
-	draw_rect(window.grow(1.5), Color(0.02, 0.03, 0.05, 0.60))
-	draw_rect(window, Color(1.0, 0.74, 0.36, lit))
-	draw_rect(Rect2(window.position, Vector2(window.size.x, 2.0)),
-		Color(1.0, 0.90, 0.62, lit))
+	_object_art(SHELTER_ART, at, SHELTER_DRAW)
+	# Firelight on the snow around it, which the picture cannot do: the hut has to
+	# get brighter as the night comes on, and that is the signal telling the
+	# player where to be.
 	draw_circle(at + Vector2(0, 7), 9.0 * flicker, Color(1.0, 0.70, 0.32, 0.10 * lit))
-	_draw_shelter_occupied(at, body, flicker)
+	_draw_shelter_occupied(at, flicker)
 
-	# A chimney with smoke, so the building is alive even when nobody is home.
-	draw_rect(Rect2(at.x + 6.0, at.y - 15.0, 4.0, 7.0), roof)
+	# Smoke, so the building is alive even when nobody is home. The chimney it
+	# rises from is in the picture now; this is only what comes out of it.
 	for index in 3:
 		var rise: float = fmod(pulse * 0.5 + float(index) * 0.34, 1.0)
 		draw_circle(at + Vector2(8.0 + sin(rise * 4.0 + float(index)) * 3.0, -17.0 - rise * 13.0),
@@ -207,7 +203,15 @@ func _draw_shelter(tile: float) -> void:
 ## Drawn on the wall rather than only inside the window because at one tile across
 ## an 8px window can hold about two pixels of anything. The whole front face is
 ## the lantern screen.
-func _draw_shelter_occupied(at: Vector2, body: Rect2, flicker: float) -> void:
+## Light escaping the hut once someone is inside.
+##
+## The wall panel and the silhouettes on it are gone with the wall: this roof is
+## seen from directly above and there is no face to throw them onto. What is left
+## is on the ground, where a top-down view can still show it -- the halo and the
+## wedge under the door -- and the wedge carries the count instead, brightening
+## with each sleeper. Weaker than four separate shadows, and the honest option:
+## drawing silhouettes onto a roof would say something the picture denies.
+func _draw_shelter_occupied(at: Vector2, flicker: float) -> void:
 	if shelter_glow <= 0.0:
 		return
 	var glow: float = clampf(shelter_glow, 0.0, 1.0)
@@ -216,41 +220,16 @@ func _draw_shelter_occupied(at: Vector2, body: Rect2, flicker: float) -> void:
 	# onto the snow from under the door.
 	draw_circle(at, 52.0 * flicker, Color(1.0, 0.72, 0.34, 0.09 * glow))
 	draw_circle(at, 30.0 * flicker, Color(1.0, 0.78, 0.42, 0.13 * glow))
+	# The count rides on the wedge rather than on four silhouettes: one sleeper is
+	# a glow under the door, four is the hut spilling light onto the snow.
+	var crowd: float = 0.55 + 0.45 * clampf(float(shelter_sleepers), 1.0, 4.0) / 4.0
 	draw_colored_polygon(PackedVector2Array([
 		at + Vector2(-7, 13), at + Vector2(7, 13),
 		at + Vector2(20, 36), at + Vector2(-20, 36)]),
-		Color(1.0, 0.80, 0.46, 0.16 * glow))
-
-	# The wall lights up from behind.
-	var panel := Rect2(body.position + Vector2(1.5, 1.5), body.size - Vector2(3.0, 3.0))
-	draw_rect(panel, Color(1.0, 0.78, 0.42, 0.62 * glow * flicker))
-
-	# One shadow each, the tall one first for the player. Capped: past four the
-	# wall is a solid dark band and the count stops meaning anything.
-	var count: int = clampi(shelter_sleepers, 1, 4)
-	var ink := Color(0.14, 0.07, 0.06, 0.82 * glow)
-	for index in count:
-		var slot: float = (float(index) + 0.5) / float(count)
-		var x: float = panel.position.x + panel.size.x * slot
-		var tall: bool = index == 0
-		var height: float = 9.0 if tall else 6.0
-		# Each shadow breathes on its own offset, so the group reads as several
-		# sleepers rather than one shape repeated.
-		var breathe: float = sin(pulse * 1.9 + float(index) * 2.1) * 0.9
-		var base: float = panel.position.y + panel.size.y - 1.0
-		var head: float = base - height + breathe
-		draw_rect(Rect2(x - 2.0, head + 1.0, 4.0, height - 1.0 - breathe), ink)
-		draw_circle(Vector2(x, head), 2.2 if tall else 1.9, ink)
-		if not tall:
-			# Ears, so the small ones are cats and not a row of fence posts.
-			draw_circle(Vector2(x - 1.6, head - 1.6), 0.8, ink)
-			draw_circle(Vector2(x + 1.6, head - 1.6), 0.8, ink)
-
-	# Frame the panel again on top, or the lit wall bleeds over the hut's outline.
-	draw_rect(body, Color(0.02, 0.03, 0.05, 0.55), false, 1.0)
+		Color(1.0, 0.80, 0.46, 0.16 * glow * crowd * flicker))
 
 ## Carried cats ride in the player's arms and are painted by PlayerActor; sleeping
-## ones are a shadow on the shelter wall. Both would otherwise be drawn twice.
+## ones are indoors and not drawn at all. Both would otherwise be drawn twice.
 func _cat_hidden(cat: Sim.Cat) -> bool:
 	return cat == sim.carried_cat or cat.state == Defs.CAT_ASLEEP \
 		or not view_rect.grow(64.0).has_point(cat.pos)
@@ -343,16 +322,19 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# The core had no shadow, so the one object the whole base points at was the
 	# only thing not standing on the ground.
 	_shadow(c + Vector2(0, 22), 20.0)
+	# The heat it throws stays procedural -- it has to breathe with `beat` and
+	# brighten when something is delivered, and a still picture does neither.
 	draw_circle(c, 52.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
 	draw_circle(c, 38.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
-	draw_circle(c, 30.0, Defs.COL_MACHINE.darkened(0.4))
-	draw_circle(c, 26.0, Defs.COL_CORE_DEEP)
-	draw_circle(c, 18.0 * beat, Defs.COL_CORE)
-	draw_circle(c, 10.0 * beat, Color("fff0c9"))
-	for index in 10:
-		var angle: float = TAU * float(index) / 10.0 + pulse * 0.25
-		draw_circle(c + Vector2.from_angle(angle) * 33.0, 2.6, Defs.COL_BRASS)
+	_object_art(CORE_ART, c, CORE_DRAW * beat)
 	draw_arc(c, 44.0, 0.0, TAU, 64, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
+
+## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --
+## which stand on a fixed ground line -- these hang off the middle of the tile.
+func _object_art(texture: Texture2D, centre: Vector2, size: float,
+		tint: Color = Color.WHITE) -> void:
+	draw_texture_rect(texture, Rect2(centre - Vector2.ONE * size * 0.5,
+		Vector2.ONE * size), false, tint)
 
 ## Every object standing on the plateau casts the same shadow: one squash, one
 ## colour, always at the object's base. Three different shadow styles was the
@@ -396,24 +378,11 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
 	var work: float = clampf(machine.progress / Defs.MINER_PERIOD, 0.0, 1.0)
-	var body: Color = Color8(74, 86, 100).lerp(Color8(48, 56, 68), frost)
 
 	_shadow(c + Vector2(0, 12), 11.0)
-	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body, Defs.machine_color(Defs.M_MINER))
-	# The warm lip is the machine's identity light, drawn over the shared faces.
-	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
-		Defs.COL_BELT_RIM.lerp(body, frost))
-	# A drill head that only turns while a cat is operating it.
-	var spin: float = pulse * (5.0 if machine.operated else 0.0)
-	for index in 3:
-		var angle: float = spin + TAU * float(index) / 3.0
-		var on_grid: bool = sim.miner_on_power(machine.cell)
-		var drill: Color = Color8(120, 132, 148)
-		if machine.operated:
-			# Cool for the grid, warm for a worker: the player can see at a glance
-			# which miners still cost them a cat.
-			drill = Defs.machine_color(Defs.M_GENERATOR) if on_grid else Defs.COL_BELT_CHEVRON
-		draw_line(c, c + Vector2.from_angle(angle) * 7.0, drill, 2.0)
+	# Cold machines go blue rather than dark: the tint is the same signal the
+	# painted body carried, applied to the picture instead of mixed into it.
+	_object_art(MINER_ART, c, MINER_DRAW, Color.WHITE.lerp(Color(0.60, 0.70, 0.86), frost))
 	# The output arrow is drawn after the cats, not here -- see _draw_machine_marks.
 	if machine.operated:
 		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
@@ -709,12 +678,7 @@ func _draw_boxes(tile: float) -> void:
 func _draw_food_bin(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	_shadow(at + Vector2(0, 10), 10.0)
-	var bin: Rect2 = _body(at, 19.0, Color8(84, 96, 112))
-	# An open hopper mouth, so the bin reads as something you take from.
-	draw_rect(Rect2(bin.position + Vector2(3.0, 3.0), Vector2(bin.size.x - 6.0, 5.0)),
-		Color8(46, 54, 66))
-	draw_rect(Rect2(bin.position + Vector2(3.0, 3.0), Vector2(bin.size.x - 6.0, 5.0)),
-		Defs.OUTLINE, false, 1.0)
+	_object_art(FOOD_BIN_ART, at, FOOD_BIN_DRAW)
 	var font := UIFont.FONT
 	draw_string(font, at + Vector2(-20, 24), "사료 %d" % sim.food, HORIZONTAL_ALIGNMENT_CENTER, 40.0, 10,
 		Defs.COL_TEXT)
