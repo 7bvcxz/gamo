@@ -67,7 +67,7 @@ ADOPTED = {
     "miner": ("miner5", 36),
     # The drill a working cat holds. One of the machine candidates rather than a
     # separate drawing, so the thing in its paws is the thing it is standing on.
-    "cat_tool": ("miner3", 30),
+    "cat_tool": ("miner3", 21),      # 0.7 of what it was: a tool, not a machine
 }
 GAME_ART = REPO / "motorio-oneshot" / "assets" / "objects"
 

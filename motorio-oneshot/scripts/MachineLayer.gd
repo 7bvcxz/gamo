@@ -38,7 +38,11 @@ const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
 ## sheet's own frame rather than to the clock, so the tool comes down when the
 ## animal does instead of beside it.
 const CAT_TOOL_ART: Texture2D = preload("res://assets/objects/cat_tool.png")
-const CAT_TOOL_DRAW := 30.0
+## 0.7 of what it was. At thirty pixels the drill was as wide as the cat holding
+## it, which reads as a machine standing in front of the animal rather than a
+## tool in its paws. Re-cut at this size too, so the pixels are the ones the game
+## draws rather than a larger sheet thrown away at the edge.
+const CAT_TOOL_DRAW := 21.0
 const CAT_TOOL_BOB := 0.875
 ## How many times the drill goes up and down per turn of the work animation.
 const CAT_TOOL_BEATS := 2.0

@@ -962,12 +962,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			if key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER or key.keycode == KEY_SPACE:
 				_begin_next_day()
 				get_viewport().set_input_as_handled()
-			elif key.keycode == KEY_N:
-				clear_save()
-				_start_run()
-				state = State.PLAY
-				audio.call("play", "confirm")
-				get_viewport().set_input_as_handled()
+			# N is gone with its label. Removing the line and leaving the key
+			# would be worse than either: a run thrown away by a stray press on
+			# the screen nobody reads, with nothing on screen to explain it.
+			# Starting over lives in settings, where it asks twice.
 			return
 		State.NIGHTFALL, State.DAYBREAK:
 			# The sequence plays itself and is over in seconds. Only the debug

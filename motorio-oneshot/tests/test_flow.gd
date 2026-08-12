@@ -276,11 +276,21 @@ func _run() -> void:
 	_assert(_settle(main, main.State.RESULT), "running out of time also plays the night out")
 	_assert(main.best_day_heat == 140, "a worse day does not overwrite the best day")
 
-	# N starts a genuinely fresh game.
+	# The summary card cannot throw the run away.
+	#
+	# It used to: N started a fresh game from here, one keypress, no confirmation.
+	# This is the screen a player presses through at the end of every day without
+	# reading it, which makes it the worst place in the game for that key --
+	# starting over lives in settings, where it asks twice. The line is gone and
+	# so is the key, because leaving the key with the label removed is the worse
+	# of the two: a run lost with nothing on screen to explain it.
+	var day_before: int = main.day_number
+	var heat_before: int = main.sim.total_heat
 	_press(main, KEY_N)
-	_assert(main.state == main.State.PLAY and main.day_number == 1, "N restarts at day one")
-	_assert(main.sim.total_heat == 0 and main.sim.heat == Defs.START_HEAT, "a fresh game resets the economy")
-	_assert(main.sim.machine_at(Vector2i(0, 2)) == null, "a fresh game clears the old factory")
+	_assert(main.state == main.State.RESULT, "정산 화면에서 N은 아무 일도 하지 않는다")
+	_assert(main.day_number == day_before, "날짜가 되돌아가지 않는다")
+	_assert(main.sim.total_heat == heat_before, "모아둔 열이 사라지지 않는다")
+	_assert(main.sim.machine_at(Vector2i(0, 2)) != null, "공장이 그대로 남는다")
 
 	if failures == 0:
 		print("FLOW_TEST: PASS")

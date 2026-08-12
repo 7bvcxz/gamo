@@ -1391,4 +1391,7 @@ func _draw_result() -> void:
 		else "Enter — %d일차 시작" % (main.day_number + 1)
 	_text_in(Rect2(card.position + Vector2(0, card.size.y - 42), Vector2(w, 20)), next_label, 16,
 		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, blink))
-	_text_in(Rect2(card.position + Vector2(0, card.size.y - 20), Vector2(w, 20)), "N — 새로 시작", 12, Defs.COL_TEXT_DIM)
+	# No "start over" here. Settings already carries it, behind a confirmation,
+	# and the summary card is the one screen a player presses through every day
+	# without reading -- an unguarded key that throws the run away does not belong
+	# on it.

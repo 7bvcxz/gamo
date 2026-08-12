@@ -253,6 +253,10 @@ func _run() -> void:
 	# The drill. It swung nearly four pixels once a work cycle, which at a cat's
 	# size reads as the animal waving the thing about rather than using it. A
 	# quarter of the travel, twice as often.
+	# A tool in the paws, not a machine parked in front of the animal.
+	_assert(MachineLayer.CAT_TOOL_DRAW < MachineLayer.CAT_DRAW * 0.45,
+		"드릴이 고양이보다 확실히 작다 (%.0f vs %.0f)"
+		% [MachineLayer.CAT_TOOL_DRAW, MachineLayer.CAT_DRAW])
 	_assert(MachineLayer.CAT_TOOL_BOB < 1.2,
 		"드릴이 크게 흔들리지 않는다 (%.2fpx)" % MachineLayer.CAT_TOOL_BOB)
 	_assert(is_equal_approx(MachineLayer.CAT_TOOL_BEATS, 2.0),
