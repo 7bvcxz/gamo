@@ -162,18 +162,21 @@ func _run() -> void:
 	_assert(MachineLayer.CAT_HEAD_FRACTION < MachineLayer.CAT_FOOT_FRACTION,
 		"머리는 발보다 위에 있다")
 
-	# The cat, its shadow and everything hung above it come from one function, so
-	# they cannot drift apart. This is checked rather than assumed because they
-	# did drift: the cat in her arms kept a centre offset from when a cat was 44
-	# pixels tall while the ones on the ground moved to anchoring on the feet.
+	# cat_rect survives for one caller: the cat in the player's arms, which
+	# PlayerActor draws in its own layer. One sprite, no shadow, nothing hanging
+	# over it -- so it has nothing to come apart from, and what is checked here is
+	# that it still stands on the same foot line the pooled cats do. It did drift
+	# once: the carried cat kept a centre offset from when a cat was 44 pixels
+	# tall while the ones on the ground moved to anchoring on the feet.
 	var stand: Vector2 = Vector2(300.0, 200.0)
 	for puff: float in [0.96, 1.0, 1.04]:
 		var box: Rect2 = MachineLayer.cat_rect(stand, puff, false, 0.0)
 		var feet: float = box.position.y + MachineLayer.CAT_FOOT_FRACTION * box.size.y
-		_assert(is_equal_approx(feet, MachineLayer.cat_shadow_at(stand).y),
-			"숨을 쉬어도 발이 그림자 위에 있다 (%.2f)" % puff)
+		_assert(is_equal_approx(feet, stand.y + MachineLayer.CAT_GROUND),
+			"숨을 쉬어도 발이 그림자 선 위에 있다 (%.2f)" % puff)
 		_assert(is_equal_approx(box.get_center().x, stand.x), "좌우 중심이 맞는다")
-		_assert(MachineLayer.cat_head_y(box) < feet, "머리가 발 위에 온다")
+		_assert(box.position.y + MachineLayer.CAT_HEAD_FRACTION * box.size.y < feet,
+			"머리가 발 위에 온다")
 	# Mirrored, the sprite occupies the same span; only the texture is reversed.
 	var right: Rect2 = MachineLayer.cat_rect(stand, 1.0, false, 0.0)
 	var left: Rect2 = MachineLayer.cat_rect(stand, 1.0, true, 0.0)
@@ -200,113 +203,78 @@ func _run() -> void:
 	_assert(MachineLayer.CAT_FOOT_FRACTION * MachineLayer.CAT_DRAW > MachineLayer.CAT_GROUND * 3.0,
 		"몸이 그림자 위로 충분히 올라온다")
 
-	# --- A walking cat does not come apart --------------------------------------
-	# The reported symptom was the gauge, the body and the shadow drifting from
-	# each other whenever a cat crossed the map -- to eat, to go home. All three
-	# are positioned from the same cat, so the only way they can disagree is if
-	# something in the chain depends on *where* the cat is. Something did: the
-	# breathing phase and the walk frame were both offset by cat.pos.x, so a cat
-	# that moved breathed and stepped as a function of its own travel. Breathing
-	# scales the sprite, the gauge hangs off the scaled height, and the shadow is
-	# not scaled -- so the gauge slid against the shadow at walking speed.
+	# --- A cat cannot come apart -----------------------------------------------
+	# It used to be able to. The gauge, the body and the shadow were computed
+	# along separate paths from one position, and three bugs came from a value
+	# leaking into one path and not the others -- the worst being the breathing
+	# scale, which set the body's height and therefore the gauge's, while the
+	# shadow was not scaled at all.
 	#
-	# Measured across a walk rather than asserted about the source, because what
-	# matters is the gap the player sees.
+	# A cat is a node with children now, so the question is no longer "do the
+	# five numbers agree" but "does anything move that should not". Only the cat
+	# moves; its parts sit at constant local offsets.
+	var view := CatView.new()
+	root.add_child(view)
+	await process_frame
 	var walker = Sim.Cat.new()
 	walker.phase = 0.37
-	var clock: float = 3.2
-	var gaps: Array[float] = []
-	var heights: Array[float] = []
-	var frames: Array[int] = []
+	walker.hunger = 0.3          # so the gauge is showing
+	walker.carrying = Defs.ITEM_CRYSTAL
+
+	var locals := {}
+	var body_scales: Array[float] = []
 	for tick in 60:
 		walker.pos = Vector2(120.0 + float(tick) * 7.3, 240.0 + float(tick) * 1.9)
-		var puff: float = MachineLayer.cat_breathe(walker, clock)
-		var shape: Rect2 = MachineLayer.cat_rect(walker.pos, puff, false, 0.0)
-		var gauge2: Rect2 = MachineLayer.cat_hunger_bar(walker.pos, shape)
-		gaps.append(MachineLayer.cat_shadow_at(walker.pos).y - gauge2.position.y)
-		heights.append(absf(shape.size.y))
-		frames.append(MachineLayer.cat_frame(walker, clock))
-	var gap_spread: float = gaps.max() - gaps.min()
-	var height_spread: float = heights.max() - heights.min()
-	_assert(gap_spread < 0.01,
-		"걷는 동안 게이지와 그림자 간격이 그대로다 (편차 %.3fpx)" % gap_spread)
-	_assert(height_spread < 0.01,
-		"걷는 동안 몸 높이가 그대로다 (편차 %.3fpx)" % height_spread)
-	_assert(frames.min() == frames.max(),
-		"같은 시각이면 어디에 있든 같은 프레임이다 (%d~%d)" % [frames.min(), frames.max()])
+		view.sync(walker, 3.2 + float(tick) * 0.017, true)
+		for child: Node2D in view.get_children():
+			if child == view._tool:
+				continue          # the drill is meant to move, on its own axis
+			var key: String = str(child.get_index())
+			if not locals.has(key):
+				locals[key] = child.position
+			_assert(child.position.is_equal_approx(locals[key]),
+				"자식 %d의 로컬 좌표가 변하지 않는다 (%s -> %s)"
+				% [child.get_index(), str(locals[key]), str(child.position)])
+		body_scales.append(view._body.scale.y)
+	_assert(view.position.is_equal_approx(walker.pos), "고양이 노드가 시뮬레이션을 따라간다")
+	# Breathing still happens -- it just happens to the body alone.
+	_assert(body_scales.max() - body_scales.min() > 0.0001, "몸은 여전히 호흡한다")
+	_assert(is_equal_approx(view._overhead.position.y, CatView.HEAD),
+		"머리 위 물건은 상수 높이에 매달린다 (%.3f vs %.3f)"
+		% [view._overhead.position.y, CatView.HEAD])
+	_assert(view._body.offset.y < 0.0,
+		"몸의 원점이 발이라, 호흡이 발을 들었다 놓지 않는다")
 
-	# And the offset still does its job: two cats must not move as one.
-	var other = Sim.Cat.new()
-	other.phase = 0.91
-	other.pos = walker.pos
-	_assert(not is_equal_approx(MachineLayer.cat_breathe(walker, clock),
-		MachineLayer.cat_breathe(other, clock)), "두 고양이는 따로 호흡한다")
-
-	# --- What hangs over a cat has to clear the tile above it -------------------
-	# A miner facing north drops its output into the cell above itself, and the
-	# worker's hunger bar hung in that same cell -- so the recommended arrangement
-	# guaranteed a gauge with a crystal through it. The load rode into the bar as
-	# well. Measured against the item's own radius and bob rather than eyeballed,
-	# so changing either moves this check with it.
-	var at := Vector2(400.0, 400.0)
-	var body: Rect2 = MachineLayer.cat_rect(at, 1.0, false, 0.0)
-	var gauge: Rect2 = MachineLayer.cat_hunger_bar(at, body)
-	var load: Vector2 = MachineLayer.cat_load_at(at, body)
-	var item_bottom: float = at.y - float(Defs.TILE) \
-		+ MachineLayer.GROUND_ITEM_RADIUS + MachineLayer.GROUND_ITEM_BOB
-	_assert(gauge.position.y >= item_bottom,
-		"허기 막대가 위 칸의 산출물 아래에 있다 (%.1f >= %.1f)" % [gauge.position.y, item_bottom])
-	_assert(load.y + MachineLayer.CAT_LOAD_RADIUS <= gauge.position.y,
-		"짐 표시가 허기 막대와 겹치지 않는다 (%.1f <= %.1f)"
-		% [load.y + MachineLayer.CAT_LOAD_RADIUS, gauge.position.y])
-	# And still attached to the animal: a gauge that clears everything by floating
-	# away belongs to nobody.
-	_assert(gauge.position.y + gauge.size.y <= MachineLayer.cat_head_y(body),
-		"막대는 머리 위에 있다")
-	_assert(MachineLayer.cat_head_y(body) - gauge.position.y < 12.0,
-		"머리에 붙어 있다 (%.1f)" % (MachineLayer.cat_head_y(body) - gauge.position.y))
-	_assert(is_equal_approx(gauge.get_center().x, at.x), "막대가 몸 중심에 온다")
-
-	# Three things stack over a working miner and the cell is 32 pixels tall:
-	# the item on the next tile, the gauge, and the output arrow. The first fix
-	# for this moved the gauge out of the item and straight into the arrow, which
-	# is not a fix, so all three gaps are checked at once.
-	# The arrow cannot be given clear air -- pulling it down far enough put it
-	# inside the cat's head, where its outline read as a second pair of eyes and
-	# it stopped being an arrow. So it is allowed to touch the gauge, and bounded
-	# instead: a couple of pixels of contact leaves both readable, a machine's
-	# worth of overlap does not.
-	var arrow_tip: float = at.y - MachineLayer.MINER_ARROW_LIFT - MachineLayer.MINER_ARROW_LENGTH
-	var arrow_tail: float = at.y - MachineLayer.MINER_ARROW_LIFT
-	var touch: float = minf(arrow_tail, gauge.position.y + gauge.size.y) \
-		- maxf(arrow_tip, gauge.position.y)
-	_assert(touch <= 3.0, "출력 화살표가 허기 막대를 덮지 않는다 (%.1f픽셀)" % touch)
+	# Shadows below every cat's body, not just their own. Two passes over the
+	# array used to guarantee that; a negative z does it now.
+	_assert(view._shadow.z_index < 0, "그림자는 몸보다 먼저 그려진다")
+	view.queue_free()
 
 	# --- What a machine is doing is drawn above the animal doing it -------------
-	# A cat is nearly sixty pixels tall standing on a thirty-two pixel cell, so
-	# anything a machine draws near its own centre is behind its worker. That hid
-	# both of the miner's readouts in exactly the case they exist for: the stall
-	# marker, because a miner only stalls while a cat is on it, and the output
-	# arrow, because a north-facing miner points straight into the cat. Two miners
-	# emitting into each other produced nothing for six minutes in a playtest and
-	# the screen said so nowhere.
+	# A cat is nearly sixty pixels tall on a thirty-two pixel cell, so anything a
+	# machine draws near its own centre is behind its worker. That hid both of a
+	# miner's readouts in exactly the case they exist for: the stall marker,
+	# because a miner only stalls while a cat is on it, and the output arrow,
+	# because a north-facing miner points straight into the cat.
 	#
-	# Checked against the source: draw order is not observable from a headless
-	# run, and the invariant is exactly "these calls come after that one".
-	var layer: String = FileAccess.get_file_as_string("res://scripts/MachineLayer.gd")
-	_assert(layer != "", "MachineLayer.gd를 읽었다")
-	var cats_at: int = layer.find("\t_draw_cats()")
-	var marks_at: int = layer.find("\t_draw_machine_marks(")
-	_assert(cats_at >= 0 and marks_at > cats_at,
-		"기계 표시가 고양이보다 뒤에 그려진다 (%d < %d)" % [cats_at, marks_at])
-	var miner_body: String = layer.substr(layer.find("func _draw_miner"))
-	miner_body = miner_body.substr(0, miner_body.find("\nfunc "))
-	_assert(miner_body.find("_draw_arrow(") < 0,
-		"채굴기 본체는 출력 화살표를 직접 그리지 않는다")
-	var marks_body: String = layer.substr(marks_at)
-	marks_body = marks_body.substr(0, marks_body.find("\nfunc _draw_stall"))
-	_assert(marks_body.find("_draw_arrow(") > 0 and marks_body.find("_draw_stall(") > 0,
-		"화살표와 정지 표시가 같은 패스에 있다")
+	# This used to hold because the marks were drawn later in the same function.
+	# Cats are their own nodes now, so the contract is a z_index -- and it is
+	# asserted from the scene rather than from the source, because that is what
+	# actually decides the order.
+	var main2 := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main2)
+	await process_frame
+	var machines_z: int = (main2.get_node("Machines") as Node2D).z_index
+	var cats_z: int = (main2.get_node("Cats") as Node2D).z_index
+	_assert(cats_z > machines_z, "고양이가 기계보다 위에 그려진다 (%d > %d)" % [cats_z, machines_z])
+	_assert(MachineLayer.MARKS_Z > cats_z,
+		"기계 표시가 고양이보다 위에 그려진다 (%d > %d)" % [MachineLayer.MARKS_Z, cats_z])
+	# The shadow rides one below its own cat, which puts every shadow under every
+	# body rather than only under its own -- what the two passes over the array
+	# used to do.
+	_assert(cats_z - 1 > machines_z,
+		"고양이 그림자도 기계보다는 위다 (%d > %d)" % [cats_z - 1, machines_z])
+	main2.queue_free()
 
 	if failures == 0:
 		print("ANIMATION_TEST: PASS")

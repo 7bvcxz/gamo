@@ -40,14 +40,16 @@ func _run() -> void:
 			working += 1
 	_assert(working >= 2, "여러 마리가 채굴기에서 일한다 (%d)" % working)
 
-	# Every cat gets its own baseline, and every tick has to reproduce it. The
-	# clock is passed in rather than read from the layer so the measurement is of
-	# the cat moving, not of time passing.
+	# Measured on the real views, not on geometry helpers. A cat is a node with
+	# children now, so what "coming apart" would mean is one of those children
+	# moving in its parent's frame -- and that is what is watched, on the same
+	# nodes the game is drawing with.
+	var pool: Node2D = main.get_node("Cats")
 	var clock: float = 5.0
-	var base_gap: Dictionary[int, float] = {}
-	var base_height: Dictionary[int, float] = {}
-	var worst_gap: float = 0.0
+	var base_local: Dictionary[String, Vector2] = {}
+	var worst_local: float = 0.0
 	var worst_height: float = 0.0
+	var base_height: Dictionary[int, float] = {}
 	var states_seen: Dictionary[int, bool] = {}
 	var travelled: float = 0.0
 
@@ -56,6 +58,12 @@ func _run() -> void:
 	var last: Dictionary[int, Vector2] = {}
 	while elapsed < 200.0:
 		main._process(step)
+		# The pool has to be ticked too. Disabling processing on Main stops its
+		# children as well, so without this the views are never synced and the
+		# check below passes because nothing ever moved -- which is not the same
+		# as nothing moving that should not. The breathing assertion at the end
+		# exists to catch exactly that: it fails when the views are asleep.
+		pool._process(step)
 		if main.state == main.State.RESULT:
 			main.touch_primary()
 		elapsed += step
@@ -65,15 +73,21 @@ func _run() -> void:
 			if last.has(index):
 				travelled += cat.pos.distance_to(last[index])
 			last[index] = cat.pos
-			var puff: float = MachineLayer.cat_breathe(cat, clock)
-			var shape: Rect2 = MachineLayer.cat_rect(cat.pos, puff, false, 0.0)
-			var gauge: Rect2 = MachineLayer.cat_hunger_bar(cat.pos, shape)
-			var gap: float = MachineLayer.cat_shadow_at(cat.pos).y - gauge.position.y
-			var height: float = absf(shape.size.y)
-			if not base_gap.has(index):
-				base_gap[index] = gap
+			if index >= pool.get_child_count():
+				continue
+			var view: CatView = pool.get_child(index)
+			if not view.visible:
+				continue
+			for part: Node2D in view.get_children():
+				if part == view._tool:
+					continue          # the drill moves on purpose
+				var key: String = "%d:%d" % [index, part.get_index()]
+				if not base_local.has(key):
+					base_local[key] = part.position
+				worst_local = maxf(worst_local, part.position.distance_to(base_local[key]))
+			var height: float = view._body.scale.y
+			if not base_height.has(index):
 				base_height[index] = height
-			worst_gap = maxf(worst_gap, absf(gap - base_gap[index]))
 			worst_height = maxf(worst_height, absf(height - base_height[index]))
 
 	# The run has to have actually contained the thing being tested.
@@ -83,8 +97,10 @@ func _run() -> void:
 	_assert(states_seen.has(Defs.CAT_TO_SHELTER) or states_seen.has(Defs.CAT_ASLEEP),
 		"귀가하는 구간이 포함됐다")
 
-	_assert(worst_gap < 0.01, "게이지와 그림자 간격이 한 번도 흔들리지 않았다 (%.4fpx)" % worst_gap)
-	_assert(worst_height < 0.01, "몸 높이가 위치에 따라 변하지 않았다 (%.4fpx)" % worst_height)
+	_assert(worst_local < 0.01,
+		"고양이의 어떤 부분도 부모 안에서 움직이지 않았다 (%.4fpx)" % worst_local)
+	# Breathing is the one thing that changes, and it changes the body alone.
+	_assert(worst_height > 0.0001, "몸은 여전히 호흡한다 (%.5f)" % worst_height)
 
 	print("CROWD: 고양이 %d마리, %.0f초, 이동 %.0fpx, 상태 %d종"
 		% [sim.cats.size(), elapsed, travelled, states_seen.size()])

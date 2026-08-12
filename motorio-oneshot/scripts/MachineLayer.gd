@@ -122,6 +122,31 @@ var night: float = 0.0
 
 var _repaint := 0.0
 
+## What a machine says about itself, drawn above the animals working it.
+##
+## This used to be the last thing in _draw(), which put it above the cats because
+## they were drawn in the same function. Cats are their own nodes now, so the
+## order has to be a z_index rather than a line number -- and it has to hold: the
+## stall marker and the output arrow are the two readouts a player needs exactly
+## when a cat is standing on the machine, and both have already been found hidden
+## underneath one.
+const MARKS_Z := 4
+var _marks_layer: Node2D
+
+func _ready() -> void:
+	_marks_layer = Node2D.new()
+	_marks_layer.z_index = MARKS_Z
+	_marks_layer.draw.connect(_draw_marks_layer)
+	add_child(_marks_layer)
+
+func _draw_marks_layer() -> void:
+	if sim == null:
+		return
+	var tile := float(Defs.TILE)
+	_draw_machine_marks(_marks_layer, tile)
+	if show_preview:
+		_draw_preview(_marks_layer, tile)
+
 func _process(delta: float) -> void:
 	pulse += delta
 	_repaint += delta
@@ -166,10 +191,10 @@ func _draw() -> void:
 	_draw_hand_progress()
 	_draw_meter_marker(tile)
 	_draw_focus_readout()
-	_draw_cats()
-	_draw_machine_marks(tile)
-	if show_preview:
-		_draw_preview(tile)
+	# Cats are not drawn here any more. They are nodes under Main/Cats at a z
+	# between this layer and _marks_layer, so what is left in this function is
+	# the factory itself.
+	_marks_layer.queue_redraw()
 
 ## A hut beside the core: the destination the night pushes you toward.
 ## The shelter is the other end of the run from the core: the core is where heat
@@ -238,12 +263,6 @@ func _draw_shelter_occupied(at: Vector2, flicker: float) -> void:
 		at + Vector2(-7, 13), at + Vector2(7, 13),
 		at + Vector2(20, 36), at + Vector2(-20, 36)]),
 		Color(1.0, 0.80, 0.46, 0.16 * glow * crowd * flicker))
-
-## Carried cats ride in the player's arms and are painted by PlayerActor; sleeping
-## ones are indoors and not drawn at all. Both would otherwise be drawn twice.
-func _cat_hidden(cat: Sim.Cat) -> bool:
-	return cat == sim.carried_cat or cat.state == Defs.CAT_ASLEEP \
-		or not view_rect.grow(64.0).has_point(cat.pos)
 
 func _draw_meter_marker(tile: float) -> void:
 	if meter_cell == Vector2i(9999, 9999):
@@ -381,12 +400,12 @@ func _body(centre: Vector2, size: float, base: Color, edge: Color = Color(0, 0, 
 
 ## One arrow shape used by previews and by placed machines, so "which way does
 ## this face" is answered the same way everywhere.
-func _draw_arrow(from: Vector2, dir: Vector2i, length: float, col: Color, width: float = 3.0) -> void:
+func _draw_arrow(on: CanvasItem, from: Vector2, dir: Vector2i, length: float, col: Color, width: float = 3.0) -> void:
 	var d := Vector2(dir)
 	var perp := Vector2(-d.y, d.x)
 	var tip: Vector2 = from + d * length
-	draw_line(from, tip - d * 5.0, col, width)
-	draw_colored_polygon(PackedVector2Array([
+	on.draw_line(from, tip - d * 5.0, col, width)
+	on.draw_colored_polygon(PackedVector2Array([
 		tip, tip - d * 7.0 + perp * 4.5, tip - d * 7.0 - perp * 4.5]), col)
 
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
@@ -534,15 +553,6 @@ static func cat_rect(at: Vector2, breathe: float, flip: bool, dip: float) -> Rec
 	return rect
 
 ## The top of the cat's head, for whatever hangs above it.
-static func cat_head_y(rect: Rect2) -> float:
-	return rect.position.y + CAT_HEAD_FRACTION * absf(rect.size.y)
-
-## The animal's own box inside the sprite cell.
-##
-## The sheets are normalised to a 128 cell with the feet at 104 and the top of
-## the head around 36, so most of that rect is empty padding. Anything drawn in
-## place of a sheet has to land in the same band or it stands beside its own
-## shadow -- which is exactly the failure this file already has a lesson about.
 static func cat_body_rect(rect: Rect2) -> Rect2:
 	var box: Rect2 = rect.abs()
 	var top: float = box.position.y + CAT_HEAD_FRACTION * box.size.y
@@ -563,23 +573,6 @@ static func cat_frame(cat: Sim.Cat, time: float) -> int:
 ## The hunger gauge and the carried load, from the same rect as everything else.
 ## Exposed rather than written inline so the gaps between them, and between them
 ## and the tile above, can be measured instead of eyeballed.
-static func cat_hunger_bar(at: Vector2, rect: Rect2) -> Rect2:
-	return Rect2(at.x - CAT_BAR_SIZE.x * 0.5, cat_head_y(rect) - CAT_BAR_LIFT,
-		CAT_BAR_SIZE.x, CAT_BAR_SIZE.y)
-
-static func cat_load_at(at: Vector2, rect: Rect2) -> Vector2:
-	return Vector2(at.x, cat_head_y(rect) - CAT_LOAD_LIFT)
-
-## Where the shadow goes. Same input as cat_rect, so the two cannot drift.
-static func cat_shadow_at(at: Vector2) -> Vector2:
-	return at + Vector2(0.0, CAT_GROUND)
-
-## Which sheet a cat plays, and whether it is mirrored. Pulled out of the draw
-## call so it can be tested: a screenshot cannot tell a front walk from an idle
-## at 44 pixels, and cats only exist after boxes have been carried to the
-## shelter, so a running game will not show one for a long while.
-##
-## Returns [Texture2D, flip].
 static func cat_sheet(state: int, heading: Vector2) -> Array:
 	# Standing still gets the idle sheet; anything with somewhere to be walks. A
 	# cat that has arrived and is working should not keep striding on the spot,
@@ -598,97 +591,6 @@ static func cat_sheet(state: int, heading: Vector2) -> Array:
 		return [CAT_WALK_N_SHEET, false]
 	return [CAT_WALK_SHEET, false]
 
-## A ring on the ground under the graded ones.
-##
-## Colour on the floor rather than on the animal. Tinting the sprite would fight
-## the sheets the pipeline spent a week getting right, and a badge over the head
-## would collide with the hunger bar and the carried item that already live
-## there. Only R and above get one, so the ninety-three percent of cats that are
-## ordinary look exactly as they always did.
-func _rarity_ring(cat: Sim.Cat) -> void:
-	if cat.rarity < Defs.RARITY_R:
-		return
-	var tint: Color = Defs.RARITY_COLORS[cat.rarity]
-	var at: Vector2 = cat_shadow_at(cat.pos)
-	# Squashed the same way the shadow is, so the ring reads as lying on the snow
-	# rather than as a hoop standing up around the cat.
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
-	draw_arc(Vector2(at.x, at.y / Defs.SHADOW_SQUASH), CAT_DRAW * 0.26, 0.0, TAU, 24,
-		Color(tint.r, tint.g, tint.b, 0.85), 2.0)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-func _draw_cats() -> void:
-	# Every shadow first, then every body. Drawn per cat, the next cat's shadow
-	# lands on top of the previous cat's feet, and a group crossing paths reads as
-	# shadows sliding around independently of the cats casting them.
-	for cat: Sim.Cat in sim.cats:
-		if _cat_hidden(cat):
-			continue
-		_shadow(cat_shadow_at(cat.pos), CAT_DRAW * 0.18)
-		_rarity_ring(cat)
-	for cat: Sim.Cat in sim.cats:
-		if _cat_hidden(cat):
-			continue
-		var breathe: float = cat_breathe(cat, pulse)
-		# Eating gets its own motion: a quick repeated dip toward the bowl, so a
-		# feeding cat is obviously busy rather than idle.
-		# No procedural dip any more: the eating sheet does the leaning down, and
-		# adding a bounce underneath it is two motions fighting. Kept as a
-		# parameter because carrying still has nothing of its own.
-		var munch: float = 0.0
-		# Whichever way it last moved, from the one place that moves it. Eating
-		# faces the bowl, which is the one pose that is not about travel.
-		var heading: Vector2 = Vector2.DOWN if cat.state == Defs.CAT_EATING else cat.heading
-		# Standing still gets the idle sheet; anything with somewhere to be walks.
-		# A cat that has arrived and is working should not keep striding on the
-		# spot, and one crossing the map should not glide.
-		var chosen: Array = cat_sheet(cat.state, heading)
-		var sheet: Texture2D = chosen[0]
-		var flip: bool = chosen[1]
-		# Offset by position so a line of cats does not step in unison, which
-		# reads as one animation playing on several bodies.
-		var step: int = cat_frame(cat, pulse)
-		var region := Rect2(float(step) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
-		var target: Rect2 = cat_rect(cat.pos, breathe, flip, munch)
-		if cat.rarity == Defs.RARITY_SSR:
-			# There is no pig sheet, so the pig is drawn. It goes in the animal's
-			# own band inside the cell, which is what keeps it on the shadow, the
-			# hunger bar and the carried-item dot that the sheets are aligned to.
-			var gait: float = 0.0
-			if cat.state in Defs.CAT_WALKING_STATES:
-				gait = pulse * 7.0
-			Icons.draw_pig(self, cat_body_rect(target), gait)
-		else:
-			draw_texture_rect_region(sheet, target, region, Color.WHITE)
-		if cat.state == Defs.CAT_WORKING:
-			# In front of the cat, which in a view from above is below it, and
-			# after the body so it reads as held rather than stood behind.
-			var swing: float = float(step) / float(CAT_FRAMES)
-			_object_art(CAT_TOOL_ART, cat.pos + Vector2(0.0, 9.0 + sin(swing * TAU) * CAT_TOOL_BOB),
-				CAT_TOOL_DRAW)
-		var head: float = cat_head_y(target)
-		if cat.carrying >= 0:
-			# What the cat is carrying rides above its head, so a line of hauling
-			# cats reads as a slow, visible conveyor.
-			var load_colour: Color = Defs.ITEM_COLORS[cat.carrying]
-			var carried_at: Vector2 = cat_load_at(cat.pos, target)
-			draw_circle(carried_at, CAT_LOAD_RADIUS,
-				Color(load_colour.r, load_colour.g, load_colour.b, 0.30))
-			draw_circle(carried_at, 3.2, load_colour)
-		if cat.state == Defs.CAT_EATING:
-			# Crumbs kicking up from the bowl.
-			for crumb in 3:
-				var phase: float = fmod(pulse * 2.2 + float(crumb) * 0.33, 1.0)
-				var at: Vector2 = cat.pos + Vector2(sin(float(crumb) * 2.1) * 9.0, 6.0 - phase * 9.0)
-				draw_circle(at, 1.6 * (1.0 - phase), Color(0.95, 0.82, 0.55, 1.0 - phase))
-		# Hunger only appears once it matters, so a healthy crew stays clean.
-		if cat.hunger < 0.5:
-			var bar: Rect2 = cat_hunger_bar(cat.pos, target)
-			draw_rect(bar, Color(0.06, 0.08, 0.12, 0.85))
-			draw_rect(Rect2(bar.position, Vector2(bar.size.x * cat.hunger, bar.size.y)),
-				Defs.COL_DANGER if cat.hunger <= 0.0 else Defs.COL_BELT_RIM)
-
-## Crates lying in the snow, and the food bin beside the shelter.
 func _draw_boxes(tile: float) -> void:
 	for cell: Vector2i in sim.cat_boxes:
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
@@ -729,7 +631,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Defs.OUTLINE, false, 1.0)
 	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
 		Defs.COL_BELT_RIM.lerp(body, frost * 0.7))
-	_draw_arrow(c + Vector2(machine.dir) * 15.0, machine.dir, 9.0, Defs.COL_BRASS, 2.2)
+	_draw_arrow(self, c + Vector2(machine.dir) * 15.0, machine.dir, 9.0, Defs.COL_BRASS, 2.2)
 	# A copper stud marks the alloy recipe, so two exchangers side by side on
 	# different recipes are told apart without selecting either.
 	if machine.recipe != Defs.RECIPE_PLAIN:
@@ -754,8 +656,8 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## behind its worker. Which way a miner points is the difference between a
 ## factory and two machines emitting into each other, and it was invisible in
 ## exactly the case where a miner is running.
-func _draw_machine_marks(tile: float) -> void:
-	_draw_food_count(tile)
+func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
+	_draw_food_count(on, tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if not _visible(cell, tile):
@@ -767,10 +669,10 @@ func _draw_machine_marks(tile: float) -> void:
 			# hat, and an output direction that looks like part of the animal is
 			# not much better than one hidden behind it.
 			var tail: Vector2 = centre + Vector2(machine.dir) * MINER_ARROW_LIFT
-			_draw_arrow(tail, machine.dir, MINER_ARROW_LENGTH, Defs.OUTLINE, 5.0)
-			_draw_arrow(tail, machine.dir, MINER_ARROW_LENGTH, Defs.COL_BELT_RIM, 2.5)
+			_draw_arrow(on, tail, machine.dir, MINER_ARROW_LENGTH, Defs.OUTLINE, 5.0)
+			_draw_arrow(on, tail, machine.dir, MINER_ARROW_LENGTH, Defs.COL_BELT_RIM, 2.5)
 		if machine.stalled:
-			_draw_stall(machine, centre)
+			_draw_stall(on, machine, centre)
 
 ## How much food is left, over the bin, with no word in front of it: what the
 ## number counts is obvious from the crate of fish it is sitting on.
@@ -782,7 +684,7 @@ func _draw_machine_marks(tile: float) -> void:
 ## No plate behind it. It is outlined instead, which is what keeps it readable on
 ## snow, on wood and on a cat depending on the minute: an outline belongs to the
 ## glyphs, so nothing is painted over the world to carry it.
-func _draw_food_count(tile: float) -> void:
+func _draw_food_count(on: CanvasItem, tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	if not view_rect.grow(tile * 2.0).has_point(at):
 		return
@@ -790,21 +692,21 @@ func _draw_food_count(tile: float) -> void:
 	var font: Font = UIFont.FONT
 	var width: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10).x
 	var origin := Vector2(at.x - width * 0.5, at.y - FOOD_BIN_DRAW * 0.5 - 3.0)
-	draw_string_outline(font, origin, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, 3,
+	on.draw_string_outline(font, origin, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, 3,
 		Color(0.04, 0.05, 0.08, 0.85))
-	draw_string(font, origin, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Defs.COL_TEXT)
+	on.draw_string(font, origin, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Defs.COL_TEXT)
 
 ## A backed-up machine is the single most common way a factory silently stops
 ## paying. It gets an unmissable pulsing marker rather than nothing at all.
-func _draw_stall(machine: Sim.Machine, c: Vector2) -> void:
+func _draw_stall(on: CanvasItem, machine: Sim.Machine, c: Vector2) -> void:
 	if not machine.stalled:
 		return
 	var beat: float = 0.55 + sin(pulse * 5.0) * 0.45
 	var at: Vector2 = c + Vector2(0, -18)
-	draw_circle(at, 7.0, Color(0.06, 0.08, 0.12, 0.85))
-	draw_circle(at, 6.0, Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.45 + beat * 0.5))
-	draw_rect(Rect2(at.x - 1.0, at.y - 3.5, 2.0, 4.5), Color(1, 1, 1, 0.9))
-	draw_rect(Rect2(at.x - 1.0, at.y + 2.0, 2.0, 2.0), Color(1, 1, 1, 0.9))
+	on.draw_circle(at, 7.0, Color(0.06, 0.08, 0.12, 0.85))
+	on.draw_circle(at, 6.0, Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.45 + beat * 0.5))
+	on.draw_rect(Rect2(at.x - 1.0, at.y - 3.5, 2.0, 4.5), Color(1, 1, 1, 0.9))
+	on.draw_rect(Rect2(at.x - 1.0, at.y + 2.0, 2.0, 2.0), Color(1, 1, 1, 0.9))
 
 func _draw_pip(at: Vector2, item_type: int, count: int) -> void:
 	var col: Color = Defs.ITEM_COLORS[item_type]
@@ -855,7 +757,7 @@ func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		draw_circle(at, 3.8, col)
 		draw_circle(at + Vector2(-1.4, -1.4), 1.6, Color(1, 1, 1, 0.7))
 
-func _draw_preview(tile: float) -> void:
+func _draw_preview(on: CanvasItem, tile: float) -> void:
 	var px: Vector2 = Vector2(preview_cell) * tile
 	# A tile that already holds a machine is not an error, it is a reclaim target.
 	# Stamping a red box over the player's own building hid the machine and read
@@ -866,22 +768,22 @@ func _draw_preview(tile: float) -> void:
 			var origin: Vector2 = px + Vector2(corner.x * (tile - 1.0), corner.y * (tile - 1.0))
 			var dx: float = -7.0 if corner.x > 0.0 else 7.0
 			var dy: float = -7.0 if corner.y > 0.0 else 7.0
-			draw_line(origin, origin + Vector2(dx, 0), mark, 2.0)
-			draw_line(origin, origin + Vector2(0, dy), mark, 2.0)
+			on.draw_line(origin, origin + Vector2(dx, 0), mark, 2.0)
+			on.draw_line(origin, origin + Vector2(0, dy), mark, 2.0)
 		return
 	# Three explicit states. A ghost that is always red teaches nothing.
 	var col: Color = Defs.COL_VALID if preview_valid else (
 		Color8(150, 160, 180) if not preview_affordable else Defs.COL_DANGER)
 	var alpha: float = 0.55 + sin(pulse * 5.0) * 0.12
-	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, 0.16))
-	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, alpha), false, 2.0)
+	on.draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, 0.16))
+	on.draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, alpha), false, 2.0)
 	# Direction is the most-missed piece of information when placing: R changes it
 	# invisibly unless the preview states it outright.
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var arrow := Color(col.r, col.g, col.b, minf(1.0, alpha + 0.3))
 	var dir := Vector2(preview_dir)
-	draw_circle(c - dir * 12.0, 3.0, Color(arrow.r, arrow.g, arrow.b, 0.55))
-	_draw_arrow(c - dir * 6.0, preview_dir, 22.0, arrow, 3.0)
+	on.draw_circle(c - dir * 12.0, 3.0, Color(arrow.r, arrow.g, arrow.b, 0.55))
+	_draw_arrow(on, c - dir * 6.0, preview_dir, 22.0, arrow, 3.0)
 	var font := UIFont.FONT
-	draw_string(font, c + dir * 20.0 + Vector2(-14.0, -12.0), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 28.0, 9,
+	on.draw_string(font, c + dir * 20.0 + Vector2(-14.0, -12.0), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 28.0, 9,
 		Color(arrow.r, arrow.g, arrow.b, 0.9))

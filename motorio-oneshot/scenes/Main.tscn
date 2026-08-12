@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://scripts/ColdFog.gd" id="11_fog"]
 [ext_resource type="Script" path="res://scripts/TouchControls.gd" id="12_touch"]
 [ext_resource type="Script" path="res://scripts/Atmosphere.gd" id="13_atmos"]
+[ext_resource type="Script" path="res://scripts/CatPool.gd" id="15_cats"]
 [ext_resource type="Shader" path="res://assets/atmosphere.gdshader" id="14_shader"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_atmos"]
@@ -41,6 +42,10 @@ script = ExtResource("3_world")
 [node name="Machines" type="Node2D" parent="."]
 z_index = 0
 script = ExtResource("4_machines")
+
+[node name="Cats" type="Node2D" parent="."]
+z_index = 2
+script = ExtResource("15_cats")
 
 [node name="Player" type="Node2D" parent="."]
 z_index = 12

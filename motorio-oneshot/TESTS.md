@@ -59,7 +59,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 | `test_hints` | **화면이 말하는 키가 그 액션에 묶여 있는가.** 한국어 조사가 단어의 받침과 맞는가 |
 | `test_font` | 소스의 모든 비ASCII 문자가 서브셋 폰트에 있는가, 그리고 폰트가 여전히 작은가 |
 | `test_sheets` | 상태·방향별로 어떤 스프라이트 시트가 재생되는가 |
-| `test_animation` | 스프라이트 정렬, 그림자, 고양이 간격 |
+| `test_animation` | 스프라이트 정렬, 그림자, 고양이 간격. **고양이 자식 노드의 로컬 좌표가 상수인가**, 그리고 기계 표시가 고양이보다 위에 오는 z_index 계약 |
 | `test_facing` | 8방향 판정과 좌우 반전 |
 | `test_pickaxe` | 곡괭이를 든 상태에서만 채굴, 스윙 프레임 |
 | `test_ground` | 눈 타일 변형의 주기성, 돌 밀도와 덩어리 크기 |

@@ -20,6 +20,10 @@ const RESCUE_SECONDS := 1.6
 @onready var cold_fog: ColdFog = $ColdFog
 @onready var world_layer: WorldLayer = $World
 @onready var machine_layer: MachineLayer = $Machines
+## Cats are nodes rather than a pass inside the machine layer, so that a cat's
+## shadow, body, drill and gauge move because their parent moved. Its z sits
+## between the machines and what the machines say about themselves.
+@onready var cats_layer: Node2D = $Cats
 @onready var fx: FxLayer = $Fx
 @onready var player: PlayerActor = $Player
 @onready var camera: Camera2D = $Player/Camera2D
@@ -126,6 +130,7 @@ func _ready() -> void:
 	ground_layer.sim = sim
 	cold_fog.sim = sim
 	machine_layer.sim = sim
+	cats_layer.sim = sim
 	hud.set("main", self)
 	player.blocked = func(cell: Vector2i) -> bool: return sim.blocks_player(cell)
 	touch.main_controller = self
@@ -499,6 +504,7 @@ func _process(delta: float) -> void:
 	cold_fog.view_rect = view
 	cold_fog.night = dark
 	machine_layer.view_rect = view
+	cats_layer.view_rect = view
 	machine_layer.night = dark
 	# Two tiles to the player's right, on the same ground line, so the generated
 	machine_layer.shelter_glow = shelter_glow()
