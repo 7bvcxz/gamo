@@ -52,6 +52,9 @@ func _run() -> void:
 	var base_height: Dictionary[int, float] = {}
 	var states_seen: Dictionary[int, bool] = {}
 	var travelled: float = 0.0
+	var trespass: Array[String] = []
+	var blocked_seen: int = 0
+	var cells: Dictionary[int, Vector2i] = {}
 
 	var step: float = 1.0 / 30.0
 	var elapsed: float = 0.0
@@ -73,6 +76,21 @@ func _run() -> void:
 			if last.has(index):
 				travelled += cat.pos.distance_to(last[index])
 			last[index] = cat.pos
+			# Entering, not standing. "Cannot pass through" is a rule about
+			# crossing into a cell: a cat that has just delivered onto the core is
+			# standing on one legitimately and has to be allowed to walk out
+			# again. The first version of this check counted those frames and
+			# reported sixteen hundred violations that were all one cat leaving.
+			var here: Vector2i = sim.cell_of(cat.pos)
+			var before: Vector2i = cells.get(index, here)
+			cells[index] = here
+			if sim.blocks_player(here):
+				blocked_seen += 1
+				var goal_cell: Vector2i = sim.cell_of(cat.path_goal) \
+					if cat.path_goal.x < 1e19 else here
+				if here != before and here != goal_cell and cat != sim.carried_cat:
+					trespass.append("%.1f초 %d번 %s 진입 (상태 %d, 목표 %s)"
+						% [elapsed, index, str(here), cat.state, str(goal_cell)])
 			if index >= pool.get_child_count():
 				continue
 			var view: CatView = pool.get_child(index)
@@ -89,6 +107,18 @@ func _run() -> void:
 			if not base_height.has(index):
 				base_height[index] = height
 			worst_height = maxf(worst_height, absf(height - base_height[index]))
+
+	# --- The rule, on every cat, on every tick ---------------------------------
+	# A cat may stand on the structure it is going to -- it works on its miner,
+	# eats at the bin, sleeps in the hut, delivers onto the core -- and may not
+	# stand on any other. Checked here rather than in the mover because a check
+	# inside the thing being checked proves only that the code agrees with
+	# itself, and because "every case of cat movement" is a claim about the whole
+	# run rather than about one function.
+	_assert(trespass.is_empty(), "지나갈 수 없는 곳을 밟은 고양이가 없다. %d건: %s"
+		% [trespass.size(), "; ".join(trespass.slice(0, 5))])
+	_assert(blocked_seen > 0,
+		"막힌 칸 옆을 지나는 상황이 실제로 있었다 (%d틱)" % blocked_seen)
 
 	# The run has to have actually contained the thing being tested.
 	_assert(travelled > 2000.0, "고양이들이 실제로 돌아다녔다 (%.0fpx)" % travelled)

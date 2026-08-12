@@ -30,8 +30,14 @@ class Cat extends RefCounted:
 	var haul_target := Vector2i(9999, 9999)
 	## Which way it is strolling while idle, and how long the current pause or
 	## stroll has left. Zero means standing.
-	var wander_dir := Vector2.ZERO
+	## How long the current pause has left. Strolling is not a flag: an idle cat
+	## with a route is strolling, which is one fewer thing that can disagree with
+	## where the animal actually is.
 	var wander_timer: float = 0.0
+	## The route being walked and the goal it was built for. Cats path around the
+	## things Grim cannot walk through, so a straight line is no longer a plan.
+	var path: Array[Vector2] = []
+	var path_goal := Vector2(1e20, 1e20)
 	var carrying: int = -1
 	## A constant, and the reason it is stored rather than derived from where the
 	## cat happens to be standing.
@@ -57,7 +63,7 @@ class Cat extends RefCounted:
 	## though its state is idle, and without this it slides across the snow with
 	## its legs still -- the exact failure the sheet tables were built to end.
 	func is_walking() -> bool:
-		return state in Defs.CAT_WALKING_STATES or wander_dir != Vector2.ZERO
+		return state in Defs.CAT_WALKING_STATES or not path.is_empty()
 
 class Machine extends RefCounted:
 	## Splitters only: which output to try first, and where the last item came
@@ -125,6 +131,20 @@ var gacha_rng := RandomNumberGenerator.new()
 ## consume draws the slot machine is counting on and a replay of a seed looks the
 ## same twice.
 var wander_rng := RandomNumberGenerator.new()
+
+## Where a cat may walk.
+##
+## They used to walk in straight lines through everything, which nobody saw while
+## ore was the only obstacle and ore was walkable. The core, the hut, the food bin
+## and every miner stop Grim, and a cat crossing the base walked through the
+## middle of all four.
+##
+## Bounded rather than unbounded: every route is inside the base and its ring of
+## seams, and a grid covering the whole procedural world would be mostly cells no
+## one ever asks about.
+const PATH_RADIUS := 48
+var _grid := AStarGrid2D.new()
+var _grid_dirty := true
 
 var heat: int = Defs.START_HEAT
 var total_heat: int = 0
@@ -292,6 +312,7 @@ func setup(seed_value: int) -> void:
 	unlocked_recipes.clear()
 	power_capacity = 0.0
 	power_draw = 0.0
+	_grid_dirty = true
 	# Or a new run opens quoting the income of the one before it, for as long as
 	# the window takes to roll over.
 	_rate_history.clear()
@@ -693,6 +714,7 @@ func build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
 	machine.dir = dir
 	machine.flash = 0.45
 	machines[cell] = machine
+	_grid_dirty = true
 	for item_type: int in cost_of(type):
 		stock[item_type] = int(stock.get(item_type, 0)) - int(cost_of(type)[item_type])
 	machine_built.emit(cell, type)
@@ -703,6 +725,7 @@ func demolish(cell: Vector2i) -> bool:
 	if machine == null or machine.type == Defs.M_CORE:
 		return false
 	machines.erase(cell)
+	_grid_dirty = true
 	# Full refund. In a game with no combat and no fail state, the engine of the
 	# fun is the freedom to tear it down and build it better -- and a 25% tax on
 	# being wrong is exactly the thing that stops players experimenting.
@@ -1072,24 +1095,117 @@ func _tick_cats(delta: float) -> void:
 ## single frame, and the sprite and its shadow visibly jumped to get there.
 ## Stopping a few pixels short reads as a cat standing next to the bowl, which is
 ## what a cat would do anyway.
+## A route from one point to another, as world points, ending on the goal itself.
+##
+## The goal is very often a structure -- a cat works standing on its miner, eats
+## at the bin, sleeps in the hut, delivers onto the core -- so "cats cannot enter
+## structures" would be a game where no cat can do anything. The rule is that a
+## cat cannot walk *through* a structure it is not going to, which is the usual
+## pathfinding one: the destination is passable for the trip that ends there.
+##
+## An empty route means walk straight. That happens when the goal is next door,
+## and when there is no way round at all -- a cat sealed in by a factory built
+## around it walks out through the wall rather than standing there forever, which
+## is the lesser of the two wrongs.
+func _route(from: Vector2, goal: Vector2) -> Array[Vector2]:
+	var start: Vector2i = cell_of(from)
+	var target: Vector2i = cell_of(goal)
+	if start == target:
+		return [goal] as Array[Vector2]
+	_refresh_grid()
+	if not _grid.is_in_boundsv(start) or not _grid.is_in_boundsv(target):
+		return [goal] as Array[Vector2]
+	# Both ends are opened for this query alone, then closed again.
+	#
+	# The destination, because a cat's errands are nearly all structures. And the
+	# start, because it is one too: a worker leaves for the bowl from on top of
+	# its own miner. Opening only the destination made A* refuse to plan from a
+	# solid cell at all, which fell through to the straight line below -- so the
+	# cats that most needed a route were exactly the ones that walked through the
+	# machine next door.
+	var opened: Array[Vector2i] = []
+	for end: Vector2i in [start, target]:
+		if _grid.is_point_solid(end):
+			_grid.set_point_solid(end, false)
+			opened.append(end)
+	var cells: Array[Vector2i] = _grid.get_id_path(start, target)
+	for end: Vector2i in opened:
+		_grid.set_point_solid(end, true)
+	if cells.size() <= 1:
+		return [goal] as Array[Vector2]
+	var route: Array[Vector2] = []
+	# The first cell is the one the cat is standing in, and walking to its centre
+	# first would drag the animal backwards before it set off.
+	for index in range(1, cells.size() - 1):
+		route.append(cell_centre(cells[index]))
+	route.append(goal)
+	return route
+
+## Solid points, rebuilt when the world changes rather than every query. Only the
+## blocked cells are touched: update() clears them all, and there are a handful of
+## structures against ten thousand cells.
+func _refresh_grid() -> void:
+	if not _grid_dirty:
+		return
+	_grid_dirty = false
+	_grid.region = Rect2i(core_cell - Vector2i.ONE * PATH_RADIUS,
+		Vector2i.ONE * (PATH_RADIUS * 2 + 1))
+	_grid.cell_size = Vector2.ONE * float(Defs.TILE)
+	_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
+	_grid.update()
+	for cell: Vector2i in machines:
+		if blocks_player(cell) and _grid.is_in_boundsv(cell):
+			_grid.set_point_solid(cell, true)
+	for cell: Vector2i in [shelter_cell, food_cell]:
+		if _grid.is_in_boundsv(cell):
+			_grid.set_point_solid(cell, true)
+
+## Which cell a point is in. One definition, because the player and the cats have
+## to agree about what "this tile" means.
+func cell_of(at: Vector2) -> Vector2i:
+	return Vector2i((at / float(Defs.TILE)).floor())
+
+## The one place a walking cat is moved.
+##
+## Every handler goes through here -- to the machine, to the bowl, to the hut, to
+## a dropped rock, to the core, and the stroll -- and that is the whole reason the
+## rule holds at all. A check written into each handler is a check missing from
+## one of them: this file has already had "do not simulate a carried cat" present
+## in three of nine handlers and absent from six.
 func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
-	# Anything with somewhere to be is no longer loitering. Left set, the stroll
-	# direction would keep is_walking() true after the cat had stopped.
-	cat.wander_dir = Vector2.ZERO
-	var to_goal: Vector2 = goal - cat.pos
-	var step: float = Defs.CAT_SPEED * delta
-	if to_goal.length() <= step:
-		cat.pos = goal
-		return true
-	var direction: Vector2 = to_goal.normalized()
-	cat.heading = direction
-	cat.pos += direction * step
-	# Arrived means standing on it, not near it. This used to report arrival from
-	# ten pixels out, which left a cat working ten pixels off the middle of its
-	# own machine -- and then anything that put it where it was supposed to be
-	# moved it those ten pixels in one frame, which is a teleport. The only snap
-	# left is the branch above, and that one is bounded by a single step.
-	return false
+	if not goal.is_equal_approx(cat.path_goal):
+		cat.path_goal = goal
+		cat.path = _route(cat.pos, goal)
+
+	# One tick buys one step, however many corners the route turns inside it.
+	# Spending a fresh step on each leg is what the first version did, and a cat
+	# rounding three corners covered three steps in a frame -- which the walking
+	# tests caught as exactly what it was, an animal moving faster than it can
+	# walk.
+	# Ambling, not commuting. A cat crossing the base to reach a machine has
+	# somewhere to be; one killing time does not, and at the same speed the two
+	# are indistinguishable.
+	var pace: float = Defs.WANDER_SPEED if cat.state == Defs.CAT_IDLE else 1.0
+	var budget: float = Defs.CAT_SPEED * pace * delta
+	while budget > 0.0 and not cat.path.is_empty():
+		var leg: Vector2 = cat.path[0]
+		var to_leg: Vector2 = leg - cat.pos
+		var distance: float = to_leg.length()
+		if distance <= budget:
+			cat.pos = leg
+			budget -= distance
+			cat.path.remove_at(0)
+			if distance > 0.0:
+				cat.heading = to_leg / distance
+			continue
+		cat.heading = to_leg / distance
+		cat.pos += cat.heading * budget
+		budget = 0.0
+	# Arrived means standing on it, not near it. Reporting arrival from ten
+	# pixels out left a cat working ten pixels off the middle of its own machine,
+	# and then anything that put it where it belonged moved it those ten pixels
+	# in one frame, which is a teleport.
+	return cat.path.is_empty()
 
 ## Hands out the loose items: one cat per item, and the nearest free cat to each.
 ##
@@ -1131,7 +1247,8 @@ func _assign_haulers() -> void:
 			return
 		best.haul_target = cell
 		best.state = Defs.CAT_HAUL_TO_ITEM
-		best.wander_dir = Vector2.ZERO
+		best.path.clear()
+		best.path_goal = Vector2(1e20, 1e20)
 		best.wander_timer = 0.0
 		free.erase(best)
 		claimed[cell] = true
@@ -1146,30 +1263,45 @@ func _assign_haulers() -> void:
 func _cat_wander(cat: Cat, delta: float) -> void:
 	if cat == carried_cat:
 		return
-	cat.wander_timer -= delta
-	if cat.wander_timer <= 0.0:
-		if cat.wander_dir == Vector2.ZERO:
-			cat.wander_dir = _wander_heading(cat)
-			cat.wander_timer = wander_rng.randf_range(Defs.WANDER_STROLL.x,
-				Defs.WANDER_STROLL.y)
-		else:
-			cat.wander_dir = Vector2.ZERO
+	# Mid-stroll: the same mover every other errand uses, so a loitering cat walks
+	# round the hut instead of through it without anything here knowing that the
+	# hut exists.
+	if not cat.path.is_empty():
+		if _step_toward(cat, cat.path_goal, delta):
 			cat.wander_timer = wander_rng.randf_range(Defs.WANDER_PAUSE.x,
 				Defs.WANDER_PAUSE.y)
-	if cat.wander_dir == Vector2.ZERO:
 		return
-	cat.heading = cat.wander_dir
-	cat.pos += cat.wander_dir * Defs.CAT_SPEED * Defs.WANDER_SPEED * delta
+	cat.wander_timer -= delta
+	if cat.wander_timer > 0.0:
+		return
+	var goal: Vector2 = _stroll_goal(cat)
+	if goal.x > 1e19:
+		cat.wander_timer = wander_rng.randf_range(Defs.WANDER_PAUSE.x, Defs.WANDER_PAUSE.y)
+		return
+	_step_toward(cat, goal, delta)
 
-## Any direction, unless the cat has drifted far enough from the hut that any
-## direction would be the wrong one. Then it is roughly homeward, with enough
-## scatter that the walk back does not look like a command.
-func _wander_heading(cat: Cat) -> Vector2:
+## Somewhere near, and somewhere it can stand.
+##
+## Tried a few times rather than solved: the base is mostly open, so a random
+## nearby cell is almost always walkable, and giving up after a handful of tries
+## is cheaper than being clever about the two frames a year where it is not.
+func _stroll_goal(cat: Cat) -> Vector2:
 	var anchor: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
-	if cat.pos.distance_to(anchor) > Defs.WANDER_LEASH:
-		return (anchor - cat.pos).normalized().rotated(
-			wander_rng.randf_range(-0.7, 0.7))
-	return Vector2.RIGHT.rotated(wander_rng.randf() * TAU)
+	var homeward: bool = cat.pos.distance_to(anchor) > Defs.WANDER_LEASH
+	for attempt in 8:
+		var heading: Vector2
+		if homeward:
+			# Roughly back, with enough scatter that the walk home does not look
+			# like an order.
+			heading = (anchor - cat.pos).normalized().rotated(
+				wander_rng.randf_range(-0.7, 0.7))
+		else:
+			heading = Vector2.RIGHT.rotated(wander_rng.randf() * TAU)
+		var reach: float = wander_rng.randf_range(1.0, 2.5) * float(Defs.TILE)
+		var candidate: Vector2 = cat.pos + heading * reach
+		if not blocks_player(cell_of(candidate)):
+			return candidate
+	return Vector2(1e20, 1e20)
 
 func _cat_fetch(cat: Cat, delta: float) -> void:
 	if cat == carried_cat:
@@ -1240,7 +1372,8 @@ func wake_cats(doorstep: Vector2) -> void:
 		# A beat on the doorstep before anyone wanders off. An animal that has
 		# just come out of a hut stands and looks around; one that starts pacing
 		# on the frame the door opens reads as a spawn rather than a waking.
-		cat.wander_dir = Vector2.ZERO
+		cat.path.clear()
+		cat.path_goal = Vector2(1e20, 1e20)
 		cat.wander_timer = wander_rng.randf_range(Defs.WANDER_PAUSE.x, Defs.WANDER_PAUSE.y)
 		# Anything still in a cat's mouth at bedtime is handed in rather than
 		# deleted. Silently losing the last minute of the day's haul is the kind

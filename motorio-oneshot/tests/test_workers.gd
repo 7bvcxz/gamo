@@ -92,8 +92,8 @@ func _run() -> void:
 		moved += hop
 		if hop > 0.0001:
 			walked_ticks += 1
-			_assert(hop <= Defs.CAT_SPEED * step + 0.01,
-				"어슬렁거림도 걷기 속도를 넘지 않는다 (%.3fpx)" % hop)
+			_assert(hop <= Defs.CAT_SPEED * Defs.WANDER_SPEED * step + 0.01,
+				"어슬렁거림은 걷기보다 느리다 (%.3fpx)" % hop)
 		else:
 			still_ticks += 1
 		furthest = maxf(furthest, loafer.pos.distance_to(anchor))
@@ -106,10 +106,10 @@ func _run() -> void:
 	_assert(furthest < Defs.WANDER_LEASH * 2.0,
 		"숙소에서 너무 멀어지지 않는다 (%.0fpx)" % furthest)
 	# And walking is reported, or the sheet plays a standing cat sliding along.
-	loafer.wander_dir = Vector2.RIGHT
-	_assert(loafer.is_walking(), "어슬렁거리는 동안은 걷는 것으로 센다")
-	loafer.wander_dir = Vector2.ZERO
 	loafer.state = Defs.CAT_IDLE
+	loafer.path = [loafer.pos + Vector2(32.0, 0.0)] as Array[Vector2]
+	_assert(loafer.is_walking(), "어슬렁거리는 동안은 걷는 것으로 센다")
+	loafer.path.clear()
 	_assert(not loafer.is_walking(), "멈춰 있으면 서 있는 것으로 센다")
 	idle.free()
 
