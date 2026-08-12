@@ -37,6 +37,14 @@ ASSETS = GAME / "assets" / "tiles"
 SHEETS = {
     "rock": ("tile_rock_6.png", "rock_6.png"),
     "crystal": ("tile_crystal_6.png", "crystal_6.png"),
+    "copper": ("tile_copper_6.png", "copper_6.png"),
+    # Cut and committed ahead of the ores themselves. This game has crystal and
+    # copper; the rest are the seams motorio has, and when one of them arrives
+    # here the picture is already waiting.
+    "coal": ("tile_coal_6.png", "coal_6.png"),
+    "gold": ("tile_gold_6.png", "gold_6.png"),
+    "iron": ("tile_iron_6.png", "iron_6.png"),
+    "uranium": ("tile_uranium_6.png", "uranium_6.png"),
 }
 
 COLUMNS = 3

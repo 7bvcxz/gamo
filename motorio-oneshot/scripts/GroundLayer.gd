@@ -124,13 +124,26 @@ static func tile_region(variant: int) -> Rect2:
 ##
 ## Still decoration and nothing else: not in the simulation, not in the save, and
 ## walked straight over, so it stays a pure function of the coordinates.
-## Crystal seams, six of them, picked at random the same way boulders are. Ore
-## moved in here when it stopped being an obstacle and became terrain: it is a
-## thing the player walks over now, so it is drawn with the other things the
-## player walks over, in the same batched pass.
+## Seams, six variants each, picked at random the same way boulders are. Ore moved
+## in here when it stopped being an obstacle and became terrain: it is a thing the
+## player walks over now, so it is drawn with the other things the player walks
+## over, in the same batched pass.
+const ORE_COLUMNS := 3
+const ORE_VARIANTS := 6
 const CRYSTAL_ATLAS: Texture2D = preload("res://assets/tiles/crystal_6.png")
-const CRYSTAL_COLUMNS := 3
-const CRYSTAL_VARIANTS := 6
+const COPPER_ATLAS: Texture2D = preload("res://assets/tiles/copper_6.png")
+## Which sheet each seam shows. Keyed by item type, so an ore without a sheet
+## falls back to the painted shard in WorldLayer rather than drawing nothing.
+const ORE_ATLAS: Dictionary[int, Texture2D] = {
+	Defs.ITEM_CRYSTAL: CRYSTAL_ATLAS,
+	Defs.ITEM_COPPER: COPPER_ATLAS,
+}
+## Cut, committed and waiting on an ore to belong to. This game has crystal and
+## copper; coal, gold, iron and uranium are the seams motorio has, and their
+## atlases are in assets/tiles/ already. A mapping entry cannot exist before the
+## item type does, so promoting one is: add the ITEM_ constant, preload the file
+## beside the two above, and put it in ORE_ATLAS.
+const ORE_ATLASES_READY := ["coal_6.png", "gold_6.png", "iron_6.png", "uranium_6.png"]
 
 const ROCK_ATLAS: Texture2D = preload("res://assets/tiles/rock_6.png")
 const ROCK_COLUMNS := 3
@@ -200,11 +213,15 @@ func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
 			for cell: Vector2i in rock_clump(block):
 				_rock[cell] = true
 
-## Only crystal has a sheet so far. Copper still draws as the painted shard in
-## WorldLayer, which is why this asks the item type rather than just "is there
-## ore here".
-func _is_crystal(cell: Vector2i) -> bool:
-	return sim != null and int(sim.ore.get(cell, -1)) == Defs.ITEM_CRYSTAL
+## The sheet this cell's seam draws from, or null if there is no seam here or its
+## ore has no sheet yet -- in which case WorldLayer paints the shard instead.
+static func ore_atlas_at(sim_ref, cell: Vector2i) -> Texture2D:
+	if sim_ref == null or not sim_ref.ore.has(cell):
+		return null
+	return ORE_ATLAS.get(int(sim_ref.ore[cell]), null)
+
+func _seam_atlas(cell: Vector2i) -> Texture2D:
+	return ore_atlas_at(sim, cell)
 
 func is_rock(cell: Vector2i) -> bool:
 	return _rock.has(cell)
@@ -222,14 +239,14 @@ static func rock_region(variant: int) -> Rect2:
 
 ## Which of the six a seam shows. Its own salt, so a cell does not inherit the
 ## number its snow or its boulder would have had.
-static func crystal_variant(cell: Vector2i) -> int:
-	return _mix(cell.x, cell.y, 61) % CRYSTAL_VARIANTS
+static func ore_variant(cell: Vector2i) -> int:
+	return _mix(cell.x, cell.y, 61) % ORE_VARIANTS
 
-static func crystal_region(variant: int) -> Rect2:
-	var index: int = clampi(variant, 0, CRYSTAL_VARIANTS - 1)
-	var size: float = float(CRYSTAL_ATLAS.get_width()) / float(CRYSTAL_COLUMNS)
-	return Rect2(float(index % CRYSTAL_COLUMNS) * size,
-		float(index / CRYSTAL_COLUMNS) * size, size, size)
+static func ore_region(atlas: Texture2D, variant: int) -> Rect2:
+	var index: int = clampi(variant, 0, ORE_VARIANTS - 1)
+	var size: float = float(atlas.get_width()) / float(ORE_COLUMNS)
+	return Rect2(float(index % ORE_COLUMNS) * size,
+		float(index / ORE_COLUMNS) * size, size, size)
 
 ## One quad per visible cell, culled to the camera the way everything else is, so
 ## the cost follows the screen rather than the map.
@@ -246,7 +263,7 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if _rock.has(cell) or _is_crystal(cell):
+			if _rock.has(cell) or _seam_atlas(cell) != null:
 				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
@@ -254,19 +271,22 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if not _rock.has(cell) or _is_crystal(cell):
+			if not _rock.has(cell) or _seam_atlas(cell) != null:
 				continue
 			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
 				rock_region(rock_variant(cell)))
-	# A third pass for the same reason there are two: one texture each, and a
-	# seam cell must be painted once. Both of the passes above multiply, so a
-	# cell drawn twice comes out twice as dark.
+	# A third pass because a seam cell must be painted once -- both passes above
+	# multiply, so a cell drawn twice comes out twice as dark. Unlike them this
+	# one can switch texture between cells, since two ores on screen are two
+	# sheets; seams are tens of cells rather than the whole floor, so the broken
+	# batch costs less than sorting them would.
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if not _is_crystal(cell):
+			var atlas: Texture2D = _seam_atlas(cell)
+			if atlas == null:
 				continue
-			_tile_layer.draw_texture_rect_region(CRYSTAL_ATLAS,
+			_tile_layer.draw_texture_rect_region(atlas,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
-				crystal_region(crystal_variant(cell)))
+				ore_region(atlas, ore_variant(cell)))

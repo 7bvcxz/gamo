@@ -52,14 +52,15 @@ func _draw_ore(tile: float) -> void:
 		var warm: bool = sim.is_warm(cell)
 		var tint: Color = base if warm else base.lerp(Defs.COL_SNOW_COLD, 0.18)
 
-		# Crystal is a floor tile now, drawn by GroundLayer with the rest of the
-		# terrain, so only what the tile cannot say is drawn here: how rich the
-		# seam is, and the glint that pulls the eye to one the player cannot
-		# reach yet. Copper has no sheet and still gets the painted shard.
-		if item_type != Defs.ITEM_CRYSTAL:
+		# Seams with a sheet are floor tiles, drawn by GroundLayer with the rest of
+		# the terrain, so only what the tile cannot say is drawn here: how rich the
+		# seam is, and the light it catches. An ore without a sheet still gets the
+		# painted shard, which is what keeps adding one from being a rendering
+		# hole while its art is being decided.
+		if GroundLayer.ore_atlas_at(sim, cell) == null:
 			_draw_shard(centre, tint, item_type, warm)
 		else:
-			_draw_sparkle(cell, centre, tint)
+			_draw_sparkle(cell, centre, tint, SPARKLE.get(item_type, 1.0))
 		_draw_purity(cell, centre, tint)
 		if not warm:
 			# A slow glint pulls the eye toward ore the player cannot reach yet.
@@ -92,18 +93,30 @@ func _draw_shard(centre: Vector2, tint: Color, item_type: int, warm: bool) -> vo
 			draw_circle(centre + Vector2(1, -1), 3.0, Defs.COPPER_CORE)
 		draw_circle(centre + Vector2(3, -3), 1.8, Color(1, 1, 1, 0.7 if warm else 0.5))
 
+## How brightly each ore catches the light. Crystal is a gem and holds it;
+## copper is metal, so it gets a shorter, dimmer glint -- enough to tell the two
+## apart across the plateau without the metal pretending to glow.
+const SPARKLE: Dictionary[int, float] = {
+	Defs.ITEM_CRYSTAL: 1.0,
+	Defs.ITEM_COPPER: 0.45,
+}
+
 ## A slow catch of light in the middle of a seam.
 ##
 ## The tile is a still picture and a crystal that never moves reads as a stain on
 ## the floor, so the one thing it cannot do for itself is done here. Offset by
 ## the cell rather than shared, or a field of seams blinks in unison and stops
 ## looking like light and starts looking like a warning.
-func _draw_sparkle(cell: Vector2i, centre: Vector2, tint: Color) -> void:
+func _draw_sparkle(cell: Vector2i, centre: Vector2, tint: Color, force: float) -> void:
+	if force <= 0.0:
+		return
 	var phase: float = pulse * 1.3 + float(cell.x) * 1.7 + float(cell.y) * 2.9
 	var wave: float = sin(phase)
 	if wave <= 0.0:
 		return
-	var strength: float = wave * wave        # squared, so it is dark most of the time
+	# Squared, so it is dark most of the time; a metal's glint is sharpened
+	# further, which makes it brief rather than merely faint.
+	var strength: float = pow(wave, 2.0 if force >= 1.0 else 4.0) * force
 	draw_circle(centre, 3.0 + strength * 3.5, Color(1, 1, 1, 0.10 * strength))
 	draw_circle(centre, 1.6 + strength * 1.4,
 		Color(1, 1, 1, 0.30 * strength).lerp(tint.lightened(0.6), 0.35))

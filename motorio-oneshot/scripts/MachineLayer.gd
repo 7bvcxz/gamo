@@ -777,8 +777,11 @@ func _draw_machine_marks(tile: float) -> void:
 ##
 ## Drawn here rather than with the bin because a crate lands on the tile above it
 ## and the cats queue in front, and both are drawn later -- so the number was
-## painted and then covered. On a plate, because it lands on snow, on wood and on
-## a cat depending on the minute, and thin light text survives none of those.
+## painted and then covered.
+##
+## No plate behind it. It is outlined instead, which is what keeps it readable on
+## snow, on wood and on a cat depending on the minute: an outline belongs to the
+## glyphs, so nothing is painted over the world to carry it.
 func _draw_food_count(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	if not view_rect.grow(tile * 2.0).has_point(at):
@@ -786,11 +789,10 @@ func _draw_food_count(tile: float) -> void:
 	var label: String = str(sim.food)
 	var font: Font = UIFont.FONT
 	var width: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10).x
-	var top: float = at.y - FOOD_BIN_DRAW * 0.5 - 12.0
-	draw_rect(Rect2(at.x - width * 0.5 - 3.0, top, width + 6.0, 12.0),
-		Color(0.06, 0.08, 0.12, 0.72))
-	draw_string(font, Vector2(at.x - width * 0.5, top + 9.0), label,
-		HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Defs.COL_TEXT)
+	var origin := Vector2(at.x - width * 0.5, at.y - FOOD_BIN_DRAW * 0.5 - 3.0)
+	draw_string_outline(font, origin, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, 3,
+		Color(0.04, 0.05, 0.08, 0.85))
+	draw_string(font, origin, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Defs.COL_TEXT)
 
 ## A backed-up machine is the single most common way a factory silently stops
 ## paying. It gets an unmissable pulsing marker rather than nothing at all.

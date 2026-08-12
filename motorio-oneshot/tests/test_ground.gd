@@ -219,6 +219,34 @@ func _rock_field() -> void:
 		% [share, sizes.size(), median, sizes[sizes.size() - 1]])
 	ground.free()
 
+	# --- Every ore that has a sheet draws from it -------------------------------
+	# Crystal moved to a tile first and copper kept the painted shard for a
+	# version, which is the state this checks against: an ore in the world must
+	# have a sheet, or its seams are a hole in the floor that only shows up on a
+	# map where that ore happens to be near the camera.
+	var world := Sim.new()
+	world.setup(4242)
+	var ore_kinds: Dictionary[int, bool] = {}
+	for cell: Vector2i in world.ore:
+		var kind: int = int(world.ore[cell])
+		ore_kinds[kind] = true
+		var atlas: Texture2D = GroundLayer.ore_atlas_at(world, cell)
+		_check(atlas != null, "%s 광맥에 시트가 있다" % Defs.ITEM_NAMES[kind])
+		if atlas != null:
+			_check(atlas.get_width() == GroundLayer.ORE_COLUMNS * 64,
+				"시트가 3열 64px이다: %d" % atlas.get_width())
+	_check(ore_kinds.has(Defs.ITEM_CRYSTAL) and ore_kinds.has(Defs.ITEM_COPPER),
+		"월드에 수정과 구리가 모두 있다")
+	_check(GroundLayer.ore_atlas_at(world, Vector2i(9999, 9999)) == null,
+		"광맥이 없는 칸은 시트도 없다")
+	var variants: Dictionary[int, bool] = {}
+	for vx in range(-40, 40):
+		for vy in range(-40, 40):
+			variants[GroundLayer.ore_variant(Vector2i(vx, vy))] = true
+	_check(variants.size() == GroundLayer.ORE_VARIANTS,
+		"광맥 여섯 변형이 모두 나온다 (%d)" % variants.size())
+	world.free()
+
 func _check(condition: bool, message: String) -> void:
 	if condition:
 		return
