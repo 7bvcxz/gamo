@@ -48,6 +48,21 @@ func _run() -> void:
 			open_sides += 1
 	_assert(open_sides >= 2, "the shelter has approaches on at least two sides (%d)" % open_sides)
 
+	# The food bin, for the same reason: it is a crate of fish standing in the
+	# snow and the player used to walk straight through the picture of it. Cats
+	# path by position rather than by this, so the bowl stays reachable to the
+	# ones that actually eat from it -- checked, because a bin nobody can get to
+	# starves the crew and looks like a pathing bug.
+	_assert(sim.is_structure(sim.food_cell), "밥통은 구조물이다")
+	_assert(sim.blocks_player(sim.food_cell), "밥통은 플레이어를 막는다")
+	_assert(sim.food_cell != sim.shelter_cell and sim.food_cell != sim.core_cell,
+		"밥통은 자기 칸을 가진다")
+	var bin_sides := 0
+	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+		if not sim.blocks_player(sim.food_cell + step):
+			bin_sides += 1
+	_assert(bin_sides >= 2, "밥통에 두 방향 이상으로 접근할 수 있다 (%d)" % bin_sides)
+
 	# Where each machine may go. The miner is the only one that may sit on ore,
 	# and the only one that is required to.
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) == "", "a miner may be built on ore")
@@ -181,23 +196,40 @@ func _run() -> void:
 	quit(failures)
 
 ## The shelter doorstep is where the player is put down every single morning, and
-## the food bin is where cats queue. Neither may ever be a tile you cannot stand
-## on. Ore is scattered from the seed, so a bad roll only ruins some worlds --
-## which is why this sweeps seeds rather than checking one. It was found as a
-## sibling test failing about one run in five, the shape a seeded-world bug
-## always takes: the map is different every run and most maps are fine.
+## the food bin is where cats queue. Ore is scattered from the seed, so a bad roll
+## only ruins some worlds -- which is why this sweeps seeds rather than checking
+## one. It was found as a sibling test failing about one run in five, the shape a
+## seeded-world bug always takes: the map is different every run and most maps
+## are fine.
+##
+## What is guarded is scatter landing where it must not, so the bin is checked
+## for ore rather than for blocking: the bin blocks on purpose now -- it is a
+## crate of fish standing in the snow -- and asserting it stays walkable would
+## turn a deliberate rule into a permanent failure. Its approaches are what
+## matter, since cats queue at it and the player has to get past it.
 func _test_reserved_tiles_across_seeds() -> void:
 	var blocked: Array[String] = []
+	var walled: Array[String] = []
 	for seed_value in range(300):
 		var sim := Sim.new()
 		sim.setup(seed_value)
-		for cell: Vector2i in [sim.shelter_cell + Vector2i(0, 1), sim.food_cell]:
-			if sim.blocks_player(cell):
-				blocked.append("seed %d at %s" % [seed_value, cell])
+		if sim.blocks_player(sim.shelter_cell + Vector2i(0, 1)):
+			blocked.append("seed %d 문 앞" % seed_value)
+		if sim.ore.has(sim.food_cell):
+			blocked.append("seed %d 밥통에 광맥" % seed_value)
+		var open_sides := 0
+		for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			if not sim.blocks_player(sim.food_cell + step):
+				open_sides += 1
+		if open_sides < 2:
+			walled.append("seed %d (%d면)" % [seed_value, open_sides])
 		sim.free()
 	_assert(blocked.is_empty(),
-		"the doorstep and the food bin are walkable on every seed. Blocked on %d: %s"
+		"문 앞은 걸을 수 있고 밥통 칸에 광맥이 없다. 위반 %d: %s"
 		% [blocked.size(), ", ".join(blocked.slice(0, 4))])
+	_assert(walled.is_empty(),
+		"밥통은 어느 시드에서도 두 방향 이상 열려 있다. 위반 %d: %s"
+		% [walled.size(), ", ".join(walled.slice(0, 4))])
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

@@ -412,6 +412,12 @@ func tile_attributes(cell: Vector2i) -> int:
 	# The shelter is a building on the grid, not a decal painted over it.
 	if cell == shelter_cell:
 		attrs |= Defs.ATTR_STRUCTURE
+	# So is the food bin. It is a box of fish standing in the snow and the player
+	# walked straight through it, which is the one thing a picture of a solid
+	# object must never let you do. Cats are unaffected: they path by position,
+	# not by this, and they have to be able to reach the bowl.
+	if cell == food_cell:
+		attrs |= Defs.ATTR_STRUCTURE
 	return attrs
 
 func has_attribute(cell: Vector2i, attribute: int) -> bool:

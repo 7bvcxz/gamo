@@ -61,7 +61,7 @@ MANIFEST = REPO / "web" / "lib" / "generated" / "objects.json"
 ## most of its pixels away at a hard edge; twice leaves headroom for the zoom
 ## keys without turning the art to noise.
 ADOPTED = {
-    "core": ("base6", 64),
+    "core": ("base6", 86.4),        # 2.7 tiles
     "shelter": ("home6", 48),
     "food_bin": ("feedbox5", 36),
     "miner": ("miner5", 36),
@@ -225,8 +225,10 @@ def main() -> int:
         if not source.exists():
             print("채택본 없음: %s -> %s" % (role, source.name), file=sys.stderr)
             return 1
-        fit(clean(Image.open(source)), draw * 2).save(GAME_ART / f"{role}.png")
-        print("게임: %-9s <- %-9s %dpx (그릴 크기 %d)" % (role, candidate, draw * 2, draw))
+        stored = int(round(draw * 2))
+        fit(clean(Image.open(source)), stored).save(GAME_ART / f"{role}.png")
+        print("게임: %-9s <- %-9s %dpx (그릴 크기 %.1f = %.2f칸)"
+              % (role, candidate, stored, draw, draw / 32.0))
     return 0
 
 

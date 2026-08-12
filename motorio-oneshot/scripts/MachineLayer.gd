@@ -32,7 +32,9 @@ const CORE_ART: Texture2D = preload("res://assets/objects/core.png")
 const SHELTER_ART: Texture2D = preload("res://assets/objects/shelter.png")
 const FOOD_BIN_ART: Texture2D = preload("res://assets/objects/food_bin.png")
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
-const CORE_DRAW := 64.0
+## 2.7 tiles across. Written as the multiple rather than as 86.4, because the
+## number that matters is how many cells of the world it covers.
+const CORE_DRAW := 2.7 * float(Defs.TILE)
 const SHELTER_DRAW := 48.0
 const FOOD_BIN_DRAW := 36.0
 const MINER_DRAW := 36.0
@@ -326,7 +328,11 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# brighten when something is delivered, and a still picture does neither.
 	draw_circle(c, 52.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
 	draw_circle(c, 38.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
-	_object_art(CORE_ART, c, CORE_DRAW * beat)
+	# Fixed size. The beat used to scale the drawing, which was fine when the
+	# drawing was four concentric circles and reads as the building itself
+	# breathing now -- a machine that grows and shrinks looks broken, not alive.
+	# The heat it throws still pulses; the machine does not.
+	_object_art(CORE_ART, c, CORE_DRAW)
 	draw_arc(c, 44.0, 0.0, TAU, 64, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
 
 ## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --
