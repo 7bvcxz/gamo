@@ -53,24 +53,28 @@ func _init() -> void:
 	# running game shows none for a long time -- which is exactly why the choice
 	# is a function rather than something buried in a draw call.
 	for cat_case in [
-		[Defs.CAT_HAUL_TO_ITEM, Vector2(-1, 0), MachineLayer.CAT_WALK_E_SHEET, true, "물건 주우러 -> 측면"],
-		[Defs.CAT_HAUL_TO_BASE, Vector2(0, 1), MachineLayer.CAT_WALK_SHEET, false, "기지로 나르며 -> 정면"],
-		[Defs.CAT_ASLEEP, Vector2(0, 1), MachineLayer.CAT_IDLE_SHEET, false, "자는 고양이 -> 서 있기"],
-		[Defs.CAT_IDLE, Vector2(1, 0), MachineLayer.CAT_IDLE_SHEET, false, "쉬는 고양이 -> 서 있기"],
-		[Defs.CAT_WORKING, Vector2(1, 0), MachineLayer.CAT_WORK_SHEET, false, "일하는 고양이 -> 작업"],
-		[Defs.CAT_EATING, Vector2(-1, 0), MachineLayer.CAT_EAT_SHEET, false, "먹는 고양이 -> 식사(방향 무시)"],
-		[Defs.CAT_WORKING, Vector2(0, -1), MachineLayer.CAT_WORK_SHEET, false, "작업은 방향을 무시한다"],
-		[Defs.CAT_TO_MINER, Vector2(1, 0), MachineLayer.CAT_WALK_E_SHEET, false, "오른쪽으로 -> 측면"],
-		[Defs.CAT_TO_MINER, Vector2(-1, 0), MachineLayer.CAT_WALK_E_SHEET, true, "왼쪽으로 -> 측면(반전)"],
-		[Defs.CAT_TO_FOOD, Vector2(0, -1), MachineLayer.CAT_WALK_N_SHEET, false, "위로 -> 뒷모습"],
-		[Defs.CAT_TO_SHELTER, Vector2(0, 1), MachineLayer.CAT_WALK_SHEET, false, "아래로 -> 정면"],
-		[Defs.CAT_TO_MINER, Vector2(0.7, 0.7), MachineLayer.CAT_WALK_E_SHEET, false, "대각 -> 측면"],
+		[Defs.CAT_HAUL_TO_ITEM, Vector2(-1, 0), true, MachineLayer.CAT_WALK_E_SHEET, true, "물건 주우러 -> 측면"],
+		[Defs.CAT_HAUL_TO_BASE, Vector2(0, 1), true, MachineLayer.CAT_WALK_SHEET, false, "기지로 나르며 -> 정면"],
+		[Defs.CAT_ASLEEP, Vector2(0, 1), false, MachineLayer.CAT_IDLE_SHEET, false, "자는 고양이 -> 서 있기"],
+		[Defs.CAT_IDLE, Vector2(1, 0), false, MachineLayer.CAT_IDLE_SHEET, false, "선 고양이 -> 서 있기"],
+		# Loitering: the state is idle and the legs are moving. Derived from the
+		# state, this case comes out as a cat sliding across the snow.
+		[Defs.CAT_IDLE, Vector2(1, 0), true, MachineLayer.CAT_WALK_E_SHEET, false, "어슬렁 -> 걷기"],
+		[Defs.CAT_IDLE, Vector2(-1, 0), true, MachineLayer.CAT_WALK_E_SHEET, true, "어슬렁 왼쪽 -> 걷기(반전)"],
+		[Defs.CAT_WORKING, Vector2(1, 0), true, MachineLayer.CAT_WORK_SHEET, false, "일하는 고양이 -> 작업"],
+		[Defs.CAT_EATING, Vector2(-1, 0), true, MachineLayer.CAT_EAT_SHEET, false, "먹는 고양이 -> 식사(방향 무시)"],
+		[Defs.CAT_WORKING, Vector2(0, -1), true, MachineLayer.CAT_WORK_SHEET, false, "작업은 방향을 무시한다"],
+		[Defs.CAT_TO_MINER, Vector2(1, 0), true, MachineLayer.CAT_WALK_E_SHEET, false, "오른쪽으로 -> 측면"],
+		[Defs.CAT_TO_MINER, Vector2(-1, 0), true, MachineLayer.CAT_WALK_E_SHEET, true, "왼쪽으로 -> 측면(반전)"],
+		[Defs.CAT_TO_FOOD, Vector2(0, -1), true, MachineLayer.CAT_WALK_N_SHEET, false, "위로 -> 뒷모습"],
+		[Defs.CAT_TO_SHELTER, Vector2(0, 1), true, MachineLayer.CAT_WALK_SHEET, false, "아래로 -> 정면"],
+		[Defs.CAT_TO_MINER, Vector2(0.7, 0.7), true, MachineLayer.CAT_WALK_E_SHEET, false, "대각 -> 측면"],
 	]:
-		var got: Array = MachineLayer.cat_sheet(int(cat_case[0]), cat_case[1])
-		if got[0] != cat_case[2] or got[1] != cat_case[3]:
-			print("  FAIL: ", cat_case[4]); failures += 1
+		var got: Array = MachineLayer.cat_sheet(int(cat_case[0]), cat_case[1], cat_case[2])
+		if got[0] != cat_case[3] or got[1] != cat_case[4]:
+			print("  FAIL: ", cat_case[5]); failures += 1
 		else:
-			print("  ok  : ", cat_case[4])
+			print("  ok  : ", cat_case[5])
 
 	# The heading a walking cat is drawn with must be the direction it is really
 	# travelling, in every travelling state. This used to be re-derived at draw

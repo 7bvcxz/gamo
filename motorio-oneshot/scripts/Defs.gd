@@ -454,6 +454,22 @@ const CAT_SPEED := 46.0            # pixels per second while walking
 ## a name for "comfortably away from it", which is what tests need when they want
 ## a cat that has not got there yet.
 const CAT_AWAY := 10.0
+
+## Loitering. A cat with nothing to do used to stand exactly still, which reads
+## as the game being paused rather than as an animal waiting, so it strolls: a
+## pause, a short walk in some direction, another pause. The numbers are ranges
+## because a fixed rhythm is its own kind of stillness -- four cats stepping on
+## the same beat look like one animation played four times.
+const WANDER_PAUSE := Vector2(2.0, 6.0)    # seconds of standing
+const WANDER_STROLL := Vector2(0.5, 1.5)   # seconds of walking
+## Ambling, not commuting. A cat crossing the base to reach a machine has
+## somewhere to be and moves at CAT_SPEED; one killing time does not.
+const WANDER_SPEED := 0.55
+## How far from the hut a loitering cat may drift before it is steered back. Far
+## enough to look free, near enough that the crew is still where the player left
+## it -- a cat that wandered out of the warm radius would look lost, and the
+## player would go looking for it.
+const WANDER_LEASH := 96.0
 const BOXES_PER_CAT := 3
 ## Crate density: one per this many tiles of world. Raised by half on request --
 ## cats are what gate automation, so how many crates the map holds is the pace at

@@ -573,7 +573,7 @@ static func cat_frame(cat: Sim.Cat, time: float) -> int:
 ## The hunger gauge and the carried load, from the same rect as everything else.
 ## Exposed rather than written inline so the gaps between them, and between them
 ## and the tile above, can be measured instead of eyeballed.
-static func cat_sheet(state: int, heading: Vector2) -> Array:
+static func cat_sheet(state: int, heading: Vector2, walking: bool) -> Array:
 	# Standing still gets the idle sheet; anything with somewhere to be walks. A
 	# cat that has arrived and is working should not keep striding on the spot,
 	# and one crossing the map should not glide.
@@ -583,7 +583,11 @@ static func cat_sheet(state: int, heading: Vector2) -> Array:
 		return [CAT_EAT_SHEET, false]
 	if state == Defs.CAT_WORKING:
 		return [CAT_WORK_SHEET, false]
-	if state not in Defs.CAT_WALKING_STATES:
+	# Asked rather than derived from the state, because a loitering cat is walking
+	# while its state says idle. Deriving it here is what this table was written
+	# to stop: two of the five travelling states were missing from a list like
+	# this one and those cats crossed the map with their legs still.
+	if not walking:
 		return [CAT_IDLE_SHEET, false]
 	if absf(heading.x) >= absf(heading.y):
 		return [CAT_WALK_E_SHEET, heading.x < 0.0]

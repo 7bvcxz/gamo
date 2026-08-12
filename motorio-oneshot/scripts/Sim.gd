@@ -28,6 +28,10 @@ class Cat extends RefCounted:
 	var assigned := Vector2i(9999, 9999)   ## the miner cell this cat works
 	## Hauling: which loose item it is going for, and what it is carrying.
 	var haul_target := Vector2i(9999, 9999)
+	## Which way it is strolling while idle, and how long the current pause or
+	## stroll has left. Zero means standing.
+	var wander_dir := Vector2.ZERO
+	var wander_timer: float = 0.0
 	var carrying: int = -1
 	## A constant, and the reason it is stored rather than derived from where the
 	## cat happens to be standing.
@@ -48,6 +52,12 @@ class Cat extends RefCounted:
 
 	func has_job() -> bool:
 		return assigned != Vector2i(9999, 9999)
+
+	## Whether the walk sheet should be playing. A strolling cat is walking even
+	## though its state is idle, and without this it slides across the snow with
+	## its legs still -- the exact failure the sheet tables were built to end.
+	func is_walking() -> bool:
+		return state in Defs.CAT_WALKING_STATES or wander_dir != Vector2.ZERO
 
 class Machine extends RefCounted:
 	## Splitters only: which output to try first, and where the last item came
@@ -111,6 +121,10 @@ var coins: int = 0
 ## rolled since -- and seeded rather than global so a test can ask for a
 ## thousand pulls and get the same thousand every time.
 var gacha_rng := RandomNumberGenerator.new()
+## Loitering. Its own stream, seeded from the run, so a strolling cat does not
+## consume draws the slot machine is counting on and a replay of a seed looks the
+## same twice.
+var wander_rng := RandomNumberGenerator.new()
 
 var heat: int = Defs.START_HEAT
 var total_heat: int = 0
@@ -303,6 +317,7 @@ func setup(seed_value: int) -> void:
 	# replays the pulls too. Shifted off the world seed so two sims that generate
 	# the same terrain do not also hand out the same first cat.
 	gacha_rng.seed = seed_value ^ 0x9E3779B9
+	wander_rng.seed = seed_value ^ 0x85EBCA6B
 	food = Defs.FOOD_START
 	shelter_cell = core_cell + Defs.SHELTER_CELL
 	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
@@ -1026,6 +1041,7 @@ func nearest_ground(from: Vector2) -> Vector2i:
 	return best
 
 func _tick_cats(delta: float) -> void:
+	_assign_haulers()
 	for cell: Vector2i in machines:
 		if machines[cell].type == Defs.M_MINER:
 			machines[cell].operated = false
@@ -1046,7 +1062,7 @@ func _tick_cats(delta: float) -> void:
 			Defs.CAT_EATING: _cat_eat(cat, delta)
 			Defs.CAT_HAUL_TO_ITEM: _cat_fetch(cat, delta)
 			Defs.CAT_HAUL_TO_BASE: _cat_deliver(cat, delta)
-			Defs.CAT_IDLE: _cat_look_for_work(cat)
+			Defs.CAT_IDLE: _cat_wander(cat, delta)
 			Defs.CAT_TO_SHELTER: _cat_walk_home(cat, delta)
 			Defs.CAT_ASLEEP: pass
 
@@ -1057,6 +1073,9 @@ func _tick_cats(delta: float) -> void:
 ## Stopping a few pixels short reads as a cat standing next to the bowl, which is
 ## what a cat would do anyway.
 func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
+	# Anything with somewhere to be is no longer loitering. Left set, the stroll
+	# direction would keep is_walking() true after the cat had stopped.
+	cat.wander_dir = Vector2.ZERO
 	var to_goal: Vector2 = goal - cat.pos
 	var step: float = Defs.CAT_SPEED * delta
 	if to_goal.length() <= step:
@@ -1072,15 +1091,85 @@ func _step_toward(cat: Cat, goal: Vector2, delta: float) -> bool:
 	# left is the branch above, and that one is bounded by a single step.
 	return false
 
-## An unassigned cat with something to fetch goes and fetches it.
-func _cat_look_for_work(cat: Cat) -> void:
-	if cat == carried_cat or cat.has_job() or ground.is_empty():
+## Hands out the loose items: one cat per item, and the nearest free cat to each.
+##
+## This used to be a pull. Every idle cat asked for the item nearest to itself,
+## which meant one rock on the floor sent the whole crew after it -- and the
+## eight of them arrived together, seven found nothing, and went back. Deciding
+## per item instead of per cat is what makes "the nearest one goes" expressible
+## at all: a cat cannot know whether another cat is closer, and the sim can.
+##
+## Run once a tick over the whole crew rather than inside a cat's own handler,
+## because that is the level the question lives at.
+func _assign_haulers() -> void:
+	if ground.is_empty() or cats.is_empty():
 		return
-	var target: Vector2i = nearest_ground(cat.pos)
-	if target == Vector2i(9999, 9999):
+	# Items already on their way to someone, and the cats with nothing on.
+	var claimed: Dictionary[Vector2i, bool] = {}
+	var free: Array[Cat] = []
+	for cat: Cat in cats:
+		if cat == carried_cat:
+			continue
+		if cat.state == Defs.CAT_HAUL_TO_ITEM:
+			claimed[cat.haul_target] = true
+		elif cat.state == Defs.CAT_IDLE and not cat.has_job():
+			free.append(cat)
+	for cell: Vector2i in ground:
+		if free.is_empty():
+			return
+		if claimed.has(cell):
+			continue
+		var at: Vector2 = cell_centre(cell)
+		var best: Cat = null
+		var best_distance: float = 1e20
+		for cat: Cat in free:
+			var distance: float = cat.pos.distance_to(at)
+			if distance < best_distance:
+				best_distance = distance
+				best = cat
+		if best == null:
+			return
+		best.haul_target = cell
+		best.state = Defs.CAT_HAUL_TO_ITEM
+		best.wander_dir = Vector2.ZERO
+		best.wander_timer = 0.0
+		free.erase(best)
+		claimed[cell] = true
+
+## Killing time. A pause, a stroll in some direction, another pause.
+##
+## Standing perfectly still reads as the game being paused rather than as an
+## animal waiting, and eight cats standing perfectly still in a row reads as a
+## bug. Both durations are drawn from a range: a fixed rhythm is its own kind of
+## stillness, because four cats stepping on the same beat look like one
+## animation played four times.
+func _cat_wander(cat: Cat, delta: float) -> void:
+	if cat == carried_cat:
 		return
-	cat.haul_target = target
-	cat.state = Defs.CAT_HAUL_TO_ITEM
+	cat.wander_timer -= delta
+	if cat.wander_timer <= 0.0:
+		if cat.wander_dir == Vector2.ZERO:
+			cat.wander_dir = _wander_heading(cat)
+			cat.wander_timer = wander_rng.randf_range(Defs.WANDER_STROLL.x,
+				Defs.WANDER_STROLL.y)
+		else:
+			cat.wander_dir = Vector2.ZERO
+			cat.wander_timer = wander_rng.randf_range(Defs.WANDER_PAUSE.x,
+				Defs.WANDER_PAUSE.y)
+	if cat.wander_dir == Vector2.ZERO:
+		return
+	cat.heading = cat.wander_dir
+	cat.pos += cat.wander_dir * Defs.CAT_SPEED * Defs.WANDER_SPEED * delta
+
+## Any direction, unless the cat has drifted far enough from the hut that any
+## direction would be the wrong one. Then it is roughly homeward, with enough
+## scatter that the walk back does not look like a command.
+func _wander_heading(cat: Cat) -> Vector2:
+	var anchor: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	if cat.pos.distance_to(anchor) > Defs.WANDER_LEASH:
+		return (anchor - cat.pos).normalized().rotated(
+			wander_rng.randf_range(-0.7, 0.7))
+	return Vector2.RIGHT.rotated(wander_rng.randf() * TAU)
 
 func _cat_fetch(cat: Cat, delta: float) -> void:
 	if cat == carried_cat:
@@ -1148,6 +1237,11 @@ func wake_cats(doorstep: Vector2) -> void:
 		# workforce of six reads as six cats leaving a hut.
 		var spread: float = (float(index) - float(count - 1) * 0.5) * Defs.CAT_LANE
 		cat.pos = doorstep + Vector2(spread, 0.0)
+		# A beat on the doorstep before anyone wanders off. An animal that has
+		# just come out of a hut stands and looks around; one that starts pacing
+		# on the frame the door opens reads as a spawn rather than a waking.
+		cat.wander_dir = Vector2.ZERO
+		cat.wander_timer = wander_rng.randf_range(Defs.WANDER_PAUSE.x, Defs.WANDER_PAUSE.y)
 		# Anything still in a cat's mouth at bedtime is handed in rather than
 		# deleted. Silently losing the last minute of the day's haul is the kind
 		# of thing a player notices only as a number that does not add up.

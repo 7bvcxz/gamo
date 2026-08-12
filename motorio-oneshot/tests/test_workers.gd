@@ -13,6 +13,106 @@ func _run() -> void:
 	_test_crates_and_adoption()
 	_test_morning_dispatch()
 	_test_hunger_and_feeding()
+	# --- One item, one cat, and the nearest one --------------------------------
+	# It used to be a pull: every idle cat asked for the item closest to itself,
+	# so one rock on the floor sent the whole crew, seven of them arrived to find
+	# nothing, and went home. A cat cannot know whether another cat is closer;
+	# the sim can, so the decision is made per item.
+	var haul := Sim.new()
+	haul.setup(1234)
+	haul.cats.clear()
+	haul.ground.clear()
+	var spots: Array[Vector2] = [Vector2(0, 0), Vector2(400, 0), Vector2(800, 0)]
+	for spot: Vector2 in spots:
+		var cat = haul.Cat.new()
+		cat.pos = spot
+		haul.cats.append(cat)
+	var drop: Vector2i = Vector2i(13, 0)          # nearest to the cat at 400
+	haul.ground[drop] = Defs.ITEM_CRYSTAL
+	haul._assign_haulers()
+	var going: Array[int] = []
+	for index in haul.cats.size():
+		if haul.cats[index].state == Defs.CAT_HAUL_TO_ITEM:
+			going.append(index)
+	_assert(going.size() == 1, "한 마리만 주우러 간다 (%d마리)" % going.size())
+	if going.size() == 1:
+		var nearest: int = 0
+		var best: float = 1e20
+		for index in haul.cats.size():
+			var distance: float = haul.cats[index].pos.distance_to(haul.cell_centre(drop))
+			if distance < best:
+				best = distance
+				nearest = index
+		_assert(going[0] == nearest, "가장 가까운 고양이가 간다 (%d번, 기대 %d번)"
+			% [going[0], nearest])
+		_assert(haul.cats[going[0]].haul_target == drop, "그 고양이가 그 칸을 맡는다")
+
+	# A second item goes to a different cat, and the claim survives the next tick
+	# rather than being re-decided into a stampede.
+	haul.ground[Vector2i(25, 0)] = Defs.ITEM_CRYSTAL
+	haul._assign_haulers()
+	var targets: Dictionary[Vector2i, int] = {}
+	for cat in haul.cats:
+		if cat.state == Defs.CAT_HAUL_TO_ITEM:
+			targets[cat.haul_target] = int(targets.get(cat.haul_target, 0)) + 1
+	_assert(targets.size() == 2, "물건 두 개면 두 마리가 나선다 (%d)" % targets.size())
+	for cell: Vector2i in targets:
+		_assert(targets[cell] == 1, "한 칸에 한 마리만 간다 (%s에 %d마리)"
+			% [str(cell), targets[cell]])
+	# A cat already assigned to a machine is not free, however close it is.
+	haul.ground[Vector2i(0, 0)] = Defs.ITEM_CRYSTAL
+	haul.cats[2].assigned = Vector2i(5, 5)
+	haul.cats[2].state = Defs.CAT_IDLE
+	haul._assign_haulers()
+	_assert(haul.cats[2].state != Defs.CAT_HAUL_TO_ITEM, "배치된 고양이는 줍지 않는다")
+	haul.free()
+
+	# --- Loitering -------------------------------------------------------------
+	# A cat with nothing to do used to stand exactly still, which reads as a
+	# paused game. It strolls now: pause, short walk, pause. Driven for a couple
+	# of minutes because the pauses are up to six seconds and a shorter run can
+	# miss the walking half entirely and pass for the wrong reason.
+	var idle := Sim.new()
+	idle.setup(99)
+	idle.cats.clear()
+	idle.ground.clear()
+	var loafer = idle.Cat.new()
+	var anchor: Vector2 = idle.cell_centre(idle.shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	loafer.pos = anchor
+	idle.cats.append(loafer)
+	var moved: float = 0.0
+	var still_ticks: int = 0
+	var walked_ticks: int = 0
+	var furthest: float = 0.0
+	var step: float = 1.0 / 30.0
+	var previous: Vector2 = loafer.pos
+	for tick in 3600:
+		idle._cat_wander(loafer, step)
+		var hop: float = loafer.pos.distance_to(previous)
+		moved += hop
+		if hop > 0.0001:
+			walked_ticks += 1
+			_assert(hop <= Defs.CAT_SPEED * step + 0.01,
+				"어슬렁거림도 걷기 속도를 넘지 않는다 (%.3fpx)" % hop)
+		else:
+			still_ticks += 1
+		furthest = maxf(furthest, loafer.pos.distance_to(anchor))
+		previous = loafer.pos
+	_assert(moved > 100.0, "실제로 돌아다닌다 (%.0fpx)" % moved)
+	_assert(walked_ticks > 200 and still_ticks > 200,
+		"걷는 시간과 서 있는 시간이 둘 다 있다 (걷기 %d, 정지 %d)" % [walked_ticks, still_ticks])
+	# Leashed, or the crew wanders out of the warm radius and the player goes
+	# looking for it.
+	_assert(furthest < Defs.WANDER_LEASH * 2.0,
+		"숙소에서 너무 멀어지지 않는다 (%.0fpx)" % furthest)
+	# And walking is reported, or the sheet plays a standing cat sliding along.
+	loafer.wander_dir = Vector2.RIGHT
+	_assert(loafer.is_walking(), "어슬렁거리는 동안은 걷는 것으로 센다")
+	loafer.wander_dir = Vector2.ZERO
+	loafer.state = Defs.CAT_IDLE
+	_assert(not loafer.is_walking(), "멈춰 있으면 서 있는 것으로 센다")
+	idle.free()
+
 	if failures == 0:
 		print("WORKERS_TEST: PASS")
 	quit(failures)

@@ -91,7 +91,7 @@ func sync(source: Sim.Cat, time: float, visible_now: bool) -> void:
 	var breathe: float = MachineLayer.cat_breathe(cat, pulse)
 	var frame: int = MachineLayer.cat_frame(cat, pulse)
 	var heading: Vector2 = Vector2.DOWN if cat.state == Defs.CAT_EATING else cat.heading
-	var chosen: Array = MachineLayer.cat_sheet(cat.state, heading)
+	var chosen: Array = MachineLayer.cat_sheet(cat.state, heading, cat.is_walking())
 	var sheet: Texture2D = chosen[0]
 	var base: float = DRAW / CELL
 
@@ -135,7 +135,7 @@ func _draw_pig() -> void:
 	if cat == null:
 		return
 	var gait: float = 0.0
-	if cat.state in Defs.CAT_WALKING_STATES:
+	if cat.is_walking():
 		gait = pulse * 7.0
 	var top: float = HEAD
 	var bottom: float = GROUND
