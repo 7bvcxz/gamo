@@ -10,6 +10,8 @@ import { DevTools } from '../../../components/content/oneshot/DevTools.jsx';
 import { OneShotLevelDesign } from '../../../components/content/OneShotLevelDesign.jsx';
 import { OneShotTodo } from '../../../components/content/OneShotTodo.jsx';
 import { OneShotReleases } from '../../../components/content/OneShotReleases.jsx';
+import { DesignDoc } from '../../../components/content/oneshot/DesignDoc.jsx';
+import design from '../../../lib/generated/design.json';
 
 // One Shot's own documentation, independent of every other game's. Split by how
 // often each part changes: identity almost never, level design when the map
@@ -19,7 +21,27 @@ import { OneShotReleases } from '../../../components/content/OneShotReleases.jsx
 // these are short category labels sitting next to Todo, Releases and the item
 // ids, and translating half of them produced a sidebar that read as a mix. The
 // English words are also the ones the design conversation actually uses.
+// The long-range design documents, straight from motorio-oneshot/design/. Built
+// from the manifest rather than listed here: a file added to that folder appears
+// on the site without this page being edited, which is the only arrangement that
+// does not eventually disagree with the folder.
+//
+// Above everything else on purpose. These are the standard the rest of the page
+// is measured against -- what the game is for comes before what it currently
+// does.
+const VISION = {
+  group: 'Vision',
+  items: (design.docs || [])
+    .filter((doc) => doc.file !== 'entity-scenes.md')
+    .map((doc) => ({
+      id: `design-${doc.id}`,
+      label: doc.label,
+      render: () => <DesignDoc id={doc.id} />,
+    })),
+};
+
 const NAV = [
+  VISION,
   {
     group: 'Design',
     items: [

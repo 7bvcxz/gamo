@@ -7,6 +7,9 @@
 ## 작업 원칙
 
 - 작업을 시작하기 전에 이 파일과 루트의 `Progress.md`를 확인한다.
+- **`motorio-oneshot`의 장기 설계는 `motorio-oneshot/design/`의 여섯 문서가 단일 원본이다** (`VISION` · `CORE_LOOP` · `PROGRESSION` · `WORLD_AND_STORY` · `VERTICAL_SLICE` · `CURRENT_STATE`). 기능을 만들기 전에 `VISION.md`와 `CURRENT_STATE.md`를 먼저 읽고, 새 시스템은 `CORE_LOOP.md` 끝의 체크리스트 네 문항에 답한 뒤에 만든다. 설계가 바뀌면 코드보다 문서를 먼저 고친다.
+- 이 문서들은 `/motorio-oneshot/doc`의 **Vision** 절에서 조회한다. 사이트는 마크다운 원본을 `web/scripts/design-to-json.mjs`로 읽어 렌더하므로 **JSX에 옮겨 적지 않는다** — 옮겨 적은 사본은 반드시 낡는다. `design/`에 파일을 추가하면 네비게이션에 자동으로 나타난다.
+- 설계 문서를 `docs/`에 두지 않는다. `docs/`는 Pages 빌드 산출물이고 `to-docs.mjs`가 다음 사이트 빌드에서 지운다.
 - Motorio의 게임 정체성·레벨 디자인·자동화 디자인은 `motorio/design/`의 세 문서가 단일 원본이다. 기능을 만들기 전에 해당 문서를 먼저 읽고, 문서와 다르게 구현하지 않는다. 설계가 바뀌면 코드보다 문서를 먼저 고친다.
 - 설계 문서의 각 항목은 `[확정]`·`[초안]`·`[질문]` 상태를 갖는다. `[질문]`으로 표시된 항목은 사용자 결정 없이 임의로 구현하지 않는다.
 - 설계 문서는 `https://7bvcxz.github.io/gamo/design/`에서 조회한다. 이 뷰어는 Pages CDN 캐시를 피해 GitHub 저장소 API로 원문을 직접 읽으므로, 문서를 push하면 새로고침만으로 반영된다.

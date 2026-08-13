@@ -330,6 +330,19 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
 - 유지보수 후보: `docs/motorio/`에 누적된 60개 해시 빌드 정리 정책, 1,670줄 `Main.gd`의 서브시스템 분리
 - 테스트 정리 후보: `test_base.gd`, `test_conveyor.gd`가 아직 실패 시 즉시 `quit(1)`을 예약하는 구식 패턴을 사용한다
 
+## motorio-oneshot 장기 설계
+
+2026-08-13에 게임 비전을 확정하고 `motorio-oneshot/design/`에 여섯 문서로 정리했다.
+앞으로 모든 기능 개발의 기준이며 `/motorio-oneshot/doc`의 Vision 절에서 읽는다.
+
+- **한 문장**: 얼어붙은 고양이 행성에 불시착한 Grim이 난로 하나에서 시작해 고양이를 구하고
+  자동화 문명을 세워 행성 전체에 열을 퍼뜨린다. 그리고 마지막에는 복수조차 자동화한다.
+- **지금 할 일은 30분 Vertical Slice** — Level 10까지 구현하는 것이 아니다.
+- **답을 기다리는 질문 둘** (`CURRENT_STATE.md`): 하루 3분·정산 카드라는 점수 어택 형태를
+  장기 진행형으로 바꿀 것인가(`S-1`), 그리고 가챠를 어떻게 할 것인가(`C-2`). 둘 다
+  `[질문]`이므로 사용자 결정 없이 구현하지 않는다.
+- 문서는 마크다운이 원본이고 사이트가 그것을 읽는다. JSX에 옮겨 적지 않는다.
+
 ## 공용 도구
 
 - **이미지 생성**: `~/Workspace/tools/imagegen/` (`imagegen`이 PATH에 있다). `~/Workspace`의
