@@ -272,6 +272,65 @@ const OBJECT_NOTE = {
     '바닥의 광맥과 그 위의 기계뿐이므로 이 묶음은 다시 만들어야 합니다.',
 };
 
+// What the game draws right now, for every object it draws from a picture.
+//
+// Above the candidates rather than below them, because the first question anyone
+// arriving here has is "what does it look like at the moment", and until this
+// existed the page could only answer "here are six things one of which it might
+// be". These are the files in assets/objects/ -- not the candidates they came
+// from, which are cropped and resized on the way in.
+//
+// Shown at the size the game draws them as well as large. The small one is the
+// one that decides whether a piece works: the miner is 43 screen pixels at the
+// default zoom and 115 zoomed in, and detail that only exists at 128 is detail
+// nobody ever sees.
+function Shipped() {
+  const chosen = objects.adopted || [];
+  if (chosen.length === 0) return null;
+  return (
+    <section className="prop">
+      <h2>지금 게임에 들어 있는 그림</h2>
+      <p className="prop-why">
+        후보가 아니라 <b>게임이 실제로 불러오는 파일</b>입니다. 왼쪽이 게임에서 그려지는 크기,
+        오른쪽이 원본입니다. 작은 쪽이 판단 기준입니다 — 128에만 있는 디테일은 아무도 보지 않는
+        디테일입니다.
+      </p>
+      <div className="shipped-grid">
+        {chosen.map((item) => (
+          <figure key={item.role} className="shipped">
+            <div className="shipped-pair">
+              <img
+                src={site(item.sizes[String(Math.round(item.draw))])}
+                alt={`${item.name} · 게임 크기`}
+                width={Math.round(item.draw)}
+                height={Math.round(item.draw)}
+              />
+              <img src={site(item.sizes['128'])} alt={item.name} width={128} height={128} />
+            </div>
+            <figcaption>
+              <b>{item.name}</b>
+              <span>
+                {Math.round(item.draw)}px로 그림 · {item.stored}px 저장 · {item.from}
+              </span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      {objects.belt_loop && (
+        <div className="shipped-loop">
+          <h3>컨베이어가 이어지는 방식</h3>
+          <p className="prop-why">
+            직선·코너·분배기 세 조각뿐입니다. 생성한 벨트 그림에서 <b>단면 하나</b>를 재서 길을
+            따라 쓸어 만들었기 때문에, 모든 팔이 칸 경계에 직각으로 닿고 경계의 픽셀이 곧 그
+            단면입니다. 만나는 두 타일은 비슷한 게 아니라 같은 숫자입니다.
+          </p>
+          <img src={site(objects.belt_loop)} alt="벨트 고리" className="shipped-loop-img" />
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ObjectSubject({ subject, picks, onPick }) {
   const [active, setActive] = useState(subject.candidates[0].id);
   const candidate = subject.candidates.find((c) => c.id === active) || subject.candidates[0];
@@ -503,6 +562,8 @@ function Proposals() {
           1번은 언제나 현재 모습입니다.
         </p>
       </header>
+
+      <Shipped />
 
       <SpriteCharacters requests={spriteRequests} picks={spritePicks} onPick={pickSprite} />
 

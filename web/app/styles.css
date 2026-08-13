@@ -390,3 +390,35 @@ th { background: var(--sidebar); font-weight: 600; }
 /* The panel is a flex column, so a button in it stretches the full width and
    reads as a banner rather than a control. */
 .sprite-panel > .btn { align-self: flex-start; }
+
+/* The shipped object art. Two images per piece: the size the game draws it and
+   a large one. The small image is pixel-exact -- image-rendering: pixelated --
+   because the game filters with NEAREST and a browser that smooths it would show
+   something softer than anyone actually plays. */
+.shipped-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+.shipped { margin: 0; }
+.shipped-pair {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #dee4ec;
+  min-height: 152px;
+}
+.shipped-pair img { image-rendering: pixelated; }
+.shipped figcaption { display: block; margin-top: 8px; font-size: 13px; }
+.shipped figcaption b { display: block; }
+.shipped figcaption span { color: var(--muted); }
+.shipped-loop { margin-top: 28px; }
+.shipped-loop-img {
+  image-rendering: pixelated;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}

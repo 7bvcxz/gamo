@@ -489,6 +489,18 @@
       759,
       761
      ]
+    },
+    {
+     "id": "miner_gen3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/miner_gen3-128-b2c6d46e8831.png",
+      "64": "/object-candidates/miner_gen3-64-9150c74baa7f.png"
+     },
+     "source": [
+      750,
+      836
+     ]
     }
    ]
   },
@@ -509,5 +521,118 @@
     }
    ]
   }
- ]
+ ],
+ "adopted": [
+  {
+   "role": "belt_corner",
+   "name": "컨베이어 벨트 · 코너",
+   "from": "build_belt.py",
+   "draw": 32.0,
+   "stored": 96,
+   "sizes": {
+    "128": "/object-candidates/shipped-belt_corner-128-3af33d8a42a9.png",
+    "32": "/object-candidates/shipped-belt_corner-32-12572904a731.png"
+   }
+  },
+  {
+   "role": "belt_straight",
+   "name": "컨베이어 벨트 · 직선",
+   "from": "build_belt.py",
+   "draw": 32.0,
+   "stored": 96,
+   "sizes": {
+    "128": "/object-candidates/shipped-belt_straight-128-d86c72fdcdc3.png",
+    "32": "/object-candidates/shipped-belt_straight-32-a1c51ab7b093.png"
+   }
+  },
+  {
+   "role": "cat_tool",
+   "name": "고양이 채굴 도구",
+   "from": "cat_tool_gen2",
+   "draw": 21,
+   "stored": 42,
+   "sizes": {
+    "128": "/object-candidates/shipped-cat_tool-128-4499a2ff4203.png",
+    "21": "/object-candidates/shipped-cat_tool-21-19ce0bf7ee0c.png"
+   }
+  },
+  {
+   "role": "core",
+   "name": "기지 코어",
+   "from": "core_gen1",
+   "draw": 86.4,
+   "stored": 173,
+   "sizes": {
+    "128": "/object-candidates/shipped-core-128-228eec7a98d7.png",
+    "86": "/object-candidates/shipped-core-86-f242aa336bf8.png"
+   }
+  },
+  {
+   "role": "exchanger",
+   "name": "수정에너지교환기",
+   "from": "exchanger_gen1",
+   "draw": 36,
+   "stored": 72,
+   "sizes": {
+    "128": "/object-candidates/shipped-exchanger-128-88e864e035dc.png",
+    "36": "/object-candidates/shipped-exchanger-36-7c66d64413a2.png"
+   }
+  },
+  {
+   "role": "food_bin",
+   "name": "밥통",
+   "from": "food_bin_gen1",
+   "draw": 36,
+   "stored": 72,
+   "sizes": {
+    "128": "/object-candidates/shipped-food_bin-128-75420a5b5127.png",
+    "36": "/object-candidates/shipped-food_bin-36-c12cb88524ec.png"
+   }
+  },
+  {
+   "role": "generator",
+   "name": "발전기",
+   "from": "generator_gen1",
+   "draw": 36,
+   "stored": 72,
+   "sizes": {
+    "128": "/object-candidates/shipped-generator-128-73277be8c119.png",
+    "36": "/object-candidates/shipped-generator-36-502b2e25be61.png"
+   }
+  },
+  {
+   "role": "miner",
+   "name": "채굴기",
+   "from": "miner_gen2",
+   "draw": 36,
+   "stored": 72,
+   "sizes": {
+    "128": "/object-candidates/shipped-miner-128-cce9cb9e592f.png",
+    "36": "/object-candidates/shipped-miner-36-7d97e8060509.png"
+   }
+  },
+  {
+   "role": "shelter",
+   "name": "숙소",
+   "from": "shelter_gen1",
+   "draw": 70.4,
+   "stored": 141,
+   "sizes": {
+    "128": "/object-candidates/shipped-shelter-128-1fcd48df9579.png",
+    "70": "/object-candidates/shipped-shelter-70-327d1fbb41ea.png"
+   }
+  },
+  {
+   "role": "splitter",
+   "name": "분배기",
+   "from": "build_belt.py",
+   "draw": 32.0,
+   "stored": 96,
+   "sizes": {
+    "128": "/object-candidates/shipped-splitter-128-4032ac1647b9.png",
+    "32": "/object-candidates/shipped-splitter-32-11f6b2ed72a3.png"
+   }
+  }
+ ],
+ "belt_loop": "/object-candidates/shipped-belt-loop-aba624a17dad.png"
 }
