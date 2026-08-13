@@ -34,6 +34,7 @@ func _init() -> void:
 	_tools(main)
 	_mining(main)
 	_gacha_button(main)
+	_same_as_keyboard(main)
 
 	print("TOUCH: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
 	quit(failures)
@@ -93,8 +94,12 @@ func _mining(main: Node2D) -> void:
 	_tap(main, (main.hud.hotbar_rects[main.TOOL_PICKAXE] as Rect2).get_center())
 	_check(main.holding_pickaxe(), "터치로 곡괭이를 들었다")
 
-	main.touch_mine(true)
-	_check(main.mine_held, "캐기 버튼이 눌린 상태가 된다")
+	# Through the pad button rather than the controller method, because the wiring
+	# between them is the thing that was wrong: the pad sent Z as a press with no
+	# hold, so mining -- which is a hold -- could not be done with it at all, and
+	# a separate 캐기 button did the holding.
+	main.touch._press_button(1, true)
+	_check(main.mine_held, "Z 버튼이 눌린 상태가 된다")
 	main._update_hand_mining(0.5)
 	_check(sim.hand_progress > 0.0,
 		"그리고 실제로 캐기 시작한다: 진행 %.2f" % sim.hand_progress)
@@ -106,10 +111,53 @@ func _mining(main: Node2D) -> void:
 		"수정조각이 나온다: 보유 %d, 바닥 %d"
 		% [int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)), sim.ground.size()])
 
-	main.touch_mine(false)
+	main.touch._press_button(1, false)
 	_check(not main.mine_held, "손을 떼면 멈춘다")
 	main._update_hand_mining(0.1)
 	_check(is_zero_approx(main.player.mining), "스윙도 멈춘다")
+
+## The pad says what the keyboard says.
+##
+## Not a comparison of labels -- a comparison of what each button does. The pad
+## used to carry a verb no key had, and a phone player following the game's own
+## hint ("press Z") found that Z did half of what it says on a desktop.
+func _same_as_keyboard(main: Node2D) -> void:
+	var sim = main.sim
+	main.state = main.State.PLAY
+	main.player.locked = false
+	var labels: Array = TouchControls.BUTTON_LABELS
+	_check(labels.size() == 4 and labels[1] == "Z" and labels[2] == "X" and labels[3] == "C",
+		"버튼이 Run/Z/X/C다: %s" % str(labels))
+
+	# C opens the panel and does not dig, exactly as on a keyboard.
+	var machine_cell := Vector2i(9999, 9999)
+	for cell: Vector2i in sim.machines:
+		machine_cell = cell
+		break
+	if machine_cell != Vector2i(9999, 9999):
+		main.player.position = sim.cell_centre(machine_cell + Vector2i(0, 1))
+		main.player.facing = Vector2i.UP
+		main.meter_cell = Vector2i(9999, 9999)
+		main.mine_held = false
+		main.touch._press_button(3, true)
+		_check(main.meter_cell == machine_cell, "C 버튼이 계기를 연다")
+		_check(not main.mine_held, "그리고 캐기를 시작하지 않는다")
+		main.touch._press_button(3, false)
+		main.touch._press_button(3, true)
+		_check(main.meter_cell == Vector2i(9999, 9999), "다시 누르면 닫힌다")
+		main.touch._press_button(3, false)
+
+	# X demolishes, which is what X does on a keyboard.
+	main.tool_index = main.TOOL_BUILD_GUN
+	var spare: Vector2i = sim.core_cell + Vector2i(7, 7)
+	sim.machines.erase(spare)
+	sim.unlocked[Defs.M_BELT] = true
+	sim.stock[Defs.ITEM_COPPER] = 500
+	if sim.build(Defs.M_BELT, spare, Vector2i.RIGHT):
+		main.player.position = sim.cell_centre(spare + Vector2i(0, 1))
+		main.player.facing = Vector2i.UP
+		main.touch._press_button(2, true)
+		_check(sim.machine_at(spare) == null, "X 버튼이 설비를 회수한다")
 
 ## The corner button a thumb reaches for, and the window it opens.
 func _gacha_button(main: Node2D) -> void:

@@ -60,8 +60,11 @@ func _bindings() -> void:
 				found = true
 		_check(found, "%s 키가 %s 액션에 실제로 묶여 있다" % [name, action])
 
-## The opening instruction names the pickaxe and the key that actually swings it,
-## and it says something different on a phone -- where there is no Z to hold.
+## The opening instruction names the pickaxe and the key that actually swings it.
+## It used to have to say something different on a phone, because the pad's Z did
+## only half of what Z does and the digging lived on a button no key had; the pad
+## is the keys now, so both say Z and the difference is only the word for
+## pressing one.
 func _mining_hint(main: Node2D) -> void:
 	main.touch.visible = false
 	var desktop: String = main._mining_hint()
@@ -73,8 +76,11 @@ func _mining_hint(main: Node2D) -> void:
 	_check(desktop.contains("Z"), "데스크톱 안내가 Z를 말한다")
 	_check(not desktop.contains("C "), "데스크톱 안내가 더 이상 C를 말하지 않는다")
 	_check(touch.contains("곡괭이"), "터치 안내가 곡괭이를 언급한다: %s" % touch)
-	_check(touch.contains("캐기"), "터치 안내가 캐기 버튼을 말한다")
-	_check(not touch.contains("Z"), "터치 안내는 Z를 말하지 않는다 — 누를 Z가 없다")
+	# The pad's buttons are the game's keys now, so the hint says the same thing
+	# on both. It used to have to differ, because the pad's Z did only half of
+	# what Z does and the digging lived on a button no key had.
+	_check(touch.contains("Z"), "터치 안내도 Z를 말한다: %s" % touch)
+	_check(not touch.contains("캐기"), "더 이상 캐기 버튼을 말하지 않는다")
 
 ## Nothing any objective can say may name a key that is not bound, and the one
 ## the game opens on is the mining line -- which is where the stale one lived.

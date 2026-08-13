@@ -15,7 +15,10 @@ const BUTTON_RADIUS := 28.0
 ## game teaches and it is a hold, not a tap, so overloading it onto Z would have
 ## made both worse -- and until now a phone player simply could not hand-mine,
 ## which is where the whole game now starts.
-const BUTTON_LABELS := ["Run", "Z", "X", "캐기"]
+## The pad says what the keyboard says. It used to carry a 캐기 button that both
+## dug and opened the throughput panel, which meant a phone player learned a verb
+## no key had and could not do with Z what the game's own hints told them to.
+const BUTTON_LABELS := ["Run", "Z", "X", "C"]
 const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
 var main_controller
@@ -205,14 +208,15 @@ func snap_to_eight_directions(direction: Vector2) -> Vector2:
 func _press_button(index: int, pressed: bool) -> void:
 	if player != null and index == 0:
 		player.touch_sprint = pressed
-	# Mining is held, so this button reports both edges rather than only presses.
-	if index == 3 and main_controller != null:
-		main_controller.call("touch_mine", pressed)
+	# Z is held as well as pressed -- mining is a hold -- so it reports both edges
+	# rather than only presses.
+	if index == 1 and main_controller != null:
+		main_controller.call("touch_primary", pressed)
 	if main_controller == null or not pressed:
 		return
 	match index:
-		1: main_controller.call("touch_primary")
 		2: main_controller.call("touch_secondary")
+		3: main_controller.call("touch_meter")
 
 ## Called when a modal panel opens, so a held direction cannot survive it and
 ## walk the player into the cold while they are reading a menu.
@@ -222,7 +226,7 @@ func release_all() -> void:
 
 func _reset_inputs() -> void:
 	if main_controller != null:
-		main_controller.call("touch_mine", false)
+		main_controller.call("touch_primary", false)
 	joystick_touch = -1
 	joystick_knob = joystick_center
 	button_touch.clear()

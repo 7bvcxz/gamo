@@ -201,7 +201,7 @@ func _start_run() -> void:
 ## the old line never mentioned at all.
 func _mining_hint() -> String:
 	if touch != null and touch.visible:
-		return "곡괭이를 고르고 수정 광맥 위에서 캐기 버튼을 누르세요"
+		return "곡괭이를 고르고 수정 광맥 위에서 Z 버튼을 누르고 계세요"
 	return "2번 곡괭이를 들고 수정 광맥 위에서 Z 를 누르고 계세요"
 
 func objective_data() -> Dictionary:
@@ -1163,7 +1163,19 @@ func touch_hud_release() -> void:
 
 ## Entry points for the mobile buttons, so touch and keyboard run through the
 ## same code rather than drifting apart.
-func touch_primary() -> void:
+## Z, on a pad, meaning exactly what Z means on a keyboard.
+##
+## It used to mean less: the pad sent only the press, so mining -- which is a
+## hold on the build key -- was impossible with it, and a separate 캐기 button
+## did the holding *and* opened the throughput panel. Two buttons each doing half
+## of two different jobs, and neither matching the keys the game teaches.
+##
+## Both edges now, and the hold is set before the action runs, which is the order
+## _unhandled_input uses for the keyboard.
+func touch_primary(pressed: bool = true) -> void:
+	mine_held = pressed and state == State.PLAY
+	if not pressed:
+		return
 	match state:
 		State.TITLE:
 			state = State.PLAY
@@ -1178,11 +1190,11 @@ func touch_primary() -> void:
 			# place a cat, which makes the game unplayable on a phone.
 			_primary_action()
 
-## The pad's mine button. Held rather than tapped, so it forwards both edges.
-func touch_mine(pressed: bool) -> void:
-	if pressed and toggle_meter():
-		return
-	mine_held = pressed and state == State.PLAY
+## The pad's C. It opens the throughput panel and nothing else, the way C does on
+## a keyboard -- it used to start a dig as well, which is why the pad had a verb
+## the keyboard did not.
+func touch_meter() -> void:
+	toggle_meter()
 
 ## The mine key does double duty: on a seam it digs, and on a machine it opens
 ## that machine's throughput panel. The two never overlap in practice -- a cell

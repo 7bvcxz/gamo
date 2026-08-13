@@ -150,9 +150,14 @@ func _run() -> void:
 	main.touch.set_pad_scale(1.0)
 	var centres: Array[Vector2] = main.touch.button_centers
 	_assert(centres.size() == 4, "the pad lays out four action buttons")
-	# Mining is the first verb the game teaches, and for a while the pad had no
-	# way to do it at all.
-	_assert(main.touch.BUTTON_LABELS.has("캐기"), "one of them mines")
+	# The pad's buttons are the keyboard's keys. Mining is the first verb the game
+	# teaches and for a while the pad had no way to do it at all, which is why a
+	# 캐기 button existed -- but a button the keys do not have is a second control
+	# scheme to teach, and this one also opened the throughput panel, which Z has
+	# never done.
+	var labels: Array = main.touch.BUTTON_LABELS
+	_assert(labels[1] == "Z" and labels[2] == "X" and labels[3] == "C",
+		"패드가 Z·X·C를 그대로 가진다: %s" % str(labels))
 	var hit: float = main.touch.button_hit_radius()
 	for a in centres.size():
 		for b in range(a + 1, centres.size()):
