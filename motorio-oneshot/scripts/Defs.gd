@@ -446,6 +446,29 @@ const COPPER_COST_IRON := 1
 
 ## Warmth grows with everything the core has ever received, so investing in the
 ## factory is what expands the map rather than hoarding.
+## How far the map fills in around the player as they walk, and how much of the
+## base is on it from the start. Sight is smaller than the screen on purpose: a
+## radius that matched what is visible would fill the map in as fast as the
+## camera moves, and there would be nothing to explore.
+const SIGHT_RADIUS := 9
+## What the map's zoom slider spans, as world cells per map pixel at each end.
+## The wide end shows roughly the whole reachable plateau; the close end is about
+## what the game screen shows, so the two ends answer "where am I in the world"
+## and "what is right here".
+const MAP_ZOOM_MIN := 0.4
+const MAP_ZOOM_MAX := 3.0
+const MAP_ZOOM_STEP := 0.2
+const MAP_ZOOM_DEFAULT := 1.0
+## How many map pixels one cell covers at zoom 1.
+##
+## Four, not two. At two the card showed 180 cells across, and the plateau a
+## player can actually reach is a few tens of cells wide -- so a run's whole
+## exploration sat in the middle of the card as a smudge the size of a coin,
+## with most of the map showing fog that is not merely unexplored but unreachable.
+## A map is worth opening when what you have done fills it.
+const MAP_CELL_PX := 4.0
+const BASE_REVEAL_RADIUS := 11
+
 const WARM_BASE := 7.0
 const WARM_PER_HEAT := 0.022
 const WARM_MAX := 22.0

@@ -153,9 +153,27 @@ func _ready() -> void:
 	add_child(carry_layer)
 	carry_layer.draw.connect(_draw_carried_cat)
 
+## A window is up, so the world is not listening.
+##
+## Separate from `locked`, which is the simulation holding the character still --
+## asleep, frozen, being carried home. The two have to stay separate or closing a
+## window would clear a freeze.
+##
+## It exists at all because movement is polled rather than delivered as events:
+## the build list already consumed its key presses and marked them handled, and
+## Grim walked anyway, because `Input.get_action_strength` does not care what any
+## handler decided. Marking an event handled cannot stop something that never
+## looked at the event.
+var modal: bool = false
+
+## The one question both of the above answer. Asked in one place so a third kind
+## of "not now" cannot be added to one of the two things that need it.
+func takes_input() -> bool:
+	return not locked and not modal
+
 func _physics_process(delta: float) -> void:
 	var input := Vector2.ZERO
-	if not locked:
+	if takes_input():
 		input = Vector2(
 			Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
 			Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
@@ -164,7 +182,7 @@ func _physics_process(delta: float) -> void:
 			input = input.normalized()
 		if not touch_direction.is_zero_approx():
 			input = touch_direction
-	var sprinting: bool = (Input.is_action_pressed("sprint") or touch_sprint) and not locked
+	var sprinting: bool = (Input.is_action_pressed("sprint") or touch_sprint) and takes_input()
 	# Cold slows the whole way down to a crawl rather than only at the end.
 	var chill_speed: float = lerpf(Defs.COLD_SPEED_FLOOR, 1.0, clampf(warmth / 100.0, 0.0, 1.0))
 	var target: Vector2 = input * SPEED * (SPRINT if sprinting else 1.0) * chill_speed

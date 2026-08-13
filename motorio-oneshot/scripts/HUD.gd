@@ -24,6 +24,10 @@ var message_color: Color = Defs.COL_TEXT
 var hotbar_rects: Array[Rect2] = []
 var direction_rect := Rect2()
 var settings_button_rect := Rect2()
+var map_button_rect := Rect2()
+var map_card_rect := Rect2()
+var map_slider_rect := Rect2()
+var dragging_map_zoom: bool = false
 ## The slot machine: the corner button that opens it, the card, and its three
 ## price buttons. Published the same way every other target is, so touch
 ## hit-tests exactly what was drawn instead of recomputing the layout.
@@ -142,6 +146,12 @@ func _layout() -> void:
 	var width: float = _text_width(label, 12) + 44.0
 	direction_rect = Rect2(size.x * 0.5 - width * 0.5, origin.y - 58.0, width, 24.0)
 	settings_button_rect = Rect2(MARGIN, MARGIN, SETTINGS_BUTTON, SETTINGS_BUTTON)
+	# Beside the gear, sharing its top row. Two square buttons in the corner read
+	# as one strip of controls; putting the map anywhere else would make it a
+	# thing to hunt for.
+	map_button_rect = Rect2(MARGIN + SETTINGS_BUTTON + 6.0, MARGIN,
+		SETTINGS_BUTTON, SETTINGS_BUTTON)
+	_layout_map()
 	# Bottom-left, bottom-aligned with the hotbar row so the two read as one
 	# strip, and above whatever the touch pad claims -- on a phone that corner is
 	# four thumb buttons and a button drawn under them can never be pressed.
@@ -369,7 +379,9 @@ func _draw() -> void:
 			_draw_build_menu()
 			_draw_gacha_card()
 			_draw_message()
+	_draw_map_card()
 	_draw_settings_button()
+	_draw_map_button()
 	_draw_debug_badge()
 
 ## After the fall the world goes out entirely, so the cut to morning reads as
@@ -708,7 +720,7 @@ func _draw_palette() -> void:
 ## both added recently. A legend is a list that goes stale the moment someone
 ## adds a key and forgets it, so the game's own hint hangs off the same place the
 ## keys do -- there is a test that reads this string.
-const KEY_LEGEND := "Z 사용   X 회수   R 회전   C 계기   B 목록   G 가챠   -/= 크기   Esc 설정"
+const KEY_LEGEND := "Z 사용   X 회수   R 회전   C 계기   B 목록   G 가챠   M 지도   -/= 크기   Esc 설정"
 
 ## Anchored to the bottom of the screen rather than measured down from the
 ## hotbar. The first version took the hotbar's baseline and used it as the top of
@@ -1395,3 +1407,97 @@ func _draw_result() -> void:
 	# and the summary card is the one screen a player presses through every day
 	# without reading -- an unguarded key that throws the run away does not belong
 	# on it.
+
+
+## --- The map ------------------------------------------------------------------
+## A square card, because the world is square and a wide one would show more east
+## than north for no reason. Sized against the shorter screen edge so it fits a
+## phone held upright as well as a desktop window.
+const MAP_SLIDER_H := 44.0
+const MAP_PAD := 14.0
+
+func _layout_map() -> void:
+	var span: float = minf(minf(size.x, size.y) - MARGIN * 4.0, 460.0)
+	map_card_rect = Rect2(size.x * 0.5 - span * 0.5, size.y * 0.5 - span * 0.5, span, span)
+	var track: float = span - MAP_PAD * 4.0
+	map_slider_rect = Rect2(map_card_rect.position.x + MAP_PAD * 2.0,
+		map_card_rect.end.y - MAP_SLIDER_H + 6.0, track, 8.0)
+
+## Where the map is drawn: everything but the strip the slider sits in.
+func map_view_rect() -> Rect2:
+	return Rect2(map_card_rect.position + Vector2(MAP_PAD, MAP_PAD + 26.0),
+		Vector2(map_card_rect.size.x - MAP_PAD * 2.0,
+			map_card_rect.size.y - MAP_PAD * 2.0 - MAP_SLIDER_H - 26.0))
+
+func _draw_map_button() -> void:
+	var rect: Rect2 = map_button_rect
+	if rect.size.x <= 0.0:
+		return
+	var open: bool = bool(main.get("map_open"))
+	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
+	var tint: Color = Defs.COL_CORE if open else Defs.COL_TEXT
+	# A folded map: three panels with the folds drawn as the zigzag of the top
+	# and bottom edges, which is what makes it read as a map rather than a page.
+	var inner := Rect2(rect.position + Vector2(7.0, 9.0), rect.size - Vector2(14.0, 18.0))
+	var third: float = inner.size.x / 3.0
+	var lift: float = inner.size.y * 0.18
+	var top: Array[Vector2] = []
+	var bottom: Array[Vector2] = []
+	for index in 4:
+		var x: float = inner.position.x + third * float(index)
+		var offset: float = lift if index % 2 == 0 else 0.0
+		top.append(Vector2(x, inner.position.y + offset))
+		bottom.append(Vector2(x, inner.end.y - lift + offset))
+	for index in 3:
+		draw_line(top[index], top[index + 1], tint, 1.6)
+		draw_line(bottom[index], bottom[index + 1], tint, 1.6)
+	for index in 4:
+		draw_line(top[index], bottom[index], tint, 1.6)
+
+func _draw_map_card() -> void:
+	if not bool(main.get("map_open")):
+		return
+	_dim(0.72)
+	_frame(map_card_rect, Defs.COL_CORE)
+	_text_in(Rect2(map_card_rect.position + Vector2(0.0, 24.0),
+		Vector2(map_card_rect.size.x, 22.0)), "지도", 18, Defs.COL_TEXT)
+
+	var view: Rect2 = map_view_rect()
+	# Everything not walked is void, so the card is painted black first and the
+	# known world drawn into it. Drawing fog over the world instead would mean
+	# knowing where the fog is, and the whole point is that most of it is fog.
+	draw_rect(view, Color(0.04, 0.05, 0.08, 1.0))
+	main.call("draw_map", self, view)
+	draw_rect(view, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g,
+		Defs.COL_PANEL_EDGE.b, 0.7), false, 1.0)
+
+	# The zoom slider. Same shape as the ones in settings, because it is the same
+	# gesture and a second style of slider would be a second thing to learn.
+	var track: Rect2 = map_slider_rect
+	draw_rect(track, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g,
+		Defs.COL_PANEL_EDGE.b, 0.6))
+	var span: float = maxf(Defs.MAP_ZOOM_MAX - Defs.MAP_ZOOM_MIN, 0.001)
+	var fraction: float = clampf((float(main.get("map_zoom")) - Defs.MAP_ZOOM_MIN) / span,
+		0.0, 1.0)
+	draw_rect(Rect2(track.position, Vector2(track.size.x * fraction, track.size.y)),
+		Defs.COL_CORE)
+	draw_circle(Vector2(track.position.x + track.size.x * fraction,
+		track.position.y + track.size.y * 0.5), 8.0, Defs.COL_CORE)
+	_text_in(Rect2(track.position + Vector2(0.0, 22.0), Vector2(track.size.x, 16.0)),
+		"확대 %d%%   ←/→   Esc 닫기" % int(round(float(main.get("map_zoom")) * 100.0)),
+		12, Defs.COL_TEXT_DIM)
+
+## Is this point on the zoom track? Generous vertically, because the track is
+## eight pixels tall and a thumb is not.
+func map_slider_at(point: Vector2) -> bool:
+	if map_slider_rect.size.x <= 0.0:
+		return false
+	return Rect2(map_slider_rect.position - Vector2(10.0, 16.0),
+		map_slider_rect.size + Vector2(20.0, 32.0)).has_point(point)
+
+func begin_map_drag() -> void:
+	dragging_map_zoom = true
+
+func end_map_drag() -> void:
+	dragging_map_zoom = false

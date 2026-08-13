@@ -22,7 +22,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 
 ---
 
-## 자동 테스트 (headless, 30개)
+## 자동 테스트 (headless, 31개)
 
 ### 규칙과 진행
 
@@ -63,6 +63,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 | `test_animation` | 스프라이트 정렬, 그림자, 고양이 간격. **고양이 자식 노드의 로컬 좌표가 상수인가**, 그리고 기계 표시가 고양이보다 위에 오는 z_index 계약 |
 | `test_facing` | 8방향 판정과 좌우 반전 |
 | `test_pickaxe` | 곡괭이를 든 상태에서만 채굴, 스윙 프레임 |
+| `test_map` | 창(건설 목록·가챠·지도)이 열리면 주인공이 입력을 안 받는가, 얼음 잠금과 섞이지 않는가, 안개(기지는 처음부터·간 곳만·음수 좌표), 확대 범위, 탐사 기록의 저장과 옛 저장 호환 |
 | `test_ground` | 눈 타일 변형의 주기성, 돌 밀도와 덩어리 크기 |
 | `test_tiles` | 지형 생성. **무작위 시드 대신 고정 시드로 부른다** |
 | `test_debug` | F2 배속, F3 해금이 주는 것 |

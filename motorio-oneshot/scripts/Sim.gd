@@ -198,6 +198,40 @@ var _cached_radius := -1.0
 ## Terrain is not stored: it is regenerated from the seed, so the save only has
 ## to carry what the player changed. That keeps the file small and means a
 ## world-generation tweak cannot corrupt an existing save's geometry.
+## --- What the player has seen ---------------------------------------------
+## Which parts of the world the map is allowed to show.
+##
+## Kept as chunks rather than cells: the map is a few hundred pixels across, so
+## it cannot resolve a single cell anyway, and a run that walks a few thousand
+## cells would otherwise keep a few thousand dictionary entries to draw forty
+## squares from.
+const EXPLORED_CHUNK := 2
+
+var explored: Dictionary[Vector2i, bool] = {}
+
+static func chunk_of(cell: Vector2i) -> Vector2i:
+	# Floor division, not integer division: the world has negative coordinates
+	# and -1 / 2 truncates toward zero, which folds two different chunks either
+	# side of the origin into one.
+	return Vector2i(floori(float(cell.x) / EXPLORED_CHUNK), floori(float(cell.y) / EXPLORED_CHUNK))
+
+## Everything within `radius` cells of here has been seen.
+##
+## Circular rather than square, because the fog is telling the player how far
+## they can see and sight is not a box. Called every frame with the player's
+## cell, so it does the least work it can: the loop is over a radius of about
+## ten, and marking a chunk that is already marked costs a dictionary write.
+func mark_explored(centre: Vector2i, radius: int) -> void:
+	var span: int = radius
+	for dy in range(-span, span + 1):
+		for dx in range(-span, span + 1):
+			if dx * dx + dy * dy > radius * radius:
+				continue
+			explored[chunk_of(centre + Vector2i(dx, dy))] = true
+
+func is_explored(cell: Vector2i) -> bool:
+	return explored.has(chunk_of(cell))
+
 func to_save() -> Dictionary:
 	var machine_rows: Array = []
 	for cell: Vector2i in machines:
@@ -236,7 +270,14 @@ func to_save() -> Dictionary:
 	for key: int in unlocked:
 		if bool(unlocked[key]):
 			unlocked_rows.append(int(key))
+	# Flat pairs rather than a dictionary of vectors: ConfigFile writes this as
+	# one array of numbers instead of several thousand "Vector2i(x, y)" strings.
+	var seen := PackedInt32Array()
+	for chunk: Vector2i in explored:
+		seen.append(chunk.x)
+		seen.append(chunk.y)
 	return {
+		"explored": seen,
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
 		"machines": machine_rows, "cats": cat_rows, "boxes": box_rows,
 		"carried": carried_boxes, "food": food, "coins": coins,
@@ -245,6 +286,15 @@ func to_save() -> Dictionary:
 	}
 
 func from_save(data: Dictionary) -> void:
+	# Absent in saves written before the map existed, and that is fine: a run
+	# reloaded from one of those starts with only the base revealed and fills in
+	# again as it is walked. Adding this without moving SAVE_SCHEMA is deliberate
+	# -- a schema bump throws away every save anyone is in the middle of, and a
+	# missing key that reads as "nothing explored yet" costs a player nothing.
+	explored.clear()
+	var seen: PackedInt32Array = data.get("explored", PackedInt32Array())
+	for index in range(0, seen.size() - 1, 2):
+		explored[Vector2i(seen[index], seen[index + 1])] = true
 	heat = int(data.get("heat", Defs.START_HEAT))
 	total_heat = int(data.get("total_heat", 0))
 	var delivered_rows: Dictionary = data.get("delivered", {})
@@ -303,6 +353,10 @@ func from_save(data: Dictionary) -> void:
 func setup(seed_value: int) -> void:
 	ore.clear()
 	machines.clear()
+	# The base is on the map from the first frame. A player who opens the map
+	# before walking anywhere should see where they are, not a black square --
+	# the fog is there to make exploring worth something, not to hide the start.
+	explored.clear()
 	heat = Defs.START_HEAT
 	total_heat = 0
 	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0}
@@ -329,6 +383,7 @@ func setup(seed_value: int) -> void:
 	core.type = Defs.M_CORE
 	core.cell = core_cell
 	machines[core_cell] = core
+	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
 	cat_boxes.clear()
 	carried_boxes = 0

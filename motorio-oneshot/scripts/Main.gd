@@ -105,6 +105,11 @@ var menu_index: int = 0
 ## keep running while a player watches the reels, and stopping it would make a
 ## three-second animation into a three-second pause in production.
 var gacha_open: bool = false
+## The map, and how far in it is zoomed. Zoom is a run-long setting rather than
+## something that resets when the card closes: a player who zoomed out to find a
+## seam wants it still zoomed out when they check again a minute later.
+var map_open: bool = false
+var map_zoom: float = Defs.MAP_ZOOM_DEFAULT
 ## Which of Defs.GACHA_COUNTS the cursor is on.
 var gacha_index: int = 0
 ## Seconds of reel left, or negative when they are not turning. The pull has
@@ -159,6 +164,7 @@ func _start_run() -> void:
 	night_warned = false
 	meter_cell = Vector2i(9999, 9999)
 	build_menu_open = false
+	map_open = false
 	menu_index = 0
 	tool_index = 0
 	# A run that was reloaded or restarted mid-sequence would otherwise keep the
@@ -317,6 +323,7 @@ func toggle_build_menu() -> bool:
 		menu_index = selected_index
 		meter_cell = Vector2i(9999, 9999)
 		gacha_open = false
+		map_open = false
 	audio.call("play", "select")
 	return true
 
@@ -337,6 +344,85 @@ func _build_menu_key(key: InputEventKey) -> void:
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + count:
 		_load_build_gun(key.keycode - KEY_1)
 
+## --- The map ------------------------------------------------------------------
+## What the player has seen, drawn small. Everything else is void: the fog is
+## what makes walking somewhere worth anything, and a map that showed the whole
+## plateau would answer the only question exploring asks.
+func toggle_map() -> bool:
+	if state != State.PLAY:
+		return false
+	map_open = not map_open
+	if map_open:
+		# One window at a time. Two would both claim the keyboard, and the arrow
+		# keys mean different things in each.
+		build_menu_open = false
+		close_gacha()
+		meter_cell = Vector2i(9999, 9999)
+	audio.call("play", "select")
+	return true
+
+func set_map_zoom(value: float) -> void:
+	map_zoom = snappedf(clampf(value, Defs.MAP_ZOOM_MIN, Defs.MAP_ZOOM_MAX),
+		Defs.MAP_ZOOM_STEP)
+
+func _map_key(key: InputEventKey) -> void:
+	match key.keycode:
+		KEY_ESCAPE, KEY_M:
+			map_open = false
+			audio.call("play", "select")
+		KEY_LEFT, KEY_A, KEY_MINUS:
+			set_map_zoom(map_zoom - Defs.MAP_ZOOM_STEP)
+			audio.call("play", "select")
+		KEY_RIGHT, KEY_D, KEY_EQUAL:
+			set_map_zoom(map_zoom + Defs.MAP_ZOOM_STEP)
+			audio.call("play", "select")
+
+## Drawn into the HUD's canvas, because that is where the card is.
+##
+## Cells rather than machines are the unit: the map's job is "have I been here
+## and what is there", and at two pixels a cell a machine is a dot either way.
+func draw_map(on: CanvasItem, view: Rect2) -> void:
+	var scale: float = Defs.MAP_CELL_PX * map_zoom
+	var centre: Vector2 = view.position + view.size * 0.5
+	var here: Vector2i = sim.cell_of(player.position)
+	# How many cells fit, plus one so the edge row is drawn rather than clipped
+	# into a gap the eye reads as unexplored.
+	var reach := Vector2i(int(view.size.x / scale * 0.5) + 1,
+		int(view.size.y / scale * 0.5) + 1)
+	var block: float = maxf(scale * float(Sim.EXPLORED_CHUNK), 1.0)
+	var dot: float = maxf(scale, 2.0)
+
+	var seen := Color(0.78, 0.83, 0.90, 1.0)
+	for dy in range(-reach.y, reach.y + 1, Sim.EXPLORED_CHUNK):
+		for dx in range(-reach.x, reach.x + 1, Sim.EXPLORED_CHUNK):
+			var cell: Vector2i = here + Vector2i(dx, dy)
+			if not sim.is_explored(cell):
+				continue
+			var at: Vector2 = centre + Vector2(cell - here) * scale
+			on.draw_rect(Rect2(at, Vector2(block, block)), seen)
+
+	# Only what stands in explored ground. A seam nobody has been near must not
+	# appear on the map because it happens to be inside the drawn area.
+	for cell: Vector2i in sim.ore:
+		if not sim.is_explored(cell):
+			continue
+		var at: Vector2 = centre + Vector2(cell - here) * scale
+		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.ITEM_COLORS[int(sim.ore[cell])])
+	for cell: Vector2i in sim.machines:
+		if not sim.is_explored(cell):
+			continue
+		var machine: Sim.Machine = sim.machines[cell]
+		var at: Vector2 = centre + Vector2(cell - here) * scale
+		if machine.type == Defs.M_CORE:
+			on.draw_circle(at + Vector2(scale, scale) * 0.5, maxf(scale * 2.0, 5.0),
+				Defs.COL_CORE)
+			continue
+		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.COL_MACHINE_EDGE)
+	# Grim last, over everything, because the one thing a map has to answer
+	# instantly is where you are.
+	on.draw_circle(centre, 4.0, Color(0.05, 0.06, 0.09, 0.9))
+	on.draw_circle(centre, 2.6, Defs.COL_TEXT)
+
 ## --- The slot machine ---------------------------------------------------------
 ## G opens and closes it, and so does Esc, for the same reason B does the build
 ## list: a window you enter with one key and leave with another is a window
@@ -350,6 +436,7 @@ func toggle_gacha() -> bool:
 	gacha_open = true
 	# Two modals over the same world would both claim the keyboard.
 	build_menu_open = false
+	map_open = false
 	meter_cell = Vector2i(9999, 9999)
 	audio.call("play", "select")
 	return true
@@ -489,8 +576,19 @@ func shelter_doorstep() -> Vector2:
 func shelter_nearby() -> bool:
 	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
 
+## Is a window up? One predicate, because every part of the game that has to
+## behave differently while one is open has to agree about when that is -- and
+## the last time this was decided in two places, the build list took the arrow
+## keys and Grim walked off anyway.
+func modal_open() -> bool:
+	return build_menu_open or gacha_open or map_open
+
 func _process(delta: float) -> void:
 	_follow_music()
+	# Pushed rather than pulled: the character polls Input directly, so it needs
+	# to be told, and being told once a frame from here is what keeps the answer
+	# in one place.
+	player.modal = modal_open()
 	# Re-applied every frame because the platform base follows the touch pad,
 	# which appears and disappears as the player switches between thumb and
 	# keyboard mid-session.
@@ -615,6 +713,10 @@ func _update_build_hold(delta: float) -> void:
 
 func _process_play(delta: float) -> void:
 	_update_footsteps()
+	# Where Grim has been is what the map is allowed to show. Marked from here
+	# rather than inside the character, because the character does not know about
+	# the world and this is the one place that has both.
+	sim.mark_explored(sim.cell_of(player.position), Defs.SIGHT_RADIUS)
 	time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
 	_update_nibbles(delta)
@@ -884,7 +986,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if state == State.SETTINGS:
 			get_viewport().set_input_as_handled()
 			return
-	if event is InputEventMouseMotion and hud.dragging_slider >= 0:
+	if event is InputEventMouseMotion and (hud.dragging_slider >= 0
+			or bool(hud.dragging_map_zoom)):
 		touch_hud_drag((event as InputEventMouseMotion).position)
 		get_viewport().set_input_as_handled()
 		return
@@ -949,6 +1052,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_gacha_key(key)
 		get_viewport().set_input_as_handled()
 		return
+	# And the map, where left and right are the zoom rather than two steps west.
+	if map_open and state == State.PLAY:
+		_map_key(key)
+		get_viewport().set_input_as_handled()
+		return
 
 	match state:
 		State.TITLE:
@@ -1008,6 +1116,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode == KEY_G:
 		toggle_gacha()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_M:
+		toggle_map()
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + TOOLS.size():
@@ -1089,6 +1201,21 @@ func touch_hud(position: Vector2) -> bool:
 		return true
 	if state != State.PLAY:
 		return false
+	if map_open:
+		# The card owns the screen while it is up. Dragging the track sets the
+		# zoom; a tap anywhere off the card closes it, which is how every other
+		# window here behaves.
+		if bool(hud.call("map_slider_at", local)):
+			hud.call("begin_map_drag")
+			_apply_map_zoom(local.x)
+			return true
+		if not (hud.map_card_rect as Rect2).has_point(local):
+			map_open = false
+			audio.call("play", "select")
+		return true
+	if (hud.map_button_rect as Rect2).has_point(local):
+		toggle_map()
+		return true
 	if build_menu_open:
 		# The menu owns the screen while it is up: a tap picks a row or closes it,
 		# and nothing falls through to the world behind.
@@ -1157,6 +1284,9 @@ func _apply_slider(row: int, local_x: float) -> void:
 
 ## Dragging the slider keeps updating the value; the pad forwards drags here.
 func touch_hud_drag(position: Vector2) -> bool:
+	if bool(hud.dragging_map_zoom):
+		_apply_map_zoom(hud_local(position).x)
+		return true
 	if state != State.SETTINGS or hud.dragging_slider < 0:
 		return false
 	_apply_slider(hud.dragging_slider, hud_local(position).x)
@@ -1164,6 +1294,15 @@ func touch_hud_drag(position: Vector2) -> bool:
 
 func touch_hud_release() -> void:
 	hud.call("end_slider_drag")
+	hud.call("end_map_drag")
+
+## Where along the track the pointer is, as a zoom.
+func _apply_map_zoom(x: float) -> void:
+	var track: Rect2 = hud.map_slider_rect
+	if track.size.x <= 0.0:
+		return
+	var fraction: float = clampf((x - track.position.x) / track.size.x, 0.0, 1.0)
+	set_map_zoom(Defs.MAP_ZOOM_MIN + fraction * (Defs.MAP_ZOOM_MAX - Defs.MAP_ZOOM_MIN))
 
 ## Entry points for the mobile buttons, so touch and keyboard run through the
 ## same code rather than drifting apart.
@@ -1782,7 +1921,9 @@ func confirm_slot(slot: int) -> void:
 		return
 	hud.slot_picker = 0
 	hud.call("end_slider_drag")
+	hud.call("end_map_drag")
 	build_menu_open = false
+	map_open = false
 	meter_cell = Vector2i(9999, 9999)
 	night_override = -1.0
 	cinema_zoom = 1.0
