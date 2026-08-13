@@ -31,11 +31,22 @@ background -- a lesson this pipeline already had, working in its favour for once
 
 ## Why the shapes are so simple
 
-The game draws these at 43 screen pixels on a 1280-wide desktop and 23 on a
-phone. The miner being replaced had roughly twenty distinct mechanical parts,
-and at 23 pixels it was grey mud. Every prompt here names a small number of
-large shapes and one warm light, because that is all that survives the trip
-down. Detail is not the thing that makes an object readable; silhouette is.
+Measure before believing a number here, and measure at the zoom people play at
+rather than the one the game opens on. The zoom keys are not only for looking
+around: players sit zoomed in, and `game_scale` runs 0.6 to 1.6 in steps of
+0.05 from a desktop default of 0.90. So the miner is 43 screen pixels only at
+the default on a 1280 window; at 1.20 on a 1920 window it is 86, and at the
+ceiling 115.
+
+Small either way. The miner being replaced had roughly twenty distinct
+mechanical parts and none of those sizes can hold twenty of anything. Every
+prompt here names a few large shapes and one warm light, because silhouette is
+what makes an object readable and detail is not.
+
+Generated at 1024 regardless, and stored by build_objects.py at twice the drawn
+size. That is what makes zooming in safe: at the ceiling the stored art is
+upscaled 1.6x by a NEAREST filter, which stays soft because these are painted
+gradients rather than authored pixels.
 """
 from __future__ import annotations
 
