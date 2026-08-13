@@ -78,6 +78,52 @@
    ]
   },
   {
+   "id": "cat_tool_gen",
+   "candidates": [
+    {
+     "id": "cat_tool_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/cat_tool_gen1-128-f3a9d138204d.png",
+      "64": "/object-candidates/cat_tool_gen1-64-671c66e538a4.png"
+     },
+     "source": [
+      754,
+      734
+     ]
+    },
+    {
+     "id": "cat_tool_gen2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/cat_tool_gen2-128-2f5976e34356.png",
+      "64": "/object-candidates/cat_tool_gen2-64-950ae9d437b3.png"
+     },
+     "source": [
+      414,
+      816
+     ]
+    }
+   ]
+  },
+  {
+   "id": "core_gen",
+   "candidates": [
+    {
+     "id": "core_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/core_gen1-128-50636c8b57a7.png",
+      "64": "/object-candidates/core_gen1-64-2eeb3acc2c8c.png"
+     },
+     "source": [
+      817,
+      862
+     ]
+    }
+   ]
+  },
+  {
    "id": "feedbox",
    "candidates": [
     {
@@ -150,6 +196,23 @@
      "source": [
       1092,
       1189
+     ]
+    }
+   ]
+  },
+  {
+   "id": "food_bin_gen",
+   "candidates": [
+    {
+     "id": "food_bin_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/food_bin_gen1-128-419bef836433.png",
+      "64": "/object-candidates/food_bin_gen1-64-c49e4c10a117.png"
+     },
+     "source": [
+      888,
+      702
      ]
     }
    ]
@@ -345,6 +408,52 @@
      "source": [
       1234,
       943
+     ]
+    }
+   ]
+  },
+  {
+   "id": "miner_gen",
+   "candidates": [
+    {
+     "id": "miner_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/miner_gen1-128-138f4a251e35.png",
+      "64": "/object-candidates/miner_gen1-64-ddaac21aa85f.png"
+     },
+     "source": [
+      797,
+      753
+     ]
+    },
+    {
+     "id": "miner_gen2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/miner_gen2-128-92988939eb12.png",
+      "64": "/object-candidates/miner_gen2-64-0db5827abdb1.png"
+     },
+     "source": [
+      759,
+      761
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shelter_gen",
+   "candidates": [
+    {
+     "id": "shelter_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/shelter_gen1-128-29111c9e5a9e.png",
+      "64": "/object-candidates/shelter_gen1-64-df42a7570013.png"
+     },
+     "source": [
+      948,
+      889
      ]
     }
    ]

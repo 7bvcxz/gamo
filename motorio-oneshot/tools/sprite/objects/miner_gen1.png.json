@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-13T11:35:35.982050+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A small mining machine for a snowy top-down game: a round drill head at the centre, two thick chunky pipes, one glowing warm amber lamp, a dusting of snow on its top surfaces. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of orange, cream, soft brown and muted blue-grey metal. Soft rounded chunky forms. Very few large simple shapes, so it stays readable when shown at 40 pixels across. The subject is centred and fills the frame, seen straight on with a slight downward tilt as in a top-down game. Flat even lighting. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio-oneshot/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "medium",
+  "background": "auto",
+  "n": 1,
+  "seconds": 55.3,
+  "usage": {
+    "input_tokens": 670,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 158
+    },
+    "output_tokens": 1756,
+    "output_tokens_details": {
+      "image_tokens": 1756,
+      "text_tokens": 0
+    },
+    "total_tokens": 2426
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio-oneshot/tools/sprite/objects/miner_gen1_raw.png"
+  ]
+}

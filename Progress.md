@@ -263,6 +263,8 @@
 | `loopfind.py` | 조밀한 프레임에서 사이클 찾기 |
 | `sprite_tool.py` | normalize / validate / mirror / sheet / publish / inspect |
 | `pipeline.py` | 위를 한 명령으로 엮음 |
+| `gen_objects.py` | 오브젝트 아트 생성(`imagegen`) → 크로마 키 → 후보. 프롬프트가 여기 산다 |
+| `build_objects.py` | 후보 → 제안 페이지 + `ADOPTED`를 게임 에셋으로 (그릴 크기의 2배) |
 
 한 번에 도는 명령:
 
@@ -327,6 +329,17 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
 - 다음 기능 방향은 사용자와 함께 정한다. (기존에 적혀 있던 자원 설계·인벤토리·운송 항목은 0.2.x~0.4.x에서 모두 구현 완료되어 2026-07-26에 정리)
 - 유지보수 후보: `docs/motorio/`에 누적된 60개 해시 빌드 정리 정책, 1,670줄 `Main.gd`의 서브시스템 분리
 - 테스트 정리 후보: `test_base.gd`, `test_conveyor.gd`가 아직 실패 시 즉시 `quit(1)`을 예약하는 구식 패턴을 사용한다
+
+## 공용 도구
+
+- **이미지 생성**: `~/Workspace/tools/imagegen/` (`imagegen`이 PATH에 있다). `~/Workspace`의
+  모든 프로젝트가 함께 쓴다. 키는 `~/.config/workspace/secrets.env`의 `OPENAI_API_KEY`이며
+  600, 저장소 밖이고, 도구가 직접 읽으므로 셸 export가 필요 없다. 호출마다 `<out>.png.json`
+  사이드카와 `~/.local/share/imagegen/ledger.jsonl` 기록이 남는다 — 프롬프트 없는 PNG는
+  추측으로만 다시 만들 수 있다. **`--dry-run`이 먼저다.**
+- 실측(2026-08-13): `gpt-image-2`는 투명 배경을 지원하지 않고 `gpt-image-1`만 된다. 대신
+  순수 초록 참조 이미지를 넘기면 결과 배경도 순수 초록으로 나와 키잉이 깨끗하다 — 스타일과
+  크로마가 한 번에 해결된다.
 
 ## 운영 규칙
 
