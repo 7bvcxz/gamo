@@ -316,20 +316,6 @@ function Shipped() {
           </figure>
         ))}
       </div>
-      {objects.terrain && (
-        <div className="shipped-loop">
-          <h3>바닥 · 바위 · 광맥</h3>
-          <p className="prop-why">
-            셋은 같은 문제가 아니라서 셋 다 다르게 만들었습니다. <b>눈</b>은 이음매 없는 한 장을
-            16×16으로 잘라 칸이 제 좌표의 조각을 읽습니다 — 이웃 칸은 이웃 조각이라 경계가 아예
-            없습니다. <b>바위</b>는 이웃 여덟 칸으로 47장 중 하나를 고르는 오토타일이라 덩어리에
-            윤곽이 생깁니다. <b>광맥</b>은 패치가 두 칸뿐이라(여덟 이웃이 다 찬 칸이 세계에 하나도
-            없습니다) 오토타일이 할 일이 없어, 여섯 변형을 그대로 두고 배경만 바닥의 눈으로
-            맞췄습니다.
-          </p>
-          <img src={site(objects.terrain)} alt="지형" className="shipped-loop-img" />
-        </div>
-      )}
       {objects.belt_loop && (
         <div className="shipped-loop">
           <h3>컨베이어가 이어지는 방식</h3>
