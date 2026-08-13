@@ -1,2 +1,2 @@
 :HL["/gamo/_next/static/chunks/3t-9zvi22g-lt.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"motorio-oneshot","param":null,"prefetchHints":0,"slots":{"children":{"name":"doc","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"c7519JgFUznd62dc-2GiB"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"motorio-oneshot","param":null,"prefetchHints":0,"slots":{"children":{"name":"doc","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"UP1whv99QdbCU9qKzmX0E"}

@@ -74,11 +74,21 @@ STYLE = (
     "same thick warm dark-brown outline, the same flat cel shading with gentle "
     "soft gradients, the same warm palette of orange, cream, soft brown and "
     "muted blue-grey metal. Soft rounded chunky forms. Very few large simple "
-    "shapes, so it stays readable when shown at 40 pixels across. The subject is "
-    "centred and fills the frame, seen straight on with a slight downward tilt "
-    "as in a top-down game. Flat even lighting. Flat solid pure green "
-    "background, one uniform colour."
+    "shapes, so it stays readable when shown at 40 pixels across. Flat even "
+    "lighting. Flat solid pure green background, one uniform colour."
 )
+
+## The camera is per subject rather than shared. Everything that stands on the
+## plateau is drawn straight on with a slight tilt, which is how the shelter and
+## the characters are drawn; the belt is drawn from directly overhead, because
+## its cross-section is measured off the picture and a tilt makes that
+## measurement a lie. A shared fragment has to be true of every subject -- this
+## repository has already watched one that was not ("walking on the spot",
+## applied to the prompt that said do not walk) flip a whole clip.
+STANDING = ("The subject is centred and fills the frame, seen straight on with a "
+            "slight downward tilt as in a top-down game. ")
+OVERHEAD = ("Seen from directly overhead, looking straight down, with no tilt "
+            "and no perspective. ")
 
 ## One entry per object the game draws from a PNG. The wording of each is the
 ## part worth arguing about; the style above is settled.
@@ -86,7 +96,36 @@ STYLE = (
 ## Written as what is there, never as what is absent: naming a thing to forbid
 ## it puts it in the picture. An earlier cat clip was told there was no bowl and
 ## came back holding one.
+## Which camera each subject is drawn with, defaulting to STANDING.
+CAMERA = {"belt": OVERHEAD}
+
 SUBJECTS = {
+    # Only the surface and its rails. The belt's cross-section is sampled off
+    # this picture and swept along a path to build the straight, corner and
+    # splitter tiles, so anything that varies along the direction of travel --
+    # slats, cleats, chevrons -- would smear into stripes. Movement is drawn by
+    # the game, over the top, where it can also scroll.
+    "belt": (
+        "A short section of conveyor belt for a snowy top-down game, running "
+        "straight from the top edge of the picture to the bottom edge and "
+        "reaching both edges: one smooth continuous rubber belt surface down the "
+        "middle in dark warm grey, and a chunky metal side rail running the full "
+        "length along each side in muted blue-grey with warm brass bolts. The "
+        "belt is uniform along its whole length, identical at the top and at the "
+        "bottom."
+    ),
+    "exchanger": (
+        "A cosy crystal-to-energy converter machine for a snowy top-down game: a "
+        "chunky rounded metal cabinet, one big round window in front glowing warm "
+        "amber, a thick funnel on top, two short brass pipes, a little snow on "
+        "its shoulders."
+    ),
+    "generator": (
+        "A cosy little power generator for a snowy top-down game: a chunky "
+        "rounded metal drum lying on a low frame, one round port in front glowing "
+        "cool blue-white, a short exhaust stack on top, warm brass bolts, a "
+        "little snow on its top surfaces."
+    ),
     "core": (
         "A cosy round heat core for a snowy top-down game: a warm glowing "
         "furnace at the centre of a circular stone-and-metal base, a big amber "
@@ -170,7 +209,7 @@ def next_slot(name: str) -> Path:
 
 
 def generate(name: str, quality: str, dry_run: bool) -> None:
-    prompt = f"{SUBJECTS[name]} {STYLE}"
+    prompt = f"{SUBJECTS[name]} {CAMERA.get(name, STANDING)}{STYLE}"
     target = next_slot(name)
     raw = target.with_name(target.stem + "_raw.png")
     command = [
@@ -204,7 +243,12 @@ def main() -> None:
     parser.add_argument("names", nargs="*", choices=list(SUBJECTS) + [],
                         help="생성할 오브젝트. 비우고 --all 을 쓰면 전부")
     parser.add_argument("--all", action="store_true")
-    parser.add_argument("--quality", default="medium",
+    # low, not medium. Measured 2026-08-13: medium bills 1,756 output tokens an
+    # image and low bills 196 -- nine times -- and at the sizes this game draws
+    # at, 43 to 115 pixels, the difference is not visible. The five objects that
+    # shipped first were generated at medium before anyone checked, which is
+    # where most of the first dollar went.
+    parser.add_argument("--quality", default="low",
                         choices=["low", "medium", "high"])
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

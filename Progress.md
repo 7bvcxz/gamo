@@ -340,6 +340,9 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
 - 실측(2026-08-13): `gpt-image-2`는 투명 배경을 지원하지 않고 `gpt-image-1`만 된다. 대신
   순수 초록 참조 이미지를 넘기면 결과 배경도 순수 초록으로 나와 키잉이 깨끗하다 — 스타일과
   크로마가 한 번에 해결된다.
+- 실측(2026-08-13): **품질은 `low`부터.** medium은 이미지당 출력 토큰 1,756, low는 196으로
+  9배 차이인데, 이 게임이 그리는 43~115픽셀에서는 구분되지 않는다. `gen_objects.py`의
+  기본값은 `low`다. 첫 다섯 오브젝트는 확인 전에 medium으로 뽑혀 첫 $1의 대부분을 썼다.
 
 ## 운영 규칙
 

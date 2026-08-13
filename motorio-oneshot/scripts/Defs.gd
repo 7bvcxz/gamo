@@ -94,6 +94,18 @@ const SHADOW := Color(0.02, 0.04, 0.08, 0.34)
 const SHADOW_SQUASH := 0.42
 ## One footprint for every machine, so they read as one class of object.
 const MACHINE_BODY := 23.0
+
+## What frost does to a machine's art. Every machine that is drawn from a texture
+## is tinted toward this rather than swapping to a second colour, so a half
+## frozen factory reads as one condition instead of as several.
+const COL_FROST_TINT := Color(0.60, 0.70, 0.86)
+
+## The four orthogonal neighbours, in one place. Belts read these to work out
+## which way things arrive, and every copy of this list that lives somewhere else
+## is a copy that can disagree about the order.
+const STEPS: Array[Vector2i] = [
+	Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1),
+]
 const FACE_LIGHT := 0.20
 const FACE_DARK := 0.24
 const FACE_BAND := 3.0

@@ -78,6 +78,23 @@
    ]
   },
   {
+   "id": "belt_gen",
+   "candidates": [
+    {
+     "id": "belt_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/belt_gen1-128-f7505ce16e5b.png",
+      "64": "/object-candidates/belt_gen1-64-6168ede65543.png"
+     },
+     "source": [
+      318,
+      1010
+     ]
+    }
+   ]
+  },
+  {
    "id": "cat_tool_gen",
    "candidates": [
     {
@@ -119,6 +136,23 @@
      "source": [
       817,
       862
+     ]
+    }
+   ]
+  },
+  {
+   "id": "exchanger_gen",
+   "candidates": [
+    {
+     "id": "exchanger_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/exchanger_gen1-128-740b7e8d6559.png",
+      "64": "/object-candidates/exchanger_gen1-64-818fd5767e0a.png"
+     },
+     "source": [
+      687,
+      941
      ]
     }
    ]
@@ -213,6 +247,23 @@
      "source": [
       888,
       702
+     ]
+    }
+   ]
+  },
+  {
+   "id": "generator_gen",
+   "candidates": [
+    {
+     "id": "generator_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/generator_gen1-128-f113b5a0f553.png",
+      "64": "/object-candidates/generator_gen1-64-712763c03358.png"
+     },
+     "source": [
+      612,
+      862
      ]
     }
    ]

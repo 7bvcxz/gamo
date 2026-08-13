@@ -74,6 +74,12 @@ ADOPTED = {
     "core": ("core_gen1", 86.4),        # 2.7 tiles
     "shelter": ("shelter_gen1", 70.4),  # 2.2 tiles
     "food_bin": ("food_bin_gen1", 36),
+    # Drawn at the miner's size rather than the 23 their painted bodies used.
+    # These three are all one-tile machines standing on the snow, and an
+    # exchanger two thirds the size of the miner beside it read as a smaller
+    # class of thing rather than as a different job.
+    "exchanger": ("exchanger_gen1", 36),
+    "generator": ("generator_gen1", 36),
     # gen2 rather than gen1: the first miner's drill leaned to one side, and the
     # direction a miner outputs in is already said by an arrow drawn over it.
     "miner": ("miner_gen2", 36),

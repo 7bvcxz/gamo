@@ -991,6 +991,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_crowd()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_F6:
+		debug_belt_loop()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("debug_scenario"):
 		debug_scenario()
 		get_viewport().set_input_as_handled()
@@ -1386,6 +1390,48 @@ func debug_scenario() -> void:
 		sim.carried_cat = spare
 		sim.place_cat(cell)
 	_notify("디버그 시나리오 · 채굴기 2대 · 고양이 배치", Defs.COL_DANGER)
+	audio.call("play", "confirm")
+
+## A closed rectangle of belt, so every turn a belt can make is on screen at once.
+##
+## Belts pick between a straight tile and a corner by looking at what feeds them,
+## which means the picture depends on the neighbours rather than on the belt --
+## and a rule like that is only really checked by laying belts down and looking.
+## Doing that by hand takes a couple of dozen presses each time, and a run built
+## by timed key holds fails in ways that look exactly like the game being broken.
+##
+## A loop rather than a line because it contains all four corner cases, both
+## handednesses, and a straight run in each direction, which is everything the
+## drawing can get wrong. `test_belt` pins the choice; this is for looking at the
+## seams, which no assertion is going to judge.
+func debug_belt_loop() -> void:
+	debug_unlock_all()
+	var origin: Vector2i = sim.core_cell + Vector2i(-3, 3)
+	var span := Vector2i(6, 4)
+	# Clockwise: east along the top, south down the right, west along the bottom,
+	# north up the left. Each belt points the way the loop travels, so the corners
+	# are made by the neighbours rather than by anything stored here.
+	var runs: Array[Array] = [
+		[Vector2i(0, 0), Vector2i(1, 0), span.x],
+		[Vector2i(span.x, 0), Vector2i(0, 1), span.y],
+		[Vector2i(span.x, span.y), Vector2i(-1, 0), span.x],
+		[Vector2i(0, span.y), Vector2i(0, -1), span.y],
+	]
+	var built := 0
+	for run: Array in runs:
+		var at: Vector2i = origin + (run[0] as Vector2i)
+		var step: Vector2i = run[1]
+		for _index in int(run[2]):
+			sim.machines.erase(at)
+			# Ore too. The first run of this landed half built because seams sat
+			# under it, and a tool that sometimes produces the arrangement it
+			# promises is worse than no tool: a gap in the loop looks exactly
+			# like a corner the drawing failed to make.
+			sim.ore.erase(at)
+			if sim.build(Defs.M_BELT, at, step):
+				built += 1
+			at += step
+	_notify("디버그 벨트 고리 · %d칸" % built, Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
 ## The crowded version: eight cats and a miner on every seam that will take one.

@@ -32,6 +32,18 @@ const CORE_ART: Texture2D = preload("res://assets/objects/core.png")
 const SHELTER_ART: Texture2D = preload("res://assets/objects/shelter.png")
 const FOOD_BIN_ART: Texture2D = preload("res://assets/objects/food_bin.png")
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
+const EXCHANGER_ART: Texture2D = preload("res://assets/objects/exchanger.png")
+const GENERATOR_ART: Texture2D = preload("res://assets/objects/generator.png")
+## The transport pieces. All three are one cross-section swept along a path by
+## tools/sprite/build_belt.py, and they are drawn in one canonical orientation --
+## travelling east, and for the corner turning from east to south -- then rotated
+## and mirrored here. Because every arm meets its tile edge square, the edge is
+## that cross-section, so any two of these that meet match exactly rather than
+## nearly. The tool checks it: placed tiles, touching pixels, maximum difference
+## zero.
+const BELT_STRAIGHT_ART: Texture2D = preload("res://assets/objects/belt_straight.png")
+const BELT_CORNER_ART: Texture2D = preload("res://assets/objects/belt_corner.png")
+const SPLITTER_ART: Texture2D = preload("res://assets/objects/splitter.png")
 ## 2.7 tiles across. Written as the multiple rather than as 86.4, because the
 ## number that matters is how many cells of the world it covers.
 ## The drill a cat holds while it works, and how far it travels. Tied to the work
@@ -47,12 +59,16 @@ const CAT_TOOL_BOB := 0.875
 ## How many times the drill goes up and down per turn of the work animation.
 const CAT_TOOL_BEATS := 2.0
 
+## Every one-tile machine drawn from a texture: miner, exchanger, generator. One
+## number rather than three, because they stand side by side on the same snow and
+## a difference between them reads as a difference in importance.
+const MACHINE_ART_DRAW := 36.0
+
 const CORE_DRAW := 2.7 * float(Defs.TILE)
 ## 2.2 tiles. Same form as the core's, for the same reason: the number that
 ## matters is how many cells of the world the building covers.
 const SHELTER_DRAW := 2.2 * float(Defs.TILE)
 const FOOD_BIN_DRAW := 36.0
-const MINER_DRAW := 36.0
 
 const CAT_CELL := 128.0
 const CAT_FRAMES := 8
@@ -376,6 +392,45 @@ func _object_art(texture: Texture2D, centre: Vector2, size: float,
 	draw_texture_rect(texture, Rect2(centre - Vector2.ONE * size * 0.5,
 		Vector2.ONE * size), false, tint)
 
+## A cell-filling tile, turned to face a direction and optionally mirrored.
+##
+## The transport art is drawn once, travelling east, and every other orientation
+## is this transform. Drawing four rotations into the atlas instead would mean
+## four chances for one of them to be regenerated and left behind, and rotation
+## by right angles costs a NEAREST filter nothing.
+func _tile_art(texture: Texture2D, px: Vector2, tile: float, facing: Vector2i,
+		mirror: bool = false, tint: Color = Color.WHITE) -> void:
+	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
+	draw_set_transform(centre, Vector2(facing).angle(),
+		Vector2(1.0, -1.0 if mirror else 1.0))
+	draw_texture_rect(texture, Rect2(-Vector2.ONE * tile * 0.5,
+		Vector2.ONE * tile), false, tint)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## The direction items arrive travelling in, which is what decides whether a belt
+## is drawn straight or turning.
+##
+## Read off the neighbours rather than stored, so it cannot go stale: a belt laid
+## down beside an existing one changes what that one looks like, and there is no
+## moment to remember to update. A belt with nothing feeding it draws straight,
+## which is also what the head of a line should look like.
+##
+## Straight wins over turning when both are present. Two lines merging is real
+## and common, and of the two pictures the straight one is the one that says
+## which way this cell sends things -- a corner would claim the merge came only
+## from the side.
+func _belt_inflow(machine: Sim.Machine) -> Vector2i:
+	var out: Vector2i = machine.dir
+	var found: Vector2i = out
+	for step: Vector2i in Defs.STEPS:
+		var feeder: Sim.Machine = sim.machines.get(machine.cell - step)
+		if feeder == null or feeder.type != Defs.M_BELT or feeder.dir != step:
+			continue
+		if step == out:
+			return out
+		found = step
+	return found
+
 ## Every object standing on the plateau casts the same shadow: one squash, one
 ## colour, always at the object's base. Three different shadow styles was the
 ## single loudest inconsistency in the old world layer.
@@ -422,7 +477,7 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	_shadow(c + Vector2(0, 12), 11.0)
 	# Cold machines go blue rather than dark: the tint is the same signal the
 	# painted body carried, applied to the picture instead of mixed into it.
-	_object_art(MINER_ART, c, MINER_DRAW, Color.WHITE.lerp(Color(0.60, 0.70, 0.86), frost))
+	_object_art(MINER_ART, c, MACHINE_ART_DRAW, Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
 	# The output arrow is drawn after the cats, not here -- see _draw_machine_marks.
 	if machine.operated:
 		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
@@ -474,9 +529,11 @@ func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var frost: float = _frost(machine)
 	var base: Color = Defs.COL_BELT_BODY if frost <= 0.0 else Defs.COL_BELT_BODY_COLD
 	var edge: Color = Defs.machine_color(Defs.M_SPLITTER)
-	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.OUTLINE)
-	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), base)
-	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), edge, false, 2.0)
+	# The same swept cross-section the belts are made of, as a T: in from behind,
+	# out to both sides. So a splitter joins its belts rather than interrupting
+	# them, which is the whole reason it is built from the same profile.
+	_tile_art(SPLITTER_ART, px, tile, machine.dir, false,
+		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
 	# Only the two lanes it actually feeds, and the one that is next is bright, so
 	# the alternation is visible rather than inferred.
 	var sides: Array[Vector2i] = sim.splitter_outputs(machine)
@@ -485,9 +542,9 @@ func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var next: bool = index == machine.next_out
 		var lane: Color = edge if next else Color(edge.r, edge.g, edge.b, 0.32)
 		draw_line(c + dir * 4.0, c + dir * 13.0, lane, 3.0 if next else 2.0)
-	# And a dim stub showing where input is expected.
-	draw_line(c - Vector2(machine.dir) * 13.0, c - Vector2(machine.dir) * 5.0,
-		Color(edge.r, edge.g, edge.b, 0.20), 2.0)
+	# The dim stub that used to show where input is expected is gone: the art has
+	# an arm there now, reaching the cell edge to meet the belt that feeds it, and
+	# a painted hint on top of a real one reads as two different claims.
 	draw_circle(c, 5.0, base.darkened(0.35))
 	draw_circle(c, 5.0, Defs.OUTLINE, false, 1.0)
 	for entry: Dictionary in machine.items:
@@ -521,16 +578,15 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
 	var live: bool = machine.operated
 	var frost: float = _frost(machine)
-	var base: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
 	_shadow(centre + Vector2(0, 12), 11.0)
-	_body(centre, Defs.MACHINE_BODY, base, Defs.machine_color(Defs.M_GENERATOR))
-	# A lit drum. Cool light, because power is infrastructure rather than warmth,
-	# and it beats only while the generator is actually supplying.
+	_object_art(GENERATOR_ART, centre, MACHINE_ART_DRAW,
+		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
+	# The port the art already has, lit from behind and beating only while the
+	# generator is actually supplying. Cool light, because power is
+	# infrastructure rather than warmth.
 	var beat: float = (0.65 + sin(pulse * 4.0) * 0.25) if live else 0.16
-	draw_circle(centre, 7.5, Color(0.30, 0.58, 0.78, beat * 0.7))
-	draw_circle(centre, 5.0, Color(0.55, 0.82, 0.98, beat))
-	draw_circle(centre, 2.2, Color(0.92, 0.99, 1.0, beat))
-	draw_circle(centre, 7.5, Defs.OUTLINE, false, 1.0)
+	draw_circle(centre + Vector2(0.0, 1.0), 6.0, Color(0.55, 0.82, 0.98, beat * 0.75))
+	draw_circle(centre + Vector2(0.0, 1.0), 2.4, Color(0.92, 0.99, 1.0, beat))
 	# Fuel sits in the same pip row every other machine uses.
 	_draw_pip(centre + Vector2(0, 13), Defs.ITEM_ENERGY, int(machine.buffer.get(Defs.ITEM_ENERGY, 0)))
 
@@ -627,7 +683,6 @@ func _draw_food_bin(tile: float) -> void:
 func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var body: Color = Color8(64, 76, 90).lerp(Color8(44, 52, 62), frost)
 	# The recipe is crystal-only. This still asked for copper, left over from the
 	# old smelter, so the window never lit no matter how well the line ran.
 	var held: int = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0))
@@ -635,12 +690,12 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
 
 	_shadow(c + Vector2(0, 12), 11.0)
-	var plate: Rect2 = _body(c, Defs.MACHINE_BODY, body, Defs.machine_color(Defs.M_EXCHANGER))
-	# A lit conversion window, warm because the light belongs to the factory.
-	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Color(1.0, 0.55, 0.2, glow))
-	draw_rect(Rect2(c.x - 6, c.y - 4, 12, 10), Defs.OUTLINE, false, 1.0)
-	draw_rect(Rect2(plate.position, Vector2(plate.size.x, 2.5)),
-		Defs.COL_BELT_RIM.lerp(body, frost * 0.7))
+	_object_art(EXCHANGER_ART, c, MACHINE_ART_DRAW,
+		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
+	# The window the art already has, lit from behind. Drawn rather than baked
+	# because it is the readout: dim means it is short of crystal, and a painted
+	# glow would say "working" while the machine sat empty.
+	draw_circle(c + Vector2(0.0, 1.0), 6.5, Color(1.0, 0.62, 0.24, glow))
 	_draw_arrow(self, c + Vector2(machine.dir) * 15.0, machine.dir, 9.0, Defs.COL_BRASS, 2.2)
 	# A copper stud marks the alloy recipe, so two exchangers side by side on
 	# different recipes are told apart without selecting either.
@@ -729,35 +784,53 @@ func _draw_pip(at: Vector2, item_type: int, count: int) -> void:
 func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var body: Color = Defs.COL_BELT_BODY if frost <= 0.0 else Defs.COL_BELT_BODY_COLD
-	# Glow first so it reads as light spilling out from under the machine.
-	draw_circle(c, 19.0, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
-		0.30 * (1.0 - frost) + 0.05))
-	draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Defs.OUTLINE)
-	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, tile - 4), body)
-	# The rim must be lighter than the pool it sits in, or it disappears into it.
-	var rim: Color = Defs.COL_BELT_RIM if frost <= 0.0 else Defs.COL_BELT_RIM.lerp(body, 0.6)
-	draw_rect(Rect2(px.x + 2, px.y + 2, tile - 4, 2.5), rim)
-	draw_rect(Rect2(px.x + 2, px.y + 2, 2.5, tile - 4), Color(rim.r, rim.g, rim.b, 0.6))
+	# A warm pool under the machine, kept well inside the cell now that the art
+	# has its own edges. At 19 it reached past them, so a run of belts was a line
+	# of overlapping orange discs on the snow rather than a lit machine.
+	draw_circle(c, 13.0, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
+		0.16 * (1.0 - frost) + 0.03))
+	var tint: Color = Color.WHITE.lerp(Defs.COL_FROST_TINT, frost)
+	var inflow: Vector2i = _belt_inflow(machine)
+	if inflow == machine.dir:
+		_tile_art(BELT_STRAIGHT_ART, px, tile, machine.dir, false, tint)
+	else:
+		# The drawn corner turns clockwise on screen. A belt that turns the other
+		# way is the same picture mirrored across the way it travels, which the
+		# transform does for free -- and a second corner drawing would be a second
+		# thing to keep in step with the first.
+		var clockwise: bool = Vector2i(-inflow.y, inflow.x) == machine.dir
+		_tile_art(BELT_CORNER_ART, px, tile, inflow, not clockwise, tint)
 	var dir := Vector2(machine.dir)
 	var perp := Vector2(-dir.y, dir.x)
 	# Scrolling chevrons: the cheapest possible "this is moving" signal.
+	#
+	# Half the size they were and half as opaque. They were drawn for a plain
+	# dark rectangle, and against one they were the only thing on the belt; over
+	# art with rails and bolts the same marks covered all of it, so a run read as
+	# arrows painted on a road rather than as a surface going somewhere. What has
+	# to be visible is that it moves -- and movement is legible at an opacity a
+	# static mark would disappear at.
 	var grade: float = float(Defs.BELT_TIERS[machine.tier]["speed"])
 	for index in 2:
 		var offset: float = fmod(pulse * Defs.BELT_SPEED * grade * 0.5 + float(index) * 0.5, 1.0)
 		var along: float = (offset - 0.5) * tile
-		var head: Vector2 = c + dir * (along + 5.0)
-		var tail: Vector2 = c + dir * (along - 2.0)
+		var head: Vector2 = c + dir * (along + 2.5)
+		var tail: Vector2 = c + dir * (along - 1.0)
 		var chev: Color = Defs.COL_BELT_CHEVRON if frost <= 0.0 else Defs.COL_FROZEN_CHEVRON
-		draw_line(tail + perp * 5.0, head, chev, 2.0)
-		draw_line(tail - perp * 5.0, head, chev, 2.0)
+		chev = Color(chev.r, chev.g, chev.b, chev.a * 0.55)
+		draw_line(tail + perp * 3.0, head, chev, 1.4)
+		draw_line(tail - perp * 3.0, head, chev, 1.4)
 
 func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var dir := Vector2(machine.dir)
+	# On a corner the first half of the cell belongs to the way the item came in,
+	# so a crystal follows the belt round instead of cutting across the elbow and
+	# leaving the surface it is supposed to be riding on.
+	var entry := Vector2(_belt_inflow(machine))
 	for item: Dictionary in machine.items:
 		var t: float = float(item["t"])
-		var at: Vector2 = c + dir * (t - 0.5) * tile
+		var at: Vector2 = c + (entry if t < 0.5 else dir) * (t - 0.5) * tile
 		var col: Color = Defs.ITEM_COLORS[int(item["type"])]
 		# Payloads were too small to see, so a working line looked identical to a
 		# broken one. These are deliberately chunky with a dark outline.
