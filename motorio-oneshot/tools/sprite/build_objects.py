@@ -369,6 +369,15 @@ def main() -> int:
         })
     manifest["adopted"] = chosen
     manifest["belt_loop"] = publish(belt_loop(), "shipped-belt-loop")
+    # Built by build_terrain.py, published here because this is the script that
+    # owns the manifest. Missing rather than fatal if that has not been run: the
+    # page simply does not show the section, which beats refusing to rebuild the
+    # object candidates because a different tool has not run yet.
+    terrain = OBJECTS.parent / "tiles" / "preview_terrain.png"
+    if terrain.exists():
+        manifest["terrain"] = publish(Image.open(terrain), "shipped-terrain")
+    else:
+        print("지형 미리보기 없음 — build_terrain.py 를 먼저 실행하세요")
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n",
                         encoding="utf-8")
     print("채택본 %d개 + 벨트 고리를 페이지로 발행" % len(chosen))
@@ -386,6 +395,8 @@ def main() -> int:
                    for entry in manifest["adopted"]
                    for url in entry["sizes"].values()}
     referenced.add(manifest["belt_loop"].rsplit("/", 1)[-1])
+    if manifest.get("terrain"):
+        referenced.add(manifest["terrain"].rsplit("/", 1)[-1])
     for stale in PUBLISH_DIR.glob("*.png"):
         if stale.name not in referenced:
             stale.unlink()

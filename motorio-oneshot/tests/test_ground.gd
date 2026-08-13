@@ -12,7 +12,7 @@ var failures := 0
 func _init() -> void:
 	_atlas()
 	_regions()
-	_variants()
+	_rock_mask()
 	_rock_atlas()
 	_rock_field()
 	print("GROUND: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
@@ -27,136 +27,113 @@ func _atlas() -> void:
 	var cell: int = atlas.get_width() / GroundLayer.TILE_COLUMNS
 	_check(atlas.get_width() % GroundLayer.TILE_COLUMNS == 0,
 		"폭이 열 수로 나누어떨어진다: %d / %d" % [atlas.get_width(), GroundLayer.TILE_COLUMNS])
-	_check(cell == 64, "타일 한 칸이 64픽셀이다: %d" % cell)
 	# A tile is 32 world pixels and the camera stops at 2.56, so 82 device pixels
 	# is the most one is ever drawn at in ordinary play. The source has to cover
 	# that without being paid for twice over.
-	_check(cell >= 64, "화면 최대 82px를 감당할 해상도다")
-	_check(GroundLayer.TILE_VARIANTS
-		== GroundLayer.TILE_COLUMNS * GroundLayer.TILE_COLUMNS,
-		"변형 수가 4x4다: %d" % GroundLayer.TILE_VARIANTS)
+	_check(cell == 64, "타일 한 칸이 64픽셀이다: %d" % cell)
 
-## Every region inside the atlas, none overlapping, all the same size. The seam
-## this guards against is a half-pixel one, so the arithmetic is what gets
-## checked rather than the picture.
+## Regions inside the atlas, and the property that replaced variety.
+##
+## The floor is one continuous picture now, so what has to be true is not that
+## sixteen variants all get used and none falls into stripes -- it is that a cell
+## reads the part of the picture at its own coordinates. Everything else follows:
+## neighbouring cells read neighbouring parts, which is why there is no seam, and
+## the repeat is the field's own size rather than something a hash decided.
 func _regions() -> void:
 	var atlas: Texture2D = GroundLayer.TILE_ATLAS
-	if atlas == null:
-		return
+	var size: float = float(atlas.get_width()) / float(GroundLayer.TILE_COLUMNS)
 	var bounds := Rect2(0.0, 0.0, float(atlas.get_width()), float(atlas.get_height()))
-	var seen: Dictionary = {}
-	var size: Vector2 = GroundLayer.tile_region(0).size
-	for variant in GroundLayer.TILE_VARIANTS:
-		var region: Rect2 = GroundLayer.tile_region(variant)
-		_check(bounds.encloses(region),
-			"%d번 영역이 아틀라스 안에 있다: %s" % [variant, region])
-		_check(region.size.is_equal_approx(size), "%d번 영역 크기가 같다" % variant)
-		var key: String = "%d,%d" % [int(region.position.x), int(region.position.y)]
-		_check(not seen.has(key), "%d번 영역이 겹치지 않는다" % variant)
-		seen[key] = true
-	_check(seen.size() == GroundLayer.TILE_VARIANTS,
-		"열여섯 자리를 전부 쓴다: %d" % seen.size())
-	# Out of range clamps rather than reading past the atlas.
-	_check(GroundLayer.tile_region(-5) == GroundLayer.tile_region(0), "범위 아래는 0번으로")
-	_check(GroundLayer.tile_region(999)
-		== GroundLayer.tile_region(GroundLayer.TILE_VARIANTS - 1), "범위 위는 마지막으로")
+	var seen: Dictionary[String, bool] = {}
+	for y in GroundLayer.TILE_COLUMNS:
+		for x in GroundLayer.TILE_COLUMNS:
+			var region: Rect2 = GroundLayer.tile_region(Vector2i(x, y))
+			_check(bounds.encloses(region), "%s 영역이 아틀라스 안이다: %s" % [Vector2i(x, y), region])
+			_check(region.size == Vector2(size, size), "영역 크기가 한 칸이다: %s" % region)
+			seen["%d,%d" % [int(region.position.x), int(region.position.y)]] = true
+	_check(seen.size() == GroundLayer.TILE_COLUMNS * GroundLayer.TILE_COLUMNS,
+		"16x16 자리를 전부 쓴다: %d" % seen.size())
 
-## The variant a cell gets. Three things matter and none of them show up in a
-## still: it must be the same every time (the map is regenerated from a seed, not
-## stored), it must use all sixteen, and it must not line up into stripes.
-func _variants() -> void:
-	var counts: Array[int] = []
-	for _variant in GroundLayer.TILE_VARIANTS:
-		counts.append(0)
-	for y in range(-40, 40):
-		for x in range(-40, 40):
-			var variant: int = GroundLayer.tile_variant(Vector2i(x, y))
-			_check(variant >= 0 and variant < GroundLayer.TILE_VARIANTS,
-				"%s 칸의 변형 번호가 범위 안이다: %d" % [Vector2i(x, y), variant])
-			counts[variant] += 1
-	var used: int = 0
-	var low: int = 999999
-	var high: int = 0
-	for count: int in counts:
-		if count > 0:
-			used += 1
-		low = mini(low, count)
-		high = maxi(high, count)
-	_check(used == GroundLayer.TILE_VARIANTS, "6400칸에서 열여섯 변형이 모두 나온다: %d" % used)
-	# Not a uniform distribution test -- a hash is allowed to be lumpy -- but a
-	# variant that almost never appears is sixteen tiles' worth of art nobody sees.
-	_check(low * 4 >= high, "가장 드문 변형도 가장 흔한 것의 4분의 1 이상이다: %d ~ %d" % [low, high])
+	# Adjacent cells read adjacent parts of the field. This is the whole point:
+	# the sixteen hashed variants were replaced because scrambling which patch
+	# lands where is exactly what puts a seam between two cells.
+	for cell: Vector2i in [Vector2i(3, 4), Vector2i(0, 0), Vector2i(15, 15)]:
+		var here: Rect2 = GroundLayer.tile_region(cell)
+		var right: Rect2 = GroundLayer.tile_region(cell + Vector2i(1, 0))
+		var down: Rect2 = GroundLayer.tile_region(cell + Vector2i(0, 1))
+		var wrapped: bool = cell.x == GroundLayer.TILE_COLUMNS - 1
+		_check(wrapped or is_equal_approx(right.position.x, here.position.x + size),
+			"%s 오른쪽 칸이 오른쪽 조각을 읽는다" % cell)
+		var wrapped_down: bool = cell.y == GroundLayer.TILE_COLUMNS - 1
+		_check(wrapped_down or is_equal_approx(down.position.y, here.position.y + size),
+			"%s 아래 칸이 아래 조각을 읽는다" % cell)
 
-	# Same answer every time, which is what makes the floor stable when the camera
-	# comes back to it.
-	for cell: Vector2i in [Vector2i(0, 0), Vector2i(-7, 13), Vector2i(120, -85)]:
-		var first: int = GroundLayer.tile_variant(cell)
-		var stable := true
-		for _repeat in 8:
-			if GroundLayer.tile_variant(cell) != first:
-				stable = false
-		_check(stable, "%s 칸은 몇 번을 물어도 같은 변형이다: %d" % [cell, first])
+	# Negative coordinates. The world has them, and `%` in GDScript keeps the
+	# sign, so a plain modulo reads a negative offset -- off the atlas entirely,
+	# which draws nothing at all rather than something slightly wrong.
+	for pair: Array in [[Vector2i(-1, -1), Vector2i(15, 15)],
+			[Vector2i(-16, -16), Vector2i(0, 0)], [Vector2i(-17, 3), Vector2i(15, 3)]]:
+		_check(GroundLayer.tile_region(pair[0]) == GroundLayer.tile_region(pair[1]),
+			"%s 와 %s 가 같은 조각을 읽는다" % [pair[0], pair[1]])
+	for cell: Vector2i in [Vector2i(-1, -1), Vector2i(-40, 7), Vector2i(1000, -1000)]:
+		_check(bounds.encloses(GroundLayer.tile_region(cell)),
+			"%s 도 아틀라스 안을 읽는다" % cell)
 
-	# Stripes: a row or a column that repeats one variant is what two even
-	# multipliers produce immediately, and it reads as tiled wallpaper.
-	for y in [-3, 0, 11]:
-		var row: Dictionary = {}
-		for x in range(0, 40):
-			row[GroundLayer.tile_variant(Vector2i(x, y))] = true
-		_check(row.size() >= 8, "y=%d 행이 한 변형으로 줄서지 않는다: %d종" % [y, row.size()])
-	for x in [-3, 0, 11]:
-		var column: Dictionary = {}
-		for y in range(0, 40):
-			column[GroundLayer.tile_variant(Vector2i(x, y))] = true
-		_check(column.size() >= 8, "x=%d 열이 한 변형으로 줄서지 않는다: %d종" % [x, column.size()])
+## Boulders autotile, so which of the forty-seven a cell draws is decided by its
+## neighbours. The mask is the part that can be wrong in a way nothing else
+## catches: a bit in the wrong place still draws a rock tile, just not the one
+## whose edges match the rock beside it.
+func _rock_mask() -> void:
+	var alone: Dictionary[Vector2i, bool] = {}
+	alone[Vector2i(5, 5)] = true
+	_check(GroundLayer.rock_mask(alone, Vector2i(5, 5)) == 0, "혼자면 마스크가 0")
 
-	# Periodicity, which "how many distinct variants" cannot see. The first hash
-	# used all sixteen variants in every row and still laid them out as a lattice
-	# that restarted every sixteen tiles -- 0, 13, 10, 7, 4, 1, and round again.
-	# A repeating floor is the thing tile variety exists to prevent, so the
-	# repeat itself is what gets tested.
-	for period in [2, 4, 8, 16, 32]:
-		for y in [-5, 0, 7]:
-			var repeats: int = 0
-			for x in range(0, 60):
-				if GroundLayer.tile_variant(Vector2i(x, y)) \
-						== GroundLayer.tile_variant(Vector2i(x + period, y)):
-					repeats += 1
-			_check(repeats < 45,
-				"행이 %d칸마다 반복되지 않는다 (y=%d): 60칸 중 %d칸 일치" % [period, y, repeats])
-		for x in [-5, 0, 7]:
-			var down: int = 0
-			for y in range(0, 60):
-				if GroundLayer.tile_variant(Vector2i(x, y)) \
-						== GroundLayer.tile_variant(Vector2i(x, y + period)):
-					down += 1
-			_check(down < 45,
-				"열이 %d칸마다 반복되지 않는다 (x=%d): 60칸 중 %d칸 일치" % [period, x, down])
+	# One neighbour at a time, in the bit order the generated table was built
+	# with. Written out rather than looped over ROCK_NEIGHBOURS, because looping
+	# over the same list the code uses would only prove the list equals itself.
+	var expected: Array = [
+		[Vector2i(0, -1), 1], [Vector2i(1, 0), 2], [Vector2i(0, 1), 4],
+		[Vector2i(-1, 0), 8], [Vector2i(1, -1), 16], [Vector2i(1, 1), 32],
+		[Vector2i(-1, 1), 64], [Vector2i(-1, -1), 128],
+	]
+	for entry: Array in expected:
+		var field: Dictionary[Vector2i, bool] = {}
+		field[Vector2i(5, 5)] = true
+		field[Vector2i(5, 5) + (entry[0] as Vector2i)] = true
+		_check(GroundLayer.rock_mask(field, Vector2i(5, 5)) == int(entry[1]),
+			"%s 이웃의 비트가 %d" % [entry[0], entry[1]])
 
-## The boulder atlas. Six tiles with no relationship to each other, so the only
-## things that can be wrong are arithmetic: a region off the edge shows as a
-## hairline of the neighbouring tile, and a variant nobody picks is art that
-## never appears.
+	# A diagonal only counts when both of its orthogonals are rock -- a corner
+	# touching only at a point has nothing to round off. The table folds that in,
+	# so two masks that must look the same land on the same tile.
+	_check(GroundLayer.rock_region(16) == GroundLayer.rock_region(0),
+		"대각선만 있으면 고립된 타일과 같다")
+	_check(GroundLayer.rock_region(1 | 2 | 16) != GroundLayer.rock_region(1 | 2),
+		"두 직교 이웃이 다 있으면 대각선이 구분된다")
+	for mask in 256:
+		var region: Rect2 = GroundLayer.rock_region(mask)
+		_check(region.size == Vector2(RockTiles.CELL, RockTiles.CELL),
+			"마스크 %d 의 영역 크기" % mask)
+	_check(GroundLayer.rock_region(-5) == GroundLayer.rock_region(0), "범위 밖은 0으로")
+	_check(GroundLayer.rock_region(999) == GroundLayer.rock_region(255), "범위 위는 255로")
+
 func _rock_atlas() -> void:
 	var atlas: Texture2D = GroundLayer.ROCK_ATLAS
 	_check(atlas != null, "돌 아틀라스가 로드된다")
 	if atlas == null:
 		return
-	var cell: int = atlas.get_width() / GroundLayer.ROCK_COLUMNS
-	_check(cell == 64, "돌 타일 한 칸이 64픽셀이다: %d" % cell)
-	_check(atlas.get_width() == GroundLayer.ROCK_COLUMNS * cell
-		and atlas.get_height() == cell * 2, "3x2 아틀라스다: %dx%d"
-		% [atlas.get_width(), atlas.get_height()])
+	_check(atlas == RockTiles.ATLAS, "GroundLayer 가 생성된 표와 같은 아틀라스를 쓴다")
+	_check(int(RockTiles.CELL) == 64, "돌 타일 한 칸이 64픽셀이다: %d" % int(RockTiles.CELL))
+	_check(atlas.get_width() == RockTiles.ATLAS_COLUMNS * int(RockTiles.CELL),
+		"아틀라스 폭이 열 수와 맞는다: %d" % atlas.get_width())
 	var bounds := Rect2(0.0, 0.0, float(atlas.get_width()), float(atlas.get_height()))
-	var seen: Dictionary = {}
-	for variant in GroundLayer.ROCK_VARIANTS:
-		var region: Rect2 = GroundLayer.rock_region(variant)
-		_check(bounds.encloses(region), "%d번 돌 영역이 아틀라스 안이다: %s" % [variant, region])
+	var seen: Dictionary[String, bool] = {}
+	for mask in 256:
+		var region: Rect2 = GroundLayer.rock_region(mask)
+		_check(bounds.encloses(region), "마스크 %d 의 영역이 아틀라스 안이다: %s" % [mask, region])
 		seen["%d,%d" % [int(region.position.x), int(region.position.y)]] = true
-	_check(seen.size() == GroundLayer.ROCK_VARIANTS, "여섯 자리를 전부 쓴다: %d" % seen.size())
-	_check(GroundLayer.rock_region(-3) == GroundLayer.rock_region(0), "범위 아래는 0번으로")
-	_check(GroundLayer.rock_region(99)
-		== GroundLayer.rock_region(GroundLayer.ROCK_VARIANTS - 1), "범위 위는 마지막으로")
+	# 47 distinct pictures out of 256 masks: that is what folding the diagonal
+	# rule in buys, and if the table ever stopped folding it the count would rise.
+	_check(seen.size() == 47, "서로 다른 타일이 47개다: %d" % seen.size())
 
 ## Where the boulders land. The two numbers the request pinned down were a
 ## twentieth of the ground and clumps of one to twelve, and neither is visible in
@@ -206,15 +183,23 @@ func _rock_field() -> void:
 		"12칸을 넘는 덩어리는 드물다: %d / %d (최대 %d)"
 		% [over, sizes.size(), sizes[sizes.size() - 1]])
 
-	# Every one of the six appears, and no cell is left without a tile.
+	# What a real field asks the tileset for. A blob set is only worth having if
+	# the shapes it draws are the shapes that occur, and this is the one place
+	# that can answer: 220 squares of actual boulders, every mask they produce.
 	var used: Dictionary[int, bool] = {}
 	for cell: Vector2i in inside:
-		var variant: int = GroundLayer.rock_variant(cell)
-		_check(variant >= 0 and variant < GroundLayer.ROCK_VARIANTS,
-			"%s 돌 변형이 범위 안이다: %d" % [cell, variant])
-		used[variant] = true
-	_check(used.size() == GroundLayer.ROCK_VARIANTS,
-		"여섯 종류가 모두 쓰인다: %d" % used.size())
+		used[GroundLayer.rock_mask(ground._rock, cell)] = true
+	var pictures: Dictionary[String, bool] = {}
+	for mask: int in used:
+		var region: Rect2 = GroundLayer.rock_region(mask)
+		pictures["%d,%d" % [int(region.position.x), int(region.position.y)]] = true
+	# Not all 47 -- some configurations need a clump shape this generator does
+	# not make -- but far more than the six unrelated stamps this replaced, and
+	# the edge cases have to be among them or clumps would have no outline.
+	_check(pictures.size() >= 20,
+		"실제 지형이 요구하는 타일이 충분히 많다: %d종" % pictures.size())
+	_check(used.has(0), "고립된 바위가 나온다")
+	print("GROUND: 마스크 %d종 · 그림 %d종" % [used.size(), pictures.size()])
 	print("GROUND: 돌 %.1f%% · 덩어리 %d개 · 중앙값 %d · 최대 %d"
 		% [share, sizes.size(), median, sizes[sizes.size() - 1]])
 	ground.free()

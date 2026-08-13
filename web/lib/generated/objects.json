@@ -634,5 +634,6 @@
    }
   }
  ],
- "belt_loop": "/object-candidates/shipped-belt-loop-aba624a17dad.png"
+ "belt_loop": "/object-candidates/shipped-belt-loop-aba624a17dad.png",
+ "terrain": "/object-candidates/shipped-terrain-a139d95cb672.png"
 }

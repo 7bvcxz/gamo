@@ -264,6 +264,8 @@
 | `sprite_tool.py` | normalize / validate / mirror / sheet / publish / inspect |
 | `pipeline.py` | 위를 한 명령으로 엮음 |
 | `gen_objects.py` | 오브젝트 아트 생성(`imagegen`) → 크로마 키 → 후보. 프롬프트가 여기 산다 |
+| `gen_terrain.py` | 지형 재질 생성. 키잉 없이 화면 전체가 재질이다 |
+| `build_terrain.py` | 재질 → 눈 필드(이음매 없음)·바위 47-blob·광맥 6변형. 이음매는 계산으로 보장 |
 | `build_objects.py` | 후보 → 제안 페이지 + `ADOPTED`를 게임 에셋으로 (그릴 크기의 2배) |
 
 한 번에 도는 명령:

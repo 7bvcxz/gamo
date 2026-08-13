@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-13T13:58:12.623220+00:00",
+  "model": "gpt-image-2",
+  "prompt": "Warm orange copper nuggets and short metallic veins lying on clean pale snow, all the same size and scattered evenly across the whole picture, with plenty of plain pale snow between them. Seen from directly overhead, looking straight down, with no tilt, no perspective and no horizon. It fills the entire frame edge to edge as an even field with no single focal point and nothing placed in the middle. Cute cozy chibi game art style, matching the reference image: the same soft shading and the same warm palette sensibility. Flat even lighting across the whole picture, no vignette, no shadow of anything outside the frame.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio-oneshot/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 23.2,
+  "usage": {
+    "input_tokens": 642,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 130
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 838
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio-oneshot/tools/sprite/tiles/copper_src.png"
+  ]
+}

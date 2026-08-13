@@ -9,12 +9,18 @@ class_name GroundLayer
 
 const TEX_SIZE := 192
 
-## The ground tiles. Sixteen painted variants in one 4x4 atlas, cut by
-## tools/sprite/build_tiles.py -- one texture rather than sixteen so the whole
-## floor batches into a single draw call instead of one per cell.
-const TILE_ATLAS: Texture2D = preload("res://assets/tiles/ground_16.png")
-const TILE_COLUMNS := 4
-const TILE_VARIANTS := 16
+## The floor. One seamless picture of snow, sixteen cells across, cut by
+## tools/sprite/build_terrain.py -- still one texture, so the whole floor batches
+## into a single draw call, but no longer sixteen unrelated variants.
+##
+## A cell shows the part of the field at its own coordinates, so neighbouring
+## cells show neighbouring parts of a continuous picture and there is no seam
+## anywhere. The sixteen hashed variants this replaces existed to break up a
+## repeat; the answer to a repeat turned out not to be a better hash but a
+## picture that is actually continuous. Sixteen cells is 512 world pixels, wider
+## than the screen at any zoom, so the field never repeats within one glance.
+const TILE_ATLAS: Texture2D = preload("res://assets/tiles/snow_256.png")
+const TILE_COLUMNS := 16
 
 var sim: Sim
 var night: float = 0.0
@@ -93,28 +99,18 @@ static func _mix(a: int, b: int, salt: int) -> int:
 	h = (h ^ (h >> 13)) * 1274126177
 	return absi(h ^ (h >> 16))
 
-## Which of the sixteen a cell shows.
+## Where in the field a cell reads from: its own coordinates, wrapped.
 ##
-## A hash of the coordinates, not a random draw: the floor has to look the same
-## every time the camera comes back to it, and the map is regenerated from a seed
-## rather than stored. The multipliers are odd and coprime so the pattern does
-## not fall into stripes along either axis, which two even ones do immediately.
-static func tile_variant(cell: Vector2i) -> int:
-	# Through a proper avalanche, and that is not decoration. The
-	# first version was `x * 73856093 ^ y * 19349663` taken modulo sixteen, and
-	# because both multipliers are odd that reduces to a function of x and y
-	# modulo sixteen -- a perfectly regular lattice repeating every sixteen
-	# tiles in both directions. Dumping a field made it obvious: every row read
-	# 0, 13, 10, 7, 4, 1, ... and then started again. Multiplying by odd numbers
-	# scatters the high bits; only a shift-xor moves them down where a modulo can
-	# see them.
-	return _mix(cell.x, cell.y, 3) % TILE_VARIANTS
-
-static func tile_region(variant: int) -> Rect2:
-	var index: int = clampi(variant, 0, TILE_VARIANTS - 1)
+## Not a hash. A hash was the right answer while the sixteen tiles were unrelated
+## pictures, and it was still being fixed as recently as the day the lattice was
+## found -- but every version of it scrambles which patch lands where, and
+## scrambling is exactly what puts a seam between two cells. Position keeps
+## neighbours as neighbours, and posmod rather than % because the world has
+## negative coordinates and a negative index reads the wrong side of the atlas.
+static func tile_region(cell: Vector2i) -> Rect2:
 	var size: float = float(TILE_ATLAS.get_width()) / float(TILE_COLUMNS)
-	return Rect2(float(index % TILE_COLUMNS) * size, float(index / TILE_COLUMNS) * size,
-		size, size)
+	return Rect2(float(posmod(cell.x, TILE_COLUMNS)) * size,
+		float(posmod(cell.y, TILE_COLUMNS)) * size, size, size)
 
 ## --- Boulders ------------------------------------------------------------------
 ## Six tiles of snow with rocks lying on it. They have nothing to do with each
@@ -145,9 +141,18 @@ const ORE_ATLAS: Dictionary[int, Texture2D] = {
 ## beside the two above, and put it in ORE_ATLAS.
 const ORE_ATLASES_READY := ["coal_6.png", "gold_6.png", "iron_6.png", "uranium_6.png"]
 
-const ROCK_ATLAS: Texture2D = preload("res://assets/tiles/rock_6.png")
-const ROCK_COLUMNS := 3
-const ROCK_VARIANTS := 6
+## Boulders autotile now. Which of the forty-seven a cell draws is decided by
+## which of its eight neighbours are also boulders, through the table in
+## RockTiles.gd -- so a clump has an outline rather than being six unrelated
+## stamps that happen to be adjacent.
+##
+## The comment that used to be here argued the opposite, and was right at the
+## time: an earlier 47-tile sheet was drawn by hand and twelve of its tiles had
+## rock touching no edge at all, so six independent variants were strictly
+## better than a tileset that did not tile. What changed is that the tiles are no
+## longer drawn. build_terrain.py computes the geometry as a mask and lets the
+## mask choose between two materials, so the pieces cannot disagree.
+const ROCK_ATLAS: Texture2D = RockTiles.ATLAS
 
 ## A twentieth of the ground, in clumps of one to twelve. One clump is seeded per
 ## block of ROCK_BLOCK cells, so the share is the average clump over the block:
@@ -228,14 +233,30 @@ func is_rock(cell: Vector2i) -> bool:
 
 ## Which of the six, on a different salt from the snow so a cell that turns to
 ## rock does not inherit its snow variant's number.
-static func rock_variant(cell: Vector2i) -> int:
-	return _mix(cell.x, cell.y, 29) % ROCK_VARIANTS
+## Which neighbours are boulders, as the eight bits RockTiles is indexed by.
+##
+## Read off `_rock` rather than stored, for the same reason a belt reads its
+## neighbours: a clump is decided by a hash of the coordinates and can be asked
+## about any cell at any time, so there is no moment at which a stored answer
+## would need updating and no way for one to be stale.
+static func rock_mask(rock: Dictionary[Vector2i, bool], cell: Vector2i) -> int:
+	var mask := 0
+	for index in ROCK_NEIGHBOURS.size():
+		if rock.has(cell + ROCK_NEIGHBOURS[index]):
+			mask |= 1 << index
+	return mask
 
-static func rock_region(variant: int) -> Rect2:
-	var index: int = clampi(variant, 0, ROCK_VARIANTS - 1)
-	var size: float = float(ROCK_ATLAS.get_width()) / float(ROCK_COLUMNS)
-	return Rect2(float(index % ROCK_COLUMNS) * size, float(index / ROCK_COLUMNS) * size,
-		size, size)
+## North, east, south, west, then the four diagonals -- the bit order the
+## generated table was built with. Written here as vectors so the two cannot
+## drift: if this order changes the table is wrong, and it is generated from the
+## same names.
+const ROCK_NEIGHBOURS: Array[Vector2i] = [
+	Vector2i(0, -1), Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0),
+	Vector2i(1, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(-1, -1),
+]
+
+static func rock_region(mask: int) -> Rect2:
+	return RockTiles.region(RockTiles.LOOKUP[clampi(mask, 0, 255)])
 
 ## Which of the six a seam shows. Its own salt, so a cell does not inherit the
 ## number its snow or its boulder would have had.
@@ -267,7 +288,7 @@ func _draw_tiles() -> void:
 				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
-				tile_region(tile_variant(cell)))
+				tile_region(cell))
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
@@ -275,7 +296,7 @@ func _draw_tiles() -> void:
 				continue
 			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
-				rock_region(rock_variant(cell)))
+				rock_region(rock_mask(_rock, cell)))
 	# A third pass because a seam cell must be painted once -- both passes above
 	# multiply, so a cell drawn twice comes out twice as dark. Unlike them this
 	# one can switch texture between cells, since two ores on screen are two
