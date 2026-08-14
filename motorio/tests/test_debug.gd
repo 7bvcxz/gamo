@@ -94,6 +94,24 @@ func _run() -> void:
 			again += 1
 	_assert(again == miners.size(), "두 번 눌러도 그대로다: %d" % again)
 
+	# F7 puts a frozen cat where she is looking, which is the only part of the
+	# rescue a browser harness cannot reliably arrange for itself: the world is
+	# seeded per run, so "walk four east and one north" is not a route, it is a
+	# guess that fails as a broken game.
+	main.sim.frozen_cats.clear()
+	main.sim.carried_frozen = false
+	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(0, 5))
+	main.player.facing = Vector2i.RIGHT
+	var front: Vector2i = main.player.facing_cell()
+	main.debug_rescue()
+	_assert(main.sim.frozen_cats.has(front),
+		"F7 은 바라보는 칸에 얼어붙은 고양이를 둔다")
+	_assert(main.sim.pick_up_frozen(front), "그 자리에서 바로 들 수 있다")
+	main.debug_rescue()
+	_assert(main.sim.frozen_cats.is_empty(),
+		"이미 안고 있으면 하나 더 만들지 않는다 — 두 번 눌러도 팔은 둘뿐이다")
+	main.sim.carried_frozen = false
+
 	main.clear_save()
 
 	if failures == 0:

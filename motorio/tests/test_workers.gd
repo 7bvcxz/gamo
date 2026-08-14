@@ -1,7 +1,8 @@
 extends SceneTree
 
 ## The worker system: miners are machines, cats are the labour that runs them,
-## crates are how labour is acquired, and food is what keeps it running.
+## and food is what keeps it running. How a cat is acquired -- found frozen and
+## carried home -- is test_frozen.
 
 var failures := 0
 
@@ -10,7 +11,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_test_miner_needs_operator()
-	_test_crates_and_adoption()
+	_test_new_cats_stand_apart()
 	_test_morning_dispatch()
 	_test_hunger_and_feeding()
 	# --- One item, one cat, and the nearest one --------------------------------
@@ -148,32 +149,14 @@ func _test_miner_needs_operator() -> void:
 
 # --- 5-2 -------------------------------------------------------------------
 
-func _test_crates_and_adoption() -> void:
+func _test_new_cats_stand_apart() -> void:
 	var sim := _sim()
-	var starter := 0
-	for cell: Vector2i in sim.cat_boxes:
-		if Vector2(cell - sim.core_cell).length() <= Defs.WARM_BASE:
-			starter += 1
-	_assert(starter >= Defs.STARTER_CAT_BOXES,
-		"three crates start inside the opening warm radius")
-	_assert(sim.cat_boxes.size() > Defs.STARTER_CAT_BOXES * 3,
-		"more crates are strewn further out, so exploring buys workers")
-
-	var first: Vector2i = sim.cat_boxes.keys()[0]
-	_assert(sim.collect_box_at(first), "walking over a crate collects it")
-	_assert(not sim.cat_boxes.has(first), "the crate leaves the world")
-	_assert(sim.carried_boxes == 1, "the crate is now carried")
-	_assert(not sim.collect_box_at(first), "an empty tile collects nothing")
-
-	_assert(sim.adopt_cats() == 0, "fewer than three crates adopts nobody")
-	sim.carried_boxes = Defs.BOXES_PER_CAT * 2
-	_assert(sim.adopt_cats() == 2, "six crates adopt two cats")
+	# Where a cat arrives from is test_frozen's business now. What is checked
+	# here is where it stands once it has: two cats appearing at once used to
+	# land on the same pixel, which reads as one cat until they walk away in
+	# different directions.
+	sim.grant_cats(2)
 	_assert(sim.cats.size() == 2, "the cats exist")
-	_assert(sim.carried_boxes == 0, "the crates are spent")
-	# The hut is solid, so cats stand at its door rather than inside it -- and
-	# beside each other rather than on top of each other. Adopting two at once
-	# used to put both on the same pixel, which reads as one cat until they walk
-	# away in different directions.
 	var door: Vector2 = sim.cell_centre(sim.shelter_cell) + Vector2(0.0, float(Defs.TILE))
 	for cat: Sim.Cat in sim.cats:
 		_assert(is_equal_approx(cat.pos.y, door.y), "a new cat starts on the shelter doorstep")
@@ -181,7 +164,7 @@ func _test_crates_and_adoption() -> void:
 		_assert(not sim.blocks_player(Vector2i((cat.pos / float(Defs.TILE)).floor())),
 			"and not standing inside the building")
 	_assert(sim.cats[0].pos.distance_to(sim.cats[1].pos) > 4.0,
-		"two cats adopted together do not land on the same spot")
+		"two cats arriving together do not land on the same spot")
 	sim.free()
 
 # --- 5-3 -------------------------------------------------------------------
@@ -192,8 +175,7 @@ func _test_morning_dispatch() -> void:
 	sim.ore[Vector2i(0, -1)] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
 	sim.build(Defs.M_MINER, Vector2i(0, -1), Vector2i.DOWN)
-	sim.carried_boxes = Defs.BOXES_PER_CAT * 2
-	sim.adopt_cats()
+	sim.grant_cats(2)
 	_assert(sim.cats.size() == 2, "two cats adopted")
 
 	# Nothing is assigned automatically: the player carries each cat to a machine.
@@ -258,8 +240,7 @@ func _test_hunger_and_feeding() -> void:
 	var cell := Vector2i(-1, 0)
 	sim.ore[cell] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
-	sim.carried_boxes = Defs.BOXES_PER_CAT
-	sim.adopt_cats()
+	sim.grant_cats(1)
 	# Assignment is manual now, so staff the machine the way a player would.
 	var cat: Sim.Cat = sim.cats[0]
 	sim.carried_cat = cat

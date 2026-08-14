@@ -31,7 +31,7 @@ export function MotorioLevelDesign() {
             <tr>
               <td>일손</td>
               <td>동시에 돌릴 수 있는 채굴기 수</td>
-              <td>고양이 상자 3개를 숙소로 가져와 입양한다</td>
+              <td>얼어붙은 고양이를 안고 와 기지 옆에서 녹인다</td>
             </tr>
             <tr>
               <td>시간</td>
@@ -82,9 +82,9 @@ export function MotorioLevelDesign() {
               <td>채굴기 전용. 시작 시점에는 닿을 수 없음</td>
             </tr>
             <tr>
-              <td>고양이 상자</td>
-              <td>100칸당 1개</td>
-              <td>시작 온기 안에 3개 보장</td>
+              <td>얼어붙은 고양이</td>
+              <td>200칸당 1마리</td>
+              <td>시작 온기 안에 1마리 보장</td>
             </tr>
           </tbody>
         </table>

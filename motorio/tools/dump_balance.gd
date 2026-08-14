@@ -105,8 +105,11 @@ func _initialize() -> void:
 			"miners_per_generator": Defs.GENERATOR_OUTPUT / Defs.MINER_POWER_DRAW,
 		},
 		"cats": {
-			"boxes_per_cat": Defs.BOXES_PER_CAT,
-			"tiles_per_box": Defs.CAT_BOX_PER_TILES,
+			"tiles_per_frozen": Defs.FROZEN_PER_TILES,
+			"starter_frozen": Defs.STARTER_FROZEN,
+			"carry_speed": Defs.FROZEN_CARRY_SPEED,
+			"thaw_radius": Defs.THAW_RADIUS,
+			"thaw_seconds": Defs.THAW_SECONDS,
 			"speed": Defs.CAT_SPEED,
 			"food_start": Defs.FOOD_START,
 		},

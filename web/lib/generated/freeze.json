@@ -1,0 +1,27 @@
+{
+ "cell": 128,
+ "sheet": "/freeze/cat_freeze_sheet-1b2941b1c2dd.png",
+ "stages": [
+  {
+   "index": 0,
+   "ice": 0.954,
+   "image": "/freeze/cat_freeze_0-3ff2f117cd49.png"
+  },
+  {
+   "index": 1,
+   "ice": 0.671,
+   "image": "/freeze/cat_freeze_1-d3ff687f39fe.png"
+  },
+  {
+   "index": 2,
+   "ice": 0.411,
+   "image": "/freeze/cat_freeze_2-2353a1a83ae5.png"
+  },
+  {
+   "index": 3,
+   "ice": 0.14,
+   "image": "/freeze/cat_freeze_3-e2655e46d150.png"
+  }
+ ],
+ "live": "/freeze/cat_live-93544abee19b.png"
+}

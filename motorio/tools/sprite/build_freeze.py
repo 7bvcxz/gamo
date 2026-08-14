@@ -3,7 +3,8 @@
 
     NODE_PATH=<playwright> SPRITE_CHROME=<chromium with H.264> \
       node tools/sprite/extract_frames.cjs melt.mp4 frames --fps 12
-    python3 tools/sprite/build_freeze.py frames
+    python3 tools/sprite/build_freeze.py frames     # cut the sheet, then publish
+    python3 tools/sprite/build_freeze.py --publish  # publish the committed sheet
 
 Writes assets/characters/cat_freeze_4.png -- one row of four cells, most frozen
 first -- and a contact sheet beside the frames for looking at.
@@ -43,6 +44,9 @@ cap really does land in the same place in each.
 """
 from __future__ import annotations
 
+import hashlib
+import io
+import json
 import sys
 from pathlib import Path
 
@@ -53,6 +57,13 @@ from sprite_tool import despeckle  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 GAME_ART = HERE.parent.parent / "assets" / "characters"
+REPO = HERE.parent.parent.parent
+## Its own directory and its own manifest, not the object candidates'. That
+## publisher deletes everything in its directory that its own manifest does not
+## name, so anything else written there disappears on its next run -- which is
+## the shape of a bug this repository has already had twice.
+PUBLISH_DIR = REPO / "web" / "public" / "freeze"
+MANIFEST = REPO / "web" / "lib" / "generated" / "freeze.json"
 
 ## The character cell every sheet in this game uses.
 CELL = 128
@@ -146,7 +157,73 @@ def measure(art: Image.Image) -> tuple[float, int]:
     return ice / max(solid, 1), cap_top
 
 
+def _publish_one(image: Image.Image, name: str) -> str:
+    """One cell, under a content-hashed name. Returns the path the page uses."""
+    payload = io.BytesIO()
+    image.save(payload, format="PNG", optimize=True)
+    data = payload.getvalue()
+    digest = hashlib.sha256(data).hexdigest()[:12]
+    filename = f"{name}-{digest}.png"
+    PUBLISH_DIR.mkdir(parents=True, exist_ok=True)
+    (PUBLISH_DIR / filename).write_bytes(data)
+    return f"/freeze/{filename}"
+
+
+def publish() -> int:
+    """The four stages onto the graphics page, beside the cat they turn into.
+
+    Read off the shipped sheet rather than off the frames, so this runs without
+    the clip and can only ever show what the game actually loads. The live cat
+    goes in the same manifest on purpose: the one thing a person has to judge
+    here is whether the animal is in the same place before and after the ice
+    goes, and that judgement is impossible if the two are on different pages.
+    """
+    if not MANIFEST.parent.is_dir():
+        print(f"{MANIFEST.parent}가 없습니다. 사이트가 매니페스트를 읽는 곳이므로 "
+              f"디렉터리를 만들 것이 아니라 경로가 낡은 것입니다.", file=sys.stderr)
+        return 1
+    sheet_path = GAME_ART / "cat_freeze_4.png"
+    if not sheet_path.exists():
+        print("시트가 없습니다: %s" % sheet_path, file=sys.stderr)
+        return 1
+    sheet = Image.open(sheet_path).convert("RGBA")
+    stages = sheet.width // CELL
+    manifest = {
+        "cell": CELL,
+        "sheet": _publish_one(sheet, "cat_freeze_sheet"),
+        # How icy each stage is, measured rather than described, so the page can
+        # say what "1단계" means without anyone writing a number down.
+        "stages": [],
+    }
+    for index in range(stages):
+        cell = sheet.crop((index * CELL, 0, (index + 1) * CELL, CELL))
+        ice, _ = measure(cell)
+        manifest["stages"].append({
+            "index": index,
+            "ice": round(ice, 3),
+            "image": _publish_one(cell, f"cat_freeze_{index}"),
+        })
+    live = Image.open(GAME_ART / "cat_idle_s.png").convert("RGBA").crop((0, 0, CELL, CELL))
+    manifest["live"] = _publish_one(live, "cat_live")
+    MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n",
+                        encoding="utf-8")
+    # Anything the manifest no longer points at. Same rule as the other
+    # publishers: a renamed stage must not leave its old render served.
+    referenced = {manifest["sheet"], manifest["live"]}
+    referenced |= {stage["image"] for stage in manifest["stages"]}
+    referenced = {url.rsplit("/", 1)[-1] for url in referenced}
+    for stale in PUBLISH_DIR.glob("*.png"):
+        if stale.name not in referenced:
+            stale.unlink()
+            print("정리: %s" % stale.name)
+    print("발행: %d단계 + 살아있는 고양이 -> %s"
+          % (stages, MANIFEST.relative_to(REPO)))
+    return 0
+
+
 def main() -> int:
+    if len(sys.argv) == 2 and sys.argv[1] == "--publish":
+        return publish()
     if len(sys.argv) != 2:
         print(__doc__)
         return 2
@@ -233,7 +310,7 @@ def main() -> int:
     out = GAME_ART / "cat_freeze_4.png"
     sheet.save(out, optimize=True)
     print(f"게임: {out.name}  {sheet.width}x{sheet.height}px  ({STAGES}단계)")
-    return 0
+    return publish()
 
 
 if __name__ == "__main__":

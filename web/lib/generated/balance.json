@@ -29,10 +29,13 @@
     }
   ],
   "cats": {
-    "boxes_per_cat": 3,
+    "carry_speed": 0.5,
     "food_start": 200,
     "speed": 46.0,
-    "tiles_per_box": 100.0
+    "starter_frozen": 1,
+    "thaw_radius": 2.0,
+    "thaw_seconds": 12.0,
+    "tiles_per_frozen": 200.1
   },
   "day": {
     "dusk_seconds": 95.0,
@@ -92,7 +95,7 @@
           "item": "구리광석"
         }
       ],
-      "hint": "자원을 기지까지 끊김 없이 나릅니다 · 전력 0.1 필요",
+      "hint": "자원을 기지까지 끊김 없이 나릅니다",
       "name": "컨테이너 벨트",
       "short": "벨트",
       "throughput": "46/분 · 칸당 3.8초 · F로 등급",
@@ -182,7 +185,7 @@
     "purity_pure": 17.0,
     "purity_rich": 11.0
   },
-  "version": "0.13.2",
+  "version": "0.20.62",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

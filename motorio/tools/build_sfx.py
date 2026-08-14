@@ -118,6 +118,29 @@ SOUNDS = {
                     partials=[(2.0, 0.32), (3.0, 0.14), (4.0, 0.06)]),
 }
 
+# The one voice. Everything above is a glide under a decaying envelope, and a
+# meow is not that shape: it rises, then falls, and the mouth closes on the way
+# down. Three things the vocabulary above cannot say, so it gets its own
+# generator rather than a fourth optional key on `one_shot`.
+#
+#   contour   -- (position, hertz) points, interpolated in ratios like the glides
+#   partials  -- (ratio, gain at the start, gain at the end); the vowel closing
+#                from "야" to "옹" is those upper gains falling, and it is the
+#                whole difference between a voice and a siren
+#   vibrato   -- (hertz, depth). Small. A steady tone reads as electronic, and
+#                this is the only thing in the game that is supposed to be alive
+#
+# Tuned to a domestic cat: the fundamental starts near 480, peaks around 760 a
+# quarter of the way in and lands at 400. Kittens run higher and read as a bird
+# at this length; a lower one reads as a cow.
+VOICES = {
+    "meow": dict(seconds=0.520, peak=0.44,
+                 contour=[(0.0, 470), (0.22, 760), (0.55, 690), (1.0, 395)],
+                 partials=[(2.0, 0.55, 0.14), (3.0, 0.34, 0.05), (4.0, 0.17, 0.02)],
+                 vibrato=(5.5, 0.022), attack=0.10, release=0.34),
+}
+
+
 # The two looping beds. These are not tones but filtered noise, and they are
 # built as a sum of sinusoids whose frequencies are exact multiples of 1/length.
 # That makes the result periodic by construction, so the loop point is not a
@@ -176,6 +199,44 @@ def one_shot(name: str, spec: dict) -> list:
         if hiss:
             value += hiss * rng.uniform(-1.0, 1.0)
         out.append(value * envelope(i, total, spec["decay"]))
+    return normalise(out, spec["peak"])
+
+
+def voice(name: str, spec: dict) -> list:
+    """A meow: a pitch that rises and falls, over a mouth that closes."""
+    total = int(RATE * spec["seconds"])
+    points = spec["contour"]
+    out = []
+    phase = 0.0
+    phases = [0.0] * len(spec["partials"])
+    for i in range(total):
+        u = i / total
+        # Between the two contour points that bracket u, in ratios rather than
+        # in hertz, for the same reason the glides are exponential: pitch is
+        # heard as intervals.
+        left, right = points[0], points[-1]
+        for a, b in zip(points, points[1:]):
+            if a[0] <= u <= b[0]:
+                left, right = a, b
+                break
+        span = max(1e-6, right[0] - left[0])
+        frequency = left[1] * (right[1] / left[1]) ** ((u - left[0]) / span)
+        frequency *= 1.0 + spec["vibrato"][1] * math.sin(
+            2.0 * math.pi * spec["vibrato"][0] * i / RATE)
+        phase += 2.0 * math.pi * frequency / RATE
+        value = math.sin(phase)
+        for index, (ratio, start, end) in enumerate(spec["partials"]):
+            phases[index] += 2.0 * math.pi * frequency * ratio / RATE
+            value += (start + (end - start) * u) * math.sin(phases[index])
+        # An open attack and a long release. The 4ms attack the effects use is
+        # what makes them read as struck; a voice is blown.
+        if u < spec["attack"]:
+            gain = u / spec["attack"]
+        elif u > 1.0 - spec["release"]:
+            gain = (1.0 - u) / spec["release"]
+        else:
+            gain = 1.0
+        out.append(value * gain)
     return normalise(out, spec["peak"])
 
 
@@ -251,6 +312,11 @@ def main() -> int:
         if args.only and args.only != name:
             continue
         write(OUT / f"{name}.wav", one_shot(name, spec))
+        print(f"{name:12s} {measure(OUT / f'{name}.wav')}")
+    for name, spec in VOICES.items():
+        if args.only and args.only != name:
+            continue
+        write(OUT / f"{name}.wav", voice(name, spec))
         print(f"{name:12s} {measure(OUT / f'{name}.wav')}")
     for name, spec in BEDS.items():
         if args.only and args.only != name:

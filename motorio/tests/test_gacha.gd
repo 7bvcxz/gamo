@@ -188,15 +188,20 @@ func _grades_reach_the_miner(sim: Sim) -> void:
 		"O 등급은 정확히 1.0배 — 기존 밸런스가 그대로다")
 	sim.cats.clear()
 
-## A cat carried home in a crate is an O. If crates started handing out grades
-## the gacha would stop being the only place they come from.
+## A cat thawed out of the ice is an O. If rescue started handing out grades the
+## gacha would stop being the only place they come from.
 func _crates_stay_ordinary(sim: Sim) -> void:
 	sim.setup(4242)
-	sim.carried_boxes = Defs.BOXES_PER_CAT * 2
-	var adopted: int = sim.adopt_cats()
-	_check(adopted == 2, "상자 6개로 고양이 2마리")
+	sim.cats.clear()
+	sim.frozen_cats.clear()
+	# Through the real thaw rather than through grant_cats, because it is the
+	# rescue path's grade that is being checked and grant_cats is the debug one.
+	sim.frozen_cats[sim.core_cell + Vector2i(1, 0)] = 0.0
+	sim.frozen_cats[sim.core_cell + Vector2i(0, 1)] = 0.0
+	sim.tick(Defs.THAW_SECONDS + 0.1)
+	_check(sim.cats.size() == 2, "얼음 2개가 녹아 고양이 2마리")
 	for cat: Sim.Cat in sim.cats:
-		_check(cat.rarity == Defs.RARITY_O, "상자에서 온 고양이는 O 등급")
+		_check(cat.rarity == Defs.RARITY_O, "구조한 고양이는 O 등급")
 	sim.cats.clear()
 
 ## Every grade has a picture, and the pig is the one that has none.

@@ -8,6 +8,7 @@ import { SpriteAnimation, SpriteStrip } from '../../../../components/graphics/Sp
 import sprites from '../../../../lib/generated/sprites.json';
 import art from '../../../../lib/generated/art.json';
 import objects from '../../../../lib/generated/objects.json';
+import freeze from '../../../../lib/generated/freeze.json';
 
 // Where I put the graphic decisions I could not settle myself. Each question is
 // five drawable options rather than five adjectives, because "warmer" and
@@ -331,6 +332,65 @@ function Shipped() {
   );
 }
 
+// The rescue, one picture per stage.
+//
+// This is not a question with five options -- the sheet is cut from a generated
+// melt and there is only one of it. It is here because the one thing about it
+// that cannot be measured is whether the animal is in the same place before and
+// after the ice goes, and that is exactly the failure the first cut had: the cap
+// sat at 56, 50, 42, 40 and the cat visibly sank between stages one and two.
+// The tool now refuses a sheet whose cap moves more than three pixels, so what
+// is left to look at is whether it reads as one cat melting rather than four
+// drawings of a cat.
+//
+// The live sprite is on the end for the same reason. What follows the last stage
+// in the game is that picture, and a step between them is a jump at the exact
+// moment the rescue pays off.
+function Frozen() {
+  if (!freeze || !freeze.stages) return null;
+  const zoom = 2;
+  const size = freeze.cell * zoom;
+  return (
+    <section className="prop">
+      <h2>얼어붙은 고양이 — 녹는 4단계</h2>
+      <p className="prop-why">
+        게임이 실제로 불러오는 시트입니다. 얼어붙은 고양이를 안고 와서 <b>기지 2칸 안</b>에
+        내려놓으면 {freeze.stages.length}단계에 걸쳐 {' '}
+        <b>12초</b> 동안 녹고, 마지막 그림 다음에 오는 것이 맨 오른쪽의 살아있는 고양이입니다.
+        단계는 시간이 아니라 <b>남은 얼음의 양</b>으로 골랐습니다 — 생성된 영상은 처음에 빠르게
+        녹고 끝에서 느려서, 시간을 4등분하면 앞의 둘이 거의 같은 그림이 됩니다.
+      </p>
+      <div className="freeze-row">
+        {freeze.stages.map((stage) => (
+          <figure key={stage.index} className="freeze-cell">
+            <img
+              src={site(stage.image)}
+              alt={`${stage.index + 1}단계`}
+              width={size}
+              height={size}
+            />
+            <figcaption>
+              <b>{stage.index + 1}단계</b>
+              <span>얼음 {Math.round(stage.ice * 100)}%</span>
+            </figcaption>
+          </figure>
+        ))}
+        <figure className="freeze-cell freeze-live">
+          <img src={site(freeze.live)} alt="깨어난 고양이" width={size} height={size} />
+          <figcaption>
+            <b>깨어난 뒤</b>
+            <span>기존 고양이 시트</span>
+          </figcaption>
+        </figure>
+      </div>
+      <p className="sprite-note">
+        마지막 단계에 일부러 얼음이 조금 남아 있습니다. 그 다음에 오는 것이 새 그림이 아니라
+        평소의 고양이 시트라서, 완전히 녹은 단계는 게임이 이미 그리고 있는 것의 사본이 됩니다.
+      </p>
+    </section>
+  );
+}
+
 function ObjectSubject({ subject, picks, onPick }) {
   const [active, setActive] = useState(subject.candidates[0].id);
   const candidate = subject.candidates.find((c) => c.id === active) || subject.candidates[0];
@@ -564,6 +624,8 @@ function Proposals() {
       </header>
 
       <Shipped />
+
+      <Frozen />
 
       <SpriteCharacters requests={spriteRequests} picks={spritePicks} onPick={pickSprite} />
 

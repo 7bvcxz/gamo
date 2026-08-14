@@ -109,7 +109,8 @@ func _objectives(main: Node2D) -> void:
 	var seen: Array[String] = []
 	var states: Array[Callable] = [
 		func() -> void: sim.stock[Defs.ITEM_CRYSTAL] = 5,
-		func() -> void: sim.carried_boxes = Defs.BOXES_PER_CAT,
+		func() -> void: sim.carried_frozen = true,
+		func() -> void: sim.carried_frozen = false,
 		func() -> void: sim._spawn_cats([Defs.RARITY_O] as Array[int]),
 		func() -> void: sim.carried_cat = sim.cats[0],
 		func() -> void: sim.carried_cat = null,

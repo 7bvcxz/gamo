@@ -129,6 +129,7 @@ func _ready() -> void:
 	sim.heat_gained.connect(_on_heat_gained)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
+	sim.cat_thawed.connect(_on_cat_thawed)
 	world_layer.sim = sim
 	ground_layer.sim = sim
 	cold_fog.sim = sim
@@ -222,14 +223,24 @@ func objective_data() -> Dictionary:
 		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
 	if sim.carried_cat != null:
 		return _goal("고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요", "thing", Icons.THING_CAT)
+	# Ahead of the mining line: a thawing cat is three seconds from being the
+	# thing the player has been walking towards, and a card telling them to go
+	# back to a seam in the middle of it is the game looking away.
+	# Both of these sit above the mining line, and for the same reason the carried
+	# cat does: what she is holding, or what is three seconds from waking up, is
+	# more urgent than the errand she was on before. A player who walked out and
+	# picked one up before ever swinging the pickaxe was being told to go and
+	# mine, with a body in her arms.
+	if sim.carried_frozen:
+		return _goal("얼어붙은 고양이를 안고 있습니다  기지 옆에 Z 로 내려놓으세요",
+			"thing", Icons.THING_CAT_FROZEN)
+	if _thawing_nearby():
+		return _goal("얼음이 녹고 있습니다  곧 깨어납니다", "thing", Icons.THING_CAT_FROZEN)
 	# Lv1 -- do it with your hands, then hire someone to do it for you.
 	if int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 0 and sim.ground.is_empty():
 		return _goal(_mining_hint(), "thing", Icons.THING_SEAM)
-	if sim.cats.is_empty() and sim.carried_boxes < Defs.BOXES_PER_CAT:
-		return _goal("고양이 상자를 %d개 모아 숙소로 가져가세요  (현재 %d개)"
-			% [Defs.BOXES_PER_CAT, sim.carried_boxes], "thing", Icons.THING_CAT_BOX)
-	if sim.cats.is_empty():
-		return _goal("숙소로 가서 고양이를 입양하세요", "thing", Icons.THING_SHELTER)
+	if sim.cats.is_empty() and not sim.frozen_cats.is_empty():
+		return _goal("얼어붙은 고양이를 찾아 Z 로 안고 오세요", "thing", Icons.THING_CAT_FROZEN)
 	# Lv2 -- crystal automation, then the exchanger that turns it into distance.
 	if sim.machine_count(Defs.M_MINER) == 0:
 		return _goal("수정 광맥 위에 채굴기를 설치하세요  (수정조각 %d)"
@@ -621,6 +632,7 @@ func _process(delta: float) -> void:
 	_update_build_hold(delta)
 	_update_hand_mining(delta)
 	player.carrying_cat = sim.carried_cat != null
+	player.carrying_frozen = sim.carried_frozen
 	# The carried cat rides in front of her, turning as she turns. Driven from
 	# here because the sim does not know where the player is standing.
 	if sim.carried_cat != null:
@@ -698,7 +710,7 @@ const SAVE_SLOTS := 31
 ## load is what makes that safe -- an unrecognised file starts a new run rather
 ## than half-restoring one.
 const SAVE_PATH := "user://motorio_save.cfg"
-const SAVE_SCHEMA := 3
+const SAVE_SCHEMA := 4
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -820,7 +832,7 @@ func _update_footsteps() -> void:
 		audio.call("play", "step_run" if player.step_running else "step")
 
 func _update_hand_mining(delta: float) -> void:
-	if state != State.PLAY or player.locked or sim.carried_cat != null:
+	if state != State.PLAY or player.locked or sim.carried_cat != null or sim.carried_frozen:
 		sim.cancel_hand_mine()
 		player.mining = 0.0
 		last_mine_frame = -1
@@ -859,17 +871,31 @@ func _update_hand_mining(delta: float) -> void:
 
 func _collect_and_adopt() -> void:
 	_collect_ground()
-	if sim.collect_box_at(player.cell()):
-		fx.popup(player.position + Vector2(0, -22), "고양이 상자 %d/%d" % [sim.carried_boxes, Defs.BOXES_PER_CAT],
-			Defs.COL_BELT_RIM, true)
-		fx.ring(player.position, Defs.COL_BELT_RIM, Defs.RING_MEDIUM)
-		audio.call("play", "select")
-	if shelter_nearby() and sim.carried_boxes >= Defs.BOXES_PER_CAT:
-		var adopted: int = sim.adopt_cats()
-		if adopted > 0:
-			_notify("고양이 %d마리를 입양했습니다" % adopted, Defs.COL_CORE)
-			fx.ring(shelter_position(), Defs.COL_CORE, Defs.RING_LARGE)
-			audio.call("play", "alloy")
+
+## Whether any ice near the core is on its way out. Read by the objective card,
+## which is why it asks the simulation rather than remembering a flag: a cat put
+## down and picked up again has to stop counting.
+func _thawing_nearby() -> bool:
+	for cell: Vector2i in sim.frozen_cats:
+		if sim.can_thaw(cell):
+			return true
+	return false
+
+## The moment the ice finishes. The rest of the game announces things with a
+## line of text; this one gets the ring, the shake and a voice, because it is the
+## first cat and the design calls it the most expensive three seconds in the
+## game. The camera move and the music change that belong with it are still to
+## come -- this is the mechanism, not yet the whole scene.
+func _on_cat_thawed(total: int, at: Vector2) -> void:
+	fx.popup(at + Vector2(0, -30), "먀?", Defs.COL_CAT_FACE, true)
+	fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
+	fx.burst(at, Defs.COL_CAT_FACE, 14)
+	shake = maxf(shake, Defs.FX_SMALL)
+	audio.call("play", "meow")
+	if total == 1:
+		_notify("고양이가 깨어났습니다  Z 로 안아 채굴기에 올려놓으세요", Defs.COL_CORE)
+	else:
+		_notify("고양이가 깨어났습니다  (%d마리)" % total, Defs.COL_CORE)
 
 func _update_warmth(delta: float) -> void:
 	_update_collapse(delta)
@@ -1109,6 +1135,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode == KEY_F6:
 		debug_belt_loop()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_F7:
+		debug_rescue()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("debug_scenario"):
@@ -1382,6 +1412,24 @@ func _primary_action() -> void:
 		_sleep()
 		return
 	var cell: Vector2i = player.facing_cell()
+	# A frozen cat answers Z before anything else. She has both arms round it,
+	# so there is nothing else the press could mean.
+	if sim.carried_frozen:
+		if not sim.put_down_frozen(cell):
+			audio.call("play", "deny")
+		elif sim.can_thaw(cell):
+			_notify("얼음이 녹기 시작합니다", Defs.COL_CORE)
+			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
+			audio.call("play", "confirm")
+		else:
+			# Allowed, and said out loud. Setting it down out here is a real move
+			# -- she can leave it and come back with a shorter walk -- but a
+			# player who thinks they have finished the errand would stand and
+			# watch nothing happen.
+			_notify("기지에서 멉니다  기지 %d칸 안에 놓아야 녹기 시작합니다"
+				% int(Defs.THAW_RADIUS), Defs.COL_TEXT_DIM)
+			audio.call("play", "remove")
+		return
 	if sim.carried_cat != null:
 		if sim.place_cat(cell):
 			_notify("고양이를 채굴기에 배치했습니다", Defs.COL_CORE)
@@ -1404,6 +1452,11 @@ func _primary_action() -> void:
 	var target: Vector2i = _hand_target()
 	var mining_here: bool = holding_pickaxe() and sim.ore.has(target) \
 		and not sim.machines.has(target)
+	if not mining_here and sim.pick_up_frozen(cell):
+		_notify("얼어붙은 고양이를 안았습니다  느려지고 달릴 수 없습니다", Defs.COL_BELT_RIM)
+		fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
+		audio.call("play", "select")
+		return
 	if not mining_here and sim.pick_up_cat(cell):
 		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
@@ -1489,12 +1542,12 @@ func debug_unlock_all() -> void:
 	for item_type: int in Defs.COUNTED_ITEMS:
 		sim.stock[item_type] = 500
 	# And a crew. Everything else this key grants can be checked from a
-	# screenshot the moment it is pressed; cats cannot, because getting one takes
-	# carrying three crates to the shelter and that is most of a twelve minute
-	# day. Verifying anything about how a cat is drawn meant playing the game to
-	# the point of having one, several times, and the day kept running out first.
-	sim.carried_boxes += Defs.BOXES_PER_CAT * maxi(0, Defs.DEBUG_CATS - sim.cats.size())
-	sim.adopt_cats()
+	# screenshot the moment it is pressed; cats cannot, because getting one means
+	# walking out to a frozen one and carrying it home at half speed, and that is
+	# most of a twelve minute day. Verifying anything about how a cat is drawn
+	# meant playing the game to the point of having one, several times, and the
+	# day kept running out first.
+	sim.grant_cats(maxi(0, Defs.DEBUG_CATS - sim.cats.size()))
 	# And coins. There is no way to earn one yet, so without this the slot machine
 	# is a window with three buttons that all refuse -- and a 0.5% grade cannot be
 	# looked at by anyone at all.
@@ -1599,8 +1652,7 @@ func debug_crowd() -> void:
 		if Vector2(cell - sim.core_cell).length() > 6.0:
 			continue
 		sim.build(Defs.M_MINER, cell, north)
-	sim.carried_boxes += Defs.BOXES_PER_CAT * maxi(0, 8 - sim.cats.size())
-	sim.adopt_cats()
+	sim.grant_cats(maxi(0, 8 - sim.cats.size()))
 	for cell: Vector2i in sim.idle_miner_cells():
 		var spare: Sim.Cat = null
 		for cat: Sim.Cat in sim.cats:
@@ -1612,6 +1664,27 @@ func debug_crowd() -> void:
 		sim.carried_cat = spare
 		sim.place_cat(cell)
 	_notify("디버그 혼잡 · 고양이 %d마리" % sim.cats.size(), Defs.COL_DANGER)
+
+## One frozen cat, on the tile she is facing.
+##
+## Checking the rescue in a browser meant walking four tiles east, one north,
+## turning to face east and pressing Z -- and when any of that landed her half a
+## tile off, Z fell through to the build gun and the run looked exactly like a
+## rescue that does not work. It happened on the first attempt. The world is
+## seeded per run, so the walk cannot be written down once and trusted.
+##
+## The whole flow after this point is real: she carries it at half speed, has to
+## get it within two tiles of the core, and the ice takes its twelve seconds.
+func debug_rescue() -> void:
+	if sim.carried_frozen:
+		_notify("이미 안고 있습니다", Defs.COL_TEXT_DIM)
+		return
+	var cell: Vector2i = player.facing_cell()
+	if sim.is_structure(cell):
+		cell = player.cell() + Vector2i(1, 0)
+	sim.frozen_cats[cell] = 0.0
+	_notify("디버그 구조 · 얼어붙은 고양이를 앞에 두었습니다", Defs.COL_DANGER)
+	fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
 
 func _cycle_recipe() -> void:
 	if player.locked:

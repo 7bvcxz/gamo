@@ -12,7 +12,7 @@ signal machine_removed(cell: Vector2i, type: int)
 signal build_rejected(reason: String, cell: Vector2i)
 signal warmth_changed(radius: float)
 signal cat_adopted(total: int)
-signal box_collected(carried: int)
+signal cat_thawed(total: int, at: Vector2)
 
 ## A cat worker. Miners cannot run without one standing at them, so the number
 ## of cats -- not the amount of heat -- is what gates automation.
@@ -110,8 +110,19 @@ var machines: Dictionary[Vector2i, Machine] = {}
 var core_cell := Vector2i.ZERO
 
 var cats: Array[Cat] = []
-var cat_boxes: Dictionary[Vector2i, bool] = {}
-var carried_boxes: int = 0
+## Frozen cats lying in the world: cell -> how far the ice has gone, 0..1.
+## A value rather than a set because thawing happens where the cat was put down
+## and the progress has to survive a save.
+var frozen_cats: Dictionary[Vector2i, float] = {}
+## Whether Grim has one in her arms. A bool rather than an object because a
+## frozen cat has no state of its own until it is on the ground -- it is not a
+## Cat yet, and pretending it is would mean a Cat that must be excluded from
+## every loop that walks the crew. That exclusion is exactly the bug this
+## repository already has a lesson about.
+var carried_frozen: bool = false
+## How far the ice on the carried one had already gone. Picking a thawing cat up
+## to move it one tile must not put the ice back.
+var carried_frozen_thaw: float = 0.0
 ## The cat currently in the player's arms. Cats are placed on machines by hand;
 ## there is no automatic assignment, so the player decides who works where.
 var carried_cat: Cat = null
@@ -254,9 +265,9 @@ func to_save() -> Dictionary:
 			"hunger": cat.hunger, "eat": cat.eat_timer,
 			"rarity": cat.rarity,
 		})
-	var box_rows: Array = []
-	for cell: Vector2i in cat_boxes:
-		box_rows.append([cell.x, cell.y])
+	var frozen_rows: Array = []
+	for cell: Vector2i in frozen_cats:
+		frozen_rows.append([cell.x, cell.y, frozen_cats[cell]])
 	var delivered_rows: Dictionary = {}
 	for key: int in delivered:
 		delivered_rows[str(key)] = int(delivered[key])
@@ -279,8 +290,9 @@ func to_save() -> Dictionary:
 	return {
 		"explored": seen,
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
-		"machines": machine_rows, "cats": cat_rows, "boxes": box_rows,
-		"carried": carried_boxes, "food": food, "coins": coins,
+		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
+		"carried_frozen": carried_frozen, "carried_frozen_thaw": carried_frozen_thaw,
+		"food": food, "coins": coins,
 		"stock": stock_rows, "ground": ground_rows, "unlocked": unlocked_rows,
 		"recipes": unlocked_recipes.keys(),
 	}
@@ -300,7 +312,6 @@ func from_save(data: Dictionary) -> void:
 	var delivered_rows: Dictionary = data.get("delivered", {})
 	for key: String in delivered_rows:
 		delivered[int(key)] = int(delivered_rows[key])
-	carried_boxes = int(data.get("carried", 0))
 	food = int(data.get("food", Defs.FOOD_START))
 	# Defaulted rather than required, so a save written before the slot machine
 	# existed loads as a run that has simply never pulled.
@@ -333,9 +344,11 @@ func from_save(data: Dictionary) -> void:
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
 		machines[cell] = machine
 
-	cat_boxes.clear()
-	for row: Array in data.get("boxes", []):
-		cat_boxes[Vector2i(int(row[0]), int(row[1]))] = true
+	frozen_cats.clear()
+	for row: Array in data.get("frozen", []):
+		frozen_cats[Vector2i(int(row[0]), int(row[1]))] = float(row[2])
+	carried_frozen = bool(data.get("carried_frozen", false))
+	carried_frozen_thaw = float(data.get("carried_frozen_thaw", 0.0))
 
 	cats.clear()
 	for row: Dictionary in data.get("cats", []):
@@ -385,8 +398,9 @@ func setup(seed_value: int) -> void:
 	machines[core_cell] = core
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
-	cat_boxes.clear()
-	carried_boxes = 0
+	frozen_cats.clear()
+	carried_frozen = false
+	carried_frozen_thaw = 0.0
 	carried_cat = null
 	coins = 0
 	# Derived from the run seed rather than randomised, so replaying a seed
@@ -398,7 +412,7 @@ func setup(seed_value: int) -> void:
 	shelter_cell = core_cell + Defs.SHELTER_CELL
 	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
 	_generate_ore(seed_value)
-	_generate_cat_boxes(seed_value)
+	_generate_frozen_cats(seed_value)
 
 ## Cells kept clear so the guaranteed opening always has a belt route home.
 ## A single row, not a block: a square patch would put ore directly in front of
@@ -473,31 +487,52 @@ func _scatter_ore(rng: RandomNumberGenerator, item_type: int, ring: Vector2, pat
 				placed += 1
 			cursor = origin + Vector2i(rng.randi_range(-1, 1), rng.randi_range(-1, 1)) * (1 + placed / 3)
 
-## Crates are strewn across the map at roughly one per hundred tiles, plus a
-## guaranteed three inside the opening warm radius so the first cat is always
-## reachable. Walking further is what buys more workers.
-func _generate_cat_boxes(seed_value: int) -> void:
+## Frozen cats lie where they fell, about one per two hundred tiles, plus a
+## guaranteed one inside the opening warm radius so the first cat is always
+## reachable. Walking further is what buys more workers -- and now the walk back
+## is at half speed, which is what makes the distance a decision.
+##
+## Deliberately the same shape as the crate scatter it replaced, seeded the same
+## way: a map generated from a given seed puts its cats in the same places the
+## crates would have grouped into.
+func _generate_frozen_cats(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 7717
-	for index in Defs.STARTER_CAT_BOXES:
-		var angle: float = TAU * float(index) / float(Defs.STARTER_CAT_BOXES) + 0.6
-		var radius: float = Defs.WARM_BASE - 2.0
-		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-		if not ore.has(cell) and cell != core_cell:
-			cat_boxes[cell] = true
+	for index in Defs.STARTER_FROZEN:
+		var cell: Vector2i = _starter_frozen_cell(index)
+		if cell != core_cell:
+			frozen_cats[cell] = 0.0
 	var reach: float = Defs.WARM_MAX + 8.0
-	var target: int = int((PI * reach * reach) / Defs.CAT_BOX_PER_TILES)
+	var target: int = int((PI * reach * reach) / Defs.FROZEN_PER_TILES)
 	var attempts := 0
-	while cat_boxes.size() < target + Defs.STARTER_CAT_BOXES and attempts < target * 30:
+	while frozen_cats.size() < target + Defs.STARTER_FROZEN and attempts < target * 30:
 		attempts += 1
 		var angle: float = rng.randf() * TAU
 		var radius: float = sqrt(rng.randf()) * reach
 		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-		if cat_boxes.has(cell) or ore.has(cell) or machines.has(cell):
+		if frozen_cats.has(cell) or ore.has(cell) or machines.has(cell):
 			continue
 		if _ring_distance(cell) < Defs.WARM_BASE - 1.0:
 			continue
-		cat_boxes[cell] = true
+		frozen_cats[cell] = 0.0
+
+## The one frozen cat that has to be inside the opening warm radius, wherever
+## the terrain left room. Walks the ring from its nominal angle rather than
+## taking that one cell or giving up: the cell can hold a seam, the shelter or a
+## previous starter, and "no cat within reach" is a run that cannot begin.
+func _starter_frozen_cell(index: int) -> Vector2i:
+	var base_angle: float = TAU * float(index) / float(Defs.STARTER_FROZEN) + 0.6
+	for step in 48:
+		# Out from the nominal ring in half-tile rings, all the way round each.
+		var radius: float = Defs.WARM_BASE - 2.0 + float(step / 16) * 0.5
+		var angle: float = base_angle + TAU * float(step % 16) / 16.0
+		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if cell == core_cell or ore.has(cell) or frozen_cats.has(cell):
+			continue
+		if is_structure(cell) or cell == shelter_cell or cell == food_cell:
+			continue
+		return cell
+	return core_cell
 
 ## --- Tile attributes ------------------------------------------------------
 ## Buildings carry STRUCTURE; terrain does not. Keeping this as a lookup rather
@@ -546,27 +581,86 @@ func _ring_distance(cell: Vector2i) -> float:
 func is_warm(cell: Vector2i) -> bool:
 	return _ring_distance(cell) <= warm_radius
 
-## Walking over a crate picks it up; three carried crates become a cat when the
-## player reaches the shelter.
-func collect_box_at(cell: Vector2i) -> bool:
-	if not cat_boxes.has(cell):
+## --- Frozen cats ----------------------------------------------------------
+## Picked up by hand, not by walking over. The crates were collected by walking
+## because they were an errand; this is a body Grim decides to carry, and the
+## decision has to be a press.
+func pick_up_frozen(cell: Vector2i) -> bool:
+	if carried_frozen or carried_cat != null:
 		return false
-	cat_boxes.erase(cell)
-	carried_boxes += 1
-	box_collected.emit(carried_boxes)
+	if not frozen_cats.has(cell):
+		return false
+	carried_frozen_thaw = frozen_cats[cell]
+	frozen_cats.erase(cell)
+	carried_frozen = true
 	return true
 
-func adopt_cats() -> int:
-	var adopted: int = carried_boxes / Defs.BOXES_PER_CAT
-	if adopted <= 0:
+## Putting one down. Anywhere is allowed -- she can set it on the snow and come
+## back for it -- but only near the core does the ice start to go.
+func put_down_frozen(cell: Vector2i) -> bool:
+	if not carried_frozen:
+		return false
+	if frozen_cats.has(cell) or is_structure(cell):
+		return false
+	frozen_cats[cell] = carried_frozen_thaw
+	carried_frozen = false
+	carried_frozen_thaw = 0.0
+	return true
+
+## Near the fire, and nowhere else. Measured from the core rather than from the
+## warm radius on purpose: the radius grows to twenty-two tiles, and a cat that
+## thawed anywhere inside it would remove the walk home entirely by the third
+## upgrade.
+func can_thaw(cell: Vector2i) -> bool:
+	return _ring_distance(cell) <= Defs.THAW_RADIUS
+
+## Which of the four pictures a given progress shows. The last stage is held
+## until the ice is gone rather than reached at three quarters, so the final
+## picture is the one the cat wakes out of.
+static func frozen_stage(progress: float) -> int:
+	return clampi(int(progress * float(Defs.FROZEN_STAGES)), 0, Defs.FROZEN_STAGES - 1)
+
+## The ice going, for every frozen cat standing near the core. A cat left out on
+## the snow does not thaw and does not re-freeze either: its progress simply
+## stops, so carrying a half-melted one the rest of the way home works.
+func _tick_thaw(delta: float) -> void:
+	var woken: Array[Vector2i] = []
+	for cell: Vector2i in frozen_cats:
+		if not can_thaw(cell):
+			continue
+		var progress: float = frozen_cats[cell] + delta / Defs.THAW_SECONDS
+		if progress >= 1.0:
+			woken.append(cell)
+		else:
+			frozen_cats[cell] = progress
+	for cell: Vector2i in woken:
+		frozen_cats.erase(cell)
+		_wake_cat(cell)
+
+## A cat wakes where it thawed, not on the shelter doorstep. It is standing in
+## the place the player chose to put it, which is the whole point of having
+## carried it there.
+func _wake_cat(cell: Vector2i) -> void:
+	var cat := Cat.new()
+	cat.phase = _next_phase()
+	cat.rarity = Defs.RARITY_O
+	cat.pos = cell_centre(cell)
+	cats.append(cat)
+	cat_thawed.emit(cats.size(), cat.pos)
+	cat_adopted.emit(cats.size())
+
+## Cats without a thaw, for the debug unlocks and for tests that need a crew
+## rather than a rescue. Everything the crates used to do through adopt_cats is
+## this, minus the crates.
+func grant_cats(count: int) -> int:
+	if count <= 0:
 		return 0
-	carried_boxes -= adopted * Defs.BOXES_PER_CAT
 	var grades: Array[int] = []
-	for _index in adopted:
+	for _index in count:
 		grades.append(Defs.RARITY_O)
 	_spawn_cats(grades)
 	cat_adopted.emit(cats.size())
-	return adopted
+	return count
 
 ## Puts new cats on the shelter doorstep, spread across it rather than stacked on
 ## one tile, the same way they come out in the morning. Three cats on the same
@@ -616,7 +710,7 @@ func pull_gacha(count: int) -> Array[int]:
 
 ## Picking a cat up takes it off its machine; the machine stops immediately.
 func pick_up_cat(cell: Vector2i) -> bool:
-	if carried_cat != null:
+	if carried_cat != null or carried_frozen:
 		return false
 	var reach: float = float(Defs.TILE) * 0.9
 	var centre: Vector2 = cell_centre(cell)
@@ -793,6 +887,7 @@ func demolish(cell: Vector2i) -> bool:
 
 func tick(delta: float) -> void:
 	_tick_cats(delta)
+	_tick_thaw(delta)
 	_recount_power()
 	# Under-supplied power slows every drawing machine in proportion rather than
 	# switching some off: a brown-out you can see is easier to diagnose than a

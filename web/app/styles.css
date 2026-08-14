@@ -419,6 +419,27 @@ th { background: var(--sidebar); font-weight: 600; }
 .shipped figcaption { display: block; margin-top: 8px; font-size: 13px; }
 .shipped figcaption b { display: block; }
 .shipped figcaption span { color: var(--muted); }
+/* The melting stages, in a row that scrolls rather than wraps: the sequence is
+   the point, and a stage that fell onto a second line would be read as a
+   separate thing. */
+.freeze-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #dee4ec;
+  overflow-x: auto;
+}
+.freeze-cell { margin: 0; flex: 0 0 auto; }
+.freeze-cell img { image-rendering: pixelated; display: block; max-width: 100%; height: auto; }
+.freeze-cell figcaption { margin-top: 6px; font-size: 13px; text-align: center; }
+.freeze-cell figcaption b { display: block; }
+.freeze-cell figcaption span { color: var(--muted); }
+/* The one that is not a stage. */
+.freeze-live { border-left: 1px dashed var(--line); padding-left: 10px; }
+
 .shipped-loop { margin-top: 28px; }
 .shipped-loop-img {
   image-rendering: pixelated;

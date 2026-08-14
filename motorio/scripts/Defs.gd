@@ -44,6 +44,10 @@ const COL_CLOCK_FILL := Color8(120, 150, 190)
 const COL_MACHINE_EDGE := Color("6fd2c8")
 const COL_CAT_FUR := Color8(168, 90, 36)
 const COL_CAT_FACE := Color8(250, 226, 190)
+## The ice a rescued cat comes out of. Pale blue rather than white so it reads
+## against the snow it is lying on -- a white block on a white field is a hole in
+## the ground, not an object.
+const COL_ICE := Color8(178, 216, 238)
 ## The SSR cat, which is a pig. Warm, like everything the player earns, but a
 ## pink that no machine and no ore uses, so half a second of it on screen is
 ## unmistakably the rare thing rather than another amber light.
@@ -537,12 +541,35 @@ const WANDER_SPEED := 0.55
 ## it -- a cat that wandered out of the warm radius would look lost, and the
 ## player would go looking for it.
 const WANDER_LEASH := 96.0
-const BOXES_PER_CAT := 3
-## Crate density: one per this many tiles of world. Raised by half on request --
-## cats are what gate automation, so how many crates the map holds is the pace at
-## which the factory is allowed to grow.
-const CAT_BOX_PER_TILES := 66.7
-const STARTER_CAT_BOXES := 3
+## --- Frozen cats ----------------------------------------------------------
+## Cats are not bought, they are found frozen and carried home. This replaced the
+## crates entirely: three crates on the doorstep was a fetch quest, and the
+## vision asks for a meeting -- ice melts, the cat opens its eyes, it looks at
+## Grim.
+##
+## One frozen cat is one cat, where three crates used to be one cat, so the
+## density is a third of the crates' and the number of cats a map can support is
+## exactly what it was. The pace of the factory has not changed; what changed is
+## what the walk is for.
+const FROZEN_PER_TILES := 200.1
+## One inside the opening warm radius, so the first cat is always reachable. The
+## crates guaranteed three for the same reason -- three of them made one cat.
+const STARTER_FROZEN := 1
+## Carrying one. She walks at half speed and cannot run: a frozen cat is a body
+## in her arms, and the distance she chose to walk out is the price of it. This
+## is the only thing in the game that slows her down other than the cold.
+const FROZEN_CARRY_SPEED := 0.5
+## How close to the core it has to be put down before the ice starts to go. Two
+## tiles, measured from the core's own cell -- the base has to be somewhere, and
+## "near the fire" is the reason the walk home exists at all.
+const THAW_RADIUS := 2.0
+## How long the ice takes once it is in place. Long enough to be watched and
+## short enough to be waited for; the four stages are three seconds each.
+const THAW_SECONDS := 12.0
+## Stages in cat_freeze_4.png. The fourth is still icy on purpose: what follows
+## it is the ordinary cat sprite, so a stage that had finished melting would be a
+## duplicate of something the game already draws.
+const FROZEN_STAGES := 4
 
 ## Hunger runs 0..1. Working costs 1/18 every ten seconds, so a fed cat works
 ## about three real minutes before it needs the food bin.

@@ -86,8 +86,7 @@ func _run() -> void:
 	# --- Carrying a cat --------------------------------------------------------
 	# The carry has to be visible and exclusive: the cat rides just in front of
 	# her facing the same way, and both hands are full while it does.
-	main.sim.carried_boxes = Defs.BOXES_PER_CAT
-	main.sim.adopt_cats()
+	main.sim.grant_cats(1)
 	_assert(main.sim.cats.size() >= 1, "a cat exists to carry")
 	var kitty = main.sim.cats[0]
 	kitty.pos = main.sim.cell_centre(main.player.facing_cell())

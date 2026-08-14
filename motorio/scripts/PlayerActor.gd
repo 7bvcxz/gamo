@@ -130,6 +130,32 @@ var touch_sprint := false
 ## The position and heading come from the cat itself rather than being recomputed
 ## here, so the drawing cannot drift from where the simulation put it.
 var carrying_cat := false
+## Set by Main while a frozen cat is being carried. Halves her speed and takes
+## the run away: it is a body, not a kitten, and the walk home is the price of
+## having walked out. Separate from `carrying_cat` because the two are drawn
+## from different sheets and only one of them slows her down.
+var carrying_frozen := false
+## The block of ice in her arms, and where its top edge sits in her local space.
+##
+## Not the arrangement a carried cat uses, and the first version was. A cat rides
+## a third of a tile ahead in the direction she faces, drawn at its full world
+## size -- which for a cat is smaller than she is, so she stays visible behind
+## it. The ice block is not: at full size it covered her from the hat down and
+## what the screen showed was Grim disappearing, not Grim carrying something.
+## Worse, riding ahead of her meant walking north pushed it *up*, over her head.
+##
+## So it is held, not carried ahead: fixed to her chest whichever way she turns,
+## drawn at seven tenths, with its top edge below her chin. Her head and
+## shoulders stay clear, and the block reaches below her feet the way a heavy
+## thing held in front of you does.
+## Both numbers were set by measuring the result rather than by reasoning about
+## it. The first attempt kept her head clear by nine pixels of the thirty-two she
+## is drawn at, which is a hat sitting on a block of ice -- correct by the
+## arithmetic and wrong on the screen. At these she is visible from the waist up.
+## The ice reaches below her feet, which is what "held out in front" looks like
+## from above.
+const FROZEN_CARRY_DRAW := MachineLayer.CAT_DRAW * 0.62
+const FROZEN_CARRY_TOP := -12.0
 ## 0..1 while working a seam by hand, for the swing animation and the ring.
 var mining: float = 0.0
 var carried_cat_pos := Vector2.ZERO
@@ -182,10 +208,15 @@ func _physics_process(delta: float) -> void:
 			input = input.normalized()
 		if not touch_direction.is_zero_approx():
 			input = touch_direction
-	var sprinting: bool = (Input.is_action_pressed("sprint") or touch_sprint) and takes_input()
+	# Not while she is carrying one: the run is refused here rather than only
+	# ignored in the speed, so the sheet, the footstep sound and the touch pad's
+	# sprint button all agree that she is walking.
+	var sprinting: bool = (Input.is_action_pressed("sprint") or touch_sprint) \
+		and takes_input() and not carrying_frozen
 	# Cold slows the whole way down to a crawl rather than only at the end.
 	var chill_speed: float = lerpf(Defs.COLD_SPEED_FLOOR, 1.0, clampf(warmth / 100.0, 0.0, 1.0))
-	var target: Vector2 = input * SPEED * (SPRINT if sprinting else 1.0) * chill_speed
+	var load_speed: float = Defs.FROZEN_CARRY_SPEED if carrying_frozen else 1.0
+	var target: Vector2 = input * SPEED * (SPRINT if sprinting else 1.0) * chill_speed * load_speed
 	if input == Vector2.ZERO:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 	else:
@@ -382,6 +413,14 @@ func _draw() -> void:
 ## Drawn in world space relative to the player, from the cat's own position, so
 ## what is on screen and what the simulation believes are the same thing.
 func _draw_carried_cat() -> void:
+	# The frozen one first: it is not a Cat and has no rarity, heading or frame.
+	if carrying_frozen:
+		var block := Rect2(Vector2(-FROZEN_CARRY_DRAW * 0.5, FROZEN_CARRY_TOP),
+			Vector2.ONE * FROZEN_CARRY_DRAW)
+		var cell := Rect2(0.0, 0.0, MachineLayer.CAT_CELL, MachineLayer.CAT_CELL)
+		carry_layer.draw_texture_rect_region(MachineLayer.CAT_FREEZE_SHEET, block, cell,
+			Color.WHITE)
+		return
 	if not carrying_cat:
 		return
 	var offset: Vector2 = carried_cat_pos - global_position

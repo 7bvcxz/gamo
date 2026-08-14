@@ -19,7 +19,7 @@ class_name Icons
 ## assumes a size, so the same code draws a 20px hotbar chip and a 48px menu tile.
 
 ## Things the objective line can point at that are not machines or items.
-const THING_CAT_BOX := "cat_box"
+const THING_CAT_FROZEN := "cat_frozen"
 const THING_CAT := "cat"
 const THING_SHELTER := "shelter"
 const THING_CORE := "core"
@@ -169,25 +169,33 @@ static func draw_item(canvas: CanvasItem, rect: Rect2, item_type: int) -> void:
 static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
 	var width: float = _outline_width(rect)
 	match key:
-		THING_CAT_BOX, THING_FOOD:
+		THING_CAT_FROZEN:
+			# A block of ice with ears in it. The ears are what make it a cat
+			# rather than a crystal -- the objective line points at this from
+			# across the screen at hotbar size, where the animal inside is three
+			# pixels of face.
+			_shadow(canvas, rect)
+			var ice := rect.grow(-rect.size.x * 0.16)
+			_body(canvas, ice, Defs.COL_ICE, Color(1, 1, 1, 0.8), width)
+			var ear: float = rect.size.x * 0.11
+			for side: float in [-1.0, 1.0]:
+				var tip: Vector2 = Vector2(ice.get_center().x + side * ice.size.x * 0.26,
+					ice.position.y + ice.size.y * 0.30)
+				canvas.draw_colored_polygon(PackedVector2Array([
+					tip + Vector2(-ear, ear * 1.2), tip + Vector2(ear, ear * 1.2),
+					tip + Vector2(side * ear * 0.4, -ear * 0.5)]), Defs.COL_CAT_FUR)
+			canvas.draw_circle(ice.get_center() + Vector2(0.0, ice.size.y * 0.10),
+				rect.size.x * 0.10, Defs.COL_CAT_FACE)
+			# The glare that says it is ice and not stone.
+			canvas.draw_line(ice.position + ice.size * Vector2(0.22, 0.62),
+				ice.position + ice.size * Vector2(0.40, 0.24), Color(1, 1, 1, 0.55), width)
+		THING_FOOD:
 			_shadow(canvas, rect)
 			var box := rect.grow(-rect.size.x * 0.18)
-			var crate: Color = Color8(150, 104, 62) if key == THING_CAT_BOX else Color8(96, 108, 128)
+			var crate := Color8(96, 108, 128)
 			_body(canvas, box, crate, crate.lightened(0.25), width)
-			if key == THING_CAT_BOX:
-				# Ears. The crate and the food bin are the same silhouette
-				# otherwise, and telling them apart at a glance is the reason the
-				# ears were added to the world art in the first place.
-				var ear: float = rect.size.x * 0.10
-				for side: float in [-1.0, 1.0]:
-					var tip: Vector2 = Vector2(box.get_center().x + side * box.size.x * 0.30,
-						box.position.y)
-					canvas.draw_colored_polygon(PackedVector2Array([
-						tip + Vector2(-ear, 0.0), tip + Vector2(ear, 0.0),
-						tip + Vector2(side * ear * 0.4, -ear * 1.7)]), crate)
-			else:
-				canvas.draw_rect(Rect2(box.position + Vector2(0.0, box.size.y * 0.30),
-					Vector2(box.size.x, box.size.y * 0.16)), crate.darkened(0.3))
+			canvas.draw_rect(Rect2(box.position + Vector2(0.0, box.size.y * 0.30),
+				Vector2(box.size.x, box.size.y * 0.16)), crate.darkened(0.3))
 		THING_CAT:
 			_shadow(canvas, rect)
 			var centre: Vector2 = rect.get_center()

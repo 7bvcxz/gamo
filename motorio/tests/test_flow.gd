@@ -176,8 +176,7 @@ func _run() -> void:
 	# Touch and keyboard must share one interaction path, or a verb added for the
 	# keyboard silently goes missing on phones.
 	main.state = main.State.PLAY
-	main.sim.carried_boxes = Defs.BOXES_PER_CAT
-	main.sim.adopt_cats()
+	main.sim.grant_cats(1)
 	_assert(main.sim.cats.size() >= 1, "a cat exists to be carried")
 	var kitty = main.sim.cats[0]
 	# Interaction targets the faced tile, not the one underfoot.

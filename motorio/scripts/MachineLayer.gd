@@ -16,6 +16,12 @@ const CAT_WALK_N_SHEET: Texture2D = preload("res://assets/characters/cat_walk_n.
 ## cat at a miner is drawn in front of the machine the game draws itself -- there
 ## is no second angle either of them is ever seen from.
 const CAT_EAT_SHEET: Texture2D = preload("res://assets/characters/cat_eat_s.png")
+## A cat still in its ice, in four stages, most frozen first. Not an animation:
+## the game holds one of these four while the ice goes, and what follows the last
+## one is the ordinary cat sheet. Built by tools/sprite/build_freeze.py from a
+## generated melt, which is why the cat does not shift between stages -- one
+## transform is shared by all four and the tool fails if the cap moves.
+const CAT_FREEZE_SHEET: Texture2D = preload("res://assets/characters/cat_freeze_4.png")
 const CAT_WORK_SHEET: Texture2D = preload("res://assets/characters/cat_work_s.png")
 ## Adopted object art, drawn from directly above.
 ##
@@ -208,7 +214,7 @@ func _draw() -> void:
 		_draw_belt_items(machine, Vector2(cell) * tile, tile)
 	_draw_shelter(tile)
 	_draw_food_bin(tile)
-	_draw_boxes(tile)
+	_draw_frozen(tile)
 	_draw_ground()
 	_draw_hand_progress()
 	_draw_meter_marker(tile)
@@ -657,22 +663,31 @@ static func cat_sheet(state: int, heading: Vector2, walking: bool) -> Array:
 		return [CAT_WALK_N_SHEET, false]
 	return [CAT_WALK_SHEET, false]
 
-func _draw_boxes(tile: float) -> void:
-	for cell: Vector2i in sim.cat_boxes:
+## The cats still in the ice. Drawn from the same rect a walking cat is drawn
+## from, so the one that wakes up stands exactly where the block was: the last
+## frozen stage and the first standing frame have to be the same animal in the
+## same place, and computing that here separately is what let the carried cat
+## drift off its anchor for a release.
+func _draw_frozen(tile: float) -> void:
+	for cell: Vector2i in sim.frozen_cats:
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
 		if not view_rect.grow(tile).has_point(at):
 			continue
+		var progress: float = sim.frozen_cats[cell]
+		# Meltwater, under the block and under its shadow. It is the only thing
+		# on screen that says the ice is going: the four stages are three seconds
+		# apart, and between them a player who has just put a cat down would have
+		# nothing at all to look at.
+		if progress > 0.0:
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+			draw_circle(Vector2(at.x, (at.y + 10.0) / Defs.SHADOW_SQUASH),
+				7.0 + 9.0 * progress, Color(Defs.COL_ICE, 0.16 + 0.24 * progress))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		_shadow(at + Vector2(0, 9), 9.0)
-		# Ears break the square silhouette. A pawprint on a brown box read as a
-		# food bin from a screen away; a shape with ears cannot be mistaken.
-		draw_colored_polygon(PackedVector2Array([
-			at + Vector2(-7, -8), at + Vector2(-4, -13), at + Vector2(-1, -8)]), Defs.OUTLINE)
-		draw_colored_polygon(PackedVector2Array([
-			at + Vector2(7, -8), at + Vector2(4, -13), at + Vector2(1, -8)]), Defs.OUTLINE)
-		var crate: Rect2 = _body(at, 17.0, Color8(146, 102, 62))
-		draw_rect(Rect2(crate.position.x, crate.get_center().y - 1.5, crate.size.x, 3.0),
-			Color8(196, 146, 92))
-		draw_circle(at + Vector2(0, -2), 2.2, Defs.COL_CAT_FACE)
+		var block: Rect2 = cat_rect(at, 1.0, false, 0.0)
+		var stage: int = Sim.frozen_stage(progress)
+		var region := Rect2(float(stage) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
+		draw_texture_rect_region(CAT_FREEZE_SHEET, block, region, Color.WHITE)
 
 func _draw_food_bin(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5

@@ -35,8 +35,7 @@ func _run() -> void:
 	_assert(not sim.is_unlocked(Defs.M_GENERATOR), "but the power line stays shut")
 
 	# --- Hauling: cats clear the floor, slowly --------------------------------
-	sim.carried_boxes = Defs.BOXES_PER_CAT
-	sim.adopt_cats()
+	sim.grant_cats(1)
 	_assert(sim.cats.size() >= 1, "three crates buy a cat")
 	var kitty = sim.cats[0]
 	var drop := Vector2i(3, 0)
@@ -358,8 +357,7 @@ func _run() -> void:
 func _haul_seconds(tiles: int) -> float:
 	var sim := Sim.new()
 	sim.setup(4242)
-	sim.carried_boxes = Defs.BOXES_PER_CAT
-	sim.adopt_cats()
+	sim.grant_cats(1)
 	var cat = sim.cats[0]
 	cat.pos = sim.cell_centre(sim.core_cell)
 	var at := sim.core_cell + Vector2i(tiles, 0)

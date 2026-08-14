@@ -39,8 +39,7 @@ func _run() -> void:
 	# Three on machines, one idle: the arrangement asked for. debug_scenario
 	# staffs whatever miners it built, so the rest is topped up here.
 	while sim.cats.size() < 4:
-		sim.carried_boxes += Defs.BOXES_PER_CAT
-		sim.adopt_cats()
+		sim.grant_cats(1)
 	for cell: Vector2i in sim.idle_miner_cells():
 		var spare = null
 		for cat: Sim.Cat in sim.cats:

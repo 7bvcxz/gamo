@@ -323,25 +323,11 @@ export const OBJECTS = [
       }
     },
   },
-  {
-    id: 'crate',
-    name: '고양이 상자',
-    kind: '수집물',
-    note: '3개를 숙소로 가져가면 고양이 한 마리. 귀가 실루엣을 깨서 사료통과 헷갈리지 않는다.',
-    states: ['기본'],
-    draw(ctx) {
-      shadow(ctx, 0, 9, 9);
-      ctx.fillStyle = PALETTE.outline;
-      ctx.beginPath();
-      ctx.moveTo(-7, -8); ctx.lineTo(-4, -13); ctx.lineTo(-1, -8);
-      ctx.moveTo(7, -8); ctx.lineTo(4, -13); ctx.lineTo(1, -8);
-      ctx.fill();
-      const crate = body(ctx, 0, 0, 17, 'rgb(146,102,62)');
-      ctx.fillStyle = 'rgb(196,146,92)';
-      ctx.fillRect(crate.x, -1.5, crate.size, 3);
-      circle(ctx, 0, -2, 2.2, PALETTE.catFace);
-    },
-  },
+  // The cat crate used to be here. It is gone from the game -- cats are found
+  // frozen and carried home now -- and a port of something the game no longer
+  // draws is worse than no entry at all. What replaced it is a sprite, not code,
+  // so it lives on the proposals page with the four melting stages rather than
+  // in this gallery of canvas drawings.
   {
     id: 'foodbin',
     name: '사료통',

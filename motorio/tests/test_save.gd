@@ -17,7 +17,7 @@ func _run() -> void:
 	await process_frame
 
 	# Build a distinctive state: a staffed miner, a belt with cargo, materials,
-	# crates in hand, a part-eaten food bin and a second day in progress.
+	# a cat in her arms, a part-eaten food bin and a second day in progress.
 	var seed_before: int = main.run_seed
 	main.sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
 	_open(main.sim)
@@ -27,12 +27,13 @@ func _run() -> void:
 	# Set the balance after building, since building spends it.
 	main.sim.heat = 250
 	(main.sim.machine_at(Vector2i(0, 2)) as Sim.Machine).items.append({"type": Defs.ITEM_COPPER, "t": 0.4})
-	main.sim.carried_boxes = 2
+	main.sim.carried_frozen = true
+	main.sim.frozen_cats.clear()
+	main.sim.frozen_cats[Vector2i(4, -3)] = 0.62
 	main.sim.food = 137
 	main.sim.delivered[Defs.ITEM_COPPER] = 9
 	main.sim.delivered[Defs.ITEM_ENERGY] = 4
 	main.sim.total_heat = 321
-	main.sim.carried_boxes = 2
 	main.sim.cats.clear()
 	var cat := Sim.Cat.new()
 	cat.assigned = Vector2i(-1, 0)
@@ -60,7 +61,9 @@ func _run() -> void:
 	_assert(int(main.sim.delivered[Defs.ITEM_COPPER]) == 9, "copper count survives")
 	_assert(int(main.sim.delivered[Defs.ITEM_ENERGY]) == 4, "iron count survives")
 	_assert(main.sim.food == 137, "the food bin level survives")
-	_assert(main.sim.carried_boxes == 2, "crates in hand survive")
+	_assert(main.sim.carried_frozen, "the frozen cat in her arms survives")
+	_assert(is_equal_approx(float(main.sim.frozen_cats.get(Vector2i(4, -3), 0.0)), 0.62),
+		"and one half-melted on the ground keeps its progress")
 
 	var miner: Sim.Machine = main.sim.machine_at(Vector2i(-1, 0))
 	_assert(miner != null and miner.type == Defs.M_MINER, "the miner is rebuilt")

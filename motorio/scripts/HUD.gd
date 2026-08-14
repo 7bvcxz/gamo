@@ -913,7 +913,11 @@ func _draw_title() -> void:
 	var full := func(y: float) -> Rect2: return Rect2(0, y, size.x, 40)
 	var touch_pad: bool = main.touch != null and main.touch.visible
 	_text_in(full.call(size.y * 0.30), "MOTORIO", 56, Defs.COL_CORE)
-	_text_in(full.call(size.y * 0.30 + 32), "O N E   S H O T", 17, Defs.COL_MACHINE_EDGE)
+	# The subtitle used to read "O N E   S H O T". It survived the rename because
+	# every search for the old name looked for motorio-oneshot, motorio_oneshot,
+	# OneShot, One Shot and oneshot -- and none of those match a string with a
+	# space between every letter. It was on the first screen of the game for four
+	# versions after the name it referred to stopped existing.
 	_text_in(full.call(size.y * 0.52), "하룻밤 안에 공장을 세워 열을 최대한 모으세요.", 16, Defs.COL_TEXT)
 	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.", 13, Defs.COL_TEXT_DIM)
 	# Never let the one call to action fall below a readable floor.
