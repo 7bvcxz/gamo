@@ -53,8 +53,8 @@ this works from a machine behind NAT at all.
 
 The site keeps its `/gamo/` base so that both hosts serve byte-identical files
 and either can be switched off without a rebuild. After the hostname is added,
-`https://gamo.heydive.in/gamo/motorio-oneshot/` and
-`https://7bvcxz.github.io/gamo/motorio-oneshot/` are the same build.
+`https://gamo.heydive.in/gamo/motorio/` and
+`https://7bvcxz.github.io/gamo/motorio/` are the same build.
 
 If the GitHub host is eventually dropped, set `base: '/'` in `web/vite.config.js`,
 change the `location /gamo/` block to `location /`, and re-export the games.

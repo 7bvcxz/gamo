@@ -20,18 +20,11 @@ export function WhatIsGamo() {
 
       <h2>지금 있는 게임</h2>
       <div className="cards">
-        <a className="card" href={game('/motorio-oneshot/')}>
-          <b>Motorio: One Shot</b>
-          <span>
-            얼어붙은 고원에서 고양이 작업자와 공장을 세우는 탑다운 자동화 게임. 하루가 끝나면 그날
-            모은 열이 정산되고, 공장과 온기는 다음 날로 이어집니다.
-          </span>
-        </a>
         <a className="card" href={game('/motorio/')}>
           <b>Motorio</b>
           <span>
-            One Shot의 원본. 기지를 단계별로 키우며 온기 반경을 넓혀 더 먼 자원에 닿는 장기 진행형
-            자동화 게임입니다.
+            얼어붙은 고원에서 고양이 작업자와 공장을 세우는 탑다운 자동화 게임. 하루가 끝나면 그날
+            모은 열이 정산되고, 공장과 온기는 다음 날로 이어집니다.
           </span>
         </a>
         <a className="card" href={game('/gunslinger/')}>
@@ -80,7 +73,7 @@ export function WhatIsGamo() {
           <tbody>
             <tr>
               <td>
-                <code>motorio/</code>, <code>motorio-oneshot/</code>, <code>nowhere/</code>
+                <code>motorio/</code>, <code>gunslinger/</code>, <code>nowhere/</code>
               </td>
               <td>각 게임의 Godot 프로젝트 소스</td>
             </tr>
@@ -114,9 +107,14 @@ export function WhatIsGamo() {
 
       <h2>설계 문서</h2>
       <p>
-        게임별 상세 설계는 별도로 관리합니다. Motorio의 정체성 · 레벨 디자인 · 자동화 설계 문서는{' '}
-        <a href={site('/design/')}>설계 문서 뷰어</a>에서 볼 수 있으며, 저장소에 커밋된 원문을 그대로
-        읽어오므로 새로고침만 하면 항상 최신 내용이 보입니다.
+        게임별 상세 설계는 게임 옆에 둡니다. Motorio의 비전 · 코어 루프 · 진행 · 세계관 · 첫 30분
+        설계는 <code>motorio/design/</code>의 마크다운이 원본이고,{' '}
+        <a href={site('/motorio/doc/')}>Motorio 문서</a>의 Vision 절이 그 파일을 그대로 렌더합니다.
+        JSX로 옮겨 적지 않으므로 사본이 낡을 자리가 없습니다.
+      </p>
+      <p>
+        무엇이 정해졌고 무엇이 아직 열려 있는지는{' '}
+        <a href={site('/motorio/decisions/')}>Decisions</a>에 모읍니다.
       </p>
     </>
   );

@@ -1,13 +1,13 @@
 extends SceneTree
 
-## "../motorio-oneshot의 Grim 캐릭터를 주인공으로 사용"을 검사한다.
+## "../motorio의 Grim 캐릭터를 주인공으로 사용"을 검사한다.
 ##
 ## 시트를 preload 하는 것만으로는 부족하다. 이 저장소가 스프라이트에서 실제로 겪은
 ## 문제는 전부 "불러와지긴 하는데 자리가 틀린" 종류였다: 셀 경계를 넘어가는 프레임,
 ## 프레임마다 다른 발 위치, 반전할 때 반 픽셀 밀리는 기준점. 그래서 여기서는 셀 산술과
 ## 반전 축을 직접 잰다.
 ##
-## 그리고 파일이 `looproom/assets/` 안에 있어야 한다. `../motorio-oneshot`을 가리키면
+## 그리고 파일이 `looproom/assets/` 안에 있어야 한다. `../motorio`을 가리키면
 ## `res://` 밖이라 Web export에 들어가지 않고, 처음 clone한 상태에서 실행되지 않는다.
 
 const MainScene := preload("res://scenes/Main.tscn")

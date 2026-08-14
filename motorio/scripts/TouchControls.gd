@@ -1,237 +1,268 @@
 extends Control
 class_name TouchControls
 
+## Mobile controls carried over from Motorio: a movement wheel on the right and
+## three action buttons on the left. Two hard-won details come with it — the
+## joystick snaps to eight directions so a thumb can hold a straight line, and
+## touch-generated mouse events are ignored for a moment, because the browser
+## synthesises a mouse event right after every tap and that used to reset the
+## stick the instant you started dragging.
+
 const JOYSTICK_RADIUS := 64.0
 const KNOB_RADIUS := 25.0
 const BUTTON_RADIUS := 28.0
-const BUTTON_LABELS := ["Run", "Z", "X"]
+## Mine got its own button rather than sharing one. It is the first verb the
+## game teaches and it is a hold, not a tap, so overloading it onto Z would have
+## made both worse -- and until now a phone player simply could not hand-mine,
+## which is where the whole game now starts.
+## The pad says what the keyboard says. It used to carry a 캐기 button that both
+## dug and opened the throughput panel, which meant a phone player learned a verb
+## no key had and could not do with Z what the game's own hints told them to.
+const BUTTON_LABELS := ["Run", "Z", "X", "C"]
 const SYNTHETIC_MOUSE_GUARD_MSEC := 750
 
-var player
 var main_controller
+var player: PlayerActor
+
 var joystick_center := Vector2.ZERO
 var joystick_knob := Vector2.ZERO
-var joystick_touch_id := -1
 var button_centers: Array[Vector2] = []
-var button_touches: Dictionary[int, int] = {}
-var action_pressed := [false, false, false]
-var last_touch_input_msec := -10000
-var ui_passthrough_touches: Dictionary[int, bool] = {}
-var menu_navigation_axis := 0
+var joystick_touch := -1
+var button_touch: Dictionary = {}
+var last_touch_msec := -100000
+## Multiplies every dimension below. The pad is sized in logical pixels, which on
+## a phone are far smaller than physical ones, so the defaults draw a wheel about
+## 50 CSS px across -- well under a thumb. The settings slider drives this.
+var pad_scale: float = Defs.UI_SCALE_TOUCH_BASE * Defs.UI_SCALE_DEFAULT
+## What the screen can actually hold. Layout, drawing and hit-testing all read
+## this rather than the requested scale, so they can never disagree.
+var _effective: float = Defs.UI_SCALE_TOUCH_BASE * Defs.UI_SCALE_DEFAULT
+
+func set_pad_scale(user_scale: float) -> void:
+	pad_scale = Defs.UI_SCALE_TOUCH_BASE * Defs.quantise_ui_scale(user_scale)
+	_effective = pad_scale
+	# Settings can load before the pad enters the tree, and there is no viewport
+	# to measure against until it does. _ready lays out again anyway.
+	if is_inside_tree():
+		_update_layout()
+
+## A pad larger than the display is not a bigger target, it is a pad with no
+## room left for the game, so the request is capped against the actual screen.
+func _clamp_to_screen(view: Vector2) -> float:
+	var by_width: float = view.x * 0.42 / (JOYSTICK_RADIUS * 2.0)
+	var by_height: float = view.y * 0.32 / (JOYSTICK_RADIUS * 2.0)
+	var by_stack: float = maxf(view.y * 0.5 - 24.0, 1.0) / 148.0
+	return clampf(pad_scale, 0.3, maxf(minf(by_width, minf(by_height, by_stack)), 0.3))
+
+func wheel_radius() -> float:
+	return JOYSTICK_RADIUS * _effective
+
+func button_radius() -> float:
+	return BUTTON_RADIUS * _effective
+
+## Hit radius, generously larger than the drawn circle.
+func button_hit_radius() -> float:
+	return button_radius() + 12.0 * _effective
 
 func _ready() -> void:
-	resized.connect(_update_layout)
-	_update_layout()
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	visible = _is_touch_device()
-	set_process_input(true)
+	_update_layout()
+	get_viewport().size_changed.connect(_update_layout)
 
 func _is_touch_device() -> bool:
-	if OS.has_feature("web"):
-		return bool(JavaScriptBridge.eval("'ontouchstart' in window || navigator.maxTouchPoints > 0"))
-	return DisplayServer.is_touchscreen_available()
+	return DisplayServer.is_touchscreen_available() or OS.has_feature("mobile")
 
 func set_controls_visible(value: bool) -> void:
 	visible = value
 	if not value:
 		_reset_inputs()
 
-func get_button_count() -> int:
-	return button_centers.size()
-
 func _update_layout() -> void:
-	joystick_center = Vector2(size.x - 90.0, size.y - 92.0)
-	if joystick_touch_id == -1:
-		joystick_knob = joystick_center
-	button_centers = [
-		Vector2(68.0, size.y - 76.0),
-		Vector2(132.0, size.y - 116.0),
-		Vector2(154.0, size.y - 52.0),
-	]
+	var view: Vector2 = get_viewport_rect().size
+	size = view
+	_effective = _clamp_to_screen(view)
+	var wheel: float = wheel_radius()
+	var radius: float = button_radius()
+	# The inset grows with the pad but far more slowly: a margin is about the
+	# distance from the screen edge, not about thumb size, and scaling it fully
+	# pushed the controls into the middle of the display.
+	var edge: float = 20.0 + 12.0 * _effective
+	joystick_center = Vector2(view.x - wheel - edge, view.y - wheel - edge)
+	joystick_knob = joystick_center
+	button_centers.clear()
+	# Centres must sit at least two hit radii apart or the generous hit circles
+	# overlap and the first match in draw order silently wins the tap.
+	var gap: float = button_hit_radius() * 2.0 + 4.0
+	var base := Vector2(edge + radius, view.y - edge - radius)
+	# A 2x2 block. Adding a fourth button as a third row grew the pad upward and
+	# shoved the hotbar over the status panel at large UI scales, so the grid is
+	# what keeps the pad exactly as tall as it was with three.
+	button_centers.append(base + Vector2(0.0, -gap))              # Run
+	button_centers.append(base + Vector2(gap, 0.0))               # Z
+	button_centers.append(base)                                   # X
+	button_centers.append(base + Vector2(gap, -gap))              # 캐기
 	queue_redraw()
 
+## How far up the screen the pad reaches, so the HUD can keep its own controls
+## out of the way instead of drawing on top of the player's thumbs.
+func reserved_height() -> float:
+	if not visible:
+		return 0.0
+	var view: Vector2 = get_viewport_rect().size
+	var highest: float = joystick_center.y - wheel_radius()
+	for centre: Vector2 in button_centers:
+		highest = minf(highest, centre.y - button_hit_radius())
+	return maxf(0.0, view.y - highest)
+
+func _process(_delta: float) -> void:
+	if visible:
+		queue_redraw()
+
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey:
-		if visible:
-			set_controls_visible(false)
-		return
-	if event is InputEventMouseButton or event is InputEventMouseMotion:
-		if Time.get_ticks_msec() - last_touch_input_msec < SYNTHETIC_MOUSE_GUARD_MSEC:
-			return
-		if visible:
-			set_controls_visible(false)
-		return
-	if event is InputEventScreenTouch or event is InputEventScreenDrag:
-		last_touch_input_msec = Time.get_ticks_msec()
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		last_touch_msec = Time.get_ticks_msec()
 		if not visible:
 			set_controls_visible(true)
-	if not visible:
-		return
-	if event is InputEventScreenTouch:
-		if event.pressed and _is_top_tutorial_control(event.position):
-			ui_passthrough_touches[event.index] = true
-			_activate_top_tutorial_control(event.position)
-			get_viewport().set_input_as_handled()
-			return
-		if ui_passthrough_touches.has(event.index):
-			if not event.pressed:
-				ui_passthrough_touches.erase(event.index)
-			get_viewport().set_input_as_handled()
-			return
-		if event.pressed:
-			_begin_touch(event.index, event.position)
+		if touch.pressed:
+			_begin_touch(touch.index, touch.position)
 		else:
-			_end_touch(event.index)
-		get_viewport().set_input_as_handled()
-	elif event is InputEventScreenDrag:
-		if ui_passthrough_touches.has(event.index):
-			return
-		if event.index == joystick_touch_id:
-			_update_joystick(event.position)
-			get_viewport().set_input_as_handled()
-
-func _is_top_tutorial_control(position: Vector2) -> bool:
-	var top_tools := position.y <= 132.0 and position.x >= size.x * 0.5 - 170.0 and position.x <= size.x * 0.5 + 170.0
-	var right_tutorial := position.y >= 152.0 and position.y <= 204.0 and position.x >= size.x - 170.0
-	return top_tools or right_tutorial
-
-func _activate_top_tutorial_control(position: Vector2) -> void:
-	if main_controller == null:
+			_end_touch(touch.index)
 		return
-	if position.y >= 152.0:
-		if position.x < size.x - 86.0:
-			main_controller._developer_previous_tutorial()
-		else:
-			main_controller._developer_advance_tutorial()
-	elif position.y <= 90.0 and position.x < size.x * 0.5:
-		main_controller._developer_add_resources()
-	elif position.y <= 90.0:
-		main_controller._developer_advance_minute()
-	elif position.x > size.x * 0.5:
-		main_controller.call_deferred("reset_game")
-	else:
-		main_controller.save_game()
+	if event is InputEventScreenDrag:
+		var drag := event as InputEventScreenDrag
+		last_touch_msec = Time.get_ticks_msec()
+		if drag.index == joystick_touch:
+			_update_joystick(drag.position)
+		elif main_controller != null:
+			main_controller.call("touch_hud_drag", drag.position)
+		return
+	# A real keyboard or mouse means a desktop player; hide the pad. The guard
+	# keeps the browser's synthetic post-tap mouse event from doing this.
+	if event is InputEventKey and visible:
+		set_controls_visible(false)
+	elif event is InputEventMouseButton and visible:
+		if Time.get_ticks_msec() - last_touch_msec > SYNTHETIC_MOUSE_GUARD_MSEC:
+			set_controls_visible(false)
 
 func _begin_touch(touch_id: int, position: Vector2) -> void:
-	var in_shelter: bool = main_controller != null and main_controller.shelter_open
-	if not in_shelter and position.x >= size.x * 0.5 and joystick_touch_id == -1:
-		joystick_touch_id = touch_id
-		_update_joystick(position)
+	# The HUD gets first refusal, ahead of the tap-anywhere shortcut below: the
+	# settings gear lives on the title screen too, and if "start" ran first the
+	# gear could never be pressed there.
+	if main_controller != null and main_controller.call("touch_hud", position):
 		return
+	# On a menu screen the whole display is the button. Requiring a player to
+	# find the small Z pad to get past the title is why the game looked broken
+	# on a phone: the prompt said "press any key" and a phone has none.
+	if main_controller != null and main_controller.call("touch_anywhere_starts"):
+		main_controller.call("touch_primary")
+		return
+	var hit: float = button_hit_radius()
 	for index in button_centers.size():
-		if in_shelter and index != 1:
-			continue
-		if position.distance_to(button_centers[index]) <= BUTTON_RADIUS * 1.25:
-			if main_controller != null and main_controller.interaction_locked() and index in [1, 2]:
-				return
-			button_touches[touch_id] = index
-			action_pressed[index] = true
-			if main_controller:
-				if index == 1:
-					main_controller.collect_action_held = true
-					main_controller.primary_action()
-				elif index == 2:
-					main_controller.begin_placement_action()
-			_sync_player()
-			queue_redraw()
+		if position.distance_to(button_centers[index]) <= hit:
+			button_touch[touch_id] = index
+			_press_button(index, true)
 			return
+	if position.x > size.x * 0.45:
+		joystick_touch = touch_id
+		_update_joystick(position)
 
 func _end_touch(touch_id: int) -> void:
-	if touch_id == joystick_touch_id:
-		joystick_touch_id = -1
-		joystick_knob = joystick_center
-		if player:
-			player.touch_direction = Vector2.ZERO
-		menu_navigation_axis = 0
-		queue_redraw()
+	if main_controller != null:
+		main_controller.call("touch_hud_release")
+	if button_touch.has(touch_id):
+		_press_button(int(button_touch[touch_id]), false)
+		button_touch.erase(touch_id)
 		return
-	if button_touches.has(touch_id):
-		var index: int = button_touches[touch_id]
-		button_touches.erase(touch_id)
-		action_pressed[index] = false
-		if main_controller and index == 1:
-			main_controller.collect_action_held = false
-		elif main_controller and index == 2:
-			main_controller.end_placement_action()
-		_sync_player()
+	if touch_id == joystick_touch:
+		joystick_touch = -1
+		joystick_knob = joystick_center
+		if player != null:
+			player.touch_direction = Vector2.ZERO
 		queue_redraw()
 
 func _update_joystick(position: Vector2) -> void:
-	var offset := position - joystick_center
-	if offset.length() > JOYSTICK_RADIUS:
-		offset = offset.normalized() * JOYSTICK_RADIUS
+	var wheel: float = wheel_radius()
+	var offset: Vector2 = position - joystick_center
+	if offset.length() > wheel:
+		offset = offset.normalized() * wheel
 	joystick_knob = joystick_center + offset
-	if main_controller != null and main_controller.any_menu_open():
-		if player:
-			player.touch_direction = Vector2.ZERO
-		var next_axis := 0
-		if offset.y <= -JOYSTICK_RADIUS * 0.32:
-			next_axis = -1
-		elif offset.y >= JOYSTICK_RADIUS * 0.32:
-			next_axis = 1
-		if next_axis != 0 and next_axis != menu_navigation_axis:
-			if main_controller.base_menu_open:
-				main_controller.move_fabricator_selection(next_axis)
-			else:
-				main_controller.move_research_selection(next_axis)
-		menu_navigation_axis = next_axis
-		queue_redraw()
+	if player == null:
 		return
-	if player:
-		player.touch_direction = snap_to_eight_directions(offset / JOYSTICK_RADIUS)
+	if offset.length() < 12.0 * _effective:
+		player.touch_direction = Vector2.ZERO
+	else:
+		player.touch_direction = snap_to_eight_directions(offset / wheel)
 	queue_redraw()
 
+## Eight-way snapping: a thumb cannot hold an exact angle, and a belt line built
+## along a drifting diagonal is the most annoying way to waste heat.
 func snap_to_eight_directions(direction: Vector2) -> Vector2:
-	if direction.length() < 0.12:
+	if direction.is_zero_approx():
 		return Vector2.ZERO
-	var snapped_angle := roundf(direction.angle() / (PI / 4.0)) * (PI / 4.0)
-	return Vector2.from_angle(snapped_angle) * clampf(direction.length(), 0.0, 1.0)
+	var step: float = TAU / 8.0
+	var angle: float = round(direction.angle() / step) * step
+	return Vector2.from_angle(angle)
 
-func _sync_player() -> void:
-	if player:
-		player.touch_sprint = action_pressed[0] and (main_controller == null or not main_controller.any_menu_open())
+func _press_button(index: int, pressed: bool) -> void:
+	if player != null and index == 0:
+		player.touch_sprint = pressed
+	# Z is held as well as pressed -- mining is a hold -- so it reports both edges
+	# rather than only presses.
+	if index == 1 and main_controller != null:
+		main_controller.call("touch_primary", pressed)
+	if main_controller == null or not pressed:
+		return
+	match index:
+		2: main_controller.call("touch_secondary")
+		3: main_controller.call("touch_meter")
+
+## Called when a modal panel opens, so a held direction cannot survive it and
+## walk the player into the cold while they are reading a menu.
+func release_all() -> void:
+	_reset_inputs()
+	queue_redraw()
 
 func _reset_inputs() -> void:
-	joystick_touch_id = -1
-	ui_passthrough_touches.clear()
-	menu_navigation_axis = 0
-	button_touches.clear()
-	action_pressed = [false, false, false]
+	if main_controller != null:
+		main_controller.call("touch_primary", false)
+	joystick_touch = -1
 	joystick_knob = joystick_center
-	if player:
+	button_touch.clear()
+	if player != null:
 		player.touch_direction = Vector2.ZERO
 		player.touch_sprint = false
-	if main_controller:
-		main_controller.collect_action_held = false
-		main_controller.cancel_placement_action()
-	queue_redraw()
 
 func _draw() -> void:
-	if main_controller != null and main_controller.shelter_open:
-		_draw_action_button(1)
+	if not visible:
 		return
-	# Movement wheel on the lower right.
-	draw_circle(joystick_center, JOYSTICK_RADIUS + 4.0, Color(0.02, 0.07, 0.08, 0.28))
-	draw_circle(joystick_center, JOYSTICK_RADIUS, Color(0.035, 0.12, 0.13, 0.62))
-	draw_arc(joystick_center, JOYSTICK_RADIUS, 0.0, TAU, 48, Color(0.50, 0.72, 0.68, 0.55), 2.0)
-	for tick in range(8):
-		var tick_direction := Vector2.from_angle(float(tick) * TAU / 8.0)
-		draw_line(joystick_center + tick_direction * 47.0, joystick_center + tick_direction * 54.0, Color(0.73, 0.86, 0.81, 0.42), 2.0)
-	draw_circle(joystick_knob + Vector2(2, 3), KNOB_RADIUS + 1.0, Color(0.03, 0.08, 0.08, 0.38))
-	draw_circle(joystick_knob, KNOB_RADIUS, Color(0.90, 0.65, 0.24, 0.9))
-	draw_circle(joystick_knob + Vector2(-6, -7), 6.0, Color(1.0, 0.86, 0.48, 0.42))
-
-	# Three action buttons on the lower left.
+	var wheel: float = wheel_radius()
+	var knob: float = KNOB_RADIUS * _effective
+	draw_circle(joystick_center, wheel + 4.0 * _effective, Color(0.02, 0.07, 0.08, 0.28))
+	draw_circle(joystick_center, wheel, Color(0.035, 0.12, 0.13, 0.62))
+	draw_arc(joystick_center, wheel, 0.0, TAU, 48, Color(0.50, 0.72, 0.68, 0.55), 2.0 * _effective)
+	for tick in 8:
+		var direction := Vector2.from_angle(float(tick) * TAU / 8.0)
+		draw_line(joystick_center + direction * wheel * 0.73,
+			joystick_center + direction * wheel * 0.84,
+			Color(0.73, 0.86, 0.81, 0.42), 2.0 * _effective)
+	draw_circle(joystick_knob + Vector2(2, 3) * _effective, knob + _effective, Color(0.03, 0.08, 0.08, 0.38))
+	draw_circle(joystick_knob, knob, Color(0.90, 0.65, 0.24, 0.9))
+	draw_circle(joystick_knob + Vector2(-6, -7) * _effective, knob * 0.24, Color(1.0, 0.86, 0.48, 0.42))
 	for index in button_centers.size():
 		_draw_action_button(index)
 
 func _draw_action_button(index: int) -> void:
-	var fill := Color(0.88, 0.52, 0.18, 0.94) if action_pressed[index] else Color(0.04, 0.14, 0.15, 0.78)
-	draw_circle(button_centers[index] + Vector2(2, 3), BUTTON_RADIUS + 1.0, Color(0.02, 0.06, 0.07, 0.35))
-	draw_circle(button_centers[index], BUTTON_RADIUS, fill)
-	draw_arc(button_centers[index], BUTTON_RADIUS, 0.0, TAU, 32, Color(0.55, 0.76, 0.71, 0.75), 2.0)
-	draw_arc(button_centers[index], BUTTON_RADIUS - 4.0, PI * 1.05, PI * 1.75, 14, Color(1.0, 0.91, 0.67, 0.35), 2.0)
+	var at: Vector2 = button_centers[index]
+	var radius: float = button_radius()
+	var held: bool = button_touch.values().has(index)
+	draw_circle(at + Vector2(2, 3) * _effective, radius + _effective, Color(0.02, 0.07, 0.08, 0.34))
+	draw_circle(at, radius, Color(0.06, 0.16, 0.17, 0.88 if held else 0.66))
+	draw_arc(at, radius, 0.0, TAU, 32, Color(0.85, 0.65, 0.30, 0.85 if held else 0.55), 2.0 * _effective)
 	var label: String = BUTTON_LABELS[index]
 	var font: Font = UIFont.FONT
-	var font_size := 11 if index == 0 else 16
-	var text_size: Vector2 = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-	draw_string(font, button_centers[index] - Vector2(text_size.x / 2.0, -text_size.y / 3.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE)
+	var glyph: int = int(round((12.0 if label.length() > 2 else 16.0) * _effective))
+	var width: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, glyph).x
+	draw_string(font, at + Vector2(-width * 0.5, 6.0 * _effective), label, HORIZONTAL_ALIGNMENT_LEFT,
+		-1, glyph, Color(0.95, 0.98, 0.96, 0.92))

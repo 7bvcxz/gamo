@@ -45,7 +45,7 @@ echo "   $count files"
 echo "── verify"
 # Against the running container, not the filesystem: a file that exists and a
 # file that is served are different claims, and only the second one matters.
-for path in /gamo/ /gamo/motorio-oneshot/ /gamo/motorio-oneshot/graphic/proposals/; do
+for path in /gamo/ /gamo/motorio/ /gamo/motorio/graphic/proposals/; do
   code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:8090$path")
   printf '   %-45s %s\n' "$path" "$code"
   [[ "$code" == "200" ]] || { echo "   FAILED"; exit 1; }

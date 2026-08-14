@@ -1,8 +1,8 @@
-// A port of motorio-oneshot's object drawing, so the graphic gallery shows what
+// A port of motorio's object drawing, so the graphic gallery shows what
 // the game actually draws rather than an artist's impression of it.
 //
 // IT IS A PORT, AND PORTS DRIFT. The rules and constants below mirror
-// motorio-oneshot/scripts/Defs.gd and MachineLayer.gd. If you change how an
+// motorio/scripts/Defs.gd and MachineLayer.gd. If you change how an
 // object is drawn in the game, change it here in the same commit. The gallery
 // page states this, so nobody trusts it further than it deserves.
 

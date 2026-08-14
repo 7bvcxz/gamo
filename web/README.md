@@ -28,7 +28,7 @@ Because of the split, no path is written down whole. `lib/links.js` exports two
 functions and they return different values per target:
 
 - `site('/doc/')` — a page built from this directory
-- `game('/motorio-oneshot/')` — a Godot build, possibly on another origin
+- `game('/motorio/')` — a Godot build, possibly on another origin
 
 ## vercel.json
 
@@ -91,6 +91,6 @@ same commit as the change they describe.
 
 `scripts/to-docs.mjs` replaces the site's files in `docs/` and must leave the
 three game directories alone — except for the site pages that live *inside*
-them, like `/motorio-oneshot/doc/`. What it removes is derived from the export
+them, like `/motorio/doc/`. What it removes is derived from the export
 itself rather than from a list, so a page moving or disappearing cannot strand a
 stale copy.

@@ -200,7 +200,7 @@
   - localhost 및 `api.heydive.in`의 `/api/games` 응답에서 Motorio `Release` 노출 확인
   - `heydive-client` 프로덕션 빌드와 `https://www.heydive.in/game` HTTP 200 확인
 
-## motorio-oneshot
+## motorio
 
 ### 모바일 UI 배율과 설정 패널 (2026-07-31)
 
@@ -210,7 +210,7 @@
 - 완료 내용:
   - 터치 기본 배율 2배(`UI_SCALE_TOUCH_BASE`), 데스크톱 0.5배로 분리
   - 좌측 최상단 설정 기어 버튼과 UI 배율 슬라이더(60~160%, 5% 단위) 추가
-  - 배율은 `user://motorio_oneshot_settings.cfg`에 별도 저장해 새 게임·세이브 스키마
+  - 배율은 `user://motorio_settings.cfg`에 별도 저장해 새 게임·세이브 스키마
     변경과 무관하게 유지
   - 설정을 별도 State로 만들어 여는 동안 시계와 체온이 멈추도록 처리
   - 배율에 따라 레이아웃이 무너지지 않도록: 핫바 폭 자동 축소, 터치패드가 차지하는
@@ -236,7 +236,7 @@
     여부를 매 프레임 반영해 키보드/터치 전환 시에도 기준이 따라간다.
   - 드래그 중 즉시 적용되어 손가락 아래에서 월드 크기가 바로 바뀐다.
   - 슬라이더가 2행이 되면서 행별 히트 영역 분리, 키보드 ↑↓ 행 선택 + ←→ 조절 추가.
-  - 두 배율 모두 `motorio_oneshot_settings.cfg`에 저장.
+  - 두 배율 모두 `motorio_settings.cfg`에 저장.
 - 검증:
   - `test_settings.gd` 확장(행 히트 영역 비중첩, 행 독립성, `camera.zoom == 기준 × 설정`,
     저장 복원), 전체 9개 테스트 통과
@@ -247,13 +247,13 @@
 
 ### 스프라이트 파이프라인 — 중단 시점 인수인계 (2026-08-07)
 
-여기서 motorio-oneshot 개발을 멈췄다. 다시 시작할 때 이 절만 읽으면 상태가 복원된다.
+여기서 motorio 개발을 멈췄다. 다시 시작할 때 이 절만 읽으면 상태가 복원된다.
 
 **무엇을 만들고 있었나.** 생성 영상에서 캐릭터 스프라이트를 뽑는 파이프라인. 게임 코드는
 건드리지 않았고, 후보를 제안 페이지에 올려 사람이 고르는 단계까지 와 있다. **채택은 아직
 안 했다** — 게임은 여전히 기존 일러스트(`SPRITE_SCALE 0.105`로 축소)를 쓴다.
 
-**도구** (`motorio-oneshot/tools/sprite/`)
+**도구** (`motorio/tools/sprite/`)
 
 | 파일 | 역할 |
 |---|---|
@@ -330,10 +330,10 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
 - 유지보수 후보: `docs/motorio/`에 누적된 60개 해시 빌드 정리 정책, 1,670줄 `Main.gd`의 서브시스템 분리
 - 테스트 정리 후보: `test_base.gd`, `test_conveyor.gd`가 아직 실패 시 즉시 `quit(1)`을 예약하는 구식 패턴을 사용한다
 
-## motorio-oneshot 장기 설계
+## motorio 장기 설계
 
-2026-08-13에 게임 비전을 확정하고 `motorio-oneshot/design/`에 여섯 문서로 정리했다.
-앞으로 모든 기능 개발의 기준이며 `/motorio-oneshot/doc`의 Vision 절에서 읽는다.
+2026-08-13에 게임 비전을 확정하고 `motorio/design/`에 여섯 문서로 정리했다.
+앞으로 모든 기능 개발의 기준이며 `/motorio/doc`의 Vision 절에서 읽는다.
 
 - **한 문장**: 얼어붙은 고양이 행성에 불시착한 Grim이 난로 하나에서 시작해 고양이를 구하고
   자동화 문명을 세워 행성 전체에 열을 퍼뜨린다. 그리고 마지막에는 복수조차 자동화한다.
@@ -353,7 +353,7 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
   없이도 렌더된다 — localhost에서 열면 편집되고, 그 외에서는 커밋된 스냅샷을 읽는다.
 - compose 프로젝트 이름을 `gamo`로 못박았다. 기본값이 디렉터리명 `server`라 이 머신의 다른
   프로젝트와 이름공간을 공유하고 있었다.
-- 페이지: `/motorio-oneshot/decisions`.
+- 페이지: `/motorio/decisions`.
 
 ## 공용 도구
 
@@ -371,9 +371,9 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
 
 ## 운영 규칙
 
-- 게임별 진행 기록은 각 게임의 문서 사이트로 옮겼다. One Shot은 `/gamo/motorio-oneshot/doc/`의
-  Releases·Todo·개발 도구가 단일 원본이며(소스는 `web/components/content/OneShot*.jsx`,
-  `web/components/content/oneshot/`), 이 파일에는 저장소 전체에 걸친 사항만 남긴다.
+- 게임별 진행 기록은 각 게임의 문서 사이트로 옮겼다. Motorio는 `/gamo/motorio/doc/`의
+  Releases·Todo·개발 도구가 단일 원본이며(소스는 `web/components/content/Motorio*.jsx`,
+  `web/components/content/motorio/`), 이 파일에는 저장소 전체에 걸친 사항만 남긴다.
 - 공동 작업 규칙의 단일 원본은 `AGENTS.md`이며, Claude Code용 `CLAUDE.md`는 `@AGENTS.md` import만 두고 본문을 복사하지 않는다.
 - 앞으로 새 게임의 완료 범위에는 Godot 구현, Web export, GitHub push, HeyDive 게임 등록 및 실행 확인을 모두 포함한다.
 - Web 배포는 고정 runner와 해시 PCK를 사용한다. GitHub Contents API는 게임 로딩 경로에서 제거했다(비인증 시간당 60회 제한으로 403이 나면 게임이 아예 열리지 않는다).

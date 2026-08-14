@@ -45,7 +45,7 @@
     "energy": 36.3636363636364,
     "heat": 181.818181818182
   },
-  "generated_by": "motorio-oneshot/tools/dump_balance.gd",
+  "generated_by": "motorio/tools/dump_balance.gd",
   "items": {
     "heat_value": [
       0,

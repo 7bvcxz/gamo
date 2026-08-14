@@ -5,21 +5,15 @@ import React from 'react';
 
 const GAMES = [
   {
-    name: 'Motorio: One Shot',
-    path: game('/motorio-oneshot/'),
+    name: 'Motorio',
+    path: game('/motorio/'),
     blurb:
       '얼어붙은 고원에서 고양이 작업자와 공장을 세웁니다. 하루가 끝나면 그날 모은 열이 정산되고, 공장과 온기는 다음 날로 이어집니다.',
     extra: [
-      { href: site('/motorio-oneshot/graphic/'), label: '그래픽' },
-      { href: site('/motorio-oneshot/graphic/proposals/'), label: '그래픽 제안' },
-      { href: site('/motorio-oneshot/doc/'), label: '문서' },
+      { href: site('/motorio/graphic/'), label: '그래픽' },
+      { href: site('/motorio/graphic/proposals/'), label: '그래픽 제안' },
+      { href: site('/motorio/doc/'), label: '문서' },
     ],
-  },
-  {
-    name: 'Motorio',
-    path: game('/motorio/'),
-    blurb: '기지를 키워 온기 반경을 넓히고 더 먼 자원에 닿는 장기 진행형 자동화 게임.',
-    extra: [{ href: site('/motorio/doc/'), label: '문서' }],
   },
   {
     name: 'Gunslinger',
@@ -50,8 +44,8 @@ function Home() {
         <p>
           Godot으로 만든 게임 모음. 설치 없이 브라우저에서 바로 실행됩니다.
         </p>
-        <a className="btn primary" href={game('/motorio-oneshot/')}>
-          Motorio: One Shot 플레이
+        <a className="btn primary" href={game('/motorio/')}>
+          Motorio: Motorio 플레이
         </a>
         <a className="btn" href={site('/doc/')}>
           문서

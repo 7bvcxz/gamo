@@ -5,10 +5,10 @@ export function SatisfactoryLevelDesign() {
     <>
       <h1>참고 — Satisfactory 레벨 디자인</h1>
       <p className="lede">
-        Motorio: One Shot이 목표로 하는 재미는 Satisfactory와 같은 계열입니다. 전투도 없고 강한
+        Motorio: Motorio가 목표로 하는 재미는 Satisfactory와 같은 계열입니다. 전투도 없고 강한
         압박도 없습니다. 재미는 <b>생산 효율을 구조화할 수 있는 수단을 충분히 주는 것</b>, 그리고
         그 수단이 <b>더 나은 배치를 상상하게 만드는 것</b>에서 나옵니다. 이 문서는 Satisfactory가
-        그 두 가지를 어떤 장치로 만들어내는지 분해하고, 마지막 절에서 One Shot으로 무엇을
+        그 두 가지를 어떤 장치로 만들어내는지 분해하고, 마지막 절에서 Motorio으로 무엇을
         가져오고 무엇을 가져오면 안 되는지를 정리합니다.
       </p>
 
@@ -337,9 +337,9 @@ export function SatisfactoryLevelDesign() {
         거리의 위기는 “공간을 정복하라”입니다. 같은 종류의 벽이 두 번 나오지 않습니다.
       </p>
 
-      <h2>7. Motorio: One Shot으로의 번역</h2>
+      <h2>7. Motorio: Motorio으로의 번역</h2>
       <p>
-        여기가 이 문서의 목적입니다. One Shot은 3분짜리 하루가 누적되는 2D 게임이고, Satisfactory는
+        여기가 이 문서의 목적입니다. Motorio는 3분짜리 하루가 누적되는 2D 게임이고, Satisfactory는
         100시간짜리 3D 게임입니다. <b>그대로 가져오면 안 되는 것이 분명히 있습니다.</b>
       </p>
 
@@ -349,7 +349,7 @@ export function SatisfactoryLevelDesign() {
           <thead>
             <tr>
               <th>가져올 것</th>
-              <th>One Shot의 현재</th>
+              <th>Motorio의 현재</th>
               <th>해야 할 일</th>
             </tr>
           </thead>
@@ -406,27 +406,27 @@ export function SatisfactoryLevelDesign() {
       <ul>
         <li>
           <b>100시간짜리 티어 사다리.</b> 하루가 3분인 게임에 티어 8단계를 넣으면 어느 단계도 충분히
-          플레이되지 않습니다. One Shot의 척추는 짧고 굵어야 합니다.
+          플레이되지 않습니다. Motorio의 척추는 짧고 굵어야 합니다.
         </li>
         <li>
           <b>유체와 수두 규칙.</b> 별도 시스템 하나를 통째로 배우게 하는 비용은 2D 소품 게임에
           과합니다. 물·석유를 넣더라도 <b>벨트와 같은 문법</b>으로 다루세요.
         </li>
         <li>
-          <b>수집물 사냥(슬러그·하드드라이브).</b> One Shot에는 이미 고양이 상자가 그 역할을 합니다.
+          <b>수집물 사냥(슬러그·하드드라이브).</b> Motorio에는 이미 고양이 상자가 그 역할을 합니다.
           두 번째 수집 루프는 초점을 흐립니다.
         </li>
         <li>
-          <b>자유 건설.</b> One Shot은 격자 게임입니다. 격자를 유지하는 대신, 격자 안에서의 표현력
+          <b>자유 건설.</b> Motorio는 격자 게임입니다. 격자를 유지하는 대신, 격자 안에서의 표현력
           (분배기, 다층)을 늘리세요.
         </li>
       </ul>
 
-      <h3>7.3 One Shot만의 축 — 온기</h3>
+      <h3>7.3 Motorio만의 축 — 온기</h3>
       <p>
-        Satisfactory에는 없고 One Shot에만 있는 것이 하나 있습니다. <b>건설 가능 영역이 게임 중에
+        Satisfactory에는 없고 Motorio에만 있는 것이 하나 있습니다. <b>건설 가능 영역이 게임 중에
         자란다</b>는 점입니다. Satisfactory의 지도는 처음부터 전부 열려 있고 플레이어의 이동 능력만
-        늘어납니다. One Shot은 <b>캔버스 자체가 커집니다.</b>
+        늘어납니다. Motorio는 <b>캔버스 자체가 커집니다.</b>
       </p>
       <p>
         이건 흉내가 아니라 고유한 자산입니다. 활용 방향:

@@ -6,23 +6,20 @@ config_version=5
 [application]
 
 config/name="Motorio"
-config/description="A top-down automation game prototype"
-config/version="0.4.19"
+config/description="A single-run frozen automation game. Build a cat-powered factory and hoard heat before the night takes the plateau."
+config/version="0.20.61"
 run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=640
-window/size/window_width_override=640
-window/size/window_height_override=640
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/size/window_width_override=960
+window/size/window_height_override=540
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[gui]
-
-theme/custom="res://ui_theme.tres"
 
 [input]
 
@@ -46,6 +43,46 @@ sprint={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194325), Object(InputEventKey,"physical_keycode":4194326)]
 }
+build={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":90), Object(InputEventKey,"physical_keycode":4194309)]
+}
+demolish={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":88)]
+}
+rotate={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":82)]
+}
+mine={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":67), Object(InputEventKey,"physical_keycode":32)]
+}
+recipe={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":70)]
+}
+debug_speed={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194333)]
+}
+debug_unlock={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194334)]
+}
+debug_scenario={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194335)]
+}
+pause={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194305)]
+}
+restart={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194308)]
+}
 
 [input_devices]
 
@@ -55,5 +92,5 @@ pointing/emulate_mouse_from_touch=false
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/default_filters/use_nearest_mipmap_filter=false
-environment/defaults/default_clear_color=Color(0.929, 0.945, 0.949, 1)
+textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0.055, 0.075, 0.11, 1)

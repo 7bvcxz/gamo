@@ -42,8 +42,8 @@ if (!existsSync(out)) {
   process.exit(1);
 }
 
-// Site pages live *inside* the game directories -- /motorio-oneshot/doc/ is a
-// page from web/, /motorio-oneshot/ is a Godot build -- so skipping a game
+// Site pages live *inside* the game directories -- /motorio/doc/ is a
+// page from web/, /motorio/ is a Godot build -- so skipping a game
 // wholesale would leave stale site bundles under it forever. What gets removed
 // is derived from the export itself: whatever the site publishes under a game's
 // path is replaced, and everything else there belongs to the game and is left.

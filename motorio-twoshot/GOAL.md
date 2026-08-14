@@ -29,10 +29,10 @@
   조건과 문서가 어긋나면 문서를 먼저 고친다.
 - 이 폴더는 아직 Godot 프로젝트가 아니다. 첫 조건에 착수할 때 `project.godot`와
   Web export preset을 함께 만든다(`AGENTS.md`의 새 게임 규칙).
-- `../motorio-oneshot`에 이 조건의 상당수가 이미 다른 형태로 구현되어 있다.
+- `../motorio`에 이 조건의 상당수가 이미 다른 형태로 구현되어 있다.
   무엇을 가져오고 무엇을 다시 만들지는 `docs/game-design/CURRENT_STATE.md`에 정리했다.
   **베끼기 전에 그 문서의 "비전과 충돌하는 것"을 먼저 읽는다** — 특히 고양이 획득 경로는
   그대로 가져오면 안 된다.
-- "30분 이내"는 감이 아니라 측정값이어야 한다. `motorio-oneshot/tools/trace_scenario.gd`가
+- "30분 이내"는 감이 아니라 측정값이어야 한다. `motorio/tools/trace_scenario.gd`가
   하는 것처럼 헤드리스로 시나리오를 돌려 각 마일스톤 도달 시각을 찍는 도구를 함께 만든다.
 - 조건에 없는 아이디어가 떠오르면 구현하지 말고 `PROGRESS.md`의 `## 제안`에 한 줄로 남긴다.

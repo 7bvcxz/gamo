@@ -1,6 +1,6 @@
 // The design documents, from the repository into the site, as data.
 //
-// They live in motorio-oneshot/design/ as markdown and that is the only place
+// They live in motorio/design/ as markdown and that is the only place
 // they are written. Retyping them into JSX would create a second copy, and the
 // second copy is always the one that goes stale -- this repository has watched a
 // level-design page quote a belt speed that had been ten times different for
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '..', '..');
-const SOURCE = join(REPO, 'motorio-oneshot', 'design');
+const SOURCE = join(REPO, 'motorio', 'design');
 const OUT = join(REPO, 'web', 'lib', 'generated', 'design.json');
 
 // The order they are meant to be read in, which is not alphabetical: vision

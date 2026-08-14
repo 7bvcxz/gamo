@@ -18,7 +18,7 @@
 * [x] 모든 방 발견 시 클리어 화면 + 소요 시간 표시
 * [x] godot --headless 실행 시 에러 0
 * [x] HTML5 export 성공, 모바일 터치로 플레이 가능
-* [x] ../motorio-oneshot의 Grim 캐릭터를 주인공으로 사용
+* [x] ../motorio의 Grim 캐릭터를 주인공으로 사용
 
 ## 하지 말 것
 
@@ -29,7 +29,7 @@
 
 ## 참고
 
-* Grim 스프라이트는 `motorio-oneshot/assets/characters/`에 있다.
+* Grim 스프라이트는 `motorio/assets/characters/`에 있다.
   `grim_{idle,walk,run,mine}_{s,e,n}.png` 형태이며 **서쪽 시트는 없다** —
   이 저장소의 관례대로 동쪽을 좌우 반전해서 쓴다. 프로젝트가 처음 clone한
   상태에서 실행되어야 하므로 상대 경로 참조가 아니라 `looproom/` 안으로

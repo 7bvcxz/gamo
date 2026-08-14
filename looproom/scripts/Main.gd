@@ -28,7 +28,7 @@ const SPEED := 260.0
 ## 그래서 프레임마다 보정할 것이 없고, 서쪽은 시트 없이 동쪽을 뒤집어 쓴다 -- 기준점 x가
 ## 셀 정중앙이라 반전이 정확하다.
 ##
-## 파일은 `looproom/assets/` 안으로 복사했다. `../motorio-oneshot`을 상대 경로로 가리키면
+## 파일은 `looproom/assets/` 안으로 복사했다. `../motorio`을 상대 경로로 가리키면
 ## `res://` 밖이라 Web export에 들어가지 않고, 처음 clone한 상태에서 실행되지도 않는다.
 const CELL := 128.0
 const SHEET_FRAMES := 8
