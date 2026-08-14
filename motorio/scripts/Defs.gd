@@ -514,6 +514,15 @@ const START_HEAT := 30
 ## as parallelism rather than as a speed upgrade. It also makes one exchanger
 ## exactly absorb four miners.
 const MINER_PERIOD := 10.0
+## A cat digging a bare seam with its paws, for comparison. Twice the miner's
+## period, and then it walks the stone to the core itself and walks back -- so a
+## seam-cat is much slower than the number alone suggests.
+##
+## That gap is the whole point of the miner. A rescued cat is useful the minute
+## it wakes, which is what the rescue promised; the machine is what you build
+## when carrying stones one at a time stops being enough, and the reason to build
+## it is speed rather than possibility.
+const CAT_DIG_PERIOD := 20.0
 const FURNACE_PERIOD := 2.2
 ## Deliberately slow. A tenth of what it used to be, which puts a ten-tile run at
 ## about 38 seconds: never a hard throughput gate -- it still carries nearly four

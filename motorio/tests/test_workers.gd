@@ -11,6 +11,7 @@ func _initialize() -> void:
 
 func _run() -> void:
 	_test_miner_needs_operator()
+	_test_cat_on_a_bare_seam()
 	_test_new_cats_stand_apart()
 	_test_morning_dispatch()
 	_test_hunger_and_feeding()
@@ -123,6 +124,126 @@ func _sim() -> Sim:
 	sim.setup(31415)
 	_open(sim)
 	return sim
+
+## A cat put on a bare seam digs it out and carries the stone home itself, and a
+## cat on a miner is faster. Both halves matter: the first is what makes a
+## rescued cat useful the minute it wakes, the second is the entire reason to
+## build the machine.
+##
+## Measured by running both and counting what came out, rather than by comparing
+## the two constants. The constants only describe the digging; the seam-cat also
+## walks to the core and back between every stone, and that walk is most of the
+## difference.
+func _test_cat_on_a_bare_seam() -> void:
+	var sim := _sim()
+	sim.cats.clear()
+	# A seam beside the core, so the round trip is as short as it ever gets --
+	# which makes this the *most* favourable case for the seam and the test still
+	# has to come out the same way.
+	var seam: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
+	_assert(sim.ore.has(seam) and not sim.machines.has(seam), "맨 광맥이 있다")
+
+	sim.grant_cats(1)
+	var cat: Sim.Cat = sim.cats[0]
+	sim.carried_cat = cat
+	_assert(sim.place_cat(seam), "맨 광맥 위에도 고양이를 내려놓을 수 있다")
+	_assert(cat.assigned == seam and cat.state == Defs.CAT_WORKING, "그 자리에서 일한다")
+	_assert(not sim.place_cat(seam), "같은 자리에 두 마리는 안 된다")
+
+	# One stone, from digging to delivery to walking back.
+	var elapsed: float = 0.0
+	var dug := false
+	var delivered := false
+	var returned := false
+	while elapsed < 200.0:
+		sim.tick(0.1)
+		elapsed += 0.1
+		if cat.carrying >= 0:
+			dug = true
+		if dug and int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0:
+			delivered = true
+		if delivered and cat.state == Defs.CAT_WORKING:
+			returned = true
+			break
+	_assert(dug, "고양이가 열석을 캐서 든다")
+	_assert(delivered, "기지까지 스스로 가져간다")
+	_assert(returned, "그리고 자기 광맥으로 돌아온다 — 서서 기다리지 않는다")
+	_assert(cat.assigned == seam, "자리를 잃지 않는다")
+	sim.free()
+
+	# Now the same seam with a machine on it, for the same simulated minutes.
+	#
+	# The machine is faster at *getting the stone out*, which is what it is for.
+	# It is not faster at delivering, because it does not deliver: it drops the
+	# stone on the next tile and something else has to move it. So the extraction
+	# rate is measured with the output tile kept clear -- otherwise the number
+	# being compared is the hauling.
+	var by_hand: float = _seam_rate()
+	var by_machine: float = _miner_rate(true)
+	_assert(by_hand > 0.0, "맨 광맥도 실제로 생산한다 (%.2f/분)" % by_hand)
+	_assert(by_machine > by_hand * 1.5,
+		"채굴기가 확실히 빨리 캔다 (%.2f/분 대 %.2f/분)" % [by_machine, by_hand])
+
+	# And the other half of the same fact, which is the one a player meets first:
+	# one cat, one miner and nowhere for the stone to go produces a single stone
+	# and then stops. The same cat on the bare seam beside it carries its own
+	# output and never stalls. The machine is not an upgrade you drop in -- it is
+	# a machine that needs a second cat or a belt, and that is the lesson the
+	# first miner is there to teach.
+	var stalled: float = _miner_rate(false)
+	_assert(stalled < by_hand,
+		"나를 사람이 없으면 채굴기는 오히려 못 미친다 (%.2f/분 대 %.2f/분)"
+			% [stalled, by_hand])
+	print("WORKERS: 맨 광맥 %.2f/분 · 채굴기(나름) %.2f/분 · 채굴기(막힘) %.2f/분"
+		% [by_hand, by_machine, stalled])
+
+## Stones a cat digs out of a bare seam and banks, per minute.
+func _seam_rate() -> float:
+	var sim := _sim()
+	sim.cats.clear()
+	var seam: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
+	sim.grant_cats(1)
+	sim.carried_cat = sim.cats[0]
+	sim.place_cat(seam)
+	for _step in 3000:
+		sim.tick(0.1)
+	var count: float = float(int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)))
+	sim.free()
+	return count / 5.0
+
+## Stones a miner pulls out of the same seam, per minute. Counted at the machine
+## rather than at the core: a miner drops its output on the next tile and
+## something else has to move it, so measuring deliveries would be measuring the
+## hauling rather than the mining.
+## Stones a miner pulls out of the same seam, per minute. With `hauled`, the
+## output tile is emptied every tick, which stands in for a belt or a second cat
+## and measures the machine rather than the logistics around it. Without it, the
+## output has nowhere to go and the machine stops -- which is the state a player
+## with exactly one cat actually arrives in.
+func _miner_rate(hauled: bool) -> float:
+	var sim := _sim()
+	sim.cats.clear()
+	var seam: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
+	sim.build(Defs.M_MINER, seam, Vector2i(0, 1))
+	sim.grant_cats(1)
+	sim.carried_cat = sim.cats[0]
+	sim.place_cat(seam)
+	var produced: float = 0.0
+	for _step in 3000:
+		sim.tick(0.1)
+		if not hauled:
+			continue
+		for cell: Vector2i in sim.ground.keys():
+			if int(sim.ground[cell]) == Defs.ITEM_HEATSTONE:
+				sim.ground.erase(cell)
+				produced += 1.0
+	if not hauled:
+		for cell: Vector2i in sim.ground:
+			if int(sim.ground[cell]) == Defs.ITEM_HEATSTONE:
+				produced += 1.0
+		produced += float(int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)))
+	sim.free()
+	return produced / 5.0
 
 # --- 5-1 -------------------------------------------------------------------
 

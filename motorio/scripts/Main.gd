@@ -262,7 +262,7 @@ func objective_data() -> Dictionary:
 	if is_dusk():
 		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
 	if sim.carried_cat != null:
-		return _goal("고양이를 안고 있습니다  채굴기 앞에서 Z 로 배치하세요", "thing", Icons.THING_CAT)
+		return _goal("고양이를 안고 있습니다  광맥이나 채굴기 앞에서 Z 로 내려놓으세요", "thing", Icons.THING_CAT)
 	# Ahead of the mining line: a thawing cat is three seconds from being the
 	# thing the player has been walking towards, and a card telling them to go
 	# back to a seam in the middle of it is the game looking away.
@@ -1486,7 +1486,8 @@ func _primary_action() -> void:
 		return
 	if sim.carried_cat != null:
 		if sim.place_cat(cell):
-			_notify("고양이를 채굴기에 배치했습니다", Defs.COL_CORE)
+			_notify("고양이를 채굴기에 배치했습니다" if sim.machines.has(cell)
+				else "고양이가 광맥을 캡니다  채굴기 위라면 더 빠릅니다", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
 			audio.call("play", "build")
 		elif sim.drop_cat(sim.cell_centre(cell)):

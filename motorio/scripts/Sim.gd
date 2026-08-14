@@ -39,6 +39,10 @@ class Cat extends RefCounted:
 	var path: Array[Vector2] = []
 	var path_goal := Vector2(1e20, 1e20)
 	var carrying: int = -1
+	## How far through digging a bare seam this cat is, 0..1. Not saved: a stone
+	## half dug when the tab closed is a second of work, and a saved field is
+	## a schema every future change has to carry.
+	var dig: float = 0.0
 	## A constant, and the reason it is stored rather than derived from where the
 	## cat happens to be standing.
 	##
@@ -748,13 +752,13 @@ func carry_at(origin: Vector2, heading: Vector2) -> void:
 	carried_cat.pos = origin + direction.normalized() * float(Defs.TILE) * Defs.CARRY_AHEAD
 	carried_cat.heading = direction
 
-## Putting a cat down on a miner assigns it to that machine for good; it will
-## return there every morning and after every meal.
+## Putting a cat down on a post -- a miner, or a bare seam -- assigns it there
+## for good; it will return every morning, after every meal, and after every
+## delivery.
 func place_cat(cell: Vector2i) -> bool:
 	if carried_cat == null:
 		return false
-	var machine: Machine = machines.get(cell, null)
-	if machine == null or machine.type != Defs.M_MINER:
+	if not _is_post(cell):
 		return false
 	for cat: Cat in cats:
 		if cat != carried_cat and cat.assigned == cell:
@@ -1483,7 +1487,11 @@ func _cat_deliver(cat: Cat, delta: float) -> void:
 	if cat.carrying >= 0:
 		_deliver(cat.carrying, core_cell)
 		cat.carrying = -1
-	cat.state = Defs.CAT_IDLE
+	# Back to the seam it was put on, rather than standing at the core waiting to
+	# be told again. A cat with a post keeps it: that is what putting it there
+	# meant, and it is the difference between a worker and an errand.
+	cat.state = Defs.CAT_TO_MINER if cat.has_job() and _is_post(cat.assigned) \
+		else Defs.CAT_IDLE
 
 # --- Going to bed ------------------------------------------------------------
 ## The workforce walks home rather than blinking out at the end of the day. It
@@ -1552,18 +1560,37 @@ func _cat_walk_home(cat: Cat, delta: float) -> void:
 		cat.state = Defs.CAT_ASLEEP
 
 func _cat_walk_to_miner(cat: Cat, delta: float) -> void:
-	if not cat.has_job() or not machines.has(cat.assigned):
+	if not cat.has_job() or not _is_post(cat.assigned):
 		cat.state = Defs.CAT_IDLE
 		return
 	if _step_toward(cat, cell_centre(cat.assigned), delta):
 		cat.state = Defs.CAT_WORKING
 
+## A post is a miner, or a bare seam. Both are places a cat can be put down and
+## will keep working; asked in one place so the three handlers that check it
+## cannot come to disagree about what a job is.
+func _is_post(cell: Vector2i) -> bool:
+	var machine: Machine = machines.get(cell, null)
+	if machine != null:
+		return machine.type == Defs.M_MINER
+	return ore.has(cell)
+
 func _cat_work(cat: Cat, delta: float) -> void:
-	if not cat.has_job() or not machines.has(cat.assigned):
+	if not cat.has_job() or not _is_post(cat.assigned):
 		cat.state = Defs.CAT_IDLE
 		return
-	machines[cat.assigned].operated = true
 	cat.hunger = maxf(0.0, cat.hunger - Defs.HUNGER_PER_SECOND * delta)
+	if machines.has(cat.assigned):
+		machines[cat.assigned].operated = true
+	else:
+		# A bare seam. The cat digs it out itself and carries the stone home,
+		# which is slower than a miner in two ways: the digging, and the walk.
+		cat.dig += delta / Defs.CAT_DIG_PERIOD
+		if cat.dig >= 1.0:
+			cat.dig = 0.0
+			cat.carrying = int(ore[cat.assigned])
+			cat.state = Defs.CAT_HAUL_TO_BASE
+			return
 	if cat.hunger <= 0.0 and food > 0:
 		cat.state = Defs.CAT_TO_FOOD
 
