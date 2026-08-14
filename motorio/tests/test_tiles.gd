@@ -136,6 +136,7 @@ func _run() -> void:
 	# roll. A flaky test is worse than no test -- it teaches you to re-run.
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.sim.setup(4242)
 	# Ore generates in clusters, so pick a seam whose approaches are clear or the
 	# test would be starting the player inside a different structure.

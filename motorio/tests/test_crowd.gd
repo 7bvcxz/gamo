@@ -28,6 +28,7 @@ func _run() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	# The title, then out of the opening. Skipping the second half left the run
 	# sitting in State.OPENING, where the per-frame play code does not run: the
 	# cats still walked, because the sim is ticked by hand here, but nothing that

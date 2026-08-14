@@ -127,6 +127,26 @@ var carried_frozen: bool = false
 ## How far the ice on the carried one had already gone. Picking a thawing cat up
 ## to move it one tile must not put the ice back.
 var carried_frozen_thaw: float = 0.0
+## The emergency kit she is carrying, if any: KIT_BASE or KIT_SHELTER.
+var carried_kit: int = Defs.KIT_NONE
+
+## --- Before there is a base -------------------------------------------------
+## The run starts at a crash site with nothing built. These say what is standing
+## and what is not; every drawing and every rule that assumed a base reads them.
+##
+## Defaulted to "already built" so that `setup()` produces exactly the world it
+## always did. The crash is something Main asks for, which keeps every test that
+## wants an ordinary world writing exactly what it wrote before.
+var base_placed := true
+var shelter_placed := true
+## The survival kit lying in the snow, and how many times it has been searched.
+## Two searches: the base, then the pickaxe and the shelter.
+var kit_cell := Vector2i(9999, 9999)
+var kit_searched: int = 0
+## How far through the current search she is, 0..1. Lives here rather than on
+## the orchestrator because the thing that draws the ring reads the world, and a
+## number the drawing cannot see is a number the drawing has to be told twice.
+var kit_progress: float = 0.0
 ## The cat currently in the player's arms. Cats are placed on machines by hand;
 ## there is no automatic assignment, so the player decides who works where.
 var carried_cat: Cat = null
@@ -296,6 +316,19 @@ func to_save() -> Dictionary:
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
 		"carried_frozen": carried_frozen, "carried_frozen_thaw": carried_frozen_thaw,
+		# The opening. Saved because it is thirteen minutes of the game and a run
+		# reloaded into the middle of it with a base that never existed is not a
+		# run, and because `core_cell` moves when the base goes down -- restoring
+		# a world around the wrong centre would put the shelter, the fog and the
+		# ore rings in different places than the ones on screen.
+		"base_placed": base_placed, "shelter_placed": shelter_placed,
+		"carried_kit": carried_kit, "kit_searched": kit_searched,
+		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
+		# All three cells, rather than the core plus arithmetic: the player picks
+		# where the hut goes, so it is not derivable from where the fire is.
+		"core_x": core_cell.x, "core_y": core_cell.y,
+		"shelter_x": shelter_cell.x, "shelter_y": shelter_cell.y,
+		"food_x": food_cell.x, "food_y": food_cell.y,
 		"food": food, "coins": coins,
 		"stock": stock_rows, "ground": ground_rows, "unlocked": unlocked_rows,
 		"recipes": unlocked_recipes.keys(),
@@ -353,6 +386,21 @@ func from_save(data: Dictionary) -> void:
 		frozen_cats[Vector2i(int(row[0]), int(row[1]))] = float(row[2])
 	carried_frozen = bool(data.get("carried_frozen", false))
 	carried_frozen_thaw = float(data.get("carried_frozen_thaw", 0.0))
+	core_cell = Vector2i(int(data.get("core_x", core_cell.x)),
+		int(data.get("core_y", core_cell.y)))
+	base_placed = bool(data.get("base_placed", true))
+	shelter_placed = bool(data.get("shelter_placed", true))
+	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
+	kit_searched = int(data.get("kit_searched", 2))
+	kit_progress = 0.0
+	kit_cell = Vector2i(int(data.get("kit_x", 9999)), int(data.get("kit_y", 9999)))
+	shelter_cell = Vector2i(int(data.get("shelter_x", shelter_cell.x)),
+		int(data.get("shelter_y", shelter_cell.y)))
+	food_cell = Vector2i(int(data.get("food_x", food_cell.x)),
+		int(data.get("food_y", food_cell.y)))
+	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
+	_cached_radius = warm_radius
+	_grid_dirty = true
 
 	cats.clear()
 	for row: Dictionary in data.get("cats", []):
@@ -376,8 +424,10 @@ func setup(seed_value: int) -> void:
 	explored.clear()
 	heat = Defs.START_HEAT
 	total_heat = 0
-	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0}
-	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0}
+	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
+		Defs.ITEM_HEATSTONE: 0}
+	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
+		Defs.ITEM_HEATSTONE: 0}
 	ground.clear()
 	unlocked.clear()
 	unlocked_recipes.clear()
@@ -405,6 +455,11 @@ func setup(seed_value: int) -> void:
 	frozen_cats.clear()
 	carried_frozen = false
 	carried_frozen_thaw = 0.0
+	carried_kit = Defs.KIT_NONE
+	kit_searched = 0
+	kit_cell = Vector2i(9999, 9999)
+	base_placed = true
+	shelter_placed = true
 	carried_cat = null
 	coins = 0
 	# Derived from the run seed rather than randomised, so replaying a seed
@@ -565,13 +620,13 @@ func tile_attributes(cell: Vector2i) -> int:
 	if machine != null and machine.type not in Defs.WALKABLE_MACHINES:
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
-	if cell == shelter_cell:
+	if shelter_placed and cell == shelter_cell:
 		attrs |= Defs.ATTR_STRUCTURE
 	# So is the food bin. It is a box of fish standing in the snow and the player
 	# walked straight through it, which is the one thing a picture of a solid
 	# object must never let you do. Cats are unaffected: they path by position,
 	# not by this, and they have to be able to reach the bowl.
-	if cell == food_cell:
+	if shelter_placed and cell == food_cell:
 		attrs |= Defs.ATTR_STRUCTURE
 	return attrs
 
@@ -590,14 +645,92 @@ func _ring_distance(cell: Vector2i) -> float:
 	return Vector2(cell - core_cell).length()
 
 func is_warm(cell: Vector2i) -> bool:
-	return _ring_distance(cell) <= warm_radius
+	return base_placed and _ring_distance(cell) <= warm_radius
+
+## Whether Grim is already carrying something. Asked in one place because there
+## are three things she can be holding and only one pair of arms -- and because
+## the last time a rule like this was written per case, six of nine handlers
+## were missing it.
+func hands_full() -> bool:
+	return carried_cat != null or carried_frozen or carried_kit != Defs.KIT_NONE
+
+## --- The crash --------------------------------------------------------------
+## Takes the base back off the map. Everything else the world generated stays
+## exactly where it is: the ore, the frozen cats and the fog are all placed
+## around this point, and this point does not move.
+func begin_crash() -> void:
+	machines.erase(core_cell)
+	base_placed = false
+	shelter_placed = false
+	carried_kit = Defs.KIT_NONE
+	kit_searched = 0
+	kit_cell = core_cell + Defs.KIT_OFFSET
+	warm_radius = Defs.CRASH_SIGHT
+	_cached_radius = warm_radius
+	explored.clear()
+	mark_explored(core_cell, int(Defs.CRASH_SIGHT))
+	_grid_dirty = true
+
+## Puts the emergency base down. The base is the centre of everything the world
+## already has -- the warm radius, the shelter's spot, the food bin's -- so
+## moving it moves those with it, and nothing else notices because two tiles is
+## smaller than any distance the generator cares about.
+func place_base(cell: Vector2i) -> bool:
+	if base_placed or carried_kit != Defs.KIT_BASE:
+		return false
+	if Vector2(cell - core_cell).length() > Defs.BASE_PLACE_RADIUS:
+		return false
+	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
+		return false
+	core_cell = cell
+	shelter_cell = core_cell + Defs.SHELTER_CELL
+	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	var core := Machine.new()
+	core.type = Defs.M_CORE
+	core.cell = core_cell
+	machines[core_cell] = core
+	base_placed = true
+	carried_kit = Defs.KIT_NONE
+	_grid_dirty = true
+	_refresh_radius()
+	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
+	return true
+
+## And the shelter, which is where she sleeps and where the cats go at night. It
+## has to stand clear of the base -- a hut built against the fire is a hut that
+## teaches nothing about the fire.
+func place_shelter(cell: Vector2i) -> bool:
+	if shelter_placed or carried_kit != Defs.KIT_SHELTER:
+		return false
+	if not base_placed:
+		return false
+	var distance: float = Vector2(cell - core_cell).length()
+	if distance <= Defs.SHELTER_CLEARANCE or distance > warm_radius:
+		return false
+	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
+		return false
+	shelter_cell = cell
+	food_cell = cell + Vector2i(Defs.FOOD_OFFSET.round())
+	shelter_placed = true
+	carried_kit = Defs.KIT_NONE
+	_grid_dirty = true
+	return true
+
+## Searching the kit. Returns what came out, or KIT_NONE if there was nothing
+## left in it or her arms were already full.
+func search_kit() -> int:
+	if kit_searched >= 2 or hands_full():
+		return Defs.KIT_NONE
+	kit_searched += 1
+	carried_kit = Defs.KIT_BASE if kit_searched == 1 else Defs.KIT_SHELTER
+	return carried_kit
 
 ## --- Frozen cats ----------------------------------------------------------
 ## Picked up by hand, not by walking over. The crates were collected by walking
 ## because they were an errand; this is a body Grim decides to carry, and the
 ## decision has to be a press.
 func pick_up_frozen(cell: Vector2i) -> bool:
-	if carried_frozen or carried_cat != null:
+	if hands_full():
 		return false
 	if not frozen_cats.has(cell):
 		return false
@@ -721,7 +854,7 @@ func pull_gacha(count: int) -> Array[int]:
 
 ## Picking a cat up takes it off its machine; the machine stops immediately.
 func pick_up_cat(cell: Vector2i) -> bool:
-	if carried_cat != null or carried_frozen:
+	if hands_full():
 		return false
 	var reach: float = float(Defs.TILE) * 0.9
 	var centre: Vector2 = cell_centre(cell)
@@ -1614,7 +1747,9 @@ func _cat_eat(cat: Cat, delta: float) -> void:
 		cat.state = Defs.CAT_TO_MINER
 
 func _refresh_radius() -> void:
-	warm_radius = Defs.warm_radius(total_heat)
+	# No base, no fire, no circle -- only as much of the map as she can see from
+	# where she is standing.
+	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
 	if not is_equal_approx(warm_radius, _cached_radius):
 		_cached_radius = warm_radius
 		warmth_changed.emit(warm_radius)

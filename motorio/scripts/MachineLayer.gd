@@ -214,6 +214,7 @@ func _draw() -> void:
 		_draw_belt_items(machine, Vector2(cell) * tile, tile)
 	_draw_shelter(tile)
 	_draw_food_bin(tile)
+	_draw_kit(tile)
 	_draw_frozen(tile)
 	_draw_ground()
 	_draw_hand_progress()
@@ -230,6 +231,8 @@ func _draw() -> void:
 ## finish -- it sits on its own tile, carries a warm pool of its own, and its
 ## window is the one light that answers the core across the base.
 func _draw_shelter(tile: float) -> void:
+	if not sim.shelter_placed:
+		return
 	var origin: Vector2 = Vector2(sim.shelter_cell) * tile
 	var at: Vector2 = origin + Vector2.ONE * tile * 0.5
 	# Firelight rises with the night, which is exactly when the player needs to
@@ -663,6 +666,35 @@ static func cat_sheet(state: int, heading: Vector2, walking: bool) -> Array:
 		return [CAT_WALK_N_SHEET, false]
 	return [CAT_WALK_SHEET, false]
 
+## The survival kit that came down with her. A scuffed metal case in the snow,
+## with the parachute lines still on it, and a slow pulse while there is
+## anything left inside -- it is the only thing on the map in the first minute
+## and it has to say "come here" without a label.
+func _draw_kit(tile: float) -> void:
+	if sim.kit_cell == Vector2i(9999, 9999) or sim.kit_searched >= 2:
+		return
+	var at: Vector2 = Vector2(sim.kit_cell) * tile + Vector2.ONE * tile * 0.5
+	if not view_rect.grow(tile).has_point(at):
+		return
+	var breathe: float = 0.5 + 0.5 * sin(pulse * 2.2)
+	draw_circle(at, 22.0, Color(1.0, 0.72, 0.36, 0.05 + 0.07 * breathe))
+	_shadow(at + Vector2(0, 8), 11.0)
+	var case: Rect2 = _body(at, 19.0, Color8(96, 104, 116), Color8(150, 160, 176))
+	# A band across the lid and two catches, so it is a case rather than a crate.
+	draw_rect(Rect2(case.position.x, case.get_center().y - 2.0, case.size.x, 4.0),
+		Color8(58, 64, 74))
+	for side: float in [-1.0, 1.0]:
+		draw_rect(Rect2(at.x + side * 5.0 - 1.5, case.get_center().y - 3.0, 3.0, 6.0),
+			Color8(214, 176, 96))
+	# The handle on top, which is the bit that reads at a distance.
+	draw_arc(at + Vector2(0, -9.0), 5.0, PI, TAU, 10, Color8(58, 64, 74), 2.0)
+	# Searching it. The same ring hand mining uses, because it is the same verb:
+	# hold the key and watch a circle close.
+	if sim.kit_progress > 0.0:
+		draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
+		draw_arc(at, 16.0, -PI * 0.5, -PI * 0.5 + TAU * clampf(sim.kit_progress, 0.0, 1.0),
+			32, Defs.COL_CORE, 3.0, true)
+
 ## The cats still in the ice. Drawn from the same rect a walking cat is drawn
 ## from, so the one that wakes up stands exactly where the block was: the last
 ## frozen stage and the first standing frame have to be the same animal in the
@@ -690,6 +722,8 @@ func _draw_frozen(tile: float) -> void:
 		draw_texture_rect_region(CAT_FREEZE_SHEET, block, region, Color.WHITE)
 
 func _draw_food_bin(tile: float) -> void:
+	if not sim.shelter_placed:
+		return
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	_shadow(at + Vector2(0, 10), 10.0)
 	_object_art(FOOD_BIN_ART, at, FOOD_BIN_DRAW)

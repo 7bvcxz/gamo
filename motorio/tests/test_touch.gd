@@ -23,6 +23,7 @@ func _init() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 	# The pad is hidden on a desktop; the hit-testing does not care, but the HUD
 	# lays itself out differently, so it is switched on for the layout to match

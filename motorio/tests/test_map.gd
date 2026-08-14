@@ -21,6 +21,7 @@ func _init() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 
 	_modal_locks_the_world(main)

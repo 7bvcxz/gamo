@@ -28,6 +28,7 @@ func _init() -> void:
 	# cats and coins is not the run any of this is about.
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 	var sim: Sim = main.sim
 

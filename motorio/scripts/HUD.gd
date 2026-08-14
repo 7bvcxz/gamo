@@ -662,6 +662,12 @@ func _draw_warmth_row(panel: Rect2) -> void:
 ## and a nine-pixel rate line. The gun moves the choice into a menu that has room
 ## to explain itself, and the bar goes back to being about what is in your hands.
 func _draw_palette() -> void:
+	# Nothing in the row is reachable before the fire is lit: there is no base to
+	# build from, the pickaxe is still in the case, and every machine in it costs
+	# a resource she has not seen. A row of things she cannot have is the game
+	# talking about the second act during the first.
+	if not main.sim.base_placed:
+		return
 	var slot: Vector2 = hotbar_slot()
 	var origin: Vector2 = hotbar_origin()
 	_draw_direction_chip(origin.y)

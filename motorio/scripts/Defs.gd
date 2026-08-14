@@ -523,6 +523,45 @@ const MINER_PERIOD := 10.0
 ## when carrying stones one at a time stops being enough, and the reason to build
 ## it is speed rather than possibility.
 const CAT_DIG_PERIOD := 20.0
+
+## --- The crash ------------------------------------------------------------
+## Before the emergency base is down there is no fire on this planet, and the
+## numbers say so: nothing is warm, the map is three tiles of snow, and she is
+## already more than half cold.
+##
+## The drain is a twenty-sixth of the ordinary one. Thirteen a second is the
+## rule for a player who has a fire to run back to; at the crash there is
+## nowhere to run, so it has to be long enough to look around in and short
+## enough to be the reason she does.
+const CRASH_WARMTH := 40.0
+const CRASH_DRAIN := 0.5           # one degree every two seconds -- eighty of them
+const CRASH_SIGHT := 3.0           # tiles of map, before there is a fire to see by
+## How far from the crash site the base may be put down. Small on purpose: the
+## world is generated around this point -- the ore rings, the frozen cats, the
+## fog -- so the base moving far would mean moving all of it. Two tiles is
+## enough for the placement to be a choice and small enough that nothing else
+## has to know it happened.
+const BASE_PLACE_RADIUS := 2.0
+## What comes out of the survival kit, in the order it comes out. One list, so
+## the thing being carried and the thing it turns into cannot disagree.
+const KIT_NONE := 0
+const KIT_BASE := 1
+const KIT_SHELTER := 2
+## How long Z is held to search the kit. Two seconds: long enough to be an act
+## rather than a keypress, short enough that it is not a chore the second time.
+const KIT_SEARCH_SECONDS := 2.0
+## Where the kit lands relative to the crash site. Two tiles, in sight from the
+## first frame: the opening's first instruction has to be visible without
+## walking, because at three tiles of vision walking is how you get lost.
+const KIT_OFFSET := Vector2i(2, 1)
+## How far the shelter must stand from the base. A hut built against the fire is
+## a hut that teaches nothing about the fire, and the two buildings drawn on top
+## of each other is a picture of one building.
+const SHELTER_CLEARANCE := 2.0
+## Stones the opening asks for before it calls the fire established. Three: few
+## enough to carry by hand without it becoming a chore, and enough that the
+## player makes the trip more than once and learns what the trip is.
+const OPENING_STONES := 3
 const FURNACE_PERIOD := 2.2
 ## Deliberately slow. A tenth of what it used to be, which puts a ten-tile run at
 ## about 38 seconds: never a hard throughput gate -- it still carries nearly four

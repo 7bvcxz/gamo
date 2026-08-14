@@ -32,6 +32,7 @@ func _init() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 
 	var sim: Sim = main.sim
 	var layer: MachineLayer = main.machine_layer

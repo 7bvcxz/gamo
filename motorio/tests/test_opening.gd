@@ -1,0 +1,299 @@
+extends SceneTree
+
+## The first thirteen minutes: a crash site with nothing on it, a case in the
+## snow, and four missions that end with a cat.
+##
+## What this is really guarding is that the opening is a *state of the world*
+## rather than a script. Every rung is decided by asking the world what is
+## standing on it, so there is no flag to set twice and none to miss when the
+## player does the thing some other way -- and every one of these has more than
+## one way to happen. The assertions below drive the world, never the mission
+## number, and then ask what the mission became.
+
+var failures := 0
+var main: Node2D = null
+
+func _init() -> void:
+	main = load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	await process_frame
+	main.clear_save()
+	_run()
+
+func _run() -> void:
+	_test_crash_site()
+	_test_clock_is_held()
+	_test_searching_the_kit()
+	_test_placing_the_base()
+	_test_placing_the_shelter()
+	_test_missions_follow_the_world()
+	_test_cold_cannot_end_it()
+	_test_save_mid_opening()
+	_test_finish_tutorial()
+	if failures == 0:
+		print("PASS test_opening")
+	else:
+		print("FAIL test_opening (%d)" % failures)
+	quit(failures)
+
+func _assert(condition: bool, label: String) -> void:
+	if condition:
+		print("  ok   %s" % label)
+	else:
+		failures += 1
+		print("  FAIL %s" % label)
+
+## Somewhere the hut will actually go. The world is generated fresh per run and
+## heat stone is scattered from three tiles out, so a hardcoded cell is a seam
+## one run in several -- which is the shape of flake this repository has been
+## bitten by before, and it fails as "the mission did not advance".
+func _shelter_spot(sim) -> Vector2i:
+	for radius in range(int(Defs.SHELTER_CLEARANCE) + 1, 7):
+		for step in 16:
+			var angle: float = TAU * float(step) / 16.0
+			var cell: Vector2i = sim.core_cell + Vector2i(
+				roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
+			if sim.ore.has(cell) or sim.machines.has(cell) or cell == sim.kit_cell:
+				continue
+			if Vector2(cell - sim.core_cell).length() <= Defs.SHELTER_CLEARANCE:
+				continue
+			return cell
+	return sim.core_cell + Vector2i(-4, 0)
+
+## A fresh crash, every time. The opening is the one part of the game whose
+## whole subject is the state it starts in.
+func _crash() -> void:
+	main.clear_save()
+	main._start_run()
+	main.state = main.State.PLAY
+
+# --- What she wakes up to ---------------------------------------------------
+
+func _test_crash_site() -> void:
+	_crash()
+	var sim = main.sim
+	_assert(not sim.base_placed, "기지가 없다")
+	_assert(not sim.shelter_placed, "거처도 없다")
+	_assert(sim.machine_at(sim.core_cell) == null, "코어가 세계에 없다")
+	_assert(main.mission == main.Mission.BASE, "첫 임무는 긴급기지다")
+	_assert(is_equal_approx(main.player.warmth, Defs.CRASH_WARMTH),
+		"체온 %.0f 으로 시작한다" % Defs.CRASH_WARMTH)
+	_assert(is_equal_approx(sim.warm_radius, Defs.CRASH_SIGHT),
+		"보이는 것은 %.0f칸뿐" % Defs.CRASH_SIGHT)
+	# Nothing is warm, including the tile the fire will stand on. A radius that
+	# still warms without a fire in it is the bug this pair is here to stop.
+	_assert(not sim.is_warm(sim.core_cell), "불이 없으니 어디도 따뜻하지 않다")
+	_assert(not sim.is_warm(sim.core_cell + Vector2i(1, 0)), "옆 칸도 마찬가지다")
+	# The kit has to be visible from where she is standing. At three tiles of
+	# sight, "go and look for it" is not an instruction.
+	var reach: float = Vector2(sim.kit_cell - sim.core_cell).length()
+	_assert(reach <= Defs.CRASH_SIGHT, "긴급생존키트가 시야 안에 있다 (%.1f칸)" % reach)
+	_assert(sim.kit_searched == 0, "아직 열지 않았다")
+	# Reach, not aim. The kit is the first thing the player touches and there is
+	# nothing within three tiles it could be confused with, so standing beside it
+	# is enough whichever way she happens to be looking. The browser run found
+	# this the hard way: it walked to the kit, held Z, and nothing happened,
+	# because the last arrow pressed had been Down.
+	main.player.position = sim.cell_centre(sim.kit_cell + Vector2i(-1, 0))
+	for facing: Vector2i in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		main.player.facing = facing
+		_assert(main._facing_kit(), "옆에 서면 어느 쪽을 보든 열 수 있다 %s" % facing)
+	main.player.position = sim.cell_centre(sim.kit_cell + Vector2i(3, 0))
+	_assert(not main._facing_kit(), "멀면 안 된다")
+	main.player.position = sim.cell_centre(sim.core_cell)
+	# And the buildings that are not there must not be walls either.
+	_assert(not sim.blocks_player(sim.shelter_cell), "없는 거처는 길을 막지 않는다")
+	_assert(not sim.blocks_player(sim.food_cell), "없는 밥통도 마찬가지다")
+
+# --- The day does not start until the opening is over -----------------------
+
+func _test_clock_is_held() -> void:
+	_crash()
+	var before: float = main.time_left
+	for _step in 120:
+		main._process_play(1.0 / 60.0)
+	_assert(is_equal_approx(main.time_left, before),
+		"오프닝 동안 하루가 흐르지 않는다 (%.1f초 그대로)" % main.time_left)
+	main.finish_tutorial()
+	for _step in 120:
+		main._process_play(1.0 / 60.0)
+	_assert(main.time_left < before - 1.5,
+		"끝나면 다시 흐른다 (%.1f초 남음)" % main.time_left)
+
+# --- The case ---------------------------------------------------------------
+
+func _test_searching_the_kit() -> void:
+	_crash()
+	var sim = main.sim
+	_assert(sim.search_kit() == Defs.KIT_BASE, "첫 번째로 긴급기지가 나온다")
+	_assert(sim.carried_kit == Defs.KIT_BASE, "그것을 들고 있다")
+	_assert(sim.hands_full(), "손이 찼다")
+	# One pair of arms. Everything that can be picked up has to agree about it,
+	# which is why they all ask the same question rather than each keeping a
+	# list of what the other two might be holding.
+	_assert(sim.search_kit() == Defs.KIT_NONE, "손이 차면 더 못 꺼낸다")
+	sim.frozen_cats[sim.core_cell + Vector2i(3, 0)] = 0.0
+	_assert(not sim.pick_up_frozen(sim.core_cell + Vector2i(3, 0)),
+		"긴급기지를 든 채로 얼어붙은 고양이를 들 수 없다")
+	sim.grant_cats(1)
+	sim.cats[0].pos = sim.cell_centre(sim.core_cell + Vector2i(4, 0))
+	_assert(not sim.pick_up_cat(sim.core_cell + Vector2i(4, 0)),
+		"살아있는 고양이도 마찬가지다")
+
+	sim.carried_kit = Defs.KIT_NONE
+	_assert(sim.search_kit() == Defs.KIT_SHELTER, "두 번째로 긴급거처가 나온다")
+	sim.carried_kit = Defs.KIT_NONE
+	_assert(sim.search_kit() == Defs.KIT_NONE, "세 번째는 없다 — 빈 상자다")
+	_assert(sim.kit_searched == 2, "두 번 뒤진 것으로 남는다")
+
+# --- Putting the fire down --------------------------------------------------
+
+func _test_placing_the_base() -> void:
+	_crash()
+	var sim = main.sim
+	var crash: Vector2i = sim.core_cell
+	sim.search_kit()
+	_assert(not sim.place_base(crash + Vector2i(6, 0)),
+		"추락 지점에서 멀면 놓을 수 없다")
+	_assert(not sim.base_placed, "그래서 아직 불이 없다")
+	var chosen: Vector2i = crash + Vector2i(1, 1)
+	_assert(sim.place_base(chosen), "%d칸 안이면 놓을 수 있다" % int(Defs.BASE_PLACE_RADIUS))
+	_assert(sim.base_placed and sim.machine_at(chosen) != null, "코어가 그 자리에 선다")
+	# The base is the centre of everything the world already has, so it takes
+	# those with it rather than leaving them behind at the crash site.
+	_assert(sim.core_cell == chosen, "세계의 중심이 그리로 옮겨간다")
+	_assert(sim.shelter_cell == chosen + Defs.SHELTER_CELL, "거처 자리도 따라온다")
+	_assert(sim.is_warm(chosen), "이제 그 자리가 따뜻하다")
+	_assert(sim.warm_radius >= Defs.WARM_BASE,
+		"온기 반경이 열린다 (%.1f칸)" % sim.warm_radius)
+	_assert(sim.carried_kit == Defs.KIT_NONE, "손이 비었다")
+	_assert(not sim.place_base(chosen + Vector2i(1, 0)), "두 번째 기지는 없다")
+
+# --- And the hut ------------------------------------------------------------
+
+func _test_placing_the_shelter() -> void:
+	_crash()
+	var sim = main.sim
+	sim.search_kit()
+	sim.place_base(sim.core_cell)
+	sim.carried_kit = Defs.KIT_NONE
+	sim.search_kit()
+	_assert(sim.carried_kit == Defs.KIT_SHELTER, "긴급거처를 들었다")
+	_assert(not sim.place_shelter(sim.core_cell + Vector2i(1, 0)),
+		"기지에 붙여서는 세울 수 없다")
+	_assert(not sim.place_shelter(sim.core_cell + Vector2i(40, 0)),
+		"온기 밖에도 세울 수 없다")
+	var spot: Vector2i = _shelter_spot(sim)
+	_assert(sim.place_shelter(spot), "그 사이라면 세울 수 있다")
+	_assert(sim.shelter_placed and sim.shelter_cell == spot, "고른 자리에 선다")
+	_assert(sim.blocks_player(spot), "그리고 이제 건물이다 — 통과할 수 없다")
+
+# --- The ladder -------------------------------------------------------------
+
+func _test_missions_follow_the_world() -> void:
+	_crash()
+	var sim = main.sim
+	_assert(main.mission == main.Mission.BASE, "1. 긴급기지")
+	sim.search_kit()
+	sim.place_base(sim.core_cell)
+	main._advance_mission()
+	_assert(main.mission == main.Mission.SURVIVE, "2. 생존 준비")
+	sim.carried_kit = Defs.KIT_NONE
+	sim.search_kit()
+	_assert(sim.place_shelter(_shelter_spot(sim)), "거처를 세운다")
+	main._advance_mission()
+	_assert(main.mission == main.Mission.MEANS, "3. 탐험할 방법")
+	# Two is not three. The card counts, so the count has to be the gate.
+	sim.delivered[Defs.ITEM_HEATSTONE] = Defs.OPENING_STONES - 1
+	main._advance_mission()
+	_assert(main.mission == main.Mission.MEANS, "열석 %d개로는 넘어가지 않는다"
+		% (Defs.OPENING_STONES - 1))
+	sim.delivered[Defs.ITEM_HEATSTONE] = Defs.OPENING_STONES
+	main._advance_mission()
+	_assert(main.mission == main.Mission.EXPLORE, "4. 주변 탐색")
+	sim.grant_cats(1)
+	main._advance_mission()
+	_assert(main.mission == main.Mission.DONE, "고양이가 생기면 오프닝이 끝난다")
+	# The card has to say something at every rung, and never the same thing twice
+	# in a row -- a ladder that repeats itself is a ladder the player thinks is
+	# stuck.
+	var seen: Dictionary[String, bool] = {}
+	_crash()
+	seen[String(main.objective_data()["text"])] = true
+	main.sim.search_kit()
+	seen[String(main.objective_data()["text"])] = true
+	main.sim.place_base(main.sim.core_cell)
+	main._advance_mission()
+	seen[String(main.objective_data()["text"])] = true
+	main.sim.carried_kit = Defs.KIT_NONE
+	main.sim.search_kit()
+	seen[String(main.objective_data()["text"])] = true
+	_assert(seen.size() == 4, "네 상황이 네 가지 문구를 낸다 (%d)" % seen.size())
+
+# --- The cold is a clock, not a wall ----------------------------------------
+
+func _test_cold_cannot_end_it() -> void:
+	_crash()
+	var warmth: float = main.player.warmth
+	for _step in 60:
+		main._update_warmth(1.0 / 60.0)
+	var lost: float = warmth - main.player.warmth
+	_assert(absf(lost - Defs.CRASH_DRAIN) < 0.05,
+		"1초에 %.2f씩 떨어진다 (%.2f)" % [Defs.CRASH_DRAIN, lost])
+	# All the way down. Nothing rescues her because there is nothing built to
+	# rescue her to, so she comes round where she fell and the opening carries
+	# on -- it can be made to take longer, but it cannot be lost.
+	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(9, 9))
+	var guard := 0
+	while main.player.warmth > 0.0 and guard < 20000:
+		main._update_warmth(1.0 / 60.0)
+		guard += 1
+	main._update_warmth(1.0 / 60.0)
+	_assert(main.player.warmth > 0.0, "다시 정신을 차린다 (%.0f)" % main.player.warmth)
+	_assert(main.state == main.State.PLAY, "게임이 끝나지 않는다")
+	_assert(main.player.cell() == main.sim.core_cell, "추락 지점에서 눈을 뜬다")
+	_assert(main.day_number == 1, "하루가 넘어가지도 않는다")
+
+# --- The world the rest of the game expects ---------------------------------
+
+func _test_save_mid_opening() -> void:
+	_crash()
+	var sim = main.sim
+	sim.search_kit()
+	var chosen: Vector2i = sim.core_cell + Vector2i(1, 0)
+	sim.place_base(chosen)
+	main._advance_mission()
+	sim.carried_kit = Defs.KIT_NONE
+	sim.search_kit()
+	main.player.warmth = 44.0
+	_assert(main.save_game(false), "오프닝 도중에 저장된다")
+
+	main._start_run()
+	main.finish_tutorial()
+	_assert(main.load_game(), "다시 불러온다")
+	_assert(main.mission == main.Mission.SURVIVE, "임무 2로 돌아온다")
+	_assert(main.sim.base_placed and not main.sim.shelter_placed,
+		"기지는 서 있고 거처는 아직 없다")
+	# The one that would have gone wrong quietly: the base moves the centre of
+	# the world, so a save that forgot where it went would put the fog, the hut's
+	# spot and the ore rings somewhere other than the fire on screen.
+	_assert(main.sim.core_cell == chosen, "옮겨 놓은 기지 자리가 살아난다")
+	_assert(main.sim.machine_at(chosen) != null, "그 자리에 코어가 있다")
+	_assert(main.sim.carried_kit == Defs.KIT_SHELTER, "손에 든 거처도 그대로다")
+	_assert(main.sim.kit_searched == 2, "상자를 두 번 뒤진 것도")
+	_assert(absf(main.player.warmth - 44.0) < 0.5, "체온도 그대로다")
+	main.clear_save()
+
+func _test_finish_tutorial() -> void:
+	_crash()
+	main.finish_tutorial()
+	var sim = main.sim
+	_assert(sim.base_placed and sim.machine_at(sim.core_cell) != null, "코어가 선다")
+	_assert(sim.shelter_placed, "거처도 선다")
+	_assert(sim.shelter_cell == sim.core_cell + Defs.SHELTER_CELL, "숙소는 제자리에")
+	_assert(sim.blocks_player(sim.food_cell), "밥통도 제자리에")
+	_assert(main.mission == main.Mission.DONE, "오프닝이 끝난 상태다")
+	_assert(sim.kit_searched == 2, "상자는 비어 있다")
+	_assert(sim.carried_kit == Defs.KIT_NONE, "손에는 아무것도 없다")
+	_assert(is_equal_approx(main.player.warmth, 100.0), "체온은 가득이다")

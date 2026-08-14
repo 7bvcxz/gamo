@@ -31,6 +31,7 @@ func _run() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.touch_primary()
 	main.debug_scenario()
 	main.process_mode = Node.PROCESS_MODE_DISABLED

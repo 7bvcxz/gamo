@@ -156,6 +156,11 @@ var carrying_frozen := false
 ## from above.
 const FROZEN_CARRY_DRAW := MachineLayer.CAT_DRAW * 0.62
 const FROZEN_CARRY_TOP := -12.0
+## Which emergency kit is in her arms, if any. Drawn in the same place the ice
+## block is and for the same reason: it is a thing held in front of her with
+## both hands, and it must not cover her head.
+var carrying_kit: int = Defs.KIT_NONE
+const KIT_CARRY_SIZE := 26.0
 ## 0..1 while working a seam by hand, for the swing animation and the ring.
 var mining: float = 0.0
 var carried_cat_pos := Vector2.ZERO
@@ -413,6 +418,17 @@ func _draw() -> void:
 ## Drawn in world space relative to the player, from the cat's own position, so
 ## what is on screen and what the simulation believes are the same thing.
 func _draw_carried_cat() -> void:
+	# A kit first: it is neither a cat nor ice, and she can only hold one thing.
+	if carrying_kit != Defs.KIT_NONE:
+		var box := Rect2(-KIT_CARRY_SIZE * 0.5, FROZEN_CARRY_TOP,
+			KIT_CARRY_SIZE, KIT_CARRY_SIZE * 0.78)
+		carry_layer.draw_rect(box.grow(1.0), Defs.OUTLINE)
+		carry_layer.draw_rect(box, Color8(96, 104, 116))
+		carry_layer.draw_rect(Rect2(box.position.x, box.get_center().y - 2.0,
+			box.size.x, 4.0), Color8(58, 64, 74))
+		carry_layer.draw_rect(Rect2(box.get_center().x - 1.5,
+			box.get_center().y - 3.5, 3.0, 7.0), Color8(214, 176, 96))
+		return
 	# The frozen one first: it is not a Cat and has no rarity, heading or frame.
 	if carrying_frozen:
 		var block := Rect2(Vector2(-FROZEN_CARRY_DRAW * 0.5, FROZEN_CARRY_TOP),

@@ -24,6 +24,7 @@ func _run() -> void:
 	# may already have someone else's factory on it.
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 	_open(main.sim)
 	# Rejections are announced on a world-space popup rather than the centre

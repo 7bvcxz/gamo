@@ -43,6 +43,20 @@ var resumed := false
 ## them, and a function can be asked what it will do.
 var cutscene_panel: int = 0
 var cutscene_time: float = 0.0
+
+## The opening's four missions, and where the run is in them.
+##
+## Four rather than the twenty-two steps they were written as: a mission is the
+## name of a situation, not the name of a step. "Investigate the kit" is an
+## instruction; "get a fire going" is a predicament, and the player works out the
+## steps because the situation makes them obvious.
+##
+## While any of them is outstanding the day clock does not run. The opening is
+## about understanding rather than about hurrying, and the pressure it does need
+## is already coming from her own temperature.
+enum Mission { BASE, SURVIVE, MEANS, EXPLORE, DONE }
+var mission: int = Mission.DONE
+
 var time_left: float = Defs.DAY_SECONDS
 var selected_index: int = 0
 var build_dir := Vector2i.RIGHT
@@ -192,8 +206,11 @@ func _start_run() -> void:
 	day_number = 1
 	day_start_heat = 0
 	time_left = Defs.DAY_SECONDS
-	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, Defs.TILE * 4.5)
-	player.warmth = 100.0
+	sim.begin_crash()
+	mission = Mission.BASE
+	# She wakes where she landed, beside the kit rather than on top of it.
+	player.position = sim.cell_centre(sim.core_cell)
+	player.warmth = Defs.CRASH_WARMTH
 	player.locked = false
 	player.velocity = Vector2.ZERO
 	collapse_timer = -1.0
@@ -256,6 +273,13 @@ func objective_data() -> Dictionary:
 	# warning; this is seconds from a blackout that costs a quarter of the run's
 	# heat, so it outranks it.
 	if not indoors() and player.warmth <= Defs.FROST_STAGES[2]:
+		# Before the fire exists there is no radius to get back inside, and
+		# telling her to go somewhere that does not exist is worse than telling
+		# her nothing. The instruction is the same one the mission gives, said
+		# with the urgency the temperature has earned.
+		if not sim.base_placed:
+			return _goal("몸이 얼고 있습니다  서둘러 긴급기지를 세우세요",
+				"thing", Icons.THING_CORE)
 		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
 	if is_night():
 		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
@@ -276,6 +300,29 @@ func objective_data() -> Dictionary:
 			"thing", Icons.THING_CAT_FROZEN)
 	if _thawing_nearby():
 		return _goal("얼음이 녹고 있습니다  곧 깨어납니다", "thing", Icons.THING_CAT_FROZEN)
+	# The opening. Four rungs of its own, above the ordinary ladder, because
+	# until they are done most of that ladder is about machines that cannot be
+	# built yet and a base that does not exist.
+	if sim.carried_kit == Defs.KIT_BASE:
+		return _goal("임무 1 · 긴급기지를 설치하자  추락 지점에서 Z 로 내려놓으세요",
+			"thing", Icons.THING_CORE)
+	if sim.carried_kit == Defs.KIT_SHELTER:
+		return _goal("임무 2 · 생존 준비를 하자  기지 %d칸 밖에 Z 로 거처를 세우세요"
+			% int(Defs.SHELTER_CLEARANCE), "thing", Icons.THING_SHELTER)
+	match mission:
+		Mission.BASE:
+			return _goal("임무 1 · 긴급기지를 설치하자  긴급생존키트 앞에서 Z 를 누르고 계세요",
+				"thing", Icons.THING_KIT)
+		Mission.SURVIVE:
+			return _goal("임무 2 · 생존 준비를 하자  긴급생존키트를 다시 살펴보세요",
+				"thing", Icons.THING_KIT)
+		Mission.MEANS:
+			return _goal("임무 3 · 탐험할 방법을 찾자  열석을 캐서 기지에 넣으세요  (%d/%d)"
+				% [int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)), Defs.OPENING_STONES],
+				"thing", Icons.THING_SEAM)
+		Mission.EXPLORE:
+			return _goal("임무 4 · 주변을 탐색하자  얼어붙은 고양이를 찾아 Z 로 안고 오세요",
+				"thing", Icons.THING_CAT_FROZEN)
 	# Lv1 -- do it with your hands, then hire someone to do it for you.
 	if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0 and sim.ground.is_empty():
 		return _goal(_mining_hint(), "thing", Icons.THING_SEAM)
@@ -673,6 +720,7 @@ func _process(delta: float) -> void:
 	_update_hand_mining(delta)
 	player.carrying_cat = sim.carried_cat != null
 	player.carrying_frozen = sim.carried_frozen
+	player.carrying_kit = sim.carried_kit
 	# The carried cat rides in front of her, turning as she turns. Driven from
 	# here because the sim does not know where the player is standing.
 	if sim.carried_cat != null:
@@ -713,7 +761,7 @@ func _process(delta: float) -> void:
 	var showing: int = state_before_settings if state == State.SETTINGS else state
 	var in_run: bool = showing != State.TITLE and showing != State.OPENING
 	player.visible = in_run and not indoors()
-	machine_layer.show_preview = state == State.PLAY
+	machine_layer.show_preview = state == State.PLAY and sim.base_placed
 
 ## Wind is always there and swells at night; the cold layer tracks how exposed
 ## the player actually is, so the ear learns the danger before the screen does.
@@ -754,7 +802,7 @@ const SAVE_SLOTS := 31
 ## load is what makes that safe -- an unrecognised file starts a new run rather
 ## than half-restoring one.
 const SAVE_PATH := "user://motorio_save.cfg"
-const SAVE_SCHEMA := 4
+const SAVE_SCHEMA := 5
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -781,20 +829,27 @@ func _process_play(delta: float) -> void:
 	# rather than inside the character, because the character does not know about
 	# the world and this is the one place that has both.
 	sim.mark_explored(sim.cell_of(player.position), Defs.SIGHT_RADIUS)
-	time_left = maxf(0.0, time_left - delta)
+	# The clock is held until the opening is over. Thirteen minutes of tutorial
+	# is four days at this length: the summary card would interrupt it four
+	# times, and the first night would arrive at 3:00 -- before there is anywhere
+	# to sleep, which is the thing the second mission is about.
+	if mission == Mission.DONE:
+		time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
 	_update_nibbles(delta)
 	_update_gacha(delta)
 	_collect_and_adopt()
 	_update_warmth(delta)
+	_update_kit_search(delta)
 	_update_preview()
 	if not night_warned and is_night():
 		night_warned = true
 		_notify("밤이 옵니다 — 숙소로 돌아가 Z로 취침하세요", Defs.COL_DANGER)
 		audio.call("play", "alarm")
 	# Running out of night entirely means the cats come and get you.
-	if time_left <= 0.0:
+	if mission == Mission.DONE and time_left <= 0.0:
 		_carried_home()
+	_advance_mission()
 
 ## Crates are picked up simply by walking over them, and carrying three to the
 ## shelter adopts a cat. No extra verb to learn.
@@ -876,7 +931,7 @@ func _update_footsteps() -> void:
 		audio.call("play", "step_run" if player.step_running else "step")
 
 func _update_hand_mining(delta: float) -> void:
-	if state != State.PLAY or player.locked or sim.carried_cat != null or sim.carried_frozen:
+	if state != State.PLAY or player.locked or sim.hands_full():
 		sim.cancel_hand_mine()
 		player.mining = 0.0
 		last_mine_frame = -1
@@ -941,8 +996,107 @@ func _on_cat_thawed(total: int, at: Vector2) -> void:
 	else:
 		_notify("고양이가 깨어났습니다  (%d마리)" % total, Defs.COL_CORE)
 
+## Which mission the run is on, recomputed from the world rather than advanced
+## by whoever happened to do the thing. A flag set at the moment of an action is
+## a flag that can be set twice, or missed when the action happens some other
+## way -- and every one of these has more than one way to happen.
+## Z held on the survival kit. A hold rather than a press because opening it is
+## the first thing she does on this planet and it should take a moment -- and
+## because the same key, held, is how everything else in this game is worked at.
+func _update_kit_search(delta: float) -> void:
+	if not _facing_kit() or not mine_held or player.locked:
+		sim.kit_progress = 0.0
+		return
+	sim.kit_progress += delta / Defs.KIT_SEARCH_SECONDS
+	if sim.kit_progress < 1.0:
+		return
+	sim.kit_progress = 0.0
+	var found: int = sim.search_kit()
+	if found == Defs.KIT_NONE:
+		return
+	fx.ring(sim.cell_centre(sim.kit_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+	audio.call("play", "alloy")
+	if found == Defs.KIT_BASE:
+		_notify("긴급기지를 꺼냈습니다  Z 로 내려놓으세요", Defs.COL_CORE)
+	else:
+		# The pickaxe comes out with the shelter. It is a tool rather than a
+		# thing to carry, so it goes straight into the row she already has.
+		_notify("곡괭이와 긴급거처를 꺼냈습니다  Z 로 거처를 세우세요", Defs.COL_CORE)
+
+## Whether she is at the kit with something still in it.
+##
+## Distance rather than facing. Everything else in this game is aimed -- you
+## face a seam, a machine, a cat -- and that is right for a world full of tiles
+## that look alike. The kit is the first thing the player ever touches, there is
+## exactly one of it, and there is nothing else within three tiles it could be
+## confused with. Requiring the correct facing there buys nothing and costs a
+## player standing next to a glowing case pressing a key that does nothing.
+##
+## Found exactly that way: the browser run walked to the kit, held Z, and the
+## game did nothing, because the last arrow pressed had been Down.
+const KIT_REACH := 1.4
+func _facing_kit() -> bool:
+	if sim.kit_searched >= 2 or sim.hands_full():
+		return false
+	return player.position.distance_to(sim.cell_centre(sim.kit_cell)) \
+		<= float(Defs.TILE) * KIT_REACH
+
+func _advance_mission() -> void:
+	var was: int = mission
+	match mission:
+		Mission.BASE:
+			if sim.base_placed:
+				mission = Mission.SURVIVE
+		Mission.SURVIVE:
+			if sim.shelter_placed:
+				mission = Mission.MEANS
+		Mission.MEANS:
+			# Three stones in the core. The number the opening asks for, and the
+			# first time the player sees the circle grow because of something
+			# they carried.
+			if int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.OPENING_STONES:
+				mission = Mission.EXPLORE
+		Mission.EXPLORE:
+			if not sim.cats.is_empty():
+				mission = Mission.DONE
+	if mission == was:
+		return
+	if mission == Mission.DONE:
+		_notify("살아남았습니다  이제 하루가 흐릅니다", Defs.COL_CORE)
+		audio.call("play", "finish")
+	else:
+		audio.call("play", "confirm")
+
+## Everything the opening builds, at once. The game after the tutorial is the
+## game this repository already had, so anything that wants that world -- a save
+## from before the opening existed, a test, a debug key -- asks for it here
+## rather than reproducing the four missions by hand.
+func finish_tutorial() -> void:
+	if not sim.base_placed:
+		sim.carried_kit = Defs.KIT_BASE
+		sim.place_base(sim.core_cell)
+	if not sim.shelter_placed:
+		sim.carried_kit = Defs.KIT_SHELTER
+		sim.shelter_placed = true
+		sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
+		sim.food_cell = sim.core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+		sim.carried_kit = Defs.KIT_NONE
+	sim.kit_searched = 2
+	mission = Mission.DONE
+	player.warmth = 100.0
+
 func _update_warmth(delta: float) -> void:
 	_update_collapse(delta)
+	# Before the fire exists there is nowhere to be warm and nowhere to be
+	# carried to, so the ordinary rules -- which are all about a base -- do not
+	# apply. She loses a degree every two seconds wherever she stands, which is
+	# eighty seconds of looking around, and hitting zero means coming to again
+	# in the snow rather than waking up at a base that has not been built.
+	if not sim.base_placed:
+		player.warmth = maxf(0.0, player.warmth - Defs.CRASH_DRAIN * delta)
+		if player.warmth <= 0.0:
+			_come_to()
+		return
 	var warm: bool = sim.is_warm(player.cell())
 	if warm and not is_night():
 		player.warmth = minf(100.0, player.warmth + Defs.COLD_RECOVER * delta)
@@ -1466,6 +1620,13 @@ func _primary_action() -> void:
 		_sleep()
 		return
 	var cell: Vector2i = player.facing_cell()
+	# The kit answers Z by being held rather than pressed, so a press at it is
+	# not a build, a pick-up or anything else.
+	if _facing_kit():
+		return
+	if sim.carried_kit != Defs.KIT_NONE:
+		_place_kit(cell)
+		return
 	# A frozen cat answers Z before anything else. She has both arms round it,
 	# so there is nothing else the press could mean.
 	if sim.carried_frozen:
@@ -1525,6 +1686,41 @@ func _primary_action() -> void:
 	if not holding_build_gun():
 		return
 	_try_build()
+
+## Putting down the base or the shelter. Both refuse for reasons the player
+## cannot see from the tile alone, so a refusal says which one it was -- a
+## placement that silently does nothing is the same experience as a broken key.
+func _place_kit(cell: Vector2i) -> void:
+	var kit: int = sim.carried_kit
+	if kit == Defs.KIT_BASE:
+		if sim.place_base(cell):
+			_notify("불이 붙었습니다  기지 %.0f칸 안이 따뜻합니다" % sim.warm_radius,
+				Defs.COL_CORE)
+			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_LARGE)
+			fx.burst(sim.cell_centre(cell), Defs.COL_CORE, 16)
+			shake = maxf(shake, Defs.FX_SMALL)
+			audio.call("play", "finish")
+			return
+		if Vector2(cell - sim.core_cell).length() > Defs.BASE_PLACE_RADIUS:
+			_notify("추락 지점에서 너무 멉니다  %d칸 안에 놓으세요"
+				% int(Defs.BASE_PLACE_RADIUS), Defs.COL_TEXT_DIM)
+		else:
+			_notify("여기에는 놓을 수 없습니다", Defs.COL_TEXT_DIM)
+	elif kit == Defs.KIT_SHELTER:
+		if sim.place_shelter(cell):
+			_notify("거처를 세웠습니다  밤에는 여기서 잡니다", Defs.COL_CORE)
+			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_LARGE)
+			audio.call("play", "finish")
+			return
+		var distance: float = Vector2(cell - sim.core_cell).length()
+		if distance <= Defs.SHELTER_CLEARANCE:
+			_notify("기지에 너무 붙었습니다  %d칸 밖에 세우세요"
+				% int(Defs.SHELTER_CLEARANCE), Defs.COL_TEXT_DIM)
+		elif distance > sim.warm_radius:
+			_notify("온기 반경 밖입니다  기지가 닿는 곳에 세우세요", Defs.COL_TEXT_DIM)
+		else:
+			_notify("여기에는 세울 수 없습니다", Defs.COL_TEXT_DIM)
+	audio.call("play", "deny")
 
 func _try_build() -> void:
 	if player.locked:
@@ -1844,6 +2040,7 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		"px": player.position.x,
 		"py": player.position.y,
 		"warmth": player.warmth,
+		"mission": mission,
 		"sim": sim.to_save(),
 	})
 	if config.save(slot_path(slot)) != OK:
@@ -1921,6 +2118,7 @@ func load_game(slot: int = 0) -> bool:
 	day_start_heat = int(data.get("day_start_heat", 0))
 	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
 	player.warmth = float(data.get("warmth", 100.0))
+	mission = int(data.get("mission", Mission.DONE))
 	player.locked = false
 	player.collapse = 0.0
 	collapse_timer = -1.0
@@ -2082,6 +2280,21 @@ func day_heat() -> int:
 
 ## Falling asleep outside: the cats bring you in, and the night ends anyway, but
 ## the day is scored as it stood.
+## Zero warmth before there is a base. Nothing rescues her because there is
+## nothing to rescue her -- she simply comes round again at the crash site, cold
+## and with the same eighty seconds. The opening cannot be lost; it can only be
+## made to take longer, which is what the temperature is there to say.
+func _come_to() -> void:
+	if collapse_timer >= 0.0 or player.collapse > 0.0:
+		return
+	player.position = sim.cell_centre(sim.core_cell)
+	player.velocity = Vector2.ZERO
+	player.warmth = Defs.CRASH_WARMTH
+	shake = maxf(shake, Defs.FX_SMALL)
+	fx.ring(player.position, Defs.COL_FROST_TINT, Defs.RING_LARGE)
+	_notify("정신을 잃었다가 다시 눈을 떴습니다  서둘러야 합니다", Defs.COL_DANGER)
+	audio.call("play", "alarm")
+
 func _carried_home() -> void:
 	rescued_tonight = true
 	_sleep()

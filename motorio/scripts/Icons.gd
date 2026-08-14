@@ -20,6 +20,7 @@ class_name Icons
 
 ## Things the objective line can point at that are not machines or items.
 const THING_CAT_FROZEN := "cat_frozen"
+const THING_KIT := "kit"
 const THING_CAT := "cat"
 const THING_SHELTER := "shelter"
 const THING_CORE := "core"
@@ -169,6 +170,20 @@ static func draw_item(canvas: CanvasItem, rect: Rect2, item_type: int) -> void:
 static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
 	var width: float = _outline_width(rect)
 	match key:
+		THING_KIT:
+			# The case, with its band and its handle. The same drawing the world
+			# layer makes, at whatever size the objective card asks for.
+			_shadow(canvas, rect)
+			var case := rect.grow(-rect.size.x * 0.16)
+			_body(canvas, case, Color8(96, 104, 116), Color8(150, 160, 176), width)
+			canvas.draw_rect(Rect2(case.position.x,
+				case.get_center().y - case.size.y * 0.08,
+				case.size.x, case.size.y * 0.16), Color8(58, 64, 74))
+			canvas.draw_rect(Rect2(case.get_center().x - case.size.x * 0.06,
+				case.get_center().y - case.size.y * 0.14,
+				case.size.x * 0.12, case.size.y * 0.28), Color8(214, 176, 96))
+			canvas.draw_arc(Vector2(case.get_center().x, case.position.y),
+				case.size.x * 0.18, PI, TAU, 10, Color8(58, 64, 74), width)
 		THING_CAT_FROZEN:
 			# A block of ice with ears in it. The ears are what make it a cat
 			# rather than a crystal -- the objective line points at this from

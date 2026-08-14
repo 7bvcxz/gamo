@@ -18,6 +18,7 @@ func _run() -> void:
 	# Absolute day numbers and a clean factory both depend on starting fresh.
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 
 	_assert(main.state == main.State.TITLE, "the game opens on the title screen")
 	_assert(main.hud.get("main") == main, "the HUD is wired to the orchestrator")
@@ -103,6 +104,12 @@ func _run() -> void:
 	main.settings_restart()
 	_assert(main.state == main.State.PLAY, "the second press starts a new run")
 	_assert(main.day_number == 1, "at day one")
+	# A new run is a new crash: 처음부터 puts the player back at the beginning of
+	# the opening, base and all. The rest of this file is about the game after
+	# that, so it asks for the finished world again.
+	_assert(main.mission == main.Mission.BASE, "처음부터 는 오프닝부터 다시 시작한다")
+	_assert(not main.sim.base_placed, "기지도 다시 없다")
+	main.finish_tutorial()
 	_assert(is_zero_approx(main.hud.restart_armed), "and disarms itself afterwards")
 
 	# The build gun. Slot 1 is a tool, not a machine, and what it is loaded with

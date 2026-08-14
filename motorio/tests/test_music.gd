@@ -81,6 +81,7 @@ func _run() -> void:
 	await process_frame
 	_assert(main.music.requested_score() == "title", "타이틀 화면이 타이틀 곡을 부른다")
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 	main._follow_music()
 	_assert(main.music.requested_score() == "", "플레이 중에는 곡이 없다")

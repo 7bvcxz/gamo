@@ -17,6 +17,7 @@ func _run() -> void:
 	# Absolute day numbers and a clean factory both depend on starting fresh.
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 
 	# Movement degrades continuously, not only at zero.

@@ -21,6 +21,7 @@ func _run() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 	var sim = main.sim
 

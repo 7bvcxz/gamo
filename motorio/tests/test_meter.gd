@@ -22,6 +22,7 @@ func _run() -> void:
 	# this test expects to be empty would arrive with someone else's factory.
 	main.clear_save()
 	main._start_run()
+	main.finish_tutorial()
 	main.state = main.State.PLAY
 	var sim = main.sim
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
