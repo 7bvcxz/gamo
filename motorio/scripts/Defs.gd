@@ -48,6 +48,64 @@ const COL_CAT_FACE := Color8(250, 226, 190)
 ## against the snow it is lying on -- a white block on a white field is a hole in
 ## the ground, not an object.
 const COL_ICE := Color8(178, 216, 238)
+
+## --- The opening ----------------------------------------------------------
+## Seven panels, in order, with the picture and its shake in the same row. Two
+## parallel lists -- one of textures, one of shake amounts -- is the arrangement
+## this repository has watched go out of step twice, and a cutscene where the
+## ground shakes on the wrong picture is worse than one that never shakes.
+##
+## The story was written as twelve beats. Twelve pictures before a game starts
+## is a wait, not an opening, so beats sharing a place and a moment were merged:
+## running for the rocket happens inside the bombardment, and the break-up, the
+## ejection and the falling debris are one picture. What survives is what changes
+## her situation.
+##
+## Shake is on the three panels where something hits: the bombardment, the Earth
+## going, and the crash. Everywhere else it is still, because a shake that never
+## stops is not a shake.
+const CUTSCENE_PANELS: Array[Dictionary] = [
+	{"art": preload("res://assets/cutscene/01.webp"), "shake": 0.0,
+		"line": "그날, 하늘이 어두워졌다."},
+	{"art": preload("res://assets/cutscene/02.webp"), "shake": 7.0,
+		"line": "펭귄 함대는 아무것도 남기지 않았다."},
+	{"art": preload("res://assets/cutscene/03.webp"), "shake": 2.5,
+		"line": "마지막 로켓이 떠올랐다."},
+	{"art": preload("res://assets/cutscene/04.webp"), "shake": 15.0,
+		"line": "그리고 지구가 사라졌다."},
+	{"art": preload("res://assets/cutscene/05.webp"), "shake": 0.0,
+		"line": "경보가 그녀를 깨웠다. 창밖에 얼음 행성이 있었다."},
+	{"art": preload("res://assets/cutscene/06.webp"), "shake": 12.0,
+		"line": "로켓은 얼음 구름 속에서 부서졌다."},
+	{"art": preload("res://assets/cutscene/07.webp"), "shake": 0.0,
+		"line": "추위가 그녀를 깨웠다. 이제 여기서 살아남아야 한다."},
+]
+## How a panel is timed. Fade in, hold, fade out -- so a panel lasts
+## FADE + HOLD + FADE and the whole opening is a little over half a minute.
+## Long enough to read one line without hurrying, short enough that a player who
+## has seen it once can press through it in seconds.
+const CUTSCENE_FADE := 0.55
+const CUTSCENE_HOLD := 3.40
+
+static func cutscene_panel_seconds() -> float:
+	return CUTSCENE_FADE * 2.0 + CUTSCENE_HOLD
+
+## Where the picture sits this instant. Deterministic rather than random so a
+## test can ask what the offset is at a given time, and decaying across the
+## panel because an impact is loudest when it lands.
+static func cutscene_shake(index: int, elapsed: float) -> Vector2:
+	if index < 0 or index >= CUTSCENE_PANELS.size():
+		return Vector2.ZERO
+	var amount: float = float(CUTSCENE_PANELS[index]["shake"])
+	if amount <= 0.0:
+		return Vector2.ZERO
+	var span: float = cutscene_panel_seconds()
+	var decay: float = clampf(1.0 - elapsed / span, 0.0, 1.0)
+	# Two frequencies per axis, none of them a multiple of another, so the
+	# picture never returns to the same place on a beat.
+	return Vector2(
+		sin(elapsed * 37.0) * 0.6 + sin(elapsed * 23.0) * 0.4,
+		sin(elapsed * 29.0) * 0.5 + sin(elapsed * 43.0) * 0.5) * amount * decay
 ## The SSR cat, which is a pig. Warm, like everything the player earns, but a
 ## pink that no machine and no ore uses, so half a second of it on screen is
 ## unmistakably the rare thing rather than another amber light.

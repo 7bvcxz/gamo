@@ -1,0 +1,28 @@
+{
+  "at": "2026-08-14T15:54:16.173364+00:00",
+  "model": "gpt-image-2",
+  "prompt": "Inside a cramped rocket cockpit lit only by a red alarm lamp, a small chibi girl with a silver-white bob and sleepy half-lidded eyes, wearing a rust-red duffel coat with cream fur trim, brown mittens and brown fur-lined boots pushes herself up off the floor with one mitten on the seat. Through the round window behind her: a white ice planet, and on its horizon two tall pointed ice peaks side by side shaped like a cat's ears. soft watercolour and coloured-pencil storybook illustration with visible pencil outlines, muted desaturated palette, warm light against cold blue shadow, cinematic wide shot, painterly grain",
+  "refs": [],
+  "mask": null,
+  "size": "1536x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 27.6,
+  "usage": {
+    "input_tokens": 135,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 135
+    },
+    "output_tokens": 158,
+    "output_tokens_details": {
+      "image_tokens": 158,
+      "text_tokens": 0
+    },
+    "total_tokens": 293
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/cutscene/05-alarm.png"
+  ]
+}

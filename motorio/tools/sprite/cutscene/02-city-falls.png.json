@@ -1,0 +1,28 @@
+{
+  "at": "2026-08-14T15:53:07.153726+00:00",
+  "model": "gpt-image-2",
+  "prompt": "The same small town at night, its buildings collapsing into orange fire and black smoke as streaks of light fall from a fleet of dark angular airships with black and white penguin-shaped hulls and small orange beaks overhead. a small chibi girl with a silver-white bob and sleepy half-lidded eyes, wearing a rust-red duffel coat with cream fur trim, brown mittens and brown fur-lined boots runs across the foreground from left to right, small against the flames, her coat lit orange on one side. soft watercolour and coloured-pencil storybook illustration with visible pencil outlines, muted desaturated palette, warm light against cold blue shadow, cinematic wide shot, painterly grain",
+  "refs": [],
+  "mask": null,
+  "size": "1536x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 21.6,
+  "usage": {
+    "input_tokens": 146,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 146
+    },
+    "output_tokens": 158,
+    "output_tokens_details": {
+      "image_tokens": 158,
+      "text_tokens": 0
+    },
+    "total_tokens": 304
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/cutscene/02-city-falls.png"
+  ]
+}

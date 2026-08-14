@@ -1,0 +1,28 @@
+{
+  "at": "2026-08-14T15:53:25.050868+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A slender white rocket climbing steeply through smoke on a column of orange flame, the burning town small and far below it, a fleet of dark angular airships with black and white penguin-shaped hulls and small orange beaks as dark silhouettes among the clouds around it. soft watercolour and coloured-pencil storybook illustration with visible pencil outlines, muted desaturated palette, warm light against cold blue shadow, cinematic wide shot, painterly grain",
+  "refs": [],
+  "mask": null,
+  "size": "1536x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 17.8,
+  "usage": {
+    "input_tokens": 94,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 94
+    },
+    "output_tokens": 158,
+    "output_tokens_details": {
+      "image_tokens": 158,
+      "text_tokens": 0
+    },
+    "total_tokens": 252
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/cutscene/03-launch.png"
+  ]
+}

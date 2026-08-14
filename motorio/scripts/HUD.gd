@@ -351,6 +351,7 @@ func _draw() -> void:
 		return
 	match main.state:
 		main.State.TITLE: _draw_title()
+		main.State.OPENING: _draw_cutscene()
 		main.State.RESULT: _draw_result()
 		main.State.NIGHTFALL, main.State.DAYBREAK:
 			# The sequence is the one moment the game is not asking for anything,
@@ -384,6 +385,11 @@ func _draw() -> void:
 			_draw_build_menu()
 			_draw_gacha_card()
 			_draw_message()
+	# Below the match, so they are on every screen -- except the opening. The
+	# scene is the one moment the game is not offering the player a control, and
+	# two little chrome squares in the corner of a painting say otherwise.
+	if main.state == main.State.OPENING:
+		return
 	_draw_map_card()
 	_draw_settings_button()
 	_draw_map_button()
@@ -930,6 +936,65 @@ func _draw_title() -> void:
 	# So a player can say which build they are on without opening anything.
 	_text_in(Rect2(0, size.y - MARGIN, size.x - MARGIN, 16), "v%s" % version_string(), 11,
 		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+
+## The opening. One picture at a time, filling the screen, with its line under
+## it and nothing else -- no status, no hotbar, no frost vignette. The scene is
+## the only thing the game is asking the player to look at.
+##
+## Drawn here rather than as its own node for the reason the night sequence is:
+## the HUD paints a full-screen wash of its own, and a second overlay that does
+## not know about it produced a night that looked like noon once already. One
+## place decides what covers the screen.
+func _draw_cutscene() -> void:
+	var panels: Array[Dictionary] = Defs.CUTSCENE_PANELS
+	var index: int = clampi(main.cutscene_panel, 0, panels.size() - 1)
+	var elapsed: float = main.cutscene_time
+	var span: float = Defs.cutscene_panel_seconds()
+	# In, hold, out. Written as two ramps rather than a curve so the hold really
+	# is a hold: a fade that never quite reaches one reads as a dirty screen.
+	var alpha: float = 1.0
+	if elapsed < Defs.CUTSCENE_FADE:
+		alpha = elapsed / Defs.CUTSCENE_FADE
+	elif elapsed > span - Defs.CUTSCENE_FADE:
+		alpha = maxf(0.0, (span - elapsed) / Defs.CUTSCENE_FADE)
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.06, 1.0))
+	var art: Texture2D = panels[index]["art"]
+	draw_texture_rect(art, cutscene_rect(size, index, elapsed), false, Color(1, 1, 1, alpha))
+	# The line sits on a band of its own. Over watercolour, an outline alone is
+	# not enough -- half of these panels have a bright sky exactly where the text
+	# goes.
+	var band := Rect2(0.0, size.y * 0.80, size.x, size.y * 0.20)
+	draw_rect(band, Color(0.02, 0.03, 0.06, 0.62 * alpha))
+	_text_in(Rect2(MARGIN, size.y * 0.86, size.x - MARGIN * 2.0, 30.0),
+		String(panels[index]["line"]), 17, Color(Defs.COL_TEXT, alpha))
+	var hint: String = "화면을 눌러 넘기기" if main.touch != null and main.touch.visible \
+		else "아무 키나 눌러 넘기기   ·   Esc 건너뛰기"
+	_text_in(Rect2(MARGIN, size.y - MARGIN, size.x - MARGIN * 2.0, 16.0), hint, 11,
+		Color(Defs.COL_TEXT_DIM, alpha * 0.75))
+
+## Where the picture goes. Static and handed its own size, so the one thing that
+## can go wrong here can be measured rather than looked for.
+##
+## Cover, not fit: the panels are 16:9 and so is the game, but a phone held
+## upright is not, and a letterboxed opening on a phone is mostly letterbox.
+##
+## And overscanned by however far this panel shakes. At exactly 16:9 a covering
+## fit is the screen *exactly*, so any offset at all slides the picture off one
+## edge and shows the background behind it -- the shake would put a black bar
+## down the side of the frame it is supposed to make feel solid.
+static func cutscene_rect(screen: Vector2, index: int, elapsed: float) -> Rect2:
+	var panels: Array[Dictionary] = Defs.CUTSCENE_PANELS
+	var panel: Dictionary = panels[clampi(index, 0, panels.size() - 1)]
+	var art: Texture2D = panel["art"]
+	var source := Vector2(float(art.get_width()), float(art.get_height()))
+	# cutscene_shake never exceeds the panel's own amount on either axis, so
+	# growing by that much on each side is exactly enough and no more.
+	var pad: float = float(panel["shake"])
+	var scale: float = maxf((screen.x + pad * 2.0) / source.x,
+		(screen.y + pad * 2.0) / source.y)
+	var drawn: Vector2 = source * scale
+	var at: Vector2 = (screen - drawn) * 0.5 + Defs.cutscene_shake(index, elapsed)
+	return Rect2(at, drawn)
 
 ## Read from the project settings rather than duplicated here, so the number on
 ## screen can never disagree with the one that was shipped.

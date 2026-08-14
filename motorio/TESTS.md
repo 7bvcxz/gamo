@@ -22,7 +22,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 
 ---
 
-## 자동 테스트 (headless, 32개)
+## 자동 테스트 (headless, 33개)
 
 ### 규칙과 진행
 
@@ -47,6 +47,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 | 테스트 | 지키는 것 |
 |---|---|
 | `test_night` | 밤 연출의 각 구간과 상한. **문이 열리는 프레임에 플레이어가 그려지는지** |
+| `test_cutscene` | 오프닝. 표의 장 수와 `assets/cutscene`의 파일 수가 같은가(표만 고치면 없는 그림을 preload하고, 파일만 넣으면 아무도 못 본다), 새 게임에서만 재생되는가, 전체 길이, 흔들림이 결정적이고 잦아드는가, 그리고 **모든 화면비·모든 순간에 그림이 화면을 덮는가** — 16:9에서 덮는 배율은 화면과 정확히 같은 크기라 흔들림이 그대로 가장자리를 드러낸다 |
 | `test_cold` | 체온 감소, 쓰러짐 유예, 구조 |
 | `test_fog` | 안개 세기와 미리보기 띠 |
 | `test_save` | 세이브 스키마 왕복. 다른 테스트가 남긴 세이브를 물려받지 않도록 `clear_save()` 먼저 |

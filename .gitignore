@@ -17,3 +17,10 @@ __pycache__/
 
 # Maven build output for the side-server. The jar is built inside Docker.
 server/target/
+
+# The generated cutscene panels at full size: seven 3 MB PNGs that nothing
+# reads after build_cutscene.py has cut them. The masters are the WebPs in
+# motorio/assets/cutscene, the prompts are in tools/sprite/gen_cutscene.py, and
+# the per-call sidecars beside these are committed.
+motorio/tools/sprite/cutscene/*.png
+motorio/tools/sprite/cutscene/*.png.import

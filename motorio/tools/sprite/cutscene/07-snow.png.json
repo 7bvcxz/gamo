@@ -1,0 +1,28 @@
+{
+  "at": "2026-08-14T15:55:02.724609+00:00",
+  "model": "gpt-image-2",
+  "prompt": "a small chibi girl with a silver-white bob and sleepy half-lidded eyes, wearing a rust-red duffel coat with cream fur trim, brown mittens and brown fur-lined boots lies on her side in deep snow under a pale empty sky, her breath showing in the cold. A collapsed white parachute is spread across the snow beside her, and a scuffed metal case sits half-buried within reach of her hand. Snow drifts across the ground. soft watercolour and coloured-pencil storybook illustration with visible pencil outlines, muted desaturated palette, warm light against cold blue shadow, cinematic wide shot, painterly grain",
+  "refs": [],
+  "mask": null,
+  "size": "1536x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 26.3,
+  "usage": {
+    "input_tokens": 135,
+    "input_tokens_details": {
+      "image_tokens": 0,
+      "text_tokens": 135
+    },
+    "output_tokens": 158,
+    "output_tokens_details": {
+      "image_tokens": 158,
+      "text_tokens": 0
+    },
+    "total_tokens": 293
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/cutscene/07-snow.png"
+  ]
+}

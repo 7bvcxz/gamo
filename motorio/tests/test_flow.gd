@@ -23,9 +23,14 @@ func _run() -> void:
 	_assert(main.hud.get("main") == main, "the HUD is wired to the orchestrator")
 	_assert(main.sim.machine_at(main.sim.core_cell) != null, "the core exists at run start")
 
-	# Any key starts the run.
+	# Any key leaves the title -- into the opening, because this run is new.
+	# test_cutscene owns the scene itself; what matters here is that the two
+	# presses in a row reach the game, and that the second one is Escape rather
+	# than a key that also means something in play.
 	_press(main, KEY_SPACE)
-	_assert(main.state == main.State.PLAY, "any key leaves the title screen")
+	_assert(main.state == main.State.OPENING, "새 게임은 타이틀에서 컷씬으로 간다")
+	_press(main, KEY_ESCAPE)
+	_assert(main.state == main.State.PLAY, "Esc 로 컷씬을 건너뛰면 게임이다")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the run starts with a full day")
 
 	# Esc opens settings. There is no separate pause screen: settings already
@@ -146,7 +151,12 @@ func _run() -> void:
 	main.state = main.State.TITLE
 	_assert(main.touch_anywhere_starts(), "a tap anywhere leaves the title on a phone")
 	main.touch_primary()
-	_assert(main.state == main.State.PLAY, "touch start actually begins the run")
+	_assert(main.state == main.State.OPENING, "폰에서도 타이틀 다음은 컷씬이다")
+	# And the pad can get out of it: a phone has no Escape, so tapping through
+	# has to reach the game on its own.
+	for _tap in Defs.CUTSCENE_PANELS.size():
+		main.touch_primary()
+	_assert(main.state == main.State.PLAY, "탭으로 끝까지 넘기면 게임이 시작된다")
 	main._process(0.0)
 	_assert(main.hud.hotbar_rects.size() == main.TOOLS.size(), "the HUD publishes a rect per tool slot")
 	main.selected_index = 0

@@ -7,7 +7,7 @@ extends Node2D
 ## and the warm radius all carry into the next morning.
 ## SETTINGS is a state rather than an overlay flag so that opening it stops the
 ## clock: sizing the UI should never cost the player warmth.
-enum State { TITLE, PLAY, RESULT, SETTINGS, NIGHTFALL, DAYBREAK }
+enum State { TITLE, OPENING, PLAY, RESULT, SETTINGS, NIGHTFALL, DAYBREAK }
 ## Phases inside NIGHTFALL and DAYBREAK. Both run on one timer rather than a
 ## handful of booleans, so there is one place to read what the sequence is doing.
 enum Phase { GATHER, GLOW, DAWN, SPILL }
@@ -34,6 +34,15 @@ const RESCUE_SECONDS := 1.6
 @onready var atmosphere: ColorRect = $Grade/Atmosphere
 
 var state: int = State.TITLE
+## The opening plays once, for a run that is actually new. A player who closed
+## the tab in the middle of day four does not need to be told again that Earth
+## is gone, and the save is the only thing that knows which of the two they are.
+var resumed := false
+## Which panel is up and how long it has been. Two numbers, because everything
+## else about the scene -- the fade, the shake, the line -- is a function of
+## them, and a function can be asked what it will do.
+var cutscene_panel: int = 0
+var cutscene_time: float = 0.0
 var time_left: float = Defs.DAY_SECONDS
 var selected_index: int = 0
 var build_dir := Vector2i.RIGHT
@@ -143,8 +152,39 @@ func _ready() -> void:
 	load_settings()
 	_start_run()
 	if load_game():
+		resumed = true
 		_notify("이어서 진행합니다", Defs.COL_CORE)
 	state = State.TITLE
+
+## --- The opening ----------------------------------------------------------
+func _leave_title() -> void:
+	audio.call("play", "confirm")
+	if resumed:
+		state = State.PLAY
+		return
+	cutscene_panel = 0
+	cutscene_time = 0.0
+	state = State.OPENING
+
+func _process_cutscene(delta: float) -> void:
+	cutscene_time += delta
+	if cutscene_time < Defs.cutscene_panel_seconds():
+		return
+	_advance_cutscene()
+
+func _advance_cutscene() -> void:
+	cutscene_panel += 1
+	cutscene_time = 0.0
+	if cutscene_panel >= Defs.CUTSCENE_PANELS.size():
+		_end_cutscene()
+
+## Straight into the run. No fanfare: the last panel is her waking in the snow
+## and the first frame of play is the same thing, so anything between them would
+## be an interruption of the one join the scene exists to make.
+func _end_cutscene() -> void:
+	cutscene_panel = 0
+	cutscene_time = 0.0
+	state = State.PLAY
 
 func _start_run() -> void:
 	run_seed = randi()
@@ -654,6 +694,7 @@ func _process(delta: float) -> void:
 	match state:
 		State.PLAY: _process_play(delta)
 		State.TITLE: pass
+		State.OPENING: _process_cutscene(delta)
 		State.NIGHTFALL: _process_nightfall(delta)
 		State.DAYBREAK: _process_daybreak(delta)
 		State.RESULT, State.SETTINGS: pass
@@ -670,14 +711,17 @@ func _process(delta: float) -> void:
 	# Opening settings from the title must not spoil the hero shot, so visibility
 	# follows the screen the panel was opened over rather than the panel itself.
 	var showing: int = state_before_settings if state == State.SETTINGS else state
-	var in_run: bool = showing != State.TITLE
+	var in_run: bool = showing != State.TITLE and showing != State.OPENING
 	player.visible = in_run and not indoors()
 	machine_layer.show_preview = state == State.PLAY
 
 ## Wind is always there and swells at night; the cold layer tracks how exposed
 ## the player actually is, so the ear learns the danger before the screen does.
 func _update_ambience(delta: float) -> void:
-	if state == State.TITLE:
+	# The opening is the title's neighbour here, not the run's: the day clock is
+	# not running and the player is not standing in the cold, so a cold bed that
+	# tracked her warmth would be describing a scene she is not in yet.
+	if state == State.TITLE or state == State.OPENING:
 		audio.call("set_bed", "wind", 0.35, delta)
 		audio.call("set_bed", "cold", 0.0, delta)
 		return
@@ -1096,8 +1140,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		State.TITLE:
 			if key.keycode == KEY_ESCAPE:
 				return
-			state = State.PLAY
-			audio.call("play", "confirm")
+			_leave_title()
+			get_viewport().set_input_as_handled()
+			return
+		State.OPENING:
+			# Any key moves on; Escape leaves the whole thing. Two verbs rather
+			# than one because "I have seen this" and "I want the next picture"
+			# are different requests and the second one is the common one.
+			if key.keycode == KEY_ESCAPE:
+				_end_cutscene()
+			else:
+				_advance_cutscene()
 			get_viewport().set_input_as_handled()
 			return
 		State.RESULT:
@@ -1359,8 +1412,9 @@ func touch_primary(pressed: bool = true) -> void:
 		return
 	match state:
 		State.TITLE:
-			state = State.PLAY
-			audio.call("play", "confirm")
+			_leave_title()
+		State.OPENING:
+			_advance_cutscene()
 		State.RESULT:
 			_begin_next_day()
 		State.SETTINGS:
