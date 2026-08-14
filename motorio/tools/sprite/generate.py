@@ -60,9 +60,14 @@ STAGING = (
     # reading of walking -- so the cat's back walk shrank steadily for four
     # seconds. Nothing repeats in a clip like that: the similarity curve just
     # gets worse with distance and there is no cycle to find.
-    "It does NOT walk toward the camera or away from the camera: it stays at the "
+    # "marching on the spot" lived here until 2026-08-14, which is the same fault
+    # as the "walking on the spot" above it and survived that fix: it tells every
+    # clip that the subject's legs are moving. The first clip that was not a walk
+    # -- a block of ice melting, with the animal inside deliberately frozen still
+    # -- would have been asked to march. Depth is stated without implying legs.
+    "It does NOT move toward the camera or away from the camera: it stays at the "
     "same distance and the same size the entire time, never getting bigger or "
-    "smaller, marching on the spot. "
+    "smaller, holding its position in the frame. "
     "Full body always visible including both feet, feet never cropped. "
     "Flat solid chroma green background, one uniform colour, no gradient, no "
     "shadow on the ground, no scenery, no props, no other characters. "
@@ -70,6 +75,32 @@ STAGING = (
 )
 
 MOTION_PROMPTS = {
+    # The one clip here that is not a cycle. Everything else loops and is cut for
+    # its period; this runs one way, from encased to nearly free, and is cut into
+    # four stages by how much ice is left. So it asks for a steady monotonic
+    # change instead of repetitions -- "repeats three times" would be exactly
+    # wrong and would produce a block that re-freezes.
+    #
+    # The hard part is the animal. A generator given a melting block will animate
+    # what is inside it, and the game needs the opposite: the cat is frozen, and
+    # the moment it blinks the whole illusion of "this one is not awake yet" is
+    # gone. So stillness is stated as the subject of the sentence rather than as
+    # a qualifier, and named part by part, because "does not move" is a claim a
+    # model will honour loosely and "its ears do not move" is one it cannot.
+    "melt": (
+        "The thick block of ice from image 1 slowly melts away over the whole "
+        "clip, steadily and continuously in one direction, never re-forming: it "
+        "starts as a thick opaque block that completely encases the animal on "
+        "every side and ends as a thin clear glassy layer clinging to the "
+        "animal's fur, so that by the end the animal's colours and face are "
+        "clearly visible through it. The surface of the ice grows smoother and "
+        "more transparent as it goes. "
+        "The animal inside stays perfectly still the entire time, exactly as it "
+        "is in image 1: its head stays at the same angle, its eyes stay exactly "
+        "as they are, its ears stay where they are, its paws stay where they "
+        "are, its tail stays where it is. It holds one single frozen pose from "
+        "the first frame to the last, like a photograph."
+    ),
     "walk": "The character from image 1 walks in place, a simple looping walk cycle at a steady pace.",
     # What separates a run from a fast walk is not speed, and asking for speed
     # does not produce one: "runs in place, leaning slightly forward" came back

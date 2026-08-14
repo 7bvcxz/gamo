@@ -1,2 +1,2 @@
 :HL["/gamo/_next/static/chunks/39jprzm5ysz9l.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"KTa74Y6c1aJMY8WulPbXC"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"jSGATQhgbHSY7iQQzPHHw"}

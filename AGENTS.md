@@ -94,6 +94,20 @@
 - 옛 이름을 찾을 때는 `motorio-oneshot`·`motorio_oneshot`·`OneShot`·`One Shot`·`oneshot`을
   모두 훑는다. 다섯 가지 표기가 코드·문서·생성물에 흩어져 있었다.
 
+## 영상에서 프레임 뽑기
+
+`extract_frames.cjs`는 브라우저의 H.264 디코더를 쓰는데, **Playwright 빌드마다 그 코덱이
+있고 없다.** 이 머신에서는 `chromium-1228`에 있고 `chromium-1187`에는 없다.
+
+```
+NODE_PATH=/tmp/motorio-playwright/node_modules \
+SPRITE_CHROME=~/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome \
+  node tools/sprite/extract_frames.cjs clip.mp4 frames --fps 12
+```
+
+Playwright가 함께 받는 `ffmpeg-1011`은 **답이 아니다.** 녹화용 빌드라 H.264 디코더가 0개다
+(`-decoders | grep h264`로 확인). 파일이 멀쩡한 mp4인데 "Invalid data"가 나오면 이것이다.
+
 ## 실수와 교훈
 
 - 2026-07-22: `godot --headless`의 더미 렌더러에서도 Viewport texture를 PNG로 저장할 수 있다고 가정해 방향별 고양이 캡처가 null texture로 실패했다. 실제 렌더 이미지 검증은 WebGL 브라우저나 렌더링 드라이버가 있는 실행 환경에서 수행하고, headless는 파싱·로직 테스트에만 사용한다.
