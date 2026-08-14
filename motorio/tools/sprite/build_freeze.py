@@ -19,19 +19,27 @@ The last stage is deliberately still icy. What follows it in the game is not a
 fifth picture but the ordinary cat sprite, so a stage that had already finished
 melting would be a duplicate of something the game already draws.
 
-## The cat is held still; the ice is what moves
+## The cat does not move, and neither do the frames
 
-The generator was asked for an animal that does not move, and it very nearly
-obliged -- the pose is identical throughout. But the block shrinks, and as it
-shrinks the cat settles: its cap travels 115 pixels down the frame, 18 percent
-of the height. Used as they are, the four stages would show the cat sliding
-downward while the ice receded.
+The generator was asked for an animal that holds still and it did: measured
+across all 48 frames, the top of its cap sits between y=94 and y=106 -- twelve
+pixels out of 640, under two percent. The camera is locked, so the frames are
+already aligned with each other and there is nothing to correct.
 
-So the frames are aligned on the cat rather than on the frame, using the cap --
-the one part visible through the ice at every stage -- and everything is placed
-where the cat sits in the final, thawed frame. The ice then recedes *around* a
-cat that stays put, which is both what the fiction says happens and what makes
-the last stage line up with the live cat sprite that replaces it.
+The first version of this did correct it, and that is what made the stages
+wrong. It tracked the cap by centroid using a strict red threshold, and through
+thick ice only a few pixels of the cap survive that threshold -- in the most
+frozen frame, one row of them. The centroid of one row is not the centroid of a
+cap, so the measurement said the cat had travelled 115 pixels and every early
+stage was shoved down by a correction for movement that never happened. The cat
+visibly sank between stages one and two.
+
+The lesson is the ordinary one and it cost a re-cut: a measurement taken through
+an obstruction measures the obstruction. Loosening the threshold made the cap
+readable at every stage and the movement disappeared.
+
+So: one transform, shared by all four stages, and a check at the end that the
+cap really does land in the same place in each.
 """
 from __future__ import annotations
 
@@ -104,8 +112,8 @@ def _despill(art: Image.Image) -> Image.Image:
     return art
 
 
-def measure(art: Image.Image) -> tuple[float, tuple[float, float]]:
-    """How much ice is left, and where the cap is.
+def measure(art: Image.Image) -> tuple[float, int]:
+    """How much ice is left, and where the top of the cap is.
 
     Ice is counted as pale blue: the palette has no other blue in it, and the
     cat's own colours are warm. The cap is the warm red, which is the only thing
@@ -118,7 +126,7 @@ def measure(art: Image.Image) -> tuple[float, tuple[float, float]]:
     pixels = list(art.getdata())
     solid = ice = 0
     cap = 0
-    cap_x = cap_y = 0
+    cap_top = art.height
     width = art.width
     for index, (r, g, b, a) in enumerate(pixels):
         if a < 32:
@@ -126,13 +134,16 @@ def measure(art: Image.Image) -> tuple[float, tuple[float, float]]:
         solid += 1
         if b >= r and b > 150:
             ice += 1
-        if r > 150 and r - g > 45 and r - b > 45:
+        # Loose on purpose. Through thick ice the cap is pale and desaturated;
+        # at `r - g > 45` the most frozen frame yielded a single row of pixels,
+        # and a centroid taken from that is what produced a phantom 115 pixels
+        # of movement. This threshold reads the cap at every stage.
+        if r > 140 and r - g > 20 and r - b > 20:
             cap += 1
-            cap_x += index % width
-            cap_y += index // width
+            cap_top = min(cap_top, index // width)
     if cap == 0:
-        raise SystemExit("모자를 찾지 못했습니다 — 정렬 기준이 없습니다")
-    return ice / max(solid, 1), (cap_x / cap, cap_y / cap)
+        raise SystemExit("모자를 찾지 못했습니다")
+    return ice / max(solid, 1), cap_top
 
 
 def main() -> int:
@@ -149,10 +160,14 @@ def main() -> int:
     ice = [m[0] for m in measured]
     caps = [m[1] for m in measured]
 
-    # Where the cat ends up, which is where every stage is moved to.
-    anchor = caps[-1]
-    print("모자 이동: %.0f px (정렬 기준 %.0f, %.0f)"
-          % (max(c[1] for c in caps) - min(c[1] for c in caps), anchor[0], anchor[1]))
+    # Stated rather than corrected. If a future clip really does move the animal
+    # this is where it shows, and the answer then is to ask for a better clip --
+    # not to shove the frames about, which is what went wrong the first time.
+    drift = max(caps) - min(caps)
+    print("모자 top: %d~%d (움직임 %d px / %d)" % (min(caps), max(caps), drift, art[0].height))
+    if drift > art[0].height * 0.05:
+        print("경고: 클립 안에서 고양이가 움직입니다 — 다시 생성하는 편이 낫습니다",
+              file=sys.stderr)
 
     # Four steps evenly spread along how much ice is left, from the most frozen
     # frame down to LAST_ICE.
@@ -186,21 +201,33 @@ def main() -> int:
     print("크기 맞춤: 프레임의 고양이 %dpx -> 셀의 %dpx (%.3f배)"
           % (box[3] - box[1], live_height, scale))
 
+    # One transform for all four. The frames are already aligned with each
+    # other -- the camera is locked and the animal holds still -- so anything
+    # per-stage here would be moving them apart rather than together.
+    place = (round(live_foot[0] - foot[0] * scale), round(live_foot[1] - foot[1] * scale))
     sheet = Image.new("RGBA", (CELL * STAGES, CELL), (0, 0, 0, 0))
     for slot, index in enumerate(chosen):
         source = art[index]
-        # Two moves, in order: the cap onto the anchor, so every stage shares the
-        # last frame's geometry, and then that geometry onto the live cat's.
-        offset = (round(anchor[0] - caps[index][0]), round(anchor[1] - caps[index][1]))
-        moved = Image.new("RGBA", source.size, (0, 0, 0, 0))
-        moved.paste(source, offset)
-
-        small = moved.resize((max(1, round(source.width * scale)),
-                              max(1, round(source.height * scale))), Image.LANCZOS)
+        small = source.resize((max(1, round(source.width * scale)),
+                               max(1, round(source.height * scale))), Image.LANCZOS)
         cell = Image.new("RGBA", (CELL, CELL), (0, 0, 0, 0))
-        cell.alpha_composite(small, (round(live_foot[0] - foot[0] * scale),
-                                     round(live_foot[1] - foot[1] * scale)))
+        cell.alpha_composite(small, place)
         sheet.alpha_composite(cell, (slot * CELL, 0))
+
+    # The thing the player actually notices, checked rather than assumed: the cat
+    # has to be in the same place in every stage, and in the same place as the
+    # live sprite that replaces it. The first cut of this sheet failed exactly
+    # here -- the cap sat at 56, 50, 42, 40 -- and nothing caught it but an eye.
+    tops = []
+    for slot in range(STAGES):
+        _, top = measure(sheet.crop((slot * CELL, 0, (slot + 1) * CELL, CELL)))
+        tops.append(top)
+    _, live_top = measure(live)
+    spread = max(tops + [live_top]) - min(tops + [live_top])
+    print("결과 모자 top: %s · 살아있는 고양이 %d · 최대 차이 %d px" % (tops, live_top, spread))
+    if spread > 3:
+        print("고양이가 단계마다 다른 자리에 있습니다", file=sys.stderr)
+        return 1
 
     GAME_ART.mkdir(parents=True, exist_ok=True)
     out = GAME_ART / "cat_freeze_4.png"
