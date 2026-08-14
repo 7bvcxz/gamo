@@ -167,9 +167,11 @@ func _energy_in_world(sim) -> int:
 	return total
 
 func _open(sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
 	sim.stock[Defs.ITEM_ENERGY] = 500
 

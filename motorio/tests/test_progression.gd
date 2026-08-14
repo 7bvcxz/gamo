@@ -18,20 +18,25 @@ func _run() -> void:
 	_assert(not sim.is_unlocked(Defs.M_MINER), "nothing is buildable on the first frame")
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_CRYSTAL:
+		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
-	_assert(seam != Vector2i(9999, 9999), "the world starts with crystal to hand-mine")
+	_assert(seam != Vector2i(9999, 9999), "the world starts with heat stone to hand-mine")
 
 	_assert(sim.hand_mine(seam, Defs.HAND_MINE_PERIOD * 0.5) < 0, "half a swing yields nothing")
 	_assert(sim.hand_fraction() > 0.4 and sim.hand_fraction() < 0.6, "and the swing is half shown")
-	_assert(sim.hand_mine(seam, Defs.HAND_MINE_PERIOD * 0.6) == Defs.ITEM_CRYSTAL,
-		"a full swing yields one crystal shard")
+	_assert(sim.hand_mine(seam, Defs.HAND_MINE_PERIOD * 0.6) == Defs.ITEM_HEATSTONE,
+		"a full swing yields one heat stone")
 	_assert(sim.hand_mine(Vector2i(500, 500), 99.0) < 0, "swinging at bare ground yields nothing")
 
-	var opened: Array[int] = sim.note_resource_seen(Defs.ITEM_CRYSTAL)
-	_assert(opened.has(Defs.M_MINER) and opened.has(Defs.M_EXCHANGER),
-		"the first crystal opens the miner and the exchanger together")
+	# The two lines open separately now, and in the order the player meets them.
+	# The miner is the thing you want after carrying stones by hand; the
+	# exchanger is the thing you want after finding crystal, which is a walk away.
+	var opened: Array[int] = sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	_assert(opened.has(Defs.M_MINER), "the first heat stone opens the miner")
+	_assert(not opened.has(Defs.M_EXCHANGER), "and not the exchanger")
+	_assert(sim.note_resource_seen(Defs.ITEM_CRYSTAL).has(Defs.M_EXCHANGER),
+		"the first crystal opens the exchanger")
 	_assert(not sim.is_unlocked(Defs.M_GENERATOR), "but the power line stays shut")
 
 	# --- Hauling: cats clear the floor, slowly --------------------------------
@@ -55,9 +60,11 @@ func _run() -> void:
 	_assert(far_trip > near_trip * 3.0,
 		"hauling from four times the distance takes far longer: %.1fs vs %.1fs" % [far_trip, near_trip])
 
-	# --- Lv2: crystal becomes distance ---------------------------------------
+	# --- Lv2: stone and crystal become distance -------------------------------
 	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_CRYSTAL]) == 0, "raw crystal is a material, not heat")
-	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_ENERGY]) > 0, "energy is the only heat")
+	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_COPPER]) == 0, "and so is copper")
+	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_ENERGY]) > 0, "energy is heat")
+	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE]) > 0, "and so is heat stone")
 
 	# One exchanger keeps up with four miners; miners stay the bottleneck.
 	var miner_rate: float = 1.0 / Defs.MINER_PERIOD
@@ -66,14 +73,18 @@ func _run() -> void:
 		"one exchanger absorbs about four miners (%.1f)" % (exchanger_intake / miner_rate))
 
 	# The gate that matters: reaching copper must be days, not hours.
+	#
+	# Measured on heat stone rather than on the exchanger chain, because that is
+	# what a player actually does -- heat stone is the seam beside the base and it
+	# burns straight in the core. The crystal route exists and is slower per unit
+	# of heat; it earns its place by being the only thing that also makes power.
 	var heat_needed: float = (Defs.COPPER_RING.x - Defs.WARM_BASE) / Defs.WARM_PER_HEAT
-	var energy_needed: float = heat_needed / float(Defs.ITEM_VALUES[Defs.ITEM_ENERGY])
-	var crystal_needed: float = energy_needed * float(Defs.CRYSTAL_COST_ENERGY)
-	var seconds_two_miners: float = crystal_needed / (2.0 * miner_rate)
+	var stones_needed: float = heat_needed / float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
+	var seconds_two_miners: float = stones_needed / (2.0 * miner_rate)
 	var days: float = seconds_two_miners / 120.0    # productive seconds per day
 	_assert(days < 6.0, "two miners reach copper inside six days (%.1f)" % days)
-	_assert(days > 1.0, "but not on the first day (%.1f)" % days)
-	print("PROGRESSION: copper at %.1f days with two miners (%.0f crystal)" % [days, crystal_needed])
+	_assert(days > 1.5, "and not inside a single one (%.1f)" % days)
+	print("PROGRESSION: copper at %.1f days with two miners (%.0f 열석)" % [days, stones_needed])
 
 	# --- Lv3: power is a rate, and it gates logistics -------------------------
 	sim.note_resource_seen(Defs.ITEM_COPPER)
@@ -81,6 +92,7 @@ func _run() -> void:
 		"the first copper opens generators and belts")
 	sim.stock[Defs.ITEM_COPPER] = 100
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
+	sim.stock[Defs.ITEM_HEATSTONE] = 100
 
 	var belt_cell := Vector2i(5, 5)
 	_assert(sim.build(Defs.M_BELT, belt_cell, Vector2i.LEFT), "a belt goes down")
@@ -112,10 +124,12 @@ func _run() -> void:
 	# the published rates worth knowing.
 	var split_sim := Sim.new()
 	split_sim.setup(31337)
+	split_sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	split_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	split_sim.note_resource_seen(Defs.ITEM_COPPER)
 	split_sim.stock[Defs.ITEM_COPPER] = 200
 	split_sim.stock[Defs.ITEM_CRYSTAL] = 200
+	split_sim.stock[Defs.ITEM_HEATSTONE] = 200
 
 	# One into two: a splitter facing east splits north and south, and takes its
 	# input from the west. R turns that axis.
@@ -203,8 +217,10 @@ func _run() -> void:
 	print("PURITY: %.1fs plain / %.1fs pure" % [grade_sim.seam_period(plain), grade_sim.seam_period(rich)])
 
 	# --- Full refund: tearing down must cost nothing --------------------------
+	grade_sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	grade_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	grade_sim.stock[Defs.ITEM_CRYSTAL] = 50
+	grade_sim.stock[Defs.ITEM_HEATSTONE] = 50
 	var before_stock: int = int(grade_sim.stock[Defs.ITEM_CRYSTAL])
 	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6)
 	grade_sim.ore.erase(spot)
@@ -222,9 +238,11 @@ func _run() -> void:
 	# what turns factory scale back into an engineering problem.
 	var grid := Sim.new()
 	grid.setup(9090)
+	grid.note_resource_seen(Defs.ITEM_HEATSTONE)
 	grid.note_resource_seen(Defs.ITEM_CRYSTAL)
 	grid.note_resource_seen(Defs.ITEM_COPPER)
 	grid.stock[Defs.ITEM_CRYSTAL] = 200
+	grid.stock[Defs.ITEM_HEATSTONE] = 200
 	grid.stock[Defs.ITEM_COPPER] = 200
 	var seam2 := Vector2i(grid.core_cell.x + 4, grid.core_cell.y + 4)
 	grid.ore[seam2] = Defs.ITEM_CRYSTAL
@@ -279,8 +297,10 @@ func _run() -> void:
 
 	var rec := Sim.new()
 	rec.setup(5150)
+	rec.note_resource_seen(Defs.ITEM_HEATSTONE)
 	rec.note_resource_seen(Defs.ITEM_CRYSTAL)
 	rec.stock[Defs.ITEM_CRYSTAL] = 100
+	rec.stock[Defs.ITEM_HEATSTONE] = 100
 	var ex := Vector2i(rec.core_cell.x + 7, rec.core_cell.y + 7)
 	rec.ore.erase(ex)
 	_assert(rec.build(Defs.M_EXCHANGER, ex, Vector2i.RIGHT), "an exchanger goes down")
@@ -330,6 +350,7 @@ func _run() -> void:
 
 	var belt_sim := Sim.new()
 	belt_sim.setup(777888)
+	belt_sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	belt_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	belt_sim.note_resource_seen(Defs.ITEM_COPPER)
 	belt_sim.stock[Defs.ITEM_COPPER] = 100

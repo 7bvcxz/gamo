@@ -245,8 +245,8 @@ func _start_run() -> void:
 ## the old line never mentioned at all.
 func _mining_hint() -> String:
 	if touch != null and touch.visible:
-		return "곡괭이를 고르고 수정 광맥 위에서 Z 버튼을 누르고 계세요"
-	return "2번 곡괭이를 들고 수정 광맥 위에서 Z 를 누르고 계세요"
+		return "곡괭이를 고르고 열석 광맥 위에서 Z 버튼을 누르고 계세요"
+	return "2번 곡괭이를 들고 열석 광맥 위에서 Z 를 누르고 계세요"
 
 func objective_data() -> Dictionary:
 	# Freezing comes before everything, including nightfall. A playtest caught the
@@ -277,14 +277,14 @@ func objective_data() -> Dictionary:
 	if _thawing_nearby():
 		return _goal("얼음이 녹고 있습니다  곧 깨어납니다", "thing", Icons.THING_CAT_FROZEN)
 	# Lv1 -- do it with your hands, then hire someone to do it for you.
-	if int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 0 and sim.ground.is_empty():
+	if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0 and sim.ground.is_empty():
 		return _goal(_mining_hint(), "thing", Icons.THING_SEAM)
 	if sim.cats.is_empty() and not sim.frozen_cats.is_empty():
 		return _goal("얼어붙은 고양이를 찾아 Z 로 안고 오세요", "thing", Icons.THING_CAT_FROZEN)
-	# Lv2 -- crystal automation, then the exchanger that turns it into distance.
+	# Lv2 -- automation, then the exchanger that turns it into distance.
 	if sim.machine_count(Defs.M_MINER) == 0:
-		return _goal("수정 광맥 위에 채굴기를 설치하세요  (수정조각 %d)"
-			% int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_CRYSTAL]), "machine", Defs.M_MINER)
+		return _goal("광맥 위에 채굴기를 설치하세요  (열석 %d)"
+			% int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_HEATSTONE]), "machine", Defs.M_MINER)
 	# Only while there is somewhere to put one. A spare cat and no free miner is a
 	# normal thing to own -- the gacha hands out cats faster than seams appear,
 	# and the third cat in the standard scenario exists precisely to haul what the
@@ -1700,8 +1700,12 @@ func debug_crowd() -> void:
 	if sim.carried_cat != null:
 		sim.drop_cat(player.position)
 	var north := Vector2i(0, -1)
+	# Any seam, not a named resource. This read ITEM_CRYSTAL, and the day crystal
+	# moved out to the middle of the game the key silently built nothing -- the
+	# crowd it exists to make was eight cats standing around. A debug key that
+	# quietly stops working is worse than one that is missing.
 	for cell: Vector2i in sim.ore.keys():
-		if int(sim.ore[cell]) != Defs.ITEM_CRYSTAL or sim.machines.has(cell):
+		if sim.machines.has(cell):
 			continue
 		if Vector2(cell - sim.core_cell).length() > 6.0:
 			continue

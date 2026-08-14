@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-14T20:24:47.645643+00:00",
+  "model": "gpt-image-2",
+  "prompt": "Clusters of glowing ember stones on snow. Each stone is a rounded dark charcoal pebble split by molten orange-red cracks, lit from inside, spilling a soft warm glow and a faint orange tint onto the snow immediately around it. A 3 by 2 grid of six separate square game tiles on a plain white page, evenly spaced with wide white gutters between them and a white margin around the outside. Every tile is the same rounded square of clean pale snow with a few tiny grey pebbles and dry grass tufts near its corners. The six tiles differ only in how the cluster on them is arranged: a round clump in the middle, a diagonal streak, two separate small clumps, a crescent, a triangle, and six pieces scattered apart. Seen from directly overhead, looking straight down, with no tilt and no perspective. Cute cozy chibi game art style with soft watercolour shading and fine pencil outlines, matching the reference image.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/tiles/tile_crystal_6.png"
+  ],
+  "mask": null,
+  "size": "1536x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 23.2,
+  "usage": {
+    "input_tokens": 1733,
+    "input_tokens_details": {
+      "image_tokens": 1536,
+      "text_tokens": 197
+    },
+    "output_tokens": 158,
+    "output_tokens_details": {
+      "image_tokens": 158,
+      "text_tokens": 0
+    },
+    "total_tokens": 1891
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/tiles/tile_heatstone_6.png"
+  ]
+}

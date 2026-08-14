@@ -120,6 +120,8 @@ func _run() -> void:
 			seam = cell
 			break
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
+	sim.stock[Defs.ITEM_HEATSTONE] = 100
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.build(Defs.M_MINER, seam, Vector2i.RIGHT)
 	_assert(sim.machine_at(seam) != null, "there is a miner to be assigned to")

@@ -43,22 +43,24 @@
     "seconds": 180.0
   },
   "gate_to_copper": {
-    "crystal": 72.7272727272727,
-    "days_two_miners": 3.03030303030303,
-    "energy": 36.3636363636364,
-    "heat": 181.818181818182
+    "crystal": 145.454545454545,
+    "days_two_miners": 6.06060606060606,
+    "energy": 72.7272727272727,
+    "heat": 363.636363636364
   },
   "generated_by": "motorio/tools/dump_balance.gd",
   "items": {
     "heat_value": [
       0,
       0,
+      5,
       5
     ],
     "names": [
       "수정조각",
       "구리광석",
-      "에너지결정"
+      "에너지결정",
+      "열석"
     ]
   },
   "machines": [
@@ -66,14 +68,14 @@
       "cost": [
         {
           "count": 5,
-          "item": "수정조각"
+          "item": "열석"
         }
       ],
-      "hint": "수정 광맥 위에 설치하고 고양이를 올려놓으세요",
+      "hint": "광맥 위에 설치하고 고양이를 올려놓으세요 · 고양이보다 빠릅니다",
       "name": "채굴기",
       "short": "채굴기",
       "throughput": "수정 6/분 · 고양이 또는 전력 0.5",
-      "unlock": "수정조각"
+      "unlock": "열석"
     },
     {
       "cost": [
@@ -175,17 +177,17 @@
   ],
   "rings": {
     "copper": [
-      11.0,
-      17.0
+      15.0,
+      21.0
     ],
     "crystal": [
-      4.0,
-      9.5
+      9.0,
+      14.0
     ],
     "purity_pure": 17.0,
     "purity_rich": 11.0
   },
-  "version": "0.20.62",
+  "version": "0.20.64",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

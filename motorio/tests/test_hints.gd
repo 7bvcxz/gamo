@@ -139,7 +139,7 @@ func _objectives(main: Node2D) -> void:
 	var place := "고양이를 Z 로 안아 채굴기에 올려놓으세요"
 	for cat: Sim.Cat in sim.cats:
 		cat.assigned = Vector2i(9999, 9999)
-	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.unlocked[Defs.M_MINER] = true
 	var seam_a: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
 	var seam_b: Vector2i = sim.core_cell + Sim.STARTER_PATCH[1]

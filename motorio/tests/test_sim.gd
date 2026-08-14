@@ -50,9 +50,11 @@ func _power(sim: Sim) -> void:
 	sim.machine_at(cell).buffer[Defs.ITEM_ENERGY] = 4
 
 func _open(sim: Sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
 	sim.stock[Defs.ITEM_ENERGY] = 500
 
@@ -72,12 +74,20 @@ func _test_generation() -> void:
 	_assert(frost < 20 and copper < 20, "ore density stays scarce after the reduction")
 	_assert(not sim.ore.has(sim.core_cell), "ore never spawns under the core")
 
-	# Frost must be reachable at the opening radius or the first 45 seconds stall.
+	# Heat stone must be reachable at the opening radius or the first minutes
+	# stall. It is what the opening is made of now -- hand-mined and burnt
+	# straight in the core -- and crystal, which used to be here, has moved out
+	# to the middle of the game.
 	var reachable := 0
+	var early_crystal := 0
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_CRYSTAL and Vector2(cell).length() <= Defs.WARM_BASE:
+		var distance: float = Vector2(cell).length()
+		if sim.ore[cell] == Defs.ITEM_HEATSTONE and distance <= Defs.WARM_BASE:
 			reachable += 1
-	_assert(reachable > 0, "some frost ore sits inside the starting warm radius")
+		if sim.ore[cell] == Defs.ITEM_CRYSTAL and distance <= Defs.WARM_BASE:
+			early_crystal += 1
+	_assert(reachable > 0, "some heat stone sits inside the starting warm radius")
+	_assert(early_crystal == 0, "and no crystal does -- it is a mid-game resource now")
 
 	# Ember must NOT be reachable at the start, or the progression has no arc.
 	var early_copper := 0
@@ -89,7 +99,7 @@ func _test_generation() -> void:
 	# The opening must be identical every run: a patch south of the core plus a
 	# clear two-tile lane to belt through. Otherwise the first minute is a search.
 	for offset: Vector2i in Sim.STARTER_PATCH:
-		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_CRYSTAL,
+		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_HEATSTONE,
 			"guaranteed starter ore exists at %s" % offset)
 	for offset: Vector2i in Sim.STARTER_LANE:
 		_assert(not sim.ore.has(sim.core_cell + offset),
@@ -97,11 +107,13 @@ func _test_generation() -> void:
 		_assert(sim.can_build(Defs.M_BELT, sim.core_cell + offset) == "",
 			"a belt can always be placed in the starter lane at %s" % offset)
 
-	# The alloy chain must be buildable in every run, not only when the scatter
-	# is kind: a guaranteed ember seam plus a clear column back to the core.
+	# The exchanger chain must be buildable in every run, not only when the
+	# scatter is kind: a guaranteed seam due north plus a clear column back to
+	# the core. It is crystal now rather than copper, because crystal is what
+	# that beat needs since heat stone took over the opening.
 	for offset: Vector2i in Sim.STARTER_COPPER:
-		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_COPPER,
-			"guaranteed copper seam exists at %s" % offset)
+		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_CRYSTAL,
+			"guaranteed crystal seam exists at %s" % offset)
 	for step in range(1, 9):
 		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, -step)
 		_assert(sim.can_build(Defs.M_BELT, lane_cell) == "",
@@ -116,7 +128,7 @@ func _test_generation() -> void:
 	var other := Sim.new()
 	other.setup(90210)
 	for offset: Vector2i in Sim.STARTER_PATCH:
-		_assert(other.ore.get(other.core_cell + offset, -1) == Defs.ITEM_CRYSTAL,
+		_assert(other.ore.get(other.core_cell + offset, -1) == Defs.ITEM_HEATSTONE,
 			"the starter patch does not depend on the run seed")
 	other.free()
 
@@ -130,6 +142,7 @@ func _test_build_rules() -> void:
 	# hotbar is the tech tree, so it starts closed.
 	_assert(not sim.is_unlocked(Defs.M_MINER), "the miner starts locked")
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) != "", "and cannot be built while locked")
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	_assert(sim.is_unlocked(Defs.M_MINER), "the first crystal opens the miner")
 	_assert(sim.is_unlocked(Defs.M_EXCHANGER), "and the exchanger with it")
@@ -140,6 +153,7 @@ func _test_build_rules() -> void:
 
 	# Machines are bought with materials out of the base stock.
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
+	sim.stock[Defs.ITEM_HEATSTONE] = 100
 	sim.stock[Defs.ITEM_COPPER] = 100
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) == "", "a miner may be placed on ore")
 	_assert(sim.can_build(Defs.M_BELT, ore_cell) != "", "a belt may not be placed on ore")
@@ -159,6 +173,8 @@ func _test_build_rules() -> void:
 	_assert(not sim.demolish(sim.core_cell), "the core can never be demolished")
 
 	sim.stock[Defs.ITEM_CRYSTAL] = 0
+
+	sim.stock[Defs.ITEM_HEATSTONE] = 0
 	_assert(sim.can_build(Defs.M_EXCHANGER, empty) != "", "an unaffordable machine is rejected")
 	sim.free()
 

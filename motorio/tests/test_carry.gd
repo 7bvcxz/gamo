@@ -22,8 +22,10 @@ func _initialize() -> void:
 func _run() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
 
 	var cat = sim.Cat.new()
 	sim.cats.append(cat)

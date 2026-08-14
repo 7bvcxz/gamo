@@ -99,6 +99,10 @@ func _draw_shard(centre: Vector2, tint: Color, item_type: int, warm: bool) -> vo
 const SPARKLE: Dictionary[int, float] = {
 	Defs.ITEM_CRYSTAL: 1.0,
 	Defs.ITEM_COPPER: 0.45,
+	# It does not catch light, it makes it. The glint that reads as a facet on a
+	# gem reads as a reflection on a coal, and a coal that reflects is not lit
+	# from inside.
+	Defs.ITEM_HEATSTONE: 0.20,
 }
 
 ## A slow catch of light in the middle of a seam.

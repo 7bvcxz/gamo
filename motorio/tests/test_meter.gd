@@ -24,9 +24,12 @@ func _run() -> void:
 	main._start_run()
 	main.state = main.State.PLAY
 	var sim = main.sim
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
 	sim.stock[Defs.ITEM_ENERGY] = 500
 

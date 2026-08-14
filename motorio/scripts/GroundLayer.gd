@@ -130,16 +130,18 @@ static func tile_region(variant: int) -> Rect2:
 ## over, in the same batched pass.
 const ORE_COLUMNS := 3
 const ORE_VARIANTS := 6
+const HEATSTONE_ATLAS: Texture2D = preload("res://assets/tiles/heatstone_6.png")
 const CRYSTAL_ATLAS: Texture2D = preload("res://assets/tiles/crystal_6.png")
 const COPPER_ATLAS: Texture2D = preload("res://assets/tiles/copper_6.png")
 ## Which sheet each seam shows. Keyed by item type, so an ore without a sheet
 ## falls back to the painted shard in WorldLayer rather than drawing nothing.
 const ORE_ATLAS: Dictionary[int, Texture2D] = {
+	Defs.ITEM_HEATSTONE: HEATSTONE_ATLAS,
 	Defs.ITEM_CRYSTAL: CRYSTAL_ATLAS,
 	Defs.ITEM_COPPER: COPPER_ATLAS,
 }
-## Cut, committed and waiting on an ore to belong to. This game has crystal and
-## copper; coal, gold, iron and uranium are the seams motorio has, and their
+## Cut, committed and waiting on an ore to belong to. This game has heat stone,
+## crystal and copper; coal, gold, iron and uranium are seams it does not, and their
 ## atlases are in assets/tiles/ already. A mapping entry cannot exist before the
 ## item type does, so promoting one is: add the ITEM_ constant, preload the file
 ## beside the two above, and put it in ORE_ATLAS.

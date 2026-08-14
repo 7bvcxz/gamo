@@ -149,8 +149,10 @@ func _assert(condition: bool, message: String) -> void:
 ## Machines are bought with materials from an unlocked hotbar, so a test that
 ## wants to build has to open and fund the base first.
 func _open(sim) -> void:
+	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
+	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
 	sim.stock[Defs.ITEM_ENERGY] = 500

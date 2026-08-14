@@ -116,21 +116,32 @@ const COL_TEXT := Color("e6eef7")
 const COL_TEXT_DIM := Color("8fa0bd")
 
 # --- Items -------------------------------------------------------------------
-## Three materials, in the order the player meets them. Crystal is hand-mined
-## from the first minute; copper needs a miner and the warmth to reach it; energy
-## is the only thing the core turns into heat.
+## Four materials, in the order the player meets them. Heat stone is hand-mined
+## from the first minute and burns straight in the core; crystal and copper are
+## the middle of the game; energy is what crystal becomes.
+##
+## Heat stone was added at the end rather than at the front, and everything
+## indexed by item type is an array, so the constants below stay where they are
+## and no save written before it changes meaning. `COUNTED_ITEMS` decides the
+## order the player sees, which is the only place the order matters.
 const ITEM_CRYSTAL := 0
 const ITEM_COPPER := 1
 const ITEM_ENERGY := 2
+const ITEM_HEATSTONE := 3
 
-const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정"]
-## Short forms for the status panel, where three counters share one row.
-const ITEM_SHORT := ["수정", "구리", "에너지"]
+const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정", "열석"]
+## Short forms for the status panel, where the counters share one row.
+const ITEM_SHORT := ["수정", "구리", "에너지", "열석"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
 ## ground, so it vanished exactly when the player was told to go find it.
-const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138)]
+## Heat stone against copper is the pair that has to survive being 38 pixels of
+## snow: copper is a bright metal, heat stone is a dark coal with fire inside it,
+## and the colour here is the fire rather than the coal because it is the fire
+## the player is looking for.
+const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138),
+	Color8(255, 122, 48)]
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
 
@@ -180,8 +191,20 @@ const FACE_BAND := 3.0
 ## Five was derived, not guessed. Reaching copper at radius 11 needs 182 heat;
 ## two miners over three days produce about 72 crystal, which is 36 energy at the
 ## 2:1 exchange, so each energy crystal has to be worth 182/36 ~= 5.
-const ITEM_VALUES := [0, 0, 5]
-const COUNTED_ITEMS: Array[int] = [ITEM_CRYSTAL, ITEM_COPPER, ITEM_ENERGY]
+## Heat stone burns in the core the way an energy crystal does, and for now it is
+## worth the same. It is deliberately the *only* thing in the early game that
+## makes heat, so the first thing the player learns -- carry this to the fire and
+## the circle grows -- is one sentence with nothing else in it.
+##
+## The tutorial asks for three stones to take the warm radius from 7 to 9, which
+## is 91 heat, or thirty a stone. Thirty here collapses the rest of the curve:
+## the moment a miner is on heat stone, two of them reach the copper ring in
+## about a minute. So the opening's jump has to come from the mission and not
+## from this number, and which of the two moves is a question for when the
+## tutorial is built.
+const ITEM_VALUES := [0, 0, 5, 5]
+## The order the counters appear in, which is the order the player meets them.
+const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_CRYSTAL, ITEM_COPPER, ITEM_ENERGY]
 
 ## Hand mining. Deliberately slow: it is the floor the whole factory is measured
 ## against, and it has to stay worth replacing.
@@ -431,7 +454,7 @@ const MACHINE_SHORT := ["코어", "채굴기", "벨트", "교환기", "발전기
 ## Machines are bought with materials now, never with heat.
 const MACHINE_COSTS := [
 	{},
-	{ITEM_CRYSTAL: 5},
+	{ITEM_HEATSTONE: 5},
 	{ITEM_COPPER: 3},
 	{ITEM_CRYSTAL: 20},
 	{ITEM_COPPER: 10},
@@ -439,7 +462,7 @@ const MACHINE_COSTS := [
 ]
 const MACHINE_HINTS := [
 	"",
-	"수정 광맥 위에 설치하고 고양이를 올려놓으세요",
+	"광맥 위에 설치하고 고양이를 올려놓으세요 · 고양이보다 빠릅니다",
 	"자원을 기지까지 끊김 없이 나릅니다",
 	"수정조각 2개를 에너지결정 1개로 바꿉니다",
 	"에너지결정을 태워 전력 1.0을 공급합니다",
@@ -474,9 +497,10 @@ static func machine_io(type: int) -> Array[String]:
 				"특성   전력은 저장되지 않는 비율"]
 	return []
 
-## What each machine needs before it appears in the hotbar. The first crystal in
-## hand opens the crystal line; the first copper opens the power line.
-const MACHINE_UNLOCK_ITEM := [-1, ITEM_CRYSTAL, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER, ITEM_COPPER]
+## What each machine needs before it appears in the hotbar. The first heat stone
+## opens the miner; the first crystal opens the exchanger line; the first copper
+## opens power.
+const MACHINE_UNLOCK_ITEM := [-1, ITEM_HEATSTONE, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER, ITEM_COPPER]
 
 # --- Economy -----------------------------------------------------------------
 ## Days repeat and accumulate rather than ending the game, so one day is short
@@ -717,8 +741,15 @@ const PURITY_NAMES := ["보통", "풍부", "순수"]
 const PURITY_RICH_RING := 11.0
 const PURITY_PURE_RING := 17.0
 
-const FROST_RING := Vector2(4.0, 9.5)
-const COPPER_RING := Vector2(11.0, 17.0)
+## Heat stone is what the first ten minutes are made of, so it is inside the
+## opening warm radius: the player never has to leave the fire to feed it.
+const HEATSTONE_RING := Vector2(3.0, 6.0)
+## Crystal moved out. It used to be the resource of minute one, and it is not any
+## more -- the exchanger and the energy line are the middle of the game, and a
+## seam of them beside the base was the game showing its second act during its
+## first. Copper follows it out so the two do not share a band.
+const FROST_RING := Vector2(9.0, 14.0)
+const COPPER_RING := Vector2(15.0, 21.0)
 
 ## UI scale. The web export renders at the device pixel ratio, so a phone that is
 ## physically 390 CSS px wide reports a ~960 px logical viewport: every constant

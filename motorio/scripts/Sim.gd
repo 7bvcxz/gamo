@@ -432,13 +432,20 @@ func _generate_ore(seed_value: int) -> void:
 	# A guaranteed first patch just south of the core. The opening minute should
 	# be about learning the miner-belt-core sentence, not about searching.
 	for offset: Vector2i in STARTER_PATCH:
-		ore[core_cell + offset] = Defs.ITEM_CRYSTAL
+		ore[core_cell + offset] = Defs.ITEM_HEATSTONE
 	# Ore is deliberately scarce: a fifth of the earlier density. Finding a seam
-	# should be an event, and a single miner should be worth protecting.
+	# should be an event, and a single miner should be worth protecting. Heat
+	# stone is the exception -- it is what the opening is made of, so there is
+	# more of it and all of it is close.
+	_scatter_ore(rng, Defs.ITEM_HEATSTONE, Defs.HEATSTONE_RING, 3, 2)
 	_scatter_ore(rng, Defs.ITEM_CRYSTAL, Defs.FROST_RING, 3, 2)
 	_scatter_ore(rng, Defs.ITEM_COPPER, Defs.COPPER_RING, 3, 2)
+	# The guaranteed seam due north is crystal now rather than copper. It exists
+	# so the exchanger -- the design's payoff -- does not depend on where the
+	# scatter happened to drop something, and crystal is the resource that beat
+	# now needs.
 	for offset: Vector2i in STARTER_COPPER:
-		ore[core_cell + offset] = Defs.ITEM_COPPER
+		ore[core_cell + offset] = Defs.ITEM_CRYSTAL
 	for offset: Vector2i in STARTER_LANE:
 		ore.erase(core_cell + offset)
 	# The shelter, its doorstep and the food bin are cleared last, after every
