@@ -9,6 +9,8 @@
 - 작업을 시작하기 전에 이 파일과 루트의 `Progress.md`를 확인한다.
 - **`motorio-oneshot`의 장기 설계는 `motorio-oneshot/design/`의 여섯 문서가 단일 원본이다** (`VISION` · `CORE_LOOP` · `PROGRESSION` · `WORLD_AND_STORY` · `VERTICAL_SLICE` · `CURRENT_STATE`). 기능을 만들기 전에 `VISION.md`와 `CURRENT_STATE.md`를 먼저 읽고, 새 시스템은 `CORE_LOOP.md` 끝의 체크리스트 네 문항에 답한 뒤에 만든다. 설계가 바뀌면 코드보다 문서를 먼저 고친다.
 - 이 문서들은 `/motorio-oneshot/doc`의 **Vision** 절에서 조회한다. 사이트는 마크다운 원본을 `web/scripts/design-to-json.mjs`로 읽어 렌더하므로 **JSX에 옮겨 적지 않는다** — 옮겨 적은 사본은 반드시 낡는다. `design/`에 파일을 추가하면 네비게이션에 자동으로 나타난다.
+- **의사결정은 `server/`의 Decisions API에 남긴다** (`/motorio-oneshot/decisions`). 무엇이 정해졌고 무엇이 열려 있는지, 그리고 거기까지 오간 의견이 여기 모인다. 작성자는 `HUMAN`과 `CLAUDE` 둘뿐이며 그 외는 400이다. 띄우는 법과 사용법은 `server/README.md`.
+- 사용자와 결정이 오간 대화는 그때그때 해당 Decision에 댓글로 남기고, 커밋 전에 `node web/scripts/decisions-snapshot.mjs`로 스냅샷을 갱신한다 — 공개 페이지는 그 스냅샷을 읽어 읽기 전용으로 보여준다. 갱신하지 않으면 사이트가 옛 결정을 말한다.
 - 설계 문서를 `docs/`에 두지 않는다. `docs/`는 Pages 빌드 산출물이고 `to-docs.mjs`가 다음 사이트 빌드에서 지운다.
 - Motorio의 게임 정체성·레벨 디자인·자동화 디자인은 `motorio/design/`의 세 문서가 단일 원본이다. 기능을 만들기 전에 해당 문서를 먼저 읽고, 문서와 다르게 구현하지 않는다. 설계가 바뀌면 코드보다 문서를 먼저 고친다.
 - 설계 문서의 각 항목은 `[확정]`·`[초안]`·`[질문]` 상태를 갖는다. `[질문]`으로 표시된 항목은 사용자 결정 없이 임의로 구현하지 않는다.

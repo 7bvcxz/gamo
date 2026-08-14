@@ -343,6 +343,18 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
   `[질문]`이므로 사용자 결정 없이 구현하지 않는다.
 - 문서는 마크다운이 원본이고 사이트가 그것을 읽는다. JSX에 옮겨 적지 않는다.
 
+## gamo-server (2026-08-14)
+
+`server/`에 Kotlin + Spring Boot 3.5.3 + Postgres 16을 Docker로 세웠다. 게임 결정과 그
+의견을 담는다. `docker compose -f server/docker-compose.yml up -d --build`, 포트 8790.
+자세한 것은 `server/README.md`.
+
+- 사이트는 여전히 서버 코드가 0인 정적 export다. 이 서버는 **옆에** 있고, 사이트는 이것
+  없이도 렌더된다 — localhost에서 열면 편집되고, 그 외에서는 커밋된 스냅샷을 읽는다.
+- compose 프로젝트 이름을 `gamo`로 못박았다. 기본값이 디렉터리명 `server`라 이 머신의 다른
+  프로젝트와 이름공간을 공유하고 있었다.
+- 페이지: `/motorio-oneshot/decisions`.
+
 ## 공용 도구
 
 - **이미지 생성**: `~/Workspace/tools/imagegen/` (`imagegen`이 PATH에 있다). `~/Workspace`의

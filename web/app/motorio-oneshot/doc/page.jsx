@@ -60,6 +60,9 @@ const NAV = [
       { id: 'todo', label: 'Todo', render: () => <OneShotTodo /> },
       { id: 'releases', label: 'Releases', render: () => <OneShotReleases /> },
     ],
+    // A link rather than a rendered panel: the decisions page talks to a server
+    // and this shell renders static panels. DocShell takes external links here.
+    links: [{ href: site('/motorio-oneshot/decisions/'), label: 'Decisions →' }],
   },
   {
     group: 'Development',

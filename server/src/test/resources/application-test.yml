@@ -1,0 +1,18 @@
+# A profile, not a replacement.
+#
+# This started life as src/test/resources/application.yml, which does not merge
+# with the main configuration -- it shadows it, because the test classpath comes
+# first and the file has the same name. Every property the application needed and
+# the tests had not thought to repeat vanished, and the whole context failed to
+# start on a missing CORS origin list that had nothing to do with any test.
+#
+# As a profile it only overrides what it names.
+spring:
+  datasource:
+    url: jdbc:h2:mem:gamo;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop

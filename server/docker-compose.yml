@@ -1,0 +1,59 @@
+# The gamo side-server: decisions, and the comments that produced them.
+#
+#     docker compose -f server/docker-compose.yml up -d --build
+#
+# Ports are chosen around what this machine already runs: 8080 and 8000 are
+# heydive, 8088 is the gamo nginx mirror, 5432 is a Postgres that is not this
+# one. Picking a free pair rather than assuming is the difference between a
+# server that starts and one that silently loses a race for a socket.
+# Named explicitly. Compose otherwise takes the project name from the directory,
+# which here is "server" -- a name this machine already has another compose
+# project using, so the two shared a namespace and each reported the other's
+# containers as orphans. One `docker compose down` in the wrong directory would
+# have been enough.
+name: gamo
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gamo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gamo}
+      POSTGRES_USER: ${POSTGRES_USER:-gamo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gamo}
+    volumes:
+      - gamo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gamo} -d ${POSTGRES_DB:-gamo}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Not published. The server reaches it over the compose network, and a
+    # database on a laptop's public interface is a database someone else can
+    # read. Uncomment to inspect it with psql from the host.
+    # ports:
+    #   - "15433:5432"
+
+  server:
+    build: .
+    container_name: gamo-server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-gamo}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-gamo}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-gamo}
+      GAMO_CORS_ORIGINS: ${GAMO_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost:8819,http://127.0.0.1:8819,http://localhost:8818,http://127.0.0.1:8818,https://gam0.vercel.app,https://7bvcxz.github.io}
+    ports:
+      - "8790:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  gamo-pgdata:

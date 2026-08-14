@@ -14,3 +14,6 @@ secrets.env
 # Python bytecode from the sprite tools.
 __pycache__/
 *.pyc
+
+# Maven build output for the side-server. The jar is built inside Docker.
+server/target/

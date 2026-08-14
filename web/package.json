@@ -7,7 +7,8 @@
     "build": "node scripts/design-to-json.mjs && next build",
     "start": "next start",
     "build:pages": "node scripts/design-to-json.mjs && GAMO_TARGET=pages next build && node scripts/to-docs.mjs",
-    "design": "node scripts/design-to-json.mjs"
+    "design": "node scripts/design-to-json.mjs",
+    "decisions": "node scripts/decisions-snapshot.mjs"
   },
   "dependencies": {
     "next": "16.2.11",

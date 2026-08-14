@@ -469,3 +469,72 @@ th { background: var(--sidebar); font-weight: 600; }
 }
 .md-table th { background: rgba(127, 127, 127, 0.10); }
 .tag-warn { background: rgba(200, 90, 60, 0.18); }
+
+/* Decisions. Two columns on a desktop, stacked on a phone -- the list is a
+   navigation aid and the detail is the content, so the detail wins the width. */
+.decisions .dec-wrap { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+@media (max-width: 860px) { .decisions .dec-wrap { grid-template-columns: 1fr; } }
+.dec-list .toolbar { display: flex; gap: 8px; margin-bottom: 10px; }
+.dec-list .search {
+  flex: 1; padding: 7px 10px; border: 1px solid var(--line);
+  border-radius: 8px; background: transparent; color: inherit;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.chip {
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: transparent; color: var(--muted); font-size: 12px; cursor: pointer;
+}
+.chip-on { background: var(--accent, #c6862f); border-color: transparent; color: #fff; }
+.dec-list .items { list-style: none; margin: 12px 0 0; padding: 0; }
+.dec-list .item {
+  display: block; width: 100%; text-align: left; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px;
+  background: transparent; color: inherit; cursor: pointer;
+}
+.dec-list .item-on { border-color: var(--accent, #c6862f); }
+.dec-list .item .t { font-weight: 600; margin-bottom: 6px; line-height: 1.4; }
+.dec-list .item .m { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; }
+.dec-detail .d-body { max-width: 74ch; }
+.d-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.d-actions { display: flex; gap: 8px; }
+.tag { padding: 2px 8px; border-radius: 999px; font-size: 11px; }
+.tag-cat { background: rgba(127, 127, 127, 0.16); }
+.pri-P0 { background: rgba(200, 70, 60, 0.22); }
+.pri-P1 { background: rgba(198, 134, 47, 0.22); }
+.pri-P2, .pri-P3, .pri-P4 { background: rgba(127, 127, 127, 0.16); }
+.st-OPEN { background: rgba(70, 140, 200, 0.22); }
+.st-DECIDED { background: rgba(90, 160, 100, 0.22); }
+.st-DEFERRED, .st-DROPPED { background: rgba(127, 127, 127, 0.16); }
+.outcome {
+  margin: 18px 0; padding: 12px 16px; border-left: 3px solid var(--accent, #c6862f);
+  background: rgba(127, 127, 127, 0.06);
+}
+.outcome h4 { margin: 0 0 6px; }
+.cmt-title { margin-top: 28px; }
+.cmts { list-style: none; margin: 0; padding: 0; }
+.cmt { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; }
+/* Claude's side is tinted so a thread can be skimmed for who said what without
+   reading the labels. */
+.cmt-claude { background: rgba(127, 127, 127, 0.06); }
+.cmt-head { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.cmt-head b { color: inherit; }
+.cmt .md p:last-child { margin-bottom: 0; }
+.cmt-form { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.cmt-form .who { display: flex; gap: 6px; }
+.cmt-form textarea, .editor textarea, .editor input, .editor select {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: 8px; background: transparent; color: inherit; font: inherit;
+}
+.editor label { display: block; margin-bottom: 12px; font-size: 13px; color: var(--muted); }
+.editor .row { display: flex; gap: 12px; flex-wrap: wrap; }
+.editor .row label { flex: 1; min-width: 120px; }
+.ghost {
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: transparent; color: var(--muted); cursor: pointer; font-size: 12px;
+}
+.ghost.danger { color: #c0554a; }
+.offline {
+  padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px;
+  background: rgba(127, 127, 127, 0.08); color: var(--muted); font-size: 13px;
+}
+.offline.danger { border-color: #c0554a; color: #c0554a; }

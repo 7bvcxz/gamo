@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: gamo-server
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/gamo}
+    username: ${SPRING_DATASOURCE_USERNAME:gamo}
+    password: ${SPRING_DATASOURCE_PASSWORD:gamo}
+  jpa:
+    hibernate:
+      # The schema is two tables and this is a single-user tool, so letting
+      # Hibernate keep them in step is the right amount of machinery. If this
+      # ever holds anything that cannot be re-entered, it wants migrations.
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+gamo:
+  # Who may call this from a browser. The local site on either build port, and
+  # the public site -- which cannot reach this server today but will if it is
+  # ever put behind the tunnel, and a CORS list that has to be remembered later
+  # is a CORS list that is wrong later.
+  cors-origins: ${GAMO_CORS_ORIGINS:http://localhost:3000,http://127.0.0.1:3000,http://localhost:8819,http://127.0.0.1:8819,http://localhost:8818,http://127.0.0.1:8818,https://gam0.vercel.app,https://7bvcxz.github.io}
