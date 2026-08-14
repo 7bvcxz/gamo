@@ -430,6 +430,11 @@ func draw_map(on: CanvasItem, view: Rect2) -> void:
 func toggle_gacha() -> bool:
 	if state != State.PLAY:
 		return false
+	# One gate, at the only door. The key, the pad and the on-screen button all
+	# arrive here, so switching the feature off cannot leave one of the three
+	# still open -- which is how a half-removed feature usually shows up.
+	if not Defs.GACHA_ENABLED:
+		return false
 	if gacha_open:
 		close_gacha()
 		return true

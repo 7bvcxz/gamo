@@ -170,6 +170,11 @@ const GACHA_PULL_H := 46.0
 const GACHA_REEL := 56.0
 
 func _layout_gacha() -> void:
+	# An empty rect while the feature is off. Both the drawing and the tap test
+	# already check the size, so zeroing it here removes the button from the
+	# screen and from the touch layer at once.
+	if not Defs.GACHA_ENABLED:
+		gacha_button_rect = Rect2()
 	gacha_card_rect = _card_rect(GACHA_CARD_H)
 	var card: Rect2 = gacha_card_rect
 	var gap := 10.0
@@ -720,7 +725,16 @@ func _draw_palette() -> void:
 ## both added recently. A legend is a list that goes stale the moment someone
 ## adds a key and forgets it, so the game's own hint hangs off the same place the
 ## keys do -- there is a test that reads this string.
-const KEY_LEGEND := "Z 사용   X 회수   R 회전   C 계기   B 목록   G 가챠   M 지도   -/= 크기   Esc 설정"
+## What the game answers to, composed rather than written out, so a key that is
+## switched off cannot go on being advertised. A legend that names a dead key is
+## the exact fault test_hints exists to catch -- the objective card told players
+## to press C for eight versions after C stopped mining.
+static func key_legend() -> String:
+	var keys: Array[String] = ["Z 사용", "X 회수", "R 회전", "C 계기", "B 목록"]
+	if Defs.GACHA_ENABLED:
+		keys.append("G 가챠")
+	keys.append_array(["M 지도", "-/= 크기", "Esc 설정"])
+	return "   ".join(keys)
 
 ## Anchored to the bottom of the screen rather than measured down from the
 ## hotbar. The first version took the hotbar's baseline and used it as the top of
@@ -729,12 +743,12 @@ const KEY_LEGEND := "Z 사용   X 회수   R 회전   C 계기   B 목록   G �
 ## window and took its own text with it. The legend had been readable before I
 ## put it on a plate.
 func _draw_key_legend() -> void:
-	var width: float = minf(_text_width(KEY_LEGEND, 11) + 20.0, size.x - MARGIN * 2.0)
+	var width: float = minf(_text_width(key_legend(), 11) + 20.0, size.x - MARGIN * 2.0)
 	var floor_y: float = size.y - 4.0 - bottom_reserved()
 	var box := Rect2(size.x - width - MARGIN, floor_y - 18.0, width, 18.0)
 	draw_rect(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.55))
 	_text_in(Rect2(box.position + Vector2(0.0, 13.0), Vector2(box.size.x, 14.0)),
-		KEY_LEGEND, 11, Defs.COL_TEXT_DIM)
+		key_legend(), 11, Defs.COL_TEXT_DIM)
 
 # --- Build menu ---------------------------------------------------------------
 ## What the gun can be loaded with, with room to say what each thing does.

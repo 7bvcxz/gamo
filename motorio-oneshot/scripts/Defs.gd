@@ -300,6 +300,25 @@ const RARITY_WORK_RATE: Array[float] = [1.0, 1.2, 1.5, 2.0, 3.0]
 ## why there is one price rather than a discount for volume: a bulk rate would
 ## make the single pull a mistake, and the single pull is the one that teaches
 ## the player what the machine does.
+## The slot machine, and whether the game has one this week.
+##
+## Decided 2026-08-14: keep it, but not in the Vertical Slice. The first thirty
+## minutes are about being cold, finding a cat and watching a belt move, and a
+## slot machine in the corner of that is a second game asking for attention.
+##
+## Nothing is deleted -- the reels, the five grades, the five cat portraits and
+## the odds table are all still here and still tested. This is the one switch.
+##
+## Turning it back on is this line plus **a way to earn a coin**. There is no
+## such way today: `sim.coins` is only ever raised by a debug key, which is how
+## an entire finished system came to be unreachable in ordinary play without
+## anyone noticing. Whoever flips this is signing up for that too.
+##
+## A static var rather than a const so the tests can turn it on and prove the
+## machinery still works. A switch nobody can flip is indistinguishable from a
+## feature that has quietly rotted.
+static var GACHA_ENABLED := false
+
 const GACHA_COUNTS: Array[int] = [1, 3, 10]
 const GACHA_SPIN_SECONDS := 3.0
 ## What the debug key tops the purse up to. Enough for three ten-pulls, so the

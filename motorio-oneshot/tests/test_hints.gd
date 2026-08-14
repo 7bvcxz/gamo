@@ -166,9 +166,19 @@ func _objectives(main: Node2D) -> void:
 func _legend() -> void:
 	# Through the script rather than an instance: HUD.gd has no class_name, and a
 	# constant is not a property, so this is the one way to reach it.
-	var legend: String = HudScript.KEY_LEGEND
-	for letter: String in ["Z", "X", "R", "C", "B", "G"]:
+	var legend: String = HudScript.key_legend()
+	for letter: String in ["Z", "X", "R", "C", "B", "M"]:
 		_check(legend.contains("%s " % letter), "조작 안내에 %s가 있다: %s" % [letter, legend])
+
+	# G follows the switch in both directions. A legend that advertises a key the
+	# game no longer answers to is the fault this whole file exists for, and a
+	# legend that hides a key that does work is the same fault backwards.
+	var was: bool = Defs.GACHA_ENABLED
+	Defs.GACHA_ENABLED = false
+	_check(not HudScript.key_legend().contains("G "), "가챠가 꺼져 있으면 G를 말하지 않는다")
+	Defs.GACHA_ENABLED = true
+	_check(HudScript.key_legend().contains("G "), "가챠가 켜져 있으면 G를 말한다")
+	Defs.GACHA_ENABLED = was
 	_check(legend.contains("-/="), "조작 안내에 화면 크기 키가 있다")
 	_check(legend.contains("Esc"), "조작 안내에 Esc가 있다")
 

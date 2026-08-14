@@ -159,17 +159,38 @@ func _same_as_keyboard(main: Node2D) -> void:
 		main.touch._press_button(2, true)
 		_check(sim.machine_at(spare) == null, "X 버튼이 설비를 회수한다")
 
-## The corner button a thumb reaches for, and the window it opens.
+## The corner button a thumb reaches for, on both sides of the switch.
+##
+## The slot machine is off for the Vertical Slice and kept in the code, and a
+## half-removed feature usually shows up exactly here: the key stops working, the
+## legend stops mentioning it, and the button is still sitting in the corner
+## waiting for a thumb. So this checks that it is gone, and then that it comes
+## back working when the switch is flipped.
 func _gacha_button(main: Node2D) -> void:
+	var was: bool = Defs.GACHA_ENABLED
+
+	Defs.GACHA_ENABLED = false
 	main.hud._layout()
 	main.gacha_open = false
+	var absent: Rect2 = main.hud.gacha_button_rect
+	_check(absent.size.x <= 0.0, "꺼져 있으면 버튼 자리가 없다: %s" % absent)
+	# The corner it used to own. A tap there must fall through to the world
+	# rather than opening a window that is supposed to be gone.
+	_tap(main, Vector2(main.hud.MARGIN + 20.0, main.hud.size.y - main.hud.bottom_reserved() - 20.0))
+	_check(not main.gacha_open, "꺼져 있으면 그 자리를 눌러도 열리지 않는다")
+
+	Defs.GACHA_ENABLED = true
+	main.hud._layout()
 	_tap(main, (main.hud.gacha_button_rect as Rect2).get_center())
-	_check(main.gacha_open, "가챠 버튼을 누르면 창이 열린다")
+	_check(main.gacha_open, "켜면 가챠 버튼을 눌러 창이 열린다")
 	# The pad must not be sitting on top of it.
 	var reserved: float = main.hud.bottom_reserved()
 	_check((main.hud.gacha_button_rect as Rect2).end.y <= main.hud.size.y - reserved + 0.01,
 		"버튼이 엄지 버튼들 위에 있다")
+
 	main.gacha_open = false
+	Defs.GACHA_ENABLED = was
+	main.hud._layout()
 
 ## A tap in HUD-local coordinates, converted back to the viewport the way a real
 ## touch arrives, so hud_local() is exercised rather than bypassed.

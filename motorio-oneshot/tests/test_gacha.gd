@@ -1,5 +1,7 @@
 extends SceneTree
 
+const HudScript := preload("res://scripts/HUD.gd")
+
 ## The slot machine: the table, the purse, and what a graded cat is worth.
 ##
 ## Almost none of this is visible in a screenshot. A pull is a number nobody can
@@ -9,6 +11,13 @@ extends SceneTree
 ## seeded rolls, and the work rate through the same call the miner makes.
 
 var failures := 0
+
+## The slot machine is switched off for the Vertical Slice and kept in the code.
+## That is only a true statement if it still works, so this file turns it on for
+## its own run and puts it back afterwards -- and checks, separately, that what
+## ships has it off.
+func _gacha_switch(on: bool) -> void:
+	Defs.GACHA_ENABLED = on
 
 func _init() -> void:
 	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
@@ -22,6 +31,22 @@ func _init() -> void:
 	main.state = main.State.PLAY
 	var sim: Sim = main.sim
 
+	# What ships. Checked before anything turns it on, because the value that
+	# matters is the one a player gets.
+	_check(not Defs.GACHA_ENABLED, "배포되는 기본값은 꺼짐이다")
+	_check(not main.toggle_gacha(), "꺼져 있으면 G로 열리지 않는다")
+	_check(not main.gacha_open, "꺼져 있으면 창이 뜨지 않는다")
+	main.hud._layout()
+	_check((main.hud.gacha_button_rect as Rect2).size.x <= 0.0,
+		"꺼져 있으면 버튼 자리가 없다: %s" % main.hud.gacha_button_rect)
+	_check(not HudScript.key_legend().contains("가챠"), "꺼져 있으면 안내에도 없다")
+
+	# And everything below is the machinery being kept, so it runs with the
+	# switch on. Restored at the end: a static var left flipped would leak into
+	# whichever test file the runner picks up next.
+	_gacha_switch(true)
+	main.hud._layout()
+
 	_table()
 	_boundaries()
 	_distribution(sim)
@@ -33,6 +58,7 @@ func _init() -> void:
 	_reels(main, sim)
 	_layout(main)
 
+	_gacha_switch(false)
 	print("GACHA: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
 	quit(failures)
 
