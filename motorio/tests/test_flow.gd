@@ -268,13 +268,18 @@ func _run() -> void:
 	_assert(main.player.warmth > 50.0, "daylight inside the warm radius restores body heat")
 	_assert(not main.sleep_available(), "you cannot go to bed in the middle of the day")
 
-	# A weaker second day must not lower the recorded best day.
+	# A second day counts only its own earnings, and nothing anywhere keeps a
+	# record of the best one. The best-day and best-total counters were removed
+	# on 2026-08-14 when the game was settled as long-form: a high score is an
+	# instruction to replay the day, which is the opposite of what this game
+	# asks for.
 	main.sim.total_heat = 160
 	main.time_left = 0.05
 	main._process(0.2)
 	_assert(main.day_heat() == 20, "the second day counts only its own earnings")
 	_assert(_settle(main, main.State.RESULT), "running out of time also plays the night out")
-	_assert(main.best_day_heat == 140, "a worse day does not overwrite the best day")
+	_assert(not ("best_day_heat" in main), "최고 하루 기록이 남아 있지 않다")
+	_assert(not ("best_heat" in main), "최고 누적 기록이 남아 있지 않다")
 
 	# The summary card cannot throw the run away.
 	#

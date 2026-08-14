@@ -40,10 +40,8 @@ var build_dir := Vector2i.RIGHT
 var shake: float = 0.0
 var collapse_timer: float = -1.0
 var run_seed: int = 0
-var best_heat: int = 0
 var day_number: int = 1
 var day_start_heat: int = 0
-var best_day_heat: int = 0
 var rescued_tonight: bool = false
 var message: String = ""
 var message_life: float = 0.0
@@ -152,7 +150,6 @@ func _start_run() -> void:
 	sim.setup(run_seed)
 	day_number = 1
 	day_start_heat = 0
-	best_day_heat = 0
 	time_left = Defs.DAY_SECONDS
 	player.position = Vector2(sim.core_cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, Defs.TILE * 4.5)
 	player.warmth = 100.0
@@ -1712,8 +1709,6 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		"day": day_number,
 		"time_left": time_left,
 		"day_start_heat": day_start_heat,
-		"best_day_heat": best_day_heat,
-		"best_heat": best_heat,
 		"px": player.position.x,
 		"py": player.position.y,
 		"warmth": player.warmth,
@@ -1792,8 +1787,6 @@ func load_game(slot: int = 0) -> bool:
 	day_number = int(data.get("day", 1))
 	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
 	day_start_heat = int(data.get("day_start_heat", 0))
-	best_day_heat = int(data.get("best_day_heat", 0))
-	best_heat = int(data.get("best_heat", 0))
 	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
 	player.warmth = float(data.get("warmth", 100.0))
 	player.locked = false
@@ -2069,10 +2062,13 @@ func _follow_music() -> void:
 		_: music.call("stop")
 
 ## Dusk, not game over. The factory keeps everything it built.
+##
+## No records are kept. A best-day and a best-total were tracked here until
+## 2026-08-14, when the shape of the game was settled as long-form rather than
+## score attack -- and a high score is the one piece of furniture that cannot be
+## in a game like that without telling the player to replay the day.
 func _finish_run() -> void:
 	state = State.RESULT
-	best_heat = maxi(best_heat, sim.total_heat)
-	best_day_heat = maxi(best_day_heat, day_heat())
 	player.locked = true
 	save_game(false)
 	shake = 4.0

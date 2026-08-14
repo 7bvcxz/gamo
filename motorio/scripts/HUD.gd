@@ -1393,13 +1393,25 @@ func _draw_result() -> void:
 	var headline: String = "%d일차 · 고양이들이 데려왔습니다" % main.day_number if main.rescued_tonight else "%d일차 · 숙소에서 잤습니다" % main.day_number
 	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), headline, 21,
 		Defs.COL_DANGER if main.rescued_tonight else Defs.COL_TEXT)
-	_text_in(Rect2(card.position + Vector2(0, 106), Vector2(w, 70)), "+%d" % main.day_heat(), 52, Defs.COL_CORE)
-	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "오늘 모은 열", 13, Defs.COL_TEXT_DIM)
+	# A morning report, not a score.
+	#
+	# This used to lead with "+N 오늘 모은 열" at 52 point and close with a "최고
+	# 하루" record, which is the shape of a run being graded. Motorio is a long
+	# game -- settled on 2026-08-14 as long-form rather than score attack -- so
+	# what a player needs at dawn is where the base has got to, not how well
+	# yesterday scored.
+	# The lead is the warm radius, because that is the thing that actually grows
+	# and the thing the next day is spent extending.
+	_text_in(Rect2(card.position + Vector2(0, 106), Vector2(w, 70)),
+		"%.1f칸" % sim.warm_radius, 52, Defs.COL_MACHINE_EDGE)
+	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "온기 반경", 13,
+		Defs.COL_TEXT_DIM)
 
+	var gained: int = main.day_heat()
 	var rows := [
 		["누적 열", "%d" % sim.total_heat, Defs.COL_CORE],
-		["온기 반경", "%.1f칸" % sim.warm_radius, Defs.COL_MACHINE_EDGE],
-		["최고 하루", "%d" % main.best_day_heat, Defs.COL_TEXT_DIM],
+		["어제 모은 열", "+%d" % gained if gained > 0 else "-", Defs.COL_TEXT_DIM],
+		["고양이", "%d마리" % sim.cats.size(), Defs.COL_TEXT_DIM],
 	]
 	var y: float = 176.0
 	for row in rows:

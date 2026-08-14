@@ -1,5 +1,12 @@
 extends SceneTree
 
+## Note: this scans the whole source file, comments included. A Korean word in a
+## comment is not drawn and does not need a glyph, but it fails here anyway --
+## which is why code comments in this project are written in English. Narrowing
+## the scan to string literals would need a GDScript parser that understands
+## where a `#` is a comment and where it is a colour; being strict costs one
+## rule and no parser.
+
 ## The UI font is a subset, so it can be missing a character.
 ##
 ## The full Noto Sans CJK collection was 16.3 MB of an 18.2 MB pack -- ninety
