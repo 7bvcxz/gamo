@@ -274,7 +274,11 @@ static func throughput_line(type: int) -> String:
 		M_SPLITTER:
 			return "한 줄을 두 줄로 · R로 나뉘는 축 회전"
 		M_CORE:
-			return "에너지결정 1개 = 열 %d" % ITEM_VALUES[ITEM_ENERGY]
+			# Both of the things that burn, because the player meets heat stone
+			# first and a line naming only the other one is a line telling them
+			# their whole opening does nothing.
+			return "Z 로 연료 투입 · 열석 1개 = 열 %d · 에너지결정 1개 = 열 %d" \
+				% [ITEM_VALUES[ITEM_HEATSTONE], ITEM_VALUES[ITEM_ENERGY]]
 	return ""
 
 ## The ratio that actually matters, stated plainly. One exchanger keeps up with
@@ -562,6 +566,11 @@ const SHELTER_CLEARANCE := 2.0
 ## enough to carry by hand without it becoming a chore, and enough that the
 ## player makes the trip more than once and learns what the trip is.
 const OPENING_STONES := 3
+## Where the circle stands when the third mission is done. Set to a number
+## rather than added as a bonus: the mission promises nine tiles, and three
+## stones of heat on their own come to 7.3. What the card says and what the
+## screen shows have to be the same thing.
+const OPENING_WARM_RADIUS := 9.0
 const FURNACE_PERIOD := 2.2
 ## Deliberately slow. A tenth of what it used to be, which puts a ten-tile run at
 ## about 38 seconds: never a hard throughput gate -- it still carries nearly four
@@ -656,6 +665,22 @@ const CAT_SPEED := 46.0            # pixels per second while walking
 ## a cat that has not got there yet.
 const CAT_AWAY := 10.0
 
+## --- The warmth gauge -------------------------------------------------------
+## Over her head, the way a cat's hunger sits over its own. The game already has
+## that sentence -- a bar above an animal is its condition -- and giving Grim a
+## second, different one somewhere else would be two rules where one will do.
+##
+## Her head occupies about y = -22 to -10 in her own space, so the bar clears it
+## by eight pixels. Wider than a cat's because she is the one being read at a
+## glance while everything else is happening.
+const WARMTH_BAR_LIFT := 30.0
+const WARMTH_BAR_SIZE := Vector2(26.0, 3.5)
+## Above this it is not drawn at all, and it fades in over the fifteen below.
+## Warmth stops being a question once the factory is running, and a gauge that is
+## always full is a gauge nobody reads when it finally is not.
+const WARMTH_BAR_SHOW := 92.0
+const WARMTH_BAR_FADE := 15.0
+
 ## Loitering. A cat with nothing to do used to stand exactly still, which reads
 ## as the game being paused rather than as an animal waiting, so it strolls: a
 ## pause, a short walk in some direction, another pause. The numbers are ranges
@@ -682,9 +707,18 @@ const WANDER_LEASH := 96.0
 ## exactly what it was. The pace of the factory has not changed; what changed is
 ## what the walk is for.
 const FROZEN_PER_TILES := 200.1
-## One inside the opening warm radius, so the first cat is always reachable. The
-## crates guaranteed three for the same reason -- three of them made one cat.
+## One inside reach, so the first cat is always findable. The crates guaranteed
+## three for the same reason -- three of them made one cat.
 const STARTER_FROZEN := 1
+## And no closer than this to the base.
+##
+## Eight and a half, which is outside the opening circle of seven and inside the
+## nine the third mission takes it to. So the first frozen cat is not visible
+## when the game starts: it appears in the ring of new ground that opens the
+## moment the player feeds the fire. That is the answer to a complaint the
+## design has had since it was written -- that the warm radius grows and nothing
+## on screen says so.
+const FROZEN_MIN_RING := 8.5
 ## Carrying one. She walks at half speed and cannot run: a frozen cat is a body
 ## in her arms, and the distance she chose to walk out is the price of it. This
 ## is the only thing in the game that slows her down other than the cold.

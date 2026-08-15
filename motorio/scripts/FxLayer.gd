@@ -9,12 +9,18 @@ const MAX_EFFECTS := 96
 var _labels: Array[Dictionary] = []
 var _rings: Array[Dictionary] = []
 var _sparks: Array[Dictionary] = []
+## Things travelling from one place to another. The only effect here that has a
+## destination: everything else happens where it happens, and this one exists to
+## say that what was in her hands is now in the fire.
+var _streams: Array[Dictionary] = []
 
 func _process(delta: float) -> void:
 	_advance(_labels, delta)
 	_advance(_rings, delta)
 	_advance(_sparks, delta)
-	if not _labels.is_empty() or not _rings.is_empty() or not _sparks.is_empty():
+	_advance(_streams, delta)
+	if not _labels.is_empty() or not _rings.is_empty() or not _sparks.is_empty() \
+			or not _streams.is_empty():
 		queue_redraw()
 
 func _advance(pool: Array[Dictionary], delta: float) -> void:
@@ -57,6 +63,28 @@ func burst(at: Vector2, color: Color, count: int = 7) -> void:
 			"color": color, "life": 0.4, "max": 0.4,
 		})
 
+## How long one piece takes to travel, whatever the distance. Long enough to be
+## watched: the core is usually one tile away when this fires, and at half this
+## the whole thing was over before a screenshot could catch it.
+const FLIGHT := 0.75
+
+## A handful of pieces flying from `from` into `to`, staggered so they arrive as
+## a stream rather than as one clump. They curve: a straight line between two
+## points reads as a laser, and these are meant to read as being pulled in.
+func stream(from: Vector2, to: Vector2, color: Color, count: int = 6) -> void:
+	if _streams.size() >= MAX_EFFECTS:
+		return
+	var span: Vector2 = to - from
+	# One side or the other, alternating, so the arc is a spray and not a rope.
+	var side: Vector2 = Vector2(-span.y, span.x).normalized()
+	for index in count:
+		var delay: float = float(index) * 0.09
+		_streams.append({
+			"pos": from, "to": to, "color": color,
+			"bend": side * (20.0 + randf() * 16.0) * (1.0 if index % 2 == 0 else -1.0),
+			"life": FLIGHT + delay, "max": FLIGHT + delay, "delay": delay,
+		})
+
 func _draw() -> void:
 	# The fallback font has no CJK glyphs, so Korean popups rendered as boxes.
 	var font: Font = UIFont.FONT
@@ -70,6 +98,18 @@ func _draw() -> void:
 		var col: Color = fx["color"]
 		var at: Vector2 = Vector2(fx["pos"]) + Vector2(fx["vel"]) * k * 0.4
 		draw_circle(at, 2.6 * (1.0 - k), Color(col.r, col.g, col.b, 1.0 - k))
+	for fx: Dictionary in _streams:
+		var elapsed: float = float(fx["max"]) - float(fx["life"])
+		if elapsed < float(fx["delay"]):
+			continue
+		var k: float = clampf((elapsed - float(fx["delay"])) / FLIGHT, 0.0, 1.0)
+		var col: Color = fx["color"]
+		# A quadratic bend, so the piece leaves her sideways and arrives head on.
+		var straight: Vector2 = Vector2(fx["pos"]).lerp(Vector2(fx["to"]), k)
+		var at: Vector2 = straight + Vector2(fx["bend"]) * sin(k * PI)
+		# Shrinking as it goes in, which is what being swallowed looks like.
+		draw_circle(at, 5.2 * (1.0 - k * 0.7), Color(col.r, col.g, col.b, 1.0 - k * 0.3))
+		draw_circle(at, 2.4 * (1.0 - k * 0.7), Color(1, 1, 1, (1.0 - k) * 0.7))
 	for fx: Dictionary in _labels:
 		var k: float = 1.0 - float(fx["life"]) / float(fx["max"])
 		var at: Vector2 = Vector2(fx["pos"]) + Vector2(0, -26.0 * k)

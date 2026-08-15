@@ -317,7 +317,11 @@ func objective_data() -> Dictionary:
 			return _goal("임무 2 · 생존 준비를 하자  긴급생존키트를 다시 살펴보세요",
 				"thing", Icons.THING_KIT)
 		Mission.MEANS:
-			return _goal("임무 3 · 탐험할 방법을 찾자  열석을 캐서 기지에 넣으세요  (%d/%d)"
+			if sim.has_fuel():
+				return _goal("임무 3 · 탐험할 방법을 찾자  기지를 바라보고 Z 로 열석을 넣으세요  (%d/%d)"
+					% [int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)), Defs.OPENING_STONES],
+					"thing", Icons.THING_CORE)
+			return _goal("임무 3 · 탐험할 방법을 찾자  곡괭이로 열석을 캐세요  (%d/%d)"
 				% [int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)), Defs.OPENING_STONES],
 				"thing", Icons.THING_SEAM)
 		Mission.EXPLORE:
@@ -1056,12 +1060,22 @@ func _advance_mission() -> void:
 			# they carried.
 			if int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.OPENING_STONES:
 				mission = Mission.EXPLORE
+				# And the circle goes to nine, which is where the first frozen
+				# cat is lying. It has been there since the world was made and
+				# has been outside the light the whole time; this is the moment
+				# it is in it.
+				sim.grant_warm(Defs.OPENING_WARM_RADIUS)
+				fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, 90.0)
 		Mission.EXPLORE:
 			if not sim.cats.is_empty():
 				mission = Mission.DONE
 	if mission == was:
 		return
-	if mission == Mission.DONE:
+	if mission == Mission.EXPLORE:
+		_notify("불이 커졌습니다  온기 %.0f칸  ·  주변을 둘러보세요" % sim.warm_radius,
+			Defs.COL_CORE)
+		audio.call("play", "finish")
+	elif mission == Mission.DONE:
 		_notify("살아남았습니다  이제 하루가 흐릅니다", Defs.COL_CORE)
 		audio.call("play", "finish")
 	else:
@@ -1627,6 +1641,12 @@ func _primary_action() -> void:
 	if sim.carried_kit != Defs.KIT_NONE:
 		_place_kit(cell)
 		return
+	# Facing the fire. Nothing can be built on the core, so Z here used to do
+	# nothing at all -- which is where the heat that had been mined by hand sat
+	# for good, because the only doorway into the core was a belt or a cat.
+	if cell == sim.core_cell and sim.base_placed:
+		_deposit_at_core()
+		return
 	# A frozen cat answers Z before anything else. She has both arms round it,
 	# so there is nothing else the press could mean.
 	if sim.carried_frozen:
@@ -1690,6 +1710,31 @@ func _primary_action() -> void:
 ## Putting down the base or the shelter. Both refuse for reasons the player
 ## cannot see from the tile alone, so a refusal says which one it was -- a
 ## placement that silently does nothing is the same experience as a broken key.
+## Handing the fuel over, and showing it go in. The pieces fly out of her arms
+## and are pulled into the core, because "the number in the corner changed" is
+## not a thing happening -- and this is the action the whole first ten minutes
+## is built around.
+func _deposit_at_core() -> void:
+	if not sim.has_fuel():
+		_notify("넣을 연료가 없습니다  열석을 캐서 오세요", Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+		return
+	var before: int = sim.heat
+	var moved: Dictionary = sim.deposit_fuel()
+	var target: Vector2 = sim.cell_centre(sim.core_cell)
+	var parts: Array[String] = []
+	for item_type: int in moved:
+		var count: int = int(moved[item_type])
+		fx.stream(player.position + Vector2(0, -10.0), target,
+			Defs.ITEM_COLORS[item_type], mini(count, 8))
+		parts.append("%s %d" % [Defs.ITEM_NAMES[item_type], count])
+	var gained: int = sim.heat - before
+	fx.popup(target + Vector2(0, -34.0), "+%d 열" % gained, Defs.COL_CORE, true)
+	fx.ring(target, Defs.COL_CORE, Defs.RING_LARGE)
+	shake = maxf(shake, Defs.FX_SMALL)
+	audio.call("play", "deliver")
+	_notify("%s  ·  온기 %.1f칸" % [" · ".join(parts), sim.warm_radius], Defs.COL_CORE)
+
 func _place_kit(cell: Vector2i) -> void:
 	var kit: int = sim.carried_kit
 	if kit == Defs.KIT_BASE:

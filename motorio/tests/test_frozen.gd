@@ -57,17 +57,27 @@ func _test_scatter() -> void:
 	# Many seeds, not one. "This cell is always clear" and "this many always
 	# exist" are the two claims a seeded world breaks one run in five, and a
 	# single seed is how that goes unnoticed until a player reports it.
+	# Not inside the opening circle -- just outside it. The first frozen cat has
+	# to be invisible at the seven tiles the base opens with and visible at the
+	# nine the third mission takes it to, so that finishing that mission is the
+	# moment one appears in ground that was white a second ago. The warm radius
+	# growing used to be a number changing in a corner.
 	var thin := 0
+	var early := 0
 	for seed_value in range(200):
 		var sim := _sim(seed_value)
-		var starter := 0
+		var reachable := 0
 		for cell: Vector2i in sim.frozen_cats:
-			if Vector2(cell - sim.core_cell).length() <= Defs.WARM_BASE:
-				starter += 1
-		if starter < Defs.STARTER_FROZEN:
+			var distance: float = Vector2(cell - sim.core_cell).length()
+			if distance <= Defs.WARM_BASE:
+				early += 1
+			if distance <= Defs.OPENING_WARM_RADIUS:
+				reachable += 1
+		if reachable < Defs.STARTER_FROZEN:
 			thin += 1
 		sim.free()
-	_assert(thin == 0, "모든 시드에서 시작 반경 안에 얼어붙은 고양이가 있다 (실패 %d)" % thin)
+	_assert(early == 0, "시작 반경 7칸 안에는 한 마리도 없다 (%d마리)" % early)
+	_assert(thin == 0, "모든 시드에서 9칸 안에는 있다 (실패 %d)" % thin)
 
 	var sim := _sim()
 	_assert(sim.frozen_cats.size() > Defs.STARTER_FROZEN * 3,

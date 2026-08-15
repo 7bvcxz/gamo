@@ -147,6 +147,10 @@ var kit_searched: int = 0
 ## the orchestrator because the thing that draws the ring reads the world, and a
 ## number the drawing cannot see is a number the drawing has to be told twice.
 var kit_progress: float = 0.0
+## Warm radius the opening granted outright, on top of what heat has bought.
+## The third mission promises nine tiles and three stones of heat come to 7.3,
+## so the difference is given rather than pretended.
+var warm_bonus: float = 0.0
 ## The cat currently in the player's arms. Cats are placed on machines by hand;
 ## there is no automatic assignment, so the player decides who works where.
 var carried_cat: Cat = null
@@ -322,6 +326,7 @@ func to_save() -> Dictionary:
 		# a world around the wrong centre would put the shelter, the fog and the
 		# ore rings in different places than the ones on screen.
 		"base_placed": base_placed, "shelter_placed": shelter_placed,
+		"warm_bonus": warm_bonus,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
 		# All three cells, rather than the core plus arithmetic: the player picks
@@ -389,6 +394,7 @@ func from_save(data: Dictionary) -> void:
 	core_cell = Vector2i(int(data.get("core_x", core_cell.x)),
 		int(data.get("core_y", core_cell.y)))
 	base_placed = bool(data.get("base_placed", true))
+	warm_bonus = float(data.get("warm_bonus", 0.0))
 	shelter_placed = bool(data.get("shelter_placed", true))
 	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
 	kit_searched = int(data.get("kit_searched", 2))
@@ -398,7 +404,8 @@ func from_save(data: Dictionary) -> void:
 		int(data.get("shelter_y", shelter_cell.y)))
 	food_cell = Vector2i(int(data.get("food_x", food_cell.x)),
 		int(data.get("food_y", food_cell.y)))
-	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
+	warm_radius = minf(Defs.warm_radius(total_heat) + warm_bonus, Defs.WARM_MAX) \
+		if base_placed else Defs.CRASH_SIGHT
 	_cached_radius = warm_radius
 	_grid_dirty = true
 
@@ -453,6 +460,7 @@ func setup(seed_value: int) -> void:
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
 	frozen_cats.clear()
+	warm_bonus = 0.0
 	carried_frozen = false
 	carried_frozen_thaw = 0.0
 	carried_kit = Defs.KIT_NONE
@@ -578,7 +586,7 @@ func _generate_frozen_cats(seed_value: int) -> void:
 		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
 		if frozen_cats.has(cell) or ore.has(cell) or machines.has(cell):
 			continue
-		if _ring_distance(cell) < Defs.WARM_BASE - 1.0:
+		if _ring_distance(cell) < Defs.FROZEN_MIN_RING:
 			continue
 		frozen_cats[cell] = 0.0
 
@@ -590,7 +598,7 @@ func _starter_frozen_cell(index: int) -> Vector2i:
 	var base_angle: float = TAU * float(index) / float(Defs.STARTER_FROZEN) + 0.6
 	for step in 48:
 		# Out from the nominal ring in half-tile rings, all the way round each.
-		var radius: float = Defs.WARM_BASE - 2.0 + float(step / 16) * 0.5
+		var radius: float = Defs.FROZEN_MIN_RING + float(step / 16) * 0.5
 		var angle: float = base_angle + TAU * float(step % 16) / 16.0
 		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
 		if cell == core_cell or ore.has(cell) or frozen_cats.has(cell):
@@ -792,6 +800,57 @@ func _wake_cat(cell: Vector2i) -> void:
 	cats.append(cat)
 	cat_thawed.emit(cats.size(), cat.pos)
 	cat_adopted.emit(cats.size())
+
+## Takes the circle out to `target` and leaves it there, by granting whatever
+## heat has not bought yet. Never shrinks it: a mission that gave two tiles must
+## not take one back later because the player got there another way.
+func grant_warm(target: float) -> void:
+	warm_bonus = maxf(warm_bonus, target - Defs.warm_radius(total_heat))
+	_refresh_radius()
+
+## Everything in the base's store that will burn, into the fire.
+##
+## Materials stay where they are. `stock` *is* the base's ledger -- it is what
+## machines are bought out of -- so crystal and copper are already in the base
+## the moment they are picked up, and taking them away to "deliver" them would
+## be spending them on nothing. What has to be handed over is fuel, which is the
+## only thing the core does anything with.
+##
+## Returns what went in, keyed by item, so the effect can draw it.
+func deposit_fuel() -> Dictionary:
+	var moved: Dictionary = {}
+	if not base_placed:
+		return moved
+	var gained: int = 0
+	for item_type: int in Defs.COUNTED_ITEMS:
+		if int(Defs.ITEM_VALUES[item_type]) <= 0:
+			continue
+		var count: int = int(stock.get(item_type, 0))
+		if count <= 0:
+			continue
+		moved[item_type] = count
+		stock[item_type] = 0
+		delivered[item_type] = int(delivered.get(item_type, 0)) + count
+		gained += int(Defs.ITEM_VALUES[item_type]) * count
+	if moved.is_empty():
+		return moved
+	heat += gained
+	total_heat += gained
+	_heat_accum += float(gained)
+	var core: Machine = machines.get(core_cell, null)
+	if core != null:
+		core.flash = 0.6
+	_refresh_radius()
+	heat_gained.emit(gained, core_cell, Defs.ITEM_HEATSTONE)
+	return moved
+
+## Whether there is anything to hand over. Asked before the verb so the game can
+## say "there is nothing to put in" rather than doing nothing.
+func has_fuel() -> bool:
+	for item_type: int in Defs.COUNTED_ITEMS:
+		if int(Defs.ITEM_VALUES[item_type]) > 0 and int(stock.get(item_type, 0)) > 0:
+			return true
+	return false
 
 ## Cats without a thaw, for the debug unlocks and for tests that need a crew
 ## rather than a rescue. Everything the crates used to do through adopt_cats is
@@ -1749,7 +1808,8 @@ func _cat_eat(cat: Cat, delta: float) -> void:
 func _refresh_radius() -> void:
 	# No base, no fire, no circle -- only as much of the map as she can see from
 	# where she is standing.
-	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
+	warm_radius = minf(Defs.warm_radius(total_heat) + warm_bonus, Defs.WARM_MAX) \
+		if base_placed else Defs.CRASH_SIGHT
 	if not is_equal_approx(warm_radius, _cached_radius):
 		_cached_radius = warm_radius
 		warmth_changed.emit(warm_radius)

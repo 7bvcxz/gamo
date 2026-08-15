@@ -29,6 +29,7 @@ func _run() -> void:
 	_test_placing_the_shelter()
 	_test_missions_follow_the_world()
 	_test_cold_cannot_end_it()
+	_test_feeding_the_fire()
 	_test_save_mid_opening()
 	_test_finish_tutorial()
 	if failures == 0:
@@ -256,6 +257,53 @@ func _test_cold_cannot_end_it() -> void:
 	_assert(main.day_number == 1, "하루가 넘어가지도 않는다")
 
 # --- The world the rest of the game expects ---------------------------------
+
+## Mined heat stone had no way into the fire. It went into the base's ledger --
+## which is where machines are bought from -- and stopped there, so the third
+## mission counted deliveries that could never happen and the opening could not
+## be finished by hand at all.
+func _test_feeding_the_fire() -> void:
+	_crash()
+	var sim = main.sim
+	main.finish_tutorial()
+	main.mission = main.Mission.MEANS
+	sim.delivered[Defs.ITEM_HEATSTONE] = 0
+	sim.stock[Defs.ITEM_HEATSTONE] = 0
+	_assert(not sim.has_fuel(), "빈손으로는 넣을 것이 없다")
+	_assert(sim.deposit_fuel().is_empty(), "그리고 아무 일도 일어나지 않는다")
+
+	sim.stock[Defs.ITEM_HEATSTONE] = Defs.OPENING_STONES
+	sim.stock[Defs.ITEM_CRYSTAL] = 4
+	_assert(sim.has_fuel(), "열석이 있으면 넣을 것이 있다")
+	var heat_before: int = sim.heat
+	var moved: Dictionary = sim.deposit_fuel()
+	_assert(int(moved.get(Defs.ITEM_HEATSTONE, 0)) == Defs.OPENING_STONES,
+		"열석이 전부 들어간다")
+	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "손에서는 사라진다")
+	_assert(sim.heat == heat_before
+		+ Defs.OPENING_STONES * int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE]),
+		"열이 그만큼 오른다")
+	_assert(int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) == Defs.OPENING_STONES,
+		"임무가 세는 숫자가 오른다")
+	# Materials are not fuel and must not be swallowed. `stock` is the base's
+	# store, so crystal is already in the base -- taking it away to "deliver" it
+	# would be spending it on nothing.
+	_assert(int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 4, "수정은 그대로 남는다")
+
+	# And the mission it exists for: three stones takes the circle to nine, which
+	# is exactly where the first frozen cat is lying.
+	main._advance_mission()
+	_assert(main.mission == main.Mission.EXPLORE, "임무 3이 끝난다")
+	_assert(absf(sim.warm_radius - Defs.OPENING_WARM_RADIUS) < 0.01,
+		"온기가 정확히 %.0f칸이 된다 (%.2f)" % [Defs.OPENING_WARM_RADIUS, sim.warm_radius])
+	var visible := 0
+	for cell: Vector2i in sim.frozen_cats:
+		if sim.is_warm(cell):
+			visible += 1
+	_assert(visible >= 1, "그 순간 얼어붙은 고양이가 온기 안에 들어온다 (%d마리)" % visible)
+	# It must not shrink back when heat is later spent or recomputed.
+	sim._refresh_radius()
+	_assert(sim.warm_radius >= Defs.OPENING_WARM_RADIUS, "다시 계산해도 줄지 않는다")
 
 func _test_save_mid_opening() -> void:
 	_crash()

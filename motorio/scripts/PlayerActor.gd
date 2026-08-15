@@ -403,7 +403,33 @@ func facing_cell() -> Vector2i:
 func cell() -> Vector2i:
 	return Vector2i((position / float(Defs.TILE)).floor())
 
+## Her temperature, over her head, in the same words a cat's hunger is in.
+##
+## The corner readout is still the exact number; this is the one the eye finds
+## without leaving her. In the opening the temperature *is* the clock, and the
+## player is looking at Grim and the snow, not at a panel.
+##
+## Hidden while she is warm. A gauge that is always full is a gauge nobody reads
+## on the day it is not.
+func _draw_warmth_bar() -> void:
+	var show: float = clampf((Defs.WARMTH_BAR_SHOW - warmth) / Defs.WARMTH_BAR_FADE,
+		0.0, 1.0)
+	if show <= 0.0:
+		return
+	var size: Vector2 = Defs.WARMTH_BAR_SIZE
+	var bar := Rect2(-size.x * 0.5, -Defs.WARMTH_BAR_LIFT, size.x, size.y)
+	var fill: float = clampf(warmth / 100.0, 0.0, 1.0)
+	draw_rect(bar.grow(1.0), Color(0.02, 0.03, 0.06, 0.80 * show))
+	draw_rect(bar, Color(0.10, 0.13, 0.20, 0.85 * show))
+	# Amber while it is only cold, red once it is dangerous. The colour changes
+	# before the number does anything, which is the point of having it here.
+	var colour: Color = Defs.COL_BELT_RIM.lerp(Defs.COL_DANGER,
+		clampf(1.0 - warmth / 45.0, 0.0, 1.0))
+	draw_rect(Rect2(bar.position, Vector2(bar.size.x * fill, bar.size.y)),
+		Color(colour.r, colour.g, colour.b, show))
+
 func _draw() -> void:
+	_draw_warmth_bar()
 	# Flattened ground shadow, drawn under the sprite so she is anchored to the
 	# grid rather than floating over it.
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
