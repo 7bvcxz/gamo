@@ -102,13 +102,16 @@ func _run() -> void:
 	_assert(main.state == main.State.SETTINGS, "처음부터 does not fire on the first press")
 	_assert(main.hud.restart_armed > 0.0, "it arms itself and says so")
 	main.settings_restart()
-	_assert(main.state == main.State.PLAY, "the second press starts a new run")
+	# 처음부터 means from the top: the story of how she got there is part of the
+	# beginning, so the run restarts at the first panel of the cutscene and then
+	# at the crash. The rest of this file is about the game after all that, so it
+	# skips forward again.
+	_assert(main.state == main.State.OPENING, "처음부터 는 컷씬부터 다시 시작한다")
+	_assert(main.cutscene_panel == 0, "첫 장부터")
 	_assert(main.day_number == 1, "at day one")
-	# A new run is a new crash: 처음부터 puts the player back at the beginning of
-	# the opening, base and all. The rest of this file is about the game after
-	# that, so it asks for the finished world again.
-	_assert(main.mission == main.Mission.BASE, "처음부터 는 오프닝부터 다시 시작한다")
+	_assert(main.mission == main.Mission.BASE, "그리고 오프닝의 첫 임무로 돌아간다")
 	_assert(not main.sim.base_placed, "기지도 다시 없다")
+	main._end_cutscene()
 	main.finish_tutorial()
 	_assert(is_zero_approx(main.hud.restart_armed), "and disarms itself afterwards")
 

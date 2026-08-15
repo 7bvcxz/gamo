@@ -117,9 +117,8 @@ func _run() -> void:
 	# looking for work.
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_CRYSTAL:
-			seam = cell
-			break
+		seam = cell
+		break
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
 	sim.stock[Defs.ITEM_HEATSTONE] = 100
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)

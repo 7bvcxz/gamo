@@ -215,6 +215,7 @@ func _draw() -> void:
 	_draw_shelter(tile)
 	_draw_food_bin(tile)
 	_draw_kit(tile)
+	_draw_shards(tile)
 	_draw_frozen(tile)
 	_draw_ground()
 	_draw_hand_progress()
@@ -665,6 +666,36 @@ static func cat_sheet(state: int, heading: Vector2, walking: bool) -> Array:
 	if heading.y < 0.0:
 		return [CAT_WALK_N_SHEET, false]
 	return [CAT_WALK_SHEET, false]
+
+## Crystal lying in the snow. There is a fixed number of these in a world and no
+## way to make another, so each one has to be worth walking to -- a slow glint
+## that catches the eye across the fog is the whole job.
+##
+## Drawn small and inset, the way everything that lies flat on the ground is.
+## Crystal used to be a seam and seams stand up; a shard does not.
+func _draw_shards(tile: float) -> void:
+	for cell: Vector2i in sim.shards:
+		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		if not view_rect.grow(tile).has_point(at):
+			continue
+		var colour: Color = Defs.ITEM_COLORS[Defs.ITEM_CRYSTAL]
+		# A phase per cell, so a field of them does not blink in unison.
+		var phase: float = float(cell.x * 7 + cell.y * 13) * 0.7
+		var glint: float = maxf(0.0, sin(pulse * 1.6 + phase))
+		draw_circle(at, 7.0, Color(colour.r, colour.g, colour.b, 0.10 + 0.10 * glint))
+		# Three shards out of the snow, biggest in the middle.
+		for index in 3:
+			var lean: float = (float(index) - 1.0) * 3.4
+			var tall: float = 6.5 if index == 1 else 4.2
+			draw_colored_polygon(PackedVector2Array([
+				at + Vector2(lean - 2.0, 3.0), at + Vector2(lean + 2.0, 3.0),
+				at + Vector2(lean + 0.4, 3.0 - tall)]), Defs.ORE_OUTLINE)
+			draw_colored_polygon(PackedVector2Array([
+				at + Vector2(lean - 1.3, 2.4), at + Vector2(lean + 1.3, 2.4),
+				at + Vector2(lean + 0.3, 2.4 - tall * 0.82)]), colour)
+		if glint > 0.92:
+			draw_circle(at + Vector2(0.4, -2.0), 1.8 + (glint - 0.92) * 12.0,
+				Color(1, 1, 1, (glint - 0.92) * 9.0))
 
 ## The survival kit that came down with her. A scuffed metal case in the snow,
 ## with the parachute lines still on it, and a slow pulse while there is

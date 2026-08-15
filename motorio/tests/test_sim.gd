@@ -63,7 +63,7 @@ func _test_generation() -> void:
 	var frost := 0
 	var copper := 0
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_CRYSTAL:
+		if sim.ore[cell] == Defs.ITEM_HEATSTONE:
 			frost += 1
 		else:
 			copper += 1
@@ -84,10 +84,19 @@ func _test_generation() -> void:
 		var distance: float = Vector2(cell).length()
 		if sim.ore[cell] == Defs.ITEM_HEATSTONE and distance <= Defs.WARM_BASE:
 			reachable += 1
-		if sim.ore[cell] == Defs.ITEM_CRYSTAL and distance <= Defs.WARM_BASE:
+		if sim.ore[cell] == Defs.ITEM_CRYSTAL:
 			early_crystal += 1
 	_assert(reachable > 0, "some heat stone sits inside the starting warm radius")
-	_assert(early_crystal == 0, "and no crystal does -- it is a mid-game resource now")
+	_assert(early_crystal == 0, "and there is no crystal seam anywhere -- it is not a seam")
+	# What crystal is instead: a fixed number of pieces lying in the snow, all of
+	# them outside the opening circle, and no way to make another.
+	_assert(sim.shards.size() == Defs.CRYSTAL_SHARDS,
+		"crystal exists as %d loose shards" % Defs.CRYSTAL_SHARDS)
+	var near_shard := 0
+	for cell: Vector2i in sim.shards:
+		if Vector2(cell - sim.core_cell).length() < Defs.CRYSTAL_RING.x:
+			near_shard += 1
+	_assert(near_shard == 0, "and none of them inside the opening")
 
 	# Ember must NOT be reachable at the start, or the progression has no arc.
 	var early_copper := 0
@@ -107,13 +116,13 @@ func _test_generation() -> void:
 		_assert(sim.can_build(Defs.M_BELT, sim.core_cell + offset) == "",
 			"a belt can always be placed in the starter lane at %s" % offset)
 
-	# The exchanger chain must be buildable in every run, not only when the
-	# scatter is kind: a guaranteed seam due north plus a clear column back to
-	# the core. It is crystal now rather than copper, because crystal is what
-	# that beat needs since heat stone took over the opening.
+	# A guaranteed seam due north with a clear column home, so the opening never
+	# depends on the scatter being kind. It has been copper and then crystal; it
+	# is whatever the beat it protects actually needs, and that beat is now the
+	# first minutes.
 	for offset: Vector2i in Sim.STARTER_COPPER:
-		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_CRYSTAL,
-			"guaranteed crystal seam exists at %s" % offset)
+		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_HEATSTONE,
+			"guaranteed seam exists at %s" % offset)
 	for step in range(1, 9):
 		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, -step)
 		_assert(sim.can_build(Defs.M_BELT, lane_cell) == "",

@@ -74,16 +74,39 @@ func _run() -> void:
 
 	# The gate that matters: reaching copper must be days, not hours.
 	#
-	# Measured on heat stone rather than on the exchanger chain, because that is
-	# what a player actually does -- heat stone is the seam beside the base and it
-	# burns straight in the core. The crystal route exists and is slower per unit
-	# of heat; it earns its place by being the only thing that also makes power.
-	var heat_needed: float = (Defs.COPPER_RING.x - Defs.WARM_BASE) / Defs.WARM_PER_HEAT
+	# Measured on heat stone, because that is what a player actually does -- heat
+	# stone is the seam beside the base and it burns straight in the core.
+	# Crystal cannot be the answer any more: there is a fixed number of pieces in
+	# a world and no way to make another.
+	#
+	# The circle goes up in steps now, so the gate is the first step that reaches
+	# the copper ring rather than an arithmetic on a rate.
+	var heat_needed: float = 0.0
+	for level: Dictionary in Defs.BASE_LEVELS:
+		if float(level["radius"]) >= Defs.COPPER_RING.x:
+			heat_needed = float(level["heat"])
+			break
+	_assert(heat_needed > 0.0, "구리 고리에 닿는 기지 단계가 존재한다")
 	var stones_needed: float = heat_needed / float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
 	var seconds_two_miners: float = stones_needed / (2.0 * miner_rate)
 	var days: float = seconds_two_miners / 120.0    # productive seconds per day
 	_assert(days < 6.0, "two miners reach copper inside six days (%.1f)" % days)
-	_assert(days > 1.5, "and not inside a single one (%.1f)" % days)
+	# The old floor here was "not inside a single day", and it encoded a curve
+	# that no longer exists: the circle used to creep up by a hundredth of a tile
+	# per heat, so the time to copper was an arithmetic on a rate. It goes up in
+	# authored steps now, and copper sits behind the fourth of them. What is
+	# worth holding is the shape of the table rather than a number derived from
+	# a rate that is gone.
+	var levels: Array[Dictionary] = Defs.BASE_LEVELS
+	for index in range(1, levels.size()):
+		_assert(int(levels[index]["heat"]) > int(levels[index - 1]["heat"])
+			and float(levels[index]["radius"]) > float(levels[index - 1]["radius"]),
+			"기지 단계 %d은 앞 단계보다 비싸고 넓다" % index)
+	var copper_level: int = Defs.base_level(int(heat_needed))
+	_assert(copper_level >= 4,
+		"구리는 오프닝에서 네 단계 뒤에 있다 (%d단계)" % copper_level)
+	_assert(Defs.warm_radius(int(heat_needed)) >= Defs.COPPER_RING.x,
+		"그 단계의 온기가 구리 고리에 실제로 닿는다")
 	print("PROGRESSION: copper at %.1f days with two miners (%.0f 열석)" % [days, stones_needed])
 
 	# --- Lv3: power is a rate, and it gates logistics -------------------------

@@ -152,6 +152,7 @@ func _ready() -> void:
 	sim.heat_gained.connect(_on_heat_gained)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
+	sim.base_upgraded.connect(_on_base_upgraded)
 	sim.cat_thawed.connect(_on_cat_thawed)
 	world_layer.sim = sim
 	ground_layer.sim = sim
@@ -171,6 +172,15 @@ func _ready() -> void:
 	state = State.TITLE
 
 ## --- The opening ----------------------------------------------------------
+## 처음부터. A new run is a new crash, and the story of how she got there is
+## part of it -- a player who asked for the beginning asked for the beginning.
+func _restart_from_the_top() -> void:
+	_start_run()
+	resumed = false
+	cutscene_panel = 0
+	cutscene_time = 0.0
+	state = State.OPENING
+
 func _leave_title() -> void:
 	audio.call("play", "confirm")
 	if resumed:
@@ -278,15 +288,14 @@ func objective_data() -> Dictionary:
 		# her nothing. The instruction is the same one the mission gives, said
 		# with the urgency the temperature has earned.
 		if not sim.base_placed:
-			return _goal("몸이 얼고 있습니다  서둘러 긴급기지를 세우세요",
-				"thing", Icons.THING_CORE)
+			return _goal(Defs.mission_line("COLD-NOBASE"), "thing", Icons.THING_CORE)
 		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
 	if is_night():
 		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
 	if is_dusk():
 		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
 	if sim.carried_cat != null:
-		return _goal("고양이를 안고 있습니다  광맥이나 채굴기 앞에서 Z 로 내려놓으세요", "thing", Icons.THING_CAT)
+		return _goal(Defs.mission_line("CARRY-CAT"), "thing", Icons.THING_CAT)
 	# Ahead of the mining line: a thawing cat is three seconds from being the
 	# thing the player has been walking towards, and a card telling them to go
 	# back to a seam in the middle of it is the game looking away.
@@ -296,37 +305,27 @@ func objective_data() -> Dictionary:
 	# picked one up before ever swinging the pickaxe was being told to go and
 	# mine, with a body in her arms.
 	if sim.carried_frozen:
-		return _goal("얼어붙은 고양이를 안고 있습니다  기지 옆에 Z 로 내려놓으세요",
-			"thing", Icons.THING_CAT_FROZEN)
+		return _goal(Defs.mission_line("CARRY-FROZEN"), "thing", Icons.THING_CAT_FROZEN)
 	if _thawing_nearby():
-		return _goal("얼음이 녹고 있습니다  곧 깨어납니다", "thing", Icons.THING_CAT_FROZEN)
+		return _goal(Defs.mission_line("THAW"), "thing", Icons.THING_CAT_FROZEN)
 	# The opening. Four rungs of its own, above the ordinary ladder, because
 	# until they are done most of that ladder is about machines that cannot be
 	# built yet and a base that does not exist.
 	if sim.carried_kit == Defs.KIT_BASE:
-		return _goal("임무 1 · 긴급기지를 설치하자  추락 지점에서 Z 로 내려놓으세요",
-			"thing", Icons.THING_CORE)
+		return _goal(Defs.mission_line("M1-HOLD"), "thing", Icons.THING_CORE)
 	if sim.carried_kit == Defs.KIT_SHELTER:
-		return _goal("임무 2 · 생존 준비를 하자  기지 %d칸 밖에 Z 로 거처를 세우세요"
-			% int(Defs.SHELTER_CLEARANCE), "thing", Icons.THING_SHELTER)
+		return _goal(Defs.mission_line("M2-HOLD"), "thing", Icons.THING_SHELTER)
 	match mission:
 		Mission.BASE:
-			return _goal("임무 1 · 긴급기지를 설치하자  긴급생존키트 앞에서 Z 를 누르고 계세요",
-				"thing", Icons.THING_KIT)
+			return _goal(Defs.mission_line("M1"), "thing", Icons.THING_KIT)
 		Mission.SURVIVE:
-			return _goal("임무 2 · 생존 준비를 하자  긴급생존키트를 다시 살펴보세요",
-				"thing", Icons.THING_KIT)
+			return _goal(Defs.mission_line("M2"), "thing", Icons.THING_KIT)
 		Mission.MEANS:
 			if sim.has_fuel():
-				return _goal("임무 3 · 탐험할 방법을 찾자  기지를 바라보고 Z 로 열석을 넣으세요  (%d/%d)"
-					% [int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)), Defs.OPENING_STONES],
-					"thing", Icons.THING_CORE)
-			return _goal("임무 3 · 탐험할 방법을 찾자  곡괭이로 열석을 캐세요  (%d/%d)"
-				% [int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)), Defs.OPENING_STONES],
-				"thing", Icons.THING_SEAM)
+				return _goal(Defs.mission_line("M3-HOLD"), "thing", Icons.THING_CORE)
+			return _goal(Defs.mission_line("M3"), "thing", Icons.THING_SEAM)
 		Mission.EXPLORE:
-			return _goal("임무 4 · 주변을 탐색하자  얼어붙은 고양이를 찾아 Z 로 안고 오세요",
-				"thing", Icons.THING_CAT_FROZEN)
+			return _goal(Defs.mission_line("M4"), "thing", Icons.THING_CAT_FROZEN)
 	# Lv1 -- do it with your hands, then hire someone to do it for you.
 	if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0 and sim.ground.is_empty():
 		return _goal(_mining_hint(), "thing", Icons.THING_SEAM)
@@ -974,6 +973,22 @@ func _update_hand_mining(delta: float) -> void:
 
 func _collect_and_adopt() -> void:
 	_collect_ground()
+	_collect_shard()
+
+## Crystal, off the snow. Announced with the running total because there is a
+## fixed number of these in the world and no way to make more: the number in her
+## pack is the only thing that says how much of the energy line is left.
+func _collect_shard() -> void:
+	if not sim.collect_shard_at(player.cell()):
+		return
+	var held: int = int(sim.stock.get(Defs.ITEM_CRYSTAL, 0))
+	fx.popup(player.position + Vector2(0, -22),
+		"%s %d" % [Defs.ITEM_NAMES[Defs.ITEM_CRYSTAL], held],
+		Defs.ITEM_COLORS[Defs.ITEM_CRYSTAL], true)
+	fx.ring(player.position, Defs.ITEM_COLORS[Defs.ITEM_CRYSTAL], Defs.RING_MEDIUM)
+	fx.burst(player.position, Defs.ITEM_COLORS[Defs.ITEM_CRYSTAL], 9)
+	audio.call("play", "alloy")
+	_announce_unlocks(sim.note_resource_seen(Defs.ITEM_CRYSTAL))
 
 ## Whether any ice near the core is on its way out. Read by the objective card,
 ## which is why it asks the simulation rather than remembering a flag: a cat put
@@ -989,6 +1004,17 @@ func _thawing_nearby() -> bool:
 ## first cat and the design calls it the most expensive three seconds in the
 ## game. The camera move and the music change that belong with it are still to
 ## come -- this is the mechanism, not yet the whole scene.
+## The base going up a step. This is the only thing that grows the circle now,
+## so it is the moment the world gets bigger -- and it has to look like one.
+func _on_base_upgraded(level: int, radius: float) -> void:
+	var at: Vector2 = sim.cell_centre(sim.core_cell)
+	fx.ring(at, Defs.COL_CORE, radius * float(Defs.TILE))
+	fx.burst(at, Defs.COL_CORE, 18)
+	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % level, Defs.COL_CORE, true)
+	shake = maxf(shake, Defs.FX_SMALL)
+	audio.call("play", "finish")
+	_notify("기지가 커졌습니다  온기 %.0f칸" % radius, Defs.COL_CORE)
+
 func _on_cat_thawed(total: int, at: Vector2) -> void:
 	fx.popup(at + Vector2(0, -30), "먀?", Defs.COL_CAT_FACE, true)
 	fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
@@ -1060,12 +1086,6 @@ func _advance_mission() -> void:
 			# they carried.
 			if int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.OPENING_STONES:
 				mission = Mission.EXPLORE
-				# And the circle goes to nine, which is where the first frozen
-				# cat is lying. It has been there since the world was made and
-				# has been outside the light the whole time; this is the moment
-				# it is in it.
-				sim.grant_warm(Defs.OPENING_WARM_RADIUS)
-				fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, 90.0)
 		Mission.EXPLORE:
 			if not sim.cats.is_empty():
 				mission = Mission.DONE
@@ -2256,8 +2276,7 @@ func settings_restart() -> void:
 		return
 	hud.restart_armed = 0.0
 	clear_save()
-	_start_run()
-	state = State.PLAY
+	_restart_from_the_top()
 	state_before_settings = State.PLAY
 	hud.call("end_slider_drag")
 	_notify("처음부터 시작합니다", Defs.COL_DANGER)

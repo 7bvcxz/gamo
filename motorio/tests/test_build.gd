@@ -31,13 +31,13 @@ func _run() -> void:
 	# banner, so the signal is the channel-independent place to read them.
 	main.sim.build_rejected.connect(_on_rejected)
 
-	# Stand one tile south of a frost seam and look north at it.
+	# Stand one tile south of a seam and look north at it.
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in main.sim.ore:
-		if main.sim.ore[cell] == Defs.ITEM_CRYSTAL and not main.sim.is_structure(cell + Vector2i(0, 1)):
+		if not main.sim.is_structure(cell + Vector2i(0, 1)):
 			seam = cell
 			break
-	_assert(seam != Vector2i(9999, 9999), "the map has a frost seam approachable from the south")
+	_assert(seam != Vector2i(9999, 9999), "the map has a seam approachable from the south")
 
 	main.player.position = main.sim.cell_centre(seam + Vector2i(0, 1))
 	main.player.facing = Vector2i.UP

@@ -64,8 +64,13 @@ func _initialize() -> void:
 			"crystal_per_minute": Defs.per_minute(Defs.MINER_PERIOD / Defs.PURITY_RATE[grade]),
 		})
 
-	# The gate the whole progression hangs on, computed the same way the test does.
-	var heat_to_copper: float = (Defs.COPPER_RING.x - Defs.WARM_BASE) / Defs.WARM_PER_HEAT
+	# The gate the whole progression hangs on. The circle goes up in steps now, so
+	# this is the step that first reaches copper rather than an arithmetic.
+	var heat_to_copper: float = 0.0
+	for level: Dictionary in Defs.BASE_LEVELS:
+		if float(level["radius"]) >= Defs.COPPER_RING.x:
+			heat_to_copper = float(level["heat"])
+			break
 	var energy_to_copper: float = heat_to_copper / float(Defs.ITEM_VALUES[Defs.ITEM_ENERGY])
 	var crystal_to_copper: float = energy_to_copper * float(Defs.CRYSTAL_COST_ENERGY)
 
@@ -77,9 +82,14 @@ func _initialize() -> void:
 			"dusk_seconds": Defs.DUSK_SECONDS,
 			"night_seconds": Defs.NIGHT_SECONDS,
 		},
+		# The objective card, id by id, with the reason each line is the way it
+		# is. Exported rather than written into the documentation page by hand:
+		# a line rewritten in the game and not on the page is a page that lies,
+		# and this repository has watched that happen to balance numbers.
+		"missions": Defs.MISSION_LINES,
 		"warmth": {
 			"base_radius": Defs.WARM_BASE,
-			"per_heat": Defs.WARM_PER_HEAT,
+			"levels": Defs.BASE_LEVELS,
 			"max_radius": Defs.WARM_MAX,
 			"outside_speed": 0.45,
 			"cold_drain": Defs.COLD_DRAIN,
@@ -114,7 +124,9 @@ func _initialize() -> void:
 			"food_start": Defs.FOOD_START,
 		},
 		"rings": {
-			"crystal": [Defs.FROST_RING.x, Defs.FROST_RING.y],
+			"heatstone": [Defs.HEATSTONE_RING.x, Defs.HEATSTONE_RING.y],
+			"crystal_shards": [Defs.CRYSTAL_RING.x, Defs.CRYSTAL_RING.y],
+			"crystal_shard_count": Defs.CRYSTAL_SHARDS,
 			"copper": [Defs.COPPER_RING.x, Defs.COPPER_RING.y],
 			"purity_rich": Defs.PURITY_RICH_RING,
 			"purity_pure": Defs.PURITY_PURE_RING,

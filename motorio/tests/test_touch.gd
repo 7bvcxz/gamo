@@ -79,10 +79,9 @@ func _mining(main: Node2D) -> void:
 	sim.setup(4242)
 	var seam: Vector2i = Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_CRYSTAL:
-			seam = cell
-			break
-	_check(seam != Vector2i(9999, 9999), "수정 광맥이 있다")
+		seam = cell
+		break
+	_check(seam != Vector2i(9999, 9999), "광맥이 있다")
 	if seam == Vector2i(9999, 9999):
 		return
 	# Stand one cell south of the seam, facing it, exactly as a player would.

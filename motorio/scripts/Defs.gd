@@ -571,6 +571,77 @@ const OPENING_STONES := 3
 ## stones of heat on their own come to 7.3. What the card says and what the
 ## screen shows have to be the same thing.
 const OPENING_WARM_RADIUS := 9.0
+
+## --- What the objective card says -------------------------------------------
+## One table, keyed by an id that does not change, so a line can be rewritten
+## without hunting for it in a ladder of branches -- and so the documentation
+## page can list them beside the reason each one exists.
+##
+## The voice is deliberately unhelpful. The card used to read "임무 3 · 탐험할
+## 방법을 찾자  열석을 캐서 기지에 넣으세요  (0/3)", which is a checklist item:
+## it says the number, the verb and the key, and nothing at all about being cold
+## and alone on someone else's planet. A count on the card also turns the first
+## ten minutes into an errand with a progress bar.
+##
+## What is left is what she would notice, in the order she would notice it. The
+## rule the lines are written against: **name the thing, never the action.** A
+## player who is told there is a box in the snow walks to the box; a player who
+## is told to press a key has been handed a manual.
+##
+## `why` is for the documentation page and is never drawn.
+const MISSION_LINES := {
+	"M1": {
+		"line": "춥다.  눈 위에 상자가 하나 있다.",
+		"why": "게임의 첫 문장. 처지와 목표물만 말하고 동사는 말하지 않는다. 상자는 맥박치며 빛나고, 3칸 시야 안에 그것 말고는 아무것도 없다.",
+	},
+	"M1-HOLD": {
+		"line": "불을 피울 자리를 골라야 한다.  떨어진 곳에서 멀지 않게.",
+		"why": "들고 있는 것이 무엇인지 말하지 않는다. 대신 그것으로 무엇이 되는지와, 놓을 수 있는 범위가 있다는 것만 흘린다.",
+	},
+	"M2": {
+		"line": "밤이 오면 이대로는 안 된다.  상자에 무언가 더 있었던 것 같다.",
+		"why": "왜 더 필요한지(밤)와 어디를 봐야 하는지(상자)를 한 줄에. 상자를 두 번 뒤진다는 것은 아무도 알려주지 않는다.",
+	},
+	"M2-HOLD": {
+		"line": "불에서 조금 떨어진 곳에 세운다.",
+		"why": "거처가 기지에 붙으면 설치가 거부되는데, 그 규칙을 거부당하기 전에 한 번 말해 둔다. 몇 칸인지는 말하지 않는다.",
+	},
+	"M3": {
+		"line": "불이 꺼져 간다.  땅에 붉게 박힌 것이 보인다.",
+		"why": "열석이라는 이름도, 곡괭이도, 개수도 말하지 않는다. 붉은 것은 화면에 실제로 붉게 그려져 있다.",
+	},
+	"M3-HOLD": {
+		"line": "손에 든 것이 탈 것 같다.",
+		"why": "연료를 가진 순간에만 바뀐다. 어디에 넣는지는 말하지 않는다 — 이 세계에 불은 하나뿐이다.",
+	},
+	"M4": {
+		"line": "빛이 닿은 자리에, 무언가 얼어 있다.",
+		"why": "기지 3단계로 온기가 9칸이 되는 순간 얼어붙은 고양이가 처음 빛 안에 들어온다. 이 줄은 그 순간을 가리키기만 한다.",
+	},
+	"CARRY-FROZEN": {
+		"line": "품 안이 차갑다.  불 가까이에 두어야 한다.",
+		"why": "해동은 기지 2칸 안에서만 시작한다. 거리 대신 '가까이'라고만 말하고, 틀리면 그때 정확히 알려준다.",
+	},
+	"THAW": {
+		"line": "얼음이 녹고 있다.",
+		"why": "12초 동안 아무것도 요구하지 않는 유일한 줄. 이 게임에서 가장 비싼 3초를 앞두고 화면이 다른 말을 하면 안 된다.",
+	},
+	"CARRY-CAT": {
+		"line": "고양이가 일할 곳을 찾는다.  광맥이든, 기계든.",
+		"why": "광맥에 직접 놓을 수 있다는 것과 기계가 따로 있다는 것을 한 번에 흘린다. 어느 쪽이 빠른지는 말하지 않는다.",
+	},
+	"COLD-NOBASE": {
+		"line": "몸이 얼고 있다.  불이 필요하다.",
+		"why": "기지가 서기 전의 동결 경고. 돌아갈 온기 반경이 아직 없으므로 '반경 안으로'라고 말할 수 없다.",
+	},
+}
+
+## The line for an id. Missing ids return the id itself rather than an empty
+## card, so a typo shows up on screen instead of as silence.
+static func mission_line(id: String) -> String:
+	if not MISSION_LINES.has(id):
+		return id
+	return String(MISSION_LINES[id]["line"])
 const FURNACE_PERIOD := 2.2
 ## Deliberately slow. A tenth of what it used to be, which puts a ten-tile run at
 ## about 38 seconds: never a hard throughput gate -- it still carries nearly four
@@ -632,8 +703,31 @@ const MAP_CELL_PX := 4.0
 const BASE_REVEAL_RADIUS := 11
 
 const WARM_BASE := 7.0
-const WARM_PER_HEAT := 0.022
 const WARM_MAX := 22.0
+## --- Base levels ------------------------------------------------------------
+## The circle used to grow by a hundredth of a tile at a time, which is a number
+## in a corner rather than a thing that happens. It goes up in steps now: the
+## base upgrades, and two tiles of white ground turn into ground.
+##
+## The thresholds are in heat, and the heat stone is worth five, so the first
+## four are the three, nine, fifteen and twenty-seven stones the opening asks
+## for. Written in heat rather than in stones because an energy crystal is heat
+## too, and a table that counted only stones would stop the exchanger from
+## contributing to the thing heat is for.
+##
+## `[초안]` beyond level 4. The first four are the design's; the rest exist
+## because the copper ring starts at 15 and a player who cannot pass 15 can
+## never reach it. They escalate the same way -- roughly double the last step.
+const BASE_LEVELS: Array[Dictionary] = [
+	{"heat": 0,   "radius": 7.0},     # the emergency base, the moment it is lit
+	{"heat": 15,  "radius": 9.0},     # 열석 3
+	{"heat": 45,  "radius": 11.0},    # 열석 9
+	{"heat": 75,  "radius": 13.0},    # 열석 15
+	{"heat": 135, "radius": 15.0},    # 열석 27 -- and the first copper
+	{"heat": 255, "radius": 17.0},
+	{"heat": 435, "radius": 19.0},
+	{"heat": 675, "radius": WARM_MAX},
+]
 
 const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
 ## Night is the reason to go home. Once it falls the warm pool is no longer
@@ -826,12 +920,25 @@ const PURITY_PURE_RING := 17.0
 ## Heat stone is what the first ten minutes are made of, so it is inside the
 ## opening warm radius: the player never has to leave the fire to feed it.
 const HEATSTONE_RING := Vector2(3.0, 6.0)
-## Crystal moved out. It used to be the resource of minute one, and it is not any
-## more -- the exchanger and the energy line are the middle of the game, and a
-## seam of them beside the base was the game showing its second act during its
-## first. Copper follows it out so the two do not share a band.
-const FROST_RING := Vector2(9.0, 14.0)
-const COPPER_RING := Vector2(15.0, 21.0)
+## Crystal has no seam. It used to have one, and a seam is a promise that there
+## will always be more -- which is the opposite of what a rare material is. It
+## lies in the snow instead, a fixed number of pieces put down when the world is
+## made and never replaced: what is out there is all there will ever be, and
+## every one of them was found by walking somewhere.
+##
+## Scattered from just outside the opening circle to past the furthest the base
+## can ever reach, so there is something to find at every stage rather than a
+## band that is exhausted at one.
+const CRYSTAL_RING := Vector2(8.0, 26.0)
+## How many exist. Twenty builds the exchanger and the rest is what it has to
+## live on -- one exchanger and about twenty energy crystals in a whole world.
+## `[초안]`: the number that decides how far the energy line can go, and it wants
+## a play-through before it is trusted.
+const CRYSTAL_SHARDS := 60
+## First reachable at base level 4, which is where the fourth upgrade puts the
+## circle. Copper is the door to power and belts, and it opens on an upgrade
+## rather than on a number quietly passing a threshold.
+const COPPER_RING := Vector2(15.0, 19.0)
 
 ## UI scale. The web export renders at the device pixel ratio, so a phone that is
 ## physically 390 CSS px wide reports a ~960 px logical viewport: every constant
@@ -988,5 +1095,22 @@ const SNOW_SHADE := Color8(136, 147, 163)
 static func warm_tint(k: float) -> Color:
 	return SNOW_LIT.lerp(SNOW_SHADE, pow(clampf(k, 0.0, 1.0), 0.85))
 
+## The level a run has reached, which is the only thing that decides the circle.
+static func base_level(total_heat: int) -> int:
+	var level: int = 0
+	for index in BASE_LEVELS.size():
+		if total_heat >= int(BASE_LEVELS[index]["heat"]):
+			level = index
+	return level
+
 static func warm_radius(total_heat: int) -> float:
-	return minf(WARM_BASE + float(total_heat) * WARM_PER_HEAT, WARM_MAX)
+	return float(BASE_LEVELS[base_level(total_heat)]["radius"])
+
+## What the next upgrade costs and gives, or an empty dictionary at the top. The
+## HUD reads this so the player can see what they are working towards rather
+## than watching a number they cannot interpret.
+static func next_base_level(total_heat: int) -> Dictionary:
+	var level: int = base_level(total_heat)
+	if level + 1 >= BASE_LEVELS.size():
+		return {}
+	return BASE_LEVELS[level + 1]

@@ -1,5 +1,8 @@
 import React from 'react';
 import { MotorioLevelMap } from './MotorioLevelMap.jsx';
+// Numbers and mission lines come out of the game, never out of this file. A
+// figure typed here goes stale the first time it is tuned and nothing fails.
+import balance from '../../lib/generated/balance.json';
 
 export function MotorioLevelDesign() {
   return (
@@ -44,11 +47,36 @@ export function MotorioLevelDesign() {
 
       <h2>제1원칙: 자원은 고정, 온기는 도달 범위</h2>
       <p>
-        모든 광맥은 월드 생성 시점에 자리가 정해진다. 열을 벌면 온기 반경(
-        <code>7 + 0.022 × 누적 열</code>, 최대 22칸)이 자라 그 자리에 닿게 될 뿐, 자원이 새로
-        생기지는 않는다. 반경 밖에서는 설비가 45% 속도로 돌아가므로 온기는 플레이어의 몸뿐 아니라
-        공장에도 의미가 있다.
+        모든 광맥은 월드 생성 시점에 자리가 정해진다. 열을 벌면 <b>기지가 단계를 올리고</b> 온기
+        반경이 그만큼 넓어져 그 자리에 닿게 될 뿐, 자원이 새로 생기지는 않는다. 반경 밖에서는
+        설비가 45% 속도로 돌아가므로 온기는 플레이어의 몸뿐 아니라 공장에도 의미가 있다.
       </p>
+      <p>
+        반경은 <b>연속으로 자라지 않는다.</b> 0.1칸씩 밀려나는 원은 구석의 숫자가 바뀌는 것이지
+        일어나는 사건이 아니다. 단계가 오르는 순간 하얗던 땅 두 칸이 한꺼번에 땅이 된다.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>기지 단계</th>
+              <th>누적 열</th>
+              <th>열석으로</th>
+              <th>온기</th>
+            </tr>
+          </thead>
+          <tbody>
+            {balance.warmth.levels.map((level, index) => (
+              <tr key={index}>
+                <td>{index}</td>
+                <td>{level.heat}</td>
+                <td>{Math.round(level.heat / balance.items.heat_value[3])}개</td>
+                <td>{level.radius}칸</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2>자원 배치</h2>
       <div className="table-wrap">
@@ -62,29 +90,35 @@ export function MotorioLevelDesign() {
           </thead>
           <tbody>
             <tr>
-              <td>시작 수정</td>
+              <td>시작 열석</td>
               <td>코어 남쪽 3칸, 한 줄</td>
               <td>모든 시드에서 보장. 첫 1분은 탐색이 아니라 학습</td>
             </tr>
             <tr>
-              <td>수정 광맥 지대</td>
-              <td>반경 4 – 9.5칸</td>
-              <td>손으로 캘 수 있는 유일한 자원</td>
+              <td>열석 광맥 지대</td>
+              <td>반경 {balance.rings.heatstone[0]} – {balance.rings.heatstone[1]}칸</td>
+              <td>처음 10분이 이것으로 만들어진다. 손으로 캐서 기지에 넣으면 그대로 열</td>
             </tr>
             <tr>
-              <td>구리 광맥</td>
-              <td>코어 북쪽 9칸, 보장</td>
-              <td>철 제련이 운에 좌우되지 않도록 고정</td>
+              <td>수정 조각</td>
+              <td>반경 {balance.rings.crystal_shards[0]} – {balance.rings.crystal_shards[1]}칸에 {balance.rings.crystal_shard_count}개</td>
+              <td>
+                <b>광맥이 아니다.</b> 월드에 놓인 개수가 전부이고 더 만들 방법이 없다. 광맥이면
+                희귀재료를 계속 캘 수 있게 되므로 희귀재료가 아니게 된다
+              </td>
             </tr>
             <tr>
               <td>구리 지대</td>
-              <td>반경 11 – 17칸</td>
-              <td>채굴기 전용. 시작 시점에는 닿을 수 없음</td>
+              <td>반경 {balance.rings.copper[0]} – {balance.rings.copper[1]}칸</td>
+              <td>기지 4단계에서 처음 닿는다. 채굴기 전용</td>
             </tr>
             <tr>
               <td>얼어붙은 고양이</td>
-              <td>200칸당 1마리</td>
-              <td>시작 온기 안에 1마리 보장</td>
+              <td>200칸당 1마리, 최소 반경 8.5칸</td>
+              <td>
+                시작 반경 7칸에서는 <b>보이지 않는다.</b> 3단계로 9칸이 되는 순간 첫 마리가
+                빛 안에 들어온다
+              </td>
             </tr>
           </tbody>
         </table>
@@ -93,6 +127,45 @@ export function MotorioLevelDesign() {
         광맥 밀도는 의도적으로 희소하다. 씨앗 3곳 × 2칸 규모라 광맥을 찾는 일이 사건이 되고, 채굴기
         한 대의 가치가 올라간다.
       </p>
+
+      <h2>미션</h2>
+      <p>
+        오프닝의 목표 카드는 <b>일부러 불친절하다.</b> 이전 문구는{' '}
+        <code>임무 3 · 탐험할 방법을 찾자 열석을 캐서 기지에 넣으세요 (0/3)</code> 였는데, 이것은
+        체크리스트 항목이다 — 숫자와 동사와 키를 말하고, 낯선 행성에 혼자 얼어붙어 있다는 것에
+        대해서는 아무 말도 하지 않는다. 카드 위의 개수는 첫 10분을 진행바가 달린 심부름으로
+        만든다.
+      </p>
+      <p>
+        남긴 것은 그녀가 알아차렸을 법한 것뿐이고, 문구는 한 가지 규칙으로 쓴다 —{' '}
+        <b>사물을 말하고 행동은 말하지 않는다.</b> 눈밭에 상자가 있다는 말을 들은 플레이어는
+        상자로 걸어간다. 키를 누르라는 말을 들은 플레이어는 설명서를 받은 것이다.
+      </p>
+      <p className="prop-why">
+        아래 표는 게임에서 뽑아낸다(<code>Defs.MISSION_LINES</code> →{' '}
+        <code>dump_balance.gd</code>). <b>ID로 지정해서 고칠 수 있다</b> — 고치고 싶은 줄의 ID를
+        말하면 그 한 줄만 바뀐다.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Content</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(balance.missions).map(([id, entry]) => (
+              <tr key={id}>
+                <td><code>{id}</code></td>
+                <td>{entry.line}</td>
+                <td>{entry.why}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2>타일 속성</h2>
       <p>

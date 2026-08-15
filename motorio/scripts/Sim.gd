@@ -13,6 +13,8 @@ signal build_rejected(reason: String, cell: Vector2i)
 signal warmth_changed(radius: float)
 signal cat_adopted(total: int)
 signal cat_thawed(total: int, at: Vector2)
+## The base reaching the next step of BASE_LEVELS.
+signal base_upgraded(level: int, radius: float)
 
 ## A cat worker. Miners cannot run without one standing at them, so the number
 ## of cats -- not the amount of heat -- is what gates automation.
@@ -117,6 +119,9 @@ var cats: Array[Cat] = []
 ## Frozen cats lying in the world: cell -> how far the ice has gone, 0..1.
 ## A value rather than a set because thawing happens where the cat was put down
 ## and the progress has to survive a save.
+## Crystal, lying where the world put it. A set rather than a count per cell:
+## one piece to a tile, so finding one is finding a place rather than a pile.
+var shards: Dictionary[Vector2i, bool] = {}
 var frozen_cats: Dictionary[Vector2i, float] = {}
 ## Whether Grim has one in her arms. A bool rather than an object because a
 ## frozen cat has no state of its own until it is on the ground -- it is not a
@@ -147,10 +152,11 @@ var kit_searched: int = 0
 ## the orchestrator because the thing that draws the ring reads the world, and a
 ## number the drawing cannot see is a number the drawing has to be told twice.
 var kit_progress: float = 0.0
-## Warm radius the opening granted outright, on top of what heat has bought.
-## The third mission promises nine tiles and three stones of heat come to 7.3,
-## so the difference is given rather than pretended.
-var warm_bonus: float = 0.0
+## Which step of BASE_LEVELS the base is on. Kept beside the radius so the thing
+## that changed can be announced -- an upgrade is an event, and the previous
+## arrangement had nothing to fire on because the radius moved every few seconds
+## by a hundredth of a tile.
+var base_level: int = 0
 ## The cat currently in the player's arms. Cats are placed on machines by hand;
 ## there is no automatic assignment, so the player decides who works where.
 var carried_cat: Cat = null
@@ -293,6 +299,10 @@ func to_save() -> Dictionary:
 			"hunger": cat.hunger, "eat": cat.eat_timer,
 			"rarity": cat.rarity,
 		})
+	var shard_rows := PackedInt32Array()
+	for cell: Vector2i in shards:
+		shard_rows.append(cell.x)
+		shard_rows.append(cell.y)
 	var frozen_rows: Array = []
 	for cell: Vector2i in frozen_cats:
 		frozen_rows.append([cell.x, cell.y, frozen_cats[cell]])
@@ -326,8 +336,8 @@ func to_save() -> Dictionary:
 		# a world around the wrong centre would put the shelter, the fog and the
 		# ore rings in different places than the ones on screen.
 		"base_placed": base_placed, "shelter_placed": shelter_placed,
-		"warm_bonus": warm_bonus,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
+		"shards": shard_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
 		# All three cells, rather than the core plus arithmetic: the player picks
 		# where the hut goes, so it is not derivable from where the fire is.
@@ -386,6 +396,10 @@ func from_save(data: Dictionary) -> void:
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
 		machines[cell] = machine
 
+	shards.clear()
+	var shard_flat: PackedInt32Array = data.get("shards", PackedInt32Array())
+	for index in range(0, shard_flat.size() - 1, 2):
+		shards[Vector2i(shard_flat[index], shard_flat[index + 1])] = true
 	frozen_cats.clear()
 	for row: Array in data.get("frozen", []):
 		frozen_cats[Vector2i(int(row[0]), int(row[1]))] = float(row[2])
@@ -394,7 +408,6 @@ func from_save(data: Dictionary) -> void:
 	core_cell = Vector2i(int(data.get("core_x", core_cell.x)),
 		int(data.get("core_y", core_cell.y)))
 	base_placed = bool(data.get("base_placed", true))
-	warm_bonus = float(data.get("warm_bonus", 0.0))
 	shelter_placed = bool(data.get("shelter_placed", true))
 	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
 	kit_searched = int(data.get("kit_searched", 2))
@@ -404,8 +417,8 @@ func from_save(data: Dictionary) -> void:
 		int(data.get("shelter_y", shelter_cell.y)))
 	food_cell = Vector2i(int(data.get("food_x", food_cell.x)),
 		int(data.get("food_y", food_cell.y)))
-	warm_radius = minf(Defs.warm_radius(total_heat) + warm_bonus, Defs.WARM_MAX) \
-		if base_placed else Defs.CRASH_SIGHT
+	base_level = Defs.base_level(total_heat)
+	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
 	_cached_radius = warm_radius
 	_grid_dirty = true
 
@@ -459,8 +472,9 @@ func setup(seed_value: int) -> void:
 	machines[core_cell] = core
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
+	shards.clear()
 	frozen_cats.clear()
-	warm_bonus = 0.0
+	base_level = 0
 	carried_frozen = false
 	carried_frozen_thaw = 0.0
 	carried_kit = Defs.KIT_NONE
@@ -479,6 +493,7 @@ func setup(seed_value: int) -> void:
 	shelter_cell = core_cell + Defs.SHELTER_CELL
 	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
 	_generate_ore(seed_value)
+	_generate_shards(seed_value)
 	_generate_frozen_cats(seed_value)
 
 ## Cells kept clear so the guaranteed opening always has a belt route home.
@@ -505,14 +520,13 @@ func _generate_ore(seed_value: int) -> void:
 	# stone is the exception -- it is what the opening is made of, so there is
 	# more of it and all of it is close.
 	_scatter_ore(rng, Defs.ITEM_HEATSTONE, Defs.HEATSTONE_RING, 3, 2)
-	_scatter_ore(rng, Defs.ITEM_CRYSTAL, Defs.FROST_RING, 3, 2)
 	_scatter_ore(rng, Defs.ITEM_COPPER, Defs.COPPER_RING, 3, 2)
-	# The guaranteed seam due north is crystal now rather than copper. It exists
-	# so the exchanger -- the design's payoff -- does not depend on where the
-	# scatter happened to drop something, and crystal is the resource that beat
-	# now needs.
+	# A guaranteed heat stone seam due north with a clear column home, so the
+	# opening never depends on the scatter being kind. It used to be copper, then
+	# crystal; it is the resource the beat it protects actually needs, and that
+	# beat is now the first minutes.
 	for offset: Vector2i in STARTER_COPPER:
-		ore[core_cell + offset] = Defs.ITEM_CRYSTAL
+		ore[core_cell + offset] = Defs.ITEM_HEATSTONE
 	for offset: Vector2i in STARTER_LANE:
 		ore.erase(core_cell + offset)
 	# The shelter, its doorstep and the food bin are cleared last, after every
@@ -560,6 +574,21 @@ func _scatter_ore(rng: RandomNumberGenerator, item_type: int, ring: Vector2, pat
 				ore[cursor] = item_type
 				placed += 1
 			cursor = origin + Vector2i(rng.randi_range(-1, 1), rng.randi_range(-1, 1)) * (1 + placed / 3)
+
+## Crystal, scattered once and never again. Placed after the ore so a piece
+## never lands on a seam -- a shard under a miner is a shard nobody can reach.
+func _generate_shards(seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 5501
+	var attempts := 0
+	while shards.size() < Defs.CRYSTAL_SHARDS and attempts < Defs.CRYSTAL_SHARDS * 40:
+		attempts += 1
+		var angle: float = rng.randf() * TAU
+		var radius: float = lerpf(Defs.CRYSTAL_RING.x, Defs.CRYSTAL_RING.y, sqrt(rng.randf()))
+		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if shards.has(cell) or ore.has(cell) or machines.has(cell) or cell == core_cell:
+			continue
+		shards[cell] = true
 
 ## Frozen cats lie where they fell, about one per two hundred tiles, plus a
 ## guaranteed one inside the opening warm radius so the first cat is always
@@ -800,13 +829,6 @@ func _wake_cat(cell: Vector2i) -> void:
 	cats.append(cat)
 	cat_thawed.emit(cats.size(), cat.pos)
 	cat_adopted.emit(cats.size())
-
-## Takes the circle out to `target` and leaves it there, by granting whatever
-## heat has not bought yet. Never shrinks it: a mission that gave two tiles must
-## not take one back later because the player got there another way.
-func grant_warm(target: float) -> void:
-	warm_bonus = maxf(warm_bonus, target - Defs.warm_radius(total_heat))
-	_refresh_radius()
 
 ## Everything in the base's store that will burn, into the fire.
 ##
@@ -1396,6 +1418,16 @@ func cancel_hand_mine() -> void:
 ## Walking over a loose item pockets it straight into the base stock. Immediate,
 ## because bending down for something you are standing on should not need a
 ## second verb.
+## A crystal picked up off the snow. Returns whether there was one -- the caller
+## says so on screen, because this is the only way crystal enters the game and a
+## silent pickup would leave the player wondering where it came from.
+func collect_shard_at(cell: Vector2i) -> bool:
+	if not shards.has(cell):
+		return false
+	shards.erase(cell)
+	_gain(Defs.ITEM_CRYSTAL, 1)
+	return true
+
 func collect_ground_at(cell: Vector2i) -> int:
 	if not ground.has(cell):
 		return -1
@@ -1808,11 +1840,15 @@ func _cat_eat(cat: Cat, delta: float) -> void:
 func _refresh_radius() -> void:
 	# No base, no fire, no circle -- only as much of the map as she can see from
 	# where she is standing.
-	warm_radius = minf(Defs.warm_radius(total_heat) + warm_bonus, Defs.WARM_MAX) \
-		if base_placed else Defs.CRASH_SIGHT
+	var level: int = Defs.base_level(total_heat)
+	var rose: bool = base_placed and level > base_level
+	base_level = level
+	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
 	if not is_equal_approx(warm_radius, _cached_radius):
 		_cached_radius = warm_radius
 		warmth_changed.emit(warm_radius)
+	if rose:
+		base_upgraded.emit(base_level, warm_radius)
 
 func _tick_miner(machine: Machine, delta: float) -> void:
 	# A miner is inert without a cat standing at it. This is the whole point of

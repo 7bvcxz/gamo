@@ -235,8 +235,13 @@ func _rock_field() -> void:
 		if atlas != null:
 			_check(atlas.get_width() == GroundLayer.ORE_COLUMNS * 64,
 				"시트가 3열 64px이다: %d" % atlas.get_width())
-	_check(ore_kinds.has(Defs.ITEM_CRYSTAL) and ore_kinds.has(Defs.ITEM_COPPER),
-		"월드에 수정과 구리가 모두 있다")
+	# Crystal is not a seam any more -- it lies in the snow in a fixed number and
+	# there is no way to make more, which is what a rare material is.
+	_check(ore_kinds.has(Defs.ITEM_HEATSTONE) and ore_kinds.has(Defs.ITEM_COPPER),
+		"월드에 열석과 구리 광맥이 모두 있다")
+	_check(not ore_kinds.has(Defs.ITEM_CRYSTAL), "수정 광맥은 없다")
+	_check(world.shards.size() == Defs.CRYSTAL_SHARDS,
+		"수정 조각은 정확히 %d개 놓인다 (%d)" % [Defs.CRYSTAL_SHARDS, world.shards.size()])
 	_check(GroundLayer.ore_atlas_at(world, Vector2i(9999, 9999)) == null,
 		"광맥이 없는 칸은 시트도 없다")
 	var variants: Dictionary[int, bool] = {}
