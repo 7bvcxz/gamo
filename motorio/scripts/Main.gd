@@ -116,6 +116,10 @@ var state_before_settings: int = State.TITLE
 ## this genre's build menus do, and movement is on WASD so the arrow keys the
 ## menu wants are free.
 var build_menu_open: bool = false
+## The fire's own window: what she is putting in and what she can make out of it.
+## One door rather than two -- everything the base does is behind the same key,
+## on the same building, and the player never has to learn which press is which.
+var base_menu_open: bool = false
 ## Which entry of Defs.BUILDABLE the cursor is on. Separate from selected_index,
 ## which is what the gun is actually loaded with -- browsing must not change what
 ## a stray Z would build.
@@ -229,6 +233,7 @@ func _start_run() -> void:
 	night_warned = false
 	meter_cell = Vector2i(9999, 9999)
 	build_menu_open = false
+	base_menu_open = false
 	map_open = false
 	menu_index = 0
 	tool_index = 0
@@ -390,14 +395,29 @@ func _unassigned_cats() -> int:
 			count += 1
 	return count
 
+## Taking a tool out. Only the torch does anything when it is picked up, and it
+## does it here rather than in the key handler so the touch row goes through the
+## same door.
+func _on_tool_selected() -> void:
+	if TOOLS[tool_index] != TOOL_TORCH:
+		return
+	if sim.light_torch():
+		audio.call("play", "confirm")
+		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
+	else:
+		_notify("%s이 없습니다  기지에서 만들 수 있습니다" % Defs.TORCH_NAME,
+			Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+
 ## The toolbar. One tool for now -- the build gun -- but it is a list because the
 ## slot it lives in is a tool slot, not a machine slot: that is the whole point of
 ## the change. What the gun is loaded with is chosen in its menu, not by which
 ## number key was pressed last.
 const TOOL_BUILD_GUN := 0
 const TOOL_PICKAXE := 1
-const TOOLS: Array[int] = [TOOL_BUILD_GUN, TOOL_PICKAXE]
-const TOOL_NAMES := ["건물건설총", "곡괭이"]
+const TOOL_TORCH := 2
+const TOOLS: Array[int] = [TOOL_BUILD_GUN, TOOL_PICKAXE, TOOL_TORCH]
+const TOOL_NAMES := ["건물건설총", "곡괭이", Defs.TORCH_NAME]
 
 var tool_index: int = 0
 
@@ -406,6 +426,11 @@ func holding_build_gun() -> bool:
 
 func holding_pickaxe() -> bool:
 	return TOOLS[tool_index] == TOOL_PICKAXE
+
+## Selected *and* alight. Choosing the slot with an empty pack shows the slot and
+## lights nothing, which is what tells the player they have run out.
+func holding_torch() -> bool:
+	return TOOLS[tool_index] == TOOL_TORCH and sim.torch_left > 0.0
 
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
@@ -424,6 +449,17 @@ func toggle_build_menu() -> bool:
 		map_open = false
 	audio.call("play", "select")
 	return true
+
+func _base_menu_key(key: InputEventKey) -> void:
+	match key.keycode:
+		KEY_ESCAPE, KEY_X:
+			close_base_menu()
+		KEY_UP, KEY_DOWN:
+			var step: int = -1 if key.keycode == KEY_UP else 1
+			menu_index = posmod(menu_index + step, maxi(1, base_rows().size()))
+			audio.call("play", "select")
+		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
+			_base_menu_confirm()
 
 func _build_menu_key(key: InputEventKey) -> void:
 	var count: int = Defs.BUILDABLE.size()
@@ -684,7 +720,7 @@ func shelter_nearby() -> bool:
 ## the last time this was decided in two places, the build list took the arrow
 ## keys and Grim walked off anyway.
 func modal_open() -> bool:
-	return build_menu_open or gacha_open or map_open
+	return build_menu_open or gacha_open or map_open or base_menu_open
 
 func _process(delta: float) -> void:
 	_follow_music()
@@ -844,6 +880,8 @@ func _process_play(delta: float) -> void:
 	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_kit_search(delta)
+	_update_torch(delta)
+	_update_torch_light()
 	_update_preview()
 	if not night_warned and is_night():
 		night_warned = true
@@ -1070,6 +1108,34 @@ func _facing_kit() -> bool:
 		return false
 	return player.position.distance_to(sim.cell_centre(sim.kit_cell)) \
 		<= float(Defs.TILE) * KIT_REACH
+
+## The torch burns only while it is in her hand. Putting it away stops the clock
+## on it, which is what makes thirty seconds a distance rather than a countdown
+## that starts when you make it.
+func _update_torch(delta: float) -> void:
+	if not holding_torch():
+		return
+	var before: float = sim.torch_left
+	sim.burn_torch(delta)
+	if before > 0.0 and sim.torch_left <= 0.0:
+		_notify("%s이 꺼졌습니다" % Defs.TORCH_NAME, Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+		fx.ring(player.position, Defs.COL_TEXT_DIM, Defs.RING_MEDIUM)
+
+## Where the torch's hole in the fog is, in viewport pixels. Computed here
+## because this is the one place that has both the character and the camera; the
+## fog knows about neither.
+func _update_torch_light() -> void:
+	if cold_fog == null:
+		return
+	# Two layers, one number. The fog opens a hole and the ground lights what is
+	# under it; either without the other is a black disc or a lit patch nobody
+	# can see through.
+	var radius: float = Defs.TORCH_SIGHT * float(Defs.TILE) if holding_torch() else 0.0
+	cold_fog.torch_at = player.global_position
+	cold_fog.torch_radius = radius
+	ground_layer.torch_at = player.global_position
+	ground_layer.torch_radius = radius
 
 func _advance_mission() -> void:
 	var was: int = mission
@@ -1308,6 +1374,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	# The build menu owns the keyboard while it is up. Placed before the state
 	# match so a keypress cannot both move the cursor and build something.
+	if base_menu_open and state == State.PLAY:
+		_base_menu_key(key)
+		get_viewport().set_input_as_handled()
+		return
 	if build_menu_open and state == State.PLAY:
 		_build_menu_key(key)
 		get_viewport().set_input_as_handled()
@@ -1403,6 +1473,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + TOOLS.size():
 		tool_index = key.keycode - KEY_1
+		_on_tool_selected()
 		audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
@@ -1665,7 +1736,7 @@ func _primary_action() -> void:
 	# nothing at all -- which is where the heat that had been mined by hand sat
 	# for good, because the only doorway into the core was a belt or a cat.
 	if cell == sim.core_cell and sim.base_placed:
-		_deposit_at_core()
+		_open_base_menu()
 		return
 	# A frozen cat answers Z before anything else. She has both arms round it,
 	# so there is nothing else the press could mean.
@@ -1730,13 +1801,71 @@ func _primary_action() -> void:
 ## Putting down the base or the shelter. Both refuse for reasons the player
 ## cannot see from the tile alone, so a refusal says which one it was -- a
 ## placement that silently does nothing is the same experience as a broken key.
+## Walking up to the fire. Putting fuel in and making something out of it are
+## both what "going to the base" means, so both are behind the one press -- but
+## as two rows rather than one automatic action and one choice.
+##
+## The first version deposited on open, and it was wrong for a reason the window
+## itself made obvious: a torch is made of the same heat stone the fire burns, so
+## opening the window spent the material the window exists to spend. Every visit
+## ended with a red cost and nothing to pay it with.
+func base_rows() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	# Only while there is something to put in. A row that is always there and
+	# usually refuses teaches the player to skip past it.
+	if sim.has_fuel():
+		rows.append({"kind": "fuel"})
+	for index in Defs.BASE_CRAFTS.size():
+		rows.append({"kind": "craft", "craft": index})
+	return rows
+
+func _open_base_menu() -> void:
+	base_menu_open = true
+	build_menu_open = false
+	map_open = false
+	gacha_open = false
+	menu_index = 0
+	audio.call("play", "select")
+
+func close_base_menu() -> void:
+	if not base_menu_open:
+		return
+	base_menu_open = false
+	audio.call("play", "select")
+
+## Whichever row the cursor is on.
+func _base_menu_confirm() -> void:
+	var rows: Array[Dictionary] = base_rows()
+	if rows.is_empty():
+		return
+	var row: Dictionary = rows[clampi(menu_index, 0, rows.size() - 1)]
+	if String(row["kind"]) == "fuel":
+		_deposit_at_core()
+		# The row it was on has just gone, so the cursor lands on the craft list
+		# rather than on whatever slid into its place.
+		menu_index = 0
+		return
+	craft_selected(int(row["craft"]))
+
+## Making something at the fire. A table rather than a branch, so the second
+## thing the base can make is a row and not a rewrite.
+func craft_selected(index: int = 0) -> void:
+	var craft: Dictionary = Defs.BASE_CRAFTS[clampi(index, 0, Defs.BASE_CRAFTS.size() - 1)]
+	if not sim.craft_torch():
+		_notify("%s  ·  재료가 모자랍니다" % String(craft["name"]), Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+		return
+	_notify("%s을 만들었습니다  (%d개)" % [String(craft["name"]), sim.torches], Defs.COL_CORE)
+	fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+	audio.call("play", "alloy")
+
 ## Handing the fuel over, and showing it go in. The pieces fly out of her arms
 ## and are pulled into the core, because "the number in the corner changed" is
 ## not a thing happening -- and this is the action the whole first ten minutes
 ## is built around.
 func _deposit_at_core() -> void:
 	if not sim.has_fuel():
-		_notify("넣을 연료가 없습니다  열석을 캐서 오세요", Defs.COL_TEXT_DIM)
+		_notify("넣을 연료가 없습니다", Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
 	var before: int = sim.heat

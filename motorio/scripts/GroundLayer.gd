@@ -19,6 +19,12 @@ const TILE_VARIANTS := 16
 var sim: Sim
 var night: float = 0.0
 var view_rect := Rect2()
+## The torch's own little pool, in world pixels. The fog opening a hole is not
+## enough on its own: outside the warm circle the ground is painted with the cold
+## fill and the tiles multiply against it, so a hole with no light in it shows
+## dark navy. A torch that reveals a black disc is not a torch.
+var torch_at := Vector2.ZERO
+var torch_radius: float = 0.0
 
 var _texture: ImageTexture
 ## The tile pass, drawn multiplied over the ground rather than on it.
@@ -84,6 +90,28 @@ func _draw() -> void:
 	# Night darkens the pool through modulation rather than a second fill pass.
 	var tint: Color = Color.WHITE.lerp(Color(0.42, 0.36, 0.48, 1.0), pow(night, 1.3) * 0.72)
 	draw_texture_rect(_texture, Rect2(core_px - Vector2.ONE * radius, Vector2.ONE * radius * 2.0), false, tint)
+	if torch_radius > 0.0:
+		_draw_torch_light(tint)
+
+## The ground under the torch.
+##
+## Not the fire's own gradient scaled down, which is what this was first: that
+## texture is baked for the warm radius and at a sixth of the size it came out a
+## dim grey disc -- the fog opened correctly and what it revealed looked like a
+## hole rather than lit snow. Drawn here instead, as its own stack of rings, so
+## how bright it is has one number and that number can be looked at.
+const TORCH_RINGS := 9
+const TORCH_STEP := 0.14
+func _draw_torch_light(tint: Color) -> void:
+	# Lit snow, with a little of the flame in it. The base fill out here is the
+	# cold navy and the tiles multiply against it, so this has to carry the
+	# ground all the way from dark to readable on its own.
+	var lit: Color = Color(0.96, 0.965, 0.99).lerp(Defs.COL_CORE, 0.10)
+	lit = lit * Color(tint.r, tint.g, tint.b, 1.0)
+	for index in TORCH_RINGS:
+		var k: float = float(index) / float(TORCH_RINGS)
+		draw_circle(torch_at, torch_radius * (1.0 - k * 0.82),
+			Color(lit.r, lit.g, lit.b, TORCH_STEP))
 
 ## Deterministic and cheap. Not a hash function anyone should trust with
 ## anything, but it has to give the same answer on every machine and every run,

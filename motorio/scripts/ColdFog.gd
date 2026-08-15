@@ -1,10 +1,19 @@
 extends Node2D
 class_name ColdFog
 
-## World-space fog hiding everything outside the warm radius, carried over from
-## Motorio. Two lessons from that project are baked in: the ring just past the
-## frontier stays readable so the next ore field is visible and worth walking to,
-## and the fog is never dense enough to make exploration impossible.
+## World-space fog hiding everything outside the warm radius.
+##
+## It used to keep a nine tile preview band past the frontier so the next ore
+## field was visible and worth walking to, and it was never dense enough to stop
+## anyone exploring. Both of those are gone as of 0.20.70. Past the circle is
+## white, and the way to see into it is to carry a light -- which turns
+## exploring from "walk further" into "spend something", and is what the energy
+## torch is for.
+##
+## The torch does not lift the fog; it punches a two tile hole in it that
+## follows her. That is done in the shader rather than by drawing a lighter
+## patch on top, because the fog is one full-screen quad and alpha cannot be
+## subtracted by drawing over it.
 ##
 ## This used to rasterise its puff field live -- a 1.7-tile grid of 2.9-tile
 ## circles, so every fogged pixel was painted about nine times, plus a scalloped
@@ -19,7 +28,10 @@ class_name ColdFog
 ## GroundLayer uses for the warm pool. Per frame this layer is one textured quad
 ## plus at most four flat fills.
 
-const PREVIEW_BAND := 9.0
+## How far past the warm edge the fog takes to close. Not a preview any more --
+## it is the softness of the edge, and at two tiles you can see the ground you
+## are about to step onto and nothing beyond it.
+const PREVIEW_BAND := 2.0
 ## Heavy overlap: at low alpha, sparse puffs read as separate bubbles rather
 ## than as weather. Radius well above spacing is what makes it merge.
 const PUFF_SPACING := 1.7
@@ -51,14 +63,54 @@ var _baked_radius: float = -1000.0
 var _extent_tiles: float = 0.0
 var _far_alpha: float = 0.0
 
+## Where the torch hole is, in world pixels, and how big. Set by Main every
+## frame; radius 0 means no light and the shader does nothing.
+var torch_at := Vector2.ZERO
+var torch_radius: float = 0.0
+
+## World coordinates, carried into the fragment stage as a varying.
+##
+## The first version used FRAGCOORD and a position converted to viewport pixels,
+## and the hole landed somewhere else entirely -- the game stretches its canvas
+## from a 960x540 base, so the two spaces are neither the same nor a clean scale
+## apart. This layer is a Node2D at the world origin, so its own vertices are
+## already in world pixels and the shader can compare like with like.
+const HOLE_SHADER := """
+shader_type canvas_item;
+uniform vec2 hole_at;
+uniform float hole_radius;
+varying vec2 world_pos;
+void vertex() {
+	world_pos = VERTEX;
+}
+void fragment() {
+	if (hole_radius > 0.0) {
+		float d = distance(world_pos, hole_at);
+		// Fully clear at the centre, fully fogged at the edge. The inner two
+		// thirds are clear so the hole reads as a lit circle rather than as a
+		// smudge that never quite opens.
+		COLOR.a *= smoothstep(hole_radius * 0.62, hole_radius, d);
+	}
+}
+"""
+
 func _ready() -> void:
 	# The project default is nearest filtering, which would show this texture's
 	# ramp as concentric steps once it is stretched across the whole band.
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	var shader := Shader.new()
+	shader.code = HOLE_SHADER
+	var shader_material := ShaderMaterial.new()
+	shader_material.shader = shader
+	material = shader_material
 
 func _process(_delta: float) -> void:
 	if sim != null and absf(sim.warm_radius - _baked_radius) >= REBAKE_STEP:
 		rebake(sim.warm_radius)
+	var shader_material: ShaderMaterial = material as ShaderMaterial
+	if shader_material != null:
+		shader_material.set_shader_parameter("hole_at", torch_at)
+		shader_material.set_shader_parameter("hole_radius", torch_radius)
 	queue_redraw()
 
 ## 0 at the warm edge, 1 once past the preview band.

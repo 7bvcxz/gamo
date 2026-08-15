@@ -566,6 +566,35 @@ const SHELTER_CLEARANCE := 2.0
 ## enough to carry by hand without it becoming a chore, and enough that the
 ## player makes the trip more than once and learns what the trip is.
 const OPENING_STONES := 3
+
+## --- The energy torch -------------------------------------------------------
+## The only way to see anything outside the fire.
+##
+## The snow fog used to keep a nine tile preview band past the warm edge so the
+## next ore field was visible and worth walking to. That is gone: past the
+## circle is white, and what is out there is found by carrying a light into it.
+## Exploration stopped being "walk further" and became "spend something".
+##
+## Two tiles is deliberately not enough to survey with. It is enough to walk by
+## and to recognise a thing you are standing next to, which makes a torch a
+## number of tiles travelled rather than a map.
+const TORCH_SECONDS := 30.0
+const TORCH_SIGHT := 2.0
+## Two heat stones. The same fuel the fire runs on, so every torch is warmth the
+## base did not get -- which is the trade the whole middle of the opening is.
+const TORCH_COST := {ITEM_HEATSTONE: 2}
+const TORCH_NAME := "에너지횃불"
+
+## What the fire can make. A table so the second thing is a row rather than a
+## rewrite of the window that shows it.
+const BASE_CRAFTS: Array[Dictionary] = [
+	{
+		"id": "torch",
+		"name": TORCH_NAME,
+		"cost": TORCH_COST,
+		"note": "들고 있는 동안 주위 %d칸이 보인다 · %d초" % [int(TORCH_SIGHT), int(TORCH_SECONDS)],
+	},
+]
 ## Where the circle stands when the third mission is done. Set to a number
 ## rather than added as a bonus: the mission promises nine tiles, and three
 ## stones of heat on their own come to 7.3. What the card says and what the

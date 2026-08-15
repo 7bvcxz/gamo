@@ -21,6 +21,7 @@ class_name Icons
 ## Things the objective line can point at that are not machines or items.
 const THING_CAT_FROZEN := "cat_frozen"
 const THING_KIT := "kit"
+const THING_TORCH := "torch"
 const THING_CAT := "cat"
 const THING_SHELTER := "shelter"
 const THING_CORE := "core"
@@ -170,6 +171,21 @@ static func draw_item(canvas: CanvasItem, rect: Rect2, item_type: int) -> void:
 static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
 	var width: float = _outline_width(rect)
 	match key:
+		THING_TORCH:
+			# A shaft with a burning head. The flame is the part that has to read
+			# at hotbar size, so it is most of the drawing.
+			_shadow(canvas, rect)
+			var centre: Vector2 = rect.get_center()
+			var shaft := Rect2(centre.x - rect.size.x * 0.06, centre.y - rect.size.y * 0.02,
+				rect.size.x * 0.12, rect.size.y * 0.42)
+			canvas.draw_rect(shaft.grow(width), Defs.OUTLINE)
+			canvas.draw_rect(shaft, Color8(122, 84, 52))
+			var head: Vector2 = Vector2(centre.x, centre.y - rect.size.y * 0.12)
+			canvas.draw_circle(head, rect.size.x * 0.20, Defs.COL_CORE_DEEP)
+			canvas.draw_circle(head + Vector2(0.0, -rect.size.y * 0.04),
+				rect.size.x * 0.13, Defs.COL_CORE)
+			canvas.draw_circle(head + Vector2(0.0, -rect.size.y * 0.07),
+				rect.size.x * 0.06, Color(1, 1, 1, 0.85))
 		THING_KIT:
 			# The case, with its band and its handle. The same drawing the world
 			# layer makes, at whatever size the objective card asks for.

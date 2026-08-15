@@ -24,7 +24,7 @@ func _run() -> void:
 	main.state = main.State.PLAY
 	await process_frame
 
-	_assert(main.TOOLS.size() == 2, "도구가 둘이다")
+	_assert(main.TOOLS.size() == 3, "도구가 셋이다 — 건설총, 곡괭이, 횃불")
 	main.tool_index = 0
 	_assert(main.holding_build_gun() and not main.holding_pickaxe(), "1번은 건설총")
 	main.tool_index = 1

@@ -383,6 +383,7 @@ func _draw() -> void:
 			_draw_meter_card()
 			_draw_gacha_button()
 			_draw_build_menu()
+			_draw_base_menu()
 			_draw_gacha_card()
 			_draw_message()
 	# Below the match, so they are on every screen -- except the opening. The
@@ -704,6 +705,30 @@ func _draw_palette() -> void:
 			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
 				"%.0f초/개" % Defs.HAND_MINE_PERIOD, 10, Defs.COL_TEXT_DIM)
 			continue
+		# The torch holds nothing either. Its slot is the two numbers that decide
+		# whether taking it out is worth it: how many are left, and how long the
+		# one in her hand has.
+		if main.TOOLS[index] == main.TOOL_TORCH:
+			Icons.draw_thing(self, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
+				Vector2(24.0, 24.0)), Icons.THING_TORCH)
+			var lit: bool = main.holding_torch()
+			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
+				"%d개" % main.sim.torches, 13,
+				Defs.COL_TEXT if main.sim.torches > 0 or lit else Defs.COL_DANGER)
+			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
+				"%.0f초 남음" % main.sim.torch_left if main.sim.torch_left > 0.0 else "꺼짐",
+				10, Defs.COL_CORE if lit else Defs.COL_TEXT_DIM)
+			# The burn, as a bar under the slot, because a number counting down is
+			# something you read and a bar draining is something you notice.
+			if main.sim.torch_left > 0.0:
+				var track := Rect2(rect.position.x + FRAME_PAD,
+					rect.position.y + rect.size.y - 9.0,
+					rect.size.x - FRAME_PAD * 2.0, 3.0)
+				draw_rect(track, Color(0.10, 0.13, 0.20, 0.85))
+				draw_rect(Rect2(track.position,
+					Vector2(track.size.x * clampf(main.sim.torch_left / Defs.TORCH_SECONDS, 0.0, 1.0),
+						track.size.y)), Defs.COL_CORE if lit else Defs.COL_TEXT_DIM)
+			continue
 		# What the gun is loaded with, as the thing itself rather than its name.
 		var chip := Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
 			Vector2(24.0, 24.0))
@@ -793,6 +818,102 @@ func build_menu_row_at(point: Vector2) -> int:
 		if build_menu_row_rect(index).has_point(point):
 			return index
 	return -1
+
+## The fire's window. What went in on the way here, and what can be made out of
+## what is left.
+##
+## Deliberately small. The build list is a catalogue with a row per machine; this
+## is one thing to make, and a card the size of the catalogue would be mostly
+## empty space announcing how little there is.
+func base_menu_rect() -> Rect2:
+	var rows: float = float(maxi(1, main.base_rows().size()))
+	var height: float = FRAME_HEADER + 60.0 + rows * MENU_ROW + 18.0
+	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
+	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
+
+func base_menu_row_rect(index: int) -> Rect2:
+	var card: Rect2 = base_menu_rect()
+	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + 56.0 + float(index) * MENU_ROW),
+		Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+
+func _draw_base_menu() -> void:
+	if not main.base_menu_open:
+		return
+	_dim(0.45)
+	var card: Rect2 = base_menu_rect()
+	_frame(card, Defs.COL_CORE, "기지   ↑↓ 선택 · Z 제작 · X 닫기")
+	var sim = main.sim
+	# The state of the fire, in one line: how far it reaches and what the next
+	# step of that costs. It is the only number the player is working towards.
+	var next_level: Dictionary = Defs.next_base_level(sim.total_heat)
+	var line: String = "온기 %.0f칸  ·  누적 열 %d" % [sim.warm_radius, sim.total_heat]
+	if not next_level.is_empty():
+		line += "   →   %d 에서 %.0f칸" % [int(next_level["heat"]), float(next_level["radius"])]
+	_text(card.position + Vector2(14.0, FRAME_HEADER + 22.0), line, 13, Defs.COL_TEXT_DIM)
+	_text(card.position + Vector2(14.0, FRAME_HEADER + 42.0),
+		"%s %d개  ·  남은 시간 %.0f초" % [Defs.TORCH_NAME, sim.torches, sim.torch_left],
+		12, Defs.COL_BELT_RIM)
+	var rows: Array[Dictionary] = main.base_rows()
+	for index in rows.size():
+		_draw_base_row(index, rows[index])
+
+func _draw_base_row(index: int, row: Dictionary) -> void:
+	var rect: Rect2 = base_menu_row_rect(index)
+	var on_cursor: bool = index == main.menu_index
+	var accent: Color = Defs.COL_CORE
+	if String(row["kind"]) == "fuel":
+		_draw_base_fuel_row(rect, on_cursor, accent)
+		return
+	var craft: Dictionary = Defs.BASE_CRAFTS[int(row["craft"])]
+	var affordable: bool = main.sim.can_craft_torch()
+	if on_cursor:
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
+		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
+	else:
+		draw_rect(rect, Color(1, 1, 1, 0.022))
+	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
+	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
+	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
+	Icons.draw_thing(self, icon, Icons.THING_TORCH)
+	var text_x: float = rect.position.x + 62.0
+	_text(Vector2(text_x, rect.position.y + 22.0), String(craft["name"]), 14,
+		Defs.COL_TEXT if affordable else Defs.COL_TEXT_DIM)
+	_text(Vector2(text_x, rect.position.y + 42.0), String(craft["note"]), 11, Defs.COL_TEXT_DIM)
+	# The cost, on the right, coloured by whether it is actually payable.
+	var cost: Dictionary = craft["cost"]
+	var parts: Array[String] = []
+	for item_type: int in cost:
+		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], int(cost[item_type])])
+	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
+		" · ".join(parts), 13, Defs.COL_TEXT if affordable else Defs.COL_DANGER)
+
+## The row that hands the fire what she is carrying. Shown only while there is
+## something to hand over, so it is never a row that refuses.
+func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
+	if on_cursor:
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
+		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
+	else:
+		draw_rect(rect, Color(1, 1, 1, 0.022))
+	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
+	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
+	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
+	Icons.draw_thing(self, icon, Icons.THING_CORE)
+	var text_x: float = rect.position.x + 62.0
+	_text(Vector2(text_x, rect.position.y + 22.0), "연료 투입", 14, Defs.COL_TEXT)
+	var parts: Array[String] = []
+	var gain: int = 0
+	for item_type: int in Defs.COUNTED_ITEMS:
+		var count: int = int(main.sim.stock.get(item_type, 0))
+		if int(Defs.ITEM_VALUES[item_type]) <= 0 or count <= 0:
+			continue
+		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], count])
+		gain += int(Defs.ITEM_VALUES[item_type]) * count
+	_text(Vector2(text_x, rect.position.y + 42.0), " · ".join(parts), 11, Defs.COL_TEXT_DIM)
+	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
+		"+%d 열" % gain, 13, Defs.COL_CORE)
 
 func _draw_build_menu() -> void:
 	if not main.build_menu_open:

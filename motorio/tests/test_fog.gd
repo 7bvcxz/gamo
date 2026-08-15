@@ -50,18 +50,15 @@ func _run() -> void:
 	_assert(alpha_at.call(warm - 0.3) > 0.05, "the hole's edge is feathered, not cut")
 	_assert(alpha_at.call(warm - 0.3) < alpha_at.call(warm + 1.0),
 		"and it thickens outward across that lip")
-	_assert(alpha_at.call(warm + ColdFog.PREVIEW_BAND * 0.5) > 0.05,
-		"the preview band is visible but not opaque")
-	_assert(alpha_at.call(warm + ColdFog.PREVIEW_BAND * 0.5) < 0.95,
-		"the next ore field can still be made out through it")
-	_assert(alpha_at.call(warm + ColdFog.PREVIEW_BAND + 3.0) > 0.85,
-		"past the band the fog is dense")
-
-	# The frontier carries a deliberate bright rim -- the scalloped bank -- so the
-	# curve is not monotonic there, and pinning it as such would be pinning the
-	# wrong thing. The rim itself is the property worth holding on to.
-	_assert(alpha_at.call(warm + 1.4) > alpha_at.call(warm + 2.4) + 0.03,
-		"the frontier keeps its bright scalloped rim")
+	# There is no preview band any more. The nine tiles past the frontier used to
+	# stay readable so the next ore field was visible and worth walking to; as of
+	# 0.20.70 what is out there is found by carrying a light into it, and the fog
+	# closes within a couple of tiles of the edge.
+	_assert(alpha_at.call(warm + ColdFog.PREVIEW_BAND + 1.0) > 0.90,
+		"the fog closes just past the edge (%.2f)"
+			% alpha_at.call(warm + ColdFog.PREVIEW_BAND + 1.0))
+	_assert(alpha_at.call(warm + 8.0) > 0.95,
+		"and further out there is nothing to see at all (%.2f)" % alpha_at.call(warm + 8.0))
 
 	# Past the rim it may only thicken, or the fog would read as concentric bands.
 	var previous: float = -1.0

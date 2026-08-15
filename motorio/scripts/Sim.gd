@@ -152,6 +152,14 @@ var kit_searched: int = 0
 ## the orchestrator because the thing that draws the ring reads the world, and a
 ## number the drawing cannot see is a number the drawing has to be told twice.
 var kit_progress: float = 0.0
+## Torches made and not yet lit, and how long is left on the one in her hand.
+##
+## Two numbers rather than a list of torches with their own timers, because only
+## one can ever be alight: `torch_left` is the burn remaining on that one, and it
+## survives putting the torch away. Lighting only spends from the pack when
+## there is nothing left burning.
+var torches: int = 0
+var torch_left: float = 0.0
 ## Which step of BASE_LEVELS the base is on. Kept beside the radius so the thing
 ## that changed can be announced -- an upgrade is an event, and the previous
 ## arrangement had nothing to fire on because the radius moved every few seconds
@@ -337,6 +345,7 @@ func to_save() -> Dictionary:
 		# ore rings in different places than the ones on screen.
 		"base_placed": base_placed, "shelter_placed": shelter_placed,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
+		"torches": torches, "torch_left": torch_left,
 		"shards": shard_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
 		# All three cells, rather than the core plus arithmetic: the player picks
@@ -411,6 +420,8 @@ func from_save(data: Dictionary) -> void:
 	shelter_placed = bool(data.get("shelter_placed", true))
 	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
 	kit_searched = int(data.get("kit_searched", 2))
+	torches = int(data.get("torches", 0))
+	torch_left = float(data.get("torch_left", 0.0))
 	kit_progress = 0.0
 	kit_cell = Vector2i(int(data.get("kit_x", 9999)), int(data.get("kit_y", 9999)))
 	shelter_cell = Vector2i(int(data.get("shelter_x", shelter_cell.x)),
@@ -473,6 +484,8 @@ func setup(seed_value: int) -> void:
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
 	shards.clear()
+	torches = 0
+	torch_left = 0.0
 	frozen_cats.clear()
 	base_level = 0
 	carried_frozen = false
@@ -829,6 +842,37 @@ func _wake_cat(cell: Vector2i) -> void:
 	cats.append(cat)
 	cat_thawed.emit(cats.size(), cat.pos)
 	cat_adopted.emit(cats.size())
+
+## --- The torch --------------------------------------------------------------
+## Made at the fire, out of the fuel the fire runs on.
+func can_craft_torch() -> bool:
+	for item_type: int in Defs.TORCH_COST:
+		if int(stock.get(item_type, 0)) < int(Defs.TORCH_COST[item_type]):
+			return false
+	return true
+
+func craft_torch() -> bool:
+	if not base_placed or not can_craft_torch():
+		return false
+	for item_type: int in Defs.TORCH_COST:
+		stock[item_type] = int(stock.get(item_type, 0)) - int(Defs.TORCH_COST[item_type])
+	torches += 1
+	return true
+
+## Taking one out. Only spends a torch if nothing is still burning -- putting one
+## away and taking it out again must not cost anything.
+func light_torch() -> bool:
+	if torch_left > 0.0:
+		return true
+	if torches <= 0:
+		return false
+	torches -= 1
+	torch_left = Defs.TORCH_SECONDS
+	return true
+
+## Burning, which only happens while it is in her hand.
+func burn_torch(delta: float) -> void:
+	torch_left = maxf(0.0, torch_left - delta)
 
 ## Everything in the base's store that will burn, into the fire.
 ##
