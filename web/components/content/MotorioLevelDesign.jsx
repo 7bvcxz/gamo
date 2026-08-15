@@ -156,9 +156,9 @@ export function MotorioLevelDesign() {
             </tr>
           </thead>
           <tbody>
-            {Object.entries(balance.missions).map(([id, entry]) => (
-              <tr key={id}>
-                <td><code>{id}</code></td>
+            {balance.missions.map((entry) => (
+              <tr key={entry.id}>
+                <td><code>{entry.id}</code></td>
                 <td>{entry.line}</td>
                 <td>{entry.why}</td>
               </tr>
