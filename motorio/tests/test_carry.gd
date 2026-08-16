@@ -43,7 +43,7 @@ func _run() -> void:
 	# walk to. Without these most of them bail out early and prove nothing.
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_CRYSTAL:
+		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "the map has a seam to assign a cat to")

@@ -179,68 +179,24 @@ const ROCK_ATLAS: Texture2D = preload("res://assets/tiles/rock_6.png")
 const ROCK_COLUMNS := 3
 const ROCK_VARIANTS := 6
 
-## A twentieth of the ground, in clumps of one to twelve. One clump is seeded per
-## block of ROCK_BLOCK cells, so the share is the average clump over the block:
-## 6.5 over 11x11 is 5.4%, and clumps from neighbouring blocks overlapping brings
-## the measured figure down to about five.
-const ROCK_BLOCK := 11
-const ROCK_MIN := 1
-const ROCK_MAX := 12
-## How far a clump can reach out of the block that seeded it. Twelve cells grown
-## from one seed cannot travel further, so the blocks around a cell are the only
-## ones that can claim it.
-const ROCK_REACH := 1
-
-## The cells one block's clump claims. Grown by filling its own concavities
-## rather than by walking, which keeps clumps close to round -- a random walk
-## produces strings one cell wide, and a line of separate boulder tiles reads as
-## a dotted line rather than as a scatter of rocks.
-static func rock_clump(block: Vector2i) -> Array[Vector2i]:
-	var size: int = ROCK_MIN + _mix(block.x, block.y, 7) % (ROCK_MAX - ROCK_MIN + 1)
-	var origin := Vector2i(
-		block.x * ROCK_BLOCK + _mix(block.x, block.y, 11) % ROCK_BLOCK,
-		block.y * ROCK_BLOCK + _mix(block.x, block.y, 13) % ROCK_BLOCK)
-	var cells: Array[Vector2i] = [origin]
-	var have: Dictionary[Vector2i, bool] = {origin: true}
-	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	while cells.size() < size:
-		var best: Array[Vector2i] = []
-		var best_score: int = -1
-		for from: Vector2i in cells:
-			for step: Vector2i in steps:
-				var candidate: Vector2i = from + step
-				if have.has(candidate):
-					continue
-				var score: int = 0
-				for around: Vector2i in steps:
-					if have.has(candidate + around):
-						score += 1
-				if score > best_score:
-					best_score = score
-					best = [candidate]
-				elif score == best_score and not best.has(candidate):
-					best.append(candidate)
-		if best.is_empty():
-			break
-		var pick: Vector2i = best[_mix(block.x, block.y, 300 + cells.size()) % best.size()]
-		cells.append(pick)
-		have[pick] = true
-	return cells
+## The rock field lives in Defs now, because the simulation has to be able to
+## ask whether a boulder is standing on a cell without asking a drawing layer --
+## rock is a resource as of 0.20.75, not decoration.
 
 ## Fills the cache for every block that could reach into this range. Called once
 ## per frame with the visible range rather than per cell.
 func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
-	var low := Vector2i(floori(float(start.x) / ROCK_BLOCK) - ROCK_REACH,
-		floori(float(start.y) / ROCK_BLOCK) - ROCK_REACH)
-	var high := Vector2i(floori(float(end.x) / ROCK_BLOCK) + ROCK_REACH,
-		floori(float(end.y) / ROCK_BLOCK) + ROCK_REACH)
+	var low := Vector2i(floori(float(start.x) / Defs.ROCK_BLOCK) - Defs.ROCK_REACH,
+		floori(float(start.y) / Defs.ROCK_BLOCK) - Defs.ROCK_REACH)
+	var high := Vector2i(floori(float(end.x) / Defs.ROCK_BLOCK) + Defs.ROCK_REACH,
+		floori(float(end.y) / Defs.ROCK_BLOCK) + Defs.ROCK_REACH)
 	for by in range(low.y, high.y + 1):
 		for bx in range(low.x, high.x + 1):
 			var block := Vector2i(bx, by)
 			if _blocks.has(block):
 				continue
 			_blocks[block] = true
-			for cell: Vector2i in rock_clump(block):
+			for cell: Vector2i in Defs.rock_clump(block):
 				_rock[cell] = true
 
 ## The sheet this cell's seam draws from, or null if there is no seam here or its
@@ -253,8 +209,11 @@ static func ore_atlas_at(sim_ref, cell: Vector2i) -> Texture2D:
 func _seam_atlas(cell: Vector2i) -> Texture2D:
 	return ore_atlas_at(sim, cell)
 
+## Whether a boulder is drawn here. The field is generated from the coordinates,
+## so a broken one is remembered by the simulation and skipped here rather than
+## removed from a set the generator would put straight back.
 func is_rock(cell: Vector2i) -> bool:
-	return _rock.has(cell)
+	return _rock.has(cell) and not (sim != null and sim.mined_rocks.has(cell))
 
 ## Which of the six, on a different salt from the snow so a cell that turns to
 ## rock does not inherit its snow variant's number.
@@ -293,7 +252,7 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if _rock.has(cell) or _seam_atlas(cell) != null:
+			if is_rock(cell) or _seam_atlas(cell) != null:
 				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
@@ -301,7 +260,7 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if not _rock.has(cell) or _seam_atlas(cell) != null:
+			if not is_rock(cell) or _seam_atlas(cell) != null:
 				continue
 			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),

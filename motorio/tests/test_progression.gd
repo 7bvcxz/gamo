@@ -45,7 +45,13 @@ func _run() -> void:
 	var kitty = sim.cats[0]
 	var drop := Vector2i(3, 0)
 	_assert(sim.drop_item(drop, Defs.ITEM_CRYSTAL), "a shard can lie on the floor")
-	_assert(not sim.drop_item(drop, Defs.ITEM_CRYSTAL), "one item per cell keeps the floor readable")
+	# A tile takes a pile of the same thing, because a belt that ends in the open
+	# pours onto the ground and one-per-tile made it stop after a single item.
+	# Two different things on one tile is still refused: a tile draws one
+	# picture, and it cannot be a picture of two materials.
+	_assert(sim.drop_item(drop, Defs.ITEM_CRYSTAL), "같은 것은 쌓인다")
+	_assert(sim.ground_count(drop) == 2, "그리고 개수로 센다")
+	_assert(not sim.drop_item(drop, Defs.ITEM_COPPER), "다른 것은 같은 칸에 못 놓는다")
 	kitty.pos = sim.cell_centre(drop + Vector2i(1, 0))
 	var banked: int = int(sim.stock.get(Defs.ITEM_CRYSTAL, 0))
 	for step in 400:

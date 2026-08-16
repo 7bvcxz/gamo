@@ -378,14 +378,29 @@ func _test_blocked_output_preserves_work() -> void:
 		sim.tick(0.1)
 	_assert(not machine.stalled, "the stall warning clears once the output is unblocked")
 
-	# A belt whose head has nowhere to go backs up and reports it too.
+	# A belt whose head has nowhere to go pours onto the ground in front of it.
+	# It used to stop dead at the last tile, so a belt built before the thing it
+	# was going to feed did nothing and gave no sign why.
 	var dead_end := Vector2i(20, 20)
 	sim.build(Defs.M_BELT, dead_end, Vector2i.RIGHT)
 	var belt: Sim.Machine = sim.machine_at(dead_end)
 	for index in Defs.BELT_CAPACITY:
 		belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 1.0})
 	sim.tick(0.2)
-	_assert(belt.stalled, "a full belt with no destination reports itself stalled")
+	_assert(not belt.stalled, "끝이 열린 벨트는 앞에 쏟아낸다")
+	_assert(sim.ground.has(dead_end + Vector2i.RIGHT), "그 칸에 자원이 놓인다")
+	# And it does back up once the heap in front is full, which is the state the
+	# stall flag is actually for.
+	sim.ground_stack[dead_end + Vector2i.RIGHT] = sim.GROUND_STACK_MAX
+	# Spaced the way the mover leaves them, so the head really is at the end of
+	# the tile. Filling them all at 1.0 does not survive one tick: the spacing
+	# rule pulls each item back behind the one ahead of it, and the new head then
+	# sits mid-tile with nothing to push.
+	belt.items.clear()
+	for index in Defs.BELT_CAPACITY:
+		belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 1.0 - float(index) * 0.34})
+	sim.tick(0.2)
+	_assert(belt.stalled, "쌓을 자리까지 차면 그때 막힌다")
 	sim.free()
 
 func _assert(condition: bool, message: String) -> void:

@@ -157,7 +157,7 @@ func _energy_in_world(sim) -> int:
 	var total: int = int(sim.delivered.get(Defs.ITEM_ENERGY, 0))
 	for cell: Vector2i in sim.ground:
 		if int(sim.ground[cell]) == Defs.ITEM_ENERGY:
-			total += 1
+			total += sim.ground_count(cell)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		for item: Dictionary in machine.items:

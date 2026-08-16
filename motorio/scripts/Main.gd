@@ -939,7 +939,12 @@ func _process_play(delta: float) -> void:
 ## Picked up simply by walking over it. Announced with the running stock so the
 ## player learns that loose items and the base ledger are the same thing.
 func _collect_ground() -> void:
+	# The tile she is on, and then the belt running under her feet. A belt's
+	# cargo used to slide past untouched, which is the one place in this game
+	# where something she can see and stand on cannot be taken.
 	var item_type: int = sim.collect_ground_at(player.cell())
+	if item_type < 0:
+		item_type = sim.collect_belt_at(player.cell())
 	if item_type < 0:
 		return
 	var held: int = int(sim.stock.get(item_type, 0))
@@ -992,7 +997,7 @@ func _update_nibbles(delta: float) -> void:
 ## next one over.
 func _hand_target() -> Vector2i:
 	var facing: Vector2i = player.facing_cell()
-	if sim.ore.has(facing):
+	if sim.can_hand_mine(facing):
 		return facing
 	return player.cell()
 
@@ -1020,7 +1025,7 @@ func _update_hand_mining(delta: float) -> void:
 		last_mine_frame = -1
 		return
 	var facing: Vector2i = _hand_target()
-	if not holding_pickaxe() or not mine_held or not sim.ore.has(facing):
+	if not holding_pickaxe() or not mine_held or not sim.can_hand_mine(facing):
 		sim.cancel_hand_mine()
 		player.mining = 0.0
 		last_mine_frame = -1
@@ -1263,7 +1268,7 @@ func _prompt_status(id: String) -> Dictionary:
 				and player.facing_cell() == sim.core_cell,
 				"done": int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
 		"MINE":
-			return {"want": holding_pickaxe() and sim.ore.has(_hand_target()),
+			return {"want": holding_pickaxe() and sim.can_hand_mine(_hand_target()),
 				"done": int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) > 0
 					or int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
 		"TORCH":
@@ -1614,6 +1619,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_rescue()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_F8:
+		debug_spill()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("debug_scenario"):
 		debug_scenario()
 		get_viewport().set_input_as_handled()
@@ -1955,7 +1964,7 @@ func _primary_action() -> void:
 	# Only bare ore. A cat standing on a miner is standing on ore too, and taking
 	# it off to reassign it has to keep working.
 	var target: Vector2i = _hand_target()
-	var mining_here: bool = holding_pickaxe() and sim.ore.has(target) \
+	var mining_here: bool = holding_pickaxe() and sim.can_hand_mine(target) \
 		and not sim.machines.has(target)
 	if not mining_here and sim.pick_up_frozen(cell):
 		_notify("얼어붙은 고양이를 안았습니다  느려지고 달릴 수 없습니다", Defs.COL_BELT_RIM)
@@ -2180,6 +2189,11 @@ func debug_unlock_all() -> void:
 	# is a window with three buttons that all refuse -- and a 0.5% grade cannot be
 	# looked at by anyone at all.
 	sim.coins = maxi(sim.coins, Defs.DEBUG_COINS)
+	# And the pickaxe, which is not in BUILDABLE and so was the one thing "unlock
+	# everything" did not unlock. Its slot opens on the kit being emptied, so a
+	# debug world starts with the kit behind her -- otherwise the key grants every
+	# machine in the game and leaves her unable to break a rock.
+	sim.kit_searched = maxi(sim.kit_searched, 2)
 	_notify("디버그 전체 해금", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
@@ -2218,6 +2232,88 @@ func debug_scenario() -> void:
 		sim.carried_cat = spare
 		sim.place_cat(cell)
 	_notify("디버그 시나리오 · 채굴기 2대 · 고양이 배치", Defs.COL_DANGER)
+	audio.call("play", "confirm")
+
+## A belt that ends in the open, and a boulder to break, both within a step.
+##
+## Both of these are easy to state and awkward to reach. A dead end needs a belt
+## laid where nothing is, which is the one place the player has no reason to lay
+## one; a boulder needs walking until a boulder happens to be in front of her.
+## Assembling either by timed key holds puts the arrangement slightly wrong about
+## as often as it puts it right, and a slightly wrong arrangement produces
+## nothing -- which on screen is indistinguishable from the feature not working.
+##
+## So the key builds the arrangement through the same doors the player uses
+## (`build`, `drop_item`) and moves her to it. `test_debug` pins what it leaves
+## behind, because a debug key that quietly stops staging what it promises sends
+## the next look at the wrong conclusion.
+func debug_spill() -> void:
+	debug_unlock_all()
+	if sim.carried_cat != null:
+		sim.drop_cat(player.position)
+	# Warm and lit first. Both arrangements are things to *look* at, and the
+	# nearest boulder is well outside the opening circle -- the first version of
+	# this key put her in front of one at 31% warmth inside white fog, where a
+	# working feature and a missing one look exactly alike.
+	if not sim.base_placed:
+		sim.carried_kit = Defs.KIT_BASE
+		sim.place_base(sim.core_cell)
+	sim.total_heat = maxi(sim.total_heat, int(Defs.BASE_LEVELS[-1]["heat"]))
+	sim._refresh_radius()
+	player.warmth = 100.0
+
+	# The boulder decides where everything goes, because it is the one thing here
+	# that cannot be moved: the field is a function of the coordinates.
+	var rock := Vector2i(9999, 9999)
+	for radius in range(2, 30):
+		for y in range(-radius, radius + 1):
+			for x in range(-radius, radius + 1):
+				var cell: Vector2i = sim.core_cell + Vector2i(x, y)
+				if maxi(absi(x), absi(y)) != radius:
+					continue
+				if sim.has_rock(cell) and rock == Vector2i(9999, 9999):
+					rock = cell
+		if rock != Vector2i(9999, 9999):
+			break
+	if rock == Vector2i(9999, 9999):
+		rock = sim.core_cell + Vector2i(6, 0)
+
+	# A run of belt one row below it, ending in the open a couple of cells short
+	# of her -- so the pile it makes and the boulder she is breaking are on the
+	# same screen at the same zoom.
+	var start_cell: Vector2i = rock + Vector2i(-6, 1)
+	var run := 4
+	for index in run + 2:
+		var cell: Vector2i = start_cell + Vector2i(index, 0)
+		sim.machines.erase(cell)
+		sim.ore.erase(cell)
+		sim.ground.erase(cell)
+		sim.ground_stack.erase(cell)
+		sim.mined_rocks[cell] = true
+	var built := 0
+	for index in run:
+		if sim.build(Defs.M_BELT, start_cell + Vector2i(index, 0), Vector2i.RIGHT):
+			built += 1
+	# Loaded from the back, spaced the way the mover spaces them: appending at the
+	# same `t` makes the spacing rule clamp them into one place, and one item does
+	# not show a pile.
+	var belt: Sim.Machine = sim.machine_at(start_cell)
+	var seeded := 0
+	if belt != null:
+		for index in 6:
+			belt.items.append({"type": Defs.ITEM_STONE, "t": 1.0 - float(index) * 0.34})
+			seeded += 1
+	# Stone back to nothing, against the 500 of everything the unlock key grants.
+	# Both things this key stages produce stone, and neither of them shows on a
+	# counter that already reads 500.
+	sim.stock[Defs.ITEM_STONE] = 0
+
+	# One cell west of the boulder, looking east, so the mining key works on the
+	# frame the arrangement lands.
+	player.position = sim.cell_centre(rock + Vector2i(-1, 0))
+	player.facing = Vector2i.RIGHT
+	tool_index = TOOL_PICKAXE
+	_notify("디버그 쏟기 · 벨트 %d칸 · 자원 %d개 · 바위 앞" % [built, seeded], Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
 ## A closed rectangle of belt, so every turn a belt can make is on screen at once.

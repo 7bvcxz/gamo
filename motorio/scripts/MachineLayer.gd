@@ -581,6 +581,27 @@ func _draw_ground() -> void:
 		draw_circle(at + Vector2(0, bob), GROUND_ITEM_RADIUS, Defs.OUTLINE, false, 1.0)
 		# A single highlight, in the same top-left place as every other object.
 		draw_circle(at + Vector2(-1.4, bob - 1.4), 1.2, Color(1, 1, 1, 0.55))
+		# A pile says how deep it is. Belts pour onto bare ground now, so a tile
+		# at the end of a line is a heap rather than a bead, and one bead where
+		# there are nine things is the screen lying about the state of the world.
+		var count: int = sim.ground_count(cell)
+		if count <= 1:
+			continue
+		# Two shoulders behind the bead, so the shape reads as more than one from
+		# further away than the number can be read at.
+		draw_circle(at + Vector2(-4.0, bob + 1.6), GROUND_ITEM_RADIUS * 0.72, colour)
+		draw_circle(at + Vector2(-4.0, bob + 1.6), GROUND_ITEM_RADIUS * 0.72,
+			Defs.OUTLINE, false, 1.0)
+		draw_circle(at + Vector2(4.0, bob + 1.6), GROUND_ITEM_RADIUS * 0.72, colour)
+		draw_circle(at + Vector2(4.0, bob + 1.6), GROUND_ITEM_RADIUS * 0.72,
+			Defs.OUTLINE, false, 1.0)
+		var label: String = str(count)
+		var width: float = UIFont.FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT,
+			-1, 10).x
+		draw_string(UIFont.FONT, at + Vector2(-width * 0.5 + 1.0, bob - 8.0), label,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Defs.OUTLINE)
+		draw_string(UIFont.FONT, at + Vector2(-width * 0.5, bob - 9.0), label,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(1, 1, 1, 0.92))
 
 ## A generator reads as a lit drum: the glow is tied to whether it is actually
 ## supplying, so an unfuelled one is visibly dark rather than silently idle.

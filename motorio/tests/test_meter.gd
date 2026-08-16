@@ -30,7 +30,6 @@ func _run() -> void:
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
-	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
 	sim.stock[Defs.ITEM_ENERGY] = 500
 
@@ -45,13 +44,17 @@ func _run() -> void:
 
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_CRYSTAL and not sim.is_structure(cell + Vector2i(0, 1)):
+		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE and not sim.is_structure(cell + Vector2i(0, 1)):
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "the map has a seam approachable from the south")
 	main.player.position = sim.cell_centre(seam + Vector2i(0, 1))
 	main.player.facing = Vector2i.UP
 	main.selected_index = 0
+	# With the pickaxe in hand Z is a swing, not a build. The slot has to be set
+	# before pressing it or this builds nothing and every measurement below is a
+	# measurement of a machine that is not there.
+	main.tool_index = main.TOOL_BUILD_GUN
 	main._primary_action()
 	var miner = sim.machine_at(seam)
 	_assert(miner != null and miner.type == Defs.M_MINER, "a miner is standing on the seam")
@@ -92,14 +95,14 @@ func _run() -> void:
 	# --- An idle machine reads zero, and says why ------------------------------
 	miner.operated = false
 	sim.tick(1.0)
-	_assert(is_equal_approx(sim.meter_rate(miner, Defs.ITEM_CRYSTAL, true), 0.0),
+	_assert(is_equal_approx(sim.meter_rate(miner, Defs.ITEM_HEATSTONE, true), 0.0),
 		"a miner with nobody on it measures nothing")
 	_assert(sim.meter_status(miner).find("일손 없음") >= 0,
 		"and the panel blames the missing worker: '%s'" % sim.meter_status(miner))
 	# The rated figure is unaffected by any of that -- it is what the machine
 	# promises, and that promise does not change when the machine stops.
 	var rated: Dictionary = sim.design_rates(miner)
-	var rated_out: float = float(rated["out"].get(Defs.ITEM_CRYSTAL, 0.0))
+	var rated_out: float = float(rated["out"].get(Defs.ITEM_HEATSTONE, 0.0))
 	_assert(rated_out > 0.0, "the miner still states a rated output while idle")
 	_assert(is_equal_approx(rated_out, Defs.per_minute(sim.seam_period(seam))),
 		"and it is this seam's rate, purity included")
@@ -126,7 +129,7 @@ func _run() -> void:
 		for cell: Vector2i in sim.ground.keys():
 			sim.ground.erase(cell)
 			produced += 1
-	var measured: float = sim.meter_rate(miner, Defs.ITEM_CRYSTAL, true)
+	var measured: float = sim.meter_rate(miner, Defs.ITEM_HEATSTONE, true)
 	var expected: float = float(produced) * 60.0 / elapsed
 	_assert(absf(measured - expected) < 1.0,
 		"the measured rate matches what was produced: %.2f vs %.2f" % [measured, expected])
@@ -144,7 +147,11 @@ func _run() -> void:
 	# Fill the tile in front and let it stall. This is the failure the panel most
 	# needs to name, because from the outside a stalled miner looks like a working
 	# one that is simply slow.
-	sim.ground[seam + miner.dir] = Defs.ITEM_CRYSTAL
+	# Filled to the brim, not merely occupied. A tile takes a stack now, so one
+	# item in front of a miner is a pile it can keep adding to -- the stall is at
+	# the top of the stack, which is where the panel has to name it.
+	sim.ground[seam + miner.dir] = Defs.ITEM_HEATSTONE
+	sim.ground_stack[seam + miner.dir] = Sim.GROUND_STACK_MAX
 	var guard: int = 0
 	while not miner.stalled and guard < 400:
 		worker.state = Defs.CAT_WORKING

@@ -121,6 +121,10 @@ var cats: Array[Cat] = []
 ## and the progress has to survive a save.
 ## Crystal, lying where the world put it. A set rather than a count per cell:
 ## one piece to a tile, so finding one is finding a place rather than a pile.
+## Boulders the player has broken. The field itself is infinite and generated
+## from the coordinates rather than stored, so what has to be remembered is not
+## where the rocks are but which ones are gone.
+var mined_rocks: Dictionary[Vector2i, bool] = {}
 var shards: Dictionary[Vector2i, bool] = {}
 var frozen_cats: Dictionary[Vector2i, float] = {}
 ## Whether Grim has one in her arms. A bool rather than an object because a
@@ -230,6 +234,10 @@ var stock: Dictionary[int, int] = {}
 ## Loose items lying in the world, one per cell. A miner with nowhere to push
 ## drops here, hand mining drops here, and cats carry from here to the base.
 var ground: Dictionary[Vector2i, int] = {}
+## How many are on each occupied tile. Absent means one -- a separate map rather
+## than a change to `ground`'s type, so every reader that only wants to know what
+## is lying there keeps working.
+var ground_stack: Dictionary[Vector2i, int] = {}
 ## Which machines the player has earned. Seeing a resource for the first time is
 ## what opens its line, so the hotbar grows as the world does.
 var unlocked: Dictionary[int, bool] = {}
@@ -329,6 +337,10 @@ func to_save() -> Dictionary:
 			"hunger": cat.hunger, "eat": cat.eat_timer,
 			"rarity": cat.rarity,
 		})
+	var mined_rows := PackedInt32Array()
+	for cell: Vector2i in mined_rocks:
+		mined_rows.append(cell.x)
+		mined_rows.append(cell.y)
 	var shard_rows := PackedInt32Array()
 	for cell: Vector2i in shards:
 		shard_rows.append(cell.x)
@@ -344,7 +356,7 @@ func to_save() -> Dictionary:
 		stock_rows[str(key)] = int(stock[key])
 	var ground_rows: Array = []
 	for cell: Vector2i in ground:
-		ground_rows.append([cell.x, cell.y, int(ground[cell])])
+		ground_rows.append([cell.x, cell.y, int(ground[cell]), ground_count(cell)])
 	var unlocked_rows: Array = []
 	for key: int in unlocked:
 		if bool(unlocked[key]):
@@ -370,7 +382,7 @@ func to_save() -> Dictionary:
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
 		"torches": torches, "torch_left": torch_left,
 		"learned": learned.keys(), "walked": walked,
-		"shards": shard_rows,
+		"shards": shard_rows, "mined_rocks": mined_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
 		# All three cells, rather than the core plus arithmetic: the player picks
 		# where the hut goes, so it is not derivable from where the fire is.
@@ -406,7 +418,9 @@ func from_save(data: Dictionary) -> void:
 		stock[int(key)] = int(stock_rows[key])
 	ground.clear()
 	for row: Array in data.get("ground", []):
-		ground[Vector2i(int(row[0]), int(row[1]))] = int(row[2])
+		var ground_cell := Vector2i(int(row[0]), int(row[1]))
+		ground[ground_cell] = int(row[2])
+		ground_stack[ground_cell] = int(row[3]) if row.size() > 3 else 1
 	unlocked.clear()
 	for type: int in data.get("unlocked", []):
 		unlocked[int(type)] = true
@@ -429,6 +443,10 @@ func from_save(data: Dictionary) -> void:
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
 		machines[cell] = machine
 
+	mined_rocks.clear()
+	var mined_flat: PackedInt32Array = data.get("mined_rocks", PackedInt32Array())
+	for index in range(0, mined_flat.size() - 1, 2):
+		mined_rocks[Vector2i(mined_flat[index], mined_flat[index + 1])] = true
 	shards.clear()
 	var shard_flat: PackedInt32Array = data.get("shards", PackedInt32Array())
 	for index in range(0, shard_flat.size() - 1, 2):
@@ -489,6 +507,7 @@ func setup(seed_value: int) -> void:
 	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
 		Defs.ITEM_HEATSTONE: 0}
 	ground.clear()
+	ground_stack.clear()
 	unlocked.clear()
 	unlocked_recipes.clear()
 	power_capacity = 0.0
@@ -513,6 +532,7 @@ func setup(seed_value: int) -> void:
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
 	shards.clear()
+	mined_rocks.clear()
 	torches = 0
 	torch_left = 0.0
 	learned.clear()
@@ -681,6 +701,24 @@ func _starter_frozen_cell(index: int) -> Vector2i:
 			continue
 		return cell
 	return core_cell
+
+## Whether a boulder is standing on this cell.
+##
+## The field is a pure function of the coordinates -- one clump seeded per block,
+## grown to fill its own concavities -- so there is nothing to generate and
+## nothing to store except which ones have been broken. Only the blocks within
+## reach can claim a cell, and a clump of twelve cannot travel further than one
+## block from its seed.
+func has_rock(cell: Vector2i) -> bool:
+	if mined_rocks.has(cell) or ore.has(cell) or machines.has(cell):
+		return false
+	var block := Vector2i(floori(float(cell.x) / float(Defs.ROCK_BLOCK)),
+		floori(float(cell.y) / float(Defs.ROCK_BLOCK)))
+	for by in range(block.y - Defs.ROCK_REACH, block.y + Defs.ROCK_REACH + 1):
+		for bx in range(block.x - Defs.ROCK_REACH, block.x + Defs.ROCK_REACH + 1):
+			if cell in Defs.rock_clump(Vector2i(bx, by)):
+				return true
+	return false
 
 ## --- Tile attributes ------------------------------------------------------
 ## Buildings carry STRUCTURE; terrain does not. Keeping this as a lookup rather
@@ -1502,8 +1540,13 @@ func miner_on_power(cell: Vector2i) -> bool:
 ## purpose: it is the baseline every machine is measured against, and the reason
 ## the first miner feels like relief rather than a sidegrade. Returns the item
 ## produced this tick, or -1.
+## Swinging at a cell. A seam yields its ore and stays; a boulder yields stone
+## and is gone, which is the difference between a resource that renews and a
+## thing you clear.
 func hand_mine(cell: Vector2i, delta: float) -> int:
-	if not ore.has(cell):
+	var seam: bool = ore.has(cell)
+	var rock: bool = not seam and has_rock(cell)
+	if not seam and not rock:
 		hand_progress = 0.0
 		hand_cell = Vector2i(9999, 9999)
 		return -1
@@ -1511,14 +1554,26 @@ func hand_mine(cell: Vector2i, delta: float) -> int:
 		hand_cell = cell
 		hand_progress = 0.0
 	hand_progress += delta
-	if hand_progress < Defs.HAND_MINE_PERIOD:
+	if hand_progress < hand_period(cell):
 		return -1
 	hand_progress = 0.0
+	if rock:
+		mined_rocks[cell] = true
+		_grid_dirty = true
+		return Defs.ITEM_STONE
 	return int(ore[cell])
 
+## How long one swing takes here. Boulders are slower than seams: a rock is a
+## rock, and the gap is what makes walking to a seam worth the walk.
+func hand_period(cell: Vector2i) -> float:
+	return Defs.HAND_MINE_PERIOD if ore.has(cell) else Defs.ROCK_MINE_PERIOD
+
 ## 0..1 across the current swing, for the progress ring the player watches.
+func can_hand_mine(cell: Vector2i) -> bool:
+	return ore.has(cell) or has_rock(cell)
+
 func hand_fraction() -> float:
-	return clampf(hand_progress / Defs.HAND_MINE_PERIOD, 0.0, 1.0)
+	return clampf(hand_progress / hand_period(hand_cell), 0.0, 1.0)
 
 func cancel_hand_mine() -> void:
 	hand_progress = 0.0
@@ -1537,15 +1592,52 @@ func collect_shard_at(cell: Vector2i) -> bool:
 	_gain(Defs.ITEM_CRYSTAL, 1)
 	return true
 
+## Walking over a pile takes the whole pile. Picking up one of a stack of nine
+## and having to walk off and back on eight more times is not a mechanic.
+##
+## The count of what was taken is in `last_collected`, so the caller can say so.
+var last_collected: int = 0
 func collect_ground_at(cell: Vector2i) -> int:
 	if not ground.has(cell):
 		return -1
 	var item_type: int = int(ground[cell])
+	var count: int = ground_count(cell)
 	ground.erase(cell)
-	_gain(item_type, 1)
+	ground_stack.erase(cell)
+	last_collected = count
+	_gain(item_type, count)
 	if item_type == Defs.ITEM_ENERGY:
-		heat += Defs.ITEM_VALUES[item_type]
-		total_heat += Defs.ITEM_VALUES[item_type]
+		heat += Defs.ITEM_VALUES[item_type] * count
+		total_heat += Defs.ITEM_VALUES[item_type] * count
+	return item_type
+
+## Everything on the belt she is standing on, straight into the pack.
+##
+## A belt runs under her feet and its cargo used to slide past untouched, which
+## is the one place in this game where a thing she can see and reach cannot be
+## taken. Returns what was taken, or -1.
+func collect_belt_at(cell: Vector2i) -> int:
+	var machine: Machine = machines.get(cell, null)
+	if machine == null or machine.type != Defs.M_BELT or machine.items.is_empty():
+		return -1
+	var item_type: int = int(machine.items[0]["type"])
+	var count := 0
+	# Only the ones of a kind, so a mixed belt does not turn into a single
+	# picture of whatever happened to be at the front.
+	var index := machine.items.size() - 1
+	while index >= 0:
+		if int(machine.items[index]["type"]) == item_type:
+			machine.items.remove_at(index)
+			count += 1
+		index -= 1
+	if count <= 0:
+		return -1
+	machine.stalled = false
+	last_collected = count
+	_gain(item_type, count)
+	if item_type == Defs.ITEM_ENERGY:
+		heat += Defs.ITEM_VALUES[item_type] * count
+		total_heat += Defs.ITEM_VALUES[item_type] * count
 	return item_type
 
 ## The nearest loose item, or a sentinel. Used by idle cats looking for work.
@@ -1808,8 +1900,14 @@ func _cat_fetch(cat: Cat, delta: float) -> void:
 		return
 	if not _step_toward(cat, cell_centre(cat.haul_target), delta):
 		return
+	# One off the pile. A cat carries one thing.
 	cat.carrying = int(ground[cat.haul_target])
-	ground.erase(cat.haul_target)
+	var left: int = ground_count(cat.haul_target) - 1
+	if left > 0:
+		ground_stack[cat.haul_target] = left
+	else:
+		ground.erase(cat.haul_target)
+		ground_stack.erase(cat.haul_target)
 	cat.state = Defs.CAT_HAUL_TO_BASE
 
 func _cat_deliver(cat: Cat, delta: float) -> void:
@@ -2013,10 +2111,32 @@ func _emit_from(machine: Machine, item_type: int) -> bool:
 
 ## Puts a loose item on the floor. One per cell keeps the world readable and
 ## stops a stalled miner from burying its own tile.
+## A loose item on a tile, and how many of them are on it.
+##
+## A cell used to hold exactly one, which is fine for a miner dropping its output
+## for a cat to fetch and wrong for the end of a belt: a line pouring onto bare
+## ground filled one tile and then stalled forever. A belt that runs out of belt
+## should pile its cargo up, not stop.
+const GROUND_STACK_MAX := 24
+
+func ground_count(cell: Vector2i) -> int:
+	return int(ground_stack.get(cell, 1)) if ground.has(cell) else 0
+
 func drop_item(cell: Vector2i, item_type: int) -> bool:
-	if ground.has(cell) or machines.has(cell) or ore.has(cell):
+	if machines.has(cell) or ore.has(cell):
 		return false
+	if ground.has(cell):
+		# Same kind stacks; a different kind does not, because a tile showing one
+		# picture cannot be holding two things.
+		if int(ground[cell]) != item_type:
+			return false
+		var held: int = ground_count(cell)
+		if held >= GROUND_STACK_MAX:
+			return false
+		ground_stack[cell] = held + 1
+		return true
 	ground[cell] = item_type
+	ground_stack[cell] = 1
 	return true
 
 func _tick_belt(machine: Machine, delta: float) -> void:
@@ -2034,7 +2154,13 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 	if float(head["t"]) < 1.0:
 		machine.stalled = false
 		return
-	if _push_into(machine.cell + machine.dir, int(head["type"]), machine.cell):
+	var ahead: Vector2i = machine.cell + machine.dir
+	# Into whatever is in front, or -- if that is bare ground -- onto it. A line
+	# that ends in the open used to stop dead at the last tile, so a belt built
+	# before the thing it was going to feed was a belt that did nothing and gave
+	# no sign why.
+	if _push_into(ahead, int(head["type"]), machine.cell) \
+			or drop_item(ahead, int(head["type"])):
 		machine.items.remove_at(0)
 		_note_out(machine, int(head["type"]))
 		machine.stalled = false

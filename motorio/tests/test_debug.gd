@@ -112,6 +112,55 @@ func _run() -> void:
 		"이미 안고 있으면 하나 더 만들지 않는다 — 두 번 눌러도 팔은 둘뿐이다")
 	main.sim.carried_frozen = false
 
+	# F8 stages the two arrangements that are awkward to reach by walking: a belt
+	# that ends in the open, and a boulder in front of her. Both of them produce
+	# nothing at all when staged slightly wrong, and nothing at all is exactly
+	# what a broken feature looks like -- so what the key leaves behind is pinned
+	# here rather than judged by eye in a browser.
+	main.debug_spill()
+	_assert(main.sim.has_rock(main.player.facing_cell()), "F8 은 바위 앞에 세운다")
+	var rock_cell: Vector2i = main.player.facing_cell()
+	var start: Vector2i = rock_cell + Vector2i(-6, 1)
+	var belts := 0
+	for index in 4:
+		var cell: Vector2i = start + Vector2i(index, 0)
+		var machine: Sim.Machine = main.sim.machine_at(cell)
+		if machine != null and machine.type == Defs.M_BELT:
+			belts += 1
+	_assert(belts == 4, "벨트 넉 줄을 놓는다: %d" % belts)
+	var tail: Vector2i = start + Vector2i(4, 0)
+	_assert(main.sim.machine_at(tail) == null, "그리고 그 앞은 비어 있다")
+	# Close enough to the boulder to be on the same screen. The first version put
+	# the run beside the core and her beside a boulder twelve cells away, and the
+	# screenshot showed neither.
+	_assert(Vector2(tail - rock_cell).length() < 4.0,
+		"쏟는 자리와 바위가 한 화면에 있다: %.1f칸" % Vector2(tail - rock_cell).length())
+	# Warm and lit, or both of them are white fog.
+	_assert(main.sim.warm_radius >= 15.0,
+		"온기가 거기까지 닿는다: %.0f칸" % main.sim.warm_radius)
+	_assert(main.player.warmth > 99.0, "그리고 체온이 가득하다")
+	var loaded: Sim.Machine = main.sim.machine_at(start)
+	_assert(loaded != null and loaded.items.size() == 6,
+		"자원 여섯 개가 실린다: %d" % (0 if loaded == null else loaded.items.size()))
+	# Spaced, not stacked -- appending six at the same t makes the mover clamp
+	# them into one place, and one bead is not a pile.
+	var spread := 0.0
+	if loaded != null and loaded.items.size() >= 2:
+		spread = absf(float(loaded.items[0]["t"]) - float(loaded.items[-1]["t"]))
+	_assert(spread > 0.5, "그리고 줄지어 실린다: %.2f" % spread)
+	_assert(int(main.sim.stock.get(Defs.ITEM_STONE, -1)) == 0,
+		"돌은 0에서 시작한다 — 이 키가 만드는 둘 다 돌이고, 500에서는 아무것도 안 보인다")
+	_assert(main.holding_pickaxe(), "곡괭이가 손에 있다")
+	_assert(main.sim.can_hand_mine(main.player.facing_cell()),
+		"그리고 바로 앞이 칠 수 있는 것이다")
+	# Twice is the same place. A tester unsure whether the key registered presses
+	# it again, and a key that walks her one cell further each time turns that
+	# into a hunt.
+	var stood: Vector2 = main.player.position
+	main.debug_spill()
+	_assert(main.player.position.distance_to(stood) < 1.0,
+		"두 번 눌러도 같은 자리다")
+
 	main.clear_save()
 
 	if failures == 0:

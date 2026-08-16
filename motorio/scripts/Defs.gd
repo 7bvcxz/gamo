@@ -128,10 +128,14 @@ const ITEM_CRYSTAL := 0
 const ITEM_COPPER := 1
 const ITEM_ENERGY := 2
 const ITEM_HEATSTONE := 3
+## Ordinary stone, out of the boulders lying on the snow. The one material that
+## is everywhere and never runs out, which is what makes it the floor the rest
+## of the costs are measured against.
+const ITEM_STONE := 4
 
-const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정", "열석"]
+const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정", "열석", "돌"]
 ## Short forms for the status panel, where the counters share one row.
-const ITEM_SHORT := ["수정", "구리", "에너지", "열석"]
+const ITEM_SHORT := ["수정", "구리", "에너지", "열석", "돌"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
@@ -141,7 +145,7 @@ const ITEM_SHORT := ["수정", "구리", "에너지", "열석"]
 ## and the colour here is the fire rather than the coal because it is the fire
 ## the player is looking for.
 const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138),
-	Color8(255, 122, 48)]
+	Color8(255, 122, 48), Color8(150, 152, 158)]
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
 
@@ -202,9 +206,9 @@ const FACE_BAND := 3.0
 ## about a minute. So the opening's jump has to come from the mission and not
 ## from this number, and which of the two moves is a question for when the
 ## tutorial is built.
-const ITEM_VALUES := [0, 0, 5, 5]
+const ITEM_VALUES := [0, 0, 5, 5, 0]
 ## The order the counters appear in, which is the order the player meets them.
-const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_CRYSTAL, ITEM_COPPER, ITEM_ENERGY]
+const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITEM_COPPER, ITEM_ENERGY]
 
 ## Hand mining. Deliberately slow: it is the floor the whole factory is measured
 ## against, and it has to stay worth replacing.
@@ -262,7 +266,8 @@ static func per_minute(seconds: float) -> float:
 static func throughput_line(type: int) -> String:
 	match type:
 		M_MINER:
-			return "수정 %.0f/분 · 고양이 또는 전력 %.1f" % [per_minute(MINER_PERIOD), MINER_POWER_DRAW]
+			# Whatever the seam under it holds -- there is no longer one ore.
+			return "광맥의 자원 %.0f/분 · 고양이 또는 전력 %.1f" % [per_minute(MINER_PERIOD), MINER_POWER_DRAW]
 		M_EXCHANGER:
 			return "수정 %.0f/분 → 에너지 %.0f/분" % [
 				per_minute(EXCHANGER_PERIOD) * float(CRYSTAL_COST_ENERGY),
@@ -505,6 +510,9 @@ static func machine_io(type: int) -> Array[String]:
 ## opens the miner; the first crystal opens the exchanger line; the first copper
 ## opens power.
 const MACHINE_UNLOCK_ITEM := [-1, ITEM_HEATSTONE, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER, ITEM_COPPER]
+## Boulders take longer than a seam: a rock is a rock and a seam is a seam, and
+## the difference is what makes walking to a seam worth it.
+const ROCK_MINE_PERIOD := 14.0
 
 # --- Economy -----------------------------------------------------------------
 ## Days repeat and accumulate rather than ending the game, so one day is short
@@ -531,6 +539,64 @@ const MINER_PERIOD := 5.0
 ## when carrying stones one at a time stops being enough, and the reason to build
 ## it is speed rather than possibility.
 const CAT_DIG_PERIOD := 20.0
+
+## --- Boulders ---------------------------------------------------------------
+## Moved here from the ground layer when rock became a resource: the simulation
+## has to answer "is there one on this cell" and it cannot ask a drawing layer.
+## The field is a pure function of the coordinates, so there is nothing to
+## generate and nothing to store except which ones have been broken.
+const ROCK_BLOCK := 11
+const ROCK_MIN := 1
+const ROCK_MAX := 12
+## How far a clump can reach out of the block that seeded it. Twelve cells grown
+## from one seed cannot travel further, so the blocks around a cell are the only
+## ones that can claim it.
+const ROCK_REACH := 1
+
+## Deterministic and cheap. Not a hash anyone should trust with anything, but it
+## has to give the same answer on every machine and every run, which rules out
+## randi() and anything seeded from the clock.
+static func rock_mix(a: int, b: int, salt: int) -> int:
+	var h: int = (a * 73856093) ^ (b * 19349663) ^ (salt * 83492791)
+	h = (h ^ (h >> 13)) * 1274126177
+	return absi(h ^ (h >> 16))
+
+## The cells one block's clump claims. Grown by filling its own concavities
+## rather than by walking, which keeps clumps close to round -- a random walk
+## produces strings one cell wide, and a line of separate boulder tiles reads as
+## a dotted line rather than as a scatter of rocks.
+static func rock_clump(block: Vector2i) -> Array[Vector2i]:
+	var size: int = ROCK_MIN + rock_mix(block.x, block.y, 7) % (ROCK_MAX - ROCK_MIN + 1)
+	var origin := Vector2i(
+		block.x * ROCK_BLOCK + rock_mix(block.x, block.y, 11) % ROCK_BLOCK,
+		block.y * ROCK_BLOCK + rock_mix(block.x, block.y, 13) % ROCK_BLOCK)
+	var cells: Array[Vector2i] = [origin]
+	var have: Dictionary[Vector2i, bool] = {origin: true}
+	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	while cells.size() < size:
+		var best: Array[Vector2i] = []
+		var best_score: int = -1
+		for from: Vector2i in cells:
+			for step: Vector2i in steps:
+				var candidate: Vector2i = from + step
+				if have.has(candidate):
+					continue
+				var score: int = 0
+				for around: Vector2i in steps:
+					if have.has(candidate + around):
+						score += 1
+				if score > best_score:
+					best_score = score
+					best = [candidate]
+				elif score == best_score and not best.has(candidate):
+					best.append(candidate)
+		if best.is_empty():
+			break
+		var pick: Vector2i = best[rock_mix(block.x, block.y, 300 + cells.size()) % best.size()]
+		cells.append(pick)
+		have[pick] = true
+	return cells
+
 
 ## --- The crash ------------------------------------------------------------
 ## Before the emergency base is down there is no fire on this planet, and the
