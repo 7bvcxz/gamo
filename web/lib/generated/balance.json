@@ -2,30 +2,30 @@
   "belts": [
     {
       "copper": 3,
-      "items_per_minute": 45.8823529411765,
+      "items_per_minute": 52.9411764705882,
       "multiplier": 1.0,
       "name": "벨트",
-      "seconds_per_tile": 3.84615384615385,
-      "ten_tile_seconds": 38.4615384615385,
-      "tiles_per_second": 0.26
+      "seconds_per_tile": 3.33333333333333,
+      "ten_tile_seconds": 33.3333333333333,
+      "tiles_per_second": 0.3
     },
     {
       "copper": 9,
-      "items_per_minute": 137.647058823529,
+      "items_per_minute": 158.823529411765,
       "multiplier": 3.0,
       "name": "고속 벨트",
-      "seconds_per_tile": 1.28205128205128,
-      "ten_tile_seconds": 12.8205128205128,
-      "tiles_per_second": 0.78
+      "seconds_per_tile": 1.11111111111111,
+      "ten_tile_seconds": 11.1111111111111,
+      "tiles_per_second": 0.9
     },
     {
       "copper": 30,
-      "items_per_minute": 458.823529411765,
+      "items_per_minute": 529.411764705882,
       "multiplier": 10.0,
       "name": "초고속 벨트",
-      "seconds_per_tile": 0.384615384615385,
-      "ten_tile_seconds": 3.84615384615385,
-      "tiles_per_second": 2.6
+      "seconds_per_tile": 0.333333333333333,
+      "ten_tile_seconds": 3.33333333333333,
+      "tiles_per_second": 3.0
     }
   ],
   "cats": {
@@ -44,7 +44,7 @@
   },
   "gate_to_copper": {
     "crystal": 54.0,
-    "days_two_miners": 2.25,
+    "days_two_miners": 1.125,
     "energy": 27.0,
     "heat": 135.0
   },
@@ -74,7 +74,7 @@
       "hint": "광맥 위에 설치하고 고양이를 올려놓으세요 · 고양이보다 빠릅니다",
       "name": "채굴기",
       "short": "채굴기",
-      "throughput": "수정 6/분 · 고양이 또는 전력 0.5",
+      "throughput": "수정 12/분 · 고양이 또는 전력 0.5",
       "unlock": "열석"
     },
     {
@@ -100,7 +100,7 @@
       "hint": "자원을 기지까지 끊김 없이 나릅니다",
       "name": "컨테이너 벨트",
       "short": "벨트",
-      "throughput": "46/분 · 칸당 3.8초 · F로 등급",
+      "throughput": "53/분 · 칸당 3.3초 · F로 등급",
       "unlock": "구리광석"
     },
     {
@@ -307,17 +307,17 @@
   ],
   "purity": [
     {
-      "crystal_per_minute": 6.0,
+      "crystal_per_minute": 12.0,
       "multiplier": 1.0,
       "name": "보통"
     },
     {
-      "crystal_per_minute": 9.0,
+      "crystal_per_minute": 18.0,
       "multiplier": 1.5,
       "name": "풍부"
     },
     {
-      "crystal_per_minute": 12.0,
+      "crystal_per_minute": 24.0,
       "multiplier": 2.0,
       "name": "순수"
     }
@@ -328,8 +328,8 @@
     "exchanger_seconds": 5.0,
     "generator_seconds": 10.0,
     "hand_mine_seconds": 10.0,
-    "miner_seconds": 10.0,
-    "ratio_hint": "교환기 1대 = 채굴기 4대"
+    "miner_seconds": 5.0,
+    "ratio_hint": "교환기 1대 = 채굴기 2대"
   },
   "recipes": [
     {
@@ -362,7 +362,7 @@
     "purity_pure": 17.0,
     "purity_rich": 11.0
   },
-  "version": "0.20.73",
+  "version": "0.20.74",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

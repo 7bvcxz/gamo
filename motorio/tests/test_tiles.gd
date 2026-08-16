@@ -95,6 +95,14 @@ func _run() -> void:
 	# path by position rather than by this, so the bowl stays reachable to the
 	# ones that actually eat from it -- checked, because a bin nobody can get to
 	# starves the crew and looks like a pathing bug.
+	#
+	# It has to be built first. A run starts without one: a feeding station four
+	# days before any cat is hungry is a solution parked next to a problem that
+	# has not happened.
+	_assert(not sim.food_placed, "새 세계에는 밥통이 없다")
+	_assert(not sim.blocks_player(sim.food_cell), "없는 밥통은 길을 막지 않는다")
+	sim.stock[Defs.ITEM_HEATSTONE] = 20
+	_assert(sim.craft_food_bin(), "기지에서 만든다")
 	_assert(sim.is_structure(sim.food_cell), "밥통은 구조물이다")
 	_assert(sim.blocks_player(sim.food_cell), "밥통은 플레이어를 막는다")
 	_assert(sim.food_cell != sim.shelter_cell and sim.food_cell != sim.core_cell,

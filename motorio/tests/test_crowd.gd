@@ -35,11 +35,21 @@ func _run() -> void:
 	# lives outside sim.tick happened and the crew never got hungry.
 	main.touch_primary()
 	main._end_cutscene()
+	# The bin is built now rather than standing from the first frame, and this
+	# run is supposed to contain a cat walking off to eat.
+	main.sim.stock[Defs.ITEM_HEATSTONE] = 20
+	main.sim.craft_food_bin()
+	# And they start part-hungry, staggered. A fed cat now works twelve minutes
+	# and this run is two hundred seconds, so waiting for hunger to arrive on its
+	# own would be waiting for a thing the file is not about -- test_workers owns
+	# the rate. Staggered so the crew does not leave for the bowl in one block.
 	main.debug_crowd()
 	main.process_mode = Node.PROCESS_MODE_DISABLED   # one source of ticks, not two
 
 	var sim = main.sim
 	_assert(sim.cats.size() >= 8, "고양이 8마리 이상 (%d)" % sim.cats.size())
+	for index in sim.cats.size():
+		sim.cats[index].hunger = 0.02 + 0.03 * float(index)
 	var working: int = 0
 	for cat: Sim.Cat in sim.cats:
 		if cat.has_job():

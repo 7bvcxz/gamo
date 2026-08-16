@@ -753,7 +753,7 @@ func _draw_frozen(tile: float) -> void:
 		draw_texture_rect_region(CAT_FREEZE_SHEET, block, region, Color.WHITE)
 
 func _draw_food_bin(tile: float) -> void:
-	if not sim.shelter_placed:
+	if not sim.food_placed:
 		return
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	_shadow(at + Vector2(0, 10), 10.0)

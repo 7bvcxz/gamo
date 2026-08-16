@@ -372,10 +372,25 @@ func _test_hunger_and_feeding() -> void:
 	for step in 100:
 		sim.tick(0.1)      # ten seconds
 	var spent: float = before - cat.hunger
-	_assert(absf(spent - 1.0 / 18.0) < 0.005, "ten seconds of work costs one eighteenth")
+	_assert(absf(spent - Defs.HUNGER_PER_SECOND * 10.0) < 0.005,
+		"열 초의 노동이 정확히 %.4f 를 쓴다" % (Defs.HUNGER_PER_SECOND * 10.0))
+	# Slow on purpose: a fed cat works about twelve minutes, which is four days.
+	# It used to be three minutes -- inside the first day, before there was a
+	# factory for the hunger to be a problem with.
+	var minutes: float = (1.0 / Defs.HUNGER_PER_SECOND) / 60.0
+	_assert(minutes > 8.0, "배부른 고양이가 %.0f분 일한다 — 서서히 배고파진다" % minutes)
 
-	# Starving halves nothing -- it thirds the rate -- and sends the cat to eat.
+	# Starving halves nothing -- it thirds the rate -- and sends the cat to eat,
+	# but only once there is a bin to walk to. There is none at the start of a
+	# run: a feeding station standing four days before any cat is hungry is a
+	# solution parked next to a problem that has not happened.
 	cat.hunger = 0.0
+	sim.food_placed = false
+	sim.tick(0.1)
+	_assert(cat.state != Defs.CAT_TO_FOOD, "밥통이 없으면 먹으러 가지 않는다")
+	sim.stock[Defs.ITEM_HEATSTONE] = 20
+	_assert(sim.craft_food_bin(), "기지에서 사료 상자를 만든다")
+	_assert(sim.food_placed and sim.blocks_player(sim.food_cell), "그리고 세워진다")
 	sim.tick(0.1)
 	_assert(cat.state == Defs.CAT_TO_FOOD, "an empty cat walks to the food bin")
 

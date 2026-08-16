@@ -214,12 +214,17 @@ func _test_miner_rate() -> void:
 	sim.ore[cell] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	_staff(sim, cell)
-	for step in 50:
-		sim.tick(0.1)     # five seconds
+	# Derived from the constant, like the wait below it. Fifty ticks used to be
+	# "less than the period"; the miner is twice as fast now and five seconds is
+	# past it, so the assertion would have been testing the opposite thing.
+	for step in int(Defs.MINER_PERIOD / 0.1) - 4:
+		sim.tick(0.1)
 	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 0, "a miner produces nothing before its period")
-	# Derived from the constant rather than a hardcoded tick count, so retuning
-	# the mining rate does not silently turn this into a test of nothing.
-	for step in int(Defs.MINER_PERIOD / 0.1) + 6:
+	# Just past it, counting from where the loop above stopped rather than from
+	# zero. Both numbers come off the constant: the first version added a whole
+	# period to a hardcoded five seconds, which was under the old period and over
+	# the new one, so halving the period turned "one ore" into two.
+	for step in 8:
 		sim.tick(0.1)
 	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 1, "a miner delivers its first ore just after its period")
 	sim.free()

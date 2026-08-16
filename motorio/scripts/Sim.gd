@@ -144,6 +144,11 @@ var carried_kit: int = Defs.KIT_NONE
 ## wants an ordinary world writing exactly what it wrote before.
 var base_placed := true
 var shelter_placed := true
+## The food bin is not part of the shelter kit. It used to appear with it, which
+## put a feeding station on the map four days before any cat was hungry -- a
+## solution standing next to a problem that had not happened. It is made at the
+## fire, when a cat working at a third speed makes the player ask why.
+var food_placed := false
 ## The survival kit lying in the snow, and how many times it has been searched.
 ## Two searches: the base, then the pickaxe and the shelter.
 var kit_cell := Vector2i(9999, 9999)
@@ -361,6 +366,7 @@ func to_save() -> Dictionary:
 		# a world around the wrong centre would put the shelter, the fog and the
 		# ore rings in different places than the ones on screen.
 		"base_placed": base_placed, "shelter_placed": shelter_placed,
+		"food_placed": food_placed,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
 		"torches": torches, "torch_left": torch_left,
 		"learned": learned.keys(), "walked": walked,
@@ -436,6 +442,7 @@ func from_save(data: Dictionary) -> void:
 		int(data.get("core_y", core_cell.y)))
 	base_placed = bool(data.get("base_placed", true))
 	shelter_placed = bool(data.get("shelter_placed", true))
+	food_placed = bool(data.get("food_placed", false))
 	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
 	kit_searched = int(data.get("kit_searched", 2))
 	torches = int(data.get("torches", 0))
@@ -519,6 +526,7 @@ func setup(seed_value: int) -> void:
 	kit_cell = Vector2i(9999, 9999)
 	base_placed = true
 	shelter_placed = true
+	food_placed = false
 	carried_cat = null
 	coins = 0
 	# Derived from the run seed rather than randomised, so replaying a seed
@@ -700,7 +708,7 @@ func tile_attributes(cell: Vector2i) -> int:
 	# walked straight through it, which is the one thing a picture of a solid
 	# object must never let you do. Cats are unaffected: they path by position,
 	# not by this, and they have to be able to reach the bowl.
-	if shelter_placed and cell == food_cell:
+	if food_placed and cell == food_cell:
 		attrs |= Defs.ATTR_STRUCTURE
 	return attrs
 
@@ -736,6 +744,7 @@ func begin_crash() -> void:
 	machines.erase(core_cell)
 	base_placed = false
 	shelter_placed = false
+	food_placed = false
 	carried_kit = Defs.KIT_NONE
 	kit_searched = 0
 	kit_cell = core_cell + Defs.KIT_OFFSET
@@ -874,6 +883,38 @@ func can_craft_torch() -> bool:
 		if int(stock.get(item_type, 0)) < int(Defs.TORCH_COST[item_type]):
 			return false
 	return true
+
+## The bin, put down beside the hut. No placement step: there is exactly one
+## sensible spot for it and asking the player to choose between identical tiles
+## is a decision with no content.
+func craft_food_bin() -> bool:
+	if not base_placed or food_placed or not can_craft("food_bin"):
+		return false
+	_spend("food_bin")
+	food_cell = shelter_cell + Vector2i(Defs.FOOD_OFFSET.round()) \
+		if shelter_placed else core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	food_placed = true
+	_grid_dirty = true
+	return true
+
+## Whether a recipe can be paid for, by id.
+func can_craft(id: String) -> bool:
+	for row: Dictionary in Defs.BASE_CRAFTS:
+		if String(row["id"]) != id:
+			continue
+		for item_type: int in row["cost"]:
+			if int(stock.get(item_type, 0)) < int(row["cost"][item_type]):
+				return false
+		return true
+	return false
+
+func _spend(id: String) -> void:
+	for row: Dictionary in Defs.BASE_CRAFTS:
+		if String(row["id"]) != id:
+			continue
+		for item_type: int in row["cost"]:
+			stock[item_type] = int(stock.get(item_type, 0)) - int(row["cost"][item_type])
+		return
 
 func craft_torch() -> bool:
 	if not base_placed or not can_craft_torch():
@@ -1883,7 +1924,7 @@ func _cat_work(cat: Cat, delta: float) -> void:
 			cat.carrying = int(ore[cat.assigned])
 			cat.state = Defs.CAT_HAUL_TO_BASE
 			return
-	if cat.hunger <= 0.0 and food > 0:
+	if cat.hunger <= 0.0 and food > 0 and food_placed:
 		cat.state = Defs.CAT_TO_FOOD
 
 func _cat_walk_to_food(cat: Cat, delta: float) -> void:

@@ -1327,10 +1327,9 @@ func finish_tutorial() -> void:
 		sim.carried_kit = Defs.KIT_BASE
 		sim.place_base(sim.core_cell)
 	if not sim.shelter_placed:
-		sim.carried_kit = Defs.KIT_SHELTER
 		sim.shelter_placed = true
 		sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
-		sim.food_cell = sim.core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+		sim.food_cell = sim.shelter_cell + Vector2i(Defs.FOOD_OFFSET.round())
 		sim.carried_kit = Defs.KIT_NONE
 	sim.kit_searched = 2
 	mission = Mission.DONE
@@ -2024,16 +2023,23 @@ func _base_menu_confirm() -> void:
 		return
 	craft_selected(int(row["craft"]))
 
-## Making something at the fire. A table rather than a branch, so the second
-## thing the base can make is a row and not a rewrite.
+## Making something at the fire. A table rather than a branch, so the third thing
+## the base can make is a row and not a rewrite.
 func craft_selected(index: int = 0) -> void:
 	var craft: Dictionary = Defs.BASE_CRAFTS[clampi(index, 0, Defs.BASE_CRAFTS.size() - 1)]
-	if not sim.craft_torch():
-		_notify("%s  ·  재료가 모자랍니다" % String(craft["name"]), Defs.COL_TEXT_DIM)
+	var id: String = String(craft["id"])
+	var made: bool = sim.craft_torch() if id == "torch" else sim.craft_food_bin()
+	if not made:
+		var reason: String = "이미 있습니다" if id == "food_bin" and sim.food_placed \
+			else "재료가 모자랍니다"
+		_notify("%s  ·  %s" % [String(craft["name"]), reason], Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
-	_notify("%s을 만들었습니다  (%d개)" % [String(craft["name"]), sim.torches], Defs.COL_CORE)
+	var tail: String = "  (%d개)" % sim.torches if id == "torch" else ""
+	_notify("%s을 만들었습니다%s" % [String(craft["name"]), tail], Defs.COL_CORE)
 	fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+	if id == "food_bin":
+		fx.ring(sim.cell_centre(sim.food_cell), Defs.COL_CORE, Defs.RING_LARGE)
 	audio.call("play", "alloy")
 
 ## Handing the fuel over, and showing it go in. The pieces fly out of her arms

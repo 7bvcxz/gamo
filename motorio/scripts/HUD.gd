@@ -889,7 +889,9 @@ func _draw_base_row(index: int, row: Dictionary) -> void:
 		_draw_base_fuel_row(rect, on_cursor, accent)
 		return
 	var craft: Dictionary = Defs.BASE_CRAFTS[int(row["craft"])]
-	var affordable: bool = main.sim.can_craft_torch()
+	var affordable: bool = main.sim.can_craft(String(craft["id"]))
+	# A bin already standing is not unaffordable, it is done.
+	var already: bool = String(craft["id"]) == "food_bin" and main.sim.food_placed
 	if on_cursor:
 		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
 		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
@@ -899,10 +901,11 @@ func _draw_base_row(index: int, row: Dictionary) -> void:
 	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
 	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
 	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
-	Icons.draw_thing(self, icon, Icons.THING_TORCH)
+	Icons.draw_thing(self, icon,
+		Icons.THING_FOOD if String(craft["id"]) == "food_bin" else Icons.THING_TORCH)
 	var text_x: float = rect.position.x + 62.0
 	_text(Vector2(text_x, rect.position.y + 22.0), String(craft["name"]), 14,
-		Defs.COL_TEXT if affordable else Defs.COL_TEXT_DIM)
+		Defs.COL_TEXT if affordable and not already else Defs.COL_TEXT_DIM)
 	_text(Vector2(text_x, rect.position.y + 42.0), String(craft["note"]), 11, Defs.COL_TEXT_DIM)
 	# The cost, on the right, coloured by whether it is actually payable.
 	var cost: Dictionary = craft["cost"]
@@ -910,7 +913,8 @@ func _draw_base_row(index: int, row: Dictionary) -> void:
 	for item_type: int in cost:
 		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], int(cost[item_type])])
 	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-		" · ".join(parts), 13, Defs.COL_TEXT if affordable else Defs.COL_DANGER)
+		"세워짐" if already else " · ".join(parts), 13,
+		Defs.COL_TEXT_DIM if already else (Defs.COL_TEXT if affordable else Defs.COL_DANGER))
 
 ## The row that hands the fire what she is carrying. Shown only while there is
 ## something to hand over, so it is never a row that refuses.

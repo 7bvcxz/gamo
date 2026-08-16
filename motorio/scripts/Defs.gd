@@ -517,7 +517,11 @@ const START_HEAT := 30
 ## it is somewhere else while the player is here, which makes the first one read
 ## as parallelism rather than as a speed upgrade. It also makes one exchanger
 ## exactly absorb four miners.
-const MINER_PERIOD := 10.0
+## Twelve a minute. The miner used to be six, which is a cat on a bare seam
+## doing 2.2 with a walk in between -- close enough that the machine was a small
+## improvement rather than the reason to build one. At twelve it is five times
+## the animal, and that gap is what a machine is for.
+const MINER_PERIOD := 5.0
 ## A cat digging a bare seam with its paws, for comparison. Twice the miner's
 ## period, and then it walks the stone to the core itself and walks back -- so a
 ## seam-cat is much slower than the number alone suggests.
@@ -596,7 +600,14 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"id": "torch",
 		"name": TORCH_NAME,
 		"cost": TORCH_COST,
-		"note": "들고 있는 동안 주위 %d칸이 보인다 · %d초" % [int(TORCH_SIGHT), int(TORCH_SECONDS)],
+		"note": "들고 있는 동안 주위 %d칸이 보이고 춥지 않다 · %d초"
+			% [int(TORCH_SIGHT), int(TORCH_SECONDS)],
+	},
+	{
+		"id": "food_bin",
+		"name": "사료 상자",
+		"cost": {ITEM_HEATSTONE: 5},
+		"note": "고양이가 배고프면 여기서 먹는다 · 거처 옆에 선다",
 	},
 ]
 ## Where the circle stands when the third mission is done. Set to a number
@@ -775,7 +786,12 @@ const FURNACE_PERIOD := 2.2
 ## times a pure seam's output -- but slow enough that a long line starts to feel
 ## like something you would rather not wait for. That feeling is what makes the
 ## grades worth having, and grade 3 restores exactly the old speed.
-const BELT_SPEED := 0.26          # tiles per second
+## Raised with the miner. The rule a belt has to keep is that one of them
+## carries one miner without choking, and doubling the miner to 12/min put the
+## richest seam at 24 -- past what 0.26 could move. The grades buy latency, not
+## throughput, so a belt that cannot keep up with a single machine turns them
+## into a throughput gate the design says they must never be.
+const BELT_SPEED := 0.30          # tiles per second
 
 ## --- Belt grades --------------------------------------------------------------
 ## Deliberately not a throughput gate. Grade 1 already carries far more than
@@ -956,9 +972,17 @@ const THAW_SECONDS := 12.0
 ## duplicate of something the game already draws.
 const FROZEN_STAGES := 4
 
-## Hunger runs 0..1. Working costs 1/18 every ten seconds, so a fed cat works
-## about three real minutes before it needs the food bin.
-const HUNGER_PER_SECOND := (1.0 / 18.0) / 10.0
+## Hunger runs 0..1, and falls slowly on purpose.
+##
+## It used to cost 1/18 every ten seconds, so a fed cat was hungry after three
+## real minutes -- which is inside the first day, before the player has built
+## anything for the food to be a problem *with*. Feeding was a chore introduced
+## before its own reason existed.
+##
+## At a quarter of that a cat works about twelve minutes, which is four days. By
+## then there is a factory to slow down, and a cat visibly working at a third
+## speed is a question the player asks rather than an errand they are handed.
+const HUNGER_PER_SECOND := (1.0 / 18.0) / 40.0
 const HUNGER_STARVED_RATE := 1.0 / 3.0    # work speed multiplier at zero hunger
 const FOOD_START := 200
 const FOOD_SECONDS_PER_UNIT := 5.0

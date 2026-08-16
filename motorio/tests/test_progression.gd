@@ -66,11 +66,14 @@ func _run() -> void:
 	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_ENERGY]) > 0, "energy is heat")
 	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE]) > 0, "and so is heat stone")
 
-	# One exchanger keeps up with four miners; miners stay the bottleneck.
+	# One exchanger keeps up with more than one miner, so miners stay the
+	# bottleneck. It used to be four; the miner doubled to 12/min and it is two,
+	# which is the same property with less headroom.
 	var miner_rate: float = 1.0 / Defs.MINER_PERIOD
 	var exchanger_intake: float = float(Defs.CRYSTAL_COST_ENERGY) / Defs.EXCHANGER_PERIOD
-	_assert(absf(exchanger_intake / miner_rate - 4.0) < 0.6,
-		"one exchanger absorbs about four miners (%.1f)" % (exchanger_intake / miner_rate))
+	var ratio: float = exchanger_intake / miner_rate
+	_assert(ratio >= 1.5,
+		"one exchanger absorbs more than one miner (%.1f)" % ratio)
 
 	# The gate that matters: reaching copper must be days, not hours.
 	#
@@ -210,9 +213,12 @@ func _run() -> void:
 	split_sim.free()
 
 	# --- The published numbers have to be the real ones ----------------------
-	_assert(Defs.throughput_line(Defs.M_MINER).find("6/분") >= 0,
+	# The published number is the real one, derived rather than typed, so retuning
+	# the miner cannot leave the hotbar advertising the old rate.
+	var advertised: String = "%.0f/분" % Defs.per_minute(Defs.MINER_PERIOD)
+	_assert(Defs.throughput_line(Defs.M_MINER).find(advertised) >= 0,
 		"the miner advertises its real rate: %s" % Defs.throughput_line(Defs.M_MINER))
-	_assert(Defs.ratio_hint().find("4") >= 0,
+	_assert(Defs.ratio_hint().find("%.0f" % ratio) >= 0,
 		"and the exchanger ratio is stated: %s" % Defs.ratio_hint())
 
 	# --- Purity: distance buys richness --------------------------------------

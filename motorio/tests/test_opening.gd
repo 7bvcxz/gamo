@@ -345,7 +345,9 @@ func _test_finish_tutorial() -> void:
 	_assert(sim.base_placed and sim.machine_at(sim.core_cell) != null, "코어가 선다")
 	_assert(sim.shelter_placed, "거처도 선다")
 	_assert(sim.shelter_cell == sim.core_cell + Defs.SHELTER_CELL, "숙소는 제자리에")
-	_assert(sim.blocks_player(sim.food_cell), "밥통도 제자리에")
+	# The bin is not part of the shelter kit. It is made at the fire, when a cat
+	# working at a third speed makes the player ask why.
+	_assert(not sim.food_placed, "밥통은 아직 없다")
 	_assert(main.mission == main.Mission.DONE, "오프닝이 끝난 상태다")
 	_assert(sim.kit_searched == 2, "상자는 비어 있다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "손에는 아무것도 없다")
