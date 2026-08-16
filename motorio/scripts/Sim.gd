@@ -7,6 +7,9 @@ class_name Sim
 ## bodies so that a few hundred of them cost almost nothing.
 
 signal heat_gained(amount: int, cell: Vector2i, item_type: int)
+## Something arrived at the core and was put in the stores. Separate from
+## `heat_gained` because arriving and burning stopped being the same event.
+signal item_delivered(item_type: int, cell: Vector2i)
 signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
 signal build_rejected(reason: String, cell: Vector2i)
@@ -1642,10 +1645,10 @@ func collect_ground_at(cell: Vector2i) -> int:
 	ground.erase(cell)
 	ground_stack.erase(cell)
 	last_collected = count
+	# Into the pack, not into the fire. An energy crystal picked up off the snow
+	# used to add its heat on the spot and stay in the stores as well, so the
+	# circle could grow from bending down.
 	_gain(item_type, count)
-	if item_type == Defs.ITEM_ENERGY:
-		heat += Defs.ITEM_VALUES[item_type] * count
-		total_heat += Defs.ITEM_VALUES[item_type] * count
 	return item_type
 
 ## Everything on the belt she is standing on, straight into the pack.
@@ -1672,9 +1675,6 @@ func collect_belt_at(cell: Vector2i) -> int:
 	machine.stalled = false
 	last_collected = count
 	_gain(item_type, count)
-	if item_type == Defs.ITEM_ENERGY:
-		heat += Defs.ITEM_VALUES[item_type] * count
-		total_heat += Defs.ITEM_VALUES[item_type] * count
 	return item_type
 
 ## The nearest loose item, or a sentinel. Used by idle cats looking for work.
@@ -2407,21 +2407,27 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			return true
 	return false
 
-## Everything that reaches the core is banked as material; energy crystals are
-## additionally burned for heat. One doorway for every resource keeps the rule
-## the player learns in minute one true for the rest of the game.
+## Everything that reaches the core is banked as material. It is not burned.
+##
+## It used to be both: a heat stone a cat carried in was added to the stores and
+## fed to the fire in the same call, so the same stone counted twice -- once on
+## arrival and again when the player pressed Z at the core and the stores went
+## into the flames. The visible half of that was worse than the arithmetic. The
+## circle grew while the player was somewhere else, doing something else; the
+## one thing the whole game is about happened as a background event with a
+## number attached, and there was nothing to do about it or with it.
+##
+## So the core is a warehouse and the fire is fed by hand. Belts and cats save
+## the walk to the seam, which is what they are for; walking to the fire and
+## feeding it is the act the circle is the answer to.
 func _deliver(item_type: int, cell: Vector2i) -> void:
-	var value: int = Defs.ITEM_VALUES[item_type]
-	heat += value
-	total_heat += value
-	_heat_accum += float(value)
 	_gain(item_type, 1)
 	delivered[item_type] = int(delivered.get(item_type, 0)) + 1
 	var core: Machine = machines.get(core_cell, null)
 	if core != null:
 		core.flash = 0.4
 		_note_in(core, item_type)
-	heat_gained.emit(value, cell, item_type)
+	item_delivered.emit(item_type, cell)
 
 func spend_rescue() -> int:
 	var lost: int = int(round(float(heat) * Defs.RESCUE_PENALTY))

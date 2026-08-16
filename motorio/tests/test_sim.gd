@@ -324,13 +324,22 @@ func _test_economy_and_warmth() -> void:
 	var start_radius: float = sim.warm_radius
 	sim.heat = 0
 	sim.total_heat = 0
+	# A delivery banks the material and nothing else. It used to credit heat as
+	# well as stock -- the same crystal twice, once on arrival and again when the
+	# player fed the stores to the fire -- and the circle grew while she was
+	# somewhere else. `test_fire` holds the whole rule; this is the arithmetic.
 	sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
-	_assert(sim.heat == Defs.ITEM_VALUES[Defs.ITEM_ENERGY], "delivery credits spendable heat")
-	_assert(sim.total_heat == Defs.ITEM_VALUES[Defs.ITEM_ENERGY], "delivery credits lifetime heat")
+	_assert(sim.heat == 0, "delivery does not credit spendable heat")
+	_assert(sim.total_heat == 0, "delivery does not credit lifetime heat")
+	_assert(int(sim.stock.get(Defs.ITEM_ENERGY, 0)) > 0, "it banks the crystal instead")
 	for step in 400:
 		sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
 	sim.tick(0.016)
-	_assert(sim.warm_radius > start_radius, "lifetime heat expands the warm radius")
+	_assert(is_equal_approx(sim.warm_radius, start_radius),
+		"and four hundred of them do not move the circle")
+	sim.deposit_fuel()
+	sim.tick(0.016)
+	_assert(sim.warm_radius > start_radius, "feeding the stores to the fire does")
 	_assert(sim.warm_radius <= Defs.WARM_MAX, "the warm radius is capped")
 
 	# Spending must not shrink the map: radius follows lifetime, not balance.

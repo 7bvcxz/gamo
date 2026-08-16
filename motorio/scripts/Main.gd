@@ -177,6 +177,7 @@ func _ready() -> void:
 	Engine.time_scale = 1.0
 	speed_index = 0
 	sim.heat_gained.connect(_on_heat_gained)
+	sim.item_delivered.connect(_on_item_delivered)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
 	sim.base_upgraded.connect(_on_base_upgraded)
@@ -2172,6 +2173,12 @@ func debug_speed() -> float:
 ## exists once a machine is unlocked, so screens like the build list could not be
 ## looked at without playing to them first.
 func debug_unlock_all() -> void:
+	# A fire first. Half of what this key grants needs somewhere to be delivered
+	# to, and a world with every machine unlocked and no core is a world where
+	# none of them can be looked at doing their job.
+	if not sim.base_placed:
+		sim.carried_kit = Defs.KIT_BASE
+		sim.place_base(sim.core_cell)
 	for type: int in Defs.BUILDABLE:
 		sim.unlocked[type] = true
 	for index in Defs.RECIPES.size():
@@ -2255,9 +2262,6 @@ func debug_spill() -> void:
 	# nearest boulder is well outside the opening circle -- the first version of
 	# this key put her in front of one at 31% warmth inside white fog, where a
 	# working feature and a missing one look exactly alike.
-	if not sim.base_placed:
-		sim.carried_kit = Defs.KIT_BASE
-		sim.place_base(sim.core_cell)
 	sim.total_heat = maxi(sim.total_heat, int(Defs.BASE_LEVELS[-1]["heat"]))
 	sim._refresh_radius()
 	player.warmth = 100.0
@@ -2469,6 +2473,16 @@ func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
 	fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE if energy else Defs.RING_SMALL)
 	shake = maxf(shake, Defs.FX_LARGE if energy else Defs.FX_QUIET)
 	audio.call("play", "alloy" if item_type == Defs.ITEM_ENERGY else "deliver")
+
+## Something reached the core. Quieter than feeding the fire, and it says what
+## arrived rather than "+5" -- the number belonged to a burn that no longer
+## happens here, and a delivery that still shouted the heat figure would be the
+## old behaviour with the effect removed.
+func _on_item_delivered(item_type: int, cell: Vector2i) -> void:
+	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+	fx.popup(at, Defs.ITEM_SHORT[item_type], Defs.ITEM_COLORS[item_type])
+	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
+	audio.call("play", "deliver")
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	# One channel only. Showing the same reason both here and in the centre
