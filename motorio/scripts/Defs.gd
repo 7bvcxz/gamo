@@ -1134,9 +1134,29 @@ const PURITY_NAMES := ["보통", "풍부", "순수"]
 const PURITY_RICH_RING := 11.0
 const PURITY_PURE_RING := 17.0
 
-## Heat stone is what the first ten minutes are made of, so it is inside the
-## opening warm radius: the player never has to leave the fire to feed it.
-const HEATSTONE_RING := Vector2(3.0, 6.0)
+## Heat stone in bands, one per step of the base ladder.
+##
+## It used to be a single ring from 3 to 6, which put every seam in the world
+## inside the opening circle. Counted across forty seeds, radius 13 and radius 15
+## reached exactly the same seams as radius 11 -- so the third and fourth
+## upgrades, which cost 15 and 27 heat stone, returned no heat stone at all. A
+## ladder paid for in the thing it does not give back gets harder to climb the
+## higher you go, and the only honest answer to "why upgrade" was "you do not".
+##
+## The band edges sit just inside each warm radius (7 / 9 / 11 / 13 / 15 / 17) so
+## a step lands a field rather than a fraction of one, and the purity rings at 11
+## and 17 finally have something to grade: before this, no heat stone seam in any
+## world was ever above 보통.
+const HEATSTONE_BANDS: Array[Dictionary] = [
+	{"ring": Vector2(3.0, 6.0), "patches": 3, "size": 2},      # 시작 반경 7
+	{"ring": Vector2(7.5, 8.8), "patches": 2, "size": 2},      # 1단계 · 9
+	{"ring": Vector2(9.5, 10.8), "patches": 2, "size": 2},     # 2단계 · 11 · 풍부
+	{"ring": Vector2(11.5, 12.8), "patches": 2, "size": 2},    # 3단계 · 13
+	{"ring": Vector2(13.5, 14.8), "patches": 2, "size": 3},    # 4단계 · 15
+	{"ring": Vector2(15.5, 16.8), "patches": 2, "size": 3},    # 5단계 · 17
+	{"ring": Vector2(17.5, 18.8), "patches": 2, "size": 3},    # 6단계 · 19 · 순수
+	{"ring": Vector2(19.5, 21.5), "patches": 2, "size": 3},    # 7단계 · 22 · 마지막
+]
 ## Crystal has no seam. It used to have one, and a seam is a promise that there
 ## will always be more -- which is the opposite of what a rare material is. It
 ## lies in the snow instead, a fixed number of pieces put down when the world is
@@ -1156,6 +1176,16 @@ const CRYSTAL_SHARDS := 60
 ## circle. Copper is the door to power and belts, and it opens on an upgrade
 ## rather than on a number quietly passing a threshold.
 const COPPER_RING := Vector2(15.0, 19.0)
+## And one patch guaranteed at the very edge of that circle, because scattering
+## three patches anywhere in 15..19 put an average of 0.3 seams inside 15 -- the
+## upgrade the design calls "the one that opens copper" opened it in about a
+## quarter of runs, and a belt costs three. A guaranteed patch makes the promise
+## true every time; the scatter is still what rewards walking past it.
+## Fourteen, not fifteen: the patch grows outward from its origin, so an origin
+## on the line puts half the cluster outside the circle it is supposed to open.
+## Measured that way, a belt was buildable at level 4 in 29 runs out of 60.
+const FIRST_COPPER_BAND := Vector2(13.4, 14.8)
+const FIRST_COPPER_SIZE := 4
 
 ## UI scale. The web export renders at the device pixel ratio, so a phone that is
 ## physically 390 CSS px wide reports a ~960 px logical viewport: every constant

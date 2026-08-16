@@ -96,8 +96,14 @@ export function MotorioLevelDesign() {
             </tr>
             <tr>
               <td>열석 광맥 지대</td>
-              <td>반경 {balance.rings.heatstone[0]} – {balance.rings.heatstone[1]}칸</td>
-              <td>처음 10분이 이것으로 만들어진다. 손으로 캐서 기지에 넣으면 그대로 열</td>
+              <td>
+                반경 {balance.rings.heatstone[0]} – {balance.rings.heatstone[1]}칸,
+                기지 단계마다 한 띠씩
+              </td>
+              <td>
+                처음 10분이 이것으로 만들어진다. 손으로 캐서 기지에 넣으면 그대로 열.
+                <b>사다리의 비용이 열석이므로 띠도 단계마다 하나씩 있다</b> — 아래 표
+              </td>
             </tr>
             <tr>
               <td>수정 조각</td>
@@ -110,13 +116,17 @@ export function MotorioLevelDesign() {
             <tr>
               <td>구리 지대</td>
               <td>반경 {balance.rings.copper[0]} – {balance.rings.copper[1]}칸</td>
-              <td>기지 4단계에서 처음 닿는다. 채굴기 전용</td>
+              <td>
+                기지 4단계에서 처음 닿는다. 채굴기 전용. 4단계 원 바로 안쪽에 한 지대가
+                <b>모든 시드에 보장</b>된다 — 흩뿌리기에만 맡기면 그 원 안의 구리가 평균
+                0.3개였고, 벨트 하나가 3개다
+              </td>
             </tr>
             <tr>
               <td>얼어붙은 고양이</td>
               <td>200칸당 1마리, 최소 반경 8.5칸</td>
               <td>
-                시작 반경 7칸에서는 <b>보이지 않는다.</b> 3단계로 9칸이 되는 순간 첫 마리가
+                시작 반경 7칸에서는 <b>보이지 않는다.</b> 1단계로 9칸이 되는 순간 첫 마리가
                 빛 안에 들어온다
               </td>
             </tr>
@@ -124,9 +134,42 @@ export function MotorioLevelDesign() {
         </table>
       </div>
       <p>
-        광맥 밀도는 의도적으로 희소하다. 씨앗 3곳 × 2칸 규모라 광맥을 찾는 일이 사건이 되고, 채굴기
-        한 대의 가치가 올라간다.
+        광맥 밀도는 의도적으로 희소하다. 씨앗 몇 곳 × 두어 칸 규모라 광맥을 찾는 일이 사건이 되고,
+        채굴기 한 대의 가치가 올라간다.
       </p>
+
+      <h3>열석 띠</h3>
+      <p>
+        열석은 오래 <b>반경 3–6칸의 한 고리</b>였다. 그러면 세상의 모든 열석이 시작 원 안에 있고,
+        40시드를 세어 보면 반경 13칸과 15칸이 반경 11칸과 <b>정확히 같은 광맥</b>을 가진다.
+        3단계가 열석 15개, 4단계가 27개를 요구하는데 둘 다 열석을 하나도 돌려주지 않는다 —
+        사다리의 비용이 사다리가 주지 않는 것이면 올라갈수록 다음 칸이 멀어지고, &ldquo;왜
+        업그레이드를 하지&rdquo;에 답이 없다. 그래서 단계마다 띠를 하나씩 둔다. 등급선(11·17칸)도
+        이제서야 채점할 것이 생겼다 — 그전에는 어떤 시드에서도 열석이 <code>보통</code>을 넘은
+        적이 없다.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>기지 단계</th>
+              <th>온기</th>
+              <th>새 열석 띠</th>
+              <th>광맥 수</th>
+            </tr>
+          </thead>
+          <tbody>
+            {balance.rings.heatstone_bands.map((band, index) => (
+              <tr key={band.from}>
+                <td>{index === 0 ? '시작' : `${index}단계`}</td>
+                <td>{band.radius}칸</td>
+                <td>반경 {band.from} – {band.to}칸</td>
+                <td>{band.seams}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h2>미션</h2>
       <p>

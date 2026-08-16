@@ -74,6 +74,19 @@ func _initialize() -> void:
 	var energy_to_copper: float = heat_to_copper / float(Defs.ITEM_VALUES[Defs.ITEM_ENERGY])
 	var crystal_to_copper: float = energy_to_copper * float(Defs.CRYSTAL_COST_ENERGY)
 
+	# One row per base step, so the doc can say what each upgrade reaches without
+	# anyone typing a radius twice.
+	var heatstone_bands: Array = []
+	for index in Defs.HEATSTONE_BANDS.size():
+		var band: Dictionary = Defs.HEATSTONE_BANDS[index]
+		var ring: Vector2 = band["ring"]
+		heatstone_bands.append({
+			"from": snappedf(ring.x, 0.1), "to": snappedf(ring.y, 0.1),
+			"seams": int(band["patches"]) * int(band["size"]),
+			"radius": float(Defs.BASE_LEVELS[index]["radius"]) if index < Defs.BASE_LEVELS.size() else 0.0,
+			"heat": int(Defs.BASE_LEVELS[index]["heat"]) if index < Defs.BASE_LEVELS.size() else 0,
+		})
+
 	var data := {
 		"generated_by": "motorio/tools/dump_balance.gd",
 		"version": String(ProjectSettings.get_setting("application/config/version", "")),
@@ -127,7 +140,9 @@ func _initialize() -> void:
 			"food_start": Defs.FOOD_START,
 		},
 		"rings": {
-			"heatstone": [Defs.HEATSTONE_RING.x, Defs.HEATSTONE_RING.y],
+			"heatstone": [float(Defs.HEATSTONE_BANDS[0]["ring"].x),
+				float(Defs.HEATSTONE_BANDS[-1]["ring"].y)],
+			"heatstone_bands": heatstone_bands,
 			"crystal_shards": [Defs.CRYSTAL_RING.x, Defs.CRYSTAL_RING.y],
 			"crystal_shard_count": Defs.CRYSTAL_SHARDS,
 			"copper": [Defs.COPPER_RING.x, Defs.COPPER_RING.y],

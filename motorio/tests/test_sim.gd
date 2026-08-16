@@ -42,11 +42,26 @@ func _fresh() -> Sim:
 	_power(sim)
 	return sim
 
-## Belts draw power, so any test that wants one to move has to energise the grid
-## first. A fuelled generator is the whole grid.
+## A fuelled generator is the whole grid, for any test that needs one.
+##
+## The cell used to be hardcoded at (6, 6). Adding a heat stone band there turned
+## the build into a refusal and the next line into a null dereference -- and the
+## test kept going with a grid that had never been energised, still reporting
+## PASS. A helper that quietly fails to set up what it promises is the fault this
+## file already has a lesson about, so it looks for somewhere it can build and
+## says so if it cannot.
 func _power(sim: Sim) -> void:
-	var cell := Vector2i(6, 6)
-	sim.build(Defs.M_GENERATOR, cell, Vector2i.RIGHT)
+	var cell := Vector2i(9999, 9999)
+	for radius in range(4, 14):
+		for y in range(-radius, radius + 1):
+			for x in range(-radius, radius + 1):
+				var candidate: Vector2i = sim.core_cell + Vector2i(x, y)
+				if cell == Vector2i(9999, 9999) and sim.can_build(Defs.M_GENERATOR, candidate) == "":
+					cell = candidate
+		if cell != Vector2i(9999, 9999):
+			break
+	_assert(cell != Vector2i(9999, 9999), "발전기를 세울 자리가 있다")
+	_assert(sim.build(Defs.M_GENERATOR, cell, Vector2i.RIGHT), "발전기가 섰다")
 	sim.machine_at(cell).buffer[Defs.ITEM_ENERGY] = 4
 
 func _open(sim: Sim) -> void:
@@ -67,11 +82,21 @@ func _test_generation() -> void:
 			frost += 1
 		else:
 			copper += 1
-	# Ore is a fifth as dense as it was: scarcity is the point, but the guaranteed
-	# seams must still make the opening and the iron recipe reachable.
+	# Scarcity is the point, but it is scarcity *per band*, not in total: heat
+	# stone runs in one small band per step of the base ladder, so the world-wide
+	# count is the sum of eight of them. This assertion used to cap it at 20,
+	# which was the old single-ring world -- where every seam sat inside the
+	# opening circle and no upgrade reached another one.
 	_assert(frost >= 6, "frost ore exists in workable but scarce amounts")
 	_assert(copper >= 6, "copper ore exists in workable but scarce amounts")
-	_assert(frost < 20 and copper < 20, "ore density stays scarce after the reduction")
+	_assert(frost < 60 and copper < 20, "ore density stays scarce after the reduction")
+	# And the opening stays a small field. It is the density near the fire that
+	# decides whether finding a seam is an event.
+	var near := 0
+	for cell: Vector2i in sim.ore:
+		if Vector2(cell - sim.core_cell).length() <= Defs.WARM_BASE:
+			near += 1
+	_assert(near < 14, "시작 반경 안은 여전히 성깁니다: %d개" % near)
 	_assert(not sim.ore.has(sim.core_cell), "ore never spawns under the core")
 
 	# Heat stone must be reachable at the opening radius or the first minutes

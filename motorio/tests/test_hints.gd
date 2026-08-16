@@ -134,6 +134,26 @@ func _legend() -> void:
 	_check(legend.contains("-/="), "조작 안내에 화면 크기 키가 있다")
 	_check(legend.contains("Esc"), "조작 안내에 Esc가 있다")
 
+	# The title screen, which is the one line every player reads and nobody
+	# re-reads. It advertised WASD, and WASD moves nothing.
+	var title: String = HudScript.title_controls(false)
+	_check(not title.to_upper().contains("WASD"),
+		"타이틀이 묶여 있지 않은 키를 말하지 않는다: %s" % title)
+	_check(title.contains("←") and title.contains("이동"),
+		"타이틀이 실제 이동 키를 말한다: %s" % title)
+	for pair: Array in [["←", "move_left"], ["→", "move_right"], ["↑", "move_up"], ["↓", "move_down"]]:
+		var arrow: String = pair[0]
+		var action: String = pair[1]
+		if not title.contains(arrow):
+			continue
+		var codes := {"←": KEY_LEFT, "→": KEY_RIGHT, "↑": KEY_UP, "↓": KEY_DOWN}
+		var bound := false
+		for event: InputEvent in InputMap.action_get_events(action):
+			var key := event as InputEventKey
+			if key != null and (key.keycode == codes[arrow] or key.physical_keycode == codes[arrow]):
+				bound = true
+		_check(bound, "%s 가 %s 에 묶여 있다" % [arrow, action])
+
 ## Korean particles, against every name the game can put in front of one. Two
 ## sentences had a fixed particle and both were wrong for every word they could
 ## ever receive -- "컨테이너 벨트은", "수정조각가 부족합니다" -- and neither looks wrong

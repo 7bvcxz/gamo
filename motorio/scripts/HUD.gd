@@ -1067,6 +1067,18 @@ func _card(height: float) -> Rect2:
 	_frame(card, Defs.COL_CORE)
 	return card
 
+## The control line on the first screen, as a function so a test can read it.
+##
+## It said "WASD 이동" for as long as it existed and WASD has never been bound to
+## anything -- `move_*` is the arrow keys only. It is the first sentence a new
+## player reads, and it named keys that do nothing: the same fault as the
+## objective that said C to mine for eight versions, in the one place nobody
+## re-reads because it scrolls past before the game starts.
+static func title_controls(touch_pad: bool) -> String:
+	if touch_pad:
+		return "휠 이동   Z 사용   X 회수   Run 달리기"
+	return "←↑→↓ 이동   Z 사용   X 회수   R 회전   1·2·3 선택"
+
 func _draw_title() -> void:
 	# A single even dim. The banded version read as a hard seam across the art on
 	# tall phone screens, where the band edge landed in open sky.
@@ -1079,14 +1091,21 @@ func _draw_title() -> void:
 	# OneShot, One Shot and oneshot -- and none of those match a string with a
 	# space between every letter. It was on the first screen of the game for four
 	# versions after the name it referred to stopped existing.
-	_text_in(full.call(size.y * 0.52), "하룻밤 안에 공장을 세워 열을 최대한 모으세요.", 16, Defs.COL_TEXT)
+	# What the game is now, rather than what it was. This read "하룻밤 안에 공장을
+	# 세워 열을 최대한 모으세요" -- the one-night score run, which has not been the
+	# shape of this game since the day stopped ending it.
+	_text_in(full.call(size.y * 0.52), "얼어붙은 행성에 불을 피우고, 그 불을 키워 나가세요.", 16, Defs.COL_TEXT)
 	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.", 13, Defs.COL_TEXT_DIM)
 	# Never let the one call to action fall below a readable floor.
 	var blink: float = 0.82 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.18
 	_text_in(full.call(size.y * 0.72), "화면을 눌러 시작" if touch_pad else "아무 키나 눌러 시작", 18,
 		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, blink))
-	var controls: String = "휠 이동   Z 설치   X 회수   Run 달리기" if touch_pad \
-		else "WASD 이동   Z 설치   X 회수   R 회전   1·2·3 선택"
+	# WASD was on this line for as long as the line existed and has never been
+	# bound to anything: `move_*` is arrow keys only. It is the first screen of
+	# the game, and it told every new player the wrong keys -- the same shape as
+	# the objective that said C to mine for eight versions. `test_hints` now
+	# checks the movement claim against the bindings like it does the letters.
+	var controls: String = title_controls(touch_pad)
 	_text_in(full.call(size.y * 0.84), controls, 12, Defs.COL_TEXT_DIM)
 	# So a player can say which build they are on without opening anything.
 	_text_in(Rect2(0, size.y - MARGIN, size.x - MARGIN, 16), "v%s" % version_string(), 11,

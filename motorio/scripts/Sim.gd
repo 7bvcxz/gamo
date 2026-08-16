@@ -584,7 +584,11 @@ func _generate_ore(seed_value: int) -> void:
 	# should be an event, and a single miner should be worth protecting. Heat
 	# stone is the exception -- it is what the opening is made of, so there is
 	# more of it and all of it is close.
-	_scatter_ore(rng, Defs.ITEM_HEATSTONE, Defs.HEATSTONE_RING, 3, 2)
+	for band: Dictionary in Defs.HEATSTONE_BANDS:
+		_scatter_ore(rng, Defs.ITEM_HEATSTONE, band["ring"], int(band["patches"]), int(band["size"]))
+	# One copper patch pinned to the edge of the fourth circle, then the scatter
+	# for everything past it.
+	_pin_patch(rng, Defs.ITEM_COPPER, Defs.FIRST_COPPER_BAND, Defs.FIRST_COPPER_SIZE)
 	_scatter_ore(rng, Defs.ITEM_COPPER, Defs.COPPER_RING, 3, 2)
 	# A guaranteed heat stone seam due north with a clear column home, so the
 	# opening never depends on the scatter being kind. It used to be copper, then
@@ -622,6 +626,39 @@ func _assign_purity() -> void:
 			purity[cell] = Defs.PURITY_RICH
 		else:
 			purity[cell] = Defs.PURITY_NORMAL
+
+## A patch at a named distance, in a direction the seed picks. Used where the
+## design says "this resource opens at this upgrade": leaving it to the scatter
+## makes that a probability rather than a promise, and the player who rolls the
+## other way is playing a different game from the one the card describes.
+func _pin_patch(rng: RandomNumberGenerator, item_type: int, band: Vector2, size: int) -> void:
+	var radius: float = (band.x + band.y) * 0.5
+	var angle: float = rng.randf() * TAU
+	var origin := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+	# Every cell of the patch inside the band, not just its origin: a cluster
+	# grown from a cell on the line puts about half of itself on the far side of
+	# it, which is how "copper opens at the fourth upgrade" came out as three
+	# seams in five runs and a stray seam inside the third circle.
+	#
+	# Gathered and sorted rather than random-walked. A walk that only ever steps
+	# one cell from its origin has nine cells to work with, and when some of them
+	# are taken or out of band it simply runs out of tries -- which is a promise
+	# that keeps itself in 58 runs out of 60, and the two it drops are the two
+	# where the player is told copper is there and it is not.
+	var candidates: Array[Vector2i] = []
+	for dy in range(-4, 5):
+		for dx in range(-4, 5):
+			var cell: Vector2i = origin + Vector2i(dx, dy)
+			var distance: float = _ring_distance(cell)
+			if ore.has(cell) or cell == core_cell:
+				continue
+			if distance < band.x or distance > band.y:
+				continue
+			candidates.append(cell)
+	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return Vector2(a - origin).length_squared() < Vector2(b - origin).length_squared())
+	for index in mini(size, candidates.size()):
+		ore[candidates[index]] = item_type
 
 ## Ore arrives in patches so the player reads them as destinations rather than
 ## noise, and so a single miner placement decision matters.
