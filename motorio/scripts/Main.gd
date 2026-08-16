@@ -1083,9 +1083,15 @@ func _upgrade_line() -> String:
 	var next_level: Dictionary = Defs.next_base_level(sim.total_heat)
 	if next_level.is_empty():
 		return Defs.mission_line("MAXED")
-	var short: int = int(next_level["heat"]) - sim.total_heat
-	var stones: int = int(ceil(float(short) / float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])))
-	return "기지 업그레이드 %02d  ·  열석 %d" % [sim.base_level + 1, stones]
+	# Counted from the start of this step rather than from the start of the run,
+	# and shown as have-of-need rather than as what is missing. A number that
+	# ticks down says how much is left; a number that fills says how far you have
+	# come, and one of those is worth carrying another stone for.
+	var floor_heat: int = int(Defs.BASE_LEVELS[sim.base_level]["heat"])
+	var per_stone: float = float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
+	var have: int = int(floor(float(sim.total_heat - floor_heat) / per_stone))
+	var need: int = int(round(float(int(next_level["heat"]) - floor_heat) / per_stone))
+	return "기지 업그레이드 %02d  ·  열석 %d/%d" % [sim.base_level + 1, have, need]
 
 func _thawing_nearby() -> bool:
 	for cell: Vector2i in sim.frozen_cats:
@@ -1341,6 +1347,12 @@ func _update_warmth(delta: float) -> void:
 		player.warmth = maxf(0.0, player.warmth - Defs.CRASH_DRAIN * delta)
 		if player.warmth <= 0.0:
 			_come_to()
+		return
+	# A lit torch is a fire she is carrying, so it holds the cold off wherever she
+	# is standing. That is what makes it the thing exploration is bought with:
+	# thirty seconds of light *and* thirty seconds of not freezing, and when it
+	# goes out both stop at once.
+	if holding_torch():
 		return
 	var warm: bool = sim.is_warm(player.cell())
 	if warm and not is_night():

@@ -212,6 +212,17 @@ func _test_missions_follow_the_world() -> void:
 	_assert(after.begins_with("기지 업그레이드"),
 		"그 뒤로 카드는 다음 기지 단계만 말한다: %s" % after)
 	_assert(not after.contains("세요"), "그리고 시키지 않는다")
+	# Counting up from nothing, towards a number that does not move.
+	_assert(after.contains("0/%d" % Defs.OPENING_STONES),
+		"모인 수는 0에서 시작하고 필요 수는 고정이다: %s" % after)
+	main.sim.delivered[Defs.ITEM_HEATSTONE] = 1
+	main.sim.total_heat = int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
+	main.sim._refresh_radius()
+	var one: String = String(main.objective_data()["text"])
+	_assert(one.contains("1/%d" % Defs.OPENING_STONES),
+		"하나 넣으면 1/%d 이 된다: %s" % [Defs.OPENING_STONES, one])
+	main.sim.total_heat = 0
+	main.sim._refresh_radius()
 	# The card has to say something at every rung, and never the same thing twice
 	# in a row -- a ladder that repeats itself is a ladder the player thinks is
 	# stuck.

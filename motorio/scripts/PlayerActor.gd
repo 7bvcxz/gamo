@@ -422,10 +422,66 @@ var _prompt_shown: String = ""
 ## read at a glance, and stacked they are one column the eye finds in one place.
 ## Never two prompts at once -- Main picks one -- because two of these is a menu
 ## and the whole point is that it is read without reading.
-const PROMPT_LIFT := 46.0
-const PROMPT_CAP := Vector2(13.0, 13.0)
-const PROMPT_GAP := 2.0
+##
+## Cap geometry. The width comes from the glyph rather than from a constant,
+## because "Shift" is not the same object as "Z" -- the first version drew every
+## key in a 13 pixel square and the wide ones ran straight out of theirs.
+const PROMPT_LIFT := 48.0
+const PROMPT_CAP_H := 15.0
+const PROMPT_CAP_MIN := 15.0
+const PROMPT_CAP_PAD := 8.0
+const PROMPT_CAP_RADIUS := 3.5
+## The lip under the face, which is the whole reason it reads as a key rather
+## than as a box with a letter in it: a key is a face sitting on a side.
+const PROMPT_CAP_LIP := 2.5
+const PROMPT_GAP := 3.0
+const PROMPT_GLYPH := 9
 const PROMPT_TEXT := 11
+
+## A rounded rectangle, as a polygon. Godot's draw_rect has square corners and a
+## square key cap is a tile.
+static func _rounded(rect: Rect2, radius: float) -> PackedVector2Array:
+	var r: float = minf(radius, minf(rect.size.x, rect.size.y) * 0.5)
+	var out := PackedVector2Array()
+	var corners: Array[Vector2] = [
+		rect.position + Vector2(r, r),
+		Vector2(rect.end.x - r, rect.position.y + r),
+		rect.end - Vector2(r, r),
+		Vector2(rect.position.x + r, rect.end.y - r),
+	]
+	for index in 4:
+		var start: float = PI + float(index) * PI * 0.5
+		for step in 5:
+			var angle: float = start + PI * 0.5 * float(step) / 4.0
+			out.append(corners[index] + Vector2.from_angle(angle) * r)
+	return out
+
+## One key. A dark side, a light face sitting on it, and the glyph.
+func _draw_cap(at: Vector2, label: String, width: float, fade: float) -> void:
+	var body := Rect2(at, Vector2(width, PROMPT_CAP_H))
+	# The side, drawn first and one lip taller, so the face sits on something.
+	draw_colored_polygon(_rounded(body, PROMPT_CAP_RADIUS),
+		Color(0.42, 0.46, 0.55, 0.95 * fade))
+	var face := Rect2(body.position, Vector2(width, PROMPT_CAP_H - PROMPT_CAP_LIP))
+	draw_colored_polygon(_rounded(face, PROMPT_CAP_RADIUS),
+		Color(0.93, 0.95, 0.98, 0.98 * fade))
+	# And a hairline along the top of the face, which is the light catching the
+	# edge of a real key.
+	draw_line(face.position + Vector2(PROMPT_CAP_RADIUS, 1.0),
+		Vector2(face.end.x - PROMPT_CAP_RADIUS, face.position.y + 1.0),
+		Color(1, 1, 1, 0.85 * fade), 1.0)
+	var font: Font = UIFont.FONT
+	var glyph_w: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1,
+		PROMPT_GLYPH).x
+	draw_string(font, Vector2(face.get_center().x - glyph_w * 0.5, face.end.y - 3.0),
+		label, HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_GLYPH,
+		Color(0.13, 0.16, 0.24, fade))
+
+static func cap_width(label: String) -> float:
+	var glyph: float = UIFont.FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT,
+		-1, PROMPT_GLYPH).x
+	return maxf(PROMPT_CAP_MIN, glyph + PROMPT_CAP_PAD)
+
 func _draw_prompt() -> void:
 	if prompt.is_empty():
 		return
@@ -438,8 +494,11 @@ func _draw_prompt() -> void:
 	var font: Font = UIFont.FONT
 	# Laid out from the total width so the whole thing is centred on her rather
 	# than growing off one shoulder.
-	var caps_w: float = float(keys.size()) * PROMPT_CAP.x + float(keys.size() - 1) * PROMPT_GAP
-	var arrow_w: float = 11.0
+	var caps_w: float = 0.0
+	for cap: String in keys:
+		caps_w += cap_width(cap) + PROMPT_GAP
+	caps_w -= PROMPT_GAP
+	var arrow_w: float = 12.0
 	var verb_w: float = font.get_string_size(verb, HORIZONTAL_ALIGNMENT_LEFT, -1,
 		PROMPT_TEXT).x
 	var total: float = caps_w + arrow_w + verb_w + 8.0
@@ -447,27 +506,23 @@ func _draw_prompt() -> void:
 	var top: float = -PROMPT_LIFT
 	# A plate, because this sits over snow, over the amber pool and over the fog,
 	# and a key cap has to be legible on all three.
-	draw_rect(Rect2(left - 4.0, top - 3.0, total + 8.0, PROMPT_CAP.y + 6.0),
-		Color(0.04, 0.05, 0.09, 0.72 * fade))
+	draw_colored_polygon(_rounded(Rect2(left - 5.0, top - 4.0,
+		total + 10.0, PROMPT_CAP_H + 8.0), 4.0), Color(0.04, 0.05, 0.09, 0.74 * fade))
 	var x: float = left
 	for cap: String in keys:
-		var box := Rect2(x, top, PROMPT_CAP.x, PROMPT_CAP.y)
-		draw_rect(box, Color(0.86, 0.89, 0.94, 0.95 * fade))
-		draw_rect(box, Color(0.20, 0.24, 0.32, 0.95 * fade), false, 1.0)
-		var glyph_w: float = font.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		draw_string(font, Vector2(box.get_center().x - glyph_w * 0.5, box.end.y - 3.5),
-			cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.10, 0.13, 0.20, fade))
-		x += PROMPT_CAP.x + PROMPT_GAP
-	draw_string(font, Vector2(x + 1.0, top + PROMPT_CAP.y - 2.5), "→",
+		var width: float = cap_width(cap)
+		_draw_cap(Vector2(x, top), cap, width, fade)
+		x += width + PROMPT_GAP
+	draw_string(font, Vector2(x + 1.0, top + PROMPT_CAP_H - 4.0), "→",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_TEXT, Color(Defs.COL_TEXT_DIM, fade))
-	draw_string(font, Vector2(x + arrow_w + 3.0, top + PROMPT_CAP.y - 2.5), verb,
+	draw_string(font, Vector2(x + arrow_w + 3.0, top + PROMPT_CAP_H - 4.0), verb,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_TEXT, Color(Defs.COL_CORE, fade))
 	# Held keys say so, because pressing Z at a seam does nothing visible and a
 	# player who taps it once concludes the game is broken.
 	if bool(row.get("hold", false)):
 		var note: String = "누르고 있기"
 		var note_w: float = font.get_string_size(note, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		draw_string(font, Vector2(-note_w * 0.5, top - 6.0), note,
+		draw_string(font, Vector2(-note_w * 0.5, top - 8.0), note,
 			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(Defs.COL_TEXT_DIM, fade * 0.9))
 
 ## Her temperature, over her head, in the same words a cat's hunger is in.

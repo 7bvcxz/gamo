@@ -575,6 +575,10 @@ const OPENING_STONES := 3
 ## circle is white, and what is out there is found by carrying a light into it.
 ## Exploration stopped being "walk further" and became "spend something".
 ##
+## And it holds the cold off. A lit torch is a fire she is carrying, so the
+## thirty seconds buy light *and* not freezing, and when it goes out both stop at
+## once. Without that the torch showed her a place she could not stay in.
+##
 ## Two tiles is deliberately not enough to survey with. It is enough to walk by
 ## and to recognise a thing you are standing next to, which makes a torch a
 ## number of tiles travelled rather than a map.
@@ -641,8 +645,8 @@ const MISSION_LINES: Array[Dictionary] = [
 	},
 	{
 		"id": "UPGRADE",
-		"line": "기지 업그레이드 NN  ·  열석 N",
-		"why": "거처를 세운 뒤부터 카드가 지시를 멈추고 이것만 남는다. 다음 기지 단계와 모자란 열석 수뿐이고, 동사도 키도 경로도 없다. 그 시점의 그녀는 불과 거처와 곡괭이와 세계를 가졌고, 거기서 또 심부름을 받으면 게임이 체크리스트가 된다. NN과 N은 실행 중에 채워진다.",
+		"line": "기지 업그레이드 NN  ·  열석 N/N",
+		"why": "거처를 세운 뒤부터 카드가 지시를 멈추고 이것만 남는다. 다음 기지 단계와 모자란 열석 수뿐이고, 동사도 키도 경로도 없다. 그 시점의 그녀는 불과 거처와 곡괭이와 세계를 가졌고, 거기서 또 심부름을 받으면 게임이 체크리스트가 된다. NN과 N은 실행 중에 채워진다. 모인 수는 이번 단계의 시작점부터 0에서 세고 필요 수는 고정이다 — 줄어드는 숫자는 얼마나 남았는지를 말하고 차오르는 숫자는 얼마나 왔는지를 말하는데, 돌 하나를 더 나르게 만드는 것은 뒤쪽이다.",
 	},
 	{
 		"id": "BROWNOUT",

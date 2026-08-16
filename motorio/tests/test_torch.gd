@@ -30,6 +30,7 @@ func _run() -> void:
 	_test_lighting()
 	_test_burns_only_in_hand()
 	_test_the_light()
+	_test_it_keeps_her_warm()
 	_test_base_window()
 	_test_save()
 	if failures == 0:
@@ -165,6 +166,40 @@ func _test_the_light() -> void:
 	_assert(main.sim.torch_left > 0.0, "그래도 횃불은 남아 있다")
 
 # --- The fire's window ------------------------------------------------------
+
+## A lit torch is a fire she is carrying. Without this it showed her a place she
+## could not stay in: two tiles of visible snow and thirteen degrees a second.
+func _test_it_keeps_her_warm() -> void:
+	var sim = main.sim
+	sim.torches = 1
+	sim.torch_left = 0.0
+	# Well outside the circle, where the cold is at its full rate.
+	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(30, 0))
+	main.player.warmth = 80.0
+	_assert(not sim.is_warm(main.player.cell()), "온기 밖에 서 있다")
+
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
+	for _step in 60:
+		main._update_warmth(1.0 / 60.0)
+	_assert(main.player.warmth < 79.0, "횃불이 없으면 떨어진다 (%.1f)" % main.player.warmth)
+
+	main.player.warmth = 80.0
+	main.tool_index = main.TOOLS.find(main.TOOL_TORCH)
+	main._on_tool_selected()
+	_assert(main.holding_torch(), "횃불을 들었다")
+	for _step in 60:
+		main._update_warmth(1.0 / 60.0)
+	_assert(is_equal_approx(main.player.warmth, 80.0),
+		"들고 있는 동안은 줄지 않는다 (%.1f)" % main.player.warmth)
+
+	# And the moment it goes out, the cold is back -- the two stop together
+	# because they are the same thirty seconds.
+	sim.torch_left = 0.0
+	for _step in 60:
+		main._update_warmth(1.0 / 60.0)
+	_assert(main.player.warmth < 79.0, "꺼지면 다시 떨어진다 (%.1f)" % main.player.warmth)
+	main.player.warmth = 100.0
+	main.player.position = sim.cell_centre(sim.core_cell)
 
 func _test_base_window() -> void:
 	var sim = main.sim
