@@ -33,7 +33,6 @@ func _init() -> void:
 	main.state = main.State.PLAY
 
 	_bindings()
-	_mining_hint(main)
 	_objectives(main)
 	_legend()
 	_particles(main)
@@ -61,36 +60,16 @@ func _bindings() -> void:
 				found = true
 		_check(found, "%s 키가 %s 액션에 실제로 묶여 있다" % [name, action])
 
-## The opening instruction names the pickaxe and the key that actually swings it.
-## It used to have to say something different on a phone, because the pad's Z did
-## only half of what Z does and the digging lived on a button no key had; the pad
-## is the keys now, so both say Z and the difference is only the word for
-## pressing one.
-func _mining_hint(main: Node2D) -> void:
-	main.touch.visible = false
-	var desktop: String = main._mining_hint()
-	main.touch.visible = true
-	var touch: String = main._mining_hint()
-	main.touch.visible = false
-
-	_check(desktop.contains("곡괭이"), "데스크톱 안내가 곡괭이를 언급한다: %s" % desktop)
-	_check(desktop.contains("Z"), "데스크톱 안내가 Z를 말한다")
-	_check(not desktop.contains("C "), "데스크톱 안내가 더 이상 C를 말하지 않는다")
-	_check(touch.contains("곡괭이"), "터치 안내가 곡괭이를 언급한다: %s" % touch)
-	# The pad's buttons are the game's keys now, so the hint says the same thing
-	# on both. It used to have to differ, because the pad's Z did only half of
-	# what Z does and the digging lived on a button no key had.
-	_check(touch.contains("Z"), "터치 안내도 Z를 말한다: %s" % touch)
-	_check(not touch.contains("캐기"), "더 이상 캐기 버튼을 말하지 않는다")
-
-## Nothing any objective can say may name a key that is not bound, and the one
-## the game opens on is the mining line -- which is where the stale one lived.
 func _objectives(main: Node2D) -> void:
 	var sim: Sim = main.sim
 	sim.setup(4242)
+	# The card stops giving instructions once the hut is up. What it shows from
+	# then on is the next step of the fire and what it costs -- no verb, no key.
 	var opening: String = String(main.objective_data()["text"])
-	_check(opening == main._mining_hint(),
-		"새 게임의 첫 목표가 채굴 안내다: %s" % opening)
+	_check(opening.begins_with("기지 업그레이드"),
+		"거처를 세운 뒤의 목표는 다음 기지 단계다: %s" % opening)
+	_check(not opening.contains("Z") and not opening.contains("하세요"),
+		"그리고 지시하지 않는다: %s" % opening)
 
 	# Freezing outranks everything. This was found by a playtest screenshot of the
 	# card discussing crates over a blackout countdown.
@@ -131,35 +110,6 @@ func _objectives(main: Node2D) -> void:
 			_check(bound.has(letter),
 				"목표 문구가 묶이지 않은 키를 말하지 않는다: '%s' 안의 %s" % [line, letter])
 	print("HINTS: 목표 문구 %d줄 확인" % seen.size())
-
-	# A rung must not ask for something with no target. Owning a spare cat is
-	# normal -- the gacha gives them out and the standard scenario keeps one on
-	# purpose to haul -- and while this rung was unconditional it both named an
-	# impossible action and, sitting early in the ladder, hid every rung after it
-	# for the rest of the run.
-	var place := "고양이를 Z 로 안아 채굴기에 올려놓으세요"
-	for cat: Sim.Cat in sim.cats:
-		cat.assigned = Vector2i(9999, 9999)
-	sim.stock[Defs.ITEM_HEATSTONE] = 500
-	sim.unlocked[Defs.M_MINER] = true
-	var seam_a: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
-	var seam_b: Vector2i = sim.core_cell + Sim.STARTER_PATCH[1]
-	_check(sim.build(Defs.M_MINER, seam_a, Vector2i(0, -1)), "채굴기가 섰다")
-	while sim.cats.size() < 2:
-		sim._spawn_cats([Defs.RARITY_O] as Array[int])
-	_check(String(main.objective_data()["text"]) == place,
-		"빈 채굴기가 있으면 고양이를 올리라고 한다")
-
-	sim.carried_cat = sim.cats[0]
-	sim.place_cat(seam_a)
-	_check(main._unassigned_cats() > 0, "아직 노는 고양이가 있다")
-	_check(String(main.objective_data()["text"]) != place,
-		"올려놓을 자리가 없으면 올리라고 하지 않는다: %s" % main.objective())
-
-	# And it comes back the moment a seat opens.
-	_check(sim.build(Defs.M_MINER, seam_b, Vector2i(0, -1)), "두 번째 채굴기가 섰다")
-	_check(String(main.objective_data()["text"]) == place,
-		"자리가 생기면 다시 올리라고 한다")
 
 ## The key legend lists every key the game answers to on a desktop. It is a
 ## hand-written list, which is the kind that goes stale the moment someone adds

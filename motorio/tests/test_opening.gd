@@ -204,18 +204,14 @@ func _test_missions_follow_the_world() -> void:
 	sim.search_kit()
 	_assert(sim.place_shelter(_shelter_spot(sim)), "거처를 세운다")
 	main._advance_mission()
-	_assert(main.mission == main.Mission.MEANS, "3. 탐험할 방법")
-	# Two is not three. The card counts, so the count has to be the gate.
-	sim.delivered[Defs.ITEM_HEATSTONE] = Defs.OPENING_STONES - 1
-	main._advance_mission()
-	_assert(main.mission == main.Mission.MEANS, "열석 %d개로는 넘어가지 않는다"
-		% (Defs.OPENING_STONES - 1))
-	sim.delivered[Defs.ITEM_HEATSTONE] = Defs.OPENING_STONES
-	main._advance_mission()
-	_assert(main.mission == main.Mission.EXPLORE, "4. 주변 탐색")
-	sim.grant_cats(1)
-	main._advance_mission()
-	_assert(main.mission == main.Mission.DONE, "고양이가 생기면 오프닝이 끝난다")
+	# Two missions, and then the game. There were four; the last two told the
+	# player to go and mine and go and explore at exactly the point the game
+	# should have stopped talking.
+	_assert(main.mission == main.Mission.DONE, "거처가 서면 오프닝이 끝난다")
+	var after: String = String(main.objective_data()["text"])
+	_assert(after.begins_with("기지 업그레이드"),
+		"그 뒤로 카드는 다음 기지 단계만 말한다: %s" % after)
+	_assert(not after.contains("세요"), "그리고 시키지 않는다")
 	# The card has to say something at every rung, and never the same thing twice
 	# in a row -- a ladder that repeats itself is a ladder the player thinks is
 	# stuck.
@@ -266,7 +262,6 @@ func _test_feeding_the_fire() -> void:
 	_crash()
 	var sim = main.sim
 	main.finish_tutorial()
-	main.mission = main.Mission.MEANS
 	sim.delivered[Defs.ITEM_HEATSTONE] = 0
 	sim.stock[Defs.ITEM_HEATSTONE] = 0
 	_assert(not sim.has_fuel(), "빈손으로는 넣을 것이 없다")
@@ -290,10 +285,9 @@ func _test_feeding_the_fire() -> void:
 	# would be spending it on nothing.
 	_assert(int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) == 4, "수정은 그대로 남는다")
 
-	# And the mission it exists for: three stones takes the circle to nine, which
-	# is exactly where the first frozen cat is lying.
-	main._advance_mission()
-	_assert(main.mission == main.Mission.EXPLORE, "임무 3이 끝난다")
+	# And the step it exists for: three stones takes the circle to nine, which is
+	# exactly where the first frozen cat is lying.
+	_assert(sim.base_level >= 1, "기지가 한 단계 오른다")
 	_assert(absf(sim.warm_radius - Defs.OPENING_WARM_RADIUS) < 0.01,
 		"온기가 정확히 %.0f칸이 된다 (%.2f)" % [Defs.OPENING_WARM_RADIUS, sim.warm_radius])
 	var visible := 0

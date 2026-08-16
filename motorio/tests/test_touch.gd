@@ -24,6 +24,10 @@ func _init() -> void:
 	main.clear_save()
 	main._start_run()
 	main.finish_tutorial()
+	# Every slot has to exist before the row can be tapped: the gun appears with
+	# the first buildable machine and the torch with the first torch.
+	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	main.sim.torches = 1
 	main.state = main.State.PLAY
 	# The pad is hidden on a desktop; the hit-testing does not care, but the HUD
 	# lays itself out differently, so it is switched on for the layout to match
@@ -45,6 +49,10 @@ func _tools(main: Node2D) -> void:
 	var rects: Array[Rect2] = main.hud.hotbar_rects
 	_check(rects.size() == main.TOOLS.size(),
 		"핫바 칸이 도구 수와 같다: %d / %d" % [rects.size(), main.TOOLS.size()])
+	# A locked slot keeps its place in the array and takes no room on screen, so
+	# a tap can still be matched to the tool it landed on.
+	_check(main.unlocked_tools().size() == main.TOOLS.size(),
+		"이 시나리오에서는 세 칸이 모두 해금돼 있다")
 	if rects.size() < 2:
 		return
 	var loaded_before: int = main.selected_index

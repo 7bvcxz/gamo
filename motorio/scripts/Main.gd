@@ -54,7 +54,17 @@ var cutscene_time: float = 0.0
 ## While any of them is outstanding the day clock does not run. The opening is
 ## about understanding rather than about hurrying, and the pressure it does need
 ## is already coming from her own temperature.
-enum Mission { BASE, SURVIVE, MEANS, EXPLORE, DONE }
+## Two, and then the game.
+##
+## There were four. The last two were "탐험할 방법을 찾자" and "주변을 탐색하자",
+## and they were the game telling the player what to do at exactly the point it
+## should have stopped: by then she has a fire, a hut, a pickaxe and a world, and
+## being handed the next errand is what turns that into a checklist.
+##
+## What replaces them is not another mission but a **standing number** -- the
+## next base upgrade and what it costs. It says what the game is for and nothing
+## about how to get there, and the ways to get there are the whole game.
+enum Mission { BASE, SURVIVE, DONE }
 var mission: int = Mission.DONE
 
 var time_left: float = Defs.DAY_SECONDS
@@ -120,6 +130,19 @@ var build_menu_open: bool = false
 ## One door rather than two -- everything the base does is behind the same key,
 ## on the same building, and the player never has to learn which press is which.
 var base_menu_open: bool = false
+## The play log, and whether it is up.
+##
+## Everything the game has said out loud this session, newest first. Deliberately
+## not saved: it is a record of *this sitting*, and a log that survives a reload
+## is a document rather than a memory of what just happened.
+##
+## Fed from _notify, which is already the one door every banner goes through, so
+## a message added later is in the log without anyone remembering to put it
+## there -- the alternative is a second list beside the first, which is the
+## arrangement this repository has watched go out of step every time.
+const LOG_MAX := 240
+var log_open: bool = false
+var play_log: Array[Dictionary] = []
 ## Which entry of Defs.BUILDABLE the cursor is on. Separate from selected_index,
 ## which is what the gun is actually loaded with -- browsing must not change what
 ## a stray Z would build.
@@ -235,6 +258,8 @@ func _start_run() -> void:
 	build_menu_open = false
 	base_menu_open = false
 	map_open = false
+	log_open = false
+	play_log.clear()
 	menu_index = 0
 	tool_index = 0
 	# A run that was reloaded or restarted mid-sequence would otherwise keep the
@@ -253,32 +278,6 @@ func _start_run() -> void:
 	gacha_spin = -1.0
 	gacha_pending = 0
 	gacha_results.clear()
-
-## The next useful action, as text plus a picture of the thing it is about.
-##
-## Both come out of the same branch on purpose. They were going to be two
-## functions -- one returning the sentence, one returning an icon for it -- and
-## that is a pair that drifts: add a step, update one, and the panel ends up
-## showing a generator next to a line about cats. One branch, one answer.
-##
-## Derived from world state rather than a script, so it stays correct however the
-## player plays.
-## How to mine, in the words of whichever device is holding the game.
-##
-## This line said "press C" for eight versions after C stopped mining. It is the
-## first instruction a new player is given and it named a key that opens the
-## throughput meter, so the opening minute of the game was a player pressing a
-## key and watching nothing happen. Mining moved onto the pickaxe in 0.20.22 and
-## the sentence describing it did not move with it.
-##
-## Two devices, two sentences, because they genuinely differ: a phone has no Z to
-## hold and a desktop has no 캐기 button to press. Both need the pickaxe first --
-## hand mining checks holding_pickaxe() before anything else -- which is the part
-## the old line never mentioned at all.
-func _mining_hint() -> String:
-	if touch != null and touch.visible:
-		return "곡괭이를 고르고 열석 광맥 위에서 Z 버튼을 누르고 계세요"
-	return "2번 곡괭이를 들고 열석 광맥 위에서 Z 를 누르고 계세요"
 
 func objective_data() -> Dictionary:
 	# Freezing comes before everything, including nightfall. A playtest caught the
@@ -325,53 +324,27 @@ func objective_data() -> Dictionary:
 			return _goal(Defs.mission_line("M1"), "thing", Icons.THING_KIT)
 		Mission.SURVIVE:
 			return _goal(Defs.mission_line("M2"), "thing", Icons.THING_KIT)
-		Mission.MEANS:
-			if sim.has_fuel():
-				return _goal(Defs.mission_line("M3-HOLD"), "thing", Icons.THING_CORE)
-			return _goal(Defs.mission_line("M3"), "thing", Icons.THING_SEAM)
-		Mission.EXPLORE:
-			return _goal(Defs.mission_line("M4"), "thing", Icons.THING_CAT_FROZEN)
-	# Lv1 -- do it with your hands, then hire someone to do it for you.
-	if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0 and sim.ground.is_empty():
-		return _goal(_mining_hint(), "thing", Icons.THING_SEAM)
-	if sim.cats.is_empty() and not sim.frozen_cats.is_empty():
-		return _goal("얼어붙은 고양이를 찾아 Z 로 안고 오세요", "thing", Icons.THING_CAT_FROZEN)
-	# Lv2 -- automation, then the exchanger that turns it into distance.
-	if sim.machine_count(Defs.M_MINER) == 0:
-		return _goal("광맥 위에 채굴기를 설치하세요  (열석 %d)"
-			% int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_HEATSTONE]), "machine", Defs.M_MINER)
-	# Only while there is somewhere to put one. A spare cat and no free miner is a
-	# normal thing to own -- the gacha hands out cats faster than seams appear,
-	# and the third cat in the standard scenario exists precisely to haul what the
-	# other two dig. Asking for it anyway names an action with no target, and
-	# because this rung sits early in the ladder it also hides every rung after
-	# it: the player never gets told about the exchanger, copper or power for as
-	# long as one cat is idle. A wrong instruction is bad; a wrong instruction
-	# that silences the correct one for the rest of the run is worse.
-	if _unassigned_cats() > 0 and not sim.idle_miner_cells().is_empty():
-		return _goal("고양이를 Z 로 안아 채굴기에 올려놓으세요", "thing", Icons.THING_CAT)
-	if sim.machine_count(Defs.M_EXCHANGER) == 0:
-		return _goal("수정에너지교환기를 지으세요  (수정조각 %d)"
-			% int(Defs.MACHINE_COSTS[Defs.M_EXCHANGER][Defs.ITEM_CRYSTAL]), "machine", Defs.M_EXCHANGER)
-	if int(sim.delivered.get(Defs.ITEM_ENERGY, 0)) == 0:
-		return _goal("교환기에 수정조각을 넣고 에너지결정을 기지로 가져가세요", "item", Defs.ITEM_ENERGY)
-	if sim.warm_radius < Defs.COPPER_RING.x:
-		return _goal("에너지결정으로 온기를 넓히세요  (구리까지 %.1f칸)"
-			% (Defs.COPPER_RING.x - sim.warm_radius), "item", Defs.ITEM_ENERGY)
-	# Lv3 -- copper, power, logistics.
-	if int(sim.stock.get(Defs.ITEM_COPPER, 0)) == 0:
-		return _goal("구리 광맥에 채굴기를 놓아 구리광석을 캐세요", "item", Defs.ITEM_COPPER)
-	if sim.machine_count(Defs.M_GENERATOR) == 0:
-		return _goal("발전기를 지어 전력을 만드세요  (구리광석 %d)"
-			% int(Defs.MACHINE_COSTS[Defs.M_GENERATOR][Defs.ITEM_COPPER]), "machine", Defs.M_GENERATOR)
-	if sim.machine_count(Defs.M_BELT) == 0:
-		return _goal("벨트로 채굴기와 기지를 이으세요  (구리광석 %d)"
-			% int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER]), "machine", Defs.M_BELT)
+	# And from here the card stops giving instructions. What it shows instead is
+	# the next step of the fire and what it costs, which is the one thing the
+	# whole game is measured in -- and how to get there is left to the player,
+	# which is the point.
+	# One state line above it, because a brown-out is a fact about the world and
+	# not an errand: the factory the player built is running at a fraction of its
+	# rate and nothing else on screen says so.
 	if sim.power_draw > sim.power_capacity:
-		return _goal("전력이 부족합니다  발전기를 늘리세요", "machine", Defs.M_GENERATOR)
-	if _unstaffed_miners() > 0 and sim.power_capacity <= 0.0:
-		return _goal("발전기를 지으면 고양이 없이도 채굴기가 돕니다", "machine", Defs.M_GENERATOR)
-	return _goal("%s  ·  더 지을수록 온기가 빨라집니다" % Defs.ratio_hint(), "machine", Defs.M_EXCHANGER)
+		return _goal(Defs.mission_line("BROWNOUT"), "machine", Defs.M_GENERATOR)
+	return _goal(_upgrade_line(), "thing", Icons.THING_CORE)
+
+## Everything that used to be below this line was an instruction ladder: build a
+## miner, put a cat on it, build the exchanger, feed it, widen the circle, go and
+## find copper, build a generator, run a belt. Thirteen rungs of being told what
+## to do next.
+##
+## It is gone as of 0.20.72. By the time the hut is standing the player has a
+## fire, a pickaxe, a world and every key they need, and being handed the next
+## errand is exactly what turns that into a checklist. What the card shows from
+## there is the next step of the fire and what it costs; how to get there is the
+## game.
 
 func _goal(text: String, kind: String, id) -> Dictionary:
 	return {"text": text, "kind": kind, "id": id}
@@ -379,25 +352,6 @@ func _goal(text: String, kind: String, id) -> Dictionary:
 func objective() -> String:
 	return String(objective_data()["text"])
 
-## Miners standing idle for want of a worker. Once power exists these run
-## themselves, so this is the number that tells the player to electrify.
-func _unstaffed_miners() -> int:
-	var count := 0
-	for cell: Vector2i in sim.machines:
-		if sim.machines[cell].type == Defs.M_MINER and not sim.machines[cell].operated:
-			count += 1
-	return count
-
-func _unassigned_cats() -> int:
-	var count := 0
-	for cat in sim.cats:
-		if not cat.has_job():
-			count += 1
-	return count
-
-## Taking a tool out. Only the torch does anything when it is picked up, and it
-## does it here rather than in the key handler so the touch row goes through the
-## same door.
 func _on_tool_selected() -> void:
 	if TOOLS[tool_index] != TOOL_TORCH:
 		return
@@ -414,19 +368,53 @@ func _on_tool_selected() -> void:
 ## slot it lives in is a tool slot, not a machine slot: that is the whole point of
 ## the change. What the gun is loaded with is chosen in its menu, not by which
 ## number key was pressed last.
-const TOOL_BUILD_GUN := 0
-const TOOL_PICKAXE := 1
+## The pickaxe is first because it is the first thing she owns: it comes out of
+## the survival kit and everything in the opening is done with it. The gun used
+## to be slot one from when the game began with a factory, which meant slot one
+## was a tool she could not use for the first ten minutes.
+const TOOL_PICKAXE := 0
+const TOOL_BUILD_GUN := 1
 const TOOL_TORCH := 2
-const TOOLS: Array[int] = [TOOL_BUILD_GUN, TOOL_PICKAXE, TOOL_TORCH]
-const TOOL_NAMES := ["건물건설총", "곡괭이", Defs.TORCH_NAME]
+const TOOLS: Array[int] = [TOOL_PICKAXE, TOOL_BUILD_GUN, TOOL_TORCH]
+const TOOL_NAMES := ["곡괭이", "건물건설총", Defs.TORCH_NAME]
+
+## A slot she does not have yet is not drawn and its number does nothing.
+##
+## Three empty slots on the first screen is three questions the game refuses to
+## answer; one slot that becomes two the moment the first heat stone is in her
+## hand is the game answering them in the order they come up.
+##
+## The number never moves. A slot that renumbers itself as others appear teaches
+## a key and then takes it away.
+func tool_unlocked(tool: int) -> bool:
+	match tool:
+		TOOL_PICKAXE:
+			# Out of the kit, with the shelter -- or simply because the opening
+			# is behind her, which is what a loaded save or a debug world is.
+			return sim.kit_searched >= 2 or mission == Mission.DONE
+		TOOL_BUILD_GUN:
+			return _anything_buildable()
+		TOOL_TORCH:
+			return sim.torches > 0 or sim.torch_left > 0.0
+	return false
+
+## The slots she actually has, in order. Everything that draws or steps through
+## the row reads this rather than TOOLS, so a locked tool cannot be reached by
+## the arrow keys, by a tap, or by the number of a slot that is not there.
+func unlocked_tools() -> Array[int]:
+	var out: Array[int] = []
+	for index in TOOLS.size():
+		if tool_unlocked(TOOLS[index]):
+			out.append(index)
+	return out
 
 var tool_index: int = 0
 
 func holding_build_gun() -> bool:
-	return TOOLS[tool_index] == TOOL_BUILD_GUN
+	return TOOLS[tool_index] == TOOL_BUILD_GUN and tool_unlocked(TOOL_BUILD_GUN)
 
 func holding_pickaxe() -> bool:
-	return TOOLS[tool_index] == TOOL_PICKAXE
+	return TOOLS[tool_index] == TOOL_PICKAXE and tool_unlocked(TOOL_PICKAXE)
 
 ## Selected *and* alight. Choosing the slot with an empty pack shows the slot and
 ## lights nothing, which is what tells the player they have run out.
@@ -442,12 +430,11 @@ func selected_type() -> int:
 func toggle_build_menu() -> bool:
 	if state != State.PLAY:
 		return false
-	build_menu_open = not build_menu_open
+	var opening: bool = not build_menu_open
+	close_windows("build" if opening else "")
+	build_menu_open = opening
 	if build_menu_open:
 		menu_index = selected_index
-		meter_cell = Vector2i(9999, 9999)
-		gacha_open = false
-		map_open = false
 	audio.call("play", "select")
 	return true
 
@@ -483,16 +470,60 @@ func _build_menu_key(key: InputEventKey) -> void:
 ## What the player has seen, drawn small. Everything else is void: the fog is
 ## what makes walking somewhere worth anything, and a map that showed the whole
 ## plateau would answer the only question exploring asks.
+## The log. Same shape as the map: one window at a time, because two of them
+## would both claim the arrow keys.
+## One window at a time, decided in one place.
+##
+## Each toggle used to close the others itself, which is four lists of "the ones
+## that are not me" -- and the fourth window was added without being added to
+## the other three, so opening the map left the log underneath it and both
+## claimed the arrow keys. There is one list now and it is this function.
+func close_windows(keep: String = "") -> void:
+	if keep != "build":
+		build_menu_open = false
+	if keep != "base":
+		base_menu_open = false
+	if keep != "map":
+		map_open = false
+	if keep != "log":
+		log_open = false
+	if keep != "gacha":
+		close_gacha()
+	if keep != "meter":
+		meter_cell = Vector2i(9999, 9999)
+
+func toggle_log() -> bool:
+	if state != State.PLAY:
+		return false
+	var opening: bool = not log_open
+	close_windows("log" if opening else "")
+	log_open = opening
+	audio.call("play", "select")
+	return true
+
+## One line of the record. `day` and the clock come from the run rather than from
+## the wall, so reading the log back tells you when in the *game* it happened.
+func note_log(text: String, colour: Color) -> void:
+	if text.strip_edges().is_empty():
+		return
+	var entry := {
+		"day": day_number, "clock": clock_text(), "text": text, "color": colour,
+	}
+	# A message repeated on the next frame is one event, not two. Popups already
+	# refresh rather than stack for the same reason.
+	if not play_log.is_empty() and String(play_log[0]["text"]) == text:
+		play_log[0] = entry
+		return
+	play_log.push_front(entry)
+	if play_log.size() > LOG_MAX:
+		play_log.resize(LOG_MAX)
+
 func toggle_map() -> bool:
 	if state != State.PLAY:
 		return false
-	map_open = not map_open
-	if map_open:
-		# One window at a time. Two would both claim the keyboard, and the arrow
-		# keys mean different things in each.
-		build_menu_open = false
-		close_gacha()
-		meter_cell = Vector2i(9999, 9999)
+	var opening: bool = not map_open
+	close_windows("map" if opening else "")
+	map_open = opening
 	audio.call("play", "select")
 	return true
 
@@ -721,7 +752,7 @@ func shelter_nearby() -> bool:
 ## the last time this was decided in two places, the build list took the arrow
 ## keys and Grim walked off anyway.
 func modal_open() -> bool:
-	return build_menu_open or gacha_open or map_open or base_menu_open
+	return build_menu_open or gacha_open or map_open or base_menu_open or log_open
 
 func _process(delta: float) -> void:
 	_follow_music()
@@ -759,6 +790,11 @@ func _process(delta: float) -> void:
 	_update_build_hold(delta)
 	_update_hand_mining(delta)
 	player.carrying_cat = sim.carried_cat != null
+	# A slot can lock again -- the last torch burns out -- and being left holding
+	# a tool she no longer has is a hand that does nothing when Z is pressed.
+	if not tool_unlocked(TOOLS[tool_index]):
+		var open_slots: Array[int] = unlocked_tools()
+		tool_index = open_slots[0] if not open_slots.is_empty() else 0
 	player.carrying_frozen = sim.carried_frozen
 	player.carrying_kit = sim.carried_kit
 	# The carried cat rides in front of her, turning as she turns. Driven from
@@ -873,6 +909,7 @@ func _process_play(delta: float) -> void:
 	if player.velocity.length() > PlayerActor.SPEED * 1.2:
 		sim.learn("RUN")
 	player.prompt = active_prompt()
+	player.main_keys = prompt_keys(player.prompt)
 	# The clock is held until the opening is over. Thirteen minutes of tutorial
 	# is four days at this length: the summary card would interrupt it four
 	# times, and the first night would arrive at 3:00 -- before there is anywhere
@@ -1036,6 +1073,20 @@ func _collect_shard() -> void:
 ## Whether any ice near the core is on its way out. Read by the objective card,
 ## which is why it asks the simulation rather than remembering a flag: a cat put
 ## down and picked up again has to stop counting.
+## "기지 업그레이드 03  ·  열석 15" -- the step the fire is working towards and
+## the number of stones it is short by. No verb, no key, no route.
+##
+## Counted in heat stones because that is what the player is carrying, and heat
+## rather than stones is the thing the base actually measures: an energy crystal
+## is worth the same and the sum has to include it.
+func _upgrade_line() -> String:
+	var next_level: Dictionary = Defs.next_base_level(sim.total_heat)
+	if next_level.is_empty():
+		return Defs.mission_line("MAXED")
+	var short: int = int(next_level["heat"]) - sim.total_heat
+	var stones: int = int(ceil(float(short) / float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])))
+	return "기지 업그레이드 %02d  ·  열석 %d" % [sim.base_level + 1, stones]
+
 func _thawing_nearby() -> bool:
 	for cell: Vector2i in sim.frozen_cats:
 		if sim.can_thaw(cell):
@@ -1145,6 +1196,20 @@ func _update_torch_light() -> void:
 ## --- The key over her head --------------------------------------------------
 ## Which prompt is showing, or "". The first one in the table that is wanted and
 ## not yet learned; only ever one, because two of them is a menu.
+## The key caps a prompt draws. The table's are canonical and the documentation
+## page lists those; TOOL is the one that has to say what she actually owns,
+## because a slot she does not have is a key that does nothing.
+func prompt_keys(id: String) -> Array:
+	var row: Dictionary = Defs.key_prompt(id)
+	if row.is_empty():
+		return []
+	if id != "TOOL":
+		return row["keys"]
+	var keys: Array = []
+	for index: int in unlocked_tools():
+		keys.append(str(index + 1))
+	return keys
+
 func active_prompt() -> String:
 	if state != State.PLAY or modal_open() or player.locked:
 		return ""
@@ -1199,7 +1264,9 @@ func _prompt_status(id: String) -> Dictionary:
 			return {"want": sim.torches > 0 and not holding_torch(),
 				"done": sim.has_learned("TORCH")}
 		"TOOL":
-			return {"want": sim.kit_searched >= 2, "done": sim.has_learned("TOOL")}
+			# Only once there is more than one slot. Telling her the number keys
+			# switch tools while she owns exactly one tool is telling her nothing.
+			return {"want": unlocked_tools().size() > 1, "done": sim.has_learned("TOOL")}
 		"BUILD":
 			return {"want": sim.base_placed and _anything_buildable(),
 				"done": sim.machine_count(Defs.M_MINER) > 0 or build_menu_open}
@@ -1236,23 +1303,10 @@ func _advance_mission() -> void:
 				mission = Mission.SURVIVE
 		Mission.SURVIVE:
 			if sim.shelter_placed:
-				mission = Mission.MEANS
-		Mission.MEANS:
-			# Three stones in the core. The number the opening asks for, and the
-			# first time the player sees the circle grow because of something
-			# they carried.
-			if int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.OPENING_STONES:
-				mission = Mission.EXPLORE
-		Mission.EXPLORE:
-			if not sim.cats.is_empty():
 				mission = Mission.DONE
 	if mission == was:
 		return
-	if mission == Mission.EXPLORE:
-		_notify("불이 커졌습니다  온기 %.0f칸  ·  주변을 둘러보세요" % sim.warm_radius,
-			Defs.COL_CORE)
-		audio.call("play", "finish")
-	elif mission == Mission.DONE:
+	if mission == Mission.DONE:
 		_notify("살아남았습니다  이제 하루가 흐릅니다", Defs.COL_CORE)
 		audio.call("play", "finish")
 	else:
@@ -1465,6 +1519,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	# The build menu owns the keyboard while it is up. Placed before the state
 	# match so a keypress cannot both move the cursor and build something.
+	if log_open and state == State.PLAY:
+		if key.keycode == KEY_ESCAPE or key.keycode == KEY_X or key.keycode == KEY_L:
+			log_open = false
+			audio.call("play", "select")
+		get_viewport().set_input_as_handled()
+		return
 	if base_menu_open and state == State.PLAY:
 		_base_menu_key(key)
 		get_viewport().set_input_as_handled()
@@ -1550,6 +1610,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _zoom_key(key):
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_L:
+		toggle_log()
+		get_viewport().set_input_as_handled()
+		return
 	if key.keycode == KEY_B:
 		toggle_build_menu()
 		get_viewport().set_input_as_handled()
@@ -1563,7 +1627,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + TOOLS.size():
-		tool_index = key.keycode - KEY_1
+		var picked: int = key.keycode - KEY_1
+		if not tool_unlocked(TOOLS[picked]):
+			return
+		tool_index = picked
 		sim.learn("TOOL")
 		_on_tool_selected()
 		audio.call("play", "select")
@@ -1657,6 +1724,14 @@ func touch_hud(position: Vector2) -> bool:
 		return true
 	if (hud.map_button_rect as Rect2).has_point(local):
 		toggle_map()
+		return true
+	if (hud.log_button_rect as Rect2).has_point(local):
+		toggle_log()
+		return true
+	if log_open:
+		if not (hud.log_card_rect as Rect2).has_point(local):
+			log_open = false
+			audio.call("play", "select")
 		return true
 	if build_menu_open:
 		# The menu owns the screen while it is up: a tap picks a row or closes it,
@@ -1912,10 +1987,8 @@ func base_rows() -> Array[Dictionary]:
 	return rows
 
 func _open_base_menu() -> void:
+	close_windows("base")
 	base_menu_open = true
-	build_menu_open = false
-	map_open = false
-	gacha_open = false
 	menu_index = 0
 	audio.call("play", "select")
 
@@ -2299,10 +2372,16 @@ func _on_warmth_changed(radius: float) -> void:
 	fx.ring(Vector2(sim.core_cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5,
 		Defs.COL_CORE, radius * float(Defs.TILE) * 0.12)
 
+## The clock as the status panel says it, so a log line and the screen agree.
+func clock_text() -> String:
+	var seconds: int = int(ceil(maxf(time_left, 0.0)))
+	return "%02d:%02d" % [seconds / 60, seconds % 60]
+
 func _notify(text: String, color: Color) -> void:
 	message = text
 	message_life = 2.0
 	hud.set("message_color", color)
+	note_log(text, color)
 
 ## --- Persistence ----------------------------------------------------------
 ## The run seed is stored, so the same world is rebuilt and only the player's

@@ -27,6 +27,8 @@ func _run() -> void:
 	main.finish_tutorial()
 	main.state = main.State.PLAY
 	_open(main.sim)
+	# Slot one is the pickaxe now, and this file is about the gun.
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
 	# Rejections are announced on a world-space popup rather than the centre
 	# banner, so the signal is the channel-independent place to read them.
 	main.sim.build_rejected.connect(_on_rejected)

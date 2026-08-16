@@ -24,11 +24,16 @@ func _run() -> void:
 	main.state = main.State.PLAY
 	await process_frame
 
-	_assert(main.TOOLS.size() == 3, "도구가 셋이다 — 건설총, 곡괭이, 횃불")
-	main.tool_index = 0
-	_assert(main.holding_build_gun() and not main.holding_pickaxe(), "1번은 건설총")
-	main.tool_index = 1
-	_assert(main.holding_pickaxe() and not main.holding_build_gun(), "2번은 곡괭이")
+	_assert(main.TOOLS.size() == 3, "도구가 셋이다 — 곡괭이, 건설총, 횃불")
+	# The pickaxe is slot one. It used to be the gun, from when the game began
+	# with a factory standing -- which made slot one a tool she could not use for
+	# the first ten minutes.
+	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
+	_assert(main.tool_index == 0, "곡괭이가 1번이다")
+	_assert(main.holding_pickaxe() and not main.holding_build_gun(), "1번은 곡괭이")
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
+	_assert(main.holding_build_gun() and not main.holding_pickaxe(), "2번은 건설총")
 
 	# Put a seam where she is facing, and make sure she is facing it.
 	var seam: Vector2i = main.player.facing_cell()
@@ -36,7 +41,7 @@ func _run() -> void:
 	main.sim.machines.erase(seam)
 
 	# The gun does not mine, however long Z is held.
-	main.tool_index = 0
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
 	main.mine_held = true
 	main.player.mining = 0.0
 	main._update_hand_mining(0.5)
@@ -44,7 +49,7 @@ func _run() -> void:
 	_assert(not main.mine_swung, "건설총이면 스윙도 없다")
 
 	# The pickaxe does.
-	main.tool_index = 1
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	main._update_hand_mining(0.5)
 	_assert(main.player.mining > 0.0, "곡괭이로는 캐진다")
 	_assert(main.mine_swung, "곡괭이 스윙이 기록된다")
@@ -63,14 +68,14 @@ func _run() -> void:
 	_assert(int(main.last_mine_frame) == -1, "스윙 프레임이 초기화된다")
 
 	# Holding Z with the pickaxe must not spin the build direction.
-	main.tool_index = 1
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	main.build_held = true
 	main.build_rotated = false
 	var direction: Vector2i = main.build_dir
 	for step in 20:
 		main._update_build_hold(0.1)
 	_assert(main.build_dir == direction, "곡괭이를 들고 Z를 눌러도 방향이 돌지 않는다")
-	main.tool_index = 0
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
 	for step in 20:
 		main._update_build_hold(0.1)
 	_assert(main.build_dir != direction, "건설총을 들면 Z 홀드가 방향을 돌린다")

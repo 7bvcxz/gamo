@@ -409,6 +409,9 @@ func cell() -> Vector2i:
 
 ## Which key prompt is showing, set by Main. Empty means none.
 var prompt: String = ""
+## The key caps to draw, when they depend on the run rather than on the table.
+## Set by Main alongside `prompt`; empty falls back to the table's own.
+var main_keys: Array = []
 ## How long the current one has been up, so it can fade in rather than appear.
 var _prompt_age: float = 0.0
 var _prompt_shown: String = ""
@@ -430,7 +433,7 @@ func _draw_prompt() -> void:
 	if row.is_empty():
 		return
 	var fade: float = clampf(_prompt_age / 0.35, 0.0, 1.0)
-	var keys: Array = row["keys"]
+	var keys: Array = main_keys if not main_keys.is_empty() else row["keys"]
 	var verb: String = String(row["verb"])
 	var font: Font = UIFont.FONT
 	# Laid out from the total width so the whole thing is centred on her rather

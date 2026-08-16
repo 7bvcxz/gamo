@@ -25,6 +25,8 @@ var hotbar_rects: Array[Rect2] = []
 var direction_rect := Rect2()
 var settings_button_rect := Rect2()
 var map_button_rect := Rect2()
+var log_button_rect := Rect2()
+var log_card_rect := Rect2()
 var map_card_rect := Rect2()
 var map_slider_rect := Rect2()
 var dragging_map_zoom: bool = false
@@ -107,7 +109,7 @@ func hotbar_slot() -> Vector2:
 
 func hotbar_origin() -> Vector2:
 	var slot: Vector2 = hotbar_slot()
-	var total: float = float(main.TOOLS.size()) * (slot.x + SLOT_GAP) - SLOT_GAP
+	var total: float = float(maxi(1, main.unlocked_tools().size())) * (slot.x + SLOT_GAP) - SLOT_GAP
 	# Lifted clear of the thumb controls rather than sharing the bottom strip
 	# with them, which at large UI scales buried a card under the X button.
 	var bottom: float = size.y - slot.y - MARGIN - bottom_reserved()
@@ -139,9 +141,18 @@ func bottom_reserved() -> float:
 func _layout() -> void:
 	var slot: Vector2 = hotbar_slot()
 	var origin: Vector2 = hotbar_origin()
+	# One rect per tool, always -- a locked slot gets an empty rect so that
+	# hotbar_rects stays parallel to TOOLS and a tap can be matched to the tool
+	# it landed on. Only the unlocked ones take up space on screen.
 	hotbar_rects.clear()
+	hotbar_rects.resize(main.TOOLS.size())
+	var shown := 0
 	for index in main.TOOLS.size():
-		hotbar_rects.append(Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot))
+		if not main.tool_unlocked(main.TOOLS[index]):
+			hotbar_rects[index] = Rect2()
+			continue
+		hotbar_rects[index] = Rect2(origin + Vector2(float(shown) * (slot.x + SLOT_GAP), 0), slot)
+		shown += 1
 	var label: String = "R 출력 방향  오른쪽"
 	var width: float = _text_width(label, 12) + 44.0
 	direction_rect = Rect2(size.x * 0.5 - width * 0.5, origin.y - 58.0, width, 24.0)
@@ -151,6 +162,13 @@ func _layout() -> void:
 	# thing to hunt for.
 	map_button_rect = Rect2(MARGIN + SETTINGS_BUTTON + 6.0, MARGIN,
 		SETTINGS_BUTTON, SETTINGS_BUTTON)
+	# And the record, third in the same strip.
+	log_button_rect = Rect2(MARGIN + (SETTINGS_BUTTON + 6.0) * 2.0, MARGIN,
+		SETTINGS_BUTTON, SETTINGS_BUTTON)
+	var log_w: float = minf(520.0, size.x - MARGIN * 2.0)
+	var log_h: float = minf(420.0, size.y - MARGIN * 2.0)
+	log_card_rect = Rect2(size.x * 0.5 - log_w * 0.5, size.y * 0.5 - log_h * 0.5,
+		log_w, log_h)
 	_layout_map()
 	# Bottom-left, bottom-aligned with the hotbar row so the two read as one
 	# strip, and above whatever the touch pad claims -- on a phone that corner is
@@ -392,8 +410,10 @@ func _draw() -> void:
 	if main.state == main.State.OPENING:
 		return
 	_draw_map_card()
+	_draw_log_card()
 	_draw_settings_button()
 	_draw_map_button()
+	_draw_log_button()
 	_draw_debug_badge()
 
 ## After the fall the world goes out entirely, so the cut to morning reads as
@@ -674,6 +694,8 @@ func _draw_palette() -> void:
 	_draw_direction_chip(origin.y)
 
 	var loaded: int = main.selected_type()
+	if main.unlocked_tools().is_empty():
+		return
 	# The hint line belongs to whatever is in her hands. With the pickaxe out the
 	# machine the gun happens to be loaded with is not what Z will do, and saying
 	# so anyway is how a player learns the wrong thing about their own keys.
@@ -689,6 +711,8 @@ func _draw_palette() -> void:
 		Defs.COL_TEXT_DIM)
 
 	for index in main.TOOLS.size():
+		if not main.tool_unlocked(main.TOOLS[index]):
+			continue
 		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() \
 			else Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot)
 		var chosen: bool = index == main.tool_index
@@ -770,7 +794,7 @@ static func key_legend() -> String:
 	var keys: Array[String] = ["Z 사용", "X 회수", "R 회전", "C 계기", "B 목록"]
 	if Defs.GACHA_ENABLED:
 		keys.append("G 가챠")
-	keys.append_array(["M 지도", "-/= 크기", "Esc 설정"])
+	keys.append_array(["M 지도", "L 기록", "-/= 크기", "Esc 설정"])
 	return "   ".join(keys)
 
 ## Anchored to the bottom of the screen rather than measured down from the
@@ -1650,6 +1674,59 @@ func map_view_rect() -> Rect2:
 	return Rect2(map_card_rect.position + Vector2(MAP_PAD, MAP_PAD + 26.0),
 		Vector2(map_card_rect.size.x - MAP_PAD * 2.0,
 			map_card_rect.size.y - MAP_PAD * 2.0 - MAP_SLIDER_H - 26.0))
+
+## The record. A page with lines on it -- next to a folded map it has to be the
+## other kind of paper at a glance, so the map is all folds and this is all
+## ruling.
+func _draw_log_button() -> void:
+	var rect: Rect2 = log_button_rect
+	if rect.size.x <= 0.0:
+		return
+	var open: bool = bool(main.get("log_open"))
+	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
+	var tint: Color = Defs.COL_CORE if open else Defs.COL_TEXT
+	var page := Rect2(rect.position + Vector2(9.0, 7.0), rect.size - Vector2(18.0, 14.0))
+	draw_rect(page, Color(tint.r, tint.g, tint.b, 0.18))
+	draw_rect(page, tint, false, 1.0)
+	for index in 4:
+		var y: float = page.position.y + page.size.y * (0.22 + 0.19 * float(index))
+		var inset: float = page.size.x * (0.30 if index == 3 else 0.16)
+		draw_line(Vector2(page.position.x + page.size.x * 0.16, y),
+			Vector2(page.end.x - inset, y), Color(tint.r, tint.g, tint.b, 0.85), 1.0)
+
+## Everything the game has said this session, newest first.
+##
+## Newest first because the question a player opens this to answer is "what just
+## happened", not "how did the run begin" -- and because the run only gets
+## longer, so a list that grows downward puts the answer further away every time.
+func _draw_log_card() -> void:
+	if not bool(main.get("log_open")):
+		return
+	_dim(0.45)
+	var card: Rect2 = log_card_rect
+	var entries: Array = main.get("play_log")
+	_frame(card, Defs.COL_CORE, "기록   %d줄 · X 닫기" % entries.size())
+	if entries.is_empty():
+		_text_in(Rect2(card.position + Vector2(0.0, card.size.y * 0.5),
+			Vector2(card.size.x, 20.0)), "아직 아무 일도 일어나지 않았습니다", 13,
+			Defs.COL_TEXT_DIM)
+		return
+	var row_h: float = 22.0
+	var top: float = card.position.y + FRAME_HEADER + 8.0
+	var rows: int = int((card.end.y - 10.0 - top) / row_h)
+	for index in mini(rows, entries.size()):
+		var entry: Dictionary = entries[index]
+		var y: float = top + float(index) * row_h + 15.0
+		if index % 2 == 1:
+			draw_rect(Rect2(card.position.x + 6.0, y - 14.0, card.size.x - 12.0, row_h - 2.0),
+				Color(1, 1, 1, 0.025))
+		# The stamp is the run's own clock, so reading a line back says when in
+		# the game it happened rather than when in the afternoon.
+		_text(Vector2(card.position.x + 14.0, y),
+			"%d일 %s" % [int(entry["day"]), String(entry["clock"])], 11, Defs.COL_TEXT_DIM)
+		_text(Vector2(card.position.x + 86.0, y), String(entry["text"]), 12,
+			entry["color"])
 
 func _draw_map_button() -> void:
 	var rect: Rect2 = map_button_rect

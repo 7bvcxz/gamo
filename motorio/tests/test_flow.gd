@@ -115,10 +115,18 @@ func _run() -> void:
 	main.finish_tutorial()
 	_assert(is_zero_approx(main.hud.restart_armed), "and disarms itself afterwards")
 
-	# The build gun. Slot 1 is a tool, not a machine, and what it is loaded with
-	# is chosen from its menu -- the old five-machine hotbar had no room to say
-	# what any of them did.
-	_assert(main.holding_build_gun(), "the run opens with the build gun in hand")
+	# The row opens on the pickaxe. It used to open on the build gun, from when
+	# the game began with a factory standing -- which meant slot one was a tool
+	# the player could not use for the first ten minutes.
+	_assert(main.holding_pickaxe(), "the run opens with the pickaxe in hand")
+	_assert(main.TOOLS[0] == main.TOOL_PICKAXE, "and the pickaxe is slot 1")
+	# And slot 2 has to be earned: the gun does not exist until something can be
+	# built with it, which is what the first heat stone in hand opens.
+	_assert(not main.tool_unlocked(main.TOOL_BUILD_GUN),
+		"the gun is not in the row before anything can be built")
+	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
+	_assert(main.holding_build_gun(), "and it is slot 2 once it is")
 	_press(main, KEY_B)
 	_assert(main.build_menu_open, "B opens the build menu")
 	var browse_from: int = main.selected_index
