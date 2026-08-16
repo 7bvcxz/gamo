@@ -22,7 +22,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 
 ---
 
-## 자동 테스트 (headless, 35개)
+## 자동 테스트 (headless, 36개)
 
 ### 규칙과 진행
 
@@ -62,6 +62,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 | `test_touch` | **터치가 키보드와 같은 상태에 도달하는가.** 핫바 탭이 도구를 고르는지, 캐기 버튼이 실제로 채굴로 이어지는지 |
 | `test_zoom` | `-`/`=`와 Shift 조합. **Shift가 문자를 바꾸므로 physical_keycode로 읽어야 한다** |
 | `test_hints` | **화면이 말하는 키가 그 액션에 묶여 있는가.** 한국어 조사가 단어의 받침과 맞는가 |
+| `test_prompts` | 머리 위 키 안내. **한 번에 하나만 뜨는가**(둘이면 그것은 메뉴다), 떨어진 첫 순간에 뜨는 것이 이동인가, 그리고 **"끝났는가"를 세계에서 읽는가** — 고양이가 한 마리라도 생기면 아무 플래그 없이 안내가 끝나야 한다 |
 | `test_font` | 소스의 모든 비ASCII 문자가 서브셋 폰트에 있는가, 그리고 폰트가 여전히 작은가 |
 | `test_sheets` | 상태·방향별로 어떤 스프라이트 시트가 재생되는가 |
 | `test_animation` | 스프라이트 정렬, 그림자, 고양이 간격. **고양이 자식 노드의 로컬 좌표가 상수인가**, 그리고 기계 표시가 고양이보다 위에 오는 z_index 계약 |

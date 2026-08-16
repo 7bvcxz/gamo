@@ -87,6 +87,9 @@ func _initialize() -> void:
 		# a line rewritten in the game and not on the page is a page that lies,
 		# and this repository has watched that happen to balance numbers.
 		"missions": Defs.MISSION_LINES,
+		# And the keys, which are the other half of the same job: the card says
+		# the situation and never a key, this says the key and never why.
+		"prompts": Defs.KEY_PROMPTS,
 		"warmth": {
 			"base_radius": Defs.WARM_BASE,
 			"levels": Defs.BASE_LEVELS,

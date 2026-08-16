@@ -167,6 +167,52 @@ export function MotorioLevelDesign() {
         </table>
       </div>
 
+      <h2>조작 안내</h2>
+      <p>
+        목표 카드를 불친절하게 만든 대가는 첫 플레이에서 바로 드러났다 —{' '}
+        <b>그녀는 방금 다른 행성에 떨어졌고 조작키를 하나도 모른다.</b>{' '}
+        <code>춥다. 눈 위에 상자가 하나 있다.</code> 는 어디로 갈지는 말해도 어떻게 갈지는 말하지
+        않는다.
+      </p>
+      <p>
+        그래서 일을 둘로 갈랐다. 카드는 <b>상황</b>을 말하고 키는 절대 말하지 않는다. 이쪽은{' '}
+        <b>키</b>를 말하고 이유는 말하지 않는다. Grim의 머리 위에 키캡 하나와 한 마디 —{' '}
+        <code>이동</code> · <code>조사</code> · <code>안기</code> — 만 뜨고, 읽는 것이 아니라
+        흘깃 보는 것으로 끝난다.
+      </p>
+      <p className="prop-why">
+        한 번에 하나만 뜬다. 둘이면 그것은 메뉴다. 표의 순서가 우선순위이고,{' '}
+        <b>&quot;끝났는가&quot;는 대부분 세계가 답한다</b> — 상자를 열었는가, 고양이가 생겼는가,
+        기계가 서 있는가. 걷기·도구 전환·횃불·달리기 넷만 세계에 흔적이 없어서 따로 기억한다.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Keys</th>
+              <th>Content</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(balance.prompts || []).map((entry) => (
+              <tr key={entry.id}>
+                <td><code>{entry.id}</code></td>
+                <td>
+                  {entry.keys.map((k) => (
+                    <code key={k} style={{ marginRight: 4 }}>{k}</code>
+                  ))}
+                  {entry.hold ? ' (누르고 있기)' : ''}
+                </td>
+                <td>{entry.verb}</td>
+                <td>{entry.why}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <h2>타일 속성</h2>
       <p>
         타일은 그 위에 무엇이 놓였는지와 별개로 <b>자기 자신의 속성</b>을 가진다. 속성은 비트

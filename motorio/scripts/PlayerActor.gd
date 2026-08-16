@@ -233,6 +233,10 @@ func _physics_process(delta: float) -> void:
 			facing = Vector2i(0, signi(int(signf(input.y))))
 	_move(velocity * delta)
 
+	if prompt != _prompt_shown:
+		_prompt_shown = prompt
+		_prompt_age = 0.0
+	_prompt_age += delta
 	_animate(delta, input, sprinting)
 	queue_redraw()
 	if carry_layer != null:
@@ -403,6 +407,66 @@ func facing_cell() -> Vector2i:
 func cell() -> Vector2i:
 	return Vector2i((position / float(Defs.TILE)).floor())
 
+## Which key prompt is showing, set by Main. Empty means none.
+var prompt: String = ""
+## How long the current one has been up, so it can fade in rather than appear.
+var _prompt_age: float = 0.0
+var _prompt_shown: String = ""
+
+## The key cap, the arrow and the word, over her head.
+##
+## Above the warmth bar rather than beside it: both belong to her and both are
+## read at a glance, and stacked they are one column the eye finds in one place.
+## Never two prompts at once -- Main picks one -- because two of these is a menu
+## and the whole point is that it is read without reading.
+const PROMPT_LIFT := 46.0
+const PROMPT_CAP := Vector2(13.0, 13.0)
+const PROMPT_GAP := 2.0
+const PROMPT_TEXT := 11
+func _draw_prompt() -> void:
+	if prompt.is_empty():
+		return
+	var row: Dictionary = Defs.key_prompt(prompt)
+	if row.is_empty():
+		return
+	var fade: float = clampf(_prompt_age / 0.35, 0.0, 1.0)
+	var keys: Array = row["keys"]
+	var verb: String = String(row["verb"])
+	var font: Font = UIFont.FONT
+	# Laid out from the total width so the whole thing is centred on her rather
+	# than growing off one shoulder.
+	var caps_w: float = float(keys.size()) * PROMPT_CAP.x + float(keys.size() - 1) * PROMPT_GAP
+	var arrow_w: float = 11.0
+	var verb_w: float = font.get_string_size(verb, HORIZONTAL_ALIGNMENT_LEFT, -1,
+		PROMPT_TEXT).x
+	var total: float = caps_w + arrow_w + verb_w + 8.0
+	var left: float = -total * 0.5
+	var top: float = -PROMPT_LIFT
+	# A plate, because this sits over snow, over the amber pool and over the fog,
+	# and a key cap has to be legible on all three.
+	draw_rect(Rect2(left - 4.0, top - 3.0, total + 8.0, PROMPT_CAP.y + 6.0),
+		Color(0.04, 0.05, 0.09, 0.72 * fade))
+	var x: float = left
+	for cap: String in keys:
+		var box := Rect2(x, top, PROMPT_CAP.x, PROMPT_CAP.y)
+		draw_rect(box, Color(0.86, 0.89, 0.94, 0.95 * fade))
+		draw_rect(box, Color(0.20, 0.24, 0.32, 0.95 * fade), false, 1.0)
+		var glyph_w: float = font.get_string_size(cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
+		draw_string(font, Vector2(box.get_center().x - glyph_w * 0.5, box.end.y - 3.5),
+			cap, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(0.10, 0.13, 0.20, fade))
+		x += PROMPT_CAP.x + PROMPT_GAP
+	draw_string(font, Vector2(x + 1.0, top + PROMPT_CAP.y - 2.5), "→",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_TEXT, Color(Defs.COL_TEXT_DIM, fade))
+	draw_string(font, Vector2(x + arrow_w + 3.0, top + PROMPT_CAP.y - 2.5), verb,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_TEXT, Color(Defs.COL_CORE, fade))
+	# Held keys say so, because pressing Z at a seam does nothing visible and a
+	# player who taps it once concludes the game is broken.
+	if bool(row.get("hold", false)):
+		var note: String = "누르고 있기"
+		var note_w: float = font.get_string_size(note, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
+		draw_string(font, Vector2(-note_w * 0.5, top - 6.0), note,
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(Defs.COL_TEXT_DIM, fade * 0.9))
+
 ## Her temperature, over her head, in the same words a cat's hunger is in.
 ##
 ## The corner readout is still the exact number; this is the one the eye finds
@@ -429,6 +493,7 @@ func _draw_warmth_bar() -> void:
 		Color(colour.r, colour.g, colour.b, show))
 
 func _draw() -> void:
+	_draw_prompt()
 	_draw_warmth_bar()
 	# Flattened ground shadow, drawn under the sprite so she is anchored to the
 	# grid rather than floating over it.

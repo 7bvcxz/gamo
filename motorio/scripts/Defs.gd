@@ -676,6 +676,88 @@ const MISSION_LINES: Array[Dictionary] = [
 	},
 ]
 
+## --- Key prompts ------------------------------------------------------------
+## A key cap over Grim's head, an arrow, and one word.
+##
+## The objective card was made deliberately unhelpful, and the cost of that
+## showed up the first time someone actually played the opening: she lands on a
+## planet and does not know a single control. "춥다. 눈 위에 상자가 하나 있다."
+## tells you where to go and nothing about how to go there.
+##
+## So the two jobs are split. The card says the **situation** and never a key;
+## this says the **key** and never why. One word each -- 이동, 조사, 안기 -- so
+## it is read in the time it takes to glance up rather than read.
+##
+## Ordered by priority: the first one that is wanted and not yet learned is the
+## one that shows. Only ever one at a time; two prompts over her head is a menu.
+##
+## `why` is for the documentation page and is never drawn.
+const KEY_PROMPTS: Array[Dictionary] = [
+	{
+		"id": "KIT", "keys": ["Z"], "hold": true, "verb": "조사",
+		"why": "상자 옆에 섰을 때. 게임에서 처음 누르는 키이고, 누르고 있어야 한다는 것은 화면의 고리가 말해준다.",
+	},
+	{
+		"id": "PLACE", "keys": ["Z"], "verb": "내려놓기",
+		"why": "긴급기지나 긴급거처를 들고 있을 때. 같은 키가 든 것을 내려놓는다는 규칙을 여기서 한 번 배우면 얼어붙은 고양이에서 다시 배울 필요가 없다.",
+	},
+	{
+		"id": "THAW", "keys": ["Z"], "verb": "내려놓기",
+		"why": "얼어붙은 고양이를 안고 있을 때. PLACE와 같은 동작이지만 그때는 이미 배운 뒤라 대개 뜨지 않는다.",
+	},
+	{
+		"id": "FROZEN", "keys": ["Z"], "verb": "안기",
+		"why": "얼어붙은 고양이 옆에 섰을 때. 이 게임에서 가장 중요한 한 번이고, 첫 고양이가 생기면 다시 뜨지 않는다.",
+	},
+	{
+		"id": "CATPLACE", "keys": ["Z"], "verb": "배치",
+		"why": "고양이를 안고 있을 때. 어디에 놓을 수 있는지는 목표 카드가 말한다.",
+	},
+	{
+		"id": "CATLIFT", "keys": ["Z"], "verb": "안기",
+		"why": "일 없는 고양이 옆에 섰을 때. 고양이를 옮길 수 있다는 것을 아무도 알려주지 않으면 평생 숙소 앞에 서 있는다.",
+	},
+	{
+		"id": "FUEL", "keys": ["Z"], "verb": "기지",
+		"why": "연료를 들고 기지를 바라볼 때. 캔 열석이 불에 들어가지 않으면 오프닝이 끝나지 않는다.",
+	},
+	{
+		"id": "MINE", "keys": ["Z"], "hold": true, "verb": "캐기",
+		"why": "곡괭이를 들고 광맥을 바라볼 때. 누르는 것이 아니라 누르고 있어야 한다.",
+	},
+	{
+		"id": "TORCH", "keys": ["3"], "verb": "횃불",
+		"why": "횃불을 만들어 두고 아직 꺼내지 않았을 때. 만들어만 두고 쓰지 않는 물건이 되기 쉽다.",
+	},
+	{
+		"id": "TOOL", "keys": ["1", "2", "3"], "verb": "도구",
+		"why": "곡괭이가 생긴 뒤 아직 도구를 바꿔 본 적이 없을 때. 숫자 키가 손에 든 것을 바꾼다는 규칙 하나.",
+	},
+	{
+		"id": "BUILD", "keys": ["B"], "verb": "건설",
+		"why": "설비가 해금됐는데 아직 아무것도 짓지 않았을 때.",
+	},
+	{
+		"id": "RUN", "keys": ["Shift"], "verb": "달리기",
+		"why": "조금 걸어 본 뒤에. 처음부터 알려주면 이동과 달리기 두 가지를 한 번에 배우게 된다.",
+	},
+	{
+		"id": "MOVE", "keys": ["←", "↑", "→", "↓"], "verb": "이동",
+		"why": "맨 처음. 그녀는 방금 다른 행성에 떨어졌고 조작키를 하나도 모른다. 목록의 맨 뒤에 있는 이유는 우선순위가 낮아서가 아니라, 시작 순간에는 다른 어떤 것도 해당되지 않기 때문이다.",
+	},
+]
+
+## How far she has to walk before 이동 counts as learned, and before 달리기 is
+## worth mentioning. In tiles.
+const PROMPT_WALK_LEARNED := 3.0
+const PROMPT_WALK_RUN := 6.0
+
+static func key_prompt(id: String) -> Dictionary:
+	for row: Dictionary in KEY_PROMPTS:
+		if String(row["id"]) == id:
+			return row
+	return {}
+
 ## The line for an id. Missing ids return the id itself rather than an empty
 ## card, so a typo shows up on screen instead of as silence.
 static func mission_line(id: String) -> String:

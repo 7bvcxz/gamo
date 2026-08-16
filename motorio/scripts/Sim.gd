@@ -160,6 +160,23 @@ var kit_progress: float = 0.0
 ## there is nothing left burning.
 var torches: int = 0
 var torch_left: float = 0.0
+
+## --- What she has been shown ------------------------------------------------
+## Which key prompts are done with. Most of them are answered by the world --
+## the kit has been searched, a cat exists, a machine is standing -- and only
+## the few with no trace in the world are recorded here, because a flag set at
+## the moment of an action is a flag that can be missed when the action happens
+## some other way.
+var learned: Dictionary[String, bool] = {}
+## How far she has walked, in tiles. The one prompt that cannot be answered by
+## looking at the world: moving leaves nothing behind.
+var walked: float = 0.0
+
+func learn(id: String) -> void:
+	learned[id] = true
+
+func has_learned(id: String) -> bool:
+	return bool(learned.get(id, false))
 ## Which step of BASE_LEVELS the base is on. Kept beside the radius so the thing
 ## that changed can be announced -- an upgrade is an event, and the previous
 ## arrangement had nothing to fire on because the radius moved every few seconds
@@ -346,6 +363,7 @@ func to_save() -> Dictionary:
 		"base_placed": base_placed, "shelter_placed": shelter_placed,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
 		"torches": torches, "torch_left": torch_left,
+		"learned": learned.keys(), "walked": walked,
 		"shards": shard_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
 		# All three cells, rather than the core plus arithmetic: the player picks
@@ -422,6 +440,10 @@ func from_save(data: Dictionary) -> void:
 	kit_searched = int(data.get("kit_searched", 2))
 	torches = int(data.get("torches", 0))
 	torch_left = float(data.get("torch_left", 0.0))
+	learned.clear()
+	for id: String in data.get("learned", []):
+		learned[id] = true
+	walked = float(data.get("walked", 0.0))
 	kit_progress = 0.0
 	kit_cell = Vector2i(int(data.get("kit_x", 9999)), int(data.get("kit_y", 9999)))
 	shelter_cell = Vector2i(int(data.get("shelter_x", shelter_cell.x)),
@@ -486,6 +508,8 @@ func setup(seed_value: int) -> void:
 	shards.clear()
 	torches = 0
 	torch_left = 0.0
+	learned.clear()
+	walked = 0.0
 	frozen_cats.clear()
 	base_level = 0
 	carried_frozen = false

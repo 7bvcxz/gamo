@@ -401,6 +401,7 @@ func _unassigned_cats() -> int:
 func _on_tool_selected() -> void:
 	if TOOLS[tool_index] != TOOL_TORCH:
 		return
+	sim.learn("TORCH")
 	if sim.light_torch():
 		audio.call("play", "confirm")
 		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
@@ -868,6 +869,10 @@ func _process_play(delta: float) -> void:
 	# rather than inside the character, because the character does not know about
 	# the world and this is the one place that has both.
 	sim.mark_explored(sim.cell_of(player.position), Defs.SIGHT_RADIUS)
+	sim.walked += player.velocity.length() * delta / float(Defs.TILE)
+	if player.velocity.length() > PlayerActor.SPEED * 1.2:
+		sim.learn("RUN")
+	player.prompt = active_prompt()
 	# The clock is held until the opening is over. Thirteen minutes of tutorial
 	# is four days at this length: the summary card would interrupt it four
 	# times, and the first night would arrive at 3:00 -- before there is anywhere
@@ -1136,6 +1141,92 @@ func _update_torch_light() -> void:
 	cold_fog.torch_radius = radius
 	ground_layer.torch_at = player.global_position
 	ground_layer.torch_radius = radius
+
+## --- The key over her head --------------------------------------------------
+## Which prompt is showing, or "". The first one in the table that is wanted and
+## not yet learned; only ever one, because two of them is a menu.
+func active_prompt() -> String:
+	if state != State.PLAY or modal_open() or player.locked:
+		return ""
+	for row: Dictionary in Defs.KEY_PROMPTS:
+		var id: String = String(row["id"])
+		var status: Dictionary = _prompt_status(id)
+		if bool(status["done"]) or not bool(status["want"]):
+			continue
+		return id
+	return ""
+
+## Whether a prompt applies and whether it is finished with, in one branch each.
+##
+## Both together on purpose. Written as two functions they are two lists keyed by
+## the same ids, and this repository has watched that arrangement go out of step
+## every time it has been tried.
+##
+## `done` is read off the world wherever the world remembers -- the kit has been
+## opened, a cat exists, a machine is standing. Only walking, switching tools,
+## lighting a torch and running leave no trace, and those four are the only ones
+## that ask `has_learned`.
+func _prompt_status(id: String) -> Dictionary:
+	var cats_working := false
+	for cat: Sim.Cat in sim.cats:
+		if cat.has_job():
+			cats_working = true
+			break
+	match id:
+		"KIT":
+			return {"want": _facing_kit(), "done": sim.kit_searched >= 2}
+		"PLACE":
+			return {"want": sim.carried_kit != Defs.KIT_NONE, "done": sim.shelter_placed}
+		"THAW":
+			return {"want": sim.carried_frozen, "done": not sim.cats.is_empty()}
+		"FROZEN":
+			return {"want": not sim.hands_full() and _frozen_within_reach(),
+				"done": not sim.cats.is_empty()}
+		"CATPLACE":
+			return {"want": sim.carried_cat != null, "done": cats_working}
+		"CATLIFT":
+			return {"want": not sim.hands_full() and not cats_working
+				and _idle_cat_within_reach(), "done": cats_working}
+		"FUEL":
+			return {"want": sim.base_placed and sim.has_fuel()
+				and player.facing_cell() == sim.core_cell,
+				"done": int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
+		"MINE":
+			return {"want": holding_pickaxe() and sim.ore.has(_hand_target()),
+				"done": int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) > 0
+					or int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
+		"TORCH":
+			return {"want": sim.torches > 0 and not holding_torch(),
+				"done": sim.has_learned("TORCH")}
+		"TOOL":
+			return {"want": sim.kit_searched >= 2, "done": sim.has_learned("TOOL")}
+		"BUILD":
+			return {"want": sim.base_placed and _anything_buildable(),
+				"done": sim.machine_count(Defs.M_MINER) > 0 or build_menu_open}
+		"RUN":
+			return {"want": sim.walked >= Defs.PROMPT_WALK_RUN, "done": sim.has_learned("RUN")}
+		"MOVE":
+			return {"want": true, "done": sim.walked >= Defs.PROMPT_WALK_LEARNED}
+	return {"want": false, "done": true}
+
+func _frozen_within_reach() -> bool:
+	for cell: Vector2i in sim.frozen_cats:
+		if player.position.distance_to(sim.cell_centre(cell)) <= float(Defs.TILE) * 1.5:
+			return true
+	return false
+
+func _idle_cat_within_reach() -> bool:
+	for cat: Sim.Cat in sim.cats:
+		if not cat.has_job() \
+				and player.position.distance_to(cat.pos) <= float(Defs.TILE) * 1.5:
+			return true
+	return false
+
+func _anything_buildable() -> bool:
+	for type: int in Defs.BUILDABLE:
+		if sim.is_unlocked(type):
+			return true
+	return false
 
 func _advance_mission() -> void:
 	var was: int = mission
@@ -1473,6 +1564,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode >= KEY_1 and key.keycode < KEY_1 + TOOLS.size():
 		tool_index = key.keycode - KEY_1
+		sim.learn("TOOL")
 		_on_tool_selected()
 		audio.call("play", "select")
 		get_viewport().set_input_as_handled()
