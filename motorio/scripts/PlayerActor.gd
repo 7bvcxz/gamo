@@ -82,6 +82,16 @@ const FPS := 10.0
 ## at 0.57s. The walk needs no such correction -- its cycle is 0.83s and eight
 ## frames at ten is 0.80s, which is the same stride.
 ##
+## How far she travels before the next frame of a walk or a run.
+##
+## 6.5 rather than the 8.4 a ten-frame walk works out to: the pose that is held
+## while she crosses those pixels is the pose the eye smears, and at sprint the
+## old clock dragged one for nineteen screen pixels. Same cadence within a few
+## percent at a walk, half again as fast at a sprint, and the feet no longer
+## skate because the cycle is measured in ground rather than in seconds.
+const STRIDE := 6.5
+var _stride: float = 0.0
+
 const RUN_FPS := 14.0
 ## A swing is slower than a stride, and the sheets say by how much. The mining
 ## clips repeat every 17, 20 and 20 source frames at twelve a second -- about a
@@ -185,6 +195,12 @@ var belt_drift: Callable = func(_cell: Vector2i) -> Vector2: return Vector2.ZERO
 ##
 ## Averaging instead of dropping is what stops it. Mipmaps because minification
 ## below a half is where plain linear starts dropping texels again.
+## Mipmaps kept after an A/B: the doubling was never the filter (the silhouette
+## has no second peak in its own autocorrelation, and plain linear rendered it
+## identically), and at the bottom of the zoom range the sprite is minified to
+## 0.30 of a screen pixel per texel, which is where plain linear starts dropping
+## texels again. The frames carry 42 pixels of transparent margin, so no mip
+## level the game can reach mixes one frame into the next.
 const SOFT_FILTER := CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 @onready var character: Sprite2D = $Character
@@ -324,7 +340,7 @@ func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
 	elif input.is_zero_approx():
 		_idle()
 	else:
-		_moving(sprinting)
+		_moving(sprinting, delta)
 
 func _collapsed() -> void:
 	# Sinks to the ground and tips over rather than freezing mid-pose.
@@ -370,7 +386,7 @@ func _idle() -> void:
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE * breath)
 	_set_frame(IDLE_SHEET, int(animation_time * FPS) % FRAMES)
 
-func _moving(sprinting: bool) -> void:
+func _moving(sprinting: bool, delta: float) -> void:
 	mine_frame = -1
 	# Nothing procedural. No rocking, no squash, no hop -- the sheet is played and
 	# that is all.
@@ -384,8 +400,23 @@ func _moving(sprinting: bool) -> void:
 	character.rotation = 0.0
 	character.scale = Vector2(SPRITE_SCALE, SPRITE_SCALE)
 
-	var fps: float = RUN_FPS if sprinting else FPS
-	var step: int = int(animation_time * fps) % FRAMES
+	# The frame comes from distance covered, not from a clock.
+	#
+	# A clock holds each pose for a fixed *time*, so the faster she goes the
+	# further each pose is dragged across the screen before it changes. At sprint
+	# that was 71ms at 143 px/s -- ten world pixels, nineteen screen pixels at
+	# full zoom, on a character 120 pixels tall. Each pose smears a sixth of her
+	# height and then jumps to the next one, and what the eye makes of that is two
+	# overlapping characters. (Measured: there is only one on screen. The
+	# silhouette's horizontal autocorrelation has no second peak, and swapping the
+	# texture filter changes nothing about it, so it was never a drawing fault.)
+	#
+	# Tying the frame to distance fixes the cause rather than the symptom: a pose
+	# is held for STRIDE pixels of ground whatever the speed, so the feet stop
+	# skating too. The stride is set so a walk keeps very close to the ten frames
+	# a second it plays at now.
+	_stride += velocity.length() * delta / STRIDE
+	var step: int = int(_stride) % FRAMES
 	# Read by Main, which plays the footfall. Kept here because this is the one
 	# place that knows which frame is showing, and a sound timed against anything
 	# else drifts away from the legs it is supposed to belong to.

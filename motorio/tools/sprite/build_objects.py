@@ -71,8 +71,14 @@ MANIFEST = REPO / "web" / "lib" / "generated" / "objects.json"
 ## far more detail than survives 43 screen pixels. The `_gen` suffix keeps the
 ## lineage legible: everything without it came in from the cutout inbox.
 ADOPTED = {
-    "core": ("core_gen1", 86.4),        # 2.7 tiles
-    "shelter": ("shelter_gen1", 70.4),  # 2.2 tiles
+    # One tile each, as of 0.20.79. Nothing in the simulation changed -- the core
+    # has always been one machine on one cell and the hut one cell beside it --
+    # so at 2.7 and 2.2 tiles the buildings were pictures three times the size of
+    # the thing they stood for, hanging over the tiles their neighbours are built
+    # on. gen2 is drawn for the size: one silhouette and one light each, because
+    # a door and a window and three pipes is twenty features in 32 pixels.
+    "core": ("core_gen2", 32),
+    "shelter": ("shelter_gen2", 32),
     "food_bin": ("food_bin_gen1", 36),
     # Drawn at the miner's size rather than the 23 their painted bodies used.
     # These three are all one-tile machines standing on the snow, and an

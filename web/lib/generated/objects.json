@@ -137,6 +137,18 @@
       817,
       862
      ]
+    },
+    {
+     "id": "core_gen2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/core_gen2-128-9ce5354e195e.png",
+      "64": "/object-candidates/core_gen2-64-38edb0f833f9.png"
+     },
+     "source": [
+      981,
+      996
+     ]
     }
    ]
   },
@@ -569,6 +581,18 @@
       948,
       889
      ]
+    },
+    {
+     "id": "shelter_gen2",
+     "number": 2,
+     "sizes": {
+      "128": "/object-candidates/shelter_gen2-128-45e1ab9f5659.png",
+      "64": "/object-candidates/shelter_gen2-64-1b432e928665.png"
+     },
+     "source": [
+      773,
+      775
+     ]
     }
    ]
   }
@@ -610,12 +634,12 @@
   {
    "role": "core",
    "name": "기지 코어",
-   "from": "core_gen1",
-   "draw": 86.4,
-   "stored": 173,
+   "from": "core_gen2",
+   "draw": 32,
+   "stored": 64,
    "sizes": {
-    "128": "/object-candidates/shipped-core-128-228eec7a98d7.png",
-    "86": "/object-candidates/shipped-core-86-f242aa336bf8.png"
+    "128": "/object-candidates/shipped-core-128-cb81afba7bdf.png",
+    "32": "/object-candidates/shipped-core-32-d483ab4132c7.png"
    }
   },
   {
@@ -698,12 +722,12 @@
   {
    "role": "shelter",
    "name": "숙소",
-   "from": "shelter_gen1",
-   "draw": 70.4,
-   "stored": 141,
+   "from": "shelter_gen2",
+   "draw": 32,
+   "stored": 64,
    "sizes": {
-    "128": "/object-candidates/shipped-shelter-128-1fcd48df9579.png",
-    "70": "/object-candidates/shipped-shelter-70-327d1fbb41ea.png"
+    "128": "/object-candidates/shipped-shelter-128-7783a907a568.png",
+    "32": "/object-candidates/shipped-shelter-32-e637c90088be.png"
    }
   },
   {

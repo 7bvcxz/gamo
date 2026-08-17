@@ -210,11 +210,74 @@ func _restart_from_the_top() -> void:
 	cutscene_time = 0.0
 	state = State.OPENING
 
-func _leave_title() -> void:
-	audio.call("play", "confirm")
+## The title screen's menu.
+##
+## Any key used to start a game -- which meant the answer to "I want to change the
+## controls first" and "I want to keep the run I was on" was the same keypress,
+## and the second one was decided for the player by whether a save happened to
+## exist. A menu says what the choices are and lets them be chosen.
+##
+## Continue is only in the list when there is something to continue, rather than
+## present and refusing: a row that is usually greyed out teaches the player to
+## skip past the row.
+const MENU_CONTINUE := 0
+const MENU_NEW := 1
+const MENU_SETTINGS := 2
+const MENU_QUIT := 3
+const MENU_LABELS := ["이어하기", "처음부터", "설정", "종료"]
+
+var title_index: int = 0
+
+func title_menu() -> Array[int]:
+	var rows: Array[int] = []
 	if resumed:
-		state = State.PLAY
+		rows.append(MENU_CONTINUE)
+	rows.append(MENU_NEW)
+	rows.append(MENU_SETTINGS)
+	# Quitting a browser tab is not something a page may do, and a row that does
+	# nothing is worse than no row. On the web the game goes back to the fire
+	# instead -- which is what "leave the menu" means when there is nowhere to go.
+	if not OS.has_feature("web"):
+		rows.append(MENU_QUIT)
+	return rows
+
+func title_step(direction: int) -> void:
+	var rows: Array[int] = title_menu()
+	if rows.is_empty():
 		return
+	title_index = wrapi(title_index + direction, 0, rows.size())
+	audio.call("play", "select")
+
+func title_choice() -> int:
+	var rows: Array[int] = title_menu()
+	if rows.is_empty():
+		return MENU_NEW
+	return rows[clampi(title_index, 0, rows.size() - 1)]
+
+## Acts on whatever the cursor is on.
+func title_confirm() -> void:
+	match title_choice():
+		MENU_CONTINUE:
+			audio.call("play", "confirm")
+			state = State.PLAY
+		MENU_SETTINGS:
+			open_settings()
+		MENU_QUIT:
+			audio.call("play", "confirm")
+			get_tree().quit()
+		_:
+			_start_new_run()
+
+## A new game from the title, whether or not a save was sitting there.
+##
+## The save is cleared first. Choosing 처음부터 with a run in the file used to
+## leave it in place, so the next launch offered to continue a game the player
+## had already thrown away.
+func _start_new_run() -> void:
+	audio.call("play", "confirm")
+	clear_save()
+	resumed = false
+	_start_run()
 	cutscene_panel = 0
 	cutscene_time = 0.0
 	state = State.OPENING
@@ -723,6 +786,14 @@ func night_level() -> float:
 
 ## True while the player is inside the hut: asleep, or waiting for the sun. They
 ## are a silhouette on the shelter wall then, not a figure standing in the snow.
+## Whether the run is inside the going-to-bed sequence, in any of its phases.
+##
+## Wider than `indoors()`, which is only the two phases the door is shut in. The
+## sequence starts with the cats still filing home and she is already inside for
+## every frame of it, so anything asking "is she out in the weather" wants this.
+func sleeping_state() -> bool:
+	return state == State.NIGHTFALL or state == State.DAYBREAK or state == State.RESULT
+
 func indoors() -> bool:
 	match state:
 		State.NIGHTFALL:
@@ -867,6 +938,19 @@ func _update_ambience(delta: float) -> void:
 		return
 	var night: float = day_fraction()
 	audio.call("set_bed", "wind", 0.45 + night * 0.45, delta)
+	# The night sequence is where the cold stops, so the sound stops with it.
+	#
+	# The bed was read off her warmth alone, and she walks into the hut at
+	# whatever she made it home on -- which is the lowest it gets all day. So the
+	# cold was loudest at the exact moment she was finally safe, and the door
+	# shutting made no difference to it.
+	#
+	# The whole sequence rather than `indoors()`, which is only the two phases the
+	# door is actually shut in: the cats are still filing home during GATHER and
+	# she is already inside for all of it.
+	if sleeping_state():
+		audio.call("set_bed", "cold", 0.0, delta)
+		return
 	var exposure: float = clampf(1.0 - player.warmth / 100.0, 0.0, 1.0)
 	if sim != null and not sim.is_warm(player.cell()):
 		exposure = maxf(exposure, 0.45)
@@ -1581,7 +1665,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		State.TITLE:
 			if key.keycode == KEY_ESCAPE:
 				return
-			_leave_title()
+			# Up and down move the cursor; everything else takes the row it is on.
+			# "Any key" is still the answer for a player who does not read the
+			# menu, and the row it lands on is the one they most likely want --
+			# 이어하기 when there is a run to come back to, 처음부터 when there
+			# is not.
+			if key.keycode == KEY_UP or key.keycode == KEY_W:
+				title_step(-1)
+			elif key.keycode == KEY_DOWN or key.keycode == KEY_S:
+				title_step(1)
+			else:
+				title_confirm()
 			get_viewport().set_input_as_handled()
 			return
 		State.OPENING:
@@ -1713,6 +1807,19 @@ func touch_hud(position: Vector2) -> bool:
 	# Hit-testing raw viewport coordinates against them silently misses by the
 	# scale factor, which is exactly the bug that made the pad feel dead.
 	var local: Vector2 = hud_local(position)
+	# The title's menu, after the chrome below. A tap on a row takes that row; a
+	# tap on empty sky takes the row the cursor is on, which is what
+	# "화면을 눌러 시작" meant and still means for anyone who does not aim.
+	#
+	# The settings button is excluded rather than ordered around, because it is
+	# checked further down and a menu that swallowed every tap swallowed that one
+	# -- so the only way into the options from a cold start stopped working.
+	if state == State.TITLE and not (hud.settings_button_rect as Rect2).has_point(local):
+		var row: int = int(hud.call("title_menu_at", local))
+		if row >= 0:
+			title_index = row
+		title_confirm()
+		return true
 	if state == State.SETTINGS and int(hud.slot_picker) > 0:
 		var slot: int = int(hud.call("slot_row_at", local))
 		if slot >= 0:
@@ -1874,7 +1981,7 @@ func touch_primary(pressed: bool = true) -> void:
 		return
 	match state:
 		State.TITLE:
-			_leave_title()
+			title_confirm()
 		State.OPENING:
 			_advance_cutscene()
 		State.RESULT:
@@ -2635,6 +2742,12 @@ func load_game(slot: int = 0) -> bool:
 func clear_save() -> void:
 	for slot in SAVE_SLOTS:
 		DirAccess.remove_absolute(slot_path(slot))
+	# And nothing to come back to. `resumed` is what the title menu asks when it
+	# decides whether to offer 이어하기, and deleting the file without clearing it
+	# left the menu offering to continue a run whose save had just been thrown
+	# away -- and taking that row dropped the player into whatever happened to be
+	# in memory.
+	resumed = false
 
 ## --- Settings -------------------------------------------------------------
 ## Kept in its own file, deliberately. UI size is a property of the player's

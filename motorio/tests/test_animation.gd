@@ -53,11 +53,23 @@ func _run() -> void:
 	# Every motion is the same shape now, and the sheets have to agree with it.
 	_assert(PlayerActor.FRAMES == 8, "eight frames")
 	_assert(is_equal_approx(PlayerActor.FPS, 10.0), "ten a second")
-	# The run is faster on purpose: its source stride is 0.58s and eight frames at
-	# ten would stretch it to 0.80s, arriving slower than it was generated.
-	_assert(PlayerActor.RUN_FPS > PlayerActor.FPS, "the run plays faster than the walk")
-	var stride: float = PlayerActor.FRAMES / PlayerActor.RUN_FPS
-	_assert(stride > 0.5 and stride < 0.65, "a run stride lands near its source 0.58s (%.2f)" % stride)
+
+	# The moving frames come from distance, not from a clock. A clock holds each
+	# pose for a fixed time, so the faster she goes the further the pose is
+	# dragged before it changes -- at sprint that was nineteen screen pixels of
+	# smear on a character 120 pixels tall, which the eye reads as two of her.
+	var walk_fps: float = PlayerActor.SPEED / PlayerActor.STRIDE
+	var run_fps: float = PlayerActor.SPEED * PlayerActor.SPRINT / PlayerActor.STRIDE
+	_assert(absf(walk_fps - PlayerActor.FPS) < 3.5,
+		"걷기 박자가 예전 초당 10프레임 근처다: %.1f" % walk_fps)
+	_assert(run_fps > walk_fps * 1.4, "달릴 때는 확실히 빨라진다: %.1f" % run_fps)
+	# What matters is not the rate but how far one pose is dragged. A tenth of her
+	# height is the ceiling: past that the smear is a second character.
+	var drag_px: float = PlayerActor.STRIDE * 1.875   # 최대 배율의 화면 배율
+	var height_px: float = PlayerActor.CELL * PlayerActor.SPRITE_SCALE * 1.875
+	_assert(drag_px < height_px * 0.12,
+		"포즈 하나가 끌리는 거리가 키의 %.0f%%다 (%.0f / %.0f 화면픽셀)"
+			% [drag_px / height_px * 100.0, drag_px, height_px])
 
 	# Half scale, so a 128 cell draws as a 64-pixel figure about one tile tall.
 	# If this drifts the character silently changes size relative to the world.
@@ -102,7 +114,7 @@ func _run() -> void:
 	for t: float in [0.0, 0.09, 0.17, 0.26, 0.38, 0.51, 0.66]:
 		actor.animation_time = t
 		for sprinting: bool in [false, true]:
-			actor._moving(sprinting)
+			actor._moving(sprinting, 0.016)
 			_assert(actor.character.scale.is_equal_approx(flat),
 				"moving does not squash or stretch at t=%.2f" % t)
 			_assert(actor.character.position.is_equal_approx(
@@ -114,9 +126,9 @@ func _run() -> void:
 	_assert(is_zero_approx(actor.character.rotation), "standing still does not tilt")
 	for t: float in [0.0, 0.12, 0.31, 0.55, 0.78]:
 		actor.animation_time = t
-		actor._moving(false)
+		actor._moving(false, 0.016)
 		_assert(is_zero_approx(actor.character.rotation), "walking does not rock at t=%.2f" % t)
-		actor._moving(true)
+		actor._moving(true, 0.016)
 		_assert(is_zero_approx(actor.character.rotation), "running does not rock at t=%.2f" % t)
 
 

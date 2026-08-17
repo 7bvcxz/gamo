@@ -21,7 +21,7 @@ func _init() -> void:
 	var failures := 0
 	for case in cases:
 		actor.set("_walk_input", case[0])
-		actor._moving(case[1])
+		actor._moving(case[1], 0.016)
 		if actor.character.texture != case[2]:
 			print("  FAIL: ", case[3]); failures += 1
 		else:

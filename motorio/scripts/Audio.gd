@@ -83,6 +83,12 @@ func play(sound: String, pitch_jitter: float = 0.06) -> void:
 	player.pitch_scale = 1.0 + randf_range(-pitch_jitter, pitch_jitter)
 	player.play()
 
+## How loud a bed actually is, after the ease. The target is what was asked for
+## and this is what the ear gets, which is the one a test has to read: a bed told
+## to stop still fades, and a fade is exactly how a sound outlives its cause.
+func bed_level(name: String) -> float:
+	return float(_bed_level.get(name, 0.0))
+
 ## Called every frame with 0..1 targets. Levels are eased rather than snapped so
 ## walking in and out of the cold is a slide, not a switch.
 func set_bed(name: String, target: float, delta: float) -> void:

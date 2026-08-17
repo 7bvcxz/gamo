@@ -84,6 +84,7 @@ func _init() -> void:
 		print("AUDIO_TEST: PASS")
 	quit(failures)
 
+
 func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		print("  FAIL: ", message)

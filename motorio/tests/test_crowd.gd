@@ -28,13 +28,17 @@ func _run() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
-	main.finish_tutorial()
 	# The title, then out of the opening. Skipping the second half left the run
 	# sitting in State.OPENING, where the per-frame play code does not run: the
 	# cats still walked, because the sim is ticked by hand here, but nothing that
 	# lives outside sim.tick happened and the crew never got hungry.
+	#
+	# The tutorial is finished on *this* side of the title. Taking 처음부터 builds
+	# a fresh world, which is the point of it, so anything set up before the tap
+	# is thrown away with the world it was set up in.
 	main.touch_primary()
 	main._end_cutscene()
+	main.finish_tutorial()
 	# The bin is built now rather than standing from the first frame, and this
 	# run is supposed to contain a cat walking off to eat.
 	main.sim.stock[Defs.ITEM_HEATSTONE] = 20

@@ -1105,6 +1105,44 @@ func _card(height: float) -> Rect2:
 	_frame(card, Defs.COL_CORE)
 	return card
 
+## The rows, and where each one is drawn.
+##
+## Measured rather than drawn straight, so a test can ask where a row is and a
+## touch can ask which row it landed on. One list, one geometry: the picture and
+## the hit test cannot come to disagree about where 처음부터 is.
+const TITLE_ROW_H := 30.0
+const TITLE_MENU_W := 210.0
+
+func title_menu_rect(index: int) -> Rect2:
+	var rows: int = main.title_menu().size()
+	var block: float = float(rows) * TITLE_ROW_H
+	var top: float = size.y * 0.64 - block * 0.5
+	return Rect2(size.x * 0.5 - TITLE_MENU_W * 0.5, top + float(index) * TITLE_ROW_H,
+		TITLE_MENU_W, TITLE_ROW_H - 4.0)
+
+## Which row a point is on, or -1. Used by the pad.
+func title_menu_at(point: Vector2) -> int:
+	for index in main.title_menu().size():
+		if title_menu_rect(index).has_point(point):
+			return index
+	return -1
+
+func _draw_title_menu() -> void:
+	var rows: Array[int] = main.title_menu()
+	var cursor: int = clampi(main.title_index, 0, maxi(0, rows.size() - 1))
+	for index in rows.size():
+		var box: Rect2 = title_menu_rect(index)
+		var chosen: bool = index == cursor
+		if chosen:
+			# The selected row is a lit plate rather than a coloured word: on a
+			# painting, colour alone is not enough to say which line is armed.
+			var beat: float = 0.72 + sin(float(Time.get_ticks_msec()) / 380.0) * 0.14
+			_panel(box, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.22 * beat),
+				Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85), 1.0)
+		_text_in(Rect2(box.position + Vector2(0.0, box.size.y * 0.5 + 6.0),
+			Vector2(box.size.x, 20.0)), main.MENU_LABELS[rows[index]], 17,
+			Defs.COL_CORE if chosen else Defs.COL_TEXT)
+
 ## The control line on the first screen, as a function so a test can read it.
 ##
 ## It said "WASD 이동" for as long as it existed and WASD has never been bound to
@@ -1134,10 +1172,7 @@ func _draw_title() -> void:
 	# shape of this game since the day stopped ending it.
 	_text_in(full.call(size.y * 0.52), "얼어붙은 행성에 불을 피우고, 그 불을 키워 나가세요.", 16, Defs.COL_TEXT)
 	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.", 13, Defs.COL_TEXT_DIM)
-	# Never let the one call to action fall below a readable floor.
-	var blink: float = 0.82 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.18
-	_text_in(full.call(size.y * 0.72), "화면을 눌러 시작" if touch_pad else "아무 키나 눌러 시작", 18,
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, blink))
+	_draw_title_menu()
 	# WASD was on this line for as long as the line existed and has never been
 	# bound to anything: `move_*` is arrow keys only. It is the first screen of
 	# the game, and it told every new player the wrong keys -- the same shape as

@@ -150,10 +150,27 @@ BEDS = {
     # The plateau. Always there, under everything.
     "wind": dict(seconds=7.5, low=26, high=150, peak=0.33, seed=17,
                  sway=[(0.13, 0.35), (0.31, 0.20)]),
-    # The cold, which fades up as warmth falls. Higher and thinner, so it sits
-    # above the wind instead of thickening it.
-    "cold": dict(seconds=5.5, low=2100, high=9000, peak=0.35, seed=23,
-                 sway=[(0.18, 0.30), (0.47, 0.15)]),
+    # The cold, which fades up as warmth falls.
+    #
+    # It used to be one dense band from 2.1 kHz to 9 kHz, which is broadband hiss
+    # sitting exactly where the ear is most sensitive -- so it did not read as
+    # cold, it read as a machine that had gone wrong. Playtest words: "컴퓨터가
+    # 버그났을 때 소리".
+    #
+    # Two layers instead. Most of it is a hollow low-mid body, the sound of air
+    # in a space too big to heat, and above that a handful of *discrete* high
+    # partials rather than a band of them -- nine of them, so they beat against
+    # each other and shimmer instead of hissing. The shimmer is quiet: it is what
+    # makes the body sound cold rather than merely large.
+    "cold": dict(seconds=6.0, peak=0.30, seed=23,
+                 sway=[(0.11, 0.34), (0.29, 0.18)],
+                 # The body sits above the wind's 26-150 Hz rather than on top
+                 # of it, or the two beds are one muddy rumble. The shimmer's
+                 # weight is per partial and there are 29 times fewer of them, so
+                 # at 0.10 it measured as nothing at all -- random phases add as
+                 # sqrt(count), so 1.6 across nine is about a third of the body.
+                 layers=[dict(low=260, high=780, count=260, weight=1.0),
+                         dict(low=2200, high=4600, count=9, weight=1.6)]),
 }
 
 
@@ -244,19 +261,31 @@ def bed(name: str, spec: dict) -> list:
     total = int(RATE * spec["seconds"])
     rng = random.Random(spec["seed"])
     base = 1.0 / spec["seconds"]
-    # One partial every few hertz across the band. Dense enough to be noise,
-    # sparse enough that this finishes quickly.
-    lowest = max(1, int(spec["low"] / base))
-    highest = int(spec["high"] / base)
-    stride = max(1, (highest - lowest) // 400)
-    harmonics = [(k * base, rng.uniform(0, 2 * math.pi)) for k in
-                 range(lowest, highest, stride)]
+    # Either one band, or several with their own densities.
+    #
+    # The density is the whole character. Hundreds of partials across a band is
+    # noise; nine of them is a shimmer, because you hear the individual tones
+    # beating rather than the average of all of them. Same generator, and the
+    # difference between "wind" and "something is wrong with the speakers" is the
+    # count.
+    layers = spec.get("layers") or [dict(low=spec["low"], high=spec["high"],
+                                         count=400, weight=1.0)]
+    harmonics = []
+    for layer in layers:
+        lowest = max(1, int(layer["low"] / base))
+        highest = int(layer["high"] / base)
+        stride = max(1, (highest - lowest) // max(1, layer["count"]))
+        weight = float(layer.get("weight", 1.0))
+        # Every partial an exact multiple of 1/length, so the loop still closes
+        # on itself with no seam to hide.
+        for k in range(lowest, highest, stride):
+            harmonics.append((k * base, rng.uniform(0, 2 * math.pi), weight))
     out = []
     for i in range(total):
         t = i / RATE
         value = 0.0
-        for frequency, offset in harmonics:
-            value += math.sin(2.0 * math.pi * frequency * t + offset)
+        for frequency, offset, weight in harmonics:
+            value += weight * math.sin(2.0 * math.pi * frequency * t + offset)
         # Slow swells, also at exact multiples of the loop length so they come
         # back round with everything else.
         gain = 1.0
@@ -280,6 +309,39 @@ def write(path: Path, samples: list) -> None:
     handle.writeframes(b"".join(
         struct.pack("<h", max(-32768, min(32767, int(v * 32767)))) for v in samples))
     handle.close()
+
+
+## What each bed must still sound like when someone edits the recipe.
+##
+## The cold used to be one dense band from 2.1 kHz to 9 kHz, which is broadband
+## hiss sitting exactly where the ear is most sensitive: it did not read as cold,
+## it read as a machine that had gone wrong. A playtest called it "컴퓨터가
+## 버그났을 때 소리".
+##
+## Zero crossings per second separates the two cases by an order of magnitude --
+## hiss centred at 5 kHz crosses ten thousand times a second, a low body under a
+## thin shimmer crosses a couple of thousand. Checked here rather than in the
+## game's tests because the imported wav is ADPCM and a test that decodes it as
+## raw PCM is measuring its own decoder, not the sound. (It did, and reported
+## 10,636 for a file this script had just measured at 2,104.)
+BED_ZCR = {"wind": (60, 600), "cold": (600, 6000)}
+
+
+def check(name: str, path: Path) -> None:
+    if name not in BED_ZCR:
+        return
+    handle = wave.open(str(path))
+    frames, rate = handle.getnframes(), handle.getframerate()
+    data = struct.unpack("<%dh" % frames, handle.readframes(frames))
+    handle.close()
+    crossings = sum(1 for i in range(1, len(data))
+                    if (data[i] < 0) != (data[i - 1] < 0))
+    per_second = crossings * rate / max(1, len(data))
+    low, high = BED_ZCR[name]
+    if not (low <= per_second <= high):
+        raise SystemExit(
+            f"SFX_CHECK: {name} 의 초당 영교차 {per_second:.0f}회가 "
+            f"{low}~{high} 밖입니다 — 소리의 성격이 바뀌었습니다")
 
 
 def measure(path: Path) -> str:
@@ -322,6 +384,7 @@ def main() -> int:
         if args.only and args.only != name:
             continue
         write(OUT / f"{name}.wav", bed(name, spec))
+        check(name, OUT / f"{name}.wav")
         print(f"{name:12s} {measure(OUT / f'{name}.wav')}  (loop)")
     return 0
 

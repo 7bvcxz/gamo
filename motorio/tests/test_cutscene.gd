@@ -135,7 +135,7 @@ func _test_table() -> void:
 func _test_plays_once() -> void:
 	main.resumed = false
 	main.state = main.State.TITLE
-	main._leave_title()
+	main.title_confirm()
 	_assert(main.state == main.State.OPENING, "새 게임은 컷씬으로 들어간다")
 	_assert(main.cutscene_panel == 0, "첫 장부터")
 
@@ -143,7 +143,7 @@ func _test_plays_once() -> void:
 	# Earth is gone.
 	main.resumed = true
 	main.state = main.State.TITLE
-	main._leave_title()
+	main.title_confirm()
 	_assert(main.state == main.State.PLAY, "이어하기는 컷씬을 건너뛴다")
 	main.resumed = false
 

@@ -19,6 +19,7 @@ func _run() -> void:
 	_test_tool_belongs_to_the_machine()
 	_test_working_cat_stands_on_the_middle()
 	_test_kit_art()
+	_test_bare_seam_job_survives_the_night()
 	if failures == 0:
 		print("CAT_ART: PASS")
 	else:
@@ -156,3 +157,46 @@ func _test_kit_art() -> void:
 		"거처 키트를 들면 거처 키트가 보인다")
 	_assert(MachineLayerScript.kit_art(Defs.KIT_BASE)
 		!= MachineLayerScript.kit_art(Defs.KIT_SHELTER), "둘은 다른 그림이다")
+
+# --- A job at a bare seam is still a job ---------------------------------------
+
+func _test_bare_seam_job_survives_the_night() -> void:
+	var sim := Sim.new()
+	sim.setup(4242)
+	var seam := Vector2i(9999, 9999)
+	for cell: Vector2i in sim.ore:
+		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
+			seam = cell
+			break
+	sim.grant_cats(1)
+	var cat: Sim.Cat = sim.cats[0]
+	sim.carried_cat = cat
+	_assert(sim.place_cat(seam), "맨 광맥에 고양이를 놓는다")
+
+	# Night. It walks home and sleeps, which is not the player taking it off.
+	cat.state = Defs.CAT_ASLEEP
+	sim.dispatch_cats()
+	_assert(cat.assigned == seam,
+		"아침에도 자기 자리를 기억한다: %s" % str(cat.assigned))
+	_assert(cat.state == Defs.CAT_TO_MINER, "그리로 걸어간다")
+
+	# And the same after carrying a stone to the base, which is what a cat on a
+	# bare seam spends its day doing.
+	cat.state = Defs.CAT_HAUL_TO_BASE
+	cat.carrying = Defs.ITEM_HEATSTONE
+	cat.pos = sim.cell_centre(sim.core_cell)
+	cat.path.clear()
+	cat.path_goal = Vector2(9999.0, 9999.0)
+	var guard := 0
+	while cat.state == Defs.CAT_HAUL_TO_BASE and guard < 2000:
+		sim.tick(0.05)
+		guard += 1
+	_assert(cat.assigned == seam,
+		"기지에 나른 뒤에도 기억한다: %s" % str(cat.assigned))
+
+	# A post that really is gone is a different thing: the seam mined out from
+	# under it leaves the cat with nothing, and it says so.
+	sim.ore.erase(seam)
+	sim.dispatch_cats()
+	_assert(not cat.has_job(), "자리가 사라지면 그때는 놓는다")
+	sim.free()

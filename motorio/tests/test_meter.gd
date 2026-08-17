@@ -179,6 +179,7 @@ func _run() -> void:
 	var exchanger = sim.machine_at(pad)
 	_assert(exchanger != null and exchanger.type == Defs.M_EXCHANGER, "the exchanger is built")
 	var inputs: Array[int] = sim.meter_items(exchanger, false)
+	_test_no_follow_readout(main)
 	_assert(inputs.has(Defs.ITEM_CRYSTAL), "its input side lists crystal before any arrives")
 	_assert(sim.meter_status(exchanger).find("입력 부족") >= 0,
 		"and an empty exchanger reports starvation: '%s'" % sim.meter_status(exchanger))
@@ -260,6 +261,21 @@ func _run() -> void:
 	if failures == 0:
 		print("METER_TEST: PASS")
 	quit(failures)
+
+
+# --- Nothing follows her around ------------------------------------------------
+
+func _test_no_follow_readout(main: Node2D) -> void:
+	# The panel is opened, never volunteered. A plate used to appear over whatever
+	# tile she happened to be facing -- the right numbers in the wrong place, over
+	# the tile she was about to build on, on screen whenever she stood near
+	# anything at all.
+	var layer: Node = main.machine_layer
+	_assert(not layer.has_method("_draw_focus_readout"),
+		"바라보는 칸에 저절로 뜨는 판이 없다")
+	# And the cell she is facing is still known, because the placement ghost and
+	# the mining ring are drawn from it.
+	_assert("focus_cell" in layer, "바라보는 칸 자체는 여전히 안다")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

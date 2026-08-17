@@ -151,16 +151,26 @@ SUBJECTS = {
         "cool blue-white, a short exhaust stack on top, warm brass bolts, a "
         "little snow on its top surfaces."
     ),
+    # Both of these were drawn across two and a half tiles and are one tile now.
+    # Nothing in the simulation changed -- the core has always been one machine on
+    # one cell and the hut one cell beside it -- so the buildings were pictures
+    # three times the size of the thing they stood for, swallowing the tiles their
+    # neighbours were built on.
+    #
+    # At one tile the old prompts are impossible: three pipes around a rim and a
+    # door and a window and log courses is twenty features in 32 pixels. These
+    # name one silhouette and one light each, which is all that survives.
     "core": (
-        "A cosy round heat core for a snowy top-down game: a warm glowing "
-        "furnace at the centre of a circular stone-and-metal base, a big amber "
-        "fire glowing through a round window, three chunky pipes around the rim, "
-        "soft snow settled on the outer ring."
+        "A cosy round stone brazier for a snowy top-down game, seen from almost "
+        "directly overhead: one thick ring of chunky pale stone, and a big warm "
+        "amber fire filling the whole middle of it. Nothing else. Snow on the "
+        "outside of the ring."
     ),
     "shelter": (
-        "A tiny cosy log cabin for a snowy top-down game, seen from the front "
-        "with its roof visible: thick snow piled on a steep wooden roof, warm "
-        "amber light in one round window, a small round door, chunky log walls."
+        "A tiny cosy hut for a snowy top-down game, seen from almost directly "
+        "overhead: one steep square roof of warm brown timber under thick snow, "
+        "a small stone chimney at one corner, and one small amber-lit window on "
+        "the near slope. Nothing else."
     ),
     "food_bin": (
         "A cosy wooden feeding trough for cats in a snowy top-down game: a "

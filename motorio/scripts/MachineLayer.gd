@@ -84,10 +84,15 @@ const CAT_TOOL_BEATS := 2.0
 ## a difference between them reads as a difference in importance.
 const MACHINE_ART_DRAW := 36.0
 
-const CORE_DRAW := 2.7 * float(Defs.TILE)
+## One tile, as of 0.20.79. It has always *been* one cell -- one machine that
+## blocks one tile -- and the picture was 2.7 of them, hanging over the tiles
+## its neighbours are built on and over the input mouth beside it.
+const CORE_DRAW := 1.0 * float(Defs.TILE)
 ## 2.2 tiles. Same form as the core's, for the same reason: the number that
 ## matters is how many cells of the world the building covers.
-const SHELTER_DRAW := 2.2 * float(Defs.TILE)
+## Also one tile now, for the same reason: `is_structure` blocks exactly the
+## one cell it stands on and the drawing claimed five.
+const SHELTER_DRAW := 1.0 * float(Defs.TILE)
 const FOOD_BIN_DRAW := 36.0
 
 const CAT_CELL := 128.0
@@ -236,7 +241,6 @@ func _draw() -> void:
 	_draw_ground()
 	_draw_hand_progress()
 	_draw_meter_marker(tile)
-	_draw_focus_readout()
 	# Cats are not drawn here any more. They are nodes under Main/Cats at a z
 	# between this layer and _marks_layer, so what is left in this function is
 	# the factory itself.
@@ -258,23 +262,23 @@ func _draw_shelter(tile: float) -> void:
 	var flicker: float = 1.0 + sin(pulse * 5.3) * 0.06 + sin(pulse * 2.1) * 0.04
 
 	# Warm pool, so it reads as a destination rather than a prop.
-	draw_circle(at, 30.0 * flicker, Color(1.0, 0.62, 0.26, 0.05 + night * 0.16))
-	draw_circle(at, 20.0 * flicker, Color(1.0, 0.66, 0.30, 0.07 + night * 0.20))
-	_shadow(at + Vector2(0, 13), 13.0)
+	draw_circle(at, 22.0 * flicker, Color(1.0, 0.62, 0.26, 0.05 + night * 0.16))
+	draw_circle(at, 14.0 * flicker, Color(1.0, 0.66, 0.30, 0.07 + night * 0.20))
+	_shadow(at + Vector2(0, 6), 8.0)
 
 	_object_art(SHELTER_ART, at, SHELTER_DRAW)
 	# Firelight on the snow around it, which the picture cannot do: the hut has to
 	# get brighter as the night comes on, and that is the signal telling the
 	# player where to be.
-	draw_circle(at + Vector2(0, 7), 9.0 * flicker, Color(1.0, 0.70, 0.32, 0.10 * lit))
+	draw_circle(at + Vector2(0, 3), 5.0 * flicker, Color(1.0, 0.70, 0.32, 0.10 * lit))
 	_draw_shelter_occupied(at, flicker)
 
 	# Smoke, so the building is alive even when nobody is home. The chimney it
 	# rises from is in the picture now; this is only what comes out of it.
 	for index in 3:
 		var rise: float = fmod(pulse * 0.5 + float(index) * 0.34, 1.0)
-		draw_circle(at + Vector2(8.0 + sin(rise * 4.0 + float(index)) * 3.0, -17.0 - rise * 13.0),
-			1.4 + rise * 1.8, Color(0.86, 0.88, 0.92, (1.0 - rise) * 0.22))
+		draw_circle(at + Vector2(5.0 + sin(rise * 4.0 + float(index)) * 2.0, -9.0 - rise * 10.0),
+			1.0 + rise * 1.4, Color(0.86, 0.88, 0.92, (1.0 - rise) * 0.22))
 
 	# No caption. A snowed-in hut with a lit window and smoke on its chimney does
 	# not need the word 숙소 written under it, and the label was a leftover from
@@ -302,14 +306,17 @@ func _draw_shelter_occupied(at: Vector2, flicker: float) -> void:
 
 	# Light escaping the building: a halo on the hut, and a wedge thrown forward
 	# onto the snow from under the door.
-	draw_circle(at, 52.0 * flicker, Color(1.0, 0.72, 0.34, 0.09 * glow))
-	draw_circle(at, 30.0 * flicker, Color(1.0, 0.78, 0.42, 0.13 * glow))
+	# Sized against a hut drawn at 2.2 tiles. The halo may stay bigger than the
+	# building -- light does -- but a 52 pixel one around a 32 pixel hut is a
+	# lamp with no lamp in it.
+	draw_circle(at, 30.0 * flicker, Color(1.0, 0.72, 0.34, 0.09 * glow))
+	draw_circle(at, 18.0 * flicker, Color(1.0, 0.78, 0.42, 0.13 * glow))
 	# The count rides on the wedge rather than on four silhouettes: one sleeper is
 	# a glow under the door, four is the hut spilling light onto the snow.
 	var crowd: float = 0.55 + 0.45 * clampf(float(shelter_sleepers), 1.0, 4.0) / 4.0
 	draw_colored_polygon(PackedVector2Array([
-		at + Vector2(-7, 13), at + Vector2(7, 13),
-		at + Vector2(20, 36), at + Vector2(-20, 36)]),
+		at + Vector2(-4, 7), at + Vector2(4, 7),
+		at + Vector2(12, 22), at + Vector2(-12, 22)]),
 		Color(1.0, 0.80, 0.46, 0.16 * glow * crowd * flicker))
 
 func _draw_meter_marker(tile: float) -> void:
@@ -340,51 +347,19 @@ func _draw_meter_marker(tile: float) -> void:
 		draw_line(at, at + Vector2(arm * step.x, 0.0), col, 2.0)
 		draw_line(at, at + Vector2(0.0, arm * step.y), col, 2.0)
 
-## The machine the player is standing in front of states its own rate. Numbers
-## the player cannot see cannot be planned around, which turns ratio design into
-## trial and error -- and ratio design is the point of the genre.
-func _draw_focus_readout() -> void:
-	if focus_cell == Vector2i(9999, 9999):
-		return
-	var machine: Sim.Machine = sim.machine_at(focus_cell)
-	var name := ""
-	var line := ""
-	if machine != null:
-		name = Defs.MACHINE_NAMES[machine.type]
-		line = Defs.throughput_line(machine.type)
-		# A miner reports what this particular seam gives it, not the generic
-		# rate: the whole point of purity is that seams differ.
-		if machine.type == Defs.M_BELT:
-			line = "%s · 칸당 %.1f초 · %.0f/분" % [Defs.BELT_TIERS[machine.tier]["name"],
-				1.0 / Defs.belt_speed(machine.tier),
-				Defs.belt_speed(machine.tier) / 0.34 * 60.0]
-		if machine.type == Defs.M_EXCHANGER:
-			line = "%s · %s" % [Defs.RECIPES[machine.recipe]["name"],
-				Defs.recipe_line(machine.recipe)]
-			if sim.recipe_unlocked(Defs.RECIPE_ALLOY):
-				name += "   F 제법 전환"
-		if machine.type == Defs.M_MINER and sim.ore.has(focus_cell):
-			var grade: int = sim.purity_of(focus_cell)
-			line = "%s 광맥 · %.0f/분" % [Defs.PURITY_NAMES[grade],
-				Defs.per_minute(sim.seam_period(focus_cell))]
-	elif sim.ore.has(focus_cell):
-		var grade: int = sim.purity_of(focus_cell)
-		name = "%s %s 광맥" % [Defs.PURITY_NAMES[grade], Defs.ITEM_NAMES[int(sim.ore[focus_cell])]]
-		line = "채굴기 설치 시 %.0f/분" % Defs.per_minute(sim.seam_period(focus_cell))
-	if line == "":
-		return
-	var tile := float(Defs.TILE)
-	var at: Vector2 = Vector2(focus_cell) * tile + Vector2(tile * 0.5, -6.0)
-	var font: Font = UIFont.FONT
-	var width: float = maxf(font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x,
-		font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x) + 12.0
-	var box := Rect2(at + Vector2(-width * 0.5, -24.0), Vector2(width, 24.0))
-	draw_rect(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92))
-	draw_rect(box, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.45), false, 1.0)
-	draw_string(font, box.position + Vector2(6, 10), name, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
-		Defs.COL_TEXT)
-	draw_string(font, box.position + Vector2(6, 20), line, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
-		Defs.COL_CORE)
+## What the tile in front of her is, when she has asked.
+##
+## This used to be a plate that followed her around: face a seam and a rate
+## appeared over it, face a machine and its throughput did. The numbers were the
+## right numbers and the panel was the wrong place for them -- a readout nobody
+## asked for, on screen whenever she happened to be standing near anything, over
+## the tile she is about to build on.
+##
+## The same numbers are still one key away: `C` pins the meter panel to a
+## machine, which is a readout the player opened. This one is gone.
+##
+## `focus_cell` stays, because the cell she is facing is what the placement ghost
+## and the mining ring are drawn from.
 
 func _visible(cell: Vector2i, tile: float) -> bool:
 	return view_rect.grow(tile * 2.0).has_point(Vector2(cell) * tile + Vector2.ONE * tile * 0.5)
@@ -399,17 +374,20 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# outrank the HUD clock in the visual hierarchy.
 	# The core had no shadow, so the one object the whole base points at was the
 	# only thing not standing on the ground.
-	_shadow(c + Vector2(0, 22), 20.0)
+	_shadow(c + Vector2(0, 8), 8.0)
 	# The heat it throws stays procedural -- it has to breathe with `beat` and
 	# brighten when something is delivered, and a still picture does neither.
-	draw_circle(c, 52.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
-	draw_circle(c, 38.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
+	# The light it throws stays wider than the building -- that is what a fire
+	# does -- but it was sized against a 2.7 tile drawing and reached most of
+	# the base on its own.
+	draw_circle(c, 34.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
+	draw_circle(c, 24.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
 	# Fixed size. The beat used to scale the drawing, which was fine when the
 	# drawing was four concentric circles and reads as the building itself
 	# breathing now -- a machine that grows and shrinks looks broken, not alive.
 	# The heat it throws still pulses; the machine does not.
 	_object_art(CORE_ART, c, CORE_DRAW)
-	draw_arc(c, 44.0, 0.0, TAU, 64, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
+	draw_arc(c, 22.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
 
 ## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --
 ## which stand on a fixed ground line -- these hang off the middle of the tile.

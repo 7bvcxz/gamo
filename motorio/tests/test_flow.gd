@@ -33,6 +33,11 @@ func _run() -> void:
 	_press(main, KEY_ESCAPE)
 	_assert(main.state == main.State.PLAY, "Esc 로 컷씬을 건너뛰면 게임이다")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the run starts with a full day")
+	# 처음부터 builds a fresh world, which is the point of it -- so the state this
+	# test set up before pressing it is gone. Everything below is about a running
+	# game with things to build, so it is set up again on this side of the door.
+	main.finish_tutorial()
+	main.debug_unlock_all()
 
 	# Esc opens settings. There is no separate pause screen: settings already
 	# stops the world, so a second stopped screen was one more thing to build and
@@ -175,6 +180,14 @@ func _run() -> void:
 	for _tap in Defs.CUTSCENE_PANELS.size():
 		main.touch_primary()
 	_assert(main.state == main.State.PLAY, "탭으로 끝까지 넘기면 게임이 시작된다")
+	# That tap went through the title menu, and 처음부터 builds a fresh world --
+	# which is the point of it. Everything below is about a running game with
+	# things to build and a fire to stand next to, so it is set up again here.
+	main.finish_tutorial()
+	_open(main.sim)
+	# Including what is in her hand: a fresh run opens on the pickaxe, and the
+	# hold-to-rotate below is a build-gun verb.
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
 	main._process(0.0)
 	_assert(main.hud.hotbar_rects.size() == main.TOOLS.size(), "the HUD publishes a rect per tool slot")
 	main.selected_index = 0

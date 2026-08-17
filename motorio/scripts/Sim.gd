@@ -1207,7 +1207,16 @@ func dispatch_cats() -> void:
 		var lane: float = (float(index) - float(cats.size() - 1) * 0.5) * Defs.CAT_LANE
 		cat.pos = doorstep + Vector2(lane, 0.0)
 		index += 1
-		if cat.has_job() and machines.has(cat.assigned):
+		# `_is_post`, not "is there a machine there". A cat can be put down on
+		# bare ore and will dig it by hand, which is the whole early game before
+		# the first miner exists -- and this asked for a machine, so every one of
+		# those cats lost its job overnight and stood at the door in the morning
+		# waiting to be carried back to the seam it was already working.
+		#
+		# The predicate is the one `place_cat` and the walk use. Three places
+		# deciding separately what counts as a job is how two of them come to
+		# disagree.
+		if cat.has_job() and _is_post(cat.assigned):
 			cat.state = Defs.CAT_TO_MINER
 			continue
 		cat.assigned = Vector2i(9999, 9999)
@@ -2043,7 +2052,9 @@ func wake_cats(doorstep: Vector2) -> void:
 			_deliver(cat.carrying, core_cell)
 			cat.carrying = -1
 		cat.haul_target = Vector2i(9999, 9999)
-		if cat.has_job() and machines.has(cat.assigned):
+		# Same predicate as the morning: a cat that carried a stone home from a
+		# bare seam went back to standing around instead of back to the seam.
+		if cat.has_job() and _is_post(cat.assigned):
 			cat.state = Defs.CAT_TO_MINER
 		else:
 			cat.assigned = Vector2i(9999, 9999)
