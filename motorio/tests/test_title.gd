@@ -65,9 +65,20 @@ func _test_rows() -> void:
 	_assert(main.title_index == saved.size() - 1, "위로 가면 끝으로 감긴다")
 
 	# What each row does.
+	# 이어하기 opens the list rather than picking a slot for the player: there are
+	# thirty-one of them and the game was choosing whichever the autosave timer
+	# happened to have written last.
 	main.title_index = saved.find(main.MENU_CONTINUE)
 	main.title_confirm()
-	_assert(main.state == main.State.PLAY, "이어하기는 하던 게임으로 들어간다")
+	_assert(main.state == main.State.SETTINGS and int(main.hud.slot_picker) == 2,
+		"이어하기는 불러올 슬롯 목록을 연다 (%d)" % int(main.hud.slot_picker))
+	_assert(main.state_before_settings == main.State.TITLE,
+		"그리고 그 목록은 타이틀에서 열린 것으로 기억된다")
+	# Cancelling goes back to the menu it was pressed from, not to a settings
+	# panel the player never opened.
+	main.close_slot_picker()
+	_assert(main.state == main.State.TITLE, "취소하면 메뉴로 돌아온다")
+	_assert(int(main.hud.slot_picker) == 0, "목록도 닫힌다")
 
 	main.state = main.State.TITLE
 	main.title_index = saved.find(main.MENU_SETTINGS)

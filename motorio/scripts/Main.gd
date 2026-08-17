@@ -26,6 +26,10 @@ const RESCUE_SECONDS := 1.6
 @onready var cats_layer: Node2D = $Cats
 @onready var fx: FxLayer = $Fx
 @onready var player: PlayerActor = $Player
+## The panel's row identifiers live on the HUD script, which has no class_name --
+## so it is preloaded here to be read as constants rather than through a node.
+const HudScript := preload("res://scripts/HUD.gd")
+
 @onready var camera: Camera2D = $Player/Camera2D
 @onready var hud: Control = $UI/HUD
 @onready var audio: Node = $Audio
@@ -258,8 +262,13 @@ func title_choice() -> int:
 func title_confirm() -> void:
 	match title_choice():
 		MENU_CONTINUE:
+			# The list, not the last autosave. There are thirty-one slots and the
+			# game was picking one of them for the player -- whichever the timer
+			# happened to have written last.
 			audio.call("play", "confirm")
-			state = State.PLAY
+			state_before_settings = State.TITLE
+			state = State.SETTINGS
+			_open_slot_picker(2)
 		MENU_SETTINGS:
 			open_settings()
 		MENU_QUIT:
@@ -1784,23 +1793,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if state == State.SETTINGS:
-		var rows: int = hud.slider_track_rects.size()
-		if key.keycode == KEY_ESCAPE or key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
+		# One cursor over the whole panel. Half of it used to be on the arrow keys
+		# and half on letters, which meant the half a player looks for while
+		# stopped -- save, load, get me out of here -- could not be found by
+		# walking down the list.
+		var rows: Array[int] = hud.settings_rows()
+		var cursor: int = clampi(int(hud.settings_row), 0, maxi(0, rows.size() - 1))
+		var kind: int = rows[cursor] if not rows.is_empty() else -1
+		var slider: int = hud.settings_slider_of(kind)
+		if key.keycode == KEY_ESCAPE:
 			close_settings()
 		elif key.keycode == KEY_UP or key.keycode == KEY_DOWN:
 			var step: int = -1 if key.keycode == KEY_UP else 1
-			hud.settings_row = posmod(int(hud.settings_row) + step, rows)
+			hud.settings_row = posmod(cursor + step, maxi(1, rows.size()))
 			audio.call("play", "select")
-		elif key.keycode == KEY_LEFT or key.keycode == KEY_MINUS:
-			_nudge_slider(int(hud.settings_row), -Defs.UI_SCALE_STEP)
-		elif key.keycode == KEY_RIGHT or key.keycode == KEY_EQUAL:
-			_nudge_slider(int(hud.settings_row), Defs.UI_SCALE_STEP)
-		elif key.keycode == KEY_N:
-			settings_restart()
-		elif key.keycode == KEY_S:
-			settings_save()
-		elif key.keycode == KEY_L:
-			settings_load()
+		elif slider >= 0 and (key.keycode == KEY_LEFT or key.keycode == KEY_MINUS):
+			_nudge_slider(slider, -Defs.UI_SCALE_STEP)
+		elif slider >= 0 and (key.keycode == KEY_RIGHT or key.keycode == KEY_EQUAL):
+			_nudge_slider(slider, Defs.UI_SCALE_STEP)
+		elif key.keycode == KEY_Z or key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
+			settings_activate(kind)
 		get_viewport().set_input_as_handled()
 		return
 	# The build menu owns the keyboard while it is up. Placed before the state
@@ -2004,19 +2016,19 @@ func touch_hud(position: Vector2) -> bool:
 		if (hud.settings_close_rect as Rect2).has_point(local):
 			close_settings()
 			return true
-		if (hud.settings_load_rect as Rect2).has_point(local):
-			settings_load()
+		# The slider first: its hit area is deliberately taller than its row so a
+		# drag that starts a little above or below the track still turns the
+		# knob, and a tap inside it means "drag me" rather than "confirm me".
+		var slider: int = int(hud.call("slider_at", local))
+		if slider >= 0:
+			hud.call("begin_slider_drag", slider)
+			_apply_slider(slider, local.x)
 			return true
-		if (hud.settings_restart_rect as Rect2).has_point(local):
-			settings_restart()
-			return true
-		if (hud.settings_save_rect as Rect2).has_point(local):
-			settings_save()
-			return true
-		var row: int = int(hud.call("slider_at", local))
+		var row: int = int(hud.call("settings_row_at", local))
 		if row >= 0:
-			hud.call("begin_slider_drag", row)
-			_apply_slider(row, local.x)
+			var rows: Array[int] = hud.settings_rows()
+			hud.settings_row = row
+			settings_activate(rows[row])
 		return true
 	if (hud.settings_button_rect as Rect2).has_point(local):
 		open_settings()
@@ -3005,6 +3017,33 @@ func open_settings() -> void:
 ## Wipes the save and starts a fresh day one. Asked twice on purpose: it is the
 ## only button in the game that can destroy hours of factory, it now sits on the
 ## panel Esc opens rather than behind a menu, and a mis-tap has no undo.
+## What a row does when it is confirmed. The two scales do nothing: they are
+## adjusted with left and right, and Z on one is a keypress that would otherwise
+## have to mean something.
+func settings_activate(kind: int) -> void:
+	match kind:
+		HudScript.ROW_SAVE: settings_save()
+		HudScript.ROW_LOAD: settings_load()
+		HudScript.ROW_TITLE: settings_to_title()
+
+## Out of the run and back to the front door.
+##
+## The panel used to offer 처음부터 instead, which threw the run away from inside
+## the run. The title menu already has that, and it also has 이어하기 -- so the
+## way out is to the place where both of those live rather than to one of them.
+func settings_to_title() -> void:
+	hud.slot_picker = 0
+	hud.restart_armed = 0.0
+	hud.call("end_slider_drag")
+	build_menu_open = false
+	base_menu_open = false
+	map_open = false
+	log_open = false
+	state = State.TITLE
+	state_before_settings = State.TITLE
+	title_index = 0
+	audio.call("play", "confirm")
+
 func settings_restart() -> void:
 	if hud.restart_armed <= 0.0:
 		hud.restart_armed = 4.0
@@ -3037,6 +3076,11 @@ func _open_slot_picker(mode: int) -> void:
 func close_slot_picker() -> void:
 	hud.slot_picker = 0
 	audio.call("play", "select")
+	# Opened from the title there is no settings panel behind it to fall back to
+	# -- 이어하기 goes straight to the list -- so cancelling returns to the menu
+	# the player pressed it from.
+	if state_before_settings == State.TITLE:
+		state = State.TITLE
 
 ## Confirming a slot. Saving writes and stays put so the list visibly updates;
 ## loading drops straight into the restored run, because a menu you have to close

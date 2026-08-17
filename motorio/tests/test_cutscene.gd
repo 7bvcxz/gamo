@@ -140,11 +140,16 @@ func _test_plays_once() -> void:
 	_assert(main.cutscene_panel == 0, "첫 장부터")
 
 	# A player who closed the tab mid-run does not need to be told again that
-	# Earth is gone.
+	# Earth is gone. 이어하기 opens the slot list rather than resuming whatever
+	# the autosave timer wrote last, and loading a slot goes straight into the
+	# run -- either way the opening does not play again.
 	main.resumed = true
 	main.state = main.State.TITLE
+	main.title_index = 0
 	main.title_confirm()
-	_assert(main.state == main.State.PLAY, "이어하기는 컷씬을 건너뛴다")
+	_assert(main.state != main.State.OPENING, "이어하기는 컷씬으로 가지 않는다")
+	_assert(int(main.hud.slot_picker) == 2, "불러올 슬롯 목록이 열린다")
+	main.close_slot_picker()
 	main.resumed = false
 
 # --- Timing -----------------------------------------------------------------

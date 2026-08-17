@@ -37,9 +37,6 @@ var gacha_button_rect := Rect2()
 var gacha_card_rect := Rect2()
 var gacha_pull_rects: Array[Rect2] = []
 var settings_close_rect := Rect2()
-var settings_restart_rect := Rect2()
-var settings_save_rect := Rect2()
-var settings_load_rect := Rect2()
 ## Which slot list is up, if any: 0 none, 1 saving, 2 loading. One list serving
 ## both is deliberate -- the picture of what is in each slot is exactly the thing
 ## you need whether you are about to write over it or read it.
@@ -217,33 +214,89 @@ func gacha_button_at(point: Vector2) -> int:
 ## Two sliders, then a row of two actions, then close. Taller than it was because
 ## Esc opens this panel now: it is the only stopped screen, so everything a
 ## player wants while stopped has to be reachable from it.
-const SETTINGS_CARD_H := 476.0
 const SLOT_CARD_H := 372.0
-const SETTINGS_ROW_H := 92.0
-const SETTINGS_ROW_TOP := 96.0
-const SLIDER_LABELS := ["화면 UI 크기", "게임 화면 크기"]
+const SETTINGS_SLIDER_H := 92.0
+const SETTINGS_ACTION_H := 50.0
+const SETTINGS_ROW_TOP := 88.0
+
+## One ordered list, top to bottom, rather than two sliders in the middle and a
+## row of buttons at the bottom.
+##
+## The panel had the sliders on the arrow keys and the actions on letters, which
+## meant half of it was reachable by walking down it and half of it was not --
+## and the half that was not is the half a player looks for while stopped. Every
+## row is on the same cursor now.
+const ROW_SAVE := 0
+const ROW_LOAD := 1
+const ROW_TITLE := 2
+const ROW_GAME := 3
+const ROW_UI := 4
+const ROW_LABELS := ["저장하기", "불러오기", "메인화면", "게임 화면 크기", "화면 UI 크기"]
+
+## Which rows this panel has. Opened from the title there is no run to save, load
+## into or leave, so the panel is the two scales and nothing else -- a row that
+## is present and refuses teaches the player to skip past the row.
+func settings_rows() -> Array[int]:
+	if main.state_before_settings == main.State.TITLE:
+		return [ROW_GAME, ROW_UI]
+	return [ROW_SAVE, ROW_LOAD, ROW_TITLE, ROW_GAME, ROW_UI]
+
+## The slider a row drives, or -1 for the actions. The two scales keep the
+## indices they have always had -- 0 is the UI, 1 is the game -- because that is
+## what `slider_range`, `slider_current` and the nudge all speak, and reordering
+## the *display* must not renumber the *values*.
+static func settings_slider_of(kind: int) -> int:
+	match kind:
+		ROW_UI: return 0
+		ROW_GAME: return 1
+	return -1
+
+func settings_card_height() -> float:
+	# The reserve at the foot has to clear the hint line *and* the focus ring the
+	# last row draws around itself: at 76 the ring landed on the hint and the two
+	# read as one smudge.
+	var height: float = SETTINGS_ROW_TOP + 96.0
+	for kind: int in settings_rows():
+		height += SETTINGS_SLIDER_H if settings_slider_of(kind) >= 0 else SETTINGS_ACTION_H
+	return height
+
+## Where each row sits. Parallel to `settings_rows()`, so the cursor, the paint
+## and the hit test are all indexing the same list.
+var settings_row_rects: Array[Rect2] = []
 
 func _layout_settings() -> void:
-	var card: Rect2 = _card_rect(SETTINGS_CARD_H)
-	for index in SLIDER_LABELS.size():
-		var top: float = SETTINGS_ROW_TOP + float(index) * SETTINGS_ROW_H
-		var track := Rect2(card.position + Vector2(34.0, top + 46.0), Vector2(card.size.x - 68.0, 8.0))
-		slider_track_rects[index] = track
-		# Half a row of slop above and below, so the two rows tile the card
-		# without overlapping and every pixel between them belongs to someone.
-		slider_hit_rects[index] = Rect2(track.position - Vector2(26.0, 34.0),
-			track.size + Vector2(52.0, 68.0))
-	var gap := 12.0
-	var action_w: float = (card.size.x - 68.0 - gap) * 0.5
-	var action_y: float = card.size.y - 186.0
-	settings_save_rect = Rect2(card.position + Vector2(34.0, action_y), Vector2(action_w, 44.0))
-	settings_load_rect = Rect2(card.position + Vector2(34.0 + action_w + gap, action_y),
-		Vector2(action_w, 44.0))
-	settings_restart_rect = Rect2(card.position + Vector2(34.0, action_y + 56.0),
-		Vector2(card.size.x - 68.0, 44.0))
-	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 62.0),
+	var card: Rect2 = _card_rect(settings_card_height())
+	var rows: Array[int] = settings_rows()
+	settings_row_rects.resize(rows.size())
+	var y: float = SETTINGS_ROW_TOP
+	for index in rows.size():
+		var kind: int = rows[index]
+		var slider: int = settings_slider_of(kind)
+		var height: float = SETTINGS_SLIDER_H if slider >= 0 else SETTINGS_ACTION_H
+		settings_row_rects[index] = Rect2(card.position + Vector2(34.0, y),
+			Vector2(card.size.x - 68.0, height - 8.0))
+		if slider >= 0:
+			var track := Rect2(card.position + Vector2(34.0, y + 52.0),
+				Vector2(card.size.x - 68.0, 8.0))
+			slider_track_rects[slider] = track
+			# Half a row of slop above and below, so a drag that starts a little
+			# off the track still belongs to that row.
+			slider_hit_rects[slider] = Rect2(track.position - Vector2(26.0, 46.0),
+				track.size + Vector2(52.0, 72.0))
+		y += height
+	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 56.0),
 		Vector2(144.0, 42.0))
+	# The old three buttons are gone: saving and loading are rows now, and
+	# 처음부터 lives on the title menu, which is where a player who wants to throw
+	# a run away is already heading.
 	_layout_slots()
+
+## Which row a point is on, or -1.
+func settings_row_at(point: Vector2) -> int:
+	for index in settings_row_rects.size():
+		if (settings_row_rects[index] as Rect2).has_point(point):
+			return index
+	return -1
 
 # --- Save slots ---------------------------------------------------------------
 ## Thirty-one slots do not fit on a card, so the list shows a window onto them and
@@ -302,7 +355,13 @@ func slider_at(point: Vector2) -> int:
 
 func begin_slider_drag(index: int) -> void:
 	dragging_slider = index
-	settings_row = index
+	# The cursor follows the drag, and the cursor counts rows rather than sliders
+	# now -- the two were the same list until the actions joined it.
+	var rows: Array[int] = settings_rows()
+	for row in rows.size():
+		if settings_slider_of(rows[row]) == index:
+			settings_row = row
+			break
 
 func end_slider_drag() -> void:
 	dragging_slider = -1
@@ -1755,39 +1814,21 @@ func _draw_settings_button() -> void:
 
 func _draw_settings_card() -> void:
 	_dim(0.72)
-	var card: Rect2 = _card(SETTINGS_CARD_H)
+	var card: Rect2 = _card(settings_card_height())
 	var w: float = card.size.x
 	_text_in(Rect2(card.position + Vector2(0, 48), Vector2(w, 30)), "설정", 26, Defs.COL_TEXT)
-	for index in SLIDER_LABELS.size():
-		_draw_settings_row(card, index)
-
-	_draw_settings_action(settings_save_rect,
-		"저장했습니다" if saved_flash > 0.0 else "저장하기",
-		Defs.COL_CORE if saved_flash > 0.0 else Defs.COL_TEXT_DIM)
-	_draw_settings_action(settings_load_rect, "불러오기", Defs.COL_MACHINE_EDGE)
-	_draw_settings_action(settings_restart_rect,
-		"정말 처음부터?" if restart_armed > 0.0 else "처음부터",
-		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
+	var rows: Array[int] = settings_rows()
+	for index in rows.size():
+		_draw_settings_row(index, rows[index])
 
 	var touch_pad: bool = main.touch != null and main.touch.visible
-	var hint: String = "한 번 더 누르면 지금까지의 공장이 사라집니다" if restart_armed > 0.0 \
-		else ("슬라이더를 드래그하세요" if touch_pad else "↑ ↓ 로 선택, ← → 로 조절")
-	# Above the buttons, not between them and 닫기: at the bottom it sat exactly on
-	# the edge of 처음부터 and the two read as one smudged line.
-	_text_in(Rect2(card.position + Vector2(0, SETTINGS_CARD_H - 200.0), Vector2(w, 18)), hint, 12,
-		Defs.COL_DANGER if restart_armed > 0.0 else Defs.COL_TEXT_DIM)
+	var hint: String = "슬라이더를 드래그하세요" if touch_pad \
+		else "↑ ↓ 로 선택, ← → 로 조절, Z 로 실행"
+	_text_in(Rect2(card.position + Vector2(0, card.size.y - 74.0), Vector2(w, 18)), hint, 12,
+		Defs.COL_TEXT_DIM)
 	var close: Rect2 = settings_close_rect
 	_panel(close, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18), Defs.COL_CORE)
 	_text_in(Rect2(close.position + Vector2(0, 28), Vector2(close.size.x, 22)), "닫기", 16, Defs.COL_TEXT)
-
-## One of the two action buttons. Outlined rather than filled, so neither of them
-## competes with the close button for being the obvious thing to press.
-func _draw_settings_action(rect: Rect2, label: String, tint: Color) -> void:
-	if rect.size.x <= 0.0:
-		return
-	_panel(rect, Color(tint.r, tint.g, tint.b, 0.12), Color(tint.r, tint.g, tint.b, 0.75))
-	_text_in(Rect2(rect.position + Vector2(0, rect.size.y * 0.5 + 6.0), Vector2(rect.size.x, 20)),
-		label, 15, Defs.COL_TEXT)
 
 ## The slot list, used for both saving and loading. Each row carries its number,
 ## when it was written, how far that run got, and a small drawing of the factory
@@ -1874,23 +1915,39 @@ func _draw_slot_thumbnail(rect: Rect2, cells) -> void:
 		draw_rect(Rect2(at - Vector2(dot, dot) * 0.5, Vector2(dot, dot)),
 			Defs.machine_color(int(row[2])))
 
-func _draw_settings_row(card: Rect2, index: int) -> void:
-	var w: float = card.size.x
-	var top: float = SETTINGS_ROW_TOP + float(index) * SETTINGS_ROW_H
+## One row: an action, or a scale with its track.
+##
+## The focus ring is the same shape on both, because the cursor walks through
+## both and a cursor that changes what it looks like halfway down a list reads
+## as two lists.
+func _draw_settings_row(index: int, kind: int) -> void:
+	var rect: Rect2 = settings_row_rects[index]
 	var focused: bool = settings_row == index and (main.touch == null or not main.touch.visible)
-	_text_in(Rect2(card.position + Vector2(0, top), Vector2(w, 22)),
-		SLIDER_LABELS[index], 14, Defs.COL_TEXT if focused else Defs.COL_TEXT_DIM)
-	_text_in(Rect2(card.position + Vector2(0, top + 30.0), Vector2(w, 26)),
-		"%d%%" % int(round(slider_current(index) * 100.0)), 22, Defs.COL_CORE)
+	if focused:
+		_panel(rect.grow(2.0), Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.10),
+			Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.75))
+	var slider: int = settings_slider_of(kind)
+	var label: String = ROW_LABELS[kind]
+	if kind == ROW_SAVE and saved_flash > 0.0:
+		label = "저장했습니다"
+	if slider < 0:
+		_text_in(Rect2(rect.position + Vector2(0, rect.size.y * 0.5 + 6.0),
+			Vector2(rect.size.x, 22)), label, 16,
+			Defs.COL_CORE if (kind == ROW_SAVE and saved_flash > 0.0) else Defs.COL_TEXT)
+		return
+	_text_in(Rect2(rect.position + Vector2(0, 20.0), Vector2(rect.size.x, 22)),
+		label, 14, Defs.COL_TEXT if focused else Defs.COL_TEXT_DIM)
+	_text_in(Rect2(rect.position + Vector2(0, 46.0), Vector2(rect.size.x, 26)),
+		"%d%%" % int(round(slider_current(slider) * 100.0)), 20, Defs.COL_CORE)
 
-	var range: Vector2 = slider_range(index)
+	var range: Vector2 = slider_range(slider)
 	var span: float = maxf(range.y - range.x, 0.001)
-	var t: float = clampf((slider_current(index) - range.x) / span, 0.0, 1.0)
-	var track: Rect2 = slider_track_rects[index]
+	var t: float = clampf((slider_current(slider) - range.x) / span, 0.0, 1.0)
+	var track: Rect2 = slider_track_rects[slider]
 	draw_rect(track, Color8(28, 36, 54))
 	draw_rect(Rect2(track.position, Vector2(track.size.x * t, track.size.y)), Defs.COL_CORE)
 	var knob := Vector2(track.position.x + track.size.x * t, track.position.y + track.size.y * 0.5)
-	var held: bool = dragging_slider == index
+	var held: bool = dragging_slider == slider
 	draw_circle(knob, 17.0 if held else 15.0, Defs.COL_CORE)
 	draw_circle(knob, 17.0 if held else 15.0, Color(0.02, 0.03, 0.06, 0.45), false, 1.6)
 

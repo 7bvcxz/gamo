@@ -189,6 +189,10 @@ func _run() -> void:
 	main.load_settings()
 	_assert(is_equal_approx(main.ui_scale, 1.35), "the UI scale survives a reload")
 	_assert(is_equal_approx(main.game_scale, 0.85), "the game scale survives a reload")
+	# Last, because it walks out of the run to the title and everything above
+	# it is standing inside that run.
+	_test_rows(main)
+
 	main.clear_save()
 	main.load_settings()
 	_assert(is_equal_approx(main.ui_scale, 1.35), "clearing the run save keeps the UI setting")
@@ -298,6 +302,55 @@ func _row_names(main: Node2D) -> Array[String]:
 	for row: Array in main.hud.resource_rows():
 		names.append(String(row[0]))
 	return names
+
+
+# --- One list, and what is on it --------------------------------------------
+
+func _test_rows(main: Node2D) -> void:
+	var hud: Node = main.hud
+
+	# From the title there is no run to save, load into or leave. A row that is
+	# present and refuses teaches the player to skip past the row.
+	main.state_before_settings = main.State.TITLE
+	var from_title: Array[int] = hud.settings_rows()
+	_assert(from_title == [hud.ROW_GAME, hud.ROW_UI],
+		"메인화면의 설정에는 두 크기만 있다: %s" % str(from_title))
+
+	# In a run, the order the player asked for, top to bottom.
+	main.state_before_settings = main.State.PLAY
+	var in_run: Array[int] = hud.settings_rows()
+	_assert(in_run == [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE, hud.ROW_GAME, hud.ROW_UI],
+		"게임 중에는 저장·불러오기·메인화면·게임 크기·UI 크기 순이다: %s" % str(in_run))
+
+	# Reordering the display must not renumber the values: the two scales keep
+	# the slider indices everything else speaks.
+	_assert(hud.settings_slider_of(hud.ROW_UI) == 0, "UI 크기는 여전히 0번 슬라이더다")
+	_assert(hud.settings_slider_of(hud.ROW_GAME) == 1, "게임 크기는 여전히 1번이다")
+	for kind: int in [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE]:
+		_assert(hud.settings_slider_of(kind) < 0, "행동 줄은 슬라이더가 아니다")
+
+	# Every row is on the same cursor, and every row is where it is drawn.
+	main.open_settings()
+	main._process(0.0)
+	for index in in_run.size():
+		var rect: Rect2 = hud.settings_row_rects[index]
+		_assert(rect.size.x > 100.0 and rect.size.y > 20.0,
+			"%d번째 줄이 그릴 만한 크기다" % index)
+		_assert(int(hud.call("settings_row_at", rect.get_center())) == index,
+			"%d번째 줄을 누르면 그 줄이 잡힌다" % index)
+	var card: Rect2 = hud.call("_card_rect", hud.settings_card_height())
+	for index in in_run.size():
+		_assert(card.encloses((hud.settings_row_rects[index] as Rect2).grow(-1.0)),
+			"%d번째 줄이 카드 안에 있다" % index)
+	_assert(card.position.y >= 0.0 and card.position.y + card.size.y <= hud.size.y,
+		"다섯 줄짜리 카드가 화면 안에 들어간다")
+
+	# And 메인화면 gets out of the run.
+	hud.settings_row = in_run.find(hud.ROW_TITLE)
+	main.settings_activate(hud.ROW_TITLE)
+	_assert(main.state == main.State.TITLE, "메인화면 줄은 타이틀로 나간다")
+	_assert(main.state_before_settings == main.State.TITLE,
+		"그리고 설정이 게임으로 돌아가려 하지 않는다")
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:
