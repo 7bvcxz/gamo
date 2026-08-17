@@ -545,7 +545,7 @@ func _base_menu_key(key: InputEventKey) -> void:
 func _build_menu_key(key: InputEventKey) -> void:
 	var count: int = Defs.BUILDABLE.size()
 	match key.keycode:
-		KEY_ESCAPE, KEY_B:
+		KEY_ESCAPE, KEY_X, KEY_B:
 			build_menu_open = false
 			audio.call("play", "select")
 		KEY_UP, KEY_LEFT, KEY_W, KEY_A:
@@ -626,7 +626,7 @@ func set_map_zoom(value: float) -> void:
 
 func _map_key(key: InputEventKey) -> void:
 	match key.keycode:
-		KEY_ESCAPE, KEY_M:
+		KEY_ESCAPE, KEY_X, KEY_M:
 			map_open = false
 			audio.call("play", "select")
 		KEY_LEFT, KEY_A, KEY_MINUS:
@@ -762,7 +762,7 @@ func _update_gacha(delta: float) -> void:
 func _gacha_key(key: InputEventKey) -> void:
 	var count: int = Defs.GACHA_COUNTS.size()
 	match key.keycode:
-		KEY_ESCAPE, KEY_G:
+		KEY_ESCAPE, KEY_X, KEY_G:
 			close_gacha()
 		KEY_LEFT, KEY_A, KEY_UP, KEY_W:
 			gacha_index = posmod(gacha_index - 1, count)
@@ -1780,7 +1780,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if state == State.SETTINGS and int(hud.slot_picker) > 0:
 		# The slot list owns the panel while it is up.
 		match key.keycode:
-			KEY_ESCAPE:
+			KEY_ESCAPE, KEY_X:
 				close_slot_picker()
 			KEY_UP, KEY_W:
 				hud.slot_index = posmod(int(hud.slot_index) - 1, SAVE_SLOTS)
@@ -1801,7 +1801,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var cursor: int = clampi(int(hud.settings_row), 0, maxi(0, rows.size() - 1))
 		var kind: int = rows[cursor] if not rows.is_empty() else -1
 		var slider: int = hud.settings_slider_of(kind)
-		if key.keycode == KEY_ESCAPE:
+		if key.keycode == KEY_ESCAPE or key.keycode == KEY_X:
 			close_settings()
 		elif key.keycode == KEY_UP or key.keycode == KEY_DOWN:
 			var step: int = -1 if key.keycode == KEY_UP else 1
@@ -2013,9 +2013,6 @@ func touch_hud(position: Vector2) -> bool:
 	if state == State.SETTINGS:
 		# While the panel is up it owns every touch, so a stray tap cannot fall
 		# through onto the world behind it.
-		if (hud.settings_close_rect as Rect2).has_point(local):
-			close_settings()
-			return true
 		# The slider first: its hit area is deliberately taller than its row so a
 		# drag that starts a little above or below the track still turns the
 		# knob, and a tap inside it means "drag me" rather than "confirm me".
@@ -3025,6 +3022,7 @@ func settings_activate(kind: int) -> void:
 		HudScript.ROW_SAVE: settings_save()
 		HudScript.ROW_LOAD: settings_load()
 		HudScript.ROW_TITLE: settings_to_title()
+		HudScript.ROW_CLOSE: close_settings()
 
 ## Out of the run and back to the front door.
 ##

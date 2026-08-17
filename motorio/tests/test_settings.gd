@@ -313,23 +313,33 @@ func _test_rows(main: Node2D) -> void:
 	# present and refuses teaches the player to skip past the row.
 	main.state_before_settings = main.State.TITLE
 	var from_title: Array[int] = hud.settings_rows()
-	_assert(from_title == [hud.ROW_GAME, hud.ROW_UI],
-		"메인화면의 설정에는 두 크기만 있다: %s" % str(from_title))
+	_assert(from_title == [hud.ROW_GAME, hud.ROW_UI, hud.ROW_CLOSE],
+		"메인화면의 설정에는 두 크기와 닫기만 있다: %s" % str(from_title))
 
 	# In a run, the order the player asked for, top to bottom.
 	main.state_before_settings = main.State.PLAY
 	var in_run: Array[int] = hud.settings_rows()
-	_assert(in_run == [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE, hud.ROW_GAME, hud.ROW_UI],
-		"게임 중에는 저장·불러오기·메인화면·게임 크기·UI 크기 순이다: %s" % str(in_run))
+	_assert(in_run == [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE, hud.ROW_GAME,
+			hud.ROW_UI, hud.ROW_CLOSE],
+		"게임 중에는 저장·불러오기·메인화면·게임 크기·UI 크기·닫기 순이다: %s" % str(in_run))
+	# The way out is on the cursor. It was the one button on the panel the arrow
+	# keys could not reach, which on a pad with no Escape meant the way out was a
+	# tap and only a tap.
+	_assert(in_run[in_run.size() - 1] == hud.ROW_CLOSE, "닫기가 마지막 줄이다")
 
 	# Reordering the display must not renumber the values: the two scales keep
 	# the slider indices everything else speaks.
 	_assert(hud.settings_slider_of(hud.ROW_UI) == 0, "UI 크기는 여전히 0번 슬라이더다")
 	_assert(hud.settings_slider_of(hud.ROW_GAME) == 1, "게임 크기는 여전히 1번이다")
-	for kind: int in [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE]:
+	for kind: int in [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE, hud.ROW_CLOSE]:
 		_assert(hud.settings_slider_of(kind) < 0, "행동 줄은 슬라이더가 아니다")
 
 	# Every row is on the same cursor, and every row is where it is drawn.
+	#
+	# `open_settings` remembers the screen it was opened over, so the state has to
+	# be the run before it is called -- otherwise the panel lays itself out as the
+	# title's two rows while this reads the run's six.
+	main.state = main.State.PLAY
 	main.open_settings()
 	main._process(0.0)
 	for index in in_run.size():
@@ -340,10 +350,25 @@ func _test_rows(main: Node2D) -> void:
 			"%d번째 줄을 누르면 그 줄이 잡힌다" % index)
 	var card: Rect2 = hud.call("_card_rect", hud.settings_card_height())
 	for index in in_run.size():
-		_assert(card.encloses((hud.settings_row_rects[index] as Rect2).grow(-1.0)),
-			"%d번째 줄이 카드 안에 있다" % index)
+		var row: Rect2 = hud.settings_row_rects[index]
+		_assert(card.encloses(row.grow(-1.0)),
+			"%d번째 줄이 카드 안에 있다 (줄 %.0f..%.0f, 카드 %.0f..%.0f)"
+				% [index, row.position.y, row.position.y + row.size.y,
+					card.position.y, card.position.y + card.size.y])
 	_assert(card.position.y >= 0.0 and card.position.y + card.size.y <= hud.size.y,
 		"다섯 줄짜리 카드가 화면 안에 들어간다")
+
+	# The close button and the last row are the same rectangle, so what the cursor
+	# lands on and what a finger taps cannot drift apart.
+	var close_row: int = in_run.find(hud.ROW_CLOSE)
+	_assert((hud.settings_close_rect as Rect2).get_center()
+		.distance_to((hud.settings_row_rects[close_row] as Rect2).get_center()) < 0.01,
+		"닫기 버튼과 마지막 줄이 같은 사각형이다")
+	hud.settings_row = close_row
+	main.settings_activate(hud.ROW_CLOSE)
+	_assert(main.state != main.State.SETTINGS, "닫기 줄에서 Z 를 누르면 닫힌다")
+	main.open_settings()
+	main._process(0.0)
 
 	# And 메인화면 gets out of the run.
 	hud.settings_row = in_run.find(hud.ROW_TITLE)

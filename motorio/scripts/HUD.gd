@@ -231,15 +231,19 @@ const ROW_LOAD := 1
 const ROW_TITLE := 2
 const ROW_GAME := 3
 const ROW_UI := 4
-const ROW_LABELS := ["저장하기", "불러오기", "메인화면", "게임 화면 크기", "화면 UI 크기"]
+## Closing is a row too. It was the one button on the panel the cursor could not
+## reach, which on a pad with no Escape key meant the way out was a tap and only
+## a tap.
+const ROW_CLOSE := 5
+const ROW_LABELS := ["저장하기", "불러오기", "메인화면", "게임 화면 크기", "화면 UI 크기", "닫기"]
 
 ## Which rows this panel has. Opened from the title there is no run to save, load
 ## into or leave, so the panel is the two scales and nothing else -- a row that
 ## is present and refuses teaches the player to skip past the row.
 func settings_rows() -> Array[int]:
 	if main.state_before_settings == main.State.TITLE:
-		return [ROW_GAME, ROW_UI]
-	return [ROW_SAVE, ROW_LOAD, ROW_TITLE, ROW_GAME, ROW_UI]
+		return [ROW_GAME, ROW_UI, ROW_CLOSE]
+	return [ROW_SAVE, ROW_LOAD, ROW_TITLE, ROW_GAME, ROW_UI, ROW_CLOSE]
 
 ## The slider a row drives, or -1 for the actions. The two scales keep the
 ## indices they have always had -- 0 is the UI, 1 is the game -- because that is
@@ -255,7 +259,8 @@ func settings_card_height() -> float:
 	# The reserve at the foot has to clear the hint line *and* the focus ring the
 	# last row draws around itself: at 76 the ring landed on the hint and the two
 	# read as one smudge.
-	var height: float = SETTINGS_ROW_TOP + 96.0
+	# The reserve at the foot is for the hint line under the last row.
+	var height: float = SETTINGS_ROW_TOP + 46.0
 	for kind: int in settings_rows():
 		height += SETTINGS_SLIDER_H if settings_slider_of(kind) >= 0 else SETTINGS_ACTION_H
 	return height
@@ -284,8 +289,11 @@ func _layout_settings() -> void:
 			slider_hit_rects[slider] = Rect2(track.position - Vector2(26.0, 46.0),
 				track.size + Vector2(52.0, 72.0))
 		y += height
-	settings_close_rect = Rect2(card.position + Vector2(card.size.x * 0.5 - 72.0, card.size.y - 56.0),
-		Vector2(144.0, 42.0))
+	# The close button is the last row's rectangle rather than a separate one, so
+	# the thing the cursor lands on and the thing a finger taps are the same
+	# rectangle and cannot drift apart.
+	var last: int = rows.size() - 1
+	settings_close_rect = settings_row_rects[last] if last >= 0 else Rect2()
 	# The old three buttons are gone: saving and loading are rows now, and
 	# 처음부터 lives on the title menu, which is where a player who wants to throw
 	# a run away is already heading.
@@ -1125,7 +1133,7 @@ func _draw_build_menu() -> void:
 		return
 	_dim(0.45)
 	var card: Rect2 = build_menu_rect()
-	_frame(card, Defs.COL_CORE, "건설 목록   ↑↓ 선택 · Z 장전 · B 닫기")
+	_frame(card, Defs.COL_CORE, "건설 목록   ↑↓ 선택 · Z 장전 · X 닫기")
 	for index in Defs.BUILDABLE.size():
 		_draw_build_row(index)
 
@@ -1583,6 +1591,9 @@ func _draw_meter_card() -> void:
 	Icons.draw_machine(self, chip, machine.type)
 	_text(origin + Vector2(FRAME_PAD + 26.0, FRAME_HEADER + 19.0),
 		Defs.MACHINE_NAMES[machine.type], 15, Defs.COL_TEXT)
+	# C, not X. The meter is the one panel the world keeps running behind, so X
+	# there is still 회수 -- and a label naming it would be inviting the player to
+	# demolish the machine they are reading.
 	_text_in(Rect2(origin + Vector2(box.size.x - 74, 16), Vector2(62, 14)), "C 닫기", 11,
 		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 	var status: String = sim.meter_status(machine)
@@ -1677,7 +1688,7 @@ func _draw_gacha_card() -> void:
 	_dim(0.45)
 	var card: Rect2 = gacha_card_rect
 	var accent: Color = Defs.RARITY_COLORS[Defs.RARITY_SSR]
-	_frame(card, accent, "가챠 슬롯머신   ← → 선택 · Z 돌리기 · G 닫기")
+	_frame(card, accent, "가챠 슬롯머신   ← → 선택 · Z 돌리기 · X 닫기")
 	# The purse, top right, because every button below is priced in it.
 	_coin(card.position + Vector2(card.size.x - 62.0, FRAME_HEADER + 24.0), 9.0)
 	_text(card.position + Vector2(card.size.x - 46.0, FRAME_HEADER + 30.0),
@@ -1823,12 +1834,9 @@ func _draw_settings_card() -> void:
 
 	var touch_pad: bool = main.touch != null and main.touch.visible
 	var hint: String = "슬라이더를 드래그하세요" if touch_pad \
-		else "↑ ↓ 로 선택, ← → 로 조절, Z 로 실행"
-	_text_in(Rect2(card.position + Vector2(0, card.size.y - 74.0), Vector2(w, 18)), hint, 12,
+		else "↑ ↓ 로 선택, ← → 로 조절, Z 로 실행, Esc 또는 X 로 닫기"
+	_text_in(Rect2(card.position + Vector2(0, card.size.y - 20.0), Vector2(w, 18)), hint, 12,
 		Defs.COL_TEXT_DIM)
-	var close: Rect2 = settings_close_rect
-	_panel(close, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18), Defs.COL_CORE)
-	_text_in(Rect2(close.position + Vector2(0, 28), Vector2(close.size.x, 22)), "닫기", 16, Defs.COL_TEXT)
 
 ## The slot list, used for both saving and loading. Each row carries its number,
 ## when it was written, how far that run got, and a small drawing of the factory
@@ -1845,7 +1853,7 @@ func _draw_slot_picker() -> void:
 			_draw_slot_row(row, index, cards[index])
 	_draw_slot_scrollbar(card)
 	_text_in(Rect2(card.position + Vector2(0, card.size.y - 16.0), Vector2(card.size.x, 16)),
-		"↑ ↓ 선택 · Z 확인 · Esc 취소     %d / %d" % [slot_index, main.SAVE_SLOTS - 1], 11,
+		"↑ ↓ 선택 · Z 확인 · Esc 또는 X 취소     %d / %d" % [slot_index, main.SAVE_SLOTS - 1], 11,
 		Defs.COL_TEXT_DIM)
 
 ## Where in the list the window is. With thirty-one slots a player needs to know
@@ -1931,6 +1939,11 @@ func _draw_settings_row(index: int, kind: int) -> void:
 	if kind == ROW_SAVE and saved_flash > 0.0:
 		label = "저장했습니다"
 	if slider < 0:
+		# The way out is filled rather than outlined: it is the one row that is
+		# always the right answer to "I am done here".
+		if kind == ROW_CLOSE:
+			_panel(rect, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.18),
+				Defs.COL_CORE)
 		_text_in(Rect2(rect.position + Vector2(0, rect.size.y * 0.5 + 6.0),
 			Vector2(rect.size.x, 22)), label, 16,
 			Defs.COL_CORE if (kind == ROW_SAVE and saved_flash > 0.0) else Defs.COL_TEXT)
@@ -2130,7 +2143,7 @@ func _draw_map_card() -> void:
 	draw_circle(Vector2(track.position.x + track.size.x * fraction,
 		track.position.y + track.size.y * 0.5), 8.0, Defs.COL_CORE)
 	_text_in(Rect2(track.position + Vector2(0.0, 22.0), Vector2(track.size.x, 16.0)),
-		"확대 %d%%   ←/→   Esc 닫기" % int(round(float(main.get("map_zoom")) * 100.0)),
+		"확대 %d%%   ←/→   X 닫기" % int(round(float(main.get("map_zoom")) * 100.0)),
 		12, Defs.COL_TEXT_DIM)
 
 ## Is this point on the zoom track? Generous vertically, because the track is
