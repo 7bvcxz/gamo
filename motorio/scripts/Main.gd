@@ -1915,6 +1915,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_spill()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_F9:
+		debug_pad()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("debug_scenario"):
 		debug_scenario()
 		get_viewport().set_input_as_handled()
@@ -1979,8 +1983,16 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## True on any screen where the only sensible action is "continue", so a tap
 ## anywhere is accepted instead of demanding a precise button press.
+## Screens where the whole display is the button.
+##
+## The opening belongs here and was missing from it. `touch_primary` has always
+## known what to do with a tap during the cutscene -- advance a panel -- but
+## nothing on a phone ever called it, because this is the test that decides
+## whether a tap becomes one. So the caption said 화면을 눌러 넘기기 and tapping
+## the screen did nothing; the panels advanced on their own timer and the player
+## sat through all seven with no way to hurry them.
 func touch_anywhere_starts() -> bool:
-	return state == State.TITLE or state == State.RESULT
+	return state == State.TITLE or state == State.RESULT or state == State.OPENING
 
 ## Touch handling for the on-screen HUD: picking a machine and rotating it are
 ## keyboard-only otherwise, which left the game unplayable on a phone.
@@ -2054,6 +2066,19 @@ func touch_hud(position: Vector2) -> bool:
 		if not (hud.log_card_rect as Rect2).has_point(local):
 			log_open = false
 			audio.call("play", "select")
+		return true
+	if base_menu_open:
+		# The same contract every other window here has, and the one this window
+		# did not: a tap picks a row or closes it, and nothing falls through.
+		# Without it the fire's window opened on a phone and then could not be
+		# used -- the cursor is the arrow keys and there are none, so every tap
+		# went past it to the tool row and the pad, and the pad re-opened it.
+		var base_row: int = int(hud.call("base_menu_row_at", local))
+		if base_row >= 0:
+			menu_index = base_row
+			_base_menu_confirm()
+		elif not (hud.call("base_menu_rect") as Rect2).has_point(local):
+			close_base_menu()
 		return true
 	if build_menu_open:
 		# The menu owns the screen while it is up: a tap picks a row or closes it,
@@ -2543,6 +2568,26 @@ func debug_scenario() -> void:
 		sim.place_cat(cell)
 	_notify("디버그 시나리오 · 채굴기 2대 · 고양이 배치", Defs.COL_DANGER)
 	audio.call("play", "confirm")
+
+## Shows the touch pad on a machine that says it has no touchscreen.
+##
+## The pad appears when `DisplayServer.is_touchscreen_available()` says so, which
+## is the right rule for players and a wall for testing: a desktop browser with
+## touch emulation turned on still answers no, so every automated pass over the
+## phone controls was running against a screen that had none of them. The choice
+## was to test the pad through a key or not to test it, and an untested pad is
+## how "the base does nothing on mobile" survived to a player.
+##
+## Only the visibility. Everything downstream -- the buttons, the joystick, the
+## default UI scale -- already reads `touch.visible` rather than asking the
+## display again, so this is the same pad a phone gets.
+func debug_pad() -> void:
+	if touch == null:
+		return
+	touch.call("set_controls_visible", not touch.visible)
+	load_settings()
+	_notify("디버그 터치 패드 %s" % ("켬" if touch.visible else "끔"), Defs.COL_DANGER)
+	audio.call("play", "select")
 
 ## A belt that ends in the open, and a boulder to break, both within a step.
 ##

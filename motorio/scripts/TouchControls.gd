@@ -73,7 +73,13 @@ func _ready() -> void:
 func _is_touch_device() -> bool:
 	return DisplayServer.is_touchscreen_available() or OS.has_feature("mobile")
 
+## Set when the pad was turned on by hand rather than by the display saying it
+## has a touchscreen. A mouse then means "someone is testing", not "this player
+## has a mouse, put the pad away".
+var forced := false
+
 func set_controls_visible(value: bool) -> void:
+	forced = value and not _is_touch_device()
 	visible = value
 	if not value:
 		_reset_inputs()
@@ -142,7 +148,7 @@ func _input(event: InputEvent) -> void:
 	# keeps the browser's synthetic post-tap mouse event from doing this.
 	if event is InputEventKey and visible:
 		set_controls_visible(false)
-	elif event is InputEventMouseButton and visible:
+	elif event is InputEventMouseButton and visible and not forced:
 		if Time.get_ticks_msec() - last_touch_msec > SYNTHETIC_MOUSE_GUARD_MSEC:
 			set_controls_visible(false)
 

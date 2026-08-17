@@ -126,6 +126,21 @@ func status_top() -> float:
 func status_rect() -> Rect2:
 	return Rect2(MARGIN, status_top(), minf(PANEL_W, size.x - MARGIN * 2.0), 108)
 
+## The bottom of everything stacked in the top-left corner.
+##
+## The cards on the right dodge the *clock* when the screen is too narrow to hold
+## both across the top, which was right when the clock was the only thing there.
+## The resource panel hangs below it and kept growing -- a row per material -- so
+## on a phone the objective card dropped exactly onto it. Asked as one question
+## so a third panel added under these two cannot be forgotten by three callers.
+func left_column_bottom() -> float:
+	var panel: Rect2 = status_rect()
+	var bottom: float = panel.position.y + panel.size.y
+	if not resource_rows().is_empty():
+		var box: Rect2 = resource_rect()
+		bottom = maxf(bottom, box.position.y + box.size.y)
+	return bottom
+
 ## Screen space the touch pad occupies along the bottom, in HUD-local units. The
 ## pad is laid out in viewport pixels and the HUD in scaled ones, so the two only
 ## agree once this crosses the scale -- and if they disagree the hotbar ends up
@@ -697,7 +712,7 @@ func info_rect(text: String) -> Rect2:
 	var box := Rect2(size.x - width - MARGIN, MARGIN, width, INFO_H)
 	var panel: Rect2 = status_rect()
 	if box.position.x < panel.position.x + panel.size.x + 8.0:
-		box.position.y = panel.position.y + panel.size.y + 8.0
+		box.position.y = left_column_bottom() + 8.0
 	return box
 
 func objective_rect(text: String) -> Rect2:
@@ -709,7 +724,7 @@ func objective_rect(text: String) -> Rect2:
 	# so the objective drops underneath the panel instead of across it.
 	var panel: Rect2 = status_rect()
 	if box.position.x < panel.position.x + panel.size.x + 8.0:
-		box.position.y = panel.position.y + panel.size.y + 8.0
+		box.position.y = left_column_bottom() + 8.0
 	# And under the state card whenever the world has something to say, which is
 	# what "above the goal" means: the thing that is true right now sits over the
 	# thing being worked towards, and neither evicts the other.
@@ -760,7 +775,7 @@ func mission_card_rect() -> Rect2:
 	var box := Rect2(size.x - width - MARGIN, MARGIN, width, maxf(height, 44.0))
 	var panel: Rect2 = status_rect()
 	if box.position.x < panel.position.x + panel.size.x + 8.0:
-		box.position.y = panel.position.y + panel.size.y + 8.0
+		box.position.y = left_column_bottom() + 8.0
 	var state: String = main.info()
 	if state != "":
 		var above: Rect2 = info_rect(state)
@@ -1030,6 +1045,18 @@ func base_menu_rect() -> Rect2:
 	var height: float = FRAME_HEADER + 60.0 + rows * MENU_ROW + 18.0
 	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
 	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
+
+## Which row of the fire's window a point is on, or -1.
+##
+## The window had no hit test at all, because it was reachable only by keyboard
+## -- and on a phone that meant it opened and then could not be used: no cursor
+## to move, no key to confirm, and every tap falling through to the tool row
+## underneath. Which reads, from the outside, as the base doing nothing.
+func base_menu_row_at(point: Vector2) -> int:
+	for index in main.base_rows().size():
+		if base_menu_row_rect(index).has_point(point):
+			return index
+	return -1
 
 func base_menu_row_rect(index: int) -> Rect2:
 	var card: Rect2 = base_menu_rect()
