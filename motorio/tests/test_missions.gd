@@ -1,0 +1,139 @@
+extends SceneTree
+
+## Three tracks, and nothing on any of them until its moment.
+##
+## One ladder was wrong for this game. Everything the player works towards went
+## through a single objective card, so the fire's next step, the animal in the
+## ice and the first belt took turns evicting each other -- and whichever one
+## happened to be showing was the only one that existed.
+##
+## A list of every rung at once would be a checklist. What is asserted here is
+## the other half: that each rung is absent before its moment, present at it, and
+## gone after -- and that the fire's own count is not on the card at all, because
+## it is drawn over the fire.
+
+var failures := 0
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	await _test_tracks()
+	if failures == 0:
+		print("MISSIONS: PASS")
+	else:
+		print("MISSIONS: FAIL (%d)" % failures)
+	quit(failures)
+
+func _assert(condition: bool, label: String) -> void:
+	if condition:
+		print("  ok   %s" % label)
+	else:
+		failures += 1
+		print("  FAIL %s" % label)
+
+func _open_ids(main: Node2D) -> Array[String]:
+	var out: Array[String] = []
+	for row: Dictionary in main.open_missions():
+		out.append(String(row["id"]))
+	return out
+
+func _test_tracks() -> void:
+	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	await process_frame
+	main.clear_save()
+	main._start_run()
+	main.state = main.State.PLAY
+	var sim: Sim = main.sim
+
+	# --- The table -------------------------------------------------------------
+	_assert(Defs.TRACK_NAMES.size() == 3, "계열이 셋이다")
+	for track in 3:
+		_assert(not Defs.missions_in(track).is_empty(),
+			"%s 계열에 임무가 있다" % Defs.TRACK_NAMES[track])
+	var ids := {}
+	for row: Dictionary in Defs.MISSIONS:
+		_assert(not ids.has(String(row["id"])), "임무 id가 겹치지 않는다: %s" % String(row["id"]))
+		ids[String(row["id"])] = true
+		_assert(not String(row["line"]).is_empty(), "%s 에 문구가 있다" % String(row["id"]))
+		_assert(not String(row["why"]).is_empty(), "%s 에 이유가 적혀 있다" % String(row["id"]))
+		# No numbers in the lines. The card is deliberately unhelpful -- the
+		# counts live on the things they are about.
+		for digit: String in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+			_assert(not String(row["line"]).contains(digit),
+				"%s 문구에 숫자가 없다: %s" % [String(row["id"]), String(row["line"])])
+
+	# --- Nothing at the crash --------------------------------------------------
+	main._update_missions()
+	_assert(_open_ids(main).is_empty(),
+		"불시착 직후에는 아무 임무도 없다: %s" % str(_open_ids(main)))
+
+	# --- The fire ---------------------------------------------------------------
+	main.finish_tutorial()
+	main._update_missions()
+	_assert(_open_ids(main).has("BASE2"), "거처가 서면 기지 임무가 열린다")
+	_assert(not _open_ids(main).has("BASE3"), "다음 단계는 아직 아니다")
+	# The world puts a frozen cat just past the opening circle, so raising the
+	# radius would find one on the same frame and 생물 탐색 would open and close
+	# together. Cleared first, so "has not seen one yet" is a real state here.
+	sim.frozen_cats.clear()
+	sim.total_heat = int(Defs.BASE_LEVELS[1]["heat"])
+	sim._refresh_radius()
+	main._update_missions()
+	_assert(not _open_ids(main).has("BASE2"), "올리면 그 줄은 닫힌다")
+	_assert(_open_ids(main).has("BASE3"), "그리고 다음 줄이 열린다")
+
+	# --- The animals ------------------------------------------------------------
+	_assert(_open_ids(main).has("CAT_LOOK"),
+		"온기가 9칸이 되는 순간 생물 탐색이 열린다 — 그때 처음으로 얼음이 불빛 안에 들어온다")
+	_assert(not _open_ids(main).has("CAT_THAW"), "아직 살릴 것은 못 봤다")
+	sim.frozen_cats[sim.core_cell + Vector2i(0, 4)] = 0.0
+	main._update_missions()
+	_assert(main.frozen_seen, "반경 안의 얼음을 봤다")
+	_assert(not _open_ids(main).has("CAT_LOOK"), "보면 탐색이 끝난다")
+	_assert(_open_ids(main).has("CAT_THAW"), "그리고 살리는 줄이 열린다")
+	# Seeing does not become false again: the cat it referred to may be carried
+	# away, and "you have seen one" is not a thing that unhappens.
+	sim.frozen_cats.clear()
+	main._update_missions()
+	_assert(main.frozen_seen, "들고 가 버려도 본 것은 본 것이다")
+
+	sim.grant_cats(1)
+	main._update_missions()
+	_assert(not _open_ids(main).has("CAT_THAW"), "고양이가 깨어나면 닫힌다")
+	_assert(_open_ids(main).has("CAT_WORK"), "일 나누기가 열린다")
+	_assert(not _open_ids(main).has("CAT_FEED"), "배고프기 전에는 밥 이야기가 없다")
+	sim.cats[0].hunger = 0.2
+	main._update_missions()
+	_assert(_open_ids(main).has("CAT_FEED"),
+		"실제로 배가 고파지면 그때 열린다 — 나흘 걸린다")
+
+	# --- The factory ------------------------------------------------------------
+	sim.stock[Defs.ITEM_HEATSTONE] = 50
+	main._update_missions()
+	_assert(_open_ids(main).has("AUTO_MINER"),
+		"채굴기를 지을 수 있게 된 순간에 자동화가 열린다")
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	main._update_missions()
+	_assert(_open_ids(main).has("AUTO_BELT"), "구리를 보면 벨트 줄이 열린다")
+
+	# --- And the card ----------------------------------------------------------
+	# The fire's count is not on it. It is drawn over the fire, where a player
+	# deciding whether to walk out for one more stone is already looking.
+	for row: Dictionary in main.open_missions():
+		_assert(not String(row["line"]).contains("업그레이드"),
+			"카드가 기지 업그레이드를 말하지 않는다: %s" % String(row["line"]))
+	_assert(main.objective().is_empty(),
+		"오프닝이 끝나면 한 줄짜리 목표는 비어 있다: '%s'" % main.objective())
+	var progress: Array[int] = main.upgrade_progress()
+	_assert(progress.size() == 2, "대신 기지 위에 셀 숫자가 있다: %s" % str(progress))
+	_assert(progress[1] > 0, "필요량이 0이 아니다")
+	# And nothing at the top of the ladder, where there is nowhere left to count.
+	sim.total_heat = int(Defs.BASE_LEVELS[-1]["heat"])
+	sim._refresh_radius()
+	_assert(main.upgrade_progress().is_empty(), "마지막 단계에서는 세지 않는다")
+
+	main.clear_save()
+	main.free()

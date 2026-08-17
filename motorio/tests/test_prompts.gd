@@ -92,11 +92,17 @@ func _test_the_kit() -> void:
 	_assert(main.active_prompt() == "KIT", "상자 옆에 서면 Z 조사")
 	_assert(bool(Defs.key_prompt("KIT").get("hold", false)),
 		"그리고 누르고 있어야 한다고 말한다")
+	# The case tips onto the snow now, so the prompt only becomes 내려놓기 once she
+	# has actually walked over and picked the kit up.
 	main.sim.search_kit()
-	_assert(main.active_prompt() == "PLACE", "꺼내 들면 내려놓기로 바뀐다")
+	for cell: Vector2i in main.sim.drops.keys():
+		main.sim.collect_drop(cell)
+	_assert(main.active_prompt() == "PLACE", "주워 들면 내려놓기로 바뀐다")
 	main.sim.place_base(main.sim.core_cell)
 	main.sim.carried_kit = Defs.KIT_NONE
 	main.sim.search_kit()
+	for cell: Vector2i in main.sim.drops.keys():
+		main.sim.collect_drop(cell)
 	main.sim.place_shelter(main.sim.core_cell + Vector2i(-4, 0))
 	main.player.position = main.sim.cell_centre(main.sim.kit_cell)
 	_assert(main.active_prompt() != "KIT", "상자를 다 뒤지면 다시 말하지 않는다")
@@ -138,6 +144,8 @@ func _test_one_at_a_time() -> void:
 	# walked. The table's order decides, and exactly one comes out.
 	main.player.position = main.sim.cell_centre(main.sim.kit_cell)
 	main.sim.search_kit()
+	for cell: Vector2i in main.sim.drops.keys():
+		main.sim.collect_drop(cell)
 	var shown: String = main.active_prompt()
 	_assert(shown == "PLACE", "여러 개가 해당돼도 표의 순서가 정한다 (%s)" % shown)
 	var wanted := 0

@@ -149,6 +149,18 @@
       981,
       996
      ]
+    },
+    {
+     "id": "core_gen3",
+     "number": 3,
+     "sizes": {
+      "128": "/object-candidates/core_gen3-128-609346b46428.png",
+      "64": "/object-candidates/core_gen3-64-9ac99d44506e.png"
+     },
+     "source": [
+      818,
+      886
+     ]
     }
    ]
   },
@@ -634,12 +646,12 @@
   {
    "role": "core",
    "name": "기지 코어",
-   "from": "core_gen2",
+   "from": "core_gen3",
    "draw": 32,
    "stored": 64,
    "sizes": {
-    "128": "/object-candidates/shipped-core-128-cb81afba7bdf.png",
-    "32": "/object-candidates/shipped-core-32-d483ab4132c7.png"
+    "128": "/object-candidates/shipped-core-128-1684d65901fc.png",
+    "32": "/object-candidates/shipped-core-32-2ed6e2ac231a.png"
    }
   },
   {

@@ -305,6 +305,9 @@ func _end_cutscene() -> void:
 func _start_run() -> void:
 	run_seed = randi()
 	sim.setup(run_seed)
+	missions_open.clear()
+	missions_done.clear()
+	frozen_seen = false
 	day_number = 1
 	day_start_heat = 0
 	time_left = Defs.DAY_SECONDS
@@ -370,11 +373,11 @@ func objective_data() -> Dictionary:
 			return _goal(Defs.mission_line("M1"), "thing", Icons.THING_KIT)
 		Mission.SURVIVE:
 			return _goal(Defs.mission_line("M2"), "thing", Icons.THING_KIT)
-	# And from here the card stops giving instructions. What it shows instead is
-	# the next step of the fire and what it costs, which is the one thing the
-	# whole game is measured in -- and how to get there is left to the player,
-	# which is the point.
-	return _goal(_upgrade_line(), "thing", Icons.THING_CORE)
+	# And from here the card stops being one line. What the player is working
+	# towards is three things at once -- the fire, the animals, the factory -- and
+	# a single line meant they took turns evicting each other. The card shows the
+	# open rungs of all three, and the fire's own count moved onto the fire.
+	return _goal("", "thing", Icons.THING_CORE)
 
 ## What is true right now and is not an errand. Empty when nothing is.
 ##
@@ -468,11 +471,13 @@ const TOOL_NAMES := ["곡괭이", "건물건설총", Defs.TORCH_NAME]
 func tool_unlocked(tool: int) -> bool:
 	match tool:
 		TOOL_PICKAXE:
-			# Out of the kit, with the shelter -- or simply because the opening
-			# is behind her, which is what a loaded save or a debug world is.
-			return sim.kit_searched >= 2 or mission == Mission.DONE
+			# Picked up, not granted. The slot used to open on the lid being
+			# lifted, so a tool she had not touched was already in her hand --
+			# and the first thing the game ever gave the player arrived as a word
+			# in the corner rather than as an object on the snow.
+			return sim.has_pickaxe
 		TOOL_BUILD_GUN:
-			return _anything_buildable()
+			return sim.has_gun and _anything_buildable()
 		TOOL_TORCH:
 			return sim.torches > 0 or sim.torch_left > 0.0
 	return false
@@ -866,6 +871,8 @@ func _process(delta: float) -> void:
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
+	machine_layer.upgrade_progress = upgrade_progress()
+	machine_layer.pickaxe_hint = pickaxe_hint_cell()
 	# A panel pinned to a machine the player has since demolished would keep
 	# reporting a machine that no longer exists.
 	if meter_cell != Vector2i(9999, 9999) and sim.machine_at(meter_cell) == null:
@@ -873,6 +880,9 @@ func _process(delta: float) -> void:
 	machine_layer.meter_cell = meter_cell
 
 	_update_ambience(delta)
+	_update_missions()
+	if pickaxe_hint_until > 0.0:
+		pickaxe_hint_until = maxf(0.0, pickaxe_hint_until - delta)
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
 	_update_hand_mining(delta)
@@ -1042,6 +1052,12 @@ func _collect_ground() -> void:
 	# The tile she is on, and then the belt running under her feet. A belt's
 	# cargo used to slide past untouched, which is the one place in this game
 	# where something she can see and stand on cannot be taken.
+	# What fell out of the case first: it is on the same tiles and it is the one
+	# thing in the opening the player is meant to walk into.
+	var drop: int = sim.collect_drop(player.cell())
+	if drop >= 0:
+		_announce_drop(drop)
+		return
 	var item_type: int = sim.collect_ground_at(player.cell())
 	if item_type < 0:
 		item_type = sim.collect_belt_at(player.cell())
@@ -1053,6 +1069,26 @@ func _collect_ground() -> void:
 	fx.ring(player.position, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
 	audio.call("play", "deliver")
 	_announce_unlocks(sim.note_resource_seen(item_type))
+
+## Picking up one of the things from the case.
+##
+## This is where the player learns what each of them is, so it is said once,
+## plainly, with what to do next -- and only for the two that are tools, because
+## a kit in her arms already says what it wants through the objective card.
+func _announce_drop(kind: int) -> void:
+	fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
+	fx.burst(player.position, Defs.COL_CORE, 12)
+	audio.call("play", "confirm")
+	match kind:
+		Sim.DROP_KIT_BASE:
+			_notify("긴급기지키트를 들었습니다", Defs.COL_CORE)
+		Sim.DROP_KIT_SHELTER:
+			_notify("긴급숙소키트를 들었습니다", Defs.COL_CORE)
+		Sim.DROP_GUN:
+			_notify("건물건설총  ·  2번", Defs.COL_CORE)
+		Sim.DROP_PICKAXE:
+			_notify("곡괭이  ·  1번", Defs.COL_CORE)
+			pickaxe_hint_until = Defs.PICKAXE_HINT_SECONDS
 
 ## A new machine appearing in the hotbar is a real milestone, so it gets the
 ## banner and the confirm sting rather than a silent slot.
@@ -1184,25 +1220,150 @@ func _collect_shard() -> void:
 ## Counted in heat stones because that is what the player is carrying, and heat
 ## rather than stones is the thing the base actually measures: an energy crystal
 ## is worth the same and the sum has to include it.
-func _upgrade_line() -> String:
+## How far the fire is from its next step, in heat stones.
+##
+## Counted from the start of this step rather than from the start of the run, and
+## shown as have-of-need rather than as what is missing: a number that ticks down
+## says how much is left, a number that fills says how far you have come, and one
+## of those is worth carrying another stone for.
+##
+## Returns an empty array at the top, where there is no next step to count to.
+func upgrade_progress() -> Array[int]:
+	var out: Array[int] = []
 	var next_level: Dictionary = Defs.next_base_level(sim.total_heat)
 	if next_level.is_empty():
-		return Defs.mission_line("MAXED")
-	# Counted from the start of this step rather than from the start of the run,
-	# and shown as have-of-need rather than as what is missing. A number that
-	# ticks down says how much is left; a number that fills says how far you have
-	# come, and one of those is worth carrying another stone for.
+		return out
 	var floor_heat: int = int(Defs.BASE_LEVELS[sim.base_level]["heat"])
 	var per_stone: float = float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
-	var have: int = int(floor(float(sim.total_heat - floor_heat) / per_stone))
-	var need: int = int(round(float(int(next_level["heat"]) - floor_heat) / per_stone))
-	return "기지 업그레이드 %02d  ·  열석 %d/%d" % [sim.base_level + 1, have, need]
+	out.append(int(floor(float(sim.total_heat - floor_heat) / per_stone)))
+	out.append(int(round(float(int(next_level["heat"]) - floor_heat) / per_stone)))
+	return out
+
+func _upgrade_line() -> String:
+	var progress: Array[int] = upgrade_progress()
+	if progress.is_empty():
+		return Defs.mission_line("MAXED")
+	return "기지 업그레이드 %02d  ·  열석 %d/%d" % [sim.base_level + 1, progress[0], progress[1]]
+
+## --- The three tracks -------------------------------------------------------
+## Which rungs have appeared, and which are behind us. Both are saved: a mission
+## that reopened on load would tell a player who has ten cats to go and look for
+## life on the planet.
+var missions_open: Dictionary = {}
+var missions_done: Dictionary = {}
+## The first time a frozen cat is inside the light. Latched rather than asked
+## every frame, because the cat it refers to may be picked up and carried away --
+## and "you have seen one" does not become false again.
+var frozen_seen := false
+
+## Whether a rung is ready to appear. One `match`, so a condition cannot be
+## written twice and drift; this repository has a record of a rule spread across
+## nine handlers with six of them missing it.
+func _mission_ready(id: String) -> bool:
+	match id:
+		"BASE2": return sim.shelter_placed
+		"BASE3": return sim.base_level >= 1
+		"BASE4": return sim.base_level >= 2
+		"CAT_LOOK": return sim.base_level >= 1
+		"CAT_THAW": return frozen_seen
+		"CAT_WORK": return sim.cats.size() > 0
+		"CAT_FEED": return _anyone_hungry()
+		"AUTO_MINER": return int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) \
+			>= int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_HEATSTONE])
+		"AUTO_BELT": return sim.is_unlocked(Defs.M_BELT)
+		"AUTO_LINE": return sim.machine_count(Defs.M_BELT) > 0
+	return false
+
+## And whether it is behind us.
+func _mission_finished(id: String) -> bool:
+	match id:
+		"BASE2": return sim.base_level >= 1
+		"BASE3": return sim.base_level >= 2
+		"BASE4": return sim.base_level >= 3
+		"CAT_LOOK": return frozen_seen
+		"CAT_THAW": return sim.cats.size() > 0
+		"CAT_WORK": return _anyone_working()
+		"CAT_FEED": return sim.food_placed
+		"AUTO_MINER": return sim.machine_count(Defs.M_MINER) > 0
+		"AUTO_BELT": return sim.machine_count(Defs.M_BELT) > 0
+		"AUTO_LINE": return sim.delivered_by_belt
+	return false
+
+func _anyone_hungry() -> bool:
+	for cat: Sim.Cat in sim.cats:
+		if cat.hunger < 0.5:
+			return true
+	return false
+
+func _anyone_working() -> bool:
+	for cat: Sim.Cat in sim.cats:
+		if cat.has_job():
+			return true
+	return false
+
+## Run once a frame. Opens what is ready and closes what is done, in that order,
+## so a rung whose conditions are both true at once still appears before it is
+## struck through -- a mission the player never saw is a mission that may as well
+## not have existed.
+func _update_missions() -> void:
+	if not frozen_seen:
+		for cell: Vector2i in sim.frozen_cats:
+			if sim.is_warm(cell):
+				frozen_seen = true
+				break
+	for row: Dictionary in Defs.MISSIONS:
+		var id: String = String(row["id"])
+		if bool(missions_done.get(id, false)):
+			continue
+		if not bool(missions_open.get(id, false)):
+			if not _mission_ready(id):
+				continue
+			missions_open[id] = true
+			_notify("새 임무 · %s  %s" % [Defs.TRACK_NAMES[int(row["track"])],
+				String(row["line"])], Defs.COL_CORE)
+			audio.call("play", "confirm")
+			continue
+		if _mission_finished(id):
+			missions_done[id] = true
+			_notify("임무 완료 · %s" % String(row["line"]), Defs.COL_BELT_RIM)
+			audio.call("play", "finish")
+
+## What the card shows: every open rung, in track order.
+func open_missions() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in Defs.MISSIONS:
+		var id: String = String(row["id"])
+		if bool(missions_open.get(id, false)) and not bool(missions_done.get(id, false)):
+			out.append(row)
+	return out
 
 func _thawing_nearby() -> bool:
 	for cell: Vector2i in sim.frozen_cats:
 		if sim.can_thaw(cell):
 			return true
 	return false
+
+## How long the pickaxe points at a seam after she picks it up.
+##
+## Long enough to walk there, short enough that it is not a permanent marker on
+## one arbitrary tile.
+var pickaxe_hint_until: float = 0.0
+
+## Which seam it is pointing at, or a sentinel. The nearest one to her when the
+## tool arrives: pointing at a seam she cannot see is pointing at nothing.
+func pickaxe_hint_cell() -> Vector2i:
+	if pickaxe_hint_until <= 0.0:
+		return Vector2i(9999, 9999)
+	var best := Vector2i(9999, 9999)
+	var closest: float = 1e20
+	for cell: Vector2i in sim.ore:
+		if int(sim.ore[cell]) != Defs.ITEM_HEATSTONE:
+			continue
+		var distance: float = sim.cell_centre(cell).distance_to(player.position)
+		if distance < closest:
+			closest = distance
+			best = cell
+	return best
 
 ## The moment the ice finishes. The rest of the game announces things with a
 ## line of text; this one gets the ring, the shake and a voice, because it is the
@@ -1246,17 +1407,19 @@ func _update_kit_search(delta: float) -> void:
 	if sim.kit_progress < 1.0:
 		return
 	sim.kit_progress = 0.0
-	var found: int = sim.search_kit()
-	if found == Defs.KIT_NONE:
+	var found: Array[int] = sim.search_kit()
+	if found.is_empty():
 		return
 	fx.ring(sim.cell_centre(sim.kit_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
 	audio.call("play", "alloy")
-	if found == Defs.KIT_BASE:
-		_notify("긴급기지를 꺼냈습니다  Z 로 내려놓으세요", Defs.COL_CORE)
-	else:
-		# The pickaxe comes out with the shelter. It is a tool rather than a
-		# thing to carry, so it goes straight into the row she already has.
-		_notify("곡괭이와 긴급거처를 꺼냈습니다  Z 로 거처를 세우세요", Defs.COL_CORE)
+	# It tips onto the snow rather than into her hands. What came out is not named
+	# here either -- two objects are lying below the case and picking one up is
+	# how the player finds out what it is.
+	var names: Array[String] = []
+	for kind: int in found:
+		names.append(Sim.DROP_NAMES[kind])
+	_notify("상자에서 무언가 떨어졌습니다", Defs.COL_CORE)
+	note_log("상자에서 나온 것 · %s" % "  ·  ".join(names), Defs.COL_CORE)
 
 ## Whether she is at the kit with something still in it.
 ##
@@ -1437,6 +1600,13 @@ func finish_tutorial() -> void:
 		sim.food_cell = sim.shelter_cell + Vector2i(Defs.FOOD_OFFSET.round())
 		sim.carried_kit = Defs.KIT_NONE
 	sim.kit_searched = 2
+	# The tools are picked up off the snow now, so a world that starts past the
+	# opening has to hand them over here -- the slots used to open on the lid
+	# being lifted, and `kit_searched` alone no longer means she is holding
+	# anything.
+	sim.has_gun = true
+	sim.has_pickaxe = true
+	sim.drops.clear()
 	mission = Mission.DONE
 	player.warmth = 100.0
 
@@ -2323,6 +2493,8 @@ func debug_unlock_all() -> void:
 	# debug world starts with the kit behind her -- otherwise the key grants every
 	# machine in the game and leaves her unable to break a rock.
 	sim.kit_searched = maxi(sim.kit_searched, 2)
+	sim.has_gun = true
+	sim.has_pickaxe = true
 	_notify("디버그 전체 해금", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
@@ -2656,6 +2828,11 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		"py": player.position.y,
 		"warmth": player.warmth,
 		"mission": mission,
+		# Which rungs have appeared and which are behind us. A track that reopened
+		# on load would tell a player with ten cats to go and look for life.
+		"missions_open": missions_open,
+		"missions_done": missions_done,
+		"frozen_seen": frozen_seen,
 		"sim": sim.to_save(),
 	})
 	if config.save(slot_path(slot)) != OK:
@@ -2734,6 +2911,9 @@ func load_game(slot: int = 0) -> bool:
 	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
 	player.warmth = float(data.get("warmth", 100.0))
 	mission = int(data.get("mission", Mission.DONE))
+	missions_open = data.get("missions_open", {})
+	missions_done = data.get("missions_done", {})
+	frozen_seen = bool(data.get("frozen_seen", false))
 	player.locked = false
 	player.collapse = 0.0
 	collapse_timer = -1.0

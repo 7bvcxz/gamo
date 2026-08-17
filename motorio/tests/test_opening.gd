@@ -38,6 +38,15 @@ func _run() -> void:
 		print("FAIL test_opening (%d)" % failures)
 	quit(failures)
 
+
+## Search the case and pick up everything it dropped. The opening is two searches
+## and four objects on the snow; every test below this one is about what happens
+## *after* that, so it is done in one line rather than four every time.
+func _empty_kit(sim) -> void:
+	sim.search_kit()
+	for cell: Vector2i in sim.drops.keys():
+		sim.collect_drop(cell)
+
 func _assert(condition: bool, label: String) -> void:
 	if condition:
 		print("  ok   %s" % label)
@@ -127,25 +136,44 @@ func _test_clock_is_held() -> void:
 func _test_searching_the_kit() -> void:
 	_crash()
 	var sim = main.sim
-	_assert(sim.search_kit() == Defs.KIT_BASE, "첫 번째로 긴급기지가 나온다")
-	_assert(sim.carried_kit == Defs.KIT_BASE, "그것을 들고 있다")
-	_assert(sim.hands_full(), "손이 찼다")
-	# One pair of arms. Everything that can be picked up has to agree about it,
-	# which is why they all ask the same question rather than each keeping a
-	# list of what the other two might be holding.
-	_assert(sim.search_kit() == Defs.KIT_NONE, "손이 차면 더 못 꺼낸다")
-	sim.frozen_cats[sim.core_cell + Vector2i(3, 0)] = 0.0
-	_assert(not sim.pick_up_frozen(sim.core_cell + Vector2i(3, 0)),
-		"긴급기지를 든 채로 얼어붙은 고양이를 들 수 없다")
-	sim.grant_cats(1)
-	sim.cats[0].pos = sim.cell_centre(sim.core_cell + Vector2i(4, 0))
-	_assert(not sim.pick_up_cat(sim.core_cell + Vector2i(4, 0)),
-		"살아있는 고양이도 마찬가지다")
+	# The case tips onto the snow rather than into her hands. The first thing the
+	# game ever gives the player used to arrive as a word in the corner of the
+	# screen; two objects lying below the case are two things to walk over, and
+	# picking a thing up is how you find out what it is.
+	var first: Array[int] = sim.search_kit()
+	_assert(first.size() == 2, "첫 조사에서 두 개가 떨어진다: %d" % first.size())
+	_assert(first.has(Sim.DROP_KIT_BASE) and first.has(Sim.DROP_GUN),
+		"긴급기지키트와 건물건설총이다")
+	_assert(sim.carried_kit == Defs.KIT_NONE, "아직 손에는 아무것도 없다")
+	_assert(not sim.has_gun, "줍기 전에는 총도 없다")
+	_assert(sim.drops.size() == 2, "바닥에 둘이 놓여 있다")
+	# Below the case, which is where she is standing to face it.
+	for cell: Vector2i in sim.drops:
+		_assert(cell.y > sim.kit_cell.y, "상자 아래쪽에 떨어진다: %s" % str(cell))
 
-	sim.carried_kit = Defs.KIT_NONE
-	_assert(sim.search_kit() == Defs.KIT_SHELTER, "두 번째로 긴급거처가 나온다")
-	sim.carried_kit = Defs.KIT_NONE
-	_assert(sim.search_kit() == Defs.KIT_NONE, "세 번째는 없다 — 빈 상자다")
+	var second: Array[int] = sim.search_kit()
+	_assert(second.size() == 2, "두 번째 조사에서 둘이 더 떨어진다: %d" % second.size())
+	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE),
+		"긴급숙소키트와 곡괭이다")
+	_assert(sim.search_kit().is_empty(), "세 번째는 없다 — 빈 상자다")
+
+	# Picking them up is what grants them.
+	for cell: Vector2i in sim.drops.keys():
+		var kind: int = int(sim.drops[cell])
+		if kind == Sim.DROP_GUN:
+			_assert(sim.collect_drop(cell) == Sim.DROP_GUN, "총을 줍는다")
+			_assert(sim.has_gun, "그때 총이 생긴다")
+		elif kind == Sim.DROP_PICKAXE:
+			_assert(sim.collect_drop(cell) == Sim.DROP_PICKAXE, "곡괭이를 줍는다")
+			_assert(sim.has_pickaxe, "그때 곡괭이가 생긴다")
+	# Both hands: a kit cannot be scooped up while something is already in them.
+	sim.carried_frozen = true
+	for cell: Vector2i in sim.drops.keys():
+		_assert(sim.collect_drop(cell) == -1, "손이 차 있으면 키트는 못 줍는다")
+	sim.carried_frozen = false
+	for cell: Vector2i in sim.drops.keys():
+		_assert(sim.collect_drop(cell) >= 0, "손이 비면 줍는다")
+		break
 	_assert(sim.kit_searched == 2, "두 번 뒤진 것으로 남는다")
 
 # --- Putting the fire down --------------------------------------------------
@@ -154,7 +182,7 @@ func _test_placing_the_base() -> void:
 	_crash()
 	var sim = main.sim
 	var crash: Vector2i = sim.core_cell
-	sim.search_kit()
+	_empty_kit(sim)
 	_assert(not sim.place_base(crash + Vector2i(6, 0)),
 		"추락 지점에서 멀면 놓을 수 없다")
 	_assert(not sim.base_placed, "그래서 아직 불이 없다")
@@ -176,10 +204,10 @@ func _test_placing_the_base() -> void:
 func _test_placing_the_shelter() -> void:
 	_crash()
 	var sim = main.sim
-	sim.search_kit()
+	_empty_kit(sim)
 	sim.place_base(sim.core_cell)
 	sim.carried_kit = Defs.KIT_NONE
-	sim.search_kit()
+	_empty_kit(sim)
 	_assert(sim.carried_kit == Defs.KIT_SHELTER, "긴급거처를 들었다")
 	_assert(not sim.place_shelter(sim.core_cell + Vector2i(1, 0)),
 		"기지에 붙여서는 세울 수 없다")
@@ -196,31 +224,34 @@ func _test_missions_follow_the_world() -> void:
 	_crash()
 	var sim = main.sim
 	_assert(main.mission == main.Mission.BASE, "1. 긴급기지")
-	sim.search_kit()
+	_empty_kit(sim)
 	sim.place_base(sim.core_cell)
 	main._advance_mission()
 	_assert(main.mission == main.Mission.SURVIVE, "2. 생존 준비")
 	sim.carried_kit = Defs.KIT_NONE
-	sim.search_kit()
+	_empty_kit(sim)
 	_assert(sim.place_shelter(_shelter_spot(sim)), "거처를 세운다")
 	main._advance_mission()
 	# Two missions, and then the game. There were four; the last two told the
 	# player to go and mine and go and explore at exactly the point the game
 	# should have stopped talking.
 	_assert(main.mission == main.Mission.DONE, "거처가 서면 오프닝이 끝난다")
-	var after: String = String(main.objective_data()["text"])
-	_assert(after.begins_with("기지 업그레이드"),
-		"그 뒤로 카드는 다음 기지 단계만 말한다: %s" % after)
-	_assert(not after.contains("세요"), "그리고 시키지 않는다")
-	# Counting up from nothing, towards a number that does not move.
-	_assert(after.contains("0/%d" % Defs.OPENING_STONES),
-		"모인 수는 0에서 시작하고 필요 수는 고정이다: %s" % after)
+	# The one-line card is finished with. What the player is working towards from
+	# here is three things at once -- the fire, the animals, the factory -- and a
+	# single line meant they took turns evicting each other. The count the fire
+	# is owed moved onto the fire, where someone deciding whether to walk out for
+	# one more stone is already looking.
+	_assert(String(main.objective_data()["text"]).is_empty(),
+		"오프닝이 끝나면 한 줄짜리 카드가 비워진다: '%s'"
+			% String(main.objective_data()["text"]))
+	var progress: Array[int] = main.upgrade_progress()
+	_assert(progress == [0, Defs.OPENING_STONES],
+		"기지 위의 숫자는 0에서 시작하고 필요 수는 고정이다: %s" % str(progress))
 	main.sim.delivered[Defs.ITEM_HEATSTONE] = 1
 	main.sim.total_heat = int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
 	main.sim._refresh_radius()
-	var one: String = String(main.objective_data()["text"])
-	_assert(one.contains("1/%d" % Defs.OPENING_STONES),
-		"하나 넣으면 1/%d 이 된다: %s" % [Defs.OPENING_STONES, one])
+	_assert(main.upgrade_progress() == [1, Defs.OPENING_STONES],
+		"하나 넣으면 1/%d 이 된다: %s" % [Defs.OPENING_STONES, str(main.upgrade_progress())])
 	main.sim.total_heat = 0
 	main.sim._refresh_radius()
 	# The card has to say something at every rung, and never the same thing twice
@@ -229,13 +260,13 @@ func _test_missions_follow_the_world() -> void:
 	var seen: Dictionary[String, bool] = {}
 	_crash()
 	seen[String(main.objective_data()["text"])] = true
-	main.sim.search_kit()
+	_empty_kit(main.sim)
 	seen[String(main.objective_data()["text"])] = true
 	main.sim.place_base(main.sim.core_cell)
 	main._advance_mission()
 	seen[String(main.objective_data()["text"])] = true
 	main.sim.carried_kit = Defs.KIT_NONE
-	main.sim.search_kit()
+	_empty_kit(main.sim)
 	seen[String(main.objective_data()["text"])] = true
 	_assert(seen.size() == 4, "네 상황이 네 가지 문구를 낸다 (%d)" % seen.size())
 
@@ -313,12 +344,12 @@ func _test_feeding_the_fire() -> void:
 func _test_save_mid_opening() -> void:
 	_crash()
 	var sim = main.sim
-	sim.search_kit()
+	_empty_kit(sim)
 	var chosen: Vector2i = sim.core_cell + Vector2i(1, 0)
 	sim.place_base(chosen)
 	main._advance_mission()
 	sim.carried_kit = Defs.KIT_NONE
-	sim.search_kit()
+	_empty_kit(sim)
 	main.player.warmth = 44.0
 	_assert(main.save_game(false), "오프닝 도중에 저장된다")
 

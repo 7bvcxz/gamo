@@ -160,11 +160,16 @@ SUBJECTS = {
     # At one tile the old prompts are impossible: three pipes around a rim and a
     # door and a window and log courses is twenty features in 32 pixels. These
     # name one silhouette and one light each, which is all that survives.
+    # gen2 was a stone ring with a fire in it, which reads as a campfire -- a
+    # thing you sit at, not a thing you bring ore to. The base is where heat is
+    # thrown from *and* where things are made, so the silhouette has to be built
+    # rather than gathered: a machine with a fire in it.
     "core": (
-        "A cosy round stone brazier for a snowy top-down game, seen from almost "
-        "directly overhead: one thick ring of chunky pale stone, and a big warm "
-        "amber fire filling the whole middle of it. Nothing else. Snow on the "
-        "outside of the ring."
+        "A cosy little furnace station for a snowy top-down game, seen from "
+        "almost directly overhead: a chunky square metal housing with rounded "
+        "corners, a big round door in the middle glowing warm amber, a short "
+        "brass chimney at the back corner, and one small metal hopper mouth on "
+        "each of its four sides. Snow settled on its top edges."
     ),
     "shelter": (
         "A tiny cosy hut for a snowy top-down game, seen from almost directly "

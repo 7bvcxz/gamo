@@ -422,7 +422,7 @@
     "purity_pure": 17.0,
     "purity_rich": 11.0
   },
-  "version": "0.20.79",
+  "version": "0.20.80",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

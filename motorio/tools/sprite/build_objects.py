@@ -77,7 +77,11 @@ ADOPTED = {
     # the thing they stood for, hanging over the tiles their neighbours are built
     # on. gen2 is drawn for the size: one silhouette and one light each, because
     # a door and a window and three pipes is twenty features in 32 pixels.
-    "core": ("core_gen2", 32),
+    # gen3 rather than gen2: gen2 was a stone ring with a fire in it, which reads
+    # as a campfire -- something you sit at, not something you bring ore to. The
+    # base throws heat *and* makes things, so the silhouette has to be built
+    # rather than gathered.
+    "core": ("core_gen3", 32),
     "shelter": ("shelter_gen2", 32),
     "food_bin": ("food_bin_gen1", 36),
     # Drawn at the miner's size rather than the 23 their painted bodies used.

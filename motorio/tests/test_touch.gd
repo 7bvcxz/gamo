@@ -85,6 +85,11 @@ func _tools(main: Node2D) -> void:
 func _mining(main: Node2D) -> void:
 	var sim: Sim = main.sim
 	sim.setup(4242)
+	# A fresh world has an unopened case in it, and the tools are picked up off
+	# the snow now rather than granted with the lid. This file is about the touch
+	# chain from the button to the swing, so it starts past that.
+	sim.has_pickaxe = true
+	sim.has_gun = true
 	var seam: Vector2i = Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
 		seam = cell

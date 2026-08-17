@@ -373,6 +373,8 @@ func to_save() -> Dictionary:
 	return {
 		"explored": seen,
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
+		"belt_fed": delivered_by_belt,
+		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
 		"carried_frozen": carried_frozen, "carried_frozen_thaw": carried_frozen_thaw,
 		# The opening. Saved because it is thirteen minutes of the game and a run
@@ -409,6 +411,12 @@ func from_save(data: Dictionary) -> void:
 		explored[Vector2i(seen[index], seen[index + 1])] = true
 	heat = int(data.get("heat", Defs.START_HEAT))
 	total_heat = int(data.get("total_heat", 0))
+	delivered_by_belt = bool(data.get("belt_fed", false))
+	has_gun = bool(data.get("has_gun", false))
+	has_pickaxe = bool(data.get("has_pickaxe", false))
+	drops.clear()
+	for row in data.get("drops", []):
+		drops[Vector2i(int(row[0]), int(row[1]))] = int(row[2])
 	var delivered_rows: Dictionary = data.get("delivered", {})
 	for key: String in delivered_rows:
 		delivered[int(key)] = int(delivered_rows[key])
@@ -505,6 +513,10 @@ func setup(seed_value: int) -> void:
 	explored.clear()
 	heat = Defs.START_HEAT
 	total_heat = 0
+	delivered_by_belt = false
+	drops.clear()
+	has_gun = false
+	has_pickaxe = false
 	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
 		Defs.ITEM_HEATSTONE: 0}
 	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
@@ -879,12 +891,90 @@ func place_shelter(cell: Vector2i) -> bool:
 
 ## Searching the kit. Returns what came out, or KIT_NONE if there was nothing
 ## left in it or her arms were already full.
-func search_kit() -> int:
-	if kit_searched >= 2 or hands_full():
-		return Defs.KIT_NONE
+## --- What comes out of the case ---------------------------------------------
+## Searching it puts its contents on the snow rather than into her hands.
+##
+## It used to hand the kit straight over, which meant the first thing the game
+## ever gave the player arrived as a word in the corner of the screen. Two
+## objects lying in the snow are two things to walk over and pick up, and picking
+## a thing up is how you find out what it is.
+const DROP_KIT_BASE := 0
+const DROP_KIT_SHELTER := 1
+const DROP_GUN := 2
+const DROP_PICKAXE := 3
+const DROP_NAMES := ["긴급기지키트", "긴급숙소키트", "건물건설총", "곡괭이"]
+
+## What each search turns out. The gun before the pickaxe on purpose: the fire is
+## the first thing that has to exist, and a pickaxe with nowhere to put what it
+## digs is a tool with no verb.
+const KIT_CONTENTS: Array[Array] = [
+	[DROP_KIT_BASE, DROP_GUN],
+	[DROP_KIT_SHELTER, DROP_PICKAXE],
+]
+
+var drops: Dictionary = {}
+## Picked up rather than granted. The slots used to open on `kit_searched`, so
+## the tools existed the moment the lid was lifted whether or not she had touched
+## them.
+var has_gun := false
+var has_pickaxe := false
+
+## Empties the case onto the snow below it. Returns what came out.
+func search_kit() -> Array[int]:
+	var out: Array[int] = []
+	if kit_searched >= KIT_CONTENTS.size():
+		return out
+	var contents: Array = KIT_CONTENTS[kit_searched]
 	kit_searched += 1
-	carried_kit = Defs.KIT_BASE if kit_searched == 1 else Defs.KIT_SHELTER
-	return carried_kit
+	for index in contents.size():
+		var cell: Vector2i = _drop_cell(index)
+		if cell == Vector2i(9999, 9999):
+			continue
+		drops[cell] = int(contents[index])
+		out.append(int(contents[index]))
+	return out
+
+## Below the case, and then outward. Below because that is where the player is
+## looking -- she has to stand south of it to face it -- and outward because a
+## seam or a rock under the case is not a reason for the game to swallow the one
+## thing the opening is about.
+## Cells cannot go into a ConfigFile as keys, so the map travels as rows.
+func _drop_rows() -> Array:
+	var rows: Array = []
+	for cell: Vector2i in drops:
+		rows.append([cell.x, cell.y, int(drops[cell])])
+	return rows
+
+func _drop_cell(index: int) -> Vector2i:
+	var wanted: Array[Vector2i] = [Vector2i(0, 1), Vector2i(1, 1), Vector2i(-1, 1),
+		Vector2i(0, 2), Vector2i(1, 2), Vector2i(-1, 2), Vector2i(1, 0), Vector2i(-1, 0)]
+	var seen := 0
+	for offset: Vector2i in wanted:
+		var cell: Vector2i = kit_cell + offset
+		if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
+			continue
+		if seen == index:
+			return cell
+		seen += 1
+	return Vector2i(9999, 9999)
+
+## Walking over one. Returns what was taken, or -1.
+func collect_drop(cell: Vector2i) -> int:
+	if not drops.has(cell):
+		return -1
+	var kind: int = int(drops[cell])
+	match kind:
+		DROP_KIT_BASE, DROP_KIT_SHELTER:
+			# Both hands, so a kit cannot be scooped up while carrying a cat.
+			if hands_full():
+				return -1
+			carried_kit = Defs.KIT_BASE if kind == DROP_KIT_BASE else Defs.KIT_SHELTER
+		DROP_GUN:
+			has_gun = true
+		DROP_PICKAXE:
+			has_pickaxe = true
+	drops.erase(cell)
+	return kind
 
 ## --- Frozen cats ----------------------------------------------------------
 ## Picked up by hand, not by walking over. The crates were collected by walking
@@ -2473,9 +2563,22 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 ## So the core is a warehouse and the fire is fed by hand. Belts and cats save
 ## the walk to the seam, which is what they are for; walking to the fire and
 ## feeding it is the act the circle is the answer to.
+## Whether a belt has ever put something into the fire.
+##
+## Latched, and saved: it is the moment the picture this game is about actually
+## runs once, and a flag that reset on load would ask a player with a working
+## factory to build their first line again.
+var delivered_by_belt := false
+
 func _deliver(item_type: int, cell: Vector2i) -> void:
 	_gain(item_type, 1)
 	delivered[item_type] = int(delivered.get(item_type, 0)) + 1
+	# Where it came from. A belt feeding the core is the moment the whole design
+	# runs by itself for the first time, and nothing else was in a position to
+	# notice it happening.
+	var feeder: Machine = machines.get(cell, null)
+	if feeder != null and feeder.type == Defs.M_BELT:
+		delivered_by_belt = true
 	var core: Machine = machines.get(core_cell, null)
 	if core != null:
 		core.flash = 0.4

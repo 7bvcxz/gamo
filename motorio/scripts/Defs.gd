@@ -700,6 +700,10 @@ const KIT_BASE := 1
 const KIT_SHELTER := 2
 ## How long Z is held to search the kit. Two seconds: long enough to be an act
 ## rather than a keypress, short enough that it is not a chore the second time.
+## How long the pickaxe marker hangs over a seam after she picks the tool up.
+## She is told which key it is; this is where to point it.
+const PICKAXE_HINT_SECONDS := 14.0
+
 const KIT_SEARCH_SECONDS := 2.0
 ## Where the kit lands relative to the crash site. Two tiles, in sight from the
 ## first frame: the opening's first instruction has to be visible without
@@ -776,6 +780,64 @@ const OPENING_WARM_RADIUS := 9.0
 ## is told to press a key has been handed a manual.
 ##
 ## `why` is for the documentation page and is never drawn.
+## The three things a run is about, and the rungs of each.
+##
+## One ladder was wrong for this game. Everything the player is working towards
+## went through a single objective card, so the fire's next step, the animal in
+## the ice and the first belt took turns evicting each other -- and whichever one
+## happened to be showing was the only one that existed.
+##
+## Three tracks, and nothing on any of them until its moment. A list of every
+## rung at once is a checklist; a rung that appears the first time a frozen cat
+## comes into the light is the game noticing.
+##
+## The conditions are in Main, one `match` for opening and one for finishing,
+## because they read the run and this file does not. The table is what they are
+## about; the predicates are when.
+const TRACK_BASE := 0
+const TRACK_CAT := 1
+const TRACK_AUTO := 2
+const TRACK_NAMES := ["기지", "고양이", "자동화"]
+
+const MISSIONS: Array[Dictionary] = [
+	{"id": "BASE2", "track": TRACK_BASE, "line": "불을 한 번 더 키운다",
+		"why": "거처가 서면 바로 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 업그레이드는 세상에 무언가가 더 있다는 것을 알게 되는 일이다."},
+	{"id": "BASE3", "track": TRACK_BASE, "line": "불을 더 멀리 보낸다",
+		"why": "2단계에 닿으면 열린다. 11칸에서 풍부 등급 열석이 처음 나오므로, 같은 곡괭이질이 더 많이 준다."},
+	{"id": "BASE4", "track": TRACK_BASE, "line": "구리가 있는 곳까지",
+		"why": "3단계에 닿으면 열린다. 15칸이 구리 고리의 안쪽 가장자리이고 구리가 벨트의 입구다 — 이 줄은 자동화 계열이 열리는 문이기도 하다."},
+
+	{"id": "CAT_LOOK", "track": TRACK_CAT, "line": "이 행성에 다른 것이 있는지 본다",
+		"why": "기지가 2단계가 되어 온기가 9칸이 되면 열린다. 그 순간 처음으로 얼어붙은 고양이가 불빛 안에 들어오는데, 카드가 그것을 가리키지 않으면 플레이어는 눈밭의 얼음 덩어리를 지형으로 보고 지나간다."},
+	{"id": "CAT_THAW", "track": TRACK_CAT, "line": "얼음 속의 것을 불 곁으로",
+		"why": "얼어붙은 고양이를 실제로 본 뒤에 열린다. 무엇을 해야 하는지는 말하지 않는다 — 안아 오는 것과 불 가까이 두는 것은 들어 보면 알게 된다."},
+	{"id": "CAT_WORK", "track": TRACK_CAT, "line": "혼자 하던 일을 나눈다",
+		"why": "첫 고양이가 깨어나면 열린다. 광맥이든 기계든 어디에 놓든 일한다는 것을 여기서 배운다."},
+	{"id": "CAT_FEED", "track": TRACK_CAT, "line": "일하는 것은 먹어야 한다",
+		"why": "고양이가 실제로 배고파졌을 때 열린다. 나흘 걸린다 — 사료 상자를 처음부터 세워 두는 것은 일어나지도 않은 문제 옆에 답을 놓는 것이고, 이 줄은 그 문제가 실제로 생긴 날에 나타난다."},
+
+	{"id": "AUTO_MINER", "track": TRACK_AUTO, "line": "손 대신 기계가 캐게 한다",
+		"why": "`[질문]` 사용자가 자동화 계열을 비워 두었으므로 초안이다. 채굴기를 지을 열석이 모였을 때 열린다 — 지을 수 있게 된 그 순간이지, 그 전이 아니다."},
+	{"id": "AUTO_BELT", "track": TRACK_AUTO, "line": "나르는 일을 그만둔다",
+		"why": "`[질문]` 초안. 첫 구리를 손에 넣어 벨트가 해금되면 열린다."},
+	{"id": "AUTO_LINE", "track": TRACK_AUTO, "line": "아무도 만지지 않는 한 줄",
+		"why": "`[질문]` 초안. 벨트를 한 칸이라도 놓으면 열리고, 벨트가 기지에 무언가를 실어 넣으면 닫힌다. 이 게임이 향하는 그림이 실제로 한 번 돌아가는 순간이다."},
+]
+
+## The rungs of one track, in order.
+static func missions_in(track: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in MISSIONS:
+		if int(row["track"]) == track:
+			out.append(row)
+	return out
+
+static func mission_row(id: String) -> Dictionary:
+	for row: Dictionary in MISSIONS:
+		if String(row["id"]) == id:
+			return row
+	return {}
+
 const MISSION_LINES: Array[Dictionary] = [
 	{
 		"id": "M1",

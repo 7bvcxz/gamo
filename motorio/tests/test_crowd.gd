@@ -150,7 +150,20 @@ func _run() -> void:
 	_assert(worst_local < 0.01,
 		"고양이의 어떤 부분도 부모 안에서 움직이지 않았다 (%.4fpx)" % worst_local)
 	# Breathing is the one thing that changes, and it changes the body alone.
-	_assert(worst_height > 0.0001, "몸은 여전히 호흡한다 (%.5f)" % worst_height)
+	#
+	# Asked of the function rather than of whatever the run happened to contain.
+	# Sampling the live views made this fail about one run in five: a crew that
+	# spent the window in states the pool draws as invisible never wrote a second
+	# height, and a test that fails sometimes is worse than one that is missing.
+	var walker: Sim.Cat = sim.cats[0]
+	walker.state = Defs.CAT_TO_MINER
+	var low: float = 9.0
+	var high: float = 0.0
+	for sample in 40:
+		var breathe: float = MachineLayer.cat_breathe(walker, float(sample) * 0.08)
+		low = minf(low, breathe)
+		high = maxf(high, breathe)
+	_assert(high - low > 0.0001, "몸은 여전히 호흡한다 (%.5f)" % (high - low))
 
 	print("CROWD: 고양이 %d마리, %.0f초, 이동 %.0fpx, 상태 %d종"
 		% [sim.cats.size(), elapsed, travelled, states_seen.size()])

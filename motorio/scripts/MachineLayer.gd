@@ -154,6 +154,15 @@ var preview_dir := Vector2i.RIGHT
 var preview_valid := true
 ## Which machine the player is facing, for the rate readout.
 var focus_cell := Vector2i(9999, 9999)
+## How far the fire is from its next step, as [have, need] in heat stones, or
+## empty at the top. Handed in by Main every frame rather than computed here:
+## the arithmetic belongs to the ladder, not to the drawing.
+##
+## Drawn over the core itself rather than on the objective card. The card said
+## the same thing from the far corner of the screen, which meant the one number
+## the player is working towards lived nowhere near the thing it is about -- and
+## it took the card's only line to say it, so the card could say nothing else.
+var upgrade_progress: Array[int] = []
 ## Which machine the throughput panel is pinned to. Marked in the world as well
 ## as in the panel, because the panel is on the far side of the screen and a
 ## reading with no visible subject is easy to attribute to the wrong machine.
@@ -236,6 +245,8 @@ func _draw() -> void:
 	_draw_shelter(tile)
 	_draw_food_bin(tile)
 	_draw_kit(tile)
+	_draw_drops(tile)
+	_draw_pickaxe_hint(tile)
 	_draw_shards(tile)
 	_draw_frozen(tile)
 	_draw_ground()
@@ -388,6 +399,34 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# The heat it throws still pulses; the machine does not.
 	_object_art(CORE_ART, c, CORE_DRAW)
 	draw_arc(c, 22.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
+	_draw_upgrade_tally(c)
+
+## `열석 2/3`, over the fire, always.
+##
+## An icon and two numbers rather than a sentence: the sentence was on the
+## objective card, in the corner, and a player looking at the fire while deciding
+## whether to walk out for one more stone had to look away from it to find out.
+##
+## Nothing at the top of the ladder. A counter that has nowhere left to count to
+## is a counter that says the same thing forever.
+func _draw_upgrade_tally(c: Vector2) -> void:
+	if upgrade_progress.size() < 2:
+		return
+	var label: String = "%d/%d" % [upgrade_progress[0], upgrade_progress[1]]
+	var font: Font = UIFont.FONT
+	var width: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11).x
+	var dot := 4.0
+	var span: float = dot * 2.0 + 4.0 + width
+	var at: Vector2 = c + Vector2(-span * 0.5, -CORE_DRAW * 0.5 - 7.0)
+	# The stone itself, so what is being counted needs no word in front of it.
+	draw_circle(at + Vector2(dot, -3.0), dot, Defs.ITEM_COLORS[Defs.ITEM_HEATSTONE])
+	draw_circle(at + Vector2(dot, -3.0), dot, Defs.OUTLINE, false, 1.0)
+	var text: Vector2 = at + Vector2(dot * 2.0 + 4.0, 1.0)
+	# Outlined rather than plated: this sits on snow, on the fire's own glow and
+	# sometimes on a cat, and an outline belongs to the glyph in all three.
+	draw_string_outline(font, text, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, 3,
+		Color(0.04, 0.05, 0.08, 0.85))
+	draw_string(font, text, label, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Defs.COL_TEXT)
 
 ## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --
 ## which stand on a fixed ground line -- these hang off the middle of the tile.
@@ -716,6 +755,53 @@ func _draw_shards(tile: float) -> void:
 ## with the parachute lines still on it, and a slow pulse while there is
 ## anything left inside -- it is the only thing on the map in the first minute
 ## and it has to say "come here" without a label.
+## Which seam the pickaxe is pointing at, and whether it is pointing at all.
+## Handed in by Main, like everything else this layer needs to know about the run.
+var pickaxe_hint := Vector2i(9999, 9999)
+
+## What fell out of the case, lying on the snow.
+##
+## Drawn with the same art the player will see in their hands or in the row, so
+## the thing on the ground and the thing they end up with are the same object.
+func _draw_drops(tile: float) -> void:
+	for cell: Vector2i in sim.drops:
+		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		if not view_rect.grow(tile).has_point(at):
+			continue
+		var kind: int = int(sim.drops[cell])
+		# A slow bob and a halo: two small objects in a white field, and the whole
+		# opening depends on the player noticing them.
+		var lift: float = sin(pulse * 2.4 + float(cell.x)) * 2.0
+		draw_circle(at, 13.0, Color(1.0, 0.72, 0.34, 0.10))
+		_shadow(at + Vector2(0, 8), 8.0)
+		match kind:
+			Sim.DROP_KIT_BASE:
+				_object_art(KIT_BASE_ART, at + Vector2(0, lift), KIT_OPEN_DRAW)
+			Sim.DROP_KIT_SHELTER:
+				_object_art(KIT_SHELTER_ART, at + Vector2(0, lift), KIT_OPEN_DRAW)
+			Sim.DROP_GUN:
+				Icons.draw_machine(self, Rect2(at + Vector2(-11.0, -11.0 + lift),
+					Vector2(22.0, 22.0)), Defs.M_MINER)
+			Sim.DROP_PICKAXE:
+				Icons.draw_pickaxe(self, Rect2(at + Vector2(-11.0, -11.0 + lift),
+					Vector2(22.0, 22.0)))
+
+## The pickaxe, over the nearest seam, for a few seconds after she picks it up.
+##
+## The game already tells her which key it is. This says where to point it, and
+## it does it by pointing rather than by another sentence -- a seam is a shape in
+## the snow that a new player has no reason to read as a resource.
+func _draw_pickaxe_hint(tile: float) -> void:
+	if pickaxe_hint == Vector2i(9999, 9999):
+		return
+	var at: Vector2 = Vector2(pickaxe_hint) * tile + Vector2.ONE * tile * 0.5
+	if not view_rect.grow(tile).has_point(at):
+		return
+	var bob: float = sin(pulse * 3.2) * 3.0
+	var box := Rect2(at + Vector2(-11.0, -34.0 + bob), Vector2(22.0, 22.0))
+	draw_circle(at, 15.0, Color(1.0, 0.72, 0.34, 0.10 + 0.06 * sin(pulse * 3.2)))
+	Icons.draw_pickaxe(self, box)
+
 func _draw_kit(tile: float) -> void:
 	if sim.kit_cell == Vector2i(9999, 9999) or sim.kit_searched >= 2:
 		return

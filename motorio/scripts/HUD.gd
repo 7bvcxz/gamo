@@ -669,9 +669,80 @@ func _draw_info() -> void:
 	_draw_goal_icon(slot, row)
 	_text(box.position + Vector2(INFO_H + 4.0, INFO_H * 0.5 + 4.0), text, 12, Defs.COL_TEXT)
 
+## The mission card: the open rungs of all three tracks.
+##
+## One line was wrong for this game. The fire's next step, the animal in the ice
+## and the first belt are three things the player is working towards at once, and
+## a single card meant whichever one happened to be showing was the only one that
+## existed. Grouped by track, because "기지" and "고양이" are different kinds of
+## wanting and reading them as one list makes them look like a queue.
+const MISSION_ROW_H := 17.0
+const MISSION_HEAD_H := 15.0
+
+func mission_card_rect() -> Rect2:
+	var rows: Array[Dictionary] = main.open_missions()
+	var tracks := {}
+	for row: Dictionary in rows:
+		tracks[int(row["track"])] = true
+	var height: float = FRAME_HEADER + 10.0 + float(rows.size()) * MISSION_ROW_H \
+		+ float(tracks.size()) * MISSION_HEAD_H
+	var width: float = 0.0
+	for row: Dictionary in rows:
+		width = maxf(width, _text_width(String(row["line"]), 12) + 46.0)
+	width = clampf(width, 150.0, size.x - MARGIN * 2.0)
+	var box := Rect2(size.x - width - MARGIN, MARGIN, width, maxf(height, 44.0))
+	var panel: Rect2 = status_rect()
+	if box.position.x < panel.position.x + panel.size.x + 8.0:
+		box.position.y = panel.position.y + panel.size.y + 8.0
+	var state: String = main.info()
+	if state != "":
+		var above: Rect2 = info_rect(state)
+		box.position.y = maxf(box.position.y, above.position.y + above.size.y + INFO_GAP)
+	return box
+
+## Whichever card is in the top-right corner right now: the opening speaks in one
+## line and everything after it is the three tracks. Anything that has to sit
+## below "the goal" asks this rather than picking one of the two.
+func goal_area() -> Rect2:
+	var text: String = main.objective()
+	if text != "":
+		return objective_rect(text)
+	if main.open_missions().is_empty():
+		var state: String = main.info()
+		return info_rect(state) if state != "" else Rect2(size.x - MARGIN, MARGIN, 0.0, 0.0)
+	return mission_card_rect()
+
+func _draw_missions() -> void:
+	var rows: Array[Dictionary] = main.open_missions()
+	# Nothing open is a real state -- the opening, and the gaps between rungs --
+	# and an empty framed card in the corner is worse than no card.
+	if rows.is_empty():
+		return
+	var box: Rect2 = mission_card_rect()
+	_frame(box, Defs.COL_CORE, "임무")
+	var y: float = box.position.y + FRAME_HEADER + 4.0
+	var track := -1
+	for row: Dictionary in rows:
+		if int(row["track"]) != track:
+			track = int(row["track"])
+			y += MISSION_HEAD_H
+			_text(Vector2(box.position.x + 12.0, y - 3.0), Defs.TRACK_NAMES[track], 11,
+				Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85))
+		y += MISSION_ROW_H
+		# A dot rather than a bullet character: the font is subset from the source
+		# and a glyph nobody wrote into a string is a glyph that is not in it.
+		draw_circle(Vector2(box.position.x + 18.0, y - 8.0), 2.0, Defs.COL_TEXT_DIM)
+		_text(Vector2(box.position.x + 26.0, y - 4.0), String(row["line"]), 12,
+			Defs.COL_TEXT)
+
 func _draw_objective() -> void:
 	var goal: Dictionary = main.objective_data()
 	var text: String = String(goal["text"])
+	# The opening still speaks in one line, and once it is over the card becomes
+	# the three tracks.
+	if text == "":
+		_draw_missions()
+		return
 	var box: Rect2 = objective_rect(text)
 	_frame(box, Defs.COL_CORE, "목표")
 	var slot := Rect2(box.position + Vector2(FRAME_PAD, FRAME_HEADER + 7.0),
@@ -977,9 +1048,18 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 			continue
 		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], count])
 		gain += int(Defs.ITEM_VALUES[item_type]) * count
-	_text(Vector2(text_x, rect.position.y + 42.0), " · ".join(parts), 11, Defs.COL_TEXT_DIM)
+	# What it does under the title, what it costs on the right -- the same way
+	# round as every other row in this window and in the build list. This one was
+	# mirrored, so a reader who had learned where to look in the window had to
+	# unlearn it for one line.
+	var next_level: Dictionary = Defs.next_base_level(main.sim.total_heat)
+	var effect: String = "+%d 열" % gain
+	if not next_level.is_empty():
+		var short: int = maxi(0, int(next_level["heat"]) - main.sim.total_heat - gain)
+		effect += "   다음 단계까지 %d" % short if short > 0 else "   다음 단계에 닿습니다"
+	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11, Defs.COL_CORE)
 	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-		"+%d 열" % gain, 13, Defs.COL_CORE)
+		" · ".join(parts), 13, Defs.COL_TEXT)
 
 func _draw_build_menu() -> void:
 	if not main.build_menu_open:
@@ -1379,8 +1459,10 @@ func meter_rect() -> Rect2:
 	var height: float = METER_HEAD + float(sections) * 20.0 + float(rows) * METER_ROW + METER_FOOT
 	var width: float = minf(METER_W, size.x - MARGIN * 2.0)
 	var box := Rect2(size.x - width - MARGIN, status_top(), width, height)
-	var objective: Rect2 = objective_rect(main.objective())
-	box.position.y = objective.position.y + objective.size.y + 8.0
+	# Under whichever card is up there: the opening's single line, or the three
+	# tracks. Asked as one question so the meter cannot land on top of either.
+	var above: Rect2 = goal_area()
+	box.position.y = above.position.y + above.size.y + 8.0
 	# The hotbar and the touch pad own the bottom of the screen. If the card no
 	# longer fits between them, it rides up rather than being drawn underneath.
 	var floor_y: float = hotbar_origin().y - 10.0

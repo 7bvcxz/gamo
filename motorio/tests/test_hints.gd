@@ -65,11 +65,16 @@ func _objectives(main: Node2D) -> void:
 	sim.setup(4242)
 	# The card stops giving instructions once the hut is up. What it shows from
 	# then on is the next step of the fire and what it costs -- no verb, no key.
+	# The one-line card is finished with once the opening is. What the player is
+	# working towards from there is three tracks at once, and the fire's own count
+	# moved onto the fire.
 	var opening: String = String(main.objective_data()["text"])
-	_check(opening.begins_with("기지 업그레이드"),
-		"거처를 세운 뒤의 목표는 다음 기지 단계다: %s" % opening)
-	_check(not opening.contains("Z") and not opening.contains("하세요"),
-		"그리고 지시하지 않는다: %s" % opening)
+	_check(opening.is_empty(),
+		"거처를 세운 뒤에는 한 줄짜리 목표가 비워진다: '%s'" % opening)
+	for row: Dictionary in main.open_missions():
+		var line: String = String(row["line"])
+		_check(not line.contains("하세요") and not line.contains("세요"),
+			"임무는 지시하지 않는다: %s" % line)
 
 	# State lines live on their own card now. The goal is what she is working
 	# towards and does not change because the sun went down; the state card is

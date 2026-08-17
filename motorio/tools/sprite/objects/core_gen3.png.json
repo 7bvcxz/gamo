@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-17T08:38:37.428882+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A cosy little furnace station for a snowy top-down game, seen from almost directly overhead: a chunky square metal housing with rounded corners, a big round door in the middle glowing warm amber, a short brass chimney at the back corner, and one small metal hopper mouth on each of its four sides. Snow settled on its top edges. The subject is centred and fills the frame, seen straight on with a slight downward tilt as in a top-down game. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of orange, cream, soft brown and muted blue-grey metal. Soft rounded chunky forms. Very few large simple shapes, so it stays readable when shown at 40 pixels across. Flat even lighting. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 25.4,
+  "usage": {
+    "input_tokens": 696,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 184
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 892
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/objects/core_gen3_raw.png"
+  ]
+}
