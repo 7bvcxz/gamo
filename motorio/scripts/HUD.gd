@@ -1185,6 +1185,14 @@ func _card(height: float) -> Rect2:
 	_frame(card, Defs.COL_CORE)
 	return card
 
+## Where the title painting goes. Static and handed its own size, so the one
+## thing that can go wrong here can be measured rather than looked for.
+static func title_rect(screen: Vector2) -> Rect2:
+	var source := Vector2(float(TITLE_ART.get_width()), float(TITLE_ART.get_height()))
+	var scale: float = maxf(screen.x / source.x, screen.y / source.y)
+	var drawn: Vector2 = source * scale
+	return Rect2((screen - drawn) * 0.5, drawn)
+
 ## The rows, and where each one is drawn.
 ##
 ## Measured rather than drawn straight, so a test can ask where a row is and a
@@ -1235,10 +1243,35 @@ static func title_controls(touch_pad: bool) -> String:
 		return "휠 이동   Z 사용   X 회수   Run 달리기"
 	return "←↑→↓ 이동   Z 사용   X 회수   R 회전   1·2·3 선택"
 
+## The painting behind the title.
+##
+## It used to be the live world, dimmed: whatever tiles the run happened to be
+## looking at when the game opened. That is a screenshot of a save file, not a
+## first impression, and on a fresh install it was an empty snowfield.
+##
+## Painted in the sprite style rather than the cutscene's watercolour, because
+## this is the first picture of Grim anyone sees and the one they compare the
+## character against a minute later.
+const TITLE_ART: Texture2D = preload("res://assets/title.webp")
+
 func _draw_title() -> void:
-	# A single even dim. The banded version read as a hard seam across the art on
-	# tall phone screens, where the band edge landed in open sky.
-	_dim(0.55)
+	# Cover, not fit: the painting is 16:9 and so is the game, but a phone held
+	# upright is not, and a letterboxed title on a phone is mostly letterbox.
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.06, 1.0))
+	draw_texture_rect(TITLE_ART, title_rect(size), false)
+	# One even dim, and nothing cleverer.
+	#
+	# The lines that would not read were not fighting the brightness, they were
+	# fighting their own colour: COL_TEXT_DIM is a muted blue-grey picked against
+	# the HUD's dark panels, and on a painted sky it is almost exactly the
+	# background's luminance. Brightening those two fixed it.
+	#
+	# A graded scrim under the text was tried first and made it worse in a way a
+	# contrast number does not show: twenty flat strips across a smooth sky are
+	# twenty visible bands. The repository already had "a hard edge across the art
+	# reads as a seam" written down about the previous version of this line, and
+	# a soft edge built out of steps is the same fault with more steps.
+	_dim(0.38)
 	var full := func(y: float) -> Rect2: return Rect2(0, y, size.x, 40)
 	var touch_pad: bool = main.touch != null and main.touch.visible
 	_text_in(full.call(size.y * 0.30), "MOTORIO", 56, Defs.COL_CORE)
@@ -1251,7 +1284,12 @@ func _draw_title() -> void:
 	# 세워 열을 최대한 모으세요" -- the one-night score run, which has not been the
 	# shape of this game since the day stopped ending it.
 	_text_in(full.call(size.y * 0.52), "얼어붙은 행성에 불을 피우고, 그 불을 키워 나가세요.", 16, Defs.COL_TEXT)
-	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.", 13, Defs.COL_TEXT_DIM)
+	# Brighter than COL_TEXT_DIM, which is a muted blue-grey chosen against the
+	# HUD's dark panels. On a painted sky it is almost exactly the background's
+	# own luminance, and a line the same brightness as what it sits on is a line
+	# nobody reads however dark you make the picture behind it.
+	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.",
+		13, Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, 0.82))
 	_draw_title_menu()
 	# WASD was on this line for as long as the line existed and has never been
 	# bound to anything: `move_*` is arrow keys only. It is the first screen of
@@ -1259,7 +1297,8 @@ func _draw_title() -> void:
 	# the objective that said C to mine for eight versions. `test_hints` now
 	# checks the movement claim against the bindings like it does the letters.
 	var controls: String = title_controls(touch_pad)
-	_text_in(full.call(size.y * 0.84), controls, 12, Defs.COL_TEXT_DIM)
+	_text_in(full.call(size.y * 0.84), controls, 12,
+		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, 0.72))
 	# So a player can say which build they are on without opening anything.
 	_text_in(Rect2(0, size.y - MARGIN, size.x - MARGIN, 16), "v%s" % version_string(), 11,
 		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)

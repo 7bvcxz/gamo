@@ -103,5 +103,43 @@ func _test_rows() -> void:
 	_assert(int(hud.call("title_menu_at", Vector2(2.0, 2.0))) < 0,
 		"딴 곳을 누르면 어떤 줄도 아니다")
 
+	_test_painting(main)
+
 	main.clear_save()
 	main.free()
+
+# --- The painting behind it ----------------------------------------------------
+
+func _test_painting(main: Node2D) -> void:
+	var hud: Node = main.hud
+	var art: Texture2D = hud.get("TITLE_ART")
+	_assert(art != null and art.get_width() > 0, "타이틀 그림이 실제로 있다")
+	_assert(art.get_width() >= 1280, "화면을 덮을 만큼 크다: %d" % art.get_width())
+
+	# Cover, not fit. The picture is 16:9 and so is the game, but a phone held
+	# upright is not -- and a letterboxed title on a phone is mostly letterbox.
+	# The cutscene had exactly this bug at exactly 16:9, where a covering fit is
+	# the screen *precisely* and any slop shows the background behind it.
+	for shape: Vector2 in [Vector2(1280, 720), Vector2(960, 540), Vector2(390, 844),
+			Vector2(844, 390), Vector2(1920, 1200), Vector2(1024, 1024)]:
+		var box: Rect2 = hud.call("title_rect", shape)
+		_assert(box.position.x <= 0.01 and box.position.y <= 0.01,
+			"%.0fx%.0f: 왼쪽 위가 화면 밖이거나 딱 맞는다 (%.1f, %.1f)"
+				% [shape.x, shape.y, box.position.x, box.position.y])
+		_assert(box.position.x + box.size.x >= shape.x - 0.01
+			and box.position.y + box.size.y >= shape.y - 0.01,
+			"%.0fx%.0f: 오른쪽 아래까지 덮는다" % [shape.x, shape.y])
+		# And it is not stretched: a title whose aspect drifts is a different
+		# painting on every window.
+		var ratio: float = box.size.x / box.size.y
+		var source: float = float(art.get_width()) / float(art.get_height())
+		_assert(absf(ratio - source) < 0.001,
+			"%.0fx%.0f: 비율이 그대로다 (%.3f / %.3f)" % [shape.x, shape.y, ratio, source])
+
+	# And the menu is drawn on it, not off it.
+	hud.size = Vector2(1280, 720)
+	main.resumed = true
+	for index in main.title_menu().size():
+		var row: Rect2 = hud.call("title_menu_rect", index)
+		_assert(row.position.y > 0.0 and row.position.y + row.size.y < hud.size.y,
+			"%d번째 줄이 그림 위에 얹힌다" % index)
