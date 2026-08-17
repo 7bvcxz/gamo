@@ -58,6 +58,9 @@ func _ready() -> void:
 	_body.position = Vector2(0.0, GROUND)
 	# The origin is the foot anchor, in texture pixels, so scale happens there.
 	_body.offset = Vector2(0.0, -(MachineLayer.CAT_FOOT_FRACTION - 0.5) * CELL)
+	# Same reason as the player's sheets -- see PlayerActor.SOFT_FILTER. A cat is
+	# drawn at 0.45 of its cell, which is the worst end of the range.
+	_body.texture_filter = PlayerActor.SOFT_FILTER
 	add_child(_body)
 
 	# No sheet exists for the pig, so it is drawn. It goes in the animal's own
@@ -80,7 +83,7 @@ func _ready() -> void:
 
 ## Called once a frame by the pool. Sets this node's position and the state its
 ## children need; nothing here computes a second position for anything.
-func sync(source: Sim.Cat, time: float, visible_now: bool) -> void:
+func sync(source: Sim.Cat, time: float, visible_now: bool, holds_tool: bool) -> void:
 	cat = source
 	pulse = time
 	visible = visible_now
@@ -103,7 +106,11 @@ func sync(source: Sim.Cat, time: float, visible_now: bool) -> void:
 	_body.flip_h = bool(chosen[1])
 	_body.scale = Vector2(base / breathe, base * breathe)
 
-	_tool.visible = cat.state == Defs.CAT_WORKING
+	# Handed in rather than derived here. A cat at a bare seam is digging with
+	# its paws and a cat at a miner is running the machine; both are CAT_WORKING,
+	# and the drawing side asking the state alone gave the open-ore cat a drill
+	# that does not exist.
+	_tool.visible = holds_tool
 	if _tool.visible:
 		# Twice a cycle, a quarter as far. A drill swinging the height of the cat
 		# reads as the animal waving it about; a short fast tap reads as work.

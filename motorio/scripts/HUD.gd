@@ -511,6 +511,7 @@ func _draw_status() -> void:
 		Defs.COL_MACHINE_EDGE)
 
 	_draw_warmth_row(panel)
+	_draw_info()
 	_draw_objective()
 
 ## Daylight as a half circle the sun crosses, left to right. A bar told the
@@ -619,6 +620,19 @@ func _draw_resources() -> void:
 const OBJECTIVE_ICON := 44.0
 const OBJECTIVE_H := 68.0
 
+## The state card. Shorter than the goal card -- it has no icon well and one line
+## -- and it takes the top-right corner, with the goal card sliding under it.
+const INFO_H := 40.0
+const INFO_GAP := 6.0
+
+func info_rect(text: String) -> Rect2:
+	var width: float = minf(_text_width(text, 12) + INFO_H + 34.0, size.x - MARGIN * 2.0)
+	var box := Rect2(size.x - width - MARGIN, MARGIN, width, INFO_H)
+	var panel: Rect2 = status_rect()
+	if box.position.x < panel.position.x + panel.size.x + 8.0:
+		box.position.y = panel.position.y + panel.size.y + 8.0
+	return box
+
 func objective_rect(text: String) -> Rect2:
 	# The trailing pad has to clear the last glyph's advance, not just sit flush
 	# against it, or the closing bracket lands on the plate border.
@@ -629,7 +643,31 @@ func objective_rect(text: String) -> Rect2:
 	var panel: Rect2 = status_rect()
 	if box.position.x < panel.position.x + panel.size.x + 8.0:
 		box.position.y = panel.position.y + panel.size.y + 8.0
+	# And under the state card whenever the world has something to say, which is
+	# what "above the goal" means: the thing that is true right now sits over the
+	# thing being worked towards, and neither evicts the other.
+	var state: String = main.info()
+	if state != "":
+		var above: Rect2 = info_rect(state)
+		box.position.y = maxf(box.position.y, above.position.y + above.size.y + INFO_GAP)
 	return box
+
+## Drawn before the goal card, because the goal card's own rectangle is measured
+## from this one and a reader following the paint order should meet them in that
+## order too.
+func _draw_info() -> void:
+	var row: Dictionary = main.info_data()
+	if not row.has("text"):
+		return
+	var text: String = String(row["text"])
+	var box: Rect2 = info_rect(text)
+	# Its own colour, not the goal's. The two cards are stacked and the same
+	# amber twice reads as one panel that grew a line.
+	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.90),
+		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.75), 1.0)
+	var slot := Rect2(box.position + Vector2(9.0, 9.0), Vector2.ONE * (INFO_H - 18.0))
+	_draw_goal_icon(slot, row)
+	_text(box.position + Vector2(INFO_H + 4.0, INFO_H * 0.5 + 4.0), text, 12, Defs.COL_TEXT)
 
 func _draw_objective() -> void:
 	var goal: Dictionary = main.objective_data()
@@ -1137,14 +1175,86 @@ func _draw_cutscene() -> void:
 	# The line sits on a band of its own. Over watercolour, an outline alone is
 	# not enough -- half of these panels have a bright sky exactly where the text
 	# goes.
-	var band := Rect2(0.0, size.y * 0.80, size.x, size.y * 0.20)
+	var band := Rect2(0.0, size.y * 0.78, size.x, size.y * 0.22)
 	draw_rect(band, Color(0.02, 0.03, 0.06, 0.62 * alpha))
-	_text_in(Rect2(MARGIN, size.y * 0.86, size.x - MARGIN * 2.0, 30.0),
-		String(panels[index]["line"]), 17, Color(Defs.COL_TEXT, alpha))
+	_draw_cutscene_lines(index, elapsed, alpha, band)
 	var hint: String = "화면을 눌러 넘기기" if main.touch != null and main.touch.visible \
 		else "아무 키나 눌러 넘기기   ·   Esc 건너뛰기"
 	_text_in(Rect2(MARGIN, size.y - MARGIN, size.x - MARGIN * 2.0, 16.0), hint, 11,
 		Color(Defs.COL_TEXT_DIM, alpha * 0.75))
+
+## The caption, laid out run by run.
+##
+## Two things it has to do that one `draw_string` cannot. The lines are written
+## with their own breaks -- a caption that decides its own break lands the comma
+## where the writer put it, and the automatic one puts it wherever the window
+## happens to be wide -- and the marked words are set in another face, bold, and
+## will not sit still.
+##
+## Every run is measured in its own font before anything is drawn, because a
+## centred line whose runs are measured in the body face and drawn in a wider one
+## comes out off-centre by exactly the difference.
+const CUTSCENE_TEXT := 17
+const CUTSCENE_LINE_H := 26.0
+
+func _draw_cutscene_lines(index: int, elapsed: float, alpha: float, band: Rect2) -> void:
+	var lines: Array[Dictionary] = Defs.cutscene_runs(index)
+	if lines.is_empty():
+		return
+	var point: int = cutscene_text_size(index)
+	var line_height: float = CUTSCENE_LINE_H * float(point) / float(CUTSCENE_TEXT)
+	var block: float = float(lines.size()) * line_height
+	var top: float = band.position.y + (band.size.y - block) * 0.5 + line_height * 0.72
+	for row in lines.size():
+		var runs: Array = lines[row]["runs"]
+		var width := 0.0
+		for run: Dictionary in runs:
+			width += _run_width(run, point)
+		var cursor: float = size.x * 0.5 - width * 0.5
+		var baseline: float = top + float(row) * line_height
+		for run: Dictionary in runs:
+			var text: String = String(run["text"])
+			if text != "":
+				var hot: bool = bool(run["hot"])
+				var font: Font = UIFont.DISPLAY if hot else UIFont.FONT
+				var at := Vector2(cursor, baseline)
+				if hot:
+					at += Defs.cutscene_word_shake(int(run["index"]), elapsed)
+				draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+					point, Color(0.02, 0.03, 0.06, 0.8 * alpha))
+				draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, point,
+					Color(Defs.COL_CORE if hot else Defs.COL_TEXT, alpha))
+			cursor += _run_width(run, point)
+
+## A run's advance, in the face it will actually be drawn in.
+func _run_width(run: Dictionary, point: int) -> float:
+	var font: Font = UIFont.DISPLAY if bool(run["hot"]) else UIFont.FONT
+	return font.get_string_size(String(run["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, point).x
+
+## How wide the widest line of a panel's caption is at a given size, so a test
+## can ask whether it fits without drawing it.
+func cutscene_text_width(index: int, point: int = CUTSCENE_TEXT) -> float:
+	var widest := 0.0
+	for line: Dictionary in Defs.cutscene_runs(index):
+		var width := 0.0
+		for run: Dictionary in line["runs"]:
+			width += _run_width(run, point)
+		widest = maxf(widest, width)
+	return widest
+
+## The size the caption is actually set at.
+##
+## The lines break where they are written, which is the point -- a caption that
+## breaks itself puts the comma wherever the window happens to be wide. But a
+## written break cannot know the screen is 390 pixels across, so the type comes
+## down until the longest line fits. Shrinking rather than re-breaking, because
+## the break is the writing and the size is not.
+func cutscene_text_size(index: int) -> int:
+	var room: float = size.x - MARGIN * 2.0
+	var point: int = CUTSCENE_TEXT
+	while point > 9 and cutscene_text_width(index, point) > room:
+		point -= 1
+	return point
 
 ## Where the picture goes. Static and handed its own size, so the one thing that
 ## can go wrong here can be measured rather than looked for.

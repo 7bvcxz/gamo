@@ -189,6 +189,7 @@ func _ready() -> void:
 	cats_layer.sim = sim
 	hud.set("main", self)
 	player.blocked = func(cell: Vector2i) -> bool: return sim.blocks_player(cell)
+	player.belt_drift = func(cell: Vector2i) -> Vector2: return sim.belt_drift(cell)
 	touch.main_controller = self
 	touch.player = player
 	atmosphere.set("main", self)
@@ -280,39 +281,20 @@ func _start_run() -> void:
 	gacha_pending = 0
 	gacha_results.clear()
 
+## The goal, and only the goal: the rung of the ladder she is on.
+##
+## This card used to carry two different kinds of sentence. One is what to do
+## next -- find the box, put the fire down, get the base to its next step. The
+## other is what is happening right now: the sun is going down, there is a cat in
+## her arms, the grid is short of power. They read the same and they are not the
+## same, and the second kind kept evicting the first: a player who picked a cat
+## up stopped being able to see what they were working towards until they put it
+## down again.
+##
+## So the state lines moved out to `info_data`, which is drawn as its own card
+## above this one. Both are on screen at once now, which is what they were
+## competing for.
 func objective_data() -> Dictionary:
-	# Freezing comes before everything, including nightfall. A playtest caught the
-	# card reading "고양이 상자를 3개 모아 숙소로 가져가세요" over a screen at 0% warmth
-	# with "의식이 흐려집니다 1.4초" written across it. The objective is the largest
-	# text on screen and it was calmly discussing errands. Night is a fifty second
-	# warning; this is seconds from a blackout that costs a quarter of the run's
-	# heat, so it outranks it.
-	if not indoors() and player.warmth <= Defs.FROST_STAGES[2]:
-		# Before the fire exists there is no radius to get back inside, and
-		# telling her to go somewhere that does not exist is worse than telling
-		# her nothing. The instruction is the same one the mission gives, said
-		# with the urgency the temperature has earned.
-		if not sim.base_placed:
-			return _goal(Defs.mission_line("COLD-NOBASE"), "thing", Icons.THING_CORE)
-		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
-	if is_night():
-		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
-	if is_dusk():
-		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
-	if sim.carried_cat != null:
-		return _goal(Defs.mission_line("CARRY-CAT"), "thing", Icons.THING_CAT)
-	# Ahead of the mining line: a thawing cat is three seconds from being the
-	# thing the player has been walking towards, and a card telling them to go
-	# back to a seam in the middle of it is the game looking away.
-	# Both of these sit above the mining line, and for the same reason the carried
-	# cat does: what she is holding, or what is three seconds from waking up, is
-	# more urgent than the errand she was on before. A player who walked out and
-	# picked one up before ever swinging the pickaxe was being told to go and
-	# mine, with a body in her arms.
-	if sim.carried_frozen:
-		return _goal(Defs.mission_line("CARRY-FROZEN"), "thing", Icons.THING_CAT_FROZEN)
-	if _thawing_nearby():
-		return _goal(Defs.mission_line("THAW"), "thing", Icons.THING_CAT_FROZEN)
 	# The opening. Four rungs of its own, above the ordinary ladder, because
 	# until they are done most of that ladder is about machines that cannot be
 	# built yet and a base that does not exist.
@@ -329,12 +311,42 @@ func objective_data() -> Dictionary:
 	# the next step of the fire and what it costs, which is the one thing the
 	# whole game is measured in -- and how to get there is left to the player,
 	# which is the point.
-	# One state line above it, because a brown-out is a fact about the world and
-	# not an errand: the factory the player built is running at a fraction of its
-	# rate and nothing else on screen says so.
+	return _goal(_upgrade_line(), "thing", Icons.THING_CORE)
+
+## What is true right now and is not an errand. Empty when nothing is.
+##
+## Ordered by how much it costs to ignore. Freezing is seconds from a blackout
+## that takes a quarter of the run's heat; night is a fifty second warning; a cat
+## in her arms is not urgent at all but is the thing she is currently doing, and
+## a card that says nothing while she carries one is a card she stops reading.
+func info_data() -> Dictionary:
+	# A playtest caught the old card reading "고양이 상자를 3개 모아 숙소로 가져가세요"
+	# over a screen at 0% warmth with "의식이 흐려집니다 1.4초" written across it.
+	if not indoors() and player.warmth <= Defs.FROST_STAGES[2]:
+		# Before the fire exists there is no radius to get back inside, and
+		# telling her to go somewhere that does not exist is worse than telling
+		# her nothing.
+		if not sim.base_placed:
+			return _goal(Defs.mission_line("COLD-NOBASE"), "thing", Icons.THING_CORE)
+		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
+	if is_night():
+		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
+	if is_dusk():
+		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
+	# What is three seconds from waking up outranks what is in her arms, and both
+	# outrank the state of the grid.
+	if _thawing_nearby():
+		return _goal(Defs.mission_line("THAW"), "thing", Icons.THING_CAT_FROZEN)
+	if sim.carried_frozen:
+		return _goal(Defs.mission_line("CARRY-FROZEN"), "thing", Icons.THING_CAT_FROZEN)
+	if sim.carried_cat != null:
+		return _goal(Defs.mission_line("CARRY-CAT"), "thing", Icons.THING_CAT)
+	# A brown-out is a fact about the world and not an errand: the factory the
+	# player built is running at a fraction of its rate and nothing else on
+	# screen says so.
 	if sim.power_draw > sim.power_capacity:
 		return _goal(Defs.mission_line("BROWNOUT"), "machine", Defs.M_GENERATOR)
-	return _goal(_upgrade_line(), "thing", Icons.THING_CORE)
+	return {}
 
 ## Everything that used to be below this line was an instruction ladder: build a
 ## miner, put a cat on it, build the exchanger, feed it, widen the circle, go and
@@ -343,15 +355,18 @@ func objective_data() -> Dictionary:
 ##
 ## It is gone as of 0.20.72. By the time the hut is standing the player has a
 ## fire, a pickaxe, a world and every key they need, and being handed the next
-## errand is exactly what turns that into a checklist. What the card shows from
-## there is the next step of the fire and what it costs; how to get there is the
-## game.
+## errand is exactly what turns that into a checklist.
 
 func _goal(text: String, kind: String, id) -> Dictionary:
 	return {"text": text, "kind": kind, "id": id}
 
 func objective() -> String:
 	return String(objective_data()["text"])
+
+## The state line, or empty when the world has nothing to say.
+func info() -> String:
+	var row: Dictionary = info_data()
+	return String(row["text"]) if row.has("text") else ""
 
 func _on_tool_selected() -> void:
 	if TOOLS[tool_index] != TOOL_TORCH:

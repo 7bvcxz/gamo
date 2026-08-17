@@ -71,18 +71,36 @@ func _objectives(main: Node2D) -> void:
 	_check(not opening.contains("Z") and not opening.contains("하세요"),
 		"그리고 지시하지 않는다: %s" % opening)
 
-	# Freezing outranks everything. This was found by a playtest screenshot of the
-	# card discussing crates over a blackout countdown.
+	# State lines live on their own card now. The goal is what she is working
+	# towards and does not change because the sun went down; the state card is
+	# what is true right now. They used to be the same card, and the second kind
+	# kept evicting the first -- a player who picked a cat up stopped being able
+	# to see what they were working towards until they put it down.
+	_check(main.info().is_empty(), "조용할 때는 정보창이 없다: '%s'" % main.info())
 	var warm: float = main.player.warmth
 	main.player.warmth = Defs.FROST_STAGES[2] - 1.0
-	var freezing: String = String(main.objective_data()["text"])
-	_check(freezing.contains("얼고"), "체온이 낮으면 목표가 온기로 바뀐다: %s" % freezing)
+	var freezing: String = main.info()
+	_check(freezing.contains("얼고"), "체온이 낮으면 정보창이 온기를 말한다: %s" % freezing)
+	_check(String(main.objective_data()["text"]) == opening,
+		"그동안 목표는 그대로다: %s" % String(main.objective_data()["text"]))
 	main.time_left = Defs.NIGHT_SECONDS - 1.0
-	_check(String(main.objective_data()["text"]) == freezing,
-		"밤이어도 동결이 먼저다")
+	_check(main.info() == freezing, "밤이어도 동결이 먼저다")
 	main.time_left = Defs.DAY_SECONDS
 	main.player.warmth = warm
-	_check(String(main.objective_data()["text"]) == opening, "체온이 돌아오면 목표도 돌아온다")
+	_check(main.info().is_empty(), "체온이 돌아오면 정보창도 닫힌다")
+	_check(String(main.objective_data()["text"]) == opening, "목표는 내내 같았다")
+
+	# And the card that stacks above it never pushes the goal off the screen.
+	main.player.warmth = Defs.FROST_STAGES[2] - 1.0
+	var hud: Node = main.hud
+	var info_box: Rect2 = hud.call("info_rect", main.info())
+	var goal_box: Rect2 = hud.call("objective_rect", main.objective())
+	_check(goal_box.position.y >= info_box.position.y + info_box.size.y,
+		"정보창이 목표창 위에 앉는다: 정보 %.0f..%.0f, 목표 %.0f"
+			% [info_box.position.y, info_box.position.y + info_box.size.y, goal_box.position.y])
+	_check(goal_box.position.y + goal_box.size.y < hud.size.y,
+		"그래도 목표창이 화면 안에 있다")
+	main.player.warmth = warm
 
 	# Walk the ladder and read every line it can produce, so a key named in a
 	# later objective is checked too rather than only the first one.
@@ -101,6 +119,13 @@ func _objectives(main: Node2D) -> void:
 	for change: Callable in states:
 		change.call()
 		seen.append(String(main.objective_data()["text"]))
+		if main.info() != "":
+			seen.append(main.info())
+		# Whatever the world is doing, the goal card keeps showing the ladder.
+		# This is the whole point of the split: picking a cat up used to blank the
+		# thing the player was working towards.
+		_check(String(main.objective_data()["text"]) == opening,
+			"세상이 무슨 일을 하든 목표는 사다리다: '%s'" % String(main.objective_data()["text"]))
 	var bound := {"Z": true, "X": true, "R": true, "F": true, "C": true}
 	for line: String in seen:
 		for letter: String in ["Z", "X", "R", "F", "C", "B", "G"]:

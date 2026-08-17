@@ -114,6 +114,31 @@ SUBJECTS = {
         "belt is uniform along its whole length, identical at the top and at the "
         "bottom."
     ),
+    # The crate she wakes up next to, and the two things that come out of it.
+    #
+    # Three pictures rather than one because the case in the snow is closed and
+    # what she carries is not: the whole opening is "there is a box, and what was
+    # in it becomes the fire and the hut", and one grey rectangle for all three
+    # states says none of that. Drawn as a case rather than a crate so it reads
+    # as equipment that came off a ship, not as cargo someone stacked.
+    "kit": (
+        "A small closed emergency survival case half-buried in snow, for a snowy "
+        "top-down game: a chunky rounded metal case with a thick lid, one broad "
+        "band across the lid, two warm brass catches on the front, a carrying "
+        "handle on top, a little snow settled on the lid."
+    ),
+    "kit_base": (
+        "A small open emergency case for a snowy top-down game, seen with its lid "
+        "raised: inside it a round amber ember glowing warmly, packed in a "
+        "cream-coloured lining, the case itself chunky rounded muted blue-grey "
+        "metal with warm brass catches."
+    ),
+    "kit_shelter": (
+        "A small open emergency case for a snowy top-down game, seen with its lid "
+        "raised: inside it a tight bundle of warm brown timber and folded cream "
+        "canvas, the case itself chunky rounded muted blue-grey metal with warm "
+        "brass catches."
+    ),
     "exchanger": (
         "A cosy crystal-to-energy converter machine for a snowy top-down game: a "
         "chunky rounded metal cabinet, one big round window in front glowing warm "

@@ -37,6 +37,20 @@ const CAT_WORK_SHEET: Texture2D = preload("res://assets/characters/cat_work_s.pn
 const CORE_ART: Texture2D = preload("res://assets/objects/core.png")
 const SHELTER_ART: Texture2D = preload("res://assets/objects/shelter.png")
 const FOOD_BIN_ART: Texture2D = preload("res://assets/objects/food_bin.png")
+## The case in the snow, and the two things that come out of it. Three pictures
+## rather than one because the whole opening is "there is a box, and what was in
+## it becomes the fire and the hut" -- one drawn grey rectangle for all three
+## states said none of that.
+const KIT_ART: Texture2D = preload("res://assets/objects/kit.png")
+const KIT_BASE_ART: Texture2D = preload("res://assets/objects/kit_base.png")
+const KIT_SHELTER_ART: Texture2D = preload("res://assets/objects/kit_shelter.png")
+const KIT_DRAW := 32.0
+const KIT_OPEN_DRAW := 26.0
+
+## Which open case she is holding. Asked here so the world layer and the player
+## cannot come to disagree about what is in her arms.
+static func kit_art(kind: int) -> Texture2D:
+	return KIT_BASE_ART if kind == Defs.KIT_BASE else KIT_SHELTER_ART
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
 const EXCHANGER_ART: Texture2D = preload("res://assets/objects/exchanger.png")
 const GENERATOR_ART: Texture2D = preload("res://assets/objects/generator.png")
@@ -92,8 +106,10 @@ const CAT_DRAW := PlayerActor.CELL * PlayerActor.SPRITE_SCALE * 0.9
 ## beside its own shadow.
 const CAT_FOOT_FRACTION := 104.0 / 128.0
 const CAT_HEAD_FRACTION := 36.0 / 128.0
-## The feet, relative to the cat's world position.
-const CAT_GROUND := 10.0
+## The feet, relative to the cat's world position. The number lives in Defs
+## because the simulation places cats by their feet and would otherwise be
+## guessing at a constant the drawing owns.
+const CAT_GROUND := Defs.CAT_FOOT_DROP
 ## What hangs over a cat, and how high.
 ##
 ## Both used to be higher: the bar at 14 above the head and the load at 7, which
@@ -731,15 +747,7 @@ func _draw_kit(tile: float) -> void:
 	var breathe: float = 0.5 + 0.5 * sin(pulse * 2.2)
 	draw_circle(at, 22.0, Color(1.0, 0.72, 0.36, 0.05 + 0.07 * breathe))
 	_shadow(at + Vector2(0, 8), 11.0)
-	var case: Rect2 = _body(at, 19.0, Color8(96, 104, 116), Color8(150, 160, 176))
-	# A band across the lid and two catches, so it is a case rather than a crate.
-	draw_rect(Rect2(case.position.x, case.get_center().y - 2.0, case.size.x, 4.0),
-		Color8(58, 64, 74))
-	for side: float in [-1.0, 1.0]:
-		draw_rect(Rect2(at.x + side * 5.0 - 1.5, case.get_center().y - 3.0, 3.0, 6.0),
-			Color8(214, 176, 96))
-	# The handle on top, which is the bit that reads at a distance.
-	draw_arc(at + Vector2(0, -9.0), 5.0, PI, TAU, 10, Color8(58, 64, 74), 2.0)
+	_object_art(KIT_ART, at, KIT_DRAW)
 	# Searching it. The same ring hand mining uses, because it is the same verb:
 	# hold the key and watch a circle close.
 	if sim.kit_progress > 0.0:
@@ -850,7 +858,20 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 ## No plate behind it. It is outlined instead, which is what keeps it readable on
 ## snow, on wood and on a cat depending on the minute: an outline belongs to the
 ## glyphs, so nothing is painted over the world to carry it.
+## The number belongs to the bin, so it is asked as one question rather than
+## checked inside the paint -- a test can read a predicate and cannot read a
+## `return` in the middle of a draw call.
+func shows_food_count() -> bool:
+	return sim != null and sim.food_placed
+
 func _draw_food_count(on: CanvasItem, tile: float) -> void:
+	# No bin, no number. The bin stopped being placed at the start in 0.20.74 --
+	# a feeding station standing on the map four days before a cat gets hungry is
+	# an answer parked next to a problem that has not happened -- but this drew
+	# `sim.food` at `sim.food_cell` regardless, so a bare 200 floated in the snow
+	# southwest of the base with nothing under it to say what it counted.
+	if not shows_food_count():
+		return
 	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
 	if not view_rect.grow(tile * 2.0).has_point(at):
 		return

@@ -128,7 +128,8 @@ func _run() -> void:
 			# passed against the very code it was written to catch.
 			if cat.state == Defs.CAT_WORKING:
 				worked += 1
-				off_centre = maxf(off_centre, cat.pos.distance_to(sim.cell_centre(cat.assigned)))
+				var feet: Vector2 = cat.pos + Vector2(0.0, Defs.CAT_FOOT_DROP)
+				off_centre = maxf(off_centre, feet.distance_to(sim.cell_centre(cat.assigned)))
 			tick_last[index] = cat.pos
 			tick_state[index] = cat.state
 		if since < SAMPLE:
@@ -159,9 +160,13 @@ func _run() -> void:
 	# And a working cat stands on the middle of its machine, not near it: the
 	# drill it holds is drawn from the same point, so an animal that stopped ten
 	# pixels short works beside the seam instead of on it.
+	#
+	# Measured at the feet. A cat's position is its torso and the drawing puts the
+	# feet CAT_FOOT_DROP below it, so a cat placed at the middle of a tile stood a
+	# third of a tile south of the machine -- 19 screen pixels at full zoom.
 	_assert(worked > 1000, "작업 중인 순간이 충분히 관측됐다 (%d틱)" % worked)
 	_assert(off_centre < 0.01,
-		"작업 중인 고양이는 채굴기 정중앙에 선다 (최대 %.2fpx 벗어남)" % off_centre)
+		"작업 중인 고양이의 발이 채굴기 정중앙을 딛는다 (최대 %.2fpx 벗어남)" % off_centre)
 
 	main.clear_save()
 	if failures == 0:

@@ -346,6 +346,57 @@
    ]
   },
   {
+   "id": "kit_base_gen",
+   "candidates": [
+    {
+     "id": "kit_base_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/kit_base_gen1-128-9e6f1eceb858.png",
+      "64": "/object-candidates/kit_base_gen1-64-e7f098a75812.png"
+     },
+     "source": [
+      583,
+      884
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kit_gen",
+   "candidates": [
+    {
+     "id": "kit_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/kit_gen1-128-7ada5ba077b0.png",
+      "64": "/object-candidates/kit_gen1-64-84f8a89cb629.png"
+     },
+     "source": [
+      911,
+      713
+     ]
+    }
+   ]
+  },
+  {
+   "id": "kit_shelter_gen",
+   "candidates": [
+    {
+     "id": "kit_shelter_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/kit_shelter_gen1-128-8b568265a28c.png",
+      "64": "/object-candidates/kit_shelter_gen1-64-0694ce607592.png"
+     },
+     "source": [
+      677,
+      864
+     ]
+    }
+   ]
+  },
+  {
    "id": "mine",
    "candidates": [
     {
@@ -598,6 +649,39 @@
    "sizes": {
     "128": "/object-candidates/shipped-generator-128-73277be8c119.png",
     "36": "/object-candidates/shipped-generator-36-502b2e25be61.png"
+   }
+  },
+  {
+   "role": "kit",
+   "name": "긴급 키트",
+   "from": "kit_gen1",
+   "draw": 32,
+   "stored": 64,
+   "sizes": {
+    "128": "/object-candidates/shipped-kit-128-eaf65a36d5da.png",
+    "32": "/object-candidates/shipped-kit-32-c1a8088d4992.png"
+   }
+  },
+  {
+   "role": "kit_base",
+   "name": "긴급기지키트",
+   "from": "kit_base_gen1",
+   "draw": 26,
+   "stored": 52,
+   "sizes": {
+    "128": "/object-candidates/shipped-kit_base-128-359521e04545.png",
+    "26": "/object-candidates/shipped-kit_base-26-e94ff90642e3.png"
+   }
+  },
+  {
+   "role": "kit_shelter",
+   "name": "긴급생존키트",
+   "from": "kit_shelter_gen1",
+   "draw": 26,
+   "stored": 52,
+   "sizes": {
+    "128": "/object-candidates/shipped-kit_shelter-128-1b1b350ede9b.png",
+    "26": "/object-candidates/shipped-kit_shelter-26-7e69519c206f.png"
    }
   },
   {

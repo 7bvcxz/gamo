@@ -87,6 +87,13 @@ ADOPTED = {
     # and down, so the bit has to point down in the art -- gen1 was a drill gun
     # aimed sideways, which reads as a cat holding a gun.
     "cat_tool": ("cat_tool_gen2", 21),  # a tool, not a machine
+    # The case she wakes up beside, and the two things that come out of it. One
+    # tile, because that is what it occupies -- the crate was a drawn grey
+    # rectangle and what she carried was the same rectangle again, so the opening
+    # had one shape for three different states.
+    "kit": ("kit_gen1", 32),
+    "kit_base": ("kit_base_gen1", 26),
+    "kit_shelter": ("kit_shelter_gen1", 26),
 }
 GAME_ART = REPO / "motorio" / "assets" / "objects"
 
@@ -108,6 +115,9 @@ ADOPTED_NAMES = {
     "belt_straight": "컨베이어 벨트 · 직선",
     "belt_corner": "컨베이어 벨트 · 코너",
     "splitter": "분배기",
+    "kit": "긴급 키트",
+    "kit_base": "긴급기지키트",
+    "kit_shelter": "긴급생존키트",
 }
 
 ## Anything at or below this is matting residue rather than art.

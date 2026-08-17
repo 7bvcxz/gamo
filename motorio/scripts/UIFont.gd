@@ -14,3 +14,11 @@ class_name UIFont
 ## render, so adding text and forgetting to rebuild the font is a failing test
 ## rather than a row of tofu boxes on a player's screen.
 const FONT: Font = preload("res://assets/ui-font.otf")
+
+## The display face: Noto Serif CJK Bold, cut to the same character set.
+##
+## Used for the handful of words the opening leans on, and it is a genuinely
+## different typeface rather than the body face emboldened -- a synthesised bold
+## reads as the same sentence shouting, and a word standing apart from its
+## sentence is supposed to look like it came from somewhere else.
+const DISPLAY: Font = preload("res://assets/ui-display.otf")

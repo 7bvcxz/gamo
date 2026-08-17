@@ -28,12 +28,72 @@ func _run() -> void:
 	_test_plays_once()
 	_test_timing()
 	_test_shake()
+	_test_caption(main)
 	_test_skip()
 	if failures == 0:
 		print("PASS test_cutscene")
 	else:
 		print("FAIL test_cutscene (%d)" % failures)
 	quit(failures)
+
+
+# --- The caption ---------------------------------------------------------------
+
+func _test_caption(main: Node2D) -> void:
+	var hud: Node = main.hud
+	for index in Defs.CUTSCENE_PANELS.size():
+		var panel: Dictionary = Defs.CUTSCENE_PANELS[index]
+		var line: String = String(panel["line"])
+		var lines: Array[Dictionary] = Defs.cutscene_runs(index)
+		# One or two lines: a single clause says what the picture already says,
+		# and three is a page.
+		_assert(lines.size() >= 1 and lines.size() <= 2,
+			"%d장은 한두 줄이다: %d줄" % [index + 1, lines.size()])
+		# The runs put the sentence back together exactly. A splitter that drops a
+		# character shows up as a missing particle, which reads as a typo.
+		var rebuilt := ""
+		for row: Dictionary in lines:
+			for run: Dictionary in row["runs"]:
+				rebuilt += String(run["text"])
+		_assert(rebuilt == line.replace("\n", ""),
+			"%d장의 조각을 이으면 원문이다" % (index + 1))
+		# Every marked word is actually found in the line, or it is a word the
+		# player will never see move.
+		var marked: Array = panel.get("hot", [])
+		_assert(not marked.is_empty(), "%d장에 강조할 낱말이 있다" % (index + 1))
+		for word: String in marked:
+			_assert(line.contains(String(word)),
+				"%d장의 강조 '%s'가 문장 안에 있다" % [index + 1, word])
+		var hot_runs := 0
+		for row: Dictionary in lines:
+			for run: Dictionary in row["runs"]:
+				if bool(run["hot"]):
+					hot_runs += 1
+		_assert(hot_runs == marked.size(),
+			"%d장에서 표시한 만큼만 강조된다: %d/%d" % [index + 1, hot_runs, marked.size()])
+
+	# Two marked words never move together, or the line reads as sliding rather
+	# than as the words shaking.
+	var a: Vector2 = Defs.cutscene_word_shake(0, 1.37)
+	var b: Vector2 = Defs.cutscene_word_shake(1, 1.37)
+	_assert(a.distance_to(b) > 0.2, "낱말마다 따로 흔들린다: %s vs %s" % [str(a), str(b)])
+	_assert(Defs.cutscene_word_shake(0, 1.37) == a, "같은 시각에는 같은 자리다")
+	_assert(a.length() <= Defs.CUTSCENE_HOT_SHAKE * 1.01,
+		"흔들림이 정해진 폭을 넘지 않는다: %.2f" % a.length())
+
+	# And it fits. Measured in the faces it will be drawn in -- the display face
+	# is wider than the body face, so a line measured in the wrong one comes out
+	# off-centre by exactly the difference and can run off the edge.
+	for shape: Vector2 in [Vector2(960, 540), Vector2(1280, 720), Vector2(390, 844),
+			Vector2(844, 390)]:
+		hud.size = shape
+		for index in Defs.CUTSCENE_PANELS.size():
+			var point: int = int(hud.call("cutscene_text_size", index))
+			var width: float = hud.call("cutscene_text_width", index, point)
+			_assert(width <= shape.x,
+				"%.0fx%.0f 화면에서 %d장 문구가 넘치지 않는다: %.0f / %.0f (%dpt)"
+					% [shape.x, shape.y, index + 1, width, shape.x, point])
+			_assert(point >= 10, "%.0f 폭에서도 읽을 만한 크기다: %dpt" % [shape.x, point])
 
 func _assert(condition: bool, label: String) -> void:
 	if condition:

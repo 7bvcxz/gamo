@@ -225,7 +225,7 @@ func _run() -> void:
 	var body_scales: Array[float] = []
 	for tick in 60:
 		walker.pos = Vector2(120.0 + float(tick) * 7.3, 240.0 + float(tick) * 1.9)
-		view.sync(walker, 3.2 + float(tick) * 0.017, true)
+		view.sync(walker, 3.2 + float(tick) * 0.017, true, false)
 		for child: Node2D in view.get_children():
 			if child == view._tool:
 				continue          # the drill is meant to move, on its own axis

@@ -1165,7 +1165,7 @@ func place_cat(cell: Vector2i) -> bool:
 		if cat != carried_cat and cat.assigned == cell:
 			return false
 	carried_cat.assigned = cell
-	carried_cat.pos = cell_centre(cell)
+	carried_cat.pos = post_stand(cell)
 	carried_cat.state = Defs.CAT_WORKING
 	carried_cat = null
 	return true
@@ -1215,6 +1215,18 @@ func dispatch_cats() -> void:
 
 func machine_at(cell: Vector2i) -> Machine:
 	return machines.get(cell, null)
+
+## Which way a belt under this cell drags whatever is standing on it, in pixels
+## per second. Zero everywhere else.
+##
+## Belts only. A splitter has a direction too, but its whole job is to send what
+## lands on it one way and then the other, and a floor that shoves the player
+## left, then right, then left is a floor they will walk around.
+func belt_drift(cell: Vector2i) -> Vector2:
+	var machine: Machine = machines.get(cell, null)
+	if machine == null or machine.type != Defs.M_BELT:
+		return Vector2.ZERO
+	return Vector2(machine.dir) * Defs.belt_carry_speed()
 
 ## What a machine costs, as a material dictionary.
 func cost_of(type: int) -> Dictionary:
@@ -1536,6 +1548,20 @@ func _recount_power() -> void:
 
 func cell_centre(cell: Vector2i) -> Vector2:
 	return Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+
+## Where a cat stands to work this cell.
+##
+## Not the middle of it. A cat's position is its torso and its feet are drawn
+## ten pixels below that, so a cat placed at the centre of a tile has its feet a
+## third of a tile south of the machine it is running -- measured on screen at
+## full zoom, 19 pixels below the miner, which reads as an animal standing just
+## in front of its post rather than at it.
+##
+## Lifted so the feet land on the middle. Used by both the walk and the drop, or
+## a cat carried to a machine would sit correctly and then shuffle down ten
+## pixels the first time it walked back from lunch.
+func post_stand(cell: Vector2i) -> Vector2:
+	return cell_centre(cell) - Vector2(0.0, Defs.CAT_FOOT_DROP)
 
 ## Work rate contributed by whichever cat is standing at this miner. Zero means
 ## nobody is home; a starving cat still works, at a third of the pace.
@@ -2031,8 +2057,24 @@ func _cat_walk_to_miner(cat: Cat, delta: float) -> void:
 	if not cat.has_job() or not _is_post(cat.assigned):
 		cat.state = Defs.CAT_IDLE
 		return
-	if _step_toward(cat, cell_centre(cat.assigned), delta):
+	if _step_toward(cat, post_stand(cat.assigned), delta):
 		cat.state = Defs.CAT_WORKING
+
+## Whether the animal is holding the drill.
+##
+## The tool belongs to the machine, not to the cat: a cat at a miner is working
+## the machine, and a cat at a bare seam is digging with its paws. Both are the
+## same state and were drawn the same way, so a cat on open ore appeared to be
+## running a drill that is not there -- and the difference between the two, the
+## whole reason to build the machine, was invisible.
+##
+## Asked here rather than at the draw call, because the drawing side keeping its
+## own list of when a cat is working is exactly how a handler gets missed.
+func cat_has_tool(cat: Cat) -> bool:
+	if cat == null or cat.state != Defs.CAT_WORKING:
+		return false
+	var machine: Machine = machines.get(cat.assigned, null)
+	return machine != null and machine.type == Defs.M_MINER
 
 ## A post is a miner, or a bare seam. Both are places a cat can be put down and
 ## will keep working; asked in one place so the three handlers that check it

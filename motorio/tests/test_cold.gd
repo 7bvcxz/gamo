@@ -57,8 +57,10 @@ func _run() -> void:
 		"낮의 동결 경고가 숙소를 가리키지 않는다: '%s'" % main.message)
 	_assert(String(main.message).find("온기 반경") >= 0,
 		"온기 반경을 가리킨다: '%s'" % main.message)
-	_assert(String(main.objective()).find("온기 반경") >= 0,
-		"목표 카드도 같은 곳을 가리킨다: '%s'" % main.objective())
+	# The state card, not the goal card: freezing is what is true right now and
+	# the goal is still the rung of the ladder she is on. Both are on screen.
+	_assert(String(main.info()).find("온기 반경") >= 0,
+		"정보 카드도 같은 곳을 가리킨다: '%s'" % main.info())
 
 	# Reaching warmth again inside the window cancels the collapse.
 	main.player.warmth = 30.0

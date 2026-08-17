@@ -23,8 +23,22 @@ const { dirname, join, resolve } = require('node:path');
 const subsetFont = require('subset-font');
 
 const game = resolve(dirname(__filename), '..');
-const SOURCE = join(game, 'tools', 'NotoSansCJK-Regular.ttc');
-const OUTPUT = join(game, 'assets', 'ui-font.otf');
+// Two faces. The body face is what the whole game is set in; the display face is
+// used for the handful of words the opening leans on, and it is a genuinely
+// different typeface rather than the same one emboldened -- a synthesised bold
+// of the body text reads as the same sentence shouting, which is not what a word
+// standing apart from its sentence is supposed to look like.
+//
+// Both are cut to the *same* character set, deliberately. The display face only
+// ever draws the words marked `hot` in the cutscene table, so a tighter subset
+// would be smaller -- and the first time someone marks a new word it would draw
+// a tofu box. One set, one test, no way to drift.
+const FACES = [
+  { source: join(game, 'tools', 'NotoSansCJK-Regular.ttc'),
+    output: join(game, 'assets', 'ui-font.otf') },
+  { source: join(game, 'tools', 'NotoSerifCJK-Bold.ttc'),
+    output: join(game, 'assets', 'ui-display.otf') },
+];
 
 // Every .gd file, plus the project file: the application name reaches the export
 // shell and the browser tab.
@@ -114,18 +128,20 @@ async function main() {
   }
 
   const text = [...chars].sort().join('');
-  const source = readFileSync(SOURCE);
-  const faces = faceCount(source);
-  // Face 0. Noto Sans CJK's faces share one glyph pool and differ only in which
-  // regional shapes the unified Han codepoints resolve to -- and this game draws
-  // no Han at all, only Hangul and Latin, so the choice cannot change a glyph.
-  const single = faces > 0 ? extractFace(source, 0) : source;
-  const subset = await subsetFont(single, text, { targetFormat: 'sfnt' });
-  writeFileSync(OUTPUT, subset);
-
   const mb = (n) => `${(n / 1024 / 1024).toFixed(2)} MB`;
-  console.log(`FONT_SUBSET: ${chars.size} characters, ${faces} faces in the collection`);
-  console.log(`FONT_SUBSET: ${mb(source.length)} -> ${mb(subset.length)}  (${OUTPUT})`);
+  console.log(`FONT_SUBSET: ${chars.size} characters`);
+  for (const face of FACES) {
+    const source = readFileSync(face.source);
+    const faces = faceCount(source);
+    // Face 0. Noto CJK's faces share one glyph pool and differ only in which
+    // regional shapes the unified Han codepoints resolve to -- and this game
+    // draws no Han at all, only Hangul and Latin, so the choice cannot change a
+    // glyph.
+    const single = faces > 0 ? extractFace(source, 0) : source;
+    const subset = await subsetFont(single, text, { targetFormat: 'sfnt' });
+    writeFileSync(face.output, subset);
+    console.log(`FONT_SUBSET: ${mb(source.length)} -> ${mb(subset.length)}  (${face.output})`);
+  }
 }
 
 main().catch((error) => {

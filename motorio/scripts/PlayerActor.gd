@@ -160,7 +160,6 @@ const FROZEN_CARRY_TOP := -12.0
 ## block is and for the same reason: it is a thing held in front of her with
 ## both hands, and it must not cover her head.
 var carrying_kit: int = Defs.KIT_NONE
-const KIT_CARRY_SIZE := 26.0
 ## 0..1 while working a seam by hand, for the swing animation and the ring.
 var mining: float = 0.0
 var carried_cat_pos := Vector2.ZERO
@@ -170,6 +169,23 @@ var carried_cat_rarity: int = Defs.RARITY_O
 ## Set by Main. Structures block movement, so the actor needs to ask the world
 ## whether a tile is passable before it commits to a step.
 var blocked: Callable = func(_cell: Vector2i) -> bool: return false
+## Set by Main: how fast the floor under a cell is moving. Empty means still.
+var belt_drift: Callable = func(_cell: Vector2i) -> Vector2: return Vector2.ZERO
+
+## How the character sheets are sampled.
+##
+## The project draws everything NEAREST, which is right for tiles laid out one
+## texel per pixel and wrong for anything minified. A 128 cell at half scale,
+## through the camera and the canvas stretch, lands on 0.30 to 1.07 screen
+## pixels per source texel depending on the zoom -- never 1, always a fraction.
+## NEAREST at 0.6 keeps three source columns in five and throws the rest away,
+## and *which* three it keeps moves with her sub-pixel position: the silhouette
+## flickers one pixel wider and narrower every frame, which reads as a slight
+## sideways tremble while running and as a crawling staircase along her edge.
+##
+## Averaging instead of dropping is what stops it. Mipmaps because minification
+## below a half is where plain linear starts dropping texels again.
+const SOFT_FILTER := CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 @onready var character: Sprite2D = $Character
 
@@ -181,8 +197,10 @@ var carry_layer: Node2D
 func _ready() -> void:
 	carry_layer = Node2D.new()
 	carry_layer.z_index = 1
+	carry_layer.texture_filter = SOFT_FILTER
 	add_child(carry_layer)
 	carry_layer.draw.connect(_draw_carried_cat)
+	character.texture_filter = SOFT_FILTER
 
 ## A window is up, so the world is not listening.
 ##
@@ -231,7 +249,18 @@ func _physics_process(delta: float) -> void:
 			facing = Vector2i(signi(int(signf(input.x))), 0)
 		elif absf(input.y) > 0.25:
 			facing = Vector2i(0, signi(int(signf(input.y))))
-	_move(velocity * delta)
+	# The floor moves too. A belt carries whatever is standing on it, and she was
+	# the one thing in the factory it did not touch -- a person could stand on a
+	# running line and the line would pretend she was not there.
+	#
+	# Added to the velocity rather than folded into it, so walking against a belt
+	# is a tug of war she wins slowly rather than a speed she is clamped to, and
+	# so standing still on one still moves her. `_move` separates the axes, so
+	# being pushed into a wall slides along it instead of passing through.
+	var drift := Vector2.ZERO
+	if belt_drift.is_valid() and not locked:
+		drift = belt_drift.call(cell())
+	_move((velocity + drift) * delta)
 
 	if prompt != _prompt_shown:
 		_prompt_shown = prompt
@@ -569,14 +598,14 @@ func _draw() -> void:
 func _draw_carried_cat() -> void:
 	# A kit first: it is neither a cat nor ice, and she can only hold one thing.
 	if carrying_kit != Defs.KIT_NONE:
-		var box := Rect2(-KIT_CARRY_SIZE * 0.5, FROZEN_CARRY_TOP,
-			KIT_CARRY_SIZE, KIT_CARRY_SIZE * 0.78)
-		carry_layer.draw_rect(box.grow(1.0), Defs.OUTLINE)
-		carry_layer.draw_rect(box, Color8(96, 104, 116))
-		carry_layer.draw_rect(Rect2(box.position.x, box.get_center().y - 2.0,
-			box.size.x, 4.0), Color8(58, 64, 74))
-		carry_layer.draw_rect(Rect2(box.get_center().x - 1.5,
-			box.get_center().y - 3.5, 3.0, 7.0), Color8(214, 176, 96))
+		# The open case, and which one depends on what she is carrying: the fire
+		# and the hut are the two things that come out of the box, and drawing
+		# the same grey rectangle for both meant the opening never showed her
+		# holding either of them.
+		var art: Texture2D = MachineLayer.kit_art(carrying_kit)
+		var size := Vector2.ONE * MachineLayer.KIT_OPEN_DRAW
+		carry_layer.draw_texture_rect(art,
+			Rect2(Vector2(-size.x * 0.5, FROZEN_CARRY_TOP), size), false)
 		return
 	# The frozen one first: it is not a Cat and has no rarity, heading or frame.
 	if carrying_frozen:

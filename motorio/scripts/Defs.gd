@@ -64,26 +64,43 @@ const COL_ICE := Color8(178, 216, 238)
 ## Shake is on the three panels where something hits: the bombardment, the Earth
 ## going, and the crash. Everywhere else it is still, because a shake that never
 ## stops is not a shake.
+## The opening, seven panels.
+##
+## Each line is one or two sentences rather than the single clause it used to be.
+## "그날, 하늘이 어두워졌다" is a caption; it says what the picture already says
+## and nothing about what it means, and seven of those in a row leave the player
+## on the ice knowing nothing except that they are on ice.
+##
+## `hot` marks the words drawn in the display face, bold, shaking on their own.
+## They are the nouns the rest of the game is about -- the fleet, the planet, the
+## cold, the fire -- so the first time each of them appears it is the word that
+## moves. Marked as a list rather than with markup inside the string, because a
+## string with tags in it is a string every width measurement has to learn to
+## strip, and the one that forgets draws the tags.
 const CUTSCENE_PANELS: Array[Dictionary] = [
 	{"art": preload("res://assets/cutscene/01.webp"), "shake": 0.0,
-		"line": "그날, 하늘이 어두워졌다."},
+		"line": "그날 하늘이 어두워졌다. 아무도 그것을 함대라고 부르지 않았다,\n이름을 붙일 시간이 없었으니까.",
+		"hot": ["함대"]},
 	{"art": preload("res://assets/cutscene/02.webp"), "shake": 7.0,
-		"line": "펭귄 함대는 아무것도 남기지 않았다."},
+		"line": "펭귄 함대는 도시를 지나갔고 아무것도 남기지 않았다.\n협상도, 요구도, 경고도 없었다.",
+		"hot": ["아무것도"]},
 	{"art": preload("res://assets/cutscene/03.webp"), "shake": 2.5,
-		"line": "마지막 로켓이 떠올랐다."},
+		"line": "마지막 로켓이 떠올랐다. 정원은 하나였고,\n그 자리에 앉은 것은 정비공 Grim이었다.",
+		"hot": ["마지막"]},
 	{"art": preload("res://assets/cutscene/04.webp"), "shake": 15.0,
-		"line": "그리고 지구가 사라졌다."},
+		"line": "그리고 지구가 사라졌다. 창밖에서, 소리도 없이.\n돌아갈 곳은 그 순간부터 없었다.",
+		"hot": ["사라졌다"]},
 	{"art": preload("res://assets/cutscene/05.webp"), "shake": 0.0,
-		"line": "경보가 그녀를 깨웠다. 창밖에 얼음 행성이 있었다."},
+		"line": "경보가 그녀를 깨웠다. 연료는 바닥이었고 창밖에는\n이름 없는 얼음 행성 하나뿐이었다.",
+		"hot": ["얼음 행성"]},
 	{"art": preload("res://assets/cutscene/06.webp"), "shake": 12.0,
-		"line": "로켓은 얼음 구름 속에서 부서졌다."},
+		"line": "로켓은 얼음 구름 속에서 부서졌다. 그녀는 살았고,\n타고 온 것은 눈밭에 흩어졌다.",
+		"hot": ["부서졌다"]},
 	{"art": preload("res://assets/cutscene/07.webp"), "shake": 0.0,
-		"line": "추위가 그녀를 깨웠다. 이제 여기서 살아남아야 한다."},
+		"line": "추위가 그녀를 깨웠다. 여기서는 불이 곧 목숨이고,\n불을 키우는 것 말고는 할 수 있는 일이 없다.",
+		"hot": ["불"]},
 ]
-## How a panel is timed. Fade in, hold, fade out -- so a panel lasts
-## FADE + HOLD + FADE and the whole opening is a little over half a minute.
-## Long enough to read one line without hurrying, short enough that a player who
-## has seen it once can press through it in seconds.
+
 const CUTSCENE_FADE := 0.55
 const CUTSCENE_HOLD := 3.40
 
@@ -93,6 +110,66 @@ static func cutscene_panel_seconds() -> float:
 ## Where the picture sits this instant. Deterministic rather than random so a
 ## test can ask what the offset is at a given time, and decaying across the
 ## panel because an impact is loudest when it lands.
+## How far a marked word has wandered from where it was set, this instant.
+##
+## Deterministic, like the panel shake and for the same reason: a test can ask
+## where the word is at a given time. Each word gets its own pair of frequencies
+## from its index, so two marked words on one panel never move together -- which
+## would read as the line itself sliding rather than as the words shaking.
+##
+## It does not decay. The panel's shake is an impact and impacts fade; this is a
+## word that will not sit still, and a word that settles after two seconds is a
+## word the player watched stop.
+const CUTSCENE_HOT_SHAKE := 1.15
+
+static func cutscene_word_shake(word_index: int, elapsed: float) -> Vector2:
+	var seed_a: float = 31.0 + float(word_index) * 7.0
+	var seed_b: float = 43.0 + float(word_index) * 11.0
+	return Vector2(
+		sin(elapsed * seed_a) * 0.6 + sin(elapsed * (seed_b * 0.7)) * 0.4,
+		sin(elapsed * seed_b) * 0.5 + sin(elapsed * (seed_a * 0.8)) * 0.5) * CUTSCENE_HOT_SHAKE
+
+## The line broken into runs, each either plain or marked. One pass, so the
+## drawing side never has to search the string for the marked words itself --
+## which is where a substring that also occurs inside an ordinary word would have
+## turned half a sentence bold.
+static func cutscene_runs(index: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if index < 0 or index >= CUTSCENE_PANELS.size():
+		return out
+	# Copied, and each word crossed off as it is used: a word listed once is
+	# emphasised once. "불이 곧 목숨이고, 불을 키우는 것" contains it twice, and two
+	# words shaking in one short line reads as the line being broken rather than
+	# as one word standing out of it.
+	var hot: Array = []
+	for word in CUTSCENE_PANELS[index].get("hot", []):
+		hot.append(String(word))
+	var word_index := 0
+	for line: String in String(CUTSCENE_PANELS[index]["line"]).split("\n"):
+		var runs: Array[Dictionary] = []
+		var rest: String = line
+		while rest != "":
+			# The earliest marked word still ahead of us, so overlapping marks
+			# resolve left to right rather than in table order.
+			var at := -1
+			var found := ""
+			for word: String in hot:
+				var here: int = rest.find(String(word))
+				if here >= 0 and (at < 0 or here < at):
+					at = here
+					found = String(word)
+			if at < 0:
+				runs.append({"text": rest, "hot": false, "index": -1})
+				break
+			if at > 0:
+				runs.append({"text": rest.substr(0, at), "hot": false, "index": -1})
+			runs.append({"text": found, "hot": true, "index": word_index})
+			hot.erase(found)
+			word_index += 1
+			rest = rest.substr(at + found.length())
+		out.append({"runs": runs})
+	return out
+
 static func cutscene_shake(index: int, elapsed: float) -> Vector2:
 	if index < 0 or index >= CUTSCENE_PANELS.size():
 		return Vector2.ZERO
@@ -857,6 +934,19 @@ const FURNACE_PERIOD := 2.2
 ## richest seam at 24 -- past what 0.26 could move. The grades buy latency, not
 ## throughput, so a belt that cannot keep up with a single machine turns them
 ## into a throughput gate the design says they must never be.
+## How fast a belt carries a person, as a multiple of what it carries a crate at.
+##
+## A belt moves its cargo at BELT_SPEED cells a second, which is under a third of
+## a tile: a person drifting at that rate cannot tell they are standing on one.
+## Three and a half times it is a tile a second -- unmistakable standing still,
+## and about a quarter added to a run going the same way. Written as a multiple
+## rather than as a number so a faster belt carries her faster too.
+const BELT_CARRY_FACTOR := 3.5
+
+## Pixels per second a belt drags whatever is standing on it.
+static func belt_carry_speed() -> float:
+	return BELT_SPEED * float(TILE) * BELT_CARRY_FACTOR
+
 const BELT_SPEED := 0.30          # tiles per second
 
 ## --- Belt grades --------------------------------------------------------------
@@ -962,6 +1052,14 @@ const FOOD_OFFSET := Vector2(-4.5, 2.5)
 # --- Cat workers -------------------------------------------------------------
 ## A miner is a machine, not a worker. It only runs while a cat stands at it,
 ## so automation is gated on adopting cats rather than on spending heat.
+## How far below a cat's position its feet are drawn.
+##
+## Lives here rather than in the drawing layer because the simulation needs it
+## too: a cat put at the middle of a tile has its *torso* there and its feet ten
+## pixels south, which on a 32 pixel tile is a third of the way to the next one.
+## Measured off a screenshot at full zoom -- the cat working a miner stood 19
+## screen pixels below the machine it was running.
+const CAT_FOOT_DROP := 10.0
 const CAT_SPEED := 46.0            # pixels per second while walking
 ## No longer an arrival threshold: a cat arrives by standing on the spot. Kept as
 ## a name for "comfortably away from it", which is what tests need when they want
