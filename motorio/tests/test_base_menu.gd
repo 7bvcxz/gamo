@@ -57,7 +57,10 @@ func _test_rows_agree() -> void:
 		var card: Rect2 = hud.call("base_menu_rect")
 		_assert(card.encloses(rect.grow(-1.0)), "%d번째 줄이 창 안에 있다" % index)
 
-	# And nothing to hand over means no row that refuses.
+	# Nothing to hand over, and the row is still there. It used to vanish, which
+	# meant the one line that says what the fire wants was missing at exactly the
+	# moment the player had nothing and needed to know what to go and fetch -- so
+	# it stays and refuses instead.
 	for item_type: int in Defs.COUNTED_ITEMS:
 		sim.stock[item_type] = 0
 	var empty: Array[Dictionary] = main.base_rows()
@@ -65,7 +68,14 @@ func _test_rows_agree() -> void:
 	for row: Dictionary in empty:
 		if String(row["kind"]) == "fuel":
 			still_fuel = true
-	_assert(not still_fuel, "넣을 것이 없으면 연료 줄이 아예 없다")
+	_assert(still_fuel, "넣을 것이 없어도 투입 줄은 남는다")
+	_assert(not sim.can_feed_base(), "그리고 그때는 넣을 수 없다")
+	# Short of the step is also a refusal. Half-paying moves the material and not
+	# the circle, and the player cannot see where it went.
+	sim.stock[Defs.ITEM_HEATSTONE] = maxi(sim.stones_to_next() - 1, 0)
+	_assert(not sim.can_feed_base(), "한 개 모자라도 넣을 수 없다")
+	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
+	_assert(sim.can_feed_base(), "다 모으면 넣을 수 있다")
 
 	main.clear_save()
 	main.free()

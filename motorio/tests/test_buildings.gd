@@ -18,6 +18,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_one_tile()
 	_test_the_sim_agrees()
+	_test_shelter_no_go()
 	if failures == 0:
 		print("BUILDINGS: PASS")
 	else:
@@ -60,4 +61,38 @@ func _test_the_sim_agrees() -> void:
 			continue
 		_assert(not sim.blocks_player(beside),
 			"기지 옆 %s 칸은 지나갈 수 있다" % str(step))
+	sim.free()
+
+## The red patch round the fire, while the hut is in her arms.
+##
+## The world layer paints it and `place_shelter` enforces it, and the two read
+## the same predicate on purpose -- a rule drawn from one place and refused from
+## another is a rule that drifts, and the drawn version is the one the player
+## believes.
+func _test_shelter_no_go() -> void:
+	var sim := Sim.new()
+	sim.setup(4242)
+	var mismatches := 0
+	var painted := 0
+	for dy in range(-4, 5):
+		for dx in range(-4, 5):
+			var cell: Vector2i = sim.core_cell + Vector2i(dx, dy)
+			var blocked: bool = sim.shelter_too_close(cell)
+			if blocked:
+				painted += 1
+			# What the rule says, tested through the door the player uses.
+			sim.shelter_placed = false
+			sim.carried_kit = Defs.KIT_SHELTER
+			sim.ore.erase(cell)
+			sim.machines.erase(cell)
+			var placed: bool = sim.place_shelter(cell)
+			if placed and blocked:
+				mismatches += 1
+			if placed:
+				sim.shelter_placed = false
+	_assert(mismatches == 0, "붉게 칠한 칸에는 실제로 놓을 수 없다 (%d건)" % mismatches)
+	_assert(painted >= 9 and painted <= 21,
+		"기지 둘레 두 칸이 칠해진다 (%d칸)" % painted)
+	_assert(not sim.shelter_too_close(sim.core_cell + Vector2i(3, 0)),
+		"세 칸 밖은 칠하지 않는다")
 	sim.free()

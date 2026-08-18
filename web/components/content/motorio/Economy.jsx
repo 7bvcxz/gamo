@@ -26,17 +26,17 @@ export function Economy() {
       <div className="table-wrap">
         <table>
           <thead>
-            <tr><th>재료</th><th>열 가치</th><th>역할</th></tr>
+            <tr><th>재료</th><th>연료</th><th>역할</th></tr>
           </thead>
           <tbody>
             {balance.items.names.map((name, index) => (
               <tr key={name}>
                 <td>{name}</td>
-                <td>{balance.items.heat_value[index]}</td>
+                <td>{name === balance.items.fuel ? '기지 연료' : '—'}</td>
                 <td>
                   {index === 0 && '손으로 캘 수 있는 유일한 자원. 교환기의 입력'}
                   {index === 1 && '설비 재료. 채굴 속도가 절반'}
-                  {index === 2 && '유일하게 열이 되는 것. 발전기 연료이기도 함'}
+                  {index === 2 && '발전기 연료'}
                 </td>
               </tr>
             ))}
@@ -166,9 +166,7 @@ export function Economy() {
         <table>
           <thead><tr><th>필요</th><th>값</th></tr></thead>
           <tbody>
-            <tr><td>누적 열</td><td>{n(balance.gate_to_copper.heat)}</td></tr>
-            <tr><td>에너지결정</td><td>{n(balance.gate_to_copper.energy)}</td></tr>
-            <tr><td>수정조각</td><td>{n(balance.gate_to_copper.crystal)}</td></tr>
+            <tr><td>불에 넣은 열석</td><td>{n(balance.gate_to_copper.stones)}개</td></tr>
             <tr><td><b>채굴기 2대 기준</b></td><td><b>{n(balance.gate_to_copper.days_two_miners, 1)}일</b></td></tr>
           </tbody>
         </table>
@@ -200,7 +198,7 @@ export function Economy() {
         <table>
           <thead><tr><th>항목</th><th>값</th></tr></thead>
           <tbody>
-            <tr><td>온기 반경</td><td>{balance.warmth.base_radius} + {balance.warmth.per_heat} × 누적 열 (최대 {balance.warmth.max_radius})</td></tr>
+            <tr><td>온기 반경</td><td>기지 단계별 고정 (시작 {balance.warmth.base_radius}칸 · 최대 {balance.warmth.max_radius}칸)</td></tr>
             <tr><td>반경 밖 설비 속도</td><td>{Math.round(balance.warmth.outside_speed * 100)}%</td></tr>
             <tr><td>반경 밖 체온 감소</td><td>초당 {n(balance.warmth.cold_drain, 1)}</td></tr>
             <tr><td>밤 추가 감소</td><td>초당 {n(balance.warmth.night_drain, 1)}</td></tr>

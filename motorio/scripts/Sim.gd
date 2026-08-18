@@ -6,9 +6,9 @@ class_name Sim
 ## lets the view layers stay dumb. Items are plain data rather than physics
 ## bodies so that a few hundred of them cost almost nothing.
 
-signal heat_gained(amount: int, cell: Vector2i, item_type: int)
+signal fuel_added(count: int, cell: Vector2i, item_type: int)
 ## Something arrived at the core and was put in the stores. Separate from
-## `heat_gained` because arriving and burning stopped being the same event.
+## `fuel_added` because arriving and being burned stopped being the same event.
 signal item_delivered(item_type: int, cell: Vector2i)
 signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
@@ -228,8 +228,14 @@ const PATH_RADIUS := 48
 var _grid := AStarGrid2D.new()
 var _grid_dirty := true
 
-var heat: int = Defs.START_HEAT
-var total_heat: int = 0
+## Heat stones put into the fire, ever. The base level is a function of this and
+## of nothing else, which is the whole of the resource economy the circle has.
+##
+## There used to be a second number called heat: stones went in, heat came out at
+## five apiece, and the ladder was written in heat. It was a currency with one
+## thing to buy, no way to spend it wrong, and a conversion the player had to do
+## in their head to read any of it.
+var stones_in: int = 0
 var delivered: Dictionary[int, int] = {}
 ## Materials banked at the base. Machines are bought out of this, so hauling is
 ## what funds construction rather than a separate abstract currency.
@@ -250,11 +256,7 @@ var unlocked_recipes: Dictionary[int, bool] = {}
 ## powered machines ask for. Neither is ever stored.
 var power_capacity: float = 0.0
 var power_draw: float = 0.0
-## Heat arriving at the core, averaged, in heat per minute. This is the score the
-## player is actually optimising, so it belongs on the panel next to the total.
-var heat_rate: float = 0.0
-var _heat_accum: float = 0.0
-## Income per material, in items per minute, averaged the same slow way heat is.
+## Income per material, in items per minute, averaged over a slow window.
 ## Per minute rather than per second because everything else the game quotes is
 ## per minute -- a miner is 6/min, and the same figure written as 0.10/s is the
 ## same information in a form nobody can plan against.
@@ -372,7 +374,7 @@ func to_save() -> Dictionary:
 		seen.append(chunk.y)
 	return {
 		"explored": seen,
-		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
+		"stones_in": stones_in, "delivered": delivered_rows,
 		"belt_fed": delivered_by_belt,
 		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
 		"thawed": _thawed_rows(),
@@ -411,8 +413,7 @@ func from_save(data: Dictionary) -> void:
 	var seen: PackedInt32Array = data.get("explored", PackedInt32Array())
 	for index in range(0, seen.size() - 1, 2):
 		explored[Vector2i(seen[index], seen[index + 1])] = true
-	heat = int(data.get("heat", Defs.START_HEAT))
-	total_heat = int(data.get("total_heat", 0))
+	stones_in = int(data.get("stones_in", 0))
 	delivered_by_belt = bool(data.get("belt_fed", false))
 	has_gun = bool(data.get("has_gun", false))
 	has_pickaxe = bool(data.get("has_pickaxe", false))
@@ -499,8 +500,8 @@ func from_save(data: Dictionary) -> void:
 		int(data.get("shelter_y", shelter_cell.y)))
 	food_cell = Vector2i(int(data.get("food_x", food_cell.x)),
 		int(data.get("food_y", food_cell.y)))
-	base_level = Defs.base_level(total_heat)
-	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
+	base_level = Defs.base_level(stones_in)
+	warm_radius = Defs.warm_radius(stones_in) if base_placed else Defs.CRASH_SIGHT
 	_cached_radius = warm_radius
 	_grid_dirty = true
 
@@ -524,8 +525,7 @@ func setup(seed_value: int) -> void:
 	# before walking anywhere should see where they are, not a black square --
 	# the fog is there to make exploring worth something, not to hide the start.
 	explored.clear()
-	heat = Defs.START_HEAT
-	total_heat = 0
+	stones_in = 0
 	delivered_by_belt = false
 	drops.clear()
 	has_gun = false
@@ -548,8 +548,6 @@ func setup(seed_value: int) -> void:
 	_rate_history.clear()
 	_gain_accum.clear()
 	gain_rate.clear()
-	heat_rate = 0.0
-	_heat_accum = 0.0
 	_rate_clock = 0.0
 	warm_radius = Defs.WARM_BASE
 	# Seed the cache so the opening frame does not announce a radius that has
@@ -568,6 +566,7 @@ func setup(seed_value: int) -> void:
 	learned.clear()
 	walked = 0.0
 	frozen_cats.clear()
+	frozen_offset.clear()
 	debris.clear()
 	debris_searched = 0
 	cancel_debris()
@@ -756,6 +755,61 @@ func _generate_frozen_cats(seed_value: int) -> void:
 			continue
 		frozen_cats[cell] = 0.0
 
+## Blocks of ice riding the belts.
+##
+## Grim slides on a belt and so does everything the belt carries, and a block of
+## ice standing on one used to be the exception -- which reads as the belt
+## running underneath it rather than as the belt being unable to move it. It is
+## the heaviest thing a player can put down, so it travels at the same speed as
+## everything else and simply stops when the next cell is taken.
+func _tick_frozen_drift(delta: float) -> void:
+	if frozen_cats.is_empty():
+		return
+	for cell: Vector2i in frozen_cats.keys():
+		var drift: Vector2 = belt_drift(cell)
+		if drift == Vector2.ZERO:
+			frozen_offset.erase(cell)
+			continue
+		var step := Vector2i(signi(int(round(drift.x))), signi(int(round(drift.y))))
+		var ahead: Vector2i = cell + step
+		# Whatever is standing there stops it. Checked before moving rather than
+		# after, because a block that has already been written into the next cell
+		# has overwritten whatever was in it.
+		if not _frozen_may_enter(ahead):
+			frozen_offset.erase(cell)
+			continue
+		var offset: Vector2 = frozen_offset.get(cell, Vector2.ZERO)
+		offset += drift * delta
+		if offset.length() < float(Defs.TILE):
+			frozen_offset[cell] = offset
+			continue
+		# Over the line: the block belongs to the next cell now, and what is left
+		# of the offset carries on there so the slide does not stutter at every
+		# boundary.
+		frozen_offset.erase(cell)
+		frozen_cats[ahead] = frozen_cats[cell]
+		frozen_cats.erase(cell)
+		if thawed.has(cell):
+			thawed[ahead] = true
+		frozen_offset[ahead] = offset - Vector2(step) * float(Defs.TILE)
+
+## Where a sliding block is allowed to go. Anything solid stops it, and so does
+## the fire itself -- a block pushed into the core would be a cat fed to it.
+func _frozen_may_enter(cell: Vector2i) -> bool:
+	if frozen_cats.has(cell) or debris.has(cell) or ore.has(cell):
+		return false
+	if cell == core_cell or (shelter_placed and cell == shelter_cell):
+		return false
+	if food_placed and cell == food_cell:
+		return false
+	var machine: Machine = machines.get(cell, null)
+	return machine == null or machine.type in Defs.WALKABLE_MACHINES
+
+## Where a block of ice is actually drawn, which is its cell plus however far it
+## has slid out of it.
+func frozen_at(cell: Vector2i) -> Vector2:
+	return cell_centre(cell) + frozen_offset.get(cell, Vector2.ZERO)
+
 ## Wreckage, from the eleventh ring outward.
 ##
 ## The first piece is placed on its ring by walking round it rather than by
@@ -911,6 +965,17 @@ func tile_attributes(cell: Vector2i) -> int:
 	var machine: Machine = machines.get(cell, null)
 	if machine != null and machine.type not in Defs.WALKABLE_MACHINES:
 		attrs |= Defs.ATTR_STRUCTURE
+	# A block of ice with a cat in it, and a piece of the ship. Both are objects
+	# standing on the snow that the player used to walk straight through, which
+	# is the one thing a picture of a solid thing must never allow -- and out
+	# past the fire, where neither can be touched yet, walking through them was
+	# also the answer to a wall the design had just put up.
+	#
+	# Cats are unaffected: they path by position rather than by this, and a cat
+	# that cannot walk over a piece of wreckage is a cat that gets stuck behind
+	# one on its way home.
+	if frozen_cats.has(cell) or debris.has(cell):
+		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
 	if shelter_placed and cell == shelter_cell:
 		attrs |= Defs.ATTR_STRUCTURE
@@ -947,6 +1012,15 @@ var torch_lit := false
 ## Pieces of the ship, cell -> which of the five shapes. Shape is stored rather
 ## than derived from the cell so that a piece cannot change what it looks like
 ## when the numbers behind the world do.
+## How far a block of ice has slid within its cell, in pixels. Only ever along
+## the belt under it, and only for the blocks that are on one.
+##
+## Kept beside `frozen_cats` rather than inside it because that map's value is
+## the thaw and is written into every save; a second map that is not saved says
+## exactly what it is -- a block halfway between two cells is a moment, not a
+## fact about the world.
+var frozen_offset: Dictionary = {}
+
 var debris: Dictionary = {}
 ## How many have been taken apart. The first one is the one that is guaranteed to
 ## carry a core part, so this is a count and not a flag.
@@ -1079,13 +1153,18 @@ func place_base(cell: Vector2i) -> bool:
 ## And the shelter, which is where she sleeps and where the cats go at night. It
 ## has to stand clear of the base -- a hut built against the fire is a hut that
 ## teaches nothing about the fire.
+## Too close to the fire to put the hut down. The world layer paints these cells
+## red while she is carrying it, and both read the same function: a rule drawn
+## from one place and enforced from another is a rule that drifts.
+func shelter_too_close(cell: Vector2i) -> bool:
+	return Vector2(cell - core_cell).length() <= Defs.SHELTER_CLEARANCE
+
 func place_shelter(cell: Vector2i) -> bool:
 	if shelter_placed or carried_kit != Defs.KIT_SHELTER:
 		return false
 	if not base_placed:
 		return false
-	var distance: float = Vector2(cell - core_cell).length()
-	if distance <= Defs.SHELTER_CLEARANCE or distance > warm_radius:
+	if shelter_too_close(cell) or Vector2(cell - core_cell).length() > warm_radius:
 		return false
 	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
 		return false
@@ -1339,36 +1418,50 @@ func deposit_fuel() -> Dictionary:
 	var moved: Dictionary = {}
 	if not base_placed:
 		return moved
-	var gained: int = 0
-	for item_type: int in Defs.COUNTED_ITEMS:
-		if int(Defs.ITEM_VALUES[item_type]) <= 0:
-			continue
-		var count: int = int(stock.get(item_type, 0))
-		if count <= 0:
-			continue
-		moved[item_type] = count
-		stock[item_type] = 0
-		delivered[item_type] = int(delivered.get(item_type, 0)) + count
-		gained += int(Defs.ITEM_VALUES[item_type]) * count
-	if moved.is_empty():
+	# Stones, and only stones. The energy crystal used to count as fuel too, which
+	# made "how many more do I need" a question with two answers and no way to
+	# ask it.
+	#
+	# All of them, not just as many as the next step wants: she is tipping the
+	# pack into the fire, and a fire that leaves change is a fire that has to
+	# explain itself. What stops a half-payment is the gate above -- she may not
+	# feed it at all until she has the whole step.
+	var count: int = int(stock.get(Defs.ITEM_HEATSTONE, 0))
+	if count <= 0:
 		return moved
-	heat += gained
-	total_heat += gained
-	_heat_accum += float(gained)
+	moved[Defs.ITEM_HEATSTONE] = count
+	stock[Defs.ITEM_HEATSTONE] = 0
+	delivered[Defs.ITEM_HEATSTONE] = int(delivered.get(Defs.ITEM_HEATSTONE, 0)) + count
+	stones_in += count
 	var core: Machine = machines.get(core_cell, null)
 	if core != null:
 		core.flash = 0.6
 	_refresh_radius()
-	heat_gained.emit(gained, core_cell, Defs.ITEM_HEATSTONE)
+	fuel_added.emit(count, core_cell, Defs.ITEM_HEATSTONE)
 	return moved
+
+## What the next step of the circle still wants, in stones. Zero at the top of
+## the ladder, which is the one case where the fire takes whatever it is given.
+func stones_to_next() -> int:
+	var next_level: Dictionary = Defs.next_base_level(stones_in)
+	if next_level.is_empty():
+		return 0
+	return maxi(0, int(next_level["stones"]) - stones_in)
+
+## Whether the fire can be fed to the next step right now. False while she is
+## short, because a fire that swallows two of the three stones it needs has taken
+## the material and given nothing -- and the player cannot see where it went.
+func can_feed_base() -> bool:
+	if not base_placed:
+		return false
+	var want: int = stones_to_next()
+	var have: int = int(stock.get(Defs.ITEM_HEATSTONE, 0))
+	return have > 0 and (want <= 0 or have >= want)
 
 ## Whether there is anything to hand over. Asked before the verb so the game can
 ## say "there is nothing to put in" rather than doing nothing.
 func has_fuel() -> bool:
-	for item_type: int in Defs.COUNTED_ITEMS:
-		if int(Defs.ITEM_VALUES[item_type]) > 0 and int(stock.get(item_type, 0)) > 0:
-			return true
-	return false
+	return int(stock.get(Defs.ITEM_HEATSTONE, 0)) > 0
 
 ## Cats without a thaw, for the debug unlocks and for tests that need a crew
 ## rather than a rescue. Everything the crates used to do through adopt_cats is
@@ -1630,6 +1723,7 @@ func demolish(cell: Vector2i) -> bool:
 func tick(delta: float) -> void:
 	_tick_cats(delta)
 	_tick_thaw(delta)
+	_tick_frozen_drift(delta)
 	_recount_power()
 	# Under-supplied power slows every drawing machine in proportion rather than
 	# switching some off: a brown-out you can see is easier to diagnose than a
@@ -1656,13 +1750,13 @@ func tick(delta: float) -> void:
 	_refresh_radius()
 	_tick_rate(delta)
 
-## A slow average rather than an instant reading: heat arrives in lumps of five,
-## and a number that jumps between 0 and 300 tells the player nothing.
+## A slow average rather than an instant reading: material arrives in lumps and
+## a number that jumps between 0 and 300 tells the player nothing.
 func _tick_rate(delta: float) -> void:
 	_rate_clock += delta
 	if _rate_clock < 1.0:
 		return
-	_rate_history.append({"dt": _rate_clock, "heat": _heat_accum, "items": _gain_accum.duplicate()})
+	_rate_history.append({"dt": _rate_clock, "items": _gain_accum.duplicate()})
 	var span: float = 0.0
 	for entry: Dictionary in _rate_history:
 		span += float(entry["dt"])
@@ -1671,21 +1765,17 @@ func _tick_rate(delta: float) -> void:
 	while _rate_history.size() > 1 and span - float(_rate_history[0]["dt"]) >= RATE_WINDOW:
 		span -= float(_rate_history[0]["dt"])
 		_rate_history.remove_at(0)
-	var heat_sum: float = 0.0
 	var item_sums: Dictionary[int, float] = {}
 	for entry: Dictionary in _rate_history:
-		heat_sum += float(entry["heat"])
 		var items: Dictionary = entry["items"]
 		for item_type: int in items:
 			item_sums[item_type] = float(item_sums.get(item_type, 0.0)) + float(items[item_type])
 	# The average over the window is the smoothing. Running a lerp on top would
 	# put the lag back without the honesty: this figure is exactly what arrived
 	# in the last fifteen seconds, scaled to a minute.
-	heat_rate = heat_sum * 60.0 / maxf(span, 0.001)
 	for item_type: int in Defs.COUNTED_ITEMS:
 		gain_rate[item_type] = float(item_sums.get(item_type, 0.0)) * 60.0 / maxf(span, 0.001)
 		_gain_accum[item_type] = 0.0
-	_heat_accum = 0.0
 	_rate_clock = 0.0
 
 ## Every route by which a material reaches the base stock. Routed through one
@@ -2454,10 +2544,10 @@ func _cat_eat(cat: Cat, delta: float) -> void:
 func _refresh_radius() -> void:
 	# No base, no fire, no circle -- only as much of the map as she can see from
 	# where she is standing.
-	var level: int = Defs.base_level(total_heat)
+	var level: int = Defs.base_level(stones_in)
 	var rose: bool = base_placed and level > base_level
 	base_level = level
-	warm_radius = Defs.warm_radius(total_heat) if base_placed else Defs.CRASH_SIGHT
+	warm_radius = Defs.warm_radius(stones_in) if base_placed else Defs.CRASH_SIGHT
 	if not is_equal_approx(warm_radius, _cached_radius):
 		_cached_radius = warm_radius
 		warmth_changed.emit(warm_radius)
@@ -2811,11 +2901,6 @@ func _deliver(item_type: int, cell: Vector2i) -> void:
 		core.flash = 0.4
 		_note_in(core, item_type)
 	item_delivered.emit(item_type, cell)
-
-func spend_rescue() -> int:
-	var lost: int = int(round(float(heat) * Defs.RESCUE_PENALTY))
-	heat -= lost
-	return lost
 
 func machine_count(type: int) -> int:
 	var count := 0

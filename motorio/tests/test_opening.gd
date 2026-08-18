@@ -140,6 +140,16 @@ func _test_searching_the_kit() -> void:
 	# game ever gives the player used to arrive as a word in the corner of the
 	# screen; two objects lying below the case are two things to walk over, and
 	# picking a thing up is how you find out what it is.
+	# The ground below the case, cleared. Where the seams fall is seeded and the
+	# run seed is different every time, so on some worlds the four cells under the
+	# case are taken and the drops legitimately go beside it instead -- which made
+	# this a test that failed about one run in five for a reason that was not the
+	# thing being tested. What is being tested is the preference, so the
+	# preference is given somewhere to go.
+	for offset: Vector2i in [Vector2i(0, 1), Vector2i(1, 1), Vector2i(-1, 1),
+			Vector2i(0, 2), Vector2i(1, 2), Vector2i(-1, 2)]:
+		sim.ore.erase(sim.kit_cell + offset)
+		sim.mined_rocks[sim.kit_cell + offset] = true
 	var first: Array[int] = sim.search_kit()
 	_assert(first.size() == 2, "첫 조사에서 두 개가 떨어진다: %d" % first.size())
 	_assert(first.has(Sim.DROP_KIT_BASE) and first.has(Sim.DROP_GUN),
@@ -248,11 +258,11 @@ func _test_missions_follow_the_world() -> void:
 	_assert(progress == [0, Defs.OPENING_STONES],
 		"기지 위의 숫자는 0에서 시작하고 필요 수는 고정이다: %s" % str(progress))
 	main.sim.delivered[Defs.ITEM_HEATSTONE] = 1
-	main.sim.total_heat = int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
+	main.sim.stones_in = 1
 	main.sim._refresh_radius()
 	_assert(main.upgrade_progress() == [1, Defs.OPENING_STONES],
 		"하나 넣으면 1/%d 이 된다: %s" % [Defs.OPENING_STONES, str(main.upgrade_progress())])
-	main.sim.total_heat = 0
+	main.sim.stones_in = 0
 	main.sim._refresh_radius()
 	# The card has to say something at every rung, and never the same thing twice
 	# in a row -- a ladder that repeats itself is a ladder the player thinks is
@@ -312,14 +322,13 @@ func _test_feeding_the_fire() -> void:
 	sim.stock[Defs.ITEM_HEATSTONE] = Defs.OPENING_STONES
 	sim.stock[Defs.ITEM_CRYSTAL] = 4
 	_assert(sim.has_fuel(), "열석이 있으면 넣을 것이 있다")
-	var heat_before: int = sim.heat
+	var stones_before: int = sim.stones_in
 	var moved: Dictionary = sim.deposit_fuel()
 	_assert(int(moved.get(Defs.ITEM_HEATSTONE, 0)) == Defs.OPENING_STONES,
 		"열석이 전부 들어간다")
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "손에서는 사라진다")
-	_assert(sim.heat == heat_before
-		+ Defs.OPENING_STONES * int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE]),
-		"열이 그만큼 오른다")
+	_assert(sim.stones_in == stones_before + Defs.OPENING_STONES,
+		"불에 들어간 열석이 그만큼 오른다")
 	_assert(int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) == Defs.OPENING_STONES,
 		"임무가 세는 숫자가 오른다")
 	# Materials are not fuel and must not be swallowed. `stock` is the base's

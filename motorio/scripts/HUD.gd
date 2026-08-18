@@ -640,7 +640,6 @@ func resource_rect() -> Rect2:
 func resource_rows() -> Array[Array]:
 	var sim = main.sim
 	var rows: Array[Array] = []
-	rows.append(["열", "%d" % sim.heat, _rate_text(sim.heat_rate), Defs.COL_CORE, -1])
 	for item_type: int in Defs.COUNTED_ITEMS:
 		var held: int = int(sim.stock.get(item_type, 0))
 		var seen: bool = held > 0 or int(sim.delivered.get(item_type, 0)) > 0
@@ -1072,10 +1071,10 @@ func _draw_base_menu() -> void:
 	var sim = main.sim
 	# The state of the fire, in one line: how far it reaches and what the next
 	# step of that costs. It is the only number the player is working towards.
-	var next_level: Dictionary = Defs.next_base_level(sim.total_heat)
-	var line: String = "온기 %.0f칸  ·  누적 열 %d" % [sim.warm_radius, sim.total_heat]
+	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
+	var line: String = "온기 %.0f칸  ·  넣은 열석 %d개" % [sim.warm_radius, sim.stones_in]
 	if not next_level.is_empty():
-		line += "   →   %d 에서 %.0f칸" % [int(next_level["heat"]), float(next_level["radius"])]
+		line += "   →   열석 %d개 더 넣으면 %.0f칸" % [sim.stones_to_next(), float(next_level["radius"])]
 	_text(card.position + Vector2(14.0, FRAME_HEADER + 22.0), line, 13, Defs.COL_TEXT_DIM)
 	_text(card.position + Vector2(14.0, FRAME_HEADER + 42.0),
 		"%s %d개  ·  남은 시간 %.0f초" % [Defs.TORCH_NAME, sim.torches, sim.torch_left],
@@ -1132,28 +1131,31 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
 	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
 	Icons.draw_thing(self, icon, Icons.THING_CORE)
+	var sim = main.sim
+	var want: int = sim.stones_to_next()
+	var have: int = int(sim.stock.get(Defs.ITEM_HEATSTONE, 0))
+	var ready: bool = sim.can_feed_base()
 	var text_x: float = rect.position.x + 62.0
-	_text(Vector2(text_x, rect.position.y + 22.0), "연료 투입", 14, Defs.COL_TEXT)
-	var parts: Array[String] = []
-	var gain: int = 0
-	for item_type: int in Defs.COUNTED_ITEMS:
-		var count: int = int(main.sim.stock.get(item_type, 0))
-		if int(Defs.ITEM_VALUES[item_type]) <= 0 or count <= 0:
-			continue
-		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], count])
-		gain += int(Defs.ITEM_VALUES[item_type]) * count
-	# What it does under the title, what it costs on the right -- the same way
-	# round as every other row in this window and in the build list. This one was
-	# mirrored, so a reader who had learned where to look in the window had to
-	# unlearn it for one line.
-	var next_level: Dictionary = Defs.next_base_level(main.sim.total_heat)
-	var effect: String = "+%d 열" % gain
-	if not next_level.is_empty():
-		var short: int = maxi(0, int(next_level["heat"]) - main.sim.total_heat - gain)
-		effect += "   다음 단계까지 %d" % short if short > 0 else "   다음 단계에 닿습니다"
-	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11, Defs.COL_CORE)
+	_text(Vector2(text_x, rect.position.y + 22.0), "연료 투입", 14,
+		Defs.COL_TEXT if ready else Defs.COL_TEXT_DIM)
+	# What the fire wants, not what she happens to be carrying. The row used to
+	# read "+35 열", which is a number in a unit the player never sees anywhere
+	# else and cannot convert; this one is the same count as the stones in her
+	# pack, so the question "am I there yet" is subtraction she can do by looking.
+	var effect: String
+	if want <= 0:
+		effect = "불은 더 커지지 않습니다"
+	elif ready:
+		effect = "다음 단계까지 열석 %d개  ·  가지고 있음 %d개" % [want, have]
+	else:
+		effect = "다음 단계까지 열석 %d개  ·  %d개 부족" % [want, want - have]
+	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11,
+		Defs.COL_CORE if ready else Defs.COL_DANGER)
+	# The stones in her pack, on the right where every other row in this window
+	# puts its cost.
 	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-		" · ".join(parts), 13, Defs.COL_TEXT)
+		"%s %d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], have], 13,
+		Defs.COL_TEXT if ready else Defs.COL_TEXT_DIM)
 
 func _draw_build_menu() -> void:
 	if not main.build_menu_open:
@@ -1922,7 +1924,8 @@ func _draw_slot_row(row: int, index: int, card: Dictionary) -> void:
 		Defs.COL_TEXT if exists else Defs.COL_TEXT_DIM)
 	if exists:
 		_text(rect.position + Vector2(92.0, 42.0),
-			"%d일차 · 누적 열 %d" % [int(card["day"]), int(card["heat"])], 11, Defs.COL_TEXT_DIM)
+			"%d일차 · 열석 %d개" % [int(card["day"]), int(card.get("stones", 0))], 11,
+			Defs.COL_TEXT_DIM)
 		_text_in(Rect2(rect.position + Vector2(rect.size.x - 180.0, 42.0), Vector2(170.0, 14)),
 			main.slot_when(float(card["saved_at"])), 11, Defs.COL_TEXT_DIM,
 			HORIZONTAL_ALIGNMENT_RIGHT)
@@ -2013,10 +2016,10 @@ func _draw_result() -> void:
 	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "온기 반경", 13,
 		Defs.COL_TEXT_DIM)
 
-	var gained: int = main.day_heat()
+	var gained: int = main.day_stones()
 	var rows := [
-		["누적 열", "%d" % sim.total_heat, Defs.COL_CORE],
-		["어제 모은 열", "+%d" % gained if gained > 0 else "-", Defs.COL_TEXT_DIM],
+		["불에 넣은 열석", "%d개" % sim.stones_in, Defs.COL_CORE],
+		["어제 넣은 열석", "+%d개" % gained if gained > 0 else "-", Defs.COL_TEXT_DIM],
 		["고양이", "%d마리" % sim.cats.size(), Defs.COL_TEXT_DIM],
 	]
 	var y: float = 176.0

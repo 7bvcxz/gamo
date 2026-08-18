@@ -295,7 +295,6 @@ const FACE_BAND := 3.0
 ## about a minute. So the opening's jump has to come from the mission and not
 ## from this number, and which of the two moves is a question for when the
 ## tutorial is built.
-const ITEM_VALUES := [0, 0, 5, 5, 0, 0]
 ## The order the counters appear in, which is the order the player meets them.
 const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITEM_COPPER,
 	ITEM_ENERGY, ITEM_CORE_PART]
@@ -419,11 +418,11 @@ static func throughput_line(type: int) -> String:
 		M_SPLITTER:
 			return "한 줄을 두 줄로 · R로 나뉘는 축 회전"
 		M_CORE:
-			# Both of the things that burn, because the player meets heat stone
-			# first and a line naming only the other one is a line telling them
-			# their whole opening does nothing.
-			return "Z 로 연료 투입 · 열석 1개 = 열 %d · 에너지결정 1개 = 열 %d" \
-				% [ITEM_VALUES[ITEM_HEATSTONE], ITEM_VALUES[ITEM_ENERGY]]
+			# One thing burns now. The energy crystal used to count towards the
+			# circle as well, which made the exchanger a second route to the one
+			# thing the fire is for -- and made "how many stones to the next
+			# step" a question with no honest answer.
+			return "Z 로 연료 투입 · 열석을 넣어 온기를 넓힙니다"
 	return ""
 
 ## The ratio that actually matters, stated plainly. One exchanger keeps up with
@@ -663,7 +662,6 @@ const ROCK_MINE_PERIOD := 14.0
 ## tail is the same length and what grew is the daylight in front of it: the last
 ## 95 seconds used to be half the day and are now under a third of it.
 const DAY_SECONDS := 300.0
-const START_HEAT := 30
 ## Deliberately slow: one cat is a trickle, so throughput has to come from more
 ## miners and better routing rather than from a single well-placed worker.
 ## Matched to hand mining on purpose. A miner is not faster than the player --
@@ -906,6 +904,16 @@ static func mission_row(id: String) -> Dictionary:
 			return row
 	return {}
 
+## What is left after 1.0.5: the opening's four lines and the one warning that
+## has nowhere else to appear.
+##
+## Six were removed at once -- the upgrade counter, the brown-out, the top of the
+## ladder, and the three that narrated what was in her arms. Each was defensible
+## on its own and together they were a card that always had something to say, and
+## a card that always has something to say is a card that is always being obeyed.
+## What she is carrying is on screen, in her arms; what the fire needs is in the
+## fire's own window; and a player who has built a factory can be trusted to
+## notice it running slowly.
 const MISSION_LINES: Array[Dictionary] = [
 	{
 		"id": "M1",
@@ -926,36 +934,6 @@ const MISSION_LINES: Array[Dictionary] = [
 		"id": "M2-HOLD",
 		"line": "불에서 조금 떨어진 곳에 세운다.",
 		"why": "거처가 기지에 붙으면 설치가 거부되는데, 그 규칙을 거부당하기 전에 한 번 말해 둔다. 몇 칸인지는 말하지 않는다.",
-	},
-	{
-		"id": "UPGRADE",
-		"line": "기지 업그레이드 NN  ·  열석 N/N",
-		"why": "거처를 세운 뒤부터 카드가 지시를 멈추고 이것만 남는다. 다음 기지 단계와 모자란 열석 수뿐이고, 동사도 키도 경로도 없다. 그 시점의 그녀는 불과 거처와 곡괭이와 세계를 가졌고, 거기서 또 심부름을 받으면 게임이 체크리스트가 된다. NN과 N은 실행 중에 채워진다. 모인 수는 이번 단계의 시작점부터 0에서 세고 필요 수는 고정이다 — 줄어드는 숫자는 얼마나 남았는지를 말하고 차오르는 숫자는 얼마나 왔는지를 말하는데, 돌 하나를 더 나르게 만드는 것은 뒤쪽이다.",
-	},
-	{
-		"id": "BROWNOUT",
-		"line": "전력이 모자랍니다.",
-		"why": "지시가 아니라 상태다. 전력이 부족하면 지어 둔 기계 전부가 비율만큼 느려지는데 그 사실을 말하는 것이 화면에 하나도 없다. 무엇을 하라고는 말하지 않는다.",
-	},
-	{
-		"id": "MAXED",
-		"line": "불은 더 커지지 않는다.",
-		"why": "마지막 단계에 닿았을 때. 다음 목표를 지어내지 않는다 — 없는 것을 있는 척하면 그 뒤로 카드를 아무도 믿지 않는다.",
-	},
-	{
-		"id": "CARRY-FROZEN",
-		"line": "품 안이 차갑다.  불 가까이에 두어야 한다.",
-		"why": "해동은 기지 2칸 안에서만 시작한다. 거리 대신 '가까이'라고만 말하고, 틀리면 그때 정확히 알려준다.",
-	},
-	{
-		"id": "THAW",
-		"line": "얼음이 녹고 있다.",
-		"why": "12초 동안 아무것도 요구하지 않는 유일한 줄. 이 게임에서 가장 비싼 3초를 앞두고 화면이 다른 말을 하면 안 된다.",
-	},
-	{
-		"id": "CARRY-CAT",
-		"line": "고양이가 일할 곳을 찾는다.  광맥이든, 기계든.",
-		"why": "광맥에 직접 놓을 수 있다는 것과 기계가 따로 있다는 것을 한 번에 흘린다. 어느 쪽이 빠른지는 말하지 않는다.",
 	},
 	{
 		"id": "COLD-NOBASE",
@@ -1125,9 +1103,15 @@ const SIGHT_RADIUS := 9
 ## The wide end shows roughly the whole reachable plateau; the close end is about
 ## what the game screen shows, so the two ends answer "where am I in the world"
 ## and "what is right here".
-const MAP_ZOOM_MIN := 0.4
+## Down to a tenth. The map's job changed when the world got bigger than the
+## screen it is drawn on: at 40% the last upgrade's circle no longer fits, and a
+## map that cannot show the whole of what it is a map of is a viewport.
+##
+## The step stays at 0.1 rather than shrinking with the range, so the same number
+## of presses crosses it.
+const MAP_ZOOM_MIN := 0.1
 const MAP_ZOOM_MAX := 3.0
-const MAP_ZOOM_STEP := 0.2
+const MAP_ZOOM_STEP := 0.1
 const MAP_ZOOM_DEFAULT := 1.0
 ## How many map pixels one cell covers at zoom 1.
 ##
@@ -1140,30 +1124,44 @@ const MAP_CELL_PX := 4.0
 const BASE_REVEAL_RADIUS := 11
 
 const WARM_BASE := 7.0
-const WARM_MAX := 22.0
+## A hundred tiles at the top of the ladder. The circle is the one thing in this
+## game that only ever grows, so its ceiling is what "finished" means -- and at
+## twenty-two it was a short walk from the fire rather than a plateau.
+const WARM_MAX := 100.0
 ## --- Base levels ------------------------------------------------------------
 ## The circle used to grow by a hundredth of a tile at a time, which is a number
 ## in a corner rather than a thing that happens. It goes up in steps now: the
 ## base upgrades, and two tiles of white ground turn into ground.
 ##
-## The thresholds are in heat, and the heat stone is worth five, so the first
-## four are the three, nine, fifteen and twenty-seven stones the opening asks
-## for. Written in heat rather than in stones because an energy crystal is heat
-## too, and a table that counted only stones would stop the exchanger from
-## contributing to the thing heat is for.
+## Counted in heat stones, as of 1.0.5. There used to be a resource called heat
+## in between -- stones went into the fire, heat came out, and the ladder was
+## written in heat -- and it was a currency with exactly one thing to buy and no
+## way to spend it wrong. Every number a player saw had to be divided by five to
+## mean anything. Now the fire asks for stones and the counter counts stones.
 ##
 ## `[초안]` beyond level 4. The first four are the design's; the rest exist
 ## because the copper ring starts at 15 and a player who cannot pass 15 can
-## never reach it. They escalate the same way -- roughly double the last step.
+## never reach it, and because the reach is capped at a hundred tiles rather
+## than at twenty-two. They escalate the same way -- roughly half again each
+## time -- and the last rungs reach past what the world currently generates.
 const BASE_LEVELS: Array[Dictionary] = [
-	{"heat": 0,   "radius": 7.0},     # the emergency base, the moment it is lit
-	{"heat": 15,  "radius": 9.0},     # 열석 3
-	{"heat": 45,  "radius": 11.0},    # 열석 9
-	{"heat": 75,  "radius": 13.0},    # 열석 15
-	{"heat": 135, "radius": 15.0},    # 열석 27 -- and the first copper
-	{"heat": 255, "radius": 17.0},
-	{"heat": 435, "radius": 19.0},
-	{"heat": 675, "radius": WARM_MAX},
+	{"stones": 0,    "radius": 7.0},    # the emergency base, the moment it is lit
+	{"stones": 3,    "radius": 9.0},
+	{"stones": 9,    "radius": 11.0},
+	{"stones": 15,   "radius": 13.0},
+	{"stones": 27,   "radius": 15.0},   # and the first copper
+	{"stones": 51,   "radius": 17.0},
+	{"stones": 87,   "radius": 19.0},
+	{"stones": 135,  "radius": 22.0},
+	{"stones": 210,  "radius": 26.0},
+	{"stones": 320,  "radius": 31.0},
+	{"stones": 480,  "radius": 37.0},
+	{"stones": 700,  "radius": 44.0},
+	{"stones": 1000, "radius": 52.0},
+	{"stones": 1400, "radius": 61.0},
+	{"stones": 2000, "radius": 71.0},
+	{"stones": 2800, "radius": 82.0},
+	{"stones": 4000, "radius": WARM_MAX},
 ]
 
 const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
@@ -1332,7 +1330,6 @@ const DAWN_SPILL_SECONDS := 1.4    ## the door opens and everyone walks out
 const NIGHT_CAMERA_ZOOM := 1.7
 const NIGHT_CAMERA_LERP := 2.6     ## per second, toward the target zoom
 const COLD_RECOVER := 26.0
-const RESCUE_PENALTY := 0.25      # share of banked heat lost when you black out
 ## Cold is a slope, not a cliff: movement degrades the whole way down so the
 ## player feels the danger long before the number reaches zero.
 const COLD_SPEED_FLOOR := 0.10    # movement multiplier at zero warmth
@@ -1383,6 +1380,10 @@ const PURITY_PURE_RING := 17.0
 ## a step lands a field rather than a fraction of one, and the purity rings at 11
 ## and 17 finally have something to grade: before this, no heat stone seam in any
 ## world was ever above 보통.
+## Cells of heat stone the opening puts down by hand, outside the bands: the
+## starter patch and the guaranteed seam due north.
+const STARTER_PATCH_SIZE := 6
+
 const HEATSTONE_BANDS: Array[Dictionary] = [
 	{"ring": Vector2(3.0, 6.0), "patches": 3, "size": 2},      # 시작 반경 7
 	{"ring": Vector2(7.5, 8.8), "patches": 2, "size": 2},      # 1단계 · 9
@@ -1391,7 +1392,21 @@ const HEATSTONE_BANDS: Array[Dictionary] = [
 	{"ring": Vector2(13.5, 14.8), "patches": 2, "size": 3},    # 4단계 · 15
 	{"ring": Vector2(15.5, 16.8), "patches": 2, "size": 3},    # 5단계 · 17
 	{"ring": Vector2(17.5, 18.8), "patches": 2, "size": 3},    # 6단계 · 19 · 순수
-	{"ring": Vector2(19.5, 21.5), "patches": 2, "size": 3},    # 7단계 · 22 · 마지막
+	{"ring": Vector2(19.5, 21.5), "patches": 2, "size": 3},    # 7단계 · 22
+	# The rungs added when the ceiling went from 22 tiles to 100. Every upgrade
+	# has to open ground that has something in it -- a circle that grows into
+	# empty snow is a number going up -- so each of these sits just inside the
+	# radius its level buys. Wider patches further out, because the walk is
+	# longer and a two-cell seam at seventy tiles is not worth the trip.
+	{"ring": Vector2(22.5, 25.5), "patches": 3, "size": 4},    # 8단계 · 26
+	{"ring": Vector2(27.0, 30.5), "patches": 3, "size": 4},    # 9단계 · 31
+	{"ring": Vector2(32.0, 36.5), "patches": 3, "size": 5},    # 10단계 · 37
+	{"ring": Vector2(38.0, 43.5), "patches": 3, "size": 5},    # 11단계 · 44
+	{"ring": Vector2(45.0, 51.5), "patches": 4, "size": 6},    # 12단계 · 52
+	{"ring": Vector2(53.0, 60.5), "patches": 4, "size": 6},    # 13단계 · 61
+	{"ring": Vector2(62.0, 70.5), "patches": 4, "size": 7},    # 14단계 · 71
+	{"ring": Vector2(72.0, 81.5), "patches": 4, "size": 7},    # 15단계 · 82
+	{"ring": Vector2(83.0, 99.0), "patches": 5, "size": 8},    # 16단계 · 100 · 마지막
 ]
 ## Crystal has no seam. It used to have one, and a seam is a promise that there
 ## will always be more -- which is the opposite of what a rare material is. It
@@ -1579,21 +1594,21 @@ static func warm_tint(k: float) -> Color:
 	return SNOW_LIT.lerp(SNOW_SHADE, pow(clampf(k, 0.0, 1.0), 0.85))
 
 ## The level a run has reached, which is the only thing that decides the circle.
-static func base_level(total_heat: int) -> int:
+static func base_level(stones: int) -> int:
 	var level: int = 0
 	for index in BASE_LEVELS.size():
-		if total_heat >= int(BASE_LEVELS[index]["heat"]):
+		if stones >= int(BASE_LEVELS[index]["stones"]):
 			level = index
 	return level
 
-static func warm_radius(total_heat: int) -> float:
-	return float(BASE_LEVELS[base_level(total_heat)]["radius"])
+static func warm_radius(stones: int) -> float:
+	return float(BASE_LEVELS[base_level(stones)]["radius"])
 
 ## What the next upgrade costs and gives, or an empty dictionary at the top. The
 ## HUD reads this so the player can see what they are working towards rather
 ## than watching a number they cannot interpret.
-static func next_base_level(total_heat: int) -> Dictionary:
-	var level: int = base_level(total_heat)
+static func next_base_level(stones: int) -> Dictionary:
+	var level: int = base_level(stones)
 	if level + 1 >= BASE_LEVELS.size():
 		return {}
 	return BASE_LEVELS[level + 1]

@@ -29,7 +29,7 @@ export function MotorioLevelDesign() {
             <tr>
               <td>온기</td>
               <td>갈 수 있는 거리</td>
-              <td>코어에 광석을 넣어 누적 열을 올린다</td>
+              <td>코어에 열석을 넣어 기지 단계를 올린다</td>
             </tr>
             <tr>
               <td>일손</td>
@@ -60,8 +60,7 @@ export function MotorioLevelDesign() {
           <thead>
             <tr>
               <th>기지 단계</th>
-              <th>누적 열</th>
-              <th>열석으로</th>
+              <th>열석</th>
               <th>온기</th>
             </tr>
           </thead>
@@ -69,8 +68,7 @@ export function MotorioLevelDesign() {
             {balance.warmth.levels.map((level, index) => (
               <tr key={index}>
                 <td>{index}</td>
-                <td>{level.heat}</td>
-                <td>{Math.round(level.heat / balance.items.heat_value[3])}개</td>
+                <td>{level.stones}개</td>
                 <td>{level.radius}칸</td>
               </tr>
             ))}
@@ -352,7 +350,7 @@ export function MotorioLevelDesign() {
         <b>온기 반경 안에서도 체온이 떨어진다.</b> 코어 옆에 서 있는 것이 전략이 되지 않으므로
         숙소로 들어가는 것이 선택이 아니라 필요가 된다. 자지 않고 밤을 넘기면 고양이들이 데려온다.
       </p>
-      <p>공장 · 온기 · 누적 열 · 고양이는 모두 다음 날로 이어진다. 하루의 끝은 게임의 끝이 아니다.</p>
+      <p>공장 · 온기 · 불에 넣은 열석 · 고양이는 모두 다음 날로 이어진다. 하루의 끝은 게임의 끝이 아니다.</p>
 
       <h2>추위</h2>
       <p>

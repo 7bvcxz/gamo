@@ -66,13 +66,11 @@ func _initialize() -> void:
 
 	# The gate the whole progression hangs on. The circle goes up in steps now, so
 	# this is the step that first reaches copper rather than an arithmetic.
-	var heat_to_copper: float = 0.0
+	var stones_to_copper: float = 0.0
 	for level: Dictionary in Defs.BASE_LEVELS:
 		if float(level["radius"]) >= Defs.COPPER_RING.x:
-			heat_to_copper = float(level["heat"])
+			stones_to_copper = float(level["stones"])
 			break
-	var energy_to_copper: float = heat_to_copper / float(Defs.ITEM_VALUES[Defs.ITEM_ENERGY])
-	var crystal_to_copper: float = energy_to_copper * float(Defs.CRYSTAL_COST_ENERGY)
 
 	# One row per base step, so the doc can say what each upgrade reaches without
 	# anyone typing a radius twice.
@@ -84,7 +82,7 @@ func _initialize() -> void:
 			"from": snappedf(ring.x, 0.1), "to": snappedf(ring.y, 0.1),
 			"seams": int(band["patches"]) * int(band["size"]),
 			"radius": float(Defs.BASE_LEVELS[index]["radius"]) if index < Defs.BASE_LEVELS.size() else 0.0,
-			"heat": int(Defs.BASE_LEVELS[index]["heat"]) if index < Defs.BASE_LEVELS.size() else 0,
+			"stones": int(Defs.BASE_LEVELS[index]["stones"]) if index < Defs.BASE_LEVELS.size() else 0,
 		})
 
 	var data := {
@@ -138,7 +136,9 @@ func _initialize() -> void:
 		},
 		"items": {
 			"names": Defs.ITEM_NAMES,
-			"heat_value": Defs.ITEM_VALUES,
+			# Heat is gone as of 1.0.5. There is no per-item heat value because
+			# there is no heat: the fire counts stones.
+			"fuel": Defs.ITEM_NAMES[Defs.ITEM_HEATSTONE],
 		},
 		"rates": {
 			"hand_mine_seconds": Defs.HAND_MINE_PERIOD,
@@ -174,10 +174,8 @@ func _initialize() -> void:
 			"purity_pure": Defs.PURITY_PURE_RING,
 		},
 		"gate_to_copper": {
-			"heat": heat_to_copper,
-			"energy": energy_to_copper,
-			"crystal": crystal_to_copper,
-			"days_two_miners": crystal_to_copper / (2.0 / Defs.MINER_PERIOD) / 120.0,
+			"stones": stones_to_copper,
+			"days_two_miners": stones_to_copper / (2.0 / Defs.MINER_PERIOD) / 120.0,
 		},
 		"machines": machines,
 		"recipes": recipes,

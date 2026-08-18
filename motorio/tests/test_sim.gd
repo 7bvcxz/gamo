@@ -89,7 +89,16 @@ func _test_generation() -> void:
 	# opening circle and no upgrade reached another one.
 	_assert(frost >= 6, "frost ore exists in workable but scarce amounts")
 	_assert(copper >= 6, "copper ore exists in workable but scarce amounts")
-	_assert(frost < 60 and copper < 20, "ore density stays scarce after the reduction")
+	# Derived from the table rather than written down. The cap was 60 when the
+	# ladder stopped at 22 tiles; the ceiling is 100 now and the bands that fill
+	# it took the world-wide total past it, which is the table growing and not
+	# the density changing. What is worth holding is that no band overfills.
+	var budget := 0
+	for band: Dictionary in Defs.HEATSTONE_BANDS:
+		budget += int(band["patches"]) * int(band["size"])
+	_assert(frost <= budget + Defs.STARTER_PATCH_SIZE,
+		"열석은 대역에 적힌 양을 넘지 않는다: %d개 (예산 %d)" % [frost, budget])
+	_assert(copper < 20, "ore density stays scarce after the reduction")
 	# And the opening stays a small field. It is the density near the fire that
 	# decides whether finding a seam is an event.
 	var near := 0
@@ -197,10 +206,10 @@ func _test_build_rules() -> void:
 
 	var cost: int = int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER])
 	var before: int = int(sim.stock[Defs.ITEM_COPPER])
-	var heat_before: int = sim.heat
+	var burnt_before: int = sim.stones_in
 	_assert(sim.build(Defs.M_BELT, empty, Vector2i.RIGHT), "building a belt succeeds")
 	_assert(int(sim.stock[Defs.ITEM_COPPER]) == before - cost, "building spends materials")
-	_assert(sim.heat == heat_before, "and never spends heat")
+	_assert(sim.stones_in == burnt_before, "and never touches the circle")
 	_assert(not sim.build(Defs.M_BELT, empty, Vector2i.RIGHT), "a filled cell rejects a second build")
 	_assert(sim.demolish(empty), "a placed machine can be reclaimed")
 	_assert(int(sim.stock[Defs.ITEM_COPPER]) > before - cost, "reclaiming refunds part of the cost")
@@ -314,43 +323,43 @@ func _test_furnace_alloy() -> void:
 	for step in 120:
 		sim.tick(0.1)
 	_assert(sim.delivered[Defs.ITEM_ENERGY] > 0, "crystal becomes energy at the core")
-	_assert(Defs.ITEM_VALUES[Defs.ITEM_ENERGY] > 0
-		and Defs.ITEM_VALUES[Defs.ITEM_CRYSTAL] == 0,
-		"energy is the only thing the core turns into heat")
+	_assert(int(sim.stock.get(Defs.ITEM_ENERGY, 0)) > 0,
+		"and the crystal it came from is spent")
 	sim.free()
 
 func _test_economy_and_warmth() -> void:
 	var sim := _fresh()
 	var start_radius: float = sim.warm_radius
-	sim.heat = 0
-	sim.total_heat = 0
+	sim.stones_in = 0
 	# A delivery banks the material and nothing else. It used to credit heat as
 	# well as stock -- the same crystal twice, once on arrival and again when the
 	# player fed the stores to the fire -- and the circle grew while she was
 	# somewhere else. `test_fire` holds the whole rule; this is the arithmetic.
 	sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
-	_assert(sim.heat == 0, "delivery does not credit spendable heat")
-	_assert(sim.total_heat == 0, "delivery does not credit lifetime heat")
+	_assert(sim.stones_in == 0, "delivery does not feed the fire")
 	_assert(int(sim.stock.get(Defs.ITEM_ENERGY, 0)) > 0, "it banks the crystal instead")
 	for step in 400:
 		sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
 	sim.tick(0.016)
 	_assert(is_equal_approx(sim.warm_radius, start_radius),
 		"and four hundred of them do not move the circle")
+	# Energy crystals are not fuel any more, so four hundred of them cannot move
+	# the circle at all. Only stones can.
+	sim.stock[Defs.ITEM_HEATSTONE] = 0
+	_assert(sim.deposit_fuel().is_empty(), "and they cannot be fed to it either")
+	sim.stock[Defs.ITEM_HEATSTONE] = int(Defs.BASE_LEVELS[-1]["stones"])
 	sim.deposit_fuel()
 	sim.tick(0.016)
-	_assert(sim.warm_radius > start_radius, "feeding the stores to the fire does")
+	_assert(sim.warm_radius > start_radius, "feeding stones to the fire does")
 	_assert(sim.warm_radius <= Defs.WARM_MAX, "the warm radius is capped")
 
-	# Spending must not shrink the map: radius follows lifetime, not balance.
+	# The circle only ever grows. Nothing spends what it is made of any more --
+	# there is no balance to spend, only stones already burnt -- which is why
+	# blacking out no longer takes a quarter of anything.
 	var radius_before: float = sim.warm_radius
-	sim.heat = 10
-	sim.tick(0.016)
-	_assert(is_equal_approx(sim.warm_radius, radius_before), "spending heat never shrinks the warm radius")
-
-	var banked: int = sim.heat
-	var lost: int = sim.spend_rescue()
-	_assert(lost > 0 and sim.heat == banked - lost, "blacking out costs a share of banked heat")
+	for step in 60:
+		sim.tick(0.016)
+	_assert(is_equal_approx(sim.warm_radius, radius_before), "and it never shrinks again")
 	sim.free()
 
 func _test_frost_throttle() -> void:

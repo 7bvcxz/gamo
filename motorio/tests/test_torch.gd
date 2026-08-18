@@ -205,7 +205,7 @@ func _test_base_window() -> void:
 	var sim = main.sim
 	main.base_menu_open = false
 	sim.stock[Defs.ITEM_HEATSTONE] = _cost()
-	var before_heat: int = sim.heat
+	var before_stones: int = sim.stones_in
 	# Facing the core is what opens it, and what she was carrying goes in on the
 	# way -- walking up to the fire means both of those things.
 	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(0, 1))
@@ -216,13 +216,16 @@ func _test_base_window() -> void:
 	# Opening it must not spend anything. The first version deposited on open,
 	# and since a torch is made of the same heat stone the fire burns, every
 	# visit ended with a red cost and nothing to pay it with.
-	_assert(sim.heat == before_heat, "여는 것만으로는 아무것도 쓰지 않는다")
+	_assert(sim.stones_in == before_stones, "여는 것만으로는 아무것도 쓰지 않는다")
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == _cost(),
 		"들고 있던 연료도 그대로다")
 
 	var rows: Array[Dictionary] = main.base_rows()
+	# The fuel row is always there now, with or without stones in her pack: it is
+	# the one line that says what the fire wants, and it was missing at exactly
+	# the moment the player had nothing and needed to know what to fetch.
 	_assert(rows.size() == Defs.BASE_CRAFTS.size() + 1,
-		"연료가 있으면 투입 줄이 하나 늘어난다 (%d줄)" % rows.size())
+		"투입 줄은 언제나 있다 (%d줄)" % rows.size())
 	_assert(String(rows[0]["kind"]) == "fuel", "그 줄이 맨 위다")
 
 	# Craft first, deposit second: the window shows both and the player chooses.
@@ -231,12 +234,12 @@ func _test_base_window() -> void:
 	main._base_menu_confirm()
 	_assert(sim.torches == torches + 1, "제작 줄을 고르면 만들어진다")
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "재료가 나간다")
-	_assert(main.base_rows().size() == Defs.BASE_CRAFTS.size(),
-		"연료가 떨어지면 투입 줄이 사라진다")
-	sim.stock[Defs.ITEM_HEATSTONE] = 4
+	_assert(main.base_rows().size() == Defs.BASE_CRAFTS.size() + 1,
+		"연료가 떨어져도 줄은 남는다")
+	sim.stock[Defs.ITEM_HEATSTONE] = maxi(4, sim.stones_to_next())
 	main.menu_index = 0
 	main._base_menu_confirm()
-	_assert(sim.heat > before_heat, "투입 줄을 고르면 불에 들어간다")
+	_assert(sim.stones_in > before_stones, "투입 줄을 고르면 불에 들어간다")
 	_assert(main.menu_index == 0, "줄이 사라져도 커서가 엉뚱한 곳에 남지 않는다")
 	main.close_base_menu()
 	_assert(not main.base_menu_open and not main.modal_open(), "닫으면 조작이 돌아온다")

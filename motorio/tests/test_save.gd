@@ -21,11 +21,8 @@ func _run() -> void:
 	var seed_before: int = main.run_seed
 	main.sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
 	_open(main.sim)
-	main.sim.heat = 400
 	main.sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
-	# Set the balance after building, since building spends it.
-	main.sim.heat = 250
 	(main.sim.machine_at(Vector2i(0, 2)) as Sim.Machine).items.append({"type": Defs.ITEM_COPPER, "t": 0.4})
 	main.sim.carried_frozen = true
 	main.sim.frozen_cats.clear()
@@ -33,7 +30,7 @@ func _run() -> void:
 	main.sim.food = 137
 	main.sim.delivered[Defs.ITEM_COPPER] = 9
 	main.sim.delivered[Defs.ITEM_ENERGY] = 4
-	main.sim.total_heat = 321
+	main.sim.stones_in = 321
 	main.sim.cats.clear()
 	var cat := Sim.Cat.new()
 	cat.assigned = Vector2i(-1, 0)
@@ -58,7 +55,7 @@ func _run() -> void:
 	_assert(main.run_seed == seed_before, "the world seed is restored, so terrain matches")
 	_assert(main.day_number == 3, "the day number survives")
 	_assert(is_equal_approx(main.time_left, 88.0), "time left in the day survives")
-	_assert(main.sim.heat == 250 and main.sim.total_heat == 321, "the economy survives")
+	_assert(main.sim.stones_in == 321, "the stones burnt into the circle survive")
 	_assert(int(main.sim.delivered[Defs.ITEM_COPPER]) == 9, "copper count survives")
 	_assert(int(main.sim.delivered[Defs.ITEM_ENERGY]) == 4, "iron count survives")
 	_assert(main.sim.food == 137, "the food bin level survives")

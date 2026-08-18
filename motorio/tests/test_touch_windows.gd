@@ -66,11 +66,11 @@ func _test_windows() -> void:
 		var rect: Rect2 = hud.call("base_menu_row_rect", index)
 		_assert(int(hud.call("base_menu_row_at", rect.get_center())) == index,
 			"기지 창 %d번째 줄을 누르면 그 줄이 잡힌다" % index)
-	var before: int = main.sim.total_heat
+	var before: int = main.sim.stones_in
 	_assert(_tap(main, (hud.call("base_menu_row_rect", 0) as Rect2).get_center()),
 		"기지 창의 탭이 처리된다")
-	_assert(main.sim.total_heat > before,
-		"연료 줄을 누르면 실제로 들어간다: %d → %d" % [before, main.sim.total_heat])
+	_assert(main.sim.stones_in > before,
+		"연료 줄을 누르면 실제로 들어간다: %d → %d" % [before, main.sim.stones_in])
 	# And the window owns the screen: a tap outside closes it rather than picking
 	# a tool out of the row underneath.
 	main._primary_action()

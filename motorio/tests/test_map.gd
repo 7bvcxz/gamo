@@ -159,7 +159,7 @@ func _persistence(main: Node2D) -> void:
 	older.setup(4242)
 	older.from_save(old_shape)
 	_check(not older.is_explored(walked), "옛 저장은 탐사 기록이 없다")
-	_check(older.heat == int(saved.get("heat", -1)), "옛 저장의 나머지는 그대로 불러온다")
+	_check(older.stones_in == int(saved.get("stones_in", -1)), "옛 저장의 나머지는 그대로 불러온다")
 
 func _key(code: int) -> InputEventKey:
 	var event := InputEventKey.new()

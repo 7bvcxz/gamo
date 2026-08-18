@@ -67,10 +67,23 @@ func _run() -> void:
 		"hauling from four times the distance takes far longer: %.1fs vs %.1fs" % [far_trip, near_trip])
 
 	# --- Lv2: stone and crystal become distance -------------------------------
-	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_CRYSTAL]) == 0, "raw crystal is a material, not heat")
-	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_COPPER]) == 0, "and so is copper")
-	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_ENERGY]) > 0, "energy is heat")
-	_assert(int(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE]) > 0, "and so is heat stone")
+	# Heat stone is the fuel and nothing else is, as of 1.0.5. The energy crystal
+	# used to burn as well, which made "how many more do I need" a question with
+	# two answers -- and it let a player widen the circle without ever touching
+	# the seam the circle is supposed to be about.
+	var fire := Sim.new()
+	fire.setup(4242)
+	fire.stock[Defs.ITEM_ENERGY] = 20
+	fire.stock[Defs.ITEM_CRYSTAL] = 20
+	fire.stock[Defs.ITEM_COPPER] = 20
+	_assert(not fire.has_fuel(), "수정도 구리도 에너지결정도 연료가 아니다")
+	fire.stock[Defs.ITEM_HEATSTONE] = 3
+	_assert(fire.has_fuel(), "열석만 연료다")
+	var burnt: Dictionary = fire.deposit_fuel()
+	_assert(burnt.size() == 1 and burnt.has(Defs.ITEM_HEATSTONE),
+		"투입은 열석만 가져간다")
+	_assert(int(fire.stock.get(Defs.ITEM_ENERGY, 0)) == 20, "나머지는 가방에 남는다")
+	fire.free()
 
 	# One exchanger keeps up with more than one miner, so miners stay the
 	# bottleneck. It used to be four; the miner doubled to 12/min and it is two,
@@ -90,13 +103,12 @@ func _run() -> void:
 	#
 	# The circle goes up in steps now, so the gate is the first step that reaches
 	# the copper ring rather than an arithmetic on a rate.
-	var heat_needed: float = 0.0
+	var stones_needed: float = 0.0
 	for level: Dictionary in Defs.BASE_LEVELS:
 		if float(level["radius"]) >= Defs.COPPER_RING.x:
-			heat_needed = float(level["heat"])
+			stones_needed = float(level["stones"])
 			break
-	_assert(heat_needed > 0.0, "구리 고리에 닿는 기지 단계가 존재한다")
-	var stones_needed: float = heat_needed / float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
+	_assert(stones_needed > 0.0, "구리 고리에 닿는 기지 단계가 존재한다")
 	var seconds_two_miners: float = stones_needed / (2.0 * miner_rate)
 	var days: float = seconds_two_miners / 120.0    # productive seconds per day
 	_assert(days < 6.0, "two miners reach copper inside six days (%.1f)" % days)
@@ -108,13 +120,13 @@ func _run() -> void:
 	# a rate that is gone.
 	var levels: Array[Dictionary] = Defs.BASE_LEVELS
 	for index in range(1, levels.size()):
-		_assert(int(levels[index]["heat"]) > int(levels[index - 1]["heat"])
+		_assert(int(levels[index]["stones"]) > int(levels[index - 1]["stones"])
 			and float(levels[index]["radius"]) > float(levels[index - 1]["radius"]),
 			"기지 단계 %d은 앞 단계보다 비싸고 넓다" % index)
-	var copper_level: int = Defs.base_level(int(heat_needed))
+	var copper_level: int = Defs.base_level(int(stones_needed))
 	_assert(copper_level >= 4,
 		"구리는 오프닝에서 네 단계 뒤에 있다 (%d단계)" % copper_level)
-	_assert(Defs.warm_radius(int(heat_needed)) >= Defs.COPPER_RING.x,
+	_assert(Defs.warm_radius(int(stones_needed)) >= Defs.COPPER_RING.x,
 		"그 단계의 온기가 구리 고리에 실제로 닿는다")
 	print("PROGRESSION: copper at %.1f days with two miners (%.0f 열석)" % [days, stones_needed])
 

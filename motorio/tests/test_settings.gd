@@ -230,7 +230,10 @@ func _test_resource_ledger(main: Node2D) -> void:
 	main.hud._layout()
 
 	var names: Array[String] = _row_names(main)
-	_assert(names.has("열"), "heat is always on the ledger, since it is the score")
+	# Heat used to have a permanent row here, because it was the score. There is
+	# no heat any more -- the fire counts stones -- so the ledger is now nothing
+	# but materials, and every one of them appears the first time it is held.
+	_assert(not names.has("열"), "'열'이라는 자원은 더 이상 없다")
 	_assert(not names.has("구리"),
 		"a resource never seen is not listed: a row reading zero teaches nothing")
 
@@ -254,11 +257,13 @@ func _test_resource_ledger(main: Node2D) -> void:
 	_assert(float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)) > 10.0,
 		"four items in a second reads as a per-minute figure, not a per-second one: %.1f"
 		% float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)))
-	# Heat is quoted from the same unit, so the two rows cannot disagree.
-	sim.heat_rate = 12.0
-	_assert(_row(main, "열")[2] == "+12/분", "heat reads per minute too: '%s'" % _row(main, "열")[2])
-	sim.heat_rate = 0.0
-	_assert(_row(main, "열")[2] == "", "and a resource producing nothing shows no rate")
+	# Every row reads from the same accounting, so two of them cannot disagree.
+	sim._gain(Defs.ITEM_HEATSTONE, 1)
+	sim.gain_rate[Defs.ITEM_HEATSTONE] = 12.0
+	_assert(_row(main, "열석")[2] == "+12/분",
+		"열석도 분당으로 읽는다: '%s'" % _row(main, "열석")[2])
+	sim.gain_rate[Defs.ITEM_HEATSTONE] = 0.0
+	_assert(_row(main, "열석")[2] == "", "and a resource producing nothing shows no rate")
 	_assert(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0) > 0.0,
 		"and what arrived is counted as income: %.1f/min" % float(sim.gain_rate.get(Defs.ITEM_COPPER, 0.0)))
 

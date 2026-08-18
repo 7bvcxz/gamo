@@ -107,5 +107,59 @@ func _init() -> void:
 			print("  ok  : ", travel[1])
 		sim.ground.erase(goal)
 
+	# How many swings a mining sheet contains.
+	#
+	# All three play at one shared fps over one shared frame count, so the rate a
+	# player sees is decided entirely by how many swings the eight frames hold --
+	# and the side sheet held two of them for eleven versions, which made Grim
+	# work twice as fast facing east as facing north. Nothing in the code said
+	# so; it was in the picture, and only a person watching both could tell.
+	#
+	# Counted off the topmost opaque row, which rises when the pickaxe goes up.
+	for sheet in [[PlayerActor.MINE_SHEET, "정면 채굴"], [PlayerActor.MINE_N_SHEET, "뒷모습 채굴"],
+			[PlayerActor.MINE_W_SHEET, "측면 채굴"]]:
+		var swings: int = _swings(sheet[0] as Texture2D)
+		if swings != 1:
+			print("  FAIL: %s 시트에 곡괭이질이 %d회 (1회여야 한다)" % [sheet[1], swings])
+			failures += 1
+		else:
+			print("  ok  : %s 시트의 곡괭이질은 8프레임에 1회" % sheet[1])
+
 	print("SHEETS: %s" % ("PASS" if failures == 0 else "FAIL %d" % failures))
 	quit(failures)
+
+
+## Swings in one sheet, from the top of the silhouette frame by frame.
+##
+## The tool above the head is the highest thing in the picture, so the profile is
+## a wave: one trough per swing. Counted as descents of the top row -- a fall of
+## more than a fifth of the sheet's travel, so shading noise does not register as
+## a swing -- and wrapped around, because the sheet loops.
+static func _swings(sheet: Texture2D) -> int:
+	var image: Image = sheet.get_image()
+	var size: int = image.get_height()
+	var frames: int = image.get_width() / size
+	var tops: Array[int] = []
+	for index in frames:
+		var top: int = size
+		for y in size:
+			var found := false
+			for x in size:
+				if image.get_pixel(index * size + x, y).a > 0.125:
+					found = true
+					break
+			if found:
+				top = y
+				break
+		tops.append(top)
+	var lowest: int = tops.min()
+	var highest: int = tops.max()
+	var threshold: float = float(highest - lowest) * 0.5
+	var swings := 0
+	for index in frames:
+		var here: int = tops[index]
+		var next: int = tops[(index + 1) % frames]
+		# The tool coming back down: the top row moving away from the ceiling.
+		if float(next - here) > threshold:
+			swings += 1
+	return swings

@@ -113,7 +113,7 @@ export function MotorioLevelMap() {
           to={[735, 372]}
           side="right"
           title="시작 온기 · 7칸"
-          note="반경 = 7 + 0.022 × 누적 열"
+          note="기지 단계마다 한 번에 넓어진다"
         />
         <Callout
           from={[CX + diag(22), CY + diag(22)]}

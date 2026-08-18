@@ -79,7 +79,7 @@ func _test_tracks() -> void:
 	# radius would find one on the same frame and 생물 탐색 would open and close
 	# together. Cleared first, so "has not seen one yet" is a real state here.
 	sim.frozen_cats.clear()
-	sim.total_heat = int(Defs.BASE_LEVELS[1]["heat"])
+	sim.stones_in = int(Defs.BASE_LEVELS[1]["stones"])
 	sim._refresh_radius()
 	main._update_missions()
 	_assert(not _open_ids(main).has("BASE2"), "올리면 그 줄은 닫힌다")
@@ -131,7 +131,7 @@ func _test_tracks() -> void:
 	_assert(progress.size() == 2, "대신 기지 위에 셀 숫자가 있다: %s" % str(progress))
 	_assert(progress[1] > 0, "필요량이 0이 아니다")
 	# And nothing at the top of the ladder, where there is nowhere left to count.
-	sim.total_heat = int(Defs.BASE_LEVELS[-1]["heat"])
+	sim.stones_in = int(Defs.BASE_LEVELS[-1]["stones"])
 	sim._refresh_radius()
 	_assert(main.upgrade_progress().is_empty(), "마지막 단계에서는 세지 않는다")
 

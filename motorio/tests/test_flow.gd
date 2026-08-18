@@ -270,7 +270,7 @@ func _run() -> void:
 	_assert(main.player.warmth < near_loss, "the shelter porch is still cold")
 	_assert(main.sleep_available(), "Z offers sleep once night has fallen and you are home")
 
-	main.sim.total_heat = 140
+	main.sim.stones_in = 140
 	main._sleep()
 	# Bedtime is a sequence now, not a cut: the workforce walks home and the hut
 	# lights up before the summary appears.
@@ -278,7 +278,7 @@ func _run() -> void:
 	_assert(main.indoors() or main.night_phase == main.Phase.GATHER,
 		"and it opens with everyone still walking home")
 	_assert(_settle(main, main.State.RESULT), "the night sequence ends on the day summary")
-	_assert(main.day_heat() == 140, "the summary reports what this day earned")
+	_assert(main.day_stones() == 140, "the summary reports what this day earned")
 	_assert(main.player.locked, "the player is locked while the day summary is up")
 
 	# Continuing must carry the world forward, not restart it: that is the whole
@@ -294,11 +294,11 @@ func _run() -> void:
 	_assert(is_zero_approx(main.night_level()), "morning is fully lit")
 	_assert(main.day_number == 2, "the day counter advances")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the new day has a full clock")
-	_assert(main.sim.total_heat == 140, "cumulative heat carries into the next day")
+	_assert(main.sim.stones_in == 140, "cumulative stones carry into the next day")
 	_assert(is_equal_approx(main.sim.warm_radius, radius_before), "the warm radius carries over")
 	_assert(main.sim.machine_at(Vector2i(0, 2)) != null, "the factory survives the night")
 	_assert(not main.player.locked, "the player can move again in the morning")
-	_assert(main.day_heat() == 0, "the daily total starts fresh each morning")
+	_assert(main.day_stones() == 0, "the daily total starts fresh each morning")
 
 	# Daytime inside the warm radius must still recover heat, or the night rule
 	# would simply be a permanent drain.
@@ -313,12 +313,12 @@ func _run() -> void:
 	# on 2026-08-14 when the game was settled as long-form: a high score is an
 	# instruction to replay the day, which is the opposite of what this game
 	# asks for.
-	main.sim.total_heat = 160
+	main.sim.stones_in = 160
 	main.time_left = 0.05
 	main._process(0.2)
-	_assert(main.day_heat() == 20, "the second day counts only its own earnings")
+	_assert(main.day_stones() == 20, "the second day counts only its own earnings")
 	_assert(_settle(main, main.State.RESULT), "running out of time also plays the night out")
-	_assert(not ("best_day_heat" in main), "최고 하루 기록이 남아 있지 않다")
+	_assert(not ("best_day_stones" in main), "최고 하루 기록이 남아 있지 않다")
 	_assert(not ("best_heat" in main), "최고 누적 기록이 남아 있지 않다")
 
 	# The summary card cannot throw the run away.
@@ -330,11 +330,11 @@ func _run() -> void:
 	# so is the key, because leaving the key with the label removed is the worse
 	# of the two: a run lost with nothing on screen to explain it.
 	var day_before: int = main.day_number
-	var heat_before: int = main.sim.total_heat
+	var stones_before: int = main.sim.stones_in
 	_press(main, KEY_N)
 	_assert(main.state == main.State.RESULT, "정산 화면에서 N은 아무 일도 하지 않는다")
 	_assert(main.day_number == day_before, "날짜가 되돌아가지 않는다")
-	_assert(main.sim.total_heat == heat_before, "모아둔 열이 사라지지 않는다")
+	_assert(main.sim.stones_in == stones_before, "불에 넣은 열석이 사라지지 않는다")
 	_assert(main.sim.machine_at(Vector2i(0, 2)) != null, "공장이 그대로 남는다")
 
 	if failures == 0:

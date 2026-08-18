@@ -78,7 +78,7 @@ var shake: float = 0.0
 var collapse_timer: float = -1.0
 var run_seed: int = 0
 var day_number: int = 1
-var day_start_heat: int = 0
+var day_start_stones: int = 0
 var rescued_tonight: bool = false
 var message: String = ""
 var message_life: float = 0.0
@@ -180,7 +180,7 @@ func _ready() -> void:
 	# while sped up would hand the next one a ten-times world.
 	Engine.time_scale = 1.0
 	speed_index = 0
-	sim.heat_gained.connect(_on_heat_gained)
+	sim.fuel_added.connect(_on_fuel_added)
 	sim.item_delivered.connect(_on_item_delivered)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
@@ -318,7 +318,7 @@ func _start_run() -> void:
 	missions_done.clear()
 	frozen_seen = false
 	day_number = 1
-	day_start_heat = 0
+	day_start_stones = 0
 	time_left = Defs.DAY_SECONDS
 	sim.begin_crash()
 	mission = Mission.BASE
@@ -408,19 +408,10 @@ func info_data() -> Dictionary:
 		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
 	if is_dusk():
 		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
-	# What is three seconds from waking up outranks what is in her arms, and both
-	# outrank the state of the grid.
-	if _thawing_nearby():
-		return _goal(Defs.mission_line("THAW"), "thing", Icons.THING_CAT_FROZEN)
-	if sim.carried_frozen:
-		return _goal(Defs.mission_line("CARRY-FROZEN"), "thing", Icons.THING_CAT_FROZEN)
-	if sim.carried_cat != null:
-		return _goal(Defs.mission_line("CARRY-CAT"), "thing", Icons.THING_CAT)
-	# A brown-out is a fact about the world and not an errand: the factory the
-	# player built is running at a fraction of its rate and nothing else on
-	# screen says so.
-	if sim.power_draw > sim.power_capacity:
-		return _goal(Defs.mission_line("BROWNOUT"), "machine", Defs.M_GENERATOR)
+	# Nothing else. What is in her arms is drawn in her arms, ice melting is drawn
+	# melting, and the grid running slow is something a player who built the grid
+	# can see -- three lines that described the screen and one that described a
+	# number, all of them removed together in 1.0.5.
 	return {}
 
 ## Everything that used to be below this line was an instruction ladder: build a
@@ -677,6 +668,20 @@ func draw_map(on: CanvasItem, view: Rect2) -> void:
 				Defs.COL_CORE)
 			continue
 		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.COL_MACHINE_EDGE)
+	# The edge of the fire's reach, drawn as the circle it actually is.
+	#
+	# Before this the map showed where she had been and what stood there, and the
+	# one line that decides what she may touch was on neither -- so "can I take
+	# that seam yet" could only be answered by walking to it. Drawn under Grim
+	# and over the ground, because it is a boundary rather than a thing.
+	if sim.base_placed:
+		var core: Vector2 = centre + Vector2(sim.core_cell - here) * scale \
+			+ Vector2(scale, scale) * 0.5
+		var radius: float = sim.warm_radius * scale
+		on.draw_arc(core, radius, 0.0, TAU, 96, Color(0.06, 0.07, 0.10, 0.55), 3.0, true)
+		on.draw_arc(core, radius, 0.0, TAU, 96,
+			Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85), 1.6, true)
+
 	# Grim last, over everything, because the one thing a map has to answer
 	# instantly is where you are.
 	on.draw_circle(centre, 4.0, Color(0.05, 0.06, 0.09, 0.9))
@@ -880,7 +885,6 @@ func _process(delta: float) -> void:
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
-	machine_layer.upgrade_progress = upgrade_progress()
 	machine_layer.pickaxe_hint = pickaxe_hint_cell()
 	# A panel pinned to a machine the player has since demolished would keep
 	# reporting a machine that no longer exists.
@@ -999,7 +1003,7 @@ const SAVE_SLOTS := 31
 ## load is what makes that safe -- an unrecognised file starts a new run rather
 ## than half-restoring one.
 const SAVE_PATH := "user://motorio_save.cfg"
-const SAVE_SCHEMA := 6
+const SAVE_SCHEMA := 7
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1251,20 +1255,13 @@ func _collect_shard() -> void:
 ## Returns an empty array at the top, where there is no next step to count to.
 func upgrade_progress() -> Array[int]:
 	var out: Array[int] = []
-	var next_level: Dictionary = Defs.next_base_level(sim.total_heat)
+	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
 	if next_level.is_empty():
 		return out
-	var floor_heat: int = int(Defs.BASE_LEVELS[sim.base_level]["heat"])
-	var per_stone: float = float(Defs.ITEM_VALUES[Defs.ITEM_HEATSTONE])
-	out.append(int(floor(float(sim.total_heat - floor_heat) / per_stone)))
-	out.append(int(round(float(int(next_level["heat"]) - floor_heat) / per_stone)))
+	var floor_stones: int = int(Defs.BASE_LEVELS[sim.base_level]["stones"])
+	out.append(sim.stones_in - floor_stones)
+	out.append(int(next_level["stones"]) - floor_stones)
 	return out
-
-func _upgrade_line() -> String:
-	var progress: Array[int] = upgrade_progress()
-	if progress.is_empty():
-		return Defs.mission_line("MAXED")
-	return "기지 업그레이드 %02d  ·  열석 %d/%d" % [sim.base_level + 1, progress[0], progress[1]]
 
 ## --- The three tracks -------------------------------------------------------
 ## Which rungs have appeared, and which are behind us. Both are saved: a mission
@@ -1408,10 +1405,11 @@ func _on_cat_thawed(total: int, at: Vector2) -> void:
 	fx.burst(at, Defs.COL_CAT_FACE, 14)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "meow")
+	# The first one is told what to do with it. After that the meow, the ring and
+	# a cat standing where a block was are the whole message -- a running count
+	# of the crew is a number the player can see by looking at the crew.
 	if total == 1:
 		_notify("고양이가 깨어났습니다  Z 로 안아 채굴기에 올려놓으세요", Defs.COL_CORE)
-	else:
-		_notify("고양이가 깨어났습니다  (%d마리)" % total, Defs.COL_CORE)
 
 ## Which mission the run is on, recomputed from the world rather than advanced
 ## by whoever happened to do the thing. A flag set at the moment of an action is
@@ -1796,8 +1794,12 @@ func _update_collapse(delta: float) -> void:
 	collapse_timer = -1.0
 	player.collapse = 0.0
 	rescued_tonight = true
-	var lost: int = sim.spend_rescue()
-	_notify("쓰러졌습니다 · 열 %d 손실" % lost, Defs.COL_DANGER)
+	# No fine. The banked heat used to lose a quarter of itself here, and once the
+	# bank became "stones already burnt into the circle" there was nothing left to
+	# take that would not shrink the reach -- and the circle is the one thing in
+	# this game that must never go backwards. Losing the rest of the day is the
+	# cost, and it was always the larger one.
+	_notify("쓰러졌습니다", Defs.COL_DANGER)
 	_finish_run()
 
 
@@ -2449,7 +2451,8 @@ func _primary_action() -> void:
 	var mining_here: bool = holding_pickaxe() and sim.can_hand_mine(target) \
 		and not sim.machines.has(target)
 	if not mining_here and sim.pick_up_frozen(cell):
-		_notify("얼어붙은 고양이를 안았습니다  느려지고 달릴 수 없습니다", Defs.COL_BELT_RIM)
+		# No banner. The block is in her arms on screen and she is visibly slower
+		# for it, and a line of text saying so is a caption under a picture.
 		fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
 		audio.call("play", "select")
 		return
@@ -2480,10 +2483,11 @@ func _primary_action() -> void:
 ## ended with a red cost and nothing to pay it with.
 func base_rows() -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
-	# Only while there is something to put in. A row that is always there and
-	# usually refuses teaches the player to skip past it.
-	if sim.has_fuel():
-		rows.append({"kind": "fuel"})
+	# Always. It used to appear only when she was carrying something burnable,
+	# which meant the one line that says what the fire wants was missing at
+	# exactly the moment the player had nothing and needed to know what to go and
+	# get. It says the number either way and refuses when she is short.
+	rows.append({"kind": "fuel"})
 	for index in Defs.BASE_CRAFTS.size():
 		rows.append({"kind": "craft", "craft": index})
 	return rows
@@ -2539,10 +2543,18 @@ func craft_selected(index: int = 0) -> void:
 ## is built around.
 func _deposit_at_core() -> void:
 	if not sim.has_fuel():
-		_notify("넣을 연료가 없습니다", Defs.COL_TEXT_DIM)
+		_notify("넣을 열석이 없습니다", Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
-	var before: int = sim.heat
+	# Short of the next step. Refused rather than half-paid: a fire that takes two
+	# of the three stones it wants has spent the material and moved nothing, and
+	# the player cannot see where it went.
+	if not sim.can_feed_base():
+		_notify("열석 %d개가 더 필요합니다"
+			% (sim.stones_to_next() - int(sim.stock.get(Defs.ITEM_HEATSTONE, 0))),
+			Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+		return
 	var moved: Dictionary = sim.deposit_fuel()
 	var target: Vector2 = sim.cell_centre(sim.core_cell)
 	var parts: Array[String] = []
@@ -2551,8 +2563,9 @@ func _deposit_at_core() -> void:
 		fx.stream(player.position + Vector2(0, -10.0), target,
 			Defs.ITEM_COLORS[item_type], mini(count, 8))
 		parts.append("%s %d" % [Defs.ITEM_NAMES[item_type], count])
-	var gained: int = sim.heat - before
-	fx.popup(target + Vector2(0, -34.0), "+%d 열" % gained, Defs.COL_CORE, true)
+	var gained: int = int(moved.get(Defs.ITEM_HEATSTONE, 0))
+	fx.popup(target + Vector2(0, -34.0),
+		"%s +%d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], gained], Defs.COL_CORE, true)
 	fx.ring(target, Defs.COL_CORE, Defs.RING_LARGE)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "deliver")
@@ -2770,7 +2783,7 @@ func debug_spill() -> void:
 	# nearest boulder is well outside the opening circle -- the first version of
 	# this key put her in front of one at 31% warmth inside white fog, where a
 	# working feature and a missing one look exactly alike.
-	sim.total_heat = maxi(sim.total_heat, int(Defs.BASE_LEVELS[-1]["heat"]))
+	sim.stones_in = maxi(sim.stones_in, int(Defs.BASE_LEVELS[-1]["stones"]))
 	sim._refresh_radius()
 	player.warmth = 100.0
 
@@ -2992,7 +3005,7 @@ func _try_demolish() -> void:
 	else:
 		_notify("회수할 설비가 없습니다", Defs.COL_TEXT_DIM)
 
-func _on_heat_gained(amount: int, cell: Vector2i, item_type: int) -> void:
+func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 	var energy: bool = item_type == Defs.ITEM_ENERGY
@@ -3048,14 +3061,14 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 	config.set_value("motorio", "card", {
 		"saved_at": Time.get_unix_time_from_system(),
 		"day": day_number,
-		"heat": sim.total_heat,
+		"stones": sim.stones_in,
 		"machines": _slot_thumbnail(),
 	})
 	config.set_value("motorio", "state", {
 		"seed": run_seed,
 		"day": day_number,
 		"time_left": time_left,
-		"day_start_heat": day_start_heat,
+		"day_start_stones": day_start_stones,
 		"px": player.position.x,
 		"py": player.position.y,
 		"warmth": player.warmth,
@@ -3139,7 +3152,7 @@ func load_game(slot: int = 0) -> bool:
 	sim.from_save(data.get("sim", {}))
 	day_number = int(data.get("day", 1))
 	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
-	day_start_heat = int(data.get("day_start_heat", 0))
+	day_start_stones = int(data.get("day_start_stones", 0))
 	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
 	player.warmth = float(data.get("warmth", 100.0))
 	mission = int(data.get("mission", Mission.DONE))
@@ -3340,8 +3353,8 @@ func close_settings() -> void:
 	hud.call("end_slider_drag")
 	audio.call("play", "confirm")
 
-func day_heat() -> int:
-	return sim.total_heat - day_start_heat
+func day_stones() -> int:
+	return sim.stones_in - day_start_stones
 
 ## Falling asleep outside: the cats bring you in, and the night ends anyway, but
 ## the day is scored as it stood.
@@ -3486,7 +3499,7 @@ func _finish_run() -> void:
 
 func _begin_next_day() -> void:
 	day_number += 1
-	day_start_heat = sim.total_heat
+	day_start_stones = sim.stones_in
 	time_left = Defs.DAY_SECONDS
 	night_warned = false
 	rescued_tonight = false

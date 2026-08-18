@@ -309,15 +309,15 @@
       "candidates": [
         {
           "id": "a",
-          "sheet": "/sprite-candidates/grim-mine-w-a-f71535d22777.png",
+          "sheet": "/sprite-candidates/grim-mine-w-a-a7cde50a7fa8.png",
           "frames": 8,
           "fps": 10,
           "closure": 0.0,
-          "seed": 4242,
-          "note": "Seedance 2.0 Mini · 640×640 · 4s"
+          "seed": -1,
+          "note": ""
         }
       ],
-      "source_video": "/sprite-candidates/source-c4be677849fd.mp4"
+      "source_video": "/sprite-candidates/source-0785d8332342.mp4"
     },
     {
       "id": "catorg-eat-s",
