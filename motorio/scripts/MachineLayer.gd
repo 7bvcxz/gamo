@@ -157,8 +157,17 @@ const GROUND_ITEM_BOB := 1.6
 ## thing this arrow was moved above the cats to fix in the first place. At 15 its
 ## tip touches the top of the gauge by about two pixels and both stay perfectly
 ## legible, which is the trade worth making. The test bounds that contact.
-const MINER_ARROW_LIFT := 15.0
-const MINER_ARROW_LENGTH := 10.0
+## Where the output arrow starts and how long it is, measured from the machine
+## centre outward.
+##
+## Fifteen put it on the worker's chest. Outlining it there helped -- cream on a
+## cream cat had been reading as part of the animal -- but a mark drawn across a
+## face is still a mark competing with a face, and the thing it has to answer is
+## "which way does this send its output", instantly. Twenty-six clears the head
+## of a cat standing on the machine, which is measured: the cat is drawn about
+## twenty-five pixels above the cell centre at its crown.
+const MINER_ARROW_LIFT := 26.0
+const MINER_ARROW_LENGTH := 12.0
 
 var sim: Sim
 var view_rect := Rect2()
@@ -484,6 +493,19 @@ func _body(centre: Vector2, size: float, base: Color, edge: Color = Color(0, 0, 
 
 ## One arrow shape used by previews and by placed machines, so "which way does
 ## this face" is answered the same way everywhere.
+## Which way a machine sends what it makes. Outlined, always.
+##
+## The miner's arrow was outlined when it moved above the cats -- cream on snow
+## reads as a mark, cream on a cream cat reads as a party hat -- and the
+## exchanger's was left plain underneath them, which is the same drawing with
+## both of that arrow's problems. One function now, so a third machine with an
+## output cannot get a third answer.
+func _draw_output_arrow(on: CanvasItem, centre: Vector2, dir: Vector2i, lift: float,
+		length: float) -> void:
+	var tail: Vector2 = centre + Vector2(dir) * lift
+	_draw_arrow(on, tail, dir, length, Defs.OUTLINE, 5.0)
+	_draw_arrow(on, tail, dir, length, Defs.COL_BELT_RIM, 2.5)
+
 func _draw_arrow(on: CanvasItem, from: Vector2, dir: Vector2i, length: float, col: Color, width: float = 3.0) -> void:
 	var d := Vector2(dir)
 	var perp := Vector2(-d.y, d.x)
@@ -784,7 +806,10 @@ func _draw_pickaxe_hint(tile: float) -> void:
 	# The same picture as the one lying in the snow. This hint points at the seam
 	# she should swing at, and pointing with a different drawing of the tool is
 	# how a player ends up looking for a second object.
-	_object_art(PICKAXE_ART, at + Vector2(0.0, -23.0 + bob), PICKAXE_DRAW)
+	# A third of the one lying in the snow. This one is a pointer sitting above a
+	# seam rather than an object on the ground, and at full size it covered the
+	# thing it was pointing at.
+	_object_art(PICKAXE_ART, at + Vector2(0.0, -18.0 + bob), PICKAXE_DRAW / 3.0)
 
 func _draw_kit(tile: float) -> void:
 	if sim.kit_cell == Vector2i(9999, 9999) or sim.kit_searched >= 2:
@@ -914,7 +939,7 @@ func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# because it is the readout: dim means it is short of crystal, and a painted
 	# glow would say "working" while the machine sat empty.
 	draw_circle(c + Vector2(0.0, 1.0), 6.5, Color(1.0, 0.62, 0.24, glow))
-	_draw_arrow(self, c + Vector2(machine.dir) * 15.0, machine.dir, 9.0, Defs.COL_BRASS, 2.2)
+	# The output arrow is drawn after the cats, in _draw_machine_marks.
 	# A copper stud marks the alloy recipe, so two exchangers side by side on
 	# different recipes are told apart without selecting either.
 	if machine.recipe != Defs.RECIPE_PLAIN:
@@ -946,14 +971,14 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		if not _visible(cell, tile):
 			continue
 		var centre: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		# Every machine that produces something says where it goes, over the cats
+		# and outlined. A cat is nearly sixty pixels tall standing on the centre
+		# these are measured from, so an arrow drawn underneath is invisible in
+		# exactly the case where the machine is running.
 		if machine.type == Defs.M_MINER:
-			# Outlined, because it is now drawn over the cat rather than under it.
-			# Cream on snow read as a mark; cream on a cream cat read as a party
-			# hat, and an output direction that looks like part of the animal is
-			# not much better than one hidden behind it.
-			var tail: Vector2 = centre + Vector2(machine.dir) * MINER_ARROW_LIFT
-			_draw_arrow(on, tail, machine.dir, MINER_ARROW_LENGTH, Defs.OUTLINE, 5.0)
-			_draw_arrow(on, tail, machine.dir, MINER_ARROW_LENGTH, Defs.COL_BELT_RIM, 2.5)
+			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
+		if machine.type == Defs.M_EXCHANGER:
+			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
 		if machine.stalled:
 			_draw_stall(on, machine, centre)
 

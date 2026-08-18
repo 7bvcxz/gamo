@@ -29,6 +29,7 @@ func _run() -> void:
 	_test_placing_the_shelter()
 	_test_missions_follow_the_world()
 	_test_cold_ends_it()
+	_test_the_gun_comes_from_the_fire()
 	_test_feeding_the_fire()
 	_test_save_mid_opening()
 	_test_finish_tutorial()
@@ -167,9 +168,10 @@ func _test_searching_the_kit() -> void:
 		_assert(cell.y > sim.kit_cell.y, "상자 아래쪽에 떨어진다: %s" % str(cell))
 
 	var second: Array[int] = sim.search_kit()
-	_assert(second.size() == 3, "두 번째 조사에서 셋이 더 떨어진다: %d" % second.size())
-	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE)
-		and second.has(Sim.DROP_GUN), "긴급숙소키트와 곡괭이와 건설총이다")
+	_assert(second.size() == 2, "두 번째 조사에서 둘이 더 떨어진다: %d" % second.size())
+	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE),
+		"긴급숙소키트와 곡괭이다")
+	_assert(not second.has(Sim.DROP_GUN), "총은 상자에 없다 — 불이 준다")
 	_assert(sim.search_kit().is_empty(), "세 번째는 없다 — 빈 상자다")
 
 	# Picking them up is what grants them.
@@ -419,3 +421,51 @@ func _kit_always_gives() -> bool:
 	if empty > 0:
 		print("   상자가 빈 회차: %d/200" % empty)
 	return empty == 0
+
+## The build gun comes out of the fire, not out of the case.
+##
+## It used to fall onto the snow at the very start, ten minutes before there is
+## anything to build or anything to build it with, beside the one object the
+## opening is about. Now the first upgrade hands it over -- which is the moment
+## the player has just learned what the fire is for.
+func _test_the_gun_comes_from_the_fire() -> void:
+	_crash()
+	var sim = main.sim
+	# Through the opening as far as the fire being lit.
+	sim.search_kit()
+	sim.search_kit()
+	_assert(not sim.gun_dropped, "상자에서는 총이 나오지 않는다")
+	var from_kit := false
+	for cell: Vector2i in sim.drops:
+		if int(sim.drops[cell]) == Sim.DROP_GUN:
+			from_kit = true
+	_assert(not from_kit, "두 번째 조사에도 없다")
+
+	sim.carried_kit = Defs.KIT_BASE
+	sim.place_base(sim.core_cell)
+	_assert(not sim.gun_dropped, "불을 피우는 것만으로는 아직이다")
+
+	# The first upgrade. Through the real door, so what the player does is what
+	# is being tested.
+	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
+	main._deposit_at_core()
+	_assert(sim.base_level >= 1, "기지가 한 단계 올랐다")
+	_assert(sim.gun_dropped, "그때 총이 떨어진다")
+	var where := Vector2i(9999, 9999)
+	for cell: Vector2i in sim.drops:
+		if int(sim.drops[cell]) == Sim.DROP_GUN:
+			where = cell
+	_assert(where != Vector2i(9999, 9999), "실제로 바닥에 놓인다")
+	_assert(Vector2(where - sim.core_cell).length() <= 3.0,
+		"기지 옆이다: %s" % str(where))
+	_assert(sim.collect_drop(where) == Sim.DROP_GUN and sim.has_gun,
+		"주우면 손에 들어온다")
+
+	# And a second upgrade does not put a second one on the snow.
+	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
+	main._deposit_at_core()
+	var guns := 0
+	for cell: Vector2i in sim.drops:
+		if int(sim.drops[cell]) == Sim.DROP_GUN:
+			guns += 1
+	_assert(guns == 0, "두 번째 업그레이드는 총을 또 주지 않는다")

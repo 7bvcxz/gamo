@@ -377,6 +377,7 @@ func to_save() -> Dictionary:
 		"stones_in": stones_in, "delivered": delivered_rows,
 		"belt_fed": delivered_by_belt,
 		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
+		"gun_dropped": gun_dropped,
 		"thawed": _thawed_rows(),
 		"debris": _debris_rows(), "debris_searched": debris_searched,
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
@@ -417,6 +418,7 @@ func from_save(data: Dictionary) -> void:
 	delivered_by_belt = bool(data.get("belt_fed", false))
 	has_gun = bool(data.get("has_gun", false))
 	has_pickaxe = bool(data.get("has_pickaxe", false))
+	gun_dropped = bool(data.get("gun_dropped", false))
 	thawed.clear()
 	for row in data.get("thawed", []):
 		thawed[Vector2i(int(row[0]), int(row[1]))] = true
@@ -530,6 +532,7 @@ func setup(seed_value: int) -> void:
 	drops.clear()
 	has_gun = false
 	has_pickaxe = false
+	gun_dropped = false
 	thawed.clear()
 	cancel_thaw()
 	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
@@ -1043,13 +1046,20 @@ var thaw_progress: float = 0.0
 ## lifted off a belt. What has to be carried is different: it is frozen into the
 ## ground where it lies, and the ground is what the five seconds are spent on.
 func is_liftable(cell: Vector2i) -> bool:
-	if frozen_cats.has(cell):
-		return true
-	var centre: Vector2 = cell_centre(cell)
+	return frozen_cats.has(cell) or cat_on(cell) != null
+
+## The cat standing on a cell, or null.
+##
+## The cell it is on, not the cell it is nearest. Both of the things Z can pick
+## up used to be found by searching a radius round the target, and a cat is a
+## body moving between cells rather than a thing sitting in one -- so a cat
+## walking diagonally past came within reach of the cell in front of her and was
+## scooped up instead of whatever she was actually facing.
+func cat_on(cell: Vector2i) -> Cat:
 	for cat: Cat in cats:
-		if cat != carried_cat and cat.pos.distance_to(centre) <= float(Defs.TILE) * 0.9:
-			return true
-	return false
+		if cat != carried_cat and cell_of(cat.pos) == cell:
+			return cat
+	return null
 
 ## Whether what is on this cell can be picked up and carried.
 ##
@@ -1200,7 +1210,7 @@ const DROP_NAMES := ["긴급기지키트", "긴급숙소키트", "건물건설�
 ## choosing which to walk to, and one of the two was a distraction.
 const KIT_CONTENTS: Array[Array] = [
 	[DROP_KIT_BASE],
-	[DROP_KIT_SHELTER, DROP_PICKAXE, DROP_GUN],
+	[DROP_KIT_SHELTER, DROP_PICKAXE],
 ]
 
 var drops: Dictionary = {}
@@ -1209,6 +1219,9 @@ var drops: Dictionary = {}
 ## them.
 var has_gun := false
 var has_pickaxe := false
+## Whether the fire has already handed the gun over, so a second upgrade does
+## not put a second one on the snow.
+var gun_dropped := false
 
 ## Empties the case onto the snow below it. Returns what came out.
 func search_kit() -> Array[int]:
@@ -1273,6 +1286,37 @@ func _drop_cell(index: int) -> Vector2i:
 		if seen == index:
 			return cell
 		seen += 1
+	return Vector2i(9999, 9999)
+
+## The build gun, handed over by the fire once it has grown a step.
+##
+## It used to fall out of the case at the start, ten minutes before there was
+## anything to build or anything to build it with. Tying it to the first upgrade
+## puts it where the player has just learned what the fire is for -- and it
+## arrives as a thing on the snow to walk over, like everything else in the
+## opening, rather than as a slot that quietly appears in the hotbar.
+func drop_gun_at_base() -> bool:
+	if has_gun or gun_dropped or not base_placed:
+		return false
+	var cell: Vector2i = _free_near(core_cell)
+	if cell == Vector2i(9999, 9999):
+		return false
+	drops[cell] = DROP_GUN
+	gun_dropped = true
+	return true
+
+## A cell beside a given one with nothing on it, searched outward. The same
+## question `_drop_cell` asks about the case, asked about the fire.
+func _free_near(origin: Vector2i) -> Vector2i:
+	for ring in range(1, 6):
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring:
+					continue
+				var cell: Vector2i = origin + Vector2i(dx, dy)
+				if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
+					continue
+				return cell
 	return Vector2i(9999, 9999)
 
 ## Walking over one. Returns what was taken, or -1.
@@ -1545,15 +1589,7 @@ func pull_gacha(count: int) -> Array[int]:
 func pick_up_cat(cell: Vector2i) -> bool:
 	if hands_full() or not can_lift(cell):
 		return false
-	var reach: float = float(Defs.TILE) * 0.9
-	var centre: Vector2 = cell_centre(cell)
-	var best: Cat = null
-	var best_distance: float = reach
-	for cat: Cat in cats:
-		var distance: float = cat.pos.distance_to(centre)
-		if distance <= best_distance:
-			best = cat
-			best_distance = distance
+	var best: Cat = cat_on(cell)
 	if best == null:
 		return false
 	if best.has_job() and machines.has(best.assigned):

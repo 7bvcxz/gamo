@@ -1402,6 +1402,16 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "finish")
 	_notify("기지가 커졌습니다  온기 %.0f칸" % radius, Defs.COL_CORE)
+	# And the first step of the fire is what hands over the build gun.
+	if sim.drop_gun_at_base():
+		var where: Vector2i = sim.core_cell
+		for cell: Vector2i in sim.drops:
+			if int(sim.drops[cell]) == Sim.DROP_GUN:
+				where = cell
+		var spot: Vector2 = sim.cell_centre(where)
+		fx.ring(spot, Defs.COL_CORE, Defs.RING_LARGE)
+		fx.burst(spot, Defs.COL_CORE, 14)
+		note_log("기지에서 무언가 떨어졌다", Defs.COL_CORE)
 
 func _on_cat_thawed(total: int, at: Vector2) -> void:
 	fx.popup(at + Vector2(0, -30), "먀?", Defs.COL_CAT_FACE, true)
@@ -1647,20 +1657,18 @@ func _prompt_status(id: String) -> Dictionary:
 ## Both of these gate a prompt that says "Z 안기", so both ask whether the ground
 ## would actually let go. Offering the verb over something still frozen down is
 ## how a prompt becomes a key that does nothing.
+## Both of these gate a prompt that says "Z 안기", so both ask about the cell the
+## key actually acts on -- the one she is facing, and only that one. They used to
+## ask about a circle a tile and a half wide, which offered the verb for a cat
+## she was standing beside rather than looking at.
 func _frozen_within_reach() -> bool:
-	for cell: Vector2i in sim.frozen_cats:
-		if player.position.distance_to(sim.cell_centre(cell)) <= float(Defs.TILE) * 1.5 \
-				and sim.can_lift(cell):
-			return true
-	return false
+	var cell: Vector2i = player.facing_cell()
+	return sim.frozen_cats.has(cell) and sim.can_lift(cell)
 
 func _idle_cat_within_reach() -> bool:
-	for cat: Sim.Cat in sim.cats:
-		if not cat.has_job() \
-				and player.position.distance_to(cat.pos) <= float(Defs.TILE) * 1.5 \
-				and sim.can_lift(sim.cell_of(cat.pos)):
-			return true
-	return false
+	var cell: Vector2i = player.facing_cell()
+	var cat: Sim.Cat = sim.cat_on(cell)
+	return cat != null and not cat.has_job() and sim.can_lift(cell)
 
 func _anything_buildable() -> bool:
 	for type: int in Defs.BUILDABLE:

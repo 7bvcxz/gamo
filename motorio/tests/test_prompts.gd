@@ -119,20 +119,26 @@ func _test_learned_from_the_world() -> void:
 	# A frozen cat in reach, with empty hands.
 	sim.frozen_cats.clear()
 	sim.cats.clear()
+	# Standing beside it and looking at it. Z acts on the cell she faces and on
+	# no other as of 1.0.7, so the prompt that offers the verb asks the same
+	# question the key answers -- offering it for a cat she is merely near is the
+	# game telling her to press a key that does nothing.
 	var spot: Vector2i = sim.core_cell + Vector2i(3, 0)
 	sim.frozen_cats[spot] = 0.0
-	main.player.position = sim.cell_centre(spot)
-	_assert(main.active_prompt() == "FROZEN", "얼어붙은 고양이 옆에서 안기")
+	main.player.position = sim.cell_centre(spot + Vector2i(-1, 0))
+	main.player.facing = Vector2i.RIGHT
+	_assert(main.active_prompt() == "FROZEN", "얼어붙은 고양이를 바라보면 안기")
 	# Nothing was pressed and no flag was set -- a cat simply exists now, and
 	# that is the world answering the question.
 	sim.grant_cats(1)
 	_assert(main.active_prompt() != "FROZEN",
 		"고양이가 한 마리라도 생기면 그 안내는 끝난다")
 
-	# And the one that follows it: a cat with no job, standing next to her.
-	sim.cats[0].pos = main.player.position
+	# And the one that follows it: a cat with no job, on the cell she is facing.
+	sim.frozen_cats.clear()
+	sim.cats[0].pos = sim.cell_centre(main.player.facing_cell())
 	sim.cats[0].assigned = Vector2i(9999, 9999)
-	_assert(main.active_prompt() == "CATLIFT", "일 없는 고양이 옆에서 안기")
+	_assert(main.active_prompt() == "CATLIFT", "일 없는 고양이를 바라보면 안기")
 	sim.cats[0].assigned = sim.core_cell + Vector2i(0, 3)
 	_assert(main.active_prompt() != "CATLIFT", "일을 시키면 끝난다")
 
