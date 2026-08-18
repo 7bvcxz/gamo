@@ -81,18 +81,28 @@ func _test_where_it_is() -> void:
 			far += 1
 		shapes[int(sim.debris[cell])] = true
 	_assert(inside == 0, "10칸 안에는 한 조각도 없다 (%d개)" % inside)
-	_assert(far >= 20, "12칸 밖에 흩어져 있다 (%d개)" % far)
+	_assert(far >= 5, "12칸 밖에 흩어져 있다 (%d개)" % far)
 	# The whole point of five pictures is that a field of wreckage does not
 	# repeat. One seed drawing three of them would be five prompts paid for and
 	# three used.
-	_assert(shapes.size() == Defs.DEBRIS_SHAPES,
-		"한 회차에 다섯 모양이 전부 나온다 (%d종)" % shapes.size())
+	# A dozen pieces and five shapes: any one world can miss a shape by chance, so
+	# the promise is checked across seeds rather than inside one.
+	var seen: Dictionary[int, bool] = {}
+	for index in 12:
+		var other := Sim.new()
+		other.setup(61000 + index)
+		for cell: Vector2i in other.debris:
+			seen[int(other.debris[cell])] = true
+		other.free()
+	_assert(seen.size() == Defs.DEBRIS_SHAPES,
+		"다섯 모양이 전부 쓰인다 (%d종)" % seen.size())
+	_assert(shapes.size() >= 3, "한 회차에도 여러 모양이 섞인다 (%d종)" % shapes.size())
 	# Sparse, not a carpet. The density is the difference between "walk out and
 	# find something" and "walk out and stand in a scrapyard".
 	var reach: float = Defs.WARM_MAX + 8.0
 	var area: float = PI * (reach * reach - Defs.DEBRIS_START_RING * Defs.DEBRIS_START_RING)
 	var per: float = area / float(sim.debris.size())
-	_assert(per >= 35.0 and per <= 70.0, "조각 하나당 %.0f칸 (목표 50)" % per)
+	_assert(per >= 140.0 and per <= 280.0, "조각 하나당 %.0f칸 (목표 200)" % per)
 	sim.free()
 
 ## The guarantee, across two hundred worlds. Exactly one, and on the ring rather
@@ -133,14 +143,24 @@ func _test_taking_one_apart() -> void:
 	sim.cancel_debris()
 	_assert(sim.debris_progress == 0.0, "손을 떼면 처음부터다")
 	_assert(sim.search_debris(near, Defs.DEBRIS_SEARCH_SECONDS), "끝까지 누르면 열린다")
-	var before: int = int(sim.stock.get(Defs.ITEM_COPPER, 0))
+	# The wreck pays in the world's own seams: a few of the best the ladder has,
+	# and a pile of the rung under it.
+	var top: int = Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]
+	var below: int = Defs.ORE_TIERS[maxi(Defs.ORE_TIERS.size() - 2, 0)]
+	var before: int = int(sim.stock.get(top, 0))
 	var found: Dictionary = sim.open_debris(near)
 	_assert(not sim.debris.has(near), "뜯은 조각은 사라진다")
-	_assert(int(sim.stock.get(Defs.ITEM_COPPER, 0)) > before, "구리가 실제로 들어온다")
-	_assert(int(found[Defs.ITEM_COPPER]) >= 5 and int(found[Defs.ITEM_COPPER]) <= 10,
-		"구리 5~10개 (%d)" % int(found[Defs.ITEM_COPPER]))
-	_assert(int(found[Defs.ITEM_IRON]) >= 2 and int(found[Defs.ITEM_IRON]) <= 5,
-		"철 2~5개 (%d)" % int(found[Defs.ITEM_IRON]))
+	_assert(int(sim.stock.get(top, 0)) > before, "재료가 실제로 들어온다")
+	_assert(int(found[top]) >= Defs.DEBRIS_HIGH.x and int(found[top]) <= Defs.DEBRIS_HIGH.y,
+		"%s 2~5개 (%d)" % [Defs.ITEM_SHORT[top], int(found[top])])
+	_assert(int(found[below]) >= Defs.DEBRIS_LOW.x and int(found[below]) <= Defs.DEBRIS_LOW.y,
+		"%s 5~10개 (%d)" % [Defs.ITEM_SHORT[below], int(found[below])])
+	# And it is the top of the ladder rather than a resource of the wreck's own.
+	# A second economy beside the seams is a second thing to balance.
+	_assert(top != below, "두 등급은 서로 다른 자원이다")
+	for item_type: int in found:
+		_assert(item_type in Defs.ORE_TIERS or item_type == Defs.ITEM_CORE_PART,
+			"잔해는 광맥 자원과 코어부품만 준다 (%s)" % Defs.ITEM_SHORT[item_type])
 	_assert(sim.open_debris(near).is_empty(), "없는 조각은 아무것도 주지 않는다")
 	sim.free()
 

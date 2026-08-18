@@ -833,10 +833,16 @@ func open_debris(cell: Vector2i) -> Dictionary:
 	debris.erase(cell)
 	debris_searched += 1
 	cancel_debris()
-	var out: Dictionary = {
-		Defs.ITEM_COPPER: debris_rng.randi_range(Defs.DEBRIS_COPPER.x, Defs.DEBRIS_COPPER.y),
-		Defs.ITEM_IRON: debris_rng.randi_range(Defs.DEBRIS_IRON.x, Defs.DEBRIS_IRON.y),
-	}
+	# The top of the seam ladder and the rung under it. When the ladder is one
+	# rung long -- which it is not today, but a list of two is a list that can
+	# become a list of one -- both lines land on the same resource and are added
+	# rather than one of them silently going missing.
+	var top: int = Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]
+	var below: int = Defs.ORE_TIERS[maxi(Defs.ORE_TIERS.size() - 2, 0)]
+	var out: Dictionary = {}
+	out[top] = debris_rng.randi_range(Defs.DEBRIS_HIGH.x, Defs.DEBRIS_HIGH.y)
+	out[below] = int(out.get(below, 0)) \
+		+ debris_rng.randi_range(Defs.DEBRIS_LOW.x, Defs.DEBRIS_LOW.y)
 	var cores: int = 1 if first else 0
 	if not first:
 		var roll: float = debris_rng.randf()

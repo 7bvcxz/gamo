@@ -999,7 +999,7 @@ const SAVE_SLOTS := 31
 ## load is what makes that safe -- an unrecognised file starts a new run rather
 ## than half-restoring one.
 const SAVE_PATH := "user://motorio_save.cfg"
-const SAVE_SCHEMA := 5
+const SAVE_SCHEMA := 6
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1462,7 +1462,7 @@ func _update_debris(delta: float) -> void:
 		return
 	var at: Vector2 = sim.cell_centre(cell)
 	fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
-	fx.burst(at, Defs.ITEM_COLORS[Defs.ITEM_IRON], 9)
+	fx.burst(at, Defs.ITEM_COLORS[Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]], 9)
 	audio.call("play", "alloy")
 	var parts: Array[String] = []
 	for item_type: int in Defs.COUNTED_ITEMS:

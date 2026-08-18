@@ -43,18 +43,20 @@
     "seconds": 300.0
   },
   "debris": {
-    "copper": [
-      5,
-      10
-    ],
     "core_one": 0.2,
     "core_two": 0.05,
     "first_ring": 11.0,
-    "iron": [
+    "high": [
       2,
       5
     ],
-    "per_tiles": 50.0,
+    "high_item": "구리광석",
+    "low": [
+      5,
+      10
+    ],
+    "low_item": "열석",
+    "per_tiles": 200.0,
     "search_seconds": 3.0,
     "shapes": 5,
     "start_ring": 12.0
@@ -73,7 +75,6 @@
       5,
       5,
       0,
-      0,
       0
     ],
     "names": [
@@ -82,7 +83,6 @@
       "에너지결정",
       "열석",
       "돌",
-      "철",
       "코어부품"
     ]
   },
@@ -466,7 +466,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.2",
+  "version": "1.0.4",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,
