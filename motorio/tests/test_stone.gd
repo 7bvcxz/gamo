@@ -32,11 +32,14 @@ func _assert(condition: bool, label: String) -> void:
 		failures += 1
 		print("  FAIL %s" % label)
 
+## A boulder she can actually reach. Outside the fire everything is frozen into
+## the ground, so a rock found anywhere on the map is a rock the pickaxe refuses
+## -- which is the rule working, and not what this file is about.
 func _find_rock(sim: Sim) -> Vector2i:
 	for y in range(-30, 30):
 		for x in range(-30, 30):
-			var cell := Vector2i(x, y)
-			if sim.has_rock(cell):
+			var cell: Vector2i = sim.core_cell + Vector2i(x, y)
+			if sim.has_rock(cell) and sim.can_touch(cell):
 				return cell
 	return Vector2i(9999, 9999)
 
@@ -108,7 +111,7 @@ func _test_belt_spill() -> void:
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_COPPER] = 500
-	var at := Vector2i(18, 18)
+	var at: Vector2i = sim.core_cell + Vector2i(3, 3)
 	var ahead: Vector2i = at + Vector2i.RIGHT
 	sim.ore.erase(ahead)
 	sim.mined_rocks[ahead] = true
@@ -138,7 +141,7 @@ func _test_belt_pickup() -> void:
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_COPPER] = 500
-	var at := Vector2i(-18, -18)
+	var at: Vector2i = sim.core_cell + Vector2i(-3, -3)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.RIGHT), "벨트를 놓는다")
 	var belt: Sim.Machine = sim.machine_at(at)
 	belt.items.append({"type": Defs.ITEM_STONE, "t": 0.2})

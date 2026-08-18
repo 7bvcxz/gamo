@@ -100,13 +100,24 @@ func _test_scatter() -> void:
 
 func _test_carry() -> void:
 	var sim := _sim()
-	var cell: Vector2i = sim.frozen_cats.keys()[0]
+	# Inside the fire. Outside it everything is frozen into the ground, and every
+	# frozen cat the world lays down is outside it -- the nearest sits 8.6 tiles
+	# out against a reach of 7, which is the whole point of where they are put.
+	# Reaching one is the player's problem; carrying one is what this file is
+	# about, so the subject is moved to where the rule allows it.
+	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+	sim.frozen_cats.clear()
+	sim.frozen_cats[cell] = 0.0
 
 	_assert(not sim.pick_up_frozen(cell + Vector2i(500, 500)), "빈 칸에서는 아무것도 안 든다")
 	_assert(sim.pick_up_frozen(cell), "Z 로 얼어붙은 고양이를 든다")
 	_assert(not sim.frozen_cats.has(cell), "든 자리에서는 사라진다")
 	_assert(sim.carried_frozen, "안고 있는 상태가 된다")
-	_assert(not sim.pick_up_frozen(sim.frozen_cats.keys()[0]), "두 마리는 못 든다")
+	# A second one, also within reach, so the refusal below is about her arms
+	# being full rather than about the fire not getting that far.
+	var second: Vector2i = sim.core_cell + Vector2i(-2, 0)
+	sim.frozen_cats[second] = 0.0
+	_assert(not sim.pick_up_frozen(second), "두 마리는 못 든다")
 
 	# The live-cat verb has to refuse too, or Z on a crowded tile would leave her
 	# holding both and the renderer drawing one on top of the other.

@@ -816,6 +816,19 @@ func blocks_player(cell: Vector2i) -> bool:
 func _ring_distance(cell: Vector2i) -> float:
 	return Vector2(cell - core_cell).length()
 
+## Whether the player can take what is on this cell.
+##
+## Outside the fire's reach everything is frozen into the ground: it can be seen
+## and walked to and not had. One predicate rather than a check at each verb,
+## because "the rule applies to every way of acquiring something" is a claim
+## about all of them -- and this repository has a record of exactly that kind of
+## rule written into nine handlers with six of them missing it.
+##
+## Before the base is placed there is no reach and no crafting either, so the
+## rule is off: a refusal in the first minute is a wall with no door in it.
+func can_touch(cell: Vector2i) -> bool:
+	return not base_placed or is_warm(cell)
+
 func is_warm(cell: Vector2i) -> bool:
 	return base_placed and _ring_distance(cell) <= warm_radius
 
@@ -960,7 +973,7 @@ func _drop_cell(index: int) -> Vector2i:
 
 ## Walking over one. Returns what was taken, or -1.
 func collect_drop(cell: Vector2i) -> int:
-	if not drops.has(cell):
+	if not drops.has(cell) or not can_touch(cell):
 		return -1
 	var kind: int = int(drops[cell])
 	match kind:
@@ -981,7 +994,7 @@ func collect_drop(cell: Vector2i) -> int:
 ## because they were an errand; this is a body Grim decides to carry, and the
 ## decision has to be a press.
 func pick_up_frozen(cell: Vector2i) -> bool:
-	if hands_full():
+	if hands_full() or not can_touch(cell):
 		return false
 	if not frozen_cats.has(cell):
 		return false
@@ -1212,7 +1225,7 @@ func pull_gacha(count: int) -> Array[int]:
 
 ## Picking a cat up takes it off its machine; the machine stops immediately.
 func pick_up_cat(cell: Vector2i) -> bool:
-	if hands_full():
+	if hands_full() or not can_touch(cell):
 		return false
 	var reach: float = float(Defs.TILE) * 0.9
 	var centre: Vector2 = cell_centre(cell)
@@ -1711,7 +1724,7 @@ func miner_on_power(cell: Vector2i) -> bool:
 func hand_mine(cell: Vector2i, delta: float) -> int:
 	var seam: bool = ore.has(cell)
 	var rock: bool = not seam and has_rock(cell)
-	if not seam and not rock:
+	if (not seam and not rock) or not can_touch(cell):
 		hand_progress = 0.0
 		hand_cell = Vector2i(9999, 9999)
 		return -1
@@ -1735,6 +1748,10 @@ func hand_period(cell: Vector2i) -> float:
 
 ## 0..1 across the current swing, for the progress ring the player watches.
 func can_hand_mine(cell: Vector2i) -> bool:
+	# The prompt reads this, so a cell frozen out of reach must answer no --
+	# otherwise the game offers 캐기 on a tile that refuses the key.
+	if not can_touch(cell):
+		return false
 	return ore.has(cell) or has_rock(cell)
 
 func hand_fraction() -> float:
@@ -1751,6 +1768,8 @@ func cancel_hand_mine() -> void:
 ## says so on screen, because this is the only way crystal enters the game and a
 ## silent pickup would leave the player wondering where it came from.
 func collect_shard_at(cell: Vector2i) -> bool:
+	if not can_touch(cell):
+		return false
 	if not shards.has(cell):
 		return false
 	shards.erase(cell)
@@ -1763,7 +1782,7 @@ func collect_shard_at(cell: Vector2i) -> bool:
 ## The count of what was taken is in `last_collected`, so the caller can say so.
 var last_collected: int = 0
 func collect_ground_at(cell: Vector2i) -> int:
-	if not ground.has(cell):
+	if not ground.has(cell) or not can_touch(cell):
 		return -1
 	var item_type: int = int(ground[cell])
 	var count: int = ground_count(cell)
@@ -1784,6 +1803,8 @@ func collect_ground_at(cell: Vector2i) -> int:
 func collect_belt_at(cell: Vector2i) -> int:
 	var machine: Machine = machines.get(cell, null)
 	if machine == null or machine.type != Defs.M_BELT or machine.items.is_empty():
+		return -1
+	if not can_touch(cell):
 		return -1
 	var item_type: int = int(machine.items[0]["type"])
 	var count := 0

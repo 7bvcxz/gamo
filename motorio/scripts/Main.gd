@@ -892,6 +892,8 @@ func _process(delta: float) -> void:
 	_update_missions()
 	if pickaxe_hint_until > 0.0:
 		pickaxe_hint_until = maxf(0.0, pickaxe_hint_until - delta)
+	if frozen_said > 0.0:
+		frozen_said = maxf(0.0, frozen_said - delta)
 	message_life = maxf(0.0, message_life - delta)
 	_update_build_hold(delta)
 	_update_hand_mining(delta)
@@ -1063,7 +1065,11 @@ func _collect_ground() -> void:
 	# where something she can see and stand on cannot be taken.
 	# What fell out of the case first: it is on the same tiles and it is the one
 	# thing in the opening the player is meant to walk into.
-	var drop: int = sim.collect_drop(player.cell())
+	var here: Vector2i = player.cell()
+	if _frozen_out_there(here):
+		_say_frozen(here)
+		return
+	var drop: int = sim.collect_drop(here)
 	if drop >= 0:
 		_announce_drop(drop)
 		return
@@ -2234,11 +2240,49 @@ func touch_secondary() -> void:
 
 ## One key, in priority order. Carrying a cat takes precedence over building so
 ## a full-handed player can always put the cat down.
+## How long before the frozen-ground line will say itself again.
+##
+## Quietly, over the object, and then silent for a while. The same sentence three
+## times in a row is read as a broken game rather than as a hint, and Z is a key
+## players hold.
+const FROZEN_SAY_AGAIN := 3.0
+var frozen_said: float = 0.0
+
+## Something out there that she can see and cannot have.
+##
+## Said once, at the thing, rather than through the message banner: the banner is
+## for what just happened, and this is what did not.
+func _say_frozen(cell: Vector2i) -> void:
+	if frozen_said > 0.0:
+		return
+	frozen_said = FROZEN_SAY_AGAIN
+	fx.popup(sim.cell_centre(cell) + Vector2(0, -20.0),
+		"땅과 얼어붙었다", Defs.COL_ICE, true)
+	fx.ring(sim.cell_centre(cell), Defs.COL_ICE, Defs.RING_SMALL)
+	note_log("땅과 얼어붙었다  ·  온기로 녹여야 할 것 같다", Defs.COL_ICE)
+	audio.call("play", "deny")
+
+## Whether the cell she is facing holds something the fire cannot reach yet.
+##
+## Only things that could otherwise be taken. Empty snow is not frozen out of
+## reach, it is empty, and saying so at every step across the plateau would make
+## the line meaningless before she ever meets a thing it is about.
+func _frozen_out_there(cell: Vector2i) -> bool:
+	if sim.can_touch(cell):
+		return false
+	return sim.ore.has(cell) or sim.has_rock(cell) or sim.ground.has(cell) \
+		or sim.frozen_cats.has(cell) or sim.shards.has(cell) or sim.drops.has(cell)
+
 func _primary_action() -> void:
 	if sleep_available():
 		_sleep()
 		return
 	var cell: Vector2i = player.facing_cell()
+	# Before anything else this key can mean: what is out there is frozen into
+	# the ground, and no verb applies to it until the fire reaches that far.
+	if _frozen_out_there(cell):
+		_say_frozen(cell)
+		return
 	# The kit answers Z by being held rather than pressed, so a press at it is
 	# not a build, a pick-up or anything else.
 	if _facing_kit():
