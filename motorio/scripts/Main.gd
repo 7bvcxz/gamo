@@ -1021,6 +1021,10 @@ func _update_build_hold(delta: float) -> void:
 		audio.call("play", "select")
 
 func _process_play(delta: float) -> void:
+	# The world decides what may be touched, and a torch in her hand is half of
+	# that answer. It is set here because the world does not know what she is
+	# holding and this is the one place that knows both.
+	sim.torch_lit = holding_torch()
 	_update_footsteps()
 	# Where Grim has been is what the map is allowed to show. Marked from here
 	# rather than inside the character, because the character does not know about
@@ -1043,6 +1047,7 @@ func _process_play(delta: float) -> void:
 	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_kit_search(delta)
+	_update_thaw(delta)
 	_update_torch(delta)
 	_update_torch_light()
 	_update_preview()
@@ -1467,6 +1472,32 @@ func _update_torch(delta: float) -> void:
 		audio.call("play", "deny")
 		fx.ring(player.position, Defs.COL_TEXT_DIM, Defs.RING_MEDIUM)
 
+## Melting a frozen thing out of the ground.
+##
+## The torch has to stay in her hand and Z has to stay down for the whole five
+## seconds; letting go of either loses them. That is what keeps the torch a
+## decision -- thirty seconds of burn spent six at a time -- instead of a key
+## that is simply held while walking past.
+func _update_thaw(delta: float) -> void:
+	if state != State.PLAY or player.locked or sim.hands_full():
+		sim.cancel_thaw()
+		return
+	var cell: Vector2i = player.facing_cell()
+	if not mine_held or not holding_torch() or not _frozen_to_lift(cell):
+		sim.cancel_thaw()
+		return
+	var at: Vector2 = sim.cell_centre(cell)
+	if not sim.thaw_ground(cell, delta):
+		# Steam off the ice while it works, so the seconds look like they are
+		# doing something to the thing rather than to a bar.
+		if randf() < delta * 6.0:
+			fx.burst(at, Defs.COL_ICE, 1)
+		return
+	fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
+	fx.popup(at + Vector2(0, -20.0), "땅이 놓아주었다", Defs.COL_CORE, true)
+	note_log("지면을 녹였다  ·  이제 들 수 있다", Defs.COL_CORE)
+	audio.call("play", "finish")
+
 ## Where the torch's hole in the fog is, in viewport pixels. Computed here
 ## because this is the one place that has both the character and the camera; the
 ## fog knows about neither.
@@ -1533,6 +1564,9 @@ func _prompt_status(id: String) -> Dictionary:
 			return {"want": sim.carried_kit != Defs.KIT_NONE, "done": sim.shelter_placed}
 		"THAW":
 			return {"want": sim.carried_frozen, "done": not sim.cats.is_empty()}
+		"MELT":
+			return {"want": not sim.hands_full() and holding_torch()
+				and _frozen_to_lift(player.facing_cell()), "done": false}
 		"FROZEN":
 			return {"want": not sim.hands_full() and _frozen_within_reach(),
 				"done": not sim.cats.is_empty()}
@@ -1565,16 +1599,21 @@ func _prompt_status(id: String) -> Dictionary:
 			return {"want": true, "done": sim.walked >= Defs.PROMPT_WALK_LEARNED}
 	return {"want": false, "done": true}
 
+## Both of these gate a prompt that says "Z 안기", so both ask whether the ground
+## would actually let go. Offering the verb over something still frozen down is
+## how a prompt becomes a key that does nothing.
 func _frozen_within_reach() -> bool:
 	for cell: Vector2i in sim.frozen_cats:
-		if player.position.distance_to(sim.cell_centre(cell)) <= float(Defs.TILE) * 1.5:
+		if player.position.distance_to(sim.cell_centre(cell)) <= float(Defs.TILE) * 1.5 \
+				and sim.can_lift(cell):
 			return true
 	return false
 
 func _idle_cat_within_reach() -> bool:
 	for cat: Sim.Cat in sim.cats:
 		if not cat.has_job() \
-				and player.position.distance_to(cat.pos) <= float(Defs.TILE) * 1.5:
+				and player.position.distance_to(cat.pos) <= float(Defs.TILE) * 1.5 \
+				and sim.can_lift(sim.cell_of(cat.pos)):
 			return true
 	return false
 
@@ -2267,11 +2306,26 @@ func _say_frozen(cell: Vector2i) -> void:
 ## Only things that could otherwise be taken. Empty snow is not frozen out of
 ## reach, it is empty, and saying so at every step across the plateau would make
 ## the line meaningless before she ever meets a thing it is about.
+## The same beat as the frozen line, but with the answer in it. She is holding
+## the answer already, so this is not a refusal -- it is an instruction.
+func _say_thaw(cell: Vector2i) -> void:
+	if frozen_said > 0.0:
+		return
+	frozen_said = FROZEN_SAY_AGAIN
+	fx.popup(sim.cell_centre(cell) + Vector2(0, -20.0), "땅과 얼어붙었다", Defs.COL_ICE, true)
+	note_log("Z를 누르고 있으면 횃불로 지면을 녹인다  ·  %d초" % int(Defs.THAW_GROUND_SECONDS),
+		Defs.COL_CORE)
+
 func _frozen_out_there(cell: Vector2i) -> bool:
 	if sim.can_touch(cell):
 		return false
 	return sim.ore.has(cell) or sim.has_rock(cell) or sim.ground.has(cell) \
 		or sim.frozen_cats.has(cell) or sim.shards.has(cell) or sim.drops.has(cell)
+
+## What she is facing has to go into her arms, and the ground has not let go of
+## it yet. A torch makes this reachable but not liftable; the five seconds do.
+func _frozen_to_lift(cell: Vector2i) -> bool:
+	return sim.is_liftable(cell) and not sim.can_lift(cell)
 
 func _primary_action() -> void:
 	if sleep_available():
@@ -2282,6 +2336,14 @@ func _primary_action() -> void:
 	# the ground, and no verb applies to it until the fire reaches that far.
 	if _frozen_out_there(cell):
 		_say_frozen(cell)
+		return
+	# Reachable, because of the torch, but still frozen into the ground. A press
+	# is not the verb here -- the key has to stay down -- so say which one is.
+	if _frozen_to_lift(cell):
+		if holding_torch():
+			_say_thaw(cell)
+		else:
+			_say_frozen(cell)
 		return
 	# The kit answers Z by being held rather than pressed, so a press at it is
 	# not a build, a pick-up or anything else.
@@ -2555,6 +2617,11 @@ func debug_unlock_all() -> void:
 		sim.unlocked_recipes[index] = true
 	for item_type: int in Defs.COUNTED_ITEMS:
 		sim.stock[item_type] = 500
+	# Torches too. They are a craft rather than a stock item, so filling the bank
+	# left the one tool that decides what is reachable out past the fire still
+	# behind a trip to the base menu -- and this key exists so that looking at
+	# something does not cost a playthrough.
+	sim.torches = maxi(sim.torches, 5)
 	# And a crew. Everything else this key grants can be checked from a
 	# screenshot the moment it is pressed; cats cannot, because getting one means
 	# walking out to a frozen one and carrying it home at half speed, and that is

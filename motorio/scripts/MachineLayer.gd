@@ -249,6 +249,7 @@ func _draw() -> void:
 	_draw_pickaxe_hint(tile)
 	_draw_shards(tile)
 	_draw_frozen(tile)
+	_draw_thaw(tile)
 	_draw_ground()
 	_draw_hand_progress()
 	_draw_meter_marker(tile)
@@ -818,6 +819,19 @@ func _draw_kit(tile: float) -> void:
 		draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
 		draw_arc(at, 16.0, -PI * 0.5, -PI * 0.5 + TAU * clampf(sim.kit_progress, 0.0, 1.0),
 			32, Defs.COL_CORE, 3.0, true)
+
+## The ground letting go, under whatever is standing on it. The same ring hand
+## mining and the kit use, in the fire's colour rather than the ice's, because
+## what is filling is heat arriving and not time passing.
+func _draw_thaw(tile: float) -> void:
+	if sim.thaw_progress <= 0.0:
+		return
+	var at: Vector2 = Vector2(sim.thaw_cell) * tile + Vector2.ONE * tile * 0.5
+	if not view_rect.grow(tile).has_point(at):
+		return
+	draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
+	draw_arc(at, 16.0, -PI * 0.5, -PI * 0.5 + TAU * sim.thaw_fraction(), 32,
+		Defs.COL_CORE, 3.0, true)
 
 ## The cats still in the ice. Drawn from the same rect a walking cat is drawn
 ## from, so the one that wakes up stands exactly where the block was: the last

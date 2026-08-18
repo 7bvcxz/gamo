@@ -95,6 +95,14 @@ func _initialize() -> void:
 			"dusk_seconds": Defs.DUSK_SECONDS,
 			"night_seconds": Defs.NIGHT_SECONDS,
 		},
+		# Carrying heat out past the fire. The burn is the range and the melt is
+		# the toll: how many liftable things one torch can free is the ratio of
+		# these two, and that ratio is the whole shape of an expedition.
+		"torch": {
+			"seconds": Defs.TORCH_SECONDS,
+			"sight": Defs.TORCH_SIGHT,
+			"thaw_seconds": Defs.THAW_GROUND_SECONDS,
+		},
 		# The objective card, id by id, with the reason each line is the way it
 		# is. Exported rather than written into the documentation page by hand:
 		# a line rewritten in the game and not on the page is a page that lies,

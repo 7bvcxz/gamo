@@ -40,7 +40,7 @@
   "day": {
     "dusk_seconds": 95.0,
     "night_seconds": 50.0,
-    "seconds": 180.0
+    "seconds": 300.0
   },
   "gate_to_copper": {
     "crystal": 54.0,
@@ -219,6 +219,15 @@
       ],
       "verb": "내려놓기",
       "why": "얼어붙은 고양이를 안고 있을 때. PLACE와 같은 동작이지만 그때는 이미 배운 뒤라 대개 뜨지 않는다."
+    },
+    {
+      "hold": true,
+      "id": "MELT",
+      "keys": [
+        "Z"
+      ],
+      "verb": "녹이기",
+      "why": "횃불을 든 채 온기 밖의 들 수 있는 것을 마주했을 때. 횃불이 손에 있으면 만질 수는 있지만 드는 것은 땅이 놓아준 다음이고, 그 5초를 누르고 있어야 한다는 것은 화면의 고리가 말해준다."
     },
     {
       "id": "FROZEN",
@@ -422,7 +431,12 @@
     "purity_pure": 17.0,
     "purity_rich": 11.0
   },
-  "version": "0.20.80",
+  "torch": {
+    "seconds": 30.0,
+    "sight": 2.0,
+    "thaw_seconds": 5.0
+  },
+  "version": "1.0.2",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

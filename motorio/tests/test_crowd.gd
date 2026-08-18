@@ -79,7 +79,10 @@ func _run() -> void:
 	var step: float = 1.0 / 30.0
 	var elapsed: float = 0.0
 	var last: Dictionary[int, Vector2] = {}
-	while elapsed < 200.0:
+	# Past the end of a day, so the run contains going home and sleeping. Derived
+	# from the day rather than written down: the day went from three minutes to
+	# five and a hand-written 200 quietly stopped reaching the evening.
+	while elapsed < Defs.DAY_SECONDS + 20.0:
 		main._process(step)
 		# The pool has to be ticked too. Disabling processing on Main stops its
 		# children as well, so without this the views are never synced and the

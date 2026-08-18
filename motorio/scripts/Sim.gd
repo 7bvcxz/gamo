@@ -375,6 +375,7 @@ func to_save() -> Dictionary:
 		"heat": heat, "total_heat": total_heat, "delivered": delivered_rows,
 		"belt_fed": delivered_by_belt,
 		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
+		"thawed": _thawed_rows(),
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
 		"carried_frozen": carried_frozen, "carried_frozen_thaw": carried_frozen_thaw,
 		# The opening. Saved because it is thirteen minutes of the game and a run
@@ -414,6 +415,9 @@ func from_save(data: Dictionary) -> void:
 	delivered_by_belt = bool(data.get("belt_fed", false))
 	has_gun = bool(data.get("has_gun", false))
 	has_pickaxe = bool(data.get("has_pickaxe", false))
+	thawed.clear()
+	for row in data.get("thawed", []):
+		thawed[Vector2i(int(row[0]), int(row[1]))] = true
 	drops.clear()
 	for row in data.get("drops", []):
 		drops[Vector2i(int(row[0]), int(row[1]))] = int(row[2])
@@ -517,6 +521,8 @@ func setup(seed_value: int) -> void:
 	drops.clear()
 	has_gun = false
 	has_pickaxe = false
+	thawed.clear()
+	cancel_thaw()
 	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
 		Defs.ITEM_HEATSTONE: 0}
 	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
@@ -816,6 +822,67 @@ func blocks_player(cell: Vector2i) -> bool:
 func _ring_distance(cell: Vector2i) -> float:
 	return Vector2(cell - core_cell).length()
 
+## Whether a lit torch is in her hand this frame. Set by Main, which is the only
+## thing that knows what she is holding.
+##
+## The fire's reach is one way to make a cell touchable and carrying heat out to
+## it is the other -- and the second one is what stops exploration from being a
+## queue behind the base ladder.
+var torch_lit := false
+
+## Cells whose ground has been thawed out with a torch. Saved, because five
+## seconds spent on a cell is work and a reload that undid it would be a theft.
+var thawed: Dictionary = {}
+var thaw_cell := Vector2i(9999, 9999)
+var thaw_progress: float = 0.0
+
+## Things that go into her arms rather than into the stores.
+##
+## The torch alone opens everything that is *taken* -- swung at, walked over,
+## lifted off a belt. What has to be carried is different: it is frozen into the
+## ground where it lies, and the ground is what the five seconds are spent on.
+func is_liftable(cell: Vector2i) -> bool:
+	if frozen_cats.has(cell):
+		return true
+	var centre: Vector2 = cell_centre(cell)
+	for cat: Cat in cats:
+		if cat != carried_cat and cat.pos.distance_to(centre) <= float(Defs.TILE) * 0.9:
+			return true
+	return false
+
+## Whether what is on this cell can be picked up and carried.
+##
+## A torch does not answer this one. It makes the cell reachable; the ground
+## still has to be melted, and that is five seconds standing over it.
+func can_lift(cell: Vector2i) -> bool:
+	return not base_placed or is_warm(cell) or bool(thawed.get(cell, false))
+
+## Melting the ground under something, a frame at a time. True on the frame it
+## finishes. The caller decides whether the conditions still hold -- a torch in
+## her hand, standing there -- because those are hers to know, not the world's.
+func thaw_ground(cell: Vector2i, delta: float) -> bool:
+	if can_lift(cell):
+		thaw_progress = 0.0
+		thaw_cell = Vector2i(9999, 9999)
+		return false
+	if cell != thaw_cell:
+		thaw_cell = cell
+		thaw_progress = 0.0
+	thaw_progress += delta
+	if thaw_progress < Defs.THAW_GROUND_SECONDS:
+		return false
+	thawed[cell] = true
+	thaw_progress = 0.0
+	thaw_cell = Vector2i(9999, 9999)
+	return true
+
+func cancel_thaw() -> void:
+	thaw_progress = 0.0
+	thaw_cell = Vector2i(9999, 9999)
+
+func thaw_fraction() -> float:
+	return clampf(thaw_progress / Defs.THAW_GROUND_SECONDS, 0.0, 1.0)
+
 ## Whether the player can take what is on this cell.
 ##
 ## Outside the fire's reach everything is frozen into the ground: it can be seen
@@ -827,7 +894,7 @@ func _ring_distance(cell: Vector2i) -> float:
 ## Before the base is placed there is no reach and no crafting either, so the
 ## rule is off: a refusal in the first minute is a wall with no door in it.
 func can_touch(cell: Vector2i) -> bool:
-	return not base_placed or is_warm(cell)
+	return not base_placed or is_warm(cell) or torch_lit
 
 func is_warm(cell: Vector2i) -> bool:
 	return base_placed and _ring_distance(cell) <= warm_radius
@@ -951,7 +1018,13 @@ func search_kit() -> Array[int]:
 ## looking -- she has to stand south of it to face it -- and outward because a
 ## seam or a rock under the case is not a reason for the game to swallow the one
 ## thing the opening is about.
-## Cells cannot go into a ConfigFile as keys, so the map travels as rows.
+## Cells cannot go into a ConfigFile as keys, so both maps travel as rows.
+func _thawed_rows() -> Array:
+	var rows: Array = []
+	for cell: Vector2i in thawed:
+		rows.append([cell.x, cell.y])
+	return rows
+
 func _drop_rows() -> Array:
 	var rows: Array = []
 	for cell: Vector2i in drops:
@@ -994,7 +1067,7 @@ func collect_drop(cell: Vector2i) -> int:
 ## because they were an errand; this is a body Grim decides to carry, and the
 ## decision has to be a press.
 func pick_up_frozen(cell: Vector2i) -> bool:
-	if hands_full() or not can_touch(cell):
+	if hands_full() or not can_lift(cell):
 		return false
 	if not frozen_cats.has(cell):
 		return false
@@ -1225,7 +1298,7 @@ func pull_gacha(count: int) -> Array[int]:
 
 ## Picking a cat up takes it off its machine; the machine stops immediately.
 func pick_up_cat(cell: Vector2i) -> bool:
-	if hands_full() or not can_touch(cell):
+	if hands_full() or not can_lift(cell):
 		return false
 	var reach: float = float(Defs.TILE) * 0.9
 	var centre: Vector2 = cell_centre(cell)

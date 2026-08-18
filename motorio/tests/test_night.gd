@@ -72,6 +72,14 @@ func _run() -> void:
 	_assert(main.state == main.State.DAYBREAK, "the summary hands over to the morning")
 	_assert(main.player.locked, "which holds the player until the sun is up")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the clock is already full")
+	# Five minutes as of 1.0.2. Dusk and night are counted back from the end, so
+	# they have to fit inside it with daylight left in front of them -- and the
+	# order matters too, because night starting before dusk would mean the lamps
+	# come on into a bright sky.
+	_assert(is_equal_approx(Defs.DAY_SECONDS, 300.0), "a day is five minutes")
+	_assert(Defs.DUSK_SECONDS < Defs.DAY_SECONDS * 0.5,
+		"dusk is the tail of the day, not half of it")
+	_assert(Defs.NIGHT_SECONDS < Defs.DUSK_SECONDS, "night falls after dusk begins")
 	_assert(main.night_level() >= 0.99,
 		"but the sky is still dark -- the clock cannot be what decides that")
 

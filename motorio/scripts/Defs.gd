@@ -289,6 +289,14 @@ const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITE
 
 ## Hand mining. Deliberately slow: it is the floor the whole factory is measured
 ## against, and it has to stay worth replacing.
+## How long a torch takes to melt the ground out from under something that has
+## to be carried.
+##
+## Long enough to be a decision -- a torch burns for thirty seconds, so this is a
+## sixth of one -- and short enough that the answer to "I want that" is the walk
+## rather than the wait.
+const THAW_GROUND_SECONDS := 5.0
+
 const HAND_MINE_PERIOD := 10.0
 ## Crystal in, energy out. Two-to-one at five seconds means one exchanger keeps
 ## up with four miners, so miners stay the bottleneck rather than the converter.
@@ -594,7 +602,12 @@ const ROCK_MINE_PERIOD := 14.0
 # --- Economy -----------------------------------------------------------------
 ## Days repeat and accumulate rather than ending the game, so one day is short
 ## enough that the dusk-to-dawn arc is felt several times in a sitting.
-const DAY_SECONDS := 180.0
+## Five minutes, up from three as of 1.0.2.
+##
+## Dusk and night are counted back from the end and stay where they are, so the
+## tail is the same length and what grew is the daylight in front of it: the last
+## 95 seconds used to be half the day and are now under a third of it.
+const DAY_SECONDS := 300.0
 const START_HEAT := 30
 ## Deliberately slow: one cat is a trickle, so throughput has to come from more
 ## miners and better routing rather than from a single well-placed worker.
@@ -924,6 +937,10 @@ const KEY_PROMPTS: Array[Dictionary] = [
 	{
 		"id": "THAW", "keys": ["Z"], "verb": "내려놓기",
 		"why": "얼어붙은 고양이를 안고 있을 때. PLACE와 같은 동작이지만 그때는 이미 배운 뒤라 대개 뜨지 않는다.",
+	},
+	{
+		"id": "MELT", "keys": ["Z"], "hold": true, "verb": "녹이기",
+		"why": "횃불을 든 채 온기 밖의 들 수 있는 것을 마주했을 때. 횃불이 손에 있으면 만질 수는 있지만 드는 것은 땅이 놓아준 다음이고, 그 5초를 누르고 있어야 한다는 것은 화면의 고리가 말해준다.",
 	},
 	{
 		"id": "FROZEN", "keys": ["Z"], "verb": "안기",

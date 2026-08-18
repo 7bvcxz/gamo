@@ -45,6 +45,7 @@ func _run() -> void:
 	main.time_left = 88.0
 	main.player.warmth = 61.0
 	main.player.position = Vector2(123, 456)
+	main.sim.thawed[Vector2i(9, -7)] = true
 
 	_assert(main.save_game(false), "the game writes a save file")
 
@@ -79,6 +80,10 @@ func _run() -> void:
 	_assert(restored.state == Defs.CAT_WORKING, "a cat remembers what it was doing")
 
 	_assert(is_equal_approx(main.player.warmth, 61.0), "body warmth survives")
+	# Five seconds with a torch is work. A reload that put the ice back would be
+	# a theft of it.
+	_assert(bool(main.sim.thawed.get(Vector2i(9, -7), false)),
+		"melted ground stays melted across a save")
 	_assert(main.player.position.distance_to(Vector2(123, 456)) < 0.5, "the player is where they left off")
 
 	# A restored miner must actually resume producing.
