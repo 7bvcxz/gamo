@@ -453,6 +453,7 @@ func _draw() -> void:
 		main.State.TITLE: _draw_title()
 		main.State.OPENING: _draw_cutscene()
 		main.State.RESULT: _draw_result()
+		main.State.GAMEOVER: _draw_gameover()
 		main.State.NIGHTFALL, main.State.DAYBREAK:
 			# The sequence is the one moment the game is not asking for anything,
 			# so the hotbar, the objective and the placement ghost all get out of
@@ -486,10 +487,11 @@ func _draw() -> void:
 			_draw_base_menu()
 			_draw_gacha_card()
 			_draw_message()
-	# Below the match, so they are on every screen -- except the opening. The
-	# scene is the one moment the game is not offering the player a control, and
-	# two little chrome squares in the corner of a painting say otherwise.
-	if main.state == main.State.OPENING:
+	# Below the match, so they are on every screen -- except the opening and the
+	# end. Both are moments the game is not offering the player a control, and
+	# two little chrome squares in the corner say otherwise; on the game over
+	# card they also offer a map of a run that is finished.
+	if main.state == main.State.OPENING or main.state == main.State.GAMEOVER:
 		return
 	_draw_map_card()
 	_draw_log_card()
@@ -1071,10 +1073,9 @@ func _draw_base_menu() -> void:
 	var sim = main.sim
 	# The state of the fire, in one line: how far it reaches and what the next
 	# step of that costs. It is the only number the player is working towards.
-	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
-	var line: String = "온기 %.0f칸  ·  넣은 열석 %d개" % [sim.warm_radius, sim.stones_in]
-	if not next_level.is_empty():
-		line += "   →   열석 %d개 더 넣으면 %.0f칸" % [sim.stones_to_next(), float(next_level["radius"])]
+	# The state of the fire only. What the next step costs is on the upgrade row,
+	# where the price of everything else in this window is.
+	var line: String = "온기 %.0f칸  ·  불에 넣은 열석 %d개" % [sim.warm_radius, sim.stones_in]
 	_text(card.position + Vector2(14.0, FRAME_HEADER + 22.0), line, 13, Defs.COL_TEXT_DIM)
 	_text(card.position + Vector2(14.0, FRAME_HEADER + 42.0),
 		"%s %d개  ·  남은 시간 %.0f초" % [Defs.TORCH_NAME, sim.torches, sim.torch_left],
@@ -1136,26 +1137,26 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 	var have: int = int(sim.stock.get(Defs.ITEM_HEATSTONE, 0))
 	var ready: bool = sim.can_feed_base()
 	var text_x: float = rect.position.x + 62.0
-	_text(Vector2(text_x, rect.position.y + 22.0), "연료 투입", 14,
+	# "연료 투입" described the gesture -- tipping a pack into a fire -- and left
+	# the player to work out what it bought. This row is the only way the circle
+	# ever grows, so it is named after that.
+	_text(Vector2(text_x, rect.position.y + 22.0), "기지 업그레이드", 14,
 		Defs.COL_TEXT if ready else Defs.COL_TEXT_DIM)
-	# What the fire wants, not what she happens to be carrying. The row used to
-	# read "+35 열", which is a number in a unit the player never sees anywhere
-	# else and cannot convert; this one is the same count as the stones in her
-	# pack, so the question "am I there yet" is subtraction she can do by looking.
-	var effect: String
-	if want <= 0:
-		effect = "불은 더 커지지 않습니다"
-	elif ready:
-		effect = "다음 단계까지 열석 %d개  ·  가지고 있음 %d개" % [want, have]
-	else:
-		effect = "다음 단계까지 열석 %d개  ·  %d개 부족" % [want, want - have]
+	# What it does under the title and what it costs on the right, exactly like
+	# every other row in this window. The previous version spelled out a running
+	# sum -- "다음 단계까지 열석 3개 · 3개 부족" -- which is a sentence about
+	# arithmetic where the rest of the window has a price tag, and a reader who
+	# had learned where to look had to read this one differently.
+	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
+	var effect: String = "온기가 더 넓어지지 않습니다"
+	if not next_level.is_empty():
+		effect = "온기 %.0f칸  →  %.0f칸" % [sim.warm_radius, float(next_level["radius"])]
 	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11,
-		Defs.COL_CORE if ready else Defs.COL_DANGER)
-	# The stones in her pack, on the right where every other row in this window
-	# puts its cost.
-	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-		"%s %d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], have], 13,
-		Defs.COL_TEXT if ready else Defs.COL_TEXT_DIM)
+		Defs.COL_CORE if ready else Defs.COL_TEXT_DIM)
+	if want > 0:
+		_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
+			"%s %d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], want], 13,
+			Defs.COL_TEXT if ready else Defs.COL_DANGER)
 
 func _draw_build_menu() -> void:
 	if not main.build_menu_open:
@@ -1993,6 +1994,26 @@ func _draw_settings_row(index: int, kind: int) -> void:
 	var held: bool = dragging_slider == slider
 	draw_circle(knob, 17.0 if held else 15.0, Defs.COL_CORE)
 	draw_circle(knob, 17.0 if held else 15.0, Color(0.02, 0.03, 0.06, 0.45), false, 1.6)
+
+## The end of a run, and the only screen in this game that says so.
+##
+## Nothing but the sentence and a line closing under it. There is no score to
+## report -- she froze in the first minute, before there was anything to have --
+## and a summary of nothing is a card that makes the loss feel small.
+func _draw_gameover() -> void:
+	_dim(0.9)
+	var card := _card(200.0)
+	var w: float = card.size.x
+	_text_in(Rect2(card.position + Vector2(0, 54), Vector2(w, 40)), "얼어붙었다", 34,
+		Defs.COL_FROST_TINT)
+	_text_in(Rect2(card.position + Vector2(0, 104), Vector2(w, 24)),
+		"불을 피우지 못했다", 15, Defs.COL_TEXT_DIM)
+	# The wait, drawn as a line that closes rather than as a number counting
+	# down. Five seconds of a digit ticking is five seconds of watching a digit.
+	var bar := Rect2(card.position + Vector2(w * 0.25, 152.0), Vector2(w * 0.5, 3.0))
+	draw_rect(bar, Color(1, 1, 1, 0.10))
+	draw_rect(Rect2(bar.position, Vector2(bar.size.x * main.gameover_fraction(), bar.size.y)),
+		Defs.COL_FROST_TINT)
 
 func _draw_result() -> void:
 	_dim(0.82)

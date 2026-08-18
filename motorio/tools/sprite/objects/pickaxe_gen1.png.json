@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-18T14:21:22.322084+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A sturdy pickaxe lying flat on snow for a snowy top-down game, seen from above: one chunky muted blue-grey steel head with two curved points, a thick warm brown wooden shaft running out of it, a band of warm brass leather binding where the two meet, a little snow gathered along one side. The subject is centred and fills the frame, seen straight on with a slight downward tilt as in a top-down game. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of orange, cream, soft brown and muted blue-grey metal. Soft rounded chunky forms. Very few large simple shapes, so it stays readable when shown at 40 pixels across. Flat even lighting. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 26.5,
+  "usage": {
+    "input_tokens": 691,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 179
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 887
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/objects/pickaxe_gen1_raw.png"
+  ]
+}

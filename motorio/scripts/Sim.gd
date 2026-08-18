@@ -1193,9 +1193,14 @@ const DROP_NAMES := ["긴급기지키트", "긴급숙소키트", "건물건설�
 ## What each search turns out. The gun before the pickaxe on purpose: the fire is
 ## the first thing that has to exist, and a pickaxe with nowhere to put what it
 ## digs is a tool with no verb.
+## The first search gives her the fire and nothing else. It used to hand over the
+## build gun at the same time, which put a tool she cannot use for another ten
+## minutes -- there is nothing to build and nothing to build it with -- next to
+## the one object the opening is actually about. Two things on the snow means
+## choosing which to walk to, and one of the two was a distraction.
 const KIT_CONTENTS: Array[Array] = [
-	[DROP_KIT_BASE, DROP_GUN],
-	[DROP_KIT_SHELTER, DROP_PICKAXE],
+	[DROP_KIT_BASE],
+	[DROP_KIT_SHELTER, DROP_PICKAXE, DROP_GUN],
 ]
 
 var drops: Dictionary = {}
@@ -1246,6 +1251,20 @@ func _drop_rows() -> Array:
 func _drop_cell(index: int) -> Vector2i:
 	var wanted: Array[Vector2i] = [Vector2i(0, 1), Vector2i(1, 1), Vector2i(-1, 1),
 		Vector2i(0, 2), Vector2i(1, 2), Vector2i(-1, 2), Vector2i(1, 0), Vector2i(-1, 0)]
+	# And then outward, ring by ring, if those eight are taken.
+	#
+	# They were the whole list, and a boulder cluster over the case meant the
+	# search returned nothing at all: the fire never came out, and the run could
+	# not be started. It is a seeded world, so most seeds were fine -- which is
+	# the shape every bug of this kind has here. Preference first, then anywhere,
+	# because a rock beside the case is not a reason for the game to swallow the
+	# one object the opening is about.
+	for ring in range(3, 7):
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring - 1:
+					continue
+				wanted.append(Vector2i(dx, dy))
 	var seen := 0
 	for offset: Vector2i in wanted:
 		var cell: Vector2i = kit_cell + offset

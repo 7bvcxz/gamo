@@ -751,7 +751,17 @@ static func rock_clump(block: Vector2i) -> Array[Vector2i]:
 ## nowhere to run, so it has to be long enough to look around in and short
 ## enough to be the reason she does.
 const CRASH_WARMTH := 40.0
-const CRASH_DRAIN := 0.5           # one degree every two seconds -- eighty of them
+## Six times faster than the game opens on, as of 1.0.6. At half a degree a
+## second the crash gave her eighty seconds of standing around and the cold was
+## a bar that moved; at three it is thirteen seconds from the wreck to the fire,
+## which is the length of the opening and not a moment longer.
+##
+## And it kills now. There is no base to be carried to and nothing to lose but
+## the run, so hitting zero out here ends it rather than waking her up again in
+## the same snow with the same forty degrees.
+const CRASH_DRAIN := 3.0
+## How long the game over card holds before the title comes back.
+const GAMEOVER_SECONDS := 5.0
 const CRASH_SIGHT := 3.0           # tiles of map, before there is a fire to see by
 ## How far from the crash site the base may be put down. Small on purpose: the
 ## world is generated around this point -- the ore rings, the frozen cats, the
@@ -866,7 +876,7 @@ const TRACK_AUTO := 2
 const TRACK_NAMES := ["기지", "고양이", "자동화"]
 
 const MISSIONS: Array[Dictionary] = [
-	{"id": "BASE2", "track": TRACK_BASE, "line": "불을 한 번 더 키운다",
+	{"id": "BASE2", "track": TRACK_BASE, "line": "불이 꺼져간다..  기지의 불씨를 살려야 한다",
 		"why": "거처가 서면 바로 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 업그레이드는 세상에 무언가가 더 있다는 것을 알게 되는 일이다."},
 	{"id": "BASE3", "track": TRACK_BASE, "line": "불을 더 멀리 보낸다",
 		"why": "2단계에 닿으면 열린다. 11칸에서 풍부 등급 열석이 처음 나오므로, 같은 곡괭이질이 더 많이 준다."},

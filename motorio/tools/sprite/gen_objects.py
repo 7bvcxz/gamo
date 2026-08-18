@@ -232,6 +232,20 @@ SUBJECTS = {
         "a short muted blue-grey mast leaning out of it with a small amber lamp "
         "at the tip, snow gathered in the bowl."
     ),
+    # The pickaxe lying in the snow, which is the second thing the game ever
+    # gives her. It was drawn in code -- a grey wedge on a brown stick -- next to
+    # a case and a hut that are painted, so the one tool in the opening looked
+    # like a placeholder beside them.
+    #
+    # Lying down rather than standing: it is on the ground, and the drop it
+    # replaces was drawn flat. One head, one shaft, one warm binding.
+    "pickaxe": (
+        "A sturdy pickaxe lying flat on snow for a snowy top-down game, seen "
+        "from above: one chunky muted blue-grey steel head with two curved "
+        "points, a thick warm brown wooden shaft running out of it, a band of "
+        "warm brass leather binding where the two meet, a little snow gathered "
+        "along one side."
+    ),
     # The cat holds this in front of itself and it bobs straight up and down.
     # Nothing rotates it, so the drill has to point down in the picture; the
     # first version came back as a drill gun aimed sideways, which reads as a

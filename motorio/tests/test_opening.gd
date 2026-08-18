@@ -28,7 +28,7 @@ func _run() -> void:
 	_test_placing_the_base()
 	_test_placing_the_shelter()
 	_test_missions_follow_the_world()
-	_test_cold_cannot_end_it()
+	_test_cold_ends_it()
 	_test_feeding_the_fire()
 	_test_save_mid_opening()
 	_test_finish_tutorial()
@@ -150,21 +150,26 @@ func _test_searching_the_kit() -> void:
 			Vector2i(0, 2), Vector2i(1, 2), Vector2i(-1, 2)]:
 		sim.ore.erase(sim.kit_cell + offset)
 		sim.mined_rocks[sim.kit_cell + offset] = true
+	# One thing, and it is the fire. The build gun used to come out at the same
+	# moment, which put a tool she cannot use for another ten minutes -- nothing
+	# to build and nothing to build it with -- beside the one object the opening
+	# is about, and made the first thing she ever sees a choice of two.
 	var first: Array[int] = sim.search_kit()
-	_assert(first.size() == 2, "첫 조사에서 두 개가 떨어진다: %d" % first.size())
-	_assert(first.has(Sim.DROP_KIT_BASE) and first.has(Sim.DROP_GUN),
-		"긴급기지키트와 건물건설총이다")
+	_assert(first.size() == 1, "첫 조사에서 하나만 떨어진다: %d" % first.size())
+	_assert(_kit_always_gives(), "그리고 200회차 모두 무언가가 나온다")
+	_assert(first.has(Sim.DROP_KIT_BASE), "긴급기지키트다")
+	_assert(not first.has(Sim.DROP_GUN), "건설총은 아직 나오지 않는다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "아직 손에는 아무것도 없다")
 	_assert(not sim.has_gun, "줍기 전에는 총도 없다")
-	_assert(sim.drops.size() == 2, "바닥에 둘이 놓여 있다")
+	_assert(sim.drops.size() == 1, "바닥에 하나가 놓여 있다")
 	# Below the case, which is where she is standing to face it.
 	for cell: Vector2i in sim.drops:
 		_assert(cell.y > sim.kit_cell.y, "상자 아래쪽에 떨어진다: %s" % str(cell))
 
 	var second: Array[int] = sim.search_kit()
-	_assert(second.size() == 2, "두 번째 조사에서 둘이 더 떨어진다: %d" % second.size())
-	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE),
-		"긴급숙소키트와 곡괭이다")
+	_assert(second.size() == 3, "두 번째 조사에서 셋이 더 떨어진다: %d" % second.size())
+	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE)
+		and second.has(Sim.DROP_GUN), "긴급숙소키트와 곡괭이와 건설총이다")
 	_assert(sim.search_kit().is_empty(), "세 번째는 없다 — 빈 상자다")
 
 	# Picking them up is what grants them.
@@ -282,7 +287,7 @@ func _test_missions_follow_the_world() -> void:
 
 # --- The cold is a clock, not a wall ----------------------------------------
 
-func _test_cold_cannot_end_it() -> void:
+func _test_cold_ends_it() -> void:
 	_crash()
 	var warmth: float = main.player.warmth
 	for _step in 60:
@@ -290,18 +295,20 @@ func _test_cold_cannot_end_it() -> void:
 	var lost: float = warmth - main.player.warmth
 	_assert(absf(lost - Defs.CRASH_DRAIN) < 0.05,
 		"1초에 %.2f씩 떨어진다 (%.2f)" % [Defs.CRASH_DRAIN, lost])
-	# All the way down. Nothing rescues her because there is nothing built to
-	# rescue her to, so she comes round where she fell and the opening carries
-	# on -- it can be made to take longer, but it cannot be lost.
+	# All the way down, and that is the end of the run as of 1.0.6.
+	#
+	# It used to wake her up at the crash site with her forty degrees back, which
+	# made the opening's one danger something that happened to a bar rather than
+	# to her: standing in the snow cost nothing and could be done forever. The
+	# clock is thirteen seconds now and running it out ends the game.
 	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(9, 9))
 	var guard := 0
 	while main.player.warmth > 0.0 and guard < 20000:
 		main._update_warmth(1.0 / 60.0)
 		guard += 1
 	main._update_warmth(1.0 / 60.0)
-	_assert(main.player.warmth > 0.0, "다시 정신을 차린다 (%.0f)" % main.player.warmth)
-	_assert(main.state == main.State.PLAY, "게임이 끝나지 않는다")
-	_assert(main.player.cell() == main.sim.core_cell, "추락 지점에서 눈을 뜬다")
+	_assert(main.player.warmth <= 0.0, "체온이 바닥난다 (%.0f)" % main.player.warmth)
+	_assert(main.state == main.State.GAMEOVER, "그리고 게임이 끝난다")
 	_assert(main.day_number == 1, "하루가 넘어가지도 않는다")
 
 # --- The world the rest of the game expects ---------------------------------
@@ -392,3 +399,23 @@ func _test_finish_tutorial() -> void:
 	_assert(sim.kit_searched == 2, "상자는 비어 있다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "손에는 아무것도 없다")
 	_assert(is_equal_approx(main.player.warmth, 100.0), "체온은 가득이다")
+
+
+## The case has to open on every world.
+##
+## Its contents used to land on one of eight cells and nowhere else, so a boulder
+## cluster over the case meant the search came back empty: no fire, and a run
+## that cannot be started. One seed proves nothing about that -- the map is
+## different every time and most maps are fine -- so this walks two hundred.
+func _kit_always_gives() -> bool:
+	var empty := 0
+	for index in 200:
+		var sim := Sim.new()
+		sim.setup(70000 + index)
+		sim.begin_crash()
+		if sim.search_kit().size() != 1 or sim.drops.size() != 1:
+			empty += 1
+		sim.free()
+	if empty > 0:
+		print("   상자가 빈 회차: %d/200" % empty)
+	return empty == 0

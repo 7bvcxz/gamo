@@ -53,6 +53,8 @@ const DEBRIS_ART: Array[Texture2D] = [
 	preload("res://assets/objects/debris5.png"),
 ]
 const DEBRIS_DRAW := 30.0
+const PICKAXE_ART: Texture2D = preload("res://assets/objects/pickaxe.png")
+const PICKAXE_DRAW := 26.0
 const KIT_ART: Texture2D = preload("res://assets/objects/kit.png")
 const KIT_BASE_ART: Texture2D = preload("res://assets/objects/kit_base.png")
 const KIT_SHELTER_ART: Texture2D = preload("res://assets/objects/kit_shelter.png")
@@ -761,8 +763,10 @@ func _draw_drops(tile: float) -> void:
 				Icons.draw_machine(self, Rect2(at + Vector2(-11.0, -11.0 + lift),
 					Vector2(22.0, 22.0)), Defs.M_MINER)
 			Sim.DROP_PICKAXE:
-				Icons.draw_pickaxe(self, Rect2(at + Vector2(-11.0, -11.0 + lift),
-					Vector2(22.0, 22.0)))
+				# Painted rather than drawn in code. It lay in the snow beside a
+				# painted case as a grey wedge on a brown stick, which is how the
+				# one tool the opening turns on came to look like a placeholder.
+				_object_art(PICKAXE_ART, at + Vector2(0, lift), PICKAXE_DRAW)
 
 ## The pickaxe, over the nearest seam, for a few seconds after she picks it up.
 ##
@@ -776,9 +780,11 @@ func _draw_pickaxe_hint(tile: float) -> void:
 	if not view_rect.grow(tile).has_point(at):
 		return
 	var bob: float = sin(pulse * 3.2) * 3.0
-	var box := Rect2(at + Vector2(-11.0, -34.0 + bob), Vector2(22.0, 22.0))
 	draw_circle(at, 15.0, Color(1.0, 0.72, 0.34, 0.10 + 0.06 * sin(pulse * 3.2)))
-	Icons.draw_pickaxe(self, box)
+	# The same picture as the one lying in the snow. This hint points at the seam
+	# she should swing at, and pointing with a different drawing of the tool is
+	# how a player ends up looking for a second object.
+	_object_art(PICKAXE_ART, at + Vector2(0.0, -23.0 + bob), PICKAXE_DRAW)
 
 func _draw_kit(tile: float) -> void:
 	if sim.kit_cell == Vector2i(9999, 9999) or sim.kit_searched >= 2:

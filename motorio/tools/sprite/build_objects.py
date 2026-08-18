@@ -109,6 +109,11 @@ ADOPTED = {
     "debris3": ("debris3_gen1", 30),
     "debris4": ("debris4_gen1", 30),
     "debris5": ("debris5_gen1", 30),
+    # The second thing the game gives her, and until now the only one drawn in
+    # code: a grey wedge on a brown stick, lying next to a painted case and a
+    # painted hut. At 26 it is a little larger than the other drops because it is
+    # the one the opening turns on.
+    "pickaxe": ("pickaxe_gen1", 26),
     "kit": ("kit_gen1", 32),
     "kit_base": ("kit_base_gen1", 26),
     "kit_shelter": ("kit_shelter_gen1", 26),
@@ -138,6 +143,7 @@ ADOPTED_NAMES = {
     "debris3": "로켓잔해 · 엔진노즐",
     "debris4": "로켓잔해 · 선체판",
     "debris5": "로켓잔해 · 안테나",
+    "pickaxe": "곡괭이",
     "kit": "긴급 키트",
     "kit_base": "긴급기지키트",
     "kit_shelter": "긴급생존키트",

@@ -580,6 +580,23 @@
    ]
   },
   {
+   "id": "pickaxe_gen",
+   "candidates": [
+    {
+     "id": "pickaxe_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/pickaxe_gen1-128-90f706a3aaaa.png",
+      "64": "/object-candidates/pickaxe_gen1-64-d214384faf91.png"
+     },
+     "source": [
+      817,
+      778
+     ]
+    }
+   ]
+  },
+  {
    "id": "shelter_gen",
    "candidates": [
     {
@@ -784,6 +801,17 @@
    "sizes": {
     "128": "/object-candidates/shipped-miner-128-cce9cb9e592f.png",
     "36": "/object-candidates/shipped-miner-36-7d97e8060509.png"
+   }
+  },
+  {
+   "role": "pickaxe",
+   "name": "곡괭이",
+   "from": "pickaxe_gen1",
+   "draw": 26,
+   "stored": 52,
+   "sizes": {
+    "128": "/object-candidates/shipped-pickaxe-128-9649c9f435f2.png",
+    "26": "/object-candidates/shipped-pickaxe-26-bdefb62b27f6.png"
    }
   },
   {

@@ -7,7 +7,7 @@ extends Node2D
 ## and the warm radius all carry into the next morning.
 ## SETTINGS is a state rather than an overlay flag so that opening it stops the
 ## clock: sizing the UI should never cost the player warmth.
-enum State { TITLE, OPENING, PLAY, RESULT, SETTINGS, NIGHTFALL, DAYBREAK }
+enum State { TITLE, OPENING, PLAY, RESULT, SETTINGS, NIGHTFALL, DAYBREAK, GAMEOVER }
 ## Phases inside NIGHTFALL and DAYBREAK. Both run on one timer rather than a
 ## handful of booleans, so there is one place to read what the sequence is doing.
 enum Phase { GATHER, GLOW, DAWN, SPILL }
@@ -79,6 +79,9 @@ var collapse_timer: float = -1.0
 var run_seed: int = 0
 var day_number: int = 1
 var day_start_stones: int = 0
+## Counts down on the game over card, and reaching zero is what returns to the
+## title. One timer rather than a flag and a clock somewhere else.
+var gameover_timer: float = 0.0
 var rescued_tonight: bool = false
 var message: String = ""
 var message_life: float = 0.0
@@ -934,6 +937,7 @@ func _process(delta: float) -> void:
 		State.NIGHTFALL: _process_nightfall(delta)
 		State.DAYBREAK: _process_daybreak(delta)
 		State.RESULT, State.SETTINGS: pass
+		State.GAMEOVER: _process_gameover(delta)
 
 	# After the state machine, not before it. These two read the state, and
 	# setting them first means they describe the frame that has just gone rather
@@ -1715,7 +1719,7 @@ func _update_warmth(delta: float) -> void:
 	if not sim.base_placed:
 		player.warmth = maxf(0.0, player.warmth - Defs.CRASH_DRAIN * delta)
 		if player.warmth <= 0.0:
-			_come_to()
+			_freeze_to_death()
 		return
 	# A lit torch is a fire she is carrying, so it holds the cold off wherever she
 	# is standing. That is what makes it the thing exploration is bought with:
@@ -3362,16 +3366,38 @@ func day_stones() -> int:
 ## nothing to rescue her -- she simply comes round again at the crash site, cold
 ## and with the same eighty seconds. The opening cannot be lost; it can only be
 ## made to take longer, which is what the temperature is there to say.
-func _come_to() -> void:
-	if collapse_timer >= 0.0 or player.collapse > 0.0:
+## Freezing before the fire is lit. It used to wake her up at the crash site with
+## her forty degrees back, which made the opening's one danger a thing that
+## happened to the bar and not to her -- she could stand in the snow forever.
+##
+## The save goes with her. A run that ended must not be sitting behind 이어하기
+## on the title screen a moment later.
+func _freeze_to_death() -> void:
+	if state == State.GAMEOVER:
 		return
-	player.position = sim.cell_centre(sim.core_cell)
+	state = State.GAMEOVER
+	gameover_timer = Defs.GAMEOVER_SECONDS
+	player.locked = true
 	player.velocity = Vector2.ZERO
-	player.warmth = Defs.CRASH_WARMTH
-	shake = maxf(shake, Defs.FX_SMALL)
+	close_windows("")
+	clear_save()
+	shake = maxf(shake, Defs.FX_LARGE)
 	fx.ring(player.position, Defs.COL_FROST_TINT, Defs.RING_LARGE)
-	_notify("정신을 잃었다가 다시 눈을 떴습니다  서둘러야 합니다", Defs.COL_DANGER)
 	audio.call("play", "alarm")
+	music.call("play_score", "title")
+
+## The card holds for five seconds and then the title comes back. No key skips
+## it: the one screen in this game that says a run is over is the one screen a
+## player is most likely to be mashing a key at.
+func _process_gameover(delta: float) -> void:
+	gameover_timer = maxf(0.0, gameover_timer - delta)
+	if gameover_timer > 0.0:
+		return
+	settings_to_title()
+	resumed = false
+
+func gameover_fraction() -> float:
+	return clampf(1.0 - gameover_timer / Defs.GAMEOVER_SECONDS, 0.0, 1.0)
 
 func _carried_home() -> void:
 	rescued_tonight = true
