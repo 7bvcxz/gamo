@@ -1047,6 +1047,7 @@ func _process_play(delta: float) -> void:
 	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_kit_search(delta)
+	_update_debris(delta)
 	_update_thaw(delta)
 	_update_torch(delta)
 	_update_torch_light()
@@ -1441,6 +1442,44 @@ func _update_kit_search(delta: float) -> void:
 	_notify("상자에서 무언가 떨어졌습니다", Defs.COL_CORE)
 	note_log("상자에서 나온 것 · %s" % "  ·  ".join(names), Defs.COL_CORE)
 
+## Taking a piece of the ship apart. Z held on it, the same as the case.
+##
+## Every material goes straight into the pack rather than onto the snow. Fifteen
+## items tipped out at eleven tiles would be fifteen cells of ground to walk
+## back and forth over, and the walk out there was already the price.
+func _update_debris(delta: float) -> void:
+	if state != State.PLAY or player.locked or not mine_held:
+		sim.cancel_debris()
+		return
+	var cell: Vector2i = player.facing_cell()
+	if not sim.debris.has(cell):
+		sim.cancel_debris()
+		return
+	if not sim.search_debris(cell, delta):
+		return
+	var found: Dictionary = sim.open_debris(cell)
+	if found.is_empty():
+		return
+	var at: Vector2 = sim.cell_centre(cell)
+	fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
+	fx.burst(at, Defs.ITEM_COLORS[Defs.ITEM_IRON], 9)
+	audio.call("play", "alloy")
+	var parts: Array[String] = []
+	for item_type: int in Defs.COUNTED_ITEMS:
+		if not found.has(item_type):
+			continue
+		var count: int = int(found[item_type])
+		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], count])
+	_notify("%s 분해 · %s" % [Defs.DEBRIS_NAME, "  ·  ".join(parts)], Defs.COL_CORE)
+	# The core part gets its own line and its own colour. It is the reason to
+	# cross the snow, and a player who reads one grey summary learns that debris
+	# gives scrap.
+	if found.has(Defs.ITEM_CORE_PART):
+		fx.popup(at + Vector2(0, -22.0), "%s +%d"
+			% [Defs.ITEM_NAMES[Defs.ITEM_CORE_PART], int(found[Defs.ITEM_CORE_PART])],
+			Defs.ITEM_COLORS[Defs.ITEM_CORE_PART], true)
+		fx.burst(at, Defs.ITEM_COLORS[Defs.ITEM_CORE_PART], 12)
+
 ## Whether she is at the kit with something still in it.
 ##
 ## Distance rather than facing. Everything else in this game is aimed -- you
@@ -1564,6 +1603,10 @@ func _prompt_status(id: String) -> Dictionary:
 			return {"want": sim.carried_kit != Defs.KIT_NONE, "done": sim.shelter_placed}
 		"THAW":
 			return {"want": sim.carried_frozen, "done": not sim.cats.is_empty()}
+		"DEBRIS":
+			return {"want": sim.debris.has(player.facing_cell())
+				and sim.can_touch(player.facing_cell()),
+				"done": sim.debris_searched > 0}
 		"MELT":
 			return {"want": not sim.hands_full() and holding_torch()
 				and _frozen_to_lift(player.facing_cell()), "done": false}
@@ -1960,6 +2003,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_spill()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_F10:
+		debug_debris()
+		get_viewport().set_input_as_handled()
+		return
 	if key.keycode == KEY_F9:
 		debug_pad()
 		get_viewport().set_input_as_handled()
@@ -2320,7 +2367,8 @@ func _frozen_out_there(cell: Vector2i) -> bool:
 	if sim.can_touch(cell):
 		return false
 	return sim.ore.has(cell) or sim.has_rock(cell) or sim.ground.has(cell) \
-		or sim.frozen_cats.has(cell) or sim.shards.has(cell) or sim.drops.has(cell)
+		or sim.frozen_cats.has(cell) or sim.shards.has(cell) or sim.drops.has(cell) \
+		or sim.debris.has(cell)
 
 ## What she is facing has to go into her arms, and the ground has not let go of
 ## it yet. A torch makes this reachable but not liftable; the five seconds do.
@@ -2346,8 +2394,9 @@ func _primary_action() -> void:
 			_say_frozen(cell)
 		return
 	# The kit answers Z by being held rather than pressed, so a press at it is
-	# not a build, a pick-up or anything else.
-	if _facing_kit():
+	# not a build, a pick-up or anything else. Wreckage is the same verb: a tap
+	# on it must not fall through and put a belt down on top of it.
+	if _facing_kit() or sim.debris.has(cell):
 		return
 	if sim.carried_kit != Defs.KIT_NONE:
 		_place_kit(cell)
@@ -2876,6 +2925,24 @@ func debug_rescue() -> void:
 	sim.frozen_cats[cell] = 0.0
 	_notify("디버그 구조 · 얼어붙은 고양이를 앞에 두었습니다", Defs.COL_DANGER)
 	fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
+
+## All five pieces of the ship, in a row in front of her.
+##
+## Five rather than one because the five shapes are the whole point of five
+## generated pictures, and looking at them one run at a time means walking to
+## the eleventh ring five times over. Checking something should not cost more
+## than building it did.
+func debug_debris() -> void:
+	var step: Vector2i = player.facing
+	if step == Vector2i.ZERO:
+		step = Vector2i(1, 0)
+	# Sideways from her, so a row of five does not run away over the horizon in
+	# the direction she happens to be looking.
+	var across := Vector2i(-step.y, step.x)
+	var origin: Vector2i = player.cell() + step
+	for shape in Defs.DEBRIS_SHAPES:
+		sim.debris[origin + across * (shape - 2)] = shape
+	_notify("디버그 · 로켓잔해 %d조각을 앞에 두었습니다" % Defs.DEBRIS_SHAPES, Defs.COL_DANGER)
 
 func _cycle_recipe() -> void:
 	if player.locked:

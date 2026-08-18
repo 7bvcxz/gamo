@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-18T07:38:38.845753+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A broken nose cone from a small crashed spacecraft, lying half-buried in snow for a snowy top-down game: one smooth cream-white cone tipped on its side with a torn ragged base, scorch marks along one flank, a band of muted blue-grey metal round it. The subject is centred and fills the frame, seen straight on with a slight downward tilt as in a top-down game. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of orange, cream, soft brown and muted blue-grey metal. Soft rounded chunky forms. Very few large simple shapes, so it stays readable when shown at 40 pixels across. Flat even lighting. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 28.7,
+  "usage": {
+    "input_tokens": 685,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 173
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 881
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/objects/debris1_gen1_raw.png"
+  ]
+}

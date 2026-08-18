@@ -98,6 +98,20 @@ func _initialize() -> void:
 		# Carrying heat out past the fire. The burn is the range and the melt is
 		# the toll: how many liftable things one torch can free is the ratio of
 		# these two, and that ratio is the whole shape of an expedition.
+		# Wreckage. The distances are a design promise -- nothing inside eleven,
+		# exactly one on the eleventh ring -- so they belong where the
+		# documentation can quote them instead of restating them by hand.
+		"debris": {
+			"first_ring": Defs.DEBRIS_FIRST_RING,
+			"start_ring": Defs.DEBRIS_START_RING,
+			"per_tiles": Defs.DEBRIS_PER_TILES,
+			"shapes": Defs.DEBRIS_SHAPES,
+			"search_seconds": Defs.DEBRIS_SEARCH_SECONDS,
+			"copper": [Defs.DEBRIS_COPPER.x, Defs.DEBRIS_COPPER.y],
+			"iron": [Defs.DEBRIS_IRON.x, Defs.DEBRIS_IRON.y],
+			"core_one": Defs.DEBRIS_CORE_ONE,
+			"core_two": Defs.DEBRIS_CORE_TWO,
+		},
 		"torch": {
 			"seconds": Defs.TORCH_SECONDS,
 			"sight": Defs.TORCH_SIGHT,

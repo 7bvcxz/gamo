@@ -101,6 +101,14 @@ ADOPTED = {
     # tile, because that is what it occupies -- the crate was a drawn grey
     # rectangle and what she carried was the same rectangle again, so the opening
     # had one shape for three different states.
+    # Five pieces of the ship, drawn at one tile each. All five at the same size
+    # on purpose: they are one kind of thing that happens to have five shapes,
+    # and a field where some pieces are bigger reads as two kinds of wreck.
+    "debris1": ("debris1_gen1", 30),
+    "debris2": ("debris2_gen1", 30),
+    "debris3": ("debris3_gen1", 30),
+    "debris4": ("debris4_gen1", 30),
+    "debris5": ("debris5_gen1", 30),
     "kit": ("kit_gen1", 32),
     "kit_base": ("kit_base_gen1", 26),
     "kit_shelter": ("kit_shelter_gen1", 26),
@@ -125,6 +133,11 @@ ADOPTED_NAMES = {
     "belt_straight": "컨베이어 벨트 · 직선",
     "belt_corner": "컨베이어 벨트 · 코너",
     "splitter": "분배기",
+    "debris1": "로켓잔해 · 노즈콘",
+    "debris2": "로켓잔해 · 연료탱크",
+    "debris3": "로켓잔해 · 엔진노즐",
+    "debris4": "로켓잔해 · 선체판",
+    "debris5": "로켓잔해 · 안테나",
     "kit": "긴급 키트",
     "kit_base": "긴급기지키트",
     "kit_shelter": "긴급생존키트",

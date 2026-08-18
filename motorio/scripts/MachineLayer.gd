@@ -41,6 +41,18 @@ const FOOD_BIN_ART: Texture2D = preload("res://assets/objects/food_bin.png")
 ## rather than one because the whole opening is "there is a box, and what was in
 ## it becomes the fire and the hut" -- one drawn grey rectangle for all three
 ## states said none of that.
+## The five pieces of the ship. Held in an array rather than five constants
+## because the world stores which shape a piece is as a number, and a number that
+## has to be turned into a name by a match statement is a sixth shape waiting to
+## be forgotten.
+const DEBRIS_ART: Array[Texture2D] = [
+	preload("res://assets/objects/debris1.png"),
+	preload("res://assets/objects/debris2.png"),
+	preload("res://assets/objects/debris3.png"),
+	preload("res://assets/objects/debris4.png"),
+	preload("res://assets/objects/debris5.png"),
+]
+const DEBRIS_DRAW := 30.0
 const KIT_ART: Texture2D = preload("res://assets/objects/kit.png")
 const KIT_BASE_ART: Texture2D = preload("res://assets/objects/kit_base.png")
 const KIT_SHELTER_ART: Texture2D = preload("res://assets/objects/kit_shelter.png")
@@ -248,6 +260,7 @@ func _draw() -> void:
 	_draw_drops(tile)
 	_draw_pickaxe_hint(tile)
 	_draw_shards(tile)
+	_draw_debris(tile)
 	_draw_frozen(tile)
 	_draw_thaw(tile)
 	_draw_ground()
@@ -832,6 +845,26 @@ func _draw_thaw(tile: float) -> void:
 	draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
 	draw_arc(at, 16.0, -PI * 0.5, -PI * 0.5 + TAU * sim.thaw_fraction(), 32,
 		Defs.COL_CORE, 3.0, true)
+
+## The wreckage, and the ring closing on whichever piece is being taken apart.
+##
+## The same ring the case and the seam use. Three different verbs now watch the
+## same circle fill, which is the point: the game has one idea of "hold the key
+## and wait", and a fourth thing that did it differently would be a fourth thing
+## to learn.
+func _draw_debris(tile: float) -> void:
+	for cell: Vector2i in sim.debris:
+		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		if not view_rect.grow(tile).has_point(at):
+			continue
+		_shadow(at + Vector2(0, 8), 10.0)
+		var shape: int = clampi(int(sim.debris[cell]), 0, DEBRIS_ART.size() - 1)
+		_object_art(DEBRIS_ART[shape], at, DEBRIS_DRAW)
+		if cell == sim.debris_cell and sim.debris_progress > 0.0:
+			draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
+			draw_arc(at, 16.0, -PI * 0.5,
+				-PI * 0.5 + TAU * clampf(sim.debris_progress, 0.0, 1.0),
+				32, Defs.COL_CORE, 3.0, true)
 
 ## The cats still in the ice. Drawn from the same rect a walking cat is drawn
 ## from, so the one that wakes up stands exactly where the block was: the last

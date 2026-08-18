@@ -42,6 +42,23 @@
     "night_seconds": 50.0,
     "seconds": 300.0
   },
+  "debris": {
+    "copper": [
+      5,
+      10
+    ],
+    "core_one": 0.2,
+    "core_two": 0.05,
+    "first_ring": 11.0,
+    "iron": [
+      2,
+      5
+    ],
+    "per_tiles": 50.0,
+    "search_seconds": 3.0,
+    "shapes": 5,
+    "start_ring": 12.0
+  },
   "gate_to_copper": {
     "crystal": 54.0,
     "days_two_miners": 1.125,
@@ -55,6 +72,8 @@
       0,
       5,
       5,
+      0,
+      0,
       0
     ],
     "names": [
@@ -62,7 +81,9 @@
       "구리광석",
       "에너지결정",
       "열석",
-      "돌"
+      "돌",
+      "철",
+      "코어부품"
     ]
   },
   "machines": [
@@ -219,6 +240,15 @@
       ],
       "verb": "내려놓기",
       "why": "얼어붙은 고양이를 안고 있을 때. PLACE와 같은 동작이지만 그때는 이미 배운 뒤라 대개 뜨지 않는다."
+    },
+    {
+      "hold": true,
+      "id": "DEBRIS",
+      "keys": [
+        "Z"
+      ],
+      "verb": "분해",
+      "why": "로켓잔해를 마주했을 때. 상자와 같은 동작이라 처음 보는 물건 앞에서도 무엇을 해야 하는지는 이미 안다. 한 번 뜯어 보면 다시 뜨지 않는다."
     },
     {
       "hold": true,

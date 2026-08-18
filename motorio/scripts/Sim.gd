@@ -376,6 +376,7 @@ func to_save() -> Dictionary:
 		"belt_fed": delivered_by_belt,
 		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
 		"thawed": _thawed_rows(),
+		"debris": _debris_rows(), "debris_searched": debris_searched,
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
 		"carried_frozen": carried_frozen, "carried_frozen_thaw": carried_frozen_thaw,
 		# The opening. Saved because it is thirteen minutes of the game and a run
@@ -418,6 +419,14 @@ func from_save(data: Dictionary) -> void:
 	thawed.clear()
 	for row in data.get("thawed", []):
 		thawed[Vector2i(int(row[0]), int(row[1]))] = true
+	# Saved as a map rather than regenerated from the seed: the pieces that are
+	# gone are gone, and a world rebuilt from its seed would put every one of
+	# them back.
+	debris.clear()
+	for row in data.get("debris", []):
+		debris[Vector2i(int(row[0]), int(row[1]))] = int(row[2])
+	debris_searched = int(data.get("debris_searched", 0))
+	cancel_debris()
 	drops.clear()
 	for row in data.get("drops", []):
 		drops[Vector2i(int(row[0]), int(row[1]))] = int(row[2])
@@ -559,6 +568,10 @@ func setup(seed_value: int) -> void:
 	learned.clear()
 	walked = 0.0
 	frozen_cats.clear()
+	debris.clear()
+	debris_searched = 0
+	cancel_debris()
+	debris_rng.seed = seed_value ^ 0xC2B2AE35
 	base_level = 0
 	carried_frozen = false
 	carried_frozen_thaw = 0.0
@@ -581,6 +594,7 @@ func setup(seed_value: int) -> void:
 	_generate_ore(seed_value)
 	_generate_shards(seed_value)
 	_generate_frozen_cats(seed_value)
+	_generate_debris(seed_value)
 
 ## Cells kept clear so the guaranteed opening always has a belt route home.
 ## A single row, not a block: a square patch would put ore directly in front of
@@ -742,6 +756,100 @@ func _generate_frozen_cats(seed_value: int) -> void:
 			continue
 		frozen_cats[cell] = 0.0
 
+## Wreckage, from the eleventh ring outward.
+##
+## The first piece is placed on its ring by walking round it rather than by
+## taking one cell and hoping: the cell can hold a seam or a frozen cat, and
+## "the guaranteed piece did not fit" is a run where the rule the whole feature
+## rests on is quietly untrue. This repository has the same lesson written down
+## from the day three starting crates became one frozen cat.
+func _generate_debris(seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 5501
+	var base_angle: float = rng.randf() * TAU
+	for step in 96:
+		var angle: float = base_angle + TAU * float(step) / 96.0
+		var cell := core_cell + Vector2i(
+			roundi(cos(angle) * Defs.DEBRIS_FIRST_RING),
+			roundi(sin(angle) * Defs.DEBRIS_FIRST_RING))
+		# On the ring, not merely near it. Rounding a circle onto a grid puts
+		# some of its cells a little in and a little out, and a piece that lands
+		# at 10.6 is inside the empty zone the rule promises.
+		if roundi(_ring_distance(cell)) != int(Defs.DEBRIS_FIRST_RING):
+			continue
+		if not _debris_free(cell):
+			continue
+		debris[cell] = rng.randi_range(0, Defs.DEBRIS_SHAPES - 1)
+		break
+	var reach: float = Defs.WARM_MAX + 8.0
+	var inner: float = Defs.DEBRIS_START_RING
+	var target: int = int(PI * (reach * reach - inner * inner) / Defs.DEBRIS_PER_TILES)
+	var attempts := 0
+	# A cap on the tries as well as on the count. An unbounded search for a free
+	# cell is how world generation hung once already.
+	while debris.size() < target + 1 and attempts < target * 30:
+		attempts += 1
+		var angle: float = rng.randf() * TAU
+		# sqrt so the points spread evenly over the disc rather than crowding
+		# the middle, which here is the edge of the empty zone.
+		var radius: float = sqrt(rng.randf()) * reach
+		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if _ring_distance(cell) < inner or not _debris_free(cell):
+			continue
+		debris[cell] = rng.randi_range(0, Defs.DEBRIS_SHAPES - 1)
+
+## Somewhere a piece can lie without covering something else that matters.
+func _debris_free(cell: Vector2i) -> bool:
+	return not debris.has(cell) and not ore.has(cell) and not machines.has(cell) \
+		and not frozen_cats.has(cell) and not shards.has(cell) and not has_rock(cell) \
+		and cell != core_cell and cell != shelter_cell and cell != food_cell
+
+## Taking one apart. Held, like the case and like a seam.
+func search_debris(cell: Vector2i, delta: float) -> bool:
+	if not debris.has(cell) or not can_touch(cell):
+		cancel_debris()
+		return false
+	if cell != debris_cell:
+		debris_cell = cell
+		debris_progress = 0.0
+	debris_progress += delta / Defs.DEBRIS_SEARCH_SECONDS
+	return debris_progress >= 1.0
+
+func cancel_debris() -> void:
+	debris_cell = Vector2i(9999, 9999)
+	debris_progress = 0.0
+
+## What comes out, item -> count, and the piece is gone. Empty when there was
+## nothing there to open.
+##
+## The first piece always carries a core part. Twenty percent is a fair rate for
+## a plateau covered in wreckage and a terrible one for the piece that has to
+## teach the player that core parts exist -- four players in five would walk away
+## from the guaranteed piece having learned that debris contains scrap.
+func open_debris(cell: Vector2i) -> Dictionary:
+	if not debris.has(cell) or not can_touch(cell):
+		return {}
+	var first: bool = debris_searched == 0
+	debris.erase(cell)
+	debris_searched += 1
+	cancel_debris()
+	var out: Dictionary = {
+		Defs.ITEM_COPPER: debris_rng.randi_range(Defs.DEBRIS_COPPER.x, Defs.DEBRIS_COPPER.y),
+		Defs.ITEM_IRON: debris_rng.randi_range(Defs.DEBRIS_IRON.x, Defs.DEBRIS_IRON.y),
+	}
+	var cores: int = 1 if first else 0
+	if not first:
+		var roll: float = debris_rng.randf()
+		if roll < Defs.DEBRIS_CORE_TWO:
+			cores = 2
+		elif roll < Defs.DEBRIS_CORE_TWO + Defs.DEBRIS_CORE_ONE:
+			cores = 1
+	if cores > 0:
+		out[Defs.ITEM_CORE_PART] = cores
+	for item_type: int in out:
+		_gain(item_type, int(out[item_type]))
+	return out
+
 ## The one frozen cat that has to be inside the opening warm radius, wherever
 ## the terrain left room. Walks the ring from its nominal angle rather than
 ## taking that one cell or giving up: the cell can hold a seam, the shelter or a
@@ -829,6 +937,19 @@ func _ring_distance(cell: Vector2i) -> float:
 ## it is the other -- and the second one is what stops exploration from being a
 ## queue behind the base ladder.
 var torch_lit := false
+
+## Pieces of the ship, cell -> which of the five shapes. Shape is stored rather
+## than derived from the cell so that a piece cannot change what it looks like
+## when the numbers behind the world do.
+var debris: Dictionary = {}
+## How many have been taken apart. The first one is the one that is guaranteed to
+## carry a core part, so this is a count and not a flag.
+var debris_searched: int = 0
+var debris_cell := Vector2i(9999, 9999)
+var debris_progress: float = 0.0
+## Seeded off the run so a replayed seed disassembles to the same materials.
+## Separate from the world generator, which has already finished by then.
+var debris_rng := RandomNumberGenerator.new()
 
 ## Cells whose ground has been thawed out with a torch. Saved, because five
 ## seconds spent on a cell is work and a reload that undid it would be a theft.
@@ -1019,6 +1140,12 @@ func search_kit() -> Array[int]:
 ## seam or a rock under the case is not a reason for the game to swallow the one
 ## thing the opening is about.
 ## Cells cannot go into a ConfigFile as keys, so both maps travel as rows.
+func _debris_rows() -> Array:
+	var rows: Array = []
+	for cell: Vector2i in debris:
+		rows.append([cell.x, cell.y, int(debris[cell])])
+	return rows
+
 func _thawed_rows() -> Array:
 	var rows: Array = []
 	for cell: Vector2i in thawed:

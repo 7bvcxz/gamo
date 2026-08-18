@@ -655,6 +655,61 @@
    }
   },
   {
+   "role": "debris1",
+   "name": "로켓잔해 · 노즈콘",
+   "from": "debris1_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-debris1-128-356e8a5bbd87.png",
+    "30": "/object-candidates/shipped-debris1-30-f8847e6d469b.png"
+   }
+  },
+  {
+   "role": "debris2",
+   "name": "로켓잔해 · 연료탱크",
+   "from": "debris2_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-debris2-128-b58354743d88.png",
+    "30": "/object-candidates/shipped-debris2-30-761fe46fba9f.png"
+   }
+  },
+  {
+   "role": "debris3",
+   "name": "로켓잔해 · 엔진노즐",
+   "from": "debris3_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-debris3-128-983771b4c5c5.png",
+    "30": "/object-candidates/shipped-debris3-30-26c80e9c226f.png"
+   }
+  },
+  {
+   "role": "debris4",
+   "name": "로켓잔해 · 선체판",
+   "from": "debris4_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-debris4-128-3f9d3b7e30ee.png",
+    "30": "/object-candidates/shipped-debris4-30-ff7c1096a386.png"
+   }
+  },
+  {
+   "role": "debris5",
+   "name": "로켓잔해 · 안테나",
+   "from": "debris5_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-debris5-128-a2afb5f17c03.png",
+    "30": "/object-candidates/shipped-debris5-30-cbcf3aaf25f0.png"
+   }
+  },
+  {
    "role": "exchanger",
    "name": "수정에너지교환기",
    "from": "exchanger_gen1",

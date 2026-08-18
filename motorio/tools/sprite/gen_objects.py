@@ -191,6 +191,47 @@ SUBJECTS = {
         "into the ground, one thick chunky pipe on each side, a glowing warm "
         "amber lamp on each side, a dusting of snow on its top surfaces."
     ),
+    # Five pieces of the ship she came down in, scattered from eleven tiles out.
+    #
+    # Five prompts rather than five samples of one, because what makes a field of
+    # wreckage read as wreckage is that no two pieces are the same shape. Five
+    # rolls of "a piece of debris" come back as five of the same lump.
+    #
+    # Each names one silhouette and one warm or cold light, like every other
+    # object here: these are drawn at roughly one tile, and a tangle of struts is
+    # a grey smudge at that size. They share a palette -- scorched cream-white
+    # hull plating, muted blue-grey metal, one amber or cyan light -- so that a
+    # player who finds a second one recognises it as the same ship.
+    "debris1": (
+        "A broken nose cone from a small crashed spacecraft, lying half-buried in "
+        "snow for a snowy top-down game: one smooth cream-white cone tipped on "
+        "its side with a torn ragged base, scorch marks along one flank, a band "
+        "of muted blue-grey metal round it."
+    ),
+    "debris2": (
+        "A ruptured fuel tank from a small crashed spacecraft, lying in snow for "
+        "a snowy top-down game: one fat rounded cream-white cylinder on its side, "
+        "a jagged split down the middle showing muted blue-grey metal inside, two "
+        "brass bands round it, a little snow settled along the top."
+    ),
+    "debris3": (
+        "A broken rocket engine nozzle from a small crashed spacecraft, lying in "
+        "snow for a snowy top-down game: one wide flared bell of muted blue-grey "
+        "metal opening toward the viewer, warm brass rings round its throat, the "
+        "inside of the bell glowing faint amber, soot along its rim."
+    ),
+    "debris4": (
+        "A torn hull panel from a small crashed spacecraft, lying flat in snow "
+        "for a snowy top-down game: one buckled rectangular plate of cream-white "
+        "plating with rounded corners and a ragged torn edge, one round porthole "
+        "in it glowing cool cyan, warm brass rivets along its edges."
+    ),
+    "debris5": (
+        "A bent antenna dish from a small crashed spacecraft, lying in snow for a "
+        "snowy top-down game: one shallow cream-white dish crumpled on one side, "
+        "a short muted blue-grey mast leaning out of it with a small amber lamp "
+        "at the tip, snow gathered in the bowl."
+    ),
     # The cat holds this in front of itself and it bobs straight up and down.
     # Nothing rotates it, so the drill has to point down in the picture; the
     # first version came back as a drill gun aimed sideways, which reads as a

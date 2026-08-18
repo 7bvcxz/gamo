@@ -209,10 +209,16 @@ const ITEM_HEATSTONE := 3
 ## is everywhere and never runs out, which is what makes it the floor the rest
 ## of the costs are measured against.
 const ITEM_STONE := 4
+## The two materials that only come out of the ship. Nothing on this planet
+## makes them: iron is the wreck's structure and a core part is a piece of what
+## flew it, and both are appended at the end because an item's number is written
+## into every save and belt.
+const ITEM_IRON := 5
+const ITEM_CORE_PART := 6
 
-const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정", "열석", "돌"]
+const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정", "열석", "돌", "철", "코어부품"]
 ## Short forms for the status panel, where the counters share one row.
-const ITEM_SHORT := ["수정", "구리", "에너지", "열석", "돌"]
+const ITEM_SHORT := ["수정", "구리", "에너지", "열석", "돌", "철", "코어부품"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
@@ -221,8 +227,14 @@ const ITEM_SHORT := ["수정", "구리", "에너지", "열석", "돌"]
 ## snow: copper is a bright metal, heat stone is a dark coal with fire inside it,
 ## and the colour here is the fire rather than the coal because it is the fire
 ## the player is looking for.
+## Iron is a cold steel blue rather than another grey: stone is already grey and
+## the two arrive together out of the same wreck, so a shared hue would make the
+## disassembly line read as one number counted twice. A core part is violet,
+## which nothing else on this planet is -- it is the only material here that was
+## manufactured.
 const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138),
-	Color8(255, 122, 48), Color8(150, 152, 158)]
+	Color8(255, 122, 48), Color8(150, 152, 158), Color8(122, 146, 176),
+	Color8(186, 148, 255)]
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
 
@@ -283,9 +295,10 @@ const FACE_BAND := 3.0
 ## about a minute. So the opening's jump has to come from the mission and not
 ## from this number, and which of the two moves is a question for when the
 ## tutorial is built.
-const ITEM_VALUES := [0, 0, 5, 5, 0]
+const ITEM_VALUES := [0, 0, 5, 5, 0, 0, 0]
 ## The order the counters appear in, which is the order the player meets them.
-const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITEM_COPPER, ITEM_ENERGY]
+const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITEM_COPPER,
+	ITEM_ENERGY, ITEM_IRON, ITEM_CORE_PART]
 
 ## Hand mining. Deliberately slow: it is the floor the whole factory is measured
 ## against, and it has to stay worth replacing.
@@ -296,6 +309,34 @@ const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITE
 ## sixth of one -- and short enough that the answer to "I want that" is the walk
 ## rather than the wait.
 const THAW_GROUND_SECONDS := 5.0
+
+# --- Rocket debris ------------------------------------------------------------
+## Pieces of the ship she came down in, lying where they fell.
+##
+## The distances are the design. Nothing inside eleven tiles, because the opening
+## is about the fire and the first cat and a fourth thing to poke at would be
+## noise; exactly one piece on the eleventh ring, because a rule that says
+## "somewhere out there" is a rule most players never meet; and everything past
+## twelve scattered thinly, so the second piece is a reason to walk rather than a
+## thing that arrives.
+##
+## One in fifty tiles sounds sparse and is not: the ring from twelve out to the
+## last upgrade's reach is about 2,400 tiles, which is roughly fifty pieces
+## spread over the whole plateau.
+const DEBRIS_FIRST_RING := 11.0
+const DEBRIS_START_RING := 12.0
+const DEBRIS_PER_TILES := 50.0
+const DEBRIS_SHAPES := 5
+const DEBRIS_NAME := "로켓잔해"
+## Held rather than pressed, like the case and the seam. Longer than the case's
+## two seconds because this one is worth something.
+const DEBRIS_SEARCH_SECONDS := 3.0
+## What comes out. Copper and iron every time -- the piece is made of them -- and
+## a core part sometimes, which is the thing worth crossing the snow for.
+const DEBRIS_COPPER := Vector2i(5, 10)
+const DEBRIS_IRON := Vector2i(2, 5)
+const DEBRIS_CORE_TWO := 0.05
+const DEBRIS_CORE_ONE := 0.20
 
 const HAND_MINE_PERIOD := 10.0
 ## Crystal in, energy out. Two-to-one at five seconds means one exchanger keeps
@@ -937,6 +978,10 @@ const KEY_PROMPTS: Array[Dictionary] = [
 	{
 		"id": "THAW", "keys": ["Z"], "verb": "내려놓기",
 		"why": "얼어붙은 고양이를 안고 있을 때. PLACE와 같은 동작이지만 그때는 이미 배운 뒤라 대개 뜨지 않는다.",
+	},
+	{
+		"id": "DEBRIS", "keys": ["Z"], "hold": true, "verb": "분해",
+		"why": "로켓잔해를 마주했을 때. 상자와 같은 동작이라 처음 보는 물건 앞에서도 무엇을 해야 하는지는 이미 안다. 한 번 뜯어 보면 다시 뜨지 않는다.",
 	},
 	{
 		"id": "MELT", "keys": ["Z"], "hold": true, "verb": "녹이기",
