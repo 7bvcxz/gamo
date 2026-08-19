@@ -897,9 +897,13 @@ func shelter_nearby() -> bool:
 ## behave differently while one is open has to agree about when that is -- and
 ## the last time this was decided in two places, the build list took the arrow
 ## keys and Grim walked off anyway.
+##
+## The room is not one of them any more. It was, when it was a panel drawn over
+## the world -- and it stayed in this list after it became a place, which meant
+## walking into the hut switched her own legs off: the arrow keys are polled by
+## the character and a modal is exactly what stops that poll.
 func modal_open() -> bool:
-	return build_menu_open or gacha_open or map_open or base_menu_open or log_open \
-		or room_open
+	return build_menu_open or gacha_open or map_open or base_menu_open or log_open
 
 func _process(delta: float) -> void:
 	_follow_music()
@@ -1658,7 +1662,12 @@ func prompt_keys(id: String) -> Array:
 	return keys
 
 func active_prompt() -> String:
-	if state != State.PLAY or modal_open() or player.locked:
+	# `room_open` is named here rather than folded into `modal_open()`, because
+	# the two questions stopped being the same one when the shelter became a
+	# place: a window is something she cannot walk under, and she walks around in
+	# there. What is true of the shelter is that none of these keys exist in it --
+	# there is no ore to mine and nothing to build on a floor.
+	if state != State.PLAY or modal_open() or room_open or player.locked:
 		return ""
 	for row: Dictionary in Defs.KEY_PROMPTS:
 		var id: String = String(row["id"])

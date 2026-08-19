@@ -912,6 +912,11 @@ func _draw_warmth_row(panel: Rect2) -> void:
 ## and a nine-pixel rate line. The gun moves the choice into a menu that has room
 ## to explain itself, and the bar goes back to being about what is in your hands.
 func _draw_palette() -> void:
+	# And nothing in it is reachable inside the shelter either. There is no ore
+	# to mine in there and nowhere to place a machine, so the row, the output
+	# chip and the key legend under them are all describing a different room.
+	if main.room_open:
+		return
 	# Nothing in the row is reachable before the fire is lit: there is no base to
 	# build from, the pickaxe is still in the case, and every machine in it costs
 	# a resource she has not seen. A row of things she cannot have is the game

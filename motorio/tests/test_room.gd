@@ -17,6 +17,7 @@ func _initialize() -> void:
 func _run() -> void:
 	_test_the_floor_plan()
 	await _test_the_door_and_the_bed()
+	await _test_walking()
 	await _test_collision()
 	await _test_the_cats()
 	await _test_sleeping()
@@ -99,6 +100,33 @@ func _test_the_door_and_the_bed() -> void:
 	_assert(not main.room_open and not sim.indoors, "문으로 나간다")
 	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0,
 		"그리고 숙소 문 앞에 선다")
+	main.clear_save()
+	main.free()
+
+## The arrow keys move her in there.
+##
+## They stopped working the moment the room became a place: the room was still
+## listed as a modal, a modal switches off the character's own input poll, and
+## the collision test below missed it because it drove `_physics_process`
+## directly -- `player.modal` is written by Main once a frame, so a test that
+## skips the frame never sees the thing that was switched off. This one runs the
+## frame.
+func _test_walking() -> void:
+	var main: Node2D = await _main()
+	var sim = main.sim
+	main.open_room()
+	_assert(not main.modal_open(), "방은 창이 아니다 — 창이면 발이 멈춘다")
+	main.player.position = sim.cell_centre(Defs.room_to_world(Defs.ROOM_ENTRY))
+	var before: Vector2 = main.player.position
+	main.player.touch_direction = Vector2(-1, 0)
+	for step in 60:
+		main._process(1.0 / 60.0)
+		main.player._physics_process(1.0 / 60.0)
+	main.player.touch_direction = Vector2.ZERO
+	_assert(not main.player.modal, "프레임을 돌려도 modal 이 아니고")
+	_assert(main.player.position.distance_to(before) > float(Defs.TILE) * 0.5,
+		"실제로 걸어간다: %.1fpx" % main.player.position.distance_to(before))
+	_assert(Defs.in_room(main.player.cell()), "그리고 방 안이다")
 	main.clear_save()
 	main.free()
 
