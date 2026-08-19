@@ -141,6 +141,10 @@ var build_menu_open: bool = false
 ## One door rather than two -- everything the base does is behind the same key,
 ## on the same building, and the player never has to learn which press is which.
 var base_menu_open: bool = false
+## Inside the hut. A window rather than a place: the world keeps running behind
+## it, and what she does in there is choose one of four things.
+var room_open: bool = false
+var room_index: int = 0
 ## The play log, and whether it is up.
 ##
 ## Everything the game has said out loud this session, newest first. Deliberately
@@ -342,6 +346,7 @@ func _start_run() -> void:
 	meter_cell = Vector2i(9999, 9999)
 	build_menu_open = false
 	base_menu_open = false
+	room_open = false
 	map_open = false
 	log_open = false
 	play_log.clear()
@@ -485,7 +490,13 @@ func tool_unlocked(tool: int) -> bool:
 			# in the corner rather than as an object on the snow.
 			return sim.has_pickaxe
 		TOOL_BUILD_GUN:
-			return sim.has_gun and _anything_buildable()
+			# Owning it is the whole condition. It used to also ask whether
+			# anything was buildable, which was true the moment a stone was seen
+			# -- and stopped being true in 1.0.8, when the miner started opening
+			# on the gun being *held*. The two conditions then waited for each
+			# other: no slot without a machine, no machine without the slot, and
+			# a player with the gun in the snow who could never load it.
+			return sim.has_gun
 		TOOL_TORCH:
 			return sim.torches > 0 or sim.torch_left > 0.0
 	return false
@@ -529,6 +540,21 @@ func toggle_build_menu() -> bool:
 		menu_index = selected_index
 	audio.call("play", "select")
 	return true
+
+## Inside the hut. The same four keys every other window here answers to, and
+## the cursor walks the furniture in the order it is listed.
+func _room_key(key: InputEventKey) -> void:
+	match key.keycode:
+		KEY_ESCAPE, KEY_X:
+			close_room()
+		KEY_UP, KEY_LEFT, KEY_W, KEY_A:
+			room_index = posmod(room_index - 1, Defs.ROOM_PIECES.size())
+			audio.call("play", "select")
+		KEY_DOWN, KEY_RIGHT, KEY_S, KEY_D:
+			room_index = posmod(room_index + 1, Defs.ROOM_PIECES.size())
+			audio.call("play", "select")
+		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
+			room_confirm()
 
 func _base_menu_key(key: InputEventKey) -> void:
 	match key.keycode:
@@ -575,6 +601,8 @@ func close_windows(keep: String = "") -> void:
 		build_menu_open = false
 	if keep != "base":
 		base_menu_open = false
+	if keep != "room":
+		room_open = false
 	if keep != "map":
 		map_open = false
 	if keep != "log":
@@ -866,7 +894,8 @@ func shelter_nearby() -> bool:
 ## the last time this was decided in two places, the build list took the arrow
 ## keys and Grim walked off anyway.
 func modal_open() -> bool:
-	return build_menu_open or gacha_open or map_open or base_menu_open or log_open
+	return build_menu_open or gacha_open or map_open or base_menu_open or log_open \
+		or room_open
 
 func _process(delta: float) -> void:
 	_follow_music()
@@ -1290,7 +1319,6 @@ var frozen_seen := false
 func _mission_ready(id: String) -> bool:
 	match id:
 		"BASE2": return sim.shelter_placed
-		"BASE3": return sim.base_level >= 1
 		"BASE4": return sim.base_level >= 2
 	return false
 
@@ -1298,7 +1326,6 @@ func _mission_ready(id: String) -> bool:
 func _mission_finished(id: String) -> bool:
 	match id:
 		"BASE2": return sim.base_level >= 1
-		"BASE3": return sim.base_level >= 2
 		"BASE4": return sim.base_level >= 3
 	return false
 
@@ -1377,7 +1404,7 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 	var at: Vector2 = sim.cell_centre(sim.core_cell)
 	fx.ring(at, Defs.COL_CORE, radius * float(Defs.TILE))
 	fx.burst(at, Defs.COL_CORE, 18)
-	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % level, Defs.COL_CORE, true)
+	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % Defs.base_level_shown(level), Defs.COL_CORE, true)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "finish")
 	_notify("기지가 커졌습니다  온기 %.0f칸" % radius, Defs.COL_CORE)
@@ -1402,7 +1429,7 @@ func _on_cat_thawed(total: int, at: Vector2) -> void:
 	# a cat standing where a block was are the whole message -- a running count
 	# of the crew is a number the player can see by looking at the crew.
 	if total == 1:
-		_notify("고양이가 깨어났습니다  Z 로 안아 채굴기에 올려놓으세요", Defs.COL_CORE)
+		_notify("고양이가 깨어났다.", Defs.COL_CORE)
 
 ## Which mission the run is on, recomputed from the world rather than advanced
 ## by whoever happened to do the thing. A flag set at the moment of an action is
@@ -1934,6 +1961,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
+	if room_open and state == State.PLAY:
+		_room_key(key)
+		get_viewport().set_input_as_handled()
+		return
 	if base_menu_open and state == State.PLAY:
 		_base_menu_key(key)
 		get_viewport().set_input_as_handled()
@@ -2024,6 +2055,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode == KEY_F8:
 		debug_spill()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_F11:
+		# The room, without waiting for night and then walking to the door with
+		# fifty seconds of night left. Checking something should not cost most of
+		# a day, and at ten times speed the walk *is* most of the night.
+		open_room()
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode == KEY_F10:
@@ -2181,6 +2219,14 @@ func touch_hud(position: Vector2) -> bool:
 		if not (hud.log_card_rect as Rect2).has_point(local):
 			log_open = false
 			audio.call("play", "select")
+		return true
+	if room_open:
+		var piece: int = int(hud.call("room_piece_at", local))
+		if piece >= 0:
+			room_index = piece
+			room_confirm()
+		elif not (hud.call("room_rect") as Rect2).has_point(local):
+			close_room()
 		return true
 	if base_menu_open:
 		# The same contract every other window here has, and the one this window
@@ -2400,7 +2446,7 @@ func _frozen_to_lift(cell: Vector2i) -> bool:
 
 func _primary_action() -> void:
 	if sleep_available():
-		_sleep()
+		open_room()
 		return
 	var cell: Vector2i = player.facing_cell()
 	# Before anything else this key can mean: what is out there is frozen into
@@ -2436,7 +2482,7 @@ func _primary_action() -> void:
 		if not sim.put_down_frozen(cell):
 			audio.call("play", "deny")
 		elif sim.can_thaw(cell):
-			_notify("얼음이 녹기 시작합니다", Defs.COL_CORE)
+			_notify("얼음이 녹기 시작한다...", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
 			audio.call("play", "confirm")
 		else:
@@ -2510,6 +2556,11 @@ func _primary_action() -> void:
 ## itself made obvious: a torch is made of the same heat stone the fire burns, so
 ## opening the window spent the material the window exists to spend. Every visit
 ## ended with a red cost and nothing to pay it with.
+## Whether the fire has grown enough to make anything. Asked in one place, so the
+## window and whatever else wants to know cannot disagree.
+func crafts_open() -> bool:
+	return Defs.base_level_shown(sim.base_level) >= Defs.BASE_CRAFT_LEVEL
+
 func base_rows() -> Array[Dictionary]:
 	var rows: Array[Dictionary] = []
 	# Always. It used to appear only when she was carrying something burnable,
@@ -2517,8 +2568,12 @@ func base_rows() -> Array[Dictionary]:
 	# exactly the moment the player had nothing and needed to know what to go and
 	# get. It says the number either way and refuses when she is short.
 	rows.append({"kind": "fuel"})
-	for index in Defs.BASE_CRAFTS.size():
-		rows.append({"kind": "craft", "craft": index})
+	# And nothing else until the fire is at 3단계. Before that this window is one
+	# line -- the thing it is for -- rather than three, two of them answers to
+	# problems she has not met yet.
+	if crafts_open():
+		for index in Defs.BASE_CRAFTS.size():
+			rows.append({"kind": "craft", "craft": index})
 	return rows
 
 func _open_base_menu() -> void:
@@ -2744,6 +2799,11 @@ func debug_unlock_all() -> void:
 ## so both jam. Facing north they drop onto open floor for the idle cat to haul.
 func debug_scenario() -> void:
 	debug_unlock_all()
+	# And the opening, which holds the day's clock at 05:00 until it is over. A
+	# scenario key that leaves the clock stopped cannot be used to look at
+	# anything that happens later in a day -- dusk, night, the morning card --
+	# and every check of those had to be done by playing the tutorial first.
+	finish_tutorial()
 	# Whatever Grim was holding goes down first, or assigning it below would drop
 	# it silently and leave the player carrying a cat that is standing elsewhere.
 	if sim.carried_cat != null:
@@ -3288,6 +3348,7 @@ func settings_to_title() -> void:
 	hud.call("end_slider_drag")
 	build_menu_open = false
 	base_menu_open = false
+	room_open = false
 	map_open = false
 	log_open = false
 	state = State.TITLE
@@ -3430,6 +3491,31 @@ func _carried_home() -> void:
 
 func sleep_available() -> bool:
 	return state == State.PLAY and is_night() and shelter_nearby()
+
+## Going inside. Z at the hut after dark opens the room rather than ending the
+## day on the spot -- the one warm place in this game used to be a button.
+func open_room() -> void:
+	close_windows("room")
+	room_open = true
+	room_index = 0
+	audio.call("play", "confirm")
+
+func close_room() -> void:
+	if not room_open:
+		return
+	room_open = false
+	audio.call("play", "select")
+
+## Whichever piece the cursor is on. Only the bed does anything; the rest say
+## what they are, which is the point of a room being a room.
+func room_confirm() -> void:
+	var piece: Dictionary = Defs.ROOM_PIECES[clampi(room_index, 0, Defs.ROOM_PIECES.size() - 1)]
+	if int(piece["id"]) != Defs.ROOM_BED:
+		_notify("%s  ·  %s" % [String(piece["name"]), String(piece["note"])], Defs.COL_TEXT_DIM)
+		audio.call("play", "select")
+		return
+	room_open = false
+	_sleep()
 
 func _sleep() -> void:
 	if state != State.PLAY:

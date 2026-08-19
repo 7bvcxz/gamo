@@ -801,6 +801,47 @@ const TORCH_NAME := "에너지횃불"
 
 ## What the fire can make. A table so the second thing is a row rather than a
 ## rewrite of the window that shows it.
+## The base level a craft appears at, counted the way the player sees it: the
+## fire is 1단계 the moment it is lit, so this is `base_level + 1`.
+##
+## Both of these used to be there from the first minute, which made the window
+## she opens to grow the fire a window with three things in it -- two of them
+## answers to problems she has not met. The torch is for going outside the
+## circle and the bin is for cats that get hungry; neither exists at 1단계.
+const BASE_CRAFT_LEVEL := 3
+
+# --- Inside the hut -----------------------------------------------------------
+## The room she goes into at night, in cells: eight across, six deep.
+##
+## Drawn rather than simulated. The hut is one tile on the plateau and this is
+## what is inside it, which is a different question from where anything stands
+## on the grid -- so the room is a picture with things in it that can be chosen,
+## and the world outside keeps its own coordinates.
+##
+## Sleeping moved in here. It used to happen the moment she pressed Z at the
+## door, which made the one warm place in the game a button: night fell, you
+## faced a wall, the screen went to a summary. Now the door opens onto a room
+## with a fire in it and going to bed is crossing that room.
+const ROOM_CELLS := Vector2i(8, 6)
+const ROOM_FIREPLACE := 0
+const ROOM_SOFA_LEFT := 1
+const ROOM_SOFA_RIGHT := 2
+const ROOM_BED := 3
+## Each piece: which cell it starts on, how many cells it covers, its name, and
+## the line it says when she is standing at it. In one table so the drawing, the
+## cursor and the hit test cannot come to disagree about where the bed is.
+const ROOM_PIECES: Array[Dictionary] = [
+	{"id": ROOM_FIREPLACE, "cell": Vector2i(0, 0), "size": Vector2i(2, 2),
+		"name": "벽난로", "note": "불이 낮게 타고 있다"},
+	{"id": ROOM_SOFA_LEFT, "cell": Vector2i(1, 3), "size": Vector2i(2, 1),
+		"name": "소파", "note": "고양이 털이 붙어 있다"},
+	{"id": ROOM_SOFA_RIGHT, "cell": Vector2i(4, 3), "size": Vector2i(2, 1),
+		"name": "소파", "note": "누군가 앉았던 자국이 남아 있다"},
+	{"id": ROOM_BED, "cell": Vector2i(6, 1), "size": Vector2i(2, 3),
+		"name": "침대", "note": "여기서 자면 아침이 온다"},
+]
+
+## What the fire can make, and the level each opens at.
 const BASE_CRAFTS: Array[Dictionary] = [
 	{
 		"id": "torch",
@@ -870,8 +911,6 @@ const TRACK_NAMES := ["기지", "고양이", "자동화"]
 const MISSIONS: Array[Dictionary] = [
 	{"id": "BASE2", "track": TRACK_BASE, "line": "불이 꺼져간다..  기지의 불씨를 살려야 한다",
 		"why": "거처가 서면 바로 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 업그레이드는 세상에 무언가가 더 있다는 것을 알게 되는 일이다."},
-	{"id": "BASE3", "track": TRACK_BASE, "line": "불을 더 멀리 보낸다",
-		"why": "2단계에 닿으면 열린다. 11칸에서 풍부 등급 열석이 처음 나오므로, 같은 곡괭이질이 더 많이 준다."},
 	{"id": "BASE4", "track": TRACK_BASE, "line": "구리가 있는 곳까지",
 		"why": "3단계에 닿으면 열린다. 15칸이 구리 고리의 안쪽 가장자리이고 구리가 벨트의 입구다 — 이 줄은 자동화 계열이 열리는 문이기도 하다."},
 
@@ -1590,6 +1629,12 @@ static func base_level(stones: int) -> int:
 
 static func warm_radius(stones: int) -> float:
 	return float(BASE_LEVELS[base_level(stones)]["radius"])
+
+## The number the player sees. `base_level` counts from zero because it indexes
+## the ladder; the fire in front of them is 1단계 the moment it is lit, and a
+## window that calls it 0 is a window arguing with the person reading it.
+static func base_level_shown(level: int) -> int:
+	return level + 1
 
 ## What the next upgrade costs and gives, or an empty dictionary at the top. The
 ## HUD reads this so the player can see what they are working towards rather

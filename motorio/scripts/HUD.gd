@@ -485,6 +485,7 @@ func _draw() -> void:
 			_draw_gacha_button()
 			_draw_build_menu()
 			_draw_base_menu()
+			_draw_room()
 			_draw_gacha_card()
 			_draw_message()
 	# Below the match, so they are on every screen -- except the opening and the
@@ -520,9 +521,20 @@ func _draw_blackout() -> void:
 ## because a test can read a predicate and cannot read a draw call -- and "night
 ## is darker than dusk" is a claim worth holding to.
 static func night_wash(level: float) -> Array[float]:
+	# The second wash starts the moment night does, and where that is comes from
+	# the clock rather than from a number typed here: night is the last
+	# NIGHT_SECONDS of the day, so it begins at that fraction of it. It used to
+	# start at 0.86, which is a third of the way *into* the night -- so the
+	# darkness the player was promised arrived after the thing it was for.
+	var night_at: float = 1.0 - Defs.NIGHT_SECONDS / Defs.DAY_SECONDS
 	var dusk: float = clampf((level - 0.55) / 0.45, 0.0, 1.0)
-	var deep: float = clampf((level - 0.86) / 0.14, 0.0, 1.0)
-	return [dusk * 0.46, deep * 0.5]
+	# A step, not a ramp from zero. Night falling is an event -- the cats stop
+	# working, the banner says go home -- and a second wash that starts at
+	# nothing on that frame means the screen looks exactly as it did a second
+	# earlier. It lands at just over half its weight and deepens from there.
+	var into: float = clampf((level - night_at) / maxf(1.0 - night_at, 0.001), 0.0, 1.0)
+	var deep: float = 0.0 if level < night_at else 0.55 + 0.45 * into
+	return [dusk * 0.46, deep * 0.62]
 
 func _draw_dusk_wash() -> void:
 	var wash: Array[float] = night_wash(main.night_level())
@@ -1060,6 +1072,103 @@ func build_menu_row_at(point: Vector2) -> int:
 ## Deliberately small. The build list is a catalogue with a row per machine; this
 ## is one thing to make, and a card the size of the catalogue would be mostly
 ## empty space announcing how little there is.
+# --- Inside the hut -----------------------------------------------------------
+## The room, as a card. Sized from the cell grid so the furniture rectangles and
+## the hit test are the same arithmetic -- a room drawn one way and clicked
+## another is a room where the bed is not where it looks.
+const ROOM_CELL := 46.0
+
+func room_rect() -> Rect2:
+	var body := Vector2(Defs.ROOM_CELLS) * ROOM_CELL
+	var card := Vector2(body.x + 32.0, body.y + FRAME_HEADER + 58.0)
+	card.x = minf(card.x, size.x - MARGIN * 2.0)
+	return Rect2(size.x * 0.5 - card.x * 0.5, size.y * 0.5 - card.y * 0.5, card.x, card.y)
+
+## Where the floor sits inside the card.
+func room_floor() -> Rect2:
+	var card: Rect2 = room_rect()
+	return Rect2(card.position + Vector2(16.0, FRAME_HEADER + 12.0),
+		Vector2(Defs.ROOM_CELLS) * ROOM_CELL)
+
+func room_piece_rect(index: int) -> Rect2:
+	var piece: Dictionary = Defs.ROOM_PIECES[index]
+	var floor_rect: Rect2 = room_floor()
+	return Rect2(floor_rect.position + Vector2(piece["cell"]) * ROOM_CELL,
+		Vector2(piece["size"]) * ROOM_CELL)
+
+## Which piece a point is on, or -1. Phones have no arrow keys, so every window
+## in this game answers a tap as well as a cursor.
+func room_piece_at(point: Vector2) -> int:
+	for index in Defs.ROOM_PIECES.size():
+		if room_piece_rect(index).has_point(point):
+			return index
+	return -1
+
+func _draw_room() -> void:
+	if not main.room_open:
+		return
+	_dim(0.62)
+	var card: Rect2 = room_rect()
+	_frame(card, Defs.COL_CORE, "숙소   ↑↓ 선택 · Z 사용 · X 나가기")
+	var floor_rect: Rect2 = room_floor()
+	# Boards, drawn as bands rather than as a grid: a chequerboard reads as a
+	# tilemap and this is a room.
+	draw_rect(floor_rect, Color(0.16, 0.13, 0.11))
+	for row in Defs.ROOM_CELLS.y:
+		if row % 2 == 0:
+			continue
+		draw_rect(Rect2(floor_rect.position + Vector2(0.0, float(row) * ROOM_CELL),
+			Vector2(floor_rect.size.x, ROOM_CELL)), Color(1, 1, 1, 0.022))
+	draw_rect(floor_rect, Color(0.35, 0.27, 0.22, 0.8), false, 2.0)
+	# The fire in the hearth lights the room, so the floor carries a warm pool
+	# under it rather than being lit evenly.
+	var hearth: Rect2 = room_piece_rect(Defs.ROOM_FIREPLACE)
+	draw_circle(hearth.get_center(), ROOM_CELL * 3.4, Color(1.0, 0.68, 0.32, 0.06))
+	draw_circle(hearth.get_center(), ROOM_CELL * 2.0, Color(1.0, 0.68, 0.32, 0.07))
+	for index in Defs.ROOM_PIECES.size():
+		_draw_room_piece(index)
+	var chosen: Dictionary = Defs.ROOM_PIECES[clampi(main.room_index, 0,
+		Defs.ROOM_PIECES.size() - 1)]
+	_text_in(Rect2(card.position + Vector2(0.0, card.size.y - 34.0), Vector2(card.size.x, 20.0)),
+		"%s  ·  %s" % [String(chosen["name"]), String(chosen["note"])], 12, Defs.COL_TEXT_DIM)
+
+func _draw_room_piece(index: int) -> void:
+	var piece: Dictionary = Defs.ROOM_PIECES[index]
+	var rect: Rect2 = room_piece_rect(index).grow(-4.0)
+	var id: int = int(piece["id"])
+	var on_cursor: bool = index == main.room_index
+	match id:
+		Defs.ROOM_FIREPLACE:
+			# Stone surround, and a fire that is drawn rather than implied: it is
+			# the only light in here and the reason the room is worth crossing.
+			draw_rect(rect, Color(0.29, 0.28, 0.30))
+			draw_rect(rect, Color(0.10, 0.10, 0.12), false, 2.0)
+			var mouth: Rect2 = rect.grow(-rect.size.x * 0.22)
+			draw_rect(mouth, Color(0.06, 0.05, 0.06))
+			var beat: float = 0.72 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.16
+			draw_circle(mouth.get_center() + Vector2(0.0, mouth.size.y * 0.18),
+				mouth.size.x * 0.42, Color(1.0, 0.52, 0.18, beat))
+			draw_circle(mouth.get_center() + Vector2(0.0, mouth.size.y * 0.22),
+				mouth.size.x * 0.24, Color(1.0, 0.85, 0.52, beat))
+		Defs.ROOM_SOFA_LEFT, Defs.ROOM_SOFA_RIGHT:
+			draw_rect(rect, Color(0.44, 0.26, 0.22))
+			draw_rect(Rect2(rect.position, Vector2(rect.size.x, rect.size.y * 0.42)),
+				Color(0.52, 0.32, 0.27))
+			draw_rect(rect, Color(0.16, 0.10, 0.09), false, 2.0)
+		Defs.ROOM_BED:
+			# Frame, mattress, and a pillow at the head, so the one piece that
+			# does something is the one that reads fastest.
+			draw_rect(rect, Color(0.40, 0.28, 0.20))
+			var sheet: Rect2 = rect.grow(-5.0)
+			draw_rect(sheet, Color(0.82, 0.84, 0.88))
+			draw_rect(Rect2(sheet.position, Vector2(sheet.size.x, sheet.size.y * 0.24)),
+				Color(0.94, 0.95, 0.97))
+			draw_rect(Rect2(sheet.position + Vector2(0.0, sheet.size.y * 0.46),
+				Vector2(sheet.size.x, sheet.size.y * 0.54)), Color(0.48, 0.36, 0.52))
+			draw_rect(rect, Color(0.18, 0.12, 0.09), false, 2.0)
+	if on_cursor:
+		draw_rect(rect.grow(3.0), Defs.COL_CORE, false, 2.0)
+
 func base_menu_rect() -> Rect2:
 	var rows: float = float(maxi(1, main.base_rows().size()))
 	var height: float = FRAME_HEADER + 60.0 + rows * MENU_ROW + 18.0

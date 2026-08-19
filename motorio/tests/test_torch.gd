@@ -220,6 +220,10 @@ func _test_base_window() -> void:
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == _cost(),
 		"들고 있던 연료도 그대로다")
 
+	# At 3단계, where the crafts are. Below that this window is one line -- the
+	# upgrade -- and the torch these cases are about does not exist yet.
+	sim.stones_in = int(Defs.BASE_LEVELS[2]["stones"])
+	sim._refresh_radius()
 	var rows: Array[Dictionary] = main.base_rows()
 	# The fuel row is always there now, with or without stones in her pack: it is
 	# the one line that says what the fire wants, and it was missing at exactly
@@ -236,6 +240,13 @@ func _test_base_window() -> void:
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "재료가 나간다")
 	_assert(main.base_rows().size() == Defs.BASE_CRAFTS.size() + 1,
 		"연료가 떨어져도 줄은 남는다")
+	# And below 3단계 the window is the upgrade alone.
+	var kept: int = sim.stones_in
+	sim.stones_in = 0
+	sim._refresh_radius()
+	_assert(main.base_rows().size() == 1, "3단계 전에는 기지 업그레이드 한 줄뿐이다")
+	sim.stones_in = kept
+	sim._refresh_radius()
 	sim.stock[Defs.ITEM_HEATSTONE] = maxi(4, sim.stones_to_next())
 	main.menu_index = 0
 	main._base_menu_confirm()

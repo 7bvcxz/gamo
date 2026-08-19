@@ -30,6 +30,7 @@ func _run() -> void:
 	_test_missions_follow_the_world()
 	_test_cold_ends_it()
 	_test_the_gun_comes_from_the_fire()
+	_test_drops_line_up()
 	_test_feeding_the_fire()
 	_test_save_mid_opening()
 	_test_finish_tutorial()
@@ -469,3 +470,37 @@ func _test_the_gun_comes_from_the_fire() -> void:
 		if int(sim.drops[cell]) == Sim.DROP_GUN:
 			guns += 1
 	_assert(guns == 0, "두 번째 업그레이드는 총을 또 주지 않는다")
+
+## What comes out of the case lands in a line, near to far.
+##
+## Two things dropped at the same distance is a clump: she walks into both at
+## once and the second is picked up without ever being looked at. The order of
+## KIT_CONTENTS is a near-to-far order now -- the case she needs first at her
+## feet, the tool one step past it.
+func _test_drops_line_up() -> void:
+	_crash()
+	var sim = main.sim
+	# Standing north of the case, so "away" is south and the line is measurable.
+	main.player.position = sim.cell_centre(sim.kit_cell + Vector2i(0, -1))
+	for offset: Vector2i in [Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3),
+			Vector2i(1, 1), Vector2i(1, 2), Vector2i(-1, 1), Vector2i(-1, 2)]:
+		sim.ore.erase(sim.kit_cell + offset)
+		sim.mined_rocks[sim.kit_cell + offset] = true
+	# Through the sim, with the direction Main would have set: the hold itself
+	# wants a held key and a facing, and neither is what this is about.
+	sim.drop_away = Vector2i(0, 1)
+	sim.search_kit()
+	sim.search_kit()
+	var kit_at := Vector2i(9999, 9999)
+	var tool_at := Vector2i(9999, 9999)
+	for cell: Vector2i in sim.drops:
+		if int(sim.drops[cell]) == Sim.DROP_KIT_SHELTER:
+			kit_at = cell
+		if int(sim.drops[cell]) == Sim.DROP_PICKAXE:
+			tool_at = cell
+	_assert(kit_at != Vector2i(9999, 9999) and tool_at != Vector2i(9999, 9999),
+		"둘 다 떨어졌다: %s %s" % [str(kit_at), str(tool_at)])
+	var near: float = Vector2(kit_at - sim.kit_cell).length()
+	var far: float = Vector2(tool_at - sim.kit_cell).length()
+	_assert(far > near, "곡괭이가 키트보다 멀다: %.1f > %.1f" % [far, near])
+	_assert(kit_at != tool_at, "그리고 같은 칸이 아니다")

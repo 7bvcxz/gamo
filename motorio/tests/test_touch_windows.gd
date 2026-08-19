@@ -59,6 +59,9 @@ func _test_windows() -> void:
 	_assert(main.base_menu_open, "기지 앞에서 Z 를 누르면 창이 열린다")
 	main._process(0.0)
 	hud._layout()
+	# At 3단계, so there is more than one row to tap through.
+	main.sim.stones_in = int(Defs.BASE_LEVELS[2]["stones"])
+	main.sim._refresh_radius()
 	var rows: Array[Dictionary] = main.base_rows()
 	_assert(rows.size() >= 2, "줄이 여럿 있다: %d" % rows.size())
 	# Every row is where it is drawn, and a tap on one is that row.

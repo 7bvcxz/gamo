@@ -618,11 +618,11 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
 	draw_circle(Vector2(0, 26), 9.0, Color(0.02, 0.04, 0.08, 0.38))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	# Two markers: the cardinal pip is the build-targeting contract, the smaller
-	# eight-way arc shows which way she is actually heading.
-	var heading: Vector2 = Defs.DIR_VECTORS[facing8]
-	draw_circle(heading * 20.0, 1.8, Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.6))
-	draw_circle(Vector2(facing.x, facing.y) * 15.0, 2.4, Defs.COL_CORE)
+	# The two facing pips are gone as of 1.0.9. They were a debugging readout that
+	# shipped: one said which cardinal cell Z would act on, the other which of
+	# eight ways she was walking, and both were dots on the snow in front of a
+	# character who is already drawn facing that way. The placement ghost says
+	# where a machine goes and the sprite says where she is looking.
 
 ## Drawn in world space relative to the player, from the cat's own position, so
 ## what is on screen and what the simulation believes are the same thing.

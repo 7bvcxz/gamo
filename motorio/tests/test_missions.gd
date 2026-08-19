@@ -76,7 +76,6 @@ func _test_tracks() -> void:
 	main.finish_tutorial()
 	main._update_missions()
 	_assert(_open_ids(main).has("BASE2"), "거처가 서면 기지 임무가 열린다")
-	_assert(not _open_ids(main).has("BASE3"), "다음 단계는 아직 아니다")
 	# The world puts a frozen cat just past the opening circle, so raising the
 	# radius would find one on the same frame and 생물 탐색 would open and close
 	# together. Cleared first, so "has not seen one yet" is a real state here.
@@ -84,8 +83,10 @@ func _test_tracks() -> void:
 	sim.stones_in = int(Defs.BASE_LEVELS[1]["stones"])
 	sim._refresh_radius()
 	main._update_missions()
+	# And nothing takes its place. "불을 더 멀리 보낸다" was a second rung saying
+	# the same thing as the first, and the fire's own window says what it wants.
 	_assert(not _open_ids(main).has("BASE2"), "올리면 그 줄은 닫힌다")
-	_assert(_open_ids(main).has("BASE3"), "그리고 다음 줄이 열린다")
+	_assert(_open_ids(main).size() <= 1, "그 자리를 대신 채우는 줄은 없다")
 
 	# What used to be here: eleven assertions walking the cat track and the
 	# automation track rung by rung. Both tracks are gone, and the rungs they

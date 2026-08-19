@@ -1278,8 +1278,19 @@ func _drop_cell(index: int) -> Vector2i:
 	if drop_away != Vector2i.ZERO:
 		away = drop_away
 	var side := Vector2i(-away.y, away.x)
-	var wanted: Array[Vector2i] = [away, away + side, away - side,
-		away * 2, away * 2 + side, away * 2 - side, side, -side]
+	# One step further out per item, so what comes out of the case lands in a
+	# line rather than in a clump: the first thing at her feet-and-a-bit, the
+	# second beyond it. The order of KIT_CONTENTS is therefore a near-to-far
+	# order -- the case first and the tool past it -- and picking up the near one
+	# does not sweep up the far one on the same step.
+	var reach: int = index + 1
+	var wanted: Array[Vector2i] = [away * reach, away * reach + side, away * reach - side]
+	for step in range(1, 4):
+		wanted.append(away * (reach + step))
+		wanted.append(away * (reach + step) + side)
+		wanted.append(away * (reach + step) - side)
+	wanted.append(side)
+	wanted.append(-side)
 	# And then outward, ring by ring, if those eight are taken.
 	#
 	# They were the whole list, and a boulder cluster over the case meant the
@@ -1294,14 +1305,11 @@ func _drop_cell(index: int) -> Vector2i:
 				if maxi(absi(dx), absi(dy)) != ring - 1:
 					continue
 				wanted.append(Vector2i(dx, dy))
-	var seen := 0
 	for offset: Vector2i in wanted:
 		var cell: Vector2i = kit_cell + offset
 		if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
 			continue
-		if seen == index:
-			return cell
-		seen += 1
+		return cell
 	return Vector2i(9999, 9999)
 
 ## The build gun, handed over by the fire once it has grown a step.

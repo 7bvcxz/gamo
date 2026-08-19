@@ -39,6 +39,10 @@ func _test_rows_agree() -> void:
 	var sim: Sim = main.sim
 	sim.stock[Defs.ITEM_HEATSTONE] = 12
 
+	# The crafts open at 3단계, so this window has one row before that. These
+	# cases are about the window's shape, not about the ladder.
+	main.sim.stones_in = int(Defs.BASE_LEVELS[2]["stones"])
+	main.sim._refresh_radius()
 	var rows: Array[Dictionary] = main.base_rows()
 	_assert(rows.size() >= 2, "기지 창에 줄이 여럿 있다: %d" % rows.size())
 	var kinds: Array[String] = []

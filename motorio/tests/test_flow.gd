@@ -125,10 +125,19 @@ func _run() -> void:
 	# the player could not use for the first ten minutes.
 	_assert(main.holding_pickaxe(), "the run opens with the pickaxe in hand")
 	_assert(main.TOOLS[0] == main.TOOL_PICKAXE, "and the pickaxe is slot 1")
-	# And slot 2 has to be earned: the gun does not exist until something can be
-	# built with it, which is what the first heat stone in hand opens.
-	_assert(not main.tool_unlocked(main.TOOL_BUILD_GUN),
-		"the gun is not in the row before anything can be built")
+	# And slot 2 has to be earned: the gun is an object she picks up off the snow
+	# when the fire first grows. Owning it is the whole condition -- it also used
+	# to ask whether anything was buildable, and in 1.0.8 that deadlocked, since
+	# the miner opens on the gun being held.
+	# `finish_tutorial` hands both tools over, so this asks the rule directly:
+	# owning the gun is the whole condition for the slot.
+	var had_gun: bool = main.sim.has_gun
+	main.sim.has_gun = false
+	_assert(not main.tool_unlocked(main.TOOL_BUILD_GUN), "총이 없으면 슬롯도 없다")
+	main.sim.has_gun = true
+	_assert(main.tool_unlocked(main.TOOL_BUILD_GUN),
+		"주우면 그때 생긴다 — 지을 것이 있는지는 묻지 않는다")
+	main.sim.has_gun = had_gun
 	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	# The miner is opened by holding the build gun with stone to pay for one,
 	# not by having seen a stone. These tests want it standing.
