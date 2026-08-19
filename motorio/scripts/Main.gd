@@ -3510,6 +3510,9 @@ func close_room() -> void:
 ## what they are, which is the point of a room being a room.
 func room_confirm() -> void:
 	var piece: Dictionary = Defs.ROOM_PIECES[clampi(room_index, 0, Defs.ROOM_PIECES.size() - 1)]
+	if int(piece["id"]) == Defs.ROOM_DOOR:
+		close_room()
+		return
 	if int(piece["id"]) != Defs.ROOM_BED:
 		_notify("%s  ·  %s" % [String(piece["name"]), String(piece["note"])], Defs.COL_TEXT_DIM)
 		audio.call("play", "select")

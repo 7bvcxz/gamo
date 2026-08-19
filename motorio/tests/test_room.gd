@@ -73,12 +73,24 @@ func _test_the_bed() -> void:
 	# The sofas and the fire say what they are and nothing else. A room where
 	# every object ends the day is a room with one object in it.
 	for index in Defs.ROOM_PIECES.size():
-		if int(Defs.ROOM_PIECES[index]["id"]) == Defs.ROOM_BED:
+		var id: int = int(Defs.ROOM_PIECES[index]["id"])
+		if id == Defs.ROOM_BED or id == Defs.ROOM_DOOR:
 			continue
 		main.room_index = index
 		main.room_confirm()
 		_assert(main.room_open and main.state == main.State.PLAY,
 			"%s 를 골라도 밤이 끝나지 않는다" % String(Defs.ROOM_PIECES[index]["name"]))
+	# The door goes back outside, which is the other thing a room needs. X does
+	# it too, but a room that can only be left with a key is a room without a
+	# door in it.
+	for index in Defs.ROOM_PIECES.size():
+		if int(Defs.ROOM_PIECES[index]["id"]) == Defs.ROOM_DOOR:
+			main.room_index = index
+	main.room_confirm()
+	_assert(not main.room_open, "문을 고르면 나간다")
+	_assert(main.state == main.State.PLAY, "그리고 밤은 그대로다")
+	_assert(not main.modal_open(), "조작도 돌아온다")
+	main.open_room()
 	for index in Defs.ROOM_PIECES.size():
 		if int(Defs.ROOM_PIECES[index]["id"]) == Defs.ROOM_BED:
 			main.room_index = index
@@ -97,7 +109,7 @@ func _test_the_furniture_lines_up() -> void:
 	var hud = load("res://scripts/HUD.gd").new()
 	hud.size = Vector2(1280, 720)
 	var floor_rect: Rect2 = hud.room_floor()
-	_assert(Defs.ROOM_PIECES.size() == 4, "가구는 넷이다")
+	_assert(Defs.ROOM_PIECES.size() == 5, "방 안에 고를 수 있는 것이 다섯이다")
 	var ids := {}
 	for index in Defs.ROOM_PIECES.size():
 		var piece: Dictionary = Defs.ROOM_PIECES[index]
@@ -112,7 +124,7 @@ func _test_the_furniture_lines_up() -> void:
 		_assert(cell.x >= 0 and cell.y >= 0 and cell.x + span.x <= Defs.ROOM_CELLS.x
 			and cell.y + span.y <= Defs.ROOM_CELLS.y,
 			"%s 가 8x6 격자를 넘지 않는다" % String(piece["name"]))
-	_assert(ids.size() == 4, "벽난로·소파 둘·침대가 각각 하나씩")
+	_assert(ids.size() == 5, "벽난로·소파 둘·침대·문이 각각 하나씩")
 	# Nothing overlaps: two pieces sharing a cell is one of them unreachable.
 	for a in Defs.ROOM_PIECES.size():
 		for b in range(a + 1, Defs.ROOM_PIECES.size()):
@@ -124,6 +136,18 @@ func _test_the_furniture_lines_up() -> void:
 			continue
 		var bed: Vector2i = Defs.ROOM_PIECES[index]["cell"]
 		_assert(bed.x >= Defs.ROOM_CELLS.x / 2, "침대는 오른쪽에 있다: x=%d" % bed.x)
+	# And the door is on the bottom wall, in the middle: it is the wall she came
+	# through, and a way out in a corner is a way out nobody finds.
+	for index in Defs.ROOM_PIECES.size():
+		if int(Defs.ROOM_PIECES[index]["id"]) != Defs.ROOM_DOOR:
+			continue
+		var door: Dictionary = Defs.ROOM_PIECES[index]
+		var cell: Vector2i = door["cell"]
+		var span: Vector2i = door["size"]
+		_assert(cell.y + span.y == Defs.ROOM_CELLS.y, "문은 아래쪽 벽에 있다: y=%d" % cell.y)
+		var middle: float = float(cell.x) + float(span.x) * 0.5
+		_assert(absf(middle - float(Defs.ROOM_CELLS.x) * 0.5) < 0.6,
+			"그리고 가운데다: %.1f" % middle)
 	hud.free()
 
 

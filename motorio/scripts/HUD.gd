@@ -1190,6 +1190,20 @@ func _draw_room_piece(index: int) -> void:
 			draw_rect(Rect2(rect.position, Vector2(rect.size.x, rect.size.y * 0.42)),
 				Color(0.52, 0.32, 0.27))
 			draw_rect(rect, Color(0.16, 0.10, 0.09), false, 2.0)
+		Defs.ROOM_DOOR:
+			# Set into the wall she came in through: a frame, boards, and a
+			# handle on the side the bed is not, so the way out reads as a way
+			# out rather than as a low cupboard.
+			draw_rect(rect, Color(0.30, 0.20, 0.14))
+			var leaf: Rect2 = rect.grow(-4.0)
+			draw_rect(leaf, Color(0.46, 0.31, 0.20))
+			for board in 3:
+				var x: float = leaf.position.x + leaf.size.x * (0.25 + 0.25 * float(board))
+				draw_line(Vector2(x, leaf.position.y + 3.0),
+					Vector2(x, leaf.end.y - 3.0), Color(0.34, 0.22, 0.14), 1.5)
+			draw_circle(Vector2(leaf.position.x + leaf.size.x * 0.12,
+				leaf.get_center().y), 2.6, Color(0.86, 0.74, 0.42))
+			draw_rect(rect, Color(0.16, 0.10, 0.07), false, 2.0)
 		Defs.ROOM_BED:
 			# Frame, mattress, and a pillow at the head, so the one piece that
 			# does something is the one that reads fastest.

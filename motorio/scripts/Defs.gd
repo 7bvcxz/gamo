@@ -827,6 +827,7 @@ const ROOM_FIREPLACE := 0
 const ROOM_SOFA_LEFT := 1
 const ROOM_SOFA_RIGHT := 2
 const ROOM_BED := 3
+const ROOM_DOOR := 4
 ## Each piece: which cell it starts on, how many cells it covers, its name, and
 ## the line it says when she is standing at it. In one table so the drawing, the
 ## cursor and the hit test cannot come to disagree about where the bed is.
@@ -839,6 +840,11 @@ const ROOM_PIECES: Array[Dictionary] = [
 		"name": "소파", "note": "누군가 앉았던 자국이 남아 있다"},
 	{"id": ROOM_BED, "cell": Vector2i(6, 1), "size": Vector2i(2, 3),
 		"name": "침대", "note": "여기서 자면 아침이 온다"},
+	# The way out, on the wall she came in through. X leaves too, but a room you
+	# can only leave with a key is a room without a door in it -- and the door is
+	# what says the bed is a choice rather than the only thing in here.
+	{"id": ROOM_DOOR, "cell": Vector2i(3, 5), "size": Vector2i(2, 1),
+		"name": "문", "note": "밖으로 나간다"},
 ]
 
 ## What the fire can make, and the level each opens at.
