@@ -822,13 +822,27 @@ const BASE_CRAFT_LEVEL := 3
 ## door, which made the one warm place in the game a button: night fell, you
 ## faced a wall, the screen went to a summary. Now the door opens onto a room
 ## with a fire in it and going to bed is crossing that room.
+## The floor. Cells are the same size as the plateau's, so a room cell and a snow
+## cell are the same distance -- the hut is a place in this world rather than a
+## diagram of one.
 const ROOM_CELLS := Vector2i(8, 6)
+## And the wall behind it, two cells tall, drawn as a surface standing up rather
+## than as floor seen from above. The room is the one place in this game with a
+## horizon: everything else is straight down, and a wall you can see is what
+## makes a window possible at all.
+const ROOM_WALL_ROWS := 2
+## The window, in wall cells: x across the same eight columns, y down from the
+## top of the wall.
+const ROOM_WINDOW_CELL := Vector2i(5, 0)
+const ROOM_WINDOW_SIZE := Vector2i(2, 1)
 const ROOM_FIREPLACE := 0
 const ROOM_SOFA_LEFT := 1
 const ROOM_SOFA_RIGHT := 2
 const ROOM_BED := 3
 const ROOM_DOOR := 4
-const ROOM_WINDOW := 5
+## The window is not in the table above: it is set into the wall, and the table
+## is the floor plan -- what she can walk into and what she can face. A window in
+## a list of furniture is a window she could stand on.
 
 ## Where she stands when she walks in, and where she wakes up. In front of the
 ## door looking into the room, and in front of the bed looking at it -- both are
@@ -865,10 +879,6 @@ const ROOM_PIECES: Array[Dictionary] = [
 	# what says the bed is a choice rather than the only thing in here.
 	{"id": ROOM_DOOR, "cell": Vector2i(3, 5), "size": Vector2i(2, 1),
 		"name": "문", "note": "밖으로 나간다"},
-	# A window, for the one thing a room can say that a caption was saying
-	# instead: she went to bed in the dark and it is light out there now.
-	{"id": ROOM_WINDOW, "cell": Vector2i(3, 0), "size": Vector2i(2, 1),
-		"name": "창문", "note": "밖이 보인다"},
 ]
 
 ## Whether a room cell can be stood on. Everything in the table is furniture or

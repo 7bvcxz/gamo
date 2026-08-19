@@ -159,7 +159,7 @@ func _test_the_furniture_lines_up() -> void:
 	var hud = load("res://scripts/HUD.gd").new()
 	hud.size = Vector2(1280, 720)
 	var floor_rect: Rect2 = hud.room_floor()
-	_assert(Defs.ROOM_PIECES.size() == 6, "방 안의 물건이 여섯이다")
+	_assert(Defs.ROOM_PIECES.size() == 5, "바닥에 놓인 것이 다섯이다")
 	var ids := {}
 	for index in Defs.ROOM_PIECES.size():
 		var piece: Dictionary = Defs.ROOM_PIECES[index]
@@ -174,7 +174,7 @@ func _test_the_furniture_lines_up() -> void:
 		_assert(cell.x >= 0 and cell.y >= 0 and cell.x + span.x <= Defs.ROOM_CELLS.x
 			and cell.y + span.y <= Defs.ROOM_CELLS.y,
 			"%s 가 8x6 격자를 넘지 않는다" % String(piece["name"]))
-	_assert(ids.size() == 6, "벽난로·소파 둘·침대·문·창문이 각각 하나씩")
+	_assert(ids.size() == 5, "벽난로·소파 둘·침대·문이 각각 하나씩")
 	# Nothing overlaps: two pieces sharing a cell is one of them unreachable.
 	for a in Defs.ROOM_PIECES.size():
 		for b in range(a + 1, Defs.ROOM_PIECES.size()):
@@ -198,6 +198,22 @@ func _test_the_furniture_lines_up() -> void:
 		var middle: float = float(cell.x) + float(span.x) * 0.5
 		_assert(absf(middle - float(Defs.ROOM_CELLS.x) * 0.5) < 0.6,
 			"그리고 가운데다: %.1f" % middle)
+	# The wall, and the window in it. The window is not in the floor plan on
+	# purpose -- a window listed as furniture is a window she could stand on.
+	var wall: Rect2 = hud.room_wall()
+	var window: Rect2 = hud.room_window_rect()
+	_assert(is_equal_approx(wall.size.y, float(Defs.ROOM_WALL_ROWS) * hud.ROOM_CELL),
+		"벽은 두 칸 높이다")
+	_assert(is_equal_approx(wall.end.y, floor_rect.position.y),
+		"그리고 바닥 바로 위에 선다")
+	_assert(wall.encloses(window), "창문은 벽 안에 있다")
+	_assert(not floor_rect.intersects(window), "바닥에는 걸치지 않는다")
+	for index in Defs.ROOM_PIECES.size():
+		_assert(int(Defs.ROOM_PIECES[index]["id"]) != 5,
+			"창문은 바닥 배치표에 없다")
+	# A room cell is a plateau cell.
+	_assert(is_equal_approx(hud.ROOM_CELL, float(Defs.TILE)),
+		"방 한 칸은 눈밭 한 칸과 같다: %.0f" % hud.ROOM_CELL)
 	hud.free()
 
 

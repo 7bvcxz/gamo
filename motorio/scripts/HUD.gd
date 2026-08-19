@@ -1076,19 +1076,34 @@ func build_menu_row_at(point: Vector2) -> int:
 ## The room, as a card. Sized from the cell grid so the furniture rectangles and
 ## the hit test are the same arithmetic -- a room drawn one way and clicked
 ## another is a room where the bed is not where it looks.
-const ROOM_CELL := 46.0
+## A room cell is a plateau cell. The hut is a place in this world, not a diagram
+## of one, and at 46 a step indoors covered half again what a step outdoors did.
+const ROOM_CELL := float(Defs.TILE)
 
 func room_rect() -> Rect2:
-	var body := Vector2(Defs.ROOM_CELLS) * ROOM_CELL
-	var card := Vector2(body.x + 32.0, body.y + FRAME_HEADER + 58.0)
+	var body := Vector2(Defs.ROOM_CELLS.x, Defs.ROOM_CELLS.y + Defs.ROOM_WALL_ROWS) * ROOM_CELL
+	var card := Vector2(body.x + 28.0, body.y + 28.0)
 	card.x = minf(card.x, size.x - MARGIN * 2.0)
 	return Rect2(size.x * 0.5 - card.x * 0.5, size.y * 0.5 - card.y * 0.5, card.x, card.y)
 
-## Where the floor sits inside the card.
-func room_floor() -> Rect2:
+## The wall behind the room: two cells of upright surface, above the floor.
+func room_wall() -> Rect2:
 	var card: Rect2 = room_rect()
-	return Rect2(card.position + Vector2(16.0, FRAME_HEADER + 12.0),
+	return Rect2(card.position + Vector2(14.0, 14.0),
+		Vector2(float(Defs.ROOM_CELLS.x), float(Defs.ROOM_WALL_ROWS)) * ROOM_CELL)
+
+## Where the floor sits inside the card: under the wall, which is what makes the
+## wall a wall.
+func room_floor() -> Rect2:
+	var wall: Rect2 = room_wall()
+	return Rect2(wall.position + Vector2(0.0, wall.size.y),
 		Vector2(Defs.ROOM_CELLS) * ROOM_CELL)
+
+## The window, in the wall rather than in the floor plan.
+func room_window_rect() -> Rect2:
+	var wall: Rect2 = room_wall()
+	return Rect2(wall.position + Vector2(Defs.ROOM_WINDOW_CELL) * ROOM_CELL,
+		Vector2(Defs.ROOM_WINDOW_SIZE) * ROOM_CELL)
 
 func room_piece_rect(index: int) -> Rect2:
 	var piece: Dictionary = Defs.ROOM_PIECES[index]
@@ -1122,15 +1137,21 @@ func _draw_room() -> void:
 	# a fire, a bed, a door -- and a line of instructions across the top is the
 	# game explaining a picture it has already drawn.
 	_frame(card, Defs.COL_CORE)
+	_draw_room_wall()
 	var floor_rect: Rect2 = room_floor()
 	# Boards, drawn as bands rather than as a grid: a chequerboard reads as a
-	# tilemap and this is a room.
+	# tilemap and this is a room. Lighter toward the front, which is the cheapest
+	# depth there is -- the far end of a floor is the end the light does not
+	# reach.
 	draw_rect(floor_rect, Color(0.16, 0.13, 0.11))
 	for row in Defs.ROOM_CELLS.y:
-		if row % 2 == 0:
-			continue
+		var lift: float = float(row) / float(maxi(Defs.ROOM_CELLS.y - 1, 1))
 		draw_rect(Rect2(floor_rect.position + Vector2(0.0, float(row) * ROOM_CELL),
-			Vector2(floor_rect.size.x, ROOM_CELL)), Color(1, 1, 1, 0.022))
+			Vector2(floor_rect.size.x, ROOM_CELL)),
+			Color(1, 1, 1, 0.012 + 0.030 * lift))
+		draw_line(floor_rect.position + Vector2(0.0, float(row) * ROOM_CELL),
+			floor_rect.position + Vector2(floor_rect.size.x, float(row) * ROOM_CELL),
+			Color(0.10, 0.08, 0.07, 0.5), 1.0)
 	draw_rect(floor_rect, Color(0.35, 0.27, 0.22, 0.8), false, 2.0)
 	# The fire in the hearth lights the room, so the floor carries a warm pool
 	# under it rather than being lit evenly.
@@ -1141,6 +1162,58 @@ func _draw_room() -> void:
 		_draw_room_piece(index)
 	_draw_room_cats(floor_rect)
 	_draw_room_player(floor_rect)
+
+## The wall, standing up.
+##
+## This is the one place in the game that is not drawn straight down. Everything
+## outside is a plan view, and a plan view has nowhere to put a window -- so the
+## hut gets a horizon: a surface facing the player, a skirting board where it
+## meets the floor, and the light falling off toward the top.
+func _draw_room_wall() -> void:
+	var wall: Rect2 = room_wall()
+	draw_rect(wall, Color(0.24, 0.18, 0.15))
+	# Boards again, upright this time, and darker as they go up: the lamp is on
+	# the floor, so the top of a wall is the far end of the room.
+	var rows := 10
+	for index in rows:
+		var k: float = float(index) / float(rows)
+		draw_rect(Rect2(wall.position + Vector2(0.0, wall.size.y * k),
+			Vector2(wall.size.x, wall.size.y / float(rows) + 1.0)),
+			Color(0.0, 0.0, 0.0, 0.16 * (1.0 - k)))
+	_draw_room_window()
+	# The skirting: a lip of board along the bottom of the wall, which is the
+	# line that makes one surface read as standing and the other as lying down.
+	draw_rect(Rect2(wall.position + Vector2(0.0, wall.size.y - 5.0),
+		Vector2(wall.size.x, 5.0)), Color(0.34, 0.25, 0.19))
+	draw_line(wall.position + Vector2(0.0, wall.size.y),
+		wall.position + Vector2(wall.size.x, wall.size.y), Color(0.12, 0.09, 0.07), 2.0)
+	draw_rect(wall, Color(0.14, 0.10, 0.08), false, 2.0)
+
+## Set into the wall, with a sill under it. Night out there, or morning.
+func _draw_room_window() -> void:
+	var frame: Rect2 = room_window_rect()
+	draw_rect(frame, Color(0.34, 0.24, 0.17))
+	var pane: Rect2 = frame.grow(-4.0)
+	var night: float = main.night_level()
+	var sky: Color = Color(0.05, 0.07, 0.16).lerp(Color(0.62, 0.78, 0.94),
+		clampf(1.0 - night, 0.0, 1.0))
+	draw_rect(pane, sky)
+	if night > 0.7:
+		# Fixed stars, not random ones: a sky that reshuffles every frame is a
+		# sky nobody believes.
+		for star in 5:
+			var at := Vector2(pane.position.x + pane.size.x * (0.14 + 0.18 * float(star)),
+				pane.position.y + pane.size.y * (0.28 + 0.34 * float((star * 3) % 2)))
+			draw_circle(at, 1.2, Color(1, 1, 1, 0.75))
+	else:
+		draw_circle(pane.position + pane.size * Vector2(0.74, 0.32),
+			pane.size.y * 0.24, Color(1.0, 0.93, 0.70, 0.9))
+	# Mullion, sill, and the light the pane throws back into the room.
+	draw_line(Vector2(pane.get_center().x, pane.position.y),
+		Vector2(pane.get_center().x, pane.end.y), Color(0.34, 0.24, 0.17), 2.0)
+	draw_rect(Rect2(frame.position + Vector2(-3.0, frame.size.y - 2.0),
+		Vector2(frame.size.x + 6.0, 4.0)), Color(0.40, 0.29, 0.21))
+	draw_rect(frame, Color(0.14, 0.10, 0.08), false, 2.0)
 
 ## Firelight on the floorboards, and only on them.
 ##
@@ -1168,10 +1241,20 @@ func _room_glow(bounds: Rect2, centre: Vector2, radius: float, alpha: float) -> 
 			continue
 		draw_rect(clipped, Color(1.0, 0.68, 0.32, alpha * falloff))
 
+## How tall a thing in this room stands, in pixels. Everything gets a front face
+## of this height under it: a room drawn straight down has no way to say a sofa
+## is a solid object, and this is the one place in the game allowed a horizon.
+const ROOM_LIFT := 7.0
+
 func _draw_room_piece(index: int) -> void:
 	var piece: Dictionary = Defs.ROOM_PIECES[index]
-	var rect: Rect2 = room_piece_rect(index).grow(-4.0)
+	var rect: Rect2 = room_piece_rect(index).grow(-3.0)
 	var id: int = int(piece["id"])
+	# The front face first, so the top of the piece is drawn over its own edge.
+	if id != Defs.ROOM_DOOR:
+		draw_rect(Rect2(rect.position + Vector2(0.0, rect.size.y - 2.0),
+			Vector2(rect.size.x, ROOM_LIFT)), Color(0.14, 0.10, 0.08))
+		rect.position.y -= ROOM_LIFT * 0.5
 	match id:
 		Defs.ROOM_FIREPLACE:
 			# Stone surround, and a fire that is drawn rather than implied: it is
@@ -1191,41 +1274,16 @@ func _draw_room_piece(index: int) -> void:
 				Color(0.52, 0.32, 0.27))
 			draw_rect(rect, Color(0.16, 0.10, 0.09), false, 2.0)
 		Defs.ROOM_DOOR:
-			# Set into the wall she came in through: a frame, boards, and a
-			# handle on the side the bed is not, so the way out reads as a way
-			# out rather than as a low cupboard.
+			# A threshold rather than a standing door. The wall the player can
+			# see is the far one, so the way out is at the near edge -- behind
+			# the camera, in effect -- and a door leaf drawn flat on the boards
+			# reads as a door lying on the floor. This is the opening seen from
+			# above: a frame, a dark gap, and a step worn pale by boots.
 			draw_rect(rect, Color(0.30, 0.20, 0.14))
-			var leaf: Rect2 = rect.grow(-4.0)
-			draw_rect(leaf, Color(0.46, 0.31, 0.20))
-			for board in 3:
-				var x: float = leaf.position.x + leaf.size.x * (0.25 + 0.25 * float(board))
-				draw_line(Vector2(x, leaf.position.y + 3.0),
-					Vector2(x, leaf.end.y - 3.0), Color(0.34, 0.22, 0.14), 1.5)
-			draw_circle(Vector2(leaf.position.x + leaf.size.x * 0.12,
-				leaf.get_center().y), 2.6, Color(0.86, 0.74, 0.42))
-			draw_rect(rect, Color(0.16, 0.10, 0.07), false, 2.0)
-		Defs.ROOM_WINDOW:
-			# The one thing in here that says what time it is. She goes to bed
-			# with the dark outside and wakes with it light, and that sentence is
-			# the whole reason the room has a window rather than a clock.
-			draw_rect(rect, Color(0.30, 0.20, 0.14))
-			var pane: Rect2 = rect.grow(-5.0)
-			var night: float = main.night_level()
-			var sky: Color = Color(0.05, 0.07, 0.16).lerp(Color(0.62, 0.78, 0.94),
-				clampf(1.0 - night, 0.0, 1.0))
-			draw_rect(pane, sky)
-			if night > 0.7:
-				# Stars, fixed rather than random: a window whose sky changes
-				# every frame is a window nobody trusts.
-				for star in 5:
-					var at := Vector2(pane.position.x + pane.size.x * (0.16 + 0.17 * float(star)),
-						pane.position.y + pane.size.y * (0.3 + 0.4 * float((star * 3) % 2)))
-					draw_circle(at, 1.4, Color(1, 1, 1, 0.7))
-			else:
-				draw_circle(pane.position + pane.size * Vector2(0.72, 0.34),
-					pane.size.y * 0.22, Color(1.0, 0.92, 0.68, 0.85))
-			draw_line(Vector2(pane.get_center().x, pane.position.y),
-				Vector2(pane.get_center().x, pane.end.y), Color(0.30, 0.20, 0.14), 2.0)
+			var gap: Rect2 = rect.grow(-4.0)
+			draw_rect(gap, Color(0.05, 0.05, 0.07))
+			draw_rect(Rect2(gap.position + Vector2(0.0, gap.size.y * 0.62),
+				Vector2(gap.size.x, gap.size.y * 0.38)), Color(0.36, 0.30, 0.26))
 			draw_rect(rect, Color(0.16, 0.10, 0.07), false, 2.0)
 		Defs.ROOM_BED:
 			# Frame, mattress, and a pillow at the head, so the one piece that
@@ -1254,14 +1312,17 @@ func _draw_room_player(floor_rect: Rect2) -> void:
 	var frame: int = int(main.room_step * 2.4) % PlayerActor.FRAMES
 	var at: Vector2 = floor_rect.position + main.room_pos * ROOM_CELL \
 		+ Vector2(ROOM_CELL, ROOM_CELL) * 0.5
-	_room_figure(sheet, frame, PlayerActor.FRAMES, at, ROOM_CELL * 1.35, mirror)
+	# The same size she is outside: 128-pixel cell at half scale is two tiles
+	# tall, and a Grim who shrinks when she goes indoors is a different Grim.
+	_room_figure(sheet, frame, PlayerActor.FRAMES, at,
+		PlayerActor.CELL * PlayerActor.SPRITE_SCALE, mirror)
 
 func _draw_room_cats(floor_rect: Rect2) -> void:
 	for spot: Vector2 in main.room_cat_positions():
 		var at: Vector2 = floor_rect.position + spot * ROOM_CELL \
 			+ Vector2(ROOM_CELL, ROOM_CELL) * 0.5
 		_room_figure(MachineLayer.CAT_IDLE_SHEET, 0, MachineLayer.CAT_FRAMES, at,
-			ROOM_CELL * 0.95, false)
+			MachineLayer.CAT_DRAW, false)
 
 ## One frame of a sheet, centred on a point, standing on it rather than hanging
 ## from it.
