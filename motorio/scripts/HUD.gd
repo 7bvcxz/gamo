@@ -452,8 +452,17 @@ func _draw() -> void:
 	match main.state:
 		main.State.TITLE: _draw_title()
 		main.State.OPENING: _draw_cutscene()
-		main.State.RESULT: _draw_result()
+		main.State.RESULT:
+			# The summary lands on the dark she fell asleep into, not on the
+			# plateau: she is in bed, and the world behind the card is a wall.
+			if main.room_open:
+				draw_rect(Rect2(Vector2.ZERO, size), ROOM_BACKDROP)
+			_draw_result()
 		main.State.GAMEOVER: _draw_gameover()
+		main.State.NIGHTFALL, main.State.DAYBREAK when main.room_open:
+			# Morning, from inside. The room is already there behind the black
+			# and the fade is what hands it over.
+			_draw_room()
 		main.State.NIGHTFALL, main.State.DAYBREAK:
 			# The sequence is the one moment the game is not asking for anything,
 			# so the hotbar, the objective and the placement ghost all get out of
@@ -1175,6 +1184,10 @@ func _draw_room() -> void:
 		_draw_room_piece(index)
 	_draw_room_cats(floor_rect)
 	_draw_room_player(floor_rect)
+	# The light going out, and coming back. Over the room rather than under it,
+	# so what dims is the room she is lying in and not a panel in front of it.
+	if main.room_fade > 0.0:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, clampf(main.room_fade, 0.0, 1.0)))
 
 ## The wall, standing up.
 ##

@@ -157,6 +157,11 @@ var room_cat_clock: float = 0.0
 ## True from the moment she wakes until she opens the door: the cats are still
 ## inside, and letting them out is what starts their day.
 var room_holds_cats: bool = false
+## Going to bed, and coming out of it. `room_fade` is how black the room is: it
+## rises while she settles and falls while she wakes, and the summary card lands
+## in the middle of it where the light has already gone.
+var room_sleeping: bool = false
+var room_fade: float = 0.0
 ## The play log, and whether it is up.
 ##
 ## Everything the game has said out loud this session, newest first. Deliberately
@@ -1504,6 +1509,13 @@ func _update_miner_unlock() -> void:
 func _update_room(delta: float) -> void:
 	if not room_open:
 		return
+	if room_sleeping:
+		_update_room_sleep(delta)
+		return
+	# Waking: the light comes back while she is already standing there, so the
+	# first thing she sees is the room rather than a card telling her about it.
+	if room_fade > 0.0:
+		room_fade = maxf(0.0, room_fade - delta / Defs.ROOM_WAKE_FADE)
 	_update_room_cats(delta)
 	var input := Vector2(
 		Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
@@ -1530,6 +1542,32 @@ func _update_room(delta: float) -> void:
 	wanted = Vector2(room_pos.x, room_pos.y + moved.y)
 	if Defs.room_walkable(Vector2i(wanted.round())):
 		room_pos.y = wanted.y
+
+## Settling onto the bed and the room going out.
+##
+## Two stages on one timer: she walks the last half-cell onto the bed and turns
+## to face the room, and then the dark comes up. The summary is not shown until
+## the screen is black, because a card over a lit room is a card interrupting it.
+func _update_room_sleep(delta: float) -> void:
+	room_step += Defs.ROOM_SPEED * delta * 0.4
+	var bed: Vector2 = room_bed_centre()
+	room_pos = room_pos.move_toward(bed, Defs.ROOM_SPEED * delta * Defs.ROOM_SLEEP_WALK)
+	if not room_pos.is_equal_approx(bed):
+		return
+	room_facing = Vector2i(0, 1)
+	room_fade = minf(1.0, room_fade + delta / Defs.ROOM_SLEEP_FADE)
+	if room_fade < 1.0:
+		return
+	room_sleeping = false
+	_finish_run()
+
+## Where she lies down: the middle of the bed's cells.
+func room_bed_centre() -> Vector2:
+	var index: int = _room_piece_index(Defs.ROOM_BED)
+	var piece: Dictionary = Defs.ROOM_PIECES[index]
+	var at: Vector2i = piece["cell"]
+	var span: Vector2i = piece["size"]
+	return Vector2(at) + Vector2(span) * 0.5 - Vector2(0.5, 0.5)
 
 ## The crew coming in through the door, one after another.
 func _update_room_cats(delta: float) -> void:
@@ -3590,6 +3628,8 @@ func close_room() -> void:
 	if not room_open:
 		return
 	room_open = false
+	room_sleeping = false
+	room_fade = 0.0
 	player.position = shelter_doorstep()
 	player.velocity = Vector2.ZERO
 	if room_holds_cats:
@@ -3613,10 +3653,16 @@ func room_confirm() -> void:
 		Defs.ROOM_DOOR:
 			close_room()
 		Defs.ROOM_BED:
-			room_open = false
-			room_cats.clear()
-			room_holds_cats = false
-			_sleep()
+			# She lies down; the room stays. `_update_room_sleep` walks her onto
+			# it, fades the light and only then ends the day.
+			if room_sleeping:
+				return
+			room_sleeping = true
+			player.locked = true
+			player.velocity = Vector2.ZERO
+			player.position = shelter_doorstep()
+			sim.force_cats_home()
+			audio.call("play", "confirm")
 
 func _sleep() -> void:
 	if state != State.PLAY:
@@ -3689,6 +3735,11 @@ func shelter_glow() -> float:
 func _process_daybreak(delta: float) -> void:
 	sim.tick(delta)
 	night_timer += delta
+	# The room lightens across the whole sunrise rather than after it. Opening it
+	# at the end meant six seconds of black and then a fade, which is a loading
+	# screen with a sun behind it.
+	if room_open and room_fade > 0.0:
+		room_fade = maxf(0.0, room_fade - delta / Defs.DAWN_SECONDS)
 	match night_phase:
 		Phase.DAWN:
 			night_override = clampf(1.0 - night_timer / Defs.DAWN_SECONDS, 0.0, 1.0)
@@ -3708,9 +3759,6 @@ func _process_daybreak(delta: float) -> void:
 				# Waking up happens where she went to sleep. The room opens with
 				# her in front of the bed and the crew still in it -- the door is
 				# what lets the day out, and that is her first move of it.
-				room_holds_cats = true
-				open_room(Defs.ROOM_WAKE, Vector2i(1, 0))
-				room_cat_clock = 99.0
 
 ## Which score belongs to the screen that is showing, decided in one place.
 ##
@@ -3749,8 +3797,13 @@ func _begin_next_day() -> void:
 	collapse_timer = -1.0
 	blackout = 0.0
 	player.warmth = 100.0
-	# Morning starts at the shelter beside the core, as it does in Motorio.
+	# Morning starts where she went to sleep: inside, in front of the bed, with
+	# the crew still in the room and the light not yet up.
 	player.position = shelter_doorstep()
+	room_holds_cats = true
+	open_room(Defs.ROOM_WAKE, Vector2i(1, 0))
+	room_cat_clock = 99.0
+	room_fade = 1.0
 	# Still locked and still indoors: the clock has been reset to a full day but
 	# the sun has not come up yet, which is exactly what night_override is for.
 	player.locked = true

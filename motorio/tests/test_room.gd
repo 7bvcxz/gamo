@@ -99,8 +99,35 @@ func _test_the_bed() -> void:
 	_assert(facing >= 0 and int(Defs.ROOM_PIECES[facing]["id"]) == Defs.ROOM_BED,
 		"깨어나는 자리에서는 침대를 보고 있다")
 	main.room_confirm()
-	_assert(not main.room_open, "침대 앞에서 Z 를 누르면 방이 닫히고")
-	_assert(main.state != main.State.PLAY, "밤 연출이 시작된다: %d" % main.state)
+	# She lies down first. The room stays, the light goes, and only then does the
+	# day end -- a cut to a summary card is the one edit nobody can watch.
+	_assert(main.room_open and main.room_sleeping, "침대에 눕는다")
+	_assert(main.state == main.State.PLAY, "그 순간에는 아직 낮이 끝나지 않았다")
+	var walked := 0.0
+	while main.room_sleeping and walked < 8.0:
+		main._update_room(1.0 / 60.0)
+		walked += 1.0 / 60.0
+	_assert(main.room_pos.is_equal_approx(main.room_bed_centre()), "침대 위로 올라갔고")
+	_assert(main.room_facing == Vector2i(0, 1), "정면을 보고 있다")
+	_assert(is_equal_approx(main.room_fade, 1.0), "화면이 완전히 검어졌다")
+	_assert(main.state == main.State.RESULT,
+		"그 다음에 하루 정리가 나온다: %d" % main.state)
+	_assert(main.room_open, "그리고 카드 뒤는 여전히 그 방이다")
+
+	# Enter, and the light comes back with her already standing.
+	main._begin_next_day()
+	var settled := 0.0
+	while main.state != main.State.PLAY and settled < 20.0:
+		main._process(1.0 / 60.0)
+		settled += 1.0 / 60.0
+	_assert(main.state == main.State.PLAY, "아침이 온다")
+	_assert(main.room_open and main.room_pos.is_equal_approx(Vector2(Defs.ROOM_WAKE)),
+		"침대 앞에서 깨어난다: %s" % str(main.room_pos))
+	var lit := 0.0
+	while main.room_fade > 0.0 and lit < 5.0:
+		main._update_room(1.0 / 60.0)
+		lit += 1.0 / 60.0
+	_assert(is_equal_approx(main.room_fade, 0.0), "그리고 화면이 다시 밝아진다")
 	main.clear_save()
 	main.free()
 

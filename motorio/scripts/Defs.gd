@@ -860,6 +860,16 @@ const ROOM_CAT_SPOTS: Array[Vector2i] = [
 	Vector2i(1, 4), Vector2i(2, 4), Vector2i(5, 4), Vector2i(6, 4),
 	Vector2i(0, 3), Vector2i(3, 2), Vector2i(4, 2), Vector2i(0, 2),
 ]
+## Lying down, and the screen going with her.
+##
+## Sleeping used to cut: the bed answered Z and the summary card was already
+## there. Going to bed is the one thing in this game that ends a day, and a cut
+## is the only edit that cannot be watched -- so she walks onto the bed, the room
+## goes dark around her, and the card arrives after the light has gone.
+const ROOM_SLEEP_WALK := 0.45
+const ROOM_SLEEP_FADE := 1.3
+const ROOM_WAKE_FADE := 1.1
+
 const ROOM_CAT_STAGGER := 0.55
 const ROOM_CAT_SPEED := 4.2
 ## Each piece: which cell it starts on, how many cells it covers, its name, and
