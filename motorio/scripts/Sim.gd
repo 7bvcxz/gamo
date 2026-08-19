@@ -805,6 +805,40 @@ func _frozen_may_enter(cell: Vector2i) -> bool:
 func frozen_at(cell: Vector2i) -> Vector2:
 	return cell_centre(cell) + frozen_offset.get(cell, Vector2.ZERO)
 
+## The middle of the room, in world pixels.
+func room_centre() -> Vector2:
+	return cell_centre(Defs.room_to_world(Vector2i.ZERO)) \
+		+ Vector2(Defs.ROOM_CELLS) * float(Defs.TILE) * 0.5 - Vector2.ONE * float(Defs.TILE) * 0.5
+
+## Everyone goes in. The cats keep whatever they were doing in their heads --
+## `assigned` survives the night, which is the thing the player set -- but they
+## are awake and strolling in here, because that is what a cat with no job does
+## anywhere else in this game.
+func enter_room(at: Vector2i) -> void:
+	indoors = true
+	_grid_dirty = true
+	for index in cats.size():
+		var cat: Cat = cats[index]
+		cat.state = Defs.CAT_IDLE
+		cat.path.clear()
+		cat.wander_timer = wander_rng.randf_range(0.1, 1.2)
+		# Spread across the floor rather than stacked on the door: they have been
+		# in here all evening by the time she opens it.
+		var spot: Vector2i = Defs.ROOM_CAT_SPOTS[index % Defs.ROOM_CAT_SPOTS.size()]
+		cat.pos = cell_centre(Defs.room_to_world(spot))
+
+## And out. Whatever they were assigned to is where they head.
+func leave_room(at: Vector2) -> void:
+	indoors = false
+	_grid_dirty = true
+	wake_cats(at)
+
+## Everyone drops where they are and sleeps, on the frame she lies down.
+func sleep_cats() -> void:
+	for cat: Cat in cats:
+		cat.state = Defs.CAT_ASLEEP
+		cat.path.clear()
+
 ## Wreckage, from the eleventh ring outward.
 ##
 ## The first piece is placed on its ring by walking round it rather than by
@@ -960,6 +994,14 @@ func tile_attributes(cell: Vector2i) -> int:
 	var machine: Machine = machines.get(cell, null)
 	if machine != null and machine.type not in Defs.WALKABLE_MACHINES:
 		attrs |= Defs.ATTR_STRUCTURE
+	# Inside the hut. The floor is open, the furniture is solid and everything
+	# past the four walls is wall -- so the same mover that walks her round a
+	# miner keeps her in the room, and the same pathing keeps the cats off the
+	# sofa. There is nothing here that knows it is indoors except this branch.
+	if indoors or Defs.in_room(cell):
+		if not Defs.in_room(cell) or not Defs.room_walkable(Defs.world_to_room(cell)):
+			return Defs.ATTR_STRUCTURE
+		return Defs.ATTR_NONE
 	# A block of ice with a cat in it, and a piece of the ship. Both are objects
 	# standing on the snow that the player used to walk straight through, which
 	# is the one thing a picture of a solid thing must never allow -- and out
@@ -1003,6 +1045,11 @@ func _ring_distance(cell: Vector2i) -> float:
 ## it is the other -- and the second one is what stops exploration from being a
 ## queue behind the base ladder.
 var torch_lit := false
+
+## True while everyone is inside the hut. The room is a place on the grid, so
+## this is what tells the world not to draw snow around it and the cats to
+## stroll around the fireplace rather than set off for the base.
+var indoors := false
 
 ## Pieces of the ship, cell -> which of the five shapes. Shape is stored rather
 ## than derived from the cell so that a piece cannot change what it looks like
@@ -2197,6 +2244,20 @@ func nearest_ground(from: Vector2) -> Vector2i:
 	return best
 
 func _tick_cats(delta: float) -> void:
+	# Indoors there are no errands. The machines, the bowl and the shelter are
+	# all six hundred cells away, and a cat that takes a job in here walks out of
+	# the room and across the map to reach it -- which is what happened the first
+	# time the room became a place. Awake and strolling, or asleep once she is,
+	# and the wander is the same one they do outside.
+	if indoors:
+		for cat: Cat in cats:
+			if cat == carried_cat or cat.state == Defs.CAT_ASLEEP:
+				continue
+			if cat.state != Defs.CAT_IDLE:
+				cat.state = Defs.CAT_IDLE
+				cat.path.clear()
+			_cat_wander(cat, delta)
+		return
 	_assign_haulers()
 	for cell: Vector2i in machines:
 		if machines[cell].type == Defs.M_MINER:
@@ -2281,11 +2342,29 @@ func _refresh_grid() -> void:
 	if not _grid_dirty:
 		return
 	_grid_dirty = false
-	_grid.region = Rect2i(core_cell - Vector2i.ONE * PATH_RADIUS,
-		Vector2i.ONE * (PATH_RADIUS * 2 + 1))
+	# The grid follows wherever everyone is. Outside that is a square around the
+	# fire; inside the hut it is the room, because a grid still centred on the
+	# base leaves the room six hundred cells out of bounds -- and out of bounds
+	# means no route, which means the straight line, which means cats walking
+	# through the sofa. Same pathing, moved.
+	if indoors:
+		_grid.region = Rect2i(Defs.ROOM_ORIGIN - Vector2i.ONE,
+			Defs.ROOM_CELLS + Vector2i.ONE * 2)
+	else:
+		_grid.region = Rect2i(core_cell - Vector2i.ONE * PATH_RADIUS,
+			Vector2i.ONE * (PATH_RADIUS * 2 + 1))
 	_grid.cell_size = Vector2.ONE * float(Defs.TILE)
 	_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
 	_grid.update()
+	if indoors:
+		# The furniture and the four walls, from the same table the drawing and
+		# the collision read.
+		for y in range(-1, Defs.ROOM_CELLS.y + 1):
+			for x in range(-1, Defs.ROOM_CELLS.x + 1):
+				var cell: Vector2i = Defs.room_to_world(Vector2i(x, y))
+				if blocks_player(cell) and _grid.is_in_boundsv(cell):
+					_grid.set_point_solid(cell, true)
+		return
 	for cell: Vector2i in machines:
 		if blocks_player(cell) and _grid.is_in_boundsv(cell):
 			_grid.set_point_solid(cell, true)
@@ -2419,7 +2498,12 @@ func _cat_wander(cat: Cat, delta: float) -> void:
 ## nearby cell is almost always walkable, and giving up after a handful of tries
 ## is cheaper than being clever about the two frames a year where it is not.
 func _stroll_goal(cat: Cat) -> Vector2:
+	# Indoors the room is the leash. Same wander, same leash length, different
+	# middle -- a cat strolling from a hut six hundred cells away would spend the
+	# night walking north.
 	var anchor: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	if indoors:
+		anchor = room_centre()
 	var homeward: bool = cat.pos.distance_to(anchor) > Defs.WANDER_LEASH
 	for attempt in 8:
 		var heading: Vector2

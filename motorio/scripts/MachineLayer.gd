@@ -226,10 +226,25 @@ func _process(delta: float) -> void:
 	_repaint = 0.0
 	queue_redraw()
 
+## The furniture, painted where the room is. Drawn from this layer because the
+## cats and Grim are nodes above it: they walk in front of a sofa, not through
+## the picture of one.
+const ROOM_ART := {
+	Defs.ROOM_FIREPLACE: preload("res://assets/room/fireplace.png"),
+	Defs.ROOM_BED: preload("res://assets/room/bed.png"),
+	Defs.ROOM_SOFA_LEFT: preload("res://assets/room/sofa.png"),
+	Defs.ROOM_SOFA_RIGHT: preload("res://assets/room/sofa.png"),
+	Defs.ROOM_DOOR: preload("res://assets/room/door.png"),
+}
+
 func _draw() -> void:
 	if sim == null:
 		return
 	var tile := float(Defs.TILE)
+	if sim.indoors:
+		_draw_room_pieces(tile)
+		_marks_layer.queue_redraw()
+		return
 	# Belts first so machines and items always sit above them.
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
@@ -1096,3 +1111,20 @@ func _draw_preview(on: CanvasItem, tile: float) -> void:
 	var font := UIFont.FONT
 	on.draw_string(font, c + dir * 20.0 + Vector2(-14.0, -12.0), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 28.0, 9,
 		Color(arrow.r, arrow.g, arrow.b, 0.9))
+
+
+## One painting per piece, fitted to the cells it stands on and standing on the
+## bottom of them.
+func _draw_room_pieces(tile: float) -> void:
+	for piece: Dictionary in Defs.ROOM_PIECES:
+		var art: Texture2D = ROOM_ART.get(int(piece["id"]), null)
+		if art == null:
+			continue
+		var origin: Vector2 = Vector2(Defs.room_to_world(piece["cell"])) * tile
+		var rect := Rect2(origin, Vector2(piece["size"]) * tile)
+		var scale: float = minf(rect.size.x / float(art.get_width()),
+			rect.size.y / float(art.get_height()))
+		var drawn := Vector2(float(art.get_width()), float(art.get_height())) * scale
+		var at := Vector2(rect.get_center().x - drawn.x * 0.5, rect.end.y - drawn.y)
+		_shadow(Vector2(rect.get_center().x, rect.end.y - 3.0), drawn.x * 0.42)
+		draw_texture_rect(art, Rect2(at, drawn), false)

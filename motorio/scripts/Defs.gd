@@ -822,6 +822,18 @@ const BASE_CRAFT_LEVEL := 3
 ## door, which made the one warm place in the game a button: night fell, you
 ## faced a wall, the screen went to a summary. Now the door opens onto a room
 ## with a fire in it and going to bed is crossing that room.
+## Where the room sits on the world grid.
+##
+## The hut's inside is a place on the map now, not a panel drawn over it. That is
+## the only way "Grim and the cats behave the same indoors and out" can be true
+## rather than maintained: it is the same character node, the same mover, the
+## same wander, the same collision -- there is no second copy to get backwards,
+## which is exactly how she came to walk right while facing left.
+##
+## Six hundred cells north of the fire, which is twenty times past anything the
+## world generates, so nothing out there can ever land in the room.
+const ROOM_ORIGIN := Vector2i(0, -600)
+
 ## The floor. Cells are the same size as the plateau's, so a room cell and a snow
 ## cell are the same distance -- the hut is a place in this world rather than a
 ## diagram of one.
@@ -854,9 +866,10 @@ const ROOM_WAKE := Vector2i(5, 2)
 ## outside. It was 3.4 -- faster indoors than out, which is the wrong way round
 ## and was not on purpose.
 const ROOM_SPEED := 84.0 / float(TILE)
-## Where the cats settle once they are in, and how long after each other they
-## come through the door. They file rather than appear: a room that fills all at
-## once is a number changing.
+## Where the cats are standing when she opens the door. Not a destination -- the
+## wander takes over on the next frame -- just somewhere each of them is, spread
+## across the floor rather than stacked on the doorstep: they have been in here
+## all evening by the time she comes in.
 const ROOM_CAT_SPOTS: Array[Vector2i] = [
 	Vector2i(1, 4), Vector2i(2, 4), Vector2i(5, 4), Vector2i(6, 4),
 	Vector2i(0, 3), Vector2i(3, 2), Vector2i(4, 2), Vector2i(0, 2),
@@ -867,12 +880,9 @@ const ROOM_CAT_SPOTS: Array[Vector2i] = [
 ## there. Going to bed is the one thing in this game that ends a day, and a cut
 ## is the only edit that cannot be watched -- so she walks onto the bed, the room
 ## goes dark around her, and the card arrives after the light has gone.
-const ROOM_SLEEP_WALK := 0.45
 const ROOM_SLEEP_FADE := 1.3
 const ROOM_WAKE_FADE := 1.1
 
-const ROOM_CAT_STAGGER := 0.55
-const ROOM_CAT_SPEED := 4.2
 ## Each piece: which cell it starts on, how many cells it covers, its name, and
 ## the line it says when she is standing at it. In one table so the drawing, the
 ## cursor and the hit test cannot come to disagree about where the bed is.
@@ -893,6 +903,19 @@ const ROOM_PIECES: Array[Dictionary] = [
 	{"id": ROOM_DOOR, "cell": Vector2i(3, 5), "size": Vector2i(2, 1),
 		"name": "문", "note": "밖으로 나간다"},
 ]
+
+## World cell <-> room cell, in one place each way.
+static func room_to_world(cell: Vector2i) -> Vector2i:
+	return ROOM_ORIGIN + cell
+
+static func world_to_room(cell: Vector2i) -> Vector2i:
+	return cell - ROOM_ORIGIN
+
+## Whether a world cell is inside the room's four walls at all.
+static func in_room(cell: Vector2i) -> bool:
+	var local: Vector2i = world_to_room(cell)
+	return local.x >= 0 and local.y >= 0 \
+		and local.x < ROOM_CELLS.x and local.y < ROOM_CELLS.y
 
 ## Whether a room cell can be stood on. Everything in the table is furniture or
 ## wall; the rest is floor.

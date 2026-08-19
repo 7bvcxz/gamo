@@ -24,6 +24,10 @@ func set_view(rect: Rect2) -> void:
 func _draw() -> void:
 	if sim == null:
 		return
+	# Indoors there is no frontier and no ore: the room is drawn by the ground
+	# layer under this one and the furniture by the machine layer above it.
+	if sim.indoors:
+		return
 	var tile := float(Defs.TILE)
 	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
 	var warm_px: float = sim.warm_radius * tile

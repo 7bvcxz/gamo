@@ -144,20 +144,9 @@ var base_menu_open: bool = false
 ## Inside the hut. A window rather than a place: the world keeps running behind
 ## it, and what she does in there is choose one of four things.
 var room_open: bool = false
-## Where she is standing in there, in room cells, and which way she is looking.
-## Floats, because she walks: the room is a place now rather than a list, and a
-## cursor stepping between four pieces was a menu wearing a picture of a room.
-var room_pos := Vector2(Defs.ROOM_ENTRY)
-var room_facing := Vector2i(0, -1)
-var room_step: float = 0.0
-## Whether she took a step this frame. The room draws a walk sheet while she is
-## moving and the idle one when she is not, which is what the plateau does --
-## a character frozen mid-stride reads as a bug in the animation.
-var room_moving: bool = false
-## The crew, filing in behind her. Each entry is where the cat is and where it is
-## going; the stagger is what makes it a queue instead of a crowd appearing.
-var room_cats: Array[Dictionary] = []
-var room_cat_clock: float = 0.0
+## The crew is in the room with her, and the room is on the grid, so there is
+## nothing here to hold: `sim.cats` are where they are and the cat nodes draw
+## them. What is left is the two things the room itself has to remember.
 ## True from the moment she wakes until she opens the door: the cats are still
 ## inside, and letting them out is what starts their day.
 var room_holds_cats: bool = false
@@ -930,6 +919,9 @@ func _process(delta: float) -> void:
 	ground_layer.view_rect = view
 	cold_fog.view_rect = view
 	cold_fog.night = dark
+	# There is no weather indoors. The fog is a white sheet over everything past
+	# the fire's reach, and the room is six hundred cells past it.
+	cold_fog.visible = not room_open
 	machine_layer.view_rect = view
 	cats_layer.view_rect = view
 	machine_layer.night = dark
@@ -1505,113 +1497,32 @@ func _update_miner_unlock() -> void:
 	fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
 	audio.call("play", "alloy")
 
-## Walking around inside the hut.
+## Going to bed, one frame at a time.
 ##
-## Read straight from the same actions the plateau uses, because it is the same
-## verb: she is a person in a room, and a room where the arrow keys move a
-## highlight instead of a person is a menu with furniture drawn on it.
+## She walks onto the bed with her own legs -- the mover is the same one that
+## crosses the plateau -- and the room goes dark once she is on it.
 func _update_room(delta: float) -> void:
 	if not room_open:
 		return
-	if room_sleeping:
-		room_moving = false
-		_update_room_sleep(delta)
-		return
-	# Waking: the light comes back while she is already standing there, so the
-	# first thing she sees is the room rather than a card telling her about it.
-	if room_fade > 0.0:
+	if room_fade > 0.0 and not room_sleeping:
 		room_fade = maxf(0.0, room_fade - delta / Defs.ROOM_WAKE_FADE)
-	_update_room_cats(delta)
-	var input := Vector2(
-		Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
-		Input.get_action_strength("move_down") - Input.get_action_strength("move_up"))
-	if not player.touch_direction.is_zero_approx():
-		input = player.touch_direction
-	if input.length() > 1.0:
-		input = input.normalized()
-	room_moving = not input.is_zero_approx()
-	if not room_moving:
+	if not room_sleeping:
 		return
-	room_facing = Vector2i(1 if input.x > 0.4 else (-1 if input.x < -0.4 else 0),
-		1 if input.y > 0.4 else (-1 if input.y < -0.4 else 0))
-	if room_facing.x != 0 and room_facing.y != 0:
-		# One axis, so what she is facing is always a cell rather than a corner.
-		room_facing = Vector2i(room_facing.x, 0) if absf(input.x) >= absf(input.y) \
-			else Vector2i(0, room_facing.y)
-	var moved: Vector2 = input * Defs.ROOM_SPEED * delta
-	room_step += moved.length()
-	# One axis at a time, so a wall on one side does not stop her sliding along
-	# it -- the same thing the plateau's collision does for free.
-	var wanted := Vector2(room_pos.x + moved.x, room_pos.y)
-	if Defs.room_walkable(Vector2i(wanted.round())):
-		room_pos.x = wanted.x
-	wanted = Vector2(room_pos.x, room_pos.y + moved.y)
-	if Defs.room_walkable(Vector2i(wanted.round())):
-		room_pos.y = wanted.y
-
-## Settling onto the bed and the room going out.
-##
-## Two stages on one timer: she walks the last half-cell onto the bed and turns
-## to face the room, and then the dark comes up. The summary is not shown until
-## the screen is black, because a card over a lit room is a card interrupting it.
-func _update_room_sleep(delta: float) -> void:
-	room_step += Defs.ROOM_SPEED * delta * 0.4
-	var bed: Vector2 = room_bed_centre()
-	room_pos = room_pos.move_toward(bed, Defs.ROOM_SPEED * delta * Defs.ROOM_SLEEP_WALK)
-	if not room_pos.is_equal_approx(bed):
+	var bed: Vector2 = sim.cell_centre(Defs.room_to_world(_room_bed_cell()))
+	player.position = player.position.move_toward(bed, PlayerActor.SPEED * delta)
+	player.facing = Vector2i.DOWN
+	if player.position.distance_to(bed) > 1.0:
 		return
-	room_facing = Vector2i(0, 1)
 	room_fade = minf(1.0, room_fade + delta / Defs.ROOM_SLEEP_FADE)
 	if room_fade < 1.0:
 		return
 	room_sleeping = false
 	_finish_run()
 
-## Where she lies down: the middle of the bed's cells.
-func room_bed_centre() -> Vector2:
-	var index: int = _room_piece_index(Defs.ROOM_BED)
-	var piece: Dictionary = Defs.ROOM_PIECES[index]
-	var at: Vector2i = piece["cell"]
-	var span: Vector2i = piece["size"]
-	return Vector2(at) + Vector2(span) * 0.5 - Vector2(0.5, 0.5)
-
-## The crew coming in through the door, one after another.
-func _update_room_cats(delta: float) -> void:
-	room_cat_clock += delta
-	for index in room_cats.size():
-		var cat: Dictionary = room_cats[index]
-		if room_cat_clock < float(cat["at"]):
-			continue
-		var goal: Vector2 = cat["goal"]
-		var here: Vector2 = cat["pos"]
-		var step: float = Defs.ROOM_CAT_SPEED * delta
-		if here.distance_to(goal) <= step:
-			cat["pos"] = goal
-		else:
-			cat["pos"] = here + (goal - here).normalized() * step
-		room_cats[index] = cat
-
-## Where the cats are, for whoever draws them. Ones that have not come through
-## the door yet are not in the list at all.
-func room_cat_positions() -> Array[Vector2]:
-	var out: Array[Vector2] = []
-	for cat: Dictionary in room_cats:
-		if room_cat_clock >= float(cat["at"]):
-			out.append(cat["pos"])
-	return out
-
-## Line them up outside the door and let them in on a stagger.
-func _fill_room_cats() -> void:
-	room_cats.clear()
-	room_cat_clock = 0.0
-	var door: Vector2 = Vector2(Defs.ROOM_PIECES[_room_piece_index(Defs.ROOM_DOOR)]["cell"]) \
-		+ Vector2(0.5, 0.0)
-	for index in mini(sim.cats.size(), Defs.ROOM_CAT_SPOTS.size()):
-		room_cats.append({
-			"pos": door,
-			"goal": Vector2(Defs.ROOM_CAT_SPOTS[index]),
-			"at": Defs.ROOM_CAT_STAGGER * float(index + 1),
-		})
+## The cell she lies down on.
+func _room_bed_cell() -> Vector2i:
+	var piece: Dictionary = Defs.ROOM_PIECES[_room_piece_index(Defs.ROOM_BED)]
+	return Vector2i(piece["cell"]) + Vector2i(piece["size"]) / 2
 
 func _room_piece_index(id: int) -> int:
 	for index in Defs.ROOM_PIECES.size():
@@ -1619,7 +1530,7 @@ func _room_piece_index(id: int) -> int:
 			return index
 	return 0
 
-## Taking a piece of the ship apart. Z held on it, the same as the case.
+## Taking a piece of the ship apart. Z held on it, the same as the case.## Taking a piece of the ship apart. Z held on it, the same as the case.
 ##
 ## Every material goes straight into the pack rather than onto the snow. Fifteen
 ## items tipped out at eleven tiles would be fifteen cells of ground to walk
@@ -1885,6 +1796,16 @@ func finish_tutorial() -> void:
 
 func _update_warmth(delta: float) -> void:
 	_update_collapse(delta)
+	# Indoors is the warmest place she has. The room is six hundred cells from
+	# the fire, so `is_warm` says no and she was freezing to death in her own
+	# hut -- with the bar ticking down behind the sofa.
+	# Asked about where she is standing rather than about a flag: "the room is
+	# open" and "she is in the room" are the same thing in the game and were not
+	# in a test that teleported her onto the plateau with the flag still set --
+	# and the version that trusted the flag kept her warm out there forever.
+	if Defs.in_room(player.cell()):
+		player.warmth = minf(100.0, player.warmth + Defs.COLD_RECOVER * delta)
+		return
 	# Before the fire exists there is nowhere to be warm and nowhere to be
 	# carried to, so the ordinary rules -- which are all about a base -- do not
 	# apply. She loses a degree every two seconds wherever she stands, which is
@@ -3357,6 +3278,15 @@ func load_game(slot: int = 0) -> bool:
 	day_start_stones = int(data.get("day_start_stones", 0))
 	day_start_collected = data.get("day_start_collected", {})
 	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
+	# A run saved while she was indoors comes back outdoors. `indoors` is a
+	# moment rather than a fact about the world, so it is not saved -- and
+	# loading into the room without it would put her in an unlit void six hundred
+	# cells from anything, with the door drawn by a layer that is switched off.
+	if Defs.in_room(player.cell()):
+		player.position = shelter_doorstep()
+		for cat: Sim.Cat in sim.cats:
+			if Defs.in_room(sim.cell_of(cat.pos)):
+				cat.pos = shelter_doorstep()
 	player.warmth = float(data.get("warmth", 100.0))
 	mission = int(data.get("mission", Mission.DONE))
 	missions_open = data.get("missions_open", {})
@@ -3618,14 +3548,15 @@ func _carried_home() -> void:
 func sleep_available() -> bool:
 	return state == State.PLAY and is_night() and shelter_nearby()
 
-## Going inside. She walks in through the door and the crew files in after her.
+## Going inside. She is put through the door and the room is where she is: her
+## own legs, her own animation, her own collision from there on.
 func open_room(at: Vector2i = Defs.ROOM_ENTRY, facing := Vector2i(0, -1)) -> void:
 	close_windows("room")
 	room_open = true
-	room_pos = Vector2(at)
-	room_facing = facing
-	room_step = 0.0
-	_fill_room_cats()
+	player.position = sim.cell_centre(Defs.room_to_world(at))
+	player.velocity = Vector2.ZERO
+	player.facing = facing
+	sim.enter_room(at)
 	audio.call("play", "confirm")
 
 ## Out through the door. If it is morning the cats come out with her and go back
@@ -3638,36 +3569,38 @@ func close_room() -> void:
 	room_fade = 0.0
 	player.position = shelter_doorstep()
 	player.velocity = Vector2.ZERO
+	sim.leave_room(shelter_doorstep())
 	if room_holds_cats:
 		room_holds_cats = false
-		sim.wake_cats(shelter_doorstep())
 		fx.ring(shelter_doorstep(), Defs.COL_CORE, 46.0)
-	room_cats.clear()
 	audio.call("play", "select")
 
-## The cell she is looking at in there.
-func room_facing_cell() -> Vector2i:
-	return Vector2i(room_pos.round()) + room_facing
+## Which piece of furniture she is facing, or -1. The cell comes from the same
+## place it does outside -- she is standing on the grid in here.
+func room_facing_piece() -> int:
+	if not room_open:
+		return -1
+	return Defs.room_piece_on(Defs.world_to_room(player.facing_cell()))
 
 ## Z, inside. The door lets her out and the bed ends the night; everything else
 ## is furniture, and furniture that answers a key with a sentence is a caption.
 func room_confirm() -> void:
-	var index: int = Defs.room_piece_on(room_facing_cell())
+	var index: int = room_facing_piece()
 	if index < 0:
 		return
 	match int(Defs.ROOM_PIECES[index]["id"]):
 		Defs.ROOM_DOOR:
 			close_room()
 		Defs.ROOM_BED:
-			# She lies down; the room stays. `_update_room_sleep` walks her onto
-			# it, fades the light and only then ends the day.
+			# She lies down; the room stays. `_update_room` walks her onto the
+			# bed, fades the light and only then ends the day -- and everyone
+			# else drops off on the frame she starts.
 			if room_sleeping:
 				return
 			room_sleeping = true
 			player.locked = true
 			player.velocity = Vector2.ZERO
-			player.position = shelter_doorstep()
-			sim.force_cats_home()
+			sim.sleep_cats()
 			audio.call("play", "confirm")
 
 func _sleep() -> void:
@@ -3808,7 +3741,6 @@ func _begin_next_day() -> void:
 	player.position = shelter_doorstep()
 	room_holds_cats = true
 	open_room(Defs.ROOM_WAKE, Vector2i(1, 0))
-	room_cat_clock = 99.0
 	room_fade = 1.0
 	# Still locked and still indoors: the clock has been reset to a full day but
 	# the sun has not come up yet, which is exactly what night_override is for.

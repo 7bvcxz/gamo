@@ -79,8 +79,17 @@ func _bake_pool() -> ImageTexture:
 			image.set_pixel(x, y, col)
 	return ImageTexture.create_from_image(image)
 
+## The room's floor and wall, painted where the room actually is. Drawn here
+## because this is the layer under everything: the cats and Grim walk on it, and
+## they are nodes above this one.
+const ROOM_FLOOR_ART: Texture2D = preload("res://assets/room/floor.png")
+const ROOM_WALL_ART: Texture2D = preload("res://assets/room/wall.png")
+
 func _draw() -> void:
 	if sim == null or _texture == null:
+		return
+	if sim.indoors:
+		_draw_room()
 		return
 	# A real 2.5x drop in ground value across the day, so dusk is unmistakable.
 	draw_rect(view_rect, Defs.COL_SNOW_COLD.lerp(Color8(9, 12, 20), pow(night, 1.4)))
@@ -242,6 +251,11 @@ static func ore_region(atlas: Texture2D, variant: int) -> Rect2:
 func _draw_tiles() -> void:
 	if sim == null:
 		return
+	# The snow is painted into its own child layer, which has its own draw call
+	# -- so returning early from `_draw` left the plateau's tiles and boulders
+	# showing through the hut's floorboards. Indoors this layer paints nothing.
+	if sim.indoors:
+		return
 	var tile := float(Defs.TILE)
 	var start := Vector2i((view_rect.position / tile).floor())
 	var end := Vector2i((view_rect.end / tile).ceil())
@@ -279,3 +293,45 @@ func _draw_tiles() -> void:
 			_tile_layer.draw_texture_rect_region(atlas,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
 				ore_region(atlas, ore_variant(cell)))
+
+
+## Inside the hut: black to the edges of the view, then the wall standing behind
+## the floor. The plateau is not drawn at all -- she is indoors, and a room with
+## snow visible past its walls is a room she never went into.
+func _draw_room() -> void:
+	draw_rect(view_rect.grow(64.0), Color(0, 0, 0, 1.0))
+	var tile := float(Defs.TILE)
+	var origin: Vector2 = Vector2(Defs.ROOM_ORIGIN) * tile
+	var floor_rect := Rect2(origin, Vector2(Defs.ROOM_CELLS) * tile)
+	var wall_rect := Rect2(origin - Vector2(0.0, float(Defs.ROOM_WALL_ROWS) * tile),
+		Vector2(float(Defs.ROOM_CELLS.x), float(Defs.ROOM_WALL_ROWS)) * tile)
+	draw_texture_rect(ROOM_WALL_ART, wall_rect, false)
+	# Darker toward the top of the wall and the back of the floor: one lamp, low
+	# down, which is the depth a flat painting cannot carry on its own.
+	for index in 10:
+		var k: float = float(index) / 10.0
+		draw_rect(Rect2(wall_rect.position + Vector2(0.0, wall_rect.size.y * k),
+			Vector2(wall_rect.size.x, wall_rect.size.y / 10.0 + 1.0)),
+			Color(0.0, 0.0, 0.0, 0.22 * (1.0 - k)))
+	_draw_room_window(wall_rect)
+	draw_line(wall_rect.position + Vector2(0.0, wall_rect.size.y),
+		wall_rect.end, Color(0.10, 0.07, 0.05), 3.0)
+	draw_texture_rect(ROOM_FLOOR_ART, floor_rect, false)
+	for row in Defs.ROOM_CELLS.y:
+		var back: float = 1.0 - float(row) / float(maxi(Defs.ROOM_CELLS.y - 1, 1))
+		draw_rect(Rect2(floor_rect.position + Vector2(0.0, float(row) * tile),
+			Vector2(floor_rect.size.x, tile + 1.0)),
+			Color(0.02, 0.02, 0.04, 0.26 * back))
+	draw_rect(floor_rect, Color(0.16, 0.11, 0.08, 0.9), false, 2.0)
+
+## Two paintings, one per sky. An empty pane handed to a model with a character
+## reference comes back with the character in it, which is what the first two
+## attempts at this window did.
+const ROOM_WINDOW_NIGHT: Texture2D = preload("res://assets/room/window_night.png")
+const ROOM_WINDOW_DAY: Texture2D = preload("res://assets/room/window_day.png")
+
+func _draw_room_window(wall_rect: Rect2) -> void:
+	var tile := float(Defs.TILE)
+	var frame := Rect2(wall_rect.position + Vector2(Defs.ROOM_WINDOW_CELL) * tile,
+		Vector2(Defs.ROOM_WINDOW_SIZE) * tile)
+	draw_texture_rect(ROOM_WINDOW_NIGHT if night > 0.62 else ROOM_WINDOW_DAY, frame, false)

@@ -117,8 +117,11 @@ func _run() -> void:
 	# that happened while the screen was dark.
 	_assert(main.room_open, "아침은 방 안에서 시작한다")
 	_assert(main.room_holds_cats, "그리고 고양이들은 아직 안에 있다")
+	# Inside, and awake: a cat with no errand strolls, which is what it does
+	# anywhere else in this game. What it cannot do is leave.
 	for cat in sim.cats:
-		_assert(cat.state == Defs.CAT_ASLEEP, "문을 열기 전에는 아무도 나가지 않았다")
+		_assert(Defs.in_room(sim.cell_of(cat.pos)),
+			"문을 열기 전에는 아무도 나가지 않았다: %s" % str(sim.cell_of(cat.pos)))
 	main.close_room()
 	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0,
 		"everyone comes out of the same door")

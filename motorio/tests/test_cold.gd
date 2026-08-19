@@ -104,7 +104,13 @@ func _run() -> void:
 	_assert(is_equal_approx(main.player.warmth, 100.0), "the player wakes warm")
 	_assert(is_zero_approx(main.player.collapse) and not main.player.locked, "the player wakes upright")
 	_assert(is_zero_approx(main.blackout), "and the screen is clear again")
-	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0, "the player wakes at the shelter door")
+	# She wakes inside the hut, which is a place on the grid six hundred cells
+	# north: the door is what puts her back on the plateau.
+	_assert(main.room_open and Defs.in_room(main.player.cell()),
+		"the player wakes inside the hut: %s" % str(main.player.cell()))
+	main.close_room()
+	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0,
+		"and the door puts her at the shelter")
 	_assert(not main.sim.blocks_player(main.player.cell()),
 		"and never inside the hut itself")
 	_assert(main.shelter_nearby(), "close enough to the door to sleep again")
@@ -146,8 +152,10 @@ func _run() -> void:
 		"and it takes about grace + fall + blackout, not longer (%.1fs)" % elapsed)
 
 	main._begin_next_day()
-	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0,
-		"the player wakes at the shelter door after freezing")
+	# However the day ended, the morning is the same one: inside, in front of the
+	# bed, with the door still to open.
+	_assert(main.room_open and Defs.in_room(main.player.cell()),
+		"the player wakes inside after freezing: %s" % str(main.player.cell()))
 	_assert(not main.sim.blocks_player(main.player.cell()), "and not inside the hut")
 
 	if failures == 0:
