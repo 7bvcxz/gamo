@@ -150,6 +150,10 @@ var room_open: bool = false
 var room_pos := Vector2(Defs.ROOM_ENTRY)
 var room_facing := Vector2i(0, -1)
 var room_step: float = 0.0
+## Whether she took a step this frame. The room draws a walk sheet while she is
+## moving and the idle one when she is not, which is what the plateau does --
+## a character frozen mid-stride reads as a bug in the animation.
+var room_moving: bool = false
 ## The crew, filing in behind her. Each entry is where the cat is and where it is
 ## going; the stagger is what makes it a queue instead of a crowd appearing.
 var room_cats: Array[Dictionary] = []
@@ -1510,6 +1514,7 @@ func _update_room(delta: float) -> void:
 	if not room_open:
 		return
 	if room_sleeping:
+		room_moving = false
 		_update_room_sleep(delta)
 		return
 	# Waking: the light comes back while she is already standing there, so the
@@ -1524,7 +1529,8 @@ func _update_room(delta: float) -> void:
 		input = player.touch_direction
 	if input.length() > 1.0:
 		input = input.normalized()
-	if input.is_zero_approx():
+	room_moving = not input.is_zero_approx()
+	if not room_moving:
 		return
 	room_facing = Vector2i(1 if input.x > 0.4 else (-1 if input.x < -0.4 else 0),
 		1 if input.y > 0.4 else (-1 if input.y < -0.4 else 0))

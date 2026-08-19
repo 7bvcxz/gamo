@@ -16,6 +16,7 @@ func _run() -> void:
 	await _test_the_door()
 	await _test_the_bed()
 	await _test_walking()
+	await _test_facing_matches_the_plateau()
 	await _test_the_cats()
 	_test_the_furniture_lines_up()
 	_test_the_world_is_hidden()
@@ -303,3 +304,55 @@ func _test_the_art_fits() -> void:
 	var window_aspect: float = float(hud.ROOM_WINDOW_NIGHT_ART.get_width()) \
 		/ float(hud.ROOM_WINDOW_NIGHT_ART.get_height())
 	_assert(absf(window_aspect - 2.0) < 0.3, "창문은 2x1이다: %.2f" % window_aspect)
+
+
+## Which way she is drawn, against the rule the plateau uses.
+##
+## The side sheet is drawn facing east, so the plateau mirrors it when the input
+## goes west (`flip_h = input.x < 0`). The room had that backwards and she walked
+## right looking left -- which is the kind of thing no assertion about positions
+## can see, so the rule itself is the assertion.
+func _test_facing_matches_the_plateau() -> void:
+	var main: Node2D = await _main()
+	main.time_left = Defs.NIGHT_SECONDS * 0.5
+	main.open_room()
+	var hud = main.hud
+	for step: Array in [[Vector2(1, 0), Vector2i(1, 0)], [Vector2(-1, 0), Vector2i(-1, 0)],
+			[Vector2(0, -1), Vector2i(0, -1)], [Vector2(0, 1), Vector2i(0, 1)]]:
+		main.room_pos = Vector2(3, 3)
+		main.player.touch_direction = step[0]
+		main._update_room(1.0 / 60.0)
+		_assert(main.room_facing == step[1],
+			"%s 를 누르면 %s 를 본다" % [str(step[0]), str(step[1])])
+		_assert(main.room_moving, "그리고 걷는 중이다")
+	# And the sheet, by the same three-way rule the plateau uses.
+	for step: Array in [[Vector2(1, 0), PlayerActor.WALK_E_SHEET],
+			[Vector2(-1, 0), PlayerActor.WALK_E_SHEET],
+			[Vector2(0, -1), PlayerActor.WALK_N_SHEET],
+			[Vector2(0, 1), PlayerActor.WALK_SHEET]]:
+		main.room_pos = Vector2(3, 3)
+		main.player.touch_direction = step[0]
+		main._update_room(1.0 / 60.0)
+		_assert(hud.room_player_sheet() == step[1],
+			"%s 는 맞는 시트로 그려진다" % str(step[0]))
+	main.player.touch_direction = Vector2.ZERO
+	main._update_room(1.0 / 60.0)
+	_assert(hud.room_player_sheet() == PlayerActor.IDLE_SHEET,
+		"멈추면 서 있는 그림이다 — 걷는 프레임에서 굳지 않는다")
+
+	# The mirror, stated as the plateau states it: west is the flipped one.
+	main.player.touch_direction = Vector2(1, 0)
+	main._update_room(1.0 / 60.0)
+	_assert(not hud.room_player_mirrored(), "동쪽으로 갈 때는 시트 그대로")
+	main.player.touch_direction = Vector2(-1, 0)
+	main._update_room(1.0 / 60.0)
+	_assert(hud.room_player_mirrored(), "서쪽으로 갈 때만 좌우를 뒤집는다")
+	# Which is the same answer the plateau gives for the same input.
+	main.player.set("_face_left", false)
+	main.player._physics_process(1.0 / 60.0)
+	main.player.touch_direction = Vector2.ZERO
+	main.player.set("_face_left", true)
+	_assert(main.player.character.flip_h == hud.room_player_mirrored(),
+		"밖에서 쓰는 규칙과 같다")
+	main.clear_save()
+	main.free()

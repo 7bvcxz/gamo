@@ -1280,15 +1280,36 @@ func _draw_room_piece(index: int) -> void:
 	draw_texture_rect(art, Rect2(at, drawn), false)
 
 ## Grim, in the room, from the same sheets she is drawn from outside.
+## Whether the side sheet is mirrored right now. Asked as a predicate because a
+## test can read one and cannot read a draw call -- and "she is facing the wrong
+## way" is exactly the kind of bug that no assertion about positions can see.
+func room_player_mirrored() -> bool:
+	return main.room_facing.x < 0
+
+## Which sheet she is drawn from in there, by the same rule the plateau uses:
+## sideways, away, or toward. A predicate again, because "she is facing the
+## wrong way" is not something a screenshot assertion can catch and this is.
+func room_player_sheet() -> Texture2D:
+	if not main.room_moving:
+		return PlayerActor.IDLE_SHEET
+	if main.room_facing.x != 0:
+		return PlayerActor.WALK_E_SHEET
+	if main.room_facing.y < 0:
+		return PlayerActor.WALK_N_SHEET
+	return PlayerActor.WALK_SHEET
+
 func _draw_room_player(floor_rect: Rect2) -> void:
-	var sheet: Texture2D = PlayerActor.WALK_SHEET
+	var sheet: Texture2D = room_player_sheet()
 	var mirror := false
 	if main.room_facing.x != 0:
-		sheet = PlayerActor.WALK_E_SHEET
-		mirror = main.room_facing.x > 0
-	elif main.room_facing.y < 0:
-		sheet = PlayerActor.WALK_N_SHEET
-	var frame: int = int(main.room_step * 2.4) % PlayerActor.FRAMES
+		# The side sheet is drawn facing east, so *west* is the mirrored one --
+		# which is what the plateau does (`flip_h = input.x < 0`). This was the
+		# other way round in here, so she walked right looking left.
+		mirror = room_player_mirrored()
+	if not main.room_moving:
+		mirror = false
+	var frame: int = 0 if not main.room_moving \
+		else int(main.room_step * 2.4) % PlayerActor.FRAMES
 	var at: Vector2 = floor_rect.position + main.room_pos * ROOM_CELL \
 		+ Vector2(ROOM_CELL, ROOM_CELL) * 0.5
 	# The same size she is outside: 128-pixel cell at half scale is two tiles

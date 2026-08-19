@@ -850,9 +850,10 @@ const ROOM_DOOR := 4
 ## is standing on.
 const ROOM_ENTRY := Vector2i(3, 4)
 const ROOM_WAKE := Vector2i(5, 2)
-## How fast she crosses the room, in cells a second. Slower than the plateau on
-## purpose: eight cells across is four steps, and a run in here would be one.
-const ROOM_SPEED := 3.4
+## How fast she crosses the room, in cells a second: exactly her walking speed
+## outside. It was 3.4 -- faster indoors than out, which is the wrong way round
+## and was not on purpose.
+const ROOM_SPEED := 84.0 / float(TILE)
 ## Where the cats settle once they are in, and how long after each other they
 ## come through the door. They file rather than appear: a room that fills all at
 ## once is a number changing.
