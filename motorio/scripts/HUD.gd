@@ -1104,10 +1104,19 @@ func room_piece_at(point: Vector2) -> int:
 			return index
 	return -1
 
+## Black behind the room, not a dimmed world.
+##
+## Every other window in this game is a panel over the plateau, and that is
+## right for them: the build list and the fire's window are things she does
+## while standing outside. Going indoors is not one of those -- the snow, the
+## machines and the cats carrying on behind a wall says she is still out there,
+## and the one place in this game with a door should feel like it shut.
+const ROOM_BACKDROP := Color(0, 0, 0, 1.0)
+
 func _draw_room() -> void:
 	if not main.room_open:
 		return
-	_dim(0.62)
+	draw_rect(Rect2(Vector2.ZERO, size), ROOM_BACKDROP)
 	var card: Rect2 = room_rect()
 	_frame(card, Defs.COL_CORE, "숙소   ↑↓ 선택 · Z 사용 · X 나가기")
 	var floor_rect: Rect2 = room_floor()
@@ -1123,14 +1132,40 @@ func _draw_room() -> void:
 	# The fire in the hearth lights the room, so the floor carries a warm pool
 	# under it rather than being lit evenly.
 	var hearth: Rect2 = room_piece_rect(Defs.ROOM_FIREPLACE)
-	draw_circle(hearth.get_center(), ROOM_CELL * 3.4, Color(1.0, 0.68, 0.32, 0.06))
-	draw_circle(hearth.get_center(), ROOM_CELL * 2.0, Color(1.0, 0.68, 0.32, 0.07))
+	_room_glow(floor_rect, hearth.get_center(), ROOM_CELL * 3.4, 0.06)
+	_room_glow(floor_rect, hearth.get_center(), ROOM_CELL * 2.0, 0.07)
 	for index in Defs.ROOM_PIECES.size():
 		_draw_room_piece(index)
 	var chosen: Dictionary = Defs.ROOM_PIECES[clampi(main.room_index, 0,
 		Defs.ROOM_PIECES.size() - 1)]
 	_text_in(Rect2(card.position + Vector2(0.0, card.size.y - 34.0), Vector2(card.size.x, 20.0)),
 		"%s  ·  %s" % [String(chosen["name"]), String(chosen["note"])], 12, Defs.COL_TEXT_DIM)
+
+## Firelight on the floorboards, and only on them.
+##
+## Drawn as circles until the backdrop went black in 1.0.10: over a dimmed world
+## the spill past the walls read as warmth, and over black it reads as a stray
+## orange blob outside the room. A canvas item cannot clip a circle, so the
+## circle is laid down a row at a time and each row is cut to the floor -- the
+## chord of a circle is arithmetic, and this way the light stops at the wall.
+func _room_glow(bounds: Rect2, centre: Vector2, radius: float, alpha: float) -> void:
+	# Enough rows that the steps are a couple of pixels, and each row fades with
+	# its distance from the middle: a hard-edged disc drawn in strips shows both
+	# the steps and the edge, and firelight has neither.
+	var rows := 56
+	var step: float = radius * 2.0 / float(rows)
+	for index in rows:
+		var y: float = centre.y - radius + step * (float(index) + 0.5)
+		var dy: float = absf(y - centre.y)
+		if dy >= radius:
+			continue
+		var half: float = sqrt(radius * radius - dy * dy)
+		var falloff: float = 1.0 - dy / radius
+		var strip := Rect2(centre.x - half, y - step * 0.5, half * 2.0, step + 1.0)
+		var clipped: Rect2 = strip.intersection(bounds)
+		if clipped.size.x <= 0.0 or clipped.size.y <= 0.0:
+			continue
+		draw_rect(clipped, Color(1.0, 0.68, 0.32, alpha * falloff))
 
 func _draw_room_piece(index: int) -> void:
 	var piece: Dictionary = Defs.ROOM_PIECES[index]

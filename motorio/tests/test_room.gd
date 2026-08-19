@@ -16,6 +16,7 @@ func _run() -> void:
 	await _test_the_door()
 	await _test_the_bed()
 	_test_the_furniture_lines_up()
+	_test_the_world_is_hidden()
 	await _test_the_debug_key()
 	if failures == 0:
 		print("ROOM: PASS")
@@ -144,3 +145,16 @@ func _test_the_debug_key() -> void:
 	main.close_room()
 	main.clear_save()
 	main.free()
+
+
+## And the world behind it is gone, not dimmed.
+##
+## Every other window here is a panel over the plateau, which is right for the
+## things she does while standing outside. A room with a door is not one of
+## those: snow and cats carrying on behind the wall says she never went in.
+func _test_the_world_is_hidden() -> void:
+	var hud = load("res://scripts/HUD.gd")
+	var backdrop: Color = hud.ROOM_BACKDROP
+	_assert(is_equal_approx(backdrop.a, 1.0), "뒤가 완전히 가려진다: a=%.2f" % backdrop.a)
+	_assert(backdrop.r + backdrop.g + backdrop.b <= 0.06,
+		"그리고 검정이다: %.2f %.2f %.2f" % [backdrop.r, backdrop.g, backdrop.b])
