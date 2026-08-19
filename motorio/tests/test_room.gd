@@ -15,6 +15,8 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_the_door()
 	await _test_the_bed()
+	await _test_walking()
+	await _test_the_cats()
 	_test_the_furniture_lines_up()
 	_test_the_world_is_hidden()
 	await _test_the_debug_key()
@@ -64,39 +66,87 @@ func _test_the_door() -> void:
 	main.clear_save()
 	main.free()
 
-## And the bed is the only thing in there that ends the day.
+## The bed and the door, reached by walking to them.
+##
+## The cursor is gone as of 1.0.12: she walks in there and Z acts on the cell she
+## is facing, exactly as it does outside. A room whose arrow keys move a
+## highlight is a menu with furniture drawn on it.
 func _test_the_bed() -> void:
 	var main: Node2D = await _main()
 	main.player.position = main.shelter_doorstep()
 	main.time_left = Defs.NIGHT_SECONDS * 0.5
 	main.open_room()
-	# The sofas and the fire say what they are and nothing else. A room where
-	# every object ends the day is a room with one object in it.
-	for index in Defs.ROOM_PIECES.size():
-		var id: int = int(Defs.ROOM_PIECES[index]["id"])
-		if id == Defs.ROOM_BED or id == Defs.ROOM_DOOR:
-			continue
-		main.room_index = index
-		main.room_confirm()
-		_assert(main.room_open and main.state == main.State.PLAY,
-			"%s 를 골라도 밤이 끝나지 않는다" % String(Defs.ROOM_PIECES[index]["name"]))
-	# The door goes back outside, which is the other thing a room needs. X does
-	# it too, but a room that can only be left with a key is a room without a
-	# door in it.
-	for index in Defs.ROOM_PIECES.size():
-		if int(Defs.ROOM_PIECES[index]["id"]) == Defs.ROOM_DOOR:
-			main.room_index = index
+	# Facing furniture that is neither: nothing happens and nothing is said.
+	main.room_pos = Vector2(1, 2)
+	main.room_facing = Vector2i(0, -1)
 	main.room_confirm()
-	_assert(not main.room_open, "문을 고르면 나간다")
+	_assert(main.room_open and main.state == main.State.PLAY,
+		"벽난로를 보고 눌러도 아무 일도 없다")
+	# The door, which is how she gets out.
+	main.room_pos = Vector2(Defs.ROOM_ENTRY)
+	main.room_facing = Vector2i(0, 1)
+	_assert(Defs.room_piece_on(main.room_facing_cell()) >= 0, "문을 보고 있다")
+	main.room_confirm()
+	_assert(not main.room_open, "문 앞에서 Z 를 누르면 나간다")
 	_assert(main.state == main.State.PLAY, "그리고 밤은 그대로다")
-	_assert(not main.modal_open(), "조작도 돌아온다")
+
+	# And the bed, which ends it.
 	main.open_room()
-	for index in Defs.ROOM_PIECES.size():
-		if int(Defs.ROOM_PIECES[index]["id"]) == Defs.ROOM_BED:
-			main.room_index = index
+	main.room_pos = Vector2(Defs.ROOM_WAKE)
+	main.room_facing = Vector2i(1, 0)
+	var facing: int = Defs.room_piece_on(main.room_facing_cell())
+	_assert(facing >= 0 and int(Defs.ROOM_PIECES[facing]["id"]) == Defs.ROOM_BED,
+		"깨어나는 자리에서는 침대를 보고 있다")
 	main.room_confirm()
-	_assert(not main.room_open, "침대를 고르면 방이 닫히고")
+	_assert(not main.room_open, "침대 앞에서 Z 를 누르면 방이 닫히고")
 	_assert(main.state != main.State.PLAY, "밤 연출이 시작된다: %d" % main.state)
+	main.clear_save()
+	main.free()
+
+## Walls stop her, and the floor does not.
+func _test_walking() -> void:
+	var main: Node2D = await _main()
+	main.time_left = Defs.NIGHT_SECONDS * 0.5
+	main.open_room()
+	# Into the bottom wall: she is at the entry cell, and below it is the door.
+	main.room_pos = Vector2(Defs.ROOM_ENTRY)
+	main.player.touch_direction = Vector2(0, 1)
+	for step in 60:
+		main._update_room(1.0 / 60.0)
+	_assert(main.room_pos.y <= float(Defs.ROOM_ENTRY.y) + 0.5,
+		"문은 벽이라 통과하지 않는다: y=%.2f" % main.room_pos.y)
+	_assert(main.room_facing == Vector2i(0, 1), "그리고 그쪽을 보고 있다")
+	# Across the floor, which she can cross.
+	main.player.touch_direction = Vector2(-1, 0)
+	for step in 60:
+		main._update_room(1.0 / 60.0)
+	_assert(main.room_pos.x < float(Defs.ROOM_ENTRY.x) - 0.5,
+		"바닥은 걸어서 지나간다: x=%.2f" % main.room_pos.x)
+	_assert(Defs.room_walkable(Vector2i(main.room_pos.round())),
+		"그리고 가구 위에 서 있지 않다")
+	main.player.touch_direction = Vector2.ZERO
+	main.clear_save()
+	main.free()
+
+## The crew files in behind her, and goes back to work when she opens the door.
+func _test_the_cats() -> void:
+	var main: Node2D = await _main()
+	main.sim.grant_cats(3)
+	main.time_left = Defs.NIGHT_SECONDS * 0.5
+	main.open_room()
+	_assert(main.room_cat_positions().is_empty(), "처음에는 아직 아무도 안 들어왔다")
+	for step in 60:
+		main._update_room(1.0 / 60.0)
+	var first: int = main.room_cat_positions().size()
+	_assert(first >= 1, "한 마리가 먼저 들어온다: %d" % first)
+	for step in 240:
+		main._update_room(1.0 / 60.0)
+	_assert(main.room_cat_positions().size() == 3, "차례로 셋 다 들어온다")
+	# Morning: the room holds them until the door opens.
+	main.room_holds_cats = true
+	main.close_room()
+	_assert(not main.room_holds_cats, "문이 열리면 붙잡고 있던 것이 풀리고")
+	_assert(main.room_cat_positions().is_empty(), "방 안에는 아무도 없다")
 	main.clear_save()
 	main.free()
 
@@ -109,7 +159,7 @@ func _test_the_furniture_lines_up() -> void:
 	var hud = load("res://scripts/HUD.gd").new()
 	hud.size = Vector2(1280, 720)
 	var floor_rect: Rect2 = hud.room_floor()
-	_assert(Defs.ROOM_PIECES.size() == 5, "방 안에 고를 수 있는 것이 다섯이다")
+	_assert(Defs.ROOM_PIECES.size() == 6, "방 안의 물건이 여섯이다")
 	var ids := {}
 	for index in Defs.ROOM_PIECES.size():
 		var piece: Dictionary = Defs.ROOM_PIECES[index]
@@ -124,7 +174,7 @@ func _test_the_furniture_lines_up() -> void:
 		_assert(cell.x >= 0 and cell.y >= 0 and cell.x + span.x <= Defs.ROOM_CELLS.x
 			and cell.y + span.y <= Defs.ROOM_CELLS.y,
 			"%s 가 8x6 격자를 넘지 않는다" % String(piece["name"]))
-	_assert(ids.size() == 5, "벽난로·소파 둘·침대·문이 각각 하나씩")
+	_assert(ids.size() == 6, "벽난로·소파 둘·침대·문·창문이 각각 하나씩")
 	# Nothing overlaps: two pieces sharing a cell is one of them unreachable.
 	for a in Defs.ROOM_PIECES.size():
 		for b in range(a + 1, Defs.ROOM_PIECES.size()):

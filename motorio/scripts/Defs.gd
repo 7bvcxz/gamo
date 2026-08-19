@@ -828,6 +828,26 @@ const ROOM_SOFA_LEFT := 1
 const ROOM_SOFA_RIGHT := 2
 const ROOM_BED := 3
 const ROOM_DOOR := 4
+const ROOM_WINDOW := 5
+
+## Where she stands when she walks in, and where she wakes up. In front of the
+## door looking into the room, and in front of the bed looking at it -- both are
+## floor cells, because both are places she is standing rather than things she
+## is standing on.
+const ROOM_ENTRY := Vector2i(3, 4)
+const ROOM_WAKE := Vector2i(5, 2)
+## How fast she crosses the room, in cells a second. Slower than the plateau on
+## purpose: eight cells across is four steps, and a run in here would be one.
+const ROOM_SPEED := 3.4
+## Where the cats settle once they are in, and how long after each other they
+## come through the door. They file rather than appear: a room that fills all at
+## once is a number changing.
+const ROOM_CAT_SPOTS: Array[Vector2i] = [
+	Vector2i(1, 4), Vector2i(2, 4), Vector2i(5, 4), Vector2i(6, 4),
+	Vector2i(0, 3), Vector2i(3, 2), Vector2i(4, 2), Vector2i(0, 2),
+]
+const ROOM_CAT_STAGGER := 0.55
+const ROOM_CAT_SPEED := 4.2
 ## Each piece: which cell it starts on, how many cells it covers, its name, and
 ## the line it says when she is standing at it. In one table so the drawing, the
 ## cursor and the hit test cannot come to disagree about where the bed is.
@@ -845,7 +865,33 @@ const ROOM_PIECES: Array[Dictionary] = [
 	# what says the bed is a choice rather than the only thing in here.
 	{"id": ROOM_DOOR, "cell": Vector2i(3, 5), "size": Vector2i(2, 1),
 		"name": "문", "note": "밖으로 나간다"},
+	# A window, for the one thing a room can say that a caption was saying
+	# instead: she went to bed in the dark and it is light out there now.
+	{"id": ROOM_WINDOW, "cell": Vector2i(3, 0), "size": Vector2i(2, 1),
+		"name": "창문", "note": "밖이 보인다"},
 ]
+
+## Whether a room cell can be stood on. Everything in the table is furniture or
+## wall; the rest is floor.
+static func room_walkable(cell: Vector2i) -> bool:
+	if cell.x < 0 or cell.y < 0 or cell.x >= ROOM_CELLS.x or cell.y >= ROOM_CELLS.y:
+		return false
+	for piece: Dictionary in ROOM_PIECES:
+		var at: Vector2i = piece["cell"]
+		var span: Vector2i = piece["size"]
+		if cell.x >= at.x and cell.y >= at.y and cell.x < at.x + span.x and cell.y < at.y + span.y:
+			return false
+	return true
+
+## Which piece covers a cell, or -1. This is what Z asks about the cell in front
+## of her, so the door and the bed are found the same way a seam is outside.
+static func room_piece_on(cell: Vector2i) -> int:
+	for index in ROOM_PIECES.size():
+		var at: Vector2i = ROOM_PIECES[index]["cell"]
+		var span: Vector2i = ROOM_PIECES[index]["size"]
+		if cell.x >= at.x and cell.y >= at.y and cell.x < at.x + span.x and cell.y < at.y + span.y:
+			return index
+	return -1
 
 ## What the fire can make, and the level each opens at.
 const BASE_CRAFTS: Array[Dictionary] = [

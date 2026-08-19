@@ -112,6 +112,14 @@ func _run() -> void:
 	_assert(not main.player.locked, "and the player has control")
 	_assert(main.night_override < 0.0,
 		"with the sky handed back to the clock rather than pinned")
+	# She wakes up inside as of 1.0.12, in front of the bed, with the crew still
+	# in there: the day starting is her opening the door rather than something
+	# that happened while the screen was dark.
+	_assert(main.room_open, "아침은 방 안에서 시작한다")
+	_assert(main.room_holds_cats, "그리고 고양이들은 아직 안에 있다")
+	for cat in sim.cats:
+		_assert(cat.state == Defs.CAT_ASLEEP, "문을 열기 전에는 아무도 나가지 않았다")
+	main.close_room()
 	_assert(main.player.position.distance_to(main.shelter_doorstep()) < 1.0,
 		"everyone comes out of the same door")
 	for cat in sim.cats:
@@ -145,6 +153,8 @@ func _run() -> void:
 	main._begin_next_day()
 	_assert(_settle(main, main.State.PLAY), "and a second morning")
 	_assert(sim.cats[0].assigned == seam, "the assigned cat kept its post overnight")
+	# Out through the door, which is where a morning starts now.
+	main.close_room()
 	_assert(sim.cats[0].state == Defs.CAT_TO_MINER, "and is walking back to it")
 	_assert(sim.cats[1].state != Defs.CAT_TO_MINER, "an unassigned cat has nowhere to walk back to")
 

@@ -144,7 +144,19 @@ var base_menu_open: bool = false
 ## Inside the hut. A window rather than a place: the world keeps running behind
 ## it, and what she does in there is choose one of four things.
 var room_open: bool = false
-var room_index: int = 0
+## Where she is standing in there, in room cells, and which way she is looking.
+## Floats, because she walks: the room is a place now rather than a list, and a
+## cursor stepping between four pieces was a menu wearing a picture of a room.
+var room_pos := Vector2(Defs.ROOM_ENTRY)
+var room_facing := Vector2i(0, -1)
+var room_step: float = 0.0
+## The crew, filing in behind her. Each entry is where the cat is and where it is
+## going; the stagger is what makes it a queue instead of a crowd appearing.
+var room_cats: Array[Dictionary] = []
+var room_cat_clock: float = 0.0
+## True from the moment she wakes until she opens the door: the cats are still
+## inside, and letting them out is what starts their day.
+var room_holds_cats: bool = false
 ## The play log, and whether it is up.
 ##
 ## Everything the game has said out loud this session, newest first. Deliberately
@@ -544,15 +556,9 @@ func toggle_build_menu() -> bool:
 ## Inside the hut. The same four keys every other window here answers to, and
 ## the cursor walks the furniture in the order it is listed.
 func _room_key(key: InputEventKey) -> void:
+	# The arrows walk her, which happens in `_update_room` off the same actions
+	# the plateau reads, so nothing here answers them. Z is the one verb.
 	match key.keycode:
-		KEY_ESCAPE, KEY_X:
-			close_room()
-		KEY_UP, KEY_LEFT, KEY_W, KEY_A:
-			room_index = posmod(room_index - 1, Defs.ROOM_PIECES.size())
-			audio.call("play", "select")
-		KEY_DOWN, KEY_RIGHT, KEY_S, KEY_D:
-			room_index = posmod(room_index + 1, Defs.ROOM_PIECES.size())
-			audio.call("play", "select")
 		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
 			room_confirm()
 
@@ -1090,6 +1096,7 @@ func _process_play(delta: float) -> void:
 	_update_warmth(delta)
 	_update_kit_search(delta)
 	_update_miner_unlock()
+	_update_room(delta)
 	_update_debris(delta)
 	_update_thaw(delta)
 	_update_torch(delta)
@@ -1488,6 +1495,85 @@ func _update_miner_unlock() -> void:
 	_notify("%s  ·  B 로 건설 목록" % Defs.MACHINE_NAMES[Defs.M_MINER], Defs.COL_CORE)
 	fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
 	audio.call("play", "alloy")
+
+## Walking around inside the hut.
+##
+## Read straight from the same actions the plateau uses, because it is the same
+## verb: she is a person in a room, and a room where the arrow keys move a
+## highlight instead of a person is a menu with furniture drawn on it.
+func _update_room(delta: float) -> void:
+	if not room_open:
+		return
+	_update_room_cats(delta)
+	var input := Vector2(
+		Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
+		Input.get_action_strength("move_down") - Input.get_action_strength("move_up"))
+	if not player.touch_direction.is_zero_approx():
+		input = player.touch_direction
+	if input.length() > 1.0:
+		input = input.normalized()
+	if input.is_zero_approx():
+		return
+	room_facing = Vector2i(1 if input.x > 0.4 else (-1 if input.x < -0.4 else 0),
+		1 if input.y > 0.4 else (-1 if input.y < -0.4 else 0))
+	if room_facing.x != 0 and room_facing.y != 0:
+		# One axis, so what she is facing is always a cell rather than a corner.
+		room_facing = Vector2i(room_facing.x, 0) if absf(input.x) >= absf(input.y) \
+			else Vector2i(0, room_facing.y)
+	var moved: Vector2 = input * Defs.ROOM_SPEED * delta
+	room_step += moved.length()
+	# One axis at a time, so a wall on one side does not stop her sliding along
+	# it -- the same thing the plateau's collision does for free.
+	var wanted := Vector2(room_pos.x + moved.x, room_pos.y)
+	if Defs.room_walkable(Vector2i(wanted.round())):
+		room_pos.x = wanted.x
+	wanted = Vector2(room_pos.x, room_pos.y + moved.y)
+	if Defs.room_walkable(Vector2i(wanted.round())):
+		room_pos.y = wanted.y
+
+## The crew coming in through the door, one after another.
+func _update_room_cats(delta: float) -> void:
+	room_cat_clock += delta
+	for index in room_cats.size():
+		var cat: Dictionary = room_cats[index]
+		if room_cat_clock < float(cat["at"]):
+			continue
+		var goal: Vector2 = cat["goal"]
+		var here: Vector2 = cat["pos"]
+		var step: float = Defs.ROOM_CAT_SPEED * delta
+		if here.distance_to(goal) <= step:
+			cat["pos"] = goal
+		else:
+			cat["pos"] = here + (goal - here).normalized() * step
+		room_cats[index] = cat
+
+## Where the cats are, for whoever draws them. Ones that have not come through
+## the door yet are not in the list at all.
+func room_cat_positions() -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for cat: Dictionary in room_cats:
+		if room_cat_clock >= float(cat["at"]):
+			out.append(cat["pos"])
+	return out
+
+## Line them up outside the door and let them in on a stagger.
+func _fill_room_cats() -> void:
+	room_cats.clear()
+	room_cat_clock = 0.0
+	var door: Vector2 = Vector2(Defs.ROOM_PIECES[_room_piece_index(Defs.ROOM_DOOR)]["cell"]) \
+		+ Vector2(0.5, 0.0)
+	for index in mini(sim.cats.size(), Defs.ROOM_CAT_SPOTS.size()):
+		room_cats.append({
+			"pos": door,
+			"goal": Vector2(Defs.ROOM_CAT_SPOTS[index]),
+			"at": Defs.ROOM_CAT_STAGGER * float(index + 1),
+		})
+
+func _room_piece_index(id: int) -> int:
+	for index in Defs.ROOM_PIECES.size():
+		if int(Defs.ROOM_PIECES[index]["id"]) == id:
+			return index
+	return 0
 
 ## Taking a piece of the ship apart. Z held on it, the same as the case.
 ##
@@ -2221,12 +2307,8 @@ func touch_hud(position: Vector2) -> bool:
 			audio.call("play", "select")
 		return true
 	if room_open:
-		var piece: int = int(hud.call("room_piece_at", local))
-		if piece >= 0:
-			room_index = piece
-			room_confirm()
-		elif not (hud.call("room_rect") as Rect2).has_point(local):
-			close_room()
+		# Tapping a piece walks nothing: the pad drives her feet and its action
+		# button is Z. A tap on the HUD in here is a tap on nothing.
 		return true
 	if base_menu_open:
 		# The same contract every other window here has, and the one this window
@@ -3492,33 +3574,49 @@ func _carried_home() -> void:
 func sleep_available() -> bool:
 	return state == State.PLAY and is_night() and shelter_nearby()
 
-## Going inside. Z at the hut after dark opens the room rather than ending the
-## day on the spot -- the one warm place in this game used to be a button.
-func open_room() -> void:
+## Going inside. She walks in through the door and the crew files in after her.
+func open_room(at: Vector2i = Defs.ROOM_ENTRY, facing := Vector2i(0, -1)) -> void:
 	close_windows("room")
 	room_open = true
-	room_index = 0
+	room_pos = Vector2(at)
+	room_facing = facing
+	room_step = 0.0
+	_fill_room_cats()
 	audio.call("play", "confirm")
 
+## Out through the door. If it is morning the cats come out with her and go back
+## to the posts they had -- which is why the door is where their day starts.
 func close_room() -> void:
 	if not room_open:
 		return
 	room_open = false
+	player.position = shelter_doorstep()
+	player.velocity = Vector2.ZERO
+	if room_holds_cats:
+		room_holds_cats = false
+		sim.wake_cats(shelter_doorstep())
+		fx.ring(shelter_doorstep(), Defs.COL_CORE, 46.0)
+	room_cats.clear()
 	audio.call("play", "select")
 
-## Whichever piece the cursor is on. Only the bed does anything; the rest say
-## what they are, which is the point of a room being a room.
+## The cell she is looking at in there.
+func room_facing_cell() -> Vector2i:
+	return Vector2i(room_pos.round()) + room_facing
+
+## Z, inside. The door lets her out and the bed ends the night; everything else
+## is furniture, and furniture that answers a key with a sentence is a caption.
 func room_confirm() -> void:
-	var piece: Dictionary = Defs.ROOM_PIECES[clampi(room_index, 0, Defs.ROOM_PIECES.size() - 1)]
-	if int(piece["id"]) == Defs.ROOM_DOOR:
-		close_room()
+	var index: int = Defs.room_piece_on(room_facing_cell())
+	if index < 0:
 		return
-	if int(piece["id"]) != Defs.ROOM_BED:
-		_notify("%s  ·  %s" % [String(piece["name"]), String(piece["note"])], Defs.COL_TEXT_DIM)
-		audio.call("play", "select")
-		return
-	room_open = false
-	_sleep()
+	match int(Defs.ROOM_PIECES[index]["id"]):
+		Defs.ROOM_DOOR:
+			close_room()
+		Defs.ROOM_BED:
+			room_open = false
+			room_cats.clear()
+			room_holds_cats = false
+			_sleep()
 
 func _sleep() -> void:
 	if state != State.PLAY:
@@ -3598,18 +3696,21 @@ func _process_daybreak(delta: float) -> void:
 				night_phase = Phase.SPILL
 				night_timer = 0.0
 				night_override = 0.0
-				# Everyone spills out of the door at once and walks back to the
-				# post they had. The assignments the player made are the thing
-				# that survives the night, so morning is where they are visible.
-				sim.wake_cats(shelter_doorstep())
-				_notify("%d일차 아침" % day_number, Defs.COL_CORE)
-				fx.ring(shelter_doorstep(), Defs.COL_CORE, 46.0)
+				# The cats stay in until she opens the door. Their day starting
+				# is a thing she does rather than a thing that has happened
+				# while the screen was dark.
 				audio.call("play", "confirm")
 		Phase.SPILL:
 			if night_timer >= Defs.DAWN_SPILL_SECONDS:
 				night_override = -1.0
 				player.locked = false
 				state = State.PLAY
+				# Waking up happens where she went to sleep. The room opens with
+				# her in front of the bed and the crew still in it -- the door is
+				# what lets the day out, and that is her first move of it.
+				room_holds_cats = true
+				open_room(Defs.ROOM_WAKE, Vector2i(1, 0))
+				room_cat_clock = 99.0
 
 ## Which score belongs to the screen that is showing, decided in one place.
 ##

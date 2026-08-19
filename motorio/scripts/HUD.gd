@@ -1118,7 +1118,10 @@ func _draw_room() -> void:
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), ROOM_BACKDROP)
 	var card: Rect2 = room_rect()
-	_frame(card, Defs.COL_CORE, "숙소   ↑↓ 선택 · Z 사용 · X 나가기")
+	# No title and no caption. The room is meant to be read by looking at it --
+	# a fire, a bed, a door -- and a line of instructions across the top is the
+	# game explaining a picture it has already drawn.
+	_frame(card, Defs.COL_CORE)
 	var floor_rect: Rect2 = room_floor()
 	# Boards, drawn as bands rather than as a grid: a chequerboard reads as a
 	# tilemap and this is a room.
@@ -1136,10 +1139,8 @@ func _draw_room() -> void:
 	_room_glow(floor_rect, hearth.get_center(), ROOM_CELL * 2.0, 0.07)
 	for index in Defs.ROOM_PIECES.size():
 		_draw_room_piece(index)
-	var chosen: Dictionary = Defs.ROOM_PIECES[clampi(main.room_index, 0,
-		Defs.ROOM_PIECES.size() - 1)]
-	_text_in(Rect2(card.position + Vector2(0.0, card.size.y - 34.0), Vector2(card.size.x, 20.0)),
-		"%s  ·  %s" % [String(chosen["name"]), String(chosen["note"])], 12, Defs.COL_TEXT_DIM)
+	_draw_room_cats(floor_rect)
+	_draw_room_player(floor_rect)
 
 ## Firelight on the floorboards, and only on them.
 ##
@@ -1171,7 +1172,6 @@ func _draw_room_piece(index: int) -> void:
 	var piece: Dictionary = Defs.ROOM_PIECES[index]
 	var rect: Rect2 = room_piece_rect(index).grow(-4.0)
 	var id: int = int(piece["id"])
-	var on_cursor: bool = index == main.room_index
 	match id:
 		Defs.ROOM_FIREPLACE:
 			# Stone surround, and a fire that is drawn rather than implied: it is
@@ -1204,6 +1204,29 @@ func _draw_room_piece(index: int) -> void:
 			draw_circle(Vector2(leaf.position.x + leaf.size.x * 0.12,
 				leaf.get_center().y), 2.6, Color(0.86, 0.74, 0.42))
 			draw_rect(rect, Color(0.16, 0.10, 0.07), false, 2.0)
+		Defs.ROOM_WINDOW:
+			# The one thing in here that says what time it is. She goes to bed
+			# with the dark outside and wakes with it light, and that sentence is
+			# the whole reason the room has a window rather than a clock.
+			draw_rect(rect, Color(0.30, 0.20, 0.14))
+			var pane: Rect2 = rect.grow(-5.0)
+			var night: float = main.night_level()
+			var sky: Color = Color(0.05, 0.07, 0.16).lerp(Color(0.62, 0.78, 0.94),
+				clampf(1.0 - night, 0.0, 1.0))
+			draw_rect(pane, sky)
+			if night > 0.7:
+				# Stars, fixed rather than random: a window whose sky changes
+				# every frame is a window nobody trusts.
+				for star in 5:
+					var at := Vector2(pane.position.x + pane.size.x * (0.16 + 0.17 * float(star)),
+						pane.position.y + pane.size.y * (0.3 + 0.4 * float((star * 3) % 2)))
+					draw_circle(at, 1.4, Color(1, 1, 1, 0.7))
+			else:
+				draw_circle(pane.position + pane.size * Vector2(0.72, 0.34),
+					pane.size.y * 0.22, Color(1.0, 0.92, 0.68, 0.85))
+			draw_line(Vector2(pane.get_center().x, pane.position.y),
+				Vector2(pane.get_center().x, pane.end.y), Color(0.30, 0.20, 0.14), 2.0)
+			draw_rect(rect, Color(0.16, 0.10, 0.07), false, 2.0)
 		Defs.ROOM_BED:
 			# Frame, mattress, and a pillow at the head, so the one piece that
 			# does something is the one that reads fastest.
@@ -1215,8 +1238,47 @@ func _draw_room_piece(index: int) -> void:
 			draw_rect(Rect2(sheet.position + Vector2(0.0, sheet.size.y * 0.46),
 				Vector2(sheet.size.x, sheet.size.y * 0.54)), Color(0.48, 0.36, 0.52))
 			draw_rect(rect, Color(0.18, 0.12, 0.09), false, 2.0)
-	if on_cursor:
-		draw_rect(rect.grow(3.0), Defs.COL_CORE, false, 2.0)
+
+## Grim, in the room, from the same sheets she is drawn from outside.
+##
+## Room cells rather than world pixels: the room is its own little grid and the
+## whole point of drawing her here is that she is a person standing in it.
+func _draw_room_player(floor_rect: Rect2) -> void:
+	var sheet: Texture2D = PlayerActor.WALK_SHEET
+	var mirror := false
+	if main.room_facing.x != 0:
+		sheet = PlayerActor.WALK_E_SHEET
+		mirror = main.room_facing.x > 0
+	elif main.room_facing.y < 0:
+		sheet = PlayerActor.WALK_N_SHEET
+	var frame: int = int(main.room_step * 2.4) % PlayerActor.FRAMES
+	var at: Vector2 = floor_rect.position + main.room_pos * ROOM_CELL \
+		+ Vector2(ROOM_CELL, ROOM_CELL) * 0.5
+	_room_figure(sheet, frame, PlayerActor.FRAMES, at, ROOM_CELL * 1.35, mirror)
+
+func _draw_room_cats(floor_rect: Rect2) -> void:
+	for spot: Vector2 in main.room_cat_positions():
+		var at: Vector2 = floor_rect.position + spot * ROOM_CELL \
+			+ Vector2(ROOM_CELL, ROOM_CELL) * 0.5
+		_room_figure(MachineLayer.CAT_IDLE_SHEET, 0, MachineLayer.CAT_FRAMES, at,
+			ROOM_CELL * 0.95, false)
+
+## One frame of a sheet, centred on a point, standing on it rather than hanging
+## from it.
+func _room_figure(sheet: Texture2D, frame: int, frames: int, at: Vector2, height: float,
+		mirror: bool) -> void:
+	var cell: float = float(sheet.get_height())
+	var source := Rect2(float(frame % frames) * cell, 0.0, cell, cell)
+	var box := Rect2(at.x - height * 0.5, at.y - height * 0.72, height, height)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+	draw_circle(Vector2(at.x, (at.y + height * 0.16) / Defs.SHADOW_SQUASH),
+		height * 0.16, Color(0.02, 0.03, 0.05, 0.35))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if mirror:
+		draw_set_transform(Vector2(box.get_center().x * 2.0, 0.0), 0.0, Vector2(-1.0, 1.0))
+	draw_texture_rect_region(sheet, box, source)
+	if mirror:
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func base_menu_rect() -> Rect2:
 	var rows: float = float(maxi(1, main.base_rows().size()))
