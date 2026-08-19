@@ -23,6 +23,9 @@ func _run() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500

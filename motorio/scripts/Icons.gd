@@ -107,16 +107,6 @@ static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
 				centre + Vector2(-drill, -drill), centre + Vector2(drill, -drill),
 				centre + Vector2(0.0, drill * 1.8)]), Defs.COL_BRASS)
 			_arrow(canvas, rect, tint)
-		Defs.M_EXCHANGER:
-			_shadow(canvas, rect)
-			_body(canvas, rect.grow(-rect.size.x * 0.14), Defs.COL_MACHINE, tint, width)
-			# The window it pours light out of, which is the part that lights up
-			# in the world when it is actually converting.
-			var window := Rect2(rect.position + rect.size * Vector2(0.32, 0.30),
-				rect.size * Vector2(0.36, 0.30))
-			canvas.draw_rect(window, Color(1.0, 0.74, 0.36, 0.90))
-			canvas.draw_rect(window, Defs.OUTLINE, false, width * 0.6)
-			_arrow(canvas, rect, tint)
 		Defs.M_BELT:
 			# Flat on the ground: inset, no shadow, chevrons showing travel.
 			var lane := Rect2(rect.position + Vector2(0.0, rect.size.y * 0.24),

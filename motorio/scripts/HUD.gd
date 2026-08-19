@@ -515,10 +515,29 @@ func _draw_blackout() -> void:
 ## that shows the world has to draw it or the sky snaps back to noon. It reads
 ## night_level rather than the clock: during the night sequence the clock is at
 ## zero and then at a full day while the sun is still coming up.
+## How dark the sky wash is at a given point in the day, as [evening, night]
+## opacities. Asked as one function rather than computed inside the paint,
+## because a test can read a predicate and cannot read a draw call -- and "night
+## is darker than dusk" is a claim worth holding to.
+static func night_wash(level: float) -> Array[float]:
+	var dusk: float = clampf((level - 0.55) / 0.45, 0.0, 1.0)
+	var deep: float = clampf((level - 0.86) / 0.14, 0.0, 1.0)
+	return [dusk * 0.46, deep * 0.5]
+
 func _draw_dusk_wash() -> void:
-	var dusk: float = clampf((main.night_level() - 0.55) / 0.45, 0.0, 1.0)
-	if dusk > 0.0:
-		draw_rect(Rect2(Vector2.ZERO, size), Color(0.035, 0.07, 0.16, dusk * 0.38))
+	var wash: Array[float] = night_wash(main.night_level())
+	if wash[0] <= 0.0:
+		return
+	# Two washes rather than one. The first is the evening -- it comes on through
+	# dusk and tops out at a blue the world is still legible through, which is
+	# what a long golden hour should look like. The second only starts once night
+	# has actually fallen and takes it most of the way down, because "밤" had
+	# been a tint the player could read a book through: the torch, the core's
+	# pool and the shelter window are the game's three sources of light and none
+	# of them mattered while the snow itself stayed bright.
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.035, 0.07, 0.16, wash[0]))
+	if wash[1] > 0.0:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.01, 0.02, 0.06, wash[1]))
 
 func _draw_cold_vignette() -> void:
 	_draw_dusk_wash()
@@ -894,7 +913,7 @@ func _draw_palette() -> void:
 	var hint: String = Defs.MACHINE_HINTS[loaded]
 	if main.holding_pickaxe():
 		hint = "광맥을 바라보고 Z를 누르고 있으면 직접 캡니다"
-	elif loaded == Defs.M_EXCHANGER or loaded == Defs.M_MINER:
+	elif loaded == Defs.M_MINER:
 		hint += "   ·   " + Defs.ratio_hint()
 	var hint_w: float = _text_width(hint, 12) + 24.0
 	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 30.0, hint_w, 24.0)
@@ -1195,17 +1214,22 @@ func _draw_build_row(index: int) -> void:
 	var io_x: float = rect.position.x + rect.size.x - 196.0
 	_text(Vector2(text_x, rect.position.y + 20.0), Defs.MACHINE_NAMES[type], 14,
 		Defs.COL_TEXT_DIM if locked else Defs.COL_TEXT)
-	if loaded:
+	if loaded and not locked:
 		_text(Vector2(text_x, rect.position.y + 58.0), "장전됨", 11, accent)
 
 	if locked:
 		# Locked entries stay visible and say what opens them. Seeing what is
 		# coming is half of why a build list exists at all.
+		# Some machines are opened by a material and some are not, and -1 is not a
+		# material: it indexes the array from the end, so the miner's row read
+		# "코어부품을 손에 넣으면" -- the rarest thing in the game, for the first
+		# machine anyone builds.
 		var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
-		_text(Vector2(text_x, rect.position.y + 38.0),
-			"%s%s 손에 넣으면 해금됩니다"
-				% [Defs.ITEM_NAMES[key_item], Defs.object_of(Defs.ITEM_NAMES[key_item])],
-				11, Defs.COL_TEXT_DIM)
+		var line: String = Defs.unlock_line(type)
+		if key_item >= 0:
+			line = "%s%s 손에 넣으면 해금됩니다" \
+				% [Defs.ITEM_NAMES[key_item], Defs.object_of(Defs.ITEM_NAMES[key_item])]
+		_text(Vector2(text_x, rect.position.y + 38.0), line, 11, Defs.COL_TEXT_DIM)
 		draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
 		return
 
@@ -2037,12 +2061,14 @@ func _draw_result() -> void:
 	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "온기 반경", 13,
 		Defs.COL_TEXT_DIM)
 
-	var gained: int = main.day_stones()
-	var rows := [
-		["불에 넣은 열석", "%d개" % sim.stones_in, Defs.COL_CORE],
-		["어제 넣은 열석", "+%d개" % gained if gained > 0 else "-", Defs.COL_TEXT_DIM],
-		["고양이", "%d마리" % sim.cats.size(), Defs.COL_TEXT_DIM],
-	]
+	# The crew, and what the day brought in. Running totals used to lead this card
+	# -- how many stones had ever gone into the fire, and how many yesterday --
+	# which is a ledger rather than a morning report: the number that says whether
+	# the day was any good is what came out of the ground on it.
+	var rows := [["고양이", "%d마리" % sim.cats.size(), Defs.COL_TEXT_DIM]]
+	for row: Array in main.day_collected():
+		rows.append([Defs.ITEM_NAMES[int(row[0])], "+%d" % int(row[1]),
+			Defs.ITEM_COLORS[int(row[0])]])
 	var y: float = 176.0
 	for row in rows:
 		_text(card.position + Vector2(74, y), String(row[0]), 14, Defs.COL_TEXT_DIM)

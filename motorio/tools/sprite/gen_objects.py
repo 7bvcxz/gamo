@@ -139,12 +139,6 @@ SUBJECTS = {
         "canvas, the case itself chunky rounded muted blue-grey metal with warm "
         "brass catches."
     ),
-    "exchanger": (
-        "A cosy crystal-to-energy converter machine for a snowy top-down game: a "
-        "chunky rounded metal cabinet, one big round window in front glowing warm "
-        "amber, a thick funnel on top, two short brass pipes, a little snow on "
-        "its shoulders."
-    ),
     "generator": (
         "A cosy little power generator for a snowy top-down game: a chunky "
         "rounded metal drum lying on a low frame, one round port in front glowing "

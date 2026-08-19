@@ -34,6 +34,13 @@ func _advance(pool: Array[Dictionary], delta: float) -> void:
 			pool[index] = fx
 		index -= 1
 
+## Half of what it was. These are the "+1 열석" labels that go up over whatever
+## she just picked up, and at fifteen they were the size of the interface -- a
+## number the size of a headline for a thing that happens twenty times a minute.
+## The plate around a plated label is measured from this rather than written
+## down, so the two cannot come apart.
+const LABEL_SIZE := 8
+
 func popup(at: Vector2, text: String, color: Color, plated: bool = false) -> void:
 	if _labels.size() >= MAX_EFFECTS:
 		return
@@ -116,11 +123,12 @@ func _draw() -> void:
 		var col: Color = fx["color"]
 		var alpha: float = clampf(1.0 - k * k, 0.0, 1.0)
 		var body: String = String(fx["text"])
-		var width: float = font.get_string_size(body, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
+		var width: float = font.get_string_size(body, HORIZONTAL_ALIGNMENT_LEFT, -1, LABEL_SIZE).x
 		# Text over the amber pool measured 1.38:1; a plate is the only way to
 		# hold contrast against a background that can be any colour.
 		if bool(fx.get("iron", false)):
-			draw_rect(Rect2(at.x - width * 0.5 - 8.0, at.y - 15.0, width + 16.0, 21.0),
+			draw_rect(Rect2(at.x - width * 0.5 - 5.0, at.y - float(LABEL_SIZE),
+				width + 10.0, float(LABEL_SIZE) + 6.0),
 				Color(0.06, 0.08, 0.12, alpha * 0.92))
-		draw_string(font, at - Vector2(width * 0.5, 0), body, HORIZONTAL_ALIGNMENT_LEFT, -1, 15,
-			Color(col.r, col.g, col.b, alpha))
+		draw_string(font, at - Vector2(width * 0.5, 0), body, HORIZONTAL_ALIGNMENT_LEFT, -1,
+			LABEL_SIZE, Color(col.r, col.g, col.b, alpha))

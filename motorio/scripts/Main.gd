@@ -79,6 +79,10 @@ var collapse_timer: float = -1.0
 var run_seed: int = 0
 var day_number: int = 1
 var day_start_stones: int = 0
+## What had been collected when the day began, so the morning report can say what
+## the day itself brought in. A dictionary rather than one number: the report
+## lists every material that moved.
+var day_start_collected: Dictionary = {}
 ## Counts down on the game over card, and reaching zero is what returns to the
 ## title. One timer rather than a flag and a clock somewhere else.
 var gameover_timer: float = 0.0
@@ -322,6 +326,7 @@ func _start_run() -> void:
 	frozen_seen = false
 	day_number = 1
 	day_start_stones = 0
+	day_start_collected.clear()
 	time_left = Defs.DAY_SECONDS
 	sim.begin_crash()
 	mission = Mission.BASE
@@ -1007,7 +1012,7 @@ const SAVE_SLOTS := 31
 ## load is what makes that safe -- an unrecognised file starts a new run rather
 ## than half-restoring one.
 const SAVE_PATH := "user://motorio_save.cfg"
-const SAVE_SCHEMA := 7
+const SAVE_SCHEMA := 8
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1055,6 +1060,7 @@ func _process_play(delta: float) -> void:
 	_collect_and_adopt()
 	_update_warmth(delta)
 	_update_kit_search(delta)
+	_update_miner_unlock()
 	_update_debris(delta)
 	_update_thaw(delta)
 	_update_torch(delta)
@@ -1286,14 +1292,6 @@ func _mission_ready(id: String) -> bool:
 		"BASE2": return sim.shelter_placed
 		"BASE3": return sim.base_level >= 1
 		"BASE4": return sim.base_level >= 2
-		"CAT_LOOK": return sim.base_level >= 1
-		"CAT_THAW": return frozen_seen
-		"CAT_WORK": return sim.cats.size() > 0
-		"CAT_FEED": return _anyone_hungry()
-		"AUTO_MINER": return int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) \
-			>= int(Defs.MACHINE_COSTS[Defs.M_MINER][Defs.ITEM_HEATSTONE])
-		"AUTO_BELT": return sim.is_unlocked(Defs.M_BELT)
-		"AUTO_LINE": return sim.machine_count(Defs.M_BELT) > 0
 	return false
 
 ## And whether it is behind us.
@@ -1302,25 +1300,6 @@ func _mission_finished(id: String) -> bool:
 		"BASE2": return sim.base_level >= 1
 		"BASE3": return sim.base_level >= 2
 		"BASE4": return sim.base_level >= 3
-		"CAT_LOOK": return frozen_seen
-		"CAT_THAW": return sim.cats.size() > 0
-		"CAT_WORK": return _anyone_working()
-		"CAT_FEED": return sim.food_placed
-		"AUTO_MINER": return sim.machine_count(Defs.M_MINER) > 0
-		"AUTO_BELT": return sim.machine_count(Defs.M_BELT) > 0
-		"AUTO_LINE": return sim.delivered_by_belt
-	return false
-
-func _anyone_hungry() -> bool:
-	for cat: Sim.Cat in sim.cats:
-		if cat.hunger < 0.5:
-			return true
-	return false
-
-func _anyone_working() -> bool:
-	for cat: Sim.Cat in sim.cats:
-		if cat.has_job():
-			return true
 	return false
 
 ## Run once a frame. Opens what is ready and closes what is done, in that order,
@@ -1440,6 +1419,17 @@ func _update_kit_search(delta: float) -> void:
 	if sim.kit_progress < 1.0:
 		return
 	sim.kit_progress = 0.0
+	# Tip it away from her. The step from her cell to the case, continued.
+	var step: Vector2i = sim.kit_cell - player.cell()
+	sim.drop_away = Vector2i(signi(step.x), signi(step.y)) if step != Vector2i.ZERO \
+		else player.facing
+	if sim.drop_away.x != 0 and sim.drop_away.y != 0:
+		# One axis, because the eight cells around the case are named in axes and
+		# a diagonal "away" would put the preferred cell on a corner.
+		if absi(step.x) >= absi(step.y):
+			sim.drop_away = Vector2i(sim.drop_away.x, 0)
+		else:
+			sim.drop_away = Vector2i(0, sim.drop_away.y)
 	var found: Array[int] = sim.search_kit()
 	if found.is_empty():
 		return
@@ -1453,6 +1443,24 @@ func _update_kit_search(delta: float) -> void:
 		names.append(Sim.DROP_NAMES[kind])
 	_notify("상자에서 무언가 떨어졌습니다", Defs.COL_CORE)
 	note_log("상자에서 나온 것 · %s" % "  ·  ".join(names), Defs.COL_CORE)
+
+## The build gun's first recipe.
+##
+## Not a material she has seen -- a tool in her hand and the stone to pay for
+## what it makes. Seeing one heat stone used to open the miner, so the gun came
+## out of the case already loaded and the build list's first line was a machine
+## the player had no reason for. Now the list is empty until she picks the gun
+## up with five stones, which is the moment both halves of "build a miner" are
+## true at once.
+func _update_miner_unlock() -> void:
+	if sim.is_unlocked(Defs.M_MINER) or not holding_build_gun():
+		return
+	if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) < Defs.MINER_UNLOCK_STONES:
+		return
+	sim.unlocked[Defs.M_MINER] = true
+	_notify("%s  ·  B 로 건설 목록" % Defs.MACHINE_NAMES[Defs.M_MINER], Defs.COL_CORE)
+	fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
+	audio.call("play", "alloy")
 
 ## Taking a piece of the ship apart. Z held on it, the same as the case.
 ##
@@ -1646,7 +1654,8 @@ func _prompt_status(id: String) -> Dictionary:
 			# switch tools while she owns exactly one tool is telling her nothing.
 			return {"want": unlocked_tools().size() > 1, "done": sim.has_learned("TOOL")}
 		"BUILD":
-			return {"want": sim.base_placed and _anything_buildable(),
+			return {"want": sim.base_level >= 1 and _anything_buildable()
+				and int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.MINER_UNLOCK_STONES,
 				"done": sim.machine_count(Defs.M_MINER) > 0 or build_menu_open}
 		"RUN":
 			return {"want": sim.walked >= Defs.PROMPT_WALK_RUN, "done": sim.has_learned("RUN")}
@@ -2442,7 +2451,7 @@ func _primary_action() -> void:
 	if sim.carried_cat != null:
 		if sim.place_cat(cell):
 			_notify("고양이를 채굴기에 배치했습니다" if sim.machines.has(cell)
-				else "고양이가 광맥을 캡니다  채굴기 위라면 더 빠릅니다", Defs.COL_CORE)
+				else "고양이가 광맥을 캡니다", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
 			audio.call("play", "build")
 		elif sim.drop_cat(sim.cell_centre(cell)):
@@ -2459,6 +2468,14 @@ func _primary_action() -> void:
 	#
 	# Only bare ore. A cat standing on a miner is standing on ore too, and taking
 	# it off to reassign it has to keep working.
+	# The gun outranks the cat. Z lifts cats before it does anything else, which
+	# is right when her hands are the tool -- but a player holding the build gun
+	# at a cell they can build on has said what they mean, and a cat wandering
+	# across the seam they are aiming at is not a change of mind.
+	if holding_build_gun() and sim.can_build(selected_type(), cell) == "" \
+			and sim.can_afford(selected_type()) and sim.is_unlocked(selected_type()):
+		_try_build()
+		return
 	var target: Vector2i = _hand_target()
 	var mining_here: bool = holding_pickaxe() and sim.can_hand_mine(target) \
 		and not sim.machines.has(target)
@@ -2469,7 +2486,7 @@ func _primary_action() -> void:
 		audio.call("play", "select")
 		return
 	if not mining_here and sim.pick_up_cat(cell):
-		_notify("고양이를 안았습니다 · 채굴기 앞에서 Z", Defs.COL_BELT_RIM)
+		_notify("고양이를 안았습니다", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
 		audio.call("play", "select")
 		return
@@ -2627,8 +2644,7 @@ func _try_build() -> void:
 		shake = maxf(shake, Defs.FX_MEDIUM)
 		audio.call("play", "build")
 
-## Switching a machine to its other recipe. Per machine rather than global, so a
-## player with spare copper on one line and none on another can run both.
+## Switching a belt to its next tier.
 ## Steps through the debug time multipliers. Engine.time_scale is global, so this
 ## moves the whole game at once rather than just the simulation.
 ## --- Zoom keys -----------------------------------------------------------------
@@ -2687,8 +2703,6 @@ func debug_unlock_all() -> void:
 		sim.place_base(sim.core_cell)
 	for type: int in Defs.BUILDABLE:
 		sim.unlocked[type] = true
-	for index in Defs.RECIPES.size():
-		sim.unlocked_recipes[index] = true
 	for item_type: int in Defs.COUNTED_ITEMS:
 		sim.stock[item_type] = 500
 	# Torches too. They are a craft rather than a stock item, so filling the bank
@@ -2987,18 +3001,8 @@ func _cycle_recipe() -> void:
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, Defs.RING_MEDIUM)
 		audio.call("play", "build")
 		return
-	if machine.type != Defs.M_EXCHANGER:
-		return
-	if not sim.recipe_unlocked(Defs.RECIPE_ALLOY):
-		_notify("구리광석을 손에 넣으면 다른 제법이 열립니다", Defs.COL_TEXT_DIM)
-		audio.call("play", "deny")
-		return
-	var picked: int = sim.cycle_recipe(cell)
-	if picked < 0:
-		return
-	_notify("%s 제법 · %s" % [Defs.RECIPES[picked]["name"], Defs.recipe_line(picked)], Defs.COL_CORE)
-	fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_MEDIUM)
-	audio.call("play", "select")
+	# The belt tier is all F does now. The exchanger was the only other machine
+	# with something to switch, and its two recipes went with it.
 
 func _try_demolish() -> void:
 	if player.locked:
@@ -3020,10 +3024,9 @@ func _try_demolish() -> void:
 func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
-	var energy: bool = item_type == Defs.ITEM_ENERGY
-	fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE if energy else Defs.RING_SMALL)
-	shake = maxf(shake, Defs.FX_LARGE if energy else Defs.FX_QUIET)
-	audio.call("play", "alloy" if item_type == Defs.ITEM_ENERGY else "deliver")
+	fx.ring(at, Defs.COL_CORE, Defs.RING_SMALL)
+	shake = maxf(shake, Defs.FX_QUIET)
+	audio.call("play", "deliver")
 
 ## Something reached the core. Quieter than feeding the fire, and it says what
 ## arrived rather than "+5" -- the number belonged to a burn that no longer
@@ -3081,6 +3084,7 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		"day": day_number,
 		"time_left": time_left,
 		"day_start_stones": day_start_stones,
+		"day_start_collected": day_start_collected,
 		"px": player.position.x,
 		"py": player.position.y,
 		"warmth": player.warmth,
@@ -3165,6 +3169,7 @@ func load_game(slot: int = 0) -> bool:
 	day_number = int(data.get("day", 1))
 	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
 	day_start_stones = int(data.get("day_start_stones", 0))
+	day_start_collected = data.get("day_start_collected", {})
 	player.position = Vector2(float(data.get("px", 0.0)), float(data.get("py", 0.0)))
 	player.warmth = float(data.get("warmth", 100.0))
 	mission = int(data.get("mission", Mission.DONE))
@@ -3368,6 +3373,18 @@ func close_settings() -> void:
 func day_stones() -> int:
 	return sim.stones_in - day_start_stones
 
+## What the day brought in, material by material, in the order the counters use.
+## Only what actually moved: a row reading zero is a line the reader has to
+## check before ignoring.
+func day_collected() -> Array:
+	var out: Array = []
+	for item_type: int in Defs.COUNTED_ITEMS:
+		var gained: int = int(sim.collected.get(item_type, 0)) \
+			- int(day_start_collected.get(item_type, 0))
+		if gained > 0:
+			out.append([item_type, gained])
+	return out
+
 ## Falling asleep outside: the cats bring you in, and the night ends anyway, but
 ## the day is scored as it stood.
 ## Zero warmth before there is a base. Nothing rescues her because there is
@@ -3534,6 +3551,7 @@ func _finish_run() -> void:
 func _begin_next_day() -> void:
 	day_number += 1
 	day_start_stones = sim.stones_in
+	day_start_collected = sim.collected.duplicate()
 	time_left = Defs.DAY_SECONDS
 	night_warned = false
 	rescued_tonight = false

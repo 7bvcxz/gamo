@@ -130,6 +130,9 @@ func _run() -> void:
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
 	sim.stock[Defs.ITEM_HEATSTONE] = 100
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.build(Defs.M_MINER, seam, Vector2i.RIGHT)
 	_assert(sim.machine_at(seam) != null, "there is a miner to be assigned to")
@@ -163,6 +166,8 @@ func _run() -> void:
 		"and the door closes on schedule rather than eventually: %.1fs" % (float(stuck) * 0.05))
 	_assert(sim.cats_all_home(), "the straggler is indoors regardless")
 
+	_test_night_is_dark()
+
 	main.clear_save()
 	if failures == 0:
 		print("NIGHT_TEST: PASS")
@@ -182,3 +187,27 @@ func _assert(condition: bool, message: String) -> void:
 	if not condition:
 		push_error("NIGHT_TEST: FAIL - " + message)
 		failures += 1
+
+## How dark the sky gets, as a curve rather than as a screenshot.
+##
+## Night was a blue tint the player could read a book through, which made the
+## three sources of light in this game -- the torch, the core's pool, the shelter
+## window -- decorative: the snow itself stayed bright. It goes down in two
+## washes now, the second only after night has actually fallen.
+func _test_night_is_dark() -> void:
+	var hud = load("res://scripts/HUD.gd")
+	var noon: Array[float] = hud.night_wash(0.2)
+	var evening: Array[float] = hud.night_wash(0.7)
+	var dusk: Array[float] = hud.night_wash(0.9)
+	var night: Array[float] = hud.night_wash(1.0)
+	var total := func(w: Array[float]) -> float: return w[0] + w[1]
+	_assert(total.call(noon) == 0.0, "낮에는 아무것도 덧칠하지 않는다")
+	_assert(total.call(evening) > 0.0, "해질녘부터 깔린다")
+	_assert(total.call(dusk) > total.call(evening), "그리고 짙어진다")
+	_assert(total.call(night) > total.call(dusk), "밤이 가장 어둡다")
+	# The second wash is what "훨씬 어둡게" means: it only exists at night, and it
+	# nearly doubles what dusk had reached.
+	_assert(evening[1] == 0.0, "두 번째 겹은 해질녘에는 없다")
+	_assert(night[1] > 0.4, "밤에는 있다: %.2f" % night[1])
+	_assert(total.call(night) > 0.9,
+		"합쳐서 화면을 거의 덮는다: %.2f" % total.call(night))

@@ -118,7 +118,7 @@ func _objectives(main: Node2D) -> void:
 		func() -> void: sim.carried_cat = sim.cats[0],
 		func() -> void: sim.carried_cat = null,
 		func() -> void: sim.stock[Defs.ITEM_COPPER] = 10,
-		func() -> void: sim.delivered[Defs.ITEM_ENERGY] = 3,
+		func() -> void: sim.delivered[Defs.ITEM_CRYSTAL] = 3,
 	]
 	seen.append(opening)
 	for change: Callable in states:
@@ -205,7 +205,7 @@ func _particles(main: Node2D) -> void:
 	var sim: Sim = main.sim
 	sim.setup(4242)
 	var seam: Vector2i = sim.ore.keys()[0]
-	var reason: String = sim.can_build(Defs.M_EXCHANGER, seam + Vector2i(0, 40))
+	var reason: String = sim.can_build(Defs.M_GENERATOR, seam + Vector2i(0, 40))
 	_check(not reason.contains("수정조각가"), "부족 안내의 조사가 맞다: %s" % reason)
 	_check(reason.contains("수정조각이") or reason == "" or not reason.contains("수정조각"),
 		"부족 안내: %s" % reason)

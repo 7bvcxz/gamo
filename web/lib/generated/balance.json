@@ -71,7 +71,6 @@
     "names": [
       "수정조각",
       "구리광석",
-      "에너지결정",
       "열석",
       "돌",
       "코어부품"
@@ -89,20 +88,7 @@
       "name": "채굴기",
       "short": "채굴기",
       "throughput": "광맥의 자원 12/분 · 고양이 또는 전력 0.5",
-      "unlock": "열석"
-    },
-    {
-      "cost": [
-        {
-          "count": 20,
-          "item": "수정조각"
-        }
-      ],
-      "hint": "수정조각 2개를 에너지결정 1개로 바꿉니다",
-      "name": "수정에너지교환기",
-      "short": "교환기",
-      "throughput": "수정 24/분 → 에너지 12/분",
-      "unlock": "수정조각"
+      "unlock": ""
     },
     {
       "cost": [
@@ -137,10 +123,10 @@
           "item": "구리광석"
         }
       ],
-      "hint": "에너지결정을 태워 전력 1.0을 공급합니다",
+      "hint": "수정조각을 태워 전력 1.0을 공급합니다",
       "name": "발전기",
       "short": "발전기",
-      "throughput": "에너지 6/분 → 전력 1.0",
+      "throughput": "수정조각 6/분 → 전력 1.0",
       "unlock": "구리광석"
     }
   ],
@@ -326,27 +312,11 @@
   ],
   "rates": {
     "copper_seconds": 20.0,
-    "crystal_per_energy": 2,
-    "exchanger_seconds": 5.0,
     "generator_seconds": 10.0,
     "hand_mine_seconds": 10.0,
     "miner_seconds": 5.0,
-    "ratio_hint": "교환기 1대 = 채굴기 2대"
+    "ratio_hint": "발전기 1대 = 수정 채굴기 2대"
   },
-  "recipes": [
-    {
-      "crystal_per_energy": 2.0,
-      "energy_per_minute": 12.0,
-      "line": "수정 2 → 에너지 1 · 5초",
-      "name": "기본"
-    },
-    {
-      "crystal_per_energy": 0.666666666666667,
-      "energy_per_minute": 18.0,
-      "line": "수정 2 + 구리 1 → 에너지 3 · 10초",
-      "name": "구리 촉매"
-    }
-  ],
   "rings": {
     "copper": [
       15.0,

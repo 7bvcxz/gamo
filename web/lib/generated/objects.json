@@ -727,17 +727,6 @@
    }
   },
   {
-   "role": "exchanger",
-   "name": "수정에너지교환기",
-   "from": "exchanger_gen1",
-   "draw": 36,
-   "stored": 72,
-   "sizes": {
-    "128": "/object-candidates/shipped-exchanger-128-88e864e035dc.png",
-    "36": "/object-candidates/shipped-exchanger-36-7c66d64413a2.png"
-   }
-  },
-  {
    "role": "food_bin",
    "name": "밥통",
    "from": "food_bin_gen1",

@@ -34,15 +34,6 @@ func _initialize() -> void:
 			"unlock": Defs.ITEM_NAMES[Defs.MACHINE_UNLOCK_ITEM[type]] if Defs.MACHINE_UNLOCK_ITEM[type] >= 0 else "",
 		})
 
-	var recipes: Array = []
-	for index in Defs.RECIPES.size():
-		recipes.append({
-			"name": String(Defs.RECIPES[index]["name"]),
-			"line": Defs.recipe_line(index),
-			"energy_per_minute": Defs.recipe_rate(index),
-			"crystal_per_energy": Defs.recipe_crystal_cost(index),
-		})
-
 	var belts: Array = []
 	for index in Defs.BELT_TIERS.size():
 		var speed: float = Defs.belt_speed(index)
@@ -144,9 +135,7 @@ func _initialize() -> void:
 			"hand_mine_seconds": Defs.HAND_MINE_PERIOD,
 			"miner_seconds": Defs.MINER_PERIOD,
 			"copper_seconds": Defs.COPPER_PERIOD,
-			"exchanger_seconds": Defs.EXCHANGER_PERIOD,
 			"generator_seconds": Defs.GENERATOR_PERIOD,
-			"crystal_per_energy": Defs.CRYSTAL_COST_ENERGY,
 			"ratio_hint": Defs.ratio_hint(),
 		},
 		"power": {
@@ -178,7 +167,6 @@ func _initialize() -> void:
 			"days_two_miners": stones_to_copper / (2.0 / Defs.MINER_PERIOD) / 120.0,
 		},
 		"machines": machines,
-		"recipes": recipes,
 		"belts": belts,
 		"purity": purity,
 	}

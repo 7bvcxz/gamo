@@ -27,6 +27,9 @@ func _init() -> void:
 	# Every slot has to exist before the row can be tapped: the gun appears with
 	# the first buildable machine and the torch with the first torch.
 	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	main.sim.unlocked[Defs.M_MINER] = true
 	main.sim.torches = 1
 	main.state = main.State.PLAY
 	# The pad is hidden on a desktop; the hit-testing does not care, but the HUD

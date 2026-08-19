@@ -14,7 +14,7 @@ func _run() -> void:
 	_test_miner_to_core()
 	_test_miner_rate()
 	_test_belt_transport()
-	_test_furnace_alloy()
+	_test_generator_burns_crystal()
 	_test_economy_and_warmth()
 	_test_frost_throttle()
 	_test_blocked_output_preserves_work()
@@ -62,16 +62,18 @@ func _power(sim: Sim) -> void:
 			break
 	_assert(cell != Vector2i(9999, 9999), "발전기를 세울 자리가 있다")
 	_assert(sim.build(Defs.M_GENERATOR, cell, Vector2i.RIGHT), "발전기가 섰다")
-	sim.machine_at(cell).buffer[Defs.ITEM_ENERGY] = 4
+	sim.machine_at(cell).buffer[Defs.ITEM_CRYSTAL] = 4
 
 func _open(sim: Sim) -> void:
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
-	sim.stock[Defs.ITEM_ENERGY] = 500
 
 func _test_generation() -> void:
 	var sim := _fresh()
@@ -186,10 +188,15 @@ func _test_build_rules() -> void:
 	_assert(not sim.is_unlocked(Defs.M_MINER), "the miner starts locked")
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) != "", "and cannot be built while locked")
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
-	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
-	_assert(sim.is_unlocked(Defs.M_MINER), "the first crystal opens the miner")
-	_assert(sim.is_unlocked(Defs.M_EXCHANGER), "and the exchanger with it")
-	_assert(not sim.is_unlocked(Defs.M_BELT), "but not the copper line")
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
+	# Copper is what opens the rest of the list now: the crystal line went with
+	# the exchanger, and the miner is opened by the gun rather than by a material.
+	sim.note_resource_seen(Defs.ITEM_COPPER)
+	_assert(sim.is_unlocked(Defs.M_MINER), "the miner is open")
+	_assert(sim.is_unlocked(Defs.M_GENERATOR), "and copper opens the generator")
+	_assert(sim.is_unlocked(Defs.M_BELT), "and the belt with it")
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	_assert(sim.is_unlocked(Defs.M_BELT) and sim.is_unlocked(Defs.M_GENERATOR),
 		"the first copper opens belts and generators")
@@ -216,9 +223,9 @@ func _test_build_rules() -> void:
 	_assert(not sim.demolish(sim.core_cell), "the core can never be demolished")
 
 	sim.stock[Defs.ITEM_CRYSTAL] = 0
-
 	sim.stock[Defs.ITEM_HEATSTONE] = 0
-	_assert(sim.can_build(Defs.M_EXCHANGER, empty) != "", "an unaffordable machine is rejected")
+	sim.stock[Defs.ITEM_COPPER] = 0
+	_assert(sim.can_build(Defs.M_GENERATOR, empty) != "", "an unaffordable machine is rejected")
 	sim.free()
 
 func _test_miner_to_core() -> void:
@@ -287,44 +294,39 @@ func _test_belt_transport() -> void:
 	_assert(sim.delivered[Defs.ITEM_CRYSTAL] > 0, "a two-tile belt run reaches the core")
 	sim.free()
 
-func _test_furnace_alloy() -> void:
+## The generator, which is what the exchanger's rules moved to when it was
+## removed in 1.0.8: it eats crystal straight off a belt instead of eating a
+## material a second building made out of crystal.
+func _test_generator_burns_crystal() -> void:
 	var sim := Sim.new()
 	sim.setup(777)
 	_open(sim)
-	_power(sim)
-	var furnace_cell := Vector2i(-2, 0)
-	_assert(sim.build(Defs.M_EXCHANGER, furnace_cell, Vector2i.RIGHT), "furnace built")
-	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "furnace output belt built")
-	var furnace: Sim.Machine = sim.machine_at(furnace_cell)
-
-	_power(sim)
-	# Below the recipe threshold: nothing may be produced.
-	furnace.buffer[Defs.ITEM_CRYSTAL] = Defs.CRYSTAL_COST_ENERGY - 1
+	var gen_cell := Vector2i(-2, 0)
+	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "generator built")
+	var gen: Sim.Machine = sim.machine_at(gen_cell)
+	gen.buffer.clear()
 	for step in 40:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_ENERGY] == 0, "an exchanger below the recipe produces nothing")
+	_assert(is_equal_approx(sim.power_capacity, 0.0), "빈 발전기는 전력을 내지 않는다")
+	_assert(sim.meter_status(gen).find("연료 없음") >= 0, "그리고 그렇게 말한다")
 
-	# Input may arrive on any face except the one the furnace outputs from.
-	var out_cell: Vector2i = furnace_cell + Vector2i.RIGHT
-	var side_cell: Vector2i = furnace_cell + Vector2i.UP
-	var back_cell: Vector2i = furnace_cell + Vector2i.LEFT
-	_assert(sim._push_into(furnace_cell, Defs.ITEM_CRYSTAL, side_cell),
-		"the exchanger accepts crystal pushed in from the side")
-	_assert(sim._push_into(furnace_cell, Defs.ITEM_CRYSTAL, back_cell),
-		"the exchanger accepts crystal pushed in from behind")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_CRYSTAL, out_cell),
-		"the exchanger refuses input pushed in from its own output face")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_ENERGY, side_cell),
-		"the exchanger never takes its own product as input")
-	_assert(not sim._push_into(furnace_cell, Defs.ITEM_COPPER, side_cell),
-		"and never takes copper, which has no recipe here")
+	# Crystal from any face, and nothing else. The output-face rule is kept even
+	# though this machine emits nothing: it costs nothing to keep and something
+	# to remember on the day it does.
+	var side_cell: Vector2i = gen_cell + Vector2i.UP
+	_assert(sim._push_into(gen_cell, Defs.ITEM_CRYSTAL, side_cell),
+		"수정조각을 받는다")
+	_assert(not sim._push_into(gen_cell, Defs.ITEM_COPPER, side_cell),
+		"구리는 받지 않는다")
+	_assert(not sim._push_into(gen_cell, Defs.ITEM_HEATSTONE, side_cell),
+		"열석도 받지 않는다")
 
-	furnace.buffer[Defs.ITEM_CRYSTAL] = 6
-	for step in 120:
+	gen.buffer[Defs.ITEM_CRYSTAL] = 4
+	var before: int = int(gen.buffer[Defs.ITEM_CRYSTAL])
+	for step in 200:
 		sim.tick(0.1)
-	_assert(sim.delivered[Defs.ITEM_ENERGY] > 0, "crystal becomes energy at the core")
-	_assert(int(sim.stock.get(Defs.ITEM_ENERGY, 0)) > 0,
-		"and the crystal it came from is spent")
+	_assert(int(gen.buffer[Defs.ITEM_CRYSTAL]) < before, "돌리면 수정을 태운다")
+	_assert(sim.power_capacity > 0.0, "그리고 전력이 생긴다")
 	sim.free()
 
 func _test_economy_and_warmth() -> void:
@@ -335,11 +337,11 @@ func _test_economy_and_warmth() -> void:
 	# well as stock -- the same crystal twice, once on arrival and again when the
 	# player fed the stores to the fire -- and the circle grew while she was
 	# somewhere else. `test_fire` holds the whole rule; this is the arithmetic.
-	sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
+	sim._deliver(Defs.ITEM_CRYSTAL, sim.core_cell)
 	_assert(sim.stones_in == 0, "delivery does not feed the fire")
-	_assert(int(sim.stock.get(Defs.ITEM_ENERGY, 0)) > 0, "it banks the crystal instead")
+	_assert(int(sim.stock.get(Defs.ITEM_CRYSTAL, 0)) > 0, "it banks the crystal instead")
 	for step in 400:
-		sim._deliver(Defs.ITEM_ENERGY, sim.core_cell)
+		sim._deliver(Defs.ITEM_CRYSTAL, sim.core_cell)
 	sim.tick(0.016)
 	_assert(is_equal_approx(sim.warm_radius, start_radius),
 		"and four hundred of them do not move the circle")

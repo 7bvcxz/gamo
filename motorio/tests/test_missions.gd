@@ -49,10 +49,12 @@ func _test_tracks() -> void:
 	var sim: Sim = main.sim
 
 	# --- The table -------------------------------------------------------------
-	_assert(Defs.TRACK_NAMES.size() == 3, "계열이 셋이다")
-	for track in 3:
-		_assert(not Defs.missions_in(track).is_empty(),
-			"%s 계열에 임무가 있다" % Defs.TRACK_NAMES[track])
+	# One track as of 1.0.8. The cat rungs and the automation rungs are gone --
+	# every one of them described a thing the game teaches by having it happen,
+	# and a card listing them turns finding a planet into working through a list.
+	_assert(not Defs.missions_in(Defs.TRACK_BASE).is_empty(), "기지 계열에 임무가 있다")
+	_assert(Defs.missions_in(Defs.TRACK_CAT).is_empty(), "고양이 계열은 비어 있다")
+	_assert(Defs.missions_in(Defs.TRACK_AUTO).is_empty(), "자동화 계열도 비어 있다")
 	var ids := {}
 	for row: Dictionary in Defs.MISSIONS:
 		_assert(not ids.has(String(row["id"])), "임무 id가 겹치지 않는다: %s" % String(row["id"]))
@@ -85,39 +87,10 @@ func _test_tracks() -> void:
 	_assert(not _open_ids(main).has("BASE2"), "올리면 그 줄은 닫힌다")
 	_assert(_open_ids(main).has("BASE3"), "그리고 다음 줄이 열린다")
 
-	# --- The animals ------------------------------------------------------------
-	_assert(_open_ids(main).has("CAT_LOOK"),
-		"온기가 9칸이 되는 순간 생물 탐색이 열린다 — 그때 처음으로 얼음이 불빛 안에 들어온다")
-	_assert(not _open_ids(main).has("CAT_THAW"), "아직 살릴 것은 못 봤다")
-	sim.frozen_cats[sim.core_cell + Vector2i(0, 4)] = 0.0
-	main._update_missions()
-	_assert(main.frozen_seen, "반경 안의 얼음을 봤다")
-	_assert(not _open_ids(main).has("CAT_LOOK"), "보면 탐색이 끝난다")
-	_assert(_open_ids(main).has("CAT_THAW"), "그리고 살리는 줄이 열린다")
-	# Seeing does not become false again: the cat it referred to may be carried
-	# away, and "you have seen one" is not a thing that unhappens.
-	sim.frozen_cats.clear()
-	main._update_missions()
-	_assert(main.frozen_seen, "들고 가 버려도 본 것은 본 것이다")
-
-	sim.grant_cats(1)
-	main._update_missions()
-	_assert(not _open_ids(main).has("CAT_THAW"), "고양이가 깨어나면 닫힌다")
-	_assert(_open_ids(main).has("CAT_WORK"), "일 나누기가 열린다")
-	_assert(not _open_ids(main).has("CAT_FEED"), "배고프기 전에는 밥 이야기가 없다")
-	sim.cats[0].hunger = 0.2
-	main._update_missions()
-	_assert(_open_ids(main).has("CAT_FEED"),
-		"실제로 배가 고파지면 그때 열린다 — 나흘 걸린다")
-
-	# --- The factory ------------------------------------------------------------
-	sim.stock[Defs.ITEM_HEATSTONE] = 50
-	main._update_missions()
-	_assert(_open_ids(main).has("AUTO_MINER"),
-		"채굴기를 지을 수 있게 된 순간에 자동화가 열린다")
-	sim.note_resource_seen(Defs.ITEM_COPPER)
-	main._update_missions()
-	_assert(_open_ids(main).has("AUTO_BELT"), "구리를 보면 벨트 줄이 열린다")
+	# What used to be here: eleven assertions walking the cat track and the
+	# automation track rung by rung. Both tracks are gone, and the rungs they
+	# described happen anyway -- a cat wakes up, a miner gets built -- which is
+	# the argument for removing them.
 
 	# --- And the card ----------------------------------------------------------
 	# The fire's count is not on it. It is drawn over the fire, where a player

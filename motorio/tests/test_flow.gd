@@ -130,6 +130,9 @@ func _run() -> void:
 	_assert(not main.tool_unlocked(main.TOOL_BUILD_GUN),
 		"the gun is not in the row before anything can be built")
 	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	main.sim.unlocked[Defs.M_MINER] = true
 	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
 	_assert(main.holding_build_gun(), "and it is slot 2 once it is")
 	_press(main, KEY_B)
@@ -222,10 +225,28 @@ func _run() -> void:
 	var kitty = main.sim.cats[0]
 	# Interaction targets the faced tile, not the one underfoot.
 	kitty.pos = main.sim.cell_centre(main.player.facing_cell())
+	# With the pickaxe in hand. The build gun outranks a cat as of 1.0.8 -- a
+	# player aiming a gun at a cell they can build on has said what they mean --
+	# so with the gun selected this tap would put a machine down instead, which
+	# is the rule below rather than a failure here.
+	main.tool_index = 0
 	main.touch_primary()
 	_assert(main.sim.carried_cat == kitty, "a touch tap can pick up a cat")
 	main.touch_primary()
 	_assert(main.sim.carried_cat == null, "a second tap puts it down again")
+
+	# And the rule itself: gun in hand, buildable cell, cat standing on it.
+	main.tool_index = 1
+	main.selected_index = 0
+	var spot: Vector2i = main.player.facing_cell()
+	main.sim.ore[spot] = Defs.ITEM_HEATSTONE
+	main.sim.machines.erase(spot)
+	main.sim.unlocked[Defs.M_MINER] = true
+	main.sim.stock[Defs.ITEM_HEATSTONE] = 50
+	kitty.pos = main.sim.cell_centre(spot)
+	main.touch_primary()
+	_assert(main.sim.machine_at(spot) != null, "건설총을 들었으면 고양이가 있어도 건설한다")
+	_assert(main.sim.carried_cat == null, "그리고 고양이를 들지 않는다")
 
 	# Z is tap-to-build, hold-to-rotate on PC. Nothing may happen on press alone,
 	# or a held key would build and rotate at once.
@@ -300,6 +321,25 @@ func _run() -> void:
 	_assert(not main.player.locked, "the player can move again in the morning")
 	_assert(main.day_stones() == 0, "the daily total starts fresh each morning")
 
+	# The morning card lists what the day brought in, material by material. It
+	# used to lead with lifetime totals, which is a ledger rather than a report:
+	# the number that says whether a day was any good is what came out of the
+	# ground on it.
+	_assert(main.day_collected().is_empty(), "새 아침에는 아직 모은 것이 없다")
+	main.sim._gain(Defs.ITEM_HEATSTONE, 4)
+	main.sim._gain(Defs.ITEM_COPPER, 2)
+	var report: Array = main.day_collected()
+	_assert(report.size() == 2, "모은 자원만 줄이 생긴다: %d" % report.size())
+	var lines := {}
+	for entry: Array in report:
+		lines[int(entry[0])] = int(entry[1])
+	_assert(int(lines.get(Defs.ITEM_HEATSTONE, 0)) == 4, "열석 4")
+	_assert(int(lines.get(Defs.ITEM_COPPER, 0)) == 2, "구리 2")
+	# Spending does not erase the day's work: the report counts gains, and a day
+	# where she mined forty and built with forty is not an empty day.
+	main.sim.stock[Defs.ITEM_HEATSTONE] = 0
+	_assert(main.day_collected().size() == 2, "쓴 것과 모은 것은 다른 이야기다")
+
 	# Daytime inside the warm radius must still recover heat, or the night rule
 	# would simply be a permanent drain.
 	main.player.position = Vector2(main.sim.core_cell) * float(Defs.TILE)
@@ -368,9 +408,11 @@ func _assert(condition: bool, message: String) -> void:
 ## wants to build has to open and fund the base first.
 func _open(sim) -> void:
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
-	sim.stock[Defs.ITEM_ENERGY] = 500

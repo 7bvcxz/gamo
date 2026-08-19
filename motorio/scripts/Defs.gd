@@ -203,12 +203,11 @@ const COL_TEXT_DIM := Color("8fa0bd")
 ## order the player sees, which is the only place the order matters.
 const ITEM_CRYSTAL := 0
 const ITEM_COPPER := 1
-const ITEM_ENERGY := 2
-const ITEM_HEATSTONE := 3
+const ITEM_HEATSTONE := 2
 ## Ordinary stone, out of the boulders lying on the snow. The one material that
 ## is everywhere and never runs out, which is what makes it the floor the rest
 ## of the costs are measured against.
-const ITEM_STONE := 4
+const ITEM_STONE := 3
 ## The one material that only comes out of the ship. Nothing on this planet
 ## makes it -- a core part is a piece of what flew her here -- and it is appended
 ## at the end because an item's number is written into every save and belt.
@@ -218,11 +217,11 @@ const ITEM_STONE := 4
 ## deleting rather than leaving: nothing produced it, so it could only ever be a
 ## row in the counter list that never appeared and a name that had to be kept
 ## true. Removing it moved this number, hence the save schema bump.
-const ITEM_CORE_PART := 5
+const ITEM_CORE_PART := 4
 
-const ITEM_NAMES := ["수정조각", "구리광석", "에너지결정", "열석", "돌", "코어부품"]
+const ITEM_NAMES := ["수정조각", "구리광석", "열석", "돌", "코어부품"]
 ## Short forms for the status panel, where the counters share one row.
-const ITEM_SHORT := ["수정", "구리", "에너지", "열석", "돌", "코어부품"]
+const ITEM_SHORT := ["수정", "구리", "열석", "돌", "코어부품"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
@@ -233,8 +232,8 @@ const ITEM_SHORT := ["수정", "구리", "에너지", "열석", "돌", "코어�
 ## the player is looking for.
 ## A core part is violet, which nothing else on this planet is -- it is the only
 ## material here that was manufactured.
-const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 217, 138),
-	Color8(255, 122, 48), Color8(150, 152, 158), Color8(186, 148, 255)]
+const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 122, 48),
+	Color8(150, 152, 158), Color8(186, 148, 255)]
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
 
@@ -297,7 +296,7 @@ const FACE_BAND := 3.0
 ## tutorial is built.
 ## The order the counters appear in, which is the order the player meets them.
 const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITEM_COPPER,
-	ITEM_ENERGY, ITEM_CORE_PART]
+	ITEM_CORE_PART]
 
 ## The seams, poorest first. The wreck pays in these rather than in a list of its
 ## own, so what a piece is worth follows the world's own ladder instead of being
@@ -354,7 +353,6 @@ const DEBRIS_CORE_ONE := 0.20
 const HAND_MINE_PERIOD := 10.0
 ## Crystal in, energy out. Two-to-one at five seconds means one exchanger keeps
 ## up with four miners, so miners stay the bottleneck rather than the converter.
-const CRYSTAL_COST_ENERGY := 2
 
 ## --- Exchanger recipes --------------------------------------------------------
 ## The device this genre uses to turn efficiency from an answer into a choice.
@@ -363,33 +361,6 @@ const CRYSTAL_COST_ENERGY := 2
 ## generators, belts and splitters are made of, and it mines at half the rate.
 ## So the right recipe depends on which resource your map and your factory have
 ## spare, which is exactly the question a dominant strategy would erase.
-const RECIPE_PLAIN := 0
-const RECIPE_ALLOY := 1
-const RECIPES := [
-	{"in": {ITEM_CRYSTAL: 2}, "out": 1, "period": 5.0, "name": "기본"},
-	{"in": {ITEM_CRYSTAL: 2, ITEM_COPPER: 1}, "out": 3, "period": 10.0, "name": "구리 촉매"},
-]
-
-## Recipes open the same way machines do: by holding the resource once.
-const RECIPE_UNLOCK_ITEM := [-1, ITEM_COPPER]
-
-static func recipe_line(index: int) -> String:
-	var recipe: Dictionary = RECIPES[index]
-	var parts: Array[String] = []
-	for item_type: int in recipe["in"]:
-		parts.append("%s %d" % [ITEM_SHORT[item_type], int(recipe["in"][item_type])])
-	return "%s → 에너지 %d · %.0f초" % [" + ".join(parts), int(recipe["out"]), float(recipe["period"])]
-
-## Energy per minute for a recipe, and crystal spent per energy produced. The
-## second number is the one that makes the trade legible.
-static func recipe_rate(index: int) -> float:
-	var recipe: Dictionary = RECIPES[index]
-	return float(recipe["out"]) * per_minute(float(recipe["period"]))
-
-static func recipe_crystal_cost(index: int) -> float:
-	var recipe: Dictionary = RECIPES[index]
-	return float(recipe["in"].get(ITEM_CRYSTAL, 0)) / float(recipe["out"])
-const EXCHANGER_PERIOD := 5.0
 const COPPER_PERIOD := 20.0
 
 ## --- Throughput ---------------------------------------------------------------
@@ -407,12 +378,8 @@ static func throughput_line(type: int) -> String:
 		M_MINER:
 			# Whatever the seam under it holds -- there is no longer one ore.
 			return "광맥의 자원 %.0f/분 · 고양이 또는 전력 %.1f" % [per_minute(MINER_PERIOD), MINER_POWER_DRAW]
-		M_EXCHANGER:
-			return "수정 %.0f/분 → 에너지 %.0f/분" % [
-				per_minute(EXCHANGER_PERIOD) * float(CRYSTAL_COST_ENERGY),
-				per_minute(EXCHANGER_PERIOD)]
 		M_GENERATOR:
-			return "에너지 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
+			return "수정조각 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
 		M_BELT:
 			return "%.0f/분 · 칸당 %.1f초 · F로 등급" % [BELT_SPEED / 0.34 * 60.0, 1.0 / BELT_SPEED]
 		M_SPLITTER:
@@ -425,11 +392,11 @@ static func throughput_line(type: int) -> String:
 			return "Z 로 연료 투입 · 열석을 넣어 온기를 넓힙니다"
 	return ""
 
-## The ratio that actually matters, stated plainly. One exchanger keeps up with
-## four miners; a player who knows that builds in fours.
+## The ratio that actually matters, stated plainly: how many miners one generator
+## can keep fed, which is what decides how many of each to build.
 static func ratio_hint() -> String:
-	var miners: float = (per_minute(EXCHANGER_PERIOD) * float(CRYSTAL_COST_ENERGY)) / per_minute(MINER_PERIOD)
-	return "교환기 1대 = 채굴기 %.0f대" % miners
+	var miners: float = per_minute(MINER_PERIOD) / per_minute(GENERATOR_PERIOD)
+	return "발전기 1대 = 수정 채굴기 %.0f대" % miners
 
 # --- Electricity -------------------------------------------------------------
 ## Power is a rate, not a stock: it never accumulates, so there is no battery to
@@ -574,13 +541,17 @@ static func roll_rarity(roll: float) -> int:
 const M_CORE := 0
 const M_MINER := 1
 const M_BELT := 2
-const M_EXCHANGER := 3
-const M_GENERATOR := 4
-const M_SPLITTER := 5
+## The crystal-to-energy exchanger lived at 3 until 1.0.8. It was the one
+## machine in the game that made a material out of another material, and what it
+## made had exactly one use -- feeding the generator -- so the whole line was a
+## middleman between the crystal in the snow and the power it was always going to
+## become. The generator eats crystal now, and the energy crystal with it.
+const M_GENERATOR := 3
+const M_SPLITTER := 4
 
 ## Hotbar order is the order they unlock, so the row grows left to right as the
 ## player earns it rather than showing four greyed slots on the first frame.
-const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_SPLITTER, M_GENERATOR]
+const BUILDABLE: Array[int] = [M_MINER, M_BELT, M_SPLITTER, M_GENERATOR]
 
 ## The machines you can walk over. Everything else is a solid object standing on
 ## the plateau, which is what a picture of a drill or a furnace already says.
@@ -595,16 +566,15 @@ const BUILDABLE: Array[int] = [M_MINER, M_EXCHANGER, M_BELT, M_SPLITTER, M_GENER
 ## between them.
 const WALKABLE_MACHINES: Array[int] = [M_BELT, M_SPLITTER]
 
-const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "수정에너지교환기", "발전기", "분배기"]
+const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "발전기", "분배기"]
 ## Hotbar cards are one slot wide and the full names do not fit beside the colour
 ## swatch. The long name still appears in the hint line above the row.
-const MACHINE_SHORT := ["코어", "채굴기", "벨트", "교환기", "발전기", "분배기"]
+const MACHINE_SHORT := ["코어", "채굴기", "벨트", "발전기", "분배기"]
 ## Machines are bought with materials now, never with heat.
 const MACHINE_COSTS := [
 	{},
 	{ITEM_HEATSTONE: 5},
 	{ITEM_COPPER: 3},
-	{ITEM_CRYSTAL: 20},
 	{ITEM_COPPER: 10},
 	{ITEM_COPPER: 2},
 ]
@@ -612,8 +582,7 @@ const MACHINE_HINTS := [
 	"",
 	"광맥 위에 설치하고 고양이를 올려놓으세요 · 고양이보다 빠릅니다",
 	"자원을 기지까지 끊김 없이 나릅니다",
-	"수정조각 2개를 에너지결정 1개로 바꿉니다",
-	"에너지결정을 태워 전력 1.0을 공급합니다",
+	"수정조각을 태워 전력 1.0을 공급합니다",
 	"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
 ]
 
@@ -626,11 +595,6 @@ static func machine_io(type: int) -> Array[String]:
 			return ["입력   없음 · 광맥 위에만 설치",
 				"출력   광맥의 자원 %.0f/분" % per_minute(MINER_PERIOD),
 				"일손   고양이 1마리 또는 전력 %.1f" % MINER_POWER_DRAW]
-		M_EXCHANGER:
-			var recipe: Dictionary = RECIPES[RECIPE_PLAIN]
-			return ["입력   수정조각 %d" % int(recipe["in"][ITEM_CRYSTAL]),
-				"출력   에너지결정 %d · %.0f초마다" % [int(recipe["out"]), float(recipe["period"])],
-				"제법   F로 전환 · 구리 촉매는 한 번에 3개"]
 		M_BELT:
 			return ["입력   뒤쪽에서 받음",
 				"출력   앞쪽으로 %.0f/분" % (BELT_SPEED / 0.34 * 60.0),
@@ -640,7 +604,7 @@ static func machine_io(type: int) -> Array[String]:
 				"출력   좌우 두 줄로 번갈아",
 				"특성   막힌 쪽은 건너뜀 · R로 축 회전"]
 		M_GENERATOR:
-			return ["입력   에너지결정 1 · %.0f초마다" % GENERATOR_PERIOD,
+			return ["입력   수정조각 1 · %.0f초마다" % GENERATOR_PERIOD,
 				"출력   전력 %.1f" % GENERATOR_OUTPUT,
 				"특성   전력은 저장되지 않는 비율"]
 	return []
@@ -648,7 +612,26 @@ static func machine_io(type: int) -> Array[String]:
 ## What each machine needs before it appears in the hotbar. The first heat stone
 ## opens the miner; the first crystal opens the exchanger line; the first copper
 ## opens power.
-const MACHINE_UNLOCK_ITEM := [-1, ITEM_HEATSTONE, ITEM_COPPER, ITEM_CRYSTAL, ITEM_COPPER, ITEM_COPPER]
+## Which material opens each machine, or -1 for the ones opened another way.
+##
+## The miner used to open the moment a single heat stone was held, which meant
+## the build gun arrived with a recipe already in it and the first thing a new
+## player saw in the build list was a machine they had no reason for yet. It is
+## opened by holding the gun with stone enough to pay for one instead -- the tool
+## in her hand and the material in her pack, which is the sentence the whole
+## build list is made of.
+const MACHINE_UNLOCK_ITEM := [-1, -1, ITEM_COPPER, ITEM_COPPER, ITEM_COPPER]
+## Stone in the pack, with the gun in her hand, that opens the miner.
+const MINER_UNLOCK_STONES := 5
+
+## What opens a machine, for the machines a material does not open. Said in the
+## build list, where a locked row has to explain itself or it is a grey rectangle
+## the player learns to ignore.
+static func unlock_line(type: int) -> String:
+	if type == M_MINER:
+		return "건물건설총을 들고 %s %d개를 모으면 해금됩니다" \
+			% [ITEM_NAMES[ITEM_HEATSTONE], MINER_UNLOCK_STONES]
+	return "아직 해금되지 않았습니다"
 ## Boulders take longer than a seam: a rock is a rock and a seam is a seam, and
 ## the difference is what makes walking to a seam worth it.
 const ROCK_MINE_PERIOD := 14.0
@@ -875,6 +858,15 @@ const TRACK_CAT := 1
 const TRACK_AUTO := 2
 const TRACK_NAMES := ["기지", "고양이", "자동화"]
 
+## What is left after 1.0.8: the fire, and nothing else.
+##
+## The cat track and the automation track are gone -- seven rungs that told the
+## player to go and look for life, to carry the ice home, to hand the work over,
+## to feed what works for them, to dig by machine, to stop carrying, to close a
+## loop. Every one of those is a thing the game already teaches by having it
+## happen, and a card listing them turns discovering a planet into working
+## through a list. What is left is the one line that cannot be discovered by
+## looking: how far the fire reaches and that it can reach further.
 const MISSIONS: Array[Dictionary] = [
 	{"id": "BASE2", "track": TRACK_BASE, "line": "불이 꺼져간다..  기지의 불씨를 살려야 한다",
 		"why": "거처가 서면 바로 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 업그레이드는 세상에 무언가가 더 있다는 것을 알게 되는 일이다."},
@@ -883,21 +875,7 @@ const MISSIONS: Array[Dictionary] = [
 	{"id": "BASE4", "track": TRACK_BASE, "line": "구리가 있는 곳까지",
 		"why": "3단계에 닿으면 열린다. 15칸이 구리 고리의 안쪽 가장자리이고 구리가 벨트의 입구다 — 이 줄은 자동화 계열이 열리는 문이기도 하다."},
 
-	{"id": "CAT_LOOK", "track": TRACK_CAT, "line": "이 행성에 다른 것이 있는지 본다",
-		"why": "기지가 2단계가 되어 온기가 9칸이 되면 열린다. 그 순간 처음으로 얼어붙은 고양이가 불빛 안에 들어오는데, 카드가 그것을 가리키지 않으면 플레이어는 눈밭의 얼음 덩어리를 지형으로 보고 지나간다."},
-	{"id": "CAT_THAW", "track": TRACK_CAT, "line": "얼음 속의 것을 불 곁으로",
-		"why": "얼어붙은 고양이를 실제로 본 뒤에 열린다. 무엇을 해야 하는지는 말하지 않는다 — 안아 오는 것과 불 가까이 두는 것은 들어 보면 알게 된다."},
-	{"id": "CAT_WORK", "track": TRACK_CAT, "line": "혼자 하던 일을 나눈다",
-		"why": "첫 고양이가 깨어나면 열린다. 광맥이든 기계든 어디에 놓든 일한다는 것을 여기서 배운다."},
-	{"id": "CAT_FEED", "track": TRACK_CAT, "line": "일하는 것은 먹어야 한다",
-		"why": "고양이가 실제로 배고파졌을 때 열린다. 나흘 걸린다 — 사료 상자를 처음부터 세워 두는 것은 일어나지도 않은 문제 옆에 답을 놓는 것이고, 이 줄은 그 문제가 실제로 생긴 날에 나타난다."},
 
-	{"id": "AUTO_MINER", "track": TRACK_AUTO, "line": "손 대신 기계가 캐게 한다",
-		"why": "`[질문]` 사용자가 자동화 계열을 비워 두었으므로 초안이다. 채굴기를 지을 열석이 모였을 때 열린다 — 지을 수 있게 된 그 순간이지, 그 전이 아니다."},
-	{"id": "AUTO_BELT", "track": TRACK_AUTO, "line": "나르는 일을 그만둔다",
-		"why": "`[질문]` 초안. 첫 구리를 손에 넣어 벨트가 해금되면 열린다."},
-	{"id": "AUTO_LINE", "track": TRACK_AUTO, "line": "아무도 만지지 않는 한 줄",
-		"why": "`[질문]` 초안. 벨트를 한 칸이라도 놓으면 열리고, 벨트가 기지에 무언가를 실어 넣으면 닫힌다. 이 게임이 향하는 그림이 실제로 한 번 돌아가는 순간이다."},
 ]
 
 ## The rungs of one track, in order.
@@ -1579,7 +1557,6 @@ static func machine_color(type: int) -> Color:
 	match type:
 		M_CORE: return COL_CORE
 		M_MINER: return COL_CAT_FUR
-		M_EXCHANGER: return Color8(210, 120, 52)
 		M_GENERATOR: return Color8(120, 190, 235)
 		M_SPLITTER: return Color8(150, 210, 160)
 		M_BELT: return COL_BELT_RIM

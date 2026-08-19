@@ -26,12 +26,14 @@ func _run() -> void:
 	main.state = main.State.PLAY
 	var sim = main.sim
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
-	sim.stock[Defs.ITEM_ENERGY] = 500
 
 	# --- The key ---------------------------------------------------------------
 	# C is the mine key. Facing nothing it has to stay the mine key, or the pad
@@ -164,37 +166,37 @@ func _run() -> void:
 
 	# --- Inputs are measured too ----------------------------------------------
 	# A machine only shows the items it is rated for or has actually seen, so an
-	# exchanger names its recipe's inputs before anything has ever reached it.
+	# generator names its recipe's inputs before anything has ever reached it.
 	var pad := Vector2i(9999, 9999)
 	for dx in range(-8, 9):
 		for dy in range(-8, 9):
 			var candidate: Vector2i = sim.core_cell + Vector2i(dx, dy)
-			if sim.can_build(Defs.M_EXCHANGER, candidate) == "":
+			if sim.can_build(Defs.M_GENERATOR, candidate) == "":
 				pad = candidate
 				break
 		if pad != Vector2i(9999, 9999):
 			break
-	_assert(pad != Vector2i(9999, 9999), "there is somewhere to put an exchanger")
-	sim.build(Defs.M_EXCHANGER, pad, Vector2i.RIGHT)
-	var exchanger = sim.machine_at(pad)
-	_assert(exchanger != null and exchanger.type == Defs.M_EXCHANGER, "the exchanger is built")
-	var inputs: Array[int] = sim.meter_items(exchanger, false)
+	_assert(pad != Vector2i(9999, 9999), "there is somewhere to put an generator")
+	sim.build(Defs.M_GENERATOR, pad, Vector2i.RIGHT)
+	var generator = sim.machine_at(pad)
+	_assert(generator != null and generator.type == Defs.M_GENERATOR, "the generator is built")
+	var inputs: Array[int] = sim.meter_items(generator, false)
 	_test_no_follow_readout(main)
 	_assert(inputs.has(Defs.ITEM_CRYSTAL), "its input side lists crystal before any arrives")
-	_assert(sim.meter_status(exchanger).find("입력 부족") >= 0,
-		"and an empty exchanger reports starvation: '%s'" % sim.meter_status(exchanger))
+	_assert(sim.meter_status(generator).find("연료 없음") >= 0,
+		"and an empty generator reports starvation: '%s'" % sim.meter_status(generator))
 
 	# Feed it by hand and check the input counter moves. _push_into is the single
 	# place inputs are counted, so this also pins that a machine added later
 	# cannot forget to count its own.
-	var before: float = sim.meter_rate(exchanger, Defs.ITEM_CRYSTAL, false)
+	var before: float = sim.meter_rate(generator, Defs.ITEM_CRYSTAL, false)
 	for index in 6:
 		sim._push_into(pad, Defs.ITEM_CRYSTAL, pad - Vector2i.RIGHT)
 	# Long enough to clear the minimum window. A rate divided by a quarter of a
 	# second is noise, and meter_rate deliberately reports nothing until it has
 	# something worth dividing by.
 	sim.tick(3.0)
-	_assert(sim.meter_rate(exchanger, Defs.ITEM_CRYSTAL, false) > before,
+	_assert(sim.meter_rate(generator, Defs.ITEM_CRYSTAL, false) > before,
 		"items pushed into a machine show up on its input side")
 
 	# --- The card fits on the screen ------------------------------------------

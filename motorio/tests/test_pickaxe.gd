@@ -29,6 +29,9 @@ func _run() -> void:
 	# with a factory standing -- which made slot one a tool she could not use for
 	# the first ten minutes.
 	main.sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	main.sim.unlocked[Defs.M_MINER] = true
 	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	_assert(main.tool_index == 0, "곡괭이가 1번이다")
 	_assert(main.holding_pickaxe() and not main.holding_build_gun(), "1번은 곡괭이")

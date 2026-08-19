@@ -66,7 +66,6 @@ const KIT_OPEN_DRAW := 26.0
 static func kit_art(kind: int) -> Texture2D:
 	return KIT_BASE_ART if kind == Defs.KIT_BASE else KIT_SHELTER_ART
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
-const EXCHANGER_ART: Texture2D = preload("res://assets/objects/exchanger.png")
 const GENERATOR_ART: Texture2D = preload("res://assets/objects/generator.png")
 ## The transport pieces. All three are one cross-section swept along a path by
 ## tools/sprite/build_belt.py, and they are drawn in one canonical orientation --
@@ -248,7 +247,6 @@ func _draw() -> void:
 		match machine.type:
 			Defs.M_CORE: _draw_core(machine, Vector2(cell) * tile, tile)
 			Defs.M_MINER: _draw_miner(machine, Vector2(cell) * tile, tile)
-			Defs.M_EXCHANGER: _draw_furnace(machine, Vector2(cell) * tile, tile)
 			Defs.M_GENERATOR: _draw_generator(machine, Vector2(cell) * tile, tile)
 			Defs.M_SPLITTER: _draw_splitter(machine, Vector2(cell) * tile, tile)
 	for cell: Vector2i in sim.machines:
@@ -654,7 +652,7 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(centre + Vector2(0.0, 1.0), 6.0, Color(0.55, 0.82, 0.98, beat * 0.75))
 	draw_circle(centre + Vector2(0.0, 1.0), 2.4, Color(0.92, 0.99, 1.0, beat))
 	# Fuel sits in the same pip row every other machine uses.
-	_draw_pip(centre + Vector2(0, 13), Defs.ITEM_ENERGY, int(machine.buffer.get(Defs.ITEM_ENERGY, 0)))
+	_draw_pip(centre + Vector2(0, 13), Defs.ITEM_CRYSTAL, int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)))
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
@@ -923,32 +921,6 @@ func _draw_food_bin(tile: float) -> void:
 	_object_art(FOOD_BIN_ART, at, FOOD_BIN_DRAW)
 	# The count is drawn after the animals -- see _draw_machine_marks.
 
-func _draw_furnace(machine: Sim.Machine, px: Vector2, tile: float) -> void:
-	var c: Vector2 = px + Vector2.ONE * tile * 0.5
-	var frost: float = _frost(machine)
-	# The recipe is crystal-only. This still asked for copper, left over from the
-	# old smelter, so the window never lit no matter how well the line ran.
-	var held: int = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0))
-	var ready: bool = held >= Defs.CRYSTAL_COST_ENERGY
-	var glow: float = (0.45 + sin(pulse * 6.0) * 0.25) if ready else 0.12
-
-	_shadow(c + Vector2(0, 12), 11.0)
-	_object_art(EXCHANGER_ART, c, MACHINE_ART_DRAW,
-		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
-	# The window the art already has, lit from behind. Drawn rather than baked
-	# because it is the readout: dim means it is short of crystal, and a painted
-	# glow would say "working" while the machine sat empty.
-	draw_circle(c + Vector2(0.0, 1.0), 6.5, Color(1.0, 0.62, 0.24, glow))
-	# The output arrow is drawn after the cats, in _draw_machine_marks.
-	# A copper stud marks the alloy recipe, so two exchangers side by side on
-	# different recipes are told apart without selecting either.
-	if machine.recipe != Defs.RECIPE_PLAIN:
-		draw_circle(c + Vector2(0, -9), 2.4, Defs.ITEM_COLORS[Defs.ITEM_COPPER])
-		draw_circle(c + Vector2(0, -9), 2.4, Defs.OUTLINE, false, 1.0)
-	# One pip row for the one input the recipe actually takes.
-	_draw_pip(c + Vector2(0, 13), Defs.ITEM_CRYSTAL, held)
-	if machine.flash > 0.0:
-		draw_circle(c, 16.0 + machine.flash * 14.0, Color(1, 0.9, 0.7, machine.flash * 0.55), false, 2.0)
 
 ## Every stalled machine, drawn after the cats.
 ##
@@ -976,8 +948,6 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		# these are measured from, so an arrow drawn underneath is invisible in
 		# exactly the case where the machine is running.
 		if machine.type == Defs.M_MINER:
-			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
-		if machine.type == Defs.M_EXCHANGER:
 			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
 		if machine.stalled:
 			_draw_stall(on, machine, centre)

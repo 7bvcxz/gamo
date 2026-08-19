@@ -34,7 +34,7 @@ export function Economy() {
                 <td>{name}</td>
                 <td>{name === balance.items.fuel ? '기지 연료' : '—'}</td>
                 <td>
-                  {index === 0 && '손으로 캘 수 있는 유일한 자원. 교환기의 입력'}
+                  {index === 0 && '손으로 캘 수 있는 유일한 자원. 발전기의 연료'}
                   {index === 1 && '설비 재료. 채굴 속도가 절반'}
                   {index === 2 && '발전기 연료'}
                 </td>
@@ -59,7 +59,6 @@ export function Economy() {
             <tr><td>손 채굴</td><td>{n(balance.rates.hand_mine_seconds, 1)}초</td><td>{n(60 / balance.rates.hand_mine_seconds, 1)}</td></tr>
             <tr><td>채굴기 (수정)</td><td>{n(balance.rates.miner_seconds, 1)}초</td><td>{n(60 / balance.rates.miner_seconds, 1)}</td></tr>
             <tr><td>채굴기 (구리)</td><td>{n(balance.rates.copper_seconds, 1)}초</td><td>{n(60 / balance.rates.copper_seconds, 1)}</td></tr>
-            <tr><td>교환기</td><td>{n(balance.rates.exchanger_seconds, 1)}초</td><td>{n(60 / balance.rates.exchanger_seconds, 1)}</td></tr>
             <tr><td>발전기 연료 소모</td><td>{n(balance.rates.generator_seconds, 1)}초</td><td>{n(60 / balance.rates.generator_seconds, 1)}</td></tr>
           </tbody>
         </table>
@@ -69,29 +68,6 @@ export function Economy() {
         <b>다른 곳에 있는 것</b>이고, 자동화의 동기는 속도가 아니라 병렬성입니다.
       </p>
       <p className="quote-ish"><b>{balance.rates.ratio_hint}</b></p>
-
-      <h2>제법</h2>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr><th>제법</th><th>식</th><th>에너지/분</th><th>에너지당 수정</th></tr>
-          </thead>
-          <tbody>
-            {balance.recipes.map((recipe) => (
-              <tr key={recipe.name}>
-                <td>{recipe.name}</td>
-                <td>{recipe.line}</td>
-                <td>{n(recipe.energy_per_minute)}</td>
-                <td>{n(recipe.crystal_per_energy, 2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p>
-        어느 쪽도 상위 호환이 아니어야 합니다. 촉매는 수정을 훨씬 아끼지만 구리를 먹고, 구리는 채굴이
-        절반 속도이며 설비 재료이기도 합니다. 정답은 <b>내 지도에 무엇이 남는가</b>에 달립니다.
-      </p>
 
       <h2>광맥 순도</h2>
       <div className="table-wrap">

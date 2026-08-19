@@ -29,15 +29,17 @@ func _run() -> void:
 		"a full swing yields one heat stone")
 	_assert(sim.hand_mine(Vector2i(500, 500), 99.0) < 0, "swinging at bare ground yields nothing")
 
-	# The two lines open separately now, and in the order the player meets them.
-	# The miner is the thing you want after carrying stones by hand; the
-	# exchanger is the thing you want after finding crystal, which is a walk away.
+	# The build list opens in the order the player meets it, and the first line is
+	# not opened by a material at all: the miner arrives with the gun, and the
+	# gun arrives from the fire. Copper opens everything after it.
 	var opened: Array[int] = sim.note_resource_seen(Defs.ITEM_HEATSTONE)
-	_assert(opened.has(Defs.M_MINER), "the first heat stone opens the miner")
-	_assert(not opened.has(Defs.M_EXCHANGER), "and not the exchanger")
-	_assert(sim.note_resource_seen(Defs.ITEM_CRYSTAL).has(Defs.M_EXCHANGER),
-		"the first crystal opens the exchanger")
-	_assert(not sim.is_unlocked(Defs.M_GENERATOR), "but the power line stays shut")
+	_assert(opened.is_empty(), "열석을 봤다고 열리는 것은 없다")
+	_assert(not sim.is_unlocked(Defs.M_MINER), "채굴기도 아직이다")
+	_assert(sim.note_resource_seen(Defs.ITEM_CRYSTAL).is_empty(),
+		"수정도 이제는 아무것도 열지 않는다 — 교환기와 함께 사라진 줄이다")
+	sim.unlocked[Defs.M_MINER] = true
+	_assert(sim.note_resource_seen(Defs.ITEM_COPPER).has(Defs.M_GENERATOR),
+		"구리가 전력 줄을 연다")
 
 	# --- Hauling: cats clear the floor, slowly --------------------------------
 	sim.grant_cats(1)
@@ -73,7 +75,6 @@ func _run() -> void:
 	# the seam the circle is supposed to be about.
 	var fire := Sim.new()
 	fire.setup(4242)
-	fire.stock[Defs.ITEM_ENERGY] = 20
 	fire.stock[Defs.ITEM_CRYSTAL] = 20
 	fire.stock[Defs.ITEM_COPPER] = 20
 	_assert(not fire.has_fuel(), "수정도 구리도 에너지결정도 연료가 아니다")
@@ -82,17 +83,18 @@ func _run() -> void:
 	var burnt: Dictionary = fire.deposit_fuel()
 	_assert(burnt.size() == 1 and burnt.has(Defs.ITEM_HEATSTONE),
 		"투입은 열석만 가져간다")
-	_assert(int(fire.stock.get(Defs.ITEM_ENERGY, 0)) == 20, "나머지는 가방에 남는다")
+	_assert(int(fire.stock.get(Defs.ITEM_CRYSTAL, 0)) == 20, "나머지는 가방에 남는다")
 	fire.free()
 
-	# One exchanger keeps up with more than one miner, so miners stay the
-	# bottleneck. It used to be four; the miner doubled to 12/min and it is two,
-	# which is the same property with less headroom.
+	# One generator burns less than one miner produces, so a player who wants
+	# power builds miners first and the seam stays the bottleneck. The exchanger
+	# used to hold this property; the generator inherited it when the exchanger
+	# was removed and the crystal went straight into the fire.
 	var miner_rate: float = 1.0 / Defs.MINER_PERIOD
-	var exchanger_intake: float = float(Defs.CRYSTAL_COST_ENERGY) / Defs.EXCHANGER_PERIOD
-	var ratio: float = exchanger_intake / miner_rate
+	var generator_intake: float = 1.0 / Defs.GENERATOR_PERIOD
+	var ratio: float = miner_rate / generator_intake
 	_assert(ratio >= 1.5,
-		"one exchanger absorbs more than one miner (%.1f)" % ratio)
+		"one miner feeds more than one generator (%.1f)" % ratio)
 
 	# The gate that matters: reaching copper must be days, not hours.
 	#
@@ -151,16 +153,16 @@ func _run() -> void:
 	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "a generator goes down")
 	sim.tick(0.01)
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "an unfuelled generator supplies nothing")
-	sim.machine_at(gen_cell).buffer[Defs.ITEM_ENERGY] = 3
+	sim.machine_at(gen_cell).buffer[Defs.ITEM_CRYSTAL] = 3
 	sim.tick(0.01)
 	_assert(sim.power_capacity >= Defs.GENERATOR_OUTPUT, "a fuelled one supplies its rating")
 	_assert(sim.power_capacity > sim.power_draw, "one generator carries many belts")
 
 	# Fuel is consumed, so power is an ongoing cost rather than a one-off build.
-	var fuel_before: int = int(sim.machine_at(gen_cell).buffer[Defs.ITEM_ENERGY])
+	var fuel_before: int = int(sim.machine_at(gen_cell).buffer[Defs.ITEM_CRYSTAL])
 	for step in int(Defs.GENERATOR_PERIOD / 0.1) + 4:
 		sim.tick(0.1)
-	_assert(int(sim.machine_at(gen_cell).buffer[Defs.ITEM_ENERGY]) < fuel_before,
+	_assert(int(sim.machine_at(gen_cell).buffer[Defs.ITEM_CRYSTAL]) < fuel_before,
 		"a running generator burns its fuel")
 
 	# --- Splitters: the grammar for writing a ratio down ----------------------
@@ -169,6 +171,9 @@ func _run() -> void:
 	var split_sim := Sim.new()
 	split_sim.setup(31337)
 	split_sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	split_sim.unlocked[Defs.M_MINER] = true
 	split_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	split_sim.note_resource_seen(Defs.ITEM_COPPER)
 	split_sim.stock[Defs.ITEM_COPPER] = 200
@@ -265,27 +270,33 @@ func _run() -> void:
 
 	# --- Full refund: tearing down must cost nothing --------------------------
 	grade_sim.note_resource_seen(Defs.ITEM_HEATSTONE)
-	grade_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
-	grade_sim.stock[Defs.ITEM_CRYSTAL] = 50
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	grade_sim.unlocked[Defs.M_MINER] = true
+	grade_sim.note_resource_seen(Defs.ITEM_COPPER)
+	grade_sim.stock[Defs.ITEM_COPPER] = 50
 	grade_sim.stock[Defs.ITEM_HEATSTONE] = 50
-	var before_stock: int = int(grade_sim.stock[Defs.ITEM_CRYSTAL])
+	var before_stock: int = int(grade_sim.stock[Defs.ITEM_COPPER])
 	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6)
 	grade_sim.ore.erase(spot)
 	grade_sim.machines.erase(spot)
-	_assert(grade_sim.build(Defs.M_EXCHANGER, spot, Vector2i.RIGHT), "an exchanger goes down")
-	_assert(int(grade_sim.stock[Defs.ITEM_CRYSTAL]) < before_stock, "and costs materials")
+	_assert(grade_sim.build(Defs.M_GENERATOR, spot, Vector2i.RIGHT), "a generator goes down")
+	_assert(int(grade_sim.stock[Defs.ITEM_COPPER]) < before_stock, "and costs materials")
 	_assert(grade_sim.demolish(spot), "and comes back up")
-	_assert(int(grade_sim.stock[Defs.ITEM_CRYSTAL]) == before_stock,
+	_assert(int(grade_sim.stock[Defs.ITEM_COPPER]) == before_stock,
 		"with every material returned, so rebuilding is free")
 	grade_sim.free()
 
 	# --- Power scales the factory, cats no longer cap it ----------------------
-	# The ratio the game now advertises (one exchanger to four miners) is useless
+	# The ratio the game now advertises (one generator to several miners) is useless
 	# if four miners need four cats and cats come from walking. Electricity is
 	# what turns factory scale back into an engineering problem.
 	var grid := Sim.new()
 	grid.setup(9090)
 	grid.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	grid.unlocked[Defs.M_MINER] = true
 	grid.note_resource_seen(Defs.ITEM_CRYSTAL)
 	grid.note_resource_seen(Defs.ITEM_COPPER)
 	grid.stock[Defs.ITEM_CRYSTAL] = 200
@@ -306,7 +317,7 @@ func _run() -> void:
 	var gen2 := Vector2i(grid.core_cell.x + 8, grid.core_cell.y + 8)
 	grid.ore.erase(gen2)
 	_assert(grid.build(Defs.M_GENERATOR, gen2, Vector2i.RIGHT), "a generator goes down")
-	grid.machine_at(gen2).buffer[Defs.ITEM_ENERGY] = 4
+	grid.machine_at(gen2).buffer[Defs.ITEM_CRYSTAL] = 4
 	grid.tick(0.02)
 	_assert(grid.miner_on_power(seam2), "with power the miner runs itself")
 	_assert(grid.power_draw >= Defs.MINER_POWER_DRAW, "and pays the grid for it")
@@ -326,53 +337,15 @@ func _run() -> void:
 		Defs.MINER_POWER_DRAW, Defs.GENERATOR_OUTPUT / Defs.MINER_POWER_DRAW])
 	grid.free()
 
-	# --- Alternate recipe: efficiency becomes a choice ------------------------
-	# The test that matters is that neither recipe wins outright. If one is
-	# strictly better the choice is decoration.
-	var plain_rate: float = Defs.recipe_rate(Defs.RECIPE_PLAIN)
-	var alloy_rate: float = Defs.recipe_rate(Defs.RECIPE_ALLOY)
-	var plain_cost: float = Defs.recipe_crystal_cost(Defs.RECIPE_PLAIN)
-	var alloy_cost: float = Defs.recipe_crystal_cost(Defs.RECIPE_ALLOY)
-	_assert(alloy_cost < plain_cost,
-		"the alloy recipe stretches crystal further (%.2f vs %.2f per energy)" % [alloy_cost, plain_cost])
-	_assert(Defs.RECIPES[Defs.RECIPE_ALLOY]["in"].has(Defs.ITEM_COPPER),
-		"and pays for it with copper, which is also what machines are made of")
-	_assert(Defs.COPPER_PERIOD > Defs.MINER_PERIOD,
-		"copper being slower to mine is what makes that a real cost")
-	print("RECIPES: 기본 %.0f/분 @ %.2f수정, 촉매 %.0f/분 @ %.2f수정" % [
-		plain_rate, plain_cost, alloy_rate, alloy_cost])
-
-	var rec := Sim.new()
-	rec.setup(5150)
-	rec.note_resource_seen(Defs.ITEM_HEATSTONE)
-	rec.note_resource_seen(Defs.ITEM_CRYSTAL)
-	rec.stock[Defs.ITEM_CRYSTAL] = 100
-	rec.stock[Defs.ITEM_HEATSTONE] = 100
-	var ex := Vector2i(rec.core_cell.x + 7, rec.core_cell.y + 7)
-	rec.ore.erase(ex)
-	_assert(rec.build(Defs.M_EXCHANGER, ex, Vector2i.RIGHT), "an exchanger goes down")
-	_assert(not rec.recipe_unlocked(Defs.RECIPE_ALLOY), "the second recipe starts locked")
-	_assert(rec.cycle_recipe(ex) == Defs.RECIPE_PLAIN, "and cycling does nothing while locked")
-	_assert(not rec._push_into(ex, Defs.ITEM_COPPER, ex + Vector2i.UP),
-		"a plain exchanger refuses copper it has no use for")
-
-	rec.note_resource_seen(Defs.ITEM_COPPER)
-	_assert(rec.recipe_unlocked(Defs.RECIPE_ALLOY), "holding copper opens the second recipe")
-	_assert(rec.cycle_recipe(ex) == Defs.RECIPE_ALLOY, "and the machine can switch to it")
-	_assert(rec._push_into(ex, Defs.ITEM_COPPER, ex + Vector2i.UP),
-		"which then accepts copper")
-
-	# The batch of three must not be silently destroyed when the output is full.
-	var machine_ref: Sim.Machine = rec.machine_at(ex)
-	machine_ref.buffer[Defs.ITEM_CRYSTAL] = 2
-	machine_ref.buffer[Defs.ITEM_COPPER] = 1
-	for around: Vector2i in [ex + Vector2i.RIGHT]:
-		rec.ore[around] = Defs.ITEM_CRYSTAL      # block the output entirely
-	for step in int(float(Defs.RECIPES[Defs.RECIPE_ALLOY]["period"]) / 0.1) + 8:
-		rec.tick(0.1)
-	_assert(int(machine_ref.buffer.get(Defs.ITEM_CRYSTAL, 0)) == 2,
-		"a blocked alloy batch keeps its inputs rather than eating them")
-	rec.free()
+	# --- What the exchanger used to hold -------------------------------------
+	# Two recipes, one stretching crystal further at the cost of copper, and a
+	# batch of three that must not be destroyed when the output is blocked: forty
+	# lines of assertions about a machine that no longer exists. The exchanger
+	# was removed in 1.0.8 because it was a building whose only customer was
+	# another building, and the choice it offered was a choice about a material
+	# that had one use. What is left of it here is the property that survives:
+	# the generator burns crystal slower than a miner produces it, which is
+	# asserted above.
 
 	# --- Belt grades are a convenience, never a gate --------------------------
 	_assert(Defs.BELT_TIERS.size() == 3, "three grades, no more")
@@ -398,6 +371,9 @@ func _run() -> void:
 	var belt_sim := Sim.new()
 	belt_sim.setup(777888)
 	belt_sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	belt_sim.unlocked[Defs.M_MINER] = true
 	belt_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	belt_sim.note_resource_seen(Defs.ITEM_COPPER)
 	belt_sim.stock[Defs.ITEM_COPPER] = 100

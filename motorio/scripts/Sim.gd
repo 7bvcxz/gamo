@@ -79,8 +79,6 @@ class Machine extends RefCounted:
 	## from so it is never sent straight back.
 	var next_out: int = 0
 	var source := Vector2i(9999, 9999)
-	## Exchangers only: which recipe this one is set to.
-	var recipe: int = Defs.RECIPE_PLAIN
 	## Belts only: which speed grade this one is.
 	var tier: int = 0
 	var type: int = Defs.M_BELT
@@ -250,8 +248,6 @@ var ground_stack: Dictionary[Vector2i, int] = {}
 ## Which machines the player has earned. Seeing a resource for the first time is
 ## what opens its line, so the hotbar grows as the world does.
 var unlocked: Dictionary[int, bool] = {}
-## Recipes earned, keyed by recipe index.
-var unlocked_recipes: Dictionary[int, bool] = {}
 ## Power is a rate. Capacity is what running generators sustain; draw is what
 ## powered machines ask for. Neither is ever stored.
 var power_capacity: float = 0.0
@@ -330,7 +326,7 @@ func to_save() -> Dictionary:
 			"x": cell.x, "y": cell.y, "type": machine.type,
 			"dx": machine.dir.x, "dy": machine.dir.y,
 			"progress": machine.progress, "items": machine.items.duplicate(true),
-			"buffer": machine.buffer.duplicate(true), "recipe": machine.recipe,
+			"buffer": machine.buffer.duplicate(true),
 			"pending": machine.pending,
 			"tier": machine.tier,
 		})
@@ -377,7 +373,7 @@ func to_save() -> Dictionary:
 		"stones_in": stones_in, "delivered": delivered_rows,
 		"belt_fed": delivered_by_belt,
 		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
-		"gun_dropped": gun_dropped,
+		"gun_dropped": gun_dropped, "collected": _collected_rows(),
 		"thawed": _thawed_rows(),
 		"debris": _debris_rows(), "debris_searched": debris_searched,
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
@@ -401,7 +397,6 @@ func to_save() -> Dictionary:
 		"food_x": food_cell.x, "food_y": food_cell.y,
 		"food": food, "coins": coins,
 		"stock": stock_rows, "ground": ground_rows, "unlocked": unlocked_rows,
-		"recipes": unlocked_recipes.keys(),
 	}
 
 func from_save(data: Dictionary) -> void:
@@ -419,6 +414,9 @@ func from_save(data: Dictionary) -> void:
 	has_gun = bool(data.get("has_gun", false))
 	has_pickaxe = bool(data.get("has_pickaxe", false))
 	gun_dropped = bool(data.get("gun_dropped", false))
+	collected.clear()
+	for row in data.get("collected", []):
+		collected[int(row[0])] = int(row[1])
 	thawed.clear()
 	for row in data.get("thawed", []):
 		thawed[Vector2i(int(row[0]), int(row[1]))] = true
@@ -451,9 +449,6 @@ func from_save(data: Dictionary) -> void:
 	unlocked.clear()
 	for type: int in data.get("unlocked", []):
 		unlocked[int(type)] = true
-	unlocked_recipes.clear()
-	for index: int in data.get("recipes", []):
-		unlocked_recipes[int(index)] = true
 
 	for row: Dictionary in data.get("machines", []):
 		var cell := Vector2i(int(row["x"]), int(row["y"]))
@@ -463,7 +458,6 @@ func from_save(data: Dictionary) -> void:
 		machine.dir = Vector2i(int(row["dx"]), int(row["dy"]))
 		machine.progress = float(row.get("progress", 0.0))
 		machine.buffer = (row.get("buffer", {}) as Dictionary).duplicate(true)
-		machine.recipe = int(row.get("recipe", Defs.RECIPE_PLAIN))
 		machine.pending = int(row.get("pending", 0))
 		machine.tier = int(row.get("tier", 0))
 		for item: Dictionary in row.get("items", []):
@@ -533,16 +527,14 @@ func setup(seed_value: int) -> void:
 	has_gun = false
 	has_pickaxe = false
 	gun_dropped = false
+	collected.clear()
 	thawed.clear()
 	cancel_thaw()
-	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
-		Defs.ITEM_HEATSTONE: 0}
-	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_ENERGY: 0,
-		Defs.ITEM_HEATSTONE: 0}
+	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_HEATSTONE: 0}
+	stock = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_HEATSTONE: 0}
 	ground.clear()
 	ground_stack.clear()
 	unlocked.clear()
-	unlocked_recipes.clear()
 	power_capacity = 0.0
 	power_draw = 0.0
 	_grid_dirty = true
@@ -1222,6 +1214,13 @@ var has_pickaxe := false
 ## Whether the fire has already handed the gun over, so a second upgrade does
 ## not put a second one on the snow.
 var gun_dropped := false
+## Which way the case tips what is inside it: away from the player, set by Main
+## before the search finishes. Zero falls back to south, which is what it always
+## used to be.
+var drop_away := Vector2i.ZERO
+## Lifetime totals per material, gains only. Saved, because the morning report
+## subtracts yesterday's reading from today's.
+var collected: Dictionary = {}
 
 ## Empties the case onto the snow below it. Returns what came out.
 func search_kit() -> Array[int]:
@@ -1243,6 +1242,12 @@ func search_kit() -> Array[int]:
 ## seam or a rock under the case is not a reason for the game to swallow the one
 ## thing the opening is about.
 ## Cells cannot go into a ConfigFile as keys, so both maps travel as rows.
+func _collected_rows() -> Array:
+	var rows: Array = []
+	for item_type: int in collected:
+		rows.append([item_type, int(collected[item_type])])
+	return rows
+
 func _debris_rows() -> Array:
 	var rows: Array = []
 	for cell: Vector2i in debris:
@@ -1262,8 +1267,19 @@ func _drop_rows() -> Array:
 	return rows
 
 func _drop_cell(index: int) -> Vector2i:
-	var wanted: Array[Vector2i] = [Vector2i(0, 1), Vector2i(1, 1), Vector2i(-1, 1),
-		Vector2i(0, 2), Vector2i(1, 2), Vector2i(-1, 2), Vector2i(1, 0), Vector2i(-1, 0)]
+	# The far side of the case, from wherever she is standing.
+	#
+	# It used to be "below", which is where she stands to face it -- so the thing
+	# that came out landed under her feet and was picked up on the frame it
+	# appeared. Nothing was ever seen falling. Away from her, it lands where she
+	# can watch it land and then walk to it, which is the whole of what the
+	# opening is teaching: things are objects in the world, not messages.
+	var away := Vector2i(0, 1)
+	if drop_away != Vector2i.ZERO:
+		away = drop_away
+	var side := Vector2i(-away.y, away.x)
+	var wanted: Array[Vector2i] = [away, away + side, away - side,
+		away * 2, away * 2 + side, away * 2 - side, side, -side]
 	# And then outward, ring by ring, if those eight are taken.
 	#
 	# They were the whole list, and a boulder cluster over the case meant the
@@ -1713,9 +1729,6 @@ func note_resource_seen(item_type: int) -> Array[int]:
 		if Defs.MACHINE_UNLOCK_ITEM[type] == item_type:
 			unlocked[type] = true
 			opened.append(type)
-	for index in Defs.RECIPES.size():
-		if not recipe_unlocked(index) and Defs.RECIPE_UNLOCK_ITEM[index] == item_type:
-			unlocked_recipes[index] = true
 	return opened
 
 func can_afford(type: int) -> bool:
@@ -1799,7 +1812,6 @@ func tick(delta: float) -> void:
 		match machine.type:
 			Defs.M_MINER: _tick_miner(machine, delta * speed)
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
-			Defs.M_EXCHANGER: _tick_exchanger(machine, delta * speed)
 			Defs.M_GENERATOR: _tick_generator(machine, delta)
 			Defs.M_SPLITTER: _tick_splitter(machine, delta * speed)
 	_refresh_radius()
@@ -1839,6 +1851,11 @@ func _tick_rate(delta: float) -> void:
 func _gain(item_type: int, amount: int) -> void:
 	stock[item_type] = int(stock.get(item_type, 0)) + amount
 	_gain_accum[item_type] = float(_gain_accum.get(item_type, 0.0)) + float(amount)
+	# Everything ever gained, which is what "collected today" is measured
+	# against. `stock` cannot answer that -- it goes down when she builds -- and a
+	# day where she mined forty and spent forty is not a day where nothing
+	# happened.
+	collected[item_type] = int(collected.get(item_type, 0)) + amount
 
 # --- Throughput meter --------------------------------------------------------
 ## What a machine is *actually* moving, as opposed to what it could move.
@@ -1899,14 +1916,8 @@ func design_rates(machine: Machine) -> Dictionary:
 		Defs.M_MINER:
 			if ore.has(machine.cell):
 				out[int(ore[machine.cell])] = Defs.per_minute(seam_period(machine.cell))
-		Defs.M_EXCHANGER:
-			var recipe: Dictionary = Defs.RECIPES[machine.recipe]
-			var period: float = float(recipe["period"])
-			for item_type: int in recipe["in"]:
-				into[item_type] = Defs.per_minute(period) * float(recipe["in"][item_type])
-			out[Defs.ITEM_ENERGY] = Defs.per_minute(period) * float(recipe["out"])
 		Defs.M_GENERATOR:
-			into[Defs.ITEM_ENERGY] = Defs.per_minute(Defs.GENERATOR_PERIOD)
+			into[Defs.ITEM_CRYSTAL] = Defs.per_minute(Defs.GENERATOR_PERIOD)
 		Defs.M_BELT:
 			# A belt has no recipe, so its rated figure is its capacity: the most
 			# it could carry if something fed it that fast.
@@ -1949,16 +1960,8 @@ func meter_status(machine: Machine) -> String:
 			if machine.stalled:
 				return "출력 막힘"
 			return "가동 중"
-		Defs.M_EXCHANGER:
-			var recipe: Dictionary = Defs.RECIPES[machine.recipe]
-			for item_type: int in recipe["in"]:
-				if int(machine.buffer.get(item_type, 0)) < int(recipe["in"][item_type]):
-					return "입력 부족 · %s" % Defs.ITEM_SHORT[item_type]
-			if machine.stalled:
-				return "출력 막힘"
-			return "가동 중"
 		Defs.M_GENERATOR:
-			if int(machine.buffer.get(Defs.ITEM_ENERGY, 0)) <= 0:
+			if int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)) <= 0:
 				return "연료 없음"
 			return "가동 중 · 전력 %.1f" % Defs.GENERATOR_OUTPUT
 		Defs.M_BELT, Defs.M_SPLITTER:
@@ -1998,7 +2001,7 @@ func _recount_power() -> void:
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
 		# Read the fuel, not a flag set later in the tick.
-		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.ITEM_ENERGY, 0)) > 0:
+		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)) > 0:
 			capacity += Defs.GENERATOR_OUTPUT
 	power_capacity = capacity
 
@@ -2719,56 +2722,6 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 	else:
 		machine.stalled = machine.items.size() >= Defs.BELT_CAPACITY
 
-## Two crystal shards become one energy crystal. This is the only route from
-## material to heat, so it is also the player's throttle on how fast the world
-## opens up.
-func _tick_exchanger(machine: Machine, delta: float) -> void:
-	# Anything the last batch could not hand on is still owed, and is paid before
-	# a new batch starts. A three-output recipe cannot put all three on one belt
-	# tile at once -- a belt wants a third of a tile of clearance between items --
-	# and the old code consumed the whole batch's inputs, placed whatever fitted
-	# and dropped the rest. Two of every three alloy crystals were destroyed the
-	# moment the output was a belt, which is a loss the player cannot see happen
-	# and cannot account for afterwards.
-	if machine.pending > 0:
-		_flush_pending(machine)
-		machine.stalled = machine.pending > 0
-		if machine.stalled:
-			return
-	var recipe: Dictionary = Defs.RECIPES[machine.recipe]
-	for item_type: int in recipe["in"]:
-		if int(machine.buffer.get(item_type, 0)) < int(recipe["in"][item_type]):
-			machine.progress = 0.0
-			machine.stalled = false
-			return
-	machine.progress += delta
-	if machine.progress < float(recipe["period"]):
-		return
-	# At least one output has to land before anything is consumed, so a machine
-	# facing a wall keeps its materials instead of eating them.
-	if not _emit_from(machine, Defs.ITEM_ENERGY):
-		machine.progress = float(recipe["period"])
-		machine.stalled = true
-		return
-	for item_type: int in recipe["in"]:
-		machine.buffer[item_type] = int(machine.buffer[item_type]) - int(recipe["in"][item_type])
-	machine.pending = int(recipe["out"]) - 1
-	_flush_pending(machine)
-	machine.stalled = machine.pending > 0
-	machine.progress = 0.0
-	machine.flash = 0.5
-
-## Hands on as much of the owed output as the destination will take right now.
-func _flush_pending(machine: Machine) -> void:
-	while machine.pending > 0 and _emit_from(machine, Defs.ITEM_ENERGY):
-		machine.pending -= 1
-
-## Which recipes this base has earned.
-func recipe_unlocked(index: int) -> bool:
-	if index == Defs.RECIPE_PLAIN:
-		return true
-	return bool(unlocked_recipes.get(index, false))
-
 ## Upgrades a belt to the next grade, charging the difference. Grades are a
 ## convenience rather than a requirement -- grade 1 already outruns every miner
 ## in the game by a wide margin -- so this is an option the player can ignore.
@@ -2786,19 +2739,6 @@ func cycle_belt_tier(cell: Vector2i) -> int:
 	machine.tier = wanted
 	machine.flash = 0.4
 	return wanted
-
-## Cycles a machine to its next available recipe. Returns the new index, or -1.
-func cycle_recipe(cell: Vector2i) -> int:
-	var machine: Machine = machines.get(cell, null)
-	if machine == null or machine.type != Defs.M_EXCHANGER:
-		return -1
-	for step in range(1, Defs.RECIPES.size() + 1):
-		var candidate: int = (machine.recipe + step) % Defs.RECIPES.size()
-		if recipe_unlocked(candidate):
-			machine.recipe = candidate
-			machine.progress = 0.0
-			return candidate
-	return -1
 
 ## Round-robin across every neighbour that will actually accept the item, which
 ## is what lets a player write a ratio down and then build it. Blocked outputs
@@ -2845,8 +2785,13 @@ func splitter_outputs(machine: Machine) -> Array[Vector2i]:
 
 ## A generator burns one energy crystal every ten seconds. `operated` doubles as
 ## "currently supplying", which is what _recount_power reads.
+## Crystal straight into the fire.
+##
+## It used to burn energy crystals, which were made from crystal shards by a
+## machine whose only customer was this one. Two buildings and a material in
+## between the shard and the power it was always going to become.
 func _tick_generator(machine: Machine, delta: float) -> void:
-	var fuel: int = int(machine.buffer.get(Defs.ITEM_ENERGY, 0))
+	var fuel: int = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0))
 	if fuel <= 0:
 		machine.operated = false
 		machine.stalled = true
@@ -2857,7 +2802,7 @@ func _tick_generator(machine: Machine, delta: float) -> void:
 	machine.progress += delta
 	if machine.progress < Defs.GENERATOR_PERIOD:
 		return
-	machine.buffer[Defs.ITEM_ENERGY] = fuel - 1
+	machine.buffer[Defs.ITEM_CRYSTAL] = fuel - 1
 	machine.progress = 0.0
 	machine.flash = 0.5
 
@@ -2891,19 +2836,6 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 				return false
 			target.items.append({"type": item_type, "t": 0.0})
 			return true
-		Defs.M_EXCHANGER:
-			if not Defs.RECIPES[target.recipe]["in"].has(item_type):
-				return false
-			# Every face except the output takes crystal. Feeding the mouth it
-			# pours out of would let a line quietly eat its own product.
-			if from == target.cell + target.dir:
-				return false
-			var held: int = int(target.buffer.get(item_type, 0))
-			if held >= 6:
-				return false
-			target.buffer[item_type] = held + 1
-			target.flash = 0.25
-			return true
 		Defs.M_SPLITTER:
 			if target.items.size() >= Defs.SPLITTER_CAPACITY:
 				return false
@@ -2912,7 +2844,11 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			target.flash = 0.2
 			return true
 		Defs.M_GENERATOR:
-			if item_type != Defs.ITEM_ENERGY:
+			# Crystal, and only from a face that is not the one it faces: feeding
+			# the mouth a machine pours out of lets a line eat its own product.
+			# The generator pours nothing, but the rule is cheaper to keep than
+			# to remember the day it does.
+			if item_type != Defs.ITEM_CRYSTAL:
 				return false
 			var fuel: int = int(target.buffer.get(item_type, 0))
 			if fuel >= 4:

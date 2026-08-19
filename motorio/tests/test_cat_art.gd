@@ -62,6 +62,9 @@ func _test_tool_belongs_to_the_machine() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
@@ -99,6 +102,9 @@ func _test_working_cat_stands_on_the_middle() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
+	# The miner is opened by holding the build gun with stone to pay for one,
+	# not by having seen a stone. These tests want it standing.
+	sim.unlocked[Defs.M_MINER] = true
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
