@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-19T06:28:44.949023+00:00",
+  "model": "gpt-image-2",
+  "prompt": "The inside wall of a cosy log cabin: horizontal timber boards in a warmer, lighter brown than a floor, soft grain, thin dark shadow lines between the boards. A flat repeating surface texture that fills the entire frame edge to edge with no border, no background, no object and no empty space. Seen straight on. The pattern continues past all four edges so that copies laid side by side line up. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of rust orange, cream, soft warm brown and muted blue-grey. Soft rounded chunky forms, very few large simple shapes, readable when shown small. Flat even lighting, no photographic detail, no text.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 12.3,
+  "usage": {
+    "input_tokens": 677,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 165
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 873
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/room/wall_gen1_raw.png"
+  ]
+}

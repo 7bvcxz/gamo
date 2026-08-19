@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-19T06:34:11.195080+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A closed cabin door in its frame, twice as wide as it is tall, seen straight on: chunky vertical planks in warm brown wood, two dark iron bands across them, a round iron handle, and a heavier frame around the whole door. The door fills the frame completely. A single object alone in the frame, seen from the front and slightly above as if by someone standing in the doorway of a small room. The object is centred and fills the frame. Flat solid pure green background, one uniform colour, nothing else in the picture. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of rust orange, cream, soft warm brown and muted blue-grey. Soft rounded chunky forms, very few large simple shapes, readable when shown small. Flat even lighting, no photographic detail, no text.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 18.3,
+  "usage": {
+    "input_tokens": 706,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 194
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 902
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/room/door_gen4_raw.png"
+  ]
+}

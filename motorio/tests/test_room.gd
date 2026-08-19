@@ -19,6 +19,7 @@ func _run() -> void:
 	await _test_the_cats()
 	_test_the_furniture_lines_up()
 	_test_the_world_is_hidden()
+	_test_the_art_fits()
 	await _test_the_debug_key()
 	if failures == 0:
 		print("ROOM: PASS")
@@ -248,3 +249,30 @@ func _test_the_world_is_hidden() -> void:
 	_assert(is_equal_approx(backdrop.a, 1.0), "뒤가 완전히 가려진다: a=%.2f" % backdrop.a)
 	_assert(backdrop.r + backdrop.g + backdrop.b <= 0.06,
 		"그리고 검정이다: %.2f %.2f %.2f" % [backdrop.r, backdrop.g, backdrop.b])
+
+
+## The painted room, checked against the cells it is painted into.
+##
+## The art is trimmed to the furniture and then fitted to the piece's rect, so a
+## picture whose proportions are wrong does not stretch -- it shrinks and leaves
+## a gap. Comparing the two aspects is how that shows up as a failure rather than
+## as a sofa with air around it.
+func _test_the_art_fits() -> void:
+	var hud = load("res://scripts/HUD.gd")
+	for index in Defs.ROOM_PIECES.size():
+		var piece: Dictionary = Defs.ROOM_PIECES[index]
+		var art: Texture2D = hud.room_piece_art(int(piece["id"]))
+		_assert(art != null and art.get_width() > 0,
+			"%s 그림이 있다" % String(piece["name"]))
+		var cells: Vector2i = piece["size"]
+		var want: float = float(cells.x) / float(cells.y)
+		var have: float = float(art.get_width()) / float(art.get_height())
+		_assert(absf(have - want) < 0.5,
+			"%s 그림 비율이 칸과 맞는다: %.2f vs %.2f" % [String(piece["name"]), have, want])
+	# Both skies, and the same frame in each: two paintings that do not match
+	# would make the morning look like a different window.
+	_assert(hud.ROOM_WINDOW_NIGHT_ART.get_size() == hud.ROOM_WINDOW_DAY_ART.get_size(),
+		"밤 창문과 아침 창문은 같은 크기다")
+	var window_aspect: float = float(hud.ROOM_WINDOW_NIGHT_ART.get_width()) \
+		/ float(hud.ROOM_WINDOW_NIGHT_ART.get_height())
+	_assert(absf(window_aspect - 2.0) < 0.3, "창문은 2x1이다: %.2f" % window_aspect)

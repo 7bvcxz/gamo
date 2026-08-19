@@ -872,7 +872,9 @@ const ROOM_PIECES: Array[Dictionary] = [
 		"name": "소파", "note": "고양이 털이 붙어 있다"},
 	{"id": ROOM_SOFA_RIGHT, "cell": Vector2i(4, 3), "size": Vector2i(2, 1),
 		"name": "소파", "note": "누군가 앉았던 자국이 남아 있다"},
-	{"id": ROOM_BED, "cell": Vector2i(6, 1), "size": Vector2i(2, 3),
+	# One cell wide and two deep, which is the shape the bed is drawn at. A piece
+	# whose art and whose cells disagree is a piece that has to be stretched.
+	{"id": ROOM_BED, "cell": Vector2i(6, 1), "size": Vector2i(1, 2),
 		"name": "침대", "note": "여기서 자면 아침이 온다"},
 	# The way out, on the wall she came in through. X leaves too, but a room you
 	# can only leave with a key is a room without a door in it -- and the door is

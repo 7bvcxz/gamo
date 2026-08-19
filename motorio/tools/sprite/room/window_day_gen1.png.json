@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-19T06:32:59.026903+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A cosy cabin window, twice as wide as it is tall: a chunky warm brown wooden frame with one crossbar down the middle, a narrow wooden sill along the bottom, a short cream curtain gathered at each side, and beyond the glass a pale morning sky over a snowy hill with a low sun, filling the whole of both panes. A single object alone in the frame, seen from the front and slightly above as if by someone standing in the doorway of a small room. The object is centred and fills the frame. Flat solid pure green background, one uniform colour, nothing else in the picture. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of rust orange, cream, soft warm brown and muted blue-grey. Soft rounded chunky forms, very few large simple shapes, readable when shown small. Flat even lighting, no photographic detail, no text.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 17.1,
+  "usage": {
+    "input_tokens": 717,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 205
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 913
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/room/window_day_gen1_raw.png"
+  ]
+}

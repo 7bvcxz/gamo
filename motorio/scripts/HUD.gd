@@ -1128,6 +1128,19 @@ func room_piece_at(point: Vector2) -> int:
 ## and the one place in this game with a door should feel like it shut.
 const ROOM_BACKDROP := Color(0, 0, 0, 1.0)
 
+## The room, painted. Generated through the same style plate the characters and
+## the machines came from, which is the only reason a wooden floor drawn by a
+## model sits under a character drawn by the same model without either looking
+## borrowed.
+const ROOM_FLOOR_ART: Texture2D = preload("res://assets/room/floor.png")
+const ROOM_WALL_ART: Texture2D = preload("res://assets/room/wall.png")
+const ROOM_FIREPLACE_ART: Texture2D = preload("res://assets/room/fireplace.png")
+const ROOM_BED_ART: Texture2D = preload("res://assets/room/bed.png")
+const ROOM_SOFA_ART: Texture2D = preload("res://assets/room/sofa.png")
+const ROOM_DOOR_ART: Texture2D = preload("res://assets/room/door.png")
+const ROOM_WINDOW_NIGHT_ART: Texture2D = preload("res://assets/room/window_night.png")
+const ROOM_WINDOW_DAY_ART: Texture2D = preload("res://assets/room/window_day.png")
+
 func _draw_room() -> void:
 	if not main.room_open:
 		return
@@ -1143,16 +1156,16 @@ func _draw_room() -> void:
 	# tilemap and this is a room. Lighter toward the front, which is the cheapest
 	# depth there is -- the far end of a floor is the end the light does not
 	# reach.
-	draw_rect(floor_rect, Color(0.16, 0.13, 0.11))
+	draw_texture_rect(ROOM_FLOOR_ART, floor_rect, false)
+	# Darker toward the back, which is the depth the painting cannot carry: the
+	# lamp is on the floor and the far end of a room is the end the light does
+	# not reach.
 	for row in Defs.ROOM_CELLS.y:
-		var lift: float = float(row) / float(maxi(Defs.ROOM_CELLS.y - 1, 1))
+		var back: float = 1.0 - float(row) / float(maxi(Defs.ROOM_CELLS.y - 1, 1))
 		draw_rect(Rect2(floor_rect.position + Vector2(0.0, float(row) * ROOM_CELL),
-			Vector2(floor_rect.size.x, ROOM_CELL)),
-			Color(1, 1, 1, 0.012 + 0.030 * lift))
-		draw_line(floor_rect.position + Vector2(0.0, float(row) * ROOM_CELL),
-			floor_rect.position + Vector2(floor_rect.size.x, float(row) * ROOM_CELL),
-			Color(0.10, 0.08, 0.07, 0.5), 1.0)
-	draw_rect(floor_rect, Color(0.35, 0.27, 0.22, 0.8), false, 2.0)
+			Vector2(floor_rect.size.x, ROOM_CELL + 1.0)),
+			Color(0.02, 0.02, 0.04, 0.26 * back))
+	draw_rect(floor_rect, Color(0.16, 0.11, 0.08, 0.9), false, 2.0)
 	# The fire in the hearth lights the room, so the floor carries a warm pool
 	# under it rather than being lit evenly.
 	var hearth: Rect2 = room_piece_rect(Defs.ROOM_FIREPLACE)
@@ -1171,49 +1184,30 @@ func _draw_room() -> void:
 ## meets the floor, and the light falling off toward the top.
 func _draw_room_wall() -> void:
 	var wall: Rect2 = room_wall()
-	draw_rect(wall, Color(0.24, 0.18, 0.15))
-	# Boards again, upright this time, and darker as they go up: the lamp is on
-	# the floor, so the top of a wall is the far end of the room.
+	draw_texture_rect(ROOM_WALL_ART, wall, false)
+	# Darker toward the top, for the same reason the floor is darker toward the
+	# back: one lamp, low down.
 	var rows := 10
 	for index in rows:
 		var k: float = float(index) / float(rows)
 		draw_rect(Rect2(wall.position + Vector2(0.0, wall.size.y * k),
 			Vector2(wall.size.x, wall.size.y / float(rows) + 1.0)),
-			Color(0.0, 0.0, 0.0, 0.16 * (1.0 - k)))
+			Color(0.0, 0.0, 0.0, 0.22 * (1.0 - k)))
 	_draw_room_window()
-	# The skirting: a lip of board along the bottom of the wall, which is the
-	# line that makes one surface read as standing and the other as lying down.
-	draw_rect(Rect2(wall.position + Vector2(0.0, wall.size.y - 5.0),
-		Vector2(wall.size.x, 5.0)), Color(0.34, 0.25, 0.19))
+	# The line where standing meets lying down. Without it the two paintings are
+	# one continuous piece of wood.
 	draw_line(wall.position + Vector2(0.0, wall.size.y),
-		wall.position + Vector2(wall.size.x, wall.size.y), Color(0.12, 0.09, 0.07), 2.0)
-	draw_rect(wall, Color(0.14, 0.10, 0.08), false, 2.0)
+		wall.position + Vector2(wall.size.x, wall.size.y), Color(0.10, 0.07, 0.05), 3.0)
+	draw_rect(wall, Color(0.14, 0.10, 0.08, 0.9), false, 2.0)
 
-## Set into the wall, with a sill under it. Night out there, or morning.
+## Set into the wall. Two paintings rather than one frame with the sky drawn
+## behind it: an empty pane handed to a model with a character reference comes
+## back with the character in it, which is what the first two attempts did.
 func _draw_room_window() -> void:
 	var frame: Rect2 = room_window_rect()
-	draw_rect(frame, Color(0.34, 0.24, 0.17))
-	var pane: Rect2 = frame.grow(-4.0)
-	var night: float = main.night_level()
-	var sky: Color = Color(0.05, 0.07, 0.16).lerp(Color(0.62, 0.78, 0.94),
-		clampf(1.0 - night, 0.0, 1.0))
-	draw_rect(pane, sky)
-	if night > 0.7:
-		# Fixed stars, not random ones: a sky that reshuffles every frame is a
-		# sky nobody believes.
-		for star in 5:
-			var at := Vector2(pane.position.x + pane.size.x * (0.14 + 0.18 * float(star)),
-				pane.position.y + pane.size.y * (0.28 + 0.34 * float((star * 3) % 2)))
-			draw_circle(at, 1.2, Color(1, 1, 1, 0.75))
-	else:
-		draw_circle(pane.position + pane.size * Vector2(0.74, 0.32),
-			pane.size.y * 0.24, Color(1.0, 0.93, 0.70, 0.9))
-	# Mullion, sill, and the light the pane throws back into the room.
-	draw_line(Vector2(pane.get_center().x, pane.position.y),
-		Vector2(pane.get_center().x, pane.end.y), Color(0.34, 0.24, 0.17), 2.0)
-	draw_rect(Rect2(frame.position + Vector2(-3.0, frame.size.y - 2.0),
-		Vector2(frame.size.x + 6.0, 4.0)), Color(0.40, 0.29, 0.21))
-	draw_rect(frame, Color(0.14, 0.10, 0.08), false, 2.0)
+	var art: Texture2D = ROOM_WINDOW_NIGHT_ART if main.night_level() > 0.62 \
+		else ROOM_WINDOW_DAY_ART
+	draw_texture_rect(art, frame, false)
 
 ## Firelight on the floorboards, and only on them.
 ##
@@ -1241,66 +1235,38 @@ func _room_glow(bounds: Rect2, centre: Vector2, radius: float, alpha: float) -> 
 			continue
 		draw_rect(clipped, Color(1.0, 0.68, 0.32, alpha * falloff))
 
-## How tall a thing in this room stands, in pixels. Everything gets a front face
-## of this height under it: a room drawn straight down has no way to say a sofa
-## is a solid object, and this is the one place in the game allowed a horizon.
-const ROOM_LIFT := 7.0
+## One painting per piece, drawn into the cells it stands on.
+##
+## The rectangles-with-a-front-face this replaces were doing the same job the
+## art does now, and doing it in code: giving a sofa enough volume to read as an
+## object in a room drawn from the front.
+static func room_piece_art(id: int) -> Texture2D:
+	match id:
+		Defs.ROOM_FIREPLACE:
+			return ROOM_FIREPLACE_ART
+		Defs.ROOM_BED:
+			return ROOM_BED_ART
+		Defs.ROOM_DOOR:
+			return ROOM_DOOR_ART
+	return ROOM_SOFA_ART
 
 func _draw_room_piece(index: int) -> void:
 	var piece: Dictionary = Defs.ROOM_PIECES[index]
-	var rect: Rect2 = room_piece_rect(index).grow(-3.0)
-	var id: int = int(piece["id"])
-	# The front face first, so the top of the piece is drawn over its own edge.
-	if id != Defs.ROOM_DOOR:
-		draw_rect(Rect2(rect.position + Vector2(0.0, rect.size.y - 2.0),
-			Vector2(rect.size.x, ROOM_LIFT)), Color(0.14, 0.10, 0.08))
-		rect.position.y -= ROOM_LIFT * 0.5
-	match id:
-		Defs.ROOM_FIREPLACE:
-			# Stone surround, and a fire that is drawn rather than implied: it is
-			# the only light in here and the reason the room is worth crossing.
-			draw_rect(rect, Color(0.29, 0.28, 0.30))
-			draw_rect(rect, Color(0.10, 0.10, 0.12), false, 2.0)
-			var mouth: Rect2 = rect.grow(-rect.size.x * 0.22)
-			draw_rect(mouth, Color(0.06, 0.05, 0.06))
-			var beat: float = 0.72 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.16
-			draw_circle(mouth.get_center() + Vector2(0.0, mouth.size.y * 0.18),
-				mouth.size.x * 0.42, Color(1.0, 0.52, 0.18, beat))
-			draw_circle(mouth.get_center() + Vector2(0.0, mouth.size.y * 0.22),
-				mouth.size.x * 0.24, Color(1.0, 0.85, 0.52, beat))
-		Defs.ROOM_SOFA_LEFT, Defs.ROOM_SOFA_RIGHT:
-			draw_rect(rect, Color(0.44, 0.26, 0.22))
-			draw_rect(Rect2(rect.position, Vector2(rect.size.x, rect.size.y * 0.42)),
-				Color(0.52, 0.32, 0.27))
-			draw_rect(rect, Color(0.16, 0.10, 0.09), false, 2.0)
-		Defs.ROOM_DOOR:
-			# A threshold rather than a standing door. The wall the player can
-			# see is the far one, so the way out is at the near edge -- behind
-			# the camera, in effect -- and a door leaf drawn flat on the boards
-			# reads as a door lying on the floor. This is the opening seen from
-			# above: a frame, a dark gap, and a step worn pale by boots.
-			draw_rect(rect, Color(0.30, 0.20, 0.14))
-			var gap: Rect2 = rect.grow(-4.0)
-			draw_rect(gap, Color(0.05, 0.05, 0.07))
-			draw_rect(Rect2(gap.position + Vector2(0.0, gap.size.y * 0.62),
-				Vector2(gap.size.x, gap.size.y * 0.38)), Color(0.36, 0.30, 0.26))
-			draw_rect(rect, Color(0.16, 0.10, 0.07), false, 2.0)
-		Defs.ROOM_BED:
-			# Frame, mattress, and a pillow at the head, so the one piece that
-			# does something is the one that reads fastest.
-			draw_rect(rect, Color(0.40, 0.28, 0.20))
-			var sheet: Rect2 = rect.grow(-5.0)
-			draw_rect(sheet, Color(0.82, 0.84, 0.88))
-			draw_rect(Rect2(sheet.position, Vector2(sheet.size.x, sheet.size.y * 0.24)),
-				Color(0.94, 0.95, 0.97))
-			draw_rect(Rect2(sheet.position + Vector2(0.0, sheet.size.y * 0.46),
-				Vector2(sheet.size.x, sheet.size.y * 0.54)), Color(0.48, 0.36, 0.52))
-			draw_rect(rect, Color(0.18, 0.12, 0.09), false, 2.0)
+	var rect: Rect2 = room_piece_rect(index)
+	var art: Texture2D = room_piece_art(int(piece["id"]))
+	# Fitted rather than stretched, and standing on the bottom of its cells: the
+	# art is trimmed to the furniture, so its proportions are the furniture's.
+	var scale: float = minf(rect.size.x / float(art.get_width()),
+		rect.size.y / float(art.get_height()))
+	var drawn := Vector2(float(art.get_width()), float(art.get_height())) * scale
+	var at := Vector2(rect.get_center().x - drawn.x * 0.5, rect.end.y - drawn.y)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+	draw_circle(Vector2(rect.get_center().x, (rect.end.y - 3.0) / Defs.SHADOW_SQUASH),
+		drawn.x * 0.42, Color(0.02, 0.02, 0.04, 0.28))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	draw_texture_rect(art, Rect2(at, drawn), false)
 
 ## Grim, in the room, from the same sheets she is drawn from outside.
-##
-## Room cells rather than world pixels: the room is its own little grid and the
-## whole point of drawing her here is that she is a person standing in it.
 func _draw_room_player(floor_rect: Rect2) -> void:
 	var sheet: Texture2D = PlayerActor.WALK_SHEET
 	var mirror := false
