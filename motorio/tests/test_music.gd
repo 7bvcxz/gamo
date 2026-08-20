@@ -72,9 +72,9 @@ func _run() -> void:
 
 	music.free()
 
-	# And the wiring: which screen asks for which score. Driven from the state
-	# every frame, so this is checked on a real Main rather than by reading the
-	# match statement.
+	# And the wiring: which screen asks for which score, and which room. Driven
+	# from the state every frame through the audio manager, so this is checked on
+	# a real Main rather than by reading the table.
 	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
 	root.add_child(main)
 	await process_frame
@@ -83,11 +83,23 @@ func _run() -> void:
 	main._start_run()
 	main.finish_tutorial()
 	main.state = main.State.PLAY
-	main._follow_music()
+	main._update_ambience(0.016)
 	_assert(main.music.requested_score() == "", "플레이 중에는 곡이 없다")
+	# The shelter is the one room the game plays music in, and it does it while
+	# the state is still PLAY -- the score follows the place, not the screen.
+	main.open_room()
+	main._update_ambience(0.016)
+	_assert(main.music.requested_score() == "home", "숙소에서는 숙소 곡이 흐른다")
+	# And a card on screen is louder than a room: she falls asleep in there and
+	# the summary has its own score.
 	main._finish_run()
-	main._follow_music()
+	main._update_ambience(0.016)
 	_assert(main.music.requested_score() == "result", "정산 화면이 정산 곡을 부른다")
+	main.close_room()
+	main.state = main.State.PLAY
+	main._update_ambience(0.016)
+	_assert(main.music.requested_score() == "", "밖으로 나오면 다시 조용해진다")
+	main.clear_save()
 	main.queue_free()
 
 	if failures == 0:

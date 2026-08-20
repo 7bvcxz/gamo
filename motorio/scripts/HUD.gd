@@ -481,7 +481,9 @@ func _draw() -> void:
 			else:
 				_draw_settings_card()
 		_:
-			if not main.room_open:
+			# Frost creeping in at the edges is the cold arriving. Where the
+			# cold cannot reach her it is just a dirty window.
+			if Zone.freezes(main.zone()):
 				_draw_cold_vignette()
 			_draw_blackout()
 			_draw_status()
@@ -912,10 +914,10 @@ func _draw_warmth_row(panel: Rect2) -> void:
 ## and a nine-pixel rate line. The gun moves the choice into a menu that has room
 ## to explain itself, and the bar goes back to being about what is in your hands.
 func _draw_palette() -> void:
-	# And nothing in it is reachable inside the shelter either. There is no ore
-	# to mine in there and nowhere to place a machine, so the row, the output
-	# chip and the key legend under them are all describing a different room.
-	if main.room_open:
+	# And nothing in it is reachable in a place with no world in it. There is no
+	# ore to mine on floorboards and nowhere to put a machine, so the row, the
+	# output chip and the key legend under them describe somewhere she is not.
+	if not Zone.has_world(main.zone()):
 		return
 	# Nothing in the row is reachable before the fire is lit: there is no base to
 	# build from, the pickaxe is still in the case, and every machine in it costs

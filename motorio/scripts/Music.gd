@@ -53,6 +53,30 @@ const SCORES := {
 			[30.0, 0, 0.26],
 		],
 	},
+	# The shelter. The only score that plays while the game is running, and the
+	# only room where nothing is being asked of the player: the clock is stopped,
+	# the cold cannot reach her and the cats are asleep on the floor. Bars of
+	# eight like the title, a third slower to fill, and quieter than either of
+	# the other two -- it plays for as long as she stays, so it has to be
+	# possible to stop hearing it.
+	"home": {
+		"bars": 24.0,
+		"loop": true,
+		"notes": [
+			[0.0, -12, 0.55], [0.0, 3, 0.30],
+			[2.0, 7, 0.26],
+			[4.0, 10, 0.24],
+			[6.0, 7, 0.22],
+			[8.0, -17, 0.50], [8.0, 0, 0.28],
+			[10.0, 3, 0.24],
+			[12.0, 7, 0.22],
+			[14.0, 3, 0.20],
+			[16.0, -19, 0.50], [16.0, -2, 0.26],
+			[18.0, 2, 0.24],
+			[20.0, 5, 0.22],
+			[22.0, 0, 0.20],
+		],
+	},
 	# The day summary. Once, and short: a rising figure that lands on the octave,
 	# because the card it plays under is the one that says the day was survived.
 	"result": {

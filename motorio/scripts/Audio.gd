@@ -1,7 +1,19 @@
 extends Node
 
-## A tiny voice pool. Sounds are procedurally generated WAVs shipped with the
-## project, so there is no licensing question and no streaming stall.
+## Everything the game makes a sound with: the one-shots, the two looping beds,
+## and -- through `music` -- what plays under the screen.
+##
+## The last part is why this is a manager rather than a voice pool. What plays
+## used to be decided in two functions in Main that did not know about each
+## other: one matched on the screen and started a score, the other read the
+## weather and set the beds. Neither asked *where she was*, so walking into the
+## shelter changed nothing about what the player heard -- the wind kept blowing
+## through a shut door, and the cold bed was at its loudest at the exact moment
+## she was finally safe, because it was read off the warmth she came home on.
+##
+## One call a frame now, with the place in it. Sounds are procedurally generated
+## WAVs shipped with the project, so there is no licensing question and no
+## streaming stall.
 
 const VOICES := 8
 const BANK := {
@@ -45,6 +57,18 @@ const BED_FLOOR := -34.0
 
 var _beds: Dictionary = {}
 var _bed_level: Dictionary = {"wind": 0.0, "cold": 0.0}
+
+## The sequencer, handed over by Main. Held rather than found so a test can run
+## this without a scene, and so there is exactly one place that decides between a
+## screen's score and a room's.
+var music: Node = null
+
+## What each screen sounds like regardless of where she is standing. The title
+## and the summary card are the game talking, not the world, so they win.
+const SCREEN_SCORES := {"title": "title", "result": "result"}
+## The plateau under a still screen: no clock running and no one in the cold, so
+## the wind is at its resting level and the cold bed says nothing.
+const STILL_WIND := 0.35
 
 var _voices: Array[AudioStreamPlayer] = []
 var _next := 0
@@ -102,3 +126,31 @@ func set_bed(name: String, target: float, delta: float) -> void:
 		player.volume_db = -80.0
 		return
 	player.volume_db = lerpf(BED_FLOOR, float(BED_CEILING[name]), level)
+
+## The whole soundscape of one frame: which score, and how loud each bed.
+##
+## `screen` is what is being drawn ("title", "opening", "play", "result", ...),
+## `zone` is where she is standing, and the two are asked in that order because a
+## card on screen is louder than a room. `exposure` is how cold she is, 0..1, and
+## `night` is how far into the day it is -- both are Main's to know and neither
+## is worth this node reading the world for.
+func apply(screen: String, zone: int, exposure: float, night: float, delta: float) -> void:
+	var score: String = String(SCREEN_SCORES.get(screen, Zone.score(zone)))
+	if music != null:
+		if score.is_empty():
+			music.call("stop")
+		else:
+			music.call("play_score", score)
+	if not Zone.has_weather(zone):
+		# Not a quieter outdoors -- no outdoors. Wind and the cold shimmer are
+		# both the sound of being in the open, and a door closing on them is the
+		# clearest thing this game says without words.
+		set_bed("wind", 0.0, delta)
+		set_bed("cold", 0.0, delta)
+		return
+	if screen == "title" or screen == "opening":
+		set_bed("wind", STILL_WIND, delta)
+		set_bed("cold", 0.0, delta)
+		return
+	set_bed("wind", 0.45 + clampf(night, 0.0, 1.0) * 0.45, delta)
+	set_bed("cold", clampf(exposure, 0.0, 1.0), delta)

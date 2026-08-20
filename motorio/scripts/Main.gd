@@ -197,6 +197,9 @@ var gacha_results: Array[int] = []
 
 func _ready() -> void:
 	randomize()
+	# The manager holds the sequencer, so there is one place that decides between
+	# a screen's score and a room's rather than two that overrule each other.
+	audio.music = music
 	# Engine.time_scale is global and survives a scene reload, so a run that ends
 	# while sped up would hand the next one a ten-times world.
 	Engine.time_scale = 1.0
@@ -841,7 +844,17 @@ func day_fraction() -> float:
 ## decides, but the night sequence has to hold the sky at night while the clock
 ## reads zero and then walk it back to morning while the clock reads a full day.
 func night_level() -> float:
-	return night_override if night_override >= 0.0 else day_fraction()
+	# The override first. It is the game deliberately painting a sky -- the dawn
+	# runs while she is standing in the room, waking up in front of the bed -- and
+	# a scene that has taken the sky over outranks whatever the place would say.
+	if night_override >= 0.0:
+		return night_override
+	# Then the place. Everything that darkens the screen reads this one function,
+	# so a room with a lit hearth in it says morning here and nothing else -- the
+	# grade, the vignette, the HUD wash -- has to know the shelter exists.
+	if not Zone.darkens(zone()):
+		return 0.0
+	return day_fraction()
 
 ## True while the player is inside the hut: asleep, or waiting for the sun. They
 ## are a silhouette on the shelter wall then, not a figure standing in the snow.
@@ -850,6 +863,21 @@ func night_level() -> float:
 ## Wider than `indoors()`, which is only the two phases the door is shut in. The
 ## sequence starts with the cats still filing home and she is already inside for
 ## every frame of it, so anything asking "is she out in the weather" wants this.
+## Which place's rules are in force this frame. One question, asked by everything
+## that behaves differently indoors, so that adding a rule to the shelter is a
+## line in `Zone.RULES` rather than a hunt for the systems that assumed snow.
+##
+## Read off where she is standing rather than off the flag that opened the door.
+## They are the same thing in the game and were not in a test that teleported her
+## onto the plateau with the flag still set -- and the rules this answers are all
+## rules about her, so her cell is the honest question. (`sim.indoors` stays what
+## the world *draws*, which is a different question with a different answer for
+## the one frame the door is closing.)
+func zone() -> int:
+	if player == null or sim == null:
+		return Zone.FIELD
+	return Zone.of(Defs.in_room(player.cell()))
+
 func sleeping_state() -> bool:
 	return state == State.NIGHTFALL or state == State.DAYBREAK or state == State.RESULT
 
@@ -906,7 +934,6 @@ func modal_open() -> bool:
 	return build_menu_open or gacha_open or map_open or base_menu_open or log_open
 
 func _process(delta: float) -> void:
-	_follow_music()
 	# Pushed rather than pulled: the character polls Input directly, so it needs
 	# to be told, and being told once a frame from here is what keeps the answer
 	# in one place.
@@ -925,7 +952,7 @@ func _process(delta: float) -> void:
 	cold_fog.night = dark
 	# There is no weather indoors. The fog is a white sheet over everything past
 	# the fire's reach, and the room is six hundred cells past it.
-	cold_fog.visible = not room_open
+	cold_fog.visible = Zone.has_weather(zone())
 	machine_layer.view_rect = view
 	cats_layer.view_rect = view
 	machine_layer.night = dark
@@ -1000,35 +1027,41 @@ func _process(delta: float) -> void:
 	player.visible = in_run and not indoors()
 	machine_layer.show_preview = state == State.PLAY and sim.base_placed
 
-## Wind is always there and swells at night; the cold layer tracks how exposed
-## the player actually is, so the ear learns the danger before the screen does.
+## What the frame sounds like, in one call to the audio manager.
+##
+## This function's whole job is the two numbers the manager cannot know -- how
+## cold she is and how late it is -- plus the name of the screen. Which score
+## plays, whether the beds are running at all and what a shut door does to them
+## are the manager's, next to the table that says what is true in each place.
 func _update_ambience(delta: float) -> void:
-	# The opening is the title's neighbour here, not the run's: the day clock is
-	# not running and the player is not standing in the cold, so a cold bed that
-	# tracked her warmth would be describing a scene she is not in yet.
-	if state == State.TITLE or state == State.OPENING:
-		audio.call("set_bed", "wind", 0.35, delta)
-		audio.call("set_bed", "cold", 0.0, delta)
-		return
-	var night: float = day_fraction()
-	audio.call("set_bed", "wind", 0.45 + night * 0.45, delta)
+	var exposure: float = 0.0
 	# The night sequence is where the cold stops, so the sound stops with it.
 	#
 	# The bed was read off her warmth alone, and she walks into the hut at
 	# whatever she made it home on -- which is the lowest it gets all day. So the
-	# cold was loudest at the exact moment she was finally safe, and the door
-	# shutting made no difference to it.
+	# cold was loudest at the exact moment she was finally safe.
 	#
 	# The whole sequence rather than `indoors()`, which is only the two phases the
 	# door is actually shut in: the cats are still filing home during GATHER and
 	# she is already inside for all of it.
-	if sleeping_state():
-		audio.call("set_bed", "cold", 0.0, delta)
-		return
-	var exposure: float = clampf(1.0 - player.warmth / 100.0, 0.0, 1.0)
-	if sim != null and not sim.is_warm(player.cell()):
-		exposure = maxf(exposure, 0.45)
-	audio.call("set_bed", "cold", exposure, delta)
+	if not sleeping_state():
+		exposure = clampf(1.0 - player.warmth / 100.0, 0.0, 1.0)
+		if sim != null and not sim.is_warm(player.cell()):
+			exposure = maxf(exposure, 0.45)
+	audio.call("apply", screen_name(), zone(), exposure, day_fraction(), delta)
+
+## What is being drawn, as a name the audio manager can look up. Settings is not
+## a screen of its own here: it is drawn over whatever it was opened from, and it
+## should sound like it too.
+func screen_name() -> String:
+	var showing: int = state_before_settings if state == State.SETTINGS else state
+	match showing:
+		State.TITLE: return "title"
+		State.OPENING: return "opening"
+		State.RESULT: return "result"
+		State.GAMEOVER: return "gameover"
+		State.NIGHTFALL, State.DAYBREAK: return "night"
+	return "play"
 
 ## Holding the build key past the threshold rotates instead of building, so PC
 ## players never need a second key for direction.
@@ -1092,7 +1125,7 @@ func _process_play(delta: float) -> void:
 	# is four days at this length: the summary card would interrupt it four
 	# times, and the first night would arrive at 3:00 -- before there is anywhere
 	# to sleep, which is the thing the second mission is about.
-	if mission == Mission.DONE:
+	if mission == Mission.DONE and Zone.clock_runs(zone()):
 		time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
 	_update_nibbles(delta)
@@ -1107,7 +1140,11 @@ func _process_play(delta: float) -> void:
 	_update_torch(delta)
 	_update_torch_light()
 	_update_preview()
-	if not night_warned and is_night():
+	# The one line in the game that tells her where to go, said to someone who is
+	# already there. It is not spent, only held: the flag stays down until she is
+	# out under the sky again, which is the only place the sentence means
+	# anything.
+	if not night_warned and is_night() and Zone.darkens(zone()):
 		night_warned = true
 		_notify("밤이 옵니다 — 숙소로 돌아가 Z로 취침하세요", Defs.COL_DANGER)
 		audio.call("play", "alarm")
@@ -1126,6 +1163,13 @@ func _collect_ground() -> void:
 	# where something she can see and stand on cannot be taken.
 	# What fell out of the case first: it is on the same tiles and it is the one
 	# thing in the opening the player is meant to walk into.
+	if not Zone.has_world(zone()):
+		# There is no ore under floorboards -- but there is under the world cells
+		# the room happens to sit on, because rock is procedural and exists
+		# everywhere. Six hundred cells from the fire nothing is reachable, so
+		# every step across her own floor answered "frozen to the ground", with
+		# the sound and the log line, once every three seconds.
+		return
 	var here: Vector2i = player.cell()
 	if _frozen_out_there(here):
 		_say_frozen(here)
@@ -1346,6 +1390,12 @@ func _mission_finished(id: String) -> bool:
 ## struck through -- a mission the player never saw is a mission that may as well
 ## not have existed.
 func _update_missions() -> void:
+	# Held while she is inside. Every objective is a thing to do out on the
+	# plateau, and a new one announced over a dark room is a banner nobody reads:
+	# it is drawn under a fade she is asleep behind. Nothing is lost -- the board
+	# opens the rung on the first frame she is back out in it.
+	if not Zone.has_world(zone()):
+		return
 	if not frozen_seen:
 		for cell: Vector2i in sim.frozen_cats:
 			if sim.is_warm(cell):
@@ -1667,7 +1717,11 @@ func active_prompt() -> String:
 	# place: a window is something she cannot walk under, and she walks around in
 	# there. What is true of the shelter is that none of these keys exist in it --
 	# there is no ore to mine and nothing to build on a floor.
-	if state != State.PLAY or modal_open() or room_open or player.locked:
+	if state != State.PLAY or modal_open() or player.locked:
+		return ""
+	# Every one of these keys is about the world: mining ore, placing a machine,
+	# lighting a torch against fog. None of them exist on a wooden floor.
+	if not Zone.has_world(zone()):
 		return ""
 	for row: Dictionary in Defs.KEY_PROMPTS:
 		var id: String = String(row["id"])
@@ -1808,11 +1862,7 @@ func _update_warmth(delta: float) -> void:
 	# Indoors is the warmest place she has. The room is six hundred cells from
 	# the fire, so `is_warm` says no and she was freezing to death in her own
 	# hut -- with the bar ticking down behind the sofa.
-	# Asked about where she is standing rather than about a flag: "the room is
-	# open" and "she is in the room" are the same thing in the game and were not
-	# in a test that teleported her onto the plateau with the flag still set --
-	# and the version that trusted the flag kept her warm out there forever.
-	if Defs.in_room(player.cell()):
+	if not Zone.freezes(zone()):
 		player.warmth = minf(100.0, player.warmth + Defs.COLD_RECOVER * delta)
 		return
 	# Before the fire exists there is nowhere to be warm and nowhere to be
@@ -3714,13 +3764,6 @@ func _process_daybreak(delta: float) -> void:
 ## eleven assignments to `state` in this file and a hook added to each of them is
 ## a hook that will be missing from the twelfth -- the same shape of bug as the
 ## cat walking states, which were listed at the draw call and were short by two.
-func _follow_music() -> void:
-	var showing: int = state_before_settings if state == State.SETTINGS else state
-	match showing:
-		State.TITLE: music.call("play_score", "title")
-		State.RESULT: music.call("play_score", "result")
-		_: music.call("stop")
-
 ## Dusk, not game over. The factory keeps everything it built.
 ##
 ## No records are kept. A best-day and a best-total were tracked here until
