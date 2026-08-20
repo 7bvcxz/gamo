@@ -1196,8 +1196,10 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 	var text_x: float = rect.position.x + 62.0
 	# "연료 투입" described the gesture -- tipping a pack into a fire -- and left
 	# the player to work out what it bought. This row is the only way the circle
-	# ever grows, so it is named after that.
-	_text(Vector2(text_x, rect.position.y + 22.0), "기지 업그레이드", 14,
+	# ever grows, so it is named after that. "강화" rather than "업그레이드"
+	# because what happens is that the fire gets stronger, and a loanword for a
+	# menu operation says less about it than the plain word does.
+	_text(Vector2(text_x, rect.position.y + 22.0), "기지 강화", 14,
 		Defs.COL_TEXT if ready else Defs.COL_TEXT_DIM)
 	# What it does under the title and what it costs on the right, exactly like
 	# every other row in this window. The previous version spelled out a running

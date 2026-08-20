@@ -96,9 +96,12 @@ func _test_tracks() -> void:
 	# --- And the card ----------------------------------------------------------
 	# The fire's count is not on it. It is drawn over the fire, where a player
 	# deciding whether to walk out for one more stone is already looking.
+	# Both words, because the row was renamed once: a check that names the old
+	# label passes forever afterwards while saying nothing.
 	for row: Dictionary in main.open_missions():
-		_assert(not String(row["line"]).contains("업그레이드"),
-			"카드가 기지 업그레이드를 말하지 않는다: %s" % String(row["line"]))
+		for word: String in ["업그레이드", "강화"]:
+			_assert(not String(row["line"]).contains(word),
+				"카드가 기지 강화를 말하지 않는다: %s" % String(row["line"]))
 	_assert(main.objective().is_empty(),
 		"오프닝이 끝나면 한 줄짜리 목표는 비어 있다: '%s'" % main.objective())
 	var progress: Array[int] = main.upgrade_progress()

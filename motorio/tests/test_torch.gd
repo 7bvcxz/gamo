@@ -244,7 +244,7 @@ func _test_base_window() -> void:
 	var kept: int = sim.stones_in
 	sim.stones_in = 0
 	sim._refresh_radius()
-	_assert(main.base_rows().size() == 1, "3단계 전에는 기지 업그레이드 한 줄뿐이다")
+	_assert(main.base_rows().size() == 1, "3단계 전에는 기지 강화 한 줄뿐이다")
 	sim.stones_in = kept
 	sim._refresh_radius()
 	sim.stock[Defs.ITEM_HEATSTONE] = maxi(4, sim.stones_to_next())
