@@ -83,6 +83,18 @@ const SPLITTER_ART: Texture2D = preload("res://assets/objects/splitter.png")
 ## sheet's own frame rather than to the clock, so the tool comes down when the
 ## animal does instead of beside it.
 const CAT_TOOL_ART: Texture2D = preload("res://assets/objects/cat_tool.png")
+## 냥마을 and the board that points at it. Sizes live in build_objects.py's
+## ADOPTED table beside the art; these are the same numbers, named here so the
+## draw call reads as a drawing rather than as arithmetic.
+const SIGN_ART: Texture2D = preload("res://assets/objects/signpost.png")
+const SIGN_DRAW := 30.0
+const VILLAGE_ART: Array[Texture2D] = [
+	preload("res://assets/objects/village_house.png"),
+	preload("res://assets/objects/village_well.png"),
+	preload("res://assets/objects/village_fire.png"),
+	preload("res://assets/objects/village_gate.png"),
+]
+const VILLAGE_DRAW: Array[float] = [38.0, 30.0, 32.0, 40.0]
 ## 0.7 of what it was. At thirty pixels the drill was as wide as the cat holding
 ## it, which reads as a machine standing in front of the animal rather than a
 ## tool in its paws. Re-cut at this size too, so the pixels are the ones the game
@@ -276,6 +288,7 @@ func _draw() -> void:
 	_draw_pickaxe_hint(tile)
 	_draw_shards(tile)
 	_draw_no_shelter(tile)
+	_draw_village(tile)
 	_draw_debris(tile)
 	_draw_frozen(tile)
 	_draw_thaw(tile)
@@ -885,6 +898,38 @@ func _draw_no_shelter(tile: float) -> void:
 ## same circle fill, which is the point: the game has one idea of "hold the key
 ## and wait", and a fourth thing that did it differently would be a fourth thing
 ## to learn.
+## The village and its signpost.
+##
+## Drawn before the ice, so a block standing in front of a house is in front of
+## it: everything out here is a picture of a solid thing on a snow field, and the
+## order they are painted in is the only depth this view has.
+##
+## The fire flickers on the same clock as every other flame in the game rather
+## than on one of its own -- two fires breathing out of step read as two
+## different kinds of fire.
+func _draw_village(tile: float) -> void:
+	if sim.sign_cell != Vector2i(9999, 9999):
+		var post: Vector2 = Vector2(sim.sign_cell) * tile + Vector2.ONE * tile * 0.5
+		if view_rect.grow(tile).has_point(post):
+			_shadow(post + Vector2(0, 9), 8.0)
+			_object_art(SIGN_ART, post, SIGN_DRAW)
+	for cell: Vector2i in sim.village:
+		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		if not view_rect.grow(tile * 2.0).has_point(at):
+			continue
+		var piece: int = int(sim.village[cell])
+		if piece < 0 or piece >= VILLAGE_ART.size():
+			continue
+		_shadow(at + Vector2(0, 10), 12.0)
+		_object_art(VILLAGE_ART[piece], at, VILLAGE_DRAW[piece])
+		if piece != Defs.VILLAGE_FIRE:
+			continue
+		# Somebody keeps this lit. It is the only warm light out here and it is
+		# what makes the square read as a place rather than as ruins.
+		var beat: float = 1.0 + sin(pulse * 2.4) * 0.06
+		draw_circle(at, 26.0 * beat, Color(1.0, 0.66, 0.30, 0.10))
+		draw_circle(at, 15.0 * beat, Color(1.0, 0.72, 0.36, 0.13))
+
 func _draw_debris(tile: float) -> void:
 	for cell: Vector2i in sim.debris:
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5

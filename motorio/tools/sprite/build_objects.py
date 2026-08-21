@@ -116,6 +116,16 @@ ADOPTED = {
     "kit": ("kit_gen1", 32),
     "kit_base": ("kit_base_gen1", 26),
     "kit_shelter": ("kit_shelter_gen1", 26),
+    # 냥마을. The houses are the largest thing out there because they are what
+    # the place is -- a cottage the size of the well beside it reads as a
+    # garden ornament -- and the gate is drawn wider than its cell on purpose:
+    # it is the one piece she walks *through*, so it has to span more than the
+    # gap it stands in.
+    "signpost": ("signpost_gen1", 30),
+    "village_house": ("village_house_gen1", 38),
+    "village_well": ("village_well_gen1", 30),
+    "village_fire": ("village_fire_gen1", 32),
+    "village_gate": ("village_gate_gen1", 40),
 }
 GAME_ART = REPO / "motorio" / "assets" / "objects"
 
@@ -145,6 +155,11 @@ ADOPTED_NAMES = {
     "kit": "긴급 키트",
     "kit_base": "긴급기지키트",
     "kit_shelter": "긴급생존키트",
+    "signpost": "표지판",
+    "village_house": "냥마을 · 집",
+    "village_well": "냥마을 · 우물",
+    "village_fire": "냥마을 · 화롯불",
+    "village_gate": "냥마을 · 입구",
 }
 
 ## Anything at or below this is matting residue rather than art.

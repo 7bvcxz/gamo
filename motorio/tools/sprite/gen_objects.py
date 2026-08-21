@@ -240,6 +240,47 @@ SUBJECTS = {
         "warm brass leather binding where the two meet, a little snow gathered "
         "along one side."
     ),
+    # 냥마을 and the sign that points at it. Five subjects that have to read as
+    # one place: a village is not four unrelated buildings, so they share a
+    # palette -- warm orange-brown timber, cream plaster, grey-blue stone -- and
+    # each names one silhouette and one warm light like everything else here.
+    #
+    # No lettering anywhere. What the sign says is drawn by the game in its own
+    # font when she reads it; asked for as part of the picture it comes back as
+    # convincing gibberish, and gibberish on a signpost is worse than a blank
+    # board because a player will squint at it.
+    "signpost": (
+        "A wooden signpost standing in deep snow for a snowy top-down game: one "
+        "thick warm brown timber post with a single blank horizontal plank board "
+        "fixed near the top, one small carved cat paw print in the middle of the "
+        "board, a little snow settled along the top edge of the board and at the "
+        "foot of the post."
+    ),
+    "village_house": (
+        "A tiny cosy cat cottage for a snowy top-down game, seen from almost "
+        "directly overhead: one steep round thatched roof in warm orange-brown "
+        "under thick snow, a small grey-blue stone chimney at one side, one small "
+        "round window on the near slope glowing warm amber, a low cream plaster "
+        "wall showing below the roof."
+    ),
+    "village_well": (
+        "A small stone well for a snowy top-down game, seen from almost directly "
+        "overhead: a round ring of chunky grey-blue stones with snow on top, a "
+        "dark round opening in the middle, a warm brown timber frame with a small "
+        "peaked roof over it, a coiled rope on the rim."
+    ),
+    "village_fire": (
+        "A cosy village fire pit for a snowy top-down game, seen from almost "
+        "directly overhead: a round ring of chunky grey-blue stones, warm amber "
+        "flames rising from a few split logs in the middle, glowing embers "
+        "underneath, snow settled on the outer stones."
+    ),
+    "village_gate": (
+        "A simple wooden village gate for a snowy top-down game: two thick warm "
+        "brown timber posts standing in snow with one crossbeam over them, a "
+        "round wooden plaque shaped like a cat's head hanging from the middle of "
+        "the beam, snow along the top of the beam."
+    ),
     # The cat holds this in front of itself and it bobs straight up and down.
     # Nothing rotates it, so the drill has to point down in the picture; the
     # first version came back as a drill gun aimed sideways, which reads as a

@@ -624,6 +624,91 @@
      ]
     }
    ]
+  },
+  {
+   "id": "signpost_gen",
+   "candidates": [
+    {
+     "id": "signpost_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/signpost_gen1-128-23aa888d0b51.png",
+      "64": "/object-candidates/signpost_gen1-64-4f9f5788f1c8.png"
+     },
+     "source": [
+      794,
+      828
+     ]
+    }
+   ]
+  },
+  {
+   "id": "village_fire_gen",
+   "candidates": [
+    {
+     "id": "village_fire_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/village_fire_gen1-128-940d0b76a68e.png",
+      "64": "/object-candidates/village_fire_gen1-64-08ae33560af4.png"
+     },
+     "source": [
+      894,
+      888
+     ]
+    }
+   ]
+  },
+  {
+   "id": "village_gate_gen",
+   "candidates": [
+    {
+     "id": "village_gate_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/village_gate_gen1-128-86eafd6cb672.png",
+      "64": "/object-candidates/village_gate_gen1-64-68441cd27c7a.png"
+     },
+     "source": [
+      959,
+      647
+     ]
+    }
+   ]
+  },
+  {
+   "id": "village_house_gen",
+   "candidates": [
+    {
+     "id": "village_house_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/village_house_gen1-128-47ca118f89ec.png",
+      "64": "/object-candidates/village_house_gen1-64-cde1f20328d6.png"
+     },
+     "source": [
+      713,
+      781
+     ]
+    }
+   ]
+  },
+  {
+   "id": "village_well_gen",
+   "candidates": [
+    {
+     "id": "village_well_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/village_well_gen1-128-facc509f915b.png",
+      "64": "/object-candidates/village_well_gen1-64-df437f84b3df.png"
+     },
+     "source": [
+      644,
+      926
+     ]
+    }
+   ]
   }
  ],
  "adopted": [
@@ -815,6 +900,17 @@
    }
   },
   {
+   "role": "signpost",
+   "name": "표지판",
+   "from": "signpost_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-signpost-128-3563e831e23b.png",
+    "30": "/object-candidates/shipped-signpost-30-b811a0560d4c.png"
+   }
+  },
+  {
    "role": "splitter",
    "name": "분배기",
    "from": "build_belt.py",
@@ -823,6 +919,50 @@
    "sizes": {
     "128": "/object-candidates/shipped-splitter-128-4032ac1647b9.png",
     "32": "/object-candidates/shipped-splitter-32-11f6b2ed72a3.png"
+   }
+  },
+  {
+   "role": "village_fire",
+   "name": "냥마을 · 화롯불",
+   "from": "village_fire_gen1",
+   "draw": 32,
+   "stored": 64,
+   "sizes": {
+    "128": "/object-candidates/shipped-village_fire-128-5d82baca280d.png",
+    "32": "/object-candidates/shipped-village_fire-32-49781dc86a14.png"
+   }
+  },
+  {
+   "role": "village_gate",
+   "name": "냥마을 · 입구",
+   "from": "village_gate_gen1",
+   "draw": 40,
+   "stored": 80,
+   "sizes": {
+    "128": "/object-candidates/shipped-village_gate-128-f89acca35b5d.png",
+    "40": "/object-candidates/shipped-village_gate-40-50e953b83c17.png"
+   }
+  },
+  {
+   "role": "village_house",
+   "name": "냥마을 · 집",
+   "from": "village_house_gen1",
+   "draw": 38,
+   "stored": 76,
+   "sizes": {
+    "128": "/object-candidates/shipped-village_house-128-1b0871d51cd7.png",
+    "38": "/object-candidates/shipped-village_house-38-27089b6c3b6e.png"
+   }
+  },
+  {
+   "role": "village_well",
+   "name": "냥마을 · 우물",
+   "from": "village_well_gen1",
+   "draw": 30,
+   "stored": 60,
+   "sizes": {
+    "128": "/object-candidates/shipped-village_well-128-66bd7c6e20aa.png",
+    "30": "/object-candidates/shipped-village_well-30-4dda96305786.png"
    }
   }
  ],

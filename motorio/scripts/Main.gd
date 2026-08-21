@@ -1773,6 +1773,9 @@ func _prompt_status(id: String) -> Dictionary:
 			return {"want": sim.base_placed and sim.has_fuel()
 				and player.facing_cell() == sim.core_cell,
 				"done": int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
+		"SIGN":
+			return {"want": player.facing_cell() == sim.sign_cell,
+				"done": sim.has_learned("SIGN")}
 		"MINE":
 			return {"want": holding_pickaxe() and sim.can_hand_mine(_hand_target()),
 				"done": int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) > 0
@@ -2174,6 +2177,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		open_room()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_F12:
+		debug_village()
+		get_viewport().set_input_as_handled()
+		return
 	if key.keycode == KEY_F10:
 		debug_debris()
 		get_viewport().set_input_as_handled()
@@ -2513,6 +2520,19 @@ var frozen_said: float = 0.0
 ##
 ## Said once, at the thing, rather than through the message banner: the banner is
 ## for what just happened, and this is what did not.
+## What the sign says, said at the sign.
+##
+## Over the object rather than in the banner at the top, like every other line
+## that belongs to a thing in the world: the banner is for what just happened,
+## and this is a board somebody nailed up. It also goes in the log, because it is
+## the one piece of directions in the game and a popup is gone in two seconds.
+func _read_sign(cell: Vector2i) -> void:
+	sim.learn("SIGN")
+	fx.popup(sim.cell_centre(cell) + Vector2(0, -24.0), Defs.SIGN_LINE,
+		Defs.COL_CORE, true)
+	note_log(Defs.SIGN_LINE, Defs.COL_CORE)
+	audio.call("play", "select")
+
 func _say_frozen(cell: Vector2i) -> void:
 	if frozen_said > 0.0:
 		return
@@ -2572,6 +2592,11 @@ func _primary_action() -> void:
 	# not a build, a pick-up or anything else. Wreckage is the same verb: a tap
 	# on it must not fall through and put a belt down on top of it.
 	if _facing_kit() or sim.debris.has(cell):
+		return
+	# The signpost. It has one answer and it is a sentence -- nothing to take,
+	# nothing to build on, and no second press that does something else.
+	if cell == sim.sign_cell:
+		_read_sign(cell)
 		return
 	if sim.carried_kit != Defs.KIT_NONE:
 		_place_kit(cell)
@@ -3148,6 +3173,32 @@ func debug_debris() -> void:
 	for shape in Defs.DEBRIS_SHAPES:
 		sim.debris[origin + across * (shape - 2)] = shape
 	_notify("디버그 · 로켓잔해 %d조각을 앞에 두었습니다" % Defs.DEBRIS_SHAPES, Defs.COL_DANGER)
+
+## To the signpost, with a torch lit.
+##
+## 냥마을 is forty-three cells out through white fog, which is a two-minute walk
+## and a torch each way -- and the third time a check costs that, the check stops
+## happening. This puts her at the board with the light on, which is where the
+## walk was going to end anyway.
+func debug_village() -> void:
+	debug_unlock_all()
+	sim.torches = maxi(sim.torches, 5)
+	# And the fire fed until its circle covers the walk. Written as stones rather
+	# than as a radius, because the radius is derived from them and recomputed
+	# every time the fire is touched -- a radius assigned here is back to seven
+	# on the next frame, which is what the first version of this key did.
+	#
+	# Not a shortcut past the design: the fog is what makes the trail worth
+	# having, and this is the run where the fire is big enough to have reached
+	# out here. A check that can only be made two cells at a time is a check
+	# nobody makes twice.
+	while sim.warm_radius < 60.0 and sim.stones_in < 100000:
+		sim.stones_in += 100
+		sim._refresh_radius()
+	player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 1))
+	player.facing = Vector2i(0, -1)
+	sim.mark_explored(sim.sign_cell, Defs.SIGHT_RADIUS)
+	_notify("디버그 · 표지판 앞입니다", Defs.COL_DANGER)
 
 func _cycle_recipe() -> void:
 	if player.locked:

@@ -293,6 +293,41 @@ func _draw_tiles() -> void:
 			_tile_layer.draw_texture_rect_region(atlas,
 				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
 				ore_region(atlas, ore_variant(cell)))
+	_draw_trail(tile, start, end)
+
+## Tracks between the signpost and 냥마을.
+##
+## Faint on purpose. This is the one direction the game ever gives without
+## words, and a path painted brightly enough to be obvious would also be a road
+## -- somebody walked here, they did not build. Two prints a cell, set either
+## side of the line and swapped row by row, because a single dot per cell reads
+## as a dotted line and a dotted line reads as drawn.
+##
+## Drawn into the tile layer with the snow rather than over the top of the world,
+## so a boulder or a machine standing on the path covers the prints instead of
+## floating above them.
+func _draw_trail(tile: float, start: Vector2i, end: Vector2i) -> void:
+	if sim.trail.is_empty():
+		return
+	for cell: Vector2i in sim.trail:
+		if cell.x < start.x - 1 or cell.x > end.x + 1:
+			continue
+		if cell.y < start.y - 1 or cell.y > end.y + 1:
+			continue
+		var base: Vector2 = Vector2(cell) * tile
+		var side: int = int(sim.trail[cell])
+		# Jittered off the cell it belongs to, because a print placed at the same
+		# two spots in every cell comes out as a column of evenly spaced dots --
+		# which is what a dotted line is, and a dotted line is drawn rather than
+		# walked. The jitter is a hash of the cell, so it holds still.
+		var wobble := Vector2(
+			float(posmod(cell.x * 73856093 + cell.y * 19349663, 7) - 3) * 0.03,
+			float(posmod(cell.y * 83492791, 7) - 3) * 0.04)
+		for index in 2:
+			var across: float = 0.32 + 0.32 * float((index + side) % 2) + wobble.x
+			var along: float = 0.24 + 0.46 * float(index) + wobble.y
+			_tile_layer.draw_circle(base + Vector2(tile * across, tile * along),
+				tile * 0.085, Color(0.52, 0.58, 0.72, 0.20))
 
 
 ## Inside the hut: black to the edges of the view, then the wall standing behind

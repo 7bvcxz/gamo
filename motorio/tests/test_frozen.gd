@@ -87,8 +87,18 @@ func _test_scatter() -> void:
 	# and the number of cats a run can reach is unchanged.
 	var reach: float = Defs.WARM_MAX + 8.0
 	var expected: int = int((PI * reach * reach) / Defs.FROZEN_PER_TILES) + Defs.STARTER_FROZEN
-	_assert(absi(sim.frozen_cats.size() - expected) <= 2,
-		"밀도가 설계값과 맞는다 (%d, 기대 %d)" % [sim.frozen_cats.size(), expected])
+	# 냥마을's seven are placed rather than scattered, so they are counted out of
+	# a claim about density: the village is a destination with a fixed number of
+	# cats in it, and adding it must not read here as the plateau having got
+	# richer.
+	var scattered := 0
+	for cell: Vector2i in sim.frozen_cats:
+		if not sim.in_village(cell):
+			scattered += 1
+	_assert(absi(scattered - expected) <= 2,
+		"밀도가 설계값과 맞는다 (%d, 기대 %d)" % [scattered, expected])
+	_assert(sim.frozen_cats.size() - scattered == Defs.VILLAGE_FROZEN.size(),
+		"그리고 마을 몫은 따로 %d마리" % Defs.VILLAGE_FROZEN.size())
 	_assert(is_equal_approx(Defs.FROZEN_PER_TILES, 66.7 * 3.0),
 		"상자 밀도의 1/3 — 한 마리가 상자 3개를 대신하므로 총 고양이 수는 그대로")
 	for cell: Vector2i in sim.frozen_cats:

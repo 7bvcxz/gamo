@@ -128,6 +128,17 @@ var cats: Array[Cat] = []
 var mined_rocks: Dictionary[Vector2i, bool] = {}
 var shards: Dictionary[Vector2i, bool] = {}
 var frozen_cats: Dictionary[Vector2i, float] = {}
+## 냥마을, and the sign that says where it is.
+##
+## Derived from the fire's cell and a table of offsets, so neither is saved: a
+## place that is in the same spot in every run is not run state. What *is* saved
+## is the seven blocks of ice in it, because those can be carried away.
+var sign_cell := Vector2i(9999, 9999)
+var village: Dictionary[Vector2i, int] = {}
+var village_rect := Rect2i()
+## Tracks in the snow between the two. The value is only which of the two marks
+## to draw; what matters is the key.
+var trail: Dictionary[Vector2i, int] = {}
 ## Whether Grim has one in her arms. A bool rather than an object because a
 ## frozen cat has no state of its own until it is on the ground -- it is not a
 ## Cat yet, and pretending it is would mean a Cat that must be excluded from
@@ -589,6 +600,11 @@ func setup(seed_value: int) -> void:
 	_generate_shards(seed_value)
 	_generate_frozen_cats(seed_value)
 	_generate_debris(seed_value)
+	# Last, so that clearing its square out is clearing out everything: a seam
+	# rolled into the village square is a seam standing in someone's house, and
+	# the shelter doorstep taught this repository that reserving a cell before
+	# the scatter runs reserves nothing.
+	_generate_village()
 
 ## Cells kept clear so the guaranteed opening always has a belt route home.
 ## A single row, not a block: a square patch would put ore directly in front of
@@ -750,6 +766,81 @@ func _generate_frozen_cats(seed_value: int) -> void:
 			continue
 		frozen_cats[cell] = 0.0
 
+## The village, the sign, and the tracks between them.
+##
+## Fixed coordinates, like every other landmark in this world: the fire decides
+## where it is and nothing rolls for it. A place a player can be told about has
+## to be in the same spot for every player who is told.
+func _generate_village() -> void:
+	village.clear()
+	trail.clear()
+	sign_cell = core_cell + Defs.SIGN_OFFSET
+	var origin: Vector2i = core_cell + Defs.VILLAGE_OFFSET \
+		- Vector2i(Defs.VILLAGE_CELLS.x / 2, Defs.VILLAGE_CELLS.y / 2)
+	village_rect = Rect2i(origin, Defs.VILLAGE_CELLS)
+	# Emptied first. Ore, wreckage and the scattered ice all landed here before
+	# anyone decided this square was a village, and a house with a seam under it
+	# is a house nobody can walk into.
+	for y in Defs.VILLAGE_CELLS.y:
+		for x in Defs.VILLAGE_CELLS.x:
+			var cell: Vector2i = origin + Vector2i(x, y)
+			ore.erase(cell)
+			purity.erase(cell)
+			debris.erase(cell)
+			frozen_cats.erase(cell)
+			shards.erase(cell)
+	ore.erase(sign_cell)
+	purity.erase(sign_cell)
+	debris.erase(sign_cell)
+	frozen_cats.erase(sign_cell)
+	for piece: Dictionary in Defs.VILLAGE_PIECES:
+		village[origin + Vector2i(piece["cell"])] = int(piece["id"])
+	for local: Vector2i in Defs.VILLAGE_FROZEN:
+		frozen_cats[origin + local] = 0.0
+	_trace_trail(sign_cell, origin + _village_gate_local())
+
+func _village_gate_local() -> Vector2i:
+	for piece: Dictionary in Defs.VILLAGE_PIECES:
+		if int(piece["id"]) == Defs.VILLAGE_GATE:
+			return Vector2i(piece["cell"])
+	return Vector2i(Defs.VILLAGE_CELLS.x / 2, Defs.VILLAGE_CELLS.y - 1)
+
+## Footprints, not a road. The line wanders a cell either side so it reads as
+## something that was walked rather than built, and the wander is a hash of the
+## row so the same world always has the same path -- a trail that reshuffled
+## every time it was drawn would shimmer.
+func _trace_trail(from: Vector2i, to: Vector2i) -> void:
+	var steps: int = absi(to.y - from.y)
+	var x: int = from.x
+	for step in range(1, steps + 1):
+		var y: int = from.y - step
+		# A walk rather than a function of the row. The first version picked the
+		# offset from a hash of `y`, which is a wander on paper and on the ground
+		# was a set of marks that jumped two cells sideways between rows -- and a
+		# footprint two cells from the last one is not a footprint, it is a
+		# second path. One step at a time, never more than a cell off the line.
+		x += posmod(y * 73856093 + step * 19349663, 3) - 1
+		x = clampi(x, from.x - 1, from.x + 1)
+		var cell := Vector2i(x, y)
+		if village.has(cell):
+			continue
+		trail[cell] = posmod(y, 2)
+		# Whatever the scatter put on the path comes off it. The tracks are the
+		# one thing in the fog that says "this way", and a boulder standing on
+		# them is the sentence with a word missing.
+		ore.erase(cell)
+		purity.erase(cell)
+		debris.erase(cell)
+
+## Whether a cell is inside the village square at all.
+func in_village(cell: Vector2i) -> bool:
+	return village_rect.has_point(cell)
+
+## What is standing on a cell, or -1. Asked by the drawing, the collision and the
+## belt, so that "is there a house here" has one answer.
+func village_piece(cell: Vector2i) -> int:
+	return int(village.get(cell, -1))
+
 ## Blocks of ice riding the belts.
 ##
 ## Grim slides on a belt and so does everything the belt carries, and a block of
@@ -792,6 +883,9 @@ func _tick_frozen_drift(delta: float) -> void:
 ## the fire itself -- a block pushed into the core would be a cat fed to it.
 func _frozen_may_enter(cell: Vector2i) -> bool:
 	if frozen_cats.has(cell) or debris.has(cell) or ore.has(cell):
+		return false
+	var piece: int = village_piece(cell)
+	if piece >= 0 and not Defs.village_walkable(piece):
 		return false
 	if cell == core_cell or (shelter_placed and cell == shelter_cell):
 		return false
@@ -967,6 +1061,12 @@ func _starter_frozen_cell(index: int) -> Vector2i:
 func has_rock(cell: Vector2i) -> bool:
 	if mined_rocks.has(cell) or ore.has(cell) or machines.has(cell):
 		return false
+	# Rock is procedural, so it exists under every cell in the world that the
+	# generator did not empty -- and the generator's dictionaries are the only
+	# thing it *can* empty. The village square and its footpath are cleared here
+	# instead, which is the same answer given in the one place that decides it.
+	if in_village(cell) or trail.has(cell) or cell == sign_cell:
+		return false
 	var block := Vector2i(floori(float(cell.x) / float(Defs.ROCK_BLOCK)),
 		floori(float(cell.y) / float(Defs.ROCK_BLOCK)))
 	for by in range(block.y - Defs.ROCK_REACH, block.y + Defs.ROCK_REACH + 1):
@@ -1012,6 +1112,12 @@ func tile_attributes(cell: Vector2i) -> int:
 	# that cannot walk over a piece of wreckage is a cat that gets stuck behind
 	# one on its way home.
 	if frozen_cats.has(cell) or debris.has(cell):
+		attrs |= Defs.ATTR_STRUCTURE
+	# Somebody's house, the well, the fire they sit round. Buildings on the grid
+	# like every other building; the gate is the exception and it is the whole
+	# point of a gate.
+	var piece: int = village_piece(cell)
+	if piece >= 0 and not Defs.village_walkable(piece):
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
 	if shelter_placed and cell == shelter_cell:

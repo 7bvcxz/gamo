@@ -961,6 +961,63 @@ const BASE_CRAFTS: Array[Dictionary] = [
 ## screen shows have to be the same thing.
 const OPENING_WARM_RADIUS := 9.0
 
+## --- The signpost and 냥마을 ------------------------------------------------
+## A place out in the fog that is worth walking to, and the two things that make
+## it findable: a sign that says how far, and tracks in the snow that say which
+## way. Everything here is an offset from the fire, because the whole world is.
+##
+## The village is not a room. The room is a separate patch of grid she is
+## teleported into; this stands on the plateau she walks across, so the cold, the
+## fog and the clock all apply to it -- getting there is the point, and a place
+## that suspended those would be a corridor rather than a journey.
+
+## Northwest of the fire, at about twenty cells. Far enough that the first warm
+## radius does not reach it and a torch is the way there.
+const SIGN_OFFSET := Vector2i(-14, -14)
+## What the sign says when she reads it. The arrow is the sign's own direction,
+## so the village is due north of it and the tracks leave northward -- an arrow
+## that points at a village somewhere off to the left is worse than no arrow.
+const SIGN_LINE := "↑ 냥마을까지 100m"
+
+const VILLAGE_CELLS := Vector2i(11, 11)
+## Twenty-seven cells up the trail from the sign, which is the number the sign is
+## quoting: a hundred metres at this game's scale.
+const VILLAGE_OFFSET := Vector2i(-14, -41)
+
+const VILLAGE_HOUSE := 0
+const VILLAGE_WELL := 1
+const VILLAGE_FIRE := 2
+const VILLAGE_GATE := 3
+
+## Local cells inside the 11x11, laid out on one axis: the gate at the south
+## edge, the fire at the centre, the well behind it, and a house at each corner
+## of the square they stand in. One table, so the drawing, the collision and the
+## test that says "four houses" cannot come to disagree.
+const VILLAGE_PIECES: Array[Dictionary] = [
+	{"id": VILLAGE_HOUSE, "cell": Vector2i(2, 2), "name": "집"},
+	{"id": VILLAGE_HOUSE, "cell": Vector2i(8, 2), "name": "집"},
+	{"id": VILLAGE_HOUSE, "cell": Vector2i(2, 8), "name": "집"},
+	{"id": VILLAGE_HOUSE, "cell": Vector2i(8, 8), "name": "집"},
+	{"id": VILLAGE_WELL, "cell": Vector2i(5, 3), "name": "우물"},
+	{"id": VILLAGE_FIRE, "cell": Vector2i(5, 5), "name": "화롯불"},
+	# The way in. Walkable, unlike everything else here -- an entrance you cannot
+	# walk through is a wall with a picture of a gate on it.
+	{"id": VILLAGE_GATE, "cell": Vector2i(5, 10), "name": "입구"},
+]
+## Seven cats, none of them on the column between the gate and the fire: the
+## first thing she sees from the gate is the fire, and a block of ice standing in
+## that line is a door half shut.
+const VILLAGE_FROZEN: Array[Vector2i] = [
+	Vector2i(3, 4), Vector2i(7, 4), Vector2i(3, 6), Vector2i(7, 6),
+	Vector2i(2, 5), Vector2i(8, 5), Vector2i(4, 8),
+]
+
+## Whether a piece can be walked over. Only the gate, and it is named here rather
+## than at each of the three places that ask, because the last rule written per
+## caller in this file was missing from six of nine of them.
+static func village_walkable(piece: int) -> bool:
+	return piece == VILLAGE_GATE
+
 ## --- What the objective card says -------------------------------------------
 ## One table, keyed by an id that does not change, so a line can be rewritten
 ## without hunting for it in a ladder of branches -- and so the documentation
@@ -1119,6 +1176,10 @@ const KEY_PROMPTS: Array[Dictionary] = [
 	{
 		"id": "FUEL", "keys": ["Z"], "verb": "기지",
 		"why": "연료를 들고 기지를 바라볼 때. 캔 열석이 불에 들어가지 않으면 오프닝이 끝나지 않는다.",
+	},
+	{
+		"id": "SIGN", "keys": ["Z"], "verb": "읽기",
+		"why": "표지판을 바라볼 때. 눈밭 한가운데의 판자는 그냥 지나칠 수 있는 물건이고, 한 번 읽으면 다시 뜨지 않는다.",
 	},
 	{
 		"id": "MINE", "keys": ["Z"], "hold": true, "verb": "캐기",
