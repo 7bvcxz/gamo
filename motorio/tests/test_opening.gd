@@ -168,6 +168,18 @@ func _test_searching_the_kit() -> void:
 	for cell: Vector2i in sim.drops:
 		_assert(cell.y > sim.kit_cell.y, "상자 아래쪽에 떨어진다: %s" % str(cell))
 
+	# And it does not open again until the fire does. Both searches used to be
+	# available from the first frame, which left her standing in the snow holding
+	# a shelter and a pickaxe with nowhere to put either -- the opening is one
+	# sentence at a time and the fire is the first one.
+	_assert(sim.search_kit().is_empty(), "불을 피우기 전에는 두 번째 조사가 없다")
+	_assert(sim.kit_searched == 1, "그래서 조사 횟수도 그대로다: %d" % sim.kit_searched)
+	_assert(not main._facing_kit() or not sim.can_search_kit(),
+		"Z도 상자를 가리키지 않는다")
+	sim.carried_kit = Defs.KIT_BASE
+	sim.place_base(sim.core_cell)
+	_assert(sim.base_placed and sim.can_search_kit(), "불을 피우면 다시 열린다")
+
 	var second: Array[int] = sim.search_kit()
 	_assert(second.size() == 2, "두 번째 조사에서 둘이 더 떨어진다: %d" % second.size())
 	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE),
@@ -490,6 +502,11 @@ func _test_drops_line_up() -> void:
 	# wants a held key and a facing, and neither is what this is about.
 	sim.drop_away = Vector2i(0, 1)
 	sim.search_kit()
+	# The second search waits for the fire, and what this test is about is where
+	# the second search puts things -- so the fire is lit rather than the rule
+	# being worked around.
+	sim.carried_kit = Defs.KIT_BASE
+	sim.place_base(sim.core_cell)
 	sim.search_kit()
 	var kit_at := Vector2i(9999, 9999)
 	var tool_at := Vector2i(9999, 9999)

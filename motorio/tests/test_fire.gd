@@ -66,17 +66,38 @@ func _test_delivery_banks() -> void:
 
 # --- Until she puts it in -----------------------------------------------------
 
+## One press, one rung.
+##
+## It used to take the whole pack, which meant five hundred stones climbed four
+## rungs at once: the circle went from seven cells to thirty and the player never
+## saw the decision. The ladder is this game's pacing.
 func _test_hand_feeds() -> void:
 	var sim := _lit()
 	var radius_before: float = sim.warm_radius
+	var level_before: int = sim.base_level
+	var want: int = sim.stones_to_next()
 	for index in 40:
 		sim._deliver(Defs.ITEM_HEATSTONE, sim.core_cell)
 	var moved: Dictionary = sim.deposit_fuel()
-	_assert(int(moved.get(Defs.ITEM_HEATSTONE, 0)) == 40, "Z 한 번에 창고가 통째로 들어간다")
-	_assert(sim.stones_in == 40, "불에 들어간 열석이 그때 오른다: %d" % sim.stones_in)
+	_assert(int(moved.get(Defs.ITEM_HEATSTONE, 0)) == want,
+		"Z 한 번에 다음 단계에 필요한 만큼만 들어간다: %d (필요 %d)"
+			% [int(moved.get(Defs.ITEM_HEATSTONE, 0)), want])
+	_assert(sim.stones_in == want, "불에 들어간 열석이 그때 오른다: %d" % sim.stones_in)
+	_assert(sim.base_level == level_before + 1,
+		"단계는 정확히 하나만 오른다: %d → %d" % [level_before, sim.base_level])
 	_assert(sim.warm_radius > radius_before,
 		"그리고 그때 원이 커진다: %.1f → %.1f칸" % [radius_before, sim.warm_radius])
-	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "창고는 비워진다")
+	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 40 - want,
+		"나머지는 가방에 남는다: %d" % int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)))
+	# And the next press buys the next rung with what is left, rather than
+	# nothing happening because the fire is "already fed".
+	var second: int = sim.stones_to_next()
+	sim.deposit_fuel()
+	_assert(sim.base_level == level_before + 2,
+		"한 번 더 누르면 한 단계 더: %d" % sim.base_level)
+	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 40 - want - second,
+		"그만큼만 더 줄어든다: %d" % int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)))
+	sim.stock[Defs.ITEM_HEATSTONE] = 0
 	_assert(sim.deposit_fuel().is_empty(), "빈 창고로 누르면 아무 일도 없다")
 	sim.free()
 

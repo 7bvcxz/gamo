@@ -18,6 +18,9 @@ const TILE_VARIANTS := 16
 
 var sim: Sim
 var night: float = 0.0
+## What the sky is doing, which indoors is not what `night` is doing: the room
+## is lit and the window in its wall looks out at whatever hour it actually is.
+var sky_night: float = 0.0
 var view_rect := Rect2()
 ## The torch's own little pool, in world pixels. The fog opening a hole is not
 ## enough on its own: outside the warm circle the ground is painted with the cold
@@ -369,4 +372,14 @@ func _draw_room_window(wall_rect: Rect2) -> void:
 	var tile := float(Defs.TILE)
 	var frame := Rect2(wall_rect.position + Vector2(Defs.ROOM_WINDOW_CELL) * tile,
 		Vector2(Defs.ROOM_WINDOW_SIZE) * tile)
-	draw_texture_rect(ROOM_WINDOW_NIGHT if night > 0.62 else ROOM_WINDOW_DAY, frame, false)
+	draw_texture_rect(ROOM_WINDOW_NIGHT if window_is_night(sky_night)
+		else ROOM_WINDOW_DAY, frame, false)
+
+## Which of the two panes is in the wall.
+##
+## The one thing in this room that answers to the clock outside rather than to
+## the lamps in here, and a predicate so a test can ask it: it read `night`,
+## `night` is zero indoors as of 1.0.19, and she went to bed with the morning
+## already in the window.
+static func window_is_night(sky: float) -> bool:
+	return sky > 0.62

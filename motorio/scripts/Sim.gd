@@ -1375,10 +1375,24 @@ var drop_away := Vector2i.ZERO
 ## subtracts yesterday's reading from today's.
 var collected: Dictionary = {}
 
+## Whether the case will open again.
+##
+## The second search waits for the fire. Both are available from the first frame
+## otherwise, and a player who searched twice before lighting anything was
+## standing in the snow holding a shelter and a pickaxe with nowhere to put
+## either -- the opening is one sentence at a time, and the fire is the first.
+##
+## One predicate, because three places ask: the search itself, the reach test
+## that decides whether Z means the case at all, and the prompt that offers it.
+func can_search_kit() -> bool:
+	if kit_searched >= KIT_CONTENTS.size():
+		return false
+	return kit_searched == 0 or base_placed
+
 ## Empties the case onto the snow below it. Returns what came out.
 func search_kit() -> Array[int]:
 	var out: Array[int] = []
-	if kit_searched >= KIT_CONTENTS.size():
+	if not can_search_kit():
 		return out
 	var contents: Array = KIT_CONTENTS[kit_searched]
 	kit_searched += 1
@@ -1662,15 +1676,25 @@ func deposit_fuel() -> Dictionary:
 	# made "how many more do I need" a question with two answers and no way to
 	# ask it.
 	#
-	# All of them, not just as many as the next step wants: she is tipping the
-	# pack into the fire, and a fire that leaves change is a fire that has to
-	# explain itself. What stops a half-payment is the gate above -- she may not
-	# feed it at all until she has the whole step.
+	# One step's worth, and the rest stays in the pack.
+	#
+	# It used to take everything she was carrying, on the grounds that tipping a
+	# pack into a fire leaves no change. What that meant in play was that five
+	# hundred stones bought four rungs of the ladder in a single keypress: the
+	# circle jumped from seven cells to thirty and the player never saw the
+	# decision that was being made for them. The ladder is the game's pacing, and
+	# a press that climbs an unpredictable number of rungs is not a decision.
+	#
+	# At the top of the ladder there is no next step, and there the fire does
+	# take whatever it is given -- the stones have nowhere else to go.
+	var want: int = stones_to_next()
 	var count: int = int(stock.get(Defs.ITEM_HEATSTONE, 0))
+	if want > 0:
+		count = mini(count, want)
 	if count <= 0:
 		return moved
 	moved[Defs.ITEM_HEATSTONE] = count
-	stock[Defs.ITEM_HEATSTONE] = 0
+	stock[Defs.ITEM_HEATSTONE] = int(stock.get(Defs.ITEM_HEATSTONE, 0)) - count
 	delivered[Defs.ITEM_HEATSTONE] = int(delivered.get(Defs.ITEM_HEATSTONE, 0)) + count
 	stones_in += count
 	var core: Machine = machines.get(core_cell, null)

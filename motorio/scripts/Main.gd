@@ -844,9 +844,11 @@ func day_fraction() -> float:
 ## decides, but the night sequence has to hold the sky at night while the clock
 ## reads zero and then walk it back to morning while the clock reads a full day.
 func night_level() -> float:
-	# The override first. It is the game deliberately painting a sky -- the dawn
-	# runs while she is standing in the room, waking up in front of the bed -- and
-	# a scene that has taken the sky over outranks whatever the place would say.
+	# The override first, and it is checked here as well as in `sky_night()`
+	# rather than by delegating: the dawn sequence runs while she is standing in
+	# the room, and a room that never darkens would swallow it. (Written the
+	# other way round once. Two tests caught it, both saying the sunrise had no
+	# sky in it.)
 	if night_override >= 0.0:
 		return night_override
 	# Then the place. Everything that darkens the screen reads this one function,
@@ -854,6 +856,21 @@ func night_level() -> float:
 	# grade, the vignette, the HUD wash -- has to know the shelter exists.
 	if not Zone.darkens(zone()):
 		return 0.0
+	return day_fraction()
+
+## How dark it is *outside*, wherever she happens to be standing.
+##
+## Split from `night_level()` when the shelter stopped getting dark: the grade
+## has to say morning in a lit room and the window in that room's wall has to
+## say midnight, and those are two different questions about the same clock. A
+## window that agrees with the lamps is a painting.
+##
+## The override comes first here because it is the game deliberately painting a
+## sky -- the dawn runs while she is standing in the room, waking up in front of
+## the bed -- and a scene that has taken the sky over outranks the clock.
+func sky_night() -> float:
+	if night_override >= 0.0:
+		return night_override
 	return day_fraction()
 
 ## True while the player is inside the hut: asleep, or waiting for the sun. They
@@ -947,6 +964,7 @@ func _process(delta: float) -> void:
 	world_layer.set_view(view)
 	world_layer.night = dark
 	ground_layer.night = dark
+	ground_layer.sky_night = sky_night()
 	ground_layer.view_rect = view
 	cold_fog.view_rect = view
 	cold_fog.night = dark
@@ -1635,7 +1653,7 @@ func _update_debris(delta: float) -> void:
 ## game did nothing, because the last arrow pressed had been Down.
 const KIT_REACH := 1.4
 func _facing_kit() -> bool:
-	if sim.kit_searched >= 2 or sim.hands_full():
+	if not sim.can_search_kit() or sim.hands_full():
 		return false
 	return player.position.distance_to(sim.cell_centre(sim.kit_cell)) \
 		<= float(Defs.TILE) * KIT_REACH
@@ -1749,7 +1767,7 @@ func _prompt_status(id: String) -> Dictionary:
 			break
 	match id:
 		"KIT":
-			return {"want": _facing_kit(), "done": sim.kit_searched >= 2}
+			return {"want": _facing_kit(), "done": not sim.can_search_kit()}
 		"PLACE":
 			return {"want": sim.carried_kit != Defs.KIT_NONE, "done": sim.shelter_placed}
 		"THAW":
@@ -2175,6 +2193,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		# fifty seconds of night left. Checking something should not cost most of
 		# a day, and at ten times speed the walk *is* most of the night.
 		open_room()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_F1:
+		# The fire's window, without walking onto the one cell it can be opened
+		# from. Every automated pass over this window has begun with a dance of
+		# timed arrow presses to land on that cell, and the dance is wrong about
+		# as often as it is right -- which shows up as a screenshot of snow.
+		#
+		# F1 was also the key this repository's browser harnesses had been
+		# pressing for several sessions believing it unlocked the world. It did
+		# nothing at all. Now it does something.
+		if state == State.PLAY and sim.base_placed and not modal_open():
+			_open_base_menu()
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode == KEY_F12:

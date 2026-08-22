@@ -21,6 +21,7 @@ func _run() -> void:
 	await _test_collision()
 	await _test_the_cats()
 	await _test_sleeping()
+	await _test_the_window()
 	await _test_warm_and_saved()
 	if failures == 0:
 		print("ROOM: PASS")
@@ -204,6 +205,26 @@ func _test_sleeping() -> void:
 		spent += 1.0 / 60.0
 	_assert(is_equal_approx(main.room_fade, 1.0), "화면이 완전히 검어지고")
 	_assert(main.state == main.State.RESULT, "그 다음에 하루 정리가 나온다")
+	# And the card is actually on screen. The state alone is not the picture: the
+	# fade is drawn after the state match, so at full darkness it was painting a
+	# second black sheet over the thing it had spent a second building to -- the
+	# summary was there every night and nobody could see it.
+	_assert(not main.hud.room_fade_visible(),
+		"검은 천이 그 카드를 덮지 않는다 (fade=%.2f)" % main.room_fade)
+	main.clear_save()
+	main.free()
+
+## The window is the one thing in here that answers to the clock outside.
+func _test_the_window() -> void:
+	var main: Node2D = await _main()
+	const Ground := preload("res://scripts/GroundLayer.gd")
+	main.time_left = Defs.NIGHT_SECONDS * 0.5
+	main.open_room()
+	_assert(is_zero_approx(main.night_level()), "방은 밤에도 밝고")
+	_assert(Ground.window_is_night(main.sky_night()),
+		"창문은 밤이다 (%.2f)" % main.sky_night())
+	main.time_left = Defs.DAY_SECONDS * 0.9
+	_assert(not Ground.window_is_night(main.sky_night()), "낮에는 낮이고")
 	main.clear_save()
 	main.free()
 

@@ -1093,14 +1093,35 @@ func build_menu_row_at(point: Vector2) -> int:
 ##
 ## What is left in the HUD is the light going out and coming back, because that
 ## is a thing done to the screen rather than to the room.
+## Whether the black sheet is painted this frame.
+##
+## A predicate rather than a branch inside the draw call, because the failure it
+## guards is invisible to a screenshot: a black screen and a black screen with
+## the day's summary underneath it are the same picture.
+func room_fade_visible() -> bool:
+	# Not over the summary. The card is what the fade was building to -- she
+	# closes her eyes and the day is counted up -- and this is drawn after the
+	# state match, so at full darkness it was painting over it. The RESULT branch
+	# lays its own black down first; this would be a second one, on top.
+	return main.room_fade > 0.0 and main.state != main.State.RESULT
+
 func _draw_room_fade() -> void:
-	if main.room_fade <= 0.0:
+	if not room_fade_visible():
 		return
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, clampf(main.room_fade, 0.0, 1.0)))
 
+## How far below the title bar the first row starts. One constant, because the
+## card's height and the rows' positions are the same measurement and the last
+## time a window's two halves each had their own copy of a number, the plate hung
+## fourteen pixels off the bottom of the screen.
+const BASE_MENU_TOP := 14.0
+
 func base_menu_rect() -> Rect2:
 	var rows: float = float(maxi(1, main.base_rows().size()))
-	var height: float = FRAME_HEADER + 60.0 + rows * MENU_ROW + 18.0
+	# No state lines above the rows any more, so the card is 46px shorter and the
+	# first row starts where they used to. Both numbers live here rather than
+	# being written twice: `base_menu_row_rect` reads the same offset.
+	var height: float = FRAME_HEADER + BASE_MENU_TOP + rows * MENU_ROW + 18.0
 	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
 	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
 
@@ -1118,8 +1139,8 @@ func base_menu_row_at(point: Vector2) -> int:
 
 func base_menu_row_rect(index: int) -> Rect2:
 	var card: Rect2 = base_menu_rect()
-	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + 56.0 + float(index) * MENU_ROW),
-		Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + BASE_MENU_TOP - 4.0
+		+ float(index) * MENU_ROW), Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
 
 func _draw_base_menu() -> void:
 	if not main.base_menu_open:
@@ -1127,16 +1148,15 @@ func _draw_base_menu() -> void:
 	_dim(0.45)
 	var card: Rect2 = base_menu_rect()
 	_frame(card, Defs.COL_CORE, "기지   ↑↓ 선택 · Z 제작 · X 닫기")
-	var sim = main.sim
-	# The state of the fire, in one line: how far it reaches and what the next
-	# step of that costs. It is the only number the player is working towards.
-	# The state of the fire only. What the next step costs is on the upgrade row,
-	# where the price of everything else in this window is.
-	var line: String = "온기 %.0f칸  ·  불에 넣은 열석 %d개" % [sim.warm_radius, sim.stones_in]
-	_text(card.position + Vector2(14.0, FRAME_HEADER + 22.0), line, 13, Defs.COL_TEXT_DIM)
-	_text(card.position + Vector2(14.0, FRAME_HEADER + 42.0),
-		"%s %d개  ·  남은 시간 %.0f초" % [Defs.TORCH_NAME, sim.torches, sim.torch_left],
-		12, Defs.COL_BELT_RIM)
+	# Two lines of state used to sit here: the circle and the stones in the fire
+	# on one, the torches and their seconds on the other. Both are gone.
+	#
+	# The first said what the upgrade row already says better -- that row reads
+	# "온기 7칸 → 9칸" next to its price, which is the same fact with the reason
+	# to care attached. The second was a torch's countdown in a window about the
+	# fire: the torch is in her hand, its clock is drawn on the tool it belongs
+	# to, and a number repeated somewhere it does not belong is a number the
+	# player has to check twice.
 	var rows: Array[Dictionary] = main.base_rows()
 	for index in rows.size():
 		_draw_base_row(index, rows[index])
