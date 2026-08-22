@@ -87,6 +87,18 @@ var day_start_collected: Dictionary = {}
 ## title. One timer rather than a flag and a clock somewhere else.
 var gameover_timer: float = 0.0
 var rescued_tonight: bool = false
+## The banner, as a stack rather than a single slot.
+##
+## It was one string and one timer, so three things happening in the same frame
+## -- which is exactly what seeing copper does, opening the belt, the splitter
+## and the generator at once -- left the player looking at the third one. Now
+## they queue: newest at the bottom, each with its own life, oldest fading first.
+const MESSAGE_LIFE := 2.4
+const MESSAGE_MAX := 4
+var messages: Array[Dictionary] = []
+## What the last one said. Kept because the save/HUD/test surface has always been
+## able to ask "what does it say right now", and because an empty stack has to
+## answer something.
 var message: String = ""
 var message_life: float = 0.0
 var night_warned: bool = false
@@ -376,6 +388,7 @@ func _start_run() -> void:
 	shake = 0.0
 	message = ""
 	message_life = 0.0
+	messages.clear()
 	gacha_open = false
 	gacha_index = 0
 	gacha_spin = -1.0
@@ -460,13 +473,28 @@ func info() -> String:
 	var row: Dictionary = info_data()
 	return String(row["text"]) if row.has("text") else ""
 
+## Picking a slot. The torch used to light itself here, which meant choosing it
+## spent one -- and a player who pressed 3 to see what it was had burned thirty
+## seconds of it before deciding. Taking it out and setting fire to it are two
+## acts now: 3 puts it in her hand, Z lights it.
 func _on_tool_selected() -> void:
 	if TOOLS[tool_index] != TOOL_TORCH:
 		return
 	sim.learn("TORCH")
+	if sim.torches <= 0 and sim.torch_left <= 0.0:
+		_notify("%s이 없습니다  기지에서 만들 수 있습니다" % Defs.TORCH_NAME,
+			Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+
+## Setting fire to it, which is what Z means while it is out.
+func _light_torch() -> void:
+	if sim.torch_left > 0.0:
+		return
+	sim.learn("LIGHT")
 	if sim.light_torch():
 		audio.call("play", "confirm")
 		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
+		_notify("%s에 불을 붙였습니다" % Defs.TORCH_NAME, Defs.COL_CORE)
 	else:
 		_notify("%s이 없습니다  기지에서 만들 수 있습니다" % Defs.TORCH_NAME,
 			Defs.COL_TEXT_DIM)
@@ -495,6 +523,12 @@ const TOOL_NAMES := ["곡괭이", "건물건설총", Defs.TORCH_NAME]
 ## The number never moves. A slot that renumbers itself as others appear teaches
 ## a key and then takes it away.
 func tool_unlocked(tool: int) -> bool:
+	# Nothing works in the shelter. There is no seam to swing at, nowhere to put
+	# a machine and no fog to burn a torch against, so the row is empty in there
+	# and whatever was in her hands is out of them -- one place answers this, so
+	# the hotbar, the verbs and the key prompts cannot disagree about it.
+	if not Zone.has_world(zone()):
+		return false
 	match tool:
 		TOOL_PICKAXE:
 			# Picked up, not granted. The slot used to open on the lid being
@@ -534,8 +568,13 @@ func holding_pickaxe() -> bool:
 
 ## Selected *and* alight. Choosing the slot with an empty pack shows the slot and
 ## lights nothing, which is what tells the player they have run out.
+## Whether a torch is alight. Not whether it is in her hand any more: once lit it
+## keeps burning while she swings a pickaxe or puts a belt down, which is what
+## makes the thirty seconds a length of time rather than a length of time spent
+## holding one particular slot. Everything that asks "is there fire on her" --
+## the fog, the thaw, the light on the ground -- asks this.
 func holding_torch() -> bool:
-	return TOOLS[tool_index] == TOOL_TORCH and sim.torch_left > 0.0
+	return sim.torch_left > 0.0
 
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
@@ -1013,7 +1052,12 @@ func _process(delta: float) -> void:
 	machine_layer.view_rect = view
 	cats_layer.view_rect = view
 	machine_layer.night = dark
-	machine_layer.sign_label = sign_label
+	# The board's line rides on the effects layer, which is above the fog: the
+	# machine layer is under it, and a direction that is only legible where she
+	# can already see is not a direction.
+	fx.sign_label = sign_label
+	fx.sign_at = sim.cell_centre(sim.sign_cell) if sim.sign_cell != Vector2i(9999, 9999) \
+		else Vector2.ZERO
 	# Two tiles to the player's right, on the same ground line, so the generated
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
@@ -1032,6 +1076,10 @@ func _process(delta: float) -> void:
 	if frozen_said > 0.0:
 		frozen_said = maxf(0.0, frozen_said - delta)
 	message_life = maxf(0.0, message_life - delta)
+	for index in range(messages.size() - 1, -1, -1):
+		messages[index]["life"] = float(messages[index]["life"]) - delta
+		if float(messages[index]["life"]) <= 0.0:
+			messages.remove_at(index)
 	_update_build_hold(delta)
 	_update_hand_mining(delta)
 	player.carrying_cat = sim.carried_cat != null
@@ -1149,20 +1197,13 @@ static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
 const AUTOSAVE_INTERVAL := 30.0
 
-func _update_build_hold(delta: float) -> void:
-	# Holding Z turns the ghost, but only when the build gun is out. With the
-	# pickaxe it is the swing, and a swing that spun the build direction every
-	# quarter second would be a key doing two unrelated things at once.
-	if not build_held or not holding_build_gun():
-		return
-	build_hold_time += delta
-	# Keeps turning for as long as the key is down, one quarter turn per
-	# interval, so reaching the far side does not need four separate presses.
-	while build_hold_time >= BUILD_HOLD_ROTATE:
-		build_hold_time -= BUILD_HOLD_ROTATE
-		build_rotated = true
-		build_dir = Vector2i(-build_dir.y, build_dir.x)
-		audio.call("play", "select")
+func _update_build_hold(_delta: float) -> void:
+	# Nothing. Holding Z used to turn the ghost a quarter turn every 0.4 seconds,
+	# which made one key mean two things -- and the second of them arrived by
+	# accident, because a Z held a moment too long on a belt is a very ordinary
+	# way to press a key. R rotates, it does only that, and the first time she
+	# has a machine loaded the prompt over her shoulder says so.
+	pass
 
 func _process_play(delta: float) -> void:
 	# The world decides what may be touched, and a torch in her hand is half of
@@ -1434,14 +1475,12 @@ var frozen_seen := false
 func _mission_ready(id: String) -> bool:
 	match id:
 		"BASE2": return sim.shelter_placed
-		"BASE4": return sim.base_level >= 2
 	return false
 
 ## And whether it is behind us.
 func _mission_finished(id: String) -> bool:
 	match id:
 		"BASE2": return sim.base_level >= 1
-		"BASE4": return sim.base_level >= 3
 	return false
 
 ## Run once a frame. Opens what is ready and closes what is done, in that order,
@@ -1633,9 +1672,13 @@ func _update_room(delta: float) -> void:
 	_finish_run()
 
 ## The cell she lies down on.
+## Where she lies down: the head of the bed rather than its middle.
+##
+## The bed is one cell wide and two deep, and half of two is one -- which put her
+## on the foot of it, half off the picture. The pillow is the top cell.
 func _room_bed_cell() -> Vector2i:
 	var piece: Dictionary = Defs.ROOM_PIECES[_room_piece_index(Defs.ROOM_BED)]
-	return Vector2i(piece["cell"]) + Vector2i(piece["size"]) / 2
+	return Vector2i(piece["cell"])
 
 func _room_piece_index(id: int) -> int:
 	for index in Defs.ROOM_PIECES.size():
@@ -1699,11 +1742,11 @@ func _facing_kit() -> bool:
 	return player.position.distance_to(sim.cell_centre(sim.kit_cell)) \
 		<= float(Defs.TILE) * KIT_REACH
 
-## The torch burns only while it is in her hand. Putting it away stops the clock
-## on it, which is what makes thirty seconds a distance rather than a countdown
-## that starts when you make it.
+## Once lit, it burns. Putting it away used to stop the clock, which made the
+## torch a thing you turned on and off rather than a thing you set fire to -- and
+## meant the fog cleared and closed as she switched tools.
 func _update_torch(delta: float) -> void:
-	if not holding_torch():
+	if sim.torch_left <= 0.0:
 		return
 	var before: float = sim.torch_left
 	sim.burn_torch(delta)
@@ -1736,6 +1779,8 @@ func _update_thaw(delta: float) -> void:
 	fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
 	fx.popup(at + Vector2(0, -20.0), "땅이 놓아주었다", Defs.COL_CORE, true)
 	note_log("지면을 녹였다  ·  이제 들 수 있다", Defs.COL_CORE)
+	# She has done it once, so the game stops suggesting it.
+	sim.learn("THAWED")
 	audio.call("play", "finish")
 
 ## Where the torch's hole in the fog is, in viewport pixels. Computed here
@@ -1832,6 +1877,12 @@ func _prompt_status(id: String) -> Dictionary:
 			return {"want": sim.base_placed and sim.has_fuel()
 				and player.facing_cell() == sim.core_cell,
 				"done": int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
+		"ROTATE":
+			# Only for the machines that have a facing. A belt rotated is a belt
+			# pointing somewhere else; a generator rotated is the same generator.
+			return {"want": holding_build_gun() and sim.is_unlocked(selected_type())
+				and selected_type() in Defs.DIRECTIONAL_MACHINES,
+				"done": sim.has_learned("ROTATE")}
 		"SIGN":
 			return {"want": player.facing_cell() == sim.sign_cell,
 				"done": sim.has_learned("SIGN")}
@@ -1840,8 +1891,13 @@ func _prompt_status(id: String) -> Dictionary:
 				"done": int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) > 0
 					or int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
 		"TORCH":
-			return {"want": sim.torches > 0 and not holding_torch(),
+			return {"want": sim.torches > 0 and sim.torch_left <= 0.0
+				and TOOLS[tool_index] != TOOL_TORCH,
 				"done": sim.has_learned("TORCH")}
+		"LIGHT":
+			return {"want": TOOLS[tool_index] == TOOL_TORCH and sim.torch_left <= 0.0
+				and sim.torches > 0,
+				"done": sim.has_learned("LIGHT")}
 		"TOOL":
 			# Only once there is more than one slot. Telling her the number keys
 			# switch tools while she owns exactly one tool is telling her nothing.
@@ -2087,7 +2143,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# The pickaxe still puts a carried cat down -- being unable to let go of
 		# a cat because of which tool is selected would be a trap -- but it does
 		# not build.
-		if build_held and not build_rotated and not mine_swung:
+		if build_held and not mine_swung:
 			_primary_action()
 		build_held = false
 		get_viewport().set_input_as_handled()
@@ -2321,6 +2377,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# when two arrive in one frame -- which reads to the player as a dead key.
 	if event.is_action_pressed("rotate"):
 		build_dir = Vector2i(-build_dir.y, build_dir.x)
+		sim.learn("ROTATE")
 		audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
@@ -2660,6 +2717,19 @@ func _say_frozen(cell: Vector2i) -> void:
 	fx.ring(sim.cell_centre(cell), Defs.COL_ICE, Defs.RING_SMALL)
 	note_log("땅과 얼어붙었다  ·  온기로 녹여야 할 것 같다", Defs.COL_ICE)
 	audio.call("play", "deny")
+	_hint_torch()
+
+## The second line, the first few times: there is a way to do this.
+##
+## Three times at most, and never once she has melted anything with a torch -- a
+## hint that keeps arriving after it has been taken is the game not listening.
+## Counted in the save, because the count belongs to this player rather than to
+## this session.
+func _hint_torch() -> void:
+	if sim.has_learned("THAWED") or sim.torch_hints >= Defs.TORCH_HINTS_MAX:
+		return
+	sim.torch_hints += 1
+	_notify("횃불로 녹일 수 있을 것 같다...", Defs.COL_CORE)
 
 ## Whether the cell she is facing holds something the fire cannot reach yet.
 ##
@@ -2705,6 +2775,12 @@ func _primary_action() -> void:
 		return
 	if sleep_available():
 		open_room()
+		return
+	# The torch in her hand and no flame on it: Z is a match. Above the rest
+	# because it is the only thing that slot can mean -- there is no swing, no
+	# placement and nothing to pick up with a torch out.
+	if TOOLS[tool_index] == TOOL_TORCH and sim.torch_left <= 0.0:
+		_light_torch()
 		return
 	var cell: Vector2i = player.facing_cell()
 	# Before anything else this key can mean: what is out there is frozen into
@@ -3430,8 +3506,22 @@ func clock_text() -> String:
 	return "%02d:%02d" % [seconds / 60, seconds % 60]
 
 func _notify(text: String, color: Color) -> void:
+	# Repeats refresh rather than stack. Something said twice in two frames is one
+	# event, which is the same rule the log already keeps.
+	for entry: Dictionary in messages:
+		if String(entry["text"]) == text:
+			entry["life"] = MESSAGE_LIFE
+			message = text
+			message_life = MESSAGE_LIFE
+			note_log(text, color)
+			return
+	messages.append({"text": text, "color": color, "life": MESSAGE_LIFE})
+	# Four is what fits above the hotbar without becoming a wall of text. The
+	# oldest goes, because the newest is the one the player has not read.
+	while messages.size() > MESSAGE_MAX:
+		messages.pop_front()
 	message = text
-	message_life = 2.0
+	message_life = MESSAGE_LIFE
 	hud.set("message_color", color)
 	note_log(text, color)
 
@@ -3813,13 +3903,14 @@ func sleep_available() -> bool:
 
 ## Going inside. She is put through the door and the room is where she is: her
 ## own legs, her own animation, her own collision from there on.
-func open_room(at: Vector2i = Defs.ROOM_ENTRY, facing := Vector2i(0, -1)) -> void:
+func open_room(at: Vector2i = Defs.ROOM_ENTRY, facing := Vector2i(0, -1),
+		arriving: bool = true) -> void:
 	close_windows("room")
 	room_open = true
 	player.position = sim.cell_centre(Defs.room_to_world(at))
 	player.velocity = Vector2.ZERO
 	player.facing = facing
-	sim.enter_room(at)
+	sim.enter_room(at, arriving)
 	audio.call("play", "confirm")
 
 ## Out through the door. If it is morning the cats come out with her and go back
@@ -4014,7 +4105,9 @@ func _begin_next_day() -> void:
 	# the crew still in the room and the light not yet up.
 	player.position = shelter_doorstep()
 	room_holds_cats = true
-	open_room(Defs.ROOM_WAKE, Vector2i(1, 0))
+	# Not arriving: she is waking up in the room she went to sleep in, and so is
+	# everybody else.
+	open_room(Defs.ROOM_WAKE, Vector2i(1, 0), false)
 	room_fade = 1.0
 	# Still locked and still indoors: the clock has been reset to a full day but
 	# the sun has not come up yet, which is exactly what night_override is for.

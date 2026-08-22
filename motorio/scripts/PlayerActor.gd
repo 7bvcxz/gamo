@@ -570,8 +570,13 @@ func _draw_prompt() -> void:
 	var top: float = -PROMPT_LIFT
 	# A plate, because this sits over snow, over the amber pool and over the fog,
 	# and a key cap has to be legible on all three.
+	# Nearly opaque. At 0.74 the white of the fog came through it and the plate
+	# read as pale grey with pale text on it -- which is exactly where the game
+	# most needs to be legible, because past the circle there is nothing else on
+	# the screen. A plate that changes colour with the ground under it is not a
+	# plate.
 	draw_colored_polygon(_rounded(Rect2(left - 5.0, top - 4.0,
-		total + 10.0, PROMPT_CAP_H + 8.0), 4.0), Color(0.04, 0.05, 0.09, 0.74 * fade))
+		total + 10.0, PROMPT_CAP_H + 8.0), 4.0), Color(0.04, 0.05, 0.09, 0.95 * fade))
 	var x: float = left
 	for cap: String in keys:
 		var width: float = cap_width(cap)

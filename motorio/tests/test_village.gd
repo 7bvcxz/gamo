@@ -179,10 +179,21 @@ func _test_reading() -> void:
 	_assert(is_zero_approx(main.sign_label), "돌아와도 저절로 다시 뜨지는 않는다")
 	# Facing away from it. The board is a thing in a cell, like everything else
 	# Z touches, and standing beside one is not reading it.
+	#
+	# The cell behind her is emptied first. The world is seeded differently every
+	# run and Z at a boulder out past the fire says "땅과 얼어붙었다" -- which is
+	# correct behaviour and a log line, so this assertion failed about one run in
+	# five for a reason that had nothing to do with signposts.
+	var behind: Vector2i = sim.sign_cell + Vector2i(0, 2)
+	sim.ore.erase(behind)
+	sim.mined_rocks[behind] = true
+	sim.frozen_cats.erase(behind)
+	sim.debris.erase(behind)
 	main.player.facing = Vector2i(0, 1)
 	var after: int = main.play_log.size()
 	main._primary_action()
-	_assert(main.play_log.size() == after, "등을 돌리면 읽히지 않는다")
+	_assert(main.play_log.size() == after, "등을 돌리면 읽히지 않는다: %s"
+		% (String(main.play_log[0]["text"]) if not main.play_log.is_empty() else ""))
 	main.clear_save()
 	main.free()
 

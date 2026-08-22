@@ -570,6 +570,10 @@ const BUILDABLE: Array[int] = [M_MINER, M_BELT, M_SPLITTER, M_GENERATOR]
 ## and the whole point of a belt is to run between places rather than to stand
 ## between them.
 const WALKABLE_MACHINES: Array[int] = [M_BELT, M_SPLITTER]
+## The machines that have a facing. A belt turned is a belt going somewhere else;
+## a generator turned is the same generator. Only these are worth telling the
+## player about R for.
+const DIRECTIONAL_MACHINES: Array[int] = [M_BELT, M_SPLITTER, M_MINER]
 
 const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "발전기", "분배기"]
 ## Hotbar cards are one slot wide and the full names do not fit beside the colour
@@ -818,7 +822,9 @@ const TORCH_SIGHT := 2.0
 ## Two heat stones. The same fuel the fire runs on, so every torch is warmth the
 ## base did not get -- which is the trade the whole middle of the opening is.
 const TORCH_COST := {ITEM_HEATSTONE: 2}
-const TORCH_NAME := "에너지횃불"
+## "에너지횃불" until 1.0.25. It is made of heat stone and it burns; the old name
+## borrowed a word from a different game.
+const TORCH_NAME := "열석 횃불"
 
 ## What the fire can make. A table so the second thing is a row rather than a
 ## rewrite of the window that shows it.
@@ -899,6 +905,10 @@ static func room_door_cell() -> Vector2i:
 		if int(piece["id"]) == ROOM_DOOR:
 			return Vector2i(piece["cell"])
 	return Vector2i(3, 5)
+## How long a cat lies there in the morning before it gets up. A spread rather
+## than a beat: the door is a queue and waking is not.
+const ROOM_WAKE_MIN := 1.0
+const ROOM_WAKE_MAX := 4.0
 ## How long between one cat coming through the door and the next.
 const ROOM_ENTER_GAP := 0.55
 const ROOM_CAT_SPOTS: Array[Vector2i] = [
@@ -1097,10 +1107,10 @@ const TRACK_NAMES := ["기지", "고양이", "자동화"]
 const MISSIONS: Array[Dictionary] = [
 	{"id": "BASE2", "track": TRACK_BASE, "line": "불이 꺼져간다..  기지의 불씨를 살려야 한다",
 		"why": "거처가 서면 바로 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 업그레이드는 세상에 무언가가 더 있다는 것을 알게 되는 일이다."},
-	{"id": "BASE4", "track": TRACK_BASE, "line": "구리가 있는 곳까지",
-		"why": "3단계에 닿으면 열린다. 15칸이 구리 고리의 안쪽 가장자리이고 구리가 벨트의 입구다 — 이 줄은 자동화 계열이 열리는 문이기도 하다."},
-
-
+	# "구리가 있는 곳까지" was here. Removed 2026-08-22: the card was telling the
+	# player to go and find a material whose name they had not been given yet --
+	# the build list no longer mentions copper before they have held any, and a
+	# mission that names it is the same leak by another route.
 ]
 
 ## The rungs of one track, in order.
@@ -1209,6 +1219,10 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "연료를 들고 기지를 바라볼 때. 캔 열석이 불에 들어가지 않으면 오프닝이 끝나지 않는다.",
 	},
 	{
+		"id": "ROTATE", "keys": ["R"], "verb": "방향",
+		"why": "건물건설총에 방향이 있는 기계를 장전하고 아직 한 번도 돌려 보지 않았을 때. 홀드 회전이 있던 시절에는 우연히 배웠는데, 그 우연을 없앴으므로 이제 말해 준다.",
+	},
+	{
 		"id": "SIGN", "keys": ["Z"], "verb": "읽기",
 		"why": "표지판을 바라볼 때. 눈밭 한가운데의 판자는 그냥 지나칠 수 있는 물건이고, 한 번 읽으면 다시 뜨지 않는다.",
 	},
@@ -1219,6 +1233,10 @@ const KEY_PROMPTS: Array[Dictionary] = [
 	{
 		"id": "TORCH", "keys": ["3"], "verb": "횃불",
 		"why": "횃불을 만들어 두고 아직 꺼내지 않았을 때. 만들어만 두고 쓰지 않는 물건이 되기 쉽다.",
+	},
+	{
+		"id": "LIGHT", "keys": ["Z"], "verb": "불붙이기",
+		"why": "횃불을 꺼내 들었는데 아직 불이 붙지 않았을 때. 고르는 것과 붙이는 것을 갈랐으므로(1.0.25) 붙이는 쪽을 한 번은 말해 줘야 한다.",
 	},
 	{
 		"id": "TOOL", "keys": ["1", "2", "3"], "verb": "도구",
@@ -1464,6 +1482,18 @@ const FROZEN_PER_TILES := 200.1
 ## One inside reach, so the first cat is always findable. The crates guaranteed
 ## three for the same reason -- three of them made one cat.
 const STARTER_FROZEN := 1
+## One block of ice sitting just outside the circle the fourth step draws.
+##
+## Awkwardly on purpose: at 4단계 the warm radius is 13 cells and this is at
+## 13.6, so she can walk up to it, see it, and be told the ground has not let go
+## -- which is the moment the torch stops being a thing she made and starts being
+## the answer to something. The next step reaches it.
+const EDGE_FROZEN_RING := 13.6
+const EDGE_FROZEN_ANGLE := -0.62
+## How many times the game may suggest the torch before it stops. Three, and not
+## at all once she has melted anything with one: a hint that keeps arriving after
+## it has been taken is the game not listening.
+const TORCH_HINTS_MAX := 3
 ## And no closer than this to the base.
 ##
 ## Eight and a half, which is outside the opening circle of seven and inside the

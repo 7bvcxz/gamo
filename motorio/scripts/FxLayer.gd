@@ -14,13 +14,26 @@ var _sparks: Array[Dictionary] = []
 ## say that what was in her hands is now in the fire.
 var _streams: Array[Dictionary] = []
 
+## The signpost's line, drawn here rather than with the board itself.
+##
+## The board is painted by the machine layer, which sits *under* the fog -- so
+## the one piece of directions in this game was legible everywhere except the
+## white where it is needed. This layer is above the fog, and above the world in
+## general, which is what "a label" means.
+##
+## Pushed by Main every frame: where the board is, and how brightly it is saying
+## its line.
+var sign_at := Vector2.ZERO
+var sign_label: float = 0.0
+const SIGN_TEXT := 11
+
 func _process(delta: float) -> void:
 	_advance(_labels, delta)
 	_advance(_rings, delta)
 	_advance(_sparks, delta)
 	_advance(_streams, delta)
 	if not _labels.is_empty() or not _rings.is_empty() or not _sparks.is_empty() \
-			or not _streams.is_empty():
+			or not _streams.is_empty() or sign_label > 0.0:
 		queue_redraw()
 
 func _advance(pool: Array[Dictionary], delta: float) -> void:
@@ -95,6 +108,7 @@ func stream(from: Vector2, to: Vector2, color: Color, count: int = 6) -> void:
 func _draw() -> void:
 	# The fallback font has no CJK glyphs, so Korean popups rendered as boxes.
 	var font: Font = UIFont.FONT
+	_draw_sign_label(font)
 	for fx: Dictionary in _rings:
 		var k: float = 1.0 - float(fx["life"]) / float(fx["max"])
 		var col: Color = fx["color"]
@@ -132,3 +146,23 @@ func _draw() -> void:
 				Color(0.06, 0.08, 0.12, alpha * 0.92))
 		draw_string(font, at - Vector2(width * 0.5, 0), body, HORIZONTAL_ALIGNMENT_LEFT, -1,
 			LABEL_SIZE, Color(col.r, col.g, col.b, alpha))
+
+## What the board says, on a plate above it. The plate is the same idea as the
+## key caps over her head: this sits over snow, over fog and over the amber pool,
+## and has to be legible on all three.
+func _draw_sign_label(font: Font) -> void:
+	if sign_label <= 0.01:
+		return
+	var fade: float = clampf(sign_label, 0.0, 1.0)
+	var width: float = font.get_string_size(Defs.SIGN_LINE,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, SIGN_TEXT).x
+	var box := Rect2(sign_at.x - width * 0.5 - 7.0, sign_at.y - 40.0,
+		width + 14.0, float(SIGN_TEXT) + 9.0)
+	# Nearly opaque, for the same reason the key caps are: this is read standing
+	# in white fog, and a translucent plate on white is a grey plate.
+	draw_rect(box, Color(0.04, 0.05, 0.09, 0.95 * fade))
+	draw_rect(box, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b,
+		0.55 * fade), false, 1.0)
+	draw_string(font, Vector2(box.position.x + 7.0, box.end.y - 6.0),
+		Defs.SIGN_LINE, HORIZONTAL_ALIGNMENT_LEFT, -1, SIGN_TEXT,
+		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, fade))

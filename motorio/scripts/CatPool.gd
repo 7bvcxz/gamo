@@ -40,7 +40,11 @@ func _process(delta: float) -> void:
 		var cat: Sim.Cat = sim.cats[index]
 		# A carried cat rides in the player's arms and is painted there; a
 		# sleeping one is indoors. Both would otherwise be drawn twice.
-		var shown: bool = cat != sim.carried_cat and cat.state != Defs.CAT_ASLEEP \
+		# A sleeping cat is drawn indoors and not outdoors. Out there "asleep"
+		# means it is in the hut and the hut draws its own sleepers; in here it
+		# means it is lying on the floor in front of her, which is a thing to see.
+		var asleep_hidden: bool = cat.state == Defs.CAT_ASLEEP and not sim.indoors
+		var shown: bool = cat != sim.carried_cat and not asleep_hidden \
 			and cat.entering <= 0.0 \
 			and view_rect.grow(64.0).has_point(cat.pos)
 		_views[index].sync(cat, pulse, shown, sim.cat_has_tool(cat))

@@ -43,6 +43,10 @@ class Cat extends RefCounted:
 	## is already in the room. Not saved: it is a second and a half of an evening
 	## and never a fact about the world.
 	var entering: float = 0.0
+	## And seconds before it wakes up in the morning. The evening is a queue at
+	## the door; the morning is the opposite shape -- everyone is already there,
+	## asleep where they dropped, and they get up one at a time.
+	var waking: float = 0.0
 	## The route being walked and the goal it was built for. Cats path around the
 	## things Grim cannot walk through, so a straight line is no longer a plan.
 	var path: Array[Vector2] = []
@@ -137,6 +141,11 @@ var frozen_cats: Dictionary[Vector2i, float] = {}
 ## Derived from the fire's cell and a table of offsets, so neither is saved: a
 ## place that is in the same spot in every run is not run state. What *is* saved
 ## is the seven blocks of ice in it, because those can be carried away.
+## The block of ice at the fourth step's edge, and how many times the game has
+## suggested a torch at one. Both saved: the hint is a thing that happened to
+## this player, and a hint that starts over on load is a hint that never stops.
+var edge_frozen := Vector2i(9999, 9999)
+var torch_hints: int = 0
 var sign_cell := Vector2i(9999, 9999)
 var village: Dictionary[Vector2i, int] = {}
 var village_rect := Rect2i()
@@ -402,7 +411,7 @@ func to_save() -> Dictionary:
 		"food_placed": food_placed,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
 		"torches": torches, "torch_left": torch_left,
-		"learned": learned.keys(), "walked": walked,
+		"learned": learned.keys(), "walked": walked, "torch_hints": torch_hints,
 		"shards": shard_rows, "mined_rocks": mined_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
 		# All three cells, rather than the core plus arithmetic: the player picks
@@ -502,6 +511,7 @@ func from_save(data: Dictionary) -> void:
 	torches = int(data.get("torches", 0))
 	torch_left = float(data.get("torch_left", 0.0))
 	learned.clear()
+	torch_hints = int(data.get("torch_hints", 0))
 	for id: String in data.get("learned", []):
 		learned[id] = true
 	walked = float(data.get("walked", 0.0))
@@ -573,6 +583,8 @@ func setup(seed_value: int) -> void:
 	mined_rocks.clear()
 	torches = 0
 	torch_left = 0.0
+	torch_hints = 0
+	edge_frozen = Vector2i(9999, 9999)
 	learned.clear()
 	walked = 0.0
 	frozen_cats.clear()
@@ -756,6 +768,10 @@ func _generate_frozen_cats(seed_value: int) -> void:
 		var cell: Vector2i = _starter_frozen_cell(index)
 		if cell != core_cell:
 			frozen_cats[cell] = 0.0
+	# The one at the fourth step's edge, before the scatter so nothing else can
+	# take that cell. Fixed, like every landmark here: it is a scene the design
+	# means to happen, not a place the seed might put something.
+	_place_edge_frozen()
 	var reach: float = Defs.WARM_MAX + 8.0
 	var target: int = int((PI * reach * reach) / Defs.FROZEN_PER_TILES)
 	var attempts := 0
@@ -845,6 +861,25 @@ func in_village(cell: Vector2i) -> bool:
 func village_piece(cell: Vector2i) -> int:
 	return int(village.get(cell, -1))
 
+## The block that sits just past the fourth circle.
+##
+## Searched outward by half a cell if the exact spot is taken, but never inward:
+## being *outside* the radius is the whole point, and one cell nearer would make
+## it a cat she picks up without noticing there was anything to notice.
+func _place_edge_frozen() -> void:
+	for step in 24:
+		var radius: float = Defs.EDGE_FROZEN_RING + float(step / 8) * 0.5
+		var angle: float = Defs.EDGE_FROZEN_ANGLE + TAU * float(step % 8) / 8.0
+		var cell := core_cell + Vector2i(roundi(cos(angle) * radius),
+			roundi(sin(angle) * radius))
+		if cell == core_cell or ore.has(cell) or frozen_cats.has(cell):
+			continue
+		if is_structure(cell) or cell == shelter_cell or cell == food_cell:
+			continue
+		frozen_cats[cell] = 0.0
+		edge_frozen = cell
+		return
+
 ## Blocks of ice riding the belts.
 ##
 ## Grim slides on a belt and so does everything the belt carries, and a block of
@@ -914,9 +949,17 @@ func room_centre() -> Vector2:
 ## `assigned` survives the night, which is the thing the player set -- but they
 ## are awake and strolling in here, because that is what a cat with no job does
 ## anywhere else in this game.
-func enter_room(at: Vector2i) -> void:
+## `arriving` is the evening: she opens the door and the crew files in behind
+## her. The morning is the same room from the inside -- nobody arrives, everybody
+## is already asleep on the floor -- and passing false is what says so. It used
+## to be one path, which is why the morning began with cats pouring out of the
+## front door of the room they had slept in.
+func enter_room(at: Vector2i, arriving: bool = true) -> void:
 	indoors = true
 	_grid_dirty = true
+	if not arriving:
+		_settle_sleepers()
+		return
 	# In through the door, one at a time, rather than already spread across the
 	# floor. They were placed on their spots the instant she stepped inside,
 	# which reads as a room that was always full -- and the cats had been out on
@@ -931,12 +974,27 @@ func enter_room(at: Vector2i) -> void:
 		cat.entering = Defs.ROOM_ENTER_GAP * float(index)
 		cat.pos = cell_centre(door)
 
+## Morning, from inside. Everyone is where they slept -- spread across the floor
+## rather than stacked on the mat -- and each gets up on its own second, between
+## one and four, so the room comes awake instead of switching on.
+func _settle_sleepers() -> void:
+	for index in cats.size():
+		var cat: Cat = cats[index]
+		cat.entering = 0.0
+		cat.path.clear()
+		cat.state = Defs.CAT_ASLEEP
+		cat.waking = wander_rng.randf_range(Defs.ROOM_WAKE_MIN, Defs.ROOM_WAKE_MAX)
+		cat.wander_timer = wander_rng.randf_range(0.1, 0.8)
+		var spot: Vector2i = Defs.ROOM_CAT_SPOTS[index % Defs.ROOM_CAT_SPOTS.size()]
+		cat.pos = cell_centre(Defs.room_to_world(spot))
+
 ## And out. Whatever they were assigned to is where they head.
 func leave_room(at: Vector2) -> void:
 	indoors = false
 	_grid_dirty = true
 	for cat: Cat in cats:
 		cat.entering = 0.0
+		cat.waking = 0.0
 	wake_cats(at)
 
 ## Everyone drops where they are and sleeps, on the frame she lies down.
@@ -945,6 +1003,7 @@ func sleep_cats() -> void:
 		# Whoever was still on the doorstep is in: she is going to bed, and a cat
 		# left mid-entrance would be a cat that never arrives.
 		cat.entering = 0.0
+		cat.waking = 0.0
 		cat.state = Defs.CAT_ASLEEP
 		cat.path.clear()
 
@@ -2409,7 +2468,17 @@ func _tick_cats(delta: float) -> void:
 	# and the wander is the same one they do outside.
 	if indoors:
 		for cat: Cat in cats:
-			if cat == carried_cat or cat.state == Defs.CAT_ASLEEP:
+			if cat == carried_cat:
+				continue
+			# Asleep on the floor, waking on its own second. She is up before them
+			# -- the morning starts with her opening her eyes in a room full of
+			# cats that have not.
+			if cat.state == Defs.CAT_ASLEEP:
+				if cat.waking <= 0.0:
+					continue
+				cat.waking = maxf(0.0, cat.waking - delta)
+				if cat.waking <= 0.0:
+					cat.state = Defs.CAT_IDLE
 				continue
 			# Still outside the door. It waits rather than standing on the mat,
 			# and the pool does not draw it -- so what the player sees is one cat

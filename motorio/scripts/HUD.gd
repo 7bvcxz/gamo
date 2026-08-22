@@ -141,6 +141,21 @@ func left_column_bottom() -> float:
 		bottom = maxf(bottom, box.position.y + box.size.y)
 	return bottom
 
+## And where the panel *below* the meter starts.
+##
+## The whole top-left is one column now -- clock, materials, throughput, then
+## what she is working towards -- and it is stacked here rather than by each card
+## measuring the one above it. The meter and the goal used to live in the
+## top-right corner and dodge each other there; two corners meant two places to
+## look and the right-hand one was the one the eye had no reason to be in.
+func goal_top() -> float:
+	var top: float = left_column_bottom() + 8.0
+	if main.meter_cell != Vector2i(9999, 9999) \
+			and main.sim.machine_at(main.meter_cell) != null:
+		var box: Rect2 = meter_rect()
+		top = maxf(top, box.position.y + box.size.y + 8.0)
+	return top
+
 ## Screen space the touch pad occupies along the bottom, in HUD-local units. The
 ## pad is laid out in viewport pixels and the HUD in scaled ones, so the two only
 ## agree once this crosses the scale -- and if they disagree the hotbar ends up
@@ -749,22 +764,13 @@ const INFO_GAP := 6.0
 
 func info_rect(text: String) -> Rect2:
 	var width: float = minf(_text_width(text, 12) + INFO_H + 34.0, size.x - MARGIN * 2.0)
-	var box := Rect2(size.x - width - MARGIN, MARGIN, width, INFO_H)
-	var panel: Rect2 = status_rect()
-	if box.position.x < panel.position.x + panel.size.x + 8.0:
-		box.position.y = left_column_bottom() + 8.0
-	return box
+	return Rect2(MARGIN, goal_top(), width, INFO_H)
 
 func objective_rect(text: String) -> Rect2:
 	# The trailing pad has to clear the last glyph's advance, not just sit flush
 	# against it, or the closing bracket lands on the plate border.
 	var width: float = minf(_text_width(text, 12) + OBJECTIVE_ICON + 50.0, size.x - MARGIN * 2.0)
-	var box := Rect2(size.x - width - MARGIN, MARGIN, width, OBJECTIVE_H)
-	# Once the UI is scaled up there is no longer room for both across the top,
-	# so the objective drops underneath the panel instead of across it.
-	var panel: Rect2 = status_rect()
-	if box.position.x < panel.position.x + panel.size.x + 8.0:
-		box.position.y = left_column_bottom() + 8.0
+	var box := Rect2(MARGIN, goal_top(), width, OBJECTIVE_H)
 	# And under the state card whenever the world has something to say, which is
 	# what "above the goal" means: the thing that is true right now sits over the
 	# thing being worked towards, and neither evicts the other.
@@ -812,10 +818,7 @@ func mission_card_rect() -> Rect2:
 	for row: Dictionary in rows:
 		width = maxf(width, _text_width(String(row["line"]), 12) + 46.0)
 	width = clampf(width, 150.0, size.x - MARGIN * 2.0)
-	var box := Rect2(size.x - width - MARGIN, MARGIN, width, maxf(height, 44.0))
-	var panel: Rect2 = status_rect()
-	if box.position.x < panel.position.x + panel.size.x + 8.0:
-		box.position.y = left_column_bottom() + 8.0
+	var box := Rect2(MARGIN, goal_top(), width, maxf(height, 44.0))
 	var state: String = main.info()
 	if state != "":
 		var above: Rect2 = info_rect(state)
@@ -973,12 +976,15 @@ func _draw_palette() -> void:
 		if main.TOOLS[index] == main.TOOL_TORCH:
 			Icons.draw_thing(self, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
 				Vector2(24.0, 24.0)), Icons.THING_TORCH)
-			var lit: bool = main.holding_torch()
+			var lit: bool = main.sim.torch_left > 0.0
 			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
 				"%d개" % main.sim.torches, 13,
 				Defs.COL_TEXT if main.sim.torches > 0 or lit else Defs.COL_DANGER)
+			# What the slot is for right now: a match, or a clock. Choosing the
+			# torch and setting fire to it are two acts as of 1.0.25, and the
+			# second line is the one that says which one is left.
 			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
-				"%.0f초 남음" % main.sim.torch_left if main.sim.torch_left > 0.0 else "꺼짐",
+				"타는중 %.0f초" % main.sim.torch_left if lit else "불 붙이기",
 				10, Defs.COL_CORE if lit else Defs.COL_TEXT_DIM)
 			# The burn, as a bar under the slot, because a number counting down is
 			# something you read and a bar draining is something you notice.
@@ -1348,17 +1354,28 @@ func _draw_direction_chip(hotbar_y: float) -> void:
 ## a pale floor; the text had a one-pixel shadow, which is enough against the
 ## night and nothing at all against the ground the game spends most of its time
 ## on. The plate fades with the message, so nothing lingers.
+const MESSAGE_ROW := 30.0
+
 func _draw_message() -> void:
-	if main.message_life <= 0.0:
+	var stack: Array = main.messages
+	if stack.is_empty():
 		return
-	var alpha: float = clampf(main.message_life, 0.0, 1.0)
-	var width: float = minf(_text_width(main.message, 15) + 32.0, size.x - MARGIN * 2.0)
-	var plate := Rect2(size.x * 0.5 - width * 0.5, 192.0, width, 26.0)
-	draw_rect(plate, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.82 * alpha))
-	draw_rect(plate, Color(message_color.r, message_color.g, message_color.b, 0.55 * alpha),
-		false, 1.0)
-	_text_in(Rect2(plate.position + Vector2(0.0, 18.0), Vector2(plate.size.x, 20.0)),
-		main.message, 15, Color(message_color.r, message_color.g, message_color.b, alpha))
+	# Oldest at the top, newest under it, because that is the order they were
+	# said in -- three machines opening at once should read as a list rather than
+	# as whichever one happened to be last.
+	var y: float = 192.0
+	for entry: Dictionary in stack:
+		var alpha: float = clampf(float(entry["life"]), 0.0, 1.0)
+		var text: String = String(entry["text"])
+		var tint: Color = entry["color"]
+		var width: float = minf(_text_width(text, 15) + 32.0, size.x - MARGIN * 2.0)
+		var plate := Rect2(size.x * 0.5 - width * 0.5, y, width, 26.0)
+		draw_rect(plate, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b,
+			0.82 * alpha))
+		draw_rect(plate, Color(tint.r, tint.g, tint.b, 0.55 * alpha), false, 1.0)
+		_text_in(Rect2(plate.position + Vector2(0.0, 18.0), Vector2(plate.size.x, 20.0)),
+			text, 15, Color(tint.r, tint.g, tint.b, alpha))
+		y += MESSAGE_ROW
 
 # --- Overlays ----------------------------------------------------------------
 
@@ -1690,11 +1707,9 @@ func meter_rect() -> Rect2:
 		sections += 1
 	var height: float = METER_HEAD + float(sections) * 20.0 + float(rows) * METER_ROW + METER_FOOT
 	var width: float = minf(METER_W, size.x - MARGIN * 2.0)
-	var box := Rect2(size.x - width - MARGIN, status_top(), width, height)
-	# Under whichever card is up there: the opening's single line, or the three
-	# tracks. Asked as one question so the meter cannot land on top of either.
-	var above: Rect2 = goal_area()
-	box.position.y = above.position.y + above.size.y + 8.0
+	# Directly under the materials, in the left column with everything else the
+	# player reads. It used to hang off the top-right corner under the goal card.
+	var box := Rect2(MARGIN, left_column_bottom() + 8.0, width, height)
 	# The hotbar and the touch pad own the bottom of the screen. If the card no
 	# longer fits between them, it rides up rather than being drawn underneath.
 	var floor_y: float = hotbar_origin().y - 10.0
@@ -2143,9 +2158,15 @@ func _draw_result() -> void:
 			Defs.ITEM_COLORS[int(row[0])]])
 	var y: float = 176.0
 	for row in rows:
+		# Both halves on the same baseline. `_text` takes a baseline and `_text_in`
+		# takes a box whose *position* is also a baseline -- so the `y - 14` that
+		# used to be here lifted every value fourteen pixels above its own label,
+		# and the card read as two columns that had been pasted separately. The
+		# same trap as the plate that hung off the bottom of the screen: a y is a
+		# baseline in one call and a top edge in the next.
 		_text(card.position + Vector2(74, y), String(row[0]), 14, Defs.COL_TEXT_DIM)
-		_text_in(Rect2(card.position + Vector2(w - 174, y - 14), Vector2(100, 18)), String(row[1]), 14,
-			row[2], HORIZONTAL_ALIGNMENT_RIGHT)
+		_text_in(Rect2(card.position + Vector2(w - 174, y), Vector2(100, 18)),
+			String(row[1]), 14, row[2], HORIZONTAL_ALIGNMENT_RIGHT)
 		y += 24.0
 
 	# The factory survives the night; that is the whole reason to keep going.

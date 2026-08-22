@@ -304,9 +304,50 @@ func _run() -> void:
 		"고양이 그림자도 기계보다는 위다 (%d > %d)" % [cats_z - 1, machines_z])
 	main2.queue_free()
 
+	# --- She is one size, in every sheet -------------------------------------
+	# A player reported that Grim got smaller when she mined facing away, and she
+	# did: the generator drew her 15% short in that clip and the normaliser --
+	# which sizes mining clips by a measured body rather than by their own
+	# silhouette, precisely so a raised pickaxe is not counted as part of her --
+	# faithfully preserved it. Measured on the resting frames, where the tool is
+	# down in both sheets, so the two are the same pose from two angles.
+	var side: float = _rest_height(PlayerActor.MINE_W_SHEET)
+	var back: float = _rest_height(PlayerActor.MINE_N_SHEET)
+	var front: float = _rest_height(PlayerActor.MINE_SHEET)
+	_assert(absf(back - side) < side * 0.08,
+		"뒤를 보고 캘 때도 같은 크기다 (옆 %.0fpx / 뒤 %.0fpx)" % [side, back])
+	_assert(absf(front - side) < side * 0.14,
+		"앞을 보고 캘 때도 마찬가지다 (앞 %.0fpx)" % front)
+
 	if failures == 0:
 		print("ANIMATION_TEST: PASS")
 	quit(failures)
+
+## The average silhouette height of the frames where the pickaxe is down. The
+## swing frames are not comparable between angles -- the tool is somewhere else
+## in each -- and these are the same standing pose seen from two sides.
+const REST_FRAMES: Array[int] = [0, 1, 6, 7]
+
+func _rest_height(sheet: Texture2D) -> float:
+	var image: Image = sheet.get_image()
+	var cell: int = image.get_height()
+	var total: float = 0.0
+	for frame: int in REST_FRAMES:
+		var top: int = -1
+		var bottom: int = -1
+		for y in cell:
+			var filled := false
+			for x in range(frame * cell, (frame + 1) * cell):
+				if image.get_pixel(x, y).a > 0.06:
+					filled = true
+					break
+			if not filled:
+				continue
+			if top < 0:
+				top = y
+			bottom = y
+		total += float(maxi(0, bottom - top + 1))
+	return total / float(REST_FRAMES.size())
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

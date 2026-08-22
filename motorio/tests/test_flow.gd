@@ -272,28 +272,19 @@ func _run() -> void:
 	_assert(main.sim.machine_at(spot) != null, "건설총을 들었으면 고양이가 있어도 건설한다")
 	_assert(main.sim.carried_cat == null, "그리고 고양이를 들지 않는다")
 
-	# Z is tap-to-build, hold-to-rotate on PC. Nothing may happen on press alone,
-	# or a held key would build and rotate at once.
+	# Z builds and does nothing else. Holding it used to turn the ghost a quarter
+	# turn every 0.4 seconds, which made one key mean two things -- and the second
+	# arrived by accident, since a Z held a moment too long is an ordinary way to
+	# press a key. R turns, and only R.
 	main.state = main.State.PLAY
 	var dir_start: Vector2i = main.build_dir
 	main.build_held = true
-	main.build_hold_time = 0.0
-	main.build_rotated = false
-	main._update_build_hold(0.2)
-	_assert(main.build_dir == dir_start, "a short hold has not rotated yet")
-	_assert(not main.build_rotated, "and the tap is still eligible to build")
-	main._update_build_hold(0.25)
-	_assert(main.build_dir != dir_start, "passing the threshold rotates the output")
-	_assert(main.build_rotated, "a rotated hold is marked so release does not also build")
-	# Holding keeps turning: one quarter turn per interval, so the far side is
-	# reachable without four separate presses.
-	var dir_after: Vector2i = main.build_dir
-	main._update_build_hold(0.4)
-	_assert(main.build_dir != dir_after, "holding past another interval turns again")
-	# Three more quarter turns complete the circle back to where it was.
-	main._update_build_hold(1.2)
-	_assert(main.build_dir == dir_after, "four intervals bring the direction full circle")
+	main._update_build_hold(2.0)
+	_assert(main.build_dir == dir_start, "Z 를 아무리 오래 눌러도 방향은 그대로다")
 	main.build_held = false
+	_press(main, KEY_R)
+	_assert(main.build_dir != dir_start, "R 이 방향을 돌린다")
+	_assert(main.sim.has_learned("ROTATE"), "그리고 한 번 돌리면 안내는 끝난다")
 
 	# Night: the warm pool alone must stop being enough, which is what sends the
 	# player indoors instead of camping next to the core.

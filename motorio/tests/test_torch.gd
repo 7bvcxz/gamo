@@ -32,6 +32,7 @@ func _run() -> void:
 	_test_the_light()
 	_test_it_keeps_her_warm()
 	_test_base_window()
+	_test_edge_and_hint()
 	_test_save()
 	if failures == 0:
 		print("PASS test_torch")
@@ -81,48 +82,57 @@ func _test_lighting() -> void:
 	_assert(sim.torch_left <= 0.0, "없으면 켜지지 않는다")
 	_assert(not main.holding_torch(), "그래서 들고 있는 것도 아니다")
 
+	# Choosing the slot takes it out and nothing more. It used to light itself,
+	# so a player who pressed 3 to see what it was had burned thirty seconds
+	# before deciding whether to walk anywhere.
 	sim.torches = 2
 	main._on_tool_selected()
-	_assert(sim.torches == 1, "하나를 꺼낸다")
+	_assert(sim.torches == 2, "고르는 것만으로는 쓰이지 않고")
+	_assert(sim.torch_left <= 0.0, "불도 붙지 않는다")
+	# Z is the match.
+	main._primary_action()
+	_assert(sim.torches == 1, "Z 를 누르면 하나를 꺼내 불을 붙인다")
 	_assert(is_equal_approx(sim.torch_left, Defs.TORCH_SECONDS),
 		"%.0f초짜리다" % Defs.TORCH_SECONDS)
-	_assert(main.holding_torch(), "이제 들고 있다")
-	# Selecting the slot again must not spend a second one on top of the one
-	# already alight.
-	main._on_tool_selected()
+	_assert(main.holding_torch(), "이제 불이 붙어 있다")
+	# And pressing it again must not spend a second one on top of the first.
+	main._primary_action()
 	_assert(sim.torches == 1, "이미 켜져 있으면 하나 더 쓰지 않는다")
 
 # --- Thirty seconds of carrying ---------------------------------------------
 
+## Once lit it keeps burning, whatever is in her hands.
+##
+## It used to burn only while the slot was selected, which made the torch a thing
+## you switched on and off: the fog opened and closed as she changed tools, and
+## thirty seconds meant thirty seconds of not doing anything else. Now it is a
+## fire she set, and it goes out when it goes out.
 func _test_burns_only_in_hand() -> void:
 	var sim = main.sim
 	sim.torches = 1
 	sim.torch_left = 0.0
 	main.tool_index = main.TOOLS.find(main.TOOL_TORCH)
 	main._on_tool_selected()
+	main._primary_action()
 	var lit: float = sim.torch_left
+	_assert(lit > 0.0, "불을 붙였고")
 
-	# Put it away and wait. Nothing should happen -- the thirty seconds are a
-	# distance she can travel, not a fuse lit at the fire.
+	# Switch to the pickaxe and wait: it burns down anyway, and she is free to
+	# use the seconds for something.
 	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
-	for _step in 600:
+	for _step in 60:
 		main._update_torch(1.0 / 60.0)
-	_assert(is_equal_approx(sim.torch_left, lit),
-		"주머니 안에서는 타지 않는다 (%.1f초)" % sim.torch_left)
-
-	# And out again, which must not cost another torch.
-	var spare: int = sim.torches
-	main.tool_index = main.TOOLS.find(main.TOOL_TORCH)
-	main._on_tool_selected()
-	_assert(sim.torches == spare, "다시 꺼내도 새 것을 쓰지 않는다")
+	_assert(sim.torch_left < lit - 0.9,
+		"곡괭이를 들어도 계속 탄다 (%.1f초)" % sim.torch_left)
+	_assert(main.holding_torch(), "그리고 여전히 불이 붙어 있다")
 
 	# Burn it down, ticked in sixtieths the way the game does.
-	var elapsed: float = 0.0
+	var elapsed: float = 1.0
 	while sim.torch_left > 0.0 and elapsed < Defs.TORCH_SECONDS * 3.0:
 		main._update_torch(1.0 / 60.0)
 		elapsed += 1.0 / 60.0
-	_assert(absf(elapsed - lit) < 0.1, "들고 있으면 %.0f초 만에 꺼진다 (%.1f)" % [lit, elapsed])
-	_assert(not main.holding_torch(), "꺼지면 들고 있는 것이 아니다")
+	_assert(absf(elapsed - lit) < 0.1, "%.0f초 만에 꺼진다 (%.1f)" % [lit, elapsed])
+	_assert(not main.holding_torch(), "꺼지면 불이 없다")
 
 # --- What it opens ----------------------------------------------------------
 
@@ -143,8 +153,9 @@ func _test_the_light() -> void:
 
 	sim.torches = 1
 	main._on_tool_selected()
+	main._primary_action()
 	main._update_torch_light()
-	_assert(fog.torch_radius > 0.0, "들면 구멍이 생긴다 (%.0fpx)" % fog.torch_radius)
+	_assert(fog.torch_radius > 0.0, "불을 붙이면 구멍이 생긴다 (%.0fpx)" % fog.torch_radius)
 	# World pixels, and the same number on both layers. The first version put the
 	# fog's hole in viewport pixels and the game stretches its canvas from a
 	# 960x540 base, so the hole opened somewhere Grim was not -- and what it
@@ -158,12 +169,15 @@ func _test_the_light() -> void:
 		"땅에 켜지는 불빛과 안개의 구멍이 같은 크기다")
 	_assert(ground.torch_at.distance_to(fog.torch_at) < 0.01, "그리고 같은 자리다")
 
-	# Put it away: the light goes with it, even though the torch is not spent.
+	# Change tools and the hole stays: it is a fire she lit, not a lamp she is
+	# holding. What puts it out is the thirty seconds running out.
 	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	main._update_torch_light()
-	_assert(is_zero_approx(fog.torch_radius), "집어넣으면 구멍도 사라진다")
+	_assert(fog.torch_radius > 0.0, "곡괭이를 들어도 구멍은 남는다")
+	main.sim.torch_left = 0.0
+	main._update_torch_light()
+	_assert(is_zero_approx(fog.torch_radius), "꺼지면 구멍도 사라진다")
 	_assert(is_zero_approx(main.ground_layer.torch_radius), "불빛도 함께 꺼진다")
-	_assert(main.sim.torch_left > 0.0, "그래도 횃불은 남아 있다")
 
 # --- The fire's window ------------------------------------------------------
 
@@ -186,11 +200,12 @@ func _test_it_keeps_her_warm() -> void:
 	main.player.warmth = 80.0
 	main.tool_index = main.TOOLS.find(main.TOOL_TORCH)
 	main._on_tool_selected()
-	_assert(main.holding_torch(), "횃불을 들었다")
+	main._primary_action()
+	_assert(main.holding_torch(), "횃불에 불을 붙였다")
 	for _step in 60:
 		main._update_warmth(1.0 / 60.0)
 	_assert(is_equal_approx(main.player.warmth, 80.0),
-		"들고 있는 동안은 줄지 않는다 (%.1f)" % main.player.warmth)
+		"타는 동안은 줄지 않는다 (%.1f)" % main.player.warmth)
 
 	# And the moment it goes out, the cold is back -- the two stop together
 	# because they are the same thirty seconds.
@@ -203,6 +218,10 @@ func _test_it_keeps_her_warm() -> void:
 
 func _test_base_window() -> void:
 	var sim = main.sim
+	# Not with the torch out: Z means "light it" while that slot is selected, and
+	# the section above leaves it selected. The pickaxe is what she walks up to
+	# the fire holding.
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	main.base_menu_open = false
 	sim.stock[Defs.ITEM_HEATSTONE] = _cost()
 	var before_stones: int = sim.stones_in
@@ -266,3 +285,34 @@ func _test_save() -> void:
 	_assert(main.sim.torches == 3, "만들어 둔 횃불이 살아난다")
 	_assert(absf(main.sim.torch_left - 12.5) < 0.1, "타다 만 것도 그만큼 남아 있다")
 	main.clear_save()
+
+## The block at the fourth step's edge, and the hint that goes with it.
+##
+## The scene the design wants: she walks to something she can see, is told the
+## ground has not let go of it, and the game says once -- three times at most --
+## that a torch would do. After she has melted one it never says it again.
+func _test_edge_and_hint() -> void:
+	var sim = main.sim
+	_assert(sim.edge_frozen != Vector2i(9999, 9999), "경계선 고양이가 있다")
+	var ring: float = sim._ring_distance(sim.edge_frozen)
+	var fourth: float = float(Defs.BASE_LEVELS[3]["radius"])
+	_assert(ring > fourth, "4단계 온기(%.0f칸) 바로 밖이다: %.1f칸" % [fourth, ring])
+	_assert(ring < fourth + 2.0, "그러나 손이 닿을 만큼 가깝다: %.1f칸" % ring)
+	_assert(sim.frozen_cats.has(sim.edge_frozen), "그 칸에 얼음이 있다")
+
+	# The hint: three times, and then never.
+	sim.torch_hints = 0
+	sim.learned.erase("THAWED")
+	for attempt in 5:
+		main.frozen_said = 0.0
+		main._say_frozen(sim.edge_frozen)
+	_assert(sim.torch_hints == Defs.TORCH_HINTS_MAX,
+		"횃불 안내는 %d번까지만 나온다 (%d)" % [Defs.TORCH_HINTS_MAX, sim.torch_hints])
+
+	# And not at all once she has melted something.
+	sim.torch_hints = 0
+	sim.learn("THAWED")
+	main.frozen_said = 0.0
+	main._say_frozen(sim.edge_frozen)
+	_assert(sim.torch_hints == 0, "한 번이라도 녹여 봤으면 다시 말하지 않는다")
+	sim.learned.erase("THAWED")

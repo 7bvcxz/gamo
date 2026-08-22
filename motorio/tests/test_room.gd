@@ -20,6 +20,7 @@ func _run() -> void:
 	await _test_walking()
 	await _test_collision()
 	await _test_the_cats()
+	await _test_morning()
 	await _test_carrying_indoors()
 	await _test_sleeping()
 	await _test_the_window()
@@ -201,6 +202,35 @@ func _test_the_cats() -> void:
 		_assert(Defs.room_walkable(Defs.world_to_room(sim.cell_of(cat.pos))),
 			"가구 위에 올라가지도 않는다: %s" % str(Defs.world_to_room(sim.cell_of(cat.pos))))
 	_assert(moved, "그리고 실제로 돌아다닌다")
+	main.clear_save()
+	main.free()
+
+## Morning is not the evening played backwards. She wakes in a room where
+## everyone is already asleep on the floor, and they get up one at a time.
+func _test_morning() -> void:
+	var main: Node2D = await _main()
+	var sim = main.sim
+	sim.grant_cats(4)
+	main.open_room(Defs.ROOM_WAKE, Vector2i(1, 0), false)
+	var door: Vector2i = Defs.room_to_world(Defs.room_door_cell())
+	for cat in sim.cats:
+		_assert(cat.state == Defs.CAT_ASLEEP, "다들 자고 있고")
+		_assert(sim.cell_of(cat.pos) != door, "현관문에서 쏟아지지 않는다")
+		_assert(Defs.in_room(sim.cell_of(cat.pos)), "방 안에 있으며")
+		_assert(cat.waking >= Defs.ROOM_WAKE_MIN and cat.waking <= Defs.ROOM_WAKE_MAX,
+			"1~4초 사이에 일어난다: %.1f" % cat.waking)
+	# A second in, somebody is still asleep -- they do not get up together.
+	for step in 60:
+		sim.tick(1.0 / 60.0)
+	var still := 0
+	for cat in sim.cats:
+		if cat.state == Defs.CAT_ASLEEP:
+			still += 1
+	_assert(still > 0, "1초 뒤에도 자는 고양이가 있다")
+	for step in int(Defs.ROOM_WAKE_MAX * 60.0) + 60:
+		sim.tick(1.0 / 60.0)
+	for cat in sim.cats:
+		_assert(cat.state != Defs.CAT_ASLEEP, "4초 안에는 전부 일어난다")
 	main.clear_save()
 	main.free()
 
