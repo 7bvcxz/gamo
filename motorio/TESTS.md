@@ -22,7 +22,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 
 ---
 
-## 자동 테스트 (headless, 37개)
+## 자동 테스트 (headless, 58개)
 
 ### 규칙과 진행
 
