@@ -99,7 +99,11 @@ const RUN_FPS := 14.0
 ## frames at ten a second is 0.8s, so walking played at its own speed and mining
 ## played at twice its own. It read as frantic, which is what a person watching
 ## it said.
-const MINE_FPS := 5.0
+## Twice what it was. A swing that takes a second and a bit reads as somebody
+## with time on their hands; this is a woman on a freezing plateau digging heat
+## out of the ground before dark, and the difference between those two is the
+## speed of her arms.
+const MINE_FPS := 10.0
 ## Which frame of the swing the pickaxe is at the ground. Used for the impact
 ## sound, so the sound lands with the hit rather than on a timer of its own.
 const MINE_IMPACT_FRAME := 4

@@ -20,6 +20,7 @@ func _run() -> void:
 	await _test_walking()
 	await _test_collision()
 	await _test_the_cats()
+	await _test_carrying_indoors()
 	await _test_sleeping()
 	await _test_the_window()
 	await _test_warm_and_saved()
@@ -163,6 +164,25 @@ func _test_the_cats() -> void:
 	var sim = main.sim
 	sim.grant_cats(4)
 	main.open_room()
+	# In through the door, one after another. They used to be standing on their
+	# spots the instant she stepped inside, which reads as a room that was
+	# already full -- and they had been out on the plateau a second earlier.
+	var door: Vector2i = Defs.room_to_world(Defs.room_door_cell())
+	var waiting := 0
+	for index in sim.cats.size():
+		var cat = sim.cats[index]
+		_assert(sim.cell_of(cat.pos) == door, "문에서 시작한다: %s" % str(sim.cell_of(cat.pos)))
+		if cat.entering > 0.0:
+			waiting += 1
+		if index > 0:
+			_assert(cat.entering > sim.cats[index - 1].entering,
+				"뒤에 오는 고양이가 더 늦게 들어온다")
+	_assert(waiting == sim.cats.size() - 1, "첫 마리만 바로 들어와 있다 (%d)" % waiting)
+	# And they are all in before the entrance could outstay a night.
+	for step in int(Defs.ROOM_ENTER_GAP * float(sim.cats.size()) * 60.0) + 60:
+		sim.tick(1.0 / 60.0)
+	for cat in sim.cats:
+		_assert(is_zero_approx(cat.entering), "이내 전부 들어와 있다")
 	for cat in sim.cats:
 		_assert(cat.state == Defs.CAT_IDLE, "들어오면 깨어 있다")
 		_assert(Defs.in_room(sim.cell_of(cat.pos)), "그리고 방 안에 있다")
@@ -181,6 +201,29 @@ func _test_the_cats() -> void:
 		_assert(Defs.room_walkable(Defs.world_to_room(sim.cell_of(cat.pos))),
 			"가구 위에 올라가지도 않는다: %s" % str(Defs.world_to_room(sim.cell_of(cat.pos))))
 	_assert(moved, "그리고 실제로 돌아다닌다")
+	main.clear_save()
+	main.free()
+
+## A cat in the room is a cat she can pick up. Same verb, same calls: what she
+## can do with an animal cannot depend on which room she is standing in.
+func _test_carrying_indoors() -> void:
+	var main: Node2D = await _main()
+	var sim = main.sim
+	sim.grant_cats(2)
+	main.open_room()
+	for cat in sim.cats:
+		cat.entering = 0.0
+	var cat = sim.cats[0]
+	var spot: Vector2i = Defs.room_to_world(Vector2i(2, 4))
+	cat.pos = sim.cell_centre(spot)
+	main.player.position = sim.cell_centre(spot + Vector2i(0, 1))
+	main.player.facing = Vector2i(0, -1)
+	_assert(sim.can_lift(spot), "방 안은 손이 닿는다 — 불에서 600칸이어도")
+	main.room_confirm()
+	_assert(sim.carried_cat == cat, "앞칸의 고양이를 안는다")
+	main.room_confirm()
+	_assert(sim.carried_cat == null, "한 번 더 누르면 내려놓는다")
+	_assert(Defs.in_room(sim.cell_of(cat.pos)), "내려놓은 자리도 방 안이다")
 	main.clear_save()
 	main.free()
 

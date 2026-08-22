@@ -23,6 +23,7 @@ func _run() -> void:
 	_test_cats_are_on_a_cell()
 	_test_the_facing_cell_only()
 	await _test_the_prompt_agrees()
+	await _test_ice_outranks_the_pickaxe()
 	if failures == 0:
 		print("REACH: PASS")
 	else:
@@ -96,5 +97,39 @@ func _test_the_prompt_agrees() -> void:
 	main.sim.cats[0].pos = main.sim.cell_centre(facing)
 	_assert(main._idle_cat_within_reach(), "앞칸에 서면 안내한다")
 	_assert(main.sim.pick_up_cat(facing), "그리고 그때 실제로 잡힌다")
+	main.clear_save()
+	main.free()
+
+## The block of ice wins, whatever is in her hands.
+##
+## A seam with a block standing on it used to answer the pickaxe: mining beat
+## lifting, on the same reasoning that keeps a cat from being scooped off a seam
+## the player is working. But a block does not wander past -- it is the one thing
+## on this map that turns into a worker, and someone who walks up to one and
+## presses Z has said exactly what they mean.
+func _test_ice_outranks_the_pickaxe() -> void:
+	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	main.clear_save()
+	main._start_run()
+	main.finish_tutorial()
+	main.state = main.State.PLAY
+	var sim = main.sim
+	# A seam she could mine, with a block of ice on top of it, right in front.
+	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+	sim.machines.erase(cell)
+	sim.ore[cell] = Defs.ITEM_HEATSTONE
+	sim.frozen_cats[cell] = 0.0
+	sim.thawed[cell] = true
+	main.player.position = sim.cell_centre(cell + Vector2i(-1, 0))
+	main.player.facing = Vector2i(1, 0)
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
+	_assert(main.holding_pickaxe(), "곡괭이를 들고 있고")
+	_assert(sim.can_hand_mine(cell), "그 칸은 캘 수 있는 광맥이며")
+	main._primary_action()
+	_assert(sim.carried_frozen, "그래도 Z는 얼음을 든다")
+	_assert(sim.frozen_cats.is_empty() or not sim.frozen_cats.has(cell),
+		"얼음은 그 칸에서 사라진다")
 	main.clear_save()
 	main.free()

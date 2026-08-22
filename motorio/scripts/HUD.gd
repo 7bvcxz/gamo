@@ -935,11 +935,13 @@ func _draw_palette() -> void:
 	# The hint line belongs to whatever is in her hands. With the pickaxe out the
 	# machine the gun happens to be loaded with is not what Z will do, and saying
 	# so anyway is how a player learns the wrong thing about their own keys.
+	# What the thing in her hands is, not which key to hold and not how many of
+	# one machine equal another. The key is on the cap over her shoulder when it
+	# is needed, and the ratio is arithmetic printed at someone who has not built
+	# either machine yet.
 	var hint: String = Defs.MACHINE_HINTS[loaded]
 	if main.holding_pickaxe():
-		hint = "광맥을 바라보고 Z를 누르고 있으면 직접 캡니다"
-	elif loaded == Defs.M_MINER:
-		hint += "   ·   " + Defs.ratio_hint()
+		hint = "광맥을 채굴하기 위한 도구"
 	var hint_w: float = _text_width(hint, 12) + 24.0
 	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 30.0, hint_w, 24.0)
 	_frame(hint_box, Defs.COL_PANEL_EDGE)
@@ -1059,7 +1061,7 @@ const MENU_ROW := 74.0
 const MENU_W := 500.0
 
 func build_menu_rect() -> Rect2:
-	var rows: float = float(Defs.BUILDABLE.size())
+	var rows: float = float(maxi(1, main.build_list().size()))
 	var height: float = FRAME_HEADER + 12.0 + rows * MENU_ROW + 30.0
 	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
 	height = minf(height, size.y - MARGIN * 2.0)
@@ -1074,9 +1076,12 @@ func build_menu_row_rect(index: int) -> Rect2:
 func build_menu_row_at(point: Vector2) -> int:
 	if not main.build_menu_open:
 		return -1
-	for index in Defs.BUILDABLE.size():
-		if build_menu_row_rect(index).has_point(point):
-			return index
+	# Returns the index into Defs.BUILDABLE, not the row on screen: the caller
+	# loads the gun with it, and the gun's number is the table's.
+	var list: Array[int] = main.build_list()
+	for row in list.size():
+		if build_menu_row_rect(row).has_point(point):
+			return list[row]
 	return -1
 
 ## The fire's window. What went in on the way here, and what can be made out of
@@ -1147,7 +1152,10 @@ func _draw_base_menu() -> void:
 		return
 	_dim(0.45)
 	var card: Rect2 = base_menu_rect()
-	_frame(card, Defs.COL_CORE, "기지   ↑↓ 선택 · Z 제작 · X 닫기")
+	# The title, and nothing about the keys. The window has a cursor on a row and
+	# rows with prices on them; a player looking at that has already been told
+	# what up and down do by the thing moving when they press them.
+	_frame(card, Defs.COL_CORE, "기지")
 	# Two lines of state used to sit here: the circle and the stones in the fire
 	# on one, the torches and their seconds on the other. Both are gone.
 	#
@@ -1242,13 +1250,17 @@ func _draw_build_menu() -> void:
 		return
 	_dim(0.45)
 	var card: Rect2 = build_menu_rect()
-	_frame(card, Defs.COL_CORE, "건설 목록   ↑↓ 선택 · Z 장전 · X 닫기")
-	for index in Defs.BUILDABLE.size():
-		_draw_build_row(index)
+	_frame(card, Defs.COL_CORE, "건설 목록")
+	var list: Array[int] = main.build_list()
+	for row in list.size():
+		_draw_build_row(row, list[row])
 
-func _draw_build_row(index: int) -> void:
+## `row` is where it sits on screen; `index` is which entry of Defs.BUILDABLE it
+## is. They stopped being the same number when the list started leaving out
+## machines the player has never had a reason to hear of.
+func _draw_build_row(row: int, index: int) -> void:
 	var type: int = Defs.BUILDABLE[index]
-	var rect: Rect2 = build_menu_row_rect(index)
+	var rect: Rect2 = build_menu_row_rect(row)
 	var on_cursor: bool = index == main.menu_index
 	var loaded: bool = index == main.selected_index
 	var locked: bool = not main.sim.is_unlocked(type)

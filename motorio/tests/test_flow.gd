@@ -146,7 +146,22 @@ func _run() -> void:
 	_assert(main.holding_build_gun(), "and it is slot 2 once it is")
 	_press(main, KEY_B)
 	_assert(main.build_menu_open, "B opens the build menu")
-	var browse_from: int = main.selected_index
+	# Nothing in the list names a material she has never held. Checked as "no row
+	# is locked-by-a-material" rather than by counting, so adding a machine to
+	# the table cannot quietly reopen the hole.
+	for index: int in main.build_list():
+		var type: int = Defs.BUILDABLE[index]
+		_assert(main.sim.is_unlocked(type) or Defs.machine_previewed(type),
+			"본 적 없는 자원의 기계는 목록에 없다: %s" % Defs.MACHINE_NAMES[type])
+	# The list only mentions machines the player has a reason to know about. With
+	# copper unseen that is the miner alone -- and a cursor in a one-row list has
+	# nowhere to go, so the arrows are checked on a list with somewhere to walk.
+	_assert(main.build_list().size() == 1,
+		"구리를 보기 전에는 채굴기 한 줄뿐이다: %d" % main.build_list().size())
+	main.sim.note_resource_seen(Defs.ITEM_COPPER)
+	_assert(main.build_list().size() > 1,
+		"구리를 본 뒤에 나머지가 나타난다: %d" % main.build_list().size())
+	var browse_from: int = main.menu_index
 	_press(main, KEY_DOWN)
 	_assert(main.menu_index != browse_from, "arrows move the cursor")
 	_assert(main.selected_index == browse_from,

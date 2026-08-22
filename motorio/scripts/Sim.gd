@@ -39,6 +39,10 @@ class Cat extends RefCounted:
 	## with a route is strolling, which is one fewer thing that can disagree with
 	## where the animal actually is.
 	var wander_timer: float = 0.0
+	## Seconds before this cat has come through the shelter door. Zero means it
+	## is already in the room. Not saved: it is a second and a half of an evening
+	## and never a fact about the world.
+	var entering: float = 0.0
 	## The route being walked and the goal it was built for. Cats path around the
 	## things Grim cannot walk through, so a straight line is no longer a plan.
 	var path: Array[Vector2] = []
@@ -913,25 +917,34 @@ func room_centre() -> Vector2:
 func enter_room(at: Vector2i) -> void:
 	indoors = true
 	_grid_dirty = true
+	# In through the door, one at a time, rather than already spread across the
+	# floor. They were placed on their spots the instant she stepped inside,
+	# which reads as a room that was always full -- and the cats had been out on
+	# the plateau a second earlier. Each waits a beat longer than the last and
+	# then walks in from the doorway.
+	var door: Vector2i = Defs.room_to_world(Defs.room_door_cell())
 	for index in cats.size():
 		var cat: Cat = cats[index]
 		cat.state = Defs.CAT_IDLE
 		cat.path.clear()
-		cat.wander_timer = wander_rng.randf_range(0.1, 1.2)
-		# Spread across the floor rather than stacked on the door: they have been
-		# in here all evening by the time she opens it.
-		var spot: Vector2i = Defs.ROOM_CAT_SPOTS[index % Defs.ROOM_CAT_SPOTS.size()]
-		cat.pos = cell_centre(Defs.room_to_world(spot))
+		cat.wander_timer = wander_rng.randf_range(0.1, 0.6)
+		cat.entering = Defs.ROOM_ENTER_GAP * float(index)
+		cat.pos = cell_centre(door)
 
 ## And out. Whatever they were assigned to is where they head.
 func leave_room(at: Vector2) -> void:
 	indoors = false
 	_grid_dirty = true
+	for cat: Cat in cats:
+		cat.entering = 0.0
 	wake_cats(at)
 
 ## Everyone drops where they are and sleeps, on the frame she lies down.
 func sleep_cats() -> void:
 	for cat: Cat in cats:
+		# Whoever was still on the doorstep is in: she is going to bed, and a cat
+		# left mid-entrance would be a cat that never arrives.
+		cat.entering = 0.0
 		cat.state = Defs.CAT_ASLEEP
 		cat.path.clear()
 
@@ -1218,6 +1231,12 @@ func cat_on(cell: Vector2i) -> Cat:
 ## A torch does not answer this one. It makes the cell reachable; the ground
 ## still has to be melted, and that is five seconds standing over it.
 func can_lift(cell: Vector2i) -> bool:
+	# Nothing is frozen to the floor of a heated room. Both of the rules below
+	# are about the fire's reach, and the shelter is six hundred cells outside
+	# it -- so out here they answered "out of reach" about a room with a hearth
+	# in it, and a cat sitting on the rug could not be picked up.
+	if Defs.in_room(cell):
+		return true
 	return not base_placed or is_warm(cell) or bool(thawed.get(cell, false))
 
 ## Melting the ground under something, a frame at a time. True on the frame it
@@ -1257,6 +1276,8 @@ func thaw_fraction() -> float:
 ## Before the base is placed there is no reach and no crafting either, so the
 ## rule is off: a refusal in the first minute is a wall with no door in it.
 func can_touch(cell: Vector2i) -> bool:
+	if Defs.in_room(cell):
+		return true
 	return not base_placed or is_warm(cell) or torch_lit
 
 func is_warm(cell: Vector2i) -> bool:
@@ -2389,6 +2410,13 @@ func _tick_cats(delta: float) -> void:
 	if indoors:
 		for cat: Cat in cats:
 			if cat == carried_cat or cat.state == Defs.CAT_ASLEEP:
+				continue
+			# Still outside the door. It waits rather than standing on the mat,
+			# and the pool does not draw it -- so what the player sees is one cat
+			# after another arriving, which is what walking in single file looks
+			# like from inside.
+			if cat.entering > 0.0:
+				cat.entering = maxf(0.0, cat.entering - delta)
 				continue
 			if cat.state != Defs.CAT_IDLE:
 				cat.state = Defs.CAT_IDLE

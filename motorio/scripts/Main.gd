@@ -540,6 +540,20 @@ func holding_torch() -> bool:
 func selected_type() -> int:
 	return Defs.BUILDABLE[selected_index]
 
+## Which rows the build list is allowed to show, as indices into Defs.BUILDABLE.
+##
+## Everything unlocked, plus the ones whose condition the player can already read
+## -- and nothing else. Indices rather than machine types because the gun's
+## `selected_index` and the cursor's `menu_index` both point into BUILDABLE, and
+## a second numbering of the same list is a second thing to keep in step.
+func build_list() -> Array[int]:
+	var out: Array[int] = []
+	for index in Defs.BUILDABLE.size():
+		var type: int = Defs.BUILDABLE[index]
+		if sim.is_unlocked(type) or Defs.machine_previewed(type):
+			out.append(index)
+	return out
+
 ## B opens and closes it, and so does Esc. Toggling rather than a separate close
 ## key because a menu that opens with one press and needs a different one to
 ## leave is a menu players get stuck in.
@@ -550,18 +564,26 @@ func toggle_build_menu() -> bool:
 	close_windows("build" if opening else "")
 	build_menu_open = opening
 	if build_menu_open:
-		menu_index = selected_index
+		var list: Array[int] = build_list()
+		if list.is_empty():
+			build_menu_open = false
+			return false
+		menu_index = selected_index if list.has(selected_index) else list[0]
 	audio.call("play", "select")
 	return true
 
 ## Inside the hut. The same four keys every other window here answers to, and
 ## the cursor walks the furniture in the order it is listed.
-func _room_key(key: InputEventKey) -> void:
-	# The arrows walk her, which happens in `_update_room` off the same actions
-	# the plateau reads, so nothing here answers them. Z is the one verb.
+## Returns whether the room took the key, so the caller knows what is left to
+## offer the rest of the game.
+func _room_key(key: InputEventKey) -> bool:
+	# The arrows walk her, which happens off the same actions the plateau reads,
+	# so nothing here answers them. Z is the one verb.
 	match key.keycode:
 		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
 			room_confirm()
+			return true
+	return false
 
 func _base_menu_key(key: InputEventKey) -> void:
 	match key.keycode:
@@ -575,21 +597,28 @@ func _base_menu_key(key: InputEventKey) -> void:
 			_base_menu_confirm()
 
 func _build_menu_key(key: InputEventKey) -> void:
-	var count: int = Defs.BUILDABLE.size()
+	# The cursor walks the rows that are drawn, not the table behind them. It
+	# used to step through Defs.BUILDABLE, which after the list started hiding
+	# unknown machines would have parked it on a row nobody could see.
+	var list: Array[int] = build_list()
+	if list.is_empty():
+		build_menu_open = false
+		return
+	var at: int = maxi(0, list.find(menu_index))
 	match key.keycode:
 		KEY_ESCAPE, KEY_X, KEY_B:
 			build_menu_open = false
 			audio.call("play", "select")
 		KEY_UP, KEY_LEFT, KEY_W, KEY_A:
-			menu_index = posmod(menu_index - 1, count)
+			menu_index = list[posmod(at - 1, list.size())]
 			audio.call("play", "select")
 		KEY_DOWN, KEY_RIGHT, KEY_S, KEY_D:
-			menu_index = posmod(menu_index + 1, count)
+			menu_index = list[posmod(at + 1, list.size())]
 			audio.call("play", "select")
 		KEY_Z, KEY_ENTER, KEY_KP_ENTER:
 			_load_build_gun(menu_index)
-	if key.keycode >= KEY_1 and key.keycode < KEY_1 + count:
-		_load_build_gun(key.keycode - KEY_1)
+	if key.keycode >= KEY_1 and key.keycode < KEY_1 + list.size():
+		_load_build_gun(list[key.keycode - KEY_1])
 
 ## --- The map ------------------------------------------------------------------
 ## What the player has seen, drawn small. Everything else is void: the fog is
@@ -603,13 +632,18 @@ func _build_menu_key(key: InputEventKey) -> void:
 ## that are not me" -- and the fourth window was added without being added to
 ## the other three, so opening the map left the log underneath it and both
 ## claimed the arrow keys. There is one list now and it is this function.
+## Shuts every window except the one being opened.
+##
+## The shelter is not in this list. It was, when it was a panel drawn over the
+## world -- and it stayed here after it became a place, which meant opening the
+## map from her own hut put her back out on the plateau. A window is something
+## you close; a room is somewhere you are, and the only way out of it is the
+## door.
 func close_windows(keep: String = "") -> void:
 	if keep != "build":
 		build_menu_open = false
 	if keep != "base":
 		base_menu_open = false
-	if keep != "room":
-		room_open = false
 	if keep != "map":
 		map_open = false
 	if keep != "log":
@@ -954,7 +988,12 @@ func _process(delta: float) -> void:
 	# Pushed rather than pulled: the character polls Input directly, so it needs
 	# to be told, and being told once a frame from here is what keeps the answer
 	# in one place.
-	player.modal = modal_open()
+	# Windows, and everything that is not play. Movement is polled by the
+	# character every frame rather than delivered as an event, so `handled` means
+	# nothing to it -- this flag is the only thing that stops her feet. Settings
+	# is a *state* rather than one of the windows in `modal_open()`, which is why
+	# the arrow keys walked her around behind the settings card.
+	player.modal = modal_open() or state != State.PLAY
 	# Re-applied every frame because the platform base follows the touch pad,
 	# which appears and disappears as the player switches between thumb and
 	# keyboard mid-session.
@@ -2104,10 +2143,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
-	if room_open and state == State.PLAY:
-		_room_key(key)
-		get_viewport().set_input_as_handled()
-		return
 	if base_menu_open and state == State.PLAY:
 		_base_menu_key(key)
 		get_viewport().set_input_as_handled()
@@ -2125,6 +2160,22 @@ func _unhandled_input(event: InputEvent) -> void:
 	# And the map, where left and right are the zoom rather than two steps west.
 	if map_open and state == State.PLAY:
 		_map_key(key)
+		get_viewport().set_input_as_handled()
+		return
+	# The shelter routes last of all, and unlike the windows above it does not
+	# swallow everything. Three of these keys are about the run rather than about
+	# the plateau -- the settings, the map and the record -- and there is no
+	# reason a player standing in their own hut cannot open them. What is
+	# swallowed is the plateau's verbs: there is nothing in here to mine, build
+	# on or demolish, and a key that does nothing is better than a key that does
+	# something somewhere she cannot see.
+	if room_open and state == State.PLAY:
+		if not _room_key(key):
+			match key.keycode:
+				KEY_ESCAPE: open_settings()
+				KEY_M: toggle_map()
+				KEY_L: toggle_log()
+				_: _zoom_key(key)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -2638,6 +2689,20 @@ func _frozen_to_lift(cell: Vector2i) -> bool:
 	return sim.is_liftable(cell) and not sim.can_lift(cell)
 
 func _primary_action() -> void:
+	# The plateau's verbs, and only there. Inside the shelter Z means the piece of
+	# furniture she is facing, and on a phone this is the only way that press
+	# arrives -- the pad has no keyboard to route through `_room_key`.
+	#
+	# It is also how "땅과 얼어붙었다" came to answer the bed. Z *pressed* went to
+	# the room; Z *released* came here, because the release branch that lets a
+	# tapped build key act as a press runs before the room ever sees the event.
+	# What it found was the cell in front of her, six hundred cells from the fire,
+	# with procedural rock under it and nothing able to reach it.
+	if room_open:
+		room_confirm()
+		return
+	if modal_open():
+		return
 	if sleep_available():
 		open_room()
 		return
@@ -2716,6 +2781,24 @@ func _primary_action() -> void:
 	# is right when her hands are the tool -- but a player holding the build gun
 	# at a cell they can build on has said what they mean, and a cat wandering
 	# across the seam they are aiming at is not a change of mind.
+	# The ice outranks everything, including the tool in her hand.
+	#
+	# It used to lose to a swing: a pickaxe aimed at a seam beat picking the block
+	# up, on the same reasoning that keeps a cat from being lifted off a seam the
+	# player is mining. But a block of ice is not a cat wandering past -- it does
+	# not move, it is the one thing on this map that becomes a worker, and a
+	# player who walks to one and presses Z has said exactly what they mean. What
+	# they got instead was a swing at the seam underneath it.
+	#
+	# The gun is below this rather than above it because it never competes: ice
+	# is a structure, so every cell holding a block already refuses to be built
+	# on, and `can_build` says so before this line is reached.
+	if sim.pick_up_frozen(cell):
+		# No banner. The block is in her arms on screen and she is visibly slower
+		# for it, and a line of text saying so is a caption under a picture.
+		fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
+		audio.call("play", "select")
+		return
 	if holding_build_gun() and sim.can_build(selected_type(), cell) == "" \
 			and sim.can_afford(selected_type()) and sim.is_unlocked(selected_type()):
 		_try_build()
@@ -2723,12 +2806,6 @@ func _primary_action() -> void:
 	var target: Vector2i = _hand_target()
 	var mining_here: bool = holding_pickaxe() and sim.can_hand_mine(target) \
 		and not sim.machines.has(target)
-	if not mining_here and sim.pick_up_frozen(cell):
-		# No banner. The block is in her arms on screen and she is visibly slower
-		# for it, and a line of text saying so is a caption under a picture.
-		fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
-		audio.call("play", "select")
-		return
 	if not mining_here and sim.pick_up_cat(cell):
 		_notify("고양이를 안았습니다", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
@@ -3771,6 +3848,24 @@ func room_facing_piece() -> int:
 ## Z, inside. The door lets her out and the bed ends the night; everything else
 ## is furniture, and furniture that answers a key with a sentence is a caption.
 func room_confirm() -> void:
+	# The cats first, and by the same calls the plateau uses. What she can do
+	# with a cat cannot depend on which room she is standing in -- they are the
+	# same animals, walking with the same legs, and an armful of cat carried
+	# through the door and then not put down would be a rule the player has to
+	# learn twice.
+	var cell: Vector2i = player.facing_cell()
+	if sim.carried_cat != null:
+		if sim.drop_cat(sim.cell_centre(cell)):
+			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
+			audio.call("play", "remove")
+		else:
+			audio.call("play", "deny")
+		return
+	if sim.pick_up_cat(cell):
+		_notify("고양이를 안았습니다", Defs.COL_BELT_RIM)
+		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
+		audio.call("play", "select")
+		return
 	var index: int = room_facing_piece()
 	if index < 0:
 		return

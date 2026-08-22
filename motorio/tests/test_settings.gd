@@ -375,6 +375,34 @@ func _test_rows(main: Node2D) -> void:
 	main.open_settings()
 	main._process(0.0)
 
+	# --- And her feet stay where they are ------------------------------------
+	# Movement is polled by the character every frame rather than delivered as an
+	# event, so nothing about consuming a key stops it: the arrows walked her
+	# around behind the settings card, and settings is a *state* rather than one
+	# of the windows `modal_open()` lists. Driven through `_process`, because the
+	# flag that stops her is written there once a frame -- a test that ticks the
+	# character alone is blind to it.
+	main.close_settings()
+	# A clean run, because this file's earlier sections leave whatever they left
+	# and `_start_run` is not a reset of the disk. A test that inherits another
+	# test's save is a test that fails one run in five for a reason that is not
+	# the thing it is about.
+	main.clear_save()
+	main._start_run()
+	main.finish_tutorial()
+	main.state = main.State.PLAY
+	main._process(0.0)
+	_assert(not main.player.modal, "노는 동안에는 발이 살아 있고")
+	main.open_settings()
+	main._process(0.0)
+	_assert(main.player.modal, "설정을 열면 화살표가 Grim 에게 가지 않는다")
+	_assert(not main.player.takes_input(), "폴링 자체가 멈춘다")
+	main.close_settings()
+	main._process(0.0)
+	_assert(not main.player.modal, "닫으면 다시 걷는다")
+	main.open_settings()
+	main._process(0.0)
+
 	# And 메인화면 gets out of the run.
 	hud.settings_row = in_run.find(hud.ROW_TITLE)
 	main.settings_activate(hud.ROW_TITLE)

@@ -41,5 +41,6 @@ func _process(delta: float) -> void:
 		# A carried cat rides in the player's arms and is painted there; a
 		# sleeping one is indoors. Both would otherwise be drawn twice.
 		var shown: bool = cat != sim.carried_cat and cat.state != Defs.CAT_ASLEEP \
+			and cat.entering <= 0.0 \
 			and view_rect.grow(64.0).has_point(cat.pos)
 		_views[index].sync(cat, pulse, shown, sim.cat_has_tool(cat))

@@ -49,15 +49,21 @@ func _test_indoors() -> void:
 	_assert(main.zone() == Zone.HOME, "숙소에 들어가면 HOME 이다")
 
 	# The floor the bug was standing on. Rock is procedural, so it is under the
-	# room too -- and unreachable from a fire six hundred cells away.
+	# room too, and every plateau rule that reads a world cell finds it there.
+	#
+	# Asked as "is there rock" rather than as "is it out of reach", which is what
+	# this looked for until the room started answering `can_touch` for itself: a
+	# precondition written in terms of the thing being fixed stops holding the
+	# moment it is fixed, and a test whose precondition never holds is a test
+	# that passes without looking at anything.
 	var trap := Vector2i(9999, 9999)
 	for y in Defs.ROOM_CELLS.y:
 		for x in Defs.ROOM_CELLS.x:
 			var world: Vector2i = Defs.room_to_world(Vector2i(x, y))
-			if main._frozen_out_there(world):
+			if sim.has_rock(world) or sim.ore.has(world):
 				trap = world
 	_assert(trap != Vector2i(9999, 9999),
-		"방 밑에도 닿을 수 없는 월드가 깔려 있다 (없으면 이 테스트는 아무것도 지키지 않는다)")
+		"방 밑에도 월드가 깔려 있다 (없으면 이 테스트는 아무것도 지키지 않는다)")
 	if trap != Vector2i(9999, 9999):
 		main.player.position = sim.cell_centre(trap)
 

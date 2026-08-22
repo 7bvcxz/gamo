@@ -381,19 +381,24 @@ static func throughput_line(type: int) -> String:
 		M_GENERATOR:
 			return "수정조각 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
 		M_BELT:
-			return "%.0f/분 · 칸당 %.1f초 · F로 등급" % [BELT_SPEED / 0.34 * 60.0, 1.0 / BELT_SPEED]
+			return "%.0f/분 · 칸당 %.1f초" % [BELT_SPEED / 0.34 * 60.0, 1.0 / BELT_SPEED]
 		M_SPLITTER:
-			return "한 줄을 두 줄로 · R로 나뉘는 축 회전"
+			return "한 줄을 두 줄로"
 		M_CORE:
 			# One thing burns now. The energy crystal used to count towards the
 			# circle as well, which made the exchanger a second route to the one
 			# thing the fire is for -- and made "how many stones to the next
 			# step" a question with no honest answer.
-			return "Z 로 연료 투입 · 열석을 넣어 온기를 넓힙니다"
+			return "열석을 넣어 온기를 넓힙니다"
 	return ""
 
-## The ratio that actually matters, stated plainly: how many miners one generator
-## can keep fed, which is what decides how many of each to build.
+## How many miners one generator can keep fed.
+##
+## No longer drawn anywhere. It was printed under the hotbar beside the miner,
+## which is the moment before the player has built either machine -- arithmetic
+## about a ratio between two things they do not own yet. Kept because the number
+## is still the answer to a real question and the documentation page reads it;
+## when it belongs on screen again it belongs next to a generator.
 static func ratio_hint() -> String:
 	var miners: float = per_minute(MINER_PERIOD) / per_minute(GENERATOR_PERIOD)
 	return "발전기 1대 = 수정 채굴기 %.0f대" % miners
@@ -632,6 +637,17 @@ const MINER_UNLOCK_STONES := 5
 ## What opens a machine, for the machines a material does not open. Said in the
 ## build list, where a locked row has to explain itself or it is a grey rectangle
 ## the player learns to ignore.
+## Whether a machine that is still locked belongs in the list at all.
+##
+## Only the ones whose condition is something the player already has a name for.
+## A machine that opens when a material arrives does not: listing it is telling
+## somebody who has never seen copper that copper exists, and three grey rows
+## naming it turn the catalogue into a menu of things that are not in the world
+## yet. They appear the moment the material does, which is also the moment the
+## sentence "copper opens these" can be read as news rather than as homework.
+static func machine_previewed(type: int) -> bool:
+	return MACHINE_UNLOCK_ITEM[type] < 0
+
 static func unlock_line(type: int) -> String:
 	if type == M_MINER:
 		return "건물건설총을 들고 %s %d개를 모으면 해금됩니다" \
@@ -875,6 +891,16 @@ const ROOM_SPEED := 84.0 / float(TILE)
 ## wander takes over on the next frame -- just somewhere each of them is, spread
 ## across the floor rather than stacked on the doorstep: they have been in here
 ## all evening by the time she comes in.
+## Where the door is, in room cells: the left half of the two it covers, which
+## is the cell the cats come in on. Derived from ROOM_PIECES rather than written
+## twice -- the door has moved once already.
+static func room_door_cell() -> Vector2i:
+	for piece: Dictionary in ROOM_PIECES:
+		if int(piece["id"]) == ROOM_DOOR:
+			return Vector2i(piece["cell"])
+	return Vector2i(3, 5)
+## How long between one cat coming through the door and the next.
+const ROOM_ENTER_GAP := 0.55
 const ROOM_CAT_SPOTS: Array[Vector2i] = [
 	Vector2i(1, 4), Vector2i(2, 4), Vector2i(5, 4), Vector2i(6, 4),
 	Vector2i(0, 3), Vector2i(3, 2), Vector2i(4, 2), Vector2i(0, 2),
