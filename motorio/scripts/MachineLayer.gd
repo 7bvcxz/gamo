@@ -95,6 +95,11 @@ const VILLAGE_ART: Array[Texture2D] = [
 	preload("res://assets/objects/village_gate.png"),
 ]
 const VILLAGE_DRAW: Array[float] = [38.0, 30.0, 32.0, 40.0]
+## How brightly the board is saying its line, 0 to 1. Pushed by Main, which owns
+## the fade, because whether she is still standing at it is a question about the
+## player and this layer only draws.
+var sign_label: float = 0.0
+const SIGN_TEXT := 11
 ## 0.7 of what it was. At thirty pixels the drill was as wide as the cat holding
 ## it, which reads as a machine standing in front of the animal rather than a
 ## tool in its paws. Re-cut at this size too, so the pixels are the ones the game
@@ -913,6 +918,7 @@ func _draw_village(tile: float) -> void:
 		if view_rect.grow(tile).has_point(post):
 			_shadow(post + Vector2(0, 9), 8.0)
 			_object_art(SIGN_ART, post, SIGN_DRAW)
+			_draw_sign_label(post)
 	for cell: Vector2i in sim.village:
 		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
 		if not view_rect.grow(tile * 2.0).has_point(at):
@@ -929,6 +935,28 @@ func _draw_village(tile: float) -> void:
 		var beat: float = 1.0 + sin(pulse * 2.4) * 0.06
 		draw_circle(at, 26.0 * beat, Color(1.0, 0.66, 0.30, 0.10))
 		draw_circle(at, 15.0 * beat, Color(1.0, 0.72, 0.36, 0.13))
+
+## What the board says, on a plate above it.
+##
+## Drawn in the world rather than on the HUD: it belongs to the post, and a line
+## about a place that follows the camera is a line about the screen. The plate is
+## the same idea as the key caps over her head -- this sits over snow, over fog
+## and over the amber pool, and has to be legible on all three.
+func _draw_sign_label(post: Vector2) -> void:
+	if sign_label <= 0.01:
+		return
+	var fade: float = clampf(sign_label, 0.0, 1.0)
+	var font: Font = UIFont.FONT
+	var width: float = font.get_string_size(Defs.SIGN_LINE,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, SIGN_TEXT).x
+	var box := Rect2(post.x - width * 0.5 - 7.0, post.y - 40.0,
+		width + 14.0, float(SIGN_TEXT) + 9.0)
+	draw_rect(box, Color(0.04, 0.05, 0.09, 0.78 * fade))
+	draw_rect(box, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b,
+		0.55 * fade), false, 1.0)
+	draw_string(font, Vector2(box.position.x + 7.0, box.end.y - 6.0),
+		Defs.SIGN_LINE, HORIZONTAL_ALIGNMENT_LEFT, -1, SIGN_TEXT,
+		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, fade))
 
 func _draw_debris(tile: float) -> void:
 	for cell: Vector2i in sim.debris:

@@ -74,6 +74,28 @@ func _init() -> void:
 	_check(main.camera.zoom.x > at_one,
 		"카메라 줌이 실제로 따라온다: %.3f -> %.3f" % [at_one, main.camera.zoom.x])
 
+	# The wheel is the same pair of keys. Driven as a real button event through
+	# the same entry point, because what is being checked is that the two inputs
+	# give the same answer -- a wheel with its own arithmetic would be a second
+	# step size and a second set of limits to keep in step.
+	main.set_game_scale(1.0)
+	main.set_ui_scale(1.0)
+	_wheel(main, MOUSE_BUTTON_WHEEL_DOWN, false)
+	_check(is_equal_approx(main.game_scale, 1.0 - step),
+		"휠을 내리면 - 와 같은 한 단계다: %.2f" % main.game_scale)
+	_wheel(main, MOUSE_BUTTON_WHEEL_UP, false)
+	_wheel(main, MOUSE_BUTTON_WHEEL_UP, false)
+	_check(is_equal_approx(main.game_scale, 1.0 + step),
+		"올리면 = 와 같다: %.2f" % main.game_scale)
+	_check(is_equal_approx(main.ui_scale, 1.0), "그동안 UI 크기는 그대로다: %.2f" % main.ui_scale)
+	_wheel(main, MOUSE_BUTTON_WHEEL_UP, true)
+	_check(is_equal_approx(main.ui_scale, 1.0 + step),
+		"Shift+휠은 UI 쪽이다: %.2f" % main.ui_scale)
+	for _step in 80:
+		_wheel(main, MOUSE_BUTTON_WHEEL_DOWN, false)
+	_check(is_equal_approx(main.game_scale, Defs.GAME_SCALE_MIN),
+		"휠도 최소값에서 멈춘다: %.2f" % main.game_scale)
+
 	# And the keys must not reach the world while a modal owns the keyboard.
 	main.set_game_scale(1.0)
 	main.gacha_open = true
@@ -92,6 +114,13 @@ func _press(main: Node2D, physical: int, shift: bool, produced: int = 0) -> void
 	var event := InputEventKey.new()
 	event.physical_keycode = physical
 	event.keycode = produced if produced != 0 else physical
+	event.shift_pressed = shift
+	event.pressed = true
+	main._unhandled_input(event)
+
+func _wheel(main: Node2D, button: int, shift: bool) -> void:
+	var event := InputEventMouseButton.new()
+	event.button_index = button
 	event.shift_pressed = shift
 	event.pressed = true
 	main._unhandled_input(event)

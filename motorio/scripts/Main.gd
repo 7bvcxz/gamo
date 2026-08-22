@@ -974,6 +974,7 @@ func _process(delta: float) -> void:
 	machine_layer.view_rect = view
 	cats_layer.view_rect = view
 	machine_layer.night = dark
+	machine_layer.sign_label = sign_label
 	# Two tiles to the player's right, on the same ground line, so the generated
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
@@ -1153,6 +1154,7 @@ func _process_play(delta: float) -> void:
 	_update_kit_search(delta)
 	_update_miner_unlock()
 	_update_room(delta)
+	_update_sign_label(delta)
 	_update_debris(delta)
 	_update_thaw(delta)
 	_update_torch(delta)
@@ -2017,6 +2019,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	# in the game, and a desktop player has no pad to route them through.
 	if event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
+		# The wheel is the zoom keys. Same step, same limits, same meaning for
+		# Shift -- it calls the same function, because a second implementation of
+		# "how big is the world" is a second set of limits to keep in step.
+		if button.pressed and (button.button_index == MOUSE_BUTTON_WHEEL_UP
+				or button.button_index == MOUSE_BUTTON_WHEEL_DOWN):
+			var direction: float = Defs.UI_SCALE_STEP \
+				if button.button_index == MOUSE_BUTTON_WHEEL_UP else -Defs.UI_SCALE_STEP
+			zoom_by(direction, button.shift_pressed)
+			get_viewport().set_input_as_handled()
+			return
 		if button.button_index == MOUSE_BUTTON_LEFT:
 			if button.pressed:
 				if touch_hud(button.position):
@@ -2551,18 +2563,42 @@ var frozen_said: float = 0.0
 ##
 ## Said once, at the thing, rather than through the message banner: the banner is
 ## for what just happened, and this is what did not.
-## What the sign says, said at the sign.
+## How long the board's line takes to appear and to go, and how far she can step
+## before it does. A cell and a half rather than exactly one: she reads it from
+## the cell in front of it, and a threshold drawn exactly on the spot she is
+## standing flickers with the half-pixel her feet are on.
+const SIGN_LABEL_FADE := 0.30
+const SIGN_LABEL_REACH := 1.5
+## Whether the board is currently saying its line, and how brightly.
+var sign_label: float = 0.0
+var sign_reading: bool = false
+
+## What the sign says, said at the sign, and left there.
 ##
 ## Over the object rather than in the banner at the top, like every other line
 ## that belongs to a thing in the world: the banner is for what just happened,
-## and this is a board somebody nailed up. It also goes in the log, because it is
-## the one piece of directions in the game and a popup is gone in two seconds.
+## and this is a board somebody nailed up.
+##
+## It used to be a popup, which rises and fades in about a second -- long enough
+## to notice and not long enough to read, on the one piece of directions the game
+## gives. It stays now for as long as she is standing at the board.
 func _read_sign(cell: Vector2i) -> void:
 	sim.learn("SIGN")
-	fx.popup(sim.cell_centre(cell) + Vector2(0, -24.0), Defs.SIGN_LINE,
-		Defs.COL_CORE, true)
+	sign_reading = true
 	note_log(Defs.SIGN_LINE, Defs.COL_CORE)
 	audio.call("play", "select")
+
+## Walking away puts it out, over a third of a second rather than in one frame:
+## the line is attached to the board, and things attached to the world do not
+## blink out of it.
+func _update_sign_label(delta: float) -> void:
+	if sim.sign_cell == Vector2i(9999, 9999):
+		sign_reading = false
+	elif player.position.distance_to(sim.cell_centre(sim.sign_cell)) \
+			> float(Defs.TILE) * SIGN_LABEL_REACH:
+		sign_reading = false
+	sign_label = move_toward(sign_label, 1.0 if sign_reading else 0.0,
+		delta / SIGN_LABEL_FADE)
 
 func _say_frozen(cell: Vector2i) -> void:
 	if frozen_said > 0.0:
@@ -2887,14 +2923,23 @@ func _zoom_key(key: InputEventKey) -> bool:
 		direction = Defs.UI_SCALE_STEP
 	else:
 		return false
-	if key.shift_pressed:
+	zoom_by(direction, key.shift_pressed)
+	return true
+
+## One step of zoom, in or out, whether it arrived on a key or under a thumb on
+## the wheel. Split out so the two inputs cannot drift apart: a wheel that ran
+## its own arithmetic would be a second set of limits, a second step size and a
+## second answer to what Shift means.
+func zoom_by(direction: float, ui: bool) -> void:
+	if is_zero_approx(direction):
+		return
+	if ui:
 		set_ui_scale(ui_scale + direction)
 		_notify("화면 UI 크기 %d%%" % int(round(ui_scale * 100.0)), Defs.COL_MACHINE_EDGE)
 	else:
 		set_game_scale(game_scale + direction)
 		_notify("게임 화면 크기 %d%%" % int(round(game_scale * 100.0)), Defs.COL_MACHINE_EDGE)
 	audio.call("play", "select")
-	return true
 
 func cycle_debug_speed() -> int:
 	speed_index = (speed_index + 1) % Defs.DEBUG_SPEEDS.size()

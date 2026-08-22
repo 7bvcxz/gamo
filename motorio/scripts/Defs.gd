@@ -580,7 +580,12 @@ const MACHINE_COSTS := [
 ]
 const MACHINE_HINTS := [
 	"",
-	"광맥 위에 설치하고 고양이를 올려놓으세요 · 고양이보다 빠릅니다",
+	# What it is, not how to use it. The instructions were two sentences of
+	# procedure in a row that has room for one line, and both halves are things
+	# the game teaches at the moment they matter: the placement ghost refuses
+	# every cell that is not a seam, and a miner with nobody on it draws the
+	# cursor that says so.
+	"채굴을 더 빠르게 할 수 있는 장치",
 	"자원을 기지까지 끊김 없이 나릅니다",
 	"수정조각을 태워 전력 1.0을 공급합니다",
 	"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",

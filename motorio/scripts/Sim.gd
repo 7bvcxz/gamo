@@ -887,6 +887,8 @@ func _frozen_may_enter(cell: Vector2i) -> bool:
 	var piece: int = village_piece(cell)
 	if piece >= 0 and not Defs.village_walkable(piece):
 		return false
+	if cell == sign_cell:
+		return false
 	if cell == core_cell or (shelter_placed and cell == shelter_cell):
 		return false
 	if food_placed and cell == food_cell:
@@ -1118,6 +1120,11 @@ func tile_attributes(cell: Vector2i) -> int:
 	# point of a gate.
 	var piece: int = village_piece(cell)
 	if piece >= 0 and not Defs.village_walkable(piece):
+		attrs |= Defs.ATTR_STRUCTURE
+	# And the board, for the same reason the ice and the wreckage are solid: it
+	# is a post driven into the ground, and walking through the picture of one is
+	# the single thing a picture of a solid object must never allow.
+	if cell == sign_cell:
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
 	if shelter_placed and cell == shelter_cell:

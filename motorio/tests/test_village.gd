@@ -120,6 +120,7 @@ func _test_trail() -> void:
 		if int(sim.village[cell]) == Defs.VILLAGE_GATE:
 			gate = cell
 	_assert(gate != Vector2i(9999, 9999), "입구가 있다")
+	_assert(sim.blocks_player(sim.sign_cell), "표지판은 통과할 수 없다")
 	var rows := {}
 	for cell: Vector2i in sim.trail:
 		_assert(not rows.has(cell.y), "한 줄에 자국 하나: %d" % cell.y)
@@ -155,6 +156,27 @@ func _test_reading() -> void:
 	_assert(String(main.play_log[0]["text"]) == Defs.SIGN_LINE,
 		"그 줄은 '%s' 이다: %s" % [Defs.SIGN_LINE, String(main.play_log[0]["text"])])
 	_assert(main.active_prompt() != "SIGN", "한 번 읽으면 안내는 사라진다")
+	# The line stays up while she is at the board. It used to be a popup, which
+	# rises and fades in about a second -- long enough to notice and not long
+	# enough to read, on the one piece of directions this game gives.
+	for step in 60:
+		main._update_sign_label(1.0 / 60.0)
+	_assert(is_equal_approx(main.sign_label, 1.0),
+		"문구가 표지판 위에 그대로 있다 (%.2f)" % main.sign_label)
+	# And a step away puts it out -- smoothly, not in one frame.
+	main.player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 3))
+	main._update_sign_label(1.0 / 60.0)
+	_assert(main.sign_label < 1.0 and main.sign_label > 0.5,
+		"멀어지면 한 프레임에 사라지지 않고 (%.2f)" % main.sign_label)
+	for step in 60:
+		main._update_sign_label(1.0 / 60.0)
+	_assert(is_zero_approx(main.sign_label), "이내 사라진다 (%.2f)" % main.sign_label)
+	# Standing at it again does not bring it back on its own: the board is read,
+	# not overheard.
+	main.player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 1))
+	for step in 60:
+		main._update_sign_label(1.0 / 60.0)
+	_assert(is_zero_approx(main.sign_label), "돌아와도 저절로 다시 뜨지는 않는다")
 	# Facing away from it. The board is a thing in a cell, like everything else
 	# Z touches, and standing beside one is not reading it.
 	main.player.facing = Vector2i(0, 1)
