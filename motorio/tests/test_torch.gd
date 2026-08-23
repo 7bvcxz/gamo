@@ -239,16 +239,21 @@ func _test_base_window() -> void:
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == _cost(),
 		"들고 있던 연료도 그대로다")
 
-	# At 3단계, where the crafts are. Below that this window is one line -- the
+	# At 3단계, where the torch is. Below that this window is one line -- the
 	# upgrade -- and the torch these cases are about does not exist yet.
+	#
+	# One recipe, not both: the list opens a rung at a time as of 1.0.26, and the
+	# bin waits for the fourth. So the count is "the fuel row plus whatever this
+	# rung has unlocked" rather than the whole table.
 	sim.stones_in = int(Defs.BASE_LEVELS[2]["stones"])
 	sim._refresh_radius()
 	var rows: Array[Dictionary] = main.base_rows()
-	# The fuel row is always there now, with or without stones in her pack: it is
-	# the one line that says what the fire wants, and it was missing at exactly
-	# the moment the player had nothing and needed to know what to fetch.
-	_assert(rows.size() == Defs.BASE_CRAFTS.size() + 1,
-		"투입 줄은 언제나 있다 (%d줄)" % rows.size())
+	var open_here := 1
+	for craft: Dictionary in Defs.BASE_CRAFTS:
+		if Defs.base_level_shown(sim.base_level) >= int(craft["level"]):
+			open_here += 1
+	_assert(rows.size() == open_here,
+		"투입 줄은 언제나 있다 (%d줄, 기대 %d줄)" % [rows.size(), open_here])
 	_assert(String(rows[0]["kind"]) == "fuel", "그 줄이 맨 위다")
 
 	# Craft first, deposit second: the window shows both and the player chooses.
@@ -257,8 +262,7 @@ func _test_base_window() -> void:
 	main._base_menu_confirm()
 	_assert(sim.torches == torches + 1, "제작 줄을 고르면 만들어진다")
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "재료가 나간다")
-	_assert(main.base_rows().size() == Defs.BASE_CRAFTS.size() + 1,
-		"연료가 떨어져도 줄은 남는다")
+	_assert(main.base_rows().size() == open_here, "연료가 떨어져도 줄은 남는다")
 	# And below 3단계 the window is the upgrade alone.
 	var kept: int = sim.stones_in
 	sim.stones_in = 0
@@ -295,9 +299,17 @@ func _test_edge_and_hint() -> void:
 	var sim = main.sim
 	_assert(sim.edge_frozen != Vector2i(9999, 9999), "경계선 고양이가 있다")
 	var ring: float = sim._ring_distance(sim.edge_frozen)
-	var fourth: float = float(Defs.BASE_LEVELS[3]["radius"])
-	_assert(ring > fourth, "4단계 온기(%.0f칸) 바로 밖이다: %.1f칸" % [fourth, ring])
-	_assert(ring < fourth + 2.0, "그러나 손이 닿을 만큼 가깝다: %.1f칸" % ring)
+	# The third circle, not the fourth. Three is the rung where the fire's window
+	# grows a craft list, so it is the first moment a torch is a thing she can
+	# have -- and a hint about a torch a rung before the torch exists is a hint
+	# about nothing.
+	var third: float = float(Defs.BASE_LEVELS[2]["radius"])
+	_assert(ring > third, "3단계 온기(%.0f칸) 바로 밖이다: %.1f칸" % [third, ring])
+	_assert(ring < third + 2.0, "그러나 손이 닿을 만큼 가깝다: %.1f칸" % ring)
+	# And the next rung reaches it, which is what makes it a promise rather than
+	# a wall: a torch now, or one more step of the fire.
+	_assert(ring < float(Defs.BASE_LEVELS[3]["radius"]),
+		"다음 단계는 그것을 품는다: %.1f칸" % ring)
 	_assert(sim.frozen_cats.has(sim.edge_frozen), "그 칸에 얼음이 있다")
 
 	# The hint: three times, and then never.

@@ -63,27 +63,6 @@ static func _arrow(canvas: CanvasItem, rect: Rect2, tint: Color) -> void:
 ## The pickaxe, for the tool slot. Drawn rather than imported for the same reason
 ## every machine here is: the whole game is a few hundred draw calls and three
 ## PNGs, and a 24-pixel icon does not need to be the fourth.
-static func draw_pickaxe(canvas: CanvasItem, rect: Rect2) -> void:
-	var centre: Vector2 = rect.get_center()
-	var unit: float = rect.size.x
-	_shadow(canvas, rect)
-	# Haft, corner to corner, so the head has somewhere to sit.
-	canvas.draw_line(centre + Vector2(-unit * 0.22, unit * 0.30),
-		centre + Vector2(unit * 0.16, -unit * 0.24), Color8(122, 82, 52), unit * 0.11)
-	# Head: two swept points off a short neck, which is what makes it a pickaxe
-	# and not a hammer at this size.
-	var neck: Vector2 = centre + Vector2(unit * 0.14, -unit * 0.22)
-	canvas.draw_colored_polygon(PackedVector2Array([
-		neck + Vector2(-unit * 0.30, -unit * 0.02),
-		neck + Vector2(-unit * 0.06, -unit * 0.14),
-		neck + Vector2(unit * 0.02, unit * 0.02),
-		neck + Vector2(-unit * 0.08, unit * 0.02)]), Defs.COL_CLOCK)
-	canvas.draw_colored_polygon(PackedVector2Array([
-		neck + Vector2(unit * 0.30, -unit * 0.02),
-		neck + Vector2(unit * 0.06, -unit * 0.14),
-		neck + Vector2(-unit * 0.02, unit * 0.02),
-		neck + Vector2(unit * 0.08, unit * 0.02)]), Defs.COL_CLOCK.darkened(0.18))
-
 static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
 	var tint: Color = Defs.machine_color(type)
 	var width: float = _outline_width(rect)

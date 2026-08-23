@@ -184,11 +184,20 @@ func _test_reading() -> void:
 	# run and Z at a boulder out past the fire says "땅과 얼어붙었다" -- which is
 	# correct behaviour and a log line, so this assertion failed about one run in
 	# five for a reason that had nothing to do with signposts.
+	# Everything that answers "there is something out there frozen into the
+	# ground", not the four that were remembered the first time this flaked. It
+	# still failed about one run in six, on a crystal lying in the snow -- so the
+	# emptied cell is checked against the predicate itself rather than against a
+	# list of sources somebody has to keep in step with it.
 	var behind: Vector2i = sim.sign_cell + Vector2i(0, 2)
 	sim.ore.erase(behind)
 	sim.mined_rocks[behind] = true
 	sim.frozen_cats.erase(behind)
 	sim.debris.erase(behind)
+	sim.shards.erase(behind)
+	sim.ground.erase(behind)
+	sim.drops.erase(behind)
+	_assert(not main._frozen_out_there(behind), "뒤쪽 칸에는 아무것도 없고")
 	main.player.facing = Vector2i(0, 1)
 	var after: int = main.play_log.size()
 	main._primary_action()

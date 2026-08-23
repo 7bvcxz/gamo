@@ -43,6 +43,10 @@ func _run() -> void:
 	# run is supposed to contain a cat walking off to eat.
 	main.sim.stock[Defs.ITEM_HEATSTONE] = 20
 	main.sim.craft_food_bin()
+	for drop_cell: Vector2i in main.sim.drops.keys():
+		if int(main.sim.drops[drop_cell]) == Sim.DROP_FOOD_BIN:
+			main.sim.collect_drop(drop_cell)
+	main.sim.place_food_bin(main.sim._free_near(main.sim.core_cell))
 	# And they start part-hungry, staggered. A fed cat now works twelve minutes
 	# and this run is two hundred seconds, so waiting for hunger to arrive on its
 	# own would be waiting for a thing the file is not about -- test_workers owns

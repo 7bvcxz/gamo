@@ -60,11 +60,36 @@ func _main(seed_value: int) -> Node2D:
 func _walk_to(main: Node2D, target: Vector2, limit: float) -> float:
 	var spent := 0.0
 	var step: float = 1.0 / 60.0
+	var was: Vector2 = main.player.position
+	var stuck := 0.0
+	var detour := Vector2.ZERO
+	var detour_left := 0.0
+	var side := 1.0
 	while spent < limit and main.player.position.distance_to(target) > 10.0:
-		main.player.touch_direction = (target - main.player.position).normalized()
+		var want: Vector2 = (target - main.player.position).normalized()
+		if detour_left > 0.0:
+			want = detour
+			detour_left -= step
+		main.player.touch_direction = want
 		main.player.touch_sprint = true
 		_tick(main, step)
 		spent += step
+		# Something solid is in the way and pressing into it moves her nowhere.
+		# A player steps round it; a straight line does not, and a harness that
+		# cannot get past one box reports the box as an unwinnable opening. The
+		# case itself became solid in 1.0.26 and stands between her and what
+		# tipped out of it, so this is now the ordinary path rather than the
+		# unlucky one.
+		if main.player.position.distance_to(was) < 0.2 and detour_left <= 0.0:
+			stuck += step
+			if stuck > 0.12:
+				detour = Vector2(-want.y, want.x) * side
+				detour_left = 0.32
+				side = -side
+				stuck = 0.0
+		else:
+			stuck = 0.0
+		was = main.player.position
 	main.player.touch_direction = Vector2.ZERO
 	main.player.touch_sprint = false
 	return spent

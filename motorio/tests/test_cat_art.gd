@@ -94,6 +94,23 @@ func _test_tool_belongs_to_the_machine() -> void:
 	idle.state = Defs.CAT_HAUL_TO_BASE
 	_assert(not sim.cat_has_tool(idle), "나르는 고양이도 들지 않는다")
 	_assert(not sim.cat_has_tool(null), "고양이가 없으면 물어도 안전하다")
+
+	# --- And the seam says how far through it is ------------------------------
+	# The miner has drawn a filling arc since it existed and the cat drew
+	# nothing, so the one screen where a player compares a worker against a
+	# machine was the one screen where only the machine looked like it was
+	# working.
+	var layer: Node2D = _layer(sim)
+	bare.dig = 0.4
+	_assert(not layer.shows_dig_ring(bare), "채굴기 위의 고양이는 자기 원을 그리지 않고")
+	sim.machines.erase(seam)
+	_assert(layer.shows_dig_ring(bare), "맨 광맥의 고양이는 그린다")
+	bare.dig = 0.0
+	_assert(not layer.shows_dig_ring(bare), "아직 파기 전에는 원이 없다")
+	bare.dig = 0.5
+	bare.state = Defs.CAT_IDLE
+	_assert(not layer.shows_dig_ring(bare), "일하지 않는 고양이도 마찬가지다")
+	layer.free()
 	sim.free()
 
 # --- Feet on the middle, not the torso ----------------------------------------

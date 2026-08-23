@@ -62,8 +62,8 @@
     "start_ring": 12.0
   },
   "gate_to_copper": {
-    "days_two_miners": 0.5625,
-    "stones": 27.0
+    "days_two_miners": 1.125,
+    "stones": 54.0
   },
   "generated_by": "motorio/tools/dump_balance.gd",
   "items": {
@@ -374,105 +374,105 @@
         "from": 9.5,
         "radius": 11.0,
         "seams": 4,
-        "stones": 9,
+        "stones": 12,
         "to": 10.8
       },
       {
         "from": 11.5,
         "radius": 13.0,
         "seams": 4,
-        "stones": 15,
+        "stones": 27,
         "to": 12.8
       },
       {
         "from": 13.5,
         "radius": 15.0,
         "seams": 6,
-        "stones": 27,
+        "stones": 54,
         "to": 14.8
       },
       {
         "from": 15.5,
         "radius": 17.0,
         "seams": 6,
-        "stones": 51,
+        "stones": 105,
         "to": 16.8
       },
       {
         "from": 17.5,
         "radius": 19.0,
         "seams": 6,
-        "stones": 87,
+        "stones": 192,
         "to": 18.8
       },
       {
         "from": 19.5,
         "radius": 22.0,
         "seams": 6,
-        "stones": 135,
+        "stones": 327,
         "to": 21.5
       },
       {
         "from": 22.5,
         "radius": 26.0,
         "seams": 12,
-        "stones": 210,
+        "stones": 537,
         "to": 25.5
       },
       {
         "from": 27.0,
         "radius": 31.0,
         "seams": 12,
-        "stones": 320,
+        "stones": 857,
         "to": 30.5
       },
       {
         "from": 32.0,
         "radius": 37.0,
         "seams": 15,
-        "stones": 480,
+        "stones": 1337,
         "to": 36.5
       },
       {
         "from": 38.0,
         "radius": 44.0,
         "seams": 15,
-        "stones": 700,
+        "stones": 2037,
         "to": 43.5
       },
       {
         "from": 45.0,
         "radius": 52.0,
         "seams": 24,
-        "stones": 1000,
+        "stones": 3037,
         "to": 51.5
       },
       {
         "from": 53.0,
         "radius": 61.0,
         "seams": 24,
-        "stones": 1400,
+        "stones": 4437,
         "to": 60.5
       },
       {
         "from": 62.0,
         "radius": 71.0,
         "seams": 28,
-        "stones": 2000,
+        "stones": 6437,
         "to": 70.5
       },
       {
         "from": 72.0,
         "radius": 82.0,
         "seams": 28,
-        "stones": 2800,
+        "stones": 9237,
         "to": 81.5
       },
       {
         "from": 83.0,
         "radius": 100.0,
         "seams": 40,
-        "stones": 4000,
+        "stones": 13237,
         "to": 99.0
       }
     ],
@@ -484,7 +484,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.25",
+  "version": "1.0.26",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,
@@ -500,63 +500,63 @@
       },
       {
         "radius": 11.0,
-        "stones": 9
+        "stones": 12
       },
       {
         "radius": 13.0,
-        "stones": 15
-      },
-      {
-        "radius": 15.0,
         "stones": 27
       },
       {
+        "radius": 15.0,
+        "stones": 54
+      },
+      {
         "radius": 17.0,
-        "stones": 51
+        "stones": 105
       },
       {
         "radius": 19.0,
-        "stones": 87
+        "stones": 192
       },
       {
         "radius": 22.0,
-        "stones": 135
+        "stones": 327
       },
       {
         "radius": 26.0,
-        "stones": 210
+        "stones": 537
       },
       {
         "radius": 31.0,
-        "stones": 320
+        "stones": 857
       },
       {
         "radius": 37.0,
-        "stones": 480
+        "stones": 1337
       },
       {
         "radius": 44.0,
-        "stones": 700
+        "stones": 2037
       },
       {
         "radius": 52.0,
-        "stones": 1000
+        "stones": 3037
       },
       {
         "radius": 61.0,
-        "stones": 1400
+        "stones": 4437
       },
       {
         "radius": 71.0,
-        "stones": 2000
+        "stones": 6437
       },
       {
         "radius": 82.0,
-        "stones": 2800
+        "stones": 9237
       },
       {
         "radius": 100.0,
-        "stones": 4000
+        "stones": 13237
       }
     ],
     "max_radius": 100.0,

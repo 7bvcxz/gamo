@@ -444,7 +444,7 @@ func info_data() -> Dictionary:
 			return _goal(Defs.mission_line("COLD-NOBASE"), "thing", Icons.THING_CORE)
 		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
 	if is_night():
-		return _goal("밤입니다  숙소로 돌아가 Z로 취침하세요", "thing", Icons.THING_SHELTER)
+		return _goal("밤입니다  숙소로 돌아가 자야 합니다", "thing", Icons.THING_SHELTER)
 	if is_dusk():
 		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
 	# Nothing else. What is in her arms is drawn in her arms, ice melting is drawn
@@ -1090,6 +1090,13 @@ func _process(delta: float) -> void:
 		tool_index = open_slots[0] if not open_slots.is_empty() else 0
 	player.carrying_frozen = sim.carried_frozen
 	player.carrying_kit = sim.carried_kit
+	# Where she is standing, for anything the sim tips onto the snow. The sim
+	# does not know where she is, and every one of these -- the case's contents,
+	# the gun the fire hands over, the bin she just made -- lands under her feet
+	# otherwise and is picked up on the frame it appears. Pushed every frame from
+	# here rather than latched at each drop site, because three places latching
+	# the same fact is three places to forget it.
+	sim.drop_from = player.cell()
 	# The carried cat rides in front of her, turning as she turns. Driven from
 	# here because the sim does not know where the player is standing.
 	if sim.carried_cat != null:
@@ -1246,7 +1253,7 @@ func _process_play(delta: float) -> void:
 	# anything.
 	if not night_warned and is_night() and Zone.darkens(zone()):
 		night_warned = true
-		_notify("밤이 옵니다 — 숙소로 돌아가 Z로 취침하세요", Defs.COL_DANGER)
+		_notify("밤이 옵니다 — 숙소로 돌아가 자야 합니다", Defs.COL_DANGER)
 		audio.call("play", "alarm")
 	# Running out of night entirely means the cats come and get you.
 	if mission == Mission.DONE and time_left <= 0.0:
@@ -1304,6 +1311,8 @@ func _announce_drop(kind: int) -> void:
 			_notify("긴급기지키트를 들었습니다", Defs.COL_CORE)
 		Sim.DROP_KIT_SHELTER:
 			_notify("긴급숙소키트를 들었습니다", Defs.COL_CORE)
+		Sim.DROP_FOOD_BIN:
+			_notify("사료 상자를 들었습니다", Defs.COL_CORE)
 		Sim.DROP_GUN:
 			_notify("건물건설총  ·  2번", Defs.COL_CORE)
 		Sim.DROP_PICKAXE:
@@ -1567,7 +1576,7 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % Defs.base_level_shown(level), Defs.COL_CORE, true)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "finish")
-	_notify("기지가 커졌습니다  온기 %.0f칸" % radius, Defs.COL_CORE)
+	_notify("기지가 커졌습니다", Defs.COL_CORE)
 	# And the first step of the fire is what hands over the build gun.
 	if sim.drop_gun_at_base():
 		var where: Vector2i = sim.core_cell
@@ -1660,7 +1669,7 @@ func _update_room(delta: float) -> void:
 		room_fade = maxf(0.0, room_fade - delta / Defs.ROOM_WAKE_FADE)
 	if not room_sleeping:
 		return
-	var bed: Vector2 = sim.cell_centre(Defs.room_to_world(_room_bed_cell()))
+	var bed: Vector2 = room_sleep_point()
 	player.position = player.position.move_toward(bed, PlayerActor.SPEED * delta)
 	player.facing = Vector2i.DOWN
 	if player.position.distance_to(bed) > 1.0:
@@ -1679,6 +1688,17 @@ func _update_room(delta: float) -> void:
 func _room_bed_cell() -> Vector2i:
 	var piece: Dictionary = Defs.ROOM_PIECES[_room_piece_index(Defs.ROOM_BED)]
 	return Vector2i(piece["cell"])
+
+## And where she actually comes to rest: half a cell down the bed from the head
+## of it.
+##
+## The pillow cell centre put her shoulders level with the pillow and her legs
+## off the top half of a two-cell bed, which reads as lying on the headboard.
+## Half a tile is the whole of the correction -- the bed is two cells and this
+## is a quarter of the way down it.
+func room_sleep_point() -> Vector2:
+	return sim.cell_centre(Defs.room_to_world(_room_bed_cell())) \
+		+ Vector2(0.0, float(Defs.TILE) * 0.5)
 
 func _room_piece_index(id: int) -> int:
 	for index in Defs.ROOM_PIECES.size():
@@ -2922,8 +2942,13 @@ func base_rows() -> Array[Dictionary]:
 	# And nothing else until the fire is at 3단계. Before that this window is one
 	# line -- the thing it is for -- rather than three, two of them answers to
 	# problems she has not met yet.
-	if crafts_open():
-		for index in Defs.BASE_CRAFTS.size():
+	# Each recipe has its own rung now. The list used to open all at once at
+	# 3단계, so the bin -- a box of fish for cats she may not have met -- arrived
+	# beside the torch, which is the answer to the thing that is actually killing
+	# her at that point.
+	var level: int = Defs.base_level_shown(sim.base_level)
+	for index in Defs.BASE_CRAFTS.size():
+		if level >= int(Defs.BASE_CRAFTS[index]["level"]):
 			rows.append({"kind": "craft", "craft": index})
 	return rows
 
@@ -2960,7 +2985,8 @@ func craft_selected(index: int = 0) -> void:
 	var id: String = String(craft["id"])
 	var made: bool = sim.craft_torch() if id == "torch" else sim.craft_food_bin()
 	if not made:
-		var reason: String = "이미 있습니다" if id == "food_bin" and sim.food_placed \
+		var reason: String = "이미 있습니다" \
+			if id == "food_bin" and (sim.food_placed or sim.bin_in_hand()) \
 			else "재료가 모자랍니다"
 		_notify("%s  ·  %s" % [String(craft["name"]), reason], Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
@@ -2968,8 +2994,6 @@ func craft_selected(index: int = 0) -> void:
 	var tail: String = "  (%d개)" % sim.torches if id == "torch" else ""
 	_notify("%s을 만들었습니다%s" % [String(craft["name"]), tail], Defs.COL_CORE)
 	fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
-	if id == "food_bin":
-		fx.ring(sim.cell_centre(sim.food_cell), Defs.COL_CORE, Defs.RING_LARGE)
 	audio.call("play", "alloy")
 
 ## Handing the fuel over, and showing it go in. The pieces fly out of her arms
@@ -3010,8 +3034,10 @@ func _place_kit(cell: Vector2i) -> void:
 	var kit: int = sim.carried_kit
 	if kit == Defs.KIT_BASE:
 		if sim.place_base(cell):
-			_notify("불이 붙었습니다  기지 %.0f칸 안이 따뜻합니다" % sim.warm_radius,
-				Defs.COL_CORE)
+			# What it did is on the ground: the fog pulls back and a circle of
+			# warm snow appears under her. Saying how many tiles wide it is is
+			# the same fact in figures, on top of the picture of it.
+			_notify("불이 붙었습니다", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_LARGE)
 			fx.burst(sim.cell_centre(cell), Defs.COL_CORE, 16)
 			shake = maxf(shake, Defs.FX_SMALL)
@@ -3020,6 +3046,16 @@ func _place_kit(cell: Vector2i) -> void:
 		if Vector2(cell - sim.core_cell).length() > Defs.BASE_PLACE_RADIUS:
 			_notify("추락 지점에서 너무 멉니다  %d칸 안에 놓으세요"
 				% int(Defs.BASE_PLACE_RADIUS), Defs.COL_TEXT_DIM)
+		else:
+			_notify("여기에는 놓을 수 없습니다", Defs.COL_TEXT_DIM)
+	elif kit == Defs.KIT_FOOD:
+		if sim.place_food_bin(cell):
+			_notify("사료 상자를 놓았습니다", Defs.COL_CORE)
+			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+			audio.call("play", "finish")
+			return
+		if not sim.can_touch(cell):
+			_notify("온기 반경 밖입니다", Defs.COL_TEXT_DIM)
 		else:
 			_notify("여기에는 놓을 수 없습니다", Defs.COL_TEXT_DIM)
 	elif kit == Defs.KIT_SHELTER:

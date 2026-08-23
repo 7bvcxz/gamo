@@ -22,6 +22,7 @@ func _run() -> void:
 	_test_where_it_is()
 	_test_the_first_ring_holds()
 	_test_taking_one_apart()
+	_test_before_copper()
 	_test_the_first_piece()
 	_test_the_rate()
 	_test_out_of_reach()
@@ -145,8 +146,13 @@ func _test_taking_one_apart() -> void:
 	_assert(sim.search_debris(near, Defs.DEBRIS_SEARCH_SECONDS), "끝까지 누르면 열린다")
 	# The wreck pays in the world's own seams: a few of the best the ladder has,
 	# and a pile of the rung under it.
+	#
+	# The best she has *reached*, not the best that exists. A player who has never
+	# held copper does not know the word, and a crate of it out of the first wreck
+	# names a material the world has not shown her yet.
 	var top: int = Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]
 	var below: int = Defs.ORE_TIERS[maxi(Defs.ORE_TIERS.size() - 2, 0)]
+	sim.collected[top] = 1
 	var before: int = int(sim.stock.get(top, 0))
 	var found: Dictionary = sim.open_debris(near)
 	_assert(not sim.debris.has(near), "뜯은 조각은 사라진다")
@@ -162,6 +168,25 @@ func _test_taking_one_apart() -> void:
 		_assert(item_type in Defs.ORE_TIERS or item_type == Defs.ITEM_CORE_PART,
 			"잔해는 광맥 자원과 코어부품만 준다 (%s)" % Defs.ITEM_SHORT[item_type])
 	_assert(sim.open_debris(near).is_empty(), "없는 조각은 아무것도 주지 않는다")
+	sim.free()
+
+## And before she has held any, the same wreck is heat and nothing else.
+func _test_before_copper() -> void:
+	var sim := Sim.new()
+	sim.setup(4242)
+	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+	sim.debris[cell] = 0
+	sim.debris_searched = 1   # past the guaranteed core part, so only the seams show
+	_assert(int(sim.collected.get(Defs.ITEM_COPPER, 0)) == 0, "구리를 캔 적이 없고")
+	var found: Dictionary = sim.open_debris(cell)
+	_assert(not found.has(Defs.ITEM_COPPER), "잔해에서 구리가 나오지 않는다")
+	_assert(int(found.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.DEBRIS_HIGH.x + Defs.DEBRIS_LOW.x,
+		"두 줄이 모두 열석으로 나온다: %d" % int(found.get(Defs.ITEM_HEATSTONE, 0)))
+	# And the moment she has held one, the wreck starts paying in it.
+	sim.collected[Defs.ITEM_COPPER] = 1
+	var second: Vector2i = sim.core_cell + Vector2i(3, 0)
+	sim.debris[second] = 0
+	_assert(sim.open_debris(second).has(Defs.ITEM_COPPER), "한 번 캐고 나면 구리가 나온다")
 	sim.free()
 
 ## Every world's first piece carries a core part. Checked over many seeds

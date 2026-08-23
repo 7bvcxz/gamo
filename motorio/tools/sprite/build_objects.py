@@ -113,6 +113,11 @@ ADOPTED = {
     # painted hut. At 26 it is a little larger than the other drops because it is
     # the one the opening turns on.
     "pickaxe": ("pickaxe_gen1", 26),
+    # The gun, at the pickaxe's size because the two are drawn by the same code
+    # in the same two places -- the snow she finds them on and the slot they sit
+    # in. Before this the slot showed a picture of a miner and so did the drop,
+    # so the tool and the machine it puts down were one object twice.
+    "build_gun": ("build_gun_gen1", 26),
     "kit": ("kit_gen1", 32),
     "kit_base": ("kit_base_gen1", 26),
     "kit_shelter": ("kit_shelter_gen1", 26),
@@ -152,6 +157,7 @@ ADOPTED_NAMES = {
     "debris4": "로켓잔해 · 선체판",
     "debris5": "로켓잔해 · 안테나",
     "pickaxe": "곡괭이",
+    "build_gun": "건물건설총",
     "kit": "긴급 키트",
     "kit_base": "긴급기지키트",
     "kit_shelter": "긴급생존키트",

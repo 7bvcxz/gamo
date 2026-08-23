@@ -81,5 +81,25 @@ func _test_rows_agree() -> void:
 	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
 	_assert(sim.can_feed_base(), "다 모으면 넣을 수 있다")
 
+	# --- One recipe per rung ---------------------------------------------------
+	# The list used to open all at once, so a box of fish for cats she may not
+	# have met arrived beside the torch -- which at three steps is the answer to
+	# the thing actually killing her.
+	for row: Dictionary in Defs.BASE_CRAFTS:
+		_assert(row.has("level"), "제작법마다 해금 단계가 있다: %s" % String(row["id"]))
+	for level in range(1, 6):
+		sim.stones_in = int(Defs.BASE_LEVELS[level - 1]["stones"])
+		sim._refresh_radius()
+		var ids: Array[String] = []
+		for row: Dictionary in main.base_rows():
+			if String(row["kind"]) == "craft":
+				ids.append(String(Defs.BASE_CRAFTS[int(row["craft"])]["id"]))
+		for craft: Dictionary in Defs.BASE_CRAFTS:
+			var id: String = String(craft["id"])
+			_assert(ids.has(id) == (level >= int(craft["level"])),
+				"%d단계에 %s 는 %s" % [level, id,
+					"있다" if level >= int(craft["level"]) else "없다"])
+	_assert(int(Defs.BASE_CRAFTS[1]["level"]) == 4, "사료 상자는 4단계다")
+
 	main.clear_save()
 	main.free()

@@ -125,6 +125,23 @@ func _run() -> void:
 		_assert(int(levels[index]["stones"]) > int(levels[index - 1]["stones"])
 			and float(levels[index]["radius"]) > float(levels[index - 1]["radius"]),
 			"기지 단계 %d은 앞 단계보다 비싸고 넓다" % index)
+	# And each rung costs what the table says it costs.
+	#
+	# The column is a running total, so what a player pays is the gap between two
+	# rows -- and those gaps used to be 3, 6, 6, 12, which is a ladder getting
+	# cheaper per rung exactly where the walk to the next seam gets longer. The
+	# steps are written down now; this is what stops one row being edited without
+	# its neighbour.
+	_assert(Defs.BASE_LEVEL_STEPS.size() == levels.size() - 1,
+		"단계 비용이 사다리와 같은 길이다 (%d)" % Defs.BASE_LEVEL_STEPS.size())
+	for index in range(1, levels.size()):
+		var step: int = int(levels[index]["stones"]) - int(levels[index - 1]["stones"])
+		_assert(step == Defs.BASE_LEVEL_STEPS[index - 1],
+			"%d단계는 열석 %d개다 (%d)" % [Defs.base_level_shown(index),
+				Defs.BASE_LEVEL_STEPS[index - 1], step])
+	for index in range(1, Defs.BASE_LEVEL_STEPS.size()):
+		_assert(Defs.BASE_LEVEL_STEPS[index] > Defs.BASE_LEVEL_STEPS[index - 1],
+			"그리고 단계마다 더 비싸진다 (%d번째)" % index)
 	var copper_level: int = Defs.base_level(int(stones_needed))
 	_assert(copper_level >= 4,
 		"구리는 오프닝에서 네 단계 뒤에 있다 (%d단계)" % copper_level)

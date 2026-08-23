@@ -126,10 +126,28 @@ func _test_ice_outranks_the_pickaxe() -> void:
 	main.player.facing = Vector2i(1, 0)
 	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	_assert(main.holding_pickaxe(), "곡괭이를 들고 있고")
-	_assert(sim.can_hand_mine(cell), "그 칸은 캘 수 있는 광맥이며")
+	_assert(sim.ore.has(cell) and sim.frozen_cats.has(cell),
+		"그 칸에는 광맥이 있고 그 위에 얼음이 있다")
 	main._primary_action()
 	_assert(sim.carried_frozen, "그래도 Z는 얼음을 든다")
 	_assert(sim.frozen_cats.is_empty() or not sim.frozen_cats.has(cell),
 		"얼음은 그 칸에서 사라진다")
+
+	# And the swing does not reach past it either.
+	#
+	# Z pressed already lifted the block -- that branch is above the pickaxe --
+	# but mining is a key *held*, and holding it started a swing before the press
+	# was ever released. So a player who walked up to a cat frozen onto a seam
+	# and held Z mined the ground out from under it, which is the one thing this
+	# whole test exists to stop.
+	sim.frozen_cats[cell] = 0.0
+	sim.carried_frozen = false
+	_assert(not sim.can_hand_mine(cell), "얼음이 얹힌 광맥은 캘 수 없고")
+	main.mine_held = true
+	main._update_hand_mining(1.0)
+	_assert(sim.hand_cell == Vector2i(9999, 9999), "Z를 눌러도 스윙이 시작되지 않는다")
+	main.mine_held = false
+	sim.frozen_cats.erase(cell)
+	_assert(sim.can_hand_mine(cell), "얼음이 치워지면 다시 캘 수 있다")
 	main.clear_save()
 	main.free()

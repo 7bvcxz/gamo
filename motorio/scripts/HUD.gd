@@ -5,7 +5,16 @@ extends Control
 ## HUD never depends on a fixed window size.
 
 const MARGIN := 20.0
-const PANEL_W := 232.0
+## One width for everything stacked in the top-left, rather than a width per
+## card measured from its own text.
+##
+## The clock was 232, the throughput panel 244 and the goal and mission cards
+## whatever their longest line came to, so a column of four things had four left
+## edges' worth of right edge -- read as four panels that happened to be near
+## each other rather than as one column. 256 is the widest thing in it (the
+## throughput card at 244, the longest mission line at 253 with its dot and its
+## pad); text longer than that wraps now instead of the plate growing.
+const COLUMN_W := 256.0
 const SETTINGS_BUTTON := 34.0
 ## Smallest logical canvas the layout is designed to hold. The height is not a
 ## round number: it is the status panel (190) plus the hotbar and its chip (154)
@@ -124,7 +133,11 @@ func status_top() -> float:
 
 ## Below the gear, and never wider than the screen it is drawn on.
 func status_rect() -> Rect2:
-	return Rect2(MARGIN, status_top(), minf(PANEL_W, size.x - MARGIN * 2.0), 108)
+	return Rect2(MARGIN, status_top(), column_width(), 96)
+
+## And never wider than the screen it is drawn on.
+func column_width() -> float:
+	return minf(COLUMN_W, size.x - MARGIN * 2.0)
 
 ## The bottom of everything stacked in the top-left corner.
 ##
@@ -286,11 +299,10 @@ static func settings_slider_of(kind: int) -> int:
 	return -1
 
 func settings_card_height() -> float:
-	# The reserve at the foot has to clear the hint line *and* the focus ring the
-	# last row draws around itself: at 76 the ring landed on the hint and the two
-	# read as one smudge.
-	# The reserve at the foot is for the hint line under the last row.
-	var height: float = SETTINGS_ROW_TOP + 46.0
+	# The reserve at the foot is now only for the focus ring the last row draws
+	# around itself. It used to also hold a line naming the keys, and the card
+	# kept that line's height for a while after the line went.
+	var height: float = SETTINGS_ROW_TOP + 24.0
 	for kind: int in settings_rows():
 		height += SETTINGS_SLIDER_H if settings_slider_of(kind) >= 0 else SETTINGS_ACTION_H
 	return height
@@ -458,8 +470,47 @@ func _text_in(box: Rect2, body: String, size: int, color: Color, align: int = HO
 	draw_string(UIFont.FONT, box.position + Vector2(1, 1), body, align, box.size.x, size, Color(0.02, 0.03, 0.06, 0.75))
 	draw_string(UIFont.FONT, box.position, body, align, box.size.x, size, color)
 
+## The two tools that are objects in the world as well as slots in the row.
+##
+## They used to be drawn twice over: the pickaxe as a wedge on a stick in code
+## and as a painting on the snow, and the gun not at all -- its slot showed a
+## picture of whichever machine it was loaded with, which is the thing it makes
+## rather than the thing it is. Same file both places now, so what she picks up
+## off the snow and what sits in her hand are one object.
+const PICKAXE_ART: Texture2D = preload("res://assets/objects/pickaxe.png")
+const BUILD_GUN_ART: Texture2D = preload("res://assets/objects/build_gun.png")
+
+## Fitted into the chip and centred, never stretched: these are painted at one
+## aspect and a slot is square.
+func _tool_art(art: Texture2D, box: Rect2) -> void:
+	var source := Vector2(float(art.get_width()), float(art.get_height()))
+	var fit: float = minf(box.size.x / source.x, box.size.y / source.y)
+	var drawn: Vector2 = source * fit
+	draw_texture_rect(art, Rect2(box.position + (box.size - drawn) * 0.5, drawn), false)
+
 func _text_width(body: String, size: int) -> float:
 	return UIFont.FONT.get_string_size(body, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+
+## A line that is allowed to be longer than the plate it sits on.
+##
+## Every card in the left column is one width now, so text can no longer be
+## measured and the plate grown to fit it -- it is the other way round. The
+## opening's longest line is 310 pixels of Korean in a 190 pixel column and was
+## drawn straight out through the border, which on a phone was most of the
+## sentence hanging over the snow.
+func _text_block(at: Vector2, body: String, width: float, size: int, color: Color) -> void:
+	draw_multiline_string(UIFont.FONT, at + Vector2(1, 1), body, HORIZONTAL_ALIGNMENT_LEFT,
+		width, size, -1, Color(0.02, 0.03, 0.06, 0.75))
+	draw_multiline_string(UIFont.FONT, at, body, HORIZONTAL_ALIGNMENT_LEFT, width, size, -1, color)
+
+## How tall that comes out. The card measures with this and draws with the one
+## above, so the plate and the text cannot disagree about how many lines there
+## are.
+func _text_block_height(body: String, width: float, size: int) -> float:
+	if body == "":
+		return 0.0
+	return UIFont.FONT.get_multiline_string_size(body, HORIZONTAL_ALIGNMENT_LEFT,
+		width, size).y
 
 func _draw() -> void:
 	if main == null:
@@ -645,9 +696,10 @@ func _draw_status() -> void:
 	_text(panel.position + Vector2(14, 56), "%d일차 · %s" % [main.day_number, phase], 11,
 		Defs.COL_DANGER if main.is_night() else Defs.COL_CLOCK)
 	_draw_day_arc(panel)
-	_text(panel.position + Vector2(14, 76), "온기 %.1f칸" % main.sim.warm_radius, 14,
-		Defs.COL_MACHINE_EDGE)
-
+	# The warm radius used to be a line here. It is a circle drawn on the snow
+	# with its edge visible from anywhere inside it, and a number in the corner
+	# saying how wide it is is a caption under a picture -- the one thing this
+	# game decided in 2026-08-19 not to write down.
 	_draw_warmth_row(panel)
 	_draw_info()
 	_draw_objective()
@@ -762,15 +814,27 @@ const OBJECTIVE_H := 68.0
 const INFO_H := 40.0
 const INFO_GAP := 6.0
 
+## The text column inside the state card, to the right of its icon.
+func info_text_width() -> float:
+	return column_width() - INFO_H - 16.0
+
 func info_rect(text: String) -> Rect2:
-	var width: float = minf(_text_width(text, 12) + INFO_H + 34.0, size.x - MARGIN * 2.0)
-	return Rect2(MARGIN, goal_top(), width, INFO_H)
+	var height: float = maxf(INFO_H,
+		_text_block_height(text, info_text_width(), 12) + 18.0)
+	return Rect2(MARGIN, goal_top(), column_width(), height)
+
+## Where the goal card's line starts, and how much room it has. Asked once so
+## the rectangle and the drawing measure the same column.
+func objective_text_x() -> float:
+	return FRAME_PAD + OBJECTIVE_ICON * 0.76 + 16.0
+
+func objective_text_width() -> float:
+	return column_width() - objective_text_x() - 12.0
 
 func objective_rect(text: String) -> Rect2:
-	# The trailing pad has to clear the last glyph's advance, not just sit flush
-	# against it, or the closing bracket lands on the plate border.
-	var width: float = minf(_text_width(text, 12) + OBJECTIVE_ICON + 50.0, size.x - MARGIN * 2.0)
-	var box := Rect2(MARGIN, goal_top(), width, OBJECTIVE_H)
+	var height: float = maxf(OBJECTIVE_H, FRAME_HEADER + 12.0
+		+ _text_block_height(text, objective_text_width(), 12))
+	var box := Rect2(MARGIN, goal_top(), column_width(), height)
 	# And under the state card whenever the world has something to say, which is
 	# what "above the goal" means: the thing that is true right now sits over the
 	# thing being worked towards, and neither evicts the other.
@@ -795,7 +859,9 @@ func _draw_info() -> void:
 		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.75), 1.0)
 	var slot := Rect2(box.position + Vector2(9.0, 9.0), Vector2.ONE * (INFO_H - 18.0))
 	_draw_goal_icon(slot, row)
-	_text(box.position + Vector2(INFO_H + 4.0, INFO_H * 0.5 + 4.0), text, 12, Defs.COL_TEXT)
+	var block: float = _text_block_height(text, info_text_width(), 12)
+	_text_block(box.position + Vector2(INFO_H + 4.0, (box.size.y - block) * 0.5 + 11.0),
+		text, info_text_width(), 12, Defs.COL_TEXT)
 
 ## The mission card: the open rungs of all three tracks.
 ##
@@ -807,18 +873,25 @@ func _draw_info() -> void:
 const MISSION_ROW_H := 17.0
 const MISSION_HEAD_H := 15.0
 
+## The column a mission line is written in: past the dot, short of the border.
+func mission_text_width() -> float:
+	return column_width() - 38.0
+
+## How tall one rung comes out. Two lines of Korean is a real rung -- 임무 lines
+## are sentences -- and the card and the drawing both ask this, so a wrapped line
+## cannot end up drawn past the bottom of its own plate.
+func mission_row_height(line: String) -> float:
+	return maxf(MISSION_ROW_H, _text_block_height(line, mission_text_width(), 12) + 3.0)
+
 func mission_card_rect() -> Rect2:
 	var rows: Array[Dictionary] = main.open_missions()
 	var tracks := {}
+	var height: float = FRAME_HEADER + 10.0
 	for row: Dictionary in rows:
 		tracks[int(row["track"])] = true
-	var height: float = FRAME_HEADER + 10.0 + float(rows.size()) * MISSION_ROW_H \
-		+ float(tracks.size()) * MISSION_HEAD_H
-	var width: float = 0.0
-	for row: Dictionary in rows:
-		width = maxf(width, _text_width(String(row["line"]), 12) + 46.0)
-	width = clampf(width, 150.0, size.x - MARGIN * 2.0)
-	var box := Rect2(MARGIN, goal_top(), width, maxf(height, 44.0))
+		height += mission_row_height(String(row["line"]))
+	height += float(tracks.size()) * MISSION_HEAD_H
+	var box := Rect2(MARGIN, goal_top(), column_width(), maxf(height, 44.0))
 	var state: String = main.info()
 	if state != "":
 		var above: Rect2 = info_rect(state)
@@ -853,11 +926,12 @@ func _draw_missions() -> void:
 			y += MISSION_HEAD_H
 			_text(Vector2(box.position.x + 12.0, y - 3.0), Defs.TRACK_NAMES[track], 11,
 				Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85))
-		y += MISSION_ROW_H
+		var line: String = String(row["line"])
+		y += mission_row_height(line)
 		# A dot rather than a bullet character: the font is subset from the source
 		# and a glyph nobody wrote into a string is a glyph that is not in it.
 		draw_circle(Vector2(box.position.x + 18.0, y - 8.0), 2.0, Defs.COL_TEXT_DIM)
-		_text(Vector2(box.position.x + 26.0, y - 4.0), String(row["line"]), 12,
+		_text_block(Vector2(box.position.x + 26.0, y - 4.0), line, mission_text_width(), 12,
 			Defs.COL_TEXT)
 
 func _draw_objective() -> void:
@@ -877,8 +951,8 @@ func _draw_objective() -> void:
 	draw_rect(slot.grow(3.0), Color(0, 0, 0, 0.28))
 	draw_rect(slot.grow(3.0), Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.30), false, 1.0)
 	_draw_goal_icon(slot, goal)
-	_text(box.position + Vector2(FRAME_PAD + OBJECTIVE_ICON * 0.76 + 16.0, FRAME_HEADER + 27.0),
-		text, 12, Defs.COL_TEXT)
+	_text_block(box.position + Vector2(objective_text_x(), FRAME_HEADER + 20.0),
+		text, objective_text_width(), 12, Defs.COL_TEXT)
 
 func _draw_goal_icon(rect: Rect2, goal: Dictionary) -> void:
 	match String(goal["kind"]):
@@ -891,11 +965,15 @@ func _draw_goal_icon(rect: Rect2, goal: Dictionary) -> void:
 func _draw_warmth_row(panel: Rect2) -> void:
 	var warmth: float = main.player.warmth
 	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
-	var origin: Vector2 = panel.position + Vector2(14, 88)
+	var origin: Vector2 = panel.position + Vector2(14, 76)
+	# Measured off the panel rather than fixed at 122, so the row still reaches
+	# both ends when the column is a different width -- a bar that stops short of
+	# the panel edge reads as a bar that is nearly full.
+	var span: float = panel.size.x - 28.0
 	_text(origin + Vector2(0, 10), "체온", 11, Defs.COL_TEXT_DIM)
-	_text_in(Rect2(origin + Vector2(166, -2), Vector2(36, 16)), "%d%%" % int(round(warmth)), 11,
+	_text_in(Rect2(origin + Vector2(span - 36.0, -2), Vector2(36, 16)), "%d%%" % int(round(warmth)), 11,
 		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER, HORIZONTAL_ALIGNMENT_RIGHT)
-	var track := Rect2(origin + Vector2(40, 2), Vector2(122, 9))
+	var track := Rect2(origin + Vector2(40, 2), Vector2(span - 82.0, 9))
 	draw_rect(track, Color8(28, 36, 54))
 	var col: Color = Defs.COL_CORE.lerp(Defs.COL_DANGER, 1.0 - k)
 	if k < 0.25:
@@ -963,8 +1041,8 @@ func _draw_palette() -> void:
 		# The pickaxe holds nothing, so its slot says what it is for instead of
 		# borrowing the gun's magazine.
 		if main.TOOLS[index] == main.TOOL_PICKAXE:
-			Icons.draw_pickaxe(self, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
-				Vector2(24.0, 24.0)))
+			_tool_art(PICKAXE_ART, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 2.0),
+				Vector2(28.0, 28.0)))
 			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
 				"직접 채굴", 13, Defs.COL_TEXT)
 			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
@@ -997,10 +1075,13 @@ func _draw_palette() -> void:
 					Vector2(track.size.x * clampf(main.sim.torch_left / Defs.TORCH_SECONDS, 0.0, 1.0),
 						track.size.y)), Defs.COL_CORE if lit else Defs.COL_TEXT_DIM)
 			continue
-		# What the gun is loaded with, as the thing itself rather than its name.
-		var chip := Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
-			Vector2(24.0, 24.0))
-		Icons.draw_machine(self, chip, loaded)
+		# The gun itself, as the thing in her hand. What it is loaded with is the
+		# name and the price beside it -- the chip used to be a picture of the
+		# machine, which made the slot a picture of something she does not have
+		# yet rather than of the tool she is holding.
+		var chip := Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 2.0),
+			Vector2(28.0, 28.0))
+		_tool_art(BUILD_GUN_ART, chip)
 		var afford: bool = main.sim.can_afford(loaded)
 		_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
 			Defs.MACHINE_SHORT[loaded], 13, Defs.COL_TEXT if afford else Defs.COL_DANGER)
@@ -1162,6 +1243,14 @@ func _draw_base_menu() -> void:
 	# rows with prices on them; a player looking at that has already been told
 	# what up and down do by the thing moving when they press them.
 	_frame(card, Defs.COL_CORE, "기지")
+	# Which step it is on, in the header opposite the title. The ladder is what
+	# this window is for and the number was nowhere in it: the row underneath
+	# says what the next rung costs, and "3개" means one thing on the second rung
+	# and another on the ninth.
+	_text_in(Rect2(card.position + Vector2(card.size.x - 90.0, 16.0), Vector2(80.0, 14.0)),
+		"Lv %d" % Defs.base_level_shown(main.sim.base_level), 12,
+		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.95),
+		HORIZONTAL_ALIGNMENT_RIGHT)
 	# Two lines of state used to sit here: the circle and the stones in the fire
 	# on one, the torches and their seconds on the other. Both are gone.
 	#
@@ -1240,10 +1329,14 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 	# sum -- "다음 단계까지 열석 3개 · 3개 부족" -- which is a sentence about
 	# arithmetic where the rest of the window has a price tag, and a reader who
 	# had learned where to look had to read this one differently.
+	# What it does, without the two numbers it used to do it with. "온기 7칸 →
+	# 9칸" is the circle on the snow written out in figures, and the circle is
+	# already on the snow -- a player who feeds the fire watches it widen. The
+	# top of the ladder still says something, because there the row refuses and a
+	# refusal with no reason is a broken key.
 	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
-	var effect: String = "온기가 더 넓어지지 않습니다"
-	if not next_level.is_empty():
-		effect = "온기 %.0f칸  →  %.0f칸" % [sim.warm_radius, float(next_level["radius"])]
+	var effect: String = "온기가 더 넓어지지 않습니다" if next_level.is_empty() \
+		else "불이 더 멀리까지 닿는다"
 	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11,
 		Defs.COL_CORE if ready else Defs.COL_TEXT_DIM)
 	if want > 0:
@@ -1706,7 +1799,7 @@ func meter_rect() -> Rect2:
 	if not main.sim.meter_items(machine, true).is_empty():
 		sections += 1
 	var height: float = METER_HEAD + float(sections) * 20.0 + float(rows) * METER_ROW + METER_FOOT
-	var width: float = minf(METER_W, size.x - MARGIN * 2.0)
+	var width: float = column_width()
 	# Directly under the materials, in the left column with everything else the
 	# player reads. It used to hang off the top-right corner under the goal card.
 	var box := Rect2(MARGIN, left_column_bottom() + 8.0, width, height)
@@ -1973,11 +2066,10 @@ func _draw_settings_card() -> void:
 	for index in rows.size():
 		_draw_settings_row(index, rows[index])
 
-	var touch_pad: bool = main.touch != null and main.touch.visible
-	var hint: String = "슬라이더를 드래그하세요" if touch_pad \
-		else "↑ ↓ 로 선택, ← → 로 조절, Z 로 실행, Esc 또는 X 로 닫기"
-	_text_in(Rect2(card.position + Vector2(0, card.size.y - 20.0), Vector2(w, 18)), hint, 12,
-		Defs.COL_TEXT_DIM)
+	# No key legend under the rows. There is a cursor sitting on one of them and
+	# sliders that move when a key is pressed; a player looking at that has been
+	# told what the arrows do by the thing that moved. The same line came off the
+	# fire's window in 1.0.24 for the same reason.
 
 ## The slot list, used for both saving and loading. Each row carries its number,
 ## when it was written, how far that run got, and a small drawing of the factory
@@ -2129,11 +2221,6 @@ func _draw_gameover() -> void:
 func _draw_result() -> void:
 	_dim(0.82)
 	var sim = main.sim
-	var card := _card(340.0)
-	var w: float = card.size.x
-	var headline: String = "%d일차 · 고양이들이 데려왔습니다" % main.day_number if main.rescued_tonight else "%d일차 · 숙소에서 잤습니다" % main.day_number
-	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), headline, 21,
-		Defs.COL_DANGER if main.rescued_tonight else Defs.COL_TEXT)
 	# A morning report, not a score.
 	#
 	# This used to lead with "+N 오늘 모은 열" at 52 point and close with a "최고
@@ -2141,13 +2228,11 @@ func _draw_result() -> void:
 	# game -- settled on 2026-08-14 as long-form rather than score attack -- so
 	# what a player needs at dawn is where the base has got to, not how well
 	# yesterday scored.
-	# The lead is the warm radius, because that is the thing that actually grows
-	# and the thing the next day is spent extending.
-	_text_in(Rect2(card.position + Vector2(0, 106), Vector2(w, 70)),
-		"%.1f칸" % sim.warm_radius, 52, Defs.COL_MACHINE_EDGE)
-	_text_in(Rect2(card.position + Vector2(0, 130), Vector2(w, 20)), "온기 반경", 13,
-		Defs.COL_TEXT_DIM)
-
+	#
+	# Then the lead itself went, in 1.0.26. It was "11.0칸 / 온기 반경" at 52
+	# point -- the circle on the snow, written out in figures, on a card that is
+	# supposed to hold the crew and what the day brought in and nothing else.
+	#
 	# The crew, and what the day brought in. Running totals used to lead this card
 	# -- how many stones had ever gone into the fire, and how many yesterday --
 	# which is a ledger rather than a morning report: the number that says whether
@@ -2156,7 +2241,15 @@ func _draw_result() -> void:
 	for row: Array in main.day_collected():
 		rows.append([Defs.ITEM_NAMES[int(row[0])], "+%d" % int(row[1]),
 			Defs.ITEM_COLORS[int(row[0])]])
-	var y: float = 176.0
+	# Sized to what it is holding rather than to a number typed once: the rows are
+	# one per resource the day produced, and a fixed card is either half empty on
+	# the first morning or too short on the tenth.
+	var card := _card(180.0 + float(rows.size()) * 24.0)
+	var w: float = card.size.x
+	var headline: String = "%d일차 · 고양이들이 데려왔습니다" % main.day_number if main.rescued_tonight else "%d일차 · 숙소에서 잤습니다" % main.day_number
+	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), headline, 21,
+		Defs.COL_DANGER if main.rescued_tonight else Defs.COL_TEXT)
+	var y: float = 96.0
 	for row in rows:
 		# Both halves on the same baseline. `_text` takes a baseline and `_text_in`
 		# takes a box whose *position* is also a baseline -- so the `y - 14` that

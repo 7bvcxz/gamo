@@ -60,6 +60,16 @@ func _bindings() -> void:
 				found = true
 		_check(found, "%s 키가 %s 액션에 실제로 묶여 있다" % [name, action])
 
+## Whether a line the player reads on a card names a key. The letters are the
+## ones this interface actually uses; the Korean fragments catch the sentence
+## form ("아무 키나 눌러") that names no letter at all.
+func _no_keys(line: String, where: String) -> void:
+	var found := ""
+	for token: String in ["Z", "X", "R", "F", "C", "Esc", "Enter", "Space", "눌러", "누르"]:
+		if line.contains(token):
+			found = token
+	_check(found == "", "%s가 키를 말하지 않는다: '%s' (%s)" % [where, line, found])
+
 func _objectives(main: Node2D) -> void:
 	var sim: Sim = main.sim
 	sim.setup(4242)
@@ -94,6 +104,26 @@ func _objectives(main: Node2D) -> void:
 	main.player.warmth = warm
 	_check(main.info().is_empty(), "체온이 돌아오면 정보창도 닫힌다")
 	_check(String(main.objective_data()["text"]) == opening, "목표는 내내 같았다")
+
+	# --- And no card names a key ------------------------------------------------
+	# The prompt over her shoulder is where a key is named: it is drawn on the
+	# thing it applies to, at the moment it applies, and it goes away. A mission
+	# card spells one out on a plate that stays on screen for the rest of the day
+	# -- "숙소로 돌아가 Z로 취침하세요" was still up while she was in the hut.
+	for row: Dictionary in Defs.MISSION_LINES:
+		_no_keys(String(row["line"]), "오프닝 줄")
+	for row: Dictionary in Defs.MISSIONS:
+		_no_keys(String(row["line"]), "임무 줄")
+	main.player.warmth = warm
+	main.time_left = Defs.NIGHT_SECONDS - 1.0
+	_check(main.info().contains("밤"), "밤에는 정보창이 밤이라고 말한다: %s" % main.info())
+	_no_keys(main.info(), "밤 정보창")
+	main.time_left = Defs.DUSK_SECONDS - 1.0
+	_no_keys(main.info(), "해질녘 정보창")
+	main.time_left = Defs.DAY_SECONDS
+	main.player.warmth = Defs.FROST_STAGES[2] - 1.0
+	_no_keys(main.info(), "동결 정보창")
+	main.player.warmth = warm
 
 	# And the card that stacks above it never pushes the goal off the screen.
 	main.player.warmth = Defs.FROST_STAGES[2] - 1.0

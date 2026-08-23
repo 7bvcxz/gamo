@@ -390,7 +390,22 @@ func _test_hunger_and_feeding() -> void:
 	_assert(cat.state != Defs.CAT_TO_FOOD, "밥통이 없으면 먹으러 가지 않는다")
 	sim.stock[Defs.ITEM_HEATSTONE] = 20
 	_assert(sim.craft_food_bin(), "기지에서 사료 상자를 만든다")
+	# Made, then carried, then put down: the recipe produces an object rather
+	# than a building, as of 1.0.26.
+	_assert(not sim.food_placed, "만들자마자 서지는 않는다")
+	var bin_at := Vector2i(9999, 9999)
+	for drop_cell: Vector2i in sim.drops:
+		if int(sim.drops[drop_cell]) == Sim.DROP_FOOD_BIN:
+			bin_at = drop_cell
+	_assert(bin_at != Vector2i(9999, 9999), "기지 옆에 떨어진다")
+	_assert(sim.collect_drop(bin_at) == Sim.DROP_FOOD_BIN, "주우면 손에 들린다")
+	_assert(sim.place_food_bin(sim._free_near(sim.core_cell)), "놓으면 선다")
 	_assert(sim.food_placed and sim.blocks_player(sim.food_cell), "그리고 세워진다")
+	_assert(sim.carried_kit == Defs.KIT_NONE, "놓고 나면 손이 빈다")
+	# And one is all there is. A window that sells a second while the first is
+	# still in her arms takes the material and leaves nothing to show for it.
+	sim.stock[Defs.ITEM_HEATSTONE] = 20
+	_assert(not sim.craft_food_bin(), "세워진 뒤에는 또 만들 수 없다")
 	sim.tick(0.1)
 	_assert(cat.state == Defs.CAT_TO_FOOD, "an empty cat walks to the food bin")
 

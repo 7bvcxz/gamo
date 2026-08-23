@@ -54,6 +54,7 @@ const DEBRIS_ART: Array[Texture2D] = [
 ]
 const DEBRIS_DRAW := 30.0
 const PICKAXE_ART: Texture2D = preload("res://assets/objects/pickaxe.png")
+const BUILD_GUN_ART: Texture2D = preload("res://assets/objects/build_gun.png")
 const PICKAXE_DRAW := 26.0
 const KIT_ART: Texture2D = preload("res://assets/objects/kit.png")
 const KIT_BASE_ART: Texture2D = preload("res://assets/objects/kit_base.png")
@@ -64,7 +65,10 @@ const KIT_OPEN_DRAW := 26.0
 ## Which open case she is holding. Asked here so the world layer and the player
 ## cannot come to disagree about what is in her arms.
 static func kit_art(kind: int) -> Texture2D:
-	return KIT_BASE_ART if kind == Defs.KIT_BASE else KIT_SHELTER_ART
+	match kind:
+		Defs.KIT_BASE: return KIT_BASE_ART
+		Defs.KIT_FOOD: return FOOD_BIN_ART
+		_: return KIT_SHELTER_ART
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
 const GENERATOR_ART: Texture2D = preload("res://assets/objects/generator.png")
 ## The transport pieces. All three are one cross-section swept along a path by
@@ -294,6 +298,7 @@ func _draw() -> void:
 	_draw_thaw(tile)
 	_draw_ground()
 	_draw_hand_progress()
+	_draw_cat_digging(tile)
 	_draw_meter_marker(tile)
 	# Cats are not drawn here any more. They are nodes under Main/Cats at a z
 	# between this layer and _marks_layer, so what is left in this function is
@@ -591,6 +596,32 @@ func _draw_hand_progress() -> void:
 			draw_circle(centre + Vector2.from_angle(angle) * radius * (0.7 + spark * 0.5),
 				2.2, Color(1.0, 0.95, 0.85, spark))
 
+## Whether a cat is showing a dig ring this frame. A predicate rather than a
+## `return` in the middle of the paint, so a test can read it.
+##
+## Only a bare seam: a cat on a miner is running the machine, and the machine has
+## drawn its own arc since it existed.
+func shows_dig_ring(cat: Sim.Cat) -> bool:
+	return cat.state == Defs.CAT_WORKING and cat.dig > 0.0 \
+		and not sim.machines.has(cat.assigned)
+
+## How far through the seam a cat with no machine is.
+##
+## The miner has always drawn this and the cat never did, so the one place the
+## game asks a player to compare a worker against a machine was the one place
+## where only the machine said it was working. Same ring the case and the ice
+## use -- dark track, light fill -- because this one is drawn on bare snow rather
+## than on a dark machine body, and a white arc on white is nothing.
+func _draw_cat_digging(tile: float) -> void:
+	for cat: Sim.Cat in sim.cats:
+		if not shows_dig_ring(cat) or not _visible(cat.assigned, tile):
+			continue
+		var c: Vector2 = Vector2(cat.assigned) * tile + Vector2.ONE * tile * 0.5
+		var fraction: float = clampf(cat.dig, 0.0, 1.0)
+		draw_arc(c, 15.0, 0.0, TAU, 28, Color(0.02, 0.04, 0.08, 0.55), 3.0)
+		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * fraction, 28,
+			Color(1.0, 0.97, 0.90, 0.92), 2.6)
+
 ## A splitter is a floor piece like the belt -- items pass over it, so it must
 ## not look like something you walk around. Four lit lanes out of a dark hub, and
 ## the lane it will feed next is the bright one, so the round-robin is visible
@@ -807,9 +838,16 @@ func _draw_drops(tile: float) -> void:
 				_object_art(KIT_BASE_ART, at + Vector2(0, lift), KIT_OPEN_DRAW)
 			Sim.DROP_KIT_SHELTER:
 				_object_art(KIT_SHELTER_ART, at + Vector2(0, lift), KIT_OPEN_DRAW)
+			Sim.DROP_FOOD_BIN:
+				# The same picture it will be once it is standing. A thing on the
+				# ground and the thing it becomes have to be one object.
+				_object_art(FOOD_BIN_ART, at + Vector2(0, lift), KIT_OPEN_DRAW)
 			Sim.DROP_GUN:
-				Icons.draw_machine(self, Rect2(at + Vector2(-11.0, -11.0 + lift),
-					Vector2(22.0, 22.0)), Defs.M_MINER)
+				# Painted, like the pickaxe beside it. It lay in the snow as a
+				# picture of a *miner* -- the first machine it happens to be
+				# loaded with -- so the tool and the thing it builds were one
+				# object, and the drop said "there is a miner here".
+				_object_art(BUILD_GUN_ART, at + Vector2(0, lift), PICKAXE_DRAW)
 			Sim.DROP_PICKAXE:
 				# Painted rather than drawn in code. It lay in the snow beside a
 				# painted case as a grey wedge on a brown stick, which is how the

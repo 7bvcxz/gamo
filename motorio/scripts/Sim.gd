@@ -1088,8 +1088,15 @@ func open_debris(cell: Vector2i) -> Dictionary:
 	# rung long -- which it is not today, but a list of two is a list that can
 	# become a list of one -- both lines land on the same resource and are added
 	# rather than one of them silently going missing.
-	var top: int = Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]
-	var below: int = Defs.ORE_TIERS[maxi(Defs.ORE_TIERS.size() - 2, 0)]
+	# The top of the seam ladder she has actually reached, not the top of the
+	# list. A player who has never held copper does not know the word, and a case
+	# of it out of the first wreck names a material the world has not shown her
+	# yet -- the same leak that took "구리가 있는 곳까지" off the mission card.
+	var reached: int = Defs.ORE_TIERS.size() - 1
+	while reached > 0 and int(collected.get(Defs.ORE_TIERS[reached], 0)) <= 0:
+		reached -= 1
+	var top: int = Defs.ORE_TIERS[reached]
+	var below: int = Defs.ORE_TIERS[maxi(reached - 1, 0)]
 	var out: Dictionary = {}
 	out[top] = debris_rng.randi_range(Defs.DEBRIS_HIGH.x, Defs.DEBRIS_HIGH.y)
 	out[below] = int(out.get(below, 0)) \
@@ -1197,6 +1204,13 @@ func tile_attributes(cell: Vector2i) -> int:
 	# is a post driven into the ground, and walking through the picture of one is
 	# the single thing a picture of a solid object must never allow.
 	if cell == sign_cell:
+		attrs |= Defs.ATTR_STRUCTURE
+	# The case she wakes up beside, for the same reason as the ice and the
+	# wreckage: it is a metal box sitting on the snow, drawn as one, and she used
+	# to walk through the middle of it. It is also the first object in the game,
+	# so what it teaches about solid things is what she will assume about all of
+	# them.
+	if cell == kit_cell:
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
 	if shelter_placed and cell == shelter_cell:
@@ -1430,7 +1444,8 @@ const DROP_KIT_BASE := 0
 const DROP_KIT_SHELTER := 1
 const DROP_GUN := 2
 const DROP_PICKAXE := 3
-const DROP_NAMES := ["긴급기지키트", "긴급숙소키트", "건물건설총", "곡괭이"]
+const DROP_FOOD_BIN := 4
+const DROP_NAMES := ["긴급기지키트", "긴급숙소키트", "건물건설총", "곡괭이", "사료 상자"]
 
 ## What each search turns out. The gun before the pickaxe on purpose: the fire is
 ## the first thing that has to exist, and a pickaxe with nowhere to put what it
@@ -1458,6 +1473,16 @@ var gun_dropped := false
 ## before the search finishes. Zero falls back to south, which is what it always
 ## used to be.
 var drop_away := Vector2i.ZERO
+## The cell she is standing in, pushed here by Main every frame. Nothing this
+## file tips onto the snow lands on it.
+##
+## "Beside the case, nearest the fire" is right until she is standing between the
+## two, which is most of the time -- she walks out from the crash site, so the
+## cell on the fire's side of the case is the cell she is in. It landed under her
+## and was picked up on the frame it appeared, which is the exact thing dropping
+## it away from her was chosen to avoid. The same is true of the gun the fire
+## hands over and of the bin she has just made.
+var drop_from := Vector2i(9999, 9999)
 ## Lifetime totals per material, gains only. Saved, because the morning report
 ## subtracts yesterday's reading from today's.
 var collected: Dictionary = {}
@@ -1538,13 +1563,33 @@ func _drop_cell(index: int) -> Vector2i:
 	# order -- the case first and the tool past it -- and picking up the near one
 	# does not sweep up the far one on the same step.
 	var reach: int = index + 1
-	var wanted: Array[Vector2i] = [away * reach, away * reach + side, away * reach - side]
+	# Beside the case rather than beyond it, as of 1.0.26.
+	#
+	# The far side was right while she could walk through the case: she saw it
+	# land, took a step and picked it up. The case is a solid box now, and a box
+	# between her and the first object in the game is two or three tiles of
+	# walking round it -- measured at 14.5 seconds of a 13.3 second opening, which
+	# is a run she loses to a design decision about where a lid tips.
+	#
+	# The side cells keep what the far side was for. It still lands where she can
+	# watch it land rather than under her feet, and it is one diagonal step away
+	# with nothing in between.
+	var near: Array[Vector2i] = [-away * reach + side, -away * reach - side,
+		side * reach, -side * reach]
+	# Of the cells beside her, the one nearer the crash site first. She is going
+	# back that way with whatever she picks up -- it is where the fire goes and
+	# where every later search is standing anyway -- so tipping the contents out
+	# on the far side of the case is asking her to walk round it twice.
+	var home: Vector2i = core_cell
+	near.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return Vector2(kit_cell + a - home).length_squared() \
+			< Vector2(kit_cell + b - home).length_squared())
+	var wanted: Array[Vector2i] = near.duplicate()
+	wanted.append_array([away * reach, away * reach + side, away * reach - side])
 	for step in range(1, 4):
+		wanted.append(side * (reach + step))
+		wanted.append(-side * (reach + step))
 		wanted.append(away * (reach + step))
-		wanted.append(away * (reach + step) + side)
-		wanted.append(away * (reach + step) - side)
-	wanted.append(side)
-	wanted.append(-side)
 	# And then outward, ring by ring, if those eight are taken.
 	#
 	# They were the whole list, and a boulder cluster over the case meant the
@@ -1561,6 +1606,8 @@ func _drop_cell(index: int) -> Vector2i:
 				wanted.append(Vector2i(dx, dy))
 	for offset: Vector2i in wanted:
 		var cell: Vector2i = kit_cell + offset
+		if cell == drop_from:
+			continue
 		if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
 			continue
 		return cell
@@ -1592,6 +1639,8 @@ func _free_near(origin: Vector2i) -> Vector2i:
 				if maxi(absi(dx), absi(dy)) != ring:
 					continue
 				var cell: Vector2i = origin + Vector2i(dx, dy)
+				if cell == drop_from:
+					continue
 				if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
 					continue
 				return cell
@@ -1603,11 +1652,14 @@ func collect_drop(cell: Vector2i) -> int:
 		return -1
 	var kind: int = int(drops[cell])
 	match kind:
-		DROP_KIT_BASE, DROP_KIT_SHELTER:
+		DROP_KIT_BASE, DROP_KIT_SHELTER, DROP_FOOD_BIN:
 			# Both hands, so a kit cannot be scooped up while carrying a cat.
 			if hands_full():
 				return -1
-			carried_kit = Defs.KIT_BASE if kind == DROP_KIT_BASE else Defs.KIT_SHELTER
+			match kind:
+				DROP_KIT_BASE: carried_kit = Defs.KIT_BASE
+				DROP_KIT_SHELTER: carried_kit = Defs.KIT_SHELTER
+				_: carried_kit = Defs.KIT_FOOD
 		DROP_GUN:
 			has_gun = true
 		DROP_PICKAXE:
@@ -1691,16 +1743,50 @@ func can_craft_torch() -> bool:
 			return false
 	return true
 
-## The bin, put down beside the hut. No placement step: there is exactly one
-## sensible spot for it and asking the player to choose between identical tiles
-## is a decision with no content.
+## The bin, made and tipped out beside the fire.
+##
+## It used to appear beside the hut the instant it was paid for, on the grounds
+## that there was one sensible spot for it and choosing between identical tiles
+## is a decision with no content. That was true of the tile and false of the
+## thing: everything else in this game is an object that lands on the snow and is
+## carried to where it goes -- the case, the fire, the hut, the gun -- and a
+## building that materialises out of a menu is the only one that is a number
+## changing. Cats walk to this thing all day, so where it stands is a real
+## decision by the tenth minute anyway.
 func craft_food_bin() -> bool:
-	if not base_placed or food_placed or not can_craft("food_bin"):
+	if not base_placed or food_placed or bin_in_hand() or not can_craft("food_bin"):
+		return false
+	var cell: Vector2i = _free_near(core_cell)
+	if cell == Vector2i(9999, 9999):
 		return false
 	_spend("food_bin")
-	food_cell = shelter_cell + Vector2i(Defs.FOOD_OFFSET.round()) \
-		if shelter_placed else core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	drops[cell] = DROP_FOOD_BIN
+	return true
+
+## Whether one is already made and not yet standing: in her arms or lying on the
+## snow. Without this the window sells a second one to a player who has not put
+## the first down, and the material goes with no second bin to show for it.
+func bin_in_hand() -> bool:
+	if carried_kit == Defs.KIT_FOOD:
+		return true
+	for cell: Vector2i in drops:
+		if int(drops[cell]) == DROP_FOOD_BIN:
+			return true
+	return false
+
+## And putting it down. Anywhere she can reach and nothing is standing: the cats
+## path to it, so a bin on the far side of the fog is a bin they walk to through
+## the cold.
+func place_food_bin(cell: Vector2i) -> bool:
+	if carried_kit != Defs.KIT_FOOD or food_placed:
+		return false
+	if not can_touch(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
+		return false
+	if cell == core_cell or (shelter_placed and cell == shelter_cell):
+		return false
+	food_cell = cell
 	food_placed = true
+	carried_kit = Defs.KIT_NONE
 	_grid_dirty = true
 	return true
 
@@ -2378,6 +2464,13 @@ func can_hand_mine(cell: Vector2i) -> bool:
 	# otherwise the game offers 캐기 on a tile that refuses the key.
 	if not can_touch(cell):
 		return false
+	# A block of ice standing on the seam outranks the seam. Z *pressed* already
+	# picked the block up -- that branch sits above the swing -- but mining is a
+	# key held down rather than pressed, and holding it started a swing before
+	# the press was ever released. So a player who walked up to a cat frozen onto
+	# a seam and held Z mined the ground out from under it.
+	if frozen_cats.has(cell):
+		return false
 	return ore.has(cell) or has_rock(cell)
 
 func hand_fraction() -> float:
@@ -2602,7 +2695,12 @@ func _refresh_grid() -> void:
 	for cell: Vector2i in machines:
 		if blocks_player(cell) and _grid.is_in_boundsv(cell):
 			_grid.set_point_solid(cell, true)
-	for cell: Vector2i in [shelter_cell, food_cell]:
+	# The two buildings, and the case. Ice and wreckage are deliberately not here
+	# -- they stand out past the fire where a cat that could not path round one
+	# would be a cat stuck behind it forever -- but the case is two cells from the
+	# core, in the middle of everything, on the line every worker walks between
+	# the eastern seams and the hut.
+	for cell: Vector2i in [shelter_cell, food_cell, kit_cell]:
 		if _grid.is_in_boundsv(cell):
 			_grid.set_point_solid(cell, true)
 

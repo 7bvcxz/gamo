@@ -276,6 +276,18 @@ func _test_sleeping() -> void:
 	while main.room_sleeping and spent < 8.0:
 		main._update_room(1.0 / 60.0)
 		spent += 1.0 / 60.0
+	# And she is lying on the bed rather than on its headboard. The bed is two
+	# cells and she used to stop on the centre of the top one, which puts her
+	# shoulders level with the pillow and her legs off the end of it.
+	var head: Vector2 = sim.cell_centre(Defs.room_to_world(main._room_bed_cell()))
+	var rest: Vector2 = main.room_sleep_point()
+	_assert(is_equal_approx(rest.x, head.x), "머리맡과 같은 줄에 눕는다")
+	_assert(is_equal_approx(rest.y - head.y, float(Defs.TILE) * 0.5),
+		"그리고 반 칸 아래다: %.1f" % (rest.y - head.y))
+	_assert(Defs.world_to_room(sim.cell_of(rest)) in [main._room_bed_cell(),
+		main._room_bed_cell() + Vector2i(0, 1)], "여전히 침대 위다")
+	_assert(main.player.position.distance_to(rest) < 2.0,
+		"실제로 거기까지 걸어간다: %.1f" % main.player.position.distance_to(rest))
 	_assert(is_equal_approx(main.room_fade, 1.0), "화면이 완전히 검어지고")
 	_assert(main.state == main.State.RESULT, "그 다음에 하루 정리가 나온다")
 	# And the card is actually on screen. The state alone is not the picture: the

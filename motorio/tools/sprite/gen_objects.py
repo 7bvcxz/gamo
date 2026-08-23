@@ -240,6 +240,24 @@ SUBJECTS = {
         "warm brass leather binding where the two meet, a little snow gathered "
         "along one side."
     ),
+    # The gun, which was the one thing in her hands drawn as something else
+    # entirely: the slot and the drop both showed a picture of a miner, so the
+    # tool and the machine it puts down were the same object twice.
+    #
+    # Lying down like the pickaxe, because these two are drawn by the same code
+    # in the same two places -- the snow it falls on and the slot it sits in --
+    # and one standing beside one lying flat reads as two kinds of thing.
+    #
+    # A gun, but a builder's: short and blunt rather than long and aimed, with
+    # the amber of the fire in it, so what it fires reads as the machine rather
+    # than as a shot.
+    "build_gun": (
+        "A chunky builder's tool gun lying flat on snow for a snowy top-down "
+        "game, seen from above: one short wide muted blue-grey metal barrel with "
+        "a broad warm brass ring around its mouth, a thick rounded warm brown "
+        "grip below it, one small cream-white canister along its top, one round "
+        "amber lamp glowing on its side, a little snow gathered along one edge."
+    ),
     # 냥마을 and the sign that points at it. Five subjects that have to read as
     # one place: a village is not four unrelated buildings, so they share a
     # palette -- warm orange-brown timber, cream plaster, grey-blue stone -- and

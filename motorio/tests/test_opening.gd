@@ -164,9 +164,15 @@ func _test_searching_the_kit() -> void:
 	_assert(sim.carried_kit == Defs.KIT_NONE, "아직 손에는 아무것도 없다")
 	_assert(not sim.has_gun, "줍기 전에는 총도 없다")
 	_assert(sim.drops.size() == 1, "바닥에 하나가 놓여 있다")
-	# Below the case, which is where she is standing to face it.
+	# Beside the case: one of the eight cells touching it.
+	#
+	# It used to be "below", then "on the far side from her", and it is beside
+	# her now because the case became a solid box in 1.0.26 -- whatever is beyond
+	# it is a walk round it, and the opening is thirteen seconds long.
 	for cell: Vector2i in sim.drops:
-		_assert(cell.y > sim.kit_cell.y, "상자 아래쪽에 떨어진다: %s" % str(cell))
+		var step: Vector2i = cell - sim.kit_cell
+		_assert(maxi(absi(step.x), absi(step.y)) == 1,
+			"상자에 붙어서 떨어진다: %s" % str(step))
 
 	# And it does not open again until the fire does. Both searches used to be
 	# available from the first frame, which left her standing in the snow holding
@@ -507,6 +513,12 @@ func _test_drops_line_up() -> void:
 	# being worked around.
 	sim.carried_kit = Defs.KIT_BASE
 	sim.place_base(sim.core_cell)
+	# Standing where a player stands to open it: between the fire and the case,
+	# which is also the cell the search would rather drop into. Set here because
+	# `search_kit` is called directly -- in the game `_update_kit_search` fills
+	# both of these in from where she actually is.
+	sim.drop_from = sim.kit_cell + Vector2i(-1, 0)
+	sim.drop_away = Vector2i(1, 0)
 	sim.search_kit()
 	var kit_at := Vector2i(9999, 9999)
 	var tool_at := Vector2i(9999, 9999)
@@ -521,3 +533,17 @@ func _test_drops_line_up() -> void:
 	var far: float = Vector2(tool_at - sim.kit_cell).length()
 	_assert(far > near, "곡괭이가 키트보다 멀다: %.1f > %.1f" % [far, near])
 	_assert(kit_at != tool_at, "그리고 같은 칸이 아니다")
+
+	# --- And the case is a box, not a decal ------------------------------------
+	# She walked straight through the middle of the first object in the game. It
+	# is drawn as a metal case sitting on the snow, and what it teaches about
+	# solid things is what a player assumes about every object after it.
+	_assert(sim.blocks_player(sim.kit_cell), "키트 칸은 지나갈 수 없다")
+	# Which is why what comes out of it lands beside her rather than beyond it.
+	# The far side is two or three tiles of walking round a box, and the opening
+	# is thirteen seconds long.
+	for cell: Vector2i in sim.drops:
+		_assert(not sim.blocks_player(cell), "떨어진 것은 막힌 칸에 있지 않다: %s" % str(cell))
+		_assert(cell != sim.drop_from, "그리고 그녀가 선 칸도 아니다: %s" % str(cell))
+		var away: Vector2 = Vector2(cell - sim.kit_cell)
+		_assert(away.length() <= 3.0, "그리고 케이스 곁에 있다: %s" % str(cell))

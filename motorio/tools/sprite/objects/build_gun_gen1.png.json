@@ -1,0 +1,30 @@
+{
+  "at": "2026-08-23T01:36:23.326725+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A chunky builder's tool gun lying flat on snow for a snowy top-down game, seen from above: one short wide muted blue-grey metal barrel with a broad warm brass ring around its mouth, a thick rounded warm brown grip below it, one small cream-white canister along its top, one round amber lamp glowing on its side, a little snow gathered along one edge. The subject is centred and fills the frame, seen straight on with a slight downward tilt as in a top-down game. Cute cozy chibi game art style, matching the reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients, the same warm palette of orange, cream, soft brown and muted blue-grey metal. Soft rounded chunky forms. Very few large simple shapes, so it stays readable when shown at 40 pixels across. Flat even lighting. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 17.6,
+  "usage": {
+    "input_tokens": 704,
+    "input_tokens_details": {
+      "image_tokens": 512,
+      "text_tokens": 192
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 900
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/objects/build_gun_gen1_raw.png"
+  ]
+}

@@ -782,6 +782,10 @@ const BASE_PLACE_RADIUS := 2.0
 const KIT_NONE := 0
 const KIT_BASE := 1
 const KIT_SHELTER := 2
+## The feeding trough, once it has been made. It is carried and put down the same
+## way the first two are -- the crafting window makes an object, and where an
+## object goes is the player's decision, not the recipe's.
+const KIT_FOOD := 3
 ## How long Z is held to search the kit. Two seconds: long enough to be an act
 ## rather than a keypress, short enough that it is not a chore the second time.
 ## How long the pickaxe marker hangs over a seam after she picks the tool up.
@@ -984,6 +988,7 @@ static func room_piece_on(cell: Vector2i) -> int:
 const BASE_CRAFTS: Array[Dictionary] = [
 	{
 		"id": "torch",
+		"level": BASE_CRAFT_LEVEL,
 		"name": TORCH_NAME,
 		"cost": TORCH_COST,
 		"note": "들고 있는 동안 주위 %d칸이 보이고 춥지 않다 · %d초"
@@ -991,9 +996,15 @@ const BASE_CRAFTS: Array[Dictionary] = [
 	},
 	{
 		"id": "food_bin",
+		# A rung later than the torch. The list opens with one thing on it -- the
+		# answer to the fog and the cold, which is what a player at three steps is
+		# up against -- and the bin arrives when there are cats to feed.
+		"level": BASE_CRAFT_LEVEL + 1,
 		"name": "사료 상자",
 		"cost": {ITEM_HEATSTONE: 5},
-		"note": "고양이가 배고프면 여기서 먹는다 · 거처 옆에 선다",
+		# It is not sited by the recipe any more, so the line no longer says where
+		# it goes: she carries it out and puts it where she wants it.
+		"note": "고양이가 배고프면 여기서 먹는다",
 	},
 ]
 ## Where the circle stands when the third mission is done. Set to a number
@@ -1379,25 +1390,42 @@ const WARM_MAX := 100.0
 ## never reach it, and because the reach is capped at a hundred tiles rather
 ## than at twenty-two. They escalate the same way -- roughly half again each
 ## time -- and the last rungs reach past what the world currently generates.
+## `stones` is the running total ever put into the fire, because that is what
+## `stones_in` is compared against. What a player actually pays is the gap
+## between two rows, and the gaps are the sequence in the comments:
+##
+##   3 · 9 · 15 · 27 · 51 · 87 · 135 · 210 · 320 · 480 · 700 · 1000 · ...
+##
+## Changed on 2026-08-23. That sequence used to *be* the totals column, so the
+## step from one rung to the next was the difference between two of them -- 3,
+## then 6, then 6 again, then 12 -- and the ladder cost least per rung exactly
+## where the walk to the next seam got longest. `test_progression` holds the
+## steps, so a row edited without its neighbour is a failing test rather than a
+## quietly cheaper game.
 const BASE_LEVELS: Array[Dictionary] = [
-	{"stones": 0,    "radius": 7.0},    # the emergency base, the moment it is lit
-	{"stones": 3,    "radius": 9.0},
-	{"stones": 9,    "radius": 11.0},
-	{"stones": 15,   "radius": 13.0},
-	{"stones": 27,   "radius": 15.0},   # and the first copper
-	{"stones": 51,   "radius": 17.0},
-	{"stones": 87,   "radius": 19.0},
-	{"stones": 135,  "radius": 22.0},
-	{"stones": 210,  "radius": 26.0},
-	{"stones": 320,  "radius": 31.0},
-	{"stones": 480,  "radius": 37.0},
-	{"stones": 700,  "radius": 44.0},
-	{"stones": 1000, "radius": 52.0},
-	{"stones": 1400, "radius": 61.0},
-	{"stones": 2000, "radius": 71.0},
-	{"stones": 2800, "radius": 82.0},
-	{"stones": 4000, "radius": WARM_MAX},
+	{"stones": 0,     "radius": 7.0},    # the emergency base, the moment it is lit
+	{"stones": 3,     "radius": 9.0},    # +3
+	{"stones": 12,    "radius": 11.0},   # +9
+	{"stones": 27,    "radius": 13.0},   # +15
+	{"stones": 54,    "radius": 15.0},   # +27, and the first copper
+	{"stones": 105,   "radius": 17.0},   # +51
+	{"stones": 192,   "radius": 19.0},   # +87
+	{"stones": 327,   "radius": 22.0},   # +135
+	{"stones": 537,   "radius": 26.0},   # +210
+	{"stones": 857,   "radius": 31.0},   # +320
+	{"stones": 1337,  "radius": 37.0},   # +480
+	{"stones": 2037,  "radius": 44.0},   # +700
+	{"stones": 3037,  "radius": 52.0},   # +1000
+	{"stones": 4437,  "radius": 61.0},   # +1400
+	{"stones": 6437,  "radius": 71.0},   # +2000
+	{"stones": 9237,  "radius": 82.0},   # +2800
+	{"stones": 13237, "radius": WARM_MAX},  # +4000
 ]
+
+## What each rung costs on its own, which is the number the fire's window shows
+## and the one a player plans against.
+const BASE_LEVEL_STEPS: Array[int] = [3, 9, 15, 27, 51, 87, 135, 210, 320,
+	480, 700, 1000, 1400, 2000, 2800, 4000]
 
 const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
 ## Night is the reason to go home. Once it falls the warm pool is no longer
@@ -1482,13 +1510,18 @@ const FROZEN_PER_TILES := 200.1
 ## One inside reach, so the first cat is always findable. The crates guaranteed
 ## three for the same reason -- three of them made one cat.
 const STARTER_FROZEN := 1
-## One block of ice sitting just outside the circle the fourth step draws.
+## One block of ice sitting just outside the circle the third step draws.
 ##
-## Awkwardly on purpose: at 4단계 the warm radius is 13 cells and this is at
-## 13.6, so she can walk up to it, see it, and be told the ground has not let go
+## Awkwardly on purpose: at 3단계 the warm radius is 11 cells and this is at
+## 11.6, so she can walk up to it, see it, and be told the ground has not let go
 ## -- which is the moment the torch stops being a thing she made and starts being
 ## the answer to something. The next step reaches it.
-const EDGE_FROZEN_RING := 13.6
+##
+## It sat outside the *fourth* circle until 2026-08-23. Three is where the fire's
+## window grows a craft list, so it is the first rung at which a torch is a thing
+## she can have -- and a hint about a torch that arrives a rung before the torch
+## does is a hint about nothing.
+const EDGE_FROZEN_RING := 11.6
 const EDGE_FROZEN_ANGLE := -0.62
 ## How many times the game may suggest the torch before it stops. Three, and not
 ## at all once she has melted anything with one: a hint that keeps arriving after

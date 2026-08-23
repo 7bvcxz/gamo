@@ -95,6 +95,23 @@
    ]
   },
   {
+   "id": "build_gun_gen",
+   "candidates": [
+    {
+     "id": "build_gun_gen1",
+     "number": 1,
+     "sizes": {
+      "128": "/object-candidates/build_gun_gen1-128-692aa581c6e9.png",
+      "64": "/object-candidates/build_gun_gen1-64-175527570527.png"
+     },
+     "source": [
+      745,
+      845
+     ]
+    }
+   ]
+  },
+  {
    "id": "cat_tool_gen",
    "candidates": [
     {
@@ -732,6 +749,17 @@
    "sizes": {
     "128": "/object-candidates/shipped-belt_straight-128-d86c72fdcdc3.png",
     "32": "/object-candidates/shipped-belt_straight-32-a1c51ab7b093.png"
+   }
+  },
+  {
+   "role": "build_gun",
+   "name": "건물건설총",
+   "from": "build_gun_gen1",
+   "draw": 26,
+   "stored": 52,
+   "sizes": {
+    "128": "/object-candidates/shipped-build_gun-128-73036b46357c.png",
+    "26": "/object-candidates/shipped-build_gun-26-2eb7c3ad3785.png"
    }
   },
   {

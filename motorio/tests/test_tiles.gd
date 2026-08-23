@@ -103,6 +103,12 @@ func _run() -> void:
 	_assert(not sim.blocks_player(sim.food_cell), "없는 밥통은 길을 막지 않는다")
 	sim.stock[Defs.ITEM_HEATSTONE] = 20
 	_assert(sim.craft_food_bin(), "기지에서 만든다")
+	var bin_at := Vector2i(9999, 9999)
+	for drop_cell: Vector2i in sim.drops:
+		if int(sim.drops[drop_cell]) == Sim.DROP_FOOD_BIN:
+			bin_at = drop_cell
+	_assert(sim.collect_drop(bin_at) == Sim.DROP_FOOD_BIN, "그리고 주워서")
+	_assert(sim.place_food_bin(sim._free_near(sim.core_cell)), "내려놓는다")
 	_assert(sim.is_structure(sim.food_cell), "밥통은 구조물이다")
 	_assert(sim.blocks_player(sim.food_cell), "밥통은 플레이어를 막는다")
 	_assert(sim.food_cell != sim.shelter_cell and sim.food_cell != sim.core_cell,
