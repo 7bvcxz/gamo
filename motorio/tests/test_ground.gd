@@ -163,60 +163,21 @@ func _rock_atlas() -> void:
 ## a screenshot: a floor that is 2% rock and one that is 9% rock both look like
 ## "some rocks".
 func _rock_field() -> void:
+	# The boulder field is off (1.0.28), and this is the drawing half of that.
+	# `test_stone` holds the simulation half; both grow from `Defs.rock_clump`,
+	# and the reason to check them separately is that they are separate copies --
+	# a field that is empty for collision and painted on the snow is exactly the
+	# shape this repository has watched two-sided rules take.
 	var ground := GroundLayer.new()
 	var span: int = 220
 	ground._ensure_rock(Vector2i(-span / 2, -span / 2), Vector2i(span / 2, span / 2))
-	var inside: Dictionary[Vector2i, bool] = {}
+	var drawn: int = 0
 	for y in range(-span / 2, span / 2):
 		for x in range(-span / 2, span / 2):
 			if ground.is_rock(Vector2i(x, y)):
-				inside[Vector2i(x, y)] = true
-	var share: float = float(inside.size()) * 100.0 / float(span * span)
-	_check(share >= 3.5 and share <= 6.5, "돌이 바닥의 5%% 안팎이다: %.1f%%" % share)
-
-	var seen: Dictionary[Vector2i, bool] = {}
-	var sizes: Array[int] = []
-	var steps: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
-	for cell: Vector2i in inside:
-		if seen.has(cell):
-			continue
-		var queue: Array[Vector2i] = [cell]
-		seen[cell] = true
-		var count: int = 0
-		while not queue.is_empty():
-			var at: Vector2i = queue.pop_back()
-			count += 1
-			for step: Vector2i in steps:
-				var next: Vector2i = at + step
-				if inside.has(next) and not seen.has(next):
-					seen[next] = true
-					queue.append(next)
-		sizes.append(count)
-	sizes.sort()
-	var median: int = sizes[sizes.size() / 2]
-	_check(sizes.size() > 80, "덩어리가 충분히 많다: %d개" % sizes.size())
-	_check(median >= 2 and median <= 12, "덩어리 중앙값이 1~12 안이다: %d" % median)
-	var over: int = 0
-	for size: int in sizes:
-		if size > 12:
-			over += 1
-	# Clumps from neighbouring blocks can touch and merge. That is not a bug, but
-	# a field where it is the norm is not "clumps of one to twelve" any more.
-	_check(float(over) / float(sizes.size()) < 0.2,
-		"12칸을 넘는 덩어리는 드물다: %d / %d (최대 %d)"
-		% [over, sizes.size(), sizes[sizes.size() - 1]])
-
-	# Every one of the six appears, and no cell is left without a tile.
-	var used: Dictionary[int, bool] = {}
-	for cell: Vector2i in inside:
-		var variant: int = GroundLayer.rock_variant(cell)
-		_check(variant >= 0 and variant < GroundLayer.ROCK_VARIANTS,
-			"%s 돌 변형이 범위 안이다: %d" % [cell, variant])
-		used[variant] = true
-	_check(used.size() == GroundLayer.ROCK_VARIANTS,
-		"여섯 종류가 모두 쓰인다: %d" % used.size())
-	print("GROUND: 돌 %.1f%% · 덩어리 %d개 · 중앙값 %d · 최대 %d"
-		% [share, sizes.size(), median, sizes[sizes.size() - 1]])
+				drawn += 1
+	_check(drawn == 0, "그리는 쪽에도 바위가 없다: %d칸" % drawn)
+	print("GROUND: 바위 %d칸 (%d×%d)" % [drawn, span, span])
 	ground.free()
 
 	# --- Every ore that has a sheet draws from it -------------------------------

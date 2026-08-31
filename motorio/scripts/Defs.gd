@@ -295,7 +295,15 @@ const FACE_BAND := 3.0
 ## from this number, and which of the two moves is a question for when the
 ## tutorial is built.
 ## The order the counters appear in, which is the order the player meets them.
-const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_STONE, ITEM_CRYSTAL, ITEM_COPPER,
+## Stone left this list in 1.0.28, with the boulders that were its only source.
+## Its `ITEM_STONE` number stays where it is: a save writes materials by number,
+## and closing the gap would turn one run's heat stone into another run's rubble.
+##
+## Crystal stays on the list even though nothing produces it any more. A run
+## saved before 1.0.27 can still be holding some, and a material she owns that
+## the panel does not show is a material she has lost. Stone is different only
+## because it never bought anything.
+const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_CRYSTAL, ITEM_COPPER,
 	ITEM_CORE_PART]
 
 ## The seams, poorest first. The wreck pays in these rather than in a list of its
@@ -734,6 +742,15 @@ const ROCK_MAX := 12
 ## ones that can claim it.
 const ROCK_REACH := 1
 
+## Whether this planet has boulders at all.
+##
+## Read here rather than at each caller because two independent systems grow the
+## field from `rock_clump`: the simulation, which answers collision and mining,
+## and the ground layer, which draws it. They have to agree on every cell, and
+## the only arrangement that cannot drift is one where both ask the same
+## function. Turning the field off here turns it off in both.
+const ROCK_FIELD := false
+
 ## Deterministic and cheap. Not a hash anyone should trust with anything, but it
 ## has to give the same answer on every machine and every run, which rules out
 ## randi() and anything seeded from the clock.
@@ -747,6 +764,8 @@ static func rock_mix(a: int, b: int, salt: int) -> int:
 ## produces strings one cell wide, and a line of separate boulder tiles reads as
 ## a dotted line rather than as a scatter of rocks.
 static func rock_clump(block: Vector2i) -> Array[Vector2i]:
+	if not ROCK_FIELD:
+		return [] as Array[Vector2i]
 	var size: int = ROCK_MIN + rock_mix(block.x, block.y, 7) % (ROCK_MAX - ROCK_MIN + 1)
 	var origin := Vector2i(
 		block.x * ROCK_BLOCK + rock_mix(block.x, block.y, 11) % ROCK_BLOCK,

@@ -118,9 +118,11 @@ func _run() -> void:
 	# what a broken feature looks like -- so what the key leaves behind is pinned
 	# here rather than judged by eye in a browser.
 	main.debug_spill()
-	_assert(main.sim.has_rock(main.player.facing_cell()), "F8 은 바위 앞에 세운다")
-	var rock_cell: Vector2i = main.player.facing_cell()
-	var start: Vector2i = rock_cell + Vector2i(-6, 1)
+	# The run used to be anchored to the nearest boulder; boulders are gone as of
+	# 1.0.28 and the anchor is a fixed offset from the fire. What the assertion
+	# has to hold is unchanged: she is beside the open end, not on top of it.
+	var anchor: Vector2i = main.player.facing_cell()
+	var start: Vector2i = anchor + Vector2i(-6, 1)
 	var belts := 0
 	for index in 4:
 		var cell: Vector2i = start + Vector2i(index, 0)
@@ -130,11 +132,11 @@ func _run() -> void:
 	_assert(belts == 4, "벨트 넉 줄을 놓는다: %d" % belts)
 	var tail: Vector2i = start + Vector2i(4, 0)
 	_assert(main.sim.machine_at(tail) == null, "그리고 그 앞은 비어 있다")
-	# Close enough to the boulder to be on the same screen. The first version put
-	# the run beside the core and her beside a boulder twelve cells away, and the
+	# Close enough to where she is standing to be on the same screen. The first
+	# version put the run beside the core and her twelve cells away, and the
 	# screenshot showed neither.
-	_assert(Vector2(tail - rock_cell).length() < 4.0,
-		"쏟는 자리와 바위가 한 화면에 있다: %.1f칸" % Vector2(tail - rock_cell).length())
+	_assert(Vector2(tail - anchor).length() < 4.0,
+		"쏟는 자리와 그녀가 한 화면에 있다: %.1f칸" % Vector2(tail - anchor).length())
 	# Warm and lit, or both of them are white fog.
 	_assert(main.sim.warm_radius >= 15.0,
 		"온기가 거기까지 닿는다: %.0f칸" % main.sim.warm_radius)
@@ -148,11 +150,13 @@ func _run() -> void:
 	if loaded != null and loaded.items.size() >= 2:
 		spread = absf(float(loaded.items[0]["t"]) - float(loaded.items[-1]["t"]))
 	_assert(spread > 0.5, "그리고 줄지어 실린다: %.2f" % spread)
-	_assert(int(main.sim.stock.get(Defs.ITEM_STONE, -1)) == 0,
-		"돌은 0에서 시작한다 — 이 키가 만드는 둘 다 돌이고, 500에서는 아무것도 안 보인다")
+	_assert(int(main.sim.stock.get(Defs.ITEM_HEATSTONE, -1)) == 0,
+		"열석은 0에서 시작한다 — 이 키가 만드는 것이 열석이고, 500에서는 아무것도 안 보인다")
 	_assert(main.holding_pickaxe(), "곡괭이가 손에 있다")
-	_assert(main.sim.can_hand_mine(main.player.facing_cell()),
-		"그리고 바로 앞이 칠 수 있는 것이다")
+	# The cell she faces used to hold a boulder and the pickaxe was for breaking
+	# it. Boulders are gone (1.0.28), so what matters is only that the arrangement
+	# is not standing on her: the belt's open end pours one row down, and she is
+	# beside it rather than in it.
 	# Twice is the same place. A tester unsure whether the key registered presses
 	# it again, and a key that walks her one cell further each time turns that
 	# into a hunt.

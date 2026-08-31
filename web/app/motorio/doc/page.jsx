@@ -11,6 +11,7 @@ import { MotorioLevelDesign } from '../../../components/content/MotorioLevelDesi
 import { MotorioTodo } from '../../../components/content/MotorioTodo.jsx';
 import { MotorioReleases } from '../../../components/content/MotorioReleases.jsx';
 import { DesignDoc } from '../../../components/content/motorio/DesignDoc.jsx';
+import { Timeline } from '../../../components/content/motorio/Timeline.jsx';
 import design from '../../../lib/generated/design.json';
 
 // Motorio's own documentation, independent of every other game's. Split by how
@@ -41,6 +42,13 @@ const VISION = {
 };
 
 const NAV = [
+  // First, because v0.1 is defined as "this timeline runs end to end" and every
+  // other page on this site is a detail of one of its bands. It draws the table
+  // out of VERTICAL_SLICE.md rather than holding one of its own.
+  {
+    group: 'Plan',
+    items: [{ id: 'timeline', label: 'Timeline', render: () => <Timeline /> }],
+  },
   VISION,
   {
     group: 'Design',

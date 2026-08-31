@@ -48,24 +48,30 @@ func _test_indoors() -> void:
 	main.open_room()
 	_assert(main.zone() == Zone.HOME, "숙소에 들어가면 HOME 이다")
 
-	# The floor the bug was standing on. Rock is procedural, so it is under the
-	# room too, and every plateau rule that reads a world cell finds it there.
+	# The floor the bug was standing on. It used to be a boulder: rock was
+	# procedural, so it was under the room too, and every plateau rule that reads
+	# a world cell found it there.
 	#
-	# Asked as "is there rock" rather than as "is it out of reach", which is what
-	# this looked for until the room started answering `can_touch` for itself: a
-	# precondition written in terms of the thing being fixed stops holding the
-	# moment it is fixed, and a test whose precondition never holds is a test
-	# that passes without looking at anything.
-	var trap := Vector2i(9999, 9999)
-	for y in Defs.ROOM_CELLS.y:
-		for x in Defs.ROOM_CELLS.x:
-			var world: Vector2i = Defs.room_to_world(Vector2i(x, y))
-			if sim.has_rock(world) or sim.ore.has(world):
-				trap = world
-	_assert(trap != Vector2i(9999, 9999),
-		"방 밑에도 월드가 깔려 있다 (없으면 이 테스트는 아무것도 지키지 않는다)")
-	if trap != Vector2i(9999, 9999):
-		main.player.position = sim.cell_centre(trap)
+	# Boulders are gone as of 1.0.28 and the room is 600 cells north of anything
+	# the generator scatters, so there is nothing under it any more -- and a test
+	# whose precondition never holds is a test that passes without looking at
+	# anything. So the seam is *put* there rather than looked for. The premise is
+	# still a fact about the world ("there is a seam under the room"), which is
+	# the form that survives the thing being fixed; what changed is that this
+	# world does not supply one on its own.
+	var trap: Vector2i = Defs.room_to_world(Vector2i(int(Defs.ROOM_CELLS.x) / 2,
+		int(Defs.ROOM_CELLS.y) / 2))
+	sim.ore[trap] = Defs.ITEM_HEATSTONE
+	_assert(sim.ore.has(trap), "방 밑에 월드를 깔아 둔다 (없으면 이 테스트는 아무것도 지키지 않는다)")
+	# Stated as distance rather than as `can_touch`, because the room answers
+	# `can_touch` for itself now -- writing the premise in terms of the rule
+	# being tested is what the paragraph above is about, and it was written the
+	# wrong way here once already.
+	var far: float = Vector2(trap - sim.core_cell).length()
+	_assert(far > Defs.WARM_MAX,
+		"그리고 그것은 불에서 %.0f칸이라 온기(최대 %.0f칸)가 절대 닿지 않는다"
+		% [far, Defs.WARM_MAX])
+	main.player.position = sim.cell_centre(trap)
 
 	# Night, so the clock and the dark have something to leak.
 	main.time_left = Defs.NIGHT_SECONDS * 0.5

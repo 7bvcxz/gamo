@@ -3271,34 +3271,24 @@ func debug_spill() -> void:
 	debug_unlock_all()
 	if sim.carried_cat != null:
 		sim.drop_cat(player.position)
-	# Warm and lit first. Both arrangements are things to *look* at, and the
-	# nearest boulder is well outside the opening circle -- the first version of
-	# this key put her in front of one at 31% warmth inside white fog, where a
-	# working feature and a missing one look exactly alike.
+	# Warm and lit first. What this stages is a thing to *look* at, and the first
+	# version of this key put her at 31% warmth inside white fog, where a working
+	# feature and a missing one look exactly alike.
 	sim.stones_in = maxi(sim.stones_in, int(Defs.BASE_LEVELS[-1]["stones"]))
 	sim._refresh_radius()
 	player.warmth = 100.0
 
-	# The boulder decides where everything goes, because it is the one thing here
-	# that cannot be moved: the field is a function of the coordinates.
-	var rock := Vector2i(9999, 9999)
-	for radius in range(2, 30):
-		for y in range(-radius, radius + 1):
-			for x in range(-radius, radius + 1):
-				var cell: Vector2i = sim.core_cell + Vector2i(x, y)
-				if maxi(absi(x), absi(y)) != radius:
-					continue
-				if sim.has_rock(cell) and rock == Vector2i(9999, 9999):
-					rock = cell
-		if rock != Vector2i(9999, 9999):
-			break
-	if rock == Vector2i(9999, 9999):
-		rock = sim.core_cell + Vector2i(6, 0)
+	# The run used to be anchored to the nearest boulder, because the boulder was
+	# the one thing here that could not be moved. There are no boulders as of
+	# 1.0.28, so the anchor is a fixed offset from the fire -- which is what the
+	# boulder was standing in for anyway: somewhere near enough to walk to and
+	# far enough that the arrangement is not sitting on the base.
+	var anchor: Vector2i = sim.core_cell + Vector2i(6, 0)
 
 	# A run of belt one row below it, ending in the open a couple of cells short
-	# of her -- so the pile it makes and the boulder she is breaking are on the
-	# same screen at the same zoom.
-	var start_cell: Vector2i = rock + Vector2i(-6, 1)
+	# of her -- so the pile it makes and where she is standing are on the same
+	# screen at the same zoom.
+	var start_cell: Vector2i = anchor + Vector2i(-6, 1)
 	var run := 4
 	for index in run + 2:
 		var cell: Vector2i = start_cell + Vector2i(index, 0)
@@ -3318,19 +3308,19 @@ func debug_spill() -> void:
 	var seeded := 0
 	if belt != null:
 		for index in 6:
-			belt.items.append({"type": Defs.ITEM_STONE, "t": 1.0 - float(index) * 0.34})
+			belt.items.append({"type": Defs.ITEM_HEATSTONE, "t": 1.0 - float(index) * 0.34})
 			seeded += 1
-	# Stone back to nothing, against the 500 of everything the unlock key grants.
-	# Both things this key stages produce stone, and neither of them shows on a
-	# counter that already reads 500.
-	sim.stock[Defs.ITEM_STONE] = 0
+	# The carried material back to nothing, against the 500 of everything the
+	# unlock key grants. What this key stages is a pile of heat stone arriving,
+	# and six arriving does not show on a counter that already reads 500.
+	sim.stock[Defs.ITEM_HEATSTONE] = 0
 
-	# One cell west of the boulder, looking east, so the mining key works on the
-	# frame the arrangement lands.
-	player.position = sim.cell_centre(rock + Vector2i(-1, 0))
+	# One cell west of the anchor, looking east, so she is beside the open end
+	# rather than on top of it.
+	player.position = sim.cell_centre(anchor + Vector2i(-1, 0))
 	player.facing = Vector2i.RIGHT
 	tool_index = TOOL_PICKAXE
-	_notify("디버그 쏟기 · 벨트 %d칸 · 자원 %d개 · 바위 앞" % [built, seeded], Defs.COL_DANGER)
+	_notify("디버그 쏟기 · 벨트 %d칸 · 자원 %d개" % [built, seeded], Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
 ## A closed rectangle of belt, so every turn a belt can make is on screen at once.
