@@ -31,7 +31,7 @@ func _run() -> void:
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	# Both of the generator's materials, or there is nowhere to put one below.
-	sim.note_resource_seen(Defs.ITEM_CORE_PART)
+	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500

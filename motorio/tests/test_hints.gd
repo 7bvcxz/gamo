@@ -219,14 +219,30 @@ func _legend() -> void:
 ## ever receive -- "컨테이너 벨트은", "수정조각가 부족합니다" -- and neither looks wrong
 ## in the source, which is why this is a test and not a proofread.
 func _particles(main: Node2D) -> void:
-	for word: String in ["수정조각", "구리광석", "에너지결정"]:
-		_check(Defs.has_final(word), "%s은 받침이 있다" % word)
-		_check(Defs.topic(word) == "은" and Defs.object_of(word) == "을"
-			and Defs.subject(word) == "이", "%s의 조사: 은/을/이" % word)
-	for word: String in Defs.MACHINE_NAMES:
-		_check(not Defs.has_final(word), "%s는 받침이 없다" % word)
-		_check(Defs.topic(word) == "는" and Defs.object_of(word) == "를"
-			and Defs.subject(word) == "가", "%s의 조사: 는/를/가" % word)
+	# Derived from the tables rather than listed here. The list this replaced was
+	# ["수정조각", "구리광석", "에너지결정"] -- and 에너지결정 has not existed since
+	# 1.0.8, so a third of the check was proofreading a word the game cannot
+	# print, while 에너지 코어 was renamed in 1.0.30 without anyone noticing it
+	# was never covered. A hand-kept list of the names in a game that renames
+	# things is a list that tests the wrong century.
+	for word: String in Defs.ITEM_NAMES + Defs.ITEM_SHORT + Defs.MACHINE_NAMES:
+		var final: bool = Defs.has_final(word)
+		_check(Defs.topic(word) == ("은" if final else "는"),
+			"%s + 은/는 -> %s" % [word, Defs.topic(word)])
+		_check(Defs.object_of(word) == ("을" if final else "를"),
+			"%s + 을/를 -> %s" % [word, Defs.object_of(word)])
+		_check(Defs.subject(word) == ("이" if final else "가"),
+			"%s + 이/가 -> %s" % [word, Defs.subject(word)])
+	# The two the rename moved across the boundary, spelled out so the change is
+	# readable rather than only derived.
+	_check(not Defs.has_final("에너지 코어"), "에너지 코어는 받침이 없다 (코어부품은 있었다)")
+	_check(Defs.has_final("열석"), "열석은 받침이 있다")
+
+	# The sentence the build list actually prints for a machine that waits for
+	# two materials. The particle follows the last name in the list, which is the
+	# word it is standing next to.
+	var line: String = Defs.unlock_line(Defs.M_GENERATOR)
+	_check(line.contains("에너지 코어를"), "발전기 해금 문구의 조사가 맞다: %s" % line)
 	# Not Hangul at all, and words the fallback has to survive.
 	_check(Defs.topic("Grim") == "는" and Defs.topic("") == "는", "한글이 아니면 기본형")
 	_check(Defs.subject("자원") == "이", "자원 -> 이")

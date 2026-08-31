@@ -165,8 +165,8 @@ func _test_taking_one_apart() -> void:
 	# A second economy beside the seams is a second thing to balance.
 	_assert(top != below, "두 등급은 서로 다른 자원이다")
 	for item_type: int in found:
-		_assert(item_type in Defs.ORE_TIERS or item_type == Defs.ITEM_CORE_PART,
-			"잔해는 광맥 자원과 코어부품만 준다 (%s)" % Defs.ITEM_SHORT[item_type])
+		_assert(item_type in Defs.ORE_TIERS or item_type == Defs.ITEM_ENERGY_CORE,
+			"잔해는 광맥 자원과 에너지 코어만 준다 (%s)" % Defs.ITEM_SHORT[item_type])
 	_assert(sim.open_debris(near).is_empty(), "없는 조각은 아무것도 주지 않는다")
 	sim.free()
 
@@ -199,10 +199,10 @@ func _test_the_first_piece() -> void:
 		var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
 		sim.debris[cell] = 0
 		var found: Dictionary = sim.open_debris(cell)
-		if int(found.get(Defs.ITEM_CORE_PART, 0)) != 1:
+		if int(found.get(Defs.ITEM_ENERGY_CORE, 0)) != 1:
 			without += 1
 		sim.free()
-	_assert(without == 0, "첫 조각은 60회차 모두 코어부품 1개를 준다 (%d회 실패)" % without)
+	_assert(without == 0, "첫 조각은 60회차 모두 에너지 코어 1개를 준다 (%d회 실패)" % without)
 
 ## And after the first, a quarter of them: one in five gives one, one in twenty
 ## gives two. Measured over a few thousand pieces, with a band wide enough that
@@ -218,7 +218,7 @@ func _test_the_rate() -> void:
 	var rounds := 4000
 	for index in rounds:
 		sim.debris[cell] = 0
-		var got: int = int(sim.open_debris(cell).get(Defs.ITEM_CORE_PART, 0))
+		var got: int = int(sim.open_debris(cell).get(Defs.ITEM_ENERGY_CORE, 0))
 		if got == 1:
 			ones += 1
 		elif got == 2:

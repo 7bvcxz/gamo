@@ -217,11 +217,15 @@ const ITEM_STONE := 3
 ## deleting rather than leaving: nothing produced it, so it could only ever be a
 ## row in the counter list that never appeared and a name that had to be kept
 ## true. Removing it moved this number, hence the save schema bump.
-const ITEM_CORE_PART := 4
+## Called 코어부품 until 1.0.30. The old name said what it was made of; the new
+## one says what it is for -- it is the thing the generator waits for and the
+## thing the ship needs back, and neither of those is a description of a part.
+## The number stays at 4: saves write materials by number.
+const ITEM_ENERGY_CORE := 4
 
-const ITEM_NAMES := ["수정조각", "구리광석", "열석", "돌", "코어부품"]
+const ITEM_NAMES := ["수정조각", "구리광석", "열석", "돌", "에너지 코어"]
 ## Short forms for the status panel, where the counters share one row.
-const ITEM_SHORT := ["수정", "구리", "열석", "돌", "코어부품"]
+const ITEM_SHORT := ["수정", "구리", "열석", "돌", "에너지 코어"]
 ## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
 ## valuable metal and clears 6:1.
 ## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
@@ -304,7 +308,7 @@ const FACE_BAND := 3.0
 ## the panel does not show is a material she has lost. Stone is different only
 ## because it never bought anything.
 const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_CRYSTAL, ITEM_COPPER,
-	ITEM_CORE_PART]
+	ITEM_ENERGY_CORE]
 
 ## The seams, poorest first. The wreck pays in these rather than in a list of its
 ## own, so what a piece is worth follows the world's own ladder instead of being
@@ -658,7 +662,7 @@ static func machine_io(type: int) -> Array[String]:
 ## answer has to be the same whichever of them lands last, which means asking
 ## what has been held rather than what is in her hands. An empty list is a
 ## machine no material opens.
-const MACHINE_UNLOCK_ITEMS := [[], [], [ITEM_COPPER], [ITEM_COPPER, ITEM_CORE_PART], [ITEM_COPPER]]
+const MACHINE_UNLOCK_ITEMS := [[], [], [ITEM_COPPER], [ITEM_COPPER, ITEM_ENERGY_CORE], [ITEM_COPPER]]
 ## Stone in the pack, with the gun in her hand, that opens the miner.
 const MINER_UNLOCK_STONES := 5
 

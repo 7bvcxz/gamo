@@ -72,7 +72,7 @@ func _open(sim: Sim) -> void:
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	# The generator waits for two materials, so a setup that wants one standing
 	# has to hand over both. Copper alone leaves it locked, which is the point.
-	sim.note_resource_seen(Defs.ITEM_CORE_PART)
+	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
@@ -203,9 +203,9 @@ func _test_build_rules() -> void:
 		"but not the generator -- one of its two materials is still missing")
 	# Whichever of the two lands last is the one that opens it, which is why the
 	# condition is asked of the run rather than matched against the arrival.
-	_assert(sim.note_resource_seen(Defs.ITEM_CORE_PART).has(Defs.M_GENERATOR),
+	_assert(sim.note_resource_seen(Defs.ITEM_ENERGY_CORE).has(Defs.M_GENERATOR),
 		"the core part opens the generator, and says so once")
-	_assert(sim.note_resource_seen(Defs.ITEM_CORE_PART).is_empty(),
+	_assert(sim.note_resource_seen(Defs.ITEM_ENERGY_CORE).is_empty(),
 		"and a second one opens nothing")
 
 	# Machines are bought with materials out of the base stock.

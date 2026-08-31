@@ -1734,11 +1734,11 @@ func _update_debris(delta: float) -> void:
 	# The core part gets its own line and its own colour. It is the reason to
 	# cross the snow, and a player who reads one grey summary learns that debris
 	# gives scrap.
-	if found.has(Defs.ITEM_CORE_PART):
+	if found.has(Defs.ITEM_ENERGY_CORE):
 		fx.popup(at + Vector2(0, -22.0), "%s +%d"
-			% [Defs.ITEM_NAMES[Defs.ITEM_CORE_PART], int(found[Defs.ITEM_CORE_PART])],
-			Defs.ITEM_COLORS[Defs.ITEM_CORE_PART], true)
-		fx.burst(at, Defs.ITEM_COLORS[Defs.ITEM_CORE_PART], 12)
+			% [Defs.ITEM_NAMES[Defs.ITEM_ENERGY_CORE], int(found[Defs.ITEM_ENERGY_CORE])],
+			Defs.ITEM_COLORS[Defs.ITEM_ENERGY_CORE], true)
+		fx.burst(at, Defs.ITEM_COLORS[Defs.ITEM_ENERGY_CORE], 12)
 
 ## Whether she is at the kit with something still in it.
 ##

@@ -42,8 +42,8 @@ func _run() -> void:
 		"구리가 운송 줄을 연다")
 	_assert(not sim.is_unlocked(Defs.M_GENERATOR),
 		"전력 줄은 아직이다 — 구리만으로는 열리지 않는다")
-	_assert(sim.note_resource_seen(Defs.ITEM_CORE_PART).has(Defs.M_GENERATOR),
-		"코어부품이 와야 전력 줄이 열린다")
+	_assert(sim.note_resource_seen(Defs.ITEM_ENERGY_CORE).has(Defs.M_GENERATOR),
+		"에너지 코어가 와야 전력 줄이 열린다")
 
 	# --- Hauling: cats clear the floor, slowly --------------------------------
 	sim.grant_cats(1)
@@ -155,7 +155,7 @@ func _run() -> void:
 
 	# --- Lv3: power is a rate, and it gates logistics -------------------------
 	sim.note_resource_seen(Defs.ITEM_COPPER)
-	sim.note_resource_seen(Defs.ITEM_CORE_PART)
+	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	_assert(sim.is_unlocked(Defs.M_GENERATOR) and sim.is_unlocked(Defs.M_BELT),
 		"copper opens belts, and copper with a core part opens the generator")
 	sim.stock[Defs.ITEM_COPPER] = 100
@@ -296,7 +296,7 @@ func _run() -> void:
 	# not by having seen a stone. These tests want it standing.
 	grade_sim.unlocked[Defs.M_MINER] = true
 	grade_sim.note_resource_seen(Defs.ITEM_COPPER)
-	grade_sim.note_resource_seen(Defs.ITEM_CORE_PART)
+	grade_sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	grade_sim.stock[Defs.ITEM_COPPER] = 50
 	grade_sim.stock[Defs.ITEM_HEATSTONE] = 50
 	var before_stock: int = int(grade_sim.stock[Defs.ITEM_COPPER])
@@ -321,7 +321,7 @@ func _run() -> void:
 	# not by having seen a stone. These tests want it standing.
 	grid.unlocked[Defs.M_MINER] = true
 	grid.note_resource_seen(Defs.ITEM_COPPER)
-	grid.note_resource_seen(Defs.ITEM_CORE_PART)
+	grid.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	grid.stock[Defs.ITEM_CRYSTAL] = 200
 	grid.stock[Defs.ITEM_HEATSTONE] = 200
 	grid.stock[Defs.ITEM_COPPER] = 200

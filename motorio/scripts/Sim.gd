@@ -1119,7 +1119,7 @@ func open_debris(cell: Vector2i) -> Dictionary:
 		elif roll < Defs.DEBRIS_CORE_TWO + Defs.DEBRIS_CORE_ONE:
 			cores = 1
 	if cores > 0:
-		out[Defs.ITEM_CORE_PART] = cores
+		out[Defs.ITEM_ENERGY_CORE] = cores
 	for item_type: int in out:
 		_gain(item_type, int(out[item_type]))
 	return out
