@@ -711,7 +711,7 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(centre + Vector2(0.0, 1.0), 6.0, Color(0.55, 0.82, 0.98, beat * 0.75))
 	draw_circle(centre + Vector2(0.0, 1.0), 2.4, Color(0.92, 0.99, 1.0, beat))
 	# Fuel sits in the same pip row every other machine uses.
-	_draw_pip(centre + Vector2(0, 13), Defs.ITEM_CRYSTAL, int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)))
+	_draw_pip(centre + Vector2(0, 13), Defs.GENERATOR_FUEL, int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)))
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.

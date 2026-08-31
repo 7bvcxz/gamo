@@ -14,7 +14,7 @@ func _run() -> void:
 	_test_miner_to_core()
 	_test_miner_rate()
 	_test_belt_transport()
-	_test_generator_burns_crystal()
+	_test_generator_burns_stone()
 	_test_economy_and_warmth()
 	_test_frost_throttle()
 	_test_blocked_output_preserves_work()
@@ -62,15 +62,17 @@ func _power(sim: Sim) -> void:
 			break
 	_assert(cell != Vector2i(9999, 9999), "발전기를 세울 자리가 있다")
 	_assert(sim.build(Defs.M_GENERATOR, cell, Vector2i.RIGHT), "발전기가 섰다")
-	sim.machine_at(cell).buffer[Defs.ITEM_CRYSTAL] = 4
+	sim.machine_at(cell).buffer[Defs.ITEM_HEATSTONE] = 4
 
 func _open(sim: Sim) -> void:
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	# The miner is opened by holding the build gun with stone to pay for one,
 	# not by having seen a stone. These tests want it standing.
 	sim.unlocked[Defs.M_MINER] = true
-	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	# The generator waits for two materials, so a setup that wants one standing
+	# has to hand over both. Copper alone leaves it locked, which is the point.
+	sim.note_resource_seen(Defs.ITEM_CORE_PART)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
@@ -191,15 +193,20 @@ func _test_build_rules() -> void:
 	# The miner is opened by holding the build gun with stone to pay for one,
 	# not by having seen a stone. These tests want it standing.
 	sim.unlocked[Defs.M_MINER] = true
-	# Copper is what opens the rest of the list now: the crystal line went with
-	# the exchanger, and the miner is opened by the gun rather than by a material.
+	# Copper opens the transport line. Power waits for a core part as well, so
+	# it arrives with the wreck rather than with the first seam.
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	_assert(sim.is_unlocked(Defs.M_MINER), "the miner is open")
-	_assert(sim.is_unlocked(Defs.M_GENERATOR), "and copper opens the generator")
-	_assert(sim.is_unlocked(Defs.M_BELT), "and the belt with it")
-	sim.note_resource_seen(Defs.ITEM_COPPER)
-	_assert(sim.is_unlocked(Defs.M_BELT) and sim.is_unlocked(Defs.M_GENERATOR),
-		"the first copper opens belts and generators")
+	_assert(sim.is_unlocked(Defs.M_BELT), "and copper opens the belt")
+	_assert(sim.is_unlocked(Defs.M_SPLITTER), "and the splitter with it")
+	_assert(not sim.is_unlocked(Defs.M_GENERATOR),
+		"but not the generator -- one of its two materials is still missing")
+	# Whichever of the two lands last is the one that opens it, which is why the
+	# condition is asked of the run rather than matched against the arrival.
+	_assert(sim.note_resource_seen(Defs.ITEM_CORE_PART).has(Defs.M_GENERATOR),
+		"the core part opens the generator, and says so once")
+	_assert(sim.note_resource_seen(Defs.ITEM_CORE_PART).is_empty(),
+		"and a second one opens nothing")
 
 	# Machines are bought with materials out of the base stock.
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
@@ -295,9 +302,10 @@ func _test_belt_transport() -> void:
 	sim.free()
 
 ## The generator, which is what the exchanger's rules moved to when it was
-## removed in 1.0.8: it eats crystal straight off a belt instead of eating a
-## material a second building made out of crystal.
-func _test_generator_burns_crystal() -> void:
+## removed in 1.0.8: it ate crystal straight off a belt instead of eating a
+## material a second building made out of crystal. Since 1.0.27 it eats heat
+## stone, because crystal is no longer in the world at all.
+func _test_generator_burns_stone() -> void:
 	var sim := Sim.new()
 	sim.setup(777)
 	_open(sim)
@@ -310,23 +318,38 @@ func _test_generator_burns_crystal() -> void:
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "빈 발전기는 전력을 내지 않는다")
 	_assert(sim.meter_status(gen).find("연료 없음") >= 0, "그리고 그렇게 말한다")
 
-	# Crystal from any face, and nothing else. The output-face rule is kept even
-	# though this machine emits nothing: it costs nothing to keep and something
-	# to remember on the day it does.
+	# Heat stone from any face, and nothing else. The output-face rule is kept
+	# even though this machine emits nothing: it costs nothing to keep and
+	# something to remember on the day it does.
 	var side_cell: Vector2i = gen_cell + Vector2i.UP
-	_assert(sim._push_into(gen_cell, Defs.ITEM_CRYSTAL, side_cell),
-		"수정조각을 받는다")
+	_assert(sim._push_into(gen_cell, Defs.ITEM_HEATSTONE, side_cell),
+		"열석을 받는다")
 	_assert(not sim._push_into(gen_cell, Defs.ITEM_COPPER, side_cell),
 		"구리는 받지 않는다")
-	_assert(not sim._push_into(gen_cell, Defs.ITEM_HEATSTONE, side_cell),
-		"열석도 받지 않는다")
+	_assert(not sim._push_into(gen_cell, Defs.ITEM_CRYSTAL, side_cell),
+		"수정조각은 더 이상 받지 않는다")
 
-	gen.buffer[Defs.ITEM_CRYSTAL] = 4
-	var before: int = int(gen.buffer[Defs.ITEM_CRYSTAL])
+	gen.buffer[Defs.ITEM_HEATSTONE] = 4
+	var before: int = int(gen.buffer[Defs.ITEM_HEATSTONE])
 	for step in 200:
 		sim.tick(0.1)
-	_assert(int(gen.buffer[Defs.ITEM_CRYSTAL]) < before, "돌리면 수정을 태운다")
+	_assert(int(gen.buffer[Defs.ITEM_HEATSTONE]) < before, "돌리면 열석을 태운다")
 	_assert(sim.power_capacity > 0.0, "그리고 전력이 생긴다")
+
+	# Every place that names the fuel has to name the same one. Five of them read
+	# `GENERATOR_FUEL` and cannot drift; the build-list hint is a written
+	# sentence and can, so it is compared here rather than trusted. The day the
+	# fuel changed, the count that decides capacity kept answering about crystal
+	# and the machine burned stone while supplying nothing.
+	var fuel_name: String = String(Defs.ITEM_NAMES[Defs.GENERATOR_FUEL])
+	_assert(String(Defs.MACHINE_HINTS[Defs.M_GENERATOR]).find(fuel_name) >= 0,
+		"건설 목록의 설명이 실제 연료를 말한다")
+	_assert(Defs.throughput_line(Defs.M_GENERATOR).find(fuel_name) >= 0,
+		"처리량 줄도 같은 연료를 말한다")
+	var io_text := ""
+	for line: String in Defs.machine_io(Defs.M_GENERATOR):
+		io_text += line
+	_assert(io_text.find(fuel_name) >= 0, "입력 줄도 같은 연료를 말한다")
 	sim.free()
 
 func _test_economy_and_warmth() -> void:

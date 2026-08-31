@@ -379,7 +379,8 @@ static func throughput_line(type: int) -> String:
 			# Whatever the seam under it holds -- there is no longer one ore.
 			return "광맥의 자원 %.0f/분 · 고양이 또는 전력 %.1f" % [per_minute(MINER_PERIOD), MINER_POWER_DRAW]
 		M_GENERATOR:
-			return "수정조각 %.0f/분 → 전력 %.1f" % [per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
+			return "%s %.0f/분 → 전력 %.1f" \
+				% [ITEM_NAMES[GENERATOR_FUEL], per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
 		M_BELT:
 			return "%.0f/분 · 칸당 %.1f초" % [BELT_SPEED / 0.34 * 60.0, 1.0 / BELT_SPEED]
 		M_SPLITTER:
@@ -401,13 +402,22 @@ static func throughput_line(type: int) -> String:
 ## when it belongs on screen again it belongs next to a generator.
 static func ratio_hint() -> String:
 	var miners: float = per_minute(MINER_PERIOD) / per_minute(GENERATOR_PERIOD)
-	return "발전기 1대 = 수정 채굴기 %.0f대" % miners
+	return "발전기 1대 = 열석 채굴기 %.0f대" % miners
 
 # --- Electricity -------------------------------------------------------------
 ## Power is a rate, not a stock: it never accumulates, so there is no battery to
 ## manage. A generator burns one energy crystal every ten seconds to sustain one
 ## unit of capacity, and machines reserve a share of it. Running out does not
 ## break anything -- everything drawing power simply slows in proportion.
+## What the generator burns.
+##
+## Named once because five places ask: the tick that consumes it, the count that
+## decides whether the grid has capacity, the face that accepts it, the rated
+## figure, and the pip drawn on the machine. When the fuel changed from crystal
+## to stone, four of them moved and the fifth kept answering about crystal --
+## the machine had fuel, burned it, and supplied no power, because "is it
+## running" and "what is it running on" were two different sentences.
+const GENERATOR_FUEL := ITEM_HEATSTONE
 const GENERATOR_PERIOD := 10.0
 const GENERATOR_OUTPUT := 1.0
 ## Belts do not draw power, and must not. They used to, at 0.1 each, which meant
@@ -596,7 +606,7 @@ const MACHINE_HINTS := [
 	# cursor that says so.
 	"채굴을 더 빠르게 할 수 있는 장치",
 	"자원을 기지까지 끊김 없이 나릅니다",
-	"수정조각을 태워 전력 1.0을 공급합니다",
+	"열석을 태워 전력 1.0을 공급합니다",
 	"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
 ]
 
@@ -618,7 +628,7 @@ static func machine_io(type: int) -> Array[String]:
 				"출력   좌우 두 줄로 번갈아",
 				"특성   막힌 쪽은 건너뜀 · R로 축 회전"]
 		M_GENERATOR:
-			return ["입력   수정조각 1 · %.0f초마다" % GENERATOR_PERIOD,
+			return ["입력   %s 1 · %.0f초마다" % [ITEM_NAMES[GENERATOR_FUEL], GENERATOR_PERIOD],
 				"출력   전력 %.1f" % GENERATOR_OUTPUT,
 				"특성   전력은 저장되지 않는 비율"]
 	return []
@@ -634,7 +644,13 @@ static func machine_io(type: int) -> Array[String]:
 ## opened by holding the gun with stone enough to pay for one instead -- the tool
 ## in her hand and the material in her pack, which is the sentence the whole
 ## build list is made of.
-const MACHINE_UNLOCK_ITEM := [-1, -1, ITEM_COPPER, ITEM_COPPER, ITEM_COPPER]
+## A list rather than one material, because the generator waits for two.
+##
+## One item could be matched against whatever had just arrived; two cannot -- the
+## answer has to be the same whichever of them lands last, which means asking
+## what has been held rather than what is in her hands. An empty list is a
+## machine no material opens.
+const MACHINE_UNLOCK_ITEMS := [[], [], [ITEM_COPPER], [ITEM_COPPER, ITEM_CORE_PART], [ITEM_COPPER]]
 ## Stone in the pack, with the gun in her hand, that opens the miner.
 const MINER_UNLOCK_STONES := 5
 
@@ -650,12 +666,26 @@ const MINER_UNLOCK_STONES := 5
 ## yet. They appear the moment the material does, which is also the moment the
 ## sentence "copper opens these" can be read as news rather than as homework.
 static func machine_previewed(type: int) -> bool:
-	return MACHINE_UNLOCK_ITEM[type] < 0
+	var needs: Array = MACHINE_UNLOCK_ITEMS[type]
+	return needs.is_empty()
 
+## The whole sentence, built here rather than in the panel that draws it. The
+## list is what decides how it reads -- one material or two -- and a caller that
+## indexes the table itself has to be taught the same rule again.
 static func unlock_line(type: int) -> String:
 	if type == M_MINER:
 		return "건물건설총을 들고 %s %d개를 모으면 해금됩니다" \
 			% [ITEM_NAMES[ITEM_HEATSTONE], MINER_UNLOCK_STONES]
+	var needs: Array = MACHINE_UNLOCK_ITEMS[type]
+	if not needs.is_empty():
+		# Joined with the separator the rest of the interface already uses, so
+		# no 과/와 has to be chosen -- and the object particle is decided by the
+		# last name in the list, which is the word it actually follows.
+		var names := PackedStringArray()
+		for item_type: int in needs:
+			names.append(String(ITEM_NAMES[item_type]))
+		var last: String = String(ITEM_NAMES[int(needs[needs.size() - 1])])
+		return "%s%s 손에 넣으면 해금됩니다" % [" · ".join(names), object_of(last)]
 	return "아직 해금되지 않았습니다"
 ## Boulders take longer than a seam: a rock is a rock and a seam is a seam, and
 ## the difference is what makes walking to a seam worth it.
@@ -1702,7 +1732,12 @@ const CRYSTAL_RING := Vector2(8.0, 26.0)
 ## live on -- one exchanger and about twenty energy crystals in a whole world.
 ## `[초안]`: the number that decides how far the energy line can go, and it wants
 ## a play-through before it is trusted.
-const CRYSTAL_SHARDS := 60
+## Zero as of 1.0.27: crystal does not lie in the snow any more. It was the
+## only source of the material -- wrecks give heat stone and copper, seams give
+## heat stone and copper -- so setting this to nothing takes crystal out of the
+## world entirely rather than making it rarer. The scatter is left standing
+## because the number is the whole of the decision and a run at it is one edit.
+const CRYSTAL_SHARDS := 0
 ## First reachable at base level 4, which is where the fourth upgrade puts the
 ## circle. Copper is the door to power and belts, and it opens on an upgrade
 ## rather than on a number quietly passing a threshold.

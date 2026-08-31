@@ -1391,15 +1391,10 @@ func _draw_build_row(row: int, index: int) -> void:
 	if locked:
 		# Locked entries stay visible and say what opens them. Seeing what is
 		# coming is half of why a build list exists at all.
-		# Some machines are opened by a material and some are not, and -1 is not a
-		# material: it indexes the array from the end, so the miner's row read
-		# "코어부품을 손에 넣으면" -- the rarest thing in the game, for the first
-		# machine anyone builds.
-		var key_item: int = Defs.MACHINE_UNLOCK_ITEM[type]
+		# The sentence comes from Defs, which owns the table. This used to index
+		# the table here and build the line itself, and when a condition grew to
+		# two materials that copy would have gone on naming one of them.
 		var line: String = Defs.unlock_line(type)
-		if key_item >= 0:
-			line = "%s%s 손에 넣으면 해금됩니다" \
-				% [Defs.ITEM_NAMES[key_item], Defs.object_of(Defs.ITEM_NAMES[key_item])]
 		_text(Vector2(text_x, rect.position.y + 38.0), line, 11, Defs.COL_TEXT_DIM)
 		draw_rect(rect, Color(0.02, 0.03, 0.06, 0.34))
 		return

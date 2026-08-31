@@ -94,6 +94,11 @@ var rescued_tonight: bool = false
 ## and the generator at once -- left the player looking at the third one. Now
 ## they queue: newest at the bottom, each with its own life, oldest fading first.
 const MESSAGE_LIFE := 2.4
+## A machine opening is the one message that changes what she can do next, and
+## 2.4 seconds is long enough to notice and not long enough to read while
+## something else is happening. The plate is solid until the last second, which
+## is the fade, so five here is four seconds of a message that is simply there.
+const UNLOCK_MESSAGE_LIFE := 5.0
 const MESSAGE_MAX := 4
 var messages: Array[Dictionary] = []
 ## What the last one said. Kept because the save/HUD/test surface has always been
@@ -1075,6 +1080,11 @@ func _process(delta: float) -> void:
 		pickaxe_hint_until = maxf(0.0, pickaxe_hint_until - delta)
 	if frozen_said > 0.0:
 		frozen_said = maxf(0.0, frozen_said - delta)
+	# Whatever the simulation opened this frame -- a cat delivering the last
+	# material, a wreck giving up a core part. The pickup handlers each used to
+	# ask after their own item, which is why opening a wreck could satisfy a
+	# condition with nobody there to say so.
+	_announce_unlocks(sim.take_unlocks())
 	message_life = maxf(0.0, message_life - delta)
 	for index in range(messages.size() - 1, -1, -1):
 		messages[index]["life"] = float(messages[index]["life"]) - delta
@@ -1323,7 +1333,7 @@ func _announce_drop(kind: int) -> void:
 ## banner and the confirm sting rather than a silent slot.
 func _announce_unlocks(opened: Array[int]) -> void:
 	for type: int in opened:
-		_notify("%s 해금!" % Defs.MACHINE_NAMES[type], Defs.COL_CORE)
+		_notify("%s 해금!" % Defs.MACHINE_NAMES[type], Defs.COL_CORE, UNLOCK_MESSAGE_LIFE)
 		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MILESTONE)
 		fx.burst(player.position, Defs.COL_CORE, 14)
 		audio.call("play", "finish")
@@ -3541,23 +3551,25 @@ func clock_text() -> String:
 	var seconds: int = int(ceil(maxf(time_left, 0.0)))
 	return "%02d:%02d" % [seconds / 60, seconds % 60]
 
-func _notify(text: String, color: Color) -> void:
+## `life` is per message rather than one constant for all of them: an unlock
+## has to outlast a refusal, and a single number cannot say both.
+func _notify(text: String, color: Color, life: float = MESSAGE_LIFE) -> void:
 	# Repeats refresh rather than stack. Something said twice in two frames is one
 	# event, which is the same rule the log already keeps.
 	for entry: Dictionary in messages:
 		if String(entry["text"]) == text:
-			entry["life"] = MESSAGE_LIFE
+			entry["life"] = life
 			message = text
-			message_life = MESSAGE_LIFE
+			message_life = life
 			note_log(text, color)
 			return
-	messages.append({"text": text, "color": color, "life": MESSAGE_LIFE})
+	messages.append({"text": text, "color": color, "life": life})
 	# Four is what fits above the hotbar without becoming a wall of text. The
 	# oldest goes, because the newest is the one the player has not read.
 	while messages.size() > MESSAGE_MAX:
 		messages.pop_front()
 	message = text
-	message_life = MESSAGE_LIFE
+	message_life = life
 	hud.set("message_color", color)
 	note_log(text, color)
 

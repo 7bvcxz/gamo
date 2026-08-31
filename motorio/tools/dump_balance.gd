@@ -31,7 +31,7 @@ func _initialize() -> void:
 			"cost": cost,
 			"throughput": Defs.throughput_line(type),
 			"hint": Defs.MACHINE_HINTS[type],
-			"unlock": Defs.ITEM_NAMES[Defs.MACHINE_UNLOCK_ITEM[type]] if Defs.MACHINE_UNLOCK_ITEM[type] >= 0 else "",
+			"unlock": _unlock_names(type),
 		})
 
 	var belts: Array = []
@@ -180,3 +180,12 @@ func _initialize() -> void:
 	file.close()
 	print("BALANCE_DUMP: wrote %s" % OUT)
 	quit(0)
+
+
+## The materials that open a machine, as names. A list because the generator
+## waits for two; empty for the ones no material opens.
+func _unlock_names(type: int) -> Array:
+	var names: Array = []
+	for item_type: int in Defs.MACHINE_UNLOCK_ITEMS[type]:
+		names.append(String(Defs.ITEM_NAMES[item_type]))
+	return names

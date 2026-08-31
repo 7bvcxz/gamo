@@ -88,7 +88,7 @@
       "name": "채굴기",
       "short": "채굴기",
       "throughput": "광맥의 자원 12/분 · 고양이 또는 전력 0.5",
-      "unlock": ""
+      "unlock": []
     },
     {
       "cost": [
@@ -101,7 +101,9 @@
       "name": "컨테이너 벨트",
       "short": "벨트",
       "throughput": "53/분 · 칸당 3.3초",
-      "unlock": "구리광석"
+      "unlock": [
+        "구리광석"
+      ]
     },
     {
       "cost": [
@@ -114,7 +116,9 @@
       "name": "분배기",
       "short": "분배기",
       "throughput": "한 줄을 두 줄로",
-      "unlock": "구리광석"
+      "unlock": [
+        "구리광석"
+      ]
     },
     {
       "cost": [
@@ -123,11 +127,14 @@
           "item": "구리광석"
         }
       ],
-      "hint": "수정조각을 태워 전력 1.0을 공급합니다",
+      "hint": "열석을 태워 전력 1.0을 공급합니다",
       "name": "발전기",
       "short": "발전기",
-      "throughput": "수정조각 6/분 → 전력 1.0",
-      "unlock": "구리광석"
+      "throughput": "열석 6/분 → 전력 1.0",
+      "unlock": [
+        "구리광석",
+        "코어부품"
+      ]
     }
   ],
   "missions": [
@@ -339,14 +346,14 @@
     "generator_seconds": 10.0,
     "hand_mine_seconds": 10.0,
     "miner_seconds": 5.0,
-    "ratio_hint": "발전기 1대 = 수정 채굴기 2대"
+    "ratio_hint": "발전기 1대 = 열석 채굴기 2대"
   },
   "rings": {
     "copper": [
       15.0,
       19.0
     ],
-    "crystal_shard_count": 60,
+    "crystal_shard_count": 0,
     "crystal_shards": [
       8.0,
       26.0
@@ -484,7 +491,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.26",
+  "version": "1.0.27",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

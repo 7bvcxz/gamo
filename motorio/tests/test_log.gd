@@ -29,6 +29,7 @@ func _run() -> void:
 	_test_bounded()
 	_test_not_saved()
 	_test_window()
+	_test_unlock_banner_stays_longer()
 	if failures == 0:
 		print("PASS test_log")
 	else:
@@ -115,3 +116,39 @@ func _test_window() -> void:
 	_assert(log_rect.position.x > map_rect.position.x, "지도 아이콘 오른쪽이다")
 	_assert(absf(log_rect.position.y - map_rect.position.y) < 0.01, "같은 줄이다")
 	_assert(not log_rect.intersects(map_rect), "겹치지 않는다")
+
+## How long a banner stays is a property of what it says.
+##
+## A refusal and a machine opening used to share one constant, and 2.4 seconds
+## is the right number for the refusal: it is said in reply to a key that was
+## just pressed, so the player is already looking. An unlock is not a reply to
+## anything -- it arrives while she is walking somewhere else -- and it changes
+## what she can do next, which is the only banner in the game that does.
+func _test_unlock_banner_stays_longer() -> void:
+	main.messages.clear()
+	main._notify("보통 알림", Defs.COL_TEXT)
+	_assert(main.messages.size() == 1, "보통 알림이 하나 놓인다")
+	_assert(is_equal_approx(float(main.messages[0]["life"]), main.MESSAGE_LIFE),
+		"그리고 기본 수명을 갖는다")
+
+	main.messages.clear()
+	# Typed, because the parameter is `Array[int]` and an array literal is not.
+	# The call fails at runtime otherwise, and a SceneTree test that dies mid-run
+	# prints PASS -- the assertions after it simply never happen.
+	var opened: Array[int] = [Defs.M_BELT]
+	main._announce_unlocks(opened)
+	_assert(main.messages.size() == 1, "해금 알림이 하나 놓인다")
+	_assert(is_equal_approx(float(main.messages[0]["life"]), main.UNLOCK_MESSAGE_LIFE),
+		"그리고 더 오래 머무는 수명을 갖는다")
+	# The plate is solid while life is above one and fades over the last second,
+	# so "five" has to mean four seconds of a banner that is simply there. A
+	# number that only clears the fade would read as a flash.
+	_assert(main.UNLOCK_MESSAGE_LIFE - 1.0 >= 3.0,
+		"페이드 1초를 빼고도 3초 이상 또렷하게 남는다 (%.1f초)" % (main.UNLOCK_MESSAGE_LIFE - 1.0))
+
+	# And it is still one door: the log heard it too.
+	var said := false
+	for entry: Dictionary in main.play_log:
+		if String(entry["text"]).find("해금") >= 0:
+			said = true
+	_assert(said, "해금 알림도 기록에 남는다")

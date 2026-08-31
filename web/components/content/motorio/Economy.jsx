@@ -162,7 +162,7 @@ export function Economy() {
                 <td>{machine.name}</td>
                 <td>{machine.cost.map((c) => `${c.item} ${c.count}`).join(' + ') || '—'}</td>
                 <td>{machine.throughput}</td>
-                <td>{machine.unlock || '—'}</td>
+                <td>{machine.unlock.join(' · ') || '—'}</td>
               </tr>
             ))}
           </tbody>

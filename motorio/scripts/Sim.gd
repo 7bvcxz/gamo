@@ -441,6 +441,14 @@ func from_save(data: Dictionary) -> void:
 	collected.clear()
 	for row in data.get("collected", []):
 		collected[int(row[0])] = int(row[1])
+	# What has been held is derived rather than stored: a lifetime total above
+	# zero is the same fact, and a save written before this existed answers it
+	# correctly without a schema bump.
+	held_items.clear()
+	for item_type: int in collected:
+		if int(collected[item_type]) > 0:
+			held_items[item_type] = true
+	pending_unlocks.clear()
 	thawed.clear()
 	for row in data.get("thawed", []):
 		thawed[Vector2i(int(row[0]), int(row[1]))] = true
@@ -553,6 +561,8 @@ func setup(seed_value: int) -> void:
 	has_pickaxe = false
 	gun_dropped = false
 	collected.clear()
+	held_items.clear()
+	pending_unlocks.clear()
 	thawed.clear()
 	cancel_thaw()
 	delivered = {Defs.ITEM_CRYSTAL: 0, Defs.ITEM_COPPER: 0, Defs.ITEM_HEATSTONE: 0}
@@ -1487,6 +1497,17 @@ var drop_from := Vector2i(9999, 9999)
 ## subtracts yesterday's reading from today's.
 var collected: Dictionary = {}
 
+## Every material that has ever passed through her hands this run.
+##
+## Separate from `collected`, which is a ledger of amounts, and from `stock`,
+## which goes back down the moment she builds: an unlock condition asks a
+## question about the run, not about the pack. Derived from `collected` when a
+## save is loaded, so it needs no schema of its own.
+var held_items: Dictionary[int, bool] = {}
+
+## Machines whose condition came true and have not been said out loud yet.
+var pending_unlocks: Array[int] = []
+
 ## Whether the case will open again.
 ##
 ## The second search waits for the fire. Both are available from the first frame
@@ -2080,13 +2101,38 @@ func is_unlocked(type: int) -> bool:
 ## Called whenever a material reaches the player. Returns the machines this
 ## unlocked, so the caller can announce them.
 func note_resource_seen(item_type: int) -> Array[int]:
-	var opened: Array[int] = []
-	for type in Defs.BUILDABLE:
-		if is_unlocked(type):
+	held_items[item_type] = true
+	_check_unlocks()
+	return take_unlocks()
+
+## Whether every material this machine waits for has been held at least once.
+##
+## Asked of the run rather than of the item that just arrived. One material
+## could be matched on arrival; two cannot, because the answer has to be the
+## same whichever of them lands last.
+func unlock_ready(type: int) -> bool:
+	for item_type: int in Defs.MACHINE_UNLOCK_ITEMS[type]:
+		if not held_items.has(item_type):
+			return false
+	return true
+
+## Opens whatever is ready and queues it. A machine no material opens is skipped
+## rather than treated as satisfied -- an empty list of conditions is trivially
+## true, and the miner would open in the first frame.
+func _check_unlocks() -> void:
+	for type: int in Defs.BUILDABLE:
+		if is_unlocked(type) or Defs.machine_previewed(type):
 			continue
-		if Defs.MACHINE_UNLOCK_ITEM[type] == item_type:
-			unlocked[type] = true
-			opened.append(type)
+		if not unlock_ready(type):
+			continue
+		unlocked[type] = true
+		pending_unlocks.append(type)
+
+## Drains the queue for whoever announces it.
+func take_unlocks() -> Array[int]:
+	var opened: Array[int] = []
+	opened.assign(pending_unlocks)
+	pending_unlocks.clear()
 	return opened
 
 func can_afford(type: int) -> bool:
@@ -2214,6 +2260,12 @@ func _gain(item_type: int, amount: int) -> void:
 	# day where she mined forty and spent forty is not a day where nothing
 	# happened.
 	collected[item_type] = int(collected.get(item_type, 0)) + amount
+	# The one place everything gained flows through, which is why the unlock
+	# question is asked here. It used to be asked at each pickup site against
+	# whatever had just arrived, and a wreck giving up a core part went through
+	# none of them: the condition became true with nobody there to notice.
+	held_items[item_type] = true
+	_check_unlocks()
 
 # --- Throughput meter --------------------------------------------------------
 ## What a machine is *actually* moving, as opposed to what it could move.
@@ -2275,7 +2327,7 @@ func design_rates(machine: Machine) -> Dictionary:
 			if ore.has(machine.cell):
 				out[int(ore[machine.cell])] = Defs.per_minute(seam_period(machine.cell))
 		Defs.M_GENERATOR:
-			into[Defs.ITEM_CRYSTAL] = Defs.per_minute(Defs.GENERATOR_PERIOD)
+			into[Defs.GENERATOR_FUEL] = Defs.per_minute(Defs.GENERATOR_PERIOD)
 		Defs.M_BELT:
 			# A belt has no recipe, so its rated figure is its capacity: the most
 			# it could carry if something fed it that fast.
@@ -2319,7 +2371,7 @@ func meter_status(machine: Machine) -> String:
 				return "출력 막힘"
 			return "가동 중"
 		Defs.M_GENERATOR:
-			if int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)) <= 0:
+			if int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)) <= 0:
 				return "연료 없음"
 			return "가동 중 · 전력 %.1f" % Defs.GENERATOR_OUTPUT
 		Defs.M_BELT, Defs.M_SPLITTER:
@@ -2359,7 +2411,7 @@ func _recount_power() -> void:
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
 		# Read the fuel, not a flag set later in the tick.
-		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0)) > 0:
+		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)) > 0:
 			capacity += Defs.GENERATOR_OUTPUT
 	power_capacity = capacity
 
@@ -3207,15 +3259,15 @@ func splitter_outputs(machine: Machine) -> Array[Vector2i]:
 	var perp := Vector2i(-dir.y, dir.x)
 	return [perp, -perp]
 
-## A generator burns one energy crystal every ten seconds. `operated` doubles as
+## A generator burns one heat stone every ten seconds. `operated` doubles as
 ## "currently supplying", which is what _recount_power reads.
-## Crystal straight into the fire.
 ##
-## It used to burn energy crystals, which were made from crystal shards by a
-## machine whose only customer was this one. Two buildings and a material in
-## between the shard and the power it was always going to become.
+## It burned crystal until 1.0.27, and crystal shards were the only place
+## crystal came from; taking them out of the snow would have left this machine
+## with nothing to eat. Heat stone is what the fire eats too, which is the
+## point: power and warmth now bid for the same stone.
 func _tick_generator(machine: Machine, delta: float) -> void:
-	var fuel: int = int(machine.buffer.get(Defs.ITEM_CRYSTAL, 0))
+	var fuel: int = int(machine.buffer.get(Defs.GENERATOR_FUEL, 0))
 	if fuel <= 0:
 		machine.operated = false
 		machine.stalled = true
@@ -3226,7 +3278,7 @@ func _tick_generator(machine: Machine, delta: float) -> void:
 	machine.progress += delta
 	if machine.progress < Defs.GENERATOR_PERIOD:
 		return
-	machine.buffer[Defs.ITEM_CRYSTAL] = fuel - 1
+	machine.buffer[Defs.GENERATOR_FUEL] = fuel - 1
 	machine.progress = 0.0
 	machine.flash = 0.5
 
@@ -3268,11 +3320,11 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			target.flash = 0.2
 			return true
 		Defs.M_GENERATOR:
-			# Crystal, and only from a face that is not the one it faces: feeding
-			# the mouth a machine pours out of lets a line eat its own product.
-			# The generator pours nothing, but the rule is cheaper to keep than
-			# to remember the day it does.
-			if item_type != Defs.ITEM_CRYSTAL:
+			# Heat stone, and only from a face that is not the one it faces:
+			# feeding the mouth a machine pours out of lets a line eat its own
+			# product. The generator pours nothing, but the rule is cheaper to
+			# keep than to remember the day it does.
+			if item_type != Defs.GENERATOR_FUEL:
 				return false
 			var fuel: int = int(target.buffer.get(item_type, 0))
 			if fuel >= 4:

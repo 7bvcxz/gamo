@@ -38,8 +38,12 @@ func _run() -> void:
 	_assert(sim.note_resource_seen(Defs.ITEM_CRYSTAL).is_empty(),
 		"수정도 이제는 아무것도 열지 않는다 — 교환기와 함께 사라진 줄이다")
 	sim.unlocked[Defs.M_MINER] = true
-	_assert(sim.note_resource_seen(Defs.ITEM_COPPER).has(Defs.M_GENERATOR),
-		"구리가 전력 줄을 연다")
+	_assert(sim.note_resource_seen(Defs.ITEM_COPPER).has(Defs.M_BELT),
+		"구리가 운송 줄을 연다")
+	_assert(not sim.is_unlocked(Defs.M_GENERATOR),
+		"전력 줄은 아직이다 — 구리만으로는 열리지 않는다")
+	_assert(sim.note_resource_seen(Defs.ITEM_CORE_PART).has(Defs.M_GENERATOR),
+		"코어부품이 와야 전력 줄이 열린다")
 
 	# --- Hauling: cats clear the floor, slowly --------------------------------
 	sim.grant_cats(1)
@@ -151,8 +155,9 @@ func _run() -> void:
 
 	# --- Lv3: power is a rate, and it gates logistics -------------------------
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.note_resource_seen(Defs.ITEM_CORE_PART)
 	_assert(sim.is_unlocked(Defs.M_GENERATOR) and sim.is_unlocked(Defs.M_BELT),
-		"the first copper opens generators and belts")
+		"copper opens belts, and copper with a core part opens the generator")
 	sim.stock[Defs.ITEM_COPPER] = 100
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
 	sim.stock[Defs.ITEM_HEATSTONE] = 100
@@ -170,16 +175,16 @@ func _run() -> void:
 	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "a generator goes down")
 	sim.tick(0.01)
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "an unfuelled generator supplies nothing")
-	sim.machine_at(gen_cell).buffer[Defs.ITEM_CRYSTAL] = 3
+	sim.machine_at(gen_cell).buffer[Defs.GENERATOR_FUEL] = 3
 	sim.tick(0.01)
 	_assert(sim.power_capacity >= Defs.GENERATOR_OUTPUT, "a fuelled one supplies its rating")
 	_assert(sim.power_capacity > sim.power_draw, "one generator carries many belts")
 
 	# Fuel is consumed, so power is an ongoing cost rather than a one-off build.
-	var fuel_before: int = int(sim.machine_at(gen_cell).buffer[Defs.ITEM_CRYSTAL])
+	var fuel_before: int = int(sim.machine_at(gen_cell).buffer[Defs.GENERATOR_FUEL])
 	for step in int(Defs.GENERATOR_PERIOD / 0.1) + 4:
 		sim.tick(0.1)
-	_assert(int(sim.machine_at(gen_cell).buffer[Defs.ITEM_CRYSTAL]) < fuel_before,
+	_assert(int(sim.machine_at(gen_cell).buffer[Defs.GENERATOR_FUEL]) < fuel_before,
 		"a running generator burns its fuel")
 
 	# --- Splitters: the grammar for writing a ratio down ----------------------
@@ -291,6 +296,7 @@ func _run() -> void:
 	# not by having seen a stone. These tests want it standing.
 	grade_sim.unlocked[Defs.M_MINER] = true
 	grade_sim.note_resource_seen(Defs.ITEM_COPPER)
+	grade_sim.note_resource_seen(Defs.ITEM_CORE_PART)
 	grade_sim.stock[Defs.ITEM_COPPER] = 50
 	grade_sim.stock[Defs.ITEM_HEATSTONE] = 50
 	var before_stock: int = int(grade_sim.stock[Defs.ITEM_COPPER])
@@ -314,8 +320,8 @@ func _run() -> void:
 	# The miner is opened by holding the build gun with stone to pay for one,
 	# not by having seen a stone. These tests want it standing.
 	grid.unlocked[Defs.M_MINER] = true
-	grid.note_resource_seen(Defs.ITEM_CRYSTAL)
 	grid.note_resource_seen(Defs.ITEM_COPPER)
+	grid.note_resource_seen(Defs.ITEM_CORE_PART)
 	grid.stock[Defs.ITEM_CRYSTAL] = 200
 	grid.stock[Defs.ITEM_HEATSTONE] = 200
 	grid.stock[Defs.ITEM_COPPER] = 200
@@ -334,7 +340,7 @@ func _run() -> void:
 	var gen2 := Vector2i(grid.core_cell.x + 8, grid.core_cell.y + 8)
 	grid.ore.erase(gen2)
 	_assert(grid.build(Defs.M_GENERATOR, gen2, Vector2i.RIGHT), "a generator goes down")
-	grid.machine_at(gen2).buffer[Defs.ITEM_CRYSTAL] = 4
+	grid.machine_at(gen2).buffer[Defs.GENERATOR_FUEL] = 4
 	grid.tick(0.02)
 	_assert(grid.miner_on_power(seam2), "with power the miner runs itself")
 	_assert(grid.power_draw >= Defs.MINER_POWER_DRAW, "and pays the grid for it")
