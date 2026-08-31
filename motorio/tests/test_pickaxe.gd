@@ -70,27 +70,27 @@ func _run() -> void:
 	_assert(is_equal_approx(main.player.mining, 0.0), "손을 떼면 멈춘다")
 	_assert(int(main.last_mine_frame) == -1, "스윙 프레임이 초기화된다")
 
-	# Holding Z with the pickaxe must not spin the build direction.
-	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
-	main.build_held = true
-	main.build_rotated = false
-	var direction: Vector2i = main.build_dir
-	for step in 20:
-		main._update_build_hold(0.1)
-	_assert(main.build_dir == direction, "곡괭이를 들고 Z를 눌러도 방향이 돌지 않는다")
-	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
-	for step in 20:
-		main._update_build_hold(0.1)
-	_assert(main.build_dir != direction, "건설총을 들면 Z 홀드가 방향을 돌린다")
-	main.build_held = false
+	# The block that used to sit here asserted that holding Z with the gun turned
+	# the ghost. That behaviour went in 1.0.25 and the assertion stayed, so this
+	# file failed on every run for four versions while describing a feature the
+	# game does not have. "Z never turns anything" now lives in `test_flow`,
+	# beside the R that does -- one place, where the two can be read together.
 
-	# The animation runs at the speed the sheets were cut at. Eight frames at ten
-	# a second is 0.8s, and the mining clips repeat every 1.4 to 1.7 seconds --
-	# playing them at the walk's rate made the swing twice as fast as it was
-	# filmed.
-	_assert(PlayerActor.MINE_FPS < PlayerActor.FPS, "채굴은 걷기보다 느리게 재생된다")
+	# The swing runs at the walk's rate, which is twice the rate the clips were
+	# filmed at. That is the decision, not an oversight: the source loops repeat
+	# every 1.4 to 1.7 seconds, and a swing that slow reads as somebody with time
+	# on their hands rather than as a woman digging heat out of the ground before
+	# dark. It was halved for being frantic once and doubled back on 2026-08-22.
+	#
+	# This assertion said the opposite until 2026-08-31, and had been failing
+	# every run since the day the speed changed -- nine days and four releases,
+	# because nothing runs this suite to completion except a person deciding to.
+	# Written as a band rather than an equality so the number still cannot move
+	# without somebody choosing to move it.
+	_assert(is_equal_approx(PlayerActor.MINE_FPS, PlayerActor.FPS),
+		"채굴은 걷기와 같은 속도로 재생된다")
 	var swing: float = float(PlayerActor.FRAMES) / PlayerActor.MINE_FPS
-	_assert(swing > 1.3 and swing < 1.9, "스윙 한 번이 1.3~1.9초 (%.2f초)" % swing)
+	_assert(swing > 0.7 and swing < 0.95, "스윙 한 번이 0.7~0.95초 (%.2f초)" % swing)
 	_assert(PlayerActor.MINE_IMPACT_FRAME >= 0
 		and PlayerActor.MINE_IMPACT_FRAME < PlayerActor.FRAMES,
 		"충돌 프레임이 시트 안에 있다")

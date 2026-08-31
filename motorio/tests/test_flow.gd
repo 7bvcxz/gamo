@@ -277,9 +277,16 @@ func _run() -> void:
 	# arrived by accident, since a Z held a moment too long is an ordinary way to
 	# press a key. R turns, and only R.
 	main.state = main.State.PLAY
+	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
 	var dir_start: Vector2i = main.build_dir
 	main.build_held = true
-	main._update_build_hold(2.0)
+	# A full second of real frames, two and a half times the threshold the old
+	# rotate-on-hold used. Driven through `_process` rather than through the
+	# helper it used to call: that helper was emptied in 1.0.25 and deleted in
+	# 1.0.29, and a test that holds a key by calling one function only ever
+	# proves that one function is quiet.
+	for step in 10:
+		main._process(0.1)
 	_assert(main.build_dir == dir_start, "Z 를 아무리 오래 눌러도 방향은 그대로다")
 	main.build_held = false
 	_press(main, KEY_R)

@@ -108,8 +108,6 @@ var message: String = ""
 var message_life: float = 0.0
 var night_warned: bool = false
 var build_held: bool = false
-var build_hold_time: float = 0.0
-var build_rotated: bool = false
 ## True once a held Z has actually been swinging at a seam. Without it, letting
 ## go after mining runs the tap action -- and standing at the shelter mining the
 ## seam beside it would put her to bed.
@@ -1090,7 +1088,6 @@ func _process(delta: float) -> void:
 		messages[index]["life"] = float(messages[index]["life"]) - delta
 		if float(messages[index]["life"]) <= 0.0:
 			messages.remove_at(index)
-	_update_build_hold(delta)
 	_update_hand_mining(delta)
 	player.carrying_cat = sim.carried_cat != null
 	# A slot can lock again -- the last torch burns out -- and being left holding
@@ -1186,9 +1183,6 @@ func screen_name() -> String:
 		State.NIGHTFALL, State.DAYBREAK: return "night"
 	return "play"
 
-## Holding the build key past the threshold rotates instead of building, so PC
-## players never need a second key for direction.
-const BUILD_HOLD_ROTATE := 0.4
 ## Slots, not one file. A single save meant every session overwrote the last one
 ## and a bad decision was permanent; three is enough to keep a known-good run
 ## while trying something.
@@ -1213,14 +1207,6 @@ const SAVE_SCHEMA := 8
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
 const AUTOSAVE_INTERVAL := 30.0
-
-func _update_build_hold(_delta: float) -> void:
-	# Nothing. Holding Z used to turn the ghost a quarter turn every 0.4 seconds,
-	# which made one key mean two things -- and the second of them arrived by
-	# accident, because a Z held a moment too long on a belt is a very ordinary
-	# way to press a key. R rotates, it does only that, and the first time she
-	# has a machine loaded the prompt over her shoulder says so.
-	pass
 
 func _process_play(delta: float) -> void:
 	# The world decides what may be touched, and a torch in her hand is half of
@@ -2412,11 +2398,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("build"):
-		# Held, Z rotates; tapped, it builds. Handled on release so the hold can
-		# be measured, which is why nothing happens here.
+		# Nothing happens on the press. Z acts on release, because letting go is
+		# what separates a tap from a swing: a Z held at a seam has been mining
+		# and must not also do the tap action when it ends.
+		#
+		# It used to be measured here as well -- held past 0.4 seconds the ghost
+		# turned a quarter turn instead of building, which made one key mean two
+		# things, and the second arrived by accident because a Z held a moment
+		# too long on a belt is a very ordinary way to press a key. That went in
+		# 1.0.25; the timer and its flag went in 1.0.29. R turns, and only R.
 		build_held = true
-		build_hold_time = 0.0
-		build_rotated = false
 		mine_swung = false
 		get_viewport().set_input_as_handled()
 		return
