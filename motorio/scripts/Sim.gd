@@ -809,6 +809,36 @@ func _generate_frozen_cats(seed_value: int) -> void:
 	# take that cell. Fixed, like every landmark here: it is a scene the design
 	# means to happen, not a place the seed might put something.
 	_place_edge_frozen()
+	# And the Lv3 pair, in the 9.4..10.6 ring the third circle opens. Seed picks
+	# the directions so the world does not look stamped; the count is the
+	# promise. Opposite-ish angles, so they read as two finds rather than one.
+	var second_angle: float = rng.randf() * TAU
+	for index in Defs.SECOND_RING_CATS:
+		var placed := false
+		for try in 24:
+			var angle: float = second_angle + TAU * float(index) / float(Defs.SECOND_RING_CATS) \
+				+ float(try % 8) * 0.11
+			var ring: float = Defs.SECOND_RING.x \
+				+ (Defs.SECOND_RING.y - Defs.SECOND_RING.x) * float(try / 8) * 0.5
+			var cell := core_cell + Vector2i(roundi(cos(angle) * ring), roundi(sin(angle) * ring))
+			if frozen_cats.has(cell) or ore.has(cell) or machines.has(cell):
+				continue
+			if cell == core_cell or cell == shelter_cell or cell == food_cell:
+				continue
+			var distance: float = _ring_distance(cell)
+			if distance < Defs.SECOND_RING.x or distance > Defs.SECOND_RING.y:
+				continue
+			frozen_cats[cell] = 0.0
+			placed = true
+			break
+		if not placed:
+			# Last resort keeps the promise: the exact ring cell in the raw
+			# direction, cleared. A promise that keeps itself in 58 runs out of
+			# 60 drops the two runs where it was made.
+			var angle: float = second_angle + TAU * float(index) / float(Defs.SECOND_RING_CATS)
+			var cell := core_cell + Vector2i(roundi(cos(angle) * 10.0), roundi(sin(angle) * 10.0))
+			ore.erase(cell)
+			frozen_cats[cell] = 0.0
 	var reach: float = Defs.WARM_MAX + 8.0
 	var target: int = int((PI * reach * reach) / Defs.FROZEN_PER_TILES)
 	var attempts := 0
@@ -819,7 +849,7 @@ func _generate_frozen_cats(seed_value: int) -> void:
 		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
 		if frozen_cats.has(cell) or ore.has(cell) or machines.has(cell):
 			continue
-		if _ring_distance(cell) < Defs.FROZEN_MIN_RING:
+		if _ring_distance(cell) < Defs.FROZEN_SCATTER_MIN:
 			continue
 		frozen_cats[cell] = 0.0
 

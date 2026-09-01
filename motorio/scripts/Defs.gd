@@ -2462,26 +2462,26 @@ const WARM_MAX := 100.0
 const BASE_LEVELS: Array[Dictionary] = [
 	{"stones": 0,     "radius": 7.0},    # the emergency base, the moment it is lit
 	{"stones": 3,     "radius": 9.0},    # +3
-	{"stones": 12,    "radius": 11.0},   # +9
-	{"stones": 27,    "radius": 13.0},   # +15
-	{"stones": 54,    "radius": 15.0},   # +27, and the first copper
-	{"stones": 105,   "radius": 17.0},   # +51
-	{"stones": 192,   "radius": 19.0},   # +87
-	{"stones": 327,   "radius": 22.0},   # +135
-	{"stones": 537,   "radius": 26.0},   # +210
-	{"stones": 857,   "radius": 31.0},   # +320
-	{"stones": 1337,  "radius": 37.0},   # +480
-	{"stones": 2037,  "radius": 44.0},   # +700
-	{"stones": 3037,  "radius": 52.0},   # +1000
-	{"stones": 4437,  "radius": 61.0},   # +1400
-	{"stones": 6437,  "radius": 71.0},   # +2000
-	{"stones": 9237,  "radius": 82.0},   # +2800
-	{"stones": 13237, "radius": WARM_MAX},  # +4000
+	{"stones": 9,     "radius": 11.0},   # +6 -- one slow cat's worth, not three
+	{"stones": 24,    "radius": 13.0},   # +15
+	{"stones": 51,    "radius": 15.0},   # +27
+	{"stones": 102,   "radius": 17.0},   # +51
+	{"stones": 189,   "radius": 19.0},   # +87
+	{"stones": 324,   "radius": 22.0},   # +135
+	{"stones": 534,   "radius": 26.0},   # +210
+	{"stones": 854,   "radius": 31.0},   # +320
+	{"stones": 1334,  "radius": 37.0},   # +480
+	{"stones": 2034,  "radius": 44.0},   # +700
+	{"stones": 3034,  "radius": 52.0},   # +1000
+	{"stones": 4434,  "radius": 61.0},   # +1400
+	{"stones": 6434,  "radius": 71.0},   # +2000
+	{"stones": 9234,  "radius": 82.0},   # +2800
+	{"stones": 13234, "radius": WARM_MAX},  # +4000
 ]
 
 ## What each rung costs on its own, which is the number the fire's window shows
 ## and the one a player plans against.
-const BASE_LEVEL_STEPS: Array[int] = [3, 9, 15, 27, 51, 87, 135, 210, 320,
+const BASE_LEVEL_STEPS: Array[int] = [3, 6, 15, 27, 51, 87, 135, 210, 320,
 	480, 700, 1000, 1400, 2000, 2800, 4000]
 
 const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
@@ -2593,6 +2593,18 @@ const TORCH_HINTS_MAX := 3
 ## design has had since it was written -- that the warm radius grows and nothing
 ## on screen says so.
 const FROZEN_MIN_RING := 8.5
+## The pair the Lv3 circle (radius 11) is promised to hold. A density scatter
+## put an expected 0.77 cats in the 8.5..11 ring -- most seeds had none -- and
+## "the workforce grows here" was a coin flip. Pinned the way the first copper
+## is: the promise is placed, the scatter still rewards walking.
+const SECOND_RING_CATS := 2
+const SECOND_RING := Vector2(9.4, 10.6)
+## Where the *random* scatter may begin. Past the Lv2 circle, so the second
+## circle's find is exactly one animal (the starter) on every seed -- the
+## density scatter used to start at 8.5 and put a bonus cat inside nine tiles
+## about one seed in seven, which made "the workforce grows at Lv3" a beat some
+## players had already had.
+const FROZEN_SCATTER_MIN := 9.6
 ## Carrying one. She walks at half speed and cannot run: a frozen cat is a body
 ## in her arms, and the distance she chose to walk out is the price of it. This
 ## is the only thing in the game that slows her down other than the cold.
