@@ -30,7 +30,8 @@ func _draw() -> void:
 		return
 	var tile := float(Defs.TILE)
 	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
-	var warm_px: float = sim.warm_radius * tile
+	# The painted circle, which trails the simulated one so growth is seen.
+	var warm_px: float = sim.shown_radius * tile
 
 	# Ground and warm pool are drawn by GroundLayer beneath this one; here we
 	# only add what animates: the frontier, the grid and the ore.

@@ -204,6 +204,12 @@ var meter_cell := Vector2i(9999, 9999)
 var shelter_glow: float = 0.0
 ## How many are inside, player included. Decides how many shadows go on the wall.
 var shelter_sleepers: int = 1
+## The fire's "!": the third motivation stands unanswered. Pushed from Main like
+## everything else on this layer.
+var base_alert := false
+## A cat is in her arms: the cells it could be set down to work on glow faintly.
+## The rule is `Sim._is_post` and the paint asks it, so the two cannot drift.
+var cat_hint := false
 
 var preview_affordable := true
 var show_preview := true
@@ -313,6 +319,8 @@ func _draw() -> void:
 	_draw_hand_progress()
 	_draw_cat_digging(tile)
 	_draw_meter_marker(tile)
+	_draw_post_hints(tile)
+	_draw_base_alert(tile)
 	# Cats are not drawn here any more. They are nodes under Main/Cats at a z
 	# between this layer and _marks_layer, so what is left in this function is
 	# the factory itself.
@@ -968,8 +976,50 @@ func _draw_pickaxe_hint(tile: float) -> void:
 	# thing it was pointing at.
 	_object_art(PICKAXE_ART, at + Vector2(0.0, -18.0 + bob), PICKAXE_DRAW / 3.0)
 
+## The "!" over the fire, while the thought that points at it stands open.
+## Small, dark-plated and bouncing a little -- the language every notice in this
+## game uses -- and gone the moment the window it points at is opened.
+func _draw_base_alert(tile: float) -> void:
+	if not base_alert or not _visible(sim.core_cell, tile):
+		return
+	var centre: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
+	var bob: float = sin(pulse * 4.0) * 2.0
+	var at: Vector2 = centre + Vector2(0.0, -34.0 + bob)
+	var plate := Rect2(at - Vector2(7.0, 10.0), Vector2(14.0, 18.0))
+	draw_rect(plate.grow(1.0), Color(0, 0, 0, 0.35))
+	draw_rect(plate, Color(0.09, 0.11, 0.16, 0.92))
+	draw_rect(plate, Defs.COL_CORE, false, 1.0)
+	var width: float = UIFont.FONT.get_string_size("!", HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+	draw_string(UIFont.FONT, at + Vector2(-width * 0.5, 5.0), "!",
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Defs.COL_CORE)
+
+## Where a carried cat could be put to work, said as faint breathing rings on
+## the cells themselves. Deliberately quiet -- a suggestion in the world, not an
+## answer in a banner -- and only while one is actually in her arms.
+func _draw_post_hints(tile: float) -> void:
+	if not cat_hint:
+		return
+	var glow: float = 0.10 + (sin(pulse * 2.4) + 1.0) * 0.05
+	for cell: Vector2i in sim.ore:
+		if not _visible(cell, tile) or not sim.can_touch(cell):
+			continue
+		if not sim._is_post(cell):
+			continue
+		var taken := false
+		for cat: Sim.Cat in sim.cats:
+			if cat.assigned == cell:
+				taken = true
+				break
+		if taken:
+			continue
+		var centre: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		draw_circle(centre, tile * 0.42, Color(1.0, 0.82, 0.45, glow))
+		draw_arc(centre, tile * 0.42, 0.0, TAU, 24, Color(1.0, 0.82, 0.45, glow * 2.2), 1.4, true)
+
 func _draw_kit(tile: float) -> void:
-	if sim.kit_cell == Vector2i(9999, 9999) or sim.kit_searched >= 2:
+	# The case stays: it opened, the base unfolded beside it, and a metal box
+	# does not stop existing because it is empty.
+	if sim.kit_cell == Vector2i(9999, 9999):
 		return
 	var at: Vector2 = Vector2(sim.kit_cell) * tile + Vector2.ONE * tile * 0.5
 	if not view_rect.grow(tile).has_point(at):

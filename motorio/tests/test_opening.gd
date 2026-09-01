@@ -30,7 +30,6 @@ func _run() -> void:
 	_test_missions_follow_the_world()
 	_test_cold_ends_it()
 	_test_the_gun_comes_from_the_fire()
-	_test_drops_line_up()
 	_test_feeding_the_fire()
 	_test_save_mid_opening()
 	_test_finish_tutorial()
@@ -41,11 +40,12 @@ func _run() -> void:
 	quit(failures)
 
 
-## Search the case and pick up everything it dropped. The opening is two searches
-## and four objects on the snow; every test below this one is about what happens
-## *after* that, so it is done in one line rather than four every time.
-func _empty_kit(sim) -> void:
+## Through the opening's first two sentences: the case unfolds into the base,
+## and the fire makes the shelter kit, which lands beside it and is picked up.
+## Every test below this one is about what happens *after* that.
+func _open_and_hold_shelter(sim) -> void:
 	sim.search_kit()
+	sim.craft_shelter_kit()
 	for cell: Vector2i in sim.drops.keys():
 		sim.collect_drop(cell)
 
@@ -138,79 +138,32 @@ func _test_clock_is_held() -> void:
 func _test_searching_the_kit() -> void:
 	_crash()
 	var sim = main.sim
-	# The case tips onto the snow rather than into her hands. The first thing the
-	# game ever gives the player used to arrive as a word in the corner of the
-	# screen; two objects lying below the case are two things to walk over, and
-	# picking a thing up is how you find out what it is.
-	# The ground below the case, cleared. Where the seams fall is seeded and the
-	# run seed is different every time, so on some worlds the four cells under the
-	# case are taken and the drops legitimately go beside it instead -- which made
-	# this a test that failed about one run in five for a reason that was not the
-	# thing being tested. What is being tested is the preference, so the
-	# preference is given somewhere to go.
-	for offset: Vector2i in [Vector2i(0, 1), Vector2i(1, 1), Vector2i(-1, 1),
-			Vector2i(0, 2), Vector2i(1, 2), Vector2i(-1, 2)]:
-		sim.ore.erase(sim.kit_cell + offset)
-		sim.mined_rocks[sim.kit_cell + offset] = true
-	# One thing, and it is the fire. The build gun used to come out at the same
-	# moment, which put a tool she cannot use for another ten minutes -- nothing
-	# to build and nothing to build it with -- beside the one object the opening
-	# is about, and made the first thing she ever sees a choice of two.
+	# One search, and the search *is* the fire. Nothing drops, nothing is
+	# carried; the case unfolds into the base on the crash anchor and the case
+	# itself stays standing beside it as the box it is. The old two-search flow
+	# -- base kit, then shelter and pickaxe -- is the exact regression the
+	# golden path work removed, so its absence is asserted by name.
 	var first: Array[int] = sim.search_kit()
-	_assert(first.size() == 1, "첫 조사에서 하나만 떨어진다: %d" % first.size())
-	_assert(_kit_always_gives(), "그리고 200회차 모두 무언가가 나온다")
-	_assert(first.has(Sim.DROP_KIT_BASE), "긴급기지키트다")
-	_assert(not first.has(Sim.DROP_GUN), "건설총은 아직 나오지 않는다")
-	_assert(sim.carried_kit == Defs.KIT_NONE, "아직 손에는 아무것도 없다")
-	_assert(not sim.has_gun, "줍기 전에는 총도 없다")
-	_assert(sim.drops.size() == 1, "바닥에 하나가 놓여 있다")
-	# Beside the case: one of the eight cells touching it.
-	#
-	# It used to be "below", then "on the far side from her", and it is beside
-	# her now because the case became a solid box in 1.0.26 -- whatever is beyond
-	# it is a walk round it, and the opening is thirteen seconds long.
-	for cell: Vector2i in sim.drops:
-		var step: Vector2i = cell - sim.kit_cell
-		_assert(maxi(absi(step.x), absi(step.y)) == 1,
-			"상자에 붙어서 떨어진다: %s" % str(step))
+	_assert(first.is_empty(), "조사에서 아무것도 떨어지지 않는다")
+	_assert(sim.machine_at(sim.core_cell) != null, "그리고 코어가 서 있다")
+	_assert(sim.base_placed, "조사가 곧 기지다")
+	_assert(sim.kit_searched == 1, "조사는 한 번이다")
+	_assert(sim.drops.is_empty(), "눈 위에는 아무것도 없다")
+	_assert(not sim.has_gun and not sim.has_pickaxe, "도구는 상자에서 나오지 않는다")
+	_assert(not sim.can_search_kit(), "두 번째 조사는 없다")
+	_assert(sim.search_kit().is_empty(), "빈 상자다")
+	_assert(not main._facing_kit(), "Z도 더는 상자를 가리키지 않는다")
 
-	# And it does not open again until the fire does. Both searches used to be
-	# available from the first frame, which left her standing in the snow holding
-	# a shelter and a pickaxe with nowhere to put either -- the opening is one
-	# sentence at a time and the fire is the first one.
-	_assert(sim.search_kit().is_empty(), "불을 피우기 전에는 두 번째 조사가 없다")
-	_assert(sim.kit_searched == 1, "그래서 조사 횟수도 그대로다: %d" % sim.kit_searched)
-	_assert(not main._facing_kit() or not sim.can_search_kit(),
-		"Z도 상자를 가리키지 않는다")
-	sim.carried_kit = Defs.KIT_BASE
-	sim.place_base(sim.core_cell)
-	_assert(sim.base_placed and sim.can_search_kit(), "불을 피우면 다시 열린다")
-
-	var second: Array[int] = sim.search_kit()
-	_assert(second.size() == 2, "두 번째 조사에서 둘이 더 떨어진다: %d" % second.size())
-	_assert(second.has(Sim.DROP_KIT_SHELTER) and second.has(Sim.DROP_PICKAXE),
-		"긴급숙소키트와 곡괭이다")
-	_assert(not second.has(Sim.DROP_GUN), "총은 상자에 없다 — 불이 준다")
-	_assert(sim.search_kit().is_empty(), "세 번째는 없다 — 빈 상자다")
-
-	# Picking them up is what grants them.
-	for cell: Vector2i in sim.drops.keys():
-		var kind: int = int(sim.drops[cell])
-		if kind == Sim.DROP_GUN:
-			_assert(sim.collect_drop(cell) == Sim.DROP_GUN, "총을 줍는다")
-			_assert(sim.has_gun, "그때 총이 생긴다")
-		elif kind == Sim.DROP_PICKAXE:
-			_assert(sim.collect_drop(cell) == Sim.DROP_PICKAXE, "곡괭이를 줍는다")
-			_assert(sim.has_pickaxe, "그때 곡괭이가 생긴다")
-	# Both hands: a kit cannot be scooped up while something is already in them.
+	# The shelter kit is a craft now, and picking it up needs empty hands.
+	_assert(sim.craft_shelter_kit(), "불이 숙소 키트를 만든다")
+	_assert(not sim.craft_shelter_kit(), "하나가 눈에 있는 동안 둘째는 없다")
 	sim.carried_frozen = true
 	for cell: Vector2i in sim.drops.keys():
 		_assert(sim.collect_drop(cell) == -1, "손이 차 있으면 키트는 못 줍는다")
 	sim.carried_frozen = false
 	for cell: Vector2i in sim.drops.keys():
-		_assert(sim.collect_drop(cell) >= 0, "손이 비면 줍는다")
-		break
-	_assert(sim.kit_searched == 2, "두 번 뒤진 것으로 남는다")
+		_assert(sim.collect_drop(cell) == Sim.DROP_KIT_SHELTER, "손이 비면 줍는다")
+	_assert(sim.carried_kit == Defs.KIT_SHELTER, "이제 들고 있다")
 
 # --- Putting the fire down --------------------------------------------------
 
@@ -218,32 +171,23 @@ func _test_placing_the_base() -> void:
 	_crash()
 	var sim = main.sim
 	var crash: Vector2i = sim.core_cell
-	_empty_kit(sim)
-	_assert(not sim.place_base(crash + Vector2i(6, 0)),
-		"추락 지점에서 멀면 놓을 수 없다")
-	_assert(not sim.base_placed, "그래서 아직 불이 없다")
-	var chosen: Vector2i = crash + Vector2i(1, 1)
-	_assert(sim.place_base(chosen), "%d칸 안이면 놓을 수 있다" % int(Defs.BASE_PLACE_RADIUS))
-	_assert(sim.base_placed and sim.machine_at(chosen) != null, "코어가 그 자리에 선다")
-	# The base is the centre of everything the world already has, so it takes
-	# those with it rather than leaving them behind at the crash site.
-	_assert(sim.core_cell == chosen, "세계의 중심이 그리로 옮겨간다")
-	_assert(sim.shelter_cell == chosen + Defs.SHELTER_CELL, "거처 자리도 따라온다")
-	_assert(sim.is_warm(chosen), "이제 그 자리가 따뜻하다")
+	sim.search_kit()
+	_assert(sim.base_placed and sim.machine_at(crash) != null, "코어가 앵커에 선다")
+	_assert(sim.shelter_cell == crash + Defs.SHELTER_CELL, "거처 자리가 정해져 있다")
+	_assert(sim.is_warm(crash), "그 자리가 따뜻하다")
 	_assert(sim.warm_radius >= Defs.WARM_BASE,
 		"온기 반경이 열린다 (%.1f칸)" % sim.warm_radius)
 	_assert(sim.carried_kit == Defs.KIT_NONE, "손이 비었다")
-	_assert(not sim.place_base(chosen + Vector2i(1, 0)), "두 번째 기지는 없다")
+	sim.carried_kit = Defs.KIT_BASE
+	_assert(not sim.place_base(crash + Vector2i(1, 0)), "두 번째 기지는 없다")
+	sim.carried_kit = Defs.KIT_NONE
 
 # --- And the hut ------------------------------------------------------------
 
 func _test_placing_the_shelter() -> void:
 	_crash()
 	var sim = main.sim
-	_empty_kit(sim)
-	sim.place_base(sim.core_cell)
-	sim.carried_kit = Defs.KIT_NONE
-	_empty_kit(sim)
+	_open_and_hold_shelter(sim)
 	_assert(sim.carried_kit == Defs.KIT_SHELTER, "긴급거처를 들었다")
 	_assert(not sim.place_shelter(sim.core_cell + Vector2i(1, 0)),
 		"기지에 붙여서는 세울 수 없다")
@@ -260,12 +204,12 @@ func _test_missions_follow_the_world() -> void:
 	_crash()
 	var sim = main.sim
 	_assert(main.mission == main.Mission.BASE, "1. 긴급기지")
-	_empty_kit(sim)
-	sim.place_base(sim.core_cell)
+	sim.search_kit()
 	main._advance_mission()
 	_assert(main.mission == main.Mission.SURVIVE, "2. 생존 준비")
-	sim.carried_kit = Defs.KIT_NONE
-	_empty_kit(sim)
+	sim.craft_shelter_kit()
+	for cell: Vector2i in sim.drops.keys():
+		sim.collect_drop(cell)
 	_assert(sim.place_shelter(_shelter_spot(sim)), "거처를 세운다")
 	main._advance_mission()
 	# Two missions, and then the game. There were four; the last two told the
@@ -296,15 +240,14 @@ func _test_missions_follow_the_world() -> void:
 	var seen: Dictionary[String, bool] = {}
 	_crash()
 	seen[String(main.objective_data()["text"])] = true
-	_empty_kit(main.sim)
-	seen[String(main.objective_data()["text"])] = true
-	main.sim.place_base(main.sim.core_cell)
+	main.sim.search_kit()
 	main._advance_mission()
 	seen[String(main.objective_data()["text"])] = true
-	main.sim.carried_kit = Defs.KIT_NONE
-	_empty_kit(main.sim)
+	main.sim.craft_shelter_kit()
+	for cell: Vector2i in main.sim.drops.keys():
+		main.sim.collect_drop(cell)
 	seen[String(main.objective_data()["text"])] = true
-	_assert(seen.size() == 4, "네 상황이 네 가지 문구를 낸다 (%d)" % seen.size())
+	_assert(seen.size() == 3, "세 상황이 세 가지 문구를 낸다 (%d)" % seen.size())
 
 # --- The cold is a clock, not a wall ----------------------------------------
 
@@ -381,12 +324,9 @@ func _test_feeding_the_fire() -> void:
 func _test_save_mid_opening() -> void:
 	_crash()
 	var sim = main.sim
-	_empty_kit(sim)
-	var chosen: Vector2i = sim.core_cell + Vector2i(1, 0)
-	sim.place_base(chosen)
+	var anchor: Vector2i = sim.core_cell
+	_open_and_hold_shelter(sim)
 	main._advance_mission()
-	sim.carried_kit = Defs.KIT_NONE
-	_empty_kit(sim)
 	main.player.warmth = 44.0
 	_assert(main.save_game(false), "오프닝 도중에 저장된다")
 
@@ -396,13 +336,10 @@ func _test_save_mid_opening() -> void:
 	_assert(main.mission == main.Mission.SURVIVE, "임무 2로 돌아온다")
 	_assert(main.sim.base_placed and not main.sim.shelter_placed,
 		"기지는 서 있고 거처는 아직 없다")
-	# The one that would have gone wrong quietly: the base moves the centre of
-	# the world, so a save that forgot where it went would put the fog, the hut's
-	# spot and the ore rings somewhere other than the fire on screen.
-	_assert(main.sim.core_cell == chosen, "옮겨 놓은 기지 자리가 살아난다")
-	_assert(main.sim.machine_at(chosen) != null, "그 자리에 코어가 있다")
+	_assert(main.sim.core_cell == anchor, "기지 자리가 살아난다")
+	_assert(main.sim.machine_at(anchor) != null, "그 자리에 코어가 있다")
 	_assert(main.sim.carried_kit == Defs.KIT_SHELTER, "손에 든 거처도 그대로다")
-	_assert(main.sim.kit_searched == 2, "상자를 두 번 뒤진 것도")
+	_assert(main.sim.kit_searched == 1, "상자는 이미 뒤진 것으로 남는다")
 	_assert(absf(main.player.warmth - 44.0) < 0.5, "체온도 그대로다")
 	main.clear_save()
 
@@ -417,52 +354,18 @@ func _test_finish_tutorial() -> void:
 	# working at a third speed makes the player ask why.
 	_assert(not sim.food_placed, "밥통은 아직 없다")
 	_assert(main.mission == main.Mission.DONE, "오프닝이 끝난 상태다")
-	_assert(sim.kit_searched == 2, "상자는 비어 있다")
+	_assert(sim.kit_searched == 1, "상자는 비어 있다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "손에는 아무것도 없다")
 	_assert(is_equal_approx(main.player.warmth, 100.0), "체온은 가득이다")
 
 
-## The case has to open on every world.
-##
-## Its contents used to land on one of eight cells and nowhere else, so a boulder
-## cluster over the case meant the search came back empty: no fire, and a run
-## that cannot be started. One seed proves nothing about that -- the map is
-## different every time and most maps are fine -- so this walks two hundred.
-func _kit_always_gives() -> bool:
-	var empty := 0
-	for index in 200:
-		var sim := Sim.new()
-		sim.setup(70000 + index)
-		sim.begin_crash()
-		if sim.search_kit().size() != 1 or sim.drops.size() != 1:
-			empty += 1
-		sim.free()
-	if empty > 0:
-		print("   상자가 빈 회차: %d/200" % empty)
-	return empty == 0
-
-## The build gun comes out of the fire, not out of the case.
-##
-## It used to fall onto the snow at the very start, ten minutes before there is
-## anything to build or anything to build it with, beside the one object the
-## opening is about. Now the first upgrade hands it over -- which is the moment
-## the player has just learned what the fire is for.
 func _test_the_gun_comes_from_the_fire() -> void:
 	_crash()
 	var sim = main.sim
 	# Through the opening as far as the fire being lit.
 	sim.search_kit()
-	sim.search_kit()
 	_assert(not sim.gun_dropped, "상자에서는 총이 나오지 않는다")
-	var from_kit := false
-	for cell: Vector2i in sim.drops:
-		if int(sim.drops[cell]) == Sim.DROP_GUN:
-			from_kit = true
-	_assert(not from_kit, "두 번째 조사에도 없다")
-
-	sim.carried_kit = Defs.KIT_BASE
-	sim.place_base(sim.core_cell)
-	_assert(not sim.gun_dropped, "불을 피우는 것만으로는 아직이다")
+	_assert(not sim.has_gun, "펼쳐지는 것만으로는 아직이다")
 
 	# The first upgrade. Through the real door, so what the player does is what
 	# is being tested.
@@ -488,62 +391,3 @@ func _test_the_gun_comes_from_the_fire() -> void:
 		if int(sim.drops[cell]) == Sim.DROP_GUN:
 			guns += 1
 	_assert(guns == 0, "두 번째 업그레이드는 총을 또 주지 않는다")
-
-## What comes out of the case lands in a line, near to far.
-##
-## Two things dropped at the same distance is a clump: she walks into both at
-## once and the second is picked up without ever being looked at. The order of
-## KIT_CONTENTS is a near-to-far order now -- the case she needs first at her
-## feet, the tool one step past it.
-func _test_drops_line_up() -> void:
-	_crash()
-	var sim = main.sim
-	# Standing north of the case, so "away" is south and the line is measurable.
-	main.player.position = sim.cell_centre(sim.kit_cell + Vector2i(0, -1))
-	for offset: Vector2i in [Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3),
-			Vector2i(1, 1), Vector2i(1, 2), Vector2i(-1, 1), Vector2i(-1, 2)]:
-		sim.ore.erase(sim.kit_cell + offset)
-		sim.mined_rocks[sim.kit_cell + offset] = true
-	# Through the sim, with the direction Main would have set: the hold itself
-	# wants a held key and a facing, and neither is what this is about.
-	sim.drop_away = Vector2i(0, 1)
-	sim.search_kit()
-	# The second search waits for the fire, and what this test is about is where
-	# the second search puts things -- so the fire is lit rather than the rule
-	# being worked around.
-	sim.carried_kit = Defs.KIT_BASE
-	sim.place_base(sim.core_cell)
-	# Standing where a player stands to open it: between the fire and the case,
-	# which is also the cell the search would rather drop into. Set here because
-	# `search_kit` is called directly -- in the game `_update_kit_search` fills
-	# both of these in from where she actually is.
-	sim.drop_from = sim.kit_cell + Vector2i(-1, 0)
-	sim.drop_away = Vector2i(1, 0)
-	sim.search_kit()
-	var kit_at := Vector2i(9999, 9999)
-	var tool_at := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.drops:
-		if int(sim.drops[cell]) == Sim.DROP_KIT_SHELTER:
-			kit_at = cell
-		if int(sim.drops[cell]) == Sim.DROP_PICKAXE:
-			tool_at = cell
-	_assert(kit_at != Vector2i(9999, 9999) and tool_at != Vector2i(9999, 9999),
-		"둘 다 떨어졌다: %s %s" % [str(kit_at), str(tool_at)])
-	var near: float = Vector2(kit_at - sim.kit_cell).length()
-	var far: float = Vector2(tool_at - sim.kit_cell).length()
-	_assert(far > near, "곡괭이가 키트보다 멀다: %.1f > %.1f" % [far, near])
-	_assert(kit_at != tool_at, "그리고 같은 칸이 아니다")
-
-	# --- And the case is a box, not a decal ------------------------------------
-	# She walked straight through the middle of the first object in the game. It
-	# is drawn as a metal case sitting on the snow, and what it teaches about
-	# solid things is what a player assumes about every object after it.
-	_assert(sim.blocks_player(sim.kit_cell), "키트 칸은 지나갈 수 없다")
-	# Which is why what comes out of it lands beside her rather than beyond it.
-	# The far side is two or three tiles of walking round a box, and the opening
-	# is thirteen seconds long.
-	for cell: Vector2i in sim.drops:
-		_assert(not sim.blocks_player(cell), "떨어진 것은 막힌 칸에 있지 않다: %s" % str(cell))
-		_assert(cell != sim.drop_from, "그리고 그녀가 선 칸도 아니다: %s" % str(cell))
-		var away: Vector2 = Vector2(cell - sim.kit_cell)
-		_assert(away.length() <= 3.0, "그리고 케이스 곁에 있다: %s" % str(cell))

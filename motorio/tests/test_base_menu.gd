@@ -96,10 +96,20 @@ func _test_rows_agree() -> void:
 				ids.append(String(Defs.BASE_CRAFTS[int(row["craft"])]["id"]))
 		for craft: Dictionary in Defs.BASE_CRAFTS:
 			var id: String = String(craft["id"])
-			_assert(ids.has(id) == (level >= int(craft["level"])),
-				"%d단계에 %s 는 %s" % [level, id,
-					"있다" if level >= int(craft["level"]) else "없다"])
-	_assert(int(Defs.BASE_CRAFTS[1]["level"]) == 4, "사료 상자는 4단계다")
+			# Level is one gate of three now: a row can wait for a state
+			# ("when") and retire on one ("until"). This world is past the
+			# opening -- shelter standing, tools owned -- so the golden-path
+			# rows are correctly absent at every level.
+			var expected: bool = level >= int(craft["level"]) \
+				and main._craft_state(String(craft.get("when", ""))) \
+				and not main._craft_state(String(craft.get("until", "__never__")))
+			_assert(ids.has(id) == expected,
+				"%d단계에 %s 는 %s" % [level, id, "있다" if expected else "없다"])
+	var bin_level := -1
+	for craft: Dictionary in Defs.BASE_CRAFTS:
+		if String(craft["id"]) == "food_bin":
+			bin_level = int(craft["level"])
+	_assert(bin_level == 4, "사료 상자는 4단계다")
 
 	main.clear_save()
 	main.free()

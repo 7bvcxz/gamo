@@ -92,9 +92,10 @@ func _test_the_kit() -> void:
 	_assert(main.active_prompt() == "KIT", "상자 옆에 서면 Z 조사")
 	_assert(bool(Defs.key_prompt("KIT").get("hold", false)),
 		"그리고 누르고 있어야 한다고 말한다")
-	# The case tips onto the snow now, so the prompt only becomes 내려놓기 once she
-	# has actually walked over and picked the kit up.
+	# The case unfolds into the base now; what she carries is the shelter kit the
+	# fire makes, so the prompt becomes 내려놓기 the moment that is in her hands.
 	main.sim.search_kit()
+	main.sim.craft_shelter_kit()
 	for cell: Vector2i in main.sim.drops.keys():
 		main.sim.collect_drop(cell)
 	_assert(main.active_prompt() == "PLACE", "주워 들면 내려놓기로 바뀐다")
@@ -150,6 +151,7 @@ func _test_one_at_a_time() -> void:
 	# walked. The table's order decides, and exactly one comes out.
 	main.player.position = main.sim.cell_centre(main.sim.kit_cell)
 	main.sim.search_kit()
+	main.sim.craft_shelter_kit()
 	for cell: Vector2i in main.sim.drops.keys():
 		main.sim.collect_drop(cell)
 	var shown: String = main.active_prompt()

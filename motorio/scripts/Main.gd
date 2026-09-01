@@ -424,8 +424,6 @@ func objective_data() -> Dictionary:
 	# The opening. Four rungs of its own, above the ordinary ladder, because
 	# until they are done most of that ladder is about machines that cannot be
 	# built yet and a base that does not exist.
-	if sim.carried_kit == Defs.KIT_BASE:
-		return _goal(Defs.mission_line("M1-HOLD"), "thing", Icons.THING_CORE)
 	if sim.carried_kit == Defs.KIT_SHELTER:
 		return _goal(Defs.mission_line("M2-HOLD"), "thing", Icons.THING_SHELTER)
 	match mission:
@@ -1076,6 +1074,8 @@ func _process(delta: float) -> void:
 	# Two tiles to the player's right, on the same ground line, so the generated
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
+	machine_layer.base_alert = base_alert()
+	machine_layer.cat_hint = sim.carried_cat != null
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
 	machine_layer.pickaxe_hint = pickaxe_hint_cell()
 	# A panel pinned to a machine the player has since demolished would keep
@@ -1224,7 +1224,11 @@ const SAVE_PATH := "user://motorio_save.cfg"
 ## never produce. The schema check is the mechanism this repository already has
 ## for exactly that, and it is what the number moved for when iron was *removed*
 ## at id 5 a version ago.
-const SAVE_SCHEMA := 9
+# 10 (2026-09-01): the golden-path rework. One kit search instead of two, the
+# shelter and the tools made at the fire, and -- over the next phases -- the
+# copper, debris and iron rings moving. A save from before answers old
+# questions; the schema check turns it into a safe new game.
+const SAVE_SCHEMA := 10
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1252,6 +1256,9 @@ func _process_play(delta: float) -> void:
 	if mission == Mission.DONE and Zone.clock_runs(zone()):
 		time_left = maxf(0.0, time_left - delta)
 	sim.tick(delta)
+	_update_craft(delta)
+	if sim.shelter_placed and shelter_age < 999.0:
+		shelter_age += delta
 	_update_nibbles(delta)
 	_update_gacha(delta)
 	_collect_and_adopt()
@@ -1475,6 +1482,13 @@ func _collect_shard() -> void:
 ## of those is worth carrying another stone for.
 ##
 ## Returns an empty array at the top, where there is no next step to count to.
+## The fire's have/need, for the window row: stones in the pack against stones
+## the next rung wants. `upgrade_progress` below is the other pair -- stones
+## already *in* the fire against the rung -- and the window shows this one
+## because the question at the window is "can I pay".
+func fuel_progress() -> Array[int]:
+	return [int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)), sim.stones_to_next()]
+
 func upgrade_progress() -> Array[int]:
 	var out: Array[int] = []
 	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
@@ -1499,9 +1513,15 @@ var frozen_seen := false
 ## Whether a rung is ready to appear. One `match`, so a condition cannot be
 ## written twice and drift; this repository has a record of a rule spread across
 ## nine handlers with six of them missing it.
+## How long the shelter has stood. The board's first rung waits out a short
+## breath of freedom after it -- the canonical order is build, look around, and
+## *then* the thought -- and `finish_tutorial` fast-forwards it, because a world
+## that starts past the opening is past the pause too.
+var shelter_age: float = 0.0
+
 func _mission_ready(id: String) -> bool:
 	match id:
-		"BASE2": return sim.shelter_placed
+		"BASE2": return sim.shelter_placed and shelter_age >= Defs.THOUGHT_DELAY
 	return false
 
 ## And whether it is behind us.
@@ -1509,6 +1529,18 @@ func _mission_finished(id: String) -> bool:
 	match id:
 		"BASE2": return sim.base_level >= 1
 	return false
+
+## Whether the fire wears a "!": the thought is open and the player has not yet
+## looked at what it points to. Opening the base window is what answers it --
+## the window is where 0/3 lives -- and the first upgrade retires it with the
+## rung itself.
+var base_alert_seen: bool = false
+
+func base_alert() -> bool:
+	if base_alert_seen or sim.base_level >= 1:
+		return false
+	return bool(missions_open.get("BASE2", false)) \
+		and not bool(missions_done.get("BASE2", false))
 
 ## Run once a frame. Opens what is ready and closes what is done, in that order,
 ## so a rung whose conditions are both true at once still appears before it is
@@ -1670,19 +1702,21 @@ func _update_kit_search(delta: float) -> void:
 			sim.drop_away = Vector2i(sim.drop_away.x, 0)
 		else:
 			sim.drop_away = Vector2i(0, sim.drop_away.y)
-	var found: Array[int] = sim.search_kit()
-	if found.is_empty():
-		return
-	fx.ring(sim.cell_centre(sim.kit_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
-	audio.call("play", "alloy")
-	# It tips onto the snow rather than into her hands. What came out is not named
-	# here either -- two objects are lying below the case and picking one up is
-	# how the player finds out what it is.
-	var names: Array[String] = []
-	for kind: int in found:
-		names.append(Sim.DROP_NAMES[kind])
-	_notify("상자에서 무언가 떨어졌습니다", Defs.COL_CORE)
-	note_log("상자에서 나온 것 · %s" % "  ·  ".join(names), Defs.COL_CORE)
+	var was_placed: bool = sim.base_placed
+	sim.search_kit()
+	if sim.base_placed and not was_placed:
+		# The case unfolds into the fire. The rings walk outward because that is
+		# what the heat is about to do -- the painted radius follows behind the
+		# simulated one from here.
+		var at: Vector2 = sim.cell_centre(sim.core_cell)
+		fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
+		fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
+		fx.ring(at, Defs.COL_CORE, Defs.RING_MILESTONE)
+		fx.burst(at, Defs.COL_CORE, 16)
+		shake = maxf(shake, Defs.FX_MILESTONE)
+		audio.call("play", "finish")
+		_notify("긴급기지가 펼쳐졌다", Defs.COL_CORE, UNLOCK_MESSAGE_LIFE)
+		note_log("상자가 기지가 되었다 · 온기가 퍼진다", Defs.COL_CORE)
 
 ## The build gun's first recipe.
 ##
@@ -2037,11 +2071,11 @@ func finish_tutorial() -> void:
 		sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
 		sim.food_cell = sim.shelter_cell + Vector2i(Defs.FOOD_OFFSET.round())
 		sim.carried_kit = Defs.KIT_NONE
-	sim.kit_searched = 2
-	# The tools are picked up off the snow now, so a world that starts past the
-	# opening has to hand them over here -- the slots used to open on the lid
-	# being lifted, and `kit_searched` alone no longer means she is holding
-	# anything.
+	sim.kit_searched = 1
+	shelter_age = 999.0
+	# The tools are made at the fire now, so a world that starts past the opening
+	# has to hand them over here -- `kit_searched` alone never meant she was
+	# holding anything.
 	sim.has_gun = true
 	sim.has_pickaxe = true
 	sim.drops.clear()
@@ -2989,6 +3023,9 @@ func _primary_action() -> void:
 	var mining_here: bool = holding_pickaxe() and sim.can_hand_mine(target) \
 		and not sim.machines.has(target)
 	if not mining_here and sim.pick_up_cat(cell):
+		if not sim.has_learned("CATHINT"):
+			sim.learn("CATHINT")
+			_notify("도와주고 싶은 것 같다.", Defs.COL_TEXT_DIM, UNLOCK_MESSAGE_LIFE)
 		_notify("고양이를 안았습니다", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
 		audio.call("play", "select")
@@ -3034,11 +3071,29 @@ func base_rows() -> Array[Dictionary]:
 	# her at that point.
 	var level: int = Defs.base_level_shown(sim.base_level)
 	for index in Defs.BASE_CRAFTS.size():
-		if level >= int(Defs.BASE_CRAFTS[index]["level"]):
-			rows.append({"kind": "craft", "craft": index})
+		var craft: Dictionary = Defs.BASE_CRAFTS[index]
+		if level < int(craft["level"]):
+			continue
+		if not _craft_state(String(craft.get("when", ""))):
+			continue
+		if _craft_state(String(craft.get("until", "__never__"))):
+			continue
+		rows.append({"kind": "craft", "craft": index})
 	return rows
 
+## The predicates a craft row may name. One match, so a condition cannot be
+## written twice and drift -- and "" is the row that is always on.
+func _craft_state(name: String) -> bool:
+	match name:
+		"": return true
+		"shelter_placed": return sim.shelter_placed
+		"has_pickaxe": return sim.has_pickaxe
+		"has_gun": return sim.has_gun
+		"copper_held": return sim.held_items.has(Defs.ITEM_COPPER)
+	return false
+
 func _open_base_menu() -> void:
+	base_alert_seen = true
 	close_windows("base")
 	base_menu_open = true
 	menu_index = 0
@@ -3129,9 +3184,28 @@ func _base_menu_confirm() -> void:
 
 ## Making something at the fire. A table rather than a branch, so the third thing
 ## the base can make is a row and not a rewrite.
+## What the fire is in the middle of making, or "" when it is idle. Not saved:
+## the longest make is three seconds, every timed make is free, and a queue that
+## survives a save is a queue that needs a schema.
+var craft_making: String = ""
+var craft_left: float = 0.0
+
 func craft_selected(index: int = 0) -> void:
 	var craft: Dictionary = Defs.BASE_CRAFTS[clampi(index, 0, Defs.BASE_CRAFTS.size() - 1)]
 	var id: String = String(craft["id"])
+	var seconds: float = float(craft.get("seconds", 0.0))
+	if seconds > 0.0:
+		if craft_making != "":
+			_notify("아직 만드는 중입니다", Defs.COL_TEXT_DIM)
+			audio.call("play", "deny")
+			return
+		craft_making = id
+		craft_left = seconds
+		close_base_menu()
+		_notify("%s%s 만드는 중..." % [String(craft["name"]),
+			Defs.object_of(String(craft["name"]))], Defs.COL_TEXT_DIM)
+		audio.call("play", "select")
+		return
 	var made: bool = sim.craft_torch() if id == "torch" else sim.craft_food_bin()
 	if not made:
 		var reason: String = "이미 있습니다" \
@@ -3144,6 +3218,48 @@ func craft_selected(index: int = 0) -> void:
 	_notify("%s을 만들었습니다%s" % [String(craft["name"]), tail], Defs.COL_CORE)
 	fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
 	audio.call("play", "alloy")
+
+## The timed makes, landing. The pop -- the ring, the sound, the thing existing
+## -- happens at the fire for objects and at her for tools, because a tool lands
+## in her hand.
+func _update_craft(delta: float) -> void:
+	if craft_making == "":
+		return
+	craft_left -= delta
+	if craft_left > 0.0:
+		return
+	var id: String = craft_making
+	craft_making = ""
+	match id:
+		"shelter":
+			if sim.craft_shelter_kit():
+				_notify("긴급숙소 키트가 나왔다  ·  들고 가 자리를 고른다", Defs.COL_CORE)
+				fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+				audio.call("play", "alloy")
+		"pickaxe":
+			if sim.craft_pickaxe():
+				_equip(TOOL_PICKAXE)
+				_notify("곡괭이가 손에 들어왔다", Defs.COL_CORE)
+				fx.ring(player.position, Defs.COL_CORE, Defs.RING_SMALL)
+				fx.burst(player.position, Defs.COL_CORE, 10)
+				audio.call("play", "alloy")
+		"gun":
+			if sim.craft_build_gun():
+				_equip(TOOL_BUILD_GUN)
+				sim.unlocked[Defs.M_MINER] = true
+				selected_index = Defs.BUILDABLE.find(Defs.M_MINER)
+				menu_index = maxi(selected_index, 0)
+				_notify("건물건설총이 손에 들어왔다  ·  채굴기가 장전되어 있다", Defs.COL_CORE)
+				fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
+				fx.burst(player.position, Defs.COL_CORE, 12)
+				audio.call("play", "finish")
+
+## Puts a tool in her hand by name, if she owns it.
+func _equip(tool: int) -> void:
+	var index: int = TOOLS.find(tool)
+	if index >= 0 and tool_unlocked(tool):
+		tool_index = index
+		_on_tool_selected()
 
 ## Handing the fuel over, and showing it go in. The pieces fly out of her arms
 ## and are pulled into the core, because "the number in the corner changed" is
@@ -3181,23 +3297,7 @@ func _deposit_at_core() -> void:
 
 func _place_kit(cell: Vector2i) -> void:
 	var kit: int = sim.carried_kit
-	if kit == Defs.KIT_BASE:
-		if sim.place_base(cell):
-			# What it did is on the ground: the fog pulls back and a circle of
-			# warm snow appears under her. Saying how many tiles wide it is is
-			# the same fact in figures, on top of the picture of it.
-			_notify("불이 붙었습니다", Defs.COL_CORE)
-			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_LARGE)
-			fx.burst(sim.cell_centre(cell), Defs.COL_CORE, 16)
-			shake = maxf(shake, Defs.FX_SMALL)
-			audio.call("play", "finish")
-			return
-		if Vector2(cell - sim.core_cell).length() > Defs.BASE_PLACE_RADIUS:
-			_notify("추락 지점에서 너무 멉니다  %d칸 안에 놓으세요"
-				% int(Defs.BASE_PLACE_RADIUS), Defs.COL_TEXT_DIM)
-		else:
-			_notify("여기에는 놓을 수 없습니다", Defs.COL_TEXT_DIM)
-	elif kit == Defs.KIT_FOOD:
+	if kit == Defs.KIT_FOOD:
 		if sim.place_food_bin(cell):
 			_notify("사료 상자를 놓았습니다", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_MEDIUM)

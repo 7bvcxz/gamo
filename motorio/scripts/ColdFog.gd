@@ -105,8 +105,8 @@ func _ready() -> void:
 	material = shader_material
 
 func _process(_delta: float) -> void:
-	if sim != null and absf(sim.warm_radius - _baked_radius) >= REBAKE_STEP:
-		rebake(sim.warm_radius)
+	if sim != null and absf(sim.shown_radius - _baked_radius) >= REBAKE_STEP:
+		rebake(sim.shown_radius)
 	var shader_material: ShaderMaterial = material as ShaderMaterial
 	if shader_material != null:
 		shader_material.set_shader_parameter("hole_at", torch_at)
@@ -117,7 +117,7 @@ func _process(_delta: float) -> void:
 func fog_strength(distance_tiles: float) -> float:
 	if sim == null:
 		return 0.0
-	var beyond: float = distance_tiles - sim.warm_radius
+	var beyond: float = distance_tiles - sim.shown_radius
 	if beyond <= 0.0:
 		return 0.0
 	return clampf(beyond / PREVIEW_BAND, 0.0, 1.0)

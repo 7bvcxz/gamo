@@ -534,7 +534,7 @@ func from_save(data: Dictionary) -> void:
 	shelter_placed = bool(data.get("shelter_placed", true))
 	food_placed = bool(data.get("food_placed", false))
 	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
-	kit_searched = int(data.get("kit_searched", 2))
+	kit_searched = mini(int(data.get("kit_searched", 1)), 1)
 	torches = int(data.get("torches", 0))
 	torch_left = float(data.get("torch_left", 0.0))
 	learned.clear()
@@ -565,6 +565,7 @@ func from_save(data: Dictionary) -> void:
 		cat.rarity = int(row.get("rarity", Defs.RARITY_O))
 		cats.append(cat)
 	_refresh_radius()
+	shown_radius = warm_radius
 
 func setup(seed_value: int) -> void:
 	ore.clear()
@@ -603,6 +604,7 @@ func setup(seed_value: int) -> void:
 	# Seed the cache so the opening frame does not announce a radius that has
 	# not actually changed yet.
 	_cached_radius = warm_radius
+	shown_radius = warm_radius
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
@@ -1420,6 +1422,7 @@ func begin_crash() -> void:
 	kit_cell = core_cell + Defs.KIT_OFFSET
 	warm_radius = Defs.CRASH_SIGHT
 	_cached_radius = warm_radius
+	shown_radius = warm_radius
 	explored.clear()
 	mark_explored(core_cell, int(Defs.CRASH_SIGHT))
 	_grid_dirty = true
@@ -1498,10 +1501,10 @@ const DROP_NAMES := ["긴급기지키트", "긴급숙소키트", "건물건설�
 ## minutes -- there is nothing to build and nothing to build it with -- next to
 ## the one object the opening is actually about. Two things on the snow means
 ## choosing which to walk to, and one of the two was a distraction.
-const KIT_CONTENTS: Array[Array] = [
-	[DROP_KIT_BASE],
-	[DROP_KIT_SHELTER, DROP_PICKAXE],
-]
+## What the case used to hold, kept as history: the base kit (now the case
+## unfolds into the base itself) and the shelter kit and pickaxe (now made at the
+## fire). The DROP_* constants stay -- the shelter kit still lands on the snow,
+## out of the fire's craft list rather than out of the case.
 
 var drops: Dictionary = {}
 ## Picked up rather than granted. The slots used to open on `kit_searched`, so
@@ -1559,24 +1562,51 @@ var last_recipe: Dictionary = {}
 ## One predicate, because three places ask: the search itself, the reach test
 ## that decides whether Z means the case at all, and the prompt that offers it.
 func can_search_kit() -> bool:
-	if kit_searched >= KIT_CONTENTS.size():
-		return false
-	return kit_searched == 0 or base_placed
+	return kit_searched == 0 and not base_placed
 
-## Empties the case onto the snow below it. Returns what came out.
+## Finishing the search unfolds the emergency base out of the case, on the spot.
+##
+## Nothing drops and nothing is carried: the golden path's first beat is the case
+## becoming the fire, not an errand between the two. The case's cell is where the
+## core stands, so the centre of the world moves those two tiles with it -- the
+## same move a player used to make by hand, inside the same tolerance.
+## Returns what came out, which is now always nothing; the callers that care ask
+## `base_placed` instead.
 func search_kit() -> Array[int]:
 	var out: Array[int] = []
 	if not can_search_kit():
 		return out
-	var contents: Array = KIT_CONTENTS[kit_searched]
-	kit_searched += 1
-	for index in contents.size():
-		var cell: Vector2i = _drop_cell(index)
-		if cell == Vector2i(9999, 9999):
-			continue
-		drops[cell] = int(contents[index])
-		out.append(int(contents[index]))
+	kit_searched = 1
+	deploy_base()
 	return out
+
+## The emergency base, unfolded beside the case -- on the crash anchor itself.
+##
+## Not on the case's own cell. Every ring promise in the world -- the starter
+## cat at 8.5, the copper band, the iron band, the wreck ring -- is measured
+## from this anchor, and the first version of this deployed two cells over and
+## put the "out of reach until Lv2" cat inside the first circle in every single
+## seed. The case stays standing beside the fire as the box it is.
+## `place_base` remains the hand-placed door for tests and debug worlds.
+func deploy_base() -> void:
+	if base_placed:
+		return
+	var cell: Vector2i = core_cell
+	ore.erase(cell)
+	purity.erase(cell)
+	machines.erase(cell)
+	shelter_cell = core_cell + Defs.SHELTER_CELL
+	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	var core := Machine.new()
+	core.type = Defs.M_CORE
+	core.cell = core_cell
+	core.flash = 0.6
+	machines[core_cell] = core
+	base_placed = true
+	carried_kit = Defs.KIT_NONE
+	_grid_dirty = true
+	_refresh_radius()
+	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 
 ## Below the case, and then outward. Below because that is where the player is
 ## looking -- she has to stand south of it to face it -- and outward because a
@@ -1870,6 +1900,38 @@ func _spend(id: String) -> void:
 		for item_type: int in row["cost"]:
 			stock[item_type] = int(stock.get(item_type, 0)) - int(row["cost"][item_type])
 		return
+
+## The shelter kit, made at the fire and tipped out beside it. Free, and the
+## first thing the player ever places by hand -- the craft makes the object, the
+## object lands on the snow, and carrying it to a spot is the placement lesson.
+func craft_shelter_kit() -> bool:
+	if not base_placed or shelter_placed or carried_kit == Defs.KIT_SHELTER:
+		return false
+	for cell: Vector2i in drops:
+		if int(drops[cell]) == DROP_KIT_SHELTER:
+			return false
+	var cell: Vector2i = _free_near(core_cell)
+	if cell == Vector2i(9999, 9999):
+		return false
+	drops[cell] = DROP_KIT_SHELTER
+	return true
+
+## The pickaxe, absorbed rather than dropped. A tool with one owner and no
+## placement decision has nothing to teach by lying on the snow -- what matters
+## is that it appears *in her hand*, in slot 1, the moment it is done.
+func craft_pickaxe() -> bool:
+	if not base_placed or has_pickaxe:
+		return false
+	has_pickaxe = true
+	return true
+
+## The build gun, absorbed like the pickaxe. Free; what pays for it is the
+## copper that opened the row.
+func craft_build_gun() -> bool:
+	if not base_placed or has_gun:
+		return false
+	has_gun = true
+	return true
 
 func craft_torch() -> bool:
 	if not base_placed or not can_craft_torch():
@@ -2238,6 +2300,7 @@ func demolish(cell: Vector2i) -> bool:
 	return true
 
 func tick(delta: float) -> void:
+	_tick_shown_radius(delta)
 	_tick_cats(delta)
 	_tick_thaw(delta)
 	_tick_frozen_drift(delta)
@@ -3173,6 +3236,20 @@ func _cat_eat(cat: Cat, delta: float) -> void:
 		cat.hunger = minf(1.0, cat.hunger + Defs.FOOD_HUNGER_PER_UNIT)
 	if cat.hunger >= 1.0:
 		cat.state = Defs.CAT_TO_MINER
+
+## What the snow shows, as opposed to what the simulation answers. The rules --
+## is_warm, can_touch, the cold -- read `warm_radius` and are right immediately;
+## the picture eases toward it, so the base unfolding and every upgrade read as
+## heat spreading rather than as a circle being swapped. Snapped on setup and on
+## load: an old fire does not re-spread.
+var shown_radius: float = 0.0
+
+func _tick_shown_radius(delta: float) -> void:
+	if is_equal_approx(shown_radius, warm_radius):
+		return
+	var gap: float = warm_radius - shown_radius
+	var rate: float = maxf(3.0, absf(gap) * 1.6)
+	shown_radius = move_toward(shown_radius, warm_radius, rate * delta)
 
 func _refresh_radius() -> void:
 	# No base, no fire, no circle -- only as much of the map as she can see from

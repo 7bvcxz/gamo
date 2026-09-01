@@ -1473,8 +1473,11 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11,
 		Defs.COL_CORE if ready else Defs.COL_TEXT_DIM)
 	if want > 0:
+		# Have against need, not need alone. "열석 3" answers what it costs and
+		# leaves "how far am I" to arithmetic; 0/3 is the same fact with the
+		# player's half already in it.
 		_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-			"%s %d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], want], 13,
+			"%s %d/%d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], have, want], 13,
 			Defs.COL_TEXT if ready else Defs.COL_DANGER)
 
 func _draw_build_menu() -> void:

@@ -79,11 +79,15 @@ func _run() -> void:
 	# --- Rebaking ---------------------------------------------------------------
 	# Rebaking is the one cost this design adds, so it must not fire on every
 	# delivery. The radius has to actually travel first.
+	# The fog paints the shown radius -- the one that eases toward the rule --
+	# so the rebake question is asked of that one.
 	var before: float = fog._baked_radius
 	main.sim.warm_radius = before + ColdFog.REBAKE_STEP * 0.5
+	main.sim.shown_radius = main.sim.warm_radius
 	fog._process(0.016)
 	_assert(is_equal_approx(fog._baked_radius, before), "a small radius change does not rebake")
 	main.sim.warm_radius = before + ColdFog.REBAKE_STEP * 1.5
+	main.sim.shown_radius = main.sim.warm_radius
 	fog._process(0.016)
 	_assert(not is_equal_approx(fog._baked_radius, before), "a real radius change does rebake")
 

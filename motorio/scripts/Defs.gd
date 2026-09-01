@@ -1828,6 +1828,10 @@ const SHELTER_CLEARANCE := 2.0
 ## enough to carry by hand without it becoming a chore, and enough that the
 ## player makes the trip more than once and learns what the trip is.
 const OPENING_STONES := 3
+## The breath between the shelter standing and the thought that points back at
+## the fire. Long enough to look around, short enough that the player who walks
+## straight to the fire is not left with an empty screen.
+const THOUGHT_DELAY := 10.0
 
 ## --- The energy torch -------------------------------------------------------
 ## The only way to see anything outside the fire.
@@ -2008,7 +2012,38 @@ static func room_piece_on(cell: Vector2i) -> int:
 	return -1
 
 ## What the fire can make, and the level each opens at.
+## Optional fields on a row: `when` names a predicate the fire asks Main for
+## before showing it ("" is always); `until` names one that retires the row once
+## the thing exists -- a shelter that is standing does not need selling twice;
+## `seconds` is how long the make takes, 0 for the instant ones. Free rows are
+## rows whose cost is {}.
 const BASE_CRAFTS: Array[Dictionary] = [
+	{
+		# The first thing the player ever places by hand. Free, because the
+		# opening's cost is the cold, and it comes out of the fire because the
+		# fire is where every tool after it will come from -- the case taught
+		# "search me" once and is done.
+		"id": "shelter",
+		"level": 1,
+		"name": "긴급숙소 키트",
+		"cost": {},
+		"seconds": 3.0,
+		"until": "shelter_placed",
+		"note": "밤에 잘 곳 · 만들어서 들고 가 세운다",
+	},
+	{
+		# After the shelter, so the window teaches one sentence at a time. It is
+		# absorbed rather than dropped: a tool with one owner and no placement
+		# decision has nothing to teach by lying on the snow.
+		"id": "pickaxe",
+		"level": 1,
+		"when": "shelter_placed",
+		"until": "has_pickaxe",
+		"name": "곡괭이",
+		"cost": {},
+		"seconds": 3.0,
+		"note": "광맥을 캐는 손 · 만들면 바로 손에 들린다",
+	},
 	{
 		"id": "torch",
 		"level": BASE_CRAFT_LEVEL,
@@ -2139,8 +2174,8 @@ const TRACK_NAMES := ["기지", "고양이", "자동화"]
 ## through a list. What is left is the one line that cannot be discovered by
 ## looking: how far the fire reaches and that it can reach further.
 const MISSIONS: Array[Dictionary] = [
-	{"id": "BASE2", "track": TRACK_BASE, "line": "불이 꺼져간다..  기지의 불씨를 살려야 한다",
-		"why": "거처가 서면 바로 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 업그레이드는 세상에 무언가가 더 있다는 것을 알게 되는 일이다."},
+	{"id": "BASE2", "track": TRACK_BASE, "line": "이대로는 기지가 오래 버티지 못할 것 같다",
+		"why": "거처가 서고 잠깐의 자유 뒤에 열린다. 그 시점의 온기는 7칸이고 얼어붙은 고양이는 8.5칸부터 누워 있으므로, 첫 강화는 세상에 무언가가 더 있다는 것을 알게 되는 일이다. 기지 위의 ! 가 같은 문장을 가리킨다."},
 	# "구리가 있는 곳까지" was here. Removed 2026-08-22: the card was telling the
 	# player to go and find a material whose name they had not been given yet --
 	# the build list no longer mentions copper before they have held any, and a
@@ -2178,14 +2213,9 @@ const MISSION_LINES: Array[Dictionary] = [
 		"why": "게임의 첫 문장. 처지와 목표물만 말하고 동사는 말하지 않는다. 상자는 맥박치며 빛나고, 3칸 시야 안에 그것 말고는 아무것도 없다.",
 	},
 	{
-		"id": "M1-HOLD",
-		"line": "불을 피울 자리를 골라야 한다.  떨어진 곳에서 멀지 않게.",
-		"why": "들고 있는 것이 무엇인지 말하지 않는다. 대신 그것으로 무엇이 되는지와, 놓을 수 있는 범위가 있다는 것만 흘린다.",
-	},
-	{
 		"id": "M2",
-		"line": "밤이 오면 이대로는 안 된다.  상자에 무언가 더 있었던 것 같다.",
-		"why": "왜 더 필요한지(밤)와 어디를 봐야 하는지(상자)를 한 줄에. 상자를 두 번 뒤진다는 것은 아무도 알려주지 않는다.",
+		"line": "밤이 오면 이대로는 안 된다.  불이 무언가 만들어 줄 수 있을 것 같다.",
+		"why": "왜 더 필요한지(밤)와 어디를 봐야 하는지(불)를 한 줄에. 상자는 기지가 되며 끝났고, 이제부터 모든 도구는 불에서 나온다.",
 	},
 	{
 		"id": "M2-HOLD",

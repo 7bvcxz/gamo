@@ -250,15 +250,26 @@ func _test_base_window() -> void:
 	var rows: Array[Dictionary] = main.base_rows()
 	var open_here := 1
 	for craft: Dictionary in Defs.BASE_CRAFTS:
-		if Defs.base_level_shown(sim.base_level) >= int(craft["level"]):
-			open_here += 1
+		if Defs.base_level_shown(sim.base_level) < int(craft["level"]):
+			continue
+		# The golden-path rows come and go with the world: the shelter row
+		# retires once the hut stands, the tool rows once the tool is owned.
+		if not main._craft_state(String(craft.get("when", ""))):
+			continue
+		if main._craft_state(String(craft.get("until", "__never__"))):
+			continue
+		open_here += 1
 	_assert(rows.size() == open_here,
 		"투입 줄은 언제나 있다 (%d줄, 기대 %d줄)" % [rows.size(), open_here])
 	_assert(String(rows[0]["kind"]) == "fuel", "그 줄이 맨 위다")
 
 	# Craft first, deposit second: the window shows both and the player chooses.
 	var torches: int = sim.torches
-	main.menu_index = 1
+	var rows_now: Array[Dictionary] = main.base_rows()
+	for index in rows_now.size():
+		if String(rows_now[index]["kind"]) == "craft" \
+				and String(Defs.BASE_CRAFTS[int(rows_now[index]["craft"])]["id"]) == "torch":
+			main.menu_index = index
 	main._base_menu_confirm()
 	_assert(sim.torches == torches + 1, "제작 줄을 고르면 만들어진다")
 	_assert(int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) == 0, "재료가 나간다")

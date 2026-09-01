@@ -123,36 +123,11 @@ func _test_the_opening_is_winnable() -> void:
 		# To the case. She wakes at 40% and the cold slows her the whole way
 		# down, so this is not the distance divided by her top speed.
 		spent += _walk_to(main, sim.cell_centre(sim.kit_cell + Vector2i(0, 1)), budget)
-		# Open it. A hold, and the hold is most of the errand.
+		# Open it. A hold, and the hold is the whole errand now: the moment the
+		# search ends the case unfolds into the base on the crash anchor. No
+		# walking over drops, no choosing a spot, no second search.
 		_hold(main, Defs.KIT_SEARCH_SECONDS + 0.3)
 		spent += Defs.KIT_SEARCH_SECONDS + 0.3
-		# Walk over it, which is how it is picked up -- unless it landed under her
-		# feet, in which case walking over it already happened on the same frame
-		# it appeared. That is the game working, and a harness that insists on
-		# the walk reports it as the case failing to open.
-		if sim.carried_kit != Defs.KIT_BASE:
-			if sim.drops.is_empty():
-				lost += 1
-				main.free()
-				continue
-			spent += _walk_to(main, sim.cell_centre(sim.drops.keys()[0]), budget - spent)
-			_tick(main, 1.0 / 60.0)
-		# A step away from the case first. Standing beside it, Z means "search the
-		# case" -- that is the whole reason the kit answers a press at all -- so
-		# putting the fire down happens where the case is not.
-		spent += _walk_to(main, sim.cell_centre(sim.core_cell + Vector2i(-1, 0)),
-			budget - spent)
-		# And put it down. Through the key rather than through the sim, and
-		# turning until it takes: the cell in front of her can hold a seam or a
-		# boulder, and turning round is what a player does about that.
-		for facing: Vector2i in [Vector2i.DOWN, Vector2i.RIGHT, Vector2i.UP, Vector2i.LEFT]:
-			if sim.base_placed:
-				break
-			main.player.facing = facing
-			main._primary_action()
-			spent += 0.3
-		if sim.carried_kit != Defs.KIT_BASE and not sim.base_placed:
-			lost += 1
 		if not sim.base_placed or main.state != main.State.PLAY:
 			lost += 1
 		worst = maxf(worst, spent)
