@@ -731,7 +731,7 @@ func _draw_manufacturer(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	_shadow(centre + Vector2(0, 12), 11.0)
 	_object_art(MANUFACTURER_ART, centre, MACHINE_ART_DRAW,
 		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
-	var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+	var recipe: Dictionary = sim.recipe_of(machine)
 	if recipe.is_empty():
 		return
 	# Warm, unlike the generator's cool port: this one is making a thing rather

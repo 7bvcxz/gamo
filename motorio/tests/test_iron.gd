@@ -48,8 +48,8 @@ func _test_items() -> void:
 	# The first intermediate. Nothing else in the game has this kind, and the day
 	# a second one does is the day the tech tree has started.
 	_assert(Defs.item_kind(Defs.ITEM_IRON_PLATE) == Defs.KIND_INTERMEDIATE, "철판은 intermediate 다")
-	_assert(Defs.items_of_kind(Defs.KIND_INTERMEDIATE) == [Defs.ITEM_IRON_PLATE],
-		"중간재는 아직 철판 하나다")
+	_assert(Defs.items_of_kind(Defs.KIND_INTERMEDIATE).has(Defs.ITEM_IRON_PLATE),
+		"철판이 중간재 목록에 있다")
 	_assert(Defs.item_atlas(Defs.ITEM_IRON_PLATE) == "", "철판은 광맥이 아니라 시트가 없다")
 	_assert(not Defs.ORE_TIERS.has(Defs.ITEM_IRON_PLATE), "그리고 잔해가 철판을 주지 않는다")
 	_assert(Defs.COUNTED_ITEMS.has(Defs.ITEM_IRON) and Defs.COUNTED_ITEMS.has(Defs.ITEM_IRON_PLATE),
@@ -128,6 +128,8 @@ func _test_recipe() -> void:
 	_assert(Defs.recipe_for_machine(Defs.M_MANUFACTURER) == recipe,
 		"제조기를 놓으면 이것이 고른 레시피가 된다")
 	_assert(Defs.recipes_using_item(Defs.ITEM_IRON) == [recipe], "철을 쓰는 레시피는 이것뿐")
+	_assert(Defs.recipes_for_machine(Defs.M_MANUFACTURER).size() >= 2,
+		"제조기는 고를 것이 둘 이상이다")
 	_assert(Defs.recipes_producing_item(Defs.ITEM_IRON_PLATE) == [recipe], "철판을 만드는 것도")
 	_assert(float(recipe["seconds"]) > 0.0 and float(recipe["seconds"]) <= 5.0,
 		"생산 시간이 눈에 보이는 범위다 (%.1f초)" % float(recipe["seconds"]))

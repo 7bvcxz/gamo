@@ -154,8 +154,8 @@ func _test_every_item_is_reachable() -> void:
 	_assert(Defs.items_of_kind(Defs.KIND_SPECIAL) == [Defs.ITEM_ENERGY_CORE],
 		"special 은 에너지 코어 하나다")
 	# 1.0.34: the day this stopped being empty is the day the tech tree started.
-	_assert(Defs.items_of_kind(Defs.KIND_INTERMEDIATE) == [Defs.ITEM_IRON_PLATE],
-		"중간재는 철판 하나다")
+	_assert(Defs.items_of_kind(Defs.KIND_INTERMEDIATE)
+		== [Defs.ITEM_IRON_PLATE, Defs.ITEM_COPPER_WIRE], "중간재는 철판과 전선이다")
 
 # --- Nothing changed for the player -------------------------------------------
 
@@ -166,11 +166,11 @@ func _test_derived_lists_are_unchanged() -> void:
 	# 0 and 3 are retired and still hold their places, which is the property this
 	# list exists to show.
 	var names: Array[String] = ["수정조각", "구리광석", "열석", "돌", "에너지 코어",
-		"철광석", "철판"]
-	var shorts: Array[String] = ["수정", "구리", "열석", "돌", "에너지 코어", "철", "철판"]
+		"철광석", "철판", "전선"]
+	var shorts: Array[String] = ["수정", "구리", "열석", "돌", "에너지 코어", "철", "철판", "전선"]
 	var colors: Array[Color] = [Color8(127, 212, 232), Color8(252, 104, 46),
 		Color8(255, 122, 48), Color8(150, 152, 158), Color8(186, 148, 255),
-		Color8(150, 176, 205), Color8(206, 216, 226)]
+		Color8(150, 176, 205), Color8(206, 216, 226), Color8(232, 168, 96)]
 	_assert(Defs.ITEM_NAMES == names, "표시 이름이 그대로다 (%s)" % str(Defs.ITEM_NAMES))
 	_assert(Defs.ITEM_SHORT == shorts, "약칭이 그대로다 (%s)" % str(Defs.ITEM_SHORT))
 	_assert(Defs.ITEM_COLORS == colors, "색이 그대로다")
@@ -178,7 +178,8 @@ func _test_derived_lists_are_unchanged() -> void:
 	# Order, not membership. The panel reads top to bottom and the wreck pays out
 	# of the ladder by index, so both of these are behaviour.
 	var counted: Array[int] = [Defs.ITEM_HEATSTONE, Defs.ITEM_CRYSTAL,
-		Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE, Defs.ITEM_IRON, Defs.ITEM_IRON_PLATE]
+		Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE, Defs.ITEM_IRON, Defs.ITEM_IRON_PLATE,
+		Defs.ITEM_COPPER_WIRE]
 	_assert(Defs.COUNTED_ITEMS == counted,
 		"자원 패널 순서가 그대로다 (%s)" % str(Defs.COUNTED_ITEMS))
 	var tiers: Array[int] = [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_IRON]

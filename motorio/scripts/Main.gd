@@ -156,6 +156,12 @@ var build_menu_open: bool = false
 ## One door rather than two -- everything the base does is behind the same key,
 ## on the same building, and the player never has to learn which press is which.
 var base_menu_open: bool = false
+## The machine window, and which machine it is about. A cell rather than a
+## reference, for the same reason `meter_cell` is one: the machine can be torn
+## down while the window is up, and a cell that no longer holds one is a closed
+## window rather than a crash.
+var machine_menu_open: bool = false
+var machine_menu_cell := Vector2i(9999, 9999)
 ## Inside the hut. A window rather than a place: the world keeps running behind
 ## it, and what she does in there is choose one of four things.
 var room_open: bool = false
@@ -375,6 +381,7 @@ func _start_run() -> void:
 	meter_cell = Vector2i(9999, 9999)
 	build_menu_open = false
 	base_menu_open = false
+	machine_menu_open = false
 	room_open = false
 	map_open = false
 	log_open = false
@@ -688,6 +695,8 @@ func close_windows(keep: String = "") -> void:
 		build_menu_open = false
 	if keep != "base":
 		base_menu_open = false
+	if keep != "machine":
+		machine_menu_open = false
 	if keep != "map":
 		map_open = false
 	if keep != "log":
@@ -1026,7 +1035,8 @@ func shelter_nearby() -> bool:
 ## walking into the hut switched her own legs off: the arrow keys are polled by
 ## the character and a modal is exactly what stops that poll.
 func modal_open() -> bool:
-	return build_menu_open or gacha_open or map_open or base_menu_open or log_open
+	return build_menu_open or gacha_open or map_open or base_menu_open or log_open \
+		or machine_menu_open
 
 func _process(delta: float) -> void:
 	# Pushed rather than pulled: the character polls Input directly, so it needs
@@ -1927,6 +1937,15 @@ func _prompt_status(id: String) -> Dictionary:
 		"CATLIFT":
 			return {"want": not sim.hands_full() and not cats_working
 				and _idle_cat_within_reach(), "done": cats_working}
+		"RECIPE":
+			# Standing in front of a machine that has a choice in it. From the
+			# outside a manufacturer making plates and one making wire are the
+			# same box, so the only way to learn the window exists is to be told
+			# the key while looking at the thing it opens -- once.
+			var facing: Sim.Machine = sim.machine_at(player.facing_cell())
+			return {"want": facing != null and Defs.machine_uses_recipes(facing.type)
+				and Defs.recipes_for_machine(facing.type).size() > 1,
+				"done": sim.has_learned("RECIPE")}
 		"FUEL":
 			return {"want": sim.base_placed and sim.has_fuel()
 				and player.facing_cell() == sim.core_cell,
@@ -2257,6 +2276,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_base_menu_key(key)
 		get_viewport().set_input_as_handled()
 		return
+	if machine_menu_open and state == State.PLAY:
+		_machine_menu_key(key)
+		get_viewport().set_input_as_handled()
+		return
 	if build_menu_open and state == State.PLAY:
 		_build_menu_key(key)
 		get_viewport().set_input_as_handled()
@@ -2550,6 +2573,17 @@ func touch_hud(position: Vector2) -> bool:
 	if room_open:
 		# Tapping a piece walks nothing: the pad drives her feet and its action
 		# button is Z. A tap on the HUD in here is a tap on nothing.
+		return true
+	if machine_menu_open:
+		# The same contract, and reached first because this window is opened by
+		# standing in front of a machine -- the tool row underneath is exactly
+		# what a phone tap would otherwise hit.
+		var machine_row: int = int(hud.call("machine_menu_row_at", local))
+		if machine_row >= 0:
+			menu_index = machine_row
+			_machine_menu_confirm()
+		elif not (hud.call("machine_menu_rect") as Rect2).has_point(local):
+			close_machine_menu()
 		return true
 	if base_menu_open:
 		# The same contract every other window here has, and the one this window
@@ -2874,6 +2908,14 @@ func _primary_action() -> void:
 	if cell == sim.core_cell and sim.base_placed:
 		_open_base_menu()
 		return
+	# A machine with a choice in it. Above the build gun on purpose: a player
+	# standing in front of their manufacturer with the gun out is far more likely
+	# to be asking it what it makes than to be trying to build on top of it.
+	var facing: Sim.Machine = sim.machine_at(cell)
+	if facing != null and Defs.machine_uses_recipes(facing.type) \
+			and Defs.recipes_for_machine(facing.type).size() > 1:
+		_open_machine_menu(cell)
+		return
 	# A frozen cat answers Z before anything else. She has both arms round it,
 	# so there is nothing else the press could mean.
 	if sim.carried_frozen:
@@ -2996,6 +3038,69 @@ func _open_base_menu() -> void:
 	base_menu_open = true
 	menu_index = 0
 	audio.call("play", "select")
+
+## The machine window. Opened by facing a machine that has something to choose,
+## which today is any machine the recipe system drives -- a belt has no menu and
+## a miner's only decision is the seam under it.
+func _open_machine_menu(cell: Vector2i) -> void:
+	close_windows("machine")
+	machine_menu_open = true
+	machine_menu_cell = cell
+	sim.learn("RECIPE")
+	var machine: Sim.Machine = sim.machine_at(cell)
+	var rows: Array[Dictionary] = machine_rows()
+	# Open on the row it is already making, so the window says what this machine
+	# is before it asks what it should be.
+	menu_index = 0
+	if machine != null:
+		var running: Dictionary = sim.recipe_of(machine)
+		for index in rows.size():
+			if rows[index] == running:
+				menu_index = index
+	audio.call("play", "select")
+
+func close_machine_menu() -> void:
+	if not machine_menu_open:
+		return
+	machine_menu_open = false
+	machine_menu_cell = Vector2i(9999, 9999)
+	audio.call("play", "select")
+
+## Everything this machine could be told to make. Read from the recipe registry
+## rather than listed here, so a recipe added later appears in the window it
+## belongs to without this file being edited.
+func machine_rows() -> Array[Dictionary]:
+	var machine: Sim.Machine = sim.machine_at(machine_menu_cell)
+	if machine == null:
+		return []
+	return Defs.recipes_for_machine(machine.type)
+
+func _machine_menu_key(key: InputEventKey) -> void:
+	match key.keycode:
+		KEY_ESCAPE, KEY_X, KEY_B:
+			close_machine_menu()
+		KEY_UP, KEY_DOWN:
+			var step: int = -1 if key.keycode == KEY_UP else 1
+			menu_index = posmod(menu_index + step, maxi(1, machine_rows().size()))
+			audio.call("play", "select")
+		KEY_ENTER, KEY_Z, KEY_SPACE:
+			_machine_menu_confirm()
+
+func _machine_menu_confirm() -> void:
+	var machine: Sim.Machine = sim.machine_at(machine_menu_cell)
+	var rows: Array[Dictionary] = machine_rows()
+	if machine == null or rows.is_empty():
+		close_machine_menu()
+		return
+	var row: Dictionary = rows[clampi(menu_index, 0, rows.size() - 1)]
+	if sim.set_recipe(machine, String(row["key"])):
+		var made: String = Defs.item_name(int((row["outputs"] as Array)[0]["item"]))
+		_notify("%s%s 만듭니다" % [made, Defs.object_of(made)], Defs.COL_CORE)
+		fx.ring(sim.cell_centre(machine_menu_cell), Defs.COL_CORE, Defs.RING_SMALL)
+		audio.call("play", "build")
+	else:
+		audio.call("play", "select")
+	close_machine_menu()
 
 func close_base_menu() -> void:
 	if not base_menu_open:
@@ -3824,6 +3929,7 @@ func settings_to_title() -> void:
 	hud.call("end_slider_drag")
 	build_menu_open = false
 	base_menu_open = false
+	machine_menu_open = false
 	room_open = false
 	map_open = false
 	log_open = false

@@ -231,6 +231,9 @@ const ITEM_IRON := 5
 ## because a machine made it. Everything before it was dug, picked up, or fell
 ## out of the ship.
 const ITEM_IRON_PLATE := 6
+## The second intermediate, and the one that makes the manufacturer a machine
+## rather than a plate press: the same building, a different choice.
+const ITEM_COPPER_WIRE := 7
 
 # --- Item registry ------------------------------------------------------------
 ## Where a material comes from, which is the only thing every material has to
@@ -327,6 +330,18 @@ const ITEMS: Array[Dictionary] = [
 		"atlas": "",
 		"counter": 5, "ore_tier": -1, "retired": false,
 		"desc": "제조기가 철광석 하나로 만든다. 이 행성에서 캘 수 없는 첫 재료.",
+	},
+	{
+		# Copper that has been through something: lighter and warmer than the ore,
+		# because a drawn wire catches light along its length where a lump of ore
+		# does not. Far enough from the plate's cold steel that a belt carrying
+		# both reads as two materials.
+		"id": ITEM_COPPER_WIRE, "key": "copper_wire", "kind": KIND_INTERMEDIATE,
+		"name": "전선", "short": "전선",
+		"color": Color8(232, 168, 96),
+		"atlas": "",
+		"counter": 6, "ore_tier": -1, "retired": false,
+		"desc": "제조기가 구리광석 하나를 두 가닥으로 뽑는다. 전기를 쓰는 것들이 요구하게 된다.",
 	},
 	{
 		# Violet, which nothing else on this planet is -- it is the only material
@@ -617,6 +632,19 @@ const RECIPES: Array[Dictionary] = [
 		"outputs": [{"item": ITEM_IRON_PLATE, "amount": 1}],
 		"seconds": 3.0,
 	},
+	{
+		# Two out of one, which is the first recipe that is not one-for-one. It
+		# matters more than the number does: a machine that hands back exactly
+		# what it was given reads as a checkpoint, and one that hands back more
+		# reads as a factory. Faster than the plate as well, so the two choices
+		# on the same machine are visibly different rates and not just different
+		# pictures.
+		"id": 2, "key": "copper_wire", "name": "전선",
+		"machine": M_MANUFACTURER,
+		"inputs": [{"item": ITEM_COPPER, "amount": 1}],
+		"outputs": [{"item": ITEM_COPPER_WIRE, "amount": 2}],
+		"seconds": 2.5,
+	},
 ]
 
 ## Machine types the recipe system drives, built from `MACHINES`: every row whose
@@ -666,9 +694,11 @@ static func recipes_for_machine(type: int) -> Array[Dictionary]:
 			out.append(row)
 	return out
 
-## The one a machine of this type runs. A machine that can be told to make
-## something else needs a chosen recipe stored on the machine, and that lands
-## with the first machine that has more than one row to choose between.
+## What a *newly built* machine of this type starts on, when nothing else says.
+##
+## Which recipe a machine is actually running is a property of that machine and
+## lives on it -- ask `Sim.recipe_of(machine)`. This is only the seed for the
+## very first one, before the player has chosen anything.
 static func recipe_for_machine(type: int) -> Dictionary:
 	var rows: Array[Dictionary] = recipes_for_machine(type)
 	return rows[0] if not rows.is_empty() else {}
@@ -1031,7 +1061,7 @@ static func throughput_line(type: int) -> String:
 			return "열석을 넣어 온기를 넓힙니다"
 	var recipe: Dictionary = recipe_for_machine(type)
 	if not recipe.is_empty():
-		return "%s → %s · %.0f초" % [_ports(recipe["inputs"]), _ports(recipe["outputs"]),
+		return "%s → %s · %.0f초" % [ports_text(recipe["inputs"]), ports_text(recipe["outputs"]),
 			float(recipe["seconds"])]
 	return ""
 
@@ -1307,7 +1337,7 @@ const MACHINES: Array[Dictionary] = [
 		# build, and `recipe_dependency_errors` is watching this row.
 		"id": M_MANUFACTURER, "key": "manufacturer", "name": "제조기", "short": "제조기",
 		"group": GROUP_PRODUCTION, "production": PROD_RECIPE,
-		"desc": "철광석을 철판으로 가공합니다 · 전력 필요",
+		"desc": "광석을 가공해 부품을 만듭니다 · 전력 필요 · Z로 품목 선택",
 		"cost": {ITEM_IRON: 10, ITEM_COPPER: 5, ITEM_HEATSTONE: 3},
 		"unlock": [ITEM_IRON],
 		"color": Color8(196, 168, 120),
@@ -1367,8 +1397,8 @@ static func machine_io(type: int) -> Array[String]:
 	var recipe: Dictionary = recipe_for_machine(type)
 	if not recipe.is_empty():
 		var lines: Array[String] = []
-		lines.append("입력   %s · %.0f초마다" % [_ports(recipe["inputs"]), float(recipe["seconds"])])
-		lines.append("출력   %s" % _ports(recipe["outputs"]))
+		lines.append("입력   %s · %.0f초마다" % [ports_text(recipe["inputs"]), float(recipe["seconds"])])
+		lines.append("출력   %s" % ports_text(recipe["outputs"]))
 		var needs: float = machine_power_draw(type)
 		lines.append("일손   전력 %.1f" % needs if needs > 0.0 else "특성   전력이 필요 없음")
 		return lines
@@ -1376,7 +1406,7 @@ static func machine_io(type: int) -> Array[String]:
 
 ## "철광석 1 · 구리광석 2", for a recipe's side. Separated with the mark the rest
 ## of the interface uses, so no 과/와 has to be chosen.
-static func _ports(rows: Array) -> String:
+static func ports_text(rows: Array) -> String:
 	if rows.is_empty():
 		return "없음"
 	var parts := PackedStringArray()
@@ -2015,6 +2045,10 @@ const KEY_PROMPTS: Array[Dictionary] = [
 	{
 		"id": "CATLIFT", "keys": ["Z"], "verb": "안기",
 		"why": "일 없는 고양이 옆에 섰을 때. 고양이를 옮길 수 있다는 것을 아무도 알려주지 않으면 평생 숙소 앞에 서 있는다.",
+	},
+	{
+		"id": "RECIPE", "keys": ["Z"], "verb": "품목",
+		"why": "만들 것이 둘 이상인 기계를 바라볼 때. 제조기는 밖에서 보면 철판을 뽑는 기계와 전선을 뽑는 기계가 같은 상자라, 창이 있다는 것은 그 앞에서 키를 한 번 들어야만 알 수 있다.",
 	},
 	{
 		"id": "FUEL", "keys": ["Z"], "verb": "기지",

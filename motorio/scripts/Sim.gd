@@ -112,6 +112,11 @@ class Machine extends RefCounted:
 	## nothing, and unable to say *what* was owed. Made a dictionary in 1.0.32,
 	## when a shared recipe tick finally needed the thing its comment described.
 	var outbox: Dictionary = {}
+	## Which recipe this machine is running, by key. Empty means "whatever this
+	## type starts on" -- which is what a save written before machines could
+	## choose says, and what a machine built before the player has chosen
+	## anything says. `Sim.recipe_of` is the only thing that resolves it.
+	var recipe_key: String = ""
 	## Miners only run while a cat is standing here.
 	var operated: bool = false
 	## What this machine has actually moved, in items, kept in two buckets so the
@@ -359,6 +364,7 @@ func to_save() -> Dictionary:
 			"progress": machine.progress, "items": machine.items.duplicate(true),
 			"buffer": machine.buffer.duplicate(true),
 			"outbox": machine.outbox.duplicate(true),
+			"recipe": machine.recipe_key,
 			"tier": machine.tier,
 		})
 	var cat_rows: Array = []
@@ -405,6 +411,7 @@ func to_save() -> Dictionary:
 		"belt_fed": delivered_by_belt,
 		"drops": _drop_rows(), "has_gun": has_gun, "has_pickaxe": has_pickaxe,
 		"gun_dropped": gun_dropped, "collected": _collected_rows(),
+		"last_recipe": last_recipe.duplicate(true),
 		"thawed": _thawed_rows(),
 		"debris": _debris_rows(), "debris_searched": debris_searched,
 		"machines": machine_rows, "cats": cat_rows, "frozen": frozen_rows,
@@ -451,6 +458,7 @@ func from_save(data: Dictionary) -> void:
 	# What has been held is derived rather than stored: a lifetime total above
 	# zero is the same fact, and a save written before this existed answers it
 	# correctly without a schema bump.
+	last_recipe = (data.get("last_recipe", {}) as Dictionary).duplicate(true)
 	held_items.clear()
 	for item_type: int in collected:
 		if int(collected[item_type]) > 0:
@@ -501,6 +509,7 @@ func from_save(data: Dictionary) -> void:
 		# always 0 -- nothing ever set it. There is nothing to migrate, only a
 		# key to stop reading.
 		machine.outbox = (row.get("outbox", {}) as Dictionary).duplicate(true)
+		machine.recipe_key = String(row.get("recipe", ""))
 		machine.tier = int(row.get("tier", 0))
 		for item: Dictionary in row.get("items", []):
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
@@ -570,6 +579,7 @@ func setup(seed_value: int) -> void:
 	has_gun = false
 	has_pickaxe = false
 	gun_dropped = false
+	last_recipe.clear()
 	collected.clear()
 	held_items.clear()
 	pending_unlocks.clear()
@@ -1531,6 +1541,14 @@ var held_items: Dictionary[int, bool] = {}
 ## Machines whose condition came true and have not been said out loud yet.
 var pending_unlocks: Array[int] = []
 
+## The last recipe the player chose, per machine type. A second manufacturer
+## starts on what the first one was set to, because a player who just decided
+## this base makes wire did not decide it once -- and a machine that always
+## starts on plates reads as a plate press with a menu bolted on.
+##
+## Saved: it is a decision, and decisions survive closing the game.
+var last_recipe: Dictionary = {}
+
 ## Whether the case will open again.
 ##
 ## The second search waits for the fire. Both are available from the first frame
@@ -2193,6 +2211,10 @@ func build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
 	machine.type = type
 	machine.cell = cell
 	machine.dir = dir
+	# What the last one was set to. A player who has just decided this base makes
+	# wire did not decide it once, and a second machine that starts on plates
+	# reads as a plate press with a menu bolted on.
+	machine.recipe_key = String(last_recipe.get(type, ""))
 	machine.flash = 0.45
 	machines[cell] = machine
 	_grid_dirty = true
@@ -2250,7 +2272,7 @@ func tick(delta: float) -> void:
 				# Everything the recipe system drives. There is no branch to add
 				# here for a new production machine -- it finds its recipe and
 				# runs the shared tick.
-				tick_recipe(machine, Defs.recipe_for_machine(machine.type), delta * speed)
+				tick_recipe(machine, recipe_of(machine), delta * speed)
 	_refresh_radius()
 	_tick_rate(delta)
 
@@ -2374,7 +2396,7 @@ func design_rates(machine: Machine) -> Dictionary:
 		_:
 			# Rated straight off the recipe, so the readout over a new machine is
 			# right the day it is added.
-			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+			var recipe: Dictionary = recipe_of(machine)
 			if not recipe.is_empty():
 				var each: float = Defs.per_minute(float(recipe["seconds"]))
 				for port: Dictionary in recipe["inputs"]:
@@ -2426,7 +2448,7 @@ func meter_status(machine: Machine) -> String:
 		Defs.M_CORE:
 			return "반입구"
 		_:
-			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+			var recipe: Dictionary = recipe_of(machine)
 			if recipe.is_empty():
 				return ""
 			if Defs.machine_power_draw(machine.type) > 0.0 and power_capacity <= 0.0:
@@ -2479,7 +2501,7 @@ func _recount_power() -> void:
 			# on the grid slows every miner on it for no reason the player can
 			# see, which is the shape of a number that moved with nothing on
 			# screen to explain it.
-			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+			var recipe: Dictionary = recipe_of(machine)
 			# Work means materials in *and* somewhere to put the result. A machine
 			# holding output it cannot place does nothing at all -- `tick_recipe`
 			# returns before the clock -- and one that kept drawing would slow
@@ -3209,6 +3231,46 @@ func tick_recipe(machine: Machine, recipe: Dictionary, delta: float) -> void:
 	_drain_outbox(machine)
 	machine.stalled = not machine.outbox.is_empty()
 
+## Which recipe this machine is actually running.
+##
+## The key on the machine, or the type's starting recipe when it has none -- a
+## machine built before the player chose anything, and every machine in a save
+## written before machines could choose. A key that no longer names a recipe
+## falls back the same way rather than leaving the machine inert.
+func recipe_of(machine: Machine) -> Dictionary:
+	if not machine.recipe_key.is_empty():
+		var chosen: Dictionary = Defs.recipe_by_key(machine.recipe_key)
+		if not chosen.is_empty() and int(chosen["machine"]) == machine.type:
+			return chosen
+	return Defs.recipe_for_machine(machine.type)
+
+## Point a machine at a different recipe.
+##
+## Inputs are consumed at the *end* of a cycle, so there is never a half-eaten
+## craft to refund -- resetting the clock loses nothing. What the buffer holds is
+## a different question: iron sitting in a machine that now wants copper would be
+## stranded there forever, since the input face only takes what the recipe asks
+## for. So it is handed back out the front, through the same exit the output
+## uses. Nothing is lost and nothing is made.
+func set_recipe(machine: Machine, key: String) -> bool:
+	var wanted: Dictionary = Defs.recipe_by_key(key)
+	if wanted.is_empty() or int(wanted["machine"]) != machine.type:
+		return false
+	if machine.recipe_key == key:
+		return false
+	machine.recipe_key = key
+	last_recipe[machine.type] = key
+	machine.progress = 0.0
+	machine.stalled = false
+	machine.operated = false
+	for item_id: int in machine.buffer.keys():
+		var held: int = int(machine.buffer[item_id])
+		if held > 0:
+			machine.outbox[item_id] = int(machine.outbox.get(item_id, 0)) + held
+	machine.buffer.clear()
+	_drain_outbox(machine)
+	return true
+
 ## Whether everything the recipe asks for is already inside the machine.
 func recipe_inputs_ready(machine: Machine, recipe: Dictionary) -> bool:
 	for port: Dictionary in recipe["inputs"]:
@@ -3483,7 +3545,7 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			# and nothing else. A machine that accepted anything would let one
 			# mis-aimed belt fill it with a material it can never spend, and the
 			# only way out of that is to tear the machine down.
-			var recipe: Dictionary = Defs.recipe_for_machine(target.type)
+			var recipe: Dictionary = recipe_of(target)
 			if recipe.is_empty():
 				return false
 			var wanted := 0

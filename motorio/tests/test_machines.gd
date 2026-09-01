@@ -143,7 +143,7 @@ func _test_metadata_snapshot() -> void:
 	_assert(Defs.MACHINE_HINTS == ["", "채굴을 더 빠르게 할 수 있는 장치",
 		"자원을 기지까지 끊김 없이 나릅니다", "열석을 태워 전력 1.0을 공급합니다",
 		"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
-		"철광석을 철판으로 가공합니다 · 전력 필요"], "건설 목록 설명이 그대로다")
+		"광석을 가공해 부품을 만듭니다 · 전력 필요 · Z로 품목 선택"], "건설 목록 설명이 그대로다")
 
 	# Costs, which are balance. A digit moved here is a different game.
 	_assert(Defs.MACHINE_COSTS[Defs.M_CORE].is_empty(), "코어는 짓는 것이 아니다")

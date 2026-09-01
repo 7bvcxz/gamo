@@ -559,6 +559,7 @@ func _draw() -> void:
 			_draw_gacha_button()
 			_draw_build_menu()
 			_draw_base_menu()
+			_draw_machine_menu()
 			_draw_gacha_card()
 			_draw_message()
 	# Below the match, so they are on every screen -- except the opening and the
@@ -1238,6 +1239,107 @@ func base_menu_row_rect(index: int) -> Rect2:
 	var card: Rect2 = base_menu_rect()
 	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + BASE_MENU_TOP - 4.0
 		+ float(index) * MENU_ROW), Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+
+# --- The machine window -------------------------------------------------------
+## What this machine could make, and what it is doing about the one it is on.
+##
+## The rows are the recipe registry's, so a recipe added later appears here
+## without this file being edited -- the same arrangement the build list has.
+
+func machine_menu_rect() -> Rect2:
+	var rows: float = float(maxi(1, main.machine_rows().size()))
+	# One extra row's worth of header, which is where the machine's own state
+	# goes: what is in it, what it is holding, and whether the grid is carrying
+	# it. A window that only offers choices cannot explain why nothing is
+	# happening.
+	var height: float = FRAME_HEADER + BASE_MENU_TOP + 26.0 + rows * MENU_ROW + 18.0
+	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
+	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
+
+func machine_menu_row_rect(index: int) -> Rect2:
+	var card: Rect2 = machine_menu_rect()
+	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + BASE_MENU_TOP + 26.0 - 4.0
+		+ float(index) * MENU_ROW), Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+
+func machine_menu_row_at(point: Vector2) -> int:
+	for index in main.machine_rows().size():
+		if machine_menu_row_rect(index).has_point(point):
+			return index
+	return -1
+
+func _draw_machine_menu() -> void:
+	if not main.machine_menu_open:
+		return
+	var machine = main.sim.machine_at(main.machine_menu_cell)
+	if machine == null:
+		return
+	_dim(0.45)
+	var card: Rect2 = machine_menu_rect()
+	_frame(card, Defs.COL_CORE, Defs.machine_name(machine.type))
+
+	# The machine's own state, on one line under the title: what it is holding on
+	# the way in, how far through it is, what it is holding on the way out, and
+	# what the grid is doing. Four facts, and the one that is wrong is the answer
+	# to "why is nothing coming out".
+	var running: Dictionary = main.sim.recipe_of(machine)
+	var state: Array[String] = []
+	if not running.is_empty():
+		state.append("입력 %s" % _held(machine.buffer, running["inputs"]))
+		state.append("출력 %s" % _held(machine.outbox, running["outputs"]))
+	state.append(main.sim.meter_status(machine))
+	_text(Vector2(card.position.x + 14.0, card.position.y + FRAME_HEADER + 16.0),
+		"  ·  ".join(state), 12, Defs.COL_TEXT_DIM)
+	# The bar is the progress, drawn rather than written: a number ticking from 0
+	# to 3 is arithmetic and a bar that fills is the machine working.
+	if not running.is_empty():
+		var span: float = maxf(float(running["seconds"]), 0.001)
+		var track := Rect2(card.position + Vector2(card.size.x - 130.0,
+			FRAME_HEADER + 8.0), Vector2(116.0, 6.0))
+		draw_rect(track, Color(1, 1, 1, 0.10))
+		draw_rect(Rect2(track.position, Vector2(track.size.x
+			* clampf(machine.progress / span, 0.0, 1.0), track.size.y)), Defs.COL_CORE)
+
+	var rows: Array[Dictionary] = main.machine_rows()
+	for index in rows.size():
+		_draw_machine_row(index, rows[index], machine)
+
+## "철 2" for whichever of a recipe's ports the machine is holding, or "없음".
+func _held(store: Dictionary, ports: Array) -> String:
+	var parts: Array[String] = []
+	for port: Dictionary in ports:
+		var item_type: int = int(port["item"])
+		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], int(store.get(item_type, 0))])
+	return " · ".join(parts) if not parts.is_empty() else "없음"
+
+func _draw_machine_row(index: int, row: Dictionary, machine) -> void:
+	var rect: Rect2 = machine_menu_row_rect(index)
+	var on_cursor: bool = index == main.menu_index
+	var running: bool = main.sim.recipe_of(machine) == row
+	var accent: Color = Defs.COL_CORE
+	if on_cursor:
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
+		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
+	else:
+		draw_rect(rect, Color(1, 1, 1, 0.022))
+	# The thing it makes, as its own picture. A row of Korean nouns is four rows
+	# of Korean nouns once there are four recipes.
+	var made: int = int((row["outputs"] as Array)[0]["item"])
+	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
+	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
+	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
+	Icons.draw_item(self, icon, made)
+	var text_x: float = rect.position.x + 62.0
+	_text(Vector2(text_x, rect.position.y + 22.0), String(row["name"]), 14, Defs.COL_TEXT)
+	# The sentence the recipe is: what goes in, what comes out, how long.
+	_text(Vector2(text_x, rect.position.y + 42.0),
+		"%s → %s · %.0f초" % [Defs.ports_text(row["inputs"]), Defs.ports_text(row["outputs"]),
+			float(row["seconds"])], 11, Defs.COL_TEXT_DIM)
+	# Which one it is on, said on the row rather than only by the cursor -- the
+	# cursor moves and this does not.
+	if running:
+		_text_in(Rect2(rect.position + Vector2(rect.size.x - 96.0, 22.0), Vector2(86.0, 16.0)),
+			"생산 중", 12, accent, HORIZONTAL_ALIGNMENT_RIGHT)
 
 func _draw_base_menu() -> void:
 	if not main.base_menu_open:
