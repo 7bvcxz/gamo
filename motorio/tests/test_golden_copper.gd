@@ -83,6 +83,38 @@ func _test_copper_is_reachable_at_heat_13() -> void:
 	_assert(missing == 0, "반경 13에는 구리가 반드시 있다 (%d회 실패)" % missing)
 	_assert(short_of_belt == 0,
 		"그리고 패치 전체(%d칸)가 안에 있다 (%d회 실패)" % [Defs.FIRST_COPPER_SIZE, short_of_belt])
+	# Warm is not walkable: ore is structure, and a copper patch pocketed by
+	# heat-stone seams would be a promise the map breaks. BFS from the core over
+	# non-structure cells, because that is the question her legs actually ask.
+	var pocketed := 0
+	for index in 200:
+		var world := Sim.new()
+		world.setup(86000 + index)
+		world.begin_crash()
+		world.search_kit()
+		world.stones_in = int(Defs.BASE_LEVELS[3]["stones"])
+		world._refresh_radius()
+		var seen: Dictionary = {}
+		var queue: Array[Vector2i] = [world.core_cell]
+		seen[world.core_cell] = true
+		var beside := false
+		while not queue.is_empty() and not beside:
+			var at: Vector2i = queue.pop_front()
+			for dir: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+				var next: Vector2i = at + dir
+				if seen.has(next) or Vector2(next - world.core_cell).length() > 14.0:
+					continue
+				if int(world.ore.get(next, -1)) == Defs.ITEM_COPPER and world.can_touch(next):
+					beside = true
+					break
+				if world.is_structure(next) or world.machines.has(next):
+					continue
+				seen[next] = true
+				queue.push_back(next)
+		if not beside:
+			pocketed += 1
+		world.free()
+	_assert(pocketed == 0, "걸어서도 닿는다 — 광맥 벽에 갇힌 구리가 없다 (%d회)" % pocketed)
 
 # --- test_construction_gun_unlocks_on_first_copper -----------------------------
 

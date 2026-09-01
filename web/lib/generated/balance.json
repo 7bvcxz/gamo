@@ -38,14 +38,14 @@
     "tiles_per_frozen": 200.1
   },
   "day": {
-    "dusk_seconds": 95.0,
-    "night_seconds": 50.0,
-    "seconds": 300.0
+    "dusk_seconds": 360.0,
+    "night_seconds": 240.0,
+    "seconds": 2160.0
   },
   "debris": {
     "core_one": 0.2,
     "core_two": 0.05,
-    "first_ring": 11.0,
+    "first_ring": 16.0,
     "high": [
       2,
       5
@@ -57,13 +57,13 @@
     ],
     "low_item": "구리광석",
     "per_tiles": 200.0,
-    "search_seconds": 3.0,
+    "search_seconds": 5.0,
     "shapes": 5,
-    "start_ring": 12.0
+    "start_ring": 17.0
   },
   "gate_to_copper": {
-    "days_two_miners": 1.125,
-    "stones": 54.0
+    "days_two_miners": 1.0625,
+    "stones": 51.0
   },
   "generated_by": "motorio/tools/dump_balance.gd",
   "items": {
@@ -86,6 +86,10 @@
         {
           "count": 5,
           "item": "열석"
+        },
+        {
+          "count": 1,
+          "item": "구리광석"
         }
       ],
       "hint": "채굴을 더 빠르게 할 수 있는 장치",
@@ -105,9 +109,7 @@
       "name": "컨테이너 벨트",
       "short": "벨트",
       "throughput": "53/분 · 칸당 3.3초",
-      "unlock": [
-        "구리광석"
-      ]
+      "unlock": []
     },
     {
       "cost": [
@@ -120,15 +122,17 @@
       "name": "분배기",
       "short": "분배기",
       "throughput": "한 줄을 두 줄로",
-      "unlock": [
-        "구리광석"
-      ]
+      "unlock": []
     },
     {
       "cost": [
         {
-          "count": 10,
+          "count": 5,
           "item": "구리광석"
+        },
+        {
+          "count": 1,
+          "item": "에너지 코어"
         }
       ],
       "hint": "열석을 태워 전력 1.0을 공급합니다",
@@ -214,14 +218,9 @@
       "why": "게임의 첫 문장. 처지와 목표물만 말하고 동사는 말하지 않는다. 상자는 맥박치며 빛나고, 3칸 시야 안에 그것 말고는 아무것도 없다."
     },
     {
-      "id": "M1-HOLD",
-      "line": "불을 피울 자리를 골라야 한다.  떨어진 곳에서 멀지 않게.",
-      "why": "들고 있는 것이 무엇인지 말하지 않는다. 대신 그것으로 무엇이 되는지와, 놓을 수 있는 범위가 있다는 것만 흘린다."
-    },
-    {
       "id": "M2",
-      "line": "밤이 오면 이대로는 안 된다.  상자에 무언가 더 있었던 것 같다.",
-      "why": "왜 더 필요한지(밤)와 어디를 봐야 하는지(상자)를 한 줄에. 상자를 두 번 뒤진다는 것은 아무도 알려주지 않는다."
+      "line": "밤이 오면 이대로는 안 된다.  불이 무언가 만들어 줄 수 있을 것 같다.",
+      "why": "왜 더 필요한지(밤)와 어디를 봐야 하는지(불)를 한 줄에. 상자는 기지가 되며 끝났고, 이제부터 모든 도구는 불에서 나온다."
     },
     {
       "id": "M2-HOLD",
@@ -519,105 +518,105 @@
         "from": 9.5,
         "radius": 11.0,
         "seams": 4,
-        "stones": 12,
+        "stones": 9,
         "to": 10.8
       },
       {
         "from": 11.5,
         "radius": 13.0,
         "seams": 4,
-        "stones": 27,
+        "stones": 24,
         "to": 12.8
       },
       {
         "from": 13.5,
         "radius": 15.0,
         "seams": 6,
-        "stones": 54,
+        "stones": 51,
         "to": 14.8
       },
       {
         "from": 15.5,
         "radius": 17.0,
         "seams": 6,
-        "stones": 105,
+        "stones": 102,
         "to": 16.8
       },
       {
         "from": 17.5,
         "radius": 19.0,
         "seams": 6,
-        "stones": 192,
+        "stones": 189,
         "to": 18.8
       },
       {
         "from": 19.5,
         "radius": 22.0,
         "seams": 6,
-        "stones": 327,
+        "stones": 324,
         "to": 21.5
       },
       {
         "from": 22.5,
         "radius": 26.0,
         "seams": 12,
-        "stones": 537,
+        "stones": 534,
         "to": 25.5
       },
       {
         "from": 27.0,
         "radius": 31.0,
         "seams": 12,
-        "stones": 857,
+        "stones": 854,
         "to": 30.5
       },
       {
         "from": 32.0,
         "radius": 37.0,
         "seams": 15,
-        "stones": 1337,
+        "stones": 1334,
         "to": 36.5
       },
       {
         "from": 38.0,
         "radius": 44.0,
         "seams": 15,
-        "stones": 2037,
+        "stones": 2034,
         "to": 43.5
       },
       {
         "from": 45.0,
         "radius": 52.0,
         "seams": 24,
-        "stones": 3037,
+        "stones": 3034,
         "to": 51.5
       },
       {
         "from": 53.0,
         "radius": 61.0,
         "seams": 24,
-        "stones": 4437,
+        "stones": 4434,
         "to": 60.5
       },
       {
         "from": 62.0,
         "radius": 71.0,
         "seams": 28,
-        "stones": 6437,
+        "stones": 6434,
         "to": 70.5
       },
       {
         "from": 72.0,
         "radius": 82.0,
         "seams": 28,
-        "stones": 9237,
+        "stones": 9234,
         "to": 81.5
       },
       {
         "from": 83.0,
         "radius": 100.0,
         "seams": 40,
-        "stones": 13237,
+        "stones": 13234,
         "to": 99.0
       }
     ],
@@ -645,63 +644,63 @@
       },
       {
         "radius": 11.0,
-        "stones": 12
+        "stones": 9
       },
       {
         "radius": 13.0,
-        "stones": 27
+        "stones": 24
       },
       {
         "radius": 15.0,
-        "stones": 54
+        "stones": 51
       },
       {
         "radius": 17.0,
-        "stones": 105
+        "stones": 102
       },
       {
         "radius": 19.0,
-        "stones": 192
+        "stones": 189
       },
       {
         "radius": 22.0,
-        "stones": 327
+        "stones": 324
       },
       {
         "radius": 26.0,
-        "stones": 537
+        "stones": 534
       },
       {
         "radius": 31.0,
-        "stones": 857
+        "stones": 854
       },
       {
         "radius": 37.0,
-        "stones": 1337
+        "stones": 1334
       },
       {
         "radius": 44.0,
-        "stones": 2037
+        "stones": 2034
       },
       {
         "radius": 52.0,
-        "stones": 3037
+        "stones": 3034
       },
       {
         "radius": 61.0,
-        "stones": 4437
+        "stones": 4434
       },
       {
         "radius": 71.0,
-        "stones": 6437
+        "stones": 6434
       },
       {
         "radius": 82.0,
-        "stones": 9237
+        "stones": 9234
       },
       {
         "radius": 100.0,
-        "stones": 13237
+        "stones": 13234
       }
     ],
     "max_radius": 100.0,
