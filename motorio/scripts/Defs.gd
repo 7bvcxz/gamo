@@ -223,21 +223,191 @@ const ITEM_STONE := 3
 ## The number stays at 4: saves write materials by number.
 const ITEM_ENERGY_CORE := 4
 
-const ITEM_NAMES := ["수정조각", "구리광석", "열석", "돌", "에너지 코어"]
-## Short forms for the status panel, where the counters share one row.
-const ITEM_SHORT := ["수정", "구리", "열석", "돌", "에너지 코어"]
-## Ember was a muddy brown against the cold ground (1.66:1); copper reads as a
-## valuable metal and clears 6:1.
-## The copper seam sat at 1.99:1 against the night and shared a hue band with the warm
-## ground, so it vanished exactly when the player was told to go find it.
-## Heat stone against copper is the pair that has to survive being 38 pixels of
-## snow: copper is a bright metal, heat stone is a dark coal with fire inside it,
-## and the colour here is the fire rather than the coal because it is the fire
-## the player is looking for.
-## A core part is violet, which nothing else on this planet is -- it is the only
-## material here that was manufactured.
-const ITEM_COLORS := [Color8(127, 212, 232), Color8(252, 104, 46), Color8(255, 122, 48),
-	Color8(150, 152, 158), Color8(186, 148, 255)]
+# --- Item registry ------------------------------------------------------------
+## Where a material comes from, which is the only thing every material has to
+## answer. `raw` is dug or picked up, `intermediate` is made by a machine, and
+## `special` is neither -- it came from somewhere that is not this planet.
+const KIND_RAW := "raw"
+const KIND_INTERMEDIATE := "intermediate"
+const KIND_SPECIAL := "special"
+
+## Every material in the game, described in one place.
+##
+## This replaced five parallel arrays indexed by item number. The arrays are
+## still here -- they are built from this table below and every caller reads them
+## unchanged -- but nothing is *written* twice any more, which is the whole point:
+## a factory game adds materials by the dozen, and five lists that have to stay
+## the same length in the same order is five chances to be wrong per material.
+##
+## Fields:
+##   id         the number a save writes. Permanent. See "retired" below.
+##   key        a stable name for code and tests, never shown to a player. The
+##              display name is allowed to change (코어부품 -> 에너지 코어); this
+##              is what a test or a recipe refers to so that it does not.
+##   kind       KIND_RAW / KIND_INTERMEDIATE / KIND_SPECIAL
+##   name       what the player reads
+##   short      the status panel, where counters share a row
+##   color      popups, counters, belt items, seam shards
+##   atlas      the seam sheet in assets/tiles/, or "" for a material with no
+##              seam. GroundLayer preloads these; `test_items` checks the two
+##              agree, because promoting an ore used to mean editing three places
+##   counter    position in the status panel, or -1 to not appear there
+##   ore_tier   position in the seam ladder the wreck pays out of, or -1
+##   retired    nothing in the world produces it any more. The row stays and the
+##              id is never reused: a save written before it retired is still
+##              holding some, and handing that number to a different material
+##              would turn one run's heat stone into another run's rubble
+const ITEMS: Array[Dictionary] = [
+	{
+		"id": ITEM_CRYSTAL, "key": "crystal", "kind": KIND_RAW,
+		"name": "수정조각", "short": "수정",
+		"color": Color8(127, 212, 232),
+		"atlas": "crystal_6.png",
+		"counter": 1, "ore_tier": -1, "retired": true,
+		"desc": "눈밭에 흩어져 있던 희귀 광물. 1.0.27에 세계에서 빠졌고, 그 전에 저장한 회차만 아직 들고 있다.",
+	},
+	{
+		# The copper seam sat at 1.99:1 against the night and shared a hue band
+		# with the warm ground, so it vanished exactly when the player was told
+		# to go find it. Copper reads as a bright metal now and clears 6:1.
+		"id": ITEM_COPPER, "key": "copper", "kind": KIND_RAW,
+		"name": "구리광석", "short": "구리",
+		"color": Color8(252, 104, 46),
+		"atlas": "copper_6.png",
+		"counter": 2, "ore_tier": 1, "retired": false,
+		"desc": "벨트와 분배기와 발전기가 만들어지는 금속. 기지 4단계의 온기가 닿는 고리에 있다.",
+	},
+	{
+		# Ember was a muddy brown against the cold ground (1.66:1). Heat stone
+		# against copper is the pair that has to survive being 38 pixels of snow,
+		# and the colour here is the fire rather than the coal, because the fire
+		# is what the player is looking for.
+		"id": ITEM_HEATSTONE, "key": "heatstone", "kind": KIND_RAW,
+		"name": "열석", "short": "열석",
+		"color": Color8(255, 122, 48),
+		"atlas": "heatstone_6.png",
+		"counter": 0, "ore_tier": 0, "retired": false,
+		"desc": "불에 넣으면 온기가 넓어지고 발전기에 넣으면 전력이 된다. 두 곳이 같은 돌을 두고 경쟁한다.",
+	},
+	{
+		"id": ITEM_STONE, "key": "stone", "kind": KIND_RAW,
+		"name": "돌", "short": "돌",
+		"color": Color8(150, 152, 158),
+		"atlas": "",
+		"counter": -1, "ore_tier": -1, "retired": true,
+		"desc": "눈밭의 바위를 깨서 나오던 것. 1.0.28에 바위와 함께 빠졌고 어떤 제작법에도 쓰인 적이 없다.",
+	},
+	{
+		# Violet, which nothing else on this planet is -- it is the only material
+		# here that was manufactured.
+		"id": ITEM_ENERGY_CORE, "key": "energy_core", "kind": KIND_SPECIAL,
+		"name": "에너지 코어", "short": "에너지 코어",
+		"color": Color8(186, 148, 255),
+		"atlas": "",
+		"counter": 3, "ore_tier": -1, "retired": false,
+		"desc": "로켓잔해에서만 나온다. 이 행성은 만들지 못한다. 발전기를 여는 두 조건 중 하나.",
+	},
+]
+
+## The five lists every caller already reads, built from the table above.
+##
+## Indexed by item number rather than by position, and sized to the largest id,
+## so a retired number in the middle stays a hole instead of shifting everything
+## after it down one.
+static var ITEM_NAMES: Array[String] = []
+static var ITEM_SHORT: Array[String] = []
+static var ITEM_COLORS: Array[Color] = []
+static var _items_by_id: Dictionary = {}
+static var _items_by_key: Dictionary = {}
+
+## Runs once, when this class is first loaded. Every list above is filled here
+## and nowhere else, so `ITEMS` is the only thing a new material is written into.
+static func _static_init() -> void:
+	var top: int = 0
+	for row: Dictionary in ITEMS:
+		top = maxi(top, int(row["id"]))
+	ITEM_NAMES.resize(top + 1)
+	ITEM_SHORT.resize(top + 1)
+	ITEM_COLORS.resize(top + 1)
+	for index in top + 1:
+		# A gap left by a number no row claims. Blank rather than absent, so a
+		# stale id read out of an old save prints nothing instead of crashing.
+		ITEM_NAMES[index] = ""
+		ITEM_SHORT[index] = ""
+		ITEM_COLORS[index] = Color(1.0, 1.0, 1.0)
+
+	var counted: Array[Dictionary] = []
+	var tiers: Array[Dictionary] = []
+	for row: Dictionary in ITEMS:
+		var id: int = int(row["id"])
+		ITEM_NAMES[id] = String(row["name"])
+		ITEM_SHORT[id] = String(row["short"])
+		ITEM_COLORS[id] = row["color"]
+		_items_by_id[id] = row
+		_items_by_key[String(row["key"])] = row
+		if int(row["counter"]) >= 0:
+			counted.append(row)
+		if int(row["ore_tier"]) >= 0:
+			tiers.append(row)
+	counted.sort_custom(func(a, b): return int(a["counter"]) < int(b["counter"]))
+	tiers.sort_custom(func(a, b): return int(a["ore_tier"]) < int(b["ore_tier"]))
+	COUNTED_ITEMS.clear()
+	for row: Dictionary in counted:
+		COUNTED_ITEMS.append(int(row["id"]))
+	ORE_TIERS.clear()
+	for row: Dictionary in tiers:
+		ORE_TIERS.append(int(row["id"]))
+
+## One row, by number. Empty for a number no material claims -- callers that
+## might be holding one out of an old save can check `is_empty()`.
+static func item(id: int) -> Dictionary:
+	return _items_by_id.get(id, {})
+
+## One row, by key. Keys are what code and tests refer to, because a display
+## name is allowed to change and a key is not.
+static func item_by_key(key: String) -> Dictionary:
+	return _items_by_key.get(key, {})
+
+static func has_item(id: int) -> bool:
+	return _items_by_id.has(id)
+
+static func item_name(id: int) -> String:
+	return String(item(id).get("name", ""))
+
+static func item_short(id: int) -> String:
+	return String(item(id).get("short", ""))
+
+static func item_color(id: int) -> Color:
+	return item(id).get("color", Color(1.0, 1.0, 1.0))
+
+static func item_kind(id: int) -> String:
+	return String(item(id).get("kind", ""))
+
+## The seam sheet filename, or "" for a material that has no seam.
+static func item_atlas(id: int) -> String:
+	return String(item(id).get("atlas", ""))
+
+static func item_desc(id: int) -> String:
+	return String(item(id).get("desc", ""))
+
+## Whether the world still produces it. A retired material keeps its number and
+## its row; what it loses is a source.
+static func item_retired(id: int) -> bool:
+	return bool(item(id).get("retired", false))
+
+## Every number in the table, in table order.
+static func item_ids() -> Array[int]:
+	var ids: Array[int] = []
+	for row: Dictionary in ITEMS:
+		ids.append(int(row["id"]))
+	return ids
+
+static func items_of_kind(kind: String) -> Array[int]:
+	var ids: Array[int] = []
+	for row: Dictionary in ITEMS:
+		if String(row["kind"]) == kind:
+			ids.append(int(row["id"]))
+	return ids
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
 
@@ -307,8 +477,9 @@ const FACE_BAND := 3.0
 ## saved before 1.0.27 can still be holding some, and a material she owns that
 ## the panel does not show is a material she has lost. Stone is different only
 ## because it never bought anything.
-const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_CRYSTAL, ITEM_COPPER,
-	ITEM_ENERGY_CORE]
+## Built from each row's `counter`, so the panel order lives beside the material
+## it orders rather than in a second list that has to be kept in step.
+static var COUNTED_ITEMS: Array[int] = []
 
 ## The seams, poorest first. The wreck pays in these rather than in a list of its
 ## own, so what a piece is worth follows the world's own ladder instead of being
@@ -316,7 +487,9 @@ const COUNTED_ITEMS: Array[int] = [ITEM_HEATSTONE, ITEM_CRYSTAL, ITEM_COPPER,
 ##
 ## Derived, not written down twice: adding a seam later means appending one entry
 ## here and the wreck starts paying in it. Today the ladder is two rungs long.
-const ORE_TIERS: Array[int] = [ITEM_HEATSTONE, ITEM_COPPER]
+## Built from each row's `ore_tier`. Adding a seam is one field, and the wreck
+## starts paying in it.
+static var ORE_TIERS: Array[int] = []
 
 ## Hand mining. Deliberately slow: it is the floor the whole factory is measured
 ## against, and it has to stay worth replacing.
