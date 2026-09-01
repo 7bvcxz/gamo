@@ -167,6 +167,7 @@ func _initialize() -> void:
 			"days_two_miners": stones_to_copper / (2.0 / Defs.MINER_PERIOD) / 120.0,
 		},
 		"machines": machines,
+		"recipes": _recipe_rows(),
 		"belts": belts,
 		"purity": purity,
 	}
@@ -179,6 +180,9 @@ func _initialize() -> void:
 	file.store_string(JSON.stringify(data, "  "))
 	file.close()
 	print("BALANCE_DUMP: wrote %s" % OUT)
+	# There is no recipe UI yet, so this is what stands in for one while the
+	# tech tree is being built.
+	print(Defs.recipes_dump())
 	quit(0)
 
 
@@ -189,3 +193,25 @@ func _unlock_names(type: int) -> Array:
 	for item_type: int in Defs.MACHINE_UNLOCK_ITEMS[type]:
 		names.append(String(Defs.ITEM_NAMES[item_type]))
 	return names
+
+## Recipes as data, the same rows the game reads. Empty until the first
+## production machine lands; the key is here from the start so the page that
+## reads it does not have to be added at the same time as the content.
+func _recipe_rows() -> Array:
+	var rows: Array = []
+	for recipe: Dictionary in Defs.RECIPES:
+		var inputs: Array = []
+		for port: Dictionary in recipe["inputs"]:
+			inputs.append({"item": Defs.item_name(int(port["item"])), "amount": int(port["amount"])})
+		var outputs: Array = []
+		for port: Dictionary in recipe["outputs"]:
+			outputs.append({"item": Defs.item_name(int(port["item"])), "amount": int(port["amount"])})
+		rows.append({
+			"key": String(recipe["key"]),
+			"name": String(recipe["name"]),
+			"machine": Defs.MACHINE_NAMES[int(recipe["machine"])],
+			"inputs": inputs,
+			"outputs": outputs,
+			"seconds": float(recipe["seconds"]),
+		})
+	return rows

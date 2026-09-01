@@ -358,6 +358,8 @@ static func _static_init() -> void:
 	for row: Dictionary in tiers:
 		ORE_TIERS.append(int(row["id"]))
 
+	_index_recipes()
+
 ## One row, by number. Empty for a number no material claims -- callers that
 ## might be holding one out of an old save can check `is_empty()`.
 static func item(id: int) -> Dictionary:
@@ -408,6 +410,256 @@ static func items_of_kind(kind: String) -> Array[int]:
 		if String(row["kind"]) == kind:
 			ids.append(int(row["id"]))
 	return ids
+
+# --- Recipe registry ----------------------------------------------------------
+## Every production recipe in the game, described in one place.
+##
+## Empty, and that is the honest state: nothing in this game turns items into
+## items yet. The two machines that produce anything do it in ways a recipe
+## cannot describe, and forcing them in would be a rewrite of working code for
+## the sake of a table with two rows in it --
+##
+##   the miner takes from the world, not from an input buffer. Its input is a
+##   seam under the tile and a cat standing on it, and its rate comes from that
+##   seam's purity. `_tick_miner` stays.
+##
+##   the generator's output is not an item. It burns a stone and the grid gains
+##   capacity, which no inputs/outputs pair says. `_tick_generator` stays.
+##
+## What this table is for is everything after them: 제조기 · 조립기 · 유체처리기 ·
+## 정유기 · 원심분리기, and the intermediates between them. `Sim.tick_recipe`
+## runs any row here, so adding production is adding a row -- there is no branch
+## to write in the simulation.
+##
+## Fields:
+##   id       a number, stable once shipped, the way an item's is
+##   key      what code and tests refer to. A display name may change; this may not
+##   name     what the player reads
+##   machine  which machine type runs it
+##   inputs   [{item, amount}], possibly empty (something that makes from nothing)
+##   outputs  [{item, amount}], never empty
+##   seconds  one full cycle at full speed
+##
+## Inputs and outputs are lists of rows rather than a pair of item ids, and each
+## row is a dictionary rather than a pair. That shape is what a fluid needs when
+## fluids arrive -- a row grows a field, and every loop over ports keeps working.
+## No fluid constant is defined here today, because a name for something that
+## does not exist is the kind of spec this repository has been misled by before.
+const RECIPES: Array[Dictionary] = []
+
+## Machine types the recipe system drives. Empty for the same reason as `RECIPES`:
+## the miner and the generator run their own ticks and are staying that way.
+## A machine listed here needs no branch anywhere -- the simulation's fall-through
+## finds its recipe and runs it.
+const RECIPE_MACHINES: Array[int] = []
+
+## How many cycles' worth of each input a recipe machine will take in.
+##
+## Two, so a belt can keep it fed across a cycle without the machine becoming a
+## warehouse: a mis-aimed line backs up on the belt, where the player can see it,
+## rather than disappearing into a buffer. The generator holds four of its one
+## fuel and is not driven by this -- it runs its own tick.
+const RECIPE_INPUT_CYCLES := 2
+
+static var _recipes_by_id: Dictionary = {}
+static var _recipes_by_key: Dictionary = {}
+
+static func _index_recipes() -> void:
+	_recipes_by_id.clear()
+	_recipes_by_key.clear()
+	for row: Dictionary in RECIPES:
+		_recipes_by_id[int(row["id"])] = row
+		_recipes_by_key[String(row["key"])] = row
+
+## Whether a machine number is one this game has. Used by the validator; it is
+## not a machine registry, which is a later piece of work.
+static func is_machine_type(type: int) -> bool:
+	return type >= 0 and type < MACHINE_NAMES.size()
+
+# --- Recipe lookup ------------------------------------------------------------
+## The rest of the game asks these rather than reading `RECIPES`, so the table's
+## shape stays a private matter between it and this block.
+static func recipe(id: int) -> Dictionary:
+	return _recipes_by_id.get(id, {})
+
+static func recipe_by_key(key: String) -> Dictionary:
+	return _recipes_by_key.get(key, {})
+
+static func recipes_for_machine(type: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in RECIPES:
+		if int(row["machine"]) == type:
+			out.append(row)
+	return out
+
+## The one a machine of this type runs. A machine that can be told to make
+## something else needs a chosen recipe stored on the machine, and that lands
+## with the first machine that has more than one row to choose between.
+static func recipe_for_machine(type: int) -> Dictionary:
+	var rows: Array[Dictionary] = recipes_for_machine(type)
+	return rows[0] if not rows.is_empty() else {}
+
+static func recipes_using_item(item_id: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in RECIPES:
+		for port: Dictionary in row["inputs"]:
+			if int(port["item"]) == item_id and not out.has(row):
+				out.append(row)
+	return out
+
+static func recipes_producing_item(item_id: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in RECIPES:
+		for port: Dictionary in row["outputs"]:
+			if int(port["item"]) == item_id and not out.has(row):
+				out.append(row)
+	return out
+
+# --- Recipe validation --------------------------------------------------------
+## Everything wrong with a table of recipes, as sentences.
+##
+## Takes the rows rather than reading `RECIPES`, so a test can hand it bad data
+## and see it complain. A validator that can only be pointed at correct data is
+## a validator nobody has watched work.
+static func recipe_errors(rows: Array = RECIPES) -> Array[String]:
+	var problems: Array[String] = []
+	var ids: Dictionary = {}
+	var keys: Dictionary = {}
+	for row: Dictionary in rows:
+		# Missing fields are reported and then the row is dropped. Reading on
+		# would not find a second problem, it would throw -- and a validator that
+		# crashes on the data it exists to judge is worse than no validator.
+		var complete := true
+		for field: String in ["id", "key", "name", "machine", "inputs", "outputs", "seconds"]:
+			if not row.has(field):
+				problems.append("레시피에 %s 항목이 없다: %s" % [field, row.get("key", row.get("id", "?"))])
+				complete = false
+		if not complete:
+			continue
+		var id: int = int(row["id"])
+		var key: String = String(row["key"])
+		if ids.has(id):
+			problems.append("레시피 번호 %d 를 %s 와 %s 가 함께 쓴다" % [id, ids[id], key])
+		if keys.has(key):
+			problems.append("레시피 key 가 겹친다: %s" % key)
+		ids[id] = key
+		keys[key] = id
+		if key.is_empty() or key != key.to_lower() or key.contains(" "):
+			problems.append("레시피 key 는 소문자에 공백이 없어야 한다: %s" % key)
+		if not is_machine_type(int(row["machine"])):
+			problems.append("%s 가 없는 기계 번호를 가리킨다: %d" % [key, int(row["machine"])])
+		if float(row["seconds"]) <= 0.0:
+			problems.append("%s 의 생산 시간이 0 이하다: %.2f" % [key, float(row["seconds"])])
+		var outputs: Array = row["outputs"]
+		if outputs.is_empty():
+			problems.append("%s 는 아무것도 만들지 않는다" % key)
+		# Inputs may be empty -- something that draws from the world rather than
+		# from a buffer is a real shape. Outputs may not.
+		for side: String in ["inputs", "outputs"]:
+			for port: Dictionary in row[side]:
+				if not port.has("item") or not port.has("amount"):
+					problems.append("%s 의 %s 줄에 item/amount 가 없다" % [key, side])
+					continue
+				var item_id: int = int(port["item"])
+				if not has_item(item_id):
+					problems.append("%s 가 없는 자원 번호를 가리킨다: %d" % [key, item_id])
+				if int(port["amount"]) <= 0:
+					problems.append("%s 의 %s 수량이 0 이하다: %s %d"
+						% [key, side, item_name(item_id), int(port["amount"])])
+	return problems
+
+## Machines that cannot ever be built.
+##
+## The rule: a machine may not cost, to build the first one, a part that only
+## that machine can make. 조립기 costing 전동기 while 전동기 is only made by a
+## 조립기 is a machine nobody can ever have, and nothing else in the game would
+## report it -- the build list would simply never light up.
+##
+## Worked by asking what is obtainable *without* the machine in question: start
+## from everything no recipe makes (dug, picked up, or out of the wreck) and keep
+## applying every other machine's recipes until the set stops growing.
+##
+## When machines are ranked -- 제조기 → 조립기 → 유체처리기 → 정유기 → 원심분리기 --
+## this widens from "without itself" to "without itself or anything above it",
+## which is one more condition in the skip below.
+## Takes the tables rather than reading them, for the same reason `recipe_errors`
+## does: a check that has only ever been pointed at correct data is a check
+## nobody has watched work. The test hands it the 조립기/전동기 knot on purpose.
+static func recipe_dependency_errors(rows: Array = RECIPES,
+		costs: Array = MACHINE_COSTS) -> Array[String]:
+	var problems: Array[String] = []
+	for type in costs.size():
+		var cost: Dictionary = costs[type]
+		if cost.is_empty():
+			continue
+		var have: Dictionary = _obtainable_without(type, rows)
+		for item_id: int in cost:
+			if not have.has(item_id):
+				var made_by: String = MACHINE_NAMES[type] if is_machine_type(type) else str(type)
+				problems.append("%s 는 자기 자신 없이는 만들 수 없는 %s%s 건설 비용으로 요구한다"
+					% [made_by, item_name(item_id), object_of(item_name(item_id))])
+	return problems
+
+static func _obtainable_without(machine_type: int, rows: Array = RECIPES) -> Dictionary:
+	var have: Dictionary = {}
+	# Anything no recipe makes is primitive: it comes out of the ground, the snow
+	# or the wreck, and a hand is enough.
+	for row: Dictionary in ITEMS:
+		var id: int = int(row["id"])
+		var made := false
+		for candidate: Dictionary in rows:
+			for port: Dictionary in candidate["outputs"]:
+				if int(port["item"]) == id:
+					made = true
+		if not made:
+			have[id] = true
+	var grew := true
+	while grew:
+		grew = false
+		for row: Dictionary in rows:
+			if int(row["machine"]) == machine_type:
+				continue
+			var ready := true
+			for port: Dictionary in row["inputs"]:
+				if not have.has(int(port["item"])):
+					ready = false
+			if not ready:
+				continue
+			for port: Dictionary in row["outputs"]:
+				var made: int = int(port["item"])
+				if not have.has(made):
+					have[made] = true
+					grew = true
+	return have
+
+# --- Recipe debug -------------------------------------------------------------
+## One recipe, readable. Used by `dump_balance.gd` and by anyone printing from a
+## breakpoint; there is no recipe UI yet and this is what stands in for one.
+static func recipe_dump(row: Dictionary) -> String:
+	if row.is_empty():
+		return "Recipe: (없음)"
+	var lines: Array[String] = []
+	lines.append("Recipe: %s (%s)" % [String(row["key"]), String(row["name"])])
+	lines.append("Machine: %s" % MACHINE_NAMES[int(row["machine"])])
+	lines.append("Input:")
+	if (row["inputs"] as Array).is_empty():
+		lines.append("  (없음)")
+	for port: Dictionary in row["inputs"]:
+		lines.append("  %s x%d" % [item_name(int(port["item"])), int(port["amount"])])
+	lines.append("Output:")
+	for port: Dictionary in row["outputs"]:
+		lines.append("  %s x%d" % [item_name(int(port["item"])), int(port["amount"])])
+	lines.append("Time:")
+	lines.append("  %.1f sec" % float(row["seconds"]))
+	return "\n".join(lines)
+
+static func recipes_dump() -> String:
+	if RECIPES.is_empty():
+		return "Recipes: 0 (제조기가 아직 없다)"
+	var blocks: Array[String] = []
+	for row: Dictionary in RECIPES:
+		blocks.append(recipe_dump(row))
+	return "\n\n".join(blocks)
 const COPPER_CORE := Color8(255, 238, 205)
 const ORE_OUTLINE := Color8(28, 20, 18)
 

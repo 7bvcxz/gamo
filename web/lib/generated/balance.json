@@ -348,6 +348,7 @@
     "miner_seconds": 5.0,
     "ratio_hint": "발전기 1대 = 열석 채굴기 2대"
   },
+  "recipes": [],
   "rings": {
     "copper": [
       15.0,
@@ -491,7 +492,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.30",
+  "version": "1.0.31",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

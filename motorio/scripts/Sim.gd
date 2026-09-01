@@ -101,10 +101,14 @@ class Machine extends RefCounted:
 	var items: Array[Dictionary] = []
 	## Furnace input buffer keyed by item type.
 	var buffer: Dictionary = {}
-	## Finished output the machine has not managed to hand on yet. A recipe that
-	## makes three at once cannot put all three on one belt tile in the same
-	## instant, and the remainder is owed rather than lost.
-	var pending: int = 0
+	## Finished output the machine has not managed to hand on yet, keyed by item
+	## type. A recipe that makes three at once cannot put all three on one belt
+	## tile in the same instant, and the remainder is owed rather than lost.
+	##
+	## Was `pending: int` from the exchanger era: written to the save, read by
+	## nothing, and unable to say *what* was owed. Made a dictionary in 1.0.32,
+	## when a shared recipe tick finally needed the thing its comment described.
+	var outbox: Dictionary = {}
 	## Miners only run while a cat is standing here.
 	var operated: bool = false
 	## What this machine has actually moved, in items, kept in two buckets so the
@@ -351,7 +355,7 @@ func to_save() -> Dictionary:
 			"dx": machine.dir.x, "dy": machine.dir.y,
 			"progress": machine.progress, "items": machine.items.duplicate(true),
 			"buffer": machine.buffer.duplicate(true),
-			"pending": machine.pending,
+			"outbox": machine.outbox.duplicate(true),
 			"tier": machine.tier,
 		})
 	var cat_rows: Array = []
@@ -490,7 +494,10 @@ func from_save(data: Dictionary) -> void:
 		machine.dir = Vector2i(int(row["dx"]), int(row["dy"]))
 		machine.progress = float(row.get("progress", 0.0))
 		machine.buffer = (row.get("buffer", {}) as Dictionary).duplicate(true)
-		machine.pending = int(row.get("pending", 0))
+		# A save written before 1.0.32 carries `pending`, which was an int and was
+		# always 0 -- nothing ever set it. There is nothing to migrate, only a
+		# key to stop reading.
+		machine.outbox = (row.get("outbox", {}) as Dictionary).duplicate(true)
 		machine.tier = int(row.get("tier", 0))
 		for item: Dictionary in row.get("items", []):
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
@@ -2218,6 +2225,11 @@ func tick(delta: float) -> void:
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
 			Defs.M_GENERATOR: _tick_generator(machine, delta)
 			Defs.M_SPLITTER: _tick_splitter(machine, delta * speed)
+			_:
+				# Everything the recipe system drives. There is no branch to add
+				# here for a new production machine -- it finds its recipe and
+				# runs the shared tick.
+				tick_recipe(machine, Defs.recipe_for_machine(machine.type), delta * speed)
 	_refresh_radius()
 	_tick_rate(delta)
 
@@ -2338,6 +2350,16 @@ func design_rates(machine: Machine) -> Dictionary:
 			var split: float = Defs.per_minute(Defs.SPLITTER_PERIOD)
 			into[-1] = split
 			out[-1] = split
+		_:
+			# Rated straight off the recipe, so the readout over a new machine is
+			# right the day it is added.
+			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+			if not recipe.is_empty():
+				var each: float = Defs.per_minute(float(recipe["seconds"]))
+				for port: Dictionary in recipe["inputs"]:
+					into[int(port["item"])] = each * float(port["amount"])
+				for port: Dictionary in recipe["outputs"]:
+					out[int(port["item"])] = each * float(port["amount"])
 	return {"in": into, "out": out}
 
 ## Every item type worth listing on one side of the panel: whatever the machine
@@ -2382,6 +2404,15 @@ func meter_status(machine: Machine) -> String:
 			return "운반 중"
 		Defs.M_CORE:
 			return "반입구"
+		_:
+			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+			if recipe.is_empty():
+				return ""
+			if not machine.outbox.is_empty():
+				return "출력 막힘"
+			if not recipe_inputs_ready(machine, recipe):
+				return "재료 없음"
+			return "가동 중"
 	return ""
 
 ## What the machine is holding right now, as "구리 2 · 수정 1". A rate alone does
@@ -3088,6 +3119,75 @@ func _refresh_radius() -> void:
 	if rose:
 		base_upgraded.emit(base_level, warm_radius)
 
+## One production step, shared by every machine the recipe system drives.
+##
+## This is the only tick a new production machine needs. Adding 제조기 is a row in
+## `Defs.RECIPES` and its number in `Defs.RECIPE_MACHINES`; nothing in this file
+## changes. That is the whole point of the piece of work this arrived in.
+##
+## The order is deliberate. Finished goods are handed on **first**, because a
+## machine still holding output must not begin another cycle -- otherwise a
+## mis-aimed belt turns the machine into a warehouse that grows without bound.
+## Progress is kept rather than thrown away when the exit is blocked: the work
+## was done, and losing it would punish the player for a belt they are about to
+## fix.
+func tick_recipe(machine: Machine, recipe: Dictionary, delta: float) -> void:
+	if recipe.is_empty():
+		return
+	_drain_outbox(machine)
+	if not machine.outbox.is_empty():
+		machine.operated = false
+		machine.stalled = true
+		return
+	if not recipe_inputs_ready(machine, recipe):
+		machine.operated = false
+		machine.stalled = false
+		return
+	machine.operated = true
+	machine.stalled = false
+	machine.progress += delta
+	if machine.progress < float(recipe["seconds"]):
+		return
+	machine.progress = 0.0
+	# Consumed at the end rather than the start, which is what makes a blocked
+	# machine hold its inputs instead of eating them into a cycle it cannot
+	# finish.
+	for port: Dictionary in recipe["inputs"]:
+		var eaten: int = int(port["item"])
+		var left: int = int(machine.buffer.get(eaten, 0)) - int(port["amount"])
+		if left > 0:
+			machine.buffer[eaten] = left
+		else:
+			machine.buffer.erase(eaten)
+	for port: Dictionary in recipe["outputs"]:
+		var made: int = int(port["item"])
+		machine.outbox[made] = int(machine.outbox.get(made, 0)) + int(port["amount"])
+	machine.flash = 0.5
+	_drain_outbox(machine)
+	machine.stalled = not machine.outbox.is_empty()
+
+## Whether everything the recipe asks for is already inside the machine.
+func recipe_inputs_ready(machine: Machine, recipe: Dictionary) -> bool:
+	for port: Dictionary in recipe["inputs"]:
+		if int(machine.buffer.get(int(port["item"]), 0)) < int(port["amount"]):
+			return false
+	return true
+
+## Hands finished goods to whatever is in front, one at a time, and leaves what
+## will not fit.
+##
+## Goes out through `_emit_from`, the same exit the miner uses -- a belt if one
+## faces, the floor otherwise. A second set of output rules for recipe machines
+## is a second set of rules to get wrong, and this repository has the receipts.
+func _drain_outbox(machine: Machine) -> void:
+	for item_id: int in machine.outbox.keys():
+		while int(machine.outbox.get(item_id, 0)) > 0:
+			if not _emit_from(machine, item_id):
+				break
+			machine.outbox[item_id] = int(machine.outbox[item_id]) - 1
+		if int(machine.outbox.get(item_id, 0)) <= 0:
+			machine.outbox.erase(item_id)
+
 func _tick_miner(machine: Machine, delta: float) -> void:
 	# A miner is inert without a cat standing at it. This is the whole point of
 	# the worker system: heat buys the machine, cats buy the output.
@@ -3330,6 +3430,26 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			if fuel >= 4:
 				return false
 			target.buffer[item_type] = fuel + 1
+			target.flash = 0.25
+			return true
+		_:
+			# Everything the recipe system drives takes what its recipe asks for
+			# and nothing else. A machine that accepted anything would let one
+			# mis-aimed belt fill it with a material it can never spend, and the
+			# only way out of that is to tear the machine down.
+			var recipe: Dictionary = Defs.recipe_for_machine(target.type)
+			if recipe.is_empty():
+				return false
+			var wanted := 0
+			for port: Dictionary in recipe["inputs"]:
+				if int(port["item"]) == item_type:
+					wanted = int(port["amount"])
+			if wanted <= 0:
+				return false
+			var held: int = int(target.buffer.get(item_type, 0))
+			if held >= wanted * Defs.RECIPE_INPUT_CYCLES:
+				return false
+			target.buffer[item_type] = held + 1
 			target.flash = 0.25
 			return true
 	return false
