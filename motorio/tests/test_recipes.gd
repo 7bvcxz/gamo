@@ -71,8 +71,9 @@ func _assert(condition: bool, label: String) -> void:
 ## power, and neither is an inputs-to-outputs pair. They still are not. What
 ## changed is that something finally is.
 func _test_the_registry_is_empty_and_says_so() -> void:
-	_assert(Defs.RECIPES.size() == 2, "레시피는 둘이다 (%d)" % Defs.RECIPES.size())
-	_assert(Defs.RECIPE_MACHINES == [Defs.M_MANUFACTURER], "그것을 도는 것은 제조기뿐이다")
+	_assert(Defs.RECIPES.size() == 3, "레시피는 셋이다 (%d)" % Defs.RECIPES.size())
+	_assert(Defs.RECIPE_MACHINES == [Defs.M_MANUFACTURER, Defs.M_ASSEMBLER],
+		"그것을 도는 것은 제조기와 조립기다 (%s)" % str(Defs.RECIPE_MACHINES))
 	_assert(not Defs.machine_uses_recipes(Defs.M_MINER)
 		and not Defs.machine_uses_recipes(Defs.M_GENERATOR),
 		"채굴기와 발전기는 여전히 자기 tick 을 돈다")

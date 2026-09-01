@@ -65,6 +65,11 @@ func _run() -> void:
 		"a point on the game row resolves to the game row")
 
 	var track: Rect2 = main.hud.slider_track_rects[0]
+	# From a known place. The setting is written to `user://` and read back on
+	# start, so a run that died half way through this file left the next one
+	# already at the maximum -- and "dragging right enlarges the UI" then fails
+	# for a reason that has nothing to do with sliders.
+	main.set_ui_scale(Defs.UI_SCALE_MIN)
 	var before: float = main.ui_scale
 	var right_end := Vector2(track.position.x + track.size.x, track.get_center().y)
 	_assert(main.touch_hud(right_end * main.hud.scale.x), "touching the slider is handled")
@@ -112,10 +117,29 @@ func _run() -> void:
 	main._apply_camera_zoom()
 
 	# Nothing may run off the screen at the largest setting.
+	#
+	# The row across the bottom is the *tools*, and it was measured against
+	# `Defs.BUILDABLE` here for as long as the two lists happened to be about the
+	# same length. They are not any more -- the machines are a menu, not a row --
+	# and the check was reading a layout the game does not draw.
 	var slot: Vector2 = main.hud.hotbar_slot()
-	var row: float = float(Defs.BUILDABLE.size()) * (slot.x + main.hud.SLOT_GAP) - main.hud.SLOT_GAP
+	var row: float = float(main.TOOLS.size()) * (slot.x + main.hud.SLOT_GAP) - main.hud.SLOT_GAP
 	_assert(row <= main.hud.size.x, "the hotbar still fits across the screen at maximum scale")
 	_assert(main.hud.hotbar_origin().x >= 0.0, "the hotbar does not start off the left edge")
+
+	# The machines are a list in a window, and what can run off the screen there
+	# is the bottom of it. With everything unlocked the card has to still contain
+	# its own last row -- the rows give way before the window does.
+	for type: int in Defs.BUILDABLE:
+		main.sim.unlocked[type] = true
+	var listed: int = main.build_list().size()
+	_assert(listed == Defs.BUILDABLE.size(), "건설 목록이 기계를 전부 보여준다 (%d)" % listed)
+	var build_card: Rect2 = main.hud.build_menu_rect()
+	var last_row: Rect2 = main.hud.build_menu_row_rect(listed - 1)
+	_assert(last_row.end.y <= build_card.end.y,
+		"가장 큰 배율에서도 마지막 줄이 창 안에 있다 (%.0f <= %.0f)"
+		% [last_row.end.y, build_card.end.y])
+	_assert(build_card.end.y <= main.hud.size.y, "창 자체도 화면 안에 있다")
 
 	main.set_ui_scale(Defs.UI_SCALE_MIN)
 	_tick(main)

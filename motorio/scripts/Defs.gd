@@ -234,6 +234,11 @@ const ITEM_IRON_PLATE := 6
 ## The second intermediate, and the one that makes the manufacturer a machine
 ## rather than a plate press: the same building, a different choice.
 const ITEM_COPPER_WIRE := 7
+## The first part that two lines have to meet to make. Iron for the body, copper
+## for the winding -- which is what a motor is, and the reason this is the item
+## that introduces the assembler rather than a third thing the manufacturer
+## stamps out on its own.
+const ITEM_ELECTRIC_MOTOR := 8
 
 # --- Item registry ------------------------------------------------------------
 ## Where a material comes from, which is the only thing every material has to
@@ -344,6 +349,14 @@ const ITEMS: Array[Dictionary] = [
 		"desc": "제조기가 구리광석 하나를 두 가닥으로 뽑는다. 전기를 쓰는 것들이 요구하게 된다.",
 	},
 	{
+		"id": ITEM_ELECTRIC_MOTOR, "key": "electric_motor", "kind": KIND_INTERMEDIATE,
+		"name": "전동기", "short": "전동기",
+		"color": Color8(150, 205, 200),
+		"atlas": "",
+		"counter": 7, "ore_tier": -1, "retired": false,
+		"desc": "철판과 전선이 한 기계에서 만난 첫 부품. 하나를 만들려면 두 공장이 동시에 돌아야 한다.",
+	},
+	{
 		# Violet, which nothing else on this planet is -- it is the only material
 		# here that was manufactured.
 		"id": ITEM_ENERGY_CORE, "key": "energy_core", "kind": KIND_SPECIAL,
@@ -442,6 +455,8 @@ static func _index_machines() -> void:
 			DIRECTIONAL_MACHINES.append(id)
 		if String(row["production"]) == PROD_RECIPE:
 			RECIPE_MACHINES.append(id)
+		if String(row["production"]) == PROD_MINER:
+			MINER_MACHINES.append(id)
 	buildable.sort_custom(func(a, b): return int(a["build_order"]) < int(b["build_order"]))
 	BUILDABLE.clear()
 	for row: Dictionary in buildable:
@@ -467,6 +482,19 @@ static func machine_production(type: int) -> String:
 ## asks about a machine it has never heard of.
 static func machine_uses_recipes(type: int) -> bool:
 	return machine_production(type) == PROD_RECIPE
+
+## Whether it takes from a seam. Asked rather than compared against M_MINER,
+## because "is this a mining rig" is now a question with two answers, and the
+## simulation asked it in eleven places -- the ore rule in `can_build`, the cat's
+## idea of a post, the power ledger, the tick, the meter. Eleven `== M_MINER`
+## comparisons are eleven places for the second rig to be forgotten.
+static func machine_mines(type: int) -> bool:
+	return machine_production(type) == PROD_MINER
+
+## How fast this rig works a seam, as a multiple of the seam's own rate. The seam
+## decides the material and the purity; the rig only decides the pace.
+static func machine_mine_rate(type: int) -> float:
+	return float(machine(type).get("mine_rate", 1.0))
 
 static func machine_power_draw(type: int) -> float:
 	return float(machine(type).get("power_draw", 0.0))
@@ -532,6 +560,16 @@ static func machine_errors(rows: Array = MACHINES) -> Array[String]:
 				problems.append("%s 의 해금 조건이 없는 자원을 가리킨다: %d" % [key, item_id])
 		if float(row["power_draw"]) < 0.0 or float(row["power_output"]) < 0.0:
 			problems.append("%s 의 전력 값이 음수다" % key)
+		# A rate belongs to a rig and to nothing else. A `mine_rate` on a belt is
+		# a number nobody reads, which is how a table starts lying: the field is
+		# there, it looks meaningful, and the simulation has never once asked.
+		if String(row["production"]) == PROD_MINER:
+			if not row.has("mine_rate"):
+				problems.append("%s 는 채굴기인데 mine_rate 가 없다" % key)
+			elif float(row["mine_rate"]) <= 0.0:
+				problems.append("%s 의 mine_rate 가 0 이하다: %.2f" % [key, float(row["mine_rate"])])
+		elif row.has("mine_rate"):
+			problems.append("%s 는 채굴기가 아닌데 mine_rate 를 갖고 있다" % key)
 	return problems
 
 ## One row, by number. Empty for a number no material claims -- callers that
@@ -644,6 +682,24 @@ const RECIPES: Array[Dictionary] = [
 		"inputs": [{"item": ITEM_COPPER, "amount": 1}],
 		"outputs": [{"item": ITEM_COPPER_WIRE, "amount": 2}],
 		"seconds": 2.5,
+	},
+	{
+		# The first recipe that two machines have to feed, and the numbers are
+		# picked so that "one of each" is the answer. A manufacturer on plates
+		# makes 2 in 6 seconds; a manufacturer on wire makes 4 in 5 seconds; this
+		# takes 6. One plate line and one wire line keep one assembler busy with
+		# a little slack on the wire side, so a player who builds one of each and
+		# nothing else sees it work -- and the first ratio they ever have to
+		# solve is one they solved by accident.
+		#
+		# Iron for the body, copper for the winding. That is what a motor is, and
+		# a recipe the player can guess is a recipe that teaches the next one.
+		"id": 3, "key": "electric_motor", "name": "전동기",
+		"machine": M_ASSEMBLER,
+		"inputs": [{"item": ITEM_IRON_PLATE, "amount": 2},
+			{"item": ITEM_COPPER_WIRE, "amount": 4}],
+		"outputs": [{"item": ITEM_ELECTRIC_MOTOR, "amount": 1}],
+		"seconds": 6.0,
 	},
 ]
 
@@ -859,6 +915,88 @@ static func _obtainable_without(machine_type: int, rows: Array = RECIPES) -> Dic
 					grew = true
 	return have
 
+# --- Production reachability --------------------------------------------------
+## What a run can actually get to, starting from a pickaxe and nothing else.
+##
+## `recipe_dependency_errors` above asks one question per machine: can this be
+## built without itself. That catches the knot it was written for -- 조립기
+## costing 전동기 -- and misses the one where two machines wait on each other,
+## because each of them *is* buildable without itself, just not without the
+## other. This asks the whole ladder at once instead, and a cycle shows up the
+## only way a cycle can: as something the set never grows to include.
+##
+## The rules are the game's own. A material no recipe makes is primitive: it is
+## dug, picked up, or falls out of the wreck. A machine can be built when every
+## material its cost names is reachable. A recipe's outputs are reachable when
+## its machine is and every input is. Run to a fixpoint.
+##
+## Takes the tables rather than reading them, like every other check here, so a
+## test can hand it a deliberately broken ladder and watch it refuse.
+static func production_reach(items: Array = ITEMS, recipes: Array = RECIPES,
+		machines: Array = MACHINES) -> Dictionary:
+	var from_a_machine: Dictionary = {}
+	for row: Dictionary in recipes:
+		for port: Dictionary in row["outputs"]:
+			from_a_machine[int(port["item"])] = true
+	var have: Dictionary = {}
+	for row: Dictionary in items:
+		var id: int = int(row["id"])
+		if bool(row.get("retired", false)):
+			continue
+		if not from_a_machine.has(id):
+			have[id] = true
+	var built: Dictionary = {}
+	var grew := true
+	while grew:
+		grew = false
+		for row: Dictionary in machines:
+			var type: int = int(row["id"])
+			if built.has(type):
+				continue
+			var payable := true
+			for item_id: int in row["cost"]:
+				if not have.has(item_id):
+					payable = false
+			if not payable:
+				continue
+			built[type] = true
+			grew = true
+		for row: Dictionary in recipes:
+			if not built.has(int(row["machine"])):
+				continue
+			var ready := true
+			for port: Dictionary in row["inputs"]:
+				if not have.has(int(port["item"])):
+					ready = false
+			if not ready:
+				continue
+			for port: Dictionary in row["outputs"]:
+				var made: int = int(port["item"])
+				if not have.has(made):
+					have[made] = true
+					grew = true
+	return {"items": have, "machines": built}
+
+## Everything the ladder cannot reach, as sentences. A machine nobody can build
+## and a material nobody can make read the same way from inside the game: the
+## thing is in the registry and there is no path to it.
+static func reachability_errors(items: Array = ITEMS, recipes: Array = RECIPES,
+		machines: Array = MACHINES) -> Array[String]:
+	var reach: Dictionary = production_reach(items, recipes, machines)
+	var built: Dictionary = reach["machines"]
+	var have: Dictionary = reach["items"]
+	var problems: Array[String] = []
+	for row: Dictionary in machines:
+		if not built.has(int(row["id"])):
+			problems.append("%s 에 도달할 수 없다 — 건설 비용이 순환한다" % String(row["name"]))
+	for row: Dictionary in items:
+		if bool(row.get("retired", false)):
+			continue
+		if not have.has(int(row["id"])):
+			var made: String = String(row["name"])
+			problems.append("%s%s 만들 방법이 없다" % [made, object_of(made)])
+	return problems
+
 # --- Recipe debug -------------------------------------------------------------
 ## One recipe, readable. Used by `dump_balance.gd` and by anyone printing from a
 ## breakpoint; there is no recipe UI yet and this is what stands in for one.
@@ -1042,10 +1180,13 @@ static func per_minute(seconds: float) -> float:
 ## One line per machine describing what it does per minute, for the hotbar and
 ## for the readout over a machine the player is facing.
 static func throughput_line(type: int) -> String:
+	# Every rig, off its own rate. Written before the match because a second rig
+	# with its own `M_` branch is the shape this registry exists to stop.
+	if machine_mines(type):
+		# Whatever the seam under it holds -- there is no longer one ore.
+		return "광맥의 자원 %.0f/분 · 고양이 또는 전력 %.1f" \
+			% [per_minute(MINER_PERIOD / machine_mine_rate(type)), machine_power_draw(type)]
 	match type:
-		M_MINER:
-			# Whatever the seam under it holds -- there is no longer one ore.
-			return "광맥의 자원 %.0f/분 · 고양이 또는 전력 %.1f" % [per_minute(MINER_PERIOD), MINER_POWER_DRAW]
 		M_GENERATOR:
 			return "%s %.0f/분 → 전력 %.1f" \
 				% [ITEM_NAMES[GENERATOR_FUEL], per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
@@ -1098,6 +1239,12 @@ const GENERATOR_OUTPUT := 1.0
 ## one. It draws only while it has work, so a machine waiting for iron is not
 ## quietly slowing the miners.
 const MANUFACTURER_POWER := 1.0
+## What an assembler takes. Half again as much as a manufacturer, because it is
+## doing the work of a machine that two lines feed -- and because the sentence
+## the player has to arrive at next is "the factory needs more generators than
+## the factory needs machines". It draws only while both its materials are in
+## and the exit is clear, like everything else the recipe tick runs.
+const ASSEMBLER_POWER := 1.5
 ## Belts do not draw power, and must not. They used to, at 0.1 each, which meant
 ## that before the first generator existed the grid had capacity zero against a
 ## non-zero draw -- and the supply ratio that every belt multiplied its speed by
@@ -1115,6 +1262,17 @@ const MANUFACTURER_POWER := 1.0
 ## power exists, a miner can run on it instead -- and the freed cat goes back to
 ## hauling, which is its other job.
 const MINER_POWER_DRAW := 0.5
+## What Mk.2 does with the same seam and the same one worker: twice the pace, for
+## twice the draw. Written as a multiple rather than as a second period, because
+## the seam still decides which material and how pure it is -- the rig only
+## decides how fast, and a second table of periods would be a second place to get
+## copper wrong.
+##
+## Two rather than three: one rig on a seam is now worth two cats, which is the
+## whole promise of a machine built out of a machine's product. A bigger number
+## would make the Mk.1 look like a mistake rather than like a starting point.
+const RIG2_RATE := 2.0
+const RIG2_POWER_DRAW := MINER_POWER_DRAW * RIG2_RATE
 
 # --- Tile attributes ---------------------------------------------------------
 ## Attributes describe what a tile *is*, independent of what sits on it. They are
@@ -1245,6 +1403,14 @@ const M_SPLITTER := 4
 ## held this job until 1.0.8 and was removed for making one thing with one use;
 ## this one is the start of a ladder rather than a middleman.
 const M_MANUFACTURER := 5
+## The first machine that needs two lines to arrive at once. Everything before
+## it turns one material into another; this one is where the factory stops being
+## a chain and becomes a shape.
+const M_ASSEMBLER := 6
+## The first machine built out of something a machine made. It is a 채굴기 that
+## works twice as fast for twice the power -- the same one-worker-or-the-grid
+## rule, over a bigger number.
+const M_MINER_MK2 := 7
 
 ## What a machine is for, which is the grouping a build list wants to show.
 const GROUP_CORE := "core"
@@ -1313,6 +1479,7 @@ const MACHINES: Array[Dictionary] = [
 		"cost": {ITEM_HEATSTONE: 5}, "unlock": [], "color": COL_CAT_FUR,
 		"power_draw": MINER_POWER_DRAW, "power_output": 0.0,
 		"build_order": 0, "walkable": false, "directional": true,
+		"mine_rate": 1.0,
 	},
 	{
 		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
@@ -1353,6 +1520,36 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": 0.0, "power_output": 0.0,
 		"build_order": 2, "walkable": true, "directional": true,
 	},
+	{
+		# Bootstrap, and this row is the one the rule was written for. An
+		# assembler that cost a 전동기 would be a machine nobody could ever build,
+		# because a 전동기 only comes out of an assembler. Everything here comes
+		# off a manufacturer, which is the machine before it --
+		# `recipe_dependency_errors` and `reachability_errors` both watch this.
+		"id": M_ASSEMBLER, "key": "assembler", "name": "조립기", "short": "조립기",
+		"group": GROUP_PRODUCTION, "production": PROD_RECIPE,
+		"desc": "부품 두 가지를 한꺼번에 받아 조립합니다 · 전력 필요",
+		"cost": {ITEM_IRON_PLATE: 10, ITEM_COPPER_WIRE: 8},
+		"unlock": [ITEM_IRON_PLATE, ITEM_COPPER_WIRE],
+		"color": Color8(176, 156, 210),
+		"power_draw": ASSEMBLER_POWER, "power_output": 0.0,
+		"build_order": 5, "walkable": false, "directional": true,
+	},
+	{
+		# The end of the line this step builds, and the reason to build it. Same
+		# seam, same one cat or the same grid, twice the pace -- so the thing the
+		# player gets for running two factories at once is that the factory feeding
+		# them gets smaller.
+		"id": M_MINER_MK2, "key": "miner_mk2", "name": "채굴기 Mk.2", "short": "Mk.2",
+		"group": GROUP_EXTRACTION, "production": PROD_MINER,
+		"desc": "같은 광맥에서 두 배로 캡니다 · 고양이 1마리 또는 전력",
+		"cost": {ITEM_IRON_PLATE: 8, ITEM_COPPER_WIRE: 6, ITEM_ELECTRIC_MOTOR: 2},
+		"unlock": [ITEM_ELECTRIC_MOTOR],
+		"color": Color8(214, 188, 140),
+		"power_draw": RIG2_POWER_DRAW, "power_output": 0.0,
+		"build_order": 6, "walkable": false, "directional": true,
+		"mine_rate": RIG2_RATE,
+	},
 ]
 
 ## The lists every caller already reads, built from the table above.
@@ -1364,6 +1561,11 @@ static var MACHINE_UNLOCK_ITEMS: Array = []
 static var BUILDABLE: Array[int] = []
 static var WALKABLE_MACHINES: Array[int] = []
 static var DIRECTIONAL_MACHINES: Array[int] = []
+## Every machine that works a seam, built from `MACHINES` the way
+## `RECIPE_MACHINES` is. Nothing indexes it today -- `machine_mines` answers the
+## question directly -- but a test that wants "every rig" should not have to
+## write the list down.
+static var MINER_MACHINES: Array[int] = []
 static var _machines_by_id: Dictionary = {}
 static var _machines_by_key: Dictionary = {}
 
@@ -1372,11 +1574,11 @@ static var _machines_by_key: Dictionary = {}
 ## going in states the property that defines it instead: for a belt the useful
 ## sentence is that it never needs power, not an empty input line.
 static func machine_io(type: int) -> Array[String]:
+	if machine_mines(type):
+		return ["입력   없음 · 광맥 위에만 설치",
+			"출력   광맥의 자원 %.0f/분" % per_minute(MINER_PERIOD / machine_mine_rate(type)),
+			"일손   고양이 1마리 또는 전력 %.1f" % machine_power_draw(type)]
 	match type:
-		M_MINER:
-			return ["입력   없음 · 광맥 위에만 설치",
-				"출력   광맥의 자원 %.0f/분" % per_minute(MINER_PERIOD),
-				"일손   고양이 1마리 또는 전력 %.1f" % MINER_POWER_DRAW]
 		M_BELT:
 			return ["입력   뒤쪽에서 받음",
 				"출력   앞쪽으로 %.0f/분" % (BELT_SPEED / 0.34 * 60.0),

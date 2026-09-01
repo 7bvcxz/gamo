@@ -117,7 +117,7 @@ func _test_bootstrap() -> void:
 	_assert(Defs.machine_errors().is_empty(), "기계 표에 잘못이 없다")
 	_assert(Defs.recipe_errors().is_empty(), "레시피 표에 잘못이 없다")
 	_assert(Defs.machine_uses_recipes(Defs.M_MANUFACTURER), "제조기는 레시피로 돈다")
-	_assert(Defs.RECIPE_MACHINES == [Defs.M_MANUFACTURER], "레시피를 도는 기계는 제조기뿐이다")
+	_assert(Defs.RECIPE_MACHINES.has(Defs.M_MANUFACTURER), "레시피를 도는 기계에 제조기가 있다")
 
 # --- The recipe ---------------------------------------------------------------
 

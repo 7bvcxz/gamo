@@ -76,7 +76,8 @@
       "에너지 코어",
       "철광석",
       "철판",
-      "전선"
+      "전선",
+      "전동기"
     ]
   },
   "machines": [
@@ -160,6 +161,49 @@
       "throughput": "철광석 1 → 철판 1 · 3초",
       "unlock": [
         "철광석"
+      ]
+    },
+    {
+      "cost": [
+        {
+          "count": 10,
+          "item": "철판"
+        },
+        {
+          "count": 8,
+          "item": "전선"
+        }
+      ],
+      "hint": "부품 두 가지를 한꺼번에 받아 조립합니다 · 전력 필요",
+      "name": "조립기",
+      "short": "조립기",
+      "throughput": "철판 2 · 전선 4 → 전동기 1 · 6초",
+      "unlock": [
+        "철판",
+        "전선"
+      ]
+    },
+    {
+      "cost": [
+        {
+          "count": 8,
+          "item": "철판"
+        },
+        {
+          "count": 6,
+          "item": "전선"
+        },
+        {
+          "count": 2,
+          "item": "전동기"
+        }
+      ],
+      "hint": "같은 광맥에서 두 배로 캡니다 · 고양이 1마리 또는 전력",
+      "name": "채굴기 Mk.2",
+      "short": "Mk.2",
+      "throughput": "광맥의 자원 24/분 · 고양이 또는 전력 1.0",
+      "unlock": [
+        "전동기"
       ]
     }
   ],
@@ -418,6 +462,28 @@
         }
       ],
       "seconds": 2.5
+    },
+    {
+      "inputs": [
+        {
+          "amount": 2,
+          "item": "철판"
+        },
+        {
+          "amount": 4,
+          "item": "전선"
+        }
+      ],
+      "key": "electric_motor",
+      "machine": "조립기",
+      "name": "전동기",
+      "outputs": [
+        {
+          "amount": 1,
+          "item": "전동기"
+        }
+      ],
+      "seconds": 6.0
     }
   ],
   "rings": {
@@ -563,7 +629,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.36",
+  "version": "1.0.37",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

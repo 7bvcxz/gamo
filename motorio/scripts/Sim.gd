@@ -2075,7 +2075,7 @@ func drop_cat(at: Vector2) -> bool:
 func idle_miner_cells() -> Array[Vector2i]:
 	var free: Array[Vector2i] = []
 	for cell: Vector2i in machines:
-		if machines[cell].type != Defs.M_MINER:
+		if not Defs.machine_mines(machines[cell].type):
 			continue
 		var taken := false
 		for cat: Cat in cats:
@@ -2190,9 +2190,9 @@ func can_build(type: int, cell: Vector2i) -> String:
 	if not can_afford(type):
 		var missing: String = _missing_label(type)
 		return "%s%s 부족합니다" % [missing, Defs.subject(missing)]
-	if type == Defs.M_MINER and not ore.has(cell):
+	if Defs.machine_mines(type) and not ore.has(cell):
 		return "광맥 위에만 설치할 수 있습니다"
-	if type != Defs.M_MINER and ore.has(cell):
+	if not Defs.machine_mines(type) and ore.has(cell):
 		return "광맥 위에는 설치할 수 없습니다"
 	return ""
 
@@ -2251,7 +2251,7 @@ func tick(delta: float) -> void:
 		machine.flash = maxf(0.0, machine.flash - delta)
 		_advance_meter(machine, delta)
 		var speed: float = 1.0 if is_warm(cell) else 0.45
-		if machine.type == Defs.M_MINER:
+		if Defs.machine_mines(machine.type):
 			var rate: float = _operator_rate(cell, supply)
 			speed *= rate
 			# The drill spin and the progress ring both read `operated`, and a
@@ -2263,8 +2263,13 @@ func tick(delta: float) -> void:
 			# stop rather than a slowdown, and nothing is lost either way: the
 			# inputs stay in the buffer until a cycle actually finishes.
 			speed *= supply if power_capacity > 0.0 else 0.0
+		# Every rig, asked rather than listed -- a `match` arm per machine number
+		# is what this registry replaced, and the second rig is the first chance
+		# to put one back.
+		if Defs.machine_mines(machine.type):
+			_tick_miner(machine, delta * speed)
+			continue
 		match machine.type:
-			Defs.M_MINER: _tick_miner(machine, delta * speed)
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
 			Defs.M_GENERATOR: _tick_generator(machine, delta)
 			Defs.M_SPLITTER: _tick_splitter(machine, delta * speed)
@@ -2377,10 +2382,13 @@ func meter_span(machine: Machine) -> float:
 func design_rates(machine: Machine) -> Dictionary:
 	var into: Dictionary = {}
 	var out: Dictionary = {}
+	# Every rig, ahead of the match, because a `match` arm cannot ask a question
+	# -- and listing machine numbers is how the second rig gets forgotten.
+	if Defs.machine_mines(machine.type):
+		if ore.has(machine.cell):
+			out[int(ore[machine.cell])] = Defs.per_minute(machine_period(machine))
+		return {"in": into, "out": out}
 	match machine.type:
-		Defs.M_MINER:
-			if ore.has(machine.cell):
-				out[int(ore[machine.cell])] = Defs.per_minute(seam_period(machine.cell))
 		Defs.M_GENERATOR:
 			into[Defs.GENERATOR_FUEL] = Defs.per_minute(Defs.GENERATOR_PERIOD)
 		Defs.M_BELT:
@@ -2428,13 +2436,13 @@ func meter_items(machine: Machine, outgoing: bool) -> Array[int]:
 ## One phrase for why the machine is not at its rated number. Ordered by what the
 ## player should fix first: no worker beats no input beats no room.
 func meter_status(machine: Machine) -> String:
+	if Defs.machine_mines(machine.type):
+		if not machine.operated:
+			return "일손 없음 · 고양이 또는 전력"
+		if machine.stalled:
+			return "출력 막힘"
+		return "가동 중"
 	match machine.type:
-		Defs.M_MINER:
-			if not machine.operated:
-				return "일손 없음 · 고양이 또는 전력"
-			if machine.stalled:
-				return "출력 막힘"
-			return "가동 중"
 		Defs.M_GENERATOR:
 			if int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)) <= 0:
 				return "연료 없음"
@@ -2494,8 +2502,8 @@ func _recount_power() -> void:
 	var draw: float = 0.0
 	for cell: Vector2i in machines:
 		var machine: Machine = machines[cell]
-		if machine.type == Defs.M_MINER and miner_on_power(cell):
-			draw += Defs.MINER_POWER_DRAW
+		if Defs.machine_mines(machine.type) and miner_on_power(cell):
+			draw += Defs.machine_power_draw(machine.type)
 		elif Defs.machine_uses_recipes(machine.type):
 			# Only while it has work. A machine standing empty and still pulling
 			# on the grid slows every miner on it for no reason the player can
@@ -2562,7 +2570,7 @@ func worker_at(cell: Vector2i) -> Cat:
 ## what the drill colour and the power ledger both need to know.
 func miner_on_power(cell: Vector2i) -> bool:
 	var machine: Machine = machines.get(cell, null)
-	if machine == null or machine.type != Defs.M_MINER:
+	if machine == null or not Defs.machine_mines(machine.type):
 		return false
 	if power_capacity <= 0.0:
 		return false
@@ -2730,7 +2738,7 @@ func _tick_cats(delta: float) -> void:
 		return
 	_assign_haulers()
 	for cell: Vector2i in machines:
-		if machines[cell].type == Defs.M_MINER:
+		if Defs.machine_mines(machines[cell].type):
 			machines[cell].operated = false
 	for cat: Cat in cats:
 		# A cat in the player's arms is not a cat that is doing anything. Its
@@ -3117,7 +3125,7 @@ func cat_has_tool(cat: Cat) -> bool:
 	if cat == null or cat.state != Defs.CAT_WORKING:
 		return false
 	var machine: Machine = machines.get(cat.assigned, null)
-	return machine != null and machine.type == Defs.M_MINER
+	return machine != null and Defs.machine_mines(machine.type)
 
 ## A post is a miner, or a bare seam. Both are places a cat can be put down and
 ## will keep working; asked in one place so the three handlers that check it
@@ -3125,7 +3133,7 @@ func cat_has_tool(cat: Cat) -> bool:
 func _is_post(cell: Vector2i) -> bool:
 	var machine: Machine = machines.get(cell, null)
 	if machine != null:
-		return machine.type == Defs.M_MINER
+		return Defs.machine_mines(machine.type)
 	return ore.has(cell)
 
 func _cat_work(cat: Cat, delta: float) -> void:
@@ -3226,7 +3234,14 @@ func tick_recipe(machine: Machine, recipe: Dictionary, delta: float) -> void:
 	for port: Dictionary in recipe["outputs"]:
 		var made: int = int(port["item"])
 		machine.outbox[made] = int(machine.outbox.get(made, 0)) + int(port["amount"])
+		# The run has now had one, which is the question an unlock asks. Mining
+		# is not the only way a material enters the world any more, and asking
+		# only `_gain` would mean a factory that has been turning out 전동기 for a
+		# minute still has nothing in the build list to spend them on -- the
+		# player would have to walk two of them home to be told what they are for.
+		held_items[made] = true
 		recipe_produced.emit(machine.cell, made, int(port["amount"]))
+	_check_unlocks()
 	machine.flash = 0.5
 	_drain_outbox(machine)
 	machine.stalled = not machine.outbox.is_empty()
@@ -3293,6 +3308,12 @@ func _drain_outbox(machine: Machine) -> void:
 		if int(machine.outbox.get(item_id, 0)) <= 0:
 			machine.outbox.erase(item_id)
 
+## Seconds per item for this rig on the seam under it. The seam decides which
+## material and how pure it is; the rig decides the pace, and that split is the
+## only thing Mk.2 changes.
+func machine_period(machine: Machine) -> float:
+	return seam_period(machine.cell) / Defs.machine_mine_rate(machine.type)
+
 func _tick_miner(machine: Machine, delta: float) -> void:
 	# A miner is inert without a cat standing at it. This is the whole point of
 	# the worker system: heat buys the machine, cats buy the output.
@@ -3300,7 +3321,7 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 		machine.stalled = false
 		return
 	var item_type: int = ore.get(machine.cell, Defs.ITEM_CRYSTAL)
-	var period: float = seam_period(machine.cell)
+	var period: float = machine_period(machine)
 	machine.progress += delta
 	if machine.progress < period:
 		return

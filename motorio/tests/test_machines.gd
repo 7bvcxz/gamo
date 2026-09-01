@@ -42,7 +42,7 @@ func _assert(condition: bool, label: String) -> void:
 func _test_table_is_wellformed() -> void:
 	_assert(Defs.machine_errors().is_empty(),
 		"지금 표에는 잘못이 없다 (%s)" % str(Defs.machine_errors()))
-	_assert(Defs.MACHINES.size() == 6, "기계는 여섯이다 (%d)" % Defs.MACHINES.size())
+	_assert(Defs.MACHINES.size() == 8, "기계는 여덟이다 (%d)" % Defs.MACHINES.size())
 
 	# Two rows claiming one hotbar seat would leave the row's order up to the
 	# sort's stability rather than to the table.
@@ -137,13 +137,15 @@ func _test_every_machine_is_reachable() -> void:
 ## and this is the file that can say none of them moved a value with them.
 func _test_metadata_snapshot() -> void:
 	_assert(Defs.MACHINE_NAMES == ["열 코어", "채굴기", "컨테이너 벨트", "발전기", "분배기",
-		"제조기"], "이름이 그대로다 (%s)" % str(Defs.MACHINE_NAMES))
-	_assert(Defs.MACHINE_SHORT == ["코어", "채굴기", "벨트", "발전기", "분배기", "제조기"],
-		"약칭이 그대로다 (%s)" % str(Defs.MACHINE_SHORT))
+		"제조기", "조립기", "채굴기 Mk.2"], "이름이 그대로다 (%s)" % str(Defs.MACHINE_NAMES))
+	_assert(Defs.MACHINE_SHORT == ["코어", "채굴기", "벨트", "발전기", "분배기", "제조기",
+		"조립기", "Mk.2"], "약칭이 그대로다 (%s)" % str(Defs.MACHINE_SHORT))
 	_assert(Defs.MACHINE_HINTS == ["", "채굴을 더 빠르게 할 수 있는 장치",
 		"자원을 기지까지 끊김 없이 나릅니다", "열석을 태워 전력 1.0을 공급합니다",
 		"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
-		"광석을 가공해 부품을 만듭니다 · 전력 필요 · Z로 품목 선택"], "건설 목록 설명이 그대로다")
+		"광석을 가공해 부품을 만듭니다 · 전력 필요 · Z로 품목 선택",
+		"부품 두 가지를 한꺼번에 받아 조립합니다 · 전력 필요",
+		"같은 광맥에서 두 배로 캡니다 · 고양이 1마리 또는 전력"], "건설 목록 설명이 그대로다")
 
 	# Costs, which are balance. A digit moved here is a different game.
 	_assert(Defs.MACHINE_COSTS[Defs.M_CORE].is_empty(), "코어는 짓는 것이 아니다")
@@ -166,21 +168,28 @@ func _test_metadata_snapshot() -> void:
 		== [Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE], "발전기는 구리와 에너지 코어")
 	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_MANUFACTURER] == [Defs.ITEM_IRON],
 		"제조기는 첫 철이 연다")
+	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_ASSEMBLER]
+		== [Defs.ITEM_IRON_PLATE, Defs.ITEM_COPPER_WIRE], "조립기는 두 중간재가 연다")
+	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_MINER_MK2] == [Defs.ITEM_ELECTRIC_MOTOR],
+		"Mk.2 는 첫 전동기가 연다")
 
 	# Hotbar order is the order they are earned, which is not id order: the
 	# splitter comes before the generator.
 	_assert(Defs.BUILDABLE == [Defs.M_MINER, Defs.M_BELT, Defs.M_SPLITTER, Defs.M_GENERATOR,
-		Defs.M_MANUFACTURER], "핫바 순서가 그대로다 (%s)" % str(Defs.BUILDABLE))
+		Defs.M_MANUFACTURER, Defs.M_ASSEMBLER, Defs.M_MINER_MK2],
+		"핫바 순서가 그대로다 (%s)" % str(Defs.BUILDABLE))
 	_assert(Defs.WALKABLE_MACHINES.size() == 2
 		and Defs.M_BELT in Defs.WALKABLE_MACHINES
 		and Defs.M_SPLITTER in Defs.WALKABLE_MACHINES, "밟을 수 있는 것은 벨트와 분배기뿐이다")
 	# The manufacturer joined them in 1.0.34: it pours its output at the cell it
 	# faces, so which way it points is a decision the player makes.
-	_assert(Defs.DIRECTIONAL_MACHINES.size() == 4
+	_assert(Defs.DIRECTIONAL_MACHINES.size() == 6
 		and Defs.M_MINER in Defs.DIRECTIONAL_MACHINES
 		and Defs.M_BELT in Defs.DIRECTIONAL_MACHINES
 		and Defs.M_SPLITTER in Defs.DIRECTIONAL_MACHINES
-		and Defs.M_MANUFACTURER in Defs.DIRECTIONAL_MACHINES, "방향이 있는 것은 넷이다")
+		and Defs.M_MANUFACTURER in Defs.DIRECTIONAL_MACHINES
+		and Defs.M_ASSEMBLER in Defs.DIRECTIONAL_MACHINES
+		and Defs.M_MINER_MK2 in Defs.DIRECTIONAL_MACHINES, "방향이 있는 것은 여섯이다")
 
 	_assert(Defs.machine_color(Defs.M_CORE) == Defs.COL_CORE, "코어 색")
 	_assert(Defs.machine_color(Defs.M_MINER) == Defs.COL_CAT_FUR, "채굴기 색")
@@ -223,7 +232,8 @@ func _test_joins_to_the_other_registries() -> void:
 	# Every recipe points at a machine that runs recipes. Empty today, on both
 	# sides, and the check is what makes the first row safe.
 	_assert(Defs.recipe_errors().is_empty(), "레시피와 기계가 어긋나지 않는다")
-	_assert(Defs.RECIPE_MACHINES == [Defs.M_MANUFACTURER], "레시피를 도는 기계는 제조기뿐이다")
+	_assert(Defs.RECIPE_MACHINES == [Defs.M_MANUFACTURER, Defs.M_ASSEMBLER],
+		"레시피를 도는 기계는 제조기와 조립기다 (%s)" % str(Defs.RECIPE_MACHINES))
 	_assert(Defs.machine_uses_recipes(Defs.M_MANUFACTURER), "제조기는 레시피로 돈다")
 	_assert(not Defs.machine_uses_recipes(Defs.M_MINER), "채굴기는 세계에서 캔다")
 	_assert(not Defs.machine_uses_recipes(Defs.M_GENERATOR), "발전기는 전력을 낸다")
@@ -246,9 +256,16 @@ func _test_save_round_trip() -> void:
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_IRON)
-	sim.stock[Defs.ITEM_COPPER] = 500
-	sim.stock[Defs.ITEM_HEATSTONE] = 500
-	sim.stock[Defs.ITEM_IRON] = 500
+	sim.note_resource_seen(Defs.ITEM_IRON_PLATE)
+	sim.note_resource_seen(Defs.ITEM_COPPER_WIRE)
+	sim.note_resource_seen(Defs.ITEM_ELECTRIC_MOTOR)
+	# Whatever the table asks for, rather than three names written down here. The
+	# point of the check below is that every buildable machine round-trips, and a
+	# hand-kept purse turns a new machine into a failure of this test rather than
+	# a test of that machine.
+	for type: int in Defs.BUILDABLE:
+		for item_id: int in Defs.MACHINE_COSTS[type]:
+			sim.stock[item_id] = 500
 
 	var placed: Dictionary = {}
 	var at: Vector2i = sim.core_cell + Vector2i(4, 4)
@@ -257,7 +274,7 @@ func _test_save_round_trip() -> void:
 		at += Vector2i(0, 2)
 		sim.ore.erase(cell)
 		sim.machines.erase(cell)
-		if type == Defs.M_MINER:
+		if Defs.machine_mines(type):
 			sim.ore[cell] = Defs.ITEM_HEATSTONE
 		if sim.build(type, cell, Vector2i.RIGHT):
 			placed[cell] = type

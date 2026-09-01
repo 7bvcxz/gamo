@@ -76,7 +76,7 @@ static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
 			canvas.draw_circle(centre, radius * 0.82, Defs.COL_CORE_DEEP)
 			canvas.draw_circle(centre, radius * 0.54, Defs.COL_CORE)
 			canvas.draw_circle(centre, radius * 0.28, Color("fff0c9"))
-		Defs.M_MINER:
+		Defs.M_MINER, Defs.M_MINER_MK2:
 			_shadow(canvas, rect)
 			_body(canvas, rect.grow(-rect.size.x * 0.16), Defs.COL_MACHINE, tint, width)
 			# The drill, pointing down into the seam it stands on.
@@ -85,6 +85,14 @@ static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
 			canvas.draw_colored_polygon(PackedVector2Array([
 				centre + Vector2(-drill, -drill), centre + Vector2(drill, -drill),
 				centre + Vector2(0.0, drill * 1.8)]), Defs.COL_BRASS)
+			# The same grade pips the rig wears on the map, so the chip in the
+			# hotbar and the machine on the ground are recognisably one thing.
+			var rate: float = Defs.machine_mine_rate(type)
+			if rate > 1.0:
+				for index in int(rate):
+					canvas.draw_circle(rect.position + Vector2(rect.size.x * (0.22 + 0.2
+						* float(index)), rect.size.y * 0.86), rect.size.x * 0.055,
+						Defs.COL_BRASS)
 			_arrow(canvas, rect, tint)
 		Defs.M_BELT:
 			# Flat on the ground: inset, no shadow, chevrons showing travel.
@@ -121,6 +129,23 @@ static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
 				centre + Vector2(unit * 0.1, unit * 0.2), centre + Vector2(-unit * 0.4, unit * 1.6),
 				centre + Vector2(unit * 0.9, -unit * 0.2), centre + Vector2(0.0, -unit * 0.2)]),
 				Defs.OUTLINE)
+		Defs.M_ASSEMBLER:
+			_shadow(canvas, rect)
+			_body(canvas, rect.grow(-rect.size.x * 0.14), Defs.COL_MACHINE, tint, width)
+			# Two hoppers over one mouth. The manufacturer's shape said "in above,
+			# out below"; this one has to say "two things in", and doubling the
+			# thing the player already read is cheaper than a new symbol.
+			var mid: Vector2 = rect.get_center()
+			var span: float = rect.size.x * 0.17
+			for side in [-1.0, 1.0]:
+				var top: Vector2 = mid + Vector2(side * span * 0.86, -span * 1.5)
+				canvas.draw_colored_polygon(PackedVector2Array([
+					top + Vector2(-span * 0.62, 0.0), top + Vector2(span * 0.62, 0.0),
+					top + Vector2(span * 0.18, span * 1.3),
+					top + Vector2(-span * 0.18, span * 1.3)]), Defs.COL_BRASS)
+			canvas.draw_rect(Rect2(mid + Vector2(-span * 0.9, span * 0.45),
+				Vector2(span * 1.8, span * 0.8)), Defs.machine_color(Defs.M_ASSEMBLER))
+			_arrow(canvas, rect, tint)
 		Defs.M_MANUFACTURER:
 			_shadow(canvas, rect)
 			_body(canvas, rect.grow(-rect.size.x * 0.14), Defs.COL_MACHINE, tint, width)

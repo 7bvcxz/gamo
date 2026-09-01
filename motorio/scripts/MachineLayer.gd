@@ -279,12 +279,20 @@ func _draw() -> void:
 			continue
 		if not _visible(cell, tile):
 			continue
+		# Rigs and recipe machines are asked rather than listed. Two families with
+		# two members each, and a `match` arm per machine number is the thing that
+		# leaves the second member of a family invisible -- a machine that is in
+		# the world, blocks the tile, and is drawn as nothing at all.
+		if Defs.machine_mines(machine.type):
+			_draw_miner(machine, Vector2(cell) * tile, tile)
+			continue
+		if Defs.machine_uses_recipes(machine.type):
+			_draw_recipe_machine(machine, Vector2(cell) * tile, tile)
+			continue
 		match machine.type:
 			Defs.M_CORE: _draw_core(machine, Vector2(cell) * tile, tile)
-			Defs.M_MINER: _draw_miner(machine, Vector2(cell) * tile, tile)
 			Defs.M_GENERATOR: _draw_generator(machine, Vector2(cell) * tile, tile)
 			Defs.M_SPLITTER: _draw_splitter(machine, Vector2(cell) * tile, tile)
-			Defs.M_MANUFACTURER: _draw_manufacturer(machine, Vector2(cell) * tile, tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if machine.type != Defs.M_BELT or not _visible(cell, tile):
@@ -553,7 +561,10 @@ func _draw_arrow(on: CanvasItem, from: Vector2, dir: Vector2i, length: float, co
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
-	var work: float = clampf(machine.progress / Defs.MINER_PERIOD, 0.0, 1.0)
+	# Its own period, not the crystal one. The ring was measured against a fixed
+	# five seconds while the machine was working a thirty-second iron seam, so it
+	# filled six times per item and read as a machine racing on an empty seam.
+	var work: float = clampf(machine.progress / maxf(sim.machine_period(machine), 0.001), 0.0, 1.0)
 
 	_shadow(c + Vector2(0, 12), 11.0)
 	# Cold machines go blue rather than dark: the tint is the same signal the
@@ -569,6 +580,15 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		draw_arc(c, 15.0, 0.0, TAU, 28, Color(0.75, 0.78, 0.85, blink), 1.5, true)
 	if machine.flash > 0.0:
 		draw_circle(c, 17.0 + machine.flash * 12.0, Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
+	# Grade pips, the same mark an upgraded belt wears on its rim. A rig that
+	# works the seam twice as fast is the same picture as one that does not, and
+	# a player who has both on screen has to be able to tell which is which
+	# without selecting either. The first rig draws none, so nothing that was
+	# already on the map changes.
+	var rate: float = Defs.machine_mine_rate(machine.type)
+	if rate > 1.0:
+		for index in int(rate):
+			draw_circle(px + Vector2(6.0 + float(index) * 5.0, tile - 4.0), 1.7, Defs.COL_BRASS)
 
 ## The swing. Ten seconds is a long time to hold a key with nothing to look at,
 ## so the seam being worked wears a filling arc and shakes a little harder as it
@@ -725,7 +745,12 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## every machine uses; the output pip sits above it, because a manufacturer that
 ## has made something it cannot hand on is the one state a player has to be able
 ## to read from across the field -- it looks identical to a machine with no ore.
-func _draw_manufacturer(machine: Sim.Machine, px: Vector2, tile: float) -> void:
+## Every machine the recipe tick drives. One picture, because what distinguishes
+## them is what they are doing rather than what they are: the pips underneath say
+## what is going in, the pips above say what is waiting to leave, and the ring
+## says how far through it is. The assembler earns a mark of its own below --
+## two inputs is a different shape, not a different colour.
+func _draw_recipe_machine(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
 	_shadow(centre + Vector2(0, 12), 11.0)
@@ -754,14 +779,32 @@ func _draw_manufacturer(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	if machine.flash > 0.0:
 		draw_circle(centre, 17.0 + machine.flash * 12.0,
 			Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
-	for port: Dictionary in recipe["inputs"]:
-		var wanted: int = int(port["item"])
-		_draw_pip(centre + Vector2(0, 13), wanted, int(machine.buffer.get(wanted, 0)))
-	for port: Dictionary in recipe["outputs"]:
-		var made: int = int(port["item"])
+	# Spread, not stacked. Every recipe had one input until the assembler, so all
+	# the pips were drawn at the same point and the second one would have been
+	# painted exactly on top of the first -- a machine waiting on wire and a
+	# machine waiting on plate would be the same picture.
+	var inputs: Array = recipe["inputs"]
+	# The mark that says two lines have to meet here: a beam across the top with
+	# a post down to each input pip. Drawn only when there is more than one way
+	# in, so the manufacturer is exactly the picture it has always been.
+	if inputs.size() > 1:
+		var arm: float = 4.5 * float(inputs.size() - 1) + 3.0
+		var beam: Color = Defs.machine_color(machine.type)
+		draw_line(centre + Vector2(-arm, 17.0), centre + Vector2(arm, 17.0), beam, 1.6)
+	for index in inputs.size():
+		var wanted: int = int((inputs[index] as Dictionary)["item"])
+		var slot: float = (float(index) - float(inputs.size() - 1) * 0.5) * 9.0
+		if inputs.size() > 1:
+			draw_line(centre + Vector2(slot, 17.0), centre + Vector2(slot, 13.0),
+				Defs.machine_color(machine.type), 1.4)
+		_draw_pip(centre + Vector2(slot, 13.0), wanted, int(machine.buffer.get(wanted, 0)))
+	var outputs: Array = recipe["outputs"]
+	for index in outputs.size():
+		var made: int = int((outputs[index] as Dictionary)["item"])
 		var owed: int = int(machine.outbox.get(made, 0))
 		if owed > 0:
-			_draw_pip(centre + Vector2(0, -13), made, owed)
+			_draw_pip(centre + Vector2((float(index) - float(outputs.size() - 1) * 0.5) * 9.0,
+				-13.0), made, owed)
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.
@@ -1099,7 +1142,7 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		# question rather than as a list of machine numbers: the placement ghost
 		# draws this arrow and then it vanished the moment the machine was built,
 		# so a manufacturer turned north and one turned east were the same picture.
-		if machine.type == Defs.M_MINER or Defs.machine_uses_recipes(machine.type):
+		if Defs.machine_mines(machine.type) or Defs.machine_uses_recipes(machine.type):
 			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
 		if machine.stalled:
 			_draw_stall(on, machine, centre)

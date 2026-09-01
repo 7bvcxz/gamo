@@ -2908,12 +2908,17 @@ func _primary_action() -> void:
 	if cell == sim.core_cell and sim.base_placed:
 		_open_base_menu()
 		return
-	# A machine with a choice in it. Above the build gun on purpose: a player
-	# standing in front of their manufacturer with the gun out is far more likely
-	# to be asking it what it makes than to be trying to build on top of it.
+	# A production machine. Above the build gun on purpose: a player standing in
+	# front of their manufacturer with the gun out is far more likely to be
+	# asking it what it makes than to be trying to build on top of it.
+	#
+	# Any of them, not only the ones with a choice. The assembler has one recipe
+	# and the window is still the only place that says 철판 0/2 · 전선 4/4 -- which
+	# is the whole answer to "both lines are running and nothing is coming out",
+	# and the first question this machine will ever be asked.
 	var facing: Sim.Machine = sim.machine_at(cell)
 	if facing != null and Defs.machine_uses_recipes(facing.type) \
-			and Defs.recipes_for_machine(facing.type).size() > 1:
+			and not Defs.recipes_for_machine(facing.type).is_empty():
 		_open_machine_menu(cell)
 		return
 	# A frozen cat answers Z before anything else. She has both arms round it,

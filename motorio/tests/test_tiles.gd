@@ -38,7 +38,7 @@ func _run() -> void:
 		var spot: Vector2i = sim.core_cell + Vector2i(9, 9)
 		sim.machines.erase(spot)
 		sim.ore.erase(spot)
-		if kind == Defs.M_MINER:
+		if Defs.machine_mines(kind):
 			sim.ore[spot] = Defs.ITEM_CRYSTAL
 		sim.unlocked[kind] = true
 		_assert(sim.build(kind, spot, Vector2i.RIGHT), "%s를 세운다" % Defs.MACHINE_NAMES[kind])
@@ -305,6 +305,11 @@ func _open(sim) -> void:
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
-	# The manufacturer costs iron, and this loop builds one of everything.
-	sim.note_resource_seen(Defs.ITEM_IRON)
-	sim.stock[Defs.ITEM_IRON] = 500
+	# Whatever the table asks for, rather than a purse written out by hand. This
+	# loop builds one of everything, so a machine added later has to be payable
+	# here -- and the version that named three materials turned every new machine
+	# into a failure of this file.
+	for type: int in Defs.BUILDABLE:
+		for item_id: int in Defs.MACHINE_COSTS[type]:
+			sim.note_resource_seen(item_id)
+			sim.stock[item_id] = 500

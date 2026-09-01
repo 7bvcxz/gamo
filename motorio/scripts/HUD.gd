@@ -1151,19 +1151,36 @@ func _draw_key_legend() -> void:
 ## its cost, and three lines saying what goes in, what comes out and what is
 ## peculiar about it -- which is the information the genre runs on.
 const MENU_ROW := 74.0
+## The shortest a build row is allowed to get. An icon is 40 tall and the two
+## lines of text sit at 22 and 42, so this is the height at which the row still
+## says everything it says.
+const BUILD_ROW_MIN := 52.0
 const MENU_W := 500.0
+
+## How tall one row of the build list is.
+##
+## The card has always clamped its own height and the rows never did, so a list
+## long enough to overflow drew its last machines *below* the card -- on a phone
+## at the largest interface size, the two machines this ladder just added. The
+## rows give way instead: the list is a catalogue and a shorter row is still a
+## readable one, where a row drawn outside the window is not a row at all.
+func build_menu_row_height() -> float:
+	var rows: float = float(maxi(1, main.build_list().size()))
+	var room: float = size.y - MARGIN * 2.0 - FRAME_HEADER - 42.0
+	return clampf(room / rows, BUILD_ROW_MIN, MENU_ROW)
 
 func build_menu_rect() -> Rect2:
 	var rows: float = float(maxi(1, main.build_list().size()))
-	var height: float = FRAME_HEADER + 12.0 + rows * MENU_ROW + 30.0
+	var height: float = FRAME_HEADER + 12.0 + rows * build_menu_row_height() + 30.0
 	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
 	height = minf(height, size.y - MARGIN * 2.0)
 	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
 
 func build_menu_row_rect(index: int) -> Rect2:
 	var card: Rect2 = build_menu_rect()
-	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + 8.0 + float(index) * MENU_ROW),
-		Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+	var step: float = build_menu_row_height()
+	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + 8.0 + float(index) * step),
+		Vector2(card.size.x - 16.0, step - 4.0))
 
 ## Which row a point falls in, or -1. Used by touch, which has no arrow keys.
 func build_menu_row_at(point: Vector2) -> int:
@@ -1284,8 +1301,8 @@ func _draw_machine_menu() -> void:
 	var running: Dictionary = main.sim.recipe_of(machine)
 	var state: Array[String] = []
 	if not running.is_empty():
-		state.append("입력 %s" % _held(machine.buffer, running["inputs"]))
-		state.append("출력 %s" % _held(machine.outbox, running["outputs"]))
+		state.append("입력 %s" % _held(machine.buffer, running["inputs"], true))
+		state.append("출력 %s" % _held(machine.outbox, running["outputs"], false))
 	state.append(main.sim.meter_status(machine))
 	_text(Vector2(card.position.x + 14.0, card.position.y + FRAME_HEADER + 16.0),
 		"  ·  ".join(state), 12, Defs.COL_TEXT_DIM)
@@ -1303,12 +1320,21 @@ func _draw_machine_menu() -> void:
 	for index in rows.size():
 		_draw_machine_row(index, rows[index], machine)
 
-## "철 2" for whichever of a recipe's ports the machine is holding, or "없음".
-func _held(store: Dictionary, ports: Array) -> String:
+## What the machine is holding on one side of its recipe, or "없음".
+##
+## The going-in side is written against what a cycle costs -- "철판 1/2 · 전선 4/4"
+## -- because with two materials the useful fact is not how much is in there, it
+## is which one is short. The coming-out side has no target: it is a count of
+## things waiting for somewhere to go.
+func _held(store: Dictionary, ports: Array, needed: bool) -> String:
 	var parts: Array[String] = []
 	for port: Dictionary in ports:
 		var item_type: int = int(port["item"])
-		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], int(store.get(item_type, 0))])
+		var have: int = int(store.get(item_type, 0))
+		if needed:
+			parts.append("%s %d/%d" % [Defs.ITEM_SHORT[item_type], have, int(port["amount"])])
+		else:
+			parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], have])
 	return " · ".join(parts) if not parts.is_empty() else "없음"
 
 func _draw_machine_row(index: int, row: Dictionary, machine) -> void:
