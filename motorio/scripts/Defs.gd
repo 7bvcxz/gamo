@@ -358,7 +358,134 @@ static func _static_init() -> void:
 	for row: Dictionary in tiers:
 		ORE_TIERS.append(int(row["id"]))
 
+	_index_machines()
 	_index_recipes()
+
+## Fills every machine list from `MACHINES`, the way the item lists are filled.
+static func _index_machines() -> void:
+	var top: int = 0
+	for row: Dictionary in MACHINES:
+		top = maxi(top, int(row["id"]))
+	MACHINE_NAMES.resize(top + 1)
+	MACHINE_SHORT.resize(top + 1)
+	MACHINE_HINTS.resize(top + 1)
+	MACHINE_COSTS.resize(top + 1)
+	MACHINE_UNLOCK_ITEMS.resize(top + 1)
+	for index in top + 1:
+		MACHINE_NAMES[index] = ""
+		MACHINE_SHORT[index] = ""
+		MACHINE_HINTS[index] = ""
+		MACHINE_COSTS[index] = {}
+		MACHINE_UNLOCK_ITEMS[index] = []
+
+	var buildable: Array[Dictionary] = []
+	for row: Dictionary in MACHINES:
+		var id: int = int(row["id"])
+		MACHINE_NAMES[id] = String(row["name"])
+		MACHINE_SHORT[id] = String(row["short"])
+		MACHINE_HINTS[id] = String(row["desc"])
+		MACHINE_COSTS[id] = row["cost"]
+		MACHINE_UNLOCK_ITEMS[id] = row["unlock"]
+		_machines_by_id[id] = row
+		_machines_by_key[String(row["key"])] = row
+		if int(row["build_order"]) >= 0:
+			buildable.append(row)
+		if bool(row["walkable"]):
+			WALKABLE_MACHINES.append(id)
+		if bool(row["directional"]):
+			DIRECTIONAL_MACHINES.append(id)
+		if String(row["production"]) == PROD_RECIPE:
+			RECIPE_MACHINES.append(id)
+	buildable.sort_custom(func(a, b): return int(a["build_order"]) < int(b["build_order"]))
+	BUILDABLE.clear()
+	for row: Dictionary in buildable:
+		BUILDABLE.append(int(row["id"]))
+
+# --- Machine lookup -----------------------------------------------------------
+static func machine(type: int) -> Dictionary:
+	return _machines_by_id.get(type, {})
+
+static func machine_by_key(key: String) -> Dictionary:
+	return _machines_by_key.get(key, {})
+
+static func machine_name(type: int) -> String:
+	return String(machine(type).get("name", ""))
+
+static func machine_group(type: int) -> String:
+	return String(machine(type).get("group", ""))
+
+static func machine_production(type: int) -> String:
+	return String(machine(type).get("production", ""))
+
+## Whether the shared recipe tick runs this one. The one question the simulation
+## asks about a machine it has never heard of.
+static func machine_uses_recipes(type: int) -> bool:
+	return machine_production(type) == PROD_RECIPE
+
+static func machine_power_draw(type: int) -> float:
+	return float(machine(type).get("power_draw", 0.0))
+
+static func machine_power_output(type: int) -> float:
+	return float(machine(type).get("power_output", 0.0))
+
+static func machine_ids() -> Array[int]:
+	var ids: Array[int] = []
+	for row: Dictionary in MACHINES:
+		ids.append(int(row["id"]))
+	return ids
+
+static func machines_of_group(group: String) -> Array[int]:
+	var ids: Array[int] = []
+	for row: Dictionary in MACHINES:
+		if String(row["group"]) == group:
+			ids.append(int(row["id"]))
+	return ids
+
+# --- Machine validation -------------------------------------------------------
+## Everything wrong with a table of machines, as sentences. Takes the rows for
+## the same reason the recipe validators do.
+static func machine_errors(rows: Array = MACHINES) -> Array[String]:
+	var problems: Array[String] = []
+	var ids: Dictionary = {}
+	var keys: Dictionary = {}
+	var groups: Array[String] = [GROUP_CORE, GROUP_EXTRACTION, GROUP_LOGISTICS, GROUP_POWER]
+	var kinds: Array[String] = [PROD_SPECIAL, PROD_MINER, PROD_RECIPE, PROD_GENERATOR,
+		PROD_LOGISTICS]
+	for row: Dictionary in rows:
+		var complete := true
+		for field: String in ["id", "key", "name", "short", "group", "production",
+				"desc", "cost", "unlock", "color", "power_draw", "power_output",
+				"build_order", "walkable", "directional"]:
+			if not row.has(field):
+				problems.append("기계에 %s 항목이 없다: %s" % [field, row.get("key", "?")])
+				complete = false
+		if not complete:
+			continue
+		var id: int = int(row["id"])
+		var key: String = String(row["key"])
+		if ids.has(id):
+			problems.append("기계 번호 %d 를 %s 와 %s 가 함께 쓴다" % [id, ids[id], key])
+		if keys.has(key):
+			problems.append("기계 key 가 겹친다: %s" % key)
+		ids[id] = key
+		keys[key] = id
+		if key.is_empty() or key != key.to_lower() or key.contains(" "):
+			problems.append("기계 key 는 소문자에 공백이 없어야 한다: %s" % key)
+		if not groups.has(String(row["group"])):
+			problems.append("%s 의 group 이 목록에 없다: %s" % [key, row["group"]])
+		if not kinds.has(String(row["production"])):
+			problems.append("%s 의 production 이 목록에 없다: %s" % [key, row["production"]])
+		for item_id: int in row["cost"]:
+			if not has_item(item_id):
+				problems.append("%s 의 건설 비용이 없는 자원을 가리킨다: %d" % [key, item_id])
+			if int(row["cost"][item_id]) <= 0:
+				problems.append("%s 의 건설 비용 수량이 0 이하다: %d" % [key, int(row["cost"][item_id])])
+		for item_id: int in row["unlock"]:
+			if not has_item(item_id):
+				problems.append("%s 의 해금 조건이 없는 자원을 가리킨다: %d" % [key, item_id])
+		if float(row["power_draw"]) < 0.0 or float(row["power_output"]) < 0.0:
+			problems.append("%s 의 전력 값이 음수다" % key)
+	return problems
 
 ## One row, by number. Empty for a number no material claims -- callers that
 ## might be holding one out of an old save can check `is_empty()`.
@@ -447,11 +574,13 @@ static func items_of_kind(kind: String) -> Array[int]:
 ## does not exist is the kind of spec this repository has been misled by before.
 const RECIPES: Array[Dictionary] = []
 
-## Machine types the recipe system drives. Empty for the same reason as `RECIPES`:
-## the miner and the generator run their own ticks and are staying that way.
-## A machine listed here needs no branch anywhere -- the simulation's fall-through
-## finds its recipe and runs it.
-const RECIPE_MACHINES: Array[int] = []
+## Machine types the recipe system drives, built from `MACHINES`: every row whose
+## production is PROD_RECIPE. Was a hand-kept list for one version, which is one
+## version longer than a hand-kept list survives in this repository.
+##
+## Empty for the same reason `RECIPES` is: the miner and the generator run their
+## own ticks and are staying that way.
+static var RECIPE_MACHINES: Array[int] = []
 
 ## How many cycles' worth of each input a recipe machine will take in.
 ##
@@ -471,10 +600,10 @@ static func _index_recipes() -> void:
 		_recipes_by_id[int(row["id"])] = row
 		_recipes_by_key[String(row["key"])] = row
 
-## Whether a machine number is one this game has. Used by the validator; it is
-## not a machine registry, which is a later piece of work.
+## Whether a machine number is one this game has, asked of the registry rather
+## than of an array's length.
 static func is_machine_type(type: int) -> bool:
-	return type >= 0 and type < MACHINE_NAMES.size()
+	return _machines_by_id.has(type)
 
 # --- Recipe lookup ------------------------------------------------------------
 ## The rest of the game asks these rather than reading `RECIPES`, so the table's
@@ -521,7 +650,7 @@ static func recipes_producing_item(item_id: int) -> Array[Dictionary]:
 ## Takes the rows rather than reading `RECIPES`, so a test can hand it bad data
 ## and see it complain. A validator that can only be pointed at correct data is
 ## a validator nobody has watched work.
-static func recipe_errors(rows: Array = RECIPES) -> Array[String]:
+static func recipe_errors(rows: Array = RECIPES, machines: Array = MACHINES) -> Array[String]:
 	var problems: Array[String] = []
 	var ids: Dictionary = {}
 	var keys: Dictionary = {}
@@ -546,8 +675,18 @@ static func recipe_errors(rows: Array = RECIPES) -> Array[String]:
 		keys[key] = id
 		if key.is_empty() or key != key.to_lower() or key.contains(" "):
 			problems.append("레시피 key 는 소문자에 공백이 없어야 한다: %s" % key)
-		if not is_machine_type(int(row["machine"])):
+		# The join between the two registries. A recipe may only name a machine
+		# this game has, and only one the shared tick actually drives -- a recipe
+		# on a belt would sit in the table looking correct and never run.
+		var runner: Dictionary = {}
+		for candidate: Dictionary in machines:
+			if int(candidate.get("id", -1)) == int(row["machine"]):
+				runner = candidate
+		if runner.is_empty():
 			problems.append("%s 가 없는 기계 번호를 가리킨다: %d" % [key, int(row["machine"])])
+		elif String(runner.get("production", "")) != PROD_RECIPE:
+			problems.append("%s 가 레시피를 돌리지 않는 기계를 가리킨다: %s (%s)"
+				% [key, runner.get("key", "?"), runner.get("production", "?")])
 		if float(row["seconds"]) <= 0.0:
 			problems.append("%s 의 생산 시간이 0 이하다: %.2f" % [key, float(row["seconds"])])
 		var outputs: Array = row["outputs"]
@@ -1001,51 +1140,113 @@ const M_BELT := 2
 const M_GENERATOR := 3
 const M_SPLITTER := 4
 
-## Hotbar order is the order they unlock, so the row grows left to right as the
-## player earns it rather than showing four greyed slots on the first frame.
-const BUILDABLE: Array[int] = [M_MINER, M_BELT, M_SPLITTER, M_GENERATOR]
+## What a machine is for, which is the grouping a build list wants to show.
+const GROUP_CORE := "core"
+const GROUP_EXTRACTION := "extraction"
+const GROUP_LOGISTICS := "logistics"
+const GROUP_POWER := "power"
 
-## The machines you can walk over. Everything else is a solid object standing on
-## the plateau, which is what a picture of a drill or a furnace already says.
-##
-## Written as the exceptions rather than as the list of things that block, so a
-## machine added later blocks by default. That is the safe direction to be wrong
-## in: a new machine you cannot walk through is a moment's annoyance, and one you
-## can walk through is a player strolling out of the middle of a furnace.
-##
-## Belts and splitters are floor. They are laid along routes people and cats use,
-## and the whole point of a belt is to run between places rather than to stand
-## between them.
-const WALKABLE_MACHINES: Array[int] = [M_BELT, M_SPLITTER]
-## The machines that have a facing. A belt turned is a belt going somewhere else;
-## a generator turned is the same generator. Only these are worth telling the
-## player about R for.
-const DIRECTIONAL_MACHINES: Array[int] = [M_BELT, M_SPLITTER, M_MINER]
+## Which tick owns it. Definition, not behaviour -- the tick itself lives in Sim,
+## and this only says which one to call. `recipe` is the one that needs no code:
+## a machine marked that way is driven by `Defs.RECIPES` through the shared tick.
+const PROD_SPECIAL := "special"
+const PROD_MINER := "miner"
+const PROD_RECIPE := "recipe"
+const PROD_GENERATOR := "generator"
+const PROD_LOGISTICS := "logistics"
 
-const MACHINE_NAMES := ["열 코어", "채굴기", "컨테이너 벨트", "발전기", "분배기"]
-## Hotbar cards are one slot wide and the full names do not fit beside the colour
-## swatch. The long name still appears in the hint line above the row.
-const MACHINE_SHORT := ["코어", "채굴기", "벨트", "발전기", "분배기"]
-## Machines are bought with materials now, never with heat.
-const MACHINE_COSTS := [
-	{},
-	{ITEM_HEATSTONE: 5},
-	{ITEM_COPPER: 3},
-	{ITEM_COPPER: 10},
-	{ITEM_COPPER: 2},
+## Every machine in the game, described in one place.
+##
+## This replaced eight lists indexed by machine number and three matches keyed on
+## it. Adding 제조기 meant editing eleven places, none of which knew about the
+## others; the pattern the item and recipe registries broke, one layer up.
+##
+## The rows carry what a machine *is*. What it *does* stays in Sim: `_tick_miner`
+## takes from a seam, `_tick_belt` moves cargo, `tick_recipe` runs a recipe. A
+## registry that also held behaviour would be a second simulation.
+##
+## Fields:
+##   id           the number `Machine.type` writes into every save. Permanent
+##   key          what code and tests refer to; a display name may change
+##   name/short   the build list, and the hotbar card where the long one will not fit
+##   group        GROUP_* -- what it is for
+##   production   PROD_* -- which tick runs it
+##   desc         one line in the build list. What it is, not how to use it
+##   cost         {item: amount} to build one
+##   unlock       materials that must have been held. Empty means opened some
+##                other way -- the miner wants the gun in her hand as well, which
+##                is a sentence rather than a list and lives in `unlock_line`
+##   color        the hotbar swatch and the map dot
+##   power_draw   what it takes from the grid, per machine
+##   power_output what it puts on the grid
+##   build_order  position in the hotbar, or -1 for a machine you do not build.
+##                Deliberately not id order: the row grows left to right as the
+##                player earns it, and the splitter is earned before the generator
+##   walkable     can be walked over. Written per machine rather than as a list of
+##                exceptions, so a machine added later blocks by default -- one you
+##                can walk through is a player strolling out of a furnace
+##   directional  has a facing worth telling the player about R for. A belt turned
+##                goes somewhere else; a generator turned is the same generator
+const MACHINES: Array[Dictionary] = [
+	{
+		"id": M_CORE, "key": "core", "name": "열 코어", "short": "코어",
+		"group": GROUP_CORE, "production": PROD_SPECIAL,
+		"desc": "",
+		"cost": {}, "unlock": [], "color": COL_CORE,
+		"power_draw": 0.0, "power_output": 0.0,
+		"build_order": -1, "walkable": false, "directional": false,
+	},
+	{
+		# What it is, not how to use it. The instructions were two sentences of
+		# procedure in a row with space for one, and both halves are things the
+		# game teaches at the moment they matter.
+		"id": M_MINER, "key": "miner", "name": "채굴기", "short": "채굴기",
+		"group": GROUP_EXTRACTION, "production": PROD_MINER,
+		"desc": "채굴을 더 빠르게 할 수 있는 장치",
+		"cost": {ITEM_HEATSTONE: 5}, "unlock": [], "color": COL_CAT_FUR,
+		"power_draw": MINER_POWER_DRAW, "power_output": 0.0,
+		"build_order": 0, "walkable": false, "directional": true,
+	},
+	{
+		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
+		"group": GROUP_LOGISTICS, "production": PROD_LOGISTICS,
+		"desc": "자원을 기지까지 끊김 없이 나릅니다",
+		"cost": {ITEM_COPPER: 3}, "unlock": [ITEM_COPPER], "color": COL_BELT_RIM,
+		"power_draw": 0.0, "power_output": 0.0,
+		"build_order": 1, "walkable": true, "directional": true,
+	},
+	{
+		"id": M_GENERATOR, "key": "generator", "name": "발전기", "short": "발전기",
+		"group": GROUP_POWER, "production": PROD_GENERATOR,
+		"desc": "열석을 태워 전력 1.0을 공급합니다",
+		"cost": {ITEM_COPPER: 10}, "unlock": [ITEM_COPPER, ITEM_ENERGY_CORE],
+		"color": Color8(120, 190, 235),
+		"power_draw": 0.0, "power_output": GENERATOR_OUTPUT,
+		"build_order": 3, "walkable": false, "directional": false,
+	},
+	{
+		"id": M_SPLITTER, "key": "splitter", "name": "분배기", "short": "분배기",
+		"group": GROUP_LOGISTICS, "production": PROD_LOGISTICS,
+		"desc": "한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
+		"cost": {ITEM_COPPER: 2}, "unlock": [ITEM_COPPER],
+		"color": Color8(150, 210, 160),
+		"power_draw": 0.0, "power_output": 0.0,
+		"build_order": 2, "walkable": true, "directional": true,
+	},
 ]
-const MACHINE_HINTS := [
-	"",
-	# What it is, not how to use it. The instructions were two sentences of
-	# procedure in a row that has room for one line, and both halves are things
-	# the game teaches at the moment they matter: the placement ghost refuses
-	# every cell that is not a seam, and a miner with nobody on it draws the
-	# cursor that says so.
-	"채굴을 더 빠르게 할 수 있는 장치",
-	"자원을 기지까지 끊김 없이 나릅니다",
-	"열석을 태워 전력 1.0을 공급합니다",
-	"한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
-]
+
+## The lists every caller already reads, built from the table above.
+static var MACHINE_NAMES: Array[String] = []
+static var MACHINE_SHORT: Array[String] = []
+static var MACHINE_COSTS: Array = []
+static var MACHINE_HINTS: Array[String] = []
+static var MACHINE_UNLOCK_ITEMS: Array = []
+static var BUILDABLE: Array[int] = []
+static var WALKABLE_MACHINES: Array[int] = []
+static var DIRECTIONAL_MACHINES: Array[int] = []
+static var _machines_by_id: Dictionary = {}
+static var _machines_by_key: Dictionary = {}
+
 
 ## What goes in and what comes out, for the build menu. A machine with nothing
 ## going in states the property that defines it instead: for a belt the useful
@@ -1087,7 +1288,6 @@ static func machine_io(type: int) -> Array[String]:
 ## answer has to be the same whichever of them lands last, which means asking
 ## what has been held rather than what is in her hands. An empty list is a
 ## machine no material opens.
-const MACHINE_UNLOCK_ITEMS := [[], [], [ITEM_COPPER], [ITEM_COPPER, ITEM_ENERGY_CORE], [ITEM_COPPER]]
 ## Stone in the pack, with the gun in her hand, that opens the miner.
 const MINER_UNLOCK_STONES := 5
 
@@ -2328,14 +2528,10 @@ static func subject(word: String) -> String:
 		return "이"
 	return "가"
 
+## From the table. A machine number the table does not know still answers, so a
+## save holding one drawn by a build that had it does not take the game down.
 static func machine_color(type: int) -> Color:
-	match type:
-		M_CORE: return COL_CORE
-		M_MINER: return COL_CAT_FUR
-		M_GENERATOR: return Color8(120, 190, 235)
-		M_SPLITTER: return Color8(150, 210, 160)
-		M_BELT: return COL_BELT_RIM
-		_: return COL_MACHINE
+	return machine(type).get("color", COL_MACHINE)
 
 ## Samples the amber ramp. `k` is 0 at the core and 1 at the frontier.
 ## Sunlit snow, not soil. The old ramp drove saturation up and value down as it

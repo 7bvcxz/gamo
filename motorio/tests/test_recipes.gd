@@ -27,6 +27,19 @@ const TEST_RECIPE := {
 	"seconds": 2.0,
 }
 
+## The real machine table with one row switched to "runs recipes", because no
+## machine in this game does yet. The validator now joins the two registries --
+## a recipe may only name a machine the shared tick actually drives -- so a test
+## about recipes has to supply a machine that qualifies.
+static func _machines_with_a_runner() -> Array:
+	var rows: Array = []
+	for row: Dictionary in Defs.MACHINES:
+		var copy: Dictionary = row.duplicate(true)
+		if int(copy["id"]) == Defs.M_SPLITTER:
+			copy["production"] = Defs.PROD_RECIPE
+		rows.append(copy)
+	return rows
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -72,54 +85,59 @@ func _test_the_registry_is_empty_and_says_so() -> void:
 # --- Broken tables ------------------------------------------------------------
 
 func _test_validator_catches_broken_recipes() -> void:
-	_assert(Defs.recipe_errors([TEST_RECIPE]).is_empty(),
-		"멀쩡한 레시피는 통과한다 (%s)" % str(Defs.recipe_errors([TEST_RECIPE])))
+	_assert(Defs.recipe_errors([TEST_RECIPE], _machines_with_a_runner()).is_empty(),
+		"멀쩡한 레시피는 통과한다 (%s)" % str(Defs.recipe_errors([TEST_RECIPE], _machines_with_a_runner())))
 
 	var second: Dictionary = TEST_RECIPE.duplicate(true)
 	second["key"] = "test_other"
-	_assert(Defs.recipe_errors([TEST_RECIPE, second]).size() > 0, "번호가 겹치면 잡는다")
+	_assert(Defs.recipe_errors([TEST_RECIPE, second], _machines_with_a_runner()).size() > 0, "번호가 겹치면 잡는다")
 
 	second = TEST_RECIPE.duplicate(true)
 	second["id"] = 9002
-	_assert(Defs.recipe_errors([TEST_RECIPE, second]).size() > 0, "key 가 겹치면 잡는다")
+	_assert(Defs.recipe_errors([TEST_RECIPE, second], _machines_with_a_runner()).size() > 0, "key 가 겹치면 잡는다")
 
 	var bad: Dictionary = TEST_RECIPE.duplicate(true)
 	bad["inputs"] = [{"item": 4242, "amount": 1}]
-	_assert(Defs.recipe_errors([bad]).size() > 0, "없는 자원을 가리키면 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "없는 자원을 가리키면 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad["inputs"] = [{"item": Defs.ITEM_HEATSTONE, "amount": 0}]
-	_assert(Defs.recipe_errors([bad]).size() > 0, "입력 수량 0 을 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "입력 수량 0 을 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad["outputs"] = [{"item": Defs.ITEM_COPPER, "amount": -1}]
-	_assert(Defs.recipe_errors([bad]).size() > 0, "출력 수량 음수를 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "출력 수량 음수를 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad["outputs"] = []
-	_assert(Defs.recipe_errors([bad]).size() > 0, "아무것도 만들지 않는 레시피를 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "아무것도 만들지 않는 레시피를 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad["seconds"] = 0.0
-	_assert(Defs.recipe_errors([bad]).size() > 0, "생산 시간 0 을 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "생산 시간 0 을 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad["machine"] = 99
-	_assert(Defs.recipe_errors([bad]).size() > 0, "없는 기계 번호를 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "없는 기계 번호를 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad["key"] = "Test Plate"
-	_assert(Defs.recipe_errors([bad]).size() > 0, "key 에 대문자와 공백이 있으면 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "key 에 대문자와 공백이 있으면 잡는다")
+
+	bad = TEST_RECIPE.duplicate(true)
+	bad["machine"] = Defs.M_BELT
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0,
+		"레시피를 돌리지 않는 기계를 가리키면 잡는다")
 
 	bad = TEST_RECIPE.duplicate(true)
 	bad.erase("seconds")
-	_assert(Defs.recipe_errors([bad]).size() > 0, "항목이 빠지면 잡는다")
+	_assert(Defs.recipe_errors([bad], _machines_with_a_runner()).size() > 0, "항목이 빠지면 잡는다")
 
 	# An empty input list is allowed: something that draws from the world rather
 	# than from a buffer is a real shape, and the miner is already that shape.
 	var sourceless: Dictionary = TEST_RECIPE.duplicate(true)
 	sourceless["inputs"] = []
-	_assert(Defs.recipe_errors([sourceless]).is_empty(), "입력이 없는 레시피는 허용한다")
+	_assert(Defs.recipe_errors([sourceless], _machines_with_a_runner()).is_empty(), "입력이 없는 레시피는 허용한다")
 
 # --- The knot -----------------------------------------------------------------
 
