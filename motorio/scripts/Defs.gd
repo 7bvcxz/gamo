@@ -292,7 +292,7 @@ const ITEMS: Array[Dictionary] = [
 		"color": Color8(252, 104, 46),
 		"atlas": "copper_6.png",
 		"counter": 2, "ore_tier": 1, "retired": false,
-		"desc": "벨트와 분배기와 발전기가 만들어지는 금속. 기지 4단계의 온기가 닿는 고리에 있다.",
+		"desc": "벨트와 분배기와 발전기가 만들어지는 금속. 기지 5단계의 온기가 닿는 고리에 있다.",
 	},
 	{
 		# Ember was a muddy brown against the cold ground (1.66:1). Heat stone
@@ -324,7 +324,7 @@ const ITEMS: Array[Dictionary] = [
 		"color": Color8(150, 176, 205),
 		"atlas": "iron_6.png",
 		"counter": 4, "ore_tier": 2, "retired": false,
-		"desc": "기지 7단계의 온기가 닿는 고리에 있다. 불에도 벨트에도 쓰이지 않고, 제조기에 들어가 철판이 된다.",
+		"desc": "기지 8단계의 온기가 닿는 고리에 있다. 불에도 벨트에도 쓰이지 않고, 제조기에 들어가 철판이 된다.",
 	},
 	{
 		# Flat and bright, because it is finished. The ores are all textured
@@ -2692,28 +2692,28 @@ const PURITY_PURE_RING := 17.0
 const STARTER_PATCH_SIZE := 6
 
 const HEATSTONE_BANDS: Array[Dictionary] = [
-	{"ring": Vector2(3.0, 6.0), "patches": 3, "size": 2},      # 시작 반경 7
-	{"ring": Vector2(7.5, 8.8), "patches": 2, "size": 2},      # 1단계 · 9
-	{"ring": Vector2(9.5, 10.8), "patches": 2, "size": 2},     # 2단계 · 11 · 풍부
-	{"ring": Vector2(11.5, 12.8), "patches": 2, "size": 2},    # 3단계 · 13
-	{"ring": Vector2(13.5, 14.8), "patches": 2, "size": 3},    # 4단계 · 15
-	{"ring": Vector2(15.5, 16.8), "patches": 2, "size": 3},    # 5단계 · 17
-	{"ring": Vector2(17.5, 18.8), "patches": 2, "size": 3},    # 6단계 · 19 · 순수
-	{"ring": Vector2(19.5, 21.5), "patches": 2, "size": 3},    # 7단계 · 22
+	{"ring": Vector2(3.0, 6.0), "patches": 3, "size": 2},      # Lv1 · 반경 7
+	{"ring": Vector2(7.5, 8.8), "patches": 2, "size": 2},      # Lv2 · 9
+	{"ring": Vector2(9.5, 10.8), "patches": 2, "size": 2},     # Lv3 · 11 · 풍부
+	{"ring": Vector2(11.5, 12.8), "patches": 2, "size": 2},    # Lv4 · 13
+	{"ring": Vector2(13.5, 14.8), "patches": 2, "size": 3},    # Lv5 · 15
+	{"ring": Vector2(15.5, 16.8), "patches": 2, "size": 3},    # Lv6 · 17
+	{"ring": Vector2(17.5, 18.8), "patches": 2, "size": 3},    # Lv7 · 19 · 순수
+	{"ring": Vector2(19.5, 21.5), "patches": 2, "size": 3},    # Lv8 · 22
 	# The rungs added when the ceiling went from 22 tiles to 100. Every upgrade
 	# has to open ground that has something in it -- a circle that grows into
 	# empty snow is a number going up -- so each of these sits just inside the
 	# radius its level buys. Wider patches further out, because the walk is
 	# longer and a two-cell seam at seventy tiles is not worth the trip.
-	{"ring": Vector2(22.5, 25.5), "patches": 3, "size": 4},    # 8단계 · 26
-	{"ring": Vector2(27.0, 30.5), "patches": 3, "size": 4},    # 9단계 · 31
-	{"ring": Vector2(32.0, 36.5), "patches": 3, "size": 5},    # 10단계 · 37
-	{"ring": Vector2(38.0, 43.5), "patches": 3, "size": 5},    # 11단계 · 44
-	{"ring": Vector2(45.0, 51.5), "patches": 4, "size": 6},    # 12단계 · 52
-	{"ring": Vector2(53.0, 60.5), "patches": 4, "size": 6},    # 13단계 · 61
-	{"ring": Vector2(62.0, 70.5), "patches": 4, "size": 7},    # 14단계 · 71
-	{"ring": Vector2(72.0, 81.5), "patches": 4, "size": 7},    # 15단계 · 82
-	{"ring": Vector2(83.0, 99.0), "patches": 5, "size": 8},    # 16단계 · 100 · 마지막
+	{"ring": Vector2(22.5, 25.5), "patches": 3, "size": 4},    # Lv9 · 26
+	{"ring": Vector2(27.0, 30.5), "patches": 3, "size": 4},    # Lv10 · 31
+	{"ring": Vector2(32.0, 36.5), "patches": 3, "size": 5},    # Lv11 · 37
+	{"ring": Vector2(38.0, 43.5), "patches": 3, "size": 5},    # Lv12 · 44
+	{"ring": Vector2(45.0, 51.5), "patches": 4, "size": 6},    # Lv13 · 52
+	{"ring": Vector2(53.0, 60.5), "patches": 4, "size": 6},    # Lv14 · 61
+	{"ring": Vector2(62.0, 70.5), "patches": 4, "size": 7},    # Lv15 · 71
+	{"ring": Vector2(72.0, 81.5), "patches": 4, "size": 7},    # Lv16 · 82
+	{"ring": Vector2(83.0, 99.0), "patches": 5, "size": 8},    # Lv17 · 100 · 마지막
 ]
 ## Crystal has no seam. It used to have one, and a seam is a promise that there
 ## will always be more -- which is the opposite of what a rare material is. It
@@ -2735,9 +2735,9 @@ const CRYSTAL_RING := Vector2(8.0, 26.0)
 ## world entirely rather than making it rarer. The scatter is left standing
 ## because the number is the whole of the decision and a run at it is one edit.
 const CRYSTAL_SHARDS := 0
-## First reachable at base level 4, which is where the fourth upgrade puts the
-## circle. Copper is the door to power and belts, and it opens on an upgrade
-## rather than on a number quietly passing a threshold.
+## First reachable at display Lv5 (internal 4), whose circle is 15. Copper is
+## the door to power and belts, and it opens on an upgrade rather than on a
+## number quietly passing a threshold.
 const COPPER_RING := Vector2(15.0, 19.0)
 ## And one patch guaranteed at the very edge of that circle, because scattering
 ## three patches anywhere in 15..19 put an average of 0.3 seams inside 15 -- the
@@ -2746,14 +2746,14 @@ const COPPER_RING := Vector2(15.0, 19.0)
 ## true every time; the scatter is still what rewards walking past it.
 ## Fourteen, not fifteen: the patch grows outward from its origin, so an origin
 ## on the line puts half the cluster outside the circle it is supposed to open.
-## Measured that way, a belt was buildable at level 4 in 29 runs out of 60.
+## Measured that way, a belt was buildable at that rung in 29 runs out of 60.
 const FIRST_COPPER_BAND := Vector2(13.4, 14.8)
 const FIRST_COPPER_SIZE := 4
 
-## Iron, three rungs past copper. Level 4's circle opens copper at 15 cells;
-## this opens at level 7's 22, which is the far side of the belt-and-generator
-## stretch -- the point of it is that the factory is already running when a
-## material it has never seen shows up.
+## Iron, three rungs past copper. Display Lv5's circle opens copper at 15
+## cells; this opens at display Lv8's 22, which is the far side of the
+## belt-and-generator stretch -- the point of it is that the factory is already
+## running when a material it has never seen shows up.
 ##
 ## Pinned like copper, and for the same reason: a scatter is a probability, and
 ## the run that rolls the other way is playing a different game from the one the
@@ -2928,6 +2928,11 @@ static func warm_radius(stones: int) -> float:
 ## The number the player sees. `base_level` counts from zero because it indexes
 ## the ladder; the fire in front of them is 1단계 the moment it is lit, and a
 ## window that calls it 0 is a window arguing with the person reading it.
+## The one convention (2026-09-01): every "Lv N" a person reads -- game UI,
+## design docs, the golden path, test names and code comments -- is THIS number,
+## the displayed one. The internal array index stays 0-based; anything written
+## about it says "internal" explicitly. The two drifted one apart and the copper
+## band ended up a whole rung later than the design that named it.
 static func base_level_shown(level: int) -> int:
 	return level + 1
 

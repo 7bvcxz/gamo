@@ -83,7 +83,7 @@ func _test_iron_is_out_there_and_not_underfoot() -> void:
 		nearest_sum += nearest
 		sim.free()
 	_assert(missing == 0,
-		"200시드 모두 기지 7단계(%.0f칸) 안에 철이 있다 (%d회 실패)" % [reach, missing])
+		"200시드 모두 표시 Lv8(%.0f칸) 안에 철이 있다 (%d회 실패)" % [reach, missing])
 	_assert(too_close == 0,
 		"그리고 구리 단계(%.0f칸) 안에는 없다 (%d회)" % [copper_rung, too_close])
 	print("       가장 가까운 철 평균 %.1f칸 · 시작 반경 %.0f칸" % [nearest_sum / float(seeds), opening])
