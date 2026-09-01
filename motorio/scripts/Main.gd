@@ -221,6 +221,7 @@ func _ready() -> void:
 	speed_index = 0
 	sim.fuel_added.connect(_on_fuel_added)
 	sim.item_delivered.connect(_on_item_delivered)
+	sim.recipe_produced.connect(_on_recipe_produced)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
 	sim.base_upgraded.connect(_on_base_upgraded)
@@ -1583,6 +1584,32 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 		fx.ring(spot, Defs.COL_CORE, Defs.RING_LARGE)
 		fx.burst(spot, Defs.COL_CORE, 14)
 		note_log("기지에서 무언가 떨어졌다", Defs.COL_CORE)
+
+## A machine finished something. The first time the game makes a material rather
+## than digging one is a milestone the size of the first belt, and it happens on
+## a tile the player may not be looking at -- so it is said once, out loud, and
+## after that it is a sound and a mark on the machine.
+##
+## Not persisted. Saying it again next session costs a line; keeping a flag in
+## the save file for one sentence costs a schema.
+var _said_produced: Dictionary = {}
+
+func _on_recipe_produced(cell: Vector2i, item_type: int) -> void:
+	var at: Vector2 = sim.cell_centre(cell)
+	fx.popup(at + Vector2(0, -20), "+1 %s" % Defs.ITEM_NAMES[item_type],
+		Defs.ITEM_COLORS[item_type], true)
+	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
+	audio.call("play", "alloy")
+	if not _said_produced.has(item_type):
+		_said_produced[item_type] = true
+		fx.burst(at, Defs.ITEM_COLORS[item_type], 12)
+		shake = maxf(shake, Defs.FX_SMALL)
+		# The particle is asked for, not written down. 철판 takes 을 and the next
+		# thing this machine makes may not, and a fixed one is wrong for every
+		# word it does not happen to fit.
+		var made: String = String(Defs.ITEM_NAMES[item_type])
+		_notify("%s%s 만들었다." % [made, Defs.object_of(made)], Defs.COL_CORE,
+			UNLOCK_MESSAGE_LIFE)
 
 func _on_cat_thawed(total: int, at: Vector2) -> void:
 	fx.popup(at + Vector2(0, -30), "먀?", Defs.COL_CAT_FACE, true)

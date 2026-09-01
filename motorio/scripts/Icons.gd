@@ -121,6 +121,20 @@ static func draw_machine(canvas: CanvasItem, rect: Rect2, type: int) -> void:
 				centre + Vector2(unit * 0.1, unit * 0.2), centre + Vector2(-unit * 0.4, unit * 1.6),
 				centre + Vector2(unit * 0.9, -unit * 0.2), centre + Vector2(0.0, -unit * 0.2)]),
 				Defs.OUTLINE)
+		Defs.M_MANUFACTURER:
+			_shadow(canvas, rect)
+			_body(canvas, rect.grow(-rect.size.x * 0.14), Defs.COL_MACHINE, tint, width)
+			# A hopper over a mouth: what goes in above, what comes out below.
+			# The one sentence this machine has, at twenty pixels wide.
+			var centre: Vector2 = rect.get_center()
+			var unit: float = rect.size.x * 0.17
+			canvas.draw_colored_polygon(PackedVector2Array([
+				centre + Vector2(-unit, -unit * 1.5), centre + Vector2(unit, -unit * 1.5),
+				centre + Vector2(unit * 0.34, -unit * 0.2),
+				centre + Vector2(-unit * 0.34, -unit * 0.2)]), Defs.COL_BRASS)
+			canvas.draw_rect(Rect2(centre + Vector2(-unit * 0.9, unit * 0.45),
+				Vector2(unit * 1.8, unit * 0.8)), Color(1.0, 0.72, 0.36, 0.9))
+			_arrow(canvas, rect, tint)
 		_:
 			_body(canvas, rect, Defs.COL_MACHINE, tint, width)
 

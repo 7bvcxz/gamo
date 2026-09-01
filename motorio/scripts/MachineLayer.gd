@@ -71,6 +71,10 @@ static func kit_art(kind: int) -> Texture2D:
 		_: return KIT_SHELTER_ART
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
 const GENERATOR_ART: Texture2D = preload("res://assets/objects/generator.png")
+## The exchanger's picture, adopted for the machine that took over its job. A
+## box with a hopper and a hot mouth is a picture of material in, different
+## material out, which is exactly what a manufacturer does.
+const MANUFACTURER_ART: Texture2D = preload("res://assets/objects/manufacturer.png")
 ## The transport pieces. All three are one cross-section swept along a path by
 ## tools/sprite/build_belt.py, and they are drawn in one canonical orientation --
 ## travelling east, and for the corner turning from east to south -- then rotated
@@ -280,6 +284,7 @@ func _draw() -> void:
 			Defs.M_MINER: _draw_miner(machine, Vector2(cell) * tile, tile)
 			Defs.M_GENERATOR: _draw_generator(machine, Vector2(cell) * tile, tile)
 			Defs.M_SPLITTER: _draw_splitter(machine, Vector2(cell) * tile, tile)
+			Defs.M_MANUFACTURER: _draw_manufacturer(machine, Vector2(cell) * tile, tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if machine.type != Defs.M_BELT or not _visible(cell, tile):
@@ -712,6 +717,51 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(centre + Vector2(0.0, 1.0), 2.4, Color(0.92, 0.99, 1.0, beat))
 	# Fuel sits in the same pip row every other machine uses.
 	_draw_pip(centre + Vector2(0, 13), Defs.GENERATOR_FUEL, int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)))
+
+## The manufacturer, drawn the way the generator is: the art, then the one light
+## the art already has, tied to whether it is actually working.
+##
+## What it is holding is drawn rather than described. The input pip is the row
+## every machine uses; the output pip sits above it, because a manufacturer that
+## has made something it cannot hand on is the one state a player has to be able
+## to read from across the field -- it looks identical to a machine with no ore.
+func _draw_manufacturer(machine: Sim.Machine, px: Vector2, tile: float) -> void:
+	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
+	var frost: float = _frost(machine)
+	_shadow(centre + Vector2(0, 12), 11.0)
+	_object_art(MANUFACTURER_ART, centre, MACHINE_ART_DRAW,
+		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
+	var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+	if recipe.is_empty():
+		return
+	# Warm, unlike the generator's cool port: this one is making a thing rather
+	# than supplying a rate.
+	var live: bool = machine.operated and not machine.stalled
+	var beat: float = (0.6 + sin(pulse * 3.0) * 0.22) if live else 0.14
+	draw_circle(centre + Vector2(0.0, 1.0), 5.5, Color(1.0, 0.72, 0.36, beat * 0.7))
+	draw_circle(centre + Vector2(0.0, 1.0), 2.2, Color(1.0, 0.93, 0.78, beat))
+	# The ring the miner draws, drawn the same way and for the same reason: a
+	# machine mid-cycle and a machine waiting look identical without it, and an
+	# idle one blinks rather than showing an empty arc.
+	var seconds: float = maxf(float(recipe["seconds"]), 0.001)
+	if live:
+		var work: float = clampf(machine.progress / seconds, 0.0, 1.0)
+		draw_arc(centre, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22,
+			Color(1, 1, 1, 0.42), 2.0, true)
+	else:
+		var blink: float = 0.45 + sin(pulse * 3.0) * 0.3
+		draw_arc(centre, 15.0, 0.0, TAU, 28, Color(0.75, 0.78, 0.85, blink), 1.5, true)
+	if machine.flash > 0.0:
+		draw_circle(centre, 17.0 + machine.flash * 12.0,
+			Color(1, 1, 1, machine.flash * 0.5), false, 2.0)
+	for port: Dictionary in recipe["inputs"]:
+		var wanted: int = int(port["item"])
+		_draw_pip(centre + Vector2(0, 13), wanted, int(machine.buffer.get(wanted, 0)))
+	for port: Dictionary in recipe["outputs"]:
+		var made: int = int(port["item"])
+		var owed: int = int(machine.outbox.get(made, 0))
+		if owed > 0:
+			_draw_pip(centre + Vector2(0, -13), made, owed)
 
 ## Cats are agents, not tiles: they walk between the shelter, their machine and
 ## the food bin, so they are drawn from their own positions.

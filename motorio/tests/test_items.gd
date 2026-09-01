@@ -153,29 +153,35 @@ func _test_every_item_is_reachable() -> void:
 
 	_assert(Defs.items_of_kind(Defs.KIND_SPECIAL) == [Defs.ITEM_ENERGY_CORE],
 		"special 은 에너지 코어 하나다")
-	_assert(Defs.items_of_kind(Defs.KIND_INTERMEDIATE).is_empty(),
-		"중간재는 아직 없다 — 이 줄이 깨지는 날이 테크트리의 시작이다")
+	# 1.0.34: the day this stopped being empty is the day the tech tree started.
+	_assert(Defs.items_of_kind(Defs.KIND_INTERMEDIATE) == [Defs.ITEM_IRON_PLATE],
+		"중간재는 철판 하나다")
 
 # --- Nothing changed for the player -------------------------------------------
 
 ## Pinned by hand, on purpose. This is the one file that can say the refactor was
 ## invisible, and it can only say it by holding the values from before it.
 func _test_derived_lists_are_unchanged() -> void:
-	var names: Array[String] = ["수정조각", "구리광석", "열석", "돌", "에너지 코어"]
-	var shorts: Array[String] = ["수정", "구리", "열석", "돌", "에너지 코어"]
+	# The five the registry migration moved, plus the two 1.0.34 added. Numbers
+	# 0 and 3 are retired and still hold their places, which is the property this
+	# list exists to show.
+	var names: Array[String] = ["수정조각", "구리광석", "열석", "돌", "에너지 코어",
+		"철광석", "철판"]
+	var shorts: Array[String] = ["수정", "구리", "열석", "돌", "에너지 코어", "철", "철판"]
 	var colors: Array[Color] = [Color8(127, 212, 232), Color8(252, 104, 46),
-		Color8(255, 122, 48), Color8(150, 152, 158), Color8(186, 148, 255)]
-	_assert(Defs.ITEM_NAMES == names, "표시 이름 다섯이 그대로다 (%s)" % str(Defs.ITEM_NAMES))
-	_assert(Defs.ITEM_SHORT == shorts, "약칭 다섯이 그대로다 (%s)" % str(Defs.ITEM_SHORT))
-	_assert(Defs.ITEM_COLORS == colors, "색 다섯이 그대로다")
+		Color8(255, 122, 48), Color8(150, 152, 158), Color8(186, 148, 255),
+		Color8(150, 176, 205), Color8(206, 216, 226)]
+	_assert(Defs.ITEM_NAMES == names, "표시 이름이 그대로다 (%s)" % str(Defs.ITEM_NAMES))
+	_assert(Defs.ITEM_SHORT == shorts, "약칭이 그대로다 (%s)" % str(Defs.ITEM_SHORT))
+	_assert(Defs.ITEM_COLORS == colors, "색이 그대로다")
 
 	# Order, not membership. The panel reads top to bottom and the wreck pays out
 	# of the ladder by index, so both of these are behaviour.
 	var counted: Array[int] = [Defs.ITEM_HEATSTONE, Defs.ITEM_CRYSTAL,
-		Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE]
+		Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE, Defs.ITEM_IRON, Defs.ITEM_IRON_PLATE]
 	_assert(Defs.COUNTED_ITEMS == counted,
 		"자원 패널 순서가 그대로다 (%s)" % str(Defs.COUNTED_ITEMS))
-	var tiers: Array[int] = [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER]
+	var tiers: Array[int] = [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_IRON]
 	_assert(Defs.ORE_TIERS == tiers, "광맥 사다리가 그대로다 (%s)" % str(Defs.ORE_TIERS))
 
 # --- The seam sheets ----------------------------------------------------------

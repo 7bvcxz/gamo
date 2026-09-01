@@ -222,6 +222,15 @@ const ITEM_STONE := 3
 ## thing the ship needs back, and neither of those is a description of a part.
 ## The number stays at 4: saves write materials by number.
 const ITEM_ENERGY_CORE := 4
+## The first material that is dug for something other than the fire. Copper buys
+## machines; iron becomes one. Appended at 5, which iron briefly held before --
+## it was removed in the version that gave the wreck the world's own ore ladder,
+## and the number has been free since.
+const ITEM_IRON := 5
+## And the first thing this planet does not contain: a material that only exists
+## because a machine made it. Everything before it was dug, picked up, or fell
+## out of the ship.
+const ITEM_IRON_PLATE := 6
 
 # --- Item registry ------------------------------------------------------------
 ## Where a material comes from, which is the only thing every material has to
@@ -296,6 +305,28 @@ const ITEMS: Array[Dictionary] = [
 		"atlas": "",
 		"counter": -1, "ore_tier": -1, "retired": true,
 		"desc": "눈밭의 바위를 깨서 나오던 것. 1.0.28에 바위와 함께 빠졌고 어떤 제작법에도 쓰인 적이 없다.",
+	},
+	{
+		# The blue-grey the seam sheet is actually painted in, measured off
+		# `iron_6.png` rather than picked: the counter and the popup have to read
+		# as the thing on the ground. Cool against copper's warm, which is the
+		# pair that has to survive being 38 pixels of snow.
+		"id": ITEM_IRON, "key": "iron", "kind": KIND_RAW,
+		"name": "철광석", "short": "철",
+		"color": Color8(150, 176, 205),
+		"atlas": "iron_6.png",
+		"counter": 4, "ore_tier": 2, "retired": false,
+		"desc": "기지 7단계의 온기가 닿는 고리에 있다. 불에도 벨트에도 쓰이지 않고, 제조기에 들어가 철판이 된다.",
+	},
+	{
+		# Flat and bright, because it is finished. The ores are all textured
+		# colours out of the ground and this is the one that came off a machine.
+		"id": ITEM_IRON_PLATE, "key": "iron_plate", "kind": KIND_INTERMEDIATE,
+		"name": "철판", "short": "철판",
+		"color": Color8(206, 216, 226),
+		"atlas": "",
+		"counter": 5, "ore_tier": -1, "retired": false,
+		"desc": "제조기가 철광석 하나로 만든다. 이 행성에서 캘 수 없는 첫 재료.",
 	},
 	{
 		# Violet, which nothing else on this planet is -- it is the only material
@@ -448,7 +479,8 @@ static func machine_errors(rows: Array = MACHINES) -> Array[String]:
 	var problems: Array[String] = []
 	var ids: Dictionary = {}
 	var keys: Dictionary = {}
-	var groups: Array[String] = [GROUP_CORE, GROUP_EXTRACTION, GROUP_LOGISTICS, GROUP_POWER]
+	var groups: Array[String] = [GROUP_CORE, GROUP_EXTRACTION, GROUP_LOGISTICS, GROUP_POWER,
+		GROUP_PRODUCTION]
 	var kinds: Array[String] = [PROD_SPECIAL, PROD_MINER, PROD_RECIPE, PROD_GENERATOR,
 		PROD_LOGISTICS]
 	for row: Dictionary in rows:
@@ -572,7 +604,20 @@ static func items_of_kind(kind: String) -> Array[int]:
 ## fluids arrive -- a row grows a field, and every loop over ports keeps working.
 ## No fluid constant is defined here today, because a name for something that
 ## does not exist is the kind of spec this repository has been misled by before.
-const RECIPES: Array[Dictionary] = []
+const RECIPES: Array[Dictionary] = [
+	{
+		# Three seconds, against a miner's thirty on an iron seam. One
+		# manufacturer keeps up with ten miners, which is not a ratio anybody has
+		# to solve today -- it is set so the machine is visibly waiting for ore
+		# rather than the ore waiting for the machine, because the first thing a
+		# player should learn here is that the input is the constraint.
+		"id": 1, "key": "iron_plate", "name": "철판",
+		"machine": M_MANUFACTURER,
+		"inputs": [{"item": ITEM_IRON, "amount": 1}],
+		"outputs": [{"item": ITEM_IRON_PLATE, "amount": 1}],
+		"seconds": 3.0,
+	},
+]
 
 ## Machine types the recipe system drives, built from `MACHINES`: every row whose
 ## production is PROD_RECIPE. Was a hand-kept list for one version, which is one
@@ -938,6 +983,10 @@ const HAND_MINE_PERIOD := 10.0
 ## So the right recipe depends on which resource your map and your factory have
 ## spare, which is exactly the question a dominant strategy would erase.
 const COPPER_PERIOD := 20.0
+## Iron is slower again. It arrives three rungs after copper and is the input to
+## everything the factory will make, so a miner on iron has to be worth walking
+## out to rather than something you put down beside the fire.
+const IRON_PERIOD := 30.0
 
 ## --- Throughput ---------------------------------------------------------------
 ## Published on purpose. The pleasure in this genre is making numbers line up,
@@ -967,6 +1016,10 @@ static func throughput_line(type: int) -> String:
 			# thing the fire is for -- and made "how many stones to the next
 			# step" a question with no honest answer.
 			return "열석을 넣어 온기를 넓힙니다"
+	var recipe: Dictionary = recipe_for_machine(type)
+	if not recipe.is_empty():
+		return "%s → %s · %.0f초" % [_ports(recipe["inputs"]), _ports(recipe["outputs"]),
+			float(recipe["seconds"])]
 	return ""
 
 ## How many miners one generator can keep fed.
@@ -996,6 +1049,12 @@ static func ratio_hint() -> String:
 const GENERATOR_FUEL := ITEM_HEATSTONE
 const GENERATOR_PERIOD := 10.0
 const GENERATOR_OUTPUT := 1.0
+## What a manufacturer takes off the grid. Exactly one generator's worth, so the
+## first sentence a player can say about power is "one generator runs one
+## manufacturer" -- and the second is what happens when they build the second
+## one. It draws only while it has work, so a machine waiting for iron is not
+## quietly slowing the miners.
+const MANUFACTURER_POWER := 1.0
 ## Belts do not draw power, and must not. They used to, at 0.1 each, which meant
 ## that before the first generator existed the grid had capacity zero against a
 ## non-zero draw -- and the supply ratio that every belt multiplied its speed by
@@ -1139,12 +1198,17 @@ const M_BELT := 2
 ## become. The generator eats crystal now, and the energy crystal with it.
 const M_GENERATOR := 3
 const M_SPLITTER := 4
+## The first machine that turns a material into another material. The exchanger
+## held this job until 1.0.8 and was removed for making one thing with one use;
+## this one is the start of a ladder rather than a middleman.
+const M_MANUFACTURER := 5
 
 ## What a machine is for, which is the grouping a build list wants to show.
 const GROUP_CORE := "core"
 const GROUP_EXTRACTION := "extraction"
 const GROUP_LOGISTICS := "logistics"
 const GROUP_POWER := "power"
+const GROUP_PRODUCTION := "production"
 
 ## Which tick owns it. Definition, not behaviour -- the tick itself lives in Sim,
 ## and this only says which one to call. `recipe` is the one that needs no code:
@@ -1225,6 +1289,19 @@ const MACHINES: Array[Dictionary] = [
 		"build_order": 3, "walkable": false, "directional": false,
 	},
 	{
+		# Bootstrap: everything it costs comes out of the ground with a pickaxe.
+		# A machine that costs what only it can make is a machine nobody can ever
+		# build, and `recipe_dependency_errors` is watching this row.
+		"id": M_MANUFACTURER, "key": "manufacturer", "name": "제조기", "short": "제조기",
+		"group": GROUP_PRODUCTION, "production": PROD_RECIPE,
+		"desc": "철광석을 철판으로 가공합니다 · 전력 필요",
+		"cost": {ITEM_IRON: 10, ITEM_COPPER: 5, ITEM_HEATSTONE: 3},
+		"unlock": [ITEM_IRON],
+		"color": Color8(196, 168, 120),
+		"power_draw": MANUFACTURER_POWER, "power_output": 0.0,
+		"build_order": 4, "walkable": false, "directional": true,
+	},
+	{
 		"id": M_SPLITTER, "key": "splitter", "name": "분배기", "short": "분배기",
 		"group": GROUP_LOGISTICS, "production": PROD_LOGISTICS,
 		"desc": "한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
@@ -1269,7 +1346,30 @@ static func machine_io(type: int) -> Array[String]:
 			return ["입력   %s 1 · %.0f초마다" % [ITEM_NAMES[GENERATOR_FUEL], GENERATOR_PERIOD],
 				"출력   전력 %.1f" % GENERATOR_OUTPUT,
 				"특성   전력은 저장되지 않는 비율"]
+	# Everything the recipe system drives, read straight off its recipe. A
+	# machine added later gets these three lines without a branch being written
+	# for it -- which is the whole promise of the registries, and the build list
+	# was the one place still showing a blank column for the first machine that
+	# tested it.
+	var recipe: Dictionary = recipe_for_machine(type)
+	if not recipe.is_empty():
+		var lines: Array[String] = []
+		lines.append("입력   %s · %.0f초마다" % [_ports(recipe["inputs"]), float(recipe["seconds"])])
+		lines.append("출력   %s" % _ports(recipe["outputs"]))
+		var needs: float = machine_power_draw(type)
+		lines.append("일손   전력 %.1f" % needs if needs > 0.0 else "특성   전력이 필요 없음")
+		return lines
 	return []
+
+## "철광석 1 · 구리광석 2", for a recipe's side. Separated with the mark the rest
+## of the interface uses, so no 과/와 has to be chosen.
+static func _ports(rows: Array) -> String:
+	if rows.is_empty():
+		return "없음"
+	var parts := PackedStringArray()
+	for port: Dictionary in rows:
+		parts.append("%s %d" % [ITEM_NAMES[int(port["item"])], int(port["amount"])])
+	return " · ".join(parts)
 
 ## What each machine needs before it appears in the hotbar. The first heat stone
 ## opens the miner; the first crystal opens the exchanger line; the first copper
@@ -2400,6 +2500,20 @@ const COPPER_RING := Vector2(15.0, 19.0)
 ## Measured that way, a belt was buildable at level 4 in 29 runs out of 60.
 const FIRST_COPPER_BAND := Vector2(13.4, 14.8)
 const FIRST_COPPER_SIZE := 4
+
+## Iron, three rungs past copper. Level 4's circle opens copper at 15 cells;
+## this opens at level 7's 22, which is the far side of the belt-and-generator
+## stretch -- the point of it is that the factory is already running when a
+## material it has never seen shows up.
+##
+## Pinned like copper, and for the same reason: a scatter is a probability, and
+## the run that rolls the other way is playing a different game from the one the
+## card describes. Inside the line rather than on it, because a patch grows
+## outward from its origin.
+const FIRST_IRON_BAND := Vector2(20.4, 21.8)
+const FIRST_IRON_SIZE := 4
+## And the scatter past it, which is what rewards walking further.
+const IRON_RING := Vector2(22.5, 28.0)
 
 ## UI scale. The web export renders at the device pixel ratio, so a phone that is
 ## physically 390 CSS px wide reports a ~960 px logical viewport: every constant

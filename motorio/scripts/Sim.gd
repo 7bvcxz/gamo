@@ -10,6 +10,9 @@ signal fuel_added(count: int, cell: Vector2i, item_type: int)
 ## Something arrived at the core and was put in the stores. Separate from
 ## `fuel_added` because arriving and being burned stopped being the same event.
 signal item_delivered(item_type: int, cell: Vector2i)
+## A recipe finished a cycle. Emitted per output item, so a recipe that makes
+## three sends three -- the caller decides whether that is three sounds or one.
+signal recipe_produced(cell: Vector2i, item_type: int)
 signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
 signal build_rejected(reason: String, cell: Vector2i)
@@ -668,6 +671,11 @@ func _generate_ore(seed_value: int) -> void:
 	# for everything past it.
 	_pin_patch(rng, Defs.ITEM_COPPER, Defs.FIRST_COPPER_BAND, Defs.FIRST_COPPER_SIZE)
 	_scatter_ore(rng, Defs.ITEM_COPPER, Defs.COPPER_RING, 3, 2)
+	# Iron, three rungs further out. Pinned for the same reason copper is: the
+	# manufacturer is the next thing the game has to offer and a seed that puts
+	# no iron inside the circle is a run that cannot reach it.
+	_pin_patch(rng, Defs.ITEM_IRON, Defs.FIRST_IRON_BAND, Defs.FIRST_IRON_SIZE)
+	_scatter_ore(rng, Defs.ITEM_IRON, Defs.IRON_RING, 3, 2)
 	# A guaranteed heat stone seam due north with a clear column home, so the
 	# opening never depends on the scatter being kind. It used to be copper, then
 	# crystal; it is the resource the beat it protects actually needs, and that
@@ -2220,6 +2228,11 @@ func tick(delta: float) -> void:
 			# machine running on the grid is just as much running.
 			if rate > 0.0:
 				machine.operated = true
+		elif Defs.machine_uses_recipes(machine.type) and Defs.machine_power_draw(machine.type) > 0.0:
+			# The same brown-out every other machine gets. No grid at all is a
+			# stop rather than a slowdown, and nothing is lost either way: the
+			# inputs stay in the buffer until a cycle actually finishes.
+			speed *= supply if power_capacity > 0.0 else 0.0
 		match machine.type:
 			Defs.M_MINER: _tick_miner(machine, delta * speed)
 			Defs.M_BELT: _tick_belt(machine, delta * speed)
@@ -2408,6 +2421,8 @@ func meter_status(machine: Machine) -> String:
 			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
 			if recipe.is_empty():
 				return ""
+			if Defs.machine_power_draw(machine.type) > 0.0 and power_capacity <= 0.0:
+				return "전력 없음"
 			if not machine.outbox.is_empty():
 				return "출력 막힘"
 			if not recipe_inputs_ready(machine, recipe):
@@ -2451,6 +2466,14 @@ func _recount_power() -> void:
 		var machine: Machine = machines[cell]
 		if machine.type == Defs.M_MINER and miner_on_power(cell):
 			draw += Defs.MINER_POWER_DRAW
+		elif Defs.machine_uses_recipes(machine.type):
+			# Only while it has work. A machine standing empty and still pulling
+			# on the grid slows every miner on it for no reason the player can
+			# see, which is the shape of a number that moved with nothing on
+			# screen to explain it.
+			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
+			if not recipe.is_empty() and recipe_inputs_ready(machine, recipe):
+				draw += Defs.machine_power_draw(machine.type)
 	power_draw = draw
 
 func cell_centre(cell: Vector2i) -> Vector2:
@@ -3162,6 +3185,7 @@ func tick_recipe(machine: Machine, recipe: Dictionary, delta: float) -> void:
 	for port: Dictionary in recipe["outputs"]:
 		var made: int = int(port["item"])
 		machine.outbox[made] = int(machine.outbox.get(made, 0)) + int(port["amount"])
+		recipe_produced.emit(machine.cell, made)
 	machine.flash = 0.5
 	_drain_outbox(machine)
 	machine.stalled = not machine.outbox.is_empty()
@@ -3211,7 +3235,10 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 ## Copper is deliberately slower than crystal: it arrives later and is worth
 ## more per unit, so the same miner produces fewer of them.
 func mine_period(item_type: int) -> float:
-	return Defs.COPPER_PERIOD if item_type == Defs.ITEM_COPPER else Defs.MINER_PERIOD
+	match item_type:
+		Defs.ITEM_COPPER: return Defs.COPPER_PERIOD
+		Defs.ITEM_IRON: return Defs.IRON_PERIOD
+	return Defs.MINER_PERIOD
 
 ## Node purity, keyed by distance from the core. Rich seams sit further out, so
 ## "walk further for a better node" becomes a real decision instead of every

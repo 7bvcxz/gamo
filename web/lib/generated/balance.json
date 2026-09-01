@@ -50,12 +50,12 @@
       2,
       5
     ],
-    "high_item": "구리광석",
+    "high_item": "철광석",
     "low": [
       5,
       10
     ],
-    "low_item": "열석",
+    "low_item": "구리광석",
     "per_tiles": 200.0,
     "search_seconds": 3.0,
     "shapes": 5,
@@ -73,7 +73,9 @@
       "구리광석",
       "열석",
       "돌",
-      "에너지 코어"
+      "에너지 코어",
+      "철광석",
+      "철판"
     ]
   },
   "machines": [
@@ -134,6 +136,29 @@
       "unlock": [
         "구리광석",
         "에너지 코어"
+      ]
+    },
+    {
+      "cost": [
+        {
+          "count": 10,
+          "item": "철광석"
+        },
+        {
+          "count": 5,
+          "item": "구리광석"
+        },
+        {
+          "count": 3,
+          "item": "열석"
+        }
+      ],
+      "hint": "철광석을 철판으로 가공합니다 · 전력 필요",
+      "name": "제조기",
+      "short": "제조기",
+      "throughput": "",
+      "unlock": [
+        "철광석"
       ]
     }
   ],
@@ -348,7 +373,26 @@
     "miner_seconds": 5.0,
     "ratio_hint": "발전기 1대 = 열석 채굴기 2대"
   },
-  "recipes": [],
+  "recipes": [
+    {
+      "inputs": [
+        {
+          "amount": 1,
+          "item": "철광석"
+        }
+      ],
+      "key": "iron_plate",
+      "machine": "제조기",
+      "name": "철판",
+      "outputs": [
+        {
+          "amount": 1,
+          "item": "철판"
+        }
+      ],
+      "seconds": 3.0
+    }
+  ],
   "rings": {
     "copper": [
       15.0,
@@ -492,7 +536,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.32",
+  "version": "1.0.33",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

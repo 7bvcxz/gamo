@@ -81,11 +81,16 @@ func _test_generation() -> void:
 	var sim := _fresh()
 	var frost := 0
 	var copper := 0
+	var iron := 0
+	# Counted per material rather than as "everything that is not heat stone",
+	# which is what this was until iron arrived and quietly joined the copper
+	# tally. A count that grows when an unrelated seam is added is not measuring
+	# what its name says.
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_HEATSTONE:
-			frost += 1
-		else:
-			copper += 1
+		match int(sim.ore[cell]):
+			Defs.ITEM_HEATSTONE: frost += 1
+			Defs.ITEM_COPPER: copper += 1
+			Defs.ITEM_IRON: iron += 1
 	# Scarcity is the point, but it is scarcity *per band*, not in total: heat
 	# stone runs in one small band per step of the base ladder, so the world-wide
 	# count is the sum of eight of them. This assertion used to cap it at 20,
@@ -102,7 +107,8 @@ func _test_generation() -> void:
 		budget += int(band["patches"]) * int(band["size"])
 	_assert(frost <= budget + Defs.STARTER_PATCH_SIZE,
 		"열석은 대역에 적힌 양을 넘지 않는다: %d개 (예산 %d)" % [frost, budget])
-	_assert(copper < 20, "ore density stays scarce after the reduction")
+	_assert(copper < 20, "구리는 드물다: %d개" % copper)
+	_assert(iron >= 4 and iron < 20, "철도 드물지만 반드시 있다: %d개" % iron)
 	# And the opening stays a small field. It is the density near the fire that
 	# decides whether finding a seam is an event.
 	var near := 0

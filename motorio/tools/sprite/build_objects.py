@@ -92,6 +92,12 @@ ADOPTED = {
     # gen2 rather than gen1: the first miner's drill leaned to one side, and the
     # direction a miner outputs in is already said by an arrow drawn over it.
     "miner": ("miner_gen2", 36),
+    # The manufacturer, drawn as the exchanger. That machine was removed in 1.0.8
+    # for making one material with one use, and its picture -- a box with a hopper
+    # and a hot mouth -- is a picture of exactly this job: material in, different
+    # material out. Reused rather than regenerated; the candidate has been sitting
+    # in objects/ since 2026-08-13.
+    "manufacturer": ("exchanger_gen1", 36),
     # The drill a working cat holds. Nothing rotates it and it bobs straight up
     # and down, so the bit has to point down in the art -- gen1 was a drill gun
     # aimed sideways, which reads as a cat holding a gun.
@@ -148,6 +154,7 @@ ADOPTED_NAMES = {
     "miner": "채굴기",
     "cat_tool": "고양이 채굴 도구",
     "generator": "발전기",
+    "manufacturer": "제조기",
     "belt_straight": "컨베이어 벨트 · 직선",
     "belt_corner": "컨베이어 벨트 · 코너",
     "splitter": "분배기",

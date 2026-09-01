@@ -173,19 +173,24 @@ const ORE_VARIANTS := 6
 const HEATSTONE_ATLAS: Texture2D = preload("res://assets/tiles/heatstone_6.png")
 const CRYSTAL_ATLAS: Texture2D = preload("res://assets/tiles/crystal_6.png")
 const COPPER_ATLAS: Texture2D = preload("res://assets/tiles/copper_6.png")
+const IRON_ATLAS: Texture2D = preload("res://assets/tiles/iron_6.png")
 ## Which sheet each seam shows. Keyed by item type, so an ore without a sheet
 ## falls back to the painted shard in WorldLayer rather than drawing nothing.
 const ORE_ATLAS: Dictionary[int, Texture2D] = {
 	Defs.ITEM_HEATSTONE: HEATSTONE_ATLAS,
 	Defs.ITEM_CRYSTAL: CRYSTAL_ATLAS,
 	Defs.ITEM_COPPER: COPPER_ATLAS,
+	Defs.ITEM_IRON: IRON_ATLAS,
 }
 ## Cut, committed and waiting on an ore to belong to. This game has heat stone,
 ## crystal and copper; coal, gold, iron and uranium are seams it does not, and their
 ## atlases are in assets/tiles/ already. A mapping entry cannot exist before the
 ## item type does, so promoting one is: add the ITEM_ constant, preload the file
 ## beside the two above, and put it in ORE_ATLAS.
-const ORE_ATLASES_READY := ["coal_6.png", "gold_6.png", "iron_6.png", "uranium_6.png"]
+## Iron left this list in 1.0.34 for a mapping entry of its own. Coal, gold and
+## uranium are still seams this game does not have, and their sheets are cut and
+## waiting: promoting one is the item row, the preload above and the mapping.
+const ORE_ATLASES_READY := ["coal_6.png", "gold_6.png", "uranium_6.png"]
 
 const ROCK_ATLAS: Texture2D = preload("res://assets/tiles/rock_6.png")
 const ROCK_COLUMNS := 3

@@ -895,6 +895,17 @@
    }
   },
   {
+   "role": "manufacturer",
+   "name": "제조기",
+   "from": "exchanger_gen1",
+   "draw": 36,
+   "stored": 72,
+   "sizes": {
+    "128": "/object-candidates/shipped-manufacturer-128-88e864e035dc.png",
+    "36": "/object-candidates/shipped-manufacturer-36-7c66d64413a2.png"
+   }
+  },
+  {
    "role": "miner",
    "name": "채굴기",
    "from": "miner_gen2",

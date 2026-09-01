@@ -305,3 +305,6 @@ func _open(sim) -> void:
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
+	# The manufacturer costs iron, and this loop builds one of everything.
+	sim.note_resource_seen(Defs.ITEM_IRON)
+	sim.stock[Defs.ITEM_IRON] = 500

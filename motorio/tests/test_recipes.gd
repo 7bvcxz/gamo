@@ -66,21 +66,24 @@ func _assert(condition: bool, label: String) -> void:
 
 # --- The real table -----------------------------------------------------------
 
-## Empty is the correct answer today, and it is worth asserting rather than
-## assuming: the miner takes from the world and the generator makes power, and
-## neither is an inputs-to-outputs pair. Forcing them in would be a rewrite of
-## working code for a table with two rows in it.
+## The table was empty until 1.0.34 and this file asserted that, because empty
+## was the right answer: the miner takes from the world and the generator makes
+## power, and neither is an inputs-to-outputs pair. They still are not. What
+## changed is that something finally is.
 func _test_the_registry_is_empty_and_says_so() -> void:
-	_assert(Defs.RECIPES.is_empty(), "레시피 표는 아직 비어 있다 (%d)" % Defs.RECIPES.size())
-	_assert(Defs.RECIPE_MACHINES.is_empty(), "레시피가 모는 기계도 아직 없다")
-	_assert(Defs.recipe_errors().is_empty(), "빈 표에는 잘못이 없다")
+	_assert(Defs.RECIPES.size() == 1, "레시피는 하나다 (%d)" % Defs.RECIPES.size())
+	_assert(Defs.RECIPE_MACHINES == [Defs.M_MANUFACTURER], "그것을 도는 것은 제조기뿐이다")
+	_assert(not Defs.machine_uses_recipes(Defs.M_MINER)
+		and not Defs.machine_uses_recipes(Defs.M_GENERATOR),
+		"채굴기와 발전기는 여전히 자기 tick 을 돈다")
+	_assert(Defs.recipe_errors().is_empty(), "표에 잘못이 없다")
 	_assert(Defs.recipe_dependency_errors().is_empty(),
 		"지금 기계들은 자기 자신 없이도 지을 수 있다 (%s)" % str(Defs.recipe_dependency_errors()))
-	# The generator and the miner cost copper and heat stone, both of which come
-	# out of the ground by hand. That is what makes the check above pass, and it
-	# is the property the rule exists to keep.
+	# Every machine costs ore that comes out of the ground by hand. That is what
+	# makes the check above pass, and it is the property the rule exists to keep.
 	_assert(Defs.recipes_producing_item(Defs.ITEM_COPPER).is_empty(), "구리를 만드는 레시피는 없다")
 	_assert(Defs.recipes_producing_item(Defs.ITEM_HEATSTONE).is_empty(), "열석도 마찬가지")
+	_assert(Defs.recipes_producing_item(Defs.ITEM_IRON).is_empty(), "철도 캐는 것이지 만드는 것이 아니다")
 
 # --- Broken tables ------------------------------------------------------------
 
@@ -178,11 +181,12 @@ func _test_dependency_check_catches_the_knot() -> void:
 func _test_lookup() -> void:
 	# Against the real registry, which is empty: the API has to answer rather
 	# than crash before there is anything in it.
-	_assert(Defs.recipe(1).is_empty(), "없는 번호는 빈 레시피를 준다")
+	_assert(Defs.recipe(9999).is_empty(), "없는 번호는 빈 레시피를 준다")
 	_assert(Defs.recipe_by_key("nothing").is_empty(), "없는 key 도 마찬가지")
 	_assert(Defs.recipes_for_machine(Defs.M_MINER).is_empty(), "채굴기에는 레시피가 없다")
+	_assert(Defs.recipes_for_machine(Defs.M_MANUFACTURER).size() == 1, "제조기에는 하나 있다")
 	_assert(Defs.recipe_for_machine(Defs.M_MINER).is_empty(), "그래서 고를 것도 없다")
-	_assert(Defs.recipes_using_item(Defs.ITEM_COPPER).is_empty(), "구리를 쓰는 레시피도 아직 없다")
+	_assert(Defs.recipes_using_item(Defs.ITEM_COPPER).is_empty(), "구리를 쓰는 레시피는 없다")
 
 	# And the shape of the answers, checked on data that exists.
 	var rows: Array = [TEST_RECIPE]
