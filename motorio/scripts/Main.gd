@@ -7,7 +7,7 @@ extends Node2D
 ## and the warm radius all carry into the next morning.
 ## SETTINGS is a state rather than an overlay flag so that opening it stops the
 ## clock: sizing the UI should never cost the player warmth.
-enum State { TITLE, OPENING, PLAY, RESULT, SETTINGS, NIGHTFALL, DAYBREAK, GAMEOVER }
+enum State { TITLE, OPENING, PLAY, SETTINGS, NIGHTFALL, DAYBREAK, GAMEOVER }
 ## Phases inside NIGHTFALL and DAYBREAK. Both run on one timer rather than a
 ## handful of booleans, so there is one place to read what the sequence is doing.
 enum Phase { GATHER, GLOW, DAWN, SPILL }
@@ -107,6 +107,9 @@ var messages: Array[Dictionary] = []
 var message: String = ""
 var message_life: float = 0.0
 var night_warned: bool = false
+## Whether tonight's "go home" has been said to the crew. Cleared by the next
+## morning -- either the sunrise while she stays up, or _begin_next_day.
+var night_rest_sent: bool = false
 var build_held: bool = false
 ## True once a held Z has actually been swinging at a seam. Without it, letting
 ## go after mining runs the tap action -- and standing at the shelter mining the
@@ -997,7 +1000,7 @@ func zone() -> int:
 	return Zone.of(Defs.in_room(player.cell()))
 
 func sleeping_state() -> bool:
-	return state == State.NIGHTFALL or state == State.DAYBREAK or state == State.RESULT
+	return state == State.NIGHTFALL or state == State.DAYBREAK
 
 func indoors() -> bool:
 	match state:
@@ -1005,9 +1008,6 @@ func indoors() -> bool:
 			return night_phase == Phase.GLOW
 		State.DAYBREAK:
 			return night_phase == Phase.DAWN
-		State.RESULT:
-			# The summary card sits inside the sequence, with the lit hut behind it.
-			return night_override >= 0.0
 	return false
 
 ## Whether the camera leans in on the hut. Deliberately not the same as being
@@ -1156,7 +1156,7 @@ func _process(delta: float) -> void:
 		State.OPENING: _process_cutscene(delta)
 		State.NIGHTFALL: _process_nightfall(delta)
 		State.DAYBREAK: _process_daybreak(delta)
-		State.RESULT, State.SETTINGS: pass
+		State.SETTINGS: pass
 		State.GAMEOVER: _process_gameover(delta)
 
 	# After the state machine, not before it. These two read the state, and
@@ -1206,7 +1206,6 @@ func screen_name() -> String:
 	match showing:
 		State.TITLE: return "title"
 		State.OPENING: return "opening"
-		State.RESULT: return "result"
 		State.GAMEOVER: return "gameover"
 		State.NIGHTFALL, State.DAYBREAK: return "night"
 	return "play"
@@ -1296,6 +1295,16 @@ func _process_play(delta: float) -> void:
 		night_warned = true
 		_notify("밤이 옵니다 — 숙소로 돌아가 자야 합니다", Defs.COL_DANGER)
 		audio.call("play", "alarm")
+	# Night sends the crew home even for a player who stays out to watch it, and
+	# morning sends them back to their posts. What keeps running is what runs on
+	# the grid -- night is when powered automation earns its keep.
+	if mission == Mission.DONE and Zone.has_world(zone()):
+		if is_night() and not night_rest_sent:
+			night_rest_sent = true
+			sim.rest_cats()
+		elif not is_night() and night_rest_sent:
+			night_rest_sent = false
+			sim.rouse_cats()
 	# Running out of night entirely means the cats come and get you.
 	if mission == Mission.DONE and time_left <= 0.0:
 		_carried_home()
@@ -2383,15 +2392,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				_advance_cutscene()
 			get_viewport().set_input_as_handled()
 			return
-		State.RESULT:
-			if key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER or key.keycode == KEY_SPACE:
-				_begin_next_day()
-				get_viewport().set_input_as_handled()
-			# N is gone with its label. Removing the line and leaving the key
-			# would be worse than either: a run thrown away by a stray press on
-			# the screen nobody reads, with nothing on screen to explain it.
-			# Starting over lives in settings, where it asks twice.
-			return
 		State.NIGHTFALL, State.DAYBREAK:
 			# The sequence plays itself and is over in seconds. Only the debug
 			# speed stays live, so a tester who has watched it forty times can
@@ -2539,7 +2539,7 @@ func _unhandled_input(event: InputEvent) -> void:
 ## the screen did nothing; the panels advanced on their own timer and the player
 ## sat through all seven with no way to hurry them.
 func touch_anywhere_starts() -> bool:
-	return state == State.TITLE or state == State.RESULT or state == State.OPENING
+	return state == State.TITLE or state == State.OPENING
 
 ## Touch handling for the on-screen HUD: picking a machine and rotating it are
 ## keyboard-only otherwise, which left the game unplayable on a phone.
@@ -2750,8 +2750,6 @@ func touch_primary(pressed: bool = true) -> void:
 			title_confirm()
 		State.OPENING:
 			_advance_cutscene()
-		State.RESULT:
-			_begin_next_day()
 		State.SETTINGS:
 			close_settings()
 		State.PLAY:
@@ -4325,8 +4323,6 @@ func shelter_glow() -> float:
 			if night_phase != Phase.GLOW:
 				return 0.0
 			return clampf(night_timer / 0.5, 0.0, 1.0)
-		State.RESULT:
-			return 1.0 if night_override >= 0.0 else 0.0
 		State.DAYBREAK:
 			if night_phase != Phase.DAWN:
 				return 0.0
@@ -4375,12 +4371,22 @@ func _process_daybreak(delta: float) -> void:
 ## 2026-08-14, when the shape of the game was settled as long-form rather than
 ## score attack -- and a high score is the one piece of furniture that cannot be
 ## in a game like that without telling the player to replay the day.
+## The night hands straight to the morning. The summary card is gone
+## (2026-09-01): a modal that pauses the world every cycle is a progression
+## interrupt, and what it said now goes to the log as "오늘의 기록" -- readable
+## when wanted, never in the way.
 func _finish_run() -> void:
-	state = State.RESULT
-	player.locked = true
 	save_game(false)
-	shake = 4.0
 	audio.call("play", "finish")
+	var parts: Array[String] = []
+	for row: Array in day_collected():
+		parts.append("%s +%d" % [Defs.ITEM_SHORT[int(row[0])], int(row[1])])
+	# Written before _begin_next_day wipes the night's flags: how the day ended
+	# belongs to this line, and this line is the only place it is said now.
+	var how: String = "고양이들이 데려왔다" if rescued_tonight else "숙소에서 잤다"
+	note_log("%d일차 기록 · %s · 고양이 %d마리%s" % [day_number, how, sim.cats.size(),
+		("  ·  " + " · ".join(parts)) if not parts.is_empty() else ""], Defs.COL_TEXT_DIM)
+	_begin_next_day()
 
 func _begin_next_day() -> void:
 	day_number += 1
@@ -4388,6 +4394,7 @@ func _begin_next_day() -> void:
 	day_start_collected = sim.collected.duplicate()
 	time_left = Defs.DAY_SECONDS
 	night_warned = false
+	night_rest_sent = false
 	rescued_tonight = false
 	player.collapse = 0.0
 	collapse_timer = -1.0

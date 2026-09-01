@@ -58,17 +58,14 @@ func _run() -> void:
 			_assert(not sim.machines[cell].operated,
 				"a miner whose cat has walked out is no longer being worked")
 
-	_assert(_settle(main, main.State.RESULT), "the sequence reaches the day summary")
+	# The summary card is gone (2026-09-01): the gather hands straight to the
+	# morning, and what the card said goes to the log instead.
+	var notes: int = main.play_log.size()
+	_assert(_settle(main, main.State.DAYBREAK), "the sequence hands straight to the morning")
 	_assert(sim.cats_all_home(), "with everybody indoors")
 	for cat in sim.cats:
 		_assert(cat.state == Defs.CAT_ASLEEP, "and asleep rather than milling about outside")
-	_assert(main.indoors(), "the player is inside too, not standing in the snow")
-	_assert(main.shelter_glow() > 0.0, "so the hut is lit from within")
-	_assert(main.night_level() >= 0.99,
-		"and the sky is still night even though the clock has run out")
-
-	# --- Daybreak --------------------------------------------------------------
-	main._begin_next_day()
+	_assert(main.play_log.size() > notes, "오늘의 기록은 로그로 남는다 — 세계를 멈추지 않고")
 	_assert(main.state == main.State.DAYBREAK, "the summary hands over to the morning")
 	_assert(main.player.locked, "which holds the player until the sun is up")
 	_assert(is_equal_approx(main.time_left, Defs.DAY_SECONDS), "the clock is already full")
@@ -76,7 +73,11 @@ func _run() -> void:
 	# they have to fit inside it with daylight left in front of them -- and the
 	# order matters too, because night starting before dusk would mean the lamps
 	# come on into a bright sky.
-	_assert(is_equal_approx(Defs.DAY_SECONDS, 300.0), "a day is five minutes")
+	# One big session as of 2026-09-01: thirty minutes of daylight, two of
+	# sunset, four of night -- the whole 0~23분 golden path fits before dusk.
+	_assert(is_equal_approx(Defs.DAY_SECONDS, 2160.0), "a cycle is thirty-six minutes")
+	_assert(Defs.DAY_SECONDS - Defs.NIGHT_SECONDS >= 23.0 * 60.0 + 60.0,
+		"first night lands past the 23-minute golden path")
 	_assert(Defs.DUSK_SECONDS < Defs.DAY_SECONDS * 0.5,
 		"dusk is the tail of the day, not half of it")
 	_assert(Defs.NIGHT_SECONDS < Defs.DUSK_SECONDS, "night falls after dusk begins")
@@ -153,9 +154,7 @@ func _run() -> void:
 	sim.cats[0].pos = sim.cell_centre(seam)
 
 	main._sleep()
-	_assert(_settle(main, main.State.RESULT), "a second night runs through")
-	main._begin_next_day()
-	_assert(_settle(main, main.State.PLAY), "and a second morning")
+	_assert(_settle(main, main.State.PLAY), "a second night runs straight through to play")
 	_assert(sim.cats[0].assigned == seam, "the assigned cat kept its post overnight")
 	# Out through the door, which is where a morning starts now.
 	main.close_room()
@@ -170,11 +169,11 @@ func _run() -> void:
 	main.state = main.State.PLAY
 	main._sleep()
 	var stuck: int = 0
-	while main.state != main.State.RESULT and stuck < 1200:
+	while main.state == main.State.NIGHTFALL and stuck < 1200:
 		sim.cats[1].pos = Vector2(90000.0, 90000.0)   # never gets any closer
 		main._process(0.05)
 		stuck += 1
-	_assert(main.state == main.State.RESULT,
+	_assert(main.state != main.State.NIGHTFALL,
 		"a cat that can never reach the hut does not hold the night open")
 	_assert(float(stuck) * 0.05 <= Defs.NIGHT_GATHER_MAX + Defs.NIGHT_GLOW_SECONDS + 1.0,
 		"and the door closes on schedule rather than eventually: %.1fs" % (float(stuck) * 0.05))

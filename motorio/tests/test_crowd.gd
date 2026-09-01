@@ -83,10 +83,12 @@ func _run() -> void:
 	var step: float = 1.0 / 30.0
 	var elapsed: float = 0.0
 	var last: Dictionary[int, Vector2] = {}
-	# Past the end of a day, so the run contains going home and sleeping. Derived
-	# from the day rather than written down: the day went from three minutes to
-	# five and a hand-written 200 quietly stopped reaching the evening.
-	while elapsed < Defs.DAY_SECONDS + 20.0:
+	# Past the end of a day, so the run contains going home and sleeping. The day
+	# is thirty-six minutes now -- a full lap is an hour of wall clock on the
+	# machine this suite runs on -- so the clock starts at the head of dusk and
+	# the walk still contains every phase the assertion cares about.
+	main.time_left = Defs.DUSK_SECONDS + 40.0
+	while elapsed < Defs.DUSK_SECONDS + 60.0:
 		main._process(step)
 		# The pool has to be ticked too. Disabling processing on Main stops its
 		# children as well, so without this the views are never synced and the
@@ -94,8 +96,8 @@ func _run() -> void:
 		# as nothing moving that should not. The breathing assertion at the end
 		# exists to catch exactly that: it fails when the views are asleep.
 		pool._process(step)
-		if main.state == main.State.RESULT:
-			main.touch_primary()
+		if main.state != main.State.PLAY and main.room_open:
+			main.close_room()
 		elapsed += step
 		for index in sim.cats.size():
 			var cat: Sim.Cat = sim.cats[index]

@@ -64,9 +64,6 @@ func _test_indoors_is_quiet() -> void:
 	main.night_phase = main.Phase.GLOW
 	_settle(main, 1.0)
 	_assert(_cold(main) < 0.03, "자는 동안에도 조용하다: %.2f" % _cold(main))
-	main.state = main.State.RESULT
-	_settle(main, 1.0)
-	_assert(_cold(main) < 0.03, "정산 카드에서도 조용하다: %.2f" % _cold(main))
 	main.state = main.State.DAYBREAK
 	main.night_phase = main.Phase.DAWN
 	_settle(main, 1.0)

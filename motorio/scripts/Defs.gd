@@ -1697,7 +1697,12 @@ const ROCK_MINE_PERIOD := 14.0
 ## Dusk and night are counted back from the end and stay where they are, so the
 ## tail is the same length and what grew is the daylight in front of it: the last
 ## 95 seconds used to be half the day and are now under a third of it.
-const DAY_SECONDS := 300.0
+## One big play session, not a five-minute lap (2026-09-01). Daylight is where
+## the factory grows and it now holds the whole 0~23분 golden path with room to
+## spare: the first sunset lands at 30 minutes and the first true night at 32.
+## Dusk and night stay a fixed tail counted back from the end, so the cycle is
+## 30분 낮 + 2분 해질녘 + 4분 밤 = 36분.
+const DAY_SECONDS := 2160.0
 ## Deliberately slow: one cat is a trickle, so throughput has to come from more
 ## miners and better routing rather than from a single well-placed worker.
 ## Matched to hand mining on purpose. A miner is not faster than the player --
@@ -2519,8 +2524,8 @@ const COLD_DRAIN := 13.0          # warmth lost per second outside the radius
 ## Night is the reason to go home. Once it falls the warm pool is no longer
 ## enough on its own, so standing next to the core all night is not a strategy:
 ## the shelter is.
-const NIGHT_SECONDS := 50.0
-const DUSK_SECONDS := 95.0
+const NIGHT_SECONDS := 240.0
+const DUSK_SECONDS := 360.0
 const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when warm
 ## How far in front of the player a carried cat rides, in tiles. Small enough to
 ## read as "in her arms" rather than as a cat standing on the next tile, but far

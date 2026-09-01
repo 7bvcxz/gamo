@@ -147,8 +147,6 @@ func _test_windows() -> void:
 		"그래서 탭이 다음 장으로 넘긴다")
 	main.state = main.State.TITLE
 	_assert(main.touch_anywhere_starts(), "타이틀도")
-	main.state = main.State.RESULT
-	_assert(main.touch_anywhere_starts(), "정산 카드도")
 	# And not while playing: there the screen is the world, and a tap on it is
 	# the joystick or a button rather than "confirm".
 	main.state = main.State.PLAY

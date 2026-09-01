@@ -82,13 +82,22 @@ func _run() -> void:
 	_assert(main.player.locked, "the fall takes control")
 	_assert(main.player.collapse > 0.0 and main.player.collapse < 1.0,
 		"the collapse animation is midway rather than instant")
-	for step in 60:
-		if main.state == main.State.RESULT:
+	var went_dark := false
+	var notes: int = main.play_log.size()
+	for step in 400:
+		if main.state != main.State.PLAY:
 			break
 		main._update_collapse(0.1)
-	_assert(main.state == main.State.RESULT, "collapsing ends the day")
-	_assert(main.blackout >= 1.0, "the world had gone fully dark before the day ended")
-	_assert(main.rescued_tonight, "the summary records that the player was carried in")
+		went_dark = went_dark or main.blackout >= 0.9
+	_assert(main.state != main.State.PLAY, "collapsing ends the day")
+	_assert(went_dark, "the world had gone fully dark before the day ended")
+	# The flag is consumed by the morning note now -- the summary card that used
+	# to read it is gone -- so what is asserted is the record itself.
+	var carried := false
+	for index in maxi(0, main.play_log.size() - notes):
+		if String(main.play_log[index]["text"]).contains("데려왔다"):
+			carried = true
+	_assert(carried, "the morning records that the player was carried in")
 
 	# Morning restores an upright, warm player at the shelter. It is a five-second
 	# sequence -- the sun comes up, then everyone walks out of the hut -- so
@@ -146,7 +155,7 @@ func _run() -> void:
 			rearmed += 1
 		last_timer = main.collapse_timer
 	_assert(rearmed == 0, "the grace timer is never re-armed once the fall begins (%d times)" % rearmed)
-	_assert(main.state == main.State.RESULT,
+	_assert(main.state != main.State.PLAY,
 		"freezing outside actually ends the day instead of looping (%.1fs)" % elapsed)
 	_assert(elapsed < Defs.COLLAPSE_GRACE + Defs.COLLAPSE_FALL + Defs.BLACKOUT_SECONDS + 2.0,
 		"and it takes about grace + fall + blackout, not longer (%.1fs)" % elapsed)

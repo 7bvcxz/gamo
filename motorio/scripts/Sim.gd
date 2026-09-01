@@ -3175,6 +3175,28 @@ func send_cats_home() -> void:
 	for cat: Cat in cats:
 		cat.state = Defs.CAT_TO_SHELTER
 
+## Night falling on a player who stays up. The crew stops work and walks home on
+## its own -- the animals keep their own hours -- but nothing is yanked: a cat
+## in her arms stays in her arms, and a machine on the grid keeps running,
+## because electricity does not sleep. This is what makes powered automation
+## the answer to the night rather than a nicer number.
+func rest_cats() -> void:
+	for cat: Cat in cats:
+		if cat == carried_cat:
+			continue
+		if cat.state == Defs.CAT_TO_SHELTER or cat.state == Defs.CAT_ASLEEP:
+			continue
+		cat.state = Defs.CAT_TO_SHELTER
+
+## And morning finding them where they slept: everyone walks back out to the
+## post they had, from the hut, with their own legs.
+func rouse_cats() -> void:
+	for cat: Cat in cats:
+		if cat.state != Defs.CAT_ASLEEP:
+			continue
+		cat.pos = cell_centre(shelter_cell) + Vector2(0.0, 12.0)
+		cat.state = Defs.CAT_TO_MINER if cat.has_job() else Defs.CAT_IDLE
+
 ## True once every cat has reached the hut.
 func cats_all_home() -> bool:
 	for cat: Cat in cats:

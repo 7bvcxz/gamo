@@ -90,11 +90,14 @@ func _run() -> void:
 	main.open_room()
 	main._update_ambience(0.016)
 	_assert(main.music.requested_score() == "home", "숙소에서는 숙소 곡이 흐른다")
-	# And a card on screen is louder than a room: she falls asleep in there and
-	# the summary has its own score.
+	# The summary card is gone (2026-09-01): falling asleep hands straight to
+	# the morning, and what the night asks of the music is the sequence's own
+	# ("night") rather than a card score. The "result" score stays in the table
+	# as an asset for the optional 기록 화면 later.
 	main._finish_run()
 	main._update_ambience(0.016)
-	_assert(main.music.requested_score() == "result", "정산 화면이 정산 곡을 부른다")
+	_assert(main.state == main.State.DAYBREAK, "잠들면 카드 없이 아침 연출이다")
+	_assert(main.music.requested_score() != "result", "정산 곡을 부르는 화면은 없다")
 	main.close_room()
 	main.state = main.State.PLAY
 	main._update_ambience(0.016)

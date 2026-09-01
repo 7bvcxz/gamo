@@ -272,13 +272,9 @@ func _test_sleeping() -> void:
 	_assert(main.room_sleeping, "눕기 시작한다")
 	for cat in sim.cats:
 		_assert(cat.state == Defs.CAT_ASLEEP, "고양이들이 일제히 잠든다")
-	var spent := 0.0
-	while main.room_sleeping and spent < 8.0:
-		main._update_room(1.0 / 60.0)
-		spent += 1.0 / 60.0
-	# And she is lying on the bed rather than on its headboard. The bed is two
-	# cells and she used to stop on the centre of the top one, which puts her
-	# shoulders level with the pillow and her legs off the end of it.
+	# The resting point's geometry: lying on the bed rather than its headboard.
+	# The bed is two cells and she used to stop on the centre of the top one,
+	# which puts her shoulders level with the pillow and her legs off the end.
 	var head: Vector2 = sim.cell_centre(Defs.room_to_world(main._room_bed_cell()))
 	var rest: Vector2 = main.room_sleep_point()
 	_assert(is_equal_approx(rest.x, head.x), "머리맡과 같은 줄에 눕는다")
@@ -286,16 +282,20 @@ func _test_sleeping() -> void:
 		"그리고 반 칸 아래다: %.1f" % (rest.y - head.y))
 	_assert(Defs.world_to_room(sim.cell_of(rest)) in [main._room_bed_cell(),
 		main._room_bed_cell() + Vector2i(0, 1)], "여전히 침대 위다")
-	_assert(main.player.position.distance_to(rest) < 2.0,
-		"실제로 거기까지 걸어간다: %.1f" % main.player.position.distance_to(rest))
-	_assert(is_equal_approx(main.room_fade, 1.0), "화면이 완전히 검어지고")
-	_assert(main.state == main.State.RESULT, "그 다음에 하루 정리가 나온다")
-	# And the card is actually on screen. The state alone is not the picture: the
-	# fade is drawn after the state match, so at full darkness it was painting a
-	# second black sheet over the thing it had spent a second building to -- the
-	# summary was there every night and nobody could see it.
-	_assert(not main.hud.room_fade_visible(),
-		"검은 천이 그 카드를 덮지 않는다 (fade=%.2f)" % main.room_fade)
+	# She actually walks there before the night takes her. Measured during the
+	# walk, because the summary modal is gone (2026-09-01): the fade now hands
+	# straight to the morning, which moves her to the wake spot.
+	var spent := 0.0
+	var closest := 1e9
+	var darkest := 0.0
+	while main.room_sleeping and spent < 8.0:
+		main._update_room(1.0 / 60.0)
+		closest = minf(closest, main.player.position.distance_to(rest))
+		darkest = maxf(darkest, main.room_fade)
+		spent += 1.0 / 60.0
+	_assert(closest < 2.0, "실제로 거기까지 걸어간다: %.1f" % closest)
+	_assert(is_equal_approx(darkest, 1.0), "화면이 완전히 검어지고")
+	_assert(main.state == main.State.DAYBREAK, "그 다음은 카드가 아니라 아침이다")
 	main.clear_save()
 	main.free()
 

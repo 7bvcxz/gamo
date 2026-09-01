@@ -322,9 +322,11 @@ func _run() -> void:
 	_assert(main.state == main.State.NIGHTFALL, "sleeping starts the night sequence")
 	_assert(main.indoors() or main.night_phase == main.Phase.GATHER,
 		"and it opens with everyone still walking home")
-	_assert(_settle(main, main.State.RESULT), "the night sequence ends on the day summary")
-	_assert(main.day_stones() == 140, "the summary reports what this day earned")
-	_assert(main.player.locked, "the player is locked while the day summary is up")
+	# The card is gone (2026-09-01): the sequence walks itself into the morning
+	# and the day's earnings go to the log instead of a modal.
+	_assert(_settle(main, main.State.DAYBREAK), "the night sequence hands straight to the morning")
+	_assert(main.day_stones() == 0, "the new day opens with its own ledger")
+	_assert(main.player.locked, "the player is locked while the sun comes up")
 
 	# Continuing must carry the world forward, not restart it: that is the whole
 	# point of days accumulating.
@@ -377,26 +379,23 @@ func _run() -> void:
 	# on 2026-08-14 when the game was settled as long-form: a high score is an
 	# instruction to replay the day, which is the opposite of what this game
 	# asks for.
+	_assert(_settle(main, main.State.PLAY), "and the morning ends in play")
+	main.close_room()
 	main.sim.stones_in = 160
+	_assert(main.day_stones() == 20, "the second day counts only its own earnings")
 	main.time_left = 0.05
 	main._process(0.2)
-	_assert(main.day_stones() == 20, "the second day counts only its own earnings")
-	_assert(_settle(main, main.State.RESULT), "running out of time also plays the night out")
+	_assert(main.state != main.State.PLAY, "running out of time also plays the night out")
+	_assert(_settle(main, main.State.PLAY), "and it too ends in the morning")
+	main.close_room()
 	_assert(not ("best_day_stones" in main), "최고 하루 기록이 남아 있지 않다")
 	_assert(not ("best_heat" in main), "최고 누적 기록이 남아 있지 않다")
 
-	# The summary card cannot throw the run away.
-	#
-	# It used to: N started a fresh game from here, one keypress, no confirmation.
-	# This is the screen a player presses through at the end of every day without
-	# reading it, which makes it the worst place in the game for that key --
-	# starting over lives in settings, where it asks twice. The line is gone and
-	# so is the key, because leaving the key with the label removed is the worse
-	# of the two: a run lost with nothing on screen to explain it.
+	# Nights cannot throw the run away: whatever ends the day, the same world
+	# wakes up. (The N-key hazard died with the summary card itself.)
 	var day_before: int = main.day_number
 	var stones_before: int = main.sim.stones_in
 	_press(main, KEY_N)
-	_assert(main.state == main.State.RESULT, "정산 화면에서 N은 아무 일도 하지 않는다")
 	_assert(main.day_number == day_before, "날짜가 되돌아가지 않는다")
 	_assert(main.sim.stones_in == stones_before, "불에 넣은 열석이 사라지지 않는다")
 	_assert(main.sim.machine_at(Vector2i(0, 2)) != null, "공장이 그대로 남는다")

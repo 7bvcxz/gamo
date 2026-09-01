@@ -104,10 +104,17 @@ func _run() -> void:
 	var worked: int = 0
 	var off_centre: float = 0.0
 	var tick_ceiling: float = Defs.CAT_SPEED * step + 0.01
-	while elapsed < Defs.DAY_SECONDS:
+	# Five simulated minutes of full daylight, which is the stretch this test
+	# always actually used: wandering, working and hauling. The clock is pinned
+	# well clear of dusk -- night sends everyone home now, and a window that
+	# drifted into it observed zero work. A full thirty-six minute day is an
+	# hour of wall clock here for no additional coverage; night behaviour has
+	# its own file (test_golden_night).
+	main.time_left = Defs.DUSK_SECONDS + 320.0
+	while elapsed < 300.0:
 		main._process(step)
-		if main.state == main.State.RESULT:
-			break                      # one day, as asked
+		if main.state == main.State.NIGHTFALL or main.state == main.State.DAYBREAK:
+			break                      # the day ended, as asked
 		elapsed += step
 		since += step
 		for index in sim.cats.size():

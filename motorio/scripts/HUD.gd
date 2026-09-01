@@ -518,12 +518,6 @@ func _draw() -> void:
 	match main.state:
 		main.State.TITLE: _draw_title()
 		main.State.OPENING: _draw_cutscene()
-		main.State.RESULT:
-			# The summary lands on the dark she fell asleep into, not on the
-			# plateau: she is in bed, and the world behind the card is a wall.
-			if main.room_open:
-				draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 1.0))
-			_draw_result()
 		main.State.GAMEOVER: _draw_gameover()
 		main.State.NIGHTFALL, main.State.DAYBREAK:
 			# The sequence is the one moment the game is not asking for anything,
@@ -1214,11 +1208,7 @@ func build_menu_row_at(point: Vector2) -> int:
 ## guards is invisible to a screenshot: a black screen and a black screen with
 ## the day's summary underneath it are the same picture.
 func room_fade_visible() -> bool:
-	# Not over the summary. The card is what the fade was building to -- she
-	# closes her eyes and the day is counted up -- and this is drawn after the
-	# state match, so at full darkness it was painting over it. The RESULT branch
-	# lays its own black down first; this would be a second one, on top.
-	return main.room_fade > 0.0 and main.state != main.State.RESULT
+	return main.room_fade > 0.0
 
 func _draw_room_fade() -> void:
 	if not room_fade_visible():
@@ -2356,65 +2346,6 @@ func _draw_gameover() -> void:
 	draw_rect(bar, Color(1, 1, 1, 0.10))
 	draw_rect(Rect2(bar.position, Vector2(bar.size.x * main.gameover_fraction(), bar.size.y)),
 		Defs.COL_FROST_TINT)
-
-func _draw_result() -> void:
-	_dim(0.82)
-	var sim = main.sim
-	# A morning report, not a score.
-	#
-	# This used to lead with "+N 오늘 모은 열" at 52 point and close with a "최고
-	# 하루" record, which is the shape of a run being graded. Motorio is a long
-	# game -- settled on 2026-08-14 as long-form rather than score attack -- so
-	# what a player needs at dawn is where the base has got to, not how well
-	# yesterday scored.
-	#
-	# Then the lead itself went, in 1.0.26. It was "11.0칸 / 온기 반경" at 52
-	# point -- the circle on the snow, written out in figures, on a card that is
-	# supposed to hold the crew and what the day brought in and nothing else.
-	#
-	# The crew, and what the day brought in. Running totals used to lead this card
-	# -- how many stones had ever gone into the fire, and how many yesterday --
-	# which is a ledger rather than a morning report: the number that says whether
-	# the day was any good is what came out of the ground on it.
-	var rows := [["고양이", "%d마리" % sim.cats.size(), Defs.COL_TEXT_DIM]]
-	for row: Array in main.day_collected():
-		rows.append([Defs.ITEM_NAMES[int(row[0])], "+%d" % int(row[1]),
-			Defs.ITEM_COLORS[int(row[0])]])
-	# Sized to what it is holding rather than to a number typed once: the rows are
-	# one per resource the day produced, and a fixed card is either half empty on
-	# the first morning or too short on the tenth.
-	var card := _card(180.0 + float(rows.size()) * 24.0)
-	var w: float = card.size.x
-	var headline: String = "%d일차 · 고양이들이 데려왔습니다" % main.day_number if main.rescued_tonight else "%d일차 · 숙소에서 잤습니다" % main.day_number
-	_text_in(Rect2(card.position + Vector2(0, 44), Vector2(w, 30)), headline, 21,
-		Defs.COL_DANGER if main.rescued_tonight else Defs.COL_TEXT)
-	var y: float = 96.0
-	for row in rows:
-		# Both halves on the same baseline. `_text` takes a baseline and `_text_in`
-		# takes a box whose *position* is also a baseline -- so the `y - 14` that
-		# used to be here lifted every value fourteen pixels above its own label,
-		# and the card read as two columns that had been pasted separately. The
-		# same trap as the plate that hung off the bottom of the screen: a y is a
-		# baseline in one call and a top edge in the next.
-		_text(card.position + Vector2(74, y), String(row[0]), 14, Defs.COL_TEXT_DIM)
-		_text_in(Rect2(card.position + Vector2(w - 174, y), Vector2(100, 18)),
-			String(row[1]), 14, row[2], HORIZONTAL_ALIGNMENT_RIGHT)
-		y += 24.0
-
-	# The factory survives the night; that is the whole reason to keep going.
-	_text_in(Rect2(card.position + Vector2(0, y + 16), Vector2(w, 20)),
-		"공장과 온기는 그대로 남습니다", 12, Defs.COL_TEXT_DIM)
-	var blink: float = 0.72 + sin(float(Time.get_ticks_msec()) / 320.0) * 0.28
-	var touch_pad: bool = main.touch != null and main.touch.visible
-	var next_label: String = "화면을 눌러 %d일차 시작" % (main.day_number + 1) if touch_pad \
-		else "Enter — %d일차 시작" % (main.day_number + 1)
-	_text_in(Rect2(card.position + Vector2(0, card.size.y - 42), Vector2(w, 20)), next_label, 16,
-		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, blink))
-	# No "start over" here. Settings already carries it, behind a confirmation,
-	# and the summary card is the one screen a player presses through every day
-	# without reading -- an unguarded key that throws the run away does not belong
-	# on it.
-
 
 ## --- The map ------------------------------------------------------------------
 ## A square card, because the world is square and a wide one would show more east
