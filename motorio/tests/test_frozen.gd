@@ -97,8 +97,12 @@ func _test_scatter() -> void:
 			scattered += 1
 	_assert(absi(scattered - expected) <= 2,
 		"밀도가 설계값과 맞는다 (%d, 기대 %d)" % [scattered, expected])
-	_assert(sim.frozen_cats.size() - scattered == Defs.VILLAGE_FROZEN.size(),
-		"그리고 마을 몫은 따로 %d마리" % Defs.VILLAGE_FROZEN.size())
+	# The village is a hidden route now: on the main path its seven are simply
+	# absent, and test_golden_iron guards that they come back whole with the
+	# flag. What this density claim keeps is that hiding them did not change
+	# what the plateau itself holds.
+	_assert(sim.frozen_cats.size() - scattered == 0,
+		"마을 몫은 메인 경로에 없다 (%d)" % (sim.frozen_cats.size() - scattered))
 	_assert(is_equal_approx(Defs.FROZEN_PER_TILES, 66.7 * 3.0),
 		"상자 밀도의 1/3 — 한 마리가 상자 3개를 대신하므로 총 고양이 수는 그대로")
 	for cell: Vector2i in sim.frozen_cats:

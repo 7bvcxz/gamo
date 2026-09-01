@@ -2112,6 +2112,8 @@ const OPENING_WARM_RADIUS := 9.0
 
 ## Northwest of the fire, at about twenty cells. Far enough that the first warm
 ## radius does not reach it and a torch is the way there.
+## Off by default: the golden path is the factory, and these are the secret.
+const STORY_ON_MAIN_PATH := false
 const SIGN_OFFSET := Vector2i(-14, -14)
 ## What the sign says when she reads it. The arrow is the sign's own direction,
 ## so the village is due north of it and the tracks leave northward -- an arrow
@@ -2827,7 +2829,10 @@ const FIRST_COPPER_SIZE := 4
 ## the run that rolls the other way is playing a different game from the one the
 ## card describes. Inside the line rather than on it, because a patch grows
 ## outward from its origin.
-const FIRST_IRON_BAND := Vector2(20.4, 21.8)
+## Whole patch inside display Lv8's circle of 22 with margin, none of it
+## inside Lv7's 19. It ran 20.4~21.8, whose far cells sat on the 22 line
+## itself -- reachable in the letter and grazing in the play.
+const FIRST_IRON_BAND := Vector2(19.6, 20.9)
 const FIRST_IRON_SIZE := 4
 ## And the scatter past it, which is what rewards walking further.
 const IRON_RING := Vector2(22.5, 28.0)

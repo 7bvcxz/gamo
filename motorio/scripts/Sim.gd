@@ -193,6 +193,10 @@ var food_placed := false
 ## The survival kit lying in the snow, and how many times it has been searched.
 ## Two searches: the base, then the pickaxe and the shelter.
 var kit_cell := Vector2i(9999, 9999)
+## Whether the hidden route's landmarks (냥마을, its sign, the footprints)
+## generate at all. Off on the main path; saved, so a run that has seen the
+## village keeps it.
+var story_enabled: bool = Defs.STORY_ON_MAIN_PATH
 var kit_searched: int = 0
 ## How far through the current search she is, 0..1. Lives here rather than on
 ## the orchestrator because the thing that draws the ring reads the world, and a
@@ -425,6 +429,7 @@ func to_save() -> Dictionary:
 		"food_placed": food_placed,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
 		"torches": torches, "torch_left": torch_left, "power_ever": power_ever,
+		"story_enabled": story_enabled,
 		"learned": learned.keys(), "walked": walked, "torch_hints": torch_hints,
 		"shards": shard_rows, "mined_rocks": mined_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
@@ -537,6 +542,9 @@ func from_save(data: Dictionary) -> void:
 	kit_searched = mini(int(data.get("kit_searched", 1)), 1)
 	torches = int(data.get("torches", 0))
 	power_ever = bool(data.get("power_ever", false))
+	if bool(data.get("story_enabled", false)) and not story_enabled:
+		story_enabled = true
+		_generate_village()
 	torch_left = float(data.get("torch_left", 0.0))
 	learned.clear()
 	torch_hints = int(data.get("torch_hints", 0))
@@ -863,6 +871,16 @@ func _generate_frozen_cats(seed_value: int) -> void:
 func _generate_village() -> void:
 	village.clear()
 	trail.clear()
+	# Hidden from the main path (2026-09-01). The factory is the game and the
+	# story is a secret: the sign stood 19.8 cells out -- inside the 18~21
+	# minute stretch -- and pointed the golden path's last act somewhere else.
+	# Nothing is deleted: flip `story_enabled` before setup() and every house,
+	# frozen villager, signpost and footprint generates exactly as before.
+	# `debug_village` flips it for a look.
+	if not story_enabled:
+		sign_cell = Vector2i(9999, 9999)
+		village_rect = Rect2i()
+		return
 	sign_cell = core_cell + Defs.SIGN_OFFSET
 	var origin: Vector2i = core_cell + Defs.VILLAGE_OFFSET \
 		- Vector2i(Defs.VILLAGE_CELLS.x / 2, Defs.VILLAGE_CELLS.y / 2)

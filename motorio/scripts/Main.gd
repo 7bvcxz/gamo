@@ -3695,6 +3695,10 @@ func debug_debris() -> void:
 ## happening. This puts her at the board with the light on, which is where the
 ## walk was going to end anyway.
 func debug_village() -> void:
+	# The hidden route, made visible for the look this key is for.
+	if not sim.story_enabled:
+		sim.story_enabled = true
+		sim._generate_village()
 	debug_unlock_all()
 	sim.torches = maxi(sim.torches, 5)
 	# And the fire fed until its circle covers the walk. Written as stones rather

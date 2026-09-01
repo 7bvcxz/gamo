@@ -1,4 +1,8 @@
 extends SceneTree
+
+## 냥마을 is a hidden route as of 2026-09-01: `story_enabled` is off on the main
+## path and this file flips it on, because what it guards is the village itself
+## -- that when the route exists, everything in it is where the sign says.
 ## 냥마을, the signpost, and the tracks between them.
 ##
 ## Three kinds of claim, and only the first is about arithmetic. The second is
@@ -26,6 +30,7 @@ func _run() -> void:
 
 func _sim() -> Node:
 	var sim = load("res://scripts/Sim.gd").new()
+	sim.story_enabled = true
 	sim.setup(4242)
 	return sim
 
@@ -84,6 +89,7 @@ func _test_clear_across_seeds() -> void:
 	var dirty := 0
 	var worst := ""
 	for seed_value in range(1, 201):
+		sim.story_enabled = true
 		sim.setup(seed_value)
 		for y in Defs.VILLAGE_CELLS.y:
 			for x in Defs.VILLAGE_CELLS.x:
@@ -144,6 +150,9 @@ func _test_reading() -> void:
 	await process_frame
 	main.clear_save()
 	main._start_run()
+	# This scene is on the hidden route: the sign has to exist to be read.
+	main.sim.story_enabled = true
+	main.sim._generate_village()
 	main.finish_tutorial()
 	main.state = main.State.PLAY
 	var sim = main.sim
