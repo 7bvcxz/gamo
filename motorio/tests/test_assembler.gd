@@ -580,7 +580,7 @@ func _world() -> Node2D:
 	sim.stones_in = maxi(sim.stones_in, int(Defs.BASE_LEVELS[-1]["stones"]))
 	sim._refresh_radius()
 	for item_id: int in [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_IRON,
-			Defs.ITEM_IRON_PLATE, Defs.ITEM_COPPER_WIRE]:
+			Defs.ITEM_IRON_PLATE, Defs.ITEM_COPPER_WIRE, Defs.ITEM_ENERGY_CORE]:
 		sim.note_resource_seen(item_id)
 		sim.stock[item_id] = 500
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)

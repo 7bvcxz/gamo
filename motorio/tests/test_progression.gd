@@ -38,8 +38,11 @@ func _run() -> void:
 	_assert(sim.note_resource_seen(Defs.ITEM_CRYSTAL).is_empty(),
 		"수정도 이제는 아무것도 열지 않는다 — 교환기와 함께 사라진 줄이다")
 	sim.unlocked[Defs.M_MINER] = true
-	_assert(sim.note_resource_seen(Defs.ITEM_COPPER).has(Defs.M_BELT),
-		"구리가 운송 줄을 연다")
+	# The canonical order (2026-09-01): copper opens *nothing* of logistics any
+	# more. The belt waits for the first watt, so the bottleneck is felt before
+	# its answer appears -- test_golden_power drives that door.
+	_assert(not sim.note_resource_seen(Defs.ITEM_COPPER).has(Defs.M_BELT),
+		"구리는 운송 줄을 열지 않는다")
 	_assert(not sim.is_unlocked(Defs.M_GENERATOR),
 		"전력 줄은 아직이다 — 구리만으로는 열리지 않는다")
 	_assert(sim.note_resource_seen(Defs.ITEM_ENERGY_CORE).has(Defs.M_GENERATOR),
@@ -156,11 +159,17 @@ func _run() -> void:
 	# --- Lv3: power is a rate, and it gates logistics -------------------------
 	sim.note_resource_seen(Defs.ITEM_COPPER)
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
-	_assert(sim.is_unlocked(Defs.M_GENERATOR) and sim.is_unlocked(Defs.M_BELT),
-		"copper opens belts, and copper with a core part opens the generator")
+	_assert(sim.is_unlocked(Defs.M_GENERATOR) and not sim.is_unlocked(Defs.M_BELT),
+		"copper with a core part opens the generator; the belt waits for the watt")
+	# The belt for the rest of this test comes through its real door: power.
+	sim.power_ever = true
+	sim._check_unlocks()
+	sim.take_unlocks()
+	_assert(sim.is_unlocked(Defs.M_BELT), "the first watt opens it")
 	sim.stock[Defs.ITEM_COPPER] = 100
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
 	sim.stock[Defs.ITEM_HEATSTONE] = 100
+	sim.stock[Defs.ITEM_ENERGY_CORE] = 5
 
 	var belt_cell := Vector2i(5, 5)
 	_assert(sim.build(Defs.M_BELT, belt_cell, Vector2i.LEFT), "a belt goes down")
@@ -198,6 +207,8 @@ func _run() -> void:
 	split_sim.unlocked[Defs.M_MINER] = true
 	split_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	split_sim.note_resource_seen(Defs.ITEM_COPPER)
+	split_sim.power_ever = true
+	split_sim._check_unlocks()
 	split_sim.stock[Defs.ITEM_COPPER] = 200
 	split_sim.stock[Defs.ITEM_CRYSTAL] = 200
 	split_sim.stock[Defs.ITEM_HEATSTONE] = 200
@@ -299,6 +310,7 @@ func _run() -> void:
 	grade_sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	grade_sim.stock[Defs.ITEM_COPPER] = 50
 	grade_sim.stock[Defs.ITEM_HEATSTONE] = 50
+	grade_sim.stock[Defs.ITEM_ENERGY_CORE] = 5
 	var before_stock: int = int(grade_sim.stock[Defs.ITEM_COPPER])
 	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6)
 	grade_sim.ore.erase(spot)
@@ -325,6 +337,7 @@ func _run() -> void:
 	grid.stock[Defs.ITEM_CRYSTAL] = 200
 	grid.stock[Defs.ITEM_HEATSTONE] = 200
 	grid.stock[Defs.ITEM_COPPER] = 200
+	grid.stock[Defs.ITEM_ENERGY_CORE] = 5
 	var seam2 := Vector2i(grid.core_cell.x + 4, grid.core_cell.y + 4)
 	grid.ore[seam2] = Defs.ITEM_CRYSTAL
 	grid._assign_purity()
@@ -399,6 +412,8 @@ func _run() -> void:
 	belt_sim.unlocked[Defs.M_MINER] = true
 	belt_sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	belt_sim.note_resource_seen(Defs.ITEM_COPPER)
+	belt_sim.power_ever = true
+	belt_sim._check_unlocks()
 	belt_sim.stock[Defs.ITEM_COPPER] = 100
 	var lane := Vector2i(belt_sim.core_cell.x + 9, belt_sim.core_cell.y + 9)
 	belt_sim.ore.erase(lane)

@@ -144,6 +144,8 @@ func _test_unlocks_on_first_iron() -> void:
 	_assert(not sim.is_unlocked(Defs.M_MANUFACTURER), "철을 보기 전에는 제조기가 없다")
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	_assert(not sim.is_unlocked(Defs.M_MANUFACTURER), "열석과 구리로도 열리지 않는다")
 	_assert(sim.note_resource_seen(Defs.ITEM_IRON).has(Defs.M_MANUFACTURER),
 		"첫 철이 제조기를 연다")
@@ -178,6 +180,7 @@ func _test_power() -> void:
 	_assert(sim.power_draw > 0.0, "일감이 있으므로 전력을 요구한다 (%.1f)" % sim.power_draw)
 
 	# One generator, one manufacturer: full speed.
+	sim.stock[Defs.ITEM_ENERGY_CORE] = 10
 	var plantside: Vector2i = _clear_cell(sim, Vector2i(-6, -6))
 	_assert(sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT), "발전기를 세운다")
 	sim.machine_at(plantside).buffer[Defs.GENERATOR_FUEL] = 4
@@ -383,6 +386,8 @@ func _open(sim) -> void:
 	sim._refresh_radius()
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	sim.note_resource_seen(Defs.ITEM_IRON)
 	sim.unlocked[Defs.M_MINER] = true

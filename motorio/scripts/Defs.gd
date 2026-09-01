@@ -555,9 +555,12 @@ static func machine_errors(rows: Array = MACHINES) -> Array[String]:
 				problems.append("%s 의 건설 비용이 없는 자원을 가리킨다: %d" % [key, item_id])
 			if int(row["cost"][item_id]) <= 0:
 				problems.append("%s 의 건설 비용 수량이 0 이하다: %d" % [key, int(row["cost"][item_id])])
-		for item_id: int in row["unlock"]:
-			if not has_item(item_id):
-				problems.append("%s 의 해금 조건이 없는 자원을 가리킨다: %d" % [key, item_id])
+		for entry in row["unlock"]:
+			if entry is String:
+				if String(entry) != UNLOCK_POWER:
+					problems.append("%s 의 해금 조건이 모르는 낱말이다: %s" % [key, entry])
+			elif not has_item(int(entry)):
+				problems.append("%s 의 해금 조건이 없는 자원을 가리킨다: %d" % [key, int(entry)])
 		if float(row["power_draw"]) < 0.0 or float(row["power_output"]) < 0.0:
 			problems.append("%s 의 전력 값이 음수다" % key)
 		# A rate belongs to a rig and to nothing else. A `mine_rate` on a belt is
@@ -1132,14 +1135,18 @@ const THAW_GROUND_SECONDS := 5.0
 ## which is close enough together that walking in any direction found one -- and
 ## a thing found by walking in any direction is scenery rather than a discovery.
 ## A dozen over the whole map means the second one is remembered.
-const DEBRIS_FIRST_RING := 11.0
-const DEBRIS_START_RING := 12.0
+## Outside display Lv5's circle of 15, so the first wreck is the torch's first
+## errand: reachable only by carrying heat out, never by waiting for the circle.
+## It sat at 11 -- inside Lv3 -- and the energy core arrived seven minutes early
+## with no torch lesson attached.
+const DEBRIS_FIRST_RING := 16.0
+const DEBRIS_START_RING := 17.0
 const DEBRIS_PER_TILES := 200.0
 const DEBRIS_SHAPES := 5
 const DEBRIS_NAME := "로켓잔해"
 ## Held rather than pressed, like the case and the seam. Longer than the case's
 ## two seconds because this one is worth something.
-const DEBRIS_SEARCH_SECONDS := 3.0
+const DEBRIS_SEARCH_SECONDS := 5.0
 ## What comes out, in seams rather than in materials of its own: a few of the
 ## best ore the ladder has and a handful of the rung below it, plus a core part
 ## sometimes -- which is the thing actually worth crossing the snow for.
@@ -1412,6 +1419,13 @@ const M_ASSEMBLER := 6
 ## rule, over a bigger number.
 const M_MINER_MK2 := 7
 
+## A non-material unlock condition. An `unlock` list holds item ids and may
+## hold these tokens; `unlock_ready` asks the world about each kind. "power" is
+## true once the grid has ever actually supplied -- the canonical order is
+## mining improved, output on the floor, power built, and *then* the belt, so
+## the belt's condition is the event and not the material.
+const UNLOCK_POWER := "power"
+
 ## What a machine is for, which is the grouping a build list wants to show.
 const GROUP_CORE := "core"
 const GROUP_EXTRACTION := "extraction"
@@ -1485,7 +1499,7 @@ const MACHINES: Array[Dictionary] = [
 		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
 		"group": GROUP_LOGISTICS, "production": PROD_LOGISTICS,
 		"desc": "자원을 기지까지 끊김 없이 나릅니다",
-		"cost": {ITEM_COPPER: 3}, "unlock": [ITEM_COPPER], "color": COL_BELT_RIM,
+		"cost": {ITEM_COPPER: 3}, "unlock": [UNLOCK_POWER], "color": COL_BELT_RIM,
 		"power_draw": 0.0, "power_output": 0.0,
 		"build_order": 1, "walkable": true, "directional": true,
 	},
@@ -1493,7 +1507,8 @@ const MACHINES: Array[Dictionary] = [
 		"id": M_GENERATOR, "key": "generator", "name": "발전기", "short": "발전기",
 		"group": GROUP_POWER, "production": PROD_GENERATOR,
 		"desc": "열석을 태워 전력 1.0을 공급합니다",
-		"cost": {ITEM_COPPER: 10}, "unlock": [ITEM_COPPER, ITEM_ENERGY_CORE],
+		"cost": {ITEM_COPPER: 5, ITEM_ENERGY_CORE: 1},
+		"unlock": [ITEM_COPPER, ITEM_ENERGY_CORE],
 		"color": Color8(120, 190, 235),
 		"power_draw": 0.0, "power_output": GENERATOR_OUTPUT,
 		"build_order": 3, "walkable": false, "directional": false,
@@ -1515,7 +1530,7 @@ const MACHINES: Array[Dictionary] = [
 		"id": M_SPLITTER, "key": "splitter", "name": "분배기", "short": "분배기",
 		"group": GROUP_LOGISTICS, "production": PROD_LOGISTICS,
 		"desc": "한 줄로 들어온 자원을 여러 줄로 균등하게 나눕니다",
-		"cost": {ITEM_COPPER: 2}, "unlock": [ITEM_COPPER],
+		"cost": {ITEM_COPPER: 2}, "unlock": [UNLOCK_POWER],
 		"color": Color8(150, 210, 160),
 		"power_draw": 0.0, "power_output": 0.0,
 		"build_order": 2, "walkable": true, "directional": true,
@@ -1658,13 +1673,15 @@ static func unlock_line(type: int) -> String:
 	if type == M_MINER:
 		return "건물건설총과 함께 열립니다"
 	var needs: Array = MACHINE_UNLOCK_ITEMS[type]
+	if needs.has(UNLOCK_POWER):
+		return "전력이 흐르기 시작하면 해금됩니다"
 	if not needs.is_empty():
 		# Joined with the separator the rest of the interface already uses, so
 		# no 과/와 has to be chosen -- and the object particle is decided by the
 		# last name in the list, which is the word it actually follows.
 		var names := PackedStringArray()
-		for item_type: int in needs:
-			names.append(String(ITEM_NAMES[item_type]))
+		for item_type in needs:
+			names.append(String(ITEM_NAMES[int(item_type)]))
 		var last: String = String(ITEM_NAMES[int(needs[needs.size() - 1])])
 		return "%s%s 손에 넣으면 해금됩니다" % [" · ".join(names), object_of(last)]
 	return "아직 해금되지 않았습니다"

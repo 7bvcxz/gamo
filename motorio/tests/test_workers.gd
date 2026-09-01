@@ -434,6 +434,8 @@ func _open(sim) -> void:
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500

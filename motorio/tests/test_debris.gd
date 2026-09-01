@@ -82,7 +82,7 @@ func _test_where_it_is() -> void:
 		if distance >= Defs.DEBRIS_START_RING:
 			far += 1
 		shapes[int(sim.debris[cell])] = true
-	_assert(inside == 0, "10칸 안에는 한 조각도 없다 (%d개)" % inside)
+	_assert(inside == 0, "첫 고리 안쪽에는 한 조각도 없다 (%d개)" % inside)
 	_assert(far >= 5, "12칸 밖에 흩어져 있다 (%d개)" % far)
 	# The whole point of five pictures is that a field of wreckage does not
 	# repeat. One seed drawing three of them would be five prompts paid for and
@@ -128,9 +128,9 @@ func _test_the_first_ring_holds() -> void:
 			missing += 1
 		worst = maxi(worst, on_ring)
 		sim.free()
-	_assert(missing == 0, "200회차 모두 11칸에 조각이 있다 (없는 회차 %d)" % missing)
+	_assert(missing == 0, "200회차 모두 첫 고리(16칸)에 조각이 있다 (없는 회차 %d)" % missing)
 	_assert(worst == 1, "그리고 딱 하나다 (가장 많은 회차 %d개)" % worst)
-	_assert(too_close == 0, "10칸 안으로는 한 조각도 새지 않는다 (%d건)" % too_close)
+	_assert(too_close == 0, "첫 고리 안쪽으로는 한 조각도 새지 않는다 (%d건)" % too_close)
 
 func _test_taking_one_apart() -> void:
 	var sim := Sim.new()

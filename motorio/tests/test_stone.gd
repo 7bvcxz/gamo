@@ -86,6 +86,8 @@ func _test_belt_spill() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var at: Vector2i = sim.core_cell + Vector2i(3, 3)
 	var ahead: Vector2i = at + Vector2i.RIGHT
@@ -115,6 +117,8 @@ func _test_belt_pickup() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var at: Vector2i = sim.core_cell + Vector2i(-3, -3)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.RIGHT), "벨트를 놓는다")

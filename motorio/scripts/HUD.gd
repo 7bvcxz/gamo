@@ -1512,6 +1512,14 @@ func _draw_build_row(row: int, index: int) -> void:
 	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
 	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
 	Icons.draw_machine(self, icon, type)
+	# Freshly unlocked since the list was last open: a small NEW over the icon,
+	# gone the next time the menu opens. The generator is the first machine that
+	# arrives *into* an existing list, and without this it is just another row.
+	if main.new_in_menu.has(type):
+		var chip := Rect2(icon.position + Vector2(-6.0, -8.0), Vector2(34.0, 14.0))
+		draw_rect(chip, Defs.COL_CORE)
+		_text_in(Rect2(chip.position + Vector2(0, 11.0), Vector2(chip.size.x, 12.0)),
+			"NEW", 9, Color(0.1, 0.08, 0.05), HORIZONTAL_ALIGNMENT_CENTER)
 
 	var text_x: float = rect.position.x + 62.0
 	# The three input/output lines stack down the right half rather than sitting

@@ -595,6 +595,21 @@ func selected_type() -> int:
 ## -- and nothing else. Indices rather than machine types because the gun's
 ## `selected_index` and the cursor's `menu_index` both point into BUILDABLE, and
 ## a second numbering of the same list is a second thing to keep in step.
+## Machines the player has not yet seen in the open list, for the NEW tag.
+## Session-local on purpose: it is a reading aid, not a fact about the run.
+var build_seen: Dictionary = {}
+var new_in_menu: Dictionary = {}
+
+func _mark_menu_seen() -> void:
+	new_in_menu.clear()
+	for index in Defs.BUILDABLE.size():
+		var type: int = Defs.BUILDABLE[index]
+		if not sim.is_unlocked(type):
+			continue
+		if not build_seen.has(type):
+			new_in_menu[type] = true
+		build_seen[type] = true
+
 func build_list() -> Array[int]:
 	var out: Array[int] = []
 	for index in Defs.BUILDABLE.size():
@@ -618,6 +633,7 @@ func toggle_build_menu() -> bool:
 			build_menu_open = false
 			return false
 		menu_index = selected_index if list.has(selected_index) else list[0]
+		_mark_menu_seen()
 	audio.call("play", "select")
 	return true
 
@@ -2000,9 +2016,13 @@ func _prompt_status(id: String) -> Dictionary:
 			# switch tools while she owns exactly one tool is telling her nothing.
 			return {"want": unlocked_tools().size() > 1, "done": sim.has_learned("TOOL")}
 		"BUILD":
-			return {"want": sim.base_level >= 1 and _anything_buildable()
-				and int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) >= Defs.MINER_UNLOCK_STONES,
-				"done": sim.machine_count(Defs.M_MINER) > 0 or build_menu_open}
+			# The canonical moment for [B]: the first energy core is in the
+			# pack and the list has just grown its second machine. Before that
+			# the gun arrives already loaded and the menu is one row deep --
+			# a key tutorial for a list of one is noise.
+			return {"want": sim.held_items.has(Defs.ITEM_ENERGY_CORE)
+				and sim.is_unlocked(Defs.M_GENERATOR),
+				"done": sim.machine_count(Defs.M_GENERATOR) > 0 or build_menu_open}
 		"RUN":
 			return {"want": sim.walked >= Defs.PROMPT_WALK_RUN, "done": sim.has_learned("RUN")}
 		"MOVE":

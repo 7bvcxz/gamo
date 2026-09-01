@@ -152,7 +152,9 @@ func _test_metadata_snapshot() -> void:
 	_assert(Defs.MACHINE_COSTS[Defs.M_MINER] == {Defs.ITEM_HEATSTONE: 5, Defs.ITEM_COPPER: 1},
 		"채굴기 열석 5 + 구리 1 — 구리 기술이다")
 	_assert(Defs.MACHINE_COSTS[Defs.M_BELT] == {Defs.ITEM_COPPER: 3}, "벨트 구리 3")
-	_assert(Defs.MACHINE_COSTS[Defs.M_GENERATOR] == {Defs.ITEM_COPPER: 10}, "발전기 구리 10")
+	_assert(Defs.MACHINE_COSTS[Defs.M_GENERATOR]
+		== {Defs.ITEM_COPPER: 5, Defs.ITEM_ENERGY_CORE: 1},
+		"발전기 구리 5 + 에너지 코어 1 — 코어는 열쇠가 아니라 재료다")
 	_assert(Defs.MACHINE_COSTS[Defs.M_SPLITTER] == {Defs.ITEM_COPPER: 2}, "분배기 구리 2")
 	# Bootstrap, spelled out: everything the first manufacturer costs comes out of
 	# the ground with a pickaxe. `test_iron` holds the same fact from the other
@@ -163,8 +165,8 @@ func _test_metadata_snapshot() -> void:
 
 	# Unlock, which is progression order.
 	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_MINER] == [], "채굴기는 재료가 열지 않는다")
-	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_BELT] == [Defs.ITEM_COPPER], "벨트는 구리")
-	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_SPLITTER] == [Defs.ITEM_COPPER], "분배기도 구리")
+	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_BELT] == [Defs.UNLOCK_POWER], "벨트는 첫 와트가 연다")
+	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_SPLITTER] == [Defs.UNLOCK_POWER], "분배기도 같은 문이다")
 	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_GENERATOR]
 		== [Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE], "발전기는 구리와 에너지 코어")
 	_assert(Defs.MACHINE_UNLOCK_ITEMS[Defs.M_MANUFACTURER] == [Defs.ITEM_IRON],
@@ -254,6 +256,8 @@ func _test_save_round_trip() -> void:
 	main._start_run()
 	var sim = main.sim
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_IRON)

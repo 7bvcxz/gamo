@@ -30,6 +30,8 @@ func _run() -> void:
 	# not by having seen a stone. These tests want it standing.
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	# Both of the generator's materials, or there is nowhere to put one below.
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
@@ -169,6 +171,7 @@ func _run() -> void:
 	# A machine only shows the items it is rated for or has actually seen, so an
 	# generator names its recipe's inputs before anything has ever reached it.
 	var pad := Vector2i(9999, 9999)
+	sim.stock[Defs.ITEM_ENERGY_CORE] = 1
 	for dx in range(-8, 9):
 		for dy in range(-8, 9):
 			var candidate: Vector2i = sim.core_cell + Vector2i(dx, dy)

@@ -298,6 +298,8 @@ func _test_outbox_survives_a_save() -> void:
 	main._start_run()
 	var sim = main.sim
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	var cell: Vector2i = sim.core_cell + Vector2i(5, 5)
 	sim.ore.erase(cell)
 	sim.stock[Defs.ITEM_COPPER] = 500

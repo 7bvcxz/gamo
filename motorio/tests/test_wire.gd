@@ -249,10 +249,13 @@ func _run_with_a_machine() -> Node2D:
 		sim.place_base(sim.core_cell)
 	sim.stones_in = maxi(sim.stones_in, int(Defs.BASE_LEVELS[-1]["stones"]))
 	sim._refresh_radius()
-	for item_id: int in [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_IRON]:
+	for item_id: int in [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_IRON,
+			Defs.ITEM_ENERGY_CORE]:
 		sim.note_resource_seen(item_id)
 		sim.stock[item_id] = 500
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.unlocked[Defs.M_MINER] = true
 	if sim.core_cell != Vector2i.ZERO:
 		push_error("이 파일은 기지가 원점에 있다고 가정한다")

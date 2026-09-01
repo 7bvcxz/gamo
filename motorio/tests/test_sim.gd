@@ -51,6 +51,10 @@ func _fresh() -> Sim:
 ## file already has a lesson about, so it looks for somewhere it can build and
 ## says so if it cannot.
 func _power(sim: Sim) -> void:
+	# The grid costs a core per generator now, and this helper's promise is a
+	# powered world -- it brings its own.
+	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
+	sim.stock[Defs.ITEM_ENERGY_CORE] = int(sim.stock.get(Defs.ITEM_ENERGY_CORE, 0)) + 1
 	var cell := Vector2i(9999, 9999)
 	for radius in range(4, 14):
 		for y in range(-radius, radius + 1):
@@ -70,6 +74,8 @@ func _open(sim: Sim) -> void:
 	# not by having seen a stone. These tests want it standing.
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	# The generator waits for two materials, so a setup that wants one standing
 	# has to hand over both. Copper alone leaves it locked, which is the point.
 	sim.note_resource_seen(Defs.ITEM_ENERGY_CORE)
@@ -202,6 +208,8 @@ func _test_build_rules() -> void:
 	# Copper opens the transport line. Power waits for a core part as well, so
 	# it arrives with the wreck rather than with the first seam.
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	_assert(sim.is_unlocked(Defs.M_MINER), "the miner is open")
 	_assert(sim.is_unlocked(Defs.M_BELT), "and copper opens the belt")
 	_assert(sim.is_unlocked(Defs.M_SPLITTER), "and the splitter with it")
@@ -316,6 +324,7 @@ func _test_generator_burns_stone() -> void:
 	sim.setup(777)
 	_open(sim)
 	var gen_cell := Vector2i(-2, 0)
+	sim.stock[Defs.ITEM_ENERGY_CORE] = 1
 	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "generator built")
 	var gen: Sim.Machine = sim.machine_at(gen_cell)
 	gen.buffer.clear()

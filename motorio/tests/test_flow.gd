@@ -159,6 +159,8 @@ func _run() -> void:
 	_assert(main.build_list().size() == 1,
 		"구리를 보기 전에는 채굴기 한 줄뿐이다: %d" % main.build_list().size())
 	main.sim.note_resource_seen(Defs.ITEM_COPPER)
+	main.sim.power_ever = true
+	main.sim._check_unlocks()
 	_assert(main.build_list().size() > 1,
 		"구리를 본 뒤에 나머지가 나타난다: %d" % main.build_list().size())
 	var browse_from: int = main.menu_index
@@ -435,6 +437,8 @@ func _open(sim) -> void:
 	sim.unlocked[Defs.M_MINER] = true
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500

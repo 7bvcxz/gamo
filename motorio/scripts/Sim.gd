@@ -424,7 +424,7 @@ func to_save() -> Dictionary:
 		"base_placed": base_placed, "shelter_placed": shelter_placed,
 		"food_placed": food_placed,
 		"carried_kit": carried_kit, "kit_searched": kit_searched,
-		"torches": torches, "torch_left": torch_left,
+		"torches": torches, "torch_left": torch_left, "power_ever": power_ever,
 		"learned": learned.keys(), "walked": walked, "torch_hints": torch_hints,
 		"shards": shard_rows, "mined_rocks": mined_rows,
 		"kit_x": kit_cell.x, "kit_y": kit_cell.y,
@@ -536,6 +536,7 @@ func from_save(data: Dictionary) -> void:
 	carried_kit = int(data.get("carried_kit", Defs.KIT_NONE))
 	kit_searched = mini(int(data.get("kit_searched", 1)), 1)
 	torches = int(data.get("torches", 0))
+	power_ever = bool(data.get("power_ever", false))
 	torch_left = float(data.get("torch_left", 0.0))
 	learned.clear()
 	torch_hints = int(data.get("torch_hints", 0))
@@ -626,6 +627,7 @@ func setup(seed_value: int) -> void:
 	cancel_debris()
 	debris_rng.seed = seed_value ^ 0xC2B2AE35
 	base_level = 0
+	power_ever = false
 	carried_frozen = false
 	carried_frozen_thaw = 0.0
 	carried_kit = Defs.KIT_NONE
@@ -1573,6 +1575,9 @@ var held_items: Dictionary[int, bool] = {}
 
 ## Machines whose condition came true and have not been said out loud yet.
 var pending_unlocks: Array[int] = []
+## Whether the grid has ever supplied anything. The belt's unlock token reads
+## this; saved, because "power has flowed here" is a fact about the run.
+var power_ever := false
 
 ## The last recipe the player chose, per machine type. A second manufacturer
 ## starts on what the first one was set to, because a player who just decided
@@ -2244,8 +2249,11 @@ func note_resource_seen(item_type: int) -> Array[int]:
 ## could be matched on arrival; two cannot, because the answer has to be the
 ## same whichever of them lands last.
 func unlock_ready(type: int) -> bool:
-	for item_type: int in Defs.MACHINE_UNLOCK_ITEMS[type]:
-		if not held_items.has(item_type):
+	for entry in Defs.MACHINE_UNLOCK_ITEMS[type]:
+		if entry is String:
+			if String(entry) == Defs.UNLOCK_POWER and not power_ever:
+				return false
+		elif not held_items.has(int(entry)):
 			return false
 	return true
 
@@ -2591,6 +2599,12 @@ func _recount_power() -> void:
 		if machine.type == Defs.M_GENERATOR and int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)) > 0:
 			capacity += Defs.GENERATOR_OUTPUT
 	power_capacity = capacity
+	# The first watt is an unlock condition ("power" token), asked here because
+	# this is the one place that knows the grid exists. Latched: a generator
+	# running dry later does not re-lock the belt.
+	if capacity > 0.0 and not power_ever:
+		power_ever = true
+		_check_unlocks()
 
 	var draw: float = 0.0
 	for cell: Vector2i in machines:

@@ -34,6 +34,8 @@ func _test_drift_query() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var cell := Vector2i(14, 14)
 	sim.ore.erase(cell)
@@ -66,6 +68,8 @@ func _test_she_rides() -> void:
 	main.state = main.State.PLAY
 	var sim: Sim = main.sim
 	sim.note_resource_seen(Defs.ITEM_COPPER)
+	sim.power_ever = true
+	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 
 	var cell: Vector2i = sim.core_cell + Vector2i(6, 6)
