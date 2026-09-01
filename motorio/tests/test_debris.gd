@@ -23,6 +23,7 @@ func _run() -> void:
 	_test_the_first_ring_holds()
 	_test_taking_one_apart()
 	_test_before_copper()
+	_test_below_is_reached_too()
 	_test_the_first_piece()
 	_test_the_rate()
 	_test_out_of_reach()
@@ -241,4 +242,37 @@ func _test_out_of_reach() -> void:
 	sim.torch_lit = true
 	_assert(sim.search_debris(far, Defs.DEBRIS_SEARCH_SECONDS), "횃불을 들면 뜯을 수 있다")
 	_assert(not sim.open_debris(far).is_empty(), "재료가 나온다")
+	sim.free()
+
+## The rung under the top one has to pass the same test as the top one.
+##
+## With two rungs the one below was always heat stone and always held, so this
+## was safe by accident. With three, a player who walked out to iron without ever
+## picking up copper got a case of copper out of a wreck -- a material the world
+## had not named for her, which is the exact leak that took "구리가 있는 곳까지"
+## off the mission card.
+func _test_below_is_reached_too() -> void:
+	var sim := Sim.new()
+	sim.setup(4242)
+	# Heat stone and iron held, copper never. Reachable: iron is past the copper
+	# ring and a torch will carry her through it.
+	sim.collected[Defs.ITEM_HEATSTONE] = 3
+	sim.collected[Defs.ITEM_IRON] = 1
+	var cell: Vector2i = sim.debris.keys()[0] if not sim.debris.is_empty() else Vector2i(9999, 9999)
+	if cell == Vector2i(9999, 9999):
+		_assert(false, "시드 4242 에 잔해가 있다")
+		sim.free()
+		return
+	# Reachable and warm, or the wreck refuses to open at all.
+	sim.carried_kit = Defs.KIT_BASE
+	sim.place_base(sim.core_cell)
+	sim.stones_in = maxi(sim.stones_in, int(Defs.BASE_LEVELS[-1]["stones"]))
+	sim._refresh_radius()
+	sim.debris_searched = 1
+	var out: Dictionary = sim.open_debris(cell)
+	_assert(not out.is_empty(), "잔해가 열린다")
+	_assert(not out.has(Defs.ITEM_COPPER),
+		"구리를 한 번도 쥔 적 없으면 잔해가 구리를 주지 않는다 (%s)" % str(out))
+	_assert(out.has(Defs.ITEM_IRON) or out.has(Defs.ITEM_HEATSTONE),
+		"쥐어 본 것들로만 값을 치른다")
 	sim.free()

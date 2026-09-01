@@ -737,6 +737,19 @@ static func recipe_errors(rows: Array = RECIPES, machines: Array = MACHINES) -> 
 		var outputs: Array = row["outputs"]
 		if outputs.is_empty():
 			problems.append("%s 는 아무것도 만들지 않는다" % key)
+		# One material, one row. Two rows naming the same item are not added:
+		# `recipe_inputs_ready` asks each port against the whole buffer, so a
+		# recipe written as two rows of one is satisfied by one item and eats
+		# both -- half the materials for a full result, and nothing else in the
+		# game would notice.
+		for side: String in ["inputs", "outputs"]:
+			var claimed: Dictionary = {}
+			for port: Dictionary in row[side]:
+				var seen: int = int(port.get("item", -1))
+				if claimed.has(seen):
+					problems.append("%s 의 %s 에 %s 가 두 줄로 적혀 있다 — 한 줄로 합친다"
+						% [key, side, item_name(seen)])
+				claimed[seen] = true
 		# Inputs may be empty -- something that draws from the world rather than
 		# from a buffer is a real shape. Outputs may not.
 		for side: String in ["inputs", "outputs"]:

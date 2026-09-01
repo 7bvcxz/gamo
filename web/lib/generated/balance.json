@@ -156,7 +156,7 @@
       "hint": "철광석을 철판으로 가공합니다 · 전력 필요",
       "name": "제조기",
       "short": "제조기",
-      "throughput": "",
+      "throughput": "철광석 1 → 철판 1 · 3초",
       "unlock": [
         "철광석"
       ]
@@ -536,7 +536,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.33",
+  "version": "1.0.35",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

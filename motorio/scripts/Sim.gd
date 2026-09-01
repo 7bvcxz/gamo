@@ -12,7 +12,7 @@ signal fuel_added(count: int, cell: Vector2i, item_type: int)
 signal item_delivered(item_type: int, cell: Vector2i)
 ## A recipe finished a cycle. Emitted per output item, so a recipe that makes
 ## three sends three -- the caller decides whether that is three sounds or one.
-signal recipe_produced(cell: Vector2i, item_type: int)
+signal recipe_produced(cell: Vector2i, item_type: int, amount: int)
 signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
 signal build_rejected(reason: String, cell: Vector2i)
@@ -1121,7 +1121,15 @@ func open_debris(cell: Vector2i) -> Dictionary:
 	while reached > 0 and int(collected.get(Defs.ORE_TIERS[reached], 0)) <= 0:
 		reached -= 1
 	var top: int = Defs.ORE_TIERS[reached]
-	var below: int = Defs.ORE_TIERS[maxi(reached - 1, 0)]
+	# The rung under it, and it has to pass the same test. With two rungs the one
+	# below was always heat stone and always held, so this was safe by accident;
+	# with three, a player who walked out to iron without ever picking up copper
+	# gets a case of a material the world has not named for her -- the exact leak
+	# the paragraph above is about.
+	var under: int = maxi(reached - 1, 0)
+	while under > 0 and int(collected.get(Defs.ORE_TIERS[under], 0)) <= 0:
+		under -= 1
+	var below: int = Defs.ORE_TIERS[under]
 	var out: Dictionary = {}
 	out[top] = debris_rng.randi_range(Defs.DEBRIS_HIGH.x, Defs.DEBRIS_HIGH.y)
 	out[below] = int(out.get(below, 0)) \
@@ -2472,7 +2480,14 @@ func _recount_power() -> void:
 			# see, which is the shape of a number that moved with nothing on
 			# screen to explain it.
 			var recipe: Dictionary = Defs.recipe_for_machine(machine.type)
-			if not recipe.is_empty() and recipe_inputs_ready(machine, recipe):
+			# Work means materials in *and* somewhere to put the result. A machine
+			# holding output it cannot place does nothing at all -- `tick_recipe`
+			# returns before the clock -- and one that kept drawing would slow
+			# every miner on the grid for a stall the player cannot see from the
+			# power number.
+			if recipe.is_empty() or not machine.outbox.is_empty():
+				continue
+			if recipe_inputs_ready(machine, recipe):
 				draw += Defs.machine_power_draw(machine.type)
 	power_draw = draw
 
@@ -3166,7 +3181,11 @@ func tick_recipe(machine: Machine, recipe: Dictionary, delta: float) -> void:
 		machine.operated = false
 		machine.stalled = false
 		return
-	machine.operated = true
+	# `operated` is what the drawing layer reads to decide between a progress arc
+	# and an idle blink, so it has to mean "actually advancing". At zero power the
+	# tick still runs with a delta of zero, and a machine that says it is working
+	# while the grid is dead is the one state a player cannot diagnose.
+	machine.operated = delta > 0.0
 	machine.stalled = false
 	machine.progress += delta
 	if machine.progress < float(recipe["seconds"]):
@@ -3185,7 +3204,7 @@ func tick_recipe(machine: Machine, recipe: Dictionary, delta: float) -> void:
 	for port: Dictionary in recipe["outputs"]:
 		var made: int = int(port["item"])
 		machine.outbox[made] = int(machine.outbox.get(made, 0)) + int(port["amount"])
-		recipe_produced.emit(machine.cell, made)
+		recipe_produced.emit(machine.cell, made, int(port["amount"]))
 	machine.flash = 0.5
 	_drain_outbox(machine)
 	machine.stalled = not machine.outbox.is_empty()

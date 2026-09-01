@@ -756,7 +756,12 @@ func resource_rows() -> Array[Array]:
 		rows.append([Defs.ITEM_SHORT[item_type], "%d" % held,
 			_rate_text(float(sim.gain_rate.get(item_type, 0.0))), Defs.ITEM_COLORS[item_type],
 			item_type])
-	if sim.power_capacity > 0.0 or sim.machine_count(Defs.M_GENERATOR) > 0:
+	# Draw without capacity is a real state now: a manufacturer opens on the first
+	# iron and the generator needs copper and an energy core, so a player can
+	# stand in front of a machine asking for power on a grid that has none. The
+	# row is how they find that out.
+	if sim.power_capacity > 0.0 or sim.power_draw > 0.0 \
+			or sim.machine_count(Defs.M_GENERATOR) > 0:
 		# Power is a rate on both sides, so it reads as used-of-available rather
 		# than as a stock with an income.
 		rows.append(["전기", "%.1f/%.1f" % [sim.power_draw, sim.power_capacity], "",

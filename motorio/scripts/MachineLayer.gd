@@ -1095,7 +1095,11 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		# and outlined. A cat is nearly sixty pixels tall standing on the centre
 		# these are measured from, so an arrow drawn underneath is invisible in
 		# exactly the case where the machine is running.
-		if machine.type == Defs.M_MINER:
+		# Anything that puts something on the cell it faces. Written as the
+		# question rather than as a list of machine numbers: the placement ghost
+		# draws this arrow and then it vanished the moment the machine was built,
+		# so a manufacturer turned north and one turned east were the same picture.
+		if machine.type == Defs.M_MINER or Defs.machine_uses_recipes(machine.type):
 			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
 		if machine.stalled:
 			_draw_stall(on, machine, centre)

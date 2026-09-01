@@ -393,6 +393,7 @@ func _start_run() -> void:
 	message = ""
 	message_life = 0.0
 	messages.clear()
+	_said_produced.clear()
 	gacha_open = false
 	gacha_index = 0
 	gacha_spin = -1.0
@@ -1203,7 +1204,17 @@ const SAVE_SLOTS := 31
 ## load is what makes that safe -- an unrecognised file starts a new run rather
 ## than half-restoring one.
 const SAVE_PATH := "user://motorio_save.cfg"
-const SAVE_SCHEMA := 8
+## Nine as of 1.0.34, because iron changed the world rather than the file.
+##
+## `ore` is not saved -- `load_game` calls `sim.setup(seed)` and regenerates it,
+## then puts the player's machines back on top. Adding a third ore therefore
+## rewrites the ground under a run in progress: a belt laid at 21 cells, a
+## frozen cat, a piece of wreck can all end up standing on a seam that did not
+## exist when they were placed, which is a state the generator itself would
+## never produce. The schema check is the mechanism this repository already has
+## for exactly that, and it is what the number moved for when iron was *removed*
+## at id 5 a version ago.
+const SAVE_SCHEMA := 9
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1594,9 +1605,9 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 ## the save file for one sentence costs a schema.
 var _said_produced: Dictionary = {}
 
-func _on_recipe_produced(cell: Vector2i, item_type: int) -> void:
+func _on_recipe_produced(cell: Vector2i, item_type: int, amount: int) -> void:
 	var at: Vector2 = sim.cell_centre(cell)
-	fx.popup(at + Vector2(0, -20), "+1 %s" % Defs.ITEM_NAMES[item_type],
+	fx.popup(at + Vector2(0, -20), "+%d %s" % [amount, Defs.ITEM_NAMES[item_type]],
 		Defs.ITEM_COLORS[item_type], true)
 	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
 	audio.call("play", "alloy")

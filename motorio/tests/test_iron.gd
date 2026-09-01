@@ -21,6 +21,7 @@ func _run() -> void:
 	_test_unlocks_on_first_iron()
 	await _test_power()
 	await _test_the_whole_chain()
+	await _test_blocked_costs_nothing()
 	await _test_survives_a_save()
 	if failures == 0:
 		print("PASS test_iron")
@@ -271,6 +272,62 @@ func _test_the_whole_chain() -> void:
 			or not machine.outbox.is_empty()
 			or int(sim.stock.get(Defs.ITEM_IRON_PLATE, 0)) > 0,
 		"벨트가 실어 온 철이 기계로 들어간다")
+
+	main.clear_save()
+	main.free()
+
+# --- A stalled machine is not a working one -----------------------------------
+
+## Two things a blocked manufacturer must not do: draw power, and look busy.
+##
+## Both were wrong when this shipped. The power branch asked whether the inputs
+## were ready and not whether there was anywhere to put the result, so a machine
+## that had done nothing for an hour was slowing every miner on the grid; and
+## `tick_recipe` set `operated` before it looked at the delta, so at zero power
+## the drawing layer showed a running machine on a dead grid. Neither is visible
+## from the power number, which is what makes them worth a test rather than a
+## look.
+func _test_blocked_costs_nothing() -> void:
+	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
+	root.add_child(main)
+	await process_frame
+	await process_frame
+	main.clear_save()
+	main._start_run()
+	var sim = main.sim
+	_open(sim)
+
+	var plant: Vector2i = _clear_cell(sim, Vector2i(7, 0))
+	var ahead: Vector2i = _clear_cell(sim, plant + Vector2i.RIGHT)
+	_assert(sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT), "제조기를 세운다")
+	var machine: Sim.Machine = sim.machine_at(plant)
+	var plantside: Vector2i = _clear_cell(sim, Vector2i(-7, 0))
+	sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT)
+	sim.machine_at(plantside).buffer[Defs.GENERATOR_FUEL] = 8
+
+	machine.buffer[Defs.ITEM_IRON] = 2
+	sim.tick(0.5)
+	var working: float = sim.power_draw
+	_assert(working > 0.0, "일감이 있는 제조기는 전력을 쓴다 (%.1f)" % working)
+
+	# Shut the exit. A seam in front takes nothing and holds no belt.
+	sim.ore[ahead] = Defs.ITEM_HEATSTONE
+	for step in 60:
+		sim.tick(0.1)
+	_assert(machine.stalled, "출력이 막히면 막혔다고 말한다")
+	_assert(not machine.outbox.is_empty(), "그리고 만든 것을 들고 있다")
+	_assert(is_zero_approx(sim.power_draw),
+		"막힌 제조기는 전력을 쓰지 않는다 (%.1f)" % sim.power_draw)
+
+	# And with the grid dead, it is not "running" either.
+	sim.ore.erase(ahead)
+	sim.tick(0.2)
+	sim.machine_at(plantside).buffer.clear()
+	machine.buffer[Defs.ITEM_IRON] = 2
+	sim.tick(0.2)
+	_assert(is_zero_approx(sim.power_capacity), "발전기 연료가 떨어졌다")
+	_assert(not machine.operated,
+		"전력이 없으면 돌고 있다고 말하지 않는다 — 화면이 그것을 읽는다")
 
 	main.clear_save()
 	main.free()
