@@ -292,7 +292,7 @@ const ITEMS: Array[Dictionary] = [
 		"color": Color8(252, 104, 46),
 		"atlas": "copper_6.png",
 		"counter": 2, "ore_tier": 1, "retired": false,
-		"desc": "벨트와 분배기와 발전기가 만들어지는 금속. 기지 5단계의 온기가 닿는 고리에 있다.",
+		"desc": "벨트와 분배기와 발전기가 만들어지는 금속. 기지 4단계의 온기가 닿는 고리에 있다.",
 	},
 	{
 		# Ember was a muddy brown against the cold ground (1.66:1). Heat stone
@@ -1476,7 +1476,7 @@ const MACHINES: Array[Dictionary] = [
 		"id": M_MINER, "key": "miner", "name": "채굴기", "short": "채굴기",
 		"group": GROUP_EXTRACTION, "production": PROD_MINER,
 		"desc": "채굴을 더 빠르게 할 수 있는 장치",
-		"cost": {ITEM_HEATSTONE: 5}, "unlock": [], "color": COL_CAT_FUR,
+		"cost": {ITEM_HEATSTONE: 5, ITEM_COPPER: 1}, "unlock": [], "color": COL_CAT_FUR,
 		"power_draw": MINER_POWER_DRAW, "power_output": 0.0,
 		"build_order": 0, "walkable": false, "directional": true,
 		"mine_rate": 1.0,
@@ -1656,8 +1656,7 @@ static func machine_previewed(type: int) -> bool:
 ## indexes the table itself has to be taught the same rule again.
 static func unlock_line(type: int) -> String:
 	if type == M_MINER:
-		return "건물건설총을 들고 %s %d개를 모으면 해금됩니다" \
-			% [ITEM_NAMES[ITEM_HEATSTONE], MINER_UNLOCK_STONES]
+		return "건물건설총과 함께 열립니다"
 	var needs: Array = MACHINE_UNLOCK_ITEMS[type]
 	if not needs.is_empty():
 		# Joined with the separator the rest of the interface already uses, so
@@ -2043,6 +2042,19 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"cost": {},
 		"seconds": 3.0,
 		"note": "광맥을 캐는 손 · 만들면 바로 손에 들린다",
+	},
+	{
+		# The DISCOVER -> AUTOMATE hinge: the first copper is what opens this
+		# row, and the row is what makes the first machine buildable. Free --
+		# the discovery already paid -- and absorbed like the pickaxe.
+		"id": "gun",
+		"level": 1,
+		"when": "copper_held",
+		"until": "has_gun",
+		"name": "건물건설총",
+		"cost": {},
+		"seconds": 3.0,
+		"note": "기계를 세우는 손 · 만들면 바로 손에 들린다",
 	},
 	{
 		"id": "torch",
@@ -2777,19 +2789,16 @@ const CRYSTAL_RING := Vector2(8.0, 26.0)
 ## world entirely rather than making it rarer. The scatter is left standing
 ## because the number is the whole of the decision and a run at it is one edit.
 const CRYSTAL_SHARDS := 0
-## First reachable at display Lv5 (internal 4), whose circle is 15. Copper is
-## the door to power and belts, and it opens on an upgrade rather than on a
-## number quietly passing a threshold.
+## The scatter ring, past the pinned first patch: what rewards walking on.
 const COPPER_RING := Vector2(15.0, 19.0)
-## And one patch guaranteed at the very edge of that circle, because scattering
-## three patches anywhere in 15..19 put an average of 0.3 seams inside 15 -- the
-## upgrade the design calls "the one that opens copper" opened it in about a
-## quarter of runs, and a belt costs three. A guaranteed patch makes the promise
-## true every time; the scatter is still what rewards walking past it.
-## Fourteen, not fifteen: the patch grows outward from its origin, so an origin
-## on the line puts half the cluster outside the circle it is supposed to open.
-## Measured that way, a belt was buildable at that rung in 29 runs out of 60.
-const FIRST_COPPER_BAND := Vector2(13.4, 14.8)
+## And one patch guaranteed inside the circle that is supposed to open it,
+## because a scatter is a probability and the run that rolls the other way is
+## playing a different game from the one the card describes.
+##
+## Inside display Lv4's circle of 13, past Lv3's 11 -- the golden path's
+## DISCOVER beat. Every cell of the patch inside the band, not just its origin:
+## a cluster grown from a cell on the line puts half of itself past it.
+const FIRST_COPPER_BAND := Vector2(11.4, 12.8)
 const FIRST_COPPER_SIZE := 4
 
 ## Iron, three rungs past copper. Display Lv5's circle opens copper at 15

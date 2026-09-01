@@ -29,6 +29,7 @@ func _run() -> void:
 	sim.note_resource_seen(Defs.ITEM_CRYSTAL)
 	sim.stock[Defs.ITEM_CRYSTAL] = 500
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
 
 	var cat = sim.Cat.new()
 	sim.cats.append(cat)

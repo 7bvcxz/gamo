@@ -66,6 +66,7 @@ func _test_tool_belongs_to_the_machine() -> void:
 	# not by having seen a stone. These tests want it standing.
 	sim.unlocked[Defs.M_MINER] = true
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
+	sim.stock[Defs.ITEM_COPPER] = 500
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.ore:
 		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:

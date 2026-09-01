@@ -149,7 +149,8 @@ func _test_metadata_snapshot() -> void:
 
 	# Costs, which are balance. A digit moved here is a different game.
 	_assert(Defs.MACHINE_COSTS[Defs.M_CORE].is_empty(), "코어는 짓는 것이 아니다")
-	_assert(Defs.MACHINE_COSTS[Defs.M_MINER] == {Defs.ITEM_HEATSTONE: 5}, "채굴기 열석 5")
+	_assert(Defs.MACHINE_COSTS[Defs.M_MINER] == {Defs.ITEM_HEATSTONE: 5, Defs.ITEM_COPPER: 1},
+		"채굴기 열석 5 + 구리 1 — 구리 기술이다")
 	_assert(Defs.MACHINE_COSTS[Defs.M_BELT] == {Defs.ITEM_COPPER: 3}, "벨트 구리 3")
 	_assert(Defs.MACHINE_COSTS[Defs.M_GENERATOR] == {Defs.ITEM_COPPER: 10}, "발전기 구리 10")
 	_assert(Defs.MACHINE_COSTS[Defs.M_SPLITTER] == {Defs.ITEM_COPPER: 2}, "분배기 구리 2")

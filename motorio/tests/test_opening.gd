@@ -367,27 +367,17 @@ func _test_the_gun_comes_from_the_fire() -> void:
 	_assert(not sim.gun_dropped, "상자에서는 총이 나오지 않는다")
 	_assert(not sim.has_gun, "펼쳐지는 것만으로는 아직이다")
 
-	# The first upgrade. Through the real door, so what the player does is what
-	# is being tested.
+	# The first upgrade used to be the gun's door. It closed: the first copper
+	# opens the gun's craft row instead (test_golden_copper drives that door),
+	# and no number of upgrades puts a gun on the snow.
 	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
 	main._deposit_at_core()
 	_assert(sim.base_level >= 1, "기지가 한 단계 올랐다")
-	_assert(sim.gun_dropped, "그때 총이 떨어진다")
-	var where := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.drops:
-		if int(sim.drops[cell]) == Sim.DROP_GUN:
-			where = cell
-	_assert(where != Vector2i(9999, 9999), "실제로 바닥에 놓인다")
-	_assert(Vector2(where - sim.core_cell).length() <= 3.0,
-		"기지 옆이다: %s" % str(where))
-	_assert(sim.collect_drop(where) == Sim.DROP_GUN and sim.has_gun,
-		"주우면 손에 들어온다")
-
-	# And a second upgrade does not put a second one on the snow.
+	_assert(not sim.gun_dropped and not sim.has_gun, "총은 나오지 않는다 — 문이 구리로 옮겨갔다")
 	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
 	main._deposit_at_core()
 	var guns := 0
 	for cell: Vector2i in sim.drops:
 		if int(sim.drops[cell]) == Sim.DROP_GUN:
 			guns += 1
-	_assert(guns == 0, "두 번째 업그레이드는 총을 또 주지 않는다")
+	_assert(guns == 0, "몇 단계를 올려도 눈 위에 총은 없다")

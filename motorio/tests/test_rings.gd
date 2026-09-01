@@ -47,7 +47,7 @@ func _run() -> void:
 							rich[key] += 1
 					Defs.ITEM_COPPER:
 						copper[key] += 1
-		if int(copper[str(radii[4])]) >= int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER]):
+		if int(copper[str(radii[3])]) >= int(Defs.MACHINE_COSTS[Defs.M_BELT][Defs.ITEM_COPPER]):
 			belt_buildable += 1
 		sim.free()
 
@@ -66,13 +66,13 @@ func _run() -> void:
 	_assert(float(rich[str(radii[3])]) / float(SEEDS) > 1.0,
 		"3단계에서 풍부 이상 열석이 나온다: %.1f개" % (float(rich[str(radii[3])]) / float(SEEDS)))
 
-	# --- Copper opens on the fourth upgrade, and opens all the way --------------
-	# Not "on average". The card says the fourth circle is where copper is; a
+	# --- Copper opens at display Lv4, and opens all the way ---------------------
+	# Not "on average". The golden path says Lv4's circle is where copper is; a
 	# promise kept in most runs is a different game for the rest of them.
-	_assert(copper[str(radii[3])] == 0,
-		"3단계 안에는 구리가 없다: %d개" % int(copper[str(radii[3])]))
+	_assert(copper[str(radii[2])] == 0,
+		"Lv3(11칸) 안에는 구리가 없다: %d개" % int(copper[str(radii[2])]))
 	_assert(belt_buildable == SEEDS,
-		"4단계에서 벨트를 지을 만큼 구리가 있다: %d/%d회차" % [belt_buildable, SEEDS])
+		"Lv4(13칸)에서 벨트를 지을 만큼 구리가 있다: %d/%d회차" % [belt_buildable, SEEDS])
 
 	if failures == 0:
 		print("RINGS: PASS")

@@ -164,6 +164,7 @@ func _run() -> void:
 	bare_sim.unlocked[Defs.M_MINER] = true
 	bare_sim.stock[Defs.ITEM_CRYSTAL] = 500
 	bare_sim.stock[Defs.ITEM_HEATSTONE] = 500
+	bare_sim.stock[Defs.ITEM_COPPER] = 500
 	_assert(bare_sim.build(Defs.M_MINER, bare, Vector2i(0, -1)), "광맥 위에 채굴기를 세운다")
 	passer.pos = bare_sim.cell_centre(bare)
 	main._primary_action()

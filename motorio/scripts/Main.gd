@@ -1627,16 +1627,8 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "finish")
 	_notify("기지가 커졌습니다", Defs.COL_CORE)
-	# And the first step of the fire is what hands over the build gun.
-	if sim.drop_gun_at_base():
-		var where: Vector2i = sim.core_cell
-		for cell: Vector2i in sim.drops:
-			if int(sim.drops[cell]) == Sim.DROP_GUN:
-				where = cell
-		var spot: Vector2 = sim.cell_centre(where)
-		fx.ring(spot, Defs.COL_CORE, Defs.RING_LARGE)
-		fx.burst(spot, Defs.COL_CORE, 14)
-		note_log("기지에서 무언가 떨어졌다", Defs.COL_CORE)
+	# The gun does not come from here any more. The first copper opens its craft
+	# row -- DISCOVER pays for AUTOMATE -- and `_update_craft` hands it over.
 
 ## A machine finished something. The first time the game makes a material rather
 ## than digging one is a milestone the size of the first belt, and it happens on
@@ -1727,14 +1719,12 @@ func _update_kit_search(delta: float) -> void:
 ## up with five stones, which is the moment both halves of "build a miner" are
 ## true at once.
 func _update_miner_unlock() -> void:
-	if sim.is_unlocked(Defs.M_MINER) or not holding_build_gun():
-		return
-	if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) < Defs.MINER_UNLOCK_STONES:
+	# The gun arrives loaded: crafting it unlocks the miner and points the gun at
+	# it in the same breath (`_update_craft`). This keeps only the safety net --
+	# a save from a state where one happened without the other.
+	if sim.is_unlocked(Defs.M_MINER) or not sim.has_gun:
 		return
 	sim.unlocked[Defs.M_MINER] = true
-	_notify("%s  ·  B 로 건설 목록" % Defs.MACHINE_NAMES[Defs.M_MINER], Defs.COL_CORE)
-	fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
-	audio.call("play", "alloy")
 
 ## Going to bed, one frame at a time.
 ##
