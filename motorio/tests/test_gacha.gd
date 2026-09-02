@@ -40,7 +40,11 @@ func _init() -> void:
 	main.hud._layout()
 	_check((main.hud.gacha_button_rect as Rect2).size.x <= 0.0,
 		"꺼져 있으면 버튼 자리가 없다: %s" % main.hud.gacha_button_rect)
-	_check(not HudScript.key_legend().contains("가챠"), "꺼져 있으면 안내에도 없다")
+	var shown := false
+	for guide: Dictionary in Defs.key_guide_rows():
+		if String(guide["id"]) == "GACHA":
+			shown = true
+	_check(not shown, "꺼져 있으면 안내에도 없다")
 
 	# And everything below is the machinery being kept, so it runs with the
 	# switch on. Restored at the end: a static var left flipped would leak into

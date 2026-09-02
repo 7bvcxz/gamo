@@ -191,6 +191,9 @@ var room_fade: float = 0.0
 ## arrangement this repository has watched go out of step every time.
 const LOG_MAX := 240
 var log_open: bool = false
+## The quest list. A window over the world like the log, not a State: reading
+## what you are working on is not a reason for the factory to stop.
+var quest_open: bool = false
 var play_log: Array[Dictionary] = []
 ## Which entry of Defs.BUILDABLE the cursor is on. Separate from selected_index,
 ## which is what the gun is actually loaded with -- browsing must not change what
@@ -366,6 +369,10 @@ func _start_run() -> void:
 	missions_open.clear()
 	missions_done.clear()
 	base_seen.clear()
+	quests_at.clear()
+	quest_order = 0
+	quest_done_flash = 0.0
+	quest_done_title = ""
 	frozen_seen = false
 	day_number = 1
 	day_start_stones = 0
@@ -719,6 +726,8 @@ func close_windows(keep: String = "") -> void:
 		map_open = false
 	if keep != "log":
 		log_open = false
+	if keep != "quest":
+		quest_open = false
 	if keep != "gacha":
 		close_gacha()
 	if keep != "meter":
@@ -730,6 +739,16 @@ func toggle_log() -> bool:
 	var opening: bool = not log_open
 	close_windows("log" if opening else "")
 	log_open = opening
+	audio.call("play", "select")
+	return true
+
+## Q. What she is working on and what she has already done, in one list.
+func toggle_quests() -> bool:
+	if state != State.PLAY:
+		return false
+	var opening: bool = not quest_open
+	close_windows("quest" if opening else "")
+	quest_open = opening
 	audio.call("play", "select")
 	return true
 
@@ -1092,6 +1111,7 @@ func _process(delta: float) -> void:
 	machine_layer.shelter_glow = shelter_glow()
 	machine_layer.shelter_sleepers = sim.cats.size() + 1
 	machine_layer.base_alert = base_alert()
+	machine_layer.craft_progress = craft_progress()
 	machine_layer.cat_hint = sim.carried_cat != null
 	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
 	machine_layer.pickaxe_hint = pickaxe_hint_cell()
@@ -1310,6 +1330,9 @@ func _process_play(delta: float) -> void:
 	if mission == Mission.DONE and time_left <= 0.0:
 		_carried_home()
 	_advance_mission()
+	# After both mission systems have moved, so a quest that opened and
+	# finished on the same frame is still stamped and still gets its tick.
+	_update_quest_log(delta)
 
 ## Crates are picked up simply by walking over them, and carrying three to the
 ## shelter adopts a cat. No extra verb to learn.
@@ -1524,6 +1547,132 @@ func upgrade_progress() -> Array[int]:
 	out.append(sim.stones_in - floor_stones)
 	out.append(int(next_level["stones"]) - floor_stones)
 	return out
+
+## --- The quest list ---------------------------------------------------------
+## One read model over the three mission systems, and the only thing any UI asks.
+##
+## The Q window, the line under the resource ledger and the completion tick all
+## read `quests()`. They used to have nowhere to read from: the opening's state
+## was an enum nobody could enumerate, the tracked rungs were a latch pair, and
+## the "0/3" the player saw was recomputed inline in the HUD from `sim` rather
+## than from `fuel_progress()` -- two copies of one number, one of them drawn.
+##
+## Nothing here stores progress. Every field is derived on the call, so a quest
+## cannot disagree with the world that produced it.
+const QUEST_LOCKED := 0
+const QUEST_ACTIVE := 1
+const QUEST_DONE := 2
+
+## When each quest finished, as a counter rather than a clock: the window lists
+## completions in the order they happened, and a wall clock would need a schema
+## and would read wrong across a reload anyway. Saved with a default, so an older
+## save loads with its finished quests simply unordered.
+var quests_at: Dictionary = {}
+var quest_order := 0
+## The tick that holds the quest line for a breath when one finishes, so the
+## next quest does not simply appear in its place with nothing having happened.
+## Two seconds, then the line goes back to whatever is open. Not saved -- it is
+## a two-second animation, and a save that restores one is a save carrying a
+## frame of UI.
+var quest_done_flash: float = 0.0
+var quest_done_title: String = ""
+
+func quests() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in Defs.QUESTS:
+		var state: int = _quest_state(row)
+		if state == QUEST_LOCKED:
+			continue
+		var id: String = String(row["id"])
+		var span: Array[int] = _quest_progress(id)
+		out.append({
+			"id": id,
+			"title": _quest_title(row, state),
+			"state": state,
+			"current": span[0] if span.size() == 2 else 0,
+			"target": span[1] if span.size() == 2 else 0,
+			"order": int(quests_at.get(id, 0)),
+		})
+	return out
+
+func active_quests() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in quests():
+		if int(row["state"]) == QUEST_ACTIVE:
+			out.append(row)
+	return out
+
+## Finished, most recent first -- a list read top-down should open on the thing
+## that just happened.
+func done_quests() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in quests():
+		if int(row["state"]) == QUEST_DONE:
+			out.append(row)
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a["order"]) > int(b["order"]))
+	return out
+
+## Where this row's state is read from. No third answer: a quest is either the
+## opening's enum or the latch pair, and the table says which.
+func _quest_state(row: Dictionary) -> int:
+	match int(row["src"]):
+		Defs.QUEST_SRC_OPENING:
+			var step: int = int(row["step"])
+			if mission > step:
+				return QUEST_DONE
+			return QUEST_ACTIVE if mission == step else QUEST_LOCKED
+		Defs.QUEST_SRC_TRACKED:
+			var id: String = String(row["id"])
+			if bool(missions_done.get(id, false)):
+				return QUEST_DONE
+			return QUEST_ACTIVE if bool(missions_open.get(id, false)) else QUEST_LOCKED
+	return QUEST_LOCKED
+
+## The sentence, taken from wherever it already lives rather than written again.
+## A finished quest speaks in the past tense, because a checklist of things still
+## phrased as instructions reads as work outstanding.
+func _quest_title(row: Dictionary, state: int) -> String:
+	if state == QUEST_DONE:
+		return String(row.get("done", ""))
+	if int(row["src"]) == Defs.QUEST_SRC_OPENING:
+		return Defs.mission_line(String(row["line"]))
+	return String(Defs.mission_row(String(row["id"])).get("line", String(row["id"])))
+
+## How far along, as have/need, or an empty array when the quest has no count.
+##
+## One arm per quest, like every other condition table in this file. BASE2 reads
+## `upgrade_progress()`, which has been sitting here correct and unread since it
+## was written -- the number on screen was a second, inline copy.
+func _quest_progress(id: String) -> Array[int]:
+	match id:
+		"BASE2": return upgrade_progress()
+	return [] as Array[int]
+
+## Stamps the order a quest finished in. Called from the two places that can
+## finish one, so the window's ordering cannot drift from the state.
+func _note_quest_done(id: String) -> void:
+	if quests_at.has(id):
+		return
+	quest_order += 1
+	quests_at[id] = quest_order
+
+## Run once a frame, after the two systems have moved. Cheap: three rows.
+func _update_quest_log(delta: float = 0.0) -> void:
+	if quest_done_flash > 0.0:
+		quest_done_flash = maxf(0.0, quest_done_flash - delta)
+	for row: Dictionary in Defs.QUESTS:
+		if _quest_state(row) != QUEST_DONE:
+			continue
+		var id: String = String(row["id"])
+		if quests_at.has(id):
+			continue
+		_note_quest_done(id)
+		# The tick reuses the line the quest was already on rather than a popup
+		# in the middle of the screen. The whole point of this corner is that it
+		# is read by glancing, and a banner is a thing that has to be waited out.
+		quest_done_flash = Defs.QUEST_FLASH_SECONDS
+		quest_done_title = _quest_title(row, QUEST_DONE)
 
 ## --- The three tracks -------------------------------------------------------
 ## Which rungs have appeared, and which are behind us. Both are saved: a mission
@@ -2314,10 +2463,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if state == State.SETTINGS:
-		# One cursor over the whole panel. Half of it used to be on the arrow keys
-		# and half on letters, which meant the half a player looks for while
-		# stopped -- save, load, get me out of here -- could not be found by
-		# walking down the list.
+		# Left and right walk the strip; up and down walk whatever the chosen tab
+		# put underneath it. Two axes for two things, which is what the strip
+		# bought: the old panel had one cursor over a single list and the arrow
+		# keys had to mean "move the cursor" and "move the slider" at once.
+		var tabs: Array[int] = hud.settings_tabs()
 		var rows: Array[int] = hud.settings_rows()
 		var cursor: int = clampi(int(hud.settings_row), 0, maxi(0, rows.size() - 1))
 		var kind: int = rows[cursor] if not rows.is_empty() else -1
@@ -2325,15 +2475,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		if key.keycode == KEY_ESCAPE or key.keycode == KEY_X:
 			close_settings()
 		elif key.keycode == KEY_UP or key.keycode == KEY_DOWN:
-			var step: int = -1 if key.keycode == KEY_UP else 1
-			hud.settings_row = posmod(cursor + step, maxi(1, rows.size()))
-			audio.call("play", "select")
-		elif slider >= 0 and (key.keycode == KEY_LEFT or key.keycode == KEY_MINUS):
-			_nudge_slider(slider, -Defs.UI_SCALE_STEP)
-		elif slider >= 0 and (key.keycode == KEY_RIGHT or key.keycode == KEY_EQUAL):
-			_nudge_slider(slider, Defs.UI_SCALE_STEP)
+			if not rows.is_empty():
+				var step: int = -1 if key.keycode == KEY_UP else 1
+				hud.settings_row = posmod(cursor + step, rows.size())
+				audio.call("play", "select")
+		elif slider >= 0 and (key.keycode == KEY_MINUS or key.keycode == KEY_EQUAL):
+			# The zoom pair still nudges the scale it is sitting on. The arrows
+			# belong to the strip now, so this is the way to move a slider
+			# without leaving the tab it is on.
+			_nudge_slider(slider, Defs.UI_SCALE_STEP if key.keycode == KEY_EQUAL
+				else -Defs.UI_SCALE_STEP)
+		elif key.keycode == KEY_LEFT or key.keycode == KEY_RIGHT:
+			settings_step(-1 if key.keycode == KEY_LEFT else 1)
 		elif key.keycode == KEY_Z or key.keycode == KEY_ENTER or key.keycode == KEY_KP_ENTER:
-			settings_activate(kind)
+			settings_choose(hud.settings_tab_kind() if not tabs.is_empty() else -1)
 		get_viewport().set_input_as_handled()
 		return
 	# The build menu owns the keyboard while it is up. Placed before the state
@@ -2341,6 +2496,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	if log_open and state == State.PLAY:
 		if key.keycode == KEY_ESCAPE or key.keycode == KEY_X or key.keycode == KEY_L:
 			log_open = false
+			audio.call("play", "select")
+		get_viewport().set_input_as_handled()
+		return
+	# The quest list owns the keyboard the same way, and swallows the key either
+	# way: Esc in front of an open window closes the window and does not also
+	# open settings behind it.
+	if quest_open and state == State.PLAY:
+		if key.keycode == KEY_ESCAPE or key.keycode == KEY_X or key.keycode == KEY_Q:
+			quest_open = false
 			audio.call("play", "select")
 		get_viewport().set_input_as_handled()
 		return
@@ -2377,7 +2541,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if room_open and state == State.PLAY:
 		if not _room_key(key):
 			match key.keycode:
-				KEY_ESCAPE: open_settings()
+				KEY_ESCAPE: escape_pressed()
 				KEY_M: toggle_map()
 				KEY_L: toggle_log()
 				_: _zoom_key(key)
@@ -2424,7 +2588,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Settings, not a separate pause screen. Opening settings already stops
 		# the world, so a second stopped screen was one more thing to build,
 		# explain and keep consistent for no behaviour anyone was missing.
-		open_settings()
+		# Through `escape_pressed`, so an open quest list closes first.
+		escape_pressed()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("debug_unlock"):
@@ -2488,6 +2653,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if key.keycode == KEY_L:
 		toggle_log()
+		get_viewport().set_input_as_handled()
+		return
+	if key.keycode == KEY_Q:
+		toggle_quests()
 		get_viewport().set_input_as_handled()
 		return
 	if key.keycode == KEY_B:
@@ -2600,13 +2769,24 @@ func touch_hud(position: Vector2) -> bool:
 			_apply_slider(slider, local.x)
 			return true
 		var row: int = int(hud.call("settings_row_at", local))
+		# The way out first: it is a small rectangle in the card's corner, and a
+		# tap that lands on it must not also be read as a tap on whatever row
+		# happens to sit underneath.
+		if (hud.settings_close_rect as Rect2).has_point(local):
+			close_settings()
+			return true
 		if row >= 0:
-			var rows: Array[int] = hud.settings_rows()
 			hud.settings_row = row
-			settings_activate(rows[row])
+			return true
+		var tab: int = hud.settings_tab_at(local)
+		if tab >= 0:
+			var tabs: Array[int] = hud.settings_tabs()
+			hud.settings_tab = tabs[tab]
+			hud.settings_row = 0
+			settings_choose(tabs[tab])
 		return true
 	if (hud.settings_button_rect as Rect2).has_point(local):
-		open_settings()
+		escape_pressed()
 		return true
 	if state != State.PLAY:
 		return false
@@ -2631,6 +2811,11 @@ func touch_hud(position: Vector2) -> bool:
 	if log_open:
 		if not (hud.log_card_rect as Rect2).has_point(local):
 			log_open = false
+			audio.call("play", "select")
+		return true
+	if quest_open:
+		if not (hud.quest_card_rect as Rect2).has_point(local):
+			quest_open = false
 			audio.call("play", "select")
 		return true
 	if room_open:
@@ -3216,6 +3401,17 @@ func _base_menu_confirm() -> void:
 ## survives a save is a queue that needs a schema.
 var craft_making: String = ""
 var craft_left: float = 0.0
+## And how long it was going to take, so the fire can show a ring rather than
+## announce itself. Without the total there is only a countdown, and a countdown
+## is a number -- which is the thing this HUD pass is getting rid of.
+var craft_total: float = 0.0
+
+## How far through the current make the fire is, 0 when it is idle. The machine
+## layer draws this on the core with the same ring hand mining uses.
+func craft_progress() -> float:
+	if craft_making == "" or craft_total <= 0.0:
+		return 0.0
+	return clampf(1.0 - craft_left / craft_total, 0.0, 1.0)
 
 func craft_selected(index: int = 0) -> void:
 	var craft: Dictionary = Defs.BASE_CRAFTS[clampi(index, 0, Defs.BASE_CRAFTS.size() - 1)]
@@ -3228,9 +3424,12 @@ func craft_selected(index: int = 0) -> void:
 			return
 		craft_making = id
 		craft_left = seconds
+		craft_total = seconds
 		close_base_menu()
-		_notify("%s%s 만드는 중..." % [String(craft["name"]),
-			Defs.object_of(String(craft["name"]))], Defs.COL_TEXT_DIM)
+		# No banner. The fire wears a closing ring for exactly as long as this
+		# takes, in the place the thing is being made -- a line of text in the
+		# corner saying "만드는 중..." was a caption on a picture the game was
+		# already capable of drawing.
 		audio.call("play", "select")
 		return
 	var made: bool = sim.craft_torch() if id == "torch" else sim.craft_food_bin()
@@ -3257,6 +3456,8 @@ func _update_craft(delta: float) -> void:
 		return
 	var id: String = craft_making
 	craft_making = ""
+	craft_left = 0.0
+	craft_total = 0.0
 	match id:
 		"shelter":
 			if sim.craft_shelter_kit():
@@ -3866,6 +4067,13 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		# And what the fire's window has already shown her, so a reload does not
 		# hang a "!" over a recipe she made an hour ago.
 		"base_seen": base_seen,
+		# Which quests are finished is already in missions_open/missions_done and in
+		# the enum; this is only the order they finished in, so the window lists
+		# them the way they happened. Optional on load -- an older save comes back
+		# with its finished quests simply unordered, which is why the schema does
+		# not move for it.
+		"quests_at": quests_at,
+		"quest_order": quest_order,
 		"frozen_seen": frozen_seen,
 		"sim": sim.to_save(),
 	})
@@ -3902,14 +4110,20 @@ func slot_cards() -> Array[Dictionary]:
 	var cards: Array[Dictionary] = []
 	for slot in SAVE_SLOTS:
 		var config := ConfigFile.new()
-		var card := {"slot": slot, "exists": false, "day": 0, "heat": 0,
+		# "stones", not "heat": that is the key `save_game` writes and the key the
+		# slot row reads. It was spelled "heat" here and nowhere else, so every
+		# slot in the picker has been drawing 열석 0개 -- one word, in the one
+		# place no test looked, on the screen whose whole job is telling two saves
+		# apart. The name for this is the one the game settled on in 1.0.5, when
+		# heat stopped being a currency and the stones themselves became the count.
+		var card := {"slot": slot, "exists": false, "day": 0, "stones": 0,
 			"saved_at": 0.0, "machines": []}
 		if config.load(slot_path(slot)) == OK \
 				and int(config.get_value("motorio", "schema", -1)) == SAVE_SCHEMA:
 			var stored: Dictionary = config.get_value("motorio", "card", {})
 			card["exists"] = true
 			card["day"] = int(stored.get("day", 0))
-			card["heat"] = int(stored.get("heat", 0))
+			card["stones"] = int(stored.get("stones", 0))
 			card["saved_at"] = float(stored.get("saved_at", 0.0))
 			card["machines"] = stored.get("machines", [])
 		cards.append(card)
@@ -3958,6 +4172,8 @@ func load_game(slot: int = 0) -> bool:
 	missions_open = data.get("missions_open", {})
 	missions_done = data.get("missions_done", {})
 	base_seen = data.get("base_seen", {})
+	quests_at = data.get("quests_at", {})
+	quest_order = int(data.get("quest_order", 0))
 	frozen_seen = bool(data.get("frozen_seen", false))
 	player.locked = false
 	player.collapse = 0.0
@@ -4038,6 +4254,20 @@ func load_settings() -> void:
 	touch.set_pad_scale(ui_scale)
 	_apply_camera_zoom()
 
+## Esc, and what it means depends on what is on top of what.
+##
+## An overlay in front of the world answers Esc first and answers it alone -- the
+## quest list closes and the settings panel does not open behind it. Pressing Esc
+## again then opens settings, because by then nothing is in front of the world.
+## One rule, checked here rather than at each caller, so the touch button and the
+## key cannot disagree about which layer Esc is talking to.
+func escape_pressed() -> void:
+	if quest_open:
+		quest_open = false
+		audio.call("play", "select")
+		return
+	open_settings()
+
 func open_settings() -> void:
 	if state == State.SETTINGS:
 		return
@@ -4059,6 +4289,39 @@ func settings_activate(kind: int) -> void:
 		HudScript.ROW_LOAD: settings_load()
 		HudScript.ROW_TITLE: settings_to_title()
 		HudScript.ROW_CLOSE: close_settings()
+
+## Along the strip. Wraps, because six icons in a row is a loop a thumb walks
+## rather than a list with ends to bump into.
+func settings_step(direction: int) -> void:
+	var tabs: Array[int] = hud.settings_tabs()
+	if tabs.is_empty():
+		return
+	var at: int = posmod(hud.settings_tab_index() + direction, tabs.size())
+	hud.settings_tab = tabs[at]
+	hud.settings_row = 0
+	audio.call("play", "select")
+
+## What an icon does when it is chosen. Save, load, main menu and quit act at
+## once; the two that have something to show -- the scales and the guide -- have
+## already shown it by being selected, so choosing them again does nothing.
+func settings_choose(tab: int) -> void:
+	match tab:
+		HudScript.TAB_SAVE: settings_save()
+		HudScript.TAB_LOAD: settings_load()
+		HudScript.TAB_TITLE: settings_to_title()
+		HudScript.TAB_QUIT: settings_quit()
+
+## Out of the game entirely.
+##
+## Quitting a browser tab is not something a page may do, which is why the title
+## menu hides its own 종료 row on the web -- here the icon is hidden the same way,
+## by `settings_tabs`, rather than being drawn and refusing.
+func settings_quit() -> void:
+	if OS.has_feature("web"):
+		close_settings()
+		return
+	audio.call("play", "confirm")
+	get_tree().quit()
 
 ## Out of the run and back to the front door.
 ##

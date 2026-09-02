@@ -36,6 +36,7 @@ var settings_button_rect := Rect2()
 var map_button_rect := Rect2()
 var log_button_rect := Rect2()
 var log_card_rect := Rect2()
+var quest_card_rect := Rect2()
 var map_card_rect := Rect2()
 var map_slider_rect := Rect2()
 var dragging_map_zoom: bool = false
@@ -132,8 +133,17 @@ func status_top() -> float:
 	return MARGIN + SETTINGS_BUTTON + 8.0
 
 ## Below the gear, and never wider than the screen it is drawn on.
+## Two bars tall, where it used to be a 96-unit panel with a clock in it.
+const STATUS_ROW := 20.0
+const STATUS_H := STATUS_ROW * 2.0
+## Where a bar starts: past the glyph that says which bar it is.
+const BAR_X := 18.0
+const BAR_H := 9.0
+## The day bar is deliberately shorter than the warmth bar.
+const DAY_BAR_SHARE := 0.62
+
 func status_rect() -> Rect2:
-	return Rect2(MARGIN, status_top(), column_width(), 96)
+	return Rect2(MARGIN, status_top(), column_width(), STATUS_H)
 
 ## And never wider than the screen it is drawn on.
 func column_width() -> float:
@@ -152,6 +162,12 @@ func left_column_bottom() -> float:
 	if not resource_rows().is_empty():
 		var box: Rect2 = resource_rect()
 		bottom = maxf(bottom, box.position.y + box.size.y)
+	# And the quest line, which is the third panel this comment warned about. It
+	# is often zero-high -- nothing active draws nothing at all -- so it is asked
+	# rather than assumed.
+	var quest: Rect2 = quest_hud_rect()
+	if quest.size.y > 0.0:
+		bottom = maxf(bottom, quest.position.y + quest.size.y)
 	return bottom
 
 ## And where the panel *below* the meter starts.
@@ -209,6 +225,13 @@ func _layout() -> void:
 	var log_h: float = minf(420.0, size.y - MARGIN * 2.0)
 	log_card_rect = Rect2(size.x * 0.5 - log_w * 0.5, size.y * 0.5 - log_h * 0.5,
 		log_w, log_h)
+	# The quest list, narrower than the record and only as tall as it needs to be:
+	# it is a checklist of three or four short lines, and a fixed card meant most
+	# of it was empty. Measured from the same numbers the drawing uses.
+	var quest_w: float = minf(430.0, size.x - MARGIN * 2.0)
+	var quest_h: float = minf(quest_card_height(quest_w), size.y - MARGIN * 2.0)
+	quest_card_rect = Rect2(size.x * 0.5 - quest_w * 0.5, size.y * 0.5 - quest_h * 0.5,
+		quest_w, quest_h)
 	_layout_map()
 	# Bottom-left, bottom-aligned with the hotbar row so the two read as one
 	# strip, and above whatever the touch pad claims -- on a phone that corner is
@@ -261,6 +284,10 @@ const SLOT_CARD_H := 372.0
 const SETTINGS_SLIDER_H := 92.0
 const SETTINGS_ACTION_H := 50.0
 const SETTINGS_ROW_TOP := 88.0
+## The strip: where it starts, how tall it is, and how far it is inset.
+const SETTINGS_TAB_TOP := 62.0
+const SETTINGS_TAB_H := 62.0
+const SETTINGS_TAB_PAD := 22.0
 
 ## One ordered list, top to bottom, rather than two sliders in the middle and a
 ## row of buttons at the bottom.
@@ -280,13 +307,76 @@ const ROW_UI := 4
 const ROW_CLOSE := 5
 const ROW_LABELS := ["저장하기", "불러오기", "메인화면", "게임 화면 크기", "화면 UI 크기", "닫기"]
 
-## Which rows this panel has. Opened from the title there is no run to save, load
-## into or leave, so the panel is the two scales and nothing else -- a row that
-## is present and refuses teaches the player to skip past the row.
+## --- The strip -----------------------------------------------------------------
+## Six things this panel can do, left to right, as pictures.
+##
+## It used to be one vertical list where every capability was a row of its own --
+## save, load, main menu, and the two scales, each taking a full-width band, so
+## the panel was six stacked rectangles and reading it meant reading five labels
+## top to bottom. A strip of icons is read in one glance and leaves the body of
+## the card free for whatever the chosen one needs, which is what let the guide
+## exist at all: there was no room for a keyboard in a list of rows.
+##
+## The row constants below did not move. `settings_slider_of` still answers 0 for
+## the UI scale and 1 for the game scale, because that numbering is what the
+## nudge, the range and the drag all speak -- reordering the display must not
+## renumber the values, and this rework reordered the display completely.
+const TAB_SAVE := 0
+const TAB_LOAD := 1
+const TAB_GAME := 2
+const TAB_GUIDE := 3
+const TAB_TITLE := 4
+const TAB_QUIT := 5
+const TAB_LABELS := ["저장", "로드", "설정", "가이드", "메인", "종료"]
+
+## Which of them this panel is offering. Opened from the title there is no run to
+## save, load or leave, so those three are absent rather than present-and-refusing
+## -- a control that is there and says no teaches the player to skip past it.
+func settings_tabs() -> Array[int]:
+	var out: Array[int] = []
+	if main.state_before_settings != main.State.TITLE:
+		out.append_array([TAB_SAVE, TAB_LOAD])
+	out.append_array([TAB_GAME, TAB_GUIDE])
+	if main.state_before_settings != main.State.TITLE:
+		out.append(TAB_TITLE)
+	# On the web there is nowhere to quit to, and an icon that does nothing is
+	# worse than no icon -- the title menu already hides its own 종료 this way.
+	if not OS.has_feature("web"):
+		out.append(TAB_QUIT)
+	return out
+
+## Which icon the strip is on, as the TAB_ id rather than as a position in the
+## list.
+##
+## It was a position first, and that is a bug: the strip is six icons in a run
+## and three from the title, so "the third one" is 설정 in one and 종료 in the
+## other. Opening the panel from the title after opening it from a run selected
+## whatever happened to be third. An id cannot mean two things.
+var settings_tab: int = TAB_GAME
+
+func settings_tab_kind() -> int:
+	var tabs: Array[int] = settings_tabs()
+	if tabs.has(settings_tab):
+		return settings_tab
+	return tabs[0] if not tabs.is_empty() else TAB_GAME
+
+## Where that icon sits right now, for the strip's own cursor and for stepping.
+func settings_tab_index() -> int:
+	var found: int = settings_tabs().find(settings_tab_kind())
+	return maxi(0, found)
+
+## The rows in the body of the card: only the scales have any, and only under
+## their own tab. Everything else acts the moment its icon is chosen.
 func settings_rows() -> Array[int]:
-	if main.state_before_settings == main.State.TITLE:
-		return [ROW_GAME, ROW_UI, ROW_CLOSE]
-	return [ROW_SAVE, ROW_LOAD, ROW_TITLE, ROW_GAME, ROW_UI, ROW_CLOSE]
+	# Built rather than returned from a ternary: an untyped array literal in one
+	# arm makes the whole expression an untyped Array, and assigning that to an
+	# `Array[int]` throws at runtime -- which aborts the layout mid-function and
+	# leaves every rect it had not written yet at zero. Nothing errors on screen;
+	# the sliders simply are not there.
+	var out: Array[int] = []
+	if settings_tab_kind() == TAB_GAME:
+		out.append_array([ROW_GAME, ROW_UI])
+	return out
 
 ## The slider a row drives, or -1 for the actions. The two scales keep the
 ## indices they have always had -- 0 is the UI, 1 is the game -- because that is
@@ -298,30 +388,74 @@ static func settings_slider_of(kind: int) -> int:
 		ROW_GAME: return 1
 	return -1
 
+## Tall enough for the strip plus whatever the chosen tab puts under it. The
+## guide is the tallest thing in here, and a card that resized as the player
+## moved along the strip would make the icons themselves jump under the finger --
+## so every tab gets the height of the largest.
+func settings_body_height() -> float:
+	match settings_tab_kind():
+		TAB_GAME:
+			return SETTINGS_SLIDER_H * 2.0
+		TAB_GUIDE:
+			return guide_height()
+	return SETTINGS_ACTION_H
+
 func settings_card_height() -> float:
-	# The reserve at the foot is now only for the focus ring the last row draws
-	# around itself. It used to also hold a line naming the keys, and the card
-	# kept that line's height for a while after the line went.
-	var height: float = SETTINGS_ROW_TOP + 24.0
-	for kind: int in settings_rows():
-		height += SETTINGS_SLIDER_H if settings_slider_of(kind) >= 0 else SETTINGS_ACTION_H
-	return height
+	return SETTINGS_TAB_TOP + SETTINGS_TAB_H + 18.0 + settings_body_height() + 20.0
+
+## The settings card, anchored by its top rather than centred.
+##
+## Every other card in the game is centred, and this one cannot be: its height
+## follows whichever icon is chosen -- the guide is a keyboard, the scales are two
+## sliders, save is nothing at all -- and a centred card of changing height slides
+## the icon strip up and down under the finger that is walking it. Pinned at the
+## top, the strip never moves and the body grows downward.
+##
+## The alternative was one height for every tab, taken from the tallest, which is
+## what this did first: it kept the strip still by leaving two hundred units of
+## empty card under 저장.
+func settings_card_rect() -> Rect2:
+	var height: float = minf(settings_card_height(), size.y - MARGIN * 2.0)
+	var width: float = minf(420.0, size.x - MARGIN * 2.0)
+	# Where a centred card of the tallest tab would start, so the panel sits in
+	# the same place it always did rather than at the very top of the screen.
+	var tallest: float = minf(SETTINGS_TAB_TOP + SETTINGS_TAB_H + 18.0 + guide_height() + 20.0,
+		size.y - MARGIN * 2.0)
+	var top: float = clampf(size.y * 0.5 - tallest * 0.5, MARGIN, size.y - height - MARGIN)
+	return Rect2(size.x * 0.5 - width * 0.5, top, width, height)
 
 ## Where each row sits. Parallel to `settings_rows()`, so the cursor, the paint
 ## and the hit test are all indexing the same list.
 var settings_row_rects: Array[Rect2] = []
+## The icon strip, and the area under it that the chosen tab fills.
+var settings_tab_rects: Array[Rect2] = []
+var settings_body_rect := Rect2()
 
 func _layout_settings() -> void:
-	var card: Rect2 = _card_rect(settings_card_height())
+	var card: Rect2 = settings_card_rect()
+	# The strip. Even widths across the card, so the icons keep their rhythm at
+	# three tabs from the title and at six from a run.
+	var tabs: Array[int] = settings_tabs()
+	settings_tab_rects.resize(tabs.size())
+	var inner: float = card.size.x - SETTINGS_TAB_PAD * 2.0
+	var step: float = inner / float(maxi(1, tabs.size()))
+	for index in tabs.size():
+		settings_tab_rects[index] = Rect2(
+			card.position + Vector2(SETTINGS_TAB_PAD + step * float(index), SETTINGS_TAB_TOP),
+			Vector2(step - 6.0, SETTINGS_TAB_H))
+
+	var body_top: float = SETTINGS_TAB_TOP + SETTINGS_TAB_H + 18.0
+	settings_body_rect = Rect2(card.position + Vector2(28.0, body_top),
+		Vector2(card.size.x - 56.0, maxf(20.0, card.size.y - body_top - 20.0)))
+
 	var rows: Array[int] = settings_rows()
 	settings_row_rects.resize(rows.size())
-	var y: float = SETTINGS_ROW_TOP
+	var y: float = body_top
 	for index in rows.size():
 		var kind: int = rows[index]
 		var slider: int = settings_slider_of(kind)
-		var height: float = SETTINGS_SLIDER_H if slider >= 0 else SETTINGS_ACTION_H
 		settings_row_rects[index] = Rect2(card.position + Vector2(34.0, y),
-			Vector2(card.size.x - 68.0, height - 8.0))
+			Vector2(card.size.x - 68.0, SETTINGS_SLIDER_H - 8.0))
 		if slider >= 0:
 			var track := Rect2(card.position + Vector2(34.0, y + 52.0),
 				Vector2(card.size.x - 68.0, 8.0))
@@ -330,16 +464,20 @@ func _layout_settings() -> void:
 			# off the track still belongs to that row.
 			slider_hit_rects[slider] = Rect2(track.position - Vector2(26.0, 46.0),
 				track.size + Vector2(52.0, 72.0))
-		y += height
-	# The close button is the last row's rectangle rather than a separate one, so
-	# the thing the cursor lands on and the thing a finger taps are the same
-	# rectangle and cannot drift apart.
-	var last: int = rows.size() - 1
-	settings_close_rect = settings_row_rects[last] if last >= 0 else Rect2()
-	# The old three buttons are gone: saving and loading are rows now, and
-	# 처음부터 lives on the title menu, which is where a player who wants to throw
-	# a run away is already heading.
+		y += SETTINGS_SLIDER_H
+	# The way out is the card's own corner now rather than a row at the bottom of
+	# a list -- there is no list any more. It stays a rectangle the touch layer
+	# can hit, because on a pad with no Escape key a panel with no drawn exit is
+	# a panel you are stuck in.
+	settings_close_rect = Rect2(card.end.x - 44.0, card.position.y + 12.0, 32.0, 32.0)
 	_layout_slots()
+
+## Which tab a point is on, or -1.
+func settings_tab_at(point: Vector2) -> int:
+	for index in settings_tab_rects.size():
+		if (settings_tab_rects[index] as Rect2).has_point(point):
+			return index
+	return -1
 
 ## Which row a point is on, or -1.
 func settings_row_at(point: Vector2) -> int:
@@ -535,6 +673,7 @@ func _draw() -> void:
 			else:
 				_draw_status()
 				_draw_resources()
+				_draw_quest_hud()
 				_draw_palette()
 			if slot_picker > 0:
 				_draw_slot_picker()
@@ -548,6 +687,7 @@ func _draw() -> void:
 			_draw_blackout()
 			_draw_status()
 			_draw_resources()
+			_draw_quest_hud()
 			_draw_palette()
 			_draw_meter_card()
 			_draw_gacha_button()
@@ -565,6 +705,7 @@ func _draw() -> void:
 		return
 	_draw_map_card()
 	_draw_log_card()
+	_draw_quest_card()
 	_draw_settings_button()
 	_draw_map_button()
 	_draw_log_button()
@@ -674,58 +815,75 @@ func _draw_snow(strength: float) -> void:
 
 # --- In-run UI ---------------------------------------------------------------
 
+## Her own situation, as two bars and nothing else.
+##
+## This corner used to be a framed panel with a 26pt clock in it, a day-and-phase
+## caption, a half-circle sun arc and a warmth row -- four readouts and a border,
+## for a game whose whole design rule is that the screen should not have to be
+## read. The clock was the clearest case: a player converts "14:22" into "how
+## long until dark", and the bar under it already answers that directly. So the
+## number is gone and the arc became a bar, because two bars stacked read as one
+## glance where a number and an arc read as two.
+##
+## No frame. The bars carry their own contrast -- an opaque dark track under an
+## opaque fill -- so they hold over snow without a plate behind them, which is
+## the thing that made this corner feel like a box.
 func _draw_status() -> void:
 	var panel: Rect2 = status_rect()
-	_frame(panel, Defs.COL_CLOCK_FILL)
-
-	# Time, daylight, warmth, body heat. Everything in this box is about the
-	# player's own situation; what they own moved to the ledger below it, because
-	# a box that grew a row per resource was slowly burying the clock.
-	var seconds: int = int(ceil(main.time_left))
-	var urgent: bool = seconds <= 45
-	var clock: Color = Defs.COL_DANGER if urgent else Color8(226, 236, 248)
-	_text(panel.position + Vector2(14, 40), "%02d:%02d" % [seconds / 60, seconds % 60], 26, clock)
-	# The phase rides on the day line rather than under the arc: a caption there
-	# lands exactly on the body-temperature readout at the panel's right edge.
-	var phase: String = "밤" if main.is_night() else ("해질녘" if main.is_dusk() else "낮")
-	_text(panel.position + Vector2(14, 56), "%d일차 · %s" % [main.day_number, phase], 11,
-		Defs.COL_DANGER if main.is_night() else Defs.COL_CLOCK)
-	_draw_day_arc(panel)
-	# The warm radius used to be a line here. It is a circle drawn on the snow
-	# with its edge visible from anywhere inside it, and a number in the corner
-	# saying how wide it is is a caption under a picture -- the one thing this
-	# game decided in 2026-08-19 not to write down.
+	# A breath of shade rather than a panel: enough to keep the small glyphs off
+	# white snow, not enough to draw an edge anywhere.
+	draw_rect(panel.grow(5.0), Color(0.02, 0.03, 0.06, 0.30))
 	_draw_warmth_row(panel)
+	_draw_day_bar(panel)
 	_draw_info()
 	_draw_objective()
 
-## Daylight as a half circle the sun crosses, left to right. A bar told the
-## player how much time was left as a number they had to convert; an arc tells
-## them where in the day they are at a glance, which is the thing they actually
-## act on. The stretch that is already dusk is marked, so "how long until I have
-## to walk home" is read rather than calculated.
-func _draw_day_arc(panel: Rect2) -> void:
-	var centre: Vector2 = panel.position + Vector2(panel.size.x - 54.0, 68.0)
-	var radius := 30.0
-	draw_arc(centre, radius, PI, TAU, 32, Color8(28, 36, 54), 5.0, true)
-	var dusk_at: float = 1.0 - Defs.DUSK_SECONDS / Defs.DAY_SECONDS
-	draw_arc(centre, radius, PI + PI * dusk_at, TAU, 20,
-		Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.45), 5.0, true)
-
-	var travelled: float = clampf(main.day_fraction(), 0.0, 1.0)
-	var angle: float = PI + PI * travelled
-	if travelled > 0.005:
-		draw_arc(centre, radius, PI, angle, 28, Defs.COL_CLOCK_FILL, 5.0, true)
-	var at: Vector2 = centre + Vector2.from_angle(angle) * radius
+## How far through today she is, and which day it is.
+##
+## Shorter than the warmth bar on purpose. They answer different sizes of
+## question -- one is "am I about to die", the other is "should I start walking
+## home" -- and two bars of exactly equal length read as one control split in
+## half. The tail is where the day number goes, so nothing overlaps at any scale.
+##
+## The stretch that is already dusk is marked in the track, so "how long until I
+## have to be somewhere warm" is read rather than calculated.
+func _draw_day_bar(panel: Rect2) -> void:
 	var night: bool = main.is_night()
+	var origin: Vector2 = panel.position + Vector2(0.0, STATUS_ROW)
+	var icon: Vector2 = origin + Vector2(7.0, 8.0)
 	var marker: Color = Color8(196, 212, 240) if night else Defs.COL_CORE
-	draw_circle(at, 9.0, Color(marker.r, marker.g, marker.b, 0.22))
-	draw_circle(at, 5.0, marker)
+	draw_circle(icon, 5.6, Color(marker.r, marker.g, marker.b, 0.20))
+	draw_circle(icon, 3.6, marker)
 	if night:
-		# Bitten with the panel colour rather than drawn as an arc: a crescent is
-		# what tells the player at a glance that the sun is no longer up.
-		draw_circle(at + Vector2(2.6, -1.8), 3.8, Defs.COL_PANEL)
+		# Bitten rather than drawn as an arc: a crescent is what says at a glance
+		# that the sun is no longer up.
+		draw_circle(icon + Vector2(1.9, -1.3), 2.8, Defs.COL_PANEL)
+	else:
+		for spoke in 8:
+			var dir := Vector2.from_angle(float(spoke) * TAU / 8.0)
+			draw_line(icon + dir * 5.2, icon + dir * 6.8,
+				Color(marker.r, marker.g, marker.b, 0.75), 1.0)
 
+	var day_text: String = "%d일차" % main.day_number
+	var tail: float = _text_width(day_text, 11) + 8.0
+	var track := Rect2(origin + Vector2(BAR_X, 4.0),
+		Vector2(maxf(20.0, (panel.size.x - BAR_X - tail) * DAY_BAR_SHARE), BAR_H))
+	draw_rect(track, Color8(28, 36, 54))
+	var dusk_at: float = 1.0 - Defs.DUSK_SECONDS / Defs.DAY_SECONDS
+	draw_rect(Rect2(track.position + Vector2(track.size.x * dusk_at, 0.0),
+		Vector2(track.size.x * (1.0 - dusk_at), track.size.y)),
+		Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.38))
+	var travelled: float = clampf(main.day_fraction(), 0.0, 1.0)
+	draw_rect(Rect2(track.position, Vector2(track.size.x * travelled, track.size.y)),
+		Color8(196, 212, 240) if night else Defs.COL_CLOCK_FILL)
+	draw_rect(track, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g,
+		Defs.COL_PANEL_EDGE.b, 0.6), false, 1.0)
+	# Left-aligned against the end of the bar. `_text_in` centres by default, and
+	# the day bar deliberately leaves a wide tail -- so centring put the label in
+	# the middle of that tail, which is on top of the bar.
+	_text_in(Rect2(Vector2(track.end.x + 8.0, origin.y - 1.0),
+		Vector2(panel.end.x - track.end.x - 8.0, 16.0)), day_text, 11,
+		Defs.COL_DANGER if night else Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_LEFT)
 # --- Resource ledger ----------------------------------------------------------
 const RESOURCE_ROW := 17.0
 
@@ -797,6 +955,157 @@ func _draw_resources() -> void:
 		_text_in(Rect2(box.position + Vector2(box.size.x - 70.0, y + 9.0), Vector2(58.0, 14)),
 			String(row[2]), 11, tint, HORIZONTAL_ALIGNMENT_RIGHT)
 		y += RESOURCE_ROW
+
+# --- The quest line -----------------------------------------------------------
+## What she is working on, under the ledger, in one line and a count.
+##
+## Not a panel. The corner already carries two bars and a list of materials, and
+## a third framed box under them is the thing this pass exists to stop. When
+## nothing is active it draws nothing at all -- an empty plate labelled 임무 is
+## worse than no plate, and this corner has learned that twice.
+const QUEST_ROW_H := 16.0
+const QUEST_LINE_W := 12
+## How long a finished quest stays on the line before the next one takes it.
+const QUEST_DONE_HOLD := 2.0
+
+func quest_hud_text() -> String:
+	if main.quest_done_flash > 0.0:
+		return String(main.quest_done_title)
+	var rows: Array[Dictionary] = main.active_quests()
+	return "" if rows.is_empty() else String(rows[0]["title"])
+
+## Directly under the ledger. Measured from the ledger rather than from
+## `left_column_bottom()`, which is what everything else below asks -- that
+## function now includes this one, and a panel that measures from the bottom of a
+## stack it is part of measures from itself.
+func quest_hud_rect() -> Rect2:
+	var text: String = quest_hud_text()
+	var under: float = status_rect().end.y
+	if not resource_rows().is_empty():
+		under = maxf(under, resource_rect().end.y)
+	if text == "":
+		return Rect2(MARGIN, under, 0.0, 0.0)
+	var height: float = 8.0 + _text_block_height(text, column_width() - 26.0, QUEST_LINE_W)
+	if main.quest_done_flash <= 0.0 and not main.active_quests().is_empty():
+		var row: Dictionary = main.active_quests()[0]
+		if int(row["target"]) > 0:
+			height += QUEST_ROW_H
+	return Rect2(MARGIN, under + 8.0, column_width(), height)
+
+func _draw_quest_hud() -> void:
+	var text: String = quest_hud_text()
+	if text == "":
+		return
+	var box: Rect2 = quest_hud_rect()
+	var done: bool = main.quest_done_flash > 0.0
+	# It fades rather than vanishing: the tick is the only congratulation this
+	# game gives, and a line that blinks out reads as a mistake.
+	var alpha: float = 1.0 if not done else clampf(main.quest_done_flash / 0.5, 0.0, 1.0)
+	var tint: Color = Defs.COL_BELT_RIM if done else Defs.COL_CORE
+	draw_rect(box.grow(4.0), Color(0.02, 0.03, 0.06, 0.30 * alpha))
+	var mark: Vector2 = box.position + Vector2(8.0, 9.0)
+	if done:
+		# A tick, drawn rather than typed: the font is subset from the game's own
+		# strings and a glyph nobody wrote is a glyph that is not in the file.
+		draw_line(mark + Vector2(-3.5, 0.0), mark + Vector2(-1.0, 2.6),
+			Color(tint.r, tint.g, tint.b, alpha), 1.8)
+		draw_line(mark + Vector2(-1.0, 2.6), mark + Vector2(4.0, -3.0),
+			Color(tint.r, tint.g, tint.b, alpha), 1.8)
+	else:
+		draw_arc(mark, 3.4, 0.0, TAU, 16, Color(tint.r, tint.g, tint.b, 0.85), 1.4)
+	_text_block(box.position + Vector2(20.0, 12.0), text, column_width() - 26.0,
+		QUEST_LINE_W, Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, alpha))
+	if done:
+		return
+	var rows: Array[Dictionary] = main.active_quests()
+	if rows.is_empty() or int(rows[0]["target"]) <= 0:
+		return
+	# The count is its own line under the sentence rather than inside it: the
+	# mission text may not carry a digit -- there is a test that says so, because
+	# a line with a number in it goes stale the moment the number moves.
+	_text(box.position + Vector2(20.0, box.size.y - 3.0),
+		"%d / %d" % [int(rows[0]["current"]), int(rows[0]["target"])], 11, tint)
+
+# --- The quest window ---------------------------------------------------------
+## How tall the list comes out. The card and the drawing ask the same question,
+## so a wrapped line cannot end up drawn past the bottom of its own plate.
+func quest_card_height(width: float) -> float:
+	var text_w: float = width - 44.0
+	var height: float = FRAME_HEADER + 24.0
+	var active: Array[Dictionary] = main.active_quests()
+	var done: Array[Dictionary] = main.done_quests()
+	if active.is_empty() and done.is_empty():
+		return FRAME_HEADER + 60.0
+	if not active.is_empty():
+		height += 16.0
+		for row: Dictionary in active:
+			height += _quest_entry_height(row, false, text_w)
+		height += 8.0
+	if not done.is_empty():
+		height += 24.0
+		for row: Dictionary in done:
+			height += _quest_entry_height(row, true, text_w)
+	return height + 12.0
+
+func _quest_entry_height(row: Dictionary, done: bool, text_w: float) -> float:
+	var height: float = _text_block_height(String(row["title"]), text_w, 13) + 12.0
+	if not done and int(row["target"]) > 0:
+		height += QUEST_ROW_H
+	return height
+
+## Q. Everything open, then everything finished, and nothing else.
+func _draw_quest_card() -> void:
+	if not bool(main.get("quest_open")):
+		return
+	_dim(0.45)
+	var card: Rect2 = quest_card_rect
+	_frame(card, Defs.COL_CORE, "임무   Q 또는 X 닫기")
+	var active: Array[Dictionary] = main.active_quests()
+	var done: Array[Dictionary] = main.done_quests()
+	var y: float = card.position.y + FRAME_HEADER + 12.0
+	var text_w: float = card.size.x - 44.0
+	if active.is_empty() and done.is_empty():
+		_text_in(Rect2(card.position + Vector2(0.0, card.size.y * 0.5),
+			Vector2(card.size.x, 20.0)), "아직 아무 일도 시작되지 않았습니다", 13,
+			Defs.COL_TEXT_DIM)
+		return
+	if not active.is_empty():
+		_text(Vector2(card.position.x + 14.0, y), "진행 중", 11,
+			Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85))
+		y += 8.0
+		for row: Dictionary in active:
+			y = _draw_quest_entry(card, y, row, false, text_w)
+		y += 8.0
+	if done.is_empty():
+		return
+	_text(Vector2(card.position.x + 14.0, y + 8.0), "완료", 11,
+		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.85))
+	y += 16.0
+	for row: Dictionary in done:
+		if y > card.end.y - 24.0:
+			return
+		y = _draw_quest_entry(card, y, row, true, text_w)
+
+## One row: a mark, the sentence, and the count if it has one. Returns the y the
+## next row starts at, so the two lists cannot disagree about spacing.
+func _draw_quest_entry(card: Rect2, y: float, row: Dictionary, done: bool,
+		text_w: float) -> float:
+	var title: String = String(row["title"])
+	var tint: Color = Defs.COL_BELT_RIM if done else Defs.COL_CORE
+	var mark := Vector2(card.position.x + 24.0, y + 12.0)
+	if done:
+		draw_line(mark + Vector2(-4.0, 0.0), mark + Vector2(-1.0, 3.0), tint, 1.8)
+		draw_line(mark + Vector2(-1.0, 3.0), mark + Vector2(4.5, -3.5), tint, 1.8)
+	else:
+		draw_arc(mark, 3.8, 0.0, TAU, 16, tint, 1.5)
+	var body: Color = Defs.COL_TEXT_DIM if done else Defs.COL_TEXT
+	_text_block(Vector2(card.position.x + 36.0, y + 16.0), title, text_w, 13, body)
+	y += _text_block_height(title, text_w, 13) + 6.0
+	if not done and int(row["target"]) > 0:
+		_text(Vector2(card.position.x + 36.0, y + 12.0),
+			"%d / %d" % [int(row["current"]), int(row["target"])], 11, tint)
+		y += QUEST_ROW_H
+	return y + 6.0
 
 ## The next useful action, always on screen. This is the whole onboarding: no
 ## modal tutorial, no text wall, just one line that keeps up with the player.
@@ -942,6 +1251,13 @@ func _draw_objective() -> void:
 	if text == "":
 		_draw_missions()
 		return
+	# Unless the quest line above is already saying it. The quest list projects
+	# the opening's own state, so its first active row and this card were drawing
+	# the same sentence twice, one under the other, in a corner this pass exists
+	# to empty out. The line wins: it is smaller, it is where the count goes, and
+	# it is the thing the player was told to look at.
+	if quest_hud_text() == text:
+		return
 	var box: Rect2 = objective_rect(text)
 	_frame(box, Defs.COL_CORE, "목표")
 	var slot := Rect2(box.position + Vector2(FRAME_PAD, FRAME_HEADER + 7.0),
@@ -960,20 +1276,30 @@ func _draw_goal_icon(rect: Rect2, goal: Dictionary) -> void:
 		"item": Icons.draw_item(self, rect, int(goal["id"]))
 		_: Icons.draw_thing(self, rect, String(goal["id"]))
 
-## Docked into the status panel and always present, so it can never pop in and
-## shift the layout at the exact moment the player is in danger.
+## Body heat, the full width of the column: the one readout in this corner that
+## is ever an emergency, so it is the longest thing in it.
+##
+## The number stayed. It was cut in the first pass -- the bar says everything the
+## player acts on -- and put back after reading it on a screen: below a quarter
+## the bar is a short red stub, and a stub does not distinguish "walk back now"
+## from "you are not going to make it". Two digits in the tail cost nothing.
 func _draw_warmth_row(panel: Rect2) -> void:
 	var warmth: float = main.player.warmth
 	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
-	var origin: Vector2 = panel.position + Vector2(14, 76)
-	# Measured off the panel rather than fixed at 122, so the row still reaches
-	# both ends when the column is a different width -- a bar that stops short of
-	# the panel edge reads as a bar that is nearly full.
-	var span: float = panel.size.x - 28.0
-	_text(origin + Vector2(0, 10), "체온", 11, Defs.COL_TEXT_DIM)
-	_text_in(Rect2(origin + Vector2(span - 36.0, -2), Vector2(36, 16)), "%d%%" % int(round(warmth)), 11,
-		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER, HORIZONTAL_ALIGNMENT_RIGHT)
-	var track := Rect2(origin + Vector2(40, 2), Vector2(span - 82.0, 9))
+	var origin: Vector2 = panel.position
+	var icon: Vector2 = origin + Vector2(7.0, 8.0)
+	var tint: Color = Defs.COL_TEXT_DIM if k > 0.25 else Defs.COL_DANGER
+	# A bulb and a stem. Drawn rather than written, because the font is subset
+	# from the game's own strings and a glyph nobody typed is a glyph that is not
+	# in the file.
+	draw_circle(icon + Vector2(0.0, 3.4), 3.2, tint)
+	draw_line(icon + Vector2(0.0, 2.0), icon + Vector2(0.0, -5.0), tint, 2.2)
+	var tail: float = 30.0
+	var track := Rect2(origin + Vector2(BAR_X, 4.0),
+		Vector2(maxf(20.0, panel.size.x - BAR_X - tail), BAR_H))
+	_text_in(Rect2(Vector2(track.end.x + 6.0, origin.y - 1.0),
+		Vector2(panel.end.x - track.end.x - 6.0, 16.0)), "%d" % int(round(warmth)), 11,
+		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER)
 	draw_rect(track, Color8(28, 36, 54))
 	var col: Color = Defs.COL_CORE.lerp(Defs.COL_DANGER, 1.0 - k)
 	if k < 0.25:
@@ -1092,49 +1418,6 @@ func _draw_palette() -> void:
 			10, Defs.COL_CORE if afford else Defs.COL_DANGER)
 		_text_in(Rect2(rect.position + Vector2(0.0, rect.size.y - 6.0), Vector2(rect.size.x - FRAME_PAD, 12)),
 			"B 목록", 10, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
-
-	if main.touch == null or not main.touch.visible:
-		_draw_key_legend()
-
-## The key legend, under the hotbar rather than across the top: the top right
-## belongs to the mission card, and a legend printed over it read as one long
-## unparseable line.
-##
-## On a panel, and that is not decoration. It used to be dim grey text laid
-## straight onto the world, which over snow is grey on grey -- a playtest
-## screenshot of it is barely legible, and the ground it sits on changes colour
-## all day. The panel is sized to the text because a panel has to hug what it is
-## backing: the line measures 321 units against the 480 the old box reserved, and
-## a plate with 159 units of empty tail reads as a misplaced rectangle.
-##
-## Two keys were missing from it: G, which opens the gacha, and the zoom pair,
-## both added recently. A legend is a list that goes stale the moment someone
-## adds a key and forgets it, so the game's own hint hangs off the same place the
-## keys do -- there is a test that reads this string.
-## What the game answers to, composed rather than written out, so a key that is
-## switched off cannot go on being advertised. A legend that names a dead key is
-## the exact fault test_hints exists to catch -- the objective card told players
-## to press C for eight versions after C stopped mining.
-static func key_legend() -> String:
-	var keys: Array[String] = ["Z 사용", "X 회수", "R 회전", "C 계기", "B 목록"]
-	if Defs.GACHA_ENABLED:
-		keys.append("G 가챠")
-	keys.append_array(["M 지도", "L 기록", "-/= 크기", "Esc 설정"])
-	return "   ".join(keys)
-
-## Anchored to the bottom of the screen rather than measured down from the
-## hotbar. The first version took the hotbar's baseline and used it as the top of
-## the plate -- but `_text_in` treats its y as a baseline and `draw_rect` treats
-## its y as a top edge, so the plate hung fourteen pixels off the bottom of the
-## window and took its own text with it. The legend had been readable before I
-## put it on a plate.
-func _draw_key_legend() -> void:
-	var width: float = minf(_text_width(key_legend(), 11) + 20.0, size.x - MARGIN * 2.0)
-	var floor_y: float = size.y - 4.0 - bottom_reserved()
-	var box := Rect2(size.x - width - MARGIN, floor_y - 18.0, width, 18.0)
-	draw_rect(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.55))
-	_text_in(Rect2(box.position + Vector2(0.0, 13.0), Vector2(box.size.x, 14.0)),
-		key_legend(), 11, Defs.COL_TEXT_DIM)
 
 # --- Build menu ---------------------------------------------------------------
 ## What the gun can be loaded with, with room to say what each thing does.
@@ -1436,8 +1719,13 @@ func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
 	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
 	Icons.draw_thing(self, icon, Icons.THING_CORE)
 	var sim = main.sim
-	var want: int = sim.stones_to_next()
-	var have: int = int(sim.stock.get(Defs.ITEM_HEATSTONE, 0))
+	# Through `fuel_progress()` rather than recomputed here. The number the player
+	# reads and the number the code computes were two separate calculations of the
+	# same thing -- this one drawn, that one asserted by the golden test -- which
+	# is a pair that can only ever drift apart quietly.
+	var span: Array[int] = main.fuel_progress()
+	var have: int = span[0]
+	var want: int = span[1]
 	var ready: bool = sim.can_feed_base()
 	var text_x: float = rect.position.x + 62.0
 	# "연료 투입" described the gesture -- tipping a pack into a fire -- and left
@@ -2186,19 +2474,152 @@ func _draw_settings_button() -> void:
 	draw_arc(centre, radius, 0.0, TAU, 24, tint, 2.2)
 	draw_circle(centre, radius * 0.38, tint)
 
+# --- The guide ------------------------------------------------------------------
+## The controls, drawn as a keyboard rather than listed as sentences.
+##
+## This is where the legend that used to sit in the corner of the play screen
+## went. A permanent list of controls is the opposite of what the rest of this
+## game does -- everything else is taught by a prompt that appears when it is
+## wanted and never comes back -- but the list still has to exist somewhere, and
+## behind Esc is where a player goes when they want it.
+##
+## Every cap here is read from `Defs.KEY_GUIDE`, which names either the InputMap
+## action or the raw keycode behind it. Nothing is spelled twice, so a key that
+## is rebound or switched off cannot go on being advertised here; `test_hints`
+## walks the same table and checks each cap against what is really bound.
+const CAP := 30.0
+const CAP_GAP := 6.0
+const GUIDE_PANE_GAP := 18.0
+
+## Four bands, and the window band wraps to a second line at every width the
+## card is ever given -- there are six keys in it and the card is 420 wide.
+func guide_height() -> float:
+	return 5.0 * (CAP + 18.0) + GUIDE_PANE_GAP + 12.0
+
+## One key cap, with its meaning beside it. Returns the x the next cap starts at.
+func _draw_cap(at: Vector2, label: String, tint: Color) -> float:
+	var wide: float = maxf(CAP, _text_width(label, 13) + 16.0)
+	var box := Rect2(at, Vector2(wide, CAP))
+	draw_rect(box.grow(1.0), Color(0, 0, 0, 0.30))
+	draw_rect(box, Color(0.09, 0.11, 0.16, 0.95))
+	draw_rect(box, Color(tint.r, tint.g, tint.b, 0.55), false, 1.0)
+	_text_in(Rect2(box.position + Vector2(0.0, CAP * 0.5 + 5.0), Vector2(wide, 16.0)),
+		label, 13, Defs.COL_TEXT)
+	return at.x + wide + CAP_GAP
+
+## How wide one entry comes out: its caps, then its meaning.
+func _guide_entry_width(row: Dictionary) -> float:
+	var wide := 0.0
+	for cap: String in row["keys"]:
+		wide += maxf(CAP, _text_width(cap, 13) + 16.0) + CAP_GAP
+	return wide + _text_width(String(row["label"]), 12) + 20.0
+
+func _draw_guide(body: Rect2) -> void:
+	var y: float = body.position.y + 4.0
+	for pane: int in [Defs.PANE_MOVE, Defs.PANE_ACT, Defs.PANE_TOOL, Defs.PANE_WINDOW]:
+		var rows: Array[Dictionary] = Defs.key_guide_pane(pane)
+		if rows.is_empty():
+			continue
+		var x: float = body.position.x + 4.0
+		for row: Dictionary in rows:
+			# Wrapped whole rather than by the cap. Breaking between two caps of
+			# one entry left "-" at the end of a line with its meaning on the
+			# next, which reads as a key that does nothing: the zoom pair is one
+			# control and has to stay one row.
+			if x > body.position.x + 4.0 \
+					and x + _guide_entry_width(row) > body.end.x - 4.0:
+				x = body.position.x + 4.0
+				y += CAP + 14.0
+			for cap: String in row["keys"]:
+				x = _draw_cap(Vector2(x, y), cap, Defs.COL_CORE)
+			_text(Vector2(x + 2.0, y + CAP * 0.5 + 5.0), String(row["label"]), 12,
+				Defs.COL_TEXT_DIM)
+			x += _text_width(String(row["label"]), 12) + 20.0
+		y += CAP + 18.0
+
 func _draw_settings_card() -> void:
 	_dim(0.72)
-	var card: Rect2 = _card(settings_card_height())
+	var card: Rect2 = settings_card_rect()
+	_frame(card, Defs.COL_CORE)
 	var w: float = card.size.x
-	_text_in(Rect2(card.position + Vector2(0, 48), Vector2(w, 30)), "설정", 26, Defs.COL_TEXT)
-	var rows: Array[int] = settings_rows()
-	for index in rows.size():
-		_draw_settings_row(index, rows[index])
+	_text_in(Rect2(card.position + Vector2(0, 40), Vector2(w, 30)), "설정", 22, Defs.COL_TEXT)
+	# The way out, in the corner. Drawn as the mark rather than the word, because
+	# it is the one control on this panel whose meaning nobody has to be told.
+	var x_at: Vector2 = settings_close_rect.position + settings_close_rect.size * 0.5
+	draw_line(x_at + Vector2(-6.0, -6.0), x_at + Vector2(6.0, 6.0), Defs.COL_TEXT_DIM, 1.8)
+	draw_line(x_at + Vector2(6.0, -6.0), x_at + Vector2(-6.0, 6.0), Defs.COL_TEXT_DIM, 1.8)
 
-	# No key legend under the rows. There is a cursor sitting on one of them and
-	# sliders that move when a key is pressed; a player looking at that has been
-	# told what the arrows do by the thing that moved. The same line came off the
-	# fire's window in 1.0.24 for the same reason.
+	var tabs: Array[int] = settings_tabs()
+	for index in tabs.size():
+		_draw_settings_tab(index, tabs[index])
+
+	match settings_tab_kind():
+		TAB_GAME:
+			var rows: Array[int] = settings_rows()
+			for index in rows.size():
+				_draw_settings_row(index, rows[index])
+		TAB_GUIDE:
+			_draw_guide(settings_body_rect)
+		_:
+			# Save, load, main menu and quit act the moment they are chosen --
+			# the slot list opens over this card, the other two leave. Nothing is
+			# drawn in the body for them, and an explanatory paragraph under an
+			# icon that has already done its job is the thing this panel was
+			# rebuilt to stop having.
+			pass
+
+## One icon in the strip. The chosen one is lit and underlined; the rest are
+## quiet. No labels-plus-descriptions: a picture and one word each.
+func _draw_settings_tab(index: int, kind: int) -> void:
+	var rect: Rect2 = settings_tab_rects[index]
+	var on: bool = kind == settings_tab_kind()
+	var tint: Color = Defs.COL_CORE if on else Defs.COL_TEXT_DIM
+	if on:
+		_panel(rect, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.12),
+			Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.70))
+	var centre := Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y + 20.0)
+	_draw_settings_icon(kind, centre, tint)
+	_text_in(Rect2(Vector2(rect.position.x, rect.position.y + rect.size.y - 8.0),
+		Vector2(rect.size.x, 14.0)), TAB_LABELS[kind], 11, tint)
+
+## The six pictures, drawn from primitives. The font is subset from the game's
+## own strings, so a glyph nobody typed is a glyph that is not in the file --
+## which rules out the emoji these would otherwise be.
+func _draw_settings_icon(kind: int, at: Vector2, tint: Color) -> void:
+	match kind:
+		TAB_SAVE:
+			# A disk: a body, a shutter, a label.
+			draw_rect(Rect2(at - Vector2(9, 9), Vector2(18, 18)), tint, false, 1.6)
+			draw_rect(Rect2(at - Vector2(5, 9), Vector2(10, 6)), tint)
+			draw_rect(Rect2(at - Vector2(6, 1), Vector2(12, 9)), tint, false, 1.2)
+		TAB_LOAD:
+			# A folder, open at the top.
+			draw_rect(Rect2(at - Vector2(10, 6), Vector2(20, 13)), tint, false, 1.6)
+			draw_line(at + Vector2(-10, -6), at + Vector2(-3, -10), tint, 1.6)
+			draw_line(at + Vector2(-3, -10), at + Vector2(2, -6), tint, 1.6)
+		TAB_GAME:
+			# The same gear the corner button draws, smaller.
+			for tooth in 8:
+				var dir := Vector2.from_angle(float(tooth) * TAU / 8.0)
+				draw_line(at + dir * 6.0, at + dir * 9.5, tint, 1.8)
+			draw_arc(at, 6.0, 0.0, TAU, 20, tint, 1.8)
+		TAB_GUIDE:
+			# A keyboard: an outline and three rows of keys.
+			draw_rect(Rect2(at - Vector2(11, 7), Vector2(22, 14)), tint, false, 1.5)
+			for row in 2:
+				for col in 4:
+					draw_rect(Rect2(at + Vector2(-8.5 + float(col) * 4.5,
+						-4.0 + float(row) * 4.5), Vector2(2.6, 2.6)), tint)
+			draw_rect(Rect2(at + Vector2(-4.0, 3.4), Vector2(8.0, 2.2)), tint)
+		TAB_TITLE:
+			# A house.
+			draw_line(at + Vector2(-10, 0), at + Vector2(0, -9), tint, 1.8)
+			draw_line(at + Vector2(0, -9), at + Vector2(10, 0), tint, 1.8)
+			draw_rect(Rect2(at + Vector2(-7, 0), Vector2(14, 9)), tint, false, 1.6)
+		TAB_QUIT:
+			# The power mark: a broken ring with a stem through the gap.
+			draw_arc(at, 8.0, -PI * 0.35, PI * 1.35, 24, tint, 1.8)
+			draw_line(at + Vector2(0, -10), at + Vector2(0, -2), tint, 1.8)
 
 ## The slot list, used for both saving and loading. Each row carries its number,
 ## when it was written, how far that run got, and a small drawing of the factory

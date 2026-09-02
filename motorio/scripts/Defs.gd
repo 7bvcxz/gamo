@@ -2222,6 +2222,47 @@ const MISSIONS: Array[Dictionary] = [
 	# mission that names it is the same leak by another route.
 ]
 
+## --- The quest list ------------------------------------------------------------
+## What the Q window shows, as a projection of the state the game already keeps.
+##
+## Mission state lives in three unrelated places and always has: `Main.mission`
+## is a three-value enum that walks the opening, `missions_open`/`missions_done`
+## is an id-keyed latch over `MISSIONS`, and `MISSION_LINES` is a table of
+## sentences nobody tracks. A quest list is exactly the view those three were
+## missing, and the wrong way to build it is a fourth system that mirrors them --
+## two records of the same fact drift, and the one the player is reading is
+## always the stale one.
+##
+## So this table holds no state. It names which quests exist, where each one's
+## state is read from, and where its sentence already lives. Everything else --
+## active, done, how far along -- is computed from the systems above every time
+## it is asked.
+##
+## `src` says which system answers for this row:
+##   OPENING  the Mission enum. `step` is the enum value that finishes it.
+##   TRACKED  missions_open / missions_done, by this id.
+## `line` names the row in MISSION_LINES that already carries the sentence;
+## TRACKED rows carry their own line in MISSIONS and do not need it.
+## How long the tick stays on the quest line after one is finished. Two seconds:
+## long enough to read four words, short enough that the next quest is not kept
+## waiting behind a congratulation.
+const QUEST_FLASH_SECONDS := 2.0
+const QUEST_SRC_OPENING := 0
+const QUEST_SRC_TRACKED := 1
+const QUESTS: Array[Dictionary] = [
+	{"id": "Q-KIT", "src": QUEST_SRC_OPENING, "step": 0, "line": "M1",
+		"done": "눈 위의 상자를 조사했다"},
+	{"id": "Q-SHELTER", "src": QUEST_SRC_OPENING, "step": 1, "line": "M2",
+		"done": "잘 곳을 세웠다"},
+	{"id": "BASE2", "src": QUEST_SRC_TRACKED, "done": "불을 더 크게 키웠다"},
+]
+
+static func quest_row(id: String) -> Dictionary:
+	for row: Dictionary in QUESTS:
+		if String(row["id"]) == id:
+			return row
+	return {}
+
 ## The rungs of one track, in order.
 static func missions_in(track: int) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
@@ -2363,6 +2404,68 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "맨 처음. 그녀는 방금 다른 행성에 떨어졌고 조작키를 하나도 모른다. 목록의 맨 뒤에 있는 이유는 우선순위가 낮아서가 아니라, 시작 순간에는 다른 어떤 것도 해당되지 않기 때문이다.",
 	},
 ]
+
+## --- Every key, once -----------------------------------------------------------
+## What the game answers to on a desktop, as a table rather than as a sentence.
+##
+## There used to be a hand-written string in the HUD -- "Z 사용   X 회수   ..." --
+## painted across the bottom-right corner for the whole run. Two things were
+## wrong with it. It was a permanent list of controls on a screen that is
+## otherwise taught by contextual prompts, and it was a list, which is the kind
+## of thing that goes stale the moment someone binds a key and forgets it: G and
+## the zoom pair were both missing for two versions, and F -- which cycles a
+## belt's grade -- was never in it at all.
+##
+## So the legend is gone from the play screen and the knowledge became this. Each
+## row names either the InputMap action it belongs to or the raw keycode Main
+## reads, and `test_hints` walks the table and checks the drawn label against
+## what is actually bound. A key that stops working can no longer keep being
+## advertised, and a key that starts working shows up in the guide by being here.
+##
+## `pane` is which band of the drawn keyboard the row belongs to.
+const PANE_MOVE := 0
+const PANE_ACT := 1
+const PANE_TOOL := 2
+const PANE_WINDOW := 3
+const KEY_GUIDE: Array[Dictionary] = [
+	{"id": "MOVE", "pane": PANE_MOVE, "keys": ["W", "A", "S", "D"], "label": "이동",
+		"action": "move_up"},
+	{"id": "RUN", "pane": PANE_MOVE, "keys": ["Shift"], "label": "달리기", "action": "sprint"},
+	{"id": "USE", "pane": PANE_ACT, "keys": ["Z"], "label": "사용", "action": "build"},
+	{"id": "TAKE", "pane": PANE_ACT, "keys": ["X"], "label": "회수", "action": "demolish"},
+	{"id": "TURN", "pane": PANE_ACT, "keys": ["R"], "label": "방향", "action": "rotate"},
+	{"id": "METER", "pane": PANE_ACT, "keys": ["C"], "label": "계기", "action": "mine"},
+	{"id": "GRADE", "pane": PANE_ACT, "keys": ["F"], "label": "등급", "action": "recipe"},
+	{"id": "TOOL", "pane": PANE_TOOL, "keys": ["1", "2", "3"], "label": "도구", "code": KEY_1},
+	{"id": "BUILD", "pane": PANE_WINDOW, "keys": ["B"], "label": "목록", "code": KEY_B},
+	{"id": "QUEST", "pane": PANE_WINDOW, "keys": ["Q"], "label": "임무", "code": KEY_Q},
+	{"id": "MAP", "pane": PANE_WINDOW, "keys": ["M"], "label": "지도", "code": KEY_M},
+	{"id": "LOG", "pane": PANE_WINDOW, "keys": ["L"], "label": "기록", "code": KEY_L},
+	{"id": "GACHA", "pane": PANE_WINDOW, "keys": ["G"], "label": "가챠", "code": KEY_G,
+		"when": "gacha"},
+	{"id": "ZOOM", "pane": PANE_WINDOW, "keys": ["-", "="], "label": "크기", "code": KEY_MINUS},
+	{"id": "MENU", "pane": PANE_WINDOW, "keys": ["Esc"], "label": "설정", "code": KEY_ESCAPE},
+]
+
+## The rows that apply right now. One switch today -- the gacha -- and it is read
+## here rather than at each drawing site, so the guide and any test asking "what
+## does this build answer to" get the same answer.
+static func key_guide_rows() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in KEY_GUIDE:
+		match String(row.get("when", "")):
+			"gacha":
+				if not GACHA_ENABLED:
+					continue
+		out.append(row)
+	return out
+
+static func key_guide_pane(pane: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for row: Dictionary in key_guide_rows():
+		if int(row["pane"]) == pane:
+			out.append(row)
+	return out
 
 ## How far she has to walk before 이동 counts as learned, and before 달리기 is
 ## worth mentioning. In tiles.

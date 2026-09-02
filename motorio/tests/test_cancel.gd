@@ -92,7 +92,11 @@ func _test_x_closes() -> void:
 	main.player.position = main.sim.cell_centre(seam + Vector2i(0, 1))
 	main.player.facing = Vector2i.UP
 	_assert(main.toggle_meter(), "계기를 연다")
-	_assert(HudScript.key_legend().contains("C 계기"), "안내가 C 를 말한다")
+	var meter_told := false
+	for guide: Dictionary in Defs.key_guide_rows():
+		if String(guide["id"]) == "METER" and (guide["keys"] as Array).has("C"):
+			meter_told = true
+	_assert(meter_told, "안내가 C 를 말한다")
 
 	# And the two places Escape means something else keep meaning it. X in play
 	# is 회수 -- a key that both demolished a machine and opened a menu would be

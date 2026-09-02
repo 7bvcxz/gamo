@@ -45,6 +45,11 @@ func _run() -> void:
 	_assert(is_equal_approx(main.time_left, frozen), "the clock stops while settings are open")
 
 	# --- The sliders ------------------------------------------------------------
+	# On the 설정 icon, which is where the two scales live now. The panel used to
+	# be one list with everything on it; it is a strip of six icons and a body,
+	# and the sliders are the body of one of them. Selecting it is what a player
+	# does to see them, so it is what this file does before measuring them.
+	_select_tab(main, main.hud.TAB_GAME)
 	_tick(main)
 	_assert(main.hud.slider_track_rects.size() == 2, "the panel has a UI row and a game row")
 	for row in 2:
@@ -235,6 +240,15 @@ func _run() -> void:
 ## The HUD is its own node, so ticking the orchestrator alone leaves its layout
 ## and scale a frame behind. Both have to run for a layout assertion to mean
 ## anything.
+## Puts the strip on one icon and re-lays the panel out, the way a left/right
+## keypress does.
+func _select_tab(main, kind: int) -> void:
+	if not main.hud.settings_tabs().has(kind):
+		return
+	main.hud.settings_tab = kind
+	main.hud.settings_row = 0
+	main.hud._layout()
+
 func _tick(main: Node2D) -> void:
 	main._process(0.0)
 	main.hud._process(0.0)
@@ -338,23 +352,55 @@ func _row_names(main: Node2D) -> Array[String]:
 func _test_rows(main: Node2D) -> void:
 	var hud: Node = main.hud
 
-	# From the title there is no run to save, load into or leave. A row that is
-	# present and refuses teaches the player to skip past the row.
+	# The panel is a strip of icons now, so what used to be one list of rows is a
+	# list of tabs plus the rows of whichever tab is chosen. Both are still pinned
+	# by exact equality, because the order is the thing the player asked for and
+	# a reorder should fail here rather than on someone's screen.
+	#
+	# From the title there is no run to save, load into or leave. An icon that is
+	# present and refuses teaches the player to skip past it.
 	main.state_before_settings = main.State.TITLE
-	var from_title: Array[int] = hud.settings_rows()
-	_assert(from_title == [hud.ROW_GAME, hud.ROW_UI, hud.ROW_CLOSE],
-		"메인화면의 설정에는 두 크기와 닫기만 있다: %s" % str(from_title))
+	var from_title: Array[int] = hud.settings_tabs()
+	var want_title: Array[int] = [hud.TAB_GAME, hud.TAB_GUIDE]
+	if not OS.has_feature("web"):
+		want_title.append(hud.TAB_QUIT)
+	_assert(from_title == want_title,
+		"메인화면의 설정에는 설정·가이드·종료만 있다: %s" % str(from_title))
 
-	# In a run, the order the player asked for, top to bottom.
+	# In a run, the order the player asked for, left to right.
 	main.state_before_settings = main.State.PLAY
-	var in_run: Array[int] = hud.settings_rows()
-	_assert(in_run == [hud.ROW_SAVE, hud.ROW_LOAD, hud.ROW_TITLE, hud.ROW_GAME,
-			hud.ROW_UI, hud.ROW_CLOSE],
-		"게임 중에는 저장·불러오기·메인화면·게임 크기·UI 크기·닫기 순이다: %s" % str(in_run))
-	# The way out is on the cursor. It was the one button on the panel the arrow
-	# keys could not reach, which on a pad with no Escape meant the way out was a
-	# tap and only a tap.
-	_assert(in_run[in_run.size() - 1] == hud.ROW_CLOSE, "닫기가 마지막 줄이다")
+	var in_run: Array[int] = hud.settings_tabs()
+	var want_run: Array[int] = [hud.TAB_SAVE, hud.TAB_LOAD, hud.TAB_GAME,
+		hud.TAB_GUIDE, hud.TAB_TITLE]
+	if not OS.has_feature("web"):
+		want_run.append(hud.TAB_QUIT)
+	_assert(in_run == want_run,
+		"게임 중에는 저장·로드·설정·가이드·메인·종료 순이다: %s" % str(in_run))
+
+	# The two scales are the body of one icon, and only of that one. Everything
+	# else acts the moment it is chosen and has nothing to put underneath.
+	hud.settings_tab = hud.TAB_GAME
+	var scales: Array[int] = hud.settings_rows()
+	_assert(scales == [hud.ROW_GAME, hud.ROW_UI],
+		"설정 탭 아래에 두 크기가 있다: %s" % str(scales))
+	for kind: int in [hud.TAB_SAVE, hud.TAB_LOAD, hud.TAB_GUIDE, hud.TAB_TITLE, hud.TAB_QUIT]:
+		hud.settings_tab = kind
+		_assert(hud.settings_rows().is_empty(),
+			"%d 번 아이콘 아래에는 줄이 없다" % kind)
+	hud.settings_tab = hud.TAB_GAME
+
+	# The strip is walked by identity, not by position: it is six icons in a run
+	# and three from the title, so "the third one" means different things in the
+	# two lists. Selecting one and reopening from the title must not land on
+	# whatever happens to be third there.
+	hud.settings_tab = hud.TAB_TITLE
+	main.state_before_settings = main.State.TITLE
+	_assert(hud.settings_tab_kind() != hud.TAB_TITLE,
+		"메인화면에 없는 아이콘은 선택된 채로 남지 않는다")
+	_assert(hud.settings_tabs().has(hud.settings_tab_kind()),
+		"선택된 아이콘은 언제나 실제로 있는 것이다")
+	main.state_before_settings = main.State.PLAY
+	hud.settings_tab = hud.TAB_GAME
 
 	# Reordering the display must not renumber the values: the two scales keep
 	# the slider indices everything else speaks.
@@ -377,7 +423,9 @@ func _test_rows(main: Node2D) -> void:
 			"%d번째 줄이 그릴 만한 크기다" % index)
 		_assert(int(hud.call("settings_row_at", rect.get_center())) == index,
 			"%d번째 줄을 누르면 그 줄이 잡힌다" % index)
-	var card: Rect2 = hud.call("_card_rect", hud.settings_card_height())
+	# The settings card is anchored by its top rather than centred, because its
+	# height follows the chosen icon -- so it has its own accessor.
+	var card: Rect2 = hud.call("settings_card_rect")
 	for index in in_run.size():
 		var row: Rect2 = hud.settings_row_rects[index]
 		_assert(card.encloses(row.grow(-1.0)),

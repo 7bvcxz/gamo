@@ -113,9 +113,12 @@ func _test_windows() -> void:
 	main.open_settings()
 	main._process(0.0)
 	hud._layout()
-	var close_row: int = hud.settings_rows().find(hud.ROW_CLOSE)
-	_assert(_tap(main, (hud.settings_row_rects[close_row] as Rect2).get_center()),
-		"설정 닫기 줄의 탭이 처리된다")
+	# The way out is the card's own corner now rather than the last row of a list
+	# -- the panel is a strip of icons and a body, and there is no list to put it
+	# at the bottom of. It is still a rectangle a finger can hit, because on a pad
+	# with no Escape key a panel with no drawn exit is a panel you are stuck in.
+	_assert(_tap(main, (hud.settings_close_rect as Rect2).get_center()),
+		"설정 닫기 버튼의 탭이 처리된다")
 	_assert(main.state != main.State.SETTINGS, "그리고 닫힌다")
 	main.open_settings()
 	main.settings_load()

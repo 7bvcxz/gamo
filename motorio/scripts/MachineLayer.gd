@@ -320,6 +320,7 @@ func _draw() -> void:
 	_draw_cat_digging(tile)
 	_draw_meter_marker(tile)
 	_draw_post_hints(tile)
+	_draw_base_craft(tile)
 	_draw_base_alert(tile)
 	# Cats are not drawn here any more. They are nodes under Main/Cats at a z
 	# between this layer and _marks_layer, so what is left in this function is
@@ -651,9 +652,26 @@ func _draw_cat_digging(tile: float) -> void:
 			continue
 		var c: Vector2 = Vector2(cat.assigned) * tile + Vector2.ONE * tile * 0.5
 		var fraction: float = clampf(cat.dig, 0.0, 1.0)
-		draw_arc(c, 15.0, 0.0, TAU, 28, Color(0.02, 0.04, 0.08, 0.55), 3.0)
-		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * fraction, 28,
-			Color(1.0, 0.97, 0.90, 0.92), 2.6)
+		_progress_ring(c, fraction, Color(1.0, 0.97, 0.90, 0.92), 15.0)
+
+## --- One ring ------------------------------------------------------------------
+## Every "hold and watch a circle close" in this game, drawn from one place.
+##
+## The pair of arcs -- a dark track and a bright sweep from twelve o'clock -- was
+## written out five times: hand mining, the cat digging, the survival case, the
+## ground thawing, the wreck coming apart. They were meant to be the same picture
+## and they had drifted into 28-segment and 32-segment versions with different
+## widths, which is what a copied drawing always eventually does. The base making
+## something is the sixth, and adding a sixth copy is what made this a function.
+##
+## Callers give world pixels, because that is what every one of them already had.
+func _progress_ring(at: Vector2, fraction: float, tint: Color, radius: float = 16.0,
+		width: float = 3.0) -> void:
+	draw_arc(at, radius, 0.0, TAU, RING_SEGMENTS, Color(0.02, 0.04, 0.08, 0.55), width)
+	draw_arc(at, radius, -PI * 0.5, -PI * 0.5 + TAU * clampf(fraction, 0.0, 1.0),
+		RING_SEGMENTS, tint, width, true)
+
+const RING_SEGMENTS := 32
 
 ## A splitter is a floor piece like the belt -- items pass over it, so it must
 ## not look like something you walk around. Four lit lanes out of a dark hub, and
@@ -976,6 +994,20 @@ func _draw_pickaxe_hint(tile: float) -> void:
 	# thing it was pointing at.
 	_object_art(PICKAXE_ART, at + Vector2(0.0, -18.0 + bob), PICKAXE_DRAW / 3.0)
 
+## What the fire is making, as a closing ring on the fire itself.
+##
+## Pushed here from Main, which owns the craft queue, because this layer draws
+## the world and the world is where the thing is being made. It is the sixth
+## caller of `_progress_ring` and it added no drawing code at all, which is the
+## reason that function exists.
+var craft_progress := 0.0
+
+func _draw_base_craft(tile: float) -> void:
+	if craft_progress <= 0.0 or not _visible(sim.core_cell, tile):
+		return
+	var centre: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
+	_progress_ring(centre, craft_progress, Defs.COL_CORE, tile * 0.46, 3.4)
+
 ## The "!" over the fire, while the thought that points at it stands open.
 ## Small, dark-plated and bouncing a little -- the language every notice in this
 ## game uses -- and gone the moment the window it points at is opened.
@@ -1031,9 +1063,7 @@ func _draw_kit(tile: float) -> void:
 	# Searching it. The same ring hand mining uses, because it is the same verb:
 	# hold the key and watch a circle close.
 	if sim.kit_progress > 0.0:
-		draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
-		draw_arc(at, 16.0, -PI * 0.5, -PI * 0.5 + TAU * clampf(sim.kit_progress, 0.0, 1.0),
-			32, Defs.COL_CORE, 3.0, true)
+		_progress_ring(at, sim.kit_progress, Defs.COL_CORE)
 
 ## The ground letting go, under whatever is standing on it. The same ring hand
 ## mining and the kit use, in the fire's colour rather than the ice's, because
@@ -1044,9 +1074,7 @@ func _draw_thaw(tile: float) -> void:
 	var at: Vector2 = Vector2(sim.thaw_cell) * tile + Vector2.ONE * tile * 0.5
 	if not view_rect.grow(tile).has_point(at):
 		return
-	draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
-	draw_arc(at, 16.0, -PI * 0.5, -PI * 0.5 + TAU * sim.thaw_fraction(), 32,
-		Defs.COL_CORE, 3.0, true)
+	_progress_ring(at, sim.thaw_fraction(), Defs.COL_CORE)
 
 ## Where the hut cannot go, while she is holding it.
 ##
@@ -1120,10 +1148,7 @@ func _draw_debris(tile: float) -> void:
 		var shape: int = clampi(int(sim.debris[cell]), 0, DEBRIS_ART.size() - 1)
 		_object_art(DEBRIS_ART[shape], at, DEBRIS_DRAW)
 		if cell == sim.debris_cell and sim.debris_progress > 0.0:
-			draw_arc(at, 16.0, 0.0, TAU, 32, Color(0.02, 0.04, 0.08, 0.55), 3.0)
-			draw_arc(at, 16.0, -PI * 0.5,
-				-PI * 0.5 + TAU * clampf(sim.debris_progress, 0.0, 1.0),
-				32, Defs.COL_CORE, 3.0, true)
+			_progress_ring(at, sim.debris_progress, Defs.COL_CORE)
 
 ## The cats still in the ice. Drawn from the same rect a walking cat is drawn
 ## from, so the one that wakes up stands exactly where the block was: the last

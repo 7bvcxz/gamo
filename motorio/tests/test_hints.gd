@@ -171,29 +171,104 @@ func _objectives(main: Node2D) -> void:
 				"목표 문구가 묶이지 않은 키를 말하지 않는다: '%s' 안의 %s" % [line, letter])
 	print("HINTS: 목표 문구 %d줄 확인" % seen.size())
 
-## The key legend lists every key the game answers to on a desktop. It is a
-## hand-written list, which is the kind that goes stale the moment someone adds
-## a key -- G and the zoom pair were both missing from it, and both were added
-## by me, two versions apart.
+## Every key the game answers to, checked against what is actually bound.
+##
+## This used to read a hand-written string in the HUD and look for letters in it.
+## The string is gone -- the play screen no longer carries a permanent list of
+## controls -- and the knowledge moved into `Defs.KEY_GUIDE`, which the ESC guide
+## draws. So the check moved with it, and got stronger: instead of asking "does
+## the sentence mention Z", it walks every row and asks the InputMap whether that
+## row's key is really bound to that row's action.
+##
+## This is the file that exists because the objective card told players to press
+## C for eight versions after C stopped mining.
 func _legend() -> void:
-	# Through the script rather than an instance: HUD.gd has no class_name, and a
-	# constant is not a property, so this is the one way to reach it.
-	var legend: String = HudScript.key_legend()
-	for letter: String in ["Z", "X", "R", "C", "B", "M"]:
-		_check(legend.contains("%s " % letter), "조작 안내에 %s가 있다: %s" % [letter, legend])
+	var seen := {}
+	for row: Dictionary in Defs.KEY_GUIDE:
+		var id: String = String(row["id"])
+		_check(not seen.has(id), "안내 표에 같은 id가 두 번 있지 않다: %s" % id)
+		seen[id] = true
+		_check(not (row.get("keys", []) as Array).is_empty(), "%s 에 키가 적혀 있다" % id)
+		_check(String(row.get("label", "")) != "", "%s 에 뜻이 적혀 있다" % id)
+		_check(row.has("action") != row.has("code"),
+			"%s 는 액션이거나 키코드다 — 둘 다이거나 둘 다 아니면 검사할 수 없다" % id)
+		if row.has("action"):
+			_check_action(row)
+		else:
+			_check_code(row)
 
-	# G follows the switch in both directions. A legend that advertises a key the
-	# game no longer answers to is the fault this whole file exists for, and a
-	# legend that hides a key that does work is the same fault backwards.
+	# The switch works in both directions. A guide that advertises a key the game
+	# no longer answers to is the fault this whole file exists for, and a guide
+	# that hides a key that does work is the same fault backwards.
 	var was: bool = Defs.GACHA_ENABLED
 	Defs.GACHA_ENABLED = false
-	_check(not HudScript.key_legend().contains("G "), "가챠가 꺼져 있으면 G를 말하지 않는다")
+	_check(not _guide_has("GACHA"), "가챠가 꺼져 있으면 G를 말하지 않는다")
 	Defs.GACHA_ENABLED = true
-	_check(HudScript.key_legend().contains("G "), "가챠가 켜져 있으면 G를 말한다")
+	_check(_guide_has("GACHA"), "가챠가 켜져 있으면 G를 말한다")
 	Defs.GACHA_ENABLED = was
-	_check(legend.contains("-/="), "조작 안내에 화면 크기 키가 있다")
-	_check(legend.contains("Esc"), "조작 안내에 Esc가 있다")
 
+	# And the keys the player actually needs are all in there. Named one by one
+	# rather than counted, because a table that lost a row would still have rows.
+	for id: String in ["MOVE", "RUN", "USE", "TAKE", "TURN", "TOOL", "BUILD",
+			"QUEST", "MAP", "LOG", "ZOOM", "MENU"]:
+		_check(_guide_has(id), "안내에 %s 가 있다" % id)
+	print("HINTS: 조작 안내 %d줄 확인" % Defs.KEY_GUIDE.size())
+
+func _guide_has(id: String) -> bool:
+	for row: Dictionary in Defs.key_guide_rows():
+		if String(row["id"]) == id:
+			return true
+	return false
+
+## The row names an InputMap action: every key it draws must be one of that
+## action's events, and the action must exist.
+func _check_action(row: Dictionary) -> void:
+	var action: String = String(row["action"])
+	var id: String = String(row["id"])
+	_check(InputMap.has_action(action), "%s 의 액션이 존재한다: %s" % [id, action])
+	if not InputMap.has_action(action):
+		return
+	var bound: Array[String] = []
+	for event: InputEvent in InputMap.action_get_events(action):
+		var key := event as InputEventKey
+		if key == null:
+			continue
+		var code: int = key.physical_keycode if key.physical_keycode != 0 else key.keycode
+		bound.append(OS.get_keycode_string(code))
+	# 이동은 네 방향이 네 액션이므로 한 줄이 대표한다. 나머지는 정확히 맞아야 한다.
+	if id == "MOVE":
+		for pair: Array in [["move_up", "W"], ["move_down", "S"],
+				["move_left", "A"], ["move_right", "D"]]:
+			var names: Array[String] = []
+			for event: InputEvent in InputMap.action_get_events(String(pair[0])):
+				var key2 := event as InputEventKey
+				if key2 == null:
+					continue
+				var c2: int = key2.physical_keycode if key2.physical_keycode != 0 else key2.keycode
+				names.append(OS.get_keycode_string(c2))
+			_check(names.has(String(pair[1])),
+				"%s 가 %s 에 묶여 있다: %s" % [String(pair[1]), String(pair[0]), str(names)])
+		return
+	for label: String in row["keys"]:
+		var want: String = "Shift" if label == "Shift" else label
+		_check(bound.has(want),
+			"%s 안내의 '%s' 가 실제로 %s 에 묶여 있다: %s" % [id, label, action, str(bound)])
+
+## How a key is spelled on screen versus what Godot calls it. Three keys have a
+## glyph a player recognises and a name they do not -- nobody reads "Minus" on a
+## keyboard -- so the guide draws the glyph. The pairs are written down here so
+## the drawn spelling is still checked against a real key rather than trusted.
+const KEY_SPELLING := {"Esc": "Escape", "-": "Minus", "=": "Equal"}
+
+## The row names a raw keycode that Main reads directly. The drawn label has to
+## be that key -- the guide cannot invent a key that is not there.
+func _check_code(row: Dictionary) -> void:
+	var code: int = int(row["code"])
+	var name: String = OS.get_keycode_string(code)
+	var first: String = String((row["keys"] as Array)[0])
+	var want: String = String(KEY_SPELLING.get(first, first))
+	_check(name == want,
+		"%s 안내의 첫 키 '%s' 가 실제 키 이름 '%s' 와 같다" % [String(row["id"]), first, name])
 	# The title screen, which is the one line every player reads and nobody
 	# re-reads. It advertised WASD, and WASD moves nothing.
 	var title: String = HudScript.title_controls(false)
