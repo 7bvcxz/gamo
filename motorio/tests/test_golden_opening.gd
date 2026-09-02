@@ -29,6 +29,8 @@ func _run() -> void:
 	_test_base_upgrade_progress_shows_0_of_3()
 	_test_first_cat_is_reachable_at_heat_9()
 	_test_the_picture_follows_the_heat()
+	_test_the_case_is_one_walk_away()
+	_test_a_new_recipe_raises_the_alert()
 	if failures == 0:
 		print("PASS test_golden_opening")
 	else:
@@ -60,16 +62,20 @@ func _run_seconds(seconds: float) -> void:
 func _test_base_deploys_on_first_search() -> void:
 	_crash()
 	var sim = main.sim
-	var anchor: Vector2i = sim.core_cell
+	var anchor: Vector2i = sim.kit_cell
 	_assert(not sim.base_placed, "조사 전에는 기지가 없다")
+	_assert(sim.core_cell != anchor, "펼치기 전의 코어는 그녀가 선 자리다")
 	sim.search_kit()
 	_assert(sim.base_placed, "첫 조사가 끝나면 기지가 저절로 선다")
-	# On the crash anchor, beside the case: every ring promise in the world is
-	# measured from this point, and moving it two cells put the Lv2 cat inside
-	# the first circle in two hundred seeds out of two hundred.
-	_assert(sim.core_cell == anchor, "추락 앵커 그 자리에서 펼쳐진다")
+	# On the case's own cell, which is the world anchor: every ring promise out
+	# there is measured from where the fire ends up, and a base two cells off it
+	# put the Lv2 cat inside the first circle in two hundred seeds out of two
+	# hundred.
+	_assert(sim.core_cell == anchor, "상자가 있던 그 칸에서 펼쳐진다")
 	_assert(sim.machine_at(anchor) != null, "코어가 실제로 그 칸에 있다")
-	_assert(Vector2(sim.kit_cell - anchor).length() <= 3.0, "상자는 그 곁에 남는다")
+	_assert(sim.kit_cell == Vector2i(9999, 9999), "상자는 사라진다 — 기지가 되었으니까")
+	_assert(not sim.is_structure(anchor + Vector2i(2, 1)),
+		"상자가 서 있던 자리에 막는 것이 남지 않는다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "기지 키트를 드는 일은 없다")
 	_assert(sim.drops.is_empty(), "눈 위에 떨어지는 것도 없다")
 	_assert(sim.is_warm(anchor), "그 순간 그 자리가 따뜻하다")
@@ -180,6 +186,11 @@ func _test_third_motivation_points_to_base() -> void:
 	sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
 	main._update_missions()
 	_assert(main.open_missions().is_empty(), "숙소 직후에는 아직 조용하다 — 짧은 자유")
+	# The pickaxe row has just appeared, so the fire is wearing its "!" for that.
+	# She looks, as a player must -- crafting happens through this window.
+	_assert(main.base_alert(), "숙소를 세우면 곡괭이 줄이 ! 를 세운다")
+	main._open_base_menu()
+	main.close_base_menu()
 	_assert(not main.base_alert(), "기지의 ! 도 아직이다")
 	_run_seconds(Defs.THOUGHT_DELAY + 0.5)
 	main._update_missions()
@@ -274,6 +285,81 @@ func _craft_index(id: String) -> int:
 		if String(Defs.BASE_CRAFTS[index]["id"]) == id:
 			return index
 	return -1
+
+# --- test_the_case_is_one_walk_away ------------------------------------------
+
+## The case became the base, so the case's cell is the world anchor -- and she
+## has to land somewhere else, or the opening is a game that begins with the
+## player standing on the only object in it.
+##
+## Two hundred worlds, because "she can reach it" is the sort of promise that
+## holds in every seed but the one a player opens.
+func _test_the_case_is_one_walk_away() -> void:
+	var far := 0
+	var blocked := 0
+	var moved := 0
+	for index in 200:
+		var world := Sim.new()
+		world.setup(84000 + index)
+		world.begin_crash()
+		var land: Vector2i = world.core_cell
+		var case_cell: Vector2i = world.kit_cell
+		if Vector2(case_cell - land).length() > Defs.CRASH_SIGHT:
+			far += 1
+		if world.blocks_player(land):
+			blocked += 1
+		world.search_kit()
+		if world.core_cell != case_cell:
+			moved += 1
+		world.free()
+	_assert(far == 0, "상자는 언제나 첫 화면 안에 있다 (%d회 벗어남)" % far)
+	_assert(blocked == 0, "착륙 지점은 언제나 설 수 있는 칸이다 (%d회 막힘)" % blocked)
+	_assert(moved == 0, "기지는 언제나 상자의 칸에 선다 (%d회 어긋남)" % moved)
+	# And the walk itself is unchanged: the same two-and-a-bit tiles the opening
+	# has always budgeted, just measured from the other end.
+	_assert(absf(Vector2(Defs.KIT_OFFSET).length() - sqrt(5.0)) < 0.01,
+		"걷는 거리는 그대로다")
+
+# --- test_a_new_recipe_raises_the_alert ---------------------------------------
+
+## Every recipe the fire grows announces itself on the fire.
+##
+## Nothing here names shelter or pickaxe: the rule is the ledger, so a row added
+## to `BASE_CRAFTS` next year is covered by this test without anyone editing it.
+## Before this, the window quietly grew a shelter kit, then a pickaxe, then a
+## torch, and the only way to find out was to walk over and press Z.
+func _test_a_new_recipe_raises_the_alert() -> void:
+	_crash()
+	var sim = main.sim
+	sim.search_kit()
+	_assert(main.base_alert(), "기지가 서면 첫 제작법이 ! 를 세운다")
+	var offered: Array[String] = main.base_offers()
+	_assert(not offered.is_empty(), "창이 실제로 무언가를 들고 있다: %s" % str(offered))
+	main._open_base_menu()
+	main.close_base_menu()
+	_assert(not main.base_alert(), "열어 보면 내려간다")
+	# The next row appears; the "!" comes back on its own.
+	sim.shelter_placed = true
+	sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
+	_assert(_craft_offered("pickaxe"), "숙소를 세우면 곡괭이 줄이 생긴다")
+	_assert(main.base_alert(), "새 줄이 생기면 ! 가 다시 선다")
+	main._open_base_menu()
+	main.close_base_menu()
+	_assert(not main.base_alert(), "그것도 열어 보면 내려간다")
+	# A row she has already looked at never raises it twice, and neither does one
+	# whose conditions merely stayed true for another frame.
+	_run_seconds(1.0)
+	_assert(not main.base_alert(), "같은 줄이 ! 를 두 번 세우지는 않는다")
+	# And the ledger survives a save: reloading used to re-announce every recipe
+	# in the window, which is the same lie as never announcing them.
+	_assert(main.save_game(false), "저장된다")
+	var seen_before: int = main.base_seen.size()
+	main.base_seen.clear()
+	_assert(main.load_game(), "다시 불러온다")
+	_assert(main.base_seen.size() == seen_before,
+		"본 것의 목록은 세이브를 건너온다 (%d/%d)" % [main.base_seen.size(), seen_before])
+	_assert(not main.base_alert(), "불러와도 ! 가 되살아나지 않는다")
+	main.clear_save()
 
 func _craft_offered(id: String) -> bool:
 	for row: Dictionary in main.base_rows():

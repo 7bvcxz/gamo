@@ -20,6 +20,11 @@ func _run() -> void:
 	# a cat in her arms, a part-eaten food bin and a second day in progress.
 	var seed_before: int = main.run_seed
 	main.sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
+	# Past the opening first. A world with a staffed miner and a belt full of
+	# cargo but no fire is not a world this game can reach, and leaning on it
+	# meant "the core still exists" was really asking about the core `setup`
+	# leaves behind rather than the one the case unfolds into.
+	main.finish_tutorial()
 	_open(main.sim)
 	main.sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)

@@ -1837,9 +1837,13 @@ const KIT_FOOD := 3
 const PICKAXE_HINT_SECONDS := 14.0
 
 const KIT_SEARCH_SECONDS := 2.0
-## Where the kit lands relative to the crash site. Two tiles, in sight from the
+## How far the case lies from where she lands. Two tiles, in sight from the
 ## first frame: the opening's first instruction has to be visible without
 ## walking, because at three tiles of vision walking is how you get lost.
+##
+## The case sits on the world anchor and she lands this much short of it, so the
+## base -- which unfolds out of the case, on its cell -- ends up on the anchor
+## every ring in the world is measured from.
 const KIT_OFFSET := Vector2i(2, 1)
 ## How far the shelter must stand from the base. A hut built against the fire is
 ## a hut that teaches nothing about the fire, and the two buildings drawn on top

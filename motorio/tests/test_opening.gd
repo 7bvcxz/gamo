@@ -170,9 +170,12 @@ func _test_searching_the_kit() -> void:
 func _test_placing_the_base() -> void:
 	_crash()
 	var sim = main.sim
-	var crash: Vector2i = sim.core_cell
+	# Where the case lies, which is the world anchor. She lands short of it and
+	# walks there; `core_cell` is her landing spot until the case unfolds.
+	var crash: Vector2i = sim.kit_cell
 	sim.search_kit()
 	_assert(sim.base_placed and sim.machine_at(crash) != null, "코어가 앵커에 선다")
+	_assert(sim.core_cell == crash, "코어는 상자가 있던 칸으로 옮겨 왔다")
 	_assert(sim.shelter_cell == crash + Defs.SHELTER_CELL, "거처 자리가 정해져 있다")
 	_assert(sim.is_warm(crash), "그 자리가 따뜻하다")
 	_assert(sim.warm_radius >= Defs.WARM_BASE,
@@ -324,7 +327,7 @@ func _test_feeding_the_fire() -> void:
 func _test_save_mid_opening() -> void:
 	_crash()
 	var sim = main.sim
-	var anchor: Vector2i = sim.core_cell
+	var anchor: Vector2i = sim.kit_cell
 	_open_and_hold_shelter(sim)
 	main._advance_mission()
 	main.player.warmth = 44.0

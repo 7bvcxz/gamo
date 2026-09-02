@@ -365,6 +365,7 @@ func _start_run() -> void:
 	sim.setup(run_seed)
 	missions_open.clear()
 	missions_done.clear()
+	base_seen.clear()
 	frozen_seen = false
 	day_number = 1
 	day_start_stones = 0
@@ -1243,7 +1244,7 @@ const SAVE_PATH := "user://motorio_save.cfg"
 # shelter and the tools made at the fire, and -- over the next phases -- the
 # copper, debris and iron rings moving. A save from before answers old
 # questions; the schema check turns it into a safe new game.
-const SAVE_SCHEMA := 10
+const SAVE_SCHEMA := 11
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1555,17 +1556,44 @@ func _mission_finished(id: String) -> bool:
 		"BASE2": return sim.base_level >= 1
 	return false
 
-## Whether the fire wears a "!": the thought is open and the player has not yet
-## looked at what it points to. Opening the base window is what answers it --
-## the window is where 0/3 lives -- and the first upgrade retires it with the
-## rung itself.
-var base_alert_seen: bool = false
+## Whether the fire wears a "!": its window is holding something she has never
+## had in front of her.
+##
+## Two kinds of thing can be in there -- the thought that opens the ladder, and
+## a recipe that was not on the list the last time she looked -- and both are
+## answered the same way, by opening the window, because that is where the
+## answer is. So there is one ledger and one rule rather than a flag per kind: a
+## new craft row needs no code here to raise the "!", which is the whole point.
+##
+## Without it the fire grew a shelter kit, then a pickaxe, then a torch, and
+## said nothing about any of them. A recipe nobody knows they have is a recipe
+## that does not exist.
+var base_seen: Dictionary = {}
+
+## What the window is holding right now, by id.
+func base_offers() -> Array[String]:
+	var out: Array[String] = []
+	if not sim.base_placed:
+		return out
+	if sim.base_level < 1 and bool(missions_open.get("BASE2", false)) \
+			and not bool(missions_done.get("BASE2", false)):
+		out.append("thought")
+	for row: Dictionary in base_rows():
+		if String(row["kind"]) == "craft":
+			out.append(String(Defs.BASE_CRAFTS[int(row["craft"])]["id"]))
+	return out
 
 func base_alert() -> bool:
-	if base_alert_seen or sim.base_level >= 1:
-		return false
-	return bool(missions_open.get("BASE2", false)) \
-		and not bool(missions_done.get("BASE2", false))
+	for id: String in base_offers():
+		if not base_seen.has(id):
+			return true
+	return false
+
+## Everything on the list right now counts as looked at. Called when the window
+## opens, so the "!" is answered by the act that answers it.
+func mark_base_seen() -> void:
+	for id: String in base_offers():
+		base_seen[id] = true
 
 ## Run once a frame. Opens what is ready and closes what is done, in that order,
 ## so a rung whose conditions are both true at once still appears before it is
@@ -1708,23 +1736,12 @@ func _update_kit_search(delta: float) -> void:
 	if sim.kit_progress < 1.0:
 		return
 	sim.kit_progress = 0.0
-	# Tip it away from her. The step from her cell to the case, continued.
-	var step: Vector2i = sim.kit_cell - player.cell()
-	sim.drop_away = Vector2i(signi(step.x), signi(step.y)) if step != Vector2i.ZERO \
-		else player.facing
-	if sim.drop_away.x != 0 and sim.drop_away.y != 0:
-		# One axis, because the eight cells around the case are named in axes and
-		# a diagonal "away" would put the preferred cell on a corner.
-		if absi(step.x) >= absi(step.y):
-			sim.drop_away = Vector2i(sim.drop_away.x, 0)
-		else:
-			sim.drop_away = Vector2i(0, sim.drop_away.y)
 	var was_placed: bool = sim.base_placed
 	sim.search_kit()
 	if sim.base_placed and not was_placed:
-		# The case unfolds into the fire. The rings walk outward because that is
-		# what the heat is about to do -- the painted radius follows behind the
-		# simulated one from here.
+		# The case unfolds into the fire, on its own cell -- it does not sit down
+		# beside it. The rings walk outward because that is what the heat is
+		# about to do; the painted radius follows behind the simulated one.
 		var at: Vector2 = sim.cell_centre(sim.core_cell)
 		fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
 		fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
@@ -2083,8 +2100,10 @@ func _advance_mission() -> void:
 ## rather than reproducing the four missions by hand.
 func finish_tutorial() -> void:
 	if not sim.base_placed:
-		sim.carried_kit = Defs.KIT_BASE
-		sim.place_base(sim.core_cell)
+		# Through the same door the opening uses. Hand-placing it here put the
+		# base wherever she happened to be standing, and the base's cell is
+		# the centre every ring in the world is measured from.
+		sim.deploy_base()
 	if not sim.shelter_placed:
 		sim.shelter_placed = true
 		sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
@@ -3101,7 +3120,7 @@ func _craft_state(name: String) -> bool:
 	return false
 
 func _open_base_menu() -> void:
-	base_alert_seen = true
+	mark_base_seen()
 	close_windows("base")
 	base_menu_open = true
 	menu_index = 0
@@ -3407,8 +3426,10 @@ func debug_unlock_all() -> void:
 	# to, and a world with every machine unlocked and no core is a world where
 	# none of them can be looked at doing their job.
 	if not sim.base_placed:
-		sim.carried_kit = Defs.KIT_BASE
-		sim.place_base(sim.core_cell)
+		# Through the same door the opening uses. Hand-placing it here put the
+		# base wherever she happened to be standing, and the base's cell is
+		# the centre every ring in the world is measured from.
+		sim.deploy_base()
 	for type: int in Defs.BUILDABLE:
 		sim.unlocked[type] = true
 	for item_type: int in Defs.COUNTED_ITEMS:
@@ -3842,6 +3863,9 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		# on load would tell a player with ten cats to go and look for life.
 		"missions_open": missions_open,
 		"missions_done": missions_done,
+		# And what the fire's window has already shown her, so a reload does not
+		# hang a "!" over a recipe she made an hour ago.
+		"base_seen": base_seen,
 		"frozen_seen": frozen_seen,
 		"sim": sim.to_save(),
 	})
@@ -3933,6 +3957,7 @@ func load_game(slot: int = 0) -> bool:
 	mission = int(data.get("mission", Mission.DONE))
 	missions_open = data.get("missions_open", {})
 	missions_done = data.get("missions_done", {})
+	base_seen = data.get("base_seen", {})
 	frozen_seen = bool(data.get("frozen_seen", false))
 	player.locked = false
 	player.collapse = 0.0

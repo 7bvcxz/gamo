@@ -614,6 +614,11 @@ func setup(seed_value: int) -> void:
 	# not actually changed yet.
 	_cached_radius = warm_radius
 	shown_radius = warm_radius
+	# The anchor every ring in this world is measured from, pinned before a
+	# single seam is placed. `core_cell` moves during the opening -- it is where
+	# she is until the case unfolds -- and a second `setup()` on the same Sim
+	# used to generate the whole world around wherever it had been left.
+	core_cell = Vector2i.ZERO
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
@@ -1469,7 +1474,19 @@ func begin_crash() -> void:
 	food_placed = false
 	carried_kit = Defs.KIT_NONE
 	kit_searched = 0
-	kit_cell = core_cell + Defs.KIT_OFFSET
+	# The case lies on the world anchor and she lands one walk short of it.
+	#
+	# It is the case that becomes the base, so the anchor has to be the case's
+	# own cell: every ring promise out there -- the Lv2 cat at 8.5, the copper
+	# band, the wreck ring -- is measured from where the fire ends up, and the
+	# first version of this unfolded two cells over and put the "out of reach
+	# until Lv2" cat inside the first circle in all two hundred seeds.
+	#
+	# Until it unfolds, `core_cell` is simply where she is. Four layers draw the
+	# lit circle around it, and centring that circle on the case instead would
+	# stand her in the fog at its rim on the first frame of the game.
+	kit_cell = core_cell
+	core_cell = kit_cell - Defs.KIT_OFFSET
 	warm_radius = Defs.CRASH_SIGHT
 	_cached_radius = warm_radius
 	shown_radius = warm_radius
@@ -1565,10 +1582,6 @@ var has_pickaxe := false
 ## Whether the fire has already handed the gun over, so a second upgrade does
 ## not put a second one on the snow.
 var gun_dropped := false
-## Which way the case tips what is inside it: away from the player, set by Main
-## before the search finishes. Zero falls back to south, which is what it always
-## used to be.
-var drop_away := Vector2i.ZERO
 ## The cell she is standing in, pushed here by Main every frame. Nothing this
 ## file tips onto the snow lands on it.
 ##
@@ -1633,17 +1646,20 @@ func search_kit() -> Array[int]:
 	deploy_base()
 	return out
 
-## The emergency base, unfolded beside the case -- on the crash anchor itself.
+## The emergency base, unfolded out of the case, on the case's own cell.
 ##
-## Not on the case's own cell. Every ring promise in the world -- the starter
-## cat at 8.5, the copper band, the iron band, the wreck ring -- is measured
-## from this anchor, and the first version of this deployed two cells over and
-## put the "out of reach until Lv2" cat inside the first circle in every single
-## seed. The case stays standing beside the fire as the box it is.
+## The box does not stay standing beside the fire: it *is* the fire. One object
+## on the snow becomes one object on the snow, and the player who walked to it
+## and held Z watches the thing they walked to open up rather than watching a
+## second building appear somewhere behind them.
+##
+## That cell is the world anchor (`begin_crash` put the case there), so the ring
+## promises hold without anything moving.
 ## `place_base` remains the hand-placed door for tests and debug worlds.
 func deploy_base() -> void:
 	if base_placed:
 		return
+	core_cell = kit_cell
 	var cell: Vector2i = core_cell
 	ore.erase(cell)
 	purity.erase(cell)
@@ -1660,6 +1676,9 @@ func deploy_base() -> void:
 	_grid_dirty = true
 	_refresh_radius()
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
+	# And the case is gone. Nothing draws it and nothing blocks on it: it did
+	# not sit down beside the base, it turned into it.
+	kit_cell = Vector2i(9999, 9999)
 
 ## Below the case, and then outward. Below because that is where the player is
 ## looking -- she has to stand south of it to face it -- and outward because a
@@ -1690,74 +1709,6 @@ func _drop_rows() -> Array:
 		rows.append([cell.x, cell.y, int(drops[cell])])
 	return rows
 
-func _drop_cell(index: int) -> Vector2i:
-	# The far side of the case, from wherever she is standing.
-	#
-	# It used to be "below", which is where she stands to face it -- so the thing
-	# that came out landed under her feet and was picked up on the frame it
-	# appeared. Nothing was ever seen falling. Away from her, it lands where she
-	# can watch it land and then walk to it, which is the whole of what the
-	# opening is teaching: things are objects in the world, not messages.
-	var away := Vector2i(0, 1)
-	if drop_away != Vector2i.ZERO:
-		away = drop_away
-	var side := Vector2i(-away.y, away.x)
-	# One step further out per item, so what comes out of the case lands in a
-	# line rather than in a clump: the first thing at her feet-and-a-bit, the
-	# second beyond it. The order of KIT_CONTENTS is therefore a near-to-far
-	# order -- the case first and the tool past it -- and picking up the near one
-	# does not sweep up the far one on the same step.
-	var reach: int = index + 1
-	# Beside the case rather than beyond it, as of 1.0.26.
-	#
-	# The far side was right while she could walk through the case: she saw it
-	# land, took a step and picked it up. The case is a solid box now, and a box
-	# between her and the first object in the game is two or three tiles of
-	# walking round it -- measured at 14.5 seconds of a 13.3 second opening, which
-	# is a run she loses to a design decision about where a lid tips.
-	#
-	# The side cells keep what the far side was for. It still lands where she can
-	# watch it land rather than under her feet, and it is one diagonal step away
-	# with nothing in between.
-	var near: Array[Vector2i] = [-away * reach + side, -away * reach - side,
-		side * reach, -side * reach]
-	# Of the cells beside her, the one nearer the crash site first. She is going
-	# back that way with whatever she picks up -- it is where the fire goes and
-	# where every later search is standing anyway -- so tipping the contents out
-	# on the far side of the case is asking her to walk round it twice.
-	var home: Vector2i = core_cell
-	near.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
-		return Vector2(kit_cell + a - home).length_squared() \
-			< Vector2(kit_cell + b - home).length_squared())
-	var wanted: Array[Vector2i] = near.duplicate()
-	wanted.append_array([away * reach, away * reach + side, away * reach - side])
-	for step in range(1, 4):
-		wanted.append(side * (reach + step))
-		wanted.append(-side * (reach + step))
-		wanted.append(away * (reach + step))
-	# And then outward, ring by ring, if those eight are taken.
-	#
-	# They were the whole list, and a boulder cluster over the case meant the
-	# search returned nothing at all: the fire never came out, and the run could
-	# not be started. It is a seeded world, so most seeds were fine -- which is
-	# the shape every bug of this kind has here. Preference first, then anywhere,
-	# because a rock beside the case is not a reason for the game to swallow the
-	# one object the opening is about.
-	for ring in range(3, 7):
-		for dy in range(-ring, ring + 1):
-			for dx in range(-ring, ring + 1):
-				if maxi(absi(dx), absi(dy)) != ring - 1:
-					continue
-				wanted.append(Vector2i(dx, dy))
-	for offset: Vector2i in wanted:
-		var cell: Vector2i = kit_cell + offset
-		if cell == drop_from:
-			continue
-		if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
-			continue
-		return cell
-	return Vector2i(9999, 9999)
-
 ## The build gun, handed over by the fire once it has grown a step.
 ##
 ## It used to fall out of the case at the start, ten minutes before there was
@@ -1775,8 +1726,7 @@ func drop_gun_at_base() -> bool:
 	gun_dropped = true
 	return true
 
-## A cell beside a given one with nothing on it, searched outward. The same
-## question `_drop_cell` asks about the case, asked about the fire.
+## A cell beside a given one with nothing on it, searched outward.
 func _free_near(origin: Vector2i) -> Vector2i:
 	for ring in range(1, 6):
 		for dy in range(-ring, ring + 1):
