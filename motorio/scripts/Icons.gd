@@ -27,6 +27,22 @@ const THING_SHELTER := "shelter"
 const THING_CORE := "core"
 const THING_SEAM := "seam"
 const THING_FOOD := "food"
+## The two painted tools. The hotbar, the fire's window and the flight from the
+## fire to her hands all draw these files, so the pickaxe that pops out of the
+## fire is the pickaxe that lands in slot 1.
+const THING_PICKAXE := "pickaxe"
+const THING_GUN := "gun"
+const PICKAXE_ART: Texture2D = preload("res://assets/objects/pickaxe.png")
+const BUILD_GUN_ART: Texture2D = preload("res://assets/objects/build_gun.png")
+
+## Fitted into the rect and centred, never stretched: painted at one aspect.
+static func draw_art(canvas: CanvasItem, rect: Rect2, art: Texture2D,
+		tint: Color = Color.WHITE) -> void:
+	var source := Vector2(float(art.get_width()), float(art.get_height()))
+	var fit: float = minf(rect.size.x / source.x, rect.size.y / source.y)
+	var drawn: Vector2 = source * fit
+	canvas.draw_texture_rect(art, Rect2(rect.position + (rect.size - drawn) * 0.5, drawn), false,
+		tint)
 
 static func _outline_width(rect: Rect2) -> float:
 	return maxf(1.0, rect.size.x / 22.0)
@@ -179,6 +195,10 @@ static func draw_item(canvas: CanvasItem, rect: Rect2, item_type: int) -> void:
 static func draw_thing(canvas: CanvasItem, rect: Rect2, key: String) -> void:
 	var width: float = _outline_width(rect)
 	match key:
+		THING_PICKAXE:
+			draw_art(canvas, rect, PICKAXE_ART)
+		THING_GUN:
+			draw_art(canvas, rect, BUILD_GUN_ART)
 		THING_TORCH:
 			# A shaft with a burning head. The flame is the part that has to read
 			# at hotbar size, so it is most of the drawing.

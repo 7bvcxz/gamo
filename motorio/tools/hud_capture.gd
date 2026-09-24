@@ -28,6 +28,9 @@ var main: Node2D
 var out_dir := ""
 var only: Array[String] = []
 var sizes: Array[Vector2i] = []
+## `--sequence craft` walks the fire's window from the first visit to the first
+## torch and saves a picture at each beat of it, timed on the real clock.
+var sequence := ""
 var settings_backup := ""
 
 func _initialize() -> void:
@@ -38,6 +41,7 @@ func _initialize() -> void:
 			"--only":
 				for name: String in args[index + 1].split(","):
 					only.append(name)
+			"--sequence": sequence = args[index + 1]
 			"--size":
 				var parts: PackedStringArray = args[index + 1].split("x")
 				sizes.append(Vector2i(int(parts[0]), int(parts[1])))
@@ -74,6 +78,14 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
+	if sequence == "craft":
+		await _resize(sizes[0])
+		await _craft_sequence()
+		_restore_settings()
+		main.clear_save()
+		print("hud_capture: wrote %s" % out_dir)
+		quit(0)
+		return
 	for size: Vector2i in sizes:
 		await _resize(size)
 		var tag: String = "%dx%d" % [size.x, size.y]
@@ -163,6 +175,68 @@ func _stage(name: String, phone: bool) -> void:
 	# Long enough for the camera to arrive and the radius to finish spreading,
 	# short enough that the opening's cold does not end the run.
 	await _frames(20)
+
+func _seconds(t: float) -> void:
+	await create_timer(t).timeout
+
+func _craft_index(id: String) -> int:
+	for index in Defs.BASE_CRAFTS.size():
+		if String(Defs.BASE_CRAFTS[index]["id"]) == id:
+			return index
+	return 0
+
+## The first minutes at the fire, beat by beat.
+func _craft_sequence() -> void:
+	main.clear_save()
+	main._start_run()
+	main.state = main.State.PLAY
+	main.sim.search_kit()
+	main.messages.clear()
+	await _frames(30)
+	# 1-2. The first visit: one thing on the list, and it is new.
+	main._open_base_menu()
+	await _frames(6)
+	await _save("craft_01_first_visit_shelter")
+	# The shelter's make: the window closes and the fire wears the ring.
+	main.craft_selected(_craft_index("shelter"))
+	await _seconds(1.4)
+	await _save("craft_02_shelter_ring")
+	await _seconds(1.9)
+	await _save("craft_03_kit_on_snow")
+	# The hut goes up (as the tests do it), and the pickaxe is on the list.
+	for cell: Vector2i in main.sim.drops.keys():
+		main.sim.drops.erase(cell)
+	main.sim.shelter_placed = true
+	main.sim.shelter_cell = main.sim.core_cell + Defs.SHELTER_CELL
+	main.shelter_age = 0.0
+	await _frames(4)
+	main._open_base_menu()
+	await _frames(6)
+	await _save("craft_04_pickaxe_recipe")
+	# 4-8. The pickaxe: the ring, the pop, the flight, the landing, the slot.
+	main.craft_selected(_craft_index("pickaxe"))
+	await _seconds(1.5)
+	await _save("craft_05_pickaxe_ring")
+	await _seconds(1.5 + 0.12)
+	await _save("craft_06_pickaxe_pops")
+	await _seconds(0.28)
+	await _save("craft_07_pickaxe_flies")
+	await _seconds(0.26)
+	await _save("craft_08_absorbed")
+	await _seconds(0.12)
+	await _save("craft_09_slot_pulse")
+	# 9. Later: the fire at 3단계 offers the torch.
+	var level: Dictionary = Defs.BASE_LEVELS[2]
+	main.sim.stones_in = int(level["stones"])
+	main.sim._refresh_radius()
+	main.sim.stock[Defs.ITEM_HEATSTONE] = 4
+	main.messages.clear()
+	await _frames(10)
+	main._open_base_menu()
+	main.menu_index = main.base_rows().size() - 1
+	await _frames(6)
+	await _save("craft_10_torch_recipe")
+	main.close_base_menu()
 
 func _restore_settings() -> void:
 	if settings_backup == "":

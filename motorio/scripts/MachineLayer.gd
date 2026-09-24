@@ -665,11 +665,12 @@ func _draw_cat_digging(tile: float) -> void:
 ## something is the sixth, and adding a sixth copy is what made this a function.
 ##
 ## Callers give world pixels, because that is what every one of them already had.
+## The drawing itself lives in WorldProgress (1.0.42), which also owns the pulse a
+## ring leaves when it fills -- so the fire, the case, the ice and the wreck all
+## finish the same way as well as fill the same way.
 func _progress_ring(at: Vector2, fraction: float, tint: Color, radius: float = 16.0,
 		width: float = 3.0) -> void:
-	draw_arc(at, radius, 0.0, TAU, RING_SEGMENTS, Color(0.02, 0.04, 0.08, 0.55), width)
-	draw_arc(at, radius, -PI * 0.5, -PI * 0.5 + TAU * clampf(fraction, 0.0, 1.0),
-		RING_SEGMENTS, tint, width, true)
+	WorldProgress.draw(self, at, fraction, tint, radius, width)
 
 const RING_SEGMENTS := 32
 

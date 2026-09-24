@@ -32,6 +32,11 @@ const BANK := {
 	"meow": preload("res://assets/sfx/meow.wav"),
 	"step": preload("res://assets/sfx/step.wav"),
 	"step_run": preload("res://assets/sfx/step_run.wav"),
+	## Making and receiving (1.0.42): the fire's tick while it works, the pop
+	## when a make is done, and the chime when an important thing reaches her.
+	"tick": preload("res://assets/sfx/tick.wav"),
+	"pop": preload("res://assets/sfx/pop.wav"),
+	"chime": preload("res://assets/sfx/chime.wav"),
 }
 const VOLUMES := {
 	"build": -6.0, "remove": -12.0, "select": -16.0, "confirm": -8.0,
@@ -42,6 +47,9 @@ const VOLUMES := {
 	# Under everything. Footsteps are the only sound that plays continuously, so
 	# what would be a reasonable level for a one-shot is a drone here.
 	"step": -24.0, "step_run": -21.0,
+	# Small on purpose. The tick repeats every second of a make; the pop and the
+	# chime mark one moment each and must not outrank a cat waking up.
+	"tick": -22.0, "pop": -10.0, "chime": -9.0,
 }
 
 ## Two looping beds rather than music: a wind floor that is always there, and a

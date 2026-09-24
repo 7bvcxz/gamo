@@ -37,6 +37,12 @@ const TEXT_NORMAL := 13
 const TEXT_TITLE := 15
 ## One row of a list set in TEXT_NORMAL.
 const ROW := 19.0
+## A row that carries a large icon beside two lines of text -- a thing, its name,
+## its price. The icon plus a gap above and below, so the text never sets it.
+const ROW_LARGE := ICON_LARGE + ITEM_GAP * 2.0
+## A small window: one list the player picks from, not a catalogue. Wide enough
+## for a large row with a name, a price and a badge.
+const WINDOW_W_SMALL := 340.0
 
 # --- Colour -----------------------------------------------------------------
 ## The plate. Navy rather than black so it belongs to the cold, and translucent
@@ -146,6 +152,39 @@ static func title(on: CanvasItem, rect: Rect2, body: String, tint: Color = ACCEN
 ## A hairline between two groups in one panel.
 static func divider(on: CanvasItem, from: Vector2, width: float) -> void:
 	on.draw_line(from, from + Vector2(width, 0.0), DIVIDER, 1.0)
+
+# --- Badges -----------------------------------------------------------------
+## A small pill with one word in it: NEW, a state, a count. Drawn right-aligned
+## to `right` so a column of them lines up, and returns its rect.
+static func badge(on: CanvasItem, right: Vector2, body: String, tint: Color,
+		filled: bool = false) -> Rect2:
+	var width: float = width_of(body, TEXT_SMALL) + ITEM_GAP * 2.0
+	var height: float = float(TEXT_SMALL) + 6.0
+	var rect := Rect2(right.x - width, right.y - height * 0.5, width, height)
+	var fill := Color(tint.r, tint.g, tint.b, 0.92 if filled else 0.14)
+	on.draw_colored_polygon(rounded(rect, height * 0.5), fill)
+	if not filled:
+		on.draw_polyline(_closed(rounded(rect, height * 0.5)),
+			Color(tint.r, tint.g, tint.b, 0.75), 1.0, true)
+	var ink: Color = Color(0.08, 0.07, 0.06) if filled else tint
+	text_in(on, Rect2(rect.position.x, baseline_for(rect.get_center().y, TEXT_SMALL),
+		rect.size.x, 12.0), body, TEXT_SMALL, ink)
+	return rect
+
+static func _closed(points: PackedVector2Array) -> PackedVector2Array:
+	var out := points.duplicate()
+	if out.size() > 0:
+		out.append(out[0])
+	return out
+
+## A glow drawn round a rect and fading as `k` goes from 1 to 0 -- a slot that
+## just received something, a row that just changed.
+static func pulse(on: CanvasItem, rect: Rect2, k: float, tint: Color = ACCENT) -> void:
+	if k <= 0.0:
+		return
+	var spread: float = (1.0 - k) * 7.0 + 1.0
+	on.draw_polyline(_closed(rounded(rect.grow(spread), CORNER_RADIUS + spread)),
+		Color(tint.r, tint.g, tint.b, 0.9 * k), 2.0, true)
 
 # --- Text -------------------------------------------------------------------
 ## Everything is set with a soft one-pixel shadow: panels are translucent, and a

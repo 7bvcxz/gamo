@@ -365,6 +365,9 @@ const ITEMS: Array[Dictionary] = [
 		"atlas": "",
 		"counter": 3, "ore_tier": -1, "retired": false,
 		"desc": "로켓잔해에서만 나온다. 이 행성은 만들지 못한다. 발전기를 여는 두 조건 중 하나.",
+		# Rare enough that its arrival is an event: it flies to her from the wreck
+		# (FxLayer.acquire) instead of joining the stack quietly.
+		"presentation": PRESENT_IMPORTANT,
 	},
 ]
 
@@ -606,6 +609,17 @@ static func item_atlas(id: int) -> String:
 
 static func item_desc(id: int) -> String:
 	return String(item(id).get("desc", ""))
+
+## How its arrival is shown. Optional in the table and "common" by default,
+## because nearly everything arrives by the dozen: heat stone and copper get the
+## quick stream they always had, and only a row that says otherwise gets the
+## pop-hover-fly-absorb that tools get. A presentation that plays for the thirtieth
+## stone of a minute is not a presentation, it is noise.
+const PRESENT_COMMON := "common"
+const PRESENT_IMPORTANT := "important"
+
+static func item_presentation(id: int) -> String:
+	return String(item(id).get("presentation", PRESENT_COMMON))
 
 ## Whether the world still produces it. A retired material keeps its number and
 ## its row; what it loses is a source.
@@ -2054,6 +2068,13 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"cost": {},
 		"seconds": 3.0,
 		"until": "shelter_placed",
+		# Made once. `one_time` rows leave the list the moment the thing exists --
+		# the kit lying by the fire counts, not only the hut standing -- and go to
+		# the window's "만든 것" line instead. `landing` is how it arrives: a kit
+		# lands on the snow beside the fire; a tool flies into her hands.
+		"one_time": true,
+		"landing": "drop",
+		"icon": "shelter",
 		"note": "밤을 버틸 곳. 들고 가서 직접 세운다.",
 	},
 	{
@@ -2067,6 +2088,9 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"name": "곡괭이",
 		"cost": {},
 		"seconds": 3.0,
+		"one_time": true,
+		"landing": "hand",
+		"icon": "pickaxe",
 		"note": "단단한 광맥을 직접 캘 수 있다.",
 	},
 	{
@@ -2080,6 +2104,9 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"name": "건물건설총",
 		"cost": {},
 		"seconds": 3.0,
+		"one_time": true,
+		"landing": "hand",
+		"icon": "gun",
 		"note": "이걸로 기계를 세울 수 있다.",
 	},
 	{
@@ -2087,9 +2114,13 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"level": BASE_CRAFT_LEVEL,
 		"name": TORCH_NAME,
 		"cost": TORCH_COST,
+		# Made again and again, so it stays on the list; still a thing for her
+		# hands, so it flies to them.
+		"landing": "hand",
+		"icon": "torch",
 		# No tiles and no seconds: she can see what it does by lighting it, and a
 		# number here is a manual the player has to convert into a feeling.
-		"note": "들고 있으면 주변이 조금 환해지고 따뜻하다. 오래가진 않을 것 같다.",
+		"note": "들고 있으면 주변이 조금 밝아지고 따뜻해진다. 오래 버티지는 못할 것 같다.",
 	},
 	{
 		"id": "food_bin",
@@ -2099,9 +2130,14 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"level": BASE_CRAFT_LEVEL + 1,
 		"name": "사료 상자",
 		"cost": {ITEM_HEATSTONE: 5},
+		# One bin a run: `craft_food_bin` refuses a second while the first is in
+		# her arms, on the snow or standing.
+		"one_time": true,
+		"landing": "drop",
+		"icon": "food",
 		# It is not sited by the recipe any more, so the line no longer says where
 		# it goes: she carries it out and puts it where she wants it.
-		"note": "고양이가 배고프면 여기서 먹는다",
+		"note": "고양이가 배고프면 여기서 먹는다.",
 	},
 ]
 ## Where the circle stands when the third mission is done. Set to a number

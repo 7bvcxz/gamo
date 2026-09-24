@@ -371,6 +371,7 @@ func _end_cutscene() -> void:
 func _start_run() -> void:
 	run_seed = randi()
 	sim.setup(run_seed)
+	_clear_presentations()
 	missions_open.clear()
 	missions_done.clear()
 	base_seen.clear()
@@ -2031,11 +2032,16 @@ func _update_debris(delta: float) -> void:
 	# The core part gets its own line and its own colour. It is the reason to
 	# cross the snow, and a player who reads one grey summary learns that debris
 	# gives scrap.
-	if found.has(Defs.ITEM_ENERGY_CORE):
-		fx.popup(at + Vector2(0, -22.0), "%s +%d"
-			% [Defs.ITEM_NAMES[Defs.ITEM_ENERGY_CORE], int(found[Defs.ITEM_ENERGY_CORE])],
-			Defs.ITEM_COLORS[Defs.ITEM_ENERGY_CORE], true)
-		fx.burst(at, Defs.ITEM_COLORS[Defs.ITEM_ENERGY_CORE], 12)
+	# And anything the registry calls important flies to her out of the wreck --
+	# the same arrival a tool made at the fire gets, because it is the same kind
+	# of moment. Stones and copper in the same wreck do not: they are the heap.
+	for item_type: int in found:
+		if Defs.item_presentation(item_type) != Defs.PRESENT_IMPORTANT:
+			continue
+		var kind: int = item_type
+		present_to_hand(at, func(canvas: CanvasItem, rect: Rect2) -> void:
+			Icons.draw_item(canvas, rect, kind), Defs.ITEM_COLORS[kind], -1,
+			"%s +%d" % [Defs.ITEM_NAMES[kind], int(found[kind])])
 
 ## Whether she is at the kit with something still in it.
 ##
@@ -3331,8 +3337,70 @@ func base_rows() -> Array[Dictionary]:
 			continue
 		if _craft_state(String(craft.get("until", "__never__"))):
 			continue
+		# Made once and made: out of the list, into the window's "만든 것" line.
+		if bool(craft.get("one_time", false)) and craft_done(String(craft["id"])):
+			continue
 		rows.append({"kind": "craft", "craft": index})
 	return rows
+
+## Whether a one-time thing exists yet, asked of the world rather than remembered
+## -- so it is right after a load without a single new key in the save. The kit
+## counts from the moment it lies by the fire: "이미 만든 긴급숙소 키트" sitting on
+## the list as if it were still to be made was the thing this answers.
+func craft_done(id: String) -> bool:
+	match id:
+		"shelter":
+			return sim.shelter_placed or sim.carried_kit == Defs.KIT_SHELTER \
+				or _drop_lies(Sim.DROP_KIT_SHELTER)
+		"pickaxe": return sim.has_pickaxe
+		"gun": return sim.has_gun
+		"food_bin": return sim.food_placed or sim.bin_in_hand()
+	return false
+
+func _drop_lies(kind: int) -> bool:
+	for cell: Vector2i in sim.drops:
+		if int(sim.drops[cell]) == kind:
+			return true
+	return false
+
+## The one-time things already made that the fire could have made by now, in the
+## table's order -- the window's footer.
+func crafts_made() -> Array[int]:
+	var out: Array[int] = []
+	var level: int = Defs.base_level_shown(sim.base_level)
+	for index in Defs.BASE_CRAFTS.size():
+		var craft: Dictionary = Defs.BASE_CRAFTS[index]
+		if not bool(craft.get("one_time", false)) or level < int(craft["level"]):
+			continue
+		if craft_done(String(craft["id"])):
+			out.append(index)
+	return out
+
+## What a row is right now. NEW is not a state but a mark on top of one: a row
+## can be new and too expensive at once.
+enum Craft { AVAILABLE, LOCKED, CRAFTING, DONE }
+
+func craft_status(index: int) -> int:
+	var craft: Dictionary = Defs.BASE_CRAFTS[clampi(index, 0, Defs.BASE_CRAFTS.size() - 1)]
+	var id: String = String(craft["id"])
+	if craft_making == id:
+		return Craft.CRAFTING
+	if bool(craft.get("one_time", false)) and craft_done(id):
+		return Craft.DONE
+	# The fire makes one timed thing at a time, so while it is busy the others wait.
+	if craft_making != "" and float(craft.get("seconds", 0.0)) > 0.0:
+		return Craft.LOCKED
+	if not sim.can_craft(id):
+		return Craft.LOCKED
+	return Craft.AVAILABLE
+
+## Rows that were not on the list the last time she looked. Snapshotted when the
+## window opens, because opening it is what marks them seen -- asked afterwards,
+## every row would already be old.
+var base_fresh: Dictionary = {}
+
+func craft_is_new(id: String) -> bool:
+	return base_fresh.has(id)
 
 ## The predicates a craft row may name. One match, so a condition cannot be
 ## written twice and drift -- and "" is the row that is always on.
@@ -3346,11 +3414,29 @@ func _craft_state(name: String) -> bool:
 	return false
 
 func _open_base_menu() -> void:
+	base_fresh.clear()
+	for id: String in base_offers():
+		if not base_seen.has(id):
+			base_fresh[id] = true
 	mark_base_seen()
 	close_windows("base")
 	base_menu_open = true
-	menu_index = 0
+	menu_index = _base_first_row()
 	audio.call("play", "select")
+
+## Where the cursor starts: on the newest thing the fire can make, if there is
+## one -- that is why she walked over -- otherwise on the first row. It used to be
+## the first row always, which on the first visit is the upgrade she cannot yet
+## pay for, lit in red, above the free kit the window was opened to show.
+func _base_first_row() -> int:
+	var rows: Array[Dictionary] = base_rows()
+	for index in rows.size():
+		if String(rows[index]["kind"]) != "craft":
+			continue
+		var id: String = String(Defs.BASE_CRAFTS[int(rows[index]["craft"])]["id"])
+		if craft_is_new(id):
+			return index
+	return 0
 
 ## The machine window. Opened by facing a machine that has something to choose,
 ## which today is any machine the recipe system drives -- a belt has no menu and
@@ -3466,13 +3552,19 @@ func craft_selected(index: int = 0) -> void:
 		craft_making = id
 		craft_left = seconds
 		craft_total = seconds
+		craft_tick_at = seconds - CRAFT_TICK
 		close_base_menu()
 		# No banner. The fire wears a closing ring for exactly as long as this
 		# takes, in the place the thing is being made -- a line of text in the
 		# corner saying "만드는 중..." was a caption on a picture the game was
-		# already capable of drawing.
-		audio.call("play", "select")
+		# already capable of drawing. And a small tick, once a second, so the
+		# ear knows the fire is working while the eye is elsewhere.
+		audio.call("play", "tick")
 		return
+	# Whether the torch already has a slot on screen. The first torch makes the
+	# slot appear, so it waits for the torch to land; the fifth does not hide a
+	# slot the player is already using.
+	var had_slot: bool = tool_unlocked(TOOL_TORCH)
 	var made: bool = sim.craft_torch() if id == "torch" else sim.craft_food_bin()
 	if not made:
 		var reason: String = "이미 있다" \
@@ -3482,47 +3574,118 @@ func craft_selected(index: int = 0) -> void:
 		audio.call("play", "deny")
 		return
 	var tail: String = "  (%d개)" % sim.torches if id == "torch" else ""
-	_notify("%s%s 만들었다.%s" % [String(craft["name"]),
-		Defs.object_of(String(craft["name"])), tail], Defs.COL_CORE)
-	fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
-	audio.call("play", "alloy")
+	var line: String = "%s%s 만들었다.%s" % [String(craft["name"]),
+		Defs.object_of(String(craft["name"])), tail]
+	_land_craft(craft, line, not had_slot)
 
 ## The timed makes, landing. The pop -- the ring, the sound, the thing existing
 ## -- happens at the fire for objects and at her for tools, because a tool lands
 ## in her hand.
+## Seconds between the fire's working ticks, and when the next one is due (in
+## seconds left on the make). Presentation only: the make takes exactly as long
+## as the table says whether or not anything ticks.
+const CRAFT_TICK := 1.0
+var craft_tick_at: float = 0.0
+
 func _update_craft(delta: float) -> void:
 	if craft_making == "":
 		return
 	craft_left -= delta
 	if craft_left > 0.0:
+		if craft_left <= craft_tick_at:
+			craft_tick_at -= CRAFT_TICK
+			audio.call("play", "tick")
 		return
 	var id: String = craft_making
 	craft_making = ""
 	craft_left = 0.0
 	craft_total = 0.0
+	var craft: Dictionary = {}
+	for row: Dictionary in Defs.BASE_CRAFTS:
+		if String(row["id"]) == id:
+			craft = row
+	# The ring filled: the logic lands this frame, exactly as it always did --
+	# the tool is owned and in her hand the moment the make ends, so nothing that
+	# reads the world waits on an animation. What follows is only what the
+	# player sees and hears.
 	match id:
 		"shelter":
 			if sim.craft_shelter_kit():
-				_notify("긴급숙소 키트가 나왔다  ·  들고 가 자리를 고른다", Defs.COL_CORE)
-				fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
-				audio.call("play", "alloy")
+				_land_craft(craft, "긴급숙소 키트가 나왔다.  들고 가서 세우면 된다.")
 		"pickaxe":
 			if sim.craft_pickaxe():
 				_equip(TOOL_PICKAXE)
-				_notify("곡괭이가 손에 들어왔다", Defs.COL_CORE)
-				fx.ring(player.position, Defs.COL_CORE, Defs.RING_SMALL)
-				fx.burst(player.position, Defs.COL_CORE, 10)
-				audio.call("play", "alloy")
+				_land_craft(craft, "곡괭이가 손에 들어왔다.")
 		"gun":
 			if sim.craft_build_gun():
 				_equip(TOOL_BUILD_GUN)
 				sim.unlocked[Defs.M_MINER] = true
 				selected_index = Defs.BUILDABLE.find(Defs.M_MINER)
 				menu_index = maxi(selected_index, 0)
-				_notify("건물건설총이 손에 들어왔다  ·  채굴기가 장전되어 있다", Defs.COL_CORE)
-				fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
-				fx.burst(player.position, Defs.COL_CORE, 12)
-				audio.call("play", "finish")
+				_land_craft(craft, "건물건설총이 손에 들어왔다.  채굴기를 세울 수 있다.")
+
+## --- Arrivals -------------------------------------------------------------------
+## A made thing leaving the fire: the ring's pulse and a small pop at the fire,
+## then either the object flying into her hands (a tool, a torch) or tipping out
+## onto the snow beside the fire (a kit, a bin). The table says which (`landing`).
+func _land_craft(craft: Dictionary, line: String, reveal: bool = true) -> void:
+	var fire: Vector2 = sim.cell_centre(sim.core_cell)
+	WorldProgress.complete(fx, fire, Defs.COL_CORE, Defs.TILE * 0.46)
+	audio.call("play", "pop")
+	var key: String = String(craft.get("icon", ""))
+	var icon := func(canvas: CanvasItem, rect: Rect2) -> void:
+		Icons.draw_thing(canvas, rect, key)
+	if String(craft.get("landing", "")) == "hand":
+		present_to_hand(fire, icon, Defs.COL_CORE, _tool_for_craft(String(craft["id"])), line,
+			reveal)
+		return
+	# Onto the snow: one piece arcs from the fire to where it now lies, so the eye
+	# is taken to the thing it is about to be told to pick up.
+	for cell: Vector2i in sim.drops:
+		var kind: int = int(sim.drops[cell])
+		if kind == Sim.DROP_KIT_SHELTER or kind == Sim.DROP_FOOD_BIN:
+			fx.stream(fire, sim.cell_centre(cell), Defs.COL_CORE, 1)
+	_notify(line, Defs.COL_CORE)
+
+## Which tool slot a craft fills, or -1.
+func _tool_for_craft(id: String) -> int:
+	match id:
+		"pickaxe": return TOOL_PICKAXE
+		"gun": return TOOL_BUILD_GUN
+		"torch": return TOOL_TORCH
+	return -1
+
+## Tools whose slot is waiting for the thing in the air to land. The slot is
+## already hers -- `tool_unlocked` says so and Z already works -- but the hotbar
+## draws it only when the object reaches her, so the slot appearing and the
+## pickaxe arriving are one event rather than two.
+var presenting_tools: Dictionary = {}
+
+func present_to_hand(from: Vector2, icon: Callable, tint: Color, tool: int = -1,
+		line: String = "", reveal: bool = true) -> void:
+	if tool >= 0 and reveal:
+		presenting_tools[tool] = true
+	fx.acquire(from, player, icon, tint, func() -> void:
+		if tool >= 0:
+			presenting_tools.erase(tool)
+			hud.call("pulse_slot", TOOLS.find(tool))
+		audio.call("play", "chime")
+		if line != "":
+			_notify(line, Defs.COL_CORE))
+
+## Everything in flight between one run and the next: things in the air, the
+## window's NEW marks, and the fire's current make. None of it is saved -- the
+## make is at most three seconds -- so a new run or a load starts with an idle
+## fire. (It used not to: a make started before "처음부터" finished in the new
+## world, three seconds in, out of a fire that had never been asked.)
+func _clear_presentations() -> void:
+	presenting_tools.clear()
+	base_fresh.clear()
+	craft_making = ""
+	craft_left = 0.0
+	craft_total = 0.0
+	if fx != null:
+		fx.clear_flights()
 
 ## Puts a tool in her hand by name, if she owns it.
 func _equip(tool: int) -> void:
@@ -4194,6 +4357,7 @@ func load_game(slot: int = 0) -> bool:
 	run_seed = int(data.get("seed", run_seed))
 	sim.setup(run_seed)
 	sim.from_save(data.get("sim", {}))
+	_clear_presentations()
 	day_number = int(data.get("day", 1))
 	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
 	day_start_stones = int(data.get("day_start_stones", 0))

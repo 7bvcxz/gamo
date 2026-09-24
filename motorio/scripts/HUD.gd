@@ -87,6 +87,10 @@ func _process(delta: float) -> void:
 	# live and expire here rather than in the orchestrator.
 	restart_armed = maxf(0.0, restart_armed - delta)
 	saved_flash = maxf(0.0, saved_flash - delta)
+	for index in slot_pulse.keys():
+		slot_pulse[index] = float(slot_pulse[index]) - delta
+		if float(slot_pulse[index]) <= 0.0:
+			slot_pulse.erase(index)
 	_repaint += delta
 	if _repaint < 1.0 / 30.0:
 		return
@@ -1483,6 +1487,27 @@ func _draw_minimap() -> void:
 ## A slot she does not have yet is not drawn, and the numbers never move -- see
 ## Main.tool_unlocked. The row is laid out for as many tools as TOOLS lists (the
 ## keys go to nine); it draws only the ones she owns.
+## A slot that has just received something glows for a moment. Set by Main when
+## a thing flying to her lands (Main.present_to_hand).
+const SLOT_PULSE := 0.6
+var slot_pulse: Dictionary = {}
+
+func pulse_slot(index: int) -> void:
+	if index >= 0:
+		slot_pulse[index] = SLOT_PULSE
+
+## 1 the instant it lands, falling to 0.
+func slot_pulse_left(index: int) -> float:
+	return clampf(float(slot_pulse.get(index, 0.0)) / SLOT_PULSE, 0.0, 1.0)
+
+## Whether the slot is drawn with its tool in it. It is hers from the moment the
+## make ends; it is shown when the thing reaches her.
+func slot_shown(index: int) -> bool:
+	if index < 0 or index >= main.TOOLS.size():
+		return false
+	return main.tool_unlocked(main.TOOLS[index]) \
+		and not main.presenting_tools.has(main.TOOLS[index])
+
 ## What she is holding, and what it is for -- in her words, not a manual's.
 func hotbar_caption() -> String:
 	if main == null or main.unlocked_tools().is_empty():
@@ -1531,10 +1556,17 @@ func _draw_hotbar() -> void:
 		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() else Rect2()
 		if rect.size.x <= 0.0:
 			continue
+		if not slot_shown(index):
+			# Hers already, but the thing is still in the air: an empty place for
+			# it to land in, so the eye knows where to look.
+			HudStyle.panel_faded(self, rect, 0.35, HudStyle.SLOT)
+			continue
 		var chosen: bool = index == main.tool_index
 		HudStyle.panel(self, rect, HudStyle.SLOT_ON if chosen else HudStyle.SLOT)
+		var landed: float = slot_pulse_left(index)
+		HudStyle.pulse(self, rect, landed)
 		var art := Rect2(rect.get_center() - Vector2.ONE * HudStyle.ICON_LARGE * 0.5,
-			Vector2.ONE * HudStyle.ICON_LARGE)
+			Vector2.ONE * HudStyle.ICON_LARGE).grow(sin(landed * PI) * 4.0)
 		match main.TOOLS[index]:
 			main.TOOL_PICKAXE:
 				_tool_art(PICKAXE_ART, art)
@@ -1670,13 +1702,23 @@ func _draw_room_fade() -> void:
 ## fourteen pixels off the bottom of the screen.
 const BASE_MENU_TOP := 14.0
 
+## The fire's window: a small workbench.
+##
+## One narrow card, the size of a list the player picks from rather than a
+## catalogue. Each row is a thing: its picture, its name, what it costs, and a
+## badge only when there is something to say (NEW, 만드는 중, 부족). What a
+## thing is *for* is one line under the list, for the row the cursor is on --
+## five sentences stacked down a window is the manual this pass takes out.
+## Things that are made once and are made leave the list for a "만든 것" line
+## at the foot. Everything here is HudStyle: the plate, the row, the badge, the
+## gaps. Nothing about this window is its own style.
 func base_menu_rect() -> Rect2:
 	var rows: float = float(maxi(1, main.base_rows().size()))
-	# No state lines above the rows any more, so the card is 46px shorter and the
-	# first row starts where they used to. Both numbers live here rather than
-	# being written twice: `base_menu_row_rect` reads the same offset.
-	var height: float = FRAME_HEADER + BASE_MENU_TOP + rows * MENU_ROW + 18.0
-	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
+	var width: float = minf(HudStyle.WINDOW_W_SMALL, size.x - MARGIN * 2.0)
+	var height: float = FRAME_HEADER + HudStyle.ITEM_GAP + rows * HudStyle.ROW_LARGE \
+		+ HudStyle.SECTION_GAP + _workbench_note_height(width) + HudStyle.PANEL_PADDING
+	if not main.crafts_made().is_empty():
+		height += HudStyle.ROW + HudStyle.ITEM_GAP
 	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
 
 ## Which row of the fire's window a point is on, or -1.
@@ -1693,8 +1735,24 @@ func base_menu_row_at(point: Vector2) -> int:
 
 func base_menu_row_rect(index: int) -> Rect2:
 	var card: Rect2 = base_menu_rect()
-	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + BASE_MENU_TOP - 4.0
-		+ float(index) * MENU_ROW), Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+	return Rect2(card.position + Vector2(HudStyle.ITEM_GAP,
+		FRAME_HEADER + HudStyle.ITEM_GAP + float(index) * HudStyle.ROW_LARGE),
+		Vector2(card.size.x - HudStyle.ITEM_GAP * 2.0, HudStyle.ROW_LARGE - 2.0))
+
+## The line under the list: what the row under the cursor is for.
+func workbench_note() -> String:
+	var rows: Array[Dictionary] = main.base_rows()
+	if rows.is_empty():
+		return ""
+	var row: Dictionary = rows[clampi(main.menu_index, 0, rows.size() - 1)]
+	if String(row["kind"]) == "fuel":
+		return "불이 더 멀리까지 닿는다." if not Defs.next_base_level(main.sim.stones_in).is_empty() \
+			else "불이 더 넓어지지는 않는다."
+	return String(Defs.BASE_CRAFTS[int(row["craft"])].get("note", ""))
+
+func _workbench_note_height(width: float) -> float:
+	return maxf(HudStyle.ROW, HudStyle.block_height(workbench_note(),
+		width - HudStyle.PANEL_PADDING * 2.0, HudStyle.TEXT_SMALL))
 
 # --- The machine window -------------------------------------------------------
 ## What this machine could make, and what it is doing about the one it is on.
@@ -1809,120 +1867,107 @@ func _draw_machine_row(index: int, row: Dictionary, machine) -> void:
 func _draw_base_menu() -> void:
 	if not main.base_menu_open:
 		return
-	_dim(0.45)
+	# A light dim: the fire and the snow around it stay visible behind the card,
+	# because the next thing that happens happens there.
+	_dim(0.25)
 	var card: Rect2 = base_menu_rect()
-	# The title, and nothing about the keys. The window has a cursor on a row and
-	# rows with prices on them; a player looking at that has already been told
-	# what up and down do by the thing moving when they press them.
-	_frame(card, Defs.COL_CORE, "기지")
-	# Which step it is on, in the header opposite the title. The ladder is what
-	# this window is for and the number was nowhere in it: the row underneath
-	# says what the next rung costs, and "3개" means one thing on the second rung
-	# and another on the ninth.
-	_text_in(Rect2(card.position + Vector2(card.size.x - 90.0, 16.0), Vector2(80.0, 14.0)),
-		"Lv %d" % Defs.base_level_shown(main.sim.base_level), 12,
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.95),
-		HORIZONTAL_ALIGNMENT_RIGHT)
-	# Two lines of state used to sit here: the circle and the stones in the fire
-	# on one, the torches and their seconds on the other. Both are gone.
-	#
-	# The first said what the upgrade row already says better -- that row reads
-	# "온기 7칸 → 9칸" next to its price, which is the same fact with the reason
-	# to care attached. The second was a torch's countdown in a window about the
-	# fire: the torch is in her hand, its clock is drawn on the tool it belongs
-	# to, and a number repeated somewhere it does not belong is a number the
-	# player has to check twice.
+	_frame(card, HudStyle.ACCENT, "기지 작업대")
+	HudStyle.text_in(self, Rect2(card.position.x, card.position.y + HudStyle.TITLE_BASELINE,
+		card.size.x - HudStyle.PANEL_PADDING, 14.0),
+		"Lv %d" % Defs.base_level_shown(main.sim.base_level), HudStyle.TEXT_SMALL,
+		HudStyle.ACCENT, HORIZONTAL_ALIGNMENT_RIGHT)
 	var rows: Array[Dictionary] = main.base_rows()
 	for index in rows.size():
 		_draw_base_row(index, rows[index])
+	# What the chosen row is for, once, under the list.
+	var y: float = FRAME_HEADER + HudStyle.ITEM_GAP + float(rows.size()) * HudStyle.ROW_LARGE
+	HudStyle.divider(self, card.position + Vector2(HudStyle.PANEL_PADDING,
+		y + HudStyle.SECTION_GAP * 0.5), card.size.x - HudStyle.PANEL_PADDING * 2.0)
+	y += HudStyle.SECTION_GAP
+	HudStyle.block(self, card.position + Vector2(HudStyle.PANEL_PADDING,
+		y + float(HudStyle.TEXT_SMALL) + 2.0), workbench_note(),
+		card.size.x - HudStyle.PANEL_PADDING * 2.0, HudStyle.TEXT_SMALL, HudStyle.TEXT_SUB)
+	y += _workbench_note_height(card.size.x)
+	# And what has been made, as pictures with a tick -- out of the list, not
+	# out of mind.
+	var made: Array[int] = main.crafts_made()
+	if made.is_empty():
+		return
+	y += HudStyle.ITEM_GAP
+	var middle: float = card.position.y + y + HudStyle.ROW * 0.5
+	var x: float = card.position.x + HudStyle.PANEL_PADDING
+	HudStyle.text(self, Vector2(x, HudStyle.baseline_for(middle, HudStyle.TEXT_SMALL)), "만든 것",
+		HudStyle.TEXT_SMALL, HudStyle.TEXT_SUB)
+	x += _text_width("만든 것", HudStyle.TEXT_SMALL) + HudStyle.ITEM_GAP * 2.0
+	for index: int in made:
+		var craft: Dictionary = Defs.BASE_CRAFTS[index]
+		Icons.draw_thing(self, Rect2(Vector2(x, middle - HudStyle.ICON_SMALL * 0.5),
+			Vector2.ONE * HudStyle.ICON_SMALL), String(craft.get("icon", "")))
+		x += HudStyle.ICON_SMALL + 2.0
+		_draw_tick(Vector2(x + 3.0, middle), HudStyle.DONE)
+		x += HudStyle.ITEM_GAP * 2.0 + 4.0
 
+## A check mark, drawn rather than typed (the font is cut from the game's own
+## strings).
+func _draw_tick(at: Vector2, tint: Color) -> void:
+	draw_line(at + Vector2(-3.0, 0.0), at + Vector2(-0.8, 2.4), tint, 1.6)
+	draw_line(at + Vector2(-0.8, 2.4), at + Vector2(3.4, -2.8), tint, 1.6)
+
+## One row: the picture, the name, the price under it, and a badge when the row
+## has something to say. The row under the cursor is lit the way the slot in her
+## hand is lit -- the same plate, so "chosen" looks the same everywhere.
 func _draw_base_row(index: int, row: Dictionary) -> void:
 	var rect: Rect2 = base_menu_row_rect(index)
 	var on_cursor: bool = index == main.menu_index
-	var accent: Color = Defs.COL_CORE
-	if String(row["kind"]) == "fuel":
-		_draw_base_fuel_row(rect, on_cursor, accent)
-		return
-	var craft: Dictionary = Defs.BASE_CRAFTS[int(row["craft"])]
-	var affordable: bool = main.sim.can_craft(String(craft["id"]))
-	# A bin already standing is not unaffordable, it is done.
-	var already: bool = String(craft["id"]) == "food_bin" and main.sim.food_placed
 	if on_cursor:
-		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
-		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
-		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
-	else:
-		draw_rect(rect, Color(1, 1, 1, 0.022))
-	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
-	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
-	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
-	Icons.draw_thing(self, icon,
-		Icons.THING_FOOD if String(craft["id"]) == "food_bin" else Icons.THING_TORCH)
-	var text_x: float = rect.position.x + 62.0
-	_text(Vector2(text_x, rect.position.y + 22.0), String(craft["name"]), 14,
-		Defs.COL_TEXT if affordable and not already else Defs.COL_TEXT_DIM)
-	_text(Vector2(text_x, rect.position.y + 42.0), String(craft["note"]), 11, Defs.COL_TEXT_DIM)
-	# The cost, on the right, coloured by whether it is actually payable.
+		HudStyle.panel(self, rect, HudStyle.BUTTON_ON)
+	var icon := Rect2(Vector2(rect.position.x + HudStyle.ITEM_GAP,
+		rect.get_center().y - HudStyle.ICON_LARGE * 0.5), Vector2.ONE * HudStyle.ICON_LARGE)
+	var text_x: float = icon.end.x + HudStyle.PANEL_PADDING
+	var top: float = rect.get_center().y - 2.0
+	var bottom: float = rect.get_center().y + float(HudStyle.TEXT_SMALL) + 2.0
+	var badge_at := Vector2(rect.end.x - HudStyle.ITEM_GAP, rect.get_center().y)
+	if String(row["kind"]) == "fuel":
+		Icons.draw_thing(self, icon.grow(-2.0), Icons.THING_CORE)
+		var span: Array[int] = main.fuel_progress()
+		var ready: bool = main.sim.can_feed_base()
+		HudStyle.text(self, Vector2(text_x, top), "기지 강화", HudStyle.TEXT_NORMAL,
+			HudStyle.TEXT_MAIN if ready else HudStyle.TEXT_SUB)
+		if span[1] > 0:
+			HudStyle.text(self, Vector2(text_x, bottom), "%s %d/%d" % [
+				Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], span[0], span[1]], HudStyle.TEXT_SMALL,
+				HudStyle.ACCENT if ready else HudStyle.DANGER)
+			if not ready:
+				HudStyle.badge(self, badge_at, "부족", HudStyle.DANGER)
+		return
+	var craft_index: int = int(row["craft"])
+	var craft: Dictionary = Defs.BASE_CRAFTS[craft_index]
+	var id: String = String(craft["id"])
+	var status: int = main.craft_status(craft_index)
+	Icons.draw_thing(self, icon.grow(-2.0), String(craft.get("icon", "")))
+	var name_tint: Color = HudStyle.TEXT_SUB if status == main.Craft.LOCKED else HudStyle.TEXT_MAIN
+	HudStyle.text(self, Vector2(text_x, top), String(craft["name"]), HudStyle.TEXT_NORMAL,
+		name_tint)
+	# The price: "무료", or what it takes with the count -- red when she is short.
 	var cost: Dictionary = craft["cost"]
 	var parts: Array[String] = []
 	for item_type: int in cost:
-		parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], int(cost[item_type])])
-	_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-		"세워짐" if already else " · ".join(parts), 13,
-		Defs.COL_TEXT_DIM if already else (Defs.COL_TEXT if affordable else Defs.COL_DANGER))
-
-## The row that hands the fire what she is carrying. Shown only while there is
-## something to hand over, so it is never a row that refuses.
-func _draw_base_fuel_row(rect: Rect2, on_cursor: bool, accent: Color) -> void:
-	if on_cursor:
-		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
-		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
-		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
-	else:
-		draw_rect(rect, Color(1, 1, 1, 0.022))
-	var icon := Rect2(rect.position + Vector2(10.0, rect.size.y * 0.5 - 20.0), Vector2(40.0, 40.0))
-	draw_rect(icon.grow(3.0), Color(0, 0, 0, 0.30))
-	draw_rect(icon.grow(3.0), Color(accent.r, accent.g, accent.b, 0.30), false, 1.0)
-	Icons.draw_thing(self, icon, Icons.THING_CORE)
-	var sim = main.sim
-	# Through `fuel_progress()` rather than recomputed here. The number the player
-	# reads and the number the code computes were two separate calculations of the
-	# same thing -- this one drawn, that one asserted by the golden test -- which
-	# is a pair that can only ever drift apart quietly.
-	var span: Array[int] = main.fuel_progress()
-	var have: int = span[0]
-	var want: int = span[1]
-	var ready: bool = sim.can_feed_base()
-	var text_x: float = rect.position.x + 62.0
-	# "연료 투입" described the gesture -- tipping a pack into a fire -- and left
-	# the player to work out what it bought. This row is the only way the circle
-	# ever grows, so it is named after that. "강화" rather than "업그레이드"
-	# because what happens is that the fire gets stronger, and a loanword for a
-	# menu operation says less about it than the plain word does.
-	_text(Vector2(text_x, rect.position.y + 22.0), "기지 강화", 14,
-		Defs.COL_TEXT if ready else Defs.COL_TEXT_DIM)
-	# What it does under the title and what it costs on the right, exactly like
-	# every other row in this window. The previous version spelled out a running
-	# sum -- "다음 단계까지 열석 3개 · 3개 부족" -- which is a sentence about
-	# arithmetic where the rest of the window has a price tag, and a reader who
-	# had learned where to look had to read this one differently.
-	# What it does, without the two numbers it used to do it with. "온기 7칸 →
-	# 9칸" is the circle on the snow written out in figures, and the circle is
-	# already on the snow -- a player who feeds the fire watches it widen. The
-	# top of the ladder still says something, because there the row refuses and a
-	# refusal with no reason is a broken key.
-	var next_level: Dictionary = Defs.next_base_level(sim.stones_in)
-	var effect: String = "온기가 더 넓어지지 않습니다" if next_level.is_empty() \
-		else "불이 더 멀리까지 닿는다"
-	_text(Vector2(text_x, rect.position.y + 42.0), effect, 11,
-		Defs.COL_CORE if ready else Defs.COL_TEXT_DIM)
-	if want > 0:
-		# Have against need, not need alone. "열석 3" answers what it costs and
-		# leaves "how far am I" to arithmetic; 0/3 is the same fact with the
-		# player's half already in it.
-		_text(Vector2(rect.position.x + rect.size.x - 96.0, rect.position.y + 32.0),
-			"%s %d/%d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], have, want], 13,
-			Defs.COL_TEXT if ready else Defs.COL_DANGER)
+		parts.append("%s ×%d" % [Defs.ITEM_SHORT[item_type], int(cost[item_type])])
+	var price: String = "무료" if parts.is_empty() else "  ".join(parts)
+	var affordable: bool = main.sim.can_craft(id)
+	HudStyle.text(self, Vector2(text_x, bottom), price, HudStyle.TEXT_SMALL,
+		HudStyle.ACCENT if affordable else HudStyle.DANGER)
+	match status:
+		main.Craft.CRAFTING:
+			# A word, not a second ring: how far along it is is the fire's to
+			# show, out in the world. The window says what, the world says how.
+			HudStyle.badge(self, badge_at, "만드는 중", HudStyle.ACCENT)
+		main.Craft.LOCKED:
+			HudStyle.badge(self, badge_at, "부족" if not affordable else "대기", HudStyle.DANGER
+				if not affordable else HudStyle.TEXT_SUB)
+		_:
+			if main.craft_is_new(id):
+				HudStyle.badge(self, badge_at, "NEW", HudStyle.ACCENT, true)
 
 func _draw_build_menu() -> void:
 	if not main.build_menu_open:

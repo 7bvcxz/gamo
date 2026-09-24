@@ -104,6 +104,20 @@ SOUNDS = {
     # something heard rather than something listened to.
     "nibble":  dict(seconds=0.045, f0=940, f1=610,  peak=0.13, decay=1.40,
                     noise=0.35, seed=37),
+    # The fire at work, once a second while it makes something (1.0.42). A
+    # tick, not a clank: high, very short and quiet, with a little hiss so it
+    # reads as a mechanism rather than a beep. It repeats, so it must be
+    # something heard rather than listened to.
+    "tick":    dict(seconds=0.040, f0=1320, f1=1240, peak=0.16, decay=1.45,
+                    noise=0.25, seed=71),
+    # The make finishing and the thing popping out of the fire: a short rising
+    # bubble. Rising, because something was produced.
+    "pop":     dict(seconds=0.090, f0=540, f1=1020,  peak=0.34, decay=1.25),
+    # Something important landing in her hands. Two bright notes a third apart,
+    # the same octave-step trick alloy uses, so it is an event and not a tone --
+    # and high, because every low sound in this game already means weight.
+    "chime":   dict(seconds=0.300, f0=1046, f1=1318, peak=0.30, decay=1.05,
+                    step=0.42, partials=[(2.0, 0.18)]),
     # Not an effect: the one note the music is played from. Music.gd triggers it
     # at different pitch_scales, which is why there is one sample and not a
     # score's worth. A rendered title theme would have been the largest file in
