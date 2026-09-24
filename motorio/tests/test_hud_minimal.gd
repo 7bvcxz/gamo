@@ -58,11 +58,13 @@ func _test_no_persistent_key_guide() -> void:
 	_assert(Defs.KEY_GUIDE.size() > 0, "대신 조작 표가 있다")
 	_assert(not Defs.key_guide_rows().is_empty(), "그리고 지금 유효한 줄이 있다")
 
-	# And the contextual prompt is untouched: it is drawn over her head, it shows
-	# one thing at a time, and each one retires once it has been learned. That is
-	# the opposite of a permanent legend and it stays.
+	# And the contextual prompt stays: one thing at a time, each one retired once
+	# it has been learned -- the opposite of a permanent legend. Since 1.0.41 it
+	# is drawn in the bottom-left corner by the HUD rather than over her head,
+	# and it is drawn in exactly one place.
 	var player: String = _source("res://scripts/PlayerActor.gd")
-	_assert(player.contains("_draw_prompt"), "상황별 안내는 그대로 남아 있다")
+	_assert(hud.contains("func _draw_prompt"), "상황별 안내는 그대로 남아 있다 (HUD 좌하단)")
+	_assert(not player.contains("func _draw_prompt"), "머리 위에 두 번째로 그리지 않는다")
 	_assert(Defs.key_prompt("MOVE").has("verb"), "첫 안내도 그대로다")
 
 # --- test_status_hud_has_no_clock -------------------------------------------

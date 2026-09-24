@@ -4,26 +4,34 @@ extends Control
 ## in one file; every position below is expressed against a screen edge so the
 ## HUD never depends on a fixed window size.
 
-const MARGIN := 20.0
-## One width for everything stacked in the top-left, rather than a width per
-## card measured from its own text.
+## Five places, one per corner and one along the bottom, and nothing anywhere
+## else while she is walking around:
 ##
-## The clock was 232, the throughput panel 244 and the goal and mission cards
-## whatever their longest line came to, so a column of four things had four left
-## edges' worth of right edge -- read as four panels that happened to be near
-## each other rather than as one column. 256 is the widest thing in it (the
-## throughput card at 244, the longest mission line at 253 with its dot and its
-## pad); text longer than that wraps now instead of the plate growing.
-const COLUMN_W := 256.0
-const SETTINGS_BUTTON := 34.0
+##   top-left      her: warmth, the day, and what she owns
+##   top-right     the world: the time of day, the weather, what she is after
+##   bottom-left   what just happened, and the one key that matters right now
+##   bottom-right  where she is
+##   bottom-centre what is in her hands
+##
+## Every plate is drawn by HudStyle, and every spacing below is one of its
+## tokens -- so the five read as one interface rather than five that happen to
+## share a screen. The middle of the screen belongs to the world.
+const MARGIN := HudStyle.OUTER_MARGIN
+## One width for the top-left card, rather than a width measured from its text.
+## The widest thing in it is a resource row with a rate: icon, name, a
+## right-aligned amount and "+12.3/분".
+const COLUMN_W := 236.0
+## The top-right card. A little narrower: its lines are sentences and wrap.
+const WORLD_W := 232.0
+const SETTINGS_BUTTON := 30.0
 ## Smallest logical canvas the layout is designed to hold. The height is not a
 ## round number: it is the status panel (190) plus the hotbar and its chip (154)
 ## plus the space the touch pad claims along the bottom (~180), which is the
 ## stack that has to coexist before anything is allowed to scale further.
 const MIN_LOGICAL := Vector2(340.0, 520.0)
-const SLOT_GAP := 10.0
-const SLOT_MAX_W := 118.0
-const SLOT_MIN_W := 54.0
+const SLOT_GAP := 8.0
+const SLOT_MAX_W := 56.0
+const SLOT_MIN_W := 44.0
 const SLOT_H := 56.0
 
 var main
@@ -91,14 +99,8 @@ func _process(delta: float) -> void:
 ## stay legible. On top of that sits the player's own setting.
 func _apply_scale() -> void:
 	var touch_pad: bool = main.touch != null and main.touch.visible
-	var base: float = Defs.UI_SCALE_TOUCH_BASE if touch_pad else Defs.UI_SCALE_DESKTOP_BASE
-	var want: float = base * float(main.ui_scale)
-	# A scale the screen cannot hold is worse than a small one: the status panel
-	# and the hotbar start overlapping and the player loses the cards entirely.
-	# Cap it at the largest value that still leaves a workable canvas.
 	var view: Vector2 = get_viewport_rect().size
-	want = minf(want, minf(view.x / MIN_LOGICAL.x, view.y / MIN_LOGICAL.y))
-	want = maxf(want, 0.1)
+	var want: float = scale_for(view, touch_pad, float(main.ui_scale))
 	var wanted_size: Vector2 = view / want
 	# Compare the size too, so a rotation or resize is picked up even when the
 	# scale itself has not moved.
@@ -107,83 +109,112 @@ func _apply_scale() -> void:
 	scale = Vector2(want, want)
 	size = wanted_size
 
-## The row shrinks rather than running off the screen once the player scales the
-## UI up, which is the whole point of letting them scale it up.
+## The HUD's scale on a screen of this size. A scale the screen cannot hold is
+## worse than a small one -- the status card and the hotbar start overlapping and
+## the player loses the cards entirely -- so it is capped at the largest value
+## that still leaves a workable canvas. Static so a test can ask it about a
+## screen the machine running the test does not have.
+static func scale_for(view: Vector2, touch_pad: bool, ui: float) -> float:
+	var base: float = Defs.UI_SCALE_TOUCH_BASE if touch_pad else Defs.UI_SCALE_DESKTOP_BASE
+	var want: float = base * ui
+	want = minf(want, minf(view.x / MIN_LOGICAL.x, view.y / MIN_LOGICAL.y))
+	return maxf(want, 0.1)
+
+## The bottom edge everything along the bottom stands on: above the touch pad
+## when there is one, because a panel drawn under a thumb button can never be
+## read or pressed.
+func floor_y() -> float:
+	return size.y - MARGIN - bottom_reserved()
+
+## Square slots. The row shrinks rather than running off the screen once the
+## player scales the UI up, which is the whole point of letting them.
 func hotbar_slot() -> Vector2:
 	var count: float = float(main.TOOLS.size()) if main != null else 1.0
 	var available: float = size.x - MARGIN * 2.0 - (count - 1.0) * SLOT_GAP
-	return Vector2(clampf(available / count, SLOT_MIN_W, SLOT_MAX_W), SLOT_H)
+	var side: float = clampf(available / count, SLOT_MIN_W, SLOT_MAX_W)
+	return Vector2(side, side)
 
 func hotbar_origin() -> Vector2:
 	var slot: Vector2 = hotbar_slot()
 	var total: float = float(maxi(1, main.unlocked_tools().size())) * (slot.x + SLOT_GAP) - SLOT_GAP
-	# Lifted clear of the thumb controls rather than sharing the bottom strip
-	# with them, which at large UI scales buried a card under the X button.
-	var bottom: float = size.y - slot.y - MARGIN - bottom_reserved()
-	# And never over the gacha button, which owns the bottom-left corner. On any
-	# real screen the centred row is nowhere near it; on the narrowest canvas the
-	# layout supports, centring puts the first card straight on top of it, and a
-	# button that cannot be pressed is worse than a row that is slightly off
-	# centre.
-	var left_limit: float = MARGIN + GACHA_BUTTON.x + SLOT_GAP
+	var bottom: float = floor_y() - slot.y
+	# And never over the gacha button, which owns the bottom-left corner when it
+	# exists. On the narrowest canvas the layout supports, centring would put the
+	# first slot straight on top of it, and a button that cannot be pressed is
+	# worse than a row that is slightly off centre.
+	var left_limit: float = MARGIN
+	if gacha_button_rect.size.x > 0.0:
+		left_limit = MARGIN + GACHA_BUTTON.x + SLOT_GAP
 	return Vector2(maxf(size.x * 0.5 - total * 0.5, left_limit), bottom)
 
-## Everything above the status panel, so the gear owns the very top-left corner.
-func status_top() -> float:
-	return MARGIN + SETTINGS_BUTTON + 8.0
+## The line over the slots that names what is in her hand.
+const CAPTION_H := 16.0
 
-## Below the gear, and never wider than the screen it is drawn on.
-## Two bars tall, where it used to be a 96-unit panel with a clock in it.
-const STATUS_ROW := 20.0
+## The top of everything the hotbar owns, caption included. Anything that has
+## to stay clear of the bottom-centre measures from here.
+func hotbar_top() -> float:
+	return hotbar_origin().y - CAPTION_H - HudStyle.ITEM_GAP
+
+## The horizontal span the hotbar and its caption take up.
+func hotbar_span() -> Vector2:
+	var slot: Vector2 = hotbar_slot()
+	var origin: Vector2 = hotbar_origin()
+	var total: float = float(maxi(1, main.unlocked_tools().size())) * (slot.x + SLOT_GAP) - SLOT_GAP
+	var caption: float = HudStyle.width_of(hotbar_caption(), HudStyle.TEXT_SMALL)
+	var half: float = maxf(total, caption) * 0.5
+	var centre: float = origin.x + total * 0.5
+	return Vector2(centre - half, centre + half)
+
+## Under the icon strip, so the gear owns the very top-left corner.
+func status_top() -> float:
+	return MARGIN + SETTINGS_BUTTON + HudStyle.ITEM_GAP
+
+## Two bars: warmth, then the day. The warmth bar is the long, thick one -- the
+## only readout in the corner that is ever an emergency.
+const STATUS_ROW := 18.0
 const STATUS_H := STATUS_ROW * 2.0
 ## Where a bar starts: past the glyph that says which bar it is.
 const BAR_X := 18.0
-const BAR_H := 9.0
+const BAR_H := 8.0
+const DAY_BAR_H := 5.0
 ## The day bar is deliberately shorter than the warmth bar.
 const DAY_BAR_SHARE := 0.62
 
+## The two bars, inside the card's padding.
 func status_rect() -> Rect2:
-	return Rect2(MARGIN, status_top(), column_width(), STATUS_H)
+	var card: Rect2 = status_card_rect()
+	return Rect2(card.position + Vector2.ONE * HudStyle.PANEL_PADDING,
+		Vector2(card.size.x - HudStyle.PANEL_PADDING * 2.0, STATUS_H))
+
+## The whole top-left plate: the bars, and the ledger under them.
+func status_card_rect() -> Rect2:
+	var height: float = HudStyle.PANEL_PADDING * 2.0 + STATUS_H
+	var rows: int = resource_rows().size()
+	if rows > 0:
+		height += HudStyle.SECTION_GAP + float(rows) * RESOURCE_ROW
+	return Rect2(MARGIN, status_top(), column_width(), height)
 
 ## And never wider than the screen it is drawn on.
 func column_width() -> float:
 	return minf(COLUMN_W, size.x - MARGIN * 2.0)
 
+## Whether the world card fits across the top beside the status card. On a phone
+## held upright it does not, and it stacks under it instead of on top of it.
+func world_beside_status() -> bool:
+	return size.x >= column_width() + WORLD_W + MARGIN * 3.0
+
 ## The bottom of everything stacked in the top-left corner.
-##
-## The cards on the right dodge the *clock* when the screen is too narrow to hold
-## both across the top, which was right when the clock was the only thing there.
-## The resource panel hangs below it and kept growing -- a row per material -- so
-## on a phone the objective card dropped exactly onto it. Asked as one question
-## so a third panel added under these two cannot be forgotten by three callers.
 func left_column_bottom() -> float:
-	var panel: Rect2 = status_rect()
-	var bottom: float = panel.position.y + panel.size.y
-	if not resource_rows().is_empty():
-		var box: Rect2 = resource_rect()
-		bottom = maxf(bottom, box.position.y + box.size.y)
-	# And the quest line, which is the third panel this comment warned about. It
-	# is often zero-high -- nothing active draws nothing at all -- so it is asked
-	# rather than assumed.
-	var quest: Rect2 = quest_hud_rect()
-	if quest.size.y > 0.0:
-		bottom = maxf(bottom, quest.position.y + quest.size.y)
+	var bottom: float = status_card_rect().end.y
+	if not world_beside_status():
+		var world: Rect2 = world_card_rect()
+		if world.size.y > 0.0:
+			bottom = maxf(bottom, world.end.y)
 	return bottom
 
-## And where the panel *below* the meter starts.
-##
-## The whole top-left is one column now -- clock, materials, throughput, then
-## what she is working towards -- and it is stacked here rather than by each card
-## measuring the one above it. The meter and the goal used to live in the
-## top-right corner and dodge each other there; two corners meant two places to
-## look and the right-hand one was the one the eye had no reason to be in.
-func goal_top() -> float:
-	var top: float = left_column_bottom() + 8.0
-	if main.meter_cell != Vector2i(9999, 9999) \
-			and main.sim.machine_at(main.meter_cell) != null:
-		var box: Rect2 = meter_rect()
-		top = maxf(top, box.position.y + box.size.y + 8.0)
-	return top
+## Where a window that hangs in the left column (the throughput card) starts.
+func meter_top() -> float:
+	return left_column_bottom() + HudStyle.SECTION_GAP
 
 ## Screen space the touch pad occupies along the bottom, in HUD-local units. The
 ## pad is laid out in viewport pixels and the HUD in scaled ones, so the two only
@@ -195,6 +226,10 @@ func bottom_reserved() -> float:
 	return float(main.touch.reserved_height()) / maxf(scale.x, 0.01) + 10.0
 
 func _layout() -> void:
+	# The gacha first: the hotbar keeps clear of its button, when there is one.
+	var floor_line: float = floor_y()
+	gacha_button_rect = Rect2(MARGIN, floor_line - GACHA_BUTTON.y, GACHA_BUTTON.x, GACHA_BUTTON.y)
+	_layout_gacha()
 	var slot: Vector2 = hotbar_slot()
 	var origin: Vector2 = hotbar_origin()
 	# One rect per tool, always -- a locked slot gets an empty rect so that
@@ -209,17 +244,18 @@ func _layout() -> void:
 			continue
 		hotbar_rects[index] = Rect2(origin + Vector2(float(shown) * (slot.x + SLOT_GAP), 0), slot)
 		shown += 1
-	var label: String = "R 출력 방향  오른쪽"
-	var width: float = _text_width(label, 12) + 44.0
-	direction_rect = Rect2(size.x * 0.5 - width * 0.5, origin.y - 58.0, width, 24.0)
+	# Laid out always, drawn and hit-tested only while it means something (the
+	# gun in her hand, loaded with a machine that has a front).
+	var label: String = _direction_label(Vector2i.RIGHT)
+	var width: float = HudStyle.width_of(label, HudStyle.TEXT_SMALL) + 40.0
+	direction_rect = Rect2(size.x * 0.5 - width * 0.5, hotbar_top() - 24.0 - HudStyle.ITEM_GAP,
+		width, 24.0)
 	settings_button_rect = Rect2(MARGIN, MARGIN, SETTINGS_BUTTON, SETTINGS_BUTTON)
-	# Beside the gear, sharing its top row. Two square buttons in the corner read
-	# as one strip of controls; putting the map anywhere else would make it a
-	# thing to hunt for.
-	map_button_rect = Rect2(MARGIN + SETTINGS_BUTTON + 6.0, MARGIN,
+	# Beside the gear, sharing its top row. Three square buttons in the corner
+	# read as one strip of controls.
+	map_button_rect = Rect2(MARGIN + SETTINGS_BUTTON + HudStyle.ITEM_GAP, MARGIN,
 		SETTINGS_BUTTON, SETTINGS_BUTTON)
-	# And the record, third in the same strip.
-	log_button_rect = Rect2(MARGIN + (SETTINGS_BUTTON + 6.0) * 2.0, MARGIN,
+	log_button_rect = Rect2(MARGIN + (SETTINGS_BUTTON + HudStyle.ITEM_GAP) * 2.0, MARGIN,
 		SETTINGS_BUTTON, SETTINGS_BUTTON)
 	var log_w: float = minf(520.0, size.x - MARGIN * 2.0)
 	var log_h: float = minf(420.0, size.y - MARGIN * 2.0)
@@ -233,12 +269,7 @@ func _layout() -> void:
 	quest_card_rect = Rect2(size.x * 0.5 - quest_w * 0.5, size.y * 0.5 - quest_h * 0.5,
 		quest_w, quest_h)
 	_layout_map()
-	# Bottom-left, bottom-aligned with the hotbar row so the two read as one
-	# strip, and above whatever the touch pad claims -- on a phone that corner is
-	# four thumb buttons and a button drawn under them can never be pressed.
-	var floor_y: float = size.y - MARGIN - bottom_reserved()
-	gacha_button_rect = Rect2(MARGIN, floor_y - GACHA_BUTTON.y, GACHA_BUTTON.x, GACHA_BUTTON.y)
-	_layout_gacha()
+	minimap_rect = _minimap_box()
 	_layout_settings()
 
 ## --- The slot machine ---------------------------------------------------------
@@ -559,54 +590,29 @@ func _panel(rect: Rect2, fill: Color, edge: Color, width: float = 1.0) -> void:
 	draw_rect(rect, edge, false, width)
 
 # --- Panel language -----------------------------------------------------------
-## One frame for every panel in the game.
+## Every window in the game goes through here, and here goes through HudStyle --
+## the same plate, edge and corner as the corner panels, so a window opening over
+## the HUD reads as more of the same interface rather than a second one. What
+## changes between windows is the colour of the title, and nothing else.
 ##
-## The HUD had grown a different box for every purpose: some outlined, some not,
-## edges in four colours, no shared spacing, nothing to tell the eye that two
-## panels belonged to the same interface. The genre this game is aiming at --
-## Factorio, Satisfactory, Planet Crafter -- gets a lot of its readability from
-## the opposite: every window is obviously the same window, and the only thing
-## that changes is the accent colour saying what kind of thing you are looking
-## at. So there is one function, and everything goes through it.
-##
-## Four parts: a drop shadow so the panel sits above the world rather than being
-## painted on it, a near-opaque body because ore silhouettes crawling behind text
-## is what made the old status panel unreadable, a bright accent rule along the
-## top edge, and corner ticks. The ticks are the cheapest way to make a plain
-## rectangle read as a machined object instead of a div.
-const FRAME_PAD := 10.0
-const FRAME_HEADER := 22.0
+## It used to be its own language: a near-opaque slab with a bright rule along
+## the top and machined corner ticks. That read as a different, colder game
+## from the one the characters are drawn in.
+const FRAME_PAD := HudStyle.PANEL_PADDING
+const FRAME_HEADER := HudStyle.TITLE_RULE
 
 func _frame(rect: Rect2, accent: Color, title: String = "") -> void:
-	draw_rect(Rect2(rect.position + Vector2(2.0, 3.0), rect.size), Color(0.02, 0.03, 0.06, 0.35))
-	draw_rect(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.97))
-	# A hairline inside the border catches the light and gives the edge depth
-	# without a second colour.
-	draw_rect(rect.grow(-1.0), Color(1, 1, 1, 0.045), false, 1.0)
-	draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.55), false, 1.0)
-	draw_rect(Rect2(rect.position, Vector2(rect.size.x, 2.0)), accent)
-	var tick: float = minf(9.0, rect.size.x * 0.16)
-	for corner: Array in [[rect.position + Vector2(0.0, rect.size.y), Vector2(1.0, -1.0)],
-			[rect.end, Vector2(-1.0, -1.0)]]:
-		var at: Vector2 = corner[0]
-		var step: Vector2 = corner[1]
-		draw_line(at, at + Vector2(tick * step.x, 0.0), Color(accent.r, accent.g, accent.b, 0.8), 2.0)
-		draw_line(at, at + Vector2(0.0, tick * step.y), Color(accent.r, accent.g, accent.b, 0.8), 2.0)
+	HudStyle.panel(self, rect, HudStyle.SOLID)
 	if title != "":
-		_text(rect.position + Vector2(FRAME_PAD, 16.0), title, 11, Color(accent.r, accent.g, accent.b, 0.95))
-		draw_line(rect.position + Vector2(FRAME_PAD, FRAME_HEADER),
-			rect.position + Vector2(rect.size.x - FRAME_PAD, FRAME_HEADER),
-			Color(accent.r, accent.g, accent.b, 0.22), 1.0)
+		HudStyle.title(self, rect, title, accent)
 
 ## Godot ignores horizontal alignment unless a width is supplied, so every
 ## centred string here spans an explicit box rather than a bare position.
 func _text(at: Vector2, body: String, size: int, color: Color) -> void:
-	draw_string(UIFont.FONT, at + Vector2(1, 1), body, HORIZONTAL_ALIGNMENT_LEFT, -1, size, Color(0.02, 0.03, 0.06, 0.75))
-	draw_string(UIFont.FONT, at, body, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
+	HudStyle.text(self, at, body, size, color)
 
 func _text_in(box: Rect2, body: String, size: int, color: Color, align: int = HORIZONTAL_ALIGNMENT_CENTER) -> void:
-	draw_string(UIFont.FONT, box.position + Vector2(1, 1), body, align, box.size.x, size, Color(0.02, 0.03, 0.06, 0.75))
-	draw_string(UIFont.FONT, box.position, body, align, box.size.x, size, color)
+	HudStyle.text_in(self, box, body, size, color, align)
 
 ## The two tools that are objects in the world as well as slots in the row.
 ##
@@ -627,7 +633,7 @@ func _tool_art(art: Texture2D, box: Rect2) -> void:
 	draw_texture_rect(art, Rect2(box.position + (box.size - drawn) * 0.5, drawn), false)
 
 func _text_width(body: String, size: int) -> float:
-	return UIFont.FONT.get_string_size(body, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	return HudStyle.width_of(body, size)
 
 ## A line that is allowed to be longer than the plate it sits on.
 ##
@@ -637,18 +643,13 @@ func _text_width(body: String, size: int) -> float:
 ## drawn straight out through the border, which on a phone was most of the
 ## sentence hanging over the snow.
 func _text_block(at: Vector2, body: String, width: float, size: int, color: Color) -> void:
-	draw_multiline_string(UIFont.FONT, at + Vector2(1, 1), body, HORIZONTAL_ALIGNMENT_LEFT,
-		width, size, -1, Color(0.02, 0.03, 0.06, 0.75))
-	draw_multiline_string(UIFont.FONT, at, body, HORIZONTAL_ALIGNMENT_LEFT, width, size, -1, color)
+	HudStyle.block(self, at, body, width, size, color)
 
 ## How tall that comes out. The card measures with this and draws with the one
 ## above, so the plate and the text cannot disagree about how many lines there
 ## are.
 func _text_block_height(body: String, width: float, size: int) -> float:
-	if body == "":
-		return 0.0
-	return UIFont.FONT.get_multiline_string_size(body, HORIZONTAL_ALIGNMENT_LEFT,
-		width, size).y
+	return HudStyle.block_height(body, width, size)
 
 func _draw() -> void:
 	if main == null:
@@ -672,9 +673,8 @@ func _draw() -> void:
 				_draw_title()
 			else:
 				_draw_status()
-				_draw_resources()
-				_draw_quest_hud()
-				_draw_palette()
+				_draw_world()
+				_draw_hotbar()
 			if slot_picker > 0:
 				_draw_slot_picker()
 			else:
@@ -686,16 +686,16 @@ func _draw() -> void:
 				_draw_cold_vignette()
 			_draw_blackout()
 			_draw_status()
-			_draw_resources()
-			_draw_quest_hud()
-			_draw_palette()
+			_draw_world()
+			_draw_minimap()
+			_draw_hotbar()
+			_draw_feed()
 			_draw_meter_card()
 			_draw_gacha_button()
 			_draw_build_menu()
 			_draw_base_menu()
 			_draw_machine_menu()
 			_draw_gacha_card()
-			_draw_message()
 	# Below the match, so they are on every screen -- except the opening and the
 	# end. Both are moments the game is not offering the player a control, and
 	# two little chrome squares in the corner say otherwise; on the game over
@@ -815,85 +815,120 @@ func _draw_snow(strength: float) -> void:
 
 # --- In-run UI ---------------------------------------------------------------
 
-## Her own situation, as two bars and nothing else.
+## Top-left: her own situation, on one plate.
 ##
-## This corner used to be a framed panel with a 26pt clock in it, a day-and-phase
-## caption, a half-circle sun arc and a warmth row -- four readouts and a border,
-## for a game whose whole design rule is that the screen should not have to be
-## read. The clock was the clearest case: a player converts "14:22" into "how
-## long until dark", and the bar under it already answers that directly. So the
-## number is gone and the arc became a bar, because two bars stacked read as one
-## glance where a number and an arc read as two.
+## Two bars and a ledger. The warmth bar is the long, thick one because it is the
+## only readout here that is ever an emergency; the day bar under it is shorter
+## and thinner and carries the day number in its tail. No clock: a player turns
+## "14:22" into "how long until dark", and the bar answers that directly.
 ##
-## No frame. The bars carry their own contrast -- an opaque dark track under an
-## opaque fill -- so they hold over snow without a plate behind them, which is
-## the thing that made this corner feel like a box.
+## This corner was two shaded boxes and a framed ledger with corner ticks, each
+## with its own margin, and the numbers were placed by eye -- so "100" floated
+## above its bar and "1일차" sat on top of it. Everything is centred on its row
+## by asking the font how tall it is (HudStyle.baseline_for).
 func _draw_status() -> void:
-	var panel: Rect2 = status_rect()
-	# A breath of shade rather than a panel: enough to keep the small glyphs off
-	# white snow, not enough to draw an edge anywhere.
-	draw_rect(panel.grow(5.0), Color(0.02, 0.03, 0.06, 0.30))
-	_draw_warmth_row(panel)
-	_draw_day_bar(panel)
-	_draw_info()
-	_draw_objective()
+	HudStyle.panel(self, status_card_rect())
+	var bars: Rect2 = status_rect()
+	_draw_warmth_row(bars)
+	_draw_day_bar(bars)
+	_draw_resources()
+	_draw_collapse_warning()
+
+## Body heat, the full width of the card.
+##
+## The number stayed, small, in the tail: below a quarter the bar is a short red
+## stub, and a stub does not distinguish "walk back now" from "you are not going
+## to make it".
+func _draw_warmth_row(bars: Rect2) -> void:
+	var warmth: float = main.player.warmth
+	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
+	var middle: float = bars.position.y + STATUS_ROW * 0.5
+	var icon := Vector2(bars.position.x + 6.0, middle)
+	var tint: Color = HudStyle.TEXT_SUB if k > 0.25 else HudStyle.DANGER
+	# A bulb and a stem, drawn rather than typed: the font is cut from the game's
+	# own strings and a glyph nobody wrote is not in it.
+	draw_circle(icon + Vector2(0.0, 3.2), 3.0, tint)
+	draw_line(icon + Vector2(0.0, 2.0), icon + Vector2(0.0, -5.0), tint, 2.0)
+	var tail: float = 26.0
+	var track := Rect2(bars.position.x + BAR_X, middle - BAR_H * 0.5,
+		maxf(20.0, bars.size.x - BAR_X - tail), BAR_H)
+	var fill: Color = HudStyle.ACCENT.lerp(HudStyle.DANGER, 1.0 - k)
+	if k < 0.25:
+		var pulse: float = 0.6 + sin(float(Time.get_ticks_msec()) / 90.0) * 0.4
+		fill = HudStyle.DANGER.lerp(Color.WHITE, pulse * 0.35)
+	HudStyle.bar(self, track, k, fill)
+	HudStyle.text_in(self, Rect2(track.end.x, HudStyle.baseline_for(middle, HudStyle.TEXT_SMALL),
+		bars.end.x - track.end.x, 14.0), "%d" % int(round(warmth)), HudStyle.TEXT_SMALL,
+		HudStyle.TEXT_MAIN if k > 0.25 else HudStyle.DANGER, HORIZONTAL_ALIGNMENT_RIGHT)
 
 ## How far through today she is, and which day it is.
 ##
-## Shorter than the warmth bar on purpose. They answer different sizes of
-## question -- one is "am I about to die", the other is "should I start walking
-## home" -- and two bars of exactly equal length read as one control split in
-## half. The tail is where the day number goes, so nothing overlaps at any scale.
-##
-## The stretch that is already dusk is marked in the track, so "how long until I
-## have to be somewhere warm" is read rather than calculated.
-func _draw_day_bar(panel: Rect2) -> void:
+## Shorter and thinner than the warmth bar on purpose: they answer different
+## sizes of question, and two equal bars read as one control split in half. The
+## stretch that is already dusk is marked in the track, so "how long until I have
+## to be somewhere warm" is read rather than calculated.
+func _draw_day_bar(bars: Rect2) -> void:
 	var night: bool = main.is_night()
-	var origin: Vector2 = panel.position + Vector2(0.0, STATUS_ROW)
-	var icon: Vector2 = origin + Vector2(7.0, 8.0)
-	var marker: Color = Color8(196, 212, 240) if night else Defs.COL_CORE
-	draw_circle(icon, 5.6, Color(marker.r, marker.g, marker.b, 0.20))
-	draw_circle(icon, 3.6, marker)
+	var middle: float = bars.position.y + STATUS_ROW * 1.5
+	var icon := Vector2(bars.position.x + 6.0, middle)
+	_draw_sun(icon, night, 1.0)
+	var day_text: String = "%d일차" % main.day_number
+	var tail: float = _text_width(day_text, HudStyle.TEXT_SMALL) + 8.0
+	var track := Rect2(bars.position.x + BAR_X, middle - DAY_BAR_H * 0.5,
+		maxf(20.0, (bars.size.x - BAR_X - tail) * DAY_BAR_SHARE), DAY_BAR_H)
+	var dusk_at: float = 1.0 - Defs.DUSK_SECONDS / Defs.DAY_SECONDS
+	HudStyle.bar(self, track, 0.0, HudStyle.TRACK)
+	var dusk := Rect2(track.position + Vector2(track.size.x * dusk_at, 0.0),
+		Vector2(track.size.x * (1.0 - dusk_at), track.size.y))
+	draw_colored_polygon(HudStyle.rounded(dusk, DAY_BAR_H * 0.5),
+		Color(HudStyle.DANGER.r, HudStyle.DANGER.g, HudStyle.DANGER.b, 0.35))
+	HudStyle.bar(self, track, clampf(main.day_fraction(), 0.0, 1.0),
+		HudStyle.ACCENT_COLD if night else Defs.COL_CLOCK_FILL, Color(0, 0, 0, 0))
+	# Left-aligned against the end of the bar, in the tail the bar leaves for it,
+	# so the two never overlap at any width the player can choose.
+	HudStyle.text(self, Vector2(track.end.x + 8.0, HudStyle.baseline_for(middle,
+		HudStyle.TEXT_SMALL)), day_text, HudStyle.TEXT_SMALL,
+		HudStyle.ACCENT_COLD if night else HudStyle.TEXT_SUB)
+
+## A sun, or once it has set, a bitten moon. Shared by the status card and the
+## world card so the two say "day" and "night" with the same picture.
+func _draw_sun(at: Vector2, night: bool, alpha: float) -> void:
+	var marker: Color = HudStyle.ACCENT_COLD if night else HudStyle.ACCENT
+	marker.a *= alpha
+	draw_circle(at, 5.4, Color(marker.r, marker.g, marker.b, 0.18 * alpha))
+	draw_circle(at, 3.4, marker)
 	if night:
-		# Bitten rather than drawn as an arc: a crescent is what says at a glance
-		# that the sun is no longer up.
-		draw_circle(icon + Vector2(1.9, -1.3), 2.8, Defs.COL_PANEL)
+		draw_circle(at + Vector2(1.8, -1.2), 2.7, Color(0.055, 0.075, 0.125, alpha))
 	else:
 		for spoke in 8:
 			var dir := Vector2.from_angle(float(spoke) * TAU / 8.0)
-			draw_line(icon + dir * 5.2, icon + dir * 6.8,
-				Color(marker.r, marker.g, marker.b, 0.75), 1.0)
+			draw_line(at + dir * 5.0, at + dir * 6.6,
+				Color(marker.r, marker.g, marker.b, 0.75 * alpha), 1.0)
 
-	var day_text: String = "%d일차" % main.day_number
-	var tail: float = _text_width(day_text, 11) + 8.0
-	var track := Rect2(origin + Vector2(BAR_X, 4.0),
-		Vector2(maxf(20.0, (panel.size.x - BAR_X - tail) * DAY_BAR_SHARE), BAR_H))
-	draw_rect(track, Color8(28, 36, 54))
-	var dusk_at: float = 1.0 - Defs.DUSK_SECONDS / Defs.DAY_SECONDS
-	draw_rect(Rect2(track.position + Vector2(track.size.x * dusk_at, 0.0),
-		Vector2(track.size.x * (1.0 - dusk_at), track.size.y)),
-		Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.38))
-	var travelled: float = clampf(main.day_fraction(), 0.0, 1.0)
-	draw_rect(Rect2(track.position, Vector2(track.size.x * travelled, track.size.y)),
-		Color8(196, 212, 240) if night else Defs.COL_CLOCK_FILL)
-	draw_rect(track, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g,
-		Defs.COL_PANEL_EDGE.b, 0.6), false, 1.0)
-	# Left-aligned against the end of the bar. `_text_in` centres by default, and
-	# the day bar deliberately leaves a wide tail -- so centring put the label in
-	# the middle of that tail, which is on top of the bar.
-	_text_in(Rect2(Vector2(track.end.x + 8.0, origin.y - 1.0),
-		Vector2(panel.end.x - track.end.x - 8.0, 16.0)), day_text, 11,
-		Defs.COL_DANGER if night else Defs.COL_CLOCK, HORIZONTAL_ALIGNMENT_LEFT)
+## The five seconds between reaching zero and falling. The one line allowed in
+## the middle of the screen, because it is the one thing on it that is about to
+## end the day -- and it sits low, under her, never across her.
+func _draw_collapse_warning() -> void:
+	if main.collapse_timer < 0.0:
+		return
+	var label: String = "쓰러지는 중…" if main.player.collapse > 0.0 \
+		else "의식이 흐려진다  %.1f초" % maxf(0.0, main.collapse_timer)
+	var width: float = _text_width(label, HudStyle.TEXT_TITLE) + HudStyle.PANEL_PADDING * 4.0
+	var chip := Rect2(size.x * 0.5 - width * 0.5, size.y * 0.64, width, 30.0)
+	HudStyle.panel(self, chip, HudStyle.SOLID)
+	HudStyle.text_in(self, Rect2(chip.position.x, HudStyle.baseline_for(chip.get_center().y,
+		HudStyle.TEXT_TITLE), chip.size.x, 18.0), label, HudStyle.TEXT_TITLE, HudStyle.DANGER)
+
 # --- Resource ledger ----------------------------------------------------------
-const RESOURCE_ROW := 17.0
+const RESOURCE_ROW := 18.0
 
-## What the player owns and how fast it is arriving, one row each. Separate from
-## the status panel: they answer different questions, and every resource added to
-## the game used to make the clock above it harder to read.
+## The rows under the bars, inside the same plate. Separate rows rather than a
+## framed box of their own: the corner is one card, and a card inside a card is
+## the thing this pass took out.
 func resource_rect() -> Rect2:
-	var panel: Rect2 = status_rect()
-	return Rect2(panel.position + Vector2(0.0, panel.size.y + 8.0),
-		Vector2(panel.size.x, FRAME_HEADER + 14.0 + float(resource_rows().size()) * RESOURCE_ROW))
+	var bars: Rect2 = status_rect()
+	return Rect2(Vector2(bars.position.x, bars.end.y + HudStyle.SECTION_GAP),
+		Vector2(bars.size.x, float(resource_rows().size()) * RESOURCE_ROW))
 
 ## [name, amount, rate text, colour]. Heat first because it is the score; power
 ## last and only once something generates it, since a row reading zero of zero
@@ -936,97 +971,240 @@ func _draw_resources() -> void:
 	if rows.is_empty():
 		return
 	var box: Rect2 = resource_rect()
-	_frame(box, Defs.COL_CORE, "자원")
-	var y: float = FRAME_HEADER + 2.0
+	HudStyle.divider(self, box.position - Vector2(0.0, HudStyle.SECTION_GAP * 0.5), box.size.x)
+	var y: float = box.position.y
 	for row: Array in rows:
+		var middle: float = y + RESOURCE_ROW * 0.5
 		var tint: Color = row[3]
+		var icon := Rect2(Vector2(box.position.x, middle - HudStyle.ICON_SMALL * 0.5),
+			Vector2(HudStyle.ICON_SMALL, HudStyle.ICON_SMALL))
 		if int(row[4]) >= 0:
-			Icons.draw_item(self, Rect2(box.position + Vector2(FRAME_PAD, y - 2.0),
-				Vector2(15.0, 15.0)), int(row[4]))
+			Icons.draw_item(self, icon, int(row[4]))
 		else:
-			draw_circle(box.position + Vector2(FRAME_PAD + 7.0, y + 5.0), 3.6, tint)
-		_text(box.position + Vector2(FRAME_PAD + 20.0, y + 9.0), String(row[0]), 12, Defs.COL_TEXT)
+			draw_circle(icon.get_center(), 3.6, tint)
+		var baseline: float = HudStyle.baseline_for(middle, HudStyle.TEXT_NORMAL)
+		HudStyle.text(self, Vector2(box.position.x + HudStyle.ICON_SMALL + HudStyle.ITEM_GAP,
+			baseline), String(row[0]), HudStyle.TEXT_NORMAL, HudStyle.TEXT_MAIN)
 		# Amount and rate are right-aligned in their own columns, so the eye can
 		# run down either one without reading the other.
-		_text_in(Rect2(box.position + Vector2(box.size.x - 146.0, y + 9.0), Vector2(70.0, 14)),
-			String(row[1]), 13, Defs.COL_TEXT, HORIZONTAL_ALIGNMENT_RIGHT)
-		# Wider than it was: "+12.3/분" needs more room than the per-second form
-		# it replaced, and a clipped rate is worse than no rate.
-		_text_in(Rect2(box.position + Vector2(box.size.x - 70.0, y + 9.0), Vector2(58.0, 14)),
-			String(row[2]), 11, tint, HORIZONTAL_ALIGNMENT_RIGHT)
+		HudStyle.text_in(self, Rect2(box.end.x - 118.0, baseline, 58.0, 14.0), String(row[1]),
+			HudStyle.TEXT_NORMAL, HudStyle.TEXT_MAIN, HORIZONTAL_ALIGNMENT_RIGHT)
+		HudStyle.text_in(self, Rect2(box.end.x - 56.0, HudStyle.baseline_for(middle,
+			HudStyle.TEXT_SMALL), 56.0, 14.0), String(row[2]), HudStyle.TEXT_SMALL, tint,
+			HORIZONTAL_ALIGNMENT_RIGHT)
 		y += RESOURCE_ROW
 
-# --- The quest line -----------------------------------------------------------
-## What she is working on, under the ledger, in one line and a count.
+# --- The world ----------------------------------------------------------------
+## Top-right: what the world is doing and what she is after.
 ##
-## Not a panel. The corner already carries two bars and a list of materials, and
-## a third framed box under them is the thing this pass exists to stop. When
-## nothing is active it draws nothing at all -- an empty plate labelled 임무 is
-## worse than no plate, and this corner has learned that twice.
-const QUEST_ROW_H := 16.0
-const QUEST_LINE_W := 12
-## How long a finished quest stays on the line before the next one takes it.
-const QUEST_DONE_HOLD := 2.0
+## A header -- the time of day and the weather, as two pictures and two words --
+## then whatever is true right now that she should act on (the cold, dusk,
+## night), then up to three quests she is working on. Finished quests do not stay:
+## a tick for a breath and then the next one takes the line.
+##
+## This used to be three different cards stacked in the left column under the
+## ledger -- a state card, a goal card with an icon well, and a mission card --
+## and the mission card and the quest line were drawing the same sentence twice,
+## one under the other. They are one card now, reading one list.
+const QUEST_SHOWN := 3
+const QUEST_MARK_W := 16.0
+const QUEST_BAR_H := 4.0
 
-func quest_hud_text() -> String:
+## "낮", "해질녘", "밤" -- or the hut, where there is no time of day.
+func phase_label() -> String:
+	if not Zone.clock_runs(main.zone()):
+		return "숙소 안"
+	if main.is_night():
+		return "밤"
+	if main.is_dusk():
+		return "해질녘"
+	return "낮"
+
+## The weather, as it feels where she is standing. The world has one weather --
+## it snows -- so what changes is whether she is inside the fire's reach.
+func weather_label() -> String:
+	if not Zone.has_weather(main.zone()):
+		return "따뜻함"
+	var warm: bool = main.sim.base_placed and main.sim.is_warm(main.player.cell())
+	return "눈 · 포근함" if warm else "눈 · 추움"
+
+## What is true right now and worth acting on, with the colour it is said in.
+func world_note() -> Dictionary:
+	var text: String = main.info()
+	if text == "":
+		return {}
+	var tint: Color = HudStyle.ACCENT
+	if not main.is_night() and not main.is_dusk():
+		tint = HudStyle.DANGER
+	elif main.is_night():
+		tint = HudStyle.ACCENT_COLD
+	return {"text": text, "color": tint}
+
+## The rows the card lists: a quest that just finished (for a breath), then the
+## open ones, at most three in all.
+func world_quests() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
 	if main.quest_done_flash > 0.0:
-		return String(main.quest_done_title)
-	var rows: Array[Dictionary] = main.active_quests()
+		out.append({"title": String(main.quest_done_title), "done": true, "current": 0,
+			"target": 0})
+	for row: Dictionary in main.active_quests():
+		if out.size() >= QUEST_SHOWN:
+			break
+		out.append({"title": String(row["title"]), "done": false,
+			"current": int(row["current"]), "target": int(row["target"])})
+	return out
+
+## The opening's own line when it says something the quest list does not -- the
+## hint that rides along while she carries the hut, say.
+func world_hint() -> String:
+	var text: String = main.objective()
+	if text == "":
+		return ""
+	for row: Dictionary in main.active_quests():
+		if String(row["title"]) == text:
+			return ""
+	return text
+
+## The first quest line, as the tests and the old corner line read it: the tick
+## while one finishes, otherwise the first open quest.
+func quest_hud_text() -> String:
+	var rows: Array[Dictionary] = world_quests()
 	return "" if rows.is_empty() else String(rows[0]["title"])
 
-## Directly under the ledger. Measured from the ledger rather than from
-## `left_column_bottom()`, which is what everything else below asks -- that
-## function now includes this one, and a panel that measures from the bottom of a
-## stack it is part of measures from itself.
-func quest_hud_rect() -> Rect2:
-	var text: String = quest_hud_text()
-	var under: float = status_rect().end.y
-	if not resource_rows().is_empty():
-		under = maxf(under, resource_rect().end.y)
-	if text == "":
-		return Rect2(MARGIN, under, 0.0, 0.0)
-	var height: float = 8.0 + _text_block_height(text, column_width() - 26.0, QUEST_LINE_W)
-	if main.quest_done_flash <= 0.0 and not main.active_quests().is_empty():
-		var row: Dictionary = main.active_quests()[0]
-		if int(row["target"]) > 0:
-			height += QUEST_ROW_H
-	return Rect2(MARGIN, under + 8.0, column_width(), height)
+func world_width() -> float:
+	if world_beside_status():
+		return minf(WORLD_W, size.x - MARGIN * 2.0)
+	return column_width()
 
-func _draw_quest_hud() -> void:
-	var text: String = quest_hud_text()
-	if text == "":
-		return
-	var box: Rect2 = quest_hud_rect()
-	var done: bool = main.quest_done_flash > 0.0
-	# It fades rather than vanishing: the tick is the only congratulation this
-	# game gives, and a line that blinks out reads as a mistake.
+func _world_text_width() -> float:
+	return world_width() - HudStyle.PANEL_PADDING * 2.0
+
+func _quest_row_height(row: Dictionary) -> float:
+	var height: float = HudStyle.block_height(String(row["title"]),
+		_world_text_width() - QUEST_MARK_W, HudStyle.TEXT_NORMAL)
+	if not bool(row["done"]) and int(row["target"]) > 0:
+		height += HudStyle.ITEM_GAP + QUEST_BAR_H
+	return height
+
+## The card, measured from the same helpers the drawing uses.
+func world_card_rect() -> Rect2:
+	var width: float = world_width()
+	var height: float = HudStyle.PANEL_PADDING * 2.0 + HudStyle.ROW
+	var note: Dictionary = world_note()
+	if not note.is_empty():
+		height += HudStyle.ITEM_GAP + HudStyle.block_height(String(note["text"]),
+			_world_text_width(), HudStyle.TEXT_SMALL)
+	var quests: Array[Dictionary] = world_quests()
+	if not quests.is_empty():
+		height += HudStyle.SECTION_GAP
+		for row: Dictionary in quests:
+			height += _quest_row_height(row) + HudStyle.ITEM_GAP
+	var hint: String = world_hint()
+	if hint != "":
+		height += HudStyle.ITEM_GAP + HudStyle.block_height(hint, _world_text_width() -
+			QUEST_MARK_W, HudStyle.TEXT_SMALL)
+	if world_beside_status():
+		return Rect2(size.x - MARGIN - width, MARGIN, width, height)
+	return Rect2(MARGIN, status_card_rect().end.y + HudStyle.SECTION_GAP, width, height)
+
+## Where the quest rows sit inside the card, or a zero-high rect when there are
+## none -- an empty plate labelled 임무 is worse than no plate.
+func quest_hud_rect() -> Rect2:
+	var quests: Array[Dictionary] = world_quests()
+	var card: Rect2 = world_card_rect()
+	if quests.is_empty():
+		return Rect2(card.position.x, card.end.y, 0.0, 0.0)
+	var top: float = card.position.y + HudStyle.PANEL_PADDING + HudStyle.ROW
+	var note: Dictionary = world_note()
+	if not note.is_empty():
+		top += HudStyle.ITEM_GAP + HudStyle.block_height(String(note["text"]),
+			_world_text_width(), HudStyle.TEXT_SMALL)
+	top += HudStyle.SECTION_GAP
+	var height := 0.0
+	for row: Dictionary in quests:
+		height += _quest_row_height(row) + HudStyle.ITEM_GAP
+	return Rect2(card.position.x + HudStyle.PANEL_PADDING, top, _world_text_width(), height)
+
+func _draw_world() -> void:
+	var card: Rect2 = world_card_rect()
+	HudStyle.panel(self, card)
+	var x: float = card.position.x + HudStyle.PANEL_PADDING
+	var middle: float = card.position.y + HudStyle.PANEL_PADDING + HudStyle.ROW * 0.5
+	var night: bool = main.is_night()
+	# The header: sun or moon and the time of day, then a flake and the weather.
+	_draw_sun(Vector2(x + 6.0, middle), night, 1.0)
+	var baseline: float = HudStyle.baseline_for(middle, HudStyle.TEXT_NORMAL)
+	var phase: String = phase_label()
+	HudStyle.text(self, Vector2(x + 18.0, baseline), phase, HudStyle.TEXT_NORMAL,
+		HudStyle.TEXT_MAIN)
+	var flake_x: float = x + 18.0 + _text_width(phase, HudStyle.TEXT_NORMAL) + 16.0
+	_draw_flake(Vector2(flake_x, middle), HudStyle.ACCENT_COLD)
+	HudStyle.text(self, Vector2(flake_x + 11.0, HudStyle.baseline_for(middle, HudStyle.TEXT_SMALL)),
+		weather_label(), HudStyle.TEXT_SMALL, HudStyle.TEXT_SUB)
+	var y: float = card.position.y + HudStyle.PANEL_PADDING + HudStyle.ROW
+	var note: Dictionary = world_note()
+	if not note.is_empty():
+		y += HudStyle.ITEM_GAP
+		var body: String = String(note["text"])
+		HudStyle.block(self, Vector2(x, y + float(HudStyle.TEXT_SMALL)), body, _world_text_width(),
+			HudStyle.TEXT_SMALL, note["color"])
+		y += HudStyle.block_height(body, _world_text_width(), HudStyle.TEXT_SMALL)
+	var quests: Array[Dictionary] = world_quests()
+	if not quests.is_empty():
+		HudStyle.divider(self, Vector2(x, y + HudStyle.SECTION_GAP * 0.5), _world_text_width())
+		y += HudStyle.SECTION_GAP
+		for row: Dictionary in quests:
+			y = _draw_world_quest(x, y, row) + HudStyle.ITEM_GAP
+	var hint: String = world_hint()
+	if hint != "":
+		y += HudStyle.ITEM_GAP
+		HudStyle.block(self, Vector2(x + QUEST_MARK_W, y + float(HudStyle.TEXT_SMALL)), hint,
+			_world_text_width() - QUEST_MARK_W, HudStyle.TEXT_SMALL, HudStyle.TEXT_SUB)
+
+## One quest: a ring (or a tick, for a breath, when it is done), the sentence,
+## and a thin bar with the count when it has one. The count is never inside the
+## sentence -- a line with a number in it goes stale the moment the number moves.
+func _draw_world_quest(x: float, y: float, row: Dictionary) -> float:
+	var done: bool = bool(row["done"])
 	var alpha: float = 1.0 if not done else clampf(main.quest_done_flash / 0.5, 0.0, 1.0)
-	var tint: Color = Defs.COL_BELT_RIM if done else Defs.COL_CORE
-	draw_rect(box.grow(4.0), Color(0.02, 0.03, 0.06, 0.30 * alpha))
-	var mark: Vector2 = box.position + Vector2(8.0, 9.0)
+	var tint: Color = HudStyle.DONE if done else HudStyle.ACCENT
+	var title: String = String(row["title"])
+	var width: float = _world_text_width() - QUEST_MARK_W
+	var first_middle: float = y + float(HudStyle.TEXT_NORMAL) * 0.6
+	var mark := Vector2(x + 5.0, first_middle)
 	if done:
-		# A tick, drawn rather than typed: the font is subset from the game's own
-		# strings and a glyph nobody wrote is a glyph that is not in the file.
 		draw_line(mark + Vector2(-3.5, 0.0), mark + Vector2(-1.0, 2.6),
 			Color(tint.r, tint.g, tint.b, alpha), 1.8)
 		draw_line(mark + Vector2(-1.0, 2.6), mark + Vector2(4.0, -3.0),
 			Color(tint.r, tint.g, tint.b, alpha), 1.8)
 	else:
-		draw_arc(mark, 3.4, 0.0, TAU, 16, Color(tint.r, tint.g, tint.b, 0.85), 1.4)
-	_text_block(box.position + Vector2(20.0, 12.0), text, column_width() - 26.0,
-		QUEST_LINE_W, Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, alpha))
-	if done:
-		return
-	var rows: Array[Dictionary] = main.active_quests()
-	if rows.is_empty() or int(rows[0]["target"]) <= 0:
-		return
-	# The count is its own line under the sentence rather than inside it: the
-	# mission text may not carry a digit -- there is a test that says so, because
-	# a line with a number in it goes stale the moment the number moves.
-	_text(box.position + Vector2(20.0, box.size.y - 3.0),
-		"%d / %d" % [int(rows[0]["current"]), int(rows[0]["target"])], 11, tint)
+		draw_arc(mark, 3.4, 0.0, TAU, 16, Color(tint.r, tint.g, tint.b, 0.9), 1.4)
+	var body: Color = HudStyle.TEXT_SUB if done else HudStyle.TEXT_MAIN
+	HudStyle.block(self, Vector2(x + QUEST_MARK_W, y + float(HudStyle.TEXT_NORMAL)), title, width,
+		HudStyle.TEXT_NORMAL, Color(body.r, body.g, body.b, alpha))
+	y += HudStyle.block_height(title, width, HudStyle.TEXT_NORMAL)
+	if done or int(row["target"]) <= 0:
+		return y
+	y += HudStyle.ITEM_GAP
+	var count: String = "%d / %d" % [int(row["current"]), int(row["target"])]
+	var count_w: float = _text_width(count, HudStyle.TEXT_SMALL) + HudStyle.ITEM_GAP
+	var track := Rect2(x + QUEST_MARK_W, y, maxf(20.0, width - count_w), QUEST_BAR_H)
+	HudStyle.bar(self, track, float(row["current"]) / maxf(float(row["target"]), 1.0), tint)
+	HudStyle.text_in(self, Rect2(track.end.x, HudStyle.baseline_for(track.get_center().y,
+		HudStyle.TEXT_SMALL), count_w, 14.0), count, HudStyle.TEXT_SMALL, tint,
+		HORIZONTAL_ALIGNMENT_RIGHT)
+	return y + QUEST_BAR_H
+
+## A six-armed flake. Drawn, not typed, for the same reason as the thermometer.
+func _draw_flake(at: Vector2, tint: Color) -> void:
+	for arm in 3:
+		var dir := Vector2.from_angle(float(arm) * PI / 3.0 + PI * 0.5)
+		draw_line(at - dir * 4.6, at + dir * 4.6, tint, 1.2)
+	draw_circle(at, 1.3, tint)
 
 # --- The quest window ---------------------------------------------------------
+## The count line under a quest in the Q window.
+const QUEST_ROW_H := 16.0
 ## How tall the list comes out. The card and the drawing ask the same question,
 ## so a wrapped line cannot end up drawn past the bottom of its own plate.
 func quest_card_height(width: float) -> float:
@@ -1107,317 +1285,305 @@ func _draw_quest_entry(card: Rect2, y: float, row: Dictionary, done: bool,
 		y += QUEST_ROW_H
 	return y + 6.0
 
-## The next useful action, always on screen. This is the whole onboarding: no
-## modal tutorial, no text wall, just one line that keeps up with the player.
-## Split out from the drawing so the placement can be asserted directly; the
-## overlap this avoids only appears at scales a test has to drive deliberately.
-## The mission card: a header, a picture of the thing being asked for, and the
-## line. The picture is the point -- "고양이 상자 3개를 모으세요" means nothing until
-## you know what a cat crate looks like, and the genre's answer to that has always
-## been to put the item next to the sentence rather than to describe it.
-const OBJECTIVE_ICON := 44.0
-const OBJECTIVE_H := 68.0
-
-## The state card. Shorter than the goal card -- it has no icon well and one line
-## -- and it takes the top-right corner, with the goal card sliding under it.
-const INFO_H := 40.0
-const INFO_GAP := 6.0
-
-## The text column inside the state card, to the right of its icon.
-func info_text_width() -> float:
-	return column_width() - INFO_H - 16.0
-
-func info_rect(text: String) -> Rect2:
-	var height: float = maxf(INFO_H,
-		_text_block_height(text, info_text_width(), 12) + 18.0)
-	return Rect2(MARGIN, goal_top(), column_width(), height)
-
-## Where the goal card's line starts, and how much room it has. Asked once so
-## the rectangle and the drawing measure the same column.
-func objective_text_x() -> float:
-	return FRAME_PAD + OBJECTIVE_ICON * 0.76 + 16.0
-
-func objective_text_width() -> float:
-	return column_width() - objective_text_x() - 12.0
-
-func objective_rect(text: String) -> Rect2:
-	var height: float = maxf(OBJECTIVE_H, FRAME_HEADER + 12.0
-		+ _text_block_height(text, objective_text_width(), 12))
-	var box := Rect2(MARGIN, goal_top(), column_width(), height)
-	# And under the state card whenever the world has something to say, which is
-	# what "above the goal" means: the thing that is true right now sits over the
-	# thing being worked towards, and neither evicts the other.
-	var state: String = main.info()
-	if state != "":
-		var above: Rect2 = info_rect(state)
-		box.position.y = maxf(box.position.y, above.position.y + above.size.y + INFO_GAP)
-	return box
-
-## Drawn before the goal card, because the goal card's own rectangle is measured
-## from this one and a reader following the paint order should meet them in that
-## order too.
-func _draw_info() -> void:
-	var row: Dictionary = main.info_data()
-	if not row.has("text"):
-		return
-	var text: String = String(row["text"])
-	var box: Rect2 = info_rect(text)
-	# Its own colour, not the goal's. The two cards are stacked and the same
-	# amber twice reads as one panel that grew a line.
-	_panel(box, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.90),
-		Color(Defs.COL_BELT_RIM.r, Defs.COL_BELT_RIM.g, Defs.COL_BELT_RIM.b, 0.75), 1.0)
-	var slot := Rect2(box.position + Vector2(9.0, 9.0), Vector2.ONE * (INFO_H - 18.0))
-	_draw_goal_icon(slot, row)
-	var block: float = _text_block_height(text, info_text_width(), 12)
-	_text_block(box.position + Vector2(INFO_H + 4.0, (box.size.y - block) * 0.5 + 11.0),
-		text, info_text_width(), 12, Defs.COL_TEXT)
-
-## The mission card: the open rungs of all three tracks.
-##
-## One line was wrong for this game. The fire's next step, the animal in the ice
-## and the first belt are three things the player is working towards at once, and
-## a single card meant whichever one happened to be showing was the only one that
-## existed. Grouped by track, because "기지" and "고양이" are different kinds of
-## wanting and reading them as one list makes them look like a queue.
-const MISSION_ROW_H := 17.0
-const MISSION_HEAD_H := 15.0
-
-## The column a mission line is written in: past the dot, short of the border.
-func mission_text_width() -> float:
-	return column_width() - 38.0
-
-## How tall one rung comes out. Two lines of Korean is a real rung -- 임무 lines
-## are sentences -- and the card and the drawing both ask this, so a wrapped line
-## cannot end up drawn past the bottom of its own plate.
-func mission_row_height(line: String) -> float:
-	return maxf(MISSION_ROW_H, _text_block_height(line, mission_text_width(), 12) + 3.0)
-
-func mission_card_rect() -> Rect2:
-	var rows: Array[Dictionary] = main.open_missions()
-	var tracks := {}
-	var height: float = FRAME_HEADER + 10.0
-	for row: Dictionary in rows:
-		tracks[int(row["track"])] = true
-		height += mission_row_height(String(row["line"]))
-	height += float(tracks.size()) * MISSION_HEAD_H
-	var box := Rect2(MARGIN, goal_top(), column_width(), maxf(height, 44.0))
-	var state: String = main.info()
-	if state != "":
-		var above: Rect2 = info_rect(state)
-		box.position.y = maxf(box.position.y, above.position.y + above.size.y + INFO_GAP)
-	return box
-
-## Whichever card is in the top-right corner right now: the opening speaks in one
-## line and everything after it is the three tracks. Anything that has to sit
-## below "the goal" asks this rather than picking one of the two.
-func goal_area() -> Rect2:
-	var text: String = main.objective()
-	if text != "":
-		return objective_rect(text)
-	if main.open_missions().is_empty():
-		var state: String = main.info()
-		return info_rect(state) if state != "" else Rect2(size.x - MARGIN, MARGIN, 0.0, 0.0)
-	return mission_card_rect()
-
-func _draw_missions() -> void:
-	var rows: Array[Dictionary] = main.open_missions()
-	# Nothing open is a real state -- the opening, and the gaps between rungs --
-	# and an empty framed card in the corner is worse than no card.
-	if rows.is_empty():
-		return
-	var box: Rect2 = mission_card_rect()
-	_frame(box, Defs.COL_CORE, "임무")
-	var y: float = box.position.y + FRAME_HEADER + 4.0
-	var track := -1
-	for row: Dictionary in rows:
-		if int(row["track"]) != track:
-			track = int(row["track"])
-			y += MISSION_HEAD_H
-			_text(Vector2(box.position.x + 12.0, y - 3.0), Defs.TRACK_NAMES[track], 11,
-				Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85))
-		var line: String = String(row["line"])
-		y += mission_row_height(line)
-		# A dot rather than a bullet character: the font is subset from the source
-		# and a glyph nobody wrote into a string is a glyph that is not in it.
-		draw_circle(Vector2(box.position.x + 18.0, y - 8.0), 2.0, Defs.COL_TEXT_DIM)
-		_text_block(Vector2(box.position.x + 26.0, y - 4.0), line, mission_text_width(), 12,
-			Defs.COL_TEXT)
-
-func _draw_objective() -> void:
-	var goal: Dictionary = main.objective_data()
-	var text: String = String(goal["text"])
-	# The opening still speaks in one line, and once it is over the card becomes
-	# the three tracks.
-	if text == "":
-		_draw_missions()
-		return
-	# Unless the quest line above is already saying it. The quest list projects
-	# the opening's own state, so its first active row and this card were drawing
-	# the same sentence twice, one under the other, in a corner this pass exists
-	# to empty out. The line wins: it is smaller, it is where the count goes, and
-	# it is the thing the player was told to look at.
-	if quest_hud_text() == text:
-		return
-	var box: Rect2 = objective_rect(text)
-	_frame(box, Defs.COL_CORE, "목표")
-	var slot := Rect2(box.position + Vector2(FRAME_PAD, FRAME_HEADER + 7.0),
-		Vector2(OBJECTIVE_ICON, OBJECTIVE_ICON) * 0.76)
-	# The icon sits in its own recessed well, which is what stops a drawn object
-	# from reading as debris that happened to land on the panel.
-	draw_rect(slot.grow(3.0), Color(0, 0, 0, 0.28))
-	draw_rect(slot.grow(3.0), Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.30), false, 1.0)
-	_draw_goal_icon(slot, goal)
-	_text_block(box.position + Vector2(objective_text_x(), FRAME_HEADER + 20.0),
-		text, objective_text_width(), 12, Defs.COL_TEXT)
-
 func _draw_goal_icon(rect: Rect2, goal: Dictionary) -> void:
 	match String(goal["kind"]):
 		"machine": Icons.draw_machine(self, rect, int(goal["id"]))
 		"item": Icons.draw_item(self, rect, int(goal["id"]))
 		_: Icons.draw_thing(self, rect, String(goal["id"]))
 
-## Body heat, the full width of the column: the one readout in this corner that
-## is ever an emergency, so it is the longest thing in it.
+# --- What just happened, and the key that matters now -------------------------
+## Bottom-left: a short feed of what the game just said, and under it the one
+## key worth pressing right now.
 ##
-## The number stayed. It was cut in the first pass -- the bar says everything the
-## player acts on -- and put back after reading it on a screen: below a quarter
-## the bar is a short red stub, and a stub does not distinguish "walk back now"
-## from "you are not going to make it". Two digits in the tail cost nothing.
-func _draw_warmth_row(panel: Rect2) -> void:
-	var warmth: float = main.player.warmth
-	var k: float = clampf(warmth / 100.0, 0.0, 1.0)
-	var origin: Vector2 = panel.position
-	var icon: Vector2 = origin + Vector2(7.0, 8.0)
-	var tint: Color = Defs.COL_TEXT_DIM if k > 0.25 else Defs.COL_DANGER
-	# A bulb and a stem. Drawn rather than written, because the font is subset
-	# from the game's own strings and a glyph nobody typed is a glyph that is not
-	# in the file.
-	draw_circle(icon + Vector2(0.0, 3.4), 3.2, tint)
-	draw_line(icon + Vector2(0.0, 2.0), icon + Vector2(0.0, -5.0), tint, 2.2)
-	var tail: float = 30.0
-	var track := Rect2(origin + Vector2(BAR_X, 4.0),
-		Vector2(maxf(20.0, panel.size.x - BAR_X - tail), BAR_H))
-	_text_in(Rect2(Vector2(track.end.x + 6.0, origin.y - 1.0),
-		Vector2(panel.end.x - track.end.x - 6.0, 16.0)), "%d" % int(round(warmth)), 11,
-		Defs.COL_TEXT if k > 0.25 else Defs.COL_DANGER)
-	draw_rect(track, Color8(28, 36, 54))
-	var col: Color = Defs.COL_CORE.lerp(Defs.COL_DANGER, 1.0 - k)
-	if k < 0.25:
-		var pulse: float = 0.6 + sin(float(Time.get_ticks_msec()) / 90.0) * 0.4
-		col = Defs.COL_DANGER.lerp(Color.WHITE, pulse * 0.35)
-	draw_rect(Rect2(track.position, Vector2(track.size.x * k, track.size.y)), col)
-	draw_rect(track, Color(Defs.COL_PANEL_EDGE.r, Defs.COL_PANEL_EDGE.g, Defs.COL_PANEL_EDGE.b, 0.6), false, 1.0)
-	if main.collapse_timer >= 0.0:
-		# Below the character, never across her.
-		var label: String = "쓰러지는 중…" if main.player.collapse > 0.0 \
-			else "의식이 흐려집니다  %.1f초" % maxf(0.0, main.collapse_timer)
-		_text_in(Rect2(0, size.y * 0.64, size.x, 20), label, 19, Defs.COL_DANGER)
-
-## The toolbar. One card, holding the build gun, showing what it is loaded with.
+## Notifications used to stack in the middle of the screen, 192 units down, on
+## plates that came and went in two and a half seconds -- the world is the thing
+## in the middle, and a banner that crosses it has to be waited out. They are a
+## quiet feed in the corner now, newest at the bottom, each fading when its time
+## is up; the whole record is still one key away (L).
 ##
-## It used to be five machine slots picked with the number keys. That put the
-## whole buildable list permanently across the bottom of the screen and left no
-## room to ever say what any of them did -- the cards were down to a name, a cost
-## and a nine-pixel rate line. The gun moves the choice into a menu that has room
-## to explain itself, and the bar goes back to being about what is in your hands.
-func _draw_palette() -> void:
-	# And nothing in it is reachable in a place with no world in it. There is no
-	# ore to mine on floorboards and nowhere to put a machine, so the row, the
-	# output chip and the key legend under them describe somewhere she is not.
-	if not Zone.has_world(main.zone()):
-		return
-	# Nothing in the row is reachable before the fire is lit: there is no base to
-	# build from, the pickaxe is still in the case, and every machine in it costs
-	# a resource she has not seen. A row of things she cannot have is the game
-	# talking about the second act during the first.
-	if not main.sim.base_placed:
-		return
-	var slot: Vector2 = hotbar_slot()
-	var origin: Vector2 = hotbar_origin()
-	_draw_direction_chip(origin.y)
+## The key prompt used to float over Grim's head. It is the same prompt -- one
+## at a time, chosen by Main from `KEY_PROMPTS`, retired once it is learned -- in
+## the corner every other instruction lives in, so the world around her is left
+## to the world.
+const FEED_W := 300.0
+const FEED_LINES := 4
+const PROMPT_H := 28.0
 
+func feed_width() -> float:
+	var room: float = size.x - MARGIN * 2.0
+	if minimap_visible():
+		room -= minimap_rect.size.x + HudStyle.SECTION_GAP
+	return clampf(room, 96.0, FEED_W)
+
+## The line the feed stands on: the floor, unless the hotbar shares its column --
+## on a narrow screen the row is as wide as the screen and the feed stacks over it.
+func feed_bottom() -> float:
+	var bottom: float = floor_y()
+	if gacha_button_rect.size.x > 0.0:
+		bottom = gacha_button_rect.position.y - HudStyle.SECTION_GAP
+	if main.sim.base_placed and Zone.has_world(main.zone()):
+		var span: Vector2 = hotbar_span()
+		if span.x < MARGIN + feed_width() + HudStyle.SECTION_GAP:
+			var top: float = hotbar_top()
+			if direction_visible():
+				top = direction_rect.position.y
+			bottom = minf(bottom, top - HudStyle.SECTION_GAP)
+	return bottom
+
+## The prompt chip, or a zero rect when nothing is being asked.
+func prompt_rect() -> Rect2:
+	var row: Dictionary = _prompt_row()
+	if row.is_empty():
+		return Rect2(MARGIN, feed_bottom(), 0.0, 0.0)
+	var width: float = _prompt_width(row)
+	return Rect2(MARGIN, feed_bottom() - PROMPT_H, width, PROMPT_H)
+
+## The whole bottom-left zone, prompt and feed together.
+func feed_rect() -> Rect2:
+	var prompt: Rect2 = prompt_rect()
+	var bottom: float = prompt.position.y - (HudStyle.ITEM_GAP if prompt.size.y > 0.0 else 0.0)
+	var top: float = bottom
+	for entry: Dictionary in _feed_entries():
+		top -= _feed_line_height(String(entry["text"])) + HudStyle.ITEM_GAP
+	var end_y: float = prompt.end.y if prompt.size.y > 0.0 else bottom
+	return Rect2(MARGIN, top, feed_width(), maxf(0.0, end_y - top))
+
+func _feed_entries() -> Array:
+	var stack: Array = main.messages
+	return stack.slice(maxi(0, stack.size() - FEED_LINES))
+
+func _feed_line_height(body: String) -> float:
+	return HudStyle.block_height(body, feed_width() - HudStyle.PANEL_PADDING * 2.0,
+		HudStyle.TEXT_NORMAL) + 8.0
+
+func _prompt_row() -> Dictionary:
+	var id: String = String(main.player.prompt)
+	if id.is_empty():
+		return {}
+	return Defs.key_prompt(id)
+
+func _prompt_keys(row: Dictionary) -> Array:
+	var keys: Array = main.player.main_keys
+	return keys if not keys.is_empty() else row["keys"]
+
+const PROMPT_HOLD := "누르고 있기"
+
+func _prompt_width(row: Dictionary) -> float:
+	var width: float = HudStyle.PANEL_PADDING * 2.0
+	for cap: String in _prompt_keys(row):
+		width += HudStyle.cap_width(cap) + 3.0
+	width += 6.0 + _text_width(String(row["verb"]), HudStyle.TEXT_NORMAL)
+	if bool(row.get("hold", false)):
+		width += HudStyle.ITEM_GAP * 2.0 + _text_width(PROMPT_HOLD, HudStyle.TEXT_SMALL)
+	return minf(width, feed_width())
+
+func _draw_feed() -> void:
+	var prompt: Rect2 = prompt_rect()
+	var y: float = prompt.position.y - (HudStyle.ITEM_GAP if prompt.size.y > 0.0 else 0.0)
+	# Newest at the bottom, nearest the prompt: the eye reads up from where it
+	# already is.
+	var entries: Array = _feed_entries()
+	for index in range(entries.size() - 1, -1, -1):
+		var entry: Dictionary = entries[index]
+		var body: String = String(entry["text"])
+		var alpha: float = clampf(float(entry["life"]), 0.0, 1.0)
+		var height: float = _feed_line_height(body)
+		y -= height
+		var text_w: float = minf(_text_width(body, HudStyle.TEXT_NORMAL),
+			feed_width() - HudStyle.PANEL_PADDING * 2.0)
+		var plate := Rect2(MARGIN, y, text_w + HudStyle.PANEL_PADDING * 2.0, height)
+		HudStyle.panel_faded(self, plate, alpha, HudStyle.CHIP)
+		var tint: Color = entry["color"]
+		HudStyle.block(self, Vector2(plate.position.x + HudStyle.PANEL_PADDING,
+			plate.position.y + 4.0 + float(HudStyle.TEXT_NORMAL)), body,
+			feed_width() - HudStyle.PANEL_PADDING * 2.0, HudStyle.TEXT_NORMAL,
+			Color(tint.r, tint.g, tint.b, alpha))
+		y -= HudStyle.ITEM_GAP
+	_draw_prompt(prompt)
+
+## The key cap, and the word. Held keys say so, because pressing Z at a seam does
+## nothing visible and a player who taps it once concludes the game is broken.
+func _draw_prompt(rect: Rect2) -> void:
+	var row: Dictionary = _prompt_row()
+	if row.is_empty() or rect.size.x <= 0.0:
+		return
+	var fade: float = float(main.player.prompt_fade())
+	HudStyle.panel_faded(self, rect, fade, HudStyle.CHIP)
+	var middle: float = rect.get_center().y
+	var x: float = rect.position.x + HudStyle.PANEL_PADDING
+	for cap: String in _prompt_keys(row):
+		x += HudStyle.keycap(self, Vector2(x, middle - HudStyle.CAP_H * 0.5), cap, fade) + 3.0
+	x += 3.0
+	var verb: String = String(row["verb"])
+	HudStyle.text(self, Vector2(x, HudStyle.baseline_for(middle, HudStyle.TEXT_NORMAL)), verb,
+		HudStyle.TEXT_NORMAL, Color(HudStyle.ACCENT.r, HudStyle.ACCENT.g, HudStyle.ACCENT.b, fade))
+	if bool(row.get("hold", false)):
+		x += _text_width(verb, HudStyle.TEXT_NORMAL) + HudStyle.ITEM_GAP * 2.0
+		HudStyle.text(self, Vector2(x, HudStyle.baseline_for(middle, HudStyle.TEXT_SMALL)),
+			PROMPT_HOLD, HudStyle.TEXT_SMALL, Color(HudStyle.TEXT_SUB.r, HudStyle.TEXT_SUB.g,
+			HudStyle.TEXT_SUB.b, fade))
+
+# --- Where she is ---------------------------------------------------------------
+## Bottom-right: a round map that follows her. The explored ground, the seams and
+## machines on it, the fire's reach, and -- when the fire itself is off the edge
+## -- a mark on the rim pointing home. North is up, as it is everywhere else.
+##
+## The same drawing as the M map (Main.draw_map), cut to a circle, so the two can
+## never disagree about what is where. A tap opens the full one.
+const MINIMAP_R := 58.0
+const MINIMAP_ZOOM := 0.8
+var minimap_rect := Rect2()
+
+func minimap_visible() -> bool:
+	if main == null or main.sim == null:
+		return false
+	return main.sim.base_placed and Zone.has_world(main.zone())
+
+func _minimap_box() -> Rect2:
+	var radius: float = clampf(minf(size.x, size.y) * 0.12, 36.0, MINIMAP_R)
+	var bottom: float = floor_y()
+	# Over the hotbar rather than beside it when the row reaches this corner.
+	var span: Vector2 = hotbar_span()
+	if main.sim.base_placed and span.y > size.x - MARGIN - radius * 2.0 - HudStyle.SECTION_GAP:
+		bottom = minf(bottom, hotbar_top() - HudStyle.SECTION_GAP)
+	return Rect2(size.x - MARGIN - radius * 2.0, bottom - radius * 2.0, radius * 2.0, radius * 2.0)
+
+func _draw_minimap() -> void:
+	if not minimap_visible():
+		return
+	var radius: float = minimap_rect.size.x * 0.5
+	var centre: Vector2 = minimap_rect.get_center()
+	draw_circle(centre + Vector2(0.0, 2.0), radius + 3.0, HudStyle.PANEL_SHADOW)
+	draw_circle(centre, radius, Color(0.035, 0.045, 0.075, 0.92))
+	main.call("draw_map", self, minimap_rect, MINIMAP_ZOOM, radius - 2.0, 0.42)
+	# The rim, then the four ticks, the brightest one north.
+	draw_arc(centre, radius, 0.0, TAU, 64, Color(HudStyle.PANEL_BORDER.r, HudStyle.PANEL_BORDER.g,
+		HudStyle.PANEL_BORDER.b, 0.55), 2.0, true)
+	for quarter in 4:
+		var dir := Vector2.from_angle(-PI * 0.5 + float(quarter) * PI * 0.5)
+		var tint: Color = HudStyle.ACCENT_COLD if quarter == 0 else HudStyle.PANEL_BORDER
+		draw_line(centre + dir * (radius - 5.0), centre + dir * (radius + 0.5), tint, 2.0)
+	HudStyle.text_in(self, Rect2(centre.x - 8.0, centre.y - radius + 16.0, 16.0, 12.0), "N",
+		HudStyle.TEXT_SMALL, HudStyle.ACCENT_COLD)
+	# Home, when home is off the edge.
+	var core: Vector2 = Vector2(main.sim.core_cell - main.player.cell()) \
+		* Defs.MAP_CELL_PX * MINIMAP_ZOOM
+	if core.length() > radius - 6.0:
+		var dir: Vector2 = core.normalized()
+		var tip: Vector2 = centre + dir * (radius - 3.0)
+		var perp := Vector2(-dir.y, dir.x)
+		draw_colored_polygon(PackedVector2Array([tip, tip - dir * 8.0 + perp * 5.0,
+			tip - dir * 8.0 - perp * 5.0]), HudStyle.ACCENT)
+
+# --- In her hands -----------------------------------------------------------------
+## Bottom-centre: the tool row. Square slots, the number in the corner and the
+## thing itself in the middle; the one in her hand is lit with the fire's colour.
+## Over the row, one line naming what she is holding and what it is for.
+##
+## A slot she does not have yet is not drawn, and the numbers never move -- see
+## Main.tool_unlocked. The row is laid out for as many tools as TOOLS lists (the
+## keys go to nine); it draws only the ones she owns.
+## What she is holding, and what it is for -- in her words, not a manual's.
+func hotbar_caption() -> String:
+	if main == null or main.unlocked_tools().is_empty():
+		return ""
+	match main.TOOLS[main.tool_index]:
+		main.TOOL_PICKAXE:
+			return "곡괭이 · 단단한 광맥을 직접 캘 수 있다"
+		main.TOOL_TORCH:
+			if main.sim.torch_left > 0.0:
+				return "%s · 타오르는 동안은 주변이 환하고 따뜻하다" % Defs.TORCH_NAME
+			return "%s · 불을 붙이면 잠시 주변이 환하고 따뜻해진다" % Defs.TORCH_NAME
 	var loaded: int = main.selected_type()
+	var cost := ""
+	for item_type: int in Defs.MACHINE_COSTS[loaded]:
+		cost += "%s %d  " % [Defs.ITEM_SHORT[item_type], int(Defs.MACHINE_COSTS[loaded][item_type])]
+	return "%s · %s  %s" % [main.TOOL_NAMES[main.TOOL_BUILD_GUN], Defs.MACHINE_SHORT[loaded],
+		cost.strip_edges()]
+
+## The output-direction chip means something only while the gun is in her hand
+## and loaded with a machine that has a front.
+func direction_visible() -> bool:
+	if main == null or not main.sim.base_placed or not Zone.has_world(main.zone()):
+		return false
+	return main.holding_build_gun() and Defs.DIRECTIONAL_MACHINES.has(main.selected_type())
+
+func _direction_label(dir: Vector2i) -> String:
+	var names := {
+		Vector2i.UP: "위", Vector2i.DOWN: "아래",
+		Vector2i.LEFT: "왼쪽", Vector2i.RIGHT: "오른쪽",
+	}
+	return "출력 방향  %s" % String(names.get(dir, "오른쪽"))
+
+func _draw_hotbar() -> void:
+	# Nothing in it is reachable in a place with no world in it, and nothing is
+	# reachable before the fire is lit: a row of things she cannot have is the
+	# game talking about the second act during the first.
+	if not Zone.has_world(main.zone()) or not main.sim.base_placed:
+		return
 	if main.unlocked_tools().is_empty():
 		return
-	# The hint line belongs to whatever is in her hands. With the pickaxe out the
-	# machine the gun happens to be loaded with is not what Z will do, and saying
-	# so anyway is how a player learns the wrong thing about their own keys.
-	# What the thing in her hands is, not which key to hold and not how many of
-	# one machine equal another. The key is on the cap over her shoulder when it
-	# is needed, and the ratio is arithmetic printed at someone who has not built
-	# either machine yet.
-	var hint: String = Defs.MACHINE_HINTS[loaded]
-	if main.holding_pickaxe():
-		hint = "광맥을 채굴하기 위한 도구"
-	var hint_w: float = _text_width(hint, 12) + 24.0
-	var hint_box := Rect2(size.x * 0.5 - hint_w * 0.5, origin.y - 30.0, hint_w, 24.0)
-	_frame(hint_box, Defs.COL_PANEL_EDGE)
-	_text_in(Rect2(hint_box.position + Vector2(0, 16), Vector2(hint_box.size.x, 16)), hint, 12,
-		Defs.COL_TEXT_DIM)
-
+	_draw_direction_chip()
+	_draw_caption()
 	for index in main.TOOLS.size():
 		if not main.tool_unlocked(main.TOOLS[index]):
 			continue
-		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() \
-			else Rect2(origin + Vector2(float(index) * (slot.x + SLOT_GAP), 0), slot)
+		var rect: Rect2 = hotbar_rects[index] if index < hotbar_rects.size() else Rect2()
+		if rect.size.x <= 0.0:
+			continue
 		var chosen: bool = index == main.tool_index
-		_frame(rect, Defs.COL_CORE if chosen else Defs.COL_PANEL_EDGE)
-		_text(rect.position + Vector2(FRAME_PAD, 16.0), "%d  %s" % [index + 1, main.TOOL_NAMES[index]],
-			11, Defs.COL_CORE if chosen else Defs.COL_TEXT_DIM)
-		# The pickaxe holds nothing, so its slot says what it is for instead of
-		# borrowing the gun's magazine.
-		if main.TOOLS[index] == main.TOOL_PICKAXE:
-			_tool_art(PICKAXE_ART, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 2.0),
-				Vector2(28.0, 28.0)))
-			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
-				"직접 채굴", 13, Defs.COL_TEXT)
-			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
-				"%.0f초/개" % Defs.HAND_MINE_PERIOD, 10, Defs.COL_TEXT_DIM)
-			continue
-		# The torch holds nothing either. Its slot is the two numbers that decide
-		# whether taking it out is worth it: how many are left, and how long the
-		# one in her hand has.
-		if main.TOOLS[index] == main.TOOL_TORCH:
-			Icons.draw_thing(self, Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 4.0),
-				Vector2(24.0, 24.0)), Icons.THING_TORCH)
-			var lit: bool = main.sim.torch_left > 0.0
-			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
-				"%d개" % main.sim.torches, 13,
-				Defs.COL_TEXT if main.sim.torches > 0 or lit else Defs.COL_DANGER)
-			# What the slot is for right now: a match, or a clock. Choosing the
-			# torch and setting fire to it are two acts as of 1.0.25, and the
-			# second line is the one that says which one is left.
-			_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0),
-				"타는중 %.0f초" % main.sim.torch_left if lit else "불 붙이기",
-				10, Defs.COL_CORE if lit else Defs.COL_TEXT_DIM)
-			# The burn, as a bar under the slot, because a number counting down is
-			# something you read and a bar draining is something you notice.
-			if main.sim.torch_left > 0.0:
-				var track := Rect2(rect.position.x + FRAME_PAD,
-					rect.position.y + rect.size.y - 9.0,
-					rect.size.x - FRAME_PAD * 2.0, 3.0)
-				draw_rect(track, Color(0.10, 0.13, 0.20, 0.85))
-				draw_rect(Rect2(track.position,
-					Vector2(track.size.x * clampf(main.sim.torch_left / Defs.TORCH_SECONDS, 0.0, 1.0),
-						track.size.y)), Defs.COL_CORE if lit else Defs.COL_TEXT_DIM)
-			continue
-		# The gun itself, as the thing in her hand. What it is loaded with is the
-		# name and the price beside it -- the chip used to be a picture of the
-		# machine, which made the slot a picture of something she does not have
-		# yet rather than of the tool she is holding.
-		var chip := Rect2(rect.position + Vector2(FRAME_PAD, FRAME_HEADER + 2.0),
-			Vector2(28.0, 28.0))
-		_tool_art(BUILD_GUN_ART, chip)
-		var afford: bool = main.sim.can_afford(loaded)
-		_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 14.0),
-			Defs.MACHINE_SHORT[loaded], 13, Defs.COL_TEXT if afford else Defs.COL_DANGER)
-		var cost_text := ""
-		for item_type: int in Defs.MACHINE_COSTS[loaded]:
-			cost_text += "%s %d " % [Defs.ITEM_SHORT[item_type], int(Defs.MACHINE_COSTS[loaded][item_type])]
-		_text(rect.position + Vector2(FRAME_PAD + 30.0, FRAME_HEADER + 27.0), cost_text.strip_edges(),
-			10, Defs.COL_CORE if afford else Defs.COL_DANGER)
-		_text_in(Rect2(rect.position + Vector2(0.0, rect.size.y - 6.0), Vector2(rect.size.x - FRAME_PAD, 12)),
-			"B 목록", 10, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+		HudStyle.panel(self, rect, HudStyle.SLOT_ON if chosen else HudStyle.SLOT)
+		var art := Rect2(rect.get_center() - Vector2.ONE * HudStyle.ICON_LARGE * 0.5,
+			Vector2.ONE * HudStyle.ICON_LARGE)
+		match main.TOOLS[index]:
+			main.TOOL_PICKAXE:
+				_tool_art(PICKAXE_ART, art)
+			main.TOOL_TORCH:
+				Icons.draw_thing(self, art.grow(-3.0), Icons.THING_TORCH)
+				_draw_slot_count(rect, main.sim.torches, main.sim.torches > 0 or main.sim.torch_left > 0.0)
+				# The burn, as a bar along the foot of the slot: a number counting
+				# down is read, a bar draining is noticed.
+				if main.sim.torch_left > 0.0:
+					HudStyle.bar(self, Rect2(rect.position.x + 7.0, rect.end.y - 7.0,
+						rect.size.x - 14.0, 3.0),
+						clampf(main.sim.torch_left / Defs.TORCH_SECONDS, 0.0, 1.0), HudStyle.ACCENT)
+			_:
+				_tool_art(BUILD_GUN_ART, art)
+				# What it is loaded with, small, in the corner -- the slot is the gun,
+				# and the machine is what it makes.
+				var loaded: int = main.selected_type()
+				var chip := Rect2(rect.end - Vector2.ONE * (HudStyle.ICON_SMALL + 5.0),
+					Vector2.ONE * HudStyle.ICON_SMALL)
+				Icons.draw_machine(self, chip, loaded)
+				if not main.sim.can_afford(loaded):
+					draw_circle(chip.position + Vector2(1.0, 1.0), 2.6, HudStyle.DANGER)
+		HudStyle.text(self, rect.position + Vector2(6.0, 13.0), "%d" % (index + 1),
+			HudStyle.TEXT_SMALL, HudStyle.ACCENT if chosen else HudStyle.TEXT_SUB)
+
+## How many are left, in the corner opposite the slot's number -- the foot of the
+## slot is where the burn bar runs.
+func _draw_slot_count(rect: Rect2, count: int, has_any: bool) -> void:
+	HudStyle.text_in(self, Rect2(rect.position.x, rect.position.y + 13.0, rect.size.x - 6.0, 12.0),
+		"%d" % count, HudStyle.TEXT_SMALL, HudStyle.TEXT_MAIN if has_any else HudStyle.DANGER,
+		HORIZONTAL_ALIGNMENT_RIGHT)
+
+func _draw_caption() -> void:
+	var caption: String = hotbar_caption()
+	if caption == "":
+		return
+	var middle: float = hotbar_origin().y - HudStyle.ITEM_GAP - CAPTION_H * 0.5
+	var parts: PackedStringArray = caption.split(" · ", true, 1)
+	var name_w: float = _text_width(parts[0], HudStyle.TEXT_SMALL)
+	var rest: String = (" · " + parts[1]) if parts.size() > 1 else ""
+	var total: float = name_w + _text_width(rest, HudStyle.TEXT_SMALL)
+	var x: float = size.x * 0.5 - total * 0.5
+	var span: Vector2 = hotbar_span()
+	x = maxf(x, minf(span.x, size.x * 0.5 - total * 0.5))
+	var baseline: float = HudStyle.baseline_for(middle, HudStyle.TEXT_SMALL)
+	HudStyle.text(self, Vector2(x, baseline), parts[0], HudStyle.TEXT_SMALL, HudStyle.TEXT_MAIN)
+	var afford: bool = not main.holding_build_gun() or main.sim.can_afford(main.selected_type())
+	HudStyle.text(self, Vector2(x + name_w, baseline), rest, HudStyle.TEXT_SMALL,
+		HudStyle.TEXT_SUB if afford else HudStyle.DANGER)
 
 # --- Build menu ---------------------------------------------------------------
 ## What the gun can be loaded with, with room to say what each thing does.
@@ -1835,57 +2001,25 @@ func _draw_build_row(row: int, index: int) -> void:
 
 ## R rotates the output direction, but until now nothing on screen said which
 ## way was currently selected, so the key felt like it did nothing.
-func _draw_direction_chip(hotbar_y: float) -> void:
+func _draw_direction_chip() -> void:
+	if not direction_visible():
+		return
 	var dir: Vector2i = main.build_dir
-	var names := {
-		Vector2i.UP: "위", Vector2i.DOWN: "아래",
-		Vector2i.LEFT: "왼쪽", Vector2i.RIGHT: "오른쪽",
-	}
-	var label: String = "출력 방향  %s" % String(names.get(dir, "오른쪽"))
-	var width: float = _text_width(label, 12) + 44.0
-	var box: Rect2 = direction_rect if direction_rect.size.x > 0.0 \
-		else Rect2(size.x * 0.5 - width * 0.5, hotbar_y - 58.0, width, 24.0)
-	_panel(box, Defs.COL_PANEL, Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
-	_text(box.position + Vector2(12, 16), label, 12, Defs.COL_TEXT)
+	var label: String = _direction_label(dir)
+	var box: Rect2 = direction_rect
+	HudStyle.panel(self, box, HudStyle.CHIP)
+	var middle: float = box.get_center().y
+	HudStyle.text(self, Vector2(box.position.x + HudStyle.PANEL_PADDING,
+		HudStyle.baseline_for(middle, HudStyle.TEXT_SMALL)), label, HudStyle.TEXT_SMALL,
+		HudStyle.TEXT_MAIN)
 	# The same arrow the world preview draws, so the two read as one statement.
-	var at: Vector2 = box.position + Vector2(box.size.x - 20.0, 12.0)
+	var at := Vector2(box.end.x - 16.0, middle)
 	var d := Vector2(dir)
 	var perp := Vector2(-d.y, d.x)
-	var tip: Vector2 = at + d * 7.0
-	draw_line(at - d * 6.0, tip - d * 3.0, Defs.COL_CORE, 2.5)
+	var tip: Vector2 = at + d * 6.0
+	draw_line(at - d * 5.0, tip - d * 3.0, HudStyle.ACCENT, 2.2)
 	draw_colored_polygon(PackedVector2Array([
-		tip, tip - d * 5.0 + perp * 3.6, tip - d * 5.0 - perp * 3.6]), Defs.COL_CORE)
-
-## Every notification the game gives goes through here -- a machine unlocking, a
-## warning that night is coming, a purchase it cannot afford.
-##
-## On a plate, because it was floating text and over snow it was very nearly
-## invisible. A playtest screenshot of "아직 해금되지 않았습니다" is a grey smear on
-## a pale floor; the text had a one-pixel shadow, which is enough against the
-## night and nothing at all against the ground the game spends most of its time
-## on. The plate fades with the message, so nothing lingers.
-const MESSAGE_ROW := 30.0
-
-func _draw_message() -> void:
-	var stack: Array = main.messages
-	if stack.is_empty():
-		return
-	# Oldest at the top, newest under it, because that is the order they were
-	# said in -- three machines opening at once should read as a list rather than
-	# as whichever one happened to be last.
-	var y: float = 192.0
-	for entry: Dictionary in stack:
-		var alpha: float = clampf(float(entry["life"]), 0.0, 1.0)
-		var text: String = String(entry["text"])
-		var tint: Color = entry["color"]
-		var width: float = minf(_text_width(text, 15) + 32.0, size.x - MARGIN * 2.0)
-		var plate := Rect2(size.x * 0.5 - width * 0.5, y, width, 26.0)
-		draw_rect(plate, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b,
-			0.82 * alpha))
-		draw_rect(plate, Color(tint.r, tint.g, tint.b, 0.55 * alpha), false, 1.0)
-		_text_in(Rect2(plate.position + Vector2(0.0, 18.0), Vector2(plate.size.x, 20.0)),
-			text, 15, Color(tint.r, tint.g, tint.b, alpha))
-		y += MESSAGE_ROW
+		tip, tip - d * 4.5 + perp * 3.2, tip - d * 4.5 - perp * 3.2]), HudStyle.ACCENT)
 
 # --- Overlays ----------------------------------------------------------------
 
@@ -1951,18 +2085,6 @@ func _draw_title_menu() -> void:
 			Vector2(box.size.x, 20.0)), main.MENU_LABELS[rows[index]], 17,
 			Defs.COL_CORE if chosen else Defs.COL_TEXT)
 
-## The control line on the first screen, as a function so a test can read it.
-##
-## It said "WASD 이동" for as long as it existed and WASD has never been bound to
-## anything -- `move_*` is the arrow keys only. It is the first sentence a new
-## player reads, and it named keys that do nothing: the same fault as the
-## objective that said C to mine for eight versions, in the one place nobody
-## re-reads because it scrolls past before the game starts.
-static func title_controls(touch_pad: bool) -> String:
-	if touch_pad:
-		return "휠 이동   Z 사용   X 회수   Run 달리기"
-	return "←↑→↓ 이동   Z 사용   X 회수   R 회전   1·2·3 선택"
-
 ## The painting behind the title.
 ##
 ## It used to be the live world, dimmed: whatever tiles the run happened to be
@@ -1993,7 +2115,6 @@ func _draw_title() -> void:
 	# a soft edge built out of steps is the same fault with more steps.
 	_dim(0.38)
 	var full := func(y: float) -> Rect2: return Rect2(0, y, size.x, 40)
-	var touch_pad: bool = main.touch != null and main.touch.visible
 	_text_in(full.call(size.y * 0.30), "MOTORIO", 56, Defs.COL_CORE)
 	# The subtitle used to read "O N E   S H O T". It survived the rename because
 	# every search for the old name looked for motorio-oneshot, motorio_oneshot,
@@ -2008,17 +2129,14 @@ func _draw_title() -> void:
 	# HUD's dark panels. On a painted sky it is almost exactly the background's
 	# own luminance, and a line the same brightness as what it sits on is a line
 	# nobody reads however dark you make the picture behind it.
-	_text_in(full.call(size.y * 0.52 + 24), "코어에 광석을 넣을수록 온기가 넓어지고 더 좋은 광맥에 닿습니다.",
+	_text_in(full.call(size.y * 0.52 + 24), "불에 열석을 넣을수록 온기가 넓어지고, 더 먼 곳에 닿는다.",
 		13, Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, 0.82))
 	_draw_title_menu()
-	# WASD was on this line for as long as the line existed and has never been
-	# bound to anything: `move_*` is arrow keys only. It is the first screen of
-	# the game, and it told every new player the wrong keys -- the same shape as
-	# the objective that said C to mine for eight versions. `test_hints` now
-	# checks the movement claim against the bindings like it does the letters.
-	var controls: String = title_controls(touch_pad)
-	_text_in(full.call(size.y * 0.84), controls, 12,
-		Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, 0.72))
+	# There was a line of controls here ("←↑→↓ 이동  Z 사용  X 회수 ..."), the last
+	# permanent key legend in the game. Gone in 1.0.41: the first key the game
+	# names is the MOVE prompt in the corner, the moment it is needed, and the
+	# whole list lives behind Esc in the guide. `test_hints` checks that prompt
+	# against the bindings the way it checked this line.
 	# So a player can say which build they are on without opening anything.
 	_text_in(Rect2(0, size.y - MARGIN, size.x - MARGIN, 16), "v%s" % version_string(), 11,
 		Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
@@ -2219,12 +2337,12 @@ func meter_rect() -> Rect2:
 	var width: float = column_width()
 	# Directly under the materials, in the left column with everything else the
 	# player reads. It used to hang off the top-right corner under the goal card.
-	var box := Rect2(MARGIN, left_column_bottom() + 8.0, width, height)
+	var box := Rect2(MARGIN, meter_top(), width, height)
 	# The hotbar and the touch pad own the bottom of the screen. If the card no
 	# longer fits between them, it rides up rather than being drawn underneath.
-	var floor_y: float = hotbar_origin().y - 10.0
-	if box.position.y + box.size.y > floor_y:
-		box.position.y = maxf(status_top(), floor_y - box.size.y)
+	var floor_line: float = hotbar_top() - HudStyle.SECTION_GAP
+	if box.position.y + box.size.y > floor_line:
+		box.position.y = maxf(status_top(), floor_line - box.size.y)
 	return box
 
 func _draw_meter_card() -> void:
@@ -2463,11 +2581,11 @@ func _draw_settings_button() -> void:
 	var rect: Rect2 = settings_button_rect
 	if rect.size.x <= 0.0:
 		return
-	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
+	var open: bool = main.state == main.State.SETTINGS
+	HudStyle.panel(self, rect, HudStyle.BUTTON_ON if open else HudStyle.BUTTON)
 	var centre: Vector2 = rect.position + rect.size * 0.5
 	var radius: float = rect.size.x * 0.24
-	var tint: Color = Defs.COL_CORE if main.state == main.State.SETTINGS else Defs.COL_TEXT
+	var tint: Color = HudStyle.ACCENT if open else HudStyle.TEXT_MAIN
 	for tooth in 8:
 		var dir := Vector2.from_angle(float(tooth) * TAU / 8.0)
 		draw_line(centre + dir * radius, centre + dir * (radius + rect.size.x * 0.14), tint, 2.0)
@@ -2497,21 +2615,16 @@ func guide_height() -> float:
 	return 5.0 * (CAP + 18.0) + GUIDE_PANE_GAP + 12.0
 
 ## One key cap, with its meaning beside it. Returns the x the next cap starts at.
-func _draw_cap(at: Vector2, label: String, tint: Color) -> float:
-	var wide: float = maxf(CAP, _text_width(label, 13) + 16.0)
-	var box := Rect2(at, Vector2(wide, CAP))
-	draw_rect(box.grow(1.0), Color(0, 0, 0, 0.30))
-	draw_rect(box, Color(0.09, 0.11, 0.16, 0.95))
-	draw_rect(box, Color(tint.r, tint.g, tint.b, 0.55), false, 1.0)
-	_text_in(Rect2(box.position + Vector2(0.0, CAP * 0.5 + 5.0), Vector2(wide, 16.0)),
-		label, 13, Defs.COL_TEXT)
-	return at.x + wide + CAP_GAP
+## The same key the corner prompt draws (HudStyle.keycap), only larger -- a
+## player who learned Z from the prompt finds the same Z here.
+func _draw_cap(at: Vector2, label: String) -> float:
+	return at.x + HudStyle.keycap(self, at, label, 1.0, CAP) + CAP_GAP
 
 ## How wide one entry comes out: its caps, then its meaning.
 func _guide_entry_width(row: Dictionary) -> float:
 	var wide := 0.0
 	for cap: String in row["keys"]:
-		wide += maxf(CAP, _text_width(cap, 13) + 16.0) + CAP_GAP
+		wide += HudStyle.cap_width(cap, CAP) + CAP_GAP
 	return wide + _text_width(String(row["label"]), 12) + 20.0
 
 func _draw_guide(body: Rect2) -> void:
@@ -2531,7 +2644,7 @@ func _draw_guide(body: Rect2) -> void:
 				x = body.position.x + 4.0
 				y += CAP + 14.0
 			for cap: String in row["keys"]:
-				x = _draw_cap(Vector2(x, y), cap, Defs.COL_CORE)
+				x = _draw_cap(Vector2(x, y), cap)
 			_text(Vector2(x + 2.0, y + CAP * 0.5 + 5.0), String(row["label"]), 12,
 				Defs.COL_TEXT_DIM)
 			x += _text_width(String(row["label"]), 12) + 20.0
@@ -2796,9 +2909,8 @@ func _draw_log_button() -> void:
 	if rect.size.x <= 0.0:
 		return
 	var open: bool = bool(main.get("log_open"))
-	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
-	var tint: Color = Defs.COL_CORE if open else Defs.COL_TEXT
+	HudStyle.panel(self, rect, HudStyle.BUTTON_ON if open else HudStyle.BUTTON)
+	var tint: Color = HudStyle.ACCENT if open else HudStyle.TEXT_MAIN
 	var page := Rect2(rect.position + Vector2(9.0, 7.0), rect.size - Vector2(18.0, 14.0))
 	draw_rect(page, Color(tint.r, tint.g, tint.b, 0.18))
 	draw_rect(page, tint, false, 1.0)
@@ -2846,9 +2958,8 @@ func _draw_map_button() -> void:
 	if rect.size.x <= 0.0:
 		return
 	var open: bool = bool(main.get("map_open"))
-	_panel(rect, Color(Defs.COL_PANEL.r, Defs.COL_PANEL.g, Defs.COL_PANEL.b, 0.92),
-		Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.55))
-	var tint: Color = Defs.COL_CORE if open else Defs.COL_TEXT
+	HudStyle.panel(self, rect, HudStyle.BUTTON_ON if open else HudStyle.BUTTON)
+	var tint: Color = HudStyle.ACCENT if open else HudStyle.TEXT_MAIN
 	# A folded map: three panels with the folds drawn as the zigzag of the top
 	# and bottom edges, which is what makes it read as a map rather than a page.
 	var inner := Rect2(rect.position + Vector2(7.0, 9.0), rect.size - Vector2(14.0, 18.0))

@@ -160,8 +160,10 @@ func _run() -> void:
 		main.set_ui_scale(value)
 		_tick(main)
 		var percent: int = int(round(value * 100.0))
-		var objective: Rect2 = main.hud.objective_rect(main.objective())
-		_assert(not objective.intersects(main.hud.status_rect()),
+		# The goal lives in the world card now (1.0.41), beside the status card
+		# on a wide screen and under it on a narrow one -- never on top of it.
+		var objective: Rect2 = main.hud.world_card_rect()
+		_assert(not objective.intersects(main.hud.status_card_rect()),
 			"the objective clears the status panel at %d%%" % percent)
 		_assert(objective.position.x >= 0.0
 			and objective.position.x + objective.size.x <= main.hud.size.x + 0.5,

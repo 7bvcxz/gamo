@@ -55,11 +55,13 @@ func _run() -> void:
 	# twice.
 	_assert(String(main.message).find("숙소") < 0,
 		"낮의 동결 경고가 숙소를 가리키지 않는다: '%s'" % main.message)
-	_assert(String(main.message).find("온기 반경") >= 0,
-		"온기 반경을 가리킨다: '%s'" % main.message)
+	# "온기", not a distance: the line is her thought now (1.0.41), and it names
+	# the warmth rather than quoting the radius -- but it still names it.
+	_assert(String(main.message).find("온기") >= 0,
+		"온기를 가리킨다: '%s'" % main.message)
 	# The state card, not the goal card: freezing is what is true right now and
 	# the goal is still the rung of the ladder she is on. Both are on screen.
-	_assert(String(main.info()).find("온기 반경") >= 0,
+	_assert(String(main.info()).find("온기") >= 0,
 		"정보 카드도 같은 곳을 가리킨다: '%s'" % main.info())
 
 	# Reaching warmth again inside the window cancels the collapse.

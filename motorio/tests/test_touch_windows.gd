@@ -168,8 +168,8 @@ func _test_windows() -> void:
 		hud.size = shape
 		main._process(0.0)
 		hud._layout()
-		var left: Rect2 = hud.call("resource_rect")
-		var goal: Rect2 = hud.call("goal_area")
+		var left: Rect2 = hud.call("status_card_rect")
+		var goal: Rect2 = hud.call("world_card_rect")
 		_assert(not left.intersects(goal),
 			"%.0fx%.0f 화면에서 자원 패널과 목표 카드가 겹치지 않는다 (자원 %.0f..%.0f, 목표 %.0f..%.0f)"
 				% [shape.x, shape.y, left.position.y, left.position.y + left.size.y,

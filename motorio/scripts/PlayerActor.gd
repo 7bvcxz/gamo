@@ -480,119 +480,14 @@ var main_keys: Array = []
 var _prompt_age: float = 0.0
 var _prompt_shown: String = ""
 
-## The key cap, the arrow and the word, over her head.
-##
-## Above the warmth bar rather than beside it: both belong to her and both are
-## read at a glance, and stacked they are one column the eye finds in one place.
-## Never two prompts at once -- Main picks one -- because two of these is a menu
-## and the whole point is that it is read without reading.
-##
-## Cap geometry. The width comes from the glyph rather than from a constant,
-## because "Shift" is not the same object as "Z" -- the first version drew every
-## key in a 13 pixel square and the wide ones ran straight out of theirs.
-const PROMPT_LIFT := 48.0
-const PROMPT_CAP_H := 15.0
-const PROMPT_CAP_MIN := 15.0
-const PROMPT_CAP_PAD := 8.0
-const PROMPT_CAP_RADIUS := 3.5
-## The lip under the face, which is the whole reason it reads as a key rather
-## than as a box with a letter in it: a key is a face sitting on a side.
-const PROMPT_CAP_LIP := 2.5
-const PROMPT_GAP := 3.0
-const PROMPT_GLYPH := 9
-const PROMPT_TEXT := 11
-
-## A rounded rectangle, as a polygon. Godot's draw_rect has square corners and a
-## square key cap is a tile.
-static func _rounded(rect: Rect2, radius: float) -> PackedVector2Array:
-	var r: float = minf(radius, minf(rect.size.x, rect.size.y) * 0.5)
-	var out := PackedVector2Array()
-	var corners: Array[Vector2] = [
-		rect.position + Vector2(r, r),
-		Vector2(rect.end.x - r, rect.position.y + r),
-		rect.end - Vector2(r, r),
-		Vector2(rect.position.x + r, rect.end.y - r),
-	]
-	for index in 4:
-		var start: float = PI + float(index) * PI * 0.5
-		for step in 5:
-			var angle: float = start + PI * 0.5 * float(step) / 4.0
-			out.append(corners[index] + Vector2.from_angle(angle) * r)
-	return out
-
-## One key. A dark side, a light face sitting on it, and the glyph.
-func _draw_cap(at: Vector2, label: String, width: float, fade: float) -> void:
-	var body := Rect2(at, Vector2(width, PROMPT_CAP_H))
-	# The side, drawn first and one lip taller, so the face sits on something.
-	draw_colored_polygon(_rounded(body, PROMPT_CAP_RADIUS),
-		Color(0.42, 0.46, 0.55, 0.95 * fade))
-	var face := Rect2(body.position, Vector2(width, PROMPT_CAP_H - PROMPT_CAP_LIP))
-	draw_colored_polygon(_rounded(face, PROMPT_CAP_RADIUS),
-		Color(0.93, 0.95, 0.98, 0.98 * fade))
-	# And a hairline along the top of the face, which is the light catching the
-	# edge of a real key.
-	draw_line(face.position + Vector2(PROMPT_CAP_RADIUS, 1.0),
-		Vector2(face.end.x - PROMPT_CAP_RADIUS, face.position.y + 1.0),
-		Color(1, 1, 1, 0.85 * fade), 1.0)
-	var font: Font = UIFont.FONT
-	var glyph_w: float = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1,
-		PROMPT_GLYPH).x
-	draw_string(font, Vector2(face.get_center().x - glyph_w * 0.5, face.end.y - 3.0),
-		label, HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_GLYPH,
-		Color(0.13, 0.16, 0.24, fade))
-
-static func cap_width(label: String) -> float:
-	var glyph: float = UIFont.FONT.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT,
-		-1, PROMPT_GLYPH).x
-	return maxf(PROMPT_CAP_MIN, glyph + PROMPT_CAP_PAD)
-
-func _draw_prompt() -> void:
+## How far the current prompt has faded in, 0 to 1. The prompt is drawn by the
+## HUD now, in the bottom-left corner with every other instruction; it used to
+## float over her head, where it competed with her for the one place the eye is.
+## It still fades in rather than appearing, so a new one reads as arriving.
+func prompt_fade() -> float:
 	if prompt.is_empty():
-		return
-	var row: Dictionary = Defs.key_prompt(prompt)
-	if row.is_empty():
-		return
-	var fade: float = clampf(_prompt_age / 0.35, 0.0, 1.0)
-	var keys: Array = main_keys if not main_keys.is_empty() else row["keys"]
-	var verb: String = String(row["verb"])
-	var font: Font = UIFont.FONT
-	# Laid out from the total width so the whole thing is centred on her rather
-	# than growing off one shoulder.
-	var caps_w: float = 0.0
-	for cap: String in keys:
-		caps_w += cap_width(cap) + PROMPT_GAP
-	caps_w -= PROMPT_GAP
-	var arrow_w: float = 12.0
-	var verb_w: float = font.get_string_size(verb, HORIZONTAL_ALIGNMENT_LEFT, -1,
-		PROMPT_TEXT).x
-	var total: float = caps_w + arrow_w + verb_w + 8.0
-	var left: float = -total * 0.5
-	var top: float = -PROMPT_LIFT
-	# A plate, because this sits over snow, over the amber pool and over the fog,
-	# and a key cap has to be legible on all three.
-	# Nearly opaque. At 0.74 the white of the fog came through it and the plate
-	# read as pale grey with pale text on it -- which is exactly where the game
-	# most needs to be legible, because past the circle there is nothing else on
-	# the screen. A plate that changes colour with the ground under it is not a
-	# plate.
-	draw_colored_polygon(_rounded(Rect2(left - 5.0, top - 4.0,
-		total + 10.0, PROMPT_CAP_H + 8.0), 4.0), Color(0.04, 0.05, 0.09, 0.95 * fade))
-	var x: float = left
-	for cap: String in keys:
-		var width: float = cap_width(cap)
-		_draw_cap(Vector2(x, top), cap, width, fade)
-		x += width + PROMPT_GAP
-	draw_string(font, Vector2(x + 1.0, top + PROMPT_CAP_H - 4.0), "→",
-		HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_TEXT, Color(Defs.COL_TEXT_DIM, fade))
-	draw_string(font, Vector2(x + arrow_w + 3.0, top + PROMPT_CAP_H - 4.0), verb,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, PROMPT_TEXT, Color(Defs.COL_CORE, fade))
-	# Held keys say so, because pressing Z at a seam does nothing visible and a
-	# player who taps it once concludes the game is broken.
-	if bool(row.get("hold", false)):
-		var note: String = "누르고 있기"
-		var note_w: float = font.get_string_size(note, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		draw_string(font, Vector2(-note_w * 0.5, top - 8.0), note,
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color(Defs.COL_TEXT_DIM, fade * 0.9))
+		return 0.0
+	return clampf(_prompt_age / 0.35, 0.0, 1.0)
 
 ## Her temperature, over her head, in the same words a cat's hunger is in.
 ##
@@ -620,7 +515,6 @@ func _draw_warmth_bar() -> void:
 		Color(colour.r, colour.g, colour.b, show))
 
 func _draw() -> void:
-	_draw_prompt()
 	_draw_warmth_bar()
 	# Flattened ground shadow, drawn under the sprite so she is anchored to the
 	# grid rather than floating over it.

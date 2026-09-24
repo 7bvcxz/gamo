@@ -84,20 +84,16 @@ func _test_quest_hud_shows_active_quest() -> void:
 	_assert(main.hud.quest_hud_text() == String(active[0]["title"]),
 		"줄이 그 임무를 말한다")
 	_assert(main.hud.quest_hud_rect().size.y > 0.0, "그리고 자리를 차지한다")
-	# Under the ledger, and the goal card below it -- the column is stacked
-	# through one function, so a third panel cannot be forgotten by three callers.
+	# Inside the world card, under its header -- one card reading one list, not a
+	# quest line in the left column with a goal card stacked under it (1.0.41).
+	main.hud._layout()
 	var quest: Rect2 = main.hud.quest_hud_rect()
-	# Under whatever is actually drawn above it. The ledger is not drawn while it
-	# has no rows, so at the very start the line sits directly under the bars --
-	# asking for the ledger's rect there would be asking about a panel nobody can
-	# see.
-	var above: float = main.hud.status_rect().end.y
-	if not main.hud.resource_rows().is_empty():
-		above = main.hud.resource_rect().end.y
-	_assert(quest.position.y >= above, "위에 그려진 것 바로 아래에 있다")
-	_assert(main.hud.left_column_bottom() >= quest.end.y,
-		"컬럼의 바닥이 임무 줄을 포함한다")
-	_assert(main.hud.goal_top() >= quest.end.y, "목표 카드가 그 아래로 밀린다")
+	var card: Rect2 = main.hud.world_card_rect()
+	_assert(card.encloses(quest), "월드 카드 안에 있다")
+	_assert(quest.position.y > card.position.y + HudStyle.ROW, "헤더 아래에 있다")
+	# And nothing in the left column draws the same sentence again.
+	_assert(not main.hud.status_card_rect().intersects(card) or not main.hud.world_beside_status(),
+		"상태 카드와 겹치지 않는다")
 
 # --- test_quest_window_toggle_q ----------------------------------------------
 

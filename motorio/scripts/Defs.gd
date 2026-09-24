@@ -2054,7 +2054,7 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"cost": {},
 		"seconds": 3.0,
 		"until": "shelter_placed",
-		"note": "밤에 잘 곳 · 만들어서 들고 가 세운다",
+		"note": "밤을 버틸 곳. 들고 가서 직접 세운다.",
 	},
 	{
 		# After the shelter, so the window teaches one sentence at a time. It is
@@ -2067,7 +2067,7 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"name": "곡괭이",
 		"cost": {},
 		"seconds": 3.0,
-		"note": "광맥을 캐는 손 · 만들면 바로 손에 들린다",
+		"note": "단단한 광맥을 직접 캘 수 있다.",
 	},
 	{
 		# The DISCOVER -> AUTOMATE hinge: the first copper is what opens this
@@ -2080,15 +2080,16 @@ const BASE_CRAFTS: Array[Dictionary] = [
 		"name": "건물건설총",
 		"cost": {},
 		"seconds": 3.0,
-		"note": "기계를 세우는 손 · 만들면 바로 손에 들린다",
+		"note": "이걸로 기계를 세울 수 있다.",
 	},
 	{
 		"id": "torch",
 		"level": BASE_CRAFT_LEVEL,
 		"name": TORCH_NAME,
 		"cost": TORCH_COST,
-		"note": "들고 있는 동안 주위 %d칸이 보이고 춥지 않다 · %d초"
-			% [int(TORCH_SIGHT), int(TORCH_SECONDS)],
+		# No tiles and no seconds: she can see what it does by lighting it, and a
+		# number here is a manual the player has to convert into a feeling.
+		"note": "들고 있으면 주변이 조금 환해지고 따뜻하다. 오래가진 않을 것 같다.",
 	},
 	{
 		"id": "food_bin",
@@ -2328,7 +2329,7 @@ const MISSION_LINES: Array[Dictionary] = [
 ## `why` is for the documentation page and is never drawn.
 const KEY_PROMPTS: Array[Dictionary] = [
 	{
-		"id": "KIT", "keys": ["Z"], "hold": true, "verb": "조사",
+		"id": "KIT", "keys": ["Z"], "hold": true, "verb": "조사하기",
 		"why": "상자 옆에 섰을 때. 게임에서 처음 누르는 키이고, 누르고 있어야 한다는 것은 화면의 고리가 말해준다.",
 	},
 	{
@@ -2340,7 +2341,7 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "얼어붙은 고양이를 안고 있을 때. PLACE와 같은 동작이지만 그때는 이미 배운 뒤라 대개 뜨지 않는다.",
 	},
 	{
-		"id": "DEBRIS", "keys": ["Z"], "hold": true, "verb": "분해",
+		"id": "DEBRIS", "keys": ["Z"], "hold": true, "verb": "뜯어보기",
 		"why": "로켓잔해를 마주했을 때. 상자와 같은 동작이라 처음 보는 물건 앞에서도 무엇을 해야 하는지는 이미 안다. 한 번 뜯어 보면 다시 뜨지 않는다.",
 	},
 	{
@@ -2352,7 +2353,7 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "얼어붙은 고양이 옆에 섰을 때. 이 게임에서 가장 중요한 한 번이고, 첫 고양이가 생기면 다시 뜨지 않는다.",
 	},
 	{
-		"id": "CATPLACE", "keys": ["Z"], "verb": "배치",
+		"id": "CATPLACE", "keys": ["Z"], "verb": "앉히기",
 		"why": "고양이를 안고 있을 때. 어디에 놓을 수 있는지는 목표 카드가 말한다.",
 	},
 	{
@@ -2360,15 +2361,15 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "일 없는 고양이 옆에 섰을 때. 고양이를 옮길 수 있다는 것을 아무도 알려주지 않으면 평생 숙소 앞에 서 있는다.",
 	},
 	{
-		"id": "RECIPE", "keys": ["Z"], "verb": "품목",
+		"id": "RECIPE", "keys": ["Z"], "verb": "고르기",
 		"why": "만들 것이 둘 이상인 기계를 바라볼 때. 제조기는 밖에서 보면 철판을 뽑는 기계와 전선을 뽑는 기계가 같은 상자라, 창이 있다는 것은 그 앞에서 키를 한 번 들어야만 알 수 있다.",
 	},
 	{
-		"id": "FUEL", "keys": ["Z"], "verb": "기지",
+		"id": "FUEL", "keys": ["Z"], "verb": "불살피기",
 		"why": "연료를 들고 기지를 바라볼 때. 캔 열석이 불에 들어가지 않으면 오프닝이 끝나지 않는다.",
 	},
 	{
-		"id": "ROTATE", "keys": ["R"], "verb": "방향",
+		"id": "ROTATE", "keys": ["R"], "verb": "돌리기",
 		"why": "건물건설총에 방향이 있는 기계를 장전하고 아직 한 번도 돌려 보지 않았을 때. 홀드 회전이 있던 시절에는 우연히 배웠는데, 그 우연을 없앴으므로 이제 말해 준다.",
 	},
 	{
@@ -2392,7 +2393,7 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "곡괭이가 생긴 뒤 아직 도구를 바꿔 본 적이 없을 때. 숫자 키가 손에 든 것을 바꾼다는 규칙 하나.",
 	},
 	{
-		"id": "BUILD", "keys": ["B"], "verb": "건설",
+		"id": "BUILD", "keys": ["B"], "verb": "짓기",
 		"why": "설비가 해금됐는데 아직 아무것도 짓지 않았을 때.",
 	},
 	{

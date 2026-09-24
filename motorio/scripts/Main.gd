@@ -93,7 +93,12 @@ var rescued_tonight: bool = false
 ## -- which is exactly what seeing copper does, opening the belt, the splitter
 ## and the generator at once -- left the player looking at the third one. Now
 ## they queue: newest at the bottom, each with its own life, oldest fading first.
-const MESSAGE_LIFE := 2.4
+##
+## Four seconds rather than 2.4 since the feed moved to the bottom-left corner.
+## In the middle of the screen a banner has to be waited out, so it had to be
+## short; in the corner it is read when the eye gets there, and 2.4 seconds is
+## often gone before it does.
+const MESSAGE_LIFE := 4.0
 ## A machine opening is the one message that changes what she can do next, and
 ## 2.4 seconds is long enough to notice and not long enough to read while
 ## something else is happening. The plate is solid until the last second, which
@@ -463,11 +468,11 @@ func info_data() -> Dictionary:
 		# her nothing.
 		if not sim.base_placed:
 			return _goal(Defs.mission_line("COLD-NOBASE"), "thing", Icons.THING_CORE)
-		return _goal("몸이 얼고 있습니다  온기 반경 안으로 돌아가세요", "thing", Icons.THING_CORE)
+		return _goal("몸이 얼고 있다.  온기 안으로 돌아가야 한다.", "thing", Icons.THING_CORE)
 	if is_night():
-		return _goal("밤입니다  숙소로 돌아가 자야 합니다", "thing", Icons.THING_SHELTER)
+		return _goal("밤이다.  숙소에 들어가 쉬어야겠다.", "thing", Icons.THING_SHELTER)
 	if is_dusk():
-		return _goal("해가 기울고 있습니다  곧 숙소로 돌아가야 합니다", "thing", Icons.THING_SHELTER)
+		return _goal("해가 기운다.  곧 숙소로 돌아가야겠다.", "thing", Icons.THING_SHELTER)
 	# Nothing else. What is in her arms is drawn in her arms, ice melting is drawn
 	# melting, and the grid running slow is something a player who built the grid
 	# can see -- three lines that described the screen and one that described a
@@ -503,7 +508,7 @@ func _on_tool_selected() -> void:
 		return
 	sim.learn("TORCH")
 	if sim.torches <= 0 and sim.torch_left <= 0.0:
-		_notify("%s이 없습니다  기지에서 만들 수 있습니다" % Defs.TORCH_NAME,
+		_notify("%s이 없다.  불에서 하나 만들어야겠다." % Defs.TORCH_NAME,
 			Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 
@@ -515,9 +520,9 @@ func _light_torch() -> void:
 	if sim.light_torch():
 		audio.call("play", "confirm")
 		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
-		_notify("%s에 불을 붙였습니다" % Defs.TORCH_NAME, Defs.COL_CORE)
+		_notify("%s에 불을 붙였다." % Defs.TORCH_NAME, Defs.COL_CORE)
 	else:
-		_notify("%s이 없습니다  기지에서 만들 수 있습니다" % Defs.TORCH_NAME,
+		_notify("%s이 없다.  불에서 하나 만들어야겠다." % Defs.TORCH_NAME,
 			Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 
@@ -798,8 +803,14 @@ func _map_key(key: InputEventKey) -> void:
 ##
 ## Cells rather than machines are the unit: the map's job is "have I been here
 ## and what is there", and at two pixels a cell a machine is a dot either way.
-func draw_map(on: CanvasItem, view: Rect2) -> void:
-	var scale: float = Defs.MAP_CELL_PX * map_zoom
+##
+## The corner minimap is this same drawing, cut to a circle: `zoom` overrides the
+## player's map zoom, `clip` is the circle's radius (nothing is drawn past it),
+## and `seen_alpha` dims the explored ground so a small map over the world does
+## not become a white disc. One drawing, so the two maps cannot disagree.
+func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.0,
+		seen_alpha: float = 1.0) -> void:
+	var scale: float = Defs.MAP_CELL_PX * (zoom if zoom > 0.0 else map_zoom)
 	var centre: Vector2 = view.position + view.size * 0.5
 	var here: Vector2i = sim.cell_of(player.position)
 	# How many cells fit, plus one so the edge row is drawn rather than clipped
@@ -808,14 +819,19 @@ func draw_map(on: CanvasItem, view: Rect2) -> void:
 		int(view.size.y / scale * 0.5) + 1)
 	var block: float = maxf(scale * float(Sim.EXPLORED_CHUNK), 1.0)
 	var dot: float = maxf(scale, 2.0)
+	var inside := func(at: Vector2, extent: float) -> bool:
+		return clip <= 0.0 or (at + Vector2(extent, extent) * 0.5).distance_to(centre) \
+			<= clip - extent * 0.5
 
-	var seen := Color(0.78, 0.83, 0.90, 1.0)
+	var seen := Color(0.78, 0.83, 0.90, seen_alpha)
 	for dy in range(-reach.y, reach.y + 1, Sim.EXPLORED_CHUNK):
 		for dx in range(-reach.x, reach.x + 1, Sim.EXPLORED_CHUNK):
 			var cell: Vector2i = here + Vector2i(dx, dy)
 			if not sim.is_explored(cell):
 				continue
 			var at: Vector2 = centre + Vector2(cell - here) * scale
+			if not inside.call(at, block):
+				continue
 			on.draw_rect(Rect2(at, Vector2(block, block)), seen)
 
 	# Only what stands in explored ground. A seam nobody has been near must not
@@ -824,6 +840,8 @@ func draw_map(on: CanvasItem, view: Rect2) -> void:
 		if not sim.is_explored(cell):
 			continue
 		var at: Vector2 = centre + Vector2(cell - here) * scale
+		if not inside.call(at, dot):
+			continue
 		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.ITEM_COLORS[int(sim.ore[cell])])
 	for cell: Vector2i in sim.machines:
 		if not sim.is_explored(cell):
@@ -831,8 +849,12 @@ func draw_map(on: CanvasItem, view: Rect2) -> void:
 		var machine: Sim.Machine = sim.machines[cell]
 		var at: Vector2 = centre + Vector2(cell - here) * scale
 		if machine.type == Defs.M_CORE:
-			on.draw_circle(at + Vector2(scale, scale) * 0.5, maxf(scale * 2.0, 5.0),
-				Defs.COL_CORE)
+			var hearth: float = maxf(scale * 2.0, 5.0)
+			if clip > 0.0 and (at + Vector2(scale, scale) * 0.5).distance_to(centre) > clip - hearth:
+				continue
+			on.draw_circle(at + Vector2(scale, scale) * 0.5, hearth, Defs.COL_CORE)
+			continue
+		if not inside.call(at, dot):
 			continue
 		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.COL_MACHINE_EDGE)
 	# The edge of the fire's reach, drawn as the circle it actually is.
@@ -845,9 +867,20 @@ func draw_map(on: CanvasItem, view: Rect2) -> void:
 		var core: Vector2 = centre + Vector2(sim.core_cell - here) * scale \
 			+ Vector2(scale, scale) * 0.5
 		var radius: float = sim.warm_radius * scale
-		on.draw_arc(core, radius, 0.0, TAU, 96, Color(0.06, 0.07, 0.10, 0.55), 3.0, true)
-		on.draw_arc(core, radius, 0.0, TAU, 96,
-			Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85), 1.6, true)
+		var shade := Color(0.06, 0.07, 0.10, 0.55)
+		var line := Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85)
+		if clip <= 0.0 or core.distance_to(centre) + radius <= clip:
+			on.draw_arc(core, radius, 0.0, TAU, 96, shade, 3.0, true)
+			on.draw_arc(core, radius, 0.0, TAU, 96, line, 1.6, true)
+		else:
+			# Past the minimap's edge the circle is cut, a segment at a time.
+			var steps := 96
+			var last: Vector2 = core + Vector2(radius, 0.0)
+			for step in range(1, steps + 1):
+				var next: Vector2 = core + Vector2.from_angle(TAU * float(step) / float(steps)) * radius
+				if last.distance_to(centre) <= clip and next.distance_to(centre) <= clip:
+					on.draw_line(last, next, line, 1.6, true)
+				last = next
 
 	# Grim last, over everything, because the one thing a map has to answer
 	# instantly is where you are.
@@ -950,7 +983,7 @@ func _gacha_key(key: InputEventKey) -> void:
 func _load_build_gun(index: int) -> void:
 	var type: int = Defs.BUILDABLE[index]
 	if not sim.is_unlocked(type):
-		_notify("%s%s 아직 해금되지 않았습니다"
+		_notify("%s%s 아직 만들 수 없다."
 			% [Defs.MACHINE_NAMES[type], Defs.topic(Defs.MACHINE_NAMES[type])],
 			Defs.COL_DANGER)
 		audio.call("play", "select")
@@ -1314,7 +1347,7 @@ func _process_play(delta: float) -> void:
 	# anything.
 	if not night_warned and is_night() and Zone.darkens(zone()):
 		night_warned = true
-		_notify("밤이 옵니다 — 숙소로 돌아가 자야 합니다", Defs.COL_DANGER)
+		_notify("해가 진다.  숙소로 돌아가야 한다.", Defs.COL_DANGER)
 		audio.call("play", "alarm")
 	# Night sends the crew home even for a player who stays out to watch it, and
 	# morning sends them back to their posts. What keeps running is what runs on
@@ -1382,11 +1415,11 @@ func _announce_drop(kind: int) -> void:
 	audio.call("play", "confirm")
 	match kind:
 		Sim.DROP_KIT_BASE:
-			_notify("긴급기지키트를 들었습니다", Defs.COL_CORE)
+			_notify("긴급기지키트를 들었다.", Defs.COL_CORE)
 		Sim.DROP_KIT_SHELTER:
-			_notify("긴급숙소키트를 들었습니다", Defs.COL_CORE)
+			_notify("긴급숙소키트를 들었다.", Defs.COL_CORE)
 		Sim.DROP_FOOD_BIN:
-			_notify("사료 상자를 들었습니다", Defs.COL_CORE)
+			_notify("사료 상자를 들었다.", Defs.COL_CORE)
 		Sim.DROP_GUN:
 			_notify("건물건설총  ·  2번", Defs.COL_CORE)
 		Sim.DROP_PICKAXE:
@@ -1768,8 +1801,9 @@ func _update_missions() -> void:
 			if not _mission_ready(id):
 				continue
 			missions_open[id] = true
-			_notify("새 임무 · %s  %s" % [Defs.TRACK_NAMES[int(row["track"])],
-				String(row["line"])], Defs.COL_CORE)
+			# The line itself, not its track: "기지" in front of a thought is a
+			# filing label, and the feed is read at a glance.
+			_notify("새 임무 · %s" % String(row["line"]), Defs.COL_CORE)
 			audio.call("play", "confirm")
 			continue
 		if _mission_finished(id):
@@ -1828,7 +1862,7 @@ func _on_base_upgraded(level: int, radius: float) -> void:
 	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % Defs.base_level_shown(level), Defs.COL_CORE, true)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "finish")
-	_notify("기지가 커졌습니다", Defs.COL_CORE)
+	_notify("불이 더 커졌다.", Defs.COL_CORE)
 	# The gun does not come from here any more. The first copper opens its craft
 	# row -- DISCOVER pays for AUTOMATE -- and `_update_craft` hands it over.
 
@@ -2030,7 +2064,7 @@ func _update_torch(delta: float) -> void:
 	var before: float = sim.torch_left
 	sim.burn_torch(delta)
 	if before > 0.0 and sim.torch_left <= 0.0:
-		_notify("%s이 꺼졌습니다" % Defs.TORCH_NAME, Defs.COL_TEXT_DIM)
+		_notify("%s이 꺼졌다." % Defs.TORCH_NAME, Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		fx.ring(player.position, Defs.COL_TEXT_DIM, Defs.RING_MEDIUM)
 
@@ -2238,7 +2272,7 @@ func _advance_mission() -> void:
 	if mission == was:
 		return
 	if mission == Mission.DONE:
-		_notify("살아남았습니다  이제 하루가 흐릅니다", Defs.COL_CORE)
+		_notify("살아남았다.  이제 하루가 흐른다.", Defs.COL_CORE)
 		audio.call("play", "finish")
 	else:
 		audio.call("play", "confirm")
@@ -2332,8 +2366,9 @@ func _begin_rescue() -> void:
 	# daylight running for it is usually the longer way to the same rescue. The
 	# objective card was already saying "온기 반경 안으로 돌아가세요" at the same
 	# moment, so the two most urgent lines on screen named different places.
-	_notify("의식이 흐려집니다  %.0f초 안에 온기 반경 안으로" % Defs.COLLAPSE_GRACE,
-		Defs.COL_DANGER)
+	# No number: the countdown is under her, in the one chip allowed in the middle
+	# of the screen. This line is what she thinks.
+	_notify("의식이 흐려진다.  어서 온기 안으로 가야 한다.", Defs.COL_DANGER)
 	fx.ring(player.position, Defs.COL_DANGER, 44.0)
 	audio.call("play", "alarm")
 
@@ -2346,7 +2381,7 @@ func _update_collapse(delta: float) -> void:
 	if player.warmth > 0.0 and not falling:
 		# Made it somewhere warm in time.
 		collapse_timer = -1.0
-		_notify("체온을 되찾았습니다", Defs.COL_CORE)
+		_notify("몸이 다시 따뜻해졌다.", Defs.COL_CORE)
 		return
 	collapse_timer -= delta
 	if collapse_timer > 0.0:
@@ -2369,7 +2404,7 @@ func _update_collapse(delta: float) -> void:
 	# take that would not shrink the reach -- and the circle is the one thing in
 	# this game that must never go backwards. Losing the rest of the day is the
 	# cost, and it was always the larger one.
-	_notify("쓰러졌습니다", Defs.COL_DANGER)
+	_notify("쓰러졌다…", Defs.COL_DANGER)
 	_finish_run()
 
 
@@ -2868,6 +2903,11 @@ func touch_hud(position: Vector2) -> bool:
 	if (hud.gacha_button_rect as Rect2).has_point(local):
 		toggle_gacha()
 		return true
+	# The round map in the corner opens the full one. A phone has no M key, and
+	# the corner map is exactly the thing a thumb reaches for when it wants more.
+	if bool(hud.call("minimap_visible")) and (hud.minimap_rect as Rect2).has_point(local):
+		toggle_map()
+		return true
 	for index in hud.hotbar_rects.size():
 		if (hud.hotbar_rects[index] as Rect2).has_point(local):
 			# The row holds tools, so a tap picks a tool. It used to hold machines
@@ -2888,7 +2928,9 @@ func touch_hud(position: Vector2) -> bool:
 			tool_index = index
 			audio.call("play", "select")
 			return true
-	if (hud.direction_rect as Rect2).has_point(local):
+	# Only while it is drawn: the chip is laid out always, so a thumb on empty
+	# snow above the hotbar must not turn a machine it cannot see.
+	if bool(hud.call("direction_visible")) and (hud.direction_rect as Rect2).has_point(local):
 		build_dir = Vector2i(-build_dir.y, build_dir.x)
 		audio.call("play", "select")
 		return true
@@ -3181,18 +3223,17 @@ func _primary_action() -> void:
 			# -- she can leave it and come back with a shorter walk -- but a
 			# player who thinks they have finished the errand would stand and
 			# watch nothing happen.
-			_notify("기지에서 멉니다  기지 %d칸 안에 놓아야 녹기 시작합니다"
-				% int(Defs.THAW_RADIUS), Defs.COL_TEXT_DIM)
+			_notify("기지 가까이에 두면 녹을 것 같다.", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
 		return
 	if sim.carried_cat != null:
 		if sim.place_cat(cell):
-			_notify("고양이를 채굴기에 배치했습니다" if sim.machines.has(cell)
-				else "고양이가 광맥을 캡니다", Defs.COL_CORE)
+			_notify("고양이를 채굴기에 앉혔다." if sim.machines.has(cell)
+				else "고양이가 광맥을 파기 시작했다.", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
 			audio.call("play", "build")
 		elif sim.drop_cat(sim.cell_centre(cell)):
-			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
+			_notify("고양이를 내려놓았다.", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
 		return
 	# ...unless she is holding the pickaxe and aiming at a bare seam, in which
@@ -3238,7 +3279,7 @@ func _primary_action() -> void:
 		if not sim.has_learned("CATHINT"):
 			sim.learn("CATHINT")
 			_notify("도와주고 싶은 것 같다.", Defs.COL_TEXT_DIM, UNLOCK_MESSAGE_LIFE)
-		_notify("고양이를 안았습니다", Defs.COL_BELT_RIM)
+		_notify("고양이를 안았다.", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
 		audio.call("play", "select")
 		return
@@ -3367,7 +3408,7 @@ func _machine_menu_confirm() -> void:
 	var row: Dictionary = rows[clampi(menu_index, 0, rows.size() - 1)]
 	if sim.set_recipe(machine, String(row["key"])):
 		var made: String = Defs.item_name(int((row["outputs"] as Array)[0]["item"]))
-		_notify("%s%s 만듭니다" % [made, Defs.object_of(made)], Defs.COL_CORE)
+		_notify("이제 %s%s 만든다." % [made, Defs.object_of(made)], Defs.COL_CORE)
 		fx.ring(sim.cell_centre(machine_menu_cell), Defs.COL_CORE, Defs.RING_SMALL)
 		audio.call("play", "build")
 	else:
@@ -3419,7 +3460,7 @@ func craft_selected(index: int = 0) -> void:
 	var seconds: float = float(craft.get("seconds", 0.0))
 	if seconds > 0.0:
 		if craft_making != "":
-			_notify("아직 만드는 중입니다", Defs.COL_TEXT_DIM)
+			_notify("아직 만드는 중이다.", Defs.COL_TEXT_DIM)
 			audio.call("play", "deny")
 			return
 		craft_making = id
@@ -3434,14 +3475,15 @@ func craft_selected(index: int = 0) -> void:
 		return
 	var made: bool = sim.craft_torch() if id == "torch" else sim.craft_food_bin()
 	if not made:
-		var reason: String = "이미 있습니다" \
+		var reason: String = "이미 있다" \
 			if id == "food_bin" and (sim.food_placed or sim.bin_in_hand()) \
-			else "재료가 모자랍니다"
+			else "재료가 모자라다"
 		_notify("%s  ·  %s" % [String(craft["name"]), reason], Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
 	var tail: String = "  (%d개)" % sim.torches if id == "torch" else ""
-	_notify("%s을 만들었습니다%s" % [String(craft["name"]), tail], Defs.COL_CORE)
+	_notify("%s%s 만들었다.%s" % [String(craft["name"]),
+		Defs.object_of(String(craft["name"])), tail], Defs.COL_CORE)
 	fx.ring(sim.cell_centre(sim.core_cell), Defs.COL_CORE, Defs.RING_MEDIUM)
 	audio.call("play", "alloy")
 
@@ -3495,14 +3537,14 @@ func _equip(tool: int) -> void:
 ## is built around.
 func _deposit_at_core() -> void:
 	if not sim.has_fuel():
-		_notify("넣을 열석이 없습니다", Defs.COL_TEXT_DIM)
+		_notify("넣을 열석이 없다.", Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
 	# Short of the next step. Refused rather than half-paid: a fire that takes two
 	# of the three stones it wants has spent the material and moved nothing, and
 	# the player cannot see where it went.
 	if not sim.can_feed_base():
-		_notify("열석 %d개가 더 필요합니다"
+		_notify("열석이 %d개 더 있어야 한다."
 			% (sim.stones_to_next() - int(sim.stock.get(Defs.ITEM_HEATSTONE, 0))),
 			Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
@@ -3521,34 +3563,33 @@ func _deposit_at_core() -> void:
 	fx.ring(target, Defs.COL_CORE, Defs.RING_LARGE)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "deliver")
-	_notify("%s  ·  온기 %.1f칸" % [" · ".join(parts), sim.warm_radius], Defs.COL_CORE)
+	_notify("불에 넣었다  ·  %s" % " · ".join(parts), Defs.COL_CORE)
 
 func _place_kit(cell: Vector2i) -> void:
 	var kit: int = sim.carried_kit
 	if kit == Defs.KIT_FOOD:
 		if sim.place_food_bin(cell):
-			_notify("사료 상자를 놓았습니다", Defs.COL_CORE)
+			_notify("사료 상자를 놓았다.", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_MEDIUM)
 			audio.call("play", "finish")
 			return
 		if not sim.can_touch(cell):
-			_notify("온기 반경 밖입니다", Defs.COL_TEXT_DIM)
+			_notify("여기는 불이 닿지 않는다.", Defs.COL_TEXT_DIM)
 		else:
-			_notify("여기에는 놓을 수 없습니다", Defs.COL_TEXT_DIM)
+			_notify("여기에는 놓을 수 없다.", Defs.COL_TEXT_DIM)
 	elif kit == Defs.KIT_SHELTER:
 		if sim.place_shelter(cell):
-			_notify("거처를 세웠습니다  밤에는 여기서 잡니다", Defs.COL_CORE)
+			_notify("잘 곳을 세웠다.  밤에는 여기서 쉬면 된다.", Defs.COL_CORE)
 			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_LARGE)
 			audio.call("play", "finish")
 			return
 		var distance: float = Vector2(cell - sim.core_cell).length()
 		if distance <= Defs.SHELTER_CLEARANCE:
-			_notify("기지에 너무 붙었습니다  %d칸 밖에 세우세요"
-				% int(Defs.SHELTER_CLEARANCE), Defs.COL_TEXT_DIM)
+			_notify("불에 너무 가깝다.  조금 떨어진 곳에 세워야겠다.", Defs.COL_TEXT_DIM)
 		elif distance > sim.warm_radius:
-			_notify("온기 반경 밖입니다  기지가 닿는 곳에 세우세요", Defs.COL_TEXT_DIM)
+			_notify("여기는 불이 닿지 않는다.  불 가까이에 세워야겠다.", Defs.COL_TEXT_DIM)
 		else:
-			_notify("여기에는 세울 수 없습니다", Defs.COL_TEXT_DIM)
+			_notify("여기에는 세울 수 없다.", Defs.COL_TEXT_DIM)
 	audio.call("play", "deny")
 
 func _try_build() -> void:
@@ -3948,7 +3989,7 @@ func _cycle_recipe() -> void:
 	if machine.type == Defs.M_BELT:
 		var tier: int = sim.cycle_belt_tier(cell)
 		if tier < 0:
-			_notify("구리광석이 부족합니다", Defs.COL_DANGER)
+			_notify("구리광석이 모자라다.", Defs.COL_DANGER)
 			audio.call("play", "deny")
 			return
 		_notify("%s · %.0f배 속도" % [Defs.BELT_TIERS[tier]["name"], Defs.BELT_TIERS[tier]["speed"]],
@@ -3965,7 +4006,7 @@ func _try_demolish() -> void:
 	# Both hands are busy. Letting X pull up a machine while a cat is being
 	# carried was the one way to hold two things at once.
 	if sim.carried_cat != null:
-		_notify("고양이를 안고 있어 회수할 수 없습니다", Defs.COL_TEXT_DIM)
+		_notify("고양이를 안고 있어서 손이 모자라다.", Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
 	var cell: Vector2i = player.facing_cell()
@@ -3974,7 +4015,7 @@ func _try_demolish() -> void:
 		fx.burst(at, Defs.COL_TEXT_DIM, 5)
 		audio.call("play", "remove")
 	else:
-		_notify("회수할 설비가 없습니다", Defs.COL_TEXT_DIM)
+		_notify("거둘 설비가 없다.", Defs.COL_TEXT_DIM)
 
 func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
@@ -4525,13 +4566,13 @@ func room_confirm() -> void:
 	var cell: Vector2i = player.facing_cell()
 	if sim.carried_cat != null:
 		if sim.drop_cat(sim.cell_centre(cell)):
-			_notify("고양이를 내려놓았습니다", Defs.COL_TEXT_DIM)
+			_notify("고양이를 내려놓았다.", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
 		else:
 			audio.call("play", "deny")
 		return
 	if sim.pick_up_cat(cell):
-		_notify("고양이를 안았습니다", Defs.COL_BELT_RIM)
+		_notify("고양이를 안았다.", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)
 		audio.call("play", "select")
 		return

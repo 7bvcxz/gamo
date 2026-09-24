@@ -112,31 +112,28 @@ func _test_tracks() -> void:
 	sim._refresh_radius()
 	_assert(main.upgrade_progress().is_empty(), "마지막 단계에서는 세지 않는다")
 
-	# --- And the column it sits in --------------------------------------------
-	# One width for everything in the top-left. Four cards measuring themselves
-	# from their own longest line meant four right edges down one column, which
-	# reads as four panels near each other rather than as one column.
+	# --- And the card it sits in ----------------------------------------------
+	# The ledger is inside the status card, one width with the bars; the quests
+	# are inside the world card. Neither plate grows to fit a line -- the line
+	# wraps, at spaces, and the card measures what the drawing will draw.
 	var hud = main.hud
+	hud._layout()
 	var column: float = hud.status_rect().size.x
-	_assert(is_equal_approx(hud.resource_rect().size.x, column), "자원 패널이 같은 폭이다")
-	_assert(is_equal_approx(hud.mission_card_rect().size.x, column), "임무 카드가 같은 폭이다")
-	_assert(is_equal_approx(hud.objective_rect("긴 문장 하나").size.x, column),
-		"목표 카드가 같은 폭이다")
-	_assert(is_equal_approx(hud.info_rect("긴 문장 하나").size.x, column),
-		"상태 카드가 같은 폭이다")
-	# And the text stays inside it. The plate no longer grows to fit the line, so
-	# the line has to wrap -- the two longest in the game are opening lines and
-	# they were drawn straight out through the border.
-	for row: Dictionary in Defs.MISSION_LINES:
+	_assert(is_equal_approx(hud.resource_rect().size.x, column), "자원 목록이 막대와 같은 폭이다")
+	_assert(hud.status_card_rect().encloses(hud.resource_rect()), "자원 목록이 상태 카드 안에 있다")
+	var width: float = hud._world_text_width() - hud.QUEST_MARK_W
+	for row: Dictionary in Defs.MISSION_LINES + Defs.MISSIONS:
 		var line: String = String(row["line"])
-		var box: Rect2 = hud.objective_rect(line)
-		var block: float = hud._text_block_height(line, hud.objective_text_width(), 12)
-		_assert(block <= box.size.y - hud.FRAME_HEADER,
-			"목표 줄이 카드 안에 들어간다: %s" % line)
-	for row: Dictionary in Defs.MISSIONS:
-		var line: String = String(row["line"])
-		_assert(hud._text_block_height(line, hud.mission_text_width(), 12)
-			<= hud.mission_row_height(line), "임무 줄이 제 칸에 들어간다: %s" % line)
+		for wrapped: String in HudStyle.wrap_lines(line, width, HudStyle.TEXT_NORMAL):
+			_assert(HudStyle.width_of(wrapped, HudStyle.TEXT_NORMAL) <= width + 0.5,
+				"줄이 카드 폭 안에서 끊긴다: %s" % wrapped)
+		# Broken at spaces: no line starts in the middle of a word.
+		var words: PackedStringArray = line.split(" ", false)
+		for wrapped: String in HudStyle.wrap_lines(line, width, HudStyle.TEXT_NORMAL):
+			if wrapped == "":
+				continue
+			var first: String = wrapped.split(" ", false)[0]
+			_assert(words.has(first), "단어 중간에서 끊기지 않는다: '%s' in %s" % [first, line])
 
 	main.clear_save()
 	main.free()

@@ -125,16 +125,17 @@ func _objectives(main: Node2D) -> void:
 	_no_keys(main.info(), "동결 정보창")
 	main.player.warmth = warm
 
-	# And the card that stacks above it never pushes the goal off the screen.
+	# And the state line never pushes the goal off the screen. Both live in the
+	# world card now (1.0.41): the line under the header, the quests under it.
 	main.player.warmth = Defs.FROST_STAGES[2] - 1.0
 	var hud: Node = main.hud
-	var info_box: Rect2 = hud.call("info_rect", main.info())
-	var goal_box: Rect2 = hud.call("objective_rect", main.objective())
-	_check(goal_box.position.y >= info_box.position.y + info_box.size.y,
-		"정보창이 목표창 위에 앉는다: 정보 %.0f..%.0f, 목표 %.0f"
-			% [info_box.position.y, info_box.position.y + info_box.size.y, goal_box.position.y])
-	_check(goal_box.position.y + goal_box.size.y < hud.size.y,
-		"그래도 목표창이 화면 안에 있다")
+	hud._layout()
+	var card: Rect2 = hud.call("world_card_rect")
+	var quests: Rect2 = hud.call("quest_hud_rect")
+	_check(not hud.call("world_note").is_empty(), "상태 줄이 월드 카드에 있다")
+	_check(quests.position.y >= card.position.y + hud.STATUS_ROW,
+		"임무가 상태 줄 아래에 앉는다: 카드 %.0f, 임무 %.0f" % [card.position.y, quests.position.y])
+	_check(card.end.y < hud.size.y, "그래도 카드가 화면 안에 있다")
 	main.player.warmth = warm
 
 	# Walk the ladder and read every line it can produce, so a key named in a
@@ -269,9 +270,11 @@ func _check_code(row: Dictionary) -> void:
 	var want: String = String(KEY_SPELLING.get(first, first))
 	_check(name == want,
 		"%s 안내의 첫 키 '%s' 가 실제 키 이름 '%s' 와 같다" % [String(row["id"]), first, name])
-	# The title screen, which is the one line every player reads and nobody
-	# re-reads. It advertised WASD, and WASD moves nothing.
-	var title: String = HudScript.title_controls(false)
+	# The first thing the game says about moving. It was a line on the title
+	# screen that advertised WASD, and WASD moves nothing; since 1.0.41 there is
+	# no line there, and the first key named is the MOVE prompt in the corner.
+	var move: Dictionary = Defs.key_prompt("MOVE")
+	var title: String = " ".join(PackedStringArray(move["keys"])) + " " + String(move["verb"])
 	_check(not title.to_upper().contains("WASD"),
 		"타이틀이 묶여 있지 않은 키를 말하지 않는다: %s" % title)
 	_check(title.contains("←") and title.contains("이동"),

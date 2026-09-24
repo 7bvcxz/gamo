@@ -12,3 +12,7 @@ export_credentials.cfg
 *.x86_64
 *.dmg
 *.app
+
+# Output of the harnesses in tools/ (agent playtests, HUD captures). Pictures
+# and logs of one run, not sources.
+/test-results/
