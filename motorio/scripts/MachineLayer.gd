@@ -214,6 +214,18 @@ var cat_hint := false
 var preview_affordable := true
 var show_preview := true
 var preview_occupied := false
+## The whole footprint the gun is aimed at, and which of its cells are blocked
+## (cell -> reason). Set by Main from `Sim.footprint_problems`, so the preview
+## and the refusal read the same rule.
+var preview_rect := Rect2i()
+var preview_problems: Dictionary = {}
+## The footprint of the machine already standing where she is aiming, when that
+## is what the gun would reclaim.
+var preview_standing := Rect2i()
+## What she is carrying would stand here if she put it down (the hut, the bin),
+## and which cells refuse it. Empty when her arms are.
+var carry_rect := Rect2i()
+var carry_problems: Dictionary = {}
 var pulse: float = 0.0
 var night: float = 0.0
 
@@ -271,39 +283,48 @@ func _draw() -> void:
 		_draw_room_pieces(tile)
 		_marks_layer.queue_redraw()
 		return
+	# Every machine is drawn over its whole footprint: `px` is the footprint's
+	# top-left and `span` its width. The pictures are the ones a one-tile machine
+	# always had, scaled to the footprint -- placeholders until the art pass, and
+	# the reason every fixed pixel size below is multiplied by `span / TILE`.
 	# Belts first so machines and items always sit above them.
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if machine.type != Defs.M_BELT:
 			continue
-		if not _visible(cell, tile):
+		var rect: Rect2 = Grid.rect_px(sim.machine_rect(machine))
+		if not _visible_rect(rect):
 			continue
-		_draw_belt(machine, Vector2(cell) * tile, tile)
+		_draw_belt(machine, rect.position, rect.size.x)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
 		if machine.type == Defs.M_BELT:
 			continue
-		if not _visible(cell, tile):
+		var rect: Rect2 = Grid.rect_px(sim.machine_rect(machine))
+		if not _visible_rect(rect):
 			continue
 		# Rigs and recipe machines are asked rather than listed. Two families with
 		# two members each, and a `match` arm per machine number is the thing that
 		# leaves the second member of a family invisible -- a machine that is in
 		# the world, blocks the tile, and is drawn as nothing at all.
 		if Defs.machine_mines(machine.type):
-			_draw_miner(machine, Vector2(cell) * tile, tile)
+			_draw_miner(machine, rect.position, rect.size.x)
 			continue
 		if Defs.machine_uses_recipes(machine.type):
-			_draw_recipe_machine(machine, Vector2(cell) * tile, tile)
+			_draw_recipe_machine(machine, rect.position, rect.size.x)
 			continue
 		match machine.type:
-			Defs.M_CORE: _draw_core(machine, Vector2(cell) * tile, tile)
-			Defs.M_GENERATOR: _draw_generator(machine, Vector2(cell) * tile, tile)
-			Defs.M_SPLITTER: _draw_splitter(machine, Vector2(cell) * tile, tile)
+			Defs.M_CORE: _draw_core(machine, rect.position, rect.size.x)
+			Defs.M_GENERATOR: _draw_generator(machine, rect.position, rect.size.x)
+			Defs.M_SPLITTER: _draw_splitter(machine, rect.position, rect.size.x)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
-		if machine.type != Defs.M_BELT or not _visible(cell, tile):
+		if machine.type != Defs.M_BELT:
 			continue
-		_draw_belt_items(machine, Vector2(cell) * tile, tile)
+		var rect: Rect2 = Grid.rect_px(sim.machine_rect(machine))
+		if not _visible_rect(rect):
+			continue
+		_draw_belt_items(machine, rect.position, rect.size.x)
 	_draw_shelter(tile)
 	_draw_food_bin(tile)
 	_draw_kit(tile)
@@ -335,8 +356,16 @@ func _draw() -> void:
 func _draw_shelter(tile: float) -> void:
 	if not sim.shelter_placed:
 		return
-	var origin: Vector2 = Vector2(sim.shelter_cell) * tile
-	var at: Vector2 = origin + Vector2.ONE * tile * 0.5
+	var footprint: Rect2 = Grid.rect_px(sim.shelter_rect())
+	# The ground it stands on. The picture is square and the footprint is not, so
+	# the footprint is marked under it: the hut covers all of these cells, and a
+	# player walking into the part the picture does not reach has to see why.
+	draw_rect(footprint.grow(-1.0), Color(0.10, 0.08, 0.07, 0.22))
+	draw_rect(footprint.grow(-1.0), Color(0.36, 0.28, 0.22, 0.45), false, 1.5)
+	var at: Vector2 = footprint.get_center()
+	var k: float = _k(minf(footprint.size.x, footprint.size.y))
+	_scale_about(at, k)
+	at = Vector2.ZERO
 	# Firelight rises with the night, which is exactly when the player needs to
 	# find this building from across the plateau.
 	var lit: float = 0.30 + night * 0.70
@@ -361,6 +390,7 @@ func _draw_shelter(tile: float) -> void:
 		draw_circle(at + Vector2(5.0 + sin(rise * 4.0 + float(index)) * 2.0, -9.0 - rise * 10.0),
 			1.0 + rise * 1.4, Color(0.86, 0.88, 0.92, (1.0 - rise) * 0.22))
 
+	_unscale()
 	# No caption. A snowed-in hut with a lit window and smoke on its chimney does
 	# not need the word 숙소 written under it, and the label was a leftover from
 	# when the building was two rectangles.
@@ -406,13 +436,11 @@ func _draw_meter_marker(tile: float) -> void:
 	var machine: Sim.Machine = sim.machine_at(meter_cell)
 	if machine == null:
 		return
-	var origin: Vector2 = Vector2(meter_cell) * tile
-	var span: Vector2 = Vector2(tile, tile)
-	if machine.type == Defs.M_CORE:
-		origin -= Vector2(tile, tile)
-		span = Vector2(tile * 3.0, tile * 3.0)
-	var box := Rect2(origin - Vector2(3, 3), span + Vector2(6, 6))
-	var arm: float = tile * 0.34
+	# The whole footprint, whatever its size -- the base used to be special-cased
+	# as three cells across because it was drawn bigger than the one it stood on.
+	var span: Rect2 = Grid.rect_px(sim.machine_rect(machine))
+	var box := Rect2(span.position - Vector2(3, 3), span.size + Vector2(6, 6))
+	var arm: float = minf(float(Grid.TILE) * 0.34, span.size.x * 0.34)
 	var glow: float = 0.55 + sin(pulse * 4.0) * 0.25
 	var col := Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, glow)
 	var corners: Array[Vector2] = [
@@ -445,11 +473,26 @@ func _draw_meter_marker(tile: float) -> void:
 func _visible(cell: Vector2i, tile: float) -> bool:
 	return view_rect.grow(tile * 2.0).has_point(Grid.centre(cell))
 
+func _visible_rect(rect: Rect2) -> bool:
+	return view_rect.grow(float(Grid.TILE) * 2.0).intersects(rect)
+
+## How much bigger than a one-tile machine this footprint is. Every fixed pixel
+## size in a machine's picture was drawn for one tile.
+static func _k(span: float) -> float:
+	return span / float(Grid.TILE)
+
 func _frost(machine: Sim.Machine) -> float:
 	return 0.0 if sim.is_warm(machine.cell) else 0.45
 
 func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
+	var k: float = _k(tile)
+	# The ground the base stands on: all of it, since the base is eight cells
+	# across and the fire in the middle of it is not.
+	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(0.16, 0.10, 0.06, 0.20))
+	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(1.0, 0.69, 0.36, 0.22), false, 1.5)
+	_scale_about(c, k)
+	c = Vector2.ZERO
 	var beat: float = 1.0 + sin(pulse * 2.2) * 0.05 + machine.flash * 0.5
 	# The core is the emotional centre of the run, so it is drawn large enough to
 	# outrank the HUD clock in the visual hierarchy.
@@ -469,6 +512,7 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# The heat it throws still pulses; the machine does not.
 	_object_art(CORE_ART, c, CORE_DRAW)
 	draw_arc(c, 22.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
+	_unscale()
 
 ## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --
 ## which stand on a fixed ground line -- these hang off the middle of the tile.
@@ -520,8 +564,24 @@ func _belt_inflow(machine: Sim.Machine) -> Vector2i:
 ## colour, always at the object's base. Three different shadow styles was the
 ## single loudest inconsistency in the old world layer.
 func _shadow(base: Vector2, radius: float) -> void:
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
+	draw_set_transform(_xf_at, 0.0, Vector2(_xf_k, _xf_k * Defs.SHADOW_SQUASH))
 	draw_circle(Vector2(base.x, base.y / Defs.SHADOW_SQUASH), radius, Defs.SHADOW)
+	draw_set_transform(_xf_at, 0.0, Vector2.ONE * _xf_k)
+
+## A one-tile picture drawn over a bigger footprint: everything drawn until
+## `_unscale` is placed around `at` and scaled by `k`. Kept in two fields
+## because `_shadow` changes the transform itself and has to put this one back.
+var _xf_at := Vector2.ZERO
+var _xf_k: float = 1.0
+
+func _scale_about(at: Vector2, k: float) -> void:
+	_xf_at = at
+	_xf_k = k
+	draw_set_transform(at, 0.0, Vector2.ONE * k)
+
+func _unscale() -> void:
+	_xf_at = Vector2.ZERO
+	_xf_k = 1.0
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 ## Every raised body: one footprint, one outline, light from the top-left.
@@ -570,6 +630,14 @@ func _draw_arrow(on: CanvasItem, from: Vector2, dir: Vector2i, length: float, co
 func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var frost: float = _frost(machine)
+	# The seam it works, under it: the post is four cells and the seam one, and
+	# which one is the anchor is the thing this picture has to say.
+	var seam: Vector2 = Grid.centre(machine.cell)
+	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(0.10, 0.08, 0.06, 0.22))
+	var k: float = _k(tile)
+	var grade_row: Vector2 = px + Vector2(0.0, tile)
+	_scale_about(c, k)
+	c = Vector2.ZERO
 	# Its own period, not the crystal one. The ring was measured against a fixed
 	# five seconds while the machine was working a thirty-second iron seam, so it
 	# filled six times per item and read as a machine racing on an empty seam.
@@ -594,10 +662,14 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# a player who has both on screen has to be able to tell which is which
 	# without selecting either. The first rig draws none, so nothing that was
 	# already on the map changes.
+	_unscale()
+	if tile > float(Grid.TILE):
+		draw_arc(seam, float(Grid.CELL) * 0.5, 0.0, TAU, 16,
+			Color(Defs.ITEM_COLORS[int(sim.ore.get(machine.cell, Defs.ITEM_HEATSTONE))], 0.85), 1.5, true)
 	var rate: float = Defs.machine_mine_rate(machine.type)
 	if rate > 1.0:
 		for index in int(rate):
-			draw_circle(px + Vector2(6.0 + float(index) * 5.0, tile - 4.0), 1.7, Defs.COL_BRASS)
+			draw_circle(grade_row + Vector2(6.0 + float(index) * 5.0, -4.0), 1.7, Defs.COL_BRASS)
 
 ## The swing. Ten seconds is a long time to hold a key with nothing to look at,
 ## so the seam being worked wears a filling arc and shakes a little harder as it
@@ -609,11 +681,11 @@ func _draw_hand_progress() -> void:
 	var fraction: float = sim.hand_fraction()
 	if fraction <= 0.0:
 		return
-	var tile := float(Grid.CELL)
 	var centre: Vector2 = Grid.centre(sim.hand_cell)
 	var jitter: float = fraction * 1.6
 	centre += Vector2(randf_range(-jitter, jitter), randf_range(-jitter, jitter))
-	var radius: float = tile * 0.52
+	# Sized to a tile, not to the seam: it is what she watches for ten seconds.
+	var radius: float = float(Grid.TILE) * 0.52
 	# The seam sits on warm amber ground, and an amber arc on amber reads as
 	# nothing. Dark track, near-white fill: the contrast has to survive the
 	# brightest floor in the game.
@@ -680,6 +752,7 @@ const RING_SEGMENTS := 32
 ## rather than inferred.
 func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
+	var k: float = _k(tile)
 	var frost: float = _frost(machine)
 	var base: Color = Defs.COL_BELT_BODY if frost <= 0.0 else Defs.COL_BELT_BODY_COLD
 	var edge: Color = Defs.machine_color(Defs.M_SPLITTER)
@@ -695,18 +768,19 @@ func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 		var dir := Vector2(sides[index])
 		var next: bool = index == machine.next_out
 		var lane: Color = edge if next else Color(edge.r, edge.g, edge.b, 0.32)
-		draw_line(c + dir * 4.0, c + dir * 13.0, lane, 3.0 if next else 2.0)
+		draw_line(c + dir * 4.0 * k, c + dir * 13.0 * k, lane, (3.0 if next else 2.0) * maxf(k, 0.6))
 	# The dim stub that used to show where input is expected is gone: the art has
 	# an arm there now, reaching the cell edge to meet the belt that feeds it, and
 	# a painted hint on top of a real one reads as two different claims.
-	draw_circle(c, 5.0, base.darkened(0.35))
-	draw_circle(c, 5.0, Defs.OUTLINE, false, 1.0)
+	draw_circle(c, 5.0 * k, base.darkened(0.35))
+	draw_circle(c, 5.0 * k, Defs.OUTLINE, false, 1.0)
 	for entry: Dictionary in machine.items:
-		draw_circle(c, 2.6, Defs.ITEM_COLORS[int(entry["type"])])
+		draw_circle(c, 2.6 * maxf(k, 0.7), Defs.ITEM_COLORS[int(entry["type"])])
 		break
 	# Grade pips on the rim, so an upgraded belt is legible without selecting it.
 	for index in machine.tier:
-		draw_circle(px + Vector2(6.0 + float(index) * 5.0, tile - 4.0), 1.7, Defs.COL_BELT_RIM)
+		draw_circle(px + Vector2((6.0 + float(index) * 5.0) * k, tile - 4.0 * k), 1.7 * maxf(k, 0.6),
+			Defs.COL_BELT_RIM)
 
 ## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
 ## reads as "come and get me" rather than as scenery.
@@ -751,6 +825,8 @@ func _draw_ground() -> void:
 ## supplying, so an unfuelled one is visibly dark rather than silently idle.
 func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
+	_scale_about(centre, _k(tile))
+	centre = Vector2.ZERO
 	var live: bool = machine.operated
 	var frost: float = _frost(machine)
 	_shadow(centre + Vector2(0, 12), 11.0)
@@ -764,6 +840,7 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	draw_circle(centre + Vector2(0.0, 1.0), 2.4, Color(0.92, 0.99, 1.0, beat))
 	# Fuel sits in the same pip row every other machine uses.
 	_draw_pip(centre + Vector2(0, 13), Defs.GENERATOR_FUEL, int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)))
+	_unscale()
 
 ## The manufacturer, drawn the way the generator is: the art, then the one light
 ## the art already has, tied to whether it is actually working.
@@ -779,6 +856,15 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## two inputs is a different shape, not a different colour.
 func _draw_recipe_machine(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var centre: Vector2 = px + Vector2.ONE * tile * 0.5
+	_scale_about(centre, _k(tile))
+	centre = Vector2.ZERO
+	_draw_recipe_body(machine)
+	_unscale()
+
+## The recipe machine's picture, drawn around the origin at one-tile size. The
+## caller scales it to the footprint.
+func _draw_recipe_body(machine: Sim.Machine) -> void:
+	var centre := Vector2.ZERO
 	var frost: float = _frost(machine)
 	_shadow(centre + Vector2(0, 12), 11.0)
 	_object_art(MANUFACTURER_ART, centre, MACHINE_ART_DRAW,
@@ -1004,20 +1090,26 @@ func _draw_pickaxe_hint(tile: float) -> void:
 var craft_progress := 0.0
 
 func _draw_base_craft(tile: float) -> void:
-	if craft_progress <= 0.0 or not _visible(sim.core_cell, tile):
+	if craft_progress <= 0.0 or not _visible_rect(Grid.rect_px(sim.base_rect())):
 		return
-	var centre: Vector2 = Grid.centre(sim.core_cell)
-	_progress_ring(centre, craft_progress, Defs.COL_CORE, tile * 0.46, 3.4)
+	var centre: Vector2 = sim.core_centre()
+	_progress_ring(centre, craft_progress, Defs.COL_CORE, _fire_ring(), 3.4)
+
+## The ring around the fire, sized to the fire: a little under half a tile for
+## every tile the base is across, and never smaller than the one-tile base had.
+func _fire_ring() -> float:
+	return maxf(float(Grid.TILE) * 0.46, Grid.rect_px(sim.base_rect()).size.x * 0.23)
 
 ## The "!" over the fire, while the thought that points at it stands open.
 ## Small, dark-plated and bouncing a little -- the language every notice in this
 ## game uses -- and gone the moment the window it points at is opened.
 func _draw_base_alert(tile: float) -> void:
-	if not base_alert or not _visible(sim.core_cell, tile):
+	if not base_alert or not _visible_rect(Grid.rect_px(sim.base_rect())):
 		return
-	var centre: Vector2 = Grid.centre(sim.core_cell)
+	var centre: Vector2 = sim.core_centre()
 	var bob: float = sin(pulse * 4.0) * 2.0
-	var at: Vector2 = centre + Vector2(0.0, -34.0 + bob)
+	var lift: float = maxf(34.0, _fire_ring() + 20.0)
+	var at: Vector2 = centre + Vector2(0.0, -lift + bob)
 	var plate := Rect2(at - Vector2(7.0, 10.0), Vector2(14.0, 18.0))
 	draw_rect(plate.grow(1.0), Color(0, 0, 0, 0.35))
 	draw_rect(plate, Color(0.09, 0.11, 0.16, 0.92))
@@ -1046,15 +1138,16 @@ func _draw_post_hints(tile: float) -> void:
 		if taken:
 			continue
 		var centre: Vector2 = Grid.centre(cell)
-		draw_circle(centre, tile * 0.42, Color(1.0, 0.82, 0.45, glow))
-		draw_arc(centre, tile * 0.42, 0.0, TAU, 24, Color(1.0, 0.82, 0.45, glow * 2.2), 1.4, true)
+		var ring: float = float(Grid.TILE) * 0.42
+		draw_circle(centre, ring, Color(1.0, 0.82, 0.45, glow))
+		draw_arc(centre, ring, 0.0, TAU, 24, Color(1.0, 0.82, 0.45, glow * 2.2), 1.4, true)
 
 func _draw_kit(tile: float) -> void:
 	# The case stays: it opened, the base unfolded beside it, and a metal box
 	# does not stop existing because it is empty.
 	if sim.kit_cell == Vector2i(9999, 9999):
 		return
-	var at: Vector2 = Grid.centre(sim.kit_cell)
+	var at: Vector2 = sim.prop_centre(sim.kit_cell)
 	if not view_rect.grow(tile).has_point(at):
 		return
 	var breathe: float = 0.5 + 0.5 * sin(pulse * 2.2)
@@ -1072,7 +1165,8 @@ func _draw_kit(tile: float) -> void:
 func _draw_thaw(tile: float) -> void:
 	if sim.thaw_progress <= 0.0:
 		return
-	var at: Vector2 = Grid.centre(sim.thaw_cell)
+	var key: Vector2i = sim.frozen_key(sim.thaw_cell)
+	var at: Vector2 = sim.prop_centre(key) if key != Sim.NONE else Grid.centre(sim.thaw_cell)
 	if not view_rect.grow(tile).has_point(at):
 		return
 	_progress_ring(at, sim.thaw_fraction(), Defs.COL_CORE)
@@ -1090,17 +1184,19 @@ func _draw_thaw(tile: float) -> void:
 func _draw_no_shelter(tile: float) -> void:
 	if sim.carried_kit != Defs.KIT_SHELTER or not sim.base_placed or sim.shelter_placed:
 		return
-	var reach: int = int(ceil(Defs.SHELTER_CLEARANCE))
-	for dy in range(-reach, reach + 1):
-		for dx in range(-reach, reach + 1):
-			var cell: Vector2i = sim.core_cell + Vector2i(dx, dy)
-			if not sim.shelter_too_close(cell):
-				continue
-			var at: Vector2 = Vector2(cell) * tile
-			if not view_rect.grow(tile).has_point(at + Vector2.ONE * tile * 0.5):
-				continue
-			draw_rect(Rect2(at, Vector2.ONE * tile),
-				Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.16))
+	# The band round the base the hut's footprint may not enter, as the ground it
+	# covers. Asked of the same predicate the placement asks, cell by cell, so
+	# the red patch is exactly the rule.
+	var gap: int = Grid.SCALE * int(Defs.SHELTER_CLEARANCE - 1.0)
+	var band: Rect2i = sim.base_rect().grow(gap)
+	var tint := Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.16)
+	for cell: Vector2i in Grid.cells_in(band):
+		if sim.base_rect().has_point(cell):
+			continue
+		var at: Vector2 = Grid.origin(cell)
+		if not view_rect.grow(tile).has_point(at):
+			continue
+		draw_rect(Rect2(at, Vector2.ONE * tile), tint)
 
 ## The wreckage, and the ring closing on whichever piece is being taken apart.
 ##
@@ -1119,12 +1215,12 @@ func _draw_no_shelter(tile: float) -> void:
 ## different kinds of fire.
 func _draw_village(tile: float) -> void:
 	if sim.sign_cell != Vector2i(9999, 9999):
-		var post: Vector2 = Grid.centre(sim.sign_cell)
+		var post: Vector2 = sim.prop_centre(sim.sign_cell)
 		if view_rect.grow(tile).has_point(post):
 			_shadow(post + Vector2(0, 9), 8.0)
 			_object_art(SIGN_ART, post, SIGN_DRAW)
 	for cell: Vector2i in sim.village:
-		var at: Vector2 = Grid.centre(cell)
+		var at: Vector2 = sim.prop_centre(cell)
 		if not view_rect.grow(tile * 2.0).has_point(at):
 			continue
 		var piece: int = int(sim.village[cell])
@@ -1142,7 +1238,7 @@ func _draw_village(tile: float) -> void:
 
 func _draw_debris(tile: float) -> void:
 	for cell: Vector2i in sim.debris:
-		var at: Vector2 = Grid.centre(cell)
+		var at: Vector2 = sim.prop_centre(cell)
 		if not view_rect.grow(tile).has_point(at):
 			continue
 		_shadow(at + Vector2(0, 8), 10.0)
@@ -1183,7 +1279,7 @@ func _draw_frozen(tile: float) -> void:
 func _draw_food_bin(tile: float) -> void:
 	if not sim.food_placed:
 		return
-	var at: Vector2 = Grid.centre(sim.food_cell)
+	var at: Vector2 = Grid.rect_centre(sim.food_rect())
 	_shadow(at + Vector2(0, 10), 10.0)
 	_object_art(FOOD_BIN_ART, at, FOOD_BIN_DRAW)
 	# The count is drawn after the animals -- see _draw_machine_marks.
@@ -1207,9 +1303,10 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 	_draw_food_count(on, tile)
 	for cell: Vector2i in sim.machines:
 		var machine: Sim.Machine = sim.machines[cell]
-		if not _visible(cell, tile):
+		var span: Rect2 = Grid.rect_px(sim.machine_rect(machine))
+		if not _visible_rect(span):
 			continue
-		var centre: Vector2 = Grid.centre(cell)
+		var centre: Vector2 = span.get_center()
 		# Every machine that produces something says where it goes, over the cats
 		# and outlined. A cat is nearly sixty pixels tall standing on the centre
 		# these are measured from, so an arrow drawn underneath is invisible in
@@ -1219,9 +1316,24 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		# draws this arrow and then it vanished the moment the machine was built,
 		# so a manufacturer turned north and one turned east were the same picture.
 		if Defs.machine_mines(machine.type) or Defs.machine_uses_recipes(machine.type):
-			_draw_output_arrow(on, centre, machine.dir, MINER_ARROW_LIFT, MINER_ARROW_LENGTH)
+			# From the edge the output leaves by, in line with the anchor -- the
+			# lane the output cell is on -- and the same ten pixels past it the
+			# one-tile machines always drew.
+			var edge: Vector2 = _edge_point(span, machine)
+			_draw_output_arrow(on, edge, machine.dir, MINER_ARROW_LIFT - float(Grid.TILE) * 0.5,
+				MINER_ARROW_LENGTH)
 		if machine.stalled:
-			_draw_stall(on, machine, centre)
+			_draw_stall(on, machine, centre + Vector2(0.0, -maxf(0.0, span.size.y * 0.5 - 16.0)))
+
+## Where a machine's output leaves its footprint: the middle of the front edge's
+## anchor lane, in world pixels.
+func _edge_point(span: Rect2, machine: Sim.Machine) -> Vector2:
+	var lane: Vector2 = Grid.centre(machine.cell)
+	match machine.dir:
+		Vector2i.LEFT: return Vector2(span.position.x, lane.y)
+		Vector2i.UP: return Vector2(lane.x, span.position.y)
+		Vector2i.DOWN: return Vector2(lane.x, span.end.y)
+	return Vector2(span.end.x, lane.y)
 
 ## How much food is left, over the bin, with no word in front of it: what the
 ## number counts is obvious from the crate of fish it is sitting on.
@@ -1247,7 +1359,7 @@ func _draw_food_count(on: CanvasItem, tile: float) -> void:
 	# southwest of the base with nothing under it to say what it counted.
 	if not shows_food_count():
 		return
-	var at: Vector2 = Grid.centre(sim.food_cell)
+	var at: Vector2 = Grid.rect_centre(sim.food_rect())
 	if not view_rect.grow(tile * 2.0).has_point(at):
 		return
 	var label: String = str(sim.food)
@@ -1280,11 +1392,12 @@ func _draw_pip(at: Vector2, item_type: int, count: int) -> void:
 
 func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
+	var k: float = _k(tile)
 	var frost: float = _frost(machine)
 	# A warm pool under the machine, kept well inside the cell now that the art
 	# has its own edges. At 19 it reached past them, so a run of belts was a line
 	# of overlapping orange discs on the snow rather than a lit machine.
-	draw_circle(c, 13.0, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
+	draw_circle(c, 13.0 * k, Color(Defs.COL_BELT_GLOW.r, Defs.COL_BELT_GLOW.g, Defs.COL_BELT_GLOW.b,
 		0.16 * (1.0 - frost) + 0.03))
 	var tint: Color = Color.WHITE.lerp(Defs.COL_FROST_TINT, frost)
 	var inflow: Vector2i = _belt_inflow(machine)
@@ -1311,12 +1424,12 @@ func _draw_belt(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	for index in 2:
 		var offset: float = fmod(pulse * Defs.BELT_SPEED * grade * 0.5 + float(index) * 0.5, 1.0)
 		var along: float = (offset - 0.5) * tile
-		var head: Vector2 = c + dir * (along + 2.5)
-		var tail: Vector2 = c + dir * (along - 1.0)
+		var head: Vector2 = c + dir * (along + 2.5 * k)
+		var tail: Vector2 = c + dir * (along - 1.0 * k)
 		var chev: Color = Defs.COL_BELT_CHEVRON if frost <= 0.0 else Defs.COL_FROZEN_CHEVRON
 		chev = Color(chev.r, chev.g, chev.b, chev.a * 0.55)
-		draw_line(tail + perp * 3.0, head, chev, 1.4)
-		draw_line(tail - perp * 3.0, head, chev, 1.4)
+		draw_line(tail + perp * 3.0 * k, head, chev, 1.4 * maxf(k, 0.7))
+		draw_line(tail - perp * 3.0 * k, head, chev, 1.4 * maxf(k, 0.7))
 
 func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
@@ -1325,27 +1438,34 @@ func _draw_belt_items(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# so a crystal follows the belt round instead of cutting across the elbow and
 	# leaving the surface it is supposed to be riding on.
 	var entry := Vector2(_belt_inflow(machine))
+	# A thin belt carries smaller beads, but not so small they vanish: the size
+	# comes down with the belt only part of the way.
+	var k: float = maxf(_k(tile), 0.7)
 	for item: Dictionary in machine.items:
 		var t: float = float(item["t"])
 		var at: Vector2 = c + (entry if t < 0.5 else dir) * (t - 0.5) * tile
 		var col: Color = Defs.ITEM_COLORS[int(item["type"])]
 		# Payloads were too small to see, so a working line looked identical to a
 		# broken one. These are deliberately chunky with a dark outline.
-		draw_circle(at + Vector2(0, 2), 7.0, Color(0.02, 0.04, 0.08, 0.4))
-		draw_circle(at, 6.6, Defs.ORE_OUTLINE)
-		draw_circle(at, 5.2, col.darkened(0.3))
-		draw_circle(at, 3.8, col)
-		draw_circle(at + Vector2(-1.4, -1.4), 1.6, Color(1, 1, 1, 0.7))
+		draw_circle(at + Vector2(0, 2) * k, 7.0 * k, Color(0.02, 0.04, 0.08, 0.4))
+		draw_circle(at, 6.6 * k, Defs.ORE_OUTLINE)
+		draw_circle(at, 5.2 * k, col.darkened(0.3))
+		draw_circle(at, 3.8 * k, col)
+		draw_circle(at + Vector2(-1.4, -1.4) * k, 1.6 * k, Color(1, 1, 1, 0.7))
 
 func _draw_preview(on: CanvasItem, tile: float) -> void:
-	var px: Vector2 = Vector2(preview_cell) * tile
-	# A tile that already holds a machine is not an error, it is a reclaim target.
-	# Stamping a red box over the player's own building hid the machine and read
-	# as a fault.
-	if preview_occupied:
+	_draw_carry_preview(on)
+	if preview_cell == Vector2i(9999, 9999):
+		return
+	# A machine that is already standing where she aims is not an error, it is a
+	# reclaim target. Stamping a red box over the player's own building hid the
+	# machine and read as a fault. Its whole footprint is marked.
+	if preview_occupied and preview_standing.has_area():
 		var mark := Color(Defs.COL_TEXT.r, Defs.COL_TEXT.g, Defs.COL_TEXT.b, 0.5 + sin(pulse * 4.0) * 0.12)
+		var span: Rect2 = Grid.rect_px(preview_standing)
 		for corner in [Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)]:
-			var origin: Vector2 = px + Vector2(corner.x * (tile - 1.0), corner.y * (tile - 1.0))
+			var origin: Vector2 = span.position + Vector2(corner.x * (span.size.x - 1.0),
+				corner.y * (span.size.y - 1.0))
 			var dx: float = -7.0 if corner.x > 0.0 else 7.0
 			var dy: float = -7.0 if corner.y > 0.0 else 7.0
 			on.draw_line(origin, origin + Vector2(dx, 0), mark, 2.0)
@@ -1355,11 +1475,20 @@ func _draw_preview(on: CanvasItem, tile: float) -> void:
 	var col: Color = Defs.COL_VALID if preview_valid else (
 		Color8(150, 160, 180) if not preview_affordable else Defs.COL_DANGER)
 	var alpha: float = 0.55 + sin(pulse * 5.0) * 0.12
-	on.draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, 0.16))
-	on.draw_rect(Rect2(px.x + 1, px.y + 1, tile - 2, tile - 2), Color(col.r, col.g, col.b, alpha), false, 2.0)
+	# The whole footprint, cell by cell: the cells that refuse are red and the
+	# rest take the ghost's colour, so a four-by-four post with one bad corner
+	# says which corner.
+	var footprint: Rect2i = preview_rect if preview_rect.has_area() \
+		else Rect2i(preview_cell, Vector2i.ONE)
+	_draw_footprint(on, footprint, preview_problems, col, alpha)
+	# The seam a post would work, when it is one.
+	if Defs.machine_mines(preview_type):
+		on.draw_arc(Grid.centre(preview_cell), float(Grid.CELL) * 0.5, 0.0, TAU, 16,
+			Color(1, 1, 1, alpha), 1.5, true)
 	# Direction is the most-missed piece of information when placing: R changes it
 	# invisibly unless the preview states it outright.
-	var c: Vector2 = px + Vector2.ONE * tile * 0.5
+	var span_px: Rect2 = Grid.rect_px(footprint)
+	var c: Vector2 = span_px.get_center()
 	var arrow := Color(col.r, col.g, col.b, minf(1.0, alpha + 0.3))
 	var dir := Vector2(preview_dir)
 	on.draw_circle(c - dir * 12.0, 3.0, Color(arrow.r, arrow.g, arrow.b, 0.55))
@@ -1367,6 +1496,26 @@ func _draw_preview(on: CanvasItem, tile: float) -> void:
 	var font := UIFont.FONT
 	on.draw_string(font, c + dir * 20.0 + Vector2(-14.0, -12.0), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 28.0, 9,
 		Color(arrow.r, arrow.g, arrow.b, 0.9))
+
+## A footprint as cells: tinted, outlined, and every blocked cell filled red.
+func _draw_footprint(on: CanvasItem, footprint: Rect2i, problems: Dictionary, col: Color,
+		alpha: float) -> void:
+	var span: Rect2 = Grid.rect_px(footprint)
+	on.draw_rect(span.grow(-1.0), Color(col.r, col.g, col.b, 0.14))
+	for cell: Vector2i in Grid.cells_in(footprint):
+		if not problems.has(cell):
+			continue
+		on.draw_rect(Rect2(Grid.origin(cell), Vector2.ONE * float(Grid.CELL)).grow(-1.0),
+			Color(Defs.COL_DANGER.r, Defs.COL_DANGER.g, Defs.COL_DANGER.b, 0.42))
+	on.draw_rect(span.grow(-1.0), Color(col.r, col.g, col.b, alpha), false, 2.0)
+
+## The hut or the bin in her arms, as the footprint it would cover.
+func _draw_carry_preview(on: CanvasItem) -> void:
+	if not carry_rect.has_area():
+		return
+	var ok: bool = carry_problems.is_empty()
+	var col: Color = Defs.COL_VALID if ok else Defs.COL_DANGER
+	_draw_footprint(on, carry_rect, carry_problems, col, 0.55 + sin(pulse * 5.0) * 0.12)
 
 
 ## One painting per piece, fitted to the cells it stands on and standing on the

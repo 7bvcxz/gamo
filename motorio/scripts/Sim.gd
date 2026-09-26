@@ -24,6 +24,9 @@ signal base_upgraded(level: int, radius: float)
 
 ## A cat worker. Miners cannot run without one standing at them, so the number
 ## of cats -- not the amount of heat -- is what gates automation.
+## "Nothing here." The sentinel every cell-valued field already used.
+const NONE := Vector2i(9999, 9999)
+
 class Cat extends RefCounted:
 	var pos := Vector2.ZERO
 	## Which way the cat is drawn facing. Maintained by _step_toward, so it is
@@ -529,7 +532,7 @@ func from_save(data: Dictionary) -> void:
 		machine.tier = int(row.get("tier", 0))
 		for item: Dictionary in row.get("items", []):
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
-		machines[cell] = machine
+		add_machine(machine)
 
 	mined_rocks.clear()
 	var mined_flat: PackedInt32Array = data.get("mined_rocks", PackedInt32Array())
@@ -633,7 +636,7 @@ func setup(seed_value: int) -> void:
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
-	machines[core_cell] = core
+	add_machine(core)
 	mark_explored(core_cell, Defs.BASE_REVEAL_RADIUS)
 	cats.clear()
 	shards.clear()
@@ -669,7 +672,7 @@ func setup(seed_value: int) -> void:
 	wander_rng.seed = seed_value ^ 0x85EBCA6B
 	food = Defs.FOOD_START
 	shelter_cell = core_cell + Defs.SHELTER_CELL
-	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	food_cell = core_cell + Defs.FOOD_CELL
 	_generate_ore(seed_value)
 	_generate_shards(seed_value)
 	_generate_frozen_cats(seed_value)
@@ -962,7 +965,8 @@ func in_village(cell: Vector2i) -> bool:
 ## What is standing on a cell, or -1. Asked by the drawing, the collision and the
 ## belt, so that "is there a house here" has one answer.
 func village_piece(cell: Vector2i) -> int:
-	return int(village.get(cell, -1))
+	var key: Vector2i = village_key(cell)
+	return int(village.get(key, -1)) if key != NONE else -1
 
 ## The block that sits just past the fourth circle.
 ##
@@ -994,7 +998,7 @@ func _tick_frozen_drift(delta: float) -> void:
 	if frozen_cats.is_empty():
 		return
 	for cell: Vector2i in frozen_cats.keys():
-		var drift: Vector2 = belt_drift(cell)
+		var drift: Vector2 = _prop_drift(cell)
 		if drift == Vector2.ZERO:
 			frozen_offset.erase(cell)
 			continue
@@ -1002,8 +1006,15 @@ func _tick_frozen_drift(delta: float) -> void:
 		var ahead: Vector2i = cell + step
 		# Whatever is standing there stops it. Checked before moving rather than
 		# after, because a block that has already been written into the next cell
-		# has overwritten whatever was in it.
-		if not _frozen_may_enter(ahead):
+		# has overwritten whatever was in it. Only the cells it would newly
+		# cover: the block is a tile across and mostly overlaps itself.
+		var blocked := false
+		var from: Rect2i = prop_rect(cell)
+		for covered: Vector2i in Grid.cells_in(prop_rect(ahead)):
+			if not from.has_point(covered) and not _frozen_may_enter(covered):
+				blocked = true
+				break
+		if blocked:
 			frozen_offset.erase(cell)
 			continue
 		var offset: Vector2 = frozen_offset.get(cell, Vector2.ZERO)
@@ -1021,27 +1032,35 @@ func _tick_frozen_drift(delta: float) -> void:
 			thawed[ahead] = true
 		frozen_offset[ahead] = offset - Vector2(step) * float(Grid.CELL)
 
+## Which way the belts under a block drag it. The block is a tile across and
+## a belt is a cell, so it is whichever belt under it is found first -- in
+## reading order, so the answer does not change from frame to frame.
+func _prop_drift(origin: Vector2i) -> Vector2:
+	for covered: Vector2i in Grid.cells_in(prop_rect(origin)):
+		var drift: Vector2 = belt_drift(covered)
+		if drift != Vector2.ZERO:
+			return drift
+	return Vector2.ZERO
+
 ## Where a sliding block is allowed to go. Anything solid stops it, and so does
 ## the fire itself -- a block pushed into the core would be a cat fed to it.
 func _frozen_may_enter(cell: Vector2i) -> bool:
-	if frozen_cats.has(cell) or debris.has(cell) or ore.has(cell):
+	if frozen_key(cell) != NONE or debris_key(cell) != NONE or ore.has(cell):
 		return false
 	var piece: int = village_piece(cell)
 	if piece >= 0 and not Defs.village_walkable(piece):
 		return false
-	if cell == sign_cell:
+	if is_sign(cell) or is_kit(cell):
 		return false
-	if cell == core_cell or (shelter_placed and cell == shelter_cell):
+	if is_base(cell) or in_shelter(cell) or in_food_bin(cell):
 		return false
-	if food_placed and cell == food_cell:
-		return false
-	var machine: Machine = machines.get(cell, null)
+	var machine: Machine = machine_at(cell)
 	return machine == null or machine.type in Defs.WALKABLE_MACHINES
 
 ## Where a block of ice is actually drawn, which is its cell plus however far it
 ## has slid out of it.
 func frozen_at(cell: Vector2i) -> Vector2:
-	return cell_centre(cell) + frozen_offset.get(cell, Vector2.ZERO)
+	return prop_centre(cell) + frozen_offset.get(cell, Vector2.ZERO)
 
 ## The middle of the room, in world pixels.
 func room_centre() -> Vector2:
@@ -1160,9 +1179,11 @@ func _debris_free(cell: Vector2i) -> bool:
 
 ## Taking one apart. Held, like the case and like a seam.
 func search_debris(cell: Vector2i, delta: float) -> bool:
-	if not debris.has(cell) or not can_touch(cell):
+	var key: Vector2i = debris_key(cell)
+	if key == NONE or not can_touch(cell):
 		cancel_debris()
 		return false
+	cell = key
 	if cell != debris_cell:
 		debris_cell = cell
 		debris_progress = 0.0
@@ -1181,10 +1202,11 @@ func cancel_debris() -> void:
 ## teach the player that core parts exist -- four players in five would walk away
 ## from the guaranteed piece having learned that debris contains scrap.
 func open_debris(cell: Vector2i) -> Dictionary:
-	if not debris.has(cell) or not can_touch(cell):
+	var key: Vector2i = debris_key(cell)
+	if key == NONE or not can_touch(cell):
 		return {}
 	var first: bool = debris_searched == 0
-	debris.erase(cell)
+	debris.erase(key)
 	debris_searched += 1
 	cancel_debris()
 	# The top of the seam ladder and the rung under it. When the ladder is one
@@ -1250,20 +1272,27 @@ func _starter_frozen_cell(index: int) -> Vector2i:
 ## nothing to store except which ones have been broken. Only the blocks within
 ## reach can claim a cell, and a clump of twelve cannot travel further than one
 ## block from its seed.
+##
+## Laid out a tile at a time: the field is a function of tile coordinates, and
+## every cell of a boulder tile answers for the whole boulder. `mined_rocks`
+## remembers broken ones by tile for the same reason.
 func has_rock(cell: Vector2i) -> bool:
-	if mined_rocks.has(cell) or ore.has(cell) or machines.has(cell):
+	if not Defs.ROCK_FIELD:
+		return false
+	var rock_tile: Vector2i = Grid.tile_of(cell)
+	if mined_rocks.has(rock_tile) or ore.has(cell) or machine_at(cell) != null:
 		return false
 	# Rock is procedural, so it exists under every cell in the world that the
 	# generator did not empty -- and the generator's dictionaries are the only
 	# thing it *can* empty. The village square and its footpath are cleared here
 	# instead, which is the same answer given in the one place that decides it.
-	if in_village(cell) or trail.has(cell) or cell == sign_cell:
+	if in_village(cell) or trail.has(Grid.from_tile(rock_tile)) or is_sign(cell):
 		return false
-	var block := Vector2i(floori(float(cell.x) / float(Defs.ROCK_BLOCK)),
-		floori(float(cell.y) / float(Defs.ROCK_BLOCK)))
+	var block := Vector2i(floori(float(rock_tile.x) / float(Defs.ROCK_BLOCK)),
+		floori(float(rock_tile.y) / float(Defs.ROCK_BLOCK)))
 	for by in range(block.y - Defs.ROCK_REACH, block.y + Defs.ROCK_REACH + 1):
 		for bx in range(block.x - Defs.ROCK_REACH, block.x + Defs.ROCK_REACH + 1):
-			if cell in Defs.rock_clump(Vector2i(bx, by)):
+			if rock_tile in Defs.rock_clump(Vector2i(bx, by)):
 				return true
 	return false
 
@@ -1283,7 +1312,7 @@ func tile_attributes(cell: Vector2i) -> int:
 	# Belts and splitters are the exceptions and they are named in Defs, not
 	# here, so that the question "can I walk on this" has one answer in one place
 	# -- and so a machine added later blocks until someone decides otherwise.
-	var machine: Machine = machines.get(cell, null)
+	var machine: Machine = machine_at(cell)
 	if machine != null and machine.type not in Defs.WALKABLE_MACHINES:
 		attrs |= Defs.ATTR_STRUCTURE
 	# Inside the hut. The floor is open, the furniture is solid and everything
@@ -1303,7 +1332,7 @@ func tile_attributes(cell: Vector2i) -> int:
 	# Cats are unaffected: they path by position rather than by this, and a cat
 	# that cannot walk over a piece of wreckage is a cat that gets stuck behind
 	# one on its way home.
-	if frozen_cats.has(cell) or debris.has(cell):
+	if frozen_key(cell) != NONE or debris_key(cell) != NONE:
 		attrs |= Defs.ATTR_STRUCTURE
 	# Somebody's house, the well, the fire they sit round. Buildings on the grid
 	# like every other building; the gate is the exception and it is the whole
@@ -1314,23 +1343,23 @@ func tile_attributes(cell: Vector2i) -> int:
 	# And the board, for the same reason the ice and the wreckage are solid: it
 	# is a post driven into the ground, and walking through the picture of one is
 	# the single thing a picture of a solid object must never allow.
-	if cell == sign_cell:
+	if is_sign(cell):
 		attrs |= Defs.ATTR_STRUCTURE
 	# The case she wakes up beside, for the same reason as the ice and the
 	# wreckage: it is a metal box sitting on the snow, drawn as one, and she used
 	# to walk through the middle of it. It is also the first object in the game,
 	# so what it teaches about solid things is what she will assume about all of
 	# them.
-	if cell == kit_cell:
+	if is_kit(cell):
 		attrs |= Defs.ATTR_STRUCTURE
 	# The shelter is a building on the grid, not a decal painted over it.
-	if shelter_placed and cell == shelter_cell:
+	if in_shelter(cell):
 		attrs |= Defs.ATTR_STRUCTURE
 	# So is the food bin. It is a box of fish standing in the snow and the player
 	# walked straight through it, which is the one thing a picture of a solid
 	# object must never let you do. Cats are unaffected: they path by position,
 	# not by this, and they have to be able to reach the bowl.
-	if food_placed and cell == food_cell:
+	if in_food_bin(cell):
 		attrs |= Defs.ATTR_STRUCTURE
 	return attrs
 
@@ -1408,7 +1437,7 @@ var thaw_progress: float = 0.0
 ## lifted off a belt. What has to be carried is different: it is frozen into the
 ## ground where it lies, and the ground is what the five seconds are spent on.
 func is_liftable(cell: Vector2i) -> bool:
-	return frozen_cats.has(cell) or cat_on(cell) != null
+	return frozen_key(cell) != NONE or cat_on(cell) != null
 
 ## The cat standing on a cell, or null.
 ##
@@ -1434,6 +1463,12 @@ func can_lift(cell: Vector2i) -> bool:
 	# in it, and a cat sitting on the rug could not be picked up.
 	if Defs.in_room(cell):
 		return true
+	# A block of ice is asked about as a whole: its middle is what is warm or
+	# not, and the thaw is remembered under its origin.
+	var key: Vector2i = frozen_key(cell)
+	if key != NONE:
+		return not base_placed or is_warm_at(prop_centre(key)) \
+			or bool(thawed.get(key, false))
 	return not base_placed or is_warm(cell) or bool(thawed.get(cell, false))
 
 ## Melting the ground under something, a frame at a time. True on the frame it
@@ -1444,6 +1479,10 @@ func thaw_ground(cell: Vector2i, delta: float) -> bool:
 		thaw_progress = 0.0
 		thaw_cell = Vector2i(9999, 9999)
 		return false
+	# The ground under the block, not whichever of its cells she happened to face.
+	var key: Vector2i = frozen_key(cell)
+	if key != NONE:
+		cell = key
 	if cell != thaw_cell:
 		thaw_cell = cell
 		thaw_progress = 0.0
@@ -1480,6 +1519,10 @@ func can_touch(cell: Vector2i) -> bool:
 func is_warm(cell: Vector2i) -> bool:
 	return base_placed and _ring_distance(cell) <= warm_radius
 
+## The same, for a point: a thing a tile across is warm when its middle is.
+func is_warm_at(point: Vector2) -> bool:
+	return base_placed and tiles_from_core_at(point) <= warm_radius
+
 ## Whether Grim is already carrying something. Asked in one place because there
 ## are three things she can be holding and only one pair of arms -- and because
 ## the last time a rule like this was written per case, six of nine handlers
@@ -1492,7 +1535,7 @@ func hands_full() -> bool:
 ## exactly where it is: the ore, the frozen cats and the fog are all placed
 ## around this point, and this point does not move.
 func begin_crash() -> void:
-	machines.erase(core_cell)
+	remove_machine(core_cell)
 	base_placed = false
 	shelter_placed = false
 	food_placed = false
@@ -1527,15 +1570,15 @@ func place_base(cell: Vector2i) -> bool:
 		return false
 	if Grid.tiles(Grid.centre(cell).distance_to(core_centre())) > Defs.BASE_PLACE_RADIUS:
 		return false
-	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
+	if not rect_problems(Defs.machine_footprint(Defs.M_CORE, cell)).is_empty():
 		return false
 	core_cell = cell
 	shelter_cell = core_cell + Defs.SHELTER_CELL
-	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	food_cell = core_cell + Defs.FOOD_CELL
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
-	machines[core_cell] = core
+	add_machine(core)
 	base_placed = true
 	carried_kit = Defs.KIT_NONE
 	_grid_dirty = true
@@ -1549,20 +1592,49 @@ func place_base(cell: Vector2i) -> bool:
 ## Too close to the fire to put the hut down. The world layer paints these cells
 ## red while she is carrying it, and both read the same function: a rule drawn
 ## from one place and enforced from another is a rule that drifts.
+##
+## Measured between the two footprints rather than between two cells: the gap of
+## bare ground between the hut and the base has to be at least SHELTER_CLEARANCE
+## tiles, less the tile a building always was.
 func shelter_too_close(cell: Vector2i) -> bool:
-	return tiles_from_core(cell) <= Defs.SHELTER_CLEARANCE
+	var gap: int = Grid.SCALE * int(Defs.SHELTER_CLEARANCE - 1.0)
+	return Grid.footprint(cell, Defs.SHELTER_SIZE).intersects(base_rect().grow(gap))
+
+## Whether a hut with its anchor here would stand in warm ground -- judged at
+## the middle of its footprint, which is where the door and the fire inside are.
+func shelter_warm(cell: Vector2i) -> bool:
+	return tiles_from_core_at(Grid.rect_centre(Grid.footprint(cell, Defs.SHELTER_SIZE))) \
+		<= warm_radius
+
+## Every cell of a hut with its anchor here that refuses it, and why. The one
+## rule the placement, the refusal line and the red cells under the carried hut
+## all read.
+func shelter_problems(cell: Vector2i, body: Array[Vector2i] = []) -> Dictionary:
+	var rect: Rect2i = Grid.footprint(cell, Defs.SHELTER_SIZE)
+	var out: Dictionary = rect_problems(rect, NONE, body)
+	var gap: int = Grid.SCALE * int(Defs.SHELTER_CLEARANCE - 1.0)
+	var band: Rect2i = base_rect().grow(gap)
+	var warm: bool = shelter_warm(cell)
+	for covered: Vector2i in Grid.cells_in(rect):
+		if out.has(covered):
+			continue
+		if band.has_point(covered):
+			out[covered] = "불에 너무 가깝습니다"
+		elif not warm:
+			out[covered] = "불이 닿지 않습니다"
+	return out
 
 func place_shelter(cell: Vector2i) -> bool:
 	if shelter_placed or carried_kit != Defs.KIT_SHELTER:
 		return false
 	if not base_placed:
 		return false
-	if shelter_too_close(cell) or tiles_from_core(cell) > warm_radius:
+	if shelter_too_close(cell) or not shelter_warm(cell):
 		return false
-	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
+	if not shelter_problems(cell).is_empty():
 		return false
 	shelter_cell = cell
-	food_cell = cell + Vector2i(Defs.FOOD_OFFSET.round())
+	food_cell = cell + Defs.FOOD_CELL
 	shelter_placed = true
 	carried_kit = Defs.KIT_NONE
 	_grid_dirty = true
@@ -1684,17 +1756,20 @@ func deploy_base() -> void:
 	if base_placed:
 		return
 	core_cell = kit_cell
-	var cell: Vector2i = core_cell
-	ore.erase(cell)
-	purity.erase(cell)
-	machines.erase(cell)
+	# Everything under the footprint gives way. The world keeps the ground here
+	# clear, but the base is eight cells across and the case was two: nothing the
+	# player can have put down near the case may end up inside the fire.
+	for cell: Vector2i in Grid.cells_in(base_rect()):
+		ore.erase(cell)
+		purity.erase(cell)
+		remove_machine(cell)
 	shelter_cell = core_cell + Defs.SHELTER_CELL
-	food_cell = core_cell + Vector2i(Defs.FOOD_OFFSET.round())
+	food_cell = core_cell + Defs.FOOD_CELL
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
 	core.flash = 0.6
-	machines[core_cell] = core
+	add_machine(core)
 	base_placed = true
 	carried_kit = Defs.KIT_NONE
 	_grid_dirty = true
@@ -1793,20 +1868,26 @@ func collect_drop(cell: Vector2i) -> int:
 func pick_up_frozen(cell: Vector2i) -> bool:
 	if hands_full() or not can_lift(cell):
 		return false
-	if not frozen_cats.has(cell):
+	var key: Vector2i = frozen_key(cell)
+	if key == NONE:
 		return false
-	carried_frozen_thaw = frozen_cats[cell]
-	frozen_cats.erase(cell)
+	carried_frozen_thaw = frozen_cats[key]
+	frozen_cats.erase(key)
+	frozen_offset.erase(key)
 	carried_frozen = true
 	return true
 
 ## Putting one down. Anywhere is allowed -- she can set it on the snow and come
 ## back for it -- but only near the core does the ice start to go.
+##
+## `cell` is the block's origin: it covers a tile from there, and every cell of
+## it has to be free.
 func put_down_frozen(cell: Vector2i) -> bool:
 	if not carried_frozen:
 		return false
-	if frozen_cats.has(cell) or is_structure(cell):
-		return false
+	for covered: Vector2i in Grid.cells_in(prop_rect(cell)):
+		if frozen_key(covered) != NONE or is_structure(covered) or not in_world(covered):
+			return false
 	frozen_cats[cell] = carried_frozen_thaw
 	carried_frozen = false
 	carried_frozen_thaw = 0.0
@@ -1817,6 +1898,9 @@ func put_down_frozen(cell: Vector2i) -> bool:
 ## thawed anywhere inside it would remove the walk home entirely by the third
 ## upgrade.
 func can_thaw(cell: Vector2i) -> bool:
+	var key: Vector2i = frozen_key(cell)
+	if key != NONE:
+		return tiles_from_core_at(prop_centre(key)) <= Defs.THAW_RADIUS
 	return _ring_distance(cell) <= Defs.THAW_RADIUS
 
 ## Which of the four pictures a given progress shows. The last stage is held
@@ -1849,7 +1933,7 @@ func _wake_cat(cell: Vector2i) -> void:
 	var cat := Cat.new()
 	cat.phase = _next_phase()
 	cat.rarity = Defs.RARITY_O
-	cat.pos = cell_centre(cell)
+	cat.pos = prop_centre(cell)
 	cats.append(cat)
 	cat_thawed.emit(cats.size(), cat.pos)
 	cat_adopted.emit(cats.size())
@@ -1899,15 +1983,23 @@ func bin_in_hand() -> bool:
 func place_food_bin(cell: Vector2i) -> bool:
 	if carried_kit != Defs.KIT_FOOD or food_placed:
 		return false
-	if not can_touch(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
-		return false
-	if cell == core_cell or (shelter_placed and cell == shelter_cell):
+	if not food_problems(cell).is_empty():
 		return false
 	food_cell = cell
 	food_placed = true
 	carried_kit = Defs.KIT_NONE
 	_grid_dirty = true
 	return true
+
+## The bin's footprint with its anchor here, cell by cell: somewhere she can
+## reach, with nothing standing on it.
+func food_problems(cell: Vector2i, body: Array[Vector2i] = []) -> Dictionary:
+	var rect: Rect2i = Grid.footprint(cell, Defs.FOOD_BIN_SIZE)
+	var out: Dictionary = rect_problems(rect, NONE, body)
+	for covered: Vector2i in Grid.cells_in(rect):
+		if not out.has(covered) and not can_touch(covered):
+			out[covered] = "불이 닿지 않습니다"
+	return out
 
 ## Whether a recipe can be paid for, by id.
 func can_craft(id: String) -> bool:
@@ -2141,6 +2233,9 @@ func carry_at(origin: Vector2, heading: Vector2) -> void:
 func place_cat(cell: Vector2i) -> bool:
 	if carried_cat == null:
 		return false
+	# Any cell of a post's footprint means that post: she is facing the machine,
+	# not a particular one of its cells.
+	cell = post_anchor(cell)
 	if not _is_post(cell):
 		return false
 	for cat: Cat in cats:
@@ -2204,8 +2299,63 @@ func dispatch_cats() -> void:
 		cat.assigned = Vector2i(9999, 9999)
 		cat.state = Defs.CAT_IDLE
 
+## The machine covering a cell, or null -- any cell of its footprint, not only
+## the anchor it is stored under.
+##
+## Answered from `_occupancy`, which is derived from `machines` and rebuilt when
+## the two disagree. Sim's own build and demolish keep it current; the checks
+## here are for everything that writes `machines` directly (tests do, and the
+## debug worlds), which would otherwise leave a footprint answering for a
+## machine that is gone.
 func machine_at(cell: Vector2i) -> Machine:
+	if machines.size() != _occupied_count:
+		_rebuild_occupancy()
+	var anchor: Vector2i = _occupancy.get(cell, NONE)
+	if anchor != NONE:
+		var found: Machine = machines.get(anchor, null)
+		if found != null and found.cell == anchor:
+			return found
+		_rebuild_occupancy()
+		anchor = _occupancy.get(cell, NONE)
+		return machines.get(anchor, null) if anchor != NONE else null
 	return machines.get(cell, null)
+
+## Every footprint cell -> the anchor of the machine on it.
+var _occupancy: Dictionary[Vector2i, Vector2i] = {}
+## How many machines `_occupancy` was built from. A different count is a
+## machine added or removed behind Sim's back.
+var _occupied_count: int = -1
+
+func _rebuild_occupancy() -> void:
+	_occupancy.clear()
+	for anchor: Vector2i in machines:
+		for cell: Vector2i in Grid.cells_in(machine_rect(machines[anchor])):
+			_occupancy[cell] = anchor
+	_occupied_count = machines.size()
+
+## Puts a machine on the grid: into `machines` under its anchor, and every cell
+## of its footprint into the occupancy map.
+func add_machine(machine: Machine) -> void:
+	if machines.size() != _occupied_count:
+		_rebuild_occupancy()
+	machines[machine.cell] = machine
+	for cell: Vector2i in Grid.cells_in(machine_rect(machine)):
+		_occupancy[cell] = machine.cell
+	_occupied_count = machines.size()
+	_grid_dirty = true
+
+## And takes one off, by any cell it covers. Returns what was removed.
+func remove_machine(cell: Vector2i) -> Machine:
+	var machine: Machine = machine_at(cell)
+	if machine == null:
+		return null
+	machines.erase(machine.cell)
+	for covered: Vector2i in Grid.cells_in(machine_rect(machine)):
+		if _occupancy.get(covered, NONE) == machine.cell:
+			_occupancy.erase(covered)
+	_occupied_count = machines.size()
+	_grid_dirty = true
+	return machine
 
 ## The cells a standing machine covers.
 func machine_rect(machine: Machine) -> Rect2i:
@@ -2221,6 +2371,128 @@ func machine_centre_at(cell: Vector2i) -> Vector2:
 	var machine: Machine = machine_at(cell)
 	return machine_centre(machine) if machine != null else Grid.centre(cell)
 
+## Where a machine's output goes: the cell past its front edge, in line with its
+## anchor. For a belt that is simply the next cell.
+func output_cell(machine: Machine) -> Vector2i:
+	return Grid.front_cell(machine_rect(machine), machine.dir, machine.cell)
+
+# --- Buildings that are not machines -------------------------------------------
+## The base is the core machine, and its footprint is the machine's. The hut and
+## the food bin are placed by hand rather than built, so they are not machines --
+## but they are buildings on the grid all the same, with footprints the same
+## rules read.
+
+func base_rect() -> Rect2i:
+	return Defs.machine_footprint(Defs.M_CORE, core_cell)
+
+## Whether a cell is part of the standing base.
+func is_base(cell: Vector2i) -> bool:
+	if not base_placed:
+		return false
+	var machine: Machine = machine_at(cell)
+	return machine != null and machine.type == Defs.M_CORE
+
+func shelter_rect() -> Rect2i:
+	return Grid.footprint(shelter_cell, Defs.SHELTER_SIZE)
+
+func in_shelter(cell: Vector2i) -> bool:
+	return shelter_placed and shelter_rect().has_point(cell)
+
+func food_rect() -> Rect2i:
+	return Grid.footprint(food_cell, Defs.FOOD_BIN_SIZE)
+
+func in_food_bin(cell: Vector2i) -> bool:
+	return food_placed and food_rect().has_point(cell)
+
+# --- Things a tile across -------------------------------------------------------
+## Ice, wreckage, the case, the board and the village's pieces all stand on the
+## snow a tile across -- the size a cell used to be -- so each covers
+## `Defs.PROP_SIZE` cells and is stored under the top-left one. These answer "which
+## one is on this cell" for any of the cells it covers.
+
+func prop_rect(origin: Vector2i) -> Rect2i:
+	return Rect2i(origin, Defs.PROP_SIZE)
+
+func prop_centre(origin: Vector2i) -> Vector2:
+	return Grid.rect_centre(prop_rect(origin))
+
+## The origin of whatever in `props` covers `cell`, or NONE.
+static func prop_key(props: Dictionary, cell: Vector2i) -> Vector2i:
+	for dy in Defs.PROP_SIZE.y:
+		for dx in Defs.PROP_SIZE.x:
+			var origin: Vector2i = cell - Vector2i(dx, dy)
+			if props.has(origin):
+				return origin
+	return NONE
+
+func frozen_key(cell: Vector2i) -> Vector2i:
+	return prop_key(frozen_cats, cell)
+
+func debris_key(cell: Vector2i) -> Vector2i:
+	return prop_key(debris, cell)
+
+func village_key(cell: Vector2i) -> Vector2i:
+	return prop_key(village, cell)
+
+func is_kit(cell: Vector2i) -> bool:
+	return kit_cell != NONE and prop_rect(kit_cell).has_point(cell)
+
+func is_sign(cell: Vector2i) -> bool:
+	return sign_cell != NONE and prop_rect(sign_cell).has_point(cell)
+
+# --- Placement --------------------------------------------------------------------
+## How far out anything may be built, in tiles from the fire. Past everything the
+## world generates -- the last seams are at a hundred tiles and the scatter reaches
+## a hundred and eight -- and well short of the hut's room, which is a place on the
+## grid six hundred tiles north that must never be built into.
+const WORLD_LIMIT := 200.0
+
+func in_world(cell: Vector2i) -> bool:
+	return tiles_from_core(cell) <= WORLD_LIMIT and not Defs.in_room(cell)
+
+## Why one cell cannot take part of a building, or "". `anchor_ore` marks the one
+## cell that must be a seam (a mining post's anchor); `mining` says a seam is
+## what this building is for, which changes what a stray seam in its footprint is
+## called.
+func cell_problem(cell: Vector2i, anchor_ore: bool = false, mining: bool = false) -> String:
+	if machine_at(cell) != null:
+		return "이미 설비가 있습니다"
+	if anchor_ore:
+		if not ore.has(cell):
+			return "광맥 위에만 설치할 수 있습니다"
+	elif ore.has(cell):
+		return "다른 광맥이 겹칩니다" if mining else "광맥 위에는 설치할 수 없습니다"
+	if not in_world(cell):
+		return "여기에는 지을 수 없습니다"
+	if is_structure(cell) or has_rock(cell):
+		return "막혀 있습니다"
+	return ""
+
+## Every cell of a rectangle that cannot take a building, and why: cell -> reason.
+##
+## The whole footprint, never just the anchor: a building is every cell it
+## covers, and the preview paints exactly these red. `ore_anchor` is the seam a
+## mining post must stand on, or NONE; `body` is where someone is standing.
+func rect_problems(rect: Rect2i, ore_anchor: Vector2i = NONE,
+		body: Array[Vector2i] = []) -> Dictionary:
+	var out: Dictionary = {}
+	var mining: bool = ore_anchor != NONE
+	for cell: Vector2i in Grid.cells_in(rect):
+		var why: String = cell_problem(cell, cell == ore_anchor, mining)
+		if why == "" and body.has(cell):
+			why = "너무 가깝습니다"
+		if why != "":
+			out[cell] = why
+	if mining and not rect.has_point(ore_anchor):
+		out[ore_anchor] = "광맥 위에만 설치할 수 있습니다"
+	return out
+
+## The same, for a machine of `type` with its anchor on `cell`.
+func footprint_problems(type: int, cell: Vector2i, dir: Vector2i = Vector2i.RIGHT,
+		body: Array[Vector2i] = []) -> Dictionary:
+	var anchor_ore: Vector2i = cell if Defs.machine_mines(type) else NONE
+	return rect_problems(Defs.machine_footprint(type, cell, dir), anchor_ore, body)
+
 ## Which way a belt under this cell drags whatever is standing on it, in pixels
 ## per second. Zero everywhere else.
 ##
@@ -2228,7 +2500,7 @@ func machine_centre_at(cell: Vector2i) -> Vector2:
 ## lands on it one way and then the other, and a floor that shoves the player
 ## left, then right, then left is a floor they will walk around.
 func belt_drift(cell: Vector2i) -> Vector2:
-	var machine: Machine = machines.get(cell, null)
+	var machine: Machine = machine_at(cell)
 	if machine == null or machine.type != Defs.M_BELT:
 		return Vector2.ZERO
 	return Vector2(machine.dir) * Defs.belt_carry_speed()
@@ -2288,18 +2560,28 @@ func can_afford(type: int) -> bool:
 			return false
 	return true
 
-func can_build(type: int, cell: Vector2i) -> String:
-	if machines.has(cell):
-		return "이미 설비가 있습니다"
+## Why a machine cannot go here, or "".
+##
+## Occupied first, then the questions about the player (is it unlocked, can it be
+## paid for), then the ground under the whole footprint -- the order the reasons
+## were always given in, so a refusal still names the first thing to fix.
+func can_build(type: int, cell: Vector2i, dir: Vector2i = Vector2i.RIGHT,
+		body: Array[Vector2i] = []) -> String:
+	var rect: Rect2i = Defs.machine_footprint(type, cell, dir)
+	for covered: Vector2i in Grid.cells_in(rect):
+		if machine_at(covered) != null:
+			return "이미 설비가 있습니다"
 	if not is_unlocked(type):
 		return "아직 해금되지 않았습니다"
 	if not can_afford(type):
 		var missing: String = _missing_label(type)
 		return "%s%s 부족합니다" % [missing, Defs.subject(missing)]
-	if Defs.machine_mines(type) and not ore.has(cell):
-		return "광맥 위에만 설치할 수 있습니다"
-	if not Defs.machine_mines(type) and ore.has(cell):
-		return "광맥 위에는 설치할 수 없습니다"
+	var problems: Dictionary = footprint_problems(type, cell, dir, body)
+	if problems.has(cell):
+		return String(problems[cell])
+	for covered: Vector2i in Grid.cells_in(rect):
+		if problems.has(covered):
+			return String(problems[covered])
 	return ""
 
 func _missing_label(type: int) -> String:
@@ -2308,8 +2590,8 @@ func _missing_label(type: int) -> String:
 			return String(Defs.ITEM_NAMES[item_type])
 	return "자원"
 
-func build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
-	var reason := can_build(type, cell)
+func build(type: int, cell: Vector2i, dir: Vector2i, body: Array[Vector2i] = []) -> bool:
+	var reason := can_build(type, cell, dir, body)
 	if reason != "":
 		build_rejected.emit(reason, cell)
 		return false
@@ -2322,25 +2604,23 @@ func build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
 	# reads as a plate press with a menu bolted on.
 	machine.recipe_key = String(last_recipe.get(type, ""))
 	machine.flash = 0.45
-	machines[cell] = machine
-	_grid_dirty = true
+	add_machine(machine)
 	for item_type: int in cost_of(type):
 		stock[item_type] = int(stock.get(item_type, 0)) - int(cost_of(type)[item_type])
 	machine_built.emit(cell, type)
 	return true
 
 func demolish(cell: Vector2i) -> bool:
-	var machine: Machine = machines.get(cell, null)
+	var machine: Machine = machine_at(cell)
 	if machine == null or machine.type == Defs.M_CORE:
 		return false
-	machines.erase(cell)
-	_grid_dirty = true
+	remove_machine(machine.cell)
 	# Full refund. In a game with no combat and no fail state, the engine of the
 	# fun is the freedom to tear it down and build it better -- and a 25% tax on
 	# being wrong is exactly the thing that stops players experimenting.
 	for item_type: int in cost_of(machine.type):
 		stock[item_type] = int(stock.get(item_type, 0)) + int(cost_of(machine.type)[item_type])
-	machine_removed.emit(cell, machine.type)
+	machine_removed.emit(machine.cell, machine.type)
 	return true
 
 func tick(delta: float) -> void:
@@ -2712,7 +2992,7 @@ func hand_mine(cell: Vector2i, delta: float) -> int:
 		return -1
 	hand_progress = 0.0
 	if rock:
-		mined_rocks[cell] = true
+		mined_rocks[Grid.tile_of(cell)] = true
 		_grid_dirty = true
 		return Defs.ITEM_STONE
 	return int(ore[cell])
@@ -2733,7 +3013,7 @@ func can_hand_mine(cell: Vector2i) -> bool:
 	# key held down rather than pressed, and holding it started a swing before
 	# the press was ever released. So a player who walked up to a cat frozen onto
 	# a seam and held Z mined the ground out from under it.
-	if frozen_cats.has(cell):
+	if frozen_key(cell) != NONE:
 		return false
 	return ore.has(cell) or has_rock(cell)
 
@@ -2784,7 +3064,7 @@ func collect_ground_at(cell: Vector2i) -> int:
 ## is the one place in this game where a thing she can see and reach cannot be
 ## taken. Returns what was taken, or -1.
 func collect_belt_at(cell: Vector2i) -> int:
-	var machine: Machine = machines.get(cell, null)
+	var machine: Machine = machine_at(cell)
 	if machine == null or machine.type != Defs.M_BELT or machine.items.is_empty():
 		return -1
 	if not can_touch(cell):
@@ -2954,17 +3234,27 @@ func _refresh_grid() -> void:
 			if blocks_player(cell) and _grid.is_in_boundsv(cell):
 				_grid.set_point_solid(cell, true)
 		return
-	for cell: Vector2i in machines:
-		if blocks_player(cell) and _grid.is_in_boundsv(cell):
-			_grid.set_point_solid(cell, true)
+	# Every cell of every footprint, not the anchors: a base is eight cells across
+	# and a cat that only knew about its anchor walked through the other sixty-three.
+	for anchor: Vector2i in machines:
+		var machine: Machine = machines[anchor]
+		if machine.type in Defs.WALKABLE_MACHINES:
+			continue
+		for cell: Vector2i in Grid.cells_in(machine_rect(machine)):
+			if _grid.is_in_boundsv(cell):
+				_grid.set_point_solid(cell, true)
 	# The two buildings, and the case. Ice and wreckage are deliberately not here
 	# -- they stand out past the fire where a cat that could not path round one
 	# would be a cat stuck behind it forever -- but the case is two cells from the
 	# core, in the middle of everything, on the line every worker walks between
 	# the eastern seams and the hut.
-	for cell: Vector2i in [shelter_cell, food_cell, kit_cell]:
-		if _grid.is_in_boundsv(cell):
-			_grid.set_point_solid(cell, true)
+	var rects: Array[Rect2i] = [shelter_rect(), food_rect()]
+	if kit_cell != NONE:
+		rects.append(prop_rect(kit_cell))
+	for rect: Rect2i in rects:
+		for cell: Vector2i in Grid.cells_in(rect):
+			if _grid.is_in_boundsv(cell):
+				_grid.set_point_solid(cell, true)
 
 ## Which cell a point is in. One definition, because the player and the cats have
 ## to agree about what "this tile" means.
@@ -3267,7 +3557,15 @@ func _is_post(cell: Vector2i) -> bool:
 	var machine: Machine = machines.get(cell, null)
 	if machine != null:
 		return Defs.machine_mines(machine.type)
-	return ore.has(cell)
+	return ore.has(cell) and machine_at(cell) == null
+
+## The post a cell belongs to: the anchor of the mining machine covering it, or
+## the cell itself when it is a bare seam. NONE for anything else.
+func post_anchor(cell: Vector2i) -> Vector2i:
+	var machine: Machine = machine_at(cell)
+	if machine != null:
+		return machine.cell if Defs.machine_mines(machine.type) else NONE
+	return cell if ore.has(cell) else NONE
 
 func _cat_work(cat: Cat, delta: float) -> void:
 	if not cat.has_job() or not _is_post(cat.assigned):
@@ -3507,7 +3805,7 @@ func seam_period(cell: Vector2i) -> float:
 ## floor is not a failure state -- it is how the game works before belts exist,
 ## because cats pick up from there.
 func _emit_from(machine: Machine, item_type: int) -> bool:
-	var ahead: Vector2i = machine.cell + machine.dir
+	var ahead: Vector2i = output_cell(machine)
 	# The floor counts as output. It is where everything goes before belts exist,
 	# and a meter that only counted belted items would read zero for a perfectly
 	# productive early-game miner.
@@ -3530,7 +3828,11 @@ func ground_count(cell: Vector2i) -> int:
 	return int(ground_stack.get(cell, 1)) if ground.has(cell) else 0
 
 func drop_item(cell: Vector2i, item_type: int) -> bool:
-	if machines.has(cell) or ore.has(cell):
+	if machine_at(cell) != null or ore.has(cell):
+		return false
+	# Not into a building either. The hut and the bin are not machines, and a
+	# line that ran into the hut's wall used to pour its cargo onto the roof.
+	if in_shelter(cell) or in_food_bin(cell):
 		return false
 	if ground.has(cell):
 		# Same kind stacks; a different kind does not, because a tile showing one
@@ -3561,7 +3863,7 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 	if float(head["t"]) < 1.0:
 		machine.stalled = false
 		return
-	var ahead: Vector2i = machine.cell + machine.dir
+	var ahead: Vector2i = output_cell(machine)
 	# Into whatever is in front, or -- if that is bare ground -- onto it. A line
 	# that ends in the open used to stop dead at the last tile, so a belt built
 	# before the thing it was going to feed was a belt that did nothing and gave
@@ -3579,7 +3881,7 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 ## in the game by a wide margin -- so this is an option the player can ignore.
 ## Returns the new tier, or -1.
 func cycle_belt_tier(cell: Vector2i) -> int:
-	var machine: Machine = machines.get(cell, null)
+	var machine: Machine = machine_at(cell)
 	if machine == null or machine.type != Defs.M_BELT:
 		return -1
 	var wanted: int = (machine.tier + 1) % Defs.BELT_TIERS.size()
@@ -3667,13 +3969,13 @@ func _tick_generator(machine: Machine, delta: float) -> void:
 func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 9999)) -> bool:
 	if not _accept_into(cell, item_type, from):
 		return false
-	var target: Machine = machines.get(cell, null)
+	var target: Machine = machine_at(cell)
 	if target != null and target.type != Defs.M_CORE:
 		_note_in(target, item_type)
 	return true
 
 func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
-	var target: Machine = machines.get(cell, null)
+	var target: Machine = machine_at(cell)
 	if target == null:
 		return false
 	match target.type:
@@ -3756,7 +4058,7 @@ func _deliver(item_type: int, cell: Vector2i) -> void:
 	# Where it came from. A belt feeding the core is the moment the whole design
 	# runs by itself for the first time, and nothing else was in a position to
 	# notice it happening.
-	var feeder: Machine = machines.get(cell, null)
+	var feeder: Machine = machine_at(cell)
 	if feeder != null and feeder.type == Defs.M_BELT:
 		delivered_by_belt = true
 	var core: Machine = machines.get(core_cell, null)

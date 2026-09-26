@@ -2722,6 +2722,19 @@ const SHELTER_CELL := Vector2i(-3, 3)
 ## tiles counts as being at the door.
 const SHELTER_REACH := 62.0
 const FOOD_OFFSET := Vector2(-4.5, 2.5)
+## Where the bin stands by default, in cells from whatever it is placed relative
+## to. It used to be FOOD_OFFSET rounded at each use; one constant says it once.
+const FOOD_CELL := Vector2i(-5, 3)
+
+## --- Footprints of the buildings that are not machines ------------------------
+## Machines carry their size in their registry row (`Defs.MACHINES`); the hut, the
+## bin and the things lying on the snow are here. All in build cells.
+##
+## A tile across: the ice, the wreckage, the case, the board, the village's
+## pieces. The size a cell used to be.
+const PROP_SIZE := Vector2i.ONE * Grid.SCALE
+const SHELTER_SIZE := Vector2i.ONE * Grid.SCALE
+const FOOD_BIN_SIZE := Vector2i.ONE * Grid.SCALE
 
 # --- Cat workers -------------------------------------------------------------
 ## A miner is a machine, not a worker. It only runs while a cat stands at it,

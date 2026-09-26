@@ -1147,7 +1147,7 @@ func _process(delta: float) -> void:
 	# machine layer is under it, and a direction that is only legible where she
 	# can already see is not a direction.
 	fx.sign_label = sign_label
-	fx.sign_at = sim.cell_centre(sim.sign_cell) if sim.sign_cell != Vector2i(9999, 9999) \
+	fx.sign_at = sim.prop_centre(sim.sign_cell) if sim.sign_cell != Sim.NONE \
 		else Vector2.ZERO
 	# Two tiles to the player's right, on the same ground line, so the generated
 	machine_layer.shelter_glow = shelter_glow()
@@ -1155,7 +1155,7 @@ func _process(delta: float) -> void:
 	machine_layer.base_alert = base_alert()
 	machine_layer.craft_progress = craft_progress()
 	machine_layer.cat_hint = sim.carried_cat != null
-	machine_layer.focus_cell = player.facing_cell() if state == State.PLAY else Vector2i(9999, 9999)
+	machine_layer.focus_cell = target_cell() if state == State.PLAY else Vector2i(9999, 9999)
 	machine_layer.pickaxe_hint = pickaxe_hint_cell()
 	# A panel pinned to a machine the player has since demolished would keep
 	# reporting a machine that no longer exists.
@@ -1393,15 +1393,25 @@ func _collect_ground() -> void:
 		# every step across her own floor answered "frozen to the ground", with
 		# the sound and the log line, once every three seconds.
 		return
-	var here: Vector2i = player.cell()
-	if _frozen_out_there(here):
-		_say_frozen(here)
-		return
-	var drop: int = sim.collect_drop(here)
-	if drop >= 0:
-		_announce_drop(drop)
-		return
-	var item_type: int = sim.collect_ground_at(player.cell())
+	# The ground she is standing on is a tile of it, the size a cell was: what
+	# lies anywhere on those cells is underfoot.
+	var underfoot: Array[Vector2i] = Grid.near_block(player.position)
+	for here: Vector2i in underfoot:
+		if _frozen_out_there(here):
+			_say_frozen(here)
+			return
+	for here: Vector2i in underfoot:
+		var drop: int = sim.collect_drop(here)
+		if drop >= 0:
+			_announce_drop(drop)
+			return
+	var item_type: int = -1
+	for here: Vector2i in underfoot:
+		item_type = sim.collect_ground_at(here)
+		if item_type >= 0:
+			break
+	# A belt only under her own feet: lines run side by side a cell apart, and
+	# walking along one must not empty the next.
 	if item_type < 0:
 		item_type = sim.collect_belt_at(player.cell())
 	if item_type < 0:
@@ -1465,6 +1475,98 @@ func _update_nibbles(delta: float) -> void:
 	nibble_timer = NIBBLE_INTERVAL * randf_range(0.85, 1.25)
 	audio.call("play", "nibble", 0.18)
 
+## --- What her hands meet (Grid v2) --------------------------------------------
+## A cell is half a tile since Grid v2, and "the cell in front of her" would have
+## halved every reach in the game. What she can touch is the probe instead --
+## `Grid.probe`, as deep and as wide as the old front cell -- and the thing she
+## is facing is the nearest cell of it that has something on it.
+
+## Whether there is anything on a cell her hands could mean.
+func _has_something(cell: Vector2i) -> bool:
+	return sim.machine_at(cell) != null or sim.ore.has(cell) \
+		or sim.frozen_key(cell) != Sim.NONE or sim.debris_key(cell) != Sim.NONE \
+		or sim.is_sign(cell) or sim.is_kit(cell) or sim.in_shelter(cell) \
+		or sim.in_food_bin(cell) or sim.cat_on(cell) != null or sim.ground.has(cell) \
+		or sim.drops.has(cell) or sim.village_piece(cell) >= 0 or sim.has_rock(cell) \
+		or sim.shards.has(cell)
+
+## The cell Z acts on: the nearest cell ahead with something on it, or simply
+## the next cell over when there is nothing there.
+func target_cell() -> Vector2i:
+	var cells: Array[Vector2i] = player.reach_cells()
+	for cell: Vector2i in cells:
+		if _has_something(cell):
+			return cell
+	return cells[0] if not cells.is_empty() else player.facing_cell()
+
+## The first cell ahead a predicate says yes to, or NONE.
+func _reach_find(test: Callable) -> Vector2i:
+	for cell: Vector2i in player.reach_cells():
+		if test.call(cell):
+			return cell
+	return Sim.NONE
+
+## The cells under her body, which nothing may be built on.
+func body_cells() -> Array[Vector2i]:
+	var r: float = Defs.PLAYER_RADIUS
+	var low: Vector2i = Grid.cell_at(player.position - Vector2(r, r))
+	var high: Vector2i = Grid.cell_at(player.position + Vector2(r, r))
+	var out: Array[Vector2i] = []
+	for y in range(low.y, high.y + 1):
+		for x in range(low.x, high.x + 1):
+			out.append(Vector2i(x, y))
+	return out
+
+## Where a building of this size goes if she puts it down now: in front of her,
+## near edge on the next cell. Returns the anchor for a footprint with the
+## default anchor rule.
+func ahead_anchor(size: Vector2i) -> Vector2i:
+	var rect: Rect2i = Grid.ahead(player.position, player.facing, size)
+	return rect.position + Grid.default_anchor(size)
+
+## Where the gun would put a machine of `type`: its anchor cell.
+##
+## A mining post goes on a seam -- its anchor *is* the seam (ORE_ANCHOR) -- so it
+## is aimed at the nearest seam ahead whose footprint would not land on her. Any
+## other machine is laid down in front of her like anything she carries.
+func build_anchor(type: int) -> Vector2i:
+	if Defs.machine_mines(type):
+		var post: Vector2i = _post_target(type)
+		if post != Sim.NONE:
+			return post
+	var size: Vector2i = Grid.rotated(Defs.machine_size(type), build_dir)
+	var rect: Rect2i = Grid.ahead(player.position, player.facing, size)
+	var local: Vector2i = Defs.machine_anchor(type)
+	if local == Grid.AUTO:
+		return rect.position + Grid.default_anchor(size)
+	return rect.position + Grid.rotate_local(local, Defs.machine_size(type), build_dir)
+
+## The seam a mining post would be aimed at. The probe, extended to the depth of
+## the post itself: a post around a seam reaches back toward her, and the seam
+## she can build on is the one far enough ahead that it does not reach her.
+func _post_target(type: int) -> Vector2i:
+	var size: Vector2i = Grid.rotated(Defs.machine_size(type), build_dir)
+	var depth: int = maxi(size.x, size.y) + 1
+	var body: Array[Vector2i] = body_cells()
+	var first := Sim.NONE
+	for cell: Vector2i in Grid.probe(player.position, player.facing, depth):
+		if not sim.ore.has(cell):
+			continue
+		var machine: Sim.Machine = sim.machine_at(cell)
+		if machine != null:
+			continue
+		if first == Sim.NONE:
+			first = cell
+		var rect: Rect2i = Defs.machine_footprint(type, cell, build_dir)
+		var clear := true
+		for covered: Vector2i in body:
+			if rect.has_point(covered):
+				clear = false
+				break
+		if clear:
+			return cell
+	return first
+
 ## Which seam a swing lands on: the one being faced, or the one underfoot.
 ##
 ## Ore used to be solid, so walking into a seam stopped you against it and left
@@ -1477,9 +1579,14 @@ func _update_nibbles(delta: float) -> void:
 ## Facing still wins, so a player standing on one seam can deliberately mine the
 ## next one over.
 func _hand_target() -> Vector2i:
-	var facing: Vector2i = player.facing_cell()
-	if sim.can_hand_mine(facing):
+	var facing: Vector2i = _reach_find(func(cell: Vector2i) -> bool:
+		return sim.can_hand_mine(cell))
+	if facing != Sim.NONE:
 		return facing
+	# Underfoot: any cell of the ground she is standing on.
+	for cell: Vector2i in Grid.near_block(player.position):
+		if sim.can_hand_mine(cell):
+			return cell
 	return player.cell()
 
 ## A boot landing, on the frames where the drawing puts one down.
@@ -1545,7 +1652,12 @@ func _collect_and_adopt() -> void:
 ## fixed number of these in the world and no way to make more: the number in her
 ## pack is the only thing that says how much of the energy line is left.
 func _collect_shard() -> void:
-	if not sim.collect_shard_at(player.cell()):
+	var found := false
+	for here: Vector2i in Grid.near_block(player.position):
+		if sim.collect_shard_at(here):
+			found = true
+			break
+	if not found:
 		return
 	var held: int = int(sim.stock.get(Defs.ITEM_CRYSTAL, 0))
 	fx.popup(player.position + Vector2(0, -22),
@@ -2016,16 +2128,18 @@ func _update_debris(delta: float) -> void:
 	if state != State.PLAY or player.locked or not mine_held:
 		sim.cancel_debris()
 		return
-	var cell: Vector2i = player.facing_cell()
-	if not sim.debris.has(cell):
+	var cell: Vector2i = _reach_find(func(ahead: Vector2i) -> bool:
+		return sim.debris_key(ahead) != Sim.NONE)
+	if cell == Sim.NONE:
 		sim.cancel_debris()
 		return
+	var piece: Vector2i = sim.debris_key(cell)
 	if not sim.search_debris(cell, delta):
 		return
 	var found: Dictionary = sim.open_debris(cell)
 	if found.is_empty():
 		return
-	var at: Vector2 = sim.cell_centre(cell)
+	var at: Vector2 = sim.prop_centre(piece)
 	fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
 	fx.burst(at, Defs.ITEM_COLORS[Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]], 9)
 	audio.call("play", "alloy")
@@ -2065,7 +2179,7 @@ const KIT_REACH := 1.4
 func _facing_kit() -> bool:
 	if not sim.can_search_kit() or sim.hands_full():
 		return false
-	return player.position.distance_to(sim.cell_centre(sim.kit_cell)) \
+	return player.position.distance_to(sim.prop_centre(sim.kit_cell)) \
 		<= Grid.px(KIT_REACH)
 
 ## Once lit, it burns. Putting it away used to stop the clock, which made the
@@ -2091,11 +2205,13 @@ func _update_thaw(delta: float) -> void:
 	if state != State.PLAY or player.locked or sim.hands_full():
 		sim.cancel_thaw()
 		return
-	var cell: Vector2i = player.facing_cell()
-	if not mine_held or not holding_torch() or not _frozen_to_lift(cell):
+	var cell: Vector2i = _reach_find(func(ahead: Vector2i) -> bool:
+		return _frozen_to_lift(ahead))
+	if not mine_held or not holding_torch() or cell == Sim.NONE:
 		sim.cancel_thaw()
 		return
-	var at: Vector2 = sim.cell_centre(cell)
+	var at: Vector2 = sim.prop_centre(sim.frozen_key(cell)) \
+		if sim.frozen_key(cell) != Sim.NONE else sim.cell_centre(cell)
 	if not sim.thaw_ground(cell, delta):
 		# Steam off the ice while it works, so the seconds look like they are
 		# doing something to the thing rather than to a bar.
@@ -2185,12 +2301,13 @@ func _prompt_status(id: String) -> Dictionary:
 		"THAW":
 			return {"want": sim.carried_frozen, "done": not sim.cats.is_empty()}
 		"DEBRIS":
-			return {"want": sim.debris.has(player.facing_cell())
-				and sim.can_touch(player.facing_cell()),
+			var wreck: Vector2i = _reach_find(func(ahead: Vector2i) -> bool:
+				return sim.debris_key(ahead) != Sim.NONE)
+			return {"want": wreck != Sim.NONE and sim.can_touch(wreck),
 				"done": sim.debris_searched > 0}
 		"MELT":
 			return {"want": not sim.hands_full() and holding_torch()
-				and _frozen_to_lift(player.facing_cell()), "done": false}
+				and _reach_find(_frozen_to_lift) != Sim.NONE, "done": false}
 		"FROZEN":
 			return {"want": not sim.hands_full() and _frozen_within_reach(),
 				"done": not sim.cats.is_empty()}
@@ -2204,13 +2321,13 @@ func _prompt_status(id: String) -> Dictionary:
 			# outside a manufacturer making plates and one making wire are the
 			# same box, so the only way to learn the window exists is to be told
 			# the key while looking at the thing it opens -- once.
-			var facing: Sim.Machine = sim.machine_at(player.facing_cell())
+			var facing: Sim.Machine = sim.machine_at(target_cell())
 			return {"want": facing != null and Defs.machine_uses_recipes(facing.type)
 				and Defs.recipes_for_machine(facing.type).size() > 1,
 				"done": sim.has_learned("RECIPE")}
 		"FUEL":
 			return {"want": sim.base_placed and sim.has_fuel()
-				and player.facing_cell() == sim.core_cell,
+				and sim.is_base(target_cell()),
 				"done": int(sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) > 0}
 		"ROTATE":
 			# Only for the machines that have a facing. A belt rotated is a belt
@@ -2219,7 +2336,7 @@ func _prompt_status(id: String) -> Dictionary:
 				and selected_type() in Defs.DIRECTIONAL_MACHINES,
 				"done": sim.has_learned("ROTATE")}
 		"SIGN":
-			return {"want": player.facing_cell() == sim.sign_cell,
+			return {"want": sim.is_sign(target_cell()),
 				"done": sim.has_learned("SIGN")}
 		"MINE":
 			return {"want": holding_pickaxe() and sim.can_hand_mine(_hand_target()),
@@ -2259,13 +2376,13 @@ func _prompt_status(id: String) -> Dictionary:
 ## ask about a circle a tile and a half wide, which offered the verb for a cat
 ## she was standing beside rather than looking at.
 func _frozen_within_reach() -> bool:
-	var cell: Vector2i = player.facing_cell()
-	return sim.frozen_cats.has(cell) and sim.can_lift(cell)
+	return _reach_find(func(cell: Vector2i) -> bool:
+		return sim.frozen_key(cell) != Sim.NONE and sim.can_lift(cell)) != Sim.NONE
 
 func _idle_cat_within_reach() -> bool:
-	var cell: Vector2i = player.facing_cell()
-	var cat: Sim.Cat = sim.cat_on(cell)
-	return cat != null and not cat.has_job() and sim.can_lift(cell)
+	return _reach_find(func(cell: Vector2i) -> bool:
+		var cat: Sim.Cat = sim.cat_on(cell)
+		return cat != null and not cat.has_job() and sim.can_lift(cell)) != Sim.NONE
 
 func _anything_buildable() -> bool:
 	for type: int in Defs.BUILDABLE:
@@ -2303,7 +2420,7 @@ func finish_tutorial() -> void:
 	if not sim.shelter_placed:
 		sim.shelter_placed = true
 		sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
-		sim.food_cell = sim.shelter_cell + Vector2i(Defs.FOOD_OFFSET.round())
+		sim.food_cell = sim.shelter_cell + Defs.FOOD_CELL
 		sim.carried_kit = Defs.KIT_NONE
 	sim.kit_searched = 1
 	shelter_age = 999.0
@@ -2423,19 +2540,40 @@ func _update_collapse(delta: float) -> void:
 
 
 func _update_preview() -> void:
+	# What she is carrying, as the ground it would cover. The hut is six cells by
+	# eight now, and "stand clear of the fire" is a rule about all of them.
+	machine_layer.carry_rect = Rect2i()
+	machine_layer.carry_problems = {}
+	if state == State.PLAY and not indoors():
+		match sim.carried_kit:
+			Defs.KIT_SHELTER:
+				var hut: Vector2i = kit_anchor()
+				machine_layer.carry_rect = Grid.footprint(hut, Defs.SHELTER_SIZE)
+				machine_layer.carry_problems = sim.shelter_problems(hut, body_cells())
+			Defs.KIT_FOOD:
+				var bin: Vector2i = kit_anchor()
+				machine_layer.carry_rect = Grid.footprint(bin, Defs.FOOD_BIN_SIZE)
+				machine_layer.carry_problems = sim.food_problems(bin, body_cells())
 	# The placement ghost belongs to the build gun. Holding the pickaxe and still
 	# being shown where a miner would go says Z will place one, and it will not.
 	if not holding_build_gun():
 		machine_layer.preview_cell = Vector2i(9999, 9999)
 		return
-	var cell: Vector2i = player.facing_cell()
+	var type: int = selected_type()
+	var cell: Vector2i = build_anchor(type)
 	machine_layer.preview_cell = cell
-	machine_layer.preview_type = selected_type()
+	machine_layer.preview_type = type
 	machine_layer.preview_dir = build_dir
-	var reason: String = sim.can_build(selected_type(), cell)
+	var reason: String = sim.can_build(type, cell, build_dir, body_cells())
 	machine_layer.preview_valid = reason == ""
-	machine_layer.preview_affordable = sim.can_afford(selected_type()) and sim.is_unlocked(selected_type())
-	machine_layer.preview_occupied = sim.machine_at(cell) != null
+	machine_layer.preview_affordable = sim.can_afford(type) and sim.is_unlocked(type)
+	# The whole footprint, and which of its cells are the trouble.
+	machine_layer.preview_rect = Defs.machine_footprint(type, cell, build_dir)
+	machine_layer.preview_problems = sim.footprint_problems(type, cell, build_dir, body_cells())
+	# Aimed at a machine that is already standing: a reclaim target, not an error.
+	var standing: Sim.Machine = sim.machine_at(target_cell())
+	machine_layer.preview_occupied = standing != null and standing.type != Defs.M_CORE
+	machine_layer.preview_standing = sim.machine_rect(standing) if standing != null else Rect2i()
 
 func _view_rect() -> Rect2:
 	var size: Vector2 = get_viewport_rect().size / maxf(camera.zoom.x, 0.01)
@@ -3037,10 +3175,10 @@ func toggle_meter() -> bool:
 		return true
 	if state != State.PLAY or player.locked:
 		return false
-	var cell: Vector2i = player.facing_cell()
-	if sim.machine_at(cell) == null:
+	var machine: Sim.Machine = sim.machine_at(target_cell())
+	if machine == null:
 		return false
-	meter_cell = cell
+	meter_cell = machine.cell
 	audio.call("play", "select")
 	return true
 
@@ -3096,7 +3234,7 @@ func _read_sign(cell: Vector2i) -> void:
 func _update_sign_label(delta: float) -> void:
 	if sim.sign_cell == Vector2i(9999, 9999):
 		sign_reading = false
-	elif player.position.distance_to(sim.cell_centre(sim.sign_cell)) \
+	elif player.position.distance_to(sim.prop_centre(sim.sign_cell)) \
 			> Grid.px(SIGN_LABEL_REACH):
 		sign_reading = false
 	sign_label = move_toward(sign_label, 1.0 if sign_reading else 0.0,
@@ -3144,8 +3282,8 @@ func _frozen_out_there(cell: Vector2i) -> bool:
 	if sim.can_touch(cell):
 		return false
 	return sim.ore.has(cell) or sim.has_rock(cell) or sim.ground.has(cell) \
-		or sim.frozen_cats.has(cell) or sim.shards.has(cell) or sim.drops.has(cell) \
-		or sim.debris.has(cell)
+		or sim.frozen_key(cell) != Sim.NONE or sim.shards.has(cell) or sim.drops.has(cell) \
+		or sim.debris_key(cell) != Sim.NONE
 
 ## What she is facing has to go into her arms, and the ground has not let go of
 ## it yet. A torch makes this reachable but not liftable; the five seconds do.
@@ -3176,7 +3314,7 @@ func _primary_action() -> void:
 	if TOOLS[tool_index] == TOOL_TORCH and sim.torch_left <= 0.0:
 		_light_torch()
 		return
-	var cell: Vector2i = player.facing_cell()
+	var cell: Vector2i = target_cell()
 	# Before anything else this key can mean: what is out there is frozen into
 	# the ground, and no verb applies to it until the fire reaches that far.
 	if _frozen_out_there(cell):
@@ -3193,11 +3331,11 @@ func _primary_action() -> void:
 	# The kit answers Z by being held rather than pressed, so a press at it is
 	# not a build, a pick-up or anything else. Wreckage is the same verb: a tap
 	# on it must not fall through and put a belt down on top of it.
-	if _facing_kit() or sim.debris.has(cell):
+	if _facing_kit() or sim.debris_key(cell) != Sim.NONE:
 		return
 	# The signpost. It has one answer and it is a sentence -- nothing to take,
 	# nothing to build on, and no second press that does something else.
-	if cell == sim.sign_cell:
+	if sim.is_sign(cell):
 		_read_sign(cell)
 		return
 	if sim.carried_kit != Defs.KIT_NONE:
@@ -3206,7 +3344,7 @@ func _primary_action() -> void:
 	# Facing the fire. Nothing can be built on the core, so Z here used to do
 	# nothing at all -- which is where the heat that had been mined by hand sat
 	# for good, because the only doorway into the core was a belt or a cat.
-	if cell == sim.core_cell and sim.base_placed:
+	if sim.is_base(cell):
 		_open_base_menu()
 		return
 	# A production machine. Above the build gun on purpose: a player standing in
@@ -3220,16 +3358,18 @@ func _primary_action() -> void:
 	var facing: Sim.Machine = sim.machine_at(cell)
 	if facing != null and Defs.machine_uses_recipes(facing.type) \
 			and not Defs.recipes_for_machine(facing.type).is_empty():
-		_open_machine_menu(cell)
+		_open_machine_menu(facing.cell)
 		return
 	# A frozen cat answers Z before anything else. She has both arms round it,
 	# so there is nothing else the press could mean.
 	if sim.carried_frozen:
-		if not sim.put_down_frozen(cell):
+		# A block a tile across, set down in front of her.
+		var spot: Vector2i = Grid.ahead(player.position, player.facing, Defs.PROP_SIZE).position
+		if not sim.put_down_frozen(spot):
 			audio.call("play", "deny")
-		elif sim.can_thaw(cell):
+		elif sim.can_thaw(spot):
 			_notify("얼음이 녹기 시작한다...", Defs.COL_CORE)
-			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
+			fx.ring(sim.prop_centre(spot), Defs.COL_CORE, 26.0)
 			audio.call("play", "confirm")
 		else:
 			# Allowed, and said out loud. Setting it down out here is a real move
@@ -3240,10 +3380,15 @@ func _primary_action() -> void:
 			audio.call("play", "remove")
 		return
 	if sim.carried_cat != null:
-		if sim.place_cat(cell):
-			_notify("고양이를 채굴기에 앉혔다." if sim.machines.has(cell)
+		var post: Vector2i = _reach_find(func(ahead: Vector2i) -> bool:
+			return sim.post_anchor(ahead) != Sim.NONE)
+		if post == Sim.NONE:
+			post = cell
+		var on_machine: bool = sim.machine_at(post) != null
+		if sim.place_cat(post):
+			_notify("고양이를 채굴기에 앉혔다." if on_machine
 				else "고양이가 광맥을 파기 시작했다.", Defs.COL_CORE)
-			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, 26.0)
+			fx.ring(sim.machine_centre_at(post), Defs.COL_CORE, 26.0)
 			audio.call("play", "build")
 		elif sim.drop_cat(sim.cell_centre(cell)):
 			_notify("고양이를 내려놓았다.", Defs.COL_TEXT_DIM)
@@ -3275,19 +3420,25 @@ func _primary_action() -> void:
 	# The gun is below this rather than above it because it never competes: ice
 	# is a structure, so every cell holding a block already refuses to be built
 	# on, and `can_build` says so before this line is reached.
+	var ice: Vector2i = sim.frozen_key(cell)
 	if sim.pick_up_frozen(cell):
 		# No banner. The block is in her arms on screen and she is visibly slower
 		# for it, and a line of text saying so is a caption under a picture.
-		fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
+		fx.ring(sim.prop_centre(ice), Defs.COL_ICE, 22.0)
 		audio.call("play", "select")
 		return
-	if holding_build_gun() and sim.can_build(selected_type(), cell) == "" \
+	if holding_build_gun() and sim.can_build(selected_type(), build_anchor(selected_type()),
+			build_dir, body_cells()) == "" \
 			and sim.can_afford(selected_type()) and sim.is_unlocked(selected_type()):
 		_try_build()
 		return
 	var target: Vector2i = _hand_target()
 	var mining_here: bool = holding_pickaxe() and sim.can_hand_mine(target) \
-		and not sim.machines.has(target)
+		and sim.machine_at(target) == null
+	var lift: Vector2i = _reach_find(func(ahead: Vector2i) -> bool:
+		return sim.cat_on(ahead) != null)
+	if lift != Sim.NONE:
+		cell = lift
 	if not mining_here and sim.pick_up_cat(cell):
 		if not sim.has_learned("CATHINT"):
 			sim.learn("CATHINT")
@@ -3735,12 +3886,23 @@ func _deposit_at_core() -> void:
 	audio.call("play", "deliver")
 	_notify("불에 넣었다  ·  %s" % " · ".join(parts), Defs.COL_CORE)
 
-func _place_kit(cell: Vector2i) -> void:
+## Where the thing in her arms would stand if she put it down now: its anchor,
+## with the footprint laid down in front of her.
+func kit_anchor() -> Vector2i:
+	match sim.carried_kit:
+		Defs.KIT_FOOD:
+			return ahead_anchor(Defs.FOOD_BIN_SIZE)
+		Defs.KIT_SHELTER:
+			return ahead_anchor(Defs.SHELTER_SIZE)
+	return target_cell()
+
+func _place_kit(_cell: Vector2i) -> void:
 	var kit: int = sim.carried_kit
+	var cell: Vector2i = kit_anchor()
 	if kit == Defs.KIT_FOOD:
 		if sim.place_food_bin(cell):
 			_notify("사료 상자를 놓았다.", Defs.COL_CORE)
-			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_MEDIUM)
+			fx.ring(Grid.rect_centre(sim.food_rect()), Defs.COL_CORE, Defs.RING_MEDIUM)
 			audio.call("play", "finish")
 			return
 		if not sim.can_touch(cell):
@@ -3750,13 +3912,12 @@ func _place_kit(cell: Vector2i) -> void:
 	elif kit == Defs.KIT_SHELTER:
 		if sim.place_shelter(cell):
 			_notify("잘 곳을 세웠다.  밤에는 여기서 쉬면 된다.", Defs.COL_CORE)
-			fx.ring(sim.cell_centre(cell), Defs.COL_CORE, Defs.RING_LARGE)
+			fx.ring(Grid.rect_centre(sim.shelter_rect()), Defs.COL_CORE, Defs.RING_LARGE)
 			audio.call("play", "finish")
 			return
-		var distance: float = Vector2(cell - sim.core_cell).length()
-		if distance <= Defs.SHELTER_CLEARANCE:
+		if sim.shelter_too_close(cell):
 			_notify("불에 너무 가깝다.  조금 떨어진 곳에 세워야겠다.", Defs.COL_TEXT_DIM)
-		elif distance > sim.warm_radius:
+		elif not sim.shelter_warm(cell):
 			_notify("여기는 불이 닿지 않는다.  불 가까이에 세워야겠다.", Defs.COL_TEXT_DIM)
 		else:
 			_notify("여기에는 세울 수 없다.", Defs.COL_TEXT_DIM)
@@ -3765,9 +3926,9 @@ func _place_kit(cell: Vector2i) -> void:
 func _try_build() -> void:
 	if player.locked:
 		return
-	var cell: Vector2i = player.facing_cell()
 	var type: int = selected_type()
-	if sim.build(type, cell, build_dir):
+	var cell: Vector2i = build_anchor(type)
+	if sim.build(type, cell, build_dir, body_cells()):
 		var at: Vector2 = sim.machine_centre_at(cell)
 		fx.ring(at, Defs.machine_color(type), Defs.RING_MEDIUM)
 		fx.burst(at, Defs.machine_color(type), 8)
@@ -3897,7 +4058,7 @@ func debug_scenario() -> void:
 	var north := Vector2i(0, -1)
 	for index in 2:
 		var cell: Vector2i = sim.core_cell + Sim.STARTER_PATCH[index]
-		if not sim.machines.has(cell):
+		if sim.machine_at(cell) == null:
 			sim.build(Defs.M_MINER, cell, north)
 	# Through the same door the player uses, so this cannot drift away from what
 	# carrying a cat over and putting it down actually does.
@@ -3963,20 +4124,22 @@ func debug_spill() -> void:
 	# 1.0.28, so the anchor is a fixed offset from the fire -- which is what the
 	# boulder was standing in for anyway: somewhere near enough to walk to and
 	# far enough that the arrangement is not sitting on the base.
-	var anchor: Vector2i = sim.core_cell + Vector2i(6, 0)
+	# Offsets in tiles, turned into cells, so the arrangement stands where it
+	# always did whatever the cell size.
+	var anchor: Vector2i = sim.core_cell + Vector2i(6, 0) * Grid.SCALE
 
 	# A run of belt one row below it, ending in the open a couple of cells short
 	# of her -- so the pile it makes and where she is standing are on the same
 	# screen at the same zoom.
-	var start_cell: Vector2i = anchor + Vector2i(-6, 1)
-	var run := 4
-	for index in run + 2:
+	var start_cell: Vector2i = anchor + Vector2i(-6, 1) * Grid.SCALE
+	var run := 4 * Grid.SCALE
+	for index in run + 2 * Grid.SCALE:
 		var cell: Vector2i = start_cell + Vector2i(index, 0)
-		sim.machines.erase(cell)
+		sim.remove_machine(cell)
 		sim.ore.erase(cell)
 		sim.ground.erase(cell)
 		sim.ground_stack.erase(cell)
-		sim.mined_rocks[cell] = true
+		sim.mined_rocks[Grid.tile_of(cell)] = true
 	var built := 0
 	for index in run:
 		if sim.build(Defs.M_BELT, start_cell + Vector2i(index, 0), Vector2i.RIGHT):
@@ -4017,8 +4180,8 @@ func debug_spill() -> void:
 ## seams, which no assertion is going to judge.
 func debug_belt_loop() -> void:
 	debug_unlock_all()
-	var origin: Vector2i = sim.core_cell + Vector2i(-3, 3)
-	var span := Vector2i(6, 4)
+	var origin: Vector2i = sim.core_cell + Vector2i(-3, 3) * Grid.SCALE
+	var span := Vector2i(6, 4) * Grid.SCALE
 	# Clockwise: east along the top, south down the right, west along the bottom,
 	# north up the left. Each belt points the way the loop travels, so the corners
 	# are made by the neighbours rather than by anything stored here.
@@ -4033,7 +4196,7 @@ func debug_belt_loop() -> void:
 		var at: Vector2i = origin + (run[0] as Vector2i)
 		var step: Vector2i = run[1]
 		for _index in int(run[2]):
-			sim.machines.erase(at)
+			sim.remove_machine(at)
 			# Ore too. The first run of this landed half built because seams sat
 			# under it, and a tool that sometimes produces the arrangement it
 			# promises is worse than no tool: a gap in the loop looks exactly
@@ -4062,9 +4225,9 @@ func debug_crowd() -> void:
 	# crowd it exists to make was eight cats standing around. A debug key that
 	# quietly stops working is worse than one that is missing.
 	for cell: Vector2i in sim.ore.keys():
-		if sim.machines.has(cell):
+		if sim.machine_at(cell) != null:
 			continue
-		if Vector2(cell - sim.core_cell).length() > 6.0:
+		if sim.tiles_from_core(cell) > 6.0:
 			continue
 		sim.build(Defs.M_MINER, cell, north)
 	sim.grant_cats(maxi(0, 8 - sim.cats.size()))
@@ -4094,12 +4257,16 @@ func debug_rescue() -> void:
 	if sim.carried_frozen:
 		_notify("이미 안고 있습니다", Defs.COL_TEXT_DIM)
 		return
-	var cell: Vector2i = player.facing_cell()
-	if sim.is_structure(cell):
+	var cell: Vector2i = Grid.ahead(player.position, player.facing, Defs.PROP_SIZE).position
+	var free := true
+	for covered: Vector2i in Grid.cells_in(sim.prop_rect(cell)):
+		if sim.is_structure(covered):
+			free = false
+	if not free:
 		cell = player.cell() + Vector2i(1, 0)
 	sim.frozen_cats[cell] = 0.0
 	_notify("디버그 구조 · 얼어붙은 고양이를 앞에 두었습니다", Defs.COL_DANGER)
-	fx.ring(sim.cell_centre(cell), Defs.COL_ICE, 22.0)
+	fx.ring(sim.prop_centre(cell), Defs.COL_ICE, 22.0)
 
 ## All five pieces of the ship, in a row in front of her.
 ##
@@ -4114,9 +4281,9 @@ func debug_debris() -> void:
 	# Sideways from her, so a row of five does not run away over the horizon in
 	# the direction she happens to be looking.
 	var across := Vector2i(-step.y, step.x)
-	var origin: Vector2i = player.cell() + step
+	var origin: Vector2i = Grid.ahead(player.position, step, Defs.PROP_SIZE).position
 	for shape in Defs.DEBRIS_SHAPES:
-		sim.debris[origin + across * (shape - 2)] = shape
+		sim.debris[origin + across * (shape - 2) * Grid.SCALE] = shape
 	_notify("디버그 · 로켓잔해 %d조각을 앞에 두었습니다" % Defs.DEBRIS_SHAPES, Defs.COL_DANGER)
 
 ## To the signpost, with a torch lit.
@@ -4144,7 +4311,7 @@ func debug_village() -> void:
 	while sim.warm_radius < 60.0 and sim.stones_in < 100000:
 		sim.stones_in += 100
 		sim._refresh_radius()
-	player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 1))
+	player.position = sim.prop_centre(sim.sign_cell) + Vector2(0.0, float(Grid.TILE))
 	player.facing = Vector2i(0, -1)
 	sim.mark_explored(sim.sign_cell, Defs.SIGHT_RADIUS)
 	_notify("디버그 · 표지판 앞입니다", Defs.COL_DANGER)
@@ -4152,10 +4319,11 @@ func debug_village() -> void:
 func _cycle_recipe() -> void:
 	if player.locked:
 		return
-	var cell: Vector2i = player.facing_cell()
+	var cell: Vector2i = target_cell()
 	var machine = sim.machine_at(cell)
 	if machine == null:
 		return
+	cell = machine.cell
 	if machine.type == Defs.M_BELT:
 		var tier: int = sim.cycle_belt_tier(cell)
 		if tier < 0:
@@ -4179,7 +4347,10 @@ func _try_demolish() -> void:
 		_notify("고양이를 안고 있어서 손이 모자라다.", Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
-	var cell: Vector2i = player.facing_cell()
+	var cell: Vector2i = target_cell()
+	var standing: Sim.Machine = sim.machine_at(cell)
+	if standing != null:
+		cell = standing.cell
 	if sim.demolish(cell):
 		var at: Vector2 = Grid.centre(cell)
 		fx.burst(at, Defs.COL_TEXT_DIM, 5)
@@ -4723,7 +4894,13 @@ func close_room() -> void:
 func room_facing_piece() -> int:
 	if not room_open:
 		return -1
-	return Defs.room_piece_on(Defs.world_to_room(player.facing_cell()))
+	# The nearest piece ahead. The room is laid out in tiles and a cell is half
+	# of one, so the next cell over can still be the tile she is standing on.
+	for cell: Vector2i in player.reach_cells():
+		var index: int = Defs.room_piece_on(Defs.world_to_room(cell))
+		if index >= 0:
+			return index
+	return -1
 
 ## Z, inside. The door lets her out and the bed ends the night; everything else
 ## is furniture, and furniture that answers a key with a sentence is a caption.
@@ -4733,7 +4910,7 @@ func room_confirm() -> void:
 	# same animals, walking with the same legs, and an armful of cat carried
 	# through the door and then not put down would be a rule the player has to
 	# learn twice.
-	var cell: Vector2i = player.facing_cell()
+	var cell: Vector2i = target_cell()
 	if sim.carried_cat != null:
 		if sim.drop_cat(sim.cell_centre(cell)):
 			_notify("고양이를 내려놓았다.", Defs.COL_TEXT_DIM)
@@ -4741,6 +4918,10 @@ func room_confirm() -> void:
 		else:
 			audio.call("play", "deny")
 		return
+	var lift: Vector2i = _reach_find(func(ahead: Vector2i) -> bool:
+		return sim.cat_on(ahead) != null)
+	if lift != Sim.NONE:
+		cell = lift
 	if sim.pick_up_cat(cell):
 		_notify("고양이를 안았다.", Defs.COL_BELT_RIM)
 		fx.ring(sim.cell_centre(cell), Defs.COL_BELT_RIM, 22.0)

@@ -193,6 +193,29 @@ static func probe(point: Vector2, facing: Vector2i, depth: int = SCALE) -> Array
 			out.append(here + facing * k + side)
 	return out
 
+## A rectangle of `size` cells laid down in front of someone at `point` facing
+## `facing`: its near edge is the next cell over, and across her line it covers
+## her own lane, then the lane she is standing toward, then outward either side.
+## This is where a building she is carrying or aiming goes -- the same ground
+## `probe` reaches, grown to the building's size.
+static func ahead(point: Vector2, facing: Vector2i, size: Vector2i) -> Rect2i:
+	var here: Vector2i = cell_at(point)
+	var offset: Vector2 = point - centre(here)
+	if facing.x != 0:
+		var top: int = here.y - _lead(size.y, offset.y)
+		var left: int = here.x + 1 if facing.x > 0 else here.x - size.x
+		return Rect2i(Vector2i(left, top), size)
+	var start: int = here.x - _lead(size.x, offset.x)
+	var near: int = here.y + 1 if facing.y > 0 else here.y - size.y
+	return Rect2i(Vector2i(start, near), size)
+
+## How many lanes of a span of `lanes` lie before hers: even spans lean toward
+## the side she is standing on, odd ones centre on her.
+static func _lead(lanes: int, offset: float) -> int:
+	if lanes % 2 == 1:
+		return (lanes - 1) / 2
+	return lanes / 2 if offset < 0.0 else lanes / 2 - 1
+
 ## The tile-sized block of cells around a point, nearest first -- what "the
 ## ground she is standing on" was when a cell was a tile.
 static func near_block(point: Vector2) -> Array[Vector2i]:

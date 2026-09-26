@@ -60,21 +60,29 @@ func _draw_ore() -> void:
 		# seam is, and the light it catches. An ore without a sheet still gets the
 		# painted shard, which is what keeps adding one from being a rendering
 		# hole while its art is being decided.
+		# The marks were drawn for a seam a tile across. A node is one cell now,
+		# so they are drawn at the node's size around its middle.
+		draw_set_transform(centre, 0.0, Vector2.ONE * NODE_SCALE)
+		var local := Vector2.ZERO
 		if GroundLayer.ore_atlas_at(sim, cell) == null:
-			_draw_shard(centre, tint, item_type, warm)
+			_draw_shard(local, tint, item_type, warm)
 		else:
-			_draw_sparkle(cell, centre, tint, SPARKLE.get(item_type, 1.0))
-		_draw_purity(cell, centre, tint)
+			_draw_sparkle(cell, local, tint, SPARKLE.get(item_type, 1.0))
+		_draw_purity(cell, local, tint)
 		if not warm:
 			# A slow glint pulls the eye toward ore the player cannot reach yet.
 			var glint: float = maxf(0.0, sin(pulse * 0.8 + float(cell.x + cell.y)))
 			if glint > 0.9:
-				draw_circle(centre + Vector2(-3, -5), 2.4, Color(1, 1, 1, (glint - 0.9) * 5.0))
+				draw_circle(local + Vector2(-3, -5), 2.4, Color(1, 1, 1, (glint - 0.9) * 5.0))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+## How big a seam's marks are drawn: a node is one cell, and they were drawn for
+## a seam a tile across.
+const NODE_SCALE := float(Grid.CELL) / float(Grid.TILE)
 
 func _draw_shard(centre: Vector2, tint: Color, item_type: int, warm: bool) -> void:
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, Defs.SHADOW_SQUASH))
-		draw_circle(Vector2(centre.x, (centre.y + 8.0) / Defs.SHADOW_SQUASH), 10.0, Defs.SHADOW)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		# The shadow, inside the node transform the caller set up.
+		draw_circle(centre + Vector2(0.0, 8.0), 10.0 * Defs.SHADOW_SQUASH, Defs.SHADOW)
 		# A dark outline keeps the silhouette on both the amber ground and the
 		# night, so ore never depends on the terrain for contrast.
 		var outline := PackedVector2Array([
