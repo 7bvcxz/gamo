@@ -38,7 +38,7 @@ func _run() -> void:
 
 	# A hole the player can see out of: everything inside the warm radius must be
 	# fully transparent, or the fog would be covering the factory.
-	var extent: float = fog.baked_extent_px() / float(Defs.TILE)
+	var extent: float = Grid.tiles(fog.baked_extent_px())
 	var alpha_at := func(tiles: float) -> float:
 		var d: float = clampf(tiles / extent, 0.0, 1.0) * middle
 		return image.get_pixel(int(round(middle + d)), int(round(middle))).a
@@ -97,7 +97,7 @@ func _run() -> void:
 	var small_hole: float = _hole_radius(fog._texture.get_image(), small_extent)
 	fog.rebake(18.0)
 	var big_hole: float = _hole_radius(fog._texture.get_image(), fog.baked_extent_px())
-	_assert(big_hole > small_hole + 5.0 * float(Defs.TILE),
+	_assert(big_hole > small_hole + Grid.px(5.0),
 		"a larger warm radius clears a larger hole: %.0f -> %.0f px" % [small_hole, big_hole])
 	_assert(fog.baked_extent_px() > small_extent,
 		"and the baked square grows with it")

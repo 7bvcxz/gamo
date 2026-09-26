@@ -169,8 +169,8 @@ func _test_kit_art() -> void:
 		_assert(art != null and art.get_width() > 0, "키트 그림이 실제로 있다")
 	# One tile. The crate is a one-by-one thing standing in the snow and the game
 	# reads it against the grid.
-	_assert(is_equal_approx(MachineLayerScript.KIT_DRAW, float(Defs.TILE)),
-		"닫힌 케이스가 정확히 한 칸이다: %.0f / %d" % [MachineLayerScript.KIT_DRAW, Defs.TILE])
+	_assert(is_equal_approx(MachineLayerScript.KIT_DRAW, float(Grid.TILE)),
+		"닫힌 케이스가 정확히 한 칸이다: %.0f / %d" % [MachineLayerScript.KIT_DRAW, Grid.TILE])
 	_assert(MachineLayerScript.KIT_OPEN_DRAW < MachineLayerScript.KIT_DRAW,
 		"품에 안은 것은 그보다 작다 — 그녀를 가리면 안 된다")
 	# And what she carries says which one it is. Both used to be the same drawn

@@ -301,7 +301,7 @@ func _run() -> void:
 	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
 	main.time_left = Defs.NIGHT_SECONDS - 1.0
 	_assert(main.is_night(), "night begins before the clock runs out")
-	main.player.position = Vector2(main.sim.core_cell) * float(Defs.TILE)
+	main.player.position = Grid.origin(main.sim.core_cell)
 	_assert(main.sim.is_warm(main.player.cell()), "the test stands the player inside the warm radius")
 	main.player.warmth = 100.0
 	main._update_warmth(1.0)
@@ -368,7 +368,7 @@ func _run() -> void:
 
 	# Daytime inside the warm radius must still recover heat, or the night rule
 	# would simply be a permanent drain.
-	main.player.position = Vector2(main.sim.core_cell) * float(Defs.TILE)
+	main.player.position = Grid.origin(main.sim.core_cell)
 	main.player.warmth = 50.0
 	main._update_warmth(1.0)
 	_assert(main.player.warmth > 50.0, "daylight inside the warm radius restores body heat")

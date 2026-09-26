@@ -58,7 +58,7 @@ func _test_cats_are_on_a_cell() -> void:
 	# And the edge case the radius was hiding: a cat that has stepped most of the
 	# way out of its cell still belongs to the cell it is in, not to the one it
 	# is nearly in.
-	cat.pos = sim.cell_centre(here) + Vector2(float(Defs.TILE) * 0.45, 0.0)
+	cat.pos = sim.cell_centre(here) + Vector2(float(Grid.CELL) * 0.45, 0.0)
 	_assert(sim.cat_on(here) == cat, "칸 가장자리까지 걸어가도 그 칸이다")
 	_assert(sim.cat_on(here + Vector2i(1, 0)) == null, "다음 칸은 아직 아니다")
 	sim.free()

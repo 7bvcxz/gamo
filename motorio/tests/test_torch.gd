@@ -160,7 +160,7 @@ func _test_the_light() -> void:
 	# fog's hole in viewport pixels and the game stretches its canvas from a
 	# 960x540 base, so the hole opened somewhere Grim was not -- and what it
 	# revealed was the unlit ground, which is dark navy.
-	var expected: float = Defs.TORCH_SIGHT * float(Defs.TILE)
+	var expected: float = Grid.px(Defs.TORCH_SIGHT)
 	_assert(absf(fog.torch_radius - expected) < 0.01, "구멍은 %.0f칸이다" % Defs.TORCH_SIGHT)
 	_assert(fog.torch_at.distance_to(main.player.global_position) < 0.01,
 		"구멍이 주인공을 따라다닌다")

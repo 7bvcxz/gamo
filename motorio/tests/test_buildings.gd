@@ -33,7 +33,7 @@ func _assert(condition: bool, label: String) -> void:
 		print("  FAIL %s" % label)
 
 func _test_one_tile() -> void:
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.TILE)
 	_assert(is_equal_approx(MachineLayerScript.CORE_DRAW, tile),
 		"기지가 한 칸이다: %.0f / %.0f" % [MachineLayerScript.CORE_DRAW, tile])
 	_assert(is_equal_approx(MachineLayerScript.SHELTER_DRAW, tile),

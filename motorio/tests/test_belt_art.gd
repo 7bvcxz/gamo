@@ -107,7 +107,7 @@ func _merge(sim: Sim, layer: MachineLayer) -> void:
 ## built, at the size it expects. A straight tile that quietly became 64 would
 ## still draw -- blurrier, and nobody would know why.
 func _art(layer: MachineLayer) -> void:
-	var expected: int = Defs.TILE * 3
+	var expected: int = Grid.TILE * 3
 	for entry: Array in [
 		["belt_straight", MachineLayerScript.BELT_STRAIGHT_ART],
 		["belt_corner", MachineLayerScript.BELT_CORNER_ART],

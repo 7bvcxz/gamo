@@ -99,7 +99,7 @@ func _run() -> void:
 	for heading: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
 		main.player.facing = heading
 		main._process(0.0)
-		var ahead: Vector2 = main.player.position + Vector2(heading) * float(Defs.TILE) * Defs.CARRY_AHEAD
+		var ahead: Vector2 = main.player.position + Vector2(heading) * Grid.px(Defs.CARRY_AHEAD)
 		_assert(kitty.pos.distance_to(ahead) < 0.5,
 			"the carried cat sits ahead facing %s" % heading)
 		_assert(kitty.heading == Vector2(heading), "and looks the same way she does: %s" % heading)

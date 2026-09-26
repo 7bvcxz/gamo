@@ -37,7 +37,7 @@ GAME = REPO / "motorio" / "assets" / "room"
 ALPHA_FLOOR = 16
 
 ## name -> (candidate, width x height in game pixels). The room draws a cell at
-## Defs.TILE, so a 2x1 piece is 64x32 and is stored at twice that.
+## Grid.TILE (a room tile), so a 2x1 piece is 64x32 and is stored at twice that.
 ##
 ## The reasons for the choices that were not the first candidate:
 ##   window   gen1 had the cat from the style plate sitting in the pane.

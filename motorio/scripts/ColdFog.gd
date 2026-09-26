@@ -125,7 +125,7 @@ func fog_strength(distance_tiles: float) -> float:
 func fog_alpha_for_cell(cell: Vector2i) -> float:
 	if sim == null:
 		return 0.0
-	var strength: float = fog_strength(Vector2(cell - sim.core_cell).length())
+	var strength: float = fog_strength(sim.tiles_from_core(cell))
 	if strength <= 0.0:
 		return 0.0
 	return 0.16 + strength * 0.72
@@ -134,7 +134,9 @@ func fog_alpha_for_cell(cell: Vector2i) -> float:
 ## order the draw calls used, so the bake reproduces the image the circles made
 ## instead of approximating it with a guessed curve.
 func _alpha_at(at: Vector2, warm_tiles: float, bank: PackedVector3Array) -> float:
-	var tile := float(Defs.TILE)
+	# Tiles of distance, not cells: the fog is sized in the unit the warm radius
+	# is written in.
+	var tile := float(Grid.TILE)
 	var spacing: float = tile * PUFF_SPACING
 	var radius: float = tile * PUFF_RADIUS
 	var warm_px: float = warm_tiles * tile
@@ -168,7 +170,7 @@ func _alpha_at(at: Vector2, warm_tiles: float, bank: PackedVector3Array) -> floa
 ## The frontier bank's circles, as (x, y, radius). Built once per bake rather
 ## than re-derived for every sample point, which was most of the bake's cost.
 func _bank_circles(warm_tiles: float) -> PackedVector3Array:
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.TILE)
 	var warm_px: float = warm_tiles * tile
 	var count: int = maxi(28, int(TAU * warm_px / (tile * 1.6)))
 	var out := PackedVector3Array()
@@ -182,7 +184,7 @@ func _bank_circles(warm_tiles: float) -> PackedVector3Array:
 
 ## Accumulated alpha as a function of distance past the warm edge.
 func _sample_profile(warm_tiles: float) -> PackedFloat32Array:
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.TILE)
 	var bank: PackedVector3Array = _bank_circles(warm_tiles)
 	var span: float = PREVIEW_BAND + EDGE_MARGIN + INNER_BLEED
 	var out := PackedFloat32Array()
@@ -222,7 +224,7 @@ func rebake(warm_tiles: float) -> void:
 
 ## Half-width of the baked square, in world pixels.
 func baked_extent_px() -> float:
-	return _extent_tiles * float(Defs.TILE)
+	return Grid.px(_extent_tiles)
 
 func far_alpha() -> float:
 	return _far_alpha
@@ -233,8 +235,7 @@ func has_bake() -> bool:
 func _draw() -> void:
 	if sim == null or _texture == null:
 		return
-	var tile := float(Defs.TILE)
-	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
+	var core_px: Vector2 = sim.core_centre()
 	var fog: Color = Color(0.94, 0.975, 1.0).lerp(Color(0.62, 0.70, 0.85), night * 0.5)
 	var extent: float = baked_extent_px()
 	var square := Rect2(core_px - Vector2.ONE * extent, Vector2.ONE * extent * 2.0)

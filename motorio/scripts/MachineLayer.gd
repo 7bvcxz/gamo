@@ -120,12 +120,12 @@ const MACHINE_ART_DRAW := 36.0
 ## One tile, as of 0.20.79. It has always *been* one cell -- one machine that
 ## blocks one tile -- and the picture was 2.7 of them, hanging over the tiles
 ## its neighbours are built on and over the input mouth beside it.
-const CORE_DRAW := 1.0 * float(Defs.TILE)
+const CORE_DRAW := 1.0 * float(Grid.TILE)
 ## 2.2 tiles. Same form as the core's, for the same reason: the number that
 ## matters is how many cells of the world the building covers.
 ## Also one tile now, for the same reason: `is_structure` blocks exactly the
 ## one cell it stands on and the drawing claimed five.
-const SHELTER_DRAW := 1.0 * float(Defs.TILE)
+const SHELTER_DRAW := 1.0 * float(Grid.TILE)
 const FOOD_BIN_DRAW := 36.0
 
 const CAT_CELL := 128.0
@@ -239,7 +239,7 @@ func _ready() -> void:
 func _draw_marks_layer() -> void:
 	if sim == null:
 		return
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.CELL)
 	_draw_machine_marks(_marks_layer, tile)
 	if show_preview:
 		_draw_preview(_marks_layer, tile)
@@ -266,7 +266,7 @@ const ROOM_ART := {
 func _draw() -> void:
 	if sim == null:
 		return
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.CELL)
 	if sim.indoors:
 		_draw_room_pieces(tile)
 		_marks_layer.queue_redraw()
@@ -443,7 +443,7 @@ func _draw_meter_marker(tile: float) -> void:
 ## and the mining ring are drawn from.
 
 func _visible(cell: Vector2i, tile: float) -> bool:
-	return view_rect.grow(tile * 2.0).has_point(Vector2(cell) * tile + Vector2.ONE * tile * 0.5)
+	return view_rect.grow(tile * 2.0).has_point(Grid.centre(cell))
 
 func _frost(machine: Sim.Machine) -> float:
 	return 0.0 if sim.is_warm(machine.cell) else 0.45
@@ -609,8 +609,8 @@ func _draw_hand_progress() -> void:
 	var fraction: float = sim.hand_fraction()
 	if fraction <= 0.0:
 		return
-	var tile := float(Defs.TILE)
-	var centre: Vector2 = Vector2(sim.hand_cell) * tile + Vector2.ONE * tile * 0.5
+	var tile := float(Grid.CELL)
+	var centre: Vector2 = Grid.centre(sim.hand_cell)
 	var jitter: float = fraction * 1.6
 	centre += Vector2(randf_range(-jitter, jitter), randf_range(-jitter, jitter))
 	var radius: float = tile * 0.52
@@ -650,7 +650,7 @@ func _draw_cat_digging(tile: float) -> void:
 	for cat: Sim.Cat in sim.cats:
 		if not shows_dig_ring(cat) or not _visible(cat.assigned, tile):
 			continue
-		var c: Vector2 = Vector2(cat.assigned) * tile + Vector2.ONE * tile * 0.5
+		var c: Vector2 = Grid.centre(cat.assigned)
 		var fraction: float = clampf(cat.dig, 0.0, 1.0)
 		_progress_ring(c, fraction, Color(1.0, 0.97, 0.90, 0.92), 15.0)
 
@@ -711,12 +711,12 @@ func _draw_splitter(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 ## Loose items on the floor. Small, lit and slowly bobbing, so a dropped shard
 ## reads as "come and get me" rather than as scenery.
 func _draw_ground() -> void:
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.CELL)
 	for cell: Vector2i in sim.ground:
 		if not _visible(cell, tile):
 			continue
 		var item_type: int = int(sim.ground[cell])
-		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var at: Vector2 = Grid.centre(cell)
 		var bob: float = sin(pulse * 3.0 + float(cell.x + cell.y)) * GROUND_ITEM_BOB
 		var colour: Color = Defs.ITEM_COLORS[item_type]
 		_shadow(at + Vector2(0, 7), 5.0)
@@ -908,7 +908,7 @@ static func cat_sheet(state: int, heading: Vector2, walking: bool) -> Array:
 ## Crystal used to be a seam and seams stand up; a shard does not.
 func _draw_shards(tile: float) -> void:
 	for cell: Vector2i in sim.shards:
-		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var at: Vector2 = Grid.centre(cell)
 		if not view_rect.grow(tile).has_point(at):
 			continue
 		var colour: Color = Defs.ITEM_COLORS[Defs.ITEM_CRYSTAL]
@@ -944,7 +944,7 @@ var pickaxe_hint := Vector2i(9999, 9999)
 ## the thing on the ground and the thing they end up with are the same object.
 func _draw_drops(tile: float) -> void:
 	for cell: Vector2i in sim.drops:
-		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var at: Vector2 = Grid.centre(cell)
 		if not view_rect.grow(tile).has_point(at):
 			continue
 		var kind: int = int(sim.drops[cell])
@@ -982,7 +982,7 @@ func _draw_drops(tile: float) -> void:
 func _draw_pickaxe_hint(tile: float) -> void:
 	if pickaxe_hint == Vector2i(9999, 9999):
 		return
-	var at: Vector2 = Vector2(pickaxe_hint) * tile + Vector2.ONE * tile * 0.5
+	var at: Vector2 = Grid.centre(pickaxe_hint)
 	if not view_rect.grow(tile).has_point(at):
 		return
 	var bob: float = sin(pulse * 3.2) * 3.0
@@ -1006,7 +1006,7 @@ var craft_progress := 0.0
 func _draw_base_craft(tile: float) -> void:
 	if craft_progress <= 0.0 or not _visible(sim.core_cell, tile):
 		return
-	var centre: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
+	var centre: Vector2 = Grid.centre(sim.core_cell)
 	_progress_ring(centre, craft_progress, Defs.COL_CORE, tile * 0.46, 3.4)
 
 ## The "!" over the fire, while the thought that points at it stands open.
@@ -1015,7 +1015,7 @@ func _draw_base_craft(tile: float) -> void:
 func _draw_base_alert(tile: float) -> void:
 	if not base_alert or not _visible(sim.core_cell, tile):
 		return
-	var centre: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
+	var centre: Vector2 = Grid.centre(sim.core_cell)
 	var bob: float = sin(pulse * 4.0) * 2.0
 	var at: Vector2 = centre + Vector2(0.0, -34.0 + bob)
 	var plate := Rect2(at - Vector2(7.0, 10.0), Vector2(14.0, 18.0))
@@ -1045,7 +1045,7 @@ func _draw_post_hints(tile: float) -> void:
 				break
 		if taken:
 			continue
-		var centre: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var centre: Vector2 = Grid.centre(cell)
 		draw_circle(centre, tile * 0.42, Color(1.0, 0.82, 0.45, glow))
 		draw_arc(centre, tile * 0.42, 0.0, TAU, 24, Color(1.0, 0.82, 0.45, glow * 2.2), 1.4, true)
 
@@ -1054,7 +1054,7 @@ func _draw_kit(tile: float) -> void:
 	# does not stop existing because it is empty.
 	if sim.kit_cell == Vector2i(9999, 9999):
 		return
-	var at: Vector2 = Vector2(sim.kit_cell) * tile + Vector2.ONE * tile * 0.5
+	var at: Vector2 = Grid.centre(sim.kit_cell)
 	if not view_rect.grow(tile).has_point(at):
 		return
 	var breathe: float = 0.5 + 0.5 * sin(pulse * 2.2)
@@ -1072,7 +1072,7 @@ func _draw_kit(tile: float) -> void:
 func _draw_thaw(tile: float) -> void:
 	if sim.thaw_progress <= 0.0:
 		return
-	var at: Vector2 = Vector2(sim.thaw_cell) * tile + Vector2.ONE * tile * 0.5
+	var at: Vector2 = Grid.centre(sim.thaw_cell)
 	if not view_rect.grow(tile).has_point(at):
 		return
 	_progress_ring(at, sim.thaw_fraction(), Defs.COL_CORE)
@@ -1119,12 +1119,12 @@ func _draw_no_shelter(tile: float) -> void:
 ## different kinds of fire.
 func _draw_village(tile: float) -> void:
 	if sim.sign_cell != Vector2i(9999, 9999):
-		var post: Vector2 = Vector2(sim.sign_cell) * tile + Vector2.ONE * tile * 0.5
+		var post: Vector2 = Grid.centre(sim.sign_cell)
 		if view_rect.grow(tile).has_point(post):
 			_shadow(post + Vector2(0, 9), 8.0)
 			_object_art(SIGN_ART, post, SIGN_DRAW)
 	for cell: Vector2i in sim.village:
-		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var at: Vector2 = Grid.centre(cell)
 		if not view_rect.grow(tile * 2.0).has_point(at):
 			continue
 		var piece: int = int(sim.village[cell])
@@ -1142,7 +1142,7 @@ func _draw_village(tile: float) -> void:
 
 func _draw_debris(tile: float) -> void:
 	for cell: Vector2i in sim.debris:
-		var at: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var at: Vector2 = Grid.centre(cell)
 		if not view_rect.grow(tile).has_point(at):
 			continue
 		_shadow(at + Vector2(0, 8), 10.0)
@@ -1183,7 +1183,7 @@ func _draw_frozen(tile: float) -> void:
 func _draw_food_bin(tile: float) -> void:
 	if not sim.food_placed:
 		return
-	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
+	var at: Vector2 = Grid.centre(sim.food_cell)
 	_shadow(at + Vector2(0, 10), 10.0)
 	_object_art(FOOD_BIN_ART, at, FOOD_BIN_DRAW)
 	# The count is drawn after the animals -- see _draw_machine_marks.
@@ -1209,7 +1209,7 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		var machine: Sim.Machine = sim.machines[cell]
 		if not _visible(cell, tile):
 			continue
-		var centre: Vector2 = Vector2(cell) * tile + Vector2.ONE * tile * 0.5
+		var centre: Vector2 = Grid.centre(cell)
 		# Every machine that produces something says where it goes, over the cats
 		# and outlined. A cat is nearly sixty pixels tall standing on the centre
 		# these are measured from, so an arrow drawn underneath is invisible in
@@ -1247,7 +1247,7 @@ func _draw_food_count(on: CanvasItem, tile: float) -> void:
 	# southwest of the base with nothing under it to say what it counted.
 	if not shows_food_count():
 		return
-	var at: Vector2 = Vector2(sim.food_cell) * tile + Vector2.ONE * tile * 0.5
+	var at: Vector2 = Grid.centre(sim.food_cell)
 	if not view_rect.grow(tile * 2.0).has_point(at):
 		return
 	var label: String = str(sim.food)
@@ -1376,8 +1376,9 @@ func _draw_room_pieces(tile: float) -> void:
 		var art: Texture2D = ROOM_ART.get(int(piece["id"]), null)
 		if art == null:
 			continue
-		var origin: Vector2 = Vector2(Defs.room_to_world(piece["cell"])) * tile
-		var rect := Rect2(origin, Vector2(piece["size"]) * tile)
+		# Room pieces are laid out in tiles, not build cells.
+		var origin: Vector2 = Grid.origin(Defs.room_to_world(piece["cell"]))
+		var rect := Rect2(origin, Vector2(piece["size"]) * float(Grid.TILE))
 		var scale: float = minf(rect.size.x / float(art.get_width()),
 			rect.size.y / float(art.get_height()))
 		var drawn := Vector2(float(art.get_width()), float(art.get_height())) * scale

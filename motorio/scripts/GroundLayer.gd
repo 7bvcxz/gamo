@@ -96,9 +96,8 @@ func _draw() -> void:
 		return
 	# A real 2.5x drop in ground value across the day, so dusk is unmistakable.
 	draw_rect(view_rect, Defs.COL_SNOW_COLD.lerp(Color8(9, 12, 20), pow(night, 1.4)))
-	var tile := float(Defs.TILE)
-	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
-	var radius: float = sim.shown_radius * tile
+	var core_px: Vector2 = sim.core_centre()
+	var radius: float = Grid.px(sim.shown_radius)
 	# Night darkens the pool through modulation rather than a second fill pass.
 	var tint: Color = Color.WHITE.lerp(Color(0.42, 0.36, 0.48, 1.0), pow(night, 1.3) * 0.72)
 	draw_texture_rect(_texture, Rect2(core_px - Vector2.ONE * radius, Vector2.ONE * radius * 2.0), false, tint)
@@ -200,8 +199,8 @@ const ROCK_VARIANTS := 6
 ## ask whether a boulder is standing on a cell without asking a drawing layer --
 ## rock is a resource as of 0.20.75, not decoration.
 
-## Fills the cache for every block that could reach into this range. Called once
-## per frame with the visible range rather than per cell.
+## Fills the cache for every block that could reach into this range of tiles.
+## Called once per frame with the visible range rather than per cell.
 func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
 	var low := Vector2i(floori(float(start.x) / Defs.ROCK_BLOCK) - Defs.ROCK_REACH,
 		floori(float(start.y) / Defs.ROCK_BLOCK) - Defs.ROCK_REACH)
@@ -229,8 +228,12 @@ func _seam_atlas(cell: Vector2i) -> Texture2D:
 ## Whether a boulder is drawn here. The field is generated from the coordinates,
 ## so a broken one is remembered by the simulation and skipped here rather than
 ## removed from a set the generator would put straight back.
+##
+## The field is laid out in tiles and asked about by cell, so every cell of a
+## rock tile answers for the whole boulder.
 func is_rock(cell: Vector2i) -> bool:
-	return _rock.has(cell) and not (sim != null and sim.mined_rocks.has(cell))
+	var rock_tile: Vector2i = Grid.tile_of(cell)
+	return _rock.has(rock_tile) and not (sim != null and sim.mined_rocks.has(rock_tile))
 
 ## Which of the six, on a different salt from the snow so a cell that turns to
 ## rock does not inherit its snow variant's number.
@@ -264,10 +267,14 @@ func _draw_tiles() -> void:
 	# showing through the hut's floorboards. Indoors this layer paints nothing.
 	if sim.indoors:
 		return
-	var tile := float(Defs.TILE)
-	var start := Vector2i((view_rect.position / tile).floor())
-	var end := Vector2i((view_rect.end / tile).ceil())
-	_ensure_rock(start, end)
+	# One ground tile per build cell: the floor is the grid, and the grid is what
+	# a player lines a factory up against.
+	var tile := float(Grid.CELL)
+	var start: Vector2i = Grid.cell_at(view_rect.position)
+	var end: Vector2i = Grid.cell_at(view_rect.end)
+	var tile_start: Vector2i = Grid.tile_of(start)
+	var tile_end: Vector2i = Grid.tile_of(end)
+	_ensure_rock(tile_start, tile_end)
 	# Two passes, one texture each. Interleaving them would break the batch at
 	# every switch, and a boulder cell must not be drawn over a snow one: both
 	# passes multiply, so a cell painted twice comes out twice as dark.
@@ -277,16 +284,18 @@ func _draw_tiles() -> void:
 			if is_rock(cell) or _seam_atlas(cell) != null:
 				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
-				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
+				Rect2(Grid.origin(cell), Vector2(tile, tile)),
 				tile_region(tile_variant(cell)))
-	for y in range(start.y, end.y + 1):
-		for x in range(start.x, end.x + 1):
-			var cell := Vector2i(x, y)
-			if not is_rock(cell) or _seam_atlas(cell) != null:
+	# Boulders are laid out a tile at a time -- the field is a function of tile
+	# coordinates -- so each is one picture a tile across, not four small ones.
+	for y in range(tile_start.y, tile_end.y + 1):
+		for x in range(tile_start.x, tile_end.x + 1):
+			var rock_tile := Vector2i(x, y)
+			if not is_rock(Grid.from_tile(rock_tile)):
 				continue
 			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
-				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
-				rock_region(rock_variant(cell)))
+				Rect2(Vector2(rock_tile) * float(Grid.TILE), Vector2.ONE * float(Grid.TILE)),
+				rock_region(rock_variant(rock_tile)))
 	# A third pass because a seam cell must be painted once -- both passes above
 	# multiply, so a cell drawn twice comes out twice as dark. Unlike them this
 	# one can switch texture between cells, since two ores on screen are two
@@ -299,9 +308,9 @@ func _draw_tiles() -> void:
 			if atlas == null:
 				continue
 			_tile_layer.draw_texture_rect_region(atlas,
-				Rect2(Vector2(cell) * tile, Vector2(tile, tile)),
+				Rect2(Grid.origin(cell), Vector2(tile, tile)),
 				ore_region(atlas, ore_variant(cell)))
-	_draw_trail(tile, start, end)
+	_draw_trail(start, end)
 
 ## Tracks between the signpost and 냥마을.
 ##
@@ -314,15 +323,19 @@ func _draw_tiles() -> void:
 ## Drawn into the tile layer with the snow rather than over the top of the world,
 ## so a boulder or a machine standing on the path covers the prints instead of
 ## floating above them.
-func _draw_trail(tile: float, start: Vector2i, end: Vector2i) -> void:
+func _draw_trail(start: Vector2i, end: Vector2i) -> void:
 	if sim.trail.is_empty():
 		return
+	# A print is sized to a stride, and a stride is a tile of distance whatever
+	# the grid under it is doing. Each mark is keyed by the top-left cell of the
+	# tile it was walked across.
+	var tile := float(Grid.TILE)
 	for cell: Vector2i in sim.trail:
-		if cell.x < start.x - 1 or cell.x > end.x + 1:
+		if cell.x < start.x - Grid.SCALE or cell.x > end.x + Grid.SCALE:
 			continue
-		if cell.y < start.y - 1 or cell.y > end.y + 1:
+		if cell.y < start.y - Grid.SCALE or cell.y > end.y + Grid.SCALE:
 			continue
-		var base: Vector2 = Vector2(cell) * tile
+		var base: Vector2 = Grid.origin(cell)
 		var side: int = int(sim.trail[cell])
 		# Jittered off the cell it belongs to, because a print placed at the same
 		# two spots in every cell comes out as a column of evenly spaced dots --
@@ -343,7 +356,8 @@ func _draw_trail(tile: float, start: Vector2i, end: Vector2i) -> void:
 ## snow visible past its walls is a room she never went into.
 func _draw_room() -> void:
 	draw_rect(view_rect.grow(64.0), Color(0, 0, 0, 1.0))
-	var tile := float(Defs.TILE)
+	# The room is laid out in tiles.
+	var tile := float(Grid.TILE)
 	var origin: Vector2 = Vector2(Defs.ROOM_ORIGIN) * tile
 	var floor_rect := Rect2(origin, Vector2(Defs.ROOM_CELLS) * tile)
 	var wall_rect := Rect2(origin - Vector2(0.0, float(Defs.ROOM_WALL_ROWS) * tile),
@@ -374,7 +388,7 @@ const ROOM_WINDOW_NIGHT: Texture2D = preload("res://assets/room/window_night.png
 const ROOM_WINDOW_DAY: Texture2D = preload("res://assets/room/window_day.png")
 
 func _draw_room_window(wall_rect: Rect2) -> void:
-	var tile := float(Defs.TILE)
+	var tile := float(Grid.TILE)
 	var frame := Rect2(wall_rect.position + Vector2(Defs.ROOM_WINDOW_CELL) * tile,
 		Vector2(Defs.ROOM_WINDOW_SIZE) * tile)
 	draw_texture_rect(ROOM_WINDOW_NIGHT if window_is_night(sky_night)

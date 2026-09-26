@@ -310,12 +310,19 @@ func _move(step: Vector2) -> void:
 	position.y += step.y
 
 ## The body is a small box, so a corner cannot clip into a structure.
+##
+## Every cell under the box, not only the four under its corners. The box is
+## eighteen pixels and a cell is sixteen, so it can straddle three cells in a
+## row -- and a corners-only test would let a structure one cell wide sit in the
+## middle of her unnoticed.
 func _free_at(at: Vector2) -> bool:
 	var r: float = Defs.PLAYER_RADIUS
-	for corner: Vector2 in [Vector2(-r, -r), Vector2(r, -r), Vector2(-r, r), Vector2(r, r)]:
-		var cell := Vector2i(((at + corner) / float(Defs.TILE)).floor())
-		if blocked.call(cell):
-			return false
+	var low: Vector2i = Grid.cell_at(at - Vector2(r, r))
+	var high: Vector2i = Grid.cell_at(at + Vector2(r, r))
+	for y in range(low.y, high.y + 1):
+		for x in range(low.x, high.x + 1):
+			if blocked.call(Vector2i(x, y)):
+				return false
 	return true
 
 func _animate(delta: float, input: Vector2, sprinting: bool) -> void:
@@ -465,11 +472,17 @@ static func foot_offset(scale: Vector2, rotation: float) -> Vector2:
 	var delta := Vector2(0.0, FOOT_ANCHOR.y - CELL * 0.5)
 	return (delta * scale).rotated(rotation)
 
+## The next cell in front of her. One cell: what she can actually reach is the
+## probe (`Grid.probe`), which is as deep and as wide as a tile.
 func facing_cell() -> Vector2i:
-	return Vector2i((position / float(Defs.TILE)).floor()) + facing
+	return cell() + facing
+
+## The cells in front of her, nearest first, covering the ground a tile covers.
+func reach_cells() -> Array[Vector2i]:
+	return Grid.probe(position, facing)
 
 func cell() -> Vector2i:
-	return Vector2i((position / float(Defs.TILE)).floor())
+	return Grid.cell_at(position)
 
 ## Which key prompt is showing, set by Main. Empty means none.
 var prompt: String = ""

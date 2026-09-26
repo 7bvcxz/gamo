@@ -127,7 +127,7 @@ func _test_walking() -> void:
 		main.player._physics_process(1.0 / 60.0)
 	main.player.touch_direction = Vector2.ZERO
 	_assert(not main.player.modal, "프레임을 돌려도 modal 이 아니고")
-	_assert(main.player.position.distance_to(before) > float(Defs.TILE) * 0.5,
+	_assert(main.player.position.distance_to(before) > float(Grid.TILE) * 0.5,
 		"실제로 걸어간다: %.1fpx" % main.player.position.distance_to(before))
 	_assert(Defs.in_room(main.player.cell()), "그리고 방 안이다")
 	main.clear_save()
@@ -278,7 +278,7 @@ func _test_sleeping() -> void:
 	var head: Vector2 = sim.cell_centre(Defs.room_to_world(main._room_bed_cell()))
 	var rest: Vector2 = main.room_sleep_point()
 	_assert(is_equal_approx(rest.x, head.x), "머리맡과 같은 줄에 눕는다")
-	_assert(is_equal_approx(rest.y - head.y, float(Defs.TILE) * 0.5),
+	_assert(is_equal_approx(rest.y - head.y, float(Grid.TILE) * 0.5),
 		"그리고 반 칸 아래다: %.1f" % (rest.y - head.y))
 	_assert(Defs.world_to_room(sim.cell_of(rest)) in [main._room_bed_cell(),
 		main._room_bed_cell() + Vector2i(0, 1)], "여전히 침대 위다")

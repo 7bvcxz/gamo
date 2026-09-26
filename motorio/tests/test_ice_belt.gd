@@ -57,7 +57,7 @@ func _test_it_rides() -> void:
 	sim.frozen_cats[start] = 0.0
 	# Long enough to cross a tile at the carrying speed, and no longer: a block
 	# that arrives too early is one that skipped a cell.
-	var seconds: float = float(Defs.TILE) / Defs.belt_carry_speed()
+	var seconds: float = float(Grid.CELL) / Defs.belt_carry_speed()
 	var moved := false
 	var elapsed := 0.0
 	while elapsed < seconds * 1.2:

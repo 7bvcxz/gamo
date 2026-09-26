@@ -3,8 +3,11 @@ class_name Defs
 
 ## Single source of truth for balance numbers, palette and machine data.
 ## Keeping this data-driven means tuning the game never requires touching logic.
-
-const TILE := 32
+##
+## Distances in this file -- every radius, ring, band and reach -- are in tiles
+## (`Grid.TILE` pixels), the unit the world is measured in. The build grid is
+## finer than that since Grid v2; see Grid.gd for which is which. There is no
+## `TILE` here any more: it used to mean both, and the two had to be told apart.
 
 # --- Art direction -----------------------------------------------------------
 # A cold navy world so that anything warm reads as valuable. Every warm hue in
@@ -468,6 +471,25 @@ static func _index_machines() -> void:
 # --- Machine lookup -----------------------------------------------------------
 static func machine(type: int) -> Dictionary:
 	return _machines_by_id.get(type, {})
+
+## How many build cells a machine covers, written facing east. A row without a
+## "size" is one cell -- the belt is the only thing that should rely on that.
+##
+## The one place a footprint's width and height come from. Placement, collision,
+## the path grid, the preview and the drawing all ask here, so a machine added
+## later is sized by writing its row and nothing else.
+static func machine_size(type: int) -> Vector2i:
+	return Vector2i(machine(type).get("size", Vector2i.ONE))
+
+## Where the anchor -- the cell the machine is stored under -- sits in its
+## footprint, or Grid.AUTO for the default rule. For a mining post the anchor is
+## the seam it works (ORE_ANCHOR).
+static func machine_anchor(type: int) -> Vector2i:
+	return Vector2i(machine(type).get("anchor", Grid.AUTO))
+
+## Every cell a machine of this type covers with its anchor on `anchor`.
+static func machine_footprint(type: int, anchor: Vector2i, dir: Vector2i = Vector2i.RIGHT) -> Rect2i:
+	return Grid.footprint(anchor, machine_size(type), dir, machine_anchor(type))
 
 static func machine_by_key(key: String) -> Dictionary:
 	return _machines_by_key.get(key, {})
@@ -1962,7 +1984,7 @@ const ROOM_WAKE := Vector2i(5, 2)
 ## How fast she crosses the room, in cells a second: exactly her walking speed
 ## outside. It was 3.4 -- faster indoors than out, which is the wrong way round
 ## and was not on purpose.
-const ROOM_SPEED := 84.0 / float(TILE)
+const ROOM_SPEED := 84.0 / float(Grid.TILE)
 ## Where the cats are standing when she opens the door. Not a destination -- the
 ## wander takes over on the next frame -- just somewhere each of them is, spread
 ## across the floor rather than stacked on the doorstep: they have been in here
@@ -2016,11 +2038,27 @@ const ROOM_PIECES: Array[Dictionary] = [
 ]
 
 ## World cell <-> room cell, in one place each way.
+##
+## The room is laid out in tiles -- ROOM_ORIGIN, ROOM_CELLS and every piece are
+## tile coordinates, the same size a floor cell always was -- so a room "cell" is
+## a tile and covers `Grid.SCALE` squared build cells. `room_to_world` answers
+## with the top-left build cell of that tile; `room_centre` is its middle, which
+## is where anything standing on it goes.
 static func room_to_world(cell: Vector2i) -> Vector2i:
-	return ROOM_ORIGIN + cell
+	return Grid.from_tile(ROOM_ORIGIN + cell)
 
 static func world_to_room(cell: Vector2i) -> Vector2i:
-	return cell - ROOM_ORIGIN
+	return Grid.tile_of(cell) - ROOM_ORIGIN
+
+## The middle of a room tile, in world pixels.
+static func room_centre(cell: Vector2i) -> Vector2:
+	return Grid.tile_centre(ROOM_ORIGIN + cell)
+
+## The floor and the walls around it, as build cells: what the path grid covers
+## while everyone is indoors.
+static func room_rect_cells(margin_tiles: int = 0) -> Rect2i:
+	return Rect2i(Grid.from_tile(ROOM_ORIGIN - Vector2i.ONE * margin_tiles),
+		Grid.from_tile(ROOM_CELLS + Vector2i.ONE * margin_tiles * 2))
 
 ## Whether a world cell is inside the room's four walls at all.
 static func in_room(cell: Vector2i) -> bool:
@@ -2544,7 +2582,7 @@ const BELT_CARRY_FACTOR := 3.5
 
 ## Pixels per second a belt drags whatever is standing on it.
 static func belt_carry_speed() -> float:
-	return BELT_SPEED * float(TILE) * BELT_CARRY_FACTOR
+	return Grid.px(BELT_SPEED) * BELT_CARRY_FACTOR
 
 const BELT_SPEED := 0.30          # tiles per second
 

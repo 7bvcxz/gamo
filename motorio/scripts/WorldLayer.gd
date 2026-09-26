@@ -28,10 +28,9 @@ func _draw() -> void:
 	# layer under this one and the furniture by the machine layer above it.
 	if sim.indoors:
 		return
-	var tile := float(Defs.TILE)
-	var core_px: Vector2 = Vector2(sim.core_cell) * tile + Vector2.ONE * tile * 0.5
+	var core_px: Vector2 = sim.core_centre()
 	# The painted circle, which trails the simulated one so growth is seen.
-	var warm_px: float = sim.shown_radius * tile
+	var warm_px: float = Grid.px(sim.shown_radius)
 
 	# Ground and warm pool are drawn by GroundLayer beneath this one; here we
 	# only add what animates: the frontier, the grid and the ore.
@@ -44,16 +43,15 @@ func _draw() -> void:
 	# so the lines landed on top of the tile edges and the floor read as two grids
 	# fighting, one soft and one ruled. What the lines were for, judging alignment
 	# when a player stops to look, is what the tile edges do.
-	_draw_ore(tile)
+	_draw_ore()
 
-func _draw_ore(tile: float) -> void:
+func _draw_ore() -> void:
 	for cell: Vector2i in sim.ore:
-		var px: Vector2 = Vector2(cell) * tile
-		if not view_rect.has_point(px + Vector2.ONE * tile * 0.5):
+		var centre: Vector2 = Grid.centre(cell)
+		if not view_rect.has_point(centre):
 			continue
 		var item_type: int = sim.ore[cell]
 		var base: Color = Defs.ITEM_COLORS[item_type]
-		var centre: Vector2 = px + Vector2.ONE * tile * 0.5
 		var warm: bool = sim.is_warm(cell)
 		var tint: Color = base if warm else base.lerp(Defs.COL_SNOW_COLD, 0.18)
 

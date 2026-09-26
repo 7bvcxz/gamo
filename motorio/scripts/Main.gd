@@ -811,15 +811,19 @@ func _map_key(key: InputEventKey) -> void:
 ## not become a white disc. One drawing, so the two maps cannot disagree.
 func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.0,
 		seen_alpha: float = 1.0) -> void:
+	# Map pixels per tile, and so per world pixel. The map is scaled in tiles
+	# rather than cells so that the grid going finer did not zoom the map in.
 	var scale: float = Defs.MAP_CELL_PX * (zoom if zoom > 0.0 else map_zoom)
+	var k: float = scale / float(Grid.TILE)
 	var centre: Vector2 = view.position + view.size * 0.5
 	var here: Vector2i = sim.cell_of(player.position)
-	# How many cells fit, plus one so the edge row is drawn rather than clipped
+	var here_px: Vector2 = Grid.origin(here)
+	# How many tiles fit, plus one so the edge row is drawn rather than clipped
 	# into a gap the eye reads as unexplored.
 	var reach := Vector2i(int(view.size.x / scale * 0.5) + 1,
 		int(view.size.y / scale * 0.5) + 1)
 	var block: float = maxf(scale * float(Sim.EXPLORED_CHUNK), 1.0)
-	var dot: float = maxf(scale, 2.0)
+	var dot: float = maxf(float(Grid.CELL) * k, 2.0)
 	var inside := func(at: Vector2, extent: float) -> bool:
 		return clip <= 0.0 or (at + Vector2(extent, extent) * 0.5).distance_to(centre) \
 			<= clip - extent * 0.5
@@ -827,10 +831,10 @@ func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.
 	var seen := Color(0.78, 0.83, 0.90, seen_alpha)
 	for dy in range(-reach.y, reach.y + 1, Sim.EXPLORED_CHUNK):
 		for dx in range(-reach.x, reach.x + 1, Sim.EXPLORED_CHUNK):
-			var cell: Vector2i = here + Vector2i(dx, dy)
+			var cell: Vector2i = here + Vector2i(dx, dy) * Grid.SCALE
 			if not sim.is_explored(cell):
 				continue
-			var at: Vector2 = centre + Vector2(cell - here) * scale
+			var at: Vector2 = centre + (Grid.origin(cell) - here_px) * k
 			if not inside.call(at, block):
 				continue
 			on.draw_rect(Rect2(at, Vector2(block, block)), seen)
@@ -840,7 +844,7 @@ func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.
 	for cell: Vector2i in sim.ore:
 		if not sim.is_explored(cell):
 			continue
-		var at: Vector2 = centre + Vector2(cell - here) * scale
+		var at: Vector2 = centre + (Grid.origin(cell) - here_px) * k
 		if not inside.call(at, dot):
 			continue
 		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.ITEM_COLORS[int(sim.ore[cell])])
@@ -848,16 +852,21 @@ func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.
 		if not sim.is_explored(cell):
 			continue
 		var machine: Sim.Machine = sim.machines[cell]
-		var at: Vector2 = centre + Vector2(cell - here) * scale
 		if machine.type == Defs.M_CORE:
 			var hearth: float = maxf(scale * 2.0, 5.0)
-			if clip > 0.0 and (at + Vector2(scale, scale) * 0.5).distance_to(centre) > clip - hearth:
+			var fire: Vector2 = centre + (sim.core_centre() - here_px) * k
+			if clip > 0.0 and fire.distance_to(centre) > clip - hearth:
 				continue
-			on.draw_circle(at + Vector2(scale, scale) * 0.5, hearth, Defs.COL_CORE)
+			on.draw_circle(fire, hearth, Defs.COL_CORE)
 			continue
-		if not inside.call(at, dot):
+		# The whole footprint, so a large building is a large mark -- but never
+		# smaller than a dot, or a belt vanishes at the wide end of the zoom.
+		var span: Rect2 = Grid.rect_px(sim.machine_rect(machine))
+		var at: Vector2 = centre + (span.position - here_px) * k
+		var size := Vector2(maxf(span.size.x * k, dot), maxf(span.size.y * k, dot))
+		if not inside.call(at, maxf(size.x, size.y)):
 			continue
-		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.COL_MACHINE_EDGE)
+		on.draw_rect(Rect2(at, size), Defs.COL_MACHINE_EDGE)
 	# The edge of the fire's reach, drawn as the circle it actually is.
 	#
 	# Before this the map showed where she had been and what stood there, and the
@@ -865,8 +874,7 @@ func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.
 	# that seam yet" could only be answered by walking to it. Drawn under Grim
 	# and over the ground, because it is a boundary rather than a thing.
 	if sim.base_placed:
-		var core: Vector2 = centre + Vector2(sim.core_cell - here) * scale \
-			+ Vector2(scale, scale) * 0.5
+		var core: Vector2 = centre + (sim.core_centre() - here_px) * k
 		var radius: float = sim.warm_radius * scale
 		var shade := Color(0.06, 0.07, 0.10, 0.55)
 		var line := Color(Defs.COL_CORE.r, Defs.COL_CORE.g, Defs.COL_CORE.b, 0.85)
@@ -1088,7 +1096,7 @@ func shelter_position() -> Vector2:
 ## Where the player stands when they wake: the doorstep, since the hut itself is
 ## solid and putting them inside it would leave them clipped into a structure.
 func shelter_doorstep() -> Vector2:
-	return shelter_position() + Vector2(0.0, float(Defs.TILE))
+	return shelter_position() + Vector2(0.0, float(Grid.TILE))
 
 func shelter_nearby() -> bool:
 	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
@@ -1314,7 +1322,7 @@ func _process_play(delta: float) -> void:
 	# rather than inside the character, because the character does not know about
 	# the world and this is the one place that has both.
 	sim.mark_explored(sim.cell_of(player.position), Defs.SIGHT_RADIUS)
-	sim.walked += player.velocity.length() * delta / float(Defs.TILE)
+	sim.walked += Grid.tiles(player.velocity.length() * delta)
 	if player.velocity.length() > PlayerActor.SPEED * 1.2:
 		sim.learn("RUN")
 	player.prompt = active_prompt()
@@ -1858,7 +1866,7 @@ func pickaxe_hint_cell() -> Vector2i:
 ## so it is the moment the world gets bigger -- and it has to look like one.
 func _on_base_upgraded(level: int, radius: float) -> void:
 	var at: Vector2 = sim.cell_centre(sim.core_cell)
-	fx.ring(at, Defs.COL_CORE, radius * float(Defs.TILE))
+	fx.ring(at, Defs.COL_CORE, Grid.px(radius))
 	fx.burst(at, Defs.COL_CORE, 18)
 	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % Defs.base_level_shown(level), Defs.COL_CORE, true)
 	shake = maxf(shake, Defs.FX_SMALL)
@@ -1991,8 +1999,7 @@ func _room_bed_cell() -> Vector2i:
 ## Half a tile is the whole of the correction -- the bed is two cells and this
 ## is a quarter of the way down it.
 func room_sleep_point() -> Vector2:
-	return sim.cell_centre(Defs.room_to_world(_room_bed_cell())) \
-		+ Vector2(0.0, float(Defs.TILE) * 0.5)
+	return Defs.room_centre(_room_bed_cell()) + Vector2(0.0, float(Grid.TILE) * 0.5)
 
 func _room_piece_index(id: int) -> int:
 	for index in Defs.ROOM_PIECES.size():
@@ -2059,7 +2066,7 @@ func _facing_kit() -> bool:
 	if not sim.can_search_kit() or sim.hands_full():
 		return false
 	return player.position.distance_to(sim.cell_centre(sim.kit_cell)) \
-		<= float(Defs.TILE) * KIT_REACH
+		<= Grid.px(KIT_REACH)
 
 ## Once lit, it burns. Putting it away used to stop the clock, which made the
 ## torch a thing you turned on and off rather than a thing you set fire to -- and
@@ -2111,7 +2118,7 @@ func _update_torch_light() -> void:
 	# Two layers, one number. The fog opens a hole and the ground lights what is
 	# under it; either without the other is a black disc or a lit patch nobody
 	# can see through.
-	var radius: float = Defs.TORCH_SIGHT * float(Defs.TILE) if holding_torch() else 0.0
+	var radius: float = Grid.px(Defs.TORCH_SIGHT) if holding_torch() else 0.0
 	cold_fog.torch_at = player.global_position
 	cold_fog.torch_radius = radius
 	ground_layer.torch_at = player.global_position
@@ -3090,7 +3097,7 @@ func _update_sign_label(delta: float) -> void:
 	if sim.sign_cell == Vector2i(9999, 9999):
 		sign_reading = false
 	elif player.position.distance_to(sim.cell_centre(sim.sign_cell)) \
-			> float(Defs.TILE) * SIGN_LABEL_REACH:
+			> Grid.px(SIGN_LABEL_REACH):
 		sign_reading = false
 	sign_label = move_toward(sign_label, 1.0 if sign_reading else 0.0,
 		delta / SIGN_LABEL_FADE)
@@ -3630,7 +3637,7 @@ func _update_craft(delta: float) -> void:
 ## onto the snow beside the fire (a kit, a bin). The table says which (`landing`).
 func _land_craft(craft: Dictionary, line: String, reveal: bool = true) -> void:
 	var fire: Vector2 = sim.cell_centre(sim.core_cell)
-	WorldProgress.complete(fx, fire, Defs.COL_CORE, Defs.TILE * 0.46)
+	WorldProgress.complete(fx, fire, Defs.COL_CORE, Grid.px(0.46))
 	audio.call("play", "pop")
 	var key: String = String(craft.get("icon", ""))
 	var icon := func(canvas: CanvasItem, rect: Rect2) -> void:
@@ -3761,7 +3768,7 @@ func _try_build() -> void:
 	var cell: Vector2i = player.facing_cell()
 	var type: int = selected_type()
 	if sim.build(type, cell, build_dir):
-		var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+		var at: Vector2 = sim.machine_centre_at(cell)
 		fx.ring(at, Defs.machine_color(type), Defs.RING_MEDIUM)
 		fx.burst(at, Defs.machine_color(type), 8)
 		shake = maxf(shake, Defs.FX_MEDIUM)
@@ -4174,14 +4181,14 @@ func _try_demolish() -> void:
 		return
 	var cell: Vector2i = player.facing_cell()
 	if sim.demolish(cell):
-		var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+		var at: Vector2 = Grid.centre(cell)
 		fx.burst(at, Defs.COL_TEXT_DIM, 5)
 		audio.call("play", "remove")
 	else:
 		_notify("거둘 설비가 없다.", Defs.COL_TEXT_DIM)
 
 func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
-	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+	var at: Vector2 = sim.machine_centre_at(cell)
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.COL_CORE, Defs.RING_SMALL)
 	shake = maxf(shake, Defs.FX_QUIET)
@@ -4192,7 +4199,7 @@ func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
 ## happens here, and a delivery that still shouted the heat figure would be the
 ## old behaviour with the effect removed.
 func _on_item_delivered(item_type: int, cell: Vector2i) -> void:
-	var at: Vector2 = Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+	var at: Vector2 = Grid.centre(cell)
 	fx.popup(at, Defs.ITEM_SHORT[item_type], Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
 	audio.call("play", "deliver")
@@ -4200,9 +4207,9 @@ func _on_item_delivered(item_type: int, cell: Vector2i) -> void:
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	# One channel only. Showing the same reason both here and in the centre
 	# banner produced two overlapping copies of the same string.
-	fx.popup(Vector2(cell) * float(Defs.TILE) + Vector2(Defs.TILE * 0.5, -8.0), reason,
+	fx.popup(Grid.origin(cell) + Vector2(float(Grid.CELL) * 0.5, -8.0), reason,
 		Color8(255, 154, 143), true)
-	fx.ring(Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5, Defs.COL_DANGER, 14.0)
+	fx.ring(Grid.centre(cell), Defs.COL_DANGER, 14.0)
 	audio.call("play", "deny")
 
 func _on_warmth_changed(radius: float) -> void:
@@ -4210,8 +4217,7 @@ func _on_warmth_changed(radius: float) -> void:
 		return
 	# The panel already carries this number. Printing it in the world drew it
 	# straight across the core at 1.22:1, defacing the one hero object.
-	fx.ring(Vector2(sim.core_cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5,
-		Defs.COL_CORE, radius * float(Defs.TILE) * 0.12)
+	fx.ring(sim.core_centre(), Defs.COL_CORE, Grid.px(radius) * 0.12)
 
 ## The clock as the status panel says it, so a log line and the screen agree.
 func clock_text() -> String:
@@ -4690,7 +4696,7 @@ func open_room(at: Vector2i = Defs.ROOM_ENTRY, facing := Vector2i(0, -1),
 		arriving: bool = true) -> void:
 	close_windows("room")
 	room_open = true
-	player.position = sim.cell_centre(Defs.room_to_world(at))
+	player.position = Defs.room_centre(at)
 	player.velocity = Vector2.ZERO
 	player.facing = facing
 	sim.enter_room(at, arriving)

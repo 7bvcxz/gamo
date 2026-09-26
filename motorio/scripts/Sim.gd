@@ -262,6 +262,8 @@ var wander_rng := RandomNumberGenerator.new()
 ## Bounded rather than unbounded: every route is inside the base and its ring of
 ## seams, and a grid covering the whole procedural world would be mostly cells no
 ## one ever asks about.
+##
+## In tiles, so the grid covers the same ground whatever the cell size is.
 const PATH_RADIUS := 48
 var _grid := AStarGrid2D.new()
 var _grid_dirty := true
@@ -329,6 +331,10 @@ var _cached_radius := -1.0
 ## it cannot resolve a single cell anyway, and a run that walks a few thousand
 ## cells would otherwise keep a few thousand dictionary entries to draw forty
 ## squares from.
+##
+## In tiles, so a chunk covers the same ground it always did -- and the chunk
+## numbers a save carries still name the same squares of the world after the
+## grid went finer.
 const EXPLORED_CHUNK := 2
 
 var explored: Dictionary[Vector2i, bool] = {}
@@ -337,7 +343,8 @@ static func chunk_of(cell: Vector2i) -> Vector2i:
 	# Floor division, not integer division: the world has negative coordinates
 	# and -1 / 2 truncates toward zero, which folds two different chunks either
 	# side of the origin into one.
-	return Vector2i(floori(float(cell.x) / EXPLORED_CHUNK), floori(float(cell.y) / EXPLORED_CHUNK))
+	var span: float = float(EXPLORED_CHUNK * Grid.SCALE)
+	return Vector2i(floori(float(cell.x) / span), floori(float(cell.y) / span))
 
 ## Everything within `radius` cells of here has been seen.
 ##
@@ -345,13 +352,17 @@ static func chunk_of(cell: Vector2i) -> Vector2i:
 ## they can see and sight is not a box. Called every frame with the player's
 ## cell, so it does the least work it can: the loop is over a radius of about
 ## ten, and marking a chunk that is already marked costs a dictionary write.
+##
+## `radius` is in tiles and the walk is a tile at a time: a chunk is two tiles
+## across, so stepping by cells would mark every chunk four times over for
+## nothing.
 func mark_explored(centre: Vector2i, radius: int) -> void:
 	var span: int = radius
 	for dy in range(-span, span + 1):
 		for dx in range(-span, span + 1):
 			if dx * dx + dy * dy > radius * radius:
 				continue
-			explored[chunk_of(centre + Vector2i(dx, dy))] = true
+			explored[chunk_of(centre + Vector2i(dx, dy) * Grid.SCALE)] = true
 
 func is_explored(cell: Vector2i) -> bool:
 	return explored.has(chunk_of(cell))
@@ -997,7 +1008,7 @@ func _tick_frozen_drift(delta: float) -> void:
 			continue
 		var offset: Vector2 = frozen_offset.get(cell, Vector2.ZERO)
 		offset += drift * delta
-		if offset.length() < float(Defs.TILE):
+		if offset.length() < float(Grid.CELL):
 			frozen_offset[cell] = offset
 			continue
 		# Over the line: the block belongs to the next cell now, and what is left
@@ -1008,7 +1019,7 @@ func _tick_frozen_drift(delta: float) -> void:
 		frozen_cats.erase(cell)
 		if thawed.has(cell):
 			thawed[ahead] = true
-		frozen_offset[ahead] = offset - Vector2(step) * float(Defs.TILE)
+		frozen_offset[ahead] = offset - Vector2(step) * float(Grid.CELL)
 
 ## Where a sliding block is allowed to go. Anything solid stops it, and so does
 ## the fire itself -- a block pushed into the core would be a cat fed to it.
@@ -1034,8 +1045,8 @@ func frozen_at(cell: Vector2i) -> Vector2:
 
 ## The middle of the room, in world pixels.
 func room_centre() -> Vector2:
-	return cell_centre(Defs.room_to_world(Vector2i.ZERO)) \
-		+ Vector2(Defs.ROOM_CELLS) * float(Defs.TILE) * 0.5 - Vector2.ONE * float(Defs.TILE) * 0.5
+	return Grid.origin(Defs.room_to_world(Vector2i.ZERO)) \
+		+ Vector2(Defs.ROOM_CELLS) * float(Grid.TILE) * 0.5
 
 ## Everyone goes in. The cats keep whatever they were doing in their heads --
 ## `assigned` survives the night, which is the thing the player set -- but they
@@ -1057,14 +1068,14 @@ func enter_room(at: Vector2i, arriving: bool = true) -> void:
 	# which reads as a room that was always full -- and the cats had been out on
 	# the plateau a second earlier. Each waits a beat longer than the last and
 	# then walks in from the doorway.
-	var door: Vector2i = Defs.room_to_world(Defs.room_door_cell())
+	var door: Vector2 = Defs.room_centre(Defs.room_door_cell())
 	for index in cats.size():
 		var cat: Cat = cats[index]
 		cat.state = Defs.CAT_IDLE
 		cat.path.clear()
 		cat.wander_timer = wander_rng.randf_range(0.1, 0.6)
 		cat.entering = Defs.ROOM_ENTER_GAP * float(index)
-		cat.pos = cell_centre(door)
+		cat.pos = door
 
 ## Morning, from inside. Everyone is where they slept -- spread across the floor
 ## rather than stacked on the mat -- and each gets up on its own second, between
@@ -1078,7 +1089,7 @@ func _settle_sleepers() -> void:
 		cat.waking = wander_rng.randf_range(Defs.ROOM_WAKE_MIN, Defs.ROOM_WAKE_MAX)
 		cat.wander_timer = wander_rng.randf_range(0.1, 0.8)
 		var spot: Vector2i = Defs.ROOM_CAT_SPOTS[index % Defs.ROOM_CAT_SPOTS.size()]
-		cat.pos = cell_centre(Defs.room_to_world(spot))
+		cat.pos = Defs.room_centre(spot)
 
 ## And out. Whatever they were assigned to is where they head.
 func leave_room(at: Vector2) -> void:
@@ -1334,8 +1345,21 @@ func is_structure(cell: Vector2i) -> bool:
 func blocks_player(cell: Vector2i) -> bool:
 	return is_structure(cell)
 
+## How far a cell is from the fire, in tiles -- the unit every ring, band and
+## radius is written in.
 func _ring_distance(cell: Vector2i) -> float:
-	return Vector2(cell - core_cell).length()
+	return tiles_from_core(cell)
+
+func tiles_from_core(cell: Vector2i) -> float:
+	return Grid.tiles(Grid.centre(cell).distance_to(core_centre()))
+
+func tiles_from_core_at(point: Vector2) -> float:
+	return Grid.tiles(point.distance_to(core_centre()))
+
+## Where the fire is, in world pixels. The middle of the base, which every ring
+## in the world is measured from and every warm circle is drawn around.
+func core_centre() -> Vector2:
+	return Grid.centre(core_cell)
 
 ## Whether a lit torch is in her hand this frame. Set by Main, which is the only
 ## thing that knows what she is holding.
@@ -1501,7 +1525,7 @@ func begin_crash() -> void:
 func place_base(cell: Vector2i) -> bool:
 	if base_placed or carried_kit != Defs.KIT_BASE:
 		return false
-	if Vector2(cell - core_cell).length() > Defs.BASE_PLACE_RADIUS:
+	if Grid.tiles(Grid.centre(cell).distance_to(core_centre())) > Defs.BASE_PLACE_RADIUS:
 		return false
 	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
 		return false
@@ -1526,14 +1550,14 @@ func place_base(cell: Vector2i) -> bool:
 ## red while she is carrying it, and both read the same function: a rule drawn
 ## from one place and enforced from another is a rule that drifts.
 func shelter_too_close(cell: Vector2i) -> bool:
-	return Vector2(cell - core_cell).length() <= Defs.SHELTER_CLEARANCE
+	return tiles_from_core(cell) <= Defs.SHELTER_CLEARANCE
 
 func place_shelter(cell: Vector2i) -> bool:
 	if shelter_placed or carried_kit != Defs.KIT_SHELTER:
 		return false
 	if not base_placed:
 		return false
-	if shelter_too_close(cell) or Vector2(cell - core_cell).length() > warm_radius:
+	if shelter_too_close(cell) or tiles_from_core(cell) > warm_radius:
 		return false
 	if ore.has(cell) or machines.has(cell) or cell == kit_cell:
 		return false
@@ -2054,7 +2078,7 @@ func _next_phase() -> float:
 ## the second one can deliver ten at once, and ten cats on one pixel is not a
 ## reward, it is a rendering bug the player will report.
 func _spawn_cats(grades: Array[int]) -> void:
-	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Grid.TILE))
 	for index in grades.size():
 		var cat := Cat.new()
 		cat.phase = _next_phase()
@@ -2108,7 +2132,7 @@ func carry_at(origin: Vector2, heading: Vector2) -> void:
 	if carried_cat == null:
 		return
 	var direction: Vector2 = heading if not heading.is_zero_approx() else Vector2.DOWN
-	carried_cat.pos = origin + direction.normalized() * float(Defs.TILE) * Defs.CARRY_AHEAD
+	carried_cat.pos = origin + direction.normalized() * Grid.px(Defs.CARRY_AHEAD)
 	carried_cat.heading = direction
 
 ## Putting a cat down on a post -- a miner, or a bare seam -- assigns it there
@@ -2155,7 +2179,7 @@ func idle_miner_cells() -> Array[Vector2i]:
 ## Cats without an assignment simply wait at the shelter to be carried somewhere:
 ## the game never picks a job for them.
 func dispatch_cats() -> void:
-	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0, float(Defs.TILE) * 0.85)
+	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0, Grid.px(0.85))
 	var index := 0
 	for cat: Cat in cats:
 		if cat == carried_cat:
@@ -2182,6 +2206,20 @@ func dispatch_cats() -> void:
 
 func machine_at(cell: Vector2i) -> Machine:
 	return machines.get(cell, null)
+
+## The cells a standing machine covers.
+func machine_rect(machine: Machine) -> Rect2i:
+	return Defs.machine_footprint(machine.type, machine.cell, machine.dir)
+
+## The middle of a machine's footprint, in world pixels -- where its picture is
+## centred and where anything that happens to it is drawn.
+func machine_centre(machine: Machine) -> Vector2:
+	return Grid.rect_centre(machine_rect(machine))
+
+## The middle of whatever machine covers this cell, or of the cell itself.
+func machine_centre_at(cell: Vector2i) -> Vector2:
+	var machine: Machine = machine_at(cell)
+	return machine_centre(machine) if machine != null else Grid.centre(cell)
 
 ## Which way a belt under this cell drags whatever is standing on it, in pixels
 ## per second. Zero everywhere else.
@@ -2597,7 +2635,7 @@ func _recount_power() -> void:
 	power_draw = draw
 
 func cell_centre(cell: Vector2i) -> Vector2:
-	return Vector2(cell) * float(Defs.TILE) + Vector2.ONE * Defs.TILE * 0.5
+	return Grid.centre(cell)
 
 ## Where a cat stands to work this cell.
 ##
@@ -2901,22 +2939,20 @@ func _refresh_grid() -> void:
 	# means no route, which means the straight line, which means cats walking
 	# through the sofa. Same pathing, moved.
 	if indoors:
-		_grid.region = Rect2i(Defs.ROOM_ORIGIN - Vector2i.ONE,
-			Defs.ROOM_CELLS + Vector2i.ONE * 2)
+		_grid.region = Defs.room_rect_cells(1)
 	else:
-		_grid.region = Rect2i(core_cell - Vector2i.ONE * PATH_RADIUS,
-			Vector2i.ONE * (PATH_RADIUS * 2 + 1))
-	_grid.cell_size = Vector2.ONE * float(Defs.TILE)
+		var reach: int = PATH_RADIUS * Grid.SCALE
+		_grid.region = Rect2i(core_cell - Vector2i.ONE * reach,
+			Vector2i.ONE * (reach * 2 + 1))
+	_grid.cell_size = Vector2.ONE * float(Grid.CELL)
 	_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES
 	_grid.update()
 	if indoors:
 		# The furniture and the four walls, from the same table the drawing and
 		# the collision read.
-		for y in range(-1, Defs.ROOM_CELLS.y + 1):
-			for x in range(-1, Defs.ROOM_CELLS.x + 1):
-				var cell: Vector2i = Defs.room_to_world(Vector2i(x, y))
-				if blocks_player(cell) and _grid.is_in_boundsv(cell):
-					_grid.set_point_solid(cell, true)
+		for cell: Vector2i in Grid.cells_in(Defs.room_rect_cells(1)):
+			if blocks_player(cell) and _grid.is_in_boundsv(cell):
+				_grid.set_point_solid(cell, true)
 		return
 	for cell: Vector2i in machines:
 		if blocks_player(cell) and _grid.is_in_boundsv(cell):
@@ -2933,7 +2969,7 @@ func _refresh_grid() -> void:
 ## Which cell a point is in. One definition, because the player and the cats have
 ## to agree about what "this tile" means.
 func cell_of(at: Vector2) -> Vector2i:
-	return Vector2i((at / float(Defs.TILE)).floor())
+	return Grid.cell_at(at)
 
 ## The one place a walking cat is moved.
 ##
@@ -3059,7 +3095,7 @@ func _stroll_goal(cat: Cat) -> Vector2:
 	# Indoors the room is the leash. Same wander, same leash length, different
 	# middle -- a cat strolling from a hut six hundred cells away would spend the
 	# night walking north.
-	var anchor: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	var anchor: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Grid.TILE))
 	if indoors:
 		anchor = room_centre()
 	var homeward: bool = cat.pos.distance_to(anchor) > Defs.WANDER_LEASH
@@ -3072,7 +3108,7 @@ func _stroll_goal(cat: Cat) -> Vector2:
 				wander_rng.randf_range(-0.7, 0.7))
 		else:
 			heading = Vector2.RIGHT.rotated(wander_rng.randf() * TAU)
-		var reach: float = wander_rng.randf_range(1.0, 2.5) * float(Defs.TILE)
+		var reach: float = Grid.px(wander_rng.randf_range(1.0, 2.5))
 		var candidate: Vector2 = cat.pos + heading * reach
 		if not blocks_player(cell_of(candidate)):
 			return candidate

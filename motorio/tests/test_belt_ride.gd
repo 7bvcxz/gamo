@@ -47,8 +47,8 @@ func _test_drift_query() -> void:
 	_assert(is_equal_approx(drift.length(), Defs.belt_carry_speed()),
 		"속도는 벨트 속도에서 나온다: %.1fpx/s" % drift.length())
 	# Fast enough to notice standing still, and not so fast it replaces walking.
-	_assert(drift.length() > float(Defs.TILE) * 0.6,
-		"가만히 서 있어도 알아챌 만큼: 초당 %.2f칸" % (drift.length() / float(Defs.TILE)))
+	_assert(drift.length() > Grid.px(0.6),
+		"가만히 서 있어도 알아챌 만큼: 초당 %.2f칸" % Grid.tiles(drift.length()))
 	_assert(drift.length() < PlayerActor.SPEED,
 		"걷는 것보다는 느리다: %.0f vs %.0f" % [drift.length(), PlayerActor.SPEED])
 	# The core is a machine and not a belt.

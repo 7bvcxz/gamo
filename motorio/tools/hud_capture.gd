@@ -158,7 +158,7 @@ func _stage(name: String, phone: bool) -> void:
 		"night":
 			main.time_left = Defs.NIGHT_SECONDS * 0.5
 		"cold":
-			main.player.position += Vector2(Defs.TILE * 30.0, 0.0)
+			main.player.position += Vector2(Grid.px(30.0), 0.0)
 			main.player.warmth = 18.0
 		"carry":
 			main.debug_rescue()

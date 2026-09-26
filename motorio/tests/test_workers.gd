@@ -79,7 +79,7 @@ func _run() -> void:
 	idle.cats.clear()
 	idle.ground.clear()
 	var loafer = idle.Cat.new()
-	var anchor: Vector2 = idle.cell_centre(idle.shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	var anchor: Vector2 = idle.cell_centre(idle.shelter_cell) + Vector2(0.0, float(Grid.TILE))
 	loafer.pos = anchor
 	idle.cats.append(loafer)
 	var moved: float = 0.0
@@ -278,11 +278,11 @@ func _test_new_cats_stand_apart() -> void:
 	# different directions.
 	sim.grant_cats(2)
 	_assert(sim.cats.size() == 2, "the cats exist")
-	var door: Vector2 = sim.cell_centre(sim.shelter_cell) + Vector2(0.0, float(Defs.TILE))
+	var door: Vector2 = sim.cell_centre(sim.shelter_cell) + Vector2(0.0, float(Grid.TILE))
 	for cat: Sim.Cat in sim.cats:
 		_assert(is_equal_approx(cat.pos.y, door.y), "a new cat starts on the shelter doorstep")
-		_assert(absf(cat.pos.x - door.x) <= float(Defs.TILE), "and within a tile of the door")
-		_assert(not sim.blocks_player(Vector2i((cat.pos / float(Defs.TILE)).floor())),
+		_assert(absf(cat.pos.x - door.x) <= float(Grid.TILE), "and within a tile of the door")
+		_assert(not sim.blocks_player(Grid.cell_at(cat.pos)),
 			"and not standing inside the building")
 	_assert(sim.cats[0].pos.distance_to(sim.cats[1].pos) > 4.0,
 		"two cats arriving together do not land on the same spot")
@@ -305,7 +305,7 @@ func _test_morning_dispatch() -> void:
 		_assert(not cat.has_job(), "the game never picks a job for a cat")
 
 	# Carrying: picking up and placing on a miner assigns it for good.
-	var cat_cell: Vector2i = Vector2i((sim.cats[0].pos / float(Defs.TILE)).floor())
+	var cat_cell: Vector2i = Grid.cell_at(sim.cats[0].pos)
 	_assert(sim.pick_up_cat(cat_cell), "a cat standing nearby can be picked up")
 	_assert(sim.carried_cat != null, "the cat is now carried")
 	# Both cats start on the same tile, so hold the reference that was actually
@@ -320,7 +320,7 @@ func _test_morning_dispatch() -> void:
 
 	# One machine, one cat.
 	var second: Sim.Cat = sim.cats[0] if sim.cats[0] != first else sim.cats[1]
-	var second_cell: Vector2i = Vector2i((second.pos / float(Defs.TILE)).floor())
+	var second_cell: Vector2i = Grid.cell_at(second.pos)
 	sim.pick_up_cat(second_cell)
 	_assert(not sim.place_cat(Vector2i(-1, 0)), "a taken machine refuses a second cat")
 	_assert(sim.place_cat(Vector2i(0, -1)), "the free machine accepts it")
@@ -337,7 +337,7 @@ func _test_morning_dispatch() -> void:
 	sim.dispatch_cats()
 	var doorstep: Vector2 = sim.cell_centre(sim.shelter_cell)
 	for cat: Sim.Cat in sim.cats:
-		_assert(cat.pos.distance_to(doorstep) < float(Defs.TILE) * 2.5,
+		_assert(cat.pos.distance_to(doorstep) < Grid.px(2.5),
 			"every cat comes out of the shelter at first light")
 	var spots: Array[float] = []
 	for cat: Sim.Cat in sim.cats:
