@@ -8,8 +8,11 @@ extends SceneTree
 ##
 ##   godot --headless --path motorio --script res://tools/golden_path_run.gd -- 4207
 ##
-## The one seam of unrealism: walking is a straight line with a wall-slide, so
-## the wall-clock cost of a run is minutes rather than a person's half hour.
+## The one seam of unrealism: walking is planned by the agent harness's own
+## planner (tools/agent/nav.gd) and driven through the pad, so the wall-clock cost
+## of a run is minutes rather than a person's half hour. It was a straight line
+## with a wall-slide; since Grid v2 the base is eight cells across and the hut six
+## by eight, and a straight line into either stops the run for good.
 
 const MainScene := preload("res://scenes/Main.tscn")
 const Nav := preload("res://tools/agent/nav.gd")
@@ -405,6 +408,12 @@ func _rescue(cell: Vector2i) -> bool:
 			+ Vector2(side) * float(Grid.TILE)
 		_walk_to(stand, 18.0)
 		main.player.facing = -side
+		# Look before pressing: the ice goes where the ghost is, and it has to be
+		# ground the fire reaches. Facing the base itself, Z opens its window.
+		var spot: Vector2i = Grid.ahead(main.player.position, main.player.facing, Defs.PROP_SIZE).position
+		if sim.is_base(main.target_cell()) \
+				or sim.tiles_from_base_at(sim.prop_centre(spot)) > Defs.THAW_RADIUS - 0.5:
+			continue
 		main._primary_action()
 		_run(0.2)
 		if not sim.carried_frozen:
@@ -633,13 +642,40 @@ func _run(seconds: float) -> void:
 		left -= dt
 
 func _walk_to(target: Vector2, limit: float) -> void:
+	# The planned route first -- cells her body fits through, aimed at the point
+	# in each where it actually does -- then the exact point asked for.
+	var nav = Nav.new(sim)
+	var goal: Vector2i = Grid.cell_at(target)
+	if not nav.walkable(goal):
+		var best_d := 1e20
+		for cell: Vector2i in Grid.cells_in(Rect2i(goal - Vector2i(3, 3), Vector2i(7, 7))):
+			var d: float = Grid.centre(cell).distance_squared_to(target)
+			if nav.walkable(cell) and d < best_d:
+				best_d = d
+				goal = cell
+	var points: Array[Vector2] = []
+	for cell: Vector2i in nav.path(main.player.cell(), goal):
+		points.append(nav.safe_point(cell))
+	points.append(target)
+	var spent := 0.0
+	for point: Vector2 in points:
+		var tolerance: float = 12.0 if point == target else 6.0
+		spent += _walk_straight(point, limit - spent, tolerance)
+		if spent >= limit:
+			break
+	main.player.touch_direction = Vector2.ZERO
+	main.player.touch_sprint = false
+
+## One leg in a straight line, sliding along walls and side-stepping when stuck.
+## Returns the seconds it took.
+func _walk_straight(target: Vector2, limit: float, tolerance: float) -> float:
 	var spent := 0.0
 	var was: Vector2 = main.player.position
 	var stuck := 0.0
 	var detour := Vector2.ZERO
 	var detour_left := 0.0
 	var side := 1.0
-	while spent < limit and main.player.position.distance_to(target) > 12.0:
+	while spent < limit and main.player.position.distance_to(target) > tolerance:
 		var want: Vector2 = (target - main.player.position).normalized()
 		if detour_left > 0.0:
 			want = detour
@@ -660,8 +696,7 @@ func _walk_to(target: Vector2, limit: float) -> void:
 		else:
 			stuck = 0.0
 		was = main.player.position
-	main.player.touch_direction = Vector2.ZERO
-	main.player.touch_sprint = false
+	return spent
 
 func _mmss(seconds: float) -> String:
 	return "%d:%02d" % [int(seconds) / 60, int(seconds) % 60]

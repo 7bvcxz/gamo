@@ -26,6 +26,9 @@ godot --headless --path . --script res://tests/test_touch.gd
 > 시작·기지·임무·고양이·총·횃불·키 안내·해질녘·밤·동결·안기·Q 창·지도·기지 창과 UI 배율 넷을 세 화면 크기(1280×720, 1920×1080, 폰 390×844)로 찍는다.
 > `--sequence craft` 는 기지 작업대의 첫 방문(숙소 키트)부터 제작 링, 키트가 눈 위에 놓이는 것, 곡괭이 줄, 곡괭이가 튀어나와 날아와 흡수되고 1번 칸이 반짝이는 순간, 3단계의 횃불 줄까지 실제 시계로 열 장을 찍는다. 헤드리스 더미 렌더러는 그림을 못 만드므로 디스플레이(Xvfb면 된다)가 필요하다. 출력은 `motorio/test-results/`(gitignore)에 둔다.
 
+> **Grid v2 화면 캡처**: `DISPLAY=:99 godot --path motorio --audio-driver Dummy --script res://tools/grid_capture.gd -- --out <절대경로>`
+> 추락 지점·기지와 숙소·한 칸 광맥·채굴기 고스트(빈 땅/광맥 위)·나란히 선 채굴기와 고양이·통로의 벨트·걷기·기지를 돌아가는 고양이를 게임이 여는 배율로 1280·1920 두 크기에서 찍는다. 출력은 `motorio/test-results/`에.
+
 ## 자동 테스트 (headless, 94개)
 
 ### 규칙과 진행
