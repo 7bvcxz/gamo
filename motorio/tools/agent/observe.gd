@@ -21,7 +21,7 @@ func _init(sim_ref, mode_v: String) -> void:
 func _knows(cell: Vector2i) -> bool:
 	if mode == "qa":
 		return true
-	return bool(sim.explored.get(cell, false))
+	return sim.is_explored(cell)
 
 func ore_cells(item_type: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
@@ -60,17 +60,19 @@ static func nearest(from: Vector2i, cells: Array[Vector2i]) -> Vector2i:
 
 ## A frontier cell for the exploration goal: just past the warm edge, in a
 ## direction not yet explored. Used by PLAYER mode (and by QA when a needed
-## resource genuinely is not inside the circle yet).
+## resource genuinely is not inside the circle yet). `radius` is in tiles, the
+## unit the warm circle is written in; the answer is a cell.
 func frontier(core: Vector2i, radius: float) -> Vector2i:
 	var best := Vector2i(9999, 9999)
 	var best_score := -1.0
+	var scale := float(Grid.SCALE)
 	for step in 24:
 		var angle: float = TAU * float(step) / 24.0
 		var cell: Vector2i = core + Vector2i(
-			roundi(cos(angle) * (radius - 1.0)), roundi(sin(angle) * (radius - 1.0)))
+			roundi(cos(angle) * (radius - 1.0) * scale), roundi(sin(angle) * (radius - 1.0) * scale))
 		var beyond: Vector2i = core + Vector2i(
-			roundi(cos(angle) * (radius + 2.0)), roundi(sin(angle) * (radius + 2.0)))
-		var unseen: float = 0.0 if bool(sim.explored.get(beyond, false)) else 1.0
+			roundi(cos(angle) * (radius + 2.0) * scale), roundi(sin(angle) * (radius + 2.0) * scale))
+		var unseen: float = 0.0 if sim.is_explored(beyond) else 1.0
 		if unseen > best_score and not sim.blocks_player(cell):
 			best_score = unseen
 			best = cell

@@ -687,14 +687,21 @@ func setup(seed_value: int) -> void:
 ## A single row, not a block: a square patch would put ore directly in front of
 ## the miner's output and the guaranteed opening would dead-end.
 ##
-## In build cells from the core's anchor (Grid v2). Three seams in a row three
-## tiles south of the fire, a mining post's width apart, so each can carry a post
-## of its own; the posts' top row is two cells below the base, which leaves the
-## lane between them for the belt home.
-const STARTER_PATCH: Array[Vector2i] = [Vector2i(-3, 7), Vector2i(1, 7), Vector2i(5, 7)]
-## That lane: the cell above each starter seam's post, where a belt facing north
-## hands straight into the base.
-const STARTER_LANE: Array[Vector2i] = [Vector2i(-3, 5), Vector2i(1, 5), Vector2i(5, 5)]
+## In build cells from the core's anchor (Grid v2). Three seams in a row under
+## four tiles south of the fire, a mining post's width apart, so each can carry a
+## post of its own. The posts' top row is three cells below the base, which
+## leaves a lane two cells -- a tile -- tall between them.
+##
+## A tile, because she has to walk it. It was two tiles when the base was one;
+## at one cell (the first Grid v2 layout) the lane was sixteen pixels against a
+## body of eighteen, so she could neither walk between the fire and its first
+## posts nor reach the middle of the lane to lay the belt home.
+const STARTER_PATCH: Array[Vector2i] = [Vector2i(-3, 8), Vector2i(1, 8), Vector2i(5, 8)]
+## That lane: the two cells above each starter seam's post. A post facing north
+## pours into the lower one; the two under the base hand straight in, the third
+## turns one cell west first.
+const STARTER_LANE: Array[Vector2i] = [Vector2i(-3, 5), Vector2i(-3, 6), Vector2i(1, 5),
+	Vector2i(1, 6), Vector2i(5, 5), Vector2i(5, 6)]
 ## A guaranteed ember seam due north, just outside the opening warm radius, with
 ## a clear column back to the core. Without it the alloy recipe -- the design's
 ## payoff -- depends on where the scatter happened to drop ember, which made the

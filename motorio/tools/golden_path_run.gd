@@ -12,6 +12,7 @@ extends SceneTree
 ## the wall-clock cost of a run is minutes rather than a person's half hour.
 
 const MainScene := preload("res://scenes/Main.tscn")
+const Nav := preload("res://tools/agent/nav.gd")
 const STEP := 1.0 / 30.0
 const CAP_MINUTES := 32.0
 
@@ -42,7 +43,8 @@ func _boot() -> void:
 	main.run_seed = seedv
 	main.sim.setup(seedv)
 	main.sim.begin_crash()
-	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(0, 1))
+	# Where the game itself lands her (Main._start_run).
+	main.player.position = main.sim.core_centre()
 	main.player.warmth = Defs.CRASH_WARMTH
 	main.state = main.State.PLAY
 	sim = main.sim
@@ -71,7 +73,7 @@ func _has(id: String) -> bool:
 func _play() -> void:
 	_mark("opening_end")
 	# 1. The case. The card points at it; hold Z beside it.
-	_walk_to(sim.cell_centre(sim.kit_cell + Vector2i(0, 1)), 30.0)
+	_walk_to(_beside(sim.kit_cell, Vector2i(0, 1)), 30.0)
 	main.player.facing = Vector2i(0, -1)
 	var held := 0.0
 	while not sim.base_placed and held < 8.0:
@@ -128,7 +130,7 @@ func _play() -> void:
 	if edge != Vector2i(9999, 9999) and not sim.can_lift(edge):
 		if _craft("torch") and _light_torch():
 			_mark("torch_used")
-			_walk_to(sim.cell_centre(edge) + Vector2(0, 30), 60.0)
+			_walk_to(_beside(edge, Vector2i(0, 1)), 60.0)
 			main.player.facing = Vector2i(0, -1)
 			var spent := 0.0
 			while not sim.can_lift(edge) and spent < 10.0:
@@ -172,7 +174,7 @@ func _play() -> void:
 		if sim.torches <= 0:
 			stalls.append("횃불을 만들 열석이 안 모인다 seed=%d" % seedv)
 		if _light_torch():
-			_walk_to(sim.cell_centre(wreck) + Vector2(0, 30), 120.0)
+			_walk_to(_beside(wreck, Vector2i(0, 1)), 120.0)
 			main.player.facing = Vector2i(0, -1)
 			var dug := 0.0
 			while sim.debris.has(wreck) and dug < 12.0:
@@ -286,7 +288,7 @@ func _refuel_generator() -> bool:
 			return false
 		if int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) <= 2:
 			return false
-		_walk_to(sim.cell_centre(cell + Vector2i(-1, 0)), 40.0)
+		_walk_to(_beside(cell, Vector2i(-1, 0)), 40.0)
 		var fed := false
 		while int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)) < 4 \
 				and int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) > 2:
@@ -299,8 +301,8 @@ func _refuel_generator() -> bool:
 
 func _craft(id: String) -> bool:
 	# Through the window: walk to the fire, open, pick the row by what it says.
-	_walk_to(sim.cell_centre(sim.core_cell + Vector2i(-1, 0)), 40.0)
-	main.player.facing = Vector2i(1, 0)
+	_walk_to(_beside(sim.core_cell, Vector2i(1, 0)), 40.0)
+	main.player.facing = Vector2i(-1, 0)
 	main._open_base_menu()
 	var rows: Array[Dictionary] = main.base_rows()
 	var found := -1
@@ -326,8 +328,8 @@ func _craft_row(id: String) -> int:
 func _feed_fire() -> bool:
 	if not sim.can_feed_base():
 		return false
-	_walk_to(sim.cell_centre(sim.core_cell + Vector2i(-1, 0)), 40.0)
-	main.player.facing = Vector2i(1, 0)
+	_walk_to(_beside(sim.core_cell, Vector2i(1, 0)), 40.0)
+	main.player.facing = Vector2i(-1, 0)
 	main._open_base_menu()
 	main.menu_index = 0
 	main._base_menu_confirm()
@@ -337,13 +339,18 @@ func _feed_fire() -> bool:
 func _place_shelter() -> void:
 	if sim.carried_kit != Defs.KIT_SHELTER:
 		return
+	# Round the base, facing away from it, putting it down the first time the
+	# ghost under her arms is clear -- what a player looking at it does.
 	for radius in range(int(Defs.SHELTER_CLEARANCE) + 1, 8):
 		for stepi in 12:
 			var angle: float = TAU * float(stepi) / 12.0
-			var spot: Vector2i = sim.core_cell + Vector2i(
-				roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
-			_walk_to(sim.cell_centre(spot + Vector2i(-1, 0)), 20.0)
-			main.player.facing = Vector2i(1, 0)
+			var heading := Vector2.from_angle(angle)
+			var stand: Vector2 = sim.core_centre() + heading * Grid.px(float(radius))
+			_walk_to(stand, 20.0)
+			main.player.facing = Vector2i(roundi(heading.x), 0) if absf(heading.x) >= absf(heading.y) \
+				else Vector2i(0, roundi(heading.y))
+			if not sim.shelter_problems(main.kit_anchor(), main.body_cells()).is_empty():
+				continue
 			main._primary_action()
 			_run(0.2)
 			if sim.shelter_placed:
@@ -383,19 +390,21 @@ func _rescue(cell: Vector2i) -> bool:
 		return false
 	if not sim.can_lift(cell):
 		return false
-	_walk_to(sim.cell_centre(cell) + Vector2(0, 26), 30.0)
+	_walk_to(_beside(cell, Vector2i(0, 1)), 30.0)
 	main.player.facing = Vector2i(0, -1)
 	main._primary_action()
 	_run(0.2)
 	if not sim.carried_frozen:
 		stalls.append("얼음까지 길이 막혔다 %s seed=%d" % [str(cell), seedv])
 		return false
-	for offset: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0),
-			Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1),
-			Vector2i(-1, -1)]:
-		var spot: Vector2i = sim.core_cell + offset
-		_walk_to(sim.cell_centre(spot - offset), 18.0)
-		main.player.facing = offset
+	# Against the base's wall, where the fire thaws it: stand a tile and a bit
+	# out from each side in turn and set it down between her and the wall.
+	var base: Rect2i = sim.base_rect()
+	for side: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+		var stand: Vector2 = _beside_rect(base, side, sim.core_cell) \
+			+ Vector2(side) * float(Grid.TILE)
+		_walk_to(stand, 18.0)
+		main.player.facing = -side
 		main._primary_action()
 		_run(0.2)
 		if not sim.carried_frozen:
@@ -433,7 +442,7 @@ func _move_cat_onto(machine_cell: Vector2i) -> void:
 		return
 	_walk_to(cat.pos, 60.0)
 	if sim.pick_up_cat(sim.cell_of(cat.pos)):
-		_walk_to(sim.cell_centre(machine_cell + Vector2i(0, 1)), 90.0)
+		_walk_to(_beside(machine_cell, Vector2i(0, 1)), 90.0)
 		main.player.facing = Vector2i(0, -1)
 		if not sim.place_cat(machine_cell):
 			sim.drop_cat(main.player.position)
@@ -458,32 +467,36 @@ func _build(type: int, cell: Vector2i, dir: Vector2i) -> bool:
 			main.selected_index = index
 	if not listed:
 		return false
-	if sim.can_build(type, cell) != "":
+	if sim.can_build(type, cell, dir) != "":
 		return false
-	_walk_to(sim.cell_centre(cell + Vector2i(0, 1)), 90.0)
+	# Below the whole footprint, so the building does not go up around her.
+	_walk_to(_beside_rect(Defs.machine_footprint(type, cell, dir), Vector2i(0, 1), cell), 90.0)
 	main.player.facing = Vector2i(0, -1)
-	return sim.build(type, cell, dir)
+	return sim.build(type, cell, dir, main.body_cells())
 
 func _belt_home(from: Vector2i) -> bool:
-	var at: Vector2i = from
-	var guard := 0
-	var laid := 0
-	sim.machines[from].dir = Vector2i(signi(sim.core_cell.x - from.x), 0) \
+	var base: Rect2i = sim.base_rect()
+	var rig = sim.machines[from]
+	rig.dir = Vector2i(signi(sim.core_cell.x - from.x), 0) \
 		if absi(sim.core_cell.x - from.x) >= absi(sim.core_cell.y - from.y) \
 		else Vector2i(0, signi(sim.core_cell.y - from.y))
-	while at != sim.core_cell and guard < 40:
+	# From the post's mouth to the base's wall, one belt per cell; the last one
+	# faces into the wall.
+	var at: Vector2i = sim.output_cell(rig)
+	var guard := 0
+	var laid := 0
+	while not base.has_point(at) and guard < 40 * Grid.SCALE:
 		guard += 1
-		var delta: Vector2i = sim.core_cell - at
+		var near := Vector2i(clampi(at.x, base.position.x, base.end.x - 1),
+			clampi(at.y, base.position.y, base.end.y - 1))
+		var delta: Vector2i = near - at
 		var stepv := Vector2i(signi(delta.x), 0) if absi(delta.x) >= absi(delta.y) \
 			else Vector2i(0, signi(delta.y))
-		var next: Vector2i = at + stepv
-		if next == sim.core_cell:
-			break
-		if not sim.machines.has(next):
-			if not _build(Defs.M_BELT, next, stepv):
+		if sim.machine_at(at) == null:
+			if not _build(Defs.M_BELT, at, stepv):
 				return laid > 0
 			laid += 1
-		at = next
+		at += stepv
 	return laid > 0
 
 func _sweep_ground() -> void:
@@ -510,7 +523,7 @@ func _collect_drops() -> void:
 func _nth_ore(item_type: int, skip: int) -> Vector2i:
 	var cells: Array[Vector2i] = []
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) != item_type or sim.machines.has(cell):
+		if int(sim.ore[cell]) != item_type or sim.machine_at(cell) != null:
 			continue
 		if not sim.can_touch(cell):
 			continue
@@ -526,9 +539,12 @@ func _bare_seam(item_type: int) -> Vector2i:
 	var best := Vector2i(9999, 9999)
 	var dist := 1e9
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) != item_type or sim.machines.has(cell):
+		if int(sim.ore[cell]) != item_type or sim.machine_at(cell) != null:
 			continue
 		if not sim.can_touch(cell):
+			continue
+		# A post goes on it later, four cells by four round it.
+		if not sim.footprint_problems(Defs.M_MINER, cell).is_empty():
 			continue
 		var taken := false
 		for cat in sim.cats:
@@ -567,10 +583,11 @@ func _free_pad() -> Vector2i:
 		for stepi in 16:
 			var angle: float = TAU * float(stepi) / 16.0
 			var cell: Vector2i = sim.core_cell + Vector2i(
-				roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
+				roundi(cos(angle) * float(radius * Grid.SCALE)),
+				roundi(sin(angle) * float(radius * Grid.SCALE)))
 			if sim.can_build(Defs.M_GENERATOR, cell) == "":
 				return cell
-	return sim.core_cell + Vector2i(3, 3)
+	return sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 
 func _idle_cat():
 	for cat in sim.cats:
@@ -584,6 +601,25 @@ func _my_rig() -> Vector2i:
 		if sim.machines[cell].type == Defs.M_MINER:
 			return cell
 	return Vector2i(9999, 9999)
+
+## A point just outside whatever stands on `cell`, on `side` of it, in line with
+## `cell`: where she stands to face it. Outside its footprint, not beside the
+## cell -- a base is eight cells across and the cell below its anchor is more
+## base (Grid v2).
+func _beside(cell: Vector2i, side: Vector2i) -> Vector2:
+	return _beside_rect(Nav.new(sim).footprint(cell), side, cell)
+
+func _beside_rect(rect: Rect2i, side: Vector2i, lane: Vector2i) -> Vector2:
+	var span: Rect2 = Grid.rect_px(rect)
+	var along: Vector2 = Grid.centre(lane)
+	var gap: float = Defs.PLAYER_RADIUS + 3.0
+	if side == Vector2i(0, 1):
+		return Vector2(along.x, span.end.y + gap)
+	if side == Vector2i(0, -1):
+		return Vector2(along.x, span.position.y - gap)
+	if side == Vector2i(1, 0):
+		return Vector2(span.end.x + gap, along.y)
+	return Vector2(span.position.x - gap, along.y)
 
 # --- Clockwork -----------------------------------------------------------------
 

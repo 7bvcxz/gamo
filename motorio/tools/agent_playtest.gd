@@ -45,7 +45,8 @@ func _boot() -> void:
 	main.run_seed = seed_value
 	main.sim.setup(seed_value)
 	main.sim.begin_crash()
-	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(0, 1))
+	# Where the game itself lands her (Main._start_run).
+	main.player.position = main.sim.core_centre()
 	main.player.warmth = Defs.CRASH_WARMTH
 	main.player.velocity = Vector2.ZERO
 	main.state = main.State.PLAY

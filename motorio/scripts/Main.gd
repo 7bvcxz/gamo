@@ -1330,6 +1330,10 @@ const SAVE_PATH := "user://motorio_save.cfg"
 # overwritten: it is copied aside first (`backup_old_save`) and migrated
 # (`SaveMigration`).
 const SAVE_SCHEMA := 12
+const SaveMigration := preload("res://scripts/SaveMigration.gd")
+## What the last load of an older save did to it, for the one line the player is
+## told and for the tests that check it. Empty when nothing was migrated.
+var migration_report: Dictionary = {}
 
 ## Where a save written under another schema is kept before anything can write
 ## over it. One per slot and schema, never overwritten once made.
@@ -4562,14 +4566,24 @@ func slot_cards() -> Array[Dictionary]:
 		# heat stopped being a currency and the stones themselves became the count.
 		var card := {"slot": slot, "exists": false, "day": 0, "stones": 0,
 			"saved_at": 0.0, "machines": []}
-		if config.load(slot_path(slot)) == OK \
-				and int(config.get_value("motorio", "schema", -1)) == SAVE_SCHEMA:
+		var schema: int = int(config.get_value("motorio", "schema", -1)) \
+			if config.load(slot_path(slot)) == OK else -1
+		# A run from before Grid v2 is still a run: it is listed, and loading it
+		# migrates it. Its little map is in tiles, so it is drawn at the scale of
+		# cells like every other card.
+		if schema == SAVE_SCHEMA or schema == SaveMigration.FROM:
 			var stored: Dictionary = config.get_value("motorio", "card", {})
 			card["exists"] = true
 			card["day"] = int(stored.get("day", 0))
 			card["stones"] = int(stored.get("stones", 0))
 			card["saved_at"] = float(stored.get("saved_at", 0.0))
-			card["machines"] = stored.get("machines", [])
+			var shape: Array = stored.get("machines", [])
+			if schema == SaveMigration.FROM:
+				var scaled: Array = []
+				for row: Array in shape:
+					scaled.append([int(row[0]) * Grid.SCALE, int(row[1]) * Grid.SCALE, row[2]])
+				shape = scaled
+			card["machines"] = shape
 		cards.append(card)
 	return cards
 
@@ -4590,15 +4604,28 @@ func load_game(slot: int = 0) -> bool:
 	# A schema change means the shape of the data moved; starting fresh is safer
 	# than half-restoring a run into a game that no longer matches it -- but the
 	# old file is kept, never written over.
-	if int(config.get_value("motorio", "schema", -1)) != SAVE_SCHEMA:
+	#
+	# The one exception is the schema right before Grid v2, which is read through
+	# SaveMigration: the same world, counted on a finer grid. Copied aside first
+	# all the same.
+	var schema: int = int(config.get_value("motorio", "schema", -1))
+	migration_report = {}
+	if schema != SAVE_SCHEMA and schema != SaveMigration.FROM:
 		backup_old_save(slot)
 		return false
 	var data: Dictionary = config.get_value("motorio", "state", {})
 	if data.is_empty():
 		return false
+	var pending: Dictionary = {}
+	if schema == SaveMigration.FROM:
+		backup_old_save(slot)
+		pending = SaveMigration.convert(data)
+		data = pending["state"]
 	run_seed = int(data.get("seed", run_seed))
 	sim.setup(run_seed)
 	sim.from_save(data.get("sim", {}))
+	if not pending.is_empty():
+		migration_report = SaveMigration.settle(sim, pending)
 	_clear_presentations()
 	day_number = int(data.get("day", 1))
 	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
@@ -4625,6 +4652,11 @@ func load_game(slot: int = 0) -> bool:
 	player.locked = false
 	player.collapse = 0.0
 	collapse_timer = -1.0
+	if not migration_report.is_empty():
+		# Out of whatever grew round her, and told what happened -- once.
+		_step_clear()
+		_notify(SaveMigration.describe(migration_report), Defs.COL_CORE, MESSAGE_LIFE * 3.0)
+		print("SAVE MIGRATION v%d -> v%d: %s" % [SaveMigration.FROM, SAVE_SCHEMA, str(migration_report)])
 	return true
 
 func clear_save() -> void:

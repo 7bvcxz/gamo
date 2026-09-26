@@ -252,16 +252,14 @@ func _sweep_warm_ground() -> void:
 
 # --- Verbs built from primitives -------------------------------------------------
 
+## Round the base, looking at the ghost the way a player does: the hut goes
+## down the first time every cell of it is clear.
 func _place_shelter() -> String:
-	for radius in range(int(Defs.SHELTER_CLEARANCE) + 1, 8):
-		for step in 12:
-			var angle: float = TAU * float(step) / 12.0
-			var spot: Vector2i = sim.core_cell + Vector2i(
-				roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
-			if sim.shelter_too_close(spot) or sim.blocks_player(spot):
-				continue
-			if body.put_down(spot) == Body.OK and sim.shelter_placed:
-				return Body.OK
+	var good := func(rect: Rect2i) -> bool:
+		return rect.size == Defs.SHELTER_SIZE \
+			and sim.shelter_problems(main.kit_anchor(), main.body_cells()).is_empty()
+	if body.place_carried(sim.base_rect(), good) == Body.OK and sim.shelter_placed:
+		return Body.OK
 	return Body.FAILED
 
 func _rescue_nearest() -> String:
@@ -271,16 +269,21 @@ func _rescue_nearest() -> String:
 		return Body.INVALID
 	if body.pick_up(cell) != Body.OK or not sim.carried_frozen:
 		return Body.FAILED
-	for offset: Vector2i in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0),
-			Vector2i(0, -1), Vector2i(1, 1), Vector2i(-1, 1)]:
-		var spot: Vector2i = sim.core_cell + offset
-		if sim.blocks_player(spot):
-			continue
-		if body.put_down(spot) == Body.OK and not sim.carried_frozen:
-			var before: int = sim.cats.size()
-			body.run(Defs.THAW_SECONDS + 2.0, "waiting")
-			return Body.OK if sim.cats.size() > before else Body.FAILED
-	return Body.FAILED
+	# Against the base, where the fire thaws it: the first ghost that is clear
+	# ground near enough.
+	var good := func(rect: Rect2i) -> bool:
+		if rect.size != Defs.PROP_SIZE:
+			return false
+		for covered: Vector2i in Grid.cells_in(rect):
+			if sim.frozen_key(covered) != Sim.NONE or sim.is_structure(covered) \
+					or not sim.in_world(covered):
+				return false
+		return sim.tiles_from_base_at(Grid.rect_centre(rect)) <= Defs.THAW_RADIUS - 0.5
+	var before: int = sim.cats.size()
+	if body.place_carried(sim.base_rect(), good, 2) != Body.OK or sim.carried_frozen:
+		return Body.FAILED
+	body.run(Defs.THAW_SECONDS + 2.0, "waiting")
+	return Body.OK if sim.cats.size() > before else Body.FAILED
 
 func _assign_idle_cat() -> String:
 	var cat = _idle_cat()
@@ -334,9 +337,9 @@ func _build_generator() -> String:
 	var rig: Vector2i = _rig_on(Defs.ITEM_HEATSTONE)
 	if rig != Vector2i(9999, 9999):
 		var machine = sim.machine_at(rig)
-		var mouth: Vector2i = rig + machine.dir
-		if sim.can_build(Defs.M_GENERATOR, mouth) == "":
-			var placed: String = body.place_machine(Defs.M_GENERATOR, mouth, Vector2i(1, 0))
+		var pad: Vector2i = _anchor_over(Defs.M_GENERATOR, sim.output_cell(machine))
+		if pad != Vector2i(9999, 9999):
+			var placed: String = body.place_machine(Defs.M_GENERATOR, pad, Vector2i(1, 0))
 			if placed == Body.OK:
 				return Body.OK
 	# No rig yet, or its mouth is taken: stand the generator beside a stone
@@ -346,11 +349,14 @@ func _build_generator() -> String:
 	var best_pad := Vector2i(9999, 9999)
 	var best_d := 1e18
 	for seam: Vector2i in eyes.ore_cells(Defs.ITEM_HEATSTONE):
-		if not sim.can_touch(seam):
+		if not sim.can_touch(seam) or sim.machine_at(seam) != null:
 			continue
 		for dir: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-			var pad: Vector2i = seam + dir
-			if sim.can_build(Defs.M_GENERATOR, pad) != "":
+			# Where a post on this seam facing `dir` would pour, and a generator
+			# over that cell that leaves the post room to stand.
+			var post: Rect2i = Defs.machine_footprint(Defs.M_MINER, seam, dir)
+			var pad: Vector2i = _anchor_over(Defs.M_GENERATOR, Grid.front_cell(post, dir, seam), post)
+			if pad == Vector2i(9999, 9999):
 				continue
 			var d: float = Vector2(pad - sim.core_cell).length_squared()
 			if d < best_d:
@@ -369,10 +375,17 @@ func _fuel_generator() -> String:
 	var generator: Vector2i = _machine_cell(Defs.M_GENERATOR)
 	if generator == Vector2i(9999, 9999):
 		return Body.INVALID
-	# A stone seam adjacent to the generator, rig on it, facing in.
-	for dir: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		var seam: Vector2i = generator + dir
-		if int(sim.ore.get(seam, -1)) != Defs.ITEM_HEATSTONE:
+	# A stone seam whose post, facing the generator, would pour into it.
+	var body_rect: Rect2i = sim.machine_rect(sim.machine_at(generator))
+	for seam: Vector2i in eyes.ore_cells(Defs.ITEM_HEATSTONE):
+		if not body_rect.grow(Defs.machine_size(Defs.M_MINER).x + 1).has_point(seam):
+			continue
+		var dir := Vector2i.ZERO
+		for heading: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var post: Rect2i = Defs.machine_footprint(Defs.M_MINER, seam, heading)
+			if not post.intersects(body_rect) and body_rect.has_point(Grid.front_cell(post, heading, seam)):
+				dir = -heading
+		if dir == Vector2i.ZERO:
 			continue
 		if sim.machines.has(seam):
 			var rig = sim.machine_at(seam)
@@ -426,7 +439,7 @@ func _build_rig() -> String:
 		if int(sim.stock.get(Defs.ITEM_COPPER, 0)) < 1:
 			return _mine_nearest(Defs.ITEM_COPPER)
 		return _mine_nearest(Defs.ITEM_HEATSTONE)
-	var seam: Vector2i = _best_bare_seam(Defs.ITEM_HEATSTONE)
+	var seam: Vector2i = _best_bare_seam(Defs.ITEM_HEATSTONE, true)
 	if seam == Vector2i(9999, 9999):
 		return Body.INVALID
 	var verdict: String = body.place_machine(Defs.M_MINER, seam, _emit_dir(seam))
@@ -440,17 +453,19 @@ func _lay_belt() -> String:
 	if rig == Vector2i(9999, 9999):
 		return Body.INVALID
 	var machine = sim.machine_at(rig)
-	var at: Vector2i = rig + machine.dir
+	var at: Vector2i = sim.output_cell(machine)
+	var base: Rect2i = sim.base_rect()
 	var laid := 0
 	var guard := 0
-	while at != sim.core_cell and guard < 30:
+	# Until the next step is the base's wall: the last belt faces into it.
+	while not base.has_point(at) and guard < 30 * Grid.SCALE:
 		guard += 1
-		var delta: Vector2i = sim.core_cell - at
+		var near := Vector2i(clampi(at.x, base.position.x, base.end.x - 1),
+			clampi(at.y, base.position.y, base.end.y - 1))
+		var delta: Vector2i = near - at
 		var step := Vector2i(signi(delta.x), 0) if absi(delta.x) >= absi(delta.y) \
 			else Vector2i(0, signi(delta.y))
-		if at + step == sim.core_cell:
-			step = step   # the last belt faces the core's mouth
-		if not sim.machines.has(at):
+		if sim.machine_at(at) == null:
 			if not sim.can_afford(Defs.M_BELT):
 				break
 			if body.place_machine(Defs.M_BELT, at, step) != Body.OK:
@@ -476,7 +491,8 @@ func _factory_ladder() -> String:
 			for step in 12:
 				var angle: float = TAU * float(step) / 12.0
 				var cell: Vector2i = sim.core_cell + Vector2i(
-					roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
+					roundi(cos(angle) * float(radius * Grid.SCALE)),
+					roundi(sin(angle) * float(radius * Grid.SCALE)))
 				if sim.can_build(Defs.M_MANUFACTURER, cell) == "":
 					var placed: String = body.place_machine(Defs.M_MANUFACTURER, cell, Vector2i(1, 0))
 					if placed == Body.OK:
@@ -489,6 +505,13 @@ func _explore_frontier() -> String:
 	var edge: Vector2i = eyes.frontier(sim.core_cell, sim.warm_radius)
 	if edge == Vector2i(9999, 9999):
 		return Body.FAILED
+	# Somewhere her body fits, near that point: a cell of open ground can still
+	# be narrower than she is.
+	if not body.nav.walkable(edge):
+		for cell: Vector2i in Grid.cells_in(Rect2i(edge - Vector2i(3, 3), Vector2i(7, 7))):
+			if body.nav.walkable(cell):
+				edge = cell
+				break
 	var verdict: String = body.move_to(edge, 40.0)
 	body.run(1.0, "exploring")
 	return verdict
@@ -534,11 +557,15 @@ func _free_post() -> Vector2i:
 			return cell
 	return _best_bare_seam(Defs.ITEM_HEATSTONE)
 
-func _best_bare_seam(item_type: int) -> Vector2i:
+func _best_bare_seam(item_type: int, for_post: bool = false) -> Vector2i:
 	var best := Vector2i(9999, 9999)
 	var dist := 1e18
 	for cell: Vector2i in eyes.ore_cells(item_type):
-		if sim.machines.has(cell) or not sim.can_touch(cell):
+		if sim.machine_at(cell) != null or not sim.can_touch(cell):
+			continue
+		# A post is four cells by four round the seam: the ground has to take all
+		# of it, not only the seam.
+		if for_post and not sim.footprint_problems(Defs.M_MINER, cell).is_empty():
 			continue
 		var taken := false
 		for cat in sim.cats:
@@ -555,7 +582,7 @@ func _best_bare_seam(item_type: int) -> Vector2i:
 func _nearest_reachable_ore(item_type: int) -> Vector2i:
 	var cells: Array[Vector2i] = []
 	for cell: Vector2i in eyes.ore_cells(item_type):
-		if sim.can_touch(cell) and not sim.machines.has(cell):
+		if sim.can_touch(cell) and sim.machine_at(cell) == null:
 			cells.append(cell)
 	return Observe.nearest(main.player.cell(), cells)
 
@@ -565,7 +592,7 @@ func _worth_another_rig() -> bool:
 	var seats: int = sim.cats.size() + int(sim.power_capacity / maxf(Defs.MINER_POWER_DRAW, 0.1))
 	if sim.machine_count(Defs.M_MINER) >= seats:
 		return false
-	if _best_bare_seam(Defs.ITEM_HEATSTONE) == Vector2i(9999, 9999):
+	if _best_bare_seam(Defs.ITEM_HEATSTONE, true) == Vector2i(9999, 9999):
 		return false
 	return sim.can_afford(Defs.M_MINER) \
 		or int(sim.stock.get(Defs.ITEM_HEATSTONE, 0)) >= 5
@@ -574,8 +601,7 @@ func _rig_without_belt() -> Vector2i:
 	for cell: Vector2i in sim.machines:
 		if not Defs.machine_mines(sim.machines[cell].type):
 			continue
-		var mouth: Vector2i = cell + sim.machines[cell].dir
-		var target = sim.machine_at(mouth)
+		var target = sim.machine_at(sim.output_cell(sim.machines[cell]))
 		if target == null:
 			return cell
 	return Vector2i(9999, 9999)
@@ -585,6 +611,20 @@ func _rig_on(item_type: int) -> Vector2i:
 		if Defs.machine_mines(sim.machines[cell].type) \
 				and int(sim.ore.get(cell, -1)) == item_type:
 			return cell
+	return Vector2i(9999, 9999)
+
+## An anchor for a machine of `type` whose footprint covers `cell` and can be
+## built, keeping clear of `avoid` -- the post that pours into it.
+func _anchor_over(type: int, cell: Vector2i, avoid: Rect2i = Rect2i()) -> Vector2i:
+	var size: Vector2i = Defs.machine_size(type)
+	for dy in size.y:
+		for dx in size.x:
+			var probe: Vector2i = cell - Vector2i(dx, dy) + Grid.default_anchor(size)
+			var rect: Rect2i = Defs.machine_footprint(type, probe)
+			if not rect.has_point(cell) or (avoid.size != Vector2i.ZERO and rect.intersects(avoid)):
+				continue
+			if sim.footprint_problems(type, probe).is_empty():
+				return probe
 	return Vector2i(9999, 9999)
 
 func _machine_cell(type: int) -> Vector2i:

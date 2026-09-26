@@ -75,10 +75,19 @@ func move_to(cell: Vector2i, budget: float = 60.0) -> String:
 
 ## Walk to a standing cell beside `target` and face it. The answer to "the
 ## object's own cell is solid", which is most objects in this game.
+##
+## Beside the whole thing, not beside the cell named: a base is eight cells
+## across and the cells beside its anchor are more base.
 func move_near(target: Vector2i, budget: float = 60.0) -> String:
-	if main.player.cell() == target:
+	var rect: Rect2i = nav.footprint(target)
+	if rect.size == Vector2i.ONE and main.player.cell() == target:
 		return OK
-	var plan: Dictionary = nav.interaction(main.player.cell(), target)
+	return move_near_rect(rect, budget)
+
+## The same, for ground that has nothing on it yet -- where a building is about
+## to go. She stands outside it, so the building does not go up around her.
+func move_near_rect(rect: Rect2i, budget: float = 60.0, keep_clear: bool = false) -> String:
+	var plan: Dictionary = nav.interaction_rect(main.player.cell(), rect, keep_clear)
 	if plan.is_empty():
 		return BLOCKED
 	var stand: Vector2i = plan["stand"]
@@ -86,8 +95,25 @@ func move_near(target: Vector2i, budget: float = 60.0) -> String:
 		var verdict: String = move_to(stand, budget)
 		if verdict != OK:
 			return verdict
-	face(target)
+	settle(stand)
+	main.player.facing = plan["face"]
 	return OK
+
+## Close the last few pixels onto a cell's middle, so what she reaches from it is
+## what the plan assumed. Her reach is read from the cell she is in, and a cell
+## is sixteen pixels: arriving "near enough" can be the neighbour.
+func settle(cell: Vector2i, patience: float = 0.6) -> void:
+	var target: Vector2 = nav.safe_point(cell)
+	var spent := 0.0
+	while main.player.position.distance_to(target) > 1.0 and spent < patience:
+		var before: Vector2 = main.player.position
+		main.player.touch_direction = (target - main.player.position).normalized() * 0.5
+		run(STEP, "moving")
+		spent += STEP
+		if main.player.position.distance_to(before) < 0.05:
+			break
+	main.player.touch_direction = Vector2.ZERO
+	main.player.velocity = Vector2.ZERO
 
 func face(target: Vector2i) -> void:
 	var delta: Vector2i = target - main.player.cell()
@@ -103,9 +129,10 @@ func face(target: Vector2i) -> void:
 func _follow(route: Array[Vector2i], budget: float) -> String:
 	var spent := 0.0
 	for next: Vector2i in route:
-		var target: Vector2 = sim.cell_centre(next)
+		var target: Vector2 = nav.safe_point(next)
 		var stuck := 0.0
-		while main.player.position.distance_to(target) > 10.0:
+		# Six pixels: inside the cell, which is sixteen across since Grid v2.
+		while main.player.position.distance_to(target) > 6.0:
 			if spent >= budget:
 				main.player.touch_direction = Vector2.ZERO
 				return TIMEOUT
@@ -263,17 +290,59 @@ func place_machine(type: int, cell: Vector2i, dir: Vector2i) -> String:
 		return INVALID
 	if not sim.is_unlocked(type) or not sim.can_afford(type):
 		return FAILED
-	if sim.can_build(type, cell) != "":
+	if sim.can_build(type, cell, dir) != "":
 		return BLOCKED
-	var verdict: String = move_near(cell, 60.0)
+	# Beside the whole footprint, never inside it.
+	var verdict: String = move_near_rect(Defs.machine_footprint(type, cell, dir), 60.0, true)
 	if verdict != OK:
 		interaction_failures += 1
 		return verdict
 	equip_tool(main.TOOL_BUILD_GUN)
-	if not sim.build(type, cell, dir):
+	if not sim.build(type, cell, dir, main.body_cells()):
 		return FAILED
 	run(0.15, "building")
 	return OK
+
+## What Z would set down, and where, if pressed now: the ice a tile across in
+## front of her, or the hut or the bin the case unpacked. Read from the same
+## functions the press reads -- the ghost the player looks at.
+func carried_spot() -> Rect2i:
+	if sim.carried_frozen:
+		return Rect2i(Grid.ahead(main.player.position, main.player.facing, Defs.PROP_SIZE).position,
+			Defs.PROP_SIZE)
+	match sim.carried_kit:
+		Defs.KIT_SHELTER:
+			return Grid.footprint(main.kit_anchor(), Defs.SHELTER_SIZE)
+		Defs.KIT_FOOD:
+			return Grid.footprint(main.kit_anchor(), Defs.FOOD_BIN_SIZE)
+	return Rect2i()
+
+## Put what she is carrying down somewhere `good` accepts, near `around`: walk to
+## standing cells in rings outward, look each way, and press Z the first time
+## the ghost is somewhere `good` says yes to. `good` takes the rect.
+func place_carried(around: Rect2i, good: Callable, rings: int = 10) -> String:
+	var tried: Dictionary = {}
+	for ring in range(1, rings + 1):
+		var grown: Rect2i = around.grow(ring * Grid.SCALE)
+		var stands: Array[Vector2i] = []
+		for cell: Vector2i in Grid.edge_cells(grown):
+			if not tried.has(cell) and nav.walkable(cell):
+				stands.append(cell)
+		stands.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+			return Vector2(a - main.player.cell()).length_squared() \
+				< Vector2(b - main.player.cell()).length_squared())
+		for stand: Vector2i in stands.slice(0, 6):
+			tried[stand] = true
+			if move_to(stand, 30.0) != OK:
+				continue
+			settle(stand)
+			for facing: Vector2i in [Vector2i(0, 1), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, -1)]:
+				main.player.facing = facing
+				if good.call(carried_spot()):
+					main._primary_action()
+					run(0.15, "interacting")
+					return OK
+	return FAILED
 
 func select_recipe(machine_cell: Vector2i, key: String) -> String:
 	var machine = sim.machine_at(machine_cell)
