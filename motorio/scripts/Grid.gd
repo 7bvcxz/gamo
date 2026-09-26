@@ -24,7 +24,7 @@ class_name Grid
 ## size: if a script needs pixels for a cell, it asks here.
 
 ## Cells per tile, along each axis.
-const SCALE := 1
+const SCALE := 2
 ## Pixels in one tile of distance. Fixed: this is the unit the world is measured
 ## in, and it is what every number in Defs was tuned against.
 const TILE := 32

@@ -35,6 +35,19 @@ func _staff(sim: Sim, cell: Vector2i) -> Sim.Cat:
 ## Most tests are about placement rules and machine behaviour, not about earning
 ## the tech tree, so this hands them an opened, funded base. The unlock and cost
 ## rules get their own explicit test.
+## A mining post's seam, cleared around so the post stands on exactly one seam.
+## Grid v2: the post is four cells by four around its seam, and the base eight by
+## eight around the core -- so a seam "beside the core" is six cells west of it.
+func _seam(sim: Sim, cell: Vector2i, item_type: int = Defs.ITEM_CRYSTAL) -> void:
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, cell)):
+		sim.ore.erase(covered)
+	sim.ore[cell] = item_type
+
+## Nothing standing on these cells, so a test can build where it means to.
+func _clear(sim: Sim, rect: Rect2i) -> void:
+	for covered: Vector2i in Grid.cells_in(rect):
+		sim.ore.erase(covered)
+
 func _fresh() -> Sim:
 	var sim := Sim.new()
 	sim.setup(12345)
@@ -119,7 +132,7 @@ func _test_generation() -> void:
 	# decides whether finding a seam is an event.
 	var near := 0
 	for cell: Vector2i in sim.ore:
-		if Vector2(cell - sim.core_cell).length() <= Defs.WARM_BASE:
+		if sim.tiles_from_core(cell) <= Defs.WARM_BASE:
 			near += 1
 	_assert(near < 14, "시작 반경 안은 여전히 성깁니다: %d개" % near)
 	_assert(not sim.ore.has(sim.core_cell), "ore never spawns under the core")
@@ -131,7 +144,7 @@ func _test_generation() -> void:
 	var reachable := 0
 	var early_crystal := 0
 	for cell: Vector2i in sim.ore:
-		var distance: float = Vector2(cell).length()
+		var distance: float = sim.tiles_from_core(cell)
 		if sim.ore[cell] == Defs.ITEM_HEATSTONE and distance <= Defs.WARM_BASE:
 			reachable += 1
 		if sim.ore[cell] == Defs.ITEM_CRYSTAL:
@@ -144,14 +157,14 @@ func _test_generation() -> void:
 		"crystal exists as %d loose shards" % Defs.CRYSTAL_SHARDS)
 	var near_shard := 0
 	for cell: Vector2i in sim.shards:
-		if Vector2(cell - sim.core_cell).length() < Defs.CRYSTAL_RING.x:
+		if sim.tiles_from_core(cell) < Defs.CRYSTAL_RING.x:
 			near_shard += 1
 	_assert(near_shard == 0, "and none of them inside the opening")
 
 	# Ember must NOT be reachable at the start, or the progression has no arc.
 	var early_copper := 0
 	for cell: Vector2i in sim.ore:
-		if sim.ore[cell] == Defs.ITEM_COPPER and Vector2(cell).length() <= Defs.WARM_BASE:
+		if sim.ore[cell] == Defs.ITEM_COPPER and sim.tiles_from_core(cell) <= Defs.WARM_BASE:
 			early_copper += 1
 	_assert(early_copper == 0, "copper ore starts outside the warm radius")
 
@@ -173,13 +186,16 @@ func _test_generation() -> void:
 	for offset: Vector2i in Sim.STARTER_COPPER:
 		_assert(sim.ore.get(sim.core_cell + offset, -1) == Defs.ITEM_HEATSTONE,
 			"guaranteed seam exists at %s" % offset)
-	for step in range(1, 9):
-		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, -step)
+	# From the seam's post down to the base's top edge, in cells (Grid v2): the
+	# post covers rows -18..-15 and the base starts at row -3.
+	for y in range(-14, -3):
+		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, y)
 		_assert(sim.can_build(Defs.M_BELT, lane_cell) == "",
 			"the copper column home is clear at %s" % lane_cell)
-	_assert(Vector2(Sim.STARTER_COPPER[0]).length() > Defs.WARM_BASE,
+	var north: Vector2i = sim.core_cell + Sim.STARTER_COPPER[0]
+	_assert(sim.tiles_from_core(north) > Defs.WARM_BASE,
 		"the copper seam starts outside the opening warm radius, so it must be earned")
-	_assert(Vector2(Sim.STARTER_COPPER[0]).length() < Defs.WARM_MAX,
+	_assert(sim.tiles_from_core(north) < Defs.WARM_MAX,
 		"the copper seam is reachable within a single run")
 	sim.free()
 
@@ -195,7 +211,9 @@ func _test_build_rules() -> void:
 	var sim := Sim.new()
 	sim.setup(12345)
 	var ore_cell: Vector2i = sim.ore.keys()[0]
-	var empty := Vector2i(2, 0)
+	# Bare ground just north of the base, in the column the generator keeps
+	# clear: a belt fits, and so does a two-by-two machine.
+	var empty := Vector2i(1, -6)
 
 	# Nothing is buildable until the matching resource has been held once. The
 	# hotbar is the tech tree, so it starts closed.
@@ -253,11 +271,13 @@ func _test_miner_to_core() -> void:
 	# Miner directly adjacent to the core, pointing at it.
 	var sim := Sim.new()
 	sim.setup(999)
-	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
+	# The post's west edge touches the base's east edge, so its output cell is a
+	# base cell.
+	var cell := Vector2i(6, 0)
+	_seam(sim, cell)
 	_open(sim)
 	_power(sim)
-	_assert(sim.build(Defs.M_MINER, cell, Vector2i.RIGHT), "miner placed next to the core")
+	_assert(sim.build(Defs.M_MINER, cell, Vector2i.LEFT), "miner placed next to the core")
 	_staff(sim, cell)
 	var before: int = int(sim.stock[Defs.ITEM_CRYSTAL])
 	for step in 200:
@@ -272,9 +292,9 @@ func _test_miner_rate() -> void:
 	sim.setup(555)
 	_open(sim)
 	_power(sim)
-	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
-	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
+	var cell := Vector2i(6, 0)
+	_seam(sim, cell)
+	sim.build(Defs.M_MINER, cell, Vector2i.LEFT)
 	_staff(sim, cell)
 	# Derived from the constant, like the wait below it. Fifty ticks used to be
 	# "less than the period"; the miner is twice as fast now and five seconds is
@@ -296,12 +316,16 @@ func _test_belt_transport() -> void:
 	sim.setup(4242)
 	_open(sim)
 	_power(sim)
-	# miner at (-3,0) -> belts at (-2,0) and (-1,0) -> core at (0,0)
-	sim.ore[Vector2i(-3, 0)] = Defs.ITEM_CRYSTAL
-	_assert(sim.build(Defs.M_MINER, Vector2i(-3, 0), Vector2i.RIGHT), "miner built")
-	_staff(sim, Vector2i(-3, 0))
-	_assert(sim.build(Defs.M_BELT, Vector2i(-2, 0), Vector2i.RIGHT), "first belt built")
-	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "second belt built")
+	# Post at (10,0), covering x 9..12, emitting at (8,0) -> belts (8..5, 0) -> the
+	# base's east edge at x 4. Two tiles of belt, four cells (Grid v2).
+	_seam(sim, Vector2i(10, 0))
+	_clear(sim, Rect2i(Vector2i(5, 0), Vector2i(4, 1)))
+	_assert(sim.build(Defs.M_MINER, Vector2i(10, 0), Vector2i.LEFT), "miner built")
+	_staff(sim, Vector2i(10, 0))
+	_assert(sim.build(Defs.M_BELT, Vector2i(8, 0), Vector2i.LEFT), "first belt built")
+	_assert(sim.build(Defs.M_BELT, Vector2i(7, 0), Vector2i.LEFT), "second belt built")
+	_assert(sim.build(Defs.M_BELT, Vector2i(6, 0), Vector2i.LEFT), "third belt built")
+	_assert(sim.build(Defs.M_BELT, Vector2i(5, 0), Vector2i.LEFT), "fourth belt built")
 	# Derived from the constants rather than a fixed count: mining one item, then
 	# walking it two tiles, both got an order of magnitude slower at different
 	# times, and a hardcoded 120 ticks silently stopped covering the journey.
@@ -323,7 +347,8 @@ func _test_generator_burns_stone() -> void:
 	var sim := Sim.new()
 	sim.setup(777)
 	_open(sim)
-	var gen_cell := Vector2i(-2, 0)
+	var gen_cell := Vector2i(6, 0)
+	_clear(sim, Defs.machine_footprint(Defs.M_GENERATOR, gen_cell))
 	sim.stock[Defs.ITEM_ENERGY_CORE] = 1
 	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "generator built")
 	var gen: Sim.Machine = sim.machine_at(gen_cell)
@@ -409,8 +434,9 @@ func _test_frost_throttle() -> void:
 	sim.setup(31337)
 	_open(sim)
 	_power(sim)
-	var warm_cell := Vector2i(2, 0)
-	var cold_cell := Vector2i(int(Defs.WARM_MAX) + 8, 0)
+	var warm_cell := Vector2i(1, -6)
+	var cold_cell := Vector2i((int(Defs.WARM_MAX) + 8) * Grid.SCALE, 0)
+	_clear(sim, Rect2i(cold_cell, Vector2i.ONE))
 	_assert(sim.is_warm(warm_cell), "the warm test cell is inside the radius")
 	_assert(not sim.is_warm(cold_cell), "the cold test cell is outside the radius")
 	_assert(sim.build(Defs.M_BELT, warm_cell, Vector2i.UP), "warm belt built")
@@ -438,11 +464,14 @@ func _test_blocked_output_preserves_work() -> void:
 	_power(sim)
 	# Miner facing empty ground: nothing accepts its output. Kept inside the warm
 	# radius so the frost throttle is not a second variable in this test.
-	var cell := Vector2i(3, 3)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
+	var cell := Vector2i(8, 8)
+	_seam(sim, cell)
 	# The output tile is ore as well, so there is nowhere to push and nowhere to
 	# drop: a miner only stalls once the floor in front of it is unavailable too.
-	sim.ore[cell + Vector2i.RIGHT] = Defs.ITEM_CRYSTAL
+	# The output tile is past the post's east edge (Grid v2), in line with its seam.
+	var out: Vector2i = Grid.front_cell(Defs.machine_footprint(Defs.M_MINER, cell),
+		Vector2i.RIGHT, cell)
+	sim.ore[out] = Defs.ITEM_CRYSTAL
 	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
 	_staff(sim, cell)
 	var machine: Sim.Machine = sim.machine_at(cell)
@@ -455,8 +484,8 @@ func _test_blocked_output_preserves_work() -> void:
 
 	# Give it somewhere to send the ore and the warning must clear on its own.
 	# The blocking ore has to go first: a belt may not sit on a seam.
-	sim.ore.erase(cell + Vector2i.RIGHT)
-	sim.build(Defs.M_BELT, cell + Vector2i.RIGHT, Vector2i.RIGHT)
+	sim.ore.erase(out)
+	sim.build(Defs.M_BELT, out, Vector2i.RIGHT)
 	for step in 40:
 		sim.tick(0.1)
 	_assert(not machine.stalled, "the stall warning clears once the output is unblocked")
@@ -465,9 +494,11 @@ func _test_blocked_output_preserves_work() -> void:
 	# It used to stop dead at the last tile, so a belt built before the thing it
 	# was going to feed did nothing and gave no sign why.
 	var dead_end := Vector2i(20, 20)
+	_clear(sim, Rect2i(dead_end, Vector2i(2, 1)))
 	sim.build(Defs.M_BELT, dead_end, Vector2i.RIGHT)
 	var belt: Sim.Machine = sim.machine_at(dead_end)
-	for index in Defs.BELT_CAPACITY:
+	# As many as one belt cell holds (Grid v2: a cell is half a tile).
+	for index in Defs.belt_cell_capacity():
 		belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 1.0})
 	sim.tick(0.2)
 	_assert(not belt.stalled, "끝이 열린 벨트는 앞에 쏟아낸다")
@@ -480,8 +511,9 @@ func _test_blocked_output_preserves_work() -> void:
 	# rule pulls each item back behind the one ahead of it, and the new head then
 	# sits mid-tile with nothing to push.
 	belt.items.clear()
-	for index in Defs.BELT_CAPACITY:
-		belt.items.append({"type": Defs.ITEM_CRYSTAL, "t": 1.0 - float(index) * 0.34})
+	for index in Defs.belt_cell_capacity():
+		belt.items.append({"type": Defs.ITEM_CRYSTAL,
+			"t": 1.0 - float(index) * Defs.belt_gap_cells()})
 	sim.tick(0.2)
 	_assert(belt.stalled, "쌓을 자리까지 차면 그때 막힌다")
 	sim.free()

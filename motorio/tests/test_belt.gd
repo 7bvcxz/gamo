@@ -33,19 +33,24 @@ func _test_unpowered_belt_moves() -> void:
 	sim.setup(4242)
 	_open(sim)
 	_assert(sim.machine_count(Defs.M_GENERATOR) == 0, "no generator exists")
-	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "a belt goes down")
-	var belt: Sim.Machine = sim.machine_at(Vector2i(-1, 0))
+	# Just east of the base's east wall (Grid v2: the base is eight cells across).
+	var at := Vector2i(5, 0)
+	sim.ore.erase(at)
+	_assert(sim.build(Defs.M_BELT, at, Vector2i.LEFT), "a belt goes down")
+	var belt: Sim.Machine = sim.machine_at(at)
 	sim.tick(0.05)
 	_assert(is_equal_approx(sim.power_draw, 0.0), "and asks the grid for nothing")
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "there being no grid to ask")
 
-	_assert(sim._push_into(Vector2i(-1, 0), Defs.ITEM_CRYSTAL, Vector2i(-2, 0)),
+	_assert(sim._push_into(at, Defs.ITEM_CRYSTAL, at + Vector2i.RIGHT),
 		"the belt accepts an item")
 	var start: float = float(belt.items[0]["t"])
 	# One second of travel, which at any sane belt speed is a visible distance.
 	for step in 20:
 		sim.tick(0.05)
-	var moved: float = float(belt.items[0]["t"]) - start
+	# `t` is a fraction of one belt cell, and a cell is half a tile (Grid v2): the
+	# world speed is what the rating is about.
+	var moved: float = (float(belt.items[0]["t"]) - start) / float(Grid.SCALE)
 	_assert(moved > 0.0, "and the item actually travels: moved %.3f of a tile in 1s" % moved)
 	_assert(absf(moved - Defs.belt_speed(belt.tier)) < 0.02,
 		"at the rated speed: %.3f vs %.3f tiles/s" % [moved, Defs.belt_speed(belt.tier)])
@@ -61,10 +66,12 @@ func _test_unpowered_line_delivers() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	_open(sim)
-	var source := Vector2i(-2, 0)
-	sim.ore[source] = Defs.ITEM_CRYSTAL
-	_assert(sim.build(Defs.M_MINER, source, Vector2i.RIGHT), "a miner goes down on a seam")
-	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 0), Vector2i.RIGHT), "with a belt into the core")
+	# The post's west edge one cell short of the base's east wall, and a belt in
+	# that cell (Grid v2).
+	var source := Vector2i(7, 0)
+	_seam(sim, source)
+	_assert(sim.build(Defs.M_MINER, source, Vector2i.LEFT), "a miner goes down on a seam")
+	_assert(sim.build(Defs.M_BELT, Vector2i(5, 0), Vector2i.LEFT), "with a belt into the core")
 	var miner: Sim.Machine = sim.machine_at(source)
 	# A cat works it. That is what makes this an *unpowered* line: no generator
 	# anywhere, and the belt is not supposed to need one either.
@@ -91,12 +98,12 @@ func _test_dead_end_backs_up() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	_open(sim)
-	var source := Vector2i(-2, 5)
-	sim.ore[source] = Defs.ITEM_CRYSTAL
+	var source := Vector2i(-7, 14)
+	_seam(sim, source)
 	_assert(sim.build(Defs.M_MINER, source, Vector2i.RIGHT), "a miner goes down")
-	_assert(sim.build(Defs.M_BELT, Vector2i(-1, 5), Vector2i.RIGHT), "with a belt to nowhere")
+	_assert(sim.build(Defs.M_BELT, Vector2i(-4, 14), Vector2i.RIGHT), "with a belt to nowhere")
 	var miner: Sim.Machine = sim.machine_at(source)
-	var belt: Sim.Machine = sim.machine_at(Vector2i(-1, 5))
+	var belt: Sim.Machine = sim.machine_at(Vector2i(-4, 14))
 	sim.grant_cats(1)
 	sim.cats[0].pos = sim.cell_centre(source)
 	sim.cats[0].assigned = source
@@ -106,10 +113,18 @@ func _test_dead_end_backs_up() -> void:
 		sim.tick(0.05)
 		guard += 1
 	_assert(miner.stalled, "the miner eventually stalls on a dead-end belt")
-	_assert(belt.items.size() == Defs.BELT_CAPACITY,
-		"and only once the belt is genuinely full: %d of %d" % [belt.items.size(), Defs.BELT_CAPACITY])
+	_assert(belt.items.size() == Defs.belt_cell_capacity(),
+		"and only once the belt is genuinely full: %d of %d"
+			% [belt.items.size(), Defs.belt_cell_capacity()])
 	_assert(sim.meter_status(miner) == "출력 막힘", "which the panel names")
 	sim.free()
+
+## A seam with nothing else under the post that will stand on it, and nothing
+## in the cells east of it where its belt goes.
+func _seam(sim, cell: Vector2i) -> void:
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, cell).grow(1)):
+		sim.ore.erase(covered)
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
 
 func _open(sim) -> void:
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)

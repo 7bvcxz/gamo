@@ -74,7 +74,10 @@ func _test_base_deploys_on_first_search() -> void:
 	_assert(sim.core_cell == anchor, "상자가 있던 그 칸에서 펼쳐진다")
 	_assert(sim.machine_at(anchor) != null, "코어가 실제로 그 칸에 있다")
 	_assert(sim.kit_cell == Vector2i(9999, 9999), "상자는 사라진다 — 기지가 되었으니까")
-	_assert(not sim.is_structure(anchor + Vector2i(2, 1)),
+	# The case was a tile and the base is four across, centred on it (Grid v2):
+	# every cell the case stood on is now the base's, and none of it is left
+	# standing as a second object.
+	_assert(sim.base_rect().encloses(sim.prop_rect(anchor)) and not sim.is_kit(anchor),
 		"상자가 서 있던 자리에 막는 것이 남지 않는다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "기지 키트를 드는 일은 없다")
 	_assert(sim.drops.is_empty(), "눈 위에 떨어지는 것도 없다")
@@ -123,7 +126,7 @@ func _test_shelter_is_crafted_not_found() -> void:
 		if int(sim.drops[cell]) == Sim.DROP_KIT_SHELTER:
 			dropped = cell
 	_assert(dropped != Vector2i(9999, 9999), "끝나면 키트가 기지 옆에 떨어진다")
-	_assert(Vector2(dropped - sim.core_cell).length() <= 5.0,
+	_assert(sim.tiles_from_core(dropped) <= 5.0,
 		"기지 곁이다: %s" % str(dropped))
 	# Pick it up and place it by hand -- the first hand-placed building.
 	_assert(sim.collect_drop(dropped) == Sim.DROP_KIT_SHELTER, "밟아서 줍는다")
@@ -304,7 +307,9 @@ func _test_the_case_is_one_walk_away() -> void:
 		world.begin_crash()
 		var land: Vector2i = world.core_cell
 		var case_cell: Vector2i = world.kit_cell
-		if Vector2(case_cell - land).length() > Defs.CRASH_SIGHT:
+		# In tiles, between where she stands and the middle of the case.
+		if Grid.tiles(world.prop_centre(case_cell).distance_to(world.core_centre())) \
+				> Defs.CRASH_SIGHT:
 			far += 1
 		if world.blocks_player(land):
 			blocked += 1
@@ -375,14 +380,13 @@ func _drop_kind_exists(sim, kind: int) -> bool:
 	return false
 
 func _clear_spot(sim) -> Vector2i:
+	# Asked of the hut's own rule, radius in tiles (Grid v2).
 	for radius in range(int(Defs.SHELTER_CLEARANCE) + 1, 7):
 		for step in 16:
 			var angle: float = TAU * float(step) / 16.0
 			var cell: Vector2i = sim.core_cell + Vector2i(
-				roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
-			if sim.ore.has(cell) or sim.machines.has(cell) or sim.debris.has(cell):
-				continue
-			if Vector2(cell - sim.core_cell).length() <= Defs.SHELTER_CLEARANCE:
-				continue
-			return cell
-	return sim.core_cell + Vector2i(-4, 0)
+				roundi(cos(angle) * float(radius * Grid.SCALE)),
+				roundi(sin(angle) * float(radius * Grid.SCALE)))
+			if sim.shelter_problems(cell).is_empty():
+				return cell
+	return sim.core_cell + Defs.SHELTER_CELL

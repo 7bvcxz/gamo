@@ -149,12 +149,17 @@ func _purse(sim: Sim) -> void:
 	before = sim.cats.size()
 	var ten: Array[int] = sim.pull_gacha(10)
 	_check(sim.cats.size() == before + 10, "10연차는 고양이 10마리")
-	var spread: float = 0.0
-	for index in ten.size():
-		var cat: Sim.Cat = sim.cats[before + index]
-		spread = maxf(spread, absf(cat.pos.x - sim.cats[before].pos.x))
-	_check(spread >= Defs.CAT_LANE * 9.0 - 0.5,
-		"10마리가 한 픽셀에 겹치지 않는다: 폭 %.1f" % spread)
+	# Pairwise, not the width of the fan. The fan is ten lanes across and an end
+	# of it that would land on a building is moved to the nearest ground (Grid v2
+	# made the buildings beside the hut bigger), so the width depends on the map;
+	# what may never happen on any map is two of them on one spot.
+	var closest: float = 1e20
+	for a in ten.size():
+		for b in range(a + 1, ten.size()):
+			closest = minf(closest,
+				sim.cats[before + a].pos.distance_to(sim.cats[before + b].pos))
+	_check(closest >= Defs.CAT_LANE * 0.5,
+		"10마리가 한 픽셀에 겹치지 않는다: 가장 가까운 둘 %.1fpx" % closest)
 	sim.cats.clear()
 	sim.coins = 0
 
@@ -201,8 +206,10 @@ func _crates_stay_ordinary(sim: Sim) -> void:
 	sim.frozen_cats.clear()
 	# Through the real thaw rather than through grant_cats, because it is the
 	# rescue path's grade that is being checked and grant_cats is the debug one.
-	sim.frozen_cats[sim.core_cell + Vector2i(1, 0)] = 0.0
-	sim.frozen_cats[sim.core_cell + Vector2i(0, 1)] = 0.0
+	# Against the base's east and south walls, where the ice goes (Grid v2: the
+	# base is eight cells across and a block two).
+	sim.frozen_cats[Vector2i(sim.base_rect().end.x, sim.core_cell.y)] = 0.0
+	sim.frozen_cats[Vector2i(sim.core_cell.x, sim.base_rect().end.y)] = 0.0
 	sim.tick(Defs.THAW_SECONDS + 0.1)
 	_check(sim.cats.size() == 2, "얼음 2개가 녹아 고양이 2마리")
 	for cat: Sim.Cat in sim.cats:

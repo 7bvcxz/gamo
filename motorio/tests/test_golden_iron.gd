@@ -42,11 +42,13 @@ func _test_story_sign_hidden_from_main_path() -> void:
 	# And the seven villagers do not wait in their pattern. The ordinary scatter
 	# may drop a cat anywhere -- that square is ordinary snow now -- so what is
 	# asserted is the *pattern*: the seven authored offsets are never all filled.
-	var would_be: Vector2i = sim.core_cell + Defs.VILLAGE_OFFSET \
+	# The village is laid out in tiles (Grid v2); each villager's block is stored
+	# under the top-left cell of its tile.
+	var would_be: Vector2i = Grid.tile_of(sim.core_cell) + Defs.VILLAGE_OFFSET \
 		- Vector2i(Defs.VILLAGE_CELLS.x / 2, Defs.VILLAGE_CELLS.y / 2)
 	var patterned := 0
 	for local: Vector2i in Defs.VILLAGE_FROZEN:
-		if sim.frozen_cats.has(would_be + local):
+		if sim.frozen_cats.has(Grid.from_tile(would_be + local)):
 			patterned += 1
 	_assert(patterned < Defs.VILLAGE_FROZEN.size(),
 		"마을 고양이 일곱이 제 무늬대로 잠들어 있지 않다 (%d)" % patterned)
@@ -69,12 +71,13 @@ func _test_village_assets_preserved() -> void:
 	var sim := Sim.new()
 	sim.story_enabled = true
 	sim.setup(90003)
-	_assert(sim.sign_cell == sim.core_cell + Defs.SIGN_OFFSET, "표지판이 제자리에 선다")
+	_assert(sim.sign_cell == Grid.from_tile(Grid.tile_of(sim.core_cell) + Defs.SIGN_OFFSET),
+		"표지판이 제자리에 선다")
 	_assert(sim.village.size() == Defs.VILLAGE_PIECES.size(),
 		"마을 조각 %d개가 전부 있다 (%d)" % [Defs.VILLAGE_PIECES.size(), sim.village.size()])
 	var villagers := 0
 	for local: Vector2i in Defs.VILLAGE_FROZEN:
-		if sim.frozen_cats.has(sim.village_rect.position + local):
+		if sim.frozen_cats.has(sim.village_rect.position + local * Grid.SCALE):
 			villagers += 1
 	_assert(villagers == Defs.VILLAGE_FROZEN.size(),
 		"얼어붙은 주민 %d마리도 그대로다 (%d)" % [Defs.VILLAGE_FROZEN.size(), villagers])

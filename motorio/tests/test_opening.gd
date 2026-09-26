@@ -60,18 +60,20 @@ func _assert(condition: bool, label: String) -> void:
 ## heat stone is scattered from three tiles out, so a hardcoded cell is a seam
 ## one run in several -- which is the shape of flake this repository has been
 ## bitten by before, and it fails as "the mission did not advance".
+##
+## Asked of the hut's own rule (`shelter_problems`) rather than rebuilt here: the
+## hut is six cells by eight since Grid v2, and a hand-written copy of "clear of
+## the fire, inside the warmth, nothing underneath" is a copy that drifts.
 func _shelter_spot(sim) -> Vector2i:
 	for radius in range(int(Defs.SHELTER_CLEARANCE) + 1, 7):
 		for step in 16:
 			var angle: float = TAU * float(step) / 16.0
 			var cell: Vector2i = sim.core_cell + Vector2i(
-				roundi(cos(angle) * float(radius)), roundi(sin(angle) * float(radius)))
-			if sim.ore.has(cell) or sim.machines.has(cell) or cell == sim.kit_cell:
-				continue
-			if Vector2(cell - sim.core_cell).length() <= Defs.SHELTER_CLEARANCE:
-				continue
-			return cell
-	return sim.core_cell + Vector2i(-4, 0)
+				roundi(cos(angle) * float(radius * Grid.SCALE)),
+				roundi(sin(angle) * float(radius * Grid.SCALE)))
+			if sim.shelter_problems(cell).is_empty():
+				return cell
+	return sim.core_cell + Defs.SHELTER_CELL
 
 ## A fresh crash, every time. The opening is the one part of the game whose
 ## whole subject is the state it starts in.
@@ -99,7 +101,7 @@ func _test_crash_site() -> void:
 	_assert(not sim.is_warm(sim.core_cell + Vector2i(1, 0)), "옆 칸도 마찬가지다")
 	# The kit has to be visible from where she is standing. At three tiles of
 	# sight, "go and look for it" is not an instruction.
-	var reach: float = Vector2(sim.kit_cell - sim.core_cell).length()
+	var reach: float = Grid.tiles(sim.prop_centre(sim.kit_cell).distance_to(sim.core_centre()))
 	_assert(reach <= Defs.CRASH_SIGHT, "긴급생존키트가 시야 안에 있다 (%.1f칸)" % reach)
 	_assert(sim.kit_searched == 0, "아직 열지 않았다")
 	# Reach, not aim. The kit is the first thing the player touches and there is
@@ -107,13 +109,13 @@ func _test_crash_site() -> void:
 	# is enough whichever way she happens to be looking. The browser run found
 	# this the hard way: it walked to the kit, held Z, and nothing happened,
 	# because the last arrow pressed had been Down.
-	main.player.position = sim.cell_centre(sim.kit_cell + Vector2i(-1, 0))
+	main.player.position = sim.prop_centre(sim.kit_cell) - Vector2(float(Grid.TILE), 0.0)
 	for facing: Vector2i in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
 		main.player.facing = facing
 		_assert(main._facing_kit(), "옆에 서면 어느 쪽을 보든 열 수 있다 %s" % facing)
-	main.player.position = sim.cell_centre(sim.kit_cell + Vector2i(3, 0))
+	main.player.position = sim.prop_centre(sim.kit_cell) + Vector2(Grid.px(3.0), 0.0)
 	_assert(not main._facing_kit(), "멀면 안 된다")
-	main.player.position = sim.cell_centre(sim.core_cell)
+	main.player.position = sim.core_centre()
 	# And the buildings that are not there must not be walls either.
 	_assert(not sim.blocks_player(sim.shelter_cell), "없는 거처는 길을 막지 않는다")
 	_assert(not sim.blocks_player(sim.food_cell), "없는 밥통도 마찬가지다")

@@ -75,7 +75,7 @@ func _test_iron_is_out_there_and_not_underfoot() -> void:
 		for cell: Vector2i in sim.ore:
 			if int(sim.ore[cell]) != Defs.ITEM_IRON:
 				continue
-			nearest = minf(nearest, Vector2(cell - sim.core_cell).length())
+			nearest = minf(nearest, sim.tiles_from_core(cell))
 		if nearest > reach:
 			missing += 1
 		if nearest <= copper_rung:
@@ -218,7 +218,7 @@ func _test_the_whole_chain() -> void:
 	var sim = main.sim
 
 	# Dig it by hand, which is how the first one always arrives.
-	var seam: Vector2i = _clear_cell(sim, Vector2i(3, 0))
+	var seam: Vector2i = _clear_cell(sim, Vector2i(3, 0) * Grid.SCALE)
 	sim.ore[seam] = Defs.ITEM_IRON
 	sim._assign_purity()
 	var got: int = sim.hand_mine(seam, sim.hand_period(seam) * 1.1)
@@ -231,7 +231,7 @@ func _test_the_whole_chain() -> void:
 	_open(sim)
 	var plant: Vector2i = _clear_cell(sim, Vector2i(0, 6))
 	_assert(sim.is_warm(plant), "제조기 자리가 온기 안이다")
-	var ahead: Vector2i = _clear_cell(sim, plant + Vector2i.RIGHT)
+	var ahead: Vector2i = _ahead(sim, Defs.M_MANUFACTURER, plant, Vector2i.RIGHT)
 	_assert(sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT), "제조기를 세운다")
 	var plantside: Vector2i = _clear_cell(sim, Vector2i(-3, 6))
 	sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT)
@@ -303,7 +303,7 @@ func _test_blocked_costs_nothing() -> void:
 	_open(sim)
 
 	var plant: Vector2i = _clear_cell(sim, Vector2i(7, 0))
-	var ahead: Vector2i = _clear_cell(sim, plant + Vector2i.RIGHT)
+	var ahead: Vector2i = _ahead(sim, Defs.M_MANUFACTURER, plant, Vector2i.RIGHT)
 	_assert(sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT), "제조기를 세운다")
 	var machine: Sim.Machine = sim.machine_at(plant)
 	var plantside: Vector2i = _clear_cell(sim, Vector2i(-7, 0))
@@ -396,13 +396,25 @@ func _open(sim) -> void:
 
 ## A cell with nothing on it, so a build cannot fail for a reason this test is
 ## not about.
+##
+## A tile of them, from the cell given: the machines here are two cells by two
+## since Grid v2, and clearing only the anchor left the rest of the footprint to
+## whatever the seed put there.
 func _clear_cell(sim, offset: Vector2i) -> Vector2i:
 	var cell: Vector2i = sim.core_cell + offset
-	sim.ore.erase(cell)
-	sim.machines.erase(cell)
-	sim.ground.erase(cell)
-	sim.ground_stack.erase(cell)
-	sim.frozen_cats.erase(cell)
-	sim.shards.erase(cell)
-	sim.debris.erase(cell)
+	for covered: Vector2i in Grid.cells_in(Rect2i(cell, Defs.PROP_SIZE)):
+		sim.ore.erase(covered)
+		sim.remove_machine(covered)
+		sim.ground.erase(covered)
+		sim.ground_stack.erase(covered)
+		sim.shards.erase(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
 	return cell
+
+## Where a machine's output lands: past its front edge (Grid v2).
+func _ahead(sim, type: int, anchor: Vector2i, dir: Vector2i) -> Vector2i:
+	return _clear_cell(sim, Grid.front_cell(Defs.machine_footprint(type, anchor, dir), dir,
+		anchor) - sim.core_cell)

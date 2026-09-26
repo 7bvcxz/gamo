@@ -387,7 +387,7 @@ func _start_run() -> void:
 	sim.begin_crash()
 	mission = Mission.BASE
 	# She wakes where she landed, beside the kit rather than on top of it.
-	player.position = sim.cell_centre(sim.core_cell)
+	player.position = sim.core_centre()
 	player.warmth = Defs.CRASH_WARMTH
 	player.locked = false
 	player.velocity = Vector2.ZERO
@@ -1091,15 +1091,33 @@ func is_dusk() -> bool:
 	return time_left <= Defs.DUSK_SECONDS
 
 func shelter_position() -> Vector2:
-	return sim.cell_centre(sim.shelter_cell)
+	return sim.shelter_centre()
 
 ## Where the player stands when they wake: the doorstep, since the hut itself is
 ## solid and putting them inside it would leave them clipped into a structure.
 func shelter_doorstep() -> Vector2:
-	return shelter_position() + Vector2(0.0, float(Grid.TILE))
+	return sim.shelter_doorstep()
 
+## Whether she is at the hut. Measured to its walls rather than to its middle:
+## the hut is six cells by eight, and SHELTER_REACH was written from the middle
+## of a hut one tile across -- half a tile of wall, and then the reach.
 func shelter_nearby() -> bool:
-	return player.global_position.distance_to(shelter_position()) <= Defs.SHELTER_REACH
+	var span: Rect2 = Grid.rect_px(sim.shelter_rect())
+	var nearest := Vector2(clampf(player.global_position.x, span.position.x, span.end.x),
+		clampf(player.global_position.y, span.position.y, span.end.y))
+	return player.global_position.distance_to(nearest) \
+		<= Defs.SHELTER_REACH - float(Grid.TILE) * 0.5
+
+## Out of anything that has just been built around her. The case unfolds into a
+## base four tiles across while she is standing at it, and a body inside a wall
+## is a body the collision can only let out, never keep out.
+func _step_clear() -> void:
+	player.position = sim.clear_point(player.position, Defs.PLAYER_RADIUS)
+	for cat: Sim.Cat in sim.cats:
+		if cat == sim.carried_cat:
+			continue
+		if sim.blocks_player(sim.cell_of(cat.pos)):
+			cat.pos = sim.clear_point(cat.pos, 1.0)
 
 ## Is a window up? One predicate, because every part of the game that has to
 ## behave differently while one is open has to agree about when that is -- and
@@ -1306,7 +1324,33 @@ const SAVE_PATH := "user://motorio_save.cfg"
 # shelter and the tools made at the fire, and -- over the next phases -- the
 # copper, debris and iron rings moving. A save from before answers old
 # questions; the schema check turns it into a safe new game.
-const SAVE_SCHEMA := 11
+# 12 (2026-09-26): Grid v2. Every cell coordinate in the file is on a lattice
+# twice as fine, the base and the hut are footprints many cells across, and the
+# seams are generated on the new lattice. An 11 is never read as a 12 and never
+# overwritten: it is copied aside first (`backup_old_save`) and migrated
+# (`SaveMigration`).
+const SAVE_SCHEMA := 12
+
+## Where a save written under another schema is kept before anything can write
+## over it. One per slot and schema, never overwritten once made.
+static func backup_path(slot: int, schema: int) -> String:
+	return slot_path(slot).trim_suffix(".cfg") + "_v%d.bak.cfg" % schema
+
+## Copies a slot aside if it holds a save from another schema. Returns the
+## backup's path, or "" when there was nothing to keep. A save is somebody's run:
+## a schema change used to mean the next autosave wrote straight over it.
+func backup_old_save(slot: int = 0) -> String:
+	var config := ConfigFile.new()
+	if config.load(slot_path(slot)) != OK:
+		return ""
+	var schema: int = int(config.get_value("motorio", "schema", -1))
+	if schema == SAVE_SCHEMA:
+		return ""
+	var path: String = backup_path(slot, schema)
+	if not FileAccess.file_exists(path):
+		DirAccess.copy_absolute(ProjectSettings.globalize_path(slot_path(slot)),
+			ProjectSettings.globalize_path(path))
+	return path
 
 static func slot_path(slot: int) -> String:
 	return SAVE_PATH if slot <= 0 else "user://motorio_save_%d.cfg" % slot
@@ -1507,8 +1551,13 @@ func _reach_find(test: Callable) -> Vector2i:
 	return Sim.NONE
 
 ## The cells under her body, which nothing may be built on.
+##
+## Two pixels inside the collision box. Her box is eighteen pixels and a cell
+## sixteen, so standing centred in the cell beside a footprint puts one pixel of
+## her over its edge -- and a refusal for a pixel is a refusal for nothing: the
+## mover lets a body out of a structure it overlaps.
 func body_cells() -> Array[Vector2i]:
-	var r: float = Defs.PLAYER_RADIUS
+	var r: float = Defs.PLAYER_RADIUS - 2.0
 	var low: Vector2i = Grid.cell_at(player.position - Vector2(r, r))
 	var high: Vector2i = Grid.cell_at(player.position + Vector2(r, r))
 	var out: Array[Vector2i] = []
@@ -1977,7 +2026,7 @@ func pickaxe_hint_cell() -> Vector2i:
 ## The base going up a step. This is the only thing that grows the circle now,
 ## so it is the moment the world gets bigger -- and it has to look like one.
 func _on_base_upgraded(level: int, radius: float) -> void:
-	var at: Vector2 = sim.cell_centre(sim.core_cell)
+	var at: Vector2 = sim.core_centre()
 	fx.ring(at, Defs.COL_CORE, Grid.px(radius))
 	fx.burst(at, Defs.COL_CORE, 18)
 	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % Defs.base_level_shown(level), Defs.COL_CORE, true)
@@ -2043,10 +2092,11 @@ func _update_kit_search(delta: float) -> void:
 	var was_placed: bool = sim.base_placed
 	sim.search_kit()
 	if sim.base_placed and not was_placed:
+		_step_clear()
 		# The case unfolds into the fire, on its own cell -- it does not sit down
 		# beside it. The rings walk outward because that is what the heat is
 		# about to do; the painted radius follows behind the simulated one.
-		var at: Vector2 = sim.cell_centre(sim.core_cell)
+		var at: Vector2 = sim.core_centre()
 		fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
 		fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
 		fx.ring(at, Defs.COL_CORE, Defs.RING_MILESTONE)
@@ -2417,6 +2467,7 @@ func finish_tutorial() -> void:
 		# base wherever she happened to be standing, and the base's cell is
 		# the centre every ring in the world is measured from.
 		sim.deploy_base()
+		_step_clear()
 	if not sim.shelter_placed:
 		sim.shelter_placed = true
 		sim.shelter_cell = sim.core_cell + Defs.SHELTER_CELL
@@ -3787,7 +3838,7 @@ func _update_craft(delta: float) -> void:
 ## then either the object flying into her hands (a tool, a torch) or tipping out
 ## onto the snow beside the fire (a kit, a bin). The table says which (`landing`).
 func _land_craft(craft: Dictionary, line: String, reveal: bool = true) -> void:
-	var fire: Vector2 = sim.cell_centre(sim.core_cell)
+	var fire: Vector2 = sim.core_centre()
 	WorldProgress.complete(fx, fire, Defs.COL_CORE, Grid.px(0.46))
 	audio.call("play", "pop")
 	var key: String = String(craft.get("icon", ""))
@@ -3871,7 +3922,7 @@ func _deposit_at_core() -> void:
 		audio.call("play", "deny")
 		return
 	var moved: Dictionary = sim.deposit_fuel()
-	var target: Vector2 = sim.cell_centre(sim.core_cell)
+	var target: Vector2 = sim.core_centre()
 	var parts: Array[String] = []
 	for item_type: int in moved:
 		var count: int = int(moved[item_type])
@@ -3901,6 +3952,7 @@ func _place_kit(_cell: Vector2i) -> void:
 	var cell: Vector2i = kit_anchor()
 	if kit == Defs.KIT_FOOD:
 		if sim.place_food_bin(cell):
+			_step_clear()
 			_notify("사료 상자를 놓았다.", Defs.COL_CORE)
 			fx.ring(Grid.rect_centre(sim.food_rect()), Defs.COL_CORE, Defs.RING_MEDIUM)
 			audio.call("play", "finish")
@@ -3911,6 +3963,7 @@ func _place_kit(_cell: Vector2i) -> void:
 			_notify("여기에는 놓을 수 없다.", Defs.COL_TEXT_DIM)
 	elif kit == Defs.KIT_SHELTER:
 		if sim.place_shelter(cell):
+			_step_clear()
 			_notify("잘 곳을 세웠다.  밤에는 여기서 쉬면 된다.", Defs.COL_CORE)
 			fx.ring(Grid.rect_centre(sim.shelter_rect()), Defs.COL_CORE, Defs.RING_LARGE)
 			audio.call("play", "finish")
@@ -4003,6 +4056,7 @@ func debug_unlock_all() -> void:
 		# base wherever she happened to be standing, and the base's cell is
 		# the centre every ring in the world is measured from.
 		sim.deploy_base()
+		_step_clear()
 	for type: int in Defs.BUILDABLE:
 		sim.unlocked[type] = true
 	for item_type: int in Defs.COUNTED_ITEMS:
@@ -4124,9 +4178,10 @@ func debug_spill() -> void:
 	# 1.0.28, so the anchor is a fixed offset from the fire -- which is what the
 	# boulder was standing in for anyway: somewhere near enough to walk to and
 	# far enough that the arrangement is not sitting on the base.
-	# Offsets in tiles, turned into cells, so the arrangement stands where it
-	# always did whatever the cell size.
-	var anchor: Vector2i = sim.core_cell + Vector2i(6, 0) * Grid.SCALE
+	# Offsets in tiles, turned into cells. Nine tiles east rather than six: the
+	# run starts six tiles back from here and one down, which was the tile under
+	# a fire one tile across, and is inside a base four tiles across (Grid v2).
+	var anchor: Vector2i = sim.core_cell + Vector2i(9, 0) * Grid.SCALE
 
 	# A run of belt one row below it, ending in the open a couple of cells short
 	# of her -- so the pile it makes and where she is standing are on the same
@@ -4151,7 +4206,8 @@ func debug_spill() -> void:
 	var seeded := 0
 	if belt != null:
 		for index in 6:
-			belt.items.append({"type": Defs.ITEM_HEATSTONE, "t": 1.0 - float(index) * 0.34})
+			belt.items.append({"type": Defs.ITEM_HEATSTONE,
+				"t": 1.0 - float(index) * Defs.belt_gap_cells()})
 			seeded += 1
 	# The carried material back to nothing, against the 500 of everything the
 	# unlock key grants. What this key stages is a pile of heat stone arriving,
@@ -4161,6 +4217,11 @@ func debug_spill() -> void:
 	# One cell west of the anchor, looking east, so she is beside the open end
 	# rather than on top of it.
 	player.position = sim.cell_centre(anchor + Vector2i(-1, 0))
+	for prop_set: Dictionary in [sim.frozen_cats, sim.debris]:
+		for origin: Vector2i in prop_set.keys():
+			if sim.prop_rect(origin).intersects(Rect2i(start_cell - Vector2i(2, 2),
+					Vector2i(run + 3 * Grid.SCALE + 4, 5))):
+				prop_set.erase(origin)
 	player.facing = Vector2i.RIGHT
 	tool_index = TOOL_PICKAXE
 	_notify("디버그 쏟기 · 벨트 %d칸 · 자원 %d개" % [built, seeded], Defs.COL_DANGER)
@@ -4458,6 +4519,8 @@ func save_game(announce: bool = true, slot: int = 0) -> bool:
 		"frozen_seen": frozen_seen,
 		"sim": sim.to_save(),
 	})
+	# Never over a run from another schema without keeping it first.
+	backup_old_save(slot)
 	if config.save(slot_path(slot)) != OK:
 		return false
 	if announce:
@@ -4525,8 +4588,10 @@ func load_game(slot: int = 0) -> bool:
 	if config.load(slot_path(slot)) != OK:
 		return false
 	# A schema change means the shape of the data moved; starting fresh is safer
-	# than half-restoring a run into a game that no longer matches it.
+	# than half-restoring a run into a game that no longer matches it -- but the
+	# old file is kept, never written over.
 	if int(config.get_value("motorio", "schema", -1)) != SAVE_SCHEMA:
+		backup_old_save(slot)
 		return false
 	var data: Dictionary = config.get_value("motorio", "state", {})
 	if data.is_empty():
@@ -4564,6 +4629,9 @@ func load_game(slot: int = 0) -> bool:
 
 func clear_save() -> void:
 	for slot in SAVE_SLOTS:
+		# A run from before a schema change is not this game's to throw away:
+		# it is copied aside first, and the copies are never cleared.
+		backup_old_save(slot)
 		DirAccess.remove_absolute(slot_path(slot))
 	# And nothing to come back to. `resumed` is what the title menu asks when it
 	# decides whether to offer 이어하기, and deleting the file without clearing it

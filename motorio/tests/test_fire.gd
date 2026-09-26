@@ -116,7 +116,8 @@ func _test_no_double_count() -> void:
 
 func _test_picking_up_is_not_feeding() -> void:
 	var sim := _lit()
-	var cell: Vector2i = sim.core_cell + Vector2i(4, 4)
+	# Four tiles out on the diagonal, clear of the base (Grid v2: eight cells).
+	var cell: Vector2i = sim.core_cell + Vector2i(4, 4) * Grid.SCALE
 	sim.ore.erase(cell)
 	sim.drop_item(cell, Defs.ITEM_CRYSTAL)
 	sim.drop_item(cell, Defs.ITEM_CRYSTAL)

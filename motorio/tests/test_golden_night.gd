@@ -74,7 +74,7 @@ func _test_cats_return_home_at_night() -> void:
 	sim.cats.clear()
 	for index in 2:
 		var cat = sim.Cat.new()
-		cat.pos = sim.cell_centre(sim.core_cell + Vector2i(3 + index, 3))
+		cat.pos = sim.cell_centre(sim.core_cell + Vector2i(3 + index, 3) * Grid.SCALE)
 		cat.state = Defs.CAT_IDLE
 		sim.cats.append(cat)
 	main.time_left = Defs.NIGHT_SECONDS - 1.0
@@ -105,9 +105,13 @@ func _test_powered_factory_continues_at_night() -> void:
 	sim.stock[Defs.ITEM_ENERGY_CORE] = 2
 	sim.stock[Defs.ITEM_IRON] = 50
 	sim.stock[Defs.ITEM_HEATSTONE] = 50
-	var gen: Vector2i = _clear(sim, sim.core_cell + Vector2i(-4, 2))
-	var plant: Vector2i = _clear(sim, sim.core_cell + Vector2i(4, 2))
-	_clear(sim, plant + Vector2i.RIGHT)
+	# In tiles, clear of the base and the hut (Grid v2), each footprint emptied.
+	var gen: Vector2i = _clear(sim, sim.core_cell + Vector2i(-4, -4) * Grid.SCALE,
+		Defs.machine_footprint(Defs.M_GENERATOR, Vector2i.ZERO).size)
+	var plant: Vector2i = _clear(sim, sim.core_cell + Vector2i(4, 2) * Grid.SCALE,
+		Defs.machine_footprint(Defs.M_MANUFACTURER, Vector2i.ZERO).size)
+	_clear(sim, Grid.front_cell(Defs.machine_footprint(Defs.M_MANUFACTURER, plant),
+		Vector2i.RIGHT, plant))
 	_assert(sim.build(Defs.M_GENERATOR, gen, Vector2i.RIGHT), "발전기가 선다")
 	_assert(sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT), "제조기가 선다")
 	sim.machine_at(gen).buffer[Defs.GENERATOR_FUEL] = 4
@@ -130,7 +134,9 @@ func _test_unpowered_cat_machine_stops_when_cat_leaves() -> void:
 	sim.stock[Defs.ITEM_HEATSTONE] = 50
 	sim.stock[Defs.ITEM_COPPER] = 50
 	sim.unlocked[Defs.M_MINER] = true
-	var seam: Vector2i = _clear(sim, sim.core_cell + Vector2i(0, 4))
+	var seam: Vector2i = sim.core_cell + Vector2i(6, -6) * Grid.SCALE
+	_clear(sim, Defs.machine_footprint(Defs.M_MINER, seam).position,
+		Defs.machine_size(Defs.M_MINER))
 	sim.ore[seam] = Defs.ITEM_HEATSTONE
 	sim._assign_purity()
 	_assert(sim.build(Defs.M_MINER, seam, Vector2i.RIGHT), "채굴기가 선다")
@@ -183,9 +189,13 @@ func _test_day_record_does_not_block_world() -> void:
 
 # --- Helpers ------------------------------------------------------------------
 
-func _clear(sim, cell: Vector2i) -> Vector2i:
-	sim.ore.erase(cell)
-	sim.machines.erase(cell)
-	sim.debris.erase(cell)
-	sim.frozen_cats.erase(cell)
+## A block of cells from `cell` emptied of everything a build would refuse.
+func _clear(sim, cell: Vector2i, size: Vector2i = Vector2i.ONE) -> Vector2i:
+	for covered: Vector2i in Grid.cells_in(Rect2i(cell, size)):
+		sim.ore.erase(covered)
+		sim.remove_machine(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
 	return cell

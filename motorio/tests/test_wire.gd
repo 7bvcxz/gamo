@@ -105,7 +105,7 @@ func _test_changing_loses_nothing() -> void:
 	var main := await _run_with_a_machine()
 	var sim = main.sim
 	var machine: Sim.Machine = sim.machine_at(_PLANT)
-	var ahead: Vector2i = _PLANT + Vector2i.RIGHT
+	var ahead: Vector2i = _OUT
 
 	machine.buffer[Defs.ITEM_IRON] = 2
 	sim.tick(1.0)
@@ -152,10 +152,10 @@ func _test_the_lines_do_not_mix() -> void:
 	# look like three wires.
 	var made: int = int(sim.stock.get(Defs.ITEM_COPPER_WIRE, 0)) \
 		+ int(machine.outbox.get(Defs.ITEM_COPPER_WIRE, 0)) \
-		+ _on_floor(sim, _PLANT + Vector2i.RIGHT, Defs.ITEM_COPPER_WIRE)
+		+ _on_floor(sim, _OUT, Defs.ITEM_COPPER_WIRE)
 	_assert(made == 2, "구리 하나가 전선 둘이 된다 (%d)" % made)
 	_assert(not machine.buffer.has(Defs.ITEM_COPPER), "그리고 구리를 먹었다")
-	_assert(sim.ground.get(_PLANT + Vector2i.RIGHT, -1) != Defs.ITEM_IRON_PLATE,
+	_assert(sim.ground.get(_OUT, -1) != Defs.ITEM_IRON_PLATE,
 		"철판은 한 개도 나오지 않았다")
 	main.free()
 
@@ -215,8 +215,10 @@ func _test_the_copper_line() -> void:
 	var machine: Sim.Machine = sim.machine_at(_PLANT)
 	sim.set_recipe(machine, "copper_wire")
 
-	var feeder: Vector2i = _clear(sim, Vector2i(4, 3))
-	var out_belt: Vector2i = _clear(sim, Vector2i(6, 3))
+	# Belts are one cell each (Grid v2), and the feeder's cell is right against
+	# the machine, so only that cell is cleared.
+	var feeder: Vector2i = _clear(sim, Vector2i(4, 3), Vector2i.ONE)
+	var out_belt: Vector2i = _clear(sim, _OUT, Vector2i.ONE)
 	_assert(sim.build(Defs.M_BELT, feeder, Vector2i.RIGHT), "입구에 벨트")
 	_assert(sim.build(Defs.M_BELT, out_belt, Vector2i.RIGHT), "출구에 벨트")
 	sim.machine_at(feeder).items.append({"type": Defs.ITEM_COPPER, "t": 0.95})
@@ -235,6 +237,9 @@ func _test_the_copper_line() -> void:
 # --- Helpers --------------------------------------------------------------------
 
 const _PLANT := Vector2i(5, 3)
+## Where it puts what it makes: past its front edge (Grid v2 -- the machine is
+## two cells by two, so the cell in front of it is two cells over).
+const _OUT := Vector2i(7, 3)
 
 func _run_with_a_machine() -> Node2D:
 	var main := load("res://scenes/Main.tscn").instantiate() as Node2D
@@ -260,8 +265,8 @@ func _run_with_a_machine() -> Node2D:
 	if sim.core_cell != Vector2i.ZERO:
 		push_error("이 파일은 기지가 원점에 있다고 가정한다")
 	var plant: Vector2i = _clear(sim, _PLANT)
-	_clear(sim, plant + Vector2i.RIGHT)
-	_clear(sim, plant + Vector2i.LEFT)
+	_clear(sim, _OUT, Vector2i.ONE)
+	_clear(sim, plant + Vector2i.LEFT, Vector2i.ONE)
 	sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT)
 	# Power, or nothing turns and every timing below measures the grid instead.
 	var plantside: Vector2i = _clear(sim, Vector2i(-5, 3))
@@ -272,13 +277,18 @@ func _run_with_a_machine() -> Node2D:
 ## Absolute cells, not offsets: the base goes down on `core_cell`, which starts
 ## at the origin and stays there in these tests, so the two are the same number
 ## and writing it twice is how they stop being.
-func _clear(sim, cell: Vector2i) -> Vector2i:
-	sim.ore.erase(cell)
-	sim.machines.erase(cell)
-	sim.ground.erase(cell)
-	sim.ground_stack.erase(cell)
-	sim.frozen_cats.erase(cell)
-	sim.debris.erase(cell)
+##
+## A tile of cells from there: the machines are two cells by two (Grid v2).
+func _clear(sim, cell: Vector2i, size: Vector2i = Defs.PROP_SIZE) -> Vector2i:
+	for covered: Vector2i in Grid.cells_in(Rect2i(cell, size)):
+		sim.ore.erase(covered)
+		sim.remove_machine(covered)
+		sim.ground.erase(covered)
+		sim.ground_stack.erase(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
 	return cell
 
 ## How many of one kind are lying on a cell. `ground_count` answers "how many",

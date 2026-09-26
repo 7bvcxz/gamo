@@ -46,7 +46,8 @@ func _test_windows() -> void:
 	main.finish_tutorial()
 	main.debug_unlock_all()
 	main.state = main.State.PLAY
-	main.player.position = main.sim.cell_centre(main.sim.core_cell + Vector2i(0, 1))
+	# Just below the base's south wall, looking up at it (Grid v2).
+	main.player.position = Grid.centre(Vector2i(main.sim.core_cell.x, main.sim.base_rect().end.y))
 	main.player.facing = Vector2i.UP
 	var hud: Node = main.hud
 	main._process(0.0)

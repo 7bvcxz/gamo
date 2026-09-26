@@ -52,7 +52,8 @@ func _run() -> void:
 	sim.grant_cats(1)
 	_assert(sim.cats.size() >= 1, "three crates buy a cat")
 	var kitty = sim.cats[0]
-	var drop := Vector2i(3, 0)
+	# Three tiles east, clear of the base (Grid v2: four tiles across).
+	var drop := Vector2i(3, 0) * Grid.SCALE
 	_assert(sim.drop_item(drop, Defs.ITEM_CRYSTAL), "a shard can lie on the floor")
 	# A tile takes a pile of the same thing, because a belt that ends in the open
 	# pours onto the ground and one-per-tile made it stop after a single item.
@@ -180,7 +181,10 @@ func _run() -> void:
 	_assert(is_equal_approx(sim.power_draw, 0.0), "a belt draws no power")
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "with nothing supplying it yet")
 
-	var gen_cell := Vector2i(5, 7)
+	# North-east of the base, off the starter seams (Grid v2).
+	var gen_cell := Vector2i(8, -6)
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, gen_cell)):
+		sim.ore.erase(covered)
 	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "a generator goes down")
 	sim.tick(0.01)
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "an unfuelled generator supplies nothing")
@@ -283,7 +287,7 @@ func _run() -> void:
 	var near_best := 0
 	var far_best := 0
 	for cell: Vector2i in grade_sim.ore:
-		var distance: float = Vector2(cell - grade_sim.core_cell).length()
+		var distance: float = grade_sim.tiles_from_core(cell)
 		if distance < Defs.PURITY_RICH_RING:
 			near_best = maxi(near_best, grade_sim.purity_of(cell))
 		if distance >= Defs.PURITY_PURE_RING:
@@ -292,8 +296,10 @@ func _run() -> void:
 	if far_best > 0:
 		_assert(far_best > near_best, "and the far ones are richer (%d vs %d)" % [far_best, near_best])
 	# A richer seam must actually mine faster, or the grade is decoration.
-	var plain := Vector2i(grade_sim.core_cell.x + 5, grade_sim.core_cell.y)
-	var rich := Vector2i(grade_sim.core_cell.x + int(Defs.PURITY_PURE_RING) + 2, grade_sim.core_cell.y)
+	# Tiles of distance, in cells (Grid v2).
+	var plain := Vector2i(grade_sim.core_cell.x + 5 * Grid.SCALE, grade_sim.core_cell.y)
+	var rich := Vector2i(grade_sim.core_cell.x + (int(Defs.PURITY_PURE_RING) + 2) * Grid.SCALE,
+		grade_sim.core_cell.y)
 	grade_sim.ore[plain] = Defs.ITEM_CRYSTAL
 	grade_sim.ore[rich] = Defs.ITEM_CRYSTAL
 	grade_sim._assign_purity()
@@ -312,9 +318,10 @@ func _run() -> void:
 	grade_sim.stock[Defs.ITEM_HEATSTONE] = 50
 	grade_sim.stock[Defs.ITEM_ENERGY_CORE] = 5
 	var before_stock: int = int(grade_sim.stock[Defs.ITEM_COPPER])
-	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6)
-	grade_sim.ore.erase(spot)
-	grade_sim.machines.erase(spot)
+	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6) * Grid.SCALE
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, spot)):
+		grade_sim.ore.erase(covered)
+		grade_sim.remove_machine(covered)
 	_assert(grade_sim.build(Defs.M_GENERATOR, spot, Vector2i.RIGHT), "a generator goes down")
 	_assert(int(grade_sim.stock[Defs.ITEM_COPPER]) < before_stock, "and costs materials")
 	_assert(grade_sim.demolish(spot), "and comes back up")
@@ -338,7 +345,9 @@ func _run() -> void:
 	grid.stock[Defs.ITEM_HEATSTONE] = 200
 	grid.stock[Defs.ITEM_COPPER] = 200
 	grid.stock[Defs.ITEM_ENERGY_CORE] = 5
-	var seam2 := Vector2i(grid.core_cell.x + 4, grid.core_cell.y + 4)
+	var seam2 := Vector2i(grid.core_cell.x + 4, grid.core_cell.y + 4) * Grid.SCALE
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, seam2)):
+		grid.ore.erase(covered)
 	grid.ore[seam2] = Defs.ITEM_CRYSTAL
 	grid._assign_purity()
 	_assert(grid.build(Defs.M_MINER, seam2, Vector2i.RIGHT), "a miner goes down")
@@ -350,8 +359,9 @@ func _run() -> void:
 	_assert(grid.ground.is_empty() and int(grid.delivered.get(Defs.ITEM_CRYSTAL, 0)) == idle_before,
 		"and produces nothing at all")
 
-	var gen2 := Vector2i(grid.core_cell.x + 8, grid.core_cell.y + 8)
-	grid.ore.erase(gen2)
+	var gen2 := Vector2i(grid.core_cell.x + 8, grid.core_cell.y + 8) * Grid.SCALE
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, gen2)):
+		grid.ore.erase(covered)
 	_assert(grid.build(Defs.M_GENERATOR, gen2, Vector2i.RIGHT), "a generator goes down")
 	grid.machine_at(gen2).buffer[Defs.GENERATOR_FUEL] = 4
 	grid.tick(0.02)
@@ -441,10 +451,12 @@ func _haul_seconds(tiles: int) -> float:
 	sim.setup(4242)
 	sim.grant_cats(1)
 	var cat = sim.cats[0]
-	cat.pos = sim.cell_centre(sim.core_cell)
-	var at := sim.core_cell + Vector2i(tiles, 0)
+	# Just outside the base's east wall, where a delivery ends (Grid v2: the base
+	# is four tiles across and solid; the cat used to stand on the one-tile core).
+	cat.pos = sim.cell_centre(Grid.front_cell(sim.base_rect(), Vector2i.RIGHT, sim.core_cell))
+	var at := sim.core_cell + Vector2i(tiles, 0) * Grid.SCALE
 	sim.ore.erase(at)
-	sim.machines.erase(at)
+	sim.remove_machine(at)
 	sim.drop_item(at, Defs.ITEM_CRYSTAL)
 	var elapsed := 0.0
 	var banked: int = int(sim.stock.get(Defs.ITEM_CRYSTAL, 0))

@@ -5,6 +5,10 @@ extends SceneTree
 
 var failures := 0
 const PATH := "user://motorio_save.cfg"
+## Where the staged factory stands, in build cells (Grid v2).
+const MINER := Vector2i(6, 0)
+const BELT := Vector2i(1, 5)
+const ICE := Vector2i(10, -6)
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -19,28 +23,33 @@ func _run() -> void:
 	# Build a distinctive state: a staffed miner, a belt with cargo, materials,
 	# a cat in her arms, a part-eaten food bin and a second day in progress.
 	var seed_before: int = main.run_seed
-	main.sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
 	# Past the opening first. A world with a staffed miner and a belt full of
 	# cargo but no fire is not a world this game can reach, and leaning on it
 	# meant "the core still exists" was really asking about the core `setup`
 	# leaves behind rather than the one the case unfolds into.
 	main.finish_tutorial()
 	_open(main.sim)
-	main.sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
-	main.sim.build(Defs.M_BELT, Vector2i(0, 2), Vector2i.UP)
-	(main.sim.machine_at(Vector2i(0, 2)) as Sim.Machine).items.append({"type": Defs.ITEM_COPPER, "t": 0.4})
+	# Grid v2: a mining post four cells across whose west edge meets the base's
+	# east edge, and a belt in the lane just south of the base.
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, MINER)):
+		main.sim.ore.erase(covered)
+	main.sim.ore[MINER] = Defs.ITEM_CRYSTAL
+	main.sim.ore.erase(BELT)
+	main.sim.build(Defs.M_MINER, MINER, Vector2i.LEFT)
+	main.sim.build(Defs.M_BELT, BELT, Vector2i.UP)
+	(main.sim.machine_at(BELT) as Sim.Machine).items.append({"type": Defs.ITEM_COPPER, "t": 0.4})
 	main.sim.carried_frozen = true
 	main.sim.frozen_cats.clear()
-	main.sim.frozen_cats[Vector2i(4, -3)] = 0.62
+	main.sim.frozen_cats[ICE] = 0.62
 	main.sim.food = 137
 	main.sim.delivered[Defs.ITEM_COPPER] = 9
 	main.sim.stones_in = 321
 	main.sim.cats.clear()
 	var cat := Sim.Cat.new()
-	cat.assigned = Vector2i(-1, 0)
+	cat.assigned = MINER
 	cat.state = Defs.CAT_WORKING
 	cat.hunger = 0.42
-	cat.pos = main.sim.cell_centre(Vector2i(-1, 0))
+	cat.pos = main.sim.post_stand(MINER)
 	main.sim.cats.append(cat)
 	main.day_number = 3
 	main.time_left = 88.0
@@ -63,19 +72,19 @@ func _run() -> void:
 	_assert(int(main.sim.delivered[Defs.ITEM_COPPER]) == 9, "copper count survives")
 	_assert(main.sim.food == 137, "the food bin level survives")
 	_assert(main.sim.carried_frozen, "the frozen cat in her arms survives")
-	_assert(is_equal_approx(float(main.sim.frozen_cats.get(Vector2i(4, -3), 0.0)), 0.62),
+	_assert(is_equal_approx(float(main.sim.frozen_cats.get(ICE, 0.0)), 0.62),
 		"and one half-melted on the ground keeps its progress")
 
-	var miner: Sim.Machine = main.sim.machine_at(Vector2i(-1, 0))
+	var miner: Sim.Machine = main.sim.machine_at(MINER)
 	_assert(miner != null and miner.type == Defs.M_MINER, "the miner is rebuilt")
-	var belt: Sim.Machine = main.sim.machine_at(Vector2i(0, 2))
+	var belt: Sim.Machine = main.sim.machine_at(BELT)
 	_assert(belt != null and belt.items.size() == 1, "cargo on the belt is rebuilt")
 	_assert(int(belt.items[0]["type"]) == Defs.ITEM_COPPER, "and it is the same cargo")
 	_assert(main.sim.machine_at(main.sim.core_cell) != null, "the core still exists exactly once")
 
 	_assert(main.sim.cats.size() == 1, "the workforce is restored")
 	var restored: Sim.Cat = main.sim.cats[0]
-	_assert(restored.assigned == Vector2i(-1, 0), "a cat remembers its machine")
+	_assert(restored.assigned == MINER, "a cat remembers its machine")
 	_assert(absf(restored.hunger - 0.42) < 0.01, "a cat remembers how hungry it is")
 	_assert(restored.state == Defs.CAT_WORKING, "a cat remembers what it was doing")
 

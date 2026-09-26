@@ -1234,7 +1234,7 @@ static func throughput_line(type: int) -> String:
 			return "%s %.0f/분 → 전력 %.1f" \
 				% [ITEM_NAMES[GENERATOR_FUEL], per_minute(GENERATOR_PERIOD), GENERATOR_OUTPUT]
 		M_BELT:
-			return "%.0f/분 · 칸당 %.1f초" % [BELT_SPEED / 0.34 * 60.0, 1.0 / BELT_SPEED]
+			return "%.0f/분 · 칸당 %.1f초" % [BELT_SPEED / BELT_GAP * 60.0, 1.0 / BELT_SPEED]
 		M_SPLITTER:
 			return "한 줄을 두 줄로"
 		M_CORE:
@@ -1510,6 +1510,12 @@ const PROD_LOGISTICS := "logistics"
 ##                can walk through is a player strolling out of a furnace
 ##   directional  has a facing worth telling the player about R for. A belt turned
 ##                goes somewhere else; a generator turned is the same generator
+##   size         the footprint in build cells, written facing east (Grid v2).
+##                Absent means one cell. Placement, collision, the path grid and
+##                the drawing all read it through `machine_size`
+##   anchor       where the anchor cell sits in the footprint; absent means the
+##                default rule (Grid.default_anchor). For a rig the anchor is the
+##                seam it works -- its ORE_ANCHOR
 const MACHINES: Array[Dictionary] = [
 	{
 		"id": M_CORE, "key": "core", "name": "열 코어", "short": "코어",
@@ -1518,6 +1524,9 @@ const MACHINES: Array[Dictionary] = [
 		"cost": {}, "unlock": [], "color": COL_CORE,
 		"power_draw": 0.0, "power_output": 0.0,
 		"build_order": -1, "walkable": false, "directional": false,
+		# The base. Eight cells across -- four tiles -- with the fire in the
+		# middle: the anchor is the cell just up and left of the true centre.
+		"size": Vector2i(8, 8),
 	},
 	{
 		# What it is, not how to use it. The instructions were two sentences of
@@ -1530,6 +1539,10 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": MINER_POWER_DRAW, "power_output": 0.0,
 		"build_order": 0, "walkable": false, "directional": true,
 		"mine_rate": 1.0,
+		# A mining post, four cells by four around one seam. The seam is the
+		# anchor (ORE_ANCHOR, the default rule's (1, 1)); nothing else in the
+		# footprint may be a seam, which is what makes it one post per seam.
+		"size": Vector2i(4, 4),
 	},
 	{
 		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
@@ -1548,6 +1561,8 @@ const MACHINES: Array[Dictionary] = [
 		"color": Color8(120, 190, 235),
 		"power_draw": 0.0, "power_output": GENERATOR_OUTPUT,
 		"build_order": 3, "walkable": false, "directional": false,
+		# Final size undecided; a tile, the size it always was.
+		"size": Vector2i(2, 2),
 	},
 	{
 		# Bootstrap: everything it costs comes out of the ground with a pickaxe.
@@ -1561,6 +1576,7 @@ const MACHINES: Array[Dictionary] = [
 		"color": Color8(196, 168, 120),
 		"power_draw": MANUFACTURER_POWER, "power_output": 0.0,
 		"build_order": 4, "walkable": false, "directional": true,
+		"size": Vector2i(2, 2),
 	},
 	{
 		"id": M_SPLITTER, "key": "splitter", "name": "분배기", "short": "분배기",
@@ -1585,6 +1601,7 @@ const MACHINES: Array[Dictionary] = [
 		"color": Color8(176, 156, 210),
 		"power_draw": ASSEMBLER_POWER, "power_output": 0.0,
 		"build_order": 5, "walkable": false, "directional": true,
+		"size": Vector2i(2, 2),
 	},
 	{
 		# The end of the line this step builds, and the reason to build it. Same
@@ -1600,6 +1617,7 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": RIG2_POWER_DRAW, "power_output": 0.0,
 		"build_order": 6, "walkable": false, "directional": true,
 		"mine_rate": RIG2_RATE,
+		"size": Vector2i(4, 4),
 	},
 ]
 
@@ -1632,7 +1650,7 @@ static func machine_io(type: int) -> Array[String]:
 	match type:
 		M_BELT:
 			return ["입력   뒤쪽에서 받음",
-				"출력   앞쪽으로 %.0f/분" % (BELT_SPEED / 0.34 * 60.0),
+				"출력   앞쪽으로 %.0f/분" % (BELT_SPEED / BELT_GAP * 60.0),
 				"특성   전력이 필요 없음 · F로 등급 변경"]
 		M_SPLITTER:
 			return ["입력   한 줄",
@@ -2600,7 +2618,19 @@ const BELT_TIERS := [
 
 static func belt_speed(tier: int) -> float:
 	return BELT_SPEED * float(BELT_TIERS[clampi(tier, 0, BELT_TIERS.size() - 1)]["speed"])
+## The same, in cells a second: how fast an item crosses one belt cell. A belt
+## cell is half a tile, so it is crossed twice as often -- which is what keeps
+## an item moving at the speed it always did.
+static func belt_cell_speed(tier: int) -> float:
+	return belt_speed(tier) * float(Grid.SCALE)
+## How far apart items ride, in tiles, and as a fraction of one belt cell.
+const BELT_GAP := 0.34
+static func belt_gap_cells() -> float:
+	return BELT_GAP * float(Grid.SCALE)
+## Items per tile of belt. A cell holds as many as fit at BELT_GAP.
 const BELT_CAPACITY := 3
+static func belt_cell_capacity() -> int:
+	return int(ceil(1.0 / belt_gap_cells()))
 ## A splitter holds a little so a momentary block on one branch does not stall
 ## the line feeding it.
 const SPLITTER_CAPACITY := 3
@@ -2714,17 +2744,22 @@ const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when wa
 ## enough that the carry is visible at a glance.
 const CARRY_AHEAD := 0.3
 
-## Whole tiles, not a half-tile offset. The shelter is a building that occupies
-## one cell of the grid exactly, like the core, so it can be a structure the
-## player walks around rather than a decal they walk through.
-const SHELTER_CELL := Vector2i(-3, 3)
+## Where the hut stands in a world that starts with one, as its anchor's offset
+## from the core's, in build cells. Against the base's west side with one tile of
+## ground between them -- SHELTER_CLEARANCE -- and its doorstep 5.4 tiles from
+## the fire, inside the opening circle as the old one-tile hut's (5.1) was. The
+## hut is six cells by eight since Grid v2 and the base eight by eight, so the
+## one-tile offset it used to be (-3, 3) would have stood the two buildings on
+## top of each other.
+const SHELTER_CELL := Vector2i(-9, 1)
 ## Measured from the cell centre, so standing on any of the four neighbouring
 ## tiles counts as being at the door.
 const SHELTER_REACH := 62.0
 const FOOD_OFFSET := Vector2(-4.5, 2.5)
-## Where the bin stands by default, in cells from whatever it is placed relative
-## to. It used to be FOOD_OFFSET rounded at each use; one constant says it once.
-const FOOD_CELL := Vector2i(-5, 3)
+## Where the bin stands by default, as its anchor's offset from the hut's, in
+## build cells: against the hut's west wall. It used to be FOOD_OFFSET rounded
+## at each use, from the core in one place and from the hut in another.
+const FOOD_CELL := Vector2i(-4, 0)
 
 ## --- Footprints of the buildings that are not machines ------------------------
 ## Machines carry their size in their registry row (`Defs.MACHINES`); the hut, the
@@ -2733,8 +2768,12 @@ const FOOD_CELL := Vector2i(-5, 3)
 ## A tile across: the ice, the wreckage, the case, the board, the village's
 ## pieces. The size a cell used to be.
 const PROP_SIZE := Vector2i.ONE * Grid.SCALE
-const SHELTER_SIZE := Vector2i.ONE * Grid.SCALE
-const FOOD_BIN_SIZE := Vector2i.ONE * Grid.SCALE
+const SHELTER_SIZE := Vector2i(6, 8)
+const FOOD_BIN_SIZE := PROP_SIZE
+## How far apart the seams of one field lie, in cells (Chebyshev). Four is the
+## closest two four-by-four mining posts can stand without either covering the
+## other's seam -- so every seam in a field can have a post of its own.
+const ORE_PITCH := 4
 
 # --- Cat workers -------------------------------------------------------------
 ## A miner is a machine, not a worker. It only runs while a cat stands at it,
@@ -2843,6 +2882,10 @@ const FROZEN_CARRY_SPEED := 0.5
 ## How close to the core it has to be put down before the ice starts to go. Two
 ## tiles, measured from the core's own cell -- the base has to be somewhere, and
 ## "near the fire" is the reason the walk home exists at all.
+##
+## Since Grid v2 the base is four tiles across, so the rule is measured from its
+## walls: THAW_RADIUS less the half tile the old core's edge was from its
+## middle (`Sim.can_thaw`). The number is the same; the fire got bigger.
 const THAW_RADIUS := 2.0
 ## How long the ice takes once it is in place. Long enough to be watched and
 ## short enough to be waited for; the four stages are three seconds each.
@@ -3197,6 +3240,12 @@ static func base_level(stones: int) -> int:
 
 static func warm_radius(stones: int) -> float:
 	return float(BASE_LEVELS[base_level(stones)]["radius"])
+
+## The same circle counted in build cells. The radius is written in tiles and a
+## tile is `Grid.SCALE` cells across since Grid v2, so the opening circle of 7 is
+## 14 cells -- the same ground it always covered.
+static func warm_radius_cells(stones: int) -> float:
+	return Grid.cells(warm_radius(stones))
 
 ## The number the player sees. `base_level` counts from zero because it indexes
 ## the ladder; the fire in front of them is 1단계 the moment it is lit, and a

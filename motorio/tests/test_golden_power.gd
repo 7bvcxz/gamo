@@ -58,7 +58,7 @@ func _test_first_debris_is_outside_heat_15() -> void:
 		sim._refresh_radius()
 		var nearest := 1e9
 		for cell: Vector2i in sim.debris:
-			nearest = minf(nearest, Vector2(cell - sim.core_cell).length())
+			nearest = minf(nearest, sim.prop_tiles_from_core(cell))
 			if sim.is_warm(cell):
 				inside += 1
 				break
@@ -79,7 +79,7 @@ func _test_first_debris_needs_a_torch() -> void:
 	var wreck := Vector2i(9999, 9999)
 	var nearest := 1e9
 	for cell: Vector2i in sim.debris:
-		var d: float = Vector2(cell - sim.core_cell).length()
+		var d: float = sim.prop_tiles_from_core(cell)
 		if d < nearest:
 			nearest = d
 			wreck = cell
@@ -104,7 +104,7 @@ func _test_debris_search_time() -> void:
 	var wreck := Vector2i(9999, 9999)
 	var nearest := 1e9
 	for cell: Vector2i in sim.debris:
-		var d: float = Vector2(cell - sim.core_cell).length()
+		var d: float = sim.prop_tiles_from_core(cell)
 		if d < nearest:
 			nearest = d
 			wreck = cell
@@ -128,10 +128,15 @@ func _test_generator_cost_consumes_energy_core() -> void:
 	_assert(sim.is_unlocked(Defs.M_GENERATOR), "구리와 코어가 발전기를 연다 — 그대로다")
 	sim.stock[Defs.ITEM_COPPER] = 5
 	sim.stock[Defs.ITEM_ENERGY_CORE] = 1
-	var spot: Vector2i = sim.core_cell + Vector2i(3, 3)
-	sim.ore.erase(spot)
-	sim.machines.erase(spot)
-	sim.debris.erase(spot)
+	# Three tiles out on the diagonal, clear of the base (Grid v2: eight cells),
+	# and everything under the generator's two-by-two footprint cleared.
+	var spot: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, spot)):
+		sim.ore.erase(covered)
+		sim.remove_machine(covered)
+		var piece: Vector2i = sim.debris_key(covered)
+		if piece != Sim.NONE:
+			sim.debris.erase(piece)
 	_assert(sim.build(Defs.M_GENERATOR, spot, Vector2i.RIGHT), "지을 수 있다")
 	_assert(int(sim.stock.get(Defs.ITEM_ENERGY_CORE, 0)) == 0,
 		"코어가 실제로 소비된다 — 두 번째 발전기는 두 번째 잔해다")
@@ -177,10 +182,15 @@ func _test_conveyor_waits_for_power() -> void:
 	# A fuelled generator: the first watt is the event.
 	sim.stock[Defs.ITEM_COPPER] = 5
 	sim.stock[Defs.ITEM_ENERGY_CORE] = 1
-	var spot: Vector2i = sim.core_cell + Vector2i(3, 3)
-	sim.ore.erase(spot)
-	sim.machines.erase(spot)
-	sim.debris.erase(spot)
+	# Three tiles out on the diagonal, clear of the base (Grid v2: eight cells),
+	# and everything under the generator's two-by-two footprint cleared.
+	var spot: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, spot)):
+		sim.ore.erase(covered)
+		sim.remove_machine(covered)
+		var piece: Vector2i = sim.debris_key(covered)
+		if piece != Sim.NONE:
+			sim.debris.erase(piece)
 	sim.build(Defs.M_GENERATOR, spot, Vector2i.RIGHT)
 	_assert(not sim.power_ever, "빈 발전기는 아직 사건이 아니다")
 	sim.tick(0.05)

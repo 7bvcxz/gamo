@@ -53,8 +53,9 @@ func _test_second_ring_guarantees_two_cats() -> void:
 		sim.stones_in = int(Defs.BASE_LEVELS[1]["stones"])
 		sim._refresh_radius()
 		var at9 := 0
+		# Each block measured at its middle: it is a tile across (Grid v2).
 		for cell: Vector2i in sim.frozen_cats:
-			if sim.is_warm(cell):
+			if sim.is_warm_at(sim.prop_centre(cell)):
 				at9 += 1
 		# ...one cat -- the starter -- and no more.
 		if at9 > 1:
@@ -64,7 +65,7 @@ func _test_second_ring_guarantees_two_cats() -> void:
 		sim._refresh_radius()
 		var at11 := 0
 		for cell: Vector2i in sim.frozen_cats:
-			if sim.is_warm(cell) and sim.can_lift(cell):
+			if sim.is_warm_at(sim.prop_centre(cell)) and sim.can_lift(cell):
 				at11 += 1
 		if at11 < 3:
 			short += 1
@@ -86,7 +87,7 @@ func _test_edge_cat_remains_outside_heat_11() -> void:
 		sim._refresh_radius()
 		if sim.edge_frozen == Vector2i(9999, 9999):
 			missing += 1
-		elif sim.is_warm(sim.edge_frozen):
+		elif sim.is_warm_at(sim.prop_centre(sim.edge_frozen)):
 			inside += 1
 		sim.free()
 	_assert(missing == 0, "경계 고양이가 늘 있다 (%d회 실패)" % missing)
@@ -115,9 +116,11 @@ func _test_torch_only_releases_ground_ice() -> void:
 	_assert(sim.cats.is_empty(), "토치만으로 깨어나는 고양이는 없다")
 	_assert(not sim.can_thaw(cell), "그 자리에서는 해동도 시작되지 않는다")
 	_assert(sim.pick_up_frozen(cell), "안아 들고")
-	var home: Vector2i = sim.core_cell + Vector2i(1, 1)
-	sim.machines.erase(home)
-	sim.ore.erase(home)
+	# Against the base's south wall (Grid v2: the base is eight cells across).
+	var home := Vector2i(sim.core_cell.x, sim.base_rect().end.y)
+	for covered: Vector2i in Grid.cells_in(sim.prop_rect(home)):
+		sim.remove_machine(covered)
+		sim.ore.erase(covered)
 	_assert(sim.put_down_frozen(home), "기지 곁에 내려놓으면")
 	_assert(sim.can_thaw(home), "그때에야 녹기 시작한다")
 	sim.free()

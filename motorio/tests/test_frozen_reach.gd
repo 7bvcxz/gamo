@@ -47,11 +47,11 @@ func _lit() -> Sim:
 
 ## A cell well outside the fire, in a direction with nothing built on it.
 func _far(sim: Sim) -> Vector2i:
-	return sim.core_cell + Vector2i(0, int(sim.warm_radius) + 4)
+	return sim.core_cell + Vector2i(0, int(sim.warm_radius) + 4) * Grid.SCALE
 
 func _test_rule() -> void:
 	var sim := _lit()
-	var near: Vector2i = sim.core_cell + Vector2i(1, 1)
+	var near: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 	var far: Vector2i = _far(sim)
 	_assert(sim.can_touch(near), "불 안쪽은 만질 수 있다")
 	_assert(not sim.can_touch(far), "불 밖은 만질 수 없다")
@@ -65,7 +65,7 @@ func _test_rule() -> void:
 	_assert(sim.hand_mine(far, 99.0) < 0, "쳐도 아무것도 안 나온다")
 	sim.ore.erase(far)
 
-	sim.mined_rocks[far] = true
+	sim.mined_rocks[Grid.tile_of(far)] = true
 	sim.drop_item(far, Defs.ITEM_STONE)
 	_assert(sim.collect_ground_at(far) < 0, "밖의 바닥 자원은 못 줍는다")
 	sim.shards[far] = true
@@ -79,9 +79,9 @@ func _test_rule() -> void:
 	_assert(not sim.pick_up_cat(far), "살아 있는 고양이도 마찬가지다")
 
 	# And the same things inside the circle are hers.
-	var inside: Vector2i = sim.core_cell + Vector2i(2, 0)
+	var inside: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
 	sim.ore.erase(inside)
-	sim.mined_rocks[inside] = true
+	sim.mined_rocks[Grid.tile_of(inside)] = true
 	sim.frozen_cats[inside] = 0.0
 	_assert(sim.pick_up_frozen(inside), "온기 안에서는 들 수 있다")
 	sim.carried_frozen = false
@@ -103,7 +103,7 @@ func _test_torch_opens_it() -> void:
 	_assert(sim.can_touch(far), "횃불을 들면 만질 수 있다")
 	_assert(sim.can_hand_mine(far), "밖의 광맥도 캘 수 있다")
 	sim.ore.erase(far)
-	sim.mined_rocks[far] = true
+	sim.mined_rocks[Grid.tile_of(far)] = true
 	sim.drop_item(far, Defs.ITEM_STONE)
 	_assert(sim.collect_ground_at(far) >= 0, "바닥에 떨어진 것도 주워진다")
 	sim.free()
@@ -164,11 +164,11 @@ func _test_before_the_fire() -> void:
 	_assert(not sim.base_placed, "아직 기지가 없다")
 	# The rule is off until there is a fire. In the first minute there is no
 	# reach and no crafting either, so a refusal then is a wall with no door.
-	_assert(sim.can_touch(sim.core_cell + Vector2i(0, 30)),
+	_assert(sim.can_touch(sim.core_cell + Vector2i(0, 30) * Grid.SCALE),
 		"기지가 서기 전에는 어디든 만질 수 있다")
 	sim.carried_kit = Defs.KIT_BASE
 	sim.place_base(sim.core_cell)
-	_assert(not sim.can_touch(sim.core_cell + Vector2i(0, 30)),
+	_assert(not sim.can_touch(sim.core_cell + Vector2i(0, 30) * Grid.SCALE),
 		"불을 피우는 순간부터 규칙이 생긴다")
 	sim.free()
 
@@ -184,7 +184,7 @@ func _test_the_cat_out_there() -> void:
 		sim.place_base(sim.core_cell)
 		var nearest := 99.0
 		for cell: Vector2i in sim.frozen_cats:
-			nearest = minf(nearest, Vector2(cell - sim.core_cell).length())
+			nearest = minf(nearest, sim.prop_tiles_from_core(cell))
 		if nearest <= sim.warm_radius + ColdFog.PREVIEW_BAND:
 			seen += 1
 		if nearest <= sim.warm_radius:

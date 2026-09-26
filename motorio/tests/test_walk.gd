@@ -81,9 +81,10 @@ func _run() -> void:
 	# delivering from the right blinking twice. An idle cat picks the nearest one
 	# up on its own, so the run below actually contains the approach being
 	# accused rather than whatever route the map happened to produce.
-	for offset in range(2, 7):
-		sim.ground[sim.core_cell + Vector2i(offset, 0)] = Defs.ITEM_CRYSTAL
-		sim.ground[sim.core_cell + Vector2i(offset, 1)] = Defs.ITEM_CRYSTAL
+	# In tiles, past the base's east wall (Grid v2: the base is four tiles across).
+	for offset in range(3, 7):
+		sim.ground[sim.core_cell + Vector2i(offset, 0) * Grid.SCALE] = Defs.ITEM_CRYSTAL
+		sim.ground[sim.core_cell + Vector2i(offset, 1) * Grid.SCALE] = Defs.ITEM_CRYSTAL
 	var hauled_from_east := false
 
 	var step: float = 1.0 / 30.0
@@ -127,7 +128,7 @@ func _run() -> void:
 				if hop > tick_ceiling:
 					snaps.append("%.1f초 %d번 %.1fpx (%d -> %d)"
 						% [elapsed, index, hop, tick_state.get(index, -1), cat.state])
-			if cat.state == Defs.CAT_HAUL_TO_BASE and cat.pos.x > sim.cell_centre(sim.core_cell).x:
+			if cat.state == Defs.CAT_HAUL_TO_BASE and cat.pos.x > sim.core_centre().x:
 				hauled_from_east = true
 			# Checked while it is happening, not at the end. The first version of
 			# this looked for working cats after the loop, by which time the day
@@ -135,8 +136,12 @@ func _run() -> void:
 			# passed against the very code it was written to catch.
 			if cat.state == Defs.CAT_WORKING:
 				worked += 1
+				# Its work position: the seam itself when bare, and the cell it
+				# works a mining post from when there is one (Grid v2 -- a post is
+				# four cells by four and solid).
 				var feet: Vector2 = cat.pos + Vector2(0.0, Defs.CAT_FOOT_DROP)
-				off_centre = maxf(off_centre, feet.distance_to(sim.cell_centre(cat.assigned)))
+				off_centre = maxf(off_centre,
+					feet.distance_to(sim.cell_centre(sim.work_cell(cat.assigned))))
 			tick_last[index] = cat.pos
 			tick_state[index] = cat.state
 		if since < SAMPLE:

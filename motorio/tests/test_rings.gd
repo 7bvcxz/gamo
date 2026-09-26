@@ -38,7 +38,7 @@ func _run() -> void:
 			rich[key] = int(rich.get(key, 0))
 			copper[key] = int(copper.get(key, 0))
 			for cell: Vector2i in sim.ore:
-				if Vector2(cell - sim.core_cell).length() > r:
+				if sim.tiles_from_core(cell) > r:
 					continue
 				match int(sim.ore[cell]):
 					Defs.ITEM_HEATSTONE:

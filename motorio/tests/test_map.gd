@@ -93,20 +93,21 @@ func _fog(main: Node2D) -> void:
 	sim.setup(4242)
 
 	_check(sim.is_explored(sim.core_cell), "기지는 처음부터 보인다")
-	var far: Vector2i = sim.core_cell + Vector2i(80, 80)
+	# Offsets below are tiles of distance, in build cells (Grid v2).
+	var far: Vector2i = sim.core_cell + Vector2i(80, 80) * Grid.SCALE
 	_check(not sim.is_explored(far), "가보지 않은 곳은 가려져 있다")
 
 	# Walking there reveals it, and only within sight.
 	sim.mark_explored(far, Defs.SIGHT_RADIUS)
 	_check(sim.is_explored(far), "간 곳은 보인다")
-	_check(sim.is_explored(far + Vector2i(Defs.SIGHT_RADIUS - 1, 0)),
+	_check(sim.is_explored(far + Vector2i(Defs.SIGHT_RADIUS - 1, 0) * Grid.SCALE),
 		"시야 안쪽은 보인다")
-	_check(not sim.is_explored(far + Vector2i(Defs.SIGHT_RADIUS * 3, 0)),
+	_check(not sim.is_explored(far + Vector2i(Defs.SIGHT_RADIUS * 3, 0) * Grid.SCALE),
 		"시야 밖은 여전히 가려져 있다")
 
 	# Round, not square: the fog says how far you can see and sight is not a box.
 	var diagonal: int = int(float(Defs.SIGHT_RADIUS) * 0.9)
-	_check(not sim.is_explored(far + Vector2i(diagonal, diagonal)),
+	_check(not sim.is_explored(far + Vector2i(diagonal, diagonal) * Grid.SCALE),
 		"대각선 모서리는 반경 밖이라 가려진다")
 
 	# Negative coordinates. Integer division truncates toward zero, which folds
@@ -114,7 +115,7 @@ func _fog(main: Node2D) -> void:
 	# the origin would be revealed by walking just east of it.
 	_check(Sim.chunk_of(Vector2i(-1, -1)) != Sim.chunk_of(Vector2i(0, 0)),
 		"원점 양쪽이 같은 칸으로 접히지 않는다")
-	var west: Vector2i = sim.core_cell + Vector2i(-60, -60)
+	var west: Vector2i = sim.core_cell + Vector2i(-60, -60) * Grid.SCALE
 	sim.explored.clear()
 	sim.mark_explored(west, 2)
 	_check(sim.is_explored(west), "음수 좌표도 표시된다")
@@ -139,7 +140,7 @@ func _zoom(main: Node2D) -> void:
 func _persistence(main: Node2D) -> void:
 	var sim: Sim = main.sim
 	sim.setup(4242)
-	var walked: Vector2i = sim.core_cell + Vector2i(40, -25)
+	var walked: Vector2i = sim.core_cell + Vector2i(40, -25) * Grid.SCALE
 	sim.mark_explored(walked, Defs.SIGHT_RADIUS)
 	var saved: Dictionary = sim.to_save()
 

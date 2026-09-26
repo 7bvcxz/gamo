@@ -121,22 +121,24 @@ func _run() -> void:
 	# The run used to be anchored to the nearest boulder; boulders are gone as of
 	# 1.0.28 and the anchor is a fixed offset from the fire. What the assertion
 	# has to hold is unchanged: she is beside the open end, not on top of it.
+	# Laid out in tiles (Grid v2): four tiles of belt, a belt a cell.
 	var anchor: Vector2i = main.player.facing_cell()
-	var start: Vector2i = anchor + Vector2i(-6, 1)
+	var start: Vector2i = anchor + Vector2i(-6, 1) * Grid.SCALE
+	var run: int = 4 * Grid.SCALE
 	var belts := 0
-	for index in 4:
+	for index in run:
 		var cell: Vector2i = start + Vector2i(index, 0)
 		var machine: Sim.Machine = main.sim.machine_at(cell)
 		if machine != null and machine.type == Defs.M_BELT:
 			belts += 1
-	_assert(belts == 4, "벨트 넉 줄을 놓는다: %d" % belts)
-	var tail: Vector2i = start + Vector2i(4, 0)
+	_assert(belts == run, "벨트 넉 줄을 놓는다: %d" % belts)
+	var tail: Vector2i = start + Vector2i(run, 0)
 	_assert(main.sim.machine_at(tail) == null, "그리고 그 앞은 비어 있다")
 	# Close enough to where she is standing to be on the same screen. The first
 	# version put the run beside the core and her twelve cells away, and the
 	# screenshot showed neither.
-	_assert(Vector2(tail - anchor).length() < 4.0,
-		"쏟는 자리와 그녀가 한 화면에 있다: %.1f칸" % Vector2(tail - anchor).length())
+	var apart: float = Grid.tiles(Grid.centre(tail).distance_to(Grid.centre(anchor)))
+	_assert(apart < 4.0, "쏟는 자리와 그녀가 한 화면에 있다: %.1f칸" % apart)
 	# Warm and lit, or both of them are white fog.
 	_assert(main.sim.warm_radius >= 15.0,
 		"온기가 거기까지 닿는다: %.0f칸" % main.sim.warm_radius)

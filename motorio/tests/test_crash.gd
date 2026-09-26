@@ -48,7 +48,7 @@ func _main(seed_value: int) -> Node2D:
 	main.run_seed = seed_value
 	main.sim.setup(seed_value)
 	main.sim.begin_crash()
-	main.player.position = main.sim.cell_centre(main.sim.core_cell)
+	main.player.position = main.sim.core_centre()
 	main.player.warmth = Defs.CRASH_WARMTH
 	main.player.velocity = Vector2.ZERO
 	main.state = main.State.PLAY
@@ -122,7 +122,9 @@ func _test_the_opening_is_winnable() -> void:
 		var spent := 0.0
 		# To the case. She wakes at 40% and the cold slows her the whole way
 		# down, so this is not the distance divided by her top speed.
-		spent += _walk_to(main, sim.cell_centre(sim.kit_cell + Vector2i(0, 1)), budget)
+		# The tile below it: the case is a tile across (Grid v2: two cells by two).
+		spent += _walk_to(main, sim.prop_centre(sim.kit_cell) + Vector2(0.0, float(Grid.TILE)),
+			budget)
 		# Open it. A hold, and the hold is the whole errand now: the moment the
 		# search ends the case unfolds into the base on the crash anchor. No
 		# walking over drops, no choosing a spot, no second search.

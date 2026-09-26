@@ -79,7 +79,7 @@ func _run() -> void:
 	idle.cats.clear()
 	idle.ground.clear()
 	var loafer = idle.Cat.new()
-	var anchor: Vector2 = idle.cell_centre(idle.shelter_cell) + Vector2(0.0, float(Grid.TILE))
+	var anchor: Vector2 = idle.shelter_doorstep()
 	loafer.pos = anchor
 	idle.cats.append(loafer)
 	var moved: float = 0.0
@@ -118,6 +118,17 @@ func _run() -> void:
 	if failures == 0:
 		print("WORKERS_TEST: PASS")
 	quit(failures)
+
+## Where the staged posts stand (Grid v2): one whose west edge meets the base's
+## east wall, one whose south edge meets its north wall. Each emits into the base.
+const WEST_POST := Vector2i(6, 0)
+const NORTH_POST := Vector2i(1, -6)
+
+## A seam with nothing else under the post that will stand on it.
+func _seam(sim: Sim, cell: Vector2i) -> void:
+	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, cell)):
+		sim.ore.erase(covered)
+	sim.ore[cell] = Defs.ITEM_CRYSTAL
 
 func _sim() -> Sim:
 	var sim := Sim.new()
@@ -249,9 +260,9 @@ func _miner_rate(hauled: bool) -> float:
 
 func _test_miner_needs_operator() -> void:
 	var sim := _sim()
-	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
-	_assert(sim.build(Defs.M_MINER, cell, Vector2i.RIGHT), "a miner can be built on ore")
+	var cell := WEST_POST
+	_seam(sim, cell)
+	_assert(sim.build(Defs.M_MINER, cell, Vector2i.LEFT), "a miner can be built on ore")
 	for step in 100:
 		sim.tick(0.1)
 	_assert(sim.delivered[Defs.ITEM_CRYSTAL] == 0, "an unstaffed miner produces nothing at all")
@@ -260,7 +271,7 @@ func _test_miner_needs_operator() -> void:
 	var cat := Sim.Cat.new()
 	cat.assigned = cell
 	cat.state = Defs.CAT_WORKING
-	cat.pos = sim.cell_centre(cell)
+	cat.pos = sim.post_stand(cell)
 	sim.cats.append(cat)
 	for step in int(Defs.MINER_PERIOD / 0.1) * 2:
 		sim.tick(0.1)
@@ -278,7 +289,7 @@ func _test_new_cats_stand_apart() -> void:
 	# different directions.
 	sim.grant_cats(2)
 	_assert(sim.cats.size() == 2, "the cats exist")
-	var door: Vector2 = sim.cell_centre(sim.shelter_cell) + Vector2(0.0, float(Grid.TILE))
+	var door: Vector2 = sim.shelter_doorstep()
 	for cat: Sim.Cat in sim.cats:
 		_assert(is_equal_approx(cat.pos.y, door.y), "a new cat starts on the shelter doorstep")
 		_assert(absf(cat.pos.x - door.x) <= float(Grid.TILE), "and within a tile of the door")
@@ -292,10 +303,10 @@ func _test_new_cats_stand_apart() -> void:
 
 func _test_morning_dispatch() -> void:
 	var sim := _sim()
-	sim.ore[Vector2i(-1, 0)] = Defs.ITEM_CRYSTAL
-	sim.ore[Vector2i(0, -1)] = Defs.ITEM_CRYSTAL
-	sim.build(Defs.M_MINER, Vector2i(-1, 0), Vector2i.RIGHT)
-	sim.build(Defs.M_MINER, Vector2i(0, -1), Vector2i.DOWN)
+	_seam(sim, WEST_POST)
+	_seam(sim, NORTH_POST)
+	sim.build(Defs.M_MINER, WEST_POST, Vector2i.LEFT)
+	sim.build(Defs.M_MINER, NORTH_POST, Vector2i.DOWN)
 	sim.grant_cats(2)
 	_assert(sim.cats.size() == 2, "two cats adopted")
 
@@ -313,29 +324,30 @@ func _test_morning_dispatch() -> void:
 	var first: Sim.Cat = sim.carried_cat
 	_assert(not sim.pick_up_cat(cat_cell), "only one cat can be carried at a time")
 	_assert(not sim.place_cat(Vector2i(5, 5)), "a cat cannot be placed on bare ground as a worker")
-	_assert(sim.place_cat(Vector2i(-1, 0)), "a cat can be placed on a miner")
+	_assert(sim.place_cat(WEST_POST), "a cat can be placed on a miner")
 	_assert(sim.carried_cat == null, "the player's arms are free again")
-	_assert(first.assigned == Vector2i(-1, 0), "the cat is bound to that machine")
+	_assert(first.assigned == WEST_POST, "the cat is bound to that machine")
 	_assert(first.state == Defs.CAT_WORKING, "and starts working immediately")
 
 	# One machine, one cat.
 	var second: Sim.Cat = sim.cats[0] if sim.cats[0] != first else sim.cats[1]
 	var second_cell: Vector2i = Grid.cell_at(second.pos)
 	sim.pick_up_cat(second_cell)
-	_assert(not sim.place_cat(Vector2i(-1, 0)), "a taken machine refuses a second cat")
-	_assert(sim.place_cat(Vector2i(0, -1)), "the free machine accepts it")
+	_assert(not sim.place_cat(WEST_POST), "a taken machine refuses a second cat")
+	_assert(sim.place_cat(NORTH_POST), "the free machine accepts it")
 
-	# Picking a worker back up stops its machine at once.
+	# Picking a worker back up stops its machine at once. It works the post from
+	# outside the footprint (Grid v2), so that is where she finds it.
 	sim.tick(0.1)
-	_assert(sim.machine_at(Vector2i(-1, 0)).operated, "the staffed machine is running")
-	_assert(sim.pick_up_cat(Vector2i(-1, 0)), "the working cat can be collected again")
+	_assert(sim.machine_at(WEST_POST).operated, "the staffed machine is running")
+	_assert(sim.pick_up_cat(sim.cell_of(first.pos)), "the working cat can be collected again")
 	sim.tick(0.1)
-	_assert(not sim.machine_at(Vector2i(-1, 0)).operated, "and the machine stops")
-	sim.drop_cat(sim.cell_centre(Vector2i(4, 4)))
+	_assert(not sim.machine_at(WEST_POST).operated, "and the machine stops")
+	sim.drop_cat(sim.cell_centre(Vector2i(4, 4) * Grid.SCALE))
 
 	# Morning turns everyone out of the shelter, and assigned cats set off on foot.
 	sim.dispatch_cats()
-	var doorstep: Vector2 = sim.cell_centre(sim.shelter_cell)
+	var doorstep: Vector2 = sim.shelter_doorstep()
 	for cat: Sim.Cat in sim.cats:
 		_assert(cat.pos.distance_to(doorstep) < Grid.px(2.5),
 			"every cat comes out of the shelter at first light")
@@ -345,7 +357,7 @@ func _test_morning_dispatch() -> void:
 	_assert(absf(spots[0] - spots[1]) > 1.0, "cats stand apart rather than stacking on one tile")
 	_assert(second.state == Defs.CAT_TO_MINER, "an assigned cat walks back each morning")
 	sim.tick(0.05)
-	_assert(not sim.machine_at(Vector2i(0, -1)).operated, "mining waits for arrival")
+	_assert(not sim.machine_at(NORTH_POST).operated, "mining waits for arrival")
 	for step in 300:
 		sim.tick(0.1)
 		if second.state == Defs.CAT_WORKING:
@@ -358,9 +370,9 @@ func _test_morning_dispatch() -> void:
 func _test_hunger_and_feeding() -> void:
 	var sim := _sim()
 	_assert(sim.food == Defs.FOOD_START, "the food bin starts stocked")
-	var cell := Vector2i(-1, 0)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
-	sim.build(Defs.M_MINER, cell, Vector2i.RIGHT)
+	var cell := WEST_POST
+	_seam(sim, cell)
+	sim.build(Defs.M_MINER, cell, Vector2i.LEFT)
 	sim.grant_cats(1)
 	# Assignment is manual now, so staff the machine the way a player would.
 	var cat: Sim.Cat = sim.cats[0]
@@ -399,7 +411,7 @@ func _test_hunger_and_feeding() -> void:
 			bin_at = drop_cell
 	_assert(bin_at != Vector2i(9999, 9999), "기지 옆에 떨어진다")
 	_assert(sim.collect_drop(bin_at) == Sim.DROP_FOOD_BIN, "주우면 손에 들린다")
-	_assert(sim.place_food_bin(sim._free_near(sim.core_cell)), "놓으면 선다")
+	_assert(sim.place_food_bin(_bin_spot(sim)), "놓으면 선다")
 	_assert(sim.food_placed and sim.blocks_player(sim.food_cell), "그리고 세워진다")
 	_assert(sim.carried_kit == Defs.KIT_NONE, "놓고 나면 손이 빈다")
 	# And one is all there is. A window that sells a second while the first is
@@ -419,6 +431,19 @@ func _test_hunger_and_feeding() -> void:
 	_assert(cat.state == Defs.CAT_TO_MINER or cat.state == Defs.CAT_WORKING,
 		"and then goes back to its machine")
 	sim.free()
+
+## Somewhere near the base the bin can stand, asked of the bin's own rule
+## rather than of a single free cell: it is a tile across (Grid v2).
+func _bin_spot(sim: Sim) -> Vector2i:
+	for ring in range(5, 16):
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring:
+					continue
+				var cell: Vector2i = sim.core_cell + Vector2i(dx, dy)
+				if sim.food_problems(cell).is_empty():
+					return cell
+	return sim.core_cell
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

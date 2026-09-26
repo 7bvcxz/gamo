@@ -23,6 +23,12 @@ func _init() -> void:
 	main._start_run()
 	main.finish_tutorial()
 	main.state = main.State.PLAY
+	# Somewhere warm with nothing in front of her. The base unfolding puts her
+	# against its wall looking at it (Grid v2: the base is four tiles across),
+	# and a Z pressed there opens the fire's window, which is not what this file
+	# is about.
+	main.player.position = main.sim.core_centre() + Vector2(Grid.px(4.0), Grid.px(4.0))
+	main.player.facing = Vector2i.RIGHT
 	_run()
 
 func _run() -> void:
@@ -188,7 +194,7 @@ func _test_it_keeps_her_warm() -> void:
 	sim.torches = 1
 	sim.torch_left = 0.0
 	# Well outside the circle, where the cold is at its full rate.
-	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(30, 0))
+	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(30, 0) * Grid.SCALE)
 	main.player.warmth = 80.0
 	_assert(not sim.is_warm(main.player.cell()), "온기 밖에 서 있다")
 
@@ -214,7 +220,7 @@ func _test_it_keeps_her_warm() -> void:
 		main._update_warmth(1.0 / 60.0)
 	_assert(main.player.warmth < 79.0, "꺼지면 다시 떨어진다 (%.1f)" % main.player.warmth)
 	main.player.warmth = 100.0
-	main.player.position = sim.cell_centre(sim.core_cell)
+	main.player.position = sim.core_centre() + Vector2(Grid.px(4.0), Grid.px(4.0))
 
 func _test_base_window() -> void:
 	var sim = main.sim
@@ -227,7 +233,8 @@ func _test_base_window() -> void:
 	var before_stones: int = sim.stones_in
 	# Facing the core is what opens it, and what she was carrying goes in on the
 	# way -- walking up to the fire means both of those things.
-	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(0, 1))
+	# Just below the base's south wall, looking up at it.
+	main.player.position = Grid.centre(Vector2i(sim.core_cell.x, sim.base_rect().end.y))
 	main.player.facing = Vector2i.UP
 	main._primary_action()
 	_assert(main.base_menu_open, "기지를 보고 Z 를 누르면 창이 열린다")

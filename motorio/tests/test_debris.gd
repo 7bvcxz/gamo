@@ -60,14 +60,14 @@ func _test_the_debug_key() -> void:
 	var near := true
 	for cell: Vector2i in main.sim.debris:
 		shapes[int(main.sim.debris[cell])] = true
-		if main.player.cell().distance_to(cell) > 4.0:
+		if Grid.tiles(main.player.position.distance_to(main.sim.prop_centre(cell))) > 4.0:
 			near = false
 	_assert(shapes.size() == Defs.DEBRIS_SHAPES, "다섯 모양이 전부 있다")
 	_assert(near, "전부 주인공 바로 옆이다")
 	main.queue_free()
 
 func _ring(sim: Sim, cell: Vector2i) -> float:
-	return Vector2(cell - sim.core_cell).length()
+	return sim.prop_tiles_from_core(cell)
 
 func _test_where_it_is() -> void:
 	var sim := Sim.new()
@@ -138,7 +138,7 @@ func _test_taking_one_apart() -> void:
 	var cell: Vector2i = sim.debris.keys()[0]
 	# Inside the fire, so reach is not what this case is about.
 	sim.debris.erase(cell)
-	var near: Vector2i = sim.core_cell + Vector2i(2, 0)
+	var near: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
 	sim.debris[near] = 0
 	_assert(not sim.search_debris(near, Defs.DEBRIS_SEARCH_SECONDS * 0.5),
 		"절반으로는 안 뜯긴다")
@@ -175,7 +175,7 @@ func _test_taking_one_apart() -> void:
 func _test_before_copper() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
-	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+	var cell: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
 	sim.debris[cell] = 0
 	sim.debris_searched = 1   # past the guaranteed core part, so only the seams show
 	_assert(int(sim.collected.get(Defs.ITEM_COPPER, 0)) == 0, "구리를 캔 적이 없고")
@@ -185,7 +185,7 @@ func _test_before_copper() -> void:
 		"두 줄이 모두 열석으로 나온다: %d" % int(found.get(Defs.ITEM_HEATSTONE, 0)))
 	# And the moment she has held one, the wreck starts paying in it.
 	sim.collected[Defs.ITEM_COPPER] = 1
-	var second: Vector2i = sim.core_cell + Vector2i(3, 0)
+	var second: Vector2i = sim.core_cell + Vector2i(4, 0) * Grid.SCALE
 	sim.debris[second] = 0
 	_assert(sim.open_debris(second).has(Defs.ITEM_COPPER), "한 번 캐고 나면 구리가 나온다")
 	sim.free()
@@ -197,7 +197,7 @@ func _test_the_first_piece() -> void:
 	for index in 60:
 		var sim := Sim.new()
 		sim.setup(52000 + index)
-		var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+		var cell: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
 		sim.debris[cell] = 0
 		var found: Dictionary = sim.open_debris(cell)
 		if int(found.get(Defs.ITEM_ENERGY_CORE, 0)) != 1:
@@ -211,7 +211,7 @@ func _test_the_first_piece() -> void:
 func _test_the_rate() -> void:
 	var sim := Sim.new()
 	sim.setup(20260818)
-	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+	var cell: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
 	sim.debris[cell] = 0
 	sim.open_debris(cell)
 	var ones := 0
@@ -235,7 +235,7 @@ func _test_the_rate() -> void:
 func _test_out_of_reach() -> void:
 	var sim := Sim.new()
 	sim.setup(20260818)
-	var far: Vector2i = sim.core_cell + Vector2i(int(sim.warm_radius) + 4, 0)
+	var far: Vector2i = sim.core_cell + Vector2i(int(sim.warm_radius) + 4, 0) * Grid.SCALE
 	sim.debris[far] = 0
 	_assert(not sim.search_debris(far, 99.0), "온기 밖에서는 뜯을 수 없다")
 	_assert(sim.open_debris(far).is_empty(), "아무것도 나오지 않는다")

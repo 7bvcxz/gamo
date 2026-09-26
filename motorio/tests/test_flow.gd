@@ -214,6 +214,19 @@ func _run() -> void:
 	# things to build and a fire to stand next to, so it is set up again here.
 	main.finish_tutorial()
 	_open(main.sim)
+	# Somewhere open, facing away from the fire: the base unfolds around the case
+	# with her beside it (Grid v2: four tiles across), and a tap there opens the
+	# fire's window rather than doing what this section is about.
+	main.player.position = main.sim.core_centre() + Vector2(Grid.px(4.0), Grid.px(4.0))
+	main.player.facing = Vector2i.RIGHT
+	for covered: Vector2i in Grid.cells_in(Rect2i(main.player.cell() - Vector2i(2, 3),
+			Vector2i(10, 7))):
+		main.sim.ore.erase(covered)
+		main.sim.remove_machine(covered)
+		for props: Dictionary in [main.sim.frozen_cats, main.sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
 	# Including what is in her hand: a fresh run opens on the pickaxe, and the
 	# hold-to-rotate below is a build-gun verb.
 	main.tool_index = main.TOOLS.find(main.TOOL_BUILD_GUN)
@@ -264,9 +277,11 @@ func _run() -> void:
 	# And the rule itself: gun in hand, buildable cell, cat standing on it.
 	main.tool_index = 1
 	main.selected_index = 0
-	var spot: Vector2i = main.player.facing_cell()
+	# A seam far enough ahead that the post around it does not land on her
+	# (Grid v2: four cells by four, the seam at (1, 1)).
+	var spot: Vector2i = main.player.cell() + main.player.facing * 3
 	main.sim.ore[spot] = Defs.ITEM_HEATSTONE
-	main.sim.machines.erase(spot)
+	main.sim.remove_machine(spot)
 	main.sim.unlocked[Defs.M_MINER] = true
 	main.sim.stock[Defs.ITEM_HEATSTONE] = 50
 	kitty.pos = main.sim.cell_centre(spot)

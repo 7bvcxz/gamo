@@ -47,7 +47,9 @@ func _test_layout() -> void:
 	_assert(int(counts.get(Defs.VILLAGE_WELL, 0)) == 1, "우물 1개")
 	_assert(int(counts.get(Defs.VILLAGE_FIRE, 0)) == 1, "화롯불 1개")
 	_assert(int(counts.get(Defs.VILLAGE_GATE, 0)) == 1, "입구 1개")
-	_assert(sim.village_rect.size == Vector2i(11, 11), "11 x 11")
+	# Eleven tiles by eleven, laid out a tile at a time (Grid v2: each is a block
+	# of build cells, and everything here is a tile across).
+	_assert(sim.village_rect.size == Vector2i(11, 11) * Grid.SCALE, "11 x 11")
 
 	var frozen := 0
 	for cell: Vector2i in sim.frozen_cats:
@@ -58,13 +60,14 @@ func _test_layout() -> void:
 	# The two distances the sign is quoting. Northwest at about twenty, then due
 	# north from there -- the arrow on the board is only honest if the village is
 	# straight up the trail from it.
-	var to_sign: float = Vector2(sim.sign_cell - sim.core_cell).length()
+	var to_sign: float = sim.prop_tiles_from_core(sim.sign_cell)
 	_assert(to_sign > 18.0 and to_sign < 22.0, "표지판은 기지에서 20칸쯤 (%.1f)" % to_sign)
 	_assert(sim.sign_cell.x < sim.core_cell.x and sim.sign_cell.y < sim.core_cell.y,
 		"그리고 북서쪽이다")
-	var centre: Vector2i = sim.village_rect.position + Vector2i(5, 5)
-	_assert(centre.x == sim.sign_cell.x, "마을은 표지판 바로 북쪽에 있다 (↑)")
-	var walk: int = sim.sign_cell.y - centre.y
+	var centre: Vector2i = Grid.tile_of(sim.village_rect.position) + Vector2i(5, 5)
+	var sign: Vector2i = Grid.tile_of(sim.sign_cell)
+	_assert(centre.x == sign.x, "마을은 표지판 바로 북쪽에 있다 (↑)")
+	var walk: int = sign.y - centre.y
 	_assert(walk > 25 and walk < 29, "그리고 27칸쯤 떨어져 있다 (%d)" % walk)
 	sim.free()
 
@@ -91,28 +94,27 @@ func _test_clear_across_seeds() -> void:
 	for seed_value in range(1, 201):
 		sim.story_enabled = true
 		sim.setup(seed_value)
-		for y in Defs.VILLAGE_CELLS.y:
-			for x in Defs.VILLAGE_CELLS.x:
-				var cell: Vector2i = sim.village_rect.position + Vector2i(x, y)
-				var junk: String = ""
-				if sim.ore.has(cell):
-					junk = "광맥"
-				elif sim.has_rock(cell):
-					junk = "바위"
-				elif sim.debris.has(cell):
-					junk = "잔해"
-				elif sim.frozen_cats.has(cell) and not sim.village.has(cell) \
-					and not _is_village_ice(sim, cell):
-					junk = "떠도는 얼음"
-				if junk != "":
-					dirty += 1
-					worst = "seed %d · %s · %s" % [seed_value, str(cell), junk]
+		# Every build cell of the square (Grid v2).
+		for cell: Vector2i in Grid.cells_in(sim.village_rect):
+			var junk: String = ""
+			var ice: Vector2i = sim.frozen_key(cell)
+			if sim.ore.has(cell):
+				junk = "광맥"
+			elif sim.has_rock(cell):
+				junk = "바위"
+			elif sim.debris_key(cell) != Sim.NONE:
+				junk = "잔해"
+			elif ice != Sim.NONE and not sim.village.has(ice) and not _is_village_ice(sim, ice):
+				junk = "떠도는 얼음"
+			if junk != "":
+				dirty += 1
+				worst = "seed %d · %s · %s" % [seed_value, str(cell), junk]
 	_assert(dirty == 0, "200개 시드에서 마을 안이 비어 있다 (%d칸, 예: %s)" % [dirty, worst])
 	sim.free()
 
 func _is_village_ice(sim, cell: Vector2i) -> bool:
 	for local: Vector2i in Defs.VILLAGE_FROZEN:
-		if sim.village_rect.position + local == cell:
+		if sim.village_rect.position + local * Grid.SCALE == cell:
 			return true
 	return false
 
@@ -121,22 +123,28 @@ func _is_village_ice(sim, cell: Vector2i) -> bool:
 ## of them.
 func _test_trail() -> void:
 	var sim = _sim()
+	# Walked a tile at a time, like everything the village is laid out in: every
+	# row of tiles between the board and the gate has a mark (Grid v2).
 	var gate := Vector2i(9999, 9999)
 	for cell: Vector2i in sim.village:
 		if int(sim.village[cell]) == Defs.VILLAGE_GATE:
-			gate = cell
+			gate = Grid.tile_of(cell)
 	_assert(gate != Vector2i(9999, 9999), "입구가 있다")
 	_assert(sim.blocks_player(sim.sign_cell), "표지판은 통과할 수 없다")
+	var sign: Vector2i = Grid.tile_of(sim.sign_cell)
 	var rows := {}
 	for cell: Vector2i in sim.trail:
-		_assert(not rows.has(cell.y), "한 줄에 자국 하나: %d" % cell.y)
-		rows[cell.y] = cell
-		_assert(not sim.has_rock(cell) and not sim.ore.has(cell)
-			and not sim.debris.has(cell), "자국 위에는 아무것도 없다: %s" % str(cell))
-	for y in range(gate.y, sim.sign_cell.y):
+		var tile: Vector2i = Grid.tile_of(cell)
+		_assert(not rows.has(tile.y), "한 줄에 자국 하나: %d" % tile.y)
+		rows[tile.y] = tile
+		for covered: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+			_assert(not sim.has_rock(covered) and not sim.ore.has(covered)
+				and sim.debris_key(covered) == Sim.NONE,
+				"자국 위에는 아무것도 없다: %s" % str(covered))
+	for y in range(gate.y, sign.y):
 		_assert(rows.has(y), "표지판과 입구 사이가 끊기지 않는다: %d" % y)
-	var previous: Vector2i = sim.sign_cell
-	for y in range(sim.sign_cell.y - 1, gate.y - 1, -1):
+	var previous: Vector2i = sign
+	for y in range(sign.y - 1, gate.y - 1, -1):
 		var here: Vector2i = rows[y]
 		_assert(absi(here.x - previous.x) <= 1, "자국은 한 칸씩 이어진다: %s" % str(here))
 		previous = here
@@ -156,7 +164,9 @@ func _test_reading() -> void:
 	main.finish_tutorial()
 	main.state = main.State.PLAY
 	var sim = main.sim
-	main.player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 1))
+	# A tile below the board, which is a tile across (Grid v2).
+	var below: Vector2 = sim.prop_centre(sim.sign_cell) + Vector2(0.0, float(Grid.TILE))
+	main.player.position = below
 	main.player.facing = Vector2i(0, -1)
 	_assert(main.active_prompt() == "SIGN", "표지판을 보면 읽으라고 한다")
 	var before: int = main.play_log.size()
@@ -173,7 +183,7 @@ func _test_reading() -> void:
 	_assert(is_equal_approx(main.sign_label, 1.0),
 		"문구가 표지판 위에 그대로 있다 (%.2f)" % main.sign_label)
 	# And a step away puts it out -- smoothly, not in one frame.
-	main.player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 3))
+	main.player.position = sim.prop_centre(sim.sign_cell) + Vector2(0.0, Grid.px(3.0))
 	main._update_sign_label(1.0 / 60.0)
 	_assert(main.sign_label < 1.0 and main.sign_label > 0.5,
 		"멀어지면 한 프레임에 사라지지 않고 (%.2f)" % main.sign_label)
@@ -182,7 +192,7 @@ func _test_reading() -> void:
 	_assert(is_zero_approx(main.sign_label), "이내 사라진다 (%.2f)" % main.sign_label)
 	# Standing at it again does not bring it back on its own: the board is read,
 	# not overheard.
-	main.player.position = sim.cell_centre(sim.sign_cell + Vector2i(0, 1))
+	main.player.position = below
 	for step in 60:
 		main._update_sign_label(1.0 / 60.0)
 	_assert(is_zero_approx(main.sign_label), "돌아와도 저절로 다시 뜨지는 않는다")
@@ -198,14 +208,19 @@ func _test_reading() -> void:
 	# still failed about one run in six, on a crystal lying in the snow -- so the
 	# emptied cell is checked against the predicate itself rather than against a
 	# list of sources somebody has to keep in step with it.
-	var behind: Vector2i = sim.sign_cell + Vector2i(0, 2)
-	sim.ore.erase(behind)
-	sim.mined_rocks[behind] = true
-	sim.frozen_cats.erase(behind)
-	sim.debris.erase(behind)
-	sim.shards.erase(behind)
-	sim.ground.erase(behind)
-	sim.drops.erase(behind)
+	# The tile behind her, every cell of it (Grid v2: she reaches a tile deep).
+	var behind_tile: Vector2i = Grid.tile_of(sim.sign_cell) + Vector2i(0, 2)
+	var behind: Vector2i = Grid.from_tile(behind_tile)
+	sim.mined_rocks[behind_tile] = true
+	for covered: Vector2i in Grid.cells_in(Grid.tile_rect(behind_tile).grow(1)):
+		sim.ore.erase(covered)
+		sim.shards.erase(covered)
+		sim.ground.erase(covered)
+		sim.drops.erase(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
 	_assert(not main._frozen_out_there(behind), "뒤쪽 칸에는 아무것도 없고")
 	main.player.facing = Vector2i(0, 1)
 	var after: int = main.play_log.size()

@@ -51,6 +51,13 @@ func _sim(seed_value: int = 1234) -> Sim:
 	sim.setup(seed_value)
 	return sim
 
+## Where to put a block `tiles` from the base's east wall, on the fire's row: its
+## origin cell. Grid v2 -- the base is eight cells across and a block two, so
+## "beside the fire" is measured from the wall, which is where the rule is.
+func _east(sim: Sim, tiles: float) -> Vector2i:
+	var wall: int = sim.base_rect().end.x
+	return Vector2i(wall + int(round(tiles * 2.0)) - 1, sim.core_cell.y)
+
 # --- What the map holds ----------------------------------------------------
 
 func _test_scatter() -> void:
@@ -68,7 +75,7 @@ func _test_scatter() -> void:
 		var sim := _sim(seed_value)
 		var reachable := 0
 		for cell: Vector2i in sim.frozen_cats:
-			var distance: float = Vector2(cell - sim.core_cell).length()
+			var distance: float = sim.prop_tiles_from_core(cell)
 			if distance <= Defs.WARM_BASE:
 				early += 1
 			if distance <= Defs.OPENING_WARM_RADIUS:
@@ -119,7 +126,7 @@ func _test_carry() -> void:
 	# out against a reach of 7, which is the whole point of where they are put.
 	# Reaching one is the player's problem; carrying one is what this file is
 	# about, so the subject is moved to where the rule allows it.
-	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
+	var cell: Vector2i = _east(sim, 0.5)
 	sim.frozen_cats.clear()
 	sim.frozen_cats[cell] = 0.0
 
@@ -129,18 +136,18 @@ func _test_carry() -> void:
 	_assert(sim.carried_frozen, "안고 있는 상태가 된다")
 	# A second one, also within reach, so the refusal below is about her arms
 	# being full rather than about the fire not getting that far.
-	var second: Vector2i = sim.core_cell + Vector2i(-2, 0)
+	var second: Vector2i = sim.base_rect().position - Vector2i(2, 0)
 	sim.frozen_cats[second] = 0.0
 	_assert(not sim.pick_up_frozen(second), "두 마리는 못 든다")
 
 	# The live-cat verb has to refuse too, or Z on a crowded tile would leave her
 	# holding both and the renderer drawing one on top of the other.
 	sim.grant_cats(1)
-	sim.cats[0].pos = sim.cell_centre(sim.core_cell + Vector2i(3, 3))
-	_assert(not sim.pick_up_cat(sim.core_cell + Vector2i(3, 3)),
+	sim.cats[0].pos = sim.cell_centre(sim.core_cell + Vector2i(6, 6))
+	_assert(not sim.pick_up_cat(sim.core_cell + Vector2i(6, 6)),
 		"얼음을 안고 있으면 살아있는 고양이는 못 든다")
 
-	var here: Vector2i = sim.core_cell + Vector2i(1, 0)
+	var here: Vector2i = _east(sim, 0.5) + Vector2i(0, 3)
 	_assert(not sim.put_down_frozen(sim.core_cell), "기지 위에는 못 놓는다")
 	_assert(sim.put_down_frozen(here), "빈 칸에 놓는다")
 	_assert(sim.frozen_cats.has(here) and not sim.carried_frozen, "놓은 자리에 남는다")
@@ -156,8 +163,10 @@ func _test_thaw_needs_the_base() -> void:
 	var sim := _sim()
 	sim.frozen_cats.clear()
 	sim.cats.clear()
-	var far: Vector2i = sim.core_cell + Vector2i(int(Defs.THAW_RADIUS) + 1, 0)
-	var near: Vector2i = sim.core_cell + Vector2i(int(Defs.THAW_RADIUS), 0)
+	# The one-tile core's two tiles from its middle were a tile and a half past
+	# its edge; three were two and a half.
+	var far: Vector2i = _east(sim, Defs.THAW_RADIUS + 0.5)
+	var near: Vector2i = _east(sim, Defs.THAW_RADIUS - 0.5)
 	sim.frozen_cats[far] = 0.0
 	sim.frozen_cats[near] = 0.0
 	_assert(not sim.can_thaw(far), "기지에서 %d칸 밖은 녹지 않는다" % (int(Defs.THAW_RADIUS) + 1))
@@ -175,8 +184,8 @@ func _test_thaw_needs_the_base() -> void:
 	# the tile's, so carrying it across the base must not put the ice back.
 	var half: float = float(sim.frozen_cats[near])
 	_assert(sim.pick_up_frozen(near), "녹는 중인 고양이도 다시 들 수 있다")
-	_assert(sim.put_down_frozen(sim.core_cell + Vector2i(0, -1)), "옆 칸에 다시 놓는다")
-	_assert(is_equal_approx(float(sim.frozen_cats[sim.core_cell + Vector2i(0, -1)]), half),
+	_assert(sim.put_down_frozen(_east(sim, 0.5)), "옆 칸에 다시 놓는다")
+	_assert(is_equal_approx(float(sim.frozen_cats[_east(sim, 0.5)]), half),
 		"옮겨도 녹은 만큼은 그대로다 (%.2f)" % half)
 	sim.free()
 
@@ -184,7 +193,8 @@ func _test_thaw_wakes_a_cat() -> void:
 	var sim := _sim()
 	sim.frozen_cats.clear()
 	sim.cats.clear()
-	var here: Vector2i = sim.core_cell + Vector2i(0, 2)
+	# Just south of the base's bottom wall.
+	var here: Vector2i = Vector2i(sim.core_cell.x, sim.base_rect().end.y)
 	sim.frozen_cats[here] = 0.0
 	var seen: Array[int] = []
 	var woke_at: Array[Vector2] = []
@@ -200,7 +210,7 @@ func _test_thaw_wakes_a_cat() -> void:
 		"설계한 시간 안에 (%.1f초, 기대 %.1f초)" % [elapsed, Defs.THAW_SECONDS])
 	_assert(sim.frozen_cats.is_empty(), "얼음은 세계에서 사라진다")
 	_assert(seen.size() == 1 and seen[0] == 1, "신호가 정확히 한 번, 총 마릿수와 함께 온다")
-	_assert(woke_at.size() == 1 and woke_at[0].distance_to(sim.cell_centre(here)) < 1.0,
+	_assert(woke_at.size() == 1 and woke_at[0].distance_to(sim.prop_centre(here)) < 1.0,
 		"놓아둔 그 자리에서 깨어난다 — 숙소 문앞이 아니라")
 	_assert(sim.cats[0].rarity == Defs.RARITY_O, "구조한 고양이는 O 등급")
 	_assert(not sim.cats[0].has_job(), "일은 플레이어가 시킨다")

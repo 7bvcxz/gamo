@@ -20,7 +20,9 @@ func _run() -> void:
 	_assert(not sim.has_attribute(ore_cell, Defs.ATTR_STRUCTURE), "구조물 비트가 없다")
 	_assert(not sim.blocks_player(ore_cell), "광맥 위를 걸어갈 수 있다")
 
-	var empty := Vector2i(1, 1)
+	# Bare ground north of the base, in the column the generator keeps clear
+	# (Grid v2: the base covers eight cells round the core).
+	var empty := Vector2i(1, -6)
 	_assert(not sim.is_structure(empty), "bare ground is not a structure")
 	_assert(not sim.blocks_player(empty), "bare ground does not block")
 
@@ -35,17 +37,27 @@ func _run() -> void:
 	# on" and a machine added later has to answer it too.
 	_open(sim)
 	for kind: int in Defs.BUILDABLE:
-		var spot: Vector2i = sim.core_cell + Vector2i(9, 9)
-		sim.machines.erase(spot)
-		sim.ore.erase(spot)
+		var spot: Vector2i = sim.core_cell + Vector2i(9, 9) * Grid.SCALE
+		# The whole footprint cleared, since footprints are more than a cell now.
+		var rect: Rect2i = Defs.machine_footprint(kind, spot)
+		for covered: Vector2i in Grid.cells_in(rect):
+			sim.remove_machine(covered)
+			sim.ore.erase(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			for origin: Vector2i in props.keys():
+				if sim.prop_rect(origin).intersects(rect):
+					props.erase(origin)
 		if Defs.machine_mines(kind):
 			sim.ore[spot] = Defs.ITEM_CRYSTAL
 		sim.unlocked[kind] = true
 		_assert(sim.build(kind, spot, Vector2i.RIGHT), "%s를 세운다" % Defs.MACHINE_NAMES[kind])
 		var walkable: bool = kind in Defs.WALKABLE_MACHINES
-		_assert(sim.blocks_player(spot) != walkable,
-			"%s: 통행 %s" % [Defs.MACHINE_NAMES[kind], "가능" if walkable else "불가"])
-		sim.machines.erase(spot)
+		# Every cell of the footprint answers the same way.
+		for covered: Vector2i in Grid.cells_in(rect):
+			_assert(sim.blocks_player(covered) != walkable,
+				"%s %s: 통행 %s" % [Defs.MACHINE_NAMES[kind], str(covered - spot),
+					"가능" if walkable else "불가"])
+		sim.remove_machine(spot)
 		sim.ore.erase(spot)
 	_assert(Defs.M_BELT in Defs.WALKABLE_MACHINES and Defs.M_SPLITTER in Defs.WALKABLE_MACHINES,
 		"걸어갈 수 있는 것은 벨트와 분배기뿐이다")
@@ -65,8 +77,9 @@ func _run() -> void:
 	# rather than ground -- so the tile that was walkable a moment ago stops
 	# being walkable, and picking the machine back up hands it over again.
 	var seam: Vector2i = Vector2i(9999, 9999)
+	sim.unlocked[Defs.M_MINER] = true
 	for cell: Vector2i in sim.ore:
-		if not sim.machines.has(cell):
+		if sim.machine_at(cell) == null and sim.can_build(Defs.M_MINER, cell, Vector2i(0, -1)) == "":
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "빈 광맥이 있다")
@@ -84,9 +97,10 @@ func _run() -> void:
 	_assert(sim.is_structure(sim.shelter_cell), "the shelter is a structure")
 	_assert(sim.blocks_player(sim.shelter_cell), "the shelter blocks the player")
 	_assert(sim.shelter_cell != sim.core_cell, "and it is its own tile, not the core's")
+	# Past each wall, in the anchor's line (Grid v2: the hut is six cells by eight).
 	var open_sides := 0
 	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-		if not sim.blocks_player(sim.shelter_cell + step):
+		if not sim.blocks_player(Grid.front_cell(sim.shelter_rect(), step, sim.shelter_cell)):
 			open_sides += 1
 	_assert(open_sides >= 2, "the shelter has approaches on at least two sides (%d)" % open_sides)
 
@@ -108,19 +122,20 @@ func _run() -> void:
 		if int(sim.drops[drop_cell]) == Sim.DROP_FOOD_BIN:
 			bin_at = drop_cell
 	_assert(sim.collect_drop(bin_at) == Sim.DROP_FOOD_BIN, "그리고 주워서")
-	_assert(sim.place_food_bin(sim._free_near(sim.core_cell)), "내려놓는다")
+	_assert(sim.place_food_bin(_bin_spot(sim)), "내려놓는다")
 	_assert(sim.is_structure(sim.food_cell), "밥통은 구조물이다")
 	_assert(sim.blocks_player(sim.food_cell), "밥통은 플레이어를 막는다")
 	_assert(sim.food_cell != sim.shelter_cell and sim.food_cell != sim.core_cell,
 		"밥통은 자기 칸을 가진다")
 	var bin_sides := 0
 	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-		if not sim.blocks_player(sim.food_cell + step):
+		if not sim.blocks_player(Grid.front_cell(sim.food_rect(), step, sim.food_cell)):
 			bin_sides += 1
 	_assert(bin_sides >= 2, "밥통에 두 방향 이상으로 접근할 수 있다 (%d)" % bin_sides)
 
 	# Where each machine may go. The miner is the only one that may sit on ore,
 	# and the only one that is required to.
+	ore_cell = seam
 	_assert(sim.can_build(Defs.M_MINER, ore_cell) == "", "a miner may be built on ore")
 	_assert(sim.can_build(Defs.M_MINER, empty) != "", "a miner may not be built off ore")
 	_assert(sim.can_build(Defs.M_BELT, ore_cell) != "", "a belt may not be built on ore")
@@ -187,43 +202,54 @@ func _run() -> void:
 	# Walking into the core. The starting ore sits directly south of it, so the
 	# approach has to be chosen from a side that is actually clear -- otherwise
 	# the test would be proving that ore blocks, which it already knows.
+	# Grid v2: the base is eight cells by eight, so an approach is the three cells
+	# past one of its walls in the core's line, and "into the core" is into any
+	# cell of it.
 	var core: Vector2i = main.sim.core_cell
+	var base: Rect2i = main.sim.base_rect()
 	var lane := Vector2.ZERO
+	var door := Vector2i.ZERO
 	for approach: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
+		var outside: Vector2i = Grid.front_cell(base, -Vector2i(approach), core)
 		var clear := true
-		for distance in [1, 2, 3]:
-			if main.sim.is_structure(core - Vector2i(approach) * distance):
+		for distance in [0, 1, 2]:
+			if main.sim.is_structure(outside - Vector2i(approach) * distance):
 				clear = false
 		if clear:
 			lane = approach
+			door = outside
 			break
 	_assert(lane != Vector2.ZERO, "the core has at least one clear approach")
-	main.player.position = main.sim.cell_centre(core) - lane * Grid.px(2.5)
+	main.player.position = main.sim.cell_centre(door) - lane * Grid.px(2.0)
 	var approached_from: Vector2 = main.player.position
 	for step in 40:
 		main.player._move(lane * 6.0)
-	_assert(main.player.cell() != core, "the player cannot walk into the core")
+	_assert(not base.has_point(main.player.cell()), "the player cannot walk into the core")
 	_assert(main.player.position.distance_to(approached_from) > 1.0,
 		"but does travel up to it")
 
 	# Walking into the shelter. Same real-movement check as the core: the hut is a
 	# building now, so the body has to stop at its wall.
 	var hut: Vector2i = main.sim.shelter_cell
+	var walls: Rect2i = main.sim.shelter_rect()
 	var hut_lane := Vector2.ZERO
+	var hut_door := Vector2i.ZERO
 	for approach: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
+		var outside: Vector2i = Grid.front_cell(walls, -Vector2i(approach), hut)
 		var clear := true
-		for distance in [1, 2, 3]:
-			if main.sim.is_structure(hut - Vector2i(approach) * distance):
+		for distance in [0, 1, 2]:
+			if main.sim.is_structure(outside - Vector2i(approach) * distance):
 				clear = false
 		if clear:
 			hut_lane = approach
+			hut_door = outside
 			break
 	_assert(hut_lane != Vector2.ZERO, "the shelter has a clear approach")
-	main.player.position = main.sim.cell_centre(hut) - hut_lane * Grid.px(2.5)
+	main.player.position = main.sim.cell_centre(hut_door) - hut_lane * Grid.px(2.0)
 	var walked_from: Vector2 = main.player.position
 	for step in 40:
 		main.player._move(hut_lane * 6.0)
-	_assert(main.player.cell() != hut, "the player cannot walk into the shelter")
+	_assert(not walls.has_point(main.player.cell()), "the player cannot walk into the shelter")
 	_assert(main.player.position.distance_to(walked_from) > 1.0, "but does walk up to its door")
 	_assert(main.shelter_nearby(), "and standing at the wall is close enough to sleep")
 
@@ -270,13 +296,15 @@ func _test_reserved_tiles_across_seeds() -> void:
 	for seed_value in range(300):
 		var sim := Sim.new()
 		sim.setup(seed_value)
-		if sim.blocks_player(sim.shelter_cell + Vector2i(0, 1)):
+		if sim.blocks_player(Grid.cell_at(sim.shelter_doorstep())):
 			blocked.append("seed %d 문 앞" % seed_value)
-		if sim.ore.has(sim.food_cell):
-			blocked.append("seed %d 밥통에 광맥" % seed_value)
+		for covered: Vector2i in Grid.cells_in(sim.food_rect()):
+			if sim.ore.has(covered):
+				blocked.append("seed %d 밥통에 광맥" % seed_value)
+				break
 		var open_sides := 0
 		for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			if not sim.blocks_player(sim.food_cell + step):
+			if not sim.blocks_player(Grid.front_cell(sim.food_rect(), step, sim.food_cell)):
 				open_sides += 1
 		if open_sides < 2:
 			walled.append("seed %d (%d면)" % [seed_value, open_sides])
@@ -287,6 +315,19 @@ func _test_reserved_tiles_across_seeds() -> void:
 	_assert(walled.is_empty(),
 		"밥통은 어느 시드에서도 두 방향 이상 열려 있다. 위반 %d: %s"
 		% [walled.size(), ", ".join(walled.slice(0, 4))])
+
+## Somewhere near the base the bin can stand, asked of the bin's own rule: it is
+## a tile across (Grid v2), so one free cell is not enough.
+func _bin_spot(sim: Sim) -> Vector2i:
+	for ring in range(5, 16):
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring:
+					continue
+				var cell: Vector2i = sim.core_cell + Vector2i(dx, dy)
+				if sim.food_problems(cell).is_empty():
+					return cell
+	return sim.core_cell
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

@@ -168,11 +168,13 @@ func _test_the_cats() -> void:
 	# In through the door, one after another. They used to be standing on their
 	# spots the instant she stepped inside, which reads as a room that was
 	# already full -- and they had been out on the plateau a second earlier.
-	var door: Vector2i = Defs.room_to_world(Defs.room_door_cell())
+	# The room is laid out in tiles; "at the door" is on the door's tile.
+	var door: Vector2i = Defs.room_door_cell()
 	var waiting := 0
 	for index in sim.cats.size():
 		var cat = sim.cats[index]
-		_assert(sim.cell_of(cat.pos) == door, "문에서 시작한다: %s" % str(sim.cell_of(cat.pos)))
+		_assert(Defs.world_to_room(sim.cell_of(cat.pos)) == door,
+			"문에서 시작한다: %s" % str(Defs.world_to_room(sim.cell_of(cat.pos))))
 		if cat.entering > 0.0:
 			waiting += 1
 		if index > 0:
@@ -212,10 +214,10 @@ func _test_morning() -> void:
 	var sim = main.sim
 	sim.grant_cats(4)
 	main.open_room(Defs.ROOM_WAKE, Vector2i(1, 0), false)
-	var door: Vector2i = Defs.room_to_world(Defs.room_door_cell())
+	var door: Vector2i = Defs.room_door_cell()
 	for cat in sim.cats:
 		_assert(cat.state == Defs.CAT_ASLEEP, "다들 자고 있고")
-		_assert(sim.cell_of(cat.pos) != door, "현관문에서 쏟아지지 않는다")
+		_assert(Defs.world_to_room(sim.cell_of(cat.pos)) != door, "현관문에서 쏟아지지 않는다")
 		_assert(Defs.in_room(sim.cell_of(cat.pos)), "방 안에 있으며")
 		_assert(cat.waking >= Defs.ROOM_WAKE_MIN and cat.waking <= Defs.ROOM_WAKE_MAX,
 			"1~4초 사이에 일어난다: %.1f" % cat.waking)
@@ -275,7 +277,7 @@ func _test_sleeping() -> void:
 	# The resting point's geometry: lying on the bed rather than its headboard.
 	# The bed is two cells and she used to stop on the centre of the top one,
 	# which puts her shoulders level with the pillow and her legs off the end.
-	var head: Vector2 = sim.cell_centre(Defs.room_to_world(main._room_bed_cell()))
+	var head: Vector2 = Defs.room_centre(main._room_bed_cell())
 	var rest: Vector2 = main.room_sleep_point()
 	_assert(is_equal_approx(rest.x, head.x), "머리맡과 같은 줄에 눕는다")
 	_assert(is_equal_approx(rest.y - head.y, float(Grid.TILE) * 0.5),

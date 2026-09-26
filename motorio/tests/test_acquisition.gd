@@ -82,7 +82,7 @@ func _test_pickaxe_acquisition_effect() -> void:
 	# The flight, beat by beat: it starts at the fire, pops up and grows, hangs,
 	# then is pulled to her and shrinks into her.
 	var flight: Dictionary = (fx.get("_flights") as Array)[0]
-	var fire: Vector2 = main.sim.cell_centre(main.sim.core_cell)
+	var fire: Vector2 = main.sim.core_centre()
 	_assert(Vector2(flight["from"]).distance_to(fire) < 1.0, "불에서 출발한다")
 	flight["t"] = 0.0
 	var start: Array = fx.flight_pose(flight)

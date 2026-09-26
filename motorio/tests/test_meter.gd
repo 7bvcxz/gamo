@@ -41,19 +41,22 @@ func _run() -> void:
 	# --- The key ---------------------------------------------------------------
 	# C is the mine key. Facing nothing it has to stay the mine key, or the pad
 	# button and the keyboard both stop digging.
-	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(6, 6))
+	main.player.position = sim.cell_centre(sim.core_cell + Vector2i(6, 6) * Grid.SCALE)
 	main.player.facing = Vector2i.UP
-	_assert(sim.machine_at(main.player.facing_cell()) == null, "facing an empty tile")
+	_assert(sim.machine_at(main.target_cell()) == null, "facing an empty tile")
 	_assert(not main.toggle_meter(), "C in front of nothing is not spent on the panel")
 	_assert(main.meter_cell == Vector2i(9999, 9999), "and no panel opened")
 
 	var seam := Vector2i(9999, 9999)
+	# A seam a post can stand on, approached from just south of where the post
+	# will stand (Grid v2: four cells by four around the seam).
 	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE and not sim.is_structure(cell + Vector2i(0, 1)):
+		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE and sim.can_build(Defs.M_MINER, cell) == "" \
+				and not sim.is_structure(_south_of_post(cell)):
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "the map has a seam approachable from the south")
-	main.player.position = sim.cell_centre(seam + Vector2i(0, 1))
+	main.player.position = sim.cell_centre(_south_of_post(seam))
 	main.player.facing = Vector2i.UP
 	main.selected_index = 0
 	# With the pickaxe in hand Z is a swing, not a build. The slot has to be set
@@ -68,18 +71,18 @@ func _run() -> void:
 	# Left as it was, every measurement below would have been a measurement of a
 	# machine that never ran, and would have agreed with itself perfectly.
 	for heading: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
-		var ahead: Vector2i = seam + heading
-		if not sim.ore.has(ahead) and not sim.machines.has(ahead) \
+		var ahead: Vector2i = Grid.front_cell(sim.machine_rect(miner), heading, seam)
+		if not sim.ore.has(ahead) and sim.machine_at(ahead) == null \
 				and not sim.ground.has(ahead) and not sim.is_structure(ahead):
 			miner.dir = heading
 			break
-	_assert(not sim.ore.has(seam + miner.dir), "the miner has somewhere to put its output")
+	_assert(not sim.ore.has(sim.output_cell(miner)), "the miner has somewhere to put its output")
 
 	_assert(main.toggle_meter(), "C in front of a machine opens the panel")
 	_assert(main.meter_cell == seam, "pinned to the machine that was faced")
 	# Pinned, not following: the player has to be able to walk away and still be
 	# reading the machine they opened.
-	main.player.position = sim.cell_centre(seam + Vector2i(4, 4))
+	main.player.position = sim.cell_centre(seam + Vector2i(4, 4) * Grid.SCALE)
 	main._process(0.0)
 	_assert(main.meter_cell == seam, "walking away does not move the panel to another machine")
 	# The world draws a bracket around whichever machine the card is reporting on.
@@ -93,7 +96,7 @@ func _run() -> void:
 	_assert(main.machine_layer.meter_cell == Vector2i(9999, 9999),
 		"and the bracket goes away with the card")
 
-	main.player.position = sim.cell_centre(seam + Vector2i(0, 1))
+	main.player.position = sim.cell_centre(_south_of_post(seam))
 	main.player.facing = Vector2i.UP
 	main.toggle_meter()
 
@@ -128,7 +131,7 @@ func _run() -> void:
 	while elapsed < Defs.METER_WINDOW:
 		worker.state = Defs.CAT_WORKING
 		worker.hunger = 1.0
-		worker.pos = sim.cell_centre(seam)
+		worker.pos = sim.post_stand(seam)
 		sim.tick(0.25)
 		elapsed += 0.25
 		for cell: Vector2i in sim.ground.keys():
@@ -155,13 +158,13 @@ func _run() -> void:
 	# Filled to the brim, not merely occupied. A tile takes a stack now, so one
 	# item in front of a miner is a pile it can keep adding to -- the stall is at
 	# the top of the stack, which is where the panel has to name it.
-	sim.ground[seam + miner.dir] = Defs.ITEM_HEATSTONE
-	sim.ground_stack[seam + miner.dir] = Sim.GROUND_STACK_MAX
+	sim.ground[sim.output_cell(miner)] = Defs.ITEM_HEATSTONE
+	sim.ground_stack[sim.output_cell(miner)] = Sim.GROUND_STACK_MAX
 	var guard: int = 0
 	while not miner.stalled and guard < 400:
 		worker.state = Defs.CAT_WORKING
 		worker.hunger = 1.0
-		worker.pos = sim.cell_centre(seam)
+		worker.pos = sim.post_stand(seam)
 		sim.tick(0.25)
 		guard += 1
 	_assert(miner.stalled, "the miner stalls once its output tile is taken")
@@ -223,7 +226,7 @@ func _run() -> void:
 	main.ui_scale = Defs.UI_SCALE_DEFAULT
 
 	# --- Demolition closes it --------------------------------------------------
-	sim.machines.erase(pad)
+	sim.remove_machine(pad)
 	main._process(0.0)
 	_assert(main.meter_cell == Vector2i(9999, 9999),
 		"removing the machine closes the panel instead of reporting a ghost")
@@ -282,6 +285,10 @@ func _test_no_follow_readout(main: Node2D) -> void:
 	# And the cell she is facing is still known, because the placement ghost and
 	# the mining ring are drawn from it.
 	_assert("focus_cell" in layer, "바라보는 칸 자체는 여전히 안다")
+
+## The cell just south of a post standing on this seam, in the seam's column.
+func _south_of_post(seam: Vector2i) -> Vector2i:
+	return Vector2i(seam.x, Defs.machine_footprint(Defs.M_MINER, seam).end.y)
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

@@ -256,7 +256,7 @@ func _test_one_cycle_eats_exactly_what_it_says() -> void:
 	var main := await _world()
 	var sim = main.sim
 	var machine: Sim.Machine = sim.machine_at(_PLANT)
-	var ahead: Vector2i = _PLANT + Vector2i.RIGHT
+	var ahead: Vector2i = _OUT
 
 	# One craft's worth plus one spare of each, so an over-eating machine shows up
 	# as a missing spare rather than as nothing at all.
@@ -355,7 +355,7 @@ func _test_two_belts_meet() -> void:
 	var machine: Sim.Machine = sim.machine_at(_PLANT)
 	var west: Vector2i = _clear(sim, _PLANT + Vector2i.LEFT)
 	var north: Vector2i = _clear(sim, _PLANT + Vector2i.UP)
-	var out_belt: Vector2i = _clear(sim, _PLANT + Vector2i.RIGHT)
+	var out_belt: Vector2i = _clear(sim, _OUT)
 	_assert(sim.build(Defs.M_BELT, west, Vector2i.RIGHT), "서쪽에서 들어오는 벨트")
 	_assert(sim.build(Defs.M_BELT, north, Vector2i.DOWN), "북쪽에서 내려오는 벨트")
 	_assert(sim.build(Defs.M_BELT, out_belt, Vector2i.RIGHT), "앞으로 나가는 벨트")
@@ -394,8 +394,7 @@ func _test_the_save() -> void:
 	machine.outbox[Defs.ITEM_ELECTRIC_MOTOR] = 1
 
 	# And a Mk.2 on a seam, so the save carries both new machine numbers.
-	var seam: Vector2i = _clear(sim, Vector2i(3, 6))
-	sim.ore[seam] = Defs.ITEM_HEATSTONE
+	var seam: Vector2i = _seam(sim, Vector2i(4, 20), Defs.ITEM_HEATSTONE)
 	sim.note_resource_seen(Defs.ITEM_ELECTRIC_MOTOR)
 	for item_id: int in Defs.MACHINE_COSTS[Defs.M_MINER_MK2]:
 		sim.stock[item_id] = 50
@@ -464,11 +463,9 @@ func _test_mk2_digs_twice_as_fast() -> void:
 	sim.note_resource_seen(Defs.ITEM_ELECTRIC_MOTOR)
 	for item_id: int in Defs.MACHINE_COSTS[Defs.M_MINER_MK2]:
 		sim.stock[item_id] = 50
-	var slow: Vector2i = _clear(sim, Vector2i(3, 8))
-	var fast: Vector2i = _clear(sim, Vector2i(3, 10))
-	for cell: Vector2i in [slow, fast]:
-		sim.ore[cell] = Defs.ITEM_COPPER
-		sim.purity[cell] = Defs.PURITY_NORMAL
+	# Two posts side by side, a post and a gap apart.
+	var slow: Vector2i = _seam(sim, Vector2i(4, 20), Defs.ITEM_COPPER)
+	var fast: Vector2i = _seam(sim, Vector2i(10, 20), Defs.ITEM_COPPER)
 	_assert(sim.build(Defs.M_MINER, slow, Vector2i.UP), "채굴기 하나")
 	_assert(sim.build(Defs.M_MINER_MK2, fast, Vector2i.UP), "Mk.2 하나")
 	var one: float = sim.machine_period(sim.machine_at(slow))
@@ -479,7 +476,7 @@ func _test_mk2_digs_twice_as_fast() -> void:
 		"계기의 설계 처리량도 두 배다")
 
 	# A seam, and only a seam.
-	_assert(sim.can_build(Defs.M_MINER_MK2, _clear(sim, Vector2i(3, 12)))
+	_assert(sim.can_build(Defs.M_MINER_MK2, _clear(sim, Vector2i(16, 20)))
 		== "광맥 위에만 설치할 수 있습니다", "빈 땅에는 못 짓는다")
 	# And it is inert without a worker, exactly like the first rig.
 	sim.machine_at(fast).operated = false
@@ -493,8 +490,8 @@ func _test_mk2_digs_twice_as_fast() -> void:
 	# Counted the same way on both sides, and only from the pile each rig pours
 	# into. `meter_out` is a rate over a window, and adding it to one side of a
 	# comparison is comparing two different quantities.
-	var slow_out: int = _on_floor(sim, slow + Vector2i.UP, Defs.ITEM_COPPER)
-	var fast_out: int = _on_floor(sim, fast + Vector2i.UP, Defs.ITEM_COPPER)
+	var slow_out: int = _on_floor(sim, sim.output_cell(sim.machine_at(slow)), Defs.ITEM_COPPER)
+	var fast_out: int = _on_floor(sim, sim.output_cell(sim.machine_at(fast)), Defs.ITEM_COPPER)
 	_assert(slow_out >= 5, "채굴기가 두 배 안에서 셀 만큼 캤다 (%d)" % slow_out)
 	_assert(fast_out >= slow_out * 2 - 1,
 		"120초 동안 Mk.2 가 두 배 캔다 (%d vs %d)" % [fast_out, slow_out])
@@ -507,20 +504,21 @@ func _test_mk2_digs_twice_as_fast() -> void:
 func _test_end_to_end() -> void:
 	var main := await _world()
 	var sim = main.sim
-	sim.machines.erase(_PLANT)
+	sim.remove_machine(_PLANT)
 
 	# Two seams, two rigs, two manufacturers -- one on plates, one on wire -- and
-	# one assembler where the lines meet.
-	var iron_seam: Vector2i = _clear(sim, Vector2i(2, -2))
-	var copper_seam: Vector2i = _clear(sim, Vector2i(2, 6))
-	sim.ore[iron_seam] = Defs.ITEM_IRON
-	sim.ore[copper_seam] = Defs.ITEM_COPPER
-	sim.purity[iron_seam] = Defs.PURITY_NORMAL
-	sim.purity[copper_seam] = Defs.PURITY_NORMAL
-	var plate_plant: Vector2i = _clear(sim, Vector2i(4, -2))
-	var wire_plant: Vector2i = _clear(sim, Vector2i(4, 6))
-	var joint: Vector2i = _clear(sim, Vector2i(6, 2))
-	_clear(sim, joint + Vector2i.RIGHT)
+	# one assembler where the lines meet. In cells (Grid v2):
+	#
+	#   iron post (3..6, -7..-4) -> belt (7,-6) -> plate plant (8..9, -6..-5) facing
+	#   south -> belts down x=8 from -4 to 3 -> (8..11, 4) east -> joint (12..13, 4..5)
+	#   copper post (3..6, 11..14) -> belt (7,12) -> wire plant (8..9, 12..13) facing
+	#   north -> belts up x=8 from 11 to 5 -> the same row east
+	var iron_seam: Vector2i = _seam(sim, Vector2i(4, -6), Defs.ITEM_IRON)
+	var copper_seam: Vector2i = _seam(sim, Vector2i(4, 12), Defs.ITEM_COPPER)
+	var plate_plant: Vector2i = _clear(sim, Vector2i(8, -6), Vector2i(2, 2))
+	var wire_plant: Vector2i = _clear(sim, Vector2i(8, 12), Vector2i(2, 2))
+	var joint: Vector2i = _clear(sim, _PLANT, Vector2i(2, 2))
+	_clear(sim, _OUT)
 
 	_assert(sim.build(Defs.M_MINER, iron_seam, Vector2i.RIGHT), "철 광맥에 채굴기")
 	_assert(sim.build(Defs.M_MINER, copper_seam, Vector2i.RIGHT), "구리 광맥에 채굴기")
@@ -532,20 +530,20 @@ func _test_end_to_end() -> void:
 	_assert(sim.build(Defs.M_ASSEMBLER, joint, Vector2i.RIGHT), "둘 사이에 조립기")
 
 	# Belts: seam to plant, plant to the joint. Straight lines, both directions.
-	for cell: Vector2i in [Vector2i(3, -2), Vector2i(3, 6)]:
+	for cell: Vector2i in [Vector2i(7, -6), Vector2i(7, 12)]:
 		sim.build(Defs.M_BELT, _clear(sim, cell), Vector2i.RIGHT)
-	for y in range(-1, 2):
-		sim.build(Defs.M_BELT, _clear(sim, Vector2i(4, y)), Vector2i.DOWN)
-	for y in range(5, 2, -1):
-		sim.build(Defs.M_BELT, _clear(sim, Vector2i(4, y)), Vector2i.UP)
-	sim.build(Defs.M_BELT, _clear(sim, Vector2i(4, 2)), Vector2i.RIGHT)
-	sim.build(Defs.M_BELT, _clear(sim, Vector2i(5, 2)), Vector2i.RIGHT)
+	for y in range(-4, 4):
+		sim.build(Defs.M_BELT, _clear(sim, Vector2i(8, y)), Vector2i.DOWN)
+	for y in range(11, 4, -1):
+		sim.build(Defs.M_BELT, _clear(sim, Vector2i(8, y)), Vector2i.UP)
+	for x in range(8, 12):
+		sim.build(Defs.M_BELT, _clear(sim, Vector2i(x, 4)), Vector2i.RIGHT)
 	_fuel(sim, 6)
 
 	for step in 3000:
 		sim.tick(0.1)
 	var assembler: Sim.Machine = sim.machine_at(joint)
-	var motors: int = _made(sim, assembler, joint + Vector2i.RIGHT, Defs.ITEM_ELECTRIC_MOTOR)
+	var motors: int = _made(sim, assembler, _OUT, Defs.ITEM_ELECTRIC_MOTOR)
 	_assert(motors >= 1, "광맥에서 시작해 전동기까지 갔다 (%d)" % motors)
 	_assert(sim.is_unlocked(Defs.M_MINER_MK2), "그리고 Mk.2 가 열렸다")
 
@@ -553,15 +551,22 @@ func _test_end_to_end() -> void:
 	for item_id: int in Defs.MACHINE_COSTS[Defs.M_MINER_MK2]:
 		sim.stock[item_id] = maxi(int(sim.stock.get(item_id, 0)),
 			int(Defs.MACHINE_COSTS[Defs.M_MINER_MK2][item_id]))
-	var upgrade: Vector2i = _clear(sim, Vector2i(2, 10))
-	sim.ore[upgrade] = Defs.ITEM_IRON
+	var upgrade: Vector2i = _seam(sim, Vector2i(4, 20), Defs.ITEM_IRON)
 	_assert(sim.build(Defs.M_MINER_MK2, upgrade, Vector2i.RIGHT),
 		"그 전동기로 Mk.2 를 세운다 — 이 단계의 끝")
 	main.free()
 
 # --- Helpers --------------------------------------------------------------------
 
-const _PLANT := Vector2i(5, 3)
+## Laid out in build cells (Grid v2): the assembler is two cells by two, a mining
+## post four by four around its seam, a belt one. Everything sits east of the
+## base, which goes down on her landing spot (-4, -2) and covers -7..0 by -5..2.
+const _PLANT := Vector2i(12, 4)
+## Where the assembler puts what it makes: past its east edge, on its anchor row.
+const _OUT := Vector2i(14, 4)
+## Where the generators go: a row of them west of the base, a tile apart.
+const _GEN_ROW := 8
+const _GEN_X := -10
 
 ## A warm world with a fire, an assembler at `_PLANT` facing east, and enough
 ## generators to run it. Nothing else is unlocked by hand that the run would not
@@ -587,9 +592,8 @@ func _world() -> Node2D:
 	sim.unlocked[Defs.M_MINER] = true
 	if sim.core_cell != Vector2i.ZERO:
 		push_error("이 파일은 기지가 원점에 있다고 가정한다")
-	for cell: Vector2i in [_PLANT, _PLANT + Vector2i.RIGHT, _PLANT + Vector2i.LEFT,
-			_PLANT + Vector2i.UP, _PLANT + Vector2i.DOWN]:
-		_clear(sim, cell)
+	_clear(sim, _PLANT - Vector2i(1, 1), Vector2i(4, 4))
+	_clear(sim, _OUT)
 	sim.build(Defs.M_ASSEMBLER, _PLANT, Vector2i.RIGHT)
 	_fuel(sim, 3)
 	return main
@@ -600,8 +604,9 @@ func _world() -> Node2D:
 func _fuel(sim, count: int) -> void:
 	var placed := 0
 	for index in count:
-		var cell: Vector2i = _clear(sim, Vector2i(-4 - index, 3))
+		var cell: Vector2i = Vector2i(_GEN_X - index * 2, _GEN_ROW)
 		if not sim.machines.has(cell):
+			_clear(sim, cell, Defs.machine_size(Defs.M_GENERATOR))
 			sim.build(Defs.M_GENERATOR, cell, Vector2i.RIGHT)
 		if sim.machines.has(cell):
 			# Deep, on purpose. Four stones is forty seconds, and a test that runs
@@ -613,17 +618,29 @@ func _fuel(sim, count: int) -> void:
 	for cell: Vector2i in sim.machines:
 		if sim.machines[cell].type != Defs.M_GENERATOR:
 			continue
-		if cell.x > -4 or cell.x < -4 - count + 1 or cell.y != 3:
+		if cell.x > _GEN_X or cell.x < _GEN_X - (count - 1) * 2 or cell.y != _GEN_ROW:
 			sim.machines[cell].buffer.clear()
 	sim._recount_power()
 
-func _clear(sim, cell: Vector2i) -> Vector2i:
-	sim.ore.erase(cell)
-	sim.machines.erase(cell)
-	sim.ground.erase(cell)
-	sim.ground_stack.erase(cell)
-	sim.frozen_cats.erase(cell)
-	sim.debris.erase(cell)
+## A block of cells from `cell` emptied of everything a build would refuse.
+func _clear(sim, cell: Vector2i, size: Vector2i = Vector2i.ONE) -> Vector2i:
+	for covered: Vector2i in Grid.cells_in(Rect2i(cell, size)):
+		sim.ore.erase(covered)
+		sim.remove_machine(covered)
+		sim.ground.erase(covered)
+		sim.ground_stack.erase(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
+	return cell
+
+## A seam with nothing else under the rig that will stand on it.
+func _seam(sim, cell: Vector2i, item_type: int) -> Vector2i:
+	var rect: Rect2i = Defs.machine_footprint(Defs.M_MINER, cell)
+	_clear(sim, rect.position, rect.size)
+	sim.ore[cell] = item_type
+	sim.purity[cell] = Defs.PURITY_NORMAL
 	return cell
 
 ## Everything one machine has made of a kind, wherever it ended up: still owed,

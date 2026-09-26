@@ -672,7 +672,7 @@ func setup(seed_value: int) -> void:
 	wander_rng.seed = seed_value ^ 0x85EBCA6B
 	food = Defs.FOOD_START
 	shelter_cell = core_cell + Defs.SHELTER_CELL
-	food_cell = core_cell + Defs.FOOD_CELL
+	food_cell = shelter_cell + Defs.FOOD_CELL
 	_generate_ore(seed_value)
 	_generate_shards(seed_value)
 	_generate_frozen_cats(seed_value)
@@ -686,14 +686,23 @@ func setup(seed_value: int) -> void:
 ## Cells kept clear so the guaranteed opening always has a belt route home.
 ## A single row, not a block: a square patch would put ore directly in front of
 ## the miner's output and the guaranteed opening would dead-end.
-const STARTER_PATCH: Array[Vector2i] = [Vector2i(0, 3), Vector2i(1, 3), Vector2i(2, 3)]
-const STARTER_LANE: Array[Vector2i] = [Vector2i(0, 1), Vector2i(0, 2)]
+##
+## In build cells from the core's anchor (Grid v2). Three seams in a row three
+## tiles south of the fire, a mining post's width apart, so each can carry a post
+## of its own; the posts' top row is two cells below the base, which leaves the
+## lane between them for the belt home.
+const STARTER_PATCH: Array[Vector2i] = [Vector2i(-3, 7), Vector2i(1, 7), Vector2i(5, 7)]
+## That lane: the cell above each starter seam's post, where a belt facing north
+## hands straight into the base.
+const STARTER_LANE: Array[Vector2i] = [Vector2i(-3, 5), Vector2i(1, 5), Vector2i(5, 5)]
 ## A guaranteed ember seam due north, just outside the opening warm radius, with
 ## a clear column back to the core. Without it the alloy recipe -- the design's
 ## payoff -- depends on where the scatter happened to drop ember, which made the
 ## mid-game beat unreliable and left the headline mechanic unreachable in a
 ## five-minute run.
-const STARTER_COPPER: Array[Vector2i] = [Vector2i(1, -9), Vector2i(0, -9), Vector2i(2, -9)]
+const STARTER_COPPER: Array[Vector2i] = [Vector2i(1, -17), Vector2i(-3, -17), Vector2i(5, -17)]
+## The column kept clear between that seam's post and the base, in cells.
+const STARTER_COLUMN := Rect2i(Vector2i(0, -14), Vector2i(3, 11))
 
 func _generate_ore(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -720,25 +729,24 @@ func _generate_ore(seed_value: int) -> void:
 	# A guaranteed heat stone seam due north with a clear column home, so the
 	# opening never depends on the scatter being kind. It used to be copper, then
 	# crystal; it is the resource the beat it protects actually needs, and that
-	# beat is now the first minutes.
+	# beat is now the first minutes. Whatever the scatter left too close to it
+	# goes, so it keeps the spacing every seam has.
 	for offset: Vector2i in STARTER_COPPER:
-		ore[core_cell + offset] = Defs.ITEM_HEATSTONE
-	for offset: Vector2i in STARTER_LANE:
-		ore.erase(core_cell + offset)
-	# The shelter, its doorstep and the food bin are cleared last, after every
-	# scatter. Ore blocks the player, and the doorstep is where they are put down
-	# every single morning: a seam rolled onto that tile woke them up standing
-	# inside a wall. It showed up as a test failing one run in five, which is the
-	# shape a seeded world bug always takes -- the map is different every run and
-	# most maps are fine.
-	for reserved: Vector2i in [shelter_cell, shelter_cell + Vector2i(0, 1), food_cell]:
-		ore.erase(reserved)
+		var cell: Vector2i = core_cell + offset
+		for near: Vector2i in ore.keys():
+			if Grid.steps(near, cell) < Defs.ORE_PITCH:
+				ore.erase(near)
+		ore[cell] = Defs.ITEM_HEATSTONE
+	# The base, its surroundings, the shelter, its doorstep and the food bin are
+	# cleared last, after every scatter. Ore blocks building, and the doorstep is
+	# where they are put down every single morning: a seam rolled onto it woke
+	# them up standing inside a wall. It showed up as a test failing one run in
+	# five, which is the shape a seeded world bug always takes -- the map is
+	# different every run and most maps are fine.
+	for cell: Vector2i in ore.keys():
+		if _ore_reserved(cell):
+			ore.erase(cell)
 	_assign_purity()
-	# Two clear columns home: one from the frost row, one from the ember seam.
-	for step in range(1, 9):
-		ore.erase(core_cell + Vector2i(1, -step))
-	for step in range(1, 3):
-		ore.erase(core_cell + Vector2i(1, step))
 
 ## Distance buys richness. The seams beside the base are ordinary; the ones out
 ## past the frontier are worth the walk. This is what stops the map from being a
@@ -761,8 +769,8 @@ func _assign_purity() -> void:
 func _pin_patch(rng: RandomNumberGenerator, item_type: int, band: Vector2, size: int) -> void:
 	var radius: float = (band.x + band.y) * 0.5
 	var angle: float = rng.randf() * TAU
-	var origin := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-	# Every cell of the patch inside the band, not just its origin: a cluster
+	var origin: Vector2i = _cell_toward(angle, radius)
+	# Every seam of the patch inside the band, not just its origin: a cluster
 	# grown from a cell on the line puts about half of itself on the far side of
 	# it, which is how "copper opens at the fourth upgrade" came out as three
 	# seams in five runs and a stray seam inside the third circle.
@@ -772,20 +780,58 @@ func _pin_patch(rng: RandomNumberGenerator, item_type: int, band: Vector2, size:
 	# are taken or out of band it simply runs out of tries -- which is a promise
 	# that keeps itself in 58 runs out of 60, and the two it drops are the two
 	# where the player is told copper is there and it is not.
+	#
+	# The whole band, not a box round the origin. Seams stand a post apart since
+	# Grid v2 and a thin band (the first copper's is 1.4 tiles) with the Lv4 heat
+	# stone already in it could leave a box short of room -- 1 seed in 200 got
+	# three seams of four. Sorted by distance from the origin, so the patch still
+	# forms where the seed pointed; it just never runs out of band.
+	var reach: int = int(ceil(Grid.cells(band.y))) + 1
+	var centre: Vector2i = core_cell
 	var candidates: Array[Vector2i] = []
-	for dy in range(-4, 5):
-		for dx in range(-4, 5):
-			var cell: Vector2i = origin + Vector2i(dx, dy)
+	for dy in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
+			var cell: Vector2i = centre + Vector2i(dx, dy)
 			var distance: float = _ring_distance(cell)
-			if ore.has(cell) or cell == core_cell:
-				continue
 			if distance < band.x or distance > band.y:
+				continue
+			if ore.has(cell) or _ore_reserved(cell) or base_rect().has_point(cell):
 				continue
 			candidates.append(cell)
 	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 		return Vector2(a - origin).length_squared() < Vector2(b - origin).length_squared())
-	for index in mini(size, candidates.size()):
-		ore[candidates[index]] = item_type
+	var placed := 0
+	for cell: Vector2i in candidates:
+		if placed >= size:
+			break
+		if not _ore_spaced(cell):
+			continue
+		ore[cell] = item_type
+		placed += 1
+
+## Where no seam may be: the base and a margin round it, the hut and its
+## doorstep, the bin, and the lanes the opening's belts run along.
+func _ore_reserved(cell: Vector2i) -> bool:
+	if base_rect().grow(2).has_point(cell):
+		return true
+	if shelter_rect().grow(1).has_point(cell) or food_rect().has_point(cell):
+		return true
+	if STARTER_COLUMN.has_point(cell - core_cell):
+		return true
+	return STARTER_LANE.has(cell - core_cell)
+
+## Whether a seam here would keep every other seam a post's width away.
+func _ore_spaced(cell: Vector2i) -> bool:
+	var reach: int = Defs.ORE_PITCH - 1
+	for dy in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
+			if ore.has(cell + Vector2i(dx, dy)):
+				return false
+	return true
+
+## The cell a distance in tiles and a direction away from the fire lands on.
+func _cell_toward(angle: float, radius_tiles: float) -> Vector2i:
+	return Grid.cell_at(core_centre() + Vector2.from_angle(angle) * Grid.px(radius_tiles))
 
 ## Ore arrives in patches so the player reads them as destinations rather than
 ## noise, and so a single miner placement decision matters.
@@ -793,29 +839,35 @@ func _scatter_ore(rng: RandomNumberGenerator, item_type: int, ring: Vector2, pat
 	for index in patches:
 		var angle: float = TAU * (float(index) + rng.randf() * 0.6) / float(patches)
 		var radius: float = rng.randf_range(ring.x, ring.y)
-		var origin := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		var origin: Vector2i = _cell_toward(angle, radius)
 		var placed := 0
 		var cursor := origin
 		var attempts := 0
+		# The same walk as ever, in steps of a post's width: every seam of the
+		# patch lands on a lattice four cells apart, so each can take a post.
 		while placed < size and attempts < size * 12:
 			attempts += 1
-			if not ore.has(cursor) and cursor != core_cell and _ring_distance(cursor) >= ring.x - 1.0:
+			if not ore.has(cursor) and _ring_distance(cursor) >= ring.x - 1.0 \
+					and not _ore_reserved(cursor) and _ore_spaced(cursor):
 				ore[cursor] = item_type
 				placed += 1
-			cursor = origin + Vector2i(rng.randi_range(-1, 1), rng.randi_range(-1, 1)) * (1 + placed / 3)
+			cursor = origin + Vector2i(rng.randi_range(-1, 1), rng.randi_range(-1, 1)) \
+				* Defs.ORE_PITCH * (1 + placed / 3)
 
 ## Crystal, scattered once and never again. Placed after the ore so a piece
 ## never lands on a seam -- a shard under a miner is a shard nobody can reach.
 func _generate_shards(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 5501
+	var core_tile: Vector2i = Grid.tile_of(core_cell)
 	var attempts := 0
 	while shards.size() < Defs.CRYSTAL_SHARDS and attempts < Defs.CRYSTAL_SHARDS * 40:
 		attempts += 1
 		var angle: float = rng.randf() * TAU
 		var radius: float = lerpf(Defs.CRYSTAL_RING.x, Defs.CRYSTAL_RING.y, sqrt(rng.randf()))
-		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-		if shards.has(cell) or ore.has(cell) or machines.has(cell) or cell == core_cell:
+		var tile := core_tile + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		var cell: Vector2i = Grid.from_tile(tile)
+		if shards.has(cell) or _tile_ore(tile) or _tile_machine(tile) or tile == core_tile:
 			continue
 		shards[cell] = true
 
@@ -830,10 +882,15 @@ func _generate_shards(seed_value: int) -> void:
 func _generate_frozen_cats(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 7717
+	# Laid out a tile at a time, with the same draws as ever: every distance
+	# this function promises is a promise about the world, and the world did not
+	# change size when the grid got finer. Each block is stored under the
+	# top-left cell of its tile.
+	var core_tile: Vector2i = Grid.tile_of(core_cell)
 	for index in Defs.STARTER_FROZEN:
-		var cell: Vector2i = _starter_frozen_cell(index)
-		if cell != core_cell:
-			frozen_cats[cell] = 0.0
+		var tile: Vector2i = _starter_frozen_tile(index)
+		if tile != core_tile:
+			frozen_cats[Grid.from_tile(tile)] = 0.0
 	# The one at the fourth step's edge, before the scatter so nothing else can
 	# take that cell. Fixed, like every landmark here: it is a scene the design
 	# means to happen, not a place the seed might put something.
@@ -849,15 +906,15 @@ func _generate_frozen_cats(seed_value: int) -> void:
 				+ float(try % 8) * 0.11
 			var ring: float = Defs.SECOND_RING.x \
 				+ (Defs.SECOND_RING.y - Defs.SECOND_RING.x) * float(try / 8) * 0.5
-			var cell := core_cell + Vector2i(roundi(cos(angle) * ring), roundi(sin(angle) * ring))
-			if frozen_cats.has(cell) or ore.has(cell) or machines.has(cell):
+			var tile := core_tile + Vector2i(roundi(cos(angle) * ring), roundi(sin(angle) * ring))
+			if _tile_frozen(tile) or _tile_ore(tile) or _tile_machine(tile):
 				continue
-			if cell == core_cell or cell == shelter_cell or cell == food_cell:
+			if tile == core_tile or _tile_building(tile):
 				continue
-			var distance: float = _ring_distance(cell)
+			var distance: float = Vector2(tile - core_tile).length()
 			if distance < Defs.SECOND_RING.x or distance > Defs.SECOND_RING.y:
 				continue
-			frozen_cats[cell] = 0.0
+			frozen_cats[Grid.from_tile(tile)] = 0.0
 			placed = true
 			break
 		if not placed:
@@ -865,9 +922,10 @@ func _generate_frozen_cats(seed_value: int) -> void:
 			# direction, cleared. A promise that keeps itself in 58 runs out of
 			# 60 drops the two runs where it was made.
 			var angle: float = second_angle + TAU * float(index) / float(Defs.SECOND_RING_CATS)
-			var cell := core_cell + Vector2i(roundi(cos(angle) * 10.0), roundi(sin(angle) * 10.0))
-			ore.erase(cell)
-			frozen_cats[cell] = 0.0
+			var tile := core_tile + Vector2i(roundi(cos(angle) * 10.0), roundi(sin(angle) * 10.0))
+			for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+				ore.erase(cell)
+			frozen_cats[Grid.from_tile(tile)] = 0.0
 	var reach: float = Defs.WARM_MAX + 8.0
 	var target: int = int((PI * reach * reach) / Defs.FROZEN_PER_TILES)
 	var attempts := 0
@@ -875,12 +933,45 @@ func _generate_frozen_cats(seed_value: int) -> void:
 		attempts += 1
 		var angle: float = rng.randf() * TAU
 		var radius: float = sqrt(rng.randf()) * reach
-		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-		if frozen_cats.has(cell) or ore.has(cell) or machines.has(cell):
+		var tile := core_tile + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if _tile_frozen(tile) or _tile_ore(tile) or _tile_machine(tile):
 			continue
-		if _ring_distance(cell) < Defs.FROZEN_SCATTER_MIN:
+		if Vector2(tile - core_tile).length() < Defs.FROZEN_SCATTER_MIN:
 			continue
-		frozen_cats[cell] = 0.0
+		frozen_cats[Grid.from_tile(tile)] = 0.0
+
+# --- The generator's tile lattice ---------------------------------------------
+## Questions the placement of tile-sized things asks about a whole tile.
+
+func _tile_ore(tile: Vector2i) -> bool:
+	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+		if ore.has(cell):
+			return true
+	return false
+
+func _tile_frozen(tile: Vector2i) -> bool:
+	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+		if frozen_key(cell) != NONE:
+			return true
+	return false
+
+func _tile_machine(tile: Vector2i) -> bool:
+	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+		if machine_at(cell) != null:
+			return true
+	return false
+
+func _tile_structure(tile: Vector2i) -> bool:
+	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+		if is_structure(cell):
+			return true
+	return false
+
+## The base, the hut or the bin covers any of it.
+func _tile_building(tile: Vector2i) -> bool:
+	var rect: Rect2i = Grid.tile_rect(tile)
+	return rect.intersects(base_rect()) or rect.intersects(shelter_rect()) \
+		or rect.intersects(food_rect())
 
 ## The village, the sign, and the tracks between them.
 ##
@@ -897,33 +988,38 @@ func _generate_village() -> void:
 	# frozen villager, signpost and footprint generates exactly as before.
 	# `debug_village` flips it for a look.
 	if not story_enabled:
-		sign_cell = Vector2i(9999, 9999)
+		sign_cell = NONE
 		village_rect = Rect2i()
 		return
-	sign_cell = core_cell + Defs.SIGN_OFFSET
-	var origin: Vector2i = core_cell + Defs.VILLAGE_OFFSET \
+	# Laid out in tiles, like every landmark: the offsets in Defs are tiles.
+	var core_tile: Vector2i = Grid.tile_of(core_cell)
+	var sign_tile: Vector2i = core_tile + Defs.SIGN_OFFSET
+	sign_cell = Grid.from_tile(sign_tile)
+	var origin: Vector2i = core_tile + Defs.VILLAGE_OFFSET \
 		- Vector2i(Defs.VILLAGE_CELLS.x / 2, Defs.VILLAGE_CELLS.y / 2)
-	village_rect = Rect2i(origin, Defs.VILLAGE_CELLS)
+	village_rect = Rect2i(Grid.from_tile(origin), Defs.VILLAGE_CELLS * Grid.SCALE)
 	# Emptied first. Ore, wreckage and the scattered ice all landed here before
 	# anyone decided this square was a village, and a house with a seam under it
 	# is a house nobody can walk into.
+	for cell: Vector2i in Grid.cells_in(village_rect):
+		ore.erase(cell)
+		purity.erase(cell)
+		shards.erase(cell)
 	for y in Defs.VILLAGE_CELLS.y:
 		for x in Defs.VILLAGE_CELLS.x:
-			var cell: Vector2i = origin + Vector2i(x, y)
-			ore.erase(cell)
-			purity.erase(cell)
-			debris.erase(cell)
-			frozen_cats.erase(cell)
-			shards.erase(cell)
-	ore.erase(sign_cell)
-	purity.erase(sign_cell)
+			var at: Vector2i = Grid.from_tile(origin + Vector2i(x, y))
+			debris.erase(at)
+			frozen_cats.erase(at)
+	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(sign_tile)):
+		ore.erase(cell)
+		purity.erase(cell)
 	debris.erase(sign_cell)
 	frozen_cats.erase(sign_cell)
 	for piece: Dictionary in Defs.VILLAGE_PIECES:
-		village[origin + Vector2i(piece["cell"])] = int(piece["id"])
+		village[Grid.from_tile(origin + Vector2i(piece["cell"]))] = int(piece["id"])
 	for local: Vector2i in Defs.VILLAGE_FROZEN:
-		frozen_cats[origin + local] = 0.0
-	_trace_trail(sign_cell, origin + _village_gate_local())
+		frozen_cats[Grid.from_tile(origin + local)] = 0.0
+	_trace_trail(sign_tile, origin + _village_gate_local())
 
 func _village_gate_local() -> Vector2i:
 	for piece: Dictionary in Defs.VILLAGE_PIECES:
@@ -936,6 +1032,8 @@ func _village_gate_local() -> Vector2i:
 ## row so the same world always has the same path -- a trail that reshuffled
 ## every time it was drawn would shimmer.
 func _trace_trail(from: Vector2i, to: Vector2i) -> void:
+	# In tiles: a footprint is a stride apart whatever the grid is doing. Each
+	# mark is stored under the top-left cell of its tile.
 	var steps: int = absi(to.y - from.y)
 	var x: int = from.x
 	for step in range(1, steps + 1):
@@ -947,15 +1045,17 @@ func _trace_trail(from: Vector2i, to: Vector2i) -> void:
 		# second path. One step at a time, never more than a cell off the line.
 		x += posmod(y * 73856093 + step * 19349663, 3) - 1
 		x = clampi(x, from.x - 1, from.x + 1)
-		var cell := Vector2i(x, y)
+		var tile := Vector2i(x, y)
+		var cell: Vector2i = Grid.from_tile(tile)
 		if village.has(cell):
 			continue
 		trail[cell] = posmod(y, 2)
 		# Whatever the scatter put on the path comes off it. The tracks are the
 		# one thing in the fog that says "this way", and a boulder standing on
 		# them is the sentence with a word missing.
-		ore.erase(cell)
-		purity.erase(cell)
+		for covered: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+			ore.erase(covered)
+			purity.erase(covered)
 		debris.erase(cell)
 
 ## Whether a cell is inside the village square at all.
@@ -974,17 +1074,18 @@ func village_piece(cell: Vector2i) -> int:
 ## being *outside* the radius is the whole point, and one cell nearer would make
 ## it a cat she picks up without noticing there was anything to notice.
 func _place_edge_frozen() -> void:
+	var core_tile: Vector2i = Grid.tile_of(core_cell)
 	for step in 24:
 		var radius: float = Defs.EDGE_FROZEN_RING + float(step / 8) * 0.5
 		var angle: float = Defs.EDGE_FROZEN_ANGLE + TAU * float(step % 8) / 8.0
-		var cell := core_cell + Vector2i(roundi(cos(angle) * radius),
+		var tile := core_tile + Vector2i(roundi(cos(angle) * radius),
 			roundi(sin(angle) * radius))
-		if cell == core_cell or ore.has(cell) or frozen_cats.has(cell):
+		if tile == core_tile or _tile_ore(tile) or _tile_frozen(tile):
 			continue
-		if is_structure(cell) or cell == shelter_cell or cell == food_cell:
+		if _tile_structure(tile) or _tile_building(tile):
 			continue
-		frozen_cats[cell] = 0.0
-		edge_frozen = cell
+		frozen_cats[Grid.from_tile(tile)] = 0.0
+		edge_frozen = Grid.from_tile(tile)
 		return
 
 ## Blocks of ice riding the belts.
@@ -1139,20 +1240,21 @@ func sleep_cats() -> void:
 func _generate_debris(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 5501
+	var core_tile: Vector2i = Grid.tile_of(core_cell)
 	var base_angle: float = rng.randf() * TAU
 	for step in 96:
 		var angle: float = base_angle + TAU * float(step) / 96.0
-		var cell := core_cell + Vector2i(
+		var tile := core_tile + Vector2i(
 			roundi(cos(angle) * Defs.DEBRIS_FIRST_RING),
 			roundi(sin(angle) * Defs.DEBRIS_FIRST_RING))
 		# On the ring, not merely near it. Rounding a circle onto a grid puts
 		# some of its cells a little in and a little out, and a piece that lands
 		# at 10.6 is inside the empty zone the rule promises.
-		if roundi(_ring_distance(cell)) != int(Defs.DEBRIS_FIRST_RING):
+		if roundi(Vector2(tile - core_tile).length()) != int(Defs.DEBRIS_FIRST_RING):
 			continue
-		if not _debris_free(cell):
+		if not _debris_free(tile):
 			continue
-		debris[cell] = rng.randi_range(0, Defs.DEBRIS_SHAPES - 1)
+		debris[Grid.from_tile(tile)] = rng.randi_range(0, Defs.DEBRIS_SHAPES - 1)
 		break
 	var reach: float = Defs.WARM_MAX + 8.0
 	var inner: float = Defs.DEBRIS_START_RING
@@ -1166,16 +1268,21 @@ func _generate_debris(seed_value: int) -> void:
 		# sqrt so the points spread evenly over the disc rather than crowding
 		# the middle, which here is the edge of the empty zone.
 		var radius: float = sqrt(rng.randf()) * reach
-		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-		if _ring_distance(cell) < inner or not _debris_free(cell):
+		var tile := core_tile + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if Vector2(tile - core_tile).length() < inner or not _debris_free(tile):
 			continue
-		debris[cell] = rng.randi_range(0, Defs.DEBRIS_SHAPES - 1)
+		debris[Grid.from_tile(tile)] = rng.randi_range(0, Defs.DEBRIS_SHAPES - 1)
 
-## Somewhere a piece can lie without covering something else that matters.
-func _debris_free(cell: Vector2i) -> bool:
-	return not debris.has(cell) and not ore.has(cell) and not machines.has(cell) \
-		and not frozen_cats.has(cell) and not shards.has(cell) and not has_rock(cell) \
-		and cell != core_cell and cell != shelter_cell and cell != food_cell
+## Somewhere a piece can lie without covering something else that matters. A
+## tile, since pieces are laid out a tile at a time.
+func _debris_free(tile: Vector2i) -> bool:
+	var cell: Vector2i = Grid.from_tile(tile)
+	if debris.has(cell) or _tile_ore(tile) or _tile_machine(tile) or _tile_frozen(tile):
+		return false
+	for covered: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
+		if shards.has(covered) or has_rock(covered):
+			return false
+	return tile != Grid.tile_of(core_cell) and not _tile_building(tile)
 
 ## Taking one apart. Held, like the case and like a seam.
 func search_debris(cell: Vector2i, delta: float) -> bool:
@@ -1251,19 +1358,20 @@ func open_debris(cell: Vector2i) -> Dictionary:
 ## the terrain left room. Walks the ring from its nominal angle rather than
 ## taking that one cell or giving up: the cell can hold a seam, the shelter or a
 ## previous starter, and "no cat within reach" is a run that cannot begin.
-func _starter_frozen_cell(index: int) -> Vector2i:
+func _starter_frozen_tile(index: int) -> Vector2i:
+	var core_tile: Vector2i = Grid.tile_of(core_cell)
 	var base_angle: float = TAU * float(index) / float(Defs.STARTER_FROZEN) + 0.6
 	for step in 48:
 		# Out from the nominal ring in half-tile rings, all the way round each.
 		var radius: float = Defs.FROZEN_MIN_RING + float(step / 16) * 0.5
 		var angle: float = base_angle + TAU * float(step % 16) / 16.0
-		var cell := core_cell + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
-		if cell == core_cell or ore.has(cell) or frozen_cats.has(cell):
+		var tile := core_tile + Vector2i(roundi(cos(angle) * radius), roundi(sin(angle) * radius))
+		if tile == core_tile or _tile_ore(tile) or _tile_frozen(tile):
 			continue
-		if is_structure(cell) or cell == shelter_cell or cell == food_cell:
+		if _tile_structure(tile) or _tile_building(tile):
 			continue
-		return cell
-	return core_cell
+		return tile
+	return core_tile
 
 ## Whether a boulder is standing on this cell.
 ##
@@ -1387,8 +1495,11 @@ func tiles_from_core_at(point: Vector2) -> float:
 
 ## Where the fire is, in world pixels. The middle of the base, which every ring
 ## in the world is measured from and every warm circle is drawn around.
+##
+## The base's footprint centre -- eight cells across, so the middle is a corner
+## between four cells, exactly where the middle of the tile it grew from was.
 func core_centre() -> Vector2:
-	return Grid.centre(core_cell)
+	return Grid.rect_centre(base_rect())
 
 ## Whether a lit torch is in her hand this frame. Set by Main, which is the only
 ## thing that knows what she is holding.
@@ -1514,7 +1625,21 @@ func thaw_fraction() -> float:
 func can_touch(cell: Vector2i) -> bool:
 	if Defs.in_room(cell):
 		return true
-	return not base_placed or is_warm(cell) or torch_lit
+	return not base_placed or is_warm_at(touch_point(cell)) or torch_lit
+
+## Where the fire's reach is measured for whatever is on a cell. A thing a tile
+## across is in reach or not as a whole -- its middle decides -- so the cell of
+## it she happens to be facing cannot change the answer.
+func touch_point(cell: Vector2i) -> Vector2:
+	for props: Dictionary in [frozen_cats, debris, village]:
+		var key: Vector2i = prop_key(props, cell)
+		if key != NONE:
+			return prop_centre(key)
+	return Grid.centre(cell)
+
+## How far a tile-sized thing stored under `origin` is from the fire, in tiles.
+func prop_tiles_from_core(origin: Vector2i) -> float:
+	return tiles_from_core_at(prop_centre(origin))
 
 func is_warm(cell: Vector2i) -> bool:
 	return base_placed and _ring_distance(cell) <= warm_radius
@@ -1553,7 +1678,7 @@ func begin_crash() -> void:
 	# lit circle around it, and centring that circle on the case instead would
 	# stand her in the fog at its rim on the first frame of the game.
 	kit_cell = core_cell
-	core_cell = kit_cell - Defs.KIT_OFFSET
+	core_cell = kit_cell - Defs.KIT_OFFSET * Grid.SCALE
 	warm_radius = Defs.CRASH_SIGHT
 	_cached_radius = warm_radius
 	shown_radius = warm_radius
@@ -1570,11 +1695,23 @@ func place_base(cell: Vector2i) -> bool:
 		return false
 	if Grid.tiles(Grid.centre(cell).distance_to(core_centre())) > Defs.BASE_PLACE_RADIUS:
 		return false
-	if not rect_problems(Defs.machine_footprint(Defs.M_CORE, cell)).is_empty():
+	# The case she is carrying the base out of is not in its own way: a base four
+	# tiles across put down beside it covers it, and the case goes.
+	# Seams give way too, the way they do under the case unfolding: the base is
+	# four tiles across and would otherwise be refused by any seam the scatter
+	# left within two tiles of wherever she is standing.
+	var problems: Dictionary = rect_problems(Defs.machine_footprint(Defs.M_CORE, cell))
+	for blocked: Vector2i in problems.keys():
+		if is_kit(blocked) or (ore.has(blocked) and machine_at(blocked) == null):
+			problems.erase(blocked)
+	if not problems.is_empty():
 		return false
 	core_cell = cell
+	if kit_cell != NONE and prop_rect(kit_cell).intersects(base_rect()):
+		kit_cell = NONE
+	_clear_under(base_rect())
 	shelter_cell = core_cell + Defs.SHELTER_CELL
-	food_cell = core_cell + Defs.FOOD_CELL
+	food_cell = shelter_cell + Defs.FOOD_CELL
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
@@ -1759,12 +1896,9 @@ func deploy_base() -> void:
 	# Everything under the footprint gives way. The world keeps the ground here
 	# clear, but the base is eight cells across and the case was two: nothing the
 	# player can have put down near the case may end up inside the fire.
-	for cell: Vector2i in Grid.cells_in(base_rect()):
-		ore.erase(cell)
-		purity.erase(cell)
-		remove_machine(cell)
+	_clear_under(base_rect())
 	shelter_cell = core_cell + Defs.SHELTER_CELL
-	food_cell = core_cell + Defs.FOOD_CELL
+	food_cell = shelter_cell + Defs.FOOD_CELL
 	var core := Machine.new()
 	core.type = Defs.M_CORE
 	core.cell = core_cell
@@ -1778,6 +1912,70 @@ func deploy_base() -> void:
 	# And the case is gone. Nothing draws it and nothing blocks on it: it did
 	# not sit down beside the base, it turned into it.
 	kit_cell = Vector2i(9999, 9999)
+
+## A point near `at` where a body `radius` across stands clear of everything
+## solid -- the nearest cell centre that works, searched outward. Used when a
+## building appears around someone: the case unfolding into a base four tiles
+## across, with her standing beside it.
+func clear_point(at: Vector2, radius: float) -> Vector2:
+	if _body_clear(at, radius):
+		return at
+	var here: Vector2i = Grid.cell_at(at)
+	for ring in range(1, 32):
+		var best := Vector2(1e20, 1e20)
+		var best_distance: float = 1e20
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring:
+					continue
+				var point: Vector2 = Grid.centre(here + Vector2i(dx, dy))
+				if not _body_clear(point, radius):
+					continue
+				var distance: float = point.distance_squared_to(at)
+				if distance < best_distance:
+					best_distance = distance
+					best = point
+		if best.x < 1e19:
+			return best
+	return at
+
+## Where a cat fanned out across a doorstep actually stands: there, if that is
+## ground, or the nearest cell that is. Eight cats thirty pixels apart are two
+## hundred pixels of doorstep, wider than the hut, and the ends of the fan used
+## to land in whatever was built beside it.
+func _clear_spot(at: Vector2) -> Vector2:
+	if not blocks_player(cell_of(at)):
+		return at
+	return clear_point(at, 1.0)
+
+func _body_clear(at: Vector2, radius: float) -> bool:
+	var low: Vector2i = Grid.cell_at(at - Vector2(radius, radius))
+	var high: Vector2i = Grid.cell_at(at + Vector2(radius, radius))
+	for y in range(low.y, high.y + 1):
+		for x in range(low.x, high.x + 1):
+			if blocks_player(Vector2i(x, y)):
+				return false
+	return true
+
+## Everything lying where the base is about to stand. The case was a tile and
+## the base is four tiles across, so the ground it opens onto is not the ground
+## the case was on -- a stone dropped beside the case, or a block of ice set down
+## next to it, would end up inside the fire.
+func _clear_under(rect: Rect2i) -> void:
+	for cell: Vector2i in Grid.cells_in(rect):
+		ore.erase(cell)
+		purity.erase(cell)
+		ground.erase(cell)
+		ground_stack.erase(cell)
+		drops.erase(cell)
+		shards.erase(cell)
+		var machine: Machine = machine_at(cell)
+		if machine != null and machine.type != Defs.M_CORE:
+			remove_machine(cell)
+	for props: Dictionary in [frozen_cats, debris]:
+		for origin: Vector2i in props.keys():
+			if prop_rect(origin).intersects(rect):
+				props.erase(origin)
 
 ## Below the case, and then outward. Below because that is where the player is
 ## looking -- she has to stand south of it to face it -- and outward because a
@@ -1827,7 +2025,9 @@ func drop_gun_at_base() -> bool:
 
 ## A cell beside a given one with nothing on it, searched outward.
 func _free_near(origin: Vector2i) -> Vector2i:
-	for ring in range(1, 6):
+	# Wide enough to get out from under the base, which is eight cells across and
+	# centred on the core's anchor.
+	for ring in range(1, 6 + Defs.machine_size(Defs.M_CORE).x):
 		for dy in range(-ring, ring + 1):
 			for dx in range(-ring, ring + 1):
 				if maxi(absi(dx), absi(dy)) != ring:
@@ -1839,6 +2039,22 @@ func _free_near(origin: Vector2i) -> Vector2i:
 					continue
 				return cell
 	return Vector2i(9999, 9999)
+
+## The nearest anchor to `origin` whose footprint of `size` a rule says nothing
+## against -- `problems` is a function of the anchor answering cell -> reason,
+## `rect_problems` over the footprint when none is given. Searched outward.
+func free_anchor_near(origin: Vector2i, size: Vector2i, problems: Callable = Callable()) -> Vector2i:
+	for ring in range(0, 24):
+		for dy in range(-ring, ring + 1):
+			for dx in range(-ring, ring + 1):
+				if maxi(absi(dx), absi(dy)) != ring:
+					continue
+				var anchor: Vector2i = origin + Vector2i(dx, dy)
+				var found: Dictionary = problems.call(anchor) if problems.is_valid() \
+					else rect_problems(Grid.footprint(anchor, size))
+				if found.is_empty():
+					return anchor
+	return NONE
 
 ## Walking over one. Returns what was taken, or -1.
 func collect_drop(cell: Vector2i) -> int:
@@ -1897,11 +2113,23 @@ func put_down_frozen(cell: Vector2i) -> bool:
 ## warm radius on purpose: the radius grows to twenty-two tiles, and a cat that
 ## thawed anywhere inside it would remove the walk home entirely by the third
 ## upgrade.
+##
+## Measured to the base's walls since Grid v2. THAW_RADIUS was two tiles from the
+## middle of a fire one tile across -- a tile and a half past its edge -- and
+## the base is four tiles across now: two tiles from its middle is inside it.
+## So "near the fire" is the same tile and a half, from where the fire's walls
+## actually are.
 func can_thaw(cell: Vector2i) -> bool:
 	var key: Vector2i = frozen_key(cell)
-	if key != NONE:
-		return tiles_from_core_at(prop_centre(key)) <= Defs.THAW_RADIUS
-	return _ring_distance(cell) <= Defs.THAW_RADIUS
+	var at: Vector2 = prop_centre(key) if key != NONE else Grid.centre(cell)
+	return tiles_from_base_at(at) <= Defs.THAW_RADIUS - 0.5
+
+## How far a point is from the base's walls, in tiles. Zero inside it.
+func tiles_from_base_at(point: Vector2) -> float:
+	var span: Rect2 = Grid.rect_px(base_rect())
+	var nearest := Vector2(clampf(point.x, span.position.x, span.end.x),
+		clampf(point.y, span.position.y, span.end.y))
+	return Grid.tiles(point.distance_to(nearest))
 
 ## Which of the four pictures a given progress shows. The last stage is held
 ## until the ice is gone rather than reached at three quarters, so the final
@@ -2170,12 +2398,13 @@ func _next_phase() -> float:
 ## the second one can deliver ten at once, and ten cats on one pixel is not a
 ## reward, it is a rendering bug the player will report.
 func _spawn_cats(grades: Array[int]) -> void:
-	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Grid.TILE))
+	var doorstep: Vector2 = shelter_doorstep()
 	for index in grades.size():
 		var cat := Cat.new()
 		cat.phase = _next_phase()
 		cat.rarity = grades[index]
-		cat.pos = doorstep + Vector2((float(index) - float(grades.size() - 1) * 0.5) * Defs.CAT_LANE, 0.0)
+		cat.pos = _clear_spot(doorstep + Vector2((float(index) - float(grades.size() - 1) * 0.5)
+			* Defs.CAT_LANE, 0.0))
 		cats.append(cat)
 
 ## --- The slot machine ---------------------------------------------------------
@@ -2274,7 +2503,7 @@ func idle_miner_cells() -> Array[Vector2i]:
 ## Cats without an assignment simply wait at the shelter to be carried somewhere:
 ## the game never picks a job for them.
 func dispatch_cats() -> void:
-	var doorstep: Vector2 = cell_centre(shelter_cell) + Vector2(0, Grid.px(0.85))
+	var doorstep: Vector2 = shelter_doorstep() - Vector2(0, Grid.px(0.15))
 	var index := 0
 	for cat: Cat in cats:
 		if cat == carried_cat:
@@ -2282,7 +2511,7 @@ func dispatch_cats() -> void:
 		# Everyone comes out of the shelter at first light, spread across the
 		# doorstep rather than stacked on one tile.
 		var lane: float = (float(index) - float(cats.size() - 1) * 0.5) * Defs.CAT_LANE
-		cat.pos = doorstep + Vector2(lane, 0.0)
+		cat.pos = _clear_spot(doorstep + Vector2(lane, 0.0))
 		index += 1
 		# `_is_post`, not "is there a machine there". A cat can be put down on
 		# bare ore and will dig it by hand, which is the whole early game before
@@ -2781,7 +3010,7 @@ func design_rates(machine: Machine) -> Dictionary:
 		Defs.M_BELT:
 			# A belt has no recipe, so its rated figure is its capacity: the most
 			# it could carry if something fed it that fast.
-			var cap: float = Defs.belt_speed(machine.tier) / 0.34 * 60.0
+			var cap: float = Defs.belt_speed(machine.tier) / Defs.BELT_GAP * 60.0
 			into[-1] = cap
 			out[-1] = cap
 		Defs.M_SPLITTER:
@@ -2860,7 +3089,8 @@ func meter_status(machine: Machine) -> String:
 func meter_buffer(machine: Machine) -> String:
 	var parts: Array[String] = []
 	if machine.type == Defs.M_BELT or machine.type == Defs.M_SPLITTER:
-		var capacity: int = Defs.BELT_CAPACITY if machine.type == Defs.M_BELT else Defs.SPLITTER_CAPACITY
+		var capacity: int = Defs.belt_cell_capacity() if machine.type == Defs.M_BELT \
+			else Defs.SPLITTER_CAPACITY
 		return "적재 %d/%d" % [machine.items.size(), capacity]
 	for item_type: int in machine.buffer:
 		var held: int = int(machine.buffer[item_type])
@@ -2929,7 +3159,87 @@ func cell_centre(cell: Vector2i) -> Vector2:
 ## a cat carried to a machine would sit correctly and then shuffle down ten
 ## pixels the first time it walked back from lunch.
 func post_stand(cell: Vector2i) -> Vector2:
-	return cell_centre(cell) - Vector2(0.0, Defs.CAT_FOOT_DROP)
+	return cell_centre(work_cell(cell)) - Vector2(0.0, Defs.CAT_FOOT_DROP)
+
+## The cell a cat works a post from.
+##
+## A bare seam is walked on, so the cat stands on it and digs. A mining post is
+## four cells by four and solid, so the cat works it from outside: the cell just
+## past the post's back edge -- the side away from its output -- in line with the
+## seam. If something stands there, the nearest free cell against the post, so a
+## worker is never sent to stand inside a wall.
+##
+## Both the cell and the point its body stands at have to be clear. A cat's
+## position is its torso, CAT_FOOT_DROP above its feet -- and that is most of a
+## cell now, so a cat whose feet were on the cell just south of a post had its
+## torso inside the post, and every walk it started began inside a wall. That
+## side takes the next cell out instead.
+func work_cell(cell: Vector2i) -> Vector2i:
+	var machine: Machine = machines.get(cell, null)
+	if machine == null or not Defs.machine_mines(machine.type):
+		return cell
+	var rect: Rect2i = machine_rect(machine)
+	var away: Vector2i = -machine.dir
+	var back: Vector2i = Grid.front_cell(rect, away, machine.cell)
+	for candidate: Vector2i in [back, back + away]:
+		if _can_stand(candidate):
+			return candidate
+	var best: Vector2i = NONE
+	var best_distance: float = 1e20
+	for edge: Vector2i in Grid.edge_cells(rect.grow(1)) + Grid.edge_cells(rect):
+		if edge == output_cell(machine) or not _can_stand(edge):
+			continue
+		var distance: float = cell_centre(edge).distance_squared_to(cell_centre(back))
+		if distance < best_distance:
+			best_distance = distance
+			best = edge
+	return best if best != NONE else back
+
+## Whether a cat can work standing on this cell: its feet there and its torso,
+## CAT_FOOT_DROP above, clear as well.
+func _can_stand(cell: Vector2i) -> bool:
+	if blocks_player(cell):
+		return false
+	return not blocks_player(cell_of(cell_centre(cell) - Vector2(0.0, Defs.CAT_FOOT_DROP)))
+
+## The free cell against a rectangle nearest to a point: where something that
+## cannot enter a building stands to reach it. `avoid` are cells not to use --
+## a post's output, which a cat standing on would be standing in the way of.
+func approach_cell(rect: Rect2i, from: Vector2, avoid: Array[Vector2i] = []) -> Vector2i:
+	var best: Vector2i = NONE
+	var best_distance: float = 1e20
+	for cell: Vector2i in Grid.edge_cells(rect):
+		if avoid.has(cell) or blocks_player(cell):
+			continue
+		var distance: float = cell_centre(cell).distance_squared_to(from)
+		if distance < best_distance:
+			best_distance = distance
+			best = cell
+	if best == NONE:
+		return Vector2i(rect.position.x, rect.end.y)
+	return best
+
+## Where a cat hands something in to the base: the nearest free cell against
+## it. The base is eight cells across and solid; walking to its middle would be
+## walking through it.
+func base_door(from: Vector2) -> Vector2:
+	return cell_centre(approach_cell(base_rect(), from))
+
+## The hut's doorstep, in world pixels: half a tile below its bottom edge, under
+## the middle of the building. Everything that comes out of the hut or goes into
+## it -- the cats at night and in the morning, her after sleeping -- comes and
+## goes here.
+func shelter_doorstep() -> Vector2:
+	var span: Rect2 = Grid.rect_px(shelter_rect())
+	return Vector2(span.get_center().x, span.end.y + float(Grid.TILE) * 0.5)
+
+## The middle of the hut, in world pixels.
+func shelter_centre() -> Vector2:
+	return Grid.rect_centre(shelter_rect())
+
+## Where a cat stands to eat: the free cell against the bin nearest to it.
+func food_door(from: Vector2) -> Vector2:
+	return cell_centre(approach_cell(food_rect(), from))
 
 ## Work rate contributed by whichever cat is standing at this miner. Zero means
 ## nobody is home; a starving cat still works, at a third of the pace.
@@ -3385,7 +3695,7 @@ func _stroll_goal(cat: Cat) -> Vector2:
 	# Indoors the room is the leash. Same wander, same leash length, different
 	# middle -- a cat strolling from a hut six hundred cells away would spend the
 	# night walking north.
-	var anchor: Vector2 = cell_centre(shelter_cell) + Vector2(0.0, float(Grid.TILE))
+	var anchor: Vector2 = shelter_doorstep()
 	if indoors:
 		anchor = room_centre()
 	var homeward: bool = cat.pos.distance_to(anchor) > Defs.WANDER_LEASH
@@ -3426,7 +3736,12 @@ func _cat_fetch(cat: Cat, delta: float) -> void:
 func _cat_deliver(cat: Cat, delta: float) -> void:
 	if cat == carried_cat:
 		return
-	if not _step_toward(cat, cell_centre(core_cell), delta):
+	# The side of the base it is coming from, chosen once per trip so the goal
+	# does not slide under it as it walks.
+	if cat.path_goal.x > 1e19 or not base_rect().grow(1).has_point(cell_of(cat.path_goal)):
+		cat.path_goal = Vector2(1e20, 1e20)
+	var door: Vector2 = cat.path_goal if cat.path_goal.x < 1e19 else base_door(cat.pos)
+	if not _step_toward(cat, door, delta):
 		return
 	if cat.carrying >= 0:
 		_deliver(cat.carrying, core_cell)
@@ -3470,7 +3785,7 @@ func rouse_cats() -> void:
 	for cat: Cat in cats:
 		if cat.state != Defs.CAT_ASLEEP:
 			continue
-		cat.pos = cell_centre(shelter_cell) + Vector2(0.0, 12.0)
+		cat.pos = shelter_doorstep() - Vector2(0.0, float(Grid.TILE) * 0.5 - 12.0)
 		cat.state = Defs.CAT_TO_MINER if cat.has_job() else Defs.CAT_IDLE
 
 ## True once every cat has reached the hut.
@@ -3488,7 +3803,7 @@ func force_cats_home() -> void:
 	for cat: Cat in cats:
 		if cat.state == Defs.CAT_ASLEEP:
 			continue          # already in, and moving it would be a jump for nothing
-		cat.pos = cell_centre(shelter_cell)
+		cat.pos = shelter_centre()
 		cat.state = Defs.CAT_ASLEEP
 
 ## Morning. Everyone starts on the doorstep and walks back to the post they had,
@@ -3501,7 +3816,7 @@ func wake_cats(doorstep: Vector2) -> void:
 		# Fanned across the doorstep rather than stacked on one pixel, so a
 		# workforce of six reads as six cats leaving a hut.
 		var spread: float = (float(index) - float(count - 1) * 0.5) * Defs.CAT_LANE
-		cat.pos = doorstep + Vector2(spread, 0.0)
+		cat.pos = _clear_spot(doorstep + Vector2(spread, 0.0))
 		# A beat on the doorstep before anyone wanders off. An animal that has
 		# just come out of a hut stands and looks around; one that starts pacing
 		# on the frame the door opens reads as a spawn rather than a waking.
@@ -3524,7 +3839,7 @@ func wake_cats(doorstep: Vector2) -> void:
 			cat.state = Defs.CAT_IDLE
 
 func _cat_walk_home(cat: Cat, delta: float) -> void:
-	if _step_toward(cat, cell_centre(shelter_cell), delta):
+	if _step_toward(cat, shelter_doorstep(), delta):
 		cat.state = Defs.CAT_ASLEEP
 
 func _cat_walk_to_miner(cat: Cat, delta: float) -> void:
@@ -3587,7 +3902,10 @@ func _cat_work(cat: Cat, delta: float) -> void:
 		cat.state = Defs.CAT_TO_FOOD
 
 func _cat_walk_to_food(cat: Cat, delta: float) -> void:
-	if _step_toward(cat, cell_centre(food_cell), delta):
+	if cat.path_goal.x > 1e19 or not food_rect().grow(1).has_point(cell_of(cat.path_goal)):
+		cat.path_goal = Vector2(1e20, 1e20)
+	var door: Vector2 = cat.path_goal if cat.path_goal.x < 1e19 else food_door(cat.pos)
+	if _step_toward(cat, door, delta):
 		cat.state = Defs.CAT_EATING
 		cat.eat_timer = 0.0
 
@@ -3848,13 +4166,16 @@ func drop_item(cell: Vector2i, item_type: int) -> bool:
 	ground_stack[cell] = 1
 	return true
 
+## `t` runs 0..1 across one belt cell. The belt is half a tile since Grid v2, so
+## the cell speed and the spacing are the tile figures scaled to it -- items
+## move and space out in the world exactly as they did.
 func _tick_belt(machine: Machine, delta: float) -> void:
-	var step: float = Defs.belt_speed(machine.tier) * delta
+	var step: float = Defs.belt_cell_speed(machine.tier) * delta
 	for index in range(machine.items.size()):
 		var item: Dictionary = machine.items[index]
 		var limit: float = 1.0
 		if index > 0:
-			limit = float(machine.items[index - 1]["t"]) - 0.34
+			limit = float(machine.items[index - 1]["t"]) - Defs.belt_gap_cells()
 		item["t"] = minf(float(item["t"]) + step, limit)
 		machine.items[index] = item
 	if machine.items.is_empty():
@@ -3874,7 +4195,7 @@ func _tick_belt(machine: Machine, delta: float) -> void:
 		_note_out(machine, int(head["type"]))
 		machine.stalled = false
 	else:
-		machine.stalled = machine.items.size() >= Defs.BELT_CAPACITY
+		machine.stalled = machine.items.size() >= Defs.belt_cell_capacity()
 
 ## Upgrades a belt to the next grade, charging the difference. Grades are a
 ## convenience rather than a requirement -- grade 1 already outruns every miner
@@ -3983,9 +4304,10 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			_deliver(item_type, cell)
 			return true
 		Defs.M_BELT:
-			if target.items.size() >= Defs.BELT_CAPACITY:
+			if target.items.size() >= Defs.belt_cell_capacity():
 				return false
-			var tail_ok: bool = target.items.is_empty() or float(target.items[-1]["t"]) > 0.34
+			var tail_ok: bool = target.items.is_empty() \
+				or float(target.items[-1]["t"]) > Defs.belt_gap_cells()
 			if not tail_ok:
 				return false
 			target.items.append({"type": item_type, "t": 0.0})

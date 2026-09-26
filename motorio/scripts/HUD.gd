@@ -770,7 +770,7 @@ func _draw_cold_vignette() -> void:
 
 	var exposure: float = 0.0
 	if main.sim != null:
-		var distance: float = Vector2(main.player.cell() - main.sim.core_cell).length()
+		var distance: float = main.sim.tiles_from_core_at(main.player.position)
 		exposure = clampf((distance - main.sim.warm_radius) / 8.0, 0.0, 1.0)
 	# Three named stages rather than a smooth fade, so the player can feel the
 	# moment their situation gets worse.
@@ -1470,7 +1470,7 @@ func _draw_minimap() -> void:
 	HudStyle.text_in(self, Rect2(centre.x - 8.0, centre.y - radius + 16.0, 16.0, 12.0), "N",
 		HudStyle.TEXT_SMALL, HudStyle.ACCENT_COLD)
 	# Home, when home is off the edge.
-	var core: Vector2 = Vector2(main.sim.core_cell - main.player.cell()) \
+	var core: Vector2 = Grid.tiles(1.0) * (main.sim.core_centre() - main.player.position) \
 		* Defs.MAP_CELL_PX * MINIMAP_ZOOM
 	if core.length() > radius - 6.0:
 		var dir: Vector2 = core.normalized()

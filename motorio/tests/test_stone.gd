@@ -89,13 +89,16 @@ func _test_belt_spill() -> void:
 	sim.power_ever = true
 	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
-	var at: Vector2i = sim.core_cell + Vector2i(3, 3)
+	# Three tiles out on the diagonal, clear of the base (Grid v2).
+	var at: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 	var ahead: Vector2i = at + Vector2i.RIGHT
+	sim.ore.erase(at)
 	sim.ore.erase(ahead)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.RIGHT), "벨트를 놓는다")
 	var belt: Sim.Machine = sim.machine_at(at)
-	for index in 3:
-		belt.items.append({"type": Defs.ITEM_HEATSTONE, "t": 1.0 - float(index) * 0.34})
+	for index in Defs.belt_cell_capacity():
+		belt.items.append({"type": Defs.ITEM_HEATSTONE,
+			"t": 1.0 - float(index) * Defs.belt_gap_cells()})
 	for _step in 60:
 		sim.tick(0.1)
 	_assert(sim.ground.has(ahead), "끝이 열려 있으면 앞 칸에 쏟는다")
@@ -120,7 +123,8 @@ func _test_belt_pickup() -> void:
 	sim.power_ever = true
 	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
-	var at: Vector2i = sim.core_cell + Vector2i(-3, -3)
+	var at: Vector2i = sim.core_cell + Vector2i(3, -3) * Grid.SCALE
+	sim.ore.erase(at)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.RIGHT), "벨트를 놓는다")
 	var belt: Sim.Machine = sim.machine_at(at)
 	belt.items.append({"type": Defs.ITEM_HEATSTONE, "t": 0.2})

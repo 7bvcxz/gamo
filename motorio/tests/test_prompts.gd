@@ -104,7 +104,8 @@ func _test_the_kit() -> void:
 	main.sim.search_kit()
 	for cell: Vector2i in main.sim.drops.keys():
 		main.sim.collect_drop(cell)
-	main.sim.place_shelter(main.sim.core_cell + Vector2i(-4, 0))
+	main.sim.place_shelter(main.sim.free_anchor_near(main.sim.core_cell + Defs.SHELTER_CELL,
+		Defs.SHELTER_SIZE, main.sim.shelter_problems))
 	main.player.position = main.sim.cell_centre(main.sim.kit_cell)
 	_assert(main.active_prompt() != "KIT", "상자를 다 뒤지면 다시 말하지 않는다")
 
@@ -124,9 +125,11 @@ func _test_learned_from_the_world() -> void:
 	# no other as of 1.0.7, so the prompt that offers the verb asks the same
 	# question the key answers -- offering it for a cat she is merely near is the
 	# game telling her to press a key that does nothing.
-	var spot: Vector2i = sim.core_cell + Vector2i(3, 0)
+	# A tile of ice four tiles east, and she a tile short of it, facing it --
+	# clear of the base, which is four tiles across (Grid v2).
+	var spot: Vector2i = sim.core_cell + Vector2i(4, 0) * Grid.SCALE
 	sim.frozen_cats[spot] = 0.0
-	main.player.position = sim.cell_centre(spot + Vector2i(-1, 0))
+	main.player.position = sim.cell_centre(spot + Vector2i(-Grid.SCALE, 0))
 	main.player.facing = Vector2i.RIGHT
 	_assert(main.active_prompt() == "FROZEN", "얼어붙은 고양이를 바라보면 안기")
 	# Nothing was pressed and no flag was set -- a cat simply exists now, and

@@ -42,8 +42,11 @@ func _world() -> Sim:
 func _belt(sim: Sim, from: Vector2i, length: int) -> void:
 	for step in length:
 		var cell: Vector2i = from + Vector2i(step, 0)
+		# The block is a tile across (Grid v2): clear the row under its lower half
+		# as well, so nothing but the belt is in its way.
 		sim.ore.erase(cell)
-		sim.mined_rocks[cell] = true
+		sim.ore.erase(cell + Vector2i(0, 1))
+		sim.mined_rocks[Grid.tile_of(cell)] = true
 		var belt := Sim.Machine.new()
 		belt.type = Defs.M_BELT
 		belt.cell = cell
@@ -52,7 +55,7 @@ func _belt(sim: Sim, from: Vector2i, length: int) -> void:
 
 func _test_it_rides() -> void:
 	var sim := _world()
-	var start: Vector2i = sim.core_cell + Vector2i(4, 4)
+	var start: Vector2i = sim.core_cell + Vector2i(4, 4) * Grid.SCALE
 	_belt(sim, start, 4)
 	sim.frozen_cats[start] = 0.0
 	# Long enough to cross a tile at the carrying speed, and no longer: a block
@@ -71,32 +74,33 @@ func _test_it_rides() -> void:
 	# Between cells it is drawn between cells rather than snapped to the grid.
 	var here: Vector2i = start + Vector2i(1, 0)
 	sim._tick_frozen_drift(0.2)
-	_assert(sim.frozen_at(here) != sim.cell_centre(here),
+	_assert(sim.frozen_at(here) != sim.prop_centre(here),
 		"칸 사이에서는 칸 사이에 그려진다")
 	sim.free()
 
 func _test_it_stops() -> void:
 	var sim := _world()
-	var start: Vector2i = sim.core_cell + Vector2i(4, -4)
-	_belt(sim, start, 3)
+	var start: Vector2i = sim.core_cell + Vector2i(4, -4) * Grid.SCALE
+	_belt(sim, start, 6)
 	sim.frozen_cats[start] = 0.0
 	# A piece of the ship in the way, which is a thing that does not move -- a
 	# second ice block would simply ride on ahead of this one, which is the belt
-	# working rather than a test of what happens when it cannot.
-	sim.debris[start + Vector2i(1, 0)] = 0
+	# working rather than a test of what happens when it cannot. The block and
+	# the piece are a tile across each, so "in the way" is a tile ahead.
+	sim.debris[start + Vector2i(Grid.SCALE, 0)] = 0
 	for tick in 600:
 		sim._tick_frozen_drift(1.0 / 60.0)
 	_assert(sim.frozen_cats.has(start), "막히면 제자리에 선다")
 	_assert(sim.frozen_cats.size() == 1 and sim.debris.size() == 1,
 		"그리고 막은 것을 지우지 않는다")
-	_assert(sim.frozen_at(start) == sim.cell_centre(start), "밀리다 만 자리에 걸치지도 않는다")
+	_assert(sim.frozen_at(start) == sim.prop_centre(start), "밀리다 만 자리에 걸치지도 않는다")
 
 	# And the same when the thing in the way is another block that cannot move
 	# either, which is what a queue on a belt actually looks like.
 	sim.debris.clear()
-	var tail: Vector2i = start + Vector2i(1, 0)
+	var tail: Vector2i = start + Vector2i(Grid.SCALE, 0)
 	sim.frozen_cats[tail] = 0.0
-	sim.ore[start + Vector2i(2, 0)] = Defs.ITEM_HEATSTONE
+	sim.ore[tail + Vector2i(Grid.SCALE, 0)] = Defs.ITEM_HEATSTONE
 	for tick in 600:
 		sim._tick_frozen_drift(1.0 / 60.0)
 	_assert(sim.frozen_cats.has(start) and sim.frozen_cats.has(tail),
@@ -106,10 +110,10 @@ func _test_it_stops() -> void:
 
 func _test_it_stays_put_off_a_belt() -> void:
 	var sim := _world()
-	var cell: Vector2i = sim.core_cell + Vector2i(-4, 3)
+	var cell: Vector2i = sim.core_cell + Vector2i(6, -6) * Grid.SCALE
 	sim.frozen_cats[cell] = 0.0
 	for tick in 300:
 		sim._tick_frozen_drift(1.0 / 60.0)
 	_assert(sim.frozen_cats.has(cell), "벨트가 없으면 움직이지 않는다")
-	_assert(sim.frozen_at(cell) == sim.cell_centre(cell), "그리고 칸 한가운데 있다")
+	_assert(sim.frozen_at(cell) == sim.prop_centre(cell), "그리고 칸 한가운데 있다")
 	sim.free()

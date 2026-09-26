@@ -94,20 +94,25 @@ func _test_copper_is_reachable_at_heat_13() -> void:
 		world.search_kit()
 		world.stones_in = int(Defs.BASE_LEVELS[3]["stones"])
 		world._refresh_radius()
+		# From every cell against the base's walls: the base is eight cells across
+		# since Grid v2, and she walks out of it from whichever side she is on.
 		var seen: Dictionary = {}
-		var queue: Array[Vector2i] = [world.core_cell]
-		seen[world.core_cell] = true
+		var queue: Array[Vector2i] = []
+		for edge: Vector2i in Grid.edge_cells(world.base_rect()):
+			if not world.is_structure(edge):
+				queue.append(edge)
+				seen[edge] = true
 		var beside := false
 		while not queue.is_empty() and not beside:
 			var at: Vector2i = queue.pop_front()
 			for dir: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 				var next: Vector2i = at + dir
-				if seen.has(next) or Vector2(next - world.core_cell).length() > 14.0:
+				if seen.has(next) or world.tiles_from_core(next) > 14.0:
 					continue
 				if int(world.ore.get(next, -1)) == Defs.ITEM_COPPER and world.can_touch(next):
 					beside = true
 					break
-				if world.is_structure(next) or world.machines.has(next):
+				if world.is_structure(next) or world.machine_at(next) != null:
 					continue
 				seen[next] = true
 				queue.push_back(next)

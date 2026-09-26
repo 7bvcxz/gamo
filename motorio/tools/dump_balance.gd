@@ -43,7 +43,7 @@ func _initialize() -> void:
 			"tiles_per_second": speed,
 			"seconds_per_tile": 1.0 / speed,
 			"ten_tile_seconds": 10.0 / speed,
-			"items_per_minute": speed / 0.34 * 60.0,
+			"items_per_minute": speed / Defs.BELT_GAP * 60.0,
 			"copper": int(Defs.BELT_TIERS[index]["cost"]),
 		})
 

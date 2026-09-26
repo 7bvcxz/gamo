@@ -50,14 +50,22 @@ func _test_the_sim_agrees() -> void:
 	sim.carried_kit = Defs.KIT_BASE
 	sim.place_base(sim.core_cell)
 	sim.shelter_placed = true
-	# One cell each, and the cell next door is walkable. This is what the drawing
-	# now says too, which is the whole point of the change: a player who walks
-	# around the picture was walking around nothing.
+	# Every cell of each footprint is solid, and the cell just past each wall is
+	# walkable. Grid v2 made the base eight cells by eight and the hut six by
+	# eight; what has not changed is that the solid part is exactly the building
+	# -- a player who walks around the picture must be walking around something.
+	for cell: Vector2i in Grid.cells_in(sim.base_rect()):
+		if not sim.blocks_player(cell):
+			_assert(false, "기지 칸 %s 은 막힌다" % str(cell))
 	_assert(sim.blocks_player(sim.core_cell), "기지 칸은 막힌다")
+	for cell: Vector2i in Grid.cells_in(sim.shelter_rect()):
+		if not sim.blocks_player(cell):
+			_assert(false, "숙소 칸 %s 은 막힌다" % str(cell))
 	_assert(sim.blocks_player(sim.shelter_cell), "숙소 칸도 막힌다")
+	var base: Rect2i = sim.base_rect()
 	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-		var beside: Vector2i = sim.core_cell + step
-		if sim.machines.has(beside) or sim.ore.has(beside):
+		var beside: Vector2i = Grid.front_cell(base, step, sim.core_cell)
+		if sim.machine_at(beside) != null or sim.ore.has(beside):
 			continue
 		_assert(not sim.blocks_player(beside),
 			"기지 옆 %s 칸은 지나갈 수 있다" % str(step))
@@ -74,25 +82,33 @@ func _test_shelter_no_go() -> void:
 	sim.setup(4242)
 	var mismatches := 0
 	var painted := 0
-	for dy in range(-4, 5):
-		for dx in range(-4, 5):
+	var gap: int = Grid.SCALE * int(Defs.SHELTER_CLEARANCE - 1.0)
+	var band: Rect2i = sim.base_rect().grow(gap)
+	# Anchors all round the base, near and far (Grid v2: the hut's anchor, and a
+	# footprint six by eight around it).
+	for dy in range(-12, 13, 2):
+		for dx in range(-12, 13, 2):
 			var cell: Vector2i = sim.core_cell + Vector2i(dx, dy)
 			var blocked: bool = sim.shelter_too_close(cell)
 			if blocked:
 				painted += 1
+			# The rule is the footprint against the band, nothing else.
+			if blocked != Grid.footprint(cell, Defs.SHELTER_SIZE).intersects(band):
+				mismatches += 1
 			# What the rule says, tested through the door the player uses.
 			sim.shelter_placed = false
 			sim.carried_kit = Defs.KIT_SHELTER
-			sim.ore.erase(cell)
-			sim.machines.erase(cell)
 			var placed: bool = sim.place_shelter(cell)
 			if placed and blocked:
 				mismatches += 1
 			if placed:
 				sim.shelter_placed = false
 	_assert(mismatches == 0, "붉게 칠한 칸에는 실제로 놓을 수 없다 (%d건)" % mismatches)
-	_assert(painted >= 9 and painted <= 21,
-		"기지 둘레 두 칸이 칠해진다 (%d칸)" % painted)
-	_assert(not sim.shelter_too_close(sim.core_cell + Vector2i(3, 0)),
-		"세 칸 밖은 칠하지 않는다")
+	_assert(painted > 0, "기지 둘레가 칠해진다 (%d칸)" % painted)
+	# A hut whose west wall stands SHELTER_CLEARANCE tiles past the base's east
+	# wall -- one tile of bare ground between them -- is not too close.
+	var clear_x: int = sim.base_rect().end.x + gap
+	var anchor: Vector2i = Vector2i(clear_x, sim.core_cell.y) + Grid.default_anchor(Defs.SHELTER_SIZE)
+	_assert(not sim.shelter_too_close(anchor), "한 타일 띄우면 칠하지 않는다")
+	_assert(sim.shelter_too_close(anchor - Vector2i(1, 0)), "한 칸만 더 붙어도 칠한다")
 	sim.free()

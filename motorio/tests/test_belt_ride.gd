@@ -39,7 +39,7 @@ func _test_drift_query() -> void:
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var cell := Vector2i(14, 14)
 	sim.ore.erase(cell)
-	sim.mined_rocks[cell] = true
+	sim.mined_rocks[Grid.tile_of(cell)] = true
 	_assert(sim.belt_drift(cell).is_zero_approx(), "빈 바닥은 아무것도 안 한다")
 	_assert(sim.build(Defs.M_BELT, cell, Vector2i.RIGHT), "벨트를 놓는다")
 	var drift: Vector2 = sim.belt_drift(cell)
@@ -72,10 +72,22 @@ func _test_she_rides() -> void:
 	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 
-	var cell: Vector2i = sim.core_cell + Vector2i(6, 6)
-	sim.ore.erase(cell)
-	sim.mined_rocks[cell] = true
-	_assert(sim.build(Defs.M_BELT, cell, Vector2i.RIGHT), "동쪽으로 가는 벨트를 놓는다")
+	var cell: Vector2i = sim.core_cell + Vector2i(6, 6) * Grid.SCALE
+	# A run of them, a tile and a half: a belt is one cell since Grid v2, and half
+	# a second at the carrying speed crosses more than one.
+	# And nothing standing beside the run: a block of ice a tile across next to it
+	# would stop her against its corner, which is a collision test rather than a
+	# belt one.
+	var lane := Rect2i(cell - Vector2i(2, 2), Vector2i(8, 5))
+	for props: Dictionary in [sim.frozen_cats, sim.debris]:
+		for origin: Vector2i in props.keys():
+			if sim.prop_rect(origin).intersects(lane):
+				props.erase(origin)
+	for step in 4:
+		sim.ore.erase(cell + Vector2i(step, 0))
+		sim.mined_rocks[Grid.tile_of(cell + Vector2i(step, 0))] = true
+		_assert(sim.build(Defs.M_BELT, cell + Vector2i(step, 0), Vector2i.RIGHT),
+			"동쪽으로 가는 벨트를 놓는다")
 
 	# Standing on it, hands off the keyboard.
 	main.player.position = sim.cell_centre(cell)

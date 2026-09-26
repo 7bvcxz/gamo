@@ -47,7 +47,7 @@ func _world() -> Sim:
 func _test_cats_are_on_a_cell() -> void:
 	var sim := _world()
 	sim.grant_cats(1)
-	var here: Vector2i = sim.core_cell + Vector2i(3, 3)
+	var here: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 	var cat: Sim.Cat = sim.cats[0]
 	cat.pos = sim.cell_centre(here)
 	_assert(sim.cat_on(here) == cat, "선 칸에서는 찾힌다")
@@ -66,7 +66,7 @@ func _test_cats_are_on_a_cell() -> void:
 func _test_the_facing_cell_only() -> void:
 	var sim := _world()
 	sim.grant_cats(1)
-	var facing: Vector2i = sim.core_cell + Vector2i(3, 0)
+	var facing: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
 	var diagonal: Vector2i = facing + Vector2i(0, 1)
 	sim.cats[0].pos = sim.cell_centre(diagonal)
 	_assert(not sim.is_liftable(facing), "대각선의 고양이는 앞칸의 것이 아니다")
@@ -87,12 +87,14 @@ func _test_the_prompt_agrees() -> void:
 	main.state = main.State.PLAY
 	main.sim.frozen_cats.clear()
 	main.sim.grant_cats(1)
-	var here: Vector2i = main.sim.core_cell + Vector2i(4, 0)
+	var here: Vector2i = main.sim.core_cell + Vector2i(4, 0) * Grid.SCALE
 	main.player.position = main.sim.cell_centre(here)
 	main.player.facing = Vector2i.RIGHT
 	var facing: Vector2i = main.player.facing_cell()
-	# A cat one step to the side of the cell she is facing.
-	main.sim.cats[0].pos = main.sim.cell_centre(facing + Vector2i(0, 1))
+	# A cat one step to the side of the cell she is facing. Her reach is a tile
+	# wide since Grid v2 (two lanes of cells), so "one step to the side" is a
+	# tile over: the next cell over is still in front of her.
+	main.sim.cats[0].pos = main.sim.cell_centre(facing + Vector2i(0, Grid.SCALE))
 	_assert(not main._idle_cat_within_reach(), "옆에 있는 고양이는 안내하지 않는다")
 	main.sim.cats[0].pos = main.sim.cell_centre(facing)
 	_assert(main._idle_cat_within_reach(), "앞칸에 서면 안내한다")
@@ -117,12 +119,14 @@ func _test_ice_outranks_the_pickaxe() -> void:
 	main.state = main.State.PLAY
 	var sim = main.sim
 	# A seam she could mine, with a block of ice on top of it, right in front.
-	var cell: Vector2i = sim.core_cell + Vector2i(2, 0)
-	sim.machines.erase(cell)
+	# A tile east of the base, and she a tile west of it (Grid v2: the block is a
+	# tile across, two cells by two).
+	var cell: Vector2i = sim.core_cell + Vector2i(4, 0) * Grid.SCALE
+	sim.remove_machine(cell)
 	sim.ore[cell] = Defs.ITEM_HEATSTONE
 	sim.frozen_cats[cell] = 0.0
 	sim.thawed[cell] = true
-	main.player.position = sim.cell_centre(cell + Vector2i(-1, 0))
+	main.player.position = sim.cell_centre(cell + Vector2i(-Grid.SCALE, 0))
 	main.player.facing = Vector2i(1, 0)
 	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	_assert(main.holding_pickaxe(), "곡괭이를 들고 있고")

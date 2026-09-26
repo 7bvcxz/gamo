@@ -11,6 +11,10 @@ var last_reason := ""
 func _on_rejected(reason: String, _cell: Vector2i) -> void:
 	last_reason = reason
 
+## The cell just south of a post standing on this seam, in the seam's column.
+func _south_of_post(seam: Vector2i) -> Vector2i:
+	return Vector2i(seam.x, Defs.machine_footprint(Defs.M_MINER, seam).end.y)
+
 func _initialize() -> void:
 	call_deferred("_run")
 
@@ -33,17 +37,20 @@ func _run() -> void:
 	# banner, so the signal is the channel-independent place to read them.
 	main.sim.build_rejected.connect(_on_rejected)
 
-	# Stand one tile south of a seam and look north at it.
+	# Stand just south of where the post would stand and look north at the seam.
+	# Grid v2: a mining post is four cells by four around its seam, so the place
+	# to stand is outside that footprint, not on the cell next to the seam.
 	var seam := Vector2i(9999, 9999)
 	for cell: Vector2i in main.sim.ore:
-		if not main.sim.is_structure(cell + Vector2i(0, 1)):
+		if main.sim.can_build(Defs.M_MINER, cell) == "" \
+				and not main.sim.is_structure(_south_of_post(cell)):
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "the map has a seam approachable from the south")
 
-	main.player.position = main.sim.cell_centre(seam + Vector2i(0, 1))
+	main.player.position = main.sim.cell_centre(_south_of_post(seam))
 	main.player.facing = Vector2i.UP
-	_assert(main.player.facing_cell() == seam, "the player is facing the seam")
+	_assert(main.build_anchor(Defs.M_MINER) == seam, "the player is facing the seam")
 
 	# The rule layer has always agreed this is legal.
 	main.selected_index = 0
@@ -68,6 +75,7 @@ func _run() -> void:
 			bare = cell
 			break
 	if bare != Vector2i(9999, 9999):
+		# Right beside it: a belt is one cell, aimed at the next cell over.
 		main.player.position = main.sim.cell_centre(bare + Vector2i(0, 1))
 		main.player.facing = Vector2i.UP
 		last_reason = ""
@@ -79,7 +87,7 @@ func _run() -> void:
 	# A second press on the finished miner must not silently rebuild or refuse
 	# for the wrong reason.
 	main.selected_index = 0
-	main.player.position = main.sim.cell_centre(seam + Vector2i(0, 1))
+	main.player.position = main.sim.cell_centre(_south_of_post(seam))
 	main.player.facing = Vector2i.UP
 	last_reason = ""
 	main._primary_action()
@@ -123,7 +131,7 @@ func _run() -> void:
 
 	# Both hands full: no picking anything else up.
 	main.player.facing = Vector2i.UP
-	main.player.position = main.sim.cell_centre(seam + Vector2i(0, 1))
+	main.player.position = main.sim.cell_centre(_south_of_post(seam))
 	_assert(main.sim.machine_at(seam) != null, "there is a machine that could be removed")
 	main._try_demolish()
 	_assert(main.sim.machine_at(seam) != null,

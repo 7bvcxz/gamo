@@ -46,7 +46,9 @@ func _run() -> void:
 	for drop_cell: Vector2i in main.sim.drops.keys():
 		if int(main.sim.drops[drop_cell]) == Sim.DROP_FOOD_BIN:
 			main.sim.collect_drop(drop_cell)
-	main.sim.place_food_bin(main.sim._free_near(main.sim.core_cell))
+	# Where the bin's own rule says it can stand -- it is a tile across (Grid v2).
+	main.sim.place_food_bin(main.sim.free_anchor_near(main.sim.core_cell, Defs.FOOD_BIN_SIZE,
+		main.sim.food_problems))
 	# And they start part-hungry, staggered. A fed cat now works twelve minutes
 	# and this run is two hundred seconds, so waiting for hunger to arrive on its
 	# own would be waiting for a thing the file is not about -- test_workers owns
@@ -113,8 +115,16 @@ func _run() -> void:
 			var here: Vector2i = sim.cell_of(cat.pos)
 			var before: Vector2i = cells.get(index, here)
 			cells[index] = here
+			# Beside a wall, which is where the rule is actually tested. Cats used
+			# to stand *on* their miner, their bin and the core; since Grid v2 they
+			# work, eat and deliver from the cell outside the footprint, so the
+			# evidence that the check saw real traffic is time spent right next to
+			# something solid.
+			for side: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+				if sim.blocks_player(here + side):
+					blocked_seen += 1
+					break
 			if sim.blocks_player(here):
-				blocked_seen += 1
 				var goal_cell: Vector2i = sim.cell_of(cat.path_goal) \
 					if cat.path_goal.x < 1e19 else here
 				if here != before and here != goal_cell and cat != sim.carried_cat:
