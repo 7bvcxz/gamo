@@ -3990,6 +3990,10 @@ func _update_craft(delta: float) -> void:
 		"pickaxe":
 			if sim.craft_pickaxe():
 				_equip(TOOL_PICKAXE)
+				# The mark over the nearest seam. It was only set by picking the old
+				# pickaxe up off the snow, so the one made at the fire -- the only
+				# way to get it now -- never showed where to use it.
+				pickaxe_hint_until = Defs.PICKAXE_HINT_SECONDS
 				_land_craft(craft, "곡괭이가 손에 들어왔다.")
 		"gun":
 			if sim.craft_build_gun():

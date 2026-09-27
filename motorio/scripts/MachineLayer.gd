@@ -704,11 +704,7 @@ func _draw_hand_progress() -> void:
 	# The seam sits on warm amber ground, and an amber arc on amber reads as
 	# nothing. Dark track, near-white fill: the contrast has to survive the
 	# brightest floor in the game.
-	draw_arc(centre, radius, 0.0, TAU, 40, Color(0.02, 0.04, 0.08, 0.72), 6.0)
-	draw_arc(centre, radius, -PI * 0.5, -PI * 0.5 + TAU * fraction, 40,
-		Color(1.0, 0.97, 0.90, 0.95), 5.0)
-	draw_arc(centre, radius, -PI * 0.5, -PI * 0.5 + TAU * fraction, 40,
-		Defs.COL_CORE, 2.0)
+	WorldProgress.draw_strong(self, centre, fraction, Defs.COL_CORE, radius)
 	# Chips fly off as the swing lands.
 	if fraction > 0.75:
 		var spark: float = (fraction - 0.75) / 0.25
@@ -1290,6 +1286,16 @@ func _draw_frozen(tile: float) -> void:
 		var stage: int = Sim.frozen_stage(progress)
 		var region := Rect2(float(stage) * CAT_CELL, 0.0, CAT_CELL, CAT_CELL)
 		draw_texture_rect_region(CAT_FREEZE_SHEET, block, region, Color.WHITE)
+		# The same ring as everything else in the world that takes a moment
+		# (Quality Pass 01). The ice going was the one wait with nothing closing
+		# over it: the meltwater spreads, but it does not say how long.
+		if thaw_ring_visible(cell):
+			_progress_ring(at + Vector2(0.0, -22.0), progress, Defs.COL_ICE, 8.0, 2.5)
+
+## Whether a frozen cat shows its thaw ring: it is thawing by the fire. A
+## predicate, so a test can ask it.
+func thaw_ring_visible(cell: Vector2i) -> bool:
+	return sim.frozen_cats.has(cell) and float(sim.frozen_cats[cell]) > 0.0 and sim.can_thaw(cell)
 
 func _draw_food_bin(tile: float) -> void:
 	if not sim.food_placed:

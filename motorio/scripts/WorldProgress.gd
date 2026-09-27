@@ -28,6 +28,19 @@ static func draw(canvas: CanvasItem, at: Vector2, fraction: float, tint: Color,
 	canvas.draw_arc(at, radius, -PI * 0.5, -PI * 0.5 + TAU * clampf(fraction, 0.0, 1.0),
 		SEGMENTS, tint, width, true)
 
+## The same ring, drawn to be read over the brightest floor in the game: a wide
+## dark track, a near-white fill and the tint down its middle. For the one thing
+## the player stares at while holding a key for seconds -- her own swing at a
+## seam, which sits on warm amber ground where a tinted arc reads as nothing.
+## (It was drawn by hand in MachineLayer; it is the same language, so it lives
+## here with the rest.)
+static func draw_strong(canvas: CanvasItem, at: Vector2, fraction: float, tint: Color,
+		radius: float = RADIUS) -> void:
+	var sweep: float = -PI * 0.5 + TAU * clampf(fraction, 0.0, 1.0)
+	canvas.draw_arc(at, radius, 0.0, TAU, 40, Color(0.02, 0.04, 0.08, 0.72), 6.0)
+	canvas.draw_arc(at, radius, -PI * 0.5, sweep, 40, Color(1.0, 0.97, 0.90, 0.95), 5.0)
+	canvas.draw_arc(at, radius, -PI * 0.5, sweep, 40, tint, 2.0)
+
 ## The ring is full: one pulse outward from where it was, a few sparks, and it is
 ## gone. Short on purpose -- it marks the moment, it does not hold the player.
 static func complete(fx: FxLayer, at: Vector2, tint: Color, radius: float = RADIUS) -> void:
