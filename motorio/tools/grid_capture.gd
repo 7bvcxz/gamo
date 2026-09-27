@@ -62,7 +62,9 @@ func _open() -> void:
 	sim.has_pickaxe = true
 	for t in [Defs.M_MINER, Defs.M_BELT, Defs.M_SPLITTER, Defs.M_GENERATOR]:
 		sim.unlocked[t] = true
-	for item in [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_CRYSTAL]:
+	# What these machines are built from. Not crystal: it is a retired number, and
+	# stocking it put a resource the game no longer has on every capture's panel.
+	for item in [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_ENERGY_CORE]:
 		sim.stock[item] = 500
 
 func _run() -> void:

@@ -188,10 +188,16 @@ func _initialize() -> void:
 
 ## The materials that open a machine, as names. A list because the generator
 ## waits for two; empty for the ones no material opens.
+##
+## The belt's condition is the first watt, written as the word `UNLOCK_POWER`
+## rather than a material number, so it is skipped here: no material opens it.
+## A typed `int` loop stopped on that word with a script error at every run.
 func _unlock_names(type: int) -> Array:
 	var names: Array = []
-	for item_type: int in Defs.MACHINE_UNLOCK_ITEMS[type]:
-		names.append(String(Defs.ITEM_NAMES[item_type]))
+	for entry in Defs.MACHINE_UNLOCK_ITEMS[type]:
+		if entry is String:
+			continue
+		names.append(String(Defs.ITEM_NAMES[int(entry)]))
 	return names
 
 ## Recipes as data, the same rows the game reads. Empty until the first

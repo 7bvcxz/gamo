@@ -415,11 +415,20 @@ func _test_rows(main: Node2D) -> void:
 	#
 	# `open_settings` remembers the screen it was opened over, so the state has to
 	# be the run before it is called -- otherwise the panel lays itself out as the
-	# title's two rows while this reads the run's six.
+	# title's tabs while this reads the run's.
+	#
+	# The rows are the chosen tab's, not the strip's. This block used to walk the
+	# six tabs and read a row rect for each -- the list-of-rows panel it was
+	# written for -- and since the strip (1.0.40) stopped with a script error at
+	# the third, while the file still printed PASS and nothing below here ran.
 	main.state = main.State.PLAY
+	hud.settings_tab = hud.TAB_GAME
 	main.open_settings()
 	main._process(0.0)
-	for index in in_run.size():
+	var rows: Array[int] = hud.settings_rows()
+	_assert(hud.settings_row_rects.size() == rows.size() and rows.size() == 2,
+		"설정 탭의 두 줄마다 자리가 있다 (%d)" % hud.settings_row_rects.size())
+	for index in rows.size():
 		var rect: Rect2 = hud.settings_row_rects[index]
 		_assert(rect.size.x > 100.0 and rect.size.y > 20.0,
 			"%d번째 줄이 그릴 만한 크기다" % index)
@@ -428,24 +437,25 @@ func _test_rows(main: Node2D) -> void:
 	# The settings card is anchored by its top rather than centred, because its
 	# height follows the chosen icon -- so it has its own accessor.
 	var card: Rect2 = hud.call("settings_card_rect")
-	for index in in_run.size():
+	for index in rows.size():
 		var row: Rect2 = hud.settings_row_rects[index]
 		_assert(card.encloses(row.grow(-1.0)),
 			"%d번째 줄이 카드 안에 있다 (줄 %.0f..%.0f, 카드 %.0f..%.0f)"
 				% [index, row.position.y, row.position.y + row.size.y,
 					card.position.y, card.position.y + card.size.y])
 	_assert(card.position.y >= 0.0 and card.position.y + card.size.y <= hud.size.y,
-		"다섯 줄짜리 카드가 화면 안에 들어간다")
+		"설정 카드가 화면 안에 들어간다")
 
-	# The close button and the last row are the same rectangle, so what the cursor
-	# lands on and what a finger taps cannot drift apart.
-	var close_row: int = in_run.find(hud.ROW_CLOSE)
-	_assert((hud.settings_close_rect as Rect2).get_center()
-		.distance_to((hud.settings_row_rects[close_row] as Rect2).get_center()) < 0.01,
-		"닫기 버튼과 마지막 줄이 같은 사각형이다")
-	hud.settings_row = close_row
+	# The way out is the card's own corner since the strip, not a last row: it has
+	# to be on the card, clear of every row, so a finger meant for a slider does not
+	# close the panel -- and on a pad with no Escape it is the only exit.
+	var close: Rect2 = hud.settings_close_rect
+	_assert(card.encloses(close), "닫기 버튼이 카드 모서리 안에 있다")
+	for index in rows.size():
+		_assert(not close.intersects(hud.settings_row_rects[index]),
+			"닫기 버튼이 %d번째 줄과 겹치지 않는다" % index)
 	main.settings_activate(hud.ROW_CLOSE)
-	_assert(main.state != main.State.SETTINGS, "닫기 줄에서 Z 를 누르면 닫힌다")
+	_assert(main.state != main.State.SETTINGS, "닫기를 누르면 닫힌다")
 	main.open_settings()
 	main._process(0.0)
 
@@ -477,10 +487,11 @@ func _test_rows(main: Node2D) -> void:
 	main.open_settings()
 	main._process(0.0)
 
-	# And 메인화면 gets out of the run.
-	hud.settings_row = in_run.find(hud.ROW_TITLE)
-	main.settings_activate(hud.ROW_TITLE)
-	_assert(main.state == main.State.TITLE, "메인화면 줄은 타이틀로 나간다")
+	# And 메인화면 gets out of the run -- chosen as the icon it is now, the path the
+	# strip actually takes, rather than as a row index into the tab list.
+	hud.settings_tab = hud.TAB_TITLE
+	main.settings_choose(hud.TAB_TITLE)
+	_assert(main.state == main.State.TITLE, "메인 아이콘은 타이틀로 나간다")
 	_assert(main.state_before_settings == main.State.TITLE,
 		"그리고 설정이 게임으로 돌아가려 하지 않는다")
 

@@ -227,9 +227,16 @@ func _test_joins_to_the_other_registries() -> void:
 		for item_id: int in Defs.MACHINE_COSTS[type]:
 			if not Defs.has_item(item_id):
 				bad = "%s -> %d" % [Defs.machine_name(type), item_id]
-		for item_id: int in Defs.MACHINE_UNLOCK_ITEMS[type]:
-			if not Defs.has_item(item_id):
-				bad = "%s 해금 -> %d" % [Defs.machine_name(type), item_id]
+		# Not every condition is a material: the belt waits for the first watt,
+		# written as a word. Read the way `Sim.unlock_ready` reads it -- a typed
+		# `int` loop here stopped this function at the belt's row with a script
+		# error, and every check below it went unrun behind a PASS.
+		for entry in Defs.MACHINE_UNLOCK_ITEMS[type]:
+			if entry is String:
+				if String(entry) != Defs.UNLOCK_POWER:
+					bad = "%s 해금 -> %s" % [Defs.machine_name(type), entry]
+			elif not Defs.has_item(int(entry)):
+				bad = "%s 해금 -> %d" % [Defs.machine_name(type), int(entry)]
 	_assert(bad == "", "비용과 해금이 실재하는 자원을 가리킨다 (%s)" % bad)
 
 	# Every recipe points at a machine that runs recipes. Empty today, on both

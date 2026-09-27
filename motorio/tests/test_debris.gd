@@ -154,6 +154,11 @@ func _test_taking_one_apart() -> void:
 	var top: int = Defs.ORE_TIERS[Defs.ORE_TIERS.size() - 1]
 	var below: int = Defs.ORE_TIERS[maxi(Defs.ORE_TIERS.size() - 2, 0)]
 	sim.collected[top] = 1
+	# And the rung under it, which has to pass the same test since the ladder
+	# grew to three: with only the top marked, the pile below falls through to
+	# heat stone and `found[below]` has no key -- a script error that stopped
+	# this function here while the file still printed PASS.
+	sim.collected[below] = 1
 	var before: int = int(sim.stock.get(top, 0))
 	var found: Dictionary = sim.open_debris(near)
 	_assert(not sim.debris.has(near), "뜯은 조각은 사라진다")

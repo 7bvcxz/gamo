@@ -19,6 +19,7 @@ func _run() -> void:
 	_test_size_is_data()
 	_test_every_direction()
 	_test_taken_down_from_any_cell()
+	_test_picture_stays_on_its_cells()
 	if failures == 0:
 		print("PASS test_mining_post_occupies_4x4")
 	else:
@@ -39,6 +40,32 @@ func _test_size_is_data() -> void:
 		var rect: Rect2i = Defs.machine_footprint(type, Vector2i(10, 10))
 		_assert(rect.position + Vector2i(1, 1) == Vector2i(10, 10),
 			"%s 의 광맥 앵커는 발자국의 (1,1) — 가운데 2x2 의 왼쪽 위" % Defs.MACHINE_NAMES[type])
+
+## What the post draws covers no more than what it blocks. Posts on neighbouring
+## seams stand exactly one footprint apart (`ORE_PITCH`), so a picture that hangs
+## over its own cells hangs over the next post's -- at the shared machine size it
+## did, by two and a half pixels a side, and a row of posts read as one block.
+##
+## Measured on the picture's opaque pixels, read from the source file rather than
+## the imported texture (the headless renderer has no image to give back), so a
+## redrawn post in the art pass is held to the same rule without touching this.
+func _test_picture_stays_on_its_cells() -> void:
+	var footprint: Vector2 = Grid.rect_px(Defs.machine_footprint(Defs.M_MINER, Vector2i.ZERO)).size
+	var drawn: float = MachineLayer.MINER_ART_DRAW * MachineLayer._k(footprint.x)
+	var image: Image = Image.load_from_file(
+		ProjectSettings.globalize_path(MachineLayer.MINER_ART.resource_path))
+	_assert(image != null, "채굴기 그림을 읽는다")
+	if image == null:
+		return
+	var used: Rect2i = image.get_used_rect()
+	var per_pixel: float = drawn / float(image.get_width())
+	# Centred on the footprint, the way `_object_art` places it.
+	var opaque := Rect2(Vector2.ONE * -drawn * 0.5 + Vector2(used.position) * per_pixel,
+		Vector2(used.size) * per_pixel)
+	var cells := Rect2(-footprint * 0.5, footprint)
+	_assert(cells.grow(0.01).encloses(opaque),
+		"채굴기 그림이 4x4 발자국 안에 그려진다 (그림 %.1f..%.1f × %.1f..%.1f, 발자국 ±%.0f)"
+			% [opaque.position.x, opaque.end.x, opaque.position.y, opaque.end.y, footprint.x * 0.5])
 
 func _test_every_direction() -> void:
 	var headings: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]

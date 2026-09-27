@@ -234,7 +234,11 @@ func _test_the_whole_chain() -> void:
 	var ahead: Vector2i = _ahead(sim, Defs.M_MANUFACTURER, plant, Vector2i.RIGHT)
 	_assert(sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT), "제조기를 세운다")
 	var plantside: Vector2i = _clear_cell(sim, Vector2i(-3, 6))
-	sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT)
+	# The generator costs an energy core since the golden path, and `_open` does
+	# not stock one. Unasserted, the refused build left `machine_at` null and the
+	# next line stopped this function with a script error behind a PASS.
+	sim.stock[Defs.ITEM_ENERGY_CORE] = 10
+	_assert(sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT), "발전기를 세운다")
 	sim.machine_at(plantside).buffer[Defs.GENERATOR_FUEL] = 4
 
 	# Fed by hand first: a player standing at the machine with ore in her pack.
@@ -307,7 +311,8 @@ func _test_blocked_costs_nothing() -> void:
 	_assert(sim.build(Defs.M_MANUFACTURER, plant, Vector2i.RIGHT), "제조기를 세운다")
 	var machine: Sim.Machine = sim.machine_at(plant)
 	var plantside: Vector2i = _clear_cell(sim, Vector2i(-7, 0))
-	sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT)
+	sim.stock[Defs.ITEM_ENERGY_CORE] = 10
+	_assert(sim.build(Defs.M_GENERATOR, plantside, Vector2i.RIGHT), "발전기를 세운다")
 	sim.machine_at(plantside).buffer[Defs.GENERATOR_FUEL] = 8
 
 	machine.buffer[Defs.ITEM_IRON] = 2

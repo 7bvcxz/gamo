@@ -112,6 +112,14 @@ func _run() -> void:
 	main.clear_save()
 	_assert(not main.load_game(), "a cleared save does not come back")
 
+	# Refused, but kept: since Grid v2 a save from any other schema is copied
+	# aside before anything can write over it, and clearing does not touch the
+	# copy. This test made that copy on every run and left it in the real user
+	# folder, so it checks the copy is there and then takes it away itself.
+	var kept: String = main.backup_path(0, 999)
+	_assert(FileAccess.file_exists(kept), "the refused save was copied aside, and clearing kept it")
+	DirAccess.remove_absolute(kept)
+
 	if failures == 0:
 		print("SAVE_TEST: PASS")
 	quit(failures)

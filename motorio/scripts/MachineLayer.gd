@@ -116,6 +116,14 @@ const CAT_TOOL_BEATS := 2.0
 ## number rather than three, because they stand side by side on the same snow and
 ## a difference between them reads as a difference in importance.
 const MACHINE_ART_DRAW := 36.0
+## Except the mining post, which is drawn exactly over its footprint (Grid v2).
+## Its picture is opaque nearly edge to edge -- 69 of 72 pixels, where the
+## generator's and the manufacturer's are 49 -- so at the shared 36 it hung two
+## and a half pixels past its four cells on each side. Alone that is nothing;
+## posts on neighbouring seams stand exactly one footprint apart, and there they
+## fused into one block. Temporary, like the rest of this art until the Step 2
+## pass redraws it to its cells; `test_mining_post_occupies_4x4` holds the rule.
+const MINER_ART_DRAW := 1.0 * float(Grid.TILE)
 
 ## One tile, as of 0.20.79. It has always *been* one cell -- one machine that
 ## blocks one tile -- and the picture was 2.7 of them, hanging over the tiles
@@ -646,7 +654,7 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	_shadow(c + Vector2(0, 12), 11.0)
 	# Cold machines go blue rather than dark: the tint is the same signal the
 	# painted body carried, applied to the picture instead of mixed into it.
-	_object_art(MINER_ART, c, MACHINE_ART_DRAW, Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
+	_object_art(MINER_ART, c, MINER_ART_DRAW, Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
 	# The output arrow is drawn after the cats, not here -- see _draw_machine_marks.
 	if machine.operated:
 		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
