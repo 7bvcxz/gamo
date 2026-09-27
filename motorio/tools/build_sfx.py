@@ -65,31 +65,12 @@ SOUNDS = {
     "select":  dict(seconds=0.050, f0=658, f1=658,  peak=0.20, decay=1.00),
     # Rising, because it means yes.
     "confirm": dict(seconds=0.160, f0=470, f1=700,  peak=0.30, decay=1.10),
-    # A delivery landing in the core. Barely rises -- it happens often, so it
-    # cannot be a fanfare.
-    "deliver": dict(seconds=0.110, f0=884, f1=995,  peak=0.35, decay=1.10),
     # Refusal: low and falling, the opposite of confirm in both.
     "deny":    dict(seconds=0.140, f0=141, f1=105,  peak=0.31, decay=1.15),
     # Smelting finishing. The octave jump partway through is the point: two
     # notes, so it is an event rather than a tone.
     "alloy":   dict(seconds=0.230, f0=760, f1=800,  peak=0.37, decay=1.10,
                     step=0.5),
-    # A boot in snow, twice per walk cycle. The quietest thing in the game and
-    # by far the most frequent -- it plays four times a second while she moves,
-    # so anything with a pitch in it becomes a tune within seconds. Almost pure
-    # noise under a fast decay, which is what packed snow actually is.
-    "step":    dict(seconds=0.075, f0=132, f1=74,   peak=0.30, decay=1.55,
-                    noise=0.86, seed=57),
-    # Running. Shorter and a little brighter, because the difference the player
-    # has to hear is the cadence, not the sound -- fourteen frames a second
-    # against ten already carries it, and a louder sound would only make the
-    # faster one tiring.
-    "step_run": dict(seconds=0.065, f0=158, f1=86,  peak=0.34, decay=1.70,
-                    noise=0.90, seed=58),
-    # Steel on stone, once per swing. Short, low and mostly noise -- a struck
-    # rock has almost no pitch in it, and the little that is there falls.
-    "pick":    dict(seconds=0.130, f0=230, f1=88,   peak=0.46, decay=1.30,
-                    partials=[(2.0, 0.30)], noise=0.55, seed=31),
     # A cat taking a bite. Quiet on purpose: it repeats every half second while
     # a cat eats and there can be several of them at the bowl, so it has to be
     # something heard rather than something listened to.
@@ -637,7 +618,85 @@ def cue_crash() -> list:
     return normalise(out, 0.60)
 
 
+def looped(samples: list, fade_seconds: float) -> list:
+    """Closes a longer take into a loop: its tail crossfaded into its head."""
+    fade = int(RATE * fade_seconds)
+    body = samples[:len(samples) - fade]
+    for i in range(fade):
+        a = i / fade
+        body[i] = samples[i] * math.sqrt(a) + samples[len(body) + i] * math.sqrt(1.0 - a)
+    return body
+
+
+def made_hearth() -> list:
+    # The shelter's stove: a low, soft breath of fire with small crackles in it.
+    # Warm because it lives between 250 Hz and 1.2 kHz, with only the crackles
+    # above; loops at 11 seconds, crossfaded.
+    seconds, fade = 11.0, 1.0
+    rng = random.Random(701)
+    out = blank(seconds + fade)
+    filters = band(250.0, 1200.0)
+    for _ in range(2048):
+        v = rng.uniform(-1.0, 1.0)
+        for f in filters:
+            v = f(v)
+    for i in range(len(out)):
+        v = rng.uniform(-1.0, 1.0)
+        for f in filters:
+            v = f(v)
+        t = (i % int(RATE * seconds)) / (RATE * seconds)
+        out[i] = v * (1.0 + 0.25 * math.sin(2.0 * math.pi * 3 * t + 1.1)
+                      + 0.15 * math.sin(2.0 * math.pi * 7 * t + 0.4))
+    body = rms(out)
+    out = [v / body * 0.25 for v in out]
+    # Crackles: small, uneven, a few a second, some in pairs.
+    at = 0.05
+    while at < seconds + fade - 0.05:
+        grain_into(out, at, rng.uniform(0.006, 0.02), rng.uniform(1200.0, 2500.0),
+                   rng.uniform(0.25, 0.9), rng)
+        if rng.random() < 0.3:
+            grain_into(out, at + rng.uniform(0.02, 0.06), 0.008, 1800.0, rng.uniform(0.2, 0.5), rng)
+        at += rng.uniform(0.08, 0.7)
+    return normalise(looped(out, fade), 0.45)
+
+
+def made_purr() -> list:
+    # Cats asleep on the floor: a purr -- noise through the low middle, pulsed
+    # about twenty-five times a second, louder breathing out than in. Above 140
+    # Hz: a purr is felt more than heard, and what is heard of it is the buzz.
+    seconds, fade = 7.2, 0.8
+    rng = random.Random(702)
+    out = blank(seconds + fade)
+    filters = band(140.0, 700.0)
+    for i in range(len(out)):
+        v = rng.uniform(-1.0, 1.0)
+        for f in filters:
+            v = f(v)
+        t = i / RATE
+        breath = 0.55 + 0.45 * math.sin(2.0 * math.pi * t / 2.4) ** 2
+        pulse = 0.5 + 0.5 * math.sin(2.0 * math.pi * 25.0 * t) ** 8
+        out[i] = v * breath * pulse
+    return normalise(looped(out, fade), 0.40)
+
+
+def made_hum() -> list:
+    # A generator running: a warm electrical hum, looped. Every partial is a
+    # whole number of cycles in the two seconds, so the loop closes on itself;
+    # the fundamental and a partner half a hertz above it beat once a loop, a
+    # slow breathing rather than a steady tone. 180 Hz and up -- warm, and
+    # nothing under 150.
+    seconds = 2.0
+    out = blank(seconds)
+    for frequency, gain in ((180.0, 1.0), (180.5, 0.35), (360.0, 0.42), (540.0, 0.18),
+                            (720.0, 0.07), (1080.0, 0.03)):
+        step = 2.0 * math.pi * frequency / RATE
+        for i in range(len(out)):
+            out[i] += gain * math.sin(step * i)
+    return normalise(out, 0.35)
+
+
 MADE = {
+    "hum": made_hum, "hearth": made_hearth, "purr": made_purr,
     "note": made_note, "chime": made_chime, "finish": made_reward,
     "alarm": made_warning, "frost": made_frost, "whoomp": made_whoomp,
     "level": made_level,

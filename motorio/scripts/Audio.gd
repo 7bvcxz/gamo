@@ -26,6 +26,9 @@ extends Node
 ## `Zone.gd`), eased rather than cut.
 
 # --- The bank -----------------------------------------------------------------
+const STEPS := [preload("res://assets/sfx/cc0/step_1.wav"), preload("res://assets/sfx/cc0/step_2.wav"),
+	preload("res://assets/sfx/cc0/step_3.wav"), preload("res://assets/sfx/cc0/step_4.wav"),
+	preload("res://assets/sfx/cc0/step_5.wav")]
 ## Each sound is a list of takes. One is picked per play, never the same as the
 ## last one where there is a choice -- a single sample struck ten times a second
 ## is exactly the "same sound again" the ear tires of first.
@@ -34,17 +37,26 @@ const BANK := {
 	"remove": [preload("res://assets/sfx/remove.wav")],
 	"select": [preload("res://assets/sfx/select.wav")],
 	"confirm": [preload("res://assets/sfx/confirm.wav")],
-	"deliver": [preload("res://assets/sfx/deliver.wav")],
+	## Something arriving at the core: a soft tap of tin (CC0, `cc0/`). It was a
+	## beep, placeless, for every item -- the factory noise in the shelter.
+	"deliver": [preload("res://assets/sfx/cc0/deliver_1.wav"), preload("res://assets/sfx/cc0/deliver_2.wav"),
+		preload("res://assets/sfx/cc0/deliver_3.wav")],
 	"alloy": [preload("res://assets/sfx/alloy.wav")],
 	"deny": [preload("res://assets/sfx/deny.wav")],
 	"alarm": [preload("res://assets/sfx/alarm.wav")],
 	"finish": [preload("res://assets/sfx/finish.wav")],
-	"pick": [preload("res://assets/sfx/pick.wav")],
+	## A pickaxe on stone: a recorded crack with the thud filtered off, a knock
+	## of stone under it and grit after (CC0, tools/build_cc0_sfx.py). Five takes
+	## -- the old one was a single falling glide ("벽 때리는 소리").
+	"pick": [preload("res://assets/sfx/cc0/pick_1.wav"), preload("res://assets/sfx/cc0/pick_2.wav"),
+		preload("res://assets/sfx/cc0/pick_3.wav"), preload("res://assets/sfx/cc0/pick_4.wav"),
+		preload("res://assets/sfx/cc0/pick_5.wav")],
 	"nibble": [preload("res://assets/sfx/nibble.wav")],
 	## The one voice in the game. A cat waking out of the ice.
 	"meow": [preload("res://assets/sfx/meow.wav")],
-	"step": [preload("res://assets/sfx/step.wav")],
-	"step_run": [preload("res://assets/sfx/step_run.wav")],
+	## A boot in packed snow, five takes; running uses the same five, faster.
+	"step": STEPS,
+	"step_run": STEPS,
 	## Making and receiving (1.0.42): the fire's tick while it works, the pop
 	## when a make is done, and the chime when an important thing reaches her.
 	"tick": [preload("res://assets/sfx/tick.wav")],
@@ -56,6 +68,18 @@ const BANK := {
 	## scheduler below decides when -- but played through it like any sound.
 	"breath": [preload("res://assets/sfx/breath_1.wav"), preload("res://assets/sfx/breath_2.wav"),
 		preload("res://assets/sfx/breath_3.wav")],
+	## A cat at work: the same stone, much smaller -- a tiny pick. Played by the
+	## worker scheduler below, a few at a time, nearest first.
+	"cat_tap": [preload("res://assets/sfx/cc0/cat_tap_1.wav"), preload("res://assets/sfx/cc0/cat_tap_2.wav"),
+		preload("res://assets/sfx/cc0/cat_tap_3.wav")],
+	## A machine finishing a piece of work: a small, light piece of metal.
+	"clink": [preload("res://assets/sfx/cc0/clink_1.wav"), preload("res://assets/sfx/cc0/clink_2.wav"),
+		preload("res://assets/sfx/cc0/clink_3.wav")],
+	## The case unfolding into a base: a latch, and a creak of hinges.
+	"latch": [preload("res://assets/sfx/cc0/latch.wav")],
+	"creak": [preload("res://assets/sfx/cc0/creak.wav")],
+	## Cloth: her getting up, out of the snow or out of bed.
+	"rustle": [preload("res://assets/sfx/cc0/rustle_1.wav"), preload("res://assets/sfx/cc0/rustle_2.wav")],
 	## Fuel catching in the fire: a soft rush of air, warm because it has no top
 	## and no bottom.
 	"whoomp": [preload("res://assets/sfx/whoomp.wav")],
@@ -64,23 +88,31 @@ const BANK := {
 }
 const VOLUMES := {
 	"build": -6.0, "remove": -12.0, "select": -16.0, "confirm": -8.0,
-	"deliver": -12.0, "alloy": -6.0, "deny": -10.0,
+	"deliver": -17.0, "alloy": -8.0, "deny": -10.0,
 	# A reminder, not an alarm (Quality Pass 01): two soft notes stepping down.
 	"alarm": -13.0,
 	# A reward is a little louder than usual, and only a little. It was -4, the
 	# loudest thing in the game, for every mission line.
 	"finish": -11.0,
-	"pick": -7.0, "nibble": -21.0,
+	"pick": -8.0, "nibble": -21.0,
 	# Loud, because it happens once per cat and it is the thing the walk was for.
 	"meow": -7.0,
 	# Under everything. Footsteps are the only sound that plays continuously, so
 	# what would be a reasonable level for a one-shot is a drone here.
-	"step": -24.0, "step_run": -21.0,
+	"step": -23.0, "step_run": -21.0,
 	# Small on purpose. The tick repeats every second of a make; the pop and the
 	# chime mark one moment each and must not outrank a cat waking up.
 	"tick": -22.0, "pop": -10.0, "chime": -12.0,
 	"frost": -24.0, "breath": -27.0, "whoomp": -15.0, "level": -11.0,
+	# A cat's tap is the smallest thing in the world that still reads: under her
+	# pick by eleven dB, and several of them are still under it (`CROWD_DB`).
+	"cat_tap": -19.0,
+	# Machines are details, not events: under a delivery, far under a build.
+	"clink": -19.0,
+	"latch": -12.0, "creak": -16.0, "rustle": -18.0,
 }
+## A sound's own pitch, before the jitter. Running is the walk played quicker.
+const PITCH := {"step_run": 1.08}
 ## Where each sound is mixed. UI is anything that answers a key or marks a
 ## reward; Character is her and the cats; Machine is the factory; Environment is
 ## the world's own events -- the fire, the base, the weather's one-shots.
@@ -91,6 +123,8 @@ const BUS_OF := {
 	"step": "Character", "step_run": "Character", "tick": "Environment",
 	"pop": "Environment", "chime": "UI", "frost": "Character", "breath": "Character",
 	"whoomp": "Environment", "level": "Environment",
+	"cat_tap": "Character", "clink": "Machine", "latch": "Environment",
+	"creak": "Environment", "rustle": "Character",
 }
 ## How a sound may repeat. `cap` is how many of it sound at once; `gap` is the
 ## shortest time between two starts. Anything not listed gets `DEFAULT_RULE`.
@@ -103,6 +137,27 @@ const RULES := {
 	"nibble": {"cap": 1, "gap": 0.2},
 	"breath": {"cap": 1, "gap": 3.0},
 	"frost": {"cap": 1, "gap": 6.0},
+	"pick": {"cap": 2, "gap": 0.08},
+	# Twenty cats at work are three taps at a time, the nearest three -- and,
+	# through the gap, never more than three or four a second however many are
+	# working. One cat taps every second or so and the gap never touches it; at
+	# sixteen in earshot the plain schedule was six a second, a chatter.
+	"cat_tap": {"cap": 3, "gap": 0.28},
+	"clink": {"cap": 3, "gap": 0.2},
+}
+
+# --- Things that work continuously ------------------------------------------------
+## Workers: many things doing the same small job -- cats at their posts. Each
+## taps now and then at its own random interval; the taps go through `play_at`,
+## so distance, the cap and the crowd rule decide what is heard.
+const WORKERS := {
+	"cat_tap": {"every": Vector2(0.85, 1.7)},
+}
+## Emitters: machines with a continuous sound. A loop is attached to the nearest
+## `cap` of them in earshot and to none of the rest -- twenty generators are two
+## hums, never twenty.
+const EMITTERS := {
+	"hum": {"stream": preload("res://assets/sfx/hum.wav"), "bus": "Machine", "db": -27.0, "cap": 2},
 }
 
 # --- Where a sound is ---------------------------------------------------------
@@ -231,6 +286,14 @@ var _last_breath := -INF
 ## Every start this manager has made, by sound -- the only observable a test has,
 ## since a headless mixer plays nothing anyone can listen to.
 var started: Dictionary = {}
+## Which take each start used, most recent last. A test reads it to see that the
+## same recording is not struck twice running.
+var take_log: Dictionary = {}
+## Its own dice. The game's world seed is drawn from the global generator, and a
+## sound that rolled from the same one would move every world after it.
+var _rng := RandomNumberGenerator.new()
+var _workers: Dictionary = {}
+var _emitters: Dictionary = {}
 
 func _ready() -> void:
 	for name: String in BEDS:
@@ -293,6 +356,8 @@ static func extra_streams() -> Array[String]:
 		out.append(stream.resource_path)
 	for name: String in CUES:
 		out.append((CUES[name] as AudioStream).resource_path)
+	for kind: String in EMITTERS:
+		out.append((EMITTERS[kind]["stream"] as AudioStream).resource_path)
 	return out
 
 ## Where a bed's loop ends: its length in frames.
@@ -302,8 +367,9 @@ static func extra_streams() -> Array[String]:
 ## (`compress/mode=2`), a few bits a sample, so that number was a fifth of the
 ## file: the 7.5 second wind looped every 1.5 seconds and the 6 second cold
 ## every 1.2, each with a jump at the seam. That is most of what a playtest
-## heard as "굉음이 계속 반복된다" and "1~2초마다 반복되는 괴음", and no recipe in
-## build_sfx.py could have fixed it.
+## heard as a roar on repeat and a strange noise every second or two, and no
+## recipe in build_sfx.py could have fixed it. (Quoted in design/AUDIO_AUDIT.md;
+## not here, because test_font holds every character in a script to the font.)
 static func loop_frames(stream: AudioStreamWAV) -> int:
 	return int(round(stream.get_length() * float(stream.mix_rate)))
 
@@ -353,12 +419,17 @@ func _start(sound: String, pitch_jitter: float, distance: float, at: Vector2,
 	var takes: Array = BANK[sound]
 	var take: int = 0
 	if takes.size() > 1:
-		take = randi() % (takes.size() - 1)
+		take = _rng.randi() % (takes.size() - 1)
 		if take >= int(_last_take.get(sound, -1)):
 			take += 1
 	_last_take[sound] = take
+	var log: Array = take_log.get(sound, [])
+	log.append(take)
+	if log.size() > 64:
+		log.pop_front()
+	take_log[sound] = log
 	var stream: AudioStream = takes[take]
-	var pitch: float = 1.0 + randf_range(-pitch_jitter, pitch_jitter)
+	var pitch: float = float(PITCH.get(sound, 1.0)) * (1.0 + _rng.randf_range(-pitch_jitter, pitch_jitter))
 	var level: float = float(VOLUMES.get(sound, -10.0))
 	if placed:
 		level += distance_db(distance)
@@ -377,6 +448,79 @@ func _start(sound: String, pitch_jitter: float, distance: float, at: Vector2,
 	_last_start[sound] = clock
 	started[sound] = int(started.get(sound, 0)) + 1
 	return true
+
+## One frame of a crowd of workers. `where` maps each worker's id to its place;
+## a worker not in it has stopped. Each keeps its own random interval, so twenty
+## cats do not tap in step -- and every tap goes through `play_at`, so only the
+## nearest few in earshot are heard.
+func work(kind: String, where: Dictionary, delta: float) -> void:
+	if not WORKERS.has(kind):
+		return
+	var every: Vector2 = WORKERS[kind]["every"]
+	var waits: Dictionary = _workers.get(kind, {})
+	for id: Variant in waits.keys():
+		if not where.has(id):
+			waits.erase(id)
+	for id: Variant in where:
+		# A worker that has just started waits a random part of an interval, so a
+		# row of cats put down together does not start in unison.
+		var wait: float = float(waits.get(id, _rng.randf_range(0.2, every.y))) - delta
+		if wait <= 0.0:
+			play_at(kind, where[id], 0.08)
+			wait = _rng.randf_range(every.x, every.y)
+		waits[id] = wait
+	_workers[kind] = waits
+
+## One frame of continuous machine sound: a loop on each of the nearest `cap`
+## emitters in earshot, faded by distance, and silence on the rest.
+func set_emitters(kind: String, points: Array, delta: float) -> void:
+	if not EMITTERS.has(kind):
+		return
+	var spec: Dictionary = EMITTERS[kind]
+	var voices: Array = _emitters.get(kind, [])
+	if voices.is_empty():
+		var stream: AudioStreamWAV = spec["stream"]
+		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		stream.loop_end = loop_frames(stream)
+		for index in int(spec["cap"]):
+			var player := AudioStreamPlayer2D.new()
+			player.attenuation = 0.0
+			player.max_distance = FAR * 4.0
+			player.bus = _bus(String(spec["bus"]))
+			player.stream = stream
+			add_child(player)
+			voices.append({"player": player, "at": Vector2.ZERO, "on": false})
+		_emitters[kind] = voices
+	var near: Array = []
+	for point: Vector2 in points:
+		var distance: float = point.distance_to(listener)
+		if distance <= FAR:
+			near.append([distance, point])
+	near.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+	for index in voices.size():
+		var voice: Dictionary = voices[index]
+		var player: AudioStreamPlayer2D = voice["player"]
+		if index < near.size():
+			var point: Vector2 = near[index][1]
+			voice["at"] = point
+			player.global_position = point
+			player.volume_db = float(spec["db"]) + distance_db(float(near[index][0]))
+			if not voice["on"]:
+				voice["on"] = true
+				# Each loop starts somewhere different: two generators side by side
+				# should not breathe in unison.
+				player.play(_rng.randf() * (player.stream as AudioStream).get_length())
+		elif voice["on"]:
+			voice["on"] = false
+			player.stop()
+
+## How many loops of an emitter kind are sounding, and where.
+func emitting(kind: String) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for voice: Dictionary in _emitters.get(kind, []):
+		if voice["on"]:
+			out.append(voice["at"])
+	return out
 
 ## A free voice from the pool, or the one closest to finishing.
 func _take_voice(pool: Array[Dictionary]) -> Dictionary:
@@ -509,13 +653,13 @@ func _tick_gusts(delta: float, evening: float) -> void:
 	if _gust_wait > 0.0:
 		return
 	var every: Vector2 = GUST_EVERY.lerp(GUST_EVERY_NIGHT, evening)
-	_gust_wait = randf_range(every.x, every.y)
+	_gust_wait = _rng.randf_range(every.x, every.y)
 	if clock < _gust_ends:
 		return
-	_gust.stream = GUSTS[randi() % GUSTS.size()]
-	_gust.pitch_scale = randf_range(0.9, 1.1)
+	_gust.stream = GUSTS[_rng.randi() % GUSTS.size()]
+	_gust.pitch_scale = _rng.randf_range(0.9, 1.1)
 	_gust_ends = clock + _gust.stream.get_length() / _gust.pitch_scale
-	_gust.volume_db = GUST_DB + randf_range(-6.0, 0.0) + 3.0 * evening
+	_gust.volume_db = GUST_DB + _rng.randf_range(-6.0, 0.0) + 3.0 * evening
 	_gust.play()
 	gusts += 1
 
@@ -542,7 +686,7 @@ func _tick_cold(exposure: float, delta: float) -> void:
 	_breath_wait -= delta
 	if _breath_wait > 0.0:
 		return
-	_breath_wait = randf_range(every.x, every.y)
+	_breath_wait = _rng.randf_range(every.x, every.y)
 	if play("breath", 0.06):
 		if _last_breath > -INF:
 			breath_gaps.append(clock - _last_breath)

@@ -241,6 +241,7 @@ func _ready() -> void:
 	speed_index = 0
 	sim.fuel_added.connect(_on_fuel_added)
 	sim.item_delivered.connect(_on_item_delivered)
+	sim.machine_worked.connect(_on_machine_worked)
 	sim.recipe_produced.connect(_on_recipe_produced)
 	sim.build_rejected.connect(_on_build_rejected)
 	sim.warmth_changed.connect(_on_warmth_changed)
@@ -1293,6 +1294,24 @@ func _update_ambience(delta: float) -> void:
 	# between the room and the fire.
 	audio.set("listener", player.position)
 	audio.call("apply", screen_name(), zone(), exposure, day_fraction(), delta)
+	_update_work_sounds(delta)
+
+## The factory's continuous sounds: every cat at work taps now and then, and a
+## running generator hums. What is heard of them -- the nearest few, faded by
+## distance, nothing from the shelter -- is the audio manager's to decide.
+func _update_work_sounds(delta: float) -> void:
+	var working: Dictionary = {}
+	var humming: Array = []
+	if sim != null and Zone.has_world(zone()) and state != State.TITLE and state != State.OPENING:
+		for cat: Sim.Cat in sim.cats:
+			if cat.state == Defs.CAT_WORKING:
+				working[cat.get_instance_id()] = cat.pos
+		for cell: Vector2i in sim.machines:
+			var machine: Sim.Machine = sim.machines[cell]
+			if machine.type == Defs.M_GENERATOR and machine.operated:
+				humming.append(sim.machine_centre_at(cell))
+	audio.call("work", "cat_tap", working, delta)
+	audio.call("set_emitters", "hum", humming, delta)
 
 ## What is being drawn, as a name the audio manager can look up. Settings is not
 ## a screen of its own here: it is drawn over whatever it was opened from, and it
@@ -2069,7 +2088,9 @@ func _on_recipe_produced(cell: Vector2i, item_type: int, amount: int) -> void:
 	fx.popup(at + Vector2(0, -20), "+%d %s" % [amount, Defs.ITEM_NAMES[item_type]],
 		Defs.ITEM_COLORS[item_type], true)
 	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
-	audio.call("play_at", "alloy", at)
+	# A small piece of metal, at the machine. It was the two-note 'alloy' --
+	# a reward sound -- for every plate, which is how a factory became a noise.
+	audio.call("play_at", "clink", at)
 	if not _said_produced.has(item_type):
 		_said_produced[item_type] = true
 		fx.burst(at, Defs.ITEM_COLORS[item_type], 12)
@@ -4456,6 +4477,11 @@ func _on_item_delivered(item_type: int, cell: Vector2i) -> void:
 	# At the core, not everywhere: the factory is heard from where she stands,
 	# and not at all from the shelter.
 	audio.call("play_at", "deliver", at)
+
+## A rig finished a piece of work: a small clink at it. Heard only nearby, a few
+## at a time (Audio.RULES), and never in the shelter.
+func _on_machine_worked(cell: Vector2i, _type: int) -> void:
+	audio.call("play_at", "clink", sim.machine_centre_at(cell))
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	# One channel only. Showing the same reason both here and in the centre

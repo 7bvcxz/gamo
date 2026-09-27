@@ -13,6 +13,9 @@ signal item_delivered(item_type: int, cell: Vector2i)
 ## A recipe finished a cycle. Emitted per output item, so a recipe that makes
 ## three sends three -- the caller decides whether that is three sounds or one.
 signal recipe_produced(cell: Vector2i, item_type: int, amount: int)
+## A mining rig put an item out. Only the sound listens: the item itself is on
+## the belt and the rig's flash already says so on screen.
+signal machine_worked(cell: Vector2i, type: int)
 signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
 signal build_rejected(reason: String, cell: Vector2i)
@@ -4099,6 +4102,7 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 		machine.progress = 0.0
 		machine.flash = 0.35
 		machine.stalled = false
+		machine_worked.emit(machine.cell, machine.type)
 	else:
 		# Hold the finished item instead of losing it when the output is blocked.
 		machine.progress = period

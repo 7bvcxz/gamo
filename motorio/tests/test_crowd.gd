@@ -154,8 +154,11 @@ func _run() -> void:
 	# inside the thing being checked proves only that the code agrees with
 	# itself, and because "every case of cat movement" is a claim about the whole
 	# run rather than about one function.
-	_assert(trespass.is_empty(), "지나갈 수 없는 곳을 밟은 고양이가 없다. %d건: %s"
-		% [trespass.size(), "; ".join(trespass.slice(0, 5))])
+	# The world is a fresh random seed each run, so a failure names it: this one
+	# is rare (six clean runs in a row on 2026-09-27, one failure before them),
+	# and a rare failure without its seed cannot be looked at again.
+	_assert(trespass.is_empty(), "지나갈 수 없는 곳을 밟은 고양이가 없다. %d건 (run_seed %d): %s"
+		% [trespass.size(), main.run_seed, "; ".join(trespass.slice(0, 5))])
 	_assert(blocked_seen > 0,
 		"막힌 칸 옆을 지나는 상황이 실제로 있었다 (%d틱)" % blocked_seen)
 

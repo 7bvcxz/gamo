@@ -54,11 +54,14 @@ CATEGORY = {
     # Weather one-shots: judged on their low end like the beds, but they are
     # seconds long by design.
     "gust": "weather",
+    # Recorded (CC0) and the machine loop.
+    "cat": "sfx", "clink": "sfx", "latch": "sfx", "creak": "sfx", "rustle": "sfx",
+    "hum": "loop",
     # The opening's cues and other single events: low end allowed -- an impact
     # is the one place it belongs -- and no length limit.
     "cue": "event",
 }
-LOOPS = {"wind", "wind_air", "cold", "hearth", "factory"}
+LOOPS = {"wind", "wind_air", "cold", "hearth", "factory", "hum", "purr"}
 
 # Limits. Loose on purpose: these are alarms for faults, not a style guide.
 PEAK_LIMIT_DB = -1.0
