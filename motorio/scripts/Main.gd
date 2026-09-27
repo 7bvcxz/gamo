@@ -1293,6 +1293,12 @@ func _update_ambience(delta: float) -> void:
 	# camera eases, and for the seconds after a door it is still somewhere
 	# between the room and the fire.
 	audio.set("listener", player.position)
+	var inside: int = 0
+	if sim != null and zone() == Zone.HOME:
+		for cat: Sim.Cat in sim.cats:
+			if Defs.in_room(Grid.cell_at(cat.pos)):
+				inside += 1
+	audio.set("cats_inside", inside)
 	audio.call("apply", screen_name(), zone(), exposure, day_fraction(), delta)
 	_update_work_sounds(delta)
 

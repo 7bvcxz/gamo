@@ -181,12 +181,18 @@ const WORLD_VOICES := 16
 ## drone, and the old cold was a separate shimmer that read as a fault. The two
 ## loops are 16 and 12.2 seconds long so they only line up again after minutes,
 ## and the gusts on top arrive at random (`GUSTS`).
+##
+## And two for inside, on the Interior bus: the stove, a soft breath of fire with
+## small crackles in it, and the cats asleep on the floor, purring. They come up
+## as the door closes and the outside goes down -- one eased mix, not a cut.
 const BEDS := {
 	"wind": preload("res://assets/sfx/wind.wav"),
 	"cold": preload("res://assets/sfx/cold.wav"),
+	"hearth": preload("res://assets/sfx/hearth.wav"),
+	"purr": preload("res://assets/sfx/purr.wav"),
 }
-const BED_CEILING := {"wind": -22.0, "cold": -27.0}
-const BED_BUS := {"wind": "Ambient", "cold": "Ambient"}
+const BED_CEILING := {"wind": -22.0, "cold": -27.0, "hearth": -24.0, "purr": -30.0}
+const BED_BUS := {"wind": "Ambient", "cold": "Ambient", "hearth": "Interior", "purr": "Interior"}
 ## Below this the bed is muted outright; -60 dB of noise is still noise.
 const BED_FLOOR := -40.0
 ## The wind by time of day: light by day, a little stronger once the sun goes.
@@ -260,7 +266,10 @@ var listener := Vector2.ZERO
 var clock := 0.0
 
 var _beds: Dictionary = {}
-var _bed_level: Dictionary = {"wind": 0.0, "cold": 0.0}
+var _bed_level: Dictionary = {"wind": 0.0, "cold": 0.0, "hearth": 0.0, "purr": 0.0}
+## How many cats are in the room with her, set by Main. The purr is theirs: a
+## shelter she walks into alone at noon has a fire in it and nothing else.
+var cats_inside: int = 0
 var _flat: Array[Dictionary] = []
 var _world: Array[Dictionary] = []
 var _last_start: Dictionary = {}
@@ -616,6 +625,9 @@ func apply(screen: String, zone: int, exposure: float, day: float, delta: float)
 		_cue.volume_db = move_toward(_cue.volume_db, -60.0, delta * 60.0)
 		if _cue.volume_db <= -59.0:
 			_cue.stop()
+	var inside: bool = Zone.mix(zone) == "inside"
+	set_bed("hearth", 1.0 if inside else 0.0, delta)
+	set_bed("purr", clampf(0.45 + 0.15 * float(cats_inside), 0.0, 1.0) if inside and cats_inside > 0 else 0.0, delta)
 	if not Zone.has_weather(zone):
 		# Not a quieter outdoors -- no outdoors. Wind is the sound of being in
 		# the open, and a door closing on it is the clearest thing this game says

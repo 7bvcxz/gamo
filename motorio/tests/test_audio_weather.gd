@@ -104,8 +104,11 @@ func _test_wind_has_no_drone() -> void:
 		var frames: int = Audio.loop_frames(stream)
 		_assert(absi(frames - int(stream.get_length() * stream.mix_rate)) <= 1,
 			"%s 는 파일 끝에서 돈다 (%d 프레임, %.2f초)" % [name, frames, float(frames) / stream.mix_rate])
-		_assert(float(frames) / stream.mix_rate > 10.0,
-			"%s 의 한 바퀴는 10초가 넘는다 (%.2f초)" % [name, float(frames) / stream.mix_rate])
+		# The weather is heard all day, so its loops have to be long; the room's
+		# are heard for a night and under a lullaby.
+		if name == "wind" or name == "cold":
+			_assert(float(frames) / stream.mix_rate > 10.0,
+				"%s 의 한 바퀴는 10초가 넘는다 (%.2f초)" % [name, float(frames) / stream.mix_rate])
 	var live: Node = Audio.new()
 	root.add_child(live)
 	await process_frame

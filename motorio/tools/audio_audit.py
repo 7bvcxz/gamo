@@ -41,7 +41,7 @@ RATE = 22050
 CATEGORY = {
     # Beds and loops.
     "wind": "ambient", "wind_air": "ambient", "wind_gust": "ambient",
-    "cold": "ambient", "hearth": "ambient", "factory": "ambient",
+    "cold": "ambient", "hearth": "ambient", "factory": "ambient", "purr": "ambient",
     # The one note the music is played from.
     "note": "music", "bell": "music",
     # Interface.
