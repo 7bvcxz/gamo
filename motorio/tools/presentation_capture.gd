@@ -113,3 +113,19 @@ func _deploy() -> void:
 	await _seconds(1.0)
 	if _wanted("base_deployed"):
 		await _save("base_deployed")
+	await _upgrade()
+
+## The fire growing a size: fed at the fire, the world answers.
+func _upgrade() -> void:
+	var sim = main.sim
+	main.player.position = sim.core_centre() + Vector2(0.0, Grid.px(2.6))
+	main.player.facing = Vector2i.UP
+	sim.stock[Defs.ITEM_HEATSTONE] = sim.stones_to_next()
+	await _frames(10)
+	main._deposit_at_core()
+	await _seconds(0.25)
+	if _wanted("base_upgrade"):
+		await _save("base_upgrade")
+	await _seconds(1.5)
+	if _wanted("base_upgraded"):
+		await _save("base_upgraded")

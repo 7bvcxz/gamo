@@ -146,9 +146,10 @@ func _test_unlock_banner_stays_longer() -> void:
 	_assert(main.UNLOCK_MESSAGE_LIFE - 1.0 >= 3.0,
 		"페이드 1초를 빼고도 3초 이상 또렷하게 남는다 (%.1f초)" % (main.UNLOCK_MESSAGE_LIFE - 1.0))
 
-	# And it is still one door: the log heard it too.
+	# And it is still one door: the log heard it too. (Worded "새 설계" since
+	# Quality Pass 01 -- one line, not a "해금!" banner.)
 	var said := false
 	for entry: Dictionary in main.play_log:
-		if String(entry["text"]).find("해금") >= 0:
+		if String(entry["text"]).find("새 설계") >= 0:
 			said = true
 	_assert(said, "해금 알림도 기록에 남는다")

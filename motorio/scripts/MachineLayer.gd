@@ -127,6 +127,10 @@ const MINER_ART_DRAW := 1.0 * float(Grid.TILE)
 ## How far the base has unfolded out of the case, 0..1 (Quality Pass 01). Main
 ## drives it for the second the case opens; everywhere else it is 1.
 var core_unfold := 1.0
+## The fire swelling when it grows a size, 1 at the moment and fading to 0; and
+## the level plate under it flashing to its new number (Quality Pass 01).
+var core_pulse := 0.0
+var level_flash := 0.0
 
 ## One tile, as of 0.20.79. It has always *been* one cell -- one machine that
 ## blocks one tile -- and the picture was 2.7 of them, hanging over the tiles
@@ -269,6 +273,8 @@ func _draw_marks_layer() -> void:
 
 func _process(delta: float) -> void:
 	pulse += delta
+	core_pulse = maxf(0.0, core_pulse - delta / 0.9)
+	level_flash = maxf(0.0, level_flash - delta / 1.4)
 	_repaint += delta
 	if _repaint < 1.0 / 30.0:
 		return
@@ -354,6 +360,7 @@ func _draw() -> void:
 	_draw_post_hints(tile)
 	_draw_base_craft(tile)
 	_draw_base_alert(tile)
+	_draw_level_plate()
 	# Cats are not drawn here any more. They are nodes under Main/Cats at a z
 	# between this layer and _marks_layer, so what is left in this function is
 	# the factory itself.
@@ -500,8 +507,9 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var k: float = _k(tile)
 	# Unfolding out of the case (Quality Pass 01): the picture grows from the
 	# case's size through a little past its own, and the light comes up last.
-	var grow: float = Defs.unfold_scale(core_unfold)
-	var light: float = Defs.unfold_light(core_unfold)
+	var swell: float = sin(core_pulse * PI) * 0.07
+	var grow: float = Defs.unfold_scale(core_unfold) * (1.0 + swell)
+	var light: float = Defs.unfold_light(core_unfold) * (1.0 + core_pulse * 0.8)
 	# The ground the base stands on: all of it, since the base is eight cells
 	# across and the fire in the middle of it is not.
 	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(0.16, 0.10, 0.06, 0.20 * core_unfold))
@@ -1128,6 +1136,33 @@ func _draw_base_alert(tile: float) -> void:
 	var width: float = UIFont.FONT.get_string_size("!", HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
 	draw_string(UIFont.FONT, at + Vector2(-width * 0.5, 5.0), "!",
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Defs.COL_CORE)
+
+## The base's level, small, under the fire (Quality Pass 01). A number on a
+## plate the size of the "!" -- read at a glance, never in the way -- which is
+## where "기지 N단계" now lives instead of a label over the middle of the
+## screen. It flashes and swells for a moment when the fire grows.
+func _draw_level_plate() -> void:
+	if not sim.base_placed or not _visible_rect(Grid.rect_px(sim.base_rect())):
+		return
+	var text: String = str(Defs.base_level_shown(sim.base_level))
+	var size: int = 11
+	var width: float = UIFont.FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
+	var grow: float = 1.0 + level_flash * 0.35
+	# Off the footprint's lower-right corner, on the snow: not on the picture,
+	# where it read as part of the machine, and not in front of the door, where
+	# she stands to feed the fire and covered it.
+	var half_base: Vector2 = Grid.rect_px(sim.base_rect()).size * 0.5
+	var at: Vector2 = sim.core_centre() + Vector2(half_base.x + 4.0, half_base.y - 10.0)
+	var half := Vector2(maxf(7.0, width * 0.5 + 4.0), 7.5) * grow
+	var plate := Rect2(at - half, half * 2.0)
+	var edge: Color = Defs.COL_CORE.lerp(Color.WHITE, level_flash * 0.6)
+	draw_rect(plate.grow(1.0), Color(0, 0, 0, 0.30))
+	draw_rect(plate, Color(0.09, 0.11, 0.16, 0.82))
+	draw_rect(plate, Color(edge, 0.55 + 0.45 * level_flash), false, 1.0)
+	draw_set_transform(at, 0.0, Vector2.ONE * grow)
+	draw_string(UIFont.FONT, Vector2(-width * 0.5, 4.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, size,
+		Color(edge, 0.85 + 0.15 * level_flash))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 ## Where a carried cat could be put to work, said as faint breathing rings on
 ## the cells themselves. Deliberately quiet -- a suggestion in the world, not an

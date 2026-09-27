@@ -1601,13 +1601,16 @@ func _announce_drop(kind: int) -> void:
 
 ## A new machine appearing in the hotbar is a real milestone, so it gets the
 ## banner and the confirm sting rather than a silent slot.
+##
+## One line and a small ring (Quality Pass 01). It was a banner with an
+## exclamation mark, the milestone ring, a burst and the milestone shake -- the
+## screen celebrating over the player. The build list's NEW mark is where the
+## new machine is actually found.
 func _announce_unlocks(opened: Array[int]) -> void:
 	for type: int in opened:
-		_notify("%s 해금!" % Defs.MACHINE_NAMES[type], Defs.COL_CORE, UNLOCK_MESSAGE_LIFE)
-		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MILESTONE)
-		fx.burst(player.position, Defs.COL_CORE, 14)
+		_notify("새 설계  ·  %s" % Defs.MACHINE_NAMES[type], Defs.COL_CORE, UNLOCK_MESSAGE_LIFE)
+		fx.ring(player.position, Defs.COL_CORE, Defs.RING_MEDIUM)
 		audio.call("play", "finish")
-		shake = maxf(shake, Defs.FX_MILESTONE)
 
 ## Working a seam by hand. Held rather than tapped, so the player feels the ten
 ## seconds they are about to automate away.
@@ -2111,6 +2114,9 @@ func _thawing_nearby() -> bool:
 ## Long enough to walk there, short enough that it is not a permanent marker on
 ## one arbitrary tile.
 var pickaxe_hint_until: float = 0.0
+## The base's level when the current deposit began, so the signals it raises can
+## tell a deposit that grew the fire from one that did not.
+var _deposit_level_before: int = 0
 
 ## Which seam it is pointing at, or a sentinel. The nearest one to her when the
 ## tool arrives: pointing at a seam she cannot see is pointing at nothing.
@@ -2135,13 +2141,22 @@ func pickaxe_hint_cell() -> Vector2i:
 ## come -- this is the mechanism, not yet the whole scene.
 ## The base going up a step. This is the only thing that grows the circle now,
 ## so it is the moment the world gets bigger -- and it has to look like one.
-func _on_base_upgraded(level: int, radius: float) -> void:
+## The fire growing a size (Quality Pass 01).
+##
+## It used to write "기지 N단계" over the fire, on top of "열석 +N" and "+N"
+## from the same deposit -- three labels stacked in the middle of the screen for
+## under a second, with two fanfares under them. Nothing of it could be read. Now
+## the world says it: the fire swells and brightens, the heat's edge runs out to
+## its new radius, the small level plate under the fire flashes to its new
+## number, and the fire's own sound. One short line in the corner, for the record.
+func _on_base_upgraded(_level: int, radius: float) -> void:
 	var at: Vector2 = sim.core_centre()
 	fx.ring(at, Defs.COL_CORE, Grid.px(radius))
-	fx.burst(at, Defs.COL_CORE, 18)
-	fx.popup(at + Vector2(0, -40.0), "기지 %d단계" % Defs.base_level_shown(level), Defs.COL_CORE, true)
+	fx.burst(at, Defs.COL_CORE, 10)
+	machine_layer.core_pulse = 1.0
+	machine_layer.level_flash = 1.0
 	shake = maxf(shake, Defs.FX_SMALL)
-	audio.call("play", "finish")
+	audio.call("play_at", "level", at)
 	_notify("불이 더 커졌다.", Defs.COL_CORE)
 	# The gun does not come from here any more. The first copper opens its craft
 	# row -- DISCOVER pays for AUTOMATE -- and `_update_craft` hands it over.
@@ -4086,11 +4101,12 @@ func _deposit_at_core() -> void:
 	# of the three stones it wants has spent the material and moved nothing, and
 	# the player cannot see where it went.
 	if not sim.can_feed_base():
-		_notify("열석이 %d개 더 있어야 한다."
+		_notify("불이 아직 받아들이지 않는다.  열석이 %d개 더 필요하다."
 			% (sim.stones_to_next() - int(sim.stock.get(Defs.ITEM_HEATSTONE, 0))),
 			Defs.COL_TEXT_DIM)
 		audio.call("play", "deny")
 		return
+	_deposit_level_before = sim.base_level
 	var moved: Dictionary = sim.deposit_fuel()
 	var target: Vector2 = sim.core_centre()
 	var parts: Array[String] = []
@@ -4099,12 +4115,12 @@ func _deposit_at_core() -> void:
 		fx.stream(player.position + Vector2(0, -10.0), target,
 			Defs.ITEM_COLORS[item_type], mini(count, 8))
 		parts.append("%s %d" % [Defs.ITEM_NAMES[item_type], count])
-	var gained: int = int(moved.get(Defs.ITEM_HEATSTONE, 0))
-	fx.popup(target + Vector2(0, -34.0),
-		"%s +%d" % [Defs.ITEM_SHORT[Defs.ITEM_HEATSTONE], gained], Defs.COL_CORE, true)
-	fx.ring(target, Defs.COL_CORE, Defs.RING_LARGE)
-	shake = maxf(shake, Defs.FX_SMALL)
-	audio.call("play", "deliver")
+	# The stones going in are the picture (the stream), the fire catching is the
+	# sound. The "열석 +N" label that stood over the fire is gone: `_on_fuel_added`
+	# already says +N, and on a deposit that grows the fire it says nothing.
+	fx.ring(target, Defs.COL_CORE, Defs.RING_MEDIUM)
+	shake = maxf(shake, Defs.FX_QUIET)
+	audio.call("play_at", "whoomp", target)
 	_notify("불에 넣었다  ·  %s" % " · ".join(parts), Defs.COL_CORE)
 
 ## Where the thing in her arms would stand if she put it down now: its anchor,
@@ -4591,10 +4607,12 @@ func _try_demolish() -> void:
 
 func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
 	var at: Vector2 = sim.machine_centre_at(cell)
-	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.COL_CORE, Defs.RING_SMALL)
-	shake = maxf(shake, Defs.FX_QUIET)
-	audio.call("play_at", "deliver", at)
+	# A small +N, unless this deposit grew the fire: then the fire's own swell
+	# and its level plate are the answer, and a number over it is one label too
+	# many. (`_refresh_radius` runs before this signal, so the level has moved.)
+	if sim.base_level <= _deposit_level_before:
+		fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 
 ## Something reached the core. Quieter than feeding the fire, and it says what
 ## arrived rather than "+5" -- the number belonged to a burn that no longer
