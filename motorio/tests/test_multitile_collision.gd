@@ -150,6 +150,11 @@ func _test_no_overlap_rules() -> void:
 	_assert(sim.can_build(Defs.M_MINER, by_base) != "", "기지에 한 칸 걸치는 채굴기는 거부된다")
 	sim.ore.erase(by_base)
 	var by_hut: Vector2i = Vector2i(sim.shelter_rect().position.x - 2, sim.shelter_cell.y)
+	# Only the hut in the way: the world is a random seed, and one seed in a few
+	# puts a seam of its own inside this footprint, which is refused first and
+	# for a different reason -- the check then failed on a sentence, not a rule.
+	for cell: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, by_hut)):
+		sim.ore.erase(cell)
 	sim.ore[by_hut] = Defs.ITEM_CRYSTAL
 	_assert(sim.can_build(Defs.M_MINER, by_hut) == "막혀 있습니다",
 		"숙소에 한 칸 걸치는 채굴기도 거부된다: '%s'" % sim.can_build(Defs.M_MINER, by_hut))

@@ -50,6 +50,10 @@ var cutscene_time: float = 0.0
 ## The panel whose sound has been played. A panel's cue plays once, as it
 ## arrives -- asked every frame, answered only when the panel changes.
 var cutscene_cued: int = -1
+## Seconds into coming to in the snow, or -1 when she is up. See Defs.WAKE_*.
+var wake_time: float = -1.0
+## How much of the HUD is drawn, 0..1: none while she comes to, fading in after.
+var hud_reveal: float = 1.0
 
 ## The opening's four missions, and where the run is in them.
 ##
@@ -377,9 +381,49 @@ func _end_cutscene() -> void:
 	cutscene_panel = 0
 	cutscene_time = 0.0
 	state = State.PLAY
+	_begin_wake()
 
-func _start_run() -> void:
-	run_seed = randi()
+## She comes to where she landed: lying in the snow, a stir, up on her knees,
+## standing. The last panel is her waking, and this is the same moment played
+## rather than told -- so it starts the instant the story ends.
+func _begin_wake() -> void:
+	wake_time = 0.0
+	hud_reveal = 0.0
+	player.locked = true
+	player.velocity = Vector2.ZERO
+	player.collapse = Defs.wake_pose(0.0)
+
+func waking() -> bool:
+	return wake_time >= 0.0
+
+func _update_wake(delta: float) -> void:
+	var before: float = wake_time
+	wake_time += delta
+	player.locked = true
+	player.velocity = Vector2.ZERO
+	player.collapse = Defs.wake_pose(wake_time)
+	player.prompt = ""
+	# Her own sounds, and only hers: a stir, a breath as she pushes up, cloth as
+	# she gets to her feet.
+	for mark: Array in [[Defs.WAKE_LIE * 0.5, "rustle"], [Defs.WAKE_LIE + 0.1, "breath"],
+			[Defs.WAKE_LIE + Defs.WAKE_SIT + Defs.WAKE_KNEEL, "rustle"]]:
+		if before < float(mark[0]) and wake_time >= float(mark[0]):
+			audio.call("play", String(mark[1]), 0.04)
+	if wake_time >= Defs.WAKE_SECONDS:
+		_end_wake()
+
+## She is up, and the player has her. The HUD fades in from here.
+func _end_wake() -> void:
+	if wake_time < 0.0:
+		return
+	wake_time = -1.0
+	player.collapse = 0.0
+	player.locked = false
+
+## A new world. The seed is drawn at random unless one is given -- which is how a
+## test that failed on one world (it prints the seed) is looked at again.
+func _start_run(seed_value: int = -1) -> void:
+	run_seed = seed_value if seed_value >= 0 else randi()
 	sim.setup(run_seed)
 	_clear_presentations()
 	missions_open.clear()
@@ -403,6 +447,8 @@ func _start_run() -> void:
 	player.velocity = Vector2.ZERO
 	collapse_timer = -1.0
 	player.collapse = 0.0
+	wake_time = -1.0
+	hud_reveal = 1.0
 	blackout = 0.0
 	night_warned = false
 	meter_cell = Vector2i(9999, 9999)
@@ -1192,6 +1238,10 @@ func _process(delta: float) -> void:
 	machine_layer.meter_cell = meter_cell
 
 	_update_ambience(delta)
+	if not waking() and hud_reveal < 1.0:
+		hud_reveal = minf(1.0, hud_reveal + delta / Defs.HUD_REVEAL_SECONDS)
+	hud.modulate.a = hud_reveal
+	player.overlay = hud_reveal
 	_update_missions()
 	if pickaxe_hint_until > 0.0:
 		pickaxe_hint_until = maxf(0.0, pickaxe_hint_until - delta)
@@ -1401,6 +1451,11 @@ static func slot_path(slot: int) -> String:
 const AUTOSAVE_INTERVAL := 30.0
 
 func _process_play(delta: float) -> void:
+	# Coming to in the snow. Nothing else runs -- no cold, no clock, no prompt --
+	# until she is on her feet: the moment is hers.
+	if waking():
+		_update_wake(delta)
+		return
 	# The world decides what may be touched, and a torch in her hand is half of
 	# that answer. It is set here because the world does not know what she is
 	# holding and this is the one place that knows both.
@@ -2508,6 +2563,9 @@ func _advance_mission() -> void:
 ## from before the opening existed, a test, a debug key -- asks for it here
 ## rather than reproducing the four missions by hand.
 func finish_tutorial() -> void:
+	# Past the opening means past waking up in it.
+	_end_wake()
+	hud_reveal = 1.0
 	if not sim.base_placed:
 		# Through the same door the opening uses. Hand-placing it here put the
 		# base wherever she happened to be standing, and the base's cell is

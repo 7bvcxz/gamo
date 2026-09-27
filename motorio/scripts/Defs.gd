@@ -1863,6 +1863,43 @@ static func rock_clump(block: Vector2i) -> Array[Vector2i]:
 ## nowhere to run, so it has to be long enough to look around in and short
 ## enough to be the reason she does.
 const CRASH_WARMTH := 40.0
+
+## --- Coming to in the snow (Quality Pass 01) ----------------------------------
+## The first frame of play was her standing, as if nothing had happened. Now she
+## is lying where she landed, stirs, pushes up to her knees and stands -- under
+## three seconds -- and the HUD comes up after she does. Nothing cools and
+## nothing moves until she is up: the crash drain counts from the moment the
+## player has her, so the budget `test_crash` measures (13.3 s against an
+## optimal 5.9) is the same as it was.
+const WAKE_LIE := 0.9
+const WAKE_SIT := 0.9
+const WAKE_KNEEL := 0.35
+const WAKE_STAND := 0.55
+const WAKE_SECONDS := WAKE_LIE + WAKE_SIT + WAKE_KNEEL + WAKE_STAND
+## How far from upright she is on her knees, in `PlayerActor.collapse` units
+## (1 is lying on her side).
+const WAKE_KNEEL_POSE := 0.42
+## The HUD fades in once she is up rather than being there from the first frame.
+const HUD_REVEAL_SECONDS := 0.8
+
+## Her pose at `t` seconds into waking, as `PlayerActor.collapse`.
+static func wake_pose(t: float) -> float:
+	if t < WAKE_LIE:
+		# Still, and then a small stir -- the first sign she is alive.
+		var stir: float = 0.0
+		if t > WAKE_LIE * 0.45:
+			stir = sin((t - WAKE_LIE * 0.45) / (WAKE_LIE * 0.55) * PI) * 0.07
+		return 1.0 - stir
+	t -= WAKE_LIE
+	if t < WAKE_SIT:
+		return lerpf(1.0, WAKE_KNEEL_POSE, smoothstep(0.0, 1.0, t / WAKE_SIT))
+	t -= WAKE_SIT
+	if t < WAKE_KNEEL:
+		return WAKE_KNEEL_POSE
+	t -= WAKE_KNEEL
+	if t < WAKE_STAND:
+		return lerpf(WAKE_KNEEL_POSE, 0.0, smoothstep(0.0, 1.0, t / WAKE_STAND))
+	return 0.0
 ## Six times faster than the game opens on, as of 1.0.6. At half a degree a
 ## second the crash gave her eighty seconds of standing around and the cold was
 ## a bar that moved; at three it is thirteen seconds from the wreck to the fire,

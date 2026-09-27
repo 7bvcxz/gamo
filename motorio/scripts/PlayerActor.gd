@@ -136,8 +136,12 @@ var _walk_input := Vector2.ZERO
 ## Which way she is drawn horizontally. Remembered rather than derived from the
 ## current input, so standing still keeps the direction she was last walking.
 var _face_left := false
-## 0 upright, 1 fully collapsed. Driven by Main once warmth runs out.
+## 0 upright, 1 fully collapsed. Driven by Main once warmth runs out -- and by
+## the wake at the start of a run, which is the same pose played backwards.
 var collapse := 0.0
+## How much of the gauge over her head to draw, 0..1. Main holds it at 0 while
+## she comes to and fades it in with the HUD.
+var overlay := 1.0
 var touch_direction := Vector2.ZERO
 var touch_sprint := false
 ## Set by Main while a cat is being carried, so it rides along in her arms.
@@ -512,7 +516,7 @@ func prompt_fade() -> float:
 ## on the day it is not.
 func _draw_warmth_bar() -> void:
 	var show: float = clampf((Defs.WARMTH_BAR_SHOW - warmth) / Defs.WARMTH_BAR_FADE,
-		0.0, 1.0)
+		0.0, 1.0) * overlay
 	if show <= 0.0:
 		return
 	var size: Vector2 = Defs.WARMTH_BAR_SIZE
