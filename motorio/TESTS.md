@@ -40,7 +40,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 > **Grid v2 화면 캡처**: `DISPLAY=:99 godot --path motorio --audio-driver Dummy --script res://tools/grid_capture.gd -- --out <절대경로>`
 > 추락 지점·기지와 숙소·한 칸 광맥·채굴기 고스트(빈 땅/광맥 위)·나란히 선 채굴기와 고양이·통로의 벨트·걷기·기지를 돌아가는 고양이를 게임이 여는 배율로 1280·1920 두 크기에서 찍는다. 출력은 `motorio/test-results/`에.
 
-## 자동 테스트 (headless, 94개)
+## 자동 테스트 (headless, 95개)
 
 ### 규칙과 진행
 
@@ -158,6 +158,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 | `test_tiles` | 지형 생성. **무작위 시드 대신 고정 시드로 부른다** |
 | `test_debug` | F2 배속, F3 해금이 주는 것, F4 표준 배치, **F7이 바라보는 칸에 얼어붙은 고양이를 두는가**, F8이 벨트 넉 줄과 그 앞의 빈 칸을 만드는가 |
 | `test_audio` · `test_music` | 사운드 뱅크와 악보가 로드되는가 |
+| `test_audio_mix` | **버스와 믹스, 그리고 소리가 어디서 나는가.** 버스 레이아웃이 방향 문서대로인가(Music·Ambient·SFX[Machine·Character·Environment]·UI·Interior), 음악이 Music 버스로 가는가, 장소 표의 `mix` 열이 믹스를 정하는가, 문이 닫히는 첫 프레임은 **아직 전환 중**이고(끊지 않는다) 곧 바람·기계 버스가 내려가며 그녀·고양이·UI는 그대로인가, 거리가 멀수록 작아지고 귀 밖의 소리는 **아예 틀지 않는가**, 그리고 실제 경우 — **숙소 안에서는 기지의 배달 소리가 나지 않고** 기지 옆에서는 나는가 |
 
 ---
 

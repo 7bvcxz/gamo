@@ -1277,6 +1277,12 @@ func _update_ambience(delta: float) -> void:
 		exposure = clampf(1.0 - player.warmth / 100.0, 0.0, 1.0)
 		if sim != null and not sim.is_warm(player.cell()):
 			exposure = maxf(exposure, 0.45)
+	# The ear is where she is. World sounds fade from here and are not played at
+	# all out of earshot -- which is also what makes the factory fall silent in
+	# the shelter, six hundred tiles from the fire. Her, not the camera: the
+	# camera eases, and for the seconds after a door it is still somewhere
+	# between the room and the fire.
+	audio.set("listener", player.position)
 	audio.call("apply", screen_name(), zone(), exposure, day_fraction(), delta)
 
 ## What is being drawn, as a name the audio manager can look up. Settings is not
@@ -2054,7 +2060,7 @@ func _on_recipe_produced(cell: Vector2i, item_type: int, amount: int) -> void:
 	fx.popup(at + Vector2(0, -20), "+%d %s" % [amount, Defs.ITEM_NAMES[item_type]],
 		Defs.ITEM_COLORS[item_type], true)
 	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
-	audio.call("play", "alloy")
+	audio.call("play_at", "alloy", at)
 	if not _said_produced.has(item_type):
 		_said_produced[item_type] = true
 		fx.burst(at, Defs.ITEM_COLORS[item_type], 12)
@@ -4428,7 +4434,7 @@ func _on_fuel_added(amount: int, cell: Vector2i, item_type: int) -> void:
 	fx.popup(at, "+%d" % amount, Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.COL_CORE, Defs.RING_SMALL)
 	shake = maxf(shake, Defs.FX_QUIET)
-	audio.call("play", "deliver")
+	audio.call("play_at", "deliver", at)
 
 ## Something reached the core. Quieter than feeding the fire, and it says what
 ## arrived rather than "+5" -- the number belonged to a burn that no longer
@@ -4438,7 +4444,9 @@ func _on_item_delivered(item_type: int, cell: Vector2i) -> void:
 	var at: Vector2 = Grid.centre(cell)
 	fx.popup(at, Defs.ITEM_SHORT[item_type], Defs.ITEM_COLORS[item_type])
 	fx.ring(at, Defs.ITEM_COLORS[item_type], Defs.RING_SMALL)
-	audio.call("play", "deliver")
+	# At the core, not everywhere: the factory is heard from where she stands,
+	# and not at all from the shelter.
+	audio.call("play_at", "deliver", at)
 
 func _on_build_rejected(reason: String, cell: Vector2i) -> void:
 	# One channel only. Showing the same reason both here and in the centre

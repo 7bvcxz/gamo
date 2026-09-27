@@ -18,43 +18,55 @@ func _init() -> void:
 	# engine errors on the way past. Nothing here needs a running mixer.
 	const Audio := preload("res://scripts/Audio.gd")
 
+	# Referenced by file, not by sound name: a sound is a list of takes since
+	# Quality Pass 01, and `pick` is five files none of which is called pick.wav.
 	var referenced: Dictionary[String, bool] = {}
 	for name: String in Audio.BANK:
-		var stream: AudioStream = Audio.BANK[name]
-		_assert(stream != null, "%s 뱅크에 스트림이 있다" % name)
-		referenced[name] = true
+		var takes: Array = Audio.BANK[name]
+		_assert(not takes.is_empty(), "%s 에 테이크가 하나 이상 있다" % name)
+		for stream: AudioStream in takes:
+			_assert(stream != null, "%s 뱅크에 스트림이 있다" % name)
+			if stream != null:
+				referenced[stream.resource_path] = true
 		_assert(Audio.VOLUMES.has(name), "%s 에 볼륨이 지정돼 있다" % name)
+		# Every sound is mixed somewhere real -- a bus name that is not in the
+		# layout would quietly fall back to Master and escape every mix.
+		_assert(Audio.BUS_OF.has(name), "%s 에 버스가 지정돼 있다" % name)
+		_assert(AudioServer.get_bus_index(String(Audio.BUS_OF.get(name, ""))) >= 0,
+			"%s 의 버스 %s 가 레이아웃에 있다" % [name, Audio.BUS_OF.get(name, "")])
 	for name: String in Audio.BEDS:
 		_assert(Audio.BEDS[name] != null, "%s 베드에 스트림이 있다" % name)
-		referenced[name] = true
+		if Audio.BEDS[name] != null:
+			referenced[(Audio.BEDS[name] as Resource).resource_path] = true
 		_assert(Audio.BED_CEILING.has(name), "%s 에 베드 상한이 지정돼 있다" % name)
+		_assert(AudioServer.get_bus_index(String(Audio.BED_BUS.get(name, ""))) >= 0,
+			"%s 베드의 버스가 레이아웃에 있다" % name)
 
 	# The music sampler holds one more, outside the effects bank.
 	const Music := preload("res://scripts/Music.gd")
 	_assert(Music.NOTE != null, "음악 샘플이 있다")
-	referenced[(Music.NOTE as Resource).resource_path.get_file().get_basename()] = true
+	referenced[(Music.NOTE as Resource).resource_path] = true
+	for path: String in Audio.extra_streams():
+		referenced[path] = true
 
-	# Nothing on disk that nobody plays.
-	var directory := DirAccess.open("res://assets/sfx")
-	_assert(directory != null, "assets/sfx 를 열 수 있다")
-	if directory != null:
-		for file: String in directory.get_files():
-			if not file.ends_with(".wav"):
-				continue
-			var stem: String = file.get_basename()
-			_assert(referenced.has(stem),
-				"%s 를 재생하는 곳이 있다 (Audio.gd 뱅크나 Music.gd 에 없으면 파일을 지운다)" % file)
+	# Nothing on disk that nobody plays -- in the folder or under it.
+	var files: Array[String] = []
+	_collect("res://assets/sfx", files)
+	_assert(not files.is_empty(), "assets/sfx 를 열 수 있다")
+	for path: String in files:
+		_assert(referenced.has(path),
+			"%s 를 재생하는 곳이 있다 (Audio.gd 뱅크나 Music.gd 에 없으면 파일을 지운다)" % path)
 
 	# Every sound the builder makes is 22050Hz mono, and the beds are the only
 	# long ones. A one-shot that grew to a second is a one-shot that overlaps
 	# itself, which the voice pool cannot fix.
 	for name: String in Audio.BANK:
-		var stream: AudioStreamWAV = Audio.BANK[name]
-		_assert(stream.mix_rate == 22050, "%s 는 22050Hz" % name)
-		_assert(stream.stereo == false, "%s 는 모노" % name)
-		var seconds: float = stream.get_length()
-		_assert(seconds > 0.0 and seconds <= 0.75,
-			"%s 길이 %.3f초는 한 방 소리 범위 안" % [name, seconds])
+		for stream: AudioStreamWAV in Audio.BANK[name]:
+			_assert(stream.mix_rate == 22050, "%s 는 22050Hz" % name)
+			_assert(stream.stereo == false, "%s 는 모노" % name)
+			var seconds: float = stream.get_length()
+			_assert(seconds > 0.0 and seconds <= 0.75,
+				"%s 길이 %.3f초는 한 방 소리 범위 안" % [name, seconds])
 
 	# Footsteps: the only sound that plays continuously, so it is the one where a
 	# wrong level or a wrong cadence is not a detail. Two frames of the eight put
@@ -84,6 +96,16 @@ func _init() -> void:
 		print("AUDIO_TEST: PASS")
 	quit(failures)
 
+
+func _collect(folder: String, into: Array[String]) -> void:
+	var directory := DirAccess.open(folder)
+	if directory == null:
+		return
+	for file: String in directory.get_files():
+		if file.ends_with(".wav") or file.ends_with(".ogg"):
+			into.append(folder.path_join(file))
+	for sub: String in directory.get_directories():
+		_collect(folder.path_join(sub), into)
 
 func _assert(condition: bool, message: String) -> void:
 	if not condition:

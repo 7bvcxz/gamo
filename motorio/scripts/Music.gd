@@ -111,7 +111,7 @@ var _fired: int = 0
 func _ready() -> void:
 	for index in VOICES:
 		var player := AudioStreamPlayer.new()
-		player.bus = "Master"
+		player.bus = &"Music" if AudioServer.get_bus_index("Music") >= 0 else &"Master"
 		player.stream = NOTE
 		add_child(player)
 		_voices.append(player)

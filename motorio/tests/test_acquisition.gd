@@ -114,9 +114,12 @@ func _test_pickaxe_acquisition_effect() -> void:
 	_assert(main.hud.slot_pulse_left(main.TOOLS.find(main.TOOL_PICKAXE)) > 0.9,
 		"1번 칸이 반짝인다")
 	# And the sounds are the small bright ones, in the bank.
-	var audio_src: String = FileAccess.get_file_as_string("res://scripts/Audio.gd")
+	# Asked of the bank, not grepped out of the source: the source spelling changed
+	# when a sound became a list of takes, and a text search went red over it.
+	const AudioScript := preload("res://scripts/Audio.gd")
 	for name: String in ["tick", "pop", "chime"]:
-		_assert(audio_src.contains("\"%s\": preload" % name), "%s 소리가 있다" % name)
+		_assert(AudioScript.BANK.has(name) and not (AudioScript.BANK[name] as Array).is_empty(),
+			"%s 소리가 있다" % name)
 
 # --- test_pickaxe_slot_activates_after_acquisition -------------------------------
 

@@ -43,6 +43,9 @@ const RULES := {
 		## carried by its two beds, and a loop under a twelve-minute day comes
 		## round often enough to stop being atmosphere.
 		"score": "",
+		## Which bus mix the ear gets (`Audio.MIXES`). Outside, everything the
+		## world makes; the shelter's own sounds are silent.
+		"mix": "outside",
 	},
 	HOME: {
 		"id": "home",
@@ -54,6 +57,9 @@ const RULES := {
 		## The one room in the game with music in it. It is also the only room
 		## where nothing is being asked of the player.
 		"score": "home",
+		## Inside, the plateau goes: the wind, the machines, the fire's events.
+		## Her and the cats stay, and the room's own warmth comes up.
+		"mix": "inside",
 	},
 }
 
@@ -83,6 +89,9 @@ static func has_weather(zone: int) -> bool:
 
 static func score(zone: int) -> String:
 	return String(_row(zone)["score"])
+
+static func mix(zone: int) -> String:
+	return String(_row(zone)["mix"])
 
 static func _row(zone: int) -> Dictionary:
 	return RULES.get(zone, RULES[FIELD])
