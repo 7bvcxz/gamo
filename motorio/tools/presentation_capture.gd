@@ -88,3 +88,28 @@ func _opening() -> void:
 	if _wanted("grim_wake"):
 		await _save("grim_wake")
 	await _seconds(Defs.WAKE_SECONDS)
+	await _deploy()
+
+func _key(pressed: bool) -> InputEvent:
+	var event: InputEvent = (InputMap.action_get_events("build")[0] as InputEvent).duplicate()
+	(event as InputEventKey).pressed = pressed
+	return event
+
+## Holding Z on the case until it opens, as a player does.
+func _deploy() -> void:
+	var sim = main.sim
+	main.player.position = sim.prop_centre(sim.kit_cell) + Vector2(-Grid.px(1.0), 0.0)
+	main.player.facing = Vector2i.RIGHT
+	await _frames(20)
+	main._unhandled_input(_key(true))
+	var frames := 0
+	while not sim.base_placed and frames < 600:
+		await process_frame
+		frames += 1
+	await _seconds(0.3)
+	if _wanted("base_deploying"):
+		await _save("base_deploying")
+	main._unhandled_input(_key(false))
+	await _seconds(1.0)
+	if _wanted("base_deployed"):
+		await _save("base_deployed")

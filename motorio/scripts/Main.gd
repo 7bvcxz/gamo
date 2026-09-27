@@ -54,6 +54,12 @@ var cutscene_cued: int = -1
 var wake_time: float = -1.0
 ## How much of the HUD is drawn, 0..1: none while she comes to, fading in after.
 var hud_reveal: float = 1.0
+## Seconds into the case unfolding into the fire, or -1. See Defs.DEPLOY_*.
+var deploy_time: float = -1.0
+## A short slide out of a footprint that has just appeared under her.
+var slide_time: float = -1.0
+var slide_from := Vector2.ZERO
+var slide_to := Vector2.ZERO
 
 ## The opening's four missions, and where the run is in them.
 ##
@@ -449,6 +455,9 @@ func _start_run(seed_value: int = -1) -> void:
 	player.collapse = 0.0
 	wake_time = -1.0
 	hud_reveal = 1.0
+	deploy_time = -1.0
+	slide_time = -1.0
+	machine_layer.core_unfold = 1.0
 	blackout = 0.0
 	night_warned = false
 	meter_cell = Vector2i(9999, 9999)
@@ -1238,6 +1247,8 @@ func _process(delta: float) -> void:
 	machine_layer.meter_cell = meter_cell
 
 	_update_ambience(delta)
+	_update_deploy(delta)
+	_update_slide(delta)
 	if not waking() and hud_reveal < 1.0:
 		hud_reveal = minf(1.0, hud_reveal + delta / Defs.HUD_REVEAL_SECONDS)
 	hud.modulate.a = hud_reveal
@@ -2187,25 +2198,73 @@ func _update_kit_search(delta: float) -> void:
 		sim.kit_progress = 0.0
 		return
 	sim.kit_progress += delta / Defs.KIT_SEARCH_SECONDS
+	# This hold is doing something, so letting go of it is not a tap. Without
+	# this the release that ended the search acted on what she was now facing --
+	# the base the case had just become -- and opened the workbench over the
+	# moment the fire first lit (Quality Pass 01).
+	mine_swung = true
 	if sim.kit_progress < 1.0:
 		return
 	sim.kit_progress = 0.0
 	var was_placed: bool = sim.base_placed
 	sim.search_kit()
 	if sim.base_placed and not was_placed:
-		_step_clear()
-		# The case unfolds into the fire, on its own cell -- it does not sit down
-		# beside it. The rings walk outward because that is what the heat is
-		# about to do; the painted radius follows behind the simulated one.
-		var at: Vector2 = sim.core_centre()
-		fx.ring(at, Defs.COL_CORE, Defs.RING_MEDIUM)
+		_begin_deploy()
+
+## The case unfolding into the fire (Quality Pass 01).
+##
+## It used to appear: three rings and a burst at once, the biggest shake in the
+## opening, the fanfare, and a line of text -- a spawn with celebrations on it.
+## Now it is a small event in the world with an order to it: a latch, the case
+## opening out to its full size with a creak, then the fire catching -- a warm
+## rush, one ring, the light coming up. The heat is real from the first frame
+## (the circle is simulated at once; only its painting spreads), so nothing about
+## the show can cost her warmth.
+func _begin_deploy() -> void:
+	deploy_time = 0.0
+	machine_layer.core_unfold = 0.0
+	_slide_clear()
+	audio.call("play_at", "latch", sim.core_centre())
+	note_log("상자가 기지가 되었다 · 온기가 퍼진다", Defs.COL_CORE)
+
+func _update_deploy(delta: float) -> void:
+	if deploy_time < 0.0:
+		return
+	var before: float = deploy_time
+	deploy_time += delta
+	machine_layer.core_unfold = clampf(deploy_time / Defs.DEPLOY_SECONDS, 0.0, 1.0)
+	var at: Vector2 = sim.core_centre()
+	if before < Defs.DEPLOY_CREAK and deploy_time >= Defs.DEPLOY_CREAK:
+		audio.call("play_at", "creak", at)
+	if before < Defs.DEPLOY_LIGHT and deploy_time >= Defs.DEPLOY_LIGHT:
+		audio.call("play_at", "whoomp", at)
 		fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
-		fx.ring(at, Defs.COL_CORE, Defs.RING_MILESTONE)
-		fx.burst(at, Defs.COL_CORE, 16)
-		shake = maxf(shake, Defs.FX_MILESTONE)
-		audio.call("play", "finish")
-		_notify("긴급기지가 펼쳐졌다", Defs.COL_CORE, UNLOCK_MESSAGE_LIFE)
-		note_log("상자가 기지가 되었다 · 온기가 퍼진다", Defs.COL_CORE)
+		fx.burst(at, Defs.COL_CORE, 10)
+		shake = maxf(shake, Defs.FX_SMALL)
+		_notify("불이 붙었다.  따뜻하다.", Defs.COL_CORE)
+	if deploy_time >= Defs.DEPLOY_SECONDS:
+		deploy_time = -1.0
+		machine_layer.core_unfold = 1.0
+
+## Out of what is now a building: stepped out of, rather than put down outside
+## it. Same place `_step_clear` puts her, reached in a fraction of a second.
+func _slide_clear() -> void:
+	slide_from = player.position
+	slide_to = sim.clear_point(player.position, Defs.PLAYER_RADIUS)
+	slide_time = 0.0 if slide_from.distance_to(slide_to) > 0.5 else -1.0
+	for cat: Sim.Cat in sim.cats:
+		if cat != sim.carried_cat and sim.blocks_player(sim.cell_of(cat.pos)):
+			cat.pos = sim.clear_point(cat.pos, 1.0)
+
+func _update_slide(delta: float) -> void:
+	if slide_time < 0.0:
+		return
+	slide_time = minf(slide_time + delta, Defs.SLIDE_SECONDS)
+	var u: float = slide_time / Defs.SLIDE_SECONDS
+	player.velocity = Vector2.ZERO
+	player.position = slide_from.lerp(slide_to, 1.0 - (1.0 - u) * (1.0 - u))
+	if slide_time >= Defs.SLIDE_SECONDS:
+		slide_time = -1.0
 
 ## The build gun's first recipe.
 ##
@@ -2285,6 +2344,8 @@ func _update_debris(delta: float) -> void:
 		sim.cancel_debris()
 		return
 	var piece: Vector2i = sim.debris_key(cell)
+	# The same rule as the kit: a hold that is working is not a tap.
+	mine_swung = true
 	if not sim.search_debris(cell, delta):
 		return
 	var found: Dictionary = sim.open_debris(cell)
@@ -2363,6 +2424,7 @@ func _update_thaw(delta: float) -> void:
 		return
 	var at: Vector2 = sim.prop_centre(sim.frozen_key(cell)) \
 		if sim.frozen_key(cell) != Sim.NONE else sim.cell_centre(cell)
+	mine_swung = true
 	if not sim.thaw_ground(cell, delta):
 		# Steam off the ice while it works, so the seconds look like they are
 		# doing something to the thing rather than to a bar.

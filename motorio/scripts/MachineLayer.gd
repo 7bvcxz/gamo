@@ -124,6 +124,9 @@ const MACHINE_ART_DRAW := 36.0
 ## fused into one block. Temporary, like the rest of this art until the Step 2
 ## pass redraws it to its cells; `test_mining_post_occupies_4x4` holds the rule.
 const MINER_ART_DRAW := 1.0 * float(Grid.TILE)
+## How far the base has unfolded out of the case, 0..1 (Quality Pass 01). Main
+## drives it for the second the case opens; everywhere else it is 1.
+var core_unfold := 1.0
 
 ## One tile, as of 0.20.79. It has always *been* one cell -- one machine that
 ## blocks one tile -- and the picture was 2.7 of them, hanging over the tiles
@@ -495,10 +498,14 @@ func _frost(machine: Sim.Machine) -> float:
 func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var c: Vector2 = px + Vector2.ONE * tile * 0.5
 	var k: float = _k(tile)
+	# Unfolding out of the case (Quality Pass 01): the picture grows from the
+	# case's size through a little past its own, and the light comes up last.
+	var grow: float = Defs.unfold_scale(core_unfold)
+	var light: float = Defs.unfold_light(core_unfold)
 	# The ground the base stands on: all of it, since the base is eight cells
 	# across and the fire in the middle of it is not.
-	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(0.16, 0.10, 0.06, 0.20))
-	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(1.0, 0.69, 0.36, 0.22), false, 1.5)
+	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(0.16, 0.10, 0.06, 0.20 * core_unfold))
+	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(1.0, 0.69, 0.36, 0.22 * light), false, 1.5)
 	_scale_about(c, k)
 	c = Vector2.ZERO
 	var beat: float = 1.0 + sin(pulse * 2.2) * 0.05 + machine.flash * 0.5
@@ -512,14 +519,14 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# The light it throws stays wider than the building -- that is what a fire
 	# does -- but it was sized against a 2.7 tile drawing and reached most of
 	# the base on its own.
-	draw_circle(c, 34.0 * beat, Color(1.0, 0.67, 0.31, 0.10))
-	draw_circle(c, 24.0 * beat, Color(1.0, 0.67, 0.31, 0.16))
+	draw_circle(c, 34.0 * beat, Color(1.0, 0.67, 0.31, 0.10 * light))
+	draw_circle(c, 24.0 * beat, Color(1.0, 0.67, 0.31, 0.16 * light))
 	# Fixed size. The beat used to scale the drawing, which was fine when the
 	# drawing was four concentric circles and reads as the building itself
 	# breathing now -- a machine that grows and shrinks looks broken, not alive.
 	# The heat it throws still pulses; the machine does not.
-	_object_art(CORE_ART, c, CORE_DRAW)
-	draw_arc(c, 22.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, 0.30 + machine.flash), 2.0, true)
+	_object_art(CORE_ART, c, CORE_DRAW * grow)
+	draw_arc(c, 22.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, (0.30 + machine.flash) * light), 2.0, true)
 	_unscale()
 
 ## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --

@@ -1882,6 +1882,28 @@ const WAKE_KNEEL_POSE := 0.42
 ## The HUD fades in once she is up rather than being there from the first frame.
 const HUD_REVEAL_SECONDS := 0.8
 
+## The case unfolding into the fire: a latch at once, the creak of it opening,
+## the fire catching, and the whole thing standing at its size -- under a second.
+const DEPLOY_SECONDS := 0.9
+const DEPLOY_CREAK := 0.18
+const DEPLOY_LIGHT := 0.5
+## Stepping out of a footprint that has just appeared around her.
+const SLIDE_SECONDS := 0.25
+
+## The unfolding's size, 0..1 of the base: from the case she was holding onto,
+## a little past full size, and settling.
+static func unfold_scale(u: float) -> float:
+	var from: float = float(PROP_SIZE.x) / 8.0
+	var t: float = clampf(u, 0.0, 1.0)
+	# An ease that overshoots: the case opens out past its size and settles.
+	var back: float = 1.0 + 2.2 * pow(t - 1.0, 3.0) + 1.2 * pow(t - 1.0, 2.0)
+	return lerpf(from, 1.0, back)
+
+## How far the fire's light is up, 0..1, as the case unfolds: nothing until it
+## has opened, then quickly on.
+static func unfold_light(u: float) -> float:
+	return smoothstep(DEPLOY_LIGHT / DEPLOY_SECONDS, 1.0, clampf(u, 0.0, 1.0))
+
 ## Her pose at `t` seconds into waking, as `PlayerActor.collapse`.
 static func wake_pose(t: float) -> float:
 	if t < WAKE_LIE:
