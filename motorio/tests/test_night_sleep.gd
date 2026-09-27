@@ -31,6 +31,7 @@ func _run() -> void:
 	_test_first_work()
 	_test_thaw()
 	_test_captions()
+	_test_new_game_from_the_shelter()
 	main.clear_save()
 	main.free()
 	if failures == 0:
@@ -191,3 +192,16 @@ func _test_captions() -> void:
 	var hud: String = FileAccess.get_file_as_string("res://scripts/HUD.gd")
 	for word: String in ["돌아옵니다", "들어왔습니다", "밝아옵니다"]:
 		_assert(not hud.contains(word), "밤의 자막이 존댓말 안내가 아니다 (%s)" % word)
+
+## 처음부터 from the settings panel while she is in the shelter, or during a dawn.
+## The new world used to inherit `indoors` (so its ground was not drawn -- a black
+## disc under the fire) and the room's fade to black.
+func _test_new_game_from_the_shelter() -> void:
+	_fresh()
+	main.player.position = main.shelter_doorstep()
+	main.open_room()
+	main.room_fade = 0.6
+	_assert(main.sim.indoors, "(숙소 안이다)")
+	main._start_run()
+	_assert(not main.sim.indoors, "새 세계는 바깥에서 시작한다")
+	_assert(main.room_fade == 0.0 and not main.room_open, "방의 어둠도 따라오지 않는다")

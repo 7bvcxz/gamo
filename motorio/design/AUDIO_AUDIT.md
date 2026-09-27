@@ -86,3 +86,71 @@
 | Kenney Impact Sounds 1.0 | kenney.nl/assets/impact-sounds | CC0 1.0 | `impactMining_000~004`(단 80~94%가 150Hz 아래 — 그대로 쓰면 또 '벽' 소리다), `footstep_snow_000~004`, `impactMetal_light`, `impactGlass_light` |
 | Kenney Interface Sounds | kenney.nl/assets/interface-sounds | CC0 1.0 | `click`, `tick`, `select`, `glass`, `pluck` |
 | Kenney RPG Audio | kenney.nl/assets/rpg-audio | CC0 1.0 | `metalClick`, `metalLatch`, `cloth1~4`, `creak1~3` |
+
+---
+
+## 6. 이후 (Quality Pass 01 끝, 2026-09-27)
+
+무엇을 왜 바꿨는지는 `QUALITY_PASS_01_REPORT.md`. 지금의 파일 전체, `python3 tools/audio_audit.py --markdown`:
+
+| file | cat | fmt | s | Hz | ch | peak dBFS | RMS dBFS | <150 Hz | <100 Hz | faults |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `assets/sfx/alarm.wav` | sfx | wav | 0.62 | 22050 | 1 | -8.0 | -18.4 | 1% | 0% | - |
+| `assets/sfx/alloy.wav` | sfx | wav | 0.23 | 22050 | 1 | -8.6 | -16.7 | 0% | 0% | - |
+| `assets/sfx/breath_1.wav` | sfx | wav | 0.72 | 22050 | 1 | -6.9 | -22.0 | 0% | 0% | - |
+| `assets/sfx/breath_2.wav` | sfx | wav | 0.75 | 22050 | 1 | -6.9 | -21.3 | 0% | 0% | - |
+| `assets/sfx/breath_3.wav` | sfx | wav | 0.68 | 22050 | 1 | -6.9 | -20.8 | 0% | 0% | - |
+| `assets/sfx/build.wav` | sfx | wav | 0.16 | 22050 | 1 | -3.4 | -11.4 | 44% | 15% | - |
+| `assets/sfx/cc0/cat_tap_1.wav` | sfx | wav | 0.20 | 22050 | 1 | -6.0 | -26.1 | 0% | 0% | - |
+| `assets/sfx/cc0/cat_tap_2.wav` | sfx | wav | 0.20 | 22050 | 1 | -6.0 | -26.9 | 0% | 0% | - |
+| `assets/sfx/cc0/cat_tap_3.wav` | sfx | wav | 0.20 | 22050 | 1 | -6.0 | -28.3 | 0% | 0% | - |
+| `assets/sfx/cc0/clink_1.wav` | sfx | wav | 0.25 | 22050 | 1 | -6.9 | -24.4 | 0% | 0% | - |
+| `assets/sfx/cc0/clink_2.wav` | sfx | wav | 0.22 | 22050 | 1 | -6.9 | -25.1 | 0% | 0% | - |
+| `assets/sfx/cc0/clink_3.wav` | sfx | wav | 0.20 | 22050 | 1 | -6.9 | -25.1 | 0% | 0% | - |
+| `assets/sfx/cc0/creak.wav` | sfx | wav | 0.32 | 22050 | 1 | -8.0 | -21.7 | 0% | 0% | - |
+| `assets/sfx/cc0/deliver_1.wav` | sfx | wav | 0.16 | 22050 | 1 | -6.9 | -24.8 | 1% | 0% | - |
+| `assets/sfx/cc0/deliver_2.wav` | sfx | wav | 0.16 | 22050 | 1 | -6.9 | -24.7 | 0% | 0% | - |
+| `assets/sfx/cc0/deliver_3.wav` | sfx | wav | 0.13 | 22050 | 1 | -6.9 | -22.7 | 1% | 0% | - |
+| `assets/sfx/cc0/latch.wav` | sfx | wav | 0.22 | 22050 | 1 | -6.0 | -29.8 | 0% | 0% | - |
+| `assets/sfx/cc0/pick_1.wav` | sfx | wav | 0.42 | 22050 | 1 | -5.2 | -26.7 | 1% | 0% | - |
+| `assets/sfx/cc0/pick_2.wav` | sfx | wav | 0.42 | 22050 | 1 | -5.2 | -27.7 | 1% | 0% | - |
+| `assets/sfx/cc0/pick_3.wav` | sfx | wav | 0.42 | 22050 | 1 | -5.2 | -25.6 | 0% | 0% | - |
+| `assets/sfx/cc0/pick_4.wav` | sfx | wav | 0.42 | 22050 | 1 | -5.2 | -27.5 | 1% | 0% | - |
+| `assets/sfx/cc0/pick_5.wav` | sfx | wav | 0.42 | 22050 | 1 | -5.2 | -28.8 | 1% | 0% | - |
+| `assets/sfx/cc0/rustle_1.wav` | sfx | wav | 0.34 | 22050 | 1 | -6.9 | -29.6 | 1% | 0% | - |
+| `assets/sfx/cc0/rustle_2.wav` | sfx | wav | 0.36 | 22050 | 1 | -6.9 | -28.0 | 2% | 0% | - |
+| `assets/sfx/cc0/step_1.wav` | sfx | wav | 0.30 | 22050 | 1 | -6.0 | -23.9 | 7% | 2% | - |
+| `assets/sfx/cc0/step_2.wav` | sfx | wav | 0.30 | 22050 | 1 | -6.0 | -21.8 | 10% | 3% | - |
+| `assets/sfx/cc0/step_3.wav` | sfx | wav | 0.30 | 22050 | 1 | -6.0 | -23.4 | 12% | 4% | - |
+| `assets/sfx/cc0/step_4.wav` | sfx | wav | 0.30 | 22050 | 1 | -6.0 | -24.3 | 12% | 3% | - |
+| `assets/sfx/cc0/step_5.wav` | sfx | wav | 0.30 | 22050 | 1 | -6.0 | -24.0 | 13% | 3% | - |
+| `assets/sfx/chime.wav` | sfx | wav | 0.62 | 22050 | 1 | -7.5 | -20.0 | 0% | 0% | - |
+| `assets/sfx/cold.wav` | ambient | wav | 12.20 | 22050 | 1 | -6.9 | -24.8 | 0% | 0% | - |
+| `assets/sfx/confirm.wav` | ui | wav | 0.16 | 22050 | 1 | -10.5 | -18.5 | 1% | 0% | - |
+| `assets/sfx/cue_alarm.wav` | event | wav | 2.60 | 22050 | 1 | -9.1 | -24.5 | 0% | 0% | - |
+| `assets/sfx/cue_blast.wav` | event | wav | 2.40 | 22050 | 1 | -4.4 | -23.3 | 92% | 85% | - |
+| `assets/sfx/cue_crash.wav` | event | wav | 2.00 | 22050 | 1 | -4.4 | -23.8 | 29% | 22% | - |
+| `assets/sfx/cue_impact.wav` | event | wav | 1.30 | 22050 | 1 | -4.4 | -22.8 | 82% | 66% | - |
+| `assets/sfx/cue_rise.wav` | event | wav | 3.30 | 22050 | 1 | -6.0 | -18.2 | 1% | 0% | - |
+| `assets/sfx/cue_tension.wav` | event | wav | 3.80 | 22050 | 1 | -8.0 | -23.1 | 0% | 0% | - |
+| `assets/sfx/deny.wav` | ui | wav | 0.14 | 22050 | 1 | -10.2 | -18.3 | 63% | 26% | - |
+| `assets/sfx/finish.wav` | sfx | wav | 0.66 | 22050 | 1 | -7.5 | -19.8 | 0% | 0% | - |
+| `assets/sfx/frost.wav` | sfx | wav | 0.28 | 22050 | 1 | -10.5 | -32.8 | 0% | 0% | - |
+| `assets/sfx/gust_1.wav` | weather | wav | 3.20 | 22050 | 1 | -5.2 | -21.5 | 1% | 0% | - |
+| `assets/sfx/gust_2.wav` | weather | wav | 4.10 | 22050 | 1 | -5.2 | -21.0 | 1% | 0% | - |
+| `assets/sfx/gust_3.wav` | weather | wav | 2.60 | 22050 | 1 | -5.2 | -21.4 | 0% | 0% | - |
+| `assets/sfx/hearth.wav` | ambient | wav | 11.00 | 22050 | 1 | -6.9 | -20.8 | 1% | 0% | - |
+| `assets/sfx/hum.wav` | loop | wav | 2.00 | 22050 | 1 | -9.1 | -14.8 | 28% | 7% | - |
+| `assets/sfx/level.wav` | sfx | wav | 0.74 | 22050 | 1 | -6.9 | -20.2 | 0% | 0% | - |
+| `assets/sfx/meow.wav` | sfx | wav | 0.52 | 22050 | 1 | -7.1 | -14.1 | 0% | 0% | - |
+| `assets/sfx/nibble.wav` | sfx | wav | 0.04 | 22050 | 1 | -17.7 | -27.9 | 0% | 0% | - |
+| `assets/sfx/note.wav` | music | wav | 1.60 | 22050 | 1 | -6.0 | -15.4 | 1% | 0% | - |
+| `assets/sfx/pop.wav` | sfx | wav | 0.09 | 22050 | 1 | -9.4 | -17.8 | 0% | 0% | - |
+| `assets/sfx/purr.wav` | ambient | wav | 7.20 | 22050 | 1 | -8.0 | -24.4 | 7% | 2% | - |
+| `assets/sfx/remove.wav` | sfx | wav | 0.08 | 22050 | 1 | -7.3 | -15.3 | 10% | 2% | - |
+| `assets/sfx/select.wav` | ui | wav | 0.05 | 22050 | 1 | -14.0 | -21.7 | 0% | 0% | - |
+| `assets/sfx/tick.wav` | ui | wav | 0.04 | 22050 | 1 | -15.9 | -25.7 | 0% | 0% | - |
+| `assets/sfx/whoomp.wav` | sfx | wav | 0.60 | 22050 | 1 | -6.9 | -21.1 | 1% | 0% | - |
+| `assets/sfx/wind.wav` | ambient | wav | 16.00 | 22050 | 1 | -6.0 | -22.6 | 5% | 1% | - |
+
+57개 파일, 결함 0. 장면별로 섞였을 때의 수치는 보고서의 "장면별 소리"(`tools/audio_scene_report.gd`).

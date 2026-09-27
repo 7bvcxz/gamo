@@ -166,6 +166,17 @@ func _test_reading() -> void:
 	var sim = main.sim
 	# A tile below the board, which is a tile across (Grid v2).
 	var below: Vector2 = sim.prop_centre(sim.sign_cell) + Vector2(0.0, float(Grid.TILE))
+	# Nothing else between her and the board. The world is a random seed, and in
+	# about one in forty a seam, a wreck or a frozen cat lies just under the sign
+	# -- nearer than the board, so Z is about that instead and this fails on the
+	# world rather than on reading (found scanning 600 seeds, 2026-09-27).
+	for covered: Vector2i in Grid.cells_in(Rect2i(sim.sign_cell + Vector2i(-1, 2), Vector2i(4, 4))):
+		sim.ore.erase(covered)
+		sim.ground.erase(covered)
+		for props: Dictionary in [sim.frozen_cats, sim.debris]:
+			var key: Vector2i = Sim.prop_key(props, covered)
+			if key != Sim.NONE:
+				props.erase(key)
 	main.player.position = below
 	main.player.facing = Vector2i(0, -1)
 	_assert(main.active_prompt() == "SIGN", "표지판을 보면 읽으라고 한다")

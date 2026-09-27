@@ -594,6 +594,12 @@ func from_save(data: Dictionary) -> void:
 	shown_radius = warm_radius
 
 func setup(seed_value: int) -> void:
+	# A new world is outdoors. 처음부터 from the settings panel while she stood in
+	# the shelter carried `indoors` into the new run, and the plateau's ground --
+	# which is not drawn indoors -- came up as a black disc under the fire
+	# (found by tools/presentation_capture.gd, Quality Pass 01).
+	indoors = false
+	_grid_dirty = true
 	ore.clear()
 	machines.clear()
 	# The base is on the map from the first frame. A player who opens the map

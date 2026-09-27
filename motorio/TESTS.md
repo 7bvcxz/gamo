@@ -37,6 +37,14 @@ godot --headless --path . --script res://tests/test_touch.gd
 > 시작·기지·임무·고양이·총·횃불·키 안내·해질녘·밤·동결·안기·Q 창·지도·기지 창과 UI 배율 넷을 세 화면 크기(1280×720, 1920×1080, 폰 390×844)로 찍는다.
 > `--sequence craft` 는 기지 작업대의 첫 방문(숙소 키트)부터 제작 링, 키트가 눈 위에 놓이는 것, 곡괭이 줄, 곡괭이가 튀어나와 날아와 흡수되고 1번 칸이 반짝이는 순간, 3단계의 횃불 줄까지 실제 시계로 열 장을 찍는다. 헤드리스 더미 렌더러는 그림을 못 만드므로 디스플레이(Xvfb면 된다)가 필요하다. 출력은 `motorio/test-results/`(gitignore)에 둔다.
 
+> **첫 5분 연출 캡처 (Quality Pass 01)**: `xvfb-run -a -s "-screen 0 1920x1080x24" godot --path motorio --audio-driver Dummy --script res://tools/presentation_capture.gd -- --out <절대경로> [--only a,b]`
+> 실제 게임을 지나며 오프닝·깨어나기·기지 펼침·강화·곡괭이(제작·비행·획득)·첫 고양이(해동·깨어남·작업)·숙소의 밤·아침을 1280·1920 두 크기로 16장씩 찍는다. 대기는 프레임으로 세므로 도구가 `Engine.max_fps = 60`을 건다. 출력은 `motorio/test-results/`에.
+
+> **장면별 소리 수치**: `godot --headless --path motorio --script res://tools/audio_scene_report.gd -- --out <md>`
+> 오프닝·추락·낮·추위·채굴·고양이 6·공장 16·숙소·밤·잠→아침을 실제로 돌리며 베드 크기, 시작한 소리와 횟수, 동시 최대, 재생 중 파일의 RMS·저음으로 추정한 레벨과 150Hz 아래 몫을 표로 낸다. 들을 수 없는 쪽에서 "너무 큰가·저음인가·반복되는가"를 묻는 방법.
+
+> **소리 파일 QA**: `python3 motorio/tools/audio_audit.py [--markdown]` — peak -1dBFS 초과, 앰비언스의 150Hz 아래 35%·100Hz 아래 15% 초과, 루프 이음새, 한 방 소리 길이. 결함이 있으면 종료 코드 1.
+
 > **Grid v2 화면 캡처**: `DISPLAY=:99 godot --path motorio --audio-driver Dummy --script res://tools/grid_capture.gd -- --out <절대경로>`
 > 추락 지점·기지와 숙소·한 칸 광맥·채굴기 고스트(빈 땅/광맥 위)·나란히 선 채굴기와 고양이·통로의 벨트·걷기·기지를 돌아가는 고양이를 게임이 여는 배율로 1280·1920 두 크기에서 찍는다. 출력은 `motorio/test-results/`에.
 

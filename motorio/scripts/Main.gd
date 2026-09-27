@@ -472,7 +472,12 @@ func _start_run(seed_value: int = -1) -> void:
 	menu_index = 0
 	tool_index = 0
 	# A run that was reloaded or restarted mid-sequence would otherwise keep the
-	# sky pinned at night and the player locked indoors.
+	# sky pinned at night and the player locked indoors -- and the room's fade to
+	# black, which is drawn over the world: a new game started during a dawn
+	# opened on the base under a dark disc (found by the presentation capture).
+	room_fade = 0.0
+	room_sleeping = false
+	room_holds_cats = false
 	night_override = -1.0
 	night_phase = Phase.GATHER
 	night_timer = 0.0
