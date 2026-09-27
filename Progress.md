@@ -326,7 +326,7 @@ SPRITE_NODE_PATH=<playwright node_modules> python3 tools/sprite/pipeline.py <cli
 
 ### Grid v2 — 칸 절반, 세계는 그대로 (2026-09-26)
 
-Step 1 "Grid v2 Foundation". 로컬 커밋만 했고 push·버전 올림·릴리스 노트는 하지 않았다.
+Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality Pass 01과 함께).
 
 - **완료**
   - 직교 격자의 칸을 32px → 16px로(옛 한 칸 = 새 2×2). 변환은 `Grid.gd` 한 곳, `Defs.TILE`
@@ -374,7 +374,7 @@ Step 1 "Grid v2 Foundation". 로컬 커밋만 했고 push·버전 올림·릴리
 
 ### Quality Pass 01 — 소리와 첫 5분의 연출 (2026-09-27)
 
-로컬 커밋만(push·버전 올림·릴리스 노트 없음). 전체 보고: `motorio/design/QUALITY_PASS_01_REPORT.md`.
+**1.0.43으로 배포했다**(2026-09-27, Grid v2와 함께 — 릴리스 노트는 `MotorioReleases.jsx`, 결정은 Decisions #28·#29). 전체 보고: `motorio/design/QUALITY_PASS_01_REPORT.md`.
 
 - **완료**
   - 소리 체계: 버스 9개(`default_bus_layout.tres`)와 장소별 믹스(`Zone.gd`의 `mix` 열), 위치가 있는
