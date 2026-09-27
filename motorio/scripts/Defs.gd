@@ -80,28 +80,34 @@ const COL_ICE := Color8(178, 216, 238)
 ## moves. Marked as a list rather than with markup inside the string, because a
 ## string with tags in it is a string every width measurement has to learn to
 ## strip, and the one that forgets draws the tags.
+## Each panel's sound (Quality Pass 01): one short cue as it arrives, and how much
+## wind is under it. Quiet, then one blow, a rise, a muffled blast, the cockpit's
+## soft alarm, the crash -- and the last panel is only wind and her breathing,
+## because the first frame of play is the same moment. No music runs under any
+## of it: the story is big and the game is small and quiet, and a trailer score
+## would promise the wrong game. (`AUDIO_DIRECTION.md`)
 const CUTSCENE_PANELS: Array[Dictionary] = [
 	{"art": preload("res://assets/cutscene/01.webp"), "shake": 0.0,
 		"line": "그날 하늘이 어두워졌다. 아무도 그것을 함대라고 부르지 않았다,\n이름을 붙일 시간이 없었으니까.",
-		"hot": ["함대"]},
+		"hot": ["함대"], "cue": "tension", "wind": 0.0},
 	{"art": preload("res://assets/cutscene/02.webp"), "shake": 7.0,
 		"line": "펭귄 함대는 도시를 지나갔고 아무것도 남기지 않았다.\n협상도, 요구도, 경고도 없었다.",
-		"hot": ["아무것도"]},
+		"hot": ["아무것도"], "cue": "impact", "wind": 0.0},
 	{"art": preload("res://assets/cutscene/03.webp"), "shake": 2.5,
 		"line": "마지막 로켓이 떠올랐다. 정원은 하나였고,\n그 자리에 앉은 것은 정비공 Grim이었다.",
-		"hot": ["마지막"]},
+		"hot": ["마지막"], "cue": "rise", "wind": 0.0},
 	{"art": preload("res://assets/cutscene/04.webp"), "shake": 15.0,
 		"line": "그리고 지구가 사라졌다. 창밖에서, 소리도 없이.\n돌아갈 곳은 그 순간부터 없었다.",
-		"hot": ["사라졌다"]},
+		"hot": ["사라졌다"], "cue": "blast", "wind": 0.0},
 	{"art": preload("res://assets/cutscene/05.webp"), "shake": 0.0,
 		"line": "경보가 그녀를 깨웠다. 연료는 바닥이었고 창밖에는\n이름 없는 얼음 행성 하나뿐이었다.",
-		"hot": ["얼음 행성"]},
+		"hot": ["얼음 행성"], "cue": "alarm", "wind": 0.0},
 	{"art": preload("res://assets/cutscene/06.webp"), "shake": 12.0,
 		"line": "로켓은 얼음 구름 속에서 부서졌다. 그녀는 살았고,\n타고 온 것은 눈밭에 흩어졌다.",
-		"hot": ["부서졌다"]},
+		"hot": ["부서졌다"], "cue": "crash", "wind": 0.25},
 	{"art": preload("res://assets/cutscene/07.webp"), "shake": 0.0,
 		"line": "추위가 그녀를 깨웠다. 여기서는 불이 곧 목숨이고,\n불을 키우는 것 말고는 할 수 있는 일이 없다.",
-		"hot": ["불"]},
+		"hot": ["불"], "cue": "breath", "wind": 0.45},
 ]
 
 const CUTSCENE_FADE := 0.55

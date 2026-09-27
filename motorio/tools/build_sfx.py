@@ -74,15 +74,6 @@ SOUNDS = {
     # notes, so it is an event rather than a tone.
     "alloy":   dict(seconds=0.230, f0=760, f1=800,  peak=0.37, decay=1.10,
                     step=0.5),
-    # Warmth running out. Long, low, and with a second partial so it carries over
-    # the wind instead of sitting underneath it.
-    "alarm":   dict(seconds=0.320, f0=146, f1=126,  peak=0.41, decay=1.05,
-                    partials=[(2.0, 0.45), (3.0, 0.22)], noise=0.118, seed=5),
-    # The day ending. The longest sound in the game, and a chord rather than a
-    # note.
-    "finish":  dict(seconds=0.600, f0=248, f1=184,  peak=0.44, decay=1.05,
-                    partials=[(1.5, 0.50), (2.0, 0.35), (3.0, 0.15)], noise=0.150,
-                    seed=11),
     # A boot in snow, twice per walk cycle. The quietest thing in the game and
     # by far the most frequent -- it plays four times a second while she moves,
     # so anything with a pitch in it becomes a tune within seconds. Almost pure
@@ -113,23 +104,6 @@ SOUNDS = {
     # The make finishing and the thing popping out of the fire: a short rising
     # bubble. Rising, because something was produced.
     "pop":     dict(seconds=0.090, f0=540, f1=1020,  peak=0.34, decay=1.25),
-    # Something important landing in her hands. Two bright notes a third apart,
-    # the same octave-step trick alloy uses, so it is an event and not a tone --
-    # and high, because every low sound in this game already means weight.
-    "chime":   dict(seconds=0.300, f0=1046, f1=1318, peak=0.30, decay=1.05,
-                    step=0.42, partials=[(2.0, 0.18)]),
-    # Not an effect: the one note the music is played from. Music.gd triggers it
-    # at different pitch_scales, which is why there is one sample and not a
-    # score's worth. A rendered title theme would have been the largest file in
-    # the game by a wide margin -- twenty-four seconds at this rate is a
-    # megabyte, against half a megabyte for everything else put together -- and
-    # a sampler costs twenty-two kilobytes and can be rewritten by editing a
-    # list of numbers.
-    #
-    # Tuned to A4. Music.gd's semitones are relative to that, so pitch_scale is
-    # just 2**(semitone/12) with nothing to look up.
-    "note":    dict(seconds=1.000, f0=440, f1=440,  peak=0.50, decay=2.00,
-                    partials=[(2.0, 0.32), (3.0, 0.14), (4.0, 0.06)]),
 }
 
 # The one voice. Everything above is a glide under a decaying envelope, and a
@@ -155,36 +129,45 @@ VOICES = {
 }
 
 
-# The two looping beds. These are not tones but filtered noise, and they are
-# built as a sum of sinusoids whose frequencies are exact multiples of 1/length.
-# That makes the result periodic by construction, so the loop point is not a
-# seam that has to be hidden with a crossfade -- there is no seam. Random phases
-# are what turn a stack of harmonics into noise rather than a buzz.
+# The looping beds (Quality Pass 01, 2026-09-27).
+#
+# Both used to be sums of sinusoids at exact multiples of 1/length -- periodic by
+# construction, so no seam -- and both failed in playtests:
+#
+#   wind  26-150 Hz. 84% of its energy below 150 Hz and 62% below 100: not wind,
+#         a drone pressing on the ear for the whole day ("브금이라기보다 굉음이
+#         계속 반복된다, 귀가 아프다"). And the partials were evenly spaced, so the
+#         sum had an envelope that repeated every 1/spacing seconds -- twice in a
+#         7.5 second loop. The loop was audible inside itself.
+#   cold  first a 2.1-9 kHz hiss ("컴퓨터가 버그났을 때 소리"), then a body with
+#         nine discrete partials beating over it ("얼어붙을 때 반복되는 괴음").
+#         Both were a *separate sound* for cold, and both read as a fault.
+#
+# Now they are filtered noise -- real noise through band filters, which has no
+# spacing to repeat -- and the loop is closed by crossfading the tail into the
+# head (equal power, so the level does not dip at the join). The swells are sine
+# envelopes at whole cycles per loop, evaluated on the loop's own clock, so the
+# crossfaded tail swells exactly as the head does. The two loops are 16 and 12.2
+# seconds: they do not divide, so the pair only lines up again after minutes, and
+# the gusts on top (`GUSTS`) arrive at random.
+#
+# And cold is no longer its own sound. It is *more wind* -- a gustier layer in the
+# mid-range that rises with exposure -- plus her breath and one small crackle of
+# ice when it gets worse (`BREATHS`, `SOUNDS["frost"]`). The direction document
+# (design/AUDIO_DIRECTION.md) has why.
 BEDS = {
-    # The plateau. Always there, under everything.
-    "wind": dict(seconds=7.5, low=26, high=150, peak=0.33, seed=17,
-                 sway=[(0.13, 0.35), (0.31, 0.20)]),
-    # The cold, which fades up as warmth falls.
-    #
-    # It used to be one dense band from 2.1 kHz to 9 kHz, which is broadband hiss
-    # sitting exactly where the ear is most sensitive -- so it did not read as
-    # cold, it read as a machine that had gone wrong. Playtest words: "컴퓨터가
-    # 버그났을 때 소리".
-    #
-    # Two layers instead. Most of it is a hollow low-mid body, the sound of air
-    # in a space too big to heat, and above that a handful of *discrete* high
-    # partials rather than a band of them -- nine of them, so they beat against
-    # each other and shimmer instead of hissing. The shimmer is quiet: it is what
-    # makes the body sound cold rather than merely large.
-    "cold": dict(seconds=6.0, peak=0.30, seed=23,
-                 sway=[(0.11, 0.34), (0.29, 0.18)],
-                 # The body sits above the wind's 26-150 Hz rather than on top
-                 # of it, or the two beds are one muddy rumble. The shimmer's
-                 # weight is per partial and there are 29 times fewer of them, so
-                 # at 0.10 it measured as nothing at all -- random phases add as
-                 # sqrt(count), so 1.6 across nine is about a third of the body.
-                 layers=[dict(low=260, high=780, count=260, weight=1.0),
-                         dict(low=2200, high=4600, count=9, weight=1.6)]),
+    # The plateau. A body of moving air above 170 Hz and a thinner layer over
+    # it; nothing below, so the whole of it is wind and none of it is rumble.
+    "wind": dict(seconds=16.0, xfade=1.5, peak=0.50, seed=17,
+                 layers=[dict(low=170, high=650, weight=1.0,
+                              sway=[(2, 0.35), (3, 0.25), (7, 0.10)]),
+                         dict(low=650, high=2200, weight=0.35,
+                              sway=[(3, 0.45), (5, 0.25)])]),
+    # The cold: the wind picking up. Mid-range and gusty, and quieter than the
+    # wind at its loudest -- it adds to the weather rather than replacing it.
+    "cold": dict(seconds=12.2, xfade=1.2, peak=0.45, seed=23,
+                 layers=[dict(low=450, high=1500, weight=1.0,
+                              sway=[(2, 0.50), (3, 0.30), (5, 0.15)])]),
 }
 
 
@@ -271,43 +254,398 @@ def voice(name: str, spec: dict) -> list:
     return normalise(out, spec["peak"])
 
 
+class Biquad:
+    """An RBJ biquad: low-pass, high-pass or constant-peak band-pass.
+
+    Enough filter for wind, breath and fire, in the standard library. `set` can
+    be called while running -- a gust sweeps its band by resetting the centre
+    every few dozen samples, and the state carries across.
+    """
+
+    def __init__(self, kind: str, frequency: float, q: float = 0.7071):
+        self.x1 = self.x2 = self.y1 = self.y2 = 0.0
+        self.set(kind, frequency, q)
+
+    def set(self, kind: str, frequency: float, q: float = 0.7071) -> None:
+        w0 = 2.0 * math.pi * min(frequency, RATE * 0.45) / RATE
+        c, sn = math.cos(w0), math.sin(w0)
+        alpha = sn / (2.0 * q)
+        if kind == "lp":
+            b0, b1, b2 = (1.0 - c) / 2.0, 1.0 - c, (1.0 - c) / 2.0
+        elif kind == "hp":
+            b0, b1, b2 = (1.0 + c) / 2.0, -(1.0 + c), (1.0 + c) / 2.0
+        else:
+            b0, b1, b2 = alpha, 0.0, -alpha
+        a0 = 1.0 + alpha
+        self.b0, self.b1, self.b2 = b0 / a0, b1 / a0, b2 / a0
+        self.a1, self.a2 = -2.0 * c / a0, (1.0 - alpha) / a0
+
+    def __call__(self, x: float) -> float:
+        y = (self.b0 * x + self.b1 * self.x1 + self.b2 * self.x2
+             - self.a1 * self.y1 - self.a2 * self.y2)
+        self.x2, self.x1 = self.x1, x
+        self.y2, self.y1 = self.y1, y
+        return y
+
+
+def band(low: float, high: float) -> list:
+    """Four poles each side: 24 dB an octave, so 'above 170 Hz' means it."""
+    return [Biquad("hp", low), Biquad("hp", low), Biquad("lp", high), Biquad("lp", high)]
+
+
+def rms(samples: list) -> float:
+    return math.sqrt(sum(v * v for v in samples) / max(1, len(samples))) or 1.0
+
+
 def bed(name: str, spec: dict) -> list:
+    """Filtered noise, crossfaded into a loop with no seam."""
+    total = int(RATE * spec["seconds"])
+    fade = int(RATE * spec["xfade"])
+    mixed = [0.0] * (total + fade)
+    for number, layer in enumerate(spec["layers"]):
+        rng = random.Random(spec["seed"] * 31 + number)
+        filters = band(layer["low"], layer["high"])
+        # Pre-roll, so the filters have settled before the first kept sample.
+        for _ in range(4096):
+            v = rng.uniform(-1.0, 1.0)
+            for f in filters:
+                v = f(v)
+        phases = [rng.uniform(0.0, 2.0 * math.pi) for _ in layer["sway"]]
+        raw = []
+        for i in range(total + fade):
+            v = rng.uniform(-1.0, 1.0)
+            for f in filters:
+                v = f(v)
+            # The swell on the loop's clock: the tail past `total` swells as the
+            # head does, which is what lets the crossfade be invisible.
+            t = (i % total) / total
+            gain = 1.0
+            for (cycles, depth), phase in zip(layer["sway"], phases):
+                gain *= 1.0 + depth * math.sin(2.0 * math.pi * cycles * t + phase)
+            raw.append(v * gain)
+        # Layers are weighed by loudness, not by whatever their bandwidth made
+        # them -- a band twice as wide is not meant to be twice as loud.
+        scale = layer["weight"] / rms(raw)
+        for i, v in enumerate(raw):
+            mixed[i] += v * scale
+    out = mixed[:total]
+    for i in range(fade):
+        a = i / fade
+        out[i] = mixed[i] * math.sqrt(a) + mixed[total + i] * math.sqrt(1.0 - a)
+    return normalise(out, spec["peak"])
+
+
+# One-shot weather and breath. Longer than the effects and not in the effect
+# bank: Audio.gd plays them from its own schedulers, at random intervals, so the
+# plateau never has two gusts in the same place of the same loop.
+GUSTS = {
+    # A gust: the band rises as it swells and falls as it passes. Three takes
+    # with different lengths, sweeps and seeds.
+    "gust_1": dict(seconds=3.2, sweep=(260, 780, 330), q=0.9, attack=0.40, peak=0.55, seed=101),
+    "gust_2": dict(seconds=4.1, sweep=(220, 620, 300), q=1.1, attack=0.33, peak=0.55, seed=102),
+    "gust_3": dict(seconds=2.6, sweep=(320, 980, 420), q=0.8, attack=0.45, peak=0.55, seed=103),
+}
+BREATHS = {
+    # Her breath in the cold: a soft exhale through the mouth, with a formant so
+    # it is a breath and not a hiss. Quiet and not often -- see Audio.gd.
+    "breath_1": dict(seconds=0.72, formant=1150, peak=0.45, seed=201),
+    "breath_2": dict(seconds=0.75, formant=980, peak=0.45, seed=202),
+    "breath_3": dict(seconds=0.68, formant=1300, peak=0.45, seed=203),
+}
+
+
+def gust(name: str, spec: dict) -> list:
     total = int(RATE * spec["seconds"])
     rng = random.Random(spec["seed"])
-    base = 1.0 / spec["seconds"]
-    # Either one band, or several with their own densities.
-    #
-    # The density is the whole character. Hundreds of partials across a band is
-    # noise; nine of them is a shimmer, because you hear the individual tones
-    # beating rather than the average of all of them. Same generator, and the
-    # difference between "wind" and "something is wrong with the speakers" is the
-    # count.
-    layers = spec.get("layers") or [dict(low=spec["low"], high=spec["high"],
-                                         count=400, weight=1.0)]
-    harmonics = []
-    for layer in layers:
-        lowest = max(1, int(layer["low"] / base))
-        highest = int(layer["high"] / base)
-        stride = max(1, (highest - lowest) // max(1, layer["count"]))
-        weight = float(layer.get("weight", 1.0))
-        # Every partial an exact multiple of 1/length, so the loop still closes
-        # on itself with no seam to hide.
-        for k in range(lowest, highest, stride):
-            harmonics.append((k * base, rng.uniform(0, 2 * math.pi), weight))
+    f0, f1, f2 = spec["sweep"]
+    attack = spec["attack"]
+    sweep = Biquad("bp", f0, spec["q"])
+    floor = [Biquad("hp", 160.0), Biquad("hp", 160.0), Biquad("lp", 2600.0)]
+    air = Biquad("hp", 1600.0)
     out = []
     for i in range(total):
-        t = i / RATE
-        value = 0.0
-        for frequency, offset, weight in harmonics:
-            value += weight * math.sin(2.0 * math.pi * frequency * t + offset)
-        # Slow swells, also at exact multiples of the loop length so they come
-        # back round with everything else.
-        gain = 1.0
-        for rate, depth in spec["sway"]:
-            cycles = max(1, round(rate * spec["seconds"]))
-            gain *= 1.0 + depth * math.sin(2.0 * math.pi * cycles * t / spec["seconds"])
-        out.append(value * gain)
+        u = i / total
+        if u < attack:
+            centre = f0 * (f1 / f0) ** (u / attack)
+            env = math.sin(0.5 * math.pi * u / attack) ** 2
+        else:
+            centre = f1 * (f2 / f1) ** ((u - attack) / (1.0 - attack))
+            env = math.cos(0.5 * math.pi * (u - attack) / (1.0 - attack)) ** 2
+        if i % 32 == 0:
+            sweep.set("bp", centre, spec["q"])
+        v = rng.uniform(-1.0, 1.0)
+        # A breath of top so it is air and not a filtered tone -- a breath only:
+        # at 0.12 the top was a sixth of the gust and it hissed.
+        value = sweep(v) + 0.03 * air(v)
+        for f in floor:
+            value = f(value)
+        out.append(value * env)
     return normalise(out, spec["peak"])
+
+
+def breath(name: str, spec: dict) -> list:
+    total = int(RATE * spec["seconds"])
+    rng = random.Random(spec["seed"])
+    floor = [Biquad("hp", 380.0), Biquad("hp", 380.0)]
+    mouth = Biquad("bp", spec["formant"], 1.3)
+    teeth = Biquad("bp", spec["formant"] * 2.3, 2.2)
+    # No sibilance: a tired breath in the cold is 'hhh', not 'sss'.
+    soft = [Biquad("lp", 3000.0), Biquad("lp", 3000.0)]
+    out = []
+    for i in range(total):
+        u = i / total
+        # In quickly, out slowly, a little uneven in the middle.
+        if u < 0.14:
+            env = math.sin(0.5 * math.pi * u / 0.14) ** 2
+        else:
+            env = math.cos(0.5 * math.pi * (u - 0.14) / 0.86) ** 1.6
+        env *= 1.0 + 0.06 * math.sin(2.0 * math.pi * 5.0 * i / RATE)
+        v = rng.uniform(-1.0, 1.0)
+        for f in floor:
+            v = f(v)
+        value = mouth(v) + 0.12 * teeth(v)
+        for f in soft:
+            value = f(value)
+        out.append(value * env)
+    return normalise(out, spec["peak"])
+
+
+# Struck, ringing things: the music's one sample, the chime when something
+# important reaches her, the fire growing. A bell rather than the glide the
+# effects use -- each partial decays on its own clock, the high ones first, which
+# is what makes a struck tone sound warm instead of electronic.
+#
+#   partials  (ratio, gain, decay multiplier); the multiplier shortens that
+#             partial's ring, so 4.2 is a bright tine that is gone in a moment
+BELL = [(1.0, 1.0, 1.0), (2.0, 0.22, 1.7), (3.0, 0.07, 2.6), (4.2, 0.06, 5.0)]
+
+
+def bell_into(out: list, start: float, frequency: float, gain: float, ring: float,
+              partials: list = BELL, attack: float = 0.005) -> None:
+    first = int(RATE * start)
+    length = min(len(out) - first, int(RATE * ring * 5.0))
+    for index, (ratio, weight, speed) in enumerate(partials):
+        f = frequency * ratio
+        if f >= RATE * 0.45:
+            continue
+        tau = ring / speed
+        step = 2.0 * math.pi * f / RATE
+        for i in range(max(0, length)):
+            t = i / RATE
+            env = math.exp(-t / tau) * min(1.0, t / attack)
+            out[first + i] += gain * weight * env * math.sin(step * i)
+
+
+def grain_into(out: list, start: float, seconds: float, low: float, gain: float,
+               rng: random.Random) -> None:
+    """A speck of noise above `low` -- ice, grit, a spark."""
+    first = int(RATE * start)
+    length = int(RATE * seconds)
+    filters = [Biquad("hp", low), Biquad("hp", low)]
+    for i in range(min(length, len(out) - first)):
+        v = rng.uniform(-1.0, 1.0)
+        for f in filters:
+            v = f(v)
+        out[first + i] += gain * v * math.exp(-5.0 * i / max(1, length))
+
+
+def thump_into(out: list, start: float, f0: float, f1: float, seconds: float,
+               gain: float) -> None:
+    """A short low impact. The only low end the game allows: an event, and brief."""
+    first = int(RATE * start)
+    length = int(RATE * seconds)
+    phase = 0.0
+    for i in range(min(length, len(out) - first)):
+        u = i / length
+        phase += 2.0 * math.pi * (f0 * (f1 / f0) ** u) / RATE
+        out[first + i] += gain * math.sin(phase) * math.exp(-4.5 * u) * min(1.0, i / 40.0)
+
+
+def noise_into(out: list, start: float, seconds: float, low: float, high: float,
+               gain: float, rng: random.Random, attack: float = 0.01,
+               decay: float = 0.3) -> None:
+    """A band of noise that strikes and decays: a whoosh, a crunch, a burst."""
+    first = int(RATE * start)
+    length = int(RATE * seconds)
+    filters = band(low, high)
+    for i in range(min(length, len(out) - first)):
+        t = i / RATE
+        v = rng.uniform(-1.0, 1.0)
+        for f in filters:
+            v = f(v)
+        env = min(1.0, t / max(attack, 1e-4)) * math.exp(-t / decay)
+        out[first + i] += gain * v * env
+
+
+def swell_into(out: list, start: float, seconds: float, sweep: tuple, q: float,
+               gain: float, rng: random.Random) -> None:
+    """Noise rising and falling while its band moves: a gust, a rocket, a breath of air."""
+    first = int(RATE * start)
+    length = int(RATE * seconds)
+    f0, f1 = sweep
+    bp = Biquad("bp", f0, q)
+    floor = Biquad("hp", 160.0)
+    for i in range(min(length, len(out) - first)):
+        u = i / length
+        if i % 32 == 0:
+            bp.set("bp", f0 * (f1 / f0) ** u, q)
+        env = math.sin(math.pi * u) ** 2
+        out[first + i] += gain * floor(bp(rng.uniform(-1.0, 1.0))) * env
+
+
+def blank(seconds: float) -> list:
+    return [0.0] * int(RATE * seconds)
+
+
+# Composed sounds. Each is a small recipe over the helpers above, written as a
+# function so the numbers sit next to what they do.
+def made_note() -> list:
+    # The music's one sample, A4. A bell now: the old note was a plucked tone the
+    # title theme struck two octaves down at full weight every four seconds.
+    out = blank(1.6)
+    bell_into(out, 0.0, 440.0, 1.0, 0.9)
+    return normalise(out, 0.5)
+
+
+def made_chime() -> list:
+    # Something important reaching her hands: three notes climbing a C major
+    # triad close together, and a few sparks above them. Small and bright.
+    out = blank(0.62)
+    rng = random.Random(301)
+    for index, frequency in enumerate((1046.5, 1318.5, 1568.0)):
+        bell_into(out, index * 0.07, frequency, 0.8 + 0.1 * index, 0.22)
+    for _ in range(6):
+        grain_into(out, rng.uniform(0.12, 0.45), 0.015, 3500.0, 0.10, rng)
+    return normalise(out, 0.42)
+
+
+def made_reward() -> list:
+    # A milestone: a warm rising arpeggio, a little lower and longer than the
+    # chime. Replaces a chord that *fell* -- the old 'finish' went down for
+    # every good thing.
+    out = blank(0.66)
+    for index, frequency in enumerate((784.0, 988.0, 1175.0)):
+        bell_into(out, index * 0.06, frequency, 0.7 + 0.1 * index, 0.30)
+    return normalise(out, 0.42)
+
+
+def made_warning() -> list:
+    # Dusk, and warmth running out. Two notes stepping down, soft -- a reminder,
+    # not an alarm. The old one was a buzz at 146 Hz with noise in it.
+    out = blank(0.62)
+    bell_into(out, 0.0, 587.3, 0.8, 0.28)
+    bell_into(out, 0.16, 440.0, 0.7, 0.32)
+    return normalise(out, 0.40)
+
+
+def made_frost() -> list:
+    # Ice closing in: a few tiny crackles, once, when the cold gets worse.
+    out = blank(0.28)
+    rng = random.Random(401)
+    for _ in range(7):
+        grain_into(out, rng.uniform(0.0, 0.2), 0.012, 2000.0, rng.uniform(0.4, 1.0), rng)
+    return normalise(out, 0.30)
+
+
+def made_whoomp() -> list:
+    # Fuel catching in the fire: a soft rush of air through the middle, quick in
+    # and slow out. Warm because it has no top and no bottom.
+    out = blank(0.6)
+    rng = random.Random(501)
+    swell_into(out, 0.0, 0.6, (320.0, 900.0), 0.9, 1.0, rng)
+    noise_into(out, 0.0, 0.25, 250.0, 1400.0, 0.5, rng, attack=0.02, decay=0.09)
+    return normalise(out, 0.45)
+
+
+def made_level() -> list:
+    # The fire growing a size: the whoomp, and two warm notes rising out of it.
+    out = blank(0.74)
+    rng = random.Random(502)
+    swell_into(out, 0.0, 0.55, (300.0, 1000.0), 0.9, 0.9, rng)
+    bell_into(out, 0.14, 784.0, 0.55, 0.30)
+    bell_into(out, 0.26, 1046.5, 0.6, 0.34)
+    return normalise(out, 0.45)
+
+
+def cue_tension() -> list:
+    # The sky going dark. Air moving somewhere far, and two quiet high tones a
+    # semitone apart -- the only thing wrong is how close they are.
+    out = blank(3.8)
+    rng = random.Random(601)
+    swell_into(out, 0.0, 3.8, (500.0, 1100.0), 0.8, 0.6, rng)
+    for frequency in (739.99, 783.99):
+        for i in range(len(out)):
+            u = i / len(out)
+            out[i] += 0.06 * math.sin(2.0 * math.pi * frequency * i / RATE) * math.sin(math.pi * u) ** 2
+    return normalise(out, 0.40)
+
+
+def cue_impact() -> list:
+    # The fleet passing over a city: one short blow and what falls after it.
+    out = blank(1.3)
+    rng = random.Random(602)
+    thump_into(out, 0.0, 80.0, 45.0, 0.35, 1.0)
+    noise_into(out, 0.0, 0.9, 250.0, 2500.0, 0.7, rng, decay=0.22)
+    for _ in range(10):
+        grain_into(out, rng.uniform(0.12, 1.0), 0.02, 1500.0, rng.uniform(0.1, 0.25), rng)
+    return normalise(out, 0.60)
+
+
+def cue_rise() -> list:
+    # The last rocket lifting: air climbing, and four notes climbing with it.
+    out = blank(3.3)
+    rng = random.Random(603)
+    swell_into(out, 0.0, 3.3, (300.0, 1600.0), 1.0, 0.55, rng)
+    for index, frequency in enumerate((440.0, 523.25, 659.25, 880.0)):
+        bell_into(out, 0.6 + index * 0.6, frequency, 0.45, 0.8)
+    return normalise(out, 0.50)
+
+
+def cue_blast() -> list:
+    # The planet going, seen through a window: one muffled blow, short, and then
+    # almost nothing -- the line under it says there was no sound.
+    out = blank(2.4)
+    rng = random.Random(604)
+    thump_into(out, 0.0, 55.0, 35.0, 0.45, 0.8)
+    noise_into(out, 0.0, 1.4, 60.0, 420.0, 1.0, rng, attack=0.02, decay=0.45)
+    return normalise(out, 0.60)
+
+
+def cue_alarm() -> list:
+    # The cockpit waking her: three soft pairs of beeps, each quieter than the
+    # last. The ice planet is what comes after them -- nearly silence.
+    out = blank(2.6)
+    for start, gain in ((0.0, 1.0), (0.9, 0.7), (1.8, 0.45)):
+        for offset in (0.0, 0.18):
+            first = int(RATE * (start + offset))
+            length = int(RATE * 0.09)
+            for i in range(length):
+                u = i / length
+                out[first + i] += gain * math.sin(2.0 * math.pi * 987.8 * i / RATE) * math.sin(math.pi * u)
+    return normalise(out, 0.35)
+
+
+def cue_crash() -> list:
+    # Breaking apart in the ice cloud: a crunch, a blow under it, and ice falling.
+    out = blank(2.0)
+    rng = random.Random(605)
+    thump_into(out, 0.0, 90.0, 50.0, 0.3, 0.7)
+    noise_into(out, 0.0, 1.2, 400.0, 2800.0, 0.9, rng, decay=0.3)
+    for _ in range(14):
+        bell_into(out, rng.uniform(0.15, 1.6), rng.uniform(2000.0, 3800.0),
+                  rng.uniform(0.15, 0.3), 0.06, partials=[(1.0, 1.0, 1.0)])
+    return normalise(out, 0.60)
+
+
+MADE = {
+    "note": made_note, "chime": made_chime, "finish": made_reward,
+    "alarm": made_warning, "frost": made_frost, "whoomp": made_whoomp,
+    "level": made_level,
+}
+CUES = {
+    "cue_tension": cue_tension, "cue_impact": cue_impact, "cue_rise": cue_rise,
+    "cue_blast": cue_blast, "cue_alarm": cue_alarm, "cue_crash": cue_crash,
+}
 
 
 def normalise(samples: list, peak: float) -> list:
@@ -338,7 +676,11 @@ def write(path: Path, samples: list) -> None:
 ## game's tests because the imported wav is ADPCM and a test that decodes it as
 ## raw PCM is measuring its own decoder, not the sound. (It did, and reported
 ## 10,636 for a file this script had just measured at 2,104.)
-BED_ZCR = {"wind": (60, 600), "cold": (600, 6000)}
+# Quality Pass 01: the wind is air above 170 Hz now and the cold is a gustier
+# mid-range layer of it, so both cross hundreds to a few thousand times a second.
+# The bounds still catch the two failures this check was written for -- a drone
+# (under 250) and a hiss centred in the top octaves (over 4000).
+BED_ZCR = {"wind": (250, 2500), "cold": (600, 4000)}
 
 
 def check(name: str, path: Path) -> None:
@@ -400,6 +742,18 @@ def main() -> int:
         write(OUT / f"{name}.wav", bed(name, spec))
         check(name, OUT / f"{name}.wav")
         print(f"{name:12s} {measure(OUT / f'{name}.wav')}  (loop)")
+    for table, make in ((GUSTS, gust), (BREATHS, breath)):
+        for name, spec in table.items():
+            if args.only and args.only != name:
+                continue
+            write(OUT / f"{name}.wav", make(name, spec))
+            print(f"{name:12s} {measure(OUT / f'{name}.wav')}")
+    for table in (MADE, CUES):
+        for name, make in table.items():
+            if args.only and args.only != name:
+                continue
+            write(OUT / f"{name}.wav", make())
+            print(f"{name:12s} {measure(OUT / f'{name}.wav')}")
     return 0
 
 

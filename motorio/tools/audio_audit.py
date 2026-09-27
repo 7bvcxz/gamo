@@ -50,7 +50,13 @@ CATEGORY = {
     "build": "sfx", "remove": "sfx", "deliver": "sfx", "alloy": "sfx",
     "alarm": "sfx", "finish": "sfx", "pop": "sfx", "chime": "sfx",
     "step": "sfx", "step_run": "sfx", "pick": "sfx", "nibble": "sfx",
-    "meow": "sfx", "breath": "sfx",
+    "meow": "sfx", "breath": "sfx", "frost": "sfx", "whoomp": "sfx", "level": "sfx",
+    # Weather one-shots: judged on their low end like the beds, but they are
+    # seconds long by design.
+    "gust": "weather",
+    # The opening's cues and other single events: low end allowed -- an impact
+    # is the one place it belongs -- and no length limit.
+    "cue": "event",
 }
 LOOPS = {"wind", "wind_air", "cold", "hearth", "factory"}
 
@@ -70,6 +76,8 @@ def category_of(path: Path) -> str:
     base = stem.rsplit("_", 1)[0]
     if stem.rsplit("_", 1)[-1].isdigit() and base in CATEGORY:
         return CATEGORY[base]
+    if stem.split("_", 1)[0] in CATEGORY:
+        return CATEGORY[stem.split("_", 1)[0]]
     if base.rsplit("_", 1)[-1].isdigit():
         return CATEGORY.get(base.rsplit("_", 1)[0], "?")
     return "?"
@@ -161,7 +169,7 @@ def faults(row) -> list:
     out = []
     if row["peak_db"] > PEAK_LIMIT_DB:
         out.append(f"peak {row['peak_db']:.1f} dBFS > {PEAK_LIMIT_DB}")
-    if row["category"] == "ambient":
+    if row["category"] in ("ambient", "weather"):
         if row["low150"] > AMBIENT_LOW_SHARE:
             out.append(f"ambient low end {row['low150'] * 100:.0f}% below 150 Hz")
         if row["low100"] > AMBIENT_SUB_SHARE:

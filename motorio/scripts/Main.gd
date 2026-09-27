@@ -47,6 +47,9 @@ var resumed := false
 ## them, and a function can be asked what it will do.
 var cutscene_panel: int = 0
 var cutscene_time: float = 0.0
+## The panel whose sound has been played. A panel's cue plays once, as it
+## arrives -- asked every frame, answered only when the panel changes.
+var cutscene_cued: int = -1
 
 ## The opening's four missions, and where the run is in them.
 ##
@@ -269,6 +272,7 @@ func _restart_from_the_top() -> void:
 	resumed = false
 	cutscene_panel = 0
 	cutscene_time = 0.0
+	cutscene_cued = -1
 	state = State.OPENING
 
 ## The title screen's menu.
@@ -346,9 +350,14 @@ func _start_new_run() -> void:
 	_start_run()
 	cutscene_panel = 0
 	cutscene_time = 0.0
+	cutscene_cued = -1
 	state = State.OPENING
 
 func _process_cutscene(delta: float) -> void:
+	if cutscene_cued != cutscene_panel and cutscene_panel < Defs.CUTSCENE_PANELS.size():
+		cutscene_cued = cutscene_panel
+		var panel: Dictionary = Defs.CUTSCENE_PANELS[cutscene_panel]
+		audio.call("cue", String(panel.get("cue", "")), float(panel.get("wind", 0.0)))
 	cutscene_time += delta
 	if cutscene_time < Defs.cutscene_panel_seconds():
 		return

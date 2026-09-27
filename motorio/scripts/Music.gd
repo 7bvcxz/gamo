@@ -32,49 +32,52 @@ const LEVEL_DB := -17.0
 ## -- 0, 2, 3, 5, 7, 8, 10 -- which is what makes a sparse figure sound intended
 ## rather than arbitrary.
 const SCORES := {
-	# The title. Slow, low, and mostly space: it plays under a still screen for
-	# as long as the player leaves it there, so it has to bear repetition. Bars
-	# of eight beats, a root every bar, a few notes over the top.
+	# The title. Rewritten in Quality Pass 01: the old one struck its loudest
+	# note two octaves below the sample (110 Hz at gain 0.9) every eight beats,
+	# and a pitch_scale of 0.25 also plays a sample four times slower -- a low
+	# boom every four seconds, which is the "opening BGM" a playtest could not
+	# stand. Now nothing goes below G3, the low notes are the quietest ones, and
+	# the sample is a bell. A slow line over sparse roots, sixteen seconds, loop.
 	"title": {
 		"bars": 32.0,
 		"loop": true,
+		"db": -19.0,
 		"notes": [
-			[0.0, -24, 0.90], [0.0, 0, 0.42],
-			[3.0, 7, 0.36],
-			[6.0, 3, 0.40],
-			[8.0, -17, 0.70], [8.0, 10, 0.30],
-			[11.0, 7, 0.34],
-			[14.0, 12, 0.26],
-			[16.0, -24, 0.85], [16.0, 3, 0.40],
-			[19.0, 0, 0.34],
-			[22.0, -2, 0.34],
-			[24.0, -19, 0.70], [24.0, 7, 0.30],
-			[27.0, 3, 0.34],
-			[30.0, 0, 0.26],
+			[0.0, -12, 0.26], [0.0, 7, 0.32],
+			[2.0, 3, 0.24],
+			[4.0, 5, 0.22],
+			[6.0, 7, 0.26],
+			[8.0, -4, 0.22], [8.0, 0, 0.24],
+			[11.0, 3, 0.22],
+			[14.0, -2, 0.20],
+			[16.0, -9, 0.24], [16.0, 10, 0.24],
+			[18.0, 7, 0.22],
+			[20.0, 5, 0.22],
+			[22.0, 3, 0.20],
+			[24.0, -14, 0.22], [24.0, 2, 0.22],
+			[27.0, 5, 0.20],
+			[30.0, 7, 0.18],
 		],
 	},
 	# The shelter. The only score that plays while the game is running, and the
 	# only room where nothing is being asked of the player: the clock is stopped,
-	# the cold cannot reach her and the cats are asleep on the floor. Bars of
-	# eight like the title, a third slower to fill, and quieter than either of
-	# the other two -- it plays for as long as she stays, so it has to be
-	# possible to stop hearing it.
+	# the cold cannot reach her and the cats are asleep on the floor. A lullaby:
+	# fewer notes than the title, softer, and the quietest score -- it plays for
+	# as long as she stays, so it has to be possible to stop hearing it.
 	"home": {
 		"bars": 24.0,
 		"loop": true,
+		"db": -24.0,
 		"notes": [
-			[0.0, -12, 0.55], [0.0, 3, 0.30],
-			[2.0, 7, 0.26],
-			[4.0, 10, 0.24],
-			[6.0, 7, 0.22],
-			[8.0, -17, 0.50], [8.0, 0, 0.28],
-			[10.0, 3, 0.24],
-			[12.0, 7, 0.22],
-			[14.0, 3, 0.20],
-			[16.0, -19, 0.50], [16.0, -2, 0.26],
-			[18.0, 2, 0.24],
-			[20.0, 5, 0.22],
-			[22.0, 0, 0.20],
+			[0.0, -12, 0.22], [0.0, 3, 0.22],
+			[3.0, 7, 0.18],
+			[6.0, 5, 0.16],
+			[8.0, -4, 0.20], [8.0, 0, 0.18],
+			[11.0, 3, 0.16],
+			[14.0, 0, 0.14],
+			[16.0, -9, 0.20], [16.0, 7, 0.18],
+			[19.0, 5, 0.15],
+			[22.0, 3, 0.14],
 		],
 	},
 	# The day summary. Once, and short: a rising figure that lands on the octave,
@@ -171,5 +174,8 @@ func _strike(semitone: int, gain: float) -> void:
 	var player: AudioStreamPlayer = _voices[_next]
 	_next = (_next + 1) % _voices.size()
 	player.pitch_scale = pow(2.0, float(semitone) / 12.0)
-	player.volume_db = LEVEL_DB + linear_to_db(clampf(gain, 0.01, 1.0))
+	var level: float = LEVEL_DB
+	if SCORES.has(_score):
+		level = float(SCORES[_score].get("db", LEVEL_DB))
+	player.volume_db = level + linear_to_db(clampf(gain, 0.01, 1.0))
 	player.play()
