@@ -2344,9 +2344,11 @@ func _draw_debug_badge() -> void:
 func _draw_night_caption() -> void:
 	var text: String = ""
 	match main.night_phase:
-		main.Phase.GATHER: text = "고양이들이 숙소로 돌아옵니다"
-		main.Phase.GLOW: text = "%d일차 밤 · 모두 숙소에 들어왔습니다" % main.day_number
-		main.Phase.DAWN: text = "아침이 밝아옵니다"
+		# Her words, not an announcer's (Quality Pass 01): the captions were the
+		# only lines in the game still in the formal register.
+		main.Phase.GATHER: text = "고양이들이 돌아온다"
+		main.Phase.GLOW: text = "%d일째 밤.  모두 들어왔다." % main.day_number
+		main.Phase.DAWN: text = "아침이다"
 		main.Phase.SPILL: text = "%d일차 아침" % main.day_number
 	if text == "":
 		return

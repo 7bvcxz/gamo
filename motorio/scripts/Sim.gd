@@ -1222,13 +1222,27 @@ func _settle_sleepers() -> void:
 		cat.pos = Defs.room_centre(spot)
 
 ## And out. Whatever they were assigned to is where they head.
-func leave_room(at: Vector2) -> void:
+## Out of the room. `wake` is false during the night rest (Quality Pass 01):
+## she may go back out into the dark, but the crew stays in -- asleep in the
+## hut, where the morning (`rouse_cats`) finds them. Waking them here sent every
+## cat with a post back to work for the rest of the night the moment she opened
+## the door.
+func leave_room(at: Vector2, wake: bool = true) -> void:
 	indoors = false
 	_grid_dirty = true
 	for cat: Cat in cats:
 		cat.entering = 0.0
 		cat.waking = 0.0
-	wake_cats(at)
+	if wake:
+		wake_cats(at)
+		return
+	for cat: Cat in cats:
+		if cat == carried_cat:
+			continue
+		cat.path.clear()
+		cat.path_goal = Vector2(1e20, 1e20)
+		cat.pos = shelter_centre()
+		cat.state = Defs.CAT_ASLEEP
 
 ## Everyone drops where they are and sleeps, on the frame she lies down.
 func sleep_cats() -> void:

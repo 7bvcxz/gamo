@@ -167,6 +167,15 @@ func _run() -> void:
 	# bed, with the door still to open.
 	_assert(main.room_open and Defs.in_room(main.player.cell()),
 		"the player wakes inside after freezing: %s" % str(main.player.cell()))
+	# She lies in bed through the dawn now (Quality Pass 01) -- the bed is
+	# furniture, so that cell blocks -- and is on her feet on the open floor by
+	# the time the morning is hers. That is the moment "not stuck in the hut"
+	# is about.
+	var steps := 0
+	while main.state == main.State.DAYBREAK and steps < 600:
+		main._process_daybreak(1.0 / 30.0)
+		steps += 1
+	_assert(main.state == main.State.PLAY and not main.player.locked, "the morning is hers")
 	_assert(not main.sim.blocks_player(main.player.cell()), "and not inside the hut")
 
 	if failures == 0:

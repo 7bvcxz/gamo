@@ -455,6 +455,7 @@ func _start_run(seed_value: int = -1) -> void:
 	player.collapse = 0.0
 	wake_time = -1.0
 	hud_reveal = 1.0
+	_first_work_heard = false
 	deploy_time = -1.0
 	slide_time = -1.0
 	machine_layer.core_unfold = 1.0
@@ -1324,7 +1325,10 @@ func _process(delta: float) -> void:
 	# follows the screen the panel was opened over rather than the panel itself.
 	var showing: int = state_before_settings if state == State.SETTINGS else state
 	var in_run: bool = showing != State.TITLE and showing != State.OPENING
-	player.visible = in_run and not indoors()
+	# Hidden while the hut is seen from outside -- but at dawn the room is open
+	# and she is in it, in bed, and a morning that begins with her missing and
+	# ends with her standing is a teleport (Quality Pass 01).
+	player.visible = in_run and (not indoors() or (state == State.DAYBREAK and room_open))
 	machine_layer.show_preview = state == State.PLAY and sim.base_placed
 
 ## What the frame sounds like, in one call to the audio manager.
@@ -2117,6 +2121,9 @@ var pickaxe_hint_until: float = 0.0
 ## The base's level when the current deposit began, so the signals it raises can
 ## tell a deposit that grew the fire from one that did not.
 var _deposit_level_before: int = 0
+## Whether this run has heard its first cat go to work. Not saved: a loaded run
+## has long since had its first automation.
+var _first_work_heard: bool = false
 
 ## Which seam it is pointing at, or a sentinel. The nearest one to her when the
 ## tool arrives: pointing at a seam she cannot see is pointing at nothing.
@@ -2189,10 +2196,27 @@ func _on_recipe_produced(cell: Vector2i, item_type: int, amount: int) -> void:
 		_notify("%s%s 만들었다." % [made, Defs.object_of(made)], Defs.COL_CORE,
 			UNLOCK_MESSAGE_LIFE)
 
+## A cat put to work (Quality Pass 01). It used to be the build thunk -- the
+## sound of a machine being placed -- for the moment an animal starts working.
+## Now it is the cat's own first tap, a few sparks at the post, and, the first
+## time in a run, the small reward: the first automation is the moment the game
+## is about, and it was the quietest one in it.
+func _cat_starts_work(at: Vector2) -> void:
+	fx.ring(at, Defs.COL_CORE, 26.0)
+	fx.burst(at, Defs.COL_BRASS, 8)
+	audio.call("play_at", "cat_tap", at, 0.04)
+	if not _first_work_heard:
+		_first_work_heard = true
+		fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
+		audio.call("play", "finish")
+
 func _on_cat_thawed(total: int, at: Vector2) -> void:
 	fx.popup(at + Vector2(0, -30), "먀?", Defs.COL_CAT_FACE, true)
 	fx.ring(at, Defs.COL_CORE, Defs.RING_LARGE)
 	fx.burst(at, Defs.COL_CAT_FACE, 14)
+	# The ice letting go, as bits of it (Quality Pass 01).
+	fx.burst(at, Defs.COL_ICE, 10)
+	audio.call("play_at", "frost", at, 0.05)
 	shake = maxf(shake, Defs.FX_SMALL)
 	audio.call("play", "meow")
 	# The first one is told what to do with it. After that the meow, the ring and
@@ -2314,6 +2338,8 @@ func _update_room(delta: float) -> void:
 	if player.position.distance_to(bed) > 1.0:
 		return
 	room_fade = minf(1.0, room_fade + delta / Defs.ROOM_SLEEP_FADE)
+	# Lying down as the light goes: the same pose she wakes out of.
+	player.collapse = minf(1.0, room_fade * 1.6)
 	if room_fade < 1.0:
 		return
 	room_sleeping = false
@@ -3620,8 +3646,7 @@ func _primary_action() -> void:
 		if sim.place_cat(post):
 			_notify("고양이를 채굴기에 앉혔다." if on_machine
 				else "고양이가 광맥을 파기 시작했다.", Defs.COL_CORE)
-			fx.ring(sim.machine_centre_at(post), Defs.COL_CORE, 26.0)
-			audio.call("play", "build")
+			_cat_starts_work(sim.machine_centre_at(post))
 		elif sim.drop_cat(sim.cell_centre(cell)):
 			_notify("고양이를 내려놓았다.", Defs.COL_TEXT_DIM)
 			audio.call("play", "remove")
@@ -5174,7 +5199,8 @@ func close_room() -> void:
 	room_fade = 0.0
 	player.position = shelter_doorstep()
 	player.velocity = Vector2.ZERO
-	sim.leave_room(shelter_doorstep())
+	# At night the crew stays in, asleep; the morning lets them out.
+	sim.leave_room(shelter_doorstep(), not night_rest_sent)
 	if room_holds_cats:
 		room_holds_cats = false
 		fx.ring(shelter_doorstep(), Defs.COL_CORE, 46.0)
@@ -5313,6 +5339,14 @@ func _process_daybreak(delta: float) -> void:
 	match night_phase:
 		Phase.DAWN:
 			night_override = clampf(1.0 - night_timer / Defs.DAWN_SECONDS, 0.0, 1.0)
+			# Up with the light: still for most of the dawn, then the same
+			# stir-kneel-stand she came to in the snow with, ending on her feet
+			# beside the pillow as the sun is up.
+			var rise: float = night_timer - (Defs.DAWN_SECONDS - Defs.BED_RISE_SECONDS)
+			if room_open:
+				player.collapse = Defs.wake_pose(Defs.WAKE_LIE + maxf(rise, -1.0)) if rise > 0.0 else 1.0
+				if rise > 0.0 and rise - delta <= 0.0:
+					audio.call("play", "rustle", 0.04)
 			if night_timer >= Defs.DAWN_SECONDS:
 				night_phase = Phase.SPILL
 				night_timer = 0.0
@@ -5322,6 +5356,13 @@ func _process_daybreak(delta: float) -> void:
 				# while the screen was dark.
 				audio.call("play", "confirm")
 		Phase.SPILL:
+			# Out of bed: a couple of steps to where the morning starts, rather
+			# than being there already.
+			if room_open:
+				player.collapse = 0.0
+				var u: float = clampf(night_timer / Defs.BED_STEP_SECONDS, 0.0, 1.0)
+				player.position = room_sleep_point().lerp(Defs.room_centre(Defs.ROOM_WAKE),
+					1.0 - (1.0 - u) * (1.0 - u))
 			if night_timer >= Defs.DAWN_SPILL_SECONDS:
 				night_override = -1.0
 				player.locked = false
@@ -5379,6 +5420,11 @@ func _begin_next_day() -> void:
 	# everybody else.
 	open_room(Defs.ROOM_WAKE, Vector2i(1, 0), false)
 	room_fade = 1.0
+	# In bed, where she lay down (Quality Pass 01). She used to be hidden for the
+	# whole dawn and appear standing on the floor when the door opened.
+	player.position = room_sleep_point()
+	player.facing = Vector2i.DOWN
+	player.collapse = 1.0
 	# Still locked and still indoors: the clock has been reset to a full day but
 	# the sun has not come up yet, which is exactly what night_override is for.
 	player.locked = true

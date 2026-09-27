@@ -3013,6 +3013,11 @@ const NIGHT_GATHER_MAX := 7.0      ## after this the stragglers are simply home
 const NIGHT_GLOW_SECONDS := 2.2    ## lamp lit, silhouettes on the wall
 const DAWN_SECONDS := 5.0          ## night -> morning
 const DAWN_SPILL_SECONDS := 1.4    ## the door opens and everyone walks out
+## Getting up in the morning (Quality Pass 01): the last this-many seconds of the
+## dawn are her sitting up and standing, and the first of the spill her steps
+## off the bed.
+const BED_RISE_SECONDS := WAKE_SIT + WAKE_KNEEL + WAKE_STAND
+const BED_STEP_SECONDS := 0.6
 ## How much closer the camera pulls in while the sequence plays. The hut is one
 ## tile across, so at normal zoom the silhouettes in the window are a few pixels.
 const NIGHT_CAMERA_ZOOM := 1.7
