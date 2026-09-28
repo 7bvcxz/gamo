@@ -375,11 +375,10 @@ func _draw_shelter(tile: float) -> void:
 	if not sim.shelter_placed:
 		return
 	var footprint: Rect2 = Grid.rect_px(sim.shelter_rect())
-	# The ground it stands on. The picture is square and the footprint is not, so
-	# the footprint is marked under it: the hut covers all of these cells, and a
-	# player walking into the part the picture does not reach has to see why.
-	draw_rect(footprint.grow(-1.0), Color(0.10, 0.08, 0.07, 0.22))
-	draw_rect(footprint.grow(-1.0), Color(0.36, 0.28, 0.22, 0.45), false, 1.5)
+	# No marked square under it any more: the hut is four by four and the
+	# picture fills exactly those cells (World Visual Pass 01), so the building is
+	# its own outline. The square that used to be drawn here explained a six by
+	# eight footprint a square picture did not reach.
 	var at: Vector2 = footprint.get_center()
 	var k: float = _k(minf(footprint.size.x, footprint.size.y))
 	_scale_about(at, k)

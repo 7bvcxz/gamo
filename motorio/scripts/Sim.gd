@@ -951,7 +951,9 @@ func _node_reserved(origin: Vector2i) -> bool:
 func _ore_reserved(cell: Vector2i) -> bool:
 	if base_rect().grow(2).has_point(cell):
 		return true
-	if shelter_rect().grow(1).has_point(cell) or food_rect().has_point(cell):
+	# The hut's clearing, not its walls: see Defs.HUT_CLEARING.
+	if Defs.HUT_CLEARING.has_point(cell - shelter_cell) \
+			or Defs.BIN_CLEARING.has_point(cell - shelter_cell):
 		return true
 	if STARTER_COLUMN.has_point(cell - core_cell):
 		return true

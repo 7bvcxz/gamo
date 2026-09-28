@@ -1,0 +1,31 @@
+{
+  "at": "2026-09-28T04:02:19.093244+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A tiny cozy winter cabin for a snowy top-down game: a small square hut of dark metal panels and warm brown timber with a thick snow-covered roof, one small square window glowing warm yellow, a short metal stove pipe on the roof, and a small closed wooden door at the front with one step. Cute cozy chibi game art style matching the first reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients. The building's body is cold dark blue-grey metal like the machines in the second reference image, with a little white snow settled on its top edges, and its one or two lights glow warm orange-yellow. Soft rounded chunky forms, very few large simple shapes so it stays readable at 40 pixels across. The subject is centred, seen straight on with a slight downward tilt as in a top-down game, and its body fills a square frame edge to edge. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png",
+    "/home/merti/Workspace/gamo/motorio/design/reference/motorio-visual-north-star.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 14.9,
+  "usage": {
+    "input_tokens": 2222,
+    "input_tokens_details": {
+      "image_tokens": 2020,
+      "text_tokens": 202
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 2418
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/art/raw/shelter.png"
+  ]
+}

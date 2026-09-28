@@ -1,12 +1,13 @@
 extends SceneTree
 
-## The hut covers six cells by eight -- three tiles by four -- and every one of
-## them is the hut.
+## The hut covers four cells by four -- two tiles by two -- and every one of them
+## is the hut (World Visual Pass 01). It was six by eight: a barn for one person
+## and a handful of cats, bigger than the fire it stood beside the fire for.
 ##
 ## It is not a machine, so it is not in `machines`; it is a building on the grid
 ## all the same, and the same questions get the same answers on each of its
-## forty-eight cells: solid to her, solid to the cats' pathing, and no building
-## on top of it. Its door is below it, on open snow.
+## sixteen cells: solid to her, solid to the cats' pathing, and no building on
+## top of it. Its door is below it, on open snow, and the picture stays on it.
 
 var failures := 0
 
@@ -17,10 +18,11 @@ func _run() -> void:
 	_test_size_is_data()
 	_test_generated_hut()
 	_test_carried_hut()
+	_test_picture_stays_on_its_cells()
 	if failures == 0:
-		print("PASS test_shelter_occupies_6x8")
+		print("PASS test_shelter_is_4x4")
 	else:
-		print("FAIL test_shelter_occupies_6x8 (%d)" % failures)
+		print("FAIL test_shelter_is_4x4 (%d)" % failures)
 	quit(failures)
 
 func _assert(condition: bool, label: String) -> void:
@@ -31,10 +33,10 @@ func _assert(condition: bool, label: String) -> void:
 		print("  FAIL %s" % label)
 
 func _test_size_is_data() -> void:
-	_assert(Defs.SHELTER_SIZE == Vector2i(6, 8), "숙소의 크기는 한 상수 6x8 이다")
-	# Rotation-ready: the same footprint function turns it without a second size.
-	_assert(Grid.footprint(Vector2i.ZERO, Defs.SHELTER_SIZE, Vector2i.DOWN).size == Vector2i(8, 6),
-		"돌리면 8x6 — 크기를 두 번 적지 않는다")
+	_assert(Defs.SHELTER_SIZE == Vector2i(4, 4), "숙소의 크기는 한 상수 4x4 이다")
+	# Square: the same footprint function turns it into itself.
+	_assert(Grid.footprint(Vector2i.ZERO, Defs.SHELTER_SIZE, Vector2i.DOWN).size == Vector2i(4, 4),
+		"돌려도 4x4")
 
 func _test_generated_hut() -> void:
 	var sim := Sim.new()
@@ -64,9 +66,9 @@ func _test_carried_hut() -> void:
 
 func _check(sim: Sim, label: String) -> void:
 	var rect: Rect2i = sim.shelter_rect()
-	_assert(rect.size == Vector2i(6, 8), "%s: 발자국이 6x8 이다 %s" % [label, rect.size])
-	_assert(rect.position == sim.shelter_cell - Vector2i(2, 3), "%s: 앵커는 (2,3)" % label)
-	_assert(Grid.rect_px(rect).size == Vector2(96.0, 128.0), "%s: 월드에서 96x128px" % label)
+	_assert(rect.size == Vector2i(4, 4), "%s: 발자국이 4x4 이다 %s" % [label, rect.size])
+	_assert(rect.position == sim.shelter_cell - Vector2i(1, 1), "%s: 앵커는 (1,1)" % label)
+	_assert(Grid.rect_px(rect).size == Vector2(64.0, 64.0), "%s: 월드에서 64x64px" % label)
 	var inside := 0
 	var solid := 0
 	var refused := 0
@@ -82,10 +84,10 @@ func _check(sim: Sim, label: String) -> void:
 			refused += 1
 		if sim._grid.is_point_solid(cell):
 			pathed += 1
-	_assert(inside == 48, "%s: 48칸 모두 숙소다 (%d)" % [label, inside])
-	_assert(solid == 48, "%s: 48칸 모두 그녀를 막는다 (%d)" % [label, solid])
-	_assert(refused == 48, "%s: 48칸 어디에도 설비를 지을 수 없다 (%d)" % [label, refused])
-	_assert(pathed == 48, "%s: 48칸 모두 고양이 길찾기에서 막혀 있다 (%d)" % [label, pathed])
+	_assert(inside == 16, "%s: 16칸 모두 숙소다 (%d)" % [label, inside])
+	_assert(solid == 16, "%s: 16칸 모두 그녀를 막는다 (%d)" % [label, solid])
+	_assert(refused == 16, "%s: 16칸 어디에도 설비를 지을 수 없다 (%d)" % [label, refused])
+	_assert(pathed == 16, "%s: 16칸 모두 고양이 길찾기에서 막혀 있다 (%d)" % [label, pathed])
 	var leaked := 0
 	for cell: Vector2i in Grid.edge_cells(rect.grow(1)):
 		if sim.in_shelter(cell):
@@ -97,3 +99,24 @@ func _check(sim: Sim, label: String) -> void:
 	_assert(not sim.blocks_player(sim.cell_of(door)), "%s: 문간은 서 있을 수 있는 땅이다" % label)
 	_assert(absf(door.x - Grid.rect_px(rect).get_center().x) < 0.01, "%s: 문간은 숙소 가운데 아래" % label)
 	_assert(sim.is_warm_at(sim.shelter_centre()), "%s: 숙소는 온기 안에 있다" % label)
+
+## What the hut draws covers no more than what it blocks, and fills it: the old
+## picture was square on a six by eight and left a strip of "hut" nobody could
+## see. Measured on the source PNG's opaque pixels, drawn the way `_draw_shelter`
+## draws it.
+func _test_picture_stays_on_its_cells() -> void:
+	var footprint: Vector2 = Grid.rect_px(Grid.footprint(Vector2i.ZERO, Defs.SHELTER_SIZE)).size
+	var drawn: float = MachineLayer.SHELTER_DRAW * MachineLayer._k(minf(footprint.x, footprint.y))
+	var image: Image = Image.load_from_file(
+		ProjectSettings.globalize_path(MachineLayer.SHELTER_ART.resource_path))
+	_assert(image != null, "숙소 그림을 읽는다")
+	if image == null:
+		return
+	var used: Rect2i = image.get_used_rect()
+	var per_pixel: float = drawn / float(image.get_width())
+	var opaque := Rect2(Vector2.ONE * -drawn * 0.5 + Vector2(used.position) * per_pixel,
+		Vector2(used.size) * per_pixel)
+	var cells := Rect2(-footprint * 0.5, footprint)
+	_assert(cells.grow(0.01).encloses(opaque), "숙소 그림이 4x4 발자국 안에 그려진다 (%s / %s)" % [opaque, cells])
+	_assert(opaque.size.x >= footprint.x * 0.8 and opaque.size.y >= footprint.y * 0.8,
+		"그리고 발자국을 채운다 (%s)" % opaque.size)

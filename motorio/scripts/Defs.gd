@@ -2835,12 +2835,14 @@ const NIGHT_DRAIN := 7.5          # warmth lost per second at night even when wa
 const CARRY_AHEAD := 0.3
 
 ## Where the hut stands in a world that starts with one, as its anchor's offset
-## from the core's, in build cells. Against the base's west side with one tile of
-## ground between them -- SHELTER_CLEARANCE -- and its doorstep 5.4 tiles from
-## the fire, inside the opening circle as the old one-tile hut's (5.1) was. The
-## hut is six cells by eight since Grid v2 and the base eight by eight, so the
-## one-tile offset it used to be (-3, 3) would have stood the two buildings on
-## top of each other.
+## from the core's, in build cells. West of the base with more than a tile of
+## ground between them -- SHELTER_CLEARANCE -- and its doorstep five tiles from
+## the fire, inside the opening circle as the old one-tile hut's (5.1) was.
+##
+## The same anchor as the six by eight it replaced (World Visual Pass 01): the
+## four by four stands inside the ground the big one covered, centred across it,
+## so a saved run's hut shrinks in place and nothing it used to cover is under
+## anything new.
 const SHELTER_CELL := Vector2i(-9, 1)
 ## Measured from the cell centre, so standing on any of the four neighbouring
 ## tiles counts as being at the door.
@@ -2848,8 +2850,17 @@ const SHELTER_REACH := 62.0
 const FOOD_OFFSET := Vector2(-4.5, 2.5)
 ## Where the bin stands by default, as its anchor's offset from the hut's, in
 ## build cells: against the hut's west wall. It used to be FOOD_OFFSET rounded
-## at each use, from the core in one place and from the hut in another.
-const FOOD_CELL := Vector2i(-4, 0)
+## at each use, from the core in one place and from the hut in another. A cell
+## further east since the hut is four by four, so it still touches the wall.
+const FOOD_CELL := Vector2i(-3, 0)
+## The ground the world keeps clear of ore round the hut, as offsets from its
+## anchor: the six by eight it stood on until World Visual Pass 01 with a cell
+## round it, and the bin's old spot beside that. Its own rule rather than a
+## margin on the hut's walls, so shrinking the hut did not pull the ore closer
+## to the door the cats come home through -- and did not move a single node in
+## any seed, which is what keeps a saved run's posts on their nodes.
+const HUT_CLEARING := Rect2i(-3, -4, 8, 10)
+const BIN_CLEARING := Rect2i(-4, 0, 2, 2)
 
 ## --- Footprints of the buildings that are not machines ------------------------
 ## Machines carry their size in their registry row (`Defs.MACHINES`); the hut, the
@@ -2858,7 +2869,10 @@ const FOOD_CELL := Vector2i(-4, 0)
 ## A tile across: the ice, the wreckage, the case, the board, the village's
 ## pieces. The size a cell used to be.
 const PROP_SIZE := Vector2i.ONE * Grid.SCALE
-const SHELTER_SIZE := Vector2i(6, 8)
+## A cabin four cells by four (World Visual Pass 01): it was six by eight, a barn
+## beside a fire it was smaller than, for one person and a handful of cats. The
+## room inside is a place of its own (`ROOM_PIECES`) and did not change.
+const SHELTER_SIZE := Vector2i(4, 4)
 const FOOD_BIN_SIZE := PROP_SIZE
 ## An ore node, in build cells: two by two, a tile (World Visual Pass 01). It
 ## was one cell -- a pebble on a grid of posts four cells across -- and read as

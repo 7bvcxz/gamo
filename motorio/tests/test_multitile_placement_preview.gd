@@ -149,7 +149,7 @@ func _test_carried_hut() -> void:
 	main.player.facing = Vector2i.RIGHT
 	main._update_preview()
 	var layer: Node2D = main.machine_layer
-	_assert(layer.carry_rect.size == Vector2i(6, 8), "들고 있는 숙소는 6x8 로 표시된다")
+	_assert(layer.carry_rect.size == Defs.SHELTER_SIZE, "들고 있는 숙소는 4x4 로 표시된다")
 	_assert(layer.carry_rect == Grid.footprint(main.kit_anchor(), Defs.SHELTER_SIZE),
 		"놓일 자리 그대로다")
 	var close := 0
