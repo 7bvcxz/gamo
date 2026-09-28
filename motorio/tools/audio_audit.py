@@ -50,7 +50,7 @@ CATEGORY = {
     "build": "sfx", "remove": "sfx", "deliver": "sfx", "alloy": "sfx",
     "alarm": "sfx", "finish": "sfx", "pop": "sfx", "chime": "sfx",
     "step": "sfx", "step_run": "sfx", "pick": "sfx", "nibble": "sfx",
-    "meow": "sfx", "breath": "sfx", "frost": "sfx", "whoomp": "sfx", "level": "sfx",
+    "meow": "sfx", "breath": "sfx", "frost": "sfx", "chill": "sfx", "whoomp": "sfx", "level": "sfx",
     # Weather one-shots: judged on their low end like the beds, but they are
     # seconds long by design.
     "gust": "weather",

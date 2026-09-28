@@ -528,6 +528,21 @@ def made_frost() -> list:
     return normalise(out, 0.30)
 
 
+def made_chill(seed: int) -> list:
+    # The cold, again, while it is still taking her (World Visual Pass 01).
+    # `frost` is the step down, once; this is what repeats every few seconds for
+    # as long as her warmth keeps falling, so it has to be something the ear can
+    # hear twenty times without it becoming a noise: fewer, softer, lower
+    # crackles than `frost`, spread over a longer breath of time, under a thin
+    # band of air that swells and goes. Three takes so no two in a row match.
+    out = blank(0.62)
+    rng = random.Random(seed)
+    noise_into(out, 0.0, 0.6, 500.0, 1300.0, 0.14, rng, attack=0.18, decay=0.16)
+    for _ in range(4):
+        grain_into(out, rng.uniform(0.04, 0.42), 0.010, 1100.0, rng.uniform(0.25, 0.6), rng)
+    return normalise(out, 0.22)
+
+
 def made_whoomp() -> list:
     # Fuel catching in the fire: a soft rush of air through the middle, quick in
     # and slow out. Warm because it has no top and no bottom.
@@ -700,6 +715,8 @@ MADE = {
     "note": made_note, "chime": made_chime, "finish": made_reward,
     "alarm": made_warning, "frost": made_frost, "whoomp": made_whoomp,
     "level": made_level,
+    "chill_1": lambda: made_chill(611), "chill_2": lambda: made_chill(622),
+    "chill_3": lambda: made_chill(633),
 }
 CUES = {
     "cue_tension": cue_tension, "cue_impact": cue_impact, "cue_rise": cue_rise,

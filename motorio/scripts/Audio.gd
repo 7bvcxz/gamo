@@ -64,6 +64,13 @@ const BANK := {
 	"chime": [preload("res://assets/sfx/chime.wav")],
 	## A few tiny crackles of ice, once, when the cold gets a step worse.
 	"frost": [preload("res://assets/sfx/frost.wav")],
+	## The cold still taking her (World Visual Pass 01): softer, lower crackles
+	## under a breath of air, every few seconds for as long as her warmth keeps
+	## falling out in the snow. Two names for one set of takes, because the
+	## danger step is the same sound a little nearer: level and pitch differ,
+	## and a rule per name keeps each step's own spacing.
+	"chill": CHILL,
+	"chill_hard": CHILL,
 	## Her breath in the cold. Not in the effect path's schedule -- the cold
 	## scheduler below decides when -- but played through it like any sound.
 	"breath": [preload("res://assets/sfx/breath_1.wav"), preload("res://assets/sfx/breath_2.wav"),
@@ -104,6 +111,9 @@ const VOLUMES := {
 	# chime mark one moment each and must not outrank a cat waking up.
 	"tick": -22.0, "pop": -10.0, "chime": -12.0,
 	"frost": -24.0, "breath": -27.0, "whoomp": -15.0, "level": -11.0,
+	# Under her breath when it is cold, level with it in danger: a reminder,
+	# never an alarm. It repeats, so it is the quietest thing she makes.
+	"chill": -31.0, "chill_hard": -27.0,
 	# A cat's tap is the smallest thing in the world that still reads: under her
 	# pick by eleven dB, and several of them are still under it (`CROWD_DB`).
 	"cat_tap": -19.0,
@@ -112,7 +122,7 @@ const VOLUMES := {
 	"latch": -12.0, "creak": -16.0, "rustle": -18.0,
 }
 ## A sound's own pitch, before the jitter. Running is the walk played quicker.
-const PITCH := {"step_run": 1.08}
+const PITCH := {"step_run": 1.08, "chill_hard": 1.06}
 ## Where each sound is mixed. UI is anything that answers a key or marks a
 ## reward; Character is her and the cats; Machine is the factory; Environment is
 ## the world's own events -- the fire, the base, the weather's one-shots.
@@ -122,6 +132,7 @@ const BUS_OF := {
 	"finish": "UI", "pick": "Character", "nibble": "Character", "meow": "Character",
 	"step": "Character", "step_run": "Character", "tick": "Environment",
 	"pop": "Environment", "chime": "UI", "frost": "Character", "breath": "Character",
+	"chill": "Character", "chill_hard": "Character",
 	"whoomp": "Environment", "level": "Environment",
 	"cat_tap": "Character", "clink": "Machine", "latch": "Environment",
 	"creak": "Environment", "rustle": "Character",
@@ -137,6 +148,8 @@ const RULES := {
 	"nibble": {"cap": 1, "gap": 0.2},
 	"breath": {"cap": 1, "gap": 3.0},
 	"frost": {"cap": 1, "gap": 6.0},
+	"chill": {"cap": 1, "gap": 4.0},
+	"chill_hard": {"cap": 1, "gap": 3.5},
 	"pick": {"cap": 2, "gap": 0.08},
 	# Twenty cats at work are three taps at a time, the nearest three -- and,
 	# through the gap, never more than three or four a second however many are
@@ -213,10 +226,19 @@ const GUST_EVERY_NIGHT := Vector2(4.5, 10.0)
 ## of ice when it steps down. `x` is where the step starts on exposure (0..1);
 ## `every` the seconds between breaths.
 const COLD_STEPS := [
-	{"name": "normal", "from": 0.0, "every": Vector2.ZERO},
-	{"name": "cold", "from": 0.4, "every": Vector2(8.0, 11.0)},
-	{"name": "danger", "from": 0.75, "every": Vector2(4.5, 6.0)},
+	{"name": "normal", "from": 0.0, "every": Vector2.ZERO,
+		"chill": "", "chill_every": Vector2.ZERO},
+	{"name": "cold", "from": 0.4, "every": Vector2(8.0, 11.0),
+		"chill": "chill", "chill_every": Vector2(6.0, 8.0)},
+	{"name": "danger", "from": 0.75, "every": Vector2(4.5, 6.0),
+		"chill": "chill_hard", "chill_every": Vector2(4.0, 5.5)},
 ]
+## The takes of the repeating chill (tools/build_sfx.py `made_chill`).
+const CHILL: Array = [preload("res://assets/sfx/chill_1.wav"),
+	preload("res://assets/sfx/chill_2.wav"), preload("res://assets/sfx/chill_3.wav")]
+## How long after the cold takes hold the first chill comes. The frost has just
+## marked the step; a chill on top of it would be two sounds for one event.
+const CHILL_FIRST := Vector2(2.5, 4.0)
 
 # --- The opening ----------------------------------------------------------------
 ## One cue a panel, played once as the panel arrives. On the Music bus: they are
@@ -287,6 +309,9 @@ var _cue: AudioStreamPlayer
 var _cue_wind := 0.0
 var _cold_step := 0
 var _breath_wait := 0.0
+var _chill_wait := 0.0
+## When each chill started, on this node's clock -- what a test reads.
+var chill_log: Array[float] = []
 ## How many gusts and breaths have started, and the gaps between breaths -- what
 ## a test reads instead of listening.
 var gusts := 0
@@ -612,7 +637,8 @@ func _push_mix() -> void:
 ## `day` is how far through the day the clock is (0 morning, 1 the end of night)
 ## -- both are Main's to know and neither is worth this node reading the world
 ## for.
-func apply(screen: String, zone: int, exposure: float, day: float, delta: float) -> void:
+func apply(screen: String, zone: int, exposure: float, day: float, delta: float,
+		cooling: bool = false) -> void:
 	var score: String = String(SCREEN_SCORES.get(screen, Zone.score(zone)))
 	if music != null:
 		if score.is_empty():
@@ -635,24 +661,28 @@ func apply(screen: String, zone: int, exposure: float, day: float, delta: float)
 		set_bed("wind", 0.0, delta)
 		set_bed("cold", 0.0, delta)
 		_cold_step = 0
+		_quiet_chill()
 		return
 	if screen == "title":
 		set_bed("wind", STILL_WIND, delta)
 		set_bed("cold", 0.0, delta)
 		_tick_gusts(delta, 0.0)
+		_quiet_chill()
 		return
 	if screen == "opening":
 		set_bed("wind", _cue_wind, delta)
 		set_bed("cold", 0.0, delta)
+		_quiet_chill()
 		return
 	var evening: float = evening_of(day)
 	set_bed("wind", lerpf(WIND_DAY, WIND_NIGHT, evening), delta)
 	set_bed("cold", clampf(exposure, 0.0, 1.0), delta)
 	_tick_gusts(delta, evening)
 	if screen == "play":
-		_tick_cold(exposure, delta)
+		_tick_cold(exposure, delta, cooling)
 	else:
 		_cold_step = 0
+		_quiet_chill()
 
 ## 0 through the day, rising through dusk to 1 at night. The day clock alone
 ## would make the wind grow from breakfast onward.
@@ -683,7 +713,7 @@ static func cold_step_of(exposure: float) -> int:
 			step = index
 	return step
 
-func _tick_cold(exposure: float, delta: float) -> void:
+func _tick_cold(exposure: float, delta: float, cooling: bool = false) -> void:
 	var step: int = cold_step_of(exposure)
 	if step > _cold_step:
 		# A step down into the cold: ice, once. Its own gap keeps a warmth that
@@ -691,6 +721,7 @@ func _tick_cold(exposure: float, delta: float) -> void:
 		play("frost", 0.05)
 		_breath_wait = minf(_breath_wait, 1.2)
 	_cold_step = step
+	_tick_chill(step, delta, cooling)
 	var every: Vector2 = COLD_STEPS[step]["every"]
 	if every == Vector2.ZERO:
 		_breath_wait = 0.0
@@ -703,6 +734,39 @@ func _tick_cold(exposure: float, delta: float) -> void:
 		if _last_breath > -INF:
 			breath_gaps.append(clock - _last_breath)
 		_last_breath = clock
+
+## The cold that keeps taking her (World Visual Pass 01).
+##
+## The frost above marks the moment the cold gets a step worse, once -- and a
+## playtest heard exactly that: the freezing sound played the first time and
+## never again, however long she stood out there going numb. So while she is out
+## in the snow and her warmth is actually falling, a soft chill comes every few
+## seconds, longer apart and quieter in the cold, a little closer and louder in
+## danger. Not while the warmth is climbing (by the fire, walking home, getting
+## up), not in the hut, not asleep, not paused, not on the game-over card:
+## `cooling` is false in all of those, or the screen is not play.
+func _tick_chill(step: int, delta: float, cooling: bool) -> void:
+	var sound: String = String(COLD_STEPS[step]["chill"])
+	if sound == "" or not cooling:
+		_quiet_chill()
+		return
+	_chill_wait -= delta
+	if _chill_wait > 0.0:
+		return
+	var every: Vector2 = COLD_STEPS[step]["chill_every"]
+	_chill_wait = _rng.randf_range(every.x, every.y)
+	if play(sound, 0.05):
+		chill_log.append(clock)
+
+## No chill is due, and one that is sounding stops: stepping into the warm or
+## through the door is the end of the cold, not the end of its last crackle.
+func _quiet_chill() -> void:
+	# The next chill, when the cold takes hold again, is a few seconds off.
+	_chill_wait = maxf(_chill_wait, CHILL_FIRST.x)
+	for voice: Dictionary in _flat + _world:
+		var name: String = String(voice["sound"])
+		if (name == "chill" or name == "chill_hard") and float(voice["ends"]) > clock:
+			_silence(voice)
 
 ## The opening's cue for the panel that has just arrived, and how much wind is
 ## under it. An empty name plays nothing and only moves the wind.

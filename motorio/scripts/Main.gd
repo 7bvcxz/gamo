@@ -128,6 +128,9 @@ var night_warned: bool = false
 ## Whether tonight's "go home" has been said to the crew. Cleared by the next
 ## morning -- either the sunrise while she stays up, or _begin_next_day.
 var night_rest_sent: bool = false
+## Her warmth as the ear last saw it, so the ambience can tell falling from
+## steady (`_update_ambience`).
+var last_warmth: float = 100.0
 var build_held: bool = false
 ## True once a held Z has actually been swinging at a seam. Without it, letting
 ## go after mining runs the tap action -- and standing at the shelter mining the
@@ -1376,7 +1379,15 @@ func _update_ambience(delta: float) -> void:
 			if Defs.in_room(Grid.cell_at(cat.pos)):
 				inside += 1
 	audio.set("cats_inside", inside)
-	audio.call("apply", screen_name(), zone(), exposure, day_fraction(), delta)
+	# Whether the cold is taking her right now: out in the snow, off the fire's
+	# ground, and her warmth lower than it was a frame ago. The one thing the
+	# repeating chill asks (World Visual Pass 01) -- climbing warmth, the hut,
+	# sleep and a paused game all answer no.
+	var cooling: bool = state == State.PLAY and not sleeping_state() and sim != null \
+		and Zone.freezes(zone()) and not sim.is_warm(player.cell()) \
+		and player.warmth < last_warmth - 0.0001
+	last_warmth = player.warmth
+	audio.call("apply", screen_name(), zone(), exposure, day_fraction(), delta, cooling)
 	_update_work_sounds(delta)
 
 ## The factory's continuous sounds: every cat at work taps now and then, and a
