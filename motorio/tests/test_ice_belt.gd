@@ -44,8 +44,8 @@ func _belt(sim: Sim, from: Vector2i, length: int) -> void:
 		var cell: Vector2i = from + Vector2i(step, 0)
 		# The block is a tile across (Grid v2): clear the row under its lower half
 		# as well, so nothing but the belt is in its way.
-		sim.ore.erase(cell)
-		sim.ore.erase(cell + Vector2i(0, 1))
+		sim.erase_ore_at(cell)
+		sim.erase_ore_at(cell + Vector2i(0, 1))
 		sim.mined_rocks[Grid.tile_of(cell)] = true
 		var belt := Sim.Machine.new()
 		belt.type = Defs.M_BELT
@@ -100,7 +100,7 @@ func _test_it_stops() -> void:
 	sim.debris.clear()
 	var tail: Vector2i = start + Vector2i(Grid.SCALE, 0)
 	sim.frozen_cats[tail] = 0.0
-	sim.ore[tail + Vector2i(Grid.SCALE, 0)] = Defs.ITEM_HEATSTONE
+	sim.put_ore(tail + Vector2i(Grid.SCALE, 0), Defs.ITEM_HEATSTONE)
 	for tick in 600:
 		sim._tick_frozen_drift(1.0 / 60.0)
 	_assert(sim.frozen_cats.has(start) and sim.frozen_cats.has(tail),

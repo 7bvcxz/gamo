@@ -328,7 +328,7 @@ func _particles(main: Node2D) -> void:
 	# And the sentences themselves, built the way the game builds them.
 	var sim: Sim = main.sim
 	sim.setup(4242)
-	var seam: Vector2i = sim.ore.keys()[0]
+	var seam: Vector2i = sim.ore_nodes.keys()[0]
 	var reason: String = sim.can_build(Defs.M_GENERATOR, seam + Vector2i(0, 40))
 	_check(not reason.contains("수정조각가"), "부족 안내의 조사가 맞다: %s" % reason)
 	_check(reason.contains("수정조각이") or reason == "" or not reason.contains("수정조각"),

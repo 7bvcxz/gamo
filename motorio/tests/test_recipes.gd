@@ -210,8 +210,8 @@ func _test_shared_tick_produces() -> void:
 	sim.setup(4242)
 	var cell: Vector2i = sim.core_cell + Vector2i(6, 6)
 	var ahead: Vector2i = cell + Vector2i.RIGHT
-	sim.ore.erase(cell)
-	sim.ore.erase(ahead)
+	sim.erase_ore_at(cell)
+	sim.erase_ore_at(ahead)
 	sim.ground.erase(ahead)
 	var machine := Sim.Machine.new()
 	machine.type = Defs.M_SPLITTER
@@ -256,9 +256,9 @@ func _test_shared_tick_waits_when_blocked() -> void:
 	sim.setup(4242)
 	var cell: Vector2i = sim.core_cell + Vector2i(-6, 6)
 	var ahead: Vector2i = cell + Vector2i.RIGHT
-	sim.ore.erase(cell)
+	sim.erase_ore_at(cell)
 	# A seam in front takes no dropped item and holds no belt, so the exit is shut.
-	sim.ore[ahead] = Defs.ITEM_HEATSTONE
+	sim.put_ore(ahead, Defs.ITEM_HEATSTONE)
 	var machine := Sim.Machine.new()
 	machine.type = Defs.M_SPLITTER
 	machine.cell = cell
@@ -278,7 +278,7 @@ func _test_shared_tick_waits_when_blocked() -> void:
 	_assert(not machine.operated, "돌고 있다고 말하지도 않는다")
 
 	# Open the exit and it drains on the next tick, then works again.
-	sim.ore.erase(ahead)
+	sim.erase_ore_at(ahead)
 	sim.tick_recipe(machine, TEST_RECIPE, 0.1)
 	_assert(machine.outbox.is_empty(), "길이 열리면 내보낸다")
 	_assert(sim.ground.get(ahead, -1) == Defs.ITEM_COPPER, "앞칸에 놓였다")
@@ -301,7 +301,7 @@ func _test_outbox_survives_a_save() -> void:
 	sim.power_ever = true
 	sim._check_unlocks()
 	var cell: Vector2i = sim.core_cell + Vector2i(5, 5)
-	sim.ore.erase(cell)
+	sim.erase_ore_at(cell)
 	sim.stock[Defs.ITEM_COPPER] = 500
 	_assert(sim.build(Defs.M_BELT, cell, Vector2i.RIGHT), "무엇이든 하나 짓는다")
 	sim.machine_at(cell).outbox[Defs.ITEM_ENERGY_CORE] = 3

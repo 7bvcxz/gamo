@@ -15,7 +15,7 @@ func _run() -> void:
 	# Ore is terrain, and terrain is walked over. A seam is a floor tile with a
 	# crystal painted into it, not an obstacle standing on the floor, and the
 	# player crosses it the way they cross snow.
-	var ore_cell: Vector2i = sim.ore.keys()[0]
+	var ore_cell: Vector2i = sim.ore_nodes.keys()[0]
 	_assert(not sim.is_structure(ore_cell), "광맥은 구조물이 아니다")
 	_assert(not sim.has_attribute(ore_cell, Defs.ATTR_STRUCTURE), "구조물 비트가 없다")
 	_assert(not sim.blocks_player(ore_cell), "광맥 위를 걸어갈 수 있다")
@@ -42,13 +42,13 @@ func _run() -> void:
 		var rect: Rect2i = Defs.machine_footprint(kind, spot)
 		for covered: Vector2i in Grid.cells_in(rect):
 			sim.remove_machine(covered)
-			sim.ore.erase(covered)
+			sim.erase_ore_at(covered)
 		for props: Dictionary in [sim.frozen_cats, sim.debris]:
 			for origin: Vector2i in props.keys():
 				if sim.prop_rect(origin).intersects(rect):
 					props.erase(origin)
 		if Defs.machine_mines(kind):
-			sim.ore[spot] = Defs.ITEM_CRYSTAL
+			sim.put_ore(spot, Defs.ITEM_CRYSTAL)
 		sim.unlocked[kind] = true
 		_assert(sim.build(kind, spot, Vector2i.RIGHT), "%s를 세운다" % Defs.MACHINE_NAMES[kind])
 		var walkable: bool = kind in Defs.WALKABLE_MACHINES
@@ -58,7 +58,7 @@ func _run() -> void:
 				"%s %s: 통행 %s" % [Defs.MACHINE_NAMES[kind], str(covered - spot),
 					"가능" if walkable else "불가"])
 		sim.remove_machine(spot)
-		sim.ore.erase(spot)
+		sim.erase_ore_at(spot)
 	_assert(Defs.M_BELT in Defs.WALKABLE_MACHINES and Defs.M_SPLITTER in Defs.WALKABLE_MACHINES,
 		"걸어갈 수 있는 것은 벨트와 분배기뿐이다")
 	_assert(Defs.WALKABLE_MACHINES.size() == 2, "그 둘뿐이다")
@@ -78,7 +78,7 @@ func _run() -> void:
 	# being walkable, and picking the machine back up hands it over again.
 	var seam: Vector2i = Vector2i(9999, 9999)
 	sim.unlocked[Defs.M_MINER] = true
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		if sim.machine_at(cell) == null and sim.can_build(Defs.M_MINER, cell, Vector2i(0, -1)) == "":
 			seam = cell
 			break
@@ -170,7 +170,7 @@ func _run() -> void:
 	# Ore generates in clusters, so pick a seam whose approaches are clear or the
 	# test would be starting the player inside a different structure.
 	var target := Vector2i(9999, 9999)
-	for cell: Vector2i in main.sim.ore:
+	for cell: Vector2i in main.sim.ore_nodes:
 		var clear := true
 		for approach: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
 			for distance in [1, 2, 3]:
@@ -299,7 +299,7 @@ func _test_reserved_tiles_across_seeds() -> void:
 		if sim.blocks_player(Grid.cell_at(sim.shelter_doorstep())):
 			blocked.append("seed %d 문 앞" % seed_value)
 		for covered: Vector2i in Grid.cells_in(sim.food_rect()):
-			if sim.ore.has(covered):
+			if sim.has_ore(covered):
 				blocked.append("seed %d 밥통에 광맥" % seed_value)
 				break
 		var open_sides := 0

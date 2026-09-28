@@ -46,11 +46,11 @@ func _draw() -> void:
 	_draw_ore()
 
 func _draw_ore() -> void:
-	for cell: Vector2i in sim.ore:
-		var centre: Vector2 = Grid.centre(cell)
-		if not view_rect.has_point(centre):
+	for cell: Vector2i in sim.ore_nodes:
+		var centre: Vector2 = sim.ore_centre(cell)
+		if not view_rect.grow(float(Grid.TILE)).has_point(centre):
 			continue
-		var item_type: int = sim.ore[cell]
+		var item_type: int = sim.ore_nodes[cell]
 		var base: Color = Defs.ITEM_COLORS[item_type]
 		var warm: bool = sim.is_warm(cell)
 		var tint: Color = base if warm else base.lerp(Defs.COL_SNOW_COLD, 0.18)
@@ -60,8 +60,9 @@ func _draw_ore() -> void:
 		# seam is, and the light it catches. An ore without a sheet still gets the
 		# painted shard, which is what keeps adding one from being a rendering
 		# hole while its art is being decided.
-		# The marks were drawn for a seam a tile across. A node is one cell now,
-		# so they are drawn at the node's size around its middle.
+		# The marks were drawn for a seam a tile across, and a node is a tile
+		# across again (World Visual Pass 01): drawn at the node's size around
+		# its middle.
 		draw_set_transform(centre, 0.0, Vector2.ONE * NODE_SCALE)
 		var local := Vector2.ZERO
 		if GroundLayer.ore_atlas_at(sim, cell) == null:
@@ -76,9 +77,9 @@ func _draw_ore() -> void:
 				draw_circle(local + Vector2(-3, -5), 2.4, Color(1, 1, 1, (glint - 0.9) * 5.0))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-## How big a seam's marks are drawn: a node is one cell, and they were drawn for
-## a seam a tile across.
-const NODE_SCALE := float(Grid.CELL) / float(Grid.TILE)
+## How big a seam's marks are drawn: the node's width against the tile they were
+## drawn for. One since nodes went back to two cells by two.
+const NODE_SCALE := float(Defs.ORE_NODE_SIZE.x * Grid.CELL) / float(Grid.TILE)
 
 func _draw_shard(centre: Vector2, tint: Color, item_type: int, warm: bool) -> void:
 		# The shadow, inside the node transform the caller set up.

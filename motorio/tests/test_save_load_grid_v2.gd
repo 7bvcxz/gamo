@@ -158,7 +158,7 @@ func _test_migrates_a_v11_run() -> void:
 		if not Defs.machine_mines(machine.type):
 			continue
 		posts += 1
-		_assert(sim.ore.has(anchor), "남은 채굴기 %s 는 광맥 위에 있다" % anchor)
+		_assert(sim.has_ore(anchor), "남은 채굴기 %s 는 광맥 위에 있다" % anchor)
 	var staffed := 0
 	for cat: Sim.Cat in sim.cats:
 		if cat.has_job():
@@ -255,7 +255,7 @@ func _test_v12_round_trip() -> void:
 		if machine == null or [machine.type, machine.dir, sim.machine_rect(machine)] != shape[anchor]:
 			same = false
 	_assert(same, "설비 %d개가 같은 앵커·방향·발자국으로 돌아온다" % shape.size())
-	_assert(sim.machine_at(seam + Vector2i(2, 2)) == sim.machine_at(seam),
+	_assert(sim.machine_at(seam + Vector2i(1, 1)) == sim.machine_at(seam),
 		"발자국의 다른 칸도 같은 채굴기를 가리킨다")
 	_assert(not sim.cats.is_empty() and sim.cats[-1].assigned == assigned, "고양이의 자리도 그대로다")
 	_assert(sim.shelter_cell == hut, "숙소 앵커도 그대로다")

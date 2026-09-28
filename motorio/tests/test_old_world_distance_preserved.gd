@@ -79,9 +79,9 @@ func _test_rings_over_seeds() -> void:
 		# The pinned copper and iron patches, every node inside their band.
 		var copper := 0
 		var iron := 0
-		for cell: Vector2i in sim.ore:
-			var d: float = sim.tiles_from_core(cell)
-			match int(sim.ore[cell]):
+		for cell: Vector2i in sim.ore_nodes:
+			var d: float = sim.ore_tiles_from_core(cell)
+			match sim.ore_type_at(cell):
 				Defs.ITEM_COPPER:
 					if d >= Defs.FIRST_COPPER_BAND.x and d <= Defs.FIRST_COPPER_BAND.y:
 						copper += 1

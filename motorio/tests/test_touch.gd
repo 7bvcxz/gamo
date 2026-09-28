@@ -94,7 +94,7 @@ func _mining(main: Node2D) -> void:
 	sim.has_pickaxe = true
 	sim.has_gun = true
 	var seam: Vector2i = Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		seam = cell
 		break
 	_check(seam != Vector2i(9999, 9999), "광맥이 있다")

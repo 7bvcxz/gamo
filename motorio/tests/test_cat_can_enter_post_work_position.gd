@@ -37,13 +37,13 @@ func _sim() -> Sim:
 	sim.setup(4242)
 	sim.cats.clear()
 	sim.unlocked[Defs.M_MINER] = true
-	for item: int in [Defs.ITEM_CRYSTAL, Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER]:
+	for item: int in [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER]:
 		sim.stock[item] = 5000
 	return sim
 
 func _clear(sim: Sim, rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 	for props: Dictionary in [sim.frozen_cats, sim.debris, sim.village]:
 		for origin: Vector2i in props.keys():
 			if sim.prop_rect(origin).intersects(rect):
@@ -90,7 +90,7 @@ func _test_each_facing() -> void:
 		var sim := _sim()
 		var seam: Vector2i = sim.core_cell + SITE
 		_clear(sim, Rect2i(seam - Vector2i(12, 12), Vector2i(25, 25)))
-		sim.ore[seam] = Defs.ITEM_HEATSTONE
+		sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 		sim.build(Defs.M_MINER, seam, dir)
 		_check_place(sim, seam, "%s 향" % dir)
 		var rect: Rect2i = sim.machine_rect(sim.machine_at(seam))
@@ -114,7 +114,7 @@ func _test_crowded_row() -> void:
 	var rects: Array[Rect2i] = []
 	for index in 5:
 		var seam: Vector2i = origin + Vector2i(index * Defs.ORE_PITCH, 0)
-		sim.ore[seam] = Defs.ITEM_HEATSTONE
+		sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 		sim.build(Defs.M_MINER, seam, Vector2i.DOWN)
 		seams.append(seam)
 		rects.append(sim.machine_rect(sim.machine_at(seam)))

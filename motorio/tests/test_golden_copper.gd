@@ -62,16 +62,16 @@ func _test_copper_is_reachable_at_heat_13() -> void:
 		# Lv3 (radius 11): no copper may be touchable yet.
 		sim.stones_in = int(Defs.BASE_LEVELS[2]["stones"])
 		sim._refresh_radius()
-		for cell: Vector2i in sim.ore:
-			if int(sim.ore[cell]) == Defs.ITEM_COPPER and sim.can_touch(cell):
+		for cell: Vector2i in sim.ore_nodes:
+			if sim.ore_type_at(cell) == Defs.ITEM_COPPER and sim.can_touch(cell):
 				early += 1
 				break
 		# Lv4 (radius 13): the first patch is inside, whole.
 		sim.stones_in = int(Defs.BASE_LEVELS[3]["stones"])
 		sim._refresh_radius()
 		var reachable := 0
-		for cell: Vector2i in sim.ore:
-			if int(sim.ore[cell]) == Defs.ITEM_COPPER and sim.can_touch(cell):
+		for cell: Vector2i in sim.ore_nodes:
+			if sim.ore_type_at(cell) == Defs.ITEM_COPPER and sim.can_touch(cell):
 				reachable += 1
 		if reachable < 1:
 			missing += 1
@@ -109,7 +109,7 @@ func _test_copper_is_reachable_at_heat_13() -> void:
 				var next: Vector2i = at + dir
 				if seen.has(next) or world.tiles_from_core(next) > 14.0:
 					continue
-				if int(world.ore.get(next, -1)) == Defs.ITEM_COPPER and world.can_touch(next):
+				if world.ore_type_at(next) == Defs.ITEM_COPPER and world.can_touch(next):
 					beside = true
 					break
 				if world.is_structure(next) or world.machine_at(next) != null:

@@ -53,7 +53,7 @@ func _open() -> void:
 
 func _clear(rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 		var machine: Sim.Machine = sim.machine_at(cell)
 		if machine != null and machine.type != Defs.M_CORE:
 			sim.remove_machine(cell)
@@ -70,7 +70,7 @@ func _hold_gun(type: int) -> void:
 func _test_post_ghost() -> void:
 	var seam: Vector2i = sim.core_cell + Vector2i(30, 0)
 	_clear(Rect2i(seam - Vector2i(8, 8), Vector2i(17, 17)))
-	sim.ore[seam] = Defs.ITEM_CRYSTAL
+	sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 	_hold_gun(Defs.M_MINER)
 	var rect: Rect2i = Defs.machine_footprint(Defs.M_MINER, seam)
 	# South of where the post would stand, looking north at the seam.
@@ -79,18 +79,24 @@ func _test_post_ghost() -> void:
 	main._update_preview()
 	var layer: Node2D = main.machine_layer
 	_assert(layer.preview_cell == seam, "고스트는 광맥을 겨눈다")
-	_assert(layer.preview_rect == rect, "고스트는 4x4 발자국 전체다: %s" % layer.preview_rect)
+	_assert(layer.preview_rect == rect and rect == Sim.ore_rect(seam),
+		"고스트는 노드를 덮는 2×2 발자국 전체다: %s" % layer.preview_rect)
 	_assert(layer.preview_problems.is_empty(), "빈 땅이면 막힌 칸이 없다")
 	_assert(layer.preview_valid, "그리고 초록이다")
-	# A second seam under one corner: that cell, and only that cell, is named.
-	var corner: Vector2i = rect.position
-	sim.ore[corner] = Defs.ITEM_CRYSTAL
+	# Something already standing on one corner -- a belt a v12 save left over
+	# the node's edge, say: that cell, and only that cell, is named. (A second
+	# node cannot be under a post any more: nodes stand two cells apart.)
+	var corner: Vector2i = rect.end - Vector2i.ONE
+	var stray := Sim.Machine.new()
+	stray.type = Defs.M_BELT
+	stray.cell = corner
+	sim.add_machine(stray)
 	main._update_preview()
 	_assert(layer.preview_problems.size() == 1, "겹치는 칸 하나만 빨갛다 (%d)" % layer.preview_problems.size())
-	_assert(String(layer.preview_problems.get(corner, "")) == "다른 광맥이 겹칩니다",
+	_assert(String(layer.preview_problems.get(corner, "")) == "이미 설비가 있습니다",
 		"그 칸의 이유가 적혀 있다: '%s'" % String(layer.preview_problems.get(corner, "")))
 	_assert(not layer.preview_valid, "고스트 전체가 거부 상태다")
-	sim.ore.erase(corner)
+	sim.remove_machine(corner)
 	# A block of ice over two cells of the far side.
 	var ice := Vector2i(rect.end.x - 1, seam.y)
 	sim.frozen_cats[ice] = 0.0
@@ -124,11 +130,11 @@ func _test_belt_ghost() -> void:
 	var layer: Node2D = main.machine_layer
 	_assert(layer.preview_rect.size == Vector2i.ONE, "벨트 고스트는 한 칸이다")
 	_assert(layer.preview_problems.is_empty() and layer.preview_valid, "빈 땅이면 초록")
-	sim.ore[layer.preview_cell] = Defs.ITEM_CRYSTAL
+	sim.put_ore(layer.preview_cell, Defs.ITEM_CRYSTAL)
 	main._update_preview()
 	_assert(layer.preview_problems.size() == 1 and not layer.preview_valid,
 		"광맥 위면 그 한 칸이 빨갛다")
-	sim.ore.erase(layer.preview_cell)
+	sim.erase_ore_at(layer.preview_cell)
 
 ## The hut in her arms shows the forty-eight cells it would cover, red where the
 ## fire is too close.

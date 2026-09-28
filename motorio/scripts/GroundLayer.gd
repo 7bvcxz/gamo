@@ -218,9 +218,9 @@ func _ensure_rock(start: Vector2i, end: Vector2i) -> void:
 ## The sheet this cell's seam draws from, or null if there is no seam here or its
 ## ore has no sheet yet -- in which case WorldLayer paints the shard instead.
 static func ore_atlas_at(sim_ref, cell: Vector2i) -> Texture2D:
-	if sim_ref == null or not sim_ref.ore.has(cell):
+	if sim_ref == null:
 		return null
-	return ORE_ATLAS.get(int(sim_ref.ore[cell]), null)
+	return ORE_ATLAS.get(int(sim_ref.ore_type_at(cell)), null)
 
 func _seam_atlas(cell: Vector2i) -> Texture2D:
 	return ore_atlas_at(sim, cell)
@@ -301,14 +301,21 @@ func _draw_tiles() -> void:
 	# one can switch texture between cells, since two ores on screen are two
 	# sheets; seams are tens of cells rather than the whole floor, so the broken
 	# batch costs less than sorting them would.
-	for y in range(start.y, end.y + 1):
-		for x in range(start.x, end.x + 1):
+	#
+	# One picture per node, across all four of its cells, from its origin. Four
+	# quarter-size copies of a seam is four seams; the node is one thing. The
+	# walk starts a cell early so a node whose origin is just off the top or
+	# left edge still paints the part of it that is on screen.
+	for y in range(start.y - 1, end.y + 1):
+		for x in range(start.x - 1, end.x + 1):
 			var cell := Vector2i(x, y)
+			if sim.ore_origin_at(cell) != cell:
+				continue
 			var atlas: Texture2D = _seam_atlas(cell)
 			if atlas == null:
 				continue
 			_tile_layer.draw_texture_rect_region(atlas,
-				Rect2(Grid.origin(cell), Vector2(tile, tile)),
+				Grid.rect_px(Sim.ore_rect(cell)),
 				ore_region(atlas, ore_variant(cell)))
 	_draw_trail(start, end)
 

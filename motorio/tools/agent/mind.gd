@@ -609,7 +609,7 @@ func _rig_without_belt() -> Vector2i:
 func _rig_on(item_type: int) -> Vector2i:
 	for cell: Vector2i in sim.machines:
 		if Defs.machine_mines(sim.machines[cell].type) \
-				and int(sim.ore.get(cell, -1)) == item_type:
+				and sim.ore_type_at(cell) == item_type:
 			return cell
 	return Vector2i(9999, 9999)
 

@@ -47,7 +47,7 @@ func _assert(condition: bool, label: String) -> void:
 
 func _clear(rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 		sim.ground.erase(cell)
 		sim.drops.erase(cell)
 	for props: Dictionary in [sim.frozen_cats, sim.debris, sim.village]:

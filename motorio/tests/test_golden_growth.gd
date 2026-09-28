@@ -120,7 +120,7 @@ func _test_torch_only_releases_ground_ice() -> void:
 	var home := Vector2i(sim.core_cell.x, sim.base_rect().end.y)
 	for covered: Vector2i in Grid.cells_in(sim.prop_rect(home)):
 		sim.remove_machine(covered)
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 	_assert(sim.put_down_frozen(home), "기지 곁에 내려놓으면")
 	_assert(sim.can_thaw(home), "그때에야 녹기 시작한다")
 	sim.free()

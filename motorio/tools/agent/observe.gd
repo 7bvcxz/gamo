@@ -25,8 +25,8 @@ func _knows(cell: Vector2i) -> bool:
 
 func ore_cells(item_type: int) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) != item_type:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) != item_type:
 			continue
 		if not _knows(cell):
 			continue

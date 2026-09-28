@@ -17,8 +17,8 @@ func _run() -> void:
 	# --- Lv1: the player produces before anything else exists -----------------
 	_assert(not sim.is_unlocked(Defs.M_MINER), "nothing is buildable on the first frame")
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "the world starts with heat stone to hand-mine")
@@ -184,7 +184,7 @@ func _run() -> void:
 	# North-east of the base, off the starter seams (Grid v2).
 	var gen_cell := Vector2i(8, -6)
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, gen_cell)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 	_assert(sim.build(Defs.M_GENERATOR, gen_cell, Vector2i.RIGHT), "a generator goes down")
 	sim.tick(0.01)
 	_assert(is_equal_approx(sim.power_capacity, 0.0), "an unfuelled generator supplies nothing")
@@ -222,7 +222,7 @@ func _run() -> void:
 	var hub := Vector2i(20, 20)
 	for around: Vector2i in [hub, hub + Vector2i.RIGHT, hub + Vector2i.DOWN,
 			hub + Vector2i.UP, hub + Vector2i.LEFT]:
-		split_sim.ore.erase(around)
+		split_sim.erase_ore_at(around)
 		split_sim.machines.erase(around)
 	_assert(split_sim.build(Defs.M_SPLITTER, hub, Vector2i.RIGHT), "a splitter goes down")
 	var outs: Array[Vector2i] = split_sim.splitter_outputs(split_sim.machine_at(hub))
@@ -286,8 +286,8 @@ func _run() -> void:
 	grade_sim.setup(20260801)
 	var near_best := 0
 	var far_best := 0
-	for cell: Vector2i in grade_sim.ore:
-		var distance: float = grade_sim.tiles_from_core(cell)
+	for cell: Vector2i in grade_sim.ore_nodes:
+		var distance: float = grade_sim.ore_tiles_from_core(cell)
 		if distance < Defs.PURITY_RICH_RING:
 			near_best = maxi(near_best, grade_sim.purity_of(cell))
 		if distance >= Defs.PURITY_PURE_RING:
@@ -300,8 +300,8 @@ func _run() -> void:
 	var plain := Vector2i(grade_sim.core_cell.x + 5 * Grid.SCALE, grade_sim.core_cell.y)
 	var rich := Vector2i(grade_sim.core_cell.x + (int(Defs.PURITY_PURE_RING) + 2) * Grid.SCALE,
 		grade_sim.core_cell.y)
-	grade_sim.ore[plain] = Defs.ITEM_CRYSTAL
-	grade_sim.ore[rich] = Defs.ITEM_CRYSTAL
+	grade_sim.put_ore(plain, Defs.ITEM_CRYSTAL)
+	grade_sim.put_ore(rich, Defs.ITEM_CRYSTAL)
 	grade_sim._assign_purity()
 	_assert(grade_sim.seam_period(rich) < grade_sim.seam_period(plain),
 		"a pure seam yields faster: %.1fs vs %.1fs" % [grade_sim.seam_period(rich), grade_sim.seam_period(plain)])
@@ -320,7 +320,7 @@ func _run() -> void:
 	var before_stock: int = int(grade_sim.stock[Defs.ITEM_COPPER])
 	var spot := Vector2i(grade_sim.core_cell.x + 6, grade_sim.core_cell.y + 6) * Grid.SCALE
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, spot)):
-		grade_sim.ore.erase(covered)
+		grade_sim.erase_ore_at(covered)
 		grade_sim.remove_machine(covered)
 	_assert(grade_sim.build(Defs.M_GENERATOR, spot, Vector2i.RIGHT), "a generator goes down")
 	_assert(int(grade_sim.stock[Defs.ITEM_COPPER]) < before_stock, "and costs materials")
@@ -347,8 +347,8 @@ func _run() -> void:
 	grid.stock[Defs.ITEM_ENERGY_CORE] = 5
 	var seam2 := Vector2i(grid.core_cell.x + 4, grid.core_cell.y + 4) * Grid.SCALE
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, seam2)):
-		grid.ore.erase(covered)
-	grid.ore[seam2] = Defs.ITEM_CRYSTAL
+		grid.erase_ore_at(covered)
+	grid.put_ore(seam2, Defs.ITEM_CRYSTAL)
 	grid._assign_purity()
 	_assert(grid.build(Defs.M_MINER, seam2, Vector2i.RIGHT), "a miner goes down")
 
@@ -361,7 +361,7 @@ func _run() -> void:
 
 	var gen2 := Vector2i(grid.core_cell.x + 8, grid.core_cell.y + 8) * Grid.SCALE
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, gen2)):
-		grid.ore.erase(covered)
+		grid.erase_ore_at(covered)
 	_assert(grid.build(Defs.M_GENERATOR, gen2, Vector2i.RIGHT), "a generator goes down")
 	grid.machine_at(gen2).buffer[Defs.GENERATOR_FUEL] = 4
 	grid.tick(0.02)
@@ -426,7 +426,7 @@ func _run() -> void:
 	belt_sim._check_unlocks()
 	belt_sim.stock[Defs.ITEM_COPPER] = 100
 	var lane := Vector2i(belt_sim.core_cell.x + 9, belt_sim.core_cell.y + 9)
-	belt_sim.ore.erase(lane)
+	belt_sim.erase_ore_at(lane)
 	_assert(belt_sim.build(Defs.M_BELT, lane, Vector2i.RIGHT), "a belt goes down at grade 1")
 	_assert(belt_sim.machine_at(lane).tier == 0, "starting at the base grade")
 	var copper_before: int = int(belt_sim.stock[Defs.ITEM_COPPER])
@@ -455,7 +455,7 @@ func _haul_seconds(tiles: int) -> float:
 	# is four tiles across and solid; the cat used to stand on the one-tile core).
 	cat.pos = sim.cell_centre(Grid.front_cell(sim.base_rect(), Vector2i.RIGHT, sim.core_cell))
 	var at := sim.core_cell + Vector2i(tiles, 0) * Grid.SCALE
-	sim.ore.erase(at)
+	sim.erase_ore_at(at)
 	sim.remove_machine(at)
 	sim.drop_item(at, Defs.ITEM_CRYSTAL)
 	var elapsed := 0.0

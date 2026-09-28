@@ -509,12 +509,12 @@ func _test_end_to_end() -> void:
 	# Two seams, two rigs, two manufacturers -- one on plates, one on wire -- and
 	# one assembler where the lines meet. In cells (Grid v2):
 	#
-	#   iron post (3..6, -7..-4) -> belt (7,-6) -> plate plant (8..9, -6..-5) facing
+	#   iron post (5..6, -6..-5) -> belt (7,-6) -> plate plant (8..9, -6..-5) facing
 	#   south -> belts down x=8 from -4 to 3 -> (8..11, 4) east -> joint (12..13, 4..5)
-	#   copper post (3..6, 11..14) -> belt (7,12) -> wire plant (8..9, 12..13) facing
+	#   copper post (5..6, 12..13) -> belt (7,12) -> wire plant (8..9, 12..13) facing
 	#   north -> belts up x=8 from 11 to 5 -> the same row east
-	var iron_seam: Vector2i = _seam(sim, Vector2i(4, -6), Defs.ITEM_IRON)
-	var copper_seam: Vector2i = _seam(sim, Vector2i(4, 12), Defs.ITEM_COPPER)
+	var iron_seam: Vector2i = _seam(sim, Vector2i(5, -6), Defs.ITEM_IRON)
+	var copper_seam: Vector2i = _seam(sim, Vector2i(5, 12), Defs.ITEM_COPPER)
 	var plate_plant: Vector2i = _clear(sim, Vector2i(8, -6), Vector2i(2, 2))
 	var wire_plant: Vector2i = _clear(sim, Vector2i(8, 12), Vector2i(2, 2))
 	var joint: Vector2i = _clear(sim, _PLANT, Vector2i(2, 2))
@@ -625,7 +625,7 @@ func _fuel(sim, count: int) -> void:
 ## A block of cells from `cell` emptied of everything a build would refuse.
 func _clear(sim, cell: Vector2i, size: Vector2i = Vector2i.ONE) -> Vector2i:
 	for covered: Vector2i in Grid.cells_in(Rect2i(cell, size)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.remove_machine(covered)
 		sim.ground.erase(covered)
 		sim.ground_stack.erase(covered)
@@ -639,7 +639,7 @@ func _clear(sim, cell: Vector2i, size: Vector2i = Vector2i.ONE) -> Vector2i:
 func _seam(sim, cell: Vector2i, item_type: int) -> Vector2i:
 	var rect: Rect2i = Defs.machine_footprint(Defs.M_MINER, cell)
 	_clear(sim, rect.position, rect.size)
-	sim.ore[cell] = item_type
+	sim.put_ore(cell, item_type)
 	sim.purity[cell] = Defs.PURITY_NORMAL
 	return cell
 

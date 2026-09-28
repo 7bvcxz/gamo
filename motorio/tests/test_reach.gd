@@ -123,14 +123,14 @@ func _test_ice_outranks_the_pickaxe() -> void:
 	# tile across, two cells by two).
 	var cell: Vector2i = sim.core_cell + Vector2i(4, 0) * Grid.SCALE
 	sim.remove_machine(cell)
-	sim.ore[cell] = Defs.ITEM_HEATSTONE
+	sim.put_ore(cell, Defs.ITEM_HEATSTONE)
 	sim.frozen_cats[cell] = 0.0
 	sim.thawed[cell] = true
 	main.player.position = sim.cell_centre(cell + Vector2i(-Grid.SCALE, 0))
 	main.player.facing = Vector2i(1, 0)
 	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
 	_assert(main.holding_pickaxe(), "곡괭이를 들고 있고")
-	_assert(sim.ore.has(cell) and sim.frozen_cats.has(cell),
+	_assert(sim.has_ore(cell) and sim.frozen_cats.has(cell),
 		"그 칸에는 광맥이 있고 그 위에 얼음이 있다")
 	main._primary_action()
 	_assert(sim.carried_frozen, "그래도 Z는 얼음을 든다")

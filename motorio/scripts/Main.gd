@@ -912,13 +912,13 @@ func draw_map(on: CanvasItem, view: Rect2, zoom: float = -1.0, clip: float = -1.
 
 	# Only what stands in explored ground. A seam nobody has been near must not
 	# appear on the map because it happens to be inside the drawn area.
-	for cell: Vector2i in sim.ore:
-		if not sim.is_explored(cell):
+	for origin: Vector2i in sim.ore_nodes:
+		if not sim.is_explored(origin):
 			continue
-		var at: Vector2 = centre + (Grid.origin(cell) - here_px) * k
+		var at: Vector2 = centre + (sim.ore_centre(origin) - here_px) * k - Vector2.ONE * dot * 0.5
 		if not inside.call(at, dot):
 			continue
-		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.ITEM_COLORS[int(sim.ore[cell])])
+		on.draw_rect(Rect2(at, Vector2(dot, dot)), Defs.ITEM_COLORS[int(sim.ore_nodes[origin])])
 	for cell: Vector2i in sim.machines:
 		if not sim.is_explored(cell):
 			continue
@@ -1439,7 +1439,10 @@ const SAVE_PATH := "user://motorio_save.cfg"
 # seams are generated on the new lattice. An 11 is never read as a 12 and never
 # overwritten: it is copied aside first (`backup_old_save`) and migrated
 # (`SaveMigration`).
-const SAVE_SCHEMA := 12
+# 13 (2026-09-28): ore nodes. A seam is two cells by two, generated per node, so
+# the ground under a running save can differ; a 12 is copied aside and settled
+# (`SaveMigration.settle_nodes`) rather than thrown away.
+const SAVE_SCHEMA := 13
 const SaveMigration := preload("res://scripts/SaveMigration.gd")
 ## What the last load of an older save did to it, for the one line the player is
 ## told and for the tests that check it. Empty when nothing was migrated.
@@ -1649,7 +1652,7 @@ func _update_nibbles(delta: float) -> void:
 
 ## Whether there is anything on a cell her hands could mean.
 func _has_something(cell: Vector2i) -> bool:
-	return sim.machine_at(cell) != null or sim.ore.has(cell) \
+	return sim.machine_at(cell) != null or sim.has_ore(cell) \
 		or sim.frozen_key(cell) != Sim.NONE or sim.debris_key(cell) != Sim.NONE \
 		or sim.is_sign(cell) or sim.is_kit(cell) or sim.in_shelter(cell) \
 		or sim.in_food_bin(cell) or sim.cat_on(cell) != null or sim.ground.has(cell) \
@@ -1712,31 +1715,29 @@ func build_anchor(type: int) -> Vector2i:
 		return rect.position + Grid.default_anchor(size)
 	return rect.position + Grid.rotate_local(local, Defs.machine_size(type), build_dir)
 
-## The seam a mining post would be aimed at. The probe, extended to the depth of
-## the post itself: a post around a seam reaches back toward her, and the seam
-## she can build on is the one far enough ahead that it does not reach her.
-func _post_target(type: int) -> Vector2i:
-	var size: Vector2i = Grid.rotated(Defs.machine_size(type), build_dir)
-	var depth: int = maxi(size.x, size.y) + 1
-	var body: Array[Vector2i] = body_cells()
-	var first := Sim.NONE
-	for cell: Vector2i in Grid.probe(player.position, player.facing, depth):
-		if not sim.ore.has(cell):
-			continue
-		var machine: Sim.Machine = sim.machine_at(cell)
-		if machine != null:
-			continue
-		if first == Sim.NONE:
-			first = cell
-		var rect: Rect2i = Defs.machine_footprint(type, cell, build_dir)
-		var clear := true
-		for covered: Vector2i in body:
-			if rect.has_point(covered):
-				clear = false
-				break
-		if clear:
-			return cell
-	return first
+## The node a mining post would be put on: the one she is facing -- the first
+## node the probe meets, whichever of its cells -- as its origin, which is where
+## a post over it is anchored. NONE when there is none in reach.
+##
+## Never the next one along. When a four by four post round a seam would have
+## landed on her, this used to walk on down the probe to the first seam whose
+## post would not -- in a field laid out a post apart, the seam *behind* the one
+## she was facing, and there usually heat stone. So she faced copper and built
+## on heat stone, and "the copper post puts out heat stone" was a post honestly
+## mining the node it stood on (World Visual Pass 01). The probe meets at most
+## one node (they stand two cells apart), and a post that would land on her is
+## shown on that node, red, until she steps back.
+func _post_target(_type: int) -> Vector2i:
+	for probed: Vector2i in Grid.probe(player.position, player.facing, Grid.SCALE + 1):
+		var node: Vector2i = sim.ore_origin_at(probed)
+		if node != Sim.NONE:
+			return node
+	return Sim.NONE
+
+## Where a swing at this cell lands on screen: the middle of the node for a seam
+## (the node is the thing, whichever quarter she aimed at), the cell otherwise.
+func _swing_centre(cell: Vector2i) -> Vector2:
+	return sim.ore_centre(cell) if sim.has_ore(cell) else sim.cell_centre(cell)
 
 ## Which seam a swing lands on: the one being faced, or the one underfoot.
 ##
@@ -1794,7 +1795,8 @@ func _update_hand_mining(delta: float) -> void:
 	var frame: int = int(player.mine_frame)
 	if frame == PlayerActor.MINE_IMPACT_FRAME and last_mine_frame != frame:
 		audio.call("play", "pick")
-		fx.burst(sim.cell_centre(facing), Defs.ITEM_COLORS[int(sim.ore[facing])], 3)
+		var kind: int = sim.ore_type_at(facing)
+		fx.burst(_swing_centre(facing), Defs.ITEM_COLORS[kind] if kind >= 0 else Defs.ITEM_COLORS[Defs.ITEM_STONE], 3)
 	last_mine_frame = frame
 	var produced: int = sim.hand_mine(facing, delta)
 	player.mining = sim.hand_fraction()
@@ -1807,10 +1809,11 @@ func _update_hand_mining(delta: float) -> void:
 		at = facing + (facing - player.cell())
 		if not sim.drop_item(at, produced):
 			sim.stock[produced] = int(sim.stock.get(produced, 0)) + 1
-	fx.popup(sim.cell_centre(facing) + Vector2(0, -18),
+	var spot: Vector2 = _swing_centre(facing)
+	fx.popup(spot + Vector2(0, -18),
 		"+1 %s" % Defs.ITEM_NAMES[produced], Defs.ITEM_COLORS[produced], true)
-	fx.burst(sim.cell_centre(facing), Defs.ITEM_COLORS[produced], 9)
-	fx.ring(sim.cell_centre(facing), Defs.ITEM_COLORS[produced], Defs.RING_SMALL)
+	fx.burst(spot, Defs.ITEM_COLORS[produced], 9)
+	fx.ring(spot, Defs.ITEM_COLORS[produced], Defs.RING_SMALL)
 	audio.call("play", "build")
 	shake = maxf(shake, Defs.FX_SMALL)
 	_announce_unlocks(sim.note_resource_seen(produced))
@@ -2137,10 +2140,10 @@ func pickaxe_hint_cell() -> Vector2i:
 		return Vector2i(9999, 9999)
 	var best := Vector2i(9999, 9999)
 	var closest: float = 1e20
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) != Defs.ITEM_HEATSTONE:
+	for cell: Vector2i in sim.ore_nodes:
+		if int(sim.ore_nodes[cell]) != Defs.ITEM_HEATSTONE:
 			continue
-		var distance: float = sim.cell_centre(cell).distance_to(player.position)
+		var distance: float = sim.ore_centre(cell).distance_to(player.position)
 		if distance < closest:
 			closest = distance
 			best = cell
@@ -3544,7 +3547,7 @@ func _say_thaw(cell: Vector2i) -> void:
 func _frozen_out_there(cell: Vector2i) -> bool:
 	if sim.can_touch(cell):
 		return false
-	return sim.ore.has(cell) or sim.has_rock(cell) or sim.ground.has(cell) \
+	return sim.has_ore(cell) or sim.has_rock(cell) or sim.ground.has(cell) \
 		or sim.frozen_key(cell) != Sim.NONE or sim.shards.has(cell) or sim.drops.has(cell) \
 		or sim.debris_key(cell) != Sim.NONE
 
@@ -3580,7 +3583,12 @@ func _primary_action() -> void:
 	var cell: Vector2i = target_cell()
 	# Before anything else this key can mean: what is out there is frozen into
 	# the ground, and no verb applies to it until the fire reaches that far.
-	if _frozen_out_there(cell):
+	#
+	# Except the gun, when it can build here: the rules let a post go down on a
+	# node past the circle, and a post is aimed *at* its node now, so the cell in
+	# front of her is the frozen ore itself. The gun that has said what it means
+	# outranks what the ground is doing (the Z rule in AGENTS.md).
+	if _frozen_out_there(cell) and not _gun_builds_here():
 		_say_frozen(cell)
 		return
 	# Reachable, because of the torch, but still frozen into the ground. A press
@@ -3689,9 +3697,7 @@ func _primary_action() -> void:
 		fx.ring(sim.prop_centre(ice), Defs.COL_ICE, 22.0)
 		audio.call("play", "select")
 		return
-	if holding_build_gun() and sim.can_build(selected_type(), build_anchor(selected_type()),
-			build_dir, body_cells()) == "" \
-			and sim.can_afford(selected_type()) and sim.is_unlocked(selected_type()):
+	if _gun_builds_here():
 		_try_build()
 		return
 	var target: Vector2i = _hand_target()
@@ -3717,6 +3723,13 @@ func _primary_action() -> void:
 	if not holding_build_gun():
 		return
 	_try_build()
+
+## Whether Z with the gun out would build right now: held, aimed where the rules
+## allow, affordable and opened.
+func _gun_builds_here() -> bool:
+	return holding_build_gun() and sim.can_build(selected_type(), build_anchor(selected_type()),
+		build_dir, body_cells()) == "" \
+		and sim.can_afford(selected_type()) and sim.is_unlocked(selected_type())
 
 ## Putting down the base or the shelter. Both refuse for reasons the player
 ## cannot see from the tile alone, so a refusal says which one it was -- a
@@ -4407,7 +4420,7 @@ func debug_spill() -> void:
 	for index in run + 2 * Grid.SCALE:
 		var cell: Vector2i = start_cell + Vector2i(index, 0)
 		sim.remove_machine(cell)
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 		sim.ground.erase(cell)
 		sim.ground_stack.erase(cell)
 		sim.mined_rocks[Grid.tile_of(cell)] = true
@@ -4478,7 +4491,7 @@ func debug_belt_loop() -> void:
 			# under it, and a tool that sometimes produces the arrangement it
 			# promises is worse than no tool: a gap in the loop looks exactly
 			# like a corner the drawing failed to make.
-			sim.ore.erase(at)
+			sim.erase_ore_at(at)
 			if sim.build(Defs.M_BELT, at, step):
 				built += 1
 			at += step
@@ -4501,10 +4514,10 @@ func debug_crowd() -> void:
 	# moved out to the middle of the game the key silently built nothing -- the
 	# crowd it exists to make was eight cats standing around. A debug key that
 	# quietly stops working is worse than one that is missing.
-	for cell: Vector2i in sim.ore.keys():
+	for cell: Vector2i in sim.ore_nodes.keys():
 		if sim.machine_at(cell) != null:
 			continue
-		if sim.tiles_from_core(cell) > 6.0:
+		if sim.ore_tiles_from_core(cell) > 6.0:
 			continue
 		sim.build(Defs.M_MINER, cell, north)
 	sim.grant_cats(maxi(0, 8 - sim.cats.size()))
@@ -4792,7 +4805,7 @@ func slot_cards() -> Array[Dictionary]:
 		# A run from before Grid v2 is still a run: it is listed, and loading it
 		# migrates it. Its little map is in tiles, so it is drawn at the scale of
 		# cells like every other card.
-		if schema == SAVE_SCHEMA or schema == SaveMigration.FROM:
+		if schema == SAVE_SCHEMA or SaveMigration.reads(schema):
 			var stored: Dictionary = config.get_value("motorio", "card", {})
 			card["exists"] = true
 			card["day"] = int(stored.get("day", 0))
@@ -4831,15 +4844,16 @@ func load_game(slot: int = 0) -> bool:
 	# all the same.
 	var schema: int = int(config.get_value("motorio", "schema", -1))
 	migration_report = {}
-	if schema != SAVE_SCHEMA and schema != SaveMigration.FROM:
+	if schema != SAVE_SCHEMA and not SaveMigration.reads(schema):
 		backup_old_save(slot)
 		return false
 	var data: Dictionary = config.get_value("motorio", "state", {})
 	if data.is_empty():
 		return false
 	var pending: Dictionary = {}
-	if schema == SaveMigration.FROM:
+	if schema != SAVE_SCHEMA:
 		backup_old_save(slot)
+	if schema == SaveMigration.FROM:
 		pending = SaveMigration.convert(data)
 		data = pending["state"]
 	run_seed = int(data.get("seed", run_seed))
@@ -4847,6 +4861,7 @@ func load_game(slot: int = 0) -> bool:
 	sim.from_save(data.get("sim", {}))
 	if not pending.is_empty():
 		migration_report = SaveMigration.settle(sim, pending)
+	SaveMigration.settle_nodes(sim, migration_report, schema)
 	_clear_presentations()
 	day_number = int(data.get("day", 1))
 	time_left = float(data.get("time_left", Defs.DAY_SECONDS))
@@ -4873,11 +4888,13 @@ func load_game(slot: int = 0) -> bool:
 	player.locked = false
 	player.collapse = 0.0
 	collapse_timer = -1.0
-	if not migration_report.is_empty():
+	if schema != SAVE_SCHEMA:
 		# Out of whatever grew round her, and told what happened -- once.
 		_step_clear()
-		_notify(SaveMigration.describe(migration_report), Defs.COL_CORE, MESSAGE_LIFE * 3.0)
-		print("SAVE MIGRATION v%d -> v%d: %s" % [SaveMigration.FROM, SAVE_SCHEMA, str(migration_report)])
+		var line: String = SaveMigration.describe(migration_report)
+		if line != "":
+			_notify(line, Defs.COL_CORE, MESSAGE_LIFE * 3.0)
+		print("SAVE MIGRATION v%d -> v%d: %s" % [schema, SAVE_SCHEMA, str(migration_report)])
 	return true
 
 func clear_save() -> void:

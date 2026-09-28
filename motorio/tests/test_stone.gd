@@ -63,16 +63,16 @@ func _test_no_boulders() -> void:
 	for y in range(-12, 12):
 		for x in range(-12, 12):
 			var cell: Vector2i = sim.core_cell + Vector2i(x, y)
-			if sim.ore.has(cell):
+			if sim.has_ore(cell):
 				continue
 			if sim.hand_mine(cell, 99.0) == Defs.ITEM_STONE:
 				mined += 1
 	_assert(mined == 0, "곡괭이를 아무 데나 휘둘러도 돌은 나오지 않는다 (%d개)" % mined)
 
 	var seam: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
-	_assert(sim.hand_mine(seam, Defs.HAND_MINE_PERIOD * 1.1) == int(sim.ore[seam]),
+	_assert(sim.hand_mine(seam, Defs.HAND_MINE_PERIOD * 1.1) == sim.ore_type_at(seam),
 		"광맥은 그대로 자기 자원을 낸다")
-	_assert(sim.ore.has(seam), "그리고 캐도 남는다")
+	_assert(sim.has_ore(seam), "그리고 캐도 남는다")
 
 	# Stone keeps its number even though nothing produces it: a save writes
 	# materials by number and closing the gap would rename what old runs hold.
@@ -92,8 +92,8 @@ func _test_belt_spill() -> void:
 	# Three tiles out on the diagonal, clear of the base (Grid v2).
 	var at: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 	var ahead: Vector2i = at + Vector2i.RIGHT
-	sim.ore.erase(at)
-	sim.ore.erase(ahead)
+	sim.erase_ore_at(at)
+	sim.erase_ore_at(ahead)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.RIGHT), "벨트를 놓는다")
 	var belt: Sim.Machine = sim.machine_at(at)
 	for index in Defs.belt_cell_capacity():
@@ -124,7 +124,7 @@ func _test_belt_pickup() -> void:
 	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var at: Vector2i = sim.core_cell + Vector2i(3, -3) * Grid.SCALE
-	sim.ore.erase(at)
+	sim.erase_ore_at(at)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.RIGHT), "벨트를 놓는다")
 	var belt: Sim.Machine = sim.machine_at(at)
 	belt.items.append({"type": Defs.ITEM_HEATSTONE, "t": 0.2})

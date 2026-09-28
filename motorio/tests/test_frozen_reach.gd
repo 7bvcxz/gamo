@@ -60,10 +60,10 @@ func _test_rule() -> void:
 	# because "the rule applies to all of them" is a claim about all of them, and
 	# this repository has a record of that kind of rule written into nine
 	# handlers with six of them missing it.
-	sim.ore[far] = Defs.ITEM_HEATSTONE
+	sim.put_ore(far, Defs.ITEM_HEATSTONE)
 	_assert(not sim.can_hand_mine(far), "밖의 광맥은 캘 수 없다")
 	_assert(sim.hand_mine(far, 99.0) < 0, "쳐도 아무것도 안 나온다")
-	sim.ore.erase(far)
+	sim.erase_ore_at(far)
 
 	sim.mined_rocks[Grid.tile_of(far)] = true
 	sim.drop_item(far, Defs.ITEM_STONE)
@@ -80,7 +80,7 @@ func _test_rule() -> void:
 
 	# And the same things inside the circle are hers.
 	var inside: Vector2i = sim.core_cell + Vector2i(3, 0) * Grid.SCALE
-	sim.ore.erase(inside)
+	sim.erase_ore_at(inside)
 	sim.mined_rocks[Grid.tile_of(inside)] = true
 	sim.frozen_cats[inside] = 0.0
 	_assert(sim.pick_up_frozen(inside), "온기 안에서는 들 수 있다")
@@ -97,12 +97,12 @@ func _test_rule() -> void:
 func _test_torch_opens_it() -> void:
 	var sim := _lit()
 	var far: Vector2i = _far(sim)
-	sim.ore[far] = Defs.ITEM_HEATSTONE
+	sim.put_ore(far, Defs.ITEM_HEATSTONE)
 	_assert(not sim.can_hand_mine(far), "횃불이 없으면 밖의 광맥은 그대로다")
 	sim.torch_lit = true
 	_assert(sim.can_touch(far), "횃불을 들면 만질 수 있다")
 	_assert(sim.can_hand_mine(far), "밖의 광맥도 캘 수 있다")
-	sim.ore.erase(far)
+	sim.erase_ore_at(far)
 	sim.mined_rocks[Grid.tile_of(far)] = true
 	sim.drop_item(far, Defs.ITEM_STONE)
 	_assert(sim.collect_ground_at(far) >= 0, "바닥에 떨어진 것도 주워진다")

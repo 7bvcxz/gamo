@@ -42,7 +42,7 @@ func _sim() -> Sim:
 
 func _clear(sim: Sim, rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 		var machine: Sim.Machine = sim.machine_at(cell)
 		if machine != null and machine.type != Defs.M_CORE:
 			sim.remove_machine(cell)

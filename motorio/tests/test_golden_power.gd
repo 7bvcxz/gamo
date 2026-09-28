@@ -132,7 +132,7 @@ func _test_generator_cost_consumes_energy_core() -> void:
 	# and everything under the generator's two-by-two footprint cleared.
 	var spot: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, spot)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.remove_machine(covered)
 		var piece: Vector2i = sim.debris_key(covered)
 		if piece != Sim.NONE:
@@ -186,7 +186,7 @@ func _test_conveyor_waits_for_power() -> void:
 	# and everything under the generator's two-by-two footprint cleared.
 	var spot: Vector2i = sim.core_cell + Vector2i(3, 3) * Grid.SCALE
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_GENERATOR, spot)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.remove_machine(covered)
 		var piece: Vector2i = sim.debris_key(covered)
 		if piece != Sim.NONE:

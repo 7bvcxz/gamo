@@ -37,10 +37,10 @@ func _run() -> void:
 			heat[key] = int(heat.get(key, 0))
 			rich[key] = int(rich.get(key, 0))
 			copper[key] = int(copper.get(key, 0))
-			for cell: Vector2i in sim.ore:
+			for cell: Vector2i in sim.ore_nodes:
 				if sim.tiles_from_core(cell) > r:
 					continue
-				match int(sim.ore[cell]):
+				match sim.ore_type_at(cell):
 					Defs.ITEM_HEATSTONE:
 						heat[key] += 1
 						if int(sim.purity.get(cell, 0)) > Defs.PURITY_NORMAL:

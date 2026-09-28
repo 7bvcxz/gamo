@@ -5,8 +5,15 @@ extends SceneTree
 
 var failures := 0
 const PATH := "user://motorio_save.cfg"
-## Where the staged factory stands, in build cells (Grid v2).
-const MINER := Vector2i(6, 0)
+## Where the staged factory stands, in build cells (Grid v2): a post on the
+## middle starter node south of the base, and the belt home from it.
+##
+## A node the world generates, not one the test puts down. Ore is not in the
+## save -- a load regenerates it from the seed -- so a post on a hand-placed seam
+## comes back standing on bare snow. This test used to do exactly that and still
+## saw the factory "keep running", because the old tick made crystal out of
+## nothing when its seam was missing (World Visual Pass 01).
+const MINER := Vector2i(1, 8)
 const BELT := Vector2i(1, 5)
 const ICE := Vector2i(10, -6)
 
@@ -29,14 +36,12 @@ func _run() -> void:
 	# leaves behind rather than the one the case unfolds into.
 	main.finish_tutorial()
 	_open(main.sim)
-	# Grid v2: a mining post four cells across whose west edge meets the base's
-	# east edge, and a belt in the lane just south of the base.
-	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, MINER)):
-		main.sim.ore.erase(covered)
-	main.sim.ore[MINER] = Defs.ITEM_CRYSTAL
-	main.sim.ore.erase(BELT)
-	main.sim.build(Defs.M_MINER, MINER, Vector2i.LEFT)
-	main.sim.build(Defs.M_BELT, BELT, Vector2i.UP)
+	# A post facing the base, and the belt from its output up the lane.
+	_assert(main.sim.ore_type_at(MINER) == Defs.ITEM_HEATSTONE, "(the starter node is there)")
+	main.sim.build(Defs.M_MINER, MINER, Vector2i.UP)
+	var out: Vector2i = main.sim.output_cell(main.sim.machine_at(MINER))
+	for y in range(BELT.y, out.y + 1):
+		main.sim.build(Defs.M_BELT, Vector2i(BELT.x, y), Vector2i.UP)
 	(main.sim.machine_at(BELT) as Sim.Machine).items.append({"type": Defs.ITEM_COPPER, "t": 0.4})
 	main.sim.carried_frozen = true
 	main.sim.frozen_cats.clear()
@@ -95,11 +100,13 @@ func _run() -> void:
 		"melted ground stays melted across a save")
 	_assert(main.player.position.distance_to(Vector2(123, 456)) < 0.5, "the player is where they left off")
 
-	# A restored miner must actually resume producing.
-	var produced_before: int = int(main.sim.delivered[Defs.ITEM_CRYSTAL])
-	for step in int(Defs.MINER_PERIOD / 0.1) * 3:
+	# A restored miner must actually resume producing: heat stone up the belt
+	# and into the fire.
+	var produced_before: int = int(main.sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) \
+		+ main.sim.stones_in
+	for step in int(Defs.MINER_PERIOD / 0.1) * 4:
 		main.sim.tick(0.1)
-	_assert(int(main.sim.delivered[Defs.ITEM_CRYSTAL]) > produced_before,
+	_assert(int(main.sim.delivered.get(Defs.ITEM_HEATSTONE, 0)) + main.sim.stones_in > produced_before,
 		"the restored factory keeps running")
 
 	# An unknown schema must be refused rather than half-applied.

@@ -85,7 +85,7 @@ func _test_x_closes() -> void:
 	# game. Its own label says C for exactly this reason.
 	main.state = main.State.PLAY
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in main.sim.ore:
+	for cell: Vector2i in main.sim.ore_nodes:
 		seam = cell
 		break
 	main.sim.build(Defs.M_MINER, seam, Vector2i.UP)

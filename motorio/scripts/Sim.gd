@@ -125,6 +125,11 @@ class Machine extends RefCounted:
 	var recipe_key: String = ""
 	## Miners only run while a cat is standing here.
 	var operated: bool = false
+	## Rigs only: the ore node this one works, by the node's origin -- its
+	## identity. Always the rig's own anchor, since a rig stands exactly over its
+	## node, but held as its own fact and saved as one: what a post puts out is
+	## asked of this, never worked out from where the post happens to be.
+	var ore_node: Vector2i = Vector2i(9999, 9999)
 	## What this machine has actually moved, in items, kept in two buckets so the
 	## readout averages over a window instead of reporting the gap between two
 	## cycles. Rolled over rather than accumulated forever, so a machine that was
@@ -136,8 +141,20 @@ class Machine extends RefCounted:
 	var meter_span: float = 0.0
 	var meter_span_old: float = 0.0
 
-var ore: Dictionary[Vector2i, int] = {}
-## Per-seam richness. Same key space as `ore`.
+## Ore, as nodes (World Visual Pass 01, 2026-09-28).
+##
+## A node is two cells by two -- a tile -- and it is one thing: one identity, one
+## material, one post. Its identity is its top-left cell, the origin, and that is
+## the key here. It was a single cell until this pass, stored per cell, and every
+## question about a seam was `ore.has(cell)`; asked of a node that answer is right
+## for one cell in four and silently wrong for the other three. So the old name is
+## gone rather than redefined -- every use had to be decided again, the way
+## `Defs.TILE` was -- and the only ways in are the functions under "Ore nodes".
+var ore_nodes: Dictionary[Vector2i, int] = {}
+## Every cell a node covers -> that node's origin. Written only by `put_ore` and
+## `erase_ore_at`, so it cannot disagree with `ore_nodes`.
+var _ore_cell: Dictionary[Vector2i, Vector2i] = {}
+## Per-node richness, keyed by origin like `ore_nodes`.
 var purity: Dictionary[Vector2i, int] = {}
 var machines: Dictionary[Vector2i, Machine] = {}
 var core_cell := Vector2i.ZERO
@@ -388,6 +405,9 @@ func to_save() -> Dictionary:
 			"recipe": machine.recipe_key,
 			"tier": machine.tier,
 		})
+		if Defs.machine_mines(machine.type):
+			machine_rows[machine_rows.size() - 1]["ore_x"] = machine.ore_node.x
+			machine_rows[machine_rows.size() - 1]["ore_y"] = machine.ore_node.y
 	var cat_rows: Array = []
 	for cat: Cat in cats:
 		cat_rows.append({
@@ -533,6 +553,8 @@ func from_save(data: Dictionary) -> void:
 		machine.outbox = (row.get("outbox", {}) as Dictionary).duplicate(true)
 		machine.recipe_key = String(row.get("recipe", ""))
 		machine.tier = int(row.get("tier", 0))
+		if row.has("ore_x"):
+			machine.ore_node = Vector2i(int(row["ore_x"]), int(row["ore_y"]))
 		for item: Dictionary in row.get("items", []):
 			machine.items.append({"type": int(item["type"]), "t": float(item["t"])})
 		add_machine(machine)
@@ -600,7 +622,7 @@ func setup(seed_value: int) -> void:
 	# (found by tools/presentation_capture.gd, Quality Pass 01).
 	indoors = false
 	_grid_dirty = true
-	ore.clear()
+	clear_ore()
 	machines.clear()
 	# The base is on the map from the first frame. A player who opens the map
 	# before walking anywhere should see where they are, not a black square --
@@ -720,13 +742,99 @@ const STARTER_COPPER: Array[Vector2i] = [Vector2i(1, -17), Vector2i(-3, -17), Ve
 ## The column kept clear between that seam's post and the base, in cells.
 const STARTER_COLUMN := Rect2i(Vector2i(0, -14), Vector2i(3, 11))
 
+# --- Ore nodes -------------------------------------------------------------------
+## The one way into the ore. Every question anything asks about a seam -- is
+## there one here, which one, what is it, what does it give -- is one of these,
+## so no caller works a material out from a cell, a colour or a tile.
+
+## Whether any node covers this cell.
+func has_ore(cell: Vector2i) -> bool:
+	return _ore_cell.has(cell)
+
+## The node covering this cell, as its origin (its identity), or NONE.
+func ore_origin_at(cell: Vector2i) -> Vector2i:
+	return _ore_cell.get(cell, NONE)
+
+## The ore type of the node covering this cell, or -1.
+func ore_type_at(cell: Vector2i) -> int:
+	var origin: Vector2i = _ore_cell.get(cell, NONE)
+	return int(ore_nodes[origin]) if origin != NONE else -1
+
+## What working the node covering this cell yields, by hand, by a cat or by a
+## post: the registry's answer for its type (`Defs.ore_output`), or -1.
+func ore_item(cell: Vector2i) -> int:
+	return Defs.ore_output(ore_type_at(cell))
+
+## The cells of the node whose origin this is.
+static func ore_rect(origin: Vector2i) -> Rect2i:
+	return Rect2i(origin, Defs.ORE_NODE_SIZE)
+
+static func ore_cells(origin: Vector2i) -> Array[Vector2i]:
+	return Grid.cells_in(ore_rect(origin))
+
+## The middle of the node covering this cell, in world pixels.
+func ore_centre(cell: Vector2i) -> Vector2:
+	return Grid.rect_centre(ore_rect(ore_origin_at(cell)))
+
+## How far a node with its origin here is from the fire, in tiles.
+##
+## Measured at the origin cell, not at the node's middle a third of a tile away.
+## The origin is where the seam was when a seam was one cell, and every ring,
+## band and purity grade was placed by measuring there: measure anywhere else and
+## the generator walks a different path and a saved run's world comes back
+## different under its posts.
+func ore_tiles_from_core(origin: Vector2i) -> float:
+	return tiles_from_core(origin)
+
+## Puts a node down with its origin on `origin`, taking away any node it would
+## overlap. The only writer of `ore_nodes` besides `erase_ore_at`.
+func put_ore(origin: Vector2i, type: int) -> void:
+	for cell: Vector2i in ore_cells(origin):
+		erase_ore_at(cell)
+	ore_nodes[origin] = type
+	for cell: Vector2i in ore_cells(origin):
+		_ore_cell[cell] = origin
+
+## Takes away the whole node covering this cell -- never a quarter of one.
+## Returns whether there was one.
+func erase_ore_at(cell: Vector2i) -> bool:
+	var origin: Vector2i = _ore_cell.get(cell, NONE)
+	if origin == NONE:
+		return false
+	for covered: Vector2i in ore_cells(origin):
+		_ore_cell.erase(covered)
+	ore_nodes.erase(origin)
+	purity.erase(origin)
+	return true
+
+func clear_ore() -> void:
+	ore_nodes.clear()
+	_ore_cell.clear()
+	purity.clear()
+
+## Everything wrong with the ore, as sentences: a node missing a cell, a cell
+## pointing at a node that is not there, two nodes overlapping.
+func ore_errors() -> Array[String]:
+	var problems: Array[String] = []
+	for origin: Vector2i in ore_nodes:
+		for cell: Vector2i in ore_cells(origin):
+			if _ore_cell.get(cell, NONE) != origin:
+				problems.append("node %s: cell %s belongs to %s" % [origin, cell, _ore_cell.get(cell, NONE)])
+	for cell: Vector2i in _ore_cell:
+		var origin: Vector2i = _ore_cell[cell]
+		if not ore_nodes.has(origin) or not ore_rect(origin).has_point(cell):
+			problems.append("cell %s points at %s, which does not cover it" % [cell, origin])
+	if _ore_cell.size() != ore_nodes.size() * Defs.ORE_NODE_SIZE.x * Defs.ORE_NODE_SIZE.y:
+		problems.append("%d cells for %d nodes" % [_ore_cell.size(), ore_nodes.size()])
+	return problems
+
 func _generate_ore(seed_value: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value
 	# A guaranteed first patch just south of the core. The opening minute should
 	# be about learning the miner-belt-core sentence, not about searching.
 	for offset: Vector2i in STARTER_PATCH:
-		ore[core_cell + offset] = Defs.ITEM_HEATSTONE
+		put_ore(core_cell + offset, Defs.ITEM_HEATSTONE)
 	# Ore is deliberately scarce: a fifth of the earlier density. Finding a seam
 	# should be an event, and a single miner should be worth protecting. Heat
 	# stone is the exception -- it is what the opening is made of, so there is
@@ -749,19 +857,19 @@ func _generate_ore(seed_value: int) -> void:
 	# goes, so it keeps the spacing every seam has.
 	for offset: Vector2i in STARTER_COPPER:
 		var cell: Vector2i = core_cell + offset
-		for near: Vector2i in ore.keys():
+		for near: Vector2i in ore_nodes.keys():
 			if Grid.steps(near, cell) < Defs.ORE_PITCH:
-				ore.erase(near)
-		ore[cell] = Defs.ITEM_HEATSTONE
+				erase_ore_at(near)
+		put_ore(cell, Defs.ITEM_HEATSTONE)
 	# The base, its surroundings, the shelter, its doorstep and the food bin are
 	# cleared last, after every scatter. Ore blocks building, and the doorstep is
 	# where they are put down every single morning: a seam rolled onto it woke
 	# them up standing inside a wall. It showed up as a test failing one run in
 	# five, which is the shape a seeded world bug always takes -- the map is
 	# different every run and most maps are fine.
-	for cell: Vector2i in ore.keys():
-		if _ore_reserved(cell):
-			ore.erase(cell)
+	for origin: Vector2i in ore_nodes.keys():
+		if _node_reserved(origin):
+			erase_ore_at(origin)
 	_assign_purity()
 
 ## Distance buys richness. The seams beside the base are ordinary; the ones out
@@ -769,14 +877,14 @@ func _generate_ore(seed_value: int) -> void:
 ## uniform field where one seam is as good as any other.
 func _assign_purity() -> void:
 	purity.clear()
-	for cell: Vector2i in ore:
-		var distance: float = _ring_distance(cell)
+	for origin: Vector2i in ore_nodes:
+		var distance: float = _ring_distance(origin)
 		if distance >= Defs.PURITY_PURE_RING:
-			purity[cell] = Defs.PURITY_PURE
+			purity[origin] = Defs.PURITY_PURE
 		elif distance >= Defs.PURITY_RICH_RING:
-			purity[cell] = Defs.PURITY_RICH
+			purity[origin] = Defs.PURITY_RICH
 		else:
-			purity[cell] = Defs.PURITY_NORMAL
+			purity[origin] = Defs.PURITY_NORMAL
 
 ## A patch at a named distance, in a direction the seed picks. Used where the
 ## design says "this resource opens at this upgrade": leaving it to the scatter
@@ -811,7 +919,7 @@ func _pin_patch(rng: RandomNumberGenerator, item_type: int, band: Vector2, size:
 			var distance: float = _ring_distance(cell)
 			if distance < band.x or distance > band.y:
 				continue
-			if ore.has(cell) or _ore_reserved(cell) or base_rect().has_point(cell):
+			if ore_nodes.has(cell) or _ore_reserved(cell) or base_rect().has_point(cell):
 				continue
 			candidates.append(cell)
 	candidates.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
@@ -822,11 +930,24 @@ func _pin_patch(rng: RandomNumberGenerator, item_type: int, band: Vector2, size:
 			break
 		if not _ore_spaced(cell):
 			continue
-		ore[cell] = item_type
+		put_ore(cell, item_type)
 		placed += 1
 
 ## Where no seam may be: the base and a margin round it, the hut and its
 ## doorstep, the bin, and the lanes the opening's belts run along.
+##
+## The walks ask it of a node's origin, exactly as they asked it of a one-cell
+## seam, so a world generates the same nodes from the same seed it generated
+## seams from before nodes existed -- a saved run's posts come back on their
+## nodes. What a node's other three cells reach into is settled once every
+## random draw is done (`_node_reserved`, in the last pass of `_generate_ore`),
+## where taking a node away cannot change where the next one goes.
+func _node_reserved(origin: Vector2i) -> bool:
+	for cell: Vector2i in ore_cells(origin):
+		if _ore_reserved(cell):
+			return true
+	return false
+
 func _ore_reserved(cell: Vector2i) -> bool:
 	if base_rect().grow(2).has_point(cell):
 		return true
@@ -836,12 +957,14 @@ func _ore_reserved(cell: Vector2i) -> bool:
 		return true
 	return STARTER_LANE.has(cell - core_cell)
 
-## Whether a seam here would keep every other seam a post's width away.
-func _ore_spaced(cell: Vector2i) -> bool:
+## Whether a node with its origin here would keep every other node a lane away.
+## Origins at least ORE_PITCH apart leave two cells between two nodes, whichever
+## way they lie -- and no node can overlap another.
+func _ore_spaced(origin: Vector2i) -> bool:
 	var reach: int = Defs.ORE_PITCH - 1
 	for dy in range(-reach, reach + 1):
 		for dx in range(-reach, reach + 1):
-			if ore.has(cell + Vector2i(dx, dy)):
+			if ore_nodes.has(origin + Vector2i(dx, dy)):
 				return false
 	return true
 
@@ -863,9 +986,9 @@ func _scatter_ore(rng: RandomNumberGenerator, item_type: int, ring: Vector2, pat
 		# patch lands on a lattice four cells apart, so each can take a post.
 		while placed < size and attempts < size * 12:
 			attempts += 1
-			if not ore.has(cursor) and _ring_distance(cursor) >= ring.x - 1.0 \
+			if not ore_nodes.has(cursor) and _ring_distance(cursor) >= ring.x - 1.0 \
 					and not _ore_reserved(cursor) and _ore_spaced(cursor):
-				ore[cursor] = item_type
+				put_ore(cursor, item_type)
 				placed += 1
 			cursor = origin + Vector2i(rng.randi_range(-1, 1), rng.randi_range(-1, 1)) \
 				* Defs.ORE_PITCH * (1 + placed / 3)
@@ -940,7 +1063,7 @@ func _generate_frozen_cats(seed_value: int) -> void:
 			var angle: float = second_angle + TAU * float(index) / float(Defs.SECOND_RING_CATS)
 			var tile := core_tile + Vector2i(roundi(cos(angle) * 10.0), roundi(sin(angle) * 10.0))
 			for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
-				ore.erase(cell)
+				erase_ore_at(cell)
 			frozen_cats[Grid.from_tile(tile)] = 0.0
 	var reach: float = Defs.WARM_MAX + 8.0
 	var target: int = int((PI * reach * reach) / Defs.FROZEN_PER_TILES)
@@ -961,7 +1084,7 @@ func _generate_frozen_cats(seed_value: int) -> void:
 
 func _tile_ore(tile: Vector2i) -> bool:
 	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
-		if ore.has(cell):
+		if has_ore(cell):
 			return true
 	return false
 
@@ -1018,8 +1141,7 @@ func _generate_village() -> void:
 	# anyone decided this square was a village, and a house with a seam under it
 	# is a house nobody can walk into.
 	for cell: Vector2i in Grid.cells_in(village_rect):
-		ore.erase(cell)
-		purity.erase(cell)
+		erase_ore_at(cell)
 		shards.erase(cell)
 	for y in Defs.VILLAGE_CELLS.y:
 		for x in Defs.VILLAGE_CELLS.x:
@@ -1027,8 +1149,7 @@ func _generate_village() -> void:
 			debris.erase(at)
 			frozen_cats.erase(at)
 	for cell: Vector2i in Grid.cells_in(Grid.tile_rect(sign_tile)):
-		ore.erase(cell)
-		purity.erase(cell)
+		erase_ore_at(cell)
 	debris.erase(sign_cell)
 	frozen_cats.erase(sign_cell)
 	for piece: Dictionary in Defs.VILLAGE_PIECES:
@@ -1070,8 +1191,7 @@ func _trace_trail(from: Vector2i, to: Vector2i) -> void:
 		# one thing in the fog that says "this way", and a boulder standing on
 		# them is the sentence with a word missing.
 		for covered: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
-			ore.erase(covered)
-			purity.erase(covered)
+			erase_ore_at(covered)
 		debris.erase(cell)
 
 ## Whether a cell is inside the village square at all.
@@ -1162,7 +1282,7 @@ func _prop_drift(origin: Vector2i) -> Vector2:
 ## Where a sliding block is allowed to go. Anything solid stops it, and so does
 ## the fire itself -- a block pushed into the core would be a cat fed to it.
 func _frozen_may_enter(cell: Vector2i) -> bool:
-	if frozen_key(cell) != NONE or debris_key(cell) != NONE or ore.has(cell):
+	if frozen_key(cell) != NONE or debris_key(cell) != NONE or has_ore(cell):
 		return false
 	var piece: int = village_piece(cell)
 	if piece >= 0 and not Defs.village_walkable(piece):
@@ -1418,7 +1538,7 @@ func has_rock(cell: Vector2i) -> bool:
 	if not Defs.ROCK_FIELD:
 		return false
 	var rock_tile: Vector2i = Grid.tile_of(cell)
-	if mined_rocks.has(rock_tile) or ore.has(cell) or machine_at(cell) != null:
+	if mined_rocks.has(rock_tile) or has_ore(cell) or machine_at(cell) != null:
 		return false
 	# Rock is procedural, so it exists under every cell in the world that the
 	# generator did not empty -- and the generator's dictionaries are the only
@@ -1665,6 +1785,10 @@ func touch_point(cell: Vector2i) -> Vector2:
 		var key: Vector2i = prop_key(props, cell)
 		if key != NONE:
 			return prop_centre(key)
+	# A node is a tile across too, and one thing: all four cells are in reach or
+	# none are, measured where its distance is (`ore_tiles_from_core`).
+	if has_ore(cell):
+		return Grid.centre(ore_origin_at(cell))
 	return Grid.centre(cell)
 
 ## How far a tile-sized thing stored under `origin` is from the fire, in tiles.
@@ -1732,7 +1856,7 @@ func place_base(cell: Vector2i) -> bool:
 	# left within two tiles of wherever she is standing.
 	var problems: Dictionary = rect_problems(Defs.machine_footprint(Defs.M_CORE, cell))
 	for blocked: Vector2i in problems.keys():
-		if is_kit(blocked) or (ore.has(blocked) and machine_at(blocked) == null):
+		if is_kit(blocked) or (has_ore(blocked) and machine_at(blocked) == null):
 			problems.erase(blocked)
 	if not problems.is_empty():
 		return false
@@ -1993,8 +2117,7 @@ func _body_clear(at: Vector2, radius: float) -> bool:
 ## next to it, would end up inside the fire.
 func _clear_under(rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		ore.erase(cell)
-		purity.erase(cell)
+		erase_ore_at(cell)
 		ground.erase(cell)
 		ground_stack.erase(cell)
 		drops.erase(cell)
@@ -2065,7 +2188,7 @@ func _free_near(origin: Vector2i) -> Vector2i:
 				var cell: Vector2i = origin + Vector2i(dx, dy)
 				if cell == drop_from:
 					continue
-				if drops.has(cell) or is_structure(cell) or ore.has(cell) or has_rock(cell):
+				if drops.has(cell) or is_structure(cell) or has_ore(cell) or has_rock(cell):
 					continue
 				return cell
 	return Vector2i(9999, 9999)
@@ -2597,6 +2720,10 @@ func _rebuild_occupancy() -> void:
 func add_machine(machine: Machine) -> void:
 	if machines.size() != _occupied_count:
 		_rebuild_occupancy()
+	# A rig added without a target (built, loaded from a save written before
+	# rigs carried one, migrated) takes the node it stands on.
+	if Defs.machine_mines(machine.type) and machine.ore_node == NONE:
+		machine.ore_node = ore_origin_at(machine.cell)
 	machines[machine.cell] = machine
 	for cell: Vector2i in Grid.cells_in(machine_rect(machine)):
 		_occupancy[cell] = machine.cell
@@ -2709,18 +2836,15 @@ const WORLD_LIMIT := 200.0
 func in_world(cell: Vector2i) -> bool:
 	return tiles_from_core(cell) <= WORLD_LIMIT and not Defs.in_room(cell)
 
-## Why one cell cannot take part of a building, or "". `anchor_ore` marks the one
-## cell that must be a seam (a mining post's anchor); `mining` says a seam is
-## what this building is for, which changes what a stray seam in its footprint is
-## called.
-func cell_problem(cell: Vector2i, anchor_ore: bool = false, mining: bool = false) -> String:
+## Why one cell cannot take part of a building, or "". `node` is the ore node a
+## mining post is being put on (NONE for anything else): its own cells are what
+## the post is for, and any other node's are in the way.
+func cell_problem(cell: Vector2i, node: Vector2i = NONE) -> String:
 	if machine_at(cell) != null:
 		return "이미 설비가 있습니다"
-	if anchor_ore:
-		if not ore.has(cell):
-			return "광맥 위에만 설치할 수 있습니다"
-	elif ore.has(cell):
-		return "다른 광맥이 겹칩니다" if mining else "광맥 위에는 설치할 수 없습니다"
+	var here: Vector2i = ore_origin_at(cell)
+	if here != NONE and here != node:
+		return "다른 광맥이 겹칩니다" if node != NONE else "광맥 위에는 설치할 수 없습니다"
 	if not in_world(cell):
 		return "여기에는 지을 수 없습니다"
 	if is_structure(cell) or has_rock(cell):
@@ -2730,27 +2854,34 @@ func cell_problem(cell: Vector2i, anchor_ore: bool = false, mining: bool = false
 ## Every cell of a rectangle that cannot take a building, and why: cell -> reason.
 ##
 ## The whole footprint, never just the anchor: a building is every cell it
-## covers, and the preview paints exactly these red. `ore_anchor` is the seam a
-## mining post must stand on, or NONE; `body` is where someone is standing.
-func rect_problems(rect: Rect2i, ore_anchor: Vector2i = NONE,
+## covers, and the preview paints exactly these red. `node` is the ore node a
+## mining post must cover, or NONE; `body` is where someone is standing.
+func rect_problems(rect: Rect2i, node: Vector2i = NONE,
 		body: Array[Vector2i] = []) -> Dictionary:
 	var out: Dictionary = {}
-	var mining: bool = ore_anchor != NONE
 	for cell: Vector2i in Grid.cells_in(rect):
-		var why: String = cell_problem(cell, cell == ore_anchor, mining)
+		var why: String = cell_problem(cell, node)
 		if why == "" and body.has(cell):
 			why = "너무 가깝습니다"
 		if why != "":
 			out[cell] = why
-	if mining and not rect.has_point(ore_anchor):
-		out[ore_anchor] = "광맥 위에만 설치할 수 있습니다"
 	return out
 
 ## The same, for a machine of `type` with its anchor on `cell`.
+##
+## A mining post's anchor is the origin of the node it works, and its footprint
+## has to take in the whole node -- never half of one, never straddling two.
+## Anything else is refused at the anchor, in the words the player needs.
 func footprint_problems(type: int, cell: Vector2i, dir: Vector2i = Vector2i.RIGHT,
 		body: Array[Vector2i] = []) -> Dictionary:
-	var anchor_ore: Vector2i = cell if Defs.machine_mines(type) else NONE
-	return rect_problems(Defs.machine_footprint(type, cell, dir), anchor_ore, body)
+	var rect: Rect2i = Defs.machine_footprint(type, cell, dir)
+	if not Defs.machine_mines(type):
+		return rect_problems(rect, NONE, body)
+	var node: Vector2i = ore_origin_at(cell)
+	var out: Dictionary = rect_problems(rect, node, body)
+	if node != cell or not rect.encloses(ore_rect(node)):
+		out[cell] = "광맥 위에만 설치할 수 있습니다"
+	return out
 
 ## Which way a belt under this cell drags whatever is standing on it, in pixels
 ## per second. Zero everywhere else.
@@ -3031,8 +3162,9 @@ func design_rates(machine: Machine) -> Dictionary:
 	# Every rig, ahead of the match, because a `match` arm cannot ask a question
 	# -- and listing machine numbers is how the second rig gets forgotten.
 	if Defs.machine_mines(machine.type):
-		if ore.has(machine.cell):
-			out[int(ore[machine.cell])] = Defs.per_minute(machine_period(machine))
+		var yielded: int = ore_item(machine.ore_node)
+		if yielded >= 0:
+			out[yielded] = Defs.per_minute(machine_period(machine))
 		return {"in": into, "out": out}
 	match machine.type:
 		Defs.M_GENERATOR:
@@ -3318,14 +3450,18 @@ func miner_on_power(cell: Vector2i) -> bool:
 ## and is gone, which is the difference between a resource that renews and a
 ## thing you clear.
 func hand_mine(cell: Vector2i, delta: float) -> int:
-	var seam: bool = ore.has(cell)
+	var seam: bool = has_ore(cell)
 	var rock: bool = not seam and has_rock(cell)
 	if (not seam and not rock) or not can_touch(cell):
 		hand_progress = 0.0
 		hand_cell = Vector2i(9999, 9999)
 		return -1
-	if cell != hand_cell:
-		hand_cell = cell
+	# A node is one seam whichever of its four cells she is aimed at, so the
+	# swing is kept against the node: stepping half a tile along it is not a
+	# new swing, and the ring is drawn on the node rather than on a quarter of it.
+	var target: Vector2i = ore_origin_at(cell) if seam else cell
+	if target != hand_cell:
+		hand_cell = target
 		hand_progress = 0.0
 	hand_progress += delta
 	if hand_progress < hand_period(cell):
@@ -3335,12 +3471,12 @@ func hand_mine(cell: Vector2i, delta: float) -> int:
 		mined_rocks[Grid.tile_of(cell)] = true
 		_grid_dirty = true
 		return Defs.ITEM_STONE
-	return int(ore[cell])
+	return ore_item(cell)
 
 ## How long one swing takes here. Boulders are slower than seams: a rock is a
 ## rock, and the gap is what makes walking to a seam worth the walk.
 func hand_period(cell: Vector2i) -> float:
-	return Defs.HAND_MINE_PERIOD if ore.has(cell) else Defs.ROCK_MINE_PERIOD
+	return Defs.HAND_MINE_PERIOD if has_ore(cell) else Defs.ROCK_MINE_PERIOD
 
 ## 0..1 across the current swing, for the progress ring the player watches.
 func can_hand_mine(cell: Vector2i) -> bool:
@@ -3355,7 +3491,7 @@ func can_hand_mine(cell: Vector2i) -> bool:
 	# a seam and held Z mined the ground out from under it.
 	if frozen_key(cell) != NONE:
 		return false
-	return ore.has(cell) or has_rock(cell)
+	return has_ore(cell) or has_rock(cell)
 
 func hand_fraction() -> float:
 	return clampf(hand_progress / hand_period(hand_cell), 0.0, 1.0)
@@ -3902,7 +4038,8 @@ func _is_post(cell: Vector2i) -> bool:
 	var machine: Machine = machines.get(cell, null)
 	if machine != null:
 		return Defs.machine_mines(machine.type)
-	return ore.has(cell) and machine_at(cell) == null
+	# A bare node is a post by its origin, the way a machine is by its anchor.
+	return ore_origin_at(cell) == cell and machine_at(cell) == null
 
 ## The post a cell belongs to: the anchor of the mining machine covering it, or
 ## the cell itself when it is a bare seam. NONE for anything else.
@@ -3910,7 +4047,7 @@ func post_anchor(cell: Vector2i) -> Vector2i:
 	var machine: Machine = machine_at(cell)
 	if machine != null:
 		return machine.cell if Defs.machine_mines(machine.type) else NONE
-	return cell if ore.has(cell) else NONE
+	return ore_origin_at(cell)
 
 func _cat_work(cat: Cat, delta: float) -> void:
 	if not cat.has_job() or not _is_post(cat.assigned):
@@ -3925,8 +4062,8 @@ func _cat_work(cat: Cat, delta: float) -> void:
 		cat.dig += delta / Defs.CAT_DIG_PERIOD
 		if cat.dig >= 1.0:
 			cat.dig = 0.0
-			cat.carrying = int(ore[cat.assigned])
-			cat.state = Defs.CAT_HAUL_TO_BASE
+			cat.carrying = ore_item(cat.assigned)
+			cat.state = Defs.CAT_HAUL_TO_BASE if cat.carrying >= 0 else Defs.CAT_IDLE
 			return
 	if cat.hunger <= 0.0 and food > 0 and food_placed:
 		cat.state = Defs.CAT_TO_FOOD
@@ -4113,7 +4250,14 @@ func _tick_miner(machine: Machine, delta: float) -> void:
 	if not machine.operated:
 		machine.stalled = false
 		return
-	var item_type: int = ore.get(machine.cell, Defs.ITEM_CRYSTAL)
+	# What the node it stands on yields -- asked of the node, never guessed. This
+	# fell back to crystal (a retired item) when the anchor had no seam, which is
+	# a machine inventing its own output; with no node under it, it produces
+	# nothing and says so.
+	var item_type: int = ore_item(machine.ore_node)
+	if item_type < 0:
+		machine.stalled = true
+		return
 	var period: float = machine_period(machine)
 	machine.progress += delta
 	if machine.progress < period:
@@ -4141,13 +4285,14 @@ func mine_period(item_type: int) -> float:
 ## seam being interchangeable. Fixed at generation like everything else, so the
 ## map is the level design.
 func purity_of(cell: Vector2i) -> int:
-	if not ore.has(cell):
+	var origin: Vector2i = ore_origin_at(cell)
+	if origin == NONE:
 		return Defs.PURITY_NORMAL
-	return int(purity.get(cell, Defs.PURITY_NORMAL))
+	return int(purity.get(origin, Defs.PURITY_NORMAL))
 
 ## Seconds per item at this seam, purity included.
 func seam_period(cell: Vector2i) -> float:
-	var base: float = mine_period(int(ore.get(cell, Defs.ITEM_CRYSTAL)))
+	var base: float = mine_period(ore_type_at(cell))
 	return base / Defs.PURITY_RATE[purity_of(cell)]
 
 ## Output goes onto a belt if one is facing, and onto the floor otherwise. The
@@ -4177,7 +4322,7 @@ func ground_count(cell: Vector2i) -> int:
 	return int(ground_stack.get(cell, 1)) if ground.has(cell) else 0
 
 func drop_item(cell: Vector2i, item_type: int) -> bool:
-	if machine_at(cell) != null or ore.has(cell):
+	if machine_at(cell) != null or has_ore(cell):
 		return false
 	# Not into a building either. The hut and the bin are not machines, and a
 	# line that ran into the hut's wall used to pour its cargo onto the roof.

@@ -137,7 +137,7 @@ func _test_unpowered_cat_machine_stops_when_cat_leaves() -> void:
 	var seam: Vector2i = sim.core_cell + Vector2i(6, -6) * Grid.SCALE
 	_clear(sim, Defs.machine_footprint(Defs.M_MINER, seam).position,
 		Defs.machine_size(Defs.M_MINER))
-	sim.ore[seam] = Defs.ITEM_HEATSTONE
+	sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 	sim._assign_purity()
 	_assert(sim.build(Defs.M_MINER, seam, Vector2i.RIGHT), "채굴기가 선다")
 	var cat = sim.Cat.new()
@@ -192,7 +192,7 @@ func _test_day_record_does_not_block_world() -> void:
 ## A block of cells from `cell` emptied of everything a build would refuse.
 func _clear(sim, cell: Vector2i, size: Vector2i = Vector2i.ONE) -> Vector2i:
 	for covered: Vector2i in Grid.cells_in(Rect2i(cell, size)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.remove_machine(covered)
 		for props: Dictionary in [sim.frozen_cats, sim.debris]:
 			var key: Vector2i = Sim.prop_key(props, covered)

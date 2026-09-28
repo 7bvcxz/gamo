@@ -221,7 +221,7 @@ func _run() -> void:
 	main.player.facing = Vector2i.RIGHT
 	for covered: Vector2i in Grid.cells_in(Rect2i(main.player.cell() - Vector2i(2, 3),
 			Vector2i(10, 7))):
-		main.sim.ore.erase(covered)
+		main.sim.erase_ore_at(covered)
 		main.sim.remove_machine(covered)
 		for props: Dictionary in [main.sim.frozen_cats, main.sim.debris]:
 			var key: Vector2i = Sim.prop_key(props, covered)
@@ -280,7 +280,7 @@ func _run() -> void:
 	# A seam far enough ahead that the post around it does not land on her
 	# (Grid v2: four cells by four, the seam at (1, 1)).
 	var spot: Vector2i = main.player.cell() + main.player.facing * 3
-	main.sim.ore[spot] = Defs.ITEM_HEATSTONE
+	main.sim.put_ore(spot, Defs.ITEM_HEATSTONE)
 	main.sim.remove_machine(spot)
 	main.sim.unlocked[Defs.M_MINER] = true
 	main.sim.stock[Defs.ITEM_HEATSTONE] = 50

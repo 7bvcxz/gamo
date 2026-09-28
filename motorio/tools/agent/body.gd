@@ -185,11 +185,11 @@ func hold_interact(target: Vector2i, done: Callable, patience: float = 12.0) -> 
 
 ## Swing at a seam until one more of its ore is in the ledger.
 func mine(seam: Vector2i, patience: float = 18.0) -> String:
-	if not sim.ore.has(seam):
+	if not sim.has_ore(seam):
 		return INVALID
 	if not sim.can_touch(seam):
 		return BLOCKED
-	var item_type: int = int(sim.ore[seam])
+	var item_type: int = sim.ore_type_at(seam)
 	equip_tool(main.TOOL_PICKAXE)
 	var verdict: String = move_near(seam, 60.0)
 	if verdict != OK:

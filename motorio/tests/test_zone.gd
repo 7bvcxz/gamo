@@ -61,8 +61,8 @@ func _test_indoors() -> void:
 	# world does not supply one on its own.
 	var trap: Vector2i = Defs.room_to_world(Vector2i(int(Defs.ROOM_CELLS.x) / 2,
 		int(Defs.ROOM_CELLS.y) / 2))
-	sim.ore[trap] = Defs.ITEM_HEATSTONE
-	_assert(sim.ore.has(trap), "방 밑에 월드를 깔아 둔다 (없으면 이 테스트는 아무것도 지키지 않는다)")
+	sim.put_ore(trap, Defs.ITEM_HEATSTONE)
+	_assert(sim.has_ore(trap), "방 밑에 월드를 깔아 둔다 (없으면 이 테스트는 아무것도 지키지 않는다)")
 	# Stated as distance rather than as `can_touch`, because the room answers
 	# `can_touch` for itself now -- writing the premise in terms of the rule
 	# being tested is what the paragraph above is about, and it was written the

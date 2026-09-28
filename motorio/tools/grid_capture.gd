@@ -96,10 +96,10 @@ func _run() -> void:
 		main.player.facing = Vector2i.UP
 		await _frames(6)
 		await _save(tag + "_05a_post_ghost")
-		sim.ore[rect.end - Vector2i.ONE] = Defs.ITEM_COPPER
+		sim.put_ore(rect.end - Vector2i.ONE, Defs.ITEM_COPPER)
 		await _frames(6)
 		await _save(tag + "_05b_post_ghost_blocked")
-		sim.ore.erase(rect.end - Vector2i.ONE)
+		sim.erase_ore_at(rect.end - Vector2i.ONE)
 		# 6-7. Cats at work on posts, three side by side.
 		for offset in Sim.STARTER_PATCH:
 			sim.build(Defs.M_MINER, sim.core_cell + offset, Vector2i.UP)

@@ -40,7 +40,7 @@ func _sim() -> Sim:
 
 func _clear(sim: Sim, rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 		var machine: Sim.Machine = sim.machine_at(cell)
 		if machine != null and machine.type != Defs.M_CORE:
 			sim.remove_machine(cell)
@@ -106,20 +106,29 @@ func _test_across_the_hut() -> void:
 	_assert(bool(result[1]), "그리고 문간 쪽에 닿는다")
 	sim.free()
 
-## Seven posts edge to edge: a wall twenty-eight cells long with no gap.
+## Seven posts on a field, a node's pitch apart: two-cell lanes between them
+## (World Visual Pass 01 -- the posts used to be four by four and stood edge to
+## edge). A cat crosses the row through a lane, never over a post.
+##
+## And seven posts pushed edge to edge by hand, a wall fourteen cells long with
+## no gap: that one it walks round the end of.
 func _test_round_a_row_of_posts() -> void:
-	var sim := _sim()
-	var origin: Vector2i = sim.core_cell + Vector2i(30, 10)
-	_clear(sim, Rect2i(origin - Vector2i(12, 14), Vector2i(Defs.ORE_PITCH * 7 + 24, 28)))
-	var rects: Array[Rect2i] = []
-	for index in 7:
-		var seam: Vector2i = origin + Vector2i(index * Defs.ORE_PITCH, 0)
-		sim.ore[seam] = Defs.ITEM_HEATSTONE
-		_assert(sim.build(Defs.M_MINER, seam, Vector2i.DOWN), "채굴기 %d" % index)
-		rects.append(sim.machine_rect(sim.machine_at(seam)))
-	var middle: Vector2 = Grid.centre(origin + Vector2i(3 * Defs.ORE_PITCH, 0))
-	var result: Array = _walk(sim, middle + Vector2(0.0, -80.0), middle + Vector2(0.0, 80.0), rects)
-	_assert(int(result[0]) == 0, "채굴기 줄을 뚫지 않는다 (%d)" % int(result[0]))
-	_assert(bool(result[1]), "끝을 돌아 건너편에 닿는다")
-	_assert(float(result[2]) > 160.0 + 200.0, "줄 끝까지 돌아간다 (%.0fpx)" % float(result[2]))
-	sim.free()
+	for pitch: int in [Defs.ORE_PITCH, Defs.ORE_NODE_SIZE.x]:
+		var sim := _sim()
+		var origin: Vector2i = sim.core_cell + Vector2i(30, 10)
+		_clear(sim, Rect2i(origin - Vector2i(12, 14), Vector2i(Defs.ORE_PITCH * 7 + 24, 28)))
+		var rects: Array[Rect2i] = []
+		for index in 7:
+			var node: Vector2i = origin + Vector2i(index * pitch, 0)
+			sim.put_ore(node, Defs.ITEM_HEATSTONE)
+			_assert(sim.build(Defs.M_MINER, node, Vector2i.DOWN), "채굴기 %d" % index)
+			rects.append(sim.machine_rect(sim.machine_at(node)))
+		var middle: Vector2 = Grid.rect_centre(rects[3])
+		var result: Array = _walk(sim, middle + Vector2(0.0, -80.0), middle + Vector2(0.0, 80.0), rects)
+		_assert(int(result[0]) == 0, "채굴기 줄을 뚫지 않는다 (간격 %d, %d번)" % [pitch, int(result[0])])
+		_assert(bool(result[1]), "건너편에 닿는다 (간격 %d)" % pitch)
+		if pitch == Defs.ORE_PITCH:
+			_assert(float(result[2]) < 160.0 + 64.0, "채굴기 사이 통로로 건너간다 (%.0fpx)" % float(result[2]))
+		else:
+			_assert(float(result[2]) > 160.0 + 100.0, "빈틈없는 줄은 끝까지 돌아간다 (%.0fpx)" % float(result[2]))
+		sim.free()

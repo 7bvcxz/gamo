@@ -41,7 +41,7 @@ func _run() -> void:
 	# Grid v2: a mining post is four cells by four around its seam, so the place
 	# to stand is outside that footprint, not on the cell next to the seam.
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in main.sim.ore:
+	for cell: Vector2i in main.sim.ore_nodes:
 		if main.sim.can_build(Defs.M_MINER, cell) == "" \
 				and not main.sim.is_structure(_south_of_post(cell)):
 			seam = cell
@@ -70,7 +70,7 @@ func _run() -> void:
 	main.selected_index = Defs.BUILDABLE.find(Defs.M_BELT)
 	_assert(main.selected_type() == Defs.M_BELT, "the belt has its own hotbar slot")
 	var bare := Vector2i(9999, 9999)
-	for cell: Vector2i in main.sim.ore:
+	for cell: Vector2i in main.sim.ore_nodes:
 		if main.sim.machine_at(cell) == null and not main.sim.is_structure(cell + Vector2i(0, 1)):
 			bare = cell
 			break

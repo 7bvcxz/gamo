@@ -1153,6 +1153,19 @@ static var COUNTED_ITEMS: Array[int] = []
 ## starts paying in it.
 static var ORE_TIERS: Array[int] = []
 
+## What a node of this ore type yields, or -1 for a type that is not a seam.
+##
+## Read from the item registry: a row with a seam sheet (`atlas`) is a material
+## that can be a node, and a node yields its own material. So a post, a cat on a
+## bare node and her pickaxe all get their answer from one place -- and a type
+## nobody registered as a seam yields nothing rather than falling back to
+## something that exists. The fallback was how a post with no seam under it used
+## to produce crystal.
+static func ore_output(ore_type: int) -> int:
+	if ore_type < 0:
+		return -1
+	return ore_type if String(item(ore_type).get("atlas", "")) != "" else -1
+
 ## Hand mining. Deliberately slow: it is the floor the whole factory is measured
 ## against, and it has to stay worth replacing.
 ## How long a torch takes to melt the ground out from under something that has
@@ -1521,7 +1534,7 @@ const PROD_LOGISTICS := "logistics"
 ##                the drawing all read it through `machine_size`
 ##   anchor       where the anchor cell sits in the footprint; absent means the
 ##                default rule (Grid.default_anchor). For a rig the anchor is the
-##                seam it works -- its ORE_ANCHOR
+##                origin of the node it covers
 const MACHINES: Array[Dictionary] = [
 	{
 		"id": M_CORE, "key": "core", "name": "열 코어", "short": "코어",
@@ -1545,10 +1558,12 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": MINER_POWER_DRAW, "power_output": 0.0,
 		"build_order": 0, "walkable": false, "directional": true,
 		"mine_rate": 1.0,
-		# A mining post, four cells by four around one seam. The seam is the
-		# anchor (ORE_ANCHOR, the default rule's (1, 1)); nothing else in the
-		# footprint may be a seam, which is what makes it one post per seam.
-		"size": Vector2i(4, 4),
+		# A mining post, exactly over one ore node (World Visual Pass 01): the
+		# node's size, anchored on the node's origin by the default rule (the
+		# top-left of a two by two). It was four by four round a one-cell seam,
+		# a building twice the size of what it worked. `footprint_problems`
+		# refuses any anchor that is not a node's origin.
+		"size": ORE_NODE_SIZE,
 	},
 	{
 		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
@@ -1623,7 +1638,7 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": RIG2_POWER_DRAW, "power_output": 0.0,
 		"build_order": 6, "walkable": false, "directional": true,
 		"mine_rate": RIG2_RATE,
-		"size": Vector2i(4, 4),
+		"size": ORE_NODE_SIZE,
 	},
 ]
 
@@ -2835,9 +2850,14 @@ const FOOD_CELL := Vector2i(-4, 0)
 const PROP_SIZE := Vector2i.ONE * Grid.SCALE
 const SHELTER_SIZE := Vector2i(6, 8)
 const FOOD_BIN_SIZE := PROP_SIZE
-## How far apart the seams of one field lie, in cells (Chebyshev). Four is the
-## closest two four-by-four mining posts can stand without either covering the
-## other's seam -- so every seam in a field can have a post of its own.
+## An ore node, in build cells: two by two, a tile (World Visual Pass 01). It
+## was one cell -- a pebble on a grid of posts four cells across -- and read as
+## a speck beside the thing it fed.
+const ORE_NODE_SIZE := Vector2i(2, 2)
+## How far apart the nodes of one field lie, origin to origin, in cells
+## (Chebyshev). Four leaves two cells -- a tile, room for her or a belt --
+## between any two nodes, so every node in a field can take a post of its own
+## and a belt out of it.
 const ORE_PITCH := 4
 
 # --- Cat workers -------------------------------------------------------------

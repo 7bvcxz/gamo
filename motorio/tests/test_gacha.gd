@@ -168,7 +168,7 @@ func _purse(sim: Sim) -> void:
 func _grades_reach_the_miner(sim: Sim) -> void:
 	sim.setup(4242)
 	var seam: Vector2i = Vector2i(0, 0)
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		seam = cell
 		break
 	var miner := Sim.Machine.new()

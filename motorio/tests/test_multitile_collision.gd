@@ -4,8 +4,8 @@ extends SceneTree
 ## it -- and nothing can be built into a building's footprint.
 ##
 ## The walk is the real one: her `_physics_process` with the pad held, ticked
-## until she has stopped, against the base (8x8), the hut (6x8) and a mining post
-## (4x4). Her body box may never overlap a footprint on any tick, she must come
+## until she has stopped, against the base (8x8), the hut and a mining post
+## (2x2, its node). Her body box may never overlap a footprint on any tick, she must come
 ## to rest against the wall rather than short of it, and pushing diagonally into
 ## a wall slides her along it.
 
@@ -67,7 +67,7 @@ func _walk(start: Vector2, dir: Vector2, span: Rect2, ticks: int = 240) -> int:
 ## Nothing generated in the corridor she walks.
 func _clear_corridor(rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 	for props: Dictionary in [sim.frozen_cats, sim.debris, sim.village]:
 		for origin: Vector2i in props.keys():
 			if sim.prop_rect(origin).intersects(rect):
@@ -100,7 +100,7 @@ func _test_walls() -> void:
 	# A mining post, from the west.
 	var seam: Vector2i = sim.core_cell + Vector2i(30, 12)
 	_clear_corridor(Rect2i(seam - Vector2i(14, 4), Vector2i(20, 9)))
-	sim.ore[seam] = Defs.ITEM_CRYSTAL
+	sim.put_ore(seam, Defs.ITEM_CRYSTAL)
 	sim.machines.erase(seam)
 	var post := Sim.Machine.new()
 	post.type = Defs.M_MINER
@@ -130,38 +130,43 @@ func _test_no_overlap_rules() -> void:
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var seam: Vector2i = sim.core_cell + Vector2i(30, 12)
 	var rect: Rect2i = Defs.machine_footprint(Defs.M_MINER, seam)
-	# A second post whose footprint shares a single corner cell.
-	var corner_seam: Vector2i = rect.end + Vector2i(1, 1) - Vector2i.ONE
-	sim.ore[corner_seam] = Defs.ITEM_CRYSTAL
+	# A second post whose footprint shares a single corner cell. Nodes stand two
+	# cells apart and a post covers only its own, so a real field never asks
+	# this; the node is put down by hand, over the first post's corner, to ask
+	# the footprint rule itself.
+	var corner_seam: Vector2i = rect.end - Vector2i.ONE
+	sim.put_ore(corner_seam, Defs.ITEM_HEATSTONE)
 	var overlap: Rect2i = Defs.machine_footprint(Defs.M_MINER, corner_seam).intersection(rect)
 	_assert(overlap.get_area() == 1, "두 번째 채굴기는 모서리 한 칸만 겹친다")
 	_assert(sim.can_build(Defs.M_MINER, corner_seam) != "", "한 칸이라도 겹치면 거부된다")
-	sim.ore.erase(corner_seam)
+	sim.erase_ore_at(corner_seam)
+	sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 	# A belt on any cell of the post.
 	var refused := 0
 	for cell: Vector2i in Grid.cells_in(rect):
 		if sim.can_build(Defs.M_BELT, cell) == "이미 설비가 있습니다":
 			refused += 1
-	_assert(refused == 16, "채굴기의 16칸 어디에도 벨트를 놓을 수 없다 (%d)" % refused)
+	_assert(refused == rect.get_area(), "채굴기의 %d칸 어디에도 벨트를 놓을 수 없다 (%d)"
+		% [rect.get_area(), refused])
 	# A post whose footprint would reach into the base, the hut, or a block of ice.
-	# The post's west column is the base's east column.
-	var by_base: Vector2i = Vector2i(sim.base_rect().end.x, sim.core_cell.y)
-	sim.ore[by_base] = Defs.ITEM_CRYSTAL
+	# The post's east column is the base's east column.
+	var by_base: Vector2i = Vector2i(sim.base_rect().end.x - 1, sim.core_cell.y)
+	sim.put_ore(by_base, Defs.ITEM_HEATSTONE)
 	_assert(sim.can_build(Defs.M_MINER, by_base) != "", "기지에 한 칸 걸치는 채굴기는 거부된다")
-	sim.ore.erase(by_base)
-	var by_hut: Vector2i = Vector2i(sim.shelter_rect().position.x - 2, sim.shelter_cell.y)
+	sim.erase_ore_at(by_base)
+	var by_hut: Vector2i = Vector2i(sim.shelter_rect().position.x - 1, sim.shelter_cell.y)
 	# Only the hut in the way: the world is a random seed, and one seed in a few
 	# puts a seam of its own inside this footprint, which is refused first and
 	# for a different reason -- the check then failed on a sentence, not a rule.
 	for cell: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, by_hut)):
-		sim.ore.erase(cell)
-	sim.ore[by_hut] = Defs.ITEM_CRYSTAL
+		sim.erase_ore_at(cell)
+	sim.put_ore(by_hut, Defs.ITEM_HEATSTONE)
 	_assert(sim.can_build(Defs.M_MINER, by_hut) == "막혀 있습니다",
 		"숙소에 한 칸 걸치는 채굴기도 거부된다: '%s'" % sim.can_build(Defs.M_MINER, by_hut))
-	sim.ore.erase(by_hut)
+	sim.erase_ore_at(by_hut)
 	var ice_seam: Vector2i = seam + Vector2i(0, 12)
 	_clear_corridor(Rect2i(ice_seam - Vector2i(4, 4), Vector2i(9, 9)))
-	sim.ore[ice_seam] = Defs.ITEM_CRYSTAL
-	sim.frozen_cats[ice_seam + Vector2i(2, 2)] = 0
+	sim.put_ore(ice_seam, Defs.ITEM_HEATSTONE)
+	sim.frozen_cats[ice_seam + Vector2i(1, 1)] = 0
 	_assert(sim.can_build(Defs.M_MINER, ice_seam) == "막혀 있습니다",
 		"얼어붙은 고양이에 걸치는 채굴기도 거부된다")

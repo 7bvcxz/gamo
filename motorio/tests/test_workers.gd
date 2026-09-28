@@ -119,16 +119,17 @@ func _run() -> void:
 		print("WORKERS_TEST: PASS")
 	quit(failures)
 
-## Where the staged posts stand (Grid v2): one whose west edge meets the base's
-## east wall, one whose south edge meets its north wall. Each emits into the base.
-const WEST_POST := Vector2i(6, 0)
-const NORTH_POST := Vector2i(1, -6)
+## Where the staged posts stand: one whose west edge meets the base's east
+## wall, one whose south edge meets its north wall. Each emits into the base. A
+## post is its node's two by two (World Visual Pass 01).
+const WEST_POST := Vector2i(5, 0)
+const NORTH_POST := Vector2i(1, -5)
 
 ## A seam with nothing else under the post that will stand on it.
 func _seam(sim: Sim, cell: Vector2i) -> void:
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, cell)):
-		sim.ore.erase(covered)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
+		sim.erase_ore_at(covered)
+	sim.put_ore(cell, Defs.ITEM_CRYSTAL)
 
 func _sim() -> Sim:
 	var sim := Sim.new()
@@ -152,7 +153,7 @@ func _test_cat_on_a_bare_seam() -> void:
 	# which makes this the *most* favourable case for the seam and the test still
 	# has to come out the same way.
 	var seam: Vector2i = sim.core_cell + Sim.STARTER_PATCH[0]
-	_assert(sim.ore.has(seam) and not sim.machines.has(seam), "맨 광맥이 있다")
+	_assert(sim.has_ore(seam) and not sim.machines.has(seam), "맨 광맥이 있다")
 
 	sim.grant_cats(1)
 	var cat: Sim.Cat = sim.cats[0]

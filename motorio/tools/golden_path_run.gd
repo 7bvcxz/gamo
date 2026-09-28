@@ -368,7 +368,7 @@ func _mine_one(item_type: int) -> bool:
 func _mine_at(seam: Vector2i) -> bool:
 	if seam == Vector2i(9999, 9999):
 		return false
-	var item_type: int = int(sim.ore.get(seam, -1))
+	var item_type: int = sim.ore_type_at(seam)
 	main.tool_index = 0
 	_walk_to(sim.cell_centre(seam) + Vector2(0, 26), 45.0)
 	main.player.facing = Vector2i(0, -1)
@@ -531,8 +531,8 @@ func _collect_drops() -> void:
 
 func _nth_ore(item_type: int, skip: int) -> Vector2i:
 	var cells: Array[Vector2i] = []
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) != item_type or sim.machine_at(cell) != null:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) != item_type or sim.machine_at(cell) != null:
 			continue
 		if not sim.can_touch(cell):
 			continue
@@ -547,8 +547,8 @@ func _nth_ore(item_type: int, skip: int) -> Vector2i:
 func _bare_seam(item_type: int) -> Vector2i:
 	var best := Vector2i(9999, 9999)
 	var dist := 1e9
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) != item_type or sim.machine_at(cell) != null:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) != item_type or sim.machine_at(cell) != null:
 			continue
 		if not sim.can_touch(cell):
 			continue

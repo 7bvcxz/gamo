@@ -52,7 +52,7 @@ func _line(sim: Sim, length: int) -> Vector2i:
 	var mouth := Vector2i(base.end.x, sim.core_cell.y)
 	var rect := Rect2i(mouth - Vector2i(0, 2), Vector2i(length + 2, 5))
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 	for props: Dictionary in [sim.frozen_cats, sim.debris, sim.village]:
 		for origin: Vector2i in props.keys():
 			if sim.prop_rect(origin).intersects(rect):

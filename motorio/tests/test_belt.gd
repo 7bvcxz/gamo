@@ -35,7 +35,7 @@ func _test_unpowered_belt_moves() -> void:
 	_assert(sim.machine_count(Defs.M_GENERATOR) == 0, "no generator exists")
 	# Just east of the base's east wall (Grid v2: the base is eight cells across).
 	var at := Vector2i(5, 0)
-	sim.ore.erase(at)
+	sim.erase_ore_at(at)
 	_assert(sim.build(Defs.M_BELT, at, Vector2i.LEFT), "a belt goes down")
 	var belt: Sim.Machine = sim.machine_at(at)
 	sim.tick(0.05)
@@ -67,8 +67,8 @@ func _test_unpowered_line_delivers() -> void:
 	sim.setup(4242)
 	_open(sim)
 	# The post's west edge one cell short of the base's east wall, and a belt in
-	# that cell (Grid v2).
-	var source := Vector2i(7, 0)
+	# that cell (a post is its node's two by two since World Visual Pass 01).
+	var source := Vector2i(6, 0)
 	_seam(sim, source)
 	_assert(sim.build(Defs.M_MINER, source, Vector2i.LEFT), "a miner goes down on a seam")
 	_assert(sim.build(Defs.M_BELT, Vector2i(5, 0), Vector2i.LEFT), "with a belt into the core")
@@ -98,7 +98,7 @@ func _test_dead_end_backs_up() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	_open(sim)
-	var source := Vector2i(-7, 14)
+	var source := Vector2i(-6, 14)
 	_seam(sim, source)
 	_assert(sim.build(Defs.M_MINER, source, Vector2i.RIGHT), "a miner goes down")
 	_assert(sim.build(Defs.M_BELT, Vector2i(-4, 14), Vector2i.RIGHT), "with a belt to nowhere")
@@ -123,8 +123,8 @@ func _test_dead_end_backs_up() -> void:
 ## in the cells east of it where its belt goes.
 func _seam(sim, cell: Vector2i) -> void:
 	for covered: Vector2i in Grid.cells_in(Defs.machine_footprint(Defs.M_MINER, cell).grow(1)):
-		sim.ore.erase(covered)
-	sim.ore[cell] = Defs.ITEM_CRYSTAL
+		sim.erase_ore_at(covered)
+	sim.put_ore(cell, Defs.ITEM_CRYSTAL)
 
 func _open(sim) -> void:
 	sim.note_resource_seen(Defs.ITEM_HEATSTONE)

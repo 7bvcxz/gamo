@@ -281,7 +281,7 @@ func _run_with_a_machine() -> Node2D:
 ## A tile of cells from there: the machines are two cells by two (Grid v2).
 func _clear(sim, cell: Vector2i, size: Vector2i = Defs.PROP_SIZE) -> Vector2i:
 	for covered: Vector2i in Grid.cells_in(Rect2i(cell, size)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.remove_machine(covered)
 		sim.ground.erase(covered)
 		sim.ground_stack.erase(covered)

@@ -98,7 +98,7 @@ func _test_clear_across_seeds() -> void:
 		for cell: Vector2i in Grid.cells_in(sim.village_rect):
 			var junk: String = ""
 			var ice: Vector2i = sim.frozen_key(cell)
-			if sim.ore.has(cell):
+			if sim.has_ore(cell):
 				junk = "광맥"
 			elif sim.has_rock(cell):
 				junk = "바위"
@@ -138,7 +138,7 @@ func _test_trail() -> void:
 		_assert(not rows.has(tile.y), "한 줄에 자국 하나: %d" % tile.y)
 		rows[tile.y] = tile
 		for covered: Vector2i in Grid.cells_in(Grid.tile_rect(tile)):
-			_assert(not sim.has_rock(covered) and not sim.ore.has(covered)
+			_assert(not sim.has_rock(covered) and not sim.has_ore(covered)
 				and sim.debris_key(covered) == Sim.NONE,
 				"자국 위에는 아무것도 없다: %s" % str(covered))
 	for y in range(gate.y, sign.y):
@@ -171,7 +171,7 @@ func _test_reading() -> void:
 	# -- nearer than the board, so Z is about that instead and this fails on the
 	# world rather than on reading (found scanning 600 seeds, 2026-09-27).
 	for covered: Vector2i in Grid.cells_in(Rect2i(sim.sign_cell + Vector2i(-1, 2), Vector2i(4, 4))):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.ground.erase(covered)
 		for props: Dictionary in [sim.frozen_cats, sim.debris]:
 			var key: Vector2i = Sim.prop_key(props, covered)
@@ -224,7 +224,7 @@ func _test_reading() -> void:
 	var behind: Vector2i = Grid.from_tile(behind_tile)
 	sim.mined_rocks[behind_tile] = true
 	for covered: Vector2i in Grid.cells_in(Grid.tile_rect(behind_tile).grow(1)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.shards.erase(covered)
 		sim.ground.erase(covered)
 		sim.drops.erase(covered)

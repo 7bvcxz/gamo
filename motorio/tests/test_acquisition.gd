@@ -179,7 +179,7 @@ func _test_important_item_uses_acquisition_presentation() -> void:
 	main.finish_tutorial()
 	main.fx.clear_flights()
 	var cell: Vector2i = main.player.facing_cell()
-	main.sim.ore.erase(cell)
+	main.sim.erase_ore_at(cell)
 	main.sim.debris[cell] = 1
 	main.mine_held = true
 	var left: float = Defs.DEBRIS_SEARCH_SECONDS + 0.3

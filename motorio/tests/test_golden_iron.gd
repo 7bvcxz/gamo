@@ -106,8 +106,8 @@ func _test_iron_reachable_at_lv8() -> void:
 		sim.stones_in = int(Defs.BASE_LEVELS[7]["stones"])   # display Lv8, radius 22
 		sim._refresh_radius()
 		var reachable := 0
-		for cell: Vector2i in sim.ore:
-			if int(sim.ore[cell]) == Defs.ITEM_IRON and sim.can_touch(cell):
+		for cell: Vector2i in sim.ore_nodes:
+			if sim.ore_type_at(cell) == Defs.ITEM_IRON and sim.can_touch(cell):
 				reachable += 1
 		if reachable < 1:
 			missing += 1
@@ -129,8 +129,8 @@ func _test_iron_not_prematurely_reachable() -> void:
 		sim.search_kit()
 		sim.stones_in = int(Defs.BASE_LEVELS[6]["stones"])   # display Lv7, radius 19
 		sim._refresh_radius()
-		for cell: Vector2i in sim.ore:
-			if int(sim.ore[cell]) == Defs.ITEM_IRON and sim.can_touch(cell):
+		for cell: Vector2i in sim.ore_nodes:
+			if sim.ore_type_at(cell) == Defs.ITEM_IRON and sim.can_touch(cell):
 				early += 1
 				break
 		sim.free()

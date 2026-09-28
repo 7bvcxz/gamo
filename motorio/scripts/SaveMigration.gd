@@ -28,7 +28,13 @@ extends RefCounted
 ## The file itself is never touched: Main copies it aside before any of this.
 
 const FROM := 11
+## The schema before ore nodes (World Visual Pass 01), read by `settle_nodes`.
+const NODES_FROM := 12
 const NONE := Vector2i(9999, 9999)
+
+## Whether a save of this schema can be brought into the current one.
+static func reads(schema: int) -> bool:
+	return schema == FROM or schema == NODES_FROM
 const STEPS: Array[Vector2i] = [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]
 
 # --- The half that needs no world ------------------------------------------------
@@ -156,8 +162,111 @@ static func settle(sim: Sim, pending: Dictionary) -> Dictionary:
 	sim._grid_dirty = true
 	return report
 
+# --- Schema 12 -> 13: seams become nodes -----------------------------------------
+##
+## A seam was one cell; since World Visual Pass 01 it is a node two cells by two
+## whose identity is its top-left cell -- which is where every v12 seam was. So a
+## v12 post, anchored on its seam, is anchored on its node, and nothing about it
+## moves. What can move is the world: the generator now asks about all four of a
+## node's cells, so a seam that reached into the hut's doorstep in v12 is not in
+## v13, and the scatter after it walks differently. A post whose seam is gone
+## goes onto a node inside the ground it used to cover, the nearest first, and
+## otherwise comes down at full refund. Its cat follows it.
+##
+## Machines the player put beside a v12 seam can find its node's other cells
+## under them now. They are left standing: a belt over ore still carries, and
+## taking it up would cut a working line to tidy a rule nobody is breaking.
+##
+## And a v12 post was four cells by four, so its front edge -- and the cell its
+## output leaves into -- was a cell further out than a two by two's. A line the
+## player laid from that cell would start one cell past the new output, and the
+## post would pour onto the snow in the gap. The gap gets a belt, facing the way
+## the post does, when something stood at the old output to take what came.
+##
+## Runs on every load, where for a current save it finds nothing to do: a rig
+## whose target is not the node under it is exactly the state this settles, and
+## a world regenerated from a seed is where it would come from.
+static func settle_nodes(sim: Sim, report: Dictionary, from_schema: int) -> void:
+	var rigs: Array[Sim.Machine] = []
+	for cell: Vector2i in sim.machines:
+		if Defs.machine_mines(sim.machines[cell].type):
+			rigs.append(sim.machines[cell])
+	var posts: Array[Sim.Machine] = []
+	for machine: Sim.Machine in rigs:
+		var cell: Vector2i = machine.cell
+		if from_schema == NODES_FROM and sim.ore_origin_at(cell) == cell:
+			_bridge_old_output(sim, machine, report)
+		if sim.ore_origin_at(cell) != cell or machine.ore_node != cell:
+			posts.append(machine)
+	for machine: Sim.Machine in posts:
+		var old: Vector2i = machine.cell
+		sim.remove_machine(old)
+		var node: Vector2i = _node_for_post(sim, machine)
+		if node != NONE:
+			machine.cell = node
+			machine.ore_node = node
+			machine.progress = 0.0
+			sim.add_machine(machine)
+			report["retargeted"] = int(report.get("retargeted", 0)) + 1
+		else:
+			if not report.has("refunded"):
+				report["refunded"] = 0
+			if not report.has("items"):
+				report["items"] = 0
+			_refund(sim, {"type": machine.type, "buffer": machine.buffer,
+				"outbox": machine.outbox, "items": machine.items}, report)
+		for cat: Sim.Cat in sim.cats:
+			if cat.assigned != old:
+				continue
+			cat.assigned = node
+			cat.state = Defs.CAT_TO_MINER if node != NONE else Defs.CAT_IDLE
+	sim._grid_dirty = true
+
+## The cell between a shrunken post's output and where its v12 output was.
+static func _bridge_old_output(sim: Sim, machine: Sim.Machine, report: Dictionary) -> void:
+	var old_rect := Rect2i(machine.cell - Vector2i.ONE, Vector2i(4, 4))
+	var old_out: Vector2i = Grid.front_cell(old_rect, machine.dir, machine.cell)
+	var new_out: Vector2i = sim.output_cell(machine)
+	if old_out == new_out or sim.machine_at(old_out) == null:
+		return
+	if sim.machine_at(new_out) != null or sim.has_ore(new_out) or sim.is_structure(new_out):
+		return
+	var belt := Sim.Machine.new()
+	belt.type = Defs.M_BELT
+	belt.cell = new_out
+	belt.dir = machine.dir
+	sim.add_machine(belt)
+	report["bridged"] = int(report.get("bridged", 0)) + 1
+
+## A node for a post whose seam is gone: one reaching into the four by four it
+## covered in v12 (its seam at (1, 1)), nearest to that seam first, that a post
+## of its kind can stand on. NONE when there is none.
+static func _node_for_post(sim: Sim, machine: Sim.Machine) -> Vector2i:
+	if sim.ore_origin_at(machine.cell) == machine.cell \
+			and sim.footprint_problems(machine.type, machine.cell, machine.dir).is_empty():
+		return machine.cell
+	var old_footprint := Rect2i(machine.cell - Vector2i.ONE, Vector2i(4, 4))
+	var seam: Vector2 = Grid.centre(machine.cell)
+	var nodes: Array[Vector2i] = []
+	for cell: Vector2i in Grid.cells_in(old_footprint):
+		var node: Vector2i = sim.ore_origin_at(cell)
+		if node != NONE and not nodes.has(node):
+			nodes.append(node)
+	nodes.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return sim.ore_centre(a).distance_squared_to(seam) \
+			< sim.ore_centre(b).distance_squared_to(seam))
+	for node: Vector2i in nodes:
+		if sim.footprint_problems(machine.type, node, machine.dir).is_empty():
+			return node
+	return NONE
+
 ## One line for the player, or "" when nothing needed saying.
 static func describe(report: Dictionary) -> String:
+	if not report.has("kept"):
+		# Only the node step ran (a v12 save): say something only if it did.
+		if int(report.get("refunded", 0)) > 0:
+			return "광맥이 넓어졌다.  채굴기 %d개는 재료로 돌려받았다." % int(report["refunded"])
+		return ""
 	var parts: Array[String] = []
 	if int(report.get("refunded", 0)) > 0:
 		parts.append("설비 %d개는 재료로 돌려받았다" % int(report["refunded"]))
@@ -240,22 +349,26 @@ static func _place_post(sim: Sim, row: Dictionary, report: Dictionary) -> Vector
 	report["kept"] = int(report["kept"]) + 1
 	return seam
 
-## The seam nearest an old tile's middle within that tile or one cell round it,
-## that `accept` takes (any, when it is not valid).
+## The node nearest an old tile's middle that reaches into that tile or the ring
+## of cells round it, that `accept` takes (any, when it is not valid). Returned
+## as the node's origin, which is where a post on it is anchored.
 static func _seam_in(sim: Sim, tile: Vector2i, accept: Callable) -> Vector2i:
 	var block := Rect2i(Grid.from_tile(tile) - Vector2i.ONE, Vector2i.ONE * (Grid.SCALE + 2))
 	var middle: Vector2 = Grid.tile_centre(tile)
 	var best: Vector2i = NONE
 	var best_distance: float = 1e20
+	var seen: Dictionary = {}
 	for cell: Vector2i in Grid.cells_in(block):
-		if not sim.ore.has(cell) or sim.machine_at(cell) != null:
+		var node: Vector2i = sim.ore_origin_at(cell)
+		if node == NONE or seen.has(node) or sim.machine_at(node) != null:
 			continue
-		if accept.is_valid() and not accept.call(cell):
+		seen[node] = true
+		if accept.is_valid() and not accept.call(node):
 			continue
-		var distance: float = Grid.centre(cell).distance_squared_to(middle)
+		var distance: float = sim.ore_centre(node).distance_squared_to(middle)
 		if distance < best_distance:
 			best_distance = distance
-			best = cell
+			best = node
 	return best
 
 ## A belt or a splitter. Every connection between two old tiles crosses an edge,

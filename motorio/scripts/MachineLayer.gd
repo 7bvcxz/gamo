@@ -687,8 +687,10 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# already on the map changes.
 	_unscale()
 	if tile > float(Grid.TILE):
-		draw_arc(seam, float(Grid.CELL) * 0.5, 0.0, TAU, 16,
-			Color(Defs.ITEM_COLORS[int(sim.ore.get(machine.cell, Defs.ITEM_HEATSTONE))], 0.85), 1.5, true)
+		var kind: int = sim.ore_type_at(machine.cell)
+		if kind >= 0:
+			draw_arc(seam, float(Grid.CELL) * 0.5, 0.0, TAU, 16,
+				Color(Defs.ITEM_COLORS[kind], 0.85), 1.5, true)
 	var rate: float = Defs.machine_mine_rate(machine.type)
 	if rate > 1.0:
 		for index in int(rate):
@@ -1087,7 +1089,8 @@ func _draw_drops(tile: float) -> void:
 func _draw_pickaxe_hint(tile: float) -> void:
 	if pickaxe_hint == Vector2i(9999, 9999):
 		return
-	var at: Vector2 = Grid.centre(pickaxe_hint)
+	var at: Vector2 = sim.ore_centre(pickaxe_hint) if sim.has_ore(pickaxe_hint) \
+		else Grid.centre(pickaxe_hint)
 	if not view_rect.grow(tile).has_point(at):
 		return
 	var bob: float = sin(pulse * 3.2) * 3.0
@@ -1171,7 +1174,7 @@ func _draw_post_hints(tile: float) -> void:
 	if not cat_hint:
 		return
 	var glow: float = 0.10 + (sin(pulse * 2.4) + 1.0) * 0.05
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		if not _visible(cell, tile) or not sim.can_touch(cell):
 			continue
 		if not sim._is_post(cell):
@@ -1183,7 +1186,8 @@ func _draw_post_hints(tile: float) -> void:
 				break
 		if taken:
 			continue
-		var centre: Vector2 = Grid.centre(cell)
+		var centre: Vector2 = sim.machine_centre_at(cell) if sim.machines.has(cell) \
+			else sim.ore_centre(cell)
 		var ring: float = float(Grid.TILE) * 0.42
 		draw_circle(centre, ring, Color(1.0, 0.82, 0.45, glow))
 		draw_arc(centre, ring, 0.0, TAU, 24, Color(1.0, 0.82, 0.45, glow * 2.2), 1.4, true)

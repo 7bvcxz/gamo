@@ -288,14 +288,14 @@ func _test_save_round_trip() -> void:
 		at += Vector2i(0, 5)
 		var rect: Rect2i = Defs.machine_footprint(type, cell)
 		for covered: Vector2i in Grid.cells_in(rect):
-			sim.ore.erase(covered)
+			sim.erase_ore_at(covered)
 			sim.remove_machine(covered)
 		for props: Dictionary in [sim.frozen_cats, sim.debris]:
 			for origin: Vector2i in props.keys():
 				if sim.prop_rect(origin).intersects(rect):
 					props.erase(origin)
 		if Defs.machine_mines(type):
-			sim.ore[cell] = Defs.ITEM_HEATSTONE
+			sim.put_ore(cell, Defs.ITEM_HEATSTONE)
 		if sim.build(type, cell, Vector2i.RIGHT):
 			placed[cell] = type
 	_assert(placed.size() == Defs.BUILDABLE.size(),

@@ -50,8 +50,8 @@ func _run() -> void:
 	var seam := Vector2i(9999, 9999)
 	# A seam a post can stand on, approached from just south of where the post
 	# will stand (Grid v2: four cells by four around the seam).
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE and sim.can_build(Defs.M_MINER, cell) == "" \
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_HEATSTONE and sim.can_build(Defs.M_MINER, cell) == "" \
 				and not sim.is_structure(_south_of_post(cell)):
 			seam = cell
 			break
@@ -72,11 +72,11 @@ func _run() -> void:
 	# machine that never ran, and would have agreed with itself perfectly.
 	for heading: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
 		var ahead: Vector2i = Grid.front_cell(sim.machine_rect(miner), heading, seam)
-		if not sim.ore.has(ahead) and sim.machine_at(ahead) == null \
+		if not sim.has_ore(ahead) and sim.machine_at(ahead) == null \
 				and not sim.ground.has(ahead) and not sim.is_structure(ahead):
 			miner.dir = heading
 			break
-	_assert(not sim.ore.has(sim.output_cell(miner)), "the miner has somewhere to put its output")
+	_assert(not sim.has_ore(sim.output_cell(miner)), "the miner has somewhere to put its output")
 
 	_assert(main.toggle_meter(), "C in front of a machine opens the panel")
 	_assert(main.meter_cell == seam, "pinned to the machine that was faced")

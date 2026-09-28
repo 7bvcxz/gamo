@@ -118,7 +118,7 @@ func _test_picking_up_is_not_feeding() -> void:
 	var sim := _lit()
 	# Four tiles out on the diagonal, clear of the base (Grid v2: eight cells).
 	var cell: Vector2i = sim.core_cell + Vector2i(4, 4) * Grid.SCALE
-	sim.ore.erase(cell)
+	sim.erase_ore_at(cell)
 	sim.drop_item(cell, Defs.ITEM_CRYSTAL)
 	sim.drop_item(cell, Defs.ITEM_CRYSTAL)
 	var before: int = sim.stones_in

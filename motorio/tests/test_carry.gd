@@ -46,8 +46,8 @@ func _run() -> void:
 	# A real assignment and something to fetch, so the handlers have somewhere to
 	# walk to. Without these most of them bail out early and prove nothing.
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "the map has a seam to assign a cat to")

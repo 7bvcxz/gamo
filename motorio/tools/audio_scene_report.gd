@@ -216,7 +216,7 @@ func _fresh_play() -> void:
 func _working_cats(count: int) -> void:
 	var sim = main.sim
 	var seams: Array = []
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		if sim.machine_at(cell) == null:
 			seams.append(cell)
 	seams.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:

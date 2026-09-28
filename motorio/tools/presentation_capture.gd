@@ -194,7 +194,7 @@ func _first_cat() -> void:
 	# The nearest bare seam, and the cat put to work on it.
 	var seam := Vector2i(9999, 9999)
 	var best := INF
-	for ore_cell: Vector2i in sim.ore:
+	for ore_cell: Vector2i in sim.ore_nodes:
 		if sim.machine_at(ore_cell) != null:
 			continue
 		var d: float = Vector2(ore_cell - sim.core_cell).length()

@@ -61,7 +61,7 @@ func _fresh() -> void:
 func _crew() -> Array:
 	var sim = main.sim
 	var seams: Array = []
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		if sim.machine_at(cell) == null:
 			seams.append(cell)
 		if seams.size() >= 2:

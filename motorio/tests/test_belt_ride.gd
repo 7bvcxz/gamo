@@ -38,7 +38,7 @@ func _test_drift_query() -> void:
 	sim._check_unlocks()
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var cell := Vector2i(14, 14)
-	sim.ore.erase(cell)
+	sim.erase_ore_at(cell)
 	sim.mined_rocks[Grid.tile_of(cell)] = true
 	_assert(sim.belt_drift(cell).is_zero_approx(), "빈 바닥은 아무것도 안 한다")
 	_assert(sim.build(Defs.M_BELT, cell, Vector2i.RIGHT), "벨트를 놓는다")
@@ -84,7 +84,7 @@ func _test_she_rides() -> void:
 			if sim.prop_rect(origin).intersects(lane):
 				props.erase(origin)
 	for step in 4:
-		sim.ore.erase(cell + Vector2i(step, 0))
+		sim.erase_ore_at(cell + Vector2i(step, 0))
 		sim.mined_rocks[Grid.tile_of(cell + Vector2i(step, 0))] = true
 		_assert(sim.build(Defs.M_BELT, cell + Vector2i(step, 0), Vector2i.RIGHT),
 			"동쪽으로 가는 벨트를 놓는다")

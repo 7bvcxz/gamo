@@ -72,8 +72,8 @@ func _test_iron_is_out_there_and_not_underfoot() -> void:
 		var sim := Sim.new()
 		sim.setup(seed_value * 977 + 13)
 		var nearest: float = 9999.0
-		for cell: Vector2i in sim.ore:
-			if int(sim.ore[cell]) != Defs.ITEM_IRON:
+		for cell: Vector2i in sim.ore_nodes:
+			if sim.ore_type_at(cell) != Defs.ITEM_IRON:
 				continue
 			nearest = minf(nearest, sim.tiles_from_core(cell))
 		if nearest > reach:
@@ -93,8 +93,8 @@ func _test_iron_is_out_there_and_not_underfoot() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_IRON:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_IRON:
 			seam = cell
 	_assert(seam != Vector2i(9999, 9999), "시드 4242 에도 철 광맥이 있다")
 	_assert(sim.mine_period(Defs.ITEM_IRON) > sim.mine_period(Defs.ITEM_COPPER),
@@ -219,7 +219,7 @@ func _test_the_whole_chain() -> void:
 
 	# Dig it by hand, which is how the first one always arrives.
 	var seam: Vector2i = _clear_cell(sim, Vector2i(3, 0) * Grid.SCALE)
-	sim.ore[seam] = Defs.ITEM_IRON
+	sim.put_ore(seam, Defs.ITEM_IRON)
 	sim._assign_purity()
 	var got: int = sim.hand_mine(seam, sim.hand_period(seam) * 1.1)
 	_assert(got == Defs.ITEM_IRON, "곡괭이로 철이 나온다 (%s)" % str(got))
@@ -321,7 +321,7 @@ func _test_blocked_costs_nothing() -> void:
 	_assert(working > 0.0, "일감이 있는 제조기는 전력을 쓴다 (%.1f)" % working)
 
 	# Shut the exit. A seam in front takes nothing and holds no belt.
-	sim.ore[ahead] = Defs.ITEM_HEATSTONE
+	sim.put_ore(ahead, Defs.ITEM_HEATSTONE)
 	for step in 60:
 		sim.tick(0.1)
 	_assert(machine.stalled, "출력이 막히면 막혔다고 말한다")
@@ -330,7 +330,7 @@ func _test_blocked_costs_nothing() -> void:
 		"막힌 제조기는 전력을 쓰지 않는다 (%.1f)" % sim.power_draw)
 
 	# And with the grid dead, it is not "running" either.
-	sim.ore.erase(ahead)
+	sim.erase_ore_at(ahead)
 	sim.tick(0.2)
 	sim.machine_at(plantside).buffer.clear()
 	machine.buffer[Defs.ITEM_IRON] = 2
@@ -408,7 +408,7 @@ func _open(sim) -> void:
 func _clear_cell(sim, offset: Vector2i) -> Vector2i:
 	var cell: Vector2i = sim.core_cell + offset
 	for covered: Vector2i in Grid.cells_in(Rect2i(cell, Defs.PROP_SIZE)):
-		sim.ore.erase(covered)
+		sim.erase_ore_at(covered)
 		sim.remove_machine(covered)
 		sim.ground.erase(covered)
 		sim.ground_stack.erase(covered)

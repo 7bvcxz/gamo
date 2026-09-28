@@ -113,7 +113,7 @@ func _test_scatter() -> void:
 	_assert(is_equal_approx(Defs.FROZEN_PER_TILES, 66.7 * 3.0),
 		"상자 밀도의 1/3 — 한 마리가 상자 3개를 대신하므로 총 고양이 수는 그대로")
 	for cell: Vector2i in sim.frozen_cats:
-		_assert(not sim.ore.has(cell), "광맥 위에는 놓이지 않는다")
+		_assert(not sim.has_ore(cell), "광맥 위에는 놓이지 않는다")
 		break
 	sim.free()
 

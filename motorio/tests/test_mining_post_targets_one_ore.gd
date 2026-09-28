@@ -68,7 +68,7 @@ func _produce(count: int, only: int = -1) -> Dictionary:
 	var origin: Vector2i = sim.core_cell + SITE
 	var area := Rect2i(origin - Vector2i(6, 8), Vector2i(Defs.ORE_PITCH * FIELD + 12, 18))
 	for cell: Vector2i in Grid.cells_in(area):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 	for props: Dictionary in [sim.frozen_cats, sim.debris, sim.village]:
 		for key: Vector2i in props.keys():
 			if sim.prop_rect(key).intersects(area):
@@ -76,7 +76,7 @@ func _produce(count: int, only: int = -1) -> Dictionary:
 	var seams: Array[Vector2i] = []
 	for index in count:
 		var seam: Vector2i = origin + Vector2i(index * Defs.ORE_PITCH, 0)
-		sim.ore[seam] = only if only >= 0 else KINDS[index % KINDS.size()]
+		sim.put_ore(seam, only if only >= 0 else KINDS[index % KINDS.size()])
 		seams.append(seam)
 	var outputs: Dictionary = {}
 	for seam: Vector2i in seams:
@@ -121,7 +121,7 @@ func _produce(count: int, only: int = -1) -> Dictionary:
 	var per_post: Dictionary = {}
 	var kinds: Dictionary = {}
 	for seam: Vector2i in seams:
-		kinds[seam] = int(sim.ore[seam])
+		kinds[seam] = sim.ore_type_at(seam)
 	var wrong := 0
 	var total := 0.0
 	var step := 0.1
@@ -131,7 +131,7 @@ func _produce(count: int, only: int = -1) -> Dictionary:
 			if not outputs.has(cell):
 				continue
 			var seam: Vector2i = outputs[cell]
-			if int(sim.ground[cell]) != int(sim.ore[seam]):
+			if int(sim.ground[cell]) != sim.ore_type_at(seam):
 				wrong += 1
 			per_post[seam] = int(per_post.get(seam, 0)) + 1
 			total += 1.0

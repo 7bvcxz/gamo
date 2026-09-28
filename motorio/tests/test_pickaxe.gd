@@ -40,7 +40,7 @@ func _run() -> void:
 
 	# Put a seam where she is facing, and make sure she is facing it.
 	var seam: Vector2i = main.player.facing_cell()
-	main.sim.ore[seam] = Defs.ITEM_CRYSTAL
+	main.sim.put_ore(seam, Defs.ITEM_CRYSTAL)
 	main.sim.machines.erase(seam)
 
 	# The gun does not mine, however long Z is held.
@@ -102,7 +102,7 @@ func _run() -> void:
 	# cost progress and gave nothing.
 	var bare_sim = main.sim
 	var bare := Vector2i(9999, 9999)
-	for cell: Vector2i in bare_sim.ore:
+	for cell: Vector2i in bare_sim.ore_nodes:
 		if not bare_sim.machines.has(cell) and not bare_sim.is_structure(cell + Vector2i(0, 1)):
 			bare = cell
 			break
@@ -128,7 +128,7 @@ func _run() -> void:
 	bare_sim.cats.clear()
 	main.player.position = bare_sim.cell_centre(bare)
 	main.player.facing = Vector2i.UP
-	_assert(not bare_sim.ore.has(main.player.facing_cell()),
+	_assert(not bare_sim.has_ore(main.player.facing_cell()),
 		"바라보는 칸에는 광맥이 없다")
 	main.tool_index = main.TOOL_PICKAXE
 	main.mine_held = true
@@ -140,14 +140,14 @@ func _run() -> void:
 	# And facing still wins, so a player standing on one seam can reach across to
 	# the next one deliberately.
 	var neighbour: Vector2i = Vector2i(9999, 9999)
-	for cell: Vector2i in bare_sim.ore:
+	for cell: Vector2i in bare_sim.ore_nodes:
 		if cell != bare and not bare_sim.machines.has(cell):
 			neighbour = cell
 			break
 	if neighbour != Vector2i(9999, 9999):
 		main.player.position = bare_sim.cell_centre(neighbour - (neighbour - bare).sign())
 		main.player.facing = (neighbour - bare).sign()
-		if bare_sim.ore.has(main.player.facing_cell()):
+		if bare_sim.has_ore(main.player.facing_cell()):
 			_assert(main._hand_target() == main.player.facing_cell(),
 				"바라보는 광맥이 발밑보다 우선한다")
 

@@ -68,8 +68,8 @@ func _test_tool_belongs_to_the_machine() -> void:
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	sim.stock[Defs.ITEM_COPPER] = 500
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
 	_assert(seam != Vector2i(9999, 9999), "광맥을 찾았다")
@@ -125,8 +125,8 @@ func _test_working_cat_stands_on_the_middle() -> void:
 	sim.unlocked[Defs.M_MINER] = true
 	sim.stock[Defs.ITEM_HEATSTONE] = 500
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
 	sim.grant_cats(1)
@@ -188,8 +188,8 @@ func _test_bare_seam_job_survives_the_night() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
-		if int(sim.ore[cell]) == Defs.ITEM_HEATSTONE:
+	for cell: Vector2i in sim.ore_nodes:
+		if sim.ore_type_at(cell) == Defs.ITEM_HEATSTONE:
 			seam = cell
 			break
 	sim.grant_cats(1)
@@ -220,7 +220,7 @@ func _test_bare_seam_job_survives_the_night() -> void:
 
 	# A post that really is gone is a different thing: the seam mined out from
 	# under it leaves the cat with nothing, and it says so.
-	sim.ore.erase(seam)
+	sim.erase_ore_at(seam)
 	sim.dispatch_cats()
 	_assert(not cat.has_job(), "자리가 사라지면 그때는 놓는다")
 	sim.free()

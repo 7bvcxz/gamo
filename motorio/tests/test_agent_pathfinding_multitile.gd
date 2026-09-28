@@ -63,7 +63,7 @@ func _assert(condition: bool, label: String) -> void:
 
 func _clear(rect: Rect2i) -> void:
 	for cell: Vector2i in Grid.cells_in(rect):
-		sim.ore.erase(cell)
+		sim.erase_ore_at(cell)
 		var machine: Sim.Machine = sim.machine_at(cell)
 		if machine != null and machine.type != Defs.M_CORE:
 			sim.remove_machine(cell)
@@ -117,7 +117,7 @@ func _test_face_what_it_was_sent_to() -> void:
 	# A post, built by the harness's own verb.
 	var seam: Vector2i = sim.core_cell + Vector2i(30, 0)
 	_clear(Rect2i(seam - Vector2i(10, 10), Vector2i(21, 21)))
-	sim.ore[seam] = Defs.ITEM_HEATSTONE
+	sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 	_park(seam + Vector2i(-8, 6))
 	_assert(body.place_machine(Defs.M_MINER, seam, Vector2i.UP) == Body.OK, "하네스가 채굴기를 짓는다")
 	var post: Sim.Machine = sim.machine_at(seam)
@@ -143,26 +143,30 @@ func _test_face_what_it_was_sent_to() -> void:
 	sim.frozen_cats.erase(ice)
 
 ## Two posts a cell apart: open ground between them, and no way through for her.
-## Two cells apart: a way through.
+## Two cells apart: a way through. (Nodes stand two cells apart in a real field,
+## so the one-cell gap is made by hand: it is the body rule being tested, and the
+## generator is what keeps a real field on the right side of it.)
 func _test_one_cell_gap_is_a_wall() -> void:
 	var origin: Vector2i = sim.core_cell + Vector2i(-40, 24)
 	_clear(Rect2i(origin - Vector2i(14, 14), Vector2i(40, 50)))
 	for gap in [1, 2]:
 		var left: Vector2i = origin + Vector2i(0, (gap - 1) * 14)
-		var right: Vector2i = left + Vector2i(4 + gap, 0)
+		var right: Vector2i = left + Vector2i(Defs.ORE_NODE_SIZE.x + gap, 0)
 		for seam: Vector2i in [left, right]:
-			sim.ore[seam] = Defs.ITEM_HEATSTONE
+			sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 			var machine := Sim.Machine.new()
 			machine.type = Defs.M_MINER
 			machine.cell = seam
 			sim.add_machine(machine)
-		var column: int = sim.machine_rect(sim.machine_at(left)).end.x
+		var post: Rect2i = sim.machine_rect(sim.machine_at(left))
+		var column: int = post.end.x
 		var north := Vector2i(column, left.y - 5)
 		var south := Vector2i(column, left.y + 6)
 		var route: Array[Vector2i] = body.nav.path(north, south)
 		var through := 0
 		for cell: Vector2i in route:
-			if cell.x >= column and cell.x < column + gap and absi(cell.y - left.y) <= 1:
+			if cell.x >= column and cell.x < column + gap \
+					and cell.y >= post.position.y and cell.y < post.end.y:
 				through += 1
 		if gap == 1:
 			_assert(not body.nav.walkable(Vector2i(column, left.y)), "한 칸 틈은 설 수 없는 땅이다")
@@ -182,7 +186,7 @@ func _test_starter_lane() -> void:
 	var base: Rect2i = sim.base_rect()
 	for offset: Vector2i in Sim.STARTER_PATCH:
 		var seam: Vector2i = sim.core_cell + offset
-		sim.ore[seam] = Defs.ITEM_HEATSTONE
+		sim.put_ore(seam, Defs.ITEM_HEATSTONE)
 		if sim.machine_at(seam) == null:
 			var why: String = sim.can_build(Defs.M_MINER, seam, Vector2i.UP)
 			_assert(sim.build(Defs.M_MINER, seam, Vector2i.UP), "시작 광맥 %s 에 채굴기 %s" % [offset, why])
@@ -202,13 +206,16 @@ func _test_starter_lane() -> void:
 	_park(east)
 	var walked: String = body.move_to(west, 30.0)
 	_assert(walked == Body.OK, "몸도 그 통로를 지나간다 (%s, %s)" % [walked, main.player.cell()])
-	# The middle post pours into the lane; the belt home goes on its mouth.
+	# The middle post pours into the lane; the belt home goes on its mouth and
+	# runs up the lane to the base's wall.
 	var middle: Sim.Machine = sim.machine_at(sim.core_cell + Sim.STARTER_PATCH[1])
 	var mouth: Vector2i = sim.output_cell(middle)
-	_assert(mouth.y == lane_y + 1, "가운데 채굴기는 통로에 쏟는다")
-	var first: String = body.place_machine(Defs.M_BELT, mouth, Vector2i.UP)
-	var second: String = body.place_machine(Defs.M_BELT, mouth + Vector2i.UP, Vector2i.UP)
-	_assert(first == Body.OK and second == Body.OK,
-		"하네스가 통로 한가운데에 기지로 가는 벨트를 깐다 (%s, %s)" % [first, second])
-	_assert(sim.base_rect().has_point(sim.output_cell(sim.machine_at(mouth + Vector2i.UP))),
+	_assert(mouth.y >= lane_y and mouth.y < sim.machine_rect(middle).position.y,
+		"가운데 채굴기는 통로에 쏟는다")
+	var laid: Array[String] = []
+	for y in range(mouth.y, lane_y - 1, -1):
+		laid.append(body.place_machine(Defs.M_BELT, Vector2i(mouth.x, y), Vector2i.UP))
+	_assert(not laid.is_empty() and laid.count(Body.OK) == laid.size(),
+		"하네스가 통로 한가운데에 기지로 가는 벨트를 깐다 %s" % str(laid))
+	_assert(sim.base_rect().has_point(sim.output_cell(sim.machine_at(Vector2i(mouth.x, lane_y)))),
 		"그 벨트는 기지 벽으로 들어간다")

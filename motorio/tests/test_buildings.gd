@@ -65,7 +65,7 @@ func _test_the_sim_agrees() -> void:
 	var base: Rect2i = sim.base_rect()
 	for step: Vector2i in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
 		var beside: Vector2i = Grid.front_cell(base, step, sim.core_cell)
-		if sim.machine_at(beside) != null or sim.ore.has(beside):
+		if sim.machine_at(beside) != null or sim.has_ore(beside):
 			continue
 		_assert(not sim.blocks_player(beside),
 			"기지 옆 %s 칸은 지나갈 수 있다" % str(step))

@@ -188,8 +188,8 @@ func _rock_field() -> void:
 	var world := Sim.new()
 	world.setup(4242)
 	var ore_kinds: Dictionary[int, bool] = {}
-	for cell: Vector2i in world.ore:
-		var kind: int = int(world.ore[cell])
+	for cell: Vector2i in world.ore_nodes:
+		var kind: int = world.ore_type_at(cell)
 		ore_kinds[kind] = true
 		var atlas: Texture2D = GroundLayer.ore_atlas_at(world, cell)
 		_check(atlas != null, "%s 광맥에 시트가 있다" % Defs.ITEM_NAMES[kind])

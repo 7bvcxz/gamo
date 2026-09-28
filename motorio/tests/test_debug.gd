@@ -69,7 +69,7 @@ func _run() -> void:
 	for cell: Vector2i in miners:
 		_assert(main.sim.machines[cell].dir == Vector2i(0, -1),
 			"출력이 위를 본다: %s" % str(main.sim.machines[cell].dir))
-		_assert(main.sim.ore.has(cell), "광맥 위에 섰다: %s" % str(cell))
+		_assert(main.sim.has_ore(cell), "광맥 위에 섰다: %s" % str(cell))
 
 	# Two working, one idle, and the two not on the same machine. The third cat
 	# is part of the scenario rather than a spare: it is the one that hauls what

@@ -136,7 +136,7 @@ func _run() -> void:
 	# arranged. A cat that had a post walks back to it; one that did not goes
 	# looking for work.
 	var seam := Vector2i(9999, 9999)
-	for cell: Vector2i in sim.ore:
+	for cell: Vector2i in sim.ore_nodes:
 		seam = cell
 		break
 	sim.stock[Defs.ITEM_CRYSTAL] = 100
