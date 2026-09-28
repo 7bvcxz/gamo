@@ -9,12 +9,28 @@ class_name GroundLayer
 
 const TEX_SIZE := 192
 
-## The ground tiles. Sixteen painted variants in one 4x4 atlas, cut by
-## tools/sprite/build_tiles.py -- one texture rather than sixteen so the whole
+## The ground tiles: the snow, four faces of one ground in a 2x2 atlas
+## (World Visual Pass 01, tools/art/build_snow.gd) -- one texture so the whole
 ## floor batches into a single draw call instead of one per cell.
-const TILE_ATLAS: Texture2D = preload("res://assets/tiles/ground_16.png")
-const TILE_COLUMNS := 4
-const TILE_VARIANTS := 16
+##
+## It was sixteen painted tiles, each with a darker rim that drew the build grid
+## on the snow, and some with footprints, twigs and blotches that repeated
+## across the field. The four here share one periodic edge and differ only
+## inside, at a few percent: bright, a touch blue, soft grain, no seams in any
+## order (`test_snow_tile_seam_smoke`). The grid is shown when building (the
+## ghost), not painted on the ground.
+const TILE_ATLAS: Texture2D = preload("res://assets/tiles/snow_4.png")
+const TILE_COLUMNS := 2
+const TILE_VARIANTS := 4
+## Their names, in atlas order. All four are one ground type.
+const SNOW_VARIANTS: Array[String] = ["snow_01", "snow_02", "snow_03", "snow_04"]
+## Ground types. The floor has one: every variant is SNOW, and nothing in the
+## game can tell them apart -- a variant is a face, not a place.
+const GROUND_SNOW := 0
+
+## What kind of ground a cell is. SNOW, whichever variant it is drawn with.
+static func ground_type(_cell: Vector2i) -> int:
+	return GROUND_SNOW
 
 var sim: Sim
 var night: float = 0.0
@@ -168,6 +184,11 @@ static func tile_region(variant: int) -> Rect2:
 ## player walks over now, so it is drawn with the other things the player walks
 ## over, in the same batched pass.
 const ORE_COLUMNS := 3
+## How far past its node a seam's picture is drawn, in pixels a side. The sheets
+## are neutral (white) away from the ore, so this spreads the ore -- a cluster
+## that filled two fifths of a two-by-two node reads as a pebble -- and nothing
+## else (World Visual Pass 01).
+const ORE_DRAW_GROW := 8.0
 const ORE_VARIANTS := 6
 const HEATSTONE_ATLAS: Texture2D = preload("res://assets/tiles/heatstone_6.png")
 const CRYSTAL_ATLAS: Texture2D = preload("res://assets/tiles/crystal_6.png")
@@ -281,7 +302,10 @@ func _draw_tiles() -> void:
 	for y in range(start.y, end.y + 1):
 		for x in range(start.x, end.x + 1):
 			var cell := Vector2i(x, y)
-			if is_rock(cell) or _seam_atlas(cell) != null:
+			# Snow under the seams too (World Visual Pass 01): a seam sheet's own
+			# snow is divided out (tools/art/build_ore_tiles.gd), so the node is
+			# drawn over the ground rather than as a patch of different snow.
+			if is_rock(cell):
 				continue
 			_tile_layer.draw_texture_rect_region(TILE_ATLAS,
 				Rect2(Grid.origin(cell), Vector2(tile, tile)),
@@ -296,11 +320,12 @@ func _draw_tiles() -> void:
 			_tile_layer.draw_texture_rect_region(ROCK_ATLAS,
 				Rect2(Vector2(rock_tile) * float(Grid.TILE), Vector2.ONE * float(Grid.TILE)),
 				rock_region(rock_variant(rock_tile)))
-	# A third pass because a seam cell must be painted once -- both passes above
-	# multiply, so a cell drawn twice comes out twice as dark. Unlike them this
-	# one can switch texture between cells, since two ores on screen are two
-	# sheets; seams are tens of cells rather than the whole floor, so the broken
-	# batch costs less than sorting them would.
+	# A third pass, over the snow: the seam sheets have their own snow divided
+	# out, so where the ore is not they are white and the multiply leaves the
+	# ground as it is. Unlike the passes above this one can switch texture
+	# between cells, since two ores on screen are two sheets; seams are tens of
+	# cells rather than the whole floor, so the broken batch costs less than
+	# sorting them would.
 	#
 	# One picture per node, across all four of its cells, from its origin. Four
 	# quarter-size copies of a seam is four seams; the node is one thing. The
@@ -315,7 +340,7 @@ func _draw_tiles() -> void:
 			if atlas == null:
 				continue
 			_tile_layer.draw_texture_rect_region(atlas,
-				Grid.rect_px(Sim.ore_rect(cell)),
+				Grid.rect_px(Sim.ore_rect(cell)).grow(ORE_DRAW_GROW),
 				ore_region(atlas, ore_variant(cell)))
 	_draw_trail(start, end)
 

@@ -1,6 +1,7 @@
 extends SceneTree
 
-## The ground tiles: the atlas, and which of the sixteen a cell gets.
+## The ground tiles: the atlas, and which of its variants a cell gets. Four
+## snow faces since World Visual Pass 01 (it was sixteen painted tiles).
 ##
 ## None of this is visible in a screenshot at the size the game draws it. A
 ## region that runs half a pixel off the edge of the atlas shows as a hairline
@@ -34,7 +35,7 @@ func _atlas() -> void:
 	_check(cell >= 64, "화면 최대 82px를 감당할 해상도다")
 	_check(GroundLayer.TILE_VARIANTS
 		== GroundLayer.TILE_COLUMNS * GroundLayer.TILE_COLUMNS,
-		"변형 수가 4x4다: %d" % GroundLayer.TILE_VARIANTS)
+		"변형 수가 열 수의 제곱이다: %d" % GroundLayer.TILE_VARIANTS)
 
 ## Every region inside the atlas, none overlapping, all the same size. The seam
 ## this guards against is a half-pixel one, so the arithmetic is what gets
@@ -55,7 +56,7 @@ func _regions() -> void:
 		_check(not seen.has(key), "%d번 영역이 겹치지 않는다" % variant)
 		seen[key] = true
 	_check(seen.size() == GroundLayer.TILE_VARIANTS,
-		"열여섯 자리를 전부 쓴다: %d" % seen.size())
+		"모든 자리를 쓴다: %d" % seen.size())
 	# Out of range clamps rather than reading past the atlas.
 	_check(GroundLayer.tile_region(-5) == GroundLayer.tile_region(0), "범위 아래는 0번으로")
 	_check(GroundLayer.tile_region(999)
@@ -82,7 +83,7 @@ func _variants() -> void:
 			used += 1
 		low = mini(low, count)
 		high = maxi(high, count)
-	_check(used == GroundLayer.TILE_VARIANTS, "6400칸에서 열여섯 변형이 모두 나온다: %d" % used)
+	_check(used == GroundLayer.TILE_VARIANTS, "6400칸에서 모든 변형이 나온다: %d" % used)
 	# Not a uniform distribution test -- a hash is allowed to be lumpy -- but a
 	# variant that almost never appears is sixteen tiles' worth of art nobody sees.
 	_check(low * 4 >= high, "가장 드문 변형도 가장 흔한 것의 4분의 1 이상이다: %d ~ %d" % [low, high])
@@ -103,12 +104,14 @@ func _variants() -> void:
 		var row: Dictionary = {}
 		for x in range(0, 40):
 			row[GroundLayer.tile_variant(Vector2i(x, y))] = true
-		_check(row.size() >= 8, "y=%d 행이 한 변형으로 줄서지 않는다: %d종" % [y, row.size()])
+		_check(row.size() >= mini(8, GroundLayer.TILE_VARIANTS),
+			"y=%d 행이 한 변형으로 줄서지 않는다: %d종" % [y, row.size()])
 	for x in [-3, 0, 11]:
 		var column: Dictionary = {}
 		for y in range(0, 40):
 			column[GroundLayer.tile_variant(Vector2i(x, y))] = true
-		_check(column.size() >= 8, "x=%d 열이 한 변형으로 줄서지 않는다: %d종" % [x, column.size()])
+		_check(column.size() >= mini(8, GroundLayer.TILE_VARIANTS),
+			"x=%d 열이 한 변형으로 줄서지 않는다: %d종" % [x, column.size()])
 
 	# Periodicity, which "how many distinct variants" cannot see. The first hash
 	# used all sixteen variants in every row and still laid them out as a lattice
