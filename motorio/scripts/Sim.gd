@@ -1220,6 +1220,13 @@ func _place_edge_frozen() -> void:
 			continue
 		if _tile_structure(tile) or _tile_building(tile):
 			continue
+		# Past the third circle and inside the fourth, checked rather than
+		# expected: the first candidate always was, but a node is a tile across
+		# now and takes that tile more often, and the next angle's rounding can
+		# land a tenth of a tile inside the circle the hint is about.
+		var ring: float = _ring_distance(Grid.from_tile(tile))
+		if ring <= float(Defs.BASE_LEVELS[2]["radius"]) or ring >= float(Defs.BASE_LEVELS[3]["radius"]):
+			continue
 		frozen_cats[Grid.from_tile(tile)] = 0.0
 		edge_frozen = Grid.from_tile(tile)
 		return
@@ -3309,60 +3316,44 @@ func _recount_power() -> void:
 func cell_centre(cell: Vector2i) -> Vector2:
 	return Grid.centre(cell)
 
-## Where a cat stands to work this cell.
+## Where a cat stands to work this cell: its torso, CAT_FOOT_DROP above its feet.
 ##
-## Not the middle of it. A cat's position is its torso and its feet are drawn
-## ten pixels below that, so a cat placed at the centre of a tile has its feet a
-## third of a tile south of the machine it is running -- measured on screen at
-## full zoom, 19 pixels below the miner, which reads as an animal standing just
-## in front of its post rather than at it.
-##
-## Lifted so the feet land on the middle. Used by both the walk and the drop, or
-## a cat carried to a machine would sit correctly and then shuffle down ten
-## pixels the first time it walked back from lunch.
+## A cat's position is its torso and its feet are drawn ten pixels below that,
+## so the point a cat is sent to is the work point lifted by that much. Used by
+## both the walk and the drop, or a cat carried to a post would sit correctly and
+## then shuffle ten pixels the first time it walked back from lunch.
 func post_stand(cell: Vector2i) -> Vector2:
-	return cell_centre(work_cell(cell)) - Vector2(0.0, Defs.CAT_FOOT_DROP)
+	return work_point(cell) - Vector2(0.0, Defs.CAT_FOOT_DROP)
 
-## The cell a cat works a post from.
+## Where a working cat's feet stand: on the post (World Visual Pass 01).
 ##
-## A bare seam is walked on, so the cat stands on it and digs. A mining post is
-## four cells by four and solid, so the cat works it from outside: the cell just
-## past the post's back edge -- the side away from its output -- in line with the
-## seam. If something stands there, the nearest free cell against the post, so a
-## worker is never sent to stand inside a wall.
+## A mining post is its node's two by two now, and the cat works it standing on
+## it -- at the rig's `work_anchor`, a point in the footprint written in its row
+## of the machine table -- rather than from the cell behind a four by four. On a
+## bare node the cat stands on the node and digs. Anything else is its own cell.
 ##
-## Both the cell and the point its body stands at have to be clear. A cat's
-## position is its torso, CAT_FOOT_DROP above its feet -- and that is most of a
-## cell now, so a cat whose feet were on the cell just south of a post had its
-## torso inside the post, and every walk it started began inside a wall. That
-## side takes the next cell out instead.
+## The post is solid to everyone else: she cannot walk into it and no other cat
+## crosses it. Its own cat reaches the spot because the route it asks for opens
+## the one cell it is going to (`_route` opens start and goal), and nothing else.
+func work_point(cell: Vector2i) -> Vector2:
+	var machine: Machine = machine_at(cell)
+	if machine != null and Defs.machine_mines(machine.type):
+		return Grid.origin(machine_rect(machine).position) \
+			+ Defs.machine_work_anchor(machine.type) * float(Grid.CELL)
+	if has_ore(cell):
+		return ore_centre(cell)
+	return cell_centre(cell)
+
+## The cell a cat works a post from: the one its feet are on.
 func work_cell(cell: Vector2i) -> Vector2i:
-	var machine: Machine = machines.get(cell, null)
-	if machine == null or not Defs.machine_mines(machine.type):
-		return cell
-	var rect: Rect2i = machine_rect(machine)
-	var away: Vector2i = -machine.dir
-	var back: Vector2i = Grid.front_cell(rect, away, machine.cell)
-	for candidate: Vector2i in [back, back + away]:
-		if _can_stand(candidate):
-			return candidate
-	var best: Vector2i = NONE
-	var best_distance: float = 1e20
-	for edge: Vector2i in Grid.edge_cells(rect.grow(1)) + Grid.edge_cells(rect):
-		if edge == output_cell(machine) or not _can_stand(edge):
-			continue
-		var distance: float = cell_centre(edge).distance_squared_to(cell_centre(back))
-		if distance < best_distance:
-			best_distance = distance
-			best = edge
-	return best if best != NONE else back
+	return cell_of(work_point(cell))
 
-## Whether a cat can work standing on this cell: its feet there and its torso,
-## CAT_FOOT_DROP above, clear as well.
-func _can_stand(cell: Vector2i) -> bool:
-	if blocks_player(cell):
-		return false
-	return not blocks_player(cell_of(cell_centre(cell) - Vector2(0.0, Defs.CAT_FOOT_DROP)))
+## The cell of a post's front edge its output leaves from, in line with its
+## anchor: `output_cell` is the one past it. Named so the cat's spot and the
+## post's doorway can be told apart -- a worker standing in its own doorway would
+## be a post that stops itself (`test_output_anchor_is_separate_from_cat_work_anchor`).
+func output_anchor(machine: Machine) -> Vector2i:
+	return output_cell(machine) - machine.dir
 
 ## The free cell against a rectangle nearest to a point: where something that
 ## cannot enter a building stands to reach it. `avoid` are cells not to use --
@@ -4242,7 +4233,7 @@ func _drain_outbox(machine: Machine) -> void:
 ## material and how pure it is; the rig decides the pace, and that split is the
 ## only thing Mk.2 changes.
 func machine_period(machine: Machine) -> float:
-	return seam_period(machine.cell) / Defs.machine_mine_rate(machine.type)
+	return seam_period(machine.ore_node) / Defs.machine_mine_rate(machine.type)
 
 func _tick_miner(machine: Machine, delta: float) -> void:
 	# A miner is inert without a cat standing at it. This is the whole point of

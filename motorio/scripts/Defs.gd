@@ -493,6 +493,11 @@ static func machine_size(type: int) -> Vector2i:
 static func machine_anchor(type: int) -> Vector2i:
 	return Vector2i(machine(type).get("anchor", Grid.AUTO))
 
+## Where a rig's working cat stands, in cells from its footprint's top-left
+## (World Visual Pass 01). Zero for anything without one.
+static func machine_work_anchor(type: int) -> Vector2:
+	return Vector2(machine(type).get("work_anchor", Vector2.ZERO))
+
 ## Every cell a machine of this type covers with its anchor on `anchor`.
 static func machine_footprint(type: int, anchor: Vector2i, dir: Vector2i = Vector2i.RIGHT) -> Rect2i:
 	return Grid.footprint(anchor, machine_size(type), dir, machine_anchor(type))
@@ -1564,6 +1569,10 @@ const MACHINES: Array[Dictionary] = [
 		# a building twice the size of what it worked. `footprint_problems`
 		# refuses any anchor that is not a node's origin.
 		"size": ORE_NODE_SIZE,
+		# Where the working cat's feet stand, in cells from the footprint's
+		# top-left: on the post, lower middle -- in front of the drill, clear of
+		# the output edge whichever way the post faces.
+		"work_anchor": WORK_ANCHOR,
 	},
 	{
 		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
@@ -1639,6 +1648,7 @@ const MACHINES: Array[Dictionary] = [
 		"build_order": 6, "walkable": false, "directional": true,
 		"mine_rate": RIG2_RATE,
 		"size": ORE_NODE_SIZE,
+		"work_anchor": WORK_ANCHOR,
 	},
 ]
 
@@ -2859,6 +2869,11 @@ const ORE_NODE_SIZE := Vector2i(2, 2)
 ## between any two nodes, so every node in a field can take a post of its own
 ## and a belt out of it.
 const ORE_PITCH := 4
+## Where a cat working a two-by-two rig stands, in cells from its top-left: the
+## middle across, three quarters of the way down. Its feet on the post's lower
+## half, its torso over the bottom row -- never on the output edge, whichever
+## way the post faces, and the drill at the top of the picture left in view.
+const WORK_ANCHOR := Vector2(1.0, 1.75)
 
 # --- Cat workers -------------------------------------------------------------
 ## A miner is a machine, not a worker. It only runs while a cat stands at it,

@@ -1184,8 +1184,15 @@ func shelter_nearby() -> bool:
 ## is a body the collision can only let out, never keep out.
 func _step_clear() -> void:
 	player.position = sim.clear_point(player.position, Defs.PLAYER_RADIUS)
+	_clear_cats()
+
+## Every cat standing inside something, out of it -- except a cat on its own
+## post, which is where it works (World Visual Pass 01), not stuck in a wall.
+func _clear_cats() -> void:
 	for cat: Sim.Cat in sim.cats:
 		if cat == sim.carried_cat:
+			continue
+		if cat.has_job() and sim.post_anchor(sim.cell_of(cat.pos)) == cat.assigned:
 			continue
 		if sim.blocks_player(sim.cell_of(cat.pos)):
 			cat.pos = sim.clear_point(cat.pos, 1.0)
@@ -2299,9 +2306,7 @@ func _slide_clear() -> void:
 	slide_from = player.position
 	slide_to = sim.clear_point(player.position, Defs.PLAYER_RADIUS)
 	slide_time = 0.0 if slide_from.distance_to(slide_to) > 0.5 else -1.0
-	for cat: Sim.Cat in sim.cats:
-		if cat != sim.carried_cat and sim.blocks_player(sim.cell_of(cat.pos)):
-			cat.pos = sim.clear_point(cat.pos, 1.0)
+	_clear_cats()
 
 func _update_slide(delta: float) -> void:
 	if slide_time < 0.0:

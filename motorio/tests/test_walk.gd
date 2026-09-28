@@ -136,12 +136,10 @@ func _run() -> void:
 			# passed against the very code it was written to catch.
 			if cat.state == Defs.CAT_WORKING:
 				worked += 1
-				# Its work position: the seam itself when bare, and the cell it
-				# works a mining post from when there is one (Grid v2 -- a post is
-				# four cells by four and solid).
+				# Its work position: on the node when bare, on the post when there
+				# is one (World Visual Pass 01 -- the post's work anchor).
 				var feet: Vector2 = cat.pos + Vector2(0.0, Defs.CAT_FOOT_DROP)
-				off_centre = maxf(off_centre,
-					feet.distance_to(sim.cell_centre(sim.work_cell(cat.assigned))))
+				off_centre = maxf(off_centre, feet.distance_to(sim.work_point(cat.assigned)))
 			tick_last[index] = cat.pos
 			tick_state[index] = cat.state
 		if since < SAMPLE:

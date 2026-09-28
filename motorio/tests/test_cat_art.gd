@@ -136,16 +136,18 @@ func _test_working_cat_stands_on_the_middle() -> void:
 
 	# A cat's position is its torso; the drawing puts its feet CAT_FOOT_DROP below
 	# it. Placed at the middle of the tile, the animal stands a third of a tile
-	# south of the thing it is working -- 19 pixels on screen at full zoom.
+	# south of the thing it is working -- 19 pixels on screen at full zoom. The
+	# feet go on the work point: the middle of a bare node (World Visual Pass 01:
+	# a node is two cells by two).
 	var feet: Vector2 = cat.pos + Vector2(0.0, Defs.CAT_FOOT_DROP)
-	var middle: Vector2 = sim.cell_centre(seam)
+	var middle: Vector2 = sim.work_point(seam)
 	_assert(feet.distance_to(middle) < 0.01,
-		"발이 칸 한가운데를 딛는다: %.1fpx 어긋남" % feet.distance_to(middle))
+		"발이 노드 한가운데를 딛는다: %.1fpx 어긋남" % feet.distance_to(middle))
 
 	# And it stays there after walking back, or a cat carried in would sit right
 	# once and drop ten pixels the first time it came home from lunch.
 	cat.state = Defs.CAT_TO_MINER
-	cat.pos = sim.cell_centre(seam) + Vector2(0.0, 60.0)
+	cat.pos = middle + Vector2(0.0, 60.0)
 	cat.path.clear()
 	cat.path_goal = Vector2(9999.0, 9999.0)
 	var guard := 0

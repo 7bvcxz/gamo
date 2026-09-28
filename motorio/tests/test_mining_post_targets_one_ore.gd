@@ -44,9 +44,9 @@ func _run() -> void:
 		"일곱이 함께 낸 양이 각자 혼자 낸 양의 합이다 (%.0f vs %.0f)" % [field["total"], expected])
 	_assert(int(field["wrong"]) == 0, "어느 채굴기도 이웃 광맥의 광석을 내지 않는다 (%d개)" % int(field["wrong"]))
 	if failures == 0:
-		print("PASS test_one_mining_post_targets_one_ore")
+		print("PASS test_mining_post_targets_one_ore")
 	else:
-		print("FAIL test_one_mining_post_targets_one_ore (%d)" % failures)
+		print("FAIL test_mining_post_targets_one_ore (%d)" % failures)
 	quit(failures)
 
 func _assert(condition: bool, label: String) -> void:
@@ -111,11 +111,12 @@ func _produce(count: int, only: int = -1) -> Dictionary:
 		_assert(not sim.place_cat(seams[0]), "이미 고양이가 있는 채굴기에는 둘째를 둘 수 없다")
 		sim.drop_cat(Grid.centre(seams[0] + Vector2i(0, -6)))
 		sim.cats.remove_at(count)
-		# Each cat stands at its own post, outside it.
+		# Each cat stands on its own post (World Visual Pass 01).
 		var spots: Dictionary = {}
 		for cat: Sim.Cat in sim.cats:
 			var rect: Rect2i = sim.machine_rect(sim.machine_at(cat.assigned))
-			_assert(not Grid.rect_px(rect).has_point(cat.pos), "고양이는 채굴기 바깥에 선다")
+			var feet: Vector2 = cat.pos + Vector2(0.0, Defs.CAT_FOOT_DROP)
+			_assert(Grid.rect_px(rect).has_point(feet), "고양이는 제 채굴기 위에 선다")
 			spots[sim.cell_of(cat.pos)] = true
 		_assert(spots.size() == count, "일곱 마리가 일곱 자리에 선다 (%d)" % spots.size())
 	var per_post: Dictionary = {}

@@ -220,6 +220,13 @@ static func settle_nodes(sim: Sim, report: Dictionary, from_schema: int) -> void
 				continue
 			cat.assigned = node
 			cat.state = Defs.CAT_TO_MINER if node != NONE else Defs.CAT_IDLE
+	# A v12 cat at work stood outside its four by four, against the back wall.
+	# The spot is on the post now; it steps onto it rather than working a post
+	# from a cell away until its next meal.
+	if from_schema == NODES_FROM:
+		for cat: Sim.Cat in sim.cats:
+			if cat.state == Defs.CAT_WORKING and sim.machines.has(cat.assigned):
+				cat.pos = sim.post_stand(cat.assigned)
 	sim._grid_dirty = true
 
 ## The cell between a shrunken post's output and where its v12 output was.

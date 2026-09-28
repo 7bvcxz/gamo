@@ -81,6 +81,10 @@ func _test_v12_posts() -> void:
 			if cat.assigned == node:
 				staffed = true
 		_assert(staffed, "%s 의 고양이가 그대로 배정되어 있다" % name)
+		for cat: Sim.Cat in sim.cats:
+			if cat.assigned == node and cat.state == Defs.CAT_WORKING:
+				_assert(Grid.rect_px(sim.machine_rect(post)).has_point(cat.pos + Vector2(0.0, Defs.CAT_FOOT_DROP)),
+					"%s 의 고양이는 이제 채굴기 위에서 일한다" % name)
 	# The line into the base still carries: heat stone reaches the fire.
 	var bridge: Sim.Machine = sim.machine_at(core + Vector2i(1, 7))
 	_assert(bridge != null and bridge.type == Defs.M_BELT and bridge.dir == Vector2i.UP,
