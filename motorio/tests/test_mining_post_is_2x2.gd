@@ -68,9 +68,12 @@ func _test_picture_stays_on_its_cells() -> void:
 		"채굴기 그림이 2×2 발자국 안에 그려진다 (그림 %.1f..%.1f × %.1f..%.1f, 발자국 ±%.0f)"
 			% [opaque.position.x, opaque.end.x, opaque.position.y, opaque.end.y, footprint.x * 0.5])
 	# And it fills it: a post drawn as a speck in the middle of its cells is a
-	# post nobody can find.
-	_assert(opaque.size.x >= footprint.x * 0.8, "그리고 발자국을 채운다 (폭 %.1f / %.0f)"
-		% [opaque.size.x, footprint.x])
+	# post nobody can find. Its long side most of the way across, its short side
+	# well over half (the rig is taller than it is wide).
+	var larger: float = maxf(opaque.size.x, opaque.size.y) / footprint.x
+	var smaller: float = minf(opaque.size.x, opaque.size.y) / footprint.x
+	_assert(larger >= 0.88 and smaller >= 0.65, "그리고 발자국을 채운다 (%.0f%% × %.0f%%)"
+		% [larger * 100.0, smaller * 100.0])
 
 func _test_every_direction() -> void:
 	var headings: Array[Vector2i] = [Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT, Vector2i.UP]

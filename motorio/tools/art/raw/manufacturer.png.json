@@ -1,0 +1,31 @@
+{
+  "at": "2026-09-28T04:03:29.857210+00:00",
+  "model": "gpt-image-2",
+  "prompt": "A small workshop press machine for a snowy top-down game: a square squat dark metal machine with a heavy press head on top, a wide input slot on one side and an output tray on the other, and one warm orange indicator lamp. Cute cozy chibi game art style matching the first reference image exactly: the same thick warm dark-brown outline, the same flat cel shading with gentle soft gradients. The building's body is cold dark blue-grey metal like the machines in the second reference image, with a little white snow settled on its top edges, and its one or two lights glow warm orange-yellow. Soft rounded chunky forms, very few large simple shapes so it stays readable at 40 pixels across. The subject is centred, seen straight on with a slight downward tilt as in a top-down game, and its body fills a square frame edge to edge. Flat solid pure green background, one uniform colour.",
+  "refs": [
+    "/home/merti/Workspace/gamo/motorio/tools/sprite/refs/style_plate.png",
+    "/home/merti/Workspace/gamo/motorio/design/reference/motorio-visual-north-star.png"
+  ],
+  "mask": null,
+  "size": "1024x1024",
+  "quality": "low",
+  "background": "auto",
+  "n": 1,
+  "seconds": 15.4,
+  "usage": {
+    "input_tokens": 2209,
+    "input_tokens_details": {
+      "image_tokens": 2020,
+      "text_tokens": 189
+    },
+    "output_tokens": 196,
+    "output_tokens_details": {
+      "image_tokens": 196,
+      "text_tokens": 0
+    },
+    "total_tokens": 2405
+  },
+  "outputs": [
+    "/home/merti/Workspace/gamo/motorio/tools/art/raw/manufacturer.png"
+  ]
+}

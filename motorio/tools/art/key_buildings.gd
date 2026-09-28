@@ -23,16 +23,19 @@ extends SceneTree
 ##   so the downscale does not average the edge with whatever green was there.
 
 const RAW := "res://tools/art/raw/"
-## name -> [output, stored size in pixels, margin as a fraction of the size]
+## name -> [output, stored size in pixels, margin as a fraction of the size].
+## Stored at twice the size the game draws them (the house rule from
+## build_objects.py): objects are drawn NEAREST, and a picture minified further
+## than that starts to lose its outline.
 const TABLE := {
 	"base": ["res://assets/objects/core.png", 256, 0.015],
 	"shelter": ["res://assets/objects/shelter.png", 128, 0.02],
-	"miner": ["res://assets/objects/miner.png", 96, 0.02],
-	"miner_mk2": ["res://assets/objects/miner_mk2.png", 96, 0.02],
-	"generator": ["res://assets/objects/generator.png", 96, 0.03],
-	"manufacturer": ["res://assets/objects/manufacturer.png", 96, 0.03],
-	"assembler": ["res://assets/objects/assembler.png", 96, 0.03],
-	"food_bin": ["res://assets/objects/food_bin.png", 96, 0.04],
+	"miner": ["res://assets/objects/miner.png", 64, 0.02],
+	"miner_mk2": ["res://assets/objects/miner_mk2.png", 64, 0.02],
+	"generator": ["res://assets/objects/generator.png", 64, 0.03],
+	"manufacturer": ["res://assets/objects/manufacturer.png", 64, 0.03],
+	"assembler": ["res://assets/objects/assembler.png", 64, 0.03],
+	"food_bin": ["res://assets/objects/food_bin.png", 64, 0.04],
 }
 
 func _initialize() -> void:

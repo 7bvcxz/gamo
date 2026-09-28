@@ -70,6 +70,10 @@ static func kit_art(kind: int) -> Texture2D:
 		Defs.KIT_FOOD: return FOOD_BIN_ART
 		_: return KIT_SHELTER_ART
 const MINER_ART: Texture2D = preload("res://assets/objects/miner.png")
+## The second rig has a picture of its own (World Visual Pass 01): two shafts
+## and brass bands, where it used to be the first rig's picture with two pips.
+const MINER_MK2_ART: Texture2D = preload("res://assets/objects/miner_mk2.png")
+const ASSEMBLER_ART: Texture2D = preload("res://assets/objects/assembler.png")
 const GENERATOR_ART: Texture2D = preload("res://assets/objects/generator.png")
 ## The exchanger's picture, adopted for the machine that took over its job. A
 ## box with a hopper and a hot mouth is a picture of material in, different
@@ -115,7 +119,12 @@ const CAT_TOOL_BEATS := 2.0
 ## Every one-tile machine drawn from a texture: miner, exchanger, generator. One
 ## number rather than three, because they stand side by side on the same snow and
 ## a difference between them reads as a difference in importance.
-const MACHINE_ART_DRAW := 36.0
+const MACHINE_ART_DRAW := 1.0 * float(Grid.TILE)
+## Where the lights drawn over the pictures sit, at one-tile size, measured off
+## the World Visual Pass 01 art: the generator's coil and the recipe machines'
+## front lamp.
+const GENERATOR_PORT := Vector2(-1.0, -10.0)
+const RECIPE_LAMP := Vector2(0.0, 8.5)
 ## Except the mining post, which is drawn exactly over its footprint (Grid v2).
 ## Its picture is opaque nearly edge to edge -- 69 of 72 pixels, where the
 ## generator's and the manufacturer's are 49 -- so at the shared 36 it hung two
@@ -141,7 +150,9 @@ const CORE_DRAW := 1.0 * float(Grid.TILE)
 ## Also one tile now, for the same reason: `is_structure` blocks exactly the
 ## one cell it stands on and the drawing claimed five.
 const SHELTER_DRAW := 1.0 * float(Grid.TILE)
-const FOOD_BIN_DRAW := 36.0
+## A tile, exactly its footprint (World Visual Pass 01). It was 36 over a
+## 32 pixel bin and hung two pixels over the snow on every side.
+const FOOD_BIN_DRAW := 1.0 * float(Grid.TILE)
 
 const CAT_CELL := 128.0
 const CAT_FRAMES := 8
@@ -509,10 +520,9 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	var swell: float = sin(core_pulse * PI) * 0.07
 	var grow: float = Defs.unfold_scale(core_unfold) * (1.0 + swell)
 	var light: float = Defs.unfold_light(core_unfold) * (1.0 + core_pulse * 0.8)
-	# The ground the base stands on: all of it, since the base is eight cells
-	# across and the fire in the middle of it is not.
-	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(0.16, 0.10, 0.06, 0.20 * core_unfold))
-	draw_rect(Rect2(px, Vector2.ONE * tile).grow(-1.0), Color(1.0, 0.69, 0.36, 0.22 * light), false, 1.5)
+	# No square painted under it any more: the picture covers its eight cells by
+	# eight (World Visual Pass 01), so the building is its own edge. The square
+	# was there to claim ground the old small picture did not reach.
 	_scale_about(c, k)
 	c = Vector2.ZERO
 	var beat: float = 1.0 + sin(pulse * 2.2) * 0.05 + machine.flash * 0.5
@@ -535,6 +545,29 @@ func _draw_core(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	_object_art(CORE_ART, c, CORE_DRAW * grow)
 	draw_arc(c, 22.0, 0.0, TAU, 48, Color(1.0, 0.69, 0.36, (0.30 + machine.flash) * light), 2.0, true)
 	_unscale()
+
+## Every building picture, the size it is drawn at and the footprint it stands
+## on -- the one table the drawing and `test_building_visual_inside_footprint`
+## both read, so a picture that is redrawn or resized is measured the way it is
+## drawn (World Visual Pass 01).
+static func building_art() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var rows: Array = [
+		["base", CORE_ART, CORE_DRAW, Defs.machine_size(Defs.M_CORE), true],
+		["shelter", SHELTER_ART, SHELTER_DRAW, Defs.SHELTER_SIZE, true],
+		["miner", MINER_ART, MINER_ART_DRAW, Defs.machine_size(Defs.M_MINER), true],
+		["miner_mk2", MINER_MK2_ART, MINER_ART_DRAW, Defs.machine_size(Defs.M_MINER_MK2), true],
+		["generator", GENERATOR_ART, MACHINE_ART_DRAW, Defs.machine_size(Defs.M_GENERATOR), true],
+		["manufacturer", MANUFACTURER_ART, MACHINE_ART_DRAW, Defs.machine_size(Defs.M_MANUFACTURER), true],
+		["assembler", ASSEMBLER_ART, MACHINE_ART_DRAW, Defs.machine_size(Defs.M_ASSEMBLER), true],
+		["food_bin", FOOD_BIN_ART, FOOD_BIN_DRAW, Defs.FOOD_BIN_SIZE, false],
+	]
+	for row: Array in rows:
+		var footprint: Vector2 = Vector2(row[3] as Vector2i) * float(Grid.CELL)
+		# Scaled with the footprint the way _scale_about scales it, or not at all.
+		var drawn: float = float(row[2]) * (_k(minf(footprint.x, footprint.y)) if bool(row[4]) else 1.0)
+		out.append({"name": row[0], "texture": row[1], "drawn": drawn, "footprint": footprint})
+	return out
 
 ## One sprite, centred on a cell. Top-down art has no feet, so unlike the cats --
 ## which stand on a fixed ground line -- these hang off the middle of the tile.
@@ -668,7 +701,8 @@ func _draw_miner(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	_shadow(c + Vector2(0, 12), 11.0)
 	# Cold machines go blue rather than dark: the tint is the same signal the
 	# painted body carried, applied to the picture instead of mixed into it.
-	_object_art(MINER_ART, c, MINER_ART_DRAW, Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
+	var art: Texture2D = MINER_MK2_ART if machine.type == Defs.M_MINER_MK2 else MINER_ART
+	_object_art(art, c, MINER_ART_DRAW, Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
 	# The output arrow is drawn after the cats, not here -- see _draw_machine_marks.
 	if machine.operated:
 		draw_arc(c, 15.0, -PI * 0.5, -PI * 0.5 + TAU * work, 22, Color(1, 1, 1, 0.42), 2.0, true)
@@ -856,8 +890,9 @@ func _draw_generator(machine: Sim.Machine, px: Vector2, tile: float) -> void:
 	# generator is actually supplying. Cool light, because power is
 	# infrastructure rather than warmth.
 	var beat: float = (0.65 + sin(pulse * 4.0) * 0.25) if live else 0.16
-	draw_circle(centre + Vector2(0.0, 1.0), 6.0, Color(0.55, 0.82, 0.98, beat * 0.75))
-	draw_circle(centre + Vector2(0.0, 1.0), 2.4, Color(0.92, 0.99, 1.0, beat))
+	# On the coil on top of the drum, where the picture's power comes out.
+	draw_circle(centre + GENERATOR_PORT, 4.5, Color(0.55, 0.82, 0.98, beat * 0.75))
+	draw_circle(centre + GENERATOR_PORT, 1.8, Color(0.92, 0.99, 1.0, beat))
 	# Fuel sits in the same pip row every other machine uses.
 	_draw_pip(centre + Vector2(0, 13), Defs.GENERATOR_FUEL, int(machine.buffer.get(Defs.GENERATOR_FUEL, 0)))
 	_unscale()
@@ -887,8 +922,8 @@ func _draw_recipe_body(machine: Sim.Machine) -> void:
 	var centre := Vector2.ZERO
 	var frost: float = _frost(machine)
 	_shadow(centre + Vector2(0, 12), 11.0)
-	_object_art(MANUFACTURER_ART, centre, MACHINE_ART_DRAW,
-		Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
+	var art: Texture2D = ASSEMBLER_ART if machine.type == Defs.M_ASSEMBLER else MANUFACTURER_ART
+	_object_art(art, centre, MACHINE_ART_DRAW, Color.WHITE.lerp(Defs.COL_FROST_TINT, frost))
 	var recipe: Dictionary = sim.recipe_of(machine)
 	if recipe.is_empty():
 		return
@@ -896,8 +931,9 @@ func _draw_recipe_body(machine: Sim.Machine) -> void:
 	# than supplying a rate.
 	var live: bool = machine.operated and not machine.stalled
 	var beat: float = (0.6 + sin(pulse * 3.0) * 0.22) if live else 0.14
-	draw_circle(centre + Vector2(0.0, 1.0), 5.5, Color(1.0, 0.72, 0.36, beat * 0.7))
-	draw_circle(centre + Vector2(0.0, 1.0), 2.2, Color(1.0, 0.93, 0.78, beat))
+	# On the lamp at the front of the picture.
+	draw_circle(centre + RECIPE_LAMP, 4.0, Color(1.0, 0.72, 0.36, beat * 0.7))
+	draw_circle(centre + RECIPE_LAMP, 1.6, Color(1.0, 0.93, 0.78, beat))
 	# The ring the miner draws, drawn the same way and for the same reason: a
 	# machine mid-cycle and a machine waiting look identical without it, and an
 	# idle one blinks rather than showing an empty arc.
