@@ -628,7 +628,7 @@
     "sight": 2.0,
     "thaw_seconds": 5.0
   },
-  "version": "1.0.42",
+  "version": "1.0.44",
   "warmth": {
     "base_radius": 7.0,
     "cold_drain": 13.0,

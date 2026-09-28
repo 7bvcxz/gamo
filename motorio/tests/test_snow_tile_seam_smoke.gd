@@ -7,8 +7,8 @@ extends SceneTree
 ## by less than the grain inside a tile. Then an 8x8 and a 16x16 floor are laid
 ## out with the game's own variant choice, and the steps across tile boundaries
 ## are no bigger than the steps inside tiles -- a seam or a drawn grid would
-## show as boundary steps standing out. The 16x16 floor is written to
-## user://snow_seam_16x16.png (and to --out, if given) to look at.
+## show as boundary steps standing out. The 16x16 floor is written to `--out`,
+## if given, to look at.
 ##
 ## Also the brief's "no big blotches": the whole tile stays within a few
 ## percent of its mean.
@@ -89,7 +89,8 @@ func _test_floor(atlas: Image, n: int) -> void:
 	_assert(mean_across <= mean_inside * 1.5 + 0.0005,
 		"%dx%d: 타일 경계의 변화가 타일 안보다 크지 않다 (경계 %.4f, 안 %.4f)" % [n, n, mean_across, mean_inside])
 	if n == 16:
-		floor.save_png(ProjectSettings.globalize_path("user://snow_seam_16x16.png"))
+		# Written only when asked for (`-- --out <path>`): a test run leaves
+		# nothing behind in the player's data folder.
 		var args := OS.get_cmdline_user_args()
 		for i in args.size():
 			if args[i] == "--out" and i + 1 < args.size():

@@ -134,7 +134,7 @@ func _run() -> void:
 	# 6. Seven posts and seven cats, a node's pitch apart, at play zoom.
 	await _fresh()
 	_zoom(1.0)
-	var row: Vector2i = sim.core_cell + Vector2i(14, 12)
+	var row: Vector2i = sim.core_cell + Vector2i(-12, 14)
 	_clear(Rect2i(row - Vector2i(6, 8), Vector2i(Defs.ORE_PITCH * 7 + 12, 18)))
 	var kinds: Array[int] = [Defs.ITEM_HEATSTONE, Defs.ITEM_COPPER, Defs.ITEM_IRON]
 	for index in 7:
