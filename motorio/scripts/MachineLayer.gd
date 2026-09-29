@@ -217,6 +217,26 @@ const MINER_ARROW_LENGTH := 12.0
 var sim: Sim
 var view_rect := Rect2()
 var preview_type: int = Defs.M_MINER
+## Which machines show their ports (Factory Interaction Pass 01). Only while it
+## matters: with the build gun out every machine in view says where it takes in
+## and puts out, because that is when belts are being laid against them; with a
+## machine's window open, that one. The rest of the time the factory is not
+## covered in marks.
+const PORTS_HIDDEN := 0
+const PORTS_ALL := 1
+const PORTS_ONE := 2
+var port_view: int = PORTS_HIDDEN
+## The factory debug overlay (` key, Factory Interaction Pass 01): every machine's
+## footprint, anchor, facing and ports, what each post is aimed at and will put
+## out, where its cat stands and where its output leaves -- and on every ore
+## node, the sheet it is drawn with beside the type it is and the item it gives.
+## Off unless asked for; never part of the game's picture.
+var debug_overlay := false
+var port_cell := Vector2i(9999, 9999)
+## In is a cool mark pointing inward, out a warm arrow pointing outward -- the
+## pair a player learns once and reads on every machine.
+const PORT_IN_COLOR := Color(0.55, 0.82, 1.0)
+const PORT_OUT_COLOR := Color(1.0, 0.78, 0.36)
 var preview_cell := Vector2i.ZERO
 var preview_dir := Vector2i.RIGHT
 var preview_valid := true
@@ -281,6 +301,52 @@ func _draw_marks_layer() -> void:
 	_draw_machine_marks(_marks_layer, tile)
 	if show_preview:
 		_draw_preview(_marks_layer, tile)
+	if debug_overlay:
+		_draw_debug_overlay(_marks_layer)
+
+func _debug_text(on: CanvasItem, at: Vector2, text: String, col: Color) -> void:
+	var font: Font = UIFont.FONT
+	on.draw_string(font, at + Vector2(1, 1), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(0, 0, 0, 0.9))
+	on.draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, col)
+
+func _draw_debug_overlay(on: CanvasItem) -> void:
+	var cyan := Color(0.4, 1.0, 1.0, 0.9)
+	var magenta := Color(1.0, 0.4, 1.0, 0.95)
+	var amber := Color(1.0, 0.75, 0.3, 0.95)
+	for origin: Vector2i in sim.ore_nodes:
+		var rect: Rect2 = Grid.rect_px(Sim.ore_rect(origin))
+		if not _visible_rect(rect):
+			continue
+		var node: Dictionary = sim.ore_node_at(origin)
+		var atlas: Texture2D = GroundLayer.ore_atlas_at(sim, origin)
+		var sheet: String = atlas.resource_path.get_file().get_basename() if atlas != null else "-"
+		on.draw_rect(rect, Color(1, 1, 0.4, 0.6), false, 1.0)
+		_debug_text(on, rect.position + Vector2(0, -12), "ORE NODE #%d" % int(node["id"]), Color.WHITE)
+		_debug_text(on, rect.position + Vector2(0, -3), "%s | %s -> %s  (%d,%d) %dx%d" % [sheet,
+			Defs.item_name(int(node["ore_type"])), Defs.item_name(int(node["resource_item"])),
+			origin.x, origin.y, (node["size"] as Vector2i).x, (node["size"] as Vector2i).y], Color.WHITE)
+	for cell: Vector2i in sim.machines:
+		var machine: Sim.Machine = sim.machines[cell]
+		var info: Dictionary = sim.machine_debug(machine)
+		var span: Rect2 = Grid.rect_px(info["footprint"])
+		if not _visible_rect(span):
+			continue
+		on.draw_rect(span, cyan, false, 1.5)
+		on.draw_rect(Rect2(Grid.origin(machine.cell), Vector2.ONE * float(Grid.CELL)), Color(cyan, 0.35))
+		_draw_port_marks(on, info["ports"], 1.0)
+		var line: String = "%s @(%d,%d) dir(%d,%d)" % [info["name"], cell.x, cell.y,
+			machine.dir.x, machine.dir.y]
+		_debug_text(on, span.position + Vector2(2, span.size.y + 9), line, cyan)
+		if info.has("ore_node"):
+			var node: Vector2i = info["ore_node"]
+			_debug_text(on, span.position + Vector2(2, span.size.y + 18),
+				"target #%d %s -> %s" % [int(info["ore_id"]), Defs.item_name(int(info["ore_type"])),
+				Defs.item_name(int(info["expected_output"]))], amber)
+			if node != Sim.NONE:
+				on.draw_line(span.get_center(), Grid.rect_px(Sim.ore_rect(node)).get_center(), amber, 1.0)
+			on.draw_circle(info["work_point"], 2.5, magenta)
+			on.draw_rect(Rect2(Grid.origin(info["output_anchor"]), Vector2.ONE * float(Grid.CELL)).grow(-2.0),
+				amber, false, 1.0)
 
 func _process(delta: float) -> void:
 	pulse += delta
@@ -1410,7 +1476,10 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 		# question rather than as a list of machine numbers: the placement ghost
 		# draws this arrow and then it vanished the moment the machine was built,
 		# so a manufacturer turned north and one turned east were the same picture.
-		if Defs.machine_mines(machine.type) or Defs.machine_uses_recipes(machine.type):
+		# While its ports are showing, the output port's arrow is this arrow --
+		# drawing both put two arrows end to end on every machine.
+		if (Defs.machine_mines(machine.type) or Defs.machine_uses_recipes(machine.type)) \
+				and not shows_ports(machine):
 			# From the edge the output leaves by, in line with the anchor -- the
 			# lane the output cell is on -- and the same ten pixels past it the
 			# one-tile machines always drew.
@@ -1419,16 +1488,52 @@ func _draw_machine_marks(on: CanvasItem, tile: float) -> void:
 				MINER_ARROW_LENGTH)
 		if machine.stalled:
 			_draw_stall(on, machine, centre + Vector2(0.0, -maxf(0.0, span.size.y * 0.5 - 16.0)))
+		if shows_ports(machine):
+			_draw_port_marks(on, sim.machine_ports(machine), 0.75)
+
+## Whether this machine's ports are drawn right now. Belts are left out even with
+## the gun up -- a line of belts is its own arrows -- and so is the fire, which
+## takes from every side and would be ringed in thirty-two marks.
+func shows_ports(machine: Sim.Machine) -> bool:
+	if machine == null or machine.type == Defs.M_CORE:
+		return false
+	match port_view:
+		PORTS_ALL:
+			return machine.type != Defs.M_BELT
+		PORTS_ONE:
+			return machine.cell == port_cell
+	return false
+
+## Small marks on a footprint's edge, one per port cell: a cool notch pointing in
+## where a belt feeds it, a warm arrow pointing out where it pours.
+func _draw_port_marks(on: CanvasItem, ports: Array[Dictionary], alpha: float) -> void:
+	for port: Dictionary in ports:
+		var d := Vector2(port["dir"] as Vector2i)
+		var perp := Vector2(-d.y, d.x)
+		var edge: Vector2 = (Grid.centre(port["inside"]) + Grid.centre(port["outside"])) * 0.5
+		if String(port["kind"]) == Defs.PORT_OUTPUT:
+			var tail: Vector2 = edge - d * 1.0
+			_draw_arrow(on, tail, port["dir"], 9.0, Color(0, 0, 0, alpha * 0.6), 4.0)
+			_draw_arrow(on, tail, port["dir"], 9.0, Color(PORT_OUT_COLOR, alpha), 2.0)
+		else:
+			var tip: Vector2 = edge - d * 1.5
+			var base: Vector2 = edge + d * 4.0
+			var mark := PackedVector2Array([tip, base + perp * 3.5, base - perp * 3.5])
+			on.draw_colored_polygon(mark, Color(PORT_IN_COLOR, alpha))
+			on.draw_polyline(PackedVector2Array([mark[0], mark[1], mark[2], mark[0]]),
+				Color(0, 0, 0, alpha * 0.5), 1.0)
 
 ## Where a machine's output leaves its footprint: the middle of the front edge's
 ## anchor lane, in world pixels.
+##
+## Read off the output port, so the arrow and the simulation cannot disagree
+## about which cell the output leaves from.
 func _edge_point(span: Rect2, machine: Sim.Machine) -> Vector2:
-	var lane: Vector2 = Grid.centre(machine.cell)
-	match machine.dir:
-		Vector2i.LEFT: return Vector2(span.position.x, lane.y)
-		Vector2i.UP: return Vector2(lane.x, span.position.y)
-		Vector2i.DOWN: return Vector2(lane.x, span.end.y)
-	return Vector2(span.end.x, lane.y)
+	var outs: Array[Dictionary] = sim.machine_output_ports(machine)
+	if outs.is_empty():
+		return span.get_center()
+	var port: Dictionary = outs[0]
+	return (Grid.centre(port["inside"]) + Grid.centre(port["outside"])) * 0.5
 
 ## How much food is left, over the bin, with no word in front of it: what the
 ## number counts is obvious from the crate of fish it is sitting on.
@@ -1582,15 +1687,25 @@ func _draw_preview(on: CanvasItem, tile: float) -> void:
 			Color(1, 1, 1, alpha), 1.5, true)
 	# Direction is the most-missed piece of information when placing: R changes it
 	# invisibly unless the preview states it outright.
-	var span_px: Rect2 = Grid.rect_px(footprint)
-	var c: Vector2 = span_px.get_center()
-	var arrow := Color(col.r, col.g, col.b, minf(1.0, alpha + 0.3))
-	var dir := Vector2(preview_dir)
-	on.draw_circle(c - dir * 12.0, 3.0, Color(arrow.r, arrow.g, arrow.b, 0.55))
-	_draw_arrow(on, c - dir * 6.0, preview_dir, 22.0, arrow, 3.0)
-	var font := UIFont.FONT
-	on.draw_string(font, c + dir * 20.0 + Vector2(-14.0, -12.0), "OUT", HORIZONTAL_ALIGNMENT_CENTER, 28.0, 9,
-		Color(arrow.r, arrow.g, arrow.b, 0.9))
+	# A one-cell piece keeps the arrow through its middle: it is its own
+	# direction. Anything larger shows its ports on its edge instead -- where the
+	# belt has to go, which is the thing being decided while the ghost is up.
+	# (There was an "OUT" label here; the warm arrow is the same word.)
+	if footprint.size == Vector2i.ONE:
+		var c: Vector2 = Grid.rect_px(footprint).get_center()
+		var arrow := Color(col.r, col.g, col.b, minf(1.0, alpha + 0.3))
+		var dir := Vector2(preview_dir)
+		on.draw_circle(c - dir * 5.0, 2.0, Color(arrow.r, arrow.g, arrow.b, 0.55))
+		_draw_arrow(on, c - dir * 4.0, preview_dir, 11.0, arrow, 2.0)
+	_draw_port_marks(on, preview_ports(), 0.9)
+
+## The ghost's ports, from the same resolver the placed machine will use.
+func preview_ports() -> Array[Dictionary]:
+	if preview_cell == Vector2i(9999, 9999):
+		return []
+	var footprint: Rect2i = preview_rect if preview_rect.has_area() \
+		else Rect2i(preview_cell, Vector2i.ONE)
+	return Defs.resolve_ports(Defs.machine_port_specs(preview_type), footprint, preview_dir)
 
 ## A footprint as cells: tinted, outlined, and every blocked cell filled red.
 func _draw_footprint(on: CanvasItem, footprint: Rect2i, problems: Dictionary, col: Color,

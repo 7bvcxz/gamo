@@ -136,9 +136,11 @@ func _test_every_machine_is_reachable() -> void:
 ## Pinned by hand, from before the migration. Nine lists moved into one table,
 ## and this is the file that can say none of them moved a value with them.
 func _test_metadata_snapshot() -> void:
-	_assert(Defs.MACHINE_NAMES == ["열 코어", "채굴기", "컨테이너 벨트", "발전기", "분배기",
-		"제조기", "조립기", "채굴기 Mk.2"], "이름이 그대로다 (%s)" % str(Defs.MACHINE_NAMES))
-	_assert(Defs.MACHINE_SHORT == ["코어", "채굴기", "벨트", "발전기", "분배기", "제조기",
+	# 채굴기 became 채굴장 on screen in Factory Interaction Pass 01: a post is a
+	# place a cat works at, not a machine. Only the words changed (M_MINER stays).
+	_assert(Defs.MACHINE_NAMES == ["열 코어", "채굴장", "컨테이너 벨트", "발전기", "분배기",
+		"제조기", "조립기", "채굴장 Mk.2"], "이름이 그대로다 (%s)" % str(Defs.MACHINE_NAMES))
+	_assert(Defs.MACHINE_SHORT == ["코어", "채굴장", "벨트", "발전기", "분배기", "제조기",
 		"조립기", "Mk.2"], "약칭이 그대로다 (%s)" % str(Defs.MACHINE_SHORT))
 	_assert(Defs.MACHINE_HINTS == ["", "채굴을 더 빠르게 할 수 있는 장치",
 		"자원을 기지까지 끊김 없이 나릅니다", "열석을 태워 전력 1.0을 공급합니다",

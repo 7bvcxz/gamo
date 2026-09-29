@@ -135,7 +135,11 @@ func _test_face_what_it_was_sent_to() -> void:
 		_assert(sim.machine_at(main.target_cell()) == post, "Z 는 그 채굴기를 향한다")
 	# A block of ice a tile across.
 	var ice: Vector2i = seam + Vector2i(0, 12)
-	_clear(Rect2i(ice - Vector2i(4, 4), Vector2i(10, 10)))
+	# Out to where she is parked (six cells past the ice) and a little beyond:
+	# the clearing used to stop at +5, and in 1 world of 150 (seed 64) a frozen
+	# cat stood exactly on the parking cell, so she started inside it and no
+	# plan could leave (Factory Interaction Pass 01; the same on 1.0.44).
+	_clear(Rect2i(ice - Vector2i(4, 4), Vector2i(14, 14)))
 	sim.frozen_cats[ice] = 0.0
 	_park(ice + Vector2i(6, 6))
 	_assert(body.move_near(ice) == Body.OK, "얼음 곁으로 간다")

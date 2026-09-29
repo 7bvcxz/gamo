@@ -1760,20 +1760,35 @@ func _workbench_note_height(width: float) -> float:
 ## The rows are the recipe registry's, so a recipe added later appears here
 ## without this file being edited -- the same arrangement the build list has.
 
+## A hand row -- put in, take out -- is a line, not a card: an icon, a verb and a
+## count. The recipe rows keep the full height their sentence needs.
+const HAND_ROW := 42.0
+
+static func _machine_row_height(row: Dictionary) -> float:
+	return HAND_ROW if row.has("kind") else MENU_ROW
+
 func machine_menu_rect() -> Rect2:
-	var rows: float = float(maxi(1, main.machine_rows().size()))
+	var total: float = 0.0
+	for row: Dictionary in main.machine_rows():
+		total += _machine_row_height(row)
+	total = maxf(total, MENU_ROW)
 	# One extra row's worth of header, which is where the machine's own state
 	# goes: what is in it, what it is holding, and whether the grid is carrying
 	# it. A window that only offers choices cannot explain why nothing is
 	# happening.
-	var height: float = FRAME_HEADER + BASE_MENU_TOP + 26.0 + rows * MENU_ROW + 18.0
+	var height: float = FRAME_HEADER + BASE_MENU_TOP + 26.0 + total + 18.0
 	var width: float = minf(MENU_W, size.x - MARGIN * 2.0)
 	return Rect2(size.x * 0.5 - width * 0.5, size.y * 0.5 - height * 0.5, width, height)
 
 func machine_menu_row_rect(index: int) -> Rect2:
 	var card: Rect2 = machine_menu_rect()
-	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + BASE_MENU_TOP + 26.0 - 4.0
-		+ float(index) * MENU_ROW), Vector2(card.size.x - 16.0, MENU_ROW - 4.0))
+	var rows: Array[Dictionary] = main.machine_rows()
+	var top: float = 0.0
+	for before in mini(index, rows.size()):
+		top += _machine_row_height(rows[before])
+	var height: float = _machine_row_height(rows[index]) if index < rows.size() else MENU_ROW
+	return Rect2(card.position + Vector2(8.0, FRAME_HEADER + BASE_MENU_TOP + 26.0 - 4.0 + top),
+		Vector2(card.size.x - 16.0, height - 4.0))
 
 func machine_menu_row_at(point: Vector2) -> int:
 	for index in main.machine_rows().size():
@@ -1795,12 +1810,16 @@ func _draw_machine_menu() -> void:
 	# the way in, how far through it is, what it is holding on the way out, and
 	# what the grid is doing. Four facts, and the one that is wrong is the answer
 	# to "why is nothing coming out".
-	var running: Dictionary = main.sim.recipe_of(machine)
+	var running: Dictionary = main.sim.recipe_of(machine) \
+		if Defs.machine_uses_recipes(machine.type) else {}
 	var state: Array[String] = []
-	if not running.is_empty():
+	if machine.type == Defs.M_GENERATOR:
+		state.append(generator_sentence(machine))
+	elif not running.is_empty():
 		state.append("입력 %s" % _held(machine.buffer, running["inputs"], true))
 		state.append("출력 %s" % _held(machine.outbox, running["outputs"], false))
-	state.append(main.sim.meter_status(machine))
+	if machine.type != Defs.M_GENERATOR:
+		state.append(main.sim.meter_status(machine))
 	_text(Vector2(card.position.x + 14.0, card.position.y + FRAME_HEADER + 16.0),
 		"  ·  ".join(state), 12, Defs.COL_TEXT_DIM)
 	# The bar is the progress, drawn rather than written: a number ticking from 0
@@ -1834,8 +1853,67 @@ func _held(store: Dictionary, ports: Array, needed: bool) -> String:
 			parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], have])
 	return " · ".join(parts) if not parts.is_empty() else "없음"
 
+## The generator's state as a sentence rather than a label: what is in the drum
+## and whether it is burning. "연료 없음" is a word on a meter; standing in front
+## of the machine it is "연료가 없어 멈춰 있다".
+func generator_sentence(machine) -> String:
+	var fuel: int = int(machine.buffer.get(Defs.GENERATOR_FUEL, 0))
+	var drum: String = "%s %d/%d" % [Defs.ITEM_SHORT[Defs.GENERATOR_FUEL], fuel, Defs.GENERATOR_FUEL_CAP]
+	if fuel <= 0 and not machine.operated:
+		return "%s  ·  연료가 없어 멈춰 있다" % drum
+	return "%s  ·  타고 있다 · 전력 %.1f" % [drum, Defs.GENERATOR_OUTPUT]
+
+## A hand row: the material's picture, what pressing does, and the count on the
+## right -- how many she has for "put in", how many are waiting for "take out".
+## Dim when pressing would do nothing, so the row says it before the press does.
+func _draw_hand_row(rect: Rect2, row: Dictionary, machine, on_cursor: bool) -> void:
+	var sim = main.sim
+	var take: bool = String(row["kind"]) == "take"
+	var item_type: int = -1
+	var label: String = ""
+	var count: String = ""
+	var live: bool = false
+	if take:
+		var waiting: int = sim.output_waiting(machine)
+		for held: int in machine.outbox:
+			item_type = held
+		if item_type < 0:
+			var running: Dictionary = sim.recipe_of(machine)
+			if not running.is_empty():
+				item_type = int(running["outputs"][0]["item"])
+		label = "꺼내기"
+		count = "%d개" % waiting
+		live = waiting > 0
+	else:
+		item_type = int(row["item"])
+		var amount: int = int(row["count"])
+		var name: String = Defs.ITEM_SHORT[item_type]
+		label = "%s %s" % [name, "전부 넣기" if amount < 0 else "%d개 넣기" % amount]
+		count = "가방 %d" % int(sim.stock.get(item_type, 0))
+		live = sim.machine_room_for(machine, item_type) > 0 and int(sim.stock.get(item_type, 0)) > 0
+	var accent: Color = Defs.COL_CORE
+	if on_cursor:
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.14))
+		draw_rect(rect, Color(accent.r, accent.g, accent.b, 0.85), false, 1.0)
+		draw_rect(Rect2(rect.position, Vector2(3.0, rect.size.y)), accent)
+	else:
+		draw_rect(rect, Color(1, 1, 1, 0.022))
+	var tone: Color = Defs.COL_TEXT if live else Defs.COL_TEXT_DIM
+	if item_type >= 0:
+		var icon := Rect2(rect.position + Vector2(12.0, rect.size.y * 0.5 - 13.0), Vector2(26.0, 26.0))
+		Icons.draw_item(self, icon, item_type)
+		if not live:
+			draw_rect(icon, Color(0, 0, 0, 0.45))
+	_text(Vector2(rect.position.x + 50.0, rect.position.y + rect.size.y * 0.5 + 5.0), label, 13, tone)
+	# `_text_in`'s y is the baseline, like `_text`'s: the same line as the label.
+	_text_in(Rect2(rect.position + Vector2(rect.size.x - 96.0, rect.size.y * 0.5 + 5.0), Vector2(86.0, 16.0)),
+		count, 12, Defs.COL_TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+
 func _draw_machine_row(index: int, row: Dictionary, machine) -> void:
 	var rect: Rect2 = machine_menu_row_rect(index)
+	if row.has("kind"):
+		_draw_hand_row(rect, row, machine, index == main.menu_index)
+		return
 	var on_cursor: bool = index == main.menu_index
 	var running: bool = main.sim.recipe_of(machine) == row
 	var accent: Color = Defs.COL_CORE

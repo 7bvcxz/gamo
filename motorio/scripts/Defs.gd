@@ -505,6 +505,55 @@ static func machine_work_anchor(type: int) -> Vector2:
 static func machine_footprint(type: int, anchor: Vector2i, dir: Vector2i = Vector2i.RIGHT) -> Rect2i:
 	return Grid.footprint(anchor, machine_size(type), dir, machine_anchor(type))
 
+## A machine's ports as its row writes them: sides and offsets, not cells.
+static func machine_port_specs(type: int) -> Array:
+	return machine(type).get("ports", [])
+
+## The way a side of a machine facing `facing` points out of it. Right is
+## clockwise of the front, which on a screen with y down is (-y, x).
+static func side_dir(side: String, facing: Vector2i) -> Vector2i:
+	match side:
+		SIDE_BACK: return -facing
+		SIDE_RIGHT: return Vector2i(-facing.y, facing.x)
+		SIDE_LEFT: return Vector2i(facing.y, -facing.x)
+	return facing
+
+## The footprint cells along the edge facing `outward`, from its top or left end.
+static func edge_line(rect: Rect2i, outward: Vector2i) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if outward.x != 0:
+		var x: int = rect.end.x - 1 if outward.x > 0 else rect.position.x
+		for y in range(rect.position.y, rect.end.y):
+			out.append(Vector2i(x, y))
+	else:
+		var y: int = rect.end.y - 1 if outward.y > 0 else rect.position.y
+		for x in range(rect.position.x, rect.end.x):
+			out.append(Vector2i(x, y))
+	return out
+
+## Port specs made into cells, for a footprint `rect` facing `facing`. One entry
+## per cell: `inside` is the footprint cell on the edge, `outside` the cell just
+## past it where a belt stands to meet it, `dir` the way out. A whole-side port
+## is one entry per cell of that side. The one place a side and an offset become
+## a place in the world -- the simulation, the port markers, the placement ghost
+## and the debug overlay all read this.
+static func resolve_ports(specs: Array, rect: Rect2i, facing: Vector2i) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var front: Vector2i = facing if facing != Vector2i.ZERO else Vector2i.RIGHT
+	for spec: Dictionary in specs:
+		var side: String = String(spec.get("side", SIDE_FRONT))
+		var outward: Vector2i = side_dir(side, front)
+		var line: Array[Vector2i] = edge_line(rect, outward)
+		var offset: int = int(spec.get("offset", PORT_WHOLE_SIDE))
+		var cells: Array[Vector2i] = line
+		if offset != PORT_WHOLE_SIDE:
+			cells = [line[clampi(offset, 0, line.size() - 1)]]
+		for inside: Vector2i in cells:
+			out.append({"kind": String(spec.get("kind", PORT_INPUT)), "side": side,
+				"name": String(spec.get("name", "")), "inside": inside,
+				"outside": inside + outward, "dir": outward})
+	return out
+
 static func machine_by_key(key: String) -> Dictionary:
 	return _machines_by_key.get(key, {})
 
@@ -771,6 +820,10 @@ static var RECIPE_MACHINES: Array[int] = []
 ## rather than disappearing into a buffer. The generator holds four of its one
 ## fuel and is not driven by this -- it runs its own tick.
 const RECIPE_INPUT_CYCLES := 2
+## How many heat stones a generator's drum holds, from a belt or by hand. Four
+## was written into the intake as a bare number; a hand that brings five at a
+## time needs a drum that can take them (Factory Interaction Pass 01).
+const GENERATOR_FUEL_CAP := 10
 
 static var _recipes_by_id: Dictionary = {}
 static var _recipes_by_key: Dictionary = {}
@@ -1285,7 +1338,7 @@ static func throughput_line(type: int) -> String:
 ## when it belongs on screen again it belongs next to a generator.
 static func ratio_hint() -> String:
 	var miners: float = per_minute(MINER_PERIOD) / per_minute(GENERATOR_PERIOD)
-	return "발전기 1대 = 열석 채굴기 %.0f대" % miners
+	return "발전기 1대 = 열석 채굴장 %.0f대" % miners
 
 # --- Electricity -------------------------------------------------------------
 ## Power is a rate, not a stock: it never accumulates, so there is no battery to
@@ -1543,6 +1596,63 @@ const PROD_LOGISTICS := "logistics"
 ##   anchor       where the anchor cell sits in the footprint; absent means the
 ##                default rule (Grid.default_anchor). For a rig the anchor is the
 ##                origin of the node it covers
+# --- Ports (Factory Interaction Pass 01) -------------------------------------------
+## Where a machine takes things in and where it puts them out, as data on its row.
+##
+## Until this pass the answer was spread over three places: every machine took
+## from every face (`_accept_into` never looked at `from`), output left from
+## `Grid.front_cell`, and the arrow on the building was drawn by a third rule
+## that happened to agree with the second. A belt aimed at the front of a
+## manufacturer fed it, which is to say the output door was also an input door.
+##
+## A port is a side and a place along that side. The side is relative to the way
+## the machine faces -- front, back, left, right -- so turning the machine turns
+## its ports. The place is `offset` cells along that edge, counted from its top
+## or left end in the world, or PORT_WHOLE_SIDE for every cell of it. Counted in
+## the world rather than turned with the building because the building's picture
+## does not turn and its anchor stays at the top-left: this is the rule the
+## output arrow has always been drawn by and every belt in every save is laid
+## against, so it is the rule the ports keep (`test_non_square_rotation_contract`).
+const PORT_INPUT := "input"
+const PORT_OUTPUT := "output"
+const SIDE_FRONT := "front"
+const SIDE_BACK := "back"
+const SIDE_LEFT := "left"
+const SIDE_RIGHT := "right"
+const SIDES: Array[String] = [SIDE_FRONT, SIDE_RIGHT, SIDE_BACK, SIDE_LEFT]
+const PORT_WHOLE_SIDE := -1
+
+## Every side, whole, taking in. The fire takes from wherever a line reaches it,
+## and the generator is a drum with a mouth all round: neither has a front.
+const PORTS_EVERY_SIDE_IN: Array[Dictionary] = [
+	{"kind": PORT_INPUT, "side": SIDE_FRONT, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_INPUT, "side": SIDE_RIGHT, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_INPUT, "side": SIDE_BACK, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_INPUT, "side": SIDE_LEFT, "offset": PORT_WHOLE_SIDE},
+]
+## A mining post takes nothing -- the ground is its input -- and puts out at the
+## front edge, in the anchor's lane: where the arrow has always been drawn.
+const PORTS_POST: Array[Dictionary] = [
+	{"kind": PORT_OUTPUT, "side": SIDE_FRONT, "offset": 0},
+]
+## In at the back and either side, out at the front: a belt, and every machine
+## the recipe system drives. The front is the output and only the output -- a
+## line aimed at it is refused rather than fed, which is what stops a machine
+## eating its own product off the belt it pours onto.
+const PORTS_THROUGH: Array[Dictionary] = [
+	{"kind": PORT_INPUT, "side": SIDE_BACK, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_INPUT, "side": SIDE_LEFT, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_INPUT, "side": SIDE_RIGHT, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_OUTPUT, "side": SIDE_FRONT, "offset": 0},
+]
+## One in, two out: in at the back, out to the right (A) and the left (B). R
+## turns all three together.
+const PORTS_SPLITTER: Array[Dictionary] = [
+	{"kind": PORT_INPUT, "side": SIDE_BACK, "offset": PORT_WHOLE_SIDE},
+	{"kind": PORT_OUTPUT, "side": SIDE_RIGHT, "offset": 0, "name": "a"},
+	{"kind": PORT_OUTPUT, "side": SIDE_LEFT, "offset": 0, "name": "b"},
+]
+
 const MACHINES: Array[Dictionary] = [
 	{
 		"id": M_CORE, "key": "core", "name": "열 코어", "short": "코어",
@@ -1554,12 +1664,13 @@ const MACHINES: Array[Dictionary] = [
 		# The base. Eight cells across -- four tiles -- with the fire in the
 		# middle: the anchor is the cell just up and left of the true centre.
 		"size": Vector2i(8, 8),
+		"ports": PORTS_EVERY_SIDE_IN,
 	},
 	{
 		# What it is, not how to use it. The instructions were two sentences of
 		# procedure in a row with space for one, and both halves are things the
 		# game teaches at the moment they matter.
-		"id": M_MINER, "key": "miner", "name": "채굴기", "short": "채굴기",
+		"id": M_MINER, "key": "miner", "name": "채굴장", "short": "채굴장",
 		"group": GROUP_EXTRACTION, "production": PROD_MINER,
 		"desc": "채굴을 더 빠르게 할 수 있는 장치",
 		"cost": {ITEM_HEATSTONE: 5, ITEM_COPPER: 1}, "unlock": [], "color": COL_CAT_FUR,
@@ -1576,6 +1687,7 @@ const MACHINES: Array[Dictionary] = [
 		# top-left: on the post, lower middle -- in front of the drill, clear of
 		# the output edge whichever way the post faces.
 		"work_anchor": WORK_ANCHOR,
+		"ports": PORTS_POST,
 	},
 	{
 		"id": M_BELT, "key": "belt", "name": "컨테이너 벨트", "short": "벨트",
@@ -1584,6 +1696,7 @@ const MACHINES: Array[Dictionary] = [
 		"cost": {ITEM_COPPER: 3}, "unlock": [UNLOCK_POWER], "color": COL_BELT_RIM,
 		"power_draw": 0.0, "power_output": 0.0,
 		"build_order": 1, "walkable": true, "directional": true,
+		"ports": PORTS_THROUGH,
 	},
 	{
 		"id": M_GENERATOR, "key": "generator", "name": "발전기", "short": "발전기",
@@ -1596,6 +1709,7 @@ const MACHINES: Array[Dictionary] = [
 		"build_order": 3, "walkable": false, "directional": false,
 		# Final size undecided; a tile, the size it always was.
 		"size": Vector2i(2, 2),
+		"ports": PORTS_EVERY_SIDE_IN,
 	},
 	{
 		# Bootstrap: everything it costs comes out of the ground with a pickaxe.
@@ -1610,6 +1724,7 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": MANUFACTURER_POWER, "power_output": 0.0,
 		"build_order": 4, "walkable": false, "directional": true,
 		"size": Vector2i(2, 2),
+		"ports": PORTS_THROUGH,
 	},
 	{
 		"id": M_SPLITTER, "key": "splitter", "name": "분배기", "short": "분배기",
@@ -1619,6 +1734,7 @@ const MACHINES: Array[Dictionary] = [
 		"color": Color8(150, 210, 160),
 		"power_draw": 0.0, "power_output": 0.0,
 		"build_order": 2, "walkable": true, "directional": true,
+		"ports": PORTS_SPLITTER,
 	},
 	{
 		# Bootstrap, and this row is the one the rule was written for. An
@@ -1635,13 +1751,14 @@ const MACHINES: Array[Dictionary] = [
 		"power_draw": ASSEMBLER_POWER, "power_output": 0.0,
 		"build_order": 5, "walkable": false, "directional": true,
 		"size": Vector2i(2, 2),
+		"ports": PORTS_THROUGH,
 	},
 	{
 		# The end of the line this step builds, and the reason to build it. Same
 		# seam, same one cat or the same grid, twice the pace -- so the thing the
 		# player gets for running two factories at once is that the factory feeding
 		# them gets smaller.
-		"id": M_MINER_MK2, "key": "miner_mk2", "name": "채굴기 Mk.2", "short": "Mk.2",
+		"id": M_MINER_MK2, "key": "miner_mk2", "name": "채굴장 Mk.2", "short": "Mk.2",
 		"group": GROUP_EXTRACTION, "production": PROD_MINER,
 		"desc": "같은 광맥에서 두 배로 캡니다 · 고양이 1마리 또는 전력",
 		"cost": {ITEM_IRON_PLATE: 8, ITEM_COPPER_WIRE: 6, ITEM_ELECTRIC_MOTOR: 2},
@@ -1652,6 +1769,7 @@ const MACHINES: Array[Dictionary] = [
 		"mine_rate": RIG2_RATE,
 		"size": ORE_NODE_SIZE,
 		"work_anchor": WORK_ANCHOR,
+		"ports": PORTS_POST,
 	},
 ]
 
@@ -1683,11 +1801,11 @@ static func machine_io(type: int) -> Array[String]:
 			"일손   고양이 1마리 또는 전력 %.1f" % machine_power_draw(type)]
 	match type:
 		M_BELT:
-			return ["입력   뒤쪽에서 받음",
+			return ["입력   뒤와 양옆에서 받음",
 				"출력   앞쪽으로 %.0f/분" % (BELT_SPEED / BELT_GAP * 60.0),
 				"특성   전력이 필요 없음 · F로 등급 변경"]
 		M_SPLITTER:
-			return ["입력   한 줄",
+			return ["입력   뒤에서 한 줄",
 				"출력   좌우 두 줄로 번갈아",
 				"특성   막힌 쪽은 건너뜀 · R로 축 회전"]
 		M_GENERATOR:
@@ -2546,8 +2664,12 @@ const KEY_PROMPTS: Array[Dictionary] = [
 		"why": "일 없는 고양이 옆에 섰을 때. 고양이를 옮길 수 있다는 것을 아무도 알려주지 않으면 평생 숙소 앞에 서 있는다.",
 	},
 	{
-		"id": "RECIPE", "keys": ["Z"], "verb": "고르기",
-		"why": "만들 것이 둘 이상인 기계를 바라볼 때. 제조기는 밖에서 보면 철판을 뽑는 기계와 전선을 뽑는 기계가 같은 상자라, 창이 있다는 것은 그 앞에서 키를 한 번 들어야만 알 수 있다.",
+		"id": "RECIPE", "keys": ["Z"], "verb": "열기",
+		"why": "제조기·조립기를 바라볼 때. 밖에서 보면 철판을 뽑는 기계와 전선을 뽑는 기계가 같은 상자이고, 재료를 손으로 넣고 만든 것을 꺼내는 곳도 그 창이라, 창이 있다는 것은 그 앞에서 키를 한 번 들어야만 알 수 있다(Factory Interaction Pass 01에서 '고르기'가 '열기'가 됐다 — 창이 고르는 것만 하지 않게 됐으므로).",
+	},
+	{
+		"id": "HANDFEED", "keys": ["Z"], "verb": "넣기",
+		"why": "열석을 가진 채 발전기를 바라볼 때. 벨트 없이도 손으로 연료를 넣을 수 있다는 것은 말해 주지 않으면 모른다 — 첫 발전기가 벨트를 기다리며 서 있게 된다. 한 번 넣으면 다시 뜨지 않는다. 동사가 한 마디인 것은 이 표의 규칙이고, 무엇을 넣는지는 바라보는 발전기가 말한다.",
 	},
 	{
 		"id": "FUEL", "keys": ["Z"], "verb": "불살피기",
@@ -3238,6 +3360,10 @@ const GAME_SCALE_MIN := 0.6
 const GAME_SCALE_MAX := 1.6
 const GAME_SCALE_DEFAULT := 1.0
 const GAME_SCALE_DEFAULT_DESKTOP := 0.90
+## How fast the camera eases to a zoom asked for by the wheel or the keys, per
+## second (Factory Interaction Pass 01). A step arrives in about a quarter of a
+## second: long enough to read as a push, short enough not to lag the hand.
+const ZOOM_EASE := 14.0
 
 static func quantise_scale(value: float, low: float, high: float) -> float:
 	return snappedf(clampf(value, low, high), UI_SCALE_STEP)

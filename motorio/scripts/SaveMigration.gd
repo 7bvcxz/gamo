@@ -272,7 +272,7 @@ static func describe(report: Dictionary) -> String:
 	if not report.has("kept"):
 		# Only the node step ran (a v12 save): say something only if it did.
 		if int(report.get("refunded", 0)) > 0:
-			return "광맥이 넓어졌다.  채굴기 %d개는 재료로 돌려받았다." % int(report["refunded"])
+			return "광맥이 넓어졌다.  채굴장 %d개는 재료로 돌려받았다." % int(report["refunded"])
 		return ""
 	var parts: Array[String] = []
 	if int(report.get("refunded", 0)) > 0:

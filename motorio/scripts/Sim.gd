@@ -18,6 +18,7 @@ signal recipe_produced(cell: Vector2i, item_type: int, amount: int)
 signal machine_worked(cell: Vector2i, type: int)
 signal machine_built(cell: Vector2i, type: int)
 signal machine_removed(cell: Vector2i, type: int)
+signal machine_rotated(cell: Vector2i, dir: Vector2i)
 signal build_rejected(reason: String, cell: Vector2i)
 signal warmth_changed(radius: float)
 signal cat_adopted(total: int)
@@ -404,6 +405,10 @@ func to_save() -> Dictionary:
 			"outbox": machine.outbox.duplicate(true),
 			"recipe": machine.recipe_key,
 			"tier": machine.tier,
+			# Whose turn it is on a splitter, so a line split A/B/A/B does not
+			# restart at A on every load (Factory Interaction Pass 01). Absent
+			# in older saves, which read it as A.
+			"next": machine.next_out,
 		})
 		if Defs.machine_mines(machine.type):
 			machine_rows[machine_rows.size() - 1]["ore_x"] = machine.ore_node.x
@@ -553,6 +558,7 @@ func from_save(data: Dictionary) -> void:
 		machine.outbox = (row.get("outbox", {}) as Dictionary).duplicate(true)
 		machine.recipe_key = String(row.get("recipe", ""))
 		machine.tier = int(row.get("tier", 0))
+		machine.next_out = int(row.get("next", 0))
 		if row.has("ore_x"):
 			machine.ore_node = Vector2i(int(row["ore_x"]), int(row["ore_y"]))
 		for item: Dictionary in row.get("items", []):
@@ -837,6 +843,27 @@ func ore_node_at(cell: Vector2i) -> Dictionary:
 
 ## A node's number: its origin, packed. Stable across saves because the origin
 ## is, and the same for all four cells because it is the origin's.
+## Everything the debug overlay says about one machine, as data (Factory
+## Interaction Pass 01) -- so a test can hold the overlay to the simulation and
+## the overlay cannot say something the simulation does not. For a post: the
+## node it works, that node's type, and what it will put out, which is the line
+## that would have caught "a copper post gives heat stone" at a glance.
+func machine_debug(machine: Machine) -> Dictionary:
+	var out: Dictionary = {
+		"type": machine.type, "name": String(Defs.machine(machine.type).get("key", "")),
+		"anchor": machine.cell, "dir": machine.dir, "footprint": machine_rect(machine),
+		"ports": machine_ports(machine),
+	}
+	if Defs.machine_mines(machine.type):
+		var node: Vector2i = machine.ore_node
+		out["ore_node"] = node
+		out["ore_id"] = ore_node_id(node) if node != NONE else -1
+		out["ore_type"] = ore_type_at(node) if node != NONE else -1
+		out["expected_output"] = ore_item(node) if node != NONE else -1
+		out["work_point"] = work_point(machine.cell)
+		out["output_anchor"] = output_anchor(machine)
+	return out
+
 static func ore_node_id(origin: Vector2i) -> int:
 	return (origin.y + 32768) * 65536 + (origin.x + 32768)
 
@@ -2794,10 +2821,78 @@ func machine_centre_at(cell: Vector2i) -> Vector2:
 	var machine: Machine = machine_at(cell)
 	return machine_centre(machine) if machine != null else Grid.centre(cell)
 
-## Where a machine's output goes: the cell past its front edge, in line with its
-## anchor. For a belt that is simply the next cell.
+## Where a machine's output goes: its first output port's outside cell -- past
+## the front edge, in the anchor's lane. For a belt that is simply the next cell.
+## A machine without an output port answers the old front cell, so a caller that
+## asks of a generator gets a place rather than nothing.
 func output_cell(machine: Machine) -> Vector2i:
+	var outs: Array[Dictionary] = machine_output_ports(machine)
+	if not outs.is_empty():
+		return outs[0]["outside"]
 	return Grid.front_cell(machine_rect(machine), machine.dir, machine.cell)
+
+# --- Ports (Factory Interaction Pass 01) ---------------------------------------
+## Where a machine takes in and puts out, as cells. Resolved from the machine's
+## row (`Defs.resolve_ports`) against where it stands and the way it faces, so a
+## turned machine has turned ports and nothing here stores them.
+
+## Every port of this machine, or only those of `kind` (Defs.PORT_INPUT/OUTPUT).
+func machine_ports(machine: Machine, kind: String = "") -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for port: Dictionary in Defs.resolve_ports(Defs.machine_port_specs(machine.type),
+			machine_rect(machine), machine.dir):
+		if kind.is_empty() or String(port["kind"]) == kind:
+			out.append(port)
+	return out
+
+func machine_input_ports(machine: Machine) -> Array[Dictionary]:
+	return machine_ports(machine, Defs.PORT_INPUT)
+
+func machine_output_ports(machine: Machine) -> Array[Dictionary]:
+	return machine_ports(machine, Defs.PORT_OUTPUT)
+
+## The cell outside the machine where the port meets a belt.
+func port_world_cell(port: Dictionary) -> Vector2i:
+	return port["outside"]
+
+## The port of `machine` a belt standing on `outside` would meet, or {}.
+func machine_port_at(machine: Machine, outside: Vector2i, kind: String = "") -> Dictionary:
+	for port: Dictionary in machine_ports(machine, kind):
+		if port["outside"] == outside:
+			return port
+	return {}
+
+## Whether this machine takes this item at all, room aside: the fuel for a
+## generator, what the running recipe asks for, anything for a belt, a splitter
+## or the fire. A mining post takes nothing.
+func port_accepts_item(machine: Machine, item_type: int) -> bool:
+	if machine_input_ports(machine).is_empty():
+		return false
+	match machine.type:
+		Defs.M_GENERATOR:
+			return item_type == Defs.GENERATOR_FUEL
+		Defs.M_CORE, Defs.M_BELT, Defs.M_SPLITTER:
+			return true
+	var recipe: Dictionary = recipe_of(machine)
+	if recipe.is_empty():
+		return false
+	for port: Dictionary in recipe["inputs"]:
+		if int(port["item"]) == item_type:
+			return true
+	return false
+
+## Whether something arriving from `from` into `cell` comes in by an input port:
+## `cell` is the port's own edge cell and `from` the cell just outside it. An
+## item from nowhere in particular (NO_FROM -- a test, a hand) is not asked.
+const NO_FROM := Vector2i(9999, 9999)
+
+func enters_by_port(machine: Machine, cell: Vector2i, from: Vector2i) -> bool:
+	if from == NO_FROM:
+		return true
+	for port: Dictionary in machine_input_ports(machine):
+		if port["inside"] == cell and port["outside"] == from:
+			return true
+	return false
 
 # --- Buildings that are not machines -------------------------------------------
 ## The base is the core machine, and its footprint is the machine's. The hut and
@@ -3035,6 +3130,41 @@ func build(type: int, cell: Vector2i, dir: Vector2i, body: Array[Vector2i] = [])
 	for item_type: int in cost_of(type):
 		stock[item_type] = int(stock.get(item_type, 0)) - int(cost_of(type)[item_type])
 	machine_built.emit(cell, type)
+	return true
+
+## Turns a standing machine a quarter, clockwise unless told otherwise (Factory
+## Interaction Pass 01). Its ports turn with it because they are resolved from its
+## facing; what it is holding -- buffer, outbox, items on it, its cat, its target
+## node -- stays, because it is the same machine pointing somewhere else.
+##
+## A square footprint covers the same cells whichever way it faces, so turning
+## it can never be refused. A non-square one (a 4x6 turned is a 6x4) covers new
+## cells, and those are asked the same questions a placement asks; if any
+## refuses, nothing moves. Only machines with a facing turn.
+func rotate_machine(cell: Vector2i, clockwise: bool = true) -> bool:
+	var machine: Machine = machine_at(cell)
+	if machine == null or not (machine.type in Defs.DIRECTIONAL_MACHINES):
+		return false
+	var was: Vector2i = machine.dir
+	var turned := Vector2i(-was.y, was.x) if clockwise else Vector2i(was.y, -was.x)
+	var old_rect: Rect2i = machine_rect(machine)
+	var new_rect: Rect2i = Defs.machine_footprint(machine.type, machine.cell, turned)
+	if new_rect != old_rect:
+		var problems: Dictionary = footprint_problems(machine.type, machine.cell, turned)
+		for covered: Vector2i in Grid.cells_in(new_rect):
+			var other: Machine = machine_at(covered)
+			if other != null and other != machine:
+				problems[covered] = "이미 설비가 있습니다"
+		for covered: Vector2i in problems.keys():
+			if old_rect.has_point(covered) and machine_at(covered) == machine:
+				problems.erase(covered)
+		if not problems.is_empty():
+			return false
+	remove_machine(machine.cell)
+	machine.dir = turned
+	add_machine(machine)
+	machine.flash = 0.3
+	machine_rotated.emit(machine.cell, turned)
 	return true
 
 func demolish(cell: Vector2i) -> bool:
@@ -4321,10 +4451,15 @@ func seam_period(cell: Vector2i) -> float:
 ## because cats pick up from there.
 func _emit_from(machine: Machine, item_type: int) -> bool:
 	var ahead: Vector2i = output_cell(machine)
+	# Leaves from the port's own edge cell, which is what the machine in front
+	# checks its input side against. The anchor would be a cell away from it on
+	# anything wider than one cell.
+	var outs: Array[Dictionary] = machine_output_ports(machine)
+	var leaving: Vector2i = outs[0]["inside"] if not outs.is_empty() else machine.cell
 	# The floor counts as output. It is where everything goes before belts exist,
 	# and a meter that only counted belted items would read zero for a perfectly
 	# productive early-game miner.
-	if _push_into(ahead, item_type, machine.cell) or drop_item(ahead, item_type):
+	if _push_into(ahead, item_type, leaving) or drop_item(ahead, item_type):
 		_note_out(machine, item_type)
 		return true
 	return false
@@ -4429,18 +4564,23 @@ func _tick_splitter(machine: Machine, delta: float) -> void:
 	# thing that can express a ratio, chains cleanly into 1:4 and 1:8, and stays
 	# readable on a 32px tile -- a four-way version mostly produced lines the
 	# player had not asked for.
-	var sides: Array[Vector2i] = splitter_outputs(machine)
-	for attempt in sides.size():
-		var index: int = (machine.next_out + attempt) % sides.size()
-		var target: Vector2i = machine.cell + sides[index]
+	# A then B then A: the two output ports in the row's order, taking turns.
+	# One that cannot take is skipped for the other, and only when both refuse
+	# does the splitter hold -- stalled, with the item still on it.
+	var outs: Array[Dictionary] = machine_output_ports(machine)
+	for attempt in outs.size():
+		var index: int = (machine.next_out + attempt) % outs.size()
+		var target: Vector2i = outs[index]["outside"]
 		# Never push back where it came from, or two splitters face to face
-		# would bounce one item between them forever.
+		# would bounce one item between them forever. The input is the back
+		# now and the outputs the sides, so this only matters to a save written
+		# when a splitter took from any face.
 		if target == machine.source:
 			continue
-		if _push_into(target, item_type, machine.cell) or drop_item(target, item_type):
+		if _push_into(target, item_type, outs[index]["inside"]) or drop_item(target, item_type):
 			machine.items.remove_at(0)
 			_note_out(machine, item_type)
-			machine.next_out = (index + 1) % sides.size()
+			machine.next_out = (index + 1) % outs.size()
 			machine.progress = 0.0
 			machine.flash = 0.25
 			machine.stalled = false
@@ -4451,9 +4591,10 @@ func _tick_splitter(machine: Machine, delta: float) -> void:
 ## The two cells a splitter feeds: the pair perpendicular to the way it faces, so
 ## R turns the split axis and the input side stays behind it.
 func splitter_outputs(machine: Machine) -> Array[Vector2i]:
-	var dir: Vector2i = machine.dir
-	var perp := Vector2i(-dir.y, dir.x)
-	return [perp, -perp]
+	var out: Array[Vector2i] = []
+	for port: Dictionary in machine_output_ports(machine):
+		out.append(port["dir"])
+	return out
 
 ## A generator burns one heat stone every ten seconds. `operated` doubles as
 ## "currently supplying", which is what _recount_power reads.
@@ -4484,7 +4625,7 @@ func _tick_generator(machine: Machine, delta: float) -> void:
 ## Every accepted item is metered here rather than in each branch, so a machine
 ## added later cannot forget to count its own input. The core is the exception:
 ## cats hand it items without going through this path, so it counts in _deliver.
-func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 9999)) -> bool:
+func _push_into(cell: Vector2i, item_type: int, from: Vector2i = NO_FROM) -> bool:
 	if not _accept_into(cell, item_type, from):
 		return false
 	var target: Machine = machine_at(cell)
@@ -4495,6 +4636,10 @@ func _push_into(cell: Vector2i, item_type: int, from: Vector2i = Vector2i(9999, 
 func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 	var target: Machine = machine_at(cell)
 	if target == null:
+		return false
+	# By an input port or not at all (Factory Interaction Pass 01). Every face
+	# used to take, so a belt aimed at a manufacturer's output fed it.
+	if not enters_by_port(target, cell, from):
 		return false
 	match target.type:
 		Defs.M_CORE:
@@ -4517,16 +4662,11 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			target.flash = 0.2
 			return true
 		Defs.M_GENERATOR:
-			# Heat stone, and only from a face that is not the one it faces:
-			# feeding the mouth a machine pours out of lets a line eat its own
-			# product. The generator pours nothing, but the rule is cheaper to
-			# keep than to remember the day it does.
-			if item_type != Defs.GENERATOR_FUEL:
+			# Heat stone, from any side (its ports are every side: it pours
+			# nothing, so it has no output face to protect), up to the drum.
+			if machine_room_for(target, item_type) <= 0:
 				return false
-			var fuel: int = int(target.buffer.get(item_type, 0))
-			if fuel >= 4:
-				return false
-			target.buffer[item_type] = fuel + 1
+			target.buffer[item_type] = int(target.buffer.get(item_type, 0)) + 1
 			target.flash = 0.25
 			return true
 		_:
@@ -4534,22 +4674,102 @@ func _accept_into(cell: Vector2i, item_type: int, from: Vector2i) -> bool:
 			# and nothing else. A machine that accepted anything would let one
 			# mis-aimed belt fill it with a material it can never spend, and the
 			# only way out of that is to tear the machine down.
-			var recipe: Dictionary = recipe_of(target)
-			if recipe.is_empty():
+			if machine_room_for(target, item_type) <= 0:
 				return false
-			var wanted := 0
-			for port: Dictionary in recipe["inputs"]:
-				if int(port["item"]) == item_type:
-					wanted = int(port["amount"])
-			if wanted <= 0:
-				return false
-			var held: int = int(target.buffer.get(item_type, 0))
-			if held >= wanted * Defs.RECIPE_INPUT_CYCLES:
-				return false
-			target.buffer[item_type] = held + 1
+			target.buffer[item_type] = int(target.buffer.get(item_type, 0)) + 1
 			target.flash = 0.25
 			return true
 	return false
+
+# --- By hand (Factory Interaction Pass 01) -------------------------------------
+## Putting things into a machine and taking what it made, without a belt.
+##
+## Before this pass the only way into a generator was a belt, and a belt costs
+## copper that a player who has just built their first generator may not have --
+## so the first power in the game waited on a conveyor for no reason the player
+## could see. Hands and belts now share one rule for how much fits
+## (`machine_room_for`), so neither can overfill what the other would refuse.
+## Everything moves between the bag and the machine; nothing is made or lost.
+
+## How many more of `item_type` this machine will take right now, from a belt or
+## a hand: the generator's drum up to GENERATOR_FUEL_CAP, a recipe machine up to
+## RECIPE_INPUT_CYCLES cycles of what its recipe asks for. Zero for anything it
+## does not take, and for belts, splitters and the fire, which take from belts
+## and are not loaded by hand here.
+func machine_room_for(machine: Machine, item_type: int) -> int:
+	if machine == null or not port_accepts_item(machine, item_type):
+		return 0
+	match machine.type:
+		Defs.M_GENERATOR:
+			return maxi(0, Defs.GENERATOR_FUEL_CAP - int(machine.buffer.get(item_type, 0)))
+		Defs.M_CORE, Defs.M_BELT, Defs.M_SPLITTER:
+			return 0
+	var recipe: Dictionary = recipe_of(machine)
+	for port: Dictionary in recipe.get("inputs", []):
+		if int(port["item"]) == item_type:
+			var cap: int = int(port["amount"]) * Defs.RECIPE_INPUT_CYCLES
+			return maxi(0, cap - int(machine.buffer.get(item_type, 0)))
+	return 0
+
+## What the machine takes by hand, in the order a window should list them: fuel
+## for a generator, the running recipe's inputs for a recipe machine.
+func hand_inputs(machine: Machine) -> Array[int]:
+	var out: Array[int] = []
+	if machine == null:
+		return out
+	if machine.type == Defs.M_GENERATOR:
+		out.append(Defs.GENERATOR_FUEL)
+		return out
+	if not Defs.machine_uses_recipes(machine.type):
+		return out
+	for port: Dictionary in recipe_of(machine).get("inputs", []):
+		out.append(int(port["item"]))
+	return out
+
+## Moves up to `count` of `item_type` from the bag into the machine (-1: as many
+## as fit). Returns how many moved. The bag and the buffer change by the same
+## number in the same call, so there is no moment where it is in both or neither.
+func insert_by_hand(machine: Machine, item_type: int, count: int = 1) -> int:
+	var moved: int = mini(machine_room_for(machine, item_type), int(stock.get(item_type, 0)))
+	if count >= 0:
+		moved = mini(moved, count)
+	if moved <= 0:
+		return 0
+	stock[item_type] = int(stock.get(item_type, 0)) - moved
+	machine.buffer[item_type] = int(machine.buffer.get(item_type, 0)) + moved
+	machine.flash = 0.25
+	return moved
+
+## How many finished things are waiting in the machine for somewhere to go.
+func output_waiting(machine: Machine) -> int:
+	var total := 0
+	if machine == null:
+		return total
+	for item_type: int in machine.outbox:
+		total += int(machine.outbox[item_type])
+	return total
+
+## Takes everything waiting in the machine's output into the bag. Returns what
+## was taken, by item. What it made has already counted as made (the unlocks
+## were asked when it was produced), so this is a move, not income: `collected`
+## and the gain rate are not touched, or a part would be counted once when the
+## machine made it and again when she carried it off.
+func take_by_hand(machine: Machine) -> Dictionary:
+	var taken: Dictionary = {}
+	if machine == null:
+		return taken
+	for item_type: int in machine.outbox.keys():
+		var count: int = int(machine.outbox[item_type])
+		if count <= 0:
+			continue
+		stock[item_type] = int(stock.get(item_type, 0)) + count
+		held_items[item_type] = true
+		taken[item_type] = count
+	machine.outbox.clear()
+	if not taken.is_empty():
+		machine.stalled = false
+		machine.flash = 0.25
+	return taken
 
 ## Everything that reaches the core is banked as material. It is not burned.
 ##

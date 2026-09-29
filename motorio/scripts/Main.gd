@@ -171,6 +171,11 @@ var ui_scale: float = Defs.UI_SCALE_DEFAULT
 ## The same idea for the world: how large the game itself is drawn, which is the
 ## camera's zoom rather than anything the HUD does.
 var game_scale: float = Defs.GAME_SCALE_DEFAULT
+## The game scale the camera is showing this frame. It follows `game_scale`
+## eased when the wheel or a key moved it (Factory Interaction Pass 01) -- a cut
+## in zoom reads as a jump, a push reads as looking closer -- and snaps when the
+## settings slider did, so a drag resizes the world under the finger.
+var view_scale: float = Defs.GAME_SCALE_DEFAULT
 var state_before_settings: int = State.TITLE
 ## The build gun's menu. Not a State: the world keeps running behind it, the way
 ## this genre's build menus do, and movement is on WASD so the arrow keys the
@@ -1345,6 +1350,14 @@ func _process(delta: float) -> void:
 	# ends with her standing is a teleport (Quality Pass 01).
 	player.visible = in_run and (not indoors() or (state == State.DAYBREAK and room_open))
 	machine_layer.show_preview = state == State.PLAY and sim.base_placed
+	# Ports show while they are the question: gun up, or one machine's window open.
+	machine_layer.port_view = MachineLayer.PORTS_HIDDEN
+	if state == State.PLAY and machine_menu_open:
+		machine_layer.port_view = MachineLayer.PORTS_ONE
+		var open_machine: Sim.Machine = sim.machine_at(machine_menu_cell)
+		machine_layer.port_cell = open_machine.cell if open_machine != null else Sim.NONE
+	elif state == State.PLAY and holding_build_gun():
+		machine_layer.port_view = MachineLayer.PORTS_ALL
 
 ## What the frame sounds like, in one call to the audio manager.
 ##
@@ -2623,9 +2636,16 @@ func _prompt_status(id: String) -> Dictionary:
 			# same box, so the only way to learn the window exists is to be told
 			# the key while looking at the thing it opens -- once.
 			var facing: Sim.Machine = sim.machine_at(target_cell())
-			return {"want": facing != null and Defs.machine_uses_recipes(facing.type)
-				and Defs.recipes_for_machine(facing.type).size() > 1,
+			return {"want": facing != null and facing.type != Defs.M_GENERATOR
+				and machine_has_window(facing),
 				"done": sim.has_learned("RECIPE")}
+		"HANDFEED":
+			# At a generator with heat stone in the bag. Once she has put
+			# something into a machine by hand, she knows the key.
+			var drum: Sim.Machine = sim.machine_at(target_cell())
+			return {"want": drum != null and drum.type == Defs.M_GENERATOR
+				and int(sim.stock.get(Defs.GENERATOR_FUEL, 0)) > 0,
+				"done": sim.has_learned("HANDFEED")}
 		"FUEL":
 			return {"want": sim.base_placed and sim.has_fuel()
 				and sim.is_base(target_cell()),
@@ -2906,7 +2926,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				or button.button_index == MOUSE_BUTTON_WHEEL_DOWN):
 			var direction: float = Defs.UI_SCALE_STEP \
 				if button.button_index == MOUSE_BUTTON_WHEEL_UP else -Defs.UI_SCALE_STEP
-			zoom_by(direction, button.shift_pressed)
+			# Ctrl+wheel is the world too, whatever Shift says (see `_zoom_key`).
+			zoom_by(direction, button.shift_pressed and not button.ctrl_pressed)
 			get_viewport().set_input_as_handled()
 			return
 		if button.button_index == MOUSE_BUTTON_LEFT:
@@ -3135,6 +3156,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		debug_pad()
 		get_viewport().set_input_as_handled()
 		return
+	if key.keycode == KEY_QUOTELEFT:
+		toggle_debug_overlay()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("debug_scenario"):
 		debug_scenario()
 		get_viewport().set_input_as_handled()
@@ -3176,9 +3201,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# is frame-scoped, so inside an event handler it can silently drop a press
 	# when two arrive in one frame -- which reads to the player as a dead key.
 	if event.is_action_pressed("rotate"):
-		build_dir = Vector2i(-build_dir.y, build_dir.x)
-		sim.learn("ROTATE")
-		audio.call("play", "select")
+		rotate_pressed()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("build"):
@@ -3666,8 +3689,7 @@ func _primary_action() -> void:
 	# is the whole answer to "both lines are running and nothing is coming out",
 	# and the first question this machine will ever be asked.
 	var facing: Sim.Machine = sim.machine_at(cell)
-	if facing != null and Defs.machine_uses_recipes(facing.type) \
-			and not Defs.recipes_for_machine(facing.type).is_empty():
+	if facing != null and machine_has_window(facing):
 		_open_machine_menu(facing.cell)
 		return
 	# A frozen cat answers Z before anything else. She has both arms round it,
@@ -3696,7 +3718,7 @@ func _primary_action() -> void:
 			post = cell
 		var on_machine: bool = sim.machine_at(post) != null
 		if sim.place_cat(post):
-			_notify("고양이를 채굴기에 앉혔다." if on_machine
+			_notify("고양이를 채굴장에 앉혔다." if on_machine
 				else "고양이가 광맥을 파기 시작했다.", Defs.COL_CORE)
 			_cat_starts_work(sim.machine_centre_at(post))
 		elif sim.drop_cat(sim.cell_centre(cell)):
@@ -3762,6 +3784,25 @@ func _primary_action() -> void:
 	if not holding_build_gun():
 		return
 	_try_build()
+
+## R. One rule for one key (Factory Interaction Pass 01): facing a standing
+## machine that has a facing, R turns *it* -- ports and all, keeping what it
+## holds; otherwise R turns the placement ghost, as it always has. Aimed at a
+## standing machine the ghost is not drawn anyway (it is a reclaim target), so a
+## turn there could only ever have been invisible.
+func rotate_pressed() -> void:
+	var standing: Sim.Machine = sim.machine_at(target_cell()) if state == State.PLAY else null
+	if standing != null and standing.type in Defs.DIRECTIONAL_MACHINES:
+		if sim.rotate_machine(standing.cell):
+			fx.ring(sim.machine_centre(standing), Defs.COL_MACHINE_EDGE, Defs.RING_SMALL)
+			audio.call("play", "select")
+		else:
+			audio.call("play", "deny")
+		sim.learn("ROTATE")
+		return
+	build_dir = Vector2i(-build_dir.y, build_dir.x)
+	sim.learn("ROTATE")
+	audio.call("play", "select")
 
 ## Whether Z with the gun out would build right now: held, aimed where the rules
 ## allow, affordable and opened.
@@ -3937,14 +3978,42 @@ func close_machine_menu() -> void:
 	machine_menu_cell = Vector2i(9999, 9999)
 	audio.call("play", "select")
 
-## Everything this machine could be told to make. Read from the recipe registry
-## rather than listed here, so a recipe added later appears in the window it
-## belongs to without this file being edited.
+## Whether Z at this machine opens its window: anything the recipe system
+## drives, and the generator, whose window is where fuel goes in by hand.
+func machine_has_window(machine: Sim.Machine) -> bool:
+	if machine == null:
+		return false
+	if machine.type == Defs.M_GENERATOR:
+		return true
+	return Defs.machine_uses_recipes(machine.type) \
+		and not Defs.recipes_for_machine(machine.type).is_empty()
+
+## How many a "some" row moves: one press, a handful, or all that fits.
+const HAND_COUNTS: Array[int] = [1, 5, -1]
+
+## The window's rows. Everything this machine could be told to make, read from
+## the recipe registry so a recipe added later appears without this file being
+## edited -- and then what she can do with her hands (Factory Interaction Pass
+## 01): put in what it takes, and take out what it made. A generator has no
+## recipe, so its window is only the fuel: one, five, or all that fits.
+##
+## Transfer rows carry a "kind"; recipe rows are the recipe dictionaries
+## themselves, which is what the cursor compares against to open on the one
+## that is running.
 func machine_rows() -> Array[Dictionary]:
 	var machine: Sim.Machine = sim.machine_at(machine_menu_cell)
 	if machine == null:
 		return []
-	return Defs.recipes_for_machine(machine.type)
+	var rows: Array[Dictionary] = []
+	if machine.type == Defs.M_GENERATOR:
+		for count: int in HAND_COUNTS:
+			rows.append({"kind": "insert", "item": Defs.GENERATOR_FUEL, "count": count})
+		return rows
+	rows.append_array(Defs.recipes_for_machine(machine.type))
+	for item_type: int in sim.hand_inputs(machine):
+		rows.append({"kind": "insert", "item": item_type, "count": -1})
+	rows.append({"kind": "take"})
+	return rows
 
 func _machine_menu_key(key: InputEventKey) -> void:
 	match key.keycode:
@@ -3964,6 +4033,11 @@ func _machine_menu_confirm() -> void:
 		close_machine_menu()
 		return
 	var row: Dictionary = rows[clampi(menu_index, 0, rows.size() - 1)]
+	# Hands, not a choice: the window stays open, because the next press is
+	# usually the same one again.
+	if row.has("kind"):
+		_machine_transfer(machine, row)
+		return
 	if sim.set_recipe(machine, String(row["key"])):
 		var made: String = Defs.item_name(int((row["outputs"] as Array)[0]["item"]))
 		_notify("이제 %s%s 만든다." % [made, Defs.object_of(made)], Defs.COL_CORE)
@@ -3972,6 +4046,37 @@ func _machine_menu_confirm() -> void:
 	else:
 		audio.call("play", "select")
 	close_machine_menu()
+
+## One transfer row pressed. Said as what happened, in the world's words, and
+## refused with the reason when nothing could move.
+func _machine_transfer(machine: Sim.Machine, row: Dictionary) -> void:
+	var centre: Vector2 = sim.machine_centre(machine)
+	if String(row["kind"]) == "take":
+		var taken: Dictionary = sim.take_by_hand(machine)
+		if taken.is_empty():
+			audio.call("play", "deny")
+			return
+		var parts: Array[String] = []
+		for item_type: int in taken:
+			parts.append("%s %d" % [Defs.ITEM_SHORT[item_type], int(taken[item_type])])
+		_notify("꺼냈다 · %s" % " · ".join(parts), Defs.COL_CORE)
+		fx.ring(centre, Defs.COL_CORE, Defs.RING_SMALL)
+		audio.call("play", "select")
+		return
+	var item_type: int = int(row["item"])
+	var moved: int = sim.insert_by_hand(machine, item_type, int(row["count"]))
+	if moved <= 0:
+		var name: String = Defs.item_name(item_type)
+		if int(sim.stock.get(item_type, 0)) <= 0:
+			_notify("%s%s 없다." % [name, Defs.subject(name)], Defs.COL_TEXT_DIM)
+		else:
+			_notify("더 들어가지 않는다.", Defs.COL_TEXT_DIM)
+		audio.call("play", "deny")
+		return
+	sim.learn("HANDFEED")
+	_notify("%s %d개를 넣었다." % [Defs.item_name(item_type), moved], Defs.COL_CORE)
+	fx.ring(centre, Defs.COL_CORE, Defs.RING_SMALL)
+	audio.call("play", "confirm")
 
 func close_base_menu() -> void:
 	if not base_menu_open:
@@ -4098,7 +4203,7 @@ func _update_craft(delta: float) -> void:
 				sim.unlocked[Defs.M_MINER] = true
 				selected_index = Defs.BUILDABLE.find(Defs.M_MINER)
 				menu_index = maxi(selected_index, 0)
-				_land_craft(craft, "건물건설총이 손에 들어왔다.  채굴기를 세울 수 있다.")
+				_land_craft(craft, "건물건설총이 손에 들어왔다.  채굴장을 세울 수 있다.")
 
 ## --- Arrivals -------------------------------------------------------------------
 ## A made thing leaving the fire: the ring's pulse and a small pop at the fire,
@@ -4282,7 +4387,9 @@ func _zoom_key(key: InputEventKey) -> bool:
 		direction = Defs.UI_SCALE_STEP
 	else:
 		return false
-	zoom_by(direction, key.shift_pressed)
+	# Ctrl is the world, always: Ctrl++ is Ctrl+Shift+= on most keyboards, and
+	# a factory player reaching for the browser's zoom chord means the map.
+	zoom_by(direction, key.shift_pressed and not key.ctrl_pressed)
 	return true
 
 ## One step of zoom, in or out, whether it arrived on a key or under a thumb on
@@ -4296,9 +4403,16 @@ func zoom_by(direction: float, ui: bool) -> void:
 		set_ui_scale(ui_scale + direction)
 		_notify("화면 UI 크기 %d%%" % int(round(ui_scale * 100.0)), Defs.COL_MACHINE_EDGE)
 	else:
-		set_game_scale(game_scale + direction)
+		set_game_scale(game_scale + direction, true)
 		_notify("게임 화면 크기 %d%%" % int(round(game_scale * 100.0)), Defs.COL_MACHINE_EDGE)
 	audio.call("play", "select")
+
+## The factory debug overlay (Factory Interaction Pass 01). Its own key because
+## every F key is taken; ` is where debug consoles live in most games.
+func toggle_debug_overlay() -> bool:
+	machine_layer.debug_overlay = not machine_layer.debug_overlay
+	_notify("공장 디버그 %s" % ("켬" if machine_layer.debug_overlay else "끔"), Defs.COL_DANGER)
+	return machine_layer.debug_overlay
 
 func cycle_debug_speed() -> int:
 	speed_index = (speed_index + 1) % Defs.DEBUG_SPEEDS.size()
@@ -4394,7 +4508,7 @@ func debug_scenario() -> void:
 			break
 		sim.carried_cat = spare
 		sim.place_cat(cell)
-	_notify("디버그 시나리오 · 채굴기 2대 · 고양이 배치", Defs.COL_DANGER)
+	_notify("디버그 시나리오 · 채굴장 2대 · 고양이 배치", Defs.COL_DANGER)
 	audio.call("play", "confirm")
 
 ## Shows the touch pad on a machine that says it has no touchscreen.
@@ -4963,14 +5077,16 @@ func set_ui_scale(value: float) -> void:
 	touch.set_pad_scale(ui_scale)
 	save_settings()
 
-func set_game_scale(value: float) -> void:
+func set_game_scale(value: float, eased: bool = false) -> void:
 	var wanted: float = Defs.quantise_game_scale(value)
 	if is_equal_approx(wanted, game_scale):
 		return
 	game_scale = wanted
 	# Applied immediately rather than on the next frame, so dragging the slider
 	# shows the world resizing under the panel while the finger is still down.
-	_apply_camera_zoom()
+	# The wheel and the keys ease instead; the frame's camera update gets there.
+	if not eased:
+		_apply_camera_zoom()
 	save_settings()
 
 ## Touch and desktop want different amounts of world on screen: the phone's
@@ -4987,7 +5103,13 @@ func _apply_camera_zoom(delta: float = 0.0) -> void:
 		cinema_zoom = lerpf(cinema_zoom, want, clampf(delta * Defs.NIGHT_CAMERA_LERP, 0.0, 1.0))
 	else:
 		cinema_zoom = want
-	var zoom: float = maxf(base * game_scale * cinema_zoom, 0.05)
+	if delta > 0.0:
+		view_scale = lerpf(view_scale, game_scale, clampf(delta * Defs.ZOOM_EASE, 0.0, 1.0))
+		if absf(view_scale - game_scale) < 0.002:
+			view_scale = game_scale
+	else:
+		view_scale = game_scale
+	var zoom: float = maxf(base * view_scale * cinema_zoom, 0.05)
 	camera.zoom = Vector2(zoom, zoom)
 
 func save_settings() -> bool:

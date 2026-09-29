@@ -352,6 +352,79 @@ func select_recipe(machine_cell: Vector2i, key: String) -> String:
 		return BLOCKED
 	return OK if sim.set_recipe(machine, key) else FAILED
 
+# --- Machines by hand (Factory Interaction Pass 01) -----------------------------
+## The same presses a player makes: walk up, Z to open the machine's window, pick
+## the row, press, close. Nothing here writes to a buffer directly -- a harness
+## that did would test itself, not the game.
+
+## Opens the window of the machine covering `cell`, standing where Z reaches it.
+func open_machine(cell: Vector2i) -> String:
+	var verdict: String = interact(cell)
+	if verdict != OK:
+		return verdict
+	return OK if main.machine_menu_open else FAILED
+
+## Presses the first window row that matches `wanted` (a subset of the row's
+## keys), and returns how the bag changed for `item_type`.
+func _press_row(wanted: Dictionary) -> String:
+	var rows: Array[Dictionary] = main.machine_rows()
+	for index in rows.size():
+		var row: Dictionary = rows[index]
+		var match_all := true
+		for key in wanted:
+			if not row.has(key) or row[key] != wanted[key]:
+				match_all = false
+				break
+		if match_all:
+			main.menu_index = index
+			main._machine_menu_confirm()
+			run(0.1, "pressing a row")
+			return OK
+	return INVALID
+
+## Puts `count` (-1: all that fits) of `item_type` into the machine at `cell`.
+## Returns how many left the bag.
+func insert_by_hand(cell: Vector2i, item_type: int, count: int = -1) -> int:
+	var before: int = int(sim.stock.get(item_type, 0))
+	if open_machine(cell) != OK:
+		return 0
+	_press_row({"kind": "insert", "item": item_type, "count": count})
+	main.close_machine_menu()
+	return before - int(sim.stock.get(item_type, 0))
+
+## Heat stone into a generator: one, five or all (-1).
+func fuel_generator(cell: Vector2i, count: int = -1) -> int:
+	return insert_by_hand(cell, Defs.GENERATOR_FUEL, count)
+
+## Takes what the machine at `cell` made. Returns what was taken, by item.
+func take_output(cell: Vector2i) -> Dictionary:
+	var before: Dictionary = sim.stock.duplicate()
+	if open_machine(cell) != OK:
+		return {}
+	_press_row({"kind": "take"})
+	main.close_machine_menu()
+	var gained: Dictionary = {}
+	for item_type: int in sim.stock:
+		var delta: int = int(sim.stock[item_type]) - int(before.get(item_type, 0))
+		if delta > 0:
+			gained[item_type] = delta
+	return gained
+
+## Turns the machine at `cell` with R until it faces `dir`, from where she can
+## reach it. At most three presses.
+func turn_machine(cell: Vector2i, dir: Vector2i) -> String:
+	var machine = sim.machine_at(cell)
+	if machine == null:
+		return INVALID
+	if move_near(cell, 60.0) != OK:
+		return BLOCKED
+	for press in 4:
+		if machine.dir == dir:
+			return OK
+		main.rotate_pressed()
+		run(0.1, "turning a machine")
+	return OK if machine.dir == dir else FAILED
+
 # --- Tools -----------------------------------------------------------------------
 
 func equip_tool(tool: int) -> String:

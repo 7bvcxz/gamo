@@ -209,7 +209,10 @@ func _test_shared_tick_produces() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	var cell: Vector2i = sim.core_cell + Vector2i(6, 6)
-	var ahead: Vector2i = cell + Vector2i.RIGHT
+	# The host is a splitter facing east, used because it has no recipe of its
+	# own; its first output port (A) is its right-hand side, so that is where the
+	# shared tick puts what it makes (`output_cell`, Factory Interaction Pass 01).
+	var ahead: Vector2i = cell + Vector2i.DOWN
 	sim.erase_ore_at(cell)
 	sim.erase_ore_at(ahead)
 	sim.ground.erase(ahead)
@@ -218,6 +221,7 @@ func _test_shared_tick_produces() -> void:
 	machine.cell = cell
 	machine.dir = Vector2i.RIGHT
 	sim.machines[cell] = machine
+	_assert(sim.output_cell(machine) == ahead, "산출 칸은 기계의 첫 출력 포트다")
 
 	# Nothing in it: no progress, no complaint.
 	sim.tick_recipe(machine, TEST_RECIPE, 1.0)
@@ -255,7 +259,10 @@ func _test_shared_tick_waits_when_blocked() -> void:
 	var sim := Sim.new()
 	sim.setup(4242)
 	var cell: Vector2i = sim.core_cell + Vector2i(-6, 6)
-	var ahead: Vector2i = cell + Vector2i.RIGHT
+	# The host is a splitter facing east, used because it has no recipe of its
+	# own; its first output port (A) is its right-hand side, so that is where the
+	# shared tick puts what it makes (`output_cell`, Factory Interaction Pass 01).
+	var ahead: Vector2i = cell + Vector2i.DOWN
 	sim.erase_ore_at(cell)
 	# A seam in front takes no dropped item and holds no belt, so the exit is shut.
 	sim.put_ore(ahead, Defs.ITEM_HEATSTONE)
@@ -264,6 +271,7 @@ func _test_shared_tick_waits_when_blocked() -> void:
 	machine.cell = cell
 	machine.dir = Vector2i.RIGHT
 	sim.machines[cell] = machine
+	_assert(sim.output_cell(machine) == ahead, "산출 칸은 기계의 첫 출력 포트다")
 	machine.buffer[Defs.ITEM_HEATSTONE] = 4
 
 	sim.tick_recipe(machine, TEST_RECIPE, 2.5)
