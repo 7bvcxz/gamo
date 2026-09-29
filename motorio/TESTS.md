@@ -50,7 +50,7 @@ godot --headless --path . --script res://tests/test_touch.gd
 > **World Visual Pass 01 화면 캡처**: `xvfb-run -a -s "-screen 0 1920x1080x24" godot --path motorio --audio-driver Dummy --script res://tools/world_visual_capture.gd -- --out <절대경로>` — 눈만, 2×2 광맥(열석·구리), 광맥 위 채굴기, 고양이가 올라선 채굴기, 채굴기 일곱과 고양이 일곱, 기지, 숙소, 발전기, 중반 공장, 추위, 밤. 설정 파일을 쓰지 않는다.
 > 추락 지점·기지와 숙소·한 칸 광맥·채굴기 고스트(빈 땅/광맥 위)·나란히 선 채굴기와 고양이·통로의 벨트·걷기·기지를 돌아가는 고양이를 게임이 여는 배율로 1280·1920 두 크기에서 찍는다. 출력은 `motorio/test-results/`에.
 
-## 자동 테스트 (headless, 135개)
+## 자동 테스트 (headless, 163개)
 
 ### 규칙과 진행
 
@@ -182,6 +182,41 @@ godot --headless --path . --script res://tests/test_touch.gd
 | `test_ore_generation_does_not_overwrite_type` | 200시드에서 생성이 **이미 놓인 노드를 다른 종류로 덮어쓰지 않는가**(`Sim.ore_overwrites`), 같은 시드가 같은 노드를 만드는가, 노드의 네 칸이 한 종류이고 광맥 사다리의 재료뿐인가, 첫 구리·철 띠에 약속한 개수가 있는가 |
 | `test_ore_save_load_preserves_type` | 여러 시드의 생성된 노드가 저장→불러오기 뒤에 같은 자리·같은 종류로 돌아오고, 불러온 세계의 구리 노드를 곡괭이로 캐면 구리인가 |
 | `test_ore_resource_mapping_is_data_driven` | 광석→재료 매핑이 아이템 표에서 정해지고(`Defs.ore_output`), 채굴하는 쪽(곡괭이·채굴기·맨 노드의 고양이)이 전부 `ore_item(`에 묻고 **재료 이름을 직접 부르지 않는가** |
+
+### Factory Interaction Pass 01 — 포트·손·회전·분배기·줌
+
+설비는 **포트**로만 받고 낸다(`Defs.MACHINES`의 `ports`, `Defs.resolve_ports`, `Sim.machine_ports`). 공용 준비는 `tests/helpers/factory.gd`(기지 옆을 비운 따뜻한 시험 구역).
+
+| 테스트 | 무엇을 막는가 |
+| --- | --- |
+| `test_machine_registry_ports_valid` | 모든 기계 행에 포트가 있고 종류·면이 올바른가, 채굴장은 입력 없이 출력 하나·발전기는 입력만·분배기는 하나 들어와 둘·기지는 사방 반입구인가, 네 방향 모두에서 포트가 발자국 **가장자리**에 있고 **바로 바깥 칸**과 맞닿으며 입력과 출력이 같은 자리를 쓰지 않는가 |
+| `test_input_port_world_position` | 동향 제조기의 입력이 서·북·남 가장자리 **전부**이고 동쪽(출력 면)에는 없는가, `port_world_cell`이 벨트가 서는 바깥 칸인가 |
+| `test_output_port_world_position` | 채굴장·제조기·조립기·벨트의 출력이 네 방향 모두 **옛 `front_cell`과 같은 칸**(모든 세이브의 벨트가 그 칸에 깔려 있다)이고 바로 옆 가장자리 칸에서 나가며, `output_cell`이 그 포트인가 |
+| `test_ports_rotate_with_machine` | 방향 있는 모든 기계가 네 방향에서 면마다 `side_dir`대로 향하고(출력은 앞, 뒤는 반대), 네 번 돌리면 포트가 제자리인가 |
+| `test_port_save_load` | 네 종류 × 네 방향 기계를 저장→다른 세계→불러오기 해도 포트가 그대로인가 |
+| `test_belt_feeds_input_port` | 제조기의 뒤·왼쪽·오른쪽 입력 앞에서 기계를 향한 벨트가 실제 틱으로 재료를 넣는가 |
+| `test_output_port_feeds_belt` | 제조기의 산출이 출력 포트의 벨트로, 고양이가 일하는 채굴장의 광석이 출력 포트의 벨트로 나가는가 |
+| `test_wrong_side_does_not_insert` | **앞면(출력 면)을 향한 벨트는 제조기에 넣지 못하고**, 채굴장은 아무것도 받지 않으며, 분배기는 옆·앞에서 받지 않고 뒤에서만 받는가 — 옛날에는 모든 면이 받았다 |
+| `test_rotated_machine_belt_io` | 네 방향 제조기 각각에 돌린 뒤쪽으로 재료를 넣고 돌린 앞쪽 벨트로 산출이 나오는가(실제 틱, 전력 포함) |
+| `test_machine_rotation_four_directions` | 방향 있는 모든 기계를 `rotate_machine`으로 네 번 돌리면 매번 시계 방향 한 칸이고, 같은 칸 위의 같은 기계이며, 출력이 함께 돌고, 들고 있던 것(버퍼·산출)이 그대로이며 제자리로 오는가. 발전기는 돌지 않는가. **R 키**: 바라보는 기계가 있으면 그것을 돌리고 고스트는 그대로, 없으면 고스트를 돌리는가 |
+| `test_rotation_save_load` | R로 돌린 제조기·조립기·벨트·분배기가 저장·불러오기 뒤에 같은 방향과 같은 출구인가 |
+| `test_non_square_rotation_contract` | 시험 동안만 등록한 **4×6** 기계로: 돌리면 6×4를 덮고, 점유 맵이 새 발자국을 따라가며(옛 칸이 답하지 않는다), 포트가 돌린 가장자리에 있고 면의 길이(뒤 6·옆 4)가 그대로이며, 새 칸이 막혀 있으면 **돌지 않고 아무것도 움직이지 않는가**, 네 번이면 제자리인가 |
+| `test_splitter_four_orientations` | 네 방향 분배기 모두 뒤에서 받고 A=오른쪽·B=왼쪽으로 내며 양쪽으로 다 나가는가 |
+| `test_splitter_alternates_outputs` | 열 개를 넣으면 A·B **엄격히 번갈아** 다섯씩 나가는가 |
+| `test_splitter_uses_open_output` | A가 막히면 전부 B로 가고 분배기는 막혔다고 하지 않는가 |
+| `test_splitter_stops_when_both_blocked` | 둘 다 막히면 물건을 든 채 멈추고 막혔다고 말하며, 없어지거나 생기는 것이 없고, 한쪽이 열리면 다시 나가는가 |
+| `test_splitter_rotation_save_load` | 네 방향 분배기가 방향·포트·**다음 차례(A/B)**·들고 있던 것 그대로 돌아오는가(`next`는 세이브의 선택 키, 옛 세이브는 A) |
+| `test_generator_manual_heatstone` | 발전기에 열석을 손으로 1·5·전부 넣으면 가방과 드럼이 같은 수만큼 바뀌고, `GENERATOR_FUEL_CAP`에서 멈추며, 다른 재료는 거부하고, 손으로만 넣은 발전기가 전력을 내는가. 게임으로: 앞에 서면 `[Z] 넣기`, Z로 창이 열리고 세 줄이 드럼을 채우며 창은 열려 있고, 창이 "연료가 없어 멈춰 있다"를 말하고, 한 번 넣으면 안내가 다시 뜨지 않는가 |
+| `test_manufacturer_manual_input` | 레시피 재료만 두 주기치까지 들어가고 더는 안 들어가며, 쓰지 않는 재료는 거부하고, 손으로만 넣은 재료로 부품을 만드는가 |
+| `test_assembler_manual_multi_input` | 한 재료는 손으로·다른 재료는 벨트로 넣어도 조립하는가(버퍼는 어느 문으로 왔는지 모른다), 둘 다 손으로 넣으면 준비되는가 |
+| `test_machine_manual_output_take` | 꺼내기가 산출 전부를 한 번에 가방으로 옮기고, 막힘을 풀며, **번 것으로 두 번 세지 않는가**(`collected` 그대로), 빈 것은 아무것도 꺼내지 않는가 |
+| `test_manual_transfer_no_duplication` | 넣기·꺼내기 200번을 섞어 눌러도, 중간에 저장·불러오기를 해도, 재료가 든 채 레시피를 바꿔도(출력으로 돌아간 것을 꺼낸다), 가득 찬 기계에 눌러도 **가방+버퍼+산출의 합이 그대로인가** |
+| `test_camera_zoom_min_max` | 가까움·멂 끝에서 멈추고 기본값이 그 사이이며, 카메라가 **부드럽게** 그 끝까지 오는가 |
+| `test_camera_zoom_does_not_scale_hud` | 줌 범위 전체에서 HUD 배율·크기·UI 크기 설정이 그대로인가 |
+| `test_camera_zoom_input` | 실제 이벤트로 Ctrl+휠, Ctrl+=, Ctrl+-, **Ctrl+Shift+=(Ctrl++)** 가 세계를 확대·축소하고 UI는 그대로인가, 한 프레임 뒤에는 가는 중이고 잠시 뒤 도착하는가 |
+| `test_debug_factory_overlay` | 등록된 광석마다 채굴장의 디버그 자료(겨눈 노드·종류·나올 것)가 서로 그리고 **땅이 그리는 시트와** 맞는가, 발자국·포트가 기계의 것인가, `` ` `` 키로 켜고 끄며 그리는 중에 오류가 없는가 |
+| `test_agent_can_manual_fuel_generator` | 에이전트가 벨트 없는 발전기에 걸어가 Z → 창 → "5개 넣기"·"전부 넣기"로 드럼을 채우고, 가방이 정확히 그만큼 줄며 발전기가 도는가 |
+| `test_agent_can_use_rotated_machine` | 에이전트가 제조기를 R로 남쪽으로 돌리고, 창으로 재료를 넣고, 손으로 채운 발전기로 돌려 **남쪽 면**에서 나온 부품을 창으로 꺼내는가 |
 
 ### 화면과 입력
 
