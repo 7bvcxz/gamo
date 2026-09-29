@@ -429,7 +429,7 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
 
 ### Factory Interaction & Logistics Pass 01 + 광석 정체 버그 (2026-09-29)
 
-**로컬 커밋만, push 하지 않았다**(지시). 버전은 올리지 않았다(push 직전에 올리는 규칙). 전체 보고:
+처음에는 로컬 커밋만 했고(지시), 2026-09-29 사이트 정리 요청과 함께 **1.0.45로 배포했다**. 전체 보고:
 `motorio/design/FACTORY_INTERACTION_PASS_01.md`, 캡처 `motorio/design/captures/factory_interaction_pass_01/`.
 
 - **완료**
@@ -445,9 +445,9 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
 - **검증**
   - 기준선 126/126 → 최종 163(신규 37: 광석 9, 공장 28) 전체 통과. 결과는 보고서 "FINAL TEST RESULT".
   - `tools/factory_capture.gd`로 A~H 장면을 실제 렌더러에서 돌려 잼(보고서 "ACTUAL PLAYTEST").
-- **알려진 것**: 옆·앞으로 먹이던 옛 분배기, 앞면으로 먹이던 제조기 벨트는 이제 막힌다. Web에서 Ctrl 줌이
-  브라우저 확대보다 먼저 게임에 가는지 보지 않았다. 사람이 직접 한 바퀴 해 보지 않았다.
-- **다음**: 사람의 플레이 + Web Ctrl 줌 확인, 벨트 드래그 설치, 병목 한 곳만 말하는 막힘 표시.
+- **알려진 것**: 옆·앞으로 먹이던 옛 분배기, 앞면으로 먹이던 제조기 벨트는 이제 막힌다. 사람이 직접 한 바퀴 해 보지 않았다.
+  Web Ctrl 줌은 1.0.45 export에서 Chromium으로 확인했다(브라우저 확대가 아니라 게임이 받는다).
+- **다음**: 사람의 플레이, 벨트 드래그 설치, 병목 한 곳만 말하는 막힘 표시.
 
 ## 다음 작업
 

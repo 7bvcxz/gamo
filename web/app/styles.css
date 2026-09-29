@@ -485,6 +485,19 @@ th { background: var(--sidebar); font-weight: 600; }
   line-height: 1.5;
 }
 .md-table { overflow-x: auto; margin: 0 0 18px; }
+/* Pictures in the documents: captures, and the mermaid diagrams drawn into
+   PNGs. A diagram is drawn on white, so in the dark theme it sits on its own
+   card rather than pretending to be part of the page. */
+.md-figure { margin: 6px 0 22px; }
+.md-figure img {
+  display: block; max-width: 100%; height: auto;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff;
+}
+.md-diagram img { padding: 6px; }
+/* Pictures stay inside the text column -- letting them run wider pushed the
+   page past the window. Each links to its full-size original instead. */
+.md-figure a { display: block; }
+.md-figure figcaption { margin-top: 6px; font-size: 13px; color: var(--muted); }
 .md-table table { border-collapse: collapse; width: 100%; font-size: 14px; }
 .md-table th, .md-table td {
   border: 1px solid var(--line);

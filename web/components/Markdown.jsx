@@ -1,6 +1,9 @@
 'use client';
 
 import React from 'react';
+import { site } from '../lib/links.js';
+import { diagramKey } from '../lib/diagram-key.mjs';
+import diagrams from '../lib/generated/diagrams.json';
 
 // A very small markdown renderer, for the design documents.
 //
@@ -13,6 +16,20 @@ import React from 'react';
 // It renders what it understands and passes anything else through as text, so a
 // document that starts using something new degrades to plain text rather than
 // disappearing.
+//
+// Two additions for pictures (2026-09-29):
+//   - an image alone on its line, `![caption](path)`, is a figure. A relative
+//     path is a file next to the design documents (motorio/design/captures/...),
+//     which design-to-json copies to /motorio/design/; `/...` is a site path.
+//   - a ```mermaid block is shown as the picture scripts/mermaid-render.mjs drew
+//     for it, found by `diagramKey` of its text. Not rendered yet (or changed
+//     since), it shows its source -- visible, never missing.
+
+function imageSrc(path) {
+  if (/^https?:\/\//.test(path)) return path;
+  if (path.startsWith('/')) return site(path);
+  return site(`/motorio/design/${path.replace(/^\.\//, '')}`);
+}
 
 function inline(text, keyBase) {
   // Bold and code, in one pass, so `**a `b` c**` does not need nesting rules
@@ -53,8 +70,34 @@ export function Markdown({ body }) {
       const start = index + 1;
       let end = start;
       while (end < lines.length && !lines[end].startsWith('```')) end++;
-      out.push(<pre key={key++}><code>{lines.slice(start, end).join('\n')}</code></pre>);
+      const code = lines.slice(start, end).join('\n');
+      const picture = line.trim() === '```mermaid' ? (diagrams.diagrams || {})[diagramKey(code)] : null;
+      if (picture) {
+        out.push(
+          <figure className="md-figure md-diagram" key={key++}>
+            <a href={site(`/${picture}`)} target="_blank" rel="noreferrer">
+              <img src={site(`/${picture}`)} alt={code.split('\n')[0]} loading="lazy" />
+            </a>
+          </figure>,
+        );
+      } else {
+        out.push(<pre key={key++}><code>{code}</code></pre>);
+      }
       index = end + 1;
+      continue;
+    }
+
+    const image = line.match(/^\s*!\[([^\]]*)\]\(([^)\s]+)\)\s*$/);
+    if (image) {
+      out.push(
+        <figure className="md-figure" key={key++}>
+          <a href={imageSrc(image[2])} target="_blank" rel="noreferrer">
+            <img src={imageSrc(image[2])} alt={image[1]} loading="lazy" />
+          </a>
+          {image[1] && <figcaption>{inline(image[1], key)}</figcaption>}
+        </figure>,
+      );
+      index++;
       continue;
     }
 
@@ -141,6 +184,7 @@ export function Markdown({ body }) {
       !/^\s*>/.test(lines[index]) &&
       !/^\s*(?:[-*]|\d+\.)\s+/.test(lines[index]) &&
       !/^\s*---+\s*$/.test(lines[index]) &&
+      !/^\s*!\[[^\]]*\]\([^)\s]+\)\s*$/.test(lines[index]) &&
       !lines[index].trim().startsWith('|')
     ) {
       paragraph.push(lines[index]);

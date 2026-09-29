@@ -217,16 +217,34 @@
 | G 발전기 창 | 세 줄 · 상태 문장 · 가방 수 |
 | H 줌 | 가까이 카메라 1.600 · 멀리 0.600, HUD 배율 0.945 그대로 |
 
-사람이 직접 한 바퀴 해 본 것은 아니다. 브라우저(Web export)에서 Ctrl+휠이 브라우저 확대보다 먼저 게임에
-가는지는 확인하지 않았다(아래).
+![A — 열석 노드 위에서 구리를 봐도 열석을 캐지 않는다(디버그 오버레이)](captures/factory_interaction_pass_01/A_direct_mining_overlay.jpg)
+
+![B — 채굴장마다 자기 광석만 나온다](captures/factory_interaction_pass_01/B_posts_output_overlay.jpg)
+
+![C — 철 채굴장 → 벨트 → 제조기 뒤, 앞으로 철판. 건설총을 들면 포트가 보인다](captures/factory_interaction_pass_01/C_logistics_ports_visible.jpg)
+
+![D — R로 동·남·서·북으로 돌린 제조기 넷, 포트도 함께 돈다](captures/factory_interaction_pass_01/D_rotation_four_ways_ports.jpg)
+
+![E — 네 방향 분배기, 뒤에서 받아 A·B로](captures/factory_interaction_pass_01/E_splitter_four_orientations.jpg)
+
+![F — 채굴장 다섯 → 분배기 → 발전기 둘](captures/factory_interaction_pass_01/F_five_posts_splitter_generators.jpg)
+
+![G — 발전기 창](captures/factory_interaction_pass_01/G_generator_hand_fuel_window.jpg)
+
+![H — 가까이(1.6)](captures/factory_interaction_pass_01/H_zoom_near.jpg)
+
+![H — 멀리(0.6)](captures/factory_interaction_pass_01/H_zoom_far.jpg)
+
+사람이 직접 한 바퀴 해 본 것은 아니다. **Web export(1.0.45)에서는 확인했다**: 헤드리스 Chromium에서
+Ctrl+휠 세 번과 Ctrl+= 한 번이 모두 게임에 도착해 `preventDefault`됐고(브라우저 페이지 배율 1 → 1 그대로),
+게임 화면 크기가 90% → 110%로 네 단계 커졌으며 HUD는 그대로였다.
 
 ## KNOWN ISSUES
 
 - **옛 세이브의 분배기**: 예전에는 옆·앞으로도 받았다. 옆이나 앞에서 먹이던 분배기는 이제 받지 않는다.
   옛 설명("R로 축 회전", "뒤에서 받음"을 테스트가 이미 전제)으로 보아 드문 배치지만 0은 아니다.
   마찬가지로 제조기·조립기의 **앞면으로** 먹이던 벨트도 이제 막힌다.
-- **Web에서 Ctrl+휠·Ctrl+±**: 헤드리스 테스트는 이벤트가 게임에 오면 동작함을 보인다. 브라우저가 페이지
-  확대로 먼저 가져가는지는 실제 브라우저에서 보지 않았다.
+- Web에서 Ctrl 줌은 Chromium에서만 확인했다(위). Safari·Firefox는 보지 않았다.
 - 디버그 오버레이는 노드가 붙어 있는 곳에서 글자가 겹친다(디버그 전용).
 - 가득 찬 줄의 벨트마다 뜨는 `!` 막힘 표시가 많아 시끄럽다(기존 동작).
 - 헤드리스 ObjectDB 누수 경고는 기준선과 같은 패턴이다(기준선 126파일 중 74파일에서 이미 난다).
@@ -242,7 +260,7 @@
 
 아래 "실제 플레이 기준 다음으로 가치 높은 작업 3개"를 보라(보고 끝).
 
-1. **사람이 공장 한 바퀴를 직접 해 보기 + Web에서 Ctrl 줌 확인** — 포트가 생기면서 "앞으로 먹이면 안 된다"를
+1. **사람이 공장 한 바퀴를 직접 해 보기** — 포트가 생기면서 "앞으로 먹이면 안 된다"를
    처음 만나는 순간이 어떤지, 포트 표시만으로 알 수 있는지는 사람만 답한다. 같은 자리에서 옛 세이브의
    분배기가 끊기는지도 본다.
 2. **벨트를 끌어서 까는 배치(드래그 설치)** — 포트가 생기자 "입구까지 벨트를 대는" 일이 공장의 대부분이

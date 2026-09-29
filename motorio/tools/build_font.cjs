@@ -144,7 +144,13 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+// Also a library: web/scripts/mermaid-render.mjs lifts a face out of the same
+// collection to draw Korean diagram labels, and one TTC reader is enough.
+module.exports = { faceCount, extractFace };
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

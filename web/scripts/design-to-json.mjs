@@ -13,7 +13,7 @@
 //     node scripts/design-to-json.mjs
 //
 // Writes web/lib/generated/design.json.
-import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync, cpSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,6 +44,12 @@ const LABEL = {
   'VERTICAL_SLICE.md': 'Vertical Slice',
   'CURRENT_STATE.md': 'Current State',
   'entity-scenes.md': 'Entity Scenes',
+  'PROGRESS.md': 'Overview',
+  'QUALITY_PASS_01_REPORT.md': 'Quality Pass 01',
+  'WORLD_VISUAL_PASS_01_REPORT.md': 'World Visual Pass 01',
+  'FACTORY_INTERACTION_PASS_01.md': 'Factory Interaction Pass 01',
+  'NIGHTLY_GOLDEN_PATH_REPORT.md': 'Nightly Golden Path',
+  'AUDIO_AUDIT.md': 'Audio Audit',
 };
 
 const files = readdirSync(SOURCE).filter((name) => name.endsWith('.md'));
@@ -72,4 +78,15 @@ const docs = files.map((name) => {
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify({ docs }, null, 1) + '\n');
+
+// The pictures the documents show (`![...](captures/...)`), next to them in the
+// repository and served beside the pages: motorio/design/captures/ ->
+// web/public/motorio/design/captures/. Copied on every build like the text, so
+// a document and its pictures cannot go out of step.
+const CAPTURES = join(SOURCE, 'captures');
+if (existsSync(CAPTURES)) {
+  const target = join(REPO, 'web', 'public', 'motorio', 'design', 'captures');
+  cpSync(CAPTURES, target, { recursive: true, filter: (src) => !src.endsWith('.import') });
+  console.log('design: captures -> web/public/motorio/design/captures');
+}
 console.log(`design: ${docs.length} docs -> web/lib/generated/design.json`);

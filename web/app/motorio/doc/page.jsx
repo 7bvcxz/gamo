@@ -30,24 +30,44 @@ import design from '../../../lib/generated/design.json';
 // Above everything else on purpose. These are the standard the rest of the page
 // is measured against -- what the game is for comes before what it currently
 // does.
+//
+// Two kinds of file live in that folder and they are read for different
+// reasons: what the game is meant to be (Vision), and what a piece of work did
+// (a report, and the overview of all of them). The reports sit under Progress,
+// next to Todo and Releases, because that is the question they answer. Which is
+// which is read off the file name -- a report says so in its name -- so a new
+// report lands in the right group without this page being edited.
+const isReport = (doc) => /REPORT|_PASS_|AUDIT/.test(doc.file);
+const asItem = (doc) => ({
+  id: `design-${doc.id}`,
+  label: doc.label,
+  render: () => <DesignDoc id={doc.id} />,
+});
+const DOCS = (design.docs || []).filter((doc) => doc.file !== 'entity-scenes.md');
+const OVERVIEW = DOCS.find((doc) => doc.file === 'PROGRESS.md');
 const VISION = {
   group: 'Vision',
-  items: (design.docs || [])
-    .filter((doc) => doc.file !== 'entity-scenes.md')
-    .map((doc) => ({
-      id: `design-${doc.id}`,
-      label: doc.label,
-      render: () => <DesignDoc id={doc.id} />,
-    })),
+  items: DOCS.filter((doc) => doc.file !== 'PROGRESS.md' && !isReport(doc)).map(asItem),
+};
+const REPORTS = {
+  group: 'Reports',
+  items: DOCS.filter(isReport).map(asItem),
 };
 
 const NAV = [
   // First, because v0.1 is defined as "this timeline runs end to end" and every
   // other page on this site is a detail of one of its bands. It draws the table
   // out of VERTICAL_SLICE.md rather than holding one of its own.
+  //
+  // Ahead of it since 2026-09-29, the overview: where the game is now, in one
+  // page with its diagrams and pictures (motorio/design/PROGRESS.md). The page
+  // opens on the first item, and "where are we" is the first question.
   {
     group: 'Plan',
-    items: [{ id: 'timeline', label: 'Timeline', render: () => <Timeline /> }],
+    items: [
+      ...(OVERVIEW ? [asItem(OVERVIEW)] : []),
+      { id: 'timeline', label: 'Timeline', render: () => <Timeline /> },
+    ],
   },
   VISION,
   {
@@ -72,6 +92,7 @@ const NAV = [
     // and this shell renders static panels. DocShell takes external links here.
     links: [{ href: site('/motorio/decisions/'), label: 'Decisions →' }],
   },
+  REPORTS,
   {
     group: 'Development',
     items: [{ id: 'devtools', label: 'Debug Tools', render: () => <DevTools /> }],
