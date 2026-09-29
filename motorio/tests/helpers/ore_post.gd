@@ -125,3 +125,69 @@ static func run_post(main: Node, node: Vector2i, type: int, seconds: float) -> D
 			sim.ground_stack.erase(out_cell)
 	result["out"] = out
 	return result
+
+## Everything she holds and everything lying on the snow, by item.
+static func holdings(sim: Sim) -> Dictionary:
+	var out: Dictionary = {}
+	for item: int in sim.stock:
+		out[item] = int(out.get(item, 0)) + int(sim.stock[item])
+	for cell: Vector2i in sim.ground:
+		var item: int = int(sim.ground[cell])
+		out[item] = int(out.get(item, 0)) + sim.ground_count(cell)
+	return out
+
+## Swings the pickaxe the way she does -- standing at `at`, facing `facing`,
+## holding Z -- through Main for `seconds`, and returns what came of it: the
+## change in her holdings by item, only the items that changed.
+static func swing(main: Node, at: Vector2, facing: Vector2i, seconds: float) -> Dictionary:
+	var sim: Sim = main.sim
+	sim.has_pickaxe = true
+	main.tool_index = main.TOOLS.find(main.TOOL_PICKAXE)
+	main.player.position = at
+	main.player.velocity = Vector2.ZERO
+	main.player.facing = facing
+	var before: Dictionary = holdings(sim)
+	var dt := 1.0 / 30.0
+	for step in int(seconds / dt):
+		main.player.position = at
+		main.player.facing = facing
+		main.player.warmth = 100.0
+		main.mine_held = true
+		# `_process`, not `_process_play`: the swing is driven from the frame.
+		main._process(dt)
+	main.mine_held = false
+	var after: Dictionary = holdings(sim)
+	var gained: Dictionary = {}
+	for item in after:
+		var diff: int = int(after[item]) - int(before.get(item, 0))
+		if diff != 0:
+			gained[item] = diff
+	return gained
+
+## Stances round a node, the way a player walks up to it: from each side, one
+## cell off its edge and in each of its two lanes, facing it; and -- the stance
+## that used to swing at the wrong node -- standing on the near row of the
+## neighbouring node on that side, looking across the gap at this one.
+static func stances(node: Vector2i) -> Array:
+	var rect: Rect2i = Sim.ore_rect(node)
+	var out: Array = []
+	for side: Vector2i in SIDES:
+		var facing: Vector2i = -side
+		for lane in [0, 1]:
+			var near: Vector2i
+			var neighbour: Vector2i
+			if side == Vector2i.DOWN:
+				near = Vector2i(rect.position.x + lane, rect.end.y)
+				neighbour = Vector2i(rect.position.x + lane, rect.end.y + Defs.ORE_PITCH - 2)
+			elif side == Vector2i.UP:
+				near = Vector2i(rect.position.x + lane, rect.position.y - 1)
+				neighbour = Vector2i(rect.position.x + lane, rect.position.y - Defs.ORE_PITCH + 1)
+			elif side == Vector2i.RIGHT:
+				near = Vector2i(rect.end.x, rect.position.y + lane)
+				neighbour = Vector2i(rect.end.x + Defs.ORE_PITCH - 2, rect.position.y + lane)
+			else:
+				near = Vector2i(rect.position.x - 1, rect.position.y + lane)
+				neighbour = Vector2i(rect.position.x - Defs.ORE_PITCH + 1, rect.position.y + lane)
+			out.append({"at": Grid.centre(near), "facing": facing, "reach": true})
+			out.append({"at": Grid.centre(neighbour), "facing": facing, "reach": false})
+	return out
