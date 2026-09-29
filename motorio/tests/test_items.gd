@@ -170,8 +170,10 @@ func _test_derived_lists_are_unchanged() -> void:
 		"철광석", "철판", "전선", "전동기"]
 	var shorts: Array[String] = ["수정", "구리", "열석", "돌", "에너지 코어", "철", "철판",
 		"전선", "전동기"]
+	# Heat stone was (255,122,48), one orange with copper's (252,104,46), and the
+	# two ores read as the same thing (Factory Interaction Pass 01).
 	var colors: Array[Color] = [Color8(127, 212, 232), Color8(252, 104, 46),
-		Color8(255, 122, 48), Color8(150, 152, 158), Color8(186, 148, 255),
+		Color8(255, 178, 62), Color8(150, 152, 158), Color8(186, 148, 255),
 		Color8(150, 176, 205), Color8(206, 216, 226), Color8(232, 168, 96),
 		Color8(150, 205, 200)]
 	_assert(Defs.ITEM_NAMES == names, "표시 이름이 그대로다 (%s)" % str(Defs.ITEM_NAMES))

@@ -1773,11 +1773,34 @@ func _hand_target() -> Vector2i:
 		return sim.can_hand_mine(cell))
 	if facing != Sim.NONE:
 		return facing
-	# Underfoot: any cell of the ground she is standing on.
+	# Underfoot: any cell of the ground she is standing on -- unless she is
+	# looking at another node. Standing on the edge of a heat stone node with a
+	# copper node three cells ahead, the copper is out of reach and this used to
+	# swing at the heat stone under her: she faced copper, held Z and got heat
+	# stone ("copper ore gives heat stone", Factory Interaction Pass 01; 571 of
+	# 25,000 copper-facing stances in six worlds). A node she is looking at is the
+	# one she means; out of reach, the answer is to step closer, not a different
+	# node.
+	var looking_at: Vector2i = _node_in_view()
 	for cell: Vector2i in Grid.near_block(player.position):
 		if sim.can_hand_mine(cell):
+			var under: Vector2i = sim.ore_origin_at(cell)
+			if looking_at != Sim.NONE and under != looking_at:
+				return Sim.NONE
 			return cell
 	return player.cell()
+
+## How far ahead she can be said to be looking at a node, in cells: past her
+## reach, up to where a node reads as "the one in front of her".
+const NODE_VIEW_CELLS := 6
+
+## The node she is looking at along her facing, near enough to mean it, or NONE.
+func _node_in_view() -> Vector2i:
+	for cell: Vector2i in Grid.probe(player.position, player.facing, NODE_VIEW_CELLS):
+		var node: Vector2i = sim.ore_origin_at(cell)
+		if node != Sim.NONE:
+			return node
+	return Sim.NONE
 
 ## A boot landing, on the frames where the drawing puts one down.
 ##

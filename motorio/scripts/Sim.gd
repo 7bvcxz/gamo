@@ -733,12 +733,13 @@ const STARTER_PATCH: Array[Vector2i] = [Vector2i(-3, 8), Vector2i(1, 8), Vector2
 ## turns one cell west first.
 const STARTER_LANE: Array[Vector2i] = [Vector2i(-3, 5), Vector2i(-3, 6), Vector2i(1, 5),
 	Vector2i(1, 6), Vector2i(5, 5), Vector2i(5, 6)]
-## A guaranteed ember seam due north, just outside the opening warm radius, with
-## a clear column back to the core. Without it the alloy recipe -- the design's
-## payoff -- depends on where the scatter happened to drop ember, which made the
-## mid-game beat unreliable and left the headline mechanic unreachable in a
-## five-minute run.
-const STARTER_COPPER: Array[Vector2i] = [Vector2i(1, -17), Vector2i(-3, -17), Vector2i(5, -17)]
+## A guaranteed heat stone seam due north, just outside the opening warm radius,
+## with a clear column back to the core, so the opening never depends on where
+## the scatter dropped heat stone. It was named STARTER_COPPER, from the day it
+## held copper, for long after it stopped: a name that says copper over a list
+## of heat stone is one more place where the two ores got confused (Factory
+## Interaction Pass 01).
+const STARTER_NORTH: Array[Vector2i] = [Vector2i(1, -17), Vector2i(-3, -17), Vector2i(5, -17)]
 ## The column kept clear between that seam's post and the base, in cells.
 const STARTER_COLUMN := Rect2i(Vector2i(0, -14), Vector2i(3, 11))
 
@@ -790,7 +791,8 @@ func ore_tiles_from_core(origin: Vector2i) -> float:
 ## overlap. The only writer of `ore_nodes` besides `erase_ore_at`.
 func put_ore(origin: Vector2i, type: int) -> void:
 	for cell: Vector2i in ore_cells(origin):
-		erase_ore_at(cell)
+		if erase_ore_at(cell):
+			ore_overwrites += 1
 	ore_nodes[origin] = type
 	for cell: Vector2i in ore_cells(origin):
 		_ore_cell[cell] = origin
@@ -811,6 +813,32 @@ func clear_ore() -> void:
 	ore_nodes.clear()
 	_ore_cell.clear()
 	purity.clear()
+	ore_overwrites = 0
+
+## How many times a node was put down over another since the ore was cleared.
+## World generation never does it -- nodes are spaced, and a starter node that
+## needs room erases its neighbours explicitly -- so a nonzero count after
+## `setup` is one node's type written over another's (Factory Interaction Pass
+## 01, `test_ore_generation_does_not_overwrite_type`).
+var ore_overwrites: int = 0
+
+## Everything a node is, in one record: its identity, where it is, how big, what
+## it is and what working it yields. Asked of any of its cells; empty for none.
+## For the debug view and for anything that wants the whole answer at once --
+## every field comes from the same node table the simulation mines from.
+func ore_node_at(cell: Vector2i) -> Dictionary:
+	var origin: Vector2i = ore_origin_at(cell)
+	if origin == NONE:
+		return {}
+	var type: int = int(ore_nodes[origin])
+	return {"id": ore_node_id(origin), "origin": origin, "size": Defs.ORE_NODE_SIZE,
+		"ore_type": type, "resource_item": Defs.ore_output(type),
+		"purity": purity_of(origin)}
+
+## A node's number: its origin, packed. Stable across saves because the origin
+## is, and the same for all four cells because it is the origin's.
+static func ore_node_id(origin: Vector2i) -> int:
+	return (origin.y + 32768) * 65536 + (origin.x + 32768)
 
 ## Everything wrong with the ore, as sentences: a node missing a cell, a cell
 ## pointing at a node that is not there, two nodes overlapping.
@@ -855,7 +883,7 @@ func _generate_ore(seed_value: int) -> void:
 	# crystal; it is the resource the beat it protects actually needs, and that
 	# beat is now the first minutes. Whatever the scatter left too close to it
 	# goes, so it keeps the spacing every seam has.
-	for offset: Vector2i in STARTER_COPPER:
+	for offset: Vector2i in STARTER_NORTH:
 		var cell: Vector2i = core_cell + offset
 		for near: Vector2i in ore_nodes.keys():
 			if Grid.steps(near, cell) < Defs.ORE_PITCH:

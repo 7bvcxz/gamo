@@ -183,7 +183,7 @@ func _test_generation() -> void:
 	# depends on the scatter being kind. It has been copper and then crystal; it
 	# is whatever the beat it protects actually needs, and that beat is now the
 	# first minutes.
-	for offset: Vector2i in Sim.STARTER_COPPER:
+	for offset: Vector2i in Sim.STARTER_NORTH:
 		_assert(sim.ore_type_at(sim.core_cell + offset) == Defs.ITEM_HEATSTONE,
 			"guaranteed seam exists at %s" % offset)
 	# From the seam's post down to the base's top edge, in cells (Grid v2): the
@@ -192,7 +192,7 @@ func _test_generation() -> void:
 		var lane_cell: Vector2i = sim.core_cell + Vector2i(1, y)
 		_assert(sim.can_build(Defs.M_BELT, lane_cell) == "",
 			"the copper column home is clear at %s" % lane_cell)
-	var north: Vector2i = sim.core_cell + Sim.STARTER_COPPER[0]
+	var north: Vector2i = sim.core_cell + Sim.STARTER_NORTH[0]
 	_assert(sim.tiles_from_core(north) > Defs.WARM_BASE,
 		"the copper seam starts outside the opening warm radius, so it must be earned")
 	_assert(sim.tiles_from_core(north) < Defs.WARM_MAX,

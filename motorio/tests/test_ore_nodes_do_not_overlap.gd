@@ -64,7 +64,7 @@ func _test_over_seeds() -> void:
 					foreign += 1
 			if foreign > 0:
 				shared_posts += 1
-		for offset: Vector2i in Sim.STARTER_PATCH + Sim.STARTER_COPPER:
+		for offset: Vector2i in Sim.STARTER_PATCH + Sim.STARTER_NORTH:
 			if not sim.ore_nodes.has(sim.core_cell + offset):
 				missing_promises += 1
 		sim.free()

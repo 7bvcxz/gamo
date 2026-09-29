@@ -310,7 +310,10 @@ const ITEMS: Array[Dictionary] = [
 		# is what the player is looking for.
 		"id": ITEM_HEATSTONE, "key": "heatstone", "kind": KIND_RAW,
 		"name": "열석", "short": "열석",
-		"color": Color8(255, 122, 48),
+		# The amber of its glow (Factory Interaction Pass 01). It was
+		# (255, 122, 48) beside copper's (252, 104, 46): every dot, belt item,
+		# drop and counter drew the two as one orange, and the seam art agreed.
+		"color": Color8(255, 178, 62),
 		"atlas": "heatstone_6.png",
 		"counter": 0, "ore_tier": 0, "retired": false,
 		"desc": "불에 넣으면 온기가 넓어지고 발전기에 넣으면 전력이 된다. 두 곳이 같은 돌을 두고 경쟁한다.",
