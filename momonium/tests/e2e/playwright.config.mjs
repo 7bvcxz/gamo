@@ -20,8 +20,10 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [['list']],
-  use: { baseURL: `http://127.0.0.1:${port}/momonium/` },
-  webServer: {
+  // MOMONIUM_E2E_BASE points one spec at a deployed build instead (the
+  // public acceptance check), and then no local server is started.
+  use: { baseURL: process.env.MOMONIUM_E2E_BASE || `http://127.0.0.1:${port}/momonium/` },
+  webServer: process.env.MOMONIUM_E2E_BASE ? undefined : {
     command: `python3 -m http.server ${port} --bind 127.0.0.1 --directory ${docs}`,
     url: `http://127.0.0.1:${port}/momonium/version.json`,
     reuseExistingServer: false,
