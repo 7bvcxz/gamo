@@ -8,6 +8,8 @@ extends Node2D
 
 const RING_RADIUS := 13.0
 const RING_WIDTH := 4.0
+## The world's night tint (set by DayNight): lights divide by it to stay warm.
+static var ambient := Color.WHITE
 
 var id := 0
 var buildings: BuildingSystem
@@ -31,7 +33,14 @@ var _top := Vector2(0, -60)
 var _bounce := 0.0
 var _shake := 0.0
 var _celebrate := 0.0
+var _sparkle := 0.0
 var _base_scale := Vector2.ONE
+var _sprite_name := ""
+## Read once: art settings the per-frame drawing needs.
+var _lights_cfg: Dictionary = {}
+var _evolution: Dictionary = {}
+## The pennant tier, kept until mastery or the building changes.
+var _pennant := -1
 
 
 func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, lib: SpriteLibrary) -> void:
@@ -41,6 +50,7 @@ func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, 
 	name = "Building_%d" % id
 	var b := buildings.get_building(id)
 	var sprite_name: String = buildings.type_def(b).get("sprite", "")
+	_sprite_name = sprite_name
 	sprite = lib.make_sprite(sprite_name) if lib.has(sprite_name) else Sprite2D.new()
 	add_child(sprite)
 	_base_scale = sprite.scale
@@ -50,6 +60,9 @@ func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, 
 	sprite.add_child(overlay)
 	if lib.has(sprite_name):
 		_top = (lib.pivot(sprite_name, "top") - lib.pivot(sprite_name, "origin")) * lib.world_scale(sprite_name)
+	_lights_cfg = buildings.sim.data.get_value("art", "night_lights", {})
+	_evolution = buildings.sim.data.get_value("art", "evolution", {})
+	refresh_pennant()
 	ring = Node2D.new()
 	ring.z_index = 5
 	ring.draw.connect(_draw_ring)
@@ -78,10 +91,16 @@ func celebrate() -> void:
 	_bounce = 1.0
 
 
+## A few small stars above it: a Momo finished a job here, or learned something.
+func sparkle() -> void:
+	_sparkle = 1.0
+
+
 func _process(delta: float) -> void:
 	_bounce = maxf(0.0, _bounce - delta * 4.0)
 	_shake = maxf(0.0, _shake - delta * 3.5)
 	_celebrate = maxf(0.0, _celebrate - delta * 1.2)
+	_sparkle = maxf(0.0, _sparkle - delta * 1.6)
 	var k := sin(_bounce * PI) * 0.08
 	sprite.position = Vector2(sin(_shake * 40.0) * 3.0 * _shake, -k * 20.0)
 	var b := buildings.get_building(id)
@@ -102,6 +121,9 @@ func _process(delta: float) -> void:
 func _update_look(look_name: String) -> void:
 	if look_name == _look:
 		return
+	# A crop changing (sprout to leaves to ripe) gives a small hop.
+	if _look != "" or look_name != "":
+		_bounce = maxf(_bounce, 0.6)
 	_look = look_name
 	if look_name == "" or not _lib.has(look_name):
 		overlay.visible = false
@@ -150,7 +172,17 @@ func _draw_ring() -> void:
 			ring.draw_circle(_top * 0.5 + Vector2(cos(a) * r, sin(a) * r * 0.6), 3.5 * _celebrate, Color(1, 0.93, 0.5, _celebrate))
 	if b["state"] == BuildingSystem.WORKING:
 		_draw_work_effect(String(buildings.current_stage(b).get("action", "")), buildings.progress(b))
+		_draw_smoke(b)
 	_draw_power(b)
+	_draw_lights(b)
+	_draw_pennant(b)
+	_draw_special(b)
+	if _sparkle > 0.0:
+		for i in 5:
+			var a := TAU * i / 5.0 + _sparkle
+			var r := 10.0 + (1.0 - _sparkle) * 18.0
+			var p := _top * 0.6 + Vector2(cos(a) * r, sin(a) * r * 0.6 - (1.0 - _sparkle) * 10.0)
+			ring.draw_circle(p, 2.5 * _sparkle, Color(1, 0.97, 0.7, _sparkle))
 	match String(b["state"]):
 		BuildingSystem.CONSTRUCTING:
 			var p := buildings.progress(b)
@@ -162,6 +194,12 @@ func _draw_ring() -> void:
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.55))
 			ring.draw_arc(centre, RING_RADIUS, 0, TAU, 32, Color(1, 1, 1, 0.25), RING_WIDTH, true)
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * p, 32, Color("#ffc94d"), RING_WIDTH, true)
+			# A little dust at its feet while it goes up.
+			var t := buildings.sim.now_ms() / 1000.0
+			for i in 4:
+				var k := fposmod(t * 0.7 + i / 4.0, 1.0)
+				var side := -1.0 if i % 2 == 0 else 1.0
+				ring.draw_circle(Vector2(side * (14.0 + k * 16.0), 6.0 - k * 10.0), 3.0 + k * 4.0, Color(0.86, 0.78, 0.62, 0.45 * (1.0 - k)))
 		BuildingSystem.WORKING:
 			var p := buildings.progress(b)
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.55))
@@ -263,3 +301,101 @@ func _draw_work_effect(action: String, p: float) -> void:
 				var k := fposmod(t * 1.3 + i / 5.0, 1.0)
 				var x := -24.0 + i * 12.0
 				ring.draw_circle(Vector2(x, -10.0 - sin(k * PI) * 26.0), 4.0, Color(0.92, 0.27, 0.18, 1.0 - k * 0.5))
+
+
+## Furnaces and workshops at work breathe a little smoke from the roof.
+func _draw_smoke(b: Dictionary) -> void:
+	if not String(b["type"]) in ["smelter", "car_factory", "game_studio", "steam_engine"]:
+		return
+	var t := buildings.sim.now_ms() / 1000.0
+	var stack := _top + Vector2(-6, 8)
+	for i in 3:
+		var k := fposmod(t * 0.5 + i / 3.0, 1.0)
+		ring.draw_circle(stack + Vector2(sin(k * 4.0 + i) * 4.0, -k * 26.0), 2.5 + k * 5.0, Color(0.88, 0.88, 0.9, 0.55 * (1.0 - k)))
+
+
+## Warm windows after dusk: brighter the darker it is. The colour is divided
+## by the night tint the whole world gets, so it stays warm on the screen.
+func _draw_lights(b: Dictionary) -> void:
+	if b["state"] == BuildingSystem.CONSTRUCTING:
+		return
+	var night := night_strength(ambient, float(_lights_cfg.get("start", 0.25)))
+	if night <= 0.01:
+		return
+	var warm := Color(String(_lights_cfg.get("color", "#ffd98a")))
+	var col := Color(minf(warm.r / maxf(ambient.r, 0.2), 4.0), minf(warm.g / maxf(ambient.g, 0.2), 4.0), minf(warm.b / maxf(ambient.b, 0.2), 4.0), 0.0)
+	var t := buildings.sim.now_ms() / 1000.0
+	var flicker := 0.92 + 0.08 * sin(t * 3.1 + id * 1.7)
+	var at := _top * 0.42 + Vector2(-8, 0)
+	ring.draw_circle(at, 9.0, Color(col, 0.18 * night * flicker))
+	ring.draw_circle(at, 4.0, Color(col, 0.75 * night * flicker))
+	ring.draw_circle(at + Vector2(16, 6), 3.0, Color(col, 0.6 * night))
+
+
+## A pennant on the four families as their mastery grows: bronze, silver, gold.
+func _draw_pennant(b: Dictionary) -> void:
+	if b["state"] == BuildingSystem.CONSTRUCTING or buildings.is_special(String(b["type"])):
+		return
+	var tier := _pennant
+	if tier < 0:
+		return
+	var col := Color(String((_evolution.get("colors", ["#ffd45a"]) as Array)[tier]))
+	var t := buildings.sim.now_ms() / 1000.0
+	var pole := _top + Vector2(20, 14)
+	ring.draw_line(pole, pole + Vector2(0, -18), Color(0.4, 0.28, 0.16), 2.0, true)
+	var wave := sin(t * 2.0 + id) * 1.5
+	ring.draw_colored_polygon(PackedVector2Array([pole + Vector2(0, -18), pole + Vector2(11, -14 + wave), pole + Vector2(0, -10)]), col)
+
+
+## The landmarks' own life: the Clock Tower's hands race and it glows gold
+## during a burst; the Monument catches the light now and then.
+func _draw_special(b: Dictionary) -> void:
+	if b["state"] == BuildingSystem.CONSTRUCTING:
+		return
+	var type := String(b["type"])
+	var t := buildings.sim.now_ms() / 1000.0
+	var ws := _lib.world_scale(_sprite_name) if _lib.has(_sprite_name) else 0.5
+	var origin := _lib.pivot(_sprite_name, "origin") if _lib.has(_sprite_name) else Vector2(70, 95)
+	match type:
+		"clock_tower":
+			var sp: SpecialSystem = buildings.sim.system(&"specials")
+			var on := sp != null and bool(sp.burst()["active"])
+			var speed := 6.0 if on else 0.3
+			for face: Vector2 in [Vector2(57, 54), Vector2(83, 54)]:
+				var c := (face - origin) * ws
+				ring.draw_line(c, c + Vector2.from_angle(t * speed - PI * 0.5) * 3.5, Color(0.23, 0.19, 0.16), 1.5, true)
+			if on:
+				var pulse := 0.5 + 0.5 * sin(t * 4.0)
+				ring.draw_arc(_top * 0.5, 22.0 + pulse * 4.0, 0, TAU, 32, Color(1.0, 0.85, 0.35, 0.35 + 0.25 * pulse), 3.0, true)
+		"momo_monument":
+			var k := fposmod(t / 6.0 + id * 0.37, 1.0)
+			if k < 0.12:
+				var g := sin(k / 0.12 * PI)
+				var at := _top + Vector2(4, 18)
+				ring.draw_line(at + Vector2(-6 * g, 0), at + Vector2(6 * g, 0), Color(1, 1, 0.9, g), 2.0, true)
+				ring.draw_line(at + Vector2(0, -6 * g), at + Vector2(0, 6 * g), Color(1, 1, 0.9, g), 2.0, true)
+
+
+## How strongly windows glow under this night tint: 0 by day, up to 1.
+static func night_strength(tint: Color, start: float = 0.25) -> float:
+	var lum := tint.r * 0.3 + tint.g * 0.55 + tint.b * 0.15
+	return clampf((1.0 - lum - start) * 2.0, 0.0, 1.0)
+
+
+## Which pennant its family's mastery has earned: -1 none, 0 bronze, 1 silver, 2 gold.
+func pennant_tier() -> int:
+	var b := buildings.get_building(id)
+	if b.is_empty() or buildings.is_special(String(b["type"])):
+		return -1
+	var fam := buildings.family_of(String(b["type"]))
+	var levels: Array = (_evolution if not _evolution.is_empty() else buildings.sim.data.get_value("art", "evolution", {})).get("levels", [])
+	var lv := int((buildings.sim.system(&"progression") as ProgressionSystem).mastery_of(fam)["level"])
+	var tier := -1
+	for i in levels.size():
+		if lv >= int(levels[i]):
+			tier = i
+	return tier
+
+
+func refresh_pennant() -> void:
+	_pennant = pennant_tier()

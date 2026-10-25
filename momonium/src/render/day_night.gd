@@ -61,6 +61,7 @@ func apply() -> void:
 	ocean.sun_screen_fraction = Vector2(body_x, 0.3)
 	ocean.sun_strength = float(look["glint_strength"]) * (0.4 + 0.6 * clampf(maxf(sun_h, moon_h), 0.0, 1.0))
 	ambient.color = look["ambient"]
+	BuildingView.ambient = look["ambient"]
 
 
 ## E2E/debug: the current phase name and a few resolved colours.

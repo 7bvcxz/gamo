@@ -12,6 +12,8 @@ var cameras: CameraController
 var router: InputRouter
 var island: IslandRenderer
 var ocean: OceanRenderer
+## An occasional fish jumping by the shore.
+var sea_life: SeaLife
 var sky: SkyRenderer
 var ambient: CanvasModulate
 var day_night: DayNight
@@ -116,6 +118,9 @@ func _ready() -> void:
 	island = IslandRenderer.new()
 	island.name = "Island"
 	world_root.add_child(island)
+	sea_life = SeaLife.new()
+	sea_life.name = "SeaLife"
+	world_root.add_child(sea_life)
 	island.setup(sim, projection)
 	marker = SelectionMarker.new()
 	marker.name = "SelectionMarker"
@@ -196,6 +201,7 @@ func _ready() -> void:
 	momo_panel.release_requested.connect(func(id: int) -> void:
 		selection.last_result = sim.execute({"type": "momo.unassign", "momo": id}))
 	selection.momo_panel = momo_panel
+	sea_life.setup(sim, projection)
 	watch_overlay.setup(sim, projection)
 	watch_editor = WatchEditor.new()
 	ui.add_child(watch_editor)
@@ -444,6 +450,18 @@ func _ready() -> void:
 	bridge.register_query("dev_sale", func(amount: Variant) -> Dictionary:
 		(sim.system(&"economy") as EconomySystem).earn(int(amount), "sale")
 		return {"money": (sim.system(&"economy") as EconomySystem).money})
+	# Frame-rate profiles: cap the engine, count what it draws.
+	bridge.register_query("dev_max_fps", func(fps: Variant) -> Dictionary:
+		Engine.max_fps = int(fps)
+		return {"max_fps": Engine.max_fps})
+	bridge.register_query("frames", func(_a: Variant) -> Dictionary:
+		return {"drawn": Engine.get_frames_drawn(), "fps": Engine.get_frames_per_second(), "ticks": Time.get_ticks_msec()})
+	bridge.register_query("vfx", func(_a: Variant) -> Dictionary:
+		var tiers := {}
+		for id: int in building_views.views:
+			tiers[str(id)] = (building_views.views[id] as BuildingView).pennant_tier()
+		return {"night": BuildingView.night_strength(BuildingView.ambient, float(sim.data.get_value("art", "night_lights", {}).get("start", 0.25))),
+			"splash": sea_life.current().keys().size() > 0, "pennants": tiers, "phase": day_night.describe()["phase"]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
 		while prog.level < int(lv):

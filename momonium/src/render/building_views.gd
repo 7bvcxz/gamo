@@ -40,6 +40,20 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			var v: BuildingView = views.get(int(payload["id"]))
 			if v:
 				v.celebrate()
+		&"task_completed":
+			# A Momo finished a job: a few stars.
+			if int(payload.get("worker", 0)) > 0:
+				var v: BuildingView = views.get(int(payload["id"]))
+				if v:
+					v.sparkle()
+		&"mastery_up", &"game_loaded":
+			for v: BuildingView in views.values():
+				v.refresh_pennant()
+		&"momo_skilled":
+			# A Momo learned something: the School twinkles if there is one.
+			var school := buildings.special_built("school")
+			if school != 0 and views.has(school):
+				(views[school] as BuildingView).sparkle()
 
 
 func sync() -> void:

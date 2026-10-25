@@ -231,5 +231,23 @@
         "stars": 0.0
       }
     }
+  },
+  "evolution": {
+    "_doc": "A pennant on the four building families once their mastery reaches each level: bronze, silver, gold.",
+    "levels": [
+      3,
+      5,
+      8
+    ],
+    "colors": [
+      "#cd8a4a",
+      "#d8e2ea",
+      "#ffd45a"
+    ]
+  },
+  "night_lights": {
+    "_doc": "Warm window light at night: strength follows how dark the ambient is (1 - its brightness); colour before the night tint.",
+    "color": "#ffd98a",
+    "start": 0.15
   }
 }
