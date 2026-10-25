@@ -982,6 +982,66 @@
           163
         ]
       }
+    },
+    "mood_content": {
+      "source": "svg/mood_content.svg",
+      "scale": 2.0,
+      "world_scale": 0.2,
+      "pivots": {
+        "origin": [
+          16,
+          60
+        ],
+        "center": [
+          36,
+          26
+        ]
+      }
+    },
+    "mood_thinking": {
+      "source": "svg/mood_thinking.svg",
+      "scale": 2.0,
+      "world_scale": 0.2,
+      "pivots": {
+        "origin": [
+          16,
+          60
+        ],
+        "center": [
+          36,
+          26
+        ]
+      }
+    },
+    "mood_confused": {
+      "source": "svg/mood_confused.svg",
+      "scale": 2.0,
+      "world_scale": 0.2,
+      "pivots": {
+        "origin": [
+          16,
+          60
+        ],
+        "center": [
+          36,
+          26
+        ]
+      }
+    },
+    "mood_worried": {
+      "source": "svg/mood_worried.svg",
+      "scale": 2.0,
+      "world_scale": 0.2,
+      "pivots": {
+        "origin": [
+          16,
+          60
+        ],
+        "center": [
+          36,
+          26
+        ]
+      }
     }
   }
 }

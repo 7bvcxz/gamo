@@ -359,6 +359,16 @@ func _call_watchers(building: int) -> void:
 			return
 
 
+## The buildings on the tiles `momo` watches (MomoMood reads it too).
+func watched_buildings(momo: int) -> Array[int]:
+	return _watched_buildings(momo)
+
+
+## Whether `momo` would go to `building` now (MomoMood reads it too).
+func open_for(momo: int, building: int) -> bool:
+	return _open_for(momo, building)
+
+
 func _watched_buildings(momo: int) -> Array[int]:
 	var momos: MomoSystem = sim.system(&"momo")
 	var buildings: BuildingSystem = sim.system(&"buildings")

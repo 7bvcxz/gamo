@@ -31,6 +31,9 @@ var mail: MailSystem
 ## mailbox's red dot, but on the island, at the Momo who is waiting.
 var envelope: Sprite2D
 var _marked := true
+## The one mood over its head when it is not at work (Step 48).
+var mood_bubble: MoodBubble
+var _mood_reason := ""
 
 
 func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProjection = null) -> void:
@@ -57,6 +60,9 @@ func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProj
 	envelope.modulate = Color(0.25, 0.45, 0.8)
 	envelope.visible = false
 	add_child(envelope)
+	mood_bubble = MoodBubble.new()
+	mood_bubble.setup(lib)
+	add_child(mood_bubble)
 
 
 ## Whether the simulation has this Momo doing its building's current stage.
@@ -123,6 +129,9 @@ func _process(delta: float) -> void:
 	if envelope.visible:
 		envelope.position = rig.position + Vector2(-26, -96 + sin(t * 3.0) * 3.0)
 		envelope.rotation = sin(t * 2.2) * 0.12
+	if mood_bubble.due(delta):
+		_mood_reason = MomoMood.reason(momos.sim, id)
+	mood_bubble.step(delta, _mood_reason, envelope.visible or dragged, rig.position)
 	# Its own drawing is the letter's bubble and the selection ring: redrawn
 	# while either shows, and once more to clear it.
 	var marks := envelope.visible or selected or dragged

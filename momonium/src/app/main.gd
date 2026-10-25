@@ -455,6 +455,7 @@ func _ready() -> void:
 			"rect": [p0.x, p0.y, p1.x - p0.x, p1.y - p0.y], "far": cameras.far()})
 	bridge.register_query("art_info", _art_info)
 	bridge.register_query("fx", _fx_info)
+	bridge.register_query("moods", _moods_info)
 	bridge.register_query("cell_screen", _cell_screen)
 	bridge.register_query("logical_screen", _logical_screen)
 	bridge.register_query("camera", _camera_info)
@@ -1015,6 +1016,20 @@ func _welcome_new_island() -> void:
 		if now > 0 and before > 0 and now < before:
 			sub = tr("fx.faster_sale").format({"before": before, "after": now})
 	celebration.play(banner, sub)
+
+
+## E2E: each Momo's mood -- the reason the rules give now, the mood on show,
+## and where its bubble is (window pixels) when it shows.
+func _moods_info(_arg: Variant) -> Dictionary:
+	var out := {}
+	var t := get_viewport().get_final_transform() * cameras.camera.get_canvas_transform()
+	for id: int in momo_views.actors:
+		var a: MomoActor = momo_views.actors[id]
+		var b := a.mood_bubble
+		out[str(id)] = {"reason": MomoMood.reason(sim, id), "wanted": b.wanted, "mood": b.mood, "why": b.why,
+			"visible": b.visible, "shown": b.shown_count, "bubbles": a.get_children().filter(func(c: Node) -> bool: return c is MoodBubble).size(),
+			"at": [(t * b.global_position).x, (t * b.global_position).y]}
+	return out
 
 
 ## E2E: the shown feedback -- HUD pops and world pops -- and the effect settings.
