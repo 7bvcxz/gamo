@@ -107,7 +107,8 @@ func test_buttons_report_their_action_and_keep_the_camera_still() -> void:
 	var hud: Hud = main.get("hud")
 	var camera: Camera2D = main.get("camera")
 	var before := camera.position
-	var b: HudButton = hud.buttons[&"land"]
+	assert_false(hud.buttons.has(&"land"), "no land button: the sea is bought where it is")
+	var b: HudButton = hud.buttons[&"status"]
 	var p := b.get_global_rect().get_center()
 	var t := InputEventScreenTouch.new()
 	t.position = p
@@ -126,5 +127,5 @@ func test_buttons_report_their_action_and_keep_the_camera_still() -> void:
 	m.pressed = false
 	holder.push_input(m, true)
 	await tree.process_frame
-	assert_eq(main.get("hud_actions"), ["land"] as Array[String], "the land button reported once")
+	assert_eq(main.get("hud_actions"), ["status"] as Array[String], "the button reported once")
 	assert_eq(camera.position, before, "and the world did not move")

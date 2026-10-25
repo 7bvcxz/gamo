@@ -18,6 +18,8 @@ extends Node
 ## browsers send compatibility clicks).
 
 signal tapped(screen: Vector2, world: Vector2)
+## A mouse moving with no button held (desktop only: touches never hover).
+signal hovered(screen: Vector2, world: Vector2)
 
 const TAP_SLOP := 10.0
 const WHEEL_STEP := 1.12
@@ -36,6 +38,8 @@ var _pinch_distance := 0.0
 var _pinch_mid := Vector2.ZERO
 var _drag_handlers: Array[Object] = []
 var _drag_owner: Object = null
+## Whether the last tap came from a mouse (a click) rather than a finger.
+var last_tap_mouse := false
 
 
 func setup(p_cameras: CameraController) -> void:
@@ -96,6 +100,8 @@ func _mouse(event: InputEventMouse) -> void:
 	elif event is InputEventMouseMotion and _points.has(-1):
 		_move(-1, event.position)
 		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseMotion and _points.is_empty():
+		hovered.emit(event.position, cameras.screen_to_world(event.position))
 
 
 func _press(id: int, pos: Vector2, pan_only: bool = false) -> void:
@@ -136,6 +142,7 @@ func _release(id: int, pos: Vector2, canceled: bool) -> void:
 	match mode:
 		Mode.PRESSED:
 			if not canceled and id == _press_id:
+				last_tap_mouse = id == -1
 				tapped.emit(pos, cameras.screen_to_world(pos))
 			mode = Mode.IDLE
 		Mode.DRAGGING:

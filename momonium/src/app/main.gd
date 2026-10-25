@@ -27,7 +27,8 @@ var watch_overlay: WatchOverlay
 var watch_editor: WatchEditor
 var selection: SelectionController
 var land_preview: LandPreview
-var land_mode: LandMode
+## Buying the sea next to the island where it is (hover/click, tap twice).
+var land_buyer: LandBuyer
 ## The shop (bottom-left): hiring.
 var shop_menu: ShopMenu
 ## Four choices beside a tapped empty tile: the only way to build.
@@ -200,10 +201,13 @@ func _ready() -> void:
 	momo_drag = MomoDrag.new()
 	momo_drag.setup(sim, projection, momo_views, building_views)
 	router.add_drag_handler(momo_drag)
-	land_mode = LandMode.new()
-	ui.add_child(land_mode)
-	land_mode.setup(sim, land_preview, projection, lib)
-	selection.land_mode = land_mode
+	land_preview.font = ui.get_theme_default_font()
+	land_buyer = LandBuyer.new()
+	land_buyer.setup(sim, land_preview, projection)
+	selection.land_buyer = land_buyer
+	router.hovered.connect(func(_screen: Vector2, world_pos: Vector2) -> void:
+		if not watch_editor.active:
+			land_buyer.on_hover(world_pos))
 	build_strip = BuildStrip.new()
 	ui.add_child(build_strip)
 	build_strip.setup(sim, lib, cameras, projection)
@@ -339,7 +343,7 @@ func _ready() -> void:
 	bridge.register_query("dev_add_money", func(amount: Variant) -> Dictionary:
 		(sim.system(&"economy") as EconomySystem).earn(int(amount), "dev")
 		return {"money": (sim.system(&"economy") as EconomySystem).money})
-	bridge.register_query("land_mode", _land_mode_info)
+	bridge.register_query("land_buy", _land_buy_info)
 	bridge.register_query("build_ui", _build_ui_info)
 	bridge.register_query("status", _status_info)
 	bridge.register_query("panels", _panels_info)
@@ -642,35 +646,26 @@ func _on_hud_action(action_name: StringName) -> void:
 	build_strip.close()
 	watch_editor.end_edit()
 	match action_name:
-		&"land":
-			selection.deselect()
-			shop_menu.visible = false
-			_close_frames()
-			land_mode.toggle()
 		&"settings":
 			shop_menu.visible = false
-			land_mode.close()
 			var was := settings_frame.visible
 			_close_frames()
 			if not was:
 				settings_view.refresh()
 				settings_frame.open()
 		&"shop":
-			land_mode.close()
 			selection.deselect()
 			_close_frames()
 			shop_menu.toggle()
 			_place_shop_menu()
 		&"status":
 			shop_menu.visible = false
-			land_mode.close()
 			detail_frame.close()
 			mail_frame.close()
 			research_frame.close()
 			status_frame.toggle(0)
 		&"power":
 			shop_menu.visible = false
-			land_mode.close()
 			var was := power_frame.visible
 			_close_frames()
 			if not was:
@@ -678,14 +673,12 @@ func _on_hud_action(action_name: StringName) -> void:
 				power_frame.open()
 		&"research":
 			shop_menu.visible = false
-			land_mode.close()
 			status_frame.close()
 			detail_frame.close()
 			mail_frame.close()
 			research_frame.toggle(0)
 		&"mailbox":
 			shop_menu.visible = false
-			land_mode.close()
 			status_frame.close()
 			detail_frame.close()
 			research_frame.close()
@@ -723,18 +716,12 @@ func _selection_info(_arg: Variant) -> Dictionary:
 		"cards": cards, "enabled": enabled, "result": selection.last_result, "window": [win.x, win.y]}
 
 
-## E2E: land mode state and its buttons (window pixels).
-func _land_mode_info(_arg: Variant) -> Dictionary:
-	var vp := get_viewport()
-	var rect := func(c: Control) -> Array:
-		var a: Vector2 = vp.get_final_transform() * c.get_global_rect().position
-		var b: Vector2 = vp.get_final_transform() * c.get_global_rect().end
-		return [a.x, a.y, b.x - a.x, b.y - a.y]
-	var win := DisplayServer.window_get_size()
-	return {"active": land_mode.active, "chosen": [land_mode.chosen.x, land_mode.chosen.y],
-		"buy": rect.call(land_mode.buy_button), "buy_disabled": land_mode.buy_button.disabled,
-		"close": rect.call(land_mode.close_button), "cost": (sim.system(&"land") as LandSystem).next_cost(),
-		"result": land_mode.last_result, "window": [win.x, win.y]}
+## E2E: the land preview (which tile, price, line under it) and the last purchase.
+func _land_buy_info(_arg: Variant) -> Dictionary:
+	var f := land_preview.focus
+	return {"focus": [] if f == LandPreview.NONE else [f.x, f.y], "pending": [] if land_buyer.pending == LandPreview.NONE else [land_buyer.pending.x, land_buyer.pending.y],
+		"price": land_preview.price_text(), "hint": land_preview.hint, "affordable": land_preview.affordable,
+		"cost": (sim.system(&"land") as LandSystem).next_cost(), "result": land_buyer.last_result}
 
 
 func _place_shop_menu() -> void:

@@ -168,10 +168,7 @@ func test_cancel_card_refunds_a_construction() -> void:
 	assert_eq(buildings.ids().size(), 0, "the construction is gone")
 
 
-func test_land_mode_owns_taps() -> void:
-	main.call("_on_hud_action", &"land")
-	_tap_cell(Vector2i(1, 1))
-	assert_false(strip.open, "buying land: a tap is not a build")
-	main.call("_on_hud_action", &"land")
-	_tap_cell(Vector2i(1, 1))
-	assert_true(strip.open, "land mode closed: it is again")
+func test_the_sea_is_not_a_build() -> void:
+	_tap_cell(Vector2i(2, 0))
+	assert_false(strip.open, "a sea tile next to the island: no building choices")
+	assert_eq((main.get("land_buyer") as LandBuyer).pending, Vector2i(2, 0), "its land preview instead")

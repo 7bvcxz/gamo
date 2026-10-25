@@ -21,17 +21,20 @@ var views: BuildingViews
 var marker: SelectionMarker
 var panel: ContextPanel
 
-## While land mode is open it owns world taps.
-var land_mode: LandMode
+## Sea next to the island: preview, then buy.
+var land_buyer: LandBuyer
 var momo_views: MomoViews
 var momo_panel: MomoPanel
 var kind := ""
 var selected_id := 0
 var selected_cell := Vector2i.ZERO
 var last_result: Dictionary = {}
+## Where taps come from (it says whether the last one was a mouse click).
+var router: InputRouter
 
 
-func setup(p_sim: Simulation, p_projection: IsoProjection, p_views: BuildingViews, p_marker: SelectionMarker, p_panel: ContextPanel, router: InputRouter) -> void:
+func setup(p_sim: Simulation, p_projection: IsoProjection, p_views: BuildingViews, p_marker: SelectionMarker, p_panel: ContextPanel, p_router: InputRouter) -> void:
+	router = p_router
 	sim = p_sim
 	world = sim.system(&"world")
 	buildings = sim.system(&"buildings")
@@ -48,13 +51,14 @@ func setup(p_sim: Simulation, p_projection: IsoProjection, p_views: BuildingView
 
 
 func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
-	if land_mode != null and land_mode.active:
-		land_mode.on_world_tap(world_pos)
-		return
 	# Editing a Momo's tiles: taps are the brush.
 	if watch_editor != null and watch_editor.active:
 		watch_editor.on_tap(world_pos)
 		return
+	# A finger's land preview waits for a second tap on that tile; any other
+	# tap puts it away.
+	if land_buyer != null and land_buyer.pending != projection.cell_at(world_pos):
+		land_buyer.clear()
 	# Assign mode (the no-drag way): the next building tapped gets the Momo.
 	if kind == "momo" and momo_panel != null and momo_panel.assigning:
 		var target := views.hit(world_pos)
@@ -84,8 +88,9 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 		if build_strip != null and world.is_buildable(cell):
 			panel.hide_panel()
 			build_strip.show_for(cell)
-	elif world.is_purchasable(cell):
-		select_tile(cell, "tile.sea")
+	elif land_buyer != null and land_buyer.buyable(cell):
+		deselect()
+		land_buyer.on_tap(world_pos, router.last_tap_mouse)
 	else:
 		deselect()
 

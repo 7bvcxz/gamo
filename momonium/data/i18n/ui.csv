@@ -5,7 +5,6 @@ hud.level,Lv %d,Lv %d,Lv %d,Lv %d
 hud.exp,%d / %d,%d / %d,%d / %d,%d / %d
 hud.research,Research,연구,研究,研究
 hud.mailbox,Mailbox,편지함,郵便箱,信箱
-hud.land,Land,땅 관리,島管理,土地
 hud.status,Status,스테이터스,ステータス,状态
 hud.settings,Settings,설정,設定,设置
 hud.shop,Shop,상점,ショップ,商店
@@ -425,3 +424,5 @@ err.no_work_here,No Momo work here,모모가 할 일이 없는 곳이에요,モ�
 watch.count,%d / %d tiles,%d / %d칸,%d / %dマス,%d / %d 格
 stats.stuck.missing,needs %s,%s 필요,%sが必要,缺 %s
 stats.stuck.crew,%d more Momo,모모 %d명 더,モモがあと%d人,还差%d只桃桃
+land.tap_again,Tap again to buy,한 번 더 누르면 구매,もう一度タップで購入,再点一次购买
+land.short,Not enough money,돈이 모자라요,お金が足りません,钱不够
