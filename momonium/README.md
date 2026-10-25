@@ -37,12 +37,21 @@ momonium/tools/test.sh unit land       # id에 land가 들어간 케이스만
 xvfb-run -a -s "-screen 0 1280x1600x24" godot --path momonium --audio-driver Dummy \
   --script res://tools/capture.gd -- --out /abs/shot.png --size 405x720
 
-# Web export → docs/momonium/ (저장소 공용 스크립트)
-./deploy-web.sh momonium
+# Web export → docs/momonium/ (저장소 공용 deploy-web.sh + 게시 중인 이전 빌드 보존)
+momonium/tools/deploy.sh
+
+# push 뒤 Pages 반영을 기다렸다가 공개 URL 스모크
+momonium/tools/verify_pages.sh
 
 # 배포 스모크 검사 (E2E 아님). 처음 한 번 npm install
 (cd momonium/tests/e2e && npm install && node smoke.mjs --url https://7bvcxz.github.io/gamo/momonium/)
+
+# E2E (브라우저) — 전체 실행은 Step 10·20·30·40에서만. 자세한 것은 tests/e2e/README.md
+(cd momonium/tests/e2e && npx playwright test specs/boot.spec.mjs)
 ```
+
+설계: [`design/ARCHITECTURE.md`](design/ARCHITECTURE.md) · [`design/DESIGN_RULES.md`](design/DESIGN_RULES.md) ·
+[`design/TOOLING.md`](design/TOOLING.md)
 
 ## 폴더
 

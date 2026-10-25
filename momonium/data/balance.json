@@ -1,0 +1,12 @@
+{
+  "_doc": "MVP starting rules. See design/DESIGN_RULES.md for why each value is what it is.",
+  "start": {
+    "money": 10,
+    "level": 1,
+    "exp": 0,
+    "island": { "origin": [0, 0], "size": [2, 2] }
+  },
+  "clock": {
+    "day_seconds": 30
+  }
+}
