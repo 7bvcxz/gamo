@@ -116,3 +116,16 @@ func test_progress_survives_a_save() -> void:
 	var p2: ProgressionSystem = copy.system(&"progression")
 	assert_eq([p2.level, p2.experience], [2, 50], "level and EXP")
 	assert_eq(p2.mastery_of("farm"), {"level": 2, "exp": 20, "next": 200}, "mastery")
+
+
+func test_mastery_up_listeners_see_the_new_level() -> void:
+	var sim := Simulation.new_game()
+	var prog: ProgressionSystem = sim.system(&"progression")
+	var seen := []
+	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
+		if t == &"mastery_up":
+			seen.append([int(p["level"]), int(prog.mastery_of(String(p["type"]))["level"])]))
+	prog.add_mastery("mine", 1000)
+	assert_true(seen.size() >= 2, "several levels at once")
+	for pair: Array in seen:
+		assert_true(pair[1] >= pair[0], "during mastery_up the level is already stored (%s)" % [pair])

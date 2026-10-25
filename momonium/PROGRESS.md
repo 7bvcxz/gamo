@@ -5,11 +5,12 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **20** (#20)
-- 현재 step: **21** — 모모 편지와 편지함 (#21)
-- 버전: `0.20.0`
-- 테스트: unit+integration 223 통과 (`momonium/tools/test.sh`)
-- E2E: 케이스 19파일(+panels). 전체 실행: Step 10(31/33 → 수정 후 PASS), Step 20(아래 표). 다음 전체 실행은 Step 30
+- 마지막 완료 step: **21** (#21)
+- 현재 step: **22** — 연구소와 데이터 주도 기술 트리 (#22). 편지가 수락한 연구(`MailSystem.accepted_research`)를 읽고,
+  `data/letters.json`의 research id(farm_expansion, watering_efficiency, harvest_boost)가 트리에 있는지 검증 추가
+- 버전: `0.21.0`
+- 테스트: unit+integration 241 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 20파일(+mail). 전체 실행: Step 10, Step 20(65/0/3 skip). 다음 전체 실행은 Step 30
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -51,4 +52,5 @@
 | 17 | #17 모모 스프라이트·애니메이션 | 0.17.0 | `349b5f17` | 184, E2E momo 단독 | 스모크 |
 | 18 | #18 모모 고용·배회·드래그 배치 | 0.18.0 | `dcab0cd7` | 196, E2E momo_assign 단독 | 스모크 |
 | 19 | #19 모모 자동 작업 | 0.19.0 | `2c4faf0d` | 207, E2E jobs 단독 | 스모크 |
-| 20 | #20 상세·상태·경제 패널 | 0.20.0 | (다음 갱신 시) | 223, **E2E 전체 2회차 65 통과/0 실패/3 skip(프로필 전용)** | 스모크 |
+| 20 | #20 상세·상태·경제 패널 | 0.20.0 | `40fbffc8` | 223, **E2E 전체 2회차 65 통과/0 실패/3 skip(프로필 전용)** | 스모크 |
+| 21 | #21 모모 편지·편지함 | 0.21.0 | (다음 갱신 시) | 241, E2E mail 단독 | 스모크 |

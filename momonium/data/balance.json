@@ -115,5 +115,9 @@
     "seed": 20261025,
     "work_time_multiplier": 4.0,
     "works_at_night": true
+  },
+  "mail": {
+    "_doc": "Momo Letters (data/letters.json). At most letters_per_day new letters arrive on one in-game day.",
+    "letters_per_day": 1
   }
 }

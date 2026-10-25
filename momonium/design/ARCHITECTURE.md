@@ -25,7 +25,7 @@
 | `src/economy` | 로직 | 돈·창고·판매 |
 | `src/progression` | 로직 | 레벨·EXP·숙련도·해금 |
 | `src/research` | 로직 | 연구 트리·효과 |
-| `src/agents` | 로직 | 모모(에이전트)·작업 스케줄링·매니저 |
+| `src/agents` | 로직 | 모모(에이전트)·작업 스케줄링(`JobSystem`)·모모 편지(`MailSystem`)·매니저 |
 | `src/persistence` | 로직 | 저장 형식·버전·이주·원자적 쓰기 |
 | `src/render` | 표현 | 섬·바다·하늘·건물 그리기, 깊이 정렬 |
 | `src/input` | 표현 | 카메라, 제스처, 입력 라우터 |

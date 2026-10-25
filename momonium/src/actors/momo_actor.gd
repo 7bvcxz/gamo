@@ -26,6 +26,10 @@ var _sit_until := 0.0
 var _next_sit := 0.0
 var _shake := 0.0
 var _pop := 0.0
+var mail: MailSystem
+## A letter held up over the head while one this Momo wrote is unread -- the
+## mailbox's red dot, but on the island, at the Momo who is waiting.
+var envelope: Sprite2D
 
 
 func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProjection = null) -> void:
@@ -40,6 +44,18 @@ func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProj
 	rig = MomoRig.new()
 	rig.setup(lib, id)
 	add_child(rig)
+	mail = sim.system(&"mail")
+	envelope = Sprite2D.new()
+	envelope.name = "Envelope"
+	lib.place(envelope, "ui_mail")
+	envelope.centered = true
+	envelope.offset = Vector2.ZERO
+	envelope.scale = Vector2.ONE * (26.0 / maxf(lib.region("ui_mail").size.x, 1.0))
+	envelope.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	# The HUD icon is drawn white for navy buttons; ink it for the white bubble.
+	envelope.modulate = Color(0.25, 0.45, 0.8)
+	envelope.visible = false
+	add_child(envelope)
 
 
 ## Whether the simulation has this Momo doing its building's current stage.
@@ -94,10 +110,20 @@ func _process(delta: float) -> void:
 			if t >= _next_sit:
 				_sit_until = t + _rng.randf_range(3.0, 6.0)
 				_next_sit = _sit_until + _rng.randf_range(10.0, 20.0)
+	envelope.visible = mail != null and mail.has_unread_from(id) and not dragged
+	if envelope.visible:
+		envelope.position = rig.position + Vector2(-26, -96 + sin(t * 3.0) * 3.0)
+		envelope.rotation = sin(t * 2.2) * 0.12
 	queue_redraw()
 
 
 func _draw() -> void:
+	if envelope != null and envelope.visible:
+		# A white speech bubble under the letter, so it reads on any ground.
+		var c := envelope.position
+		draw_circle(c, 19.0, Color(1, 1, 1, 0.92))
+		draw_colored_polygon(PackedVector2Array([c + Vector2(8, 14), c + Vector2(20, 26), c + Vector2(14, 10)]), Color(1, 1, 1, 0.92))
+		draw_arc(c, 19.0, 0, TAU, 32, Color(0.35, 0.55, 0.85, 0.6), 1.5, true)
 	if selected or dragged:
 		draw_set_transform(Vector2(0, 2), 0.0, Vector2(1.0, 0.45))
 		draw_arc(Vector2.ZERO, 30.0, 0, TAU, 32, Color(1, 0.92, 0.45, 0.95), 4.0, true)

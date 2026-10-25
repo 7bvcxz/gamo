@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance", "art", "buildings", "items"]
+const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []
@@ -77,9 +77,32 @@ func validate() -> void:
 	_validate_balance(table("balance"))
 	_validate_art()
 	_validate_buildings()
+	_validate_letters()
 	_require_number({}, "balance", "land.base", 1)
 	_require_number({}, "balance", "land.growth", 1)
 	_require_number({}, "balance", "land.round_to", 1)
+
+
+func _validate_letters() -> void:
+	var types: Dictionary = table("buildings").get("types", {})
+	var seen := {}
+	for l: Dictionary in table("letters").get("letters", []):
+		var id := String(l.get("id", ""))
+		if id == "" or seen.has(id):
+			errors.append("letters: every letter needs a unique id (%s)" % id)
+		seen[id] = true
+		if not types.has(String(l.get("industry", ""))):
+			errors.append("letters: %s.industry %s is not a building type" % [id, l.get("industry", "")])
+		var trigger: Dictionary = l.get("trigger", {})
+		if trigger.size() != 1 or not (trigger.has("work") or trigger.has("mastery")):
+			errors.append("letters: %s.trigger must be exactly one of {work}, {mastery}" % id)
+		for kind: String in trigger:
+			for t: String in trigger[kind]:
+				if not types.has(t) or float(trigger[kind][t]) < 1.0:
+					errors.append("letters: %s.trigger.%s.%s must name a building type and a count >= 1" % [id, kind, t])
+		for key: String in ["title", "body", "research"]:
+			if String(l.get(key, "")) == "":
+				errors.append("letters: %s.%s missing" % [id, key])
 
 
 func _validate_balance(t: Dictionary) -> void:

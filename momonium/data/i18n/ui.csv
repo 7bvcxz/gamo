@@ -100,3 +100,43 @@ detail.by_you,Cycle by hand,직접 하면,自分で,亲自
 detail.by_momo,Cycle by Momo,모모가 하면,モモなら,桃桃来做
 time.s,{s} s,{s}초,{s}秒,{s}秒
 time.ms,{m} min {s} s,{m}분 {s}초,{m}分{s}秒,{m}分{s}秒
+letter.farm_first_harvest.title,What if we widened the field?,밭을 조금 넓혀 보면 어때?,畑をちょっと広げてみない？,把田地扩大一点怎么样？
+letter.farm_first_harvest.body,"Guess what, I had an idea!
+If we set the rows a little closer and till right to the edges, the same island could hold more plants.
+Shall we look into it?","있잖아, 좋은 생각이 났어!
+이랑 사이를 조금 좁히고 밭 가장자리까지 고르게 갈면, 같은 섬에서도 작물을 더 심을 수 있을 것 같아.
+한번 연구해 볼래?","ねえ、いいこと思いついたよ！
+畝の間を少しつめて、畑のはしまで耕したら、同じ島でももっと作物を植えられそう。
+研究してみない？","我想到一个好主意！
+把垄间距缩小一点，再把田边也翻好，同样的岛就能多种一些作物。
+要不要研究一下？"
+letter.farm_watering.title,Maybe we could water less often,물 주기를 덜 해도 될지도 몰라,水やり、少なくできるかも,也许可以少浇几次水
+letter.farm_watering.body,"The soil dries out so fast after watering.
+If we cover it with straw, or let water seep slowly to the roots, it stays moist much longer.
+Then we could wait longer between waterings!","물을 주고 나면 흙이 금방 말라 버리더라.
+짚을 덮어 두거나 뿌리 쪽으로 물이 천천히 스미게 하면, 흙이 촉촉한 시간이 훨씬 길어질 거야.
+그럼 물 주는 간격을 늘릴 수 있어!","水をあげても、土がすぐかわいちゃうの。
+わらをかぶせたり、根もとにゆっくり水がしみるようにしたら、しっとりした時間がずっと長くなるはず。
+そうしたら水やりの間かくをのばせるよ！","浇完水，土很快就干了。
+如果盖上稻草，或者让水慢慢渗到根部，土就能湿润更久。
+这样浇水的间隔就能拉长啦！"
+letter.farm_soil.title,Let's give the soil something back,흙에 영양을 돌려주자,土に栄養を返そう,把养分还给土壤吧
+letter.farm_soil.body,"Growing in the same field again and again seems to tire the soil.
+If we compost the leftover stalks and take turns with what we plant, the soil can recover.
+Then each plant should bear more, right?","같은 밭에서 계속 키우니까 흙이 조금 지친 것 같아.
+수확하고 남은 줄기로 퇴비를 만들고 작물을 돌아가며 심으면, 흙이 다시 기운을 차릴 거야.
+그럼 열매도 더 많이 맺히겠지?","同じ畑で育て続けて、土が少しつかれてるみたい。
+収穫のあとの茎でたい肥を作って、植える作物を順番に変えたら、土が元気になるはず。
+そうしたら実もたくさんなるよね？","一直在同一块田里种，土好像有点累了。
+用收获后剩下的茎秆做堆肥，再轮流换着种，土就能恢复元气。
+这样结的果实也会更多吧？"
+research.farm_expansion.name,Field expansion,밭 넓히기,畑の拡張,扩大田地
+research.watering_efficiency.name,Watering efficiency,물 주기 효율,水やり効率化,浇水效率
+research.harvest_boost.name,Bigger harvests,수확량 늘리기,収穫量アップ,增加收成
+mail.empty,No letters yet,아직 편지가 없어요,まだ手紙はありません,还没有信
+mail.from,From %s,%s의 편지,%sより,来自%s
+mail.proposal,Proposal,제안,提案,提议
+mail.claim,Let's research it,연구해 볼게,研究してみる,研究看看
+mail.claimed,On the research list,연구 목록에 넣었어요,研究リストに入れました,已加入研究
+err.no_letter,No such letter,편지가 없어요,手紙がありません,没有这封信
+err.already_claimed,Already accepted,이미 받았어요,もう受け取りました,已经接受了

@@ -44,9 +44,10 @@ func test_fonts_carry_every_character() -> void:
 	for row: Dictionary in _rows():
 		for pair: Array in [["ko", "res://assets/fonts/ui_ko.otf"], ["ja", "res://assets/fonts/ui_ja.otf"], ["zh_CN", "res://assets/fonts/ui_zh.otf"]]:
 			var font: FontFile = load(pair[1])
-			for ch: String in String(row[pair[0]]):
+			# Line breaks (letters are several lines) are layout, not glyphs.
+			for ch: String in String(row[pair[0]]).replace("\n", ""):
 				assert_true(font.has_char(ch.unicode_at(0)), "%s font draws '%s' (%s) -- run tools/fonts/build_fonts.mjs" % [pair[0], ch, row["key"]])
-			for ch: String in String(row["en"]):
+			for ch: String in String(row["en"]).replace("\n", ""):
 				assert_true(font.has_char(ch.unicode_at(0)), "%s font draws English '%s'" % [pair[0], ch])
 
 

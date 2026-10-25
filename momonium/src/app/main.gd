@@ -37,6 +37,9 @@ var stats_view: StatsView
 ## Everything about one building, opened from its name.
 var detail_frame: PanelFrame
 var detail_view: BuildingDetailView
+## Momo Letters.
+var mail_frame: PanelFrame
+var mailbox_view: MailboxView
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -189,6 +192,11 @@ func _ready() -> void:
 	detail_view.setup(sim, lib)
 	detail_frame.add_tab("", detail_view)
 	detail_view.gone.connect(detail_frame.close)
+	mail_frame = _frame(ui, "MailFrame")
+	mailbox_view = MailboxView.new()
+	mailbox_view.setup(sim, lib)
+	mail_frame.add_tab("hud.mailbox", mailbox_view)
+	mail_frame.closed.connect(mailbox_view.show_list)
 	panel.details_pressed.connect(open_details)
 	_place_frames()
 	hud.layout_changed.connect(_place_frames)
@@ -225,6 +233,7 @@ func _ready() -> void:
 	bridge.register_query("build_ui", _build_ui_info)
 	bridge.register_query("status", _status_info)
 	bridge.register_query("panels", _panels_info)
+	bridge.register_query("mail", _mail_info)
 	bridge.register_query("momos", _momo_info)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
 		var out := {}
@@ -336,7 +345,15 @@ func _on_hud_action(action_name: StringName) -> void:
 			land_mode.close()
 			placement.close()
 			detail_frame.close()
+			mail_frame.close()
 			status_frame.toggle(0)
+		&"mailbox":
+			build_menu.visible = false
+			land_mode.close()
+			placement.close()
+			status_frame.close()
+			detail_frame.close()
+			open_mailbox()
 
 
 ## E2E: HUD texts, button rectangles (window pixels) and recent actions.
@@ -425,13 +442,24 @@ func _frame(ui: Control, frame_name: String) -> PanelFrame:
 func _close_frames() -> void:
 	status_frame.close()
 	detail_frame.close()
+	mail_frame.close()
+
+
+## The mailbox, opening on the list of letters.
+func open_mailbox() -> void:
+	if mail_frame.visible:
+		mail_frame.close()
+		return
+	mail_frame.set_title(tr("hud.mailbox"))
+	mailbox_view.show_list()
+	mail_frame.open()
 
 
 func _place_frames() -> void:
 	var size := get_viewport_rect().size
 	# Keep the side buttons free.
 	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
-	for f: PanelFrame in [status_frame, detail_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame]:
 		f.right_reserved = reserved
 		f._layout()
 
@@ -441,6 +469,7 @@ func open_details(id: int) -> void:
 	if b.is_empty():
 		return
 	status_frame.close()
+	mail_frame.close()
 	build_menu.visible = false
 	detail_frame.set_title(tr((sim.system(&"buildings") as BuildingSystem).type_def(b).get("name", "")))
 	detail_view.show_building(id)
@@ -479,6 +508,29 @@ func _panels_info(_arg: Variant) -> Dictionary:
 		"detail": {"state": detail_view.state_label.text, "workers": workers,
 			"you": (detail_view.cycle_you.get_node("Value") as Label).text, "momo": (detail_view.cycle_momo.get_node("Value") as Label).text,
 			"done": (detail_view.done_row.get_node("Value") as Label).text},
+		"window": [win.x, win.y]}
+
+
+## E2E: the mailbox as shown -- rows, the open letter, where to tap.
+func _mail_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var rect := func(c: Control) -> Array:
+		var r := c.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+	var rows: Array = []
+	for row: Node in mailbox_view.list_box.get_children():
+		rows.append({"id": int(String(row.name).trim_prefix("Row_")), "unread": bool(row.get_meta("unread", false)), "rect": rect.call(row)})
+	var mail: MailSystem = sim.system(&"mail")
+	return {"open": mail_frame.visible, "reading": mailbox_view.open_id, "rows": rows,
+		"badge": (hud.buttons[&"mailbox"] as HudButton).badge, "unread": mail.unread_count(),
+		"title": mailbox_view.card.title_label.text, "body": mailbox_view.card.body_label.text,
+		"from": mailbox_view.card.from_label.text, "proposal": mailbox_view.proposal_label.text,
+		"claim": rect.call(mailbox_view.claim_button), "claim_text": mailbox_view.claim_button.text,
+		"claimed": mailbox_view.claim_button.disabled, "back": rect.call(mailbox_view.back_button),
+		"envelopes": momo_views.actors.keys().filter(func(k: int) -> bool: return (momo_views.actors[k] as MomoActor).envelope.visible),
 		"window": [win.x, win.y]}
 
 

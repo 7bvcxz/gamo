@@ -16,5 +16,6 @@ static func create_default() -> Array[SimSystem]:
 		ProgressionSystem.new(),
 		MomoSystem.new(),
 		JobSystem.new(),
+		MailSystem.new(),
 	]
 	return list

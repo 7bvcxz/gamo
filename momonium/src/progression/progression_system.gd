@@ -82,12 +82,14 @@ func add_mastery(type: String, amount: int) -> void:
 	if amount <= 0 or type == "":
 		return
 	var m: Dictionary = mastery.get(type, {"level": 1, "exp": 0})
+	# Stored before announcing: a listener asking mastery_of() during
+	# mastery_up must see the new level, also for a type's first gain.
+	mastery[type] = m
 	m["exp"] = int(m["exp"]) + amount
 	while int(m["exp"]) >= mastery_needed_for(int(m["level"])):
 		m["exp"] = int(m["exp"]) - mastery_needed_for(int(m["level"]))
 		m["level"] = int(m["level"]) + 1
 		sim.bus.emit(&"mastery_up", {"type": type, "level": m["level"]})
-	mastery[type] = m
 	sim.bus.emit(&"mastery_gained", {"type": type, "amount": amount, "level": m["level"], "exp": m["exp"]})
 
 

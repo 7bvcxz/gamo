@@ -190,6 +190,10 @@ func refresh(force: bool = false) -> void:
 	_set_text(_money_label, "money", _format_money(economy.money), force)
 	_set_text(_level_label, "level", tr("hud.level") % prog.level, force)
 	_set_text(_exp_label, "exp", tr("hud.exp") % [prog.experience, prog.next_level_exp()], force)
+	var mail: MailSystem = sim.system(&"mail")
+	var mail_button: HudButton = buttons.get(&"mailbox")
+	if mail != null and mail_button != null and mail_button.badge != (mail.unread_count() > 0):
+		mail_button.badge = mail.unread_count() > 0
 	var production := production_summary()
 	_set_text(production_label, "prod", production, force)
 	production_label.visible = production != ""

@@ -1,0 +1,29 @@
+{
+  "_doc": "Momo Letters: improvement proposals an assigned Momo writes to the mailbox at real milestones. Each letter is written once. `industry` is a building type; the sender is a Momo assigned to a building of that type (the one who has done the most work there; ties to the lowest id). `trigger`: {work: {type: n}} = Momo (not the player) have finished n work stages at buildings of that type; {mastery: {type: level}} = that building mastery reached level. At most `balance.mail.letters_per_day` letters arrive on one day, so milestones met together come on following days. `research` is the improvement it proposes -- real agronomy and engineering, never magic. Text lives in data/i18n/ui.csv under the title/body keys.",
+  "letters": [
+    {
+      "id": "farm_first_harvest",
+      "industry": "farm",
+      "trigger": {"work": {"farm": 5}},
+      "title": "letter.farm_first_harvest.title",
+      "body": "letter.farm_first_harvest.body",
+      "research": "farm_expansion"
+    },
+    {
+      "id": "farm_watering",
+      "industry": "farm",
+      "trigger": {"mastery": {"farm": 2}},
+      "title": "letter.farm_watering.title",
+      "body": "letter.farm_watering.body",
+      "research": "watering_efficiency"
+    },
+    {
+      "id": "farm_soil",
+      "industry": "farm",
+      "trigger": {"mastery": {"farm": 3}},
+      "title": "letter.farm_soil.title",
+      "body": "letter.farm_soil.body",
+      "research": "harvest_boost"
+    }
+  ]
+}
