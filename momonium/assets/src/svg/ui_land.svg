@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A one-tile island block: grass top, earth sides. -->
+  <g stroke="#ffffff" stroke-width="3" stroke-linejoin="round">
+    <path d="M32 10 L56 22 L32 34 L8 22 Z" fill="#9be15d"/>
+    <path d="M8 22 L32 34 L32 52 L8 40 Z" fill="#e8c79a"/>
+    <path d="M56 22 L32 34 L32 52 L56 40 Z" fill="#c99a63"/>
+  </g>
+</svg>

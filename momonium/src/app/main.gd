@@ -15,6 +15,9 @@ var ocean: OceanRenderer
 var sky: SkyRenderer
 var ambient: CanvasModulate
 var day_night: DayNight
+var hud: Hud
+## The last few HUD actions, newest last (for the browser bridge and tests).
+var hud_actions: Array[String] = []
 var entities: EntityLayer
 var _version_label: Label
 
@@ -65,9 +68,14 @@ func _ready() -> void:
 	add_child(router)
 	router.setup(cameras)
 
+	LocaleService.apply(LocaleService.detect())
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	add_child(ui)
+	hud = Hud.new()
+	ui.add_child(hud)
+	hud.setup(sim, SpriteLibrary.load_atlas())
+	hud.action.connect(_on_hud_action)
 	_version_label = Label.new()
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
@@ -86,6 +94,10 @@ func _ready() -> void:
 	bridge.register_query("dev_grow_island", _dev_grow_island)
 	bridge.register_query("sky", func(_a: Variant) -> Dictionary: return day_night.describe())
 	bridge.register_query("dev_advance_to", _dev_advance_to)
+	bridge.register_query("hud", _hud_info)
+	bridge.register_query("set_language", func(code: Variant) -> Dictionary:
+		LocaleService.apply(String(code))
+		return {"locale": LocaleService.current()})
 
 
 func _process(delta: float) -> void:
@@ -161,3 +173,28 @@ func _dev_advance_to(arg: Variant) -> Dictionary:
 		sim.advance_to(target)
 	day_night.apply()
 	return {"now_ms": sim.now_ms(), "day": sim.clock.day_number()}
+
+
+## Corner buttons. Each opens its panel as later steps add them; until then
+## pressing one is recorded and does nothing else.
+func _on_hud_action(action_name: StringName) -> void:
+	hud_actions.append(String(action_name))
+	if hud_actions.size() > 20:
+		hud_actions.pop_front()
+
+
+## E2E: HUD texts, button rectangles (window pixels) and recent actions.
+func _hud_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var to_window := func(r: Rect2) -> Array:
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var buttons := {}
+	for key: StringName in hud.buttons:
+		buttons[String(key)] = to_window.call((hud.buttons[key] as Control).get_global_rect())
+	var win := DisplayServer.window_get_size()
+	return {"day": hud._day_label.text, "seconds": hud._seconds_label.text, "money": hud._money_label.text,
+		"level": hud._level_label.text, "exp": hud._exp_label.text, "buttons": buttons,
+		"labels": hud.buttons.keys().map(func(k: StringName) -> String: return (hud.buttons[k] as HudButton)._label.text),
+		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current()}

@@ -15,3 +15,5 @@ tests/e2e/playwright-report/
 
 # Captures and measurements written by tools; regenerate rather than commit.
 /test-results/
+tools/fonts/node_modules/
+data/i18n/*.translation

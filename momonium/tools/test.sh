@@ -17,10 +17,10 @@ FILTER="${2:-}"
 LOG="$(mktemp)"
 trap 'rm -f "$LOG"' EXIT
 
-# A fresh checkout has no .godot/ yet; class_name lookups need the import.
-if [[ ! -d "$HERE/.godot" ]]; then
-  "$GODOT" --headless --path "$HERE" --import >/dev/null 2>&1 || true
-fi
+# Import every run: a fresh checkout has no .godot/ yet (class_name lookups
+# need it), and translation tables are generated from data/i18n/*.csv by the
+# importer -- a stale table would test yesterday's strings.
+"$GODOT" --headless --path "$HERE" --import >/dev/null 2>&1 || true
 
 args=(--headless --path "$HERE" --script res://tests/framework/runner.gd -- --suite "$SUITE")
 [[ -n "$FILTER" ]] && args+=(--filter "$FILTER")

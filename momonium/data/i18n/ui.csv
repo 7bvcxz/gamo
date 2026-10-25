@@ -1,0 +1,13 @@
+keys,en,ko,ja,zh_CN
+hud.day,Day %d,Day %d,Day %d,第 %d 天
+hud.seconds,%02d / %d sec,%02d / %d sec,%02d / %d sec,%02d / %d 秒
+hud.level,Lv %d,Lv %d,Lv %d,Lv %d
+hud.exp,%d / %d,%d / %d,%d / %d,%d / %d
+hud.research,Research,연구,研究,研究
+hud.mailbox,Mailbox,편지함,郵便箱,信箱
+hud.land,Land,땅 관리,島管理,土地
+hud.status,Status,스테이터스,ステータス,状态
+hud.settings,Settings,설정,設定,设置
+hud.shop,Shop,상점,ショップ,商店
+hud.per_day,+$%d / day,+$%d / 일,+$%d / 日,+$%d / 天
+lang.name,English,한국어,日本語,简体中文

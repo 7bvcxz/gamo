@@ -5,8 +5,9 @@ import { decodePng, pixel } from '../lib/png.mjs';
 
 async function skyPixel(game) {
   const png = decodePng(await game.canvas.screenshot());
-  // Upper-left of the sky, away from the sun's arc and most clouds.
-  return pixel(png, png.width * 0.08, png.height * 0.04);
+  // Top of the sky between the Day panel and the money pill (the HUD owns the
+  // corners since Step 10), above the clouds and left of the sun's noon spot.
+  return pixel(png, png.width * 0.33, png.height * 0.025);
 }
 
 test('day, sunset and night follow the clock', async ({ game }) => {

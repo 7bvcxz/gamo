@@ -5,11 +5,12 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **09** (#9)
-- 현재 step: **10** — 미니멀 HUD와 모서리 버튼 (#10) + **전체 E2E 첫 실행**
-- 버전: `0.9.0`
-- 테스트: unit+integration 88 통과 (`momonium/tools/test.sh`)
-- E2E 케이스: `boot`, `save`, `art`, `world`, `island`, `camera`, `ocean`, `sky` (각각 단독 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
+- 마지막 완료 step: **10** (#10)
+- 현재 step: **11** — 탭·선택·상황별 행동 라우팅 (#11)
+- 버전: `0.10.0`
+- 테스트: unit+integration 99 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 9파일(boot·save·art·world·island·camera·ocean·sky·hud). **Step 10 전체 실행: 31 passed / 2 failed / 3 skipped**
+  → 실패 2건(하늘 색 측정점이 새 HUD 패널과 겹침)은 측정점을 옮기고 그 케이스만 재실행해 PASS. 다음 전체 실행은 Step 20
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -40,4 +41,5 @@
 | 06 | #6 2.5D 섬 렌더링 | 0.6.0 | `3f008d7d` | 56, E2E island 단독, CI success | 스모크 PASS |
 | 07 | #7 카메라·제스처 | 0.7.0 | `0ded785d` | 67, E2E camera 단독, CI success | 스모크 PASS |
 | 08 | #8 끝없는 바다·해안 VFX | 0.8.0 | `c7558918` | 76, E2E ocean 단독, CI success | 스모크 PASS |
-| 09 | #9 시계·하늘 | 0.9.0 | (다음 갱신 시) | 88, E2E sky 단독 | 스모크 |
+| 09 | #9 시계·하늘 | 0.9.0 | `df07b881` | 88, E2E sky 단독, CI success | 스모크 PASS |
+| 10 | #10 미니멀 HUD | 0.10.0 | (다음 갱신 시) | 99, **E2E 전체 31/33(+3 skip), 실패 2 수정 후 재실행 PASS** | 스모크 |

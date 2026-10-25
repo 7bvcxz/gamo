@@ -1,0 +1,9 @@
+{
+  "name": "momonium-fonts",
+  "private": true,
+  "type": "module",
+  "description": "Cuts the per-language UI font subsets out of Noto Sans CJK. Run build_fonts.mjs after adding text.",
+  "dependencies": {
+    "subset-font": "2.4.0"
+  }
+}

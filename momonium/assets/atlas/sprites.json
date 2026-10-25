@@ -80,6 +80,125 @@
       "source": "svg/prop_crate.svg",
       "source_sha": "00e826ef9f20708e",
       "world_scale": 0.5
+    },
+    "ui_land": {
+      "pivots": {
+        "center": [
+          26.0,
+          24.0
+        ]
+      },
+      "region": [
+        54,
+        202,
+        52,
+        46
+      ],
+      "source": "svg/ui_land.svg",
+      "source_sha": "ec1fa9d081396fa6",
+      "world_scale": 1.0
+    },
+    "ui_mail": {
+      "pivots": {
+        "center": [
+          26.0,
+          18.0
+        ]
+      },
+      "region": [
+        202,
+        202,
+        52,
+        38
+      ],
+      "source": "svg/ui_mail.svg",
+      "source_sha": "e02cc5e9e78d3b93",
+      "world_scale": 1.0
+    },
+    "ui_research": {
+      "pivots": {
+        "center": [
+          16.0,
+          26.0
+        ]
+      },
+      "region": [
+        444,
+        2,
+        34,
+        52
+      ],
+      "source": "svg/ui_research.svg",
+      "source_sha": "c6fd331c9031acac",
+      "world_scale": 1.0
+    },
+    "ui_settings": {
+      "pivots": {
+        "center": [
+          28.0,
+          26.0
+        ]
+      },
+      "region": [
+        384,
+        2,
+        56,
+        56
+      ],
+      "source": "svg/ui_settings.svg",
+      "source_sha": "4fe029b4c4b8b2a4",
+      "world_scale": 1.0
+    },
+    "ui_shop": {
+      "pivots": {
+        "center": [
+          24.0,
+          24.0
+        ]
+      },
+      "region": [
+        2,
+        202,
+        48,
+        48
+      ],
+      "source": "svg/ui_shop.svg",
+      "source_sha": "773fbad9ff282d03",
+      "world_scale": 1.0
+    },
+    "ui_sprout": {
+      "pivots": {
+        "center": [
+          22.0,
+          15.0
+        ]
+      },
+      "region": [
+        154,
+        202,
+        44,
+        39
+      ],
+      "source": "svg/ui_sprout.svg",
+      "source_sha": "af97c4f9a7f1331b",
+      "world_scale": 1.0
+    },
+    "ui_status": {
+      "pivots": {
+        "center": [
+          20.0,
+          21.0
+        ]
+      },
+      "region": [
+        110,
+        202,
+        40,
+        43
+      ],
+      "source": "svg/ui_status.svg",
+      "source_sha": "bceb4eee461fd294",
+      "world_scale": 1.0
     }
   }
 }

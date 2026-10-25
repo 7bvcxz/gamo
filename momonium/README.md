@@ -37,6 +37,9 @@ momonium/tools/test.sh unit land       # id에 land가 들어간 케이스만
 godot --headless --path momonium --script res://tools/art/build_atlas.gd
 godot --headless --path momonium --script res://tools/art/build_textures.gd
 
+# UI 글꼴: 언어별 Noto Sans CJK 서브셋 (data/i18n/*.csv의 글자로)
+(cd momonium/tools/fonts && npm install && node build_fonts.mjs)
+
 # CI와 같은 검사: import → 에디터 로드 → 테스트 (+ --export: Web export·팩 크기·브라우저 스모크)
 momonium/tools/check.sh --export
 
