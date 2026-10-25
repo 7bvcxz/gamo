@@ -20,9 +20,15 @@ test('about the game, in Settings', async ({ game }) => {
   expect(st.about).toContain('no account, no server, no leaderboards');
   expect(st.about).toContain('Saved in this browser');
   expect(st.build).toBe(`v${await game.version()} · Web`);
-  await game.query('set_language', 'ko');
+  // The language buttons at the top of Settings, by a real tap.
+  await game.query('dev_settings_reveal', 'Lang_ko');
   await game.page.waitForTimeout(200);
+  const langs = (await game.query('settings_ui')).langs;
+  const ko_button = await centre(game, langs.ko, st.window);
+  await game.tap(ko_button.x, ko_button.y);
+  await game.page.waitForTimeout(300);
   const ko = await game.query('settings_ui');
+  expect(ko.locale).toBe('ko');
   expect(ko.about).toContain('계정·서버·순위표 없이');
   expect(ko.build).toContain('· 웹');
 });

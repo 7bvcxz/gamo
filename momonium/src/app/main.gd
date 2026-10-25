@@ -430,7 +430,7 @@ func _ready() -> void:
 			"shown": view.is_visible_in_tree()})
 	# Scrolls Settings to a row by its node name, as a player's scroll would.
 	bridge.register_query("dev_settings_reveal", func(node_name: Variant) -> Dictionary:
-		var c := settings_view.get_node_or_null(String(node_name)) as Control
+		var c := settings_view.find_child(String(node_name), true, false) as Control
 		if c == null:
 			return {"ok": false}
 		settings_frame.scroll.ensure_control_visible(c)
