@@ -383,6 +383,8 @@ func _ready() -> void:
 	ui.add_child(_demo_badge)
 	perf_overlay = PerfOverlay.new()
 	ui.add_child(perf_overlay)
+	# Beneath every panel (they sit below the HUD): Settings opens over it.
+	ui.move_child(perf_overlay, 0)
 	perf_overlay.setup(building_views, momo_views)
 	perf_overlay.show_overlay(bool(settings.get_value("perf_overlay")))
 	_layout()
@@ -1263,7 +1265,8 @@ func _settings_info(_arg: Variant) -> Dictionary:
 		"tutorial": conv.call(settings_view.tutorial_button), "demo": conv.call(settings_view.demo_button),
 		"demo_text": settings_view.demo_button.text, "langs": langs, "locale": LocaleService.current(), "window": [win.x, win.y],
 		"large_demo": _settings_rect(settings_view.large_demo_button), "perf": _settings_rect(settings_view.perf_toggle), "demo_kind": demo_kind,
-		"badge_text": _demo_badge.text}
+		"badge_text": _demo_badge.text, "about": settings_view.about_label.text, "build": settings_view.version_label.text,
+		"about_rect": _settings_rect(settings_view.about_label)}
 
 
 ## E2E: what one whole farm cycle (sow, three waterings, harvest) earns.

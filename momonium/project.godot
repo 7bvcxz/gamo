@@ -12,7 +12,7 @@ config/name="Momonium"
 config/description="A tiny ocean island, a big tomorrow."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/version="0.43.1"
+config/version="0.44.0"
 config/icon="res://icon.svg"
 
 [display]
@@ -37,6 +37,7 @@ pointing/emulate_mouse_from_touch=true
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.137, 0.494, 0.808, 1)
+textures/vram_compression/import_etc2_astc=true
 
 [internationalization]
 

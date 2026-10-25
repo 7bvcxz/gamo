@@ -561,3 +561,12 @@ journey.research,First research done,첫 연구 완료,はじめての研究完�
 journey.letter,A Momo's first letter,모모의 첫 편지,モモからのはじめての手紙,桃桃的第一封信
 journey.level,Level {n},레벨 {n},レベル {n},等级 {n}
 journey.tier,Became a {name},{name} 승급,{name}に昇格,升为{name}
+settings.about,About,이 게임에 대해,このゲームについて,关于本游戏
+settings.about_build,v{v} · {p},v{v} · {p},v{v} · {p},v{v} · {p}
+settings.platform.web,Web,웹,Web,网页版
+settings.platform.android,Android,Android,Android,Android
+settings.platform.ios,iOS,iOS,iOS,iOS
+settings.platform.desktop,Desktop,데스크톱,デスクトップ,桌面版
+settings.about_solo,"A solo game: no account, no server, no leaderboards. Your island is yours alone.","혼자 하는 게임이에요. 계정·서버·순위표 없이, 섬은 오직 내 것이에요.","ひとりで遊ぶゲームです。アカウントもサーバーもランキングもありません。島はあなただけのもの。","单人游戏：没有账号、服务器和排行榜。岛屿只属于你。"
+settings.about_storage_web,"Saved in this browser. Clearing the site's data clears the island.","이 브라우저에 저장돼요. 사이트 데이터를 지우면 섬도 지워져요.","このブラウザに保存されます。サイトのデータを消すと島も消えます。","保存在此浏览器中。清除网站数据会同时清除岛屿。"
+settings.about_storage_device,"Saved on this device. Uninstalling removes the island unless the device backs it up.","이 기기에 저장돼요. 앱을 지우면 섬도 지워져요(기기 백업이 켜져 있으면 복원돼요).","この端末に保存されます。アンインストールすると島も消えます（端末のバックアップがあれば復元）。","保存在此设备上。卸载会删除岛屿（若设备开启备份则可恢复）。"

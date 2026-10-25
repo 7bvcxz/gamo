@@ -25,6 +25,7 @@ var large_demo_button: Button
 var perf_toggle: CheckButton
 var in_demo := false
 var version_label: Label
+var about_label: Label
 ## Sound: three volumes, mute, and silence in the background (AudioService).
 var audio: AudioService
 var sliders: Dictionary = {}
@@ -164,9 +165,36 @@ func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
 	save_note = PanelViews.label("", 14, true)
 	save_note.name = "SaveNote"
 	add_child(save_note)
+	# About: which build on which platform, and that the island is the
+	# player's alone -- no server, no leaderboard, saved on this device.
+	var about_title := PanelViews.label("", 17, true)
+	about_title.name = "AboutTitle"
+	add_child(about_title)
+	about_label = PanelViews.label("", 14, true)
+	about_label.name = "About"
+	about_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(about_label)
 	version_label = PanelViews.label("v%s" % ProjectSettings.get_setting("application/config/version", "0"), 14, true)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(version_label)
+
+
+## "web", "android", "ios" or "desktop" -- where this build runs.
+static func platform() -> String:
+	if OS.has_feature("web"):
+		return "web"
+	if OS.has_feature("android"):
+		return "android"
+	if OS.has_feature("ios"):
+		return "ios"
+	return "desktop"
+
+
+## Solo and local: no server or leaderboard; where the island is kept and
+## what would remove it on this platform.
+func about_text() -> String:
+	var where := "settings.about_storage_web" if platform() == "web" else "settings.about_storage_device"
+	return "%s\n%s" % [tr("settings.about_solo"), tr(where)]
 
 
 func _toggle(node_name: String, key: String) -> CheckButton:
@@ -215,6 +243,9 @@ func refresh() -> void:
 	perf_toggle.text = tr("settings.perf_overlay")
 	tips_button.text = tr("settings.replay_tips")
 	save_button.text = tr("settings.save_now")
+	(get_node("AboutTitle") as Label).text = tr("settings.about")
+	about_label.text = about_text()
+	version_label.text = tr("settings.about_build").format({"v": ProjectSettings.get_setting("application/config/version", "0"), "p": tr("settings.platform." + platform())})
 	if settings != null:
 		scale_slider.set_value_no_signal(float(settings.get_value("ui_scale")))
 		low_power_toggle.set_pressed_no_signal(bool(settings.get_value("low_power")))

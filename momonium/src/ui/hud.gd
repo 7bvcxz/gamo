@@ -328,12 +328,20 @@ func _notification(what: int) -> void:
 ## Safe area in this control's coordinates (notches, rounded corners), as
 ## margins. Falls back to a plain margin where the platform reports none.
 func safe_margins() -> Dictionary:
+	if OS.has_feature("web"):
+		return margins_for(Vector2i.ZERO, Rect2i(), Vector2i.ONE, size)
+	return margins_for(DisplayServer.screen_get_size(), DisplayServer.get_display_safe_area(), DisplayServer.window_get_size(), size)
+
+
+## The margins for a screen of `screen` pixels whose safe area is `safe`, shown
+## in a window of `window` pixels on a control of `control` units: the plain
+## margin plus each edge's cut-out (a notch, a punch-hole camera, the gesture
+## bar), scaled to the control.
+static func margins_for(screen: Vector2i, safe: Rect2i, window: Vector2i, control: Vector2) -> Dictionary:
 	var m := {"left": MARGIN, "top": MARGIN, "right": MARGIN, "bottom": MARGIN}
-	var screen := DisplayServer.screen_get_size()
-	var safe := DisplayServer.get_display_safe_area()
-	if screen.x <= 0 or safe.size.x <= 0 or OS.has_feature("web"):
+	if screen.x <= 0 or safe.size.x <= 0 or window.x <= 0 or window.y <= 0:
 		return m
-	var scale := size / Vector2(DisplayServer.window_get_size())
+	var scale := control / Vector2(window)
 	m["left"] += safe.position.x * scale.x
 	m["top"] += safe.position.y * scale.y
 	m["right"] += maxf(0.0, screen.x - safe.end.x) * scale.x

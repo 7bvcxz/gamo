@@ -137,6 +137,9 @@ func test_editing_tiles_does_not_redo_the_route() -> void:
 func test_the_performance_readout() -> void:
 	var perf: PerfOverlay = main.get("perf_overlay")
 	assert_false(perf.visible, "off by default")
+	var frame: Node = main.get("settings_frame")
+	if frame.get_parent() == perf.get_parent():
+		assert_true(perf.get_index() < frame.get_index(), "Settings opens over it, not under it")
 	assert_false(perf.is_processing(), "and costs nothing when off")
 	main.get("settings_view").option_changed.emit("perf_overlay", true)
 	assert_true(perf.visible and perf.is_processing(), "Settings turns it on")
