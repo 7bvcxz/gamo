@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A seed bag. -->
+  <path d="M18 18 Q16 12 22 12 H42 Q48 12 46 18 L50 52 Q50 58 44 58 H20 Q14 58 14 52 Z" fill="#e2c89a" stroke="#8a6a3c" stroke-width="3"/>
+  <path d="M20 18 H44" stroke="#8a6a3c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 46 V36" stroke="#4f8f2a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 38 C30 31 23 30 21 33 C23 37 28 38 32 38 Z" fill="#8ed14b"/>
+  <path d="M32 36 C34 29 41 28 43 31 C41 35 36 36 32 36 Z" fill="#a6de5c"/>
+</svg>

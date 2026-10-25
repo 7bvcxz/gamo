@@ -147,6 +147,80 @@
           32
         ]
       }
+    },
+    "crop_seeds": {
+      "source": "svg/crop_seeds.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          55
+        ]
+      }
+    },
+    "crop_sprout": {
+      "source": "svg/crop_sprout.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          55
+        ]
+      }
+    },
+    "crop_leafy": {
+      "source": "svg/crop_leafy.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          55
+        ]
+      }
+    },
+    "crop_ripe": {
+      "source": "svg/crop_ripe.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          55
+        ]
+      }
+    },
+    "ui_seed": {
+      "source": "svg/ui_seed.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "ui_water": {
+      "source": "svg/ui_water.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "ui_harvest": {
+      "source": "svg/ui_harvest.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
     }
   }
 }

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A watering can with a little flower. -->
+  <g stroke="#3d6fa8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M14 26 H40 L38 54 H16 Z" fill="#8fbde6"/>
+    <path d="M40 32 L54 22" fill="none"/>
+    <path d="M51 18 L58 24" fill="none"/>
+    <path d="M20 26 Q27 12 34 26" fill="none"/>
+  </g>
+  <circle cx="27" cy="40" r="4" fill="#ffffff"/>
+  <circle cx="27" cy="40" r="1.8" fill="#ffd34d"/>
+  <g fill="#6fc3ff"><circle cx="58" cy="32" r="2.2"/><circle cx="54" cy="38" r="2"/><circle cx="60" cy="40" r="1.8"/></g>
+</svg>

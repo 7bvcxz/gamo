@@ -142,8 +142,14 @@ func _validate_buildings() -> void:
 		if typeof(stages) != TYPE_ARRAY or (stages as Array).is_empty():
 			errors.append("buildings: %s.cycle.stages must list at least one stage" % key)
 			continue
+		var looks: Variant = (t.get("cycle", {}) as Dictionary).get("looks", [])
+		if typeof(looks) == TYPE_ARRAY and not (looks as Array).is_empty() and (looks as Array).size() != (stages as Array).size():
+			errors.append("buildings: %s.cycle.looks needs one entry per stage" % key)
 		var ids := {}
 		for st: Dictionary in stages:
+			for item: String in st.get("yield", {}):
+				if not (get_value("items", "items", {}) as Dictionary).has(item):
+					errors.append("buildings: %s.%s yields unknown item %s" % [key, st.get("id", "?"), item])
 			if not st.has("id") or ids.has(st["id"]):
 				errors.append("buildings: %s has a stage without a unique id" % key)
 			ids[st.get("id", "")] = true

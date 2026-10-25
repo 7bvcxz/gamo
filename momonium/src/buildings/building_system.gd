@@ -30,6 +30,14 @@ const COOLDOWN := "cooldown"
 ##   build_start, build_end (ms), paid {money, items} (what construction cost)
 var buildings: Dictionary = {}
 var next_id := 1
+## Objects that change how long stages take (research, later): each has
+## stage_multiplier(kind: String, type: String, action: String) -> float,
+## kind being "work" or "cooldown". They can shorten a stage, never remove one:
+## every stage still runs, in order, for at least its floor.
+var modifiers: Array[Object] = []
+
+## No stage is ever instant, whatever multiplies it.
+const MIN_WORK_SECONDS := 0.5
 
 
 func _init() -> void:
@@ -264,7 +272,7 @@ func tap(id: int) -> Dictionary:
 	if b["state"] == COOLDOWN:
 		return SimResult.fail("err.cooldown", {"remaining_ms": remaining_ms(b)})
 	var stage := current_stage(b)
-	var duration := int(round(float(stage.get("seconds", 1.0)) * 1000.0))
+	var duration := int(round(stage_seconds(b, stage) * 1000.0))
 	b["state"] = WORKING
 	b["task_start"] = sim.now_ms()
 	b["task_end"] = sim.now_ms() + duration
@@ -292,11 +300,65 @@ func handle_event(type: String, data: Dictionary) -> void:
 			sim.bus.emit(&"building_built", {"id": id, "type": b["type"]})
 
 
+## Active work time of a stage after modifiers, never under its floor.
+func stage_seconds(b: Dictionary, stage: Dictionary) -> float:
+	var base := float(stage.get("seconds", 1.0))
+	var m := _multiplier("work", String(b["type"]), String(stage.get("action", "")))
+	return maxf(base * m, maxf(float(stage.get("seconds_floor", MIN_WORK_SECONDS)), MIN_WORK_SECONDS))
+
+
+## Wait after a stage after modifiers, never under its floor (a world rule:
+## plants need time to drink, however good the watering can).
+func stage_cooldown(b: Dictionary, stage: Dictionary) -> float:
+	var base := float(stage.get("cooldown", 0.0))
+	if base <= 0.0:
+		return 0.0
+	var m := _multiplier("cooldown", String(b["type"]), String(stage.get("action", "")))
+	return maxf(base * m, float(stage.get("cooldown_floor", 0.0)))
+
+
+func _multiplier(kind: String, type: String, action: String) -> float:
+	var m := 1.0
+	for source: Object in modifiers:
+		m *= float(source.call("stage_multiplier", kind, type, action))
+	return maxf(m, 0.0)
+
+
+## The crop overlay (or other look) for the building's present state: the
+## look of the stage it is waiting to do next. "" for none.
+func look(b: Dictionary) -> String:
+	var looks: Array = type_def(b).get("cycle", {}).get("looks", [])
+	if looks.is_empty():
+		return ""
+	return String(looks[int(b["stage"]) % looks.size()])
+
+
+## Stages grouped by action (sow / water x3 / harvest): what the panel shows
+## as cards. Each group: {action, label, icon, seconds, first, count}.
+func action_groups(b: Dictionary) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var list := stages(b)
+	for i in list.size():
+		var st: Dictionary = list[i]
+		var action: String = st.get("action", st.get("id", ""))
+		if not out.is_empty() and out[-1]["action"] == action:
+			out[-1]["count"] = int(out[-1]["count"]) + 1
+			continue
+		out.append({"action": action, "label": st.get("label", ""), "icon": st.get("icon", ""), "seconds": float(st.get("seconds", 0)), "first": i, "count": 1})
+	return out
+
+
 func _complete_stage(b: Dictionary) -> void:
 	var stage := current_stage(b)
 	b["completed"] = int(b["completed"]) + 1
+	var produced: Dictionary = stage.get("yield", {})
+	if not produced.is_empty():
+		var inv: InventorySystem = sim.system(&"inventory")
+		for item: String in produced:
+			inv.add(item, int(produced[item]), "yield:" + String(b["type"]))
+		sim.bus.emit(&"produced", {"id": b["id"], "type": b["type"], "items": produced.duplicate()})
 	b["stage"] = (int(b["stage"]) + 1) % maxi(stages(b).size(), 1)
-	var cooldown := int(round(float(stage.get("cooldown", 0.0)) * 1000.0))
+	var cooldown := int(round(stage_cooldown(b, stage) * 1000.0))
 	if cooldown > 0:
 		b["state"] = COOLDOWN
 		b["ready_at"] = sim.now_ms() + cooldown

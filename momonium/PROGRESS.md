@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **13** (#13)
-- 현재 step: **14** — 밭: 심기·물 주기 3번·수확 (#14)
-- 버전: `0.13.0`
-- 테스트: unit+integration 139 통과 (`momonium/tools/test.sh`)
-- E2E: 케이스 12파일(+build). Step 10 전체 실행 31/33 → 2건 수정 후 PASS. 다음 전체 실행은 Step 20
+- 마지막 완료 step: **14** (#14)
+- 현재 step: **15** — 창고·작물 판매·돈 (#15)
+- 버전: `0.14.0`
+- 테스트: unit+integration 150 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 13파일(+farm). Step 10 전체 실행 31/33 → 2건 수정 후 PASS. 다음 전체 실행은 Step 20
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -44,4 +44,5 @@
 | 10 | #10 미니멀 HUD | 0.10.0 | `96ad4c7b` (+CI 수정 `1e6aac55`) | 99, **E2E 전체 31/33(+3 skip), 실패 2 수정 후 재실행 PASS** | 스모크 |
 | 11 | #11 탭·선택·행동 라우팅 | 0.11.0 | `794d7c6a` | 113, E2E select 단독 | 스모크 |
 | 12 | #12 땅 구매·미리보기 | 0.12.0 | `8dc7e160` | 125, E2E land 단독 | 스모크 |
-| 13 | #13 건물·비용·건설 | 0.13.0 | (다음 갱신 시) | 139, E2E build 단독 | 스모크 |
+| 13 | #13 건물·비용·건설 | 0.13.0 | `fb21a5dc` | 139, E2E build 단독 | 스모크 |
+| 14 | #14 밭: 심기·물×3·수확 | 0.14.0 | (다음 갱신 시) | 150, E2E farm 단독 | 스모크 |

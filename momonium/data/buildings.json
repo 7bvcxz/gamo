@@ -9,13 +9,66 @@
       ],
       "sprite": "farm",
       "cycle": {
+        "_doc": "Sow, water three times with at least 30 s between waterings (the plants need the time to drink and grow; it is world time, not work time), let it ripen, harvest. `looks[i]` is the crop overlay shown while stage i is the next one to do. Research may change how long a stage takes or the waits between them, never remove a `required` stage.",
         "stages": [
           {
-            "id": "tend",
-            "label": "stage.tend",
+            "id": "sow",
+            "action": "sow",
+            "label": "stage.sow",
+            "icon": "ui_seed",
             "seconds": 5,
-            "cooldown": 0
+            "cooldown": 0,
+            "required": true
+          },
+          {
+            "id": "water1",
+            "action": "water",
+            "label": "stage.water",
+            "icon": "ui_water",
+            "seconds": 5,
+            "cooldown": 30,
+            "required": true,
+            "cooldown_floor": 10
+          },
+          {
+            "id": "water2",
+            "action": "water",
+            "label": "stage.water",
+            "icon": "ui_water",
+            "seconds": 5,
+            "cooldown": 30,
+            "required": true,
+            "cooldown_floor": 10
+          },
+          {
+            "id": "water3",
+            "action": "water",
+            "label": "stage.water",
+            "icon": "ui_water",
+            "seconds": 5,
+            "cooldown": 30,
+            "required": true,
+            "cooldown_floor": 10
+          },
+          {
+            "id": "harvest",
+            "action": "harvest",
+            "label": "stage.harvest",
+            "icon": "ui_harvest",
+            "seconds": 5,
+            "cooldown": 0,
+            "required": true,
+            "yield": {
+              "crop": 1
+            }
           }
+        ],
+        "looks": [
+          "",
+          "crop_seeds",
+          "crop_sprout",
+          "crop_leafy",
+          "crop_ripe"
         ]
       },
       "icon": "ui_sprout",

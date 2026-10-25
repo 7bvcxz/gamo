@@ -281,8 +281,9 @@ func _selection_info(_arg: Variant) -> Dictionary:
 		var b: Vector2 = vp.get_final_transform() * r.end
 		cards.append([a.x, a.y, b.x - a.x, b.y - a.y])
 	var win := DisplayServer.window_get_size()
+	var enabled: Array = panel.cards.map(func(c: Button) -> bool: return not c.disabled)
 	return {"kind": selection.kind, "id": selection.selected_id, "cell": [selection.selected_cell.x, selection.selected_cell.y],
-		"cards": cards, "result": selection.last_result, "window": [win.x, win.y]}
+		"cards": cards, "enabled": enabled, "result": selection.last_result, "window": [win.x, win.y]}
 
 
 ## E2E: land mode state and its buttons (window pixels).

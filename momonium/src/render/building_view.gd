@@ -17,7 +17,11 @@ var selected := false:
 		selected = value
 		queue_redraw()
 var sprite: Sprite2D
+## Crops and other stage looks, drawn over the base sprite.
+var overlay: Sprite2D
 var ring: Node2D
+var _lib: SpriteLibrary
+var _look := ""
 var _top := Vector2(0, -60)
 var _bounce := 0.0
 var _shake := 0.0
@@ -35,6 +39,10 @@ func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, 
 	sprite = lib.make_sprite(sprite_name) if lib.has(sprite_name) else Sprite2D.new()
 	add_child(sprite)
 	_base_scale = sprite.scale
+	_lib = lib
+	overlay = Sprite2D.new()
+	overlay.visible = false
+	sprite.add_child(overlay)
 	if lib.has(sprite_name):
 		_top = (lib.pivot(sprite_name, "top") - lib.pivot(sprite_name, "origin")) * lib.world_scale(sprite_name)
 	ring = Node2D.new()
@@ -81,7 +89,25 @@ func _process(delta: float) -> void:
 	else:
 		sprite.scale = _base_scale
 		sprite.modulate = Color.WHITE
+	if not b.is_empty():
+		_update_look(buildings.look(b))
 	ring.queue_redraw()
+
+
+func _update_look(look_name: String) -> void:
+	if look_name == _look:
+		return
+	_look = look_name
+	if look_name == "" or not _lib.has(look_name):
+		overlay.visible = false
+		return
+	_lib.place(overlay, look_name)
+	# The overlay is a child of the base sprite, which already carries the
+	# world scale and the base offset; express it in the base's own frame.
+	overlay.scale = Vector2.ONE * (_lib.world_scale(look_name) / maxf(_base_scale.x, 0.0001))
+	overlay.position = Vector2.ZERO
+	overlay.offset = -_lib.pivot(look_name)
+	overlay.visible = true
 
 
 func _draw() -> void:
@@ -109,6 +135,8 @@ func _draw_ring() -> void:
 			var a := TAU * i / 8.0 + (1.0 - _celebrate) * 2.0
 			var r := 20.0 + (1.0 - _celebrate) * 34.0
 			ring.draw_circle(_top * 0.5 + Vector2(cos(a) * r, sin(a) * r * 0.6), 3.5 * _celebrate, Color(1, 0.93, 0.5, _celebrate))
+	if b["state"] == BuildingSystem.WORKING:
+		_draw_work_effect(String(buildings.current_stage(b).get("action", "")), buildings.progress(b))
 	match String(b["state"]):
 		BuildingSystem.CONSTRUCTING:
 			var p := buildings.progress(b)
@@ -130,3 +158,26 @@ func _draw_ring() -> void:
 			var left := float(buildings.remaining_ms(b)) / total
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.45))
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * left, 32, Color(0.75, 0.85, 1.0, 0.8), RING_WIDTH, true)
+
+
+## A little of what the work looks like: seeds dropping, water arcing down,
+## ripe crops hopping up. Drawn from progress, so it is the same at any speed.
+func _draw_work_effect(action: String, p: float) -> void:
+	var t := Time.get_ticks_msec() / 1000.0
+	match action:
+		"sow":
+			for i in 6:
+				var k := fposmod(t * 1.6 + i / 6.0, 1.0)
+				var x := -26.0 + i * 10.0
+				ring.draw_circle(Vector2(x, -30.0 + k * 28.0), 2.2, Color(0.93, 0.85, 0.6, 1.0 - k))
+		"water":
+			for i in 10:
+				var k := fposmod(t * 2.2 + i / 10.0, 1.0)
+				var x := lerpf(-30.0, 30.0, i / 9.0)
+				ring.draw_circle(Vector2(x + sin(i) * 4.0, -34.0 + k * 34.0), 2.0, Color(0.55, 0.82, 1.0, 0.9 * (1.0 - k)))
+			ring.draw_arc(Vector2(0, 2), 26.0 * (0.6 + 0.4 * fposmod(t * 2.0, 1.0)), 0, TAU, 24, Color(0.7, 0.9, 1.0, 0.35), 2.0, true)
+		"harvest":
+			for i in 5:
+				var k := fposmod(t * 1.3 + i / 5.0, 1.0)
+				var x := -24.0 + i * 12.0
+				ring.draw_circle(Vector2(x, -10.0 - sin(k * PI) * 26.0), 4.0, Color(0.92, 0.27, 0.18, 1.0 - k * 0.5))

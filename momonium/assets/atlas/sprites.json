@@ -1,10 +1,78 @@
 {
   "generated_by": "tools/art/build_atlas.gd",
   "size": [
-    512,
+    1024,
     512
   ],
   "sprites": {
+    "crop_leafy": {
+      "pivots": {
+        "origin": [
+          140.0,
+          110.0
+        ]
+      },
+      "region": [
+        650,
+        2,
+        214,
+        148
+      ],
+      "source": "svg/crop_leafy.svg",
+      "source_sha": "6138f785ea55fbb3",
+      "world_scale": 0.5
+    },
+    "crop_ripe": {
+      "pivots": {
+        "origin": [
+          140.0,
+          110.0
+        ]
+      },
+      "region": [
+        426,
+        2,
+        220,
+        151
+      ],
+      "source": "svg/crop_ripe.svg",
+      "source_sha": "357cf4445d0ceb29",
+      "world_scale": 0.5
+    },
+    "crop_seeds": {
+      "pivots": {
+        "origin": [
+          66.0,
+          54.0
+        ]
+      },
+      "region": [
+        208,
+        202,
+        120,
+        90
+      ],
+      "source": "svg/crop_seeds.svg",
+      "source_sha": "df745929fc567240",
+      "world_scale": 0.5
+    },
+    "crop_sprout": {
+      "pivots": {
+        "origin": [
+          140.0,
+          110.0
+        ]
+      },
+      "region": [
+        2,
+        202,
+        202,
+        146
+      ],
+      "source": "svg/crop_sprout.svg",
+      "source_sha": "eec7310dc51fb512",
+      "world_scale": 0.5
+    },
     "farm": {
       "pivots": {
         "origin": [
@@ -34,7 +102,7 @@
         ]
       },
       "region": [
-        2,
+        412,
         202,
         60,
         60
@@ -51,7 +119,7 @@
         ]
       },
       "region": [
-        66,
+        476,
         202,
         58,
         56
@@ -93,8 +161,8 @@
         ]
       },
       "region": [
-        426,
-        2,
+        332,
+        202,
         76,
         70
       ],
@@ -110,13 +178,30 @@
         ]
       },
       "region": [
-        226,
+        636,
         202,
         44,
         50
       ],
       "source": "svg/ui_build.svg",
       "source_sha": "ba9fa234edcf9e35",
+      "world_scale": 1.0
+    },
+    "ui_harvest": {
+      "pivots": {
+        "center": [
+          24.0,
+          17.0
+        ]
+      },
+      "region": [
+        880,
+        202,
+        48,
+        41
+      ],
+      "source": "svg/ui_harvest.svg",
+      "source_sha": "43ad3025f817b9e6",
       "world_scale": 1.0
     },
     "ui_land": {
@@ -127,7 +212,7 @@
         ]
       },
       "region": [
-        326,
+        780,
         202,
         52,
         46
@@ -144,8 +229,8 @@
         ]
       },
       "region": [
-        2,
-        266,
+        50,
+        352,
         52,
         38
       ],
@@ -161,13 +246,30 @@
         ]
       },
       "region": [
-        188,
+        598,
         202,
         34,
         52
       ],
       "source": "svg/ui_research.svg",
       "source_sha": "c6fd331c9031acac",
+      "world_scale": 1.0
+    },
+    "ui_seed": {
+      "pivots": {
+        "center": [
+          20.0,
+          22.0
+        ]
+      },
+      "region": [
+        684,
+        202,
+        40,
+        50
+      ],
+      "source": "svg/ui_seed.svg",
+      "source_sha": "6b60dc8e8b0643d1",
       "world_scale": 1.0
     },
     "ui_settings": {
@@ -178,7 +280,7 @@
         ]
       },
       "region": [
-        128,
+        538,
         202,
         56,
         56
@@ -195,7 +297,7 @@
         ]
       },
       "region": [
-        274,
+        728,
         202,
         48,
         48
@@ -212,8 +314,8 @@
         ]
       },
       "region": [
-        426,
-        202,
+        2,
+        352,
         44,
         39
       ],
@@ -229,13 +331,30 @@
         ]
       },
       "region": [
-        382,
+        836,
         202,
         40,
         43
       ],
       "source": "svg/ui_status.svg",
       "source_sha": "bceb4eee461fd294",
+      "world_scale": 1.0
+    },
+    "ui_water": {
+      "pivots": {
+        "center": [
+          20.0,
+          16.0
+        ]
+      },
+      "region": [
+        932,
+        202,
+        50,
+        40
+      ],
+      "source": "svg/ui_water.svg",
+      "source_sha": "83cd0df1f0c0d08b",
       "world_scale": 1.0
     }
   }

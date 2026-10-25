@@ -28,3 +28,9 @@ err.locked,Lv %d,Lv %d,Lv %d,Lv %d
 err.occupied,Occupied,이미 있어요,使用中,已占用
 err.not_owned,Not your land,내 땅이 아니에요,自分の土地ではありません,不是你的土地
 err.not_enough_items,Not enough materials,재료가 부족해요,材料が足りません,材料不足
+stage.sow,Sow,심기,植える,播种
+stage.water,Water,물 주기,水やり,浇水
+stage.harvest,Harvest,수확,収穫する,收获
+item.crop,Crops,작물,作物,作物
+item.wood,Wood,나무,木材,木材
+item.stone,Stone,돌,石,石头

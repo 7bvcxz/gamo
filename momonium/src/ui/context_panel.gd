@@ -68,8 +68,12 @@ func show_building(id: int) -> void:
 		cancel.set_meta("cancel", true)
 		cards.append(cancel)
 	else:
-		for i in buildings.stages(b).size():
-			cards.append(_make_card(buildings.stages(b)[i], i))
+		var groups := buildings.action_groups(b)
+		for i in groups.size():
+			var card := _make_card(groups[i], i)
+			card.set_meta("first", int(groups[i]["first"]))
+			card.set_meta("count", int(groups[i]["count"]))
+			cards.append(card)
 	_layout()
 	_refresh()
 
@@ -166,10 +170,11 @@ func _refresh() -> void:
 		c.text = "+$%d" % int((b.get("paid", {}) as Dictionary).get("money", 0))
 		cards[0].queue_redraw()
 		return
-	var current := int(b["stage"]) % maxi(cards.size(), 1)
+	var stage := int(b["stage"])
 	for card: Button in cards:
-		var i: int = card.get_meta("index")
-		var is_current := i == current
+		var first: int = card.get_meta("first")
+		var count: int = card.get_meta("count")
+		var is_current := stage >= first and stage < first + count
 		var time_label: Label = card.find_child("Time", true, false)
 		var secs: float = time_label.get_meta("seconds")
 		card.disabled = not is_current or not buildings.is_ready(b)
@@ -182,9 +187,31 @@ func _refresh() -> void:
 		card.queue_redraw()
 
 
+## Which group the building is in, for a card: -1 done, 0 current, 1 to come.
+func _card_phase(card: Button, b: Dictionary) -> int:
+	if not card.has_meta("first"):
+		return 0
+	var stage := int(b["stage"])
+	var first: int = card.get_meta("first")
+	var count: int = card.get_meta("count")
+	if stage >= first + count:
+		return -1
+	return 0 if stage >= first else 1
+
+
 func _draw_card_progress(card: Button) -> void:
 	var b := buildings.get_building(building_id)
-	if b.is_empty() or int(card.get_meta("index")) != int(b["stage"]) % maxi(cards.size(), 1):
+	if b.is_empty():
+		return
+	# Repeated stages (water x3) show one dot each, filled as they are done.
+	if card.has_meta("count") and int(card.get_meta("count")) > 1:
+		var count: int = card.get_meta("count")
+		var first: int = card.get_meta("first")
+		var done := clampi(int(b["stage"]) - first, 0, count)
+		for i in count:
+			var c := Vector2(card.size.x * 0.5 + (i - (count - 1) * 0.5) * 14.0, 12.0)
+			card.draw_circle(c, 4.5, Color("#6fc3ff") if i < done else Color(1, 1, 1, 0.3))
+	if _card_phase(card, b) != 0:
 		return
 	if b["state"] == BuildingSystem.WORKING or (b["state"] == BuildingSystem.CONSTRUCTING and not card.has_meta("cancel")):
 		var p := buildings.progress(b)

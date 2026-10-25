@@ -46,8 +46,11 @@ test('the stage card starts the next stage', async ({ game }) => {
   await game.setTimeScale(0);
   const s = await game.query('selection');
   expect(s.cards.length).toBeGreaterThan(0);
+  // The lit card is whatever the building does next (after sowing: watering).
+  const lit = s.enabled.indexOf(true);
+  expect(lit).toBeGreaterThanOrEqual(0);
   const box = await game.canvas.boundingBox();
-  const [x, y, w, h] = s.cards[0];
+  const [x, y, w, h] = s.cards[lit];
   await game.tap((x + w / 2) * (box.width / s.window[0]), (y + h / 2) * (box.height / s.window[1]));
   await game.page.waitForTimeout(150);
   const b = (await game.state()).buildings.buildings.find((x2) => x2.id === id);
