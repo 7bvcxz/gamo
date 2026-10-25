@@ -226,6 +226,22 @@ func stage_multiplier(kind: String, type: String, action: String) -> float:
 	return m
 
 
+## BuildingSystem modifier: whether research has opened this crop variety.
+func unlocks_variety(type: String, variety: String) -> bool:
+	for e: Dictionary in _effects("variety"):
+		if String(e.get("type", "")) == type and String(e.get("variety", "")) == variety:
+			return true
+	return false
+
+
+## Whether stages with this action run by themselves (a drip line waters).
+func is_auto(type: String, action: String) -> bool:
+	for e: Dictionary in _effects("auto"):
+		if String(e.get("type", "")) == type and String(e.get("action", "")) == action:
+			return true
+	return false
+
+
 ## BuildingSystem modifier: extra items a stage yields.
 func yield_bonus(type: String, stage_id: String, item: String) -> int:
 	var n := 0

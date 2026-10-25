@@ -245,6 +245,27 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("dev_research_done", func(ids: Variant) -> Dictionary:
+		var research: ResearchSystem = sim.system(&"research")
+		for id: Variant in ids:
+			research.completed[String(id)] = sim.now_ms()
+		sim.bus.emit(&"research_completed", {"id": String(ids[-1]) if not ids.is_empty() else ""})
+		return {"completed": research.completed.keys()})
+	bridge.register_query("details", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var out := {"open": detail_frame.visible, "varieties": {}, "workers": [], "research": [], "window": []}
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		out["window"] = [win.x, win.y]
+		for c: Node in detail_view.variety_box.get_children():
+			var r := (c as Control).get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			out["varieties"][String(c.get_meta("variety"))] = {"rect": [a.x, a.y, b.x - a.x, b.y - a.y], "disabled": (c as Button).disabled}
+		for c: Node in detail_view.workers_box.get_children():
+			out["workers"].append(String(c.get_meta("who", "")))
+		for c: Node in detail_view.research_box.get_children():
+			out["research"].append((c as Label).text)
+		return out)
 	bridge.register_query("momos", _momo_info)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
 		var out := {}

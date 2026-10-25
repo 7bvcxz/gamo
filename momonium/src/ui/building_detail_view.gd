@@ -21,6 +21,13 @@ var cycle_you: HBoxContainer
 var cycle_momo: HBoxContainer
 var yield_row: HBoxContainer
 var done_row: HBoxContainer
+## What this building grows (farms): one choice per variety.
+var variety_box: HBoxContainer
+var variety_hint: Label
+## Finished research acting on this building, in words.
+var research_box: VBoxContainer
+var last_result: Dictionary = {}
+var _shown_varieties := ""
 
 
 func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
@@ -59,11 +66,22 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	done_row = PanelViews.row("", "")
 	done_row.name = "Done"
 	add_child(done_row)
+	variety_box = HBoxContainer.new()
+	variety_box.name = "Varieties"
+	variety_box.add_theme_constant_override("separation", 8)
+	add_child(variety_box)
+	variety_hint = PanelViews.label("", 15, true)
+	variety_hint.name = "VarietyHint"
+	add_child(variety_hint)
+	research_box = VBoxContainer.new()
+	research_box.name = "Research"
+	add_child(research_box)
 
 
 func show_building(id: int) -> void:
 	building_id = id
 	PanelViews.clear(workers_box)
+	_shown_varieties = ""
 	refresh()
 
 
@@ -115,11 +133,111 @@ func refresh() -> void:
 	_set_row(cycle_you, tr("detail.by_you"), duration(you["cycle_seconds"]))
 	_set_row(cycle_momo, tr("detail.by_momo"), duration(by_momo["cycle_seconds"]))
 	_set_row(done_row, tr("panel.records.tasks"), str(int(b.get("completed", 0))))
+	_refresh_varieties(b, buildings)
+	_refresh_research(b)
 
 
 func _set_row(row: HBoxContainer, key: String, value: String) -> void:
 	(row.get_child(0) as Label).text = key
 	(row.get_node("Value") as Label).text = value
+
+
+## The varieties this building can grow, each with what it asks and gives:
+## waterings, crops a harvest, a cycle by hand. Tapping one sets it (between
+## cycles only -- the simulation says no otherwise, and the hint says why).
+func _refresh_varieties(b: Dictionary, buildings: BuildingSystem) -> void:
+	var type := String(b["type"])
+	var list := buildings.varieties(type)
+	variety_box.visible = list.size() > 1
+	variety_hint.visible = false
+	if list.size() <= 1:
+		return
+	var key := ""
+	for v: String in list:
+		key += "%s:%s:%s;" % [v, buildings.variety_unlocked(type, v), buildings.variety_of(b) == v]
+	key += TranslationServer.get_locale()
+	if key != _shown_varieties:
+		_shown_varieties = key
+		PanelViews.clear(variety_box)
+		for v: String in list:
+			variety_box.add_child(_variety_button(b, buildings, v))
+	var between: bool = b["state"] == BuildingSystem.IDLE and int(b["stage"]) == 0
+	if not between:
+		variety_hint.text = tr("err.variety_busy")
+		variety_hint.visible = true
+	for c: Node in variety_box.get_children():
+		var open: bool = buildings.variety_unlocked(type, String(c.get_meta("variety")))
+		(c as Button).disabled = not open or (not between and buildings.variety_of(b) != String(c.get_meta("variety")))
+
+
+func _variety_button(b: Dictionary, buildings: BuildingSystem, v: String) -> Button:
+	var type := String(b["type"])
+	var def := buildings.variety_def(type, v)
+	var btn := Button.new()
+	btn.name = "Variety_" + v
+	btn.set_meta("variety", v)
+	btn.custom_minimum_size = Vector2(0, 92)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.focus_mode = Control.FOCUS_NONE
+	var id := int(b["id"])
+	btn.pressed.connect(func() -> void:
+		last_result = sim.execute({"type": "building.variety", "id": id, "variety": v})
+		refresh())
+	var col := VBoxContainer.new()
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 0)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var icon := PanelViews.icon(lib, String(def.get("icon", "ui_sprout")), 30.0)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(icon)
+	var n := PanelViews.label(tr(String(def.get("name", v))), 16)
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(n)
+	var probe := b.duplicate()
+	probe["variety"] = v
+	var waterings := buildings.stages(probe).filter(func(st: Dictionary) -> bool: return st.get("action", "") == "water").size()
+	var crops := 0
+	for item: String in buildings.cycle_estimate(probe)["yield"]:
+		crops += int(buildings.cycle_estimate(probe)["yield"][item])
+	var facts := PanelViews.label(tr("detail.variety_facts").format({"w": waterings, "c": crops}), 13, true)
+	facts.name = "Facts"
+	facts.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(facts)
+	btn.add_child(col)
+	var chosen := buildings.variety_of(b) == v
+	var open := buildings.variety_unlocked(type, v)
+	btn.draw.connect(func() -> void:
+		if chosen:
+			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), Color("#ffe27a"), false, 3.0)
+		if not open:
+			var c := Vector2(btn.size.x - 14, 14)
+			btn.draw_circle(c, 11.0, Color(0.1, 0.18, 0.3, 0.85))
+			btn.draw_arc(c + Vector2(0, -2), 4.0, PI, TAU, 10, Color.WHITE, 2.0, true)
+			btn.draw_rect(Rect2(c + Vector2(-5, -2), Vector2(10, 8)), Color.WHITE))
+	return btn
+
+
+## Finished research that acts on this building type, in the research menu's words.
+func _refresh_research(b: Dictionary) -> void:
+	var research: ResearchSystem = sim.system(&"research")
+	var lines: Array[String] = []
+	if research != null:
+		for id: String in research.completed:
+			for line: String in ResearchText.effect_lines(sim, research.node(id), String(b["type"])):
+				lines.append("%s · %s" % [tr(String(research.node(id).get("name", ""))), line])
+	var key := "|".join(lines)
+	if research_box.get_meta("key", "") == key:
+		return
+	research_box.set_meta("key", key)
+	PanelViews.clear(research_box)
+	if lines.is_empty():
+		return
+	research_box.add_child(PanelViews.label(tr("detail.research"), 15, true))
+	for line: String in lines:
+		var l := PanelViews.label(line, 15)
+		l.add_theme_color_override("font_color", Color("#b7f08a"))
+		research_box.add_child(l)
 
 
 ## One chip per worker spot: the Momo there and what it is doing, or an
@@ -131,6 +249,8 @@ func _refresh_workers(b: Dictionary, momos: MomoSystem) -> void:
 	var want: Array[String] = []
 	if b["state"] == BuildingSystem.WORKING and int(b.get("worker", 0)) == 0:
 		want.append("you")
+	elif b["state"] == BuildingSystem.WORKING and int(b.get("worker", 0)) == JobSystem.AUTO_WORKER:
+		want.append("auto")
 	for i in slots:
 		want.append("momo:%d" % ids[i] if i < ids.size() else "empty")
 	var have: Array[String] = []
@@ -146,7 +266,7 @@ func _refresh_workers(b: Dictionary, momos: MomoSystem) -> void:
 		var status := c.find_child("Status", true, false) as Label
 		if status == null:
 			continue
-		if who == "you":
+		if who == "you" or who == "auto":
 			status.text = tr("detail.momo_working")
 		elif who.begins_with("momo:"):
 			var id := int(who.trim_prefix("momo:"))
@@ -165,7 +285,7 @@ func _chip(who: String) -> Control:
 	chip.custom_minimum_size = Vector2(150, 0)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
-	var face := PanelViews.icon(lib, "momo_front" if who != "you" else "ui_build", 40.0)
+	var face := PanelViews.icon(lib, {"you": "ui_build", "auto": "ui_water"}.get(who, "momo_front"), 40.0)
 	if who == "empty":
 		face.modulate = Color(1, 1, 1, 0.25)
 	row.add_child(face)
@@ -174,6 +294,8 @@ func _chip(who: String) -> Control:
 	var n: String
 	if who == "you":
 		n = tr("detail.you")
+	elif who == "auto":
+		n = tr("detail.irrigation")
 	elif who == "empty":
 		n = tr("detail.empty_slot")
 	else:

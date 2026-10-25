@@ -21,6 +21,9 @@ extends SimSystem
 ## beyond a session, but saved so a load does not reshuffle turns).
 var last_worked: Dictionary = {}
 
+## The `worker` recorded for a stage that ran by itself (irrigation).
+const AUTO_WORKER := -1
+
 
 func _init() -> void:
 	key = &"jobs"
@@ -43,9 +46,9 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			try_start(int(payload.get("building", 0)))
 		&"task_completed":
 			var worker := int(payload.get("worker", 0))
-			if worker != 0:
+			if worker > 0:
 				last_worked[worker] = sim.now_ms()
-		&"sold":
+		&"sold", &"research_completed":
 			_try_all()
 
 
@@ -81,12 +84,20 @@ func next_worker(building: int) -> int:
 
 
 func try_start(building: int) -> Dictionary:
-	if building == 0 or resting():
-		return SimResult.fail("err.resting")
+	if building == 0:
+		return SimResult.fail("err.no_building")
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var b := buildings.get_building(building)
 	if b.is_empty() or b["state"] != BuildingSystem.IDLE:
 		return SimResult.fail("err.busy")
+	# A stage researched to run by itself (a drip line watering) starts at
+	# once, at its normal time, day or night, Momo or not.
+	var research: ResearchSystem = sim.system(&"research")
+	var action := String(buildings.current_stage(b).get("action", ""))
+	if research != null and research.is_auto(String(b["type"]), action):
+		return buildings.start_stage(building, AUTO_WORKER, 1.0)
+	if resting():
+		return SimResult.fail("err.resting")
 	var worker := next_worker(building)
 	if worker == 0:
 		return SimResult.fail("err.no_worker")

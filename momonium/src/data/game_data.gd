@@ -84,6 +84,41 @@ func validate() -> void:
 	_require_number({}, "balance", "land.round_to", 1)
 
 
+## Varieties: base is the type's cycle; another variety's own process must be
+## a real cycle (unique stage ids, something harvested, one look per stage).
+func _validate_varieties(key: String, def: Dictionary, items: Dictionary) -> void:
+	var vs: Dictionary = def.get("varieties", {})
+	if vs.is_empty():
+		return
+	if not vs.has("base"):
+		errors.append("buildings: %s.varieties needs base" % key)
+	for v: String in vs:
+		if v.begins_with("_"):
+			continue
+		var vdef: Dictionary = vs[v]
+		if String(vdef.get("name", "")) == "":
+			errors.append("buildings: %s variety %s needs a name" % [key, v])
+		var stages: Array = vdef.get("stages", def.get("cycle", {}).get("stages", []))
+		var ids := {}
+		var yields := false
+		for st: Dictionary in stages:
+			if ids.has(st.get("id", "")):
+				errors.append("buildings: %s variety %s repeats stage %s" % [key, v, st.get("id", "")])
+			ids[st.get("id", "")] = true
+			yields = yields or not (st.get("yield", {}) as Dictionary).is_empty()
+		for sid: String in vdef.get("yield", {}):
+			if not ids.has(sid):
+				errors.append("buildings: %s variety %s yields at unknown stage %s" % [key, v, sid])
+			for item: String in vdef["yield"][sid]:
+				yields = true
+				if not items.has(item):
+					errors.append("buildings: %s variety %s yields unknown item %s" % [key, v, item])
+		if not yields:
+			errors.append("buildings: %s variety %s harvests nothing" % [key, v])
+		if vdef.has("stages") and (vdef.get("looks", []) as Array).size() != stages.size():
+			errors.append("buildings: %s variety %s needs one look per stage" % [key, v])
+
+
 func _validate_letters() -> void:
 	var types: Dictionary = table("buildings").get("types", {})
 	var seen := {}
@@ -150,6 +185,16 @@ func _validate_research() -> void:
 				if not seen.has(r):
 					seen[r] = true
 					stack.append(r)
+	# Every variety but base must be opened by some research, or it is unreachable.
+	var opened := {}
+	for id: String in ids:
+		for e: Dictionary in (ids[id] as Dictionary).get("effects", []):
+			if String(e.get("kind", "")) == "variety":
+				opened["%s/%s" % [e.get("type", ""), e.get("variety", "")]] = true
+	for t: String in table("buildings").get("types", {}):
+		for v: String in table("buildings")["types"][t].get("varieties", {}):
+			if v != "base" and not v.begins_with("_") and not opened.has("%s/%s" % [t, v]):
+				errors.append("buildings: %s variety %s is opened by no research" % [t, v])
 	# Letters and the tree must agree: every proposal is a node, and every
 	# proposal-gated node is proposed by some letter (or it could never open).
 	var proposed := {}
@@ -183,6 +228,14 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 				errors.append("research: %s yields unknown item %s" % [id, e.get("item", "")])
 			if int(e.get("add", 0)) < 1:
 				errors.append("research: %s yield add must be >= 1" % id)
+		"auto":
+			var t := String(e.get("type", ""))
+			if not types.has(t) or not (types[t].get("cycle", {}).get("stages", []) as Array).any(func(st: Dictionary) -> bool: return st.get("action", "") == e.get("action", "")):
+				errors.append("research: %s auto effect on unknown action %s.%s" % [id, t, e.get("action", "")])
+		"variety":
+			var t := String(e.get("type", ""))
+			if not types.has(t) or not (types[t].get("varieties", {}) as Dictionary).has(String(e.get("variety", ""))):
+				errors.append("research: %s opens unknown variety %s.%s" % [id, t, e.get("variety", "")])
 		"research_time":
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0:
@@ -233,6 +286,7 @@ func _validate_buildings() -> void:
 		return
 	for key: String in types:
 		var t: Dictionary = types[key]
+		_validate_varieties(key, t, table("items").get("items", {}))
 		var size: Variant = t.get("size")
 		if typeof(size) != TYPE_ARRAY or (size as Array).size() != 2 or int(size[0]) < 1 or int(size[1]) < 1:
 			errors.append("buildings: %s.size must be [w, h] >= 1" % key)

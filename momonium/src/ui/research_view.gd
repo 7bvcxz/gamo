@@ -8,8 +8,9 @@ extends HBoxContainer
 ## time, and the button. Every value comes from the ResearchSystem; effects
 ## are described from the same data the simulation applies.
 
-const CARD := Vector2(118, 112)
-const ROW := 152.0
+const CARD := Vector2(118, 104)
+const ROW := 134.0
+const GAP := 8.0
 
 var sim: Simulation
 var lib: SpriteLibrary
@@ -28,6 +29,8 @@ var cost_label: Label
 var time_label: Label
 var start_button: Button
 var last_result: Dictionary = {}
+## Most nodes on one row: cards narrow to fit it.
+var _widest := 1
 
 
 func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_industry: String) -> void:
@@ -51,6 +54,9 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_industry: String) -> void:
 	for id: String in cards:
 		depth = maxi(depth, _depth(id))
 	tree.custom_minimum_size = Vector2(2 * CARD.x + 24, (depth + 1) * ROW)
+	_widest = 1
+	for d in depth + 1:
+		_widest = maxi(_widest, cards.keys().filter(func(id: String) -> bool: return _depth(id) == d).size())
 	_build_detail()
 	for id: String in cards:
 		if selected == "" or research.state_of(id) in ["active", "available"] and research.state_of(selected) == "locked":
@@ -71,11 +77,15 @@ func _place_cards() -> void:
 		if not by_depth.has(d):
 			by_depth[d] = []
 		(by_depth[d] as Array).append(id)
+	var w := minf(CARD.x, tree.size.x / _widest - GAP)
 	for d: int in by_depth:
 		var row: Array = by_depth[d]
 		for i in row.size():
-			var x := tree.size.x * (i + 0.5) / row.size() - CARD.x * 0.5
-			(cards[row[i]] as Button).position = Vector2(x, d * ROW + 6.0)
+			var card: Button = cards[row[i]]
+			card.custom_minimum_size = Vector2(w, CARD.y)
+			card.size = Vector2(w, CARD.y)
+			(card.find_child("Name", true, false) as Label).custom_minimum_size.x = w - 10.0
+			card.position = Vector2(tree.size.x * (i + 0.5) / row.size() - w * 0.5, d * ROW + 6.0)
 	tree.queue_redraw()
 
 
@@ -97,7 +107,7 @@ func _card(n: Dictionary) -> Button:
 	var icon := PanelViews.icon(lib, String(n.get("icon", "ui_research")), 42.0)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(icon)
-	var label := PanelViews.label("", 15)
+	var label := PanelViews.label("", 14)
 	label.name = "Name"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -202,27 +212,7 @@ func _build_detail() -> void:
 
 ## Effect lines for a node, from its data.
 func effect_lines(id: String) -> Array[String]:
-	var out: Array[String] = []
-	for e: Dictionary in research.node(id).get("effects", []):
-		var pct := int(round((1.0 - float(e.get("multiply", 1.0))) * 100.0))
-		match String(e.get("kind", "")):
-			"yield":
-				out.append(tr("effect.yield").format({"stage": tr(_stage_label(String(e["type"]), "id", String(e["stage"]))),
-					"item": tr(String(sim.data.item(String(e["item"])).get("name", ""))), "n": int(e["add"])}))
-			"cooldown":
-				out.append(tr("effect.cooldown").format({"action": tr(_stage_label(String(e["type"]), "action", String(e.get("action", "")))), "pct": pct}))
-			"work":
-				out.append(tr("effect.work").format({"action": tr(_stage_label(String(e["type"]), "action", String(e.get("action", "")))), "pct": pct}))
-			"research_time":
-				out.append(tr("effect.research_time").format({"pct": pct}))
-	return out
-
-
-func _stage_label(type: String, field: String, value: String) -> String:
-	for st: Dictionary in sim.data.building_type(type).get("cycle", {}).get("stages", []):
-		if String(st.get(field, "")) == value:
-			return String(st.get("label", value))
-	return value
+	return ResearchText.effect_lines(sim, research.node(id))
 
 
 ## What a locked node still needs, as lines.
@@ -249,6 +239,7 @@ func refresh() -> void:
 		(b.find_child("Name", true, false) as Label).text = tr(String(n.get("name", id)))
 		var need := int(research.cost_of(id)["items"].get("notes", 0))
 		(b.find_child("Notes", true, false) as Label).text = "%d / %d" % [mini(inv.count("notes"), need), need]
+		(b.find_child("Notes", true, false) as Label).get_parent().visible = not research.is_done(id)
 		b.modulate = Color(1, 1, 1, 0.55) if research.state_of(id) == "locked" else Color.WHITE
 		b.queue_redraw()
 	tree.queue_redraw()
@@ -265,7 +256,7 @@ func refresh() -> void:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		effects_box.add_child(l)
 	PanelViews.clear(needs_box)
-	for line: String in need_lines(selected):
+	for line: String in (need_lines(selected) if research.state_of(selected) == "locked" else [] as Array[String]):
 		var l := PanelViews.label(line, 15)
 		l.add_theme_color_override("font_color", Color("#ffb3a8"))
 		needs_box.add_child(l)

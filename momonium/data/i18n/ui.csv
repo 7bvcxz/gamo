@@ -168,3 +168,24 @@ err.research_locked,Not unlocked yet,아직 열리지 않았어요,まだ解放�
 err.research_done,Already done,이미 완료했어요,完了済みです,已完成
 err.no_research,Unknown research,없는 연구예요,不明な研究です,未知研究
 time.m,{m} min,{m}분,{m}分,{m}分钟
+research.watering_can.name,Watering can,물뿌리개,じょうろ,洒水壶
+research.watering_can.desc,A long spout and a fine rose: water reaches every plant without trampling the rows.,"긴 주둥이와 고운 물뿌리개 꼭지로, 이랑을 밟지 않고 포기마다 물이 닿아요.",長い注ぎ口と細かいハス口で、畝をふまずに株ごとに水が届きます。,长壶嘴配细喷头，不踩垄就能浇到每一株。
+research.drip_irrigation.name,Drip irrigation,점적 관개,点滴かんがい,滴灌
+research.drip_irrigation.desc,"Rain barrels feed a drip line along the rows: it waters by itself, slowly, at the roots. The plants still need their time.","빗물 통에서 이랑을 따라 점적 호스로 물이 천천히 뿌리에 가요. 물 주기는 저절로, 기다림은 그대로 필요해요.",雨水タンクから畝ぞいの点滴チューブで、根もとへゆっくり水が届きます。水やりは自動、待ち時間は必要です。,雨水桶接上沿垄的滴灌带，水慢慢流到根部。浇水自动进行，但植物仍需要时间。
+research.greenhouse.name,Greenhouse,온실,温室,温室
+research.greenhouse.desc,"Glass keeps the beds warm through cool hours, so the plants grow faster between waterings.","유리가 서늘한 시간에도 밭을 따뜻하게 지켜, 물 주기 사이에 작물이 더 빨리 자라요.",ガラスが涼しい時間も畑を温かく保ち、水やりの間に作物が早く育ちます。,玻璃让田地在凉爽时段也保持温暖，两次浇水之间长得更快。
+research.seed_selection.name,Seed selection,종자 선발,種の選抜,选种
+research.seed_selection.desc,"Keep seed only from the best plants, season after season: a hardier variety that bears more.","해마다 가장 좋은 포기에서만 씨앗을 받아, 더 튼튼하고 많이 열리는 품종을 만들어요.",毎年いちばん良い株からだけ種をとり、丈夫でよく実る品種にします。,每季只从最好的植株留种，培育出更健壮、更高产的品种。
+research.drought_millet.name,Drought-hardy millet,가뭄에 강한 기장,乾燥に強いキビ,耐旱小米
+research.drought_millet.desc,"A grain bred for dry ground: two waterings with longer waits, a different crop with its own way of growing.","마른 땅에 맞게 개량한 곡식이에요. 물은 두 번, 기다림은 더 길게 — 자라는 방식이 다른 작물이에요.",乾いた土に合わせた穀物。水やりは2回で待ちは長め — 育ち方のちがう作物です。,为干燥土地培育的谷物：浇两次水、等待更久——是生长方式不同的作物。
+variety.base,Usual crop,기본 작물,いつもの作物,普通作物
+variety.hardy,Hardy crop,튼튼한 품종,丈夫な品種,健壮品种
+variety.millet,Millet,기장,キビ,小米
+effect.auto,{action} by itself,{action} 자동,{action}は自動,{action}自动进行
+effect.variety,New variety: {name},새 품종: {name},新品種: {name},新品种：{name}
+detail.irrigation,Drip line,점적 관개,点滴かんがい,滴灌
+detail.variety_facts,Water x{w} · {c} a harvest,물 {w}번 · 수확 {c},水{w}回 · 収穫{c},浇水{w}次 · 收获{c}
+detail.research,Research in use,적용된 연구,使っている研究,已应用的研究
+err.no_variety,No such variety,없는 품종이에요,その品種はありません,没有这个品种
+err.variety_locked,Research it first,먼저 연구해야 해요,先に研究が必要です,需要先研究
+err.variety_busy,Change it after the harvest,수확한 뒤에 바꿀 수 있어요,収穫のあとで変えられます,收获后才能更换

@@ -25,6 +25,7 @@ var cards: Array[Button] = []
 ## The building's name; tapping it opens the details (the "›" says it opens).
 var title: Button
 var _shown_state := ""
+var _shown_variety := ""
 var _tile_pill: PanelContainer
 var _tile_label: Label
 ## Bottom margin, and the width taken by the bottom-left buttons: cards sit on
@@ -69,6 +70,7 @@ func show_building(id: int) -> void:
 	title.text = _title(b)
 	title.visible = true
 	_shown_state = String(b["state"])
+	_shown_variety = buildings.variety_of(b)
 	if b["state"] == BuildingSystem.CONSTRUCTING:
 		var build_card := _make_card({"id": "construct", "label": "build.constructing", "icon": "ui_build", "seconds": float(buildings.type_def(b).get("build_seconds", 0))}, 0)
 		build_card.disabled = true
@@ -179,6 +181,9 @@ func _refresh() -> void:
 		hide_panel()
 		return
 	if String(b["state"]) != _shown_state and (_shown_state == BuildingSystem.CONSTRUCTING or b["state"] == BuildingSystem.CONSTRUCTING):
+		show_building(building_id)
+		return
+	if buildings.variety_of(b) != _shown_variety:
 		show_building(building_id)
 		return
 	_shown_state = String(b["state"])

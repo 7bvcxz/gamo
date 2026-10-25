@@ -55,7 +55,7 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 	match type:
 		&"task_completed":
 			var worker := int(payload.get("worker", 0))
-			if worker == 0:
+			if worker <= 0:
 				return
 			var t := String(payload.get("type", ""))
 			work[t] = int(work.get(t, 0)) + 1

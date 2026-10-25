@@ -1,5 +1,5 @@
 {
-  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields; {kind: research_time, multiply} scales how long research takes. `name`/`desc` are translation keys; desc explains the real technique.",
+  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields; {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type. `name`/`desc` are translation keys; desc explains the real technique.",
   "nodes": [
     {
       "id": "farm_expansion",
@@ -108,6 +108,159 @@
         {
           "kind": "research_time",
           "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "watering_can",
+      "industry": "farm",
+      "name": "research.watering_can.name",
+      "desc": "research.watering_can.desc",
+      "icon": "ui_water",
+      "requires": [
+        "watering_efficiency"
+      ],
+      "unlock": {
+        "mastery": {
+          "farm": 3
+        }
+      },
+      "cost": {
+        "money": 60,
+        "items": {
+          "notes": 6
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "farm",
+          "action": "water",
+          "multiply": 0.6
+        }
+      ]
+    },
+    {
+      "id": "drip_irrigation",
+      "industry": "farm",
+      "name": "research.drip_irrigation.name",
+      "desc": "research.drip_irrigation.desc",
+      "icon": "ui_water",
+      "requires": [
+        "watering_can"
+      ],
+      "unlock": {
+        "mastery": {
+          "farm": 4
+        }
+      },
+      "cost": {
+        "money": 150,
+        "items": {
+          "notes": 12
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "auto",
+          "type": "farm",
+          "action": "water"
+        },
+        {
+          "kind": "cooldown",
+          "type": "farm",
+          "action": "water",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "greenhouse",
+      "industry": "farm",
+      "name": "research.greenhouse.name",
+      "desc": "research.greenhouse.desc",
+      "icon": "ui_sprout",
+      "requires": [
+        "harvest_boost"
+      ],
+      "unlock": {
+        "mastery": {
+          "farm": 4
+        }
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 10
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "cooldown",
+          "type": "farm",
+          "action": "water",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "seed_selection",
+      "industry": "farm",
+      "name": "research.seed_selection.name",
+      "desc": "research.seed_selection.desc",
+      "icon": "ui_seed",
+      "requires": [
+        "harvest_boost"
+      ],
+      "unlock": {
+        "mastery": {
+          "farm": 3
+        }
+      },
+      "cost": {
+        "money": 80,
+        "items": {
+          "notes": 8
+        }
+      },
+      "seconds": 120,
+      "effects": [
+        {
+          "kind": "variety",
+          "type": "farm",
+          "variety": "hardy"
+        }
+      ]
+    },
+    {
+      "id": "drought_millet",
+      "industry": "farm",
+      "name": "research.drought_millet.name",
+      "desc": "research.drought_millet.desc",
+      "icon": "ui_harvest",
+      "requires": [
+        "seed_selection"
+      ],
+      "unlock": {
+        "mastery": {
+          "farm": 4
+        }
+      },
+      "cost": {
+        "money": 100,
+        "items": {
+          "notes": 10
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "variety",
+          "type": "farm",
+          "variety": "millet"
         }
       ]
     }

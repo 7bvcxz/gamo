@@ -50,7 +50,11 @@ func test_the_research_button_opens_the_tree() -> void:
 	assert_eq((frame.tabs[0]["button"] as Button).text, "Farm", "the farm tab")
 	assert_eq((frame.tabs[1]["button"] as Button).text, "General", "the general tab")
 	var view := _farm_view()
-	assert_eq(view.cards.size(), 3, "three farm nodes")
+	assert_eq(view.cards.size(), (sim.system(&"research") as ResearchSystem).nodes("farm").size(), "every farm node has a card")
+	for id: String in view.cards:
+		for other: String in view.cards:
+			if id != other:
+				assert_false((view.cards[id] as Button).get_rect().intersects((view.cards[other] as Button).get_rect()), "%s and %s do not overlap" % [id, other])
 	var root: Button = view.cards["farm_expansion"]
 	var child: Button = view.cards["watering_efficiency"]
 	assert_true(root.position.y < child.position.y, "the root sits above its children")

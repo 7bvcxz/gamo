@@ -82,7 +82,76 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "varieties": {
+        "_doc": "What is grown. `base` is the cycle above (sow, three waterings, harvest -- always). Another variety is a different crop with its own real agricultural process: `stages`/`looks` replace the cycle (omit them to keep it) and `yield` {stage id: {item: n}} replaces what a stage gives. Varieties other than base open through research (an effect {kind: variety}). A farm changes variety only between cycles, before sowing.",
+        "base": {
+          "name": "variety.base",
+          "icon": "ui_sprout"
+        },
+        "hardy": {
+          "name": "variety.hardy",
+          "icon": "ui_seed",
+          "yield": {
+            "harvest": {
+              "crop": 2
+            }
+          }
+        },
+        "millet": {
+          "name": "variety.millet",
+          "icon": "ui_harvest",
+          "stages": [
+            {
+              "id": "sow",
+              "action": "sow",
+              "label": "stage.sow",
+              "icon": "ui_seed",
+              "seconds": 5,
+              "cooldown": 0,
+              "required": true
+            },
+            {
+              "id": "water1",
+              "action": "water",
+              "label": "stage.water",
+              "icon": "ui_water",
+              "seconds": 5,
+              "cooldown": 45,
+              "required": true,
+              "cooldown_floor": 15
+            },
+            {
+              "id": "water2",
+              "action": "water",
+              "label": "stage.water",
+              "icon": "ui_water",
+              "seconds": 5,
+              "cooldown": 45,
+              "required": true,
+              "cooldown_floor": 15
+            },
+            {
+              "id": "harvest",
+              "action": "harvest",
+              "label": "stage.harvest",
+              "icon": "ui_harvest",
+              "seconds": 5,
+              "cooldown": 0,
+              "required": true,
+              "yield": {
+                "crop": 1
+              }
+            }
+          ],
+          "looks": [
+            "",
+            "crop_seeds",
+            "crop_leafy",
+            "crop_ripe"
+          ]
+        }
+      }
     },
     "research": {
       "name": "building.research",

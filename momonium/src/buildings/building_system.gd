@@ -35,6 +35,9 @@ var next_id := 1
 ## kind being "work" or "cooldown". They can shorten a stage, never remove one:
 ## every stage still runs, in order, for at least its floor.
 var modifiers: Array[Object] = []
+## "type/variety" -> stages (data is fixed for a game, so built once).
+var _stage_cache: Dictionary = {}
+const BASE_VARIETY := "base"
 
 ## No stage is ever instant, whatever multiplies it.
 const MIN_WORK_SECONDS := 0.5
@@ -49,7 +52,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["building.tap", "building.place", "building.cancel"])
+	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety"])
 
 
 func on_new_game() -> void:
@@ -67,8 +70,72 @@ func type_def(b: Dictionary) -> Dictionary:
 	return sim.data.building_type(b.get("type", ""))
 
 
+## The work cycle of this building: its type's cycle, or the process of the
+## variety it grows (a variety may bring its own stages, or only different
+## yields). Built once per type and variety.
 func stages(b: Dictionary) -> Array:
-	return type_def(b).get("cycle", {}).get("stages", [])
+	var v := variety_of(b)
+	var key := "%s/%s" % [b.get("type", ""), v]
+	if _stage_cache.has(key):
+		return _stage_cache[key]
+	var def := type_def(b)
+	var vdef: Dictionary = def.get("varieties", {}).get(v, {}) if v != BASE_VARIETY else {}
+	var list: Array = vdef.get("stages", def.get("cycle", {}).get("stages", []))
+	var yields: Dictionary = vdef.get("yield", {})
+	if not yields.is_empty():
+		list = list.duplicate(true)
+		for st: Dictionary in list:
+			if yields.has(String(st.get("id", ""))):
+				st["yield"] = (yields[String(st["id"])] as Dictionary).duplicate()
+	_stage_cache[key] = list
+	return list
+
+
+func variety_of(b: Dictionary) -> String:
+	return String(b.get("variety", BASE_VARIETY))
+
+
+## Varieties this building type can grow, in data order ("base" first), or
+## empty for buildings that grow nothing.
+func varieties(type: String) -> Array[String]:
+	var out: Array[String] = []
+	for v: String in sim.data.building_type(type).get("varieties", {}):
+		if not v.begins_with("_"):
+			out.append(v)
+	return out
+
+
+func variety_def(type: String, variety: String) -> Dictionary:
+	return sim.data.building_type(type).get("varieties", {}).get(variety, {})
+
+
+## Base is always open; others when a modifier source (research) opens them.
+func variety_unlocked(type: String, variety: String) -> bool:
+	if variety == BASE_VARIETY:
+		return true
+	for source: Object in modifiers:
+		if source.has_method("unlocks_variety") and bool(source.call("unlocks_variety", type, variety)):
+			return true
+	return false
+
+
+## Changes what a farm grows. Only between cycles -- before sowing, with
+## nothing running -- so a crop in the ground is never swapped for another.
+func set_variety(id: int, variety: String) -> Dictionary:
+	var b := get_building(id)
+	if b.is_empty():
+		return SimResult.fail("err.no_building")
+	if not varieties(String(b["type"])).has(variety):
+		return SimResult.fail("err.no_variety")
+	if not variety_unlocked(String(b["type"]), variety):
+		return SimResult.fail("err.variety_locked")
+	if variety_of(b) == variety:
+		return SimResult.ok()
+	if b["state"] != IDLE or int(b["stage"]) != 0:
+		return SimResult.fail("err.variety_busy")
+	b["variety"] = variety
+	sim.bus.emit(&"variety_changed", {"id": id, "variety": variety})
+	return SimResult.ok()
 
 
 func current_stage(b: Dictionary) -> Dictionary:
@@ -257,6 +324,8 @@ func execute(command: Dictionary) -> Dictionary:
 			return place(Cmd.text(command, "building"), Cmd.vec2i(command, "anchor"))
 		"building.cancel":
 			return cancel(Cmd.integer(command, "id"))
+		"building.variety":
+			return set_variety(Cmd.integer(command, "id"), Cmd.text(command, "variety"))
 	return SimResult.fail("err.unknown_command")
 
 
@@ -378,7 +447,8 @@ func cycle_estimate(b: Dictionary, time_multiplier: float = 1.0) -> Dictionary:
 ## The crop overlay (or other look) for the building's present state: the
 ## look of the stage it is waiting to do next. "" for none.
 func look(b: Dictionary) -> String:
-	var looks: Array = type_def(b).get("cycle", {}).get("looks", [])
+	var v := variety_def(String(b.get("type", "")), variety_of(b)) if variety_of(b) != BASE_VARIETY else {}
+	var looks: Array = v.get("looks", type_def(b).get("cycle", {}).get("looks", []))
 	if looks.is_empty():
 		return ""
 	return String(looks[int(b["stage"]) % looks.size()])

@@ -39,7 +39,8 @@ func _ready_to_research() -> void:
 
 func test_the_tree_and_its_branches() -> void:
 	assert_eq(research.industries(), ["farm", "global"] as Array[String], "a farm branch and a general one")
-	assert_eq(research.nodes("farm").size(), 3, "three farming technologies")
+	assert_eq(research.nodes("farm").size(), GameData.load_default().table("research")["nodes"].filter(func(n: Dictionary) -> bool: return n["industry"] == "farm").size(), "every farming technology in the data")
+	assert_true(research.nodes("farm").size() >= 3, "several of them")
 	for n: Dictionary in research.nodes():
 		assert_eq(research.state_of(String(n["id"])), "locked", "%s starts locked" % n["id"])
 
