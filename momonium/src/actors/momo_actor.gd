@@ -42,6 +42,15 @@ func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProj
 	add_child(rig)
 
 
+## Whether the simulation has this Momo doing its building's current stage.
+func is_working() -> bool:
+	var b := int(momos.get_momo(id).get("assigned", 0))
+	if b == 0:
+		return false
+	var rec := (momos.sim.system(&"buildings") as BuildingSystem).get_building(b)
+	return not rec.is_empty() and rec["state"] == BuildingSystem.WORKING and int(rec.get("worker", 0)) == id
+
+
 ## World-space box a tap or a drag can grab.
 func hit_rect() -> Rect2:
 	return Rect2(position + Vector2(-26, -76), Vector2(52, 80))
@@ -70,6 +79,9 @@ func _process(delta: float) -> void:
 			rig.set_state("walk")
 			var h := momos.heading(id)
 			rig.face(projection.to_screen(h) - projection.to_screen(Vector2.ZERO))
+		elif is_working():
+			rig.set_state("work")
+			rig.face(Vector2(-1, -0.4))
 		elif cycle.is_night(clock):
 			rig.set_state("sleep")
 		elif int(momos.get_momo(id).get("assigned", 0)) != 0:

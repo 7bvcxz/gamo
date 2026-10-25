@@ -17,6 +17,7 @@ extends SimSystem
 ## Assigned Momo walk to their building and stay; Step 19 gives them the work.
 
 const ROAM := "momo.roam"
+const ARRIVE := "momo.arrive"
 const NEIGHBOURS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
 ## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired}
@@ -31,7 +32,7 @@ func _init() -> void:
 
 
 func handled_events() -> PackedStringArray:
-	return PackedStringArray([ROAM])
+	return PackedStringArray([ROAM, ARRIVE])
 
 
 func handled_commands() -> PackedStringArray:
@@ -189,9 +190,18 @@ func assign(momo: int, building: int) -> Dictionary:
 		return check
 	var m: Dictionary = momos[momo]
 	m["assigned"] = building
-	_walk_to(m, work_spot(building))
+	var arrive := _walk_to(m, work_spot(building))
+	m["token"] = int(m["token"]) + 1
+	sim.scheduler.schedule(arrive, ARRIVE, {"id": momo, "token": m["token"]})
 	sim.bus.emit(&"momo_assigned", {"id": momo, "building": building})
 	return SimResult.ok()
+
+
+## Whether an assigned Momo has reached its building and can work.
+func at_work(id: int) -> bool:
+	var m: Dictionary = momos.get(id, {})
+	return not m.is_empty() and int(m["assigned"]) != 0 and not is_moving(id) \
+		and position_of(id).distance_to(work_spot(int(m["assigned"]))) < 0.01
 
 
 func unassign(momo: int) -> Dictionary:
@@ -244,7 +254,10 @@ func work_spot(building: int) -> Vector2:
 # --- movement -------------------------------------------------------------------------
 
 func handle_event(type: String, data: Dictionary) -> void:
-	if type != ROAM:
+	if type == ARRIVE:
+		var a: Dictionary = momos.get(int(data.get("id", 0)), {})
+		if not a.is_empty() and int(data.get("token", -1)) == int(a["token"]) and int(a["assigned"]) != 0:
+			sim.bus.emit(&"momo_arrived", {"id": a["id"], "building": a["assigned"]})
 		return
 	var m: Dictionary = momos.get(int(data.get("id", 0)), {})
 	if m.is_empty() or int(data.get("token", -1)) != int(m["token"]) or int(m["assigned"]) != 0:

@@ -2,14 +2,14 @@
 // work finishes on the simulation clock while something else is selected; a
 // tile selects, open sea deselects; the panel's card is a second way to start.
 import { test, expect } from '../lib/fixtures.mjs';
-import { cellToCanvas } from '../lib/coords.mjs';
+import { cellToCanvas, clearPointOnCell } from '../lib/coords.mjs';
 
 test('tap a farm, select elsewhere, the work still finishes', async ({ game }) => {
   await game.setTimeScale(0);
   const { id } = await game.query('dev_place_building', ['farm', 1, 0]);
   expect(id).toBeGreaterThan(0);
   await game.page.waitForTimeout(150);
-  const farm = await cellToCanvas(game, [1, 0]);
+  const farm = await clearPointOnCell(game, [1, 0]);
   await game.tap(farm.x, farm.y);
   await game.page.waitForTimeout(150);
   let s = await game.query('selection');
@@ -39,7 +39,7 @@ test('tap a farm, select elsewhere, the work still finishes', async ({ game }) =
 test('the stage card starts the next stage', async ({ game }) => {
   await game.setTimeScale(0);
   const { id } = await game.query('dev_place_building', ['farm', 0, 0]);
-  const farm = await cellToCanvas(game, [0, 0]);
+  const farm = await clearPointOnCell(game, [0, 0]);
   await game.tap(farm.x, farm.y);
   await game.setTimeScale(10);
   await expect.poll(async () => (await game.state()).buildings.buildings.find((x) => x.id === id).state, { timeout: 10_000 }).toBe('idle');

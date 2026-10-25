@@ -14,13 +14,14 @@ extends Node2D
 ##   walk   legs and arms swinging, a bob in the step, ears bouncing
 ##   sit    legs out in front, body lowered, still breathing
 ##   sleep  curled low, eyes closed, slow breaths, little z's rising
+##   work   leaning in, arms busy in turn (the job's own tool comes later)
 ## `facing` picks the front or the back view and mirrors for left/right.
 ## Special outfits for later jobs attach to the "hand_r" point.
 
 const FRAME_ORIGIN := Vector2(100, 210)
 ## World pixels per frame unit: Momo stands about 70 px tall, a bit over half a tile.
 const UNIT := 0.33
-const STATES: PackedStringArray = ["idle", "walk", "sit", "sleep"]
+const STATES: PackedStringArray = ["idle", "walk", "sit", "sleep", "work"]
 
 var state := "idle"
 var facing := Vector2(1, 1)
@@ -174,6 +175,15 @@ func tick(delta: float) -> void:
 			body_y = 10.0
 			arm_l = 0.25
 			arm_r = -0.25
+		"work":
+			var w := t * TAU * 1.6
+			arm_l = -0.55 + 0.35 * sin(w)
+			arm_r = 0.55 - 0.35 * sin(w + PI)
+			body_y = 1.5 + absf(sin(w)) * 1.5
+			head_rot = 0.06
+			ear_l += 0.06 * sin(w)
+			ear_r -= 0.06 * sin(w)
+			breathe = 0.0
 		"sleep":
 			leg_scale = 0.45
 			leg_l = 0.9

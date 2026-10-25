@@ -100,7 +100,7 @@
     }
   },
   "momo": {
-    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order. Hiring price of the k-th hired Momo (k = 0 first) = round_to * ceil(base * growth^k / round_to). Unassigned Momo wander their island at walk_speed tiles/s, resting rest_seconds between strolls.",
+    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order. Hiring price of the k-th hired Momo (k = 0 first) = round_to * ceil(base * growth^k / round_to). Unassigned Momo wander their island at walk_speed tiles/s, resting rest_seconds between strolls, and sleep at night. An assigned Momo does its building's work by itself, each stage taking work_time_multiplier times the player's time (cooldowns are world rules and stay as they are); with works_at_night true they keep at it under the moon, as in the reference night scene.",
     "names": 10,
     "hire": {
       "base": 30,
@@ -112,6 +112,8 @@
       2.0,
       6.0
     ],
-    "seed": 20261025
+    "seed": 20261025,
+    "work_time_multiplier": 4.0,
+    "works_at_night": true
   }
 }

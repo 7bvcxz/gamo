@@ -149,7 +149,7 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 func _record(type: String, anchor: Vector2i) -> Dictionary:
 	return {"id": next_id, "type": type, "anchor": [anchor.x, anchor.y], "state": IDLE, "stage": 0,
 		"task_start": 0, "task_end": 0, "ready_at": 0, "token": 0, "completed": 0,
-		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}}
+		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}, "worker": 0}
 
 
 # --- catalog and construction ---------------------------------------------------------
@@ -260,8 +260,15 @@ func execute(command: Dictionary) -> Dictionary:
 	return SimResult.fail("err.unknown_command")
 
 
-## Starts the building's current stage if it is ready.
+## Starts the building's current stage if it is ready (the player's hands).
 func tap(id: int) -> Dictionary:
+	return start_stage(id, 0, 1.0)
+
+
+## Starts the current stage done by `worker` (a Momo id, 0 for the player),
+## taking `time_multiplier` times the stage's work time. Cooldowns that follow
+## are world rules and do not scale with who did the work.
+func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 	if not buildings.has(id):
 		return SimResult.fail("err.no_building")
 	var b: Dictionary = buildings[id]
@@ -277,13 +284,14 @@ func tap(id: int) -> Dictionary:
 	var produces: Dictionary = stage.get("yield", {})
 	if not produces.is_empty() and not (sim.system(&"inventory") as InventorySystem).fits(produces):
 		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
-	var duration := int(round(stage_seconds(b, stage) * 1000.0))
+	var duration := int(round(stage_seconds(b, stage) * maxf(time_multiplier, 0.01) * 1000.0))
 	b["state"] = WORKING
+	b["worker"] = worker
 	b["task_start"] = sim.now_ms()
 	b["task_end"] = sim.now_ms() + duration
 	b["token"] = int(b["token"]) + 1
 	sim.scheduler.schedule(int(b["task_end"]), TASK_DONE, {"id": id, "token": b["token"]})
-	sim.bus.emit(&"task_started", {"id": id, "stage": stage.get("id", ""), "ends_ms": b["task_end"]})
+	sim.bus.emit(&"task_started", {"id": id, "stage": stage.get("id", ""), "ends_ms": b["task_end"], "worker": worker})
 	return SimResult.ok({"stage": stage.get("id", ""), "ends_ms": b["task_end"]})
 
 
@@ -300,9 +308,11 @@ func handle_event(type: String, data: Dictionary) -> void:
 		COOLDOWN_DONE:
 			b["state"] = IDLE
 			sim.bus.emit(&"building_ready", {"id": id})
+			sim.bus.emit(&"building_idle", {"id": id})
 		BUILT:
 			b["state"] = IDLE
 			sim.bus.emit(&"building_built", {"id": id, "type": b["type"]})
+			sim.bus.emit(&"building_idle", {"id": id})
 
 
 ## Active work time of a stage after modifiers, never under its floor.
@@ -371,7 +381,11 @@ func _complete_stage(b: Dictionary) -> void:
 		sim.scheduler.schedule(int(b["ready_at"]), COOLDOWN_DONE, {"id": b["id"], "token": b["token"]})
 	else:
 		b["state"] = IDLE
-	sim.bus.emit(&"task_completed", {"id": b["id"], "stage": stage.get("id", ""), "type": b["type"]})
+	var worker := int(b.get("worker", 0))
+	b["worker"] = 0
+	sim.bus.emit(&"task_completed", {"id": b["id"], "stage": stage.get("id", ""), "type": b["type"], "worker": worker})
+	if b["state"] == IDLE:
+		sim.bus.emit(&"building_idle", {"id": b["id"]})
 
 
 func _size(type: String) -> Vector2i:
@@ -393,7 +407,7 @@ func load_state(state: Dictionary) -> void:
 	next_id = int(state.get("next_id", 1))
 	for raw: Dictionary in state.get("buildings", []):
 		var b := raw.duplicate(true)
-		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end"]:
+		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end", "worker"]:
 			b[k] = int(b.get(k, 0))
 		var paid: Dictionary = b.get("paid", {})
 		var items := {}
