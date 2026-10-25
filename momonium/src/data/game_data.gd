@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance", "art", "buildings"]
+const TABLES: PackedStringArray = ["balance", "art", "buildings", "items"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []
@@ -127,6 +127,17 @@ func _validate_buildings() -> void:
 		var size: Variant = t.get("size")
 		if typeof(size) != TYPE_ARRAY or (size as Array).size() != 2 or int(size[0]) < 1 or int(size[1]) < 1:
 			errors.append("buildings: %s.size must be [w, h] >= 1" % key)
+		var cost: Variant = t.get("cost", {})
+		if typeof(cost) != TYPE_DICTIONARY or float((cost as Dictionary).get("money", 0)) < 0.0:
+			errors.append("buildings: %s.cost must be {money >= 0, items}" % key)
+		else:
+			for item: String in (cost as Dictionary).get("items", {}):
+				if not (get_value("items", "items", {}) as Dictionary).has(item):
+					errors.append("buildings: %s costs unknown item %s" % [key, item])
+		if float(t.get("build_seconds", 0)) <= 0.0:
+			errors.append("buildings: %s.build_seconds must be > 0" % key)
+		if int((t.get("unlock", {}) as Dictionary).get("level", 1)) < 1:
+			errors.append("buildings: %s.unlock.level must be >= 1" % key)
 		var stages: Variant = (t.get("cycle", {}) as Dictionary).get("stages")
 		if typeof(stages) != TYPE_ARRAY or (stages as Array).is_empty():
 			errors.append("buildings: %s.cycle.stages must list at least one stage" % key)
@@ -140,6 +151,10 @@ func _validate_buildings() -> void:
 				errors.append("buildings: %s.%s must take time (seconds > 0)" % [key, st.get("id", "?")])
 			if float(st.get("cooldown", 0)) < 0.0:
 				errors.append("buildings: %s.%s cooldown cannot be negative" % [key, st.get("id", "?")])
+
+
+func item(key: String) -> Dictionary:
+	return get_value("items", "items." + key, {})
 
 
 func building_type(key: String) -> Dictionary:

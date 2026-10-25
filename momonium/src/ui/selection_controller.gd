@@ -21,8 +21,9 @@ var views: BuildingViews
 var marker: SelectionMarker
 var panel: ContextPanel
 
-## While land mode is open it owns world taps.
+## While a mode (land, placement) is open it owns world taps.
 var land_mode: LandMode
+var placement: PlacementMode
 var kind := ""
 var selected_id := 0
 var selected_cell := Vector2i.ZERO
@@ -39,11 +40,18 @@ func setup(p_sim: Simulation, p_projection: IsoProjection, p_views: BuildingView
 	panel = p_panel
 	router.tapped.connect(on_tap)
 	panel.start_pressed.connect(func(id: int) -> void: _act_on(id))
+	panel.cancel_pressed.connect(func(id: int) -> void:
+		last_result = sim.execute({"type": "building.cancel", "id": id})
+		if last_result["ok"]:
+			deselect())
 
 
 func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 	if land_mode != null and land_mode.active:
 		land_mode.on_world_tap(world_pos)
+		return
+	if placement != null and placement.active:
+		placement.on_world_tap(world_pos)
 		return
 	var id := views.hit(world_pos)
 	if id == 0:

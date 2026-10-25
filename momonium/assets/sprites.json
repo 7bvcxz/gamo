@@ -137,6 +137,16 @@
           8
         ]
       }
+    },
+    "ui_build": {
+      "source": "svg/ui_build.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
     }
   }
 }

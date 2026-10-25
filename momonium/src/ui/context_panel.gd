@@ -10,6 +10,7 @@ extends Control
 ## shows when nothing is selected: the island stays the picture.
 
 signal start_pressed(id: int)
+signal cancel_pressed(id: int)
 
 const CARD_SIZE := Vector2(150, 118)
 const GAP := 10.0
@@ -20,6 +21,7 @@ var lib: SpriteLibrary
 var building_id := 0
 var cards: Array[Button] = []
 var title: Label
+var _shown_state := ""
 var _tile_pill: PanelContainer
 var _tile_label: Label
 ## Bottom margin, and the width taken by the bottom-left buttons: cards sit on
@@ -56,8 +58,18 @@ func show_building(id: int) -> void:
 	var b := buildings.get_building(id)
 	title.text = tr(buildings.type_def(b).get("name", ""))
 	title.visible = true
-	for i in buildings.stages(b).size():
-		cards.append(_make_card(buildings.stages(b)[i], i))
+	_shown_state = String(b["state"])
+	if b["state"] == BuildingSystem.CONSTRUCTING:
+		var build_card := _make_card({"id": "construct", "label": "build.constructing", "icon": "ui_build", "seconds": float(buildings.type_def(b).get("build_seconds", 0))}, 0)
+		build_card.disabled = true
+		cards.append(build_card)
+		var cancel := _make_card({"id": "cancel", "label": "build.cancel", "icon": "ui_build", "seconds": 0}, 1)
+		cancel.pressed.connect(func() -> void: cancel_pressed.emit(building_id))
+		cancel.set_meta("cancel", true)
+		cards.append(cancel)
+	else:
+		for i in buildings.stages(b).size():
+			cards.append(_make_card(buildings.stages(b)[i], i))
 	_layout()
 	_refresh()
 
@@ -125,7 +137,7 @@ func _make_card(stage: Dictionary, index: int) -> Button:
 	box.add_child(time_label)
 	card.set_meta("index", index)
 	card.pressed.connect(func() -> void:
-		if building_id != 0:
+		if building_id != 0 and not card.has_meta("cancel"):
 			start_pressed.emit(building_id))
 	card.draw.connect(_draw_card_progress.bind(card))
 	add_child(card)
@@ -141,6 +153,18 @@ func _refresh() -> void:
 	var b := buildings.get_building(building_id)
 	if b.is_empty():
 		hide_panel()
+		return
+	if String(b["state"]) != _shown_state and (_shown_state == BuildingSystem.CONSTRUCTING or b["state"] == BuildingSystem.CONSTRUCTING):
+		show_building(building_id)
+		return
+	_shown_state = String(b["state"])
+	if b["state"] == BuildingSystem.CONSTRUCTING:
+		var left := ceili(buildings.remaining_ms(b) / 1000.0)
+		var t: Label = cards[0].find_child("Time", true, false)
+		t.text = tr("panel.seconds") % left
+		var c: Label = cards[1].find_child("Time", true, false)
+		c.text = "+$%d" % int((b.get("paid", {}) as Dictionary).get("money", 0))
+		cards[0].queue_redraw()
 		return
 	var current := int(b["stage"]) % maxi(cards.size(), 1)
 	for card: Button in cards:
@@ -162,7 +186,7 @@ func _draw_card_progress(card: Button) -> void:
 	var b := buildings.get_building(building_id)
 	if b.is_empty() or int(card.get_meta("index")) != int(b["stage"]) % maxi(cards.size(), 1):
 		return
-	if b["state"] == BuildingSystem.WORKING:
+	if b["state"] == BuildingSystem.WORKING or (b["state"] == BuildingSystem.CONSTRUCTING and not card.has_meta("cancel")):
 		var p := buildings.progress(b)
 		var bar := Rect2(10, card.size.y - 12, (card.size.x - 20) * p, 6)
 		card.draw_rect(Rect2(10, card.size.y - 12, card.size.x - 20, 6), Color(1, 1, 1, 0.2))

@@ -1,0 +1,23 @@
+{
+  "_doc": "Everything that can sit in the island's store. `kind`: crop, material, product. `stack` is per-item storage limit before buildings that add storage (Step 15 tunes it).",
+  "items": {
+    "crop": {
+      "name": "item.crop",
+      "kind": "crop",
+      "icon": "ui_sprout",
+      "stack": 50
+    },
+    "wood": {
+      "name": "item.wood",
+      "kind": "material",
+      "icon": "ui_sprout",
+      "stack": 50
+    },
+    "stone": {
+      "name": "item.stone",
+      "kind": "material",
+      "icon": "ui_sprout",
+      "stack": 50
+    }
+  }
+}

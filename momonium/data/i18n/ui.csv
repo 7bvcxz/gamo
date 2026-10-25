@@ -21,3 +21,10 @@ err.cooldown,%ds left,%d초 남음,あと%d秒,还需%d秒
 land.buy,Buy,구매,購入,购买
 land.next,Next plot,다음 땅,次の土地,下一块地
 err.not_enough_money,Not enough money,돈이 부족해요,お金が足りません,金钱不足
+build.build,Build,건설,建てる,建造
+build.constructing,Building,건설 중,建設中,建造中
+build.cancel,Cancel,취소,やめる,取消
+err.locked,Lv %d,Lv %d,Lv %d,Lv %d
+err.occupied,Occupied,이미 있어요,使用中,已占用
+err.not_owned,Not your land,내 땅이 아니에요,自分の土地ではありません,不是你的土地
+err.not_enough_items,Not enough materials,재료가 부족해요,材料が足りません,材料不足

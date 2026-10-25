@@ -21,6 +21,8 @@ var ring: Node2D
 var _top := Vector2(0, -60)
 var _bounce := 0.0
 var _shake := 0.0
+var _celebrate := 0.0
+var _base_scale := Vector2.ONE
 
 
 func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, lib: SpriteLibrary) -> void:
@@ -32,6 +34,7 @@ func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, 
 	var sprite_name: String = buildings.type_def(b).get("sprite", "")
 	sprite = lib.make_sprite(sprite_name) if lib.has(sprite_name) else Sprite2D.new()
 	add_child(sprite)
+	_base_scale = sprite.scale
 	if lib.has(sprite_name):
 		_top = (lib.pivot(sprite_name, "top") - lib.pivot(sprite_name, "origin")) * lib.world_scale(sprite_name)
 	ring = Node2D.new()
@@ -57,12 +60,27 @@ func refuse() -> void:
 	_shake = 1.0
 
 
+func celebrate() -> void:
+	_celebrate = 1.0
+	_bounce = 1.0
+
+
 func _process(delta: float) -> void:
 	_bounce = maxf(0.0, _bounce - delta * 4.0)
 	_shake = maxf(0.0, _shake - delta * 3.5)
+	_celebrate = maxf(0.0, _celebrate - delta * 1.2)
 	var k := sin(_bounce * PI) * 0.08
-	var base := sprite.scale.x if sprite.scale.x > 0 else 1.0
 	sprite.position = Vector2(sin(_shake * 40.0) * 3.0 * _shake, -k * 20.0)
+	var b := buildings.get_building(id)
+	if not b.is_empty() and b["state"] == BuildingSystem.CONSTRUCTING:
+		# Under construction the building grows up out of its plot, half seen.
+		var p := buildings.progress(b)
+		var rise := 0.3 + 0.7 * (1.0 - pow(1.0 - p, 2.0))
+		sprite.scale = Vector2(_base_scale.x, _base_scale.y * rise)
+		sprite.modulate = Color(1, 1, 1, 0.35 + 0.5 * p)
+	else:
+		sprite.scale = _base_scale
+		sprite.modulate = Color.WHITE
 	ring.queue_redraw()
 
 
@@ -86,7 +104,22 @@ func _draw_ring() -> void:
 	if b.is_empty():
 		return
 	var centre := _top + Vector2(0, -18)
+	if _celebrate > 0.0:
+		for i in 8:
+			var a := TAU * i / 8.0 + (1.0 - _celebrate) * 2.0
+			var r := 20.0 + (1.0 - _celebrate) * 34.0
+			ring.draw_circle(_top * 0.5 + Vector2(cos(a) * r, sin(a) * r * 0.6), 3.5 * _celebrate, Color(1, 0.93, 0.5, _celebrate))
 	match String(b["state"]):
+		BuildingSystem.CONSTRUCTING:
+			var p := buildings.progress(b)
+			# Scaffold posts at the footprint corners, fading as the work completes.
+			for cell: Vector2i in buildings.cells_of(b):
+				for corner: Vector2 in projection.cell_corners(cell):
+					var foot := corner - position
+					ring.draw_line(foot, foot + Vector2(0, -46), Color(0.55, 0.38, 0.2, 0.9 * (1.0 - p * 0.6)), 3.0, true)
+			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.55))
+			ring.draw_arc(centre, RING_RADIUS, 0, TAU, 32, Color(1, 1, 1, 0.25), RING_WIDTH, true)
+			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * p, 32, Color("#ffc94d"), RING_WIDTH, true)
 		BuildingSystem.WORKING:
 			var p := buildings.progress(b)
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.55))

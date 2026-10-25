@@ -17,14 +17,17 @@ extends SimSystem
 
 const TASK_DONE := "building.task_done"
 const COOLDOWN_DONE := "building.cooldown_done"
+const BUILT := "building.built"
 
+const CONSTRUCTING := "constructing"
 const IDLE := "idle"
 const WORKING := "working"
 const COOLDOWN := "cooldown"
 
 ## id -> record (plain data, saved as-is):
 ##   id, type, anchor [x, y], state, stage (index of the stage being done or next),
-##   task_start, task_end, ready_at (ms), token, completed (stages finished)
+##   task_start, task_end, ready_at (ms), token, completed (stages finished),
+##   build_start, build_end (ms), paid {money, items} (what construction cost)
 var buildings: Dictionary = {}
 var next_id := 1
 
@@ -34,11 +37,11 @@ func _init() -> void:
 
 
 func handled_events() -> PackedStringArray:
-	return PackedStringArray([TASK_DONE, COOLDOWN_DONE])
+	return PackedStringArray([TASK_DONE, COOLDOWN_DONE, BUILT])
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["building.tap"])
+	return PackedStringArray(["building.tap", "building.place", "building.cancel"])
 
 
 func on_new_game() -> void:
@@ -85,17 +88,23 @@ func is_ready(b: Dictionary) -> bool:
 	return b["state"] == IDLE
 
 
-## Fraction of the current stage done (0..1) while working; 0 otherwise.
+## Fraction of the current stage (or of construction) done, 0..1.
 func progress(b: Dictionary) -> float:
-	if b["state"] != WORKING:
-		return 0.0
-	var span := maxi(int(b["task_end"]) - int(b["task_start"]), 1)
-	return clampf(float(sim.now_ms() - int(b["task_start"])) / span, 0.0, 1.0)
+	match String(b["state"]):
+		WORKING:
+			var span := maxi(int(b["task_end"]) - int(b["task_start"]), 1)
+			return clampf(float(sim.now_ms() - int(b["task_start"])) / span, 0.0, 1.0)
+		CONSTRUCTING:
+			var span := maxi(int(b["build_end"]) - int(b["build_start"]), 1)
+			return clampf(float(sim.now_ms() - int(b["build_start"])) / span, 0.0, 1.0)
+	return 0.0
 
 
 ## Milliseconds until the building can be tapped again (0 when ready).
 func remaining_ms(b: Dictionary) -> int:
 	match b["state"]:
+		CONSTRUCTING:
+			return maxi(int(b["build_end"]) - sim.now_ms(), 0)
 		WORKING:
 			return maxi(int(b["task_end"]) - sim.now_ms(), 0)
 		COOLDOWN:
@@ -120,8 +129,7 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 	if sim.data.building_type(type).is_empty():
 		return 0
 	var world: WorldSystem = sim.system(&"world")
-	var b := {"id": next_id, "type": type, "anchor": [anchor.x, anchor.y], "state": IDLE, "stage": 0,
-		"task_start": 0, "task_end": 0, "ready_at": 0, "token": 0, "completed": 0}
+	var b := _record(type, anchor)
 	if not world.occupy(cells_of(b), next_id):
 		return 0
 	buildings[next_id] = b
@@ -130,10 +138,117 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 	return b["id"]
 
 
+func _record(type: String, anchor: Vector2i) -> Dictionary:
+	return {"id": next_id, "type": type, "anchor": [anchor.x, anchor.y], "state": IDLE, "stage": 0,
+		"task_start": 0, "task_end": 0, "ready_at": 0, "token": 0, "completed": 0,
+		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}}
+
+
+# --- catalog and construction ---------------------------------------------------------
+
+## Types offered right now, in catalog order, with whether the player may build them.
+func catalog() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var types: Dictionary = sim.data.get_value("buildings", "types", {})
+	for type: String in types:
+		var t: Dictionary = types[type]
+		if not bool(t.get("enabled", true)):
+			continue
+		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
+			"cost": t.get("cost", {}), "build_seconds": float(t.get("build_seconds", 1))})
+	return out
+
+
+func is_unlocked(type: String) -> bool:
+	var t := sim.data.building_type(type)
+	var prog: ProgressionSystem = sim.system(&"progression")
+	return not t.is_empty() and bool(t.get("enabled", true)) and prog.level >= int(t.get("unlock", {}).get("level", 1))
+
+
+## Whether `type` could be placed at `anchor` now, and if not, why -- without
+## changing anything. The placement preview colours itself by this.
+func can_place(type: String, anchor: Vector2i) -> Dictionary:
+	var t := sim.data.building_type(type)
+	if t.is_empty() or not bool(t.get("enabled", true)):
+		return SimResult.fail("err.unknown_building")
+	if not is_unlocked(type):
+		return SimResult.fail("err.locked", {"level": int(t.get("unlock", {}).get("level", 1))})
+	var world: WorldSystem = sim.system(&"world")
+	for c: Vector2i in cells_of(_record(type, anchor)):
+		if not world.is_owned(c):
+			return SimResult.fail("err.not_owned", {"cell": [c.x, c.y]})
+		if world.is_occupied(c):
+			return SimResult.fail("err.occupied", {"cell": [c.x, c.y]})
+	var cost: Dictionary = t.get("cost", {})
+	var money := int(cost.get("money", 0))
+	if not (sim.system(&"economy") as EconomySystem).can_afford(money):
+		return SimResult.fail("err.not_enough_money", {"cost": money})
+	var inv: InventorySystem = sim.system(&"inventory")
+	var items: Dictionary = cost.get("items", {})
+	if not inv.has_all(items):
+		return SimResult.fail("err.not_enough_items", {"missing": inv.shortfall(items)})
+	return SimResult.ok()
+
+
+## Pays and starts construction. The building occupies its cells at once
+## (nothing else can be put there) and becomes usable when the timer ends.
+func place(type: String, anchor: Vector2i) -> Dictionary:
+	var check := can_place(type, anchor)
+	if not check["ok"]:
+		return check
+	var t := sim.data.building_type(type)
+	var cost: Dictionary = t.get("cost", {})
+	var money := int(cost.get("money", 0))
+	var items: Dictionary = (cost.get("items", {}) as Dictionary).duplicate()
+	var b := _record(type, anchor)
+	(sim.system(&"world") as WorldSystem).occupy(cells_of(b), b["id"])
+	(sim.system(&"economy") as EconomySystem).spend(money, "build:" + type)
+	(sim.system(&"inventory") as InventorySystem).take_all(items, "build:" + type)
+	var duration := int(round(float(t.get("build_seconds", 1.0)) * 1000.0))
+	b["state"] = CONSTRUCTING
+	b["build_start"] = sim.now_ms()
+	b["build_end"] = sim.now_ms() + duration
+	b["paid"] = {"money": money, "items": items}
+	b["token"] = 1
+	buildings[b["id"]] = b
+	next_id += 1
+	sim.scheduler.schedule(int(b["build_end"]), BUILT, {"id": b["id"], "token": b["token"]})
+	sim.bus.emit(&"building_added", {"id": b["id"], "type": type})
+	sim.bus.emit(&"construction_started", {"id": b["id"], "type": type, "ends_ms": b["build_end"], "money": money})
+	return SimResult.ok({"id": b["id"], "ends_ms": b["build_end"]})
+
+
+## Stops a construction and gives back what it cost (the `refund` share of
+## it, all of it by default: nothing was built, nothing was used).
+func cancel(id: int) -> Dictionary:
+	if not buildings.has(id):
+		return SimResult.fail("err.no_building")
+	var b: Dictionary = buildings[id]
+	if b["state"] != CONSTRUCTING:
+		return SimResult.fail("err.not_constructing")
+	var share := float(type_def(b).get("refund", 1.0))
+	var paid: Dictionary = b.get("paid", {})
+	var money := int(floor(int(paid.get("money", 0)) * share))
+	(sim.system(&"economy") as EconomySystem).earn(money, "refund")
+	var inv: InventorySystem = sim.system(&"inventory")
+	var items: Dictionary = paid.get("items", {})
+	for item: String in items:
+		inv.add(item, int(floor(int(items[item]) * share)), "refund")
+	b["token"] = int(b["token"]) + 1
+	(sim.system(&"world") as WorldSystem).vacate(id)
+	buildings.erase(id)
+	sim.bus.emit(&"building_removed", {"id": id, "type": b["type"], "refund": money})
+	return SimResult.ok({"refund": money})
+
+
 func execute(command: Dictionary) -> Dictionary:
 	match String(command.get("type", "")):
 		"building.tap":
 			return tap(Cmd.integer(command, "id"))
+		"building.place":
+			return place(Cmd.text(command, "building"), Cmd.vec2i(command, "anchor"))
+		"building.cancel":
+			return cancel(Cmd.integer(command, "id"))
 	return SimResult.fail("err.unknown_command")
 
 
@@ -142,6 +257,8 @@ func tap(id: int) -> Dictionary:
 	if not buildings.has(id):
 		return SimResult.fail("err.no_building")
 	var b: Dictionary = buildings[id]
+	if b["state"] == CONSTRUCTING:
+		return SimResult.fail("err.constructing", {"remaining_ms": remaining_ms(b)})
 	if b["state"] == WORKING:
 		return SimResult.fail("err.busy", {"remaining_ms": remaining_ms(b)})
 	if b["state"] == COOLDOWN:
@@ -170,6 +287,9 @@ func handle_event(type: String, data: Dictionary) -> void:
 		COOLDOWN_DONE:
 			b["state"] = IDLE
 			sim.bus.emit(&"building_ready", {"id": id})
+		BUILT:
+			b["state"] = IDLE
+			sim.bus.emit(&"building_built", {"id": id, "type": b["type"]})
 
 
 func _complete_stage(b: Dictionary) -> void:
@@ -206,6 +326,11 @@ func load_state(state: Dictionary) -> void:
 	next_id = int(state.get("next_id", 1))
 	for raw: Dictionary in state.get("buildings", []):
 		var b := raw.duplicate(true)
-		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed"]:
+		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end"]:
 			b[k] = int(b.get(k, 0))
+		var paid: Dictionary = b.get("paid", {})
+		var items := {}
+		for item: String in paid.get("items", {}):
+			items[item] = int(paid["items"][item])
+		b["paid"] = {"money": int(paid.get("money", 0)), "items": items}
 		buildings[b["id"]] = b

@@ -12,6 +12,7 @@ static func create_default() -> Array[SimSystem]:
 		LandSystem.new(),
 		BuildingSystem.new(),
 		EconomySystem.new(),
+		InventorySystem.new(),
 		ProgressionSystem.new(),
 	]
 	return list

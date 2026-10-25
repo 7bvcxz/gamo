@@ -29,6 +29,10 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			var v: BuildingView = views.get(int(payload["id"]))
 			if v:
 				v.pulse()
+		&"building_built":
+			var v: BuildingView = views.get(int(payload["id"]))
+			if v:
+				v.celebrate()
 
 
 func sync() -> void:

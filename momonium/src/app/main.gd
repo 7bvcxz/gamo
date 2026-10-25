@@ -22,6 +22,9 @@ var building_views: BuildingViews
 var selection: SelectionController
 var land_preview: LandPreview
 var land_mode: LandMode
+var placement_preview: PlacementPreview
+var placement: PlacementMode
+var build_menu: BuildMenu
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -61,6 +64,9 @@ func _ready() -> void:
 	land_preview.name = "LandPreview"
 	world_root.add_child(land_preview)
 	land_preview.setup(sim, projection)
+	placement_preview = PlacementPreview.new()
+	placement_preview.name = "PlacementPreview"
+	world_root.add_child(placement_preview)
 	entities = EntityLayer.new(projection)
 	entities.name = "Entities"
 	world_root.add_child(entities)
@@ -108,6 +114,20 @@ func _ready() -> void:
 	ui.add_child(land_mode)
 	land_mode.setup(sim, land_preview, projection, lib)
 	selection.land_mode = land_mode
+	placement_preview.setup(sim, projection, lib)
+	placement = PlacementMode.new()
+	ui.add_child(placement)
+	placement.setup(sim, placement_preview, projection, lib)
+	placement.placed.connect(func(id: int) -> void: selection.select_building(id))
+	selection.placement = placement
+	build_menu = BuildMenu.new()
+	ui.add_child(build_menu)
+	build_menu.setup(sim, lib)
+	build_menu.picked.connect(func(type: String) -> void:
+		land_mode.close()
+		selection.deselect()
+		placement.open(type))
+	build_menu.resized.connect(_place_build_menu)
 	_version_label = Label.new()
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
@@ -135,6 +155,7 @@ func _ready() -> void:
 		(sim.system(&"economy") as EconomySystem).earn(int(amount), "dev")
 		return {"money": (sim.system(&"economy") as EconomySystem).money})
 	bridge.register_query("land_mode", _land_mode_info)
+	bridge.register_query("build_ui", _build_ui_info)
 	bridge.register_query("set_language", func(code: Variant) -> Dictionary:
 		LocaleService.apply(String(code))
 		return {"locale": LocaleService.current()})
@@ -224,7 +245,14 @@ func _on_hud_action(action_name: StringName) -> void:
 	match action_name:
 		&"land":
 			selection.deselect()
+			placement.close()
+			build_menu.visible = false
 			land_mode.toggle()
+		&"shop":
+			land_mode.close()
+			placement.close()
+			build_menu.toggle()
+			_place_build_menu()
 
 
 ## E2E: HUD texts, button rectangles (window pixels) and recent actions.
@@ -269,3 +297,31 @@ func _land_mode_info(_arg: Variant) -> Dictionary:
 		"buy": rect.call(land_mode.buy_button), "buy_disabled": land_mode.buy_button.disabled,
 		"close": rect.call(land_mode.close_button), "cost": (sim.system(&"land") as LandSystem).next_cost(),
 		"result": land_mode.last_result, "window": [win.x, win.y]}
+
+
+func _place_build_menu() -> void:
+	if build_menu == null:
+		return
+	build_menu.reset_size()
+	var size := get_viewport_rect().size
+	build_menu.position = Vector2((size.x - build_menu.size.x) * 0.5, size.y - build_menu.size.y - 104)
+
+
+## E2E: shop cards, placement bar and state (window pixels).
+func _build_ui_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var rect := func(c: Control) -> Array:
+		var a: Vector2 = vp.get_final_transform() * c.get_global_rect().position
+		var b: Vector2 = vp.get_final_transform() * c.get_global_rect().end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var cards := {}
+	for type: String in build_menu.cards:
+		cards[type] = rect.call(build_menu.cards[type])
+	var win := DisplayServer.window_get_size()
+	return {"menu_open": build_menu.visible, "cards": cards, "placing": placement.active, "type": placement.type,
+		"anchor": [placement.anchor.x, placement.anchor.y], "valid": placement.check.get("ok", false),
+		"reason": placement.check.get("reason", ""), "build": rect.call(placement.build_button),
+		"result": placement.last_result, "panel_cards": panel.card_rects().map(func(r: Rect2) -> Array:
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]), "window": [win.x, win.y]}

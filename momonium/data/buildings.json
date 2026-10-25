@@ -1,15 +1,34 @@
 {
-  "_doc": "Building catalog. Each type: footprint, what it costs, how long it takes to build, when it unlocks, and its work cycle. A cycle is a list of stages done in order; a stage takes `seconds` of active work, and `cooldown` seconds must pass after it before the next stage can start. Steps 13+ fill this in; the farm cycle here is a placeholder until Step 14.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step).",
   "types": {
     "farm": {
       "name": "building.farm",
-      "size": [1, 1],
+      "size": [
+        1,
+        1
+      ],
       "sprite": "farm",
       "cycle": {
         "stages": [
-          { "id": "tend", "label": "stage.tend", "seconds": 5, "cooldown": 0 }
+          {
+            "id": "tend",
+            "label": "stage.tend",
+            "seconds": 5,
+            "cooldown": 0
+          }
         ]
-      }
+      },
+      "icon": "ui_sprout",
+      "cost": {
+        "money": 10,
+        "items": {}
+      },
+      "build_seconds": 5,
+      "unlock": {
+        "level": 1
+      },
+      "enabled": true,
+      "refund": 1.0
     }
   }
 }

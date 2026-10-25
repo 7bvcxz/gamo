@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A small hammer: construction. -->
+  <g stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M30 26 L12 52 L18 56 L36 30 Z" fill="#e8c79a"/>
+    <path d="M22 14 L46 10 L52 22 L44 26 L40 20 L30 24 Z" fill="#c3ccd6"/>
+  </g>
+</svg>
