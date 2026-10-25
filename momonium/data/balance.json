@@ -4,9 +4,37 @@
     "money": 10,
     "level": 1,
     "exp": 0,
-    "island": { "origin": [0, 0], "size": [2, 2] }
+    "island": {
+      "origin": [
+        0,
+        0
+      ],
+      "size": [
+        2,
+        2
+      ]
+    }
   },
   "clock": {
-    "day_seconds": 30
+    "day_seconds": 30,
+    "phases": [
+      {
+        "name": "day",
+        "from": 0.0
+      },
+      {
+        "name": "sunset",
+        "from": 0.56
+      },
+      {
+        "name": "night",
+        "from": 0.7
+      },
+      {
+        "name": "dawn",
+        "from": 0.92
+      }
+    ],
+    "_doc": "A day is day_seconds of real time and starts in the morning (Day N, 00 s is daylight, as in the reference screens). Phases are fractions of the day; the sky, light and anything that cares about night read them from here."
   }
 }

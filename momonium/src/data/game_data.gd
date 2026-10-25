@@ -100,6 +100,7 @@ func _validate_art() -> void:
 		errors.append("art: projection.elevation_deg %s is outside the 50-60 degree view the art is drawn for" % elevation)
 	if int(get_int("art", "projection.tile_width")) % 2 != 0:
 		errors.append("art: projection.tile_width must be even so tile corners land on whole pixels")
+	_validate_day_cycle()
 	var palette: Variant = get_value("art", "palette")
 	if typeof(palette) != TYPE_DICTIONARY:
 		errors.append("art: palette missing")
@@ -110,6 +111,35 @@ func _validate_art() -> void:
 		for c: Variant in colors:
 			if typeof(c) == TYPE_STRING and not Color.html_is_valid(c):
 				errors.append("art: palette.%s has invalid colour %s" % [key, c])
+
+
+func _validate_day_cycle() -> void:
+	var phases: Variant = get_value("balance", "clock.phases")
+	if typeof(phases) != TYPE_ARRAY or (phases as Array).is_empty():
+		errors.append("balance: clock.phases must list the parts of the day")
+	else:
+		var last := -1.0
+		for p: Variant in phases:
+			var from := float((p as Dictionary).get("from", -1.0))
+			if from < last or from < 0.0 or from >= 1.0:
+				errors.append("balance: clock.phases must start in [0, 1) and increase (%s)" % from)
+			last = from
+		if float((phases[0] as Dictionary).get("from", 1.0)) != 0.0:
+			errors.append("balance: the first phase must start at 0")
+	var keys: Variant = get_value("art", "day_cycle.keys")
+	var looks: Variant = get_value("art", "day_cycle.looks")
+	if typeof(keys) != TYPE_ARRAY or typeof(looks) != TYPE_DICTIONARY:
+		errors.append("art: day_cycle needs keys and looks")
+		return
+	if float(keys[0]["t"]) != 0.0 or float(keys[-1]["t"]) != 1.0:
+		errors.append("art: day_cycle keys must run from t=0 to t=1")
+	for k: Dictionary in keys:
+		if not (looks as Dictionary).has(k["look"]):
+			errors.append("art: day_cycle key uses unknown look %s" % k["look"])
+	for name: String in looks:
+		for field: String in ["sky", "sea", "ambient", "cloud", "glint", "stars"]:
+			if not (looks[name] as Dictionary).has(field):
+				errors.append("art: day_cycle look %s lacks %s" % [name, field])
 
 
 ## A palette colour by key (index into a gradient list when the entry is one).

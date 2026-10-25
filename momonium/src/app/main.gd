@@ -12,6 +12,9 @@ var cameras: CameraController
 var router: InputRouter
 var island: IslandRenderer
 var ocean: OceanRenderer
+var sky: SkyRenderer
+var ambient: CanvasModulate
+var day_night: DayNight
 var entities: EntityLayer
 var _version_label: Label
 
@@ -23,8 +26,10 @@ func _ready() -> void:
 	var back := CanvasLayer.new()
 	back.name = "Background"
 	back.layer = -10
-	back.add_child(Backdrop.new())
 	add_child(back)
+	sky = SkyRenderer.new()
+	sky.name = "Sky"
+	back.add_child(sky)
 	ocean = OceanRenderer.new()
 	ocean.name = "Ocean"
 	back.add_child(ocean)
@@ -32,6 +37,9 @@ func _ready() -> void:
 	var world_root := Node2D.new()
 	world_root.name = "World"
 	add_child(world_root)
+	ambient = CanvasModulate.new()
+	ambient.name = "Ambient"
+	world_root.add_child(ambient)
 	island = IslandRenderer.new()
 	island.name = "Island"
 	world_root.add_child(island)
@@ -48,6 +56,10 @@ func _ready() -> void:
 	add_child(cameras)
 	cameras.setup(camera, projection, sim.system(&"world"))
 	ocean.setup(sim, camera, projection)
+	day_night = DayNight.new()
+	day_night.name = "DayNight"
+	add_child(day_night)
+	day_night.setup(sim, sky, ocean, ambient)
 	router = InputRouter.new()
 	router.name = "InputRouter"
 	add_child(router)
@@ -72,6 +84,8 @@ func _ready() -> void:
 	bridge.register_query("logical_screen", _logical_screen)
 	bridge.register_query("camera", _camera_info)
 	bridge.register_query("dev_grow_island", _dev_grow_island)
+	bridge.register_query("sky", func(_a: Variant) -> Dictionary: return day_night.describe())
+	bridge.register_query("dev_advance_to", _dev_advance_to)
 
 
 func _process(delta: float) -> void:
@@ -136,3 +150,14 @@ func _dev_grow_island(arg: Variant) -> Dictionary:
 			world.add_land(Vector2i(i, ring))
 	cameras.frame_island()
 	return {"cells": world.owned_count()}
+
+
+## E2E (browser test mode only): runs the simulation forward to a given
+## fraction of a given day, through the normal event loop.
+func _dev_advance_to(arg: Variant) -> Dictionary:
+	var day := int(arg[0])
+	var target := int(((day - 1) + float(arg[1])) * sim.clock.day_ms)
+	if target > sim.now_ms():
+		sim.advance_to(target)
+	day_night.apply()
+	return {"now_ms": sim.now_ms(), "day": sim.clock.day_number()}

@@ -13,17 +13,55 @@
     "sprite_texels_per_world_px": 2
   },
   "palette": {
-    "sky_day": ["#2693f8", "#45b0fd", "#c0ddfc"],
-    "sky_sunset": ["#8c6fb8", "#dd8478", "#fda35f"],
-    "sky_night": ["#071a4f", "#0e2f7c", "#496dc3"],
-    "sea_day": ["#68b7fc", "#2fb6f8", "#139fe0", "#2cd6dc"],
-    "sea_sunset": ["#cf8884", "#8a74a0", "#6f6894", "#f0a070"],
-    "sea_night": ["#13429c", "#124aad", "#0a3486", "#2e5fc0"],
+    "sky_day": [
+      "#2693f8",
+      "#45b0fd",
+      "#c0ddfc"
+    ],
+    "sky_sunset": [
+      "#8c6fb8",
+      "#dd8478",
+      "#fda35f"
+    ],
+    "sky_night": [
+      "#071a4f",
+      "#0e2f7c",
+      "#496dc3"
+    ],
+    "sea_day": [
+      "#68b7fc",
+      "#2fb6f8",
+      "#139fe0",
+      "#2cd6dc"
+    ],
+    "sea_sunset": [
+      "#cf8884",
+      "#8a74a0",
+      "#6f6894",
+      "#f0a070"
+    ],
+    "sea_night": [
+      "#13429c",
+      "#124aad",
+      "#0a3486",
+      "#2e5fc0"
+    ],
     "foam": "#ffffff",
-    "grass": ["#a6d64b", "#8cc63f", "#6fae33"],
+    "grass": [
+      "#a6d64b",
+      "#8cc63f",
+      "#6fae33"
+    ],
     "grass_rim": "#c8e86a",
-    "dirt": ["#c99a63", "#a97a4b"],
-    "stone": ["#c3bcb4", "#a19a93", "#7f7973"],
+    "dirt": [
+      "#c99a63",
+      "#a97a4b"
+    ],
+    "stone": [
+      "#c3bcb4",
+      "#a19a93",
+      "#7f7973"
+    ],
     "ui_panel": "#163f78",
     "ui_panel_alpha": 0.62,
     "ui_text": "#ffffff",
@@ -40,6 +78,158 @@
   },
   "layers": {
     "_doc": "Draw order, back to front. Entities inside `world_entities` are y-sorted by their origin pivot.",
-    "order": ["sky", "ocean", "island_ground", "ground_decals", "world_entities", "effects", "hud", "panels", "modal"]
+    "order": [
+      "sky",
+      "ocean",
+      "island_ground",
+      "ground_decals",
+      "world_entities",
+      "effects",
+      "hud",
+      "panels",
+      "modal"
+    ]
+  },
+  "day_cycle": {
+    "_doc": "Colour keyframes over one day (t = fraction of the day, 0 = morning). The sky, sea and world light are interpolated between neighbouring keys; t=1 meets t=0. The sun's arc wraps past midnight (rises before the day rolls over).",
+    "sun": {
+      "rise": 0.94,
+      "set": 0.66
+    },
+    "moon": {
+      "rise": 0.64,
+      "set": 0.97
+    },
+    "keys": [
+      {
+        "t": 0.0,
+        "look": "morning"
+      },
+      {
+        "t": 0.08,
+        "look": "day"
+      },
+      {
+        "t": 0.5,
+        "look": "day"
+      },
+      {
+        "t": 0.62,
+        "look": "sunset"
+      },
+      {
+        "t": 0.74,
+        "look": "night"
+      },
+      {
+        "t": 0.9,
+        "look": "night"
+      },
+      {
+        "t": 0.96,
+        "look": "dawn"
+      },
+      {
+        "t": 1.0,
+        "look": "morning"
+      }
+    ],
+    "looks": {
+      "day": {
+        "sky": [
+          "#2693f8",
+          "#45b0fd",
+          "#c0ddfc"
+        ],
+        "sea": [
+          "#68b7fc",
+          "#2fb6f8",
+          "#139fe0",
+          "#2cd6dc"
+        ],
+        "ambient": "#ffffff",
+        "cloud": "#ffffff",
+        "cloud_shade": "#c9dcf2",
+        "glint": "#fffbe8",
+        "glint_strength": 1.0,
+        "stars": 0.0
+      },
+      "sunset": {
+        "sky": [
+          "#7f6ab5",
+          "#dd8478",
+          "#fda35f"
+        ],
+        "sea": [
+          "#cf8884",
+          "#8a74a0",
+          "#5f5a8c",
+          "#f0a070"
+        ],
+        "ambient": "#ffd2b0",
+        "cloud": "#ffc9a0",
+        "cloud_shade": "#b77a8c",
+        "glint": "#ffd27a",
+        "glint_strength": 1.2,
+        "stars": 0.0
+      },
+      "night": {
+        "sky": [
+          "#06154a",
+          "#0e2f7c",
+          "#3d5fb5"
+        ],
+        "sea": [
+          "#163f96",
+          "#124aad",
+          "#08307e",
+          "#2e5fc0"
+        ],
+        "ambient": "#7f8fd0",
+        "cloud": "#7b8cc4",
+        "cloud_shade": "#2b3d7a",
+        "glint": "#fdecba",
+        "glint_strength": 0.55,
+        "stars": 1.0
+      },
+      "dawn": {
+        "sky": [
+          "#6d8fd6",
+          "#f2b7a6",
+          "#ffd9a8"
+        ],
+        "sea": [
+          "#9fb6e8",
+          "#5aa6e6",
+          "#2f86cc",
+          "#7fd0d8"
+        ],
+        "ambient": "#f4dcc8",
+        "cloud": "#fff0e4",
+        "cloud_shade": "#c7a7b9",
+        "glint": "#ffe2c0",
+        "glint_strength": 0.8,
+        "stars": 0.25
+      },
+      "morning": {
+        "sky": [
+          "#3a8ee6",
+          "#62b4f5",
+          "#d6e6f4"
+        ],
+        "sea": [
+          "#7cbdf4",
+          "#3db3f2",
+          "#1b98d8",
+          "#45d2dc"
+        ],
+        "ambient": "#fff6ec",
+        "cloud": "#fffaf2",
+        "cloud_shade": "#d2d9ea",
+        "glint": "#fff3dc",
+        "glint_strength": 0.9,
+        "stars": 0.0
+      }
+    }
   }
 }
