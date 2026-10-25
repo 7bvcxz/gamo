@@ -1,5 +1,5 @@
 {
-  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type. `name`/`desc` are translation keys; desc explains the real technique.",
+  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique.",
   "nodes": [
     {
       "id": "farm_expansion",
@@ -410,6 +410,123 @@
           "stage": "dig",
           "item": "gold_ore",
           "add": 0.05
+        }
+      ]
+    },
+    {
+      "id": "bellows",
+      "industry": "smelter",
+      "name": "research.bellows.name",
+      "desc": "research.bellows.desc",
+      "icon": "item_copper_ingot",
+      "requires": [],
+      "unlock": {
+        "proposal": true
+      },
+      "cost": {
+        "money": 80,
+        "items": {
+          "notes": 6,
+          "copper_ingot": 2
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "smelter",
+          "action": "smelt",
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
+      "id": "bloomery",
+      "industry": "smelter",
+      "name": "research.bloomery.name",
+      "desc": "research.bloomery.desc",
+      "icon": "item_iron_ingot",
+      "requires": [
+        "bellows"
+      ],
+      "unlock": {
+        "mastery": {
+          "smelter": 2
+        }
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8,
+          "copper_ingot": 4
+        }
+      },
+      "seconds": 120,
+      "effects": [
+        {
+          "kind": "recipe",
+          "type": "smelter",
+          "recipe": "iron_ingot"
+        }
+      ]
+    },
+    {
+      "id": "larger_crucible",
+      "industry": "smelter",
+      "name": "research.larger_crucible.name",
+      "desc": "research.larger_crucible.desc",
+      "icon": "item_iron_ingot",
+      "requires": [
+        "bloomery"
+      ],
+      "unlock": {
+        "mastery": {
+          "smelter": 3
+        }
+      },
+      "cost": {
+        "money": 150,
+        "items": {
+          "notes": 10,
+          "iron_ingot": 4
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "batch",
+          "type": "smelter",
+          "add": 1
+        }
+      ]
+    },
+    {
+      "id": "fine_assay",
+      "industry": "smelter",
+      "name": "research.fine_assay.name",
+      "desc": "research.fine_assay.desc",
+      "icon": "item_gold_ingot",
+      "requires": [
+        "bloomery"
+      ],
+      "unlock": {
+        "mastery": {
+          "smelter": 3
+        }
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 12,
+          "iron_ingot": 2
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "recipe",
+          "type": "smelter",
+          "recipe": "gold_ingot"
         }
       ]
     },

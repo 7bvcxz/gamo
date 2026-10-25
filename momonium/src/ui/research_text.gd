@@ -34,6 +34,14 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 		"variety":
 			var v: Dictionary = sim.data.building_type(type).get("varieties", {}).get(String(e.get("variety", "")), {})
 			return t.translate("effect.variety").format({"name": t.translate(String(v.get("name", "")))})
+		"recipe":
+			var r: Dictionary = {}
+			for x: Dictionary in sim.data.table("recipes").get("recipes", []):
+				if String(x["id"]) == String(e.get("recipe", "")):
+					r = x
+			return t.translate("effect.recipe").format({"name": t.translate(String(r.get("name", "")))})
+		"batch":
+			return t.translate("effect.batch").format({"n": int(e.get("add", 1)) + 1})
 		"research_time":
 			return t.translate("effect.research_time").format({"pct": pct})
 	return ""

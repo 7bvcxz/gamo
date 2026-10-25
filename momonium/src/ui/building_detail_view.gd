@@ -26,6 +26,12 @@ var variety_box: HBoxContainer
 var variety_hint: Label
 ## Finished research acting on this building, in words.
 var research_box: VBoxContainer
+## What a processing building makes: one choice per recipe; what the next
+## batch takes (have / need) and, when it cannot start, why.
+var recipe_box: HBoxContainer
+var takes_row: HBoxContainer
+var block_label: Label
+var _shown_recipes := ""
 var last_result: Dictionary = {}
 var _shown_varieties := ""
 
@@ -73,6 +79,18 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	variety_hint = PanelViews.label("", 15, true)
 	variety_hint.name = "VarietyHint"
 	add_child(variety_hint)
+	recipe_box = HBoxContainer.new()
+	recipe_box.name = "Recipes"
+	recipe_box.add_theme_constant_override("separation", 8)
+	add_child(recipe_box)
+	takes_row = PanelViews.row("", "")
+	takes_row.name = "Takes"
+	add_child(takes_row)
+	block_label = PanelViews.label("", 16)
+	block_label.name = "Blocked"
+	block_label.add_theme_color_override("font_color", Color("#ffb3a8"))
+	block_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(block_label)
 	research_box = VBoxContainer.new()
 	research_box.name = "Research"
 	add_child(research_box)
@@ -82,6 +100,7 @@ func show_building(id: int) -> void:
 	building_id = id
 	PanelViews.clear(workers_box)
 	_shown_varieties = ""
+	_shown_recipes = ""
 	refresh()
 
 
@@ -141,6 +160,7 @@ func refresh() -> void:
 	_set_row(cycle_momo, tr("detail.by_momo"), duration(by_momo["cycle_seconds"]))
 	_set_row(done_row, tr("panel.records.tasks"), str(int(b.get("completed", 0))))
 	_refresh_varieties(b, buildings)
+	_refresh_recipes(b, buildings)
 	_refresh_research(b)
 
 
@@ -214,6 +234,91 @@ func _variety_button(b: Dictionary, buildings: BuildingSystem, v: String) -> But
 	btn.add_child(col)
 	var chosen := buildings.variety_of(b) == v
 	var open := buildings.variety_unlocked(type, v)
+	btn.draw.connect(func() -> void:
+		if chosen:
+			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), Color("#ffe27a"), false, 3.0)
+		if not open:
+			var c := Vector2(btn.size.x - 14, 14)
+			btn.draw_circle(c, 11.0, Color(0.1, 0.18, 0.3, 0.85))
+			btn.draw_arc(c + Vector2(0, -2), 4.0, PI, TAU, 10, Color.WHITE, 2.0, true)
+			btn.draw_rect(Rect2(c + Vector2(-5, -2), Vector2(10, 8)), Color.WHITE))
+	return btn
+
+
+## "Copper ore 1/2 · Wood 3/1": each item with what the store holds and what is needed.
+func items_line(items: Dictionary, with_have: bool) -> String:
+	var inv: InventorySystem = sim.system(&"inventory")
+	var parts: Array[String] = []
+	for item: String in items:
+		var name_ := tr(String(sim.data.item(item).get("name", item)))
+		parts.append("%s %d/%d" % [name_, inv.count(item), int(items[item])] if with_have else "%s %d" % [name_, int(items[item])])
+	return " · ".join(parts)
+
+
+func _refresh_recipes(b: Dictionary, buildings: BuildingSystem) -> void:
+	var type := String(b["type"])
+	var list := buildings.recipes(type)
+	recipe_box.visible = not list.is_empty()
+	var stage := buildings.current_stage(b)
+	var consumes: Dictionary = stage.get("consumes", {})
+	takes_row.visible = not consumes.is_empty()
+	if not consumes.is_empty():
+		_set_row(takes_row, tr("detail.takes"), items_line(consumes, true))
+	var block := buildings.blocked(b)
+	block_label.visible = not block.is_empty()
+	if block.has("missing"):
+		block_label.text = tr("detail.short").format({"items": items_line(block["missing"], false)})
+	elif block.has("full"):
+		block_label.text = tr("detail.full").format({"items": items_line(block["full"], false)})
+	if list.is_empty():
+		return
+	var key := ""
+	for r: String in list:
+		key += "%s:%s:%s;" % [r, buildings.recipe_unlocked(type, r), buildings.recipe_of(b) == r]
+	key += "%d%s" % [buildings.batch_of(b), TranslationServer.get_locale()]
+	if key != _shown_recipes:
+		_shown_recipes = key
+		PanelViews.clear(recipe_box)
+		for r: String in list:
+			recipe_box.add_child(_recipe_button(b, buildings, r))
+	for c: Node in recipe_box.get_children():
+		var r := String(c.get_meta("recipe"))
+		var open: bool = buildings.recipe_unlocked(type, r)
+		(c as Button).disabled = not open or (b["state"] != BuildingSystem.IDLE and buildings.recipe_of(b) != r)
+
+
+func _recipe_button(b: Dictionary, buildings: BuildingSystem, r: String) -> Button:
+	var type := String(b["type"])
+	var def := buildings.recipe_def(r)
+	var btn := Button.new()
+	btn.name = "Recipe_" + r
+	btn.set_meta("recipe", r)
+	btn.custom_minimum_size = Vector2(0, 96)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.focus_mode = Control.FOCUS_NONE
+	var id := int(b["id"])
+	btn.pressed.connect(func() -> void:
+		last_result = sim.execute({"type": "building.recipe", "id": id, "recipe": r})
+		refresh())
+	var col := VBoxContainer.new()
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 0)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var icon := PanelViews.icon(lib, String(def.get("icon", "ui_sprout")), 30.0)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(icon)
+	var n := PanelViews.label(tr(String(def.get("name", r))), 15)
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(n)
+	var facts := PanelViews.label(items_line(def.get("inputs", {}), false), 12, true)
+	facts.name = "Facts"
+	facts.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	facts.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(facts)
+	btn.add_child(col)
+	var chosen := buildings.recipe_of(b) == r
+	var open := buildings.recipe_unlocked(type, r)
 	btn.draw.connect(func() -> void:
 		if chosen:
 			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), Color("#ffe27a"), false, 3.0)

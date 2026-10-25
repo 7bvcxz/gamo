@@ -70,13 +70,16 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	top.add_child(text)
 	col.add_child(top)
 
-	var grid := HBoxContainer.new()
-	grid.add_theme_constant_override("separation", 10)
+	# One card per building mastery, three to a row as industries are added.
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
 	col.add_child(grid)
 	for type: String in (sim.system(&"progression") as ProgressionSystem).mastery_types():
 		var card := PanelContainer.new()
 		card.name = "Mastery_" + type
-		card.custom_minimum_size = Vector2(124, 0)
+		card.custom_minimum_size = Vector2(160, 0)
 		var box := VBoxContainer.new()
 		box.add_theme_constant_override("separation", 4)
 		var head := HBoxContainer.new()

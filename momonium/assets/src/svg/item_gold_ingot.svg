@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Gold ingot: a cast bar, top face lit. -->
+  <path d="M8 40 L20 30 L56 30 L44 40 Z" fill="#ffe9a6" stroke="#b8862a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M8 40 L44 40 L44 50 L8 50 Z" fill="#f2c14e" stroke="#b8862a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M44 40 L56 30 L56 40 L44 50 Z" fill="#f2c14e" stroke="#b8862a" stroke-width="3" stroke-linejoin="round" opacity="0.85"/>
+  <path d="M14 22 L24 14 L52 14 L42 22 Z" fill="#ffe9a6" stroke="#b8862a" stroke-width="2.5" stroke-linejoin="round" opacity="0.9"/>
+  <path d="M16 36 L26 33" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+</svg>

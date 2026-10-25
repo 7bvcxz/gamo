@@ -23,20 +23,23 @@ static func build(data: GameData = null) -> Simulation:
 	var lab := bs.place_instant("research", Vector2i(0, 1))
 	var lumber := bs.place_instant("lumberyard", Vector2i(-1, 0))
 	var mine := bs.place_instant("mine", Vector2i(2, 1))
-	for i in 4:
+	var smelter := bs.place_instant("smelter", Vector2i(1, 1))
+	for i in 5:
 		sim.execute({"type": "momo.hire"})
-	var jobs := [farm, farm2, lab, lumber, mine]
+	var jobs := [farm, farm2, lab, lumber, mine, smelter]
 	for i in jobs.size():
 		sim.execute({"type": "momo.assign", "momo": i + 1, "building": jobs[i]})
 	prog.add_mastery("farm", 700)
 	prog.add_mastery("mine", 700)
 	prog.add_mastery("lumberyard", 350)
 	prog.add_mastery("research", 300)
-	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes"]:
+	prog.add_mastery("smelter", 300)
+	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery"]:
 		research.completed[id] = 0
 	sim.bus.emit(&"research_completed", {"id": "sharp_axes"})
 	(sim.system(&"inventory") as InventorySystem).add("notes", 25, "demo")
 	(sim.system(&"inventory") as InventorySystem).add("wood", 30, "demo")
-	# Let the staffed island run a while so its stores, mail and ledger are real.
-	sim.advance_ms(30000 * 40)
+	# Let the staffed island run a while so its stores, mail and ledger are real:
+	# the mine's ore and the lumberyard's wood feed the smelter by the rules.
+	sim.advance_ms(30000 * 60)
 	return sim

@@ -34,7 +34,8 @@ test('catalog, demo island and back', async ({ game }) => {
   st = await game.query('settings_ui');
   expect(st.badge).toBe(true);
   const s = await game.state();
-  expect(s.buildings.buildings.map((b) => b.type)).toEqual(expect.arrayContaining(['mine', 'lumberyard', 'research', 'farm']));
+  expect(s.buildings.buildings.map((b) => b.type)).toEqual(expect.arrayContaining(['mine', 'lumberyard', 'research', 'farm', 'smelter']));
+  expect(s.inventory.items.copper_ingot ?? 0).toBeGreaterThan(0);
   expect(s.inventory.items.stone).toBeGreaterThan(0);
   const r = await game.query('research');
   void r;

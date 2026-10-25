@@ -50,6 +50,27 @@
       "icon": "item_gold",
       "stack": 20,
       "price": 0
+    },
+    "copper_ingot": {
+      "name": "item.copper_ingot",
+      "kind": "product",
+      "icon": "item_copper_ingot",
+      "stack": 50,
+      "price": 0
+    },
+    "iron_ingot": {
+      "name": "item.iron_ingot",
+      "kind": "product",
+      "icon": "item_iron_ingot",
+      "stack": 50,
+      "price": 0
+    },
+    "gold_ingot": {
+      "name": "item.gold_ingot",
+      "kind": "product",
+      "icon": "item_gold_ingot",
+      "stack": 20,
+      "price": 0
     }
   }
 }

@@ -64,7 +64,8 @@
       "farm",
       "mine",
       "lumberyard",
-      "research"
+      "research",
+      "smelter"
     ],
     "rewards": {
       "stage": {
@@ -83,6 +84,10 @@
         "mine.dig": {
           "player": 4,
           "mastery": 8
+        },
+        "smelter.smelt": {
+          "player": 6,
+          "mastery": 10
         }
       },
       "event": {

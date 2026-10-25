@@ -48,12 +48,25 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			var worker := int(payload.get("worker", 0))
 			if worker > 0:
 				last_worked[worker] = sim.now_ms()
-		&"sold", &"research_completed":
+		&"sold", &"research_completed", &"recipe_changed":
 			_try_all()
+		&"inventory_changed":
+			# Inputs arriving can unblock a waiting furnace.
+			if int(payload.get("delta", 0)) > 0:
+				_try_waiting()
 
 
 func on_day_started(_day: int) -> void:
 	_try_all()
+
+
+## Buildings idle for want of inputs, tried again.
+func _try_waiting() -> void:
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	for id: int in buildings.ids():
+		var b := buildings.get_building(id)
+		if b["state"] == BuildingSystem.IDLE and not (buildings.current_stage(b).get("consumes", {}) as Dictionary).is_empty():
+			try_start(id)
 
 
 func _try_all() -> void:

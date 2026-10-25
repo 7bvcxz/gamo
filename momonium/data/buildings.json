@@ -285,6 +285,52 @@
       "enabled": true,
       "refund": 1.0,
       "workers": 1
+    },
+    "smelter": {
+      "name": "building.smelter",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "smelter",
+      "cycle": {
+        "_doc": "One stage, filled in from the chosen recipe (data/recipes.json): charge the furnace (inputs taken), smelt, let the crucible cool.",
+        "stages": [
+          {
+            "id": "smelt",
+            "action": "smelt",
+            "label": "stage.smelt",
+            "icon": "item_copper_ingot",
+            "seconds": 10,
+            "cooldown": 5,
+            "required": true,
+            "cooldown_floor": 2
+          }
+        ],
+        "looks": [
+          ""
+        ]
+      },
+      "recipes": [
+        "copper_ingot",
+        "iron_ingot",
+        "gold_ingot"
+      ],
+      "icon": "item_copper_ingot",
+      "cost": {
+        "money": 200,
+        "items": {
+          "stone": 20,
+          "wood": 10
+        }
+      },
+      "build_seconds": 20,
+      "unlock": {
+        "level": 4
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 1
     }
   }
 }

@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters", "research"]
+const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters", "research", "recipes"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []
@@ -78,6 +78,7 @@ func validate() -> void:
 	_validate_art()
 	_validate_buildings()
 	_validate_letters()
+	_validate_recipes()
 	_validate_research()
 	_require_number({}, "balance", "land.base", 1)
 	_require_number({}, "balance", "land.growth", 1)
@@ -117,6 +118,33 @@ func _validate_varieties(key: String, def: Dictionary, items: Dictionary) -> voi
 			errors.append("buildings: %s variety %s harvests nothing" % [key, v])
 		if vdef.has("stages") and (vdef.get("looks", []) as Array).size() != stages.size():
 			errors.append("buildings: %s variety %s needs one look per stage" % [key, v])
+
+
+## Recipes: real inputs and outputs, a building that lists them, time > 0.
+func _validate_recipes() -> void:
+	var types: Dictionary = table("buildings").get("types", {})
+	var items: Dictionary = table("items").get("items", {})
+	var ids := {}
+	for r: Dictionary in table("recipes").get("recipes", []):
+		var id := String(r.get("id", ""))
+		if id == "" or ids.has(id):
+			errors.append("recipes: every recipe needs a unique id (%s)" % id)
+		ids[id] = true
+		var b := String(r.get("building", ""))
+		if not types.has(b) or not (types[b].get("recipes", []) as Array).has(id):
+			errors.append("recipes: %s names building %s, which does not list it" % [id, b])
+		if (r.get("inputs", {}) as Dictionary).is_empty() or (r.get("outputs", {}) as Dictionary).is_empty():
+			errors.append("recipes: %s needs inputs and outputs -- nothing from nothing" % id)
+		for side: String in ["inputs", "outputs"]:
+			for item: String in r.get(side, {}):
+				if not items.has(item) or int(r[side][item]) < 1:
+					errors.append("recipes: %s %s unknown item or count %s" % [id, side, item])
+		if float(r.get("seconds", 0)) <= 0.0:
+			errors.append("recipes: %s.seconds must be > 0" % id)
+	for t: String in types:
+		for id: String in types[t].get("recipes", []):
+			if not ids.has(id):
+				errors.append("buildings: %s lists unknown recipe %s" % [t, id])
 
 
 func _validate_letters() -> void:
@@ -185,6 +213,15 @@ func _validate_research() -> void:
 				if not seen.has(r):
 					seen[r] = true
 					stack.append(r)
+	# Every recipe that is not known from the start must be opened by research.
+	var open_recipes := {}
+	for id: String in ids:
+		for e: Dictionary in (ids[id] as Dictionary).get("effects", []):
+			if String(e.get("kind", "")) == "recipe":
+				open_recipes[String(e.get("recipe", ""))] = true
+	for r: Dictionary in table("recipes").get("recipes", []):
+		if not bool(r.get("default", false)) and not open_recipes.has(String(r.get("id", ""))):
+			errors.append("recipes: %s is opened by no research" % r.get("id", ""))
 	# Every variety but base must be opened by some research, or it is unreachable.
 	var opened := {}
 	for id: String in ids:
@@ -237,6 +274,13 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 			var t := String(e.get("type", ""))
 			if not types.has(t) or not (types[t].get("varieties", {}) as Dictionary).has(String(e.get("variety", ""))):
 				errors.append("research: %s opens unknown variety %s.%s" % [id, t, e.get("variety", "")])
+		"recipe":
+			var t := String(e.get("type", ""))
+			if not types.has(t) or not (types[t].get("recipes", []) as Array).has(String(e.get("recipe", ""))):
+				errors.append("research: %s opens unknown recipe %s.%s" % [id, t, e.get("recipe", "")])
+		"batch":
+			if not types.has(String(e.get("type", ""))) or int(e.get("add", 0)) < 1:
+				errors.append("research: %s batch effect needs a type and add >= 1" % id)
 		"research_time":
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0:

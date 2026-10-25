@@ -60,6 +60,18 @@
       "title": "letter.mine_first.title",
       "body": "letter.mine_first.body",
       "research": "copper_prospecting"
+    },
+    {
+      "id": "smelter_first",
+      "industry": "smelter",
+      "trigger": {
+        "work": {
+          "smelter": 4
+        }
+      },
+      "title": "letter.smelter_first.title",
+      "body": "letter.smelter_first.body",
+      "research": "bellows"
     }
   ]
 }

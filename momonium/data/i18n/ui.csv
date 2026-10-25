@@ -259,3 +259,39 @@ settings.demo_note,Try features that open later. Your own island is kept as it i
 settings.leave_demo,Back to my island,내 섬으로 돌아가기,自分の島に戻る,返回我的岛
 hud.demo,DEMO,체험 중,体験中,体验中
 tutorial.working,"Working -- the bar fills, then it is done",일하는 중이에요. 막대가 다 차면 끝나요,作業中。バーがいっぱいになれば完了,工作中——进度条满了就完成
+building.smelter,Smelter,제련소,製錬所,冶炼厂
+stage.smelt,Smelt,제련,製錬,冶炼
+mastery.smelter,Smelting,제련,製錬,冶炼
+item.copper_ingot,Copper ingot,구리 주괴,銅インゴット,铜锭
+item.iron_ingot,Iron ingot,철 주괴,鉄インゴット,铁锭
+item.gold_ingot,Gold ingot,금 주괴,金インゴット,金锭
+recipe.copper_ingot,Copper ingot,구리 주괴,銅インゴット,铜锭
+recipe.iron_ingot,Iron ingot,철 주괴,鉄インゴット,铁锭
+recipe.gold_ingot,Gold ingot,금 주괴,金インゴット,金锭
+research.bellows.name,Bellows,풀무,ふいご,风箱
+research.bellows.desc,Pumped air makes the charcoal fire hotter: the ore melts sooner.,풀무로 바람을 넣으면 숯불이 더 뜨거워져 광석이 빨리 녹아요.,ふいごで風を送ると炭火が熱くなり、鉱石が早く溶けます。,用风箱鼓风，炭火更旺，矿石熔得更快。
+research.bloomery.name,Bloomery,괴철로,たたら炉,块炼炉
+research.bloomery.desc,"Iron needs a hotter, closed furnace: a clay bloomery turns iron ore into iron.",철은 더 뜨겁고 닫힌 화로가 필요해요. 흙으로 쌓은 괴철로에서 철광석이 철이 돼요.,鉄にはもっと熱く閉じた炉がいります。粘土のたたら炉で鉄鉱石が鉄になります。,炼铁需要更热的封闭炉子：黏土块炼炉把铁矿石变成铁。
+research.larger_crucible.name,Larger crucible,큰 도가니,大きなるつぼ,大坩埚
+research.larger_crucible.desc,An iron-banded crucible holds two charges at once.,쇠테를 두른 큰 도가니는 한 번에 두 번 분량을 담아요.,鉄の輪をはめた大きなるつぼは、一度に2回分入ります。,箍铁的大坩埚一次能装两炉的量。
+research.fine_assay.name,Gold refining,금 정련,金の精錬,金的精炼
+research.fine_assay.desc,"Gold hides in quartz: crush, wash and melt it out with care.",금은 석영 속에 숨어 있어요. 부수고 씻어서 조심스레 녹여 내요.,金は石英の中。砕いて洗い、ていねいに溶かし出します。,金藏在石英里：粉碎、淘洗，再小心熔出。
+letter.smelter_first.title,The fire could be hotter,불을 더 뜨겁게 할 수 있을 것 같아,火をもっと熱くできそう,火可以更旺一点
+letter.smelter_first.body,"The ore melts slowly in a still fire.
+If we pump air in with bellows, the charcoal burns much hotter.
+Shall we build some?","가만히 둔 불에서는 광석이 천천히 녹아.
+풀무로 바람을 넣어 주면 숯불이 훨씬 뜨거워질 거야.
+하나 만들어 볼까?","そのままの火だと鉱石はゆっくり溶けるの。
+ふいごで風を送れば、炭火はずっと熱くなるよ。
+作ってみる？","火不动的时候，矿石化得很慢。
+用风箱鼓风，炭火会热得多。
+做一个试试？"
+err.missing_inputs,Missing materials,재료가 모자라요,材料が足りません,材料不足
+err.no_recipe,No such recipe,없는 레시피예요,そのレシピはありません,没有这个配方
+err.recipe_locked,Research it first,먼저 연구해야 해요,先に研究が必要です,需要先研究
+err.recipe_busy,Change it when the furnace is empty,화로가 비었을 때 바꿀 수 있어요,炉が空のときに変えられます,炉子空着时才能更换
+detail.takes,Takes,넣는 것,入れるもの,投入
+detail.short,Short: {items},부족: {items},不足: {items},不足：{items}
+detail.full,Store full: {items},창고 가득: {items},倉庫がいっぱい: {items},仓库已满：{items}
+effect.recipe,New recipe: {name},새 레시피: {name},新レシピ: {name},新配方：{name}
+effect.batch,{n} batches a charge,한 번에 {n}배치,一度に{n}回分,一次{n}批

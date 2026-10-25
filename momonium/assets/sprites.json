@@ -606,6 +606,51 @@
           32
         ]
       }
+    },
+    "smelter": {
+      "source": "svg/smelter.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          70,
+          10
+        ]
+      }
+    },
+    "item_copper_ingot": {
+      "source": "svg/item_copper_ingot.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "item_iron_ingot": {
+      "source": "svg/item_iron_ingot.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "item_gold_ingot": {
+      "source": "svg/item_gold_ingot.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
     }
   }
 }

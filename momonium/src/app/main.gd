@@ -324,6 +324,11 @@ func _ready() -> void:
 		var r := OfflineProgress.catch_up(sim, int(ms))
 		_tell_about_return(r)
 		return r)
+	bridge.register_query("dev_add_items", func(arg: Variant) -> Dictionary:
+		var inv: InventorySystem = sim.system(&"inventory")
+		for item: String in (arg as Dictionary):
+			inv.add(item, int(arg[item]), "dev")
+		return inv.save_state())
 	bridge.register_query("dev_research_done", func(ids: Variant) -> Dictionary:
 		var research: ResearchSystem = sim.system(&"research")
 		for id: Variant in ids:

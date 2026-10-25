@@ -1,0 +1,54 @@
+{
+  "_doc": "Recipes: what a processing building makes. `building` names the type that runs it; `inputs` are taken from the store when a batch starts (fuel included -- wood burned to charcoal heat), `outputs` go to the store when it ends, so nothing appears without something consumed and work done. `seconds` is the work, `cooldown` the wait after (the crucible cooling, a world rule), `batch` how many runs one charge holds (research can add). A recipe with `default` true is known from the start; others open through research ({kind: recipe}).",
+  "recipes": [
+    {
+      "id": "copper_ingot",
+      "building": "smelter",
+      "name": "recipe.copper_ingot",
+      "icon": "item_copper_ingot",
+      "inputs": {
+        "copper_ore": 2,
+        "wood": 1
+      },
+      "outputs": {
+        "copper_ingot": 1
+      },
+      "seconds": 10,
+      "cooldown": 5,
+      "batch": 1,
+      "default": true
+    },
+    {
+      "id": "iron_ingot",
+      "building": "smelter",
+      "name": "recipe.iron_ingot",
+      "icon": "item_iron_ingot",
+      "inputs": {
+        "iron_ore": 2,
+        "wood": 2
+      },
+      "outputs": {
+        "iron_ingot": 1
+      },
+      "seconds": 14,
+      "cooldown": 6,
+      "batch": 1
+    },
+    {
+      "id": "gold_ingot",
+      "building": "smelter",
+      "name": "recipe.gold_ingot",
+      "icon": "item_gold_ingot",
+      "inputs": {
+        "gold_ore": 1,
+        "wood": 1
+      },
+      "outputs": {
+        "gold_ingot": 1
+      },
+      "seconds": 12,
+      "cooldown": 6,
+      "batch": 1
+    }
+  ]
+}

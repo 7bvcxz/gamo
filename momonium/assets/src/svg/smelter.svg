@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 smelter in the tile projection (diamond centre = origin pivot at
+       (70, 95)): a stone furnace with a glowing mouth, a brick chimney with a
+       wisp of smoke, a crucible and two ingots cooling on the hearth. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5a68e" stroke="#8f8068" stroke-width="2" stroke-linejoin="round"/>
+  <!-- furnace body: two visible faces -->
+  <path d="M30 96 L70 120 L70 66 L30 42 Z" fill="#8f8a82" stroke="#5f5a52" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 120 L106 96 L106 42 L70 66 Z" fill="#b0aba2" stroke="#5f5a52" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M30 42 L66 20 L106 42 L70 66 Z" fill="#c9c4bb" stroke="#5f5a52" stroke-width="2" stroke-linejoin="round"/>
+  <g stroke="#6f6a62" stroke-width="1.5" opacity="0.6">
+    <path d="M30 60 L70 84 M30 78 L70 102 M70 84 L106 60 M70 102 L106 78"/>
+  </g>
+  <!-- glowing mouth on the right face -->
+  <path d="M80 104 L98 92 L98 76 Q89 70 80 82 Z" fill="#ff8a3d" stroke="#5f5a52" stroke-width="2"/>
+  <path d="M84 100 L94 93 L94 82 Q89 78 84 86 Z" fill="#ffd36b"/>
+  <!-- chimney and smoke -->
+  <path d="M52 34 L52 8 L64 2 L64 28 Z" fill="#a0573c" stroke="#5f3424" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M64 28 L64 2 L72 6 L72 32 Z" fill="#c06a48" stroke="#5f3424" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M56 0 Q50 -8 58 -12" fill="none" stroke="#d8d4cc" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <!-- crucible and cooling ingots on the hearth -->
+  <path d="M38 112 L50 106 L56 110 L44 116 Z" fill="#e0894a" stroke="#7a4220" stroke-width="1.5"/>
+  <path d="M46 120 L58 114 L64 118 L52 124 Z" fill="#c9d0d8" stroke="#5f6670" stroke-width="1.5"/>
+  <path d="M20 98 Q20 90 28 90 Q34 90 34 98 L32 104 L22 104 Z" fill="#5f5a52" stroke="#3a3530" stroke-width="1.5"/>
+</svg>

@@ -33,7 +33,7 @@ func test_status_button_opens_numbers_from_the_simulation() -> void:
 	assert_eq(panel.exp_label.text, "45 / 180 EXP", "exact EXP")
 	assert_near(panel.exp_bar.value, 45.0 / 180.0, 0.001, "bar matches")
 	assert_eq((panel.cards["farm"].find_child("Exp", true, false) as Label).text, "60 / 100 EXP", "farm mastery")
-	assert_eq(panel.cards.size(), 4, "farm, mine, lumber, research")
+	assert_eq(panel.cards.size(), (sim.system(&"progression") as ProgressionSystem).mastery_types().size(), "a card per mastery (farm, mine, lumber, research, smelting)")
 	main.call("_on_hud_action", &"status")
 	assert_false(frame.visible, "and closes again")
 

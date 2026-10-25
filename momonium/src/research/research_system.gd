@@ -234,6 +234,23 @@ func unlocks_variety(type: String, variety: String) -> bool:
 	return false
 
 
+## BuildingSystem modifier: whether research has opened this recipe.
+func unlocks_recipe(type: String, recipe: String) -> bool:
+	for e: Dictionary in _effects("recipe"):
+		if String(e.get("type", "")) == type and String(e.get("recipe", "")) == recipe:
+			return true
+	return false
+
+
+## BuildingSystem modifier: extra batches one charge holds.
+func batch_bonus(type: String) -> int:
+	var n := 0
+	for e: Dictionary in _effects("batch"):
+		if String(e.get("type", "")) == type:
+			n += int(e.get("add", 0))
+	return n
+
+
 ## Whether stages with this action run by themselves (a drip line waters).
 func is_auto(type: String, action: String) -> bool:
 	for e: Dictionary in _effects("auto"):

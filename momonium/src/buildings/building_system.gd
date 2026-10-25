@@ -52,7 +52,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety"])
+	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety", "building.recipe"])
 
 
 func on_new_game() -> void:
@@ -75,10 +75,12 @@ func type_def(b: Dictionary) -> Dictionary:
 ## yields). Built once per type and variety.
 func stages(b: Dictionary) -> Array:
 	var v := variety_of(b)
+	var def := type_def(b)
+	if def.has("recipes"):
+		return _recipe_stages(b, def)
 	var key := "%s/%s" % [b.get("type", ""), v]
 	if _stage_cache.has(key):
 		return _stage_cache[key]
-	var def := type_def(b)
 	var vdef: Dictionary = def.get("varieties", {}).get(v, {}) if v != BASE_VARIETY else {}
 	var list: Array = vdef.get("stages", def.get("cycle", {}).get("stages", []))
 	var yields: Dictionary = vdef.get("yield", {})
@@ -89,6 +91,110 @@ func stages(b: Dictionary) -> Array:
 				st["yield"] = (yields[String(st["id"])] as Dictionary).duplicate()
 	_stage_cache[key] = list
 	return list
+
+
+## A processing building's cycle: its one stage, filled in from the chosen
+## recipe -- what it takes (`consumes`), gives, and how long it works and
+## cools -- times the batches one charge holds.
+func _recipe_stages(b: Dictionary, def: Dictionary) -> Array:
+	var r := recipe_def(recipe_of(b))
+	var batch := batch_of(b)
+	var key := "%s/%s/%d" % [b.get("type", ""), recipe_of(b), batch]
+	if _stage_cache.has(key):
+		return _stage_cache[key]
+	var st: Dictionary = (def.get("cycle", {}).get("stages", [{}]) as Array)[0].duplicate(true)
+	var consumes := {}
+	for item: String in r.get("inputs", {}):
+		consumes[item] = int(r["inputs"][item]) * batch
+	var gives := {}
+	for item: String in r.get("outputs", {}):
+		gives[item] = int(r["outputs"][item]) * batch
+	st["consumes"] = consumes
+	st["yield"] = gives
+	st["seconds"] = float(r.get("seconds", st.get("seconds", 1))) * batch
+	st["cooldown"] = float(r.get("cooldown", st.get("cooldown", 0)))
+	st["icon"] = String(r.get("icon", st.get("icon", "")))
+	st["recipe"] = recipe_of(b)
+	var list := [st]
+	_stage_cache[key] = list
+	return list
+
+
+func recipe_def(id: String) -> Dictionary:
+	for r: Dictionary in sim.data.table("recipes").get("recipes", []):
+		if String(r["id"]) == id:
+			return r
+	return {}
+
+
+## Recipes this building type can run, in data order.
+func recipes(type: String) -> Array[String]:
+	var out: Array[String] = []
+	for id: String in sim.data.building_type(type).get("recipes", []):
+		out.append(id)
+	return out
+
+
+func recipe_of(b: Dictionary) -> String:
+	if b.has("recipe") and String(b["recipe"]) != "":
+		return String(b["recipe"])
+	for id: String in recipes(String(b.get("type", ""))):
+		if bool(recipe_def(id).get("default", false)):
+			return id
+	return ""
+
+
+func recipe_unlocked(type: String, recipe: String) -> bool:
+	if bool(recipe_def(recipe).get("default", false)):
+		return true
+	for source: Object in modifiers:
+		if source.has_method("unlocks_recipe") and bool(source.call("unlocks_recipe", type, recipe)):
+			return true
+	return false
+
+
+## How many batches one charge holds (the recipe's, plus research).
+func batch_of(b: Dictionary) -> int:
+	var n := int(recipe_def(recipe_of(b)).get("batch", 1))
+	for source: Object in modifiers:
+		if source.has_method("batch_bonus"):
+			n += int(source.call("batch_bonus", String(b.get("type", ""))))
+	return maxi(n, 1)
+
+
+## Changes what a processing building makes -- only while nothing is in it.
+func set_recipe(id: int, recipe: String) -> Dictionary:
+	var b := get_building(id)
+	if b.is_empty():
+		return SimResult.fail("err.no_building")
+	if not recipes(String(b["type"])).has(recipe):
+		return SimResult.fail("err.no_recipe")
+	if not recipe_unlocked(String(b["type"]), recipe):
+		return SimResult.fail("err.recipe_locked")
+	if recipe_of(b) == recipe:
+		return SimResult.ok()
+	if b["state"] != IDLE:
+		return SimResult.fail("err.recipe_busy")
+	b["recipe"] = recipe
+	sim.bus.emit(&"recipe_changed", {"id": id, "recipe": recipe})
+	return SimResult.ok()
+
+
+## What keeps an idle building from its next stage right now, as data the
+## views can draw: {missing: {item: short by}} for inputs not in the store,
+## {full: {item: n}} when the output has nowhere to go; {} when nothing does.
+func blocked(b: Dictionary) -> Dictionary:
+	if b.is_empty() or b["state"] != IDLE:
+		return {}
+	var stage := current_stage(b)
+	var inv: InventorySystem = sim.system(&"inventory")
+	var consumes: Dictionary = stage.get("consumes", {})
+	if not consumes.is_empty() and not inv.has_all(consumes):
+		return {"missing": inv.shortfall(consumes)}
+	var produces := whole_yield(b, stage)
+	if not produces.is_empty() and not inv.fits(produces):
+		return {"full": produces}
+	return {}
 
 
 func variety_of(b: Dictionary) -> String:
@@ -326,6 +432,8 @@ func execute(command: Dictionary) -> Dictionary:
 			return cancel(Cmd.integer(command, "id"))
 		"building.variety":
 			return set_variety(Cmd.integer(command, "id"), Cmd.text(command, "variety"))
+		"building.recipe":
+			return set_recipe(Cmd.integer(command, "id"), Cmd.text(command, "recipe"))
 	return SimResult.fail("err.unknown_command")
 
 
@@ -348,11 +456,20 @@ func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 	if b["state"] == COOLDOWN:
 		return SimResult.fail("err.cooldown", {"remaining_ms": remaining_ms(b)})
 	var stage := current_stage(b)
+	var inv: InventorySystem = sim.system(&"inventory")
+	# A stage that takes inputs starts only with all of them in the store, and
+	# takes them as it starts: nothing is made from nothing, nothing half-charged.
+	var consumes: Dictionary = stage.get("consumes", {})
+	if not consumes.is_empty() and not inv.has_all(consumes):
+		return SimResult.fail("err.missing_inputs", {"missing": inv.shortfall(consumes)})
 	# A stage that produces does not start unless its output has somewhere to
 	# go: a full store stops the harvest, it does not throw the crop away.
 	var produces := whole_yield(b, stage)
-	if not produces.is_empty() and not (sim.system(&"inventory") as InventorySystem).fits(produces):
+	if not produces.is_empty() and not inv.fits(produces):
 		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
+	if not consumes.is_empty():
+		inv.take_all(consumes, "consume:" + String(b["type"]))
+		sim.bus.emit(&"consumed", {"id": id, "type": b["type"], "items": consumes.duplicate()})
 	var duration := int(round(stage_seconds(b, stage) * maxf(time_multiplier, 0.01) * 1000.0))
 	b["state"] = WORKING
 	b["worker"] = worker

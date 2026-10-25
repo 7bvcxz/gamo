@@ -166,11 +166,35 @@ func _draw_ring() -> void:
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.55))
 			ring.draw_arc(centre, RING_RADIUS, 0, TAU, 32, Color(1, 1, 1, 0.25), RING_WIDTH, true)
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * p, 32, Color("#9be15d"), RING_WIDTH, true)
+		BuildingSystem.IDLE:
+			_draw_blocked(b, centre)
 		BuildingSystem.COOLDOWN:
 			var total := maxf(float(int(b["ready_at"]) - int(b["task_end"])), 1.0)
 			var left := float(buildings.remaining_ms(b)) / total
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.45))
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * left, 32, Color(0.75, 0.85, 1.0, 0.8), RING_WIDTH, true)
+
+
+## A building that cannot start shows why, without words: the item it lacks
+## on a white disc, struck through in red -- or, when its output has nowhere
+## to go, that item ringed in orange (the store is full).
+func _draw_blocked(b: Dictionary, centre: Vector2) -> void:
+	var block := buildings.blocked(b)
+	if block.is_empty():
+		return
+	var missing := block.has("missing")
+	var items: Dictionary = block.get("missing", block.get("full", {}))
+	if items.is_empty():
+		return
+	var item := String(items.keys()[0])
+	var icon := String(buildings.sim.data.item(item).get("icon", ""))
+	var red := Color("#ff5a4f") if missing else Color("#ffa53a")
+	ring.draw_circle(centre, RING_RADIUS + 6, Color(1, 1, 1, 0.94))
+	ring.draw_arc(centre, RING_RADIUS + 6, 0, TAU, 32, red, 3.0, true)
+	if _lib.has(icon):
+		ring.draw_texture_rect_region(_lib.texture, Rect2(centre - Vector2(13, 13), Vector2(26, 26)), _lib.region(icon))
+	if missing:
+		ring.draw_line(centre + Vector2(-13, 13), centre + Vector2(13, -13), red, 3.0, true)
 
 
 ## A little of what the work looks like: seeds dropping, water arcing down,
