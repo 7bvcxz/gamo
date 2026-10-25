@@ -73,7 +73,12 @@ func test_at_most_one_letter_a_day() -> void:
 	assert_eq(mail.letters[1]["day"], first_day + 1, "on the following day")
 	assert_eq([mail.letters[0]["template"], mail.letters[1]["template"]], ["farm_watering", "farm_soil"], "in data order")
 	sim.advance_ms(30000 * 5)
-	assert_eq(mail.letters.size(), 2, "and nothing more until a new milestone")
+	# The only new milestone in these days is the Momo's own fifth stage at
+	# the farm (the first-harvest letter) -- reached or not at this Momo speed.
+	var met := 1 if int(mail.work.get("farm", 0)) >= 5 else 0
+	assert_eq(mail.letters.size(), 2 + met, "and nothing more until a new milestone")
+	if met == 1:
+		assert_eq(mail.letters[2]["template"], "farm_first_harvest", "which is the Momo's fifth stage")
 
 
 func test_the_most_experienced_assigned_momo_writes() -> void:

@@ -1,4 +1,5 @@
-// Step 16: a harvest (not a tap) earns EXP and farm mastery, and the Status
+// Step 16: a harvest (not a tap) earns EXP and farm mastery -- since Step 42
+// a little for each finished sowing and watering too -- and the Status
 // button shows the exact numbers and bars.
 import { test, expect } from '../lib/fixtures.mjs';
 
@@ -18,8 +19,9 @@ test('a harvest shows up in Status', async ({ game }) => {
     await game.query('dev_advance_ms', wait);
   }
   const s = await game.state();
-  expect(s.progression.exp).toBe(20);
-  expect(s.progression.mastery.farm.exp).toBe(25);
+  const rules = await game.query('rules');
+  expect(s.progression.exp).toBe(rules.farm_cycle_exp);
+  expect(s.progression.mastery.farm.exp).toBe(rules.farm_cycle_mastery);
   const hud = await game.query('hud');
   const btn = await centre(game, hud.buttons.status, hud.window);
   await game.tap(btn.x, btn.y);
@@ -27,7 +29,7 @@ test('a harvest shows up in Status', async ({ game }) => {
   const st = await game.query('status');
   expect(st.open).toBe(true);
   expect(st.level).toBe('1');
-  expect(st.exp).toBe('20 / 100 EXP');
-  expect(st.mastery.farm).toBe('25 / 100 EXP');
+  expect(st.exp).toBe(`${rules.farm_cycle_exp} / 100 EXP`);
+  expect(st.mastery.farm).toBe(`${rules.farm_cycle_mastery} / 100 EXP`);
   expect(st.mastery.mine).toBe('0 / 100 EXP');
 });

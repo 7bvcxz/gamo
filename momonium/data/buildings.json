@@ -9,7 +9,7 @@
       ],
       "sprite": "farm",
       "cycle": {
-        "_doc": "Sow, water three times with at least 30 s between waterings (the plants need the time to drink and grow; it is world time, not work time), let it ripen, harvest. `looks[i]` is the crop overlay shown while stage i is the next one to do. Research may change how long a stage takes or the waits between them, never remove a `required` stage.",
+        "_doc": "Sow, water three times with at least 15 s between waterings (Step 42: 30 s left the first minutes too quiet -- the crop still needs three waterings, and research shortens the wait towards its floor) (the plants need the time to drink and grow; it is world time, not work time), let it ripen, harvest. `looks[i]` is the crop overlay shown while stage i is the next one to do. Research may change how long a stage takes or the waits between them, never remove a `required` stage.",
         "stages": [
           {
             "id": "sow",
@@ -26,9 +26,9 @@
             "label": "stage.water",
             "icon": "ui_water",
             "seconds": 5,
-            "cooldown": 30,
+            "cooldown": 15,
             "required": true,
-            "cooldown_floor": 10
+            "cooldown_floor": 4
           },
           {
             "id": "water2",
@@ -36,9 +36,9 @@
             "label": "stage.water",
             "icon": "ui_water",
             "seconds": 5,
-            "cooldown": 30,
+            "cooldown": 15,
             "required": true,
-            "cooldown_floor": 10
+            "cooldown_floor": 4
           },
           {
             "id": "water3",
@@ -46,9 +46,9 @@
             "label": "stage.water",
             "icon": "ui_water",
             "seconds": 5,
-            "cooldown": 30,
+            "cooldown": 15,
             "required": true,
-            "cooldown_floor": 10
+            "cooldown_floor": 4
           },
           {
             "id": "harvest",
@@ -183,7 +183,7 @@
       },
       "icon": "ui_flask",
       "cost": {
-        "money": 60,
+        "money": 45,
         "items": {}
       },
       "build_seconds": 10,

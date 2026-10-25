@@ -546,3 +546,18 @@ settings.large_demo,Large island demo (performance),큰 섬 데모 (성능 확�
 settings.perf_overlay,Show performance,성능 표시,パフォーマンス表示,显示性能
 hud.demo_large,LARGE DEMO,큰 섬 체험 중,大きな島 体験中,大岛体验中
 perf.buildings,Buildings,건물,建物,建筑
+journey.title,Journey,여정,旅のあゆみ,旅程
+journey.totals,"Played {p} · away {a} ({o} of it caught up)","플레이 {p} · 자리 비움 {a} (그중 {o} 따라잡음)","プレイ {p}・留守 {a}（うち {o} 進行）","游玩 {p} · 离开 {a}（其中补算 {o}）"
+journey.when,"{p} played · {w} since the start","플레이 {p} · 시작부터 {w}","プレイ {p}・開始から {w}","游玩 {p} · 开始后 {w}"
+journey.empty,The firsts of this island will appear here.,이 섬의 첫 기록이 여기에 쌓여요.,この島の「はじめて」がここに並びます。,这座岛的“第一次”会显示在这里。
+journey.built,First {name},첫 {name},はじめての{name},第一座{name}
+journey.built_special,First landmark,첫 랜드마크,はじめてのランドマーク,第一座地标
+journey.harvest,First harvest,첫 수확,はじめての収穫,第一次收获
+journey.sale,First sale,첫 판매,はじめての売上,第一次出售
+journey.momo_work,A Momo's first job,모모의 첫 일,モモのはじめての仕事,桃桃的第一份工作
+journey.land,First land bought,첫 땅 구매,はじめての土地購入,第一次买地
+journey.hire,First Momo hired,첫 모모 고용,はじめてのモモ雇用,第一次雇佣桃桃
+journey.research,First research done,첫 연구 완료,はじめての研究完了,第一次完成研究
+journey.letter,A Momo's first letter,모모의 첫 편지,モモからのはじめての手紙,桃桃的第一封信
+journey.level,Level {n},레벨 {n},レベル {n},等级 {n}
+journey.tier,Became a {name},{name} 승급,{name}に昇格,升为{name}

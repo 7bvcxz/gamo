@@ -43,9 +43,20 @@ func test_taps_earn_nothing_harvests_earn_exp() -> void:
 	for i in 30:
 		sim.execute({"type": "building.tap", "id": farm})
 	assert_eq(prog.experience, 0, "thirty taps on a sowing farm: no EXP")
+	var gains: Array = []
+	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
+		if t == &"exp_gained":
+			gains.append([String(p["reason"]), int(p["amount"])]))
 	_farm_cycle(farm)
-	assert_eq(prog.experience, 20, "one harvest: 20 EXP")
-	assert_eq(prog.mastery_of("farm")["exp"], 25, "and 25 farm mastery")
+	var stage: Dictionary = sim.data.get_value("balance", "progression.rewards.stage", {})
+	assert_true(gains.has(["farm.harvest", int(stage["farm.harvest"]["player"])]), "one harvest: its EXP (%s)" % [gains])
+	var total := 0
+	for g: Array in gains:
+		assert_true(stage.has(String(g[0])), "%s is a finished stage, never a tap" % g[0])
+		total += int(g[1])
+	assert_eq(prog.experience, total, "and nothing else")
+	assert_eq(int(stage["farm.harvest"]["player"]), 20, "the harvest is the big one")
+	assert_true(int(stage["farm.sow"]["player"]) < int(stage["farm.harvest"]["player"]) and int(stage["farm.water"]["player"]) < int(stage["farm.harvest"]["player"]), "sowing and watering pay a little")
 	assert_eq(prog.mastery_of("mine")["exp"], 0, "other masteries untouched")
 
 

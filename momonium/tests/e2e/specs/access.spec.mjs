@@ -28,7 +28,7 @@ test('settings for comfort, and a tip', async ({ page }, info) => {
   await page.waitForTimeout(1500);
   let o = await g.query('options');
   expect(o.tip).toBe('land');
-  expect(o.tip_text).toContain('$50');
+  expect(o.tip_text).toContain(`$${(await g.query('rules')).land_price}`);
   await tap(o.tip_ok, o.window);
   o = await g.query('options');
   expect(o.tip).toBe('');

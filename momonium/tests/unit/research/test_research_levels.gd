@@ -42,7 +42,7 @@ func test_the_general_rule_for_the_rest() -> void:
 
 func test_unlocked_is_not_active() -> void:
 	rs.unlocked["momo_training"] = true
-	assert_eq((sim.system(&"momo") as MomoSystem).work_multiplier(1, "farm"), 4.0, "unlocked, no points: no effect")
+	assert_eq((sim.system(&"momo") as MomoSystem).work_multiplier(1, "farm"), sim.data.get_float("balance", "momo.work_time_multiplier", 4.0), "unlocked, no points: no effect")
 	assert_eq(rs.state_of("momo_training"), "available", "but shown, ready to research or place")
 	assert_true(rs.missing("momo_training").is_empty(), "the Lv 3 it once needed is not asked again")
 	rs.unlocked["momo_reach"] = true

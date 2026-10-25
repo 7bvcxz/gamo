@@ -44,9 +44,10 @@ func test_a_working_momo_shows_the_work_pose() -> void:
 	assert_true(actor.is_working(), "the simulation has Momo 1 sowing")
 	assert_eq(actor.rig.state, "work", "and the rig shows it working")
 	# Sowing then the first watering run back to back (no wait after sowing);
-	# the 30 s wait after watering is where Momo stands idle.
+	# the wait after watering is where Momo stands idle.
 	var arrived := int((sim.system(&"momo") as MomoSystem).get_momo(1)["end"])
-	sim.advance_to(arrived + 40000 + 5000)
+	var stage := int(round(5.0 * sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 1000.0))
+	sim.advance_to(arrived + 2 * stage + 5000)
 	await tree.process_frame
 	assert_false(actor.is_working(), "during the wait after watering Momo is not working")
 	assert_ne(actor.rig.state, "work", "and stops the work pose")

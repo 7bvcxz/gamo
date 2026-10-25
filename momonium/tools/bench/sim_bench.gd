@@ -83,6 +83,7 @@ static func run(side: int, hours: float, momos: int = -1) -> Dictionary:
 	var wall := (Time.get_ticks_usec() - t0) / 1000.0
 	var snap := sim.snapshot()
 	snap.erase("analytics")
+	snap.erase("journey")
 	return {"buildings": (sim.system(&"buildings") as BuildingSystem).ids().size(), "momos": (sim.system(&"momo") as MomoSystem).ids().size(),
 		"ms_per_hour": wall / hours, "events": events[0], "mb": OS.get_static_memory_usage() / 1048576.0,
 		"hash": str(JSON.stringify(snap).hash())}

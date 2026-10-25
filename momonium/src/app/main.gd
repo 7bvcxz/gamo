@@ -410,6 +410,22 @@ func _ready() -> void:
 		tutorial.start()
 		return _tutorial_info(null))
 	bridge.register_query("settings_ui", _settings_info)
+	# The numbers the rules come from (data), so browser tests compute their
+	# expectations instead of copying numbers that a rebalance changes.
+	bridge.register_query("rules", func(_a: Variant) -> Dictionary:
+		return {"momo_x": sim.data.get_float("balance", "momo.work_time_multiplier", 4.0),
+			"farm_wait_ms": int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0),
+			"land_price": (sim.system(&"land") as LandSystem).next_cost(), "hire_price": (sim.system(&"momo") as MomoSystem).hire_cost(),
+			"farm_cycle_exp": _cycle_reward("player"), "farm_cycle_mastery": _cycle_reward("mastery")})
+	bridge.register_query("journey", func(_a: Variant) -> Dictionary:
+		var j: JourneySystem = sim.system(&"journey")
+		var rows := {}
+		var view := stats_view.journey_view
+		for r: Node in view.list.get_children():
+			if r is HBoxContainer:
+				rows[String(r.name).trim_prefix("First_")] = [(r.get_child(0) as Label).text, (r.get_node("Value") as Label).text]
+		return {"timeline": j.timeline(), "totals": j.totals(), "rows": rows, "head": view.head.text, "totals_text": view.totals.text,
+			"shown": view.is_visible_in_tree()})
 	# Scrolls Settings to a row by its node name, as a player's scroll would.
 	bridge.register_query("dev_settings_reveal", func(node_name: Variant) -> Dictionary:
 		var c := settings_view.get_node_or_null(String(node_name)) as Control
@@ -1053,7 +1069,9 @@ func _hud_info(_arg: Variant) -> Dictionary:
 		"level": hud._level_label.text, "exp": hud._exp_label.text, "buttons": buttons,
 		"labels": hud.buttons.keys().map(func(k: StringName) -> String: return (hud.buttons[k] as HudButton)._label.text),
 		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current(),
-		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text}}
+		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text},
+		"pills": {"day": to_window.call(hud.day_panel.get_global_rect()), "money": to_window.call(hud.money_pill.get_global_rect()),
+			"exp": to_window.call(hud.exp_pill.get_global_rect())}}
 
 
 ## E2E: what is selected, the panel's cards (window pixels) and the last tap result.
@@ -1230,6 +1248,15 @@ func _settings_info(_arg: Variant) -> Dictionary:
 		"demo_text": settings_view.demo_button.text, "langs": langs, "locale": LocaleService.current(), "window": [win.x, win.y],
 		"large_demo": _settings_rect(settings_view.large_demo_button), "perf": _settings_rect(settings_view.perf_toggle), "demo_kind": demo_kind,
 		"badge_text": _demo_badge.text}
+
+
+## E2E: what one whole farm cycle (sow, three waterings, harvest) earns.
+func _cycle_reward(kind: String) -> int:
+	var stage: Dictionary = sim.data.get_value("balance", "progression.rewards.stage", {})
+	var n := 0
+	for k: String in ["farm.sow", "farm.water", "farm.water", "farm.water", "farm.harvest"]:
+		n += int(stage.get(k, {}).get(kind, 0))
+	return n
 
 
 ## E2E: where a Settings row is on screen -- [] while it is scrolled out of

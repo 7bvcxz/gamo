@@ -78,7 +78,7 @@ func test_tips_once_and_again() -> void:
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
 	main.call("_check_land_tip", 2.0)
 	assert_eq(tips.tip, "land", "money for land: the sea tip")
-	assert_true(tips.text.text.contains("$50"), "with the price (%s)" % tips.text.text)
+	assert_true(tips.text.text.contains("$%d" % (sim.system(&"land") as LandSystem).next_cost()), "with the price (%s)" % tips.text.text)
 	assert_eq(tips.bubble.mouse_filter, Control.MOUSE_FILTER_IGNORE, "it lets taps through")
 	tips.dismiss()
 	main.call("_check_land_tip", 2.0)

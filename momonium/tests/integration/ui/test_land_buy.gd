@@ -69,11 +69,16 @@ func _finger(p: Vector2) -> void:
 		vp.push_input(t, true)
 
 
+## The k-th land purchase's price, from the data.
+func _price(k: int) -> int:
+	return (sim.system(&"land") as LandSystem).cost_of(k)
+
+
 func test_hover_shows_the_block_and_its_price() -> void:
 	economy.earn(100, "test")
 	_hover(_at(Vector2i(2, 0)))
 	assert_eq(preview.focus, Vector2i(2, 0), "the sea tile beside the island is previewed")
-	assert_eq(preview.price_text(), "$50", "with its price")
+	assert_eq(preview.price_text(), "$%d" % _price(0), "with its price")
 	assert_true(preview.affordable, "gold: it can be bought")
 	_hover(_at(Vector2i(0, 0)))
 	assert_eq(preview.focus, LandPreview.NONE, "over the island: nothing")
@@ -85,8 +90,8 @@ func test_click_buys_at_once_and_the_land_rises() -> void:
 	_hover(_at(Vector2i(2, 0)))
 	_click(_at(Vector2i(2, 0)))
 	assert_true(world.is_owned(Vector2i(2, 0)), "bought with one click")
-	assert_eq(economy.money, 60, "the real price, $50")
-	assert_eq((sim.system(&"land") as LandSystem).next_cost(), 65, "the next costs more")
+	assert_eq(economy.money, 110 - _price(0), "the real price")
+	assert_eq((sim.system(&"land") as LandSystem).next_cost(), _price(1), "the next costs more")
 	assert_eq(preview.focus, LandPreview.NONE, "the preview goes")
 	assert_true(main.find_child("LandRise", true, false) != null, "and the new land rises out of the sea")
 
@@ -102,7 +107,7 @@ func test_a_finger_taps_twice() -> void:
 	assert_eq(world.owned_count(), 4, "")
 	_finger(_at(Vector2i(2, 1)))
 	assert_true(world.is_owned(Vector2i(2, 1)), "the second tap on the same tile buys it")
-	assert_eq(economy.money, 60, "for its price")
+	assert_eq(economy.money, 110 - _price(0), "for its price")
 	_finger(_at(Vector2i(0, 2)))
 	_finger(_at(Vector2i(0, 0)))
 	assert_eq(buyer.pending, LandPreview.NONE, "a tap on the island forgets the preview")

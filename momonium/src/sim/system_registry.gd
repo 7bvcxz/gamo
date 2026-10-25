@@ -27,5 +27,6 @@ static func create_default() -> Array[SimSystem]:
 		PrestigeSystem.new(),
 		TierSystem.new(),
 		SpecialSystem.new(),
+		JourneySystem.new(),
 	]
 	return list

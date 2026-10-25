@@ -1,10 +1,13 @@
-// Step 19: an assigned Momo runs the farm with no taps -- every stage at four
-// times the player's work time, with the world's 30-second waits unchanged --
+// Step 19: an assigned Momo runs the farm with no taps -- every stage at the
+// Momo multiple of the player's work time, with the world's waits unchanged --
 // and the harvest is sold; a player tap during Momo's work is refused.
 import { test, expect } from '../lib/fixtures.mjs';
 
 test('Momo farms alone', async ({ game }) => {
   await game.setTimeScale(0);
+  const rules = await game.query('rules');
+  const stage = 5000 * rules.momo_x;
+  const wait = rules.farm_wait_ms;
   const { id } = await game.query('dev_place_building', ['farm', 1, 0]);
   expect((await game.command({ type: 'momo.assign', momo: 1, building: id })).ok).toBe(true);
   let s = await game.state();
@@ -13,10 +16,10 @@ test('Momo farms alone', async ({ game }) => {
   let farm = (await game.state()).buildings.buildings.find((b) => b.id === id);
   expect(farm.state).toBe('working');
   expect(farm.worker).toBe(1);
-  expect(farm.task_end - farm.task_start).toBe(20000);
+  expect(farm.task_end - farm.task_start).toBe(stage);
   expect((await game.command({ type: 'building.tap', id })).reason).toBe('err.busy');
-  // The rest of the cycle: 19 s of sowing left, then water, wait, water, wait, water, wait, harvest.
-  await game.query('dev_advance_ms', 19000 + 20000 + 30000 + 20000 + 30000 + 20000 + 30000 + 20000 + 10);
+  // The rest of the cycle: the sowing left, then water, wait, water, wait, water, wait, harvest.
+  await game.query('dev_advance_ms', stage - 1000 + 4 * stage + 3 * wait + 10);
   s = await game.state();
   farm = s.buildings.buildings.find((b) => b.id === id);
   expect(farm.completed).toBe(5);

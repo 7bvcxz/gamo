@@ -134,7 +134,8 @@ func test_mulch_shortens_the_wait_but_keeps_three_waterings() -> void:
 	var stages := buildings.stages(b)
 	assert_eq(stages.filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 3, "still three waterings")
 	assert_eq(stages.size(), 5, "no stage removed")
-	assert_eq(buildings.stage_cooldown(b, stages[1]), 22.5, "the wait after watering is 30 s x 0.75")
+	var wait := float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"])
+	assert_eq(buildings.stage_cooldown(b, stages[1]), wait * 0.75, "the wait after watering is the data's wait x 0.75")
 	assert_eq(buildings.stage_cooldown(b, stages[0]), 0.0, "sowing still has no wait")
 
 
@@ -148,7 +149,7 @@ func test_floors_hold_whatever_the_research() -> void:
 	research.completed["watering_efficiency"] = 0
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	var b := buildings.get_building(farm)
-	assert_eq(buildings.stage_cooldown(b, buildings.stages(b)[1]), 10.0, "the plants' 10 s floor holds")
+	assert_eq(buildings.stage_cooldown(b, buildings.stages(b)[1]), float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"]), "the plants' floor holds")
 
 
 func test_the_notebook_speeds_up_research() -> void:

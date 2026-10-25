@@ -57,12 +57,13 @@ func test_cooldown_is_shown_on_the_water_card() -> void:
 	sim.execute({"type": "building.tap", "id": farm})
 	sim.advance_ms(5000)
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(5000 + 12000)
+	var wait := int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]))
+	sim.advance_ms(5000 + 5000)
 	panel._refresh()
 	var time: Label = panel.cards[1].find_child("Time", true, false)
 	LocaleService.apply("en")
 	panel._refresh()
-	assert_eq(time.text, "18s left", "18 seconds of the 30 s wait remain")
+	assert_eq(time.text, "%ds left" % (wait - 5), "%d seconds of the %d s wait remain" % [wait - 5, wait])
 	assert_true(panel.cards[1].disabled, "and the card cannot be pressed until then")
 
 

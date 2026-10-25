@@ -13,8 +13,13 @@ func before_each() -> void:
 	economy = sim.system(&"economy")
 
 
+## The first cell's price: the data's base (a multiple of round_to).
+func _base() -> int:
+	return int(sim.data.get_float("balance", "land.base", 50.0))
+
+
 func test_prices_climb_from_data() -> void:
-	assert_eq(land.cost_of(0), 50, "the first cell is $50")
+	assert_eq(land.cost_of(0), _base(), "the first cell costs the base")
 	var last := 0
 	for k in 12:
 		var c := land.cost_of(k)
@@ -31,10 +36,11 @@ func test_buying_takes_the_money_and_raises_the_land() -> void:
 	economy.earn(90, "test")
 	var r := sim.execute({"type": "land.buy", "cell": [2, 0]})
 	assert_true(r["ok"], "an adjacent cell")
-	assert_eq(economy.money, 50, "$100 - $50")
+	assert_eq(economy.money, 100 - _base(), "$100 - the price")
 	assert_true(world.is_owned(Vector2i(2, 0)), "now land")
 	assert_true(world.is_contiguous(), "one island")
-	assert_eq(r["next_cost"], 65, "the next one costs more")
+	assert_eq(r["next_cost"], land.cost_of(1), "the next one costs more")
+	assert_true(land.cost_of(1) > _base(), "")
 	assert_eq(land.purchased_count(), 1, "recorded")
 
 
@@ -52,9 +58,9 @@ func test_invalid_purchases_change_nothing() -> void:
 
 func test_cannot_buy_without_the_money() -> void:
 	var r := sim.execute({"type": "land.buy", "cell": [2, 0]})
-	assert_false(r["ok"], "$10 does not buy a $50 cell")
+	assert_false(r["ok"], "$10 does not buy a $%d cell" % _base())
 	assert_eq(r["reason"], "err.not_enough_money", "with the reason")
-	assert_eq(r["cost"], 50, "and the price")
+	assert_eq(r["cost"], _base(), "and the price")
 	assert_eq(economy.money, 10, "money untouched")
 	assert_false(world.is_owned(Vector2i(2, 0)), "land untouched")
 

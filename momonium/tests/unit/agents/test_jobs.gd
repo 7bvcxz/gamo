@@ -1,8 +1,8 @@
 extends "res://tests/framework/test_case.gd"
 
 ## Assigned Momo run their farm with nobody touching it: every stage, in
-## order, at four times the player's work time, with the world's 30 s waits
-## unchanged, resting at night, sharing fairly, never doubling up.
+## order, at the Momo multiple of the player's work time (balance data), with
+## the world's waits unchanged, sharing fairly, never doubling up.
 
 var sim: Simulation
 var buildings: BuildingSystem
@@ -21,6 +21,16 @@ func before_each() -> void:
 	farm = buildings.place_instant("farm", Vector2i(1, 0))
 
 
+## A Momo stage of the farm (5 s for the player) and the wait after a
+## watering, in ms, as the data gives them.
+func _momo_stage_ms() -> int:
+	return int(round(5.0 * sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 1000.0))
+
+
+func _wait_ms() -> int:
+	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0)
+
+
 func _log() -> Array:
 	var log: Array = []
 	var clock := sim.clock
@@ -36,7 +46,7 @@ func test_a_momo_runs_the_whole_cycle_unattended() -> void:
 	var log := _log()
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var arrived_at := int(momos.get_momo(1)["end"])
-	sim.advance_to(arrived_at + 20000 * 5 + 30000 * 3 + 100)
+	sim.advance_to(arrived_at + _momo_stage_ms() * 5 + _wait_ms() * 3 + 100)
 	var starts := log.filter(func(e: Array) -> bool: return e[0] == "start")
 	assert_eq(starts[0][3], arrived_at, "work began the moment Momo reached the farm, without a tap")
 	assert_eq(starts[0][2], 1, "done by Momo 1")
@@ -45,15 +55,16 @@ func test_a_momo_runs_the_whole_cycle_unattended() -> void:
 	assert_eq(inv.count("crop") + int(economy.money > 10), 1, "one batch harvested (in store, or already sold)")
 
 
-func test_momo_time_is_four_times_the_players_and_waits_are_unchanged() -> void:
+func test_momo_time_is_the_momo_multiple_and_waits_are_unchanged() -> void:
 	var log := _log()
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var t0 := int(momos.get_momo(1)["end"])
-	sim.advance_to(t0 + 20000 + 20000 + 30000 + 20000 + 10)
+	var m := _momo_stage_ms()
+	sim.advance_to(t0 + m + m + _wait_ms() + m + 10)
 	var times := log.map(func(e: Array) -> Array: return [e[0], e[1], e[3] - t0])
-	assert_eq(times[1], ["done", "sow", 20000], "sowing takes 4 x 5 s")
-	assert_eq(times[3], ["done", "water1", 40000], "watering takes 4 x 5 s")
-	assert_eq(times[4], ["start", "water2", 70000], "the next watering waits exactly the 30 s world rule")
+	assert_eq(times[1], ["done", "sow", m], "sowing takes the Momo multiple of 5 s")
+	assert_eq(times[3], ["done", "water1", 2 * m], "so does watering")
+	assert_eq(times[4], ["start", "water2", 2 * m + _wait_ms()], "the next watering waits exactly the world's wait")
 
 
 func test_harvests_sell_and_the_farm_keeps_going() -> void:
@@ -75,7 +86,7 @@ func test_assigned_momo_work_under_the_moon() -> void:
 		if t == &"task_started" and cycle.is_night(clock):
 			night_starts[0] += 1)
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(30000 * 4)
+	sim.advance_ms(30000 * 12)
 	assert_true(night_starts[0] > 0, "work starts at night too (%d times)" % night_starts[0])
 
 

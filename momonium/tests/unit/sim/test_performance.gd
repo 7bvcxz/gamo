@@ -24,8 +24,11 @@ func _island() -> Simulation:
 	return sim
 
 
+## The island (the journey, which keeps how the time passed, is left out).
 func _state(sim: Simulation) -> String:
-	return JSON.stringify(sim.snapshot())
+	var snap := sim.snapshot()
+	snap.erase("journey")
+	return JSON.stringify(snap)
 
 
 func test_frames_one_stretch_offline_and_a_reload_agree() -> void:

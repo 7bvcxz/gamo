@@ -57,8 +57,11 @@ test('a building name opens its details', async ({ game }) => {
   p = await game.query('panels');
   expect(p.detail_open).toBe(true);
   expect(p.detail_title).toBe('Farm');
-  expect(p.detail.you).toBe('1 min 55 s');
-  expect(p.detail.momo).toBe('3 min 10 s');
+  // A cycle: five 5 s stages and three waits -- by hand, and at Momo pace.
+  const rules = await game.query('rules');
+  const fmt = (sec) => (sec < 60 ? `${sec} s` : sec % 60 === 0 ? `${sec / 60} min` : `${Math.floor(sec / 60)} min ${sec % 60} s`);
+  expect(p.detail.you).toBe(fmt(25 + (3 * rules.farm_wait_ms) / 1000));
+  expect(p.detail.momo).toBe(fmt(Math.round(25 * rules.momo_x + (3 * rules.farm_wait_ms) / 1000)));
   // The tap that selected the farm also sowed it: you work, the Momo spot is empty.
   expect(p.detail.workers).toEqual(['you', 'empty']);
   expect(p.detail.state).toMatch(/^Sow · \d s left$/);

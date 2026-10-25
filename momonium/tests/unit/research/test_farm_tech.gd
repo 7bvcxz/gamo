@@ -12,6 +12,15 @@ var inv: InventorySystem
 var farm := 0
 
 
+
+## The wait after a watering and its floor, as the farm data gives them (s).
+func _wait() -> float:
+	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"])
+
+
+func _floor() -> float:
+	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"])
+
 func before_each() -> void:
 	sim = Simulation.new_game()
 	research = sim.system(&"research")
@@ -64,7 +73,7 @@ func test_a_watering_can_shortens_the_work_not_the_wait() -> void:
 	var water: Dictionary = buildings.stages(b)[1]
 	assert_eq(buildings.stage_seconds(b, water), 3.0, "5 s x 0.6")
 	assert_eq(buildings.stage_seconds(b, buildings.stages(b)[0]), 5.0, "sowing unchanged")
-	assert_eq(buildings.stage_cooldown(b, water), 22.5, "the wait is mulch's, not the can's")
+	assert_eq(buildings.stage_cooldown(b, water), _wait() * 0.75, "the wait is mulch's, not the can's")
 
 
 func test_drip_irrigation_waters_by_itself_but_not_sows_or_harvests() -> void:
@@ -82,7 +91,7 @@ func test_drip_irrigation_waters_by_itself_but_not_sows_or_harvests() -> void:
 	assert_eq(b["state"], BuildingSystem.IDLE, "nobody harvests by magic")
 	var water: Dictionary = buildings.stages(b)[1]
 	assert_eq(buildings.stage_seconds(b, water), 3.0, "a drip watering takes the time of a watering")
-	assert_near(buildings.stage_cooldown(b, water), 18.0, 0.0001, "and the waits remain (30 x 0.75 x 0.8)")
+	assert_near(buildings.stage_cooldown(b, water), maxf(_wait() * 0.75 * 0.8, _floor()), 0.0001, "and the waits remain (wait x 0.75 x 0.8)")
 
 
 func test_irrigation_runs_at_night_and_is_not_momo_experience() -> void:
@@ -98,9 +107,9 @@ func test_irrigation_runs_at_night_and_is_not_momo_experience() -> void:
 func test_a_greenhouse_shortens_the_waits_down_to_the_floor() -> void:
 	_done(["farm_expansion", "watering_efficiency", "harvest_boost", "greenhouse"])
 	var b := buildings.get_building(farm)
-	assert_near(buildings.stage_cooldown(b, buildings.stages(b)[1]), 18.0, 0.001, "30 x 0.75 x 0.8")
+	assert_near(buildings.stage_cooldown(b, buildings.stages(b)[1]), maxf(_wait() * 0.75 * 0.8, _floor()), 0.001, "wait x 0.75 x 0.8")
 	_all_research()
-	assert_near(buildings.stage_cooldown(b, buildings.stages(b)[1]), 14.4, 0.0001, "with drip too: 30 x 0.75 x 0.8 x 0.8")
+	assert_near(buildings.stage_cooldown(b, buildings.stages(b)[1]), maxf(_wait() * 0.75 * 0.8 * 0.8, _floor()), 0.0001, "with drip too: wait x 0.75 x 0.8 x 0.8")
 	var r: Dictionary = GameData.load_default().table("research").duplicate(true)
 	for n: Dictionary in r["nodes"]:
 		for e: Dictionary in n["effects"]:
@@ -112,7 +121,7 @@ func test_a_greenhouse_shortens_the_waits_down_to_the_floor() -> void:
 	for n: Dictionary in r["nodes"]:
 		(s2.system(&"research") as ResearchSystem).completed[n["id"]] = 0
 	var rec := b2.get_building(f2)
-	assert_eq(b2.stage_cooldown(rec, b2.stages(rec)[1]), 10.0, "however strong the research, the plants get their 10 s")
+	assert_eq(b2.stage_cooldown(rec, b2.stages(rec)[1]), _floor(), "however strong the research, the plants get their floor")
 	assert_eq(b2.stage_seconds(rec, b2.stages(rec)[1]), 0.5, "and a watering at least half a second")
 
 

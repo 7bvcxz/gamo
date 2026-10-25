@@ -22,7 +22,12 @@ static func catch_up(sim: Simulation, away_ms: int) -> Dictionary:
 	var start := sim.now_ms()
 	var wanted := clampi(away_ms, 0, max_ms)
 	var before := counters(sim)
+	var journey: JourneySystem = sim.system(&"journey")
+	if journey != null:
+		journey.begin_away()
 	var reached := sim.advance_to_budget(start + wanted, budget)
+	if journey != null:
+		journey.end_away(maxi(away_ms, 0), reached - start)
 	var after := counters(sim)
 	var research_done: Array = []
 	for id: String in after["research"]:

@@ -2,10 +2,12 @@ class_name StatsView
 extends VBoxContainer
 
 ## The island's record: days, size, buildings, Momo at work, jobs done, crops
-## grown, money earned and spent. Read from the systems each time it is shown.
+## grown, money earned and spent -- and below, its journey (JourneyView).
+## Read from the systems each time it is shown.
 
 var sim: Simulation
 var values: Dictionary = {}
+var journey_view: JourneyView
 
 const ROWS := ["days", "land", "buildings", "momo", "tasks", "crops"]
 
@@ -19,6 +21,9 @@ func setup(p_sim: Simulation, _lib: SpriteLibrary) -> void:
 		r.name = "Row_" + key
 		add_child(r)
 		values[key] = r
+	journey_view = JourneyView.new()
+	journey_view.setup(sim)
+	add_child(journey_view)
 
 
 ## The numbers themselves, for the view and for tests.
@@ -44,6 +49,7 @@ func numbers() -> Dictionary:
 
 
 func refresh() -> void:
+	journey_view.refresh()
 	var n := numbers()
 	for key: String in ROWS:
 		var r: HBoxContainer = values[key]

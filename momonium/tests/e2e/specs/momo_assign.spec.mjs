@@ -48,6 +48,7 @@ test('the sea refuses a Momo', async ({ game }, info) => {
 test('hire a second Momo in the shop', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('dev_add_money', 40);
+  const price = (await game.query('rules')).hire_price;
   const hud = await game.query('hud');
   const shop = await toCss(game, [hud.buttons.shop[0] + hud.buttons.shop[2] / 2, hud.buttons.shop[1] + hud.buttons.shop[3] / 2], hud.window);
   await game.tap(shop.x, shop.y);
@@ -59,6 +60,6 @@ test('hire a second Momo in the shop', async ({ game }) => {
   await game.page.waitForTimeout(200);
   const s = await game.state();
   expect(s.momo.momos.length).toBe(2);
-  expect(s.economy.money).toBe(20);
+  expect(s.economy.money).toBe(50 - price);
   expect((await game.query('momos')).selected).toBe('momo');
 });

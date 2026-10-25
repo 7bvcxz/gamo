@@ -44,7 +44,7 @@ func test_rest_makes_a_housed_momo_quicker() -> void:
 	assert_eq(community.work_factor(1), 1.0, "outdoors: no change")
 	_built("villa", Vector2i(0, 0))
 	assert_eq(community.work_factor(1), 0.92, "a villa: rested, 0.92")
-	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.92, 0.0001, "and Momo work follows")
+	assert_near(momos.work_multiplier(1, "farm"), sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 0.92, 0.0001, "and Momo work follows")
 
 
 func test_happiness_stacks_with_less_each_copy_and_is_capped() -> void:

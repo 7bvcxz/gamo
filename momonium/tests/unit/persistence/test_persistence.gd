@@ -216,7 +216,14 @@ func test_away_is_the_same_as_staying() -> void:
 	OfflineProgress.catch_up(a, 600000)
 	for i in 600:
 		b.advance_ms(1000)
-	assert_eq(JSON.stringify(a.save_state()), JSON.stringify(b.save_state()), "ten minutes away = ten minutes watched")
+	# The journey keeps which of the two it was; the island is the same.
+	var sa := a.save_state()
+	var sb := b.save_state()
+	assert_eq(int(sa["systems"]["journey"]["offline_ms"]), 600000, "the journey knows these ten minutes were away")
+	assert_eq(int(sb["systems"]["journey"]["offline_ms"]), 0, "and these were watched")
+	sa["systems"].erase("journey")
+	sb["systems"].erase("journey")
+	assert_eq(JSON.stringify(sa), JSON.stringify(sb), "ten minutes away = ten minutes watched")
 
 
 func test_the_newer_of_two_copies_opens() -> void:

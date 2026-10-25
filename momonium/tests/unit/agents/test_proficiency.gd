@@ -17,6 +17,11 @@ func before_each() -> void:
 	farm = bs.place_instant("farm", Vector2i(1, 0))
 
 
+## A Momo's base multiple of the player's time (balance data).
+func _base() -> float:
+	return sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
+
+
 func test_experience_is_per_momo_and_per_kind() -> void:
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(30000 * 12)
@@ -28,13 +33,13 @@ func test_experience_is_per_momo_and_per_kind() -> void:
 
 func test_levels_shorten_the_work() -> void:
 	assert_eq(momos.proficiency(1, "farm"), 0, "a beginner")
-	assert_eq(momos.work_multiplier(1, "farm"), 4.0, "takes 4x the player's time")
+	assert_eq(momos.work_multiplier(1, "farm"), _base(), "takes the Momo multiple of the player's time")
 	momos.get_momo(1)["experience"]["farm"] = 10
 	assert_eq(momos.proficiency(1, "farm"), 1, "10 stages: level 1")
-	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.92, 0.0001, "a little faster")
+	assert_near(momos.work_multiplier(1, "farm"), _base() * 0.92, 0.0001, "a little faster")
 	momos.get_momo(1)["experience"]["farm"] = 150
 	assert_eq(momos.proficiency(1, "farm"), 4, "150: level 4")
-	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.72, 0.0001, "much faster")
+	assert_near(momos.work_multiplier(1, "farm"), _base() * 0.72, 0.0001, "much faster")
 	assert_eq(momos.proficiency(1, "mine"), 0, "but still a beginner at the mine")
 
 
@@ -47,7 +52,7 @@ func test_the_job_system_uses_the_momos_own_speed() -> void:
 			spans.append(int(p["ends_ms"]) - clock.now_ms))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(30000)
-	assert_eq(spans[0], int(round(5.0 * 4.0 * 0.78 * 1000.0)), "sowing takes 5 s x 4 x 0.78 for a level-3 farmer (70 stages)")
+	assert_eq(spans[0], int(round(5.0 * _base() * 0.78 * 1000.0)), "sowing takes 5 s x the Momo multiple x 0.78 for a level-3 farmer (70 stages)")
 
 
 func test_skill_up_is_announced() -> void:
@@ -63,10 +68,10 @@ func test_skill_up_is_announced() -> void:
 
 func test_training_research_speeds_every_momo() -> void:
 	(sim.system(&"research") as ResearchSystem).completed["momo_training"] = 0
-	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.9, 0.0001, "Lv 1: x0.9 for all")
-	assert_near(momos.work_multiplier(1, "mine"), 4.0 * 0.9, 0.0001, "at every kind of building")
+	assert_near(momos.work_multiplier(1, "farm"), _base() * 0.9, 0.0001, "Lv 1: x0.9 for all")
+	assert_near(momos.work_multiplier(1, "mine"), _base() * 0.9, 0.0001, "at every kind of building")
 	(sim.system(&"research") as ResearchSystem).bought["momo_training"] = 2
-	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.8, 0.0001, "Lv 2: x0.8, as its data says")
+	assert_near(momos.work_multiplier(1, "farm"), _base() * 0.8, 0.0001, "Lv 2: x0.8, as its data says")
 
 
 func test_history_and_pinning() -> void:

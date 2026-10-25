@@ -25,6 +25,7 @@ test('buy the sea beside the island where it is', async ({ game }, info) => {
   await game.setTimeScale(0);
   await game.query('set_language', 'en');
   await game.query('dev_add_money', 90);
+  const rules = await game.query('rules');
   const hud = await game.query('hud');
   expect(hud.buttons.land).toBeUndefined();
   // Hover (mouse) or first tap (finger): a preview with the price, nothing bought.
@@ -32,7 +33,7 @@ test('buy the sea beside the island where it is', async ({ game }, info) => {
   await game.page.waitForTimeout(200);
   let b = await game.query('land_buy');
   expect(b.focus).toEqual([2, 0]);
-  expect(b.price).toBe('$50');
+  expect(b.price).toBe(`$${rules.land_price}`);
   expect(b.affordable).toBe(true);
   if (touch) expect(b.hint).toBe('Tap again to buy');
   expect((await game.state()).world.land.length).toBe(4);
@@ -41,9 +42,10 @@ test('buy the sea beside the island where it is', async ({ game }, info) => {
   await game.page.waitForTimeout(250);
   const s = await game.state();
   expect(s.world.land.some(([x, y]) => x === 2 && y === 0)).toBe(true);
-  expect(s.economy.money).toBe(50);
+  expect(s.economy.money).toBe(100 - rules.land_price);
   b = await game.query('land_buy');
-  expect(b.cost).toBe(65);
+  expect(b.cost).toBe((await game.query('rules')).land_price);
+  expect(b.cost).toBeGreaterThan(rules.land_price);
   expect(b.focus).toEqual([]);
 });
 

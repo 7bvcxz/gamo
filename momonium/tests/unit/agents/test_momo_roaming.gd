@@ -59,13 +59,14 @@ func test_momo_rest_at_night() -> void:
 
 
 func test_hiring_costs_from_data_and_grows() -> void:
-	assert_eq(momos.hire_cost(), 30, "the first hire is $30")
+	var first := int(sim.data.get_float("balance", "momo.hire.base", 30.0))
+	assert_eq(momos.hire_cost(), first, "the first hire costs the data's base ($%d)" % first)
 	assert_eq(sim.execute({"type": "momo.hire"})["reason"], "err.not_enough_money", "$10 cannot hire")
 	economy.earn(200, "test")
 	var r := sim.execute({"type": "momo.hire"})
 	assert_true(r["ok"], "hired")
-	assert_eq(economy.money, 210 - 30, "paid $30")
-	assert_true(r["next_cost"] > 30, "the next one costs more ($%d)" % r["next_cost"])
+	assert_eq(economy.money, 210 - first, "paid it")
+	assert_true(r["next_cost"] > first, "the next one costs more ($%d)" % r["next_cost"])
 	assert_true(_on_land(momos.position_of(int(r["id"]))), "the new Momo is on the island")
 	assert_eq(momos.ids().size(), 2, "two Momo")
 

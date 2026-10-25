@@ -1,8 +1,9 @@
 extends "res://tests/framework/test_case.gd"
 
-## The farm as the rules describe it: sow 5 s, water 5 s three times with at
-## least 30 s between waterings, harvest 5 s for one batch of crops -- every
-## time, in order, with nothing skipped.
+## The farm as the rules describe it: sow 5 s, water 5 s three times with a
+## wait between waterings (15 s in the data since Step 42; read from it here),
+## harvest 5 s for one batch of crops -- every time, in order, with nothing
+## skipped.
 
 var sim: Simulation
 var buildings: BuildingSystem
@@ -23,6 +24,15 @@ func before_each() -> void:
 	buildings = sim.system(&"buildings")
 	inv = sim.system(&"inventory")
 	farm = buildings.place_instant("farm", Vector2i(0, 0))
+
+
+## The wait after a watering, and its floor, as the data gives them (ms, s).
+func _wait_ms() -> int:
+	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0)
+
+
+func _floor_s() -> float:
+	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"])
 
 
 func _tap() -> Dictionary:
@@ -52,21 +62,22 @@ func test_the_full_cycle_in_order() -> void:
 	assert_eq(inv.count("crop"), 1, "one batch of crops from one cycle")
 	assert_eq(_stage(), "sow", "and the plot is ready to sow again")
 	var times: Array = log.map(func(e: Array) -> int: return e[1])
-	assert_eq(times, [5000, 10000, 45000, 80000, 115000], "5 + 5 + (30 + 5) x 2 + 30 + 5 seconds")
+	var w := _wait_ms()
+	assert_eq(times, [5000, 10000, 15000 + w, 20000 + 2 * w, 25000 + 3 * w], "5 + 5 + (wait + 5) x 2 + wait + 5 seconds")
 
 
-func test_watering_waits_thirty_seconds_on_the_world_clock() -> void:
+func test_watering_waits_on_the_world_clock() -> void:
 	_tap()
 	sim.advance_ms(5000)
 	_tap()
 	sim.advance_ms(5000)
 	var r := _tap()
 	assert_eq(r["reason"], "err.cooldown", "straight after watering, the next watering waits")
-	assert_eq(r["remaining_ms"], 30000, "thirty seconds")
-	sim.advance_ms(29999)
+	assert_eq(r["remaining_ms"], _wait_ms(), "the whole wait")
+	sim.advance_ms(_wait_ms() - 1)
 	assert_eq(_tap()["reason"], "err.cooldown", "still waiting 1 ms before")
 	sim.advance_ms(1)
-	assert_true(_tap()["ok"], "and can water again at 30 s")
+	assert_true(_tap()["ok"], "and can water again when it ends")
 	assert_eq(_stage(), "water2", "the second watering")
 
 
@@ -75,7 +86,7 @@ func test_harvest_needs_all_three_waterings() -> void:
 	sim.advance_ms(5000)
 	for i in 2:
 		_tap()
-		sim.advance_ms(35000)
+		sim.advance_ms(5000 + _wait_ms())
 	assert_eq(_stage(), "water3", "after two waterings the farm asks for a third, not the harvest")
 	assert_eq(inv.count("crop"), 0, "and nothing has been produced")
 
@@ -104,18 +115,20 @@ func test_overlapping_farms_keep_their_own_clocks() -> void:
 
 
 func test_cycles_run_across_midnight() -> void:
-	sim.advance_ms(28000)
+	# Sow, then water so that the wait after it straddles the next midnight.
+	var day_ms := 30000
+	sim.advance_ms(2 * day_ms - _wait_ms() - 10000 + 1000)
 	_tap()
 	sim.advance_ms(5000)
-	assert_eq(sim.clock.day_number(), 2, "the sowing ended on Day 2")
-	assert_eq(buildings.get_building(farm)["completed"], 1, "and completed")
+	var day := sim.clock.day_number()
+	assert_eq(buildings.get_building(farm)["completed"], 1, "sown")
 	_tap()
 	sim.advance_ms(5000)
 	var r := _tap()
-	assert_eq(r["remaining_ms"], 30000, "the 30 s wait does not reset at a day boundary")
-	sim.advance_ms(30000)
-	assert_true(_tap()["ok"], "and ends 30 s later, on Day 3")
-	assert_eq(sim.clock.day_number(), 3, "Day 3")
+	assert_eq(r["remaining_ms"], _wait_ms(), "the wait does not reset at a day boundary")
+	sim.advance_ms(_wait_ms())
+	assert_true(_tap()["ok"], "and ends on time")
+	assert_eq(sim.clock.day_number(), day + 1, "on the next day")
 
 
 func test_no_modifier_can_skip_growth() -> void:
@@ -139,7 +152,8 @@ func test_no_modifier_can_skip_growth() -> void:
 	assert_eq(stages, ["sow", "water1", "water2", "water3", "harvest"] as Array[String], "every stage still runs, in order")
 	var w := buildings.current_stage({"type": "farm", "stage": 1})
 	assert_near(buildings.stage_seconds({"type": "farm"}, w), BuildingSystem.MIN_WORK_SECONDS, 0.0001, "work has a floor")
-	assert_near(buildings.stage_cooldown({"type": "farm"}, w), 10.0, 0.0001, "and the wait between waterings has a floor of 10 s")
+	assert_near(buildings.stage_cooldown({"type": "farm"}, w), _floor_s(), 0.0001, "and the wait between waterings has its floor")
+	assert_true(_floor_s() >= 1.0, "a real floor: the plants always get time to drink")
 
 
 func test_farm_data_keeps_the_rules() -> void:
@@ -150,5 +164,6 @@ func test_farm_data_keeps_the_rules() -> void:
 		assert_eq(float(st["seconds"]), 5.0, "%s takes 5 s" % st["id"])
 		assert_true(bool(st.get("required", false)), "%s is required" % st["id"])
 	for st: Dictionary in stages.slice(1, 4):
-		assert_true(float(st["cooldown"]) >= 30.0, "%s is followed by at least 30 s" % st["id"])
+		assert_true(float(st["cooldown"]) >= 15.0, "%s is followed by at least 15 s" % st["id"])
+		assert_true(float(st["cooldown_floor"]) < float(st["cooldown"]), "%s: research can shorten the wait (floor below it)" % st["id"])
 	assert_eq(int(stages[4]["yield"]["crop"]), 1, "harvest gives one batch of crops")
