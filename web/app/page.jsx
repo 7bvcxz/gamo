@@ -16,6 +16,13 @@ const GAMES = [
     ],
   },
   {
+    name: 'Momonium',
+    path: game('/momonium/'),
+    blurb:
+      '바다 한가운데 2×2 섬에서 $10으로 시작합니다. 밭을 일구고 땅을 한 칸씩 넓히며, 모모들이 일을 이어받아 섬이 문명이 됩니다.',
+    extra: [{ href: site('/momonium/doc/'), label: '문서' }],
+  },
+  {
     name: 'Gunslinger',
     path: game('/gunslinger/'),
     blurb:

@@ -27,6 +27,13 @@ export function WhatIsGamo() {
             모은 열이 정산되고, 공장과 온기는 다음 날로 이어집니다.
           </span>
         </a>
+        <a className="card" href={game('/momonium/')}>
+          <b>Momonium</b>
+          <span>
+            바다 위 2×2 섬에서 시작하는 세로형 경영 게임. 30초짜리 하루마다 작물이 팔리고, 섬은 한 칸씩
+            넓어지며, 일을 배운 모모들이 손을 대신합니다.
+          </span>
+        </a>
         <a className="card" href={game('/gunslinger/')}>
           <b>Gunslinger</b>
           <span>

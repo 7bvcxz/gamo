@@ -1,0 +1,13 @@
+{
+  "name": "momonium-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser checks for the Momonium web build: a per-deploy smoke check and the milestone E2E suite.",
+  "scripts": {
+    "smoke": "node smoke.mjs",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

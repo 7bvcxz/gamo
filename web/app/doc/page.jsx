@@ -29,6 +29,7 @@ const NAV = [
     group: '게임별 문서',
     links: [
       { href: site('/motorio/doc/'), label: 'Motorio →' },
+      { href: site('/momonium/doc/'), label: 'Momonium →' },
       { href: site('/gunslinger/doc/'), label: 'Gunslinger →' },
       { href: site('/looproom/doc/'), label: 'looproom →' },
     ],

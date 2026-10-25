@@ -1,0 +1,39 @@
+; Momonium — a small ocean island that Momo turn into a civilisation.
+;
+; Portrait first. The reference screens are phone-shaped (9:16) with the sky in
+; the top two fifths and the island below, so the design resolution is a phone
+; and every other shape is that phone made wider or taller ("expand").
+
+config_version=5
+
+[application]
+
+config/name="Momonium"
+config/description="A tiny ocean island, a big tomorrow."
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.1.0"
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=405
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[input_devices]
+
+; Left on: Controls (buttons, sliders) only understand mouse events, and a
+; phone only sends touches. The world input router tells emulated mouse events
+; apart by their device id and ignores them, so one tap is still one action.
+pointing/emulate_mouse_from_touch=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.137, 0.494, 0.808, 1)

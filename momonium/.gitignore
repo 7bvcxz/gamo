@@ -1,0 +1,17 @@
+# Godot 4 generated state. The editor rewrites these constantly and they carry
+# absolute local paths, so they must never be committed.
+.godot/
+.import/
+export_credentials.cfg
+
+# Local exports; the shipped web build lives in the repository's docs/ folder.
+/build/
+
+# Browser E2E tooling. The package.json and lockfile are committed, the
+# installed modules and reports are not.
+tests/e2e/node_modules/
+tests/e2e/test-results/
+tests/e2e/playwright-report/
+
+# Captures and measurements written by tools; regenerate rather than commit.
+/test-results/
