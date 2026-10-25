@@ -87,8 +87,37 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 		corner_buttons.append(_button(spec, lib))
 
 	resized.connect(_layout)
+	sim.bus.emitted.connect(_on_sim_event)
 	refresh(true)
 	_layout()
+
+
+func _on_sim_event(type: StringName, payload: Dictionary) -> void:
+	if type == &"money_changed" and int(payload.get("delta", 0)) != 0:
+		pop_money(int(payload["delta"]))
+
+
+## A "+$5" (or "-$10") that rises from the money pill and fades, and a little
+## bounce of the pill: the number changed, here is by how much.
+func pop_money(delta: int) -> void:
+	var l := Label.new()
+	l.text = ("+$%d" if delta > 0 else "-$%d") % absi(delta)
+	l.add_theme_font_size_override("font_size", 24)
+	l.add_theme_color_override("font_color", Color("#ffe27a") if delta > 0 else Color("#ffb3a8"))
+	l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
+	l.add_theme_constant_override("outline_size", 6)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(l)
+	l.reset_size()
+	l.position = money_pill.position + Vector2(money_pill.size.x * 0.5 - l.size.x * 0.5, money_pill.size.y + 4)
+	var tween := create_tween()
+	tween.tween_property(l, "position:y", l.position.y + 40.0, 1.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(l, "modulate:a", 0.0, 1.1).set_delay(0.3)
+	tween.tween_callback(l.queue_free)
+	money_pill.pivot_offset = money_pill.size * 0.5
+	var bump := create_tween()
+	bump.tween_property(money_pill, "scale", Vector2(1.08, 1.08), 0.1)
+	bump.tween_property(money_pill, "scale", Vector2.ONE, 0.18)
 
 
 func _label(font_size: int) -> Label:
@@ -145,10 +174,17 @@ func refresh(force: bool = false) -> void:
 	production_label.visible = production != ""
 
 
-## One short line of what the island makes per day. Empty until something is
-## produced (Step 15 onwards fills it), and then it is the only line.
+## One short line: crops waiting in the store and what they fetch at the next
+## day boundary. Empty when the store holds nothing to sell.
 func production_summary() -> String:
-	return ""
+	var economy: EconomySystem = sim.system(&"economy")
+	var inv: InventorySystem = sim.system(&"inventory")
+	var crops := 0
+	for item: String in inv.of_kind("crop"):
+		crops += inv.count(item)
+	if crops <= 0:
+		return ""
+	return tr("hud.store") % [crops, economy.pending_sale()]
 
 
 func _set_text(label: Label, key: String, text: String, force: bool) -> void:

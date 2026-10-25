@@ -34,3 +34,5 @@ stage.harvest,Harvest,수확,収穫する,收获
 item.crop,Crops,작물,作物,作物
 item.wood,Wood,나무,木材,木材
 item.stone,Stone,돌,石,石头
+err.storage_full,Store is full,창고가 가득 찼어요,倉庫がいっぱいです,仓库已满
+hud.store,%d crops · +$%d,작물 %d · +$%d,作物 %d · +$%d,作物 %d · +$%d

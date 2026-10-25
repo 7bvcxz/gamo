@@ -272,6 +272,11 @@ func tap(id: int) -> Dictionary:
 	if b["state"] == COOLDOWN:
 		return SimResult.fail("err.cooldown", {"remaining_ms": remaining_ms(b)})
 	var stage := current_stage(b)
+	# A stage that produces does not start unless its output has somewhere to
+	# go: a full store stops the harvest, it does not throw the crop away.
+	var produces: Dictionary = stage.get("yield", {})
+	if not produces.is_empty() and not (sim.system(&"inventory") as InventorySystem).fits(produces):
+		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
 	var duration := int(round(stage_seconds(b, stage) * 1000.0))
 	b["state"] = WORKING
 	b["task_start"] = sim.now_ms()

@@ -146,6 +146,9 @@ func _ready() -> void:
 	bridge.register_query("dev_grow_island", _dev_grow_island)
 	bridge.register_query("sky", func(_a: Variant) -> Dictionary: return day_night.describe())
 	bridge.register_query("dev_advance_to", _dev_advance_to)
+	bridge.register_query("dev_advance_ms", func(ms: Variant) -> Dictionary:
+		sim.advance_ms(int(ms))
+		return {"now_ms": sim.now_ms(), "day": sim.clock.day_number()})
 	bridge.register_query("hud", _hud_info)
 	bridge.register_query("dev_place_building", func(arg: Variant) -> Dictionary:
 		var id := (sim.system(&"buildings") as BuildingSystem).place_instant(String(arg[0]), Vector2i(int(arg[1]), int(arg[2])))
