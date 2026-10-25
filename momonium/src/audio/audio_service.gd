@@ -41,6 +41,8 @@ var focused := true
 
 func setup(p_sim: Simulation, p_settings: SettingsStore) -> void:
 	sim = p_sim
+	_cycle = null
+	_retarget_left = 0.0
 	settings = p_settings
 	name = "Audio"
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -140,10 +142,16 @@ func _notification(what: int) -> void:
 
 # --- ambience -----------------------------------------------------------------------------
 
+const RETARGET_SECONDS := 0.25
+var _retarget_left := 0.0
+var _cycle: DayCycle
+
 ## Where each layer should be now: the sea always, wind and crickets by the
 ## hour, the hum while industry works.
 func targets() -> Dictionary:
-	var night := DayCycle.new(sim.data).is_night(sim.clock)
+	if _cycle == null:
+		_cycle = DayCycle.new(sim.data)
+	var night := _cycle.is_night(sim.clock)
 	var working := false
 	var bs: BuildingSystem = sim.system(&"buildings")
 	for id: int in bs.ids():
@@ -157,7 +165,13 @@ func targets() -> Dictionary:
 func _process(delta: float) -> void:
 	if sim == null:
 		return
-	target = targets()
+	# Where the layers head changes with the hour and the work: a few looks a
+	# second are plenty for fades this slow (and spare a walk over every
+	# building each frame).
+	_retarget_left -= delta
+	if _retarget_left <= 0.0:
+		_retarget_left = RETARGET_SECONDS
+		target = targets()
 	for layer: String in LAYERS:
 		var v := move_toward(float(level[layer]), float(target[layer]), EASE * delta)
 		level[layer] = v

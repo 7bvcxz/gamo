@@ -10,6 +10,11 @@ var buildings: BuildingSystem
 var layer: EntityLayer
 var lib: SpriteLibrary
 var views: Dictionary = {}
+## Set by the composition root: views outside the camera's sight (with a
+## margin for tall sprites) stop their per-frame work -- rings, smoke, lights
+## -- until seen; zoomed far out, the rest draw their motions less often.
+var cameras: CameraController
+const CULL_MARGIN := 220.0
 
 
 func setup(p_sim: Simulation, p_layer: EntityLayer, p_lib: SpriteLibrary) -> void:
@@ -72,6 +77,29 @@ func sync() -> void:
 			centre += Vector2(c) + Vector2(0.5, 0.5)
 		layer.add_entity(v, centre / cells.size())
 		views[id] = v
+
+
+func _process(_delta: float) -> void:
+	if cameras == null or cameras.camera == null or not cameras.camera.is_inside_tree():
+		return
+	var sight := cameras.sight_rect(CULL_MARGIN)
+	var far := cameras.far()
+	for id: int in views:
+		var v: BuildingView = views[id]
+		var on := sight.has_point(v.position)
+		if v.is_processing() != on:
+			v.set_process(on)
+			v.ring.visible = on
+		v.far = far
+
+
+## How many views are doing their per-frame work (tests, benchmarks).
+func active_count() -> int:
+	var n := 0
+	for v: BuildingView in views.values():
+		if v.is_processing():
+			n += 1
+	return n
 
 
 ## The front-most building whose sprite covers `world_pos`, or 0.

@@ -9,6 +9,7 @@ signal language_chosen(code: String)
 signal replay_tutorial
 signal demo_requested
 signal leave_demo_requested
+signal large_demo_requested
 ## Screen and help options the composition root applies.
 signal option_changed(key: String, value: Variant)
 signal save_requested
@@ -20,6 +21,8 @@ var lang_buttons: Dictionary = {}
 var tutorial_button: Button
 var demo_button: Button
 var demo_note: Label
+var large_demo_button: Button
+var perf_toggle: CheckButton
 var in_demo := false
 var version_label: Label
 ## Sound: three volumes, mute, and silence in the background (AudioService).
@@ -72,6 +75,12 @@ func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
 	demo_note = PanelViews.label("", 15, true)
 	demo_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(demo_note)
+	# A big, busy island to see how the game holds up (never saved either).
+	large_demo_button = _wide("LargeDemo")
+	large_demo_button.pressed.connect(func() -> void: large_demo_requested.emit())
+	add_child(large_demo_button)
+	# And how hard the game is working, beside it.
+	perf_toggle = _toggle("Performance", "perf_overlay")
 	var sound_title := PanelViews.label("", 17, true)
 	sound_title.name = "SoundTitle"
 	add_child(sound_title)
@@ -187,6 +196,8 @@ func refresh() -> void:
 	tutorial_button.text = tr("settings.tutorial")
 	demo_button.text = tr("settings.leave_demo") if in_demo else tr("settings.demo")
 	demo_note.text = "" if in_demo else tr("settings.demo_note")
+	large_demo_button.visible = not in_demo
+	large_demo_button.text = tr("settings.large_demo")
 	(get_node("SoundTitle") as Label).text = tr("settings.sound")
 	if audio != null:
 		for key: String in sliders:
@@ -201,6 +212,7 @@ func refresh() -> void:
 	low_power_toggle.text = tr("settings.low_power")
 	camera_toggle.text = tr("settings.camera_buttons")
 	tips_toggle.text = tr("settings.tips")
+	perf_toggle.text = tr("settings.perf_overlay")
 	tips_button.text = tr("settings.replay_tips")
 	save_button.text = tr("settings.save_now")
 	if settings != null:
@@ -208,3 +220,4 @@ func refresh() -> void:
 		low_power_toggle.set_pressed_no_signal(bool(settings.get_value("low_power")))
 		camera_toggle.set_pressed_no_signal(bool(settings.get_value("camera_buttons")))
 		tips_toggle.set_pressed_no_signal(bool(settings.get_value("tips")))
+		perf_toggle.set_pressed_no_signal(bool(settings.get_value("perf_overlay")))

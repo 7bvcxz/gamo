@@ -79,9 +79,8 @@ func is_open(id: int) -> bool:
 func homes() -> Array[int]:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var out: Array[int] = []
-	for id: int in bs.ids():
-		var b := bs.get_building(id)
-		if not (bs.type_def(b).get("housing", {}) as Dictionary).is_empty() and b["state"] != BuildingSystem.CONSTRUCTING:
+	for id: int in bs.ids_where("housing"):
+		if bs.get_building(id)["state"] != BuildingSystem.CONSTRUCTING:
 			out.append(id)
 	return out
 
@@ -128,11 +127,7 @@ func rest_of(momo: int) -> float:
 
 func amenities() -> Array[int]:
 	var bs: BuildingSystem = sim.system(&"buildings")
-	var out: Array[int] = []
-	for id: int in bs.ids():
-		if not (bs.type_def(bs.get_building(id)).get("amenity", {}) as Dictionary).is_empty():
-			out.append(id)
-	return out
+	return bs.ids_where("amenity").duplicate()
 
 
 ## Each amenity's part in today's happiness: [{id, type, open, adds}].

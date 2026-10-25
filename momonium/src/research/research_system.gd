@@ -88,10 +88,25 @@ func nodes(industry: String = "") -> Array[Dictionary]:
 
 
 func node(id: String) -> Dictionary:
-	for n: Dictionary in nodes():
-		if String(n["id"]) == id:
-			return n
-	return {}
+	var all: Array = sim.data.table("research").get("nodes", [])
+	if _by_id.size() != all.size():
+		_by_id.clear()
+		for n: Dictionary in all:
+			_by_id[String(n["id"])] = n
+	return _by_id.get(id, {})
+
+
+## A number that changes whenever what is researched does (a node finished,
+## a level bought or placed): what other systems key their memos by.
+func state_sig() -> int:
+	return [completed.keys(), bought, allocated].hash()
+
+
+## id -> node, built once from the data (node() is asked on every stage).
+var _by_id: Dictionary = {}
+## kind -> effects at their levels, for the research state `_effects_sig` names.
+var _effects_cache: Dictionary = {}
+var _effects_sig := 0
 
 
 ## Industries with research, in data order ("global" last).
@@ -374,9 +389,18 @@ func something_to_start() -> bool:
 
 # --- effects --------------------------------------------------------------------
 
-## Every active effect of a kind, at the strength of its node's level.
+## Every active effect of a kind, at the strength of its node's level --
+## remembered until the research state changes (any finished node, bought or
+## placed level), as every stage start asks for these.
 func _effects(kind: String) -> Array[Dictionary]:
+	var sig := state_sig()
+	if sig != _effects_sig:
+		_effects_sig = sig
+		_effects_cache.clear()
+	if _effects_cache.has(kind):
+		return _effects_cache[kind]
 	var out: Array[Dictionary] = []
+	_effects_cache[kind] = out
 	for id: String in completed:
 		var l := level(id)
 		for e: Dictionary in node(id).get("effects", []):

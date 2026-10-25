@@ -32,9 +32,9 @@ func setup(p_sim: Simulation) -> void:
 ## The effect of a special type that stands finished now, or {}.
 func effect(kind: String) -> Dictionary:
 	var bs: BuildingSystem = sim.system(&"buildings")
-	for id: int in bs.ids():
+	for id: int in bs.ids_where("special"):
 		var b := bs.get_building(id)
-		if b["state"] == BuildingSystem.CONSTRUCTING or not bs.is_special(String(b["type"])):
+		if b["state"] == BuildingSystem.CONSTRUCTING:
 			continue
 		var e: Dictionary = bs.type_def(b).get("effect", {})
 		if String(e.get("kind", "")) == kind:

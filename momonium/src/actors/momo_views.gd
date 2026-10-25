@@ -10,6 +10,11 @@ var momos: MomoSystem
 var layer: EntityLayer
 var lib: SpriteLibrary
 var actors: Dictionary = {}
+## Set by the composition root: Momo out of sight stop animating (their place
+## is still kept, for when the camera comes), and far out they move their
+## limbs at half the rate.
+var cameras: CameraController
+const CULL_MARGIN := 160.0
 
 
 func setup(p_sim: Simulation, p_layer: EntityLayer, p_lib: SpriteLibrary) -> void:
@@ -43,12 +48,27 @@ func sync() -> void:
 
 
 func _process(_delta: float) -> void:
+	var culling := cameras != null and cameras.camera != null and cameras.camera.is_inside_tree()
+	var sight := cameras.sight_rect(CULL_MARGIN) if culling else Rect2()
+	var far := culling and cameras.far()
 	for id: int in actors:
 		var a: MomoActor = actors[id]
 		if a.dragged:
 			a.position = a.drag_world + Vector2(0, MomoActor.LIFT)
 		else:
 			layer.move_entity(a, momos.position_of(id))
+		if culling:
+			a.set_awake(a.dragged or a.selected or sight.has_point(a.position))
+			a.rig.lod_step = 2 if far else 1
+
+
+## How many Momo are animating now (tests and the performance view).
+func awake_count() -> int:
+	var n := 0
+	for a: MomoActor in actors.values():
+		if a.is_processing():
+			n += 1
+	return n
 
 
 ## Front-most Momo whose body covers `world_pos`, or 0.

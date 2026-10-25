@@ -458,12 +458,16 @@ func _validate_buildings() -> void:
 				errors.append("buildings: %s.%s cooldown cannot be negative" % [key, st.get("id", "?")])
 
 
+## Hot paths (every stage start asks): read the tables directly instead of
+## splitting a path string on each call.
 func item(key: String) -> Dictionary:
-	return get_value("items", "items." + key, {})
+	var items: Variant = table("items").get("items", {})
+	return (items as Dictionary).get(key, {}) if typeof(items) == TYPE_DICTIONARY else {}
 
 
 func building_type(key: String) -> Dictionary:
-	return get_value("buildings", "types." + key, {})
+	var types: Variant = table("buildings").get("types", {})
+	return (types as Dictionary).get(key, {}) if typeof(types) == TYPE_DICTIONARY else {}
 
 
 func _validate_day_cycle() -> void:

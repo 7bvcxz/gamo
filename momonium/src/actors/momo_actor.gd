@@ -30,6 +30,7 @@ var mail: MailSystem
 ## A letter held up over the head while one this Momo wrote is unread -- the
 ## mailbox's red dot, but on the island, at the Momo who is waiting.
 var envelope: Sprite2D
+var _marked := true
 
 
 func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProjection = null) -> void:
@@ -70,6 +71,14 @@ func is_working() -> bool:
 ## World-space box a tap or a drag can grab.
 func hit_rect() -> Rect2:
 	return Rect2(position + Vector2(-26, -76), Vector2(52, 80))
+
+
+## Out of sight it stops animating -- its body and its letter -- until seen.
+func set_awake(on: bool) -> void:
+	if is_processing() == on:
+		return
+	set_process(on)
+	rig.set_process(on)
 
 
 func refuse() -> void:
@@ -114,7 +123,12 @@ func _process(delta: float) -> void:
 	if envelope.visible:
 		envelope.position = rig.position + Vector2(-26, -96 + sin(t * 3.0) * 3.0)
 		envelope.rotation = sin(t * 2.2) * 0.12
-	queue_redraw()
+	# Its own drawing is the letter's bubble and the selection ring: redrawn
+	# while either shows, and once more to clear it.
+	var marks := envelope.visible or selected or dragged
+	if marks or _marked:
+		queue_redraw()
+	_marked = marks
 
 
 func _draw() -> void:

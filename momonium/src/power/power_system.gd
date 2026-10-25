@@ -149,6 +149,23 @@ func capacity() -> float:
 
 ## The power use research has given this building type: {draw, multiply, required}, or {}.
 func use_of(type: String) -> Dictionary:
+	var research: ResearchSystem = sim.system(&"research")
+	# Asked for every start and every look at an idle building: remembered
+	# per kind until the research changes.
+	var sig := research.state_sig() if research != null else 0
+	if sig != _use_sig:
+		_use_sig = sig
+		_use_memo.clear()
+	if not _use_memo.has(type):
+		_use_memo[type] = _use_of(type)
+	return _use_memo[type]
+
+
+var _use_memo: Dictionary = {}
+var _use_sig := 0
+
+
+func _use_of(type: String) -> Dictionary:
 	var out := {}
 	# A building that always runs on power says so in its data.
 	var own: Dictionary = sim.data.building_type(type).get("power", {}).get("use", {})

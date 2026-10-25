@@ -96,6 +96,22 @@ func sparkle() -> void:
 	_sparkle = 1.0
 
 
+## Zoomed far out (set by BuildingViews): small motions at a lower rate.
+var far := false
+## Ring redraws so far (tests and the performance view).
+var ring_draws := 0
+var _since_draw := INF
+var _drawn_state := ""
+var _moves_type := ""
+var _moves := false
+## A building with nothing in motion redraws its ring this often (the night
+## lights' flicker, the pennant's wave); one at work, building, cooling down,
+## celebrating or turning (a generator, a landmark) every frame -- or this
+## often when zoomed far out.
+const AMBIENT_REDRAW_SECONDS := 0.1
+const FAR_REDRAW_SECONDS := 0.1
+
+
 func _process(delta: float) -> void:
 	_bounce = maxf(0.0, _bounce - delta * 4.0)
 	_shake = maxf(0.0, _shake - delta * 3.5)
@@ -115,7 +131,33 @@ func _process(delta: float) -> void:
 		sprite.modulate = Color.WHITE
 	if not b.is_empty():
 		_update_look(buildings.look(b))
-	ring.queue_redraw()
+	_since_draw += delta
+	var state := String(b.get("state", ""))
+	var every := 0.0 if _in_motion(b) else AMBIENT_REDRAW_SECONDS
+	if far:
+		every = maxf(every, FAR_REDRAW_SECONDS)
+	if state != _drawn_state or _since_draw >= every:
+		_drawn_state = state
+		_since_draw = 0.0
+		ring_draws += 1
+		ring.queue_redraw()
+
+
+## Whether its ring moves frame to frame: a progress arc, a celebration or
+## sparkle, turning blades, a landmark's glint.
+func _in_motion(b: Dictionary) -> bool:
+	if _celebrate > 0.0 or _sparkle > 0.0:
+		return true
+	if b.is_empty():
+		return false
+	if String(b["state"]) in [BuildingSystem.WORKING, BuildingSystem.CONSTRUCTING, BuildingSystem.COOLDOWN]:
+		return true
+	var type := String(b["type"])
+	if type != _moves_type:
+		_moves_type = type
+		var power: PowerSystem = buildings.sim.system(&"power")
+		_moves = buildings.is_special(type) or (power != null and String(power.generator_def(type).get("kind", "")) != "")
+	return _moves
 
 
 func _update_look(look_name: String) -> void:

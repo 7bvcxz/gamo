@@ -108,6 +108,8 @@ func work_multiplier(id: int, type: String) -> float:
 
 func on_new_game() -> void:
 	momos.clear()
+	_ids.clear()
+	_watch_sig = -1
 	next_id = 1
 	hired = 0
 	rng.seed = sim.data.get_int("balance", "momo.seed", 1)
@@ -131,12 +133,22 @@ func add_momo(pos: Vector2) -> int:
 
 # --- queries ------------------------------------------------------------------------
 
+## Momo ids in order (a copy). Kept sorted until the Momo change.
 func ids() -> Array[int]:
-	var out: Array[int] = []
-	for id: int in momos:
-		out.append(id)
-	out.sort()
-	return out
+	if _ids.size() != momos.size():
+		_ids.clear()
+		for id: int in momos:
+			_ids.append(id)
+		_ids.sort()
+	return _ids.duplicate()
+
+
+var _ids: Array[int] = []
+## The day's parts, read once from the data.
+var _cycle: DayCycle
+## cell -> Momo watching it (sorted), rebuilt when any watch set changes.
+var _watch_index: Dictionary = {}
+var _watch_sig := -1
 
 
 func get_momo(id: int) -> Dictionary:
@@ -174,9 +186,10 @@ func heading(id: int) -> Vector2:
 
 func workers_at(building: int) -> Array[int]:
 	var out: Array[int] = []
-	for id: int in ids():
+	for id: int in momos:
 		if int(momos[id]["assigned"]) == building:
 			out.append(id)
+	out.sort()
 	return out
 
 
@@ -267,6 +280,7 @@ func assign(momo: int, building: int, by_player: bool = true, keep_watch: bool =
 			cells.append([c.x, c.y])
 		cells.sort()
 		m["watch"] = cells
+		_watch_sig = -1
 	elif int(m["assigned"]) == building:
 		var again := _walk_to(m, work_spot(building))
 		m["token"] = int(m["token"]) + 1
@@ -314,6 +328,7 @@ func unassign(momo: int, keep_watch: bool = false) -> Dictionary:
 		m["pinned"] = false
 		if not (m["watch"] as Array).is_empty():
 			m["watch"] = []
+			_watch_sig = -1
 			sim.bus.emit(&"momo_watch_changed", {"id": momo})
 	_stop(m)
 	_schedule_roam(m, _rest_ms())
@@ -353,13 +368,35 @@ func is_watching(momo: int, cell: Vector2i) -> bool:
 func watchers_of(building: int) -> Array[int]:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var cells := bs.cells_of(bs.get_building(building))
+	var index := _watchers_index()
 	var out: Array[int] = []
-	for id: int in ids():
-		for c: Vector2i in cells:
-			if is_watching(id, c):
+	for c: Vector2i in cells:
+		for id: int in index.get(c, []):
+			if not out.has(id):
 				out.append(id)
-				break
+	out.sort()
 	return out
+
+
+## Who watches each cell. Rebuilt when the watched tiles change: every write
+## to a watch set clears `_watch_sig` on the spot, and the total of watched
+## tiles and the Momo count are checked as well.
+func _watchers_index() -> Dictionary:
+	var total := 0
+	for id: int in momos:
+		total += (momos[id].get("watch", []) as Array).size()
+	var sig := total * 1000 + momos.size()
+	if sig == _watch_sig:
+		return _watch_index
+	_watch_sig = sig
+	_watch_index.clear()
+	for id: int in ids():
+		for c: Array in momos[id].get("watch", []):
+			var cell := Vector2i(int(c[0]), int(c[1]))
+			if not _watch_index.has(cell):
+				_watch_index[cell] = []
+			(_watch_index[cell] as Array).append(id)
+	return _watch_index
 
 
 ## Whether `momo` may start watching `cell`: its island's land, not a
@@ -409,6 +446,8 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 			changed.append(key)
 	watch.sort()
 	if not changed.is_empty():
+		# Who watches what is read again before anyone hears of it.
+		_watch_sig = -1
 		m["pinned"] = true
 		# Its building is no longer on its rounds: it goes (a stage under way
 		# finishes by itself), and JobSystem finds it the next job.
@@ -513,7 +552,9 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if m.is_empty() or int(data.get("token", -1)) != int(m["token"]) or int(m["assigned"]) != 0:
 		return
 	# Momo sleep at night: no strolls until the morning.
-	if DayCycle.new(sim.data).is_night(sim.clock):
+	if _cycle == null:
+		_cycle = DayCycle.new(sim.data)
+	if _cycle.is_night(sim.clock):
 		m["token"] = int(m["token"]) + 1
 		sim.scheduler.schedule(sim.clock.next_day_start_ms() + _rest_ms(), ROAM, {"id": m["id"], "token": m["token"]})
 		return
@@ -587,6 +628,8 @@ func save_state() -> Dictionary:
 
 func load_state(state: Dictionary) -> void:
 	momos.clear()
+	_ids.clear()
+	_watch_sig = -1
 	next_id = int(state.get("next_id", 1))
 	hired = int(state.get("hired", 0))
 	rng.seed = int(str(state.get("rng_seed", "1")))

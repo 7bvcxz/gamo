@@ -35,6 +35,22 @@ var next_id := 1
 ## kind being "work" or "cooldown". They can shorten a stage, never remove one:
 ## every stage still runs, in order, for at least its floor.
 var modifiers: Array[Object] = []
+## method -> the modifier sources that answer it (sources only join at setup).
+var _answering: Dictionary = {}
+var _answering_n := -1
+
+
+func _with(method: String) -> Array[Object]:
+	if _answering_n != modifiers.size():
+		_answering_n = modifiers.size()
+		_answering.clear()
+	if not _answering.has(method):
+		var out: Array[Object] = []
+		for source: Object in modifiers:
+			if source.has_method(method):
+				out.append(source)
+		_answering[method] = out
+	return _answering[method]
 ## "type/variety" -> stages (data is fixed for a game, so built once).
 var _stage_cache: Dictionary = {}
 const BASE_VARIETY := "base"
@@ -61,6 +77,8 @@ var special_cooldowns: Dictionary = {}
 
 func on_new_game() -> void:
 	buildings.clear()
+	_ids_dirty = true
+	ids_version += 1
 	next_id = 1
 	special_cooldowns.clear()
 
@@ -102,9 +120,10 @@ func stages(b: Dictionary) -> Array:
 ## recipe -- what it takes (`consumes`), gives, and how long it works and
 ## cools -- times the batches one charge holds.
 func _recipe_stages(b: Dictionary, def: Dictionary) -> Array:
-	var r := recipe_def(recipe_of(b))
+	var recipe := recipe_of(b)
+	var r := recipe_def(recipe)
 	var batch := batch_of(b)
-	var key := "%s/%s/%d" % [b.get("type", ""), recipe_of(b), batch]
+	var key := "%s/%s/%d" % [b.get("type", ""), recipe, batch]
 	if _stage_cache.has(key):
 		return _stage_cache[key]
 	var st: Dictionary = (def.get("cycle", {}).get("stages", [{}]) as Array)[0].duplicate(true)
@@ -119,17 +138,23 @@ func _recipe_stages(b: Dictionary, def: Dictionary) -> Array:
 	st["seconds"] = float(r.get("seconds", st.get("seconds", 1))) * batch
 	st["cooldown"] = float(r.get("cooldown", st.get("cooldown", 0)))
 	st["icon"] = String(r.get("icon", st.get("icon", "")))
-	st["recipe"] = recipe_of(b)
+	st["recipe"] = recipe
 	var list := [st]
 	_stage_cache[key] = list
 	return list
 
 
 func recipe_def(id: String) -> Dictionary:
-	for r: Dictionary in sim.data.table("recipes").get("recipes", []):
-		if String(r["id"]) == id:
-			return r
-	return {}
+	var all: Array = sim.data.table("recipes").get("recipes", [])
+	if _recipes_by_id.size() != all.size():
+		_recipes_by_id.clear()
+		for r: Dictionary in all:
+			_recipes_by_id[String(r["id"])] = r
+	return _recipes_by_id.get(id, {})
+
+
+## id -> recipe, built once from the data (asked on every stage of a furnace).
+var _recipes_by_id: Dictionary = {}
 
 
 ## Recipes this building type can run, in data order.
@@ -143,17 +168,25 @@ func recipes(type: String) -> Array[String]:
 func recipe_of(b: Dictionary) -> String:
 	if b.has("recipe") and String(b["recipe"]) != "":
 		return String(b["recipe"])
-	for id: String in recipes(String(b.get("type", ""))):
-		if bool(recipe_def(id).get("default", false)):
-			return id
-	return ""
+	var type := String(b.get("type", ""))
+	if not _default_recipe.has(type):
+		_default_recipe[type] = ""
+		for id: String in recipes(type):
+			if bool(recipe_def(id).get("default", false)):
+				_default_recipe[type] = id
+				break
+	return _default_recipe[type]
+
+
+## type -> its default recipe (data only, so read once).
+var _default_recipe: Dictionary = {}
 
 
 func recipe_unlocked(type: String, recipe: String) -> bool:
 	if bool(recipe_def(recipe).get("default", false)):
 		return true
-	for source: Object in modifiers:
-		if source.has_method("unlocks_recipe") and bool(source.call("unlocks_recipe", type, recipe)):
+	for source: Object in _with("unlocks_recipe"):
+		if bool(source.call("unlocks_recipe", type, recipe)):
 			return true
 	return false
 
@@ -161,9 +194,8 @@ func recipe_unlocked(type: String, recipe: String) -> bool:
 ## How many batches one charge holds (the recipe's, plus research).
 func batch_of(b: Dictionary) -> int:
 	var n := int(recipe_def(recipe_of(b)).get("batch", 1))
-	for source: Object in modifiers:
-		if source.has_method("batch_bonus"):
-			n += int(source.call("batch_bonus", String(b.get("type", ""))))
+	for source: Object in _with("batch_bonus"):
+		n += int(source.call("batch_bonus", String(b.get("type", ""))))
 	return maxi(n, 1)
 
 
@@ -264,8 +296,8 @@ func variety_def(type: String, variety: String) -> Dictionary:
 func variety_unlocked(type: String, variety: String) -> bool:
 	if variety == BASE_VARIETY:
 		return true
-	for source: Object in modifiers:
-		if source.has_method("unlocks_variety") and bool(source.call("unlocks_variety", type, variety)):
+	for source: Object in _with("unlocks_variety"):
+		if bool(source.call("unlocks_variety", type, variety)):
 			return true
 	return false
 
@@ -338,12 +370,42 @@ func remaining_ms(b: Dictionary) -> int:
 	return 0
 
 
+## Building ids in order. Kept sorted between changes (asked constantly);
+## a copy, so callers may change what they get.
 func ids() -> Array[int]:
-	var out: Array[int] = []
-	for id: int in buildings:
-		out.append(id)
-	out.sort()
-	return out
+	if _ids_dirty or _ids.size() != buildings.size():
+		_ids.clear()
+		for id: int in buildings:
+			_ids.append(id)
+		_ids.sort()
+		_ids_dirty = false
+	return _ids.duplicate()
+
+
+var _ids: Array[int] = []
+var _ids_dirty := true
+## Goes up whenever a building is added, removed or refitted into another
+## kind: lists kept by kind (homes, amenities, specials) are rebuilt by it.
+var ids_version := 0
+var _where: Dictionary = {}
+var _where_version := -1
+
+
+## Ids (in order) of the buildings whose kind's definition has a non-empty
+## `key` -- "housing", "amenity", "effect"... Asked on every stage, so kept
+## until the buildings change. Read-only for callers.
+func ids_where(key: String) -> Array[int]:
+	if _where_version != ids_version:
+		_where.clear()
+		_where_version = ids_version
+	if not _where.has(key):
+		var out: Array[int] = []
+		for id: int in ids():
+			var v: Variant = type_def(buildings[id]).get(key)
+			if v != null and not (typeof(v) in [TYPE_DICTIONARY, TYPE_ARRAY] and v.is_empty()) and not (typeof(v) == TYPE_BOOL and not v):
+				out.append(id)
+		_where[key] = out
+	return _where[key]
 
 
 # --- changes ----------------------------------------------------------------------
@@ -359,6 +421,8 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 	if not world.occupy(cells_of(b), next_id):
 		return 0
 	buildings[next_id] = b
+	_ids_dirty = true
+	ids_version += 1
 	next_id += 1
 	sim.bus.emit(&"building_added", {"id": b["id"], "type": type})
 	return b["id"]
@@ -548,6 +612,7 @@ func refit(id: int, type: String) -> Dictionary:
 	b["paid"] = paid
 	var from := String(b["type"])
 	b["type"] = type
+	ids_version += 1
 	b["stage"] = 0
 	b.erase("variety")
 	b.erase("recipe")
@@ -604,6 +669,8 @@ func demolish(id: int) -> Dictionary:
 	b["token"] = int(b["token"]) + 1
 	(sim.system(&"world") as WorldSystem).vacate(id)
 	buildings.erase(id)
+	_ids_dirty = true
+	ids_version += 1
 	# A special pulled down waits before it can rise again: pulling down and
 	# rebuilding never restarts anything early.
 	if is_special(String(b["type"])):
@@ -720,6 +787,8 @@ func cancel(id: int) -> Dictionary:
 	b["token"] = int(b["token"]) + 1
 	(sim.system(&"world") as WorldSystem).vacate(id)
 	buildings.erase(id)
+	_ids_dirty = true
+	ids_version += 1
 	sim.bus.emit(&"building_removed", {"id": id, "type": b["type"], "refund": money})
 	return SimResult.ok({"refund": money})
 
@@ -765,11 +834,10 @@ func can_start(id: int) -> Dictionary:
 	var stage := current_stage(b)
 	if stage.is_empty():
 		return SimResult.fail("err.no_job")
-	for source: Object in modifiers:
-		if source.has_method("start_blocker"):
-			var why := String(source.call("start_blocker", String(b["type"])))
-			if why != "":
-				return SimResult.fail(why)
+	for source: Object in _with("start_blocker"):
+		var why := String(source.call("start_blocker", String(b["type"])))
+		if why != "":
+			return SimResult.fail(why)
 	var short := crew_short(b)
 	if short > 0:
 		return SimResult.fail("err.needs_crew", {"short": short})
@@ -857,16 +925,14 @@ func stage_yield(b: Dictionary, stage: Dictionary) -> Dictionary:
 	var base: Dictionary = stage.get("yield", {})
 	for item: String in base:
 		out[item] = float(base[item])
-	for source: Object in modifiers:
-		if source.has_method("yield_items"):
-			for item: String in source.call("yield_items", String(b["type"]), String(stage.get("id", ""))):
-				if not out.has(item):
-					out[item] = 0.0
+	for source: Object in _with("yield_items"):
+		for item: String in source.call("yield_items", String(b["type"]), String(stage.get("id", ""))):
+			if not out.has(item):
+				out[item] = 0.0
 	for item: String in out.keys():
 		var n := float(out[item])
-		for source: Object in modifiers:
-			if source.has_method("yield_bonus"):
-				n += float(source.call("yield_bonus", String(b["type"]), String(stage.get("id", "")), item))
+		for source: Object in _with("yield_bonus"):
+			n += float(source.call("yield_bonus", String(b["type"]), String(stage.get("id", "")), item))
 		if n > 0.0:
 			out[item] = n
 		else:
@@ -1006,6 +1072,8 @@ func save_state() -> Dictionary:
 
 func load_state(state: Dictionary) -> void:
 	buildings.clear()
+	_ids_dirty = true
+	ids_version += 1
 	next_id = int(state.get("next_id", 1))
 	special_cooldowns.clear()
 	var cd: Dictionary = state.get("special_cooldowns", {})
@@ -1015,6 +1083,9 @@ func load_state(state: Dictionary) -> void:
 		var b := raw.duplicate(true)
 		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end", "worker", "releases"]:
 			b[k] = int(b.get(k, 0))
+		# Tile coordinates are whole numbers (JSON hands them back as floats).
+		var at: Array = b.get("anchor", [0, 0])
+		b["anchor"] = [int(at[0]), int(at[1])]
 		var carry := {}
 		var raw_carry: Dictionary = b.get("carry", {})
 		for item: String in raw_carry:

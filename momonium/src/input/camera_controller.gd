@@ -101,6 +101,23 @@ func screen_to_cell(screen: Vector2) -> Vector2i:
 	return projection.cell_at(screen_to_world(screen))
 
 
+## The world area on screen now, grown by `margin` world units -- what the
+## views keep animating (the rest wait, unseen, until the camera comes).
+func sight_rect(margin: float = 0.0) -> Rect2:
+	var a := screen_to_world(Vector2.ZERO)
+	var b := screen_to_world(viewport_size())
+	return Rect2(a, b - a).abs().grow(margin)
+
+
+## Zoomed out far enough that a tile is small on screen: the views draw
+## their small motions less often (the rings, the Momo's limbs).
+func far() -> bool:
+	return projection.tile_width * camera.zoom.x < FAR_TILE_PIXELS
+
+
+const FAR_TILE_PIXELS := 64.0
+
+
 # --- moves ----------------------------------------------------------------------
 
 ## Moves the view by a screen-space drag: the ground follows the finger.

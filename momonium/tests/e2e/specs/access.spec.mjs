@@ -35,10 +35,17 @@ test('settings for comfort, and a tip', async ({ page }, info) => {
   // Settings.
   const hud = await g.query('hud');
   await tap(hud.buttons.settings, hud.window);
+  // Settings scrolls where it does not fit (a landscape screen): bring each
+  // row into view first, as a player would.
+  await g.query('dev_settings_reveal', 'LowPower');
+  await page.waitForTimeout(150);
   o = await g.query('options');
   await tap(o.toggles.low_power, o.window);
   o = await g.query('options');
   expect(o.max_fps).toBe(30);
+  await g.query('dev_settings_reveal', 'CameraButtons');
+  await page.waitForTimeout(150);
+  o = await g.query('options');
   await tap(o.toggles.camera_buttons, o.window);
   o = await g.query('options');
   expect(o.pad.left.length).toBe(4);

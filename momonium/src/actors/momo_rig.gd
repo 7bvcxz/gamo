@@ -129,8 +129,22 @@ func _apply_view() -> void:
 		body_root.move_child(parts["arm_r"], 0 if _back else 4)
 
 
+## Zoomed far out the limbs pose every `lod_step` frames (with the time that
+## passed), which nobody can tell at that size.
+var lod_step := 1
+var _lod_frame := 0
+var _lod_delta := 0.0
+
+
 func _process(delta: float) -> void:
-	tick(delta)
+	if lod_step <= 1:
+		tick(delta)
+		return
+	_lod_delta += delta
+	_lod_frame += 1
+	if _lod_frame % lod_step == 0:
+		tick(_lod_delta)
+		_lod_delta = 0.0
 
 
 ## Advances the animation by `delta` seconds and poses every joint. Pure

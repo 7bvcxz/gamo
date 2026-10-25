@@ -542,3 +542,7 @@ tips.rp,"Your research levels became points: place them again, e.g. 3/1/1 as 1/2
 tutorial.momo_select,Tap a Momo,모모를 눌러 보세요,モモをタップ,点一下桃桃
 tutorial.momo_pencil,Its tiles light up. The pencil edits them,맡은 칸이 빛나요. 연필로 고쳐요,受け持ちが光ります。鉛筆で編集,照看的格子亮起来了。用铅笔编辑
 tutorial.momo_edit,Tap tiles or drag across them: %d / %d,칸을 누르거나 그어 보세요: %d / %d칸,マスをタップかなぞる: %d / %dマス,点击或划过格子：%d / %d 格
+settings.large_demo,Large island demo (performance),큰 섬 데모 (성능 확인),大きな島のデモ（性能確認）,大岛演示（性能测试）
+settings.perf_overlay,Show performance,성능 표시,パフォーマンス表示,显示性能
+hud.demo_large,LARGE DEMO,큰 섬 체험 중,大きな島 体験中,大岛体验中
+perf.buildings,Buildings,건물,建物,建筑

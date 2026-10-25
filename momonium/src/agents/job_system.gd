@@ -95,22 +95,77 @@ func on_day_started(_day: int) -> void:
 ## Buildings idle for want of inputs, tried again.
 func _try_waiting() -> void:
 	var buildings: BuildingSystem = sim.system(&"buildings")
-	for id: int in buildings.ids():
+	var inv: InventorySystem = sim.system(&"inventory")
+	for id: int in _consumer_ids():
 		var b := buildings.get_building(id)
-		if b["state"] == BuildingSystem.IDLE and not (buildings.current_stage(b).get("consumes", {}) as Dictionary).is_empty():
+		if b.is_empty() or b["state"] != BuildingSystem.IDLE or not _consumer(String(b["type"])):
+			continue
+		var consumes: Dictionary = buildings.current_stage(b).get("consumes", {})
+		# Still short of its inputs: it could not start -- no need to ask.
+		if not consumes.is_empty() and inv.has_all(consumes):
 			try_start(id)
+
+
+## Kinds of building that ever take inputs (recipes, or a stage that consumes).
+func _consumer(type: String) -> bool:
+	if not _consumers.has(type):
+		var t := sim.data.building_type(type)
+		var takes := not (t.get("recipes", []) as Array).is_empty()
+		for st: Dictionary in t.get("cycle", {}).get("stages", []):
+			takes = takes or not (st.get("consumes", {}) as Dictionary).is_empty()
+		_consumers[type] = takes
+	return bool(_consumers[type])
+
+
+var _consumers: Dictionary = {}
+## The buildings of those kinds, in id order; rebuilt when buildings change.
+var _consumer_list: Array[int] = []
+var _consumer_sig := -1
+
+
+func _consumer_ids() -> Array[int]:
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var sig := buildings.ids_version
+	if sig != _consumer_sig:
+		_consumer_sig = sig
+		_consumer_list.clear()
+		for id: int in buildings.ids():
+			if _consumer(String(buildings.get_building(id)["type"])):
+				_consumer_list.append(id)
+	return _consumer_list
+
 
 
 func _try_all() -> void:
 	var buildings: BuildingSystem = sim.system(&"buildings")
+	var momos: MomoSystem = sim.system(&"momo")
+	var research: ResearchSystem = sim.system(&"research")
+	# Who is posted where, read once: a building nobody is posted to, with no
+	# stage that runs by itself, has no one to start it -- it is not asked.
+	var staffed := {}
+	for m: int in momos.momos:
+		staffed[int(momos.momos[m]["assigned"])] = true
 	for id: int in buildings.ids():
+		if not staffed.has(id):
+			var b := buildings.get_building(id)
+			if b.is_empty() or b["state"] != BuildingSystem.IDLE:
+				continue
+			var action := String(buildings.current_stage(b).get("action", ""))
+			if research == null or not research.is_auto(String(b["type"]), action):
+				continue
 		try_start(id)
 
 
 func resting() -> bool:
 	if sim.data.get_value("balance", "momo.works_at_night", false):
 		return false
-	return DayCycle.new(sim.data).is_night(sim.clock)
+	if _cycle == null:
+		_cycle = DayCycle.new(sim.data)
+	return _cycle.is_night(sim.clock)
+
+
+## The day's parts, read once from the data (resting() is asked constantly).
+var _cycle: DayCycle
 
 
 ## The worker who would take the building's next stage now, or 0.
@@ -175,16 +230,20 @@ func route_order(momo: int) -> Array[int]:
 	var list := _watched_buildings(momo)
 	if route == "zone":
 		list = list.filter(func(id: int) -> bool: return zone_owner(id) == momo)
-	var anchor := func(id: int) -> Vector2i:
-		var c: Array = buildings.get_building(id)["anchor"]
-		return Vector2i(int(c[0]), int(c[1]))
+	# Sort keys are read once per building, not in every comparison (the
+	# order is the same; ordering is asked on every dispatch).
 	if route == "rows" or route == "zigzag":
+		var anchors := {}
+		for id: int in list:
+			var c: Array = buildings.get_building(id)["anchor"]
+			anchors[id] = Vector2i(int(c[0]), int(c[1]))
+		var zigzag := route == "zigzag"
 		list.sort_custom(func(a: int, b: int) -> bool:
-			var pa: Vector2i = anchor.call(a)
-			var pb: Vector2i = anchor.call(b)
+			var pa: Vector2i = anchors[a]
+			var pb: Vector2i = anchors[b]
 			if pa.y != pb.y:
 				return pa.y < pb.y
-			if route == "zigzag" and pa.y % 2 != 0:
+			if zigzag and pa.y % 2 != 0:
 				return pa.x > pb.x
 			return pa.x < pb.x)
 		var at := int(momos.get_momo(momo).get("assigned", 0))
@@ -193,9 +252,12 @@ func route_order(momo: int) -> Array[int]:
 			list = list.slice(i + 1) + list.slice(0, i + 1)
 		return list
 	var here := momos.position_of(momo)
+	var dist := {}
+	for id: int in list:
+		dist[id] = here.distance_to(momos.work_spot(id))
 	list.sort_custom(func(a: int, b: int) -> bool:
-		var da := here.distance_to(momos.work_spot(a))
-		var db := here.distance_to(momos.work_spot(b))
+		var da: float = dist[a]
+		var db: float = dist[b]
 		return da < db - 0.0001 or (absf(da - db) <= 0.0001 and a < b))
 	return list
 
@@ -277,9 +339,12 @@ func _call_watchers(building: int) -> void:
 	for id: int in momos.watchers_of(building):
 		if not is_working(id) and int(momos.get_momo(id)["assigned"]) != building:
 			free.append(id)
+	var dist := {}
+	for id: int in free:
+		dist[id] = momos.position_of(id).distance_to(spot)
 	free.sort_custom(func(a: int, b: int) -> bool:
-		var da := momos.position_of(a).distance_to(spot)
-		var db := momos.position_of(b).distance_to(spot)
+		var da: float = dist[a]
+		var db: float = dist[b]
 		return da < db - 0.0001 or (absf(da - db) <= 0.0001 and a < b))
 	var owner := zone_owner(building)
 	for id: int in free:

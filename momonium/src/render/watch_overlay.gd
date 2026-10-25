@@ -24,6 +24,8 @@ var editing := false
 ## cell -> seconds of red left
 var _flash: Dictionary = {}
 var _t := 0.0
+## How many times the route has been drawn (tests: not with every pulse).
+var route_draws := 0
 
 
 func setup(sim: Simulation, p_projection: IsoProjection) -> void:
@@ -39,12 +41,14 @@ func setup(sim: Simulation, p_projection: IsoProjection) -> void:
 	add_child(route_layer)
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
 		if type in [&"momo_watch_changed", &"momo_route_changed", &"momo_assigned"] and int(p.get("id", 0)) == momo:
-			queue_redraw())
+			queue_redraw()
+			route_layer.queue_redraw())
 
 
 func show_for(id: int) -> void:
 	momo = id
 	queue_redraw()
+	route_layer.queue_redraw()
 
 
 func clear() -> void:
@@ -97,12 +101,14 @@ func _draw() -> void:
 		var m := projection.cell_center(cell)
 		draw_line(m + Vector2(-10, -6), m + Vector2(10, 6), Color(1, 1, 1, a), 3.0, true)
 		draw_line(m + Vector2(-10, 6), m + Vector2(10, -6), Color(1, 1, 1, a), 3.0, true)
-	if route_layer != null:
-		route_layer.queue_redraw()
+	# The route is not redrawn with the pulse: ordering it walks the whole
+	# watch set, and it only moves when the tiles, the route or the Momo do
+	# (the events above, and the half-second timer for walking).
 
 
 ## The route: Momo -> 1 -> 2 -> ..., in the order route_order() gives.
 func _draw_route() -> void:
+	route_draws += 1
 	if jobs == null or momo == 0:
 		return
 	var order := route()

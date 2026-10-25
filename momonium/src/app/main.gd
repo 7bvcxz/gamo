@@ -77,8 +77,12 @@ var settings_frame: PanelFrame
 var settings_view: SettingsView
 var tutorial: Tutorial
 ## The demo island (Settings) is never saved; Engine meta "momonium_demo"
-## survives the scene reload that switches to it and back.
+## survives the scene reload that switches to it and back. Its value names
+## the demo: "full" (every industry part-way) or "large" (StressIsland).
 var in_demo := false
+var demo_kind := ""
+## Frames per second, frame and simulation time, what animates (Settings).
+var perf_overlay: PerfOverlay
 ## The last sale's result (E2E reads it).
 var last_sale: Dictionary = {}
 ## The confetti when the settlement goes up a tier.
@@ -191,7 +195,9 @@ func _ready() -> void:
 	building_views.name = "BuildingViews"
 	add_child(building_views)
 	building_views.setup(sim, entities, lib)
+	building_views.cameras = cameras
 	momo_views = MomoViews.new()
+	momo_views.cameras = cameras
 	momo_views.name = "MomoViews"
 	add_child(momo_views)
 	momo_views.setup(sim, entities, lib)
@@ -349,6 +355,7 @@ func _ready() -> void:
 		_close_frames()
 		tutorial.start())
 	settings_view.demo_requested.connect(enter_demo)
+	settings_view.large_demo_requested.connect(func() -> void: enter_demo("large"))
 	settings_view.leave_demo_requested.connect(leave_demo)
 	settings_view.settings = settings
 	settings_view.option_changed.connect(func(key: String, value: Variant) -> void:
@@ -374,6 +381,10 @@ func _ready() -> void:
 	_demo_badge.add_theme_color_override("font_color", Color("#ffe27a"))
 	_demo_badge.visible = in_demo
 	ui.add_child(_demo_badge)
+	perf_overlay = PerfOverlay.new()
+	ui.add_child(perf_overlay)
+	perf_overlay.setup(building_views, momo_views)
+	perf_overlay.show_overlay(bool(settings.get_value("perf_overlay")))
 	_layout()
 	tutorial = Tutorial.new()
 	ui.add_child(tutorial)
@@ -399,6 +410,20 @@ func _ready() -> void:
 		tutorial.start()
 		return _tutorial_info(null))
 	bridge.register_query("settings_ui", _settings_info)
+	# Scrolls Settings to a row by its node name, as a player's scroll would.
+	bridge.register_query("dev_settings_reveal", func(node_name: Variant) -> Dictionary:
+		var c := settings_view.get_node_or_null(String(node_name)) as Control
+		if c == null:
+			return {"ok": false}
+		settings_frame.scroll.ensure_control_visible(c)
+		return {"ok": true})
+	bridge.register_query("perf", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var r := perf_overlay.get_global_rect()
+		var p0: Vector2 = vp.get_final_transform() * r.position
+		var p1: Vector2 = vp.get_final_transform() * r.end
+		return {"visible": perf_overlay.visible, "text": perf_overlay.text, "now": perf_overlay.measure(), "shown": perf_overlay.numbers,
+			"rect": [p0.x, p0.y, p1.x - p0.x, p1.y - p0.y], "far": cameras.far()})
 	bridge.register_query("art_info", _art_info)
 	bridge.register_query("cell_screen", _cell_screen)
 	bridge.register_query("logical_screen", _logical_screen)
@@ -535,7 +560,7 @@ func _ready() -> void:
 		return {"content_scale": get_tree().root.content_scale_factor, "max_fps": Engine.max_fps, "pad": pad,
 			"camera": [camera.position.x, camera.position.y], "tip": tips.tip, "tip_text": tips.text.text, "tip_rect": [a.x, a.y, b.x - a.x, b.y - a.y],
 			"tip_ok": conv.call(tips.ok_button) if tips.tip != "" else [],
-			"toggles": {"low_power": conv.call(settings_view.low_power_toggle), "camera_buttons": conv.call(settings_view.camera_toggle)} if settings_view.is_visible_in_tree() else {},
+			"toggles": {"low_power": _settings_rect(settings_view.low_power_toggle), "camera_buttons": _settings_rect(settings_view.camera_toggle)} if settings_view.is_visible_in_tree() else {},
 			"scale_slider": conv.call(settings_view.scale_slider) if settings_view.is_visible_in_tree() else [], "window": [win.x, win.y]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
@@ -684,7 +709,10 @@ func _process(delta: float) -> void:
 	_last_wall = wall
 	if gap > 5.0 and sim.time_scale > 0.0:
 		_tell_about_return(OfflineProgress.catch_up(sim, int(gap * 1000.0 * sim.time_scale)))
+	var t0 := Time.get_ticks_usec()
 	sim.advance_seconds(delta)
+	if perf_overlay != null:
+		perf_overlay.sim_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	if tips != null:
 		_check_land_tip(delta)
 	if persist:
@@ -714,6 +742,9 @@ func _load_or_new() -> Simulation:
 		return next
 	if in_demo:
 		load_status = "demo"
+		demo_kind = String(Engine.get_meta("momonium_demo")) if typeof(Engine.get_meta("momonium_demo")) == TYPE_STRING else "full"
+		if demo_kind == "large":
+			return StressIsland.build(StressIsland.DEMO_SIDE)
 		return DemoWorld.build()
 	if Engine.has_meta("momonium_save_path"):
 		save_path = String(Engine.get_meta("momonium_save_path"))
@@ -780,9 +811,9 @@ func open_rp() -> void:
 
 ## Switches to the demo island: saves the player's island first, then
 ## reloads the scene in demo mode. Nothing of the demo is ever saved.
-func enter_demo() -> void:
+func enter_demo(kind: String = "full") -> void:
 	save_now()
-	Engine.set_meta("momonium_demo", true)
+	Engine.set_meta("momonium_demo", kind)
 	get_tree().reload_current_scene.call_deferred()
 
 
@@ -868,6 +899,8 @@ func apply_options() -> void:
 		get_tree().root.content_scale_factor = s
 		_layout.call_deferred()
 	Engine.max_fps = 30 if bool(settings.get_value("low_power")) else 0
+	if perf_overlay != null:
+		perf_overlay.show_overlay(bool(settings.get_value("perf_overlay")))
 	if camera_pad != null:
 		camera_pad.visible = bool(settings.get_value("camera_buttons"))
 		_place_camera_pad()
@@ -882,13 +915,15 @@ func _layout() -> void:
 	var size := get_viewport_rect().size
 	_version_label.position = size - Vector2(84, 28)
 	if _demo_badge != null:
-		_demo_badge.text = tr("hud.demo")
+		_demo_badge.text = tr("hud.demo_large") if demo_kind == "large" else tr("hud.demo")
 		_demo_badge.reset_size()
 		_demo_badge.position = Vector2((size.x - _demo_badge.size.x) * 0.5, 22.0)
 	if cameras.fit_zoom > 0.0 and camera.is_inside_tree():
 		cameras.on_resize()
 	if camera_pad != null:
 		_place_camera_pad()
+	if perf_overlay != null and hud.day_panel != null:
+		perf_overlay.position = Vector2(12.0, hud.day_panel.get_global_rect().end.y + 8.0)
 
 
 ## E2E: proves the platform's user:// (IndexedDB on the web) can hold a save and
@@ -1192,7 +1227,23 @@ func _settings_info(_arg: Variant) -> Dictionary:
 		langs[code] = conv.call(settings_view.lang_buttons[code])
 	return {"open": settings_frame.visible, "in_demo": in_demo, "badge": _demo_badge.visible and _demo_badge.text != "",
 		"tutorial": conv.call(settings_view.tutorial_button), "demo": conv.call(settings_view.demo_button),
-		"demo_text": settings_view.demo_button.text, "langs": langs, "locale": LocaleService.current(), "window": [win.x, win.y]}
+		"demo_text": settings_view.demo_button.text, "langs": langs, "locale": LocaleService.current(), "window": [win.x, win.y],
+		"large_demo": _settings_rect(settings_view.large_demo_button), "perf": _settings_rect(settings_view.perf_toggle), "demo_kind": demo_kind,
+		"badge_text": _demo_badge.text}
+
+
+## E2E: where a Settings row is on screen -- [] while it is scrolled out of
+## the panel (or hidden), so a test never taps beside the panel by mistake.
+func _settings_rect(c: Control) -> Array:
+	if not c.is_visible_in_tree():
+		return []
+	var vp := get_viewport()
+	var r := c.get_global_rect()
+	if not settings_frame.scroll.get_global_rect().grow(1.0).encloses(r):
+		return []
+	var a: Vector2 = vp.get_final_transform() * r.position
+	var b: Vector2 = vp.get_final_transform() * r.end
+	return [a.x, a.y, b.x - a.x, b.y - a.y]
 
 
 ## E2E: the research menu as shown -- node states, the chosen node's details, where to tap.
