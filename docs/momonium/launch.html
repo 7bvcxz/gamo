@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Momonium</title>
+  <!--
+    The launch page (Step 43): play, or open a labelled demo that is never
+    saved -- the game reads ?demo= once and the way back leads to the player's
+    own island. tools/deploy.sh copies this file to docs/momonium/launch.html.
+    No network but this folder's version.json (never api.github.com).
+  -->
+  <style>
+    :root { --bg: #0d2238; --card: #13314f; --ink: #eef6ff; --dim: #a9c3dc; --gold: #ffd36b; --sea: #4cc3e0; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: radial-gradient(circle at 50% 30%, #1b4f7a, var(--bg) 70%); color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif; }
+    main { max-width: 440px; margin: 0 auto; padding: 48px 16px 32px; display: grid; gap: 14px; text-align: center; }
+    h1 { margin: 0; font-size: 44px; letter-spacing: 0.02em; }
+    .tag { margin: 0 0 12px; color: var(--dim); }
+    a.btn { display: block; padding: 16px; border-radius: 16px; background: var(--card); color: var(--ink); text-decoration: none; font-size: 19px;
+      border: 2px solid transparent; }
+    a.btn:hover, a.btn:focus-visible { border-color: var(--sea); outline: none; }
+    a.play { background: var(--gold); color: #2b1d00; font-weight: 700; font-size: 22px; }
+    .small { font-size: 13px; color: var(--dim); }
+    #version { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Momonium</h1>
+    <p class="tag" data-ko="모모와 함께 작은 섬을 키워요" data-en="Grow a little island with the Momo">모모와 함께 작은 섬을 키워요</p>
+    <a class="btn play" id="play" href="./" data-ko="▶ 플레이" data-en="▶ Play">▶ 플레이</a>
+    <a class="btn" id="demo" href="./?demo=full" data-ko="체험 섬 — 나중 기능 미리 해 보기" data-en="Demo island — try later features">체험 섬 — 나중 기능 미리 해 보기</a>
+    <a class="btn" id="large" href="./?demo=large" data-ko="큰 섬 데모 — 성능 확인" data-en="Large island demo — performance">큰 섬 데모 — 성능 확인</a>
+    <p class="small" data-ko="데모는 저장되지 않아요. 내 섬은 이 브라우저에 그대로 있어요." data-en="Demos are never saved. Your own island stays in this browser.">데모는 저장되지 않아요. 내 섬은 이 브라우저에 그대로 있어요.</p>
+    <p class="small" id="version">…</p>
+  </main>
+  <script>
+    const lang = (navigator.language || "en").toLowerCase().startsWith("ko") ? "ko" : "en";
+    document.documentElement.lang = lang;
+    for (const el of document.querySelectorAll("[data-" + lang + "]")) el.textContent = el.dataset[lang];
+    fetch("version.json", { cache: "no-store" }).then((r) => r.json()).then((v) => {
+      const build = String(v.pack || "").replace(/^game-|\.pck$/g, "");
+      document.getElementById("version").textContent = `v${v.version || "?"} · build ${build} · Godot ${v.godot || "?"}`;
+    }).catch(() => { document.getElementById("version").textContent = ""; });
+  </script>
+</body>
+</html>
