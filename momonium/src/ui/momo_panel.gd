@@ -155,5 +155,11 @@ func _refresh_skill(m: Dictionary, building: int) -> void:
 			break
 	history_label.visible = not past.is_empty()
 	history_label.text = tr("momo.history").format({"list": " · ".join(past)})
+	var community: CommunitySystem = sim.system(&"community")
+	if community != null and community.capacity() > 0:
+		var home := community.home_of(momo_id)
+		var line := tr("momo.home").format({"name": tr(String(buildings.type_def(buildings.get_building(home)).get("name", "")))}) if home != 0 else tr("momo.no_home")
+		history_label.text = line + ("  ·  " + history_label.text if history_label.visible else "")
+		history_label.visible = true
 	pin_button.visible = building != 0
 	pin_button.text = tr("momo.pinned") if bool(m.get("pinned", false)) else tr("momo.free_to_move")

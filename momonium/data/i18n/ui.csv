@@ -353,3 +353,26 @@ momo.history,Before: {list},전에: {list},以前: {list},以前：{list}
 manager.status,Managing · {n} moves,관리 중 · {n}번 옮김,管理中 · {n}回移動,管理中 · 调动{n}次
 manager.none,No manager at work,일하는 관리인이 없어요,働いている管理人がいません,没有在岗的管理员
 fx.manager_moved,%s → %s,%s → %s,%s → %s,%s → %s
+building.villa,Villa,빌라,ヴィラ,别墅
+building.apartment,Apartment,아파트,アパート,公寓
+building.park,Park,공원,公園,公园
+building.pub,Pub,술집,パブ,酒馆
+building.community_center,Community center,마을 회관,公民館,社区中心
+research.masonry.name,Masonry,석조 건축,石造建築,石砌建筑
+research.masonry.desc,Dressed stone and iron ties: buildings that can rise several storeys -- apartments.,다듬은 돌과 쇠 이음으로 여러 층을 올릴 수 있어요 — 아파트.,切り石と鉄のつなぎで、何階も建てられます — アパート。,琢石加铁拉结，可以盖好几层——公寓。
+research.civic_planning.name,Civic planning,마을 계획,まちづくり,城镇规划
+research.civic_planning.desc,"A hall for everyone: a community center, lit and warm, where the island gathers.",모두의 강당: 불 밝고 따뜻한 마을 회관에 섬이 모여요.,みんなの集会所: 明るく暖かい公民館に島が集まります。,大家的礼堂：灯火通明、温暖的社区中心，全岛在此相聚。
+panel.tab.life,Life,생활,くらし,生活
+life.happiness,Happiness,행복,しあわせ,幸福
+life.homes,Homes,집,住まい,住所
+life.homeless,{n} sleep outdoors,{n}명이 밖에서 자요,{n}匹が外で寝ています,{n}只在户外睡
+life.work,Momo work time,모모 작업 시간,モモの作業時間,桃桃作业时间
+life.none,"No parks, pubs or halls yet",아직 공원·술집·회관이 없어요,まだ公園・パブ・公民館がありません,还没有公园、酒馆或会馆
+life.open,open,영업 중,営業中,营业中
+life.shut_short,shut: short of {items},닫음: {items} 부족,休業: {items}が足りない,停业：{items}不足
+life.shut_power,shut: needs {kw} kW,닫음: 전기 {kw} kW 필요,休業: 電気 {kw} kW が必要,停业：需要 {kw} kW 电
+life.extra_copy,another of these adds less,같은 시설은 더할수록 덜 늘어요,同じ施設は増やすほど効果が小さく,同类设施越多加成越少
+detail.residents,Residents {n}/{cap},주민 {n}/{cap},住人 {n}/{cap},居民 {n}/{cap}
+detail.amenity_open,Open today · happiness +{n},오늘 영업 · 행복 +{n},今日営業 · しあわせ +{n},今日营业 · 幸福 +{n}
+momo.home,Lives in the {name},{name}에 살아요,{name}に住んでいます,住在{name}
+momo.no_home,Sleeps outdoors,밖에서 자요,外で寝ています,在户外睡

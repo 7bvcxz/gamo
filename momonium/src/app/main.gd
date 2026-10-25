@@ -34,6 +34,7 @@ var status_frame: PanelFrame
 var inventory_view: InventoryView
 var economy_view: EconomyView
 var stats_view: StatsView
+var life_view: LifeView
 ## Everything about one building, opened from its name.
 var detail_frame: PanelFrame
 var detail_view: BuildingDetailView
@@ -219,6 +220,9 @@ func _ready() -> void:
 	stats_view = StatsView.new()
 	stats_view.setup(sim, lib)
 	status_frame.add_tab("panel.tab.records", stats_view)
+	life_view = LifeView.new()
+	life_view.setup(sim, lib)
+	status_frame.add_tab("panel.tab.life", life_view)
 	detail_frame = _frame(ui, "DetailFrame")
 	detail_view = BuildingDetailView.new()
 	detail_view.setup(sim, lib)
@@ -322,6 +326,16 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("dev_select_cell", func(cell: Variant) -> Dictionary:
+		var id := (sim.system(&"buildings") as BuildingSystem).building_at(Vector2i(int(cell[0]), int(cell[1])))
+		if id != 0:
+			selection.select_building(id)
+		return {"id": id})
+	bridge.register_query("life", func(_a: Variant) -> Dictionary:
+		var c: CommunitySystem = sim.system(&"community")
+		life_view.refresh()
+		return {"happiness": c.happiness(), "homes": (life_view.homes_row.get_node("Value") as Label).text,
+			"work": (life_view.work_row.get_node("Value") as Label).text, "parts": c.breakdown()})
 	bridge.register_query("power", func(_a: Variant) -> Dictionary:
 		var power: PowerSystem = sim.system(&"power")
 		var vp := get_viewport()

@@ -748,6 +748,81 @@
           20
         ]
       }
+    },
+    "villa": {
+      "source": "svg/villa.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          66,
+          31
+        ]
+      }
+    },
+    "apartment": {
+      "source": "svg/apartment.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          125
+        ],
+        "top": [
+          70,
+          1
+        ]
+      }
+    },
+    "park": {
+      "source": "svg/park.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          44,
+          57
+        ]
+      }
+    },
+    "pub": {
+      "source": "svg/pub.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          66,
+          29
+        ]
+      }
+    },
+    "community_center": {
+      "source": "svg/community_center.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          68,
+          3
+        ]
+      }
     }
   }
 }

@@ -2,7 +2,6 @@
 // details set its priority by tap; a Momo's card shows its skill and lets
 // the player pin it.
 import { test, expect } from '../lib/fixtures.mjs';
-import { clearPointOnCell } from '../lib/coords.mjs';
 
 const centre = async (game, rect, win) => {
   const box = await game.canvas.boundingBox();
@@ -26,9 +25,9 @@ test('manager, priorities and skill', async ({ game }) => {
   expect(s.manager.moves_made).toBeGreaterThan(0);
   const office = s.buildings.buildings.find((b) => b.type === 'office');
   expect(office).toBeTruthy();
-  // The second mine: tap it, open its details, set High.
-  const at = await clearPointOnCell(game, [3, 1]);
-  await game.tap(at.x, at.y);
+  // The second mine (behind the tall apartment, so selected directly): open
+  // its details from its name and set High -- by taps.
+  await game.query('dev_select_cell', [3, 1]);
   await game.page.waitForTimeout(250);
   const p = await game.query('panels');
   const title = await centre(game, p.context_title, p.window);

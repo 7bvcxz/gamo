@@ -4,7 +4,7 @@ extends "res://tests/framework/test_case.gd"
 ## never depends on presentation. Logic folders hold RefCounted rules and data;
 ## presentation folders hold nodes that read the simulation and send commands.
 
-const LOGIC := ["core", "data", "sim", "world", "buildings", "economy", "progression", "research", "persistence", "agents", "power"]
+const LOGIC := ["core", "data", "sim", "world", "buildings", "economy", "progression", "research", "persistence", "agents", "power", "community"]
 const PRESENTATION := ["render", "input", "ui", "actors", "audio", "app", "platform"]
 const NODE_BASES := ["extends Node", "extends Control", "extends CanvasItem", "extends Sprite2D", "extends CanvasLayer", "extends Camera2D"]
 const PRESENTATION_APIS := ["get_tree()", "get_viewport()", "Input.", "queue_redraw", "DisplayServer.", "JavaScriptBridge"]

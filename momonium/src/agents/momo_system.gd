@@ -80,6 +80,9 @@ func work_multiplier(id: int, type: String) -> float:
 	var research: ResearchSystem = sim.system(&"research")
 	if research != null:
 		m *= research.momo_multiplier(type)
+	var community: CommunitySystem = sim.system(&"community")
+	if community != null:
+		m *= community.work_factor(id)
 	return m
 
 

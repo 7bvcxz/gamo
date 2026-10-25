@@ -356,7 +356,16 @@ func _validate_buildings() -> void:
 			errors.append("buildings: %s.unlock.level must be >= 1" % key)
 		var stages: Variant = (t.get("cycle", {}) as Dictionary).get("stages")
 		var generates := not ((t.get("power", {}) as Dictionary).get("generate", {}) as Dictionary).is_empty()
-		var manages := bool(t.get("manages", false))
+		var manages := bool(t.get("manages", false)) or not (t.get("housing", {}) as Dictionary).is_empty() or not (t.get("amenity", {}) as Dictionary).is_empty()
+		var housing: Dictionary = t.get("housing", {})
+		if not housing.is_empty() and (int(housing.get("capacity", 0)) < 1 or float(housing.get("rest", 0)) <= 0.0 or float(housing.get("rest", 0)) > 1.0):
+			errors.append("buildings: %s.housing needs capacity >= 1 and rest in (0, 1]" % key)
+		var amenity: Dictionary = t.get("amenity", {})
+		if not amenity.is_empty() and float(amenity.get("happiness", 0)) <= 0.0:
+			errors.append("buildings: %s.amenity needs happiness > 0" % key)
+		for item: String in amenity.get("daily", {}):
+			if not table("items").get("items", {}).has(item):
+				errors.append("buildings: %s.amenity.daily uses unknown item %s" % [key, item])
 		if generates:
 			var kind := String(t["power"]["generate"].get("kind", ""))
 			if not ["solar", "wind", "steam", "hydro"].has(kind) or float(t["power"]["generate"].get("kw", 0)) <= 0.0:

@@ -768,6 +768,48 @@
       },
       "seconds": 120,
       "effects": []
+    },
+    {
+      "id": "masonry",
+      "industry": "global",
+      "name": "research.masonry.name",
+      "desc": "research.masonry.desc",
+      "icon": "item_stone",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8,
+          "stone": 10
+        }
+      },
+      "seconds": 120,
+      "effects": []
+    },
+    {
+      "id": "civic_planning",
+      "industry": "global",
+      "name": "research.civic_planning.name",
+      "desc": "research.civic_planning.desc",
+      "icon": "ui_status",
+      "requires": [
+        "masonry"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 12,
+          "copper_ingot": 2
+        }
+      },
+      "seconds": 150,
+      "effects": []
     }
   ],
   "branches": [

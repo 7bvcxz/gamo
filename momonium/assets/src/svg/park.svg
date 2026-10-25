@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
+  <!-- A 1x1 park (diamond centre = origin (70, 95)): lawn, a winding path, two
+       round trees, a bench and a little pond. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#8fd16a" stroke="#5f9f45" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M34 98 Q60 92 66 104 Q74 118 104 104" fill="none" stroke="#e8d3a8" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="88" cy="88" rx="12" ry="6" fill="#7cc7f0" stroke="#4a9ac8" stroke-width="1.5"/>
+  <rect x="42" y="74" width="5" height="16" fill="#8a5a34"/>
+  <circle cx="44" cy="68" r="12" fill="#4f9a45"/><circle cx="38" cy="72" r="7" fill="#5aab4f"/>
+  <rect x="96" y="96" width="4" height="12" fill="#8a5a34"/>
+  <circle cx="98" cy="92" r="9" fill="#66b85a"/>
+  <path d="M58 112 L74 104 M58 116 L74 108 M60 112 L60 118 M72 105 L72 111" stroke="#a8723f" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="30" cy="100" r="2" fill="#ff8ab0"/><circle cx="110" cy="96" r="2" fill="#ffd36b"/><circle cx="52" cy="122" r="2" fill="#ffffff"/>
+</svg>

@@ -379,6 +379,23 @@ func _refresh_management(b: Dictionary, buildings: BuildingSystem) -> void:
 	manager_label.visible = is_office
 	if is_office and manager != null:
 		manager_label.text = tr("manager.status").format({"n": manager.moves_made}) if manager.manager() != 0 else tr("manager.none")
+	# Homes and amenities say what they do, in the same words as the Life tab.
+	var community: CommunitySystem = sim.system(&"community")
+	var def := buildings.type_def(b)
+	if community != null and not (def.get("housing", {}) as Dictionary).is_empty():
+		var residents := community.housing().values().filter(func(h: int) -> bool: return h == int(b["id"])).size()
+		manager_label.visible = true
+		manager_label.text = tr("detail.residents").format({"n": residents, "cap": int(def["housing"]["capacity"])})
+	elif community != null and not (def.get("amenity", {}) as Dictionary).is_empty():
+		manager_label.visible = true
+		var part: Array = community.breakdown().filter(func(p: Dictionary) -> bool: return int(p["id"]) == int(b["id"]))
+		if not part.is_empty() and bool(part[0]["open"]):
+			manager_label.text = tr("detail.amenity_open").format({"n": amount(float(part[0]["adds"]))})
+		else:
+			var lv := LifeView.new()
+			lv.sim = sim
+			manager_label.text = lv.shut_reason(int(b["id"]))
+			lv.free()
 
 
 ## A generator: what it gives now of its most. A powered building: what it

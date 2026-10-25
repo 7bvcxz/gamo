@@ -54,7 +54,7 @@ func test_closed_panels_leave_the_island_alone() -> void:
 func test_tabs_switch_and_every_control_is_touch_sized() -> void:
 	main.call("_on_hud_action", &"status")
 	await tree.process_frame
-	assert_eq(frame.tabs.size(), 4, "status, store, money, records")
+	assert_eq(frame.tabs.size(), 5, "status, store, money, records, life")
 	for i in frame.tabs.size():
 		var b: Button = frame.tabs[i]["button"]
 		assert_true(b.size.y >= 48.0, "tab %d is tall enough (%.0f)" % [i, b.size.y])

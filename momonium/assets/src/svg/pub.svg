@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 150" width="140" height="150">
+  <!-- A 1x1 pub (diamond centre = origin (70, 95)): a timber-framed house with
+       warm windows, a hanging sign with a mug, and a barrel by the door. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5a68e" stroke="#8f8068" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 98 L70 122 L70 76 L28 52 Z" fill="#f0dfc0" stroke="#5a3820" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 122 L110 98 L110 52 L70 76 Z" fill="#fbecd0" stroke="#5a3820" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 52 L70 76 L110 52 M28 75 L70 99 L110 75 M49 64 L49 110 M90 64 L90 110" fill="none" stroke="#6b4426" stroke-width="3"/>
+  <path d="M22 56 L66 28 L116 56 L70 82 Z" fill="#7a5a3a" stroke="#4a3220" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M34 80 L44 86 L44 96 L34 90 Z M76 90 L86 84 L86 94 L76 100 Z" fill="#ffd36b" stroke="#6b4426" stroke-width="1.5"/>
+  <path d="M94 104 L104 98 L104 84 L94 90 Z" fill="#8a5a34" stroke="#4a3220" stroke-width="2"/>
+  <path d="M110 66 L124 66" stroke="#4a3220" stroke-width="2"/>
+  <rect x="116" y="66" width="12" height="14" rx="2" fill="#e2b98a" stroke="#4a3220" stroke-width="1.5"/>
+  <path d="M119 70 L119 77 L124 77 L124 70 Z M124 72 L126 72 L126 75 L124 75" fill="#f2c14e" stroke="#7a5a3a" stroke-width="1"/>
+  <ellipse cx="22" cy="104" rx="7" ry="9" fill="#a8723f" stroke="#5a3820" stroke-width="1.5"/>
+  <path d="M15 100 L29 100 M15 108 L29 108" stroke="#5a3820" stroke-width="1.5"/>
+</svg>

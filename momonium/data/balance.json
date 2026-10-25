@@ -175,5 +175,16 @@
     "review_seconds": 20,
     "stuck_seconds": 40,
     "moves_per_review": 2
+  },
+  "community": {
+    "_doc": "Momo life. Each Momo gets a home in id order from the homes' capacity (oldest homes first); unhoused Momo rest outdoors (rest 1.0). Island happiness 0..max_happiness is the sum of open amenities, each type counting its i-th copy at stack[i] (none beyond the list). Work time at a building is multiplied by the Momo's rest times (1 - happiness / max_happiness * happiness_effect), never below floor.",
+    "max_happiness": 100,
+    "happiness_effect": 0.15,
+    "stack": [
+      1.0,
+      0.5,
+      0.25
+    ],
+    "floor": 0.75
   }
 }

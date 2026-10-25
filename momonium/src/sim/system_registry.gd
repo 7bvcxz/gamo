@@ -11,6 +11,9 @@ static func create_default() -> Array[SimSystem]:
 		WorldSystem.new(),
 		LandSystem.new(),
 		BuildingSystem.new(),
+		# Before the economy: at dawn the island feeds its pubs from the
+		# night's stock first, then sells what is left.
+		CommunitySystem.new(),
 		EconomySystem.new(),
 		InventorySystem.new(),
 		ProgressionSystem.new(),

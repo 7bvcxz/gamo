@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 community centre (diamond centre = origin (70, 95)): a wide hall
+       with a gable front, tall windows lit warm, a clock and a flag. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#c9c4bb" stroke="#8d8579" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 96 L70 122 L70 70 L24 44 Z" fill="#e4ecf2" stroke="#6f7b87" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 122 L116 96 L116 44 L70 70 Z" fill="#f4f8fb" stroke="#6f7b87" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M18 48 L68 18 L122 48 L70 76 Z" fill="#4d8fd6" stroke="#2f5d96" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 70 L70 22 L116 48" fill="none" stroke="#2f5d96" stroke-width="2"/>
+  <g fill="#ffe7a6" stroke="#6f7b87" stroke-width="1.5">
+    <path d="M32 64 L40 69 L40 88 L32 83 Z"/><path d="M48 73 L56 78 L56 97 L48 92 Z"/>
+    <path d="M80 84 L88 79 L88 98 L80 103 Z"/><path d="M98 74 L106 69 L106 88 L98 93 Z"/>
+  </g>
+  <circle cx="68" cy="40" r="7" fill="#ffffff" stroke="#2f5d96" stroke-width="2"/>
+  <path d="M68 36 L68 40 L71 42" stroke="#2f5d96" stroke-width="1.5" fill="none"/>
+  <path d="M68 18 L68 2" stroke="#6f7b87" stroke-width="2"/>
+  <path d="M68 2 L82 6 L68 10 Z" fill="#9be15d"/>
+</svg>

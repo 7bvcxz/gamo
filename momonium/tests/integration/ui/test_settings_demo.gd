@@ -85,3 +85,12 @@ func test_a_brand_new_island_starts_the_tutorial_once() -> void:
 	await _open()
 	await tree.process_frame
 	assert_false((main.get("tutorial") as Tutorial).running, "seen once: not again by itself")
+
+
+func test_the_demo_island_is_fully_staffed() -> void:
+	var demo := DemoWorld.build()
+	var momos: MomoSystem = demo.system(&"momo")
+	assert_eq(momos.ids().size(), 8, "every Momo it means to hire was hired (money did not run out)")
+	assert_true(momos.ids().all(func(m: int) -> bool: return int(momos.get_momo(m)["assigned"]) != 0), "and each has a job")
+	var community: CommunitySystem = demo.system(&"community")
+	assert_eq(community.housing().size(), 8, "and a home")

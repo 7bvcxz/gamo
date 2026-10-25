@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle).",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start.",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -518,6 +518,164 @@
       "enabled": true,
       "refund": 1.0,
       "workers": 1
+    },
+    "villa": {
+      "name": "building.villa",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "villa",
+      "cycle": {
+        "_doc": "No work cycle.",
+        "stages": [],
+        "looks": []
+      },
+      "housing": {
+        "capacity": 2,
+        "rest": 0.92
+      },
+      "icon": "ui_status",
+      "cost": {
+        "money": 120,
+        "items": {
+          "wood": 20
+        }
+      },
+      "build_seconds": 12,
+      "unlock": {
+        "level": 3
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
+    },
+    "apartment": {
+      "name": "building.apartment",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "apartment",
+      "cycle": {
+        "_doc": "No work cycle.",
+        "stages": [],
+        "looks": []
+      },
+      "housing": {
+        "capacity": 6,
+        "rest": 0.96
+      },
+      "icon": "ui_status",
+      "cost": {
+        "money": 300,
+        "items": {
+          "stone": 30,
+          "iron_ingot": 4
+        }
+      },
+      "build_seconds": 25,
+      "unlock": {
+        "level": 5,
+        "research": "masonry"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
+    },
+    "park": {
+      "name": "building.park",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "park",
+      "cycle": {
+        "_doc": "No work cycle.",
+        "stages": [],
+        "looks": []
+      },
+      "amenity": {
+        "happiness": 10
+      },
+      "icon": "ui_sprout",
+      "cost": {
+        "money": 80,
+        "items": {}
+      },
+      "build_seconds": 8,
+      "unlock": {
+        "level": 3
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
+    },
+    "pub": {
+      "name": "building.pub",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "pub",
+      "cycle": {
+        "_doc": "No work cycle.",
+        "stages": [],
+        "looks": []
+      },
+      "amenity": {
+        "happiness": 14,
+        "daily": {
+          "crop": 3
+        }
+      },
+      "icon": "ui_harvest",
+      "cost": {
+        "money": 180,
+        "items": {
+          "wood": 15
+        }
+      },
+      "build_seconds": 15,
+      "unlock": {
+        "level": 4
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
+    },
+    "community_center": {
+      "name": "building.community_center",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "community_center",
+      "cycle": {
+        "_doc": "No work cycle.",
+        "stages": [],
+        "looks": []
+      },
+      "amenity": {
+        "happiness": 18,
+        "power": 2
+      },
+      "icon": "ui_status",
+      "cost": {
+        "money": 350,
+        "items": {
+          "stone": 20,
+          "copper_ingot": 4
+        }
+      },
+      "build_seconds": 25,
+      "unlock": {
+        "level": 5,
+        "research": "civic_planning"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
     }
   }
 }

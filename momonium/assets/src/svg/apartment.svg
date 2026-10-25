@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 180" width="140" height="180">
+  <!-- A 1x1 apartment block (diamond centre = origin (70, 125)): three storeys
+       of stone with rows of windows and a flat roof with a water tank. -->
+  <path d="M70 90 L122 126 L70 162 L18 126 Z" fill="#c9c4bb" stroke="#8d8579" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 128 L70 152 L70 46 L28 22 Z" fill="#d8d0c4" stroke="#7d7568" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 152 L112 128 L112 22 L70 46 Z" fill="#ece6dc" stroke="#7d7568" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 22 L70 0 L112 22 L70 46 Z" fill="#a8a196" stroke="#7d7568" stroke-width="2" stroke-linejoin="round"/>
+  <g fill="#cfe9ff" stroke="#7d7568" stroke-width="1.5">
+    <path d="M36 44 L46 50 L46 62 L36 56 Z"/><path d="M52 53 L62 59 L62 71 L52 65 Z"/>
+    <path d="M36 74 L46 80 L46 92 L36 86 Z"/><path d="M52 83 L62 89 L62 101 L52 95 Z"/>
+    <path d="M36 104 L46 110 L46 122 L36 116 Z"/>
+    <path d="M78 59 L88 53 L88 65 L78 71 Z"/><path d="M94 50 L104 44 L104 56 L94 62 Z"/>
+    <path d="M78 89 L88 83 L88 95 L78 101 Z"/><path d="M94 80 L104 74 L104 86 L94 92 Z"/>
+    <path d="M94 110 L104 104 L104 116 L94 122 Z"/>
+  </g>
+  <path d="M78 140 L88 134 L88 116 L78 122 Z" fill="#7a5a3a"/>
+  <ellipse cx="82" cy="14" rx="9" ry="5" fill="#8a8f96" stroke="#5f6670" stroke-width="1.5"/>
+  <path d="M73 14 L73 6 Q82 0 91 6 L91 14" fill="#9aa1a8" stroke="#5f6670" stroke-width="1.5"/>
+</svg>

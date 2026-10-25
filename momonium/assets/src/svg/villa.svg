@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 150" width="140" height="150">
+  <!-- A 1x1 villa (diamond centre = origin (70, 95)): a cosy cream cottage with
+       a red roof, round window, flower box and a little fence. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M30 98 L70 120 L70 78 L30 56 Z" fill="#f3e3c3" stroke="#8a6a4a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 120 L108 98 L108 56 L70 78 Z" fill="#fff4dc" stroke="#8a6a4a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 60 L66 30 L114 60 L70 84 Z" fill="#e0685a" stroke="#9a3a30" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 60 L70 84 L70 88 L24 64 Z" fill="#c04e42"/>
+  <circle cx="48" cy="84" r="7" fill="#cfe9ff" stroke="#8a6a4a" stroke-width="2"/>
+  <path d="M80 110 L92 103 L92 86 L80 93 Z" fill="#a8723f" stroke="#6b4426" stroke-width="2"/>
+  <path d="M96 92 L106 86 L106 92 L96 98 Z" fill="#7cc35a"/>
+  <circle cx="99" cy="90" r="2" fill="#ff8ab0"/><circle cx="104" cy="87" r="2" fill="#ffd36b"/>
+  <path d="M84 30 L84 18 L92 18 L92 34" fill="#b0aba2" stroke="#6f6a62" stroke-width="2"/>
+</svg>
