@@ -41,7 +41,8 @@ func _init() -> void:
 			var p: Array = spec["pivots"][pivot]
 			pivots[pivot] = [float(p[0]) * scale - used.position.x, float(p[1]) * scale - used.position.y]
 		items.append({"name": name, "image": trimmed, "pivots": pivots, "source": spec["source"],
-			"sha": svg.sha256_text().substr(0, 16), "world_scale": float(spec.get("world_scale", 1.0))})
+			"sha": svg.sha256_text().substr(0, 16), "world_scale": float(spec.get("world_scale", 1.0)),
+			"meta": spec.get("meta", {}), "scale": scale})
 	items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a["image"].get_height() > b["image"].get_height() or (a["image"].get_height() == b["image"].get_height() and a["name"] < b["name"]))
 
@@ -66,7 +67,7 @@ func _init() -> void:
 		out_sprites[item["name"]] = {
 			"region": [pos.x, pos.y, img.get_width(), img.get_height()],
 			"pivots": item["pivots"], "source": item["source"], "source_sha": item["sha"],
-			"world_scale": item["world_scale"]}
+			"world_scale": item["world_scale"], "scale": item["scale"], "meta": item["meta"]}
 	var atlas_name: String = manifest.get("atlas", "sprites")
 	atlas.save_png(OUT_DIR + atlas_name + ".png")
 	var out := {"generated_by": "tools/art/build_atlas.gd", "size": [width, height], "sprites": out_sprites}

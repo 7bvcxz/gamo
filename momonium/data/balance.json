@@ -13,7 +13,8 @@
         2,
         2
       ]
-    }
+    },
+    "momos": 1
   },
   "clock": {
     "day_seconds": 30,
@@ -97,5 +98,9 @@
     "land": {
       "level": 1
     }
+  },
+  "momo": {
+    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order.",
+    "names": 10
   }
 }

@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **16** (#16)
-- 현재 step: **17** — 모모 스프라이트와 대기 애니메이션 (#17)
-- 버전: `0.16.0`
-- 테스트: unit+integration 173 통과 (`momonium/tools/test.sh`)
-- E2E: 케이스 15파일(+status). Step 10 전체 실행 31/33 → 2건 수정 후 PASS. 다음 전체 실행은 Step 20
+- 마지막 완료 step: **17** (#17)
+- 현재 step: **18** — 모모 고용·배회·드래그 배치 (#18)
+- 버전: `0.17.0`
+- 테스트: unit+integration 184 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 16파일(+momo). Step 10 전체 실행 31/33 → 2건 수정 후 PASS. 다음 전체 실행은 Step 20
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -47,4 +47,5 @@
 | 13 | #13 건물·비용·건설 | 0.13.0 | `fb21a5dc` | 139, E2E build 단독 | 스모크 |
 | 14 | #14 밭: 심기·물×3·수확 | 0.14.0 | `32a1a7d6` | 150, E2E farm 단독 | 스모크 |
 | 15 | #15 창고·판매·돈 | 0.15.0 | `a1a98888` | 161, E2E sale 단독 | 스모크 |
-| 16 | #16 EXP·숙련도·해금 | 0.16.0 | (다음 갱신 시) | 173, E2E status 단독 | 스모크 |
+| 16 | #16 EXP·숙련도·해금 | 0.16.0 | `f2e7157e` | 173, E2E status 단독 | 스모크 |
+| 17 | #17 모모 스프라이트·애니메이션 | 0.17.0 | (다음 갱신 시) | 184, E2E momo 단독 | 스모크 |

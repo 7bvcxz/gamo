@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Overalls from behind: crossed straps and a round fluffy tail. -->
+<g stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M64 132 Q60 170 72 186 Q86 194 100 188 Q114 194 128 186 Q140 170 136 132 Z" fill="#f4dec5"/>
+<path d="M74 124 L126 156 M126 124 L74 156" fill="none" stroke-width="7"/>
+</g>
+<path d="M74 124 L126 156 M126 124 L74 156" fill="none" stroke="#efd5b6" stroke-width="3.6" stroke-linecap="round"/>
+<circle cx="100" cy="168" r="11" fill="#fffcf4" stroke="#61504f" stroke-width="2.6"/>
+<path d="M94 166 Q100 160 106 166" fill="none" stroke="#ebe3da" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

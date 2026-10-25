@@ -19,6 +19,7 @@ var hud: Hud
 var panel: ContextPanel
 var marker: SelectionMarker
 var building_views: BuildingViews
+var momo_views: MomoViews
 var selection: SelectionController
 var land_preview: LandPreview
 var land_mode: LandMode
@@ -107,6 +108,10 @@ func _ready() -> void:
 	building_views.name = "BuildingViews"
 	add_child(building_views)
 	building_views.setup(sim, entities, lib)
+	momo_views = MomoViews.new()
+	momo_views.name = "MomoViews"
+	add_child(momo_views)
+	momo_views.setup(sim, entities, lib)
 	selection = SelectionController.new()
 	selection.name = "Selection"
 	add_child(selection)
@@ -165,6 +170,12 @@ func _ready() -> void:
 	bridge.register_query("land_mode", _land_mode_info)
 	bridge.register_query("build_ui", _build_ui_info)
 	bridge.register_query("status", _status_info)
+	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
+		var out := {}
+		for id: int in momo_views.actors:
+			var a: MomoActor = momo_views.actors[id]
+			out[str(id)] = {"state": a.rig.state, "blinking": a.rig.blinking, "back": a.rig.is_back_view()}
+		return out)
 	bridge.register_query("set_language", func(code: Variant) -> Dictionary:
 		LocaleService.apply(String(code))
 		return {"locale": LocaleService.current()})

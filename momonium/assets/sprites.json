@@ -251,6 +251,266 @@
           32
         ]
       }
+    },
+    "momo_leg_l": {
+      "source": "svg/momo/leg_l.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          86,
+          182
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          86,
+          182
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_leg_r": {
+      "source": "svg/momo/leg_r.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          114,
+          182
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          114,
+          182
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_body": {
+      "source": "svg/momo/body.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          100,
+          150
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          100,
+          150
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_arm_l": {
+      "source": "svg/momo/arm_l.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          70,
+          128
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          70,
+          128
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_arm_r": {
+      "source": "svg/momo/arm_r.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          130,
+          128
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          130,
+          128
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_head": {
+      "source": "svg/momo/head.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          100,
+          120
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          100,
+          120
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_eyes_open": {
+      "source": "svg/momo/eyes_open.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          100,
+          84
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          100,
+          84
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_eyes_closed": {
+      "source": "svg/momo/eyes_closed.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          100,
+          84
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          100,
+          84
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_tuft": {
+      "source": "svg/momo/tuft.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          101,
+          32
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          101,
+          32
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_ear_l": {
+      "source": "svg/momo/ear_l.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          58,
+          50
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          58,
+          50
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_ear_r": {
+      "source": "svg/momo/ear_r.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          142,
+          50
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          142,
+          50
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_head_back": {
+      "source": "svg/momo/head_back.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          100,
+          120
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          100,
+          120
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
+    },
+    "momo_body_back": {
+      "source": "svg/momo/body_back.svg",
+      "scale": 1.5,
+      "pivots": {
+        "joint": [
+          100,
+          150
+        ]
+      },
+      "meta": {
+        "frame_joint": [
+          100,
+          150
+        ],
+        "frame_origin": [
+          100,
+          210
+        ]
+      }
     }
   }
 }

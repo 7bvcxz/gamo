@@ -46,6 +46,17 @@ func world_scale(name: String) -> float:
 	return float(sprites[name].get("world_scale", 1.0))
 
 
+## Free-form data the manifest attached to a sprite (e.g. a rig part's joint
+## position in its source frame).
+func meta(name: String) -> Dictionary:
+	return sprites[name].get("meta", {})
+
+
+## Texels per source unit the sprite was rasterised at.
+func source_scale(name: String) -> float:
+	return float(sprites[name].get("scale", 1.0))
+
+
 func atlas_texture(name: String) -> AtlasTexture:
 	var t := AtlasTexture.new()
 	t.atlas = texture

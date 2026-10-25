@@ -6,6 +6,7 @@
   ],
   "sprites": {
     "crop_leafy": {
+      "meta": {},
       "pivots": {
         "origin": [
           140.0,
@@ -18,11 +19,13 @@
         214,
         148
       ],
+      "scale": 2.0,
       "source": "svg/crop_leafy.svg",
       "source_sha": "6138f785ea55fbb3",
       "world_scale": 0.5
     },
     "crop_ripe": {
+      "meta": {},
       "pivots": {
         "origin": [
           140.0,
@@ -35,11 +38,13 @@
         220,
         151
       ],
+      "scale": 2.0,
       "source": "svg/crop_ripe.svg",
       "source_sha": "357cf4445d0ceb29",
       "world_scale": 0.5
     },
     "crop_seeds": {
+      "meta": {},
       "pivots": {
         "origin": [
           66.0,
@@ -47,16 +52,18 @@
         ]
       },
       "region": [
-        208,
-        202,
+        2,
+        353,
         120,
         90
       ],
+      "scale": 2.0,
       "source": "svg/crop_seeds.svg",
       "source_sha": "df745929fc567240",
       "world_scale": 0.5
     },
     "crop_sprout": {
+      "meta": {},
       "pivots": {
         "origin": [
           140.0,
@@ -64,16 +71,18 @@
         ]
       },
       "region": [
-        2,
+        394,
         202,
         202,
         146
       ],
+      "scale": 2.0,
       "source": "svg/crop_sprout.svg",
       "source_sha": "eec7310dc51fb512",
       "world_scale": 0.5
     },
     "farm": {
+      "meta": {},
       "pivots": {
         "origin": [
           122.0,
@@ -90,11 +99,13 @@
         244,
         192
       ],
+      "scale": 2.0,
       "source": "svg/farm.svg",
       "source_sha": "432cd3cdb8fcdbfc",
       "world_scale": 0.5
     },
     "icon_coin": {
+      "meta": {},
       "pivots": {
         "center": [
           30.0,
@@ -102,16 +113,18 @@
         ]
       },
       "region": [
-        412,
-        202,
+        304,
+        353,
         60,
         60
       ],
+      "scale": 1.0,
       "source": "svg/icon_coin.svg",
       "source_sha": "4d89778744a5db85",
       "world_scale": 1.0
     },
     "icon_star": {
+      "meta": {},
       "pivots": {
         "center": [
           29.0,
@@ -119,16 +132,242 @@
         ]
       },
       "region": [
-        476,
-        202,
+        454,
+        353,
         58,
         56
       ],
+      "scale": 1.0,
       "source": "svg/icon_star.svg",
       "source_sha": "e78ea1da43eee1c4",
       "world_scale": 1.0
     },
+    "momo_arm_l": {
+      "meta": {
+        "frame_joint": [
+          70.0,
+          128.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          36.0,
+          9.0
+        ]
+      },
+      "region": [
+        206,
+        353,
+        45,
+        61
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/arm_l.svg",
+      "source_sha": "2510ba4facf987bc",
+      "world_scale": 1.0
+    },
+    "momo_arm_r": {
+      "meta": {
+        "frame_joint": [
+          130.0,
+          128.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          9.0,
+          9.0
+        ]
+      },
+      "region": [
+        255,
+        353,
+        45,
+        61
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/arm_r.svg",
+      "source_sha": "fc3b0c7cfdbebf0b",
+      "world_scale": 1.0
+    },
+    "momo_body": {
+      "meta": {
+        "frame_joint": [
+          100.0,
+          150.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          58.0,
+          63.0
+        ]
+      },
+      "region": [
+        762,
+        202,
+        116,
+        127
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/body.svg",
+      "source_sha": "e2e96c98b2be2e47",
+      "world_scale": 1.0
+    },
+    "momo_body_back": {
+      "meta": {
+        "frame_joint": [
+          100.0,
+          150.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          58.0,
+          45.0
+        ]
+      },
+      "region": [
+        882,
+        202,
+        116,
+        109
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/body_back.svg",
+      "source_sha": "99f983ddf8614ca3",
+      "world_scale": 1.0
+    },
+    "momo_ear_l": {
+      "meta": {
+        "frame_joint": [
+          58.0,
+          50.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          66.0,
+          9.0
+        ]
+      },
+      "region": [
+        600,
+        202,
+        77,
+        132
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/ear_l.svg",
+      "source_sha": "3dd44df404db245e",
+      "world_scale": 1.0
+    },
+    "momo_ear_r": {
+      "meta": {
+        "frame_joint": [
+          142.0,
+          50.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          11.0,
+          9.0
+        ]
+      },
+      "region": [
+        681,
+        202,
+        77,
+        132
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/ear_r.svg",
+      "source_sha": "fc4f6645a32f90db",
+      "world_scale": 1.0
+    },
+    "momo_eyes_closed": {
+      "meta": {
+        "frame_joint": [
+          100.0,
+          84.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          45.0,
+          1.0
+        ]
+      },
+      "region": [
+        336,
+        447,
+        90,
+        11
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/eyes_closed.svg",
+      "source_sha": "945c5ec203217ae1",
+      "world_scale": 1.0
+    },
+    "momo_eyes_open": {
+      "meta": {
+        "frame_joint": [
+          100.0,
+          84.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          42.0,
+          15.0
+        ]
+      },
+      "region": [
+        217,
+        447,
+        84,
+        30
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/eyes_open.svg",
+      "source_sha": "539a7e8c44ce628f",
+      "world_scale": 1.0
+    },
     "momo_front": {
+      "meta": {},
       "pivots": {
         "hand_r": [
           132.0,
@@ -149,11 +388,153 @@
         172,
         196
       ],
+      "scale": 1.0,
       "source": "svg/momo_front.svg",
       "source_sha": "58be7c704b91d056",
       "world_scale": 0.42
     },
+    "momo_head": {
+      "meta": {
+        "frame_joint": [
+          100.0,
+          120.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          96.0,
+          138.0
+        ]
+      },
+      "region": [
+        2,
+        202,
+        192,
+        147
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/head.svg",
+      "source_sha": "74fbdbea4bec583e",
+      "world_scale": 1.0
+    },
+    "momo_head_back": {
+      "meta": {
+        "frame_joint": [
+          100.0,
+          120.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          96.0,
+          138.0
+        ]
+      },
+      "region": [
+        198,
+        202,
+        192,
+        147
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/head_back.svg",
+      "source_sha": "1fb293e456ea03aa",
+      "world_scale": 1.0
+    },
+    "momo_leg_l": {
+      "meta": {
+        "frame_joint": [
+          86.0,
+          182.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          21.0,
+          18.0
+        ]
+      },
+      "region": [
+        368,
+        353,
+        39,
+        60
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/leg_l.svg",
+      "source_sha": "4bf42d16bb787292",
+      "world_scale": 1.0
+    },
+    "momo_leg_r": {
+      "meta": {
+        "frame_joint": [
+          114.0,
+          182.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          18.0,
+          18.0
+        ]
+      },
+      "region": [
+        411,
+        353,
+        39,
+        60
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/leg_r.svg",
+      "source_sha": "0d6ccda940a8d06a",
+      "world_scale": 1.0
+    },
+    "momo_tuft": {
+      "meta": {
+        "frame_joint": [
+          101.0,
+          32.0
+        ],
+        "frame_origin": [
+          100.0,
+          210.0
+        ]
+      },
+      "pivots": {
+        "joint": [
+          14.5,
+          27.0
+        ]
+      },
+      "region": [
+        305,
+        447,
+        27,
+        29
+      ],
+      "scale": 1.5,
+      "source": "svg/momo/tuft.svg",
+      "source_sha": "3f0c46356d969920",
+      "world_scale": 1.0
+    },
     "prop_crate": {
+      "meta": {},
       "pivots": {
         "origin": [
           38.0,
@@ -161,16 +542,18 @@
         ]
       },
       "region": [
-        332,
-        202,
+        126,
+        353,
         76,
         70
       ],
+      "scale": 1.0,
       "source": "svg/prop_crate.svg",
       "source_sha": "00e826ef9f20708e",
       "world_scale": 0.5
     },
     "ui_build": {
+      "meta": {},
       "pivots": {
         "center": [
           22.0,
@@ -178,16 +561,18 @@
         ]
       },
       "region": [
-        684,
-        202,
+        662,
+        353,
         44,
         50
       ],
+      "scale": 1.0,
       "source": "svg/ui_build.svg",
       "source_sha": "ba9fa234edcf9e35",
       "world_scale": 1.0
     },
     "ui_flask": {
+      "meta": {},
       "pivots": {
         "center": [
           22.0,
@@ -195,16 +580,18 @@
         ]
       },
       "region": [
-        598,
-        202,
+        576,
+        353,
         44,
         54
       ],
+      "scale": 1.0,
       "source": "svg/ui_flask.svg",
       "source_sha": "d8487740475dd723",
       "world_scale": 1.0
     },
     "ui_harvest": {
+      "meta": {},
       "pivots": {
         "center": [
           24.0,
@@ -212,16 +599,18 @@
         ]
       },
       "region": [
-        2,
-        352,
+        960,
+        353,
         48,
         41
       ],
+      "scale": 1.0,
       "source": "svg/ui_harvest.svg",
       "source_sha": "43ad3025f817b9e6",
       "world_scale": 1.0
     },
     "ui_land": {
+      "meta": {},
       "pivots": {
         "center": [
           26.0,
@@ -229,16 +618,18 @@
         ]
       },
       "region": [
-        828,
-        202,
+        806,
+        353,
         52,
         46
       ],
+      "scale": 1.0,
       "source": "svg/ui_land.svg",
       "source_sha": "ec1fa9d081396fa6",
       "world_scale": 1.0
     },
     "ui_lumber": {
+      "meta": {},
       "pivots": {
         "center": [
           27.0,
@@ -246,16 +637,18 @@
         ]
       },
       "region": [
-        156,
-        352,
+        104,
+        447,
         53,
         38
       ],
+      "scale": 1.0,
       "source": "svg/ui_lumber.svg",
       "source_sha": "3518d365175453dd",
       "world_scale": 1.0
     },
     "ui_mail": {
+      "meta": {},
       "pivots": {
         "center": [
           26.0,
@@ -263,16 +656,18 @@
         ]
       },
       "region": [
-        213,
-        352,
+        161,
+        447,
         52,
         38
       ],
+      "scale": 1.0,
       "source": "svg/ui_mail.svg",
       "source_sha": "e02cc5e9e78d3b93",
       "world_scale": 1.0
     },
     "ui_mine": {
+      "meta": {},
       "pivots": {
         "center": [
           24.0,
@@ -280,16 +675,18 @@
         ]
       },
       "region": [
-        928,
-        202,
+        906,
+        353,
         50,
         42
       ],
+      "scale": 1.0,
       "source": "svg/ui_mine.svg",
       "source_sha": "50e7b9b9a4a2e24b",
       "world_scale": 1.0
     },
     "ui_research": {
+      "meta": {},
       "pivots": {
         "center": [
           16.0,
@@ -297,16 +694,18 @@
         ]
       },
       "region": [
-        646,
-        202,
+        624,
+        353,
         34,
         52
       ],
+      "scale": 1.0,
       "source": "svg/ui_research.svg",
       "source_sha": "c6fd331c9031acac",
       "world_scale": 1.0
     },
     "ui_seed": {
+      "meta": {},
       "pivots": {
         "center": [
           20.0,
@@ -314,16 +713,18 @@
         ]
       },
       "region": [
-        732,
-        202,
+        710,
+        353,
         40,
         50
       ],
+      "scale": 1.0,
       "source": "svg/ui_seed.svg",
       "source_sha": "6b60dc8e8b0643d1",
       "world_scale": 1.0
     },
     "ui_settings": {
+      "meta": {},
       "pivots": {
         "center": [
           28.0,
@@ -331,16 +732,18 @@
         ]
       },
       "region": [
-        538,
-        202,
+        516,
+        353,
         56,
         56
       ],
+      "scale": 1.0,
       "source": "svg/ui_settings.svg",
       "source_sha": "4fe029b4c4b8b2a4",
       "world_scale": 1.0
     },
     "ui_shop": {
+      "meta": {},
       "pivots": {
         "center": [
           24.0,
@@ -348,16 +751,18 @@
         ]
       },
       "region": [
-        776,
-        202,
+        754,
+        353,
         48,
         48
       ],
+      "scale": 1.0,
       "source": "svg/ui_shop.svg",
       "source_sha": "773fbad9ff282d03",
       "world_scale": 1.0
     },
     "ui_sprout": {
+      "meta": {},
       "pivots": {
         "center": [
           22.0,
@@ -365,16 +770,18 @@
         ]
       },
       "region": [
-        108,
-        352,
+        56,
+        447,
         44,
         39
       ],
+      "scale": 1.0,
       "source": "svg/ui_sprout.svg",
       "source_sha": "af97c4f9a7f1331b",
       "world_scale": 1.0
     },
     "ui_status": {
+      "meta": {},
       "pivots": {
         "center": [
           20.0,
@@ -382,16 +789,18 @@
         ]
       },
       "region": [
-        884,
-        202,
+        862,
+        353,
         40,
         43
       ],
+      "scale": 1.0,
       "source": "svg/ui_status.svg",
       "source_sha": "bceb4eee461fd294",
       "world_scale": 1.0
     },
     "ui_water": {
+      "meta": {},
       "pivots": {
         "center": [
           20.0,
@@ -399,11 +808,12 @@
         ]
       },
       "region": [
-        54,
-        352,
+        2,
+        447,
         50,
         40
       ],
+      "scale": 1.0,
       "source": "svg/ui_water.svg",
       "source_sha": "83cd0df1f0c0d08b",
       "world_scale": 1.0

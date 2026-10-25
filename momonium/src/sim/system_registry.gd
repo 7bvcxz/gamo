@@ -14,5 +14,6 @@ static func create_default() -> Array[SimSystem]:
 		EconomySystem.new(),
 		InventorySystem.new(),
 		ProgressionSystem.new(),
+		MomoSystem.new(),
 	]
 	return list

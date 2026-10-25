@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Cream overalls: trousers, bib with stitched pocket, straps and buttons. -->
+<g stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+<path d="M64 132 Q60 170 72 186 Q86 194 100 188 Q114 194 128 186 Q140 170 136 132 Z" fill="#f4dec5"/>
+<path d="M100 160 L100 188" fill="none" stroke-width="2.4"/>
+<path d="M76 122 L124 122 L126 158 Q100 164 74 158 Z" fill="#f4dec5"/>
+<rect x="86" y="132" width="28" height="20" rx="4" fill="#efd5b6" stroke-width="2.4"/>
+<path d="M76 124 L70 112" fill="none" stroke-width="7"/>
+<path d="M124 124 L130 112" fill="none" stroke-width="7"/>
+</g>
+<path d="M76 124 L70 112" fill="none" stroke="#f4dec5" stroke-width="3.6" stroke-linecap="round"/>
+<path d="M124 124 L130 112" fill="none" stroke="#f4dec5" stroke-width="3.6" stroke-linecap="round"/>
+<rect x="89.5" y="135.5" width="21" height="13" rx="3" fill="none" stroke="#c9a37f" stroke-width="1.4" stroke-dasharray="3 2.4"/>
+<circle cx="80" cy="127" r="5" fill="#d19363" stroke="#61504f" stroke-width="2.2"/>
+<circle cx="120" cy="127" r="5" fill="#d19363" stroke="#61504f" stroke-width="2.2"/>
+<path d="M77.5 124.5 L82.5 129.5 M82.5 124.5 L77.5 129.5 M117.5 124.5 L122.5 129.5 M122.5 124.5 L117.5 129.5" stroke="#8a5a34" stroke-width="1.1"/>
+</svg>
