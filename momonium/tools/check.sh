@@ -24,6 +24,11 @@ fail() { echo "── check.sh: FAILED — $1"; exit 1; }
 engine_problems() { grep -E 'SCRIPT ERROR|Parse Error|Failed to load|Failed loading resource|ERROR: ' "$1" | grep -v 'leaked at exit' || true; }
 
 echo "── import"
+# Twice: on a fresh checkout the first pass generates what the project loads at
+# startup (translation tables from data/i18n/*.csv, the class cache), and the
+# engine complains about their absence while it does so. The second pass is the
+# one that must be clean.
+timeout 300 "$GODOT" --headless --path "$HERE" --import >/dev/null 2>&1 || true
 timeout 300 "$GODOT" --headless --path "$HERE" --import >"$LOG" 2>&1
 [[ -z "$(engine_problems "$LOG")" ]] || { engine_problems "$LOG" | head; fail "import"; }
 
