@@ -1,1 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><path d="M68 124 Q46 132 48 154 Q52 165 62 159 Q68 146 74 136 Z" fill="#fffcf4" stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: left arm -- a round white mitt. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
+<defs><radialGradient id="fur" cx="0.42" cy="0.32" r="0.78"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#fffaf3"/><stop offset="1" stop-color="#efe3d6"/></radialGradient></defs><path d="M73 121 C58 123 47 136 47 150 C47 160 55 165 62 160 C68 154 72 145 77 136 Z" fill="url(#fur)" stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

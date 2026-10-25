@@ -1,2 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: left leg (front). Shares the 200x220 frame of every Momo part. -->
-<path d="M74 172 Q72 207 86 208 Q97 208 96 186 Z" fill="#fffcf4" stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: left leg -- a cream trouser leg and a round white foot. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
+<defs><radialGradient id="fur" cx="0.42" cy="0.32" r="0.78"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#fffaf3"/><stop offset="1" stop-color="#efe3d6"/></radialGradient><radialGradient id="cloth" cx="0.4" cy="0.3" r="0.85"><stop offset="0" stop-color="#fdf1e2"/><stop offset="0.65" stop-color="#f5e3cb"/><stop offset="1" stop-color="#e6cdae"/></radialGradient></defs><g stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+<path d="M74 174 Q72 190 75 198 L96 198 Q98 186 97 176 Z" fill="url(#cloth)"/>
+<path d="M73 197 Q71 209 85 209 Q98 209 97 197 Z" fill="url(#fur)"/>
+</g></svg>

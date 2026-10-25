@@ -1,9 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Overalls from behind: crossed straps and a round fluffy tail. -->
-<g stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-<path d="M64 132 Q60 170 72 186 Q86 194 100 188 Q114 194 128 186 Q140 170 136 132 Z" fill="#f4dec5"/>
-<path d="M74 124 L126 156 M126 124 L74 156" fill="none" stroke-width="7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: overalls from behind -- crossed straps and a round fluffy tail. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
+<defs><radialGradient id="fur" cx="0.42" cy="0.32" r="0.78"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#fffaf3"/><stop offset="1" stop-color="#efe3d6"/></radialGradient><radialGradient id="cloth" cx="0.4" cy="0.3" r="0.85"><stop offset="0" stop-color="#fdf1e2"/><stop offset="0.65" stop-color="#f5e3cb"/><stop offset="1" stop-color="#e6cdae"/></radialGradient></defs>
+<g stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
+<path d="M68 126 C68 116 84 114 100 114 C116 114 132 116 132 126 L134 150 L66 150 Z" fill="url(#fur)"/>
+<path d="M67 132 C61 160 63 182 76 191 C86 196 96 194 100 189 C104 194 114 196 124 191 C137 182 139 160 133 132 Z" fill="url(#cloth)"/>
+<path d="M76 122 L124 154 M124 122 L76 154" fill="none" stroke-width="6.6"/>
 </g>
-<path d="M74 124 L126 156 M126 124 L74 156" fill="none" stroke="#efd5b6" stroke-width="3.6" stroke-linecap="round"/>
-<circle cx="100" cy="168" r="11" fill="#fffcf4" stroke="#61504f" stroke-width="2.6"/>
-<path d="M94 166 Q100 160 106 166" fill="none" stroke="#ebe3da" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M76 122 L124 154 M124 122 L76 154" fill="none" stroke="#f6e6d0" stroke-width="3.4" stroke-linecap="round"/>
+<circle cx="100" cy="170" r="12" fill="url(#fur)" stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M93 167 Q100 160 107 167" fill="none" stroke="#ece2d8" stroke-width="2.4" stroke-linecap="round"/>
 </svg>

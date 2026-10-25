@@ -7,6 +7,7 @@ extends RefCounted
 
 const RADIUS := 18
 const BODY_SIZE := 20
+const RIM_ALPHA := 0.2
 
 
 static func build(data: GameData, font: Font) -> Theme:
@@ -33,10 +34,18 @@ static func build(data: GameData, font: Font) -> Theme:
 	return t
 
 
+## Glass, not slabs (Step 46): a hairline of light around the edge and a
+## soft shadow under it lift a panel off the world without making it heavier.
 static func _box(color: Color, radius: int, pad: int) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = color
 	box.set_corner_radius_all(radius)
 	box.set_content_margin_all(pad)
+	box.border_color = Color(1, 1, 1, RIM_ALPHA)
+	box.set_border_width_all(1)
+	box.border_blend = true
+	box.shadow_color = Color(0.0, 0.04, 0.14, 0.22)
+	box.shadow_size = 6
+	box.shadow_offset = Vector2(0, 2)
 	box.anti_aliasing = true
 	return box

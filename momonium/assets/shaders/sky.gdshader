@@ -1,5 +1,6 @@
 // The sky band above the horizon: gradient, sun or moon with glow, stars at
-// night, and two layers of soft procedural clouds drifting with the clock.
+// night, and clouds drifting with the clock -- the painted cloud band when
+// there is one (assets/textures/clouds.png), else two procedural layers.
 // Everything is driven by uniforms the day cycle sets each frame; the shader
 // keeps no time of its own beyond cloud drift and twinkle.
 shader_type canvas_item;
@@ -20,6 +21,10 @@ uniform float stars = 0.0;
 uniform float cloud_drift = 0.0;
 uniform float twinkle_time = 0.0;
 uniform float aspect = 0.5;
+// Painted cloud band (Step 46): r = how sunlit, a = cover; tinted by the
+// time of day's cloud colours, so sunset and night still colour it.
+uniform sampler2D clouds_tex : source_color, repeat_enable, filter_linear_mipmap;
+uniform float painted_clouds = 0.0;
 
 float hash(vec2 p) {
 	p = fract(p * vec2(234.34, 435.345));
@@ -64,10 +69,15 @@ void fragment() {
 		}
 	}
 
-	// Sun and moon, with soft glow.
+	// Sun (added after the clouds, so a low sun shines over the cloud bank)
+	// and moon, with soft glow.
 	vec2 sq = vec2(sun_uv.x * aspect, sun_uv.y);
 	float ds = length(q - sq);
-	col += sun_color.rgb * (smoothstep(sun_size, sun_size * 0.92, ds) * 0.9 + exp(-ds * 9.0) * 0.35 + exp(-ds * 3.0) * 0.12);
+	vec3 sun = sun_color.rgb * (smoothstep(sun_size, sun_size * 0.92, ds) * 0.9 + exp(-ds * 9.0) * 0.35 + exp(-ds * 3.0) * 0.12);
+	// Soft rays turning slowly around the sun, as in the concept art.
+	float ang = atan(q.y - sq.y, q.x - sq.x);
+	float rays = pow(0.5 + 0.5 * sin(ang * 9.0 + twinkle_time * 0.15), 6.0);
+	sun += sun_color.rgb * rays * exp(-ds * 5.5) * smoothstep(sun_size * 0.9, sun_size * 1.6, ds) * 0.22;
 	vec2 mq = vec2(moon_uv.x * aspect, moon_uv.y);
 	float dm = length(q - mq);
 	float moon_disc = smoothstep(moon_size, moon_size * 0.93, dm);
@@ -75,6 +85,25 @@ void fragment() {
 	col = mix(col, moon_color.rgb * (0.92 - craters), moon_disc);
 	col += moon_color.rgb * exp(-dm * 10.0) * 0.25;
 
+	if (painted_clouds > 0.5) {
+		// A far, smaller and paler row first, then the near heaps standing on
+		// the horizon haze; both drift slowly with the clock.
+		// Clouds thin out at night (stars = how much night it is).
+		float cover = mix(1.0, 0.5, stars);
+		vec2 far_uv = vec2(q.x * 1.5 - cloud_drift * 0.05 + 0.41, (uv.y - 0.3) / 0.46);
+		if (far_uv.y > 0.0 && far_uv.y < 1.0) {
+			vec4 c = texture(clouds_tex, far_uv);
+			vec3 cc = mix(cloud_shade.rgb, cloud_color.rgb, c.r);
+			col = mix(col, mix(cc, horizon_color.rgb, 0.4), c.a * 0.45 * cover);
+		}
+		vec2 near_uv = vec2(q.x * 0.9 + cloud_drift * 0.12, (uv.y - 0.4) / 0.6);
+		if (near_uv.y > 0.0 && near_uv.y < 1.0) {
+			vec4 c = texture(clouds_tex, near_uv);
+			vec3 cc = mix(cloud_shade.rgb, cloud_color.rgb, c.r);
+			col = mix(col, cc, c.a * 0.96 * cover);
+		}
+		col = mix(col, horizon_color.rgb, smoothstep(0.9, 1.0, uv.y) * 0.5);
+	} else {
 	// Clouds: a thick low bank near the horizon and thin high wisps.
 	// Cumulus heaps sitting above the horizon with blue between them: the band's
 	// top edge is lifted by a second noise, so the clouds rise in mounds.
@@ -89,6 +118,8 @@ void fragment() {
 	vec3 cloud = mix(cloud_color.rgb, cloud_shade.rgb, shade * 0.6);
 	col = mix(col, cloud, lowmask * 0.92);
 	col = mix(col, cloud_color.rgb, highmask);
+	}
 
+	col += sun;
 	COLOR = vec4(col, 1.0);
 }

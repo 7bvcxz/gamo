@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 130" width="140" height="130">
   <!-- Small two-leaf sprouts in three rows. -->
+  <defs>
   <g id="s">
     <path d="M0 0 V-6" stroke="#4f8f2a" stroke-width="1.6" stroke-linecap="round"/>
     <path d="M0 -5 C-1 -9 -6 -10 -7 -8 C-6 -6 -3 -5 0 -5 Z" fill="#8ed14b"/>
     <path d="M0 -5 C1 -9 6 -10 7 -8 C6 -6 3 -5 0 -5 Z" fill="#a6de5c"/>
   </g>
+  </defs>
   <use href="#s" transform="translate(66 31)"/><use href="#s" transform="translate(80 41)"/><use href="#s" transform="translate(94 52)"/>
   <use href="#s" transform="translate(53 41)"/><use href="#s" transform="translate(67 51)"/><use href="#s" transform="translate(81 62)"/>
   <use href="#s" transform="translate(40 51)"/><use href="#s" transform="translate(54 61)"/><use href="#s" transform="translate(68 72)"/>

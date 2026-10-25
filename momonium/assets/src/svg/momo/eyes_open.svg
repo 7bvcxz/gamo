@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><ellipse cx="80" cy="84" rx="7.5" ry="9.5" fill="#3b2620"/>
-<ellipse cx="120" cy="84" rx="7.5" ry="9.5" fill="#3b2620"/>
-<circle cx="82.5" cy="80" r="3" fill="#ffffff"/>
-<circle cx="122.5" cy="80" r="3" fill="#ffffff"/>
-<circle cx="78" cy="89" r="1.4" fill="#ffffff" opacity="0.8"/>
-<circle cx="118" cy="89" r="1.4" fill="#ffffff" opacity="0.8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: open eyes -- big warm dark eyes with two catchlights. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
+<defs><radialGradient id="iris" cx="0.5" cy="0.75" r="0.8"><stop offset="0" stop-color="#6b4030"/><stop offset="0.55" stop-color="#3a231c"/><stop offset="1" stop-color="#24140f"/></radialGradient></defs>
+<ellipse cx="78" cy="85" rx="8.2" ry="10.2" fill="url(#iris)"/><ellipse cx="122" cy="85" rx="8.2" ry="10.2" fill="url(#iris)"/>
+<circle cx="81" cy="80.5" r="3.4" fill="#ffffff"/><circle cx="125" cy="80.5" r="3.4" fill="#ffffff"/>
+<circle cx="75.5" cy="90" r="1.6" fill="#ffffff" opacity="0.85"/><circle cx="119.5" cy="90" r="1.6" fill="#ffffff" opacity="0.85"/>
 </svg>

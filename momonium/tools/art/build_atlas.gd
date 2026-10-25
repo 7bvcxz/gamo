@@ -5,7 +5,8 @@ extends SceneTree
 ##   godot --headless --path momonium --script res://tools/art/build_atlas.gd
 ##   godot --headless --path momonium --import      # let the editor import the png
 ##
-## Each SVG is rasterised at its `scale`, trimmed to its visible pixels, and
+## Each SVG is rasterised at its `scale` (a painted .png source is stored at
+## that scale already), trimmed to its visible pixels, and
 ## shelf-packed with padding whose pixels repeat the sprite's edge (so linear
 ## filtering and mipmaps never sample a neighbour). Pivots are converted from
 ## SVG units to pixels relative to the trimmed region. The source hash of every
@@ -25,10 +26,20 @@ func _init() -> void:
 	var items: Array[Dictionary] = []
 	for name: String in manifest["sprites"]:
 		var spec: Dictionary = manifest["sprites"][name]
-		var svg := FileAccess.get_file_as_string(SRC + spec["source"])
 		var scale: float = float(spec.get("scale", 1.0))
 		var image := Image.new()
-		var err := image.load_svg_from_string(svg, scale)
+		var err := OK
+		var sha := ""
+		if String(spec["source"]).ends_with(".png"):
+			# A painted source (Step 46) is stored at the sprite's own scale --
+			# frame units x `scale` -- so its pivots convert exactly like an SVG's.
+			var bytes := FileAccess.get_file_as_bytes(SRC + spec["source"])
+			err = image.load_png_from_buffer(bytes)
+			sha = bytes_sha(bytes)
+		else:
+			var svg := FileAccess.get_file_as_string(SRC + spec["source"])
+			err = image.load_svg_from_string(svg, scale)
+			sha = svg.sha256_text().substr(0, 16)
 		if err != OK:
 			push_error("build_atlas: %s failed to rasterise (%d)" % [name, err])
 			quit(1)
@@ -41,7 +52,7 @@ func _init() -> void:
 			var p: Array = spec["pivots"][pivot]
 			pivots[pivot] = [float(p[0]) * scale - used.position.x, float(p[1]) * scale - used.position.y]
 		items.append({"name": name, "image": trimmed, "pivots": pivots, "source": spec["source"],
-			"sha": svg.sha256_text().substr(0, 16), "world_scale": float(spec.get("world_scale", 1.0)),
+			"sha": sha, "world_scale": float(spec.get("world_scale", 1.0)),
 			"meta": spec.get("meta", {}), "scale": scale})
 	items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return a["image"].get_height() > b["image"].get_height() or (a["image"].get_height() == b["image"].get_height() and a["name"] < b["name"]))
@@ -107,6 +118,14 @@ func _blit_extruded(atlas: Image, img: Image, pos: Vector2i, padding: int) -> vo
 			var c := img.get_pixel(sx, sy)
 			atlas.set_pixel(pos.x + dx, pos.y + dy, Color(c.r, c.g, c.b, 0.0))
 	atlas.blit_rect(img, Rect2i(0, 0, w, h), pos)
+
+
+## The hash the atlas keeps of a painted source (the bytes of the png).
+static func bytes_sha(bytes: PackedByteArray) -> String:
+	var ctx := HashingContext.new()
+	ctx.start(HashingContext.HASH_SHA256)
+	ctx.update(bytes)
+	return ctx.finish().hex_encode().substr(0, 16)
 
 
 static func _next_pow2(v: int) -> int:

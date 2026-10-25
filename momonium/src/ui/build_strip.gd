@@ -14,7 +14,7 @@ signal built(id: int)
 signal mode_changed(mode: String)
 
 const FAMILIES: PackedStringArray = ["farm", "mine", "lumberyard", "research"]
-const BUTTON := Vector2(104, 112)
+const BUTTON := Vector2(108, 124)
 
 var sim: Simulation
 var lib: SpriteLibrary
@@ -127,14 +127,14 @@ func _choice(node_name: String, sprite: String) -> Button:
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 0)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var icon := PanelViews.icon(lib, sprite if lib.has(sprite) else "ui_build", 46.0)
+	var icon := PanelViews.icon(lib, sprite if lib.has(sprite) else "ui_build", 62.0)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(icon)
-	var n := PanelViews.label("", 15)
+	var n := PanelViews.label("", 16)
 	n.name = "Name"
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(n)
-	var price := PanelViews.label("", 13)
+	var price := PanelViews.label("", 14)
 	price.name = "Price"
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	price.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

@@ -89,7 +89,9 @@ void fragment() {
 	float glint = smoothstep(0.62, 0.8, g) * (0.25 + 0.75 * t);
 	float dx = (screen_pos.x - sun_screen.x) / screen_size.x;
 	float column = exp(-dx * dx * 45.0) * (1.0 - 0.6 * t);
-	col += glint_color.rgb * sun_strength * (glint * 0.5 + column * 0.22 * (0.4 + n));
+	// Under a low sun the column carries the glitter: a path of light (concepts).
+	glint *= 1.0 + column * 2.5 * max(sun_strength - 1.0, 0.0);
+	col += glint_color.rgb * sun_strength * (glint * 0.5 + column * 0.3 * (0.4 + n));
 
 	// Foam: a bright line at the waterline and soft rings travelling outward.
 	float band = smoothstep(0.05, 0.25, shore) * (1.0 - smoothstep(0.38, 0.46, shore));

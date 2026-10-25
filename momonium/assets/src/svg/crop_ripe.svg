@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 130" width="140" height="130">
   <!-- Full plants with ripe tomatoes, ready to harvest. -->
+  <defs>
   <g id="r">
     <path d="M0 0 V-12" stroke="#4f8f2a" stroke-width="2.2" stroke-linecap="round"/>
     <path d="M0 -9 C-4 -19 -15 -19 -16 -14 C-13 -9 -6 -8 0 -9 Z" fill="#5fae34"/>
@@ -9,6 +10,7 @@
     <circle cx="6" cy="-5" r="3.8" fill="#f05a3a" stroke="#a82a1a" stroke-width="0.8"/>
     <circle cx="-7.4" cy="-7.6" r="1.2" fill="#ffd0c4"/>
   </g>
+  </defs>
   <use href="#r" transform="translate(66 33)"/><use href="#r" transform="translate(80 43)"/><use href="#r" transform="translate(94 54)"/>
   <use href="#r" transform="translate(53 43)"/><use href="#r" transform="translate(67 53)"/><use href="#r" transform="translate(81 64)"/>
   <use href="#r" transform="translate(40 53)"/><use href="#r" transform="translate(54 63)"/><use href="#r" transform="translate(68 74)"/>

@@ -1,11 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 130" width="140" height="130">
   <!-- Leafy young plants. -->
+  <defs>
   <g id="p">
     <path d="M0 0 V-10" stroke="#4f8f2a" stroke-width="2" stroke-linecap="round"/>
     <path d="M0 -8 C-3 -16 -12 -16 -13 -12 C-11 -8 -5 -7 0 -8 Z" fill="#6fbe3a"/>
     <path d="M0 -9 C3 -17 12 -17 13 -13 C11 -9 5 -8 0 -9 Z" fill="#8ed14b"/>
     <path d="M0 -10 C-2 -17 2 -20 4 -18 C4 -14 2 -12 0 -10 Z" fill="#a6de5c"/>
   </g>
+  </defs>
   <use href="#p" transform="translate(66 32)"/><use href="#p" transform="translate(80 42)"/><use href="#p" transform="translate(94 53)"/>
   <use href="#p" transform="translate(53 42)"/><use href="#p" transform="translate(67 52)"/><use href="#p" transform="translate(81 63)"/>
   <use href="#p" transform="translate(40 52)"/><use href="#p" transform="translate(54 62)"/><use href="#p" transform="translate(68 73)"/>

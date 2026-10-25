@@ -156,21 +156,21 @@
       },
       "sunset": {
         "sky": [
-          "#7f6ab5",
-          "#dd8478",
-          "#fda35f"
+          "#c97a72",
+          "#f4a25a",
+          "#ffd486"
         ],
         "sea": [
-          "#cf8884",
-          "#8a74a0",
-          "#5f5a8c",
-          "#f0a070"
+          "#f4b47c",
+          "#4b62ad",
+          "#2b3c84",
+          "#eaa27c"
         ],
-        "ambient": "#ffd2b0",
-        "cloud": "#ffc9a0",
-        "cloud_shade": "#b77a8c",
+        "ambient": "#ffd8b8",
+        "cloud": "#ffd3a2",
+        "cloud_shade": "#c27c7e",
         "glint": "#ffd27a",
-        "glint_strength": 1.2,
+        "glint_strength": 1.6,
         "stars": 0.0
       },
       "night": {
@@ -189,7 +189,7 @@
         "cloud": "#7b8cc4",
         "cloud_shade": "#2b3d7a",
         "glint": "#fdecba",
-        "glint_strength": 0.55,
+        "glint_strength": 0.85,
         "stars": 1.0
       },
       "dawn": {

@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Head with cheeks and mouth; eyes are separate so they can blink and look around. -->
-<path d="M100 30 C150 30 164 62 162 84 C160 112 132 124 100 124 C68 124 40 112 38 84 C36 62 50 30 100 30 Z" fill="#fffcf4" stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-<ellipse cx="66" cy="100" rx="9" ry="5.6" fill="#ffb7b0" opacity="0.9"/>
-<ellipse cx="134" cy="100" rx="9" ry="5.6" fill="#ffb7b0" opacity="0.9"/>
-<path d="M92 97 Q100 112 108 97 Z" fill="#c9504f" stroke="#61504f" stroke-width="2.2" stroke-linejoin="round"/>
-<path d="M95 103 Q100 108 105 103 Q100 100 95 103 Z" fill="#ff8f8a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: head, front -- a wide mochi head with blush and an open smile; eyes are separate so they can blink and look around. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
+<defs><radialGradient id="fur" cx="0.42" cy="0.32" r="0.78"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#fffaf3"/><stop offset="1" stop-color="#efe3d6"/></radialGradient><radialGradient id="blush"><stop offset="0" stop-color="#ff9f9a" stop-opacity="0.95"/><stop offset="0.6" stop-color="#ffb3ad" stop-opacity="0.6"/><stop offset="1" stop-color="#ffc4bd" stop-opacity="0"/></radialGradient></defs>
+<path d="M100 28 C146 28 170 56 170 88 C170 116 142 130 100 130 C58 130 30 116 30 88 C30 56 54 28 100 28 Z" fill="url(#fur)" stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M44 108 C60 124 140 124 156 108 C146 122 124 128 100 128 C76 128 54 122 44 108 Z" fill="#eadccd" opacity="0.7"/>
+<ellipse cx="69" cy="104" rx="12" ry="7.5" fill="url(#blush)"/><ellipse cx="131" cy="104" rx="12" ry="7.5" fill="url(#blush)"/>
+<path d="M92.5 99 Q100 100.5 107.5 99 Q106.5 110.5 100 111 Q93.5 110.5 92.5 99 Z" fill="#a93c3a" stroke="#5a4038" stroke-width="2" stroke-linejoin="round"/>
+<path d="M95.2 105.6 Q100 102.4 104.8 105.6 Q103.4 109.6 100 109.8 Q96.6 109.6 95.2 105.6 Z" fill="#ff8c86"/>
 </svg>

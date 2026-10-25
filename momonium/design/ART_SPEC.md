@@ -37,7 +37,9 @@
 
 흰 **늘어진 귀**(머리 옆으로 내려와 뺨 아래까지), 머리 위 **작은 털 뭉치**(새싹이 아니다), **갈색 눈**과 흰 하이라이트,
 **분홍 볼**, **크림색 멜빵바지**와 단추 두 개, **바느질 선이 있는 앞주머니**. 작은 장식(참)은 없다.
-갈색 윤곽선(`#61504f`). 특수 복장은 미래 직업용으로 남겨 둔다. 샘플: `assets/src/svg/momo_front.svg`.
+갈색 윤곽선(Step 46부터 더 따뜻하고 가는 `#5a4038`, 2.6). 특수 복장은 미래 직업용으로 남겨 둔다.
+샘플: `assets/src/svg/momo_front.svg` — Step 46부터 리그 부품으로 **조립해 만든다**(`tools/art/gen/compose_momo.py`,
+테스트가 부품과 같은지 검사). 부품을 고치면 다시 조립한다.
 
 ## 5. 파이프라인
 
@@ -45,6 +47,8 @@
 assets/src/svg/*.svg ──(tools/art/build_atlas.gd)──► assets/atlas/sprites.png + sprites.json
   assets/sprites.json (스케일·피벗)                       (영역, 피벗[px], 원본 해시, world_scale)
 data/art.json 팔레트 ──(tools/art/build_textures.gd)──► assets/textures/{grass,dirt,stone}.png
+assets/src/png/*.png (Step 46, 그린 원본) ──(build_atlas.gd)──► 같은 아틀라스
+assets/src/png/textures/{grass,cliff,clouds}.png ──(build_textures.gd: 이음매 없게)──► assets/textures/
 ```
 
 1. **원본은 SVG**(벡터). 손으로 그리거나 다듬고, 래스터는 도구가 만든다. `assets/src/`는 `.gdignore`라 게임에 실리지 않는다.
@@ -81,7 +85,9 @@ build_atlas → import → `scenes/dev/art_gallery.tscn`으로 확인.
 | 텍스처 메모리 합(RGBA 기준) | 16MB |
 | 웹 팩 | 20MB (`tools/check.sh --export`) |
 
-현재: 아틀라스 512×256(4 스프라이트), 텍스처 3장, 합계 약 0.8MB.
+현재(Step 46): 아틀라스 2048×1024(71 스프라이트), 텍스처 5장(잔디 512², 절벽 512×256, 구름 512×289, 흙·돌),
+합계 약 10.3MB(RGBA). 아틀라스와 그린 텍스처는 **손실 WebP(품질 0.82)**로 가져온다 — 무손실이면 팩이 2.3MB
+늘었고, 2배 확대해 비교해도 차이가 보이지 않았다.
 
 ## 7. 바다와 해안 (Step 08)
 
@@ -128,7 +134,34 @@ build_atlas → import → `scenes/dev/art_gallery.tscn`으로 확인.
   직업 복장은 나중에 `hand_point()`에 붙인다.
 - 갤러리: `scenes/dev/momo_gallery.tscn`.
 
-## 11. 하지 않는 것
+## 11. 그린 에셋 (Step 46)
+
+컨셉(`~/Workspace/download/momonium_*.png`)과 실제 게임의 차이를 줄이려고, 건물·작물·지형·하늘·소품을 **그린 그림**으로
+바꿨다. 컨셉은 여전히 *스타일 레퍼런스*일 뿐이고 잘라 쓰지 않는다 — 모든 그림은 **게임의 원래 SVG 프레임**을 입력으로
+다시 그린 것이라 피벗·발자국·탭 영역이 그대로다.
+
+| 단계 | 도구 | 하는 일 |
+|---|---|---|
+| 입력 | `tools/art/gen/render_input.gd` | 스프라이트의 SVG 프레임 전체를 1024² 초록(#00FF00) 위 가운데에 그리고, 프레임 위치를 `.frame.json`에 적는다 |
+| 생성 | TopView `image_edit`, GPT Image 2, 1K, medium | 입력 + 컨셉 한 장(화풍). "같은 자리·크기·발자국, 바깥은 순수 초록" |
+| 키잉 | `tools/art/gen/key_output.gd` | 테두리에서 시작하는 flood fill로 배경만 지우고(잔디는 아무리 초록이어도 남는다), 가장자리는 초록을 풀어 낸다(unmix). 모델이 옮기거나 키운 그림을 **입력의 너비와 아래 꼭짓점(땅)**에 맞춘 뒤 프레임 × `scale` 크기로 잘라 `assets/src/png/<이름>.png` |
+| 확인 | `mark_pivots.gd`·`onbg.gd` | 피벗(굴뚝 연기·풍차 허브·물레방아)과 초록 테두리를 눈으로 |
+| 아틀라스 | `tools/art/build_atlas.gd` | `.png` 원본도 받는다(바이트 해시로 최신 검사) |
+
+- **지형**: `assets/src/png/textures/{grass,cliff}.png`(그린 원본)를 `build_textures.gd`가 넓은 빛을 평평하게 하고
+  반쯤 민 사본을 교차해 **이음매 없이** 만든다(잔디는 상하좌우, 절벽은 좌우 + 물 닿는 줄).
+- **하늘**: 자홍(#FF00FF) 위에 그린 뭉게구름 띠를 `key_clouds.gd`가 (r = 햇빛 받은 정도, a = 덮임)으로 바꾸고,
+  `sky.gdshader`가 시간대의 구름 색으로 물들여 두 겹(먼 줄·가까운 더미)으로 흘린다 — 노을·밤에도 맞는 색이 된다.
+  해는 구름 **뒤에 더해** 낮은 노을 해가 구름에 가리지 않는다.
+- **소품**: 덤불·꽃 덤불·들꽃·이끼 바위·풀·어린 나무 한 장(`split_props.gd`가 6개로 자른다). `IslandProps`가 칸에서
+  유도해(같은 섬은 늘 같다) 가장자리에 두고, 나무는 먼 가장자리에만, 안쪽엔 작은 꽃·풀만, **무언가 선 칸에는 두지 않는다**.
+  엔티티 레이어의 일반 스프라이트라 깊이 정렬되고 프레임마다 도는 코드가 없다.
+- **모모**: 생성한 부품은 관절이 맞지 않아(몸이 176px 위로 갔다) 쓰지 않았다. 대신 SVG 부품을 컨셉 비율로 다시 그렸다
+  — 넓은 찹쌀떡 머리, 볼 아래까지 늘어진 큰 귀, 둥근 손, 통통한 멜빵, 흰 발, 부드러운 방사형 음영. 관절은 그대로다.
+- **크레딧**: 31장, **6.20 크레딧**(시작 379.72 → 373.52, 한도 40). 게임에 쓴 것 28장.
+- 대조표: `design/art46/contact_sheet.jpg`(열: 컨셉 | 0.44 | 0.46, 행: 낮·노을·밤·모모·건물 4+특별·개조 건물·건설 줄·연구).
+
+## 12. 하지 않는 것
 
 - 참조 이미지를 잘라 스프라이트로 쓰지 않는다(조명·원근·해상도가 섞여 있다).
 - 전체 화면 AI 영상 루프나 무거운 물리로 바다·하늘을 만들지 않는다(셰이더·타일로, Step 08·09).

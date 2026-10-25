@@ -124,7 +124,7 @@
       }
     },
     "farm": {
-      "source": "svg/farm.svg",
+      "source": "png/farm.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -149,7 +149,7 @@
       }
     },
     "crop_seeds": {
-      "source": "svg/crop_seeds.svg",
+      "source": "png/crop_seeds.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -160,7 +160,7 @@
       }
     },
     "crop_sprout": {
-      "source": "svg/crop_sprout.svg",
+      "source": "png/crop_sprout.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -171,7 +171,7 @@
       }
     },
     "crop_leafy": {
-      "source": "svg/crop_leafy.svg",
+      "source": "png/crop_leafy.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -182,7 +182,7 @@
       }
     },
     "crop_ripe": {
-      "source": "svg/crop_ripe.svg",
+      "source": "png/crop_ripe.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -513,7 +513,7 @@
       }
     },
     "lab": {
-      "source": "svg/lab.svg",
+      "source": "png/lab.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -528,7 +528,7 @@
       }
     },
     "mine": {
-      "source": "svg/mine.svg",
+      "source": "png/mine.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -543,7 +543,7 @@
       }
     },
     "lumberyard": {
-      "source": "svg/lumberyard.svg",
+      "source": "png/lumberyard.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -608,7 +608,7 @@
       }
     },
     "smelter": {
-      "source": "svg/smelter.svg",
+      "source": "png/smelter.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -663,7 +663,7 @@
       }
     },
     "solar_panel": {
-      "source": "svg/solar_panel.svg",
+      "source": "png/solar_panel.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -678,7 +678,7 @@
       }
     },
     "wind_turbine": {
-      "source": "svg/wind_turbine.svg",
+      "source": "png/wind_turbine.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -697,7 +697,7 @@
       }
     },
     "steam_engine": {
-      "source": "svg/steam_engine.svg",
+      "source": "png/steam_engine.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -716,7 +716,7 @@
       }
     },
     "water_wheel": {
-      "source": "svg/water_wheel.svg",
+      "source": "png/water_wheel.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -735,7 +735,7 @@
       }
     },
     "office": {
-      "source": "svg/office.svg",
+      "source": "png/office.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -750,7 +750,7 @@
       }
     },
     "villa": {
-      "source": "svg/villa.svg",
+      "source": "png/villa.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -765,7 +765,7 @@
       }
     },
     "apartment": {
-      "source": "svg/apartment.svg",
+      "source": "png/apartment.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -780,7 +780,7 @@
       }
     },
     "park": {
-      "source": "svg/park.svg",
+      "source": "png/park.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -795,7 +795,7 @@
       }
     },
     "pub": {
-      "source": "svg/pub.svg",
+      "source": "png/pub.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -810,7 +810,7 @@
       }
     },
     "community_center": {
-      "source": "svg/community_center.svg",
+      "source": "png/community_center.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -825,7 +825,7 @@
       }
     },
     "game_studio": {
-      "source": "svg/game_studio.svg",
+      "source": "png/game_studio.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -840,7 +840,7 @@
       }
     },
     "car_factory": {
-      "source": "svg/car_factory.svg",
+      "source": "png/car_factory.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -865,7 +865,7 @@
       }
     },
     "clock_tower": {
-      "source": "svg/clock_tower.svg",
+      "source": "png/clock_tower.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -880,7 +880,7 @@
       }
     },
     "school": {
-      "source": "svg/school.svg",
+      "source": "png/school.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -895,7 +895,7 @@
       }
     },
     "momo_monument": {
-      "source": "svg/momo_monument.svg",
+      "source": "png/momo_monument.png",
       "scale": 2.0,
       "world_scale": 0.5,
       "pivots": {
@@ -906,6 +906,72 @@
         "top": [
           70,
           34
+        ]
+      }
+    },
+    "prop_bush": {
+      "source": "png/prop_bush.png",
+      "scale": 1.0,
+      "world_scale": 0.34,
+      "pivots": {
+        "origin": [
+          69,
+          124
+        ]
+      }
+    },
+    "prop_bush_flowers": {
+      "source": "png/prop_bush_flowers.png",
+      "scale": 1.0,
+      "world_scale": 0.34,
+      "pivots": {
+        "origin": [
+          70,
+          125
+        ]
+      }
+    },
+    "prop_flowers": {
+      "source": "png/prop_flowers.png",
+      "scale": 1.0,
+      "world_scale": 0.28,
+      "pivots": {
+        "origin": [
+          64,
+          124
+        ]
+      }
+    },
+    "prop_rocks": {
+      "source": "png/prop_rocks.png",
+      "scale": 1.0,
+      "world_scale": 0.26,
+      "pivots": {
+        "origin": [
+          59,
+          86
+        ]
+      }
+    },
+    "prop_grass": {
+      "source": "png/prop_grass.png",
+      "scale": 1.0,
+      "world_scale": 0.24,
+      "pivots": {
+        "origin": [
+          64,
+          121
+        ]
+      }
+    },
+    "prop_tree": {
+      "source": "png/prop_tree.png",
+      "scale": 1.0,
+      "world_scale": 0.62,
+      "pivots": {
+        "origin": [
+          64,
+          163
         ]
       }
     }

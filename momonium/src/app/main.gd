@@ -101,6 +101,7 @@ var _last_wall := 0.0
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
+var island_props: IslandProps
 var _version_label: Label
 
 
@@ -196,6 +197,10 @@ func _ready() -> void:
 	add_child(building_views)
 	building_views.setup(sim, entities, lib)
 	building_views.cameras = cameras
+	island_props = IslandProps.new()
+	island_props.name = "IslandProps"
+	add_child(island_props)
+	island_props.setup(sim, entities, lib)
 	momo_views = MomoViews.new()
 	momo_views.cameras = cameras
 	momo_views.name = "MomoViews"
@@ -976,7 +981,19 @@ func _art_info(_arg: Variant) -> Dictionary:
 	var lib := SpriteLibrary.load_atlas()
 	return {"sprites": lib.sprites.size(), "size": [lib.size.x, lib.size.y],
 		"texture": [lib.texture.get_width(), lib.texture.get_height()] if lib.texture else [0, 0],
-		"momo_origin": [lib.pivot("momo_front").x, lib.pivot("momo_front").y]}
+		"momo_origin": [lib.pivot("momo_front").x, lib.pivot("momo_front").y],
+		"props": island_props.count() if island_props != null else 0,
+		"painted_clouds": float((sky.material as ShaderMaterial).get_shader_parameter("painted_clouds")) > 0.5,
+		"research_card": _window_rect(research_frame.card_rect()) if research_frame.visible else [],
+		"side_reserved": research_frame.right_reserved * get_viewport().get_final_transform().get_scale().x}
+
+
+## A rect in window pixels, as the E2E bridge reports rects.
+func _window_rect(r: Rect2) -> Array:
+	var t := get_viewport().get_final_transform()
+	var a: Vector2 = t * r.position
+	var b: Vector2 = t * r.end
+	return [a.x, a.y, b.x - a.x, b.y - a.y]
 
 
 ## E2E: where a cell's centre is in window pixels, so a browser test can tap it.

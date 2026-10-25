@@ -5,6 +5,8 @@ extends ColorRect
 
 const SHADER := preload("res://assets/shaders/sky.gdshader")
 const FRACTION := 0.4
+## The painted cloud band (tools/art/build_textures.gd), when it exists.
+const CLOUDS := "res://assets/textures/clouds.png"
 
 var _mat: ShaderMaterial
 
@@ -12,6 +14,9 @@ var _mat: ShaderMaterial
 func _ready() -> void:
 	_mat = ShaderMaterial.new()
 	_mat.shader = SHADER
+	if ResourceLoader.exists(CLOUDS):
+		_mat.set_shader_parameter("clouds_tex", load(CLOUDS))
+		_mat.set_shader_parameter("painted_clouds", 1.0)
 	material = _mat
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 

@@ -14,13 +14,21 @@ func before_each() -> void:
 	budgets = GameData.load_default().table("art")["budgets"]
 
 
+const BuildAtlas := preload("res://tools/art/build_atlas.gd")
+
+
 func test_atlas_is_up_to_date_with_sources() -> void:
 	for name: String in manifest["sprites"]:
 		assert_true(atlas["sprites"].has(name), "%s is in the built atlas (run tools/art/build_atlas.gd)" % name)
 		if not atlas["sprites"].has(name):
 			continue
-		var svg := FileAccess.get_file_as_string("res://assets/src/" + manifest["sprites"][name]["source"])
-		assert_eq(atlas["sprites"][name]["source_sha"], svg.sha256_text().substr(0, 16), "%s atlas matches its SVG (rebuild the atlas)" % name)
+		var source := String(manifest["sprites"][name]["source"])
+		var sha := ""
+		if source.ends_with(".png"):
+			sha = BuildAtlas.bytes_sha(FileAccess.get_file_as_bytes("res://assets/src/" + source))
+		else:
+			sha = FileAccess.get_file_as_string("res://assets/src/" + source).sha256_text().substr(0, 16)
+		assert_eq(atlas["sprites"][name]["source_sha"], sha, "%s atlas matches its source (rebuild the atlas)" % name)
 	for name: String in atlas["sprites"]:
 		assert_true(manifest["sprites"].has(name), "%s in the atlas has a source" % name)
 

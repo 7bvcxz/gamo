@@ -393,7 +393,7 @@ func occupied_rects() -> Array[Rect2]:
 
 func _draw_burst() -> void:
 	var r := Rect2(Vector2.ZERO, burst_pill.size)
-	burst_pill.draw_rect(r, Color(0.06, 0.16, 0.3, 0.78))
+	burst_pill.draw_style_box(burst_pill.get_theme_stylebox("panel", "PanelContainer"), r)
 	var c := Vector2(17, r.size.y * 0.5)
 	var col := Color("#ffd45a") if burst_active else Color(1, 1, 1, 0.55)
 	burst_pill.draw_arc(c, 10.0, 0.0, TAU, 24, Color(1, 1, 1, 0.18), 3.0, true)

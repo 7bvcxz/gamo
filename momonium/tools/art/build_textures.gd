@@ -10,6 +10,10 @@ extends SceneTree
 ## dirt.png   256x64   wraps horizontally (the band under the grass rim)
 ## stone.png  256x128  wraps horizontally and vertically (cliff blocks)
 ## cliff.png  256x128  wraps horizontally: dirt, stone and wet line in one face
+##
+## A painted source in assets/src/png/textures/<name>.png (Step 46) takes the
+## place of the procedural grass or cliff, at 512 px, and adds clouds.png
+## (the sky's painted cloud band).
 
 const OUT := "res://assets/textures/"
 const SIZE := 256
@@ -20,11 +24,98 @@ var palette: Dictionary
 func _init() -> void:
 	var art: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/art.json"))
 	palette = art["palette"]
-	_save(_grass(), "grass")
+	var painted_grass := _painted("grass")
+	var painted_cliff := _painted("cliff")
+	var painted_clouds := _painted("clouds")
+	_save(_painted_grass(painted_grass) if painted_grass != null else _grass(), "grass")
 	_save(_dirt(), "dirt")
 	_save(_stone(), "stone")
-	_save(_cliff(), "cliff")
+	_save(_painted_cliff(painted_cliff) if painted_cliff != null else _cliff(), "cliff")
+	if painted_clouds != null:
+		_save(_painted_clouds(painted_clouds), "clouds")
 	quit(0)
+
+
+# --- painted sources (Step 46) ------------------------------------------------
+# A painted image in assets/src/png/textures/ replaces the procedural texture
+# of the same name. It is made to tile here, so the source stays exactly what
+# was painted and the texture is still rebuilt rather than hand-edited.
+
+const PAINTED := "res://assets/src/png/textures/"
+const PAINTED_SIZE := 512
+
+
+func _painted(name: String) -> Image:
+	var path := PAINTED + name + ".png"
+	if not FileAccess.file_exists(path):
+		return null
+	var img := Image.load_from_file(path)
+	img.convert(Image.FORMAT_RGBA8)
+	return img
+
+
+func _painted_grass(src: Image) -> Image:
+	var img := src.duplicate() as Image
+	img.resize(PAINTED_SIZE, PAINTED_SIZE, Image.INTERPOLATE_LANCZOS)
+	_flatten_light(img, 0.85)
+	return seamless(seamless(img, true), false)
+
+
+## The cliff face: the painted strip cropped to 2:1 (soil on top, stones
+## below), tiled left to right, with the wet line where it meets the water.
+func _painted_cliff(src: Image) -> Image:
+	var w := src.get_width()
+	var h := mini(src.get_height(), w / 2)
+	var img := src.get_region(Rect2i(0, (src.get_height() - h) / 2, w, h))
+	img.resize(PAINTED_SIZE, PAINTED_SIZE / 2, Image.INTERPOLATE_LANCZOS)
+	_flatten_light(img, 0.6)
+	img = seamless(img, true)
+	var hh := img.get_height()
+	for y in range(hh - 6, hh):
+		for x in img.get_width():
+			img.set_pixel(x, y, img.get_pixel(x, y).lerp(Color(1, 1, 1), 0.55 if y >= hh - 3 else 0.3))
+	return img
+
+
+## Cloud band for the sky shader: already keyed (r = how sunlit, a = cover);
+## only made to tile left to right.
+func _painted_clouds(src: Image) -> Image:
+	var img := src.duplicate() as Image
+	img.resize(PAINTED_SIZE, int(float(PAINTED_SIZE) * src.get_height() / src.get_width()), Image.INTERPOLATE_LANCZOS)
+	return seamless(img, true)
+
+
+## Takes out the painting's broad light (a vignette, a brighter corner) so
+## the repeat of a tiled texture cannot be seen as a pattern of light patches.
+static func _flatten_light(img: Image, strength: float) -> void:
+	var low := img.duplicate() as Image
+	low.resize(4, 4, Image.INTERPOLATE_BILINEAR)
+	var mean := Color(0, 0, 0, 0)
+	for y in 4:
+		for x in 4:
+			mean += low.get_pixel(x, y) / 16.0
+	low.resize(img.get_width(), img.get_height(), Image.INTERPOLATE_BILINEAR)
+	for y in img.get_height():
+		for x in img.get_width():
+			var c := img.get_pixel(x, y)
+			var d := (mean - low.get_pixel(x, y)) * strength
+			img.set_pixel(x, y, Color(clampf(c.r + d.r, 0, 1), clampf(c.g + d.g, 0, 1), clampf(c.b + d.b, 0, 1), c.a))
+
+
+## Makes an image wrap along one axis: a copy shifted by half the size wraps
+## exactly where the original has its seam, so near the edges the shifted
+## copy is shown and in the middle the original, with a soft blend between.
+static func seamless(img: Image, horizontal: bool) -> Image:
+	var w := img.get_width()
+	var h := img.get_height()
+	var out := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h:
+		for x in w:
+			var t := absf(float(x) - w / 2.0) / (w / 2.0) if horizontal else absf(float(y) - h / 2.0) / (h / 2.0)
+			var k := smoothstep(0.35, 1.0, t)
+			var shifted := img.get_pixel((x + w / 2) % w, y) if horizontal else img.get_pixel(x, (y + h / 2) % h)
+			out.set_pixel(x, y, img.get_pixel(x, y).lerp(shifted, k))
+	return out
 
 
 func _c(key: String, i: int = 0) -> Color:

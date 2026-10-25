@@ -1,3 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><path d="M58 46 C34 46 14 72 16 104 C17 126 30 134 40 128 C52 120 50 96 56 80 C60 68 70 56 58 46 Z" fill="#fffcf4" stroke="#61504f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M30 110 C30 92 38 76 50 66 C44 82 42 100 40 120 Z" fill="#ebe3da"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: left ear -- long, wide and floppy, falling past the cheek. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
+<defs><linearGradient id="earl" x1="0.6" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#fff8ef"/><stop offset="1" stop-color="#eddfd1"/></linearGradient></defs>
+<path d="M70 42 C48 34 18 56 10 96 C5 124 14 150 31 151 C46 152 51 138 47 120 C44 104 45 88 53 72 C59 60 77 50 70 42 Z" fill="url(#earl)" stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M25 137 C20 113 27 88 43 70 C37 92 36 116 40 141 C35 144 29 143 25 137 Z" fill="#ecdfd2" opacity="0.85"/>
 </svg>

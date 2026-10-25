@@ -22,11 +22,13 @@ var scroll: ScrollContainer
 var title_label: Label
 var close_button: Button
 var tab_bar: HBoxContainer
+var tab_scroll: ScrollContainer
 var body: VBoxContainer
 var tabs: Array[Dictionary] = []
 var current := -1
 ## Pixels on the right the card must leave free (the HUD's side buttons).
 var right_reserved := 100.0
+const CARD_ALPHA := 0.9
 var _refresh_left := 0.0
 
 
@@ -61,8 +63,16 @@ func _init() -> void:
 	tab_bar.name = "Tabs"
 	tab_bar.add_theme_constant_override("separation", 6)
 	tab_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	tab_bar.visible = false
-	head.add_child(tab_bar)
+	# Many tabs (Research has one per industry) scroll sideways instead of
+	# widening the card under the HUD's side buttons.
+	tab_scroll = ScrollContainer.new()
+	tab_scroll.name = "TabScroll"
+	tab_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tab_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	tab_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tab_scroll.visible = false
+	tab_scroll.add_child(tab_bar)
+	head.add_child(tab_scroll)
 	close_button = PanelViews.close_button(52.0)
 	close_button.pressed.connect(close)
 	head.add_child(close_button)
@@ -107,6 +117,7 @@ func add_tab(label_key: String, view: Control) -> void:
 	body.add_child(view)
 	tabs.append({"key": label_key, "view": view, "button": button})
 	tab_bar.visible = tabs.size() > 1
+	tab_scroll.visible = tab_bar.visible
 	title_label.visible = not tab_bar.visible
 	view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_relabel()
@@ -117,6 +128,8 @@ func show_tab(index: int) -> void:
 	for i in tabs.size():
 		(tabs[i]["view"] as Control).visible = i == current
 		(tabs[i]["button"] as Button).modulate = Color(1.25, 1.2, 0.85) if i == current else Color(1, 1, 1, 0.7)
+	if not tabs.is_empty():
+		tab_scroll.ensure_control_visible.call_deferred(tabs[current]["button"])
 	refresh()
 	_layout.call_deferred()
 
@@ -180,6 +193,13 @@ func _relabel() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and tab_bar != null:
 		_relabel()
+	elif what == NOTIFICATION_THEME_CHANGED and card != null:
+		# A card of reading is denser than the HUD's glass (Step 46): small
+		# text over a busy island must stay legible.
+		var box := get_theme_stylebox("panel", "PanelContainer").duplicate() as StyleBoxFlat
+		if box != null:
+			box.bg_color.a = CARD_ALPHA
+			card.add_theme_stylebox_override("panel", box)
 
 
 ## Centred in the space left of the side buttons; as tall as its body up to
