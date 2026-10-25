@@ -16,6 +16,8 @@ var level: int = 1
 var experience: int = 0
 ## type -> {level, exp}
 var mastery: Dictionary = {}
+## Mastery experience fractions owed (thousandths, by type) -- the School.
+var mastery_carry: Dictionary = {}
 
 
 func _init() -> void:
@@ -26,6 +28,7 @@ func on_new_game() -> void:
 	level = sim.data.get_int("balance", "start.level", 1)
 	experience = sim.data.get_int("balance", "start.exp")
 	mastery = {}
+	mastery_carry = {}
 
 
 func setup(p_sim: Simulation) -> void:
@@ -81,6 +84,12 @@ func add_exp(amount: int, reason: String) -> void:
 func add_mastery(type: String, amount: int) -> void:
 	if amount <= 0 or type == "":
 		return
+	# The School: more mastery from the same work, the fraction carried.
+	var specials: SpecialSystem = sim.system(&"specials")
+	if specials != null:
+		amount = specials.scaled_exp(amount, mastery_carry, type)
+		if amount <= 0:
+			return
 	var m: Dictionary = mastery.get(type, {"level": 1, "exp": 0})
 	# Stored before announcing: a listener asking mastery_of() during
 	# mastery_up must see the new level, also for a type's first gain.
@@ -136,7 +145,7 @@ func save_state() -> Dictionary:
 	var m := {}
 	for t: String in mastery:
 		m[t] = {"level": int(mastery[t]["level"]), "exp": int(mastery[t]["exp"])}
-	return {"level": level, "exp": experience, "mastery": m}
+	return {"level": level, "exp": experience, "mastery": m, "mastery_carry": mastery_carry.duplicate()}
 
 
 func load_state(state: Dictionary) -> void:
@@ -146,3 +155,7 @@ func load_state(state: Dictionary) -> void:
 	var m: Dictionary = state.get("mastery", {})
 	for t: String in m:
 		mastery[t] = {"level": int(m[t]["level"]), "exp": int(m[t]["exp"])}
+	mastery_carry = {}
+	var c: Dictionary = state.get("mastery_carry", {})
+	for t: String in c:
+		mastery_carry[t] = clampi(int(c[t]), 0, 999)

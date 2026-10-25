@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes. Only four families are placed on land -- farm, mine, lumberyard and research (the Lab); `placeable` marks them. Every other type is an internal facility of one family (`family`): a building of that family is refitted into it in place (building.refit), keeping its tile. Demolishing a finished building refunds `demolish_refund` of what was actually paid (money and materials, rounded down). Special structures (`special`: true) are landmarks, not a fifth production family: built from the Special part of the build strip, one of each type at a time, within the settlement's special slots (balance.specials); no work cycle, no family. Pulled down, half of what was paid comes back and that type cannot be built again for `rebuild_cooldown` seconds.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes. Only four families are placed on land -- farm, mine, lumberyard and research (the Lab); `placeable` marks them. Every other type is an internal facility of one family (`family`): a building of that family is refitted into it in place (building.refit), keeping its tile. Demolishing a finished building refunds `demolish_refund` of what was actually paid (money and materials, rounded down). Special structures (`special`: true) are landmarks, not a fifth production family: built from the Special part of the build strip, one of each type at a time, within the settlement's special slots (balance.specials); no work cycle, no family. Pulled down, half of what was paid comes back and that type cannot be built again for `rebuild_cooldown` seconds. A special's `effect` (SpecialSystem): work_burst {multiply, active_seconds, cycle_seconds} -- work started in the first active_seconds of every game-clock cycle takes multiply times as long; skill_exp {multiply} -- Momo skill and mastery experience; legacy {share} -- extra legacy points when the island is sold (rounded half up).",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -870,7 +870,13 @@
         "level": 5
       },
       "workers": 0,
-      "rebuild_cooldown": 180
+      "rebuild_cooldown": 180,
+      "effect": {
+        "kind": "work_burst",
+        "multiply": 0.5,
+        "active_seconds": 30,
+        "cycle_seconds": 180
+      }
     },
     "school": {
       "name": "building.school",
@@ -894,7 +900,11 @@
         "level": 4
       },
       "workers": 0,
-      "rebuild_cooldown": 180
+      "rebuild_cooldown": 180,
+      "effect": {
+        "kind": "skill_exp",
+        "multiply": 1.2
+      }
     },
     "momo_monument": {
       "name": "building.momo_monument",
@@ -918,7 +928,11 @@
         "level": 6
       },
       "workers": 0,
-      "rebuild_cooldown": 180
+      "rebuild_cooldown": 180,
+      "effect": {
+        "kind": "legacy",
+        "share": 0.1
+      }
     }
   }
 }

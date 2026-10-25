@@ -26,6 +26,12 @@ var side_buttons: Array[HudButton] = []
 ## Supply / draw in kW, once power is part of the island; tap for the details.
 var power_pill: Button
 var power_label: Label
+## The Clock Tower's burst: a tiny dial -- gold and counting down while work
+## goes twice as fast, dim and counting to the next burst otherwise.
+var burst_pill: Control
+var burst_text := ""
+var burst_active := false
+var burst_fraction := 0.0
 var corner_buttons: Array[HudButton] = []
 var buttons: Dictionary = {}
 ## Right edge of the bottom-left buttons and the bottom margin, after layout.
@@ -105,6 +111,14 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	power_pill.add_child(pill_row)
 	power_pill.pressed.connect(func() -> void: action.emit(&"power"))
 	add_child(power_pill)
+	burst_pill = Control.new()
+	burst_pill.name = "BurstPill"
+	burst_pill.custom_minimum_size = Vector2(118, 34)
+	burst_pill.size = Vector2(118, 34)
+	burst_pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	burst_pill.visible = false
+	burst_pill.draw.connect(_draw_burst)
+	add_child(burst_pill)
 
 	production_label = _label(15)
 	production_label.name = "Production"
@@ -246,6 +260,20 @@ func refresh(force: bool = false) -> void:
 		var want := research.something_to_start()
 		if research_button.badge != want:
 			research_button.badge = want
+	var specials: SpecialSystem = sim.system(&"specials")
+	if specials != null:
+		var b := specials.burst()
+		if burst_pill.visible != bool(b["standing"]):
+			burst_pill.visible = bool(b["standing"])
+			_layout.call_deferred()
+		if b["standing"]:
+			burst_active = bool(b["active"])
+			var left := int(ceil(int(b["remaining_ms"]) / 1000.0))
+			burst_text = ("x2 " if burst_active else "") + "%d:%02d" % [left / 60, left % 60]
+			var e := specials.effect("work_burst")
+			var span := float(e.get("active_seconds", 30)) * 1000.0 if burst_active else float(int(b["cycle_ms"]) - int(float(e.get("active_seconds", 30)) * 1000.0))
+			burst_fraction = clampf(float(int(b["remaining_ms"])) / maxf(span, 1.0), 0.0, 1.0)
+			burst_pill.queue_redraw()
 	# A red dot on Status when the settlement can be promoted.
 	var tiers: TierSystem = sim.system(&"tiers")
 	var status_button: HudButton = buttons.get(&"status")
@@ -330,6 +358,8 @@ func _layout() -> void:
 	exp_pill.position = Vector2(w - m["right"] - pill_w, money_pill.position.y + money_pill.size.y + GAP)
 	power_pill.reset_size()
 	power_pill.position = Vector2(m["left"], day_panel.position.y + day_panel.size.y + GAP)
+	var below := power_pill.position.y + (power_pill.size.y + GAP if power_pill.visible else 0.0)
+	burst_pill.position = Vector2(m["left"], below)
 	production_label.reset_size()
 	production_label.position = Vector2(w - m["right"] - production_label.size.x, exp_pill.position.y + exp_pill.size.y + 4)
 	var y := exp_pill.position.y + exp_pill.size.y + 34
@@ -351,3 +381,16 @@ func occupied_rects() -> Array[Rect2]:
 	for b: HudButton in side_buttons + corner_buttons:
 		out.append(b.get_rect())
 	return out
+
+
+func _draw_burst() -> void:
+	var r := Rect2(Vector2.ZERO, burst_pill.size)
+	burst_pill.draw_rect(r, Color(0.06, 0.16, 0.3, 0.78))
+	var c := Vector2(17, r.size.y * 0.5)
+	var col := Color("#ffd45a") if burst_active else Color(1, 1, 1, 0.55)
+	burst_pill.draw_arc(c, 10.0, 0.0, TAU, 24, Color(1, 1, 1, 0.18), 3.0, true)
+	burst_pill.draw_arc(c, 10.0, -PI * 0.5, -PI * 0.5 + TAU * burst_fraction, 24, col, 3.0, true)
+	burst_pill.draw_line(c, c + Vector2(0, -6), col, 2.0, true)
+	burst_pill.draw_line(c, c + Vector2(4, 0), col, 2.0, true)
+	var font := burst_pill.get_theme_default_font()
+	burst_pill.draw_string(font, Vector2(34, r.size.y * 0.5 + 6), burst_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 17, col)

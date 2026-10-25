@@ -854,7 +854,8 @@ func _hud_info(_arg: Variant) -> Dictionary:
 	return {"day": hud._day_label.text, "seconds": hud._seconds_label.text, "money": hud._money_label.text,
 		"level": hud._level_label.text, "exp": hud._exp_label.text, "buttons": buttons,
 		"labels": hud.buttons.keys().map(func(k: StringName) -> String: return (hud.buttons[k] as HudButton)._label.text),
-		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current()}
+		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current(),
+		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text}}
 
 
 ## E2E: what is selected, the panel's cards (window pixels) and the last tap result.

@@ -508,3 +508,8 @@ tier.promoted,Now a {name},이제 {name}예요,{name}になりました,现在�
 tier.slots,Special slots {n},특별 건물 자리 {n},特別な建物の枠 {n},特殊建筑位置 {n}
 err.tier_not_yet,Not every milestone is met yet,아직 조건을 다 채우지 못했어요,まだ条件を満たしていません,条件还未全部达成
 err.tier_top,Already the highest tier,이미 가장 높은 단계예요,すでに最高の段階です,已是最高阶段
+sale.monument,Momo Monument,모모 기념비,モモ記念碑,桃桃纪念碑
+sale.monument_line,{base} ★ + 10% = +{bonus} ★ (rounded),{base} ★ + 10% = +{bonus} ★ (반올림),{base} ★ + 10% = +{bonus} ★ (四捨五入),{base} ★ + 10% = +{bonus} ★（四舍五入）
+special.burst,x2,x2,x2,x2
+special.burst_on,Clock Tower: x2 work · %s,시계탑 ×2 · %s,時計塔 ×2 · %s,钟楼 ×2 · %s
+special.burst_off,Clock Tower: next in %s,시계탑 다음까지 %s,時計塔 次まで %s,钟楼 下次 %s

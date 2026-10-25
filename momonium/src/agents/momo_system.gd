@@ -68,7 +68,12 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			var exp: Dictionary = momos[worker]["experience"]
 			var t := String(payload.get("type", ""))
 			var before := proficiency(worker, t)
-			exp[t] = int(exp.get(t, 0)) + 1
+			# One stage, one point -- times the School, its fraction carried.
+			var specials: SpecialSystem = sim.system(&"specials")
+			var gain := 1
+			if specials != null:
+				gain = specials.scaled_exp(1, momos[worker]["exp_carry"], t)
+			exp[t] = int(exp.get(t, 0)) + gain
 			if proficiency(worker, t) > before:
 				sim.bus.emit(&"momo_skilled", {"id": worker, "type": t, "level": proficiency(worker, t)})
 
@@ -118,7 +123,7 @@ func add_momo(pos: Vector2) -> int:
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
 		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": [],
-		"route": "nearest", "route_since": now}
+		"route": "nearest", "route_since": now, "exp_carry": {}}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -596,6 +601,10 @@ func load_state(state: Dictionary) -> void:
 		for t: String in raw_exp:
 			exp[t] = int(raw_exp[t])
 		m["experience"] = exp
+		var carry := {}
+		for t: String in m.get("exp_carry", {}):
+			carry[t] = clampi(int(m["exp_carry"][t]), 0, 999)
+		m["exp_carry"] = carry
 		var hist: Array = []
 		for h: Dictionary in m.get("history", []):
 			hist.append({"building": int(h.get("building", 0)), "type": String(h.get("type", "")), "from": int(h.get("from", 0)), "to": int(h.get("to", -1)), "by": String(h.get("by", "player"))})

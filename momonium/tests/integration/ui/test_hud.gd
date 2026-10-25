@@ -129,3 +129,22 @@ func test_buttons_report_their_action_and_keep_the_camera_still() -> void:
 	await tree.process_frame
 	assert_eq(main.get("hud_actions"), ["status"] as Array[String], "the button reported once")
 	assert_eq(camera.position, before, "and the world did not move")
+
+
+func test_the_clock_tower_dial() -> void:
+	await _open(SIZES[0])
+	var hud: Hud = main.get("hud")
+	hud.refresh()
+	assert_false(hud.burst_pill.visible, "no tower: no dial")
+	var sim: Simulation = main.get("sim")
+	(sim.system(&"buildings") as BuildingSystem).place_instant("clock_tower", Vector2i(1, 1))
+	sim.advance_to(180000 + 12000)
+	hud.refresh()
+	assert_true(hud.burst_pill.visible, "a tower: a small dial")
+	assert_true(hud.burst_active, "gold during a burst")
+	assert_eq(hud.burst_text, "x2 0:18", "counting the burst down")
+	sim.advance_to(180000 + 40000)
+	hud.refresh()
+	assert_false(hud.burst_active, "dim between bursts")
+	assert_eq(hud.burst_text, "2:20", "counting to the next one")
+	assert_true(hud.burst_pill.get_global_rect().size.x < 140.0, "and small")

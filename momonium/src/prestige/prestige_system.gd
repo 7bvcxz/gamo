@@ -117,9 +117,12 @@ func appraise() -> Dictionary:
 	# A sale that adds no points is allowed -- it simply pays nothing.
 	if prog.level < min_level:
 		reason = "err.prestige_level"
+	var base_points := new_points(net)
+	var specials: SpecialSystem = sim.system(&"specials")
+	var monument := specials.legacy_bonus(base_points) if specials != null else 0
 	return {"families": families, "buildings": buildings, "land": land, "productivity": productivity, "momo": momo,
 		"research": research, "experience": experience, "gross": gross, "seed": seed_money, "net": net,
-		"points": new_points(net), "can_sell": reason == "", "reason": reason, "min_level": min_level,
+		"points": base_points + monument, "points_base": base_points, "monument": monument, "can_sell": reason == "", "reason": reason, "min_level": min_level,
 		"rp_new": rs.rp_pending(), "rp_after": rs.rp_earned + rs.rp_pending()}
 
 

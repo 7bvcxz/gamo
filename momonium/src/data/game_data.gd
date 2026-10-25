@@ -164,6 +164,21 @@ func _validate_families() -> void:
 			# A landmark: no family, no work, and never a production type.
 			if types[key].has("family") or int(types[key].get("workers", 0)) > 0 or types[key].has("cycle") or bool(types[key].get("placeable", false)):
 				errors.append("buildings: special %s must have no family, workers, work cycle or plain placement" % key)
+			var e: Dictionary = types[key].get("effect", {})
+			match String(e.get("kind", "")):
+				"work_burst":
+					if float(e.get("multiply", 0)) <= 0.0 or float(e.get("multiply", 0)) >= 1.0 or float(e.get("active_seconds", 0)) <= 0.0 or float(e.get("cycle_seconds", 0)) <= float(e.get("active_seconds", 0)):
+						errors.append("buildings: %s work_burst needs multiply in (0, 1) and a burst shorter than its cycle" % key)
+				"skill_exp":
+					if float(e.get("multiply", 0)) <= 1.0 or float(e.get("multiply", 0)) > 2.0:
+						errors.append("buildings: %s skill_exp multiply must be in (1, 2]" % key)
+				"legacy":
+					if float(e.get("share", 0)) <= 0.0 or float(e.get("share", 0)) > 0.5:
+						errors.append("buildings: %s legacy share must be in (0, 0.5]" % key)
+				"":
+					pass
+				_:
+					errors.append("buildings: %s has an unknown special effect %s" % [key, e.get("kind", "")])
 			continue
 		var fam := String(types[key].get("family", key))
 		if not types.has(fam) or not bool(types[fam].get("placeable", true)):
