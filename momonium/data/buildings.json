@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle).",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -488,6 +488,36 @@
       "enabled": true,
       "refund": 1.0,
       "workers": 0
+    },
+    "office": {
+      "name": "building.office",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "office",
+      "cycle": {
+        "_doc": "No work cycle: the Momo here manages (ManagerSystem).",
+        "stages": [],
+        "looks": []
+      },
+      "manages": true,
+      "icon": "ui_status",
+      "cost": {
+        "money": 250,
+        "items": {
+          "wood": 20,
+          "stone": 10
+        }
+      },
+      "build_seconds": 20,
+      "unlock": {
+        "level": 5,
+        "research": "management"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 1
     }
   }
 }

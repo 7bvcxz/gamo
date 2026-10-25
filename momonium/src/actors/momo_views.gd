@@ -21,7 +21,10 @@ func setup(p_sim: Simulation, p_layer: EntityLayer, p_lib: SpriteLibrary) -> voi
 		if type in [&"momo_added", &"momo_removed", &"game_loaded"]:
 			sync()
 		if type == &"momo_hired" and actors.has(int(p["id"])):
-			(actors[int(p["id"])] as MomoActor).appear())
+			(actors[int(p["id"])] as MomoActor).appear()
+		# A Momo the manager sends elsewhere hops before it sets off.
+		if type == &"manager_moved" and actors.has(int(p["momo"])):
+			(actors[int(p["momo"])] as MomoActor).appear())
 	sync()
 
 

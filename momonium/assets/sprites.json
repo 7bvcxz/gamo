@@ -733,6 +733,21 @@
           96
         ]
       }
+    },
+    "office": {
+      "source": "svg/office.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          64,
+          20
+        ]
+      }
     }
   }
 }

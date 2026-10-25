@@ -52,7 +52,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety", "building.recipe"])
+	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety", "building.recipe", "building.priority"])
 
 
 func on_new_game() -> void:
@@ -195,6 +195,19 @@ func blocked(b: Dictionary) -> Dictionary:
 	if not produces.is_empty() and not inv.fits(produces):
 		return {"full": produces}
 	return {}
+
+
+## How much the island's manager should want workers here: high, normal,
+## low, or off (the manager takes its workers elsewhere).
+func set_priority(id: int, priority: String) -> Dictionary:
+	var b := get_building(id)
+	if b.is_empty():
+		return SimResult.fail("err.no_building")
+	if not ["high", "normal", "low", "off"].has(priority):
+		return SimResult.fail("err.bad_priority")
+	b["priority"] = priority
+	sim.bus.emit(&"priority_changed", {"id": id, "priority": priority})
+	return SimResult.ok()
 
 
 func variety_of(b: Dictionary) -> String:
@@ -458,6 +471,8 @@ func execute(command: Dictionary) -> Dictionary:
 			return set_variety(Cmd.integer(command, "id"), Cmd.text(command, "variety"))
 		"building.recipe":
 			return set_recipe(Cmd.integer(command, "id"), Cmd.text(command, "recipe"))
+		"building.priority":
+			return set_priority(Cmd.integer(command, "id"), Cmd.text(command, "priority"))
 	return SimResult.fail("err.unknown_command")
 
 

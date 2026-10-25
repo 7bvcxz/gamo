@@ -285,6 +285,10 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 			var m := float(e.get("multiply", 0.0))
 			if not types.has(String(e.get("type", ""))) or float(e.get("draw", 0)) <= 0.0 or m <= 0.0 or m > 1.0:
 				errors.append("research: %s power_use needs a type, draw > 0 and multiply in (0, 1]" % id)
+		"momo_work":
+			var m := float(e.get("multiply", 0.0))
+			if m <= 0.0 or m > 1.0 or (e.has("type") and not types.has(String(e["type"]))):
+				errors.append("research: %s momo_work needs multiply in (0, 1] and a known type if any" % id)
 		"research_time":
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0:
@@ -352,6 +356,7 @@ func _validate_buildings() -> void:
 			errors.append("buildings: %s.unlock.level must be >= 1" % key)
 		var stages: Variant = (t.get("cycle", {}) as Dictionary).get("stages")
 		var generates := not ((t.get("power", {}) as Dictionary).get("generate", {}) as Dictionary).is_empty()
+		var manages := bool(t.get("manages", false))
 		if generates:
 			var kind := String(t["power"]["generate"].get("kind", ""))
 			if not ["solar", "wind", "steam", "hydro"].has(kind) or float(t["power"]["generate"].get("kw", 0)) <= 0.0:
@@ -361,7 +366,7 @@ func _validate_buildings() -> void:
 		var research_needed := String((t.get("unlock", {}) as Dictionary).get("research", ""))
 		if research_needed != "" and not (table("research").get("nodes", []) as Array).any(func(n: Dictionary) -> bool: return String(n.get("id", "")) == research_needed):
 			errors.append("buildings: %s.unlock.research %s is not a research node" % [key, research_needed])
-		if typeof(stages) != TYPE_ARRAY or ((stages as Array).is_empty() and not generates):
+		if typeof(stages) != TYPE_ARRAY or ((stages as Array).is_empty() and not generates and not manages):
 			errors.append("buildings: %s.cycle.stages must list at least one stage" % key)
 			continue
 		var looks: Variant = (t.get("cycle", {}) as Dictionary).get("looks", [])

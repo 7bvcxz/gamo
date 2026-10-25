@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 office in the tile projection (diamond centre = origin pivot at
+       (70, 95)): a two-storey timber house with a green roof, a big window,
+       a notice board by the door and a little flag. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 98 L70 122 L70 66 L28 42 Z" fill="#e8d3b0" stroke="#8a6a4a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 122 L110 98 L110 42 L70 66 Z" fill="#f6e7cc" stroke="#8a6a4a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 70 L70 94 L110 70" fill="none" stroke="#8a6a4a" stroke-width="2"/>
+  <path d="M22 46 L64 20 L116 46 L70 72 Z" fill="#5aa86a" stroke="#2f6a3e" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M22 46 L70 72 L70 76 L22 50 Z" fill="#3f8a52"/>
+  <path d="M38 64 L56 74 L56 88 L38 78 Z" fill="#cfe9ff" stroke="#8a6a4a" stroke-width="2"/>
+  <path d="M80 108 L94 100 L94 82 L80 90 Z" fill="#a8723f" stroke="#6b4426" stroke-width="2"/>
+  <path d="M98 92 L106 88 L106 76 L98 80 Z" fill="#ffffff" stroke="#6b4426" stroke-width="1.5"/>
+  <path d="M100 84 L104 82 M100 87 L104 85" stroke="#7a8a9a" stroke-width="1"/>
+  <path d="M64 20 L64 4" stroke="#6b4426" stroke-width="2"/>
+  <path d="M64 4 L78 8 L64 12 Z" fill="#ff8a7a"/>
+</svg>

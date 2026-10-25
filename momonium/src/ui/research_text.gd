@@ -24,7 +24,7 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 	match String(e.get("kind", "")):
 		"yield":
 			return t.translate("effect.yield").format({"stage": t.translate(stage_label(sim, type, "id", String(e["stage"]))),
-				"item": t.translate(String(sim.data.item(String(e["item"])).get("name", ""))), "n": int(e["add"])})
+				"item": t.translate(String(sim.data.item(String(e["item"])).get("name", ""))), "n": BuildingDetailView.amount(float(e["add"]))})
 		"cooldown":
 			return t.translate("effect.cooldown").format({"action": t.translate(stage_label(sim, type, "action", String(e.get("action", "")))), "pct": pct})
 		"work":
@@ -44,6 +44,8 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 			return t.translate("effect.batch").format({"n": int(e.get("add", 1)) + 1})
 		"power_use":
 			return t.translate("effect.power_use").format({"kw": BuildingDetailView.amount(float(e.get("draw", 0))), "pct": pct})
+		"momo_work":
+			return t.translate("effect.momo_work").format({"pct": pct})
 		"research_time":
 			return t.translate("effect.research_time").format({"pct": pct})
 	return ""

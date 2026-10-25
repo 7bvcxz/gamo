@@ -16,7 +16,7 @@ static func build(data: GameData = null) -> Simulation:
 	var research: ResearchSystem = sim.system(&"research")
 	economy.earn(5000, "demo")
 	prog.add_exp(900, "demo")
-	for cell: Array in [[2, 0], [2, 1], [-1, 0], [-1, 1], [0, 2], [1, 2]]:
+	for cell: Array in [[2, 0], [2, 1], [-1, 0], [-1, 1], [0, 2], [1, 2], [3, 0], [3, 1]]:
 		sim.execute({"type": "land.buy", "cell": cell})
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	var farm2 := bs.place_instant("farm", Vector2i(2, 0))
@@ -29,17 +29,23 @@ static func build(data: GameData = null) -> Simulation:
 	bs.place_instant("wind_turbine", Vector2i(-1, 1))
 	var steam := bs.place_instant("steam_engine", Vector2i(0, 0))
 	bs.place_instant("water_wheel", Vector2i(0, 2))
-	for i in 6:
+	# An office with a manager, and a second mine the manager may staff.
+	var office := bs.place_instant("office", Vector2i(3, 0))
+	bs.place_instant("mine", Vector2i(3, 1))
+	for i in 7:
 		sim.execute({"type": "momo.hire"})
-	var jobs := [farm, farm2, lab, lumber, mine, smelter, steam]
+	var jobs := [farm, farm2, lab, lumber, mine, smelter, steam, office]
 	for i in jobs.size():
 		sim.execute({"type": "momo.assign", "momo": i + 1, "building": jobs[i]})
+	# Industry workers are left to the manager (the farms and lab stay put).
+	for i in range(3, jobs.size() - 1):
+		sim.execute({"type": "momo.pin", "momo": i + 1, "pinned": false})
 	prog.add_mastery("farm", 700)
 	prog.add_mastery("mine", 700)
 	prog.add_mastery("lumberyard", 350)
 	prog.add_mastery("research", 300)
 	prog.add_mastery("smelter", 300)
-	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery", "photovoltaics", "wind_power", "steam_power", "hydropower", "electric_drill", "lab_lighting"]:
+	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery", "photovoltaics", "wind_power", "steam_power", "hydropower", "electric_drill", "lab_lighting", "momo_training", "management"]:
 		research.completed[id] = 0
 	sim.bus.emit(&"research_completed", {"id": "sharp_axes"})
 	(sim.system(&"inventory") as InventorySystem).add("notes", 25, "demo")

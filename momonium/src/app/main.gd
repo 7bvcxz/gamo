@@ -367,6 +367,14 @@ func _ready() -> void:
 			out["workers"].append(String(c.get_meta("who", "")))
 		for c: Node in detail_view.research_box.get_children():
 			out["research"].append((c as Label).text)
+		if detail_view.priority_box.visible:
+			var pr := {}
+			for p: String in ManagerSystem.PRIORITIES:
+				var r := (detail_view.priority_box.get_node("P_" + p) as Control).get_global_rect()
+				var a: Vector2 = vp.get_final_transform() * r.position
+				var b: Vector2 = vp.get_final_transform() * r.end
+				pr[p] = [a.x, a.y, b.x - a.x, b.y - a.y]
+			out["priority"] = pr
 		return out)
 	bridge.register_query("momos", _momo_info)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:

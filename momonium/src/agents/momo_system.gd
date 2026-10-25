@@ -36,7 +36,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["momo.hire", "momo.assign", "momo.unassign", "momo.move"])
+	return PackedStringArray(["momo.hire", "momo.assign", "momo.unassign", "momo.move", "momo.pin"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -44,11 +44,43 @@ func setup(p_sim: Simulation) -> void:
 	p_sim.bus.emitted.connect(_on_event)
 
 
-## A building that disappears (a cancelled construction) lets its workers go.
+## A building that disappears (a cancelled construction) lets its workers go;
+## a stage a Momo finishes is experience at that kind of building.
 func _on_event(type: StringName, payload: Dictionary) -> void:
 	if type == &"building_removed":
 		for id: int in workers_at(int(payload.get("id", 0))):
 			unassign(id)
+	elif type == &"task_completed":
+		var worker := int(payload.get("worker", 0))
+		if momos.has(worker):
+			var exp: Dictionary = momos[worker]["experience"]
+			var t := String(payload.get("type", ""))
+			var before := proficiency(worker, t)
+			exp[t] = int(exp.get(t, 0)) + 1
+			if proficiency(worker, t) > before:
+				sim.bus.emit(&"momo_skilled", {"id": worker, "type": t, "level": proficiency(worker, t)})
+
+
+## Skill level (0..) of a Momo at a kind of building, from the stages it has done there.
+func proficiency(id: int, type: String) -> int:
+	var done := int((momos.get(id, {}).get("experience", {}) as Dictionary).get(type, 0))
+	var level := 0
+	for need: Variant in sim.data.get_value("balance", "momo.proficiency.thresholds", []):
+		if done >= int(need):
+			level += 1
+	return level
+
+
+## How many times the player's time this Momo takes for a stage at this kind
+## of building: the Momo base, its own skill there, and Momo research.
+func work_multiplier(id: int, type: String) -> float:
+	var m := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
+	var mults: Array = sim.data.get_value("balance", "momo.proficiency.multipliers", [1.0])
+	m *= float(mults[mini(proficiency(id, type), mults.size() - 1)])
+	var research: ResearchSystem = sim.system(&"research")
+	if research != null:
+		m *= research.momo_multiplier(type)
+	return m
 
 
 func on_new_game() -> void:
@@ -67,7 +99,7 @@ func add_momo(pos: Vector2) -> int:
 	var names := maxi(sim.data.get_int("balance", "momo.names", 10), 1)
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
-		"start": now, "end": now, "assigned": 0, "token": 0}
+		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -163,6 +195,8 @@ func execute(command: Dictionary) -> Dictionary:
 			return assign(Cmd.integer(command, "momo"), Cmd.integer(command, "building"))
 		"momo.unassign":
 			return unassign(Cmd.integer(command, "momo"))
+		"momo.pin":
+			return set_pinned(Cmd.integer(command, "momo"), bool(command.get("pinned", true)))
 		"momo.move":
 			var p: Variant = command.get("pos")
 			return move_to(Cmd.integer(command, "momo"), Vector2(float(p[0]), float(p[1])) if typeof(p) == TYPE_ARRAY else Vector2(-999, -999))
@@ -184,12 +218,22 @@ func hire() -> Dictionary:
 	return SimResult.ok({"id": id, "cost": cost, "next_cost": hire_cost()})
 
 
-func assign(momo: int, building: int) -> Dictionary:
+## `by_player`: placed by the player (dragged, or the Assign button) -- such
+## a Momo is pinned and a manager never moves it. A manager assigns unpinned.
+func assign(momo: int, building: int, by_player: bool = true) -> Dictionary:
 	var check := can_assign(momo, building)
 	if not check["ok"]:
 		return check
 	var m: Dictionary = momos[momo]
+	if int(m["assigned"]) != 0 and int(m["assigned"]) != building:
+		_close_history(m)
 	m["assigned"] = building
+	m["pinned"] = by_player
+	var b := (sim.system(&"buildings") as BuildingSystem).get_building(building)
+	var hist: Array = m["history"]
+	hist.append({"building": building, "type": String(b.get("type", "")), "from": sim.now_ms(), "to": -1, "by": "player" if by_player else "manager"})
+	while hist.size() > sim.data.get_int("balance", "momo.history_kept", 12):
+		hist.pop_front()
 	var arrive := _walk_to(m, work_spot(building))
 	m["token"] = int(m["token"]) + 1
 	sim.scheduler.schedule(arrive, ARRIVE, {"id": momo, "token": m["token"]})
@@ -211,10 +255,27 @@ func unassign(momo: int) -> Dictionary:
 	var was := int(m["assigned"])
 	if was == 0:
 		return SimResult.fail("err.not_assigned")
+	_close_history(m)
 	m["assigned"] = 0
+	m["pinned"] = false
 	_stop(m)
 	_schedule_roam(m, _rest_ms())
 	sim.bus.emit(&"momo_unassigned", {"id": momo, "building": was})
+	return SimResult.ok()
+
+
+func _close_history(m: Dictionary) -> void:
+	var hist: Array = m["history"]
+	if not hist.is_empty() and int(hist.back()["to"]) < 0:
+		hist.back()["to"] = sim.now_ms()
+
+
+## Lets the manager move this Momo (false), or keeps it where the player put it (true).
+func set_pinned(momo: int, pinned: bool) -> Dictionary:
+	if not momos.has(momo):
+		return SimResult.fail("err.no_momo")
+	momos[momo]["pinned"] = pinned
+	sim.bus.emit(&"momo_pinned", {"id": momo, "pinned": pinned})
 	return SimResult.ok()
 
 
@@ -337,6 +398,16 @@ func load_state(state: Dictionary) -> void:
 		var m := raw.duplicate(true)
 		for k: String in ["id", "assigned", "token", "start", "end"]:
 			m[k] = int(m.get(k, 0))
+		var exp := {}
+		var raw_exp: Dictionary = m.get("experience", {})
+		for t: String in raw_exp:
+			exp[t] = int(raw_exp[t])
+		m["experience"] = exp
+		var hist: Array = []
+		for h: Dictionary in m.get("history", []):
+			hist.append({"building": int(h.get("building", 0)), "type": String(h.get("type", "")), "from": int(h.get("from", 0)), "to": int(h.get("to", -1)), "by": String(h.get("by", "player"))})
+		m["history"] = hist
+		m["pinned"] = bool(m.get("pinned", int(m["assigned"]) != 0))
 		if not m.has("from"):
 			var p: Array = m.get("pos", [0.5, 0.5])
 			m["from"] = p

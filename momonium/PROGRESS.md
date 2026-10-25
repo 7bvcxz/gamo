@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **27** (#27)
-- 현재 step: **28** — 숙련 모모와 매니저 자동화 (#28). 웹 플레이 기준 유지(실제 UI 경로·잠금 표시, 늦은 기능은 체험 섬).
-- 버전: `0.27.0`
-- 테스트: unit+integration 345 통과 (`momonium/tools/test.sh`)
-- E2E: 케이스 27파일(+power). 전체 실행: Step 10, Step 20(65/0/3 skip). 다음 전체 실행은 **Step 30 완료 시**
+- 마지막 완료 step: **28** (#28)
+- 현재 step: **29** — 주거·공동체 시설과 행복/휴식 효과 (#29). 웹 플레이 기준 유지.
+- 버전: `0.28.0`
+- 테스트: unit+integration 367 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 28파일(+manager). 전체 실행: Step 10, Step 20(65/0/3 skip). 다음 전체 실행은 **Step 30 완료 시**
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -58,4 +58,5 @@
 | 24 | #24 버전 저장·오프라인 진행 | 0.24.0 | `36c40247` | 296, E2E persist 단독 | 스모크 |
 | 25 | #25 임업·광업 + 첫 실행 튜토리얼·설정·체험 섬 | 0.25.0 | `c26bffa9` | 316, E2E tutorial·industry 단독 | 스모크 |
 | 26 | #26 제련소·레시피 | 0.26.0 | `9b5590b8` | 328, E2E smelting 단독 | 스모크 |
-| 27 | #27 전력 | 0.27.0 | (다음 갱신 시) | 345, E2E power 단독 | 스모크 |
+| 27 | #27 전력 | 0.27.0 | `26e74eb9` | 345, E2E power 단독 | 스모크 |
+| 28 | #28 숙련 모모·관리인 | 0.28.0 | (다음 갱신 시) | 367, E2E manager 단독 | 스모크 |

@@ -333,3 +333,23 @@ power.none,No generators yet,아직 발전기가 없어요,まだ発電機があ
 power.users,Uses power,전기를 쓰는 곳,電気を使う所,用电设施
 detail.power_gen,Now {kw} kW of {max},지금 {kw} kW / 최대 {max},いま {kw} kW / 最大 {max},当前 {kw} kW / 最大 {max}
 detail.power_use,Uses {kw} kW · gets {pct}%,{kw} kW 사용 · 공급 {pct}%,{kw} kW 使用 · 供給 {pct}%,用电 {kw} kW · 供电 {pct}%
+building.office,Office,관리소,管理所,管理处
+research.momo_training.name,Momo training,모모 교육,モモの研修,桃桃培训
+research.momo_training.desc,Shared tips and better habits: every Momo works a little faster.,요령을 나누고 습관을 다듬어요. 모든 모모가 조금 더 빨리 일해요.,コツを教え合い、くせを整えます。すべてのモモが少し早く働きます。,分享窍门、养成好习惯：每只桃桃都快一点。
+research.management.name,Management,관리,管理,管理
+research.management.desc,An office where one Momo keeps an eye on the island and moves helpers to where the work is.,모모 한 명이 섬을 살피며 일이 있는 곳으로 일손을 보내는 관리소를 지어요.,モモがひとり島を見わたし、仕事のある所へ手を回す管理所です。,一只桃桃坐镇管理处，看着全岛，把人手派到有活的地方。
+effect.momo_work,Momo work time -{pct}%,모모 작업 시간 -{pct}%,モモの作業時間 -{pct}%,桃桃作业时间 -{pct}%
+priority.title,Workers wanted,일손 우선순위,人手の優先度,人手优先级
+priority.high,High,높음,高,高
+priority.normal,Normal,보통,普通,普通
+priority.low,Low,낮음,低,低
+priority.off,Off,끄기,オフ,关闭
+err.bad_priority,No such priority,없는 우선순위예요,その優先度はありません,没有这个优先级
+momo.skill,{type} skill {n},{type} 숙련 {n},{type}の腕前 {n},{type}熟练 {n}
+momo.done,{n} jobs,작업 {n}회,作業 {n}回,工作 {n}次
+momo.pinned,Stays here,여기 고정,ここに固定,固定在此
+momo.free_to_move,Manager may move,관리인에게 맡김,管理人にまかせる,交给管理员
+momo.history,Before: {list},전에: {list},以前: {list},以前：{list}
+manager.status,Managing · {n} moves,관리 중 · {n}번 옮김,管理中 · {n}回移動,管理中 · 调动{n}次
+manager.none,No manager at work,일하는 관리인이 없어요,働いている管理人がいません,没有在岗的管理员
+fx.manager_moved,%s → %s,%s → %s,%s → %s,%s → %s

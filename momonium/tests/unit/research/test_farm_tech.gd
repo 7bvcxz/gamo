@@ -192,3 +192,8 @@ func test_unattended_runs_are_the_same_whatever_the_step() -> void:
 		out.append([bs.get_building(f)["completed"], (s.system(&"inventory") as InventorySystem).count("crop"), (s.system(&"economy") as EconomySystem).money])
 	assert_eq(out[1], out[0], "1 s steps")
 	assert_eq(out[2], out[0], "7.8 s steps")
+
+
+func test_fractional_yields_are_written_as_fractions() -> void:
+	TranslationServer.set_locale("en")
+	assert_eq(ResearchText.effect_lines(sim, research.node("copper_prospecting")), ["Dig: Copper ore +0.25"] as Array[String], "a quarter, not +0")

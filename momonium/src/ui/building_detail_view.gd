@@ -32,6 +32,9 @@ var recipe_box: HBoxContainer
 var takes_row: HBoxContainer
 var block_label: Label
 var power_row: HBoxContainer
+## How much the manager should want workers here (shown once management exists).
+var priority_box: HBoxContainer
+var manager_label: Label
 var _shown_recipes := ""
 var last_result: Dictionary = {}
 var _shown_varieties := ""
@@ -95,6 +98,28 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	power_row = PanelViews.row("", "")
 	power_row.name = "Power"
 	add_child(power_row)
+	priority_box = HBoxContainer.new()
+	priority_box.name = "Priority"
+	priority_box.add_theme_constant_override("separation", 6)
+	var ptitle := PanelViews.label("", 15, true)
+	ptitle.name = "Title"
+	priority_box.add_child(ptitle)
+	for p: String in ManagerSystem.PRIORITIES:
+		var pb := Button.new()
+		pb.name = "P_" + p
+		pb.custom_minimum_size = Vector2(0, 48)
+		pb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		pb.focus_mode = Control.FOCUS_NONE
+		pb.add_theme_font_size_override("font_size", 15)
+		pb.pressed.connect(func() -> void:
+			last_result = sim.execute({"type": "building.priority", "id": building_id, "priority": p})
+			refresh())
+		priority_box.add_child(pb)
+	add_child(priority_box)
+	manager_label = PanelViews.label("", 16)
+	manager_label.name = "Manager"
+	manager_label.add_theme_color_override("font_color", Color("#ffe27a"))
+	add_child(manager_label)
 	research_box = VBoxContainer.new()
 	research_box.name = "Research"
 	add_child(research_box)
@@ -166,6 +191,7 @@ func refresh() -> void:
 	_refresh_varieties(b, buildings)
 	_refresh_recipes(b, buildings)
 	_refresh_power(b)
+	_refresh_management(b, buildings)
 	_refresh_research(b)
 
 
@@ -333,6 +359,26 @@ func _recipe_button(b: Dictionary, buildings: BuildingSystem, r: String) -> Butt
 			btn.draw_arc(c + Vector2(0, -2), 4.0, PI, TAU, 10, Color.WHITE, 2.0, true)
 			btn.draw_rect(Rect2(c + Vector2(-5, -2), Vector2(10, 8)), Color.WHITE))
 	return btn
+
+
+## Priority buttons once the island can have a manager (the research is
+## done); and, on an office, who manages and how many moves it has made.
+func _refresh_management(b: Dictionary, buildings: BuildingSystem) -> void:
+	var research: ResearchSystem = sim.system(&"research")
+	var manager: ManagerSystem = sim.system(&"manager")
+	var managed := research != null and research.is_done("management")
+	var is_office := bool(buildings.type_def(b).get("manages", false))
+	priority_box.visible = managed and not is_office and not buildings.stages(b).is_empty()
+	if priority_box.visible:
+		(priority_box.get_node("Title") as Label).text = tr("priority.title")
+		var current := String(b.get("priority", "normal"))
+		for p: String in ManagerSystem.PRIORITIES:
+			var pb: Button = priority_box.get_node("P_" + p)
+			pb.text = tr("priority." + p)
+			pb.modulate = Color(1.3, 1.25, 0.8) if p == current else Color(1, 1, 1, 0.75)
+	manager_label.visible = is_office
+	if is_office and manager != null:
+		manager_label.text = tr("manager.status").format({"n": manager.moves_made}) if manager.manager() != 0 else tr("manager.none")
 
 
 ## A generator: what it gives now of its most. A powered building: what it

@@ -114,7 +114,7 @@ func try_start(building: int) -> Dictionary:
 	var worker := next_worker(building)
 	if worker == 0:
 		return SimResult.fail("err.no_worker")
-	var mult := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
+	var mult := (sim.system(&"momo") as MomoSystem).work_multiplier(worker, String(b["type"]))
 	return buildings.start_stage(building, worker, mult)
 
 

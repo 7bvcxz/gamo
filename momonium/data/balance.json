@@ -131,7 +131,24 @@
     ],
     "seed": 20261025,
     "work_time_multiplier": 4.0,
-    "works_at_night": true
+    "works_at_night": true,
+    "proficiency": {
+      "_doc": "A Momo's skill at one kind of building grows with the stages it has finished there: reaching thresholds[i] stages gives level i+1, and its work there takes multipliers[level] of its usual Momo time (level 0 = 1.0). Skill is per building type and stays with the Momo.",
+      "thresholds": [
+        10,
+        30,
+        70,
+        150
+      ],
+      "multipliers": [
+        1.0,
+        0.92,
+        0.85,
+        0.78,
+        0.72
+      ]
+    },
+    "history_kept": 12
   },
   "mail": {
     "_doc": "Momo Letters (data/letters.json). At most letters_per_day new letters arrive on one in-game day.",
@@ -152,5 +169,11 @@
     "wind_fast_amp": 0.15,
     "wind_fast_days": 0.7,
     "wind_min": 0.1
+  },
+  "manager": {
+    "_doc": "A Momo at an office manages: every review_seconds it moves at most moves_per_review workers -- never one the player placed (pinned) -- from a building idle and blocked for stuck_seconds, or set to off, to the highest-priority building with a free spot and work it can do; and it sends free Momo only to high-priority spots. Moves are walks, never instant.",
+    "review_seconds": 20,
+    "stuck_seconds": 40,
+    "moves_per_review": 2
   }
 }

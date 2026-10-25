@@ -234,6 +234,16 @@ func unlocks_variety(type: String, variety: String) -> bool:
 	return false
 
 
+## Momo work time at a kind of building from research (training, tools):
+## the product of every momo_work effect for that type or for all types.
+func momo_multiplier(type: String) -> float:
+	var m := 1.0
+	for e: Dictionary in _effects("momo_work"):
+		if not e.has("type") or String(e["type"]) == type:
+			m *= float(e.get("multiply", 1.0))
+	return m
+
+
 ## BuildingSystem modifier: whether research has opened this recipe.
 func unlocks_recipe(type: String, recipe: String) -> bool:
 	for e: Dictionary in _effects("recipe"):
