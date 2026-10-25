@@ -27,10 +27,20 @@ test('the sea is animated and the coast is shallow and foamy', async ({ game }) 
   }
   expect(changed, 'pixels across the open sea change over time').toBeGreaterThan(4);
   const bright = (p) => p[0] + p[1] + p[2];
+  // A 9x9 average, not one pixel: glints and foam rings move on real time, and
+  // a single pixel landing on a glint in the open sea made this flaky (Step 46).
+  const patch = (png, x, y) => {
+    const sum = [0, 0, 0];
+    for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++) {
+      const q = pixel(png, x + dx, y + dy);
+      for (let i = 0; i < 3; i++) sum[i] += q[i] / 81;
+    }
+    return sum.map(Math.round);
+  };
   // Water just past the south-east coast (below the cliff) vs open sea at the left edge.
   const coast = await logicalToCanvas(game, 2.15, 1.0, -0.62);
-  const nearCoast = pixel(b.png, coast.x * b.sx, coast.y * b.sy);
-  const open = pixel(b.png, b.png.width * 0.04, b.png.height * 0.85);
+  const nearCoast = patch(b.png, coast.x * b.sx, coast.y * b.sy);
+  const open = patch(b.png, b.png.width * 0.04, b.png.height * 0.85);
   expect(bright(nearCoast), `coast ${nearCoast} brighter than open sea ${open}`).toBeGreaterThan(bright(open));
 });
 
