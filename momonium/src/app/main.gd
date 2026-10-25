@@ -1331,7 +1331,8 @@ func _settings_info(_arg: Variant) -> Dictionary:
 		"demo_text": settings_view.demo_button.text, "langs": langs, "locale": LocaleService.current(), "window": [win.x, win.y],
 		"large_demo": _settings_rect(settings_view.large_demo_button), "perf": _settings_rect(settings_view.perf_toggle), "demo_kind": demo_kind,
 		"badge_text": _demo_badge.text, "about": settings_view.about_label.text, "build": settings_view.version_label.text,
-		"about_rect": _settings_rect(settings_view.about_label)}
+		"about_rect": _settings_rect(settings_view.about_label),
+		"toggles": {"effects": _settings_rect(settings_view.effects_toggle), "reduce_motion": _settings_rect(settings_view.motion_toggle)}}
 
 
 ## E2E: what one whole farm cycle (sow, three waterings, harvest) earns.
