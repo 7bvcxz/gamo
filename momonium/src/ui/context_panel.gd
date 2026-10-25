@@ -13,6 +13,8 @@ signal start_pressed(id: int)
 signal cancel_pressed(id: int)
 ## The building's name was tapped: show everything about it.
 signal details_pressed(id: int)
+## The check above the trash was tapped: pull the building down.
+signal demolish_pressed(id: int)
 
 const CARD_SIZE := Vector2(150, 118)
 const GAP := 10.0
@@ -24,6 +26,10 @@ var building_id := 0
 var cards: Array[Button] = []
 ## The building's name; tapping it opens the details (the "›" says it opens).
 var title: Button
+## Bottom-right: a small trash can; tapping it shows a check above it, and
+## only the check demolishes (two deliberate taps; tap the can again to back out).
+var trash_button: Button
+var confirm_button: Button
 var _shown_state := ""
 var _shown_variety := ""
 var _tile_pill: PanelContainer
@@ -59,6 +65,38 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 		if building_id != 0:
 			details_pressed.emit(building_id))
 	add_child(title)
+	trash_button = Button.new()
+	trash_button.name = "Trash"
+	trash_button.custom_minimum_size = Vector2(52, 52)
+	trash_button.size = Vector2(52, 52)
+	trash_button.focus_mode = Control.FOCUS_NONE
+	trash_button.visible = false
+	trash_button.draw.connect(func() -> void:
+		var c := trash_button.size * 0.5
+		var col := Color(1, 1, 1, 0.92)
+		trash_button.draw_rect(Rect2(c + Vector2(-9, -6), Vector2(18, 20)), col, false, 2.5)
+		trash_button.draw_line(c + Vector2(-12, -9), c + Vector2(12, -9), col, 2.5, true)
+		trash_button.draw_line(c + Vector2(-4, -13), c + Vector2(4, -13), col, 2.5, true)
+		for dx: float in [-4.0, 0.0, 4.0]:
+			trash_button.draw_line(c + Vector2(dx, -2), c + Vector2(dx, 10), col, 1.6, true))
+	trash_button.pressed.connect(func() -> void:
+		confirm_button.visible = not confirm_button.visible)
+	add_child(trash_button)
+	confirm_button = Button.new()
+	confirm_button.name = "Confirm"
+	confirm_button.custom_minimum_size = Vector2(52, 52)
+	confirm_button.size = Vector2(52, 52)
+	confirm_button.focus_mode = Control.FOCUS_NONE
+	confirm_button.visible = false
+	confirm_button.modulate = Color(1.0, 0.82, 0.78)
+	confirm_button.draw.connect(func() -> void:
+		var c := confirm_button.size * 0.5
+		confirm_button.draw_polyline(PackedVector2Array([c + Vector2(-11, 0), c + Vector2(-3, 8), c + Vector2(12, -9)]), Color("#ff6b5e"), 4.0, true))
+	confirm_button.pressed.connect(func() -> void:
+		confirm_button.visible = false
+		if building_id != 0:
+			demolish_pressed.emit(building_id))
+	add_child(confirm_button)
 	resized.connect(_layout)
 
 
@@ -69,6 +107,8 @@ func show_building(id: int) -> void:
 	var b := buildings.get_building(id)
 	title.text = _title(b)
 	title.visible = true
+	trash_button.visible = true
+	confirm_button.visible = false
 	_shown_state = String(b["state"])
 	_shown_variety = buildings.variety_of(b)
 	if b["state"] == BuildingSystem.CONSTRUCTING:
@@ -92,7 +132,7 @@ func show_building(id: int) -> void:
 
 ## Name, and the worker spots when the building has any: "Farm · 1/1".
 func _title(b: Dictionary) -> String:
-	var text := tr(buildings.type_def(b).get("name", ""))
+	var text := BuildingDetailView.full_name(sim, String(b["type"]))
 	var momos: MomoSystem = sim.system(&"momo")
 	var slots := momos.slots_of(int(b["id"]))
 	if slots > 0:
@@ -104,6 +144,8 @@ func show_tile(text_key: String) -> void:
 	_clear_cards()
 	building_id = 0
 	title.visible = false
+	trash_button.visible = false
+	confirm_button.visible = false
 	_tile_label.text = tr(text_key)
 	_tile_pill.visible = true
 	_layout()
@@ -114,6 +156,8 @@ func hide_panel() -> void:
 	building_id = 0
 	title.visible = false
 	_tile_pill.visible = false
+	trash_button.visible = false
+	confirm_button.visible = false
 
 
 func is_open() -> bool:
@@ -265,6 +309,9 @@ func _layout() -> void:
 		x += CARD_SIZE.x + GAP
 	title.reset_size()
 	title.position = Vector2((w - title.size.x) * 0.5, y - title.size.y - 2)
+	# Bottom right, just above the card row (never on a card), the check above it.
+	trash_button.position = Vector2(w - 16.0 - trash_button.size.x, y - trash_button.size.y - 8.0)
+	confirm_button.position = trash_button.position - Vector2(0, confirm_button.size.y + 8.0)
 	_tile_pill.reset_size()
 	_tile_pill.position = Vector2(area_left + maxf((area_right - area_left - _tile_pill.size.x) * 0.5, 0.0), h - _bottom_reserved - _tile_pill.size.y)
 

@@ -1,12 +1,13 @@
-// Step 25 acceptance: a first-time player on a fresh island, with no docs,
-// is led by the tutorial to the catalog, the farm and its price, a tile, the
-// build, the first sowing and watering, and to where the mine and lumberyard
-// wait with their unlock levels -- all by real taps on what it rings. With
-// MOMONIUM_EVIDENCE set, each step's screen is saved there.
+// Step 25 acceptance, Step 30 flow: a first-time player on a fresh island,
+// with no docs, is led by the tutorial to an empty tile, the farm among the
+// four choices beside it (price shown), the build, the first sowing and
+// watering, and at the end to the trash can and its check -- all by real taps
+// on what it rings. With MOMONIUM_EVIDENCE set, each step's screen is saved.
 import { test, expect } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
 const EVIDENCE = process.env.MOMONIUM_EVIDENCE || '';
+const near = (a, b) => a.length === 4 && b.length === 4 && a.every((v, i) => Math.abs(v - b[i]) < 2);
 
 async function open(page) {
   await page.addInitScript(() => { window.MOMONIUM_E2E = true; window.MOMONIUM_E2E_TUTORIAL = true; });
@@ -41,27 +42,24 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   };
   let t = await g.query('tutorial');
   expect(t.running).toBe(true);
-  expect(t.step).toBe('open_build');
-  await shot('1-open-build');
+  expect(t.step).toBe('pick_tile');
+  await shot('1-empty-tile');
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
   expect(t.step).toBe('pick_farm');
-  const ui = await g.query('build_ui');
-  expect(Object.keys(ui.cards)).toEqual(expect.arrayContaining(['farm', 'lumberyard', 'mine']));
-  await shot('2-catalog-farm-price');
+  const strip = await g.query('strip');
+  expect(strip.open).toBe(true);
+  expect(Object.keys(strip.buttons).sort()).toEqual(['farm', 'lumberyard', 'mine', 'research']);
+  await shot('2-four-choices-farm-price');
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
-  expect(t.step).toBe('pick_tile');
-  await shot('3-tile-and-cost');
-  await tapRect(t.target2, t.window);
-  t = await g.query('tutorial');
   expect(t.step).toBe('wait_build');
-  await shot('4-building');
+  await shot('3-building');
   await g.query('dev_advance_ms', 6000);
   await page.waitForTimeout(300);
   t = await g.query('tutorial');
   expect(t.step).toBe('sow');
-  await shot('5-sow');
+  await shot('4-sow');
   await tapRect(t.target2, t.window);
   t = await g.query('tutorial');
   expect(t.step).toBe('working');
@@ -69,15 +67,18 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await page.waitForTimeout(300);
   t = await g.query('tutorial');
   expect(t.step).toBe('water');
-  await shot('6-water');
+  await shot('5-water');
   await tapRect(t.target2, t.window);
   await g.query('dev_advance_ms', 5000);
   await page.waitForTimeout(300);
   t = await g.query('tutorial');
   expect(t.step).toBe('more');
+  const ring = await g.query('strip');
+  expect(near(t.target, ring.trash)).toBe(true);
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
-  await shot('7-mine-lumberyard-levels');
+  expect(near(t.target2, (await g.query('strip')).confirm)).toBe(true);
+  await shot('6-trash-and-check');
   const s = await g.state();
   const farm = s.buildings.buildings.find((b) => b.type === 'farm');
   expect(farm.completed).toBe(2);

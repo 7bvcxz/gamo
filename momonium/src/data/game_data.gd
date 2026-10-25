@@ -78,6 +78,7 @@ func validate() -> void:
 	_validate_art()
 	_validate_buildings()
 	_validate_letters()
+	_validate_families()
 	_validate_recipes()
 	_validate_research()
 	_require_number({}, "balance", "land.base", 1)
@@ -145,6 +146,23 @@ func _validate_recipes() -> void:
 		for id: String in types[t].get("recipes", []):
 			if not ids.has(id):
 				errors.append("buildings: %s lists unknown recipe %s" % [t, id])
+
+
+## Exactly the four families are placed on land; every other type belongs
+## to one of them (refitted in place).
+func _validate_families() -> void:
+	var types: Dictionary = table("buildings").get("types", {})
+	var placeable: Array[String] = []
+	for key: String in types:
+		if bool(types[key].get("placeable", true)):
+			placeable.append(key)
+	placeable.sort()
+	if not table("buildings").has("_test_any_families") and placeable != (["farm", "lumberyard", "mine", "research"] as Array[String]):
+		errors.append("buildings: exactly farm, mine, lumberyard and research are placeable (got %s)" % [placeable])
+	for key: String in types:
+		var fam := String(types[key].get("family", key))
+		if not types.has(fam) or not bool(types[fam].get("placeable", true)):
+			errors.append("buildings: %s belongs to family %s, which is not a placeable type" % [key, fam])
 
 
 func _validate_letters() -> void:

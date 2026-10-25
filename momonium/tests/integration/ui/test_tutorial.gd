@@ -1,10 +1,10 @@
 extends "res://tests/framework/test_case.gd"
 
-## The first-run tutorial with real taps: it rings the Build button, the farm
-## card (price shown), a free tile and the build button, waits for the farm,
-## asks for the first sowing and watering, then points at where the mine and
-## lumberyard are. It can be skipped, never blocks a tap, and replays from
-## Settings.
+## The first-run tutorial with real taps: it rings an empty tile, then the
+## farm among the four choices beside it (price shown), waits for the farm,
+## asks for the first sowing and watering, then shows that any empty tile
+## builds the others and how one comes down. It can be skipped, never blocks a
+## tap, and replays from Settings.
 
 const MainScene := preload("res://scenes/main.tscn")
 
@@ -55,22 +55,19 @@ func test_not_started_under_tests_or_on_its_own() -> void:
 func test_the_whole_path_with_taps() -> void:
 	tut.start()
 	await _frame()
-	var hud: Hud = main.get("hud")
-	assert_eq(tut.step, "open_build", "first: where buildings are made")
-	assert_eq(tut.target, hud.buttons[&"build"].get_global_rect(), "the Build button is ringed")
-	assert_eq(tut.text.text, "Buildings are made here", "with one short line")
+	assert_eq(tut.step, "pick_tile", "first: tap the ground")
+	var cell := tut.suggested_tile()
+	assert_true((sim.system(&"world") as WorldSystem).is_buildable(cell), "the ringed tile is free")
+	assert_eq(tut.text.text, "Tap an empty tile", "with one short line")
 	_tap_at(tut.target.get_center())
 	await _frame()
-	assert_eq(tut.step, "pick_farm", "the catalog is open")
-	var menu: BuildMenu = main.get("build_menu")
-	assert_eq(tut.target, menu.cards["farm"].get_global_rect(), "the farm card is ringed")
-	assert_eq(tut.text.text, "Choose the farm · $10", "with its price")
+	assert_eq(tut.step, "pick_farm", "the four choices are open")
+	var strip: BuildStrip = main.get("build_strip")
+	assert_eq(strip.cell, cell, "on the ringed tile")
+	assert_eq(tut.target, strip.buttons["farm"].get_global_rect(), "the farm is ringed")
+	assert_eq(tut.text.text, "Build a farm here · $10", "with its price")
+	assert_false(tut.bubble.get_global_rect().intersects(strip.strip_rect()), "the line sits clear of the choices")
 	_tap_at(tut.target.get_center())
-	await _frame()
-	assert_eq(tut.step, "pick_tile", "placing the farm")
-	var placement: PlacementMode = main.get("placement")
-	assert_eq(tut.target2, placement.build_button.get_global_rect(), "the build button is ringed too")
-	_tap_at(tut.target2.get_center())
 	await _frame()
 	assert_eq(tut.step, "wait_build", "building")
 	sim.advance_ms(6000)
@@ -90,19 +87,48 @@ func test_the_whole_path_with_taps() -> void:
 	await _frame()
 	assert_eq(tut.step, "more", "first watering done")
 	assert_true(tut.text.text.begins_with("Plants need time to drink"), "the wait is explained before the last pointer")
+	assert_true(tut.text.text.contains("Any empty tile builds"), "then where the others are built")
+	assert_true(tut.text.text.contains("half comes back"), "and how one comes down")
 	assert_true(tut.ok_button.visible, "a Got it button now")
-	_tap_at(hud.buttons[&"build"].get_global_rect().get_center())
+	assert_true(tut.target.size.x > 0.0 or tut.target2.size.x > 0.0, "something is ringed")
+	(main.get("selection") as SelectionController).deselect()
+	_tap_at((main.get("cameras") as CameraController).world_to_screen((main.get("projection") as IsoProjection).cell_center(tut.suggested_tile())))
 	await _frame()
-	assert_eq(tut.target, menu.cards["lumberyard"].get_global_rect(), "the lumberyard card is ringed")
-	assert_eq(tut.target2, menu.cards["mine"].get_global_rect(), "and the mine card")
-	assert_false(tut.bubble.get_global_rect().intersects(menu.get_global_rect()), "the line sits clear of the catalog")
-	assert_eq((menu.cards["mine"].find_child("Unlock", true, false) as Label).text, "Opens at Lv 3", "the mine says when it opens")
+	assert_eq(tut.target, strip.buttons["lumberyard"].get_global_rect(), "an empty tile tapped: the lumberyard is ringed")
+	assert_eq(tut.target2, strip.buttons["mine"].get_global_rect(), "and the mine")
+	assert_eq((strip.buttons["mine"].find_child("Price", true, false) as Label).text, "Opens at Lv 3", "the mine says when it opens")
 	var done := [false]
 	tut.finished.connect(func(skipped: bool) -> void: done[0] = not skipped)
 	_tap_at(tut.ok_button.get_global_rect().get_center())
 	assert_true(done[0], "finished")
 	assert_false(tut.running, "and gone")
 	assert_true(bool((main.get("settings") as SettingsStore).get_value("tutorial_done")), "remembered")
+
+
+func test_the_trash_is_shown_at_the_end() -> void:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	tut.start()
+	var farm := bs.place_instant("farm", Vector2i(1, 0))
+	bs.get_building(farm)["completed"] = 2
+	(main.get("selection") as SelectionController).select_building(farm)
+	await _frame()
+	var panel: ContextPanel = main.get("panel")
+	assert_eq(tut.step, "more", "the last step")
+	assert_eq(tut.target, panel.trash_button.get_global_rect(), "a building selected: its trash can is ringed")
+	for r: Rect2 in [panel.trash_button.get_global_rect(), panel.confirm_button.get_global_rect()]:
+		assert_false(tut.bubble.get_global_rect().intersects(r), "the line keeps clear of the trash and where its check appears")
+	for c: Button in panel.cards:
+		assert_false(c.get_global_rect().intersects(panel.trash_button.get_global_rect()), "the trash is on no card")
+
+
+func test_the_ringed_tile_has_no_momo_on_it() -> void:
+	var momos: MomoSystem = sim.system(&"momo")
+	var world: WorldSystem = sim.system(&"world")
+	for c: Vector2i in world.owned_cells():
+		momos.get_momo(1)["from"] = [c.x + 0.5, c.y + 0.5]
+		momos.get_momo(1)["to"] = [c.x + 0.5, c.y + 0.5]
+		var p := momos.position_of(1)
+		assert_ne(tut.suggested_tile(), Vector2i(floori(p.x), floori(p.y)), "Momo on %s: another tile is ringed" % c)
 
 
 func test_skip_and_it_never_blocks() -> void:
@@ -122,12 +148,13 @@ func test_skip_and_it_never_blocks() -> void:
 
 func test_it_follows_the_player_back() -> void:
 	tut.start()
-	main.call("_on_hud_action", &"build")
+	var strip: BuildStrip = main.get("build_strip")
+	strip.show_for(Vector2i(1, 1))
 	await _frame()
-	assert_eq(tut.step, "pick_farm", "catalog open")
-	main.call("_on_hud_action", &"build")
+	assert_eq(tut.step, "pick_farm", "choices open")
+	strip.close()
 	await _frame()
-	assert_eq(tut.step, "open_build", "closed again: it points at the Build button again")
+	assert_eq(tut.step, "pick_tile", "closed again: it points at a tile again")
 
 
 func test_replay_from_settings() -> void:
@@ -140,5 +167,5 @@ func test_replay_from_settings() -> void:
 	_tap_at(view.tutorial_button.get_global_rect().get_center())
 	await _frame()
 	assert_true(tut.running, "it starts again")
-	assert_eq(tut.step, "open_build", "and waits for a new farm, not the old one")
+	assert_eq(tut.step, "pick_tile", "and waits for a new farm, not the old one")
 	assert_false((main.get("settings_frame") as PanelFrame).visible, "settings closed out of the way")

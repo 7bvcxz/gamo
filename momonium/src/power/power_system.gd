@@ -53,9 +53,11 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 		var b := (sim.system(&"buildings") as BuildingSystem).get_building(int(payload["id"]))
 		if not use_of(String(b.get("type", ""))).is_empty():
 			shares[int(payload["id"])] = ratio()
-	elif type == &"building_removed":
+	elif type == &"building_removed" or type == &"building_refit":
 		fired_until.erase(int(payload.get("id", 0)))
 		shares.erase(int(payload.get("id", 0)))
+		if type == &"building_refit":
+			sim.bus.emit(&"power_changed", {})
 
 
 # --- generation -------------------------------------------------------------------

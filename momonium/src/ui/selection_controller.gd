@@ -21,9 +21,8 @@ var views: BuildingViews
 var marker: SelectionMarker
 var panel: ContextPanel
 
-## While a mode (land, placement) is open it owns world taps.
+## While land mode is open it owns world taps.
 var land_mode: LandMode
-var placement: PlacementMode
 var momo_views: MomoViews
 var momo_panel: MomoPanel
 var kind := ""
@@ -52,9 +51,6 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 	if land_mode != null and land_mode.active:
 		land_mode.on_world_tap(world_pos)
 		return
-	if placement != null and placement.active:
-		placement.on_world_tap(world_pos)
-		return
 	# Assign mode (the no-drag way): the next building tapped gets the Momo.
 	if kind == "momo" and momo_panel != null and momo_panel.assigning:
 		var target := views.hit(world_pos)
@@ -80,6 +76,10 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 	var cell := projection.cell_at(world_pos)
 	if world.is_owned(cell):
 		select_tile(cell, "tile.grass")
+		# An empty tile of the island: the four families to build, right here.
+		if build_strip != null and world.is_buildable(cell):
+			panel.hide_panel()
+			build_strip.show_for(cell)
 	elif world.is_purchasable(cell):
 		select_tile(cell, "tile.sea")
 	else:
@@ -91,6 +91,10 @@ func _act_on(id: int) -> void:
 	var v := views.view(id)
 	if v != null and not last_result["ok"]:
 		v.refuse()
+
+
+## The four choices beside an empty tile.
+var build_strip: BuildStrip
 
 
 func select_momo(id: int) -> void:
@@ -138,6 +142,8 @@ func deselect() -> void:
 
 
 func _unmark() -> void:
+	if build_strip != null:
+		build_strip.close()
 	if kind == "building":
 		var v := views.view(selected_id)
 		if v:

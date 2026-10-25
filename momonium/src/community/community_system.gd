@@ -37,7 +37,7 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 	# A new amenity opens the day it is finished (if it can).
 	if type == &"building_built":
 		_open(int(payload.get("id", 0)))
-	elif type == &"building_removed":
+	elif type == &"building_removed" or type == &"building_refit":
 		open_on.erase(int(payload.get("id", 0)))
 
 

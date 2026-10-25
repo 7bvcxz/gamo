@@ -52,7 +52,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety", "building.recipe", "building.priority"])
+	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety", "building.recipe", "building.priority", "building.refit", "building.demolish"])
 
 
 func on_new_game() -> void:
@@ -373,13 +373,163 @@ func catalog() -> Array[Dictionary]:
 	var types: Dictionary = sim.data.get_value("buildings", "types", {})
 	for type: String in types:
 		var t: Dictionary = types[type]
-		if not bool(t.get("enabled", true)):
+		if not bool(t.get("enabled", true)) or not is_placeable(type):
 			continue
 		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
 			"level_met": (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})),
 			"research": String(t.get("unlock", {}).get("research", "")), "research_met": research_met(type),
 			"cost": t.get("cost", {}), "build_seconds": float(t.get("build_seconds", 1))})
 	return out
+
+
+## The four families placed on land (farm, mine, lumberyard, lab); every
+## other type is a facility one of them is refitted into.
+func is_placeable(type: String) -> bool:
+	return bool(sim.data.building_type(type).get("placeable", true))
+
+
+func family_of(type: String) -> String:
+	return String(sim.data.building_type(type).get("family", type))
+
+
+## The facilities a building can be refitted into (its family, not itself),
+## each with whether it is open and what it costs: [{type, unlocked, level,
+## research, research_met, level_met, cost, build_seconds}].
+func refits(id: int) -> Array[Dictionary]:
+	var b := get_building(id)
+	var out: Array[Dictionary] = []
+	if b.is_empty():
+		return out
+	var fam := family_of(String(b["type"]))
+	var types: Dictionary = sim.data.get_value("buildings", "types", {})
+	for type: String in types:
+		var t: Dictionary = types[type]
+		if type == String(b["type"]) or family_of(type) != fam or not bool(t.get("enabled", true)):
+			continue
+		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
+			"level_met": (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})),
+			"research": String(t.get("unlock", {}).get("research", "")), "research_met": research_met(type),
+			"cost": t.get("cost", {}), "build_seconds": float(t.get("build_seconds", 1))})
+	return out
+
+
+## Whether `refit` would go through now, without changing anything: the
+## same answer the refit gives (the detail list greys out by it).
+func can_refit(id: int, type: String) -> Dictionary:
+	var b := get_building(id)
+	if b.is_empty():
+		return SimResult.fail("err.no_building")
+	var t := sim.data.building_type(type)
+	if t.is_empty() or family_of(type) != family_of(String(b["type"])) or type == String(b["type"]):
+		return SimResult.fail("err.wrong_family")
+	if b["state"] == CONSTRUCTING:
+		return SimResult.fail("err.constructing", {"remaining_ms": remaining_ms(b)})
+	if not is_unlocked(type):
+		if not research_met(type) and (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})):
+			return SimResult.fail("err.needs_research", {"research": String(t["unlock"]["research"])})
+		return SimResult.fail("err.locked", {"level": int(t.get("unlock", {}).get("level", 1))})
+	if String(t.get("placement", "")) == "shore":
+		for c: Vector2i in cells_of(b):
+			if not _beside_sea(c):
+				return SimResult.fail("err.needs_shore", {"cell": [c.x, c.y]})
+	var cost: Dictionary = t.get("cost", {})
+	if not (sim.system(&"economy") as EconomySystem).can_afford(int(cost.get("money", 0))):
+		return SimResult.fail("err.not_enough_money", {"cost": int(cost.get("money", 0))})
+	var inv: InventorySystem = sim.system(&"inventory")
+	if not inv.has_all(cost.get("items", {})):
+		return SimResult.fail("err.not_enough_items", {"missing": inv.shortfall(cost.get("items", {}))})
+	return SimResult.ok()
+
+
+## Turns a building into another facility of its family, in place: pays the
+## facility's cost, lets its workers go, stops a stage under way (its inputs
+## back) and builds for the facility's time.
+func refit(id: int, type: String) -> Dictionary:
+	var check := can_refit(id, type)
+	if not check["ok"]:
+		return check
+	var b := get_building(id)
+	var t := sim.data.building_type(type)
+	var cost: Dictionary = t.get("cost", {})
+	var money := int(cost.get("money", 0))
+	var items: Dictionary = cost.get("items", {})
+	var economy: EconomySystem = sim.system(&"economy")
+	var inv: InventorySystem = sim.system(&"inventory")
+	economy.spend(money, "build:" + type)
+	inv.take_all(items, "build:" + type)
+	_stop_work(b)
+	var momos: MomoSystem = sim.system(&"momo")
+	if momos != null:
+		for m: int in momos.workers_at(id):
+			momos.unassign(m)
+	var paid: Dictionary = b.get("paid", {"money": 0, "items": {}})
+	paid["money"] = int(paid.get("money", 0)) + money
+	var paid_items: Dictionary = paid.get("items", {})
+	for item: String in items:
+		paid_items[item] = int(paid_items.get(item, 0)) + int(items[item])
+	paid["items"] = paid_items
+	b["paid"] = paid
+	var from := String(b["type"])
+	b["type"] = type
+	b["stage"] = 0
+	b.erase("variety")
+	b.erase("recipe")
+	b["carry"] = {}
+	b["token"] = int(b["token"]) + 1
+	var now := sim.now_ms()
+	b["state"] = CONSTRUCTING
+	b["build_start"] = now
+	b["build_end"] = now + int(float(t.get("build_seconds", 1)) * 1000.0)
+	sim.scheduler.schedule(int(b["build_end"]), BUILT, {"id": id, "token": b["token"]})
+	sim.bus.emit(&"building_refit", {"id": id, "from": from, "type": type})
+	return SimResult.ok()
+
+
+## A stage cut short (refit, demolition): what it took as it started goes
+## back to the store -- nothing made, nothing lost. The caller moves the
+## token on, so its scheduled finish never lands.
+func _stop_work(b: Dictionary) -> void:
+	if b["state"] != WORKING:
+		return
+	var consumes: Dictionary = current_stage(b).get("consumes", {})
+	var inv: InventorySystem = sim.system(&"inventory")
+	for item: String in consumes:
+		inv.add(item, int(consumes[item]), "refund")
+	b["state"] = IDLE
+	b["worker"] = 0
+	sim.bus.emit(&"task_stopped", {"id": b["id"]})
+
+
+## Pulls a finished building down: half of everything actually paid for it
+## (building and refits, money and each material, rounded down) comes back,
+## its workers are let go, its tile is free. One under construction is
+## cancelled instead (cancel()).
+func demolish(id: int) -> Dictionary:
+	var b := get_building(id)
+	if b.is_empty():
+		return SimResult.fail("err.no_building")
+	if b["state"] == CONSTRUCTING:
+		return cancel(id)
+	_stop_work(b)
+	var share := sim.data.get_float("balance", "construction.demolish_refund", 0.5)
+	var paid: Dictionary = b.get("paid", {})
+	var money := int(floor(int(paid.get("money", 0)) * share))
+	var back := {}
+	for item: String in paid.get("items", {}):
+		var n := int(floor(int(paid["items"][item]) * share))
+		if n > 0:
+			back[item] = n
+	if money > 0:
+		(sim.system(&"economy") as EconomySystem).earn(money, "refund")
+	var inv: InventorySystem = sim.system(&"inventory")
+	for item: String in back:
+		inv.add(item, int(back[item]), "refund")
+	b["token"] = int(b["token"]) + 1
+	(sim.system(&"world") as WorldSystem).vacate(id)
+	buildings.erase(id)
+	sim.bus.emit(&"building_removed", {"id": id, "type": b["type"], "refund": money})
+	sim.bus.emit(&"building_demolished", {"id": id, "type": b["type"], "money": money, "items": back})
+	return SimResult.ok({"money": money, "items": back})
 
 
 func is_unlocked(type: String) -> bool:
@@ -398,11 +548,13 @@ func research_met(type: String) -> bool:
 
 
 ## Whether `type` could be placed at `anchor` now, and if not, why -- without
-## changing anything. The placement preview colours itself by this.
+## changing anything. The build strip dims its choices by this.
 func can_place(type: String, anchor: Vector2i) -> Dictionary:
 	var t := sim.data.building_type(type)
 	if t.is_empty() or not bool(t.get("enabled", true)):
 		return SimResult.fail("err.unknown_building")
+	if not is_placeable(type):
+		return SimResult.fail("err.not_placeable", {"family": family_of(type)})
 	if not is_unlocked(type):
 		if not research_met(type) and (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})):
 			return SimResult.fail("err.needs_research", {"research": String(t["unlock"]["research"])})
@@ -500,6 +652,10 @@ func execute(command: Dictionary) -> Dictionary:
 			return set_recipe(Cmd.integer(command, "id"), Cmd.text(command, "recipe"))
 		"building.priority":
 			return set_priority(Cmd.integer(command, "id"), Cmd.text(command, "priority"))
+		"building.refit":
+			return refit(Cmd.integer(command, "id"), Cmd.text(command, "building"))
+		"building.demolish":
+			return demolish(Cmd.integer(command, "id"))
 	return SimResult.fail("err.unknown_command")
 
 

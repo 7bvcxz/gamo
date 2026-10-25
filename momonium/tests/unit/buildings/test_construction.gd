@@ -75,7 +75,7 @@ func test_level_unlock_and_material_costs() -> void:
 	for t: String in listed:
 		if t != "farm":
 			assert_false(listed[t], "%s is listed but locked at Lv 1" % t)
-	assert_true(listed.has("mine") and listed.has("solar_panel"), "every enabled type is on the list (%s)" % [listed.keys()])
+	assert_eq(listed.keys(), ["farm", "research", "lumberyard", "mine", "shed"], "only placeable families are on the list -- facilities come by refit (%s)" % [listed.keys()])
 	(sim.system(&"progression") as ProgressionSystem).level = 3
 	var r := sim.execute({"type": "building.place", "building": "shed", "anchor": [0, 0]})
 	assert_eq(r["reason"], "err.not_enough_items", "money is not enough: it needs wood")

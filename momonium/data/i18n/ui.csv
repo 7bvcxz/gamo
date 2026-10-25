@@ -240,16 +240,14 @@ Want to study it?","캐다 보니 초록 줄무늬가 있는 돌이 있었어 �
 研究してみる？","挖的时候发现带绿色条纹的石头——是铜！
 学会分辨铜矿石和普通石头，就能边挖边挑出来。
 要研究一下吗？"
-hud.build,Build,건설,建てる,建造
 build.unlock_at,Opens at Lv %d,Lv %d에 열려요,Lv %dで解放,Lv %d 解锁
-tutorial.open_build,Buildings are made here,여기서 건물을 지어요,ここで建物を建てます,在这里建造建筑
-tutorial.pick_farm,Choose the farm · $%d,밭을 골라요 · $%d,畑を選びます · $%d,选择农田 · $%d
-tutorial.pick_tile,"Tap an empty tile, check the price, then build","빈 칸을 눌러 자리를 고르고, 값을 확인한 뒤 지어요",空いているマスを選び、値段を見て建てます,点一块空地，看看价格，然后建造
+tutorial.pick_farm,Build a farm here · $%d,여기에 밭을 지어요 · $%d,ここに畑を建てます · $%d,在这里建农田 · $%d
+tutorial.pick_tile,Tap an empty tile,빈 땅을 눌러 보세요,空いている土地をタップ,点一块空地
 tutorial.wait_build,Building -- just a moment,짓는 중이에요. 잠깐만요,建設中。少し待ってね,建造中，稍等一下
 tutorial.sow,Tap the farm to sow,밭을 눌러 씨를 뿌려요,畑をタップして種をまきます,点农田播种
 tutorial.wait_water,Plants need time to drink between waterings,물을 준 뒤에는 작물이 마실 시간이 필요해요,水やりの間は、作物が水を吸う時間がいります,两次浇水之间，作物需要时间吸水
 tutorial.water,Tap again to water -- three times in all,다시 눌러 물을 줘요 — 모두 세 번,もう一度タップして水やり — 全部で3回,再点一次浇水——一共三次
-tutorial.more,Mines and lumberyards open as you level up -- they are in here,광산·목재소는 레벨이 오르면 열려요. 여기서 볼 수 있어요,鉱山と製材所はレベルが上がると開きます。ここで見られます,矿山和伐木场会随等级解锁，在这里可以看到
+tutorial.more,"Any empty tile builds a farm, mine, lumberyard or lab. To pull one down: tap it, the bin, then the check -- half comes back","빈 땅을 누르면 밭·광산·목재소·연구소를 지을 수 있어요. 철거는 건물 → 휴지통 → 체크, 절반을 돌려받아요",空き地をタップすれば畑・鉱山・製材所・研究所を建てられます。取り壊しは建物 → ゴミ箱 → チェック、半分が戻ります,点空地就能建农田、矿山、伐木场或研究所。拆除：建筑 → 垃圾桶 → 对勾，返还一半
 tutorial.skip,Skip,건너뛰기,スキップ,跳过
 tutorial.ok,Got it,알겠어요,わかった,知道了
 settings.language,Language,언어,言語,语言
@@ -396,3 +394,25 @@ effect.sale_price,Sale prices +{pct}%,판매가 +{pct}%,売値 +{pct}%,售价 +{
 err.needs_crew,Needs more Momo here,모모가 더 필요해요,モモがもっと必要です,需要更多桃桃
 detail.crew,Crew {n}/{need},일손 {n}/{need},人手 {n}/{need},人手 {n}/{need}
 detail.revenue,Next release ${n} · {r} released,다음 출시 ${n} · {r}편 출시,次の発売 ${n} · {r}本発売,下次发行 ${n} · 已发行{r}款
+panel.tab.stats,Stats,분석,分析,分析
+stats.wait,The first day's book closes at dawn,첫날 장부는 새벽에 마감돼요,最初の日の帳簿は夜明けに締まります,第一天的账本在黎明结算
+stats.money,Money,돈,お金,资金
+stats.per_day,Per day (last {d} days),하루 평균 (최근 {d}일),1日平均 (直近{d}日),每天平均（最近{d}天）
+stats.items,Made · used · sold per day,하루 생산 · 사용 · 판매,1日の生産・使用・売却,每天生产 · 使用 · 出售
+stats.item_line,{made} · {used} · {sold},{made} · {used} · {sold},{made} · {used} · {sold},{made} · {used} · {sold}
+stats.buildings,Buildings (busiest first),시설 (가동률 순),施設 (稼働率順),设施（按开工率）
+stats.rate,"{made} made/day, {stages} jobs","하루 {made}개 생산, 작업 {stages}회",1日{made}個生産、作業{stages}回,每天产出{made}，工作{stages}次
+stats.momo,Momo busy,모모 가동률,モモの稼働率,桃桃开工率
+stats.power,Power,전력,電力,电力
+stats.power_line,{s} kW supply · {d} kW draw · short {short}%,공급 {s} kW · 사용 {d} kW · 부족 {short}%,供給 {s} kW · 使用 {d} kW · 不足 {short}%,供电 {s} kW · 用电 {d} kW · 不足 {short}%
+stats.blocked,"Idle, and why",멈춘 이유,止まった理由,停工原因
+stats.none_blocked,Nothing stood idle,멈춘 곳이 없었어요,止まった所はありません,没有停工
+stats.why.missing,Short of materials,재료 부족,材料不足,材料不足
+stats.why.full,Store full,창고 가득,倉庫がいっぱい,仓库已满
+stats.why.crew,Not enough Momo,일손 부족,人手不足,人手不足
+stats.why.power,No power,전기 없음,電気なし,没电
+stats.building_line,Last 7 days: {made} made/day · {stages} jobs/day · busy {pct}%,최근 7일: 하루 {made}개 · 작업 {stages}회 · 가동 {pct}%,直近7日: 1日{made}個 · 作業{stages}回 · 稼働{pct}%,最近7天：每天{made}个 · 工作{stages}次 · 开工{pct}%
+stats.before_after,{name}: {before} → {after} a day,{name}: 하루 {before} → {after},{name}: 1日 {before} → {after},{name}：每天 {before} → {after}
+refit.title,Refit into,개조,改装,改造
+err.not_placeable,Refit one of the four instead,네 가지 건물을 개조해서 만들어요,4種類の建物を改装して作ります,由四类建筑改造而成
+err.wrong_family,Only within the same family,같은 계열끼리만 개조할 수 있어요,同じ系統の中だけで改装できます,只能在同类之间改造

@@ -30,10 +30,12 @@ func _crew(id: int) -> void:
 
 
 func test_they_wait_for_research_and_level() -> void:
-	var entry: Dictionary = bs.catalog().filter(func(e: Dictionary) -> bool: return e["type"] == "game_studio")[0]
-	assert_eq([entry["level"], entry["research"]], [6, "software"], "the studio: Lv 6 and software")
-	entry = bs.catalog().filter(func(e: Dictionary) -> bool: return e["type"] == "car_factory")[0]
-	assert_eq([entry["level"], entry["research"]], [7, "automotive"], "the factory: Lv 7 and automotive")
+	var lab := bs.place_instant("research", Vector2i(1, 0))
+	var mine := bs.place_instant("mine", Vector2i(0, 1))
+	var entry: Dictionary = bs.refits(lab).filter(func(e: Dictionary) -> bool: return e["type"] == "game_studio")[0]
+	assert_eq([entry["level"], entry["research"]], [6, "software"], "a lab refitted as a studio: Lv 6 and software")
+	entry = bs.refits(mine).filter(func(e: Dictionary) -> bool: return e["type"] == "car_factory")[0]
+	assert_eq([entry["level"], entry["research"]], [7, "automotive"], "a mine refitted as car works: Lv 7 and automotive")
 	assert_eq(research.node("automotive")["requires"], ["electric_furnace"], "which needs electric furnaces first")
 
 

@@ -93,9 +93,12 @@ func test_the_water_wheel_needs_the_shore() -> void:
 	research.completed["hydropower"] = 0
 	inv.add("wood", 30, "test")
 	inv.add("iron_ingot", 2, "test")
-	assert_eq(bs.can_place("water_wheel", Vector2i(1, 1))["reason"], "err.needs_shore", "not in the middle of the island")
-	assert_true(bs.can_place("water_wheel", Vector2i(0, 1))["ok"], "on the edge, beside the sea")
-	var w := bs.place_instant("water_wheel", Vector2i(0, 1))
+	var inner := bs.place_instant("lumberyard", Vector2i(1, 1))
+	var edge := bs.place_instant("lumberyard", Vector2i(0, 1))
+	assert_eq(sim.execute({"type": "building.refit", "id": inner, "building": "water_wheel"})["reason"], "err.needs_shore", "not in the middle of the island")
+	assert_true(sim.execute({"type": "building.refit", "id": edge, "building": "water_wheel"})["ok"], "on the edge, beside the sea")
+	sim.advance_ms(16000)
+	var w := edge
 	assert_eq(power.output_of(w, 0), 3.0, "steady")
 	assert_eq(power.output_of(w, int(sim.clock.day_ms * 0.8)), 3.0, "night and day")
 
@@ -105,11 +108,12 @@ func test_generators_open_through_research() -> void:
 	(sim.system(&"economy") as EconomySystem).earn(1000, "test")
 	inv.add("copper_ingot", 5, "test")
 	inv.add("stone", 10, "test")
-	assert_eq(bs.can_place("solar_panel", Vector2i(0, 0))["reason"], "err.needs_research", "the level is there, the research is not")
-	var entry: Dictionary = bs.catalog().filter(func(e: Dictionary) -> bool: return e["type"] == "solar_panel")[0]
-	assert_eq([entry["level_met"], entry["research"], entry["research_met"]], [true, "photovoltaics", false], "the catalog says which research")
+	var lab := bs.place_instant("research", Vector2i(0, 0))
+	assert_eq(sim.execute({"type": "building.refit", "id": lab, "building": "solar_panel"})["reason"], "err.needs_research", "the level is there, the research is not")
+	var entry: Dictionary = bs.refits(lab).filter(func(e: Dictionary) -> bool: return e["type"] == "solar_panel")[0]
+	assert_eq([entry["level_met"], entry["research"], entry["research_met"]], [true, "photovoltaics", false], "the refit list says which research")
 	research.completed["photovoltaics"] = 0
-	assert_true(bs.can_place("solar_panel", Vector2i(0, 0))["ok"], "researched: it can be built")
+	assert_true(sim.execute({"type": "building.refit", "id": lab, "building": "solar_panel"})["ok"], "researched: the lab gets its solar roof")
 
 
 func test_power_speeds_up_what_uses_it() -> void:

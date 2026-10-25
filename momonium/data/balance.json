@@ -192,5 +192,14 @@
       0.25
     ],
     "floor": 0.75
+  },
+  "analytics": {
+    "_doc": "The island's daily book (AnalyticsSystem): written from events, plus a look at power and idle buildings every sample_seconds; keep_days closed days are kept.",
+    "sample_seconds": 10,
+    "keep_days": 30
+  },
+  "construction": {
+    "_doc": "Demolishing a finished building returns this share of everything paid for it (building and refits), rounded down per item; cancelling one still under construction returns its type's `refund` (all of it).",
+    "demolish_refund": 0.5
   }
 }

@@ -32,6 +32,12 @@ var recipe_box: HBoxContainer
 var takes_row: HBoxContainer
 var block_label: Label
 var power_row: HBoxContainer
+## The last seven days and before/after research, from the island's book.
+var stats_label: Label
+## What this building can be refitted into (its family's facilities).
+var refit_title: Label
+var refit_box: GridContainer
+var _shown_refits := ""
 ## How much the manager should want workers here (shown once management exists).
 var priority_box: HBoxContainer
 var manager_label: Label
@@ -98,6 +104,20 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	power_row = PanelViews.row("", "")
 	power_row.name = "Power"
 	add_child(power_row)
+	refit_title = PanelViews.label("", 15, true)
+	refit_title.name = "RefitTitle"
+	add_child(refit_title)
+	refit_box = GridContainer.new()
+	refit_box.name = "Refits"
+	refit_box.columns = 3
+	refit_box.add_theme_constant_override("h_separation", 6)
+	refit_box.add_theme_constant_override("v_separation", 6)
+	add_child(refit_box)
+	stats_label = PanelViews.label("", 15)
+	stats_label.name = "Stats"
+	stats_label.add_theme_color_override("font_color", Color("#cfe9ff"))
+	stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	add_child(stats_label)
 	priority_box = HBoxContainer.new()
 	priority_box.name = "Priority"
 	priority_box.add_theme_constant_override("separation", 6)
@@ -131,6 +151,17 @@ func show_building(id: int) -> void:
 	_shown_varieties = ""
 	_shown_recipes = ""
 	refresh()
+
+
+## A building's name with its family: "Mine · Smelter" for a refitted mine,
+## just "Mine" for the plain one.
+static func full_name(sim: Simulation, type: String) -> String:
+	var def := sim.data.building_type(type)
+	var fam := String(def.get("family", type))
+	var own := TranslationServer.translate(String(def.get("name", type)))
+	if fam == type:
+		return own
+	return "%s · %s" % [TranslationServer.translate(String(sim.data.building_type(fam).get("name", fam))), own]
 
 
 ## 1 -> "1", 0.25 -> "0.25", 0.2 -> "0.2": a rate as people write it.
@@ -194,6 +225,8 @@ func refresh() -> void:
 	_refresh_power(b)
 	_refresh_management(b, buildings)
 	_refresh_research(b)
+	_refresh_stats(b)
+	_refresh_refits(b, buildings)
 
 
 func _set_row(row: HBoxContainer, key: String, value: String) -> void:
@@ -412,6 +445,100 @@ func _refresh_management(b: Dictionary, buildings: BuildingSystem) -> void:
 			lv.sim = sim
 			manager_label.text = lv.shut_reason(int(b["id"]))
 			lv.free()
+
+
+## The building's last seven days from the island's book, and -- for the
+## latest research that changed its kind -- output per day before and after.
+func _refresh_stats(b: Dictionary) -> void:
+	var analytics: AnalyticsSystem = sim.system(&"analytics")
+	var research: ResearchSystem = sim.system(&"research")
+	if analytics == null or analytics.last(1).is_empty() or (sim.system(&"buildings") as BuildingSystem).stages(b).is_empty():
+		stats_label.visible = false
+		return
+	var rate := analytics.building_rate(int(b["id"]))
+	var text := tr("stats.building_line").format({"made": NumberFormat.compact(rate["made"]), "stages": NumberFormat.compact(rate["stages"]), "pct": int(round(float(rate["utilization"]) * 100.0))})
+	var latest := ""
+	var at := -1
+	for id: String in research.completed:
+		var affects := false
+		for e: Dictionary in research.node(id).get("effects", []):
+			if String(e.get("type", "")) == String(b["type"]):
+				affects = true
+		if affects and int(research.completed[id]) > at:
+			latest = id
+			at = int(research.completed[id])
+	if latest != "":
+		var ba := analytics.before_after(String(b["type"]), latest)
+		if int(ba.get("days_before", 0)) > 0 and int(ba.get("days_after", 0)) > 0:
+			text += "\n" + tr("stats.before_after").format({"name": tr(String(research.node(latest).get("name", ""))),
+				"before": NumberFormat.compact(ba["before"]), "after": NumberFormat.compact(ba["after"])})
+	stats_label.text = text
+	stats_label.visible = true
+
+
+## The family's other facilities: picture, name, price or what it waits for.
+## One tap refits this building into it (the simulation says no if it can't).
+func _refresh_refits(b: Dictionary, buildings: BuildingSystem) -> void:
+	var list := buildings.refits(int(b["id"]))
+	refit_title.visible = not list.is_empty()
+	refit_box.visible = not list.is_empty()
+	refit_title.text = tr("refit.title")
+	var key := "%d:%s:%s:%s" % [int(b["id"]), b["type"], b["state"], TranslationServer.get_locale()]
+	for e: Dictionary in list:
+		key += "%s%s" % [e["type"], e["unlocked"]]
+	key += str((sim.system(&"economy") as EconomySystem).money) + str((sim.system(&"inventory") as InventorySystem).items.hash())
+	if key == _shown_refits:
+		return
+	_shown_refits = key
+	PanelViews.clear(refit_box)
+	for e: Dictionary in list:
+		refit_box.add_child(_refit_button(b, e))
+
+
+func _refit_button(b: Dictionary, e: Dictionary) -> Button:
+	var type := String(e["type"])
+	var def := sim.data.building_type(type)
+	var btn := Button.new()
+	btn.name = "Refit_" + type
+	btn.custom_minimum_size = Vector2(0, 104)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.focus_mode = Control.FOCUS_NONE
+	var col := VBoxContainer.new()
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 0)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sprite := String(def.get("sprite", ""))
+	var icon := PanelViews.icon(lib, sprite if lib.has(sprite) else "ui_build", 40.0)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(icon)
+	var n := PanelViews.label(tr(String(def.get("name", type))), 14)
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(n)
+	var cost: Dictionary = e["cost"]
+	var text := "$%d" % int(cost.get("money", 0))
+	for item: String in cost.get("items", {}):
+		text += " · %s %d" % [tr(String(sim.data.item(item).get("name", item))), int(cost["items"][item])]
+	if not bool(e["level_met"]):
+		text = tr("build.unlock_at") % int(e["level"])
+	elif not bool(e["research_met"]):
+		text = tr("build.needs_research") % tr(String((sim.system(&"research") as ResearchSystem).node(String(e["research"])).get("name", "")))
+	var check := (sim.system(&"buildings") as BuildingSystem).can_refit(int(b["id"]), type)
+	var price := PanelViews.label(text, 12, not bool(e["unlocked"]))
+	if bool(e["unlocked"]) and not check["ok"]:
+		price.add_theme_color_override("font_color", Color("#ff9a8f"))
+	price.name = "Price"
+	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(price)
+	btn.add_child(col)
+	btn.disabled = not check["ok"]
+	var id := int(b["id"])
+	btn.pressed.connect(func() -> void:
+		last_result = sim.execute({"type": "building.refit", "id": id, "building": type})
+		_shown_refits = ""
+		refresh())
+	return btn
 
 
 ## A generator: what it gives now of its most. A powered building: what it

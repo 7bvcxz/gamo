@@ -1,8 +1,10 @@
-// Step 25: mine and lumberyard are in the catalog with their unlock levels
-// from the start; the demo island (Settings) lets their later features be
-// tried in the browser -- clearly labelled -- and leads back to the player's
-// own island untouched.
+// Step 25 / 30: mine and lumberyard are among the four choices of an empty
+// tile, with their unlock levels, from the start; the demo island (Settings)
+// lets their later features be tried in the browser -- clearly labelled --
+// including refitting a lab into one of its facilities, and leads back to
+// the player's own island untouched.
 import { test, expect } from '../lib/fixtures.mjs';
+import { cellToCanvas } from '../lib/coords.mjs';
 
 const centre = async (game, rect, win) => {
   const box = await game.canvas.boundingBox();
@@ -15,13 +17,13 @@ test('catalog, demo island and back', async ({ game }) => {
   await game.query('dev_add_money', 7);
   const own = await game.state();
   const hud = await game.query('hud');
-  const build = await centre(game, hud.buttons.build, hud.window);
-  await game.tap(build.x, build.y);
+  const tile = await cellToCanvas(game, [1, 1]);
+  await game.tap(tile.x, tile.y);
   await game.page.waitForTimeout(250);
-  const ui = await game.query('build_ui');
-  expect(ui.cards.mine).toBeTruthy();
-  expect(ui.cards.lumberyard).toBeTruthy();
-  await game.tap(build.x, build.y);
+  const strip = await game.query('strip');
+  expect(strip.buttons.mine.price).toBe('Opens at Lv 3');
+  expect(strip.buttons.lumberyard.price).toBe('Opens at Lv 2');
+  expect(strip.buttons.research.price).toBe('Opens at Lv 2');
   // Settings -> demo island.
   const gear = await centre(game, hud.buttons.settings, hud.window);
   await game.tap(gear.x, gear.y);
@@ -37,8 +39,31 @@ test('catalog, demo island and back', async ({ game }) => {
   expect(s.buildings.buildings.map((b) => b.type)).toEqual(expect.arrayContaining(['mine', 'lumberyard', 'research', 'farm', 'smelter']));
   expect(s.inventory.items.copper_ingot ?? 0).toBeGreaterThan(0);
   expect(s.inventory.items.stone).toBeGreaterThan(0);
-  const r = await game.query('research');
-  void r;
+  // A lab of the demo island: its details list what it can be refitted into.
+  await game.setTimeScale(0);
+  const lab = s.buildings.buildings.find((b) => b.type === 'research');
+  await game.query('dev_select_cell', lab.anchor);
+  await game.page.waitForTimeout(250);
+  const p = await game.query('panels');
+  const title = await centre(game, p.context_title, p.window);
+  await game.tap(title.x, title.y);
+  await game.page.waitForTimeout(400);
+  let d = await game.query('details');
+  expect(d.open).toBe(true);
+  expect(Object.keys(d.refits)).toEqual(expect.arrayContaining(['solar_panel', 'office', 'apartment', 'community_center', 'game_studio']));
+  expect(Object.keys(d.refits)).not.toContain('smelter');
+  const open = Object.entries(d.refits).find(([, v]) => !v.disabled);
+  expect(open).toBeTruthy();
+  const refit = await centre(game, open[1].rect, d.window);
+  await game.tap(refit.x, refit.y);
+  await game.page.waitForTimeout(300);
+  d = await game.query('details');
+  expect([open[0], d.result.ok, d.result.reason]).toEqual([open[0], true, '']);
+  const after = (await game.state()).buildings.buildings.find((b) => b.id === lab.id);
+  expect(after.type).toBe(open[0]);
+  expect(after.anchor).toEqual(lab.anchor);
+  expect(after.state).toBe('constructing');
+  await game.query('dev_advance_ms', 60000);
   // Back to the player's own island.
   await game.setTimeScale(0);
   const hud2 = await game.query('hud');

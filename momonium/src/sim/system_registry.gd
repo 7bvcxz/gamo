@@ -23,5 +23,6 @@ static func create_default() -> Array[SimSystem]:
 		ResearchSystem.new(),
 		PowerSystem.new(),
 		ManagerSystem.new(),
+		AnalyticsSystem.new(),
 	]
 	return list

@@ -1,5 +1,8 @@
-// Step 13: Shop -> Farm -> tap a tile -> Build: $10 is spent, the farm is
-// under construction for 5 seconds and then ready; an occupied tile is refused.
+// Step 30 (redesigned): tap an empty tile of the island and four choices --
+// farm, mine, lumberyard, lab -- open beside it with their prices or levels;
+// one tap builds. Tap a building: a trash can bottom right; tap it and a check
+// appears above; only the check pulls the building down, with half of what it
+// cost back.
 import { test, expect } from '../lib/fixtures.mjs';
 import { cellToCanvas } from '../lib/coords.mjs';
 
@@ -8,32 +11,36 @@ const centre = async (game, rect, win) => {
   return { x: (rect[0] + rect[2] / 2) * (box.width / win[0]), y: (rect[1] + rect[3] / 2) * (box.height / win[1]) };
 };
 
-test('build the first farm from the shop', async ({ game }) => {
+test('tap an empty tile, then the farm: built in one tap', async ({ game }) => {
   await game.setTimeScale(0);
+  await game.query('set_language', 'en');
   const hud = await game.query('hud');
-  const shop = await centre(game, hud.buttons.shop, hud.window);
-  await game.tap(shop.x, shop.y);
-  await game.page.waitForTimeout(200);
-  let ui = await game.query('build_ui');
-  expect(ui.menu_open).toBe(true);
-  const card = await centre(game, ui.cards.farm, ui.window);
-  await game.tap(card.x, card.y);
-  await game.page.waitForTimeout(150);
+  expect(hud.buttons.build).toBeUndefined();
   const cell = await cellToCanvas(game, [1, 1]);
   await game.tap(cell.x, cell.y);
-  await game.page.waitForTimeout(150);
-  ui = await game.query('build_ui');
-  expect(ui.placing).toBe(true);
-  expect(ui.anchor).toEqual([1, 1]);
-  expect(ui.valid).toBe(true);
-  const build = await centre(game, ui.build, ui.window);
-  await game.tap(build.x, build.y);
-  await game.page.waitForTimeout(150);
-  let s = await game.state();
+  await game.page.waitForTimeout(250);
+  const strip = await game.query('strip');
+  expect(strip.open).toBe(true);
+  expect(strip.cell).toEqual([1, 1]);
+  expect(Object.keys(strip.buttons).sort()).toEqual(['farm', 'lumberyard', 'mine', 'research']);
+  expect(strip.buttons.farm.disabled).toBe(false);
+  expect(strip.buttons.farm.price).toBe('$10');
+  expect(strip.buttons.mine.disabled).toBe(true);
+  expect(strip.buttons.mine.price).toBe('Opens at Lv 3');
+  for (const b of Object.values(strip.buttons)) {
+    expect(b.rect[0]).toBeGreaterThanOrEqual(0);
+    expect(b.rect[0] + b.rect[2]).toBeLessThanOrEqual(strip.window[0] + 1);
+  }
+  const farm = await centre(game, strip.buttons.farm.rect, strip.window);
+  await game.tap(farm.x, farm.y);
+  await game.page.waitForTimeout(200);
+  const s = await game.state();
   expect(s.economy.money).toBe(0);
-  const farm = s.buildings.buildings[0];
-  expect(farm.state).toBe('constructing');
-  expect(farm.build_end - farm.build_start).toBe(5000);
+  const b = s.buildings.buildings[0];
+  expect(b.type).toBe('farm');
+  expect(b.anchor).toEqual([1, 1]);
+  expect(b.state).toBe('constructing');
+  expect((await game.query('strip')).open).toBe(false);
   await game.setTimeScale(10);
   await expect.poll(async () => (await game.state()).buildings.buildings[0].state, { timeout: 10_000 }).toBe('idle');
 });
@@ -45,4 +52,38 @@ test('an occupied tile is refused', async ({ game }) => {
   expect(r.ok).toBe(false);
   expect(r.reason).toBe('err.occupied');
   expect((await game.state()).economy.money).toBe(10);
+});
+
+test('trash, then the check: pulled down for half of its cost', async ({ game }) => {
+  await game.setTimeScale(0);
+  await game.query('dev_add_money', 70);
+  const r = await game.command({ type: 'building.place', building: 'farm', anchor: [1, 0] });
+  expect(r.ok).toBe(true);
+  await game.query('dev_advance_ms', 6000);
+  await game.query('dev_select_cell', [1, 0]);
+  await game.page.waitForTimeout(250);
+  let ui = await game.query('strip');
+  expect(ui.trash.length).toBe(4);
+  expect(ui.confirm).toEqual([]);
+  expect(ui.trash[0]).toBeGreaterThan(ui.window[0] * 0.7);
+  const before = (await game.state()).economy.money;
+  const trash = await centre(game, ui.trash, ui.window);
+  await game.tap(trash.x, trash.y);
+  await game.page.waitForTimeout(200);
+  ui = await game.query('strip');
+  expect(ui.confirm.length).toBe(4);
+  expect(ui.confirm[1] + ui.confirm[3]).toBeLessThanOrEqual(ui.trash[1] + 1);
+  expect((await game.state()).buildings.buildings.length).toBe(1);
+  const check = await centre(game, ui.confirm, ui.window);
+  await game.tap(check.x, check.y);
+  await game.page.waitForTimeout(200);
+  const s = await game.state();
+  expect(s.buildings.buildings.length).toBe(0);
+  expect(s.economy.money - before).toBe(5);
+  ui = await game.query('strip');
+  expect(ui.trash).toEqual([]);
+  const cell = await cellToCanvas(game, [1, 0]);
+  await game.tap(cell.x, cell.y);
+  await game.page.waitForTimeout(200);
+  expect((await game.query('strip')).open).toBe(true);
 });

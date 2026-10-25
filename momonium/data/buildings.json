@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes. Only four families are placed on land -- farm, mine, lumberyard and research (the Lab); `placeable` marks them. Every other type is an internal facility of one family (`family`): a building of that family is refitted into it in place (building.refit), keeping its tile. Demolishing a finished building refunds `demolish_refund` of what was actually paid (money and materials, rounded down).",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -151,7 +151,9 @@
             "crop_ripe"
           ]
         }
-      }
+      },
+      "family": "farm",
+      "placeable": true
     },
     "research": {
       "name": "building.research",
@@ -190,7 +192,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "family": "research",
+      "placeable": true
     },
     "lumberyard": {
       "name": "building.lumberyard",
@@ -241,7 +245,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "family": "lumberyard",
+      "placeable": true
     },
     "mine": {
       "name": "building.mine",
@@ -284,7 +290,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "family": "mine",
+      "placeable": true
     },
     "smelter": {
       "name": "building.smelter",
@@ -330,7 +338,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "family": "mine",
+      "placeable": false
     },
     "solar_panel": {
       "name": "building.solar_panel",
@@ -365,7 +375,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "research",
+      "placeable": false
     },
     "wind_turbine": {
       "name": "building.wind_turbine",
@@ -400,7 +412,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "lumberyard",
+      "placeable": false
     },
     "steam_engine": {
       "name": "building.steam_engine",
@@ -451,7 +465,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "family": "lumberyard",
+      "placeable": false
     },
     "water_wheel": {
       "name": "building.water_wheel",
@@ -487,7 +503,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "lumberyard",
+      "placeable": false
     },
     "office": {
       "name": "building.office",
@@ -517,7 +535,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 1
+      "workers": 1,
+      "family": "research",
+      "placeable": false
     },
     "villa": {
       "name": "building.villa",
@@ -548,7 +568,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "farm",
+      "placeable": false
     },
     "apartment": {
       "name": "building.apartment",
@@ -581,7 +603,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "research",
+      "placeable": false
     },
     "park": {
       "name": "building.park",
@@ -609,7 +633,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "farm",
+      "placeable": false
     },
     "pub": {
       "name": "building.pub",
@@ -642,7 +668,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "farm",
+      "placeable": false
     },
     "community_center": {
       "name": "building.community_center",
@@ -675,7 +703,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 0
+      "workers": 0,
+      "family": "research",
+      "placeable": false
     },
     "game_studio": {
       "name": "building.game_studio",
@@ -754,7 +784,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 3
+      "workers": 3,
+      "family": "research",
+      "placeable": false
     },
     "car_factory": {
       "name": "building.car_factory",
@@ -812,7 +844,9 @@
       },
       "enabled": true,
       "refund": 1.0,
-      "workers": 3
+      "workers": 3,
+      "family": "mine",
+      "placeable": false
     }
   }
 }

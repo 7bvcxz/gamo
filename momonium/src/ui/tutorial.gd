@@ -2,24 +2,25 @@ class_name Tutorial
 extends Control
 
 ## The first-run tutorial: a pulsing ring on the next thing to touch and one
-## short line beside it, from opening the catalog to the first watering, then
-## a pointer to where the mine and lumberyard wait with their levels.
+## short line beside it -- an empty tile, the farm among the four choices that
+## open beside it, then the first sowing and watering -- and at the end where
+## the other buildings are (any empty tile) and how one comes down (trash, then
+## the check, half back).
 ##
 ## It never takes over: the overlay ignores input (only its Skip / Got it
 ## buttons are buttons), nothing is opened or done for the player, and the
 ## step shown is worked out each frame from the world and the screen -- close
-## the catalog and it points back at the Build button; build the farm another
-## way and it moves on. Replaying it from Settings starts again on the island
+## the choices and it points at a tile again; build the farm another way and
+## it moves on. Replaying it from Settings starts again on the island
 ## as it is: it waits for a new farm.
 
 signal finished(skipped: bool)
 
-const STEPS: PackedStringArray = ["open_build", "pick_farm", "pick_tile", "wait_build", "sow", "working", "water", "more"]
+const STEPS: PackedStringArray = ["pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "more"]
 
 var sim: Simulation
 var hud: Hud
-var build_menu: BuildMenu
-var placement: PlacementMode
+var strip: BuildStrip
 var cameras: CameraController
 var projection: IsoProjection
 var building_views: BuildingViews
@@ -29,7 +30,6 @@ var step := ""
 ## The farm this run of the tutorial is about (0 until one is placed).
 var farm := 0
 var _farms_at_start: Array[int] = []
-var _saw_catalog_after := false
 var _time := 0.0
 var bubble: PanelContainer
 var text: Label
@@ -39,12 +39,11 @@ var target := Rect2()
 var target2 := Rect2()
 
 
-func setup(p_sim: Simulation, p_hud: Hud, p_menu: BuildMenu, p_placement: PlacementMode, p_cameras: CameraController, p_projection: IsoProjection, p_views: BuildingViews, p_context: ContextPanel = null) -> void:
+func setup(p_sim: Simulation, p_hud: Hud, p_strip: BuildStrip, p_cameras: CameraController, p_projection: IsoProjection, p_views: BuildingViews, p_context: ContextPanel = null) -> void:
 	context = p_context
 	sim = p_sim
 	hud = p_hud
-	build_menu = p_menu
-	placement = p_placement
+	strip = p_strip
 	cameras = p_cameras
 	projection = p_projection
 	building_views = p_views
@@ -85,7 +84,6 @@ func start() -> void:
 	running = true
 	farm = 0
 	_farms_at_start.clear()
-	_saw_catalog_after = false
 	var bs: BuildingSystem = sim.system(&"buildings")
 	for id: int in bs.ids():
 		if String(bs.get_building(id)["type"]) == "farm":
@@ -120,9 +118,7 @@ func current_step() -> String:
 				farm = id
 	if farm == 0 or bs.get_building(farm).is_empty():
 		farm = 0
-		if placement.active and placement.type == "farm":
-			return "pick_tile"
-		return "pick_farm" if build_menu.visible else "open_build"
+		return "pick_farm" if strip.open else "pick_tile"
 	var b := bs.get_building(farm)
 	if b["state"] == BuildingSystem.CONSTRUCTING:
 		return "wait_build"
@@ -145,17 +141,13 @@ func _update() -> void:
 	skip_button.text = tr("tutorial.skip")
 	skip_button.visible = step != "more"
 	match step:
-		"open_build":
-			target = _rect(hud.buttons.get(&"build"))
-			text.text = tr("tutorial.open_build")
+		"pick_tile":
+			target = _cell_rect(suggested_tile())
+			text.text = tr("tutorial.pick_tile")
 		"pick_farm":
-			target = _rect(build_menu.cards.get("farm"))
+			target = _rect(strip.buttons.get("farm"))
 			var cost := int(sim.data.building_type("farm").get("cost", {}).get("money", 0))
 			text.text = tr("tutorial.pick_farm") % cost
-		"pick_tile":
-			target = _cell_rect(placement.anchor)
-			target2 = _rect(placement.build_button)
-			text.text = tr("tutorial.pick_tile")
 		"wait_build":
 			target = _building_rect(farm)
 			text.text = tr("tutorial.wait_build")
@@ -171,13 +163,46 @@ func _update() -> void:
 			target2 = _stage_card()
 			text.text = tr("tutorial.water")
 		"more":
-			target = _rect(hud.buttons.get(&"build"))
 			text.text = tr("tutorial.wait_water") + "\n" + tr("tutorial.more")
-			if build_menu.visible:
-				_saw_catalog_after = true
-				target = _rect(build_menu.cards.get("lumberyard"))
-				target2 = _rect(build_menu.cards.get("mine"))
+			if strip.open:
+				target = _rect(strip.buttons.get("lumberyard"))
+				target2 = _rect(strip.buttons.get("mine"))
+			elif context != null and context.trash_button.visible:
+				target = _rect(context.trash_button)
+				target2 = _rect(context.confirm_button)
+			else:
+				target = _cell_rect(suggested_tile())
 	_place_bubble()
+
+
+## The free tile of the island nearest its middle (ties: the first in cell
+## order), to ring when the tutorial asks for a tap on empty ground.
+func suggested_tile() -> Vector2i:
+	var world: WorldSystem = sim.system(&"world")
+	var cells := world.owned_cells()
+	if cells.is_empty():
+		return Vector2i.ZERO
+	var middle := Vector2.ZERO
+	for c: Vector2i in cells:
+		middle += Vector2(c)
+	middle /= float(cells.size())
+	# Not where a Momo stands: a tap there picks the Momo, not the ground.
+	var under: Array[Vector2i] = []
+	var momos: MomoSystem = sim.system(&"momo")
+	for id: int in momos.ids():
+		var p := momos.position_of(id)
+		under.append(Vector2i(floori(p.x), floori(p.y)))
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	cells.sort()
+	for c: Vector2i in cells:
+		if not world.is_buildable(c) or under.has(c):
+			continue
+		var d := Vector2(c).distance_squared_to(middle)
+		if d < best_d - 0.001:
+			best_d = d
+			best = c
+	return best if best.x >= 0 else cells[0]
 
 
 ## The lit stage card of the tutorial's farm, when its panel is showing:
@@ -209,14 +234,21 @@ func _building_rect(id: int) -> Rect2:
 
 
 ## Beside the target: below it when there is room, otherwise above, kept on
-## screen -- and clear of the open catalog, whose header it must not cover.
+## screen -- and clear of the open build strip.
 func _place_bubble() -> void:
 	bubble.reset_size()
 	var s := bubble.size
 	var t := target if target.size != Vector2.ZERO else Rect2(size * 0.5, Vector2.ZERO)
-	if build_menu.visible:
-		t = build_menu.get_global_rect()
-		bubble.position = Vector2(clampf(t.get_center().x - s.x * 0.5, 12.0, maxf(size.x - s.x - 12.0, 12.0)), maxf(t.position.y - s.y - 14.0, 80.0))
+	if target.size != Vector2.ZERO and target2.size != Vector2.ZERO:
+		t = target.merge(target2)
+	# The trash's check appears right above it: keep that spot clear too.
+	if step == "more" and context != null and context.trash_button.visible:
+		t = t.merge(context.confirm_button.get_global_rect())
+	if strip.open:
+		t = strip.strip_rect()
+		var below := t.end.y + 14.0
+		var y0 := below if below + s.y < size.y - 12.0 else t.position.y - s.y - 14.0
+		bubble.position = Vector2(clampf(t.get_center().x - s.x * 0.5, 12.0, maxf(size.x - s.x - 12.0, 12.0)), clampf(y0, 80.0, maxf(size.y - s.y - 12.0, 80.0)))
 		return
 	var x := clampf(t.get_center().x - s.x * 0.5, 12.0, maxf(size.x - s.x - 12.0, 12.0))
 	var y := t.end.y + 18.0

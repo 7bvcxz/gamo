@@ -25,9 +25,10 @@ var momo_drag: MomoDrag
 var selection: SelectionController
 var land_preview: LandPreview
 var land_mode: LandMode
-var placement_preview: PlacementPreview
-var placement: PlacementMode
-var build_menu: BuildMenu
+## The shop (bottom-left): hiring.
+var shop_menu: ShopMenu
+## Four choices beside a tapped empty tile: the only way to build.
+var build_strip: BuildStrip
 var status_panel: StatusPanel
 ## Status, store, money and records, as tabs of one frame.
 var status_frame: PanelFrame
@@ -35,6 +36,7 @@ var inventory_view: InventoryView
 var economy_view: EconomyView
 var stats_view: StatsView
 var life_view: LifeView
+var analytics_view: AnalyticsView
 ## Everything about one building, opened from its name.
 var detail_frame: PanelFrame
 var detail_view: BuildingDetailView
@@ -111,9 +113,6 @@ func _ready() -> void:
 	land_preview.name = "LandPreview"
 	world_root.add_child(land_preview)
 	land_preview.setup(sim, projection)
-	placement_preview = PlacementPreview.new()
-	placement_preview.name = "PlacementPreview"
-	world_root.add_child(placement_preview)
 	entities = EntityLayer.new(projection)
 	entities.name = "Entities"
 	world_root.add_child(entities)
@@ -189,21 +188,16 @@ func _ready() -> void:
 	ui.add_child(land_mode)
 	land_mode.setup(sim, land_preview, projection, lib)
 	selection.land_mode = land_mode
-	placement_preview.setup(sim, projection, lib)
-	placement = PlacementMode.new()
-	ui.add_child(placement)
-	placement.setup(sim, placement_preview, projection, lib)
-	placement.placed.connect(func(id: int) -> void: selection.select_building(id))
-	selection.placement = placement
-	build_menu = BuildMenu.new()
-	ui.add_child(build_menu)
-	build_menu.setup(sim, lib)
-	build_menu.picked.connect(func(type: String) -> void:
-		land_mode.close()
-		selection.deselect()
-		placement.open(type))
-	build_menu.resized.connect(_place_build_menu)
-	build_menu.hire_requested.connect(func() -> void:
+	build_strip = BuildStrip.new()
+	ui.add_child(build_strip)
+	build_strip.setup(sim, lib, cameras, projection)
+	build_strip.built.connect(func(id: int) -> void: selection.select_building(id))
+	selection.build_strip = build_strip
+	shop_menu = ShopMenu.new()
+	ui.add_child(shop_menu)
+	shop_menu.setup(sim, lib)
+	shop_menu.resized.connect(_place_shop_menu)
+	shop_menu.hire_requested.connect(func() -> void:
 		var r := sim.execute({"type": "momo.hire"})
 		if r["ok"]:
 			selection.select_momo(int(r["id"])))
@@ -223,6 +217,10 @@ func _ready() -> void:
 	life_view = LifeView.new()
 	life_view.setup(sim, lib)
 	status_frame.add_tab("panel.tab.life", life_view)
+	analytics_view = AnalyticsView.new()
+	analytics_view.setup(sim, lib)
+	status_frame.add_tab("panel.tab.stats", analytics_view)
+	analytics_view.building_chosen.connect(func(id: int) -> void: open_details(id))
 	detail_frame = _frame(ui, "DetailFrame")
 	detail_view = BuildingDetailView.new()
 	detail_view.setup(sim, lib)
@@ -246,6 +244,11 @@ func _ready() -> void:
 	power_view.setup(sim, lib)
 	power_frame.add_tab("", power_view)
 	panel.details_pressed.connect(open_details)
+	panel.demolish_pressed.connect(func(id: int) -> void:
+		selection.last_result = sim.execute({"type": "building.demolish", "id": id})
+		if selection.last_result["ok"]:
+			_close_frames()
+			selection.deselect())
 	_place_frames()
 	hud.layout_changed.connect(_place_frames)
 	_version_label = Label.new()
@@ -289,7 +292,7 @@ func _ready() -> void:
 	_layout()
 	tutorial = Tutorial.new()
 	ui.add_child(tutorial)
-	tutorial.setup(sim, hud, build_menu, placement, cameras, projection, building_views, panel)
+	tutorial.setup(sim, hud, build_strip, cameras, projection, building_views, panel)
 	tutorial.finished.connect(func(_skipped: bool) -> void: settings.set_value("tutorial_done", true))
 	_place_frames()
 
@@ -326,6 +329,22 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("strip", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			var r := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var buttons := {}
+		for t: String in build_strip.buttons:
+			buttons[t] = {"rect": conv.call(build_strip.buttons[t]), "disabled": (build_strip.buttons[t] as Button).disabled,
+				"price": ((build_strip.buttons[t] as Button).find_child("Price", true, false) as Label).text}
+		return {"open": build_strip.open, "cell": [build_strip.cell.x, build_strip.cell.y], "buttons": buttons,
+			"trash": conv.call(panel.trash_button) if panel.trash_button.visible else [],
+			"confirm": conv.call(panel.confirm_button) if panel.confirm_button.visible else [],
+			"result": build_strip.last_result, "window": [win.x, win.y]})
 	bridge.register_query("dev_select_cell", func(cell: Variant) -> Dictionary:
 		var id := (sim.system(&"buildings") as BuildingSystem).building_at(Vector2i(int(cell[0]), int(cell[1])))
 		if id != 0:
@@ -382,6 +401,16 @@ func _ready() -> void:
 		for c: Node in detail_view.research_box.get_children():
 			out["research"].append((c as Label).text)
 		out["takes"] = (detail_view.takes_row.get_node("Value") as Label).text if detail_view.takes_row.visible else ""
+		var refits := {}
+		if detail_view.refit_box.visible:
+			for c: Node in detail_view.refit_box.get_children():
+				var r := (c as Control).get_global_rect()
+				var a: Vector2 = vp.get_final_transform() * r.position
+				var b: Vector2 = vp.get_final_transform() * r.end
+				refits[String(c.name).trim_prefix("Refit_")] = {"rect": [a.x, a.y, b.x - a.x, b.y - a.y], "disabled": (c as Button).disabled,
+					"price": ((c as Button).find_child("Price", true, false) as Label).text}
+		out["refits"] = refits
+		out["result"] = detail_view.last_result
 		if detail_view.priority_box.visible:
 			var pr := {}
 			for p: String in ManagerSystem.PRIORITIES:
@@ -579,57 +608,52 @@ func _on_hud_action(action_name: StringName) -> void:
 	hud_actions.append(String(action_name))
 	if hud_actions.size() > 20:
 		hud_actions.pop_front()
+	build_strip.close()
 	match action_name:
 		&"land":
 			selection.deselect()
-			placement.close()
-			build_menu.visible = false
+			shop_menu.visible = false
 			_close_frames()
 			land_mode.toggle()
 		&"settings":
-			build_menu.visible = false
+			shop_menu.visible = false
 			land_mode.close()
-			placement.close()
 			var was := settings_frame.visible
 			_close_frames()
 			if not was:
 				settings_view.refresh()
 				settings_frame.open()
-		&"shop", &"build":
+		&"shop":
 			land_mode.close()
-			placement.close()
+			selection.deselect()
 			_close_frames()
-			build_menu.toggle()
-			_place_build_menu()
+			shop_menu.toggle()
+			_place_shop_menu()
 		&"status":
-			build_menu.visible = false
+			shop_menu.visible = false
 			land_mode.close()
-			placement.close()
 			detail_frame.close()
 			mail_frame.close()
 			research_frame.close()
 			status_frame.toggle(0)
 		&"power":
-			build_menu.visible = false
+			shop_menu.visible = false
 			land_mode.close()
-			placement.close()
 			var was := power_frame.visible
 			_close_frames()
 			if not was:
 				power_frame.set_title(tr("research.industry.power"))
 				power_frame.open()
 		&"research":
-			build_menu.visible = false
+			shop_menu.visible = false
 			land_mode.close()
-			placement.close()
 			status_frame.close()
 			detail_frame.close()
 			mail_frame.close()
 			research_frame.toggle(0)
 		&"mailbox":
-			build_menu.visible = false
+			shop_menu.visible = false
 			land_mode.close()
-			placement.close()
 			status_frame.close()
 			detail_frame.close()
 			research_frame.close()
@@ -681,22 +705,15 @@ func _land_mode_info(_arg: Variant) -> Dictionary:
 		"result": land_mode.last_result, "window": [win.x, win.y]}
 
 
-func _place_build_menu() -> void:
-	if build_menu == null:
+func _place_shop_menu() -> void:
+	if shop_menu == null:
 		return
-	# The catalog wraps: as many columns as fit beside the side buttons, so
-	# cards form rows rather than one long strip off the screen.
-	var room := get_viewport_rect().size.x - 32.0 - (get_viewport_rect().size.x - hud.side_buttons[0].position.x if not hud.side_buttons.is_empty() else 0.0)
-	build_menu.list.columns = clampi(int((room - 24.0) / 160.0), 2, 4)
-	build_menu.max_list_height = maxf(get_viewport_rect().size.y * 0.36, 180.0)
-	build_menu._fit_scroll()
-	build_menu.custom_minimum_size.x = 0.0
-	build_menu.reset_size()
+	shop_menu.reset_size()
 	var size := get_viewport_rect().size
-	build_menu.position = Vector2(16.0 + maxf((room - build_menu.size.x) * 0.5, 0.0), size.y - build_menu.size.y - 104)
+	shop_menu.position = Vector2(16.0, size.y - shop_menu.size.y - 104)
 
 
-## E2E: shop cards, placement bar and state (window pixels).
+## E2E: shop cards and the stage cards under a selected building (window pixels).
 func _build_ui_info(_arg: Variant) -> Dictionary:
 	var vp := get_viewport()
 	var rect := func(c: Control) -> Array:
@@ -704,13 +721,10 @@ func _build_ui_info(_arg: Variant) -> Dictionary:
 		var b: Vector2 = vp.get_final_transform() * c.get_global_rect().end
 		return [a.x, a.y, b.x - a.x, b.y - a.y]
 	var cards := {}
-	for type: String in build_menu.cards:
-		cards[type] = rect.call(build_menu.cards[type])
+	for type: String in shop_menu.cards:
+		cards[type] = rect.call(shop_menu.cards[type])
 	var win := DisplayServer.window_get_size()
-	return {"menu_open": build_menu.visible, "cards": cards, "placing": placement.active, "type": placement.type,
-		"anchor": [placement.anchor.x, placement.anchor.y], "valid": placement.check.get("ok", false),
-		"reason": placement.check.get("reason", ""), "build": rect.call(placement.build_button),
-		"result": placement.last_result, "panel_cards": panel.card_rects().map(func(r: Rect2) -> Array:
+	return {"menu_open": shop_menu.visible, "cards": cards, "panel_cards": panel.card_rects().map(func(r: Rect2) -> Array:
 			var a: Vector2 = vp.get_final_transform() * r.position
 			var b: Vector2 = vp.get_final_transform() * r.end
 			return [a.x, a.y, b.x - a.x, b.y - a.y]), "window": [win.x, win.y]}
@@ -767,8 +781,8 @@ func open_details(id: int) -> void:
 	status_frame.close()
 	mail_frame.close()
 	research_frame.close()
-	build_menu.visible = false
-	detail_frame.set_title(tr((sim.system(&"buildings") as BuildingSystem).type_def(b).get("name", "")))
+	shop_menu.visible = false
+	detail_frame.set_title(BuildingDetailView.full_name(sim, String(b["type"])))
 	detail_view.show_building(id)
 	detail_frame.open()
 

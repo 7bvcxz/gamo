@@ -25,6 +25,13 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 	match type:
 		&"building_added", &"building_removed", &"game_loaded":
 			sync()
+		&"building_refit":
+			# Same building, another facility: drawn afresh as what it is now.
+			var old: BuildingView = views.get(int(payload["id"]))
+			if old:
+				old.queue_free()
+				views.erase(int(payload["id"]))
+			sync()
 		&"task_started":
 			var v: BuildingView = views.get(int(payload["id"]))
 			if v:

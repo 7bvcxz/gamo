@@ -146,9 +146,11 @@ func test_costs_money_and_materials() -> void:
 	(sim.system(&"progression") as ProgressionSystem).add_exp(3000, "test")
 	(sim.system(&"economy") as EconomySystem).earn(500, "test")
 	inv.add("wood", 10, "test")
-	assert_eq(sim.execute({"type": "building.place", "building": "smelter", "anchor": [0, 1]})["reason"], "err.not_enough_items", "stone for the furnace walls is missing")
+	assert_eq(sim.execute({"type": "building.place", "building": "smelter", "anchor": [0, 1]})["reason"], "err.not_placeable", "a smelter is not placed on land: a mine is refitted")
+	var mine := bs.place_instant("mine", Vector2i(0, 1))
+	assert_eq(sim.execute({"type": "building.refit", "id": mine, "building": "smelter"})["reason"], "err.not_enough_items", "stone for the furnace walls is missing")
 	inv.add("stone", 20, "test")
-	assert_true(sim.execute({"type": "building.place", "building": "smelter", "anchor": [0, 1]})["ok"], "with stone and wood it is built")
+	assert_true(sim.execute({"type": "building.refit", "id": mine, "building": "smelter"})["ok"], "with stone and wood the mine becomes a smelter")
 	assert_eq([inv.count("stone"), inv.count("wood")], [0, 0], "both used")
 
 

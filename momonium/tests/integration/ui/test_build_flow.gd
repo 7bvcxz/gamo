@@ -1,12 +1,16 @@
 extends "res://tests/framework/test_case.gd"
 
+## Building by tapping the island: an empty tile opens four choices beside
+## it, one tap builds; a building tapped shows a trash can, the can shows a
+## check, and only the check pulls it down (half of what it cost comes back).
+
 const MainScene := preload("res://scenes/main.tscn")
 
 var main: Node
 var sim: Simulation
 var buildings: BuildingSystem
-var placement: PlacementMode
-var menu: BuildMenu
+var strip: BuildStrip
+var panel: ContextPanel
 var cams: CameraController
 var proj: IsoProjection
 var vp: Viewport
@@ -19,11 +23,12 @@ func before_each() -> void:
 	sim = main.get("sim")
 	sim.time_scale = 0.0
 	buildings = sim.system(&"buildings")
-	placement = main.get("placement")
-	menu = main.get("build_menu")
+	strip = main.get("build_strip")
+	panel = main.get("panel")
 	cams = main.get("cameras")
 	proj = main.get("projection")
 	vp = main.get_viewport()
+	LocaleService.apply("en")
 
 
 func after_each() -> void:
@@ -31,79 +36,142 @@ func after_each() -> void:
 	await tree.process_frame
 
 
-func _tap_cell(cell: Vector2i) -> void:
-	var p := cams.world_to_screen(proj.cell_center(cell))
+func _tap(p: Vector2) -> void:
 	for pressed: bool in [true, false]:
 		var t := InputEventScreenTouch.new()
 		t.position = p
 		t.pressed = pressed
 		vp.push_input(t, true)
+		var m := InputEventMouseButton.new()
+		m.button_index = MOUSE_BUTTON_LEFT
+		m.position = p
+		m.pressed = pressed
+		vp.push_input(m, true)
 
 
-func test_shop_lists_the_farm_and_picking_it_starts_placement() -> void:
+func _tap_cell(cell: Vector2i) -> void:
+	_tap(cams.world_to_screen(proj.cell_center(cell)))
+
+
+func test_no_build_button_and_the_shop_only_hires() -> void:
+	var hud: Hud = main.get("hud")
+	assert_false(hud.buttons.has(&"build"), "no separate Build button: tap the ground")
 	main.call("_on_hud_action", &"shop")
-	assert_true(menu.visible, "Shop opens the building list")
-	assert_true(menu.cards.has("farm"), "with the farm")
-	(menu.cards["farm"] as Button).pressed.emit()
-	assert_false(menu.visible, "picking closes the list")
-	assert_true(placement.active, "and starts placing")
-	assert_eq(placement.type, "farm", "a farm")
-	assert_true(placement.check["ok"], "on a free cell to begin with")
+	var shop: ShopMenu = main.get("shop_menu")
+	assert_true(shop.visible, "the shop opens")
+	assert_eq(shop.cards.keys(), ["momo"], "with hiring only")
 
 
-func test_place_where_tapped_then_build() -> void:
-	placement.open("farm")
+func test_an_empty_tile_opens_four_choices_beside_it() -> void:
 	_tap_cell(Vector2i(1, 1))
-	assert_eq(placement.anchor, Vector2i(1, 1), "the ghost follows the tap")
-	assert_false(placement.build_button.disabled, "valid: Build enabled")
-	placement.confirm()
-	assert_false(placement.active, "placement closes after building")
-	var id := buildings.building_at(Vector2i(1, 1))
-	assert_true(id > 0, "a building stands there")
+	await tree.process_frame
+	assert_true(strip.open, "tapping empty ground opens the choices")
+	assert_eq(strip.cell, Vector2i(1, 1), "for that tile")
+	assert_eq(strip.buttons.keys(), ["farm", "mine", "lumberyard", "research"], "farm, mine, lumberyard, lab")
+	assert_false((strip.buttons["farm"] as Button).disabled, "the farm can be built at once")
+	for t: String in ["mine", "lumberyard", "research"]:
+		assert_true((strip.buttons[t] as Button).disabled, "%s waits for a level" % t)
+	assert_eq((strip.buttons["mine"].find_child("Price", true, false) as Label).text, "Opens at Lv 3", "and says which")
+	assert_eq((strip.buttons["farm"].find_child("Price", true, false) as Label).text, "$10", "the farm shows its price")
+	var screen := main.get_viewport().get_visible_rect()
+	assert_true(screen.encloses(strip.strip_rect()), "on screen")
+	var tile := cams.world_to_screen(proj.cell_center(Vector2i(1, 1)))
+	assert_true(strip.strip_rect().get_center().distance_to(tile) < 220.0, "near the tile")
+
+
+func test_one_tap_builds() -> void:
+	_tap_cell(Vector2i(1, 0))
+	await tree.process_frame
+	_tap((strip.buttons["farm"] as Button).get_global_rect().get_center())
+	await tree.process_frame
+	var id := buildings.building_at(Vector2i(1, 0))
+	assert_true(id > 0, "a farm stands there")
+	assert_false(strip.open, "the choices close")
 	assert_eq(buildings.get_building(id)["state"], BuildingSystem.CONSTRUCTING, "under construction")
 	assert_eq((main.get("selection") as SelectionController).selected_id, id, "and selected so its progress shows")
-	assert_eq((sim.system(&"economy") as EconomySystem).money, 0, "paid")
-	sim.advance_ms(5000)
-	assert_eq(buildings.get_building(id)["state"], BuildingSystem.IDLE, "built in 5 s")
+	assert_eq((sim.system(&"economy") as EconomySystem).money, 0, "paid $10")
 
 
-func test_invalid_spots_say_why_and_cannot_build() -> void:
-	buildings.place_instant("farm", Vector2i(0, 0))
-	placement.open("farm")
-	_tap_cell(Vector2i(0, 0))
-	assert_eq(placement.check["reason"], "err.occupied", "occupied")
-	assert_true(placement.build_button.disabled, "Build disabled")
-	_tap_cell(Vector2i(3, 0))
-	assert_eq(placement.check["reason"], "err.not_owned", "sea")
-	placement.confirm()
-	assert_eq(buildings.ids().size(), 1, "nothing was built")
+func test_near_every_edge_it_stays_on_screen() -> void:
+	var world: WorldSystem = sim.system(&"world")
+	var screen := main.get_viewport().get_visible_rect()
+	for c: Vector2i in world.owned_cells():
+		strip.show_for(c)
+		assert_true(screen.encloses(strip.strip_rect()), "tile %s: the choices fit on screen" % c)
+	cams.camera.position += Vector2(500, 900)
+	strip.show_for(Vector2i(0, 0))
+	assert_true(screen.encloses(strip.strip_rect()), "even with the tile pushed off to a corner")
 
 
-func test_closing_placement_spends_nothing() -> void:
-	placement.open("farm")
-	placement.close_button.pressed.emit()
-	assert_false(placement.active, "closed")
-	assert_eq((sim.system(&"economy") as EconomySystem).money, 10, "no money spent")
-	assert_false((main.get("placement_preview") as PlacementPreview).active, "no ghost left behind")
+func test_tapping_elsewhere_closes_it() -> void:
+	_tap_cell(Vector2i(1, 1))
+	assert_true(strip.open, "open")
+	_tap_cell(Vector2i(6, 6))
+	assert_false(strip.open, "a tap on the sea closes it")
+	_tap_cell(Vector2i(1, 1))
+	main.call("_on_hud_action", &"status")
+	assert_false(strip.open, "and so does opening a panel")
+
+
+func test_occupied_tile_shows_info_and_the_trash() -> void:
+	var farm := buildings.place_instant("farm", Vector2i(0, 1))
+	_tap_cell(Vector2i(0, 1))
+	await tree.process_frame
+	assert_false(strip.open, "no choices on a built tile")
+	assert_eq(panel.building_id, farm, "its information instead")
+	assert_true(panel.trash_button.visible, "with the trash can")
+	assert_false(panel.confirm_button.visible, "the check is not there yet")
+	var screen := main.get_viewport().get_visible_rect()
+	assert_true(panel.trash_button.get_global_rect().get_center().x > screen.size.x * 0.75, "bottom right")
+
+
+func test_trash_then_check_demolishes_for_half() -> void:
+	(sim.system(&"economy") as EconomySystem).earn(200, "test")
+	(sim.system(&"progression") as ProgressionSystem).add_exp(500, "test")
+	var r := sim.execute({"type": "building.place", "building": "lumberyard", "anchor": [1, 0]})
+	sim.advance_ms(20000)
+	var id := int(r["id"])
+	sim.execute({"type": "momo.assign", "momo": 1, "building": id})
+	(main.get("selection") as SelectionController).select_building(id)
+	await tree.process_frame
+	var money := (sim.system(&"economy") as EconomySystem).money
+	_tap(panel.trash_button.get_global_rect().get_center())
+	await tree.process_frame
+	assert_true(panel.confirm_button.visible, "the trash shows a check")
+	assert_true(panel.confirm_button.get_global_rect().end.y <= panel.trash_button.get_global_rect().position.y, "right above it")
+	assert_false(buildings.get_building(id).is_empty(), "nothing pulled down yet")
+	_tap(panel.trash_button.get_global_rect().get_center())
+	await tree.process_frame
+	assert_false(panel.confirm_button.visible, "the trash again backs out")
+	assert_false(buildings.get_building(id).is_empty(), "still standing")
+	_tap(panel.trash_button.get_global_rect().get_center())
+	await tree.process_frame
+	_tap(panel.confirm_button.get_global_rect().get_center())
+	await tree.process_frame
+	assert_true(buildings.get_building(id).is_empty(), "the check pulls it down")
+	assert_eq((sim.system(&"economy") as EconomySystem).money - money, 40, "half of $80 back")
+	assert_eq(int((sim.system(&"momo") as MomoSystem).get_momo(1)["assigned"]), 0, "its Momo is free")
+	assert_eq((main.get("selection") as SelectionController).kind, "", "nothing selected")
+	assert_false(panel.trash_button.visible, "and the trash goes away")
+	_tap_cell(Vector2i(1, 0))
+	assert_true(strip.open, "the tile is empty again: tap it to build")
 
 
 func test_cancel_card_refunds_a_construction() -> void:
-	placement.open("farm")
 	_tap_cell(Vector2i(1, 0))
-	placement.confirm()
 	await tree.process_frame
-	var panel: ContextPanel = main.get("panel")
+	_tap((strip.buttons["farm"] as Button).get_global_rect().get_center())
+	await tree.process_frame
 	assert_eq(panel.cards.size(), 2, "construction card and cancel card")
 	panel.cards[1].pressed.emit()
-	assert_eq((sim.system(&"economy") as EconomySystem).money, 10, "refunded")
+	assert_eq((sim.system(&"economy") as EconomySystem).money, 10, "refunded in full")
 	assert_eq(buildings.ids().size(), 0, "the construction is gone")
 
 
-func test_taps_place_while_placing_and_modes_exclude_each_other() -> void:
-	var id := buildings.place_instant("farm", Vector2i(0, 1))
-	placement.open("farm")
-	_tap_cell(Vector2i(0, 1))
-	assert_eq(buildings.get_building(id)["state"], BuildingSystem.IDLE, "a tap while placing does not start a farm")
+func test_land_mode_owns_taps() -> void:
 	main.call("_on_hud_action", &"land")
-	assert_false(placement.active, "opening land mode closes placement")
-	assert_true((main.get("land_mode") as LandMode).active, "and land mode is open")
+	_tap_cell(Vector2i(1, 1))
+	assert_false(strip.open, "buying land: a tap is not a build")
+	main.call("_on_hud_action", &"land")
+	_tap_cell(Vector2i(1, 1))
+	assert_true(strip.open, "land mode closed: it is again")
