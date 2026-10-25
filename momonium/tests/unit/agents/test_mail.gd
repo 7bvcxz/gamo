@@ -158,8 +158,9 @@ func test_same_letters_whatever_the_step_size() -> void:
 		s.execute({"type": "momo.assign", "momo": 1, "building": f})
 		var t := 0
 		while t < 30000 * 40:
-			s.advance_ms(chunk)
-			t += chunk
+			var step := mini(chunk, 30000 * 40 - t)
+			s.advance_ms(step)
+			t += step
 		out.append(JSON.stringify((s.system(&"mail") as MailSystem).letters))
 	assert_eq(out[1], out[0], "1 s steps")
 	assert_eq(out[2], out[0], "10 s steps")

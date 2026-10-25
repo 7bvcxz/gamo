@@ -38,7 +38,7 @@ func _ready_to_research() -> void:
 
 
 func test_the_tree_and_its_branches() -> void:
-	assert_eq(research.industries(), ["farm", "global"] as Array[String], "a farm branch and a general one")
+	assert_eq(research.industries(), ["farm", "lumberyard", "mine", "global"] as Array[String], "a branch per industry, general last")
 	assert_eq(research.nodes("farm").size(), GameData.load_default().table("research")["nodes"].filter(func(n: Dictionary) -> bool: return n["industry"] == "farm").size(), "every farming technology in the data")
 	assert_true(research.nodes("farm").size() >= 3, "several of them")
 	for n: Dictionary in research.nodes():
@@ -105,10 +105,10 @@ func test_field_expansion_brings_a_bigger_harvest() -> void:
 	var farm := _accept_first_proposal()
 	_ready_to_research()
 	var b := buildings.get_building(farm)
-	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 1}, "one crop a cycle before")
+	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 1.0}, "one crop a cycle before")
 	sim.execute({"type": "research.start", "id": "farm_expansion"})
 	sim.advance_ms(60000)
-	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 2}, "two after")
+	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 2.0}, "two after")
 	var made := [0]
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
 		if t == &"produced":
@@ -176,7 +176,7 @@ func test_research_survives_a_save_mid_way() -> void:
 	copy.advance_ms(1)
 	assert_eq(r2.state_of("farm_expansion"), "done", "finishes when it would have")
 	var farm2 := (copy.system(&"buildings") as BuildingSystem).building_at(Vector2i(1, 0))
-	assert_eq((copy.system(&"buildings") as BuildingSystem).cycle_estimate((copy.system(&"buildings") as BuildingSystem).get_building(farm2))["yield"], {"crop": 2}, "and its effect applies in the loaded world")
+	assert_eq((copy.system(&"buildings") as BuildingSystem).cycle_estimate((copy.system(&"buildings") as BuildingSystem).get_building(farm2))["yield"], {"crop": 2.0}, "and its effect applies in the loaded world")
 
 
 func test_an_old_save_without_research_loads() -> void:
@@ -217,8 +217,9 @@ func test_same_outcome_whatever_the_step_size() -> void:
 		var started := false
 		var t := 0
 		while t < 30000 * 20:
-			s.advance_ms(chunk)
-			t += chunk
+			var step := mini(chunk, 30000 * 20 - t)
+			s.advance_ms(step)
+			t += step
 			if not started and not (s.system(&"mail") as MailSystem).letters.is_empty():
 				s.execute({"type": "mail.claim", "id": 1})
 				started = s.execute({"type": "research.start", "id": "farm_expansion"})["ok"]

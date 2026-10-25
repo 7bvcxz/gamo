@@ -216,7 +216,7 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 func _record(type: String, anchor: Vector2i) -> Dictionary:
 	return {"id": next_id, "type": type, "anchor": [anchor.x, anchor.y], "state": IDLE, "stage": 0,
 		"task_start": 0, "task_end": 0, "ready_at": 0, "token": 0, "completed": 0,
-		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}, "worker": 0}
+		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}, "worker": 0, "carry": {}}
 
 
 # --- catalog and construction ---------------------------------------------------------
@@ -350,7 +350,7 @@ func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 	var stage := current_stage(b)
 	# A stage that produces does not start unless its output has somewhere to
 	# go: a full store stops the harvest, it does not throw the crop away.
-	var produces := stage_yield(b, stage)
+	var produces := whole_yield(b, stage)
 	if not produces.is_empty() and not (sim.system(&"inventory") as InventorySystem).fits(produces):
 		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
 	var duration := int(round(stage_seconds(b, stage) * maxf(time_multiplier, 0.01) * 1000.0))
@@ -401,16 +401,59 @@ func stage_cooldown(b: Dictionary, stage: Dictionary) -> float:
 	return maxf(base * m, float(stage.get("cooldown_floor", 0.0)))
 
 
-## What a stage gives after modifiers (research can add to a yield).
+## What a stage gives per completion after modifiers, as rates (research can
+## add, and add fractions: 0.25 copper per dig). Items research adds that the
+## stage did not yield before are included.
 func stage_yield(b: Dictionary, stage: Dictionary) -> Dictionary:
 	var out := {}
 	var base: Dictionary = stage.get("yield", {})
 	for item: String in base:
-		var n := int(base[item])
+		out[item] = float(base[item])
+	for source: Object in modifiers:
+		if source.has_method("yield_items"):
+			for item: String in source.call("yield_items", String(b["type"]), String(stage.get("id", ""))):
+				if not out.has(item):
+					out[item] = 0.0
+	for item: String in out.keys():
+		var n := float(out[item])
 		for source: Object in modifiers:
 			if source.has_method("yield_bonus"):
-				n += int(source.call("yield_bonus", String(b["type"]), String(stage.get("id", "")), item))
-		out[item] = maxi(n, 0)
+				n += float(source.call("yield_bonus", String(b["type"]), String(stage.get("id", "")), item))
+		if n > 0.0:
+			out[item] = n
+		else:
+			out.erase(item)
+	return out
+
+
+## Whole items this stage hands over if it completes now: the rate plus what
+## this building carries over, in thousandths, so fractional rates come out
+## exactly (0.25 is one every fourth time, never by chance).
+func whole_yield(b: Dictionary, stage: Dictionary) -> Dictionary:
+	var out := {}
+	var carry: Dictionary = b.get("carry", {})
+	var rates := stage_yield(b, stage)
+	for item: String in rates:
+		var milli := int(round(float(rates[item]) * 1000.0)) + int(carry.get(item, 0))
+		if milli >= 1000:
+			out[item] = milli / 1000
+	return out
+
+
+func _take_yield(b: Dictionary, stage: Dictionary) -> Dictionary:
+	var out := {}
+	var carry: Dictionary = b.get("carry", {})
+	var rates := stage_yield(b, stage)
+	for item: String in rates:
+		var milli := int(round(float(rates[item]) * 1000.0)) + int(carry.get(item, 0))
+		var whole := milli / 1000
+		if whole > 0:
+			out[item] = whole
+		if milli - whole * 1000 > 0:
+			carry[item] = milli - whole * 1000
+		else:
+			carry.erase(item)
+	b["carry"] = carry
 	return out
 
 
@@ -435,7 +478,7 @@ func cycle_estimate(b: Dictionary, time_multiplier: float = 1.0) -> Dictionary:
 		wait += stage_cooldown(b, st)
 		var gives := stage_yield(b, st)
 		for item: String in gives:
-			produced[item] = int(produced.get(item, 0)) + int(gives[item])
+			produced[item] = float(produced.get(item, 0.0)) + float(gives[item])
 	var cycle := work + wait
 	var day_seconds := sim.clock.day_ms / 1000.0
 	var per_day := {}
@@ -472,7 +515,7 @@ func action_groups(b: Dictionary) -> Array[Dictionary]:
 func _complete_stage(b: Dictionary) -> void:
 	var stage := current_stage(b)
 	b["completed"] = int(b["completed"]) + 1
-	var produced := stage_yield(b, stage)
+	var produced := _take_yield(b, stage)
 	if not produced.is_empty():
 		var inv: InventorySystem = sim.system(&"inventory")
 		for item: String in produced:
@@ -515,6 +558,11 @@ func load_state(state: Dictionary) -> void:
 		var b := raw.duplicate(true)
 		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end", "worker"]:
 			b[k] = int(b.get(k, 0))
+		var carry := {}
+		var raw_carry: Dictionary = b.get("carry", {})
+		for item: String in raw_carry:
+			carry[item] = int(raw_carry[item])
+		b["carry"] = carry
 		var paid: Dictionary = b.get("paid", {})
 		var items := {}
 		for item: String in paid.get("items", {}):

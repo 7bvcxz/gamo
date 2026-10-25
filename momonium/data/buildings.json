@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig.",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -187,6 +187,100 @@
       "build_seconds": 10,
       "unlock": {
         "level": 2
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 1
+    },
+    "lumberyard": {
+      "name": "building.lumberyard",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "lumberyard",
+      "cycle": {
+        "_doc": "Sustainable forestry: fell a grown tree (wood), plant a sapling in its place, and let it grow before the next felling. The wait is the sapling's growing time, a world rule.",
+        "stages": [
+          {
+            "id": "chop",
+            "action": "chop",
+            "label": "stage.chop",
+            "icon": "ui_lumber",
+            "seconds": 6,
+            "cooldown": 0,
+            "required": true,
+            "yield": {
+              "wood": 2
+            }
+          },
+          {
+            "id": "replant",
+            "action": "replant",
+            "label": "stage.replant",
+            "icon": "ui_sprout",
+            "seconds": 4,
+            "cooldown": 40,
+            "required": true,
+            "cooldown_floor": 15
+          }
+        ],
+        "looks": [
+          "",
+          ""
+        ]
+      },
+      "icon": "ui_lumber",
+      "cost": {
+        "money": 80,
+        "items": {}
+      },
+      "build_seconds": 10,
+      "unlock": {
+        "level": 2
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 1
+    },
+    "mine": {
+      "name": "building.mine",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "mine",
+      "cycle": {
+        "_doc": "Dig at the face (stone), then shore up the tunnel and clear the rubble before digging on -- the wait is that work of the rock, not the miner. Ores other than stone come with prospecting research, at fractional rates per dig carried over exactly (thousandths), so every dig is the same rule and no ore appears by chance.",
+        "stages": [
+          {
+            "id": "dig",
+            "action": "dig",
+            "label": "stage.dig",
+            "icon": "ui_mine",
+            "seconds": 8,
+            "cooldown": 12,
+            "required": true,
+            "cooldown_floor": 4,
+            "yield": {
+              "stone": 1
+            }
+          }
+        ],
+        "looks": [
+          ""
+        ]
+      },
+      "icon": "ui_mine",
+      "cost": {
+        "money": 120,
+        "items": {
+          "wood": 10
+        }
+      },
+      "build_seconds": 15,
+      "unlock": {
+        "level": 3
       },
       "enabled": true,
       "refund": 1.0,

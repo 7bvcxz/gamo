@@ -269,6 +269,17 @@ func _layout() -> void:
 	_tile_pill.position = Vector2(area_left + maxf((area_right - area_left - _tile_pill.size.x) * 0.5, 0.0), h - _bottom_reserved - _tile_pill.size.y)
 
 
+## The card for the stage that comes next (the lit one), or null.
+func current_card() -> Button:
+	var b := buildings.get_building(building_id)
+	if b.is_empty():
+		return null
+	for card: Button in cards:
+		if card.has_meta("first") and _card_phase(card, b) == 0:
+			return card
+	return null
+
+
 func card_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = []
 	for c: Button in cards:

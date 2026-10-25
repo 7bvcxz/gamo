@@ -200,3 +200,62 @@ save.backup,"Your save was damaged, so the one before it was opened.",저장이 
 save.corrupt,"Your save could not be read, so a new island was started. The old file is kept.",저장을 읽을 수 없어 새 섬으로 시작했어요. 옛 파일은 보관했어요.,セーブを読めなかったので新しい島で始めました。古いファイルは残してあります。,无法读取存档，已开始新的岛屿。旧文件已保留。
 save.too_new,This save is from a newer version. This version will not overwrite it.,더 새 버전의 저장이에요. 이 버전에서는 덮어쓰지 않아요.,新しいバージョンのセーブです。このバージョンでは上書きしません。,这是新版本的存档。此版本不会覆盖它。
 time.hm,{h} h {m} min,{h}시간 {m}분,{h}時間{m}分,{h}小时{m}分
+building.lumberyard,Lumberyard,목재소,製材所,伐木场
+building.mine,Mine,광산,鉱山,矿山
+stage.chop,Fell,벌목,伐採,伐木
+stage.replant,Replant,나무 심기,植樹,补种
+stage.dig,Dig,채굴,採掘,采掘
+item.copper_ore,Copper ore,구리 광석,銅鉱石,铜矿石
+item.iron_ore,Iron ore,철광석,鉄鉱石,铁矿石
+item.gold_ore,Gold ore,금광석,金鉱石,金矿石
+research.sharp_axes.name,Sharp axes,잘 드는 도끼,よく切れる斧,锋利的斧头
+research.sharp_axes.desc,A whetstone and a proper felling cut: each tree comes down in fewer strokes.,"숫돌로 날을 세우고 제대로 홈을 내어 베면, 나무가 적은 도끼질로 쓰러져요.",砥石で刃を研ぎ、受け口を正しく切れば、少ない打ち込みで倒れます。,用磨刀石磨刃、正确开出倒向口，用更少的斧数就能伐倒。
+research.tree_nursery.name,Tree nursery,묘목장,苗畑,苗圃
+research.tree_nursery.desc,Saplings raised ahead in a nursery bed are planted strong and take hold faster.,묘목장에서 미리 키운 튼튼한 묘목을 심으면 더 빨리 자리를 잡아요.,苗畑で先に育てた丈夫な苗を植えると、早く根づきます。,在苗圃里提前培育的壮苗，种下后扎根更快。
+research.pickaxes.name,Steel-tipped picks,강철 곡괭이,鋼の先のつるはし,钢尖镐
+research.pickaxes.desc,Steel tips hold their edge in hard rock: less time at the face for each load.,"끝을 강철로 댄 곡괭이는 단단한 바위에서도 무뎌지지 않아, 한 번 캐는 시간이 줄어요.",先に鋼をつけたつるはしは硬い岩でも鈍らず、掘る時間が短くなります。,镐尖包钢，在硬岩里也不易变钝，每次采掘更快。
+research.copper_prospecting.name,Copper prospecting,구리 찾기,銅の探鉱,铜矿勘探
+research.copper_prospecting.desc,Green streaks of malachite mark copper rock: set it aside as you dig. About one in four loads.,녹색 줄무늬(공작석)가 있는 바위가 구리 광석이에요. 캐면서 골라 두면 네 번에 한 번쯤 나와요.,緑のすじ(孔雀石)がある岩が銅鉱石。掘りながら分ければ、4回に1回ほど出ます。,带绿色条纹（孔雀石）的岩石就是铜矿，边挖边挑，大约四次出一次。
+research.iron_prospecting.name,Iron prospecting,철 찾기,鉄の探鉱,铁矿勘探
+research.iron_prospecting.desc,"Heavy, rust-red rock is iron ore. Knowing it by weight and streak, one load in five is kept.",무겁고 붉은 녹빛 바위가 철광석이에요. 무게와 줄무늬로 알아보면 다섯 번에 한 번 골라내요.,重くて赤さび色の岩が鉄鉱石。重さとすじ色で見分け、5回に1回取りおきます。,沉重、铁锈红的岩石是铁矿，凭重量和条痕辨认，五次留一次。
+research.deep_shaft.name,Deep shaft,깊은 갱도,深い坑道,深井
+research.deep_shaft.desc,"A timbered shaft follows the quartz vein down to where gold sits in it -- rarely, one load in twenty.","나무로 받친 갱도로 석영 광맥을 따라 내려가면 금이 박힌 곳에 닿아요 — 드물게, 스무 번에 한 번.",木で支えた坑道で石英の鉱脈を下ると、金を含む所に届きます — まれに、20回に1回。,用木架支撑的竖井沿石英矿脉向下，到达含金处——很少见，二十次一次。
+letter.lumber_first.title,Let's grow the next trees first,다음 나무를 먼저 키워 두자,次の木を先に育てよう,先把下一批树养起来吧
+letter.lumber_first.body,"Felling is quick, but waiting for a new tree is long.
+If we raise saplings in a nursery bed beforehand, we can plant strong ones right away.
+Shall we try it?","나무를 베는 건 금방인데, 새 나무를 기다리는 건 오래 걸려.
+묘목장에서 미리 묘목을 키워 두면 튼튼한 걸 바로 심을 수 있을 거야.
+해 볼까?","木を切るのはすぐだけど、新しい木を待つのは長いね。
+苗畑で先に苗を育てておけば、丈夫な苗をすぐ植えられるよ。
+やってみる？","砍树很快，可等新树长大要好久。
+如果先在苗圃里育好树苗，就能马上种下壮苗。
+试试看吗？"
+letter.mine_first.title,Green streaks in the rock,바위에 초록 줄무늬가 있어,岩に緑のすじがあるよ,岩石里有绿色条纹
+letter.mine_first.body,"While digging I found stones with green streaks -- that's copper!
+If we learn to tell copper rock from plain stone, we can set it aside as we dig.
+Want to study it?","캐다 보니 초록 줄무늬가 있는 돌이 있었어 — 구리야!
+구리 광석과 그냥 돌을 구별하는 법을 배우면, 캐면서 골라 둘 수 있어.
+연구해 볼래?","掘っていたら緑のすじがある石があったの — 銅だよ！
+銅鉱石とただの石を見分けられれば、掘りながら分けておけるよ。
+研究してみる？","挖的时候发现带绿色条纹的石头——是铜！
+学会分辨铜矿石和普通石头，就能边挖边挑出来。
+要研究一下吗？"
+hud.build,Build,건설,建てる,建造
+build.unlock_at,Opens at Lv %d,Lv %d에 열려요,Lv %dで解放,Lv %d 解锁
+tutorial.open_build,Buildings are made here,여기서 건물을 지어요,ここで建物を建てます,在这里建造建筑
+tutorial.pick_farm,Choose the farm · $%d,밭을 골라요 · $%d,畑を選びます · $%d,选择农田 · $%d
+tutorial.pick_tile,"Tap an empty tile, check the price, then build","빈 칸을 눌러 자리를 고르고, 값을 확인한 뒤 지어요",空いているマスを選び、値段を見て建てます,点一块空地，看看价格，然后建造
+tutorial.wait_build,Building -- just a moment,짓는 중이에요. 잠깐만요,建設中。少し待ってね,建造中，稍等一下
+tutorial.sow,Tap the farm to sow,밭을 눌러 씨를 뿌려요,畑をタップして種をまきます,点农田播种
+tutorial.wait_water,Plants need time to drink between waterings,물을 준 뒤에는 작물이 마실 시간이 필요해요,水やりの間は、作物が水を吸う時間がいります,两次浇水之间，作物需要时间吸水
+tutorial.water,Tap again to water -- three times in all,다시 눌러 물을 줘요 — 모두 세 번,もう一度タップして水やり — 全部で3回,再点一次浇水——一共三次
+tutorial.more,Mines and lumberyards open as you level up -- they are in here,광산·목재소는 레벨이 오르면 열려요. 여기서 볼 수 있어요,鉱山と製材所はレベルが上がると開きます。ここで見られます,矿山和伐木场会随等级解锁，在这里可以看到
+tutorial.skip,Skip,건너뛰기,スキップ,跳过
+tutorial.ok,Got it,알겠어요,わかった,知道了
+settings.language,Language,언어,言語,语言
+settings.tutorial,Replay tutorial,튜토리얼 다시 보기,チュートリアルをもう一度,重新播放教程
+settings.demo,Open the demo island,체험 섬 열기 (데모),体験用の島を開く (デモ),打开体验岛（演示）
+settings.demo_note,Try features that open later. Your own island is kept as it is.,나중에 열리는 기능을 미리 해 봐요. 내 섬은 그대로 둬요.,あとで開く機能を先に試せます。自分の島はそのままです。,提前体验之后才开放的功能。你自己的岛保持不变。
+settings.leave_demo,Back to my island,내 섬으로 돌아가기,自分の島に戻る,返回我的岛
+hud.demo,DEMO,체험 중,体験中,体验中
+tutorial.working,"Working -- the bar fills, then it is done",일하는 중이에요. 막대가 다 차면 끝나요,作業中。バーがいっぱいになれば完了,工作中——进度条满了就完成

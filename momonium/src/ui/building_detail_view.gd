@@ -85,6 +85,13 @@ func show_building(id: int) -> void:
 	refresh()
 
 
+## 1 -> "1", 0.25 -> "0.25", 0.2 -> "0.2": a rate as people write it.
+static func amount(x: float) -> String:
+	if is_equal_approx(x, round(x)):
+		return str(int(round(x)))
+	return String.num(x, 3).rstrip("0").rstrip(".")
+
+
 static func duration(seconds: float) -> String:
 	var s := int(round(seconds))
 	if s < 60:
@@ -128,7 +135,7 @@ func refresh() -> void:
 	var by_momo := buildings.cycle_estimate(b, mult)
 	var gives: Array[String] = []
 	for item: String in you["yield"]:
-		gives.append("%s %d" % [tr(String(sim.data.item(item).get("name", item))), int(you["yield"][item])])
+		gives.append("%s %s" % [tr(String(sim.data.item(item).get("name", item))), amount(float(you["yield"][item]))])
 	_set_row(yield_row, tr("detail.cycle"), ", ".join(gives))
 	_set_row(cycle_you, tr("detail.by_you"), duration(you["cycle_seconds"]))
 	_set_row(cycle_momo, tr("detail.by_momo"), duration(by_momo["cycle_seconds"]))
@@ -199,7 +206,7 @@ func _variety_button(b: Dictionary, buildings: BuildingSystem, v: String) -> But
 	var waterings := buildings.stages(probe).filter(func(st: Dictionary) -> bool: return st.get("action", "") == "water").size()
 	var crops := 0
 	for item: String in buildings.cycle_estimate(probe)["yield"]:
-		crops += int(buildings.cycle_estimate(probe)["yield"][item])
+		crops += int(round(float(buildings.cycle_estimate(probe)["yield"][item])))
 	var facts := PanelViews.label(tr("detail.variety_facts").format({"w": waterings, "c": crops}), 13, true)
 	facts.name = "Facts"
 	facts.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

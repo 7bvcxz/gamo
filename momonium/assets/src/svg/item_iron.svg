@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Iron: a lump of rock with its mineral showing. -->
+  <path d="M10 42 L16 20 L34 10 L52 18 L56 40 L40 54 L20 54 Z" fill="#9a8f88" stroke="#5f5650" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M16 20 L30 30 L34 10 M30 30 L40 54 M30 30 L56 40" fill="none" stroke="#5f5650" stroke-width="2" opacity="0.55"/>
+  <path d="M22 30 L30 26 M34 40 L42 36 M26 44 L30 48" stroke="#b0553a" stroke-width="4" stroke-linecap="round"/><circle cx="38" cy="28" r="3" fill="#7a3a28"/><circle cx="24" cy="38" r="2.5" fill="#7a3a28"/>
+</svg>

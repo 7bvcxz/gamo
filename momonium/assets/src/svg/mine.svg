@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 150" width="140" height="150">
+  <!-- A 1x1 mine in the tile projection (diamond centre = origin pivot at
+       (70, 95)): a rocky mound with a timber-framed tunnel mouth, a lantern,
+       and a little cart of stone on its rails. -->
+  <defs>
+    <linearGradient id="rockL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9a958c"/>
+      <stop offset="1" stop-color="#77726a"/>
+    </linearGradient>
+    <linearGradient id="rockR" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#bdb8ae"/>
+      <stop offset="1" stop-color="#99948a"/>
+    </linearGradient>
+  </defs>
+  <!-- gravel on the tile -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5a68e" stroke="#8f8068" stroke-width="2" stroke-linejoin="round"/>
+  <!-- the mound -->
+  <path d="M22 92 Q30 46 62 30 Q74 24 84 32 Q112 50 118 92 L70 118 Z" fill="url(#rockR)" stroke="#6d685f" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M22 92 Q30 46 62 30 Q66 70 70 118 Z" fill="url(#rockL)"/>
+  <path d="M40 58 L52 52 M88 46 L98 54 M100 70 L110 76 M34 76 L44 72" stroke="#6d685f" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- tunnel mouth with timber frame -->
+  <path d="M74 106 L74 76 Q86 66 98 74 L98 94 Z" fill="#2c2620"/>
+  <path d="M72 108 L72 74 M100 92 L100 72 M70 74 Q86 60 102 72" fill="none" stroke="#a8723f" stroke-width="5" stroke-linecap="round"/>
+  <!-- lantern -->
+  <path d="M102 70 L108 70" stroke="#6b4426" stroke-width="2"/>
+  <circle cx="108" cy="76" r="4.5" fill="#ffd36b" stroke="#a8723f" stroke-width="1.5"/>
+  <!-- rails and a cart of stone -->
+  <path d="M60 128 L96 104 M52 122 L88 98" stroke="#7d6a55" stroke-width="2"/>
+  <path d="M46 104 L66 92 L74 98 L74 110 L54 122 L46 116 Z" fill="#8a5a34" stroke="#5a3820" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="52" cy="118" r="3" fill="#3a3530"/>
+  <circle cx="68" cy="108" r="3" fill="#3a3530"/>
+  <path d="M50 102 Q56 94 62 98 Q66 92 72 98" fill="#a9a49b" stroke="#77726a" stroke-width="1.5"/>
+</svg>

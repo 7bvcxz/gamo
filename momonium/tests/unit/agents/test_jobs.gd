@@ -167,8 +167,9 @@ func test_unattended_runs_are_deterministic() -> void:
 		s.execute({"type": "momo.assign", "momo": 1, "building": f})
 		var t := 0
 		while t < 30000 * 6:
-			s.advance_ms(chunk)
-			t += chunk
+			var step := mini(chunk, 30000 * 6 - t)
+			s.advance_ms(step)
+			t += step
 		results.append([bs.get_building(f)["completed"], (s.system(&"inventory") as InventorySystem).count("crop"),
 			(s.system(&"economy") as EconomySystem).money, (s.system(&"momo") as MomoSystem).position_of(1)])
 	assert_eq(results[1], results[0], "1 s steps match 16 ms steps")

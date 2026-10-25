@@ -4,7 +4,11 @@
     {
       "id": "farm_first_harvest",
       "industry": "farm",
-      "trigger": {"work": {"farm": 5}},
+      "trigger": {
+        "work": {
+          "farm": 5
+        }
+      },
       "title": "letter.farm_first_harvest.title",
       "body": "letter.farm_first_harvest.body",
       "research": "farm_expansion"
@@ -12,7 +16,11 @@
     {
       "id": "farm_watering",
       "industry": "farm",
-      "trigger": {"mastery": {"farm": 2}},
+      "trigger": {
+        "mastery": {
+          "farm": 2
+        }
+      },
       "title": "letter.farm_watering.title",
       "body": "letter.farm_watering.body",
       "research": "watering_efficiency"
@@ -20,10 +28,38 @@
     {
       "id": "farm_soil",
       "industry": "farm",
-      "trigger": {"mastery": {"farm": 3}},
+      "trigger": {
+        "mastery": {
+          "farm": 3
+        }
+      },
       "title": "letter.farm_soil.title",
       "body": "letter.farm_soil.body",
       "research": "harvest_boost"
+    },
+    {
+      "id": "lumber_first",
+      "industry": "lumberyard",
+      "trigger": {
+        "work": {
+          "lumberyard": 6
+        }
+      },
+      "title": "letter.lumber_first.title",
+      "body": "letter.lumber_first.body",
+      "research": "tree_nursery"
+    },
+    {
+      "id": "mine_first",
+      "industry": "mine",
+      "trigger": {
+        "work": {
+          "mine": 6
+        }
+      },
+      "title": "letter.mine_first.title",
+      "body": "letter.mine_first.body",
+      "research": "copper_prospecting"
     }
   ]
 }

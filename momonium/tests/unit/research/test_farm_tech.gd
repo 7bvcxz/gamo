@@ -130,7 +130,7 @@ func test_varieties_open_through_research_and_change_between_cycles() -> void:
 	b["state"] = BuildingSystem.IDLE
 	assert_true(sim.execute({"type": "building.variety", "id": farm, "variety": "hardy"})["ok"], "between cycles it changes")
 	assert_eq(buildings.stages(b).filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 3, "the hardy crop is watered three times too")
-	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 4}, "and gives 2, plus field expansion and soil care: 4")
+	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 4.0}, "and gives 2, plus field expansion and soil care: 4")
 
 
 func test_millet_is_a_different_crop_with_its_own_process() -> void:
@@ -186,8 +186,9 @@ func test_unattended_runs_are_the_same_whatever_the_step() -> void:
 		s.execute({"type": "momo.assign", "momo": 1, "building": f})
 		var t := 0
 		while t < 30000 * 15:
-			s.advance_ms(chunk)
-			t += chunk
+			var step := mini(chunk, 30000 * 15 - t)
+			s.advance_ms(step)
+			t += step
 		out.append([bs.get_building(f)["completed"], (s.system(&"inventory") as InventorySystem).count("crop"), (s.system(&"economy") as EconomySystem).money])
 	assert_eq(out[1], out[0], "1 s steps")
 	assert_eq(out[2], out[0], "7.8 s steps")

@@ -226,8 +226,9 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 				errors.append("research: %s yield effect on unknown stage %s.%s" % [id, t, e.get("stage", "")])
 			if not items.has(String(e.get("item", ""))):
 				errors.append("research: %s yields unknown item %s" % [id, e.get("item", "")])
-			if int(e.get("add", 0)) < 1:
-				errors.append("research: %s yield add must be >= 1" % id)
+			var add := float(e.get("add", 0))
+			if add <= 0.0 or absf(add * 1000.0 - round(add * 1000.0)) > 0.0001:
+				errors.append("research: %s yield add must be > 0, in thousandths" % id)
 		"auto":
 			var t := String(e.get("type", ""))
 			if not types.has(t) or not (types[t].get("cycle", {}).get("stages", []) as Array).any(func(st: Dictionary) -> bool: return st.get("action", "") == e.get("action", "")):

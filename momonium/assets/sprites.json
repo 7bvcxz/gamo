@@ -526,6 +526,86 @@
           8
         ]
       }
+    },
+    "mine": {
+      "source": "svg/mine.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          70,
+          26
+        ]
+      }
+    },
+    "lumberyard": {
+      "source": "svg/lumberyard.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          70,
+          30
+        ]
+      }
+    },
+    "item_wood": {
+      "source": "svg/item_wood.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "item_stone": {
+      "source": "svg/item_stone.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "item_copper": {
+      "source": "svg/item_copper.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "item_iron": {
+      "source": "svg/item_iron.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "item_gold": {
+      "source": "svg/item_gold.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
     }
   }
 }

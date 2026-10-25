@@ -66,6 +66,11 @@
   작은 뷰(`StatusPanel`·`InventoryView`·`EconomyView`·`StatsView`·`BuildingDetailView`)다. 뷰는 값을 들고
   있지 않고 그릴 때마다 시스템에서 읽는다. 프레임은 시뮬레이션 사건마다, 그리고 초당 4번 보이는 뷰만 새로 그린다.
   프레임은 HUD 아래 층이라 열려 있어도 모서리 버튼이 눌린다.
+- **설정은 섬과 따로**(`SettingsStore`): 언어, 튜토리얼 본 여부. `user://momonium_settings.json` + 웹 localStorage.
+- **체험 섬**(`DemoWorld`): 실제 명령과 시간으로 만든 중반 섬. `Engine` 메타 `momonium_demo`로 장면을 다시 불러
+  들어가고 나오며(메타는 장면 재로드를 넘어 남는다), 그동안 `persist`는 꺼진다.
+- **튜토리얼**(`ui/Tutorial`): HUD 위 오버레이. 단계는 상태가 아니라 계산이다(`current_step()`이 세계와 화면을 본다).
+  새 섬 + 처음 + 데모 아님 + 브라우저 테스트 아님(테스트는 `window.MOMONIUM_E2E_TUTORIAL`로 켠다)일 때만 스스로 시작.
 - **화면에 쓰는 기호는 폰트에 있어야 한다.** UI 폰트는 언어별 서브셋이라 "✕" 같은 기호가 없다. 닫기 표시는
   그린다(`PanelViews.close_button`). `test_locale`이 UI 코드의 문자열 리터럴을 훑어 확인한다.
 

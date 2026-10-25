@@ -55,6 +55,15 @@ var save_blocked := false
 var offline_report: Dictionary = {}
 var away_frame: PanelFrame
 var away_view: AwayView
+## Preferences apart from the island (language, tutorial seen).
+var settings: SettingsStore
+var settings_frame: PanelFrame
+var settings_view: SettingsView
+var tutorial: Tutorial
+## The demo island (Settings) is never saved; Engine meta "momonium_demo"
+## survives the scene reload that switches to it and back.
+var in_demo := false
+var _demo_badge: Label
 var saves_written := 0
 var _autosave_left := 0.0
 var _last_wall := 0.0
@@ -65,6 +74,7 @@ var _version_label: Label
 
 
 func _ready() -> void:
+	settings = SettingsStore.open()
 	sim = _load_or_new()
 	projection = IsoProjection.from_data(sim.data)
 
@@ -121,7 +131,8 @@ func _ready() -> void:
 	add_child(router)
 	router.setup(cameras)
 
-	LocaleService.apply(LocaleService.detect())
+	var chosen := String(settings.get_value("language"))
+	LocaleService.apply(chosen if chosen != "" else LocaleService.detect())
 	var layer := CanvasLayer.new()
 	layer.name = "UI"
 	add_child(layer)
@@ -241,9 +252,44 @@ func _ready() -> void:
 	_last_wall = Time.get_unix_time_from_system()
 	_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
 	_tell_about_return.call_deferred(offline_report)
+	settings_frame = _frame(ui, "SettingsFrame")
+	settings_view = SettingsView.new()
+	settings_view.setup(sim, lib)
+	settings_view.in_demo = in_demo
+	settings_frame.add_tab("", settings_view)
+	settings_frame.set_title(tr("hud.settings"))
+	settings_view.language_chosen.connect(func(code: String) -> void:
+		LocaleService.apply(code)
+		settings.set_value("language", code)
+		settings_frame.set_title(tr("hud.settings"))
+		settings_view.refresh())
+	settings_view.replay_tutorial.connect(func() -> void:
+		_close_frames()
+		tutorial.start())
+	settings_view.demo_requested.connect(enter_demo)
+	settings_view.leave_demo_requested.connect(leave_demo)
+	_demo_badge = Label.new()
+	_demo_badge.name = "DemoBadge"
+	_demo_badge.add_theme_font_size_override("font_size", 18)
+	_demo_badge.add_theme_color_override("font_color", Color("#ffe27a"))
+	_demo_badge.visible = in_demo
+	ui.add_child(_demo_badge)
+	_layout()
+	tutorial = Tutorial.new()
+	ui.add_child(tutorial)
+	tutorial.setup(sim, hud, build_menu, placement, cameras, projection, building_views, panel)
+	tutorial.finished.connect(func(_skipped: bool) -> void: settings.set_value("tutorial_done", true))
+	_place_frames()
 
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
+	_maybe_start_tutorial.call_deferred()
 	bridge.register_query("save_roundtrip", _save_roundtrip)
+	bridge.register_query("tutorial", _tutorial_info)
+	bridge.register_query("tutorial_start", func(_a: Variant) -> Dictionary:
+		_close_frames()
+		tutorial.start()
+		return _tutorial_info(null))
+	bridge.register_query("settings_ui", _settings_info)
 	bridge.register_query("art_info", _art_info)
 	bridge.register_query("cell_screen", _cell_screen)
 	bridge.register_query("logical_screen", _logical_screen)
@@ -334,9 +380,14 @@ func _notification(what: int) -> void:
 				save_now()
 
 
-## Loads the island (with what happened while away) or starts a new one.
+## Loads the island (with what happened while away) or starts a new one --
+## or, when the demo was asked for, the demo island (never saved).
 func _load_or_new() -> Simulation:
-	persist = not Engine.has_meta("momonium_no_save")
+	in_demo = Engine.has_meta("momonium_demo")
+	persist = not Engine.has_meta("momonium_no_save") and not in_demo
+	if in_demo:
+		load_status = "demo"
+		return DemoWorld.build()
 	if Engine.has_meta("momonium_save_path"):
 		save_path = String(Engine.get_meta("momonium_save_path"))
 	if not persist:
@@ -355,6 +406,29 @@ func _load_or_new() -> Simulation:
 		return loaded
 	save_blocked = load_status == "too_new"
 	return Simulation.new_game()
+
+
+## The first-run tutorial starts by itself only on a brand-new island, once,
+## never in the demo and never under the browser test bridge (tests start it
+## when they want it).
+func _maybe_start_tutorial() -> void:
+	var tests_want_it := bridge.e2e and bool(JavaScriptBridge.eval("!!window.MOMONIUM_E2E_TUTORIAL", true))
+	if in_demo or (bridge.e2e and not tests_want_it) or not persist or load_status != "missing" or bool(settings.get_value("tutorial_done")):
+		return
+	tutorial.start()
+
+
+## Switches to the demo island: saves the player's island first, then
+## reloads the scene in demo mode. Nothing of the demo is ever saved.
+func enter_demo() -> void:
+	save_now()
+	Engine.set_meta("momonium_demo", true)
+	get_tree().reload_current_scene.call_deferred()
+
+
+func leave_demo() -> void:
+	Engine.remove_meta("momonium_demo")
+	get_tree().reload_current_scene.call_deferred()
 
 
 func save_now() -> Error:
@@ -381,6 +455,10 @@ func _tell_about_return(report: Dictionary) -> void:
 func _layout() -> void:
 	var size := get_viewport_rect().size
 	_version_label.position = size - Vector2(84, 28)
+	if _demo_badge != null:
+		_demo_badge.text = tr("hud.demo")
+		_demo_badge.reset_size()
+		_demo_badge.position = Vector2((size.x - _demo_badge.size.x) * 0.5, 22.0)
 	if cameras.fit_zoom > 0.0 and camera.is_inside_tree():
 		cameras.on_resize()
 
@@ -462,7 +540,16 @@ func _on_hud_action(action_name: StringName) -> void:
 			build_menu.visible = false
 			_close_frames()
 			land_mode.toggle()
-		&"shop":
+		&"settings":
+			build_menu.visible = false
+			land_mode.close()
+			placement.close()
+			var was := settings_frame.visible
+			_close_frames()
+			if not was:
+				settings_view.refresh()
+				settings_frame.open()
+		&"shop", &"build":
 			land_mode.close()
 			placement.close()
 			_close_frames()
@@ -542,9 +629,14 @@ func _land_mode_info(_arg: Variant) -> Dictionary:
 func _place_build_menu() -> void:
 	if build_menu == null:
 		return
+	# The catalog wraps: as many columns as fit beside the side buttons, so
+	# cards form rows rather than one long strip off the screen.
+	var room := get_viewport_rect().size.x - 32.0 - (get_viewport_rect().size.x - hud.side_buttons[0].position.x if not hud.side_buttons.is_empty() else 0.0)
+	build_menu.list.columns = clampi(int((room - 24.0) / 160.0), 2, 4)
+	build_menu.custom_minimum_size.x = 0.0
 	build_menu.reset_size()
 	var size := get_viewport_rect().size
-	build_menu.position = Vector2((size.x - build_menu.size.x) * 0.5, size.y - build_menu.size.y - 104)
+	build_menu.position = Vector2(16.0 + maxf((room - build_menu.size.x) * 0.5, 0.0), size.y - build_menu.size.y - 104)
 
 
 ## E2E: shop cards, placement bar and state (window pixels).
@@ -580,6 +672,8 @@ func _frame(ui: Control, frame_name: String) -> PanelFrame:
 func _close_frames() -> void:
 	if away_frame != null:
 		away_frame.close()
+	if settings_frame != null:
+		settings_frame.close()
 	status_frame.close()
 	detail_frame.close()
 	mail_frame.close()
@@ -600,7 +694,9 @@ func _place_frames() -> void:
 	var size := get_viewport_rect().size
 	# Keep the side buttons free.
 	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
-	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame]:
+		if f == null:
+			continue
 		f.right_reserved = reserved
 		f._layout()
 
@@ -651,6 +747,39 @@ func _panels_info(_arg: Variant) -> Dictionary:
 			"you": (detail_view.cycle_you.get_node("Value") as Label).text, "momo": (detail_view.cycle_momo.get_node("Value") as Label).text,
 			"done": (detail_view.done_row.get_node("Value") as Label).text},
 		"window": [win.x, win.y]}
+
+
+## E2E: the tutorial as shown -- step, what it rings, where its buttons are.
+func _tutorial_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var conv := func(r: Rect2) -> Array:
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+	return {"running": tutorial.running, "step": tutorial.step, "text": tutorial.text.text,
+		"target": conv.call(tutorial.target), "target2": conv.call(tutorial.target2),
+		"bubble": conv.call(tutorial.bubble.get_global_rect()),
+		"skip": conv.call(tutorial.skip_button.get_global_rect()) if tutorial.skip_button.visible else [],
+		"ok": conv.call(tutorial.ok_button.get_global_rect()) if tutorial.ok_button.visible else [],
+		"done": bool(settings.get_value("tutorial_done")), "window": [win.x, win.y]}
+
+
+## E2E: the settings panel, the demo badge and where to tap.
+func _settings_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var conv := func(c: Control) -> Array:
+		var r := c.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+	var langs := {}
+	for code: String in settings_view.lang_buttons:
+		langs[code] = conv.call(settings_view.lang_buttons[code])
+	return {"open": settings_frame.visible, "in_demo": in_demo, "badge": _demo_badge.visible and _demo_badge.text != "",
+		"tutorial": conv.call(settings_view.tutorial_button), "demo": conv.call(settings_view.demo_button),
+		"demo_text": settings_view.demo_button.text, "langs": langs, "locale": LocaleService.current(), "window": [win.x, win.y]}
 
 
 ## E2E: the research menu as shown -- node states, the chosen node's details, where to tap.

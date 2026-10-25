@@ -11,7 +11,7 @@ func test_estimate_matches_the_rules() -> void:
 	var you := buildings.cycle_estimate(b, 1.0)
 	assert_eq(you["work_seconds"], 25.0, "five stages of 5 s")
 	assert_eq(you["wait_seconds"], 90.0, "three 30 s waits")
-	assert_eq(you["yield"], {"crop": 1}, "one crop")
+	assert_eq(you["yield"], {"crop": 1.0}, "one crop")
 	assert_near(you["per_day"]["crop"], 30.0 / 115.0, 0.0001, "per 30 s day")
 	var momo := buildings.cycle_estimate(b, 4.0)
 	assert_eq(momo["cycle_seconds"], 190.0, "4 x the work, the same waits")

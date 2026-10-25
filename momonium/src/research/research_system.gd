@@ -242,13 +242,22 @@ func is_auto(type: String, action: String) -> bool:
 	return false
 
 
-## BuildingSystem modifier: extra items a stage yields.
-func yield_bonus(type: String, stage_id: String, item: String) -> int:
-	var n := 0
+## BuildingSystem modifier: extra items a stage yields (a rate; may be a fraction).
+func yield_bonus(type: String, stage_id: String, item: String) -> float:
+	var n := 0.0
 	for e: Dictionary in _effects("yield"):
 		if String(e.get("type", "")) == type and String(e.get("stage", "")) == stage_id and String(e.get("item", "")) == item:
-			n += int(e.get("add", 0))
+			n += float(e.get("add", 0))
 	return n
+
+
+## BuildingSystem modifier: items research makes a stage yield at all.
+func yield_items(type: String, stage_id: String) -> Array[String]:
+	var out: Array[String] = []
+	for e: Dictionary in _effects("yield"):
+		if String(e.get("type", "")) == type and String(e.get("stage", "")) == stage_id and not out.has(String(e.get("item", ""))):
+			out.append(String(e.get("item", "")))
+	return out
 
 
 func save_state() -> Dictionary:

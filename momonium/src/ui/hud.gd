@@ -81,7 +81,7 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	add_child(production_label)
 
 	for spec: Array in [[&"research", "hud.research", "ui_research"], [&"mailbox", "hud.mailbox", "ui_mail"],
-			[&"land", "hud.land", "ui_land"], [&"status", "hud.status", "ui_status"]]:
+			[&"land", "hud.land", "ui_land"], [&"status", "hud.status", "ui_status"], [&"build", "hud.build", "ui_build"]]:
 		side_buttons.append(_button(spec, lib))
 	for spec: Array in [[&"settings", "hud.settings", "ui_settings"], [&"shop", "hud.shop", "ui_shop"]]:
 		corner_buttons.append(_button(spec, lib))

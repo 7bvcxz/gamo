@@ -1,9 +1,11 @@
 class_name BuildMenu
 extends PanelContainer
 
-## The shop's building list: one card per building on offer -- icon, name,
-## price, build time -- with locked ones dimmed and their level shown. Picking
-## a card starts placement. Opened from the Shop button.
+## The building catalog: one card per building on offer -- icon, name,
+## price in money and materials, build time -- with locked ones dimmed and the
+## level they open at written on them, so every industry can be found before
+## it can be built. Cards wrap onto more rows as the catalog grows. Picking a
+## card starts placement. Opened from the Build button (right) or the Shop.
 
 signal picked(type: String)
 signal hire_requested
@@ -11,7 +13,7 @@ signal hire_requested
 var sim: Simulation
 var buildings: BuildingSystem
 var lib: SpriteLibrary
-var list: HBoxContainer
+var list: GridContainer
 var cards: Dictionary = {}
 
 
@@ -32,8 +34,10 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	close.pressed.connect(func() -> void: visible = false)
 	head.add_child(close)
 	col.add_child(head)
-	list = HBoxContainer.new()
-	list.add_theme_constant_override("separation", 10)
+	list = GridContainer.new()
+	list.columns = 4
+	list.add_theme_constant_override("h_separation", 10)
+	list.add_theme_constant_override("v_separation", 10)
 	col.add_child(list)
 	add_child(col)
 	visible = false
@@ -56,8 +60,7 @@ func toggle() -> void:
 
 func rebuild() -> void:
 	(find_child("Title", true, false) as Label).text = tr("hud.shop")
-	for c: Node in list.get_children():
-		c.queue_free()
+	PanelViews.clear(list)
 	cards.clear()
 	var economy: EconomySystem = sim.system(&"economy")
 	for entry: Dictionary in buildings.catalog():
@@ -65,7 +68,7 @@ func rebuild() -> void:
 		var def := sim.data.building_type(type)
 		var card := Button.new()
 		card.name = "Card_" + type
-		card.custom_minimum_size = Vector2(150, 150)
+		card.custom_minimum_size = Vector2(150, 168)
 		card.focus_mode = Control.FOCUS_NONE
 		var box := VBoxContainer.new()
 		box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -83,11 +86,29 @@ func rebuild() -> void:
 		box.add_child(_label(tr(def.get("name", type)), 19))
 		var money := int((entry["cost"] as Dictionary).get("money", 0))
 		var price := _label("$%d · %s" % [money, tr("panel.seconds") % int(entry["build_seconds"])], 15)
+		price.name = "Price"
 		box.add_child(price)
+		var items: Dictionary = (entry["cost"] as Dictionary).get("items", {})
+		var inv: InventorySystem = sim.system(&"inventory")
+		if not items.is_empty():
+			var mats := HBoxContainer.new()
+			mats.name = "Materials"
+			mats.alignment = BoxContainer.ALIGNMENT_CENTER
+			mats.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			for item: String in items:
+				mats.add_child(PanelViews.icon(lib, String(sim.data.item(item).get("icon", "ui_sprout")), 22.0))
+				var n := _label("%d/%d" % [inv.count(item), int(items[item])], 15)
+				if inv.count(item) < int(items[item]):
+					n.modulate = Color("#ff9a8f")
+				mats.add_child(n)
+			box.add_child(mats)
 		if not entry["unlocked"]:
-			box.add_child(_label(tr("err.locked") % int(entry["level"]), 15))
+			var lock := _label(tr("build.unlock_at") % int(entry["level"]), 15)
+			lock.name = "Unlock"
+			lock.add_theme_color_override("font_color", Color("#ffe27a"))
+			box.add_child(lock)
 			card.disabled = true
-			card.modulate = Color(1, 1, 1, 0.55)
+			card.modulate = Color(1, 1, 1, 0.7)
 		elif not economy.can_afford(money):
 			price.modulate = Color("#ff9a8f")
 		card.pressed.connect(func() -> void:
@@ -105,7 +126,7 @@ func _add_hire_card(economy: EconomySystem) -> void:
 	var cost := momos.hire_cost()
 	var card := Button.new()
 	card.name = "Card_momo"
-	card.custom_minimum_size = Vector2(150, 150)
+	card.custom_minimum_size = Vector2(150, 168)
 	card.focus_mode = Control.FOCUS_NONE
 	var box := VBoxContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

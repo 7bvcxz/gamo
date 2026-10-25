@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Stone: a lump of rock. -->
+  <path d="M10 42 L16 20 L34 10 L52 18 L56 40 L40 54 L20 54 Z" fill="#b3aea5" stroke="#7d786f" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M16 20 L30 30 L34 10 M30 30 L40 54 M30 30 L56 40" fill="none" stroke="#7d786f" stroke-width="2" opacity="0.55"/>
+  
+</svg>
