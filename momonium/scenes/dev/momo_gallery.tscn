@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://src/actors/momo_gallery.gd" id="1_g"]
 
-[node name="MomoGallery" type="Node2D"]
+[node name="MomoGallery" type="Node2D" unique_id=1002]
 script = ExtResource("1_g")

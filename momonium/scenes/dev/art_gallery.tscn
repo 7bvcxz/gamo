@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://src/render/art_gallery.gd" id="1_gallery"]
 
-[node name="ArtGallery" type="Node2D"]
+[node name="ArtGallery" type="Node2D" unique_id=1003]
 script = ExtResource("1_gallery")

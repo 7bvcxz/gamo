@@ -21,9 +21,13 @@
    - `version.json`에 버전·엔진·커밋을 적고, `web/launch.html`을 복사하고, `tools/check_release.py`로 검사한다.
 3. `docs/`를 커밋하고 push한다. `tools/verify_release.sh`가 Pages 반영을 기다려 폰·데스크톱 스모크와 CI 결과를 본다.
 
-**재현성:** 같은 소스는 바이트까지 같은 팩을 낸다(팩 이름 = SHA-256 앞 12자리). Step 43에서 같은 커밋을 두 번
-내보내 `game-c1ca35911f8f.pck`가 그대로임을 확인했다. CI(`check.sh --export`)는 자기가 만든 팩의 해시를 게시된
-`version.json`과 비교해 같으면 "reproducible", 다르면 경고를 남긴다(소스만 먼저 올라간 경우).
+**재현성:** 같은 소스는 어느 체크아웃에서든 바이트까지 같은 팩을 낸다(팩 이름 = SHA-256 앞 12자리).
+- 처음에는 같은 커밋을 두 번 내보내 확인했는데, 그것은 캐시 안의 재현성이었다. CI의 팩은 달랐다.
+- 이유 (1): 손으로 쓴 `.tscn` 노드에 `unique_id`가 없으면 새 export마다 무작위 node id가 들어간다. 이제 모든 노드에 고정 id가 있다(`test_every_scene_node_has_a_fixed_id`).
+- 이유 (2): 로컬의 오래된 텍스처 import 하나가 달랐다.
+- 고친 뒤 깨끗한 체크아웃 두 개와 로컬이 모두 같은 팩을 냈다.
+- CI(`check.sh --export`)는 자기가 만든 팩의 해시를 게시된 `version.json`과 비교해 같으면 "reproducible", 다르면 경고를 남긴다(소스만 먼저 올라간 경우).
+- 재현성은 `git worktree add --detach`로 깨끗한 체크아웃을 만들어 import→export한 해시로 확인한다.
 
 엔진: Godot 4.7-stable(official). CI는 같은 버전을 내려받는다(`.github/workflows/momonium.yml`).
 

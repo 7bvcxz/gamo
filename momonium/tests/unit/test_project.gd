@@ -40,6 +40,37 @@ func test_web_preset_excludes_tooling() -> void:
 		if cfg.get_value(section, "platform", "") == "Web":
 			found_web = true
 			var exclude: String = cfg.get_value(section, "exclude_filter", "")
-			for folder: String in ["tests/*", "tools/*", "design/*"]:
+			for folder: String in ["tests/*", "tools/*", "design/*", "web/*"]:
 				assert_true(exclude.contains(folder), "web export excludes %s" % folder)
 	assert_true(found_web, "a Web export preset exists")
+
+
+## A scene node without a stored unique_id gets a random one each time a fresh
+## checkout exports, so the same source would publish different packs (Step 43
+## found it: only a long-lived import cache had hidden it). Every node keeps one.
+func test_every_scene_node_has_a_fixed_id() -> void:
+	var missing: Array = []
+	var seen := {}
+	for path: String in _scenes("res://scenes"):
+		for line: String in FileAccess.get_file_as_string(path).split("\n"):
+			if not line.begins_with("[node "):
+				continue
+			var m := RegEx.create_from_string("unique_id=(\\d+)").search(line)
+			if m == null:
+				missing.append("%s: %s" % [path, line])
+			else:
+				assert_false(seen.has(m.get_string(1)), "unique_id %s used once (%s)" % [m.get_string(1), path])
+				seen[m.get_string(1)] = true
+	assert_eq(missing, [], "every scene node stores its id")
+	assert_true(seen.size() >= 3, "the scenes were read (%d nodes)" % seen.size())
+
+
+func _scenes(dir: String) -> Array[String]:
+	var out: Array[String] = []
+	var d := DirAccess.open(dir)
+	for f: String in d.get_files():
+		if f.ends_with(".tscn"):
+			out.append(dir + "/" + f)
+	for sub: String in d.get_directories():
+		out.append_array(_scenes(dir + "/" + sub))
+	return out
