@@ -154,12 +154,17 @@ func _validate_families() -> void:
 	var types: Dictionary = table("buildings").get("types", {})
 	var placeable: Array[String] = []
 	for key: String in types:
-		if bool(types[key].get("placeable", true)):
+		if bool(types[key].get("placeable", true)) and not bool(types[key].get("special", false)):
 			placeable.append(key)
 	placeable.sort()
 	if not table("buildings").has("_test_any_families") and placeable != (["farm", "lumberyard", "mine", "research"] as Array[String]):
 		errors.append("buildings: exactly farm, mine, lumberyard and research are placeable (got %s)" % [placeable])
 	for key: String in types:
+		if bool(types[key].get("special", false)):
+			# A landmark: no family, no work, and never a production type.
+			if types[key].has("family") or int(types[key].get("workers", 0)) > 0 or types[key].has("cycle") or bool(types[key].get("placeable", false)):
+				errors.append("buildings: special %s must have no family, workers, work cycle or plain placement" % key)
+			continue
 		var fam := String(types[key].get("family", key))
 		if not types.has(fam) or not bool(types[fam].get("placeable", true)):
 			errors.append("buildings: %s belongs to family %s, which is not a placeable type" % [key, fam])
@@ -415,6 +420,9 @@ func _validate_buildings() -> void:
 		var research_needed := String((t.get("unlock", {}) as Dictionary).get("research", ""))
 		if research_needed != "" and not (table("research").get("nodes", []) as Array).any(func(n: Dictionary) -> bool: return String(n.get("id", "")) == research_needed):
 			errors.append("buildings: %s.unlock.research %s is not a research node" % [key, research_needed])
+		# A landmark has no work cycle to check (its own rule is in _validate_families).
+		if bool(t.get("special", false)):
+			continue
 		if typeof(stages) != TYPE_ARRAY or ((stages as Array).is_empty() and not generates and not manages):
 			errors.append("buildings: %s.cycle.stages must list at least one stage" % key)
 			continue

@@ -51,7 +51,7 @@ func test_appraisal_lines() -> void:
 	sim.execute({"type": "building.place", "building": "lumberyard", "anchor": [0, 1]})
 	sim.execute({"type": "land.buy", "cell": [2, 0]})
 	var a := (sim.system(&"prestige") as PrestigeSystem).appraise()
-	assert_eq(a["families"], {"farm": 6, "mine": 0, "lumberyard": 48, "research": 0}, "60% of what each family cost")
+	assert_eq(a["families"], {"farm": 6, "mine": 0, "lumberyard": 48, "research": 0, "special": 0}, "60% of what each family cost")
 	assert_eq(a["land"], 40, "80% of the $50 tile")
 	assert_eq(a["momo"], 30, "one Momo, no skill yet")
 	assert_true(a["experience"] > 0, "the levels climbed")

@@ -23,6 +23,8 @@ func test_exactly_four_families_are_placed() -> void:
 	var placeable := bs.catalog().map(func(e: Dictionary) -> String: return e["type"])
 	assert_eq(placeable, ["farm", "research", "lumberyard", "mine"], "farm, lab, lumberyard, mine")
 	for type: String in GameData.load_default().table("buildings")["types"]:
+		if bs.is_special(type):
+			continue
 		assert_true(["farm", "mine", "lumberyard", "research"].has(bs.family_of(type)), "%s belongs to one of the four" % type)
 	assert_eq(sim.execute({"type": "building.place", "building": "office", "anchor": [0, 0]})["reason"], "err.not_placeable", "an office is not placed on land")
 

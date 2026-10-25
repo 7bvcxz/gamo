@@ -234,5 +234,9 @@
     "level_time_growth": 1.5,
     "level_strength": 0.25,
     "level_item_growth": 1.3
+  },
+  "specials": {
+    "_doc": "Special structures: how many may stand at once (`slots`, one village special until settlement tiers raise it).",
+    "slots": 1
   }
 }

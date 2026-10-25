@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 Momo monument in the tile projection (diamond centre = origin
+       pivot at (70, 95)): a round stone plinth with a golden Momo -- long
+       ears, round face -- waving, and flowers at its foot. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <ellipse cx="70" cy="104" rx="32" ry="16" fill="#cfc6b6" stroke="#7d6e5c" stroke-width="2"/>
+  <path d="M38 104 L38 84 A32 16 0 0 0 102 84 L102 104 A32 16 0 0 1 38 104 Z" fill="#e2dacb" stroke="#7d6e5c" stroke-width="2"/>
+  <ellipse cx="70" cy="84" rx="32" ry="16" fill="#f1ebdf" stroke="#7d6e5c" stroke-width="2"/>
+  <path d="M56 96 L84 96" stroke="#b9ad9b" stroke-width="1.5"/>
+  <ellipse cx="70" cy="70" rx="13" ry="15" fill="#f2c94c" stroke="#a8823a" stroke-width="2"/>
+  <path d="M58 46 Q46 52 50 72 Q56 70 60 56 Z" fill="#f2c94c" stroke="#a8823a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M82 46 Q94 52 90 72 Q84 70 80 56 Z" fill="#f2c94c" stroke="#a8823a" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="70" cy="48" r="14" fill="#f7d76a" stroke="#a8823a" stroke-width="2"/>
+  <circle cx="65" cy="47" r="1.8" fill="#7a5a22"/>
+  <circle cx="75" cy="47" r="1.8" fill="#7a5a22"/>
+  <path d="M67 53 Q70 55 73 53" fill="none" stroke="#7a5a22" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M83 66 Q92 58 90 50" fill="none" stroke="#a8823a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M83 66 Q92 58 90 50" fill="none" stroke="#f2c94c" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="44" cy="110" r="3" fill="#ff8aa8"/>
+  <circle cx="50" cy="114" r="3" fill="#ffd45a"/>
+  <circle cx="92" cy="112" r="3" fill="#ff8aa8"/>
+  <circle cx="98" cy="108" r="3" fill="#ffffff"/>
+</svg>

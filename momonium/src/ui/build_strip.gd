@@ -1,15 +1,18 @@
 class_name BuildStrip
 extends Control
 
-## Tap an empty tile of your island and four choices appear right beside it:
+## Tap an empty tile of your island and five choices appear right beside it:
 ## farm, mine, lumberyard, lab -- each with its price, or the level / research
-## it waits for. One tap builds it there. Kept on screen near the edges; tap
-## anywhere else and it goes.
+## it waits for -- and Special. One tap builds it there. Special turns the strip
+## into the landmarks not yet standing (a back arrow first): each with its
+## price or what it waits for (a level, a free special slot, the wait after it
+## was pulled down); built ones are not offered. Kept on screen near the edges;
+## tap anywhere else and it goes.
 
 signal built(id: int)
 
 const FAMILIES: PackedStringArray = ["farm", "mine", "lumberyard", "research"]
-const BUTTON := Vector2(112, 112)
+const BUTTON := Vector2(104, 112)
 
 var sim: Simulation
 var lib: SpriteLibrary
@@ -17,7 +20,12 @@ var cameras: CameraController
 var projection: IsoProjection
 var cell := Vector2i.ZERO
 var open := false
+## "core" (the four families and Special) or "special" (the landmarks).
+var mode := "core"
 var buttons: Dictionary = {}
+var special_buttons: Dictionary = {}
+var special_button: Button
+var back_button: Button
 var row: HBoxContainer
 var last_result: Dictionary = {}
 
@@ -36,33 +44,6 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_cameras: CameraController,
 	panel.name = "Panel"
 	panel.add_child(row)
 	add_child(panel)
-	for type: String in FAMILIES:
-		var b := Button.new()
-		b.name = "Build_" + type
-		b.custom_minimum_size = BUTTON
-		b.focus_mode = Control.FOCUS_NONE
-		var col := VBoxContainer.new()
-		col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		col.alignment = BoxContainer.ALIGNMENT_CENTER
-		col.add_theme_constant_override("separation", 0)
-		col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var sprite := String(sim.data.building_type(type).get("sprite", ""))
-		var icon := PanelViews.icon(lib, sprite if lib.has(sprite) else "ui_build", 48.0)
-		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		col.add_child(icon)
-		var n := PanelViews.label("", 15)
-		n.name = "Name"
-		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		col.add_child(n)
-		var price := PanelViews.label("", 14)
-		price.name = "Price"
-		price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		col.add_child(price)
-		b.add_child(col)
-		var t := type
-		b.pressed.connect(func() -> void: build(t))
-		row.add_child(b)
-		buttons[type] = b
 	visible = false
 
 
@@ -70,13 +51,93 @@ func show_for(p_cell: Vector2i) -> void:
 	cell = p_cell
 	open = true
 	visible = true
-	refresh()
+	_set_mode("core")
 	place()
 
 
 func close() -> void:
 	open = false
 	visible = false
+
+
+func show_specials() -> void:
+	_set_mode("special")
+	place()
+
+
+func show_core() -> void:
+	_set_mode("core")
+	place()
+
+
+func _set_mode(m: String) -> void:
+	mode = m
+	for c: Node in row.get_children():
+		row.remove_child(c)
+		c.queue_free()
+	buttons.clear()
+	special_buttons.clear()
+	special_button = null
+	back_button = null
+	if mode == "core":
+		for type: String in FAMILIES:
+			var b := _choice("Build_" + type, String(sim.data.building_type(type).get("sprite", "")))
+			var t := type
+			b.pressed.connect(func() -> void: build(t))
+			row.add_child(b)
+			buttons[type] = b
+		special_button = _choice("Build_special", "icon_star")
+		special_button.pressed.connect(func() -> void:
+			if open:
+				show_specials())
+		row.add_child(special_button)
+	else:
+		back_button = Button.new()
+		back_button.name = "Back"
+		back_button.custom_minimum_size = Vector2(64, BUTTON.y)
+		back_button.focus_mode = Control.FOCUS_NONE
+		back_button.draw.connect(_draw_back)
+		back_button.pressed.connect(func() -> void:
+			if open:
+				show_core())
+		row.add_child(back_button)
+		for e: Dictionary in (sim.system(&"buildings") as BuildingSystem).special_catalog():
+			var type := String(e["type"])
+			var b := _choice("Special_" + type, String(sim.data.building_type(type).get("sprite", "")))
+			b.pressed.connect(func() -> void: build(type))
+			row.add_child(b)
+			special_buttons[type] = b
+		if special_buttons.is_empty():
+			var none := PanelViews.label(tr("build.special_none"), 15, true)
+			none.name = "None"
+			row.add_child(none)
+	refresh()
+
+
+func _choice(node_name: String, sprite: String) -> Button:
+	var b := Button.new()
+	b.name = node_name
+	b.custom_minimum_size = BUTTON
+	b.focus_mode = Control.FOCUS_NONE
+	var col := VBoxContainer.new()
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 0)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var icon := PanelViews.icon(lib, sprite if lib.has(sprite) else "ui_build", 46.0)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(icon)
+	var n := PanelViews.label("", 15)
+	n.name = "Name"
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(n)
+	var price := PanelViews.label("", 13)
+	price.name = "Price"
+	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(price)
+	b.add_child(col)
+	return b
 
 
 func build(type: String) -> void:
@@ -96,26 +157,45 @@ func build(type: String) -> void:
 ## Price, or what it waits for, on each choice; dimmed when it cannot be built now.
 func refresh() -> void:
 	var bs: BuildingSystem = sim.system(&"buildings")
-	var inv: InventorySystem = sim.system(&"inventory")
-	var economy: EconomySystem = sim.system(&"economy")
-	for type: String in FAMILIES:
-		var b: Button = buttons[type]
-		var def := sim.data.building_type(type)
-		(b.find_child("Name", true, false) as Label).text = tr(String(def.get("name", type)))
-		var price: Label = b.find_child("Price", true, false)
-		var cost: Dictionary = def.get("cost", {})
-		var text := "$%d" % int(cost.get("money", 0))
-		for item: String in cost.get("items", {}):
-			text += " · %s %d" % [tr(String(sim.data.item(item).get("name", item))), int(cost["items"][item])]
+	for type: String in buttons:
+		_label_choice(buttons[type], type, bs.can_place(type, cell))
+	if special_button != null:
+		(special_button.find_child("Name", true, false) as Label).text = tr("build.special")
+		(special_button.find_child("Price", true, false) as Label).text = "%d/%d" % [bs.specials_count(), bs.special_slots()]
+	for type: String in special_buttons:
 		var check := bs.can_place(type, cell)
-		var locked := String(check.get("reason", "")) in ["err.locked", "err.needs_research"]
-		if String(check.get("reason", "")) == "err.locked":
-			text = tr("build.unlock_at") % int(def.get("unlock", {}).get("level", 1))
-		price.text = text
-		price.add_theme_color_override("font_color", Color("#ffe27a") if locked else (Color.WHITE if check["ok"] else Color("#ff9a8f")))
-		b.disabled = not check["ok"]
-		b.modulate = Color(1, 1, 1, 0.7) if locked else Color.WHITE
+		_label_choice(special_buttons[type], type, check)
+		var price: Label = special_buttons[type].find_child("Price", true, false)
+		match String(check.get("reason", "")):
+			"err.special_slots":
+				price.text = tr("build.special_slots") % [bs.specials_count(), bs.special_slots()]
+			"err.special_cooldown":
+				price.text = tr("build.special_cooldown") % BuildingDetailView.duration(ceilf(int(check["remaining_ms"]) / 1000.0))
 	(get_node("Panel") as PanelContainer).reset_size()
+
+
+func _label_choice(b: Button, type: String, check: Dictionary) -> void:
+	var def := sim.data.building_type(type)
+	(b.find_child("Name", true, false) as Label).text = tr(String(def.get("name", type)))
+	var price: Label = b.find_child("Price", true, false)
+	var cost: Dictionary = def.get("cost", {})
+	var text := "$%d" % int(cost.get("money", 0))
+	for item: String in cost.get("items", {}):
+		text += " · %s %d" % [tr(String(sim.data.item(item).get("name", item))), int(cost["items"][item])]
+	var reason := String(check.get("reason", ""))
+	var locked := reason in ["err.locked", "err.needs_research", "err.special_slots", "err.special_cooldown"]
+	if reason == "err.locked":
+		text = tr("build.unlock_at") % int(def.get("unlock", {}).get("level", 1))
+	price.text = text
+	price.add_theme_color_override("font_color", Color("#ffe27a") if locked else (Color.WHITE if check["ok"] else Color("#ff9a8f")))
+	b.disabled = not check["ok"]
+	b.modulate = Color(1, 1, 1, 0.7) if locked else Color.WHITE
+
+
+func _draw_back() -> void:
+	var c := back_button.size * 0.5
+	var col := Color(1, 1, 1, 0.95)
+	back_button.draw_polyline(PackedVector2Array([c + Vector2(6, -14), c + Vector2(-8, 0), c + Vector2(6, 14)]), col, 4.0, true)
 
 
 ## Below the tile, or above it near the bottom; kept inside the screen.

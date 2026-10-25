@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 clock tower in the tile projection (diamond centre = origin pivot
+       at (70, 95)): a slim stone tower with a clock face on each visible side,
+       a blue pointed roof and a gold finial. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M44 104 L70 118 L70 52 L44 38 Z" fill="#d9cfc0" stroke="#7d6e5c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 118 L96 104 L96 38 L70 52 Z" fill="#ece4d6" stroke="#7d6e5c" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M44 84 L70 98 L96 84 M44 66 L70 80 L96 66" fill="none" stroke="#b9ad9b" stroke-width="1.5"/>
+  <ellipse cx="57" cy="54" rx="8" ry="9" transform="rotate(28 57 54)" fill="#fffaf0" stroke="#5b4a3a" stroke-width="2"/>
+  <path d="M57 54 L57 48 M57 54 L61 56" stroke="#3a3028" stroke-width="1.8" stroke-linecap="round"/>
+  <ellipse cx="83" cy="54" rx="8" ry="9" transform="rotate(-28 83 54)" fill="#fffaf0" stroke="#5b4a3a" stroke-width="2"/>
+  <path d="M83 54 L83 48 M83 54 L79 57" stroke="#3a3028" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M40 40 L70 56 L100 40 L70 12 Z" fill="#5b8fd6" stroke="#2f5a94" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M40 40 L70 56 L70 12 Z" fill="#4a7cc0"/>
+  <path d="M70 12 L70 6" stroke="#a8823a" stroke-width="2"/>
+  <circle cx="70" cy="4" r="3" fill="#ffd45a" stroke="#a8823a" stroke-width="1.5"/>
+  <path d="M62 116 L70 120 L78 116 L78 102 Q70 96 62 102 Z" fill="#8a5a36" stroke="#5b3a22" stroke-width="1.5"/>
+</svg>

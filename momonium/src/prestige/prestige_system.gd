@@ -76,11 +76,11 @@ func _cfg(path: String, fallback: float) -> float:
 ## gross, seed, net, points (gained by selling now), can_sell, reason, min_level}.
 func appraise() -> Dictionary:
 	var bs: BuildingSystem = sim.system(&"buildings")
-	var families := {"farm": 0, "mine": 0, "lumberyard": 0, "research": 0}
+	var families := {"farm": 0, "mine": 0, "lumberyard": 0, "research": 0, "special": 0}
 	var share := _cfg("value.buildings", 0.6)
 	for id: int in bs.ids():
 		var b := bs.get_building(id)
-		var fam := bs.family_of(String(b["type"]))
+		var fam := "special" if bs.is_special(String(b["type"])) else bs.family_of(String(b["type"]))
 		families[fam] = int(families.get(fam, 0)) + int(floor(int(b.get("paid", {}).get("money", 0)) * share))
 	var buildings := 0
 	for f: String in families:

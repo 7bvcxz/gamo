@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 school in the tile projection (diamond centre = origin pivot at
+       (70, 95)): a cream schoolhouse with a red roof, a little bell tower, a
+       round window, a green chalkboard by the door and a flag. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 98 L70 124 L70 74 L24 48 Z" fill="#f3e2c2" stroke="#8a6a4a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 124 L114 98 L114 48 L70 74 Z" fill="#fbefd6" stroke="#8a6a4a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M18 52 L64 24 L120 52 L70 80 Z" fill="#e2655a" stroke="#9c3a32" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M18 52 L70 80 L70 84 L18 56 Z" fill="#c24e44"/>
+  <path d="M56 30 L64 26 L72 30 L72 14 L64 10 L56 14 Z" fill="#fbefd6" stroke="#8a6a4a" stroke-width="1.5"/>
+  <path d="M54 15 L64 6 L74 15 L64 20 Z" fill="#e2655a" stroke="#9c3a32" stroke-width="1.5"/>
+  <circle cx="64" cy="21" r="3" fill="#ffd45a" stroke="#a8823a" stroke-width="1.2"/>
+  <ellipse cx="46" cy="76" rx="7" ry="8" transform="rotate(28 46 76)" fill="#cfe9ff" stroke="#8a6a4a" stroke-width="2"/>
+  <path d="M80 114 L94 106 L94 86 L80 94 Z" fill="#a8723f" stroke="#6b4426" stroke-width="2"/>
+  <path d="M98 98 L110 91 L110 78 L98 85 Z" fill="#3f7a52" stroke="#6b4426" stroke-width="1.5"/>
+  <path d="M100 92 L106 89 M100 88 L104 86" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M114 48 L114 30" stroke="#6b4426" stroke-width="2"/>
+  <path d="M114 30 L126 34 L114 38 Z" fill="#5aa8e6"/>
+</svg>

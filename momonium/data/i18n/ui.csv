@@ -480,3 +480,17 @@ route.auto,Smart,똑똑하게,かしこく,智能
 route.label,Route: %s,순회: %s,見回り: %s,巡视：%s
 route.compare,Since the change: {before} → {after} jobs a day,바꾼 뒤: 하루 작업 {before} → {after}회,変えてから: 1日の作業 {before} → {after}回,改后：每天工作 {before} → {after} 次
 route.compare_wait,Comparing: a few days are needed on each side,비교 중: 바꾼 앞뒤로 며칠이 쌓여야 해요,比較中: 前後に数日分が必要です,对比中：前后各需要几天数据
+building.clock_tower,Clock Tower,시계탑,時計塔,钟楼
+building.school,School,학교,学校,学校
+building.momo_monument,Momo Monument,모모 기념비,モモ記念碑,桃桃纪念碑
+special.clock_tower.desc,"Rings the island to work: every few minutes, a short burst of double-speed work.",섬에 일할 시간을 알려요. 몇 분마다 잠깐 두 배로 빨리 일해요.,島に仕事の時間を告げます。数分ごとに少しの間、倍の速さで働きます。,为岛屿报时：每隔几分钟，短时间内工作速度翻倍。
+special.school.desc,Momo learn faster: more experience from every job.,모모가 더 빨리 배워요. 일할 때마다 경험이 더 쌓여요.,モモの上達が早くなります。仕事ごとの経験が増えます。,桃桃学得更快：每次工作获得更多经验。
+special.momo_monument.desc,A proud island is worth more: more legacy when it is sold.,자랑스러운 섬은 더 값져요. 팔 때 유산이 늘어요.,誇らしい島は価値が上がります。売るときの遺産が増えます。,骄傲的岛屿更有价值：出售时遗产更多。
+build.special,Special,특별,特別,特殊
+build.special_slots,No slot (%d/%d),자리 없음 (%d/%d),枠なし (%d/%d),没有位置（%d/%d）
+build.special_cooldown,Again in %s,%s 뒤 다시,%s後にまた,%s后可再建
+build.special_none,All built,모두 지었어요,すべて建てました,都建好了
+err.special_built,Only one of these at a time,하나만 지을 수 있어요,ひとつだけ建てられます,只能建一座
+err.special_slots,No special slot left,특별 건물 자리가 없어요,特別な建物の枠がありません,没有特殊建筑位置了
+err.special_cooldown,Pulled down recently: wait a little,최근에 철거했어요. 조금 기다려요,最近取り壊しました。少し待ちます,最近拆除过，稍等一下
+sale.special,Specials,특별 건물,特別な建物,特殊建筑

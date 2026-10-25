@@ -451,7 +451,13 @@ func _ready() -> void:
 		for t: String in build_strip.buttons:
 			buttons[t] = {"rect": conv.call(build_strip.buttons[t]), "disabled": (build_strip.buttons[t] as Button).disabled,
 				"price": ((build_strip.buttons[t] as Button).find_child("Price", true, false) as Label).text}
-		return {"open": build_strip.open, "cell": [build_strip.cell.x, build_strip.cell.y], "buttons": buttons,
+		var specials := {}
+		for t: String in build_strip.special_buttons:
+			var b: Button = build_strip.special_buttons[t]
+			specials[t] = {"rect": conv.call(b), "disabled": b.disabled, "price": (b.find_child("Price", true, false) as Label).text}
+		return {"open": build_strip.open, "cell": [build_strip.cell.x, build_strip.cell.y], "buttons": buttons, "mode": build_strip.mode,
+			"special": conv.call(build_strip.special_button) if build_strip.special_button != null and build_strip.open else [],
+			"back": conv.call(build_strip.back_button) if build_strip.back_button != null and build_strip.open else [], "specials": specials,
 			"trash": conv.call(panel.trash_button) if panel.trash_button.visible else [],
 			"confirm": conv.call(panel.confirm_button) if panel.confirm_button.visible else [],
 			"result": build_strip.last_result, "window": [win.x, win.y]})

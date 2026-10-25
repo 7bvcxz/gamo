@@ -55,9 +55,14 @@ func handled_commands() -> PackedStringArray:
 	return PackedStringArray(["building.tap", "building.place", "building.cancel", "building.variety", "building.recipe", "building.priority", "building.refit", "building.demolish"])
 
 
+## Special type -> ms until it may be built again (after a demolition).
+var special_cooldowns: Dictionary = {}
+
+
 func on_new_game() -> void:
 	buildings.clear()
 	next_id = 1
+	special_cooldowns.clear()
 
 
 # --- queries ----------------------------------------------------------------------
@@ -382,6 +387,78 @@ func catalog() -> Array[Dictionary]:
 	return out
 
 
+# --- specials -------------------------------------------------------------------
+
+## A landmark (Clock Tower, School, Momo Monument): not a production family.
+func is_special(type: String) -> bool:
+	return bool(sim.data.building_type(type).get("special", false))
+
+
+func special_types() -> Array[String]:
+	var out: Array[String] = []
+	var types: Dictionary = sim.data.get_value("buildings", "types", {})
+	for type: String in types:
+		if bool(types[type].get("special", false)) and bool(types[type].get("enabled", true)):
+			out.append(type)
+	return out
+
+
+## The standing (or rising) building of a special type, or 0.
+func special_built(type: String) -> int:
+	for id: int in ids():
+		if String(buildings[id]["type"]) == type:
+			return id
+	return 0
+
+
+func specials_count() -> int:
+	var n := 0
+	for id: int in ids():
+		if is_special(String(buildings[id]["type"])):
+			n += 1
+	return n
+
+
+## How many specials may stand at once (settlement tiers raise it).
+func special_slots() -> int:
+	var tiers: Object = sim.system(&"tiers")
+	if tiers != null and tiers.has_method("special_slots"):
+		return int(tiers.call("special_slots"))
+	return sim.data.get_int("balance", "specials.slots", 1)
+
+
+## Ms left before a pulled-down special may be built again.
+func special_cooldown_ms(type: String) -> int:
+	return maxi(int(special_cooldowns.get(type, 0)) - sim.now_ms(), 0)
+
+
+## What stops this special type from being built now (besides tile and
+## cost): already standing, no slot left, pulled down too recently.
+func special_blocker(type: String) -> Dictionary:
+	if special_built(type) != 0:
+		return SimResult.fail("err.special_built")
+	if specials_count() >= special_slots():
+		return SimResult.fail("err.special_slots", {"used": specials_count(), "slots": special_slots()})
+	if special_cooldown_ms(type) > 0:
+		return SimResult.fail("err.special_cooldown", {"remaining_ms": special_cooldown_ms(type)})
+	return {}
+
+
+## The special part of the build menu: every special not standing, with what
+## it costs or waits for -- [{type, unlocked, level, research, cooldown_ms,
+## slot_free, cost}].
+func special_catalog() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for type: String in special_types():
+		if special_built(type) != 0:
+			continue
+		var t := sim.data.building_type(type)
+		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
+			"research": String(t.get("unlock", {}).get("research", "")), "cooldown_ms": special_cooldown_ms(type),
+			"slot_free": specials_count() < special_slots(), "cost": t.get("cost", {})})
+	return out
+
+
 ## The four families placed on land (farm, mine, lumberyard, lab); every
 ## other type is a facility one of them is refitted into.
 func is_placeable(type: String) -> bool:
@@ -527,6 +604,11 @@ func demolish(id: int) -> Dictionary:
 	b["token"] = int(b["token"]) + 1
 	(sim.system(&"world") as WorldSystem).vacate(id)
 	buildings.erase(id)
+	# A special pulled down waits before it can rise again: pulling down and
+	# rebuilding never restarts anything early.
+	if is_special(String(b["type"])):
+		var wait := int(sim.data.building_type(String(b["type"])).get("rebuild_cooldown", 0)) * 1000
+		special_cooldowns[String(b["type"])] = sim.now_ms() + wait
 	sim.bus.emit(&"building_removed", {"id": id, "type": b["type"], "refund": money})
 	sim.bus.emit(&"building_demolished", {"id": id, "type": b["type"], "money": money, "items": back})
 	return SimResult.ok({"money": money, "items": back})
@@ -553,7 +635,11 @@ func can_place(type: String, anchor: Vector2i) -> Dictionary:
 	var t := sim.data.building_type(type)
 	if t.is_empty() or not bool(t.get("enabled", true)):
 		return SimResult.fail("err.unknown_building")
-	if not is_placeable(type):
+	if is_special(type):
+		var why := special_blocker(type)
+		if not why.is_empty():
+			return why
+	elif not is_placeable(type):
 		return SimResult.fail("err.not_placeable", {"family": family_of(type)})
 	if not is_unlocked(type):
 		if not research_met(type) and (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})):
@@ -915,12 +1001,16 @@ func save_state() -> Dictionary:
 	var list: Array = []
 	for id: int in ids():
 		list.append(buildings[id].duplicate(true))
-	return {"next_id": next_id, "buildings": list}
+	return {"next_id": next_id, "buildings": list, "special_cooldowns": special_cooldowns.duplicate()}
 
 
 func load_state(state: Dictionary) -> void:
 	buildings.clear()
 	next_id = int(state.get("next_id", 1))
+	special_cooldowns.clear()
+	var cd: Dictionary = state.get("special_cooldowns", {})
+	for type: String in cd:
+		special_cooldowns[type] = int(cd[type])
 	for raw: Dictionary in state.get("buildings", []):
 		var b := raw.duplicate(true)
 		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end", "worker", "releases"]:

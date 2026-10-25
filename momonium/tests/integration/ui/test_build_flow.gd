@@ -172,3 +172,38 @@ func test_the_sea_is_not_a_build() -> void:
 	_tap_cell(Vector2i(2, 0))
 	assert_false(strip.open, "a sea tile next to the island: no building choices")
 	assert_eq((main.get("land_buyer") as LandBuyer).pending, Vector2i(2, 0), "its land preview instead")
+
+
+func test_special_choices_and_back() -> void:
+	var prog: ProgressionSystem = sim.system(&"progression")
+	while prog.level < 6:
+		prog.add_exp(prog.next_level_exp() - prog.experience, "test")
+	(sim.system(&"economy") as EconomySystem).earn(2000, "test")
+	var inv: InventorySystem = sim.system(&"inventory")
+	for item: String in ["stone", "wood", "copper_ingot"]:
+		inv.add(item, 50, "test")
+	_tap_cell(Vector2i(1, 1))
+	await tree.process_frame
+	assert_true(strip.special_button != null, "a fifth choice: Special")
+	assert_eq((strip.special_button.find_child("Price", true, false) as Label).text, "0/1", "with its slots")
+	_tap(strip.special_button.get_global_rect().get_center())
+	await tree.process_frame
+	assert_eq(strip.mode, "special", "the strip turns into the landmarks")
+	assert_eq(strip.row.get_child(0), strip.back_button, "a back arrow first")
+	assert_eq(strip.special_buttons.keys(), ["clock_tower", "school", "momo_monument"], "then the three")
+	_tap(strip.special_buttons["school"].get_global_rect().get_center())
+	await tree.process_frame
+	var id := buildings.building_at(Vector2i(1, 1))
+	assert_eq(String(buildings.get_building(id)["type"]), "school", "a school, through the usual build")
+	assert_false(strip.open, "and the strip goes")
+	_tap_cell(Vector2i(0, 1))
+	await tree.process_frame
+	_tap(strip.special_button.get_global_rect().get_center())
+	await tree.process_frame
+	assert_false(strip.special_buttons.has("school"), "the school standing: not offered")
+	assert_true((strip.special_buttons["clock_tower"] as Button).disabled, "the slot is taken")
+	assert_eq((strip.special_buttons["clock_tower"].find_child("Price", true, false) as Label).text, "No slot (1/1)", "and it says so")
+	_tap(strip.back_button.get_global_rect().get_center())
+	await tree.process_frame
+	assert_eq(strip.mode, "core", "back: the five again")
+	assert_true(strip.buttons.has("farm"), "")

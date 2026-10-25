@@ -863,6 +863,51 @@
           32
         ]
       }
+    },
+    "clock_tower": {
+      "source": "svg/clock_tower.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          70,
+          4
+        ]
+      }
+    },
+    "school": {
+      "source": "svg/school.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          64,
+          6
+        ]
+      }
+    },
+    "momo_monument": {
+      "source": "svg/momo_monument.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          70,
+          34
+        ]
+      }
     }
   }
 }

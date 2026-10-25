@@ -85,6 +85,8 @@ func refresh() -> void:
 	PanelViews.clear(lines_box)
 	for fam: String in ["farm", "mine", "lumberyard", "research"]:
 		_line(lines_box, tr(String(sim.data.building_type(fam).get("name", fam))), PanelViews.money(int(a["families"][fam])), "Fam_" + fam)
+	if int(a["families"]["special"]) > 0:
+		_line(lines_box, tr("sale.special"), PanelViews.money(int(a["families"]["special"])), "Fam_special")
 	_line(lines_box, tr("sale.land"), PanelViews.money(int(a["land"])), "Land")
 	_line(lines_box, tr("sale.productivity"), PanelViews.money(int(a["productivity"])), "Productivity")
 	_line(lines_box, tr("sale.momo"), PanelViews.money(int(a["momo"])), "Momo")
