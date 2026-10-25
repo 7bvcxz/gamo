@@ -140,6 +140,13 @@ func _draw_card(b: Button, id: String) -> void:
 		"done":
 			b.draw_circle(corner, 13.0, Color("#5fbf5a"))
 			b.draw_polyline(PackedVector2Array([corner + Vector2(-6, 0), corner + Vector2(-2, 5), corner + Vector2(7, -5)]), Color.WHITE, 3.0, true)
+		"levelup":
+			# Researched, and can go higher: its level in a green disc.
+			b.draw_circle(corner, 13.0, Color("#5fbf5a"))
+			var f := b.get_theme_default_font()
+			var t := str(research.level(id))
+			var ts := f.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16)
+			b.draw_string(f, corner + Vector2(-ts.x * 0.5, 6), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
 		"active":
 			var r := Rect2(10, b.size.y - 9, b.size.x - 20, 5)
 			b.draw_rect(r, Color(1, 1, 1, 0.2))
@@ -248,6 +255,8 @@ func refresh() -> void:
 	var n := research.node(selected)
 	detail_icon.texture = lib.atlas_texture(String(n.get("icon", "ui_research")))
 	detail_name.text = tr(String(n.get("name", "")))
+	if research.max_level(selected) > 1 and research.level(selected) > 0:
+		detail_name.text += "  " + tr("research.level_of") % [research.level(selected), research.max_level(selected)]
 	detail_desc.text = tr(String(n.get("desc", "")))
 	PanelViews.clear(effects_box)
 	for line: String in effect_lines(selected):
@@ -273,6 +282,11 @@ func refresh() -> void:
 		"active":
 			start_button.text = tr("research.running").format({"t": BuildingDetailView.duration(ceilf(research.remaining_ms() / 1000.0))})
 			start_button.disabled = true
+		"levelup":
+			start_button.disabled = not check["ok"]
+			start_button.text = tr("research.level_up") % (research.level(selected) + 1)
+			if not check["ok"]:
+				start_button.text += " · " + tr(String(check["reason"]))
 		_:
 			start_button.disabled = not check["ok"]
 			start_button.text = tr("research.start") if check["ok"] or state == "locked" else tr(String(check["reason"]))

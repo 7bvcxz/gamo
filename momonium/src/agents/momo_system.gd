@@ -90,6 +90,9 @@ func work_multiplier(id: int, type: String) -> float:
 	var community: CommunitySystem = sim.system(&"community")
 	if community != null:
 		m *= community.work_factor(id)
+	var legacy: PrestigeSystem = sim.system(&"prestige")
+	if legacy != null:
+		m *= legacy.work_factor()
 	return m
 
 

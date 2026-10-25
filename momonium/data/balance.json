@@ -205,5 +205,34 @@
   "construction": {
     "_doc": "Demolishing a finished building returns this share of everything paid for it (building and refits), rounded down per item; cancelling one still under construction returns its type's `refund` (all of it).",
     "demolish_refund": 0.5
+  },
+  "prestige": {
+    "_doc": "Selling the settlement (PrestigeSystem). Appraisal: every building's paid money x value.buildings (by family), land bought x value.land, daily sale+release income (last 7 days) x value.income_days, each Momo value.momo_base + value.momo_per_skill per skill level, completed research money cost x value.research, all experience gained x value.exp. Net value = appraisal - the head start the island was given. Legacy points ever earned = floor(sqrt(lifetime net / points_unit)); a sale adds what it lifts that by. Selling needs player level min_level. Points give, permanently: rewards.money_per_point starting money each, a starting Momo every rewards.momo_every (at most max_momos), and Momo work time x (1 - work_per_point per point, at most work_cap).",
+    "min_level": 5,
+    "points_unit": 100,
+    "value": {
+      "buildings": 0.6,
+      "land": 0.8,
+      "income_days": 10,
+      "momo_base": 30,
+      "momo_per_skill": 20,
+      "research": 0.5,
+      "exp": 0.2
+    },
+    "rewards": {
+      "money_per_point": 15,
+      "momo_every": 5,
+      "max_momos": 4,
+      "work_per_point": 0.02,
+      "work_cap": 0.3
+    }
+  },
+  "research": {
+    "_doc": "Research levels. A node can be researched again up to its max_level (5 unless its effects are switches -- auto, recipe, variety, power_use -- which stop at 1, or the node sets max_level). Level L costs money x level_cost_growth^(L-1) and items x level_item_growth^(L-1) -- never more of an item than the store can hold, so every level can be reached -- and takes seconds x level_time_growth^(L-1); its effects grow by level_strength per level past the first: a multiply m becomes m^(1 + level_strength x (L-1)), an add becomes add x (1 + level_strength x (L-1)). At Prestige every level researched in that run becomes one research point (RP) for good; RP are allocated to unlocked nodes as levels, freely re-allocated, never minted twice.",
+    "max_level": 5,
+    "level_cost_growth": 1.8,
+    "level_time_growth": 1.5,
+    "level_strength": 0.25,
+    "level_item_growth": 1.3
   }
 }

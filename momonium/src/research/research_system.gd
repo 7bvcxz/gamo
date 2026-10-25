@@ -13,12 +13,29 @@ extends SimSystem
 ## this system applies as a modifier source of the building system (stage work
 ## and wait multipliers, yield bonuses) and to research durations. The UI reads
 ## the same effects to describe them -- nothing is worked out twice.
+##
+## Levels: a node can be researched again, up to max_level, each level costing
+## and taking more and strengthening its effects (balance.research). A node's
+## level is the levels researched this run (`bought`) plus the levels placed on
+## it from research points (`allocated`). Once researched, a node stays
+## `unlocked` for good. At Prestige the levels bought in that run become RP --
+## a permanent ledger, `rp_earned` -- and every level goes back to 0, to be
+## allocated again (allocate_all). Allocating moves points around; only
+## research actually done adds to the ledger, so no loop mints RP.
 
 const DONE := "research.done"
 const LAB := "research"
 
-## id -> ms it finished.
+## id -> ms it became active (level 1 or more) this run.
 var completed: Dictionary = {}
+## id -> levels researched this run (paid for with money and time).
+var bought: Dictionary = {}
+## id -> levels placed on it from research points.
+var allocated: Dictionary = {}
+## id -> true: researched at least once, in any run. Never reset.
+var unlocked: Dictionary = {}
+## Research points ever issued (one per level researched, at each Prestige).
+var rp_earned := 0
 ## The running research: {id, start, end, token}, or empty.
 var active: Dictionary = {}
 var token := 0
@@ -33,7 +50,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["research.start"])
+	return PackedStringArray(["research.start", "research.allocate"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -45,6 +62,10 @@ func setup(p_sim: Simulation) -> void:
 
 func on_new_game() -> void:
 	completed.clear()
+	bought.clear()
+	allocated.clear()
+	unlocked.clear()
+	rp_earned = 0
 	active = {}
 	token = 0
 
@@ -82,6 +103,115 @@ func is_done(id: String) -> bool:
 	return completed.has(id)
 
 
+# --- levels ---------------------------------------------------------------------
+
+## The highest level a node can reach: 1 for switches, else balance.research.max_level.
+func max_level(id: String) -> int:
+	var n := node(id)
+	if n.has("max_level"):
+		return maxi(int(n["max_level"]), 1)
+	# Nothing to grow (a node that opens a building) or a switch: one level.
+	if (n.get("effects", []) as Array).is_empty():
+		return 1
+	for e: Dictionary in n.get("effects", []):
+		if String(e.get("kind", "")) in ["auto", "recipe", "variety", "power_use"]:
+			return 1
+	return sim.data.get_int("balance", "research.max_level", 5)
+
+
+## A node's level now: researched this run plus allocated (a node marked done
+## without either -- an old save, a test -- counts as level 1).
+func level(id: String) -> int:
+	var l := int(bought.get(id, 0)) + int(allocated.get(id, 0))
+	if l == 0 and completed.has(id):
+		l = 1
+	return mini(l, max_level(id))
+
+
+func is_unlocked_node(id: String) -> bool:
+	return unlocked.has(id) or completed.has(id)
+
+
+func rp_allocated() -> int:
+	var n := 0
+	for id: String in allocated:
+		n += int(allocated[id])
+	return n
+
+
+func rp_unspent() -> int:
+	return rp_earned - rp_allocated()
+
+
+## Levels researched this run: what the next Prestige turns into RP.
+func rp_pending() -> int:
+	var n := 0
+	for id: String in bought:
+		n += int(bought[id])
+	return n
+
+
+## Whether a whole allocation {id: levels} is allowed: unlocked nodes, 0..what
+## each can still take, every allocated node's prerequisites active, within the
+## points earned. The first reason it is not, or ok.
+func check_allocation(plan: Dictionary) -> Dictionary:
+	var total := 0
+	for id: String in plan:
+		var n := int(plan[id])
+		if n == 0:
+			continue
+		if node(id).is_empty():
+			return SimResult.fail("err.no_research", {"id": id})
+		if not is_unlocked_node(id):
+			return SimResult.fail("err.research_locked", {"id": id})
+		if n < 0 or n + int(bought.get(id, 0)) > max_level(id):
+			return SimResult.fail("err.research_max", {"id": id, "max": max_level(id)})
+		total += n
+	if total > rp_earned:
+		return SimResult.fail("err.rp_short", {"need": total, "have": rp_earned})
+	for id: String in plan:
+		if int(plan[id]) <= 0:
+			continue
+		for r: String in node(id).get("requires", []):
+			if int(plan.get(r, 0)) + int(bought.get(r, 0)) <= 0 and not (completed.has(r) and not allocated.has(r)):
+				return SimResult.fail("err.research_needs", {"id": id, "requires": r})
+	# Nodes researched this run that rest on allocated ones must keep them.
+	for id: String in bought:
+		for r: String in node(id).get("requires", []):
+			if int(plan.get(r, 0)) + int(bought.get(r, 0)) <= 0 and allocated.has(r):
+				return SimResult.fail("err.research_needed_by", {"id": r, "by": id})
+	return SimResult.ok({"total": total})
+
+
+## Replaces the whole allocation at once (the allocation screen's confirm).
+func allocate_all(plan: Dictionary) -> Dictionary:
+	var clean := {}
+	for id: String in plan:
+		if int(plan[id]) > 0:
+			clean[id] = int(plan[id])
+	var check := check_allocation(clean)
+	if not check["ok"]:
+		return check
+	var was_active := {}
+	for id: String in completed:
+		was_active[id] = true
+	var old := allocated
+	allocated = clean
+	# Active only through points that are no longer there: off again.
+	for id: String in old:
+		if int(bought.get(id, 0)) + int(allocated.get(id, 0)) <= 0:
+			completed.erase(id)
+	var now := sim.now_ms()
+	for id: String in allocated:
+		if not completed.has(id):
+			completed[id] = now
+	for id: String in completed:
+		if not was_active.has(id):
+			sim.bus.emit(&"research_completed", {"id": id, "level": level(id), "allocated": true})
+	sim.bus.emit(&"research_allocated", {"allocated": allocated.duplicate(), "unspent": rp_unspent()})
+	return SimResult.ok({"unspent": rp_unspent()})
+
+
 ## What still stands between the player and this node, as data the UI can
 ## show: [{kind: requires, id} | {kind: level, need, have} |
 ## {kind: mastery, type, need, have} | {kind: proposal}].
@@ -106,12 +236,15 @@ func missing(id: String) -> Array[Dictionary]:
 	return out
 
 
-## done | active | available | locked
+## done (top level) | levelup (researched, can go higher) | active |
+## available | locked
 func state_of(id: String) -> String:
-	if is_done(id):
-		return "done"
 	if String(active.get("id", "")) == id:
 		return "active"
+	if level(id) >= max_level(id):
+		return "done"
+	if level(id) >= 1:
+		return "levelup"
 	return "available" if missing(id).is_empty() else "locked"
 
 
@@ -124,16 +257,26 @@ func has_lab() -> bool:
 	return false
 
 
+## How long the next level of `id` takes.
 func duration_ms(id: String) -> int:
 	var m := 1.0
 	for e: Dictionary in _effects("research_time"):
 		m *= float(e.get("multiply", 1.0))
+	m *= pow(sim.data.get_float("balance", "research.level_time_growth", 1.5), level(id))
 	return int(round(float(node(id).get("seconds", 60)) * m * 1000.0))
 
 
+## What the next level of `id` costs: money grows faster than items, and no
+## item is asked for in larger numbers than the store can hold.
 func cost_of(id: String) -> Dictionary:
 	var c: Dictionary = node(id).get("cost", {})
-	return {"money": int(c.get("money", 0)), "items": c.get("items", {})}
+	var g := pow(sim.data.get_float("balance", "research.level_cost_growth", 1.8), level(id))
+	var gi := pow(sim.data.get_float("balance", "research.level_item_growth", 1.3), level(id))
+	var inv: InventorySystem = sim.system(&"inventory")
+	var items := {}
+	for item: String in c.get("items", {}):
+		items[item] = mini(int(ceil(int(c["items"][item]) * gi)), inv.capacity(item) if inv != null else 999999)
+	return {"money": int(ceil(int(c.get("money", 0)) * g)), "items": items}
 
 
 ## Whether `id` can start now, as a command result: the first reason it cannot.
@@ -160,6 +303,9 @@ func can_start(id: String) -> Dictionary:
 
 
 func execute(command: Dictionary) -> Dictionary:
+	if String(command.get("type", "")) == "research.allocate":
+		var plan: Variant = command.get("levels", {})
+		return allocate_all(plan if typeof(plan) == TYPE_DICTIONARY else {})
 	var id := String(command.get("id", ""))
 	var check := can_start(id)
 	if not check["ok"]:
@@ -180,9 +326,15 @@ func handle_event(type: String, data: Dictionary) -> void:
 	if type != DONE or active.is_empty() or int(data.get("token", -1)) != int(active["token"]):
 		return
 	var id := String(active["id"])
-	completed[id] = sim.now_ms()
+	if level(id) == 1 and int(bought.get(id, 0)) == 0 and not allocated.has(id):
+		# An old "done" node researched again: that first level was bought too.
+		bought[id] = 1
+	bought[id] = int(bought.get(id, 0)) + 1
+	unlocked[id] = true
+	if not completed.has(id):
+		completed[id] = sim.now_ms()
 	active = {}
-	sim.bus.emit(&"research_completed", {"id": id})
+	sim.bus.emit(&"research_completed", {"id": id, "level": level(id)})
 
 
 func progress() -> float:
@@ -208,12 +360,26 @@ func something_to_start() -> bool:
 
 # --- effects --------------------------------------------------------------------
 
+## Every active effect of a kind, at the strength of its node's level.
 func _effects(kind: String) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
+	var s := sim.data.get_float("balance", "research.level_strength", 0.25)
 	for id: String in completed:
+		var l := level(id)
 		for e: Dictionary in node(id).get("effects", []):
-			if String(e.get("kind", "")) == kind:
+			if String(e.get("kind", "")) != kind:
+				continue
+			if l <= 1:
 				out.append(e)
+				continue
+			var k := 1.0 + s * (l - 1)
+			var x := e.duplicate()
+			if x.has("multiply"):
+				x["multiply"] = pow(float(x["multiply"]), k)
+			if x.has("add"):
+				var add := float(x["add"]) * k
+				x["add"] = int(floor(add)) if typeof(e["add"]) == TYPE_INT else add
+			out.append(x)
 	return out
 
 
@@ -311,8 +477,23 @@ func yield_items(type: String, stage_id: String) -> Array[String]:
 	return out
 
 
+## Prestige: this run's researched levels become research points for good,
+## every level goes back to 0 (to be allocated again), unlocks stay. Returns
+## the RP issued.
+func carry_over() -> Dictionary:
+	return {"unlocked": unlocked.duplicate(), "rp_earned": rp_earned + rp_pending(), "issued": rp_pending()}
+
+
+func adopt(carry: Dictionary) -> void:
+	for id: String in carry.get("unlocked", {}):
+		if not node(id).is_empty():
+			unlocked[id] = true
+	rp_earned = maxi(int(carry.get("rp_earned", 0)), 0)
+
+
 func save_state() -> Dictionary:
-	return {"completed": completed.duplicate(), "active": active.duplicate(), "token": token}
+	return {"completed": completed.duplicate(), "active": active.duplicate(), "token": token,
+		"bought": bought.duplicate(), "allocated": allocated.duplicate(), "unlocked": unlocked.keys(), "rp_earned": rp_earned}
 
 
 func load_state(state: Dictionary) -> void:
@@ -324,3 +505,35 @@ func load_state(state: Dictionary) -> void:
 	if not a.is_empty():
 		active = {"id": String(a["id"]), "start": int(a["start"]), "end": int(a["end"]), "token": int(a["token"])}
 	token = int(state.get("token", 0))
+	rp_earned = maxi(int(state.get("rp_earned", 0)), 0)
+	for id: Variant in state.get("unlocked", []):
+		if not node(String(id)).is_empty():
+			unlocked[String(id)] = true
+	var raw_bought: Dictionary = state.get("bought", {})
+	if not state.has("bought"):
+		# Before levels: everything finished was researched once.
+		for id: String in completed:
+			raw_bought[id] = 1
+	for id: String in raw_bought:
+		if not node(id).is_empty() and int(raw_bought[id]) > 0:
+			bought[id] = mini(int(raw_bought[id]), max_level(id))
+			unlocked[id] = true
+	for id: String in completed:
+		unlocked[id] = true
+	# Allocations are trusted only as far as they add up: a damaged save that
+	# places more points than were earned, on locked or unknown nodes or past
+	# a node's top, loses those allocations (the points come back unspent).
+	var raw_alloc: Dictionary = state.get("allocated", {})
+	var plan := {}
+	var ids := raw_alloc.keys()
+	ids.sort()
+	for id: Variant in ids:
+		plan[String(id)] = int(raw_alloc[id])
+	if not plan.is_empty():
+		if check_allocation(plan)["ok"]:
+			allocated = plan
+		else:
+			allocated = {}
+			for id: String in completed.keys():
+				if int(bought.get(id, 0)) <= 0 and plan.has(id):
+					completed.erase(id)

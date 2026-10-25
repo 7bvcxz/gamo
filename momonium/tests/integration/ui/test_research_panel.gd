@@ -46,7 +46,7 @@ func test_the_research_button_opens_the_tree() -> void:
 	main.call("_on_hud_action", &"research")
 	await tree.process_frame
 	assert_true(frame.visible, "the research menu opens")
-	assert_eq(frame.tabs.map(func(t: Dictionary) -> String: return (t["button"] as Button).text), ["Farm", "Lumber", "Mine", "Smelting", "Power", "Games", "Cars", "General"], "a tab per branch, general last")
+	assert_eq(frame.tabs.map(func(t: Dictionary) -> String: return (t["button"] as Button).text), ["Farm", "Lumber", "Mine", "Smelting", "Power", "Games", "Cars", "General", "Points"], "a tab per branch, general last, then the research points")
 	var view := _farm_view()
 	assert_eq(view.cards.size(), (sim.system(&"research") as ResearchSystem).nodes("farm").size(), "every farm node has a card")
 	for id: String in view.cards:
@@ -98,7 +98,8 @@ func test_start_by_tap_then_running_and_done() -> void:
 	assert_false((main.get("hud") as Hud).buttons[&"research"].badge, "nothing else can start: no dot")
 	sim.advance_ms(60000)
 	view.refresh()
-	assert_eq(view.start_button.text, "Done", "done")
+	assert_true(view.start_button.text.begins_with("Research Lv 2"), "done -- and the next level is offered (%s)" % view.start_button.text)
+	assert_true(view.detail_name.text.ends_with("Lv 1 / 5"), "with its level")
 
 
 func test_lack_of_a_lab_is_named() -> void:

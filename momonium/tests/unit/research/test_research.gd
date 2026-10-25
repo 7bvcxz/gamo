@@ -96,9 +96,11 @@ func test_one_at_a_time_and_finishes_by_itself() -> void:
 	sim.advance_ms(59999)
 	assert_eq(research.state_of("farm_expansion"), "active", "not a moment early")
 	sim.advance_ms(1)
-	assert_eq(research.state_of("farm_expansion"), "done", "done after exactly 60 s")
+	assert_eq(research.state_of("farm_expansion"), "levelup", "done after exactly 60 s, and it can go further")
+	assert_eq(research.level("farm_expansion"), 1, "level 1")
 	assert_eq(done[0], "farm_expansion", "announced")
-	assert_eq(sim.execute({"type": "research.start", "id": "farm_expansion"})["reason"], "err.research_done", "not twice")
+	var first := (research.node("farm_expansion")["cost"]["money"] as float)
+	assert_eq(research.cost_of("farm_expansion")["money"], int(ceil(first * 1.8)), "level 2 costs 1.8 times as much")
 
 
 func test_field_expansion_brings_a_bigger_harvest() -> void:
@@ -174,7 +176,7 @@ func test_research_survives_a_save_mid_way() -> void:
 	copy.advance_ms(39999)
 	assert_eq(r2.state_of("farm_expansion"), "active", "on the same clock")
 	copy.advance_ms(1)
-	assert_eq(r2.state_of("farm_expansion"), "done", "finishes when it would have")
+	assert_eq(r2.level("farm_expansion"), 1, "finishes when it would have")
 	var farm2 := (copy.system(&"buildings") as BuildingSystem).building_at(Vector2i(1, 0))
 	assert_eq((copy.system(&"buildings") as BuildingSystem).cycle_estimate((copy.system(&"buildings") as BuildingSystem).get_building(farm2))["yield"], {"crop": 2.0}, "and its effect applies in the loaded world")
 

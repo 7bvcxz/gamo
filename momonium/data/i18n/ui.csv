@@ -426,3 +426,37 @@ stats.stuck.missing,needs %s,%s 필요,%sが必要,缺 %s
 stats.stuck.crew,%d more Momo,모모 %d명 더,モモがあと%d人,还差%d只桃桃
 land.tap_again,Tap again to buy,한 번 더 누르면 구매,もう一度タップで購入,再点一次购买
 land.short,Not enough money,돈이 모자라요,お金が足りません,钱不够
+research.level_up,Research Lv %d,Lv %d 연구,Lv %dを研究,研究 Lv %d
+research.level_of,Lv %d / %d,Lv %d / %d,Lv %d / %d,Lv %d / %d
+sale.title,Sell the island,섬 매각,島を売る,出售岛屿
+sale.open,Island worth {v} · Sell…,섬 가치 {v} · 매각…,島の価値 {v} · 売る…,岛屿价值 {v} · 出售…
+sale.worth,What it is worth,평가액,評価額,估值
+sale.land,Land bought,산 땅,買った土地,购买的土地
+sale.productivity,Earnings (10 days),생산력 (수입 10일분),稼ぎ (10日分),产能（10天收入）
+sale.momo,Momo and their skills,모모와 숙련,モモと熟練,桃桃与熟练度
+sale.research,Research this time,이번 연구,今回の研究,本轮研究
+sale.experience,Experience,경험,経験,经验
+sale.seed,Head start it was given,받은 출발 지원,受け取ったスタート支援,获得的起步支援
+sale.net,Net worth,순가치,正味の価値,净值
+sale.gives,Selling gives,매각하면,売ると,出售后获得
+sale.legacy,Legacy points,유산 포인트,遺産ポイント,遗产点数
+sale.rp,Research points,연구 포인트,研究ポイント,研究点数
+sale.next,Next island,다음 섬,次の島,下一座岛
+sale.next_line,${money} · {momo} Momo · {work}% quicker,${money} · 모모 {momo}명 · 작업 {work}% 빠르게,${money} · モモ{momo}人 · 作業{work}%速く,${money} · 桃桃{momo}只 · 工作快{work}%
+sale.resets,Starts over,초기화돼요,リセット,会重置
+sale.resets_text,"Buildings, land, money, store, level, hired Momo and their tiles, research levels (they come back as points)",건물·땅·돈·창고·레벨·고용한 모모와 맡은 칸·연구 레벨(포인트로 돌려받아요),建物・土地・お金・倉庫・レベル・雇ったモモと受け持ち・研究レベル（ポイントで戻ります）,建筑、土地、资金、仓库、等级、雇用的桃桃及其照看格、研究等级（以点数返还）
+sale.keeps,Stays,남아요,残る,保留
+sale.keeps_text,"Legacy points and their bonuses, research points and every research unlocked, the record of sales, settings",유산 포인트와 그 보너스·연구 포인트와 해금한 연구 전부·매각 기록·설정,遺産ポイントとボーナス・研究ポイントと解放した研究すべて・売却の記録・設定,遗产点数与加成、研究点数与已解锁的全部研究、出售记录、设置
+sale.sell,Sell the island,섬 매각,島を売る,出售岛屿
+sale.confirm,Really sell? Tap to confirm,정말 매각할까요? 눌러서 확정,本当に売る？ タップで確定,确定出售？点击确认
+sale.cancel,Cancel,취소,キャンセル,取消
+err.prestige_level,Can be sold from Lv %d,Lv %d부터 팔 수 있어요,Lv %dから売れます,Lv %d起可出售
+rp.tab,Points,포인트,ポイント,点数
+rp.head,Research points {left} / {total},연구 포인트 {left} / {total},研究ポイント {left} / {total},研究点数 {left} / {total}
+rp.pending,(+%d at the next sale),(다음 매각 때 +%d),(次の売却で+%d),（下次出售+%d）
+rp.confirm,Confirm,확정,確定,确认
+rp.none,No research yet: what you research becomes points when the island is sold,아직 연구가 없어요. 연구한 레벨은 섬을 팔 때 포인트가 돼요,まだ研究がありません。研究したレベルは島を売るとポイントになります,还没有研究。研究的等级会在出售岛屿时变成点数
+rp.needs,{a} needs {b} first,{a}에는 {b}가 먼저 필요해요,{a}には先に{b}が必要です,{a} 需要先有 {b}
+rp.needed_by,{b} needs {a},{b}에 {a}가 필요해요,{b}には{a}が必要です,{b} 需要 {a}
+err.rp_short,Not enough research points,연구 포인트가 모자라요,研究ポイントが足りません,研究点数不够
+err.research_max,Already at its top level,이미 최고 레벨이에요,すでに最高レベルです,已是最高等级

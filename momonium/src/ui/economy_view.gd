@@ -11,6 +11,10 @@ var money_label: Label
 var today_box: VBoxContainer
 var days: DayBars
 var totals_box: VBoxContainer
+## The island's worth, and the way to sell it.
+var sale_button: Button
+
+signal sale_requested
 
 
 func setup(p_sim: Simulation, _lib: SpriteLibrary) -> void:
@@ -32,6 +36,12 @@ func setup(p_sim: Simulation, _lib: SpriteLibrary) -> void:
 	totals_box = VBoxContainer.new()
 	totals_box.name = "Totals"
 	add_child(totals_box)
+	sale_button = Button.new()
+	sale_button.name = "SaleButton"
+	sale_button.custom_minimum_size = Vector2(0, 52)
+	sale_button.focus_mode = Control.FOCUS_NONE
+	sale_button.pressed.connect(func() -> void: sale_requested.emit())
+	add_child(sale_button)
 
 
 func _heading(key: String) -> Label:
@@ -73,6 +83,8 @@ func refresh() -> void:
 	var tout := PanelViews.row(tr("panel.economy.total_out"), PanelViews.money(eco.lifetime_expense()))
 	tout.name = "TotalOut"
 	totals_box.add_child(tout)
+	var a := (sim.system(&"prestige") as PrestigeSystem).appraise()
+	sale_button.text = tr("sale.open").format({"v": PanelViews.money(int(a["net"]))})
 	for child: Node in get_children():
 		if child.has_meta("key"):
 			(child as Label).text = tr(String(child.get_meta("key")))

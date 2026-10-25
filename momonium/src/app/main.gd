@@ -48,6 +48,10 @@ var detail_view: BuildingDetailView
 var research_frame: PanelFrame
 var research_views: Array[ResearchView] = []
 ## Power at a glance (from the HUD's power pill).
+## Selling the island, and placing research points.
+var sale_frame: PanelFrame
+var sale_view: SaleView
+var rp_view: RpView
 var power_frame: PanelFrame
 var power_view: PowerView
 ## Momo Letters.
@@ -73,6 +77,8 @@ var tutorial: Tutorial
 ## The demo island (Settings) is never saved; Engine meta "momonium_demo"
 ## survives the scene reload that switches to it and back.
 var in_demo := false
+## The last sale's result (E2E reads it).
+var last_sale: Dictionary = {}
 var _demo_badge: Label
 var saves_written := 0
 var _autosave_left := 0.0
@@ -258,7 +264,21 @@ func _ready() -> void:
 		research_views.append(rv)
 		# A building industry is named as its mastery; other branches (power, general) by their own key.
 		research_frame.add_tab("mastery." + industry if not sim.data.building_type(industry).is_empty() else "research.industry." + industry, rv)
+	rp_view = RpView.new()
+	rp_view.setup(sim, lib)
+	research_frame.add_tab("rp.tab", rp_view)
+	rp_view.done.connect(func() -> void:
+		research_frame.close())
+	research_frame.closed.connect(func() -> void:
+		if (sim.system(&"prestige") as PrestigeSystem).welcome:
+			sim.execute({"type": "prestige.welcomed"}))
 	research_frame.set_title(tr("hud.research"))
+	sale_frame = _frame(ui, "SaleFrame")
+	sale_view = SaleView.new()
+	sale_view.setup(sim, lib)
+	sale_frame.add_tab("", sale_view)
+	sale_view.sell_confirmed.connect(sell_settlement)
+	economy_view.sale_requested.connect(open_sale)
 	power_frame = _frame(ui, "PowerFrame")
 	power_view = PowerView.new()
 	power_view.setup(sim, lib)
@@ -318,6 +338,8 @@ func _ready() -> void:
 
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
 	_maybe_start_tutorial.call_deferred()
+	if (sim.system(&"prestige") as PrestigeSystem).welcome:
+		open_rp.call_deferred()
 	bridge.register_query("save_roundtrip", _save_roundtrip)
 	bridge.register_query("tutorial", _tutorial_info)
 	bridge.register_query("tutorial_start", func(_a: Variant) -> Dictionary:
@@ -349,6 +371,45 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("sale", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			var r := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var p: PrestigeSystem = sim.system(&"prestige")
+		return {"open": sale_frame.visible, "appraisal": p.appraise(), "points": p.points, "sales": p.sales, "welcome": p.welcome,
+			"sell": conv.call(sale_view.sell_button) if sale_frame.visible else [], "sell_text": sale_view.sell_button.text,
+			"sell_disabled": sale_view.sell_button.disabled, "confirming": sale_view.confirming,
+			"entry": conv.call(economy_view.sale_button) if economy_view.sale_button.is_visible_in_tree() else [],
+			"last_sale": {"ok": last_sale.get("ok", false), "reason": last_sale.get("reason", ""), "gained": last_sale.get("gained", 0), "rp_issued": last_sale.get("rp_issued", 0)},
+			"status": load_status, "window": [win.x, win.y]})
+	bridge.register_query("rp", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			var r := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var rs: ResearchSystem = sim.system(&"research")
+		var rows := {}
+		for id: String in rp_view.rows:
+			var r: Control = rp_view.rows[id]
+			rows[id] = {"level": rs.level(id), "draft": int(rp_view.draft.get(id, 0)), "label": (r.get_node("Level") as Label).text,
+				"minus": conv.call(r.get_node("Minus")), "plus": conv.call(r.get_node("Plus")),
+				"plus_disabled": (r.get_node("Plus") as Button).disabled}
+		return {"open": research_frame.visible and research_frame.current_view() == rp_view, "earned": rs.rp_earned, "unspent": rs.rp_unspent(),
+			"pending": rs.rp_pending(), "allocated": rs.allocated, "unlocked": rs.unlocked.keys(), "head": rp_view.head.text, "rows": rows,
+			"confirm": conv.call(rp_view.confirm_button) if rp_view.is_visible_in_tree() else [], "confirm_disabled": rp_view.confirm_button.disabled,
+			"why": rp_view.why.text, "result": rp_view.last_result, "window": [win.x, win.y]})
+	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
+		var prog: ProgressionSystem = sim.system(&"progression")
+		while prog.level < int(lv):
+			prog.add_exp(prog.next_level_exp() - prog.experience, "dev")
+		return {"level": prog.level})
 	bridge.register_query("watch", func(_a: Variant) -> Dictionary:
 		var vp := get_viewport()
 		var conv := func(c: Control) -> Array:
@@ -421,6 +482,16 @@ func _ready() -> void:
 			research.completed[String(id)] = sim.now_ms()
 		sim.bus.emit(&"research_completed", {"id": String(ids[-1]) if not ids.is_empty() else ""})
 		return {"completed": research.completed.keys()})
+	# Levels researched this run, as if paid for and waited out (browser tests).
+	bridge.register_query("dev_research_levels", func(levels: Variant) -> Dictionary:
+		var research: ResearchSystem = sim.system(&"research")
+		for id: String in (levels as Dictionary):
+			research.bought[id] = int(levels[id])
+			research.unlocked[id] = true
+			if not research.completed.has(id):
+				research.completed[id] = sim.now_ms()
+			sim.bus.emit(&"research_completed", {"id": id})
+		return {"pending": research.rp_pending()})
 	bridge.register_query("details", func(_a: Variant) -> Dictionary:
 		var vp := get_viewport()
 		var out := {"open": detail_frame.visible, "varieties": {}, "workers": [], "research": [], "window": []}
@@ -495,6 +566,12 @@ func _notification(what: int) -> void:
 func _load_or_new() -> Simulation:
 	in_demo = Engine.has_meta("momonium_demo")
 	persist = not Engine.has_meta("momonium_no_save") and not in_demo
+	# A sold island hands over the new one (already saved when saving is on).
+	if Engine.has_meta("momonium_handoff"):
+		var next: Simulation = Engine.get_meta("momonium_handoff")
+		Engine.remove_meta("momonium_handoff")
+		load_status = "sold"
+		return next
 	if in_demo:
 		load_status = "demo"
 		return DemoWorld.build()
@@ -526,6 +603,39 @@ func _maybe_start_tutorial() -> void:
 	if in_demo or (bridge.e2e and not tests_want_it) or not persist or load_status != "missing" or bool(settings.get_value("tutorial_done")):
 		return
 	tutorial.start()
+
+
+## Selling: the appraisal opens in its own frame.
+func open_sale() -> void:
+	_close_frames()
+	sale_view.confirming = false
+	sale_frame.set_title(tr("sale.title"))
+	sale_frame.open()
+
+
+## Sells the island: the new one is saved (when saving is on) and the scene
+## starts again on it, opening on its research points.
+func sell_settlement() -> void:
+	var r := PrestigeSystem.sell(sim)
+	last_sale = r
+	if not r["ok"]:
+		return
+	var next: Simulation = r["sim"]
+	if persist and not save_blocked:
+		var text := SaveService.encode(next)
+		SaveService.write_text(text, save_path)
+		WebStorage.set_item(MIRROR_KEY, text)
+	Engine.set_meta("momonium_handoff", next)
+	# The game restarts on it; a test that holds Main itself takes it from there.
+	if get_tree().current_scene == self:
+		get_tree().reload_current_scene.call_deferred()
+
+
+## A new island from a sale opens on the research points to place.
+func open_rp() -> void:
+	_close_frames()
+	rp_view.reset_draft()
+	research_frame.open(research_frame.tabs.size() - 1)
 
 
 ## Switches to the demo island: saves the player's island first, then
@@ -766,6 +876,8 @@ func _close_frames() -> void:
 		settings_frame.close()
 	if power_frame != null:
 		power_frame.close()
+	if sale_frame != null:
+		sale_frame.close()
 	status_frame.close()
 	detail_frame.close()
 	mail_frame.close()
