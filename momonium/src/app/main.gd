@@ -25,6 +25,7 @@ var land_mode: LandMode
 var placement_preview: PlacementPreview
 var placement: PlacementMode
 var build_menu: BuildMenu
+var status_panel: StatusPanel
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -128,6 +129,10 @@ func _ready() -> void:
 		selection.deselect()
 		placement.open(type))
 	build_menu.resized.connect(_place_build_menu)
+	status_panel = StatusPanel.new()
+	ui.add_child(status_panel)
+	status_panel.setup(sim, lib)
+	status_panel.resized.connect(_place_status_panel)
 	_version_label = Label.new()
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
@@ -159,6 +164,7 @@ func _ready() -> void:
 		return {"money": (sim.system(&"economy") as EconomySystem).money})
 	bridge.register_query("land_mode", _land_mode_info)
 	bridge.register_query("build_ui", _build_ui_info)
+	bridge.register_query("status", _status_info)
 	bridge.register_query("set_language", func(code: Variant) -> Dictionary:
 		LocaleService.apply(String(code))
 		return {"locale": LocaleService.current()})
@@ -254,8 +260,13 @@ func _on_hud_action(action_name: StringName) -> void:
 		&"shop":
 			land_mode.close()
 			placement.close()
+			status_panel.visible = false
 			build_menu.toggle()
 			_place_build_menu()
+		&"status":
+			build_menu.visible = false
+			status_panel.toggle()
+			_place_status_panel()
 
 
 ## E2E: HUD texts, button rectangles (window pixels) and recent actions.
@@ -329,3 +340,23 @@ func _build_ui_info(_arg: Variant) -> Dictionary:
 			var a: Vector2 = vp.get_final_transform() * r.position
 			var b: Vector2 = vp.get_final_transform() * r.end
 			return [a.x, a.y, b.x - a.x, b.y - a.y]), "window": [win.x, win.y]}
+
+
+func _place_status_panel() -> void:
+	if status_panel == null:
+		return
+	status_panel.reset_size()
+	var size := get_viewport_rect().size
+	# Centred in the space left of the side buttons, so they stay usable.
+	var right := hud.side_buttons[0].position.x - 8.0 if not hud.side_buttons.is_empty() else size.x - 16.0
+	var left := 16.0
+	status_panel.position = Vector2(left + maxf((right - left - status_panel.size.x) * 0.5, 0.0), size.y * 0.16)
+
+
+## E2E: the Status panel's numbers.
+func _status_info(_arg: Variant) -> Dictionary:
+	var out := {"open": status_panel.visible, "level": status_panel.level_label.text, "exp": status_panel.exp_label.text, "mastery": {}}
+	for type: String in status_panel.cards:
+		var card: PanelContainer = status_panel.cards[type]
+		out["mastery"][type] = (card.find_child("Exp", true, false) as Label).text
+	return out

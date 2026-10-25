@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A grey rock: mining. -->
+  <path d="M10 46 L18 24 L32 16 L46 22 L56 40 L48 52 L22 54 Z" fill="#9aa3ad" stroke="#5c6670" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M18 24 L30 32 L46 22 M30 32 L28 52" fill="none" stroke="#7a838d" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M22 28 L28 22" stroke="#d6dde3" stroke-width="3" stroke-linecap="round"/>
+</svg>

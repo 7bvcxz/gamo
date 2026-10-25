@@ -69,6 +69,8 @@ func execute(command: Dictionary) -> Dictionary:
 func buy(cell: Vector2i) -> Dictionary:
 	var world: WorldSystem = sim.system(&"world")
 	var economy: EconomySystem = sim.system(&"economy")
+	if not (sim.system(&"progression") as ProgressionSystem).is_unlocked("land"):
+		return SimResult.fail("err.locked", {"level": sim.data.get_int("balance", "unlocks.land.level", 1)})
 	if world.is_owned(cell):
 		return SimResult.fail("err.owned")
 	if not world.is_purchasable(cell):

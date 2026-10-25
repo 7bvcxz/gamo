@@ -178,13 +178,30 @@
         ]
       },
       "region": [
-        636,
+        684,
         202,
         44,
         50
       ],
       "source": "svg/ui_build.svg",
       "source_sha": "ba9fa234edcf9e35",
+      "world_scale": 1.0
+    },
+    "ui_flask": {
+      "pivots": {
+        "center": [
+          22.0,
+          26.0
+        ]
+      },
+      "region": [
+        598,
+        202,
+        44,
+        54
+      ],
+      "source": "svg/ui_flask.svg",
+      "source_sha": "d8487740475dd723",
       "world_scale": 1.0
     },
     "ui_harvest": {
@@ -195,8 +212,8 @@
         ]
       },
       "region": [
-        880,
-        202,
+        2,
+        352,
         48,
         41
       ],
@@ -212,13 +229,30 @@
         ]
       },
       "region": [
-        780,
+        828,
         202,
         52,
         46
       ],
       "source": "svg/ui_land.svg",
       "source_sha": "ec1fa9d081396fa6",
+      "world_scale": 1.0
+    },
+    "ui_lumber": {
+      "pivots": {
+        "center": [
+          27.0,
+          20.0
+        ]
+      },
+      "region": [
+        156,
+        352,
+        53,
+        38
+      ],
+      "source": "svg/ui_lumber.svg",
+      "source_sha": "3518d365175453dd",
       "world_scale": 1.0
     },
     "ui_mail": {
@@ -229,13 +263,30 @@
         ]
       },
       "region": [
-        50,
+        213,
         352,
         52,
         38
       ],
       "source": "svg/ui_mail.svg",
       "source_sha": "e02cc5e9e78d3b93",
+      "world_scale": 1.0
+    },
+    "ui_mine": {
+      "pivots": {
+        "center": [
+          24.0,
+          18.0
+        ]
+      },
+      "region": [
+        928,
+        202,
+        50,
+        42
+      ],
+      "source": "svg/ui_mine.svg",
+      "source_sha": "50e7b9b9a4a2e24b",
       "world_scale": 1.0
     },
     "ui_research": {
@@ -246,7 +297,7 @@
         ]
       },
       "region": [
-        598,
+        646,
         202,
         34,
         52
@@ -263,7 +314,7 @@
         ]
       },
       "region": [
-        684,
+        732,
         202,
         40,
         50
@@ -297,7 +348,7 @@
         ]
       },
       "region": [
-        728,
+        776,
         202,
         48,
         48
@@ -314,7 +365,7 @@
         ]
       },
       "region": [
-        2,
+        108,
         352,
         44,
         39
@@ -331,7 +382,7 @@
         ]
       },
       "region": [
-        836,
+        884,
         202,
         40,
         43
@@ -348,8 +399,8 @@
         ]
       },
       "region": [
-        932,
-        202,
+        54,
+        352,
         50,
         40
       ],

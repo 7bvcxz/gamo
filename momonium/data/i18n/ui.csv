@@ -36,3 +36,11 @@ item.wood,Wood,나무,木材,木材
 item.stone,Stone,돌,石,石头
 err.storage_full,Store is full,창고가 가득 찼어요,倉庫がいっぱいです,仓库已满
 hud.store,%d crops · +$%d,작물 %d · +$%d,作物 %d · +$%d,作物 %d · +$%d
+status.title,Momonium,Momonium,Momonium,Momonium
+status.tagline,"A small island, a big tomorrow.",작은 섬에서 큰 내일로.,小さな島から、大きな明日へ。,小小的岛，大大的明天。
+status.exp,%d / %d EXP,%d / %d EXP,%d / %d EXP,%d / %d EXP
+mastery.farm,Farm,농장,農場,农场
+mastery.mine,Mine,광산,鉱山,矿山
+mastery.lumberyard,Lumber,목재,木材,木材
+mastery.research,Research,연구,研究,研究
+fx.level_up,Lv %d!,Lv %d!,Lv %d!,Lv %d!

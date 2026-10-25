@@ -95,6 +95,27 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 	if type == &"money_changed" and int(payload.get("delta", 0)) != 0:
 		pop_money(int(payload["delta"]))
+	elif type == &"level_up":
+		_pop(exp_pill, tr("fx.level_up") % int(payload["level"]), Color("#ffe27a"))
+	elif type == &"exp_gained":
+		_pop(exp_pill, "+%d EXP" % int(payload["amount"]), Color(1, 1, 1, 0.95))
+
+
+func _pop(anchor: Control, text: String, color: Color) -> void:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 20)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
+	l.add_theme_constant_override("outline_size", 6)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(l)
+	l.reset_size()
+	l.position = anchor.position + Vector2(anchor.size.x * 0.5 - l.size.x * 0.5, anchor.size.y + 2)
+	var tween := create_tween()
+	tween.tween_property(l, "position:y", l.position.y + 34.0, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(l, "modulate:a", 0.0, 1.0).set_delay(0.3)
+	tween.tween_callback(l.queue_free)
 
 
 ## A "+$5" (or "-$10") that rises from the money pill and fades, and a little

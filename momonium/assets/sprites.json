@@ -221,6 +221,36 @@
           32
         ]
       }
+    },
+    "ui_mine": {
+      "source": "svg/ui_mine.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "ui_lumber": {
+      "source": "svg/ui_lumber.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "ui_flask": {
+      "source": "svg/ui_flask.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
     }
   }
 }

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A log: lumber. -->
+  <path d="M14 26 L44 14 Q54 12 56 22 Q58 32 48 36 L18 48 Z" fill="#c48a52" stroke="#7a4f2a" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="16" cy="37" rx="9" ry="11" fill="#e8c79a" stroke="#7a4f2a" stroke-width="3" transform="rotate(-22 16 37)"/>
+  <ellipse cx="16" cy="37" rx="4" ry="5" fill="none" stroke="#b07a46" stroke-width="2" transform="rotate(-22 16 37)"/>
+</svg>

@@ -170,7 +170,7 @@ func catalog() -> Array[Dictionary]:
 func is_unlocked(type: String) -> bool:
 	var t := sim.data.building_type(type)
 	var prog: ProgressionSystem = sim.system(&"progression")
-	return not t.is_empty() and bool(t.get("enabled", true)) and prog.level >= int(t.get("unlock", {}).get("level", 1))
+	return not t.is_empty() and bool(t.get("enabled", true)) and prog.meets(t.get("unlock", {}))
 
 
 ## Whether `type` could be placed at `anchor` now, and if not, why -- without
