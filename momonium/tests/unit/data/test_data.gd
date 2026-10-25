@@ -36,3 +36,18 @@ func test_data_changes_the_rules() -> void:
 	var sim := Simulation.new_game(GameData.from_tables({"balance": balance}))
 	assert_eq((sim.system(&"economy") as EconomySystem).money, 250, "start money comes from data")
 	assert_eq(sim.clock.day_ms, 60000, "day length comes from data")
+
+
+func test_art_spec_is_in_data() -> void:
+	var data := GameData.load_default()
+	assert_between(data.get_float("art", "projection.elevation_deg"), 50.0, 60.0, "50-60 degree view")
+	for key: String in ["momo_fur", "momo_overall", "momo_cheek", "momo_eye", "momo_outline"]:
+		assert_ne(data.color(key), Color.MAGENTA, "palette has %s" % key)
+	assert_eq(data.color("sky_day", 0), Color("#2693f8"), "gradient entries are indexable")
+
+
+func test_art_elevation_outside_spec_is_rejected() -> void:
+	var art: Dictionary = GameData.load_default().table("art").duplicate(true)
+	art["projection"]["elevation_deg"] = 30
+	var data := GameData.from_tables({"art": art})
+	assert_false(data.is_valid(), "a 30 degree view is not the game's view")

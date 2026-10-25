@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance"]
+const TABLES: PackedStringArray = ["balance", "art"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []
@@ -75,6 +75,7 @@ func is_valid() -> bool:
 func validate() -> void:
 	errors.clear()
 	_validate_balance(table("balance"))
+	_validate_art()
 
 
 func _validate_balance(t: Dictionary) -> void:
@@ -88,6 +89,35 @@ func _validate_balance(t: Dictionary) -> void:
 	var origin: Variant = get_value("balance", "start.island.origin")
 	if typeof(origin) != TYPE_ARRAY or (origin as Array).size() != 2:
 		errors.append("balance: start.island.origin must be [x, y]")
+
+
+func _validate_art() -> void:
+	_require_number({}, "art", "projection.tile_width", 16)
+	_require_number({}, "art", "projection.elevation_deg", 30)
+	_require_number({}, "art", "projection.cliff_height", 0)
+	var elevation := get_float("art", "projection.elevation_deg")
+	if elevation < 50.0 or elevation > 60.0:
+		errors.append("art: projection.elevation_deg %s is outside the 50-60 degree view the art is drawn for" % elevation)
+	if int(get_int("art", "projection.tile_width")) % 2 != 0:
+		errors.append("art: projection.tile_width must be even so tile corners land on whole pixels")
+	var palette: Variant = get_value("art", "palette")
+	if typeof(palette) != TYPE_DICTIONARY:
+		errors.append("art: palette missing")
+		return
+	for key: String in palette:
+		var value: Variant = palette[key]
+		var colors: Array = value if typeof(value) == TYPE_ARRAY else [value]
+		for c: Variant in colors:
+			if typeof(c) == TYPE_STRING and not Color.html_is_valid(c):
+				errors.append("art: palette.%s has invalid colour %s" % [key, c])
+
+
+## A palette colour by key (index into a gradient list when the entry is one).
+func color(key: String, index: int = 0) -> Color:
+	var value: Variant = get_value("art", "palette." + key)
+	if typeof(value) == TYPE_ARRAY:
+		value = value[clampi(index, 0, (value as Array).size() - 1)]
+	return Color.html(value) if typeof(value) == TYPE_STRING and Color.html_is_valid(value) else Color.MAGENTA
 
 
 func _require_number(_t: Dictionary, table_name: String, path: String, minimum: float) -> void:

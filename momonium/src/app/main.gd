@@ -24,6 +24,7 @@ func _ready() -> void:
 	_layout()
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
 	bridge.register_query("save_roundtrip", _save_roundtrip)
+	bridge.register_query("art_info", _art_info)
 
 
 func _process(delta: float) -> void:
@@ -43,3 +44,11 @@ func _save_roundtrip(_arg: Variant) -> Dictionary:
 	var same := JSON.stringify(restored.snapshot()) == JSON.stringify(sim.snapshot())
 	DirAccess.remove_absolute(path)
 	return {"write": err, "equal": same, "now_ms": restored.now_ms()}
+
+
+## E2E: the exported build carries the atlas and its metadata.
+func _art_info(_arg: Variant) -> Dictionary:
+	var lib := SpriteLibrary.load_atlas()
+	return {"sprites": lib.sprites.size(), "size": [lib.size.x, lib.size.y],
+		"texture": [lib.texture.get_width(), lib.texture.get_height()] if lib.texture else [0, 0],
+		"momo_origin": [lib.pivot("momo_front").x, lib.pivot("momo_front").y]}

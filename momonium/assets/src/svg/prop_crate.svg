@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- A wooden crate drawn in the tile projection: top diamond plus two faces. Origin pivot (48, 88). -->
+  <g stroke="#6b4426" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M48 22 L84 40 L48 58 L12 40 Z" fill="#e3b277"/>
+    <path d="M12 40 L48 58 L48 88 L12 70 Z" fill="#c88f55"/>
+    <path d="M84 40 L48 58 L48 88 L84 70 Z" fill="#a8723f"/>
+    <path d="M12 40 L48 88 M48 58 L12 70 M84 40 L48 88" fill="none" stroke-width="2"/>
+  </g>
+</svg>

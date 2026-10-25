@@ -1,0 +1,11 @@
+{
+  "_doc": "Sprite sources for the atlas. scale = texels per SVG unit. Pivots are in SVG units; every world sprite has an `origin` (where it touches the ground). Rebuild with tools/art/build_atlas.gd after editing a source.",
+  "atlas": "sprites",
+  "padding": 2,
+  "sprites": {
+    "momo_front": { "source": "svg/momo_front.svg", "scale": 1.0, "world_scale": 0.42, "pivots": { "origin": [100, 210], "head": [100, 34], "hand_r": [146, 156] } },
+    "icon_coin": { "source": "svg/icon_coin.svg", "scale": 1.0, "pivots": { "center": [32, 32] } },
+    "icon_star": { "source": "svg/icon_star.svg", "scale": 1.0, "pivots": { "center": [32, 32] } },
+    "prop_crate": { "source": "svg/prop_crate.svg", "scale": 1.0, "world_scale": 0.5, "pivots": { "origin": [48, 88] } }
+  }
+}

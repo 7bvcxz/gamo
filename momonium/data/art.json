@@ -1,0 +1,45 @@
+{
+  "_doc": "Visual specification as data. design/ART_SPEC.md explains each value; tests/unit/render checks they hold.",
+  "projection": {
+    "_doc": "Square logical tiles seen from 45 degrees of yaw and `elevation_deg` above the horizon.",
+    "tile_width": 128,
+    "elevation_deg": 50,
+    "cliff_height": 0.62
+  },
+  "budgets": {
+    "atlas_max_size": 2048,
+    "atlas_total_mb": 16,
+    "texture_max_size": 512,
+    "sprite_texels_per_world_px": 2
+  },
+  "palette": {
+    "sky_day": ["#2693f8", "#45b0fd", "#c0ddfc"],
+    "sky_sunset": ["#8c6fb8", "#dd8478", "#fda35f"],
+    "sky_night": ["#071a4f", "#0e2f7c", "#496dc3"],
+    "sea_day": ["#68b7fc", "#2fb6f8", "#139fe0", "#2cd6dc"],
+    "sea_sunset": ["#cf8884", "#8a74a0", "#6f6894", "#f0a070"],
+    "sea_night": ["#13429c", "#124aad", "#0a3486", "#2e5fc0"],
+    "foam": "#ffffff",
+    "grass": ["#a6d64b", "#8cc63f", "#6fae33"],
+    "grass_rim": "#c8e86a",
+    "dirt": ["#c99a63", "#a97a4b"],
+    "stone": ["#c3bcb4", "#a19a93", "#7f7973"],
+    "ui_panel": "#163f78",
+    "ui_panel_alpha": 0.62,
+    "ui_text": "#ffffff",
+    "ui_accent": "#ffd34d",
+    "momo_fur": "#fffcf4",
+    "momo_fur_shade": "#ebe3da",
+    "momo_overall": "#f4dec5",
+    "momo_overall_shade": "#e4c8a8",
+    "momo_cheek": "#ffb7b0",
+    "momo_eye": "#3b2620",
+    "momo_outline": "#61504f",
+    "momo_button": "#d19363",
+    "warm_light": "#f1ae53"
+  },
+  "layers": {
+    "_doc": "Draw order, back to front. Entities inside `world_entities` are y-sorted by their origin pivot.",
+    "order": ["sky", "ocean", "island_ground", "ground_decals", "world_entities", "effects", "hud", "panels", "modal"]
+  }
+}

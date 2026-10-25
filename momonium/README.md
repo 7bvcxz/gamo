@@ -15,7 +15,7 @@
 | Godot | **4.7.stable** (`4.7.stable.official.5b4e0cb0f`) | `godot`이 PATH에 있어야 한다. 다른 버전이면 `GODOT=/path/to/godot` |
 | Web export 템플릿 | 4.7.stable `web_nothreads_*` | `~/.local/share/godot/export_templates/4.7.stable/` |
 | Node | 20 이상 | 브라우저 검사(Playwright 1.64.1)용 |
-| Android | SDK + JDK 21 + Android 템플릿 | Step 44에서 사용. 설치 상태와 절차는 [`design/TOOLING.md`](design/TOOLING.md) · [`design/TESTING.md`](design/TESTING.md) |
+| Android | SDK + JDK 21 + Android 템플릿 | Step 44에서 사용. 설치 상태와 절차는 [`design/TOOLING.md`](design/TOOLING.md) · [`design/TESTING.md`](design/TESTING.md) · [`design/ART_SPEC.md`](design/ART_SPEC.md) |
 
 렌더러는 **Compatibility**(웹·모바일 공통), 기준 해상도는 세로 **720×1280**이며
 `expand`로 어떤 화면비든 채운다.
@@ -32,6 +32,10 @@ godot --path momonium
 momonium/tools/test.sh
 momonium/tools/test.sh unit            # 한 묶음만
 momonium/tools/test.sh unit land       # id에 land가 들어간 케이스만
+
+# 아트: SVG → 아틀라스, 팔레트 → 지형 텍스처 (design/ART_SPEC.md)
+godot --headless --path momonium --script res://tools/art/build_atlas.gd
+godot --headless --path momonium --script res://tools/art/build_textures.gd
 
 # CI와 같은 검사: import → 에디터 로드 → 테스트 (+ --export: Web export·팩 크기·브라우저 스모크)
 momonium/tools/check.sh --export
@@ -54,7 +58,7 @@ momonium/tools/verify_pages.sh
 ```
 
 설계: [`design/ARCHITECTURE.md`](design/ARCHITECTURE.md) · [`design/DESIGN_RULES.md`](design/DESIGN_RULES.md) ·
-[`design/TOOLING.md`](design/TOOLING.md) · [`design/TESTING.md`](design/TESTING.md)
+[`design/TOOLING.md`](design/TOOLING.md) · [`design/TESTING.md`](design/TESTING.md) · [`design/ART_SPEC.md`](design/ART_SPEC.md)
 
 ## 폴더
 

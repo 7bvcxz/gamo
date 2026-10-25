@@ -1,0 +1,85 @@
+{
+  "generated_by": "tools/art/build_atlas.gd",
+  "size": [
+    512,
+    256
+  ],
+  "sprites": {
+    "icon_coin": {
+      "pivots": {
+        "center": [
+          30.0,
+          30.0
+        ]
+      },
+      "region": [
+        258,
+        2,
+        60,
+        60
+      ],
+      "source": "svg/icon_coin.svg",
+      "source_sha": "4d89778744a5db85",
+      "world_scale": 1.0
+    },
+    "icon_star": {
+      "pivots": {
+        "center": [
+          29.0,
+          29.0
+        ]
+      },
+      "region": [
+        322,
+        2,
+        58,
+        56
+      ],
+      "source": "svg/icon_star.svg",
+      "source_sha": "e78ea1da43eee1c4",
+      "world_scale": 1.0
+    },
+    "momo_front": {
+      "pivots": {
+        "hand_r": [
+          132.0,
+          142.0
+        ],
+        "head": [
+          86.0,
+          20.0
+        ],
+        "origin": [
+          86.0,
+          196.0
+        ]
+      },
+      "region": [
+        2,
+        2,
+        172,
+        196
+      ],
+      "source": "svg/momo_front.svg",
+      "source_sha": "58be7c704b91d056",
+      "world_scale": 0.42
+    },
+    "prop_crate": {
+      "pivots": {
+        "origin": [
+          38.0,
+          68.0
+        ]
+      },
+      "region": [
+        178,
+        2,
+        76,
+        70
+      ],
+      "source": "svg/prop_crate.svg",
+      "source_sha": "00e826ef9f20708e",
+      "world_scale": 0.5
+    }
+  }
+}
