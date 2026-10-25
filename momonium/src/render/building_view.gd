@@ -150,6 +150,7 @@ func _draw_ring() -> void:
 			ring.draw_circle(_top * 0.5 + Vector2(cos(a) * r, sin(a) * r * 0.6), 3.5 * _celebrate, Color(1, 0.93, 0.5, _celebrate))
 	if b["state"] == BuildingSystem.WORKING:
 		_draw_work_effect(String(buildings.current_stage(b).get("action", "")), buildings.progress(b))
+	_draw_power(b)
 	match String(b["state"]):
 		BuildingSystem.CONSTRUCTING:
 			var p := buildings.progress(b)
@@ -173,6 +174,49 @@ func _draw_ring() -> void:
 			var left := float(buildings.remaining_ms(b)) / total
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.45))
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * left, 32, Color(0.75, 0.85, 1.0, 0.8), RING_WIDTH, true)
+
+
+## Generators move with what they give: blades turning with the wind, the
+## wheel turning steadily, smoke from a fired boiler. A powered building at
+## work wears a small bolt -- bright when it got all its power, dim when not.
+func _draw_power(b: Dictionary) -> void:
+	var power: PowerSystem = buildings.sim.system(&"power")
+	if power == null or b["state"] == BuildingSystem.CONSTRUCTING:
+		return
+	var type := String(b["type"])
+	var now := buildings.sim.now_ms()
+	var t := now / 1000.0
+	var sprite_name := String(buildings.type_def(b).get("sprite", ""))
+	var origin := _lib.pivot(sprite_name, "origin") if _lib.has(sprite_name) else Vector2.ZERO
+	var ws := _lib.world_scale(sprite_name) if _lib.has(sprite_name) else 0.5
+	match String(power.generator_def(type).get("kind", "")):
+		"wind":
+			var hub := (_lib.pivot(sprite_name, "hub") - origin) * ws
+			var a := t * 6.0 * power.wind(now)
+			for i in 3:
+				var dir := Vector2.from_angle(a + TAU * i / 3.0)
+				ring.draw_line(hub, hub + dir * 30.0, Color(0.96, 0.97, 0.98), 4.0, true)
+				ring.draw_line(hub, hub + dir * 30.0, Color(0.6, 0.65, 0.7, 0.6), 1.0, true)
+			ring.draw_circle(hub, 3.0, Color(0.8, 0.83, 0.87))
+		"hydro":
+			var hub := (_lib.pivot(sprite_name, "hub") - origin) * ws
+			ring.draw_arc(hub, 14.0, 0, TAU, 24, Color(0.55, 0.36, 0.2), 3.0, true)
+			for i in 8:
+				var dir := Vector2.from_angle(t * 1.6 + TAU * i / 8.0)
+				ring.draw_line(hub, hub + dir * 14.0, Color(0.66, 0.45, 0.25), 2.0, true)
+				ring.draw_rect(Rect2(hub + dir * 14.0 - Vector2(2.5, 2.5), Vector2(5, 5)), Color(0.55, 0.36, 0.2))
+		"steam":
+			if power.output_of(int(b["id"]), now) > 0.0:
+				var stack := (_lib.pivot(sprite_name, "stack") - origin) * ws
+				for i in 3:
+					var k := fposmod(t * 0.6 + i / 3.0, 1.0)
+					ring.draw_circle(stack + Vector2(sin(k * 5.0 + i) * 4.0, -k * 30.0), 3.0 + k * 5.0, Color(0.9, 0.9, 0.92, 0.7 * (1.0 - k)))
+	if b["state"] == BuildingSystem.WORKING and not power.use_of(type).is_empty():
+		var share := float(power.shares.get(int(b["id"]), 1.0))
+		var c := _top + Vector2(26, -18)
+		var col := Color("#ffd84d") if share >= 0.999 else Color(1.0, 0.6, 0.3, 0.9)
+		ring.draw_circle(c, 9.0, Color(0.09, 0.25, 0.47, 0.8))
+		ring.draw_colored_polygon(PackedVector2Array([c + Vector2(2, -7), c + Vector2(-4, 1), c + Vector2(0, 1), c + Vector2(-2, 7), c + Vector2(4, -1), c + Vector2(0, -1)]), col)
 
 
 ## A building that cannot start shows why, without words: the item it lacks

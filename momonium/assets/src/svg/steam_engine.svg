@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 150" width="140" height="150">
+  <!-- A 1x1 steam engine in the tile projection (diamond centre = origin pivot
+       at (70, 95)): a riveted boiler drum with a firebox door, a tall stack,
+       a flywheel and a wood pile. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5a68e" stroke="#8f8068" stroke-width="2" stroke-linejoin="round"/>
+  <!-- boiler drum -->
+  <path d="M34 98 L34 70 Q34 58 52 58 L88 58 Q102 58 102 70 L102 98 Q102 110 86 112 L50 112 Q34 110 34 98 Z" fill="#7a3a28" stroke="#4a2218" stroke-width="2"/>
+  <path d="M40 70 Q40 64 52 64 L88 64 Q96 64 96 70" fill="none" stroke="#a0573c" stroke-width="3"/>
+  <g fill="#c99a6a"><circle cx="46" cy="76" r="2"/><circle cx="46" cy="96" r="2"/><circle cx="90" cy="76" r="2"/><circle cx="90" cy="96" r="2"/></g>
+  <!-- firebox door -->
+  <rect x="58" y="86" width="20" height="16" rx="3" fill="#2c2620" stroke="#4a2218" stroke-width="2"/>
+  <rect x="61" y="91" width="14" height="8" rx="2" fill="#ff8a3d"/>
+  <!-- stack -->
+  <path d="M78 58 L78 14 L90 14 L90 58 Z" fill="#3a3530" stroke="#1f1b18" stroke-width="2"/>
+  <path d="M75 14 L93 14 L93 9 L75 9 Z" fill="#5f5a52" stroke="#1f1b18" stroke-width="2"/>
+  <!-- flywheel -->
+  <circle cx="112" cy="96" r="12" fill="none" stroke="#5f5a52" stroke-width="4"/>
+  <path d="M112 84 L112 108 M100 96 L124 96" stroke="#5f5a52" stroke-width="3"/>
+  <!-- wood pile -->
+  <g stroke="#6b4426" stroke-width="1.5"><ellipse cx="26" cy="112" rx="5" ry="4" fill="#e2b98a"/><ellipse cx="34" cy="116" rx="5" ry="4" fill="#e2b98a"/><ellipse cx="30" cy="108" rx="5" ry="4" fill="#e2b98a"/></g>
+</svg>

@@ -40,6 +40,9 @@ var detail_view: BuildingDetailView
 ## The technology tree, one tab per industry.
 var research_frame: PanelFrame
 var research_views: Array[ResearchView] = []
+## Power at a glance (from the HUD's power pill).
+var power_frame: PanelFrame
+var power_view: PowerView
 ## Momo Letters.
 var mail_frame: PanelFrame
 var mailbox_view: MailboxView
@@ -231,8 +234,13 @@ func _ready() -> void:
 		var rv := ResearchView.new()
 		rv.setup(sim, lib, industry)
 		research_views.append(rv)
-		research_frame.add_tab("research.industry.global" if industry == "global" else "mastery." + industry, rv)
+		# A building industry is named as its mastery; other branches (power, general) by their own key.
+		research_frame.add_tab("mastery." + industry if not sim.data.building_type(industry).is_empty() else "research.industry." + industry, rv)
 	research_frame.set_title(tr("hud.research"))
+	power_frame = _frame(ui, "PowerFrame")
+	power_view = PowerView.new()
+	power_view.setup(sim, lib)
+	power_frame.add_tab("", power_view)
 	panel.details_pressed.connect(open_details)
 	_place_frames()
 	hud.layout_changed.connect(_place_frames)
@@ -314,6 +322,16 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("power", func(_a: Variant) -> Dictionary:
+		var power: PowerSystem = sim.system(&"power")
+		var vp := get_viewport()
+		var r := hud.power_pill.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		return {"supply": power.supply(), "demand": power.demand(), "ratio": power.ratio(), "capacity": power.capacity(),
+			"pill": hud.power_pill.visible, "pill_text": hud.power_label.text, "pill_rect": [a.x, a.y, b.x - a.x, b.y - a.y],
+			"open": power_frame.visible, "head": power_view.head.text, "window": [win.x, win.y]})
 	bridge.register_query("save_now", func(_a: Variant) -> Dictionary:
 		return {"err": save_now(), "path": save_path, "persist": persist, "written": saves_written,
 			"userfs_persistent": OS.is_userfs_persistent()})
@@ -568,6 +586,15 @@ func _on_hud_action(action_name: StringName) -> void:
 			mail_frame.close()
 			research_frame.close()
 			status_frame.toggle(0)
+		&"power":
+			build_menu.visible = false
+			land_mode.close()
+			placement.close()
+			var was := power_frame.visible
+			_close_frames()
+			if not was:
+				power_frame.set_title(tr("research.industry.power"))
+				power_frame.open()
 		&"research":
 			build_menu.visible = false
 			land_mode.close()
@@ -679,6 +706,8 @@ func _close_frames() -> void:
 		away_frame.close()
 	if settings_frame != null:
 		settings_frame.close()
+	if power_frame != null:
+		power_frame.close()
 	status_frame.close()
 	detail_frame.close()
 	mail_frame.close()
@@ -699,7 +728,7 @@ func _place_frames() -> void:
 	var size := get_viewport_rect().size
 	# Keep the side buttons free.
 	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
-	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame, power_frame]:
 		if f == null:
 			continue
 		f.right_reserved = reserved

@@ -1,5 +1,5 @@
 {
-  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique.",
+  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type.",
   "nodes": [
     {
       "id": "farm_expansion",
@@ -531,6 +531,174 @@
       ]
     },
     {
+      "id": "photovoltaics",
+      "industry": "power",
+      "name": "research.photovoltaics.name",
+      "desc": "research.photovoltaics.desc",
+      "icon": "ui_power",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 100,
+        "items": {
+          "notes": 8,
+          "copper_ingot": 3
+        }
+      },
+      "seconds": 120,
+      "effects": []
+    },
+    {
+      "id": "wind_power",
+      "industry": "power",
+      "name": "research.wind_power.name",
+      "desc": "research.wind_power.desc",
+      "icon": "ui_power",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8,
+          "iron_ingot": 2
+        }
+      },
+      "seconds": 120,
+      "effects": []
+    },
+    {
+      "id": "steam_power",
+      "industry": "power",
+      "name": "research.steam_power.name",
+      "desc": "research.steam_power.desc",
+      "icon": "ui_power",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8,
+          "iron_ingot": 3
+        }
+      },
+      "seconds": 120,
+      "effects": []
+    },
+    {
+      "id": "hydropower",
+      "industry": "power",
+      "name": "research.hydropower.name",
+      "desc": "research.hydropower.desc",
+      "icon": "ui_power",
+      "requires": [
+        "wind_power"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 12,
+          "iron_ingot": 4
+        }
+      },
+      "seconds": 180,
+      "effects": []
+    },
+    {
+      "id": "electric_drill",
+      "industry": "power",
+      "name": "research.electric_drill.name",
+      "desc": "research.electric_drill.desc",
+      "icon": "ui_mine",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 10,
+          "copper_ingot": 2,
+          "iron_ingot": 2
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "power_use",
+          "type": "mine",
+          "draw": 1.5,
+          "multiply": 0.6
+        }
+      ]
+    },
+    {
+      "id": "electric_furnace",
+      "industry": "power",
+      "name": "research.electric_furnace.name",
+      "desc": "research.electric_furnace.desc",
+      "icon": "item_iron_ingot",
+      "requires": [
+        "electric_drill"
+      ],
+      "unlock": {
+        "mastery": {
+          "smelter": 3
+        }
+      },
+      "cost": {
+        "money": 180,
+        "items": {
+          "notes": 12,
+          "copper_ingot": 4
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "power_use",
+          "type": "smelter",
+          "draw": 3,
+          "multiply": 0.6
+        }
+      ]
+    },
+    {
+      "id": "lab_lighting",
+      "industry": "power",
+      "name": "research.lab_lighting.name",
+      "desc": "research.lab_lighting.desc",
+      "icon": "ui_flask",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 80,
+        "items": {
+          "notes": 6,
+          "copper_ingot": 1
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "power_use",
+          "type": "research",
+          "draw": 1,
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
       "id": "field_notebook",
       "industry": "global",
       "name": "research.field_notebook.name",
@@ -556,5 +724,8 @@
         }
       ]
     }
+  ],
+  "branches": [
+    "power"
   ]
 }

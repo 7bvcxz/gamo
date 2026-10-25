@@ -295,3 +295,41 @@ detail.short,Short: {items},부족: {items},不足: {items},不足：{items}
 detail.full,Store full: {items},창고 가득: {items},倉庫がいっぱい: {items},仓库已满：{items}
 effect.recipe,New recipe: {name},새 레시피: {name},新レシピ: {name},新配方：{name}
 effect.batch,{n} batches a charge,한 번에 {n}배치,一度に{n}回分,一次{n}批
+research.industry.power,Power,전력,電力,电力
+building.solar_panel,Solar panels,태양광 패널,太陽光パネル,太阳能板
+building.wind_turbine,Wind turbine,풍력 발전기,風力発電機,风力发电机
+building.steam_engine,Steam engine,증기 기관,蒸気機関,蒸汽机
+building.water_wheel,Water wheel,물레방아,水車,水车
+stage.stoke,Stoke,불 때기,くべる,添柴
+research.photovoltaics.name,Photovoltaics,태양광 발전,太陽光発電,光伏发电
+research.photovoltaics.desc,Copper-wired panels turn sunlight into electricity -- only while the sun is up.,구리로 이은 패널이 햇빛을 전기로 바꿔요 — 해가 떠 있을 때만.,銅でつないだパネルが日の光を電気に変えます — 日が出ている間だけ。,铜线连接的面板把阳光变成电——只在有太阳时。
+research.wind_power.name,Wind power,풍력 발전,風力発電,风力发电
+research.wind_power.desc,"An iron mast and wooden blades: power whenever the wind blows, day or night, more or less.","쇠 기둥과 나무 날개 — 바람이 부는 만큼, 낮이든 밤이든 전기가 나와요.",鉄の柱と木の羽根 — 風が吹くだけ、昼も夜も電気が出ます。,铁杆配木叶片——有风就发电，白天黑夜都行，多少随风。
+research.steam_power.name,Steam power,증기 동력,蒸気動力,蒸汽动力
+research.steam_power.desc,A boiler fired with wood turns a dynamo: steady power for as long as someone stokes it.,나무로 불을 때는 보일러가 발전기를 돌려요. 누군가 불을 때는 동안 일정하게 전기가 나와요.,木で焚くボイラーが発電機を回します。だれかがくべている間、安定して電気が出ます。,烧柴的锅炉带动发电机：有人添柴就能稳定供电。
+research.hydropower.name,Hydropower,수력 발전,水力発電,水力发电
+research.hydropower.desc,"Where the sea moves against the shore, a water wheel turns steadily. Only beside the water.",바닷물이 기슭에 부딪히는 곳에서 물레방아가 꾸준히 돌아요. 물가에만 지을 수 있어요.,海が岸に寄せる所で、水車が休まず回ります。水辺にだけ建てられます。,海水拍岸处，水车稳稳转动。只能建在水边。
+research.electric_drill.name,Electric drill,전기 드릴,電気ドリル,电钻
+research.electric_drill.desc,A powered drill bites into the rock faster -- when there is power for it.,전기로 도는 드릴은 바위를 더 빨리 파요 — 전기가 있을 때.,電気で回るドリルは岩を早く掘ります — 電気があるときに。,电动钻头凿岩更快——前提是有电。
+research.electric_furnace.name,Electric furnace,전기로,電気炉,电炉
+research.electric_furnace.desc,"Electric heat on top of the charcoal: the ore melts much sooner, if the island can power it.",숯불에 전기 열을 더하면 광석이 훨씬 빨리 녹아요 — 섬에 전기가 충분하다면.,炭火に電気の熱を足すと鉱石がずっと早く溶けます — 島に電気が足りれば。,炭火再加电热，矿石熔得快得多——只要岛上电够。
+research.lab_lighting.name,Lab lighting,연구소 조명,研究所の照明,实验室照明
+research.lab_lighting.desc,"Electric light keeps the experiments going faster, day and night.",전등이 있으면 낮이든 밤이든 실험이 더 빨라져요.,電灯があれば、昼も夜も実験がはかどります。,有了电灯，白天黑夜实验都更快。
+effect.power_use,Uses {kw} kW at work · up to -{pct}% time,일할 때 {kw} kW 사용 · 시간 최대 -{pct}%,作業中 {kw} kW 使用 · 時間 最大 -{pct}%,工作时用电 {kw} kW · 时间最多 -{pct}%
+build.needs_research,Needs research: %s,연구 필요: %s,研究が必要: %s,需要研究：%s
+err.needs_research,Research it first,먼저 연구해야 해요,先に研究が必要です,需要先研究
+err.needs_shore,Must be beside the sea,바다에 닿은 칸이어야 해요,海に面したマスが必要です,必须建在海边
+err.no_power,No power,전기가 없어요,電気がありません,没有电
+power.supply,Supply,공급,供給,供电
+power.demand,Draw,사용,使用,用电
+power.share,Share,공급률,供給率,供电率
+power.kind.solar,With the sun,해가 있을 때,日が出ている間,有太阳时
+power.kind.wind,With the wind ({pct}%),바람 따라 ({pct}%),風しだい ({pct}%),随风（{pct}%）
+power.kind.steam,While stoked,불을 때는 동안,くべている間,添柴时
+power.kind.hydro,Steady,늘 일정,いつも一定,稳定
+power.cold,Cold -- needs stoking,식었어요 — 불을 때야 해요,冷えています — くべる必要があります,已冷却——需要添柴
+power.today,Today's supply,오늘의 공급,今日の供給,今天的供电
+power.none,No generators yet,아직 발전기가 없어요,まだ発電機がありません,还没有发电机
+power.users,Uses power,전기를 쓰는 곳,電気を使う所,用电设施
+detail.power_gen,Now {kw} kW of {max},지금 {kw} kW / 최대 {max},いま {kw} kW / 最大 {max},当前 {kw} kW / 最大 {max}
+detail.power_use,Uses {kw} kW · gets {pct}%,{kw} kW 사용 · 공급 {pct}%,{kw} kW 使用 · 供給 {pct}%,用电 {kw} kW · 供电 {pct}%

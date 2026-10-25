@@ -103,7 +103,13 @@ func rebuild() -> void:
 				mats.add_child(n)
 			box.add_child(mats)
 		if not entry["unlocked"]:
-			var lock := _label(tr("build.unlock_at") % int(entry["level"]), 15)
+			var why := tr("build.unlock_at") % int(entry["level"])
+			if bool(entry.get("level_met", false)) and not bool(entry.get("research_met", true)):
+				var node := (sim.system(&"research") as ResearchSystem).node(String(entry["research"]))
+				why = tr("build.needs_research") % tr(String(node.get("name", "")))
+			var lock := _label(why, 15)
+			lock.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			lock.custom_minimum_size.x = 140
 			lock.name = "Unlock"
 			lock.add_theme_color_override("font_color", Color("#ffe27a"))
 			box.add_child(lock)

@@ -181,8 +181,8 @@ func _validate_research() -> void:
 	for id: String in ids:
 		var n: Dictionary = ids[id]
 		var industry := String(n.get("industry", ""))
-		if industry != "global" and not types.has(industry):
-			errors.append("research: %s.industry %s is neither a building type nor global" % [id, industry])
+		if industry != "global" and not types.has(industry) and not (table("research").get("branches", []) as Array).has(industry):
+			errors.append("research: %s.industry %s is neither a building type, a branch nor global" % [id, industry])
 		for r: String in n.get("requires", []):
 			if not ids.has(r):
 				errors.append("research: %s requires unknown %s" % [id, r])
@@ -281,6 +281,10 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 		"batch":
 			if not types.has(String(e.get("type", ""))) or int(e.get("add", 0)) < 1:
 				errors.append("research: %s batch effect needs a type and add >= 1" % id)
+		"power_use":
+			var m := float(e.get("multiply", 0.0))
+			if not types.has(String(e.get("type", ""))) or float(e.get("draw", 0)) <= 0.0 or m <= 0.0 or m > 1.0:
+				errors.append("research: %s power_use needs a type, draw > 0 and multiply in (0, 1]" % id)
 		"research_time":
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0:
@@ -347,7 +351,17 @@ func _validate_buildings() -> void:
 		if int((t.get("unlock", {}) as Dictionary).get("level", 1)) < 1:
 			errors.append("buildings: %s.unlock.level must be >= 1" % key)
 		var stages: Variant = (t.get("cycle", {}) as Dictionary).get("stages")
-		if typeof(stages) != TYPE_ARRAY or (stages as Array).is_empty():
+		var generates := not ((t.get("power", {}) as Dictionary).get("generate", {}) as Dictionary).is_empty()
+		if generates:
+			var kind := String(t["power"]["generate"].get("kind", ""))
+			if not ["solar", "wind", "steam", "hydro"].has(kind) or float(t["power"]["generate"].get("kw", 0)) <= 0.0:
+				errors.append("buildings: %s.power.generate needs a known kind and kw > 0" % key)
+			if kind == "steam" and (typeof(stages) != TYPE_ARRAY or not (stages as Array).any(func(st: Dictionary) -> bool: return not (st.get("consumes", {}) as Dictionary).is_empty())):
+				errors.append("buildings: %s burns fuel but has no stage that takes any" % key)
+		var research_needed := String((t.get("unlock", {}) as Dictionary).get("research", ""))
+		if research_needed != "" and not (table("research").get("nodes", []) as Array).any(func(n: Dictionary) -> bool: return String(n.get("id", "")) == research_needed):
+			errors.append("buildings: %s.unlock.research %s is not a research node" % [key, research_needed])
+		if typeof(stages) != TYPE_ARRAY or ((stages as Array).is_empty() and not generates):
 			errors.append("buildings: %s.cycle.stages must list at least one stage" % key)
 			continue
 		var looks: Variant = (t.get("cycle", {}) as Dictionary).get("looks", [])

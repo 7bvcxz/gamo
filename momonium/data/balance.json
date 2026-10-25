@@ -143,5 +143,14 @@
     "max_events": 40000,
     "report_seconds": 60,
     "autosave_seconds": 15
+  },
+  "power": {
+    "_doc": "Power is capacity, not stored energy: supply now (kW) against the draw of the buildings working now. A stage takes its power share when it starts -- satisfaction = supply / (draw of everything running + its own), capped at 1 -- and keeps that speed to its end (no continuous physics). Solar follows the sun (zero at night, peak at midday, the sky's own phases); wind follows a smooth deterministic gust curve (wind_* below) day and night; steam is steady while stoked; hydro is steady but needs the shore.",
+    "wind_base": 0.55,
+    "wind_slow_amp": 0.3,
+    "wind_slow_days": 3.0,
+    "wind_fast_amp": 0.15,
+    "wind_fast_days": 0.7,
+    "wind_min": 0.1
   }
 }

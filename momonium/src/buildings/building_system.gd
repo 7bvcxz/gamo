@@ -336,6 +336,8 @@ func catalog() -> Array[Dictionary]:
 		if not bool(t.get("enabled", true)):
 			continue
 		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
+			"level_met": (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})),
+			"research": String(t.get("unlock", {}).get("research", "")), "research_met": research_met(type),
 			"cost": t.get("cost", {}), "build_seconds": float(t.get("build_seconds", 1))})
 	return out
 
@@ -343,7 +345,16 @@ func catalog() -> Array[Dictionary]:
 func is_unlocked(type: String) -> bool:
 	var t := sim.data.building_type(type)
 	var prog: ProgressionSystem = sim.system(&"progression")
-	return not t.is_empty() and bool(t.get("enabled", true)) and prog.meets(t.get("unlock", {}))
+	return not t.is_empty() and bool(t.get("enabled", true)) and prog.meets(t.get("unlock", {})) and research_met(type)
+
+
+## Whether the research a type waits for (unlock.research) is finished.
+func research_met(type: String) -> bool:
+	var needed := String(sim.data.building_type(type).get("unlock", {}).get("research", ""))
+	if needed == "":
+		return true
+	var research: ResearchSystem = sim.system(&"research")
+	return research != null and research.is_done(needed)
 
 
 ## Whether `type` could be placed at `anchor` now, and if not, why -- without
@@ -353,6 +364,8 @@ func can_place(type: String, anchor: Vector2i) -> Dictionary:
 	if t.is_empty() or not bool(t.get("enabled", true)):
 		return SimResult.fail("err.unknown_building")
 	if not is_unlocked(type):
+		if not research_met(type) and (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})):
+			return SimResult.fail("err.needs_research", {"research": String(t["unlock"]["research"])})
 		return SimResult.fail("err.locked", {"level": int(t.get("unlock", {}).get("level", 1))})
 	var world: WorldSystem = sim.system(&"world")
 	for c: Vector2i in cells_of(_record(type, anchor)):
@@ -360,6 +373,9 @@ func can_place(type: String, anchor: Vector2i) -> Dictionary:
 			return SimResult.fail("err.not_owned", {"cell": [c.x, c.y]})
 		if world.is_occupied(c):
 			return SimResult.fail("err.occupied", {"cell": [c.x, c.y]})
+		# A water wheel needs moving water: the tile must touch the sea.
+		if String(t.get("placement", "")) == "shore" and not _beside_sea(c):
+			return SimResult.fail("err.needs_shore", {"cell": [c.x, c.y]})
 	var cost: Dictionary = t.get("cost", {})
 	var money := int(cost.get("money", 0))
 	if not (sim.system(&"economy") as EconomySystem).can_afford(money):
@@ -369,6 +385,14 @@ func can_place(type: String, anchor: Vector2i) -> Dictionary:
 	if not inv.has_all(items):
 		return SimResult.fail("err.not_enough_items", {"missing": inv.shortfall(items)})
 	return SimResult.ok()
+
+
+func _beside_sea(c: Vector2i) -> bool:
+	var world: WorldSystem = sim.system(&"world")
+	for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if not world.is_owned(c + d):
+			return true
+	return false
 
 
 ## Pays and starts construction. The building occupies its cells at once
@@ -456,6 +480,13 @@ func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 	if b["state"] == COOLDOWN:
 		return SimResult.fail("err.cooldown", {"remaining_ms": remaining_ms(b)})
 	var stage := current_stage(b)
+	if stage.is_empty():
+		return SimResult.fail("err.no_job")
+	for source: Object in modifiers:
+		if source.has_method("start_blocker"):
+			var why := String(source.call("start_blocker", String(b["type"])))
+			if why != "":
+				return SimResult.fail(why)
 	var inv: InventorySystem = sim.system(&"inventory")
 	# A stage that takes inputs starts only with all of them in the store, and
 	# takes them as it starts: nothing is made from nothing, nothing half-charged.

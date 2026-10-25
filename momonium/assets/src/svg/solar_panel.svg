@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
+  <!-- A 1x1 solar array in the tile projection (diamond centre = origin
+       pivot at (70, 95)): two tilted panels of blue cells on a frame. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <g stroke="#6f7680" stroke-width="3" stroke-linecap="round">
+    <path d="M40 104 L40 84 M70 120 L70 98 M100 104 L100 84 M54 92 L54 74 M86 92 L86 74"/>
+  </g>
+  <!-- back panel -->
+  <path d="M38 76 L72 56 L106 76 L72 96 Z" fill="#2f5d96" stroke="#c9d3dd" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#7fb6ee" stroke-width="1.5" opacity="0.8">
+    <path d="M49 70 L83 90 M60 63 L94 83 M55 86 L89 66 M46 80 L80 60"/>
+  </g>
+  <!-- front panel -->
+  <path d="M30 96 L64 76 L98 96 L64 116 Z" fill="#3a6fb3" stroke="#e4e8ec" stroke-width="3" stroke-linejoin="round"/>
+  <g stroke="#a8d1f5" stroke-width="1.5" opacity="0.8">
+    <path d="M41 90 L75 110 M52 83 L86 103 M47 106 L81 86 M38 100 L72 80"/>
+  </g>
+  <path d="M40 92 L52 85" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+</svg>

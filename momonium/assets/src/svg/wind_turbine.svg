@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 190" width="140" height="190">
+  <!-- A 1x1 wind turbine in the tile projection (diamond centre = origin pivot
+       at (70, 135)): a tapering white mast on a concrete pad, the nacelle at
+       the top (its blades are drawn turning in code, at the hub (70, 30)). -->
+  <path d="M70 100 L122 136 L70 172 L18 136 Z" fill="#b5d77a" stroke="#86a855" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M52 140 L70 128 L88 140 L70 152 Z" fill="#c9c4bb" stroke="#8d8579" stroke-width="2"/>
+  <path d="M65 142 L67 34 L73 34 L75 142 Z" fill="#f4f6f8" stroke="#9aa4ae" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M60 26 L84 26 Q90 30 84 34 L60 34 Z" fill="#e4e8ec" stroke="#9aa4ae" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="70" cy="30" r="5" fill="#c9d3dd" stroke="#6f7b87" stroke-width="2"/>
+</svg>

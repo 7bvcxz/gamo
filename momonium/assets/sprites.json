@@ -651,6 +651,88 @@
           32
         ]
       }
+    },
+    "ui_power": {
+      "source": "svg/ui_power.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
+    },
+    "solar_panel": {
+      "source": "svg/solar_panel.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          72,
+          58
+        ]
+      }
+    },
+    "wind_turbine": {
+      "source": "svg/wind_turbine.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          135
+        ],
+        "top": [
+          70,
+          27
+        ],
+        "hub": [
+          70,
+          30
+        ]
+      }
+    },
+    "steam_engine": {
+      "source": "svg/steam_engine.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          84,
+          9
+        ],
+        "stack": [
+          84,
+          9
+        ]
+      }
+    },
+    "water_wheel": {
+      "source": "svg/water_wheel.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          62,
+          38
+        ],
+        "hub": [
+          104,
+          96
+        ]
+      }
     }
   }
 }

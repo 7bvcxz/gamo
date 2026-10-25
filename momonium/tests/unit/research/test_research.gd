@@ -38,7 +38,7 @@ func _ready_to_research() -> void:
 
 
 func test_the_tree_and_its_branches() -> void:
-	assert_eq(research.industries(), ["farm", "lumberyard", "mine", "smelter", "global"] as Array[String], "a branch per industry, general last")
+	assert_eq(research.industries(), ["farm", "lumberyard", "mine", "smelter", "power", "global"] as Array[String], "a branch per industry, general last")
 	assert_eq(research.nodes("farm").size(), GameData.load_default().table("research")["nodes"].filter(func(n: Dictionary) -> bool: return n["industry"] == "farm").size(), "every farming technology in the data")
 	assert_true(research.nodes("farm").size() >= 3, "several of them")
 	for n: Dictionary in research.nodes():
@@ -192,7 +192,7 @@ func test_bad_trees_are_refused() -> void:
 		"requires itself": [{"id": "a", "industry": "farm", "name": "n", "desc": "d", "requires": ["b"], "seconds": 1, "effects": []},
 			{"id": "b", "industry": "farm", "name": "n", "desc": "d", "requires": ["a"], "seconds": 1, "effects": []}],
 		"requires unknown": [{"id": "a", "industry": "farm", "name": "n", "desc": "d", "requires": ["zz"], "seconds": 1, "effects": []}],
-		"neither a building type nor global": [{"id": "a", "industry": "spaceport", "name": "n", "desc": "d", "seconds": 1, "effects": []}],
+		"neither a building type": [{"id": "a", "industry": "spaceport", "name": "n", "desc": "d", "seconds": 1, "effects": []}],
 		"makes things easier": [{"id": "a", "industry": "farm", "name": "n", "desc": "d", "seconds": 1, "effects": [{"kind": "cooldown", "type": "farm", "action": "water", "multiply": 1.5}]}],
 		"unknown effect kind": [{"id": "a", "industry": "farm", "name": "n", "desc": "d", "seconds": 1, "effects": [{"kind": "skip_stage", "type": "farm"}]}],
 		"waits for a proposal no letter makes": [{"id": "a", "industry": "farm", "name": "n", "desc": "d", "seconds": 1, "unlock": {"proposal": true}, "effects": []}],

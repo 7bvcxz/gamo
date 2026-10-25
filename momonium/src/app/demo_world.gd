@@ -24,9 +24,14 @@ static func build(data: GameData = null) -> Simulation:
 	var lumber := bs.place_instant("lumberyard", Vector2i(-1, 0))
 	var mine := bs.place_instant("mine", Vector2i(2, 1))
 	var smelter := bs.place_instant("smelter", Vector2i(1, 1))
-	for i in 5:
+	# Power: one of each kind -- sun, wind, a stoked boiler, a wheel on the shore.
+	bs.place_instant("solar_panel", Vector2i(1, 2))
+	bs.place_instant("wind_turbine", Vector2i(-1, 1))
+	var steam := bs.place_instant("steam_engine", Vector2i(0, 0))
+	bs.place_instant("water_wheel", Vector2i(0, 2))
+	for i in 6:
 		sim.execute({"type": "momo.hire"})
-	var jobs := [farm, farm2, lab, lumber, mine, smelter]
+	var jobs := [farm, farm2, lab, lumber, mine, smelter, steam]
 	for i in jobs.size():
 		sim.execute({"type": "momo.assign", "momo": i + 1, "building": jobs[i]})
 	prog.add_mastery("farm", 700)
@@ -34,7 +39,7 @@ static func build(data: GameData = null) -> Simulation:
 	prog.add_mastery("lumberyard", 350)
 	prog.add_mastery("research", 300)
 	prog.add_mastery("smelter", 300)
-	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery"]:
+	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery", "photovoltaics", "wind_power", "steam_power", "hydropower", "electric_drill", "lab_lighting"]:
 		research.completed[id] = 0
 	sim.bus.emit(&"research_completed", {"id": "sharp_axes"})
 	(sim.system(&"inventory") as InventorySystem).add("notes", 25, "demo")

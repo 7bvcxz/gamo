@@ -31,6 +31,7 @@ var research_box: VBoxContainer
 var recipe_box: HBoxContainer
 var takes_row: HBoxContainer
 var block_label: Label
+var power_row: HBoxContainer
 var _shown_recipes := ""
 var last_result: Dictionary = {}
 var _shown_varieties := ""
@@ -91,6 +92,9 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	block_label.add_theme_color_override("font_color", Color("#ffb3a8"))
 	block_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(block_label)
+	power_row = PanelViews.row("", "")
+	power_row.name = "Power"
+	add_child(power_row)
 	research_box = VBoxContainer.new()
 	research_box.name = "Research"
 	add_child(research_box)
@@ -161,6 +165,7 @@ func refresh() -> void:
 	_set_row(done_row, tr("panel.records.tasks"), str(int(b.get("completed", 0))))
 	_refresh_varieties(b, buildings)
 	_refresh_recipes(b, buildings)
+	_refresh_power(b)
 	_refresh_research(b)
 
 
@@ -328,6 +333,26 @@ func _recipe_button(b: Dictionary, buildings: BuildingSystem, r: String) -> Butt
 			btn.draw_arc(c + Vector2(0, -2), 4.0, PI, TAU, 10, Color.WHITE, 2.0, true)
 			btn.draw_rect(Rect2(c + Vector2(-5, -2), Vector2(10, 8)), Color.WHITE))
 	return btn
+
+
+## A generator: what it gives now of its most. A powered building: what it
+## draws and the share it got.
+func _refresh_power(b: Dictionary) -> void:
+	var power: PowerSystem = sim.system(&"power")
+	power_row.visible = false
+	if power == null:
+		return
+	var type := String(b["type"])
+	if power.is_generator(type):
+		power_row.visible = true
+		_set_row(power_row, tr("power.supply"), tr("detail.power_gen").format({
+			"kw": amount(snappedf(power.output_of(int(b["id"]), sim.now_ms()), 0.1)), "max": amount(float(power.generator_def(type).get("kw", 0)))}))
+		return
+	var use := power.use_of(type)
+	if not use.is_empty():
+		power_row.visible = true
+		var share := float(power.shares.get(int(b["id"]), power.satisfaction(type)))
+		_set_row(power_row, tr("power.demand"), tr("detail.power_use").format({"kw": amount(float(use["draw"])), "pct": int(round(share * 100.0))}))
 
 
 ## Finished research that acts on this building type, in the research menu's words.

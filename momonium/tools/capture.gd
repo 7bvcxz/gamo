@@ -28,6 +28,9 @@ func _init() -> void:
 		var value: String = raw[i + 1] if i + 1 < raw.size() else ""
 		_args[key] = value
 		i += 2
+	# --demo 1 opens the demo island (Settings > demo) instead of a new one.
+	if _args.get("demo", "") == "1":
+		Engine.set_meta("momonium_demo", true)
 	if not _args.has("out"):
 		push_error("capture: --out <absolute png path> is required")
 		quit(2)

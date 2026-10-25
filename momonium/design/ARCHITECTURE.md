@@ -27,6 +27,7 @@
 | `src/research` | 로직 | `ResearchSystem` — 연구 트리·해금·진행, 효과는 `BuildingSystem.modifiers`로(작업·기다림 배율, 수확 보너스) |
 | `src/agents` | 로직 | 모모(에이전트)·작업 스케줄링(`JobSystem`)·모모 편지(`MailSystem`)·매니저 |
 | `src/persistence` | 로직 | 저장 형식·버전·이주·원자적 쓰기 |
+| `src/power` | 로직 | `PowerSystem` — 발전(태양·바람·증기·수력)·사용·공급 비율, `BuildingSystem.modifiers`로 작업 속도와 시작 차단 |
 | `src/render` | 표현 | 섬·바다·하늘·건물 그리기, 깊이 정렬 |
 | `src/input` | 표현 | 카메라, 제스처, 입력 라우터 |
 | `src/ui` | 표현 | HUD, 패널, 문구 |

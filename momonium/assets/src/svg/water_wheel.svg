@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 water wheel in the tile projection (diamond centre = origin pivot
+       at (70, 95)): a little timber mill house; the wheel itself is drawn
+       turning in code beside it (hub at (104, 96)). -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#9ccf6e" stroke="#6f9f45" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M28 98 L66 120 L66 82 L28 60 Z" fill="#c88f55" stroke="#6b4426" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M66 120 L94 104 L94 66 L66 82 Z" fill="#e2b98a" stroke="#6b4426" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M22 62 L62 38 L100 64 L66 86 Z" fill="#a0573c" stroke="#5f3424" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M42 84 L54 90 L54 102 L42 96 Z" fill="#8fd0ff" stroke="#6b4426" stroke-width="2"/>
+  <path d="M74 98 L84 92 L84 110 L74 116 Z" fill="#6b4426"/>
+</svg>

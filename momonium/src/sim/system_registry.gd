@@ -18,5 +18,6 @@ static func create_default() -> Array[SimSystem]:
 		JobSystem.new(),
 		MailSystem.new(),
 		ResearchSystem.new(),
+		PowerSystem.new(),
 	]
 	return list

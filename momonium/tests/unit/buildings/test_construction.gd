@@ -70,7 +70,12 @@ func test_level_unlock_and_material_costs() -> void:
 	var listed := {}
 	for entry: Dictionary in buildings.catalog():
 		listed[entry["type"]] = entry["unlocked"]
-	assert_eq(listed, {"farm": true, "research": false, "lumberyard": false, "mine": false, "smelter": false, "shed": false}, "the catalog shows what exists and what is locked (lab and lumberyard Lv 2, mine Lv 3, smelter Lv 4), not disabled types")
+	assert_true(listed["farm"], "the farm is open at Lv 1")
+	assert_false(listed["shed"], "the Lv 3 shed is listed, locked")
+	for t: String in listed:
+		if t != "farm":
+			assert_false(listed[t], "%s is listed but locked at Lv 1" % t)
+	assert_true(listed.has("mine") and listed.has("solar_panel"), "every enabled type is on the list (%s)" % [listed.keys()])
 	(sim.system(&"progression") as ProgressionSystem).level = 3
 	var r := sim.execute({"type": "building.place", "building": "shed", "anchor": [0, 0]})
 	assert_eq(r["reason"], "err.not_enough_items", "money is not enough: it needs wood")

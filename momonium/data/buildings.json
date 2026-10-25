@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too.",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -331,6 +331,163 @@
       "enabled": true,
       "refund": 1.0,
       "workers": 1
+    },
+    "solar_panel": {
+      "name": "building.solar_panel",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "solar_panel",
+      "cycle": {
+        "_doc": "No work cycle: it generates by itself.",
+        "stages": [],
+        "looks": []
+      },
+      "power": {
+        "generate": {
+          "kind": "solar",
+          "kw": 4
+        }
+      },
+      "icon": "ui_power",
+      "cost": {
+        "money": 150,
+        "items": {
+          "copper_ingot": 2,
+          "stone": 4
+        }
+      },
+      "build_seconds": 12,
+      "unlock": {
+        "level": 4,
+        "research": "photovoltaics"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
+    },
+    "wind_turbine": {
+      "name": "building.wind_turbine",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "wind_turbine",
+      "cycle": {
+        "_doc": "No work cycle: it generates by itself.",
+        "stages": [],
+        "looks": []
+      },
+      "power": {
+        "generate": {
+          "kind": "wind",
+          "kw": 3
+        }
+      },
+      "icon": "ui_power",
+      "cost": {
+        "money": 200,
+        "items": {
+          "iron_ingot": 2,
+          "wood": 12
+        }
+      },
+      "build_seconds": 15,
+      "unlock": {
+        "level": 4,
+        "research": "wind_power"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
+    },
+    "steam_engine": {
+      "name": "building.steam_engine",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "steam_engine",
+      "cycle": {
+        "_doc": "Stoke the firebox with wood; the boiler then runs for power.generate.burn_seconds. A Momo keeps it stoked; without wood it goes cold.",
+        "stages": [
+          {
+            "id": "stoke",
+            "action": "stoke",
+            "label": "stage.stoke",
+            "icon": "item_wood",
+            "seconds": 3,
+            "cooldown": 27,
+            "required": true,
+            "consumes": {
+              "wood": 1
+            }
+          }
+        ],
+        "looks": [
+          ""
+        ]
+      },
+      "power": {
+        "generate": {
+          "kind": "steam",
+          "kw": 5,
+          "burn_seconds": 30
+        }
+      },
+      "icon": "ui_power",
+      "cost": {
+        "money": 180,
+        "items": {
+          "iron_ingot": 3,
+          "stone": 10
+        }
+      },
+      "build_seconds": 15,
+      "unlock": {
+        "level": 4,
+        "research": "steam_power"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 1
+    },
+    "water_wheel": {
+      "name": "building.water_wheel",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "water_wheel",
+      "cycle": {
+        "_doc": "No work cycle: it generates by itself.",
+        "stages": [],
+        "looks": []
+      },
+      "power": {
+        "generate": {
+          "kind": "hydro",
+          "kw": 3
+        }
+      },
+      "placement": "shore",
+      "icon": "ui_power",
+      "cost": {
+        "money": 160,
+        "items": {
+          "wood": 15,
+          "iron_ingot": 1
+        }
+      },
+      "build_seconds": 15,
+      "unlock": {
+        "level": 5,
+        "research": "hydropower"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 0
     }
   }
 }

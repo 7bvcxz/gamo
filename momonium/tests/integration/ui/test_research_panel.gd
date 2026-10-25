@@ -46,7 +46,7 @@ func test_the_research_button_opens_the_tree() -> void:
 	main.call("_on_hud_action", &"research")
 	await tree.process_frame
 	assert_true(frame.visible, "the research menu opens")
-	assert_eq(frame.tabs.map(func(t: Dictionary) -> String: return (t["button"] as Button).text), ["Farm", "Lumber", "Mine", "Smelting", "General"], "a tab per branch, general last")
+	assert_eq(frame.tabs.map(func(t: Dictionary) -> String: return (t["button"] as Button).text), ["Farm", "Lumber", "Mine", "Smelting", "Power", "General"], "a tab per branch, general last")
 	var view := _farm_view()
 	assert_eq(view.cards.size(), (sim.system(&"research") as ResearchSystem).nodes("farm").size(), "every farm node has a card")
 	for id: String in view.cards:

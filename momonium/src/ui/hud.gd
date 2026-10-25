@@ -23,6 +23,9 @@ var money_pill: PanelContainer
 var exp_pill: PanelContainer
 var production_label: Label
 var side_buttons: Array[HudButton] = []
+## Supply / draw in kW, once power is part of the island; tap for the details.
+var power_pill: Button
+var power_label: Label
 var corner_buttons: Array[HudButton] = []
 var buttons: Dictionary = {}
 ## Right edge of the bottom-left buttons and the bottom margin, after layout.
@@ -74,6 +77,34 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	exp_pill.get_child(0).add_child(_level_label)
 	exp_pill.get_child(0).add_child(_exp_label)
 	add_child(exp_pill)
+
+	power_pill = Button.new()
+	power_pill.name = "PowerPill"
+	power_pill.custom_minimum_size = Vector2(150, 44)
+	power_pill.focus_mode = Control.FOCUS_NONE
+	power_pill.visible = false
+	var pill_row := HBoxContainer.new()
+	pill_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pill_row.offset_left = 10
+	pill_row.offset_right = -10
+	pill_row.add_theme_constant_override("separation", 6)
+	pill_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bolt := TextureRect.new()
+	bolt.texture = lib.atlas_texture("ui_power")
+	bolt.custom_minimum_size = Vector2(22, 22)
+	bolt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	bolt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	bolt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	bolt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pill_row.add_child(bolt)
+	power_label = Label.new()
+	power_label.add_theme_font_size_override("font_size", 17)
+	power_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	power_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pill_row.add_child(power_label)
+	power_pill.add_child(pill_row)
+	power_pill.pressed.connect(func() -> void: action.emit(&"power"))
+	add_child(power_pill)
 
 	production_label = _label(15)
 	production_label.name = "Production"
@@ -197,6 +228,18 @@ func refresh(force: bool = false) -> void:
 	var mail_button: HudButton = buttons.get(&"mailbox")
 	if mail != null and mail_button != null and mail_button.badge != (mail.unread_count() > 0):
 		mail_button.badge = mail.unread_count() > 0
+	var power: PowerSystem = sim.system(&"power")
+	if power != null:
+		var show := power.in_use()
+		if power_pill.visible != show:
+			power_pill.visible = show
+			_layout.call_deferred()
+		if show:
+			var text := "%s / %s kW" % [BuildingDetailView.amount(snappedf(power.supply(), 0.1)), BuildingDetailView.amount(snappedf(power.demand(), 0.1))]
+			if power_label.text != text:
+				power_label.text = text
+			var r := power.ratio()
+			power_pill.modulate = Color.WHITE if r >= 0.999 else (Color("#ffb347") if r > 0.0 else Color("#ff7a6e"))
 	var research: ResearchSystem = sim.system(&"research")
 	var research_button: HudButton = buttons.get(&"research")
 	if research != null and research_button != null:
@@ -206,6 +249,12 @@ func refresh(force: bool = false) -> void:
 	var production := production_summary()
 	_set_text(production_label, "prod", production, force)
 	production_label.visible = production != ""
+
+
+func _set_text_button(b: Button, text: String) -> void:
+	if b.text != text:
+		b.text = text
+		b.reset_size()
 
 
 ## One short line: crops waiting in the store and what they fetch at the next
@@ -274,6 +323,8 @@ func _layout() -> void:
 	exp_pill.size.x = pill_w
 	money_pill.position = Vector2(w - m["right"] - pill_w, m["top"])
 	exp_pill.position = Vector2(w - m["right"] - pill_w, money_pill.position.y + money_pill.size.y + GAP)
+	power_pill.reset_size()
+	power_pill.position = Vector2(m["left"], day_panel.position.y + day_panel.size.y + GAP)
 	production_label.reset_size()
 	production_label.position = Vector2(w - m["right"] - production_label.size.x, exp_pill.position.y + exp_pill.size.y + 4)
 	var y := exp_pill.position.y + exp_pill.size.y + 34

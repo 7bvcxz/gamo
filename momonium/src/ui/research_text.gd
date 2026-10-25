@@ -42,6 +42,8 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 			return t.translate("effect.recipe").format({"name": t.translate(String(r.get("name", "")))})
 		"batch":
 			return t.translate("effect.batch").format({"n": int(e.get("add", 1)) + 1})
+		"power_use":
+			return t.translate("effect.power_use").format({"kw": BuildingDetailView.amount(float(e.get("draw", 0))), "pct": pct})
 		"research_time":
 			return t.translate("effect.research_time").format({"pct": pct})
 	return ""
