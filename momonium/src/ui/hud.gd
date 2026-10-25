@@ -29,6 +29,16 @@ var power_label: Label
 ## The Clock Tower's burst: a tiny dial -- gold and counting down while work
 ## goes twice as fast, dim and counting to the next burst otherwise.
 var burst_pill: Control
+## Feedback gathered within this many seconds pops once (see _on_sim_event).
+const FEEDBACK_WINDOW := 0.3
+var _pending_money := 0
+var _pending_exp := 0
+var _pending_level := 0
+var _pending_research: Array = []
+var _feedback_queued := false
+var _live := {}
+## Every pop shown, newest last (tests, the E2E bridge).
+var pops: Array[String] = []
 var burst_text := ""
 var burst_active := false
 var burst_fraction := 0.0
@@ -137,56 +147,164 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	_layout()
 
 
+## Feedback from the simulation, gathered for a moment so a burst -- the sale
+## and a harvest in one frame, many Momo finishing together -- reads as one
+## pop per kind, not a stack. Nothing pops while time away is being caught up
+## (the welcome-back card sums it), and nothing at all with effects off.
 func _on_sim_event(type: StringName, payload: Dictionary) -> void:
-	if type == &"money_changed" and int(payload.get("delta", 0)) != 0:
-		pop_money(int(payload["delta"]))
-	elif type == &"level_up":
-		_pop(exp_pill, tr("fx.level_up") % int(payload["level"]), Color("#ffe27a"))
-	elif type == &"research_completed" and buttons.has(&"research"):
-		var node := (sim.system(&"research") as ResearchSystem).node(String(payload["id"]))
-		_pop(buttons[&"research"], tr("fx.research_done") % tr(String(node.get("name", ""))), Color("#b7f08a"))
-	elif type == &"exp_gained":
-		_pop(exp_pill, "+%d EXP" % int(payload["amount"]), Color(1, 1, 1, 0.95))
+	if sim.replaying:
+		return
+	match type:
+		&"money_changed":
+			_pending_money += int(payload.get("delta", 0))
+		&"exp_gained":
+			_pending_exp += int(payload.get("amount", 0))
+		&"level_up":
+			_pending_level = maxi(_pending_level, int(payload["level"]))
+		&"research_completed":
+			_pending_research.append(payload)
+		_:
+			return
+	if _feedback_queued:
+		return
+	_feedback_queued = true
+	if is_inside_tree():
+		get_tree().create_timer(FEEDBACK_WINDOW).timeout.connect(flush_feedback)
+	else:
+		flush_feedback()
 
 
-func _pop(anchor: Control, text: String, color: Color) -> void:
+## Shows what gathered since the last pop, once.
+func flush_feedback() -> void:
+	_feedback_queued = false
+	var money := _pending_money
+	var exp_gain := _pending_exp
+	var level := _pending_level
+	var research := _pending_research.duplicate()
+	_pending_money = 0
+	_pending_exp = 0
+	_pending_level = 0
+	_pending_research.clear()
+	if not FxPrefs.enabled:
+		return
+	if money != 0:
+		pop_money(money)
+	if exp_gain > 0:
+		_pop_amount("exp", exp_pill, exp_gain, Color(1, 1, 1, 0.95))
+	if level > 0:
+		_pop(exp_pill, tr("fx.level_up") % level, Color("#ffe27a"), 0.45, true)
+	if not research.is_empty() and buttons.has(&"research"):
+		_pop(buttons[&"research"], research_text(research), Color("#b7f08a"), 0.0, true)
+
+
+## What research just finished, in a line or two: one technology with what
+## its new level does -- before and after, from the same effect data the
+## simulation applies -- or how many at once.
+func research_text(done: Array) -> String:
+	var rs: ResearchSystem = sim.system(&"research")
+	if done.size() > 1:
+		return tr("fx.research_many") % done.size()
+	var id := String(done[0]["id"])
+	var lv := int(done[0].get("level", rs.level(id)))
+	var text := tr("fx.research_done") % tr(String(rs.node(id).get("name", "")))
+	var now := ResearchText.at_level(sim, id, lv) if lv > 0 else ""
+	var before := ResearchText.at_level(sim, id, lv - 1) if lv > 1 else ""
+	if now != "" and before != "" and before != now:
+		text += "\n" + tr("fx.before_after").format({"before": before, "after": now})
+	elif now != "":
+		text += "\n" + now
+	return text
+
+
+## A short line beside `anchor`, drifting up and fading: to its left (the
+## pills and side buttons sit at the right edge), so it never covers another
+## control; long text wraps rather than leaving the screen.
+func _pop(anchor: Control, text: String, color: Color, delay: float = 0.0, side: bool = false) -> void:
 	var l := Label.new()
 	l.text = text
+	l.name = "Pop"
 	l.add_theme_font_size_override("font_size", 20)
 	l.add_theme_color_override("font_color", color)
 	l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
 	l.add_theme_constant_override("outline_size", 6)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if side and text.length() > 18:
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		l.custom_minimum_size.x = minf(340.0, anchor.position.x - 24.0)
 	add_child(l)
 	l.reset_size()
-	l.position = anchor.position + Vector2(anchor.size.x * 0.5 - l.size.x * 0.5, anchor.size.y + 2)
-	var tween := create_tween()
-	tween.tween_property(l, "position:y", l.position.y + 34.0, 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(l, "modulate:a", 0.0, 1.0).set_delay(0.3)
-	tween.tween_callback(l.queue_free)
+	if side:
+		l.position = anchor.position + Vector2(-l.size.x - 10.0, anchor.size.y * 0.5 - 14.0)
+	else:
+		l.position = anchor.position + Vector2(anchor.size.x * 0.5 - l.size.x * 0.5, anchor.size.y + 2)
+	l.position.x = clampf(l.position.x, 8.0, maxf(size.x - l.size.x - 8.0, 8.0))
+	_log_pop(text)
+	_animate(l, -16.0 if side else 34.0, 1.0 + (0.8 if text.length() > 18 else 0.0), delay)
 
 
-## A "+$5" (or "-$10") that rises from the money pill and fades, and a little
-## bounce of the pill: the number changed, here is by how much.
+## A "+$5" (or "-$10") beside the money pill, and a little bounce of the
+## pill: the number changed, here is by how much.
 func pop_money(delta: int) -> void:
-	var l := Label.new()
-	l.text = ("+$%d" if delta > 0 else "-$%d") % absi(delta)
-	l.add_theme_font_size_override("font_size", 24)
-	l.add_theme_color_override("font_color", Color("#ffe27a") if delta > 0 else Color("#ffb3a8"))
-	l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
-	l.add_theme_constant_override("outline_size", 6)
-	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(l)
+	_pop_amount("money", money_pill, delta, Color("#ffe27a") if delta > 0 else Color("#ffb3a8"))
+	if FxPrefs.moving():
+		money_pill.pivot_offset = money_pill.size * 0.5
+		var bump := create_tween()
+		bump.tween_property(money_pill, "scale", Vector2(1.08, 1.08), 0.1)
+		bump.tween_property(money_pill, "scale", Vector2.ONE, 0.18)
+
+
+## An amount beside its pill. While the last one for the same pill is still
+## fresh it grows instead (+$5 then +$3 reads +$8): two pops never stack on
+## one spot.
+func _pop_amount(key: String, anchor: Control, amount: int, color: Color) -> void:
+	var live: Dictionary = _live.get(key, {})
+	var now := Time.get_ticks_msec()
+	var l: Label = live.get("label") if not live.is_empty() and is_instance_valid(live.get("label")) else null
+	var total := amount
+	if l != null and now - int(live["at"]) < 800 and signi(int(live["total"])) == signi(amount):
+		total += int(live["total"])
+		(live["tween"] as Tween).kill()
+		l.modulate.a = 1.0
+	else:
+		l = Label.new()
+		l.name = "Pop"
+		l.add_theme_font_size_override("font_size", 24 if key == "money" else 20)
+		l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
+		l.add_theme_constant_override("outline_size", 6)
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(l)
+	l.add_theme_color_override("font_color", color)
+	if key == "money":
+		l.text = ("+$%s" if total > 0 else "-$%s") % FxPrefs.compact(absi(total))
+	else:
+		l.text = "+%s EXP" % FxPrefs.compact(total)
 	l.reset_size()
-	l.position = money_pill.position + Vector2(money_pill.size.x * 0.5 - l.size.x * 0.5, money_pill.size.y + 4)
+	l.position = anchor.position + Vector2(-l.size.x - 10.0, (anchor.size.y - l.size.y) * 0.5)
+	_log_pop(l.text)
+	_live[key] = {"label": l, "total": total, "at": now, "tween": _animate(l, -16.0, 1.1, 0.0)}
+
+
+## Rises and fades -- or, with reduced motion, only fades where it is.
+func _animate(l: Label, rise: float, seconds: float, delay: float) -> Tween:
 	var tween := create_tween()
-	tween.tween_property(l, "position:y", l.position.y + 40.0, 1.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(l, "modulate:a", 0.0, 1.1).set_delay(0.3)
+	if delay > 0.0:
+		l.modulate.a = 0.0
+		tween.tween_interval(delay)
+		tween.tween_property(l, "modulate:a", 1.0, 0.12)
+	if FxPrefs.moving():
+		tween.tween_property(l, "position:y", l.position.y + rise, seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(l, "modulate:a", 0.0, seconds).set_delay(0.3)
+	else:
+		tween.tween_property(l, "modulate:a", 0.0, seconds).set_delay(0.5)
 	tween.tween_callback(l.queue_free)
-	money_pill.pivot_offset = money_pill.size * 0.5
-	var bump := create_tween()
-	bump.tween_property(money_pill, "scale", Vector2(1.08, 1.08), 0.1)
-	bump.tween_property(money_pill, "scale", Vector2.ONE, 0.18)
+	return tween
+
+
+func _log_pop(text: String) -> void:
+	pops.append(text)
+	if pops.size() > 40:
+		pops.pop_front()
 
 
 func _label(font_size: int) -> Label:

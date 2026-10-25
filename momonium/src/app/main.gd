@@ -102,6 +102,7 @@ var _last_wall := 0.0
 var hud_actions: Array[String] = []
 var entities: EntityLayer
 var island_props: IslandProps
+var feedback_fx: FeedbackFx
 var _version_label: Label
 
 
@@ -197,6 +198,10 @@ func _ready() -> void:
 	add_child(building_views)
 	building_views.setup(sim, entities, lib)
 	building_views.cameras = cameras
+	feedback_fx = FeedbackFx.new()
+	feedback_fx.name = "FeedbackFx"
+	world_root.add_child(feedback_fx)
+	feedback_fx.setup(sim, building_views, lib, cameras, hud.theme.default_font)
 	island_props = IslandProps.new()
 	island_props.name = "IslandProps"
 	add_child(island_props)
@@ -305,7 +310,7 @@ func _ready() -> void:
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
 		if type == &"tier_promoted":
 			_close_frames()
-			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))})))
+			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))}), _promotion_change(p)))
 	sale_frame = _frame(ui, "SaleFrame")
 	sale_view = SaleView.new()
 	sale_view.setup(sim, lib)
@@ -410,6 +415,7 @@ func _ready() -> void:
 	_maybe_start_tutorial.call_deferred()
 	if (sim.system(&"prestige") as PrestigeSystem).welcome:
 		open_rp.call_deferred()
+		_welcome_new_island.call_deferred()
 	bridge.register_query("save_roundtrip", _save_roundtrip)
 	bridge.register_query("tutorial", _tutorial_info)
 	bridge.register_query("tutorial_start", func(_a: Variant) -> Dictionary:
@@ -448,6 +454,7 @@ func _ready() -> void:
 		return {"visible": perf_overlay.visible, "text": perf_overlay.text, "now": perf_overlay.measure(), "shown": perf_overlay.numbers,
 			"rect": [p0.x, p0.y, p1.x - p0.x, p1.y - p0.y], "far": cameras.far()})
 	bridge.register_query("art_info", _art_info)
+	bridge.register_query("fx", _fx_info)
 	bridge.register_query("cell_screen", _cell_screen)
 	bridge.register_query("logical_screen", _logical_screen)
 	bridge.register_query("camera", _camera_info)
@@ -583,7 +590,7 @@ func _ready() -> void:
 		return {"content_scale": get_tree().root.content_scale_factor, "max_fps": Engine.max_fps, "pad": pad,
 			"camera": [camera.position.x, camera.position.y], "tip": tips.tip, "tip_text": tips.text.text, "tip_rect": [a.x, a.y, b.x - a.x, b.y - a.y],
 			"tip_ok": conv.call(tips.ok_button) if tips.tip != "" else [],
-			"toggles": {"low_power": _settings_rect(settings_view.low_power_toggle), "camera_buttons": _settings_rect(settings_view.camera_toggle)} if settings_view.is_visible_in_tree() else {},
+			"toggles": {"low_power": _settings_rect(settings_view.low_power_toggle), "camera_buttons": _settings_rect(settings_view.camera_toggle), "effects": _settings_rect(settings_view.effects_toggle), "reduce_motion": _settings_rect(settings_view.motion_toggle)} if settings_view.is_visible_in_tree() else {},
 			"scale_slider": conv.call(settings_view.scale_slider) if settings_view.is_visible_in_tree() else [], "window": [win.x, win.y]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
@@ -938,6 +945,7 @@ func apply_options() -> void:
 		get_tree().root.content_scale_factor = s
 		_layout.call_deferred()
 	Engine.max_fps = 30 if bool(settings.get_value("low_power")) else 0
+	FxPrefs.apply(settings)
 	if perf_overlay != null:
 		perf_overlay.show_overlay(bool(settings.get_value("perf_overlay")))
 	if camera_pad != null:
@@ -974,6 +982,46 @@ func _save_roundtrip(_arg: Variant) -> Dictionary:
 	var same := JSON.stringify(restored.snapshot()) == JSON.stringify(sim.snapshot())
 	DirAccess.remove_absolute(path)
 	return {"write": err, "equal": same, "now_ms": restored.now_ms()}
+
+
+## What a promotion changed, before and after -- only the Special slots,
+## which the tier data states exactly; empty when they did not change.
+func _promotion_change(p: Dictionary) -> String:
+	var tiers: TierSystem = sim.system(&"tiers")
+	var levels := tiers.levels()
+	var t := int(p["tier"])
+	if levels.is_empty() or t < 1 or t >= levels.size():
+		return ""
+	var before := int((levels[t - 1] as Dictionary).get("special_slots", 1))
+	var after := int(p.get("special_slots", before))
+	if after == before:
+		return ""
+	return tr("fx.special_slots").format({"before": before, "after": after})
+
+
+## A new island bought with the old one's sale: what it carried over, and --
+## from the second sale on -- how much sooner this island sold than the last
+## (the days on record, nothing estimated).
+func _welcome_new_island() -> void:
+	var prestige: PrestigeSystem = sim.system(&"prestige")
+	if prestige.history.is_empty():
+		return
+	var last: Dictionary = prestige.history[-1]
+	var banner := tr("fx.legacy").format({"n": FxPrefs.compact(int(last.get("points", 0)))})
+	var sub := ""
+	if prestige.history.size() >= 2:
+		var before := int((prestige.history[-2] as Dictionary).get("day", 0))
+		var now := int(last.get("day", 0))
+		if now > 0 and before > 0 and now < before:
+			sub = tr("fx.faster_sale").format({"before": before, "after": now})
+	celebration.play(banner, sub)
+
+
+## E2E: the shown feedback -- HUD pops and world pops -- and the effect settings.
+func _fx_info(_arg: Variant) -> Dictionary:
+	return {"hud": hud.pops.duplicate(), "world": feedback_fx.shown.duplicate(true), "active": feedback_fx.active_count(),
+		"effects": FxPrefs.enabled, "reduce_motion": FxPrefs.reduced_motion,
+		"celebration": celebration.text, "celebration_sub": celebration.sub}
 
 
 ## E2E: the exported build carries the atlas and its metadata.

@@ -14,7 +14,7 @@ const MIRROR_KEY := "momonium_settings"
 var values := {"language": "", "tutorial_done": false,
 	"music_volume": 0.6, "ambience_volume": 0.7, "sfx_volume": 0.8, "muted": false, "mute_unfocused": true,
 	"ui_scale": 1.0, "low_power": false, "camera_buttons": false, "tips": true, "tips_seen": [],
-	"perf_overlay": false}
+	"perf_overlay": false, "effects": true, "reduce_motion": false}
 var persistent := true
 
 
@@ -31,11 +31,23 @@ static func open() -> SettingsStore:
 		if text == "" and FileAccess.file_exists(s.path):
 			text = FileAccess.get_file_as_string(s.path)
 		var json := JSON.new()
+		var loaded := {}
 		if text != "" and json.parse(text) == OK and typeof(json.data) == TYPE_DICTIONARY:
+			loaded = json.data
 			for k: String in s.values:
-				if (json.data as Dictionary).has(k):
-					s.values[k] = json.data[k]
+				if loaded.has(k):
+					s.values[k] = loaded[k]
+		# Until the player chooses, follow the system's "reduce motion" (web).
+		if not loaded.has("reduce_motion"):
+			s.values["reduce_motion"] = system_reduces_motion()
 	return s
+
+
+## The browser's prefers-reduced-motion; false where there is no such setting.
+static func system_reduces_motion() -> bool:
+	if not OS.has_feature("web"):
+		return false
+	return bool(JavaScriptBridge.eval("!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)", true))
 
 
 func get_value(key: String) -> Variant:

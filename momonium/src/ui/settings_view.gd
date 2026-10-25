@@ -35,6 +35,8 @@ var scale_slider: HSlider
 var low_power_toggle: CheckButton
 var camera_toggle: CheckButton
 var tips_toggle: CheckButton
+var effects_toggle: CheckButton
+var motion_toggle: CheckButton
 var tips_button: Button
 var save_button: Button
 var save_note: Label
@@ -156,6 +158,8 @@ func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
 	low_power_toggle = _toggle("LowPower", "low_power")
 	camera_toggle = _toggle("CameraButtons", "camera_buttons")
 	tips_toggle = _toggle("Tips", "tips")
+	effects_toggle = _toggle("Effects", "effects")
+	motion_toggle = _toggle("ReduceMotion", "reduce_motion")
 	tips_button = _wide("ReplayTips")
 	tips_button.pressed.connect(func() -> void: replay_tips.emit())
 	add_child(tips_button)
@@ -240,6 +244,8 @@ func refresh() -> void:
 	low_power_toggle.text = tr("settings.low_power")
 	camera_toggle.text = tr("settings.camera_buttons")
 	tips_toggle.text = tr("settings.tips")
+	effects_toggle.text = tr("settings.effects")
+	motion_toggle.text = tr("settings.reduce_motion")
 	perf_toggle.text = tr("settings.perf_overlay")
 	tips_button.text = tr("settings.replay_tips")
 	save_button.text = tr("settings.save_now")
@@ -251,4 +257,6 @@ func refresh() -> void:
 		low_power_toggle.set_pressed_no_signal(bool(settings.get_value("low_power")))
 		camera_toggle.set_pressed_no_signal(bool(settings.get_value("camera_buttons")))
 		tips_toggle.set_pressed_no_signal(bool(settings.get_value("tips")))
+		effects_toggle.set_pressed_no_signal(bool(settings.get_value("effects")))
+		motion_toggle.set_pressed_no_signal(bool(settings.get_value("reduce_motion")))
 		perf_toggle.set_pressed_no_signal(bool(settings.get_value("perf_overlay")))

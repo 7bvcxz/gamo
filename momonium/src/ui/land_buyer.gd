@@ -67,12 +67,14 @@ func buy(cell: Vector2i) -> void:
 		pending = LandPreview.NONE
 		hover = LandPreview.NONE
 		preview.clear()
-		# The new land rises out of the sea (the island already owns it).
-		var fx := LandRiseEffect.new()
-		fx.name = "LandRise"
-		fx.projection = projection
-		fx.cell = cell
-		preview.get_parent().add_child(fx)
+		# The new land rises out of the sea (the island already owns it) --
+		# unless effects are off or motion reduced: then it is simply there.
+		if FxPrefs.moving():
+			var fx := LandRiseEffect.new()
+			fx.name = "LandRise"
+			fx.projection = projection
+			fx.cell = cell
+			preview.get_parent().add_child(fx)
 	else:
 		_show(cell, "")
 

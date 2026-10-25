@@ -27,6 +27,9 @@ func setup(p_sim: Simulation, p_layer: EntityLayer, p_lib: SpriteLibrary) -> voi
 
 
 func _on_event(type: StringName, payload: Dictionary) -> void:
+	# Time away being caught up: the world changes, nothing celebrates.
+	if buildings.sim.replaying and type in [&"task_started", &"building_built", &"task_completed", &"momo_skilled"]:
+		return
 	match type:
 		&"building_added", &"building_removed", &"game_loaded":
 			sync()

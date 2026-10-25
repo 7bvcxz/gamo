@@ -78,8 +78,14 @@ func hit_rect() -> Rect2:
 	return Rect2(position + sprite.offset * s, r.size * s)
 
 
+## Where pops and stars go: the top of the drawing, in the layer's space.
+func top_point() -> Vector2:
+	return position + _top
+
+
 func pulse() -> void:
-	_bounce = 1.0
+	if FxPrefs.moving():
+		_bounce = 1.0
 
 
 func refuse() -> void:
@@ -87,13 +93,17 @@ func refuse() -> void:
 
 
 func celebrate() -> void:
+	if not FxPrefs.enabled:
+		return
 	_celebrate = 1.0
-	_bounce = 1.0
+	if FxPrefs.moving():
+		_bounce = 1.0
 
 
 ## A few small stars above it: a Momo finished a job here, or learned something.
 func sparkle() -> void:
-	_sparkle = 1.0
+	if FxPrefs.enabled:
+		_sparkle = 1.0
 
 
 ## Zoomed far out (set by BuildingViews): small motions at a lower rate.
@@ -403,8 +413,12 @@ func _draw_special(b: Dictionary) -> void:
 			var sp: SpecialSystem = buildings.sim.system(&"specials")
 			var on := sp != null and bool(sp.burst()["active"])
 			var speed := 6.0 if on else 0.3
-			for face: Vector2 in [Vector2(57, 54), Vector2(83, 54)]:
-				var c := (face - origin) * ws
+			# The painted faces' centres are pivots (pixels, like `origin`): a
+			# frame-unit point minus a pixel pivot put the hands on the roof.
+			for pv: String in ["face_l", "face_r"]:
+				if not _lib.has(_sprite_name) or not (_lib.sprites[_sprite_name]["pivots"] as Dictionary).has(pv):
+					continue
+				var c := (_lib.pivot(_sprite_name, pv) - origin) * ws
 				ring.draw_line(c, c + Vector2.from_angle(t * speed - PI * 0.5) * 3.5, Color(0.23, 0.19, 0.16), 1.5, true)
 			if on:
 				var pulse := 0.5 + 0.5 * sin(t * 4.0)

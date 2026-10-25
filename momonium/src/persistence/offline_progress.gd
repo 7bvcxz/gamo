@@ -25,7 +25,9 @@ static func catch_up(sim: Simulation, away_ms: int) -> Dictionary:
 	var journey: JourneySystem = sim.system(&"journey")
 	if journey != null:
 		journey.begin_away()
+	sim.replaying = true
 	var reached := sim.advance_to_budget(start + wanted, budget)
+	sim.replaying = false
 	if journey != null:
 		journey.end_away(maxi(away_ms, 0), reached - start)
 	var after := counters(sim)

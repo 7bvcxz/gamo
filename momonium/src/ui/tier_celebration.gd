@@ -2,11 +2,15 @@ class_name TierCelebration
 extends Control
 
 ## A short celebration when the settlement is promoted: a banner with its new
-## name and a burst of confetti, 2.5 s, over everything, taking no taps.
+## name and a burst of confetti, 2.5 s, over everything, taking no taps. A
+## second line says what changed, before and after, when that is exact (the
+## Special slots of the new tier; Step 47). With effects off or reduced
+## motion the banner still shows -- it is news -- but no confetti falls.
 
 const DURATION := 2.5
 
 var text := ""
+var sub := ""
 var _t := -1.0
 var _bits: Array[Dictionary] = []
 
@@ -18,11 +22,14 @@ func setup() -> void:
 	visible = false
 
 
-func play(banner: String) -> void:
+func play(banner: String, sub_line: String = "") -> void:
 	text = banner
+	sub = sub_line
 	_t = 0.0
 	visible = true
 	_bits.clear()
+	if not FxPrefs.moving():
+		return
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var colours: Array[Color] = [Color("#ffd45a"), Color("#ff8aa8"), Color("#7ff0e6"), Color("#b7f08a"), Color.WHITE]
@@ -57,6 +64,19 @@ func _draw() -> void:
 	var ts := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 	var pop := minf(_t / 0.25, 1.0)
 	var box := Rect2(Vector2((size.x - ts.x) * 0.5 - 24.0, size.y * 0.3 - 40.0), Vector2(ts.x + 48.0, 72.0))
-	draw_rect(box.grow(4.0 * (1.0 - pop)), Color(0.06, 0.18, 0.36, 0.9 * fade))
-	draw_rect(box, Color("#ffd45a", fade), false, 3.0)
-	draw_string(font, Vector2(box.position.x + 24.0, box.position.y + 48.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1, 1, 1, fade))
+	var sub_fs := 20
+	var sub_size := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, sub_fs) if sub != "" else Vector2.ZERO
+	if sub != "":
+		box = Rect2(Vector2((size.x - maxf(ts.x, sub_size.x)) * 0.5 - 24.0, box.position.y), Vector2(maxf(ts.x, sub_size.x) + 48.0, 104.0))
+	if not FxPrefs.moving():
+		pop = 1.0
+	var panel := StyleBoxFlat.new()
+	panel.bg_color = Color(0.06, 0.18, 0.36, 0.9 * fade)
+	panel.set_corner_radius_all(18)
+	panel.border_color = Color("#ffd45a", fade)
+	panel.set_border_width_all(3)
+	panel.anti_aliasing = true
+	draw_style_box(panel, box.grow(4.0 * (1.0 - pop)))
+	draw_string(font, Vector2(box.position.x + (box.size.x - ts.x) * 0.5, box.position.y + 48.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1, 1, 1, fade))
+	if sub != "":
+		draw_string(font, Vector2(box.position.x + (box.size.x - sub_size.x) * 0.5, box.position.y + 84.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, sub_fs, Color("#ffe9a8", fade))

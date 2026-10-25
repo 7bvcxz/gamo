@@ -25,6 +25,10 @@ var scheduler: Scheduler
 var bus: EventBus
 ## Real seconds -> simulated seconds. 1.0 in play; tests and E2E speed it up.
 var time_scale: float = 1.0
+## True while catching up on time away (OfflineProgress): the same rules run,
+## but views do not celebrate each replayed event -- the welcome-back card
+## sums them up instead. A presentation hint only; no rule reads it.
+var replaying := false
 
 var _systems: Array[SimSystem] = []
 var _by_key: Dictionary = {}

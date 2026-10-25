@@ -40,6 +40,8 @@ func test_sale_pops_the_amount_by_the_money() -> void:
 	sim.advance_to(sim.clock.next_day_start_ms())
 	hud.refresh()
 	assert_eq(hud._money_label.text, "15", "$10 + $5")
+	# Feedback gathers for a moment (Step 47) so a burst pops once.
+	hud.flush_feedback()
 	var pops := hud.get_children().filter(func(n: Node) -> bool: return n is Label and (n as Label).text == "+$5")
 	assert_eq(pops.size(), 1, "a single '+$5' rises from the money pill")
 	assert_true(hud.get_child_count() > before, "added on top of the HUD")

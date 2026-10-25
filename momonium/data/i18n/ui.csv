@@ -570,3 +570,10 @@ settings.platform.desktop,Desktop,데스크톱,デスクトップ,桌面版
 settings.about_solo,"A solo game: no account, no server, no leaderboards. Your island is yours alone.","혼자 하는 게임이에요. 계정·서버·순위표 없이, 섬은 오직 내 것이에요.","ひとりで遊ぶゲームです。アカウントもサーバーもランキングもありません。島はあなただけのもの。","单人游戏：没有账号、服务器和排行榜。岛屿只属于你。"
 settings.about_storage_web,"Saved in this browser. Clearing the site's data clears the island.","이 브라우저에 저장돼요. 사이트 데이터를 지우면 섬도 지워져요.","このブラウザに保存されます。サイトのデータを消すと島も消えます。","保存在此浏览器中。清除网站数据会同时清除岛屿。"
 settings.about_storage_device,"Saved on this device. Uninstalling removes the island unless the device backs it up.","이 기기에 저장돼요. 앱을 지우면 섬도 지워져요(기기 백업이 켜져 있으면 복원돼요).","この端末に保存されます。アンインストールすると島も消えます（端末のバックアップがあれば復元）。","保存在此设备上。卸载会删除岛屿（若设备开启备份则可恢复）。"
+settings.effects,"Effects (numbers, sparkles)",효과 (숫자·반짝임),演出（数字・きらめき）,特效（数字、闪光）
+settings.reduce_motion,Reduce motion,움직임 줄이기,動きを減らす,减少动态效果
+fx.research_many,Research ×%d done!,연구 %d개 완료!,研究 %d件完了！,完成 %d 项研究！
+fx.before_after,{before} → {after},{before} → {after},{before} → {after},{before} → {after}
+fx.special_slots,Special slots {before} → {after},특별 자리 {before} → {after},特別枠 {before} → {after},特别位置 {before} → {after}
+fx.legacy,A new island · legacy points +{n},새 섬 · 유산 포인트 +{n},新しい島 · 遺産ポイント +{n},新的岛屿 · 遗产点数 +{n}
+fx.faster_sale,Sold on Day {after} — the last island on Day {before},{after}일째에 팔았어요 — 지난 섬은 {before}일째,{after}日目に売却 — 前の島は{before}日目,第{after}天卖出 — 上一个岛是第{before}天
