@@ -13,6 +13,7 @@ var projection: IsoProjection
 var bridge := WebBridge.new()
 var camera: Camera2D
 var island: IslandRenderer
+var entities: EntityLayer
 var _version_label: Label
 
 
@@ -33,6 +34,9 @@ func _ready() -> void:
 	island.name = "Island"
 	world_root.add_child(island)
 	island.setup(sim, projection)
+	entities = EntityLayer.new(projection)
+	entities.name = "Entities"
+	world_root.add_child(entities)
 	camera = Camera2D.new()
 	camera.name = "Camera"
 	world_root.add_child(camera)
@@ -53,6 +57,7 @@ func _ready() -> void:
 	bridge.register_query("save_roundtrip", _save_roundtrip)
 	bridge.register_query("art_info", _art_info)
 	bridge.register_query("cell_screen", _cell_screen)
+	bridge.register_query("logical_screen", _logical_screen)
 
 
 func _process(delta: float) -> void:
@@ -76,7 +81,10 @@ func _frame_island(size: Vector2) -> void:
 	var rect := Rect2(pts[0], Vector2.ZERO)
 	for p: Vector2 in pts:
 		rect = rect.expand(p)
-	var zoom := clampf(size.x * 0.62 / maxf(rect.size.x, 1.0), 0.2, 4.0)
+	# Include the cliffs below the near edges, then fit width and height: a
+	# landscape window is height-limited, a phone width-limited.
+	rect = rect.grow_side(SIDE_BOTTOM, projection.cliff_height * projection.height_scale)
+	var zoom := clampf(minf(size.x * 0.74 / maxf(rect.size.x, 1.0), size.y * 0.46 / maxf(rect.size.y, 1.0)), 0.2, 4.0)
 	camera.zoom = Vector2(zoom, zoom)
 	camera.position = rect.get_center() - Vector2(0, (ISLAND_SCREEN_Y - 0.5) * size.y / zoom)
 
@@ -103,8 +111,12 @@ func _art_info(_arg: Variant) -> Dictionary:
 ## E2E: where a cell's centre is in window pixels, so a browser test can tap it.
 ## The test scales by canvas CSS size / window size.
 func _cell_screen(arg: Variant) -> Dictionary:
-	var cell := Vector2i(int(arg[0]), int(arg[1]))
-	var world_pos := projection.cell_center(cell)
+	return _logical_screen([float(arg[0]) + 0.5, float(arg[1]) + 0.5, 0.0])
+
+
+## E2E: window position of a logical ground point [x, y, z] (z in tile edges).
+func _logical_screen(arg: Variant) -> Dictionary:
+	var world_pos := projection.to_screen(Vector2(float(arg[0]), float(arg[1])), float(arg[2]) if arg.size() > 2 else 0.0)
 	var vp := get_viewport()
 	var window_pos: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * world_pos)
 	var win := DisplayServer.window_get_size()

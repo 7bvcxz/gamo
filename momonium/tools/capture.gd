@@ -39,14 +39,22 @@ func _init() -> void:
 	var packed: PackedScene = load(_args.get("scene", "res://scenes/main.tscn"))
 	_scene = packed.instantiate()
 	root.add_child(_scene)
-	if _args.has("setup"):
-		var setup: Script = load(_args["setup"])
-		setup.new().call("setup", _scene)
 	_frames_left = int(float(_args.get("seconds", "1.0")) * 60.0)
 	process_frame.connect(_tick)
 
 
+var _setup_done := false
+
+
 func _tick() -> void:
+	# A scene added in _init is not in the tree until the first frame (root is
+	# not inside the tree yet), so its _ready -- and the setup that relies on
+	# it -- waits until here.
+	if not _setup_done:
+		_setup_done = true
+		if _args.has("setup"):
+			var setup: Script = load(_args["setup"])
+			setup.new().call("setup", _scene)
 	_frames_left -= 1
 	if _frames_left > 0:
 		return
