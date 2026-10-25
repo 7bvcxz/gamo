@@ -11,10 +11,24 @@ test('grass tops, cliff faces, sea and sky are where they should be', async ({ g
   const sx = png.width / box.width;
   const sy = png.height / box.height;
   const at = (p) => pixel(png, p.x * sx, p.y * sy);
+  // Step 46: the turf is painted -- a warm yellow-green with sunlit tips, as in
+  // the concepts -- so one pixel can be a highlight. Average a small patch and
+  // ask for green well above blue and about level with red (not brown soil,
+  // grey stone, blue sea or a yellow flower).
+  const patch = (p) => {
+    const sum = [0, 0, 0];
+    for (let dy = -3; dy <= 3; dy++) for (let dx = -3; dx <= 3; dx++) {
+      const q = pixel(png, p.x * sx + dx, p.y * sy + dy);
+      for (let i = 0; i < 3; i++) sum[i] += q[i] / 49;
+    }
+    return sum;
+  };
+  const isTurf = ([r, g, b]) => g > b + 40 && g >= r - 10;
   const isGreen = ([r, g, b]) => g > r + 20 && g > b + 20;
   const isBlue = ([r, g, b]) => b > r + 30 && b >= g;
   for (const cell of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
-    expect(isGreen(at(await cellToCanvas(game, cell))), `grass on ${cell}`).toBe(true);
+    const turf = patch(await cellToCanvas(game, cell));
+    expect(isTurf(turf), `grass on ${cell} (${turf.map(Math.round)})`).toBe(true);
   }
   // Halfway down the cliff below the middle of the south-east face.
   const cliff = at(await logicalToCanvas(game, 2, 1.5, -0.3));
