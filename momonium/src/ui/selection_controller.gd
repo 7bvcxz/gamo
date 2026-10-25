@@ -24,6 +24,8 @@ var panel: ContextPanel
 ## While a mode (land, placement) is open it owns world taps.
 var land_mode: LandMode
 var placement: PlacementMode
+var momo_views: MomoViews
+var momo_panel: MomoPanel
 var kind := ""
 var selected_id := 0
 var selected_cell := Vector2i.ZERO
@@ -53,6 +55,21 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 	if placement != null and placement.active:
 		placement.on_world_tap(world_pos)
 		return
+	# Assign mode (the no-drag way): the next building tapped gets the Momo.
+	if kind == "momo" and momo_panel != null and momo_panel.assigning:
+		var target := views.hit(world_pos)
+		if target == 0:
+			target = buildings.building_at(projection.cell_at(world_pos))
+		if target != 0:
+			last_result = sim.execute({"type": "momo.assign", "momo": selected_id, "building": target})
+			momo_panel.assigning = false
+			if not last_result["ok"] and momo_views.actor(selected_id) != null:
+				momo_views.actor(selected_id).refuse()
+			return
+	var momo := momo_views.hit(world_pos) if momo_views != null else 0
+	if momo != 0:
+		select_momo(momo)
+		return
 	var id := views.hit(world_pos)
 	if id == 0:
 		id = buildings.building_at(projection.cell_at(world_pos))
@@ -74,6 +91,17 @@ func _act_on(id: int) -> void:
 	var v := views.view(id)
 	if v != null and not last_result["ok"]:
 		v.refuse()
+
+
+func select_momo(id: int) -> void:
+	_unmark()
+	kind = "momo"
+	selected_id = id
+	momo_views.actor(id).selected = true
+	marker.clear()
+	panel.hide_panel()
+	momo_panel.show_momo(id)
+	selection_changed.emit(kind)
 
 
 func select_building(id: int) -> void:
@@ -114,4 +142,9 @@ func _unmark() -> void:
 		var v := views.view(selected_id)
 		if v:
 			v.selected = false
+	elif kind == "momo":
+		var a := momo_views.actor(selected_id)
+		if a:
+			a.selected = false
+		momo_panel.hide_panel()
 	selected_id = 0

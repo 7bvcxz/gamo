@@ -6,6 +6,7 @@ extends PanelContainer
 ## a card starts placement. Opened from the Shop button.
 
 signal picked(type: String)
+signal hire_requested
 
 var sim: Simulation
 var buildings: BuildingSystem
@@ -98,6 +99,41 @@ func rebuild() -> void:
 			picked.emit(type))
 		list.add_child(card)
 		cards[type] = card
+	_add_hire_card(economy)
+
+
+## Hiring is bought in the shop like a building, but placed by itself: the new
+## Momo appears somewhere on the island and starts to wander.
+func _add_hire_card(economy: EconomySystem) -> void:
+	var momos: MomoSystem = sim.system(&"momo")
+	var cost := momos.hire_cost()
+	var card := Button.new()
+	card.name = "Card_momo"
+	card.custom_minimum_size = Vector2(150, 150)
+	card.focus_mode = Control.FOCUS_NONE
+	var box := VBoxContainer.new()
+	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(box)
+	var icon := TextureRect.new()
+	icon.texture = lib.atlas_texture("momo_front")
+	icon.custom_minimum_size = Vector2(64, 56)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(icon)
+	box.add_child(_label(tr("momo.hire"), 18))
+	var price := _label("$%d" % cost, 15)
+	if not economy.can_afford(cost):
+		price.modulate = Color("#ff9a8f")
+		card.disabled = true
+	box.add_child(price)
+	card.pressed.connect(func() -> void:
+		visible = false
+		hire_requested.emit())
+	list.add_child(card)
+	cards["momo"] = card
 
 
 func _label(text: String, font_size: int) -> Label:

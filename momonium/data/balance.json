@@ -100,7 +100,18 @@
     }
   },
   "momo": {
-    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order.",
-    "names": 10
+    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order. Hiring price of the k-th hired Momo (k = 0 first) = round_to * ceil(base * growth^k / round_to). Unassigned Momo wander their island at walk_speed tiles/s, resting rest_seconds between strolls.",
+    "names": 10,
+    "hire": {
+      "base": 30,
+      "growth": 1.6,
+      "round_to": 5
+    },
+    "walk_speed": 0.7,
+    "rest_seconds": [
+      2.0,
+      6.0
+    ],
+    "seed": 20261025
   }
 }

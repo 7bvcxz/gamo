@@ -56,7 +56,7 @@ func show_building(id: int) -> void:
 	_tile_pill.visible = false
 	building_id = id
 	var b := buildings.get_building(id)
-	title.text = tr(buildings.type_def(b).get("name", ""))
+	title.text = _title(b)
 	title.visible = true
 	_shown_state = String(b["state"])
 	if b["state"] == BuildingSystem.CONSTRUCTING:
@@ -76,6 +76,16 @@ func show_building(id: int) -> void:
 			cards.append(card)
 	_layout()
 	_refresh()
+
+
+## Name, and the worker spots when the building has any: "Farm · 1/1".
+func _title(b: Dictionary) -> String:
+	var text := tr(buildings.type_def(b).get("name", ""))
+	var momos: MomoSystem = sim.system(&"momo")
+	var slots := momos.slots_of(int(b["id"]))
+	if slots > 0:
+		text += "  ·  %d/%d" % [momos.workers_at(int(b["id"])).size(), slots]
+	return text
 
 
 func show_tile(text_key: String) -> void:
@@ -162,6 +172,7 @@ func _refresh() -> void:
 		show_building(building_id)
 		return
 	_shown_state = String(b["state"])
+	title.text = _title(b)
 	if b["state"] == BuildingSystem.CONSTRUCTING:
 		var left := ceili(buildings.remaining_ms(b) / 1000.0)
 		var t: Label = cards[0].find_child("Time", true, false)

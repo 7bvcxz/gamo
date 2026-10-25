@@ -54,3 +54,10 @@ momo.name.6,Kiki,키키,キキ,琪琪
 momo.name.7,Sora,소라,ソラ,天天
 momo.name.8,Nuku,누쿠,ヌク,暖暖
 momo.name.9,Popo,포포,ポポ,波波
+momo.hire,Hire Momo,모모 고용,モモを雇う,雇佣桃桃
+momo.roaming,Free time,쉬는 중,おやすみ中,休息中
+momo.working_at,Working at %s,%s에서 일하는 중,%sで働いています,在%s工作
+momo.assign,Assign,배치,配置,分配
+momo.unassign,Release,해제,解除,解除
+err.slots_full,No free spot,자리가 없어요,空きがありません,没有空位
+err.no_job,No work here,여기는 일이 없어요,ここに仕事はありません,这里没有工作

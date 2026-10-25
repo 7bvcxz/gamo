@@ -16,6 +16,11 @@ var selected := false:
 	set(value):
 		selected = value
 		queue_redraw()
+## While a Momo is carried over this building: 1 can work here, -1 cannot.
+var drop_hint := 0:
+	set(value):
+		drop_hint = value
+		queue_redraw()
 var sprite: Sprite2D
 ## Crops and other stage looks, drawn over the base sprite.
 var overlay: Sprite2D
@@ -111,9 +116,17 @@ func _update_look(look_name: String) -> void:
 
 
 func _draw() -> void:
-	if not selected:
+	if not selected and drop_hint == 0:
 		return
 	var b := buildings.get_building(id)
+	var fill := Color(1, 0.95, 0.6, 0.18)
+	var line := Color(1, 0.93, 0.45, 0.95)
+	if drop_hint == 1:
+		fill = Color(0.45, 0.95, 0.5, 0.3)
+		line = Color(0.6, 1.0, 0.6, 1.0)
+	elif drop_hint == -1:
+		fill = Color(1.0, 0.35, 0.3, 0.3)
+		line = Color(1.0, 0.45, 0.4, 1.0)
 	for cell: Vector2i in buildings.cells_of(b):
 		var c := projection.cell_corners(cell)
 		var local := PackedVector2Array()
@@ -121,8 +134,8 @@ func _draw() -> void:
 			local.append(p - position)
 		var loop := local.duplicate()
 		loop.append(local[0])
-		draw_colored_polygon(local, Color(1, 0.95, 0.6, 0.18))
-		draw_polyline(loop, Color(1, 0.93, 0.45, 0.95), 3.0, true)
+		draw_colored_polygon(local, fill)
+		draw_polyline(loop, line, 3.0, true)
 
 
 func _draw_ring() -> void:

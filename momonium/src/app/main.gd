@@ -20,6 +20,8 @@ var panel: ContextPanel
 var marker: SelectionMarker
 var building_views: BuildingViews
 var momo_views: MomoViews
+var momo_panel: MomoPanel
+var momo_drag: MomoDrag
 var selection: SelectionController
 var land_preview: LandPreview
 var land_mode: LandMode
@@ -116,6 +118,18 @@ func _ready() -> void:
 	selection.name = "Selection"
 	add_child(selection)
 	selection.setup(sim, projection, building_views, marker, panel, router)
+	selection.momo_views = momo_views
+	momo_panel = MomoPanel.new()
+	ui.add_child(momo_panel)
+	momo_panel.setup(sim, lib)
+	momo_panel.resized.connect(_place_momo_panel)
+	momo_panel.visibility_changed.connect(_place_momo_panel)
+	momo_panel.release_requested.connect(func(id: int) -> void:
+		selection.last_result = sim.execute({"type": "momo.unassign", "momo": id}))
+	selection.momo_panel = momo_panel
+	momo_drag = MomoDrag.new()
+	momo_drag.setup(sim, projection, momo_views, building_views)
+	router.add_drag_handler(momo_drag)
 	land_mode = LandMode.new()
 	ui.add_child(land_mode)
 	land_mode.setup(sim, land_preview, projection, lib)
@@ -134,6 +148,10 @@ func _ready() -> void:
 		selection.deselect()
 		placement.open(type))
 	build_menu.resized.connect(_place_build_menu)
+	build_menu.hire_requested.connect(func() -> void:
+		var r := sim.execute({"type": "momo.hire"})
+		if r["ok"]:
+			selection.select_momo(int(r["id"])))
 	status_panel = StatusPanel.new()
 	ui.add_child(status_panel)
 	status_panel.setup(sim, lib)
@@ -170,6 +188,7 @@ func _ready() -> void:
 	bridge.register_query("land_mode", _land_mode_info)
 	bridge.register_query("build_ui", _build_ui_info)
 	bridge.register_query("status", _status_info)
+	bridge.register_query("momos", _momo_info)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
 		var out := {}
 		for id: int in momo_views.actors:
@@ -371,3 +390,29 @@ func _status_info(_arg: Variant) -> Dictionary:
 		var card: PanelContainer = status_panel.cards[type]
 		out["mastery"][type] = (card.find_child("Exp", true, false) as Label).text
 	return out
+
+
+func _place_momo_panel() -> void:
+	if momo_panel == null or not momo_panel.visible:
+		return
+	momo_panel.reset_size()
+	var size := get_viewport_rect().size
+	momo_panel.position = Vector2(hud.bottom_left_end + 8.0, size.y - momo_panel.size.y - hud.bottom_margin)
+	if momo_panel.position.x + momo_panel.size.x > size.x - 8.0:
+		momo_panel.position.x = maxf(8.0, size.x - momo_panel.size.x - 8.0)
+		momo_panel.position.y -= 80.0
+
+
+## E2E: Momo positions on screen (window pixels), their assignment, and the drag/selection state.
+func _momo_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var out := {}
+	var momos: MomoSystem = sim.system(&"momo")
+	for id: int in momo_views.actors:
+		var a: MomoActor = momo_views.actors[id]
+		var body: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * (a.position + Vector2(0, -35)))
+		var feet: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * a.position)
+		out[str(id)] = {"body": [body.x, body.y], "feet": [feet.x, feet.y], "assigned": int(momos.get_momo(id)["assigned"]),
+			"moving": momos.is_moving(id), "state": a.rig.state}
+	var win := DisplayServer.window_get_size()
+	return {"momos": out, "drag": momo_drag.last_result, "selected": selection.kind, "assigning": momo_panel.assigning, "window": [win.x, win.y]}
