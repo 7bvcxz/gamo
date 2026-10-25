@@ -12,4 +12,4 @@ func setup(main: Node) -> void:
 	var layer: EntityLayer = main.get("entities")
 	for spec: Array in [["prop_crate", Vector2(1.5, 0.5)], ["momo_front", Vector2(1.5, 1.2)], ["prop_crate", Vector2(0.5, 1.5)], ["momo_front", Vector2(2.4, 2.3)], ["prop_crate", Vector2(2.5, 1.5)]]:
 		layer.add_entity(lib.make_sprite(spec[0]), spec[1])
-	main.call("_layout")
+	(main.get("cameras") as CameraController).frame_island()
