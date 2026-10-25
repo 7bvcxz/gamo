@@ -4,7 +4,7 @@ const PATH := "user://test_save_roundtrip.json"
 
 
 func after_each() -> void:
-	for p: String in [PATH, PATH + ".tmp"]:
+	for p: String in [PATH, PATH + ".tmp", PATH + ".bak", PATH + ".corrupt"]:
 		if FileAccess.file_exists(p):
 			DirAccess.remove_absolute(p)
 

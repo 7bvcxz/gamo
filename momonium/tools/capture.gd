@@ -18,6 +18,8 @@ var _scene: Node
 
 
 func _init() -> void:
+	# Captures show the scenario's world, never the player's saved island.
+	Engine.set_meta("momonium_no_save", true)
 	Engine.max_fps = 60
 	var raw := OS.get_cmdline_user_args()
 	var i := 0

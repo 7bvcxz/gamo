@@ -12,7 +12,11 @@ extends RefCounted
 ## order. Because nothing depends on frame boundaries, advancing 60 s in one
 ## call or in 3,600 small calls produces the same world.
 
-const SAVE_SCHEMA := 1
+## Version of the save format (SaveService wraps it; SaveMigration upgrades
+## older ones). 2: the envelope with time saved and checksum (Step 24).
+const SAVE_SCHEMA := 2
+## Events handled since this Simulation was made (not saved; for budgets).
+var events_processed := 0
 const DAY_EVENT := "sim.day"
 
 var data: GameData
@@ -106,7 +110,30 @@ func advance_to(target_ms: int) -> void:
 		var event: Dictionary = scheduler.pop()
 		clock.now_ms = maxi(clock.now_ms, int(event["at"]))
 		_dispatch(event)
+		events_processed += 1
 	clock.now_ms = maxi(clock.now_ms, target_ms)
+
+
+## advance_to with a ceiling on how much work it may do: stops after
+## `max_events` events, with the clock at the last event handled (not at the
+## target), so a capped catch-up never claims time it did not simulate. The
+## cap is a count, not wall-clock time, so the same save always reaches the
+## same moment. Returns the time reached.
+func advance_to_budget(target_ms: int, max_events: int) -> int:
+	var handled := 0
+	while not scheduler.is_empty() and scheduler.peek_time() <= target_ms:
+		if handled >= max_events:
+			# Everything due at this same instant still runs, so the world is
+			# never left half-way through one moment.
+			if scheduler.peek_time() > clock.now_ms:
+				return clock.now_ms
+		var event: Dictionary = scheduler.pop()
+		clock.now_ms = maxi(clock.now_ms, int(event["at"]))
+		_dispatch(event)
+		events_processed += 1
+		handled += 1
+	clock.now_ms = maxi(clock.now_ms, target_ms)
+	return clock.now_ms
 
 
 func schedule_in(delay_ms: int, type: String, data_payload: Dictionary = {}) -> int:

@@ -43,6 +43,21 @@ var research_views: Array[ResearchView] = []
 ## Momo Letters.
 var mail_frame: PanelFrame
 var mailbox_view: MailboxView
+## Persistence: where the island is saved, whether saving is on (tests turn it
+## off with Engine meta "momonium_no_save" and may point it elsewhere with
+## "momonium_save_path"), what loading found, and what happened while away.
+var save_path := SaveService.DEFAULT_PATH
+## localStorage key of the save's synchronous mirror on the web.
+const MIRROR_KEY := "momonium_save"
+var persist := true
+var load_status := ""
+var save_blocked := false
+var offline_report: Dictionary = {}
+var away_frame: PanelFrame
+var away_view: AwayView
+var saves_written := 0
+var _autosave_left := 0.0
+var _last_wall := 0.0
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -50,7 +65,7 @@ var _version_label: Label
 
 
 func _ready() -> void:
-	sim = Simulation.new_game()
+	sim = _load_or_new()
 	projection = IsoProjection.from_data(sim.data)
 
 	var back := CanvasLayer.new()
@@ -218,6 +233,14 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	cameras.frame_island()
+	away_frame = _frame(ui, "AwayFrame")
+	away_view = AwayView.new()
+	away_view.setup(sim, lib)
+	away_frame.add_tab("", away_view)
+	away_frame.set_title(tr("away.title"))
+	_last_wall = Time.get_unix_time_from_system()
+	_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
+	_tell_about_return.call_deferred(offline_report)
 
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
 	bridge.register_query("save_roundtrip", _save_roundtrip)
@@ -245,6 +268,16 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("save_now", func(_a: Variant) -> Dictionary:
+		return {"err": save_now(), "path": save_path, "persist": persist, "written": saves_written,
+			"userfs_persistent": OS.is_userfs_persistent()})
+	bridge.register_query("persistence", func(_a: Variant) -> Dictionary:
+		return {"status": load_status, "persist": persist, "blocked": save_blocked, "report": offline_report,
+			"away_open": away_frame.visible, "away_lines": away_view.lines().map(func(l: Array) -> String: return "%s|%s" % l)})
+	bridge.register_query("dev_away", func(ms: Variant) -> Dictionary:
+		var r := OfflineProgress.catch_up(sim, int(ms))
+		_tell_about_return(r)
+		return r)
 	bridge.register_query("dev_research_done", func(ids: Variant) -> Dictionary:
 		var research: ResearchSystem = sim.system(&"research")
 		for id: Variant in ids:
@@ -279,7 +312,70 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Time the frame loop did not see (a hidden browser tab stops drawing) is
+	# caught up the same way as time with the game closed.
+	var wall := Time.get_unix_time_from_system()
+	var gap := wall - _last_wall - delta
+	_last_wall = wall
+	if gap > 5.0 and sim.time_scale > 0.0:
+		_tell_about_return(OfflineProgress.catch_up(sim, int(gap * 1000.0 * sim.time_scale)))
 	sim.advance_seconds(delta)
+	if persist:
+		_autosave_left -= delta
+		if _autosave_left <= 0.0:
+			_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
+			save_now()
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_CLOSE_REQUEST:
+			if sim != null:
+				save_now()
+
+
+## Loads the island (with what happened while away) or starts a new one.
+func _load_or_new() -> Simulation:
+	persist = not Engine.has_meta("momonium_no_save")
+	if Engine.has_meta("momonium_save_path"):
+		save_path = String(Engine.get_meta("momonium_save_path"))
+	if not persist:
+		return Simulation.new_game()
+	var r := SaveService.load_save(save_path)
+	if WebStorage.available():
+		var mirror := WebStorage.get_item(MIRROR_KEY)
+		if mirror != "":
+			r = SaveService.newest(r, SaveService.decode(mirror))
+	load_status = String(r["status"])
+	if load_status in ["ok", "backup"]:
+		var loaded := Simulation.from_save(r["state"])
+		var saved := int(r.get("saved_unix", 0))
+		if saved > 0:
+			offline_report = OfflineProgress.catch_up(loaded, int((Time.get_unix_time_from_system() - saved) * 1000.0))
+		return loaded
+	save_blocked = load_status == "too_new"
+	return Simulation.new_game()
+
+
+func save_now() -> Error:
+	if not persist or save_blocked or sim == null:
+		return ERR_UNAVAILABLE
+	var text := SaveService.encode(sim)
+	var err := SaveService.write_text(text, save_path)
+	WebStorage.set_item(MIRROR_KEY, text)
+	if err == OK:
+		saves_written += 1
+	return err
+
+
+## The welcome-back card, when there is something worth saying.
+func _tell_about_return(report: Dictionary) -> void:
+	var notice := load_status in ["backup", "corrupt", "too_new"] and not away_frame.visible and saves_written == 0
+	if not notice and (report.is_empty() or not OfflineProgress.worth_telling(report, sim.data.get_float("balance", "offline.report_seconds", 60.0))):
+		return
+	_close_frames()
+	away_view.show_report(report, load_status if notice else "")
+	away_frame.open()
 
 
 func _layout() -> void:
@@ -482,6 +578,8 @@ func _frame(ui: Control, frame_name: String) -> PanelFrame:
 
 
 func _close_frames() -> void:
+	if away_frame != null:
+		away_frame.close()
 	status_frame.close()
 	detail_frame.close()
 	mail_frame.close()

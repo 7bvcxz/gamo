@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **23** (#23)
-- 현재 step: **24** — 버전 있는 로컬 저장과 오프라인 진행 (#24)
-- 버전: `0.23.0`
-- 테스트: unit+integration 275 통과 (`momonium/tools/test.sh`)
-- E2E: 케이스 22파일(+farm_tech). 전체 실행: Step 10, Step 20(65/0/3 skip). 다음 전체 실행은 Step 30
+- 마지막 완료 step: **24** (#24)
+- 현재 step: **25** — 임업·광업 (#25)
+- 버전: `0.24.0`
+- 테스트: unit+integration 296 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 23파일(+persist). 전체 실행: Step 10, Step 20(65/0/3 skip). 다음 전체 실행은 Step 30
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -54,4 +54,5 @@
 | 20 | #20 상세·상태·경제 패널 | 0.20.0 | `40fbffc8` | 223, **E2E 전체 2회차 65 통과/0 실패/3 skip(프로필 전용)** | 스모크 |
 | 21 | #21 모모 편지·편지함 | 0.21.0 | `9afcef77` | 241, E2E mail 단독 | 스모크 |
 | 22 | #22 연구소·기술 트리 | 0.22.0 | `4a75cb18` | 261, E2E research 단독 | 스모크 |
-| 23 | #23 농업 기술·품종 | 0.23.0 | (다음 갱신 시) | 275, E2E farm_tech 단독 | 스모크 |
+| 23 | #23 농업 기술·품종 | 0.23.0 | `50900ab9` | 275, E2E farm_tech 단독 | 스모크 |
+| 24 | #24 버전 저장·오프라인 진행 | 0.24.0 | (다음 갱신 시) | 296, E2E persist 단독 | 스모크 |

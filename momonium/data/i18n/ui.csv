@@ -189,3 +189,14 @@ detail.research,Research in use,적용된 연구,使っている研究,已应用
 err.no_variety,No such variety,없는 품종이에요,その品種はありません,没有这个品种
 err.variety_locked,Research it first,먼저 연구해야 해요,先に研究が必要です,需要先研究
 err.variety_busy,Change it after the harvest,수확한 뒤에 바꿀 수 있어요,収穫のあとで変えられます,收获后才能更换
+away.title,Welcome back,다녀오셨어요,おかえりなさい,欢迎回来
+away.time,Away,떠나 있던 시간,離れていた時間,离开时间
+away.capped,Only {t} of it was counted,그중 {t}만 셌어요,そのうち{t}だけ数えました,只计算了其中的{t}
+away.crops,Crops grown,수확한 작물,収穫した作物,收获的作物
+away.income,Earned,번 돈,かせいだお金,收入
+away.research,Research done,끝난 연구,完了した研究,完成的研究
+away.letters,Letters,받은 편지,届いた手紙,收到的信
+save.backup,"Your save was damaged, so the one before it was opened.",저장이 손상되어 바로 전 저장으로 열었어요.,セーブが壊れていたので、ひとつ前のセーブを開きました。,存档损坏，已打开上一个存档。
+save.corrupt,"Your save could not be read, so a new island was started. The old file is kept.",저장을 읽을 수 없어 새 섬으로 시작했어요. 옛 파일은 보관했어요.,セーブを読めなかったので新しい島で始めました。古いファイルは残してあります。,无法读取存档，已开始新的岛屿。旧文件已保留。
+save.too_new,This save is from a newer version. This version will not overwrite it.,더 새 버전의 저장이에요. 이 버전에서는 덮어쓰지 않아요.,新しいバージョンのセーブです。このバージョンでは上書きしません。,这是新版本的存档。此版本不会覆盖它。
+time.hm,{h} h {m} min,{h}시간 {m}분,{h}時間{m}分,{h}小时{m}分

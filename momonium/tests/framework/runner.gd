@@ -34,6 +34,9 @@ var _logger := CaptureLogger.new()
 
 
 func _init() -> void:
+	# Main must not load or overwrite a real save while tests run: a stale
+	# save from one test would be the next test's starting world.
+	Engine.set_meta("momonium_no_save", true)
 	OS.add_logger(_logger)
 	_run.call_deferred()
 
