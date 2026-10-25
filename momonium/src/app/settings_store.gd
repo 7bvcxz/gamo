@@ -1,8 +1,9 @@
 class_name SettingsStore
 extends RefCounted
 
-## The player's own preferences, apart from the island: chosen language and
-## whether the first-run tutorial has been seen. Kept in
+## The player's own preferences, apart from the island: chosen language,
+## whether the first-run tutorial has been seen, and sound (three volumes,
+## mute, and whether to fall silent while the game is in the background). Kept in
 ## user://momonium_settings.json and, on the web, mirrored to localStorage
 ## (synchronous, survives a tab closed at once). Under tests (Engine meta
 ## "momonium_no_save") it lives in memory only.
@@ -10,7 +11,8 @@ extends RefCounted
 const PATH := "user://momonium_settings.json"
 const MIRROR_KEY := "momonium_settings"
 
-var values := {"language": "", "tutorial_done": false}
+var values := {"language": "", "tutorial_done": false,
+	"music_volume": 0.6, "ambience_volume": 0.7, "sfx_volume": 0.8, "muted": false, "mute_unfocused": true}
 var persistent := true
 
 

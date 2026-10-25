@@ -18,6 +18,12 @@ var demo_button: Button
 var demo_note: Label
 var in_demo := false
 var version_label: Label
+## Sound: three volumes, mute, and silence in the background (AudioService).
+var audio: AudioService
+var sliders: Dictionary = {}
+var mute_toggle: CheckButton
+var background_toggle: CheckButton
+const SOUND: PackedStringArray = ["music_volume", "ambience_volume", "sfx_volume"]
 
 
 func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
@@ -53,6 +59,49 @@ func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
 	demo_note = PanelViews.label("", 15, true)
 	demo_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(demo_note)
+	var sound_title := PanelViews.label("", 17, true)
+	sound_title.name = "SoundTitle"
+	add_child(sound_title)
+	for key: String in SOUND:
+		var r := HBoxContainer.new()
+		r.name = "Row_" + key
+		r.add_theme_constant_override("separation", 10)
+		var l := PanelViews.label("", 16)
+		l.name = "Label"
+		l.custom_minimum_size = Vector2(110, 0)
+		r.add_child(l)
+		var s := HSlider.new()
+		s.name = "Slider"
+		s.min_value = 0.0
+		s.max_value = 1.0
+		s.step = 0.05
+		s.custom_minimum_size = Vector2(0, 44)
+		s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		s.focus_mode = Control.FOCUS_NONE
+		var k := key
+		s.value_changed.connect(func(v: float) -> void:
+			if audio != null:
+				audio.set_setting(k, v))
+		r.add_child(s)
+		add_child(r)
+		sliders[key] = s
+	mute_toggle = CheckButton.new()
+	mute_toggle.name = "Mute"
+	mute_toggle.custom_minimum_size = Vector2(0, 48)
+	mute_toggle.focus_mode = Control.FOCUS_NONE
+	mute_toggle.toggled.connect(func(on: bool) -> void:
+		if audio != null:
+			audio.set_setting("muted", on))
+	add_child(mute_toggle)
+	background_toggle = CheckButton.new()
+	background_toggle.name = "Background"
+	background_toggle.custom_minimum_size = Vector2(0, 48)
+	background_toggle.focus_mode = Control.FOCUS_NONE
+	background_toggle.toggled.connect(func(on: bool) -> void:
+		if audio != null:
+			audio.set_setting("mute_unfocused", on))
+	add_child(background_toggle)
 	version_label = PanelViews.label("v%s" % ProjectSettings.get_setting("application/config/version", "0"), 14, true)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(version_label)
@@ -75,3 +124,12 @@ func refresh() -> void:
 	tutorial_button.text = tr("settings.tutorial")
 	demo_button.text = tr("settings.leave_demo") if in_demo else tr("settings.demo")
 	demo_note.text = "" if in_demo else tr("settings.demo_note")
+	(get_node("SoundTitle") as Label).text = tr("settings.sound")
+	if audio != null:
+		for key: String in sliders:
+			(get_node("Row_" + key + "/Label") as Label).text = tr("settings." + key)
+			(sliders[key] as HSlider).set_value_no_signal(float(audio.settings.get_value(key)))
+		mute_toggle.set_pressed_no_signal(bool(audio.settings.get_value("muted")))
+		background_toggle.set_pressed_no_signal(bool(audio.settings.get_value("mute_unfocused")))
+	mute_toggle.text = tr("settings.muted")
+	background_toggle.text = tr("settings.mute_unfocused")

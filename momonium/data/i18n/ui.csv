@@ -513,3 +513,9 @@ sale.monument_line,{base} ★ + 10% = +{bonus} ★ (rounded),{base} ★ + 10% = 
 special.burst,x2,x2,x2,x2
 special.burst_on,Clock Tower: x2 work · %s,시계탑 ×2 · %s,時計塔 ×2 · %s,钟楼 ×2 · %s
 special.burst_off,Clock Tower: next in %s,시계탑 다음까지 %s,時計塔 次まで %s,钟楼 下次 %s
+settings.sound,Sound,소리,サウンド,声音
+settings.music_volume,Music,음악,音楽,音乐
+settings.ambience_volume,Ambience,환경음,環境音,环境音
+settings.sfx_volume,Effects,효과음,効果音,音效
+settings.muted,Mute everything,모두 음소거,すべてミュート,全部静音
+settings.mute_unfocused,Silent in the background,백그라운드에서는 조용히,バックグラウンドでは無音,在后台时静音

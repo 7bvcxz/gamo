@@ -83,6 +83,8 @@ var in_demo := false
 var last_sale: Dictionary = {}
 ## The confetti when the settlement goes up a tier.
 var celebration: TierCelebration
+## Music, ambience and effects.
+var audio: AudioService
 var _demo_badge: Label
 var saves_written := 0
 var _autosave_left := 0.0
@@ -323,8 +325,13 @@ func _ready() -> void:
 	_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
 	_tell_about_return.call_deferred(offline_report)
 	settings_frame = _frame(ui, "SettingsFrame")
+	audio = AudioService.new()
+	add_child(audio)
+	audio.setup(sim, settings)
+	audio.start()
 	settings_view = SettingsView.new()
 	settings_view.setup(sim, lib)
+	settings_view.audio = audio
 	settings_view.in_demo = in_demo
 	settings_frame.add_tab("", settings_view)
 	settings_frame.set_title(tr("hud.settings"))
@@ -462,6 +469,25 @@ func _ready() -> void:
 			tiers[str(id)] = (building_views.views[id] as BuildingView).pennant_tier()
 		return {"night": BuildingView.night_strength(BuildingView.ambient, float(sim.data.get_value("art", "night_lights", {}).get("start", 0.25))),
 			"splash": sea_life.current().keys().size() > 0, "pennants": tiers, "phase": day_night.describe()["phase"]})
+	bridge.register_query("audio", func(_a: Variant) -> Dictionary:
+		var buses := {}
+		for bus: String in AudioService.BUSES:
+			var i := AudioServer.get_bus_index(bus)
+			buses[bus] = {"db": AudioServer.get_bus_volume_db(i), "mute": AudioServer.is_bus_mute(i)}
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			var r := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var sl := {}
+		for key: String in settings_view.sliders:
+			sl[key] = {"value": (settings_view.sliders[key] as HSlider).value, "rect": conv.call(settings_view.sliders[key]) if settings_view.is_visible_in_tree() else []}
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		return {"played": audio.played, "level": audio.level, "target": audio.target, "buses": buses, "master_mute": AudioServer.is_bus_mute(0),
+			"music": audio.music.playing, "sliders": sl, "mute": conv.call(settings_view.mute_toggle) if settings_view.is_visible_in_tree() else [],
+			"settings": {"music_volume": settings.get_value("music_volume"), "ambience_volume": settings.get_value("ambience_volume"), "sfx_volume": settings.get_value("sfx_volume"), "muted": settings.get_value("muted")},
+			"window": [win.x, win.y]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
 		while prog.level < int(lv):
