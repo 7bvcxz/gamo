@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **04** (#4)
-- 현재 step: **05** — 바다 세계와 2×2 땅 격자 (#5)
-- 버전: `0.4.0`
-- 테스트: unit+integration 44 통과 (`momonium/tools/test.sh`)
-- E2E 케이스: `boot`, `save`, `art` (각각 단독 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
+- 마지막 완료 step: **05** (#5)
+- 현재 step: **06** — 2.5D 섬 렌더링 (#6)
+- 버전: `0.5.0`
+- 테스트: unit+integration 51 통과 (`momonium/tools/test.sh`)
+- E2E 케이스: `boot`, `save`, `art`, `world` (각각 단독 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -35,4 +35,5 @@
 | 01 | #1 프로젝트·환경 | 0.1.0 | `0f37bf70` | unit 5 | 스모크 PASS (로컬·Pages) |
 | 02 | #2 모듈 구조·설계 규칙 | 0.2.0 | `ebb32f58` | unit 24, E2E boot 단독 | 스모크 PASS |
 | 03 | #3 테스트·검증·CI | 0.3.0 | `1d9f4101` | 30, E2E save 단독, CI success | 스모크 PASS |
-| 04 | #4 아트 파이프라인 | 0.4.0 | (다음 갱신 시) | 44, E2E art 단독 | 스모크 |
+| 04 | #4 아트 파이프라인 | 0.4.0 | `248f2bea` | 44, E2E art 단독, CI success | 스모크 PASS |
+| 05 | #5 바다 세계·2×2 격자 | 0.5.0 | (다음 갱신 시) | 51, E2E world 단독 | 스모크 |
