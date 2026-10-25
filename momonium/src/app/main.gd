@@ -23,6 +23,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
+	bridge.register_query("save_roundtrip", _save_roundtrip)
 
 
 func _process(delta: float) -> void:
@@ -31,3 +32,14 @@ func _process(delta: float) -> void:
 
 func _layout() -> void:
 	_version_label.position = get_viewport_rect().size - Vector2(84, 28)
+
+
+## E2E: proves the platform's user:// (IndexedDB on the web) can hold a save and
+## give the same world back. Writes to its own file, never the player's save.
+func _save_roundtrip(_arg: Variant) -> Dictionary:
+	var path := "user://e2e_roundtrip.json"
+	var err := SaveService.write(sim, path)
+	var restored := Simulation.from_save(SaveService.read(path))
+	var same := JSON.stringify(restored.snapshot()) == JSON.stringify(sim.snapshot())
+	DirAccess.remove_absolute(path)
+	return {"write": err, "equal": same, "now_ms": restored.now_ms()}

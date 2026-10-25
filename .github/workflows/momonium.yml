@@ -1,0 +1,107 @@
+# Momonium only. Other games in this repository have no CI and are untouched:
+# the path filter means a change outside momonium/ never starts this workflow.
+#
+# Runs import, the editor load check and the unit + integration tests on every
+# change, and a Web export + browser smoke on pushes to main. It never runs the
+# E2E suite (tests/e2e/specs) -- that is a milestone check done by hand at
+# Steps 10, 20, 30 and 40.
+name: momonium
+
+on:
+  push:
+    branches: [main]
+    paths: ['momonium/**', '.github/workflows/momonium.yml']
+  pull_request:
+    paths: ['momonium/**', '.github/workflows/momonium.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: momonium-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7-stable
+  GODOT_TEMPLATES_DIR: 4.7.stable
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            momonium
+            .github
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux
+      - name: Download Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - run: echo "$HOME/godot" >> "$GITHUB_PATH"
+      - run: godot --version
+      - name: Import, load check, unit + integration
+        run: momonium/tools/check.sh
+
+  web-export-smoke:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            momonium
+            .github
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux
+      - name: Download Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - run: echo "$HOME/godot" >> "$GITHUB_PATH"
+      # The templates ship as one 1.3 GB archive; only the two web zips are
+      # kept in the cache, so the big download happens once per cache lifetime.
+      - name: Cache web export templates
+        id: templates-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          key: godot-${{ env.GODOT_VERSION }}-web-templates
+      - name: Download web export templates
+        if: steps.templates-cache.outputs.cache-hit != 'true'
+        run: |
+          dir=~/.local/share/godot/export_templates/${GODOT_TEMPLATES_DIR}
+          mkdir -p "$dir"
+          curl -sSL -o /tmp/templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q -j /tmp/templates.tpz 'templates/web_nothreads_*' 'templates/version.txt' -d "$dir"
+          rm /tmp/templates.tpz
+          ls -la "$dir"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Browser tooling
+        working-directory: momonium/tests/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Web export + browser smoke
+        run: momonium/tools/check.sh --export --skip-tests

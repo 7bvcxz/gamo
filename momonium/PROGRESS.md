@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **02** (#2)
-- 현재 step: **03** — 테스트·검증·CI (#3)
-- 버전: `0.2.0`
-- 테스트: unit 24 통과 (`momonium/tools/test.sh`)
-- E2E 케이스: `specs/boot.spec.mjs` (단독 실행 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
+- 마지막 완료 step: **03** (#3)
+- 현재 step: **04** — 레퍼런스 이미지 기반 아트 파이프라인 (#4)
+- 버전: `0.3.0`
+- 테스트: unit+integration 30 통과 (`momonium/tools/test.sh`), `tools/check.sh --export` 통과, CI(`momonium.yml`)
+- E2E 케이스: `boot`, `save` (각각 단독 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -33,4 +33,5 @@
 | step | 이슈 | 버전 | 커밋 | 테스트 | 배포 |
 |---|---|---|---|---|---|
 | 01 | #1 프로젝트·환경 | 0.1.0 | `0f37bf70` | unit 5 | 스모크 PASS (로컬·Pages) |
-| 02 | #2 모듈 구조·설계 규칙 | 0.2.0 | (다음 갱신 시) | unit 24, E2E boot 단독 | 스모크 |
+| 02 | #2 모듈 구조·설계 규칙 | 0.2.0 | `ebb32f58` | unit 24, E2E boot 단독 | 스모크 PASS |
+| 03 | #3 테스트·검증·CI | 0.3.0 | (다음 갱신 시) | 30, E2E save 단독, check --export | 스모크 |
