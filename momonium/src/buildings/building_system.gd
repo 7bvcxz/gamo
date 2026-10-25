@@ -687,6 +687,19 @@ func is_unlocked(type: String) -> bool:
 	return not t.is_empty() and bool(t.get("enabled", true)) and prog.meets(t.get("unlock", {})) and research_met(type)
 
 
+## The types that this player level opened just now, in catalog order: their
+## level is exactly `level` and nothing else they need is missing. What the
+## level-up banner names (Step 45: three blind players nearly missed Lv 2).
+func opened_at(level: int) -> Array[String]:
+	var out: Array[String] = []
+	var types: Dictionary = sim.data.get_value("buildings", "types", {})
+	for type: String in types:
+		var t: Dictionary = types[type]
+		if int((t.get("unlock", {}) as Dictionary).get("level", 1)) == level and is_placeable(type) and is_unlocked(type):
+			out.append(type)
+	return out
+
+
 ## Whether the research a type waits for (unlock.research) is finished.
 func research_met(type: String) -> bool:
 	var needed := String(sim.data.building_type(type).get("unlock", {}).get("research", ""))

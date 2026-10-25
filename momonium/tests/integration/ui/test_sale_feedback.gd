@@ -31,7 +31,12 @@ func test_store_line_shows_crops_and_their_value() -> void:
 	(sim.system(&"inventory") as InventorySystem).add("crop", 2)
 	hud.refresh()
 	assert_true(hud.production_label.visible, "crops in store: the line appears")
-	assert_eq(hud.production_label.text, "2 crops · +$10", "two batches worth $10 tomorrow")
+	assert_eq(hud.production_label.text, "Crops 2 · +$10 at dawn", "two batches worth $10 tomorrow, and it says when")
+	# Placed by its width once the text arrives: inside the screen (Step 45 blind playtest: "1 c…").
+	await tree.process_frame
+	var right := hud.production_label.position.x + hud.production_label.size.x
+	assert_true(right <= hud.size.x + 0.5, "the line ends inside the screen (%.0f of %.0f)" % [right, hud.size.x])
+	assert_true(hud.production_label.position.x >= 0.0, "and starts inside it")
 
 
 func test_sale_pops_the_amount_by_the_money() -> void:

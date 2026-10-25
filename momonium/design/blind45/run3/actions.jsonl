@@ -1,0 +1,122 @@
+{"t":0.6,"at":"00:00","cmd":"look","shot":"001.png"}
+{"t":7.3,"at":"00:07","cmd":"note","text":"First screen: a small floating grassy island in the ocean, a bunny-like creature with a blue hood seen from behind, trees. HUD says Day 2, 11/30 sec, 10 coins, Lv1 0/100. A hint says 'Tap an empty tile' with a yellow box highlighting a patch of grass. Going to tap inside that box."}
+{"t":8.9,"at":"00:08","cmd":"tap","x":300,"y":760,"shot":"002.png"}
+{"t":14.3,"at":"00:14","cmd":"note","text":"A build menu popped up: Farm 10 dollars (I have 10), Mine opens Lv3, Lumberyard Lv2, Research lab Lv2, Special 0/1. Sky turning dusk already - days are only 30 seconds. Building the farm."}
+{"t":15.8,"at":"00:15","cmd":"tap","x":108,"y":895,"shot":"003.png"}
+{"t":20.6,"at":"00:20","cmd":"note","text":"Coins went to 0. Farm is under construction, 4 sec. It became night with a moon - very pretty day/night cycle. Waiting for it to finish."}
+{"t":26.3,"at":"00:26","cmd":"wait","s":5,"shot":"004.png"}
+{"t":31.6,"at":"00:31","cmd":"note","text":"Farm built, got 5 XP, now Day 3. The bunny has a heart bubble - cute. Hint: Tap the farm to sow. Bottom shows Sow / Water / Harvest steps, 5 sec each. Tapping the farm."}
+{"t":33.1,"at":"00:33","cmd":"tap","x":300,"y":760,"shot":"005.png"}
+{"t":39,"at":"00:38","cmd":"note","text":"Oops, the bunny walked onto the farm and I tapped HER instead. Her name is Momo, 'Free time', with an Assign button. There's a pencil icon above her (rename?). The hint still says tap the farm to sow. Let me try Assign, maybe that puts her to work on the farm."}
+{"t":40.5,"at":"00:40","cmd":"tap","x":333,"y":1187,"shot":"006.png"}
+{"t":46.4,"at":"00:46","cmd":"note","text":"Assign button lit up greenish but nothing obvious changed; Momo still says Free time. Maybe now I pick a building? Tapping the farm at its left edge, away from Momo."}
+{"t":48,"at":"00:47","cmd":"tap","x":220,"y":755,"shot":"007.png"}
+{"t":53.6,"at":"00:53","cmd":"note","text":"OK! Momo is now 'Working at Farm', farm skill 0, 0 jobs, 'Stays here', 'Route: Nearest first'. So Assign then tap a building = put her to work. Not super obvious but the hint helped. Hint says the bar fills then it's done. Waiting."}
+{"t":60.3,"at":"01:00","cmd":"wait","s":6,"shot":"008.png"}
+{"t":66,"at":"01:05","cmd":"note","text":"Day 4. +1 EXP, Momo has done 1 job. But I don't see crops yet and no coins. I don't actually see a bar filling - just a '1' badge. Closing her panel by tapping the sea to see the farm's own state."}
+{"t":67.5,"at":"01:07","cmd":"tap","x":300,"y":1100,"shot":"009.png"}
+{"t":72.8,"at":"01:12","cmd":"note","text":"Now I see it: a green ring above the farm is filling - that's 'the bar'. Gorgeous sunset. Waiting for the ring to finish."}
+{"t":78.6,"at":"01:18","cmd":"wait","s":5,"shot":"010.png"}
+{"t":83.7,"at":"01:23","cmd":"note","text":"XP 7 now. Tiny sprouts in the farm? Momo has a '...' speech bubble and the hint now says 'Tap a Momo'. Tapping her."}
+{"t":85.3,"at":"01:25","cmd":"tap","x":295,"y":760,"shot":"011.png"}
+{"t":90.9,"at":"01:30","cmd":"note","text":"Tapped Momo: 2 jobs done. New hint: 'Its tiles light up. The pencil edits them.' So the pencil edits which tiles she works? Tapping the pencil."}
+{"t":92.5,"at":"01:32","cmd":"tap","x":296,"y":640,"shot":"012.png"}
+{"t":99.2,"at":"01:39","cmd":"note","text":"Edit mode: '1/4 tiles', tap tiles or drag across them. So Momo can cover up to 4 tiles. But I only have one farm... Trying to tap a grass tile next to the farm to see what happens."}
+{"t":100.8,"at":"01:40","cmd":"tap","x":230,"y":860,"shot":"013.png"}
+{"t":108.3,"at":"01:48","cmd":"note","text":"Now 2/4 tiles - the empty grass tile I tapped turned blue (added to Momo's area). The farm has leafy plants now! A text box explains: plants need time between waterings, any empty tile can build farm/mine/lumberyard/lab, demolish = tap, bin, check, half refunded. A lot of text at once. Tapping Got it."}
+{"t":109.8,"at":"01:49","cmd":"tap","x":313,"y":1013,"shot":"014.png"}
+{"t":116.5,"at":"01:56","cmd":"note","text":"Island looks like a 2x2 grid of tiles; farm on top. The left tile is now in Momo's zone. Still 0 coins - I want the harvest to pay out. Confirming with the check mark."}
+{"t":118,"at":"01:57","cmd":"tap","x":294,"y":641,"shot":"015.png"}
+{"t":123.7,"at":"02:03","cmd":"note","text":"Tile edit saved, the tutorial bubbles are gone. Now I just want to see the crops get harvested and coins come in. Waiting ~10 seconds."}
+{"t":134.5,"at":"02:14","cmd":"wait","s":10,"shot":"016.png"}
+{"t":140.2,"at":"02:20","cmd":"note","text":"Red fruits are hanging in the farm now - ripe! 4 jobs done (sow, water, ...). Next should be harvest. Waiting a bit more for coins."}
+{"t":148.9,"at":"02:28","cmd":"wait","s":8,"shot":"017.png"}
+{"t":154.9,"at":"02:34","cmd":"note","text":"Momo seems to be harvesting now (ring filling, red fruit near her ears). Patience... still 0 coins."}
+{"t":161.6,"at":"02:41","cmd":"wait","s":6,"shot":"018.png"}
+{"t":168.8,"at":"02:48","cmd":"note","text":"Harvest done: XP jumped 9 -> 29, but coins are still 0. Odd. There was a cut-off '1 c...' text at the right screen edge (clipped). Mailbox got a red dot and Momo shows an envelope bubble. Opening the Mailbox."}
+{"t":170.4,"at":"02:50","cmd":"tap","x":557,"y":228,"shot":"019.png"}
+{"t":177,"at":"02:56","cmd":"note","text":"Coins finally 5! (so maybe a separate selling step after harvest). Mailbox has a letter from Momo: 'What if we widened the field?' Aww. Opening it."}
+{"t":178.6,"at":"02:58","cmd":"tap","x":260,"y":248,"shot":"020.png"}
+{"t":184.7,"at":"03:04","cmd":"note","text":"Charming letter from Momo: set rows closer, till to the edges, more plants on the same island. 'Proposal - Field expansion' with a 'Let's research it' button. I love that the upgrade comes as a letter from the character. Tapping Let's research it."}
+{"t":186.5,"at":"03:06","cmd":"tap","x":420,"y":557,"shot":"021.png"}
+{"t":192.9,"at":"03:12","cmd":"note","text":"Button changed to 'On the research list'. Let's look at the Research screen."}
+{"t":194.7,"at":"03:14","cmd":"tap","x":557,"y":165,"shot":"022.png"}
+{"t":203.6,"at":"03:23","cmd":"note","text":"Research tree! Tabs: Farm, Lumber, Mine, Smelting, Power, Games, Ca(t?)... Field expansion costs 0/3 flasks + 20 dollars, 1 min, needs a research lab (which opens at Lv2). Big tree below it (watering, bigger harvests, greenhouse, drip irrigation, millet). What is a flask though? I don't have any. Closing and checking Status."}
+{"t":205.2,"at":"03:25","cmd":"tap","x":469,"y":187,"shot":"023.png"}
+{"t":210.4,"at":"03:30","cmd":"tap","x":557,"y":292,"shot":"024.png"}
+{"t":218.9,"at":"03:38","cmd":"note","text":"Status: island is called Momonium, 'A small island, a big tomorrow.' Farm Lv1 39/100 EXP. Village -> City goal: Land 4/9, Momo 1/3, Research levels 0/3, value produced 5 / 1.5K. So there's a long-term goal: more land, more Momos. Got it, then peeking at Store tab."}
+{"t":220.6,"at":"03:40","cmd":"tap","x":379,"y":470,"shot":"025.png"}
+{"t":222.3,"at":"03:42","cmd":"tap","x":141,"y":187,"shot":"026.png"}
+{"t":229.1,"at":"03:49","cmd":"note","text":"Store tab: Crops 0/20, Made 1. So the one crop got sold automatically for 5 dollars I guess. Checking Money tab."}
+{"t":230.7,"at":"03:50","cmd":"tap","x":206,"y":187,"shot":"027.png"}
+{"t":239,"at":"03:58","cmd":"note","text":"Money tab: 5 earned, 10 spent, and 'Island worth 49 - Sell...' - selling the whole island? Sounds like a prestige/restart thing, not touching it yet. One harvest cycle took about a minute and a half for only 5 dollars, feels slow. Closing and checking the Shop."}
+{"t":240.5,"at":"04:00","cmd":"tap","x":469,"y":187,"shot":"028.png"}
+{"t":242,"at":"04:02","cmd":"tap","x":104,"y":1247,"shot":"029.png"}
+{"t":250.8,"at":"04:10","cmd":"note","text":"Shop has just one thing: Hire Momo, 25 dollars. Second crop already ripening - faster this time. Plan: save 10 dollars and build a second farm on the left tile, which I already put in Momo's work area. Then save for a second Momo. Closing shop and letting time pass."}
+{"t":252.4,"at":"04:12","cmd":"tap","x":126,"y":1025,"shot":"030.png"}
+{"t":265.1,"at":"04:25","cmd":"wait","s":12,"shot":"031.png"}
+{"t":272.8,"at":"04:32","cmd":"note","text":"Second harvest: XP 33 -> 53, and again a clipped '1 c' popup on the very right edge of the screen, I can't read it. Coins still 5 - money seems to arrive later than the harvest. Waiting to see when it lands."}
+{"t":281.6,"at":"04:41","cmd":"wait","s":8,"shot":"032.png"}
+{"t":289.1,"at":"04:49","cmd":"note","text":"That '1 c' text is stuck on the right edge under the level bar, cut off. Coins still 5. Checking Status > Store to see if the crop is sitting in storage instead of being sold."}
+{"t":290.8,"at":"04:50","cmd":"tap","x":557,"y":292,"shot":"033.png"}
+{"t":292.4,"at":"04:52","cmd":"tap","x":141,"y":187,"shot":"034.png"}
+{"t":299.9,"at":"04:59","cmd":"note","text":"Got it: crops are sold when a new day starts - now 10 coins on Day 12. Made 2 crops total. Time to build the second farm on the left tile."}
+{"t":301.5,"at":"05:01","cmd":"tap","x":469,"y":187,"shot":"035.png"}
+{"t":303.1,"at":"05:03","cmd":"tap","x":180,"y":850,"shot":"036.png"}
+{"t":310.6,"at":"05:10","cmd":"note","text":"Build menu is up, though I can't clearly see which tile is selected (the menu covers it). Building Farm for 10."}
+{"t":312.2,"at":"05:12","cmd":"tap","x":61,"y":985,"shot":"037.png"}
+{"t":319.5,"at":"05:19","cmd":"note","text":"Second farm is being built on the left tile - right where I wanted. Scaffolding poles, nice touch. Waiting for it, then I'll see if Momo picks it up on her own since it's in her zone."}
+{"t":328.3,"at":"05:28","cmd":"wait","s":8,"shot":"038.png"}
+{"t":336.2,"at":"05:36","cmd":"note","text":"Yes! Momo walked over to the new farm on her own and is sowing it, while the first farm grows leafy plants. Two farms going. Lv 61/100 - Lv2 will unlock lumberyard and research lab. There's a 'Farm 1/1 >' label at the bottom - tapping it to see what the arrow does."}
+{"t":338,"at":"05:37","cmd":"tap","x":300,"y":1157,"shot":"039.png"}
+{"t":348.2,"at":"05:48","cmd":"note","text":"Farm detail panel: a cycle gives 1 crop; 'Cycle by hand 1 min 10s' vs 'Cycle by Momo 1 min 48s' - so I can work farms myself and I'm faster than Momo! Crop choices (hardy crop, millet locked), and refits into Villa/Park/Pub at higher levels. Closing it and trying to work the FIRST farm by hand with the Sow/Water/Harvest buttons."}
+{"t":349.8,"at":"05:49","cmd":"tap","x":469,"y":187,"shot":"040.png"}
+{"t":351.3,"at":"05:51","cmd":"tap","x":330,"y":735,"shot":"041.png"}
+{"t":360.5,"at":"06:00","cmd":"note","text":"Tapped Momo again by accident - she keeps standing on the building I aim for. Farm skill went up to 1, 15 jobs. The farms are numbered 1 and 2 (her route order I think). Got it, then tapping the right corner of farm 1 to avoid her."}
+{"t":362.1,"at":"06:02","cmd":"tap","x":407,"y":563,"shot":"042.png"}
+{"t":363.8,"at":"06:03","cmd":"tap","x":375,"y":752,"shot":"043.png"}
+{"t":372.3,"at":"06:12","cmd":"note","text":"Farm 1 selected: full of ripe tomatoes, Harvest button says '5s left'. The pencil tip popped up again even though I pressed Got it. Waiting 5s then tapping Harvest myself."}
+{"t":377.9,"at":"06:17","cmd":"wait","s":5,"shot":"044.png"}
+{"t":379.4,"at":"06:19","cmd":"tap","x":499,"y":1236,"shot":"045.png"}
+{"t":388.4,"at":"06:28","cmd":"note","text":"When I tapped Harvest, Momo had already walked back and started harvesting farm 1 herself (Farm 1/1). The button shows a progress bar but I can't tell whether it's me helping or just her. Farm 2 has leafy plants. Waiting for the harvest."}
+{"t":397.2,"at":"06:37","cmd":"wait","s":8,"shot":"046.png"}
+{"t":404.6,"at":"06:44","cmd":"note","text":"Harvest done, XP 86/100 - close to Lv2. Momo already re-sowed and is watering. Another letter from Momo (envelope bubble + red dot). Reading it."}
+{"t":406.3,"at":"06:46","cmd":"tap","x":557,"y":228,"shot":"047.png"}
+{"t":413.5,"at":"06:53","cmd":"note","text":"New letter: 'Maybe we could water less often'. She's clearly feeling the watering pain (water x3 per crop). Opening and adding it to research."}
+{"t":415.2,"at":"06:55","cmd":"tap","x":260,"y":248,"shot":"048.png"}
+{"t":422.4,"at":"07:02","cmd":"note","text":"Letter about straw mulch / slow seep watering -> Proposal: Watering efficiency. 5 coins arrived at dawn (Day 16). Adding to research, then I'll try watering farm 1 myself - its Water button says 5s left."}
+{"t":424,"at":"07:04","cmd":"tap","x":420,"y":557,"shot":"049.png"}
+{"t":425.7,"at":"07:05","cmd":"tap","x":469,"y":187,"shot":"050.png"}
+{"t":433.3,"at":"07:13","cmd":"note","text":"Farm 2 is full of ripe tomatoes while Momo is busy watering farm 1. Perfect chance to harvest farm 2 by hand. Selecting farm 2 then Harvest."}
+{"t":434.8,"at":"07:14","cmd":"tap","x":190,"y":845,"shot":"051.png"}
+{"t":436.5,"at":"07:16","cmd":"tap","x":499,"y":1236,"shot":"052.png"}
+{"t":445.9,"at":"07:25","cmd":"note","text":"Argh. Momo walked onto farm 2 just as I tapped it, so I selected HER, and my second tap landed on her 'Release' button instead of Harvest. Now she's on 'Free time'. Frustrating that she keeps standing on the thing I want to tap. Re-assigning her: Assign, then tap the farm."}
+{"t":447.4,"at":"07:27","cmd":"tap","x":413,"y":1193,"shot":"053.png"}
+{"t":449,"at":"07:28","cmd":"tap","x":300,"y":735,"shot":"054.png"}
+{"t":457.7,"at":"07:37","cmd":"note","text":"LEVEL 2! (9/180). Momo is back to work but only farm 1 has a badge now - re-assigning reset her zone. Using the pencil to add farm 2 back."}
+{"t":459.4,"at":"07:39","cmd":"tap","x":288,"y":643,"shot":"055.png"}
+{"t":461,"at":"07:41","cmd":"tap","x":190,"y":860,"shot":"056.png"}
+{"t":468.9,"at":"07:48","cmd":"note","text":"Farm 2 is back in her zone (2/4 tiles, badges 1 and 2). Confirming. Then let me check what a Research lab costs on an empty tile now that I'm Lv2."}
+{"t":470.5,"at":"07:50","cmd":"tap","x":258,"y":670,"shot":"057.png"}
+{"t":472.1,"at":"07:52","cmd":"tap","x":420,"y":880,"shot":"058.png"}
+{"t":480.3,"at":"08:00","cmd":"note","text":"Lv2 prices: Lumberyard 80, Research lab 45, Farm 10. I have 10 (sold at dawn). The lab is a long way off at 5 coins per crop. Peeking at 'Special 0/1' first."}
+{"t":481.9,"at":"08:01","cmd":"tap","x":537,"y":985,"shot":"059.png"}
+{"t":489.5,"at":"08:09","cmd":"note","text":"Special = landmarks: Clock Tower (Lv5), School (Lv4), Momo Monument (Lv6) - one of each. A Momo Monument, ha. Long-term carrots. Going back and building a third farm with my 10 coins."}
+{"t":491.1,"at":"08:11","cmd":"tap","x":379,"y":876,"shot":"060.png"}
+{"t":492.7,"at":"08:12","cmd":"tap","x":267,"y":985,"shot":"061.png"}
+{"t":500.7,"at":"08:20","cmd":"tap","x":157,"y":985,"shot":"062.png"}
+{"t":506,"at":"08:25","cmd":"note","text":"Third farm going up on the right tile. Harvest sold at dawn so I have 5 left, Lv2 32/180. Once it's built I'll add it to Momo's tiles with the pencil (3/4)."}
+{"t":511.7,"at":"08:31","cmd":"wait","s":5,"shot":"063.png"}
+{"t":518.5,"at":"08:38","cmd":"note","text":"Farm 3 is built and selected, nobody working it (0/1), Sow button is lit. Sowing it myself this time."}
+{"t":520,"at":"08:40","cmd":"tap","x":233,"y":1236,"shot":"064.png"}
+{"t":525.2,"at":"08:45","cmd":"note","text":"Seeds flying into farm 3 - I'm sowing it by hand, the bar under Sow is filling. Feels good to contribute. Next I'll water."}
+{"t":530.9,"at":"08:50","cmd":"wait","s":5,"shot":"065.png"}
+{"t":535.5,"at":"08:55","cmd":"note","text":"Seeds planted in neat dots in farm 3. Water is lit now. Watering by hand."}
+{"t":537.1,"at":"08:57","cmd":"tap","x":366,"y":1236,"shot":"066.png"}
+{"t":542.3,"at":"09:02","cmd":"note","text":"Water droplets falling on farm 3 under my hand while Momo tends farms 1 and 2. Three farms, island is almost full (one grass tile left). With about a minute left: I like the cozy look and the letters, but money is slow - 5 dollars per crop, lab costs 45. Letting it run."}
+{"t":558,"at":"09:18","cmd":"wait","s":15,"shot":"067.png"}
+{"t":562.6,"at":"09:22","cmd":"note","text":"Farm 3 sprouted! The Water button has three little dots on top - first one filled, so that's the 'water x3' count. Watering again."}
+{"t":564.1,"at":"09:24","cmd":"tap","x":366,"y":1236,"shot":"068.png"}
+{"t":569.4,"at":"09:29","cmd":"note","text":"Second watering going on farm 3. Farm 2 is red with ripe tomatoes again, Momo is on farm 1. Nothing sold this dawn, still 5 coins. Final thought: calm and pretty, I understood the loop, but I'd want income to speed up soon to keep me."}
+{"t":595,"at":"09:54","cmd":"wait","s":25,"shot":"069.png"}
+{"t":604.4,"at":"10:04","cmd":"wait","s":6,"shot":"070.png"}

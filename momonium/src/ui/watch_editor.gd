@@ -30,6 +30,8 @@ var overlay: WatchOverlay
 var momo := 0
 var active := false
 var pencil: Button
+## Where the pencil waits: the selected Momo's card on screen (Rect2() when none).
+var anchor: Callable
 var count_label: Label
 var count_pill: PanelContainer
 var last_result: Dictionary = {}
@@ -219,14 +221,22 @@ func _process(_delta: float) -> void:
 		_place()
 
 
-## Above the Momo's head, kept on screen.
+## Just above the selected Momo's card (`anchor`), where it holds still --
+## above a walking Momo's head it walked away from the finger (the blind
+## playtest missed it again and again, Step 45). Above the head only when
+## there is no card. Kept on screen.
 func _place() -> void:
 	var a := momo_views.actor(momo) if momo_views != null else null
 	if a == null:
 		return
-	var head := cameras.world_to_screen(a.global_position) - Vector2(0, a.hit_rect().size.y * cameras.camera.zoom.y + 12.0)
 	var screen := get_viewport_rect().size
-	var p := Vector2(head.x - BUTTON.x * 0.5, head.y - BUTTON.y)
+	var card: Rect2 = anchor.call() if anchor.is_valid() else Rect2()
+	var p := Vector2.ZERO
+	if card.size != Vector2.ZERO:
+		p = Vector2(card.position.x + 8.0, card.position.y - BUTTON.y - 8.0)
+	else:
+		var head := cameras.world_to_screen(a.global_position) - Vector2(0, a.hit_rect().size.y * cameras.camera.zoom.y + 12.0)
+		p = Vector2(head.x - BUTTON.x * 0.5, head.y - BUTTON.y)
 	p.x = clampf(p.x, 8.0, screen.x - BUTTON.x - 8.0)
 	p.y = clampf(p.y, 80.0, screen.y - BUTTON.y - 8.0)
 	pencil.position = p

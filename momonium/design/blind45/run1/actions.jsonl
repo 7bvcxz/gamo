@@ -1,0 +1,102 @@
+{"t":0.6,"at":"00:00","cmd":"look","shot":"001.png"}
+{"t":9.7,"at":"00:09","cmd":"note","text":"Tiny floating island at night, a white bunny-ish creature with its back to me, trees. Day 1 with a 30 sec timer, 10 coins, Lv1. A yellow box highlights grass on the left and says 'Tap an empty tile'. I'll tap inside the box."}
+{"t":11.3,"at":"00:11","cmd":"tap","x":190,"y":840,"shot":"002.png"}
+{"t":17.3,"at":"00:17","cmd":"note","text":"Oh, it became day 2 and sunny; the bunny turned around, cute. A build menu: Farm $10, Mine (Lv3), Lumberyard (Lv2), Research lab (Lv2), Special 0/1. I have exactly 10 coins. Building a farm."}
+{"t":18.9,"at":"00:18","cmd":"tap","x":62,"y":980,"shot":"003.png"}
+{"t":28.4,"at":"00:28","cmd":"wait","s":5,"shot":"004.png"}
+{"t":34.4,"at":"00:34","cmd":"note","text":"Farm built in ~4s, coins now 0, got 5 XP. Night again already (days are 30 sec). Bottom shows Sow / Water / Harvest, 5 sec each. Hint says tap the farm to sow. Tapping the farm plot."}
+{"t":35.9,"at":"00:35","cmd":"tap","x":190,"y":850,"shot":"005.png"}
+{"t":45.9,"at":"00:45","cmd":"wait","s":5,"shot":"006.png"}
+{"t":51.9,"at":"00:51","cmd":"note","text":"Seeds planted (little dots in the soil). Day 3. Now 'Tap again to water -- three times in all'. The hint bubble is covering the bunny's face, a little annoying. Tapping farm to water."}
+{"t":53.5,"at":"00:53","cmd":"tap","x":190,"y":850,"shot":"007.png"}
+{"t":62.7,"at":"01:02","cmd":"wait","s":4,"shot":"008.png"}
+{"t":68.6,"at":"01:08","cmd":"note","text":"First watering done, sprouts showing. Water button says '10s left' - maybe a cooldown before the next watering? Now hint says 'Tap a Momo' - so the bunny is called a Momo. Tapping it."}
+{"t":70.3,"at":"01:10","cmd":"tap","x":303,"y":730,"shot":"009.png"}
+{"t":76.9,"at":"01:16","cmd":"note","text":"Tapped Momo: panel says 'Momo - Free time' with an Assign button. Hint: 'Its tiles light up. The pencil edits them'. I don't really see tiles lighting up, just a ring under Momo. Not sure what 'its tiles' means. Tapping the pencil."}
+{"t":78.5,"at":"01:18","cmd":"tap","x":373,"y":658,"shot":"010.png"}
+{"t":84.6,"at":"01:24","cmd":"tap","x":274,"y":572,"shot":"011.png"}
+{"t":92.1,"at":"01:32","cmd":"note","text":"Hmm, Momo wanders around and the pencil moved with it, so my taps kept missing; now the panel closed and the tutorial hint is gone. A bit frustrating chasing a moving target. Let me go back to the farm and water it again (it said three times)."}
+{"t":93.6,"at":"01:33","cmd":"tap","x":190,"y":850,"shot":"012.png"}
+{"t":104,"at":"01:43","cmd":"wait","s":5,"shot":"013.png"}
+{"t":111.4,"at":"01:51","cmd":"note","text":"Second watering done, plants are leafy now - nice visible growth. Water shows '9s left', so there's a wait between waterings. While waiting, let me try the Momo again and press Assign this time - maybe it can work the farm for me."}
+{"t":113,"at":"01:52","cmd":"tap","x":405,"y":745,"shot":"014.png"}
+{"t":121.2,"at":"02:01","cmd":"note","text":"Clearer hint now: 'The pencil edits which tiles this Momo looks after: tap or drag over tiles'. So I paint tiles for the Momo to tend. I want it to look after the farm. Tapping Got it, then the pencil."}
+{"t":122.7,"at":"02:02","cmd":"tap","x":525,"y":607,"shot":"015.png"}
+{"t":129,"at":"02:08","cmd":"tap","x":423,"y":705,"shot":"016.png"}
+{"t":137.4,"at":"02:17","cmd":"note","text":"Got into edit mode: a checkmark and '0 / 4 tiles'. So the Momo can look after up to 4 tiles. The island seems to be 4 tiles total. Tapping the farm tile to add it."}
+{"t":138.8,"at":"02:18","cmd":"tap","x":190,"y":840,"shot":"017.png"}
+{"t":147.4,"at":"02:27","cmd":"note","text":"Farm tile highlighted with a '1' and the Momo walked straight over to it. Panel now: 'Working at Farm, Farm skill 0, 0 jobs, Stays here, Route: Nearest first'. That's satisfying - I've got a worker. Confirming with the checkmark."}
+{"t":148.9,"at":"02:28","cmd":"tap","x":184,"y":727,"shot":"018.png"}
+{"t":156.5,"at":"02:36","cmd":"note","text":"Confirmed. Momo is sitting in the farm with a progress ring - it seems to be doing the watering itself. While it works, I'm curious about the Mailbox button top right."}
+{"t":158.2,"at":"02:38","cmd":"tap","x":557,"y":230,"shot":"019.png"}
+{"t":166.1,"at":"02:46","cmd":"note","text":"Mailbox: 'No letters yet'. But look - red tomatoes in the farm now! Momo has 1 job done and a '...' speech bubble. Closing mail, peeking at Research."}
+{"t":167.9,"at":"02:47","cmd":"tap","x":557,"y":165,"shot":"020.png"}
+{"t":177.3,"at":"02:57","cmd":"note","text":"Research is a big tech tree: tabs Farm, Lumber, Mine, Smelting, Power, Games, Ca(?). First node 'Field expansion' costs 3 flasks + $20, 1 min. I have no flasks and no money, and don't know where flasks come from - probably that Research lab at Lv2. Lots ahead! Closing it, going to watch the harvest."}
+{"t":178.9,"at":"02:58","cmd":"tap","x":469,"y":187,"shot":"021.png"}
+{"t":188.7,"at":"03:08","cmd":"note","text":"Momo harvested - farm is empty again, 2 jobs, XP jumped to 29/100. But coins still 0, and there's some cut-off text '1 c...' at the right screen edge under the XP bar that I can't read. Where did the tomatoes go? Do I need to sell them? Checking Status."}
+{"t":190.5,"at":"03:10","cmd":"tap","x":557,"y":293,"shot":"022.png"}
+{"t":200.6,"at":"03:20","cmd":"note","text":"Coins went 0 -> 5, so the harvest did sell (just with a delay). Status screen: the island is 'Momonium - A small island, a big tomorrow'. Village -> City goal: Land 4/9, Momo 1/3, Research levels 0/3, Value produced $5/$1.5K. Now I have a long-term goal! Skill bars for Farm/Mine/Lumber/Research/Smelting. Tapping Got it, then Store tab."}
+{"t":202.4,"at":"03:22","cmd":"tap","x":380,"y":470,"shot":"023.png"}
+{"t":207.2,"at":"03:27","cmd":"tap","x":141,"y":187,"shot":"024.png"}
+{"t":217.5,"at":"03:37","cmd":"note","text":"Store tab: Crops 0/20, Made 1 - a storage, and the one crop got sold automatically I guess. Momo is on its 4th job, working steadily on its own. Closing this and checking the Shop button bottom left."}
+{"t":219.1,"at":"03:39","cmd":"tap","x":469,"y":187,"shot":"025.png"}
+{"t":220.6,"at":"03:40","cmd":"tap","x":104,"y":1247,"shot":"026.png"}
+{"t":231.9,"at":"03:51","cmd":"note","text":"Shop has one thing: Hire Momo $25. I only have $5. Each harvest seems to give ~$5, so that's a while. Better plan: when I hit $10, build a second farm on another empty tile. Closing shop and tapping an empty tile to see the build menu."}
+{"t":233.4,"at":"03:53","cmd":"tap","x":126,"y":1025,"shot":"027.png"}
+{"t":235,"at":"03:54","cmd":"tap","x":360,"y":930,"shot":"028.png"}
+{"t":244.7,"at":"04:04","cmd":"note","text":"Build menu again (Farm $10 in red, can't afford). Ooh - Momo has an envelope speech bubble and the Mailbox has a red dot. A letter from the Momo! First, peeking at 'Special 0/1' in the build menu."}
+{"t":246.3,"at":"04:06","cmd":"tap","x":489,"y":1067,"shot":"029.png"}
+{"t":256,"at":"04:15","cmd":"note","text":"Special = landmarks: Clock Tower (Lv5), School (Lv4), Momo Monument (Lv6). One of each, 0/1 slots. Nice long-term carrots. Got it, then reading the letter."}
+{"t":257.6,"at":"04:17","cmd":"tap","x":280,"y":960,"shot":"030.png"}
+{"t":259.3,"at":"04:19","cmd":"tap","x":557,"y":230,"shot":"031.png"}
+{"t":267.3,"at":"04:27","cmd":"note","text":"A letter from Momo: 'What if we widened the field?' - cute, the worker is suggesting the Field expansion research. Opening it."}
+{"t":268.9,"at":"04:28","cmd":"tap","x":260,"y":248,"shot":"032.png"}
+{"t":277.8,"at":"04:37","cmd":"note","text":"Lovely letter, styled like a real airmail envelope with a flower stamp. Momo proposes Field expansion. 'Let's research it' button. I doubt I can afford it ($20 + 3 flasks), but let's press it and see."}
+{"t":279.5,"at":"04:39","cmd":"tap","x":420,"y":557,"shot":"033.png"}
+{"t":290.4,"at":"04:50","cmd":"note","text":"Button now says 'On the research list'. OK. Coins have been stuck at $5 for a few days though, while tomatoes keep growing. Wondering how money comes in. Closing mail and waiting to watch a full cycle."}
+{"t":292,"at":"04:52","cmd":"tap","x":469,"y":187,"shot":"034.png"}
+{"t":304.7,"at":"05:04","cmd":"wait","s":12,"shot":"035.png"}
+{"t":314.8,"at":"05:14","cmd":"note","text":"Another harvest: XP 54/100, but coins STILL $5. That clipped '1 c...' popup appears again at the far right edge - maybe '+1 crop'? It's cut off so I can't read it. Going to the Status > Money tab to understand income."}
+{"t":316.5,"at":"05:16","cmd":"tap","x":557,"y":293,"shot":"036.png"}
+{"t":318.1,"at":"05:18","cmd":"tap","x":206,"y":187,"shot":"037.png"}
+{"t":328.7,"at":"05:28","cmd":"note","text":"Money tab: now $10! Income seems to land when the day rolls over ('Yesterday +$5'), with a 7-day bar chart. Also an intriguing 'Island worth $61 - Sell...' button - not touching that! With $10 I'll build a second farm on the empty tile in front."}
+{"t":330.2,"at":"05:30","cmd":"tap","x":469,"y":187,"shot":"038.png"}
+{"t":331.8,"at":"05:31","cmd":"tap","x":300,"y":930,"shot":"039.png"}
+{"t":339.4,"at":"05:39","cmd":"tap","x":109,"y":1067,"shot":"040.png"}
+{"t":348.2,"at":"05:48","cmd":"note","text":"Second farm going up on the front tile, $0 again. Once it's built I'll add it to Momo's tiles with the pencil so it farms both."}
+{"t":353.9,"at":"05:53","cmd":"wait","s":5,"shot":"041.png"}
+{"t":362.6,"at":"06:02","cmd":"note","text":"Two farms side by side now, looks great. Sowing the new one myself by tapping it."}
+{"t":364.2,"at":"06:04","cmd":"tap","x":300,"y":930,"shot":"042.png"}
+{"t":373.6,"at":"06:13","cmd":"note","text":"Sowing the new farm. Now selecting Momo to add the new farm tile to its route."}
+{"t":375.1,"at":"06:15","cmd":"tap","x":183,"y":820,"shot":"043.png"}
+{"t":385,"at":"06:24","cmd":"note","text":"Momo is selected, Farm skill went up to 1 after 11 jobs - it's learning! Pencil, then tap the new farm."}
+{"t":386.5,"at":"06:26","cmd":"tap","x":183,"y":727,"shot":"044.png"}
+{"t":388.1,"at":"06:28","cmd":"tap","x":300,"y":935,"shot":"045.png"}
+{"t":397.1,"at":"06:37","cmd":"note","text":"2/4 tiles, numbered 1 and 2 - the numbers look like a route order. Confirming. Then I'll try 'Route: Nearest first' to see what it does."}
+{"t":398.7,"at":"06:38","cmd":"tap","x":184,"y":727,"shot":"046.png"}
+{"t":400.3,"at":"06:40","cmd":"tap","x":280,"y":1248,"shot":"047.png"}
+{"t":410.3,"at":"06:50","cmd":"note","text":"Route switched to 'Row by row' and the tile numbers swapped (front farm is now 1). It says 'Comparing: a few days are needed on each side' - neat, it'll tell me which route is better. Another letter arrived (red dot + envelope over Momo). XP 83/100, close to level 2. Reading the mail."}
+{"t":412,"at":"06:52","cmd":"tap","x":557,"y":230,"shot":"048.png"}
+{"t":419.3,"at":"06:59","cmd":"tap","x":260,"y":248,"shot":"049.png"}
+{"t":429.7,"at":"07:09","cmd":"note","text":"Second letter: 'Maybe we could water less often' - straw mulch idea, proposes Watering efficiency. Charming that the ideas come from the worker. Accepting it. (Also noticed the 1/2 tile numbers flipped back again - a little confusing which is which.)"}
+{"t":431.6,"at":"07:11","cmd":"tap","x":420,"y":557,"shot":"050.png"}
+{"t":433.5,"at":"07:13","cmd":"tap","x":557,"y":165,"shot":"051.png"}
+{"t":443.6,"at":"07:23","cmd":"note","text":"Research panel now answers my flask question: the button says 'Build a research lab'. That opens at Lv2 and I'm at 86/100 XP. Hmm, only Field expansion has a yellow dot; the Watering efficiency I just accepted still looks locked. Closing and waiting for level 2."}
+{"t":445.4,"at":"07:25","cmd":"tap","x":469,"y":187,"shot":"052.png"}
+{"t":461.1,"at":"07:41","cmd":"wait","s":15,"shot":"053.png"}
+{"t":471.2,"at":"07:51","cmd":"note","text":"Panel now reports 'Since the change: 1.4 -> 3 jobs a day' - satisfying, the route change (or the second farm?) doubled output. Not sure which one deserves credit. Still $5 though, money feels slow. XP 88/100. Waiting for level 2."}
+{"t":491.9,"at":"08:11","cmd":"wait","s":20,"shot":"054.png"}
+{"t":501.8,"at":"08:21","cmd":"note","text":"Both farms are loaded with ripe tomatoes, Momo is harvesting one. Coins have sat at $5 for 3+ days though, which confuses me. I'll help by harvesting the front farm myself."}
+{"t":503.4,"at":"08:23","cmd":"tap","x":320,"y":920,"shot":"055.png"}
+{"t":514.6,"at":"08:34","cmd":"note","text":"Level 2! (10/180) - it just quietly ticked over, I almost missed it; no celebration. Research lab and Lumberyard should be open now. Tapping the empty right-hand tile to see their prices."}
+{"t":516.2,"at":"08:36","cmd":"tap","x":440,"y":850,"shot":"056.png"}
+{"t":526.6,"at":"08:46","cmd":"note","text":"Unlocked prices: Research lab $45, Lumberyard $80. I have $5 - a long way off at this pace. The clipped '2 c...' popup at the right edge again. Checking the Store tab to see if crops are piling up unsold."}
+{"t":528.3,"at":"08:48","cmd":"tap","x":557,"y":293,"shot":"057.png"}
+{"t":529.9,"at":"08:49","cmd":"tap","x":141,"y":187,"shot":"058.png"}
+{"t":539.3,"at":"08:59","cmd":"note","text":"Coins jumped to $15 at the new day - two crops yesterday, $5 each, paid at dawn. Made 5 crops total. Now it clicks: crops sell overnight. Quick peek at the 'Life' tab before time runs out."}
+{"t":541,"at":"09:01","cmd":"tap","x":344,"y":187,"shot":"059.png"}
+{"t":550.2,"at":"09:10","cmd":"note","text":"Life tab: Happiness 0/100 ('No parks, pubs or halls yet'), Homes 0/0, '1 sleeps outdoors' in red - aww, my poor Momo has no house! But I never saw a house in the build menu. Momo work time x1. That makes me want to give it a home. Saving up $45 for the research lab next."}
+{"t":551.9,"at":"09:11","cmd":"tap","x":410,"y":187,"shot":"060.png"}
+{"t":562.3,"at":"09:22","cmd":"note","text":"Stats tab is a wall of numbers: +$2.1/-$1.4 per day, crops 0.4 made/used/sold per day, farm busy 55%/32%, Momo busy 83%, Power 0 kW. Too spreadsheet-y for me right now, but nice for later. Main takeaway: income is ~$2/day and the lab is $45 - slow. Next step would be hiring a second Momo ($25) to work the second farm."}
+{"t":588.1,"at":"09:48","cmd":"wait","s":25,"shot":"061.png"}
+{"t":604.1,"at":"10:04","cmd":"wait","s":12,"shot":"062.png"}

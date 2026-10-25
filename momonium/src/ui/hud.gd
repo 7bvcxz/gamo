@@ -398,8 +398,13 @@ func refresh(force: bool = false) -> void:
 	if tiers != null and status_button != null and status_button.badge != tiers.can_promote():
 		status_button.badge = tiers.can_promote()
 	var production := production_summary()
+	var shown_before := production_label.text
 	_set_text(production_label, "prod", production, force)
 	production_label.visible = production != ""
+	# Placed by its width: laid out while empty, a new line grew past the
+	# screen's right edge ("1 c…", found by the blind playtest, Step 45).
+	if production_label.text != shown_before:
+		_layout.call_deferred()
 
 
 func _set_text_button(b: Button, text: String) -> void:

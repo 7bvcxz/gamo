@@ -4,8 +4,10 @@ extends Node
 ## What a tap on the world means, and what is selected.
 ##
 ## Receives taps from the InputRouter (which has already given the UI and any
-## drag the first say). Front-most building sprite under the finger wins, then
-## the building on the tapped cell, then the cell itself; open sea deselects.
+## drag the first say). A Momo under the finger wins (but tapped again while
+## selected, it lets the tap through to its building), then the front-most
+## building sprite, then the building on the tapped cell, then the cell
+## itself; open sea deselects.
 ## Tapping a ready building starts its work at once -- the tap is the action,
 ## not a request to open a menu -- and selects it so its cards show progress.
 ## Selection is presentation state: it is not saved and the simulation never
@@ -70,13 +72,16 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 			if not last_result["ok"] and momo_views.actor(selected_id) != null:
 				momo_views.actor(selected_id).refuse()
 			return
-	var momo := momo_views.hit(world_pos) if momo_views != null else 0
-	if momo != 0:
-		select_momo(momo)
-		return
 	var id := views.hit(world_pos)
 	if id == 0:
 		id = buildings.building_at(projection.cell_at(world_pos))
+	var momo := momo_views.hit(world_pos) if momo_views != null else 0
+	# The Momo in front wins -- except a second tap on the one already
+	# selected: that reaches the building it stands on. A working Momo stands
+	# on its farm, and the blind playtest (Step 45) kept getting the Momo.
+	if momo != 0 and not (id != 0 and kind == "momo" and selected_id == momo):
+		select_momo(momo)
+		return
 	if id != 0:
 		select_building(id)
 		_act_on(id)

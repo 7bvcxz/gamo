@@ -34,7 +34,7 @@ item.crop,Crops,작물,作物,作物
 item.wood,Wood,나무,木材,木材
 item.stone,Stone,돌,石,石头
 err.storage_full,Store is full,창고가 가득 찼어요,倉庫がいっぱいです,仓库已满
-hud.store,%d crops · +$%d,작물 %d · +$%d,作物 %d · +$%d,作物 %d · +$%d
+hud.store,Crops %d · +$%d at dawn,작물 %d · 아침에 +$%d,作物 %d · 夜明けに +$%d,作物 %d · 黎明时 +$%d
 status.title,Momonium,Momonium,Momonium,Momonium
 status.tagline,"A small island, a big tomorrow.",작은 섬에서 큰 내일로.,小さな島から、大きな明日へ。,小小的岛，大大的明天。
 status.exp,%d / %d EXP,%d / %d EXP,%d / %d EXP,%d / %d EXP
@@ -43,6 +43,8 @@ mastery.mine,Mine,광산,鉱山,矿山
 mastery.lumberyard,Lumber,목재,木材,木材
 mastery.research,Research,연구,研究,研究
 fx.level_up,Lv %d!,Lv %d!,Lv %d!,Lv %d!
+fx.level_banner,Level %d,레벨 %d,レベル %d,等级 %d
+fx.now_open,Now open: %s,새로 열림: %s,新しく解放: %s,新解锁：%s
 momo.name.0,Momo,모모,モモ,桃桃
 momo.name.1,Mochi,모찌,モチ,麻糬
 momo.name.2,Pomu,포무,ポム,波姆
@@ -540,7 +542,7 @@ tips.special_built,"A landmark built leaves the Special list; pulled down, it co
 tips.tier,Meet these to grow into a City: one more landmark slot,"이 조건을 채우면 도시로 승급, 랜드마크 자리 +1",条件を満たすと町に昇格、ランドマーク枠+1,达成这些条件就能升级为城市：地标位置+1
 tips.rp,"Your research levels became points: place them again, e.g. 3/1/1 as 1/2/2",연구 레벨이 포인트가 됐어요. 3/1/1을 1/2/2처럼 다시 나눠요,研究レベルがポイントになりました。3/1/1を1/2/2のように配り直せます,研究等级变成了点数：可以重新分配，比如把 3/1/1 改成 1/2/2
 tutorial.momo_select,Tap a Momo,모모를 눌러 보세요,モモをタップ,点一下桃桃
-tutorial.momo_pencil,Its tiles light up. The pencil edits them,맡은 칸이 빛나요. 연필로 고쳐요,受け持ちが光ります。鉛筆で編集,照看的格子亮起来了。用铅笔编辑
+tutorial.momo_pencil,Tap the pencil to pick the tiles this Momo looks after,연필을 눌러 이 모모가 맡을 칸을 골라요,鉛筆をタップして、このモモの受け持ちを選びます,点铅笔，选这只桃桃照看的格子
 tutorial.momo_edit,Tap tiles or drag across them: %d / %d,칸을 누르거나 그어 보세요: %d / %d칸,マスをタップかなぞる: %d / %dマス,点击或划过格子：%d / %d 格
 settings.large_demo,Large island demo (performance),큰 섬 데모 (성능 확인),大きな島のデモ（性能確認）,大岛演示（性能测试）
 settings.perf_overlay,Show performance,성능 표시,パフォーマンス表示,显示性能

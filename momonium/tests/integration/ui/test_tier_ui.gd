@@ -68,3 +68,26 @@ func test_milestones_then_a_tap_to_promote() -> void:
 	assert_true(party.playing(), "celebrated")
 	assert_eq(party.text, "Now a City", "with its new name")
 	assert_eq(party.mouse_filter, Control.MOUSE_FILTER_IGNORE, "never in the way of a tap")
+
+
+## Step 45 (blind playtest: all three players nearly missed Lv 2): a level
+## that opens buildings says so in the banner; one that opens nothing keeps
+## the small pop, and nothing celebrates during a catch-up.
+func test_a_level_that_opens_something_names_it() -> void:
+	var prog: ProgressionSystem = sim.system(&"progression")
+	var celebration: TierCelebration = main.get("celebration")
+	prog.add_exp(prog.next_level_exp(), "test")
+	assert_eq(prog.level, 2, "level 2")
+	assert_true(celebration.playing(), "a banner")
+	assert_eq(celebration.text, "Level 2", "naming the level")
+	assert_eq(celebration.sub, "Now open: Research lab · Lumberyard", "and what it opened")
+	celebration._t = -1.0
+	prog.level = 7
+	prog.add_exp(prog.next_level_exp(), "test")
+	assert_eq(prog.level, 8, "level 8")
+	assert_false(celebration.playing(), "opens nothing: no banner")
+	prog.level = 1
+	sim.replaying = true
+	prog.add_exp(prog.next_level_exp(), "test")
+	sim.replaying = false
+	assert_false(celebration.playing(), "caught up while away: no banner")

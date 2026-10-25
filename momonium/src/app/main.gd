@@ -229,6 +229,7 @@ func _ready() -> void:
 	watch_editor = WatchEditor.new()
 	ui.add_child(watch_editor)
 	watch_editor.setup(sim, cameras, projection, momo_views, watch_overlay)
+	watch_editor.anchor = func() -> Rect2: return momo_panel.get_global_rect() if momo_panel.visible else Rect2()
 	watch_editor.editing_changed.connect(func(on: bool) -> void:
 		if on:
 			momo_panel.assigning = false)
@@ -310,7 +311,9 @@ func _ready() -> void:
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
 		if type == &"tier_promoted":
 			_close_frames()
-			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))}), _promotion_change(p)))
+			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))}), _promotion_change(p))
+		elif type == &"level_up" and not sim.replaying:
+			_celebrate_level(int(p["level"])))
 	sale_frame = _frame(ui, "SaleFrame")
 	sale_view = SaleView.new()
 	sale_view.setup(sim, lib)
@@ -1174,7 +1177,8 @@ func _hud_info(_arg: Variant) -> Dictionary:
 		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current(),
 		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text},
 		"pills": {"day": to_window.call(hud.day_panel.get_global_rect()), "money": to_window.call(hud.money_pill.get_global_rect()),
-			"exp": to_window.call(hud.exp_pill.get_global_rect())}}
+			"exp": to_window.call(hud.exp_pill.get_global_rect())},
+		"store": {"text": hud.production_label.text, "rect": to_window.call(hud.production_label.get_global_rect())} if hud.production_label.visible else {}}
 
 
 ## E2E: what is selected, the panel's cards (window pixels) and the last tap result.
@@ -1434,6 +1438,19 @@ func _status_info(_arg: Variant) -> Dictionary:
 		var card: PanelContainer = status_panel.cards[type]
 		out["mastery"][type] = (card.find_child("Exp", true, false) as Label).text
 	return out
+
+
+## A level that opens something is news: the banner names it. A level that
+## opens nothing keeps the small pop by the EXP pill (HUD); so does a level
+## reached while a promotion is still on screen.
+func _celebrate_level(level: int) -> void:
+	var opened := (sim.system(&"buildings") as BuildingSystem).opened_at(level)
+	if opened.is_empty() or celebration.playing():
+		return
+	var names := PackedStringArray()
+	for type: String in opened:
+		names.append(tr("building." + type))
+	celebration.play(tr("fx.level_banner") % level, tr("fx.now_open") % " · ".join(names))
 
 
 func _place_momo_panel() -> void:

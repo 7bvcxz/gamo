@@ -54,6 +54,29 @@ func test_tapping_a_ready_building_starts_its_work() -> void:
 	assert_true((main.get("panel") as ContextPanel).card_rects().size() > 0, "its stage cards show")
 
 
+## Step 45 (blind playtest): a working Momo stands on its farm, so a tap on
+## the farm got the Momo, again and again. A second tap on the selected Momo
+## reaches the building it stands on; the first still gets the Momo.
+func test_a_second_tap_on_a_selected_momo_reaches_its_building() -> void:
+	var farm := buildings.place_instant("farm", Vector2i(1, 0))
+	var momos: MomoSystem = sim.system(&"momo")
+	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
+	sim.advance_ms(30000)
+	await tree.process_frame
+	var actor := (main.get("momo_views") as MomoViews).actor(1)
+	assert_true(momos.at_work(1), "the Momo is at its farm")
+	var spot := actor.position + Vector2(0, -6)
+	assert_eq(buildings.building_at(proj.cell_at(spot)), farm, "the point is on the farm")
+	assert_eq((main.get("momo_views") as MomoViews).hit(spot), 1, "and on the Momo")
+	_tap(cams.world_to_screen(spot))
+	assert_eq(sel.kind, "momo", "first tap: the Momo")
+	_tap(cams.world_to_screen(spot))
+	assert_eq(sel.kind, "building", "second tap: through to the farm")
+	assert_eq(sel.selected_id, farm, "this farm")
+	_tap(cams.world_to_screen(spot))
+	assert_eq(sel.kind, "momo", "a third: the Momo again (nothing is out of reach)")
+
+
 func test_work_continues_when_something_else_is_selected() -> void:
 	var a := buildings.place_instant("farm", Vector2i(1, 0))
 	var b := buildings.place_instant("farm", Vector2i(0, 1))

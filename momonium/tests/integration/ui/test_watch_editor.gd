@@ -87,8 +87,17 @@ func test_selecting_a_momo_shows_its_tiles_and_a_pencil() -> void:
 	await _select_momo()
 	assert_eq(overlay.tinted(), [Vector2i(1, 0)] as Array[Vector2i], "its farm's tile is tinted")
 	assert_true(editor.pencil.is_visible_in_tree(), "a pencil")
-	var head := cams.world_to_screen((main.get("momo_views") as MomoViews).actor(1).global_position)
-	assert_true(editor.pencil.get_global_rect().get_center().y < head.y, "above the Momo")
+	# Step 45 (blind playtest): the pencil waits by the Momo's card, still,
+	# not above a head that walks away from the finger.
+	var card := (main.get("momo_panel") as MomoPanel).get_global_rect()
+	await tree.process_frame
+	var at := editor.pencil.get_global_rect()
+	assert_true(at.end.y <= card.position.y + 1.0 and absf(at.position.x - card.position.x) < 40.0, "just above the Momo's card (%s, card %s)" % [at, card])
+	var actor := (main.get("momo_views") as MomoViews).actor(1)
+	var before := at.position
+	actor.position += Vector2(120, 40)
+	editor._place()
+	assert_eq(editor.pencil.get_global_rect().position, before, "and it holds still when the Momo moves")
 	assert_false(editor.active, "not editing yet")
 	(main.get("selection") as SelectionController).deselect()
 	assert_eq(overlay.tinted(), [] as Array[Vector2i], "deselected: no tint")
@@ -159,7 +168,9 @@ func test_taps_edit_one_tile_and_the_sea_or_check_ends() -> void:
 func test_outside_editing_a_drag_pans() -> void:
 	await _select_momo()
 	var cam_before := cams.camera.position
-	_stroke([_cell(Vector2i(0, 2)), _cell(Vector2i(2, 2))])
+	# Over the sea beyond the island's far edge, clear of the pencil (which
+	# waits by the Momo card at the bottom since Step 45).
+	_stroke([_cell(Vector2i(0, -1)), _cell(Vector2i(2, -1))])
 	assert_ne(cams.camera.position, cam_before, "not editing: the camera pans")
 	assert_eq(momos.watched(1), [] as Array[Vector2i], "and no tile changes")
 
