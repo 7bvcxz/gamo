@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters"]
+const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters", "research"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []
@@ -78,6 +78,7 @@ func validate() -> void:
 	_validate_art()
 	_validate_buildings()
 	_validate_letters()
+	_validate_research()
 	_require_number({}, "balance", "land.base", 1)
 	_require_number({}, "balance", "land.growth", 1)
 	_require_number({}, "balance", "land.round_to", 1)
@@ -103,6 +104,91 @@ func _validate_letters() -> void:
 		for key: String in ["title", "body", "research"]:
 			if String(l.get(key, "")) == "":
 				errors.append("letters: %s.%s missing" % [id, key])
+
+
+func _validate_research() -> void:
+	var types: Dictionary = table("buildings").get("types", {})
+	var items: Dictionary = table("items").get("items", {})
+	var ids := {}
+	for n: Dictionary in table("research").get("nodes", []):
+		var id := String(n.get("id", ""))
+		if id == "" or ids.has(id):
+			errors.append("research: every node needs a unique id (%s)" % id)
+		ids[id] = n
+	for id: String in ids:
+		var n: Dictionary = ids[id]
+		var industry := String(n.get("industry", ""))
+		if industry != "global" and not types.has(industry):
+			errors.append("research: %s.industry %s is neither a building type nor global" % [id, industry])
+		for r: String in n.get("requires", []):
+			if not ids.has(r):
+				errors.append("research: %s requires unknown %s" % [id, r])
+		if float(n.get("seconds", 0)) <= 0.0:
+			errors.append("research: %s.seconds must be > 0" % id)
+		for item: String in n.get("cost", {}).get("items", {}):
+			if not items.has(item):
+				errors.append("research: %s costs unknown item %s" % [id, item])
+		for t: String in n.get("unlock", {}).get("mastery", {}):
+			if not types.has(t):
+				errors.append("research: %s.unlock.mastery names unknown type %s" % [id, t])
+		for k: String in ["name", "desc"]:
+			if String(n.get(k, "")) == "":
+				errors.append("research: %s.%s missing" % [id, k])
+		for e: Dictionary in n.get("effects", []):
+			_validate_effect(id, e, types, items)
+	# No node may (indirectly) require itself.
+	for id: String in ids:
+		var seen := {}
+		var stack: Array = [id]
+		while not stack.is_empty():
+			var cur := String(stack.pop_back())
+			for r: String in (ids.get(cur, {}) as Dictionary).get("requires", []):
+				if r == id:
+					errors.append("research: %s requires itself through %s" % [id, cur])
+					stack.clear()
+					break
+				if not seen.has(r):
+					seen[r] = true
+					stack.append(r)
+	# Letters and the tree must agree: every proposal is a node, and every
+	# proposal-gated node is proposed by some letter (or it could never open).
+	var proposed := {}
+	for l: Dictionary in table("letters").get("letters", []):
+		proposed[String(l.get("research", ""))] = true
+		if not ids.has(String(l.get("research", ""))):
+			errors.append("letters: %s proposes unknown research %s" % [l.get("id", "?"), l.get("research", "")])
+	for id: String in ids:
+		if bool((ids[id] as Dictionary).get("unlock", {}).get("proposal", false)) and not proposed.has(id):
+			errors.append("research: %s waits for a proposal no letter makes" % id)
+
+
+func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dictionary) -> void:
+	var kind := String(e.get("kind", ""))
+	match kind:
+		"work", "cooldown":
+			var t := String(e.get("type", ""))
+			if not types.has(t):
+				errors.append("research: %s effect on unknown type %s" % [id, t])
+			elif e.has("action") and not (types[t].get("cycle", {}).get("stages", []) as Array).any(func(st: Dictionary) -> bool: return st.get("action", "") == e["action"]):
+				errors.append("research: %s effect on unknown action %s.%s" % [id, t, e["action"]])
+			var m := float(e.get("multiply", 0.0))
+			if m <= 0.0 or m > 1.0:
+				errors.append("research: %s %s multiply must be in (0, 1] -- research makes things easier, not impossible" % [id, kind])
+		"yield":
+			var t := String(e.get("type", ""))
+			var stage_ok := types.has(t) and (types[t].get("cycle", {}).get("stages", []) as Array).any(func(st: Dictionary) -> bool: return st.get("id", "") == e.get("stage", ""))
+			if not stage_ok:
+				errors.append("research: %s yield effect on unknown stage %s.%s" % [id, t, e.get("stage", "")])
+			if not items.has(String(e.get("item", ""))):
+				errors.append("research: %s yields unknown item %s" % [id, e.get("item", "")])
+			if int(e.get("add", 0)) < 1:
+				errors.append("research: %s yield add must be >= 1" % id)
+		"research_time":
+			var m := float(e.get("multiply", 0.0))
+			if m <= 0.0 or m > 1.0:
+				errors.append("research: %s research_time multiply must be in (0, 1]" % id)
+		_:
+			errors.append("research: %s has unknown effect kind %s" % [id, kind])
 
 
 func _validate_balance(t: Dictionary) -> void:

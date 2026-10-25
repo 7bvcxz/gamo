@@ -1,5 +1,5 @@
 {
-  "_doc": "Everything that can sit in the island's store. `kind`: crop (sold automatically at the next day boundary for `price` each), material, product. `stack` is how many the store holds of that item.",
+  "_doc": "Everything that can sit in the island's store. `kind`: crop (sold automatically at the next day boundary for `price` each), material, product, science (research notes from the lab, spent on research, never sold). `stack` is how many the store holds of that item.",
   "items": {
     "crop": {
       "name": "item.crop",
@@ -21,6 +21,13 @@
       "kind": "material",
       "icon": "ui_sprout",
       "stack": 50,
+      "price": 0
+    },
+    "notes": {
+      "name": "item.notes",
+      "kind": "science",
+      "icon": "ui_flask",
+      "stack": 30,
       "price": 0
     }
   }

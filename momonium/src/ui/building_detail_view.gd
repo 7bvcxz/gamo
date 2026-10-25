@@ -71,6 +71,8 @@ static func duration(seconds: float) -> String:
 	var s := int(round(seconds))
 	if s < 60:
 		return TranslationServer.translate("time.s").format({"s": s})
+	if s % 60 == 0:
+		return TranslationServer.translate("time.m").format({"m": s / 60})
 	return TranslationServer.translate("time.ms").format({"m": s / 60, "s": s % 60})
 
 

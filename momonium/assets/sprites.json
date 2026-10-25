@@ -511,6 +511,21 @@
           210
         ]
       }
+    },
+    "lab": {
+      "source": "svg/lab.svg",
+      "scale": 2.0,
+      "world_scale": 0.5,
+      "pivots": {
+        "origin": [
+          70,
+          95
+        ],
+        "top": [
+          70,
+          8
+        ]
+      }
     }
   }
 }

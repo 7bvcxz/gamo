@@ -83,6 +83,45 @@
       "enabled": true,
       "refund": 1.0,
       "workers": 1
+    },
+    "research": {
+      "name": "building.research",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "lab",
+      "cycle": {
+        "_doc": "Study: experiments written up as research notes, the currency research is paid in. No wait between studies; the store's room for notes is the limit.",
+        "stages": [
+          {
+            "id": "study",
+            "action": "study",
+            "label": "stage.study",
+            "icon": "ui_flask",
+            "seconds": 6,
+            "cooldown": 0,
+            "yield": {
+              "notes": 1
+            }
+          }
+        ],
+        "looks": [
+          ""
+        ]
+      },
+      "icon": "ui_flask",
+      "cost": {
+        "money": 60,
+        "items": {}
+      },
+      "build_seconds": 10,
+      "unlock": {
+        "level": 2
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 1
     }
   }
 }

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 170" width="140" height="170">
+  <!-- A 1x1 research lab in the tile projection (128x78 diamond, centre = origin
+       pivot at (70, 95)): a whitewashed hut with a blue tent roof, a round
+       window, a wooden door and a flask sign over it. -->
+  <defs>
+    <linearGradient id="roofL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4d8fd6"/>
+      <stop offset="1" stop-color="#3a6fb3"/>
+    </linearGradient>
+    <linearGradient id="roofR" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fb6ee"/>
+      <stop offset="1" stop-color="#5a97da"/>
+    </linearGradient>
+  </defs>
+  <!-- stone plinth on the tile -->
+  <path d="M70 62 L120 96 L70 130 L20 96 Z" fill="#b9b2a6" stroke="#8d8579" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M20 96 L70 130 L70 135 L20 101 Z" fill="#9b9488"/>
+  <path d="M70 130 L120 96 L120 101 L70 135 Z" fill="#aaa397"/>
+  <!-- walls: the two faces we see -->
+  <path d="M26 94 L70 124 L70 82 L26 52 Z" fill="#e9e4da" stroke="#a79f92" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 124 L114 94 L114 52 L70 82 Z" fill="#fbf8f2" stroke="#a79f92" stroke-width="2" stroke-linejoin="round"/>
+  <!-- round window on the left wall -->
+  <ellipse cx="46" cy="83" rx="10" ry="12" fill="#cfe9ff" stroke="#8a6a4a" stroke-width="3"/>
+  <path d="M46 72 L46 94 M37 83 L55 83" stroke="#8a6a4a" stroke-width="2"/>
+  <!-- door on the right wall -->
+  <path d="M86 113 L102 102 L102 78 Q94 75 86 86 Z" fill="#a8723f" stroke="#6b4426" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="98" cy="96" r="1.8" fill="#f2c14e"/>
+  <!-- tent roof with a little overhang -->
+  <path d="M16 56 L70 92 L70 10 Z" fill="url(#roofL)" stroke="#2f5d96" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 92 L124 56 L70 10 Z" fill="url(#roofR)" stroke="#2f5d96" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M16 56 L70 92 L124 56" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- flask sign on the roof -->
+  <circle cx="84" cy="54" r="13" fill="#ffffff" stroke="#2f5d96" stroke-width="2"/>
+  <path d="M81 45 L87 45 M82 45 L82 51 L76 61 Q75 63 77 63 L91 63 Q93 63 92 61 L86 51 L86 45" fill="#ffffff" stroke="#3a6fb3" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M78.5 59 L89.5 59 L91 62 L77 62 Z" fill="#7fd0a6"/>
+  <!-- finial -->
+  <circle cx="70" cy="9" r="3.5" fill="#f2c14e" stroke="#c99a2e" stroke-width="1.5"/>
+</svg>

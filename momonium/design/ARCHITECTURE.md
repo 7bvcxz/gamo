@@ -24,7 +24,7 @@
 | `src/world` | 로직 | 격자·땅·점유 (Step 05~) |
 | `src/economy` | 로직 | 돈·창고·판매 |
 | `src/progression` | 로직 | 레벨·EXP·숙련도·해금 |
-| `src/research` | 로직 | 연구 트리·효과 |
+| `src/research` | 로직 | `ResearchSystem` — 연구 트리·해금·진행, 효과는 `BuildingSystem.modifiers`로(작업·기다림 배율, 수확 보너스) |
 | `src/agents` | 로직 | 모모(에이전트)·작업 스케줄링(`JobSystem`)·모모 편지(`MailSystem`)·매니저 |
 | `src/persistence` | 로직 | 저장 형식·버전·이주·원자적 쓰기 |
 | `src/render` | 표현 | 섬·바다·하늘·건물 그리기, 깊이 정렬 |

@@ -17,5 +17,6 @@ static func create_default() -> Array[SimSystem]:
 		MomoSystem.new(),
 		JobSystem.new(),
 		MailSystem.new(),
+		ResearchSystem.new(),
 	]
 	return list

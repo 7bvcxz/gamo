@@ -281,7 +281,7 @@ func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 	var stage := current_stage(b)
 	# A stage that produces does not start unless its output has somewhere to
 	# go: a full store stops the harvest, it does not throw the crop away.
-	var produces: Dictionary = stage.get("yield", {})
+	var produces := stage_yield(b, stage)
 	if not produces.is_empty() and not (sim.system(&"inventory") as InventorySystem).fits(produces):
 		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
 	var duration := int(round(stage_seconds(b, stage) * maxf(time_multiplier, 0.01) * 1000.0))
@@ -332,6 +332,19 @@ func stage_cooldown(b: Dictionary, stage: Dictionary) -> float:
 	return maxf(base * m, float(stage.get("cooldown_floor", 0.0)))
 
 
+## What a stage gives after modifiers (research can add to a yield).
+func stage_yield(b: Dictionary, stage: Dictionary) -> Dictionary:
+	var out := {}
+	var base: Dictionary = stage.get("yield", {})
+	for item: String in base:
+		var n := int(base[item])
+		for source: Object in modifiers:
+			if source.has_method("yield_bonus"):
+				n += int(source.call("yield_bonus", String(b["type"]), String(stage.get("id", "")), item))
+		out[item] = maxi(n, 0)
+	return out
+
+
 func _multiplier(kind: String, type: String, action: String) -> float:
 	var m := 1.0
 	for source: Object in modifiers:
@@ -351,8 +364,9 @@ func cycle_estimate(b: Dictionary, time_multiplier: float = 1.0) -> Dictionary:
 	for st: Dictionary in stages(b):
 		work += stage_seconds(b, st) * time_multiplier
 		wait += stage_cooldown(b, st)
-		for item: String in st.get("yield", {}):
-			produced[item] = int(produced.get(item, 0)) + int(st["yield"][item])
+		var gives := stage_yield(b, st)
+		for item: String in gives:
+			produced[item] = int(produced.get(item, 0)) + int(gives[item])
 	var cycle := work + wait
 	var day_seconds := sim.clock.day_ms / 1000.0
 	var per_day := {}
@@ -388,7 +402,7 @@ func action_groups(b: Dictionary) -> Array[Dictionary]:
 func _complete_stage(b: Dictionary) -> void:
 	var stage := current_stage(b)
 	b["completed"] = int(b["completed"]) + 1
-	var produced: Dictionary = stage.get("yield", {})
+	var produced := stage_yield(b, stage)
 	if not produced.is_empty():
 		var inv: InventorySystem = sim.system(&"inventory")
 		for item: String in produced:

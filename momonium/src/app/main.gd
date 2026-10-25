@@ -37,6 +37,9 @@ var stats_view: StatsView
 ## Everything about one building, opened from its name.
 var detail_frame: PanelFrame
 var detail_view: BuildingDetailView
+## The technology tree, one tab per industry.
+var research_frame: PanelFrame
+var research_views: Array[ResearchView] = []
 ## Momo Letters.
 var mail_frame: PanelFrame
 var mailbox_view: MailboxView
@@ -197,6 +200,13 @@ func _ready() -> void:
 	mailbox_view.setup(sim, lib)
 	mail_frame.add_tab("hud.mailbox", mailbox_view)
 	mail_frame.closed.connect(mailbox_view.show_list)
+	research_frame = _frame(ui, "ResearchFrame")
+	for industry: String in (sim.system(&"research") as ResearchSystem).industries():
+		var rv := ResearchView.new()
+		rv.setup(sim, lib, industry)
+		research_views.append(rv)
+		research_frame.add_tab("research.industry.global" if industry == "global" else "mastery." + industry, rv)
+	research_frame.set_title(tr("hud.research"))
 	panel.details_pressed.connect(open_details)
 	_place_frames()
 	hud.layout_changed.connect(_place_frames)
@@ -234,6 +244,7 @@ func _ready() -> void:
 	bridge.register_query("status", _status_info)
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
+	bridge.register_query("research", _research_info)
 	bridge.register_query("momos", _momo_info)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
 		var out := {}
@@ -346,13 +357,23 @@ func _on_hud_action(action_name: StringName) -> void:
 			placement.close()
 			detail_frame.close()
 			mail_frame.close()
+			research_frame.close()
 			status_frame.toggle(0)
+		&"research":
+			build_menu.visible = false
+			land_mode.close()
+			placement.close()
+			status_frame.close()
+			detail_frame.close()
+			mail_frame.close()
+			research_frame.toggle(0)
 		&"mailbox":
 			build_menu.visible = false
 			land_mode.close()
 			placement.close()
 			status_frame.close()
 			detail_frame.close()
+			research_frame.close()
 			open_mailbox()
 
 
@@ -443,6 +464,7 @@ func _close_frames() -> void:
 	status_frame.close()
 	detail_frame.close()
 	mail_frame.close()
+	research_frame.close()
 
 
 ## The mailbox, opening on the list of letters.
@@ -459,7 +481,7 @@ func _place_frames() -> void:
 	var size := get_viewport_rect().size
 	# Keep the side buttons free.
 	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
-	for f: PanelFrame in [status_frame, detail_frame, mail_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame]:
 		f.right_reserved = reserved
 		f._layout()
 
@@ -470,6 +492,7 @@ func open_details(id: int) -> void:
 		return
 	status_frame.close()
 	mail_frame.close()
+	research_frame.close()
 	build_menu.visible = false
 	detail_frame.set_title(tr((sim.system(&"buildings") as BuildingSystem).type_def(b).get("name", "")))
 	detail_view.show_building(id)
@@ -509,6 +532,32 @@ func _panels_info(_arg: Variant) -> Dictionary:
 			"you": (detail_view.cycle_you.get_node("Value") as Label).text, "momo": (detail_view.cycle_momo.get_node("Value") as Label).text,
 			"done": (detail_view.done_row.get_node("Value") as Label).text},
 		"window": [win.x, win.y]}
+
+
+## E2E: the research menu as shown -- node states, the chosen node's details, where to tap.
+func _research_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var rect := func(c: Control) -> Array:
+		var r := c.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+	var research: ResearchSystem = sim.system(&"research")
+	var view: ResearchView = research_frame.current_view() if research_frame.current >= 0 else null
+	var nodes := {}
+	if view != null:
+		for id: String in view.cards:
+			nodes[id] = {"state": research.state_of(id), "rect": rect.call(view.cards[id])}
+	var tabs := {}
+	for t: Dictionary in research_frame.tabs:
+		tabs[String(t["key"])] = rect.call(t["button"])
+	return {"open": research_frame.visible, "nodes": nodes, "tabs": tabs, "selected": view.selected if view else "",
+		"name": view.detail_name.text if view else "", "effects": view.effect_lines(view.selected) if view and view.selected != "" else [],
+		"needs": view.need_lines(view.selected) if view and view.selected != "" else [],
+		"button": rect.call(view.start_button) if view else [], "button_text": view.start_button.text if view else "",
+		"button_disabled": view.start_button.disabled if view else true, "active": research.active, "completed": research.completed.keys(),
+		"badge": (hud.buttons[&"research"] as HudButton).badge, "window": [win.x, win.y]}
 
 
 ## E2E: the mailbox as shown -- rows, the open letter, where to tap.

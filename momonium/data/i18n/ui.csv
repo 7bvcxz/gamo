@@ -140,3 +140,31 @@ mail.claim,Let's research it,연구해 볼게,研究してみる,研究看看
 mail.claimed,On the research list,연구 목록에 넣었어요,研究リストに入れました,已加入研究
 err.no_letter,No such letter,편지가 없어요,手紙がありません,没有这封信
 err.already_claimed,Already accepted,이미 받았어요,もう受け取りました,已经接受了
+building.research,Research lab,연구소,研究所,研究所
+stage.study,Experiment,실험,実験,实验
+item.notes,Research notes,연구 노트,研究ノート,研究笔记
+research.farm_expansion.desc,"Closer rows, tilled right to the edges: more plants in the same plot.","이랑 간격을 좁히고 가장자리까지 갈아, 같은 밭에 더 많이 심어요.",畝の間をつめて、はしまで耕し、同じ畑にもっと植えます。,缩小垄距、翻到田边，同一块田种得更多。
+research.watering_efficiency.desc,Straw mulch and watering at the roots keep the soil moist longer. Still three waterings.,짚 멀칭과 뿌리 쪽 물주기로 흙이 더 오래 촉촉해요. 물 주기는 여전히 세 번.,わらのマルチと根もとへの水やりで、土が長くしっとり。水やりは今までどおり3回。,稻草覆盖和根部浇水让土壤保湿更久。仍然要浇三次水。
+research.harvest_boost.desc,Compost from the stalks and crop rotation bring the soil's strength back.,줄기로 만든 퇴비와 돌려짓기로 흙의 힘을 되살려요.,茎のたい肥と輪作で、土の力を取りもどします。,用茎秆堆肥和轮作，让土壤恢复肥力。
+research.field_notebook.name,Field notebook,관찰 일지,観察ノート,观察日志
+research.field_notebook.desc,Write every experiment down and no mistake is made twice.,실험을 빠짐없이 적어 두면 같은 실수를 두 번 하지 않아요.,実験をきちんと書きとめれば、同じ失敗はくり返しません。,把每次实验都记下来，就不会重复同样的错误。
+research.industry.global,General,공통,共通,通用
+research.start,Start research,연구 시작,研究を始める,开始研究
+research.running,Researching · {t},연구 중 · {t},研究中 · {t},研究中 · {t}
+research.done,Done,완료,完了,已完成
+research.time,Time {t},시간 {t},時間 {t},时间 {t}
+research.req.level,Player Lv {n},레벨 {n},レベル{n},等级 {n}
+research.req.mastery,{type} mastery Lv {n},{type} 숙련도 {n},{type}熟練度 {n},{type}熟练度 {n}
+research.req.proposal,A Momo's proposal,모모의 제안,モモの提案,桃桃的提议
+research.req.requires,After {name},{name} 먼저,{name}のあと,先完成{name}
+effect.yield,{stage}: {item} +{n},{stage} 때 {item} +{n},{stage}：{item} +{n},{stage}时{item} +{n}
+effect.cooldown,Wait after {action} -{pct}%,{action} 뒤 기다림 -{pct}%,{action}後の待ち -{pct}%,{action}后等待 -{pct}%
+effect.work,{action} work time -{pct}%,{action} 작업 시간 -{pct}%,{action}の作業時間 -{pct}%,{action}作业时间 -{pct}%
+effect.research_time,Research time -{pct}%,연구 시간 -{pct}%,研究時間 -{pct}%,研究时间 -{pct}%
+fx.research_done,Researched: %s,%s 연구 완료!,%s 研究完了！,%s 研究完成！
+err.no_lab,Build a research lab,연구소가 필요해요,研究所が必要です,需要研究所
+err.research_busy,Another research is running,다른 연구가 진행 중이에요,ほかの研究を進めています,正在进行其他研究
+err.research_locked,Not unlocked yet,아직 열리지 않았어요,まだ解放されていません,尚未解锁
+err.research_done,Already done,이미 완료했어요,完了済みです,已完成
+err.no_research,Unknown research,없는 연구예요,不明な研究です,未知研究
+time.m,{m} min,{m}분,{m}分,{m}分钟

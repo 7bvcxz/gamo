@@ -97,6 +97,9 @@ func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 		pop_money(int(payload["delta"]))
 	elif type == &"level_up":
 		_pop(exp_pill, tr("fx.level_up") % int(payload["level"]), Color("#ffe27a"))
+	elif type == &"research_completed" and buttons.has(&"research"):
+		var node := (sim.system(&"research") as ResearchSystem).node(String(payload["id"]))
+		_pop(buttons[&"research"], tr("fx.research_done") % tr(String(node.get("name", ""))), Color("#b7f08a"))
 	elif type == &"exp_gained":
 		_pop(exp_pill, "+%d EXP" % int(payload["amount"]), Color(1, 1, 1, 0.95))
 
@@ -194,6 +197,12 @@ func refresh(force: bool = false) -> void:
 	var mail_button: HudButton = buttons.get(&"mailbox")
 	if mail != null and mail_button != null and mail_button.badge != (mail.unread_count() > 0):
 		mail_button.badge = mail.unread_count() > 0
+	var research: ResearchSystem = sim.system(&"research")
+	var research_button: HudButton = buttons.get(&"research")
+	if research != null and research_button != null:
+		var want := research.something_to_start()
+		if research_button.badge != want:
+			research_button.badge = want
 	var production := production_summary()
 	_set_text(production_label, "prod", production, force)
 	production_label.visible = production != ""

@@ -71,6 +71,10 @@
         "farm.harvest": {
           "player": 20,
           "mastery": 25
+        },
+        "research.study": {
+          "player": 4,
+          "mastery": 10
         }
       },
       "event": {
