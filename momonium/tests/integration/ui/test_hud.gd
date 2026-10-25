@@ -148,3 +148,18 @@ func test_the_clock_tower_dial() -> void:
 	assert_false(hud.burst_active, "dim between bursts")
 	assert_eq(hud.burst_text, "2:20", "counting to the next one")
 	assert_true(hud.burst_pill.get_global_rect().size.x < 140.0, "and small")
+
+
+func test_bigger_text_still_fits() -> void:
+	# Text and buttons at their largest (x1.25) make the canvas 1/1.25 of the
+	# screen: the smallest phones below, as the HUD then sees them.
+	for size: Vector2i in [Vector2i(576, 768), Vector2i(576, 1246)]:
+		await _open(size)
+		var hud: Hud = main.get("hud")
+		var screen := Rect2(Vector2.ZERO, Vector2(size))
+		var rects := hud.occupied_rects()
+		for i in rects.size():
+			assert_true(screen.encloses(rects[i]), "%s: element %d %s is on screen" % [size, i, rects[i]])
+			for j in range(i + 1, rects.size()):
+				assert_false(rects[i].intersects(rects[j]), "%s: elements %d and %d do not overlap" % [size, i, j])
+		await after_each()

@@ -108,6 +108,8 @@ func show_building(id: int) -> void:
 	title.text = _title(b)
 	title.visible = true
 	trash_button.visible = true
+	trash_button.tooltip_text = tr("tip.trash")
+	confirm_button.tooltip_text = tr("tip.confirm_demolish")
 	confirm_button.visible = false
 	_shown_state = String(b["state"])
 	_shown_variety = buildings.variety_of(b)

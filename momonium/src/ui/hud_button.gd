@@ -48,6 +48,8 @@ func _init(p_action: StringName, p_label_key: String, icon_texture: Texture2D) -
 
 func refresh_text() -> void:
 	_label.text = tr(label_key)
+	# A mouse resting on it (desktop) gets the name in a tooltip too.
+	tooltip_text = _label.text
 
 
 func _notification(what: int) -> void:

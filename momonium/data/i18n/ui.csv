@@ -519,3 +519,26 @@ settings.ambience_volume,Ambience,환경음,環境音,环境音
 settings.sfx_volume,Effects,효과음,効果音,音效
 settings.muted,Mute everything,모두 음소거,すべてミュート,全部静音
 settings.mute_unfocused,Silent in the background,백그라운드에서는 조용히,バックグラウンドでは無音,在后台时静音
+settings.screen,Screen and help,화면과 도움말,画面とヘルプ,画面与帮助
+settings.ui_scale,Text and buttons,글자·버튼 크기,文字・ボタンの大きさ,文字和按钮大小
+settings.low_power,Battery saver (30 fps),배터리 절약 (30fps),省電力 (30fps),省电模式（30fps）
+settings.camera_buttons,Buttons to move the view,화면 이동 버튼,画面移動ボタン,移动画面的按钮
+settings.tips,Show tips,도움말 보기,ヒントを表示,显示提示
+settings.replay_tips,Show the tips again,도움말 다시 보기,ヒントをもう一度,重新显示提示
+settings.save_now,Save now,지금 저장,今すぐ保存,立即保存
+settings.saved,Saved,저장했어요,保存しました,已保存
+settings.save_auto,Saved by itself as you play,플레이하는 동안 자동으로 저장돼요,遊んでいる間、自動で保存されます,游戏时会自动保存
+watch.edit,Edit the tiles this Momo looks after,이 모모가 맡을 칸 고치기,このモモの受け持ちを編集,编辑这只桃桃照看的格子
+watch.done,Done,완료,完了,完成
+tip.trash,Pull down (half of the cost back),철거하기 (비용 절반 돌려받음),取り壊す（費用の半分が戻る）,拆除（返还一半费用）
+tip.confirm_demolish,"Yes, pull it down","네, 철거해요",はい、取り壊します,确定拆除
+tips.land_mouse,"The sea beside the island can be bought: point at it to see the price ($%d), click to buy","섬 옆 바다를 살 수 있어요. 마우스를 올리면 가격($%d), 클릭하면 구매",島の隣の海を買えます。マウスを乗せると値段（$%d）、クリックで購入,岛边的海可以买：鼠标移上去看价格（$%d），点击购买
+tips.land_touch,"The sea beside the island can be bought: tap it for the price ($%d), tap again to buy","섬 옆 바다를 살 수 있어요. 한 번 누르면 가격($%d), 한 번 더 누르면 구매",島の隣の海を買えます。タップで値段（$%d）、もう一度で購入,岛边的海可以买：点一下看价格（$%d），再点一下购买
+tips.watch,The pencil edits which tiles this Momo looks after: tap or drag over tiles,연필을 누르면 이 모모가 맡을 칸을 고쳐요. 칸을 누르거나 그어 보세요,鉛筆でこのモモの受け持ちを編集。マスをタップかなぞって,用铅笔编辑这只桃桃照看的格子：点击或划过格子
+tips.special,"Back here with the arrow. One of each landmark, {used}/{slots} slots in use","화살표로 돌아가요. 랜드마크는 종류마다 하나, 자리 {used}/{slots}",矢印で戻ります。ランドマークは種類ごとにひとつ、枠 {used}/{slots},用箭头返回。地标每种一座，位置 {used}/{slots}
+tips.special_built,"A landmark built leaves the Special list; pulled down, it comes back","지은 랜드마크는 특별 목록에서 빠지고, 철거하면 돌아와요",建てたランドマークは特別リストから消え、取り壊すと戻ります,建好的地标会从特殊列表消失，拆除后会回来
+tips.tier,Meet these to grow into a City: one more landmark slot,"이 조건을 채우면 도시로 승급, 랜드마크 자리 +1",条件を満たすと町に昇格、ランドマーク枠+1,达成这些条件就能升级为城市：地标位置+1
+tips.rp,"Your research levels became points: place them again, e.g. 3/1/1 as 1/2/2",연구 레벨이 포인트가 됐어요. 3/1/1을 1/2/2처럼 다시 나눠요,研究レベルがポイントになりました。3/1/1を1/2/2のように配り直せます,研究等级变成了点数：可以重新分配，比如把 3/1/1 改成 1/2/2
+tutorial.momo_select,Tap a Momo,모모를 눌러 보세요,モモをタップ,点一下桃桃
+tutorial.momo_pencil,Its tiles light up. The pencil edits them,맡은 칸이 빛나요. 연필로 고쳐요,受け持ちが光ります。鉛筆で編集,照看的格子亮起来了。用铅笔编辑
+tutorial.momo_edit,Tap tiles or drag across them: %d / %d,칸을 누르거나 그어 보세요: %d / %d칸,マスをタップかなぞる: %d / %dマス,点击或划过格子：%d / %d 格

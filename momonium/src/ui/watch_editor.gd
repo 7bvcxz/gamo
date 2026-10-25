@@ -207,6 +207,7 @@ func _touch(cell: Vector2i) -> void:
 func _refresh_count() -> void:
 	if momo == 0:
 		return
+	pencil.tooltip_text = tr("watch.done") if active else tr("watch.edit")
 	count_label.text = tr("watch.count") % [momos.watched(momo).size(), momos.watch_capacity(momo)]
 	count_label.visible = active
 	count_pill.visible = active

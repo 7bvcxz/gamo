@@ -91,7 +91,12 @@ func _draw() -> void:
 		draw_polyline(loop, Color(EDGE, 0.95 if editing else 0.8), 4.0 if editing else 3.0, true)
 	for cell: Vector2i in _flash:
 		var c := projection.cell_corners(cell)
-		draw_colored_polygon(c, Color(REFUSED, 0.45 * float(_flash[cell]) / FLASH_SECONDS))
+		var a := float(_flash[cell]) / FLASH_SECONDS
+		draw_colored_polygon(c, Color(REFUSED, 0.45 * a))
+		# Not by colour alone: a cross says "no" to anyone who cannot tell red.
+		var m := projection.cell_center(cell)
+		draw_line(m + Vector2(-10, -6), m + Vector2(10, 6), Color(1, 1, 1, a), 3.0, true)
+		draw_line(m + Vector2(-10, 6), m + Vector2(10, -6), Color(1, 1, 1, a), 3.0, true)
 	if route_layer != null:
 		route_layer.queue_redraw()
 

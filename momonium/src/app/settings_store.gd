@@ -12,7 +12,8 @@ const PATH := "user://momonium_settings.json"
 const MIRROR_KEY := "momonium_settings"
 
 var values := {"language": "", "tutorial_done": false,
-	"music_volume": 0.6, "ambience_volume": 0.7, "sfx_volume": 0.8, "muted": false, "mute_unfocused": true}
+	"music_volume": 0.6, "ambience_volume": 0.7, "sfx_volume": 0.8, "muted": false, "mute_unfocused": true,
+	"ui_scale": 1.0, "low_power": false, "camera_buttons": false, "tips": true, "tips_seen": []}
 var persistent := true
 
 

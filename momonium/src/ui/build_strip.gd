@@ -10,6 +10,8 @@ extends Control
 ## tap anywhere else and it goes.
 
 signal built(id: int)
+## The strip switched between the five choices and the landmarks.
+signal mode_changed(mode: String)
 
 const FAMILIES: PackedStringArray = ["farm", "mine", "lumberyard", "research"]
 const BUTTON := Vector2(104, 112)
@@ -112,6 +114,7 @@ func _set_mode(m: String) -> void:
 			none.name = "None"
 			row.add_child(none)
 	refresh()
+	mode_changed.emit(mode)
 
 
 func _choice(node_name: String, sprite: String) -> Button:
@@ -187,6 +190,7 @@ func _label_choice(b: Button, type: String, check: Dictionary) -> void:
 	if reason == "err.locked":
 		text = tr("build.unlock_at") % int(def.get("unlock", {}).get("level", 1))
 	price.text = text
+	b.tooltip_text = "%s · %s" % [tr(String(def.get("name", type))), text]
 	price.add_theme_color_override("font_color", Color("#ffe27a") if locked else (Color.WHITE if check["ok"] else Color("#ff9a8f")))
 	b.disabled = not check["ok"]
 	b.modulate = Color(1, 1, 1, 0.7) if locked else Color.WHITE

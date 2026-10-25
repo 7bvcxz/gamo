@@ -85,6 +85,11 @@ var last_sale: Dictionary = {}
 var celebration: TierCelebration
 ## Music, ambience and effects.
 var audio: AudioService
+## Arrows and zoom buttons for the view (a Settings option).
+var camera_pad: CameraPad
+## One-time help for the newer ways to play.
+var tips: Tips
+var _tip_check := 0.0
 var _demo_badge: Label
 var saves_written := 0
 var _autosave_left := 0.0
@@ -345,6 +350,24 @@ func _ready() -> void:
 		tutorial.start())
 	settings_view.demo_requested.connect(enter_demo)
 	settings_view.leave_demo_requested.connect(leave_demo)
+	settings_view.settings = settings
+	settings_view.option_changed.connect(func(key: String, value: Variant) -> void:
+		settings.set_value(key, value)
+		apply_options())
+	settings_view.save_requested.connect(func() -> void:
+		var err := save_now()
+		settings_view.save_note.text = tr("settings.saved") if err == OK else tr("settings.save_auto"))
+	camera_pad = CameraPad.new()
+	ui.add_child(camera_pad)
+	camera_pad.setup(cameras)
+	tips = Tips.new()
+	ui.add_child(tips)
+	tips.setup(settings)
+	tips.allowed = not bridge.e2e or bool(JavaScriptBridge.eval("!!window.MOMONIUM_E2E_TIPS", true))
+	settings_view.replay_tips.connect(func() -> void:
+		tips.replay()
+		_close_frames())
+	_connect_tips()
 	_demo_badge = Label.new()
 	_demo_badge.name = "DemoBadge"
 	_demo_badge.add_theme_font_size_override("font_size", 18)
@@ -355,10 +378,17 @@ func _ready() -> void:
 	tutorial = Tutorial.new()
 	ui.add_child(tutorial)
 	tutorial.setup(sim, hud, build_strip, cameras, projection, building_views, panel)
+	tutorial.selection = selection
+	tutorial.editor = watch_editor
+	tutorial.momo_views = momo_views
+	sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
+		if type == &"momo_watch_changed" and tutorial.running and watch_editor.active:
+			tutorial._edited = true)
 	tutorial.finished.connect(func(_skipped: bool) -> void: settings.set_value("tutorial_done", true))
 	_place_frames()
 
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
+	apply_options()
 	_maybe_start_tutorial.call_deferred()
 	if (sim.system(&"prestige") as PrestigeSystem).welcome:
 		open_rp.call_deferred()
@@ -488,6 +518,25 @@ func _ready() -> void:
 			"music": audio.music.playing, "sliders": sl, "mute": conv.call(settings_view.mute_toggle) if settings_view.is_visible_in_tree() else [],
 			"settings": {"music_volume": settings.get_value("music_volume"), "ambience_volume": settings.get_value("ambience_volume"), "sfx_volume": settings.get_value("sfx_volume"), "muted": settings.get_value("muted")},
 			"window": [win.x, win.y]})
+	bridge.register_query("options", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			var r := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var pad := {}
+		for k: String in camera_pad.buttons:
+			pad[k] = conv.call(camera_pad.buttons[k]) if camera_pad.visible else []
+		var tip_rect := Rect2(tips.target.position, tips.target.size)
+		var a := vp.get_final_transform() * tip_rect.position
+		var b := vp.get_final_transform() * tip_rect.end
+		return {"content_scale": get_tree().root.content_scale_factor, "max_fps": Engine.max_fps, "pad": pad,
+			"camera": [camera.position.x, camera.position.y], "tip": tips.tip, "tip_text": tips.text.text, "tip_rect": [a.x, a.y, b.x - a.x, b.y - a.y],
+			"tip_ok": conv.call(tips.ok_button) if tips.tip != "" else [],
+			"toggles": {"low_power": conv.call(settings_view.low_power_toggle), "camera_buttons": conv.call(settings_view.camera_toggle)} if settings_view.is_visible_in_tree() else {},
+			"scale_slider": conv.call(settings_view.scale_slider) if settings_view.is_visible_in_tree() else [], "window": [win.x, win.y]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
 		while prog.level < int(lv):
@@ -636,6 +685,8 @@ func _process(delta: float) -> void:
 	if gap > 5.0 and sim.time_scale > 0.0:
 		_tell_about_return(OfflineProgress.catch_up(sim, int(gap * 1000.0 * sim.time_scale)))
 	sim.advance_seconds(delta)
+	if tips != null:
+		_check_land_tip(delta)
 	if persist:
 		_autosave_left -= delta
 		if _autosave_left <= 0.0:
@@ -761,6 +812,72 @@ func _tell_about_return(report: Dictionary) -> void:
 	away_frame.open()
 
 
+## When each tip may appear: the moment its subject is on screen, never during
+## the first-run tutorial, never twice.
+func _connect_tips() -> void:
+	selection.selection_changed.connect(func(kind: String) -> void:
+		if kind == "momo" and not tutorial.running:
+			(func() -> void: tips.offer("watch", tr("tips.watch"), func() -> Rect2: return watch_editor.pencil.get_global_rect() if watch_editor.visible else Rect2())).call_deferred())
+	build_strip.mode_changed.connect(func(mode: String) -> void:
+		if mode == "special" and not tutorial.running:
+			var bs: BuildingSystem = sim.system(&"buildings")
+			tips.offer("special", tr("tips.special").format({"used": bs.specials_count(), "slots": bs.special_slots()}),
+				func() -> Rect2: return build_strip.back_button.get_global_rect() if build_strip.back_button != null and build_strip.open else Rect2()))
+	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
+		if type == &"building_added" and (sim.system(&"buildings") as BuildingSystem).is_special(String(p.get("type", ""))):
+			var id := int(p.get("id", 0))
+			tips.offer("special_built", tr("tips.special_built"), func() -> Rect2:
+				var v := building_views.view(id)
+				if v == null:
+					return Rect2()
+				var r := v.hit_rect()
+				return Rect2(cameras.world_to_screen(r.position), cameras.world_to_screen(r.end) - cameras.world_to_screen(r.position))))
+	status_frame.opened.connect(func() -> void:
+		if not tutorial.running:
+			(func() -> void: tips.offer("tier", tr("tips.tier"), func() -> Rect2: return status_panel.tier_view.get_global_rect() if status_panel.tier_view.is_visible_in_tree() else Rect2())).call_deferred())
+	research_frame.opened.connect(func() -> void:
+		if (sim.system(&"prestige") as PrestigeSystem).welcome:
+			(func() -> void: tips.offer("rp", tr("tips.rp"), func() -> Rect2: return rp_view.head.get_global_rect() if rp_view.is_visible_in_tree() else Rect2())).call_deferred())
+
+
+## The sea tip waits until the player can afford a tile.
+func _check_land_tip(delta: float) -> void:
+	_tip_check -= delta
+	if _tip_check > 0.0 or tutorial.running or tips.tip != "" or tips.seen("land"):
+		return
+	_tip_check = 1.0
+	var land: LandSystem = sim.system(&"land")
+	if not (sim.system(&"economy") as EconomySystem).can_afford(land.next_cost()) or not (sim.system(&"progression") as ProgressionSystem).is_unlocked("land"):
+		return
+	var spots := land.suggested()
+	if spots.is_empty():
+		return
+	var cell: Vector2i = spots[0]
+	var line := tr("tips.land_touch") if DisplayServer.is_touchscreen_available() else tr("tips.land_mouse")
+	tips.offer("land", line % land.next_cost(), func() -> Rect2:
+		var c := cameras.world_to_screen(projection.cell_center(cell))
+		var w := projection.tile_width * cameras.camera.zoom.x * 0.5
+		return Rect2(c - Vector2(w, w * 0.6), Vector2(w * 2.0, w * 1.2)))
+
+
+## Screen options from Settings: text-and-button size (the whole canvas is
+## scaled; the island refits), the 30 fps battery saver, the camera buttons.
+func apply_options() -> void:
+	var s := clampf(float(settings.get_value("ui_scale")), 0.85, 1.25)
+	if not is_equal_approx(get_tree().root.content_scale_factor, s):
+		get_tree().root.content_scale_factor = s
+		_layout.call_deferred()
+	Engine.max_fps = 30 if bool(settings.get_value("low_power")) else 0
+	if camera_pad != null:
+		camera_pad.visible = bool(settings.get_value("camera_buttons"))
+		_place_camera_pad()
+
+
+func _place_camera_pad() -> void:
+	var size := get_viewport_rect().size
+	camera_pad.position = Vector2(size.x - camera_pad.size.x - 16.0, size.y - camera_pad.size.y - 170.0)
+
+
 func _layout() -> void:
 	var size := get_viewport_rect().size
 	_version_label.position = size - Vector2(84, 28)
@@ -770,6 +887,8 @@ func _layout() -> void:
 		_demo_badge.position = Vector2((size.x - _demo_badge.size.x) * 0.5, 22.0)
 	if cameras.fit_zoom > 0.0 and camera.is_inside_tree():
 		cameras.on_resize()
+	if camera_pad != null:
+		_place_camera_pad()
 
 
 ## E2E: proves the platform's user:// (IndexedDB on the web) can hold a save and

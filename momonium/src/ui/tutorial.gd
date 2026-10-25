@@ -16,11 +16,17 @@ extends Control
 
 signal finished(skipped: bool)
 
-const STEPS: PackedStringArray = ["pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "more"]
+const STEPS: PackedStringArray = ["pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "momo_select", "momo_pencil", "momo_edit", "more"]
 
 var sim: Simulation
 var hud: Hud
 var strip: BuildStrip
+## For the Momo steps: what is selected, the pencil, where Momo stand.
+var selection: SelectionController
+var editor: WatchEditor
+var momo_views: MomoViews
+var _momo_done := false
+var _edited := false
 var cameras: CameraController
 var projection: IsoProjection
 var building_views: BuildingViews
@@ -83,6 +89,8 @@ func setup(p_sim: Simulation, p_hud: Hud, p_strip: BuildStrip, p_cameras: Camera
 func start() -> void:
 	running = true
 	farm = 0
+	_momo_done = false
+	_edited = false
 	_farms_at_start.clear()
 	var bs: BuildingSystem = sim.system(&"buildings")
 	for id: int in bs.ids():
@@ -129,6 +137,16 @@ func current_step() -> String:
 		return "sow"
 	if done == 1:
 		return "water"
+	# Then the Momo: tap one, its pencil, a tile or a stroke.
+	if not _momo_done and editor != null and selection != null:
+		if editor.active and _edited:
+			_momo_done = true
+		elif editor.active:
+			return "momo_edit"
+		elif selection.kind == "momo":
+			return "momo_pencil"
+		else:
+			return "momo_select"
 	return "more"
 
 
@@ -162,6 +180,15 @@ func _update() -> void:
 			target = _building_rect(farm)
 			target2 = _stage_card()
 			text.text = tr("tutorial.water")
+		"momo_select":
+			target = _momo_rect()
+			text.text = tr("tutorial.momo_select")
+		"momo_pencil":
+			target = _rect(editor.pencil)
+			text.text = tr("tutorial.momo_pencil")
+		"momo_edit":
+			target = _rect(editor.count_pill)
+			text.text = tr("tutorial.momo_edit") % [(sim.system(&"momo") as MomoSystem).watched(editor.momo).size(), (sim.system(&"momo") as MomoSystem).watch_capacity(editor.momo)]
 		"more":
 			text.text = tr("tutorial.wait_water") + "\n" + tr("tutorial.more")
 			if strip.open:
@@ -203,6 +230,25 @@ func suggested_tile() -> Vector2i:
 			best_d = d
 			best = c
 	return best if best.x >= 0 else cells[0]
+
+
+## The Momo nearest the middle of the screen, on screen.
+func _momo_rect() -> Rect2:
+	if momo_views == null:
+		return Rect2()
+	var best := Rect2()
+	var best_d := INF
+	for id: int in (sim.system(&"momo") as MomoSystem).ids():
+		var a := momo_views.actor(id)
+		if a == null:
+			continue
+		var r := a.hit_rect()
+		var sr := Rect2(cameras.world_to_screen(r.position), cameras.world_to_screen(r.end) - cameras.world_to_screen(r.position))
+		var d := sr.get_center().distance_to(size * 0.5)
+		if d < best_d:
+			best = sr
+			best_d = d
+	return best
 
 
 ## The lit stage card of the tutorial's farm, when its panel is showing:

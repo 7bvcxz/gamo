@@ -9,6 +9,10 @@ signal language_chosen(code: String)
 signal replay_tutorial
 signal demo_requested
 signal leave_demo_requested
+## Screen and help options the composition root applies.
+signal option_changed(key: String, value: Variant)
+signal save_requested
+signal replay_tips
 
 const LANGUAGES := [["en", "English"], ["ko", "한국어"], ["ja", "日本語"], ["zh_CN", "中文"]]
 
@@ -23,6 +27,15 @@ var audio: AudioService
 var sliders: Dictionary = {}
 var mute_toggle: CheckButton
 var background_toggle: CheckButton
+var scale_slider: HSlider
+var low_power_toggle: CheckButton
+var camera_toggle: CheckButton
+var tips_toggle: CheckButton
+var tips_button: Button
+var save_button: Button
+var save_note: Label
+## Where options are read from (the composition root's SettingsStore).
+var settings: SettingsStore
 const SOUND: PackedStringArray = ["music_volume", "ambience_volume", "sfx_volume"]
 
 
@@ -102,9 +115,59 @@ func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
 		if audio != null:
 			audio.set_setting("mute_unfocused", on))
 	add_child(background_toggle)
+	var screen_title := PanelViews.label("", 17, true)
+	screen_title.name = "ScreenTitle"
+	add_child(screen_title)
+	var srow := HBoxContainer.new()
+	srow.name = "Row_ui_scale"
+	srow.add_theme_constant_override("separation", 10)
+	var sl := PanelViews.label("", 16)
+	sl.name = "Label"
+	sl.custom_minimum_size = Vector2(110, 0)
+	srow.add_child(sl)
+	scale_slider = HSlider.new()
+	scale_slider.name = "Slider"
+	scale_slider.min_value = 0.85
+	scale_slider.max_value = 1.25
+	scale_slider.step = 0.05
+	scale_slider.custom_minimum_size = Vector2(0, 44)
+	scale_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scale_slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	scale_slider.focus_mode = Control.FOCUS_NONE
+	# Applied when the finger lets go: the whole screen re-lays itself out.
+	scale_slider.drag_ended.connect(func(_changed: bool) -> void: option_changed.emit("ui_scale", scale_slider.value))
+	scale_slider.value_changed.connect(func(v: float) -> void:
+		if not scale_slider.has_meta("dragging"):
+			option_changed.emit("ui_scale", v))
+	scale_slider.drag_started.connect(func() -> void: scale_slider.set_meta("dragging", true))
+	scale_slider.drag_ended.connect(func(_c: bool) -> void: scale_slider.remove_meta("dragging"))
+	srow.add_child(scale_slider)
+	add_child(srow)
+	low_power_toggle = _toggle("LowPower", "low_power")
+	camera_toggle = _toggle("CameraButtons", "camera_buttons")
+	tips_toggle = _toggle("Tips", "tips")
+	tips_button = _wide("ReplayTips")
+	tips_button.pressed.connect(func() -> void: replay_tips.emit())
+	add_child(tips_button)
+	save_button = _wide("SaveNow")
+	save_button.pressed.connect(func() -> void: save_requested.emit())
+	add_child(save_button)
+	save_note = PanelViews.label("", 14, true)
+	save_note.name = "SaveNote"
+	add_child(save_note)
 	version_label = PanelViews.label("v%s" % ProjectSettings.get_setting("application/config/version", "0"), 14, true)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(version_label)
+
+
+func _toggle(node_name: String, key: String) -> CheckButton:
+	var t := CheckButton.new()
+	t.name = node_name
+	t.custom_minimum_size = Vector2(0, 48)
+	t.focus_mode = Control.FOCUS_NONE
+	t.toggled.connect(func(on: bool) -> void: option_changed.emit(key, on))
+	add_child(t)
+	return t
 
 
 func _wide(node_name: String) -> Button:
@@ -133,3 +196,15 @@ func refresh() -> void:
 		background_toggle.set_pressed_no_signal(bool(audio.settings.get_value("mute_unfocused")))
 	mute_toggle.text = tr("settings.muted")
 	background_toggle.text = tr("settings.mute_unfocused")
+	(get_node("ScreenTitle") as Label).text = tr("settings.screen")
+	(get_node("Row_ui_scale/Label") as Label).text = tr("settings.ui_scale")
+	low_power_toggle.text = tr("settings.low_power")
+	camera_toggle.text = tr("settings.camera_buttons")
+	tips_toggle.text = tr("settings.tips")
+	tips_button.text = tr("settings.replay_tips")
+	save_button.text = tr("settings.save_now")
+	if settings != null:
+		scale_slider.set_value_no_signal(float(settings.get_value("ui_scale")))
+		low_power_toggle.set_pressed_no_signal(bool(settings.get_value("low_power")))
+		camera_toggle.set_pressed_no_signal(bool(settings.get_value("camera_buttons")))
+		tips_toggle.set_pressed_no_signal(bool(settings.get_value("tips")))

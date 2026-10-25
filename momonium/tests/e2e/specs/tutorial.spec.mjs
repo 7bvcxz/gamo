@@ -71,14 +71,33 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await tapRect(t.target2, t.window);
   await g.query('dev_advance_ms', 5000);
   await page.waitForTimeout(300);
+  // The Momo: tap it, its pencil, a tile.
+  t = await g.query('tutorial');
+  expect(t.step).toBe('momo_select');
+  await tapRect(t.target, t.window);
+  t = await g.query('tutorial');
+  expect(t.step).toBe('momo_pencil');
+  await shot('6-momo-pencil');
+  await tapRect(t.target, t.window);
+  t = await g.query('tutorial');
+  expect(t.step).toBe('momo_edit');
+  const tile = await page.evaluate(() => window.momonium.call('cell_screen', [0, 1]));
+  await tapRect([tile.x - 2, tile.y - 2, 4, 4], tile.window);
   t = await g.query('tutorial');
   expect(t.step).toBe('more');
+  const w = await g.query('watch');
+  if (w.editing) await tapRect(w.pencil, w.window);
+  // The farm selected again: the last step rings its trash.
+  const built = (await g.state()).buildings.buildings.find((b) => b.type === 'farm');
+  await g.query('dev_select_cell', built.anchor);
+  await page.waitForTimeout(300);
+  t = await g.query('tutorial');
   const ring = await g.query('strip');
   expect(near(t.target, ring.trash)).toBe(true);
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
   expect(near(t.target2, (await g.query('strip')).confirm)).toBe(true);
-  await shot('6-trash-and-check');
+  await shot('7-trash-and-check');
   const s = await g.state();
   const farm = s.buildings.buildings.find((b) => b.type === 'farm');
   expect(farm.completed).toBe(2);
