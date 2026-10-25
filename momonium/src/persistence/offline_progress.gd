@@ -25,9 +25,14 @@ static func catch_up(sim: Simulation, away_ms: int) -> Dictionary:
 	var journey: JourneySystem = sim.system(&"journey")
 	if journey != null:
 		journey.begin_away()
+	# What happened, counted from the events themselves as they run (Step 49):
+	# EXP gained, what each building made, which Momo did the work.
+	var tally := _Tally.new()
+	sim.bus.emitted.connect(tally.on_event)
 	sim.replaying = true
 	var reached := sim.advance_to_budget(start + wanted, budget)
 	sim.replaying = false
+	sim.bus.emitted.disconnect(tally.on_event)
 	if journey != null:
 		journey.end_away(maxi(away_ms, 0), reached - start)
 	var after := counters(sim)
@@ -41,7 +46,30 @@ static func catch_up(sim: Simulation, away_ms: int) -> Dictionary:
 		"crops": int(after["crops"]) - int(before["crops"]), "income": int(after["income"]) - int(before["income"]),
 		"jobs": int(after["jobs"]) - int(before["jobs"]), "letters": int(after["letters"]) - int(before["letters"]),
 		"research": research_done, "days": int(after["day"]) - int(before["day"]),
+		"exp": tally.exp, "levels": tally.levels, "items": tally.items, "workers": tally.workers.size(),
 	}
+
+
+## Sums the catch-up's own events: nothing estimated, nothing counted twice.
+class _Tally:
+	var exp := 0
+	var levels := 0
+	var items := {}
+	var workers := {}
+
+	func on_event(type: StringName, p: Dictionary) -> void:
+		match type:
+			&"exp_gained":
+				exp += int(p.get("amount", 0))
+			&"level_up":
+				levels += 1
+			&"produced":
+				for item: String in (p.get("items", {}) as Dictionary):
+					items[item] = int(items.get(item, 0)) + int(p["items"][item])
+			&"task_completed":
+				var w := int(p.get("worker", 0))
+				if w > 0:
+					workers[w] = true
 
 
 static func counters(sim: Simulation) -> Dictionary:
@@ -60,7 +88,15 @@ static func counters(sim: Simulation) -> Dictionary:
 	}
 
 
-## Whether the player should hear about it: away a while and something happened.
-static func worth_telling(report: Dictionary, min_seconds: float) -> bool:
-	return int(report.get("counted_ms", 0)) >= int(min_seconds * 1000.0) and \
-		(int(report["jobs"]) > 0 or int(report["income"]) > 0 or not (report["research"] as Array).is_empty() or int(report["letters"]) > 0)
+## Whether the player should hear about it: away a while and something
+## happened -- or away long enough (`quiet_seconds`) that a quiet island is
+## worth a word too (an empty report says so gently, it does not invent).
+static func worth_telling(report: Dictionary, min_seconds: float, quiet_seconds: float = INF) -> bool:
+	if int(report.get("counted_ms", 0)) < int(min_seconds * 1000.0):
+		return false
+	return something_happened(report) or int(report.get("counted_ms", 0)) >= int(quiet_seconds * 1000.0)
+
+
+static func something_happened(report: Dictionary) -> bool:
+	return int(report.get("jobs", 0)) > 0 or int(report.get("income", 0)) > 0 or int(report.get("exp", 0)) > 0 or \
+		not (report.get("research", []) as Array).is_empty() or int(report.get("letters", 0)) > 0

@@ -577,3 +577,9 @@ fx.before_after,{before} → {after},{before} → {after},{before} → {after},{
 fx.special_slots,Special slots {before} → {after},특별 자리 {before} → {after},特別枠 {before} → {after},特别位置 {before} → {after}
 fx.legacy,A new island · legacy points +{n},새 섬 · 유산 포인트 +{n},新しい島 · 遺産ポイント +{n},新的岛屿 · 遗产点数 +{n}
 fx.faster_sale,Sold on Day {after} — the last island on Day {before},{after}일째에 팔았어요 — 지난 섬은 {before}일째,{after}日目に売却 — 前の島は{before}日目,第{after}天卖出 — 上一个岛是第{before}天
+away.exp,EXP earned,얻은 EXP,得たEXP,获得经验
+away.jobs_by,{n} by {m} Momo,모모 {m}마리가 {n}번,モモ{m}匹で{n}回,{m}只桃桃完成{n}次
+away.counted_all,Away {away}. Momo kept the island going the whole time.,{away} 동안 떠나 있었어요. 그동안 모모가 섬을 돌봤어요.,{away}のあいだ留守でした。そのあいだモモが島を見ていました。,离开了{away}。这段时间桃桃一直在照看岛屿。
+away.counted_part,Away {away}. The island counts {t} of it.,{away} 동안 떠나 있었어요. 섬은 그중 {t}를 셌어요.,{away}のあいだ留守でした。島が数えたのはそのうち{t}です。,离开了{away}。岛屿计算了其中的{t}。
+away.quiet,The island rested while you were away. Momo keep working while you are gone when they have a building to look after.,섬이 조용히 쉬었어요. 돌볼 건물이 있으면 모모는 떠나 있는 동안에도 일해요.,島はのんびり休んでいました。世話をする建物があれば、モモは留守のあいだも働きます。,岛屿安静地休息了。只要有要照看的建筑，你离开时桃桃也会继续工作。
+away.counted_only,Away {away}.,{away} 동안 떠나 있었어요.,{away}のあいだ留守でした。,离开了{away}。

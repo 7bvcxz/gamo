@@ -660,7 +660,8 @@ func _ready() -> void:
 			"userfs_persistent": OS.is_userfs_persistent()})
 	bridge.register_query("persistence", func(_a: Variant) -> Dictionary:
 		return {"status": load_status, "persist": persist, "blocked": save_blocked, "report": offline_report,
-			"away_open": away_frame.visible, "away_lines": away_view.lines().map(func(l: Array) -> String: return "%s|%s" % l)})
+			"away_open": away_frame.visible, "away_lines": away_view.lines().map(func(l: Array) -> String: return "%s|%s" % [l[0], l[1]]),
+			"away_counted": away_view.counted_label.text, "away_quiet": away_view.quiet.text, "away_report": away_view.report})
 	bridge.register_query("dev_away", func(ms: Variant) -> Dictionary:
 		var r := OfflineProgress.catch_up(sim, int(ms))
 		_tell_about_return(r)
@@ -883,7 +884,11 @@ func save_now() -> Error:
 ## The welcome-back card, when there is something worth saying.
 func _tell_about_return(report: Dictionary) -> void:
 	var notice := load_status in ["backup", "corrupt", "too_new"] and not away_frame.visible and saves_written == 0
-	if not notice and (report.is_empty() or not OfflineProgress.worth_telling(report, sim.data.get_float("balance", "offline.report_seconds", 60.0))):
+	# The time away is now in the island: save it at once, so a refresh or a
+	# second launch starts from here and never catches the same hours up again.
+	if not report.is_empty() and int(report.get("counted_ms", 0)) > 0:
+		save_now()
+	if not notice and (report.is_empty() or not OfflineProgress.worth_telling(report, sim.data.get_float("balance", "offline.report_seconds", 60.0), sim.data.get_float("balance", "offline.quiet_report_seconds", 1800.0))):
 		return
 	_close_frames()
 	away_view.show_report(report, load_status if notice else "")
