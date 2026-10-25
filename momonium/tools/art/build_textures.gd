@@ -9,6 +9,7 @@ extends SceneTree
 ## grass.png  256x256  wraps in both directions (island top, mapped in tile space)
 ## dirt.png   256x64   wraps horizontally (the band under the grass rim)
 ## stone.png  256x128  wraps horizontally and vertically (cliff blocks)
+## cliff.png  256x128  wraps horizontally: dirt, stone and wet line in one face
 
 const OUT := "res://assets/textures/"
 const SIZE := 256
@@ -22,6 +23,7 @@ func _init() -> void:
 	_save(_grass(), "grass")
 	_save(_dirt(), "dirt")
 	_save(_stone(), "stone")
+	_save(_cliff(), "cliff")
 	quit(0)
 
 
@@ -113,6 +115,29 @@ func _stone() -> Image:
 					var col_c := base.lightened(0.12 * (1.0 - v * 2.5) if v < 0.4 else 0.0).darkened(0.18 * maxf(0.0, v - 0.7) * 3.0)
 					col_c = col_c.lerp(_c("stone", 2), n.get_pixel(px, y).r * 0.22)
 					img.set_pixel(px, y, col_c)
+	return img
+
+
+## One texture for a whole cliff face, top to bottom: dirt band, stone blocks,
+## and the wet line where it meets the water. One texture means one mesh, so
+## faces can be drawn strictly far-to-near in a single draw call.
+func _cliff() -> Image:
+	var w := SIZE
+	var h := 128
+	var dirt := _dirt()
+	var stone := _stone()
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	var dirt_h := int(h * 0.32)
+	for y in h:
+		for x in w:
+			var c: Color
+			if y < dirt_h:
+				c = dirt.get_pixel(x, int(float(y) / dirt_h * (dirt.get_height() - 1)))
+			else:
+				c = stone.get_pixel(x, int(float(y - dirt_h) / (h - dirt_h) * (stone.get_height() - 1)))
+			if y >= h - 4:
+				c = c.lerp(Color(1, 1, 1), 0.55 if y >= h - 2 else 0.3)
+			img.set_pixel(x, y, c)
 	return img
 
 

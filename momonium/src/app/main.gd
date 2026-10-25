@@ -11,6 +11,7 @@ var camera: Camera2D
 var cameras: CameraController
 var router: InputRouter
 var island: IslandRenderer
+var ocean: OceanRenderer
 var entities: EntityLayer
 var _version_label: Label
 
@@ -24,6 +25,9 @@ func _ready() -> void:
 	back.layer = -10
 	back.add_child(Backdrop.new())
 	add_child(back)
+	ocean = OceanRenderer.new()
+	ocean.name = "Ocean"
+	back.add_child(ocean)
 
 	var world_root := Node2D.new()
 	world_root.name = "World"
@@ -43,6 +47,7 @@ func _ready() -> void:
 	cameras.name = "CameraController"
 	add_child(cameras)
 	cameras.setup(camera, projection, sim.system(&"world"))
+	ocean.setup(sim, camera, projection)
 	router = InputRouter.new()
 	router.name = "InputRouter"
 	add_child(router)
@@ -66,6 +71,7 @@ func _ready() -> void:
 	bridge.register_query("cell_screen", _cell_screen)
 	bridge.register_query("logical_screen", _logical_screen)
 	bridge.register_query("camera", _camera_info)
+	bridge.register_query("dev_grow_island", _dev_grow_island)
 
 
 func _process(delta: float) -> void:
@@ -117,3 +123,16 @@ func _logical_screen(arg: Variant) -> Dictionary:
 func _camera_info(_arg: Variant) -> Dictionary:
 	return {"x": camera.position.x, "y": camera.position.y, "zoom": camera.zoom.x,
 		"fit": cameras.fit_zoom, "min": cameras.min_zoom(), "max": cameras.max_zoom()}
+
+
+## E2E (browser test mode only): grows the island to an n x n square so large
+## worlds can be looked at and timed without playing for an hour.
+func _dev_grow_island(arg: Variant) -> Dictionary:
+	var n := int(arg)
+	var world: WorldSystem = sim.system(&"world")
+	for ring in range(2, n):
+		for i in range(0, ring + 1):
+			world.add_land(Vector2i(ring, i))
+			world.add_land(Vector2i(i, ring))
+	cameras.frame_island()
+	return {"cells": world.owned_count()}

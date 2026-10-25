@@ -20,6 +20,7 @@ func _draw() -> void:
 	var size: Vector2 = get_viewport_rect().size
 	var horizon: float = size.y * SKY_FRACTION
 	_vertical_gradient(Rect2(0, 0, size.x, horizon), SKY_TOP, SKY_HORIZON)
+	# Under the ocean shader: shows only for a frame if the shader is late.
 	_vertical_gradient(Rect2(0, horizon, size.x, size.y - horizon), SEA_HORIZON, SEA_DEEP)
 
 

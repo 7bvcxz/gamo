@@ -80,3 +80,16 @@ func test_entities_sort_by_depth() -> void:
 	assert_true(front.position.y > back.position.y, "nearer cell draws later")
 	assert_true(right.position.y > left.position.y, "same depth: larger x draws later (stable tie-break)")
 	assert_true(absf(right.position.y - left.position.y) < 0.1, "tie-break is too small to see")
+
+
+func test_island_draws_in_three_calls_whatever_its_size() -> void:
+	for y in 30:
+		for x in 30:
+			if not world.is_owned(Vector2i(x, y)):
+				world.add_land(Vector2i(x, y)) if world.is_purchasable(Vector2i(x, y)) else null
+	await tree.process_frame
+	assert_eq(world.owned_count(), 900, "a 30x30 island")
+	assert_eq(island.paint_order().size(), 900, "rebuilt once for all of it")
+	for mesh: ArrayMesh in [island.faces_mesh, island.tops_mesh, island.overlay_mesh]:
+		assert_eq(mesh.get_surface_count(), 1, "one surface per mesh -> three draw calls in total")
+	assert_true(island.last_build_ms < 400.0, "900-cell rebuild in %.1f ms" % island.last_build_ms)

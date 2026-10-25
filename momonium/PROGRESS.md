@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **07** (#7)
-- 현재 step: **08** — 끝없는 바다와 해안 VFX (#8)
-- 버전: `0.7.0`
-- 테스트: unit+integration 67 통과 (`momonium/tools/test.sh`)
-- E2E 케이스: `boot`, `save`, `art`, `world`, `island`, `camera` (각각 단독 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
+- 마지막 완료 step: **08** (#8)
+- 현재 step: **09** — 게임 시계와 낮·노을·밤 하늘 (#9)
+- 버전: `0.8.0`
+- 테스트: unit+integration 76 통과 (`momonium/tools/test.sh`)
+- E2E 케이스: `boot`, `save`, `art`, `world`, `island`, `camera`, `ocean` (각각 단독 PASS). 전체 스위트 첫 실행은 Step 10 완료 시
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -38,4 +38,5 @@
 | 04 | #4 아트 파이프라인 | 0.4.0 | `248f2bea` | 44, E2E art 단독, CI success | 스모크 PASS |
 | 05 | #5 바다 세계·2×2 격자 | 0.5.0 | `bde1bce8` | 51, E2E world 단독, CI success | 스모크 PASS |
 | 06 | #6 2.5D 섬 렌더링 | 0.6.0 | `3f008d7d` | 56, E2E island 단독, CI success | 스모크 PASS |
-| 07 | #7 카메라·제스처 | 0.7.0 | (다음 갱신 시) | 67, E2E camera 단독 | 스모크 |
+| 07 | #7 카메라·제스처 | 0.7.0 | `0ded785d` | 67, E2E camera 단독, CI success | 스모크 PASS |
+| 08 | #8 끝없는 바다·해안 VFX | 0.8.0 | (다음 갱신 시) | 76, E2E ocean 단독 | 스모크 |

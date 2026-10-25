@@ -2,58 +2,66 @@ class_name IslandRenderer
 extends Node2D
 
 ## Draws owned land as an elevated 2.5D island: textured grass tops with their
-## 1x1 boundaries, a grass lip over each exposed edge, dirt-and-stone cliff
-## faces down to the water, a shallow-water halo and foam where cliff meets sea.
+## 1x1 boundaries, a grass lip over each exposed edge and dirt-and-stone cliff
+## faces down to the water. Shallows and moving foam belong to the ocean.
 ##
-## Everything is projected through the one IsoProjection, and textures are
-## mapped in logical tile space (not screen space) -- the grass on cell (3, 4)
-## continues the grass on (2, 4) exactly, whatever the camera does.
+## The island is baked into three meshes whenever land or occupancy changes,
+## and each frame draws just those three -- whatever the island's size:
+##   faces    cliff texture, every visible face, far to near
+##   tops     grass texture, every top and its lip, far to near
+##   overlay  untextured: 1x1 boundaries and decorations
+## Faces go before tops because a top can only ever cover a face that is
+## farther away, and within each mesh triangles are emitted far-to-near, which
+## is the painter's order inside one draw call. (A per-cell immediate-mode
+## version drew the same picture at 1.9 fps for a 30x30 island.)
 ##
-## Painter's order: cells are drawn nearest-last (depth x+y, then x), each one
-## face-then-top, because a back cell's cliff can reach down behind a front
-## cell's top. Decorations are derived from the cell here and never enter the
-## simulation, so a flower can never block a building.
+## Textures are mapped in logical tile space, not screen space, so the grass on
+## (3, 4) continues the grass on (2, 4) exactly, wherever the camera is.
+## Decorations are derived from the cell and never enter the simulation, so a
+## flower can never block a building.
 
-## Grass texture repeats once every this many tiles.
 const GRASS_TILES_PER_TEXTURE := 2.0
-const STONE_TILES_PER_TEXTURE := 2.0
-## Fraction of the cliff that is dirt; the rest is stone blocks.
-const DIRT_FRACTION := 0.32
+const CLIFF_TILES_PER_TEXTURE := 2.0
 ## The lit side faces down-left (light from the upper left, as in the art).
 const LEFT_FACE_LIGHT := 1.0
 const RIGHT_FACE_LIGHT := 0.78
+const LIP_DEPTH := 7.0
+const LIP_STEPS := 8
+const LIP_TINT := Color(1.12, 1.14, 0.86)
+const BOUNDARY_DARK := Color(0.25, 0.45, 0.12, 0.28)
+const BOUNDARY_LIGHT := Color(1, 1, 0.8, 0.22)
 
 var _world: WorldSystem
 var _proj: IsoProjection
 var _grass_tex: Texture2D
-var _dirt_tex: Texture2D
-var _stone_tex: Texture2D
-var _rim: Color
-var _shallow: Color
-var _boundary := Color(0.25, 0.45, 0.12, 0.28)
-var _boundary_light := Color(1, 1, 0.8, 0.22)
-## Cells currently hidden from decoration (occupied by something).
-var _occupied: Dictionary = {}
+var _cliff_tex: Texture2D
 var _order: Array[Vector2i] = []
+var faces_mesh := ArrayMesh.new()
+var tops_mesh := ArrayMesh.new()
+var overlay_mesh := ArrayMesh.new()
+var last_build_ms := 0.0
 
 
 func setup(sim: Simulation, projection: IsoProjection) -> void:
 	_world = sim.system(&"world")
 	_proj = projection
 	_grass_tex = load("res://assets/textures/grass.png")
-	_dirt_tex = load("res://assets/textures/dirt.png")
-	_stone_tex = load("res://assets/textures/stone.png")
-	_rim = sim.data.color("grass_rim")
-	_shallow = sim.data.color("sea_day", 3)
+	_cliff_tex = load("res://assets/textures/cliff.png")
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	sim.bus.emitted.connect(_on_event)
-	_rebuild()
+	rebuild()
 
 
+## Changes are coalesced: many cells bought or built in one frame (a load, a
+## blueprint) cost one rebuild, at the start of the next frame.
 func _on_event(type: StringName, _payload: Dictionary) -> void:
-	if type in [&"land_added", &"game_loaded", &"occupancy_changed"]:
-		_rebuild()
+	if type in [&"land_added", &"game_loaded", &"occupancy_changed"] and not _dirty:
+		_dirty = true
+		rebuild.call_deferred()
+
+
+var _dirty := false
 
 
 ## The order cells are painted in: farthest first.
@@ -85,130 +93,121 @@ static func decals_for(cell: Vector2i) -> Array:
 	return out
 
 
-func _rebuild() -> void:
+func rebuild() -> void:
+	_dirty = false
+	var t0 := Time.get_ticks_usec()
 	_order = _world.owned_cells()
 	_order.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
 		var da := IsoProjection.depth(a)
 		var db := IsoProjection.depth(b)
 		return da < db or (da == db and a.x < b.x))
-	_occupied = _world.occupancy.duplicate()
-	queue_redraw()
-
-
-func _draw() -> void:
-	if _world == null:
-		return
-	var water_z := -_proj.cliff_height
-	# Shallow water and foam halo, under everything.
-	for cell: Vector2i in _order:
-		_draw_shallows(cell, water_z)
+	var faces := _Batch.new()
+	var tops := _Batch.new()
+	var overlay := _Batch.new()
 	for cell: Vector2i in _order:
 		var east_open := is_face_visible(cell, Vector2i(1, 0))
 		var south_open := is_face_visible(cell, Vector2i(0, 1))
 		if east_open:
-			_draw_face(cell, Vector2(cell.x + 1, cell.y), Vector2(cell.x + 1, cell.y + 1), RIGHT_FACE_LIGHT, float(cell.y))
+			_face(faces, Vector2(cell.x + 1, cell.y), Vector2(cell.x + 1, cell.y + 1), RIGHT_FACE_LIGHT, float(cell.y))
 		if south_open:
-			_draw_face(cell, Vector2(cell.x, cell.y + 1), Vector2(cell.x + 1, cell.y + 1), LEFT_FACE_LIGHT, float(cell.x))
-		_draw_top(cell)
-		_draw_rims(cell, east_open, south_open)
-		if not _occupied.has(cell):
-			_draw_decals(cell)
+			_face(faces, Vector2(cell.x, cell.y + 1), Vector2(cell.x + 1, cell.y + 1), LEFT_FACE_LIGHT, float(cell.x))
+		_top(tops, cell)
+		var corners := _proj.cell_corners(cell)
+		if east_open:
+			_lip(tops, corners[1], corners[2], cell)
+		if south_open:
+			_lip(tops, corners[3], corners[2], cell)
+		_boundaries(overlay, cell, corners)
+		if not _world.is_occupied(cell):
+			_decals(overlay, cell)
+	faces.commit(faces_mesh)
+	tops.commit(tops_mesh)
+	overlay.commit(overlay_mesh)
+	last_build_ms = (Time.get_ticks_usec() - t0) / 1000.0
+	queue_redraw()
 
 
-func _draw_top(cell: Vector2i) -> void:
+func _draw() -> void:
+	draw_mesh(faces_mesh, _cliff_tex)
+	draw_mesh(tops_mesh, _grass_tex)
+	draw_mesh(overlay_mesh, null)
+
+
+# --- geometry ---------------------------------------------------------------------
+
+func _top(b: _Batch, cell: Vector2i) -> void:
 	var corners := _proj.cell_corners(cell)
 	var c := Vector2(cell)
 	var s := 1.0 / GRASS_TILES_PER_TEXTURE
-	var uvs := PackedVector2Array([c * s, (c + Vector2(1, 0)) * s, (c + Vector2(1, 1)) * s, (c + Vector2(0, 1)) * s])
-	draw_polygon(corners, PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE, Color.WHITE]), uvs, _grass_tex)
-	# The 1x1 boundary: a soft dark line on the far edges and a light one on the
-	# near edges reads as a shallow bevel rather than a drawn grid.
-	draw_line(corners[3], corners[0], _boundary, 1.6, true)
-	draw_line(corners[0], corners[1], _boundary, 1.6, true)
-	draw_line(corners[1], corners[2], _boundary_light, 1.2, true)
-	draw_line(corners[2], corners[3], _boundary_light, 1.2, true)
+	b.quad(corners, PackedVector2Array([c * s, (c + Vector2(1, 0)) * s, (c + Vector2(1, 1)) * s, (c + Vector2(0, 1)) * s]),
+		[Color.WHITE, Color.WHITE, Color.WHITE, Color.WHITE])
 
 
 ## One vertical cliff face hanging below the logical edge a-b. `u0` is where
 ## along the coast this face starts, so blocks line up across neighbours.
-func _draw_face(_cell: Vector2i, a: Vector2, b: Vector2, light: float, u0: float) -> void:
+func _face(b: _Batch, a: Vector2, c: Vector2, light: float, u0: float) -> void:
 	var top_a := _proj.to_screen(a)
-	var top_b := _proj.to_screen(b)
-	var depth := _proj.cliff_height * _proj.height_scale
-	var dirt_h := depth * DIRT_FRACTION
-	var tint := Color(light, light, light)
-	var su := 1.0 / STONE_TILES_PER_TEXTURE
-	var u_a := u0 * su
-	var u_b := (u0 + 1.0) * su
-	# Dirt band.
-	var dirt := PackedVector2Array([top_a, top_b, top_b + Vector2(0, dirt_h), top_a + Vector2(0, dirt_h)])
-	draw_polygon(dirt, PackedColorArray([tint, tint, tint, tint]),
-		PackedVector2Array([Vector2(u_a, 0), Vector2(u_b, 0), Vector2(u_b, 0.5), Vector2(u_a, 0.5)]), _dirt_tex)
-	# Stone blocks, darkening towards the water.
-	var deep := Color(light * 0.82, light * 0.84, light * 0.9)
-	var stone := PackedVector2Array([top_a + Vector2(0, dirt_h), top_b + Vector2(0, dirt_h), top_b + Vector2(0, depth), top_a + Vector2(0, depth)])
-	var v1 := (depth - dirt_h) / (_proj.tile_width / sqrt(2.0)) * 2.0 * su
-	draw_polygon(stone, PackedColorArray([tint, tint, deep, deep]),
-		PackedVector2Array([Vector2(u_a, 0), Vector2(u_b, 0), Vector2(u_b, v1), Vector2(u_a, v1)]), _stone_tex)
-	# Foam where the cliff meets the sea.
-	draw_line(top_a + Vector2(0, depth), top_b + Vector2(0, depth), Color(1, 1, 1, 0.85), 3.0, true)
-	draw_line(top_a + Vector2(0, depth + 3), top_b + Vector2(0, depth + 3), Color(1, 1, 1, 0.35), 4.0, true)
+	var top_c := _proj.to_screen(c)
+	var down := Vector2(0, _proj.cliff_height * _proj.height_scale)
+	var su := 1.0 / CLIFF_TILES_PER_TEXTURE
+	var lit := Color(light, light, light)
+	var deep := Color(light * 0.8, light * 0.83, light * 0.9)
+	b.quad(PackedVector2Array([top_a, top_c, top_c + down, top_a + down]),
+		PackedVector2Array([Vector2(u0 * su, 0), Vector2((u0 + 1.0) * su, 0), Vector2((u0 + 1.0) * su, 1), Vector2(u0 * su, 1)]),
+		[lit, lit, deep, deep])
 
 
-## A lighter grass lip spilling a few pixels over each exposed near edge, and a
-## thin highlight on exposed far edges.
-func _draw_rims(cell: Vector2i, east_open: bool, south_open: bool) -> void:
-	var corners := _proj.cell_corners(cell)
-	var lip := 7.0
-	if east_open:
-		_lip(corners[1], corners[2], lip, cell)
-	if south_open:
-		_lip(corners[3], corners[2], lip, cell)
+## A lighter grass lip spilling a few pixels over an exposed near edge. Drawn
+## with the grass texture so it reads as the same turf, just catching light.
+func _lip(b: _Batch, a: Vector2, c: Vector2, cell: Vector2i) -> void:
+	var rng := _rng(cell, 7 + int(a.x * 13.0))
+	var la := _proj.to_logical(a)
+	var lc := _proj.to_logical(c)
+	var s := 1.0 / GRASS_TILES_PER_TEXTURE
+	for i in LIP_STEPS:
+		var t0 := float(i) / LIP_STEPS
+		var t1 := float(i + 1) / LIP_STEPS
+		var p0 := a.lerp(c, t0)
+		var p1 := a.lerp(c, t1)
+		var d0 := LIP_DEPTH * (0.55 + 0.45 * rng.randf())
+		var d1 := LIP_DEPTH * (0.55 + 0.45 * rng.randf())
+		var u0 := la.lerp(lc, t0) * s
+		var u1 := la.lerp(lc, t1) * s
+		b.quad(PackedVector2Array([p0, p1, p1 + Vector2(0, d1), p0 + Vector2(0, d0)]),
+			PackedVector2Array([u0, u1, u1 + Vector2(0, 0.02), u0 + Vector2(0, 0.02)]),
+			[LIP_TINT, LIP_TINT, LIP_TINT, LIP_TINT])
+
+
+## The 1x1 boundary: a soft dark line on the far edges and a light one on the
+## near edges reads as a shallow bevel rather than a drawn grid.
+func _boundaries(b: _Batch, cell: Vector2i, corners: PackedVector2Array) -> void:
+	b.line(corners[3], corners[0], 1.6, BOUNDARY_DARK)
+	b.line(corners[0], corners[1], 1.6, BOUNDARY_DARK)
+	b.line(corners[1], corners[2], 1.2, BOUNDARY_LIGHT)
+	b.line(corners[2], corners[3], 1.2, BOUNDARY_LIGHT)
+	var rim := Color(0.78, 0.91, 0.42, 0.9)
 	if not _world.is_owned(cell + Vector2i(-1, 0)):
-		draw_line(corners[3], corners[0], _rim, 2.2, true)
+		b.line(corners[3], corners[0], 2.2, rim)
 	if not _world.is_owned(cell + Vector2i(0, -1)):
-		draw_line(corners[0], corners[1], _rim, 2.2, true)
-
-
-func _lip(a: Vector2, b: Vector2, depth: float, cell: Vector2i) -> void:
-	var pts := PackedVector2Array([a, b])
-	var steps := 8
-	var rng := _rng(cell, 7)
-	for i in range(steps, -1, -1):
-		var t := float(i) / steps
-		var wobble := depth * (0.55 + 0.45 * rng.randf())
-		pts.append(a.lerp(b, t) + Vector2(0, wobble))
-	draw_colored_polygon(pts, _rim)
-
-
-## Shallow water fading out from the island: three widening rings of the
-## shallow colour, each fainter, so the edge reads as depth rather than a plate.
-func _draw_shallows(cell: Vector2i, water_z: float) -> void:
-	var centre := _proj.cell_center(cell, water_z)
-	var corners := _proj.cell_corners(cell, water_z)
-	for ring: Array in [[1.55, 0.14], [1.38, 0.18], [1.2, 0.26]]:
-		var halo := PackedVector2Array()
-		for c: Vector2 in corners:
-			halo.append(centre + (c - centre) * float(ring[0]))
-		draw_colored_polygon(halo, Color(_shallow, float(ring[1])))
+		b.line(corners[0], corners[1], 2.2, rim)
 
 
 ## Flowers and tufts: derived from the cell, deterministic, purely visual.
-func _draw_decals(cell: Vector2i) -> void:
+func _decals(b: _Batch, cell: Vector2i) -> void:
 	for decal: Array in decals_for(cell):
 		var p := _proj.to_screen(decal[1])
 		match int(decal[0]):
 			0:
 				for k in 5:
 					var ang := TAU * k / 5.0
-					draw_circle(p + Vector2(cos(ang), sin(ang) * 0.7) * 2.6, 1.9, Color("#ffffff"))
-				draw_circle(p, 1.5, Color("#ffd34d"))
+					b.disc(p + Vector2(cos(ang), sin(ang) * 0.7) * 2.6, 1.9, Color("#ffffff"), 5)
+				b.disc(p, 1.4, Color("#ffd34d"), 5)
 			1:
-				draw_circle(p, 2.2, Color("#ffd34d"))
-				draw_circle(p + Vector2(4, 1), 1.8, Color("#fff4b0"))
+				b.disc(p, 2.2, Color("#ffd34d"), 6)
+				b.disc(p + Vector2(4, 1), 1.8, Color("#fff4b0"), 5)
 			_:
 				for k in 3:
-					draw_line(p + Vector2(k * 2 - 2, 0), p + Vector2(k * 3 - 3, -5), Color("#5f9e2c"), 1.4, true)
+					b.line(p + Vector2(k * 2 - 2, 0), p + Vector2(k * 3 - 3, -5), 1.3, Color("#5f9e2c"))
 
 
 ## Deterministic per-cell randomness. A proper integer mixer: a multiply-xor
@@ -222,3 +221,39 @@ static func _rng(cell: Vector2i, salt: int) -> RandomNumberGenerator:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = h & 0x7fffffffffffffff
 	return rng
+
+
+## Accumulates triangles for one mesh surface.
+class _Batch:
+	var verts := PackedVector2Array()
+	var uvs := PackedVector2Array()
+	var colors := PackedColorArray()
+
+	func quad(p: PackedVector2Array, uv: PackedVector2Array, c: Array) -> void:
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			verts.append(p[i])
+			uvs.append(uv[i])
+			colors.append(c[i])
+
+	func line(a: Vector2, b: Vector2, width: float, color: Color) -> void:
+		var n := (b - a).orthogonal().normalized() * width * 0.5
+		quad(PackedVector2Array([a + n, b + n, b - n, a - n]), PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO]), [color, color, color, color])
+
+	func disc(centre: Vector2, radius: float, color: Color, sides: int) -> void:
+		for i in sides:
+			var a0 := TAU * i / sides
+			var a1 := TAU * (i + 1) / sides
+			verts.append_array(PackedVector2Array([centre, centre + Vector2(cos(a0), sin(a0)) * radius, centre + Vector2(cos(a1), sin(a1)) * radius]))
+			uvs.append_array(PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO]))
+			colors.append_array(PackedColorArray([color, color, color]))
+
+	func commit(mesh: ArrayMesh) -> void:
+		mesh.clear_surfaces()
+		if verts.is_empty():
+			return
+		var arrays := []
+		arrays.resize(Mesh.ARRAY_MAX)
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		arrays[Mesh.ARRAY_TEX_UV] = uvs
+		arrays[Mesh.ARRAY_COLOR] = colors
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
