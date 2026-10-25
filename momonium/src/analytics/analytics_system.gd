@@ -44,7 +44,7 @@ func _schedule() -> void:
 
 static func _blank(day: int) -> Dictionary:
 	return {"day": day, "income": {}, "expense": {}, "made": {}, "used": {}, "sold": {}, "buildings": {},
-		"momo_ms": {}, "samples": 0, "supply": 0.0, "demand": 0.0, "short": 0, "blocked": {}, "blocked_by": {}}
+		"momo_ms": {}, "momo_stages": {}, "samples": 0, "supply": 0.0, "demand": 0.0, "short": 0, "blocked": {}, "blocked_by": {}}
 
 
 static func _add(d: Dictionary, key: Variant, n: Variant) -> void:
@@ -83,6 +83,7 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 			var worker := int(p.get("worker", 0))
 			if worker > 0:
 				_add(today["momo_ms"], worker, took)
+				_add(today["momo_stages"], worker, 1)
 		&"produced":
 			var row: Dictionary = today["buildings"].get(int(p["id"]), {"stages": 0, "busy_ms": 0, "made": {}})
 			for item: String in p.get("items", {}):
@@ -214,6 +215,26 @@ func before_after(type: String, research_id: String, n: int = 5) -> Dictionary:
 	return {"before": avg.call(before), "after": avg.call(after), "days_before": before.size(), "days_after": after.size()}
 
 
+## A Momo's stages a day on the closed days before and after `since_ms`
+## (a routing change): {before, after, days_before, days_after}.
+func momo_before_after(momo: int, since_ms: int, n: int = 5) -> Dictionary:
+	var day := 1 + since_ms / sim.clock.day_ms
+	var before: Array[int] = []
+	var after: Array[int] = []
+	for d: Dictionary in days:
+		var stages := int(d.get("momo_stages", {}).get(momo, 0))
+		if int(d["day"]) < day and int(d["day"]) >= day - n:
+			before.append(stages)
+		elif int(d["day"]) > day and int(d["day"]) <= day + n:
+			after.append(stages)
+	var avg := func(a: Array[int]) -> float:
+		var s := 0
+		for x: int in a:
+			s += x
+		return float(s) / a.size() if not a.is_empty() else 0.0
+	return {"before": avg.call(before), "after": avg.call(after), "days_before": before.size(), "days_after": after.size()}
+
+
 func save_state() -> Dictionary:
 	return {"today": _out(today), "days": days.map(func(d: Dictionary) -> Dictionary: return _out(d))}
 
@@ -232,7 +253,7 @@ func load_state(state: Dictionary) -> void:
 ## back as ints; counts come back as ints.
 static func _out(d: Dictionary) -> Dictionary:
 	var c := d.duplicate(true)
-	for field: String in ["buildings", "momo_ms", "blocked_by"]:
+	for field: String in ["buildings", "momo_ms", "momo_stages", "blocked_by"]:
 		var m := {}
 		for k: Variant in c.get(field, {}):
 			m[str(k)] = c[field][k]
@@ -245,7 +266,7 @@ static func _in(d: Dictionary) -> Dictionary:
 	for field: String in ["income", "expense", "made", "used", "sold", "blocked"]:
 		for k: String in d.get(field, {}):
 			c[field][k] = int(d[field][k])
-	for field: String in ["momo_ms", "blocked_by"]:
+	for field: String in ["momo_ms", "momo_stages", "blocked_by"]:
 		for k: String in d.get(field, {}):
 			c[field][int(k)] = int(d[field][k])
 	for k: String in d.get("buildings", {}):

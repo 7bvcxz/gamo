@@ -409,6 +409,16 @@ func _ready() -> void:
 			"profiles": range(ResearchSystem.PROFILES).map(func(i: int) -> Dictionary: return {"text": rp_view.profile_buttons[i].text,
 				"load": conv.call(rp_view.profile_buttons[i]), "save": conv.call(rp_view.save_buttons[i]), "levels": rs.profiles[i]}),
 			"window": [win.x, win.y]})
+	bridge.register_query("route", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var r := momo_panel.route_button.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var momo := momo_panel.momo_id
+		return {"momo": momo, "route": (sim.system(&"momo") as MomoSystem).route_of(momo) if momo != 0 else "",
+			"label": momo_panel.route_button.text, "button": [a.x, a.y, b.x - a.x, b.y - a.y] if momo_panel.route_button.is_visible_in_tree() else [],
+			"compare": momo_panel.compare_label.text if momo_panel.compare_label.visible else "", "stops": watch_overlay.route(), "window": [win.x, win.y]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
 		while prog.level < int(lv):

@@ -194,3 +194,30 @@ func test_the_momo_starts_on_new_tiles_at_once() -> void:
 	assert_eq(int(momos.get_momo(1)["assigned"]), farm, "the farm on the new tile: it heads there now")
 	sim.advance_ms(40000)
 	assert_true(int(bs.get_building(farm)["completed"]) > 0, "and works it")
+
+
+func test_the_route_button_and_its_preview() -> void:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var a := bs.place_instant("lumberyard", Vector2i(0, 0))
+	var b := bs.place_instant("lumberyard", Vector2i(2, 2))
+	sim.execute({"type": "momo.watch", "momo": 1, "cells": [[0, 0], [2, 2]], "op": "add"})
+	await _select_momo()
+	var panel: MomoPanel = main.get("momo_panel")
+	panel.refresh()
+	assert_eq(panel.route_button.text, "Route: Nearest first", "the panel names its route")
+	assert_eq(overlay.route().size(), 2, "and the island shows it: two stops")
+	assert_true(overlay.route().has(a) and overlay.route().has(b), "")
+	var p := panel.route_button.get_global_rect().get_center()
+	for pressed: bool in [true, false]:
+		var m := InputEventMouseButton.new()
+		m.button_index = MOUSE_BUTTON_LEFT
+		m.position = p
+		m.pressed = pressed
+		vp.push_input(m, true)
+	panel.refresh()
+	assert_eq(momos.route_of(1), "rows", "a tap: the next way")
+	assert_eq(panel.route_button.text, "Route: Row by row", "")
+	assert_eq(panel.compare_label.text, "Comparing: a few days are needed on each side", "and it will compare before and after")
+	for i in 3:
+		panel.next_route()
+	assert_eq(momos.route_of(1), "nearest", "zigzag, zone, and round again (smart needs its research)")

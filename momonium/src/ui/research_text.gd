@@ -57,6 +57,8 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 			return t.translate("effect.research_time").format({"pct": pct})
 		"watch_tiles":
 			return t.translate("effect.watch_tiles").format({"n": int(e.get("add", 0))})
+		"route":
+			return t.translate("effect.route").format({"name": t.translate("route." + String(e.get("strategy", "")))})
 	return ""
 
 

@@ -56,11 +56,17 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 						dispatch(w, id)
 				_call_watchers(id)
 		&"momo_arrived":
-			if not try_start(int(payload.get("building", 0)))["ok"]:
-				dispatch(int(payload.get("id", 0)), int(payload.get("building", 0)))
+			var arrived := int(payload.get("building", 0))
+			if not try_start(arrived)["ok"]:
+				# The smart route came early on purpose: it waits for the cooldown.
+				var b := (sim.system(&"buildings") as BuildingSystem).get_building(arrived)
+				var waits: bool = (sim.system(&"momo") as MomoSystem).route_of(int(payload.get("id", 0))) == "auto" \
+					and not b.is_empty() and b["state"] == BuildingSystem.COOLDOWN
+				if not waits:
+					dispatch(int(payload.get("id", 0)), arrived)
 		&"momo_assigned":
 			try_start(int(payload.get("building", 0)))
-		&"momo_watch_changed":
+		&"momo_watch_changed", &"momo_route_changed":
 			dispatch(int(payload.get("id", 0)))
 		&"task_completed":
 			var worker := int(payload.get("worker", 0))
@@ -130,21 +136,21 @@ func is_working(momo: int) -> bool:
 	return not b.is_empty() and b["state"] == BuildingSystem.WORKING and int(b.get("worker", 0)) == momo
 
 
-## A free Momo picks its next job among the buildings it watches: the
-## nearest that could start now and has room for it (ties: lower id). Its own
-## building, when it qualifies, is simply started; `skip` (just tried) is not
-## walked back to. Returns the building it went to, or 0.
+## A free Momo picks its next job among the buildings it watches, in the
+## order its route gives (route_order): the first that could start now and has
+## room for it. Its own building, when it comes up first and qualifies, is
+## simply started; `skip` (just tried) is not walked back to. With the smart
+## route it may also set off for a building that will be ready by the time it
+## arrives. Returns the building it went to (or stays at), or 0.
 func dispatch(momo: int, skip: int = 0) -> int:
 	var momos: MomoSystem = sim.system(&"momo")
 	var m := momos.get_momo(momo)
 	if m.is_empty() or (m.get("watch", []) as Array).is_empty() or resting() or is_working(momo):
 		return 0
-	var buildings: BuildingSystem = sim.system(&"buildings")
-	var here := momos.position_of(momo)
+	if momos.route_of(momo) == "auto":
+		return _dispatch_auto(momo, skip)
 	var at := int(m["assigned"])
-	var best := 0
-	var best_d := INF
-	for id: int in _watched_buildings(momo):
+	for id: int in route_order(momo):
 		if id == skip or not _open_for(momo, id):
 			continue
 		if id == at:
@@ -152,11 +158,111 @@ func dispatch(momo: int, skip: int = 0) -> int:
 			if momos.at_work(momo):
 				try_start(id)
 			return id
-		var d := here.distance_to(momos.work_spot(id))
+		if momos.assign(momo, id, false, true)["ok"]:
+			return id
+	return 0
+
+
+## The watched buildings in the order this Momo's route visits them:
+## nearest / zone / auto -- by distance from where it is (zone: only those
+## nearer its own tiles than any other watcher's); rows -- reading order, row
+## by row; zigzag -- rows alternating left-right and right-left. A row route
+## goes on from where the Momo is: the building it is at comes last.
+func route_order(momo: int) -> Array[int]:
+	var momos: MomoSystem = sim.system(&"momo")
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var route := momos.route_of(momo)
+	var list := _watched_buildings(momo)
+	if route == "zone":
+		list = list.filter(func(id: int) -> bool: return zone_owner(id) == momo)
+	var anchor := func(id: int) -> Vector2i:
+		var c: Array = buildings.get_building(id)["anchor"]
+		return Vector2i(int(c[0]), int(c[1]))
+	if route == "rows" or route == "zigzag":
+		list.sort_custom(func(a: int, b: int) -> bool:
+			var pa: Vector2i = anchor.call(a)
+			var pb: Vector2i = anchor.call(b)
+			if pa.y != pb.y:
+				return pa.y < pb.y
+			if route == "zigzag" and pa.y % 2 != 0:
+				return pa.x > pb.x
+			return pa.x < pb.x)
+		var at := int(momos.get_momo(momo).get("assigned", 0))
+		var i := list.find(at)
+		if i >= 0:
+			list = list.slice(i + 1) + list.slice(0, i + 1)
+		return list
+	var here := momos.position_of(momo)
+	list.sort_custom(func(a: int, b: int) -> bool:
+		var da := here.distance_to(momos.work_spot(a))
+		var db := here.distance_to(momos.work_spot(b))
+		return da < db - 0.0001 or (absf(da - db) <= 0.0001 and a < b))
+	return list
+
+
+## Which Momo a building belongs to when several watch it (the zone route):
+## the watcher whose own tiles are centred nearest to it (ties: lower id).
+func zone_owner(building: int) -> int:
+	var momos: MomoSystem = sim.system(&"momo")
+	var watchers := momos.watchers_of(building)
+	if watchers.size() <= 1:
+		return watchers[0] if not watchers.is_empty() else 0
+	var spot := momos.work_spot(building)
+	var best := 0
+	var best_d := INF
+	for w: int in watchers:
+		var cells := momos.watched(w)
+		var home := Vector2.ZERO
+		for c: Vector2i in cells:
+			home += Vector2(c) + Vector2(0.5, 0.5)
+		home /= maxf(cells.size(), 1.0)
+		var d := home.distance_to(spot)
 		if d < best_d - 0.0001:
-			best = id
+			best = w
 			best_d = d
-	if best != 0 and momos.assign(momo, best, false, true)["ok"]:
+	return best
+
+
+## The smart route: every watched building with a Momo job and room, ready
+## now or cooling down; the one where work could start soonest -- the longer
+## of the walk and the wait -- wins (ties: nearer, then lower id). Waiting is
+## done there, so the stage starts the moment the building is free.
+func _dispatch_auto(momo: int, skip: int) -> int:
+	var momos: MomoSystem = sim.system(&"momo")
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var here := momos.position_of(momo)
+	var at := int(momos.get_momo(momo)["assigned"])
+	var speed := momos.walk_speed()
+	var now := sim.now_ms()
+	var best := 0
+	var best_eta := INF
+	var best_d := INF
+	for id: int in _watched_buildings(momo):
+		if id == skip or not _job_for_momo(id):
+			continue
+		var others := momos.workers_at(id)
+		others.erase(momo)
+		if others.size() >= momos.slots_of(id):
+			continue
+		var b := buildings.get_building(id)
+		var wait := 0.0
+		if b["state"] == BuildingSystem.COOLDOWN:
+			wait = maxf(float(int(b.get("ready_at", now)) - now), 0.0)
+		elif not buildings.can_start(id)["ok"]:
+			continue
+		var d := here.distance_to(momos.work_spot(id))
+		var eta := maxf(d / speed * 1000.0, wait)
+		if eta < best_eta - 0.5 or (absf(eta - best_eta) <= 0.5 and d < best_d - 0.0001):
+			best = id
+			best_eta = eta
+			best_d = d
+	if best == 0:
+		return 0
+	if best == at:
+		if momos.at_work(momo) and buildings.can_start(at)["ok"]:
+			try_start(at)
+		return at
+	if momos.assign(momo, best, false, true)["ok"]:
 		return best
 	return 0
 
@@ -175,7 +281,11 @@ func _call_watchers(building: int) -> void:
 		var da := momos.position_of(a).distance_to(spot)
 		var db := momos.position_of(b).distance_to(spot)
 		return da < db - 0.0001 or (absf(da - db) <= 0.0001 and a < b))
+	var owner := zone_owner(building)
 	for id: int in free:
+		# The zone route: only the building's own Momo comes.
+		if momos.route_of(id) == "zone" and owner != id:
+			continue
 		# Only a Momo with nothing to start where it stands walks over.
 		var at := int(momos.get_momo(id)["assigned"])
 		if at != 0 and momos.at_work(id) and _open_for(id, at):

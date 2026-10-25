@@ -318,6 +318,9 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 		"watch_tiles":
 			if int(e.get("add", 0)) < 1:
 				errors.append("research: %s watch_tiles needs add >= 1" % id)
+		"route":
+			if not ["auto"].has(String(e.get("strategy", ""))):
+				errors.append("research: %s opens an unknown route strategy %s" % [id, e.get("strategy", "")])
 		_:
 			errors.append("research: %s has unknown effect kind %s" % [id, kind])
 	# Listed levels must only get better (a smaller multiplier for times, a

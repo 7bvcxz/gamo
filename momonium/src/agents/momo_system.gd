@@ -25,6 +25,11 @@ extends SimSystem
 const ROAM := "momo.roam"
 const ARRIVE := "momo.arrive"
 const NEIGHBOURS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+## How a Momo picks its next watched building (JobSystem): nearest ready one;
+## in reading order, row by row; rows alternating direction; only the
+## buildings nearer its own tiles than any other watcher's; and, once
+## researched, planning around waits (setting off for what will be ready).
+const ROUTES: PackedStringArray = ["nearest", "rows", "zigzag", "zone", "auto"]
 
 ## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired,
 ##        watch [[x,y]...] (sorted)}
@@ -43,7 +48,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["momo.hire", "momo.assign", "momo.unassign", "momo.move", "momo.pin", "momo.watch"])
+	return PackedStringArray(["momo.hire", "momo.assign", "momo.unassign", "momo.move", "momo.pin", "momo.watch", "momo.route"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -112,7 +117,8 @@ func add_momo(pos: Vector2) -> int:
 	var names := maxi(sim.data.get_int("balance", "momo.names", 10), 1)
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
-		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": []}
+		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": [],
+		"route": "nearest", "route_since": now}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -216,6 +222,8 @@ func execute(command: Dictionary) -> Dictionary:
 				if typeof(c) == TYPE_ARRAY and (c as Array).size() == 2:
 					cells.append(Vector2i(int(c[0]), int(c[1])))
 			return set_watch(Cmd.integer(command, "momo"), cells, Cmd.text(command, "op"))
+		"momo.route":
+			return set_route(Cmd.integer(command, "momo"), Cmd.text(command, "route"))
 		"momo.move":
 			var p: Variant = command.get("pos")
 			return move_to(Cmd.integer(command, "momo"), Vector2(float(p[0]), float(p[1])) if typeof(p) == TYPE_ARRAY else Vector2(-999, -999))
@@ -411,6 +419,41 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 	return SimResult.ok({"changed": changed, "refused": refused, "count": watch.size(), "capacity": watch_capacity(momo)})
 
 
+# --- routes --------------------------------------------------------------------------
+
+## The strategies this island can use now (auto once researched).
+func routes_open() -> PackedStringArray:
+	var out: PackedStringArray = []
+	var research: ResearchSystem = sim.system(&"research")
+	for r: String in ROUTES:
+		if r != "auto" or (research != null and research.opens_route("auto")):
+			out.append(r)
+	return out
+
+
+## How this Momo picks its jobs now: its choice, or nearest when that choice
+## is no longer open (its research points were placed elsewhere).
+func route_of(momo: int) -> String:
+	var r := String(momos.get(momo, {}).get("route", "nearest"))
+	return r if routes_open().has(r) else "nearest"
+
+
+func set_route(momo: int, route: String) -> Dictionary:
+	if not momos.has(momo):
+		return SimResult.fail("err.no_momo")
+	if not ROUTES.has(route):
+		return SimResult.fail("err.bad_command")
+	if not routes_open().has(route):
+		return SimResult.fail("err.needs_research", {"research": "smart_schedule"})
+	var m: Dictionary = momos[momo]
+	if String(m.get("route", "nearest")) == route:
+		return SimResult.ok()
+	m["route"] = route
+	m["route_since"] = sim.now_ms()
+	sim.bus.emit(&"momo_route_changed", {"id": momo, "route": route})
+	return SimResult.ok()
+
+
 ## Lets the manager move this Momo (false), or keeps it where the player put it (true).
 func set_pinned(momo: int, pinned: bool) -> Dictionary:
 	if not momos.has(momo):
@@ -484,12 +527,18 @@ func handle_event(type: String, data: Dictionary) -> void:
 	_schedule_roam(m, arrive - sim.now_ms() + _rest_ms())
 
 
-func _walk_to(m: Dictionary, target: Vector2) -> int:
-	var here := position_at(m["id"], sim.now_ms())
+## Tiles a second a Momo walks: the base, times transport research.
+func walk_speed() -> float:
 	var speed := maxf(sim.data.get_float("balance", "momo.walk_speed", 0.7), 0.05)
 	var research: ResearchSystem = sim.system(&"research")
 	if research != null:
 		speed *= research.walk_multiplier()
+	return speed
+
+
+func _walk_to(m: Dictionary, target: Vector2) -> int:
+	var here := position_at(m["id"], sim.now_ms())
+	var speed := walk_speed()
 	var now := sim.now_ms()
 	m["from"] = [here.x, here.y]
 	m["to"] = [target.x, target.y]
@@ -560,6 +609,8 @@ func load_state(state: Dictionary) -> void:
 				for c: Vector2i in bs.cells_of(bs.get_building(int(m["assigned"]))):
 					cells.append([c.x, c.y])
 			m["watch"] = cells
+		m["route"] = String(m.get("route", "nearest")) if ROUTES.has(String(m.get("route", "nearest"))) else "nearest"
+		m["route_since"] = int(m.get("route_since", 0))
 		var w: Array = []
 		for c: Variant in m["watch"]:
 			w.append([int(c[0]), int(c[1])])

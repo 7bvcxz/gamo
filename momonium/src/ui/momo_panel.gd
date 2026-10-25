@@ -21,6 +21,10 @@ var skill_label: Label
 var history_label: Label
 ## Keeps a Momo where the player put it, or lets the manager move it.
 var pin_button: Button
+## How it picks its next job (tap to try the next way), and how the days
+## before and after the last change compare.
+var route_button: Button
+var compare_label: Label
 
 
 func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
@@ -68,6 +72,18 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 			sim.execute({"type": "momo.pin", "momo": momo_id, "pinned": not bool(m.get("pinned", false))})
 			refresh())
 	col.add_child(pin_button)
+	route_button = Button.new()
+	route_button.name = "Route"
+	route_button.flat = true
+	route_button.focus_mode = Control.FOCUS_NONE
+	route_button.custom_minimum_size = Vector2(0, 44)
+	route_button.add_theme_font_size_override("font_size", 15)
+	route_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	route_button.pressed.connect(next_route)
+	col.add_child(route_button)
+	compare_label = PanelViews.label("", 13, true)
+	compare_label.name = "Compare"
+	col.add_child(compare_label)
 	row.add_child(col)
 	assign_button = _button("Assign")
 	assign_button.pressed.connect(func() -> void:
@@ -89,6 +105,14 @@ func _button(node_name: String) -> Button:
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_size_override("font_size", 19)
 	return b
+
+
+## The next routing way this island has (wrapping round).
+func next_route() -> void:
+	var open := momos.routes_open()
+	var i := open.find(momos.route_of(momo_id))
+	sim.execute({"type": "momo.route", "momo": momo_id, "route": open[(i + 1) % open.size()]})
+	refresh()
 
 
 func show_momo(id: int) -> void:
@@ -125,6 +149,15 @@ func refresh() -> void:
 	assign_button.modulate = Color(1.3, 1.25, 0.8) if assigning else Color.WHITE
 	release_button.text = tr("momo.unassign")
 	release_button.visible = b != 0
+	route_button.text = tr("route.label") % tr("route." + momos.route_of(momo_id))
+	route_button.visible = not (m.get("watch", []) as Array).is_empty()
+	compare_label.visible = route_button.visible and int(m.get("route_since", 0)) > 0
+	if compare_label.visible:
+		var ba := (sim.system(&"analytics") as AnalyticsSystem).momo_before_after(momo_id, int(m["route_since"]))
+		if int(ba["days_before"]) > 0 and int(ba["days_after"]) > 0:
+			compare_label.text = tr("route.compare").format({"before": AnalyticsView.n(ba["before"]), "after": AnalyticsView.n(ba["after"])})
+		else:
+			compare_label.text = tr("route.compare_wait")
 	_refresh_skill(m, b)
 
 

@@ -121,7 +121,7 @@ func max_level(id: String) -> int:
 	if (n.get("effects", []) as Array).is_empty():
 		return 1
 	for e: Dictionary in n.get("effects", []):
-		if String(e.get("kind", "")) in ["auto", "recipe", "variety", "power_use"]:
+		if String(e.get("kind", "")) in ["auto", "recipe", "variety", "power_use", "route"]:
 			return 1
 	return sim.data.get_int("balance", "research.max_level", 5)
 
@@ -474,6 +474,14 @@ func watch_bonus() -> int:
 	for e: Dictionary in _effects("watch_tiles"):
 		n += int(e.get("add", 0))
 	return n
+
+
+## Whether research has opened a routing strategy (auto).
+func opens_route(strategy: String) -> bool:
+	for e: Dictionary in _effects("route"):
+		if String(e.get("strategy", "")) == strategy:
+			return true
+	return false
 
 
 ## How much faster Momo walk, from transport research (>= 1).
