@@ -79,6 +79,8 @@ var tutorial: Tutorial
 var in_demo := false
 ## The last sale's result (E2E reads it).
 var last_sale: Dictionary = {}
+## The confetti when the settlement goes up a tier.
+var celebration: TierCelebration
 var _demo_badge: Label
 var saves_written := 0
 var _autosave_left := 0.0
@@ -273,6 +275,13 @@ func _ready() -> void:
 		if (sim.system(&"prestige") as PrestigeSystem).welcome:
 			sim.execute({"type": "prestige.welcomed"}))
 	research_frame.set_title(tr("hud.research"))
+	celebration = TierCelebration.new()
+	celebration.setup()
+	ui.add_child(celebration)
+	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
+		if type == &"tier_promoted":
+			_close_frames()
+			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))})))
 	sale_frame = _frame(ui, "SaleFrame")
 	sale_view = SaleView.new()
 	sale_view.setup(sim, lib)
@@ -419,6 +428,22 @@ func _ready() -> void:
 		return {"momo": momo, "route": (sim.system(&"momo") as MomoSystem).route_of(momo) if momo != 0 else "",
 			"label": momo_panel.route_button.text, "button": [a.x, a.y, b.x - a.x, b.y - a.y] if momo_panel.route_button.is_visible_in_tree() else [],
 			"compare": momo_panel.compare_label.text if momo_panel.compare_label.visible else "", "stops": watch_overlay.route(), "window": [win.x, win.y]})
+	bridge.register_query("tier", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var tv := status_panel.tier_view
+		var r := tv.promote_button.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var tiers: TierSystem = sim.system(&"tiers")
+		return {"tier": tiers.tier_name(), "slots": tiers.special_slots(), "progress": tiers.progress(), "can": tiers.can_promote(),
+			"head": tv.head.text, "promote": [a.x, a.y, b.x - a.x, b.y - a.y] if tv.promote_button.is_visible_in_tree() else [],
+			"promote_disabled": tv.promote_button.disabled, "celebrating": celebration.playing(), "celebration": celebration.text,
+			"badge": hud.buttons[&"status"].badge, "window": [win.x, win.y]})
+	# Money as if from sales (browser tests of what counts produced value).
+	bridge.register_query("dev_sale", func(amount: Variant) -> Dictionary:
+		(sim.system(&"economy") as EconomySystem).earn(int(amount), "sale")
+		return {"money": (sim.system(&"economy") as EconomySystem).money})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
 		while prog.level < int(lv):

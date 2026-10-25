@@ -494,3 +494,17 @@ err.special_built,Only one of these at a time,하나만 지을 수 있어요,ひ
 err.special_slots,No special slot left,특별 건물 자리가 없어요,特別な建物の枠がありません,没有特殊建筑位置了
 err.special_cooldown,Pulled down recently: wait a little,최근에 철거했어요. 조금 기다려요,最近取り壊しました。少し待ちます,最近拆除过，稍等一下
 sale.special,Specials,특별 건물,特別な建物,特殊建筑
+tier.village,Village,마을,村,村庄
+tier.city,City,도시,町,城市
+tier.nation,Nation,국가,国,国家
+tier.next,Next: {name},다음: {name},次: {name},下一步：{name}
+tier.top,The highest a settlement can be,가장 높은 단계예요,いちばん上の段階です,已是最高阶段
+tier.need.tiles,Land,땅,土地,土地
+tier.need.momos,Momo,모모,モモ,桃桃
+tier.need.research_levels,Research levels,연구 레벨,研究レベル,研究等级
+tier.need.produced,Value produced,생산한 가치,生産した価値,产出价值
+tier.promote,Become a {name}!,{name}로 승급!,{name}に昇格!,升级为{name}！
+tier.promoted,Now a {name},이제 {name}예요,{name}になりました,现在是{name}了
+tier.slots,Special slots {n},특별 건물 자리 {n},特別な建物の枠 {n},特殊建筑位置 {n}
+err.tier_not_yet,Not every milestone is met yet,아직 조건을 다 채우지 못했어요,まだ条件を満たしていません,条件还未全部达成
+err.tier_top,Already the highest tier,이미 가장 높은 단계예요,すでに最高の段階です,已是最高阶段

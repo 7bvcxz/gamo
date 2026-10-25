@@ -17,6 +17,8 @@ var level_label: Label
 var exp_label: Label
 var exp_bar: Bar
 var cards: Dictionary = {}
+## The settlement's tier and its next milestones.
+var tier_view: TierView
 
 
 func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
@@ -108,6 +110,9 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 		card.add_child(box)
 		grid.add_child(card)
 		cards[type] = card
+	tier_view = TierView.new()
+	tier_view.setup(sim)
+	col.add_child(tier_view)
 
 
 func _label(text: String, font_size: int) -> Label:
@@ -119,6 +124,7 @@ func _label(text: String, font_size: int) -> Label:
 
 
 func refresh() -> void:
+	tier_view.refresh()
 	var prog: ProgressionSystem = sim.system(&"progression")
 	level_label.text = str(prog.level)
 	var need := prog.next_level_exp()

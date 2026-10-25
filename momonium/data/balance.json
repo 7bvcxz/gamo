@@ -238,5 +238,34 @@
   "specials": {
     "_doc": "Special structures: how many may stand at once (`slots`, one village special until settlement tiers raise it).",
     "slots": 1
+  },
+  "tiers": {
+    "_doc": "Settlement tiers (TierSystem): village -> city -> nation. `special_slots` is how many special structures may stand at once at that tier (in total). `needs` are the milestones to promote INTO that tier: tiles owned, Momo living on the island, research levels active (sum), and produced value (lifetime money from sales and releases).",
+    "levels": [
+      {
+        "name": "village",
+        "special_slots": 1
+      },
+      {
+        "name": "city",
+        "special_slots": 2,
+        "needs": {
+          "tiles": 9,
+          "momos": 3,
+          "research_levels": 3,
+          "produced": 1500
+        }
+      },
+      {
+        "name": "nation",
+        "special_slots": 3,
+        "needs": {
+          "tiles": 20,
+          "momos": 6,
+          "research_levels": 10,
+          "produced": 8000
+        }
+      }
+    ]
   }
 }

@@ -25,5 +25,6 @@ static func create_default() -> Array[SimSystem]:
 		ManagerSystem.new(),
 		AnalyticsSystem.new(),
 		PrestigeSystem.new(),
+		TierSystem.new(),
 	]
 	return list

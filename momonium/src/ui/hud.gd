@@ -246,6 +246,11 @@ func refresh(force: bool = false) -> void:
 		var want := research.something_to_start()
 		if research_button.badge != want:
 			research_button.badge = want
+	# A red dot on Status when the settlement can be promoted.
+	var tiers: TierSystem = sim.system(&"tiers")
+	var status_button: HudButton = buttons.get(&"status")
+	if tiers != null and status_button != null and status_button.badge != tiers.can_promote():
+		status_button.badge = tiers.can_promote()
 	var production := production_summary()
 	_set_text(production_label, "prod", production, force)
 	production_label.visible = production != ""
