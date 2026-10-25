@@ -9,6 +9,7 @@ extends RefCounted
 static func create_default() -> Array[SimSystem]:
 	var list: Array[SimSystem] = [
 		WorldSystem.new(),
+		BuildingSystem.new(),
 		EconomySystem.new(),
 		ProgressionSystem.new(),
 	]

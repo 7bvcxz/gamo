@@ -1,0 +1,15 @@
+{
+  "_doc": "Building catalog. Each type: footprint, what it costs, how long it takes to build, when it unlocks, and its work cycle. A cycle is a list of stages done in order; a stage takes `seconds` of active work, and `cooldown` seconds must pass after it before the next stage can start. Steps 13+ fill this in; the farm cycle here is a placeholder until Step 14.",
+  "types": {
+    "farm": {
+      "name": "building.farm",
+      "size": [1, 1],
+      "sprite": "farm",
+      "cycle": {
+        "stages": [
+          { "id": "tend", "label": "stage.tend", "seconds": 5, "cooldown": 0 }
+        ]
+      }
+    }
+  }
+}

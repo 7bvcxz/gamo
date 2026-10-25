@@ -16,6 +16,10 @@ var sky: SkyRenderer
 var ambient: CanvasModulate
 var day_night: DayNight
 var hud: Hud
+var panel: ContextPanel
+var marker: SelectionMarker
+var building_views: BuildingViews
+var selection: SelectionController
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -47,6 +51,10 @@ func _ready() -> void:
 	island.name = "Island"
 	world_root.add_child(island)
 	island.setup(sim, projection)
+	marker = SelectionMarker.new()
+	marker.name = "SelectionMarker"
+	marker.projection = projection
+	world_root.add_child(marker)
 	entities = EntityLayer.new(projection)
 	entities.name = "Entities"
 	world_root.add_child(entities)
@@ -72,10 +80,24 @@ func _ready() -> void:
 	var ui := CanvasLayer.new()
 	ui.name = "UI"
 	add_child(ui)
+	var lib := SpriteLibrary.load_atlas()
+	panel = ContextPanel.new()
+	ui.add_child(panel)
+	panel.setup(sim, lib)
 	hud = Hud.new()
 	ui.add_child(hud)
-	hud.setup(sim, SpriteLibrary.load_atlas())
+	hud.setup(sim, lib)
 	hud.action.connect(_on_hud_action)
+	hud.layout_changed.connect(func() -> void: panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin))
+	panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin)
+	building_views = BuildingViews.new()
+	building_views.name = "BuildingViews"
+	add_child(building_views)
+	building_views.setup(sim, entities, lib)
+	selection = SelectionController.new()
+	selection.name = "Selection"
+	add_child(selection)
+	selection.setup(sim, projection, building_views, marker, panel, router)
 	_version_label = Label.new()
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
@@ -95,6 +117,10 @@ func _ready() -> void:
 	bridge.register_query("sky", func(_a: Variant) -> Dictionary: return day_night.describe())
 	bridge.register_query("dev_advance_to", _dev_advance_to)
 	bridge.register_query("hud", _hud_info)
+	bridge.register_query("dev_place_building", func(arg: Variant) -> Dictionary:
+		var id := (sim.system(&"buildings") as BuildingSystem).place_instant(String(arg[0]), Vector2i(int(arg[1]), int(arg[2])))
+		return {"id": id})
+	bridge.register_query("selection", _selection_info)
 	bridge.register_query("set_language", func(code: Variant) -> Dictionary:
 		LocaleService.apply(String(code))
 		return {"locale": LocaleService.current()})
@@ -198,3 +224,16 @@ func _hud_info(_arg: Variant) -> Dictionary:
 		"level": hud._level_label.text, "exp": hud._exp_label.text, "buttons": buttons,
 		"labels": hud.buttons.keys().map(func(k: StringName) -> String: return (hud.buttons[k] as HudButton)._label.text),
 		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current()}
+
+
+## E2E: what is selected, the panel's cards (window pixels) and the last tap result.
+func _selection_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var cards: Array = []
+	for r: Rect2 in panel.card_rects():
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		cards.append([a.x, a.y, b.x - a.x, b.y - a.y])
+	var win := DisplayServer.window_get_size()
+	return {"kind": selection.kind, "id": selection.selected_id, "cell": [selection.selected_cell.x, selection.selected_cell.y],
+		"cards": cards, "result": selection.last_result, "window": [win.x, win.y]}

@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance", "art"]
+const TABLES: PackedStringArray = ["balance", "art", "buildings"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []
@@ -76,6 +76,7 @@ func validate() -> void:
 	errors.clear()
 	_validate_balance(table("balance"))
 	_validate_art()
+	_validate_buildings()
 
 
 func _validate_balance(t: Dictionary) -> void:
@@ -111,6 +112,35 @@ func _validate_art() -> void:
 		for c: Variant in colors:
 			if typeof(c) == TYPE_STRING and not Color.html_is_valid(c):
 				errors.append("art: palette.%s has invalid colour %s" % [key, c])
+
+
+func _validate_buildings() -> void:
+	var types: Variant = get_value("buildings", "types")
+	if typeof(types) != TYPE_DICTIONARY or (types as Dictionary).is_empty():
+		errors.append("buildings: types missing")
+		return
+	for key: String in types:
+		var t: Dictionary = types[key]
+		var size: Variant = t.get("size")
+		if typeof(size) != TYPE_ARRAY or (size as Array).size() != 2 or int(size[0]) < 1 or int(size[1]) < 1:
+			errors.append("buildings: %s.size must be [w, h] >= 1" % key)
+		var stages: Variant = (t.get("cycle", {}) as Dictionary).get("stages")
+		if typeof(stages) != TYPE_ARRAY or (stages as Array).is_empty():
+			errors.append("buildings: %s.cycle.stages must list at least one stage" % key)
+			continue
+		var ids := {}
+		for st: Dictionary in stages:
+			if not st.has("id") or ids.has(st["id"]):
+				errors.append("buildings: %s has a stage without a unique id" % key)
+			ids[st.get("id", "")] = true
+			if float(st.get("seconds", 0)) <= 0.0:
+				errors.append("buildings: %s.%s must take time (seconds > 0)" % [key, st.get("id", "?")])
+			if float(st.get("cooldown", 0)) < 0.0:
+				errors.append("buildings: %s.%s cooldown cannot be negative" % [key, st.get("id", "?")])
+
+
+func building_type(key: String) -> Dictionary:
+	return get_value("buildings", "types." + key, {})
 
 
 func _validate_day_cycle() -> void:

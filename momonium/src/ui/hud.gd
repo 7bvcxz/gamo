@@ -11,6 +11,8 @@ extends Control
 ## number does. Buttons emit `action`; what they open arrives in later steps.
 
 signal action(name: StringName)
+## After every layout pass: other bottom UI lines up with the corner buttons.
+signal layout_changed
 
 const MARGIN := 16.0
 const GAP := 8.0
@@ -23,6 +25,9 @@ var production_label: Label
 var side_buttons: Array[HudButton] = []
 var corner_buttons: Array[HudButton] = []
 var buttons: Dictionary = {}
+## Right edge of the bottom-left buttons and the bottom margin, after layout.
+var bottom_left_end := 168.0
+var bottom_margin := MARGIN
 
 var _day_label: Label
 var _seconds_label: Label
@@ -209,6 +214,9 @@ func _layout() -> void:
 	for b: HudButton in corner_buttons:
 		b.position = Vector2(x, h - m["bottom"] - b.size.y)
 		x += b.size.x + GAP
+	bottom_left_end = x
+	bottom_margin = m["bottom"]
+	layout_changed.emit()
 
 
 ## Screen rectangles of everything the HUD draws (tests check overlaps).

@@ -11,3 +11,10 @@ hud.settings,Settings,설정,設定,设置
 hud.shop,Shop,상점,ショップ,商店
 hud.per_day,+$%d / day,+$%d / 일,+$%d / 日,+$%d / 天
 lang.name,English,한국어,日本語,简体中文
+building.farm,Farm,밭,畑,农田
+stage.tend,Tend,돌보기,世話,照料
+tile.grass,Free land,빈 땅,空き地,空地
+tile.sea,Sea,바다,海,海
+panel.seconds,%d sec,%d sec,%d sec,%d 秒
+err.busy,Working,작업 중,作業中,工作中
+err.cooldown,%ds left,%d초 남음,あと%d秒,还需%d秒
