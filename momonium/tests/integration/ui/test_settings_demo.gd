@@ -94,3 +94,9 @@ func test_the_demo_island_is_fully_staffed() -> void:
 	assert_true(momos.ids().all(func(m: int) -> bool: return int(momos.get_momo(m)["assigned"]) != 0), "and each has a job")
 	var community: CommunitySystem = demo.system(&"community")
 	assert_eq(community.housing().size(), 8, "eight have a home (the villa and apartment hold 8): the Life tab shows the rest outdoors")
+
+
+func test_an_address_may_ask_for_a_demo() -> void:
+	for pair: Array in [["large", "large"], ["LARGE", "large"], ["full", "full"], ["demo", "full"], ["1", "full"], ["", ""], ["nope", ""], ["../save", ""]]:
+		assert_eq(DemoWorld.kind_from(String(pair[0])), pair[1], "?demo=%s -> %s" % [pair[0], pair[1] if pair[1] != "" else "the player's island"])
+	assert_eq(DemoWorld.kind_from(" large "), "large", "spaces do not matter")

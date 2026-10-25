@@ -58,11 +58,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
+      # The published version.json too (not its packs): check.sh compares this
+      # export with the build published for the same source.
       - uses: actions/checkout@v4
         with:
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
-            momonium
-            .github
+            /momonium/
+            /.github/
+            /docs/momonium/version.json
       - name: Cache Godot
         id: godot-cache
         uses: actions/cache@v4

@@ -51,6 +51,21 @@ if [[ $EXPORT -eq 1 ]]; then
   echo "   pack $pck bytes (budget $budget)"
   (( pck <= budget )) || fail "pack over budget"
   if grep -qa 'res://tests/' "$WORK/site/momonium/index.pck"; then fail "tests leaked into the pack"; fi
+  echo "── what the pack ships"
+  python3 "$HERE/tools/check_release.py" "$WORK/site/momonium/index.pck" --budget-mb "${MOMONIUM_PCK_BUDGET_MB:-20}" || fail "release check"
+  # Reproducible: this source exports the very pack that is published for it
+  # (pack names are the first 12 hex of their SHA-256). Only a warning: a
+  # change pushed before its web export is allowed, just not yet published.
+  published="$HERE/../docs/momonium/version.json"
+  if [[ -f "$published" ]]; then
+    ours="game-$(sha256sum "$WORK/site/momonium/index.pck" | cut -c1-12).pck"
+    theirs="$(sed -E 's/.*"pack":"([^"]+)".*/\1/' "$published")"
+    if [[ "$ours" == "$theirs" ]]; then
+      echo "   reproducible: this export is the published $theirs"
+    else
+      echo "::warning::this source exports $ours; the published build is $theirs (export not yet published, or not reproducible here)"
+    fi
+  fi
 
   echo "── browser smoke"
   port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')

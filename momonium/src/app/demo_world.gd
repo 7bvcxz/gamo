@@ -8,6 +8,17 @@ extends RefCounted
 ## writing numbers into the world, and it is never saved over the player's
 ## island.
 
+## Which demo an address asks for (`?demo=` on the page): "full", "large",
+## or "" for none. Anything else is ignored -- the player's island opens.
+static func kind_from(value: String) -> String:
+	match value.strip_edges().to_lower():
+		"full", "demo", "1", "true":
+			return "full"
+		"large", "big", "stress":
+			return "large"
+	return ""
+
+
 static func build(data: GameData = null) -> Simulation:
 	var sim := Simulation.new_game(data)
 	var economy: EconomySystem = sim.system(&"economy")

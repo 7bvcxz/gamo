@@ -748,6 +748,7 @@ func _notification(what: int) -> void:
 ## Loads the island (with what happened while away) or starts a new one --
 ## or, when the demo was asked for, the demo island (never saved).
 func _load_or_new() -> Simulation:
+	_read_launch_address()
 	in_demo = Engine.has_meta("momonium_demo")
 	persist = not Engine.has_meta("momonium_no_save") and not in_demo
 	# A sold island hands over the new one (already saved when saving is on).
@@ -827,6 +828,21 @@ func open_rp() -> void:
 
 ## Switches to the demo island: saves the player's island first, then
 ## reloads the scene in demo mode. Nothing of the demo is ever saved.
+## The address can open a labelled demo at once -- .../momonium/?demo=large or
+## ?demo=full (the launch page links them). Read once per page load, so the way
+## back from the demo leads to the player's island, which is never touched.
+func _read_launch_address() -> void:
+	if Engine.has_meta("momonium_launch_read"):
+		return
+	Engine.set_meta("momonium_launch_read", true)
+	if not OS.has_feature("web"):
+		return
+	var asked := String(JavaScriptBridge.eval("(typeof RUNNER_PARAMS !== 'undefined' && RUNNER_PARAMS.get('demo')) || ''", true))
+	var kind := DemoWorld.kind_from(asked)
+	if kind != "":
+		Engine.set_meta("momonium_demo", kind)
+
+
 func enter_demo(kind: String = "full") -> void:
 	save_now()
 	Engine.set_meta("momonium_demo", kind)
