@@ -50,5 +50,11 @@
       2500
     ],
     "growth": 1.3
+  },
+  "land": {
+    "_doc": "Price of the k-th purchased cell (k = 0 for the first): round_to * ceil(base * growth^k / round_to). Only cells sharing an edge with owned land can be bought.",
+    "base": 50,
+    "growth": 1.3,
+    "round_to": 5
   }
 }

@@ -77,6 +77,9 @@ func validate() -> void:
 	_validate_balance(table("balance"))
 	_validate_art()
 	_validate_buildings()
+	_require_number({}, "balance", "land.base", 1)
+	_require_number({}, "balance", "land.growth", 1)
+	_require_number({}, "balance", "land.round_to", 1)
 
 
 func _validate_balance(t: Dictionary) -> void:

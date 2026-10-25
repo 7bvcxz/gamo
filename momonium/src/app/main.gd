@@ -20,6 +20,8 @@ var panel: ContextPanel
 var marker: SelectionMarker
 var building_views: BuildingViews
 var selection: SelectionController
+var land_preview: LandPreview
+var land_mode: LandMode
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -55,6 +57,10 @@ func _ready() -> void:
 	marker.name = "SelectionMarker"
 	marker.projection = projection
 	world_root.add_child(marker)
+	land_preview = LandPreview.new()
+	land_preview.name = "LandPreview"
+	world_root.add_child(land_preview)
+	land_preview.setup(sim, projection)
 	entities = EntityLayer.new(projection)
 	entities.name = "Entities"
 	world_root.add_child(entities)
@@ -98,6 +104,10 @@ func _ready() -> void:
 	selection.name = "Selection"
 	add_child(selection)
 	selection.setup(sim, projection, building_views, marker, panel, router)
+	land_mode = LandMode.new()
+	ui.add_child(land_mode)
+	land_mode.setup(sim, land_preview, projection, lib)
+	selection.land_mode = land_mode
 	_version_label = Label.new()
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
@@ -121,6 +131,10 @@ func _ready() -> void:
 		var id := (sim.system(&"buildings") as BuildingSystem).place_instant(String(arg[0]), Vector2i(int(arg[1]), int(arg[2])))
 		return {"id": id})
 	bridge.register_query("selection", _selection_info)
+	bridge.register_query("dev_add_money", func(amount: Variant) -> Dictionary:
+		(sim.system(&"economy") as EconomySystem).earn(int(amount), "dev")
+		return {"money": (sim.system(&"economy") as EconomySystem).money})
+	bridge.register_query("land_mode", _land_mode_info)
 	bridge.register_query("set_language", func(code: Variant) -> Dictionary:
 		LocaleService.apply(String(code))
 		return {"locale": LocaleService.current()})
@@ -207,6 +221,10 @@ func _on_hud_action(action_name: StringName) -> void:
 	hud_actions.append(String(action_name))
 	if hud_actions.size() > 20:
 		hud_actions.pop_front()
+	match action_name:
+		&"land":
+			selection.deselect()
+			land_mode.toggle()
 
 
 ## E2E: HUD texts, button rectangles (window pixels) and recent actions.
@@ -237,3 +255,17 @@ func _selection_info(_arg: Variant) -> Dictionary:
 	var win := DisplayServer.window_get_size()
 	return {"kind": selection.kind, "id": selection.selected_id, "cell": [selection.selected_cell.x, selection.selected_cell.y],
 		"cards": cards, "result": selection.last_result, "window": [win.x, win.y]}
+
+
+## E2E: land mode state and its buttons (window pixels).
+func _land_mode_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var rect := func(c: Control) -> Array:
+		var a: Vector2 = vp.get_final_transform() * c.get_global_rect().position
+		var b: Vector2 = vp.get_final_transform() * c.get_global_rect().end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var win := DisplayServer.window_get_size()
+	return {"active": land_mode.active, "chosen": [land_mode.chosen.x, land_mode.chosen.y],
+		"buy": rect.call(land_mode.buy_button), "buy_disabled": land_mode.buy_button.disabled,
+		"close": rect.call(land_mode.close_button), "cost": (sim.system(&"land") as LandSystem).next_cost(),
+		"result": land_mode.last_result, "window": [win.x, win.y]}

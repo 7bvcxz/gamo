@@ -21,6 +21,8 @@ var views: BuildingViews
 var marker: SelectionMarker
 var panel: ContextPanel
 
+## While land mode is open it owns world taps.
+var land_mode: LandMode
 var kind := ""
 var selected_id := 0
 var selected_cell := Vector2i.ZERO
@@ -40,6 +42,9 @@ func setup(p_sim: Simulation, p_projection: IsoProjection, p_views: BuildingView
 
 
 func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
+	if land_mode != null and land_mode.active:
+		land_mode.on_world_tap(world_pos)
+		return
 	var id := views.hit(world_pos)
 	if id == 0:
 		id = buildings.building_at(projection.cell_at(world_pos))
