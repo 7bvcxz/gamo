@@ -27,14 +27,15 @@ func test_status_button_opens_numbers_from_the_simulation() -> void:
 	prog.add_exp(145, "test")
 	prog.add_mastery("farm", 60)
 	main.call("_on_hud_action", &"status")
-	assert_true(panel.visible, "Status opens")
+	var frame: PanelFrame = main.get("status_frame")
+	assert_true(frame.visible and panel.visible, "Status opens on its first tab")
 	assert_eq(panel.level_label.text, "2", "Lv 2")
 	assert_eq(panel.exp_label.text, "45 / 180 EXP", "exact EXP")
 	assert_near(panel.exp_bar.value, 45.0 / 180.0, 0.001, "bar matches")
 	assert_eq((panel.cards["farm"].find_child("Exp", true, false) as Label).text, "60 / 100 EXP", "farm mastery")
 	assert_eq(panel.cards.size(), 4, "farm, mine, lumber, research")
 	main.call("_on_hud_action", &"status")
-	assert_false(panel.visible, "and closes again")
+	assert_false(frame.visible, "and closes again")
 
 
 func test_open_panel_follows_live_progress() -> void:
@@ -47,5 +48,6 @@ func test_panel_leaves_the_side_buttons_free() -> void:
 	main.call("_on_hud_action", &"status")
 	await tree.process_frame
 	var hud: Hud = main.get("hud")
+	var card := (main.get("status_frame") as PanelFrame).card_rect()
 	for b: HudButton in hud.side_buttons:
-		assert_false(panel.get_rect().intersects(b.get_rect()), "Status does not cover %s" % b.action)
+		assert_false(card.intersects(b.get_global_rect()), "Status does not cover %s" % b.action)

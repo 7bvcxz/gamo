@@ -339,6 +339,28 @@ func _multiplier(kind: String, type: String, action: String) -> float:
 	return maxf(m, 0.0)
 
 
+## What one full work cycle of this building takes and gives, for whoever is
+## doing it (`time_multiplier` 1 for the player, the Momo multiplier for a
+## Momo): {cycle_seconds, work_seconds, wait_seconds, yield {item: n}, per_day {item: n}}.
+## Computed from the same stage rules the simulation runs -- the panels show
+## this instead of working anything out themselves.
+func cycle_estimate(b: Dictionary, time_multiplier: float = 1.0) -> Dictionary:
+	var work := 0.0
+	var wait := 0.0
+	var produced := {}
+	for st: Dictionary in stages(b):
+		work += stage_seconds(b, st) * time_multiplier
+		wait += stage_cooldown(b, st)
+		for item: String in st.get("yield", {}):
+			produced[item] = int(produced.get(item, 0)) + int(st["yield"][item])
+	var cycle := work + wait
+	var day_seconds := sim.clock.day_ms / 1000.0
+	var per_day := {}
+	for item: String in produced:
+		per_day[item] = float(produced[item]) * day_seconds / maxf(cycle, 0.001)
+	return {"cycle_seconds": cycle, "work_seconds": work, "wait_seconds": wait, "yield": produced, "per_day": per_day}
+
+
 ## The crop overlay (or other look) for the building's present state: the
 ## look of the stage it is waiting to do next. "" for none.
 func look(b: Dictionary) -> String:

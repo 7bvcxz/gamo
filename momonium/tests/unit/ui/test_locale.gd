@@ -50,6 +50,33 @@ func test_fonts_carry_every_character() -> void:
 				assert_true(font.has_char(ch.unicode_at(0)), "%s font draws English '%s'" % [pair[0], ch])
 
 
+## Text written straight into UI code (symbols like "›") must be drawable
+## too. The web has no system fonts: a glyph missing from our subsets is an
+## empty box there even though the desktop shows it -- the "✕" of every close
+## button was exactly that until Step 20.
+func test_ui_code_literals_have_glyphs() -> void:
+	var fonts: Array[FontFile] = []
+	for path: String in ["res://assets/fonts/ui_ko.otf", "res://assets/fonts/ui_ja.otf", "res://assets/fonts/ui_zh.otf"]:
+		fonts.append(load(path))
+	var literal := RegEx.create_from_string('"([^"\\\\]|\\\\.)*"')
+	var checked := 0
+	for dir: String in ["res://src/ui", "res://src/render", "res://src/actors", "res://src/app"]:
+		for file: String in DirAccess.get_files_at(dir):
+			if not file.ends_with(".gd"):
+				continue
+			for line: String in FileAccess.get_file_as_string(dir + "/" + file).split("\n"):
+				if line.strip_edges().begins_with("#"):
+					continue
+				for m: RegExMatch in literal.search_all(line):
+					for ch: String in m.get_string():
+						if ch.unicode_at(0) < 128:
+							continue
+						checked += 1
+						var drawn := fonts.any(func(f: FontFile) -> bool: return f.has_char(ch.unicode_at(0)))
+						assert_true(drawn, "'%s' in %s/%s is in a UI font" % [ch, dir, file])
+	assert_true(checked > 0, "found symbols to check (%d)" % checked)
+
+
 func test_translation_server_has_the_tables() -> void:
 	var before := TranslationServer.get_locale()
 	for pair: Array in [["en", "Research"], ["ko", "연구"], ["ja", "研究"], ["zh_CN", "研究"]]:

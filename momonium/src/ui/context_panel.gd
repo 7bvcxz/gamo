@@ -11,6 +11,8 @@ extends Control
 
 signal start_pressed(id: int)
 signal cancel_pressed(id: int)
+## The building's name was tapped: show everything about it.
+signal details_pressed(id: int)
 
 const CARD_SIZE := Vector2(150, 118)
 const GAP := 10.0
@@ -20,7 +22,8 @@ var buildings: BuildingSystem
 var lib: SpriteLibrary
 var building_id := 0
 var cards: Array[Button] = []
-var title: Label
+## The building's name; tapping it opens the details (the "›" says it opens).
+var title: Button
 var _shown_state := ""
 var _tile_pill: PanelContainer
 var _tile_label: Label
@@ -44,9 +47,16 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	_tile_pill.add_child(_tile_label)
 	_tile_pill.visible = false
 	add_child(_tile_pill)
-	title = Label.new()
+	title = Button.new()
+	title.name = "Title"
+	title.flat = true
+	title.focus_mode = Control.FOCUS_NONE
+	title.custom_minimum_size = Vector2(0, 48)
 	title.add_theme_font_size_override("font_size", 20)
 	title.visible = false
+	title.pressed.connect(func() -> void:
+		if building_id != 0:
+			details_pressed.emit(building_id))
 	add_child(title)
 	resized.connect(_layout)
 
@@ -85,7 +95,7 @@ func _title(b: Dictionary) -> String:
 	var slots := momos.slots_of(int(b["id"]))
 	if slots > 0:
 		text += "  ·  %d/%d" % [momos.workers_at(int(b["id"])).size(), slots]
-	return text
+	return text + "  ›"
 
 
 func show_tile(text_key: String) -> void:
@@ -249,7 +259,7 @@ func _layout() -> void:
 		card.position = Vector2(x, y)
 		x += CARD_SIZE.x + GAP
 	title.reset_size()
-	title.position = Vector2((w - title.size.x) * 0.5, y - title.size.y - 6)
+	title.position = Vector2((w - title.size.x) * 0.5, y - title.size.y - 2)
 	_tile_pill.reset_size()
 	_tile_pill.position = Vector2(area_left + maxf((area_right - area_left - _tile_pill.size.x) * 0.5, 0.0), h - _bottom_reserved - _tile_pill.size.y)
 

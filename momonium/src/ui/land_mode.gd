@@ -58,12 +58,7 @@ func setup(p_sim: Simulation, p_preview: LandPreview, p_projection: IsoProjectio
 	buy_button.add_theme_font_size_override("font_size", 22)
 	buy_button.pressed.connect(confirm)
 	row.add_child(buy_button)
-	close_button = Button.new()
-	close_button.name = "Close"
-	close_button.text = "✕"
-	close_button.custom_minimum_size = Vector2(64, 64)
-	close_button.focus_mode = Control.FOCUS_NONE
-	close_button.add_theme_font_size_override("font_size", 26)
+	close_button = PanelViews.close_button(64.0)
 	close_button.pressed.connect(close)
 	row.add_child(close_button)
 	bar.add_child(row)

@@ -61,3 +61,42 @@ momo.assign,Assign,배치,配置,分配
 momo.unassign,Release,해제,解除,解除
 err.slots_full,No free spot,자리가 없어요,空きがありません,没有空位
 err.no_job,No work here,여기는 일이 없어요,ここに仕事はありません,这里没有工作
+panel.tab.status,Status,상태,ステータス,状态
+panel.tab.store,Store,창고,倉庫,仓库
+panel.tab.economy,Money,경제,経済,经济
+panel.tab.records,Records,기록,記録,记录
+panel.store.pending,Sells tomorrow +$%d,내일 판매 +$%d,明日売却 +$%d,明天出售 +$%d
+panel.store.made,Made %d,누적 %d,累計 %d,累计 %d
+panel.economy.today,Today,오늘,今日,今天
+panel.economy.days,Last 7 days,최근 7일,直近7日,最近7天
+panel.economy.yesterday,Yesterday,어제,昨日,昨天
+panel.economy.total_in,Earned in total,총 수입,総収入,总收入
+panel.economy.total_out,Spent in total,총 지출,総支出,总支出
+panel.economy.none,Nothing yet,아직 없음,まだなし,暂无
+econ.cat.sale,Crop sales,작물 판매,作物の売上,作物销售
+econ.cat.build,Construction,건설,建設,建造
+econ.cat.land,Land,땅,土地,土地
+econ.cat.hire,Hiring,고용,雇用,雇佣
+econ.cat.refund,Refunds,환불,返金,退款
+econ.cat.dev,Dev,개발,開発,开发
+panel.records.days,Days on the island,섬에서 보낸 날,島で過ごした日,岛上天数
+panel.records.land,Island tiles,섬 크기,島の広さ,岛屿面积
+panel.records.buildings,Buildings,건물,建物,建筑
+panel.records.momo,Momo,모모,モモ,桃桃
+panel.records.momo_value,%d · %d working,%d · 일하는 중 %d,%d · 仕事中 %d,%d · 工作中 %d
+panel.records.tasks,Jobs done,완료한 작업,完了した作業,完成的工作
+panel.records.crops,Crops grown,수확한 작물,収穫した作物,收获的作物
+detail.next,Next: {stage},다음: {stage},次: {stage},下一步: {stage}
+detail.working,{stage} · {s} s left,{stage} · {s}초 남음,{stage} · 残り{s}秒,{stage} · 剩余{s}秒
+detail.waiting,{stage} in {s} s,{s}초 뒤 {stage},{s}秒後に{stage},{s}秒后{stage}
+detail.building,Building · {s} s left,건설 중 · {s}초 남음,建設中 · 残り{s}秒,建造中 · 剩余{s}秒
+detail.you,You,직접,自分,亲自
+detail.empty_slot,Empty,빈 자리,空き,空位
+detail.momo_walking,On the way,가는 중,移動中,前往中
+detail.momo_working,Working,일하는 중,作業中,工作中
+detail.momo_waiting,Waiting,기다리는 중,待機中,等待中
+detail.cycle,One cycle gives,한 주기 수확,1サイクルの収穫,一个周期收获
+detail.by_you,Cycle by hand,직접 하면,自分で,亲自
+detail.by_momo,Cycle by Momo,모모가 하면,モモなら,桃桃来做
+time.s,{s} s,{s}초,{s}秒,{s}秒
+time.ms,{m} min {s} s,{m}분 {s}초,{m}分{s}秒,{m}分{s}秒

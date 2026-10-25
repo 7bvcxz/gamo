@@ -28,11 +28,7 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	title.add_theme_font_size_override("font_size", 22)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
-	var close := Button.new()
-	close.name = "Close"
-	close.text = "✕"
-	close.custom_minimum_size = Vector2(52, 52)
-	close.focus_mode = Control.FOCUS_NONE
+	var close := PanelViews.close_button(52.0)
 	close.pressed.connect(func() -> void: visible = false)
 	head.add_child(close)
 	col.add_child(head)

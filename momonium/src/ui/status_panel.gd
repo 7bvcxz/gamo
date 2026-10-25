@@ -1,10 +1,11 @@
 class_name StatusPanel
-extends PanelContainer
+extends VBoxContainer
 
 ## Status (the reference's ステータス card): the level in a ring with the island
 ## name and its line, the exact EXP and a bar to the next level, then one small
 ## card per building mastery -- icon, name, level, bar, exact EXP. Every number
 ## is read from the simulation when shown and while open; nothing is stored here.
+## It is the first tab of the status frame (PanelFrame), which owns closing.
 
 const ICONS := {"farm": "ui_sprout", "mine": "ui_mine", "lumberyard": "ui_lumber", "research": "ui_flask"}
 const FILLS := {"farm": "#9be15d", "mine": "#c8a27a", "lumberyard": "#d39b62", "research": "#5fb4ff"}
@@ -22,7 +23,6 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	sim = p_sim
 	lib = p_lib
 	name = "StatusPanel"
-	custom_minimum_size = Vector2(560, 0)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 14)
 	add_child(col)
@@ -50,19 +50,9 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
-	var title_row := HBoxContainer.new()
 	var title := _label(tr("status.title"), 30)
 	title.name = "Title"
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_row.add_child(title)
-	var close := Button.new()
-	close.name = "Close"
-	close.text = "✕"
-	close.custom_minimum_size = Vector2(48, 48)
-	close.focus_mode = Control.FOCUS_NONE
-	close.pressed.connect(func() -> void: visible = false)
-	title_row.add_child(close)
-	text.add_child(title_row)
+	text.add_child(title)
 	var tagline := _label(tr("status.tagline"), 17)
 	tagline.name = "Tagline"
 	tagline.modulate = Color(1, 1, 1, 0.8)
@@ -115,10 +105,6 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 		card.add_child(box)
 		grid.add_child(card)
 		cards[type] = card
-	visible = false
-	sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
-		if visible and type in [&"exp_gained", &"mastery_gained", &"level_up", &"mastery_up"]:
-			refresh())
 
 
 func _label(text: String, font_size: int) -> Label:
@@ -127,12 +113,6 @@ func _label(text: String, font_size: int) -> Label:
 	l.add_theme_font_size_override("font_size", font_size)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
-
-
-func toggle() -> void:
-	visible = not visible
-	if visible:
-		refresh()
 
 
 func refresh() -> void:

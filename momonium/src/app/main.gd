@@ -29,6 +29,14 @@ var placement_preview: PlacementPreview
 var placement: PlacementMode
 var build_menu: BuildMenu
 var status_panel: StatusPanel
+## Status, store, money and records, as tabs of one frame.
+var status_frame: PanelFrame
+var inventory_view: InventoryView
+var economy_view: EconomyView
+var stats_view: StatsView
+## Everything about one building, opened from its name.
+var detail_frame: PanelFrame
+var detail_view: BuildingDetailView
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -93,9 +101,18 @@ func _ready() -> void:
 	router.setup(cameras)
 
 	LocaleService.apply(LocaleService.detect())
-	var ui := CanvasLayer.new()
-	ui.name = "UI"
-	add_child(ui)
+	var layer := CanvasLayer.new()
+	layer.name = "UI"
+	add_child(layer)
+	# One root Control for every piece of UI, so they all inherit the HUD's
+	# theme and font: a CanvasLayer does not pass a theme on, and without it
+	# panels fell back to the engine's grey boxes and its font, which has no
+	# Hangul or kana -- fine on a desktop with system fonts, empty boxes on the web.
+	var ui := Control.new()
+	ui.name = "Root"
+	ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(ui)
 	var lib := SpriteLibrary.load_atlas()
 	panel = ContextPanel.new()
 	ui.add_child(panel)
@@ -103,6 +120,8 @@ func _ready() -> void:
 	hud = Hud.new()
 	ui.add_child(hud)
 	hud.setup(sim, lib)
+	# The same Theme object: the HUD swaps its font when the language changes.
+	ui.theme = hud.theme
 	hud.action.connect(_on_hud_action)
 	hud.layout_changed.connect(func() -> void: panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin))
 	panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin)
@@ -152,10 +171,27 @@ func _ready() -> void:
 		var r := sim.execute({"type": "momo.hire"})
 		if r["ok"]:
 			selection.select_momo(int(r["id"])))
+	status_frame = _frame(ui, "StatusFrame")
 	status_panel = StatusPanel.new()
-	ui.add_child(status_panel)
 	status_panel.setup(sim, lib)
-	status_panel.resized.connect(_place_status_panel)
+	status_frame.add_tab("panel.tab.status", status_panel)
+	inventory_view = InventoryView.new()
+	inventory_view.setup(sim, lib)
+	status_frame.add_tab("panel.tab.store", inventory_view)
+	economy_view = EconomyView.new()
+	economy_view.setup(sim, lib)
+	status_frame.add_tab("panel.tab.economy", economy_view)
+	stats_view = StatsView.new()
+	stats_view.setup(sim, lib)
+	status_frame.add_tab("panel.tab.records", stats_view)
+	detail_frame = _frame(ui, "DetailFrame")
+	detail_view = BuildingDetailView.new()
+	detail_view.setup(sim, lib)
+	detail_frame.add_tab("", detail_view)
+	detail_view.gone.connect(detail_frame.close)
+	panel.details_pressed.connect(open_details)
+	_place_frames()
+	hud.layout_changed.connect(_place_frames)
 	_version_label = Label.new()
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
@@ -188,6 +224,7 @@ func _ready() -> void:
 	bridge.register_query("land_mode", _land_mode_info)
 	bridge.register_query("build_ui", _build_ui_info)
 	bridge.register_query("status", _status_info)
+	bridge.register_query("panels", _panels_info)
 	bridge.register_query("momos", _momo_info)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
 		var out := {}
@@ -286,17 +323,20 @@ func _on_hud_action(action_name: StringName) -> void:
 			selection.deselect()
 			placement.close()
 			build_menu.visible = false
+			_close_frames()
 			land_mode.toggle()
 		&"shop":
 			land_mode.close()
 			placement.close()
-			status_panel.visible = false
+			_close_frames()
 			build_menu.toggle()
 			_place_build_menu()
 		&"status":
 			build_menu.visible = false
-			status_panel.toggle()
-			_place_status_panel()
+			land_mode.close()
+			placement.close()
+			detail_frame.close()
+			status_frame.toggle(0)
 
 
 ## E2E: HUD texts, button rectangles (window pixels) and recent actions.
@@ -372,20 +412,79 @@ func _build_ui_info(_arg: Variant) -> Dictionary:
 			return [a.x, a.y, b.x - a.x, b.y - a.y]), "window": [win.x, win.y]}
 
 
-func _place_status_panel() -> void:
-	if status_panel == null:
-		return
-	status_panel.reset_size()
+## A frame under the HUD, so the corner buttons stay usable over its scrim.
+func _frame(ui: Control, frame_name: String) -> PanelFrame:
+	var f := PanelFrame.new()
+	f.name = frame_name
+	ui.add_child(f)
+	ui.move_child(f, hud.get_index())
+	f.watch(sim)
+	return f
+
+
+func _close_frames() -> void:
+	status_frame.close()
+	detail_frame.close()
+
+
+func _place_frames() -> void:
 	var size := get_viewport_rect().size
-	# Centred in the space left of the side buttons, so they stay usable.
-	var right := hud.side_buttons[0].position.x - 8.0 if not hud.side_buttons.is_empty() else size.x - 16.0
-	var left := 16.0
-	status_panel.position = Vector2(left + maxf((right - left - status_panel.size.x) * 0.5, 0.0), size.y * 0.16)
+	# Keep the side buttons free.
+	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
+	for f: PanelFrame in [status_frame, detail_frame]:
+		f.right_reserved = reserved
+		f._layout()
+
+
+func open_details(id: int) -> void:
+	var b := (sim.system(&"buildings") as BuildingSystem).get_building(id)
+	if b.is_empty():
+		return
+	status_frame.close()
+	build_menu.visible = false
+	detail_frame.set_title(tr((sim.system(&"buildings") as BuildingSystem).type_def(b).get("name", "")))
+	detail_view.show_building(id)
+	detail_frame.open()
+
+
+## E2E: what the panels show, read off their controls, and where to tap.
+func _panels_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var rect := func(c: Control) -> Array:
+		var r := c.get_global_rect()
+		var a: Vector2 = vp.get_final_transform() * r.position
+		var b: Vector2 = vp.get_final_transform() * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+	var tabs := {}
+	for t: Dictionary in status_frame.tabs:
+		tabs[String(t["key"]).trim_prefix("panel.tab.")] = rect.call(t["button"])
+	var store := {}
+	for item: String in inventory_view.rows:
+		store[item] = (inventory_view.rows[item]["count"] as Label).text
+	var today := {}
+	for r: Node in economy_view.today_box.get_children():
+		if r.has_node("Value"):
+			today[String(r.name).trim_prefix("Cat_")] = (r.get_node("Value") as Label).text
+	var workers: Array = []
+	for c: Node in detail_view.workers_box.get_children():
+		workers.append(String(c.get_meta("who", "")))
+	return {
+		"status_open": status_frame.visible, "tab": String(status_frame.tabs[status_frame.current]["key"]).trim_prefix("panel.tab.") if status_frame.current >= 0 else "",
+		"detail_open": detail_frame.visible, "detail_title": detail_frame.title_label.text,
+		"tabs": tabs, "card": rect.call(status_frame.card) if status_frame.visible else rect.call(detail_frame.card),
+		"close": rect.call(status_frame.close_button) if status_frame.visible else rect.call(detail_frame.close_button),
+		"context_title": rect.call(panel.title) if panel.title.visible else [],
+		"store": store, "money": economy_view.money_label.text, "today": today, "records": stats_view.numbers(),
+		"detail": {"state": detail_view.state_label.text, "workers": workers,
+			"you": (detail_view.cycle_you.get_node("Value") as Label).text, "momo": (detail_view.cycle_momo.get_node("Value") as Label).text,
+			"done": (detail_view.done_row.get_node("Value") as Label).text},
+		"window": [win.x, win.y]}
 
 
 ## E2E: the Status panel's numbers.
 func _status_info(_arg: Variant) -> Dictionary:
-	var out := {"open": status_panel.visible, "level": status_panel.level_label.text, "exp": status_panel.exp_label.text, "mastery": {}}
+	var out := {"open": status_frame.visible and status_frame.current == 0, "level": status_panel.level_label.text, "exp": status_panel.exp_label.text, "mastery": {}}
 	for type: String in status_panel.cards:
 		var card: PanelContainer = status_panel.cards[type]
 		out["mastery"][type] = (card.find_child("Exp", true, false) as Label).text

@@ -9,6 +9,8 @@ extends SimSystem
 ## before they start, and `add` reports what actually fitted.
 
 var items: Dictionary = {}
+## Since the game began: item -> how many were produced into the store.
+var produced: Dictionary = {}
 
 
 func _init() -> void:
@@ -17,6 +19,7 @@ func _init() -> void:
 
 func on_new_game() -> void:
 	items.clear()
+	produced.clear()
 
 
 func count(item: String) -> int:
@@ -62,6 +65,8 @@ func add(item: String, amount: int, reason: String = "") -> int:
 	if stored <= 0:
 		return 0
 	items[item] = count(item) + stored
+	if reason.begins_with("yield"):
+		produced[item] = int(produced.get(item, 0)) + stored
 	sim.bus.emit(&"inventory_changed", {"item": item, "count": items[item], "delta": stored, "reason": reason})
 	return stored
 
@@ -97,7 +102,10 @@ func save_state() -> Dictionary:
 	for k: String in keys:
 		if int(items[k]) != 0:
 			out[k] = int(items[k])
-	return {"items": out}
+	var made := {}
+	for k: String in produced:
+		made[k] = int(produced[k])
+	return {"items": out, "produced": made}
 
 
 func load_state(state: Dictionary) -> void:
@@ -105,3 +113,7 @@ func load_state(state: Dictionary) -> void:
 	var saved: Dictionary = state.get("items", {})
 	for k: String in saved:
 		items[k] = int(saved[k])
+	produced.clear()
+	var made: Dictionary = state.get("produced", {})
+	for k: String in made:
+		produced[k] = int(made[k])

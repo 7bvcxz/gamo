@@ -19,6 +19,8 @@ var today: Dictionary = {}
 var today_open: int = 0
 ## Closed days: {day, open, close, income, expense, by: {category: amount}}.
 var history: Array = []
+## Since the game began: category -> signed amount (history keeps 30 days).
+var lifetime: Dictionary = {}
 
 
 func _init() -> void:
@@ -30,6 +32,7 @@ func on_new_game() -> void:
 	today = {}
 	today_open = money
 	history = []
+	lifetime = {}
 
 
 func can_afford(amount: int) -> bool:
@@ -59,6 +62,21 @@ func earn(amount: int, reason: String) -> void:
 func _book(reason: String, amount: int) -> void:
 	var category := reason.split(":")[0]
 	today[category] = int(today.get(category, 0)) + amount
+	lifetime[category] = int(lifetime.get(category, 0)) + amount
+
+
+func lifetime_income() -> int:
+	var total := 0
+	for k: String in lifetime:
+		total += maxi(int(lifetime[k]), 0)
+	return total
+
+
+func lifetime_expense() -> int:
+	var total := 0
+	for k: String in lifetime:
+		total += maxi(-int(lifetime[k]), 0)
+	return total
 
 
 ## Value of the crops waiting in the store at today's prices.
@@ -120,7 +138,7 @@ func last_day_income() -> int:
 
 
 func save_state() -> Dictionary:
-	return {"money": money, "today": today.duplicate(), "today_open": today_open, "history": history.duplicate(true)}
+	return {"money": money, "today": today.duplicate(), "today_open": today_open, "history": history.duplicate(true), "lifetime": lifetime.duplicate()}
 
 
 func load_state(state: Dictionary) -> void:
@@ -130,6 +148,10 @@ func load_state(state: Dictionary) -> void:
 	for k: String in t:
 		today[k] = int(t[k])
 	today_open = int(state.get("today_open", money))
+	lifetime = {}
+	var lt: Dictionary = state.get("lifetime", {})
+	for k: String in lt:
+		lifetime[k] = int(lt[k])
 	history = []
 	for h: Dictionary in state.get("history", []):
 		var by := {}
