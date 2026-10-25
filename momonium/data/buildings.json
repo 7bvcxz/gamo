@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start.",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes.",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -676,6 +676,143 @@
       "enabled": true,
       "refund": 1.0,
       "workers": 0
+    },
+    "game_studio": {
+      "name": "building.game_studio",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "game_studio",
+      "cycle": {
+        "_doc": "Design (ideas from research notes), develop, release. Release pays revenue.base, more for a studio with releases behind it (+per_release each, up to cap) -- experience, not magic; the team must be there (staff.min Momo at work) and the computers need power.",
+        "stages": [
+          {
+            "id": "design",
+            "action": "design",
+            "label": "stage.design",
+            "icon": "ui_flask",
+            "seconds": 20,
+            "cooldown": 0,
+            "required": true,
+            "consumes": {
+              "notes": 3
+            }
+          },
+          {
+            "id": "develop",
+            "action": "develop",
+            "label": "stage.develop",
+            "icon": "ui_research",
+            "seconds": 40,
+            "cooldown": 0,
+            "required": true
+          },
+          {
+            "id": "release",
+            "action": "release",
+            "label": "stage.release",
+            "icon": "icon_coin",
+            "seconds": 10,
+            "cooldown": 30,
+            "required": true,
+            "revenue": {
+              "base": 150,
+              "per_release": 0.08,
+              "cap": 1.8
+            }
+          }
+        ],
+        "looks": [
+          "",
+          "",
+          ""
+        ]
+      },
+      "power": {
+        "use": {
+          "draw": 2,
+          "multiply": 1.0,
+          "required": true
+        }
+      },
+      "staff": {
+        "min": 2
+      },
+      "icon": "ui_research",
+      "cost": {
+        "money": 600,
+        "items": {
+          "copper_ingot": 6,
+          "stone": 20
+        }
+      },
+      "build_seconds": 30,
+      "unlock": {
+        "level": 6,
+        "research": "software"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 3
+    },
+    "car_factory": {
+      "name": "building.car_factory",
+      "size": [
+        1,
+        1
+      ],
+      "sprite": "car_factory",
+      "cycle": {
+        "_doc": "Assemble a car from three iron ingots (frame, engine block) and a copper ingot (wiring), on a powered line run by a crew.",
+        "stages": [
+          {
+            "id": "assemble",
+            "action": "assemble",
+            "label": "stage.assemble",
+            "icon": "item_car",
+            "seconds": 30,
+            "cooldown": 10,
+            "required": true,
+            "consumes": {
+              "iron_ingot": 3,
+              "copper_ingot": 1
+            },
+            "yield": {
+              "car": 1
+            }
+          }
+        ],
+        "looks": [
+          ""
+        ]
+      },
+      "power": {
+        "use": {
+          "draw": 3,
+          "multiply": 1.0,
+          "required": true
+        }
+      },
+      "staff": {
+        "min": 2
+      },
+      "icon": "item_car",
+      "cost": {
+        "money": 900,
+        "items": {
+          "iron_ingot": 10,
+          "stone": 30
+        }
+      },
+      "build_seconds": 40,
+      "unlock": {
+        "level": 7,
+        "research": "automotive"
+      },
+      "enabled": true,
+      "refund": 1.0,
+      "workers": 3
     }
   }
 }

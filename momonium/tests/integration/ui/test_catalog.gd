@@ -40,3 +40,12 @@ func test_build_button_and_every_industry() -> void:
 	assert_true(screen.encloses(menu.get_global_rect()), "the catalog fits on screen")
 	for b: HudButton in hud.side_buttons:
 		assert_false(menu.get_global_rect().intersects(b.get_global_rect()), "and leaves %s free" % b.action)
+
+
+func test_hiring_is_always_in_view() -> void:
+	main.call("_on_hud_action", &"build")
+	await tree.process_frame
+	await tree.process_frame
+	var menu: BuildMenu = main.get("build_menu")
+	assert_eq(String(menu.list.get_child(0).name), "Card_momo", "the hire card comes first")
+	assert_true(menu.scroll.get_global_rect().encloses(menu.cards["momo"].get_global_rect()), "inside the visible part of the catalog")

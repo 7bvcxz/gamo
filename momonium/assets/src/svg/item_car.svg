@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A car: a little red hatchback. -->
+  <path d="M6 40 L10 30 Q12 26 18 26 L30 18 Q34 16 40 16 L46 16 Q52 16 54 22 L58 30 L58 40 Z" fill="#e0685a" stroke="#9a3a30" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M30 20 L40 20 L42 28 L24 28 Z M44 20 L48 20 Q50 20 52 28 L46 28 Z" fill="#cfe9ff" stroke="#9a3a30" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="18" cy="42" r="7" fill="#2c2620" stroke="#5f5a52" stroke-width="2"/><circle cx="18" cy="42" r="2.5" fill="#c9d0d8"/>
+  <circle cx="46" cy="42" r="7" fill="#2c2620" stroke="#5f5a52" stroke-width="2"/><circle cx="46" cy="42" r="2.5" fill="#c9d0d8"/>
+  <path d="M54 32 L58 32" stroke="#ffd36b" stroke-width="3" stroke-linecap="round"/>
+</svg>

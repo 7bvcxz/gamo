@@ -289,6 +289,10 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0 or (e.has("type") and not types.has(String(e["type"]))):
 				errors.append("research: %s momo_work needs multiply in (0, 1] and a known type if any" % id)
+		"sale_price", "walk_speed":
+			var m := float(e.get("multiply", 0.0))
+			if m < 1.0 or m > 2.0:
+				errors.append("research: %s %s multiply must be in [1, 2]" % [id, kind])
 		"research_time":
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0:

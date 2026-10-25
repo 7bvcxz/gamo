@@ -226,12 +226,13 @@ func _draw_blocked(b: Dictionary, centre: Vector2) -> void:
 	var block := buildings.blocked(b)
 	if block.is_empty():
 		return
-	var missing := block.has("missing")
-	var items: Dictionary = block.get("missing", block.get("full", {}))
-	if items.is_empty():
-		return
-	var item := String(items.keys()[0])
-	var icon := String(buildings.sim.data.item(item).get("icon", ""))
+	var missing := block.has("missing") or block.has("crew")
+	var icon := "momo_front"
+	if not block.has("crew"):
+		var items: Dictionary = block.get("missing", block.get("full", {}))
+		if items.is_empty():
+			return
+		icon = String(buildings.sim.data.item(String(items.keys()[0])).get("icon", ""))
 	var red := Color("#ff5a4f") if missing else Color("#ffa53a")
 	ring.draw_circle(centre, RING_RADIUS + 6, Color(1, 1, 1, 0.94))
 	ring.draw_arc(centre, RING_RADIUS + 6, 0, TAU, 32, red, 3.0, true)

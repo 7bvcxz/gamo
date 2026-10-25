@@ -15,8 +15,8 @@ static func build(data: GameData = null) -> Simulation:
 	var prog: ProgressionSystem = sim.system(&"progression")
 	var research: ResearchSystem = sim.system(&"research")
 	economy.earn(40000, "demo")
-	prog.add_exp(900, "demo")
-	for cell: Array in [[2, 0], [2, 1], [-1, 0], [-1, 1], [0, 2], [1, 2], [3, 0], [3, 1], [2, 2], [3, 2], [-1, 2], [4, 0], [4, 1]]:
+	prog.add_exp(4000, "demo")
+	for cell: Array in [[2, 0], [2, 1], [-1, 0], [-1, 1], [0, 2], [1, 2], [3, 0], [3, 1], [2, 2], [3, 2], [-1, 2], [4, 0], [4, 1], [4, 2], [2, 3]]:
 		sim.execute({"type": "land.buy", "cell": cell})
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	var farm2 := bs.place_instant("farm", Vector2i(2, 0))
@@ -38,9 +38,12 @@ static func build(data: GameData = null) -> Simulation:
 	bs.place_instant("park", Vector2i(-1, 2))
 	bs.place_instant("pub", Vector2i(4, 0))
 	bs.place_instant("community_center", Vector2i(4, 1))
-	for i in 7:
+	# Advanced industry: a game studio and a car factory, each with its crew of two.
+	var studio := bs.place_instant("game_studio", Vector2i(4, 2))
+	var cars := bs.place_instant("car_factory", Vector2i(2, 3))
+	for i in 11:
 		sim.execute({"type": "momo.hire"})
-	var jobs := [farm, farm2, lab, lumber, mine, smelter, steam, office]
+	var jobs := [farm, farm2, lab, lumber, mine, smelter, steam, office, studio, studio, cars, cars]
 	for i in jobs.size():
 		sim.execute({"type": "momo.assign", "momo": i + 1, "building": jobs[i]})
 	# Industry workers are left to the manager (the farms and lab stay put).
@@ -51,11 +54,14 @@ static func build(data: GameData = null) -> Simulation:
 	prog.add_mastery("lumberyard", 350)
 	prog.add_mastery("research", 300)
 	prog.add_mastery("smelter", 300)
-	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery", "photovoltaics", "wind_power", "steam_power", "hydropower", "electric_drill", "lab_lighting", "momo_training", "management", "masonry", "civic_planning"]:
+	for id: String in ["farm_expansion", "watering_efficiency", "harvest_boost", "watering_can", "seed_selection", "pickaxes", "copper_prospecting", "iron_prospecting", "sharp_axes", "bellows", "bloomery", "photovoltaics", "wind_power", "steam_power", "hydropower", "electric_drill", "lab_lighting", "momo_training", "management", "masonry", "civic_planning", "electric_furnace", "software", "automotive"]:
 		research.completed[id] = 0
 	sim.bus.emit(&"research_completed", {"id": "sharp_axes"})
 	(sim.system(&"inventory") as InventorySystem).add("notes", 25, "demo")
 	(sim.system(&"inventory") as InventorySystem).add("wood", 30, "demo")
+	# Ingots for the car line to start on (the smelter makes more as it runs).
+	(sim.system(&"inventory") as InventorySystem).add("iron_ingot", 12, "demo")
+	(sim.system(&"inventory") as InventorySystem).add("copper_ingot", 4, "demo")
 	# Let the staffed island run a while so its stores, mail and ledger are real:
 	# the mine's ore and the lumberyard's wood feed the smelter by the rules.
 	sim.advance_ms(30000 * 60)

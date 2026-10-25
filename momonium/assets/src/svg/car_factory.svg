@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 car factory (diamond centre = origin (70, 95)): a saw-tooth roofed
+       hall, a roller door with a finished car rolling out, a tall stack. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#b5a68e" stroke="#8f8068" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 98 L70 124 L70 70 L24 44 Z" fill="#a8b0b8" stroke="#5f6670" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 124 L116 98 L116 44 L70 70 Z" fill="#c9d0d8" stroke="#5f6670" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 44 L36 30 L48 51 L60 37 L70 70 M70 70 L116 44 L104 30 L92 51 L80 37 Z" fill="#7a8a9a" stroke="#4a5560" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M84 116 L106 103 L106 80 L84 93 Z" fill="#5f6670" stroke="#3a4048" stroke-width="2"/>
+  <g stroke="#7a8590" stroke-width="1.2"><path d="M84 97 L106 84 M84 101 L106 88 M84 105 L106 92 M84 109 L106 96"/></g>
+  <path d="M40 16 L40 54 L50 54 L50 16 Z" fill="#a0573c" stroke="#5f3424" stroke-width="2"/>
+  <path d="M38 12 L52 12 L52 16 L38 16 Z" fill="#5f5a52"/>
+  <!-- a car rolling out -->
+  <path d="M96 120 L116 108 L124 112 L124 118 L104 130 L96 126 Z" fill="#e0685a" stroke="#9a3a30" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M102 118 L112 112 L118 115 L108 121 Z" fill="#cfe9ff"/>
+  <circle cx="102" cy="127" r="3" fill="#2c2620"/><circle cx="118" cy="118" r="3" fill="#2c2620"/>
+</svg>

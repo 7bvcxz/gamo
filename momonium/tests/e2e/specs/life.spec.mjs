@@ -35,5 +35,6 @@ test('life on the demo island', async ({ game }) => {
   const l = await game.query('life');
   expect(l.happiness).toBeGreaterThan(0);
   expect(l.homes).toBe('8 / 8');
+  expect(l.homeless).toBe(true);
   expect(l.work).toMatch(/^×0\.\d+$/);
 });

@@ -83,9 +83,25 @@ func lifetime_expense() -> int:
 func pending_sale() -> int:
 	var inv: InventorySystem = sim.system(&"inventory")
 	var total := 0
-	for item: String in inv.of_kind("crop"):
-		total += inv.count(item) * int(sim.data.item(item).get("price", 0))
+	for item: String in daily_items():
+		total += inv.count(item) * unit_price(item)
 	return total
+
+
+## Items the daily sale takes (sell "daily"), in data order.
+func daily_items() -> Array[String]:
+	var out: Array[String] = []
+	for item: String in sim.data.table("items").get("items", {}):
+		if String(sim.data.item(item).get("sell", "")) == "daily":
+			out.append(item)
+	return out
+
+
+## What one unit fetches today: its price, times market research (sale_price).
+func unit_price(item: String) -> int:
+	var research: ResearchSystem = sim.system(&"research")
+	var m := research.sale_multiplier() if research != null else 1.0
+	return int(floor(float(sim.data.item(item).get("price", 0)) * m))
 
 
 func on_day_started(day: int) -> void:
@@ -97,11 +113,9 @@ func _sell_crops(day: int) -> void:
 	var inv: InventorySystem = sim.system(&"inventory")
 	var sold := {}
 	var total := 0
-	for item: String in inv.of_kind("crop"):
-		if String(sim.data.item(item).get("sell", "")) != "daily":
-			continue
+	for item: String in daily_items():
 		var n := inv.count(item)
-		var price := int(sim.data.item(item).get("price", 0))
+		var price := unit_price(item)
 		if n <= 0 or price <= 0:
 			continue
 		inv.take_all({item: n}, "sale")

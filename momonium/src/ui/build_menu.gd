@@ -14,6 +14,9 @@ var sim: Simulation
 var buildings: BuildingSystem
 var lib: SpriteLibrary
 var list: GridContainer
+var scroll: ScrollContainer
+## Tallest the card area may be before it scrolls (set by the layout).
+var max_list_height := 380.0
 var cards: Dictionary = {}
 
 
@@ -38,7 +41,13 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	list.columns = 4
 	list.add_theme_constant_override("h_separation", 10)
 	list.add_theme_constant_override("v_separation", 10)
-	col.add_child(list)
+	# The catalog grows with the industries: past a couple of rows it scrolls
+	# rather than covering the island (and the tutorial's line above it).
+	scroll = ScrollContainer.new()
+	scroll.name = "Scroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.add_child(list)
+	col.add_child(scroll)
 	add_child(col)
 	visible = false
 	sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
@@ -63,6 +72,9 @@ func rebuild() -> void:
 	PanelViews.clear(list)
 	cards.clear()
 	var economy: EconomySystem = sim.system(&"economy")
+	# Hiring first: it is wanted early and often, and the catalog scrolls once
+	# the industries fill it -- the last card would be out of sight.
+	_add_hire_card(economy)
 	for entry: Dictionary in buildings.catalog():
 		var type: String = entry["type"]
 		var def := sim.data.building_type(type)
@@ -122,7 +134,12 @@ func rebuild() -> void:
 			picked.emit(type))
 		list.add_child(card)
 		cards[type] = card
-	_add_hire_card(economy)
+	_fit_scroll.call_deferred()
+
+
+func _fit_scroll() -> void:
+	scroll.custom_minimum_size = Vector2(list.get_combined_minimum_size().x, minf(list.get_combined_minimum_size().y, max_list_height))
+	reset_size()
 
 
 ## Hiring is bought in the shop like a building, but placed by itself: the new

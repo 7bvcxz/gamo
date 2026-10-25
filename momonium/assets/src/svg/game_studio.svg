@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" width="140" height="160">
+  <!-- A 1x1 game studio (diamond centre = origin (70, 95)): a modern glass-front
+       building, screens glowing inside, a game-pad sign on the roof. -->
+  <path d="M70 60 L122 96 L70 132 L18 96 Z" fill="#c9c4bb" stroke="#8d8579" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 96 L70 122 L70 62 L24 36 Z" fill="#5b6b8c" stroke="#36405a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M70 122 L116 96 L116 36 L70 62 Z" fill="#8fb3e6" stroke="#36405a" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M24 36 L70 10 L116 36 L70 62 Z" fill="#e4ecf2" stroke="#36405a" stroke-width="2" stroke-linejoin="round"/>
+  <g stroke="#36405a" stroke-width="1.5"><path d="M93 49 L93 109 M70 82 L116 56"/></g>
+  <g fill="#b7f08a"><path d="M76 74 L88 67 L88 75 L76 82 Z"/><path d="M98 62 L110 55 L110 63 L98 70 Z"/></g>
+  <g fill="#ffd36b"><path d="M76 96 L88 89 L88 97 L76 104 Z"/><path d="M98 84 L110 77 L110 85 L98 92 Z"/></g>
+  <g fill="#cfe9ff" opacity="0.8"><path d="M32 52 L42 58 L42 70 L32 64 Z"/><path d="M50 62 L60 68 L60 80 L50 74 Z"/></g>
+  <rect x="54" y="8" width="32" height="16" rx="8" fill="#ffffff" stroke="#36405a" stroke-width="2"/>
+  <path d="M62 16 L68 16 M65 13 L65 19" stroke="#36405a" stroke-width="2"/>
+  <circle cx="76" cy="14" r="2" fill="#ff8a7a"/><circle cx="80" cy="18" r="2" fill="#7fb6ee"/>
+</svg>

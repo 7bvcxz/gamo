@@ -88,6 +88,12 @@
         "smelter.smelt": {
           "player": 6,
           "mastery": 10
+        },
+        "game_studio.release": {
+          "player": 40
+        },
+        "car_factory.assemble": {
+          "player": 20
         }
       },
       "event": {

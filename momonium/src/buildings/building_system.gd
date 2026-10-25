@@ -180,6 +180,31 @@ func set_recipe(id: int, recipe: String) -> Dictionary:
 	return SimResult.ok()
 
 
+## How many more Momo must be at work here before a stage may start (staff.min).
+func crew_short(b: Dictionary) -> int:
+	var need := int(type_def(b).get("staff", {}).get("min", 0))
+	if need <= 0:
+		return 0
+	var momos: MomoSystem = sim.system(&"momo")
+	var here := 0
+	for m: int in momos.workers_at(int(b["id"])):
+		if momos.at_work(m):
+			here += 1
+	return maxi(need - here, 0)
+
+
+## Money a stage pays on completion (`revenue`): base, more for each release
+## this building has behind it, up to the cap -- times market research.
+func revenue_of(b: Dictionary, stage: Dictionary) -> int:
+	var rev: Dictionary = stage.get("revenue", {})
+	if rev.is_empty():
+		return 0
+	var m := minf(1.0 + float(rev.get("per_release", 0)) * int(b.get("releases", 0)), float(rev.get("cap", 1.0)))
+	var research: ResearchSystem = sim.system(&"research")
+	var market := research.sale_multiplier() if research != null else 1.0
+	return int(floor(float(rev.get("base", 0)) * m * market))
+
+
 ## What keeps an idle building from its next stage right now, as data the
 ## views can draw: {missing: {item: short by}} for inputs not in the store,
 ## {full: {item: n}} when the output has nowhere to go; {} when nothing does.
@@ -187,6 +212,8 @@ func blocked(b: Dictionary) -> Dictionary:
 	if b.is_empty() or b["state"] != IDLE:
 		return {}
 	var stage := current_stage(b)
+	if crew_short(b) > 0:
+		return {"crew": crew_short(b)}
 	var inv: InventorySystem = sim.system(&"inventory")
 	var consumes: Dictionary = stage.get("consumes", {})
 	if not consumes.is_empty() and not inv.has_all(consumes):
@@ -335,7 +362,7 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 func _record(type: String, anchor: Vector2i) -> Dictionary:
 	return {"id": next_id, "type": type, "anchor": [anchor.x, anchor.y], "state": IDLE, "stage": 0,
 		"task_start": 0, "task_end": 0, "ready_at": 0, "token": 0, "completed": 0,
-		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}, "worker": 0, "carry": {}}
+		"build_start": 0, "build_end": 0, "paid": {"money": 0, "items": {}}, "worker": 0, "carry": {}, "releases": 0}
 
 
 # --- catalog and construction ---------------------------------------------------------
@@ -502,6 +529,9 @@ func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 			var why := String(source.call("start_blocker", String(b["type"])))
 			if why != "":
 				return SimResult.fail(why)
+	var short := crew_short(b)
+	if short > 0:
+		return SimResult.fail("err.needs_crew", {"short": short})
 	var inv: InventorySystem = sim.system(&"inventory")
 	# A stage that takes inputs starts only with all of them in the store, and
 	# takes them as it starts: nothing is made from nothing, nothing half-charged.
@@ -678,6 +708,11 @@ func action_groups(b: Dictionary) -> Array[Dictionary]:
 func _complete_stage(b: Dictionary) -> void:
 	var stage := current_stage(b)
 	b["completed"] = int(b["completed"]) + 1
+	var pay := revenue_of(b, stage)
+	if pay > 0:
+		b["releases"] = int(b.get("releases", 0)) + 1
+		(sim.system(&"economy") as EconomySystem).earn(pay, "release:" + String(b["type"]))
+		sim.bus.emit(&"released", {"id": b["id"], "type": b["type"], "money": pay, "releases": b["releases"]})
 	var produced := _take_yield(b, stage)
 	if not produced.is_empty():
 		var inv: InventorySystem = sim.system(&"inventory")
@@ -719,7 +754,7 @@ func load_state(state: Dictionary) -> void:
 	next_id = int(state.get("next_id", 1))
 	for raw: Dictionary in state.get("buildings", []):
 		var b := raw.duplicate(true)
-		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end", "worker"]:
+		for k: String in ["id", "stage", "task_start", "task_end", "ready_at", "token", "completed", "build_start", "build_end", "worker", "releases"]:
 			b[k] = int(b.get(k, 0))
 		var carry := {}
 		var raw_carry: Dictionary = b.get("carry", {})

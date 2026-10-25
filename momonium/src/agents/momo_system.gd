@@ -349,6 +349,9 @@ func handle_event(type: String, data: Dictionary) -> void:
 func _walk_to(m: Dictionary, target: Vector2) -> int:
 	var here := position_at(m["id"], sim.now_ms())
 	var speed := maxf(sim.data.get_float("balance", "momo.walk_speed", 0.7), 0.05)
+	var research: ResearchSystem = sim.system(&"research")
+	if research != null:
+		speed *= research.walk_multiplier()
 	var now := sim.now_ms()
 	m["from"] = [here.x, here.y]
 	m["to"] = [target.x, target.y]

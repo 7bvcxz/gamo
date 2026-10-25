@@ -5,11 +5,11 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **29** (#29)
-- 현재 step: **30** — 고급 산업(게임 스튜디오·자동차 회사)과 운송 (#30) + **전체 E2E 3회차**. 웹 플레이 기준 유지.
-- 버전: `0.29.0`
-- 테스트: unit+integration 379 통과 (`momonium/tools/test.sh`)
-- E2E: 케이스 29파일(+life). 전체 실행: Step 10, Step 20(65/0/3 skip). 다음 전체 실행은 **Step 30 완료 시**
+- 마지막 완료 step: **30** (#30)
+- 현재 step: **31** — 생산 분석과 도시 경제 대시보드 (#31). 웹 플레이 기준 유지.
+- 버전: `0.30.0`
+- 테스트: unit+integration 387 통과 (`momonium/tools/test.sh`)
+- E2E: 케이스 30파일(+advanced). 전체 실행: Step 10, Step 20(65/0/3 skip), **Step 30(아래 표)**. 다음 전체 실행은 Step 40
 - 배포: https://7bvcxz.github.io/gamo/momonium/ (Pages, `docs/momonium/`) — `tools/deploy.sh` → push → `tools/verify_pages.sh`
 - 막힌 것: 없음
 - 보류: HeyDive 등록(AGENTS.md의 새 게임 규칙) — 플레이할 수 있는 내용이 생기는 Step 43에서 사용자 확인 후 진행
@@ -60,4 +60,5 @@
 | 26 | #26 제련소·레시피 | 0.26.0 | `9b5590b8` | 328, E2E smelting 단독 | 스모크 |
 | 27 | #27 전력 | 0.27.0 | `26e74eb9` | 345, E2E power 단독 | 스모크 |
 | 28 | #28 숙련 모모·관리인 | 0.28.0 | `5bb3835f` | 367, E2E manager 단독 | 스모크 |
-| 29 | #29 주거·공동체 시설 | 0.29.0 | (다음 갱신 시) | 379, E2E life·manager 등 | 스모크 |
+| 29 | #29 주거·공동체 시설 | 0.29.0 | `13f6a8eb` | 379, E2E life·manager 등 | 스모크 |
+| 30 | #30 고급 산업·운송 | 0.30.0 | (다음 갱신 시) | 387, **E2E 전체 3회차 85 통과/2 실패/3 skip → 1건(모모 고용 카드가 스크롤 밖) 수정 후 재실행 14 통과** | 스모크 |

@@ -90,7 +90,7 @@ func test_a_brand_new_island_starts_the_tutorial_once() -> void:
 func test_the_demo_island_is_fully_staffed() -> void:
 	var demo := DemoWorld.build()
 	var momos: MomoSystem = demo.system(&"momo")
-	assert_eq(momos.ids().size(), 8, "every Momo it means to hire was hired (money did not run out)")
+	assert_eq(momos.ids().size(), 12, "every Momo it means to hire was hired (money did not run out)")
 	assert_true(momos.ids().all(func(m: int) -> bool: return int(momos.get_momo(m)["assigned"]) != 0), "and each has a job")
 	var community: CommunitySystem = demo.system(&"community")
-	assert_eq(community.housing().size(), 8, "and a home")
+	assert_eq(community.housing().size(), 8, "eight have a home (the villa and apartment hold 8): the Life tab shows the rest outdoors")

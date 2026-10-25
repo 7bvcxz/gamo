@@ -376,3 +376,23 @@ detail.residents,Residents {n}/{cap},주민 {n}/{cap},住人 {n}/{cap},居民 {n
 detail.amenity_open,Open today · happiness +{n},오늘 영업 · 행복 +{n},今日営業 · しあわせ +{n},今日营业 · 幸福 +{n}
 momo.home,Lives in the {name},{name}에 살아요,{name}に住んでいます,住在{name}
 momo.no_home,Sleeps outdoors,밖에서 자요,外で寝ています,在户外睡
+mastery.game_studio,Games,게임,ゲーム,游戏
+mastery.car_factory,Cars,자동차,自動車,汽车
+building.game_studio,Game studio,게임 스튜디오,ゲームスタジオ,游戏工作室
+building.car_factory,Car factory,자동차 공장,自動車工場,汽车工厂
+item.car,Car,자동차,自動車,汽车
+stage.design,Design,기획,企画,策划
+stage.develop,Develop,개발,開発,开发
+stage.release,Release,출시,発売,发行
+stage.assemble,Assemble,조립,組み立て,组装
+research.software.name,Software,소프트웨어,ソフトウェア,软件
+research.software.desc,Computers in a lit room and a team that writes code: an island game studio.,불 켜진 방의 컴퓨터와 코드를 짜는 팀 — 섬의 게임 스튜디오.,明るい部屋のコンピューターとコードを書くチーム — 島のゲームスタジオ。,明亮房间里的电脑和写代码的团队——岛上的游戏工作室。
+research.automotive.name,Automotive,자동차 공학,自動車工学,汽车工程
+research.automotive.desc,"Iron frames, cast engine blocks and copper wiring on a powered assembly line.","쇠 차체, 주조 엔진 블록, 구리 배선을 전기로 도는 조립 라인에서.",鉄の車体、鋳造エンジン、銅の配線を電気で動く組立ラインで。,铁车架、铸造发动机缸体和铜线，在电动装配线上组装。
+research.delivery_vans.name,Delivery vans,배달 밴,配達バン,送货车
+research.delivery_vans.desc,Two of the island's own cars become delivery vans: Momo get about faster and goods reach better buyers.,섬에서 만든 자동차 두 대를 배달 밴으로 — 모모가 더 빨리 다니고 물건이 더 좋은 값에 팔려요.,島の車2台を配達バンに — モモの移動が速くなり、品物がより良い値で売れます。,把岛上造的两辆车改成送货车——桃桃走得更快，货物卖得更好。
+effect.walk_speed,Momo walk +{pct}%,모모 이동 +{pct}%,モモの移動 +{pct}%,桃桃移动 +{pct}%
+effect.sale_price,Sale prices +{pct}%,판매가 +{pct}%,売値 +{pct}%,售价 +{pct}%
+err.needs_crew,Needs more Momo here,모모가 더 필요해요,モモがもっと必要です,需要更多桃桃
+detail.crew,Crew {n}/{need},일손 {n}/{need},人手 {n}/{need},人手 {n}/{need}
+detail.revenue,Next release ${n} · {r} released,다음 출시 ${n} · {r}편 출시,次の発売 ${n} · {r}本発売,下次发行 ${n} · 已发行{r}款

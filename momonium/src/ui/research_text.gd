@@ -44,6 +44,10 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 			return t.translate("effect.batch").format({"n": int(e.get("add", 1)) + 1})
 		"power_use":
 			return t.translate("effect.power_use").format({"kw": BuildingDetailView.amount(float(e.get("draw", 0))), "pct": pct})
+		"walk_speed":
+			return t.translate("effect.walk_speed").format({"pct": int(round((float(e.get("multiply", 1.0)) - 1.0) * 100.0))})
+		"sale_price":
+			return t.translate("effect.sale_price").format({"pct": int(round((float(e.get("multiply", 1.0)) - 1.0) * 100.0))})
 		"momo_work":
 			return t.translate("effect.momo_work").format({"pct": pct})
 		"research_time":

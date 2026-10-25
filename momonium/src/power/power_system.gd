@@ -147,10 +147,14 @@ func capacity() -> float:
 
 ## The power use research has given this building type: {draw, multiply, required}, or {}.
 func use_of(type: String) -> Dictionary:
+	var out := {}
+	# A building that always runs on power says so in its data.
+	var own: Dictionary = sim.data.building_type(type).get("power", {}).get("use", {})
+	if not own.is_empty():
+		out = {"draw": float(own.get("draw", 0)), "multiply": float(own.get("multiply", 1.0)), "required": bool(own.get("required", false))}
 	var research: ResearchSystem = sim.system(&"research")
 	if research == null:
-		return {}
-	var out := {}
+		return out
 	for id: String in research.completed:
 		for e: Dictionary in research.node(id).get("effects", []):
 			if String(e.get("kind", "")) == "power_use" and String(e.get("type", "")) == type:
@@ -229,7 +233,7 @@ func in_use() -> bool:
 	if capacity() > 0.0:
 		return true
 	var buildings: BuildingSystem = sim.system(&"buildings")
-	for type: String in sim.data.get_value("buildings", "types", {}):
-		if not use_of(type).is_empty():
+	for id: int in buildings.ids():
+		if not use_of(String(buildings.get_building(id)["type"])).is_empty():
 			return true
 	return false

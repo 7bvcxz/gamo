@@ -334,7 +334,7 @@ func _ready() -> void:
 	bridge.register_query("life", func(_a: Variant) -> Dictionary:
 		var c: CommunitySystem = sim.system(&"community")
 		life_view.refresh()
-		return {"happiness": c.happiness(), "homes": (life_view.homes_row.get_node("Value") as Label).text,
+		return {"happiness": c.happiness(), "homes": (life_view.homes_row.get_node("Value") as Label).text, "homeless": life_view.homeless.visible,
 			"work": (life_view.work_row.get_node("Value") as Label).text, "parts": c.breakdown()})
 	bridge.register_query("power", func(_a: Variant) -> Dictionary:
 		var power: PowerSystem = sim.system(&"power")
@@ -381,6 +381,7 @@ func _ready() -> void:
 			out["workers"].append(String(c.get_meta("who", "")))
 		for c: Node in detail_view.research_box.get_children():
 			out["research"].append((c as Label).text)
+		out["takes"] = (detail_view.takes_row.get_node("Value") as Label).text if detail_view.takes_row.visible else ""
 		if detail_view.priority_box.visible:
 			var pr := {}
 			for p: String in ManagerSystem.PRIORITIES:
@@ -687,6 +688,8 @@ func _place_build_menu() -> void:
 	# cards form rows rather than one long strip off the screen.
 	var room := get_viewport_rect().size.x - 32.0 - (get_viewport_rect().size.x - hud.side_buttons[0].position.x if not hud.side_buttons.is_empty() else 0.0)
 	build_menu.list.columns = clampi(int((room - 24.0) / 160.0), 2, 4)
+	build_menu.max_list_height = maxf(get_viewport_rect().size.y * 0.36, 180.0)
+	build_menu._fit_scroll()
 	build_menu.custom_minimum_size.x = 0.0
 	build_menu.reset_size()
 	var size := get_viewport_rect().size

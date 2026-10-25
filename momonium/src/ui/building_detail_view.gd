@@ -185,6 +185,7 @@ func refresh() -> void:
 	for item: String in you["yield"]:
 		gives.append("%s %s" % [tr(String(sim.data.item(item).get("name", item))), amount(float(you["yield"][item]))])
 	_set_row(yield_row, tr("detail.cycle"), ", ".join(gives))
+	yield_row.visible = not gives.is_empty()
 	_set_row(cycle_you, tr("detail.by_you"), duration(you["cycle_seconds"]))
 	_set_row(cycle_momo, tr("detail.by_momo"), duration(by_momo["cycle_seconds"]))
 	_set_row(done_row, tr("panel.records.tasks"), str(int(b.get("completed", 0))))
@@ -297,7 +298,22 @@ func _refresh_recipes(b: Dictionary, buildings: BuildingSystem) -> void:
 		_set_row(takes_row, tr("detail.takes"), items_line(consumes, true))
 	var block := buildings.blocked(b)
 	block_label.visible = not block.is_empty()
-	if block.has("missing"):
+	var need := int(buildings.type_def(b).get("staff", {}).get("min", 0))
+	if need > 0:
+		var momos: MomoSystem = sim.system(&"momo")
+		var here := momos.workers_at(int(b["id"])).filter(func(m: int) -> bool: return momos.at_work(m)).size()
+		takes_row.visible = true
+		var rev_stage: Dictionary = {}
+		for st: Dictionary in buildings.stages(b):
+			if not (st.get("revenue", {}) as Dictionary).is_empty():
+				rev_stage = st
+		var text := tr("detail.crew").format({"n": here, "need": need})
+		if not rev_stage.is_empty():
+			text += "  ·  " + tr("detail.revenue").format({"n": buildings.revenue_of(b, rev_stage), "r": int(b.get("releases", 0))})
+		_set_row(takes_row, tr("detail.takes") if not consumes.is_empty() else "", (items_line(consumes, true) + "  ·  " if not consumes.is_empty() else "") + text)
+	if block.has("crew"):
+		block_label.text = tr("err.needs_crew")
+	elif block.has("missing"):
 		block_label.text = tr("detail.short").format({"items": items_line(block["missing"], false)})
 	elif block.has("full"):
 		block_label.text = tr("detail.full").format({"items": items_line(block["full"], false)})

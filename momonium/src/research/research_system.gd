@@ -244,6 +244,22 @@ func momo_multiplier(type: String) -> float:
 	return m
 
 
+## What the daily sale pays, times market research (>= 1).
+func sale_multiplier() -> float:
+	var m := 1.0
+	for e: Dictionary in _effects("sale_price"):
+		m *= float(e.get("multiply", 1.0))
+	return m
+
+
+## How much faster Momo walk, from transport research (>= 1).
+func walk_multiplier() -> float:
+	var m := 1.0
+	for e: Dictionary in _effects("walk_speed"):
+		m *= float(e.get("multiply", 1.0))
+	return m
+
+
 ## BuildingSystem modifier: whether research has opened this recipe.
 func unlocks_recipe(type: String, recipe: String) -> bool:
 	for e: Dictionary in _effects("recipe"):
