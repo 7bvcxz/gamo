@@ -63,8 +63,10 @@ func test_skill_up_is_announced() -> void:
 
 func test_training_research_speeds_every_momo() -> void:
 	(sim.system(&"research") as ResearchSystem).completed["momo_training"] = 0
-	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.85, 0.0001, "x0.85 for all")
-	assert_near(momos.work_multiplier(1, "mine"), 4.0 * 0.85, 0.0001, "at every kind of building")
+	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.9, 0.0001, "Lv 1: x0.9 for all")
+	assert_near(momos.work_multiplier(1, "mine"), 4.0 * 0.9, 0.0001, "at every kind of building")
+	(sim.system(&"research") as ResearchSystem).bought["momo_training"] = 2
+	assert_near(momos.work_multiplier(1, "farm"), 4.0 * 0.8, 0.0001, "Lv 2: x0.8, as its data says")
 
 
 func test_history_and_pinning() -> void:

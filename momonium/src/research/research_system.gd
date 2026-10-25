@@ -36,6 +36,10 @@ var allocated: Dictionary = {}
 var unlocked: Dictionary = {}
 ## Research points ever issued (one per level researched, at each Prestige).
 var rp_earned := 0
+## Saved allocation plans: PROFILES slots of {id: levels} (or empty), kept
+## for good like the points themselves.
+var profiles: Array = []
+const PROFILES := 3
 ## The running research: {id, start, end, token}, or empty.
 var active: Dictionary = {}
 var token := 0
@@ -50,7 +54,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["research.start", "research.allocate"])
+	return PackedStringArray(["research.start", "research.allocate", "research.profile_save"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -66,6 +70,9 @@ func on_new_game() -> void:
 	allocated.clear()
 	unlocked.clear()
 	rp_earned = 0
+	profiles = []
+	for i in PROFILES:
+		profiles.append({})
 	active = {}
 	token = 0
 
@@ -221,6 +228,10 @@ func missing(id: String) -> Array[Dictionary]:
 	for r: String in n.get("requires", []):
 		if not is_done(r):
 			out.append({"kind": "requires", "id": r})
+	# Unlocked once, unlocked for good: the level, mastery or letter that
+	# opened it is not asked for again (its prerequisites still are).
+	if unlocked.has(id):
+		return out
 	var unlock: Dictionary = n.get("unlock", {})
 	var prog: ProgressionSystem = sim.system(&"progression")
 	if unlock.has("level") and prog.level < int(unlock["level"]):
@@ -306,6 +317,9 @@ func execute(command: Dictionary) -> Dictionary:
 	if String(command.get("type", "")) == "research.allocate":
 		var plan: Variant = command.get("levels", {})
 		return allocate_all(plan if typeof(plan) == TYPE_DICTIONARY else {})
+	if String(command.get("type", "")) == "research.profile_save":
+		var levels: Variant = command.get("levels", {})
+		return save_profile(Cmd.integer(command, "slot"), levels if typeof(levels) == TYPE_DICTIONARY else {})
 	var id := String(command.get("id", ""))
 	var check := can_start(id)
 	if not check["ok"]:
@@ -363,24 +377,60 @@ func something_to_start() -> bool:
 ## Every active effect of a kind, at the strength of its node's level.
 func _effects(kind: String) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	var s := sim.data.get_float("balance", "research.level_strength", 0.25)
 	for id: String in completed:
 		var l := level(id)
 		for e: Dictionary in node(id).get("effects", []):
-			if String(e.get("kind", "")) != kind:
-				continue
-			if l <= 1:
-				out.append(e)
-				continue
-			var k := 1.0 + s * (l - 1)
-			var x := e.duplicate()
-			if x.has("multiply"):
-				x["multiply"] = pow(float(x["multiply"]), k)
-			if x.has("add"):
-				var add := float(x["add"]) * k
-				x["add"] = int(floor(add)) if typeof(e["add"]) == TYPE_INT else add
-			out.append(x)
+			if String(e.get("kind", "")) == kind:
+				out.append(effect_at(e, l))
 	return out
+
+
+## An effect as it works at `level`: its `per_level` value when the data
+## lists one, otherwise grown by balance.research.level_strength per level past
+## the first (multiply m -> m^k, add -> add x k, k = 1 + strength x (L-1)).
+func effect_at(e: Dictionary, lv: int) -> Dictionary:
+	if lv <= 1 and not e.has("per_level"):
+		return e
+	var x := e.duplicate()
+	var steps: Array = e.get("per_level", [])
+	if not steps.is_empty():
+		var v: Variant = steps[clampi(lv, 1, steps.size()) - 1]
+		if x.has("multiply"):
+			x["multiply"] = float(v)
+		elif x.has("add"):
+			x["add"] = v
+		return x
+	var k := 1.0 + sim.data.get_float("balance", "research.level_strength", 0.25) * (lv - 1)
+	if x.has("multiply"):
+		x["multiply"] = pow(float(x["multiply"]), k)
+	if x.has("add"):
+		var add := float(x["add"]) * k
+		x["add"] = int(floor(add)) if typeof(e["add"]) == TYPE_INT else add
+	return x
+
+
+## A node's effects at a given level (the points screen previews with this).
+func effects_at(id: String, lv: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if lv <= 0:
+		return out
+	for e: Dictionary in node(id).get("effects", []):
+		out.append(effect_at(e, mini(lv, max_level(id))))
+	return out
+
+
+## Saves a plan in a slot (validated as far as nodes and levels go; the
+## points may be short, it is only a plan).
+func save_profile(slot: int, levels: Dictionary) -> Dictionary:
+	if slot < 0 or slot >= PROFILES:
+		return SimResult.fail("err.bad_command")
+	var clean := {}
+	for id: String in levels:
+		if not node(id).is_empty() and is_unlocked_node(id) and int(levels[id]) > 0:
+			clean[id] = mini(int(levels[id]), max_level(id))
+	profiles[slot] = clean
+	sim.bus.emit(&"research_profile_saved", {"slot": slot})
+	return SimResult.ok({"levels": clean})
 
 
 ## BuildingSystem modifier: multiplier on a stage's work time or the wait after it.
@@ -481,7 +531,7 @@ func yield_items(type: String, stage_id: String) -> Array[String]:
 ## every level goes back to 0 (to be allocated again), unlocks stay. Returns
 ## the RP issued.
 func carry_over() -> Dictionary:
-	return {"unlocked": unlocked.duplicate(), "rp_earned": rp_earned + rp_pending(), "issued": rp_pending()}
+	return {"unlocked": unlocked.duplicate(), "rp_earned": rp_earned + rp_pending(), "issued": rp_pending(), "profiles": profiles.duplicate(true)}
 
 
 func adopt(carry: Dictionary) -> void:
@@ -489,11 +539,24 @@ func adopt(carry: Dictionary) -> void:
 		if not node(id).is_empty():
 			unlocked[id] = true
 	rp_earned = maxi(int(carry.get("rp_earned", 0)), 0)
+	_read_profiles(carry.get("profiles", []))
+
+
+func _read_profiles(raw: Variant) -> void:
+	profiles = []
+	for i in PROFILES:
+		var p := {}
+		if typeof(raw) == TYPE_ARRAY and i < (raw as Array).size() and typeof(raw[i]) == TYPE_DICTIONARY:
+			for id: String in raw[i]:
+				if not node(id).is_empty() and int(raw[i][id]) > 0:
+					p[id] = mini(int(raw[i][id]), max_level(id))
+		profiles.append(p)
 
 
 func save_state() -> Dictionary:
 	return {"completed": completed.duplicate(), "active": active.duplicate(), "token": token,
-		"bought": bought.duplicate(), "allocated": allocated.duplicate(), "unlocked": unlocked.keys(), "rp_earned": rp_earned}
+		"bought": bought.duplicate(), "allocated": allocated.duplicate(), "unlocked": unlocked.keys(), "rp_earned": rp_earned,
+		"profiles": profiles.duplicate(true)}
 
 
 func load_state(state: Dictionary) -> void:
@@ -506,6 +569,7 @@ func load_state(state: Dictionary) -> void:
 		active = {"id": String(a["id"]), "start": int(a["start"]), "end": int(a["end"]), "token": int(a["token"])}
 	token = int(state.get("token", 0))
 	rp_earned = maxi(int(state.get("rp_earned", 0)), 0)
+	_read_profiles(state.get("profiles", []))
 	for id: Variant in state.get("unlocked", []):
 		if not node(String(id)).is_empty():
 			unlocked[String(id)] = true

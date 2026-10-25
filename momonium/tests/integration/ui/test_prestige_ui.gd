@@ -126,3 +126,29 @@ func test_a_broken_plan_cannot_be_confirmed() -> void:
 	assert_false(rp.confirm_button.disabled, "training alone: fine")
 	_tap(rp.cancel_button)
 	assert_eq(rs.allocated, {}, "cancel places nothing")
+
+
+func test_plans_and_the_preview() -> void:
+	var rs: ResearchSystem = sim.system(&"research")
+	rs.rp_earned = 4
+	for id: String in ["momo_training", "momo_reach", "momo_paths"]:
+		rs.unlocked[id] = true
+	main.call("open_rp")
+	await tree.process_frame
+	var rp: RpView = main.get("rp_view")
+	var preview := func(id: String) -> String: return ((rp.rows[id] as Control).find_child("Preview", true, false) as Label).text
+	assert_true(preview.call("momo_training").begins_with("At Lv 1:"), "untouched: what Lv 1 would do (%s)" % preview.call("momo_training"))
+	_tap((rp.rows["momo_training"] as Control).get_node("Plus"))
+	_tap((rp.rows["momo_training"] as Control).get_node("Plus"))
+	assert_true(preview.call("momo_training").begins_with("off → "), "off -> its Lv 2 numbers (%s)" % preview.call("momo_training"))
+	assert_true(preview.call("momo_training").contains("20"), "-20%")
+	_tap((rp.rows["momo_reach"] as Control).get_node("Plus"))
+	_tap(rp.save_buttons[0])
+	assert_eq(rs.profiles[0], {"momo_training": 2, "momo_reach": 1}, "saved as plan A")
+	assert_true(rp.profile_buttons[0].text.begins_with("A · 3 RP"), "A says how many points (%s)" % rp.profile_buttons[0].text)
+	_tap((rp.rows["momo_reach"] as Control).get_node("Minus"))
+	_tap((rp.rows["momo_training"] as Control).get_node("Minus"))
+	_tap(rp.profile_buttons[0])
+	assert_eq(rp.draft, {"momo_training": 2, "momo_reach": 1}, "loading A brings it back")
+	_tap(rp.confirm_button)
+	assert_eq(rs.allocated, {"momo_training": 2, "momo_reach": 1}, "and it can be confirmed")

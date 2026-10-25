@@ -7,7 +7,9 @@ extends VBoxContainer
 ## earned; Confirm applies the draft in one go (the simulation checks it
 ## again), Cancel throws it away. A draft that breaks a rule -- too few points,
 ## a node above its top, one whose prerequisite has no level -- cannot be
-## confirmed and says why.
+## confirmed and says why. Under each node, what it does now and what the draft
+## would make it do. Three saved plans: tap one to load it into the draft,
+## Save to keep the draft there -- they survive every sale, like the points.
 
 signal done
 
@@ -16,6 +18,8 @@ var research: ResearchSystem
 var head: Label
 var why: Label
 var list: VBoxContainer
+var profile_buttons: Array[Button] = []
+var save_buttons: Array[Button] = []
 var confirm_button: Button
 var cancel_button: Button
 ## id -> allocated levels in the draft
@@ -38,6 +42,39 @@ func setup(p_sim: Simulation, _lib: SpriteLibrary) -> void:
 	why.add_theme_color_override("font_color", Color("#ffb3a8"))
 	why.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(why)
+	var ph := PanelViews.label(tr("rp.profiles"), 15, true)
+	ph.name = "ProfilesHead"
+	ph.set_meta("key", "rp.profiles")
+	add_child(ph)
+	var prow := HBoxContainer.new()
+	prow.name = "Profiles"
+	prow.add_theme_constant_override("separation", 6)
+	for i in ResearchSystem.PROFILES:
+		var col := VBoxContainer.new()
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_theme_constant_override("separation", 2)
+		var load_button := Button.new()
+		load_button.name = "Load%d" % i
+		load_button.custom_minimum_size = Vector2(0, 48)
+		load_button.focus_mode = Control.FOCUS_NONE
+		load_button.add_theme_font_size_override("font_size", 15)
+		var slot := i
+		load_button.pressed.connect(func() -> void: load_profile(slot))
+		col.add_child(load_button)
+		var save_button := Button.new()
+		save_button.name = "Save%d" % i
+		save_button.custom_minimum_size = Vector2(0, 40)
+		save_button.focus_mode = Control.FOCUS_NONE
+		save_button.flat = true
+		save_button.add_theme_font_size_override("font_size", 14)
+		save_button.pressed.connect(func() -> void:
+			last_result = sim.execute({"type": "research.profile_save", "slot": slot, "levels": draft.duplicate()})
+			refresh())
+		col.add_child(save_button)
+		prow.add_child(col)
+		profile_buttons.append(load_button)
+		save_buttons.append(save_button)
+	add_child(prow)
 	list = VBoxContainer.new()
 	list.name = "List"
 	list.add_theme_constant_override("separation", 4)
@@ -73,6 +110,20 @@ func reset_draft() -> void:
 	refresh()
 
 
+## A saved plan into the draft: only nodes unlocked now, each at most what it
+## can still take on top of what was researched this run.
+func load_profile(slot: int) -> void:
+	var p: Dictionary = research.profiles[slot]
+	draft = {}
+	for id: String in p:
+		if research.is_unlocked_node(id):
+			var room := research.max_level(id) - int(research.bought.get(id, 0))
+			if mini(int(p[id]), room) > 0:
+				draft[id] = mini(int(p[id]), room)
+	last_result = {}
+	refresh()
+
+
 func _unlocked_ids() -> Array[String]:
 	var out: Array[String] = []
 	for n: Dictionary in research.nodes():
@@ -88,11 +139,19 @@ func _build_rows() -> void:
 		var r := HBoxContainer.new()
 		r.name = "Row_" + id
 		r.add_theme_constant_override("separation", 8)
+		var words := VBoxContainer.new()
+		words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		words.add_theme_constant_override("separation", 0)
 		var label := PanelViews.label("", 16)
 		label.name = "Name"
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		r.add_child(label)
+		words.add_child(label)
+		var preview := PanelViews.label("", 13)
+		preview.name = "Preview"
+		preview.add_theme_color_override("font_color", Color("#b7f08a"))
+		preview.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		words.add_child(preview)
+		r.add_child(words)
 		var minus := _step_button("Minus", "-")
 		minus.pressed.connect(func() -> void: _step(id, -1))
 		r.add_child(minus)
@@ -151,16 +210,40 @@ func refresh() -> void:
 		var r: HBoxContainer = rows[id]
 		var base := int(research.bought.get(id, 0))
 		var lv := base + int(draft.get(id, 0))
-		(r.get_node("Name") as Label).text = tr(String(research.node(id).get("name", id)))
+		(r.find_child("Name", true, false) as Label).text = tr(String(research.node(id).get("name", id)))
 		(r.get_node("Level") as Label).text = "Lv %d/%d" % [lv, research.max_level(id)]
+		(r.find_child("Preview", true, false) as Label).text = preview_text(id, research.level(id), lv)
 		(r.get_node("Minus") as Button).disabled = int(draft.get(id, 0)) <= 0
 		(r.get_node("Plus") as Button).disabled = left <= 0 or lv >= research.max_level(id)
+	for i in ResearchSystem.PROFILES:
+		var p: Dictionary = research.profiles[i]
+		var n := 0
+		for k: String in p:
+			n += int(p[k])
+		var slot := String.chr(65 + i)
+		profile_buttons[i].text = tr("rp.profile").format({"slot": slot, "n": n}) if not p.is_empty() else tr("rp.profile_empty").format({"slot": slot})
+		profile_buttons[i].disabled = p.is_empty()
+		save_buttons[i].text = tr("rp.save")
+	for child: Node in get_children():
+		if child.has_meta("key"):
+			(child as Label).text = tr(String(child.get_meta("key")))
 	confirm_button.text = tr("rp.confirm")
 	confirm_button.disabled = not check["ok"]
 	cancel_button.text = tr("sale.cancel")
 	if list.get_child_count() == 0:
 		why.text = tr("rp.none")
 		why.visible = true
+
+
+## "now -> with the draft", in the effect's own numbers.
+func preview_text(id: String, now: int, then: int) -> String:
+	if now == 0 and then == 0:
+		return tr("rp.at_one") % ResearchText.at_level(sim, id, 1)
+	var a := ResearchText.at_level(sim, id, now) if now > 0 else tr("rp.off")
+	if now == then:
+		return a
+	var b := ResearchText.at_level(sim, id, then) if then > 0 else tr("rp.off")
+	return "%s → %s" % [a, b]
 
 
 func _reason(check: Dictionary) -> String:

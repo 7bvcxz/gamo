@@ -460,3 +460,12 @@ rp.needs,{a} needs {b} first,{a}에는 {b}가 먼저 필요해요,{a}には先�
 rp.needed_by,{b} needs {a},{b}에 {a}가 필요해요,{b}には{a}が必要です,{b} 需要 {a}
 err.rp_short,Not enough research points,연구 포인트가 모자라요,研究ポイントが足りません,研究点数不够
 err.research_max,Already at its top level,이미 최고 레벨이에요,すでに最高レベルです,已是最高等级
+research.momo_paths.name,Island paths,섬 오솔길,島の小道,岛上小路
+research.momo_paths.desc,Trodden paths between the buildings: every Momo walks faster.,건물 사이에 길이 나서 모든 모모가 더 빨리 걸어요.,建物の間に道ができ、モモがみんな速く歩きます。,建筑之间踩出了小路，桃桃们都走得更快。
+effect.watch_tiles,Each Momo looks after {n} more tiles,모모마다 맡는 칸 +{n},モモの受け持ち +{n}マス,每只桃桃多照看{n}格
+rp.off,off,꺼짐,オフ,关闭
+rp.profile,{slot} · {n} RP,{slot} · {n} RP,{slot} · {n} RP,{slot} · {n} RP
+rp.profile_empty,{slot} · empty,{slot} · 비어 있음,{slot} · 空き,{slot} · 空
+rp.save,Save,저장,保存,保存
+rp.profiles,Saved plans,저장한 배분,保存した配分,保存的方案
+rp.at_one,At Lv 1: %s,Lv 1이면: %s,Lv 1なら: %s,Lv 1 时：%s

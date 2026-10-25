@@ -399,12 +399,16 @@ func _ready() -> void:
 		for id: String in rp_view.rows:
 			var r: Control = rp_view.rows[id]
 			rows[id] = {"level": rs.level(id), "draft": int(rp_view.draft.get(id, 0)), "label": (r.get_node("Level") as Label).text,
+				"preview": (r.find_child("Preview", true, false) as Label).text,
 				"minus": conv.call(r.get_node("Minus")), "plus": conv.call(r.get_node("Plus")),
 				"plus_disabled": (r.get_node("Plus") as Button).disabled}
 		return {"open": research_frame.visible and research_frame.current_view() == rp_view, "earned": rs.rp_earned, "unspent": rs.rp_unspent(),
 			"pending": rs.rp_pending(), "allocated": rs.allocated, "unlocked": rs.unlocked.keys(), "head": rp_view.head.text, "rows": rows,
 			"confirm": conv.call(rp_view.confirm_button) if rp_view.is_visible_in_tree() else [], "confirm_disabled": rp_view.confirm_button.disabled,
-			"why": rp_view.why.text, "result": rp_view.last_result, "window": [win.x, win.y]})
+			"why": rp_view.why.text, "result": rp_view.last_result, "draft": rp_view.draft,
+			"profiles": range(ResearchSystem.PROFILES).map(func(i: int) -> Dictionary: return {"text": rp_view.profile_buttons[i].text,
+				"load": conv.call(rp_view.profile_buttons[i]), "save": conv.call(rp_view.save_buttons[i]), "levels": rs.profiles[i]}),
+			"window": [win.x, win.y]})
 	bridge.register_query("dev_level", func(lv: Variant) -> Dictionary:
 		var prog: ProgressionSystem = sim.system(&"progression")
 		while prog.level < int(lv):

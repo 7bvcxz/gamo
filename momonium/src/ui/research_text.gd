@@ -8,7 +8,10 @@ extends RefCounted
 
 static func effect_lines(sim: Simulation, node: Dictionary, only_type: String = "") -> Array[String]:
 	var out: Array[String] = []
-	for e: Dictionary in node.get("effects", []):
+	var rs: ResearchSystem = sim.system(&"research")
+	var lv := rs.level(String(node.get("id", ""))) if rs != null else 0
+	for e0: Dictionary in node.get("effects", []):
+		var e := rs.effect_at(e0, maxi(lv, 1)) if rs != null else e0
 		if only_type != "" and String(e.get("type", "")) != only_type:
 			continue
 		var line := effect_line(sim, e)
@@ -52,7 +55,20 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 			return t.translate("effect.momo_work").format({"pct": pct})
 		"research_time":
 			return t.translate("effect.research_time").format({"pct": pct})
+		"watch_tiles":
+			return t.translate("effect.watch_tiles").format({"n": int(e.get("add", 0))})
 	return ""
+
+
+## What a node does at a level, in one line (the points screen's preview).
+static func at_level(sim: Simulation, id: String, lv: int) -> String:
+	var rs: ResearchSystem = sim.system(&"research")
+	var parts: PackedStringArray = []
+	for e: Dictionary in rs.effects_at(id, lv):
+		var line := effect_line(sim, e)
+		if line != "":
+			parts.append(line)
+	return " · ".join(parts)
 
 
 static func stage_label(sim: Simulation, type: String, field: String, value: String) -> String:

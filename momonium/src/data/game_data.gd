@@ -320,6 +320,18 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 				errors.append("research: %s watch_tiles needs add >= 1" % id)
 		_:
 			errors.append("research: %s has unknown effect kind %s" % [id, kind])
+	# Listed levels must only get better (a smaller multiplier for times, a
+	# larger one or more for gains).
+	var steps: Array = e.get("per_level", [])
+	if not steps.is_empty():
+		var prev := float(steps[0])
+		for v: Variant in steps:
+			var f := float(v)
+			var better := f <= prev if e.has("multiply") and float(e["multiply"]) <= 1.0 else f >= prev
+			if not better:
+				errors.append("research: %s %s per_level must only get better with each level" % [id, kind])
+				break
+			prev = f
 
 
 func _validate_balance(t: Dictionary) -> void:
