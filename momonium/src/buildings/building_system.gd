@@ -664,10 +664,9 @@ func tap(id: int) -> Dictionary:
 	return start_stage(id, 0, 1.0)
 
 
-## Starts the current stage done by `worker` (a Momo id, 0 for the player),
-## taking `time_multiplier` times the stage's work time. Cooldowns that follow
-## are world rules and do not scale with who did the work.
-func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
+## Whether a stage could start now, without starting it: the same checks
+## start_stage makes, in the same order (a Momo deciding where to walk asks this).
+func can_start(id: int) -> Dictionary:
 	if not buildings.has(id):
 		return SimResult.fail("err.no_building")
 	var b: Dictionary = buildings[id]
@@ -699,6 +698,20 @@ func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
 	var produces := whole_yield(b, stage)
 	if not produces.is_empty() and not inv.fits(produces):
 		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
+	return SimResult.ok()
+
+
+## Starts the current stage done by `worker` (a Momo id, 0 for the player),
+## taking `time_multiplier` times the stage's work time. Cooldowns that follow
+## are world rules and do not scale with who did the work.
+func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
+	var check := can_start(id)
+	if not check["ok"]:
+		return check
+	var b: Dictionary = buildings[id]
+	var stage := current_stage(b)
+	var consumes: Dictionary = stage.get("consumes", {})
+	var inv: InventorySystem = sim.system(&"inventory")
 	if not consumes.is_empty():
 		inv.take_all(consumes, "consume:" + String(b["type"]))
 		sim.bus.emit(&"consumed", {"id": id, "type": b["type"], "items": consumes.duplicate()})

@@ -11,6 +11,12 @@ extends SimSystem
 ## times the player's time. Cooldowns are untouched -- the plants do not drink
 ## faster because a Momo poured.
 ##
+## Rounds: a Momo works the buildings on the tiles it watches. When it is
+## free -- its stage done, its zone edited, a watched building turning ready
+## -- it goes to the nearest watched building that could start now and has
+## room (`dispatch`); with nothing ready it stays where it is. A Momo watching
+## only its own building (the default) never leaves it, exactly as before.
+##
 ## Fairness: when several Momo share a building, the one who has waited
 ## longest goes next. Nothing is ever started twice: the building's own state
 ## machine refuses a second start, and completion events carry tokens.
@@ -41,13 +47,30 @@ func on_new_game() -> void:
 func _on_event(type: StringName, payload: Dictionary) -> void:
 	match type:
 		&"building_idle":
-			try_start(int(payload["id"]))
-		&"momo_arrived", &"momo_assigned":
+			var id := int(payload["id"])
+			if not try_start(id)["ok"]:
+				# Nothing to do here for the Momo standing by: their rounds go on.
+				var momos: MomoSystem = sim.system(&"momo")
+				for w: int in momos.workers_at(id):
+					if momos.at_work(w):
+						dispatch(w, id)
+				_call_watchers(id)
+		&"momo_arrived":
+			if not try_start(int(payload.get("building", 0)))["ok"]:
+				dispatch(int(payload.get("id", 0)), int(payload.get("building", 0)))
+		&"momo_assigned":
 			try_start(int(payload.get("building", 0)))
+		&"momo_watch_changed":
+			dispatch(int(payload.get("id", 0)))
 		&"task_completed":
 			var worker := int(payload.get("worker", 0))
 			if worker > 0:
 				last_worked[worker] = sim.now_ms()
+				# A wait follows: meanwhile it may work elsewhere on its rounds.
+				# (No wait: building_idle comes next and starts it again here.)
+				var b := (sim.system(&"buildings") as BuildingSystem).get_building(int(payload.get("id", 0)))
+				if not b.is_empty() and b["state"] == BuildingSystem.COOLDOWN:
+					dispatch(worker, int(payload.get("id", 0)))
 		&"sold", &"research_completed", &"recipe_changed":
 			_try_all()
 		&"inventory_changed":
@@ -58,6 +81,9 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 
 func on_day_started(_day: int) -> void:
 	_try_all()
+	var momos: MomoSystem = sim.system(&"momo")
+	for id: int in momos.ids():
+		dispatch(id)
 
 
 ## Buildings idle for want of inputs, tried again.
@@ -94,6 +120,102 @@ func next_worker(building: int) -> int:
 			best = id
 			best_since = since
 	return best
+
+
+## Whether a Momo is in the middle of a stage somewhere.
+func is_working(momo: int) -> bool:
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var at := int((sim.system(&"momo") as MomoSystem).get_momo(momo).get("assigned", 0))
+	var b := buildings.get_building(at)
+	return not b.is_empty() and b["state"] == BuildingSystem.WORKING and int(b.get("worker", 0)) == momo
+
+
+## A free Momo picks its next job among the buildings it watches: the
+## nearest that could start now and has room for it (ties: lower id). Its own
+## building, when it qualifies, is simply started; `skip` (just tried) is not
+## walked back to. Returns the building it went to, or 0.
+func dispatch(momo: int, skip: int = 0) -> int:
+	var momos: MomoSystem = sim.system(&"momo")
+	var m := momos.get_momo(momo)
+	if m.is_empty() or (m.get("watch", []) as Array).is_empty() or resting() or is_working(momo):
+		return 0
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var here := momos.position_of(momo)
+	var at := int(m["assigned"])
+	var best := 0
+	var best_d := INF
+	for id: int in _watched_buildings(momo):
+		if id == skip or not _open_for(momo, id):
+			continue
+		if id == at:
+			# Its own building (or the one it is walking to) is ready.
+			if momos.at_work(momo):
+				try_start(id)
+			return id
+		var d := here.distance_to(momos.work_spot(id))
+		if d < best_d - 0.0001:
+			best = id
+			best_d = d
+	if best != 0 and momos.assign(momo, best, false, true)["ok"]:
+		return best
+	return 0
+
+
+## Watched buildings of free Momo nearest first: one of them comes over.
+func _call_watchers(building: int) -> void:
+	if resting() or not _job_for_momo(building):
+		return
+	var momos: MomoSystem = sim.system(&"momo")
+	var spot := momos.work_spot(building)
+	var free: Array[int] = []
+	for id: int in momos.watchers_of(building):
+		if not is_working(id) and int(momos.get_momo(id)["assigned"]) != building:
+			free.append(id)
+	free.sort_custom(func(a: int, b: int) -> bool:
+		var da := momos.position_of(a).distance_to(spot)
+		var db := momos.position_of(b).distance_to(spot)
+		return da < db - 0.0001 or (absf(da - db) <= 0.0001 and a < b))
+	for id: int in free:
+		# Only a Momo with nothing to start where it stands walks over.
+		var at := int(momos.get_momo(id)["assigned"])
+		if at != 0 and momos.at_work(id) and _open_for(id, at):
+			continue
+		if _open_for(id, building) and momos.assign(id, building, false, true)["ok"]:
+			return
+
+
+func _watched_buildings(momo: int) -> Array[int]:
+	var momos: MomoSystem = sim.system(&"momo")
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var out: Array[int] = []
+	for c: Vector2i in momos.watched(momo):
+		var id := buildings.building_at(c)
+		if id != 0 and not out.has(id):
+			out.append(id)
+	out.sort()
+	return out
+
+
+## A stage a Momo (not a drip line) would do now.
+func _job_for_momo(building: int) -> bool:
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var b := buildings.get_building(building)
+	if b.is_empty():
+		return false
+	var research: ResearchSystem = sim.system(&"research")
+	var action := String(buildings.current_stage(b).get("action", ""))
+	return research == null or not research.is_auto(String(b["type"]), action)
+
+
+## Whether `momo` should go to `building` now: a Momo job that could start,
+## and a free place for it there.
+func _open_for(momo: int, building: int) -> bool:
+	var momos: MomoSystem = sim.system(&"momo")
+	if not _job_for_momo(building) or not (sim.system(&"buildings") as BuildingSystem).can_start(building)["ok"]:
+		return false
+	var others := momos.workers_at(building)
+	others.erase(momo)
+	return others.size() < momos.slots_of(building)
 
 
 func try_start(building: int) -> Dictionary:

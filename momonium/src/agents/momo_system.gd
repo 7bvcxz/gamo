@@ -15,12 +15,19 @@ extends SimSystem
 ## system's own seeded RNG, saved with it, so a wander is reproducible.
 ##
 ## Assigned Momo walk to their building and stay; Step 19 gives them the work.
+##
+## Each Momo also watches a set of tiles (`watch`): it works the buildings on
+## them, going to whichever is ready (JobSystem decides). Being assigned to a
+## building -- dragged there, or by the manager -- makes that building's tiles
+## the whole set, so nobody has to paint zones to play; the pencil adds and
+## removes tiles one at a time, up to watch_capacity().
 
 const ROAM := "momo.roam"
 const ARRIVE := "momo.arrive"
 const NEIGHBOURS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
-## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired}
+## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired,
+##        watch [[x,y]...] (sorted)}
 var momos: Dictionary = {}
 var next_id := 1
 var hired := 0
@@ -36,7 +43,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["momo.hire", "momo.assign", "momo.unassign", "momo.move", "momo.pin"])
+	return PackedStringArray(["momo.hire", "momo.assign", "momo.unassign", "momo.move", "momo.pin", "momo.watch"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -49,7 +56,7 @@ func setup(p_sim: Simulation) -> void:
 func _on_event(type: StringName, payload: Dictionary) -> void:
 	if type == &"building_removed":
 		for id: int in workers_at(int(payload.get("id", 0))):
-			unassign(id)
+			unassign(id, true)
 	elif type == &"task_completed":
 		var worker := int(payload.get("worker", 0))
 		if momos.has(worker):
@@ -102,7 +109,7 @@ func add_momo(pos: Vector2) -> int:
 	var names := maxi(sim.data.get_int("balance", "momo.names", 10), 1)
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
-		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false}
+		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": []}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -200,6 +207,12 @@ func execute(command: Dictionary) -> Dictionary:
 			return unassign(Cmd.integer(command, "momo"))
 		"momo.pin":
 			return set_pinned(Cmd.integer(command, "momo"), bool(command.get("pinned", true)))
+		"momo.watch":
+			var cells: Array[Vector2i] = []
+			for c: Variant in command.get("cells", []):
+				if typeof(c) == TYPE_ARRAY and (c as Array).size() == 2:
+					cells.append(Vector2i(int(c[0]), int(c[1])))
+			return set_watch(Cmd.integer(command, "momo"), cells, Cmd.text(command, "op"))
 		"momo.move":
 			var p: Variant = command.get("pos")
 			return move_to(Cmd.integer(command, "momo"), Vector2(float(p[0]), float(p[1])) if typeof(p) == TYPE_ARRAY else Vector2(-999, -999))
@@ -223,11 +236,28 @@ func hire() -> Dictionary:
 
 ## `by_player`: placed by the player (dragged, or the Assign button) -- such
 ## a Momo is pinned and a manager never moves it. A manager assigns unpinned.
-func assign(momo: int, building: int, by_player: bool = true) -> Dictionary:
+##
+## `keep_watch`: the Momo goes to a building it already watches (its rounds,
+## JobSystem); otherwise the building's tiles become everything it watches.
+func assign(momo: int, building: int, by_player: bool = true, keep_watch: bool = false) -> Dictionary:
 	var check := can_assign(momo, building)
 	if not check["ok"]:
 		return check
 	var m: Dictionary = momos[momo]
+	if not keep_watch:
+		var cells: Array = []
+		var bs: BuildingSystem = sim.system(&"buildings")
+		for c: Vector2i in bs.cells_of(bs.get_building(building)):
+			cells.append([c.x, c.y])
+		cells.sort()
+		m["watch"] = cells
+	elif int(m["assigned"]) == building:
+		var again := _walk_to(m, work_spot(building))
+		m["token"] = int(m["token"]) + 1
+		sim.scheduler.schedule(again, ARRIVE, {"id": momo, "token": m["token"]})
+		return SimResult.ok()
+	if keep_watch:
+		by_player = bool(m.get("pinned", false))
 	if int(m["assigned"]) != 0 and int(m["assigned"]) != building:
 		_close_history(m)
 	m["assigned"] = building
@@ -241,6 +271,8 @@ func assign(momo: int, building: int, by_player: bool = true) -> Dictionary:
 	m["token"] = int(m["token"]) + 1
 	sim.scheduler.schedule(arrive, ARRIVE, {"id": momo, "token": m["token"]})
 	sim.bus.emit(&"momo_assigned", {"id": momo, "building": building})
+	if not keep_watch:
+		sim.bus.emit(&"momo_watch_changed", {"id": momo})
 	return SimResult.ok()
 
 
@@ -251,7 +283,9 @@ func at_work(id: int) -> bool:
 		and position_of(id).distance_to(work_spot(int(m["assigned"]))) < 0.01
 
 
-func unassign(momo: int) -> Dictionary:
+## Lets a Momo go from its building. Unless `keep_watch` (its rounds go on
+## elsewhere, or its building is gone), it stops watching anything too.
+func unassign(momo: int, keep_watch: bool = false) -> Dictionary:
 	if not momos.has(momo):
 		return SimResult.fail("err.no_momo")
 	var m: Dictionary = momos[momo]
@@ -260,7 +294,11 @@ func unassign(momo: int) -> Dictionary:
 		return SimResult.fail("err.not_assigned")
 	_close_history(m)
 	m["assigned"] = 0
-	m["pinned"] = false
+	if not keep_watch:
+		m["pinned"] = false
+		if not (m["watch"] as Array).is_empty():
+			m["watch"] = []
+			sim.bus.emit(&"momo_watch_changed", {"id": momo})
 	_stop(m)
 	_schedule_roam(m, _rest_ms())
 	sim.bus.emit(&"momo_unassigned", {"id": momo, "building": was})
@@ -271,6 +309,103 @@ func _close_history(m: Dictionary) -> void:
 	var hist: Array = m["history"]
 	if not hist.is_empty() and int(hist.back()["to"]) < 0:
 		hist.back()["to"] = sim.now_ms()
+
+
+# --- watched tiles -----------------------------------------------------------------
+
+## How many tiles one Momo may watch: the base, plus research.
+func watch_capacity(_momo: int = 0) -> int:
+	var n := sim.data.get_int("balance", "momo.watch.base_tiles", 4)
+	var research: ResearchSystem = sim.system(&"research")
+	if research != null:
+		n += research.watch_bonus()
+	return n
+
+
+func watched(momo: int) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for c: Array in momos.get(momo, {}).get("watch", []):
+		out.append(Vector2i(int(c[0]), int(c[1])))
+	return out
+
+
+func is_watching(momo: int, cell: Vector2i) -> bool:
+	return (momos.get(momo, {}).get("watch", []) as Array).has([cell.x, cell.y])
+
+
+## The Momo watching any tile of `building`.
+func watchers_of(building: int) -> Array[int]:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var cells := bs.cells_of(bs.get_building(building))
+	var out: Array[int] = []
+	for id: int in ids():
+		for c: Vector2i in cells:
+			if is_watching(id, c):
+				out.append(id)
+				break
+	return out
+
+
+## Whether `momo` may start watching `cell`: its island's land, not a
+## building with no Momo work (a solar roof), and room in its rounds.
+func can_watch(momo: int, cell: Vector2i) -> Dictionary:
+	if not momos.has(momo):
+		return SimResult.fail("err.no_momo")
+	if is_watching(momo, cell):
+		return SimResult.ok()
+	if not (sim.system(&"world") as WorldSystem).is_owned(cell):
+		return SimResult.fail("err.not_owned")
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var on := bs.building_at(cell)
+	if on != 0 and slots_of(on) <= 0:
+		return SimResult.fail("err.no_work_here")
+	if (momos[momo]["watch"] as Array).size() >= watch_capacity(momo):
+		return SimResult.fail("err.watch_full", {"capacity": watch_capacity(momo)})
+	return SimResult.ok()
+
+
+## Adds (`op` "add") or removes ("remove") tiles from what a Momo watches --
+## the same operation for every tile, so a brush stroke never flips a tile
+## twice. Each tile that cannot be added says why; the rest still go in. A
+## Momo whose zone the player edits is theirs: the manager leaves it alone.
+func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
+	if not momos.has(momo):
+		return SimResult.fail("err.no_momo")
+	if op != "add" and op != "remove":
+		return SimResult.fail("err.bad_command")
+	var m: Dictionary = momos[momo]
+	var watch: Array = m["watch"]
+	var changed: Array = []
+	var refused := {}
+	for c: Vector2i in cells:
+		var key := [c.x, c.y]
+		if op == "add":
+			if watch.has(key):
+				continue
+			var check := can_watch(momo, c)
+			if not check["ok"]:
+				refused["%d,%d" % [c.x, c.y]] = check["reason"]
+				continue
+			watch.append(key)
+			changed.append(key)
+		elif watch.has(key):
+			watch.erase(key)
+			changed.append(key)
+	watch.sort()
+	if not changed.is_empty():
+		m["pinned"] = true
+		# Its building is no longer on its rounds: it goes (a stage under way
+		# finishes by itself), and JobSystem finds it the next job.
+		var at := int(m["assigned"])
+		if at != 0 and op == "remove":
+			var bs: BuildingSystem = sim.system(&"buildings")
+			var still := false
+			for c: Vector2i in bs.cells_of(bs.get_building(at)):
+				still = still or watch.has([c.x, c.y])
+			if not still:
+				unassign(momo, true)
+		sim.bus.emit(&"momo_watch_changed", {"id": momo})
+	return SimResult.ok({"changed": changed, "refused": refused, "count": watch.size(), "capacity": watch_capacity(momo)})
 
 
 ## Lets the manager move this Momo (false), or keeps it where the player put it (true).
@@ -414,6 +549,19 @@ func load_state(state: Dictionary) -> void:
 			hist.append({"building": int(h.get("building", 0)), "type": String(h.get("type", "")), "from": int(h.get("from", 0)), "to": int(h.get("to", -1)), "by": String(h.get("by", "player"))})
 		m["history"] = hist
 		m["pinned"] = bool(m.get("pinned", int(m["assigned"]) != 0))
+		# Before watched tiles, a Momo watched exactly its building.
+		if not m.has("watch"):
+			var cells: Array = []
+			var bs: BuildingSystem = sim.system(&"buildings")
+			if int(m["assigned"]) != 0 and bs != null and not bs.get_building(int(m["assigned"])).is_empty():
+				for c: Vector2i in bs.cells_of(bs.get_building(int(m["assigned"]))):
+					cells.append([c.x, c.y])
+			m["watch"] = cells
+		var w: Array = []
+		for c: Variant in m["watch"]:
+			w.append([int(c[0]), int(c[1])])
+		w.sort()
+		m["watch"] = w
 		if not m.has("from"):
 			var p: Array = m.get("pos", [0.5, 0.5])
 			m["from"] = p

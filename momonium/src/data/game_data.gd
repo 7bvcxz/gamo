@@ -315,6 +315,9 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 			var m := float(e.get("multiply", 0.0))
 			if m <= 0.0 or m > 1.0:
 				errors.append("research: %s research_time multiply must be in (0, 1]" % id)
+		"watch_tiles":
+			if int(e.get("add", 0)) < 1:
+				errors.append("research: %s watch_tiles needs add >= 1" % id)
 		_:
 			errors.append("research: %s has unknown effect kind %s" % [id, kind])
 

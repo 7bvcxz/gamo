@@ -154,7 +154,11 @@
         0.72
       ]
     },
-    "history_kept": 12
+    "history_kept": 12,
+    "watch": {
+      "_doc": "Watched tiles: each Momo works the buildings on the tiles it watches, the nearest ready one first. A Momo assigned to a building (dragged, or by the manager) watches that building's tiles; the pencil edits the set. `base_tiles` is how many one Momo may watch before research (watch_tiles effects add).",
+      "base_tiles": 4
+    }
   },
   "mail": {
     "_doc": "Momo Letters (data/letters.json). At most letters_per_day new letters arrive on one in-game day.",

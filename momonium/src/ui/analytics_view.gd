@@ -132,12 +132,28 @@ func refresh() -> void:
 	var blocked := AnalyticsSystem.total(ds, "blocked")
 	if blocked.is_empty():
 		blocked_box.add_child(PanelViews.label(tr("stats.none_blocked"), 15, true))
-	var by := AnalyticsSystem.total(ds, "blocked_by")
 	for why: Variant in blocked:
-		var worst := 0
-		for id: Variant in by:
-			if worst == 0 or int(by[id]) > int(by[worst]):
-				worst = int(id)
 		var row := PanelViews.row(tr("stats.why." + String(why)), "%d%%" % int(round(100.0 * int(blocked[why]) / maxf(samples, 1))))
 		row.name = "Why_" + String(why)
 		blocked_box.add_child(row)
+	# Where it is stuck right now, and on what -- the bottleneck to fix.
+	var stuck := 0
+	for id: int in bs.ids():
+		var b := bs.get_building(id)
+		var block := bs.blocked(b)
+		if block.is_empty() or stuck >= 4:
+			continue
+		var what := ""
+		if block.has("missing"):
+			var parts: PackedStringArray = []
+			for item: String in block["missing"]:
+				parts.append("%s %d" % [tr(String(sim.data.item(item).get("name", item))), int(block["missing"][item])])
+			what = tr("stats.stuck.missing") % ", ".join(parts)
+		elif block.has("full"):
+			what = tr("stats.why.full")
+		elif block.has("crew"):
+			what = tr("stats.stuck.crew") % int(block["crew"])
+		var row := PanelViews.row(BuildingDetailView.full_name(sim, String(b["type"])), what)
+		row.name = "Stuck_%d" % id
+		blocked_box.add_child(row)
+		stuck += 1

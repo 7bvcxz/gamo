@@ -252,6 +252,14 @@ func sale_multiplier() -> float:
 	return m
 
 
+## How many more tiles each Momo may watch, from research.
+func watch_bonus() -> int:
+	var n := 0
+	for e: Dictionary in _effects("watch_tiles"):
+		n += int(e.get("add", 0))
+	return n
+
+
 ## How much faster Momo walk, from transport research (>= 1).
 func walk_multiplier() -> float:
 	var m := 1.0

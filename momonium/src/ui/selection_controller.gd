@@ -51,6 +51,10 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 	if land_mode != null and land_mode.active:
 		land_mode.on_world_tap(world_pos)
 		return
+	# Editing a Momo's tiles: taps are the brush.
+	if watch_editor != null and watch_editor.active:
+		watch_editor.on_tap(world_pos)
+		return
 	# Assign mode (the no-drag way): the next building tapped gets the Momo.
 	if kind == "momo" and momo_panel != null and momo_panel.assigning:
 		var target := views.hit(world_pos)
@@ -95,6 +99,8 @@ func _act_on(id: int) -> void:
 
 ## The four choices beside an empty tile.
 var build_strip: BuildStrip
+## The selected Momo's tiles and their pencil.
+var watch_editor: WatchEditor
 
 
 func select_momo(id: int) -> void:
@@ -105,6 +111,8 @@ func select_momo(id: int) -> void:
 	marker.clear()
 	panel.hide_panel()
 	momo_panel.show_momo(id)
+	if watch_editor != null:
+		watch_editor.show_for(id)
 	selection_changed.emit(kind)
 
 
@@ -153,4 +161,6 @@ func _unmark() -> void:
 		if a:
 			a.selected = false
 		momo_panel.hide_panel()
+		if watch_editor != null:
+			watch_editor.hide_editor()
 	selected_id = 0

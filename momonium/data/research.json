@@ -1,5 +1,5 @@
 {
-  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type. {kind: momo_work, multiply, type?} scales Momo work time (all types, or one). {kind: sale_price, multiply >= 1} raises what the daily sale pays (better market access); {kind: walk_speed, multiply >= 1} makes Momo walk faster.",
+  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type. {kind: momo_work, multiply, type?} scales Momo work time (all types, or one). {kind: sale_price, multiply >= 1} raises what the daily sale pays (better market access); {kind: walk_speed, multiply >= 1} makes Momo walk faster. {kind: watch_tiles, add} lets every Momo watch `add` more tiles (4 -> 9 -> 16).",
   "nodes": [
     {
       "id": "farm_expansion",
@@ -820,6 +820,58 @@
         {
           "kind": "momo_work",
           "multiply": 0.85
+        }
+      ]
+    },
+    {
+      "id": "momo_reach",
+      "industry": "global",
+      "name": "research.momo_reach.name",
+      "desc": "research.momo_reach.desc",
+      "icon": "ui_land",
+      "requires": [
+        "momo_training"
+      ],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8
+        }
+      },
+      "seconds": 120,
+      "effects": [
+        {
+          "kind": "watch_tiles",
+          "add": 5
+        }
+      ]
+    },
+    {
+      "id": "momo_wide_reach",
+      "industry": "global",
+      "name": "research.momo_wide_reach.name",
+      "desc": "research.momo_wide_reach.desc",
+      "icon": "ui_land",
+      "requires": [
+        "momo_reach"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 300,
+        "items": {
+          "notes": 16
+        }
+      },
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "watch_tiles",
+          "add": 7
         }
       ]
     },

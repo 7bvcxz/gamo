@@ -416,3 +416,12 @@ stats.before_after,{name}: {before} → {after} a day,{name}: 하루 {before} �
 refit.title,Refit into,개조,改装,改造
 err.not_placeable,Refit one of the four instead,네 가지 건물을 개조해서 만들어요,4種類の建物を改装して作ります,由四类建筑改造而成
 err.wrong_family,Only within the same family,같은 계열끼리만 개조할 수 있어요,同じ系統の中だけで改装できます,只能在同类之间改造
+research.momo_reach.name,Wider rounds,넓은 순찰,広い見回り,扩大巡视
+research.momo_reach.desc,Each Momo learns a longer route: it can look after up to 9 tiles.,모모가 더 긴 순찰 길을 익혀 9칸까지 맡을 수 있어요.,モモがもっと長い見回りを覚え、9マスまで受け持てます。,每只桃桃学会更长的巡视路线，最多照看9格。
+research.momo_wide_reach.name,Whole-field rounds,들판 순찰,畑ぜんぶの見回り,整片田野巡视
+research.momo_wide_reach.desc,Shared maps of the island: each Momo can look after up to 16 tiles.,섬 지도를 함께 써서 모모마다 16칸까지 맡을 수 있어요.,島の地図を共有して、モモごとに16マスまで受け持てます。,共享岛屿地图后，每只桃桃最多照看16格。
+err.watch_full,This Momo can look after no more tiles,이 모모는 더 맡을 수 없어요,このモモはこれ以上受け持てません,这只桃桃照看不了更多格子了
+err.no_work_here,No Momo work here,모모가 할 일이 없는 곳이에요,モモの仕事がない場所です,这里没有桃桃的工作
+watch.count,%d / %d tiles,%d / %d칸,%d / %dマス,%d / %d 格
+stats.stuck.missing,needs %s,%s 필요,%sが必要,缺 %s
+stats.stuck.crew,%d more Momo,모모 %d명 더,モモがあと%d人,还差%d只桃桃

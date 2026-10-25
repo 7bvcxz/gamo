@@ -22,6 +22,9 @@ var building_views: BuildingViews
 var momo_views: MomoViews
 var momo_panel: MomoPanel
 var momo_drag: MomoDrag
+## The selected Momo's watched tiles, and the pencil that edits them.
+var watch_overlay: WatchOverlay
+var watch_editor: WatchEditor
 var selection: SelectionController
 var land_preview: LandPreview
 var land_mode: LandMode
@@ -109,6 +112,9 @@ func _ready() -> void:
 	marker.name = "SelectionMarker"
 	marker.projection = projection
 	world_root.add_child(marker)
+	watch_overlay = WatchOverlay.new()
+	watch_overlay.name = "WatchOverlay"
+	world_root.add_child(watch_overlay)
 	land_preview = LandPreview.new()
 	land_preview.name = "LandPreview"
 	world_root.add_child(land_preview)
@@ -181,6 +187,16 @@ func _ready() -> void:
 	momo_panel.release_requested.connect(func(id: int) -> void:
 		selection.last_result = sim.execute({"type": "momo.unassign", "momo": id}))
 	selection.momo_panel = momo_panel
+	watch_overlay.setup(sim, projection)
+	watch_editor = WatchEditor.new()
+	ui.add_child(watch_editor)
+	watch_editor.setup(sim, cameras, projection, momo_views, watch_overlay)
+	watch_editor.editing_changed.connect(func(on: bool) -> void:
+		if on:
+			momo_panel.assigning = false)
+	selection.watch_editor = watch_editor
+	# Before the Momo drag: while editing, a stroke paints tiles.
+	router.add_drag_handler(watch_editor)
 	momo_drag = MomoDrag.new()
 	momo_drag.setup(sim, projection, momo_views, building_views)
 	router.add_drag_handler(momo_drag)
@@ -329,6 +345,21 @@ func _ready() -> void:
 	bridge.register_query("panels", _panels_info)
 	bridge.register_query("mail", _mail_info)
 	bridge.register_query("research", _research_info)
+	bridge.register_query("watch", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			var r := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * r.position
+			var b: Vector2 = vp.get_final_transform() * r.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
+		var cells := watch_overlay.tinted().map(func(c: Vector2i) -> Array: return [c.x, c.y])
+		var m := watch_editor.momo
+		return {"momo": m, "editing": watch_editor.active, "tinted": cells,
+			"capacity": (sim.system(&"momo") as MomoSystem).watch_capacity(m) if m != 0 else 0,
+			"pencil": conv.call(watch_editor.pencil) if watch_editor.visible else [],
+			"count": watch_editor.count_label.text if watch_editor.count_label.visible else "",
+			"result": watch_editor.last_result, "window": [win.x, win.y]})
 	bridge.register_query("strip", func(_a: Variant) -> Dictionary:
 		var vp := get_viewport()
 		var conv := func(c: Control) -> Array:
@@ -609,6 +640,7 @@ func _on_hud_action(action_name: StringName) -> void:
 	if hud_actions.size() > 20:
 		hud_actions.pop_front()
 	build_strip.close()
+	watch_editor.end_edit()
 	match action_name:
 		&"land":
 			selection.deselect()
