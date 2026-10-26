@@ -1,0 +1,349 @@
+{
+  "_doc": "Momo's 5x5 sheet (Step 51, design/MOMO_SPRITES.md section 4): which keyed source goes in which cell. `fit` (tools/art/gen/build_momo_sheet.gd): upright poses by height (the default), `head` where something rises above the head or the body is not upright (matched to its `view`'s anchor), `width` for lying down -- 236 px gives the approved sheet's own ratio, the sleeping Momo 0.59x as tall as the standing one (the generated pose is a little flatter than the sheet's, so fitting its width to the sheet's 1.05x of the standing ears left the head visibly small). Sources are TopView image edits of the approved sheet, keyed by tools/art/gen/key_sprite.gd; the generation log is in design/MOMO_SPRITES.md section 6.",
+  "cell": 256,
+  "cols": 5,
+  "rows": 5,
+  "foot": 14,
+  "stand_height": 200,
+  "anchors": {
+    "front": "front_idle",
+    "back": "back_idle",
+    "side": "side_idle"
+  },
+  "cells": [
+    {
+      "name": "front_idle",
+      "row": 0,
+      "col": 0,
+      "view": "front",
+      "state": "idle",
+      "src": "front_idle.webp"
+    },
+    {
+      "name": "front_blink",
+      "row": 0,
+      "col": 1,
+      "view": "front",
+      "state": "blink",
+      "src": "front_blink.webp"
+    },
+    {
+      "name": "front_walk_a",
+      "row": 0,
+      "col": 2,
+      "view": "front",
+      "state": "walk",
+      "frame": 0,
+      "src": "front_walk_a.webp"
+    },
+    {
+      "name": "front_walk_b",
+      "row": 0,
+      "col": 3,
+      "view": "front",
+      "state": "walk",
+      "frame": 1,
+      "src": "front_walk_b.webp"
+    },
+    {
+      "name": "front_walk_c",
+      "row": 0,
+      "col": 4,
+      "view": "front",
+      "state": "walk",
+      "frame": 2,
+      "src": "front_walk_c.webp"
+    },
+    {
+      "name": "back_idle",
+      "row": 1,
+      "col": 0,
+      "view": "back",
+      "state": "idle",
+      "src": "back_idle.webp"
+    },
+    {
+      "name": "back_walk_a",
+      "row": 1,
+      "col": 1,
+      "view": "back",
+      "state": "walk",
+      "frame": 0,
+      "src": "back_walk_a.webp"
+    },
+    {
+      "name": "back_walk_b",
+      "row": 1,
+      "col": 2,
+      "view": "back",
+      "state": "walk",
+      "frame": 1,
+      "src": "back_walk_b.webp"
+    },
+    {
+      "name": "back_walk_c",
+      "row": 1,
+      "col": 3,
+      "view": "back",
+      "state": "walk",
+      "frame": 2,
+      "src": "back_walk_c.webp"
+    },
+    {
+      "name": "back_work",
+      "row": 1,
+      "col": 4,
+      "view": "back",
+      "state": "work",
+      "src": "back_work.webp"
+    },
+    {
+      "name": "side_idle",
+      "row": 2,
+      "col": 0,
+      "view": "side",
+      "state": "idle",
+      "src": "side_idle.webp"
+    },
+    {
+      "name": "side_walk_a",
+      "row": 2,
+      "col": 1,
+      "view": "side",
+      "state": "walk",
+      "frame": 0,
+      "src": "side_walk_a.webp"
+    },
+    {
+      "name": "side_walk_b",
+      "row": 2,
+      "col": 2,
+      "view": "side",
+      "state": "walk",
+      "frame": 1,
+      "src": "side_walk_b.webp"
+    },
+    {
+      "name": "side_walk_c",
+      "row": 2,
+      "col": 3,
+      "view": "side",
+      "state": "walk",
+      "frame": 2,
+      "src": "side_walk_c.webp"
+    },
+    {
+      "name": "side_carry",
+      "row": 2,
+      "col": 4,
+      "view": "side",
+      "state": "carry",
+      "src": "side_carry.webp"
+    },
+    {
+      "name": "harvest",
+      "row": 3,
+      "col": 0,
+      "view": "front",
+      "state": "harvest",
+      "src": "harvest.webp"
+    },
+    {
+      "name": "water",
+      "row": 3,
+      "col": 1,
+      "view": "front",
+      "state": "water",
+      "src": "water.webp"
+    },
+    {
+      "name": "dig",
+      "row": 3,
+      "col": 2,
+      "view": "front",
+      "state": "dig",
+      "src": "dig.webp",
+      "fit": "head"
+    },
+    {
+      "name": "carry",
+      "row": 3,
+      "col": 3,
+      "view": "front",
+      "state": "carry",
+      "src": "carry.webp"
+    },
+    {
+      "name": "study",
+      "row": 3,
+      "col": 4,
+      "view": "front",
+      "state": "study",
+      "src": "study.webp"
+    },
+    {
+      "name": "sit",
+      "row": 4,
+      "col": 0,
+      "view": "front",
+      "state": "sit",
+      "src": "sit.webp",
+      "fit": "head"
+    },
+    {
+      "name": "sleep",
+      "row": 4,
+      "col": 1,
+      "view": "front",
+      "state": "sleep",
+      "src": "sleep.webp",
+      "fit": "width",
+      "width": 236,
+      "align": "box"
+    },
+    {
+      "name": "happy",
+      "row": 4,
+      "col": 2,
+      "view": "front",
+      "state": "happy",
+      "src": "happy.webp"
+    },
+    {
+      "name": "confused",
+      "row": 4,
+      "col": 3,
+      "view": "front",
+      "state": "confused",
+      "src": "confused.webp"
+    },
+    {
+      "name": "waiting",
+      "row": 4,
+      "col": 4,
+      "view": "front",
+      "state": "waiting",
+      "src": "waiting.webp"
+    }
+  ],
+  "animations": {
+    "idle_front": {
+      "cells": [
+        "front_idle"
+      ],
+      "fps": 0,
+      "blink": "front_blink"
+    },
+    "walk_front": {
+      "cells": [
+        "front_walk_a",
+        "front_walk_b",
+        "front_walk_c",
+        "front_walk_b"
+      ],
+      "fps": 8
+    },
+    "idle_back": {
+      "cells": [
+        "back_idle"
+      ],
+      "fps": 0
+    },
+    "walk_back": {
+      "cells": [
+        "back_walk_a",
+        "back_walk_b",
+        "back_walk_c",
+        "back_walk_b"
+      ],
+      "fps": 8
+    },
+    "work_back": {
+      "cells": [
+        "back_work"
+      ],
+      "fps": 0
+    },
+    "idle_side": {
+      "cells": [
+        "side_idle"
+      ],
+      "fps": 0
+    },
+    "walk_side": {
+      "cells": [
+        "side_walk_a",
+        "side_walk_b",
+        "side_walk_c",
+        "side_walk_b"
+      ],
+      "fps": 8
+    },
+    "carry_side": {
+      "cells": [
+        "side_carry"
+      ],
+      "fps": 0
+    },
+    "harvest": {
+      "cells": [
+        "harvest"
+      ],
+      "fps": 0
+    },
+    "water": {
+      "cells": [
+        "water"
+      ],
+      "fps": 0
+    },
+    "dig": {
+      "cells": [
+        "dig"
+      ],
+      "fps": 0
+    },
+    "carry": {
+      "cells": [
+        "carry"
+      ],
+      "fps": 0
+    },
+    "study": {
+      "cells": [
+        "study"
+      ],
+      "fps": 0
+    },
+    "sit": {
+      "cells": [
+        "sit"
+      ],
+      "fps": 0
+    },
+    "sleep": {
+      "cells": [
+        "sleep"
+      ],
+      "fps": 0
+    },
+    "happy": {
+      "cells": [
+        "happy"
+      ],
+      "fps": 0
+    },
+    "confused": {
+      "cells": [
+        "confused"
+      ],
+      "fps": 0
+    },
+    "waiting": {
+      "cells": [
+        "waiting"
+      ],
+      "fps": 0
+    }
+  }
+}

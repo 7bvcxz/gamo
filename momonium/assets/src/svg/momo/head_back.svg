@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220"><!-- Momo part: the back of the head -- no face, a soft shadow low on the fur. Shares the 200x220 frame of every Momo part (Step 46 redesign: concept proportions, soft shading). -->
-<defs><radialGradient id="fur" cx="0.42" cy="0.32" r="0.78"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#fffaf3"/><stop offset="1" stop-color="#efe3d6"/></radialGradient></defs>
-<path d="M100 28 C146 28 170 56 170 88 C170 116 142 130 100 130 C58 130 30 116 30 88 C30 56 54 28 100 28 Z" fill="url(#fur)" stroke="#5a4038" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
-<path d="M40 100 C60 122 140 122 160 100 C150 120 126 128 100 128 C74 128 50 120 40 100 Z" fill="#e8d9c9" opacity="0.8"/>
-</svg>

@@ -132,15 +132,19 @@ func test_sky_draws_the_painted_cloud_band_that_wraps() -> void:
 	assert_true(wrap < inner * 2.5 + 1.0, "the cloud band wraps left to right (wrap %.1f vs inner %.1f)" % [wrap, inner])
 
 
-func test_momo_portrait_is_composed_from_the_rig_parts() -> void:
-	var front := FileAccess.get_file_as_string("res://assets/src/svg/momo_front.svg")
-	for part: String in ["leg_l", "leg_r", "body", "arm_l", "arm_r", "head", "eyes_open", "tuft", "ear_l", "ear_r"]:
-		var svg := FileAccess.get_file_as_string("res://assets/src/svg/momo/%s.svg" % part)
-		var d := RegEx.create_from_string("<path d=\"([^\"]+)\"").search(svg)
-		var shape := d.get_string(1) if d != null else ""
-		if shape == "":
-			shape = RegEx.create_from_string("<ellipse [^>]+>").search(svg).get_string().get_slice(" fill", 0)
-		assert_true(front.contains(shape), "momo_front.svg has the current %s (run tools/art/gen/compose_momo.py)" % part)
+## Step 51: the panels' Momo is the island's Momo -- the portrait is cut from
+## the sheet's front standing cell, pixel for pixel, in the frame the old
+## drawing had (feet at 100, 210).
+func test_momo_portrait_is_the_sheets_front_cell() -> void:
+	var portrait := Image.load_from_file(ProjectSettings.globalize_path("res://assets/src/png/momo_front.png"))
+	var sheet := Image.load_from_file(ProjectSettings.globalize_path("res://assets/momo/momo_sheet.png"))
+	portrait.convert(Image.FORMAT_RGBA8)
+	sheet.convert(Image.FORMAT_RGBA8)
+	var map := MomoSheet.shared()
+	var c: Dictionary = map.cells["front_idle"]
+	var at := Vector2i(int(c["col"]) * map.cell.x + int(map.pivot.x) - 100, int(c["row"]) * map.cell.y + int(map.pivot.y) - 210)
+	assert_eq(portrait.get_size(), Vector2i(200, 220), "the old frame")
+	assert_eq(portrait.get_data(), sheet.get_region(Rect2i(at, Vector2i(200, 220))).get_data(), "the sheet's front cell (rebuild with tools/art/gen/build_momo_sheet.gd)")
 
 
 func test_research_card_stays_clear_of_the_side_buttons() -> void:

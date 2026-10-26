@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/art/gen/momo_legend.gd" id="1"]
+
+[node name="MomoLegend" type="Node2D" unique_id=1517002]
+script = ExtResource("1")

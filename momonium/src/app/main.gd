@@ -1537,6 +1537,8 @@ func _momo_info(_arg: Variant) -> Dictionary:
 		var body: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * (a.position + Vector2(0, -35)))
 		var feet: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * a.position)
 		out[str(id)] = {"body": [body.x, body.y], "feet": [feet.x, feet.y], "assigned": int(momos.get_momo(id)["assigned"]),
-			"moving": momos.is_moving(id), "state": a.rig.state}
+			"moving": momos.is_moving(id), "state": a.rig.state,
+			"cell": a.rig.cell_name(), "view": a.rig.view(), "mirrored": a.rig.scale.x < 0.0,
+			"sheet": [a.rig.body.texture.get_width(), a.rig.body.texture.get_height()] if a.rig.body.texture != null else []}
 	var win := DisplayServer.window_get_size()
 	return {"momos": out, "drag": momo_drag.last_result, "selected": selection.kind, "assigning": momo_panel.assigning, "window": [win.x, win.y]}

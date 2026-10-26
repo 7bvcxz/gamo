@@ -7,6 +7,8 @@ extends Node2D
 ## shadow. Owns no game state.
 
 const LIFT := 26.0
+## The pose a shown mood puts an idle Momo in (Step 51; the bubble stays).
+const MOOD_POSE := {"content": "happy", "thinking": "waiting", "confused": "confused", "worried": "confused"}
 
 var id := 0
 var rig: MomoRig
@@ -74,6 +76,25 @@ func is_working() -> bool:
 	return not rec.is_empty() and rec["state"] == BuildingSystem.WORKING and int(rec.get("worker", 0)) == id
 
 
+## The sheet's pose for the stage it is doing: picking the crop, the watering
+## can, the pickaxe at a mine, a flask at a lab; "" works back turned (sowing,
+## felling, the factories).
+func work_pose() -> String:
+	var bs: BuildingSystem = momos.sim.system(&"buildings")
+	var rec := bs.get_building(int(momos.get_momo(id).get("assigned", 0)))
+	if rec.is_empty():
+		return ""
+	var stage := String(bs.current_stage(rec).get("id", ""))
+	match bs.family_of(String(rec["type"])):
+		"farm":
+			return stage if stage in ["harvest", "water"] else ""
+		"mine":
+			return "dig"
+		"research":
+			return "study"
+	return ""
+
+
 ## World-space box a tap or a drag can grab.
 func hit_rect() -> Rect2:
 	var r := Rect2(position + Vector2(-26, -76), Vector2(52, 80))
@@ -122,6 +143,7 @@ func _process(delta: float) -> void:
 			rig.face(projection.to_screen(h) - projection.to_screen(Vector2.ZERO))
 		elif is_working():
 			rig.set_state("work")
+			rig.work_pose = work_pose()
 			rig.face(Vector2(-1, -0.4))
 		elif cycle.is_night(clock):
 			rig.set_state("sleep")
@@ -142,6 +164,7 @@ func _process(delta: float) -> void:
 	if mood_bubble.due(delta):
 		_mood_reason = MomoMood.reason(momos.sim, id)
 	mood_bubble.step(delta, _mood_reason, envelope.visible or dragged, rig.position)
+	rig.mood_pose = String(MOOD_POSE.get(mood_bubble.mood, ""))
 	# Its own drawing is the letter's bubble and the selection ring: redrawn
 	# while either shows, and once more to clear it.
 	var marks := envelope.visible or selected or dragged

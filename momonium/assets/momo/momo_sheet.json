@@ -1,0 +1,486 @@
+{
+  "_doc": "Momo's sprite sheet (Step 51, design/MOMO_SPRITES.md): equal cells, rows x cols; each cell holds one pose of the same Momo, its feet on the pivot (cell x, cell y from the cell's top-left). `animations` name the cells a state plays in order at `fps`; a left-facing view is the same cell mirrored. Built by tools/art/gen/build_momo_sheet.gd from assets/src/png/momo/.",
+  "cell": [
+    256,
+    256
+  ],
+  "cols": 5,
+  "rows": 5,
+  "pivot": [
+    128,
+    242
+  ],
+  "stand_height": 200.0,
+  "cells": [
+    {
+      "name": "front_idle",
+      "row": 0.0,
+      "col": 0.0,
+      "view": "front",
+      "state": "idle",
+      "frame": 0,
+      "box": [
+        33,
+        42,
+        189,
+        200
+      ]
+    },
+    {
+      "name": "front_blink",
+      "row": 0.0,
+      "col": 1.0,
+      "view": "front",
+      "state": "blink",
+      "frame": 0,
+      "box": [
+        33,
+        42,
+        189,
+        200
+      ]
+    },
+    {
+      "name": "front_walk_a",
+      "row": 0.0,
+      "col": 2.0,
+      "view": "front",
+      "state": "walk",
+      "frame": 0,
+      "box": [
+        32,
+        42,
+        191,
+        200
+      ]
+    },
+    {
+      "name": "front_walk_b",
+      "row": 0.0,
+      "col": 3.0,
+      "view": "front",
+      "state": "walk",
+      "frame": 1,
+      "box": [
+        32,
+        42,
+        191,
+        200
+      ]
+    },
+    {
+      "name": "front_walk_c",
+      "row": 0.0,
+      "col": 4.0,
+      "view": "front",
+      "state": "walk",
+      "frame": 2,
+      "box": [
+        32,
+        42,
+        191,
+        200
+      ]
+    },
+    {
+      "name": "back_idle",
+      "row": 1.0,
+      "col": 0.0,
+      "view": "back",
+      "state": "idle",
+      "frame": 0,
+      "box": [
+        38,
+        42,
+        179,
+        200
+      ]
+    },
+    {
+      "name": "back_walk_a",
+      "row": 1.0,
+      "col": 1.0,
+      "view": "back",
+      "state": "walk",
+      "frame": 0,
+      "box": [
+        39,
+        42,
+        178,
+        200
+      ]
+    },
+    {
+      "name": "back_walk_b",
+      "row": 1.0,
+      "col": 2.0,
+      "view": "back",
+      "state": "walk",
+      "frame": 1,
+      "box": [
+        44,
+        42,
+        168,
+        200
+      ]
+    },
+    {
+      "name": "back_walk_c",
+      "row": 1.0,
+      "col": 3.0,
+      "view": "back",
+      "state": "walk",
+      "frame": 2,
+      "box": [
+        41,
+        42,
+        174,
+        200
+      ]
+    },
+    {
+      "name": "back_work",
+      "row": 1.0,
+      "col": 4.0,
+      "view": "back",
+      "state": "work",
+      "frame": 0,
+      "box": [
+        42,
+        42,
+        171,
+        200
+      ]
+    },
+    {
+      "name": "side_idle",
+      "row": 2.0,
+      "col": 0.0,
+      "view": "side",
+      "state": "idle",
+      "frame": 0,
+      "box": [
+        66,
+        42,
+        119,
+        200
+      ]
+    },
+    {
+      "name": "side_walk_a",
+      "row": 2.0,
+      "col": 1.0,
+      "view": "side",
+      "state": "walk",
+      "frame": 0,
+      "box": [
+        63,
+        42,
+        129,
+        200
+      ]
+    },
+    {
+      "name": "side_walk_b",
+      "row": 2.0,
+      "col": 2.0,
+      "view": "side",
+      "state": "walk",
+      "frame": 1,
+      "box": [
+        69,
+        42,
+        113,
+        200
+      ]
+    },
+    {
+      "name": "side_walk_c",
+      "row": 2.0,
+      "col": 3.0,
+      "view": "side",
+      "state": "walk",
+      "frame": 2,
+      "box": [
+        61,
+        42,
+        135,
+        200
+      ]
+    },
+    {
+      "name": "side_carry",
+      "row": 2.0,
+      "col": 4.0,
+      "view": "side",
+      "state": "carry",
+      "frame": 0,
+      "box": [
+        67,
+        42,
+        138,
+        200
+      ]
+    },
+    {
+      "name": "harvest",
+      "row": 3.0,
+      "col": 0.0,
+      "view": "front",
+      "state": "harvest",
+      "frame": 0,
+      "box": [
+        34,
+        42,
+        187,
+        200
+      ]
+    },
+    {
+      "name": "water",
+      "row": 3.0,
+      "col": 1.0,
+      "view": "front",
+      "state": "water",
+      "frame": 0,
+      "box": [
+        33,
+        42,
+        207,
+        200
+      ]
+    },
+    {
+      "name": "dig",
+      "row": 3.0,
+      "col": 2.0,
+      "view": "front",
+      "state": "dig",
+      "frame": 0,
+      "box": [
+        8,
+        41,
+        211,
+        201
+      ]
+    },
+    {
+      "name": "carry",
+      "row": 3.0,
+      "col": 3.0,
+      "view": "front",
+      "state": "carry",
+      "frame": 0,
+      "box": [
+        33,
+        42,
+        188,
+        200
+      ]
+    },
+    {
+      "name": "study",
+      "row": 3.0,
+      "col": 4.0,
+      "view": "front",
+      "state": "study",
+      "frame": 0,
+      "box": [
+        37,
+        42,
+        179,
+        200
+      ]
+    },
+    {
+      "name": "sit",
+      "row": 4.0,
+      "col": 0.0,
+      "view": "front",
+      "state": "sit",
+      "frame": 0,
+      "box": [
+        30,
+        44,
+        196,
+        198
+      ]
+    },
+    {
+      "name": "sleep",
+      "row": 4.0,
+      "col": 1.0,
+      "view": "front",
+      "state": "sleep",
+      "frame": 0,
+      "box": [
+        10,
+        120,
+        236,
+        122
+      ]
+    },
+    {
+      "name": "happy",
+      "row": 4.0,
+      "col": 2.0,
+      "view": "front",
+      "state": "happy",
+      "frame": 0,
+      "box": [
+        29,
+        42,
+        198,
+        200
+      ]
+    },
+    {
+      "name": "confused",
+      "row": 4.0,
+      "col": 3.0,
+      "view": "front",
+      "state": "confused",
+      "frame": 0,
+      "box": [
+        30,
+        42,
+        185,
+        200
+      ]
+    },
+    {
+      "name": "waiting",
+      "row": 4.0,
+      "col": 4.0,
+      "view": "front",
+      "state": "waiting",
+      "frame": 0,
+      "box": [
+        41,
+        42,
+        173,
+        200
+      ]
+    }
+  ],
+  "animations": {
+    "idle_front": {
+      "cells": [
+        "front_idle"
+      ],
+      "fps": 0.0,
+      "blink": "front_blink"
+    },
+    "walk_front": {
+      "cells": [
+        "front_walk_a",
+        "front_walk_b",
+        "front_walk_c",
+        "front_walk_b"
+      ],
+      "fps": 8.0
+    },
+    "idle_back": {
+      "cells": [
+        "back_idle"
+      ],
+      "fps": 0.0
+    },
+    "walk_back": {
+      "cells": [
+        "back_walk_a",
+        "back_walk_b",
+        "back_walk_c",
+        "back_walk_b"
+      ],
+      "fps": 8.0
+    },
+    "work_back": {
+      "cells": [
+        "back_work"
+      ],
+      "fps": 0.0
+    },
+    "idle_side": {
+      "cells": [
+        "side_idle"
+      ],
+      "fps": 0.0
+    },
+    "walk_side": {
+      "cells": [
+        "side_walk_a",
+        "side_walk_b",
+        "side_walk_c",
+        "side_walk_b"
+      ],
+      "fps": 8.0
+    },
+    "carry_side": {
+      "cells": [
+        "side_carry"
+      ],
+      "fps": 0.0
+    },
+    "harvest": {
+      "cells": [
+        "harvest"
+      ],
+      "fps": 0.0
+    },
+    "water": {
+      "cells": [
+        "water"
+      ],
+      "fps": 0.0
+    },
+    "dig": {
+      "cells": [
+        "dig"
+      ],
+      "fps": 0.0
+    },
+    "carry": {
+      "cells": [
+        "carry"
+      ],
+      "fps": 0.0
+    },
+    "study": {
+      "cells": [
+        "study"
+      ],
+      "fps": 0.0
+    },
+    "sit": {
+      "cells": [
+        "sit"
+      ],
+      "fps": 0.0
+    },
+    "sleep": {
+      "cells": [
+        "sleep"
+      ],
+      "fps": 0.0
+    },
+    "happy": {
+      "cells": [
+        "happy"
+      ],
+      "fps": 0.0
+    },
+    "confused": {
+      "cells": [
+        "confused"
+      ],
+      "fps": 0.0
+    },
+    "waiting": {
+      "cells": [
+        "waiting"
+      ],
+      "fps": 0.0
+    }
+  }
+}
