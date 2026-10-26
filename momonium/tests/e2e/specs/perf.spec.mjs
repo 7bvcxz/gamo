@@ -71,6 +71,11 @@ test('large island demo with the performance readout', async ({ game }) => {
   // Back to the player's own island, as it was.
   st = await openSettings();
   expect(st.demo_text).toBe('Back to my island');
+  // The panel keeps where it was scrolled (down at the view buttons); on a
+  // desktop's larger UI (Step 54) the button is above that, out of sight.
+  await game.query('dev_settings_reveal', 'Demo');
+  await game.page.waitForTimeout(150);
+  st = await game.query('settings_ui');
   const back = await centre(game, st.demo, st.window);
   await game.tap(back.x, back.y);
   await game.page.waitForFunction(() => window.momonium && window.momonium.call && window.momonium.call('settings_ui').in_demo === false, null, { timeout: 60_000 });
