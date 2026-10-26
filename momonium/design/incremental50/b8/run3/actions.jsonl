@@ -1,0 +1,126 @@
+{"t":0.6,"at":"00:00","cmd":"look","issued":0,"shot":"001.png"}
+{"t":5.5,"at":"00:05","cmd":"note","text":"A tiny floating island at night, a farm plot with tomatoes and a bunny-like creature. It says 'Tap the ripe crop'. Day 2, 10 coins. Let me tap the tomatoes.","issued":5.5}
+{"t":7.1,"at":"00:07","cmd":"tap","x":290,"y":750,"issued":5.5,"shot":"002.png"}
+{"t":12.7,"at":"00:12","cmd":"note","text":"Harvest gave +3 coins and 3 XP. Night turned into day 3. Now 'Tap the farm to sow'. A bottom panel shows Sow / Water / Harvest, 1 sec each. Tapping the farm.","issued":12.7}
+{"t":14.3,"at":"00:14","cmd":"tap","x":280,"y":760,"issued":12.8,"shot":"003.png"}
+{"t":20.4,"at":"00:20","cmd":"tap","x":280,"y":770,"issued":18.9,"shot":"004.png"}
+{"t":25.6,"at":"00:25","cmd":"note","text":"Watered, crops are growing (2s left). The bunny is called a Momo. Now it asks me to tap a Momo. Cute!","issued":25.6}
+{"t":27.2,"at":"00:27","cmd":"tap","x":395,"y":780,"issued":25.7,"shot":"005.png"}
+{"t":32.6,"at":"00:32","cmd":"note","text":"Days are only 30 seconds, it's night again. A Momo panel opened with 'Free time' and Assign. Tutorial says tap the pencil to pick tiles this Momo looks after.","issued":32.6}
+{"t":34,"at":"00:34","cmd":"tap","x":174,"y":1068,"issued":32.6,"shot":"006.png"}
+{"t":41.6,"at":"00:41","cmd":"tap","x":300,"y":790,"issued":40.2,"shot":"007.png"}
+{"t":46.8,"at":"00:46","cmd":"note","text":"Assigned the farm tile to Momo, marked '1'. Momo is now 'Working at Farm'. The other tiles are empty grass, so I'll confirm with the checkmark.","issued":46.8}
+{"t":48.3,"at":"00:48","cmd":"tap","x":175,"y":1096,"issued":46.9,"shot":"008.png"}
+{"t":54.2,"at":"00:54","cmd":"note","text":"Momo works the farm on its own now - 19 coins, +9/min. A mail bubble popped up over Momo and the Mailbox has a red dot. Let me open the mailbox.","issued":54.2}
+{"t":55.8,"at":"00:55","cmd":"tap","x":557,"y":228,"issued":54.3,"shot":"009.png"}
+{"t":61.6,"at":"01:01","cmd":"tap","x":260,"y":248,"issued":60.1,"shot":"010.png"}
+{"t":67.3,"at":"01:07","cmd":"note","text":"Aww, a letter from Momo proposing to widen the field. Very charming. Income is climbing fast (+18/min). Tapping 'Let's research it'.","issued":67.3}
+{"t":69.1,"at":"01:09","cmd":"tap","x":420,"y":557,"issued":67.4,"shot":"011.png"}
+{"t":75.7,"at":"01:15","cmd":"tap","x":557,"y":165,"issued":74,"shot":"012.png"}
+{"t":82,"at":"01:21","cmd":"note","text":"Research tree with tabs: Farm, Lumber, Mine, Smelting, Power, Games... Field expansion needs 3 flasks + 20 coins, and there's a button 'Build a research lab'. So I need a lab to make the flasks. Tapping it.","issued":82}
+{"t":83.6,"at":"01:23","cmd":"tap","x":401,"y":428,"issued":82.1,"shot":"013.png"}
+{"t":90.7,"at":"01:30","cmd":"note","text":"A build menu: Farm 10, Mine (Lv3), Lumberyard (Lv2), Research lab (Lv2), Special 0/1. I'm Lv1 50/95 so the lab is locked. I have 40 coins - buying a second farm should speed everything up.","issued":90.7}
+{"t":92.3,"at":"01:32","cmd":"tap","x":158,"y":985,"issued":90.8,"shot":"014.png"}
+{"t":98.6,"at":"01:38","cmd":"note","text":"The second farm is being built on the right tile (it picked the spot itself). 2 sec build. There's a new mail again. Opening it.","issued":98.6}
+{"t":100.3,"at":"01:40","cmd":"tap","x":557,"y":228,"issued":98.7,"shot":"015.png"}
+{"t":107.5,"at":"01:47","cmd":"tap","x":260,"y":248,"issued":106,"shot":"016.png"}
+{"t":114.5,"at":"01:54","cmd":"tap","x":420,"y":557,"issued":112.9,"shot":"017.png"}
+{"t":116.1,"at":"01:56","cmd":"tap","x":469,"y":187,"issued":114.6,"shot":"018.png"}
+{"t":122.6,"at":"02:02","cmd":"note","text":"Level 2! Fireworks. Research lab and Lumberyard unlocked. The second farm is ripe and Momo is on the first one, so I'll harvest the second myself.","issued":122.6}
+{"t":124.1,"at":"02:04","cmd":"tap","x":410,"y":840,"issued":122.7,"shot":"019.png"}
+{"t":130.2,"at":"02:10","cmd":"note","text":"Harvested farm 2 - 63 coins. Now I want to build the research lab. I'll tap the empty grass on the left to see if a build menu comes up.","issued":130.2}
+{"t":131.8,"at":"02:11","cmd":"tap","x":200,"y":880,"issued":130.3,"shot":"020.png"}
+{"t":138.1,"at":"02:18","cmd":"note","text":"Tapping grass opens the build menu. Research lab 40, Lumberyard 80 (red - can't afford). Building the research lab here on the left tile.","issued":138.1}
+{"t":139.6,"at":"02:19","cmd":"tap","x":346,"y":985,"issued":138.2,"shot":"021.png"}
+{"t":146,"at":"02:26","cmd":"note","text":"Lab is under construction. New hint: 'Tap the glowing sea to grow the island' - there's a dashed outline in the water, seems to cost 30. I have 35. Let's grow!","issued":146}
+{"t":147.6,"at":"02:27","cmd":"tap","x":410,"y":1010,"issued":146.1,"shot":"022.png"}
+{"t":155.6,"at":"02:35","cmd":"tap","x":410,"y":1010,"issued":154.1,"shot":"023.png"}
+{"t":163,"at":"02:43","cmd":"note","text":"The island grew a new tile in the bottom-right with a little bush. Lab is done and Momo walked to it on its own. A tip explains empty tiles build things and demolishing returns half. 17 coins left. Got it.","issued":163}
+{"t":164.5,"at":"02:44","cmd":"tap","x":424,"y":1098,"issued":163.1,"shot":"024.png"}
+{"t":172.6,"at":"02:52","cmd":"note","text":"A flask counter '1' appeared under the day - the lab made a research note. One Momo is juggling two farms and the lab. I wonder if I can hire a second Momo. Checking Hire.","issued":172.6}
+{"t":174.2,"at":"02:54","cmd":"tap","x":104,"y":1248,"issued":172.7,"shot":"025.png"}
+{"t":182,"at":"03:02","cmd":"note","text":"Hiring another Momo costs 90, I have 32. Saving up. Meanwhile I'll help by harvesting the ripe right farm myself.","issued":182}
+{"t":183.6,"at":"03:03","cmd":"tap","x":126,"y":1025,"issued":182.1,"shot":"026.png"}
+{"t":185.2,"at":"03:05","cmd":"tap","x":420,"y":840,"issued":183.7,"shot":"027.png"}
+{"t":193.3,"at":"03:13","cmd":"note","text":"Oops, Momo had already moved to that farm so I tapped Momo instead. It shows Momo's route numbered 1,2,3 over the farms and the lab - it already looks after everything. Fine. 2 flasks now.","issued":193.3}
+{"t":195,"at":"03:15","cmd":"tap","x":279,"y":937,"issued":193.4,"shot":"028.png"}
+{"t":196.7,"at":"03:16","cmd":"tap","x":557,"y":228,"issued":195.1,"shot":"029.png"}
+{"t":204,"at":"03:24","cmd":"tap","x":260,"y":248,"issued":202.4,"shot":"030.png"}
+{"t":211.5,"at":"03:31","cmd":"note","text":"Third letter: compost for bigger harvests. I now have 3 flasks and Research has a red dot - Field expansion should be affordable. Accepting this letter, then researching.","issued":211.5}
+{"t":213.2,"at":"03:33","cmd":"tap","x":420,"y":582,"issued":211.6,"shot":"031.png"}
+{"t":214.9,"at":"03:34","cmd":"tap","x":557,"y":165,"issued":213.2,"shot":"032.png"}
+{"t":222.6,"at":"03:42","cmd":"tap","x":401,"y":428,"issued":220.8,"shot":"033.png"}
+{"t":230.6,"at":"03:50","cmd":"note","text":"Field expansion researching, 20 seconds. Spent 3 flasks + 20 coins. Now I'm curious what 'Next: City 0/4' in the top-left means. Closing research and tapping it.","issued":230.6}
+{"t":232.3,"at":"03:52","cmd":"tap","x":469,"y":187,"issued":230.7,"shot":"034.png"}
+{"t":234.2,"at":"03:54","cmd":"tap","x":57,"y":135,"issued":232.4,"shot":"035.png"}
+{"t":242.7,"at":"04:02","cmd":"note","text":"Level 3, Mine unlocked! The Status panel shows my island 'Momonium - a small island, a big tomorrow'. To become a City I need Land 5/9, Momo 1/3, Research levels 0/3, Value 44/1.5K. Now I have a clear goal: more land, more Momos, more research.","issued":242.7}
+{"t":244.7,"at":"04:04","cmd":"tap","x":380,"y":470,"issued":242.8,"shot":"036.png"}
+{"t":254.5,"at":"04:14","cmd":"note","text":"Research levels already 1/3 - Field expansion finished. 63 coins. I think a second Momo (90) is the best buy since one Momo runs three buildings. Closing panels and helping harvest the ripe right farm while I save.","issued":254.5}
+{"t":256.2,"at":"04:16","cmd":"tap","x":469,"y":187,"issued":254.6,"shot":"037.png"}
+{"t":257.9,"at":"04:17","cmd":"tap","x":440,"y":830,"issued":256.3,"shot":"038.png"}
+{"t":266.3,"at":"04:26","cmd":"note","text":"Harvest now gives +6 instead of +3 - the field expansion doubled it, nice payoff! 93 coins, +66/min. Hiring a second Momo now.","issued":266.3}
+{"t":267.8,"at":"04:27","cmd":"tap","x":410,"y":977,"issued":266.4,"shot":"039.png"}
+{"t":269.4,"at":"04:29","cmd":"tap","x":104,"y":1248,"issued":267.9,"shot":"040.png"}
+{"t":276.9,"at":"04:36","cmd":"tap","x":86,"y":1120,"issued":275.4,"shot":"041.png"}
+{"t":285.9,"at":"04:45","cmd":"note","text":"Hired 'Mochi'! Mochi went straight to the research lab, so the first Momo can focus on farms. Love that each has a name. 27 coins. Next plan: buy the 40 sea tile and build a mine. Waiting a few seconds.","issued":285.9}
+{"t":298.7,"at":"04:58","cmd":"wait","s":12,"issued":286,"shot":"042.png"}
+{"t":306.5,"at":"05:06","cmd":"note","text":"With Mochi on the lab, flasks jumped to 6 and income is +102/min. Research has a red dot again - checking what I can unlock.","issued":306.5}
+{"t":308.3,"at":"05:08","cmd":"tap","x":557,"y":165,"issued":306.6,"shot":"043.png"}
+{"t":318.3,"at":"05:18","cmd":"note","text":"Field expansion can be levelled up (Lv1/5): 4 flasks + 38 coins for another +1 crop. Watering efficiency and Bigger harvests are also lighting up. Field expansion doubled my income last time so I'll take Lv2.","issued":318.3}
+{"t":320.3,"at":"05:20","cmd":"tap","x":401,"y":443,"issued":318.4,"shot":"044.png"}
+{"t":330.8,"at":"05:30","cmd":"tap","x":469,"y":187,"issued":329.1,"shot":"045.png"}
+{"t":332.3,"at":"05:32","cmd":"tap","x":300,"y":1060,"issued":330.9,"shot":"046.png"}
+{"t":340.3,"at":"05:40","cmd":"tap","x":300,"y":1100,"issued":338.8,"shot":"047.png"}
+{"t":349.2,"at":"05:49","cmd":"note","text":"Bought the land, the island is shaped like an L now, and a new glowing tile appeared next to it. A Momo at the lab has a '...' thought bubble. 69 coins. Tapping the empty middle tile to build a Mine (unlocked at Lv3).","issued":349.2}
+{"t":350.8,"at":"05:50","cmd":"tap","x":330,"y":960,"issued":349.3,"shot":"048.png"}
+{"t":359.7,"at":"05:59","cmd":"note","text":"Mine needs 120 coins + 10 Wood - so I need wood first, i.e. a Lumberyard (80). I have 87. Also a toast: Field expansion Lv2 went from Crops +1 to +1.25, a much smaller bump than Lv1. Building the Lumberyard.","issued":359.7}
+{"t":361.3,"at":"06:01","cmd":"tap","x":299,"y":1070,"issued":359.8,"shot":"049.png"}
+{"t":369.2,"at":"06:09","cmd":"note","text":"Lumberyard under construction in the middle. 'Lumberyard 0/1' - probably needs a Momo to work it. Let me wait and see if one of my two Momos goes there by itself.","issued":369.2}
+{"t":380,"at":"06:20","cmd":"wait","s":10,"issued":369.3,"shot":"050.png"}
+{"t":388.4,"at":"06:28","cmd":"note","text":"The farm Momo moved over to the lumberyard (Fell/Replant). Now both farms are ripe with nobody tending them - I'll harvest them myself.","issued":388.4}
+{"t":390,"at":"06:29","cmd":"tap","x":300,"y":730,"issued":388.4,"shot":"051.png"}
+{"t":391.6,"at":"06:31","cmd":"tap","x":440,"y":820,"issued":390.1,"shot":"052.png"}
+{"t":400.4,"at":"06:40","cmd":"note","text":"Wood counter appeared (2 logs) next to 12 flasks. Momos keep hopping between buildings. Research dot is on - going to spend flasks on Bigger harvests.","issued":400.4}
+{"t":402.2,"at":"06:42","cmd":"tap","x":557,"y":165,"issued":400.5,"shot":"053.png"}
+{"t":410,"at":"06:49","cmd":"tap","x":238,"y":375,"issued":408.3,"shot":"054.png"}
+{"t":419.6,"at":"06:59","cmd":"note","text":"Bigger harvests: 8 flasks + 60 coins, 2 minutes, Crops +1 (full +1, better than Field expansion Lv3's tiny bump). Starting it; the mine can wait a bit.","issued":419.6}
+{"t":421.5,"at":"07:01","cmd":"tap","x":401,"y":428,"issued":419.7,"shot":"055.png"}
+{"t":430.2,"at":"07:10","cmd":"tap","x":108,"y":375,"issued":428.4,"shot":"056.png"}
+{"t":438.4,"at":"07:18","cmd":"note","text":"Only one research at a time ('Another research is running'). Both farms are ripe again and both Momos are at the lab/lumberyard. Closing and harvesting both farms by hand.","issued":438.4}
+{"t":440,"at":"07:19","cmd":"tap","x":469,"y":187,"issued":438.4,"shot":"057.png"}
+{"t":441.6,"at":"07:21","cmd":"tap","x":300,"y":730,"issued":440,"shot":"058.png"}
+{"t":443.2,"at":"07:23","cmd":"tap","x":440,"y":820,"issued":441.7,"shot":"059.png"}
+{"t":450.9,"at":"07:30","cmd":"note","text":"Beautiful sunset. 99 coins, 8 wood. The right farm still looks ripe and the Harvest button is lit - trying the button directly this time.","issued":450.9}
+{"t":452.5,"at":"07:32","cmd":"tap","x":499,"y":1228,"issued":451,"shot":"060.png"}
+{"t":461.9,"at":"07:41","cmd":"note","text":"Harvest button works from the bottom bar. 110 coins and exactly 10 wood - nearly enough for the mine (120 + 10 wood). Reading the new mail while coins tick up.","issued":461.9}
+{"t":463.6,"at":"07:43","cmd":"tap","x":557,"y":228,"issued":462,"shot":"061.png"}
+{"t":468.8,"at":"07:48","cmd":"tap","x":260,"y":248,"issued":467,"shot":"062.png"}
+{"t":476.9,"at":"07:56","cmd":"note","text":"Level 4 (silently this time?). Letter about a tree nursery - accepting. 130 coins, 12 wood: time to build the mine on the empty tile with the bush.","issued":476.9}
+{"t":478.7,"at":"07:58","cmd":"tap","x":420,"y":557,"issued":477,"shot":"063.png"}
+{"t":480.4,"at":"08:00","cmd":"tap","x":469,"y":187,"issued":478.8,"shot":"064.png"}
+{"t":482.1,"at":"08:02","cmd":"tap","x":380,"y":1020,"issued":480.5,"shot":"065.png"}
+{"t":490,"at":"08:10","cmd":"tap","x":252,"y":880,"issued":488.5,"shot":"066.png"}
+{"t":497.8,"at":"08:17","cmd":"note","text":"Mine is going up (7 sec) on the bottom-right tile. Now I have 5 buildings and only 2 Momos - they can't keep up. Checking what a third Momo costs.","issued":497.8}
+{"t":499.4,"at":"08:19","cmd":"tap","x":104,"y":1248,"issued":497.9,"shot":"067.png"}
+{"t":507.6,"at":"08:27","cmd":"note","text":"Third Momo costs 145 now (price went up from 90). The mine is built - a cute cave with a minecart. Both farms are ripe and unattended again, so I'm the farmer. Harvesting.","issued":507.6}
+{"t":509.2,"at":"08:29","cmd":"tap","x":126,"y":1025,"issued":507.7,"shot":"068.png"}
+{"t":510.9,"at":"08:30","cmd":"tap","x":300,"y":730,"issued":509.3,"shot":"069.png"}
+{"t":516.2,"at":"08:36","cmd":"tap","x":450,"y":830,"issued":514.7,"shot":"070.png"}
+{"t":525,"at":"08:44","cmd":"note","text":"Harvested both; a stone counter appeared too (1 stone) so somebody's been to the mine. Fields are bare - sowing them myself so they don't sit idle.","issued":525}
+{"t":526.7,"at":"08:46","cmd":"tap","x":233,"y":1228,"issued":525.1,"shot":"071.png"}
+{"t":528.3,"at":"08:48","cmd":"tap","x":440,"y":830,"issued":526.8,"shot":"072.png"}
+{"t":537,"at":"08:57","cmd":"tap","x":499,"y":1228,"issued":535.4,"shot":"073.png"}
+{"t":538.9,"at":"08:58","cmd":"tap","x":557,"y":165,"issued":537.1,"shot":"074.png"}
+{"t":546.7,"at":"09:06","cmd":"note","text":"Bigger harvests is almost done (green bar). 21 flasks piling up but I can only run one research at a time - that feels like a bottleneck. Peeking at the Mine tab.","issued":546.7}
+{"t":548.6,"at":"09:08","cmd":"tap","x":188,"y":187,"issued":546.8,"shot":"075.png"}
+{"t":557.2,"at":"09:17","cmd":"note","text":"Mine research needs 'Mine mastery Lv2' first - locked. But 'Next: City' just became 1/4, so Bigger harvests must have finished (research levels 3/3). Going back to Farm tab to start Watering efficiency.","issued":557.2}
+{"t":559,"at":"09:18","cmd":"tap","x":68,"y":187,"issued":557.2,"shot":"076.png"}
+{"t":560.9,"at":"09:20","cmd":"tap","x":103,"y":375,"issued":559.1,"shot":"077.png"}
+{"t":570,"at":"09:30","cmd":"tap","x":401,"y":443,"issued":568.3,"shot":"078.png"}
+{"t":570.1,"at":"09:30","cmd":"note","text":"Bigger harvests done (badge 1), Greenhouse and Seed selection unlocked. Started Watering efficiency. 159 coins - enough for that third Momo (145) right as time runs out. Fun loop!","issued":570.1}
+{"t":575.5,"at":"09:35","cmd":"tap","x":469,"y":187,"issued":573.9,"shot":"079.png"}
+{"t":577.2,"at":"09:37","cmd":"tap","x":104,"y":1248,"issued":575.6,"shot":"080.png"}
+{"t":584.6,"at":"09:44","cmd":"note","text":"Research ate 40 coins so I'm at 142, 3 short of the 145 Momo. Waiting a few seconds then hiring.","issued":584.6}
+{"t":589.3,"at":"09:49","cmd":"wait","s":4,"issued":584.7,"shot":"081.png"}
+{"t":590.6,"at":"09:50","cmd":"tap","x":86,"y":1120,"issued":589.3,"shot":"082.png"}
+{"t":598,"at":"09:57","cmd":"note","text":"Hired 'Pomu', who went straight to the mine. Next: City is 2/4 now. Three Momos, 5 buildings, +103/min. Would happily keep going.","issued":598}

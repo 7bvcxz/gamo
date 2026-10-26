@@ -1,0 +1,29 @@
+{
+  "round": "R11",
+  "extends": [
+    "r10.json"
+  ],
+  "_note": "After the holdout (public build, three new players): every primary within 10% except income at 10:00, $1,004/$1,249/$1,593 (median +13.5%). B7 and the holdout share the first ten minutes: the median of all six is $1,207 (+9.7%). One lever that leaves 0:00-5:00 alone: later research levels cost more. In the calibrated sim 2.0 took income at 10:00 from $1,408 to $1,160 and 1.9 to $1,234 (-12%), projecting the six-run median to ~$1,058 (-4%); T1-T6 unchanged.",
+  "sets": [
+    {
+      "set": "balance:research/level_cost_growth=1.9",
+      "old": 1.8,
+      "why": "see the note"
+    },
+    {
+      "set": "balance:progression/exp_to_next/4=4400",
+      "old": 4800,
+      "why": "slower research slowed EXP: with 4800/4900 the sim put Lv 6 at 20:30 and prestige at 26:24 (+10.0%); 4400/4500 gives 19:57 and 25:40 (+6.9%)"
+    },
+    {
+      "set": "balance:progression/exp_to_next/5=4500",
+      "old": 4900,
+      "why": "the same"
+    },
+    {
+      "set": "balance:tiers/levels/2/needs/research_levels=50",
+      "old": 35,
+      "why": "with 1.9 the 48-hour calendar moved: 30 -> 23.9 h, 35 -> 24.2 h, 40 -> 24.3 h, 42 -> 24.4 h, 45 -> 32.2 h, 48/50/55 -> 32.4/32.4/32.5 h. 35 would pass by minutes; 50 sits in the middle of the plateau"
+    }
+  ]
+}

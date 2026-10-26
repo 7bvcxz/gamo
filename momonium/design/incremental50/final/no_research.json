@@ -13,7 +13,7 @@
   },
   "end": {
     "buildings": 15,
-    "exp": 3311,
+    "exp": 3711,
     "income": 6497,
     "income_all": 6497,
     "island": 1,
@@ -50,7 +50,7 @@
     "level:3": 239560,
     "level:4": 439560,
     "level:5": 792950,
-    "level:6": 1459081,
+    "level:6": 1417480,
     "momo_income": 57682,
     "momo_work": 57682,
     "sale": 9000
@@ -88,7 +88,7 @@
     "level 3": 239560,
     "level 4": 439560,
     "level 5": 792950,
-    "level 6": 1459081,
+    "level 6": 1417480,
     "lumberyard mastery 3": 878664,
     "mine mastery 3": 1071000,
     "research mastery 3": 469840
@@ -345,11 +345,11 @@
         "target": 720.0
       },
       {
-        "error": 0.216,
+        "error": 0.181,
         "id": "L6",
         "kind": "exact",
         "metric": "journey:level:6",
-        "observed": 1459.081,
+        "observed": 1417.48,
         "pass": false,
         "primary": false,
         "target": 1200.0
@@ -715,7 +715,7 @@
     {
       "buildings": 15,
       "checkpoint_s": 1800,
-      "exp": 3311,
+      "exp": 3711,
       "income": 6497,
       "income_all": 6497,
       "island": 1,

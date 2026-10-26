@@ -1,0 +1,12 @@
+{
+  "url": "http://127.0.0.1:8861/momonium/index.html",
+  "version": "0.50.0",
+  "load_ms": 4386,
+  "colours": 6169,
+  "viewport": {
+    "width": 400,
+    "height": 860
+  },
+  "dpr": 1.5,
+  "minutes": 10
+}
