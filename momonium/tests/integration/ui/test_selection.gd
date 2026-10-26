@@ -68,7 +68,7 @@ func test_a_second_tap_on_a_selected_momo_reaches_its_building() -> void:
 	await tree.process_frame
 	var actor := (main.get("momo_views") as MomoViews).actor(1)
 	assert_true(momos.at_work(1), "the Momo is at its farm")
-	var spot := actor.position + Vector2(0, -6)
+	var spot := actor.ground() + Vector2(0, -6)
 	assert_eq(buildings.building_at(proj.cell_at(spot)), farm, "the point is on the farm")
 	assert_eq((main.get("momo_views") as MomoViews).hit(spot), 1, "and on the Momo")
 	_tap(cams.world_to_screen(spot))

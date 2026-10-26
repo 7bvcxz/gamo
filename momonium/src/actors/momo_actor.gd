@@ -29,6 +29,10 @@ var _next_sit := 0.0
 var _shake := 0.0
 var _pop := 0.0
 var mail: MailSystem
+## How far below its feet this node sits for the depth sort (Step 55,
+## MomoViews): everything it draws is lifted back by as much, so the Momo is
+## seen -- and tapped -- exactly where it stands.
+var depth_lift := 0.0
 ## A letter held up over the head while one this Momo wrote is unread -- the
 ## mailbox's red dot, but on the island, at the Momo who is waiting.
 var envelope: Sprite2D
@@ -97,7 +101,7 @@ func work_pose() -> String:
 
 ## World-space box a tap or a drag can grab.
 func hit_rect() -> Rect2:
-	var r := Rect2(position + Vector2(-26, -76), Vector2(52, 80))
+	var r := Rect2(ground() + Vector2(-26, -76), Vector2(52, 80))
 	# Its letter's bubble belongs to it too (Step 50: a blind player's tap on
 	# the envelope bought the sea behind it instead).
 	return r.merge(envelope_rect()) if envelope != null and envelope.visible else r
@@ -108,6 +112,11 @@ func envelope_rect() -> Rect2:
 	if envelope == null or not envelope.visible:
 		return Rect2()
 	return Rect2(position + envelope.position - Vector2(22, 22), Vector2(44, 48))
+
+
+## Where it stands (its feet, in the layer), the sort's lift taken off.
+func ground() -> Vector2:
+	return position - Vector2(0, depth_lift)
 
 
 ## Out of sight it stops animating -- its body and its letter -- until seen.
@@ -133,10 +142,10 @@ func _process(delta: float) -> void:
 	if dragged:
 		rig.set_state("walk")
 		rig.walk_speed = 2.0
-		rig.position = Vector2(0, -LIFT)
+		rig.position = Vector2(0, -LIFT - depth_lift)
 	else:
 		rig.walk_speed = 1.0
-		rig.position = Vector2(sin(_shake * 40.0) * 4.0 * _shake, -sin(_pop * PI) * 18.0)
+		rig.position = Vector2(sin(_shake * 40.0) * 4.0 * _shake, -sin(_pop * PI) * 18.0 - depth_lift)
 		if momos.is_moving(id):
 			rig.set_state("walk")
 			var h := momos.heading(id)
@@ -181,6 +190,6 @@ func _draw() -> void:
 		draw_colored_polygon(PackedVector2Array([c + Vector2(8, 14), c + Vector2(20, 26), c + Vector2(14, 10)]), Color(1, 1, 1, 0.92))
 		draw_arc(c, 19.0, 0, TAU, 32, Color(0.35, 0.55, 0.85, 0.6), 1.5, true)
 	if selected or dragged:
-		draw_set_transform(Vector2(0, 2), 0.0, Vector2(1.0, 0.45))
+		draw_set_transform(Vector2(0, 2 - depth_lift), 0.0, Vector2(1.0, 0.45))
 		draw_arc(Vector2.ZERO, 30.0, 0, TAU, 32, Color(1, 0.92, 0.45, 0.95), 4.0, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

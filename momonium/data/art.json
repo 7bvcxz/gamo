@@ -245,6 +245,10 @@
       "#ffd45a"
     ]
   },
+  "momo_depth": {
+    "_doc": "Step 55: how much nearer than its feet a Momo counts when the island is depth-sorted (tiles of depth, x + y). Buildings stand at their footprint's centre, so a Momo on a building's own tile or beside its front half was drawn behind it -- the owner saw Momo vanish into buildings on ordinary walks. With 0.5 a Momo is drawn in front of a building unless it stands in the back quarter of its tile or on a tile behind it: clearly behind, it stays hidden. Only the order changes -- the Momo is drawn, tapped and dropped where it stands. Momo among themselves keep their order (every Momo gets the same bias).",
+    "bias_tiles": 0.5
+  },
   "night_lights": {
     "_doc": "Warm window light at night: strength follows how dark the ambient is (1 - its brightness); colour before the night tint.",
     "color": "#ffd98a",

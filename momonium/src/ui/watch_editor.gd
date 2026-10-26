@@ -235,7 +235,7 @@ func _place() -> void:
 	if card.size != Vector2.ZERO:
 		p = Vector2(card.position.x + 8.0, card.position.y - BUTTON.y - 8.0)
 	else:
-		var head := cameras.world_to_screen(a.global_position) - Vector2(0, a.hit_rect().size.y * cameras.camera.zoom.y + 12.0)
+		var head := cameras.world_to_screen(a.global_position - Vector2(0, a.depth_lift)) - Vector2(0, a.hit_rect().size.y * cameras.camera.zoom.y + 12.0)
 		p = Vector2(head.x - BUTTON.x * 0.5, head.y - BUTTON.y)
 	p.x = clampf(p.x, 8.0, screen.x - BUTTON.x - 8.0)
 	p.y = clampf(p.y, 80.0, screen.y - BUTTON.y - 8.0)

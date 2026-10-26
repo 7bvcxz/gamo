@@ -4,6 +4,11 @@ extends Node
 ## Keeps one MomoActor per Momo in the entity layer, depth-sorted with the
 ## buildings, positioned from the simulation every frame (or from the finger
 ## while dragged), and answers "which Momo is under this point".
+##
+## Step 55: a Momo sorts `art.momo_depth.bias_tiles` nearer than its feet --
+## its node sits that much lower on screen and its drawing that much higher
+## (MomoActor.depth_lift), so only the order changes: in front of a building
+## it stands beside or in front of, still behind one it is clearly behind.
 
 var sim: Simulation
 var momos: MomoSystem
@@ -15,6 +20,8 @@ var actors: Dictionary = {}
 ## limbs at half the rate.
 var cameras: CameraController
 const CULL_MARGIN := 160.0
+## The depth bias in screen pixels (from the data, through the projection).
+var depth_lift := 0.0
 
 
 func setup(p_sim: Simulation, p_layer: EntityLayer, p_lib: SpriteLibrary) -> void:
@@ -22,6 +29,8 @@ func setup(p_sim: Simulation, p_layer: EntityLayer, p_lib: SpriteLibrary) -> voi
 	momos = sim.system(&"momo")
 	layer = p_layer
 	lib = p_lib
+	var bias := sim.data.get_float("art", "momo_depth.bias_tiles", 0.5)
+	depth_lift = layer.projection.to_screen(Vector2(bias, bias) * 0.5).y - layer.projection.to_screen(Vector2.ZERO).y if layer.projection != null else 0.0
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
 		if type in [&"momo_added", &"momo_removed", &"game_loaded"]:
 			sync()
@@ -43,7 +52,9 @@ func sync() -> void:
 			continue
 		var a := MomoActor.new()
 		a.setup(id, sim, lib, layer.projection)
+		a.depth_lift = depth_lift
 		layer.add_entity(a, momos.position_of(id))
+		a.position.y += depth_lift
 		actors[id] = a
 
 
@@ -54,11 +65,12 @@ func _process(_delta: float) -> void:
 	for id: int in actors:
 		var a: MomoActor = actors[id]
 		if a.dragged:
-			a.position = a.drag_world + Vector2(0, MomoActor.LIFT)
+			a.position = a.drag_world + Vector2(0, MomoActor.LIFT + depth_lift)
 		else:
 			layer.move_entity(a, momos.position_of(id))
+			a.position.y += depth_lift
 		if culling:
-			a.set_awake(a.dragged or a.selected or sight.has_point(a.position))
+			a.set_awake(a.dragged or a.selected or sight.has_point(a.ground()))
 			a.rig.lod_step = 2 if far else 1
 
 

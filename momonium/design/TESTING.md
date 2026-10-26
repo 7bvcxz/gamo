@@ -19,6 +19,8 @@ momonium/tools/check.sh                 # CI와 같은 검사: import → 에디
 momonium/tools/check.sh --export        # + 임시 폴더로 Web export → 팩 크기·테스트 누출 → 브라우저 스모크
 ```
 
+전후 비교용 **웹 화면**(검사가 아니라 증거)은 `tests/e2e/specs/shots.spec.mjs`가 찍는다. `MOMONIUM_SHOTS=<폴더>`일 때만 돌고, `MOMONIUM_E2E_BASE`를 공개 URL로 두면 플레이어가 받는 빌드를 찍는다. 그래서 '이전'은 배포 전에 공개 빌드에서 찍는다.
+
 ## 왜 GdUnit4가 아니라 자체 러너인가
 
 GdUnit4는 좋은 도구지만 이 저장소에는 맞지 않았다.
