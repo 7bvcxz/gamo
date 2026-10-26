@@ -102,8 +102,8 @@ class SupplyChart:
 		fill.append(Vector2(size.x, size.y))
 		fill.append(Vector2(0, size.y))
 		draw_colored_polygon(fill, Color(1.0, 0.85, 0.3, 0.25))
-		draw_polyline(pts, Color("#ffd84d"), 2.5, true)
+		draw_polyline(pts, get_theme_color("font_color", "GoldLabel"), 2.5, true)
 		var dy := size.y - 4.0 - (size.y - 8.0) * power.demand() / cap
-		draw_dashed_line(Vector2(0, dy), Vector2(size.x, dy), Color("#ff8a7a"), 2.0, 6.0)
+		draw_dashed_line(Vector2(0, dy), Vector2(size.x, dy), get_theme_color("font_color", "BadLabel"), 2.0, 6.0)
 		var nx := size.x * float(posmod(sim.now_ms(), day)) / float(day)
-		draw_line(Vector2(nx, 0), Vector2(nx, size.y), Color(1, 1, 1, 0.8), 2.0)
+		draw_line(Vector2(nx, 0), Vector2(nx, size.y), get_theme_color("line", "Ink"), 2.0)

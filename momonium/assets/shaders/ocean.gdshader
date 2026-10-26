@@ -42,6 +42,50 @@ float hash(vec2 p) {
 	return fract(p.x * p.y);
 }
 
+vec2 hash2(vec2 p) {
+	return vec2(hash(p), hash(p + vec2(17.13, 3.71)));
+}
+
+// Distance to the nearest cell edge of a Voronoi pattern (F2 - F1): thin
+// bright lines where cells meet, the net of light the concept's water wears.
+// Only the 2x2 cells nearest the point are read, with their seeds kept near
+// the cell centres so the two nearest are always among them -- a quarter of
+// the full 3x3 search's cost (it is drawn over most of the screen).
+float caustic(vec2 p) {
+	vec2 b = floor(p - 0.5);
+	float d1 = 8.0;
+	float d2 = 8.0;
+	for (int y = 0; y <= 1; y++) {
+		for (int x = 0; x <= 1; x++) {
+			vec2 cell = b + vec2(float(x), float(y));
+			vec2 c = cell + 0.5 + (hash2(cell) - 0.5) * 0.5 - p;
+			float d = dot(c, c);
+			d2 = d < d1 ? d1 : min(d2, d);
+			d1 = min(d1, d);
+		}
+	}
+	return sqrt(d2) - sqrt(d1);
+}
+
+// Step 52: the concept's sparkles -- four-pointed stars scattered over the
+// sea, each twinkling on its own beat. One star per cell at most, and one
+// hash per pixel: where it sits and how big it is come from the same number.
+float sparkle(vec2 p, float t) {
+	vec2 i = floor(p);
+	float h = hash(i);
+	if (h < 0.5) {
+		return 0.0;
+	}
+	vec2 d = abs(fract(p) - 0.5 - (vec2(fract(h * 13.7), fract(h * 91.3)) - 0.5) * 0.5);
+	// A triangle wave for the twinkle and straight falloffs for the arms:
+	// the same star as smoothsteps and a sine, at a fraction of the cost.
+	float beat = abs(fract(t * (0.25 + 0.3 * h) + h * 7.0) * 2.0 - 1.0);
+	float size = 0.14 + 0.24 * fract(h * 7.1);
+	vec2 arm = clamp(1.0 - d / size, 0.0, 1.0) * clamp(1.0 - d.yx / 0.035, 0.0, 1.0);
+	float core = clamp(1.0 - (d.x + d.y) / 0.09, 0.0, 1.0);
+	return (max(arm.x, arm.y) + core) * beat * beat;
+}
+
 float vnoise(vec2 p) {
 	vec2 i = floor(p);
 	vec2 f = fract(p);
@@ -92,6 +136,25 @@ void fragment() {
 	// Under a low sun the column carries the glitter: a path of light (concepts).
 	glint *= 1.0 + column * 2.5 * max(sun_strength - 1.0, 0.0);
 	col += glint_color.rgb * sun_strength * (glint * 0.5 + column * 0.22 * (0.4 + n));
+
+	// The net of light on the water, brightest in the shallows (concepts).
+	// Sunlight draws it: it fades with the water's own brightness, so the
+	// night sea is not crazed with white lines -- and is not computed at all
+	// when it would not show (it is the sea's most expensive term).
+	float daylight = smoothstep(0.25, 0.6, dot(mid_color.rgb, vec3(0.3, 0.5, 0.2)));
+	if (quality > 0.5 && daylight > 0.01) {
+		// Warped by the swell's own noise: organic cells, not a mesh.
+		float edge = caustic(logical * 2.2 + vec2(time_s * 0.05, time_s * 0.03) + vec2(n - 0.5, 0.5 - n) * 1.1);
+		// Deeper blue inside the cells, white where they meet.
+		col = mix(col, deep_color.rgb * 0.92, smoothstep(0.25, 0.7, edge) * 0.22 * (0.3 + 0.7 * t) * daylight);
+		float net = smoothstep(0.15, 0.02, edge) * (0.2 + 0.45 * smoothstep(0.0, 0.4, shore)) * (0.35 + 0.65 * t);
+		col = mix(col, foam_color.rgb, net * daylight);
+	}
+	// Sparkles. Up close a tile covers more of the screen, so the cells there
+	// are smaller -- a star stays a few pixels wide from the horizon to the
+	// bottom edge instead of growing into a streak. Fewer and dimmer at night.
+	vec2 sp = vec2(logical.x - logical.y, (logical.x + logical.y) * 0.55) * (2.4 + 5.0 * t);
+	col += glint_color.rgb * sparkle(sp, time_s) * (0.45 + 0.75 * daylight) * sun_strength * (1.0 - smoothstep(0.3, 0.5, shore));
 
 	// Foam: a bright line at the waterline and soft rings travelling outward.
 	float band = smoothstep(0.05, 0.25, shore) * (1.0 - smoothstep(0.38, 0.46, shore));

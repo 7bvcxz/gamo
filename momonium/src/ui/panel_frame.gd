@@ -28,7 +28,7 @@ var tabs: Array[Dictionary] = []
 var current := -1
 ## Pixels on the right the card must leave free (the HUD's side buttons).
 var right_reserved := 100.0
-const CARD_ALPHA := 0.9
+const CARD_ALPHA := 0.86
 var _refresh_left := 0.0
 
 
@@ -127,7 +127,7 @@ func show_tab(index: int) -> void:
 	current = clampi(index, 0, tabs.size() - 1)
 	for i in tabs.size():
 		(tabs[i]["view"] as Control).visible = i == current
-		(tabs[i]["button"] as Button).modulate = Color(1.25, 1.2, 0.85) if i == current else Color(1, 1, 1, 0.7)
+		(tabs[i]["button"] as Button).theme_type_variation = &"SelectedButton" if i == current else &""
 	if not tabs.is_empty():
 		tab_scroll.ensure_control_visible.call_deferred(tabs[current]["button"])
 	refresh()
@@ -199,6 +199,9 @@ func _notification(what: int) -> void:
 		var box := get_theme_stylebox("panel", "PanelContainer").duplicate() as StyleBoxFlat
 		if box != null:
 			box.bg_color.a = CARD_ALPHA
+			box.set_corner_radius_all(HudTheme.CARD_RADIUS)
+			box.shadow_size = 14
+			box.shadow_color = Color(0.05, 0.16, 0.34, 0.22)
 			card.add_theme_stylebox_override("panel", box)
 
 

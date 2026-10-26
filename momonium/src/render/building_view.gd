@@ -41,6 +41,8 @@ var _lights_cfg: Dictionary = {}
 var _evolution: Dictionary = {}
 ## The pennant tier, kept until mastery or the building changes.
 var _pennant := -1
+## Its lit windows (Step 52), when the drawing has any.
+var lit: Sprite2D
 
 
 func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, lib: SpriteLibrary) -> void:
@@ -58,6 +60,14 @@ func setup(p_id: int, p_buildings: BuildingSystem, p_projection: IsoProjection, 
 	overlay = Sprite2D.new()
 	overlay.visible = false
 	sprite.add_child(overlay)
+	# Step 52: its window panes, painted warm, laid over it after dusk.
+	if lib.has(sprite_name + "_lit"):
+		lit = Sprite2D.new()
+		lit.name = "Lit"
+		lib.place(lit, sprite_name + "_lit")
+		lit.scale = Vector2.ONE * (lib.world_scale(sprite_name + "_lit") / maxf(_base_scale.x, 0.0001))
+		lit.visible = false
+		sprite.add_child(lit)
 	if lib.has(sprite_name):
 		_top = (lib.pivot(sprite_name, "top") - lib.pivot(sprite_name, "origin")) * lib.world_scale(sprite_name)
 	_lights_cfg = buildings.sim.data.get_value("art", "night_lights", {})
@@ -368,20 +378,20 @@ func _draw_smoke(b: Dictionary) -> void:
 
 ## Warm windows after dusk: brighter the darker it is. The colour is divided
 ## by the night tint the whole world gets, so it stays warm on the screen.
+## Step 52: the panes themselves light up -- the `_lit` sprite traced from the
+## painting -- instead of two dots near the roof that matched no window. They
+## are fully lit by mid-evening: half-lit, warm over blue glass reads as beige.
 func _draw_lights(b: Dictionary) -> void:
-	if b["state"] == BuildingSystem.CONSTRUCTING:
+	if lit == null:
 		return
 	var night := night_strength(ambient, float(_lights_cfg.get("start", 0.25)))
-	if night <= 0.01:
+	lit.visible = night > 0.01 and b["state"] != BuildingSystem.CONSTRUCTING
+	if not lit.visible:
 		return
 	var warm := Color(String(_lights_cfg.get("color", "#ffd98a")))
-	var col := Color(minf(warm.r / maxf(ambient.r, 0.2), 4.0), minf(warm.g / maxf(ambient.g, 0.2), 4.0), minf(warm.b / maxf(ambient.b, 0.2), 4.0), 0.0)
 	var t := buildings.sim.now_ms() / 1000.0
 	var flicker := 0.92 + 0.08 * sin(t * 3.1 + id * 1.7)
-	var at := _top * 0.42 + Vector2(-8, 0)
-	ring.draw_circle(at, 9.0, Color(col, 0.18 * night * flicker))
-	ring.draw_circle(at, 4.0, Color(col, 0.75 * night * flicker))
-	ring.draw_circle(at + Vector2(16, 6), 3.0, Color(col, 0.6 * night))
+	lit.modulate = Color(minf(warm.r / maxf(ambient.r, 0.2), 4.0), minf(warm.g / maxf(ambient.g, 0.2), 4.0), minf(warm.b / maxf(ambient.b, 0.2), 4.0), minf(1.0, night * 2.2) * flicker)
 
 
 ## A pennant on the four families as their mastery grows: bronze, silver, gold.
@@ -419,7 +429,9 @@ func _draw_special(b: Dictionary) -> void:
 				if not _lib.has(_sprite_name) or not (_lib.sprites[_sprite_name]["pivots"] as Dictionary).has(pv):
 					continue
 				var c := (_lib.pivot(_sprite_name, pv) - origin) * ws
-				ring.draw_line(c, c + Vector2.from_angle(t * speed - PI * 0.5) * 3.5, Color(0.23, 0.19, 0.16), 1.5, true)
+				# Step 52: the redrawn dials are larger -- an hour and a minute hand.
+				ring.draw_line(c, c + Vector2.from_angle(t * speed / 12.0 - PI * 0.5) * 2.4, Color(0.23, 0.19, 0.16), 1.3, true)
+				ring.draw_line(c, c + Vector2.from_angle(t * speed - PI * 0.5) * 3.5, Color(0.23, 0.19, 0.16), 1.0, true)
 			if on:
 				var pulse := 0.5 + 0.5 * sin(t * 4.0)
 				ring.draw_arc(_top * 0.5, 22.0 + pulse * 4.0, 0, TAU, 32, Color(1.0, 0.85, 0.35, 0.35 + 0.25 * pulse), 3.0, true)

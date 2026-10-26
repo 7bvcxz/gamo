@@ -6,6 +6,7 @@ extends "res://tests/framework/test_case.gd"
 ## composed from the rig's parts, and panels that stay clear of the HUD.
 
 const MainScene := preload("res://scenes/main.tscn")
+const WindowLights := preload("res://tools/art/gen/window_lights.gd")
 
 var main: Node
 var sim: Simulation
@@ -86,9 +87,9 @@ func test_trees_stand_on_far_edges_and_props_stay_in_their_cell() -> void:
 			for p: Array in IslandProps.props_for(cell, open):
 				var local: Vector2 = p[1] - Vector2(cell)
 				assert_true(local.x > 0.0 and local.x < 1.0 and local.y > 0.0 and local.y < 1.0, "prop inside its cell")
-				if p[0] == "prop_tree":
+				if (IslandProps.TREES + IslandProps.FAR_GOODS).any(func(t: Array) -> bool: return t[0] == p[0]):
 					trees += 1
-					assert_true(local.x < 0.3 or local.y < 0.3, "a tree stands on a far edge, behind the island")
+					assert_true(local.x < 0.3 or local.y < 0.3, "a tree or a crate stands on a far edge, behind the island (%s)" % p[0])
 				if open.is_empty():
 					assert_true(p[0] in ["prop_flowers", "prop_grass"], "inside the island only small flowers and grass")
 	assert_true(trees > 0, "some far edges grow a tree")
@@ -96,21 +97,58 @@ func test_trees_stand_on_far_edges_and_props_stay_in_their_cell() -> void:
 
 func test_painted_sprites_keep_the_frame_of_their_pivots() -> void:
 	# A painted png replaces an SVG drawn in a frame the pivots were measured
-	# in: it must be exactly that frame at the sprite's scale.
+	# in: it must be exactly that frame at the sprite's scale -- plus, for a
+	# Step 52 redraw that rose higher, its `headroom` on top.
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/sprites.json"))
 	var checked := 0
 	for name: String in manifest["sprites"]:
 		var spec: Dictionary = manifest["sprites"][name]
 		var src := String(spec["source"])
 		var svg := "res://assets/src/svg/%s.svg" % src.get_file().get_basename()
-		if not src.ends_with(".png") or not FileAccess.file_exists(svg):
+		if not src.ends_with(".png") or not FileAccess.file_exists(svg) or name.ends_with("_lit"):
 			continue
 		var m := RegEx.create_from_string("viewBox=\"[\\d.\\-]+[ ,]+[\\d.\\-]+[ ,]+([\\d.]+)[ ,]+([\\d.]+)\"").search(FileAccess.get_file_as_string(svg))
 		var img := Image.load_from_file(ProjectSettings.globalize_path("res://assets/src/" + src))
-		var want := Vector2(float(m.get_string(1)), float(m.get_string(2))) * float(spec.get("scale", 1.0))
+		var want := Vector2(float(m.get_string(1)), float(m.get_string(2)) + float(spec.get("headroom", 0.0))) * float(spec.get("scale", 1.0))
 		assert_true(absf(img.get_width() - want.x) <= 1.0 and absf(img.get_height() - want.y) <= 1.0, "%s is its frame %s (got %dx%d)" % [name, want, img.get_width(), img.get_height()])
 		checked += 1
 	assert_true(checked >= 20, "the painted buildings and crops are checked (%d)" % checked)
+
+
+## Step 52: a building's lit windows are cut from its own drawing -- every lit
+## texel lands, through the two origins, on a pane of the building (its glass,
+## amber or highlight), so a shift of even one texel would show.
+func test_lit_windows_lie_on_their_building() -> void:
+	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/sprites.json"))
+	var checked := 0
+	for name: String in manifest["sprites"]:
+		if not name.ends_with("_lit"):
+			continue
+		var lit_spec: Dictionary = manifest["sprites"][name]
+		var spec: Dictionary = manifest["sprites"][name.trim_suffix("_lit")]
+		var k := float(spec.get("scale", 1.0))
+		assert_eq(float(lit_spec.get("scale", 1.0)), k, "%s at its building's scale" % name)
+		var lit := Image.load_from_file(ProjectSettings.globalize_path("res://assets/src/" + String(lit_spec["source"])))
+		var img := Image.load_from_file(ProjectSettings.globalize_path("res://assets/src/" + String(spec["source"])))
+		var o_lit: Array = lit_spec["pivots"]["origin"]
+		var o: Array = spec["pivots"]["origin"]
+		var shift := Vector2i(roundi((float(o[0]) - float(o_lit[0])) * k), roundi((float(o[1]) - float(o_lit[1])) * k))
+		var total := 0
+		var on := 0
+		for y in range(0, lit.get_height(), 2):
+			for x in range(0, lit.get_width(), 2):
+				if lit.get_pixel(x, y).a < 0.5:
+					continue
+				total += 1
+				var p := Vector2i(x, y) + shift
+				if p.x < 0 or p.y < 0 or p.x >= img.get_width() or p.y >= img.get_height():
+					continue
+				var c := img.get_pixel(p.x, p.y)
+				if WindowLights._is_glass(c) or WindowLights._is_amber(c) or (c.a > 0.9 and c.r > 0.85 and c.g > 0.88 and c.b > 0.88):
+					on += 1
+		assert_true(total > 0 and on == total, "%s lies on its building (%d of %d)" % [name, on, total])
+		checked += 1
+	assert_true(checked >= 8, "the houses have lit windows (%d)" % checked)
 
 
 func test_sky_draws_the_painted_cloud_band_that_wraps() -> void:

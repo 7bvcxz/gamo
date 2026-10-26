@@ -39,7 +39,7 @@ func setup(p_sim: Simulation, _lib: SpriteLibrary) -> void:
 	add_child(head)
 	why = PanelViews.label("", 15)
 	why.name = "Why"
-	why.add_theme_color_override("font_color", Color("#ffb3a8"))
+	why.theme_type_variation = &"BadLabel"
 	why.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(why)
 	var ph := PanelViews.label(tr("rp.profiles"), 15, true)
@@ -148,7 +148,7 @@ func _build_rows() -> void:
 		words.add_child(label)
 		var preview := PanelViews.label("", 13)
 		preview.name = "Preview"
-		preview.add_theme_color_override("font_color", Color("#b7f08a"))
+		preview.theme_type_variation = &"GoodLabel"
 		preview.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		words.add_child(preview)
 		r.add_child(words)

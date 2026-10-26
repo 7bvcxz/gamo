@@ -59,7 +59,9 @@ func refresh() -> void:
 			value = "$" + value.replace(" / ", " / $")
 		var r := PanelViews.row(("✓ " if p["met"] else "") + tr("tier.need." + String(p["key"])), value)
 		r.name = "Need_" + String(p["key"])
-		r.modulate = Color("#b7f08a") if p["met"] else Color.WHITE
+		if p["met"]:
+			for l: Label in r.get_children():
+				l.theme_type_variation = &"GoodLabel"
 		list.add_child(r)
 	promote_button.visible = true
 	promote_button.disabled = not tiers.can_promote()

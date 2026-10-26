@@ -7,7 +7,7 @@ extends SceneTree
 ## the same frame, keeping every pivot valid.
 ##
 ##   godot --headless --path momonium --script res://tools/art/gen/render_input.gd -- \
-##     --sprite farm --out /abs/farm_in.png [--size 1024] [--fill 0.82]
+##     --sprite farm --out /abs/farm_in.png [--size 1024] [--fill 0.82] [--headroom <frame units>]
 
 const GREEN := Color(0, 1, 0)
 
@@ -16,21 +16,36 @@ func _init() -> void:
 	var args := _args()
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/sprites.json"))
 	var spec: Dictionary = manifest["sprites"][args["sprite"]]
-	var svg := FileAccess.get_file_as_string("res://assets/src/" + spec["source"])
-	var box := _viewbox(svg)
 	var size := int(args.get("size", "1024"))
 	var fill := float(args.get("fill", "0.82"))
-	var s := size * fill / maxf(box.size.x, box.size.y)
+	# Step 52: `--headroom` frame units of empty space above the frame, for a
+	# redraw taller than the old drawing (the pivots move down by as much).
+	var head := float(args.get("headroom", "0"))
 	var img := Image.new()
-	img.load_svg_from_string(svg, s)
+	var box: Rect2
+	var s: float
+	if String(spec["source"]).ends_with(".png"):
+		# A painted source (Step 46) is the frame at the sprite's `scale`.
+		img = Image.load_from_file(ProjectSettings.globalize_path("res://assets/src/" + spec["source"]))
+		var k := float(spec.get("scale", 1.0))
+		box = Rect2(0, 0, img.get_width() / k, img.get_height() / k)
+		s = size * fill / maxf(box.size.x, box.size.y + head)
+		img.resize(maxi(1, roundi(box.size.x * s)), maxi(1, roundi(box.size.y * s)), Image.INTERPOLATE_LANCZOS)
+	else:
+		var svg := FileAccess.get_file_as_string("res://assets/src/" + spec["source"])
+		box = _viewbox(svg)
+		s = size * fill / maxf(box.size.x, box.size.y + head)
+		img.load_svg_from_string(svg, s)
 	img.convert(Image.FORMAT_RGBA8)
 	var canvas := Image.create(size, size, false, Image.FORMAT_RGBA8)
 	canvas.fill(GREEN)
-	var at := Vector2i(int((size - img.get_width()) / 2.0), int((size - img.get_height()) / 2.0))
+	var full_h := (box.size.y + head) * s
+	var top := int((size - full_h) / 2.0)
+	var at := Vector2i(int((size - img.get_width()) / 2.0), top + roundi(head * s))
 	canvas.blend_rect(img, Rect2i(Vector2i.ZERO, img.get_size()), at)
 	canvas.save_png(args["out"])
-	var frame := {"sprite": args["sprite"], "canvas": size, "x": at.x, "y": at.y, "scale": s,
-		"frame_w": box.size.x, "frame_h": box.size.y}
+	var frame := {"sprite": args["sprite"], "canvas": size, "x": at.x, "y": top, "scale": s,
+		"frame_w": box.size.x, "frame_h": box.size.y + head, "headroom": head}
 	var f := FileAccess.open(args["out"] + ".frame.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(frame))
 	print("render_input: %s %s scale %.3f at %s" % [args["sprite"], args["out"], s, at])

@@ -53,7 +53,7 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	notice = PanelViews.label("", 16)
 	notice.name = "Notice"
 	notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	notice.add_theme_color_override("font_color", Color("#ffe27a"))
+	notice.theme_type_variation = &"GoldLabel"
 	add_child(notice)
 	rows = VBoxContainer.new()
 	rows.name = "Rows"

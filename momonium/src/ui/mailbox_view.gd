@@ -53,7 +53,7 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	back_button.focus_mode = Control.FOCUS_NONE
 	back_button.draw.connect(func() -> void:
 		var c := back_button.size * 0.5 + Vector2(-2, 0)
-		back_button.draw_polyline(PackedVector2Array([c + Vector2(6, -10), c + Vector2(-5, 0), c + Vector2(6, 10)]), Color(1, 1, 1, 0.92), 3.5, true))
+		back_button.draw_polyline(PackedVector2Array([c + Vector2(6, -10), c + Vector2(-5, 0), c + Vector2(6, 10)]), back_button.get_theme_color("glyph", "Ink"), 3.5, true))
 	back_button.pressed.connect(show_list)
 	letter_box.add_child(back_button)
 	card = LetterCard.new()

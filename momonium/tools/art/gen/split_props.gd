@@ -7,6 +7,9 @@ extends SceneTree
 ##
 ##   godot --headless --path momonium --script res://tools/art/gen/split_props.gd -- \
 ##     --in /abs/sheet.png --names bush,bush_flowers,... --out res://assets/src/png/ [--px 0.25]
+## Step 52: `--rows 4 --prefix "" --square 128` cuts an icon sheet instead:
+## names used as they are, each icon centred in a square of that many px;
+## `--cols 4` treats the sheet as a strict grid (pieces in a cell are one icon).
 
 const KeyOutput := preload("res://tools/art/gen/key_output.gd")
 
@@ -21,9 +24,22 @@ func _init() -> void:
 	KeyOutput.key(img)
 	var names: PackedStringArray = String(args["names"]).split(",")
 	var boxes := _components(img, 400)
+	var rows := float(args.get("rows", "2"))
+	if args.has("cols"):
+		# A strict grid: every blob joins the others in its cell (a watering
+		# can's drops, a seed bag's seeds are pieces of one icon).
+		var cols := float(args["cols"])
+		var cells := {}
+		for r in boxes:
+			var c := r.get_center()
+			var key := Vector2i(int(c.x / (img.get_width() / cols)), int(c.y / (img.get_height() / rows)))
+			cells[key] = (cells[key] as Rect2i).merge(r) if cells.has(key) else r
+		boxes.assign(cells.values())
+	var prefix := String(args.get("prefix", "prop_"))
+	var square := int(args.get("square", "0"))
 	boxes.sort_custom(func(a: Rect2i, b: Rect2i) -> bool:
-		var ra := int((a.position.y + a.size.y / 2) / (img.get_height() / 2.0))
-		var rb := int((b.position.y + b.size.y / 2) / (img.get_height() / 2.0))
+		var ra := int((a.position.y + a.size.y / 2) / (img.get_height() / rows))
+		var rb := int((b.position.y + b.size.y / 2) / (img.get_height() / rows))
 		return ra < rb or (ra == rb and a.position.x < b.position.x))
 	if boxes.size() != names.size():
 		push_error("split_props: found %d props, expected %d" % [boxes.size(), names.size()])
@@ -33,10 +49,17 @@ func _init() -> void:
 	for i in boxes.size():
 		var r := boxes[i].grow(4).intersection(Rect2i(Vector2i.ZERO, img.get_size()))
 		var cut := img.get_region(r)
-		cut.resize(maxi(1, roundi(cut.get_width() * px)), maxi(1, roundi(cut.get_height() * px)), Image.INTERPOLATE_LANCZOS)
-		var path := ProjectSettings.globalize_path(String(args["out"]).path_join("prop_%s.png" % names[i]))
+		if square > 0:
+			var k := square * 0.94 / maxf(cut.get_width(), cut.get_height())
+			cut.resize(maxi(1, roundi(cut.get_width() * k)), maxi(1, roundi(cut.get_height() * k)), Image.INTERPOLATE_LANCZOS)
+			var sq := Image.create(square, square, false, Image.FORMAT_RGBA8)
+			sq.blit_rect(cut, Rect2i(Vector2i.ZERO, cut.get_size()), (Vector2i(square, square) - cut.get_size()) / 2)
+			cut = sq
+		else:
+			cut.resize(maxi(1, roundi(cut.get_width() * px)), maxi(1, roundi(cut.get_height() * px)), Image.INTERPOLATE_LANCZOS)
+		var path := ProjectSettings.globalize_path(String(args["out"]).path_join("%s%s.png" % [prefix, names[i]]))
 		cut.save_png(path)
-		print("split_props: prop_%s %dx%d" % [names[i], cut.get_width(), cut.get_height()])
+		print("split_props: %s%s %dx%d" % [prefix, names[i], cut.get_width(), cut.get_height()])
 	quit()
 
 

@@ -17,6 +17,12 @@ signal details_pressed(id: int)
 signal demolish_pressed(id: int)
 
 const CARD_SIZE := Vector2(150, 118)
+## Step 52: the concept's job cards -- cream for sowing, sky for watering,
+## butter for harvesting -- with warm brown ink; other jobs take the colours
+## in turn. A card's colour says which job it is before its word does.
+const TINTS := {"ui_seed": "#fdf0dc", "ui_water": "#dcf1fc", "ui_harvest": "#fff0bf"}
+const TINT_CYCLE := ["#fdf0dc", "#dcf1fc", "#fff0bf"]
+const CARD_INK := Color("#5a4632")
 const GAP := 10.0
 
 var sim: Simulation
@@ -178,6 +184,11 @@ func _make_card(stage: Dictionary, index: int) -> Button:
 	card.custom_minimum_size = CARD_SIZE
 	card.size = CARD_SIZE
 	card.focus_mode = Control.FOCUS_NONE
+	var tint := Color(TINTS.get(String(stage.get("icon", "")), TINT_CYCLE[index % TINT_CYCLE.size()]))
+	card.set_meta("tint", tint)
+	for state: String in ["normal", "hover", "pressed", "disabled"]:
+		var face := tint.darkened(0.08) if state == "pressed" else tint
+		card.add_theme_stylebox_override(state, _card_box(face))
 	var box := VBoxContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -187,7 +198,7 @@ func _make_card(stage: Dictionary, index: int) -> Button:
 	var icon := TextureRect.new()
 	var icon_name: String = stage.get("icon", "ui_sprout")
 	icon.texture = lib.atlas_texture(icon_name if lib.has(icon_name) else "ui_sprout")
-	icon.custom_minimum_size = Vector2(44, 44)
+	icon.custom_minimum_size = Vector2(52, 52)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -197,16 +208,31 @@ func _make_card(stage: Dictionary, index: int) -> Button:
 	name_label.text = tr(stage.get("label", ""))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override("font_size", 19)
+	name_label.add_theme_color_override("font_color", CARD_INK)
+	name_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0))
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(name_label)
 	var time_label := Label.new()
 	time_label.name = "Time"
 	time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	time_label.add_theme_font_size_override("font_size", 16)
-	time_label.modulate = Color(1, 1, 1, 0.85)
+	time_label.add_theme_color_override("font_color", CARD_INK)
+	time_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0))
 	time_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	time_label.set_meta("seconds", float(stage.get("seconds", 0)))
-	box.add_child(time_label)
+	# The time sits on a small chip of the card's own colour, a shade deeper.
+	var chip := PanelContainer.new()
+	chip.name = "TimeChip"
+	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chip.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	var chip_box := StyleBoxFlat.new()
+	chip_box.bg_color = tint.darkened(0.1)
+	chip_box.set_corner_radius_all(12)
+	chip_box.content_margin_left = 12
+	chip_box.content_margin_right = 12
+	chip.add_theme_stylebox_override("panel", chip_box)
+	chip.add_child(time_label)
+	box.add_child(chip)
 	card.set_meta("index", index)
 	card.pressed.connect(func() -> void:
 		if building_id != 0 and not card.has_meta("cancel"):
@@ -250,8 +276,8 @@ func _refresh() -> void:
 		var time_label: Label = card.find_child("Time", true, false)
 		var secs: float = time_label.get_meta("seconds")
 		card.disabled = not is_current or not buildings.is_ready(b)
-		card.self_modulate = Color(1.25, 1.2, 0.9) if is_current else Color(1, 1, 1, 0.75)
-		card.modulate = Color.WHITE if is_current else Color(1, 1, 1, 0.6)
+		card.set_meta("current", is_current)
+		card.modulate = Color.WHITE if is_current else Color(1, 1, 1, 0.62)
 		if is_current and b["state"] == BuildingSystem.COOLDOWN:
 			time_label.text = tr("err.cooldown") % ceili(buildings.remaining_ms(b) / 1000.0)
 		else:
@@ -275,6 +301,15 @@ func _draw_card_progress(card: Button) -> void:
 	var b := buildings.get_building(building_id)
 	if b.is_empty():
 		return
+	# The card of the job that comes next wears the accent rim.
+	if card.get_meta("current", false):
+		var rim := StyleBoxFlat.new()
+		rim.draw_center = false
+		rim.border_color = Color("#ffcf3f")
+		rim.set_border_width_all(4)
+		rim.set_corner_radius_all(22)
+		rim.anti_aliasing = true
+		card.draw_style_box(rim, Rect2(Vector2.ZERO, card.size))
 	# Repeated stages (water x3) show one dot each, filled as they are done.
 	if card.has_meta("count") and int(card.get_meta("count")) > 1:
 		var count: int = card.get_meta("count")
@@ -282,14 +317,14 @@ func _draw_card_progress(card: Button) -> void:
 		var done := clampi(int(b["stage"]) - first, 0, count)
 		for i in count:
 			var c := Vector2(card.size.x * 0.5 + (i - (count - 1) * 0.5) * 14.0, 12.0)
-			card.draw_circle(c, 4.5, Color("#6fc3ff") if i < done else Color(1, 1, 1, 0.3))
+			card.draw_circle(c, 4.5, Color("#4aa8e8") if i < done else Color(CARD_INK, 0.22))
 	if _card_phase(card, b) != 0:
 		return
 	if b["state"] == BuildingSystem.WORKING or (b["state"] == BuildingSystem.CONSTRUCTING and not card.has_meta("cancel")):
 		var p := buildings.progress(b)
 		var bar := Rect2(10, card.size.y - 12, (card.size.x - 20) * p, 6)
-		card.draw_rect(Rect2(10, card.size.y - 12, card.size.x - 20, 6), Color(1, 1, 1, 0.2))
-		card.draw_rect(bar, Color("#9be15d"))
+		card.draw_rect(Rect2(10, card.size.y - 12, card.size.x - 20, 6), Color(CARD_INK, 0.14))
+		card.draw_rect(bar, Color("#7cc943"))
 
 
 func set_reserved(left: float, bottom: float) -> void:
@@ -334,3 +369,18 @@ func card_rects() -> Array[Rect2]:
 	for c: Button in cards:
 		out.append(c.get_global_rect())
 	return out
+
+
+## A job card's face: its colour, a white rim, a soft shadow (Step 52).
+static func _card_box(face: Color) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = face
+	box.set_corner_radius_all(22)
+	box.border_color = Color(1, 1, 1, 0.95)
+	box.set_border_width_all(2)
+	box.shadow_color = Color(0.1, 0.16, 0.3, 0.22)
+	box.shadow_size = 6
+	box.shadow_offset = Vector2(0, 2)
+	box.anti_aliasing = true
+	box.set_content_margin_all(6)
+	return box

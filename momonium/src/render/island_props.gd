@@ -10,8 +10,14 @@ extends Node
 ## and behind them in depth order, and they run no per-frame code.
 
 ## [sprite, weight] for a rim cell; trees only on the far edges, where they
-## stand behind the island instead of in front of what is on it.
+## stand behind the island instead of in front of what is on it. Step 52 adds
+## the concept's pines, and its crates, barrels, log piles and stumps -- these
+## too only on far edges: solid wood in front of a tile reads as a thing
+## standing on it.
 const RIM := [["prop_bush", 5], ["prop_bush_flowers", 4], ["prop_flowers", 4], ["prop_rocks", 2], ["prop_grass", 3]]
+const TREES := [["prop_tree", 3], ["prop_pine", 3], ["prop_pine_small", 2]]
+const FAR_GOODS := [["prop_crate", 2], ["prop_barrel", 2], ["prop_logs", 2], ["prop_stump", 1]]
+const GOODS_CHANCE := 0.3
 const INNER := [["prop_flowers", 3], ["prop_grass", 2]]
 const RIM_CHANCE := 0.9
 const SECOND_CHANCE := 0.5
@@ -92,7 +98,9 @@ static func props_for(cell: Vector2i, open: Array[Vector2i]) -> Array:
 		if d.x < 0 or d.y < 0:
 			far.append(d)
 	if not far.is_empty() and rng.randf() < TREE_CHANCE:
-		out.append(["prop_tree", _edge_point(cell, far[rng.randi() % far.size()], rng), rng.randf() < 0.5])
+		out.append([_pick(TREES, rng), _edge_point(cell, far[rng.randi() % far.size()], rng), rng.randf() < 0.5])
+	elif not far.is_empty() and rng.randf() < GOODS_CHANCE:
+		out.append([_pick(FAR_GOODS, rng), _edge_point(cell, far[rng.randi() % far.size()], rng), rng.randf() < 0.5])
 	var n := 0
 	if rng.randf() < RIM_CHANCE:
 		n = 2 if rng.randf() < SECOND_CHANCE else 1

@@ -18,6 +18,8 @@ const MARGIN := 16.0
 const GAP := 8.0
 
 var sim: Simulation
+## The white glass of the reading panels (Step 52); frames take it.
+var card_theme: Theme
 var day_panel: PanelContainer
 var money_pill: PanelContainer
 var exp_pill: PanelContainer
@@ -80,6 +82,7 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	theme = HudTheme.build(sim.data, LocaleService.font_for(LocaleService.current()))
+	card_theme = HudTheme.build_card(sim.data, theme.default_font)
 
 	day_panel = PanelContainer.new()
 	day_panel.name = "DayPanel"
@@ -571,6 +574,7 @@ static func _format_money(amount: int) -> String:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_TRANSLATION_CHANGED and sim != null:
 		theme.default_font = LocaleService.font_for(LocaleService.current())
+		card_theme.default_font = theme.default_font
 		refresh(true)
 		_layout.call_deferred()
 

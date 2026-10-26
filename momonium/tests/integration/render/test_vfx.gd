@@ -36,6 +36,30 @@ func test_lights_only_after_dusk() -> void:
 	assert_eq(BuildingView.night_strength(sunset, start), 0.0, "nor in the warm sunset")
 
 
+## Step 52: the panes themselves light -- the `_lit` sprite traced from the
+## painting -- warm at night, gone by day; a building without windows has none.
+func test_windows_light_up_at_night() -> void:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var office := bs.place_instant("office", Vector2i(1, 0))
+	var farm := bs.place_instant("farm", Vector2i(0, 1))
+	await tree.process_frame
+	var views: BuildingViews = main.get("building_views")
+	var view := views.view(office)
+	assert_true(view.lit != null, "the office has lit windows")
+	assert_eq(view.lit.get_parent(), view.sprite, "laid on the building's own sprite (it bounces with it)")
+	assert_true(views.view(farm).lit == null, "a farm has no windows to light")
+	var palette := SkyPalette.new(sim.data)
+	var before := BuildingView.ambient
+	BuildingView.ambient = palette.at(0.8)["ambient"]
+	view._draw_lights(bs.get_building(office))
+	assert_true(view.lit.visible and view.lit.modulate.a > 0.4, "night: the panes glow (%.2f)" % view.lit.modulate.a)
+	assert_true(view.lit.modulate.r > view.lit.modulate.b, "warm, not the night's blue")
+	BuildingView.ambient = palette.at(0.4)["ambient"]
+	view._draw_lights(bs.get_building(office))
+	assert_false(view.lit.visible, "day: dark panes")
+	BuildingView.ambient = before
+
+
 func test_pennants_follow_mastery() -> void:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var farm := bs.place_instant("farm", Vector2i(1, 0))

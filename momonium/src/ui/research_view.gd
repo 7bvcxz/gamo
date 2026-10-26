@@ -133,7 +133,7 @@ func _card(n: Dictionary) -> Button:
 func _draw_card(b: Button, id: String) -> void:
 	var state := research.state_of(id)
 	if id == selected:
-		b.draw_rect(Rect2(Vector2.ONE * 2, b.size - Vector2.ONE * 4), Color("#ffe27a"), false, 3.0)
+		b.draw_rect(Rect2(Vector2.ONE * 2, b.size - Vector2.ONE * 4), b.get_theme_color("font_color", "GoldLabel"), false, 3.0)
 	var corner := Vector2(b.size.x - 16, 16)
 	match state:
 		"locked":
@@ -153,10 +153,10 @@ func _draw_card(b: Button, id: String) -> void:
 			b.draw_string(f, corner + Vector2(-ts.x * 0.5, 6), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 16, Color.WHITE)
 		"active":
 			var r := Rect2(10, b.size.y - 9, b.size.x - 20, 5)
-			b.draw_rect(r, Color(1, 1, 1, 0.2))
+			b.draw_rect(r, b.get_theme_color("track", "Ink"))
 			b.draw_rect(Rect2(r.position, Vector2(r.size.x * research.progress(), r.size.y)), Color("#9be15d"))
 		"available":
-			b.draw_circle(corner, 6.0, Color("#ffe27a"))
+			b.draw_circle(corner, 6.0, b.get_theme_color("font_color", "GoldLabel"))
 
 
 func _draw_links() -> void:
@@ -169,7 +169,8 @@ func _draw_links() -> void:
 			var a := parent.position + Vector2(parent.size.x * 0.5, parent.size.y)
 			var b := child.position + Vector2(child.size.x * 0.5, 0)
 			var mid := (a.y + b.y) * 0.5
-			var color := Color(1, 1, 1, 0.75) if research.is_done(r) else Color(1, 1, 1, 0.35)
+			var line := tree.get_theme_color("line", "Ink")
+			var color := line if research.is_done(r) else Color(line, line.a * 0.45)
 			for seg: Array in [[a, Vector2(a.x, mid)], [Vector2(a.x, mid), Vector2(b.x, mid)], [Vector2(b.x, mid), b]]:
 				tree.draw_dashed_line(seg[0], seg[1], color, 2.0, 6.0)
 
@@ -268,13 +269,13 @@ func refresh() -> void:
 	PanelViews.clear(effects_box)
 	for line: String in effect_lines(selected):
 		var l := PanelViews.label(line, 16)
-		l.add_theme_color_override("font_color", Color("#b7f08a"))
+		l.theme_type_variation = &"GoodLabel"
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		effects_box.add_child(l)
 	PanelViews.clear(needs_box)
 	for line: String in (need_lines(selected) if research.state_of(selected) == "locked" else [] as Array[String]):
 		var l := PanelViews.label(line, 15)
-		l.add_theme_color_override("font_color", Color("#ffb3a8"))
+		l.theme_type_variation = &"BadLabel"
 		needs_box.add_child(l)
 	var cost := research.cost_of(selected)
 	var notes := int(cost["items"].get("notes", 0))

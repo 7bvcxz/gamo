@@ -103,7 +103,7 @@ class DayBars:
 
 	func _draw() -> void:
 		var mid := size.y * 0.62
-		draw_line(Vector2(0, mid), Vector2(size.x, mid), Color(1, 1, 1, 0.25), 1.0)
+		draw_line(Vector2(0, mid), Vector2(size.x, mid), get_theme_color("line", "Ink"), 1.0)
 		if days.is_empty():
 			return
 		var biggest := 1.0

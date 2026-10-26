@@ -64,7 +64,10 @@ func _init() -> void:
 		if layout["height"] <= width or width >= max_size:
 			break
 		width *= 2
-	var height := _next_pow2(int(layout["height"]))
+	# Step 52: the height rounds up to 128, not to a power of two -- Godot 4's
+	# web renderer is WebGL 2, which samples and mipmaps any size, and a
+	# power of two had doubled the atlas (and its memory) for 100 rows.
+	var height := ceili(int(layout["height"]) / 128.0) * 128
 	if width > max_size or height > max_size:
 		push_error("build_atlas: atlas %dx%d exceeds budget %d" % [width, height, max_size])
 		quit(1)
@@ -126,10 +129,3 @@ static func bytes_sha(bytes: PackedByteArray) -> String:
 	ctx.start(HashingContext.HASH_SHA256)
 	ctx.update(bytes)
 	return ctx.finish().hex_encode().substr(0, 16)
-
-
-static func _next_pow2(v: int) -> int:
-	var p := 1
-	while p < v:
-		p *= 2
-	return p

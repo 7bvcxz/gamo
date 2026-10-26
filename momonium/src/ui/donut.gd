@@ -18,7 +18,7 @@ var end_color := Color("#ffe27a")
 func _draw() -> void:
 	var r := minf(size.x, size.y) * 0.5 - thickness * 0.5
 	var c := size * 0.5
-	draw_arc(c, r, 0.0, TAU, 48, track, thickness, true)
+	draw_arc(c, r, 0.0, TAU, 48, get_theme_color("track", "Ink") if has_theme_color("track", "Ink") else track, thickness, true)
 	if progress <= 0.0:
 		return
 	# Drawn as short segments so the colour can travel along the ring.

@@ -19,7 +19,7 @@ func _init(p_fill: Color = Color("#9be15d")) -> void:
 
 func _draw() -> void:
 	var r := size.y * 0.5
-	_rounded(Rect2(Vector2.ZERO, size), track, r)
+	_rounded(Rect2(Vector2.ZERO, size), get_theme_color("track", "Ink") if has_theme_color("track", "Ink") else track, r)
 	if value > 0.0:
 		_rounded(Rect2(Vector2.ZERO, Vector2(maxf(size.x * value, size.y), size.y)), fill, r)
 

@@ -98,7 +98,7 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	add_child(takes_row)
 	block_label = PanelViews.label("", 16)
 	block_label.name = "Blocked"
-	block_label.add_theme_color_override("font_color", Color("#ffb3a8"))
+	block_label.theme_type_variation = &"BadLabel"
 	block_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(block_label)
 	power_row = PanelViews.row("", "")
@@ -115,7 +115,7 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	add_child(refit_box)
 	stats_label = PanelViews.label("", 15)
 	stats_label.name = "Stats"
-	stats_label.add_theme_color_override("font_color", Color("#cfe9ff"))
+	stats_label.theme_type_variation = &"InfoLabel"
 	stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(stats_label)
 	priority_box = HBoxContainer.new()
@@ -138,7 +138,7 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	add_child(priority_box)
 	manager_label = PanelViews.label("", 16)
 	manager_label.name = "Manager"
-	manager_label.add_theme_color_override("font_color", Color("#ffe27a"))
+	manager_label.theme_type_variation = &"GoldLabel"
 	add_child(manager_label)
 	research_box = VBoxContainer.new()
 	research_box.name = "Research"
@@ -301,7 +301,7 @@ func _variety_button(b: Dictionary, buildings: BuildingSystem, v: String) -> But
 	var open := buildings.variety_unlocked(type, v)
 	btn.draw.connect(func() -> void:
 		if chosen:
-			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), Color("#ffe27a"), false, 3.0)
+			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), btn.get_theme_color("font_color", "GoldLabel"), false, 3.0)
 		if not open:
 			var c := Vector2(btn.size.x - 14, 14)
 			btn.draw_circle(c, 11.0, Color(0.1, 0.18, 0.3, 0.85))
@@ -401,7 +401,7 @@ func _recipe_button(b: Dictionary, buildings: BuildingSystem, r: String) -> Butt
 	var open := buildings.recipe_unlocked(type, r)
 	btn.draw.connect(func() -> void:
 		if chosen:
-			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), Color("#ffe27a"), false, 3.0)
+			btn.draw_rect(Rect2(Vector2.ONE * 2, btn.size - Vector2.ONE * 4), btn.get_theme_color("font_color", "GoldLabel"), false, 3.0)
 		if not open:
 			var c := Vector2(btn.size.x - 14, 14)
 			btn.draw_circle(c, 11.0, Color(0.1, 0.18, 0.3, 0.85))
@@ -424,7 +424,7 @@ func _refresh_management(b: Dictionary, buildings: BuildingSystem) -> void:
 		for p: String in ManagerSystem.PRIORITIES:
 			var pb: Button = priority_box.get_node("P_" + p)
 			pb.text = tr("priority." + p)
-			pb.modulate = Color(1.3, 1.25, 0.8) if p == current else Color(1, 1, 1, 0.75)
+			pb.theme_type_variation = &"SelectedButton" if p == current else &""
 	manager_label.visible = is_office
 	if is_office and manager != null:
 		manager_label.text = tr("manager.status").format({"n": manager.moves_made}) if manager.manager() != 0 else tr("manager.none")
@@ -526,7 +526,7 @@ func _refit_button(b: Dictionary, e: Dictionary) -> Button:
 	var check := (sim.system(&"buildings") as BuildingSystem).can_refit(int(b["id"]), type)
 	var price := PanelViews.label(text, 12, not bool(e["unlocked"]))
 	if bool(e["unlocked"]) and not check["ok"]:
-		price.add_theme_color_override("font_color", Color("#ff9a8f"))
+		price.theme_type_variation = &"BadLabel"
 	price.name = "Price"
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	price.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -579,7 +579,7 @@ func _refresh_research(b: Dictionary) -> void:
 	research_box.add_child(PanelViews.label(tr("detail.research"), 15, true))
 	for line: String in lines:
 		var l := PanelViews.label(line, 15)
-		l.add_theme_color_override("font_color", Color("#b7f08a"))
+		l.theme_type_variation = &"GoodLabel"
 		research_box.add_child(l)
 
 

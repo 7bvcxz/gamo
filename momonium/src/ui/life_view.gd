@@ -41,7 +41,7 @@ func setup(p_sim: Simulation, _lib: SpriteLibrary) -> void:
 	add_child(homes_row)
 	homeless = PanelViews.label("", 15)
 	homeless.name = "Homeless"
-	homeless.add_theme_color_override("font_color", Color("#ffb3a8"))
+	homeless.theme_type_variation = &"BadLabel"
 	add_child(homeless)
 	work_row = PanelViews.row("", "")
 	work_row.name = "Work"

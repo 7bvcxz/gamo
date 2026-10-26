@@ -224,7 +224,7 @@ func refresh() -> void:
 	(get_node("LanguageTitle") as Label).text = tr("settings.language")
 	var current := LocaleService.current()
 	for code: String in lang_buttons:
-		(lang_buttons[code] as Button).modulate = Color(1.25, 1.2, 0.85) if code == current else Color(1, 1, 1, 0.8)
+		(lang_buttons[code] as Button).theme_type_variation = &"SelectedButton" if code == current else &""
 	tutorial_button.text = tr("settings.tutorial")
 	demo_button.text = tr("settings.leave_demo") if in_demo else tr("settings.demo")
 	demo_note.text = "" if in_demo else tr("settings.demo_note")

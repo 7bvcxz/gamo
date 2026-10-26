@@ -385,7 +385,6 @@ func _ready() -> void:
 	tips = Tips.new()
 	ui.add_child(tips)
 	tips.setup(settings)
-	tips.allowed = not bridge.e2e or bool(JavaScriptBridge.eval("!!window.MOMONIUM_E2E_TIPS", true))
 	settings_view.replay_tips.connect(func() -> void:
 		tips.replay()
 		_close_frames())
@@ -417,6 +416,10 @@ func _ready() -> void:
 	_place_frames()
 
 	bridge.attach(sim, _version_label.text.trim_prefix("v"))
+	# After attach: only then does the bridge know it is driven by a browser
+	# test (read before it, tips were never off in E2E -- Step 52 found the sea
+	# tip taking a test's tap whenever the test ran a little slower).
+	tips.allowed = not bridge.e2e or bool(JavaScriptBridge.eval("!!window.MOMONIUM_E2E_TIPS", true))
 	apply_options()
 	_maybe_start_tutorial.call_deferred()
 	if (sim.system(&"prestige") as PrestigeSystem).welcome:
@@ -1101,7 +1104,13 @@ func _art_info(_arg: Variant) -> Dictionary:
 		"props": island_props.count() if island_props != null else 0,
 		"painted_clouds": float((sky.material as ShaderMaterial).get_shader_parameter("painted_clouds")) > 0.5,
 		"research_card": _window_rect(research_frame.card_rect()) if research_frame.visible else [],
-		"side_reserved": research_frame.right_reserved * get_viewport().get_final_transform().get_scale().x}
+		"status_card": _window_rect(status_frame.card_rect()) if status_frame.visible else [],
+		"side_reserved": research_frame.right_reserved * get_viewport().get_final_transform().get_scale().x,
+		# Step 52: each building with lit windows -- [id, lit now, its panes' rect].
+		"lit": building_views.views.values().filter(func(v: BuildingView) -> bool: return v.lit != null).map(func(v: BuildingView) -> Array:
+			var xf := v.lit.get_global_transform_with_canvas()
+			var a: Vector2 = xf * v.lit.offset
+			return [v.id, v.lit.visible, _window_rect(Rect2(a, xf * (v.lit.offset + v.lit.region_rect.size) - a))])}
 
 
 ## A rect in window pixels, as the E2E bridge reports rects.
@@ -1283,6 +1292,7 @@ func _build_ui_info(_arg: Variant) -> Dictionary:
 func _frame(ui: Control, frame_name: String) -> PanelFrame:
 	var f := PanelFrame.new()
 	f.name = frame_name
+	f.theme = hud.card_theme
 	ui.add_child(f)
 	ui.move_child(f, hud.get_index())
 	f.watch(sim)

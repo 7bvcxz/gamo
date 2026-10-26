@@ -1,5 +1,5 @@
 {
-  "_doc": "Sprite sources for the atlas. scale = texels per SVG unit. Pivots are in SVG units; every world sprite has an `origin` (where it touches the ground). Rebuild with tools/art/build_atlas.gd after editing a source.",
+  "_doc": "Sprite sources for the atlas. scale = texels per SVG unit. Pivots are in SVG units; every world sprite has an `origin` (where it touches the ground). Rebuild with tools/art/build_atlas.gd after editing a source. `headroom` (Step 52): frame units a redraw added above the SVG frame -- the png is the frame plus that much on top, and its pivots moved down by as much.",
   "atlas": "sprites",
   "padding": 2,
   "sprites": {
@@ -23,8 +23,8 @@
       }
     },
     "icon_coin": {
-      "source": "svg/icon_coin.svg",
-      "scale": 1.0,
+      "source": "png/icon_coin.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -33,8 +33,8 @@
       }
     },
     "icon_star": {
-      "source": "svg/icon_star.svg",
-      "scale": 1.0,
+      "source": "png/icon_star.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -43,13 +43,13 @@
       }
     },
     "prop_crate": {
-      "source": "svg/prop_crate.svg",
+      "source": "png/prop_crate.png",
       "scale": 1.0,
-      "world_scale": 0.5,
+      "world_scale": 0.3,
       "pivots": {
         "origin": [
-          48,
-          88
+          41,
+          91
         ]
       }
     },
@@ -74,8 +74,8 @@
       }
     },
     "ui_land": {
-      "source": "svg/ui_land.svg",
-      "scale": 1.0,
+      "source": "png/ui_land.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -114,8 +114,8 @@
       }
     },
     "ui_sprout": {
-      "source": "svg/ui_sprout.svg",
-      "scale": 1.0,
+      "source": "png/ui_sprout.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -127,14 +127,15 @@
       "source": "png/farm.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          55
+          85
         ],
         "top": [
           70,
-          8
+          12
         ]
       }
     },
@@ -193,8 +194,8 @@
       }
     },
     "ui_seed": {
-      "source": "svg/ui_seed.svg",
-      "scale": 1.0,
+      "source": "png/ui_seed.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -203,8 +204,8 @@
       }
     },
     "ui_water": {
-      "source": "svg/ui_water.svg",
-      "scale": 1.0,
+      "source": "png/ui_water.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -213,8 +214,8 @@
       }
     },
     "ui_harvest": {
-      "source": "svg/ui_harvest.svg",
-      "scale": 1.0,
+      "source": "png/ui_harvest.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -223,8 +224,8 @@
       }
     },
     "ui_mine": {
-      "source": "svg/ui_mine.svg",
-      "scale": 1.0,
+      "source": "png/ui_mine.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -233,8 +234,8 @@
       }
     },
     "ui_lumber": {
-      "source": "svg/ui_lumber.svg",
-      "scale": 1.0,
+      "source": "png/ui_lumber.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -243,8 +244,8 @@
       }
     },
     "ui_flask": {
-      "source": "svg/ui_flask.svg",
-      "scale": 1.0,
+      "source": "png/ui_flask.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -256,14 +257,15 @@
       "source": "png/lab.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 50,
       "pivots": {
         "origin": [
           70,
-          95
+          145
         ],
         "top": [
           70,
-          8
+          39
         ]
       }
     },
@@ -271,14 +273,15 @@
       "source": "png/mine.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           70,
-          26
+          58
         ]
       }
     },
@@ -286,20 +289,21 @@
       "source": "png/lumberyard.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           70,
-          30
+          60
         ]
       }
     },
     "item_wood": {
-      "source": "svg/item_wood.svg",
-      "scale": 1.0,
+      "source": "png/item_wood.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -308,8 +312,8 @@
       }
     },
     "item_stone": {
-      "source": "svg/item_stone.svg",
-      "scale": 1.0,
+      "source": "png/item_stone.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -318,8 +322,8 @@
       }
     },
     "item_copper": {
-      "source": "svg/item_copper.svg",
-      "scale": 1.0,
+      "source": "png/item_copper.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -328,8 +332,8 @@
       }
     },
     "item_iron": {
-      "source": "svg/item_iron.svg",
-      "scale": 1.0,
+      "source": "png/item_iron.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -338,8 +342,8 @@
       }
     },
     "item_gold": {
-      "source": "svg/item_gold.svg",
-      "scale": 1.0,
+      "source": "png/item_gold.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -351,20 +355,21 @@
       "source": "png/smelter.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           70,
-          10
+          28.5
         ]
       }
     },
     "item_copper_ingot": {
-      "source": "svg/item_copper_ingot.svg",
-      "scale": 1.0,
+      "source": "png/item_copper_ingot.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -373,8 +378,8 @@
       }
     },
     "item_iron_ingot": {
-      "source": "svg/item_iron_ingot.svg",
-      "scale": 1.0,
+      "source": "png/item_iron_ingot.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -383,8 +388,8 @@
       }
     },
     "item_gold_ingot": {
-      "source": "svg/item_gold_ingot.svg",
-      "scale": 1.0,
+      "source": "png/item_gold_ingot.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -393,8 +398,8 @@
       }
     },
     "ui_power": {
-      "source": "svg/ui_power.svg",
-      "scale": 1.0,
+      "source": "png/ui_power.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -406,14 +411,15 @@
       "source": "png/solar_panel.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           72,
-          58
+          71.5
         ]
       }
     },
@@ -421,18 +427,19 @@
       "source": "png/wind_turbine.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          135
+          165
         ],
         "top": [
           70,
-          27
+          20.5
         ],
         "hub": [
-          70,
-          30
+          69.3,
+          24
         ]
       }
     },
@@ -440,18 +447,19 @@
       "source": "png/steam_engine.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
-          84,
-          9
+          83.5,
+          33.5
         ],
         "stack": [
-          84,
-          9
+          83.5,
+          34
         ]
       }
     },
@@ -459,18 +467,19 @@
       "source": "png/water_wheel.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           62,
-          38
+          46.5
         ],
         "hub": [
-          104,
-          96
+          102,
+          116
         ]
       }
     },
@@ -478,14 +487,15 @@
       "source": "png/office.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           64,
-          20
+          1.5
         ]
       }
     },
@@ -493,14 +503,15 @@
       "source": "png/villa.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           66,
-          31
+          40.5
         ]
       }
     },
@@ -508,14 +519,15 @@
       "source": "png/apartment.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          125
+          155
         ],
         "top": [
           70,
-          1
+          0
         ]
       }
     },
@@ -523,14 +535,15 @@
       "source": "png/park.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           44,
-          57
+          72
         ]
       }
     },
@@ -538,14 +551,15 @@
       "source": "png/pub.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           66,
-          29
+          20
         ]
       }
     },
@@ -553,14 +567,15 @@
       "source": "png/community_center.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           68,
-          3
+          23.5
         ]
       }
     },
@@ -568,14 +583,15 @@
       "source": "png/game_studio.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           70,
-          10
+          14.5
         ]
       }
     },
@@ -583,20 +599,21 @@
       "source": "png/car_factory.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           45,
-          13
+          38
         ]
       }
     },
     "item_car": {
-      "source": "svg/item_car.svg",
-      "scale": 1.0,
+      "source": "png/item_car.png",
+      "scale": 2.0,
       "pivots": {
         "center": [
           32,
@@ -608,22 +625,23 @@
       "source": "png/clock_tower.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           70,
-          4
+          18.5
         ],
         "face_l": [
-          55.5,
-          53.3
+          57.5,
+          72.5
         ],
         "face_r": [
-          82.2,
-          53.0
+          82,
+          72.5
         ]
       }
     },
@@ -631,14 +649,15 @@
       "source": "png/school.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           64,
-          6
+          27
         ]
       }
     },
@@ -646,14 +665,15 @@
       "source": "png/momo_monument.png",
       "scale": 2.0,
       "world_scale": 0.5,
+      "headroom": 30,
       "pivots": {
         "origin": [
           70,
-          95
+          125
         ],
         "top": [
           70,
-          34
+          59
         ]
       }
     },
@@ -723,6 +743,61 @@
         ]
       }
     },
+    "prop_pine": {
+      "source": "png/prop_pine.png",
+      "scale": 1.0,
+      "world_scale": 0.7,
+      "pivots": {
+        "origin": [
+          48,
+          148
+        ]
+      }
+    },
+    "prop_pine_small": {
+      "source": "png/prop_pine_small.png",
+      "scale": 1.0,
+      "world_scale": 0.72,
+      "pivots": {
+        "origin": [
+          36,
+          88
+        ]
+      }
+    },
+    "prop_stump": {
+      "source": "png/prop_stump.png",
+      "scale": 1.0,
+      "world_scale": 0.36,
+      "pivots": {
+        "origin": [
+          33,
+          65
+        ]
+      }
+    },
+    "prop_barrel": {
+      "source": "png/prop_barrel.png",
+      "scale": 1.0,
+      "world_scale": 0.33,
+      "pivots": {
+        "origin": [
+          34,
+          84
+        ]
+      }
+    },
+    "prop_logs": {
+      "source": "png/prop_logs.png",
+      "scale": 1.0,
+      "world_scale": 0.33,
+      "pivots": {
+        "origin": [
+          43,
+          73
+        ]
+      }
+    },
     "mood_content": {
       "source": "svg/mood_content.svg",
       "scale": 2.0,
@@ -782,6 +857,105 @@
           26
         ]
       }
+    },
+    "water_wheel_lit": {
+      "source": "png/lit/water_wheel.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          23,
+          16.5
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "office_lit": {
+      "source": "png/lit/office.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          29,
+          59
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "villa_lit": {
+      "source": "png/lit/villa.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          25,
+          20.5
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "apartment_lit": {
+      "source": "png/lit/apartment.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          31,
+          112.5
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "community_center_lit": {
+      "source": "png/lit/community_center.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          34,
+          31.5
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "game_studio_lit": {
+      "source": "png/lit/game_studio.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          33,
+          101.5
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "car_factory_lit": {
+      "source": "png/lit/car_factory.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          34,
+          54.5
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "school_lit": {
+      "source": "png/lit/school.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          46.5,
+          28
+        ]
+      },
+      "world_scale": 0.5
+    },
+    "pub_lit": {
+      "source": "png/lit/pub.png",
+      "scale": 2.0,
+      "pivots": {
+        "origin": [
+          31.5,
+          51.5
+        ]
+      },
+      "world_scale": 0.5
     }
   }
 }

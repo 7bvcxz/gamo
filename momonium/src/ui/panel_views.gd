@@ -28,7 +28,7 @@ static func row(key: String, value: String) -> HBoxContainer:
 
 
 static func icon(lib: SpriteLibrary, sprite: String, px: float = 32.0) -> TextureRect:
-	var t := TextureRect.new()
+	var t: TextureRect = GlyphIcon.new() if sprite in GlyphIcon.GLYPHS else TextureRect.new()
 	t.texture = lib.atlas_texture(sprite if lib.has(sprite) else "ui_sprout")
 	t.custom_minimum_size = Vector2(px, px)
 	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -51,7 +51,7 @@ static func close_button(px: float = 52.0) -> Button:
 		var c := b.size * 0.5
 		var r := px * 0.17
 		for d: Vector2 in [Vector2(1, 1), Vector2(1, -1)]:
-			b.draw_line(c - d * r, c + d * r, Color(1, 1, 1, 0.92), maxf(px / 17.0, 2.5), true))
+			b.draw_line(c - d * r, c + d * r, b.get_theme_color("glyph", "Ink"), maxf(px / 17.0, 2.5), true))
 	return b
 
 
