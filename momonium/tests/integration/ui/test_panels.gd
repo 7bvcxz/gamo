@@ -147,7 +147,7 @@ func test_building_details_from_the_name() -> void:
 	assert_eq(view.state_label.text, "Next: Sow", "what comes next")
 	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
 	var wait := float(stages[1]["cooldown"])
-	var work := float(stages[0]["seconds"]) + float(stages[1]["seconds"]) + float(stages[2]["seconds"])
+	var work := (float(stages[0]["seconds"]) + float(stages[1]["seconds"]) + float(stages[2]["seconds"])) * work_scale(sim)
 	var momo_x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
 	assert_eq((view.cycle_you.get_node("Value") as Label).text, BuildingDetailView.duration(work + wait), "a cycle by hand: the work + the wait")
 	assert_eq((view.cycle_momo.get_node("Value") as Label).text, BuildingDetailView.duration(work * momo_x + wait), "by Momo: its work + the same wait")
@@ -155,8 +155,8 @@ func test_building_details_from_the_name() -> void:
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "empty", "an empty worker spot")
 	sim.execute({"type": "building.tap", "id": farm})
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "you", "you, while you sow")
-	assert_eq(view.state_label.text, "Sow · %s left" % BuildingDetailView.duration(float(stages[0]["seconds"])), "and the time left")
-	sim.advance_ms(int(float(stages[0]["seconds"]) * 1000.0))
+	assert_eq(view.state_label.text, "Sow · %s left" % BuildingDetailView.duration(float(stages[0]["seconds"]) * work_scale(sim)), "and the time left")
+	sim.advance_ms(int(float(stages[0]["seconds"]) * work_scale(sim) * 1000.0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	view.refresh()
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "momo:1", "the assigned Momo fills the spot")
@@ -164,7 +164,7 @@ func test_building_details_from_the_name() -> void:
 	sim.advance_ms(int((sim.system(&"momo") as MomoSystem).get_momo(1)["end"]) - sim.now_ms() + 10)
 	view.refresh()
 	assert_eq((view.workers_box.get_child(0).find_child("Status", true, false) as Label).text, "Working", "and working")
-	sim.advance_ms(int(round(float(stages[1]["seconds"]) * momo_x * 1000.0)))
+	sim.advance_ms(int(round(float(stages[1]["seconds"]) * work_scale(sim) * momo_x * 1000.0)))
 	assert_eq(view.state_label.text, "Harvest in %d s" % int(wait), "then the crop ripens before the harvest")
 	assert_eq((view.done_row.get_node("Value") as Label).text, "2", "two jobs done")
 

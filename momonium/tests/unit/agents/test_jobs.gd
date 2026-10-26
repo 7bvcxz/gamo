@@ -24,7 +24,7 @@ func before_each() -> void:
 ## A Momo's time for farm stage `i` (the player's time times the Momo
 ## multiple) and the wait after watering, in ms, as the data gives them.
 func _momo_stage_ms(i: int = 0) -> int:
-	var seconds := float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"])
+	var seconds := float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"]) * work_scale(sim)
 	return int(round(seconds * sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 1000.0))
 
 

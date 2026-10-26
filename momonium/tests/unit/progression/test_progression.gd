@@ -20,7 +20,7 @@ func _farm_cycle(farm: int) -> void:
 		if b["state"] != BuildingSystem.IDLE:
 			sim.advance_ms(buildings.remaining_ms(b))
 		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(int(float(buildings.current_stage(b)["seconds"]) * 1000.0))
+		sim.advance_ms(int(float(buildings.current_stage(b)["seconds"]) * work_scale(sim) * 1000.0))
 	var b := buildings.get_building(farm)
 	if b["state"] != BuildingSystem.IDLE:
 		sim.advance_ms(buildings.remaining_ms(b))

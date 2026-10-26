@@ -703,9 +703,11 @@ func handle_event(type: String, data: Dictionary) -> void:
 	_schedule_roam(m, arrive - sim.now_ms() + _rest_ms())
 
 
-## Tiles a second a Momo walks: the base, times transport research.
+## Tiles a second a Momo walks: the base over `balance.pace.travel_scale`
+## (Step 58: walks take 1.3 times as long), times transport research.
 func walk_speed() -> float:
 	var speed := maxf(sim.data.get_float("balance", "momo.walk_speed", 0.7), 0.05)
+	speed /= maxf(sim.data.get_float("balance", "pace.travel_scale", 1.0), 0.05)
 	var research: ResearchSystem = sim.system(&"research")
 	if research != null:
 		speed *= research.walk_multiplier()

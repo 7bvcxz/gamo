@@ -23,7 +23,7 @@ func _floor() -> float:
 
 
 func _work(i: int) -> float:
-	return float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"])
+	return float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"]) * work_scale(sim)
 
 func before_each() -> void:
 	sim = Simulation.new_game()
@@ -126,7 +126,7 @@ func test_a_greenhouse_shortens_the_waits_down_to_the_floor() -> void:
 		(s2.system(&"research") as ResearchSystem).completed[n["id"]] = 0
 	var rec := b2.get_building(f2)
 	assert_eq(b2.stage_cooldown(rec, b2.stages(rec)[1]), _floor(), "however strong the research, the plants get their floor")
-	assert_eq(b2.stage_seconds(rec, b2.stages(rec)[1]), 0.5, "and a watering at least half a second")
+	assert_eq(b2.stage_seconds(rec, b2.stages(rec)[1]), 0.5 * work_scale(s2), "and a watering at least its floor (half a second of data, times the work scale)")
 
 
 func test_varieties_open_through_research_and_change_between_cycles() -> void:
@@ -158,7 +158,7 @@ func test_millet_is_a_different_crop_with_its_own_process() -> void:
 	assert_true(float(by_hand["wait_seconds"]) > float(usual["wait_seconds"]), "a longer wait (%.1f s)" % float(by_hand["wait_seconds"]))
 	assert_eq(buildings.look(b), "", "nothing planted yet")
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(int(float(millet[0]["seconds"]) * 1000.0))
+	sim.advance_ms(int(float(millet[0]["seconds"]) * work_scale(sim) * 1000.0))
 	assert_eq(buildings.look(b), "crop_sprout", "its own looks: growing")
 	sim.advance_ms(int(float(millet[0]["cooldown"]) * 1000.0))
 	assert_eq(buildings.look(b), "crop_ripe", "then ripe")

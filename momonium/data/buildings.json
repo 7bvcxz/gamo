@@ -9,7 +9,7 @@
       ],
       "sprite": "farm",
       "cycle": {
-        "_doc": "Sow, water once, harvest (Step 50: one complete cycle is 5 s by hand -- 1 s of work each and 2 s for the watered crop to drink and ripen, a world rule research can shorten towards its floor). The harvest's crops are sold the moment they are picked. `looks[i]` is the crop overlay while stage i is the next one to do; `growing_looks[i]` while waiting for it. Research may change how long a stage takes or the wait, never remove a `required` stage.",
+        "_doc": "Sow, water once, harvest (Step 50: one complete cycle was 5 s by hand -- 1 s of work each and 2 s for the watered crop to drink and ripen, a world rule research can shorten towards its floor. Step 58: the work is balance.pace.work_scale (2.5) times these seconds, the wait stays -- 9.5 s a cycle). The harvest's crops are sold the moment they are picked. `looks[i]` is the crop overlay while stage i is the next one to do; `growing_looks[i]` while waiting for it. Research may change how long a stage takes or the wait, never remove a `required` stage.",
         "stages": [
           {
             "id": "sow",
@@ -229,7 +229,7 @@
       ],
       "sprite": "mine",
       "cycle": {
-        "_doc": "Dig at the face, then shore up the tunnel and clear the rubble before digging on (Step 50: 10 s for each unit dug -- 4 s of work, 6 s of the rock's own wait). The ore at the face is sold as it comes out (`revenue`, paid at once); the stone is kept for building (what the store has no room for is sold). Ores other than stone come with prospecting research, at fractional rates per dig carried over exactly (thousandths).",
+        "_doc": "Dig at the face, then shore up the tunnel and clear the rubble before digging on (Step 50: 10 s for each unit dug -- 4 s of work, 6 s of the rock's own wait; Step 58: the work x2.5, 16 s a unit). The ore at the face is sold as it comes out (`revenue`, paid at once); the stone is kept for building (what the store has no room for is sold). Ores other than stone come with prospecting research, at fractional rates per dig carried over exactly (thousandths).",
         "stages": [
           {
             "id": "dig",

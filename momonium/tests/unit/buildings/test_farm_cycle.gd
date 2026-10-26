@@ -1,8 +1,9 @@
 extends "res://tests/framework/test_case.gd"
 
 ## The farm as the rules describe it (Step 50): sow, water, a short wait while
-## the watered crop drinks and ripens, harvest -- one complete cycle in 5 s by
-## hand, every stage every time, in order, with nothing skipped. The harvest's
+## the watered crop drinks and ripens, harvest -- one complete cycle in 9.5 s
+## by hand since Step 58 (the work x2.5: 2.5 + 2.5 + the 2 s wait + 2.5; it
+## was 5 s), every stage every time, in order, with nothing skipped. The harvest's
 ## crops are sold the moment they are picked. Durations are read from the data.
 
 var sim: Simulation
@@ -33,7 +34,7 @@ func _stages() -> Array:
 
 
 func _work_ms(i: int) -> int:
-	return int(float(_stages()[i]["seconds"]) * 1000.0)
+	return int(round(float(_stages()[i]["seconds"]) * work_scale(sim) * 1000.0))
 
 
 ## The wait after watering, and its floor, as the data gives them (ms, s).
@@ -53,7 +54,7 @@ func _stage() -> String:
 	return String(buildings.current_stage(buildings.get_building(farm))["id"])
 
 
-func test_the_full_cycle_in_order_in_five_seconds() -> void:
+func test_the_full_cycle_in_order_in_nine_and_a_half_seconds() -> void:
 	var clock := sim.clock
 	var log: Array = []
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
@@ -69,7 +70,7 @@ func test_the_full_cycle_in_order_in_five_seconds() -> void:
 			sim.advance_ms(buildings.remaining_ms(b))
 	var times: Array = log.map(func(e: Array) -> int: return e[1])
 	assert_eq(times, [_work_ms(0), _work_ms(0) + _work_ms(1), _work_ms(0) + _work_ms(1) + _wait_ms() + _work_ms(2)], "sow, water, wait, harvest")
-	assert_eq(int(times[-1]), 5000, "one complete cycle by hand is 5 s (Step 50)")
+	assert_eq(int(times[-1]), 9500, "one complete cycle by hand is 9.5 s (Step 58; Step 50: 5 s)")
 	assert_eq(_stage(), "sow", "and the plot is ready to sow again")
 	assert_eq(inv.count("crop"), 0, "the crop never sits in the store")
 	assert_eq(economy.money - money, economy.unit_price("crop"), "it was sold the moment it was picked")
@@ -150,12 +151,12 @@ func test_no_modifier_can_skip_growth() -> void:
 		if b["state"] != BuildingSystem.IDLE:
 			sim.advance_ms(buildings.remaining_ms(b))
 		_tap()
-		sim.advance_ms(500)
+		sim.advance_ms(int(BuildingSystem.MIN_WORK_SECONDS * work_scale(sim) * 1000.0))
 	var b := buildings.get_building(farm)
 	sim.advance_ms(buildings.remaining_ms(b))
 	assert_eq(stages, ["sow", "water", "harvest"] as Array[String], "every stage still runs, in order")
 	var w := buildings.current_stage({"type": "farm", "stage": 1})
-	assert_near(buildings.stage_seconds({"type": "farm"}, w), BuildingSystem.MIN_WORK_SECONDS, 0.0001, "work has a floor")
+	assert_near(buildings.stage_seconds({"type": "farm"}, w), BuildingSystem.MIN_WORK_SECONDS * work_scale(sim), 0.0001, "work has a floor (scaled like the work, Step 58)")
 	assert_near(buildings.stage_cooldown({"type": "farm"}, w), _floor_s(), 0.0001, "and the ripening has its floor")
 	assert_true(_floor_s() > 0.0, "a real floor: the plants always get time to drink")
 
@@ -167,8 +168,8 @@ func test_farm_data_keeps_the_rules() -> void:
 	var total := 0.0
 	for st: Dictionary in stages:
 		assert_true(bool(st.get("required", false)), "%s is required" % st["id"])
-		total += float(st["seconds"]) + float(st.get("cooldown", 0.0))
-	assert_near(total, 5.0, 0.0001, "a complete cycle by hand is 5 s (Step 50)")
+		total += float(st["seconds"]) * work_scale(sim) + float(st.get("cooldown", 0.0))
+	assert_near(total, 9.5, 0.0001, "a complete cycle by hand is 9.5 s (Step 58; Step 50: 5 s)")
 	assert_true(float(stages[1]["cooldown"]) > 0.0, "the watered crop needs time to ripen")
 	assert_true(float(stages[1]["cooldown_floor"]) < float(stages[1]["cooldown"]), "research can shorten that wait (floor below it)")
 	assert_eq(int(stages[2]["yield"]["crop"]), 1, "harvest gives one batch of crops")
@@ -185,6 +186,6 @@ func test_a_ripe_farm_waits_on_a_new_island() -> void:
 	var eco: EconomySystem = island.system(&"economy")
 	var before := eco.money
 	assert_true(island.execute({"type": "building.tap", "id": b["id"]})["ok"], "the first tap is the harvest")
-	island.advance_ms(int(float(bs.current_stage(b)["seconds"]) * 1000.0))
+	island.advance_ms(int(float(bs.current_stage(b)["seconds"]) * work_scale(island) * 1000.0))
 	assert_eq(eco.money - before, eco.unit_price("crop"), "and its money, within seconds")
 	assert_eq(Simulation.new_game().system(&"buildings").ids().size(), 0, "the bare world for tests stays bare")

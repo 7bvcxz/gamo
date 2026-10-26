@@ -14,7 +14,7 @@ building.farm,Farm,밭,畑,农田
 stage.tend,Tend,돌보기,世話,照料
 tile.grass,Free land,빈 땅,空き地,空地
 tile.sea,Sea,바다,海,海
-panel.seconds,%d sec,%d sec,%d sec,%d 秒
+panel.seconds,%s sec,%s sec,%s sec,%s 秒
 err.busy,Working,작업 중,作業中,工作中
 err.cooldown,%ds left,%d초 남음,あと%d秒,还需%d秒
 land.buy,Buy,구매,購入,购买

@@ -446,8 +446,11 @@ func _ready() -> void:
 			"farm_wait_ms": int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0),
 			"land_price": (sim.system(&"land") as LandSystem).next_cost(), "hire_price": (sim.system(&"momo") as MomoSystem).hire_cost(),
 			"farm_cycle_exp": _cycle_reward("player"), "farm_cycle_mastery": _cycle_reward("mastery"),
+			# Step 58: work times as played (times balance.pace.work_scale).
 			"farm_stages": (sim.data.building_type("farm")["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
-				return [String(st["id"]), int(float(st["seconds"]) * 1000.0), int(float(st.get("cooldown", 0.0)) * 1000.0)]),
+				return [String(st["id"]), int(float(st["seconds"]) * _work_scale() * 1000.0), int(float(st.get("cooldown", 0.0)) * 1000.0)]),
+			"work_scale": _work_scale(), "travel_scale": sim.data.get_float("balance", "pace.travel_scale", 1.0),
+			"walk_speed": sim.data.get_float("balance", "momo.walk_speed", 1.0),
 			"crop_price": (sim.system(&"economy") as EconomySystem).unit_price("crop"),
 			"exp_to_next": sim.data.get_value("balance", "progression.exp_to_next", []),
 			"prestige_level": sim.data.get_int("balance", "prestige.min_level", 5),
@@ -1333,7 +1336,9 @@ func _selection_info(_arg: Variant) -> Dictionary:
 	var win := DisplayServer.window_get_size()
 	var enabled: Array = panel.cards.map(func(c: Button) -> bool: return not c.disabled)
 	return {"kind": selection.kind, "id": selection.selected_id, "cell": [selection.selected_cell.x, selection.selected_cell.y],
-		"cards": cards, "enabled": enabled, "result": selection.last_result, "window": [win.x, win.y]}
+		"cards": cards, "enabled": enabled, "result": selection.last_result, "window": [win.x, win.y],
+		# Step 58: the time each job card says.
+		"card_times": panel.cards.map(func(c: Button) -> String: return (c.find_child("Time", true, false) as Label).text if c.find_child("Time", true, false) != null else "")}
 
 
 ## E2E: the land preview (which tile, price, line under it) and the last purchase.
@@ -1519,8 +1524,12 @@ func _stages_ms() -> Dictionary:
 	var out := {}
 	for type: String in ["farm", "lumberyard", "mine", "research"]:
 		out[type] = (sim.data.building_type(type)["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
-			return [String(st["id"]), int(float(st["seconds"]) * 1000.0)])
+			return [String(st["id"]), int(float(st["seconds"]) * _work_scale() * 1000.0)])
 	return out
+
+
+func _work_scale() -> float:
+	return (sim.system(&"buildings") as BuildingSystem).work_scale()
 
 
 ## E2E: where a Settings row is on screen -- [] while it is scrolled out of

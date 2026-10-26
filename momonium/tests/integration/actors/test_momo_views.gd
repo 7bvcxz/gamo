@@ -51,7 +51,7 @@ func test_a_working_momo_shows_the_work_pose() -> void:
 	# the wait after watering is where Momo stands idle.
 	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
 	var x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
-	var work := int(round((float(stages[0]["seconds"]) + float(stages[1]["seconds"])) * x * 1000.0))
+	var work := int(round((float(stages[0]["seconds"]) + float(stages[1]["seconds"])) * work_scale(sim) * x * 1000.0))
 	sim.advance_to(arrived + work + int(float(stages[1]["cooldown"]) * 500.0))
 	await tree.process_frame
 	assert_false(actor.is_working(), "during the wait after watering Momo is not working")
@@ -73,7 +73,7 @@ func test_the_work_cell_follows_the_job() -> void:
 	assert_eq(actor.rig.cell_name(), "back_work", "sowing: busy, back turned (no seed in the sheet)")
 	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
 	var x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
-	sim.advance_to(arrived + int(float(stages[0]["seconds"]) * x * 1000.0) + 300)
+	sim.advance_to(arrived + int(float(stages[0]["seconds"]) * work_scale(sim) * x * 1000.0) + 300)
 	await tree.process_frame
 	if actor.is_working():
 		assert_eq(actor.work_pose(), "water", "watering")

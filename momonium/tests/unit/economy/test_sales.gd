@@ -30,7 +30,7 @@ func _grow_one_batch(farm: int) -> void:
 		if b["state"] != BuildingSystem.IDLE:
 			sim.advance_ms(buildings.remaining_ms(b))
 		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(int(float(buildings.current_stage(b)["seconds"]) * 1000.0))
+		sim.advance_ms(int(float(buildings.current_stage(b)["seconds"]) * work_scale(sim) * 1000.0))
 	var b := buildings.get_building(farm)
 	if b["state"] != BuildingSystem.IDLE:
 		sim.advance_ms(buildings.remaining_ms(b))
@@ -100,12 +100,12 @@ func test_a_mine_pays_as_it_digs_and_keeps_the_stone() -> void:
 	var dig: Dictionary = buildings.current_stage(buildings.get_building(mine))
 	var before := economy.money
 	sim.execute({"type": "building.tap", "id": mine})
-	sim.advance_ms(int(float(dig["seconds"]) * 1000.0))
+	sim.advance_ms(int(float(dig["seconds"]) * work_scale(sim) * 1000.0))
 	assert_eq(economy.money - before, buildings.revenue_of(buildings.get_building(mine), dig), "the ore at the face is sold as it comes out")
 	assert_true(economy.money > before, "money at once")
 	assert_eq(inv.count("stone"), int(dig["yield"]["stone"]), "the stone kept for building")
-	var cycle := float(dig["seconds"]) + float(dig["cooldown"])
-	assert_near(cycle, 10.0, 0.0001, "ten seconds for each unit dug (Step 50)")
+	var cycle := float(dig["seconds"]) * work_scale(sim) + float(dig["cooldown"])
+	assert_near(cycle, 16.0, 0.0001, "sixteen seconds for each unit dug (Step 58: 4 s of digging x2.5 + the 6 s wait; Step 50: 10 s)")
 
 
 func test_a_full_store_sells_the_surplus_instead_of_stopping() -> void:
@@ -114,7 +114,7 @@ func test_a_full_store_sells_the_surplus_instead_of_stopping() -> void:
 	var dig: Dictionary = buildings.current_stage(buildings.get_building(mine))
 	var before := economy.money
 	assert_true(sim.execute({"type": "building.tap", "id": mine})["ok"], "a full store of stone does not stop the mine")
-	sim.advance_ms(int(float(dig["seconds"]) * 1000.0))
+	sim.advance_ms(int(float(dig["seconds"]) * work_scale(sim) * 1000.0))
 	assert_eq(inv.count("stone"), inv.capacity("stone"), "the store stays full")
 	assert_eq(economy.money - before, buildings.revenue_of(buildings.get_building(mine), dig) + economy.unit_price("stone"), "the stone that did not fit was sold, not thrown away")
 

@@ -13,7 +13,9 @@ var smelter := 0
 
 
 func before_each() -> void:
-	sim = with_starter_momo(Simulation.new_game())
+	# The industry's own rules at the data's pace (Step 58: test_pace checks
+	# the work and travel scales).
+	sim = with_starter_momo(Simulation.new_game(unit_pace()))
 	bs = sim.system(&"buildings")
 	inv = sim.system(&"inventory")
 	research = sim.system(&"research")
@@ -142,7 +144,7 @@ func test_save_mid_smelt_keeps_what_went_in() -> void:
 	inv.add("wood", 1, "test")
 	sim.execute({"type": "building.tap", "id": smelter})
 	sim.advance_ms(4000)
-	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
+	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())), sim.data)
 	var ci: InventorySystem = copy.system(&"inventory")
 	assert_eq(ci.count("copper_ore"), 0, "the charge is in the furnace, not back in the store")
 	copy.advance_ms(6000)

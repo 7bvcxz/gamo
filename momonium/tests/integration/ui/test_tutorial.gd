@@ -55,7 +55,7 @@ func _frame() -> void:
 ## How long a farm stage (or its building) takes, from the data (ms).
 func _ms(i: int) -> int:
 	var st: Dictionary = sim.data.building_type("farm")["cycle"]["stages"][i]
-	return int((float(st["seconds"]) + float(st.get("cooldown", 0.0))) * 1000.0)
+	return int((float(st["seconds"]) * work_scale(sim) + float(st.get("cooldown", 0.0))) * 1000.0)
 
 
 func test_a_new_island_starts_with_the_ripe_crop() -> void:
@@ -121,7 +121,7 @@ func test_the_whole_path_with_taps() -> void:
 	_tap_at(tut.target2.get_center())
 	await _frame()
 	assert_eq(tut.step, "working", "watering")
-	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["seconds"]) * 1000.0))
+	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["seconds"]) * work_scale(sim) * 1000.0))
 	await _frame()
 	# Step 53: no Momo yet -- the farm by hand until the first is affordable,
 	# then the Hire button, then its card; the hire is selected at once.

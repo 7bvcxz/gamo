@@ -40,7 +40,7 @@ func _lit() -> Array[bool]:
 
 ## A farm stage's work and its wait, from the data (ms).
 func _work(i: int) -> int:
-	return int(float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"]) * 1000.0)
+	return int(round(float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"]) * work_scale(sim) * 1000.0))
 
 
 func _wait() -> int:

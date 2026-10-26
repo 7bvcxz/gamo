@@ -12,7 +12,9 @@ var research: ResearchSystem
 
 
 func before_each() -> void:
-	sim = with_starter_momo(Simulation.new_game())
+	# The industry's own rules at the data's pace (Step 58: test_pace checks
+	# the work and travel scales).
+	sim = with_starter_momo(Simulation.new_game(unit_pace()))
 	bs = sim.system(&"buildings")
 	inv = sim.system(&"inventory")
 	economy = sim.system(&"economy")
@@ -82,7 +84,7 @@ func test_fractions_carry_across_a_save() -> void:
 	research.completed["copper_prospecting"] = 0
 	_by_hand(mine, 3)
 	assert_eq(int(bs.get_building(mine)["carry"]["copper_ore"]), 750, "three quarters carried")
-	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
+	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())), sim.data)
 	var cbs: BuildingSystem = copy.system(&"buildings")
 	assert_eq(typeof(cbs.get_building(mine)["carry"]["copper_ore"]), TYPE_INT, "kept as whole thousandths")
 	copy.advance_ms(_ms("mine", 0, "cooldown") + 1000)
@@ -139,7 +141,8 @@ func test_unlock_levels_and_mastery() -> void:
 	var prog: ProgressionSystem = sim.system(&"progression")
 	var yard := bs.place_instant("lumberyard", Vector2i(1, 0))
 	_by_hand(yard, 2)
-	assert_eq(int(prog.mastery_of("lumberyard")["exp"]), 10, "felling teaches forestry (replanting does not count twice)")
+	var chop := int(sim.data.get_value("balance", "progression.rewards.stage", {})["lumberyard.chop"]["mastery"])
+	assert_eq(int(prog.mastery_of("lumberyard")["exp"]), chop, "felling teaches forestry, once (replanting does not count twice)")
 
 
 func test_materials_are_kept_not_sold() -> void:

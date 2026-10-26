@@ -83,7 +83,7 @@ func test_a_real_tap_harvests_once_and_pops_once() -> void:
 	# Touch and its emulated mouse click together, as on a phone.
 	_tap(cams.world_to_screen(proj.cell_center(Vector2i(1, 0))))
 	await tree.process_frame
-	sim.advance_ms(2000)
+	sim.advance_ms(int(2000 * work_scale(sim)))
 	assert_eq(harvests.size(), 1, "the tap harvested once (%s)" % [harvests])
 	var got := int(harvests[0]) if not harvests.is_empty() else 0
 	var pops := _produced("money")
@@ -145,7 +145,7 @@ func test_effects_off_shows_nothing_but_changes_nothing() -> void:
 	var id := _ripe_farm()
 	var harvests := _harvests()
 	sim.execute({"type": "building.tap", "id": id})
-	sim.advance_ms(2000)
+	sim.advance_ms(int(2000 * work_scale(sim)))
 	hud.flush_feedback()
 	assert_eq(harvests.size(), 1, "the harvest still happens")
 	assert_eq(fx.shown.size(), 0, "no world pops")

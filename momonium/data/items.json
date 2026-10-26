@@ -6,7 +6,7 @@
       "kind": "crop",
       "icon": "ui_sprout",
       "stack": 20,
-      "price": 3,
+      "price": 6,
       "sell": "instant"
     },
     "wood": {
@@ -14,7 +14,7 @@
       "kind": "material",
       "icon": "item_wood",
       "stack": 50,
-      "price": 1,
+      "price": 2,
       "sell": "surplus"
     },
     "stone": {
@@ -22,7 +22,7 @@
       "kind": "material",
       "icon": "item_stone",
       "stack": 50,
-      "price": 1,
+      "price": 2,
       "sell": "surplus"
     },
     "notes": {
@@ -37,7 +37,7 @@
       "kind": "ore",
       "icon": "item_copper",
       "stack": 50,
-      "price": 2,
+      "price": 4,
       "sell": "surplus"
     },
     "iron_ore": {
@@ -45,7 +45,7 @@
       "kind": "ore",
       "icon": "item_iron",
       "stack": 50,
-      "price": 3,
+      "price": 6,
       "sell": "surplus"
     },
     "gold_ore": {
@@ -53,7 +53,7 @@
       "kind": "ore",
       "icon": "item_gold",
       "stack": 20,
-      "price": 8,
+      "price": 16,
       "sell": "surplus"
     },
     "copper_ingot": {
@@ -61,7 +61,7 @@
       "kind": "product",
       "icon": "item_copper_ingot",
       "stack": 50,
-      "price": 5,
+      "price": 10,
       "sell": "surplus"
     },
     "iron_ingot": {
@@ -69,7 +69,7 @@
       "kind": "product",
       "icon": "item_iron_ingot",
       "stack": 50,
-      "price": 7,
+      "price": 14,
       "sell": "surplus"
     },
     "gold_ingot": {
@@ -77,7 +77,7 @@
       "kind": "product",
       "icon": "item_gold_ingot",
       "stack": 20,
-      "price": 20,
+      "price": 40,
       "sell": "surplus"
     },
     "car": {
@@ -85,7 +85,7 @@
       "kind": "product",
       "icon": "item_car",
       "stack": 10,
-      "price": 420,
+      "price": 840,
       "sell": "instant"
     }
   }

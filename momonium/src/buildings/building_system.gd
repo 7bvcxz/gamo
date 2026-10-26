@@ -946,11 +946,21 @@ func handle_event(type: String, data: Dictionary) -> void:
 			sim.bus.emit(&"building_idle", {"id": id})
 
 
-## Active work time of a stage after modifiers, never under its floor.
+## Active work time of a stage after modifiers, never under its floor. The
+## data's seconds and floor are both times `work_scale()` (Step 58) -- here,
+## once: everything that times a stage (the player, a Momo, the estimates and
+## the cards) comes through this.
 func stage_seconds(b: Dictionary, stage: Dictionary) -> float:
-	var base := float(stage.get("seconds", 1.0))
+	var k := work_scale()
+	var base := float(stage.get("seconds", 1.0)) * k
 	var m := _multiplier("work", String(b["type"]), String(stage.get("action", "")))
-	return maxf(base * m, maxf(float(stage.get("seconds_floor", MIN_WORK_SECONDS)), MIN_WORK_SECONDS))
+	return maxf(base * m, maxf(float(stage.get("seconds_floor", MIN_WORK_SECONDS)), MIN_WORK_SECONDS) * k)
+
+
+## Step 58: how much longer every stage's work takes than its data says
+## (`balance.pace.work_scale`). Waits after a stage are not scaled.
+func work_scale() -> float:
+	return maxf(sim.data.get_float("balance", "pace.work_scale", 1.0), 0.05)
 
 
 ## Wait after a stage after modifiers, never under its floor (a world rule:
@@ -1074,7 +1084,7 @@ func action_groups(b: Dictionary) -> Array[Dictionary]:
 		if not out.is_empty() and out[-1]["action"] == action:
 			out[-1]["count"] = int(out[-1]["count"]) + 1
 			continue
-		out.append({"action": action, "label": st.get("label", ""), "icon": st.get("icon", ""), "seconds": float(st.get("seconds", 0)), "first": i, "count": 1})
+		out.append({"action": action, "label": st.get("label", ""), "icon": st.get("icon", ""), "seconds": stage_seconds(b, st), "first": i, "count": 1})
 	return out
 
 

@@ -123,7 +123,7 @@ func test_construction_never_blocks_other_work() -> void:
 	var a := buildings.place_instant("farm", Vector2i(0, 0))
 	sim.execute({"type": "building.tap", "id": a})
 	var b: int = sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 1]})["id"]
-	sim.advance_ms(maxi(_build_ms("farm"), int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * 1000.0)))
+	sim.advance_ms(maxi(_build_ms("farm"), int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * work_scale(sim) * 1000.0)))
 	assert_eq(buildings.get_building(a)["completed"], 1, "the working farm finished on time")
 	assert_eq(buildings.get_building(b)["state"], BuildingSystem.IDLE, "while the new one was built")
 

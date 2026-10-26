@@ -84,7 +84,7 @@ func test_the_drip_line_shows_as_the_worker() -> void:
 		research.completed[id] = 0
 	main.call("open_details", farm)
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * 1000.0) + 100)
+	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * work_scale(sim) * 1000.0) + 100)
 	view.refresh()
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "auto", "the drip line is watering")
 	assert_eq((view.workers_box.get_child(0).find_child("Status", true, false) as Label).text, "Working", "at work")

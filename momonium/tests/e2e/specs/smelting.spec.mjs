@@ -45,7 +45,9 @@ test('smelt copper', async ({ game }) => {
   let s = await game.state();
   expect(s.inventory.items.copper_ore ?? 0).toBe(0);
   expect(s.inventory.items.wood).toBe(1);
-  await game.query('dev_advance_ms', 10000);
+  // The recipe's seconds times the work scale (Step 58: 10 s -> 25 s).
+  const scale = (await game.query('rules')).work_scale;
+  await game.query('dev_advance_ms', Math.ceil(10000 * scale));
   s = await game.state();
   expect(s.inventory.items.copper_ingot).toBe(1);
 });

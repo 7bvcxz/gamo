@@ -10,7 +10,7 @@ extends "res://tests/framework/test_case.gd"
 func _farm_cycle_s(sim: Simulation) -> float:
 	var total := 0.0
 	for st: Dictionary in sim.data.building_type("farm")["cycle"]["stages"]:
-		total += float(st["seconds"]) + float(st.get("cooldown", 0.0))
+		total += float(st["seconds"]) * work_scale(sim) + float(st.get("cooldown", 0.0))
 	return total
 
 

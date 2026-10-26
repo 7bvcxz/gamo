@@ -52,7 +52,7 @@ func test_the_job_system_uses_the_momos_own_speed() -> void:
 			spans.append(int(p["ends_ms"]) - clock.now_ms))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(30000)
-	var sow := float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"])
+	var sow := float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * work_scale(sim)
 	assert_eq(spans[0], int(round(sow * _base() * 0.78 * 1000.0)), "sowing takes its time x the Momo multiple x 0.78 for a level-3 farmer (70 stages)")
 
 

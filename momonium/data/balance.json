@@ -81,38 +81,38 @@
     "rewards": {
       "stage": {
         "farm.sow": {
-          "player": 1,
-          "mastery": 2
+          "player": 2,
+          "mastery": 4
         },
         "farm.water": {
-          "player": 1,
-          "mastery": 2
+          "player": 2,
+          "mastery": 4
         },
         "farm.harvest": {
-          "player": 3,
-          "mastery": 6
+          "player": 6,
+          "mastery": 12
         },
         "research.study": {
-          "player": 4,
-          "mastery": 10
+          "player": 8,
+          "mastery": 20
         },
         "lumberyard.chop": {
-          "player": 4,
-          "mastery": 10
+          "player": 8,
+          "mastery": 20
         },
         "mine.dig": {
-          "player": 4,
-          "mastery": 8
+          "player": 8,
+          "mastery": 16
         },
         "smelter.smelt": {
-          "player": 6,
-          "mastery": 10
+          "player": 12,
+          "mastery": 20
         },
         "game_studio.release": {
-          "player": 40
+          "player": 80
         },
         "car_factory.assemble": {
-          "player": 20
+          "player": 40
         }
       },
       "event": {
@@ -183,6 +183,11 @@
       "auto": true
     },
     "starve_seconds": 8
+  },
+  "pace": {
+    "_doc": "Step 58: the owner found the work and the Momo far too quick. work_scale multiplies the work time of every stage (the player's tap, a Momo's turn, a lab's study, a smelt -- buildings.json `seconds` and recipe seconds) and its floor, once, in BuildingSystem.stage_seconds; the waits after a stage (`cooldown`: crops drinking, ore settling) are world rules and stay. travel_scale divides a Momo's walking speed, once, in MomoSystem.walk_speed. Research, skills, the Clock Tower, legacy and offline time all multiply on top of these, as before. The game clock, the camera, UI and feedback animations and the day are not touched. Each action pays more to match (Step 58, the owner's 'keep the direct rewards'): every item's price and every stage's EXP and mastery doubled (x2 against the work's x2.5 -- money a minute stays a little lower than before, the frozen pacing targets hold; design/INCREMENTAL_BALANCE_REPORT.md 'Step 58').",
+    "work_scale": 2.5,
+    "travel_scale": 1.3
   },
   "mail": {
     "_doc": "Momo Letters (data/letters.json). At most letters_per_day new letters arrive on one in-game day. Step 57: a letter that brings research (it is discovered on arrival) comes at least research_gap_seconds of game time after the previous one -- discoveries are paced by work, by days and by this gap, never by a delay in the UI.",

@@ -13,7 +13,9 @@ var inv: InventorySystem
 
 
 func before_each() -> void:
-	sim = with_starter_momo(Simulation.new_game())
+	# The industry's own rules at the data's pace (Step 58: test_pace checks
+	# the work and travel scales).
+	sim = with_starter_momo(Simulation.new_game(unit_pace()))
 	bs = sim.system(&"buildings")
 	power = sim.system(&"power")
 	research = sim.system(&"research")
@@ -119,7 +121,7 @@ func test_generators_open_through_research() -> void:
 func test_power_speeds_up_what_uses_it() -> void:
 	var mine := bs.place_instant("mine", Vector2i(1, 0))
 	var m := bs.get_building(mine)
-	var dig := float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"])
+	var dig := float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"]) * work_scale(sim)
 	assert_eq(bs.stage_seconds(m, bs.current_stage(m)), dig, "a plain mine: its dig time")
 	research.completed["electric_drill"] = 0
 	assert_eq(bs.stage_seconds(m, bs.current_stage(m)), dig, "an electric drill with no power: the same, never worse")
@@ -157,7 +159,7 @@ func test_at_night_solar_power_goes_but_nothing_breaks() -> void:
 	assert_eq(power.supply(), 0.0, "no sun")
 	assert_true(sim.execute({"type": "building.tap", "id": mine})["ok"], "the mine still digs")
 	var m := bs.get_building(mine)
-	assert_eq(int(m["task_end"]) - int(m["task_start"]), int(float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"]) * 1000.0), "at its unpowered pace")
+	assert_eq(int(m["task_end"]) - int(m["task_start"]), int(float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"]) * work_scale(sim) * 1000.0), "at its unpowered pace")
 	assert_eq(float(power.shares[mine]), 0.0, "with no share")
 
 
@@ -183,7 +185,7 @@ func test_power_state_survives_a_save() -> void:
 	sim.execute({"type": "building.tap", "id": e})
 	sim.advance_ms(3000)
 	sim.execute({"type": "building.tap", "id": mine})
-	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
+	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())), sim.data)
 	var p2: PowerSystem = copy.system(&"power")
 	assert_eq(p2.output_of(e, copy.now_ms()), 5.0, "the boiler is still fired")
 	assert_eq(float(p2.shares[mine]), 1.0, "the share is remembered")

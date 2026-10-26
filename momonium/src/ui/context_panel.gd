@@ -263,7 +263,7 @@ func _refresh() -> void:
 	if b["state"] == BuildingSystem.CONSTRUCTING:
 		var left := ceili(buildings.remaining_ms(b) / 1000.0)
 		var t: Label = cards[0].find_child("Time", true, false)
-		t.text = tr("panel.seconds") % left
+		t.text = tr("panel.seconds") % ContextPanel.seconds_text(left)
 		var c: Label = cards[1].find_child("Time", true, false)
 		c.text = "+$%d" % int((b.get("paid", {}) as Dictionary).get("money", 0))
 		cards[0].queue_redraw()
@@ -281,8 +281,14 @@ func _refresh() -> void:
 		if is_current and b["state"] == BuildingSystem.COOLDOWN:
 			time_label.text = tr("err.cooldown") % ceili(buildings.remaining_ms(b) / 1000.0)
 		else:
-			time_label.text = tr("panel.seconds") % int(secs)
+			time_label.text = tr("panel.seconds") % ContextPanel.seconds_text(secs)
 		card.queue_redraw()
+
+
+## A card's seconds: whole as they are, a half kept (Step 58: 2.5 s of work
+## each on the farm -- the card said "2 sec").
+static func seconds_text(secs: float) -> String:
+	return str(int(round(secs))) if is_equal_approx(secs, round(secs)) else "%.1f" % secs
 
 
 ## Which group the building is in, for a card: -1 done, 0 current, 1 to come.
