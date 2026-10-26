@@ -1,7 +1,11 @@
 {
   "_doc": "Step 50 pacing targets, FROZEN before any tuning (design/INCREMENTAL_PACING.md explains each). Times are seconds of active play from the first look (a blind session's clock; the simulator's active time). kind exact: relative_error = |observed - target| / target, must be <= tolerance; max / min: pass-fail bounds. primary targets gate the issue: for blind evidence each is the median of three independent runs (a run that never reaches it counts as never -- a failure, not a missing sample), and the weighted aggregate of the primary exact targets must also be <= tolerance. sources: which evidence measures it (sim: tools/balance_optimizer/optimize.gd with the 'blind' profile unless `profile` says otherwise; blind: tools/blind_playtest). Metrics: journey:<key> = when the game's own journey first marked <key>; income_at:<s> = production money (sales and releases) by then; meaningful_at:<s> = level-ups + buildings + land bought + Momo hired + research levels + letters by then; first_reward_after_tap = seconds from the first tap to the first reward (money or EXP); income_gap = longest wait between two production incomes after the first Momo income, up to 10:00; momo_share_at:<s> = share of finished work stages done by Momo; prestige_ready = first moment the island can be sold for a point; tier_wall_h:<n> = wall-clock hours to reach tier n in the 48-hour calendar.",
   "frozen": "2026-10-26",
-  "tolerance": 0.1,
+  "tolerance": 0.6,
+  "tolerance_history": [
+    {"value": 0.1, "from": "2026-10-26", "by": "issue #50 as written (frozen with the targets)"},
+    {"value": 0.6, "from": "2026-10-26", "by": "the owner, during the step: '10%가 아니라 대략 60% 정도 이내면 괜찮도록' -- the targets themselves are unchanged"}
+  ],
   "targets": [
     {"id": "P1", "metric": "journey:income", "kind": "max", "target": 15, "primary": true, "sources": ["sim", "blind"], "why": "<=15 s: the first income-producing action is done and its money shown"},
     {"id": "P2", "metric": "first_reward_after_tap", "kind": "max", "target": 5, "primary": true, "sources": ["sim", "blind"], "why": "0-5 s: the obvious first action answers with a reward at once"},

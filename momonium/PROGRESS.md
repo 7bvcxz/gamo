@@ -8,7 +8,7 @@
 - 마지막 완료 step: **50** (#50). 다음: #51(모모 5×5 스프라이트), #52(건물·섬·UI 아트) — 둘 다 TopView를 쓰며 **Step 46부터 이어지는 총 40크레딧 상한을 함께 쓴다**(46에서 6.20 사용, 남은 33.80)
 - 현재 step: 없음
 - 버전: `0.50.1` (R11을 0.50.0 위에 다시 배포)
-- 페이스(Step 50): 목표·합격 기준은 `design/INCREMENTAL_PACING.md`(고정), 라운드 기록·증거는 `design/INCREMENTAL_BALANCE_REPORT.md`·`design/incremental50/`. 도구 `tools/balance_optimizer/`(`optimize.gd` 시뮬 표·후보, `score_blind.mjs` 블라인드 채점, `chart.mjs`·`grid.gd`). **블라인드형 봇은 최근 블라인드 라운드에 맞춰 둔 것**(B6 ±12%) — 게임 흐름을 바꾸면 다시 맞춘다
+- 페이스(Step 50): 목표·합격 기준은 `design/INCREMENTAL_PACING.md`(고정), 라운드 기록·증거는 `design/INCREMENTAL_BALANCE_REPORT.md`·`design/incremental50/`. 도구 `tools/balance_optimizer/`(`optimize.gd` 시뮬 표·후보, `score_blind.mjs` 블라인드 채점, `chart.mjs`·`grid.gd`). **블라인드형 봇은 최근 블라인드 라운드에 맞춰 둔 것**(B6 ±12%) — 게임 흐름을 바꾸면 다시 맞춘다. 허용 오차는 2026-10-26 소유자 결정으로 10% → **60%**(`targets.json`의 `tolerance`, 목표값은 그대로)
 - **알려진 제한(Step 50)**: 오프라인 따라잡기의 이벤트 천장(40,000)이 5초 밭에서는 8시간보다 먼저 닿는다(모모 4: 2.5 h, 모모 9: 0.7 h만 셈). 비용 상한이라 그대로 두었고, 추정으로 채울지·천장을 올릴지는 오프라인 설계의 결정(보고서 §발견한 문제)
 - 블라인드 플레이테스트(Step 45): 도구 `tools/blind_playtest/`(README에 절차·플레이어 프롬프트 원문), 가설 `design/PLAYTIME.md`, 결과 `design/BLIND_PLAYTEST.md`, 증거 `design/blind45/`. 같은 도구로 다시 돌려 지표를 비교한다
 - 테스트: unit+integration 586 통과 (`momonium/tools/test.sh`)
