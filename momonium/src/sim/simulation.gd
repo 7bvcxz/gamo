@@ -60,6 +60,12 @@ static func new_game(p_data: GameData = null, systems: Array[SimSystem] = []) ->
 	return sim
 
 
+## A player's new island: the fresh world above, plus what `balance.start`
+## puts on it for a new player. Tests that want the bare rules use new_game.
+static func new_island(p_data: GameData = null) -> Simulation:
+	return new_game(p_data)
+
+
 static func from_save(state: Dictionary, p_data: GameData = null, systems: Array[SimSystem] = []) -> Simulation:
 	var sim := Simulation.new(p_data, systems)
 	sim.load_state(state)

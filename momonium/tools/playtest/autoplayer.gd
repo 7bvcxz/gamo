@@ -49,6 +49,36 @@ var sales: Array[Dictionary] = []
 ## Sell once this many legacy points are on offer (and the level allows it).
 var sell_at_points := 2
 
+## How this player plays (Step 50, tools/balance_optimizer/): "human" -- the
+## attentive person above, a decision a second, hands first; "blind" -- a
+## first-time player taking about ten seconds a decision, as the blind AI
+## playtests of Step 45 did (their taps came 9-11 s apart), who follows the
+## tutorial's ring, then reacts to what the screen offers (a badge, a new
+## building, an affordable hire or tile) and taps by hand what is left, and
+## now and then spends a decision just looking around.
+var profile := "human"
+## Milliseconds between decisions.
+var step_ms := STEP_MS
+## No decision before this much play (the first look at the screen).
+var first_ms := 0
+## Every this many decisions one goes on looking around (0: never).
+var explore_every := 0
+## Sensitivity switches: "no_land", "no_hire", "no_research", "no_letters",
+## "hands_only" (never puts a Momo to work) -- each true to leave that out.
+var strategy := {}
+## Stages the tutorial has the player do by hand before it turns to the Momo.
+var tutorial_taps := 3
+## A sample after every decision: {"t" (active ms), "island", "money",
+## "income" (production money this island: sales and releases), "income_all"
+## (every island), "level", "land", "buildings", "momos", "research",
+## "jobs" {hand, momo, auto}}.
+var series: Array[Dictionary] = []
+## Stages finished, by whom: "hand" (the player), "momo", "auto" (a drip line).
+var jobs := {"hand": 0, "momo": 0, "auto": 0}
+var _income_before := 0
+var _decisions := 0
+var _tutorial_ui := 0
+
 
 func _init(p_sim: Simulation = null) -> void:
 	attach(p_sim if p_sim != null else Simulation.new_game())
@@ -77,17 +107,41 @@ func _now() -> int:
 func play(seconds: float) -> void:
 	var end := active_ms + int(seconds * 1000.0)
 	while active_ms < end:
+		var step := mini(step_ms, end - active_ms)
 		_step_from = sim.now_ms()
-		var acted := act()
-		sim.advance_ms(STEP_MS)
-		active_ms += STEP_MS
+		var acted := false
+		if active_ms >= first_ms:
+			_decisions += 1
+			acted = false if explore_every > 0 and _decisions % explore_every == 0 else act()
+		sim.advance_ms(step)
+		active_ms += step
 		_step_from = -1
+		_sample()
 		if acted:
 			_stuck = 0
 		elif _nothing_working():
-			_stuck += 1
-			stuck_seconds += 1
+			_stuck += step / 1000
+			stuck_seconds += step / 1000
 			longest_stuck = maxi(longest_stuck, _stuck)
+
+
+## Production money so far on this island: crops and goods sold, releases.
+func production_income() -> int:
+	var lt: Dictionary = (sim.system(&"economy") as EconomySystem).lifetime
+	return int(lt.get("sale", 0)) + int(lt.get("release", 0))
+
+
+func _sample() -> void:
+	var prog: ProgressionSystem = sim.system(&"progression")
+	var rs: ResearchSystem = sim.system(&"research")
+	var done := 0
+	for id: String in rs.bought:
+		done += int(rs.bought[id])
+	series.append({"t": active_ms, "island": island, "money": (sim.system(&"economy") as EconomySystem).money,
+		"income": production_income(), "income_all": _income_before + production_income(), "level": prog.level,
+		"exp": prog.experience, "land": (sim.system(&"land") as LandSystem).purchases.size(),
+		"buildings": (sim.system(&"buildings") as BuildingSystem).ids().size(), "momos": (sim.system(&"momo") as MomoSystem).ids().size(),
+		"research": done, "jobs": jobs.duplicate()})
 
 
 ## Closes the game for `seconds`: the island catches up as it does on return.
@@ -103,6 +157,8 @@ func away(seconds: float) -> Dictionary:
 
 ## One decision; true when it did something.
 func act() -> bool:
+	if profile == "blind":
+		return _act_blind()
 	# Early the hands do the work; once a Momo has been hired the player
 	# manages first and taps what is left.
 	var managing := int((sim.system(&"momo") as MomoSystem).hired) > 0
@@ -114,6 +170,145 @@ func act() -> bool:
 			actions += 1
 			return true
 	return false
+
+
+## The blind-like player: the tutorial's ring first, then whatever the screen
+## offers (a letter's badge, research, a hire it can afford, a new kind of
+## building, a free tile, the sea when the island is full), then the hands.
+## A decision spent on the screen only (opening a panel, the pencil) is a
+## decision all the same.
+func _act_blind() -> bool:
+	var t := _tutorial()
+	if t >= 0:
+		return t > 0
+	if _pending_assign != 0:
+		return _assign_new()
+	var order: Array[Callable] = []
+	if not strategy.get("no_letters", false):
+		order.append(_claim_letter)
+	if not strategy.get("no_research", false):
+		order.append(_research)
+	order.append_array([_promote, _sell])
+	if not strategy.get("no_hire", false) and not strategy.get("hands_only", false):
+		order.append(_hire_blind)
+	order.append_array([_build_blind])
+	if not strategy.get("no_land", false):
+		order.append(_buy_land)
+	order.append_array([_special, _work_by_hand])
+	for try: Callable in order:
+		if bool(try.call()):
+			actions += 1
+			return true
+	return false
+
+
+## -1 when the tutorial is over; 1 when a decision went on it; 0 when it
+## waits (the farm building, a stage running).
+func _tutorial() -> int:
+	if _tutorial_over:
+		return -1
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var farm := 0
+	for id: int in bs.ids():
+		if String(bs.get_building(id)["type"]) == "farm":
+			farm = id
+			break
+	if farm == 0:
+		if _tutorial_ui == 0:
+			_tutorial_ui = 1
+			counts["look: tile"] = int(counts.get("look: tile", 0)) + 1
+			return 1
+		_tutorial_ui = 0
+		var free := (sim.system(&"world") as WorldSystem).buildable_cells()
+		return 1 if not free.is_empty() and _do("build farm", {"type": "building.place", "building": "farm", "anchor": [free[0].x, free[0].y]}) else 0
+	var b := bs.get_building(farm)
+	if int(b["completed"]) < tutorial_taps:
+		if b["state"] == BuildingSystem.IDLE and bs.can_start(farm)["ok"]:
+			return 1 if _do("tap", {"type": "building.tap", "id": farm}) else 0
+		return 0
+	var momos: MomoSystem = sim.system(&"momo")
+	if not strategy.get("hands_only", false) and not momos.ids().is_empty() and momos.watched(momos.ids()[0]).is_empty():
+		if _tutorial_ui < 2:
+			_tutorial_ui += 1
+			counts["look: momo"] = int(counts.get("look: momo", 0)) + 1
+			return 1
+		_tutorial_ui = 0
+		var c: Vector2i = bs.cells_of(b)[0]
+		_do("give tiles", {"type": "momo.watch", "momo": momos.ids()[0], "cells": [[c.x, c.y]], "op": "add"})
+		return 1
+	_tutorial_over = true
+	return -1
+
+
+var _tutorial_over := false
+## A Momo just hired that watches nothing yet: select it, the pencil, tiles.
+var _pending_assign := 0
+
+
+func _hire_blind() -> bool:
+	var momos: MomoSystem = sim.system(&"momo")
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var economy: EconomySystem = sim.system(&"economy")
+	if momos.ids().size() * 2 >= bs.ids().size() or not economy.can_afford(momos.hire_cost()):
+		return false
+	if not _do("hire Momo", {"type": "momo.hire"}):
+		return false
+	var id: int = momos.ids()[-1]
+	if momos.watched(id).is_empty():
+		_pending_assign = id
+		_tutorial_ui = 0
+	return true
+
+
+func _assign_new() -> bool:
+	var momos: MomoSystem = sim.system(&"momo")
+	if not momos.ids().has(_pending_assign) or not momos.watched(_pending_assign).is_empty():
+		_pending_assign = 0
+		return false
+	if _tutorial_ui < 2:
+		_tutorial_ui += 1
+		counts["look: momo"] = int(counts.get("look: momo", 0)) + 1
+		return true
+	_tutorial_ui = 0
+	var m := _pending_assign
+	_pending_assign = 0
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var here := momos.position_of(m)
+	var free: Array = []
+	for id: int in bs.ids():
+		if momos.watchers_of(id).is_empty() and momos.slots_of(id) > 0:
+			free.append(id)
+	free.sort_custom(func(a: int, b: int) -> bool: return here.distance_to(momos.work_spot(a)) < here.distance_to(momos.work_spot(b)) or (here.distance_to(momos.work_spot(a)) == here.distance_to(momos.work_spot(b)) and a < b))
+	var cells: Array = []
+	for id: int in free:
+		for c: Vector2i in bs.cells_of(bs.get_building(id)):
+			if cells.size() < momos.watch_capacity(m):
+				cells.append([c.x, c.y])
+	return not cells.is_empty() and _do("give tiles", {"type": "momo.watch", "momo": m, "cells": cells, "op": "add"})
+
+
+## A kind of building the player has not got yet (the lab, then the
+## lumberyard, then the mine) as soon as it is open and affordable; otherwise
+## a farm on a free tile.
+func _build_blind() -> bool:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var free := (sim.system(&"world") as WorldSystem).buildable_cells()
+	if free.is_empty():
+		return false
+	var have := {}
+	for id: int in bs.ids():
+		var fam := bs.family_of(String(bs.get_building(id)["type"]))
+		have[fam] = int(have.get(fam, 0)) + 1
+	for fam: String in ["research", "lumberyard", "mine"]:
+		if not have.has(fam) and bs.is_unlocked(fam):
+			if _affords(fam):
+				return _do("build " + fam, {"type": "building.place", "building": fam, "anchor": [free[0].x, free[0].y]})
+			# Saving for it: a farm only on a tile it can spare.
+			if free.size() < 2:
+				return false
+	if not _affords("farm"):
+		return false
+	return _do("build farm", {"type": "building.place", "building": "farm", "anchor": [free[0].x, free[0].y]})
 
 
 func _do(kind: String, command: Dictionary) -> bool:
@@ -139,6 +334,8 @@ func _promote() -> bool:
 func _sell() -> bool:
 	var ps: PrestigeSystem = sim.system(&"prestige")
 	var a := ps.appraise()
+	if a["can_sell"] and int(a["points"]) >= 1:
+		_mark("prestige ready")
 	if not a["can_sell"] or int(a["points"]) < sell_at_points:
 		return false
 	var lv := (sim.system(&"progression") as ProgressionSystem).level
@@ -148,6 +345,7 @@ func _sell() -> bool:
 	counts["sell island"] = int(counts.get("sell island", 0)) + 1
 	sales.append({"island": island, "active_ms": active_ms, "points": a["points"], "level": lv, "rp": r["rp_issued"]})
 	_mark("sold island %d" % island)
+	_income_before += production_income()
 	attach(r["sim"])
 	island += 1
 	_place_points()
@@ -383,7 +581,9 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 	if type == &"task_completed":
 		var action := String(p.get("stage", "")).rstrip("0123456789")
 		_mark("first " + action)
-		if int(p.get("worker", 0)) > 0:
+		var worker := int(p.get("worker", 0))
+		jobs["momo" if worker > 0 else ("hand" if worker == 0 else "auto")] += 1
+		if worker > 0:
 			_mark("first Momo work")
 	if not FEEDBACK.has(type):
 		return
