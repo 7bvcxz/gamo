@@ -32,7 +32,16 @@ var power_label: Label
 ## goes twice as fast, dim and counting to the next burst otherwise.
 var burst_pill: Control
 ## Feedback gathered within this many seconds pops once (see _on_sim_event).
-const FEEDBACK_WINDOW := 0.3
+## Step 54: a few frames -- enough for one frame's burst of events to read as
+## one pop; at 0.3 s the pop came visibly late after the tap. A pop still on
+## screen grows with what follows (_pop_amount).
+const FEEDBACK_WINDOW := 0.08
+## How long an amount stays readable before it fades (Step 54: was 0.3 s of a
+## 1.1 s rise -- gone before the eye got there).
+const POP_HOLD := 0.8
+const POP_SECONDS := 1.6
+## A dark rim around every pop: readable over the bright sea and the grass.
+const POP_OUTLINE := Color(0.03, 0.1, 0.24, 0.95)
 var _pending_money := 0
 ## Money spent in the same moment, popped on its own: a $80 hire beside an
 ## $8 harvest read "-$72" to the blind players (Step 50).
@@ -59,6 +68,11 @@ var _donut: Donut
 var _money_label: Label
 var _level_label: Label
 var _exp_label: Label
+## Step 54: the level's progress as a bar, and the level-up burst at the card.
+var exp_bar: ExpBar
+var level_fx: LevelUpFx
+## The level before the levels gathered in this feedback window.
+var _level_from := 0
 var _shown := {}
 
 
@@ -101,18 +115,36 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	day_panel.add_child(day_row)
 	add_child(day_panel)
 
-	money_pill = _pill("MoneyPill", lib.atlas_texture("icon_coin"))
-	_money_label = _label(22)
+	# Step 54: money and the level are the HUD's first read -- larger than
+	# anything else in it, the level with its bar.
+	money_pill = _pill("MoneyPill", lib.atlas_texture("icon_coin"), 38.0)
+	_money_label = _label(32)
 	money_pill.get_child(0).add_child(_money_label)
 	add_child(money_pill)
 
-	exp_pill = _pill("ExpPill", lib.atlas_texture("icon_star"))
-	_level_label = _label(16)
-	_level_label.modulate = Color(1, 1, 1, 0.85)
-	_exp_label = _label(18)
-	exp_pill.get_child(0).add_child(_level_label)
-	exp_pill.get_child(0).add_child(_exp_label)
+	exp_pill = _pill("ExpPill", lib.atlas_texture("icon_star"), 38.0)
+	var exp_col := VBoxContainer.new()
+	exp_col.add_theme_constant_override("separation", 2)
+	exp_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var exp_row := HBoxContainer.new()
+	exp_row.add_theme_constant_override("separation", 8)
+	exp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_level_label = _label(24)
+	_level_label.add_theme_color_override("font_color", sim.data.color("ui_accent"))
+	_exp_label = _label(17)
+	_exp_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_exp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	exp_row.add_child(_level_label)
+	exp_row.add_child(_exp_label)
+	exp_col.add_child(exp_row)
+	exp_bar = ExpBar.new()
+	exp_bar.name = "ExpBar"
+	exp_bar.custom_minimum_size = Vector2(160, 12)
+	exp_col.add_child(exp_bar)
+	exp_pill.get_child(0).add_child(exp_col)
 	add_child(exp_pill)
+	level_fx = LevelUpFx.new()
+	add_child(level_fx)
 
 	power_pill = Button.new()
 	power_pill.name = "PowerPill"
@@ -187,6 +219,9 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 ## pop per kind, not a stack. Nothing pops while time away is being caught up
 ## (the welcome-back card sums it), and nothing at all with effects off.
 func _on_sim_event(type: StringName, payload: Dictionary) -> void:
+	if type == &"game_loaded":
+		# A loaded island's level is shown as it is, not slid to (Step 54).
+		exp_bar.level = 0
 	if sim.replaying:
 		return
 	match type:
@@ -199,6 +234,8 @@ func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 		&"exp_gained":
 			_pending_exp += int(payload.get("amount", 0))
 		&"level_up":
+			if _pending_level == 0:
+				_level_from = int(payload["level"]) - 1
 			_pending_level = maxi(_pending_level, int(payload["level"]))
 		&"research_completed":
 			_pending_research.append(payload)
@@ -235,7 +272,7 @@ func flush_feedback() -> void:
 	if exp_gain > 0:
 		_pop_amount("exp", exp_pill, exp_gain, Color(1, 1, 1, 0.95))
 	if level > 0:
-		_pop(exp_pill, tr("fx.level_up") % level, Color("#ffe27a"), 0.45, true)
+		level_up(_level_from, level)
 	if not research.is_empty() and buttons.has(&"research"):
 		_pop(buttons[&"research"], research_text(research), Color("#b7f08a"), 0.0, true)
 
@@ -266,10 +303,10 @@ func _pop(anchor: Control, text: String, color: Color, delay: float = 0.0, side:
 	var l := Label.new()
 	l.text = text
 	l.name = "Pop"
-	l.add_theme_font_size_override("font_size", 20)
+	l.add_theme_font_size_override("font_size", 24)
 	l.add_theme_color_override("font_color", color)
-	l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
-	l.add_theme_constant_override("outline_size", 6)
+	l.add_theme_color_override("font_outline_color", POP_OUTLINE)
+	l.add_theme_constant_override("outline_size", 10)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if side and text.length() > 18:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -297,6 +334,19 @@ func pop_money(delta: int) -> void:
 		bump.tween_property(money_pill, "scale", Vector2.ONE, 0.18)
 
 
+## A level gained (or several in one moment): the burst at the EXP card, and
+## the card itself pulsing once. With effects off the bar and numbers still
+## change -- only the show is skipped (flush_feedback returns before here).
+func level_up(from: int, to: int) -> void:
+	_log_pop(tr("fx.level_up") % to)
+	level_fx.play(exp_pill.get_rect(), from, to)
+	if FxPrefs.moving():
+		exp_pill.pivot_offset = exp_pill.size * 0.5
+		var bump := create_tween()
+		bump.tween_property(exp_pill, "scale", Vector2(1.12, 1.12), 0.12)
+		bump.tween_property(exp_pill, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
 ## An amount beside its pill. While the last one for the same pill is still
 ## fresh it grows instead (+$5 then +$3 reads +$8): two pops never stack on
 ## one spot.
@@ -312,9 +362,9 @@ func _pop_amount(key: String, anchor: Control, amount: int, color: Color) -> voi
 	else:
 		l = Label.new()
 		l.name = "Pop"
-		l.add_theme_font_size_override("font_size", 24 if key == "money" else 20)
-		l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
-		l.add_theme_constant_override("outline_size", 6)
+		l.add_theme_font_size_override("font_size", 32 if key == "money" else 28)
+		l.add_theme_color_override("font_outline_color", POP_OUTLINE)
+		l.add_theme_constant_override("outline_size", 10)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(l)
 	l.add_theme_color_override("font_color", color)
@@ -328,7 +378,7 @@ func _pop_amount(key: String, anchor: Control, amount: int, color: Color) -> voi
 		# Under the pill, apart from what came in.
 		l.position.y += anchor.size.y * 0.7
 	_log_pop(l.text)
-	_live[key] = {"label": l, "total": total, "at": now, "tween": _animate(l, -16.0, 1.1, 0.0)}
+	_live[key] = {"label": l, "total": total, "at": now, "tween": _animate(l, -16.0, POP_SECONDS, 0.0)}
 
 
 ## Rises and fades -- or, with reduced motion, only fades where it is.
@@ -340,9 +390,9 @@ func _animate(l: Label, rise: float, seconds: float, delay: float) -> Tween:
 		tween.tween_property(l, "modulate:a", 1.0, 0.12)
 	if FxPrefs.moving():
 		tween.tween_property(l, "position:y", l.position.y + rise, seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(l, "modulate:a", 0.0, seconds).set_delay(0.3)
+		tween.parallel().tween_property(l, "modulate:a", 0.0, maxf(seconds - POP_HOLD, 0.2)).set_delay(POP_HOLD)
 	else:
-		tween.tween_property(l, "modulate:a", 0.0, seconds).set_delay(0.5)
+		tween.tween_property(l, "modulate:a", 0.0, maxf(seconds - POP_HOLD, 0.2)).set_delay(POP_HOLD)
 	tween.tween_callback(l.queue_free)
 	return tween
 
@@ -360,16 +410,16 @@ func _label(font_size: int) -> Label:
 	return l
 
 
-func _pill(node_name: String, icon: Texture2D) -> PanelContainer:
+func _pill(node_name: String, icon: Texture2D, icon_px: float = 26.0) -> PanelContainer:
 	var pill := PanelContainer.new()
 	pill.name = node_name
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
+	row.add_theme_constant_override("separation", 10)
 	var tex := TextureRect.new()
 	tex.texture = icon
 	tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	tex.custom_minimum_size = Vector2(26, 26)
+	tex.custom_minimum_size = Vector2(icon_px, icon_px)
 	tex.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	row.add_child(tex)
 	pill.add_child(row)
@@ -401,7 +451,9 @@ func refresh(force: bool = false) -> void:
 	_donut.progress = clock.day_progress()
 	_set_text(_money_label, "money", _format_money(economy.money), force)
 	_set_text(_level_label, "level", tr("hud.level") % prog.level, force)
-	_set_text(_exp_label, "exp", tr("hud.exp") % [prog.experience, prog.next_level_exp()], force)
+	_set_text(_exp_label, "exp", tr("hud.exp") % [_format_money(prog.experience), _format_money(prog.next_level_exp())], force)
+	# Forced (a load, a new language): set at once; otherwise it slides.
+	exp_bar.show_progress(prog.level, prog.experience, prog.next_level_exp(), not force)
 	var mail: MailSystem = sim.system(&"mail")
 	var mail_button: HudButton = buttons.get(&"mailbox")
 	if mail != null and mail_button != null and mail_button.badge != (mail.unread_count() > 0):
@@ -609,9 +661,9 @@ func _layout() -> void:
 	var h := size.y
 	day_panel.reset_size()
 	day_panel.position = Vector2(m["left"], m["top"])
-	money_pill.custom_minimum_size = Vector2(150, 0)
+	money_pill.custom_minimum_size = Vector2(200, 0)
 	money_pill.reset_size()
-	exp_pill.custom_minimum_size = Vector2(150, 0)
+	exp_pill.custom_minimum_size = Vector2(200, 0)
 	exp_pill.reset_size()
 	var pill_w := maxf(money_pill.size.x, exp_pill.size.x)
 	money_pill.size.x = pill_w

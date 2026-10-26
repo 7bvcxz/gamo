@@ -25,7 +25,6 @@ func setup(main: Node) -> void:
 	sim.advance_to(sim.clock.next_day_start_ms() + 1000)
 	(main.get("hud") as Hud).flush_feedback()
 	(main.get("hud") as Hud).pops.clear()
-	(main.get("feedback_fx") as FeedbackFx).flush()
 	(main.get("feedback_fx") as FeedbackFx).clear()
 	tap.call()
 	sim.advance_ms(6000)

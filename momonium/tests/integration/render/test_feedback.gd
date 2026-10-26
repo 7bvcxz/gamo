@@ -55,7 +55,6 @@ func _tap(p: Vector2) -> void:
 ## A farm one tap away from harvest (sown and watered three times by command).
 func _ripe_farm() -> int:
 	var id := bs.place_ready("farm", Vector2i(1, 0), "harvest")
-	fx.flush()
 	fx.shown.clear()
 	hud.flush_feedback()
 	hud.pops.clear()
@@ -85,7 +84,6 @@ func test_a_real_tap_harvests_once_and_pops_once() -> void:
 	_tap(cams.world_to_screen(proj.cell_center(Vector2i(1, 0))))
 	await tree.process_frame
 	sim.advance_ms(2000)
-	fx.flush()
 	assert_eq(harvests.size(), 1, "the tap harvested once (%s)" % [harvests])
 	var got := int(harvests[0]) if not harvests.is_empty() else 0
 	var pops := _produced("money")
@@ -101,7 +99,6 @@ func test_a_batch_of_jobs_is_one_pop_per_building_and_item() -> void:
 	for i in 4:
 		sim.bus.emit(&"produced", {"id": a, "type": "lumberyard", "items": {"wood": 2}})
 	sim.bus.emit(&"produced", {"id": b, "type": "mine", "items": {"stone": 3}})
-	fx.flush()
 	var pops := _produced()
 	assert_eq(pops.size(), 2, "one pop per building")
 	var wood: Array = pops.filter(func(s: Dictionary) -> bool: return String(s["key"]).ends_with(":wood"))
@@ -127,7 +124,6 @@ func test_time_away_caught_up_on_return_pops_nothing() -> void:
 	var f := bs.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": f})
 	await tree.process_frame
-	fx.flush()
 	fx.shown.clear()
 	hud.flush_feedback()
 	hud.pops.clear()
@@ -139,7 +135,6 @@ func test_time_away_caught_up_on_return_pops_nothing() -> void:
 	sim.time_scale = 0.0
 	assert_true(int(bs.get_building(f).get("completed", 0)) > jobs_before, "Momo worked while away")
 	assert_false(sim.replaying, "replaying ends with the catch-up")
-	fx.flush()
 	hud.flush_feedback()
 	assert_eq(fx.shown.size(), 0, "no world pops for time caught up (%s)" % [fx.shown])
 	assert_eq(hud.pops.filter(func(t: String) -> bool: return t.begins_with("+$") or t.ends_with("EXP")), [], "no HUD pops for it either")
@@ -151,7 +146,6 @@ func test_effects_off_shows_nothing_but_changes_nothing() -> void:
 	var harvests := _harvests()
 	sim.execute({"type": "building.tap", "id": id})
 	sim.advance_ms(2000)
-	fx.flush()
 	hud.flush_feedback()
 	assert_eq(harvests.size(), 1, "the harvest still happens")
 	assert_eq(fx.shown.size(), 0, "no world pops")
@@ -165,14 +159,15 @@ func test_reduced_motion_pops_without_moving() -> void:
 	FxPrefs.reduced_motion = true
 	var a := bs.place_instant("lumberyard", Vector2i(1, 0))
 	sim.bus.emit(&"produced", {"id": a, "type": "lumberyard", "items": {"wood": 2}})
-	fx.flush()
 	assert_eq(fx.active_count(), 1, "it still shows")
 	var node: Node2D = fx.get_children().filter(func(c: Node) -> bool: return c is Node2D and c.visible)[0]
 	var at := node.position
 	fx._process(0.5)
 	assert_eq(node.position, at, "but does not rise")
 	fx._process(0.6)
-	assert_true(node.modulate.a < 1.0, "it fades where it is")
+	assert_eq(node.modulate.a, 1.0, "Step 54: held fully readable for two thirds of its life")
+	fx._process(0.4)
+	assert_true(node.modulate.a < 1.0, "then it fades where it is")
 	var view: BuildingView = (main.get("building_views") as BuildingViews).view(a)
 	view.celebrate()
 	assert_eq(float(view.get("_bounce")), 0.0, "no bounce")
@@ -202,7 +197,6 @@ func test_a_flood_stays_within_the_pool() -> void:
 	await tree.process_frame
 	for id: int in ids:
 		sim.bus.emit(&"produced", {"id": id, "type": "lumberyard", "items": {"wood": 1}})
-	fx.flush()
 	assert_true(fx.active_count() <= FeedbackFx.MAX_ACTIVE, "at most %d at once (%d)" % [FeedbackFx.MAX_ACTIVE, fx.active_count()])
 	var nodes := fx.get_children().filter(func(c: Node) -> bool: return c is Node2D).size()
 	assert_true(nodes <= FeedbackFx.MAX_ACTIVE + 1, "nodes are pooled, not made per pop (%d)" % nodes)

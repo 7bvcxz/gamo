@@ -70,5 +70,4 @@ func test_a_harvest_pops_its_money_at_once() -> void:
 	assert_eq(pops.size(), 1, "a single '+$%d' rises from the money pill" % price)
 	assert_true(hud.get_child_count() > before, "added on top of the HUD")
 	var fx: FeedbackFx = main.get("feedback_fx")
-	fx.flush()
 	assert_true(fx.shown.any(func(e: Dictionary) -> bool: return String(e["kind"]) == "money" and String(e["text"]) == "+$%d" % price), "and over the farm itself (%s)" % [fx.shown])

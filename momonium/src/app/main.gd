@@ -340,6 +340,10 @@ func _ready() -> void:
 	_version_label.add_theme_font_size_override("font_size", 14)
 	ui.add_child(_version_label)
 	get_viewport().size_changed.connect(_layout)
+	# Turning a phone or resizing a window can cross into landscape.
+	get_tree().root.size_changed.connect(func() -> void:
+		if settings != null:
+			apply_options())
 	_layout()
 	cameras.frame_island()
 	away_frame = _frame(ui, "AwayFrame")
@@ -492,6 +496,10 @@ func _ready() -> void:
 	bridge.register_query("dev_add_momo", func(at: Variant) -> Dictionary:
 		var p: Array = at if typeof(at) == TYPE_ARRAY else [0.55, 1.35]
 		return {"id": (sim.system(&"momo") as MomoSystem).add_momo(Vector2(float(p[0]), float(p[1])))})
+	bridge.register_query("dev_add_exp", func(amount: Variant) -> Dictionary:
+		var p := sim.system(&"progression") as ProgressionSystem
+		p.add_exp(int(amount), "dev")
+		return {"level": p.level, "exp": p.experience, "next": p.next_level_exp()})
 	bridge.register_query("dev_add_money", func(amount: Variant) -> Dictionary:
 		(sim.system(&"economy") as EconomySystem).earn(int(amount), "dev")
 		return {"money": (sim.system(&"economy") as EconomySystem).money})
@@ -1001,11 +1009,25 @@ func _offer_lab() -> void:
 
 
 ## Screen options from Settings: text-and-button size (the whole canvas is
-## scaled; the island refits), the 30 fps battery saver, the camera buttons.
+## scaled, and the camera zooms back by as much -- the island keeps its size on
+## screen), the 30 fps battery saver, the camera buttons.
+## Step 54: the HUD is drawn for a portrait phone (720 wide). A landscape
+## window shows that design at its height, a third smaller than on a phone held
+## upright -- the money and the level were a squint on a desktop. A window
+## clearly wider than tall gets that back.
+const LANDSCAPE_UI := 1.3
+
+
 func apply_options() -> void:
-	var s := clampf(float(settings.get_value("ui_scale")), 0.85, 1.25)
-	if not is_equal_approx(get_tree().root.content_scale_factor, s):
+	var s := ui_scale()
+	var was := get_tree().root.content_scale_factor
+	if not is_equal_approx(was, s):
 		get_tree().root.content_scale_factor = s
+		# Larger text is not a closer island: without this the camera kept its
+		# zoom through the change and a desktop cut the island's front off,
+		# with the sea tiles in front of it out of the window.
+		if camera != null:
+			camera.zoom *= was / s
 		_layout.call_deferred()
 	Engine.max_fps = 30 if bool(settings.get_value("low_power")) else 0
 	FxPrefs.apply(settings)
@@ -1014,6 +1036,14 @@ func apply_options() -> void:
 	if camera_pad != null:
 		camera_pad.visible = bool(settings.get_value("camera_buttons"))
 		_place_camera_pad()
+
+
+## The UI's scale: the player's setting, times LANDSCAPE_UI in a wide window
+## (its real pixels -- the content scale itself does not change them).
+func ui_scale() -> float:
+	var user := clampf(float(settings.get_value("ui_scale")), 0.85, 1.25)
+	var win := get_tree().root.size
+	return user * (LANDSCAPE_UI if win.x > win.y * 1.2 else 1.0)
 
 
 func _place_camera_pad() -> void:
@@ -1243,7 +1273,12 @@ func _hud_info(_arg: Variant) -> Dictionary:
 		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text},
 		"pills": {"day": to_window.call(hud.day_panel.get_global_rect()), "money": to_window.call(hud.money_pill.get_global_rect()),
 			"exp": to_window.call(hud.exp_pill.get_global_rect())},
-		"store": {"text": hud.production_label.text, "rect": to_window.call(hud.production_label.get_global_rect())} if hud.production_label.visible else {}}
+		"store": {"text": hud.production_label.text, "rect": to_window.call(hud.production_label.get_global_rect())} if hud.production_label.visible else {},
+		# Step 54: the EXP bar and the level-up at the card.
+		"exp_bar": {"rect": to_window.call(hud.exp_bar.get_global_rect()), "value": hud.exp_bar.value, "target": hud.exp_bar.target, "level": hud.exp_bar.level},
+		"level_up": {"playing": hud.level_fx.playing(), "from": hud.level_fx.from_level, "to": hud.level_fx.to_level,
+			"title": hud.level_fx.title.text, "line": hud.level_fx.line.text, "title_rect": to_window.call(hud.level_fx.title.get_global_rect())},
+		"pops": hud.pops.slice(maxi(hud.pops.size() - 8, 0)), "content_scale": get_tree().root.content_scale_factor}
 
 
 ## E2E: what is selected, the panel's cards (window pixels) and the last tap result.

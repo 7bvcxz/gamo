@@ -10,7 +10,9 @@ extends Node2D
 ##
 ## Restrained by construction:
 ##   - one pop per building and item within MERGE_SECONDS: a batch of jobs
-##     finishing together is one "+N", never a stack;
+##     finishing together is one "+N", never a stack (Step 54: the first shows
+##     at once and the rest add to it -- it used to wait the whole window, so
+##     the number came after the eye had moved on);
 ##   - nothing while time away is caught up (`sim.replaying`), after a load,
 ##     or with effects off; fades only with reduced motion;
 ##   - at most MAX_ACTIVE at once, from a pool, only where the camera looks,
@@ -20,10 +22,13 @@ extends Node2D
 
 const MERGE_SECONDS := 0.45
 const MAX_ACTIVE := 10
-const LIFE := 1.3
-const RISE := 30.0
-const FONT_SIZE := 26
-const ICON_PX := 26.0
+## Step 54: larger, held longer (opaque for the first two thirds), with a
+## heavy dark rim -- readable over the bright sea and the grass.
+const LIFE := 1.9
+const RISE := 36.0
+const FONT_SIZE := 34
+const ICON_PX := 34.0
+const OUTLINE := Color(0.03, 0.1, 0.24, 0.95)
 
 var sim: Simulation
 var views: BuildingViews
@@ -33,7 +38,6 @@ var font: Font
 ## Every pop shown, newest last: {kind, key, text, amount} (tests, E2E).
 var shown: Array[Dictionary] = []
 
-var _pending := {}
 var _active: Array[Dictionary] = []
 var _pool: Array[Node2D] = []
 var _burst_was := false
@@ -86,24 +90,32 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			shown.append({"kind": "promoted", "key": "tier", "text": String(payload.get("name", "")), "amount": 0.0})
 
 
-## Gathers events for the same building and item into one pop.
+## One pop per building and item: shown at once; what follows within
+## MERGE_SECONDS adds to the pop on screen instead of making another.
 func _queue(key: String, kind: String, building: int, amount: float, icon: String, color: Color, text: String = "") -> void:
-	if _pending.has(key):
-		_pending[key]["amount"] = float(_pending[key]["amount"]) + amount
-	else:
-		_pending[key] = {"kind": kind, "building": building, "amount": amount, "icon": icon, "color": color, "age": 0.0, "text": text}
-	set_process(true)
+	for a: Dictionary in _active:
+		if String(a.get("key", "")) == key and float(a["age"]) < MERGE_SECONDS:
+			a["amount"] = float(a["amount"]) + amount
+			_relabel(a)
+			return
+	_show(key, {"kind": kind, "building": building, "amount": amount, "icon": icon, "color": color, "text": text})
 
 
-## Sends everything waiting now (tests; also the end of each merge window).
-func flush() -> void:
-	for key: String in _pending.keys():
-		_show(key, _pending[key])
-	_pending.clear()
+
+## A pop that grew: its number, laid out again, a small bump, and the record.
+func _relabel(a: Dictionary) -> void:
+	var node: Node2D = a["node"]
+	var text := ("+$" if String(a["kind"]) == "money" else "+") + FxPrefs.compact(float(a["amount"]))
+	_layout(node, text)
+	a["bump"] = 0.0
+	for i in range(shown.size() - 1, -1, -1):
+		if String(shown[i]["key"]) == String(a["key"]):
+			shown[i]["amount"] = float(a["amount"])
+			shown[i]["text"] = text
+			break
 
 
 func clear() -> void:
-	_pending.clear()
 	for a: Dictionary in _active:
 		_recycle(a["node"])
 	_active.clear()
@@ -114,25 +126,24 @@ func active_count() -> int:
 
 
 func _process(delta: float) -> void:
-	if _pending.is_empty() and _active.is_empty():
+	if _active.is_empty():
 		set_process(false)
 		return
-	for key: String in _pending.keys():
-		var p: Dictionary = _pending[key]
-		p["age"] = float(p["age"]) + delta
-		if float(p["age"]) >= MERGE_SECONDS:
-			_show(key, p)
-			_pending.erase(key)
 	var zoom := cameras.camera.zoom.x if cameras != null and cameras.camera != null else 1.0
 	for i in range(_active.size() - 1, -1, -1):
 		var a: Dictionary = _active[i]
 		a["age"] = float(a["age"]) + delta
 		var k := float(a["age"]) / LIFE
 		var node: Node2D = a["node"]
-		node.scale = Vector2.ONE / maxf(zoom, 0.05)
+		# A pop that just grew swells a little and settles (not with reduced motion).
+		var swell := 1.0
+		if a.has("bump") and FxPrefs.moving():
+			a["bump"] = float(a["bump"]) + delta
+			swell = 1.0 + 0.18 * maxf(0.0, 1.0 - float(a["bump"]) / 0.2)
+		node.scale = Vector2.ONE * swell / maxf(zoom, 0.05)
 		if FxPrefs.moving():
 			node.position = Vector2(a["from"]) + Vector2(0, -RISE * (1.0 - pow(1.0 - minf(k, 1.0), 2.0))) / maxf(zoom, 0.05)
-		node.modulate.a = clampf((1.0 - k) * 2.5, 0.0, 1.0)
+		node.modulate.a = clampf((1.0 - k) * 3.0, 0.0, 1.0)
 		if k >= 1.0:
 			_recycle(node)
 			_active.remove_at(i)
@@ -170,28 +181,34 @@ func _show(key: String, p: Dictionary) -> void:
 	var text := String(p["text"]) if String(p["text"]) != "" else ("+$" if String(p["kind"]) == "money" else "+") + FxPrefs.compact(float(p["amount"]))
 	var node := _take()
 	var label: Label = node.get_node("Text")
-	label.text = text
 	label.add_theme_color_override("font_color", p["color"])
-	label.reset_size()
 	var icon: Sprite2D = node.get_node("Icon")
 	var icon_name := String(p["icon"])
 	icon.visible = icon_name != "" and lib.has(icon_name)
-	var width := label.size.x
 	if icon.visible:
 		lib.place(icon, icon_name, "center" if lib.pivot(icon_name, "center") != Vector2.ZERO else "origin")
 		var r := lib.region(icon_name)
 		icon.scale = Vector2.ONE * ICON_PX / maxf(r.size.x, r.size.y)
-		width += ICON_PX + 4.0
-	label.position = Vector2(-width * 0.5 + (ICON_PX + 4.0 if icon.visible else 0.0), -label.size.y * 0.5)
-	icon.position = Vector2(-width * 0.5 + ICON_PX * 0.5, 0)
+	_layout(node, text)
 	node.position = at
 	node.modulate.a = 1.0
 	node.visible = true
-	_active.append({"node": node, "age": 0.0, "from": at, "building": int(p["building"])})
+	_active.append({"node": node, "age": 0.0, "from": at, "building": int(p["building"]), "key": key, "kind": String(p["kind"]), "amount": float(p["amount"])})
 	shown.append({"kind": p["kind"], "key": key, "text": text, "amount": float(p["amount"])})
 	if shown.size() > 60:
 		shown.pop_front()
 	set_process(true)
+
+
+## Text and icon of a pop, centred on its point.
+func _layout(node: Node2D, text: String) -> void:
+	var label: Label = node.get_node("Text")
+	var icon: Sprite2D = node.get_node("Icon")
+	label.text = text
+	label.reset_size()
+	var width := label.size.x + (ICON_PX + 4.0 if icon.visible else 0.0)
+	label.position = Vector2(-width * 0.5 + (ICON_PX + 4.0 if icon.visible else 0.0), -label.size.y * 0.5)
+	icon.position = Vector2(-width * 0.5 + ICON_PX * 0.5, 0)
 
 
 func _take() -> Node2D:
@@ -208,8 +225,8 @@ func _take() -> Node2D:
 	if font != null:
 		label.add_theme_font_override("font", font)
 	label.add_theme_font_size_override("font_size", FONT_SIZE)
-	label.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.85))
-	label.add_theme_constant_override("outline_size", 6)
+	label.add_theme_color_override("font_outline_color", OUTLINE)
+	label.add_theme_constant_override("outline_size", 10)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	node.add_child(label)
 	add_child(node)

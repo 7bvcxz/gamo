@@ -29,6 +29,44 @@ func after_each() -> void:
 	await tree.process_frame
 
 
+
+## Step 54: a window clearly wider than tall shows the portrait-phone design
+## at its height -- a third smaller -- so the UI scale makes that up there.
+func test_a_landscape_window_gets_a_larger_ui() -> void:
+	var was := tree.root.size
+	var settings: SettingsStore = main.get("settings")
+	settings.set_value("ui_scale", 1.0)
+	tree.root.size = Vector2i(720, 1280)
+	assert_near(main.ui_scale(), 1.0, 0.001, "a phone held upright: the player's scale")
+	tree.root.size = Vector2i(1280, 800)
+	assert_near(main.ui_scale(), 1.0 * main.LANDSCAPE_UI, 0.001, "a desktop window: larger")
+	settings.set_value("ui_scale", 1.2)
+	assert_near(main.ui_scale(), 1.2 * main.LANDSCAPE_UI, 0.001, "on top of the player's own choice")
+	settings.set_value("ui_scale", 1.0)
+	tree.root.size = was
+	main.apply_options()
+
+
+## Step 54: larger text is not a closer island. The camera kept its zoom
+## through a scale change, so a desktop window (1.3) cut the island's front off.
+func test_the_island_keeps_its_size_on_screen_when_the_ui_scales() -> void:
+	var cams: CameraController = main.get("cameras")
+	var vp := main.get_viewport()
+	var on_screen := func() -> Rect2:
+		var t := vp.get_final_transform() * vp.get_canvas_transform()
+		var r := cams.island_rect()
+		return Rect2(t * r.position, t * r.end - t * r.position)
+	cams.frame_island()
+	var before: Rect2 = on_screen.call()
+	main.get("settings_view").option_changed.emit("ui_scale", 1.2)
+	await tree.process_frame
+	await tree.process_frame
+	var after: Rect2 = on_screen.call()
+	assert_near(after.size.x, before.size.x, 1.0, "the island as wide on screen (%s -> %s)" % [before, after])
+	assert_near(after.get_center().y, before.get_center().y, 1.0, "and where it was")
+	main.get("settings_view").option_changed.emit("ui_scale", 1.0)
+
+
 func test_bigger_text_and_buttons() -> void:
 	var before := main.get_viewport().get_visible_rect().size
 	main.get("settings_view").option_changed.emit("ui_scale", 1.2)
