@@ -101,14 +101,14 @@ test('mail: a letter arrives, the letter, research', async ({ game }, info) => {
     await game.tap((r[0] + r[2] / 2) * (box.width / win[0]), (r[1] + r[3] / 2) * (box.height / win[1]));
     await game.page.waitForTimeout(400);
   };
-  let h = await game.query('hud');
+  // Research first, the letter still unread; then the mailbox and the letter.
+  const h = await game.query('hud');
+  await tap(h.buttons.research, h.window);
+  await save(game, info, 'mail', 'research');
+  await tap(h.buttons.research, h.window);
   await tap(h.buttons.mailbox, h.window);
   await save(game, info, 'mail', 'list');
   const m = await game.query('mail');
   await tap(m.rows[0].rect, m.window);
   await save(game, info, 'mail', 'letter');
-  await tap(h.buttons.mailbox, h.window);
-  h = await game.query('hud');
-  await tap(h.buttons.research, h.window);
-  await save(game, info, 'mail', 'research');
 });
