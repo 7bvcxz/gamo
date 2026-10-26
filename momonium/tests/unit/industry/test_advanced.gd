@@ -95,16 +95,14 @@ func test_cars_from_ingots_sold_each_day() -> void:
 		if t == &"sold":
 			sold[0] += int((p["items"] as Dictionary).get("car", 0)))
 	sim.advance_ms(30000 * 8)
-	assert_eq(sold[0], 1, "one car built and sold at the day's sale")
+	assert_eq(sold[0], 1, "one car built, and sold the moment it rolled out")
 	assert_eq(inv.count("car"), 0, "none left in the store")
 
 
 func test_delivery_vans_speed_momo_and_sales() -> void:
-	inv.add("crop", 10, "test")
+	var price := int(sim.data.item("crop")["price"])
 	research.completed["delivery_vans"] = 0
-	var money := economy.money
-	sim.advance_to(sim.clock.next_day_start_ms() + 1)
-	assert_eq(economy.money - money, 50, "crops sell at 5 x 1.1 = 5 (whole dollars, rounded down)")
+	assert_eq(economy.unit_price("crop"), int(floor(price * 1.1)), "crops sell at the price x 1.1 (whole dollars, rounded down)")
 	var momos: MomoSystem = sim.system(&"momo")
 	var t0 := sim.now_ms()
 	sim.execute({"type": "momo.move", "momo": 1, "pos": [0.1, 0.1]})

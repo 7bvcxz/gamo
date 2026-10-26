@@ -5,7 +5,7 @@ extends SimSystem
 ##
 ## Event-driven, never polled: a building becoming idle (a stage done, a
 ## cooldown over, construction finished), a Momo arriving at its building, a
-## new morning, or room appearing in the store (a sale) each make this look at
+## new morning, or research or a recipe changing what can run each make this look at
 ## exactly the buildings concerned. If a worker is there and ready, the
 ## building's next stage starts with that Momo, taking work_time_multiplier
 ## times the player's time. Cooldowns are untouched -- the plants do not drink
@@ -77,7 +77,8 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 				var b := (sim.system(&"buildings") as BuildingSystem).get_building(int(payload.get("id", 0)))
 				if not b.is_empty() and b["state"] == BuildingSystem.COOLDOWN:
 					dispatch(worker, int(payload.get("id", 0)))
-		&"sold", &"research_completed", &"recipe_changed":
+		&"research_completed", &"recipe_changed", &"research_started":
+			# (Starting research spends notes: room for a lab that was full.)
 			_try_all()
 		&"inventory_changed":
 			# Inputs arriving can unblock a waiting furnace.
@@ -259,7 +260,37 @@ func route_order(momo: int) -> Array[int]:
 		var da: float = dist[a]
 		var db: float = dist[b]
 		return da < db - 0.0001 or (absf(da - db) <= 0.0001 and a < b))
-	return list
+	return _neglected_first(list)
+
+
+## Nearest first, but never forever (Step 50): a watched building that has
+## stood ready for `balance.momo.starve_seconds` while nearer ones kept the
+## Momo busy goes first, longest-waiting first. With five-second farms always
+## ready next door, the lab beside them was never studied.
+func _neglected_first(list: Array[int]) -> Array[int]:
+	var limit := int(sim.data.get_float("balance", "momo.starve_seconds", 0.0) * 1000.0)
+	if limit <= 0:
+		return list
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var now := sim.now_ms()
+	var waiting: Array[int] = []
+	var since := {}
+	for id: int in list:
+		var b := buildings.get_building(id)
+		if b.is_empty() or b["state"] != BuildingSystem.IDLE:
+			continue
+		var ready := maxi(maxi(int(b.get("task_end", 0)), int(b.get("ready_at", 0))), int(b.get("build_end", 0)))
+		if now - ready >= limit and buildings.can_start(id)["ok"]:
+			waiting.append(id)
+			since[id] = ready
+	if waiting.is_empty():
+		return list
+	waiting.sort_custom(func(a: int, b: int) -> bool: return int(since[a]) < int(since[b]) or (int(since[a]) == int(since[b]) and a < b))
+	var out: Array[int] = waiting.duplicate()
+	for id: int in list:
+		if not waiting.has(id):
+			out.append(id)
+	return out
 
 
 ## Which Momo a building belongs to when several watch it (the zone route):

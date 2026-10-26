@@ -1,27 +1,29 @@
 {
-  "_doc": "Everything that can sit in the island's store. `kind`: crop (sold automatically at the next day boundary for `price` each), material, product, science (research notes from the lab, spent on research, never sold), ore (from the mine, for smelting later). `stack` is how many the store holds of that item. Any item with sell \"daily\" is sold at the next day boundary for `price` each (research may raise prices: sale_price).",
+  "_doc": "Everything that can sit in the island's store. `kind`: crop, material, product, science (research notes from the lab, spent on research, never sold), ore (from the mine, for smelting). `stack` is how many the store holds of that item. `sell` (Step 50: finished work is money at once): \"instant\" -- sold the moment it is made, never stored (crops, cars); \"surplus\" -- stored up to the stack, and what does not fit is sold at once instead of stopping the work (stone, wood, ores, ingots); absent -- never sold (research notes). `price` is what one fetches (research may raise it: sale_price).",
   "items": {
     "crop": {
       "name": "item.crop",
       "kind": "crop",
       "icon": "ui_sprout",
       "stack": 20,
-      "price": 5,
-      "sell": "daily"
+      "price": 3,
+      "sell": "instant"
     },
     "wood": {
       "name": "item.wood",
       "kind": "material",
       "icon": "item_wood",
       "stack": 50,
-      "price": 0
+      "price": 1,
+      "sell": "surplus"
     },
     "stone": {
       "name": "item.stone",
       "kind": "material",
       "icon": "item_stone",
       "stack": 50,
-      "price": 0
+      "price": 1,
+      "sell": "surplus"
     },
     "notes": {
       "name": "item.notes",
@@ -35,42 +37,48 @@
       "kind": "ore",
       "icon": "item_copper",
       "stack": 50,
-      "price": 0
+      "price": 2,
+      "sell": "surplus"
     },
     "iron_ore": {
       "name": "item.iron_ore",
       "kind": "ore",
       "icon": "item_iron",
       "stack": 50,
-      "price": 0
+      "price": 3,
+      "sell": "surplus"
     },
     "gold_ore": {
       "name": "item.gold_ore",
       "kind": "ore",
       "icon": "item_gold",
       "stack": 20,
-      "price": 0
+      "price": 8,
+      "sell": "surplus"
     },
     "copper_ingot": {
       "name": "item.copper_ingot",
       "kind": "product",
       "icon": "item_copper_ingot",
       "stack": 50,
-      "price": 0
+      "price": 5,
+      "sell": "surplus"
     },
     "iron_ingot": {
       "name": "item.iron_ingot",
       "kind": "product",
       "icon": "item_iron_ingot",
       "stack": 50,
-      "price": 0
+      "price": 7,
+      "sell": "surplus"
     },
     "gold_ingot": {
       "name": "item.gold_ingot",
       "kind": "product",
       "icon": "item_gold_ingot",
       "stack": 20,
-      "price": 0
+      "price": 20,
+      "sell": "surplus"
     },
     "car": {
       "name": "item.car",
@@ -78,7 +86,7 @@
       "icon": "item_car",
       "stack": 10,
       "price": 420,
-      "sell": "daily"
+      "sell": "instant"
     }
   }
 }

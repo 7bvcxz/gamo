@@ -119,15 +119,16 @@ func test_generators_open_through_research() -> void:
 func test_power_speeds_up_what_uses_it() -> void:
 	var mine := bs.place_instant("mine", Vector2i(1, 0))
 	var m := bs.get_building(mine)
-	assert_eq(bs.stage_seconds(m, bs.current_stage(m)), 8.0, "a plain mine: 8 s")
+	var dig := float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"])
+	assert_eq(bs.stage_seconds(m, bs.current_stage(m)), dig, "a plain mine: its dig time")
 	research.completed["electric_drill"] = 0
-	assert_eq(bs.stage_seconds(m, bs.current_stage(m)), 8.0, "an electric drill with no power: still 8 s, never worse")
+	assert_eq(bs.stage_seconds(m, bs.current_stage(m)), dig, "an electric drill with no power: the same, never worse")
 	bs.place_instant("water_wheel", Vector2i(0, 0))
-	assert_near(bs.stage_seconds(m, bs.current_stage(m)), 4.8, 0.001, "with power: 8 x 0.6")
+	assert_near(bs.stage_seconds(m, bs.current_stage(m)), dig * 0.6, 0.001, "with power: x 0.6")
 	sim.execute({"type": "building.tap", "id": mine})
 	assert_eq(power.demand(), 1.5, "it draws 1.5 kW while it digs")
 	assert_eq(float(power.shares[mine]), 1.0, "and got all of it")
-	sim.advance_ms(4800)
+	sim.advance_ms(int(ceil(bs.stage_seconds(m, bs.current_stage(m)) * 1000.0)) + 1)
 	assert_eq(power.demand(), 0.0, "nothing when it stops")
 
 
@@ -156,7 +157,7 @@ func test_at_night_solar_power_goes_but_nothing_breaks() -> void:
 	assert_eq(power.supply(), 0.0, "no sun")
 	assert_true(sim.execute({"type": "building.tap", "id": mine})["ok"], "the mine still digs")
 	var m := bs.get_building(mine)
-	assert_eq(int(m["task_end"]) - int(m["task_start"]), 8000, "at its unpowered pace")
+	assert_eq(int(m["task_end"]) - int(m["task_start"]), int(float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"]) * 1000.0), "at its unpowered pace")
 	assert_eq(float(power.shares[mine]), 0.0, "with no share")
 
 

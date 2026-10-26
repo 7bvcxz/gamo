@@ -119,3 +119,90 @@ func test_saved_and_old_saves() -> void:
 		m["assigned"] = farm
 	var old := Simulation.from_save(raw)
 	assert_eq((old.system(&"momo") as MomoSystem).watched(1), [Vector2i(1, 0)] as Array[Vector2i], "an older save: it watches its building")
+
+
+func _cells_of(building: int) -> Array[Vector2i]:
+	return bs.cells_of(bs.get_building(building))
+
+
+func _hire() -> int:
+	(sim.system(&"economy") as EconomySystem).earn(momos.hire_cost(), "test")
+	var r := sim.execute({"type": "momo.hire"})
+	assert_true(r["ok"], "hired")
+	return int(r.get("id", 0))
+
+
+func test_a_hire_takes_a_share_when_nothing_is_unwatched() -> void:
+	var farms: Array[int] = []
+	for x in [1, 2, 3]:
+		farms.append(bs.place_instant("farm", Vector2i(x, 0)))
+	_watch(1, [[1, 0], [2, 0], [3, 0]], "add")
+	sim.advance_ms(3000)
+	var at := int(momos.get_momo(1)["assigned"])
+	assert_true(farms.has(at), "the first Momo is at one of its three farms")
+	var hired := _hire()
+	assert_eq(momos.watched(hired).size(), 1, "the new Momo is not left standing about (Step 50): it takes one")
+	assert_eq(momos.watched(1).size(), 2, "the first keeps two")
+	assert_true(momos.watched(1).has(_cells_of(at)[0]), "among them the one it is at")
+	var newest: int = farms.filter(func(f: int) -> bool: return f != at).max()
+	assert_eq(momos.watched(hired), _cells_of(newest), "the new one takes the newest of the others")
+	sim.advance_ms(20000)
+	assert_true(int(momos.get_momo(hired)["assigned"]) != 0, "and works")
+
+
+func test_the_players_assign_wins_over_a_momo_on_its_rounds() -> void:
+	sim.data.tables["balance"]["momo"]["watch"]["auto"] = false
+	var a := bs.place_instant("farm", Vector2i(1, 0))
+	var b := bs.place_instant("farm", Vector2i(2, 0))
+	_watch(1, [[1, 0], [2, 0]], "add")
+	var hired := _hire()
+	assert_true(momos.watched(hired).is_empty(), "(automatic sharing off: the new Momo has nothing yet)")
+	sim.advance_ms(3000)
+	var at := int(momos.get_momo(1)["assigned"])
+	assert_true(at == a or at == b, "the first is at one of its two farms")
+	var r := sim.execute({"type": "momo.assign", "momo": hired, "building": at})
+	assert_true(r["ok"], "the player's Assign wins over a Momo passing on its rounds (Step 50: it said 'Another Momo works here')")
+	assert_eq(int(momos.get_momo(hired)["assigned"]), at, "the new one goes there")
+	assert_false(momos.watched(1).has(_cells_of(at)[0]), "the first lets that farm go")
+	assert_eq(momos.watched(1), _cells_of(b if at == a else a), "and keeps its other")
+
+
+func test_a_momo_given_one_building_is_not_displaced() -> void:
+	var a := bs.place_instant("farm", Vector2i(1, 0))
+	sim.execute({"type": "momo.assign", "momo": 1, "building": a})
+	var hired := _hire()
+	sim.advance_ms(2000)
+	var r := sim.execute({"type": "momo.assign", "momo": hired, "building": a})
+	assert_false(r["ok"], "a Momo the player put on this one building keeps it")
+	assert_eq(String(r.get("reason", "")), "err.slots_full", "and the refusal says why")
+	assert_eq(int(momos.get_momo(1)["assigned"]), a, "")
+
+
+## Built the way a player builds: paid, then the construction time.
+func _built(type: String, cell: Vector2i) -> int:
+	(sim.system(&"economy") as EconomySystem).earn(1000, "test")
+	var r := sim.execute({"type": "building.place", "building": type, "anchor": [cell.x, cell.y]})
+	assert_true(r["ok"], "%s placed (%s)" % [type, r.get("reason", "")])
+	sim.advance_ms(int(float(sim.data.building_type(type)["build_seconds"]) * 1000.0) + 10)
+	return bs.building_at(cell)
+
+
+func test_a_new_building_goes_to_an_idle_momo_first() -> void:
+	var a := bs.place_instant("farm", Vector2i(1, 0))
+	_watch(1, [[1, 0]], "add")
+	var idle := momos.add_momo(Vector2(3.5, 3.5))
+	assert_true(momos.watched(idle).is_empty(), "a Momo that came with the island, given nothing yet")
+	var b := _built("farm", Vector2i(2, 0))
+	assert_eq(momos.watchers_of(b), [idle] as Array[int], "the new farm goes to the Momo with nothing to do (Step 50), not the nearest with room")
+	var c := _built("farm", Vector2i(3, 0))
+	assert_eq(momos.watchers_of(c).size(), 1, "the next one to the nearest with room (tiles kept together: less walking)")
+	assert_eq(momos.watched(1).size() + momos.watched(idle).size(), 3, "three farms, three tiles between two Momos")
+	assert_eq(momos.watchers_of(a), [1] as Array[int], "")
+
+
+func test_until_some_momo_is_put_to_work_none_is() -> void:
+	var farm := _built("farm", Vector2i(1, 0))
+	assert_true(momos.watchers_of(farm).is_empty(), "the tutorial's step: the player gives the first Momo its tiles")
+	_watch(1, [[1, 0]], "add")
+	var next := _built("farm", Vector2i(2, 0))
+	assert_eq(momos.watchers_of(next), [1] as Array[int], "after that new work is taken by itself")

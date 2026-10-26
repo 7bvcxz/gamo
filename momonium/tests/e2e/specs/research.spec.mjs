@@ -2,6 +2,7 @@
 // by real taps: pick the node, start it, and it finishes on the clock with its
 // effect (two crops a harvest).
 import { test, expect } from '../lib/fixtures.mjs';
+import { settle } from '../lib/farm.mjs';
 
 const centre = async (game, rect, win) => {
   const box = await game.canvas.boundingBox();
@@ -17,8 +18,9 @@ test('research field expansion', async ({ game }) => {
   await game.query('dev_advance_ms', 250000);
   expect((await game.command({ type: 'mail.claim', id: 1 })).ok).toBe(true);
   for (let i = 0; i < 3; i++) {
+    await settle(game, lab);
     expect((await game.command({ type: 'building.tap', id: lab })).ok).toBe(true);
-    await game.query('dev_advance_ms', 6000);
+    await settle(game, lab);
   }
   await game.query('dev_add_money', 50);
   const hud = await game.query('hud');

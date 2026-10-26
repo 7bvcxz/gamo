@@ -28,26 +28,34 @@ func _by_hand(id: int, times: int) -> void:
 		sim.advance_ms(maxi(bs.remaining_ms(bs.get_building(id)), 0) + 1)
 
 
+## A stage's seconds and wait, from the data (ms).
+func _ms(type: String, i: int, key: String) -> int:
+	return int(float(sim.data.building_type(type)["cycle"]["stages"][i].get(key, 0)) * 1000.0)
+
+
 func test_forestry_fells_then_replants_and_waits() -> void:
 	var yard := bs.place_instant("lumberyard", Vector2i(1, 0))
 	var b := bs.get_building(yard)
 	assert_eq(bs.stages(b).map(func(st: Dictionary) -> String: return st["action"]), ["chop", "replant"], "fell one, plant one")
+	var money := economy.money
 	sim.execute({"type": "building.tap", "id": yard})
-	sim.advance_ms(6000)
+	sim.advance_ms(_ms("lumberyard", 0, "seconds"))
 	assert_eq(inv.count("wood"), 2, "a felled tree gives two wood")
+	assert_true(economy.money > money, "and its timber is sold at once (Step 50)")
 	sim.execute({"type": "building.tap", "id": yard})
-	sim.advance_ms(4000)
+	sim.advance_ms(_ms("lumberyard", 1, "seconds"))
 	assert_eq(b["state"], BuildingSystem.COOLDOWN, "then the sapling grows")
-	assert_eq(bs.remaining_ms(b), 40000, "for 40 s")
+	assert_eq(bs.remaining_ms(b), _ms("lumberyard", 1, "cooldown"), "for its growing time")
 	assert_eq(sim.execute({"type": "building.tap", "id": yard})["reason"], "err.cooldown", "no felling a sapling")
 
 
 func test_the_mine_digs_stone_and_waits_for_the_props() -> void:
 	var mine := bs.place_instant("mine", Vector2i(1, 0))
 	sim.execute({"type": "building.tap", "id": mine})
-	sim.advance_ms(8000)
+	sim.advance_ms(_ms("mine", 0, "seconds"))
 	assert_eq(inv.count("stone"), 1, "a load of stone")
-	assert_eq(bs.remaining_ms(bs.get_building(mine)), 12000, "then 12 s to shore up and clear")
+	assert_eq(bs.remaining_ms(bs.get_building(mine)), _ms("mine", 0, "cooldown"), "then the wait to shore up and clear")
+	assert_eq(_ms("mine", 0, "seconds") + _ms("mine", 0, "cooldown"), 10000, "ten seconds for each unit dug (Step 50)")
 	assert_eq(inv.count("copper_ore"), 0, "no ore without prospecting")
 
 
@@ -77,9 +85,9 @@ func test_fractions_carry_across_a_save() -> void:
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
 	var cbs: BuildingSystem = copy.system(&"buildings")
 	assert_eq(typeof(cbs.get_building(mine)["carry"]["copper_ore"]), TYPE_INT, "kept as whole thousandths")
-	copy.advance_ms(13000)
+	copy.advance_ms(_ms("mine", 0, "cooldown") + 1000)
 	copy.execute({"type": "building.tap", "id": mine})
-	copy.advance_ms(9000)
+	copy.advance_ms(_ms("mine", 0, "seconds") + 1000)
 	assert_eq((copy.system(&"inventory") as InventorySystem).count("copper_ore"), 1, "the fourth dig after loading brings the copper")
 
 
@@ -137,10 +145,9 @@ func test_unlock_levels_and_mastery() -> void:
 func test_materials_are_kept_not_sold() -> void:
 	inv.add("wood", 20, "test")
 	inv.add("stone", 5, "test")
-	inv.add("crop", 2, "test")
 	var money := economy.money
 	sim.advance_to(sim.clock.next_day_start_ms() + 1)
-	assert_eq(economy.money, money + 10, "only the crops were sold")
+	assert_eq(economy.money, money, "nothing is sold at dawn")
 	assert_eq(inv.count("wood"), 20, "wood kept for building")
 	assert_eq(inv.count("stone"), 5, "stone kept")
 
@@ -153,9 +160,9 @@ func test_research_for_the_new_branches() -> void:
 	research.completed["tree_nursery"] = 0
 	var m := bs.get_building(mine)
 	var y := bs.get_building(yard)
-	assert_eq(bs.stage_seconds(m, bs.stages(m)[0]), 6.0, "steel picks: 8 s x 0.75")
-	assert_near(bs.stage_seconds(y, bs.stages(y)[0]), 4.2, 0.0001, "sharp axes: 6 s x 0.7")
-	assert_near(bs.stage_cooldown(y, bs.stages(y)[1]), 28.0, 0.0001, "nursery saplings: 40 s x 0.7")
+	assert_near(bs.stage_seconds(m, bs.stages(m)[0]), _ms("mine", 0, "seconds") / 1000.0 * 0.75, 0.0001, "steel picks: dig x 0.75")
+	assert_near(bs.stage_seconds(y, bs.stages(y)[0]), _ms("lumberyard", 0, "seconds") / 1000.0 * 0.7, 0.0001, "sharp axes: felling x 0.7")
+	assert_near(bs.stage_cooldown(y, bs.stages(y)[1]), maxf(_ms("lumberyard", 1, "cooldown") / 1000.0 * 0.7, float(sim.data.building_type("lumberyard")["cycle"]["stages"][1]["cooldown_floor"])), 0.0001, "nursery saplings: growing x 0.7")
 	assert_eq(bs.cycle_estimate(m)["yield"], {"stone": 1.0}, "no ore yet")
 	research.completed["copper_prospecting"] = 0
 	assert_eq(bs.cycle_estimate(m)["yield"], {"stone": 1.0, "copper_ore": 0.25}, "copper prospecting adds a quarter")

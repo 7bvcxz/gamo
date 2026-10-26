@@ -37,6 +37,11 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_cameras: CameraController,
 	lib = p_lib
 	cameras = p_cameras
 	projection = p_projection
+	# Prices follow the purse while the choices are open (Step 50: a player
+	# watched the lumberyard stay red at $97 and $115 until they reopened it).
+	sim.bus.emitted.connect(func(type: StringName, _payload: Dictionary) -> void:
+		if open and type in [&"money_changed", &"inventory_changed", &"level_up", &"research_completed"]:
+			refresh())
 	name = "BuildStrip"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row = HBoxContainer.new()

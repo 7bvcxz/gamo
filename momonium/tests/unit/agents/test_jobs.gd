@@ -21,10 +21,11 @@ func before_each() -> void:
 	farm = buildings.place_instant("farm", Vector2i(1, 0))
 
 
-## A Momo stage of the farm (5 s for the player) and the wait after a
-## watering, in ms, as the data gives them.
-func _momo_stage_ms() -> int:
-	return int(round(5.0 * sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 1000.0))
+## A Momo's time for farm stage `i` (the player's time times the Momo
+## multiple) and the wait after watering, in ms, as the data gives them.
+func _momo_stage_ms(i: int = 0) -> int:
+	var seconds := float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"])
+	return int(round(seconds * sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 1000.0))
 
 
 func _wait_ms() -> int:
@@ -46,33 +47,34 @@ func test_a_momo_runs_the_whole_cycle_unattended() -> void:
 	var log := _log()
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var arrived_at := int(momos.get_momo(1)["end"])
-	sim.advance_to(arrived_at + _momo_stage_ms() * 5 + _wait_ms() * 3 + 100)
+	sim.advance_to(arrived_at + _momo_stage_ms(0) + _momo_stage_ms(1) + _momo_stage_ms(2) + _wait_ms() + 100)
 	var starts := log.filter(func(e: Array) -> bool: return e[0] == "start")
 	assert_eq(starts[0][3], arrived_at, "work began the moment Momo reached the farm, without a tap")
 	assert_eq(starts[0][2], 1, "done by Momo 1")
 	var done := log.filter(func(e: Array) -> bool: return e[0] == "done").map(func(e: Array) -> String: return e[1])
-	assert_eq(done.slice(0, 5), ["sow", "water1", "water2", "water3", "harvest"], "every stage, in order, no taps")
-	assert_eq(inv.count("crop") + int(economy.money > 10), 1, "one batch harvested (in store, or already sold)")
+	assert_eq(done.slice(0, 3), ["sow", "water", "harvest"], "every stage, in order, no taps")
+	assert_eq(int(economy.lifetime.get("sale", 0)), economy.unit_price("crop"), "one batch harvested and sold at once")
 
 
 func test_momo_time_is_the_momo_multiple_and_waits_are_unchanged() -> void:
 	var log := _log()
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var t0 := int(momos.get_momo(1)["end"])
-	var m := _momo_stage_ms()
-	sim.advance_to(t0 + m + m + _wait_ms() + m + 10)
+	var m0 := _momo_stage_ms(0)
+	var m1 := _momo_stage_ms(1)
+	sim.advance_to(t0 + m0 + m1 + _wait_ms() + _momo_stage_ms(2) + 10)
 	var times := log.map(func(e: Array) -> Array: return [e[0], e[1], e[3] - t0])
-	assert_eq(times[1], ["done", "sow", m], "sowing takes the Momo multiple of 5 s")
-	assert_eq(times[3], ["done", "water1", 2 * m], "so does watering")
-	assert_eq(times[4], ["start", "water2", 2 * m + _wait_ms()], "the next watering waits exactly the world's wait")
+	assert_eq(times[1], ["done", "sow", m0], "sowing takes the Momo multiple of the player's time")
+	assert_eq(times[3], ["done", "water", m0 + m1], "so does watering")
+	assert_eq(times[4], ["start", "harvest", m0 + m1 + _wait_ms()], "the harvest waits exactly the world's wait")
 
 
 func test_harvests_sell_and_the_farm_keeps_going() -> void:
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(30000 * 30)
 	var b := buildings.get_building(farm)
-	assert_true(int(b["completed"]) >= 15, "three cycles in thirty days, all by Momo (%d stages)" % b["completed"])
-	assert_true(economy.money >= 10 + 15, "and the crops turned into money ($%d)" % economy.money)
+	assert_true(int(b["completed"]) >= 15, "many cycles in thirty days, all by Momo (%d stages)" % b["completed"])
+	assert_eq(int(economy.lifetime.get("sale", 0)), int(b["completed"]) / 3 * economy.unit_price("crop"), "and every harvest turned into money at once ($%d)" % economy.money)
 
 
 func test_assigned_momo_work_under_the_moon() -> void:
@@ -158,15 +160,18 @@ func test_no_stage_is_ever_started_or_completed_twice() -> void:
 	assert_eq(completions, int(b["completed"]), "every completion counted once")
 
 
-func test_a_full_store_makes_momo_wait_and_the_sale_frees_it() -> void:
-	inv.add("crop", inv.capacity("crop"))
-	var b := buildings.get_building(farm)
-	b["stage"] = 4
-	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
+func test_a_full_store_makes_momo_wait_and_spending_frees_it() -> void:
+	# Crops never fill the store now (sold as picked); research notes do.
+	inv.add("notes", inv.capacity("notes"))
+	var lab := buildings.place_instant("research", Vector2i(0, 1))
+	var b := buildings.get_building(lab)
+	sim.execute({"type": "momo.assign", "momo": 1, "building": lab})
 	sim.advance_ms(6000)
-	assert_eq(b["state"], BuildingSystem.IDLE, "cannot harvest into a full store: Momo waits")
-	sim.advance_to(sim.clock.next_day_start_ms() + 10)
-	assert_eq(b["state"], BuildingSystem.WORKING, "after the day's sale Momo harvests")
+	assert_eq(b["state"], BuildingSystem.IDLE, "cannot study into a full store: Momo waits")
+	(sim.system(&"progression") as ProgressionSystem).add_mastery("research", 100)
+	var r := sim.execute({"type": "research.start", "id": "field_notebook"})
+	assert_true(r["ok"], "research spends notes (%s)" % [r])
+	assert_eq(b["state"], BuildingSystem.WORKING, "and the Momo studies again at once")
 
 
 func test_unattended_runs_are_deterministic() -> void:

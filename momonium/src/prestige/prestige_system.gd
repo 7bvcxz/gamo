@@ -188,7 +188,7 @@ static func sell(old: Simulation) -> Dictionary:
 	(legacy["history"] as Array).append({"n": me.sales + 1, "value": a["net"], "points": gained, "rp": research["issued"], "day": old.clock.day_number()})
 	while (legacy["history"] as Array).size() > 20:
 		(legacy["history"] as Array).pop_front()
-	var next := Simulation.new_game(old.data)
+	var next := Simulation.new_island(old.data)
 	(next.system(&"research") as ResearchSystem).adopt(research)
 	(next.system(&"prestige") as PrestigeSystem).adopt(legacy)
 	next.bus.emit(&"settlement_sold", {"value": a["net"], "points": gained, "rp": research["issued"]})

@@ -41,13 +41,20 @@ func test_without_inputs_nothing_starts_and_nothing_is_taken() -> void:
 	assert_eq(bs.blocked(bs.get_building(smelter)), {"missing": {"copper_ore": 1, "wood": 1}}, "and the building says why")
 
 
-func test_a_full_store_keeps_the_inputs() -> void:
+func test_a_full_store_sells_the_ingot() -> void:
+	# Ingots have a surplus price (Step 50): what the store has no room for
+	# is sold at once instead of stopping the furnace -- never thrown away.
 	inv.add("copper_ore", 2, "test")
 	inv.add("wood", 1, "test")
 	inv.add("copper_ingot", inv.capacity("copper_ingot"), "test")
-	assert_eq(sim.execute({"type": "building.tap", "id": smelter})["reason"], "err.storage_full", "no room for the ingot")
-	assert_eq([inv.count("copper_ore"), inv.count("wood")], [2, 1], "so the ore and wood are not burned")
-	assert_eq(bs.blocked(bs.get_building(smelter)).keys(), ["full"], "full, says the building")
+	var economy: EconomySystem = sim.system(&"economy")
+	assert_eq(bs.blocked(bs.get_building(smelter)), {}, "a full store of ingots does not block the smelter")
+	assert_true(sim.execute({"type": "building.tap", "id": smelter})["ok"], "it charges")
+	var money := economy.money
+	var b := bs.get_building(smelter)
+	sim.advance_ms(bs.remaining_ms(b) + 1)
+	assert_eq(inv.count("copper_ingot"), inv.capacity("copper_ingot"), "the store stays full")
+	assert_eq(economy.money - money, economy.unit_price("copper_ingot"), "and the ingot that did not fit was sold")
 
 
 func test_recipes_open_through_research_and_change_when_empty() -> void:

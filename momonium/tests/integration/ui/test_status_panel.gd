@@ -24,14 +24,15 @@ func after_each() -> void:
 
 func test_status_button_opens_numbers_from_the_simulation() -> void:
 	var prog: ProgressionSystem = sim.system(&"progression")
-	prog.add_exp(145, "test")
+	prog.add_exp(prog.exp_needed_for(1) + 45, "test")
 	prog.add_mastery("farm", 60)
 	main.call("_on_hud_action", &"status")
 	var frame: PanelFrame = main.get("status_frame")
 	assert_true(frame.visible and panel.visible, "Status opens on its first tab")
 	assert_eq(panel.level_label.text, "2", "Lv 2")
-	assert_eq(panel.exp_label.text, "45 / 180 EXP", "exact EXP")
-	assert_near(panel.exp_bar.value, 45.0 / 180.0, 0.001, "bar matches")
+	var next := prog.exp_needed_for(2)
+	assert_eq(panel.exp_label.text, "45 / %d EXP" % next, "exact EXP")
+	assert_near(panel.exp_bar.value, 45.0 / next, 0.001, "bar matches")
 	assert_eq((panel.cards["farm"].find_child("Exp", true, false) as Label).text, "60 / 100 EXP", "farm mastery")
 	assert_eq(panel.cards.size(), (sim.system(&"progression") as ProgressionSystem).mastery_types().size(), "a card per mastery (farm, mine, lumber, research, smelting)")
 	main.call("_on_hud_action", &"status")
@@ -41,7 +42,7 @@ func test_status_button_opens_numbers_from_the_simulation() -> void:
 func test_open_panel_follows_live_progress() -> void:
 	main.call("_on_hud_action", &"status")
 	(sim.system(&"progression") as ProgressionSystem).add_exp(20, "harvest")
-	assert_eq(panel.exp_label.text, "20 / 100 EXP", "updates while open")
+	assert_eq(panel.exp_label.text, "20 / %d EXP" % (sim.system(&"progression") as ProgressionSystem).exp_needed_for(1), "updates while open")
 
 
 func test_panel_leaves_the_side_buttons_free() -> void:

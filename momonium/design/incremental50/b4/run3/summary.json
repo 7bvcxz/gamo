@@ -1,0 +1,14 @@
+{
+  "reason": "time",
+  "elapsed_s": 601,
+  "counts": {
+    "look": 1,
+    "tap": 78,
+    "drag": 0,
+    "wait": 1,
+    "note": 53
+  },
+  "shots": 81,
+  "final_shot": "/tmp/claude-1000/-home-merti-Workspace-gamo/4eb9288b-f3ff-40e5-8acb-d20ea9d8c212/scratchpad/blind50/b4/run3/player/shots/081.png",
+  "version": "0.50.0"
+}

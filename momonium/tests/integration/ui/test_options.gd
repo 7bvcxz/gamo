@@ -77,7 +77,12 @@ func test_tips_once_and_again() -> void:
 	settings.set_value("tips_seen", [])
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
 	main.call("_check_land_tip", 2.0)
-	assert_eq(tips.tip, "land", "money for land: the sea tip")
+	assert_eq(tips.tip, "", "money for land but room on the island: not yet (Step 50)")
+	var bs: BuildingSystem = sim.system(&"buildings")
+	for c: Vector2i in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1)]:
+		bs.place_instant("farm", c)
+	main.call("_check_land_tip", 2.0)
+	assert_eq(tips.tip, "land", "one tile left and money for land: the sea tip")
 	assert_true(tips.text.text.contains("$%d" % (sim.system(&"land") as LandSystem).next_cost()), "with the price (%s)" % tips.text.text)
 	assert_eq(tips.bubble.mouse_filter, Control.MOUSE_FILTER_IGNORE, "it lets taps through")
 	tips.dismiss()
@@ -95,4 +100,22 @@ func test_tips_once_and_again() -> void:
 	settings.set_value("tips", true)
 	main.call("_check_land_tip", 2.0)
 	assert_eq(tips.tip, "land", "shown again after 'show the tips again'")
+	tips.dismiss()
+
+
+func test_a_tip_waits_while_the_choices_are_open() -> void:
+	var tips: Tips = main.get("tips")
+	tips.allowed = true
+	(main.get("settings") as SettingsStore).set_value("tips_seen", [])
+	(sim.system(&"economy") as EconomySystem).earn(100, "test")
+	var bs: BuildingSystem = sim.system(&"buildings")
+	for c: Vector2i in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1)]:
+		bs.place_instant("farm", c)
+	var strip: BuildStrip = main.get("build_strip")
+	strip.show_for(Vector2i(1, 1))
+	main.call("_check_land_tip", 2.0)
+	assert_eq(tips.tip, "", "the build choices are open: the sea tip waits (Step 50: it took the tap meant for Special)")
+	strip.close()
+	main.call("_check_land_tip", 2.0)
+	assert_eq(tips.tip, "land", "closed: now")
 	tips.dismiss()

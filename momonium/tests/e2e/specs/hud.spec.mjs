@@ -16,7 +16,7 @@ test('shows Day, money and exact EXP', async ({ game }) => {
   const info = await game.query('hud');
   expect(info.day).toBe('Day 1');
   expect(info.money).toBe('10');
-  expect(info.exp).toBe('0 / 100');
+  expect(info.exp).toBe(`0 / ${(await game.query('rules')).exp_to_next[0]}`);
   expect(info.seconds).toMatch(/^\d\d \/ 30 sec$/);
 });
 

@@ -10,8 +10,12 @@ extends SimSystem
 ## which the status and analytics screens read instead of keeping their own
 ## counters.
 ##
-## At each day boundary the store's crops are sold at their data price -- what
-## was harvested today is money tomorrow.
+## Finished work is money at once (Step 50): a harvest's crops are sold the
+## moment they are picked (items with sell "instant"), a stage's `revenue`
+## (ore sold at the mine face, timber at the yard) is paid as it completes,
+## and what the store has no room for is sold at its price (sell "surplus")
+## instead of stopping the work -- never thrown away, never sold twice. The
+## day boundary only closes the day's book.
 
 var money: int = 0
 ## Today's bookings: category -> signed amount.
@@ -21,6 +25,10 @@ var today_open: int = 0
 var history: Array = []
 ## Since the game began: category -> signed amount (history keeps 30 days).
 var lifetime: Dictionary = {}
+## Production income of the last minute: [[ms, amount], ...] oldest first --
+## the HUD's "+$N/min". Rebuilt by play, not saved.
+var recent: Array = []
+const RATE_WINDOW_MS := 60000
 
 
 func _init() -> void:
@@ -33,6 +41,7 @@ func on_new_game() -> void:
 	today_open = money
 	history = []
 	lifetime = {}
+	recent = []
 
 
 func can_afford(amount: int) -> bool:
@@ -79,51 +88,73 @@ func lifetime_expense() -> int:
 	return total
 
 
-## Value of the crops waiting in the store at today's prices.
-func pending_sale() -> int:
-	var inv: InventorySystem = sim.system(&"inventory")
-	var total := 0
-	for item: String in daily_items():
-		total += inv.count(item) * unit_price(item)
-	return total
-
-
-## Items the daily sale takes (sell "daily"), in data order.
-func daily_items() -> Array[String]:
-	var out: Array[String] = []
-	for item: String in sim.data.table("items").get("items", {}):
-		if String(sim.data.item(item).get("sell", "")) == "daily":
-			out.append(item)
-	return out
-
-
-## What one unit fetches today: its price, times market research (sale_price).
+## What one unit fetches: its price, times market research (sale_price).
 func unit_price(item: String) -> int:
 	var research: ResearchSystem = sim.system(&"research")
 	var m := research.sale_multiplier() if research != null else 1.0
 	return int(floor(float(sim.data.item(item).get("price", 0)) * m))
 
 
-func on_day_started(day: int) -> void:
-	_sell_crops(day)
-	_close_day(day - 1)
+## Sold the moment it is made (sell "instant": crops, cars).
+func sells_at_once(item: String) -> bool:
+	return String(sim.data.item(item).get("sell", "")) == "instant"
 
 
-func _sell_crops(day: int) -> void:
+## Can be sold at all -- at once, or what the store has no room for.
+func sellable(item: String) -> bool:
+	return String(sim.data.item(item).get("sell", "")) in ["instant", "surplus"] and int(sim.data.item(item).get("price", 0)) > 0
+
+
+## A finished stage's output turned into the island's: `items` (whole items
+## made) are stored, or sold -- at once (instant), or the part that does not
+## fit (surplus) -- and `revenue` money is paid with them, all booked as one
+## sale of building `b` by `worker`. Returns {stored, sold, money}.
+func cash_in(b: Dictionary, items: Dictionary, revenue: int, worker: int) -> Dictionary:
 	var inv: InventorySystem = sim.system(&"inventory")
+	var type := String(b.get("type", ""))
+	var stored := {}
 	var sold := {}
-	var total := 0
-	for item: String in daily_items():
-		var n := inv.count(item)
-		var price := unit_price(item)
-		if n <= 0 or price <= 0:
+	var money := maxi(revenue, 0)
+	for item: String in items:
+		var n := int(items[item])
+		if n <= 0:
 			continue
-		inv.take_all({item: n}, "sale")
-		sold[item] = n
-		total += n * price
-	if total > 0:
-		earn(total, "sale")
-		sim.bus.emit(&"sold", {"day": day, "items": sold, "money": total})
+		var keep := 0
+		if not sells_at_once(item):
+			keep = inv.add(item, n, "yield:" + type)
+			if keep > 0:
+				stored[item] = keep
+		var rest := n - keep
+		if rest > 0 and sellable(item):
+			inv.count_made(item, rest)
+			sold[item] = rest
+			money += rest * unit_price(item)
+	if money > 0:
+		earn(money, "sale:" + type)
+		_note_rate(money)
+		sim.bus.emit(&"sold", {"id": int(b.get("id", 0)), "type": type, "items": sold, "money": money, "worker": worker, "revenue": maxi(revenue, 0)})
+	return {"stored": stored, "sold": sold, "money": money}
+
+
+func _note_rate(amount: int) -> void:
+	var now := sim.now_ms()
+	recent.append([now, amount])
+	while not recent.is_empty() and int(recent[0][0]) <= now - RATE_WINDOW_MS:
+		recent.pop_front()
+
+
+## Production money of the last minute (what the HUD shows as +$N/min).
+func income_per_minute() -> int:
+	var from := sim.now_ms() - RATE_WINDOW_MS
+	var total := 0
+	for r: Array in recent:
+		if int(r[0]) > from:
+			total += int(r[1])
+	return total
+
+
+func on_day_started(day: int) -> void:
+	_close_day(day - 1)
 
 
 func _close_day(day: int) -> void:
@@ -135,8 +166,6 @@ func _close_day(day: int) -> void:
 			income += v
 		else:
 			expense -= v
-	# The boundary's sale is booked before this closes, so a day's income
-	# includes the crops it harvested: "Day 3 earned $10".
 	history.append({"day": day, "open": today_open, "close": money,
 		"income": income, "expense": expense, "by": today.duplicate()})
 	var keep := sim.data.get_int("balance", "economy.history_days", 30)

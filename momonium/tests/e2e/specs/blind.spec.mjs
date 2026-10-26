@@ -1,13 +1,23 @@
 // Step 45: what three blind first-time players stumbled on, in the real
-// build. The crops-for-dawn line under the EXP pill fits on the phone screen
-// and says when it pays; the Momo's pencil holds still by its card; a level
-// that opens buildings says which.
+// build. The line under the EXP pill fits on the phone screen (Step 50: it
+// says what the island earned in the last minute); the Momo's pencil holds
+// still by its card; a level that opens buildings says which.
 import { test, expect } from '../lib/fixtures.mjs';
 
-test('the crops line fits the screen and says it pays at dawn', async ({ game }) => {
+test('the income line fits the screen and says per minute', async ({ game }) => {
   await game.setTimeScale(0);
-  await game.query('dev_add_items', { crop: 1 });
-  await expect.poll(async () => (await game.query('hud')).store.text || '', { timeout: 8_000 }).toBe('Crops 1 · +$5 at dawn');
+  await game.query('set_language', 'en');
+  const { id } = await game.query('dev_place_building', ['farm', 0, 0]);
+  for (let stage = 0; stage < 3; stage++) {
+    let s = await game.state();
+    let f = s.buildings.buildings.find((x) => x.id === id);
+    if (f.state === 'cooldown') await game.query('dev_advance_ms', f.ready_at - s.now_ms + 5);
+    await game.command({ type: 'building.tap', id });
+    s = await game.state();
+    f = s.buildings.buildings.find((x) => x.id === id);
+    await game.query('dev_advance_ms', f.task_end - s.now_ms + 5);
+  }
+  await expect.poll(async () => (await game.query('hud')).store.text || '', { timeout: 8_000 }).toMatch(/^\+\$\d+\/min$/);
   await game.page.waitForTimeout(300);
   const hud = await game.query('hud');
   const [x, , w] = hud.store.rect;

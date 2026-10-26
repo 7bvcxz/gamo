@@ -93,6 +93,12 @@ func _run() -> void:
 		print("FAIL no tests ran")
 		quit(1)
 		return
+	# A freed player's sound is let go on the audio thread's next mix: quitting
+	# in the same frame reported the music and the last sounds as leaked, now
+	# and then, by timing alone (Step 50).
+	for i in 3:
+		await process_frame
+	await create_timer(0.25).timeout
 	OS.remove_logger(_logger)
 	quit(mini(failed.size(), 255))
 

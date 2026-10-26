@@ -44,7 +44,7 @@ func test_the_life_tab_explains() -> void:
 	var lines := {}
 	for r: Node in view.parts.get_children():
 		lines[String(r.name)] = (r.get_node("Value") as Label).text
-	assert_eq(lines["Part_%d" % pub], "shut: short of Crops 3", "the pub says why it is shut")
+	assert_eq(lines["Part_%d" % pub], "shut: short of $%d" % int(sim.data.building_type("pub")["amenity"]["daily"]["money"]), "the pub says why it is shut: its day's food money")
 	assert_eq((view.homes_row.get_node("Value") as Label).text, "1 / 2", "one Momo, a villa for two")
 	assert_false(view.homeless.visible, "nobody outdoors")
 	assert_eq((view.work_row.get_node("Value") as Label).text, "×0.91", "0.92 x (1 - 0.1 x 0.15)")

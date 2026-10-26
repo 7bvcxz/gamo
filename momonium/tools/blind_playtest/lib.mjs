@@ -93,10 +93,23 @@ export function snapshotFromSave(text) {
     return null;
   }
   const sys = (state && state.systems) || {};
-  const buildings = ((sys.buildings || {}).buildings || []).map((b) => b.type);
+  const blist = (sys.buildings || {}).buildings || [];
+  const buildings = blist.map((b) => b.type);
   const research = sys.research || {};
+  const lifetime = (sys.economy || {}).lifetime || {};
+  const momoList = (sys.momo || {}).momos || [];
+  const sum = (o) => Object.values(o || {}).reduce((a, v) => a + (Number(v) || 0), 0);
   return {
     sim_ms: (state.clock || {}).now_ms || 0,
+    // Step 50: when the game wrote this save (maps game time to the session
+    // clock), production income, and who did the work.
+    saved_unix: env.saved_unix ?? null,
+    income: (lifetime.sale || 0) + (lifetime.release || 0),
+    jobs: blist.reduce((a, b) => a + (b.completed || 0), 0),
+    momo_jobs: momoList.reduce((a, m) => a + sum(m.experience), 0),
+    hired: (sys.momo || {}).hired ?? 0,
+    letters: ((sys.mail || {}).letters || []).length,
+    research_levels: sum(research.bought),
     money: (sys.economy || {}).money ?? 0,
     level: (sys.progression || {}).level ?? 1,
     exp: (sys.progression || {}).exp ?? 0,

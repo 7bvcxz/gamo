@@ -111,7 +111,7 @@ func test_tapping_a_busy_building_does_not_restart_it() -> void:
 	await tree.process_frame
 	_tap_cell(Vector2i(1, 1))
 	var end_before: int = buildings.get_building(id)["task_end"]
-	sim.advance_ms(1000)
+	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * 500.0))
 	_tap_cell(Vector2i(1, 1))
 	assert_eq(sel.last_result["reason"], "err.busy", "the second tap is refused")
 	assert_eq(buildings.get_building(id)["task_end"], end_before, "and the work keeps its end time")

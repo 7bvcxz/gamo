@@ -65,9 +65,7 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 		&"inventory_changed":
 			var why := String(p.get("reason", ""))
 			var delta := int(p.get("delta", 0))
-			if delta > 0 and why.begins_with("yield:"):
-				_add(today["made"], String(p["item"]), delta)
-			elif delta < 0 and why.begins_with("consume:"):
+			if delta < 0 and why.begins_with("consume:"):
 				_add(today["used"], String(p["item"]), -delta)
 		&"sold":
 			for item: String in p.get("items", {}):
@@ -88,6 +86,8 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 			var row: Dictionary = today["buildings"].get(int(p["id"]), {"stages": 0, "busy_ms": 0, "made": {}})
 			for item: String in p.get("items", {}):
 				_add(row["made"], item, int(p["items"][item]))
+				# Made, whether it was stored or sold the moment it was made.
+				_add(today["made"], item, int(p["items"][item]))
 			today["buildings"][int(p["id"])] = row
 
 

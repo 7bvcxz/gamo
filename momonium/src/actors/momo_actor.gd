@@ -76,7 +76,17 @@ func is_working() -> bool:
 
 ## World-space box a tap or a drag can grab.
 func hit_rect() -> Rect2:
-	return Rect2(position + Vector2(-26, -76), Vector2(52, 80))
+	var r := Rect2(position + Vector2(-26, -76), Vector2(52, 80))
+	# Its letter's bubble belongs to it too (Step 50: a blind player's tap on
+	# the envelope bought the sea behind it instead).
+	return r.merge(envelope_rect()) if envelope != null and envelope.visible else r
+
+
+## The letter's bubble over its head (empty when there is no letter).
+func envelope_rect() -> Rect2:
+	if envelope == null or not envelope.visible:
+		return Rect2()
+	return Rect2(position + envelope.position - Vector2(22, 22), Vector2(44, 48))
 
 
 ## Out of sight it stops animating -- its body and its letter -- until seen.

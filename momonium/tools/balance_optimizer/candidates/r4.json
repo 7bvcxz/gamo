@@ -1,0 +1,10 @@
+{
+  "round": "R4",
+  "extends": ["r3.json"],
+  "_note": "Also in this round, rules for comprehension (blind round B1): the next land tile glows with its price once at most one tile is free (was: only a full island); money in and money out pop apart; pops over one building stack; the envelope over a Momo opens its letter; the Momo panel says it is on its rounds or on its way; Assign says to tap a building.",
+  "sets": [
+    {"set": "balance:progression/exp_to_next/0=77", "old": 60, "why": "B1 blind: Lv 2 at 1:34 against 2:00 (-22%); the simulator agreed (2:05) only because its bot farms by hand less"},
+    {"set": "balance:progression/exp_to_next/1=143", "old": 160, "why": "Lv 3 was on target in B1 (3:54): keep its total (60+160 = 77+143)"},
+    {"set": "balance:progression/exp_to_next/2=430", "old": 550, "why": "B1 blind: Lv 4 at 8:57 against 7:00"}
+  ]
+}

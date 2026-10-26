@@ -17,7 +17,15 @@ func _data() -> GameData:
 		"cycle": {"stages": [{"id": "store", "seconds": 4, "cooldown": 10}]}}
 	b["types"]["future"] = {"name": "building.farm", "size": [1, 1], "cost": {"money": 1, "items": {}},
 		"build_seconds": 1, "unlock": {"level": 1}, "enabled": false, "cycle": {"stages": [{"id": "x", "seconds": 1}]}}
-	return GameData.from_tables({"buildings": b})
+	# Construction on its own: the island's Momo does not take new buildings
+	# by itself here (Step 50's momo.watch.auto has its own tests).
+	var balance: Dictionary = GameData.load_default().table("balance").duplicate(true)
+	balance["momo"]["watch"]["auto"] = false
+	return GameData.from_tables({"buildings": b, "balance": balance})
+
+
+func _build_ms(type: String) -> int:
+	return int(float(sim.data.building_type(type)["build_seconds"]) * 1000.0)
 
 
 func before_each() -> void:
@@ -28,7 +36,7 @@ func before_each() -> void:
 	world = sim.system(&"world")
 
 
-func test_first_farm_is_affordable_and_takes_five_seconds() -> void:
+func test_first_farm_is_affordable_and_quick_to_build() -> void:
 	var r := sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})
 	assert_true(r["ok"], "the starting $10 buys a farm")
 	assert_eq(economy.money, 0, "and that is all of it")
@@ -37,10 +45,11 @@ func test_first_farm_is_affordable_and_takes_five_seconds() -> void:
 	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "under construction")
 	assert_eq(world.occupant(Vector2i(0, 0)), id, "occupying its cell at once")
 	assert_eq(sim.execute({"type": "building.tap", "id": id})["reason"], "err.constructing", "not usable yet")
-	sim.advance_ms(4999)
-	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "4.999 s: still building")
+	sim.advance_ms(_build_ms("farm") - 1)
+	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "a moment before: still building")
 	sim.advance_ms(1)
-	assert_eq(b["state"], BuildingSystem.IDLE, "5 s: built and ready")
+	assert_eq(b["state"], BuildingSystem.IDLE, "on time: built and ready")
+	assert_true(_build_ms("farm") <= 5000, "within five seconds")
 	assert_true(sim.execute({"type": "building.tap", "id": id})["ok"], "and it works")
 
 
@@ -114,18 +123,18 @@ func test_construction_never_blocks_other_work() -> void:
 	var a := buildings.place_instant("farm", Vector2i(0, 0))
 	sim.execute({"type": "building.tap", "id": a})
 	var b: int = sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 1]})["id"]
-	sim.advance_ms(5000)
+	sim.advance_ms(maxi(_build_ms("farm"), int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * 1000.0)))
 	assert_eq(buildings.get_building(a)["completed"], 1, "the working farm finished on time")
 	assert_eq(buildings.get_building(b)["state"], BuildingSystem.IDLE, "while the new one was built")
 
 
 func test_save_mid_construction() -> void:
 	var id: int = sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 0]})["id"]
-	sim.advance_ms(2000)
+	sim.advance_ms(1000)
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())), _data())
 	var cb: BuildingSystem = copy.system(&"buildings")
 	assert_eq(cb.get_building(id)["state"], BuildingSystem.CONSTRUCTING, "still building after load")
-	copy.advance_ms(2999)
+	copy.advance_ms(_build_ms("farm") - 1000 - 1)
 	assert_eq(cb.get_building(id)["state"], BuildingSystem.CONSTRUCTING, "not early")
 	copy.advance_ms(1)
 	assert_eq(cb.get_building(id)["state"], BuildingSystem.IDLE, "built at the original time")

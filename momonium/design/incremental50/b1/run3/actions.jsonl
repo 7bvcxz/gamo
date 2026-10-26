@@ -1,0 +1,132 @@
+{"t":0.5,"at":"00:00","cmd":"look","shot":"001.png"}
+{"t":5.9,"at":"00:05","cmd":"note","text":"A floating island with a tomato patch and a white bunny-ish creature. Says Day 3 already, odd for a first launch. Prompt says tap the ripe crop, so I'll tap the tomatoes."}
+{"t":7.7,"at":"00:07","cmd":"tap","x":290,"y":745,"shot":"002.png"}
+{"t":13.6,"at":"00:13","cmd":"note","text":"Harvested: coins 10->14, XP 3/60. Bunny hopped onto the empty plot. Now it asks to tap the farm to sow; there's also a Sow/Water/Harvest bar at the bottom with Sow highlighted. I'll tap the farm itself."}
+{"t":15.1,"at":"00:15","cmd":"tap","x":260,"y":780,"shot":"003.png"}
+{"t":21,"at":"00:20","cmd":"note","text":"Seeds are in the rows. Sky is turning pink - a day seems to be 30 seconds. Now: tap again to water."}
+{"t":22.5,"at":"00:22","cmd":"tap","x":260,"y":780,"shot":"004.png"}
+{"t":28,"at":"00:27","cmd":"note","text":"Watered. Night already - moon out, everything blue. Harvest says 2s left. The bunny is called a Momo, it has a ring over its head. Tap a Momo."}
+{"t":29.4,"at":"00:29","cmd":"tap","x":302,"y":720,"shot":"005.png"}
+{"t":35.6,"at":"00:35","cmd":"note","text":"Day 4 started. A Momo panel popped up at the bottom (Momo, Free time, Assign) but the hint bubble sits on top of it so I can barely read the panel. Hint says tap the pencil to pick tiles this Momo looks after. Tomatoes are ripe again. Tapping the pencil."}
+{"t":37.2,"at":"00:37","cmd":"tap","x":174,"y":1068,"shot":"006.png"}
+{"t":43.5,"at":"00:43","cmd":"note","text":"Tile-picking mode: 0/4 tiles. I don't see a tile grid drawn, so I guess the farm is one tile. There's a weird ring floating off the right edge of the island. Tapping the farm first."}
+{"t":45,"at":"00:45","cmd":"tap","x":290,"y":760,"shot":"007.png"}
+{"t":51.4,"at":"00:51","cmd":"note","text":"Farm tile picked (1/4), Momo now Working at Farm. A text box explains: empty tiles can become farm/mine/lumberyard/lab. So the island is 2x2 tiles and a yellow box highlights the empty left tile. Hitting Got it."}
+{"t":53,"at":"00:53","cmd":"tap","x":313,"y":1013,"shot":"008.png"}
+{"t":59.3,"at":"00:59","cmd":"note","text":"The Momo works on its own now - 6 jobs done, coins 22, +12/min. Mail icon over its head and a red dot on Mailbox. I'll confirm the tile pick with the check mark, then read the mail."}
+{"t":60.8,"at":"01:00","cmd":"tap","x":175,"y":1096,"shot":"009.png"}
+{"t":67.2,"at":"01:07","cmd":"note","text":"Day 5, 0, XP 23/60. New tip: I can buy the sea beside the island for 5. Feels like the game is drip-feeding tips, which is fine. Got it, then check the mail first."}
+{"t":68.8,"at":"01:08","cmd":"tap","x":544,"y":807,"shot":"010.png"}
+{"t":73.1,"at":"01:13","cmd":"tap","x":557,"y":228,"shot":"011.png"}
+{"t":79.3,"at":"01:19","cmd":"tap","x":260,"y":248,"shot":"012.png"}
+{"t":85.1,"at":"01:25","cmd":"note","text":"Aww, the Momo wrote me a letter proposing Field expansion research. Charming way to introduce research. Tapping Let's research it."}
+{"t":86.9,"at":"01:26","cmd":"tap","x":420,"y":557,"shot":"013.png"}
+{"t":93.9,"at":"01:33","cmd":"tap","x":66,"y":238,"shot":"014.png"}
+{"t":100.3,"at":"01:40","cmd":"tap","x":260,"y":248,"shot":"015.png"}
+{"t":107,"at":"01:47","cmd":"note","text":"Hit level 2 quietly in the corner (5/160). Second letter: Watering efficiency. Accepting it too, then I'll open Research to see what 'on the research list' means."}
+{"t":108.7,"at":"01:48","cmd":"tap","x":420,"y":557,"shot":"016.png"}
+{"t":110.6,"at":"01:50","cmd":"tap","x":557,"y":165,"shot":"017.png"}
+{"t":118.2,"at":"01:58","cmd":"note","text":"Research is a tech tree with tabs (Farm, Lumber, Mine, Smelting, Power, Games...). Field expansion costs 3 flasks + $20, and the button says Build a research lab. So flasks must come from a lab. Closing this to build a lab on an empty tile."}
+{"t":119.9,"at":"01:59","cmd":"tap","x":469,"y":187,"shot":"018.png"}
+{"t":121.5,"at":"02:01","cmd":"tap","x":180,"y":870,"shot":"019.png"}
+{"t":128.5,"at":"02:08","cmd":"note","text":"Build menu: Farm $10, Mine (Lv3), Lumberyard $80 in red even though I have $82?, Research lab $40, Special 0/1. Not sure which tile I tapped - no highlight visible. Picking Research lab."}
+{"t":130.1,"at":"02:10","cmd":"tap","x":346,"y":985,"shot":"020.png"}
+{"t":136.9,"at":"02:16","cmd":"note","text":"Lab is going up on the left tile as a ghost, 4 sec build, -$40. It says Research lab 0/1 - I suspect that means it needs a Momo worker and I only have one. Waiting for it to finish."}
+{"t":142.8,"at":"02:22","cmd":"wait","s":5,"shot":"021.png"}
+{"t":149.8,"at":"02:29","cmd":"note","text":"Cute blue-roofed lab with a flask sign. Bottom shows Experiment 7s left, seems to run by itself even with 0/1 workers. Waiting to see if a flask pops out."}
+{"t":158.5,"at":"02:38","cmd":"wait","s":8,"shot":"022.png"}
+{"t":166.2,"at":"02:46","cmd":"note","text":"Hmm, 8 seconds later the Experiment still says 4s left - did it finish one and restart, or is it stuck? No flask counter visible anywhere. Momo has a '...' bubble. Tapping the Experiment button."}
+{"t":167.8,"at":"02:47","cmd":"tap","x":366,"y":1226,"shot":"023.png"}
+{"t":175.1,"at":"02:55","cmd":"note","text":"Tapping Experiment pulled the Momo over to the lab (1/1) and a 3 sec progress bar started. Lovely sunset. So buildings need a Momo standing at them - one Momo for two jobs. Waiting for the experiment."}
+{"t":179.9,"at":"02:59","cmd":"wait","s":4,"shot":"024.png"}
+{"t":188,"at":"03:08","cmd":"note","text":"Experiment done, Momo hopped back to the farm, red dot on Research. I didn't see a flask count anywhere on the HUD though. Opening Research."}
+{"t":189.8,"at":"03:09","cmd":"tap","x":557,"y":165,"shot":"025.png"}
+{"t":197.6,"at":"03:17","cmd":"note","text":"I have 4 flasks now (one experiment gave 4?). The node reads 3/3 but the side panel says 4/3, slightly inconsistent. Start research!"}
+{"t":199.5,"at":"03:19","cmd":"tap","x":401,"y":428,"shot":"026.png"}
+{"t":208.1,"at":"03:28","cmd":"note","text":"Researching, 29s. Cost 3 flasks + $20. Momo is back at the lab experimenting on its own and has another letter. The farm is full of ripe tomatoes nobody is picking - one Momo is spread thin. I want a second Momo. Let me peek in the Shop."}
+{"t":209.7,"at":"03:29","cmd":"tap","x":469,"y":187,"shot":"027.png"}
+{"t":211.2,"at":"03:31","cmd":"tap","x":104,"y":1246,"shot":"028.png"}
+{"t":218.5,"at":"03:38","cmd":"note","text":"Shop has exactly what I wanted: Hire Momo $50. I have $86. Hiring!"}
+{"t":220,"at":"03:39","cmd":"tap","x":86,"y":1122,"shot":"029.png"}
+{"t":228.1,"at":"03:48","cmd":"note","text":"Hired Mochi! It has a name, adorable. Plan: Mochi looks after the lab, first Momo keeps the farm. Got it, then pencil, then tap the lab tile."}
+{"t":229.8,"at":"03:49","cmd":"tap","x":287,"y":1018,"shot":"030.png"}
+{"t":231.3,"at":"03:51","cmd":"tap","x":174,"y":1097,"shot":"031.png"}
+{"t":240,"at":"04:00","cmd":"tap","x":130,"y":790,"shot":"032.png"}
+{"t":248.8,"at":"04:08","cmd":"note","text":"Tapped the lab tile in pencil mode but the pencil mode just closed and Mochi is still Free time - not sure what happened, maybe I hit the edge. Level 3 now (mine unlocks!). Trying the Assign button instead."}
+{"t":250.3,"at":"04:10","cmd":"tap","x":333,"y":1200,"shot":"033.png"}
+{"t":259,"at":"04:18","cmd":"note","text":"Assign lit up green but nothing else changed and no hint. Maybe it wants me to tap a building next? Only one bunny visible now, at the lab - where did Mochi go? Tapping the lab roof."}
+{"t":260.6,"at":"04:20","cmd":"tap","x":140,"y":760,"shot":"034.png"}
+{"t":270.1,"at":"04:30","cmd":"note","text":"Got it: Assign, then tap a building. Mochi now Working at Research lab. Odd line at the bottom: 'Comparing: a few days are needed on each side' - no idea what is being compared. Income up to $68/min. Checking Research (red dot)."}
+{"t":271.8,"at":"04:31","cmd":"tap","x":557,"y":165,"shot":"035.png"}
+{"t":279.7,"at":"04:39","cmd":"note","text":"Field expansion done (Lv1/5), harvest +1 crop. Watering efficiency unlocked, 6 flasks on hand. Income $84/min. Picking Watering efficiency."}
+{"t":281.6,"at":"04:41","cmd":"tap","x":109,"y":375,"shot":"036.png"}
+{"t":289,"at":"04:48","cmd":"note","text":"Watering efficiency: wait after water -25%, 5 flasks + $40, 1m30s. Starting it. Then I want to build a mine since I'm Lv3."}
+{"t":290.9,"at":"04:50","cmd":"tap","x":401,"y":443,"shot":"037.png"}
+{"t":292.4,"at":"04:52","cmd":"tap","x":469,"y":187,"shot":"038.png"}
+{"t":301,"at":"05:01","cmd":"note","text":"Research running. Mochi's panel stays open over the bottom of the island; there's no close X on it. I'll tap the empty right-hand tile to try building a mine."}
+{"t":302.5,"at":"05:02","cmd":"tap","x":430,"y":870,"shot":"039.png"}
+{"t":311.2,"at":"05:11","cmd":"note","text":"Mine costs $120 + Wood 10 (red: no wood). So wood first - building a Lumberyard ($80) on this tile. Clear chain: lumber -> mine."}
+{"t":312.7,"at":"05:12","cmd":"tap","x":347,"y":985,"shot":"040.png"}
+{"t":320.4,"at":"05:20","cmd":"note","text":"Lumberyard going up on the right tile. Saw a little '+1' flask float off the lab. While it builds, reading the waiting letter."}
+{"t":322.1,"at":"05:22","cmd":"tap","x":557,"y":228,"shot":"041.png"}
+{"t":330.2,"at":"05:30","cmd":"note","text":"Lumberyard done, the farm Momo walked over to fell trees (Fell/Replant actions). Farm left unattended again. Third letter: Let's give the soil something back. Opening."}
+{"t":331.8,"at":"05:31","cmd":"tap","x":260,"y":248,"shot":"042.png"}
+{"t":339.4,"at":"05:39","cmd":"note","text":"Bigger harvests proposal, accepting. Momo went back to the farm, leaving the lumberyard 0/1. I need a third Momo for the lumberyard. Going to hire one."}
+{"t":341.1,"at":"05:41","cmd":"tap","x":420,"y":583,"shot":"043.png"}
+{"t":342.7,"at":"05:42","cmd":"tap","x":469,"y":187,"shot":"044.png"}
+{"t":344.3,"at":"05:44","cmd":"tap","x":104,"y":1246,"shot":"045.png"}
+{"t":351.6,"at":"05:51","cmd":"note","text":"Second hire costs $80 now (price rises). I have $124. Hiring, then Assign it to the lumberyard."}
+{"t":353.3,"at":"05:53","cmd":"tap","x":86,"y":1122,"shot":"046.png"}
+{"t":360.7,"at":"06:00","cmd":"note","text":"New Momo named Pomu. Assign, then tap the lumberyard."}
+{"t":362.1,"at":"06:02","cmd":"tap","x":312,"y":1127,"shot":"047.png"}
+{"t":363.6,"at":"06:03","cmd":"tap","x":470,"y":860,"shot":"048.png"}
+{"t":372.5,"at":"06:12","cmd":"note","text":"Didn't take - Pomu still Free time and seems to be hanging around the farm. Trying Assign again and looking before tapping the building."}
+{"t":374.1,"at":"06:14","cmd":"tap","x":312,"y":1127,"shot":"049.png"}
+{"t":383,"at":"06:22","cmd":"tap","x":450,"y":830,"shot":"050.png"}
+{"t":390.7,"at":"06:30","cmd":"note","text":"Pomu is now Working at Lumberyard. The first Assign tap seems to need a moment or I tapped too fast. Three Momos, three buildings, $104/min. Research has a red dot again."}
+{"t":392.6,"at":"06:32","cmd":"tap","x":557,"y":165,"shot":"051.png"}
+{"t":400.2,"at":"06:40","cmd":"note","text":"Watering efficiency done. 11 flasks. Bigger harvests and Watering can are now open. Going for Bigger harvests since Momo asked for it."}
+{"t":402.2,"at":"06:42","cmd":"tap","x":238,"y":378,"shot":"052.png"}
+{"t":410.6,"at":"06:50","cmd":"note","text":"Bigger harvests: Crops +1, 8 flasks + $60, 2 min. Starting. Then mailbox, then look at the remaining front tile / buying sea."}
+{"t":412.4,"at":"06:52","cmd":"tap","x":401,"y":428,"shot":"053.png"}
+{"t":414.2,"at":"06:54","cmd":"tap","x":469,"y":187,"shot":"054.png"}
+{"t":416.1,"at":"06:56","cmd":"tap","x":557,"y":228,"shot":"055.png"}
+{"t":423.3,"at":"07:03","cmd":"note","text":"New letter: Let's grow the next trees first - probably a Lumber research. Accepting."}
+{"t":424.9,"at":"07:04","cmd":"tap","x":260,"y":248,"shot":"056.png"}
+{"t":433.1,"at":"07:13","cmd":"note","text":"Tree nursery proposal - accepting. I still can't see how much wood I have anywhere on screen. Checking Status for an inventory."}
+{"t":434.9,"at":"07:14","cmd":"tap","x":420,"y":557,"shot":"057.png"}
+{"t":436.5,"at":"07:16","cmd":"tap","x":469,"y":187,"shot":"058.png"}
+{"t":438.3,"at":"07:18","cmd":"tap","x":557,"y":292,"shot":"059.png"}
+{"t":447.2,"at":"07:27","cmd":"note","text":"Status is great: my island is called Momonium, a Village. A checklist to become a City: Land 4/9, Momo 3/3 done, Research levels 2/3, Value produced $550/$1.5K. Finally a clear goal! So I need to buy land. Checking the Store tab for wood count."}
+{"t":449,"at":"07:29","cmd":"tap","x":379,"y":470,"shot":"060.png"}
+{"t":450.7,"at":"07:30","cmd":"tap","x":141,"y":187,"shot":"061.png"}
+{"t":459.7,"at":"07:39","cmd":"note","text":"Store shows Wood 16/50 and Research notes 8/30 - so wood and notes have storage caps. I have $220 and 16 wood: enough for a Mine ($120 + 10 wood). Building it on the empty front tile."}
+{"t":461.3,"at":"07:41","cmd":"tap","x":469,"y":187,"shot":"062.png"}
+{"t":463,"at":"07:42","cmd":"tap","x":300,"y":960,"shot":"063.png"}
+{"t":470.1,"at":"07:50","cmd":"note","text":"Build menu up and Mine is no longer red. Building Mine."}
+{"t":471.8,"at":"07:51","cmd":"tap","x":204,"y":1070,"shot":"064.png"}
+{"t":480.7,"at":"08:00","cmd":"note","text":"Mine is building (7 sec). Charged -$112 not -$120, small mismatch. Now I can see a dashed outline of a sea plot off the front-right edge with a $25 tag half hidden behind the Cancel button. Tapping it to buy land."}
+{"t":482.2,"at":"08:02","cmd":"tap","x":430,"y":1060,"shot":"065.png"}
+{"t":490.8,"at":"08:10","cmd":"note","text":"Mine done - a cute mossy dome with a lantern. A Momo already went in. The price tag now says '...again to buy' but its first half is hidden behind the log pile. Tapping the plot again."}
+{"t":492.3,"at":"08:12","cmd":"tap","x":430,"y":1060,"shot":"066.png"}
+{"t":501.2,"at":"08:21","cmd":"note","text":"The island grew! A new grassy plot with a flowering bush popped up off the front - really satisfying. Cost -$19 though the tag said $25, +23 EXP. Mine is empty now - Pomu went back to the lumberyard. Hiring a 4th Momo for the mine."}
+{"t":502.9,"at":"08:22","cmd":"tap","x":104,"y":1246,"shot":"067.png"}
+{"t":510.2,"at":"08:30","cmd":"note","text":"Hire now $130 (50 -> 80 -> 130). Have $221. Hiring and assigning to the mine."}
+{"t":511.9,"at":"08:31","cmd":"tap","x":86,"y":1122,"shot":"068.png"}
+{"t":520.2,"at":"08:40","cmd":"note","text":"Fourth Momo: Mugi. Assign then tap the mine dome."}
+{"t":521.6,"at":"08:41","cmd":"tap","x":312,"y":1127,"shot":"069.png"}
+{"t":523.2,"at":"08:43","cmd":"tap","x":300,"y":840,"shot":"070.png"}
+{"t":532.6,"at":"08:52","cmd":"note","text":"Mugi is mining. Four Momos each at their own spot, $178/min, Lv3 nearly 4. Little orange flags appeared on the farm and lab - not sure what they mean. Trying to put a cheap Farm on the new plot."}
+{"t":534.3,"at":"08:54","cmd":"tap","x":470,"y":985,"shot":"071.png"}
+{"t":541.9,"at":"09:01","cmd":"note","text":"Build menu opened (over the island, covering the mine). Picking Farm for $10. No Momo for it yet, but the farm Momo might cover both."}
+{"t":543.6,"at":"09:03","cmd":"tap","x":158,"y":875,"shot":"072.png"}
+{"t":552.3,"at":"09:12","cmd":"note","text":"Level 4! Second farm going up on the new plot. Another sea plot appeared front-left for $35, its price tag hidden under the Building button. Buying it for Land progress."}
+{"t":553.9,"at":"09:13","cmd":"tap","x":225,"y":1115,"shot":"073.png"}
+{"t":555.6,"at":"09:15","cmd":"tap","x":225,"y":1115,"shot":"074.png"}
+{"t":563.6,"at":"09:23","cmd":"note","text":"Bought a second plot - island is now an L shape with 6 tiles, new farm already sprouting. $240/min. Last seconds: queueing another research."}
+{"t":565.4,"at":"09:25","cmd":"tap","x":557,"y":165,"shot":"075.png"}
+{"t":572.8,"at":"09:32","cmd":"note","text":"Bigger harvests done; three new nodes lit up (Watering can, Greenhouse, Seed selection). Picking Greenhouse to see what it does."}
+{"t":574.7,"at":"09:34","cmd":"tap","x":173,"y":485,"shot":"076.png"}
+{"t":582.3,"at":"09:42","cmd":"note","text":"Greenhouse: wait after water -20%, $120. Starting it as my last move. $356, $280/min, Lv4. I'd keep going - next goals would be more land toward City and smelting."}
+{"t":584.2,"at":"09:44","cmd":"tap","x":401,"y":449,"shot":"077.png"}
+{"t":604.5,"at":"10:04","cmd":"wait","s":16,"shot":"078.png"}

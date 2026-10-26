@@ -1,0 +1,10 @@
+{
+  "round": "R7",
+  "extends": ["r6.json"],
+  "_note": "Also in this round (blind round B4): a goal button under the day panel names the settlement's next step and how many of its needs are met ('Next: City 2/4'; a tap opens Status -- found only after 6-9 minutes in every round); 'Build a research lab' in the research panel opens the build choices on a free tile (four players tapped it and nothing happened); a Momo on its rounds says it looks after its tiles (not 'the next crop' at a lab).",
+  "sets": [
+    {"set": "balance:land/base=65", "old": 25, "why": "B2 showed the sea tip is acted on within ~15 s when nothing else competes; B3/B4 tied it to tiles or level and it competed with the lab and the hire (land 6:14, 6:19). The tip and the glow now come when the first tile is affordable, and its price puts that near 2:10-2:40"},
+    {"set": "balance:land/invite_level=1", "old": 2, "why": "the same: affordability alone decides"},
+    {"set": "balance:momo/hire/base=100", "old": 60, "why": "B4 blind: first hire 2:43-3:03 against 4:30 once the button said Hire; income +33% at 5:00 and +25% at 10:00 followed from it"}
+  ]
+}

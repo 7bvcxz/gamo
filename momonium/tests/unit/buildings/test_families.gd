@@ -53,6 +53,9 @@ func test_a_busy_building_stops_and_gets_its_inputs_back() -> void:
 	inv.add("copper_ore", 10, "test")
 	var mine := bs.place_instant("mine", Vector2i(1, 0))
 	sim.execute({"type": "building.refit", "id": mine, "building": "smelter"})
+	# The player's hands here: the island's Momo would take the refitted
+	# building by itself (Step 50) and charge it first.
+	sim.data.tables["balance"]["momo"]["watch"]["auto"] = false
 	sim.advance_ms(30000)
 	var ore := inv.count("copper_ore")
 	var r := sim.execute({"type": "building.tap", "id": mine})

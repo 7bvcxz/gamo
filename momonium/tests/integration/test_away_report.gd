@@ -97,6 +97,17 @@ func test_the_card_says_both_times_and_short_numbers() -> void:
 	assert_eq(view.counted_label.text, "Away 1 h 0 min. Momo kept the island going the whole time.")
 
 
+func test_opening_a_window_puts_the_card_away() -> void:
+	var sim := _working_island()
+	_write(sim, 3 * 3600)
+	await _open()
+	assert_true((main.get("away_frame") as PanelFrame).visible, "the card")
+	(main.get("hud") as Hud).action.emit(&"status")
+	await tree.process_frame
+	assert_false((main.get("away_frame") as PanelFrame).visible, "Status opened: the card is put away (Step 50: it covered Status's tabs)")
+	assert_true((main.get("status_frame") as PanelFrame).visible, "and Status is in front")
+
+
 func test_rounding_and_the_threshold() -> void:
 	assert_eq(AwayView.long_duration(59999), "59 s", "under a minute: seconds, rounded down")
 	assert_eq(AwayView.long_duration(3600000 + 65000), "1 h 1 min", "an hour and a minute")

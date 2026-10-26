@@ -66,7 +66,9 @@ func test_starting_needs_a_finished_lab_and_the_cost() -> void:
 	_accept_first_proposal()
 	assert_eq(sim.execute({"type": "research.start", "id": "farm_expansion"})["reason"], "err.no_lab", "no lab")
 	economy.earn(200, "test")
-	assert_eq(sim.execute({"type": "building.place", "building": "research", "anchor": [0, 1]})["reason"], "err.locked", "the lab opens at Lv 2")
+	var fresh := Simulation.new_game()
+	(fresh.system(&"economy") as EconomySystem).earn(200, "test")
+	assert_eq(fresh.execute({"type": "building.place", "building": "research", "anchor": [0, 1]})["reason"], "err.locked", "the lab opens at Lv 2")
 	var lab := buildings.place_instant("research", Vector2i(0, 1))
 	var b := buildings.get_building(lab)
 	b["state"] = BuildingSystem.CONSTRUCTING
@@ -77,10 +79,10 @@ func test_starting_needs_a_finished_lab_and_the_cost() -> void:
 	var money_before := economy.money
 	var r := sim.execute({"type": "research.start", "id": "farm_expansion"})
 	assert_true(r["ok"], "started")
-	assert_eq(economy.money, money_before - 20, "paid $20")
+	assert_eq(economy.money, money_before - int(research.node("farm_expansion")["cost"]["money"]), "paid its money")
 	assert_eq(inv.count("notes"), 0, "and three notes")
 	assert_eq(research.state_of("farm_expansion"), "active", "running")
-	assert_eq(r["ends_ms"], sim.now_ms() + 60000, "for 60 s")
+	assert_eq(r["ends_ms"], sim.now_ms() + int(float(research.node("farm_expansion")["seconds"]) * 1000.0), "for its time")
 
 
 func test_one_at_a_time_and_finishes_by_itself() -> void:
@@ -93,14 +95,16 @@ func test_one_at_a_time_and_finishes_by_itself() -> void:
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
 		if t == &"research_completed":
 			done[0] = String(p["id"]))
-	sim.advance_ms(59999)
+	var took := research.duration_ms("farm_expansion")
+	sim.advance_ms(took - 1)
 	assert_eq(research.state_of("farm_expansion"), "active", "not a moment early")
 	sim.advance_ms(1)
-	assert_eq(research.state_of("farm_expansion"), "levelup", "done after exactly 60 s, and it can go further")
+	assert_eq(research.state_of("farm_expansion"), "levelup", "done on the dot, and it can go further")
 	assert_eq(research.level("farm_expansion"), 1, "level 1")
 	assert_eq(done[0], "farm_expansion", "announced")
 	var first := (research.node("farm_expansion")["cost"]["money"] as float)
-	assert_eq(research.cost_of("farm_expansion")["money"], int(ceil(first * 1.8)), "level 2 costs 1.8 times as much")
+	var g := sim.data.get_float("balance", "research.level_cost_growth", 1.8)
+	assert_eq(research.cost_of("farm_expansion")["money"], int(ceil(first * g)), "level 2 costs the growth times as much")
 
 
 func test_field_expansion_brings_a_bigger_harvest() -> void:
@@ -109,7 +113,7 @@ func test_field_expansion_brings_a_bigger_harvest() -> void:
 	var b := buildings.get_building(farm)
 	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 1.0}, "one crop a cycle before")
 	sim.execute({"type": "research.start", "id": "farm_expansion"})
-	sim.advance_ms(60000)
+	sim.advance_ms(research.duration_ms("farm_expansion"))
 	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 2.0}, "two after")
 	var made := [0]
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
@@ -119,7 +123,7 @@ func test_field_expansion_brings_a_bigger_harvest() -> void:
 	assert_true(made[0] >= 2 and made[0] % 2 == 0, "real harvests give two crops each (%d)" % made[0])
 
 
-func test_mulch_shortens_the_wait_but_keeps_three_waterings() -> void:
+func test_mulch_shortens_the_wait_but_keeps_the_watering() -> void:
 	var farm := _accept_first_proposal()
 	_ready_to_research()
 	research.completed["farm_expansion"] = 0
@@ -132,8 +136,8 @@ func test_mulch_shortens_the_wait_but_keeps_three_waterings() -> void:
 	sim.advance_ms(90000)
 	var b := buildings.get_building(farm)
 	var stages := buildings.stages(b)
-	assert_eq(stages.filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 3, "still three waterings")
-	assert_eq(stages.size(), 5, "no stage removed")
+	assert_eq(stages.filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 1, "still watered")
+	assert_eq(stages.size(), 3, "no stage removed")
 	var wait := float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"])
 	assert_eq(buildings.stage_cooldown(b, stages[1]), wait * 0.75, "the wait after watering is the data's wait x 0.75")
 	assert_eq(buildings.stage_cooldown(b, stages[0]), 0.0, "sowing still has no wait")
@@ -170,11 +174,12 @@ func test_research_survives_a_save_mid_way() -> void:
 	_accept_first_proposal()
 	_ready_to_research()
 	sim.execute({"type": "research.start", "id": "farm_expansion"})
-	sim.advance_ms(20000)
+	var took := research.duration_ms("farm_expansion")
+	sim.advance_ms(took / 3)
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
 	var r2: ResearchSystem = copy.system(&"research")
 	assert_eq(r2.state_of("farm_expansion"), "active", "still running after loading")
-	copy.advance_ms(39999)
+	copy.advance_ms(took - took / 3 - 1)
 	assert_eq(r2.state_of("farm_expansion"), "active", "on the same clock")
 	copy.advance_ms(1)
 	assert_eq(r2.level("farm_expansion"), 1, "finishes when it would have")

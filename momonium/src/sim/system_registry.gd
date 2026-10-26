@@ -2,8 +2,8 @@ class_name SystemRegistry
 extends RefCounted
 
 ## The systems a game runs, in the order they hear about each new day.
-## Order matters and is part of the rules: a day's sales must see the stock the
-## previous day produced before anything else runs.
+## Order matters and is part of the rules (the same order every run keeps
+## every island deterministic).
 
 
 static func create_default() -> Array[SimSystem]:
@@ -11,8 +11,8 @@ static func create_default() -> Array[SimSystem]:
 		WorldSystem.new(),
 		LandSystem.new(),
 		BuildingSystem.new(),
-		# Before the economy: at dawn the island feeds its pubs from the
-		# night's stock first, then sells what is left.
+		# Before the economy: at dawn the pubs pay for their day's food,
+		# booked in the day that is closing.
 		CommunitySystem.new(),
 		EconomySystem.new(),
 		InventorySystem.new(),

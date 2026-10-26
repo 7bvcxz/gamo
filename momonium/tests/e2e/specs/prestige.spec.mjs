@@ -37,7 +37,7 @@ async function sellFromTheMoneyTab(game) {
 test('sell, and place the research points again', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('set_language', 'en');
-  await game.query('dev_level', 6);
+  await game.query('dev_level', (await game.query('rules')).prestige_level);
   await game.query('dev_research_levels', { momo_training: 3, momo_reach: 1, momo_wide_reach: 1 });
   let s = await game.query('sale');
   expect(s.appraisal.rp_new).toBe(5);
@@ -70,7 +70,7 @@ test('sell, and place the research points again', async ({ game }) => {
   expect(s.points).toBeGreaterThan(0);
   expect(s.welcome).toBe(false);
   // Selling again with no new research: still 5.
-  await game.query('dev_level', 6);
+  await game.query('dev_level', (await game.query('rules')).prestige_level);
   await sellFromTheMoneyTab(game);
   rp = await game.query('rp');
   expect(rp.earned).toBe(5);

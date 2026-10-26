@@ -424,6 +424,9 @@ func _validate_buildings() -> void:
 		if not amenity.is_empty() and float(amenity.get("happiness", 0)) <= 0.0:
 			errors.append("buildings: %s.amenity needs happiness > 0" % key)
 		for item: String in amenity.get("daily", {}):
+			# `money`: a daily upkeep paid from the island's money (Step 50).
+			if item == "money":
+				continue
 			if not table("items").get("items", {}).has(item):
 				errors.append("buildings: %s.amenity.daily uses unknown item %s" % [key, item])
 		if generates:

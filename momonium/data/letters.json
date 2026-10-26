@@ -6,7 +6,7 @@
       "industry": "farm",
       "trigger": {
         "work": {
-          "farm": 5
+          "farm": 3
         }
       },
       "title": "letter.farm_first_harvest.title",

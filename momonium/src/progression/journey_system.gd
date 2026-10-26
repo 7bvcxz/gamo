@@ -2,7 +2,8 @@ class_name JourneySystem
 extends SimSystem
 
 ## The island's journey: when each first happened -- the first farm built,
-## harvest, sale, Momo at work, land, hire, research, letter, the levels in
+## harvest, sale (the first income), a Momo's first earnings, Momo at work, land, hire,
+## research started and done, letter, the levels in
 ## `balance.journey.levels`, each tier -- kept three ways, because a player
 ## counts time three ways: played (the game open), offline (time away the
 ## island caught up on), and wall time since the island began (both, plus
@@ -62,8 +63,14 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 				_mark("harvest")
 			if int(p.get("worker", 0)) >= MOMO_WORK_MIN:
 				_mark("momo_work")
-		&"sold":
+		&"sold", &"released":
+			# Every sale is finished work paying at once (Step 50): the first
+			# sale is the first income; a Momo's own first earnings too.
 			_mark("sale")
+			if int(p.get("worker", 0)) >= MOMO_WORK_MIN and int(p.get("money", 0)) > 0:
+				_mark("momo_income")
+		&"research_started":
+			_mark("research_start")
 		&"land_bought":
 			_mark("land")
 		&"momo_hired":

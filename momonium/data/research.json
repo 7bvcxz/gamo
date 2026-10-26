@@ -17,7 +17,7 @@
           "notes": 3
         }
       },
-      "seconds": 60,
+      "seconds": 20,
       "effects": [
         {
           "kind": "yield",
@@ -757,7 +757,7 @@
       "cost": {
         "money": 200,
         "items": {
-          "car": 2,
+          "iron_ingot": 6,
           "notes": 10
         }
       },

@@ -1,0 +1,12 @@
+{
+  "round": "R2",
+  "extends": ["r1.json"],
+  "sets": [
+    {"set": "items:items/crop/price=4", "old": 3, "why": "R1: income 34% short at 5:00, 40% at 10:00 -- one Momo on one farm is the whole economy until the first hire"},
+    {"set": "balance:momo/hire/base=35", "old": 60, "why": "R1: first hire 7:20 against 4:30 -- the player is never rich enough while every coin goes to farms and land"},
+    {"set": "balance:land/base=25", "old": 30, "why": "R1: first land 4:10 against 2:30"},
+    {"set": "balance:progression/exp_to_next/0=60", "old": 70, "why": "R1: Lv 2 at 2:15 against 2:00"},
+    {"set": "balance:progression/exp_to_next/1=160", "old": 200, "why": "R1: Lv 3 at 4:41 against 4:00"},
+    {"set": "balance:momo/walk_speed=1.0", "old": 0.7, "why": "a Momo walking between four tiles spent most of a five-second cycle walking"}
+  ]
+}

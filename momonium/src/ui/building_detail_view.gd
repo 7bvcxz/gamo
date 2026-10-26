@@ -292,7 +292,7 @@ func _variety_button(b: Dictionary, buildings: BuildingSystem, v: String) -> But
 	var crops := 0
 	for item: String in buildings.cycle_estimate(probe)["yield"]:
 		crops += int(round(float(buildings.cycle_estimate(probe)["yield"][item])))
-	var facts := PanelViews.label(tr("detail.variety_facts").format({"w": waterings, "c": crops}), 13, true)
+	var facts := PanelViews.label(tr("detail.variety_facts" if waterings > 0 else "detail.variety_facts_dry").format({"w": waterings, "c": crops}), 13, true)
 	facts.name = "Facts"
 	facts.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(facts)

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 254" font-family="sans-serif" font-size="12">
+<rect width="720" height="254" fill="#ffffff"/>
+<text x="12" y="22" font-size="15" font-weight="bold">처음 해낸 시각: 목표(±10%) · 실행 · 중앙값 R10 · 블라인드 B7</text>
+<text x="150" y="246" text-anchor="middle" fill="#555">0:00</text>
+<line x1="150" y1="34" x2="150" y2="232" stroke="#eee"/>
+<text x="227.14285714285714" y="246" text-anchor="middle" fill="#555">1:00</text>
+<line x1="227.14285714285714" y1="34" x2="227.14285714285714" y2="232" stroke="#eee"/>
+<text x="304.2857142857143" y="246" text-anchor="middle" fill="#555">2:00</text>
+<line x1="304.2857142857143" y1="34" x2="304.2857142857143" y2="232" stroke="#eee"/>
+<text x="381.42857142857144" y="246" text-anchor="middle" fill="#555">3:00</text>
+<line x1="381.42857142857144" y1="34" x2="381.42857142857144" y2="232" stroke="#eee"/>
+<text x="458.57142857142856" y="246" text-anchor="middle" fill="#555">4:00</text>
+<line x1="458.57142857142856" y1="34" x2="458.57142857142856" y2="232" stroke="#eee"/>
+<text x="535.7142857142858" y="246" text-anchor="middle" fill="#555">5:00</text>
+<line x1="535.7142857142858" y1="34" x2="535.7142857142858" y2="232" stroke="#eee"/>
+<text x="612.8571428571429" y="246" text-anchor="middle" fill="#555">6:00</text>
+<line x1="612.8571428571429" y1="34" x2="612.8571428571429" y2="232" stroke="#eee"/>
+<text x="690" y="246" text-anchor="middle" fill="#555">7:00</text>
+<line x1="690" y1="34" x2="690" y2="232" stroke="#eee"/>
+<text x="12" y="52">T1 level:2</text>
+<rect x="288.85714285714283" y="40" width="30.85714285714289" height="16" fill="#d0e2ff"/>
+<line x1="304.2857142857143" y1="38" x2="304.2857142857143" y2="58" stroke="#1b6ef3" stroke-width="2"/>
+<circle cx="292.90585702514653" cy="48" r="4" fill="#868e96"/>
+<circle cx="293.62328573145186" cy="48" r="4" fill="#868e96"/>
+<circle cx="288.0329999534062" cy="48" r="4" fill="#868e96"/>
+<path d="M286.90585702514653,48 l6,-7 l6,7 l-6,7 z" fill="#2b8a3e"/>
+<text x="12" y="86">T2 land</text>
+<rect x="323.57142857142856" y="74" width="38.571428571428555" height="16" fill="#d0e2ff"/>
+<line x1="342.8571428571429" y1="72" x2="342.8571428571429" y2="92" stroke="#1b6ef3" stroke-width="2"/>
+<circle cx="359.0892855965751" cy="82" r="4" fill="#868e96"/>
+<circle cx="354.84900001716613" cy="82" r="4" fill="#868e96"/>
+<circle cx="344.10814281054905" cy="82" r="4" fill="#868e96"/>
+<path d="M348.84900001716613,82 l6,-7 l6,7 l-6,7 z" fill="#2b8a3e"/>
+<text x="12" y="120">T3 level:3</text>
+<rect x="427.71428571428567" y="108" width="61.71428571428578" height="16" fill="#d0e2ff"/>
+<line x1="458.57142857142856" y1="106" x2="458.57142857142856" y2="126" stroke="#1b6ef3" stroke-width="2"/>
+<circle cx="445.57157131086086" cy="116" r="4" fill="#868e96"/>
+<circle cx="443.2675714457376" cy="116" r="4" fill="#868e96"/>
+<circle cx="442.49742852483473" cy="116" r="4" fill="#868e96"/>
+<path d="M437.2675714457376,116 l6,-7 l6,7 l-6,7 z" fill="#2b8a3e"/>
+<text x="12" y="154">T4 research</text>
+<rect x="427.71428571428567" y="142" width="61.71428571428578" height="16" fill="#d0e2ff"/>
+<line x1="458.57142857142856" y1="140" x2="458.57142857142856" y2="160" stroke="#1b6ef3" stroke-width="2"/>
+<circle cx="470.48614273943224" cy="150" r="4" fill="#868e96"/>
+<circle cx="448.41428573145186" cy="150" r="4" fill="#868e96"/>
+<circle cx="443.7227142391204" cy="150" r="4" fill="#868e96"/>
+<path d="M442.41428573145186,150 l6,-7 l6,7 l-6,7 z" fill="#2b8a3e"/>
+<text x="12" y="188">T5 hire</text>
+<rect x="462.42857142857144" y="176" width="69.42857142857144" height="16" fill="#d0e2ff"/>
+<line x1="497.14285714285717" y1="174" x2="497.14285714285717" y2="194" stroke="#1b6ef3" stroke-width="2"/>
+<circle cx="512.755285596575" cy="184" r="4" fill="#868e96"/>
+<circle cx="499.5908571600233" cy="184" r="4" fill="#868e96"/>
+<circle cx="494.05457138197767" cy="184" r="4" fill="#868e96"/>
+<path d="M493.5908571600233,184 l6,-7 l6,7 l-6,7 z" fill="#2b8a3e"/>
+<text x="12" y="222">L4 level:4</text>
+<rect x="636" y="210" width="108" height="16" fill="#d0e2ff"/>
+<line x1="690" y1="208" x2="690" y2="228" stroke="#1b6ef3" stroke-width="2"/>
+<circle cx="690" cy="218" r="4" fill="#868e96"/>
+<circle cx="690" cy="218" r="4" fill="#868e96"/>
+<circle cx="680.4574285248348" cy="218" r="4" fill="#868e96"/>
+<path d="M684,218 l6,-7 l6,7 l-6,7 z" fill="#2b8a3e"/>
+</svg>

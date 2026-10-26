@@ -1,0 +1,7 @@
+{
+  "round": "R3",
+  "extends": ["r2.json"],
+  "sets": [
+    {"set": "balance:momo/hire/base=50", "old": 35, "why": "R2: first hire 2:40 against 4:30 -- cheap enough to come before land and research"}
+  ]
+}

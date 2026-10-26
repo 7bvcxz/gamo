@@ -131,9 +131,14 @@ func test_the_tower_makes_real_work_go_faster() -> void:
 	var y1 := bs.place_instant("lumberyard", Vector2i(0, 0))
 	bs.place_instant("clock_tower", Vector2i(2, 2))
 	var spans: Array[int] = []
+	# The Momo's own pace when that first stage began (its skill grows with
+	# every stage, and five-second work cycles give it many, Step 50).
+	var pace := [0.0]
 	var watch := func(t: StringName, p: Dictionary) -> void:
 		if t == &"task_started" and int(p["id"]) == y1:
 			var b := bs.get_building(y1)
+			if spans.is_empty():
+				pace[0] = (sim.system(&"momo") as MomoSystem).work_multiplier(1, "lumberyard")
 			spans.append(int(b["task_end"]) - int(b["task_start"]))
 	sim.bus.emitted.connect(watch)
 	sim.advance_to(185000)
@@ -149,4 +154,4 @@ func test_the_tower_makes_real_work_go_faster() -> void:
 	sim.advance_to(180000 * 2 + 40000)
 	var b := bs.get_building(y1)
 	var chop: Dictionary = bs.stages(b)[0]
-	assert_eq(in_burst * 2, int(round(bs.stage_seconds(b, chop) * 1000.0 * (sim.system(&"momo") as MomoSystem).work_multiplier(1, "lumberyard"))), "exactly half of a chop outside a burst")
+	assert_eq(in_burst * 2, int(round(bs.stage_seconds(b, chop) * 1000.0 * float(pace[0]))), "exactly half of a chop outside a burst")

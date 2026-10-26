@@ -1,0 +1,24 @@
+{
+  "round": "R6",
+  "extends": [
+    "r5.json"
+  ],
+  "_note": "Also in this round (blind round B3): the next tile glows and the sea tip comes from player level 2 (land.invite_level) or with one tile left -- tied to free tiles alone it waited for the player's second building (B3: 6:14); a compact row under the day panel counts what the store holds (wood, flasks...; asked for in all three rounds); while the tutorial asks for a Momo, a tap a little beside a walking Momo still picks it. Tried and dropped: research level_cost_growth 1.8 -> 2.4 (to flatten the late curve): the second island, whose research points already sit on its nodes, then reached Lv 5 in 13.9 minutes against 8.5 on the first (tests/unit/sim/test_balance.gd) -- a sale must make the next island faster.",
+  "sets": [
+    {
+      "set": "balance:land/invite_level=2",
+      "old": null,
+      "why": "B3 blind: first land 6:14 / 3:05 / 6:25 against 2:30"
+    },
+    {
+      "set": "buildings:types/research/cycle/stages/0/cooldown=6",
+      "old": 9,
+      "why": "B3 blind: first research 4:37 against 4:00 -- Lv 2 (and the lab) came later in R5"
+    },
+    {
+      "set": "research:nodes/0/seconds=20",
+      "old": 30,
+      "why": "the same: field expansion is the first research"
+    }
+  ]
+}

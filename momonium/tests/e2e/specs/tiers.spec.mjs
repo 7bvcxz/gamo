@@ -22,7 +22,8 @@ test('meet the milestones and become a City', async ({ game }) => {
   await game.command({ type: 'momo.hire' });
   await game.command({ type: 'momo.hire' });
   await game.query('dev_research_levels', { momo_training: 3 });
-  await game.query('dev_sale', 1500);
+  // As much produced value as the city asks for (data, Step 50 retuned it).
+  await game.query('dev_sale', t.progress.find((p) => p.key === 'produced').need);
   await game.page.waitForTimeout(400);
   t = await game.query('tier');
   expect(t.progress.every((p) => p.met)).toBe(true);

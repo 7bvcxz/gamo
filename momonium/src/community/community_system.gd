@@ -10,7 +10,7 @@ extends SimSystem
 ## Happiness (0..max): the island's open amenities, each type counting its
 ## first copy fully and further copies at the `stack` fractions (a second
 ## park is pleasant, a fifth adds nothing). Amenities are opened at each new
-## day: one with `daily` needs (a pub's crops) takes them from the store or
+## day: one with `daily` needs (a pub's food money) takes them from the store or
 ## stays shut that day; one that needs `power` opens only if that much is on
 ## supply at that moment. Work time is multiplied by
 ## rest * (1 - happiness/max * effect), never below `floor` -- a contented,
@@ -56,16 +56,25 @@ func _open(id: int) -> void:
 	if int(open_on.get(id, -1)) == day:
 		return
 	var ok := true
-	var needs: Dictionary = am.get("daily", {})
+	# Daily needs: items from the store, and `money` (a pub buys its food at
+	# the market now that crops are sold as they are picked, Step 50).
+	var needs: Dictionary = (am.get("daily", {}) as Dictionary).duplicate()
+	var upkeep := int(needs.get("money", 0))
+	needs.erase("money")
 	var inv: InventorySystem = sim.system(&"inventory")
+	var economy: EconomySystem = sim.system(&"economy")
 	if not needs.is_empty():
 		ok = inv.has_all(needs)
+	if ok and upkeep > 0:
+		ok = economy.can_afford(upkeep)
 	var kw := float(am.get("power", 0))
 	if ok and kw > 0.0:
 		var power: PowerSystem = sim.system(&"power")
 		ok = power != null and power.supply() >= kw
 	if ok and not needs.is_empty():
 		inv.take_all(needs, "consume:" + String(b["type"]))
+	if ok and upkeep > 0:
+		economy.spend(upkeep, "upkeep:" + String(b["type"]))
 	open_on[id] = day if ok else -1
 	sim.bus.emit(&"amenity_opened" if ok else &"amenity_shut", {"id": id, "day": day})
 

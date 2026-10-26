@@ -23,7 +23,9 @@ test('settings for comfort, and a tip', async ({ page }, info) => {
     if (info.project.use.hasTouch) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
     await page.waitForTimeout(300);
   };
-  // A tip, once land is affordable.
+  // A tip, once land is offered (the island nearly full, or grown to the
+  // level the game offers the sea from -- Step 50) and affordable.
+  await g.query('dev_level', (await g.query('rules')).land_invite_level);
   await g.query('dev_add_money', 100);
   await page.waitForTimeout(1500);
   let o = await g.query('options');

@@ -112,7 +112,10 @@ async function touchDrag(from, to, steps = 12) {
 // The controller's view of progress: the game's own save, every ten seconds.
 async function snapshot() {
   const text = await page.evaluate(() => localStorage.getItem('momonium_save')).catch(() => null);
-  fs.appendFileSync(states, JSON.stringify({ t: Math.round(sessionClock.elapsed()), state: snapshotFromSave(text) }) + '\n');
+  // started_at (epoch ms of the first look) and the save's own saved_unix
+  // place the game's clock on the session's (Step 50: exact milestone times
+  // from the save's journey, not this ten-second poll).
+  fs.appendFileSync(states, JSON.stringify({ t: Math.round(sessionClock.elapsed()), started_at: sessionClock.startedAt, state: snapshotFromSave(text) }) + '\n');
 }
 
 async function finish(reason) {
@@ -140,6 +143,9 @@ async function handle(cmd, args) {
   }
   sessionClock.start();
   counts[cmd] = (counts[cmd] || 0) + 1;
+  // When the command began (the log line's t is when it finished: a tap
+  // waits for the game to answer and a screenshot is taken).
+  const issued = Math.round(sessionClock.elapsed() * 10) / 10;
   let result = {};
   if (cmd === 'tap') {
     const p = toCss(args.x, args.y, DPR, VIEWPORT);
@@ -152,7 +158,7 @@ async function handle(cmd, args) {
     await page.waitForTimeout(Math.round(args.s * 1000));
   }
   if (cmd !== 'note') result.screen = await screenshot();
-  fs.appendFileSync(actions, logLine(sessionClock.elapsed(), cmd, args, result.screen ? { shot: path.basename(result.screen) } : {}));
+  fs.appendFileSync(actions, logLine(sessionClock.elapsed(), cmd, args, { issued, ...(result.screen ? { shot: path.basename(result.screen) } : {}) }));
   return { ...result, time: clock(sessionClock.elapsed()), left: clock(sessionClock.remaining()) };
 }
 

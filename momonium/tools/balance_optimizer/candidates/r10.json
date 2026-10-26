@@ -1,0 +1,29 @@
+{
+  "round": "R10",
+  "extends": [
+    "r9.json"
+  ],
+  "_note": "Long horizon only -- nothing in the first ten minutes changes, so blind round B7 (R9) stands for R10's first ten minutes. The blind sim bot was recalibrated on B6 before these runs (tools/playtest/autoplayer.gd: the first sea when the tutorial rings it, a hire saved for before more research or building, later land only for room): on R8's data it reproduced B6's medians within 12% (Lv 2 +7%, land -8%, Lv 3 +3%, research -12%, hire +3%, income +2%/+10% at 5:00/10:00).",
+  "sets": [
+    {
+      "set": "balance:prestige/min_level=7",
+      "old": 6,
+      "why": "prestige needs the level and a point, and a point comes by 5:00, so the level is the gate. With the gate at Lv 6, LP (24:00 +-10%) and L6 (20:00 +-10%) overlap only at 21:36-22:00 (6800 EXP: 21:46 and 21:54, both within 9%). With the gate at Lv 7 both sit near the middle"
+    },
+    {
+      "set": "balance:progression/exp_to_next/4=4800",
+      "old": 2400,
+      "why": "Lv 6 near 20:00: the calibrated sim reached it at 15:50; 4600/4800/5000 gave 19:00/19:15/19:32"
+    },
+    {
+      "set": "balance:progression/exp_to_next/5=4900",
+      "old": 4000,
+      "why": "Lv 7 just after (the table must grow): prestige 24:40/24:56/25:24 with 4700/4900/5100"
+    },
+    {
+      "set": "balance:tiers/levels/2/needs/research_levels=35",
+      "old": 10,
+      "why": "see the long-horizon section: research points from sales come back as research levels, so this need counts sales"
+    }
+  ]
+}

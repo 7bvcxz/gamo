@@ -38,16 +38,18 @@ func test_a_working_momo_shows_the_work_pose() -> void:
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(3000)
+	var arrived := int((sim.system(&"momo") as MomoSystem).get_momo(1)["end"])
+	sim.advance_to(arrived + 300)
 	await tree.process_frame
 	var actor := (main.get("momo_views") as MomoViews).actor(1)
 	assert_true(actor.is_working(), "the simulation has Momo 1 sowing")
 	assert_eq(actor.rig.state, "work", "and the rig shows it working")
 	# Sowing then the first watering run back to back (no wait after sowing);
 	# the wait after watering is where Momo stands idle.
-	var arrived := int((sim.system(&"momo") as MomoSystem).get_momo(1)["end"])
-	var stage := int(round(5.0 * sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) * 1000.0))
-	sim.advance_to(arrived + 2 * stage + 5000)
+	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
+	var x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
+	var work := int(round((float(stages[0]["seconds"]) + float(stages[1]["seconds"])) * x * 1000.0))
+	sim.advance_to(arrived + work + int(float(stages[1]["cooldown"]) * 500.0))
 	await tree.process_frame
 	assert_false(actor.is_working(), "during the wait after watering Momo is not working")
 	assert_ne(actor.rig.state, "work", "and stops the work pose")

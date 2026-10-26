@@ -1,9 +1,52 @@
 {
-  "_doc": "Player profiles of the pacing optimizer (Step 50). bot: the play bot's way of playing (tools/playtest/autoplayer.gd profile). step_ms: time between decisions; first_ms: the first decision (the first look); explore_every: every Nth decision goes on looking around; tutorial_taps: stages done by hand before the tutorial turns to the Momo; minutes: default length. 'blind' is calibrated on the Step 45 blind AI playtests of v0.49.0 (taps 9-11 s apart, first tap 8-11 s) -- see design/INCREMENTAL_PACING.md.",
+  "_doc": "Player profiles of the pacing optimizer (Step 50). bot: the play bot's way of playing (tools/playtest/autoplayer.gd profile). step_ms: time between decisions; first_ms: the first decision (the first look); explore_every: every Nth decision goes on looking around; tutorial_taps: stages done by hand before the tutorial turns to the Momo; minutes: default length; sell_at_points: the legacy points the player waits for before selling an island (human48: the two-day calendar's patient seller). 'blind' (v2) is calibrated on blind round B1 of Step 50 (taps 6-9 s apart, first tap 7-8 s); 'blind_v1' is the first calibration, on the Step 45 blind AI playtests of v0.49.0 (taps 9-11 s apart) -- see design/INCREMENTAL_PACING.md and INCREMENTAL_BALANCE_REPORT.md.",
   "profiles": {
-    "blind": {"bot": "blind", "step_ms": 10000, "first_ms": 10000, "explore_every": 3, "tutorial_taps": 2, "minutes": 10},
-    "blind_slow": {"bot": "blind", "step_ms": 15000, "first_ms": 12000, "explore_every": 3, "tutorial_taps": 2, "minutes": 10},
-    "blind_fast": {"bot": "blind", "step_ms": 7000, "first_ms": 8000, "explore_every": 5, "tutorial_taps": 2, "minutes": 10},
-    "human": {"bot": "human", "step_ms": 1000, "first_ms": 0, "explore_every": 0, "minutes": 30}
+    "blind": {
+      "bot": "blind",
+      "step_ms": 8000,
+      "first_ms": 7000,
+      "explore_every": 4,
+      "tutorial_taps": 3,
+      "minutes": 10
+    },
+    "blind_slow": {
+      "bot": "blind",
+      "step_ms": 15000,
+      "first_ms": 12000,
+      "explore_every": 3,
+      "tutorial_taps": 3,
+      "minutes": 10
+    },
+    "blind_fast": {
+      "bot": "blind",
+      "step_ms": 7000,
+      "first_ms": 8000,
+      "explore_every": 5,
+      "tutorial_taps": 3,
+      "minutes": 10
+    },
+    "human": {
+      "bot": "human",
+      "step_ms": 1000,
+      "first_ms": 0,
+      "explore_every": 0,
+      "minutes": 30
+    },
+    "human48": {
+      "bot": "human",
+      "step_ms": 1000,
+      "first_ms": 0,
+      "explore_every": 0,
+      "sell_at_points": 8,
+      "minutes": 60
+    },
+    "blind_v1": {
+      "bot": "blind",
+      "step_ms": 10000,
+      "first_ms": 10000,
+      "explore_every": 3,
+      "tutorial_taps": 3,
+      "minutes": 10
+    }
   }
 }

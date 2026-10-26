@@ -37,15 +37,14 @@ func _init() -> void:
 			"--minutes": minutes = float(args[i + 1])
 			"--json": json_out = args[i + 1]
 			"--quiet": quiet = true
+			"--trace": strategy["_trace"] = true
 			"--schedule": schedule = args[i + 1]
 			"--set": sets.append(args[i + 1])
 			"--strategy":
 				for s: String in args[i + 1].split(",", false):
 					strategy[s] = true
 			"--candidate":
-				var cand: Variant = JSON.parse_string(FileAccess.get_file_as_string(_path(args[i + 1])))
-				for e: Variant in (cand as Dictionary).get("sets", []):
-					sets.append(String((e as Dictionary)["set"]))
+				sets.append_array(candidate_sets(_path(args[i + 1])))
 	var profiles: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "profiles.json"))
 	var profile: Dictionary = profiles["profiles"][profile_name]
 	var data := GameData.load_default()
@@ -59,7 +58,7 @@ func _init() -> void:
 	result["strategy"] = strategy.keys()
 	var targets: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DIR + "targets.json")) if FileAccess.file_exists(DIR + "targets.json") else {}
 	if not targets.is_empty():
-		result["score"] = score(result, targets, "sim")
+		result["score"] = score(result, targets, "sim48" if schedule == "48h" else "sim")
 	if not quiet:
 		_print(result)
 	if json_out != "":
@@ -71,6 +70,19 @@ func _init() -> void:
 		f.store_string(JSON.stringify(result, "  "))
 		f.close()
 	quit()
+
+
+## The overrides of a candidate file, after those of the candidates it
+## `extends` (paths relative to it): a round is its predecessor plus a few
+## changes, each with the value it replaces and why.
+static func candidate_sets(path: String) -> Array[String]:
+	var out: Array[String] = []
+	var cand: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(path))
+	for base: Variant in cand.get("extends", []):
+		out.append_array(candidate_sets(path.get_base_dir().path_join(String(base))))
+	for e: Variant in cand.get("sets", []):
+		out.append(String((e as Dictionary)["set"]))
+	return out
 
 
 ## A path given on the command line: res://, absolute, or relative to the
@@ -93,8 +105,14 @@ static func run(data: GameData, profile: Dictionary, strategy: Dictionary, minut
 	bot.tutorial_taps = int(profile.get("tutorial_taps", 3))
 	bot.sell_at_points = int(profile.get("sell_at_points", 2))
 	bot.strategy = strategy
+	bot.trace = bool(strategy.get("_trace", false))
 	var extra := {"prestige_ready_ms": -1, "first_income_ms": -1, "first_momo_income_ms": -1}
-	bot.sim.bus.emitted.connect(_watcher(bot, extra))
+	var watcher := _watcher(bot, extra)
+	bot.sim.bus.emitted.connect(watcher)
+	# A sale hands the bot a new island: the watcher follows it.
+	var watched := [bot.sim]
+	extra["_watched"] = watched
+	extra["_watcher"] = watcher
 	if schedule == "48h":
 		for day in 2:
 			for session: Array in [[30.0, 3.5], [15.0, 4.0], [40.0, 15.0]]:
@@ -107,11 +125,41 @@ static func run(data: GameData, profile: Dictionary, strategy: Dictionary, minut
 		if cp * 1000 > bot.active_ms:
 			break
 		rows.append(_at(bot.series, cp * 1000))
+	# Let go of the island (the watcher's closure holds the bot, the bot the
+	# island, the island's bus the closure: a cycle that would leak).
+	(watched[0] as Simulation).bus.emitted.disconnect(watcher)
+	extra.erase("_watched")
+	extra.erase("_watcher")
 	var ms := {}
 	for k: String in bot.milestones:
 		ms[k] = int(bot.milestones[k]["active_ms"])
 	var first_income := int(extra["first_income_ms"])
-	return {"minutes": bot.active_ms / 60000.0, "series": rows, "milestones": ms,
+	var journey: Array[Dictionary] = bot.first_journey if bot.island > 1 else (bot.sim.system(&"journey") as JourneySystem).timeline()
+	var marks := {}
+	for e: Dictionary in journey:
+		marks[String(e["key"])] = int(e["played_ms"])
+	var first_reward := -1
+	for e: Dictionary in bot.events:
+		if String(e["kind"]) in ["exp_gained", "income"] and int(e["active_ms"]) >= bot.first_command_ms:
+			first_reward = int(e["active_ms"])
+			break
+	var start_buildings := (data.get_value("balance", "start.buildings", []) as Array).size()
+	var start_momos := data.get_int("balance", "start.momos", 1)
+	for row: Dictionary in rows:
+		row["meaningful"] = maxi(int(row.get("level", 1)) - 1, 0) + maxi(int(row.get("buildings", 0)) - start_buildings, 0) + int(row.get("land", 0)) \
+			+ maxi(int(row.get("momos", 1)) - start_momos, 0) + int(row.get("research", 0)) + int(row.get("letters", 0))
+		var j: Dictionary = row.get("jobs", {})
+		var all := int(j.get("hand", 0)) + int(j.get("momo", 0)) + int(j.get("auto", 0))
+		row["momo_share"] = snappedf(float(int(j.get("momo", 0)) + int(j.get("auto", 0))) / all, 0.001) if all > 0 else 0.0
+	var tiers := {}
+	for k: String in bot.milestones:
+		if k.begins_with("tier "):
+			var n := int(k.split(" ")[1])
+			var wall := float(bot.milestones[k]["wall_ms"]) / 3600000.0
+			if not tiers.has(n) or wall < float(tiers[n]):
+				tiers[n] = wall
+	return {"minutes": bot.active_ms / 60000.0, "series": rows, "milestones": ms, "journey": marks,
+		"first_command_ms": bot.first_command_ms, "first_reward_ms": first_reward, "tier_wall_h": tiers,
 		"first_income_ms": first_income, "first_momo_income_ms": int(extra["first_momo_income_ms"]),
 		"prestige_ready_ms": int(extra["prestige_ready_ms"]),
 		"income_gap_s": _income_gap(bot.events, maxi(int(extra["first_momo_income_ms"]), 0), mini(bot.active_ms, 600000)),
@@ -123,7 +171,17 @@ static func run(data: GameData, profile: Dictionary, strategy: Dictionary, minut
 
 
 static func _play(bot: Object, seconds: float, extra: Dictionary) -> void:
-	bot.play(seconds)
+	# In minutes, so the watcher can move to a new island after a sale.
+	var left := seconds
+	while left > 0.0:
+		var step := minf(left, 60.0)
+		bot.play(step)
+		left -= step
+		var w: Array = extra["_watched"]
+		if w[0] != bot.sim:
+			(w[0] as Simulation).bus.emitted.disconnect(extra["_watcher"])
+			bot.sim.bus.emitted.connect(extra["_watcher"])
+			w[0] = bot.sim
 	# The bot looks at the sale on every decision and marks the first moment
 	# the island could be sold for a point.
 	if int(extra["prestige_ready_ms"]) < 0 and bot.milestones.has("prestige ready"):
@@ -132,17 +190,14 @@ static func _play(bot: Object, seconds: float, extra: Dictionary) -> void:
 
 static func _watcher(bot: Object, extra: Dictionary) -> Callable:
 	return func(type: StringName, p: Dictionary) -> void:
-		if type != &"money_changed" or int(p.get("delta", 0)) <= 0:
-			return
-		var cat := String(p.get("reason", "")).split(":")[0]
-		if cat != "sale" and cat != "release":
+		if (type != &"sold" and type != &"released") or int(p.get("money", 0)) <= 0:
 			return
 		var now: int = bot._now()
 		if int(extra["first_income_ms"]) < 0:
 			extra["first_income_ms"] = now
 		if int(extra["first_momo_income_ms"]) < 0 and int(p.get("worker", 0)) > 0:
 			extra["first_momo_income_ms"] = now
-		bot.events.append({"active_ms": now, "island": bot.island, "kind": "income", "detail": "$%d" % int(p["delta"])})
+		bot.events.append({"active_ms": now, "island": bot.island, "kind": "income", "detail": "$%d" % int(p["money"])})
 
 
 ## The sample at or just before `t_ms`.
@@ -231,6 +286,28 @@ static func score(result: Dictionary, targets: Dictionary, source: String) -> Di
 static func observe(result: Dictionary, metric: String) -> Variant:
 	var parts := metric.split(":", true, 1)
 	match parts[0]:
+		"journey":
+			# "income" is the journey's first sale: every sale is finished work
+			# paying at once (Step 50).
+			var key := "sale" if parts[1] == "income" else parts[1]
+			var marks: Dictionary = result.get("journey", {})
+			return float(marks[key]) / 1000.0 if marks.has(key) else null
+		"first_reward_after_tap":
+			if int(result.get("first_reward_ms", -1)) < 0 or int(result.get("first_command_ms", -1)) < 0:
+				return null
+			return float(int(result["first_reward_ms"]) - int(result["first_command_ms"])) / 1000.0
+		"meaningful_at", "momo_share_at":
+			var f := "meaningful" if parts[0] == "meaningful_at" else "momo_share"
+			for row: Dictionary in result.get("series", []):
+				if int(row["checkpoint_s"]) == int(parts[1]):
+					return row.get(f, null)
+			return null
+		"tier_wall_h":
+			var t: Dictionary = result.get("tier_wall_h", {})
+			for k: Variant in t:
+				if int(k) == int(parts[1]):
+					return t[k]
+			return null
 		"milestone":
 			var ms: Dictionary = result.get("milestones", {})
 			return float(ms[parts[1]]) / 1000.0 if ms.has(parts[1]) else null

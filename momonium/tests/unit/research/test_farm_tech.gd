@@ -2,8 +2,8 @@ extends "res://tests/framework/test_case.gd"
 
 ## Farming technology: better tools shorten the work, irrigation waters by
 ## itself, a greenhouse shortens the waits, bred varieties give more or grow
-## differently -- and the usual crop is always sown, watered three times and
-## harvested, whatever has been researched.
+## differently -- and the usual crop is always sown, watered and harvested,
+## whatever has been researched. Times are read from the data.
 
 var sim: Simulation
 var research: ResearchSystem
@@ -20,6 +20,10 @@ func _wait() -> float:
 
 func _floor() -> float:
 	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"])
+
+
+func _work(i: int) -> float:
+	return float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"])
 
 func before_each() -> void:
 	sim = Simulation.new_game()
@@ -39,11 +43,11 @@ func _all_research() -> void:
 	_done(research.nodes().map(func(n: Dictionary) -> String: return String(n["id"])))
 
 
-func test_the_usual_crop_always_gets_three_waterings() -> void:
+func test_the_usual_crop_always_gets_its_watering() -> void:
 	_all_research()
 	var b := buildings.get_building(farm)
 	var stages := buildings.stages(b)
-	assert_eq(stages.map(func(st: Dictionary) -> String: return st["action"]), ["sow", "water", "water", "water", "harvest"], "sow, water x3, harvest -- with everything researched")
+	assert_eq(stages.map(func(st: Dictionary) -> String: return st["action"]), ["sow", "water", "harvest"], "sow, water, harvest -- with everything researched")
 	for st: Dictionary in stages:
 		assert_true(bool(st.get("required", false)), "%s is still required" % st["id"])
 	# In play: count waterings between each sowing and its harvest.
@@ -59,20 +63,20 @@ func test_the_usual_crop_always_gets_three_waterings() -> void:
 			per_harvest.append(since_sow[0])
 		else:
 			since_sow[0] += 1)
-	for i in 30:
+	for i in 40:
 		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(7000)
+		sim.advance_ms(1500)
 	assert_true(per_harvest.size() >= 2, "several harvests (%d)" % per_harvest.size())
 	for n: int in per_harvest:
-		assert_eq(n, 3, "every harvest came after exactly three waterings")
+		assert_eq(n, 1, "every harvest came after its watering")
 
 
 func test_a_watering_can_shortens_the_work_not_the_wait() -> void:
 	_done(["farm_expansion", "watering_efficiency", "watering_can"])
 	var b := buildings.get_building(farm)
 	var water: Dictionary = buildings.stages(b)[1]
-	assert_eq(buildings.stage_seconds(b, water), 3.0, "5 s x 0.6")
-	assert_eq(buildings.stage_seconds(b, buildings.stages(b)[0]), 5.0, "sowing unchanged")
+	assert_near(buildings.stage_seconds(b, water), maxf(_work(1) * 0.6, BuildingSystem.MIN_WORK_SECONDS), 0.0001, "watering x 0.6")
+	assert_eq(buildings.stage_seconds(b, buildings.stages(b)[0]), _work(0), "sowing unchanged")
 	assert_eq(buildings.stage_cooldown(b, water), _wait() * 0.75, "the wait is mulch's, not the can's")
 
 
@@ -86,11 +90,11 @@ func test_drip_irrigation_waters_by_itself_but_not_sows_or_harvests() -> void:
 			workers.append([p["stage"], p["worker"]]))
 	sim.execute({"type": "building.tap", "id": farm})
 	sim.advance_ms(200000)
-	assert_eq(workers, [["sow", 0], ["water1", -1], ["water2", -1], ["water3", -1]], "you sow; the drip line does all three waterings")
-	assert_eq(int(b["stage"]), 4, "and the harvest waits for hands")
+	assert_eq(workers, [["sow", 0], ["water", -1]], "you sow; the drip line waters")
+	assert_eq(int(b["stage"]), 2, "and the harvest waits for hands")
 	assert_eq(b["state"], BuildingSystem.IDLE, "nobody harvests by magic")
 	var water: Dictionary = buildings.stages(b)[1]
-	assert_eq(buildings.stage_seconds(b, water), 3.0, "a drip watering takes the time of a watering")
+	assert_near(buildings.stage_seconds(b, water), maxf(_work(1) * 0.6, BuildingSystem.MIN_WORK_SECONDS), 0.0001, "a drip watering takes the time of a watering")
 	assert_near(buildings.stage_cooldown(b, water), maxf(_wait() * 0.75 * 0.8, _floor()), 0.0001, "and the waits remain (wait x 0.75 x 0.8)")
 
 
@@ -98,7 +102,7 @@ func test_irrigation_runs_at_night_and_is_not_momo_experience() -> void:
 	_done(["farm_expansion", "watering_efficiency", "watering_can", "drip_irrigation"])
 	sim.advance_to(int(0.8 * sim.clock.day_ms))
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(6000)
+	sim.advance_ms(int(_work(0) * 1000.0) + 100)
 	assert_eq(buildings.get_building(farm)["worker"], -1, "watering under the moon")
 	sim.advance_ms(100000)
 	assert_eq(int((sim.system(&"mail") as MailSystem).work.get("farm", 0)), 0, "the drip line writes no letters")
@@ -132,13 +136,13 @@ func test_varieties_open_through_research_and_change_between_cycles() -> void:
 	_done(["farm_expansion", "harvest_boost", "seed_selection"])
 	sim.execute({"type": "building.tap", "id": farm})
 	assert_eq(sim.execute({"type": "building.variety", "id": farm, "variety": "hardy"})["reason"], "err.variety_busy", "not with seed in the ground")
-	sim.advance_ms(5000)
-	assert_eq(sim.execute({"type": "building.variety", "id": farm, "variety": "hardy"})["reason"], "err.variety_busy", "nor between waterings")
+	sim.advance_ms(int(_work(0) * 1000.0))
+	assert_eq(sim.execute({"type": "building.variety", "id": farm, "variety": "hardy"})["reason"], "err.variety_busy", "nor once it is sown")
 	var b := buildings.get_building(farm)
 	b["stage"] = 0
 	b["state"] = BuildingSystem.IDLE
 	assert_true(sim.execute({"type": "building.variety", "id": farm, "variety": "hardy"})["ok"], "between cycles it changes")
-	assert_eq(buildings.stages(b).filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 3, "the hardy crop is watered three times too")
+	assert_eq(buildings.stages(b).filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 1, "the hardy crop is watered too")
 	assert_eq(buildings.cycle_estimate(b)["yield"], {"crop": 4.0}, "and gives 2, plus field expansion and soil care: 4")
 
 
@@ -146,14 +150,18 @@ func test_millet_is_a_different_crop_with_its_own_process() -> void:
 	_done(["farm_expansion", "harvest_boost", "seed_selection", "drought_millet"])
 	assert_true(sim.execute({"type": "building.variety", "id": farm, "variety": "millet"})["ok"], "chosen")
 	var b := buildings.get_building(farm)
-	assert_eq(buildings.stages(b).map(func(st: Dictionary) -> String: return st["action"]), ["sow", "water", "water", "harvest"], "a grain for dry ground: two waterings")
+	assert_eq(buildings.stages(b).map(func(st: Dictionary) -> String: return st["action"]), ["sow", "harvest"], "a grain for dry ground: no watering at all")
+	var millet: Array = sim.data.building_type("farm")["varieties"]["millet"]["stages"]
 	var by_hand := buildings.cycle_estimate(b)
-	assert_eq(by_hand["work_seconds"], 20.0, "less work")
-	assert_eq(by_hand["wait_seconds"], 90.0, "longer waits (45 s each)")
+	var usual := buildings.cycle_estimate({"type": "farm", "variety": "base", "stage": 0})
+	assert_true(float(by_hand["work_seconds"]) < float(usual["work_seconds"]), "less work")
+	assert_true(float(by_hand["wait_seconds"]) > float(usual["wait_seconds"]), "a longer wait (%.1f s)" % float(by_hand["wait_seconds"]))
 	assert_eq(buildings.look(b), "", "nothing planted yet")
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(5000)
-	assert_eq(buildings.look(b), "crop_seeds", "its own looks")
+	sim.advance_ms(int(float(millet[0]["seconds"]) * 1000.0))
+	assert_eq(buildings.look(b), "crop_sprout", "its own looks: growing")
+	sim.advance_ms(int(float(millet[0]["cooldown"]) * 1000.0))
+	assert_eq(buildings.look(b), "crop_ripe", "then ripe")
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
 	var b2 := (copy.system(&"buildings") as BuildingSystem).get_building(farm)
 	assert_eq((copy.system(&"buildings") as BuildingSystem).variety_of(b2), "millet", "the variety is saved")

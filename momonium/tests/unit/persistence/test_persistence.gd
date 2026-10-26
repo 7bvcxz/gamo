@@ -119,7 +119,10 @@ func test_a_save_from_before_the_envelope_opens() -> void:
 	assert_eq(r["status"], "ok", "schema 1 migrates")
 	assert_eq(int(r["saved_unix"]), 0, "with no time, so no offline progress is guessed")
 	assert_eq(int(r["state"]["schema"]), Simulation.SAVE_SCHEMA, "now at the current schema")
-	assert_eq(_json(Simulation.from_save(r["state"]).save_state()["systems"]), _json(sim.save_state()["systems"]), "same island")
+	# Every later step runs too (Step 50's farm cycle among them).
+	var later := sim.save_state()
+	later["schema"] = 2
+	assert_eq(_json(Simulation.from_save(r["state"]).save_state()["systems"]), _json(Simulation.from_save(SaveMigration.migrate(later)).save_state()["systems"]), "same island")
 
 
 func test_a_crash_mid_write_leaves_a_save() -> void:

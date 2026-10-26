@@ -83,10 +83,29 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   expect(t.step).toBe('momo_edit');
   const tile = await page.evaluate(() => window.momonium.call('cell_screen', [0, 1]));
   await tapRect([tile.x - 2, tile.y - 2, 4, 4], tile.window);
-  t = await g.query('tutorial');
-  expect(t.step).toBe('more');
   const w = await g.query('watch');
   if (w.editing) await tapRect(w.pencil, w.window);
+  // Quiet while the island has room (Step 50), then the sea once it is
+  // nearly full: its price, and when affordable, two taps on the glow.
+  t = await g.query('tutorial');
+  expect(t.step).toBe('later');
+  expect(t.shown).toBe(false);
+  while (t.free.length > 1) {
+    await g.query('dev_place_building', ['research', t.free[0][0], t.free[0][1]]);
+    t = await g.query('tutorial');
+  }
+  await g.query('dev_add_money', (await g.query('rules')).land_price);
+  await page.waitForTimeout(300);
+  t = await g.query('tutorial');
+  expect(t.step).toBe('land');
+  expect(t.shown).toBe(true);
+  expect(t.target.length).toBe(4);
+  await shot('6b-land');
+  const sea = t.target;
+  await tapRect(sea, t.window);
+  await tapRect(sea, t.window);
+  t = await g.query('tutorial');
+  expect(t.step).toBe('more');
   // The farm selected again: the last step rings its trash.
   const built = (await g.state()).buildings.buildings.find((b) => b.type === 'farm');
   await g.query('dev_select_cell', built.anchor);

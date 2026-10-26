@@ -8,14 +8,20 @@ func test_estimate_matches_the_rules() -> void:
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	var b := buildings.get_building(farm)
-	var wait := float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"])
+	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
+	var work := 0.0
+	var wait := 0.0
+	for st: Dictionary in stages:
+		work += float(st["seconds"])
+		wait += float(st.get("cooldown", 0.0))
 	var you := buildings.cycle_estimate(b, 1.0)
-	assert_eq(you["work_seconds"], 25.0, "five stages of 5 s")
-	assert_eq(you["wait_seconds"], 3.0 * wait, "three waits")
+	assert_eq(you["work_seconds"], work, "the stages' work")
+	assert_eq(you["wait_seconds"], wait, "the waits")
 	assert_eq(you["yield"], {"crop": 1.0}, "one crop")
-	assert_near(you["per_day"]["crop"], 30.0 / (25.0 + 3.0 * wait), 0.0001, "per 30 s day")
+	var day := sim.clock.day_ms / 1000.0
+	assert_near(you["per_day"]["crop"], day / (work + wait), 0.0001, "per day")
 	var momo := buildings.cycle_estimate(b, 4.0)
-	assert_eq(momo["cycle_seconds"], 100.0 + 3.0 * wait, "4 x the work, the same waits")
+	assert_near(momo["cycle_seconds"], 4.0 * work + wait, 0.0001, "4 x the work, the same waits")
 
 
 func test_a_momo_cycle_takes_what_the_estimate_says() -> void:

@@ -20,9 +20,12 @@ func before_each() -> void:
 
 func _harvest_by_hand(times: int) -> void:
 	for i in times:
-		for wait: int in [5000, 35000, 35000, 35000, 5000]:
+		for st in buildings.stages(buildings.get_building(farm)).size():
+			var b := buildings.get_building(farm)
+			if b["state"] != BuildingSystem.IDLE:
+				sim.advance_ms(buildings.remaining_ms(b))
 			sim.execute({"type": "building.tap", "id": farm})
-			sim.advance_ms(wait)
+			sim.advance_ms(buildings.remaining_ms(b))
 
 
 func test_the_first_unattended_harvest_brings_one_letter() -> void:
@@ -32,7 +35,10 @@ func test_the_first_unattended_harvest_brings_one_letter() -> void:
 		if t == &"task_completed" and p["stage"] == "harvest" and harvested[0] == 0:
 			harvested[0] = clock.now_ms)
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	var waited := 0
+	while mail.letters.is_empty() and waited < 250000:
+		sim.advance_ms(100)
+		waited += 100
 	assert_eq(mail.letters.size(), 1, "one letter")
 	var l: Dictionary = mail.letters[0]
 	assert_eq(l["template"], "farm_first_harvest", "about the first harvest Momo brought in alone")
@@ -53,7 +59,7 @@ func test_the_first_unattended_harvest_brings_one_letter() -> void:
 
 
 func test_the_players_own_work_does_not_count() -> void:
-	_harvest_by_hand(4)
+	_harvest_by_hand(12)
 	assert_true(int(prog.mastery_of("farm")["level"]) >= 2, "farm mastery reached Lv 2 by hand")
 	assert_eq(mail.letters.size(), 0, "but nobody works the farm: no letter")
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
@@ -67,18 +73,19 @@ func test_at_most_one_letter_a_day() -> void:
 	prog.add_mastery("farm", 100000)
 	assert_true(int(prog.mastery_of("farm")["level"]) >= 3, "mastery jumped past two milestones at once")
 	assert_eq(mail.letters.size(), 1, "only one letter today")
+	assert_eq(mail.letters[0]["template"], "farm_watering", "the first of them in data order")
 	var first_day: int = mail.letters[0]["day"]
 	sim.advance_to(sim.clock.next_day_start_ms() + 1)
 	assert_eq(mail.letters.size(), 2, "the next one tomorrow")
 	assert_eq(mail.letters[1]["day"], first_day + 1, "on the following day")
-	assert_eq([mail.letters[0]["template"], mail.letters[1]["template"]], ["farm_watering", "farm_soil"], "in data order")
-	sim.advance_ms(30000 * 5)
-	# The only new milestone in these days is the Momo's own fifth stage at
-	# the farm (the first-harvest letter) -- reached or not at this Momo speed.
-	var met := 1 if int(mail.work.get("farm", 0)) >= 5 else 0
-	assert_eq(mail.letters.size(), 2 + met, "and nothing more until a new milestone")
-	if met == 1:
-		assert_eq(mail.letters[2]["template"], "farm_first_harvest", "which is the Momo's fifth stage")
+	sim.advance_ms(sim.clock.day_ms * 5)
+	# The Momo's own first harvest at the farm is a milestone too: three
+	# letters in all, each on its own day, each once.
+	var templates: Array = mail.letters.map(func(l: Dictionary) -> String: return String(l["template"]))
+	templates.sort()
+	assert_eq(templates, ["farm_first_harvest", "farm_soil", "farm_watering"], "each farm letter once")
+	for i in range(1, mail.letters.size()):
+		assert_true(int(mail.letters[i]["day"]) > int(mail.letters[i - 1]["day"]), "one a day")
 
 
 func test_the_most_experienced_assigned_momo_writes() -> void:
@@ -151,8 +158,9 @@ func test_an_old_save_without_mail_loads_and_does_not_flood() -> void:
 	assert_eq(m2.letters.size(), 0, "no mail in the old save")
 	copy.advance_ms(30000 * 3)
 	var days := m2.letters.map(func(l: Dictionary) -> int: return int(l["day"]))
-	assert_eq(days.size(), 2, "both passed milestones arrive (%s)" % [days])
-	assert_ne(days[0], days[1], "but on different days, not as a pile")
+	assert_true(days.size() >= 2, "the passed milestones arrive (%s)" % [days])
+	for i in range(1, days.size()):
+		assert_ne(days[i], days[i - 1], "but on different days, not as a pile")
 
 
 func test_same_letters_whatever_the_step_size() -> void:

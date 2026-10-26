@@ -81,13 +81,14 @@ func test_a_missing_input_is_worrying() -> void:
 
 
 func test_a_full_store_is_worrying() -> void:
-	# Wood is not sold each morning, so a full wood store stays full.
+	# Research notes are never sold, so a full store of them stays full
+	# (wood and crops are sold rather than stop the work, Step 50).
 	var inv: InventorySystem = sim.system(&"inventory")
-	inv.add("wood", inv.room_for("wood"), "test")
-	var l := bs.place_instant("lumberyard", Vector2i(1, 0))
+	inv.add("notes", inv.room_for("notes"), "test")
+	var l := bs.place_instant("research", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": l})
 	assert_true(_until(func() -> bool: return not momos.is_moving(1)), "it arrives")
-	assert_eq(String(bs.can_start(l)["reason"]), "err.storage_full", "nowhere to put the wood")
+	assert_eq(String(bs.can_start(l)["reason"]), "err.storage_full", "nowhere to put the notes")
 	assert_eq(MomoMood.reason(sim, 1), "full")
 	assert_eq(MomoMood.mood(sim, 1), "worried")
 

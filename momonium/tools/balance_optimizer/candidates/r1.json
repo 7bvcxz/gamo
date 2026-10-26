@@ -1,0 +1,9 @@
+{
+  "round": "R1",
+  "based_on": "R0 (the Step 50 rules with their first numbers, data/ at this commit)",
+  "sets": [
+    {"set": "buildings:types/research/cycle/stages/0/seconds=3", "old": 4, "why": "a study is a short write-up"},
+    {"set": "buildings:types/research/cycle/stages/0/cooldown=9", "old": 0, "why": "the experiment runs between write-ups: the lab no longer swallows the only Momo (R0: farm income fell to $3/min at 4:00 while it studied up to the notes cap)"},
+    {"set": "buildings:types/research/cycle/stages/0/cooldown_floor=3", "old": null, "why": "research may shorten the wait, not remove it"}
+  ]
+}

@@ -56,7 +56,10 @@ func shut_reason(id: int) -> String:
 	if not daily.is_empty():
 		var names: Array[String] = []
 		for item: String in daily:
-			names.append("%s %d" % [tr(String(sim.data.item(item).get("name", item))), int(daily[item])])
+			if item == "money":
+				names.append("$%d" % int(daily[item]))
+			else:
+				names.append("%s %d" % [tr(String(sim.data.item(item).get("name", item))), int(daily[item])])
 		return tr("life.shut_short").format({"items": ", ".join(names)})
 	return tr("life.shut_power").format({"kw": BuildingDetailView.amount(float(am.get("power", 0)))})
 

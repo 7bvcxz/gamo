@@ -1,25 +1,21 @@
 // Step 47: growth feedback is exact in the real build -- a real tap that
-// harvests pops once over the farm (touch on phones, a click on desktop),
-// time away caught up pops nothing, and Settings can switch effects off by a
-// real tap (the harvest still happens, nothing pops).
+// harvests pops once over the farm (touch on phones, a click on desktop;
+// Step 50: the crop is sold as it is picked, so the pop is its money), time
+// away caught up pops nothing, and Settings can switch effects off by a real
+// tap (the harvest still happens, nothing pops).
 import { test, expect } from '../lib/fixtures.mjs';
 import { clearPointOnCell } from '../lib/coords.mjs';
+import { runStages, settle } from '../lib/farm.mjs';
 
 async function farmReady(game) {
   await game.setTimeScale(0);
   const { id } = await game.query('dev_place_building', ['farm', 1, 0]);
   const b = async () => (await game.state()).buildings.buildings.find((x) => x.id === id);
-  // Through sow and three waterings by command, to a ripe farm.
-  for (let i = 0; i < 4; i++) {
-    await game.command({ type: 'building.tap', id });
-    for (let k = 0; k < 4 && (await b()).state !== 'idle'; k++) {
-      const s = await game.state();
-      const f = s.buildings.buildings.find((x) => x.id === id);
-      const end = f.state === 'working' ? f.task_end : f.ready_at;
-      await game.query('dev_advance_ms', Math.max(end - s.now_ms, 0) + 5);
-    }
-  }
-  expect((await b()).stage).toBe(4);
+  // Through sowing and watering by command, to a ripe farm.
+  const rules = await game.query('rules');
+  await runStages(game, id, rules.farm_stages.length - 1);
+  await settle(game, id);
+  expect((await b()).stage).toBe(rules.farm_stages.length - 1);
   return { id, b };
 }
 
@@ -36,7 +32,7 @@ async function harvestByTap(game, id, b) {
   await game.page.waitForTimeout(700);
 }
 
-const cropPops = (fx, id) => fx.world.filter((p) => p.key === `prod:${id}:crop`);
+const cropPops = (fx, id) => fx.world.filter((p) => p.key === `money:${id}`);
 
 test('a real tap harvests once and pops once over the farm', async ({ game }) => {
   const { id, b } = await farmReady(game);
@@ -45,7 +41,7 @@ test('a real tap harvests once and pops once over the farm', async ({ game }) =>
   const fx = await game.query('fx');
   const pops = cropPops(fx, id);
   expect(pops.length - before, `one pop for one harvest (${JSON.stringify(pops)})`).toBe(1);
-  expect(pops[pops.length - 1].text).toBe('+1');
+  expect(pops[pops.length - 1].text).toBe(`+$${(await game.query('rules')).crop_price}`);
 });
 
 test('time away caught up pops nothing', async ({ game }) => {
@@ -83,6 +79,6 @@ test('effects off by a real tap in Settings: the harvest happens, nothing pops',
   const before = await game.query('fx');
   await harvestByTap(game, id, b);
   const after = await game.query('fx');
-  expect((await game.state()).inventory.items.crop, 'the crop is in the store').toBeGreaterThan(0);
+  expect((await game.state()).economy.lifetime.sale, 'the crop was sold').toBeGreaterThan(0);
   expect(cropPops(after, id).length, 'but no pop').toBe(cropPops(before, id).length);
 });

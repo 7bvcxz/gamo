@@ -25,7 +25,9 @@ static func build(data: GameData = null) -> Simulation:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var prog: ProgressionSystem = sim.system(&"progression")
 	var research: ResearchSystem = sim.system(&"research")
-	economy.earn(40000, "demo")
+	# Enough for everything below at Step 50's prices (eleven hires alone
+	# are about $45,000 now).
+	economy.earn(120000, "demo")
 	prog.add_exp(4000, "demo")
 	for cell: Array in [[2, 0], [2, 1], [-1, 0], [-1, 1], [0, 2], [1, 2], [3, 0], [3, 1], [2, 2], [3, 2], [-1, 2], [4, 0], [4, 1], [4, 2], [2, 3]]:
 		sim.execute({"type": "land.buy", "cell": cell})

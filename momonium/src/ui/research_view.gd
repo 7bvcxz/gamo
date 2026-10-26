@@ -12,6 +12,10 @@ const CARD := Vector2(118, 104)
 const ROW := 134.0
 const GAP := 8.0
 
+## "Build a research lab" pressed: the island should offer the lab on a free
+## tile (Step 50: four blind players tapped that line and nothing happened).
+signal lab_wanted
+
 var sim: Simulation
 var lib: SpriteLibrary
 var research: ResearchSystem
@@ -211,6 +215,9 @@ func _build_detail() -> void:
 	start_button.focus_mode = Control.FOCUS_NONE
 	start_button.add_theme_font_size_override("font_size", 18)
 	start_button.pressed.connect(func() -> void:
+		if String(research.can_start(selected).get("reason", "")) == "err.no_lab":
+			lab_wanted.emit()
+			return
 		last_result = sim.execute({"type": "research.start", "id": selected})
 		refresh())
 	detail.add_child(start_button)
@@ -288,5 +295,6 @@ func refresh() -> void:
 			if not check["ok"]:
 				start_button.text += " · " + tr(String(check["reason"]))
 		_:
-			start_button.disabled = not check["ok"]
+			# Without a lab the button is the way to one, not a dead label.
+			start_button.disabled = not check["ok"] and String(check["reason"]) != "err.no_lab"
 			start_button.text = tr("research.start") if check["ok"] or state == "locked" else tr(String(check["reason"]))

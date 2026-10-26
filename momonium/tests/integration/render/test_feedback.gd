@@ -51,13 +51,7 @@ func _tap(p: Vector2) -> void:
 
 ## A farm one tap away from harvest (sown and watered three times by command).
 func _ripe_farm() -> int:
-	var id := bs.place_instant("farm", Vector2i(1, 0))
-	var tap := func() -> void: sim.execute({"type": "building.tap", "id": id})
-	tap.call()
-	sim.advance_ms(5000)
-	for i in 3:
-		tap.call()
-		sim.advance_ms(35000)
+	var id := bs.place_ready("farm", Vector2i(1, 0), "harvest")
 	fx.flush()
 	fx.shown.clear()
 	hud.flush_feedback()
@@ -69,8 +63,8 @@ func _produced(kind: String = "produced") -> Array:
 	return fx.shown.filter(func(s: Dictionary) -> bool: return s["kind"] == kind)
 
 
-## Crops the simulation reports harvested (the daily sale may empty the store
-## before a test looks, so count the events, not the store).
+## Crops the simulation reports harvested (they are sold as they are picked
+## and never reach the store, so count the events).
 func _harvests() -> Array:
 	var got: Array = []
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
@@ -87,14 +81,15 @@ func test_a_real_tap_harvests_once_and_pops_once() -> void:
 	# Touch and its emulated mouse click together, as on a phone.
 	_tap(cams.world_to_screen(proj.cell_center(Vector2i(1, 0))))
 	await tree.process_frame
-	sim.advance_ms(6000)
+	sim.advance_ms(2000)
 	fx.flush()
 	assert_eq(harvests.size(), 1, "the tap harvested once (%s)" % [harvests])
 	var got := int(harvests[0]) if not harvests.is_empty() else 0
-	var pops := _produced()
+	var pops := _produced("money")
 	assert_eq(pops.size(), 1, "one pop for one harvest (%s)" % [pops])
-	assert_eq(int(pops[0]["amount"]), got, "showing what was harvested")
-	assert_eq(String(pops[0]["key"]), "prod:%d:crop" % id, "over that farm")
+	assert_eq(int(pops[0]["amount"]), got * (sim.system(&"economy") as EconomySystem).unit_price("crop"), "showing the money it fetched")
+	assert_eq(String(pops[0]["key"]), "money:%d" % id, "over that farm")
+	assert_eq(_produced().size(), 0, "the crop sold at once is shown as its money, not as a crop")
 
 
 func test_a_batch_of_jobs_is_one_pop_per_building_and_item() -> void:
@@ -152,7 +147,7 @@ func test_effects_off_shows_nothing_but_changes_nothing() -> void:
 	var id := _ripe_farm()
 	var harvests := _harvests()
 	sim.execute({"type": "building.tap", "id": id})
-	sim.advance_ms(6000)
+	sim.advance_ms(2000)
 	fx.flush()
 	hud.flush_feedback()
 	assert_eq(harvests.size(), 1, "the harvest still happens")

@@ -14,6 +14,12 @@ extends Node
 ## sees it. A building keeps working when something else is selected.
 
 signal selection_changed(kind: String)
+## A tap on a Momo's letter bubble: the letter should open.
+signal envelope_tapped(momo: int)
+## World units a tap may miss a Momo by and still pick it -- set by the
+## tutorial while it asks for one (Step 50: blind players needed three or four
+## taps to catch a Momo walking away).
+var momo_slack := 0.0
 
 var sim: Simulation
 var world: WorldSystem
@@ -69,17 +75,26 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 		if target != 0:
 			last_result = sim.execute({"type": "momo.assign", "momo": selected_id, "building": target})
 			momo_panel.assigning = false
-			if not last_result["ok"] and momo_views.actor(selected_id) != null:
-				momo_views.actor(selected_id).refuse()
+			if not last_result["ok"]:
+				# Why, in words (Step 50: a refused assignment only shook the
+				# Momo and blind players thought Assign did nothing).
+				momo_panel.say(tr(String(last_result.get("reason", ""))))
+				if momo_views.actor(selected_id) != null:
+					momo_views.actor(selected_id).refuse()
 			return
 	var id := views.hit(world_pos)
 	if id == 0:
 		id = buildings.building_at(projection.cell_at(world_pos))
-	var momo := momo_views.hit(world_pos) if momo_views != null else 0
+	var momo := momo_views.hit(world_pos, momo_slack) if momo_views != null else 0
 	# The Momo in front wins -- except a second tap on the one already
-	# selected: that reaches the building it stands on. A working Momo stands
-	# on its farm, and the blind playtest (Step 45) kept getting the Momo.
-	if momo != 0 and not (id != 0 and kind == "momo" and selected_id == momo):
+	# selected: that reaches what it stands on, a building or an empty tile.
+	# A working Momo stands on its farm, and the blind playtest (Step 45)
+	# kept getting the Momo.
+	if momo != 0 and momo_views.actor(momo).envelope_rect().has_point(world_pos):
+		select_momo(momo)
+		envelope_tapped.emit(momo)
+		return
+	if momo != 0 and not (kind == "momo" and selected_id == momo):
 		select_momo(momo)
 		return
 	if id != 0:

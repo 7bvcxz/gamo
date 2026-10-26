@@ -215,6 +215,7 @@ func _ready() -> void:
 	selection.name = "Selection"
 	add_child(selection)
 	selection.setup(sim, projection, building_views, marker, panel, router)
+	selection.envelope_tapped.connect(func(_m: int) -> void: _on_hud_action(&"mailbox"))
 	selection.momo_views = momo_views
 	momo_panel = MomoPanel.new()
 	ui.add_child(momo_panel)
@@ -293,6 +294,7 @@ func _ready() -> void:
 	for industry: String in (sim.system(&"research") as ResearchSystem).industries():
 		var rv := ResearchView.new()
 		rv.setup(sim, lib, industry)
+		rv.lab_wanted.connect(_offer_lab)
 		research_views.append(rv)
 		# A building industry is named as its mastery; other branches (power, general) by their own key.
 		research_frame.add_tab("mastery." + industry if not sim.data.building_type(industry).is_empty() else "research.industry." + industry, rv)
@@ -407,6 +409,7 @@ func _ready() -> void:
 	tutorial.selection = selection
 	tutorial.editor = watch_editor
 	tutorial.momo_views = momo_views
+	tutorial.land_preview = land_preview
 	sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
 		if type == &"momo_watch_changed" and tutorial.running and watch_editor.active:
 			tutorial._edited = true)
@@ -432,7 +435,14 @@ func _ready() -> void:
 		return {"momo_x": sim.data.get_float("balance", "momo.work_time_multiplier", 4.0),
 			"farm_wait_ms": int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0),
 			"land_price": (sim.system(&"land") as LandSystem).next_cost(), "hire_price": (sim.system(&"momo") as MomoSystem).hire_cost(),
-			"farm_cycle_exp": _cycle_reward("player"), "farm_cycle_mastery": _cycle_reward("mastery")})
+			"farm_cycle_exp": _cycle_reward("player"), "farm_cycle_mastery": _cycle_reward("mastery"),
+			"farm_stages": (sim.data.building_type("farm")["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
+				return [String(st["id"]), int(float(st["seconds"]) * 1000.0), int(float(st.get("cooldown", 0.0)) * 1000.0)]),
+			"crop_price": (sim.system(&"economy") as EconomySystem).unit_price("crop"),
+			"exp_to_next": sim.data.get_value("balance", "progression.exp_to_next", []),
+			"prestige_level": sim.data.get_int("balance", "prestige.min_level", 5),
+			"land_invite_level": sim.data.get_int("balance", "land.invite_level", 1),
+			"stages_ms": _stages_ms()})
 	bridge.register_query("journey", func(_a: Variant) -> Dictionary:
 		var j: JourneySystem = sim.system(&"journey")
 		var rows := {}
@@ -799,7 +809,16 @@ func _load_or_new() -> Simulation:
 			offline_report = OfflineProgress.catch_up(loaded, int((Time.get_unix_time_from_system() - saved) * 1000.0))
 		return loaded
 	save_blocked = load_status == "too_new"
-	return Simulation.new_game()
+	return _fresh_island()
+
+
+## A new player's island (a ripe farm waiting, Step 50) -- or, under the
+## browser test bridge, the bare world the specs build on, unless the page
+## asks for the real start (`window.MOMONIUM_E2E_ISLAND`).
+func _fresh_island() -> Simulation:
+	if WebBridge.is_web() and bool(JavaScriptBridge.eval("!!window.MOMONIUM_E2E && !window.MOMONIUM_E2E_ISLAND", true)):
+		return Simulation.new_game()
+	return Simulation.new_island()
 
 
 ## The first-run tutorial starts by itself only on a brand-new island, once,
@@ -926,24 +945,50 @@ func _connect_tips() -> void:
 			(func() -> void: tips.offer("rp", tr("tips.rp"), func() -> Rect2: return rp_view.head.get_global_rect() if rp_view.is_visible_in_tree() else Rect2())).call_deferred())
 
 
-## The sea tip waits until the player can afford a tile.
+## The sea tip waits for the moment the island needs room (at most one free
+## tile) and the player can afford a tile -- when the next tile glows too
+## (LandPreview.invitation; Step 50: offered as soon as it was affordable,
+## half the blind players bought a tile in the first minute and the other
+## half not for minutes).
 func _check_land_tip(delta: float) -> void:
 	_tip_check -= delta
-	if _tip_check > 0.0 or tutorial.running or tips.tip != "" or tips.seen("land"):
+	if _tip_check > 0.0 or tutorial.running or tips.tip != "" or tips.seen("land") or _busy():
 		return
 	_tip_check = 1.0
 	var land: LandSystem = sim.system(&"land")
-	if not (sim.system(&"economy") as EconomySystem).can_afford(land.next_cost()) or not (sim.system(&"progression") as ProgressionSystem).is_unlocked("land"):
+	var cell := land_preview.invitation()
+	if cell == LandPreview.NONE:
 		return
-	var spots := land.suggested()
-	if spots.is_empty():
-		return
-	var cell: Vector2i = spots[0]
 	var line := tr("tips.land_touch") if DisplayServer.is_touchscreen_available() else tr("tips.land_mouse")
 	tips.offer("land", line % land.next_cost(), func() -> Rect2:
 		var c := cameras.world_to_screen(projection.cell_center(cell))
 		var w := projection.tile_width * cameras.camera.zoom.x * 0.5
 		return Rect2(c - Vector2(w, w * 0.6), Vector2(w * 2.0, w * 1.2)))
+
+
+## The player is in the middle of something: the build choices or a window
+## are open. A tip waits (Step 50: the sea tip rose over the open choices and
+## took the tap meant for Special).
+func _busy() -> bool:
+	if build_strip.open:
+		return true
+	for f: PanelFrame in [status_frame, detail_frame, research_frame, sale_frame, power_frame, mail_frame, away_frame, settings_frame]:
+		if f != null and f.visible:
+			return true
+	return false
+
+
+## "Build a research lab" from the research panel: the panel closes and the
+## build choices open on a free tile (or, with none, the next tile to buy
+## glows -- the sea tip's own picture).
+func _offer_lab() -> void:
+	research_frame.close()
+	var world: WorldSystem = sim.system(&"world")
+	var free := world.buildable_cells()
+	if free.is_empty():
+		return
+	selection.select_tile(free[0], "tile.grass")
+	build_strip.show_for(free[0])
 
 
 ## Screen options from Settings: text-and-button size (the whole canvas is
@@ -1120,6 +1165,10 @@ func _on_hud_action(action_name: StringName) -> void:
 		hud_actions.pop_front()
 	build_strip.close()
 	watch_editor.end_edit()
+	# The welcome-back card has been read: whatever opens next takes its place
+	# (Step 50: it stayed on top of Status and covered its tabs).
+	if away_frame != null:
+		away_frame.close()
 	match action_name:
 		&"settings":
 			shop_menu.visible = false
@@ -1174,6 +1223,7 @@ func _hud_info(_arg: Variant) -> Dictionary:
 	return {"day": hud._day_label.text, "seconds": hud._seconds_label.text, "money": hud._money_label.text,
 		"level": hud._level_label.text, "exp": hud._exp_label.text, "buttons": buttons,
 		"labels": hud.buttons.keys().map(func(k: StringName) -> String: return (hud.buttons[k] as HudButton)._label.text),
+		"badges": hud.buttons.keys().filter(func(k: StringName) -> bool: return (hud.buttons[k] as HudButton).badge).map(func(k: StringName) -> String: return String(k)),
 		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current(),
 		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text},
 		"pills": {"day": to_window.call(hud.day_panel.get_global_rect()), "money": to_window.call(hud.money_pill.get_global_rect()),
@@ -1200,7 +1250,8 @@ func _land_buy_info(_arg: Variant) -> Dictionary:
 	var f := land_preview.focus
 	return {"focus": [] if f == LandPreview.NONE else [f.x, f.y], "pending": [] if land_buyer.pending == LandPreview.NONE else [land_buyer.pending.x, land_buyer.pending.y],
 		"price": land_preview.price_text(), "hint": land_preview.hint, "affordable": land_preview.affordable,
-		"cost": (sim.system(&"land") as LandSystem).next_cost(), "result": land_buyer.last_result}
+		"cost": (sim.system(&"land") as LandSystem).next_cost(), "result": land_buyer.last_result,
+		"invite": [] if land_preview.invite == LandPreview.NONE else [land_preview.invite.x, land_preview.invite.y]}
 
 
 func _place_shop_menu() -> void:
@@ -1335,7 +1386,9 @@ func _tutorial_info(_arg: Variant) -> Dictionary:
 		"bubble": conv.call(tutorial.bubble.get_global_rect()),
 		"skip": conv.call(tutorial.skip_button.get_global_rect()) if tutorial.skip_button.visible else [],
 		"ok": conv.call(tutorial.ok_button.get_global_rect()) if tutorial.ok_button.visible else [],
-		"done": bool(settings.get_value("tutorial_done")), "window": [win.x, win.y]}
+		"done": bool(settings.get_value("tutorial_done")), "window": [win.x, win.y],
+		"shown": tutorial.bubble.visible,
+		"free": (sim.system(&"world") as WorldSystem).buildable_cells().map(func(c: Vector2i) -> Array: return [c.x, c.y])}
 
 
 ## E2E: the settings panel, the demo badge and where to tap.
@@ -1363,9 +1416,19 @@ func _settings_info(_arg: Variant) -> Dictionary:
 func _cycle_reward(kind: String) -> int:
 	var stage: Dictionary = sim.data.get_value("balance", "progression.rewards.stage", {})
 	var n := 0
-	for k: String in ["farm.sow", "farm.water", "farm.water", "farm.water", "farm.harvest"]:
-		n += int(stage.get(k, {}).get(kind, 0))
+	# The farm's stages as the data has them (one watering since Step 50).
+	for st: Dictionary in sim.data.building_type("farm")["cycle"]["stages"]:
+		n += int(stage.get("farm." + String(st["id"]), {}).get(kind, 0))
 	return n
+
+
+## E2E: each core building's stages, [id, ms] in order.
+func _stages_ms() -> Dictionary:
+	var out := {}
+	for type: String in ["farm", "lumberyard", "mine", "research"]:
+		out[type] = (sim.data.building_type(type)["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
+			return [String(st["id"]), int(float(st["seconds"]) * 1000.0)])
+	return out
 
 
 ## E2E: where a Settings row is on screen -- [] while it is scrolled out of

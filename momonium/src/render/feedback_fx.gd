@@ -2,7 +2,8 @@ class_name FeedbackFx
 extends Node2D
 
 ## Small world-space responses to real events (Step 47): "+3" with the item's
-## icon over a building that produced, "x2" over the Clock Tower when its
+## icon over a building that produced, "+$3" over one whose work just sold
+## (Step 50: finished work is money at once), "x2" over the Clock Tower when its
 ## burst begins, the whole island twinkling once when the settlement is
 ## promoted. Every pop comes from a simulation event, never from a counter of
 ## its own.
@@ -68,10 +69,17 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 	match type:
 		&"produced":
 			var id := int(payload["id"])
+			var economy: EconomySystem = sim.system(&"economy")
 			for item: String in (payload.get("items", {}) as Dictionary):
 				var n := float(payload["items"][item])
-				if n > 0.0:
+				# A crop sold as it is picked shows as its money, not as a crop.
+				if n > 0.0 and not economy.sells_at_once(item):
 					_queue("prod:%d:%s" % [id, item], "produced", id, n, String(sim.data.item(item).get("icon", "")), Color("#fff6d8"))
+		&"sold":
+			# The money of a finished job, over the building that earned it.
+			var id := int(payload.get("id", 0))
+			if id != 0 and int(payload.get("money", 0)) > 0:
+				_queue("money:%d" % id, "money", id, float(payload["money"]), "icon_coin", Color("#ffe27a"))
 		&"tier_promoted":
 			for v: BuildingView in views.views.values():
 				v.sparkle()
@@ -150,10 +158,16 @@ func _show(key: String, p: Dictionary) -> void:
 	var at := v.top_point()
 	if cameras != null and cameras.camera != null and cameras.camera.is_inside_tree() and not cameras.sight_rect(0.0).has_point(at):
 		return
+	# Two things at once over one building (a felled tree's wood and its
+	# money): one above the other, never on top of each other (Step 50).
+	var zoom := cameras.camera.zoom.x if cameras != null and cameras.camera != null else 1.0
+	for a: Dictionary in _active:
+		if int(a.get("building", 0)) == int(p["building"]) and float(a["age"]) < 0.5:
+			at.y -= 30.0 / maxf(zoom, 0.05)
 	if _active.size() >= MAX_ACTIVE:
 		_recycle(_active[0]["node"])
 		_active.remove_at(0)
-	var text := String(p["text"]) if String(p["text"]) != "" else "+" + FxPrefs.compact(float(p["amount"]))
+	var text := String(p["text"]) if String(p["text"]) != "" else ("+$" if String(p["kind"]) == "money" else "+") + FxPrefs.compact(float(p["amount"]))
 	var node := _take()
 	var label: Label = node.get_node("Text")
 	label.text = text
@@ -173,7 +187,7 @@ func _show(key: String, p: Dictionary) -> void:
 	node.position = at
 	node.modulate.a = 1.0
 	node.visible = true
-	_active.append({"node": node, "age": 0.0, "from": at})
+	_active.append({"node": node, "age": 0.0, "from": at, "building": int(p["building"])})
 	shown.append({"kind": p["kind"], "key": key, "text": text, "amount": float(p["amount"])})
 	if shown.size() > 60:
 		shown.pop_front()

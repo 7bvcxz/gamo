@@ -1,5 +1,5 @@
 {
-  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes. Only four families are placed on land -- farm, mine, lumberyard and research (the Lab); `placeable` marks them. Every other type is an internal facility of one family (`family`): a building of that family is refitted into it in place (building.refit), keeping its tile. Demolishing a finished building refunds `demolish_refund` of what was actually paid (money and materials, rounded down). Special structures (`special`: true) are landmarks, not a fifth production family: built from the Special part of the build strip, one of each type at a time, within the settlement's special slots (balance.specials); no work cycle, no family. Pulled down, half of what was paid comes back and that type cannot be built again for `rebuild_cooldown` seconds. A special's `effect` (SpecialSystem): work_burst {multiply, active_seconds, cycle_seconds} -- work started in the first active_seconds of every game-clock cycle takes multiply times as long; skill_exp {multiply} -- Momo skill and mastery experience; legacy {share} -- extra legacy points when the island is sold (rounded half up).",
+  "_doc": "Building catalog. Each type: footprint `size`, `cost` (money and items), `build_seconds` of construction, `unlock` (player level for now; research later), and a work `cycle`: stages done in order, each taking `seconds` of active work and followed by `cooldown` seconds before the next stage may start. Types with \"enabled\": false are not offered yet (their industry arrives in a later step). `workers` is how many Momo can be assigned to work there. Stage yields may be fractional (a rate per completed stage); each building carries the remainder in thousandths, so 0.25 copper per dig is exactly one copper every fourth dig. `power.generate` makes a type a generator ({kind: solar|wind|steam|hydro, kw, burn_seconds for fuel}); generators have no work cycle unless they need tending (the steam engine's stoking). `placement: shore` builds only on a tile beside the sea. `unlock.research` names research that must be finished too. `manages`: a Momo working here is the island's manager (no work cycle). `housing` {capacity, rest}: homes; a housed Momo works `rest` times as long (rested). `amenity` {happiness, daily?, power?}: raises island happiness; `daily` items (and `money`) are used up at each new day (closed that day if short), `power` kW must be on supply at the day's start. `power.use` {draw, multiply, required}: power a building always needs while working (research can add more). `staff.min`: Momo that must be at work there for a stage to start (the player alone cannot run it). A stage's `revenue` {base, per_release, cap} pays money when it completes (a studio's release grows with its releases; a mine's or lumberyard's is the sale of what was dug or felled). Only four families are placed on land -- farm, mine, lumberyard and research (the Lab); `placeable` marks them. Every other type is an internal facility of one family (`family`): a building of that family is refitted into it in place (building.refit), keeping its tile. Demolishing a finished building refunds `demolish_refund` of what was actually paid (money and materials, rounded down). Special structures (`special`: true) are landmarks, not a fifth production family: built from the Special part of the build strip, one of each type at a time, within the settlement's special slots (balance.specials); no work cycle, no family. Pulled down, half of what was paid comes back and that type cannot be built again for `rebuild_cooldown` seconds. A special's `effect` (SpecialSystem): work_burst {multiply, active_seconds, cycle_seconds} -- work started in the first active_seconds of every game-clock cycle takes multiply times as long; skill_exp {multiply} -- Momo skill and mastery experience; legacy {share} -- extra legacy points when the island is sold (rounded half up).",
   "types": {
     "farm": {
       "name": "building.farm",
@@ -9,53 +9,33 @@
       ],
       "sprite": "farm",
       "cycle": {
-        "_doc": "Sow, water three times with at least 15 s between waterings (Step 42: 30 s left the first minutes too quiet -- the crop still needs three waterings, and research shortens the wait towards its floor) (the plants need the time to drink and grow; it is world time, not work time), let it ripen, harvest. `looks[i]` is the crop overlay shown while stage i is the next one to do. Research may change how long a stage takes or the waits between them, never remove a `required` stage.",
+        "_doc": "Sow, water once, harvest (Step 50: one complete cycle is 5 s by hand -- 1 s of work each and 2 s for the watered crop to drink and ripen, a world rule research can shorten towards its floor). The harvest's crops are sold the moment they are picked. `looks[i]` is the crop overlay while stage i is the next one to do; `growing_looks[i]` while waiting for it. Research may change how long a stage takes or the wait, never remove a `required` stage.",
         "stages": [
           {
             "id": "sow",
             "action": "sow",
             "label": "stage.sow",
             "icon": "ui_seed",
-            "seconds": 5,
+            "seconds": 1,
             "cooldown": 0,
             "required": true
           },
           {
-            "id": "water1",
+            "id": "water",
             "action": "water",
             "label": "stage.water",
             "icon": "ui_water",
-            "seconds": 5,
-            "cooldown": 15,
+            "seconds": 1,
+            "cooldown": 2,
             "required": true,
-            "cooldown_floor": 4
-          },
-          {
-            "id": "water2",
-            "action": "water",
-            "label": "stage.water",
-            "icon": "ui_water",
-            "seconds": 5,
-            "cooldown": 15,
-            "required": true,
-            "cooldown_floor": 4
-          },
-          {
-            "id": "water3",
-            "action": "water",
-            "label": "stage.water",
-            "icon": "ui_water",
-            "seconds": 5,
-            "cooldown": 15,
-            "required": true,
-            "cooldown_floor": 4
+            "cooldown_floor": 0.5
           },
           {
             "id": "harvest",
             "action": "harvest",
             "label": "stage.harvest",
             "icon": "ui_harvest",
-            "seconds": 5,
+            "seconds": 1,
             "cooldown": 0,
             "required": true,
             "yield": {
@@ -66,9 +46,12 @@
         "looks": [
           "",
           "crop_seeds",
-          "crop_sprout",
-          "crop_leafy",
           "crop_ripe"
+        ],
+        "growing_looks": [
+          "",
+          "",
+          "crop_leafy"
         ]
       },
       "icon": "ui_sprout",
@@ -76,7 +59,7 @@
         "money": 10,
         "items": {}
       },
-      "build_seconds": 5,
+      "build_seconds": 3,
       "unlock": {
         "level": 1
       },
@@ -84,7 +67,7 @@
       "refund": 1.0,
       "workers": 1,
       "varieties": {
-        "_doc": "What is grown. `base` is the cycle above (sow, three waterings, harvest -- always). Another variety is a different crop with its own real agricultural process: `stages`/`looks` replace the cycle (omit them to keep it) and `yield` {stage id: {item: n}} replaces what a stage gives. Varieties other than base open through research (an effect {kind: variety}). A farm changes variety only between cycles, before sowing.",
+        "_doc": "What is grown. `base` is the cycle above (sow, water, harvest -- always). Another variety is a different crop with its own real agricultural process: `stages`/`looks` replace the cycle (omit them to keep it) and `yield` {stage id: {item: n}} replaces what a stage gives. Varieties other than base open through research (an effect {kind: variety}). A farm changes variety only between cycles, before sowing.",
         "base": {
           "name": "variety.base",
           "icon": "ui_sprout"
@@ -107,48 +90,31 @@
               "action": "sow",
               "label": "stage.sow",
               "icon": "ui_seed",
-              "seconds": 5,
-              "cooldown": 0,
-              "required": true
-            },
-            {
-              "id": "water1",
-              "action": "water",
-              "label": "stage.water",
-              "icon": "ui_water",
-              "seconds": 5,
-              "cooldown": 45,
+              "seconds": 1,
+              "cooldown": 6,
               "required": true,
-              "cooldown_floor": 15
-            },
-            {
-              "id": "water2",
-              "action": "water",
-              "label": "stage.water",
-              "icon": "ui_water",
-              "seconds": 5,
-              "cooldown": 45,
-              "required": true,
-              "cooldown_floor": 15
+              "cooldown_floor": 2
             },
             {
               "id": "harvest",
               "action": "harvest",
               "label": "stage.harvest",
               "icon": "ui_harvest",
-              "seconds": 5,
+              "seconds": 1,
               "cooldown": 0,
               "required": true,
               "yield": {
-                "crop": 1
+                "crop": 2
               }
             }
           ],
           "looks": [
             "",
-            "crop_seeds",
-            "crop_leafy",
             "crop_ripe"
+          ],
+          "growing_looks": [
+            "",
+            "crop_sprout"
           ]
         }
       },
@@ -163,18 +129,19 @@
       ],
       "sprite": "lab",
       "cycle": {
-        "_doc": "Study: experiments written up as research notes, the currency research is paid in. No wait between studies; the store's room for notes is the limit.",
+        "_doc": "Study: an experiment runs (the wait) and is written up as a research note, the currency research is paid in. The store's room for notes is the limit. (Step 50: the wait lets a Momo look after its farms meanwhile -- with no wait the lab kept the only Momo from them.)",
         "stages": [
           {
             "id": "study",
             "action": "study",
             "label": "stage.study",
             "icon": "ui_flask",
-            "seconds": 6,
-            "cooldown": 0,
+            "seconds": 3,
+            "cooldown": 6,
             "yield": {
               "notes": 1
-            }
+            },
+            "cooldown_floor": 3
           }
         ],
         "looks": [
@@ -183,10 +150,10 @@
       },
       "icon": "ui_flask",
       "cost": {
-        "money": 45,
+        "money": 40,
         "items": {}
       },
-      "build_seconds": 10,
+      "build_seconds": 5,
       "unlock": {
         "level": 2
       },
@@ -204,18 +171,23 @@
       ],
       "sprite": "lumberyard",
       "cycle": {
-        "_doc": "Sustainable forestry: fell a grown tree (wood), plant a sapling in its place, and let it grow before the next felling. The wait is the sapling's growing time, a world rule.",
+        "_doc": "Sustainable forestry: fell a grown tree (the timber sold at once as `revenue`, wood kept for building), plant a sapling in its place, and let it grow before the next felling -- the sapling's growing time, a world rule.",
         "stages": [
           {
             "id": "chop",
             "action": "chop",
             "label": "stage.chop",
             "icon": "ui_lumber",
-            "seconds": 6,
+            "seconds": 4,
             "cooldown": 0,
             "required": true,
             "yield": {
               "wood": 2
+            },
+            "revenue": {
+              "base": 5,
+              "per_release": 0,
+              "cap": 1
             }
           },
           {
@@ -223,10 +195,10 @@
             "action": "replant",
             "label": "stage.replant",
             "icon": "ui_sprout",
-            "seconds": 4,
-            "cooldown": 40,
+            "seconds": 2,
+            "cooldown": 10,
             "required": true,
-            "cooldown_floor": 15
+            "cooldown_floor": 4
           }
         ],
         "looks": [
@@ -239,7 +211,7 @@
         "money": 80,
         "items": {}
       },
-      "build_seconds": 10,
+      "build_seconds": 5,
       "unlock": {
         "level": 2
       },
@@ -257,19 +229,24 @@
       ],
       "sprite": "mine",
       "cycle": {
-        "_doc": "Dig at the face (stone), then shore up the tunnel and clear the rubble before digging on -- the wait is that work of the rock, not the miner. Ores other than stone come with prospecting research, at fractional rates per dig carried over exactly (thousandths), so every dig is the same rule and no ore appears by chance.",
+        "_doc": "Dig at the face, then shore up the tunnel and clear the rubble before digging on (Step 50: 10 s for each unit dug -- 4 s of work, 6 s of the rock's own wait). The ore at the face is sold as it comes out (`revenue`, paid at once); the stone is kept for building (what the store has no room for is sold). Ores other than stone come with prospecting research, at fractional rates per dig carried over exactly (thousandths).",
         "stages": [
           {
             "id": "dig",
             "action": "dig",
             "label": "stage.dig",
             "icon": "ui_mine",
-            "seconds": 8,
-            "cooldown": 12,
+            "seconds": 4,
+            "cooldown": 6,
             "required": true,
-            "cooldown_floor": 4,
+            "cooldown_floor": 2,
             "yield": {
               "stone": 1
+            },
+            "revenue": {
+              "base": 6,
+              "per_release": 0,
+              "cap": 1
             }
           }
         ],
@@ -284,7 +261,7 @@
           "wood": 10
         }
       },
-      "build_seconds": 15,
+      "build_seconds": 8,
       "unlock": {
         "level": 3
       },
@@ -652,7 +629,7 @@
       "amenity": {
         "happiness": 14,
         "daily": {
-          "crop": 3
+          "money": 15
         }
       },
       "icon": "ui_harvest",

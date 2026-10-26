@@ -1,10 +1,12 @@
 extends "res://tests/framework/test_case.gd"
 
-## The first-run tutorial with real taps: it rings an empty tile, then the
-## farm among the four choices beside it (price shown), waits for the farm,
-## asks for the first sowing and watering, then shows that any empty tile
-## builds the others and how one comes down. It can be skipped, never blocks a
-## tap, and replays from Settings.
+## The first-run tutorial with real taps. On a new player's island it rings
+## the ripe crop first (the first tap is a harvest and its money, Step 50),
+## then sowing and watering it; on an island without one it rings an empty
+## tile, then the farm among the four choices beside it (price shown), waits
+## for the farm, asks for the first sowing and watering. Then a Momo and its
+## tiles, then that any empty tile builds the others and how one comes down.
+## It can be skipped, never blocks a tap, and replays from Settings.
 
 const MainScene := preload("res://scenes/main.tscn")
 
@@ -48,6 +50,40 @@ func _frame() -> void:
 	await tree.process_frame
 
 
+## How long a farm stage (or its building) takes, from the data (ms).
+func _ms(i: int) -> int:
+	var st: Dictionary = sim.data.building_type("farm")["cycle"]["stages"][i]
+	return int((float(st["seconds"]) + float(st.get("cooldown", 0.0))) * 1000.0)
+
+
+func test_a_new_island_starts_with_the_ripe_crop() -> void:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var farm := bs.place_ready("farm", Vector2i(0, 0), "harvest")
+	tut.start()
+	await _frame()
+	assert_eq(tut.step, "harvest", "first: the ripe crop")
+	assert_eq(tut.text.text, "Tap the ripe crop", "with one short line")
+	var money := (sim.system(&"economy") as EconomySystem).money
+	_tap_at(tut.target.get_center())
+	await _frame()
+	assert_eq(tut.step, "working", "the tap is the harvest")
+	sim.advance_ms(_ms(2))
+	await _frame()
+	assert_true((sim.system(&"economy") as EconomySystem).money > money, "and its money")
+	assert_eq(tut.step, "sow", "then sow it again")
+	_tap_at(tut.target2.get_center())
+	await _frame()
+	sim.advance_ms(_ms(0))
+	await _frame()
+	assert_eq(tut.step, "water", "then water")
+	_tap_at(tut.target2.get_center())
+	await _frame()
+	sim.advance_ms(_ms(1))
+	await _frame()
+	assert_eq(tut.step, "momo_select", "then a Momo")
+	assert_eq(int(bs.get_building(farm)["completed"]), 3, "three stages by hand")
+
+
 func test_not_started_under_tests_or_on_its_own() -> void:
 	assert_false(tut.running, "no tutorial unless a fresh island asks for it")
 
@@ -70,20 +106,20 @@ func test_the_whole_path_with_taps() -> void:
 	_tap_at(tut.target.get_center())
 	await _frame()
 	assert_eq(tut.step, "wait_build", "building")
-	sim.advance_ms(6000)
+	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
 	await _frame()
 	assert_eq(tut.step, "sow", "built: sow it")
 	assert_true(tut.target2.size.x > 0.0, "the lit Sow card is ringed too (a Momo may stand in front of the farm)")
 	_tap_at(tut.target2.get_center())
 	await _frame()
 	assert_eq(tut.step, "working", "the tap is sowing")
-	sim.advance_ms(5000)
+	sim.advance_ms(_ms(0))
 	await _frame()
 	assert_eq(tut.step, "water", "then water")
 	_tap_at(tut.target2.get_center())
 	await _frame()
 	assert_eq(tut.step, "working", "watering")
-	sim.advance_ms(5000)
+	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["seconds"]) * 1000.0))
 	await _frame()
 	# The Momo, its pencil, a tile: what each Momo looks after.
 	assert_eq(tut.step, "momo_select", "first watering done: now a Momo")
@@ -100,9 +136,37 @@ func test_the_whole_path_with_taps() -> void:
 	assert_true(tut.text.text.begins_with("Tap tiles or drag across them:"), "how, with the count (%s)" % tut.text.text)
 	_tap_at((main.get("cameras") as CameraController).world_to_screen((main.get("projection") as IsoProjection).cell_center(Vector2i(0, 1))))
 	await _frame()
-	assert_eq(tut.step, "more", "a tile edited: the last step")
+	# The sea (Step 50), once the island is nearly full: quiet until then.
 	(main.get("watch_editor") as WatchEditor).end_edit()
-	assert_true(tut.text.text.begins_with("Plants need time to drink"), "the wait is explained before the last pointer")
+	await _frame()
+	assert_eq(tut.step, "later", "a tile edited: quiet while the island has room")
+	assert_false(tut.bubble.visible, "nothing on screen")
+	assert_true(tut.running, "but not over")
+	var world: WorldSystem = sim.system(&"world")
+	while world.buildable_cells().size() > 1:
+		(sim.system(&"buildings") as BuildingSystem).place_instant("research", world.buildable_cells()[0])
+	await _frame()
+	assert_eq(tut.step, "land", "one tile left: the sea")
+	assert_true(tut.bubble.visible, "said again")
+	var land: LandSystem = sim.system(&"land")
+	var economy: EconomySystem = sim.system(&"economy")
+	var preview: LandPreview = main.get("land_preview")
+	assert_eq(tut.target, tut._cell_rect(preview.grow_spot()), "the tile the island would grow into is ringed")
+	if not economy.can_afford(land.next_cost()):
+		assert_eq(tut.text.text, "The island can grow here · $%d" % land.next_cost(), "with its price while it is too dear")
+		economy.earn(land.next_cost(), "test")
+		await _frame()
+	assert_eq(tut.text.text, "Tap the glowing sea to grow the island", "affordable: tap it")
+	assert_eq(preview.invitation(), preview.grow_spot(), "the ringed tile is the glowing one")
+	(main.get("selection") as SelectionController).deselect()
+	var sea := tut.target.get_center()
+	_tap_at(sea)
+	await _frame()
+	_tap_at(sea)
+	await _frame()
+	assert_false(land.purchases.is_empty(), "two taps: the island grew")
+	assert_eq(tut.step, "more", "then the last step")
+	assert_true(tut.text.text.begins_with("Watered, the crop ripens"), "the wait is explained before the last pointer")
 	assert_true(tut.text.text.contains("Any empty tile builds"), "then where the others are built")
 	assert_true(tut.text.text.contains("half comes back"), "and how one comes down")
 	assert_true(tut.ok_button.visible, "a Got it button now")
@@ -127,6 +191,7 @@ func test_the_trash_is_shown_at_the_end() -> void:
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	bs.get_building(farm)["completed"] = 2
 	tut._momo_done = true
+	tut._land_done = true
 	(main.get("selection") as SelectionController).select_building(farm)
 	await _frame()
 	var panel: ContextPanel = main.get("panel")

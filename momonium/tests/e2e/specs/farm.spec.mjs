@@ -1,17 +1,17 @@
-// Step 14: real taps run the whole farm: sow, water three times with the
-// 30-second waits in between, harvest; the harvest puts one batch of crops in
-// the store; a tap during a wait is refused.
+// Step 14, Step 50: real taps run the whole farm -- sow, water, the short
+// wait while the crop ripens, harvest -- and the harvest is money at once:
+// sold the moment it is picked (no crop waits in the store for dawn); a tap
+// during the wait is refused.
 import { test, expect } from '../lib/fixtures.mjs';
 import { clearPointOnCell } from '../lib/coords.mjs';
 
-test('sow, water x3, harvest', async ({ game }) => {
+test('sow, water, harvest: paid at once', async ({ game }) => {
   await game.setTimeScale(0);
   const { id } = await game.query('dev_place_building', ['farm', 1, 0]);
   const tapFarm = async () => { const p = await clearPointOnCell(game, [1, 0]); await game.tap(p.x, p.y); };
   const b = async () => (await game.state()).buildings.buildings.find((x) => x.id === id);
   // Game time is moved exactly to where the stage (and its wait) ends: no
-  // real-time polling at 40x speed, which on a slow device overshot into the
-  // next morning's automatic sale.
+  // real-time polling at high speed.
   const waitIdle = async () => {
     for (let i = 0; i < 4 && (await b()).state !== 'idle'; i++) {
       const s = await game.state();
@@ -21,6 +21,7 @@ test('sow, water x3, harvest', async ({ game }) => {
     }
     expect((await b()).state).toBe('idle');
   };
+  const money0 = (await game.state()).economy.money;
   await tapFarm();
   expect((await b()).state).toBe('working');
   await waitIdle();
@@ -34,14 +35,11 @@ test('sow, water x3, harvest', async ({ game }) => {
   await tapFarm();
   expect((await game.query('selection')).result.reason).toBe('err.cooldown');
   await waitIdle();
-  for (let i = 0; i < 2; i++) {
-    await tapFarm();
-    await waitIdle();
-  }
-  expect((await b()).stage).toBe(4);
+  expect((await b()).stage).toBe(2);
   await tapFarm();
   await waitIdle();
   const s = await game.state();
-  expect(s.inventory.items.crop).toBe(1);
+  expect(s.inventory.items.crop || 0).toBe(0);
+  expect(s.economy.money).toBeGreaterThan(money0);
   expect((await b()).stage).toBe(0);
 });

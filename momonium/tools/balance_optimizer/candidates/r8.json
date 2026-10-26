@@ -1,0 +1,14 @@
+{
+  "round": "R8",
+  "extends": ["r7.json"],
+  "_note": "Also in this round (blind round B5): the tutorial's last guided step before its end is the sea, once the island is nearly full (LandPreview.due: one free tile or none, or Lv 3) -- the tile the island would grow into is ringed with its price until it is affordable, then 'tap the glowing sea'; until then the tutorial waits with nothing on screen. In B4 and B5 all six players built the lab the moment Lv 2 opened it, and a tip or a glow offered at the same moment lost to it (first land 4:53-6:50); the tutorial ring was followed within seconds every time.",
+  "sets": [
+    {"set": "items:items/crop/price=3", "old": 4, "why": "B4 and B5 blind: the whole economy ran about 30% ahead of the target curve (income +33%/+25% and +31%/+34% at 5:00/10:00; a $100 hire affordable at 3:30) once the tutorial and the Hire button stopped costing time -- one scale for all money (x0.75)"},
+    {"set": "buildings:types/mine/cycle/stages/0/revenue/base=6", "old": 8, "why": "the same scale"},
+    {"set": "buildings:types/lumberyard/cycle/stages/0/revenue/base=5", "old": 6, "why": "the same scale"},
+    {"set": "balance:land/invite_level=3", "old": 1, "why": "the sea is offered when the island is nearly full (the lab usually fills it, 2:06-2:44 in B5) or at Lv 3, not alongside the lab"},
+    {"set": "balance:land/base=40", "old": 65, "why": "B5 money after the lab, scaled x0.75: $38-50 at 2:30-2:42 -- affordable within seconds of the ring"},
+    {"set": "balance:progression/exp_to_next/1=180", "old": 130, "why": "B5 blind Lv 3 3:18-3:25 (target 4:00, -15%): EXP rate between Lv 2 and 3 was ~1.45/s, so +50 moves it ~35 s later (money does not change EXP)"},
+    {"set": "balance:progression/exp_to_next/2=400", "old": 430, "why": "keeps Lv 4 near 7:00 (B5 6:47) after Lv 3 moves later"}
+  ]
+}

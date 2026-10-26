@@ -2,9 +2,10 @@ class_name InventoryView
 extends VBoxContainer
 
 ## The store: one row per item the island has ever had -- icon, name, how
-## full its stack is, and for crops what tomorrow's sale will bring. Items the
-## player has never seen stay out of the list, so the store does not name
-## resources before the game has introduced them.
+## full its stack is, and how many were made. Crops are sold the moment they
+## are picked (Step 50): their row says so instead of showing a stack that
+## never fills. Items the player has never seen stay out of the list, so the
+## store does not name resources before the game has introduced them.
 
 var sim: Simulation
 var lib: SpriteLibrary
@@ -38,17 +39,18 @@ func refresh() -> void:
 		rows.clear()
 		for item: String in items:
 			rows[item] = _row(item)
+	var economy: EconomySystem = sim.system(&"economy")
 	for item: String in items:
 		var r: Dictionary = rows[item]
 		var have := inv.count(item)
 		var cap := inv.capacity(item)
-		(r["count"] as Label).text = "%d / %d" % [have, cap]
+		var at_once := economy.sells_at_once(item)
+		(r["count"] as Label).text = "" if at_once else "%d / %d" % [have, cap]
+		(r["bar"] as Bar).visible = not at_once
 		(r["bar"] as Bar).value = float(have) / maxf(cap, 1)
 		var notes: Array[String] = []
-		if sim.data.item(item).get("kind", "") == "crop":
-			var pending := have * int(sim.data.item(item).get("price", 0))
-			if pending > 0:
-				notes.append(tr("panel.store.pending") % pending)
+		if at_once:
+			notes.append(tr("panel.store.sold_at_once") % economy.unit_price(item))
 		notes.append(tr("panel.store.made") % int(inv.produced.get(item, 0)))
 		(r["note"] as Label).text = "  ·  ".join(notes)
 

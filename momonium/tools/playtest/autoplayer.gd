@@ -76,6 +76,12 @@ var series: Array[Dictionary] = []
 ## Stages finished, by whom: "hand" (the player), "momo", "auto" (a drip line).
 var jobs := {"hand": 0, "momo": 0, "auto": 0}
 var _income_before := 0
+## Active ms of the first command the player sent (the first tap), or -1.
+var first_command_ms := -1
+## Print every command as it is sent (tools/balance_optimizer --trace).
+var trace := false
+## The first island's journey (JourneySystem.timeline()), kept when it is sold.
+var first_journey: Array[Dictionary] = []
 var _decisions := 0
 var _tutorial_ui := 0
 
@@ -141,7 +147,8 @@ func _sample() -> void:
 		"income": production_income(), "income_all": _income_before + production_income(), "level": prog.level,
 		"exp": prog.experience, "land": (sim.system(&"land") as LandSystem).purchases.size(),
 		"buildings": (sim.system(&"buildings") as BuildingSystem).ids().size(), "momos": (sim.system(&"momo") as MomoSystem).ids().size(),
-		"research": done, "jobs": jobs.duplicate()})
+		"research": done, "jobs": jobs.duplicate(), "letters": (sim.system(&"mail") as MailSystem).letters.size(),
+		"net": int((sim.system(&"prestige") as PrestigeSystem).appraise()["net"])})
 
 
 ## Closes the game for `seconds`: the island catches up as it does on return.
@@ -159,12 +166,10 @@ func away(seconds: float) -> Dictionary:
 func act() -> bool:
 	if profile == "blind":
 		return _act_blind()
-	# Early the hands do the work; once a Momo has been hired the player
-	# manages first and taps what is left.
-	var managing := int((sim.system(&"momo") as MomoSystem).hired) > 0
-	var order: Array[Callable] = [_claim_letter, _promote, _sell, _work_by_hand, _research, _special, _refit, _hire, _give_tiles, _build, _buy_land]
-	if managing:
-		order = [_claim_letter, _promote, _sell, _research, _special, _refit, _hire, _give_tiles, _build, _buy_land, _work_by_hand]
+	# The player manages first and taps what is left. (Before Step 50 the
+	# hands came first until a hire; with five-second farms always ready that
+	# left no decision for anything else.)
+	var order: Array[Callable] = [_claim_letter, _promote, _sell, _research, _special, _refit, _hire, _give_tiles, _build, _buy_land, _work_by_hand]
 	for try: Callable in order:
 		if bool(try.call()):
 			actions += 1
@@ -183,15 +188,20 @@ func _act_blind() -> bool:
 		return t > 0
 	if _pending_assign != 0:
 		return _assign_new()
+	# B6's order (calibration, design/INCREMENTAL_BALANCE_REPORT.md): the
+	# first sea when the tutorial rings it (within seconds of affording it),
+	# a hire before more research (they saved for it), building, and later
+	# land only for room to build.
 	var order: Array[Callable] = []
 	if not strategy.get("no_letters", false):
 		order.append(_claim_letter)
-	if not strategy.get("no_research", false):
-		order.append(_research)
-	order.append_array([_promote, _sell])
+	if not strategy.get("no_land", false):
+		order.append(_buy_land_blind)
 	if not strategy.get("no_hire", false) and not strategy.get("hands_only", false):
 		order.append(_hire_blind)
-	order.append_array([_build_blind])
+	if not strategy.get("no_research", false):
+		order.append(_research)
+	order.append_array([_promote, _sell, _build_blind])
 	if not strategy.get("no_land", false):
 		order.append(_buy_land)
 	order.append_array([_special, _work_by_hand])
@@ -247,9 +257,8 @@ var _pending_assign := 0
 
 func _hire_blind() -> bool:
 	var momos: MomoSystem = sim.system(&"momo")
-	var bs: BuildingSystem = sim.system(&"buildings")
 	var economy: EconomySystem = sim.system(&"economy")
-	if momos.ids().size() * 2 >= bs.ids().size() or not economy.can_afford(momos.hire_cost()):
+	if not _hire_wanted() or not economy.can_afford(momos.hire_cost()):
 		return false
 	if not _do("hire Momo", {"type": "momo.hire"}):
 		return false
@@ -258,6 +267,19 @@ func _hire_blind() -> bool:
 		_pending_assign = id
 		_tutorial_ui = 0
 	return true
+
+
+## One Momo to every two buildings: B6's players hired at that point and
+## saved for it -- no new building or land while a hire was wanted.
+func _hire_wanted() -> bool:
+	if strategy.get("no_hire", false) or strategy.get("hands_only", false):
+		return false
+	var momos: MomoSystem = sim.system(&"momo")
+	return momos.ids().size() * 2 < (sim.system(&"buildings") as BuildingSystem).ids().size()
+
+
+func _saving_for_hire() -> bool:
+	return profile == "blind" and _hire_wanted() and not (sim.system(&"economy") as EconomySystem).can_afford((sim.system(&"momo") as MomoSystem).hire_cost())
 
 
 func _assign_new() -> bool:
@@ -293,7 +315,7 @@ func _assign_new() -> bool:
 func _build_blind() -> bool:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var free := (sim.system(&"world") as WorldSystem).buildable_cells()
-	if free.is_empty():
+	if free.is_empty() or _saving_for_hire():
 		return false
 	var have := {}
 	for id: int in bs.ids():
@@ -303,17 +325,27 @@ func _build_blind() -> bool:
 		if not have.has(fam) and bs.is_unlocked(fam):
 			if _affords(fam):
 				return _do("build " + fam, {"type": "building.place", "building": fam, "anchor": [free[0].x, free[0].y]})
-			# Saving for it: a farm only on a tile it can spare.
+			# Saving for the new kind (the B1 blind players did: the lab once
+			# a letter asked for research): a farm only on a tile it can spare.
 			if free.size() < 2:
 				return false
+			break
+	# One more farm before the lab, as every blind player built -- not a
+	# field of them (B6: farm, farm, then the lab at Lv 2).
+	if not have.has("research") and int(have.get("farm", 0)) >= 2:
+		return false
 	if not _affords("farm"):
 		return false
 	return _do("build farm", {"type": "building.place", "building": "farm", "anchor": [free[0].x, free[0].y]})
 
 
 func _do(kind: String, command: Dictionary) -> bool:
+	if first_command_ms < 0:
+		first_command_ms = _now()
 	var r := sim.execute(command)
 	var key := kind if r["ok"] else kind + " refused (" + String(r.get("reason", "")) + ")"
+	if trace:
+		print("  %6.1f s  $%-5d %s" % [_now() / 1000.0, (sim.system(&"economy") as EconomySystem).money, key])
 	counts[key] = int(counts.get(key, 0)) + 1
 	return bool(r["ok"])
 
@@ -346,6 +378,8 @@ func _sell() -> bool:
 	sales.append({"island": island, "active_ms": active_ms, "points": a["points"], "level": lv, "rp": r["rp_issued"]})
 	_mark("sold island %d" % island)
 	_income_before += production_income()
+	if island == 1:
+		first_journey = (sim.system(&"journey") as JourneySystem).timeline()
 	attach(r["sim"])
 	island += 1
 	_place_points()
@@ -494,7 +528,11 @@ func _give_tiles() -> bool:
 		return false
 	var momos: MomoSystem = sim.system(&"momo")
 	var bs: BuildingSystem = sim.system(&"buildings")
-	for m: int in momos.ids():
+	# The Momo with the least to do first, one building at a time: the work
+	# shared out, not all on the first Momo with room.
+	var order := momos.ids()
+	order.sort_custom(func(a: int, b: int) -> bool: return momos.watched(a).size() < momos.watched(b).size() or (momos.watched(a).size() == momos.watched(b).size() and a < b))
+	for m: int in order:
 		var room := momos.watch_capacity(m) - momos.watched(m).size()
 		if room <= 0:
 			continue
@@ -506,9 +544,11 @@ func _give_tiles() -> bool:
 				free.append(id)
 		free.sort_custom(func(a: int, b: int) -> bool: return here.distance_to(momos.work_spot(a)) < here.distance_to(momos.work_spot(b)) or (here.distance_to(momos.work_spot(a)) == here.distance_to(momos.work_spot(b)) and a < b))
 		for id: int in free:
-			for c: Vector2i in bs.cells_of(bs.get_building(id)):
-				if cells.size() < room:
+			var more := bs.cells_of(bs.get_building(id))
+			if more.size() <= room:
+				for c: Vector2i in more:
 					cells.append([c.x, c.y])
+				break
 		if not cells.is_empty():
 			return _do("give tiles", {"type": "momo.watch", "momo": m, "cells": cells, "op": "add"})
 	return false
@@ -555,10 +595,31 @@ func _affords(type: String) -> bool:
 		and (sim.system(&"inventory") as InventorySystem).has_all(cost.get("items", {}))
 
 
+## The sea tile the game shows unasked (one free tile or none left, and the
+## price in hand: LandPreview.invitation) -- what a first-time player sees.
+func _buy_land_blind() -> bool:
+	var world: WorldSystem = sim.system(&"world")
+	var land: LandSystem = sim.system(&"land")
+	if not land.purchases.is_empty() or not _land_offered() or not (sim.system(&"economy") as EconomySystem).can_afford(land.next_cost()):
+		return false
+	var spots := land.suggested()
+	return not spots.is_empty() and _do("buy land", {"type": "land.buy", "cell": [spots[0].x, spots[0].y]})
+
+
+## What LandPreview.due answers on screen: the island (nearly) full, or grown
+## to `land.invite_level` -- when the ring and the glow show the sea.
+func _land_offered() -> bool:
+	var world: WorldSystem = sim.system(&"world")
+	var progression: ProgressionSystem = sim.system(&"progression")
+	if not progression.is_unlocked("land"):
+		return false
+	return world.buildable_cells().size() <= 1 or progression.level >= sim.data.get_int("balance", "land.invite_level", 1)
+
+
 func _buy_land() -> bool:
 	var world: WorldSystem = sim.system(&"world")
 	var land: LandSystem = sim.system(&"land")
-	if not world.buildable_cells().is_empty():
+	if not world.buildable_cells().is_empty() or _saving_for_hire():
 		return false
 	if not (sim.system(&"economy") as EconomySystem).can_afford(land.next_cost()):
 		return false

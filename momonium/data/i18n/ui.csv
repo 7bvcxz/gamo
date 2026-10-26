@@ -7,7 +7,7 @@ hud.research,Research,연구,研究,研究
 hud.mailbox,Mailbox,편지함,郵便箱,信箱
 hud.status,Status,스테이터스,ステータス,状态
 hud.settings,Settings,설정,設定,设置
-hud.shop,Shop,상점,ショップ,商店
+hud.shop,Hire,고용,雇用,雇佣
 hud.per_day,+$%d / day,+$%d / 일,+$%d / 日,+$%d / 天
 lang.name,English,한국어,日本語,简体中文
 building.farm,Farm,밭,畑,农田
@@ -34,7 +34,8 @@ item.crop,Crops,작물,作物,作物
 item.wood,Wood,나무,木材,木材
 item.stone,Stone,돌,石,石头
 err.storage_full,Store is full,창고가 가득 찼어요,倉庫がいっぱいです,仓库已满
-hud.store,Crops %d · +$%d at dawn,작물 %d · 아침에 +$%d,作物 %d · 夜明けに +$%d,作物 %d · 黎明时 +$%d
+hud.rate,+$%s/min,+$%s/분,+$%s/分,+$%s/分钟
+hud.goal,Next: {tier} {met}/{of},다음: {tier} {met}/{of},次: {tier} {met}/{of},下一步：{tier} {met}/{of}
 status.title,Momonium,Momonium,Momonium,Momonium
 status.tagline,"A small island, a big tomorrow.",작은 섬에서 큰 내일로.,小さな島から、大きな明日へ。,小小的岛，大大的明天。
 status.exp,%d / %d EXP,%d / %d EXP,%d / %d EXP,%d / %d EXP
@@ -58,15 +59,18 @@ momo.name.9,Popo,포포,ポポ,波波
 momo.hire,Hire Momo,모모 고용,モモを雇う,雇佣桃桃
 momo.roaming,Free time,쉬는 중,おやすみ中,休息中
 momo.working_at,Working at %s,%s에서 일하는 중,%sで働いています,在%s工作
+momo.heading_to,On the way: %s,가는 중: %s,移動中: %s,正在前往：%s
+momo.on_rounds,Looking after its tiles,맡은 칸을 돌보는 중,受け持ちのマスを見回り中,照看负责的格子
+momo.assign_hint,Tap a building for this Momo,이 모모가 일할 건물을 눌러요,このモモが働く建物をタップ,点一座建筑让这只桃桃去工作
 momo.assign,Assign,배치,配置,分配
 momo.unassign,Release,해제,解除,解除
-err.slots_full,No free spot,자리가 없어요,空きがありません,没有空位
+err.slots_full,Another Momo works here,다른 모모가 일하고 있어요,別のモモが働いています,另一只桃桃在这里工作
 err.no_job,No work here,여기는 일이 없어요,ここに仕事はありません,这里没有工作
 panel.tab.status,Status,상태,ステータス,状态
 panel.tab.store,Store,창고,倉庫,仓库
 panel.tab.economy,Money,경제,経済,经济
 panel.tab.records,Records,기록,記録,记录
-panel.store.pending,Sells tomorrow +$%d,내일 판매 +$%d,明日売却 +$%d,明天出售 +$%d
+panel.store.sold_at_once,Sold as picked · $%d each,거두면 바로 판매 · 하나에 $%d,収穫したらすぐ売れる · 1つ $%d,收获即售出 · 每个 $%d
 panel.store.made,Made %d,누적 %d,累計 %d,累计 %d
 panel.economy.today,Today,오늘,今日,今天
 panel.economy.days,Last 7 days,최근 7일,直近7日,最近7天
@@ -186,6 +190,7 @@ effect.auto,{action} by itself,{action} 자동,{action}は自動,{action}自动�
 effect.variety,New variety: {name},새 품종: {name},新品種: {name},新品种：{name}
 detail.irrigation,Drip line,점적 관개,点滴かんがい,滴灌
 detail.variety_facts,Water x{w} · {c} a harvest,물 {w}번 · 수확 {c},水{w}回 · 収穫{c},浇水{w}次 · 收获{c}
+detail.variety_facts_dry,No watering · {c} a harvest,물 없이 · 수확 {c},水やりなし · 収穫{c},不用浇水 · 收获{c}
 detail.research,Research in use,적용된 연구,使っている研究,已应用的研究
 err.no_variety,No such variety,없는 품종이에요,その品種はありません,没有这个品种
 err.variety_locked,Research it first,먼저 연구해야 해요,先に研究が必要です,需要先研究
@@ -246,8 +251,11 @@ tutorial.pick_farm,Build a farm here · $%d,여기에 밭을 지어요 · $%d,�
 tutorial.pick_tile,Tap an empty tile,빈 땅을 눌러 보세요,空いている土地をタップ,点一块空地
 tutorial.wait_build,Building -- just a moment,짓는 중이에요. 잠깐만요,建設中。少し待ってね,建造中，稍等一下
 tutorial.sow,Tap the farm to sow,밭을 눌러 씨를 뿌려요,畑をタップして種をまきます,点农田播种
-tutorial.wait_water,Plants need time to drink between waterings,물을 준 뒤에는 작물이 마실 시간이 필요해요,水やりの間は、作物が水を吸う時間がいります,两次浇水之间，作物需要时间吸水
-tutorial.water,Tap again to water -- three times in all,다시 눌러 물을 줘요 — 모두 세 번,もう一度タップして水やり — 全部で3回,再点一次浇水——一共三次
+tutorial.harvest,Tap the ripe crop,익은 작물을 눌러 거둬요,実った作物をタップ,点一下成熟的作物
+tutorial.land_save,The island can grow here · $%d,섬은 여기로 넓힐 수 있어요 · $%d,島はここに広げられます · $%d,岛可以向这里扩展 · $%d
+tutorial.land_buy,Tap the glowing sea to grow the island,빛나는 바다를 눌러 섬을 넓혀요,光る海をタップして島を広げよう,点发光的海面来扩大岛屿
+tutorial.wait_water,"Watered, the crop ripens in a moment",물을 준 작물은 잠깐 뒤에 익어요,水をやった作物はすぐに実ります,浇过水的作物很快就会成熟
+tutorial.water,Tap again to water,다시 눌러 물을 줘요,もう一度タップして水やり,再点一次浇水
 tutorial.more,"Any empty tile builds a farm, mine, lumberyard or lab. To pull one down: tap it, the bin, then the check -- half comes back","빈 땅을 누르면 밭·광산·목재소·연구소를 지을 수 있어요. 철거는 건물 → 휴지통 → 체크, 절반을 돌려받아요",空き地をタップすれば畑・鉱山・製材所・研究所を建てられます。取り壊しは建物 → ゴミ箱 → チェック、半分が戻ります,点空地就能建农田、矿山、伐木场或研究所。拆除：建筑 → 垃圾桶 → 对勾，返还一半
 tutorial.skip,Skip,건너뛰기,スキップ,跳过
 tutorial.ok,Got it,알겠어요,わかった,知道了
@@ -557,6 +565,8 @@ journey.built_special,First landmark,첫 랜드마크,はじめてのランド�
 journey.harvest,First harvest,첫 수확,はじめての収穫,第一次收获
 journey.sale,First sale,첫 판매,はじめての売上,第一次出售
 journey.momo_work,A Momo's first job,모모의 첫 일,モモのはじめての仕事,桃桃的第一份工作
+journey.momo_income,A Momo's first earnings,모모가 처음 번 돈,モモがはじめて稼いだお金,桃桃第一次赚到的钱
+journey.research_start,First research started,첫 연구 시작,はじめての研究開始,第一次开始研究
 journey.land,First land bought,첫 땅 구매,はじめての土地購入,第一次买地
 journey.hire,First Momo hired,첫 모모 고용,はじめてのモモ雇用,第一次雇佣桃桃
 journey.research,First research done,첫 연구 완료,はじめての研究完了,第一次完成研究

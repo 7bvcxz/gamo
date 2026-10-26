@@ -1,0 +1,10 @@
+{
+  "round": "R9",
+  "extends": ["r8.json"],
+  "_note": "Also in this round (blind round B6): a hired Momo with nothing unwatched takes the newest half of the buildings of the Momo looking after the most (one B6 player's hire stood idle five minutes: income $642 at 10:00 against $1,085-1,123); the player's Assign wins over a Momo only passing on its rounds (it keeps its other buildings); build-choice prices follow the purse while open.",
+  "sets": [
+    {"set": "balance:land/base=30", "old": 40, "why": "B6 blind: the lab stood at 2:10-2:19 with $29-41 left; the $40 sea came 2:45-2:54 (median +15.9%). At $30 it is affordable as the ring appears"},
+    {"set": "balance:momo/hire/base=90", "old": 100, "why": "B6 blind first hire 4:49-5:09 (median 4:58, +10.4%), money reaching $100 at 4:34-5:00; $10 less on land and on the hire is ~20 s"},
+    {"set": "balance:progression/exp_to_next/0=95", "old": 90, "why": "B6 blind Lv 2 1:48-1:55 (median 1:51, -7.6%): +5 EXP is ~5 s at that rate"}
+  ]
+}

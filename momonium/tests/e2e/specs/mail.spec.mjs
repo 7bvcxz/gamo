@@ -13,7 +13,9 @@ test('a letter from Momo', async ({ game }) => {
   await game.query('set_language', 'en');
   const { id } = await game.query('dev_place_building', ['farm', 1, 0]);
   await game.command({ type: 'momo.assign', momo: 1, building: id });
-  await game.query('dev_advance_ms', 250000);
+  // The Momo's first harvest is seconds away (Step 50); later milestones
+  // bring more letters, so not much longer.
+  await game.query('dev_advance_ms', 20000);
   await game.page.waitForTimeout(200);
   let m = await game.query('mail');
   expect(m.unread).toBe(1);

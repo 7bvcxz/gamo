@@ -1,0 +1,513 @@
+{
+  "runs": [
+    {
+      "run": "run1",
+      "offset": -33.49900000762938,
+      "journey": {
+        "sale": 8.316999992370626,
+        "harvest": 8.316999992370626,
+        "momo_income": 40.691999992370626,
+        "momo_work": 40.691999992370626,
+        "letter": 42.691999992370626,
+        "built:farm": 108.01799999237062,
+        "level:2": 113.39199999237061,
+        "built:research": 150.03899999237063,
+        "hire": 162.53199999237063,
+        "level:3": 196.5699999923706,
+        "research_start": 199.77899999237061,
+        "research": 219.77899999237061,
+        "built:lumberyard": 274.4579999923706,
+        "land": 365.3789999923706,
+        "level:4": 389.68799999237064,
+        "built:mine": 427.49999999237065
+      },
+      "metrics": {
+        "first_reward_after_tap": 1.9169999923706253,
+        "income_gap": 30,
+        "meaningful_at:600": 21,
+        "momo_share_at:600": 0.9862745098039216,
+        "income_at:10": 4,
+        "income_at:30": 5,
+        "income_at:60": 24,
+        "income_at:120": 76,
+        "income_at:180": 136,
+        "income_at:240": 234,
+        "income_at:300": 393,
+        "income_at:360": 560,
+        "income_at:420": 729,
+        "income_at:480": 856,
+        "income_at:540": 975,
+        "income_at:600": 1136
+      },
+      "errors": 0,
+      "saves": 41,
+      "end": {
+        "level": 4,
+        "money": 301,
+        "income": 1136,
+        "buildings": 5,
+        "land": 4,
+        "momos": 4,
+        "research_levels": 3
+      }
+    },
+    {
+      "run": "run2",
+      "offset": -45.81899992561341,
+      "journey": {
+        "sale": 7.71700007438659,
+        "harvest": 7.71700007438659,
+        "momo_income": 41.77500007438658,
+        "momo_work": 41.77500007438658,
+        "letter": 43.77500007438658,
+        "built:farm": 110.91800007438658,
+        "level:2": 115.4680000743866,
+        "built:research": 159.76900007438658,
+        "hire": 173.2480000743866,
+        "level:3": 203.38800007438658,
+        "research_start": 235.27600007438662,
+        "research": 255.27600007438662,
+        "built:lumberyard": 312.6800000743866,
+        "land": 384.20100007438657,
+        "level:4": 420.7400000743866,
+        "built:mine": 422.2970000743866
+      },
+      "metrics": {
+        "first_reward_after_tap": 1.7170000743865899,
+        "income_gap": 16,
+        "meaningful_at:600": 21,
+        "momo_share_at:600": 0.9948006932409013,
+        "income_at:10": 3,
+        "income_at:30": 5,
+        "income_at:60": 22,
+        "income_at:120": 73,
+        "income_at:180": 137,
+        "income_at:240": 196,
+        "income_at:300": 320,
+        "income_at:360": 492,
+        "income_at:420": 677,
+        "income_at:480": 874,
+        "income_at:540": 1173,
+        "income_at:600": 1560
+      },
+      "errors": 0,
+      "saves": 41,
+      "end": {
+        "level": 4,
+        "money": 803,
+        "income": 1584,
+        "buildings": 6,
+        "land": 2,
+        "momos": 4,
+        "research_levels": 3
+      }
+    },
+    {
+      "run": "run3",
+      "offset": -58.20099999046323,
+      "journey": {
+        "sale": 15.404000009536773,
+        "harvest": 15.404000009536773,
+        "momo_income": 50.208000009536775,
+        "momo_work": 50.208000009536775,
+        "letter": 52.208000009536775,
+        "level:2": 124.31600000953676,
+        "built:farm": 124.31600000953676,
+        "built:research": 170.06700000953677,
+        "hire": 183.14000000953678,
+        "level:3": 213.8340000095368,
+        "research_start": 224.39100000953675,
+        "research": 244.39100000953675,
+        "built:lumberyard": 304.64600000953675,
+        "land": 379.39600000953675,
+        "level:4": 425.8560000095368,
+        "built:mine": 433.19800000953677
+      },
+      "metrics": {
+        "first_reward_after_tap": 9.404000009536773,
+        "income_gap": 26,
+        "meaningful_at:600": 21,
+        "momo_share_at:600": 0.9946524064171123,
+        "income_at:10": 2,
+        "income_at:30": 4,
+        "income_at:60": 15,
+        "income_at:120": 66,
+        "income_at:180": 127,
+        "income_at:240": 192,
+        "income_at:300": 340,
+        "income_at:360": 492,
+        "income_at:420": 642,
+        "income_at:480": 826,
+        "income_at:540": 1036,
+        "income_at:600": 1370
+      },
+      "errors": 0,
+      "saves": 40,
+      "end": {
+        "level": 4,
+        "money": 505,
+        "income": 1370,
+        "buildings": 6,
+        "land": 2,
+        "momos": 4,
+        "research_levels": 3
+      }
+    }
+  ],
+  "rows": [
+    {
+      "id": "P1",
+      "metric": "journey:income",
+      "kind": "max",
+      "target": 15,
+      "primary": true,
+      "runs": [
+        8.316999992370626,
+        7.71700007438659,
+        15.404000009536773
+      ],
+      "median": 8.316999992370626,
+      "pass": true
+    },
+    {
+      "id": "P2",
+      "metric": "first_reward_after_tap",
+      "kind": "max",
+      "target": 5,
+      "primary": true,
+      "runs": [
+        1.9169999923706253,
+        1.7170000743865899,
+        9.404000009536773
+      ],
+      "median": 1.9169999923706253,
+      "pass": true
+    },
+    {
+      "id": "P3",
+      "metric": "journey:momo_income",
+      "kind": "max",
+      "target": 90,
+      "primary": true,
+      "runs": [
+        40.691999992370626,
+        41.77500007438658,
+        50.208000009536775
+      ],
+      "median": 41.77500007438658,
+      "pass": true
+    },
+    {
+      "id": "P4",
+      "metric": "income_gap",
+      "kind": "max",
+      "target": 30,
+      "primary": true,
+      "runs": [
+        30,
+        16,
+        26
+      ],
+      "median": 26,
+      "pass": true
+    },
+    {
+      "id": "P5",
+      "metric": "meaningful_at:600",
+      "kind": "min",
+      "target": 15,
+      "primary": true,
+      "runs": [
+        21,
+        21,
+        21
+      ],
+      "median": 21,
+      "pass": true
+    },
+    {
+      "id": "P6",
+      "metric": "momo_share_at:600",
+      "kind": "min",
+      "target": 0.6,
+      "primary": true,
+      "runs": [
+        0.9862745098039216,
+        0.9948006932409013,
+        0.9946524064171123
+      ],
+      "median": 0.9946524064171123,
+      "pass": true
+    },
+    {
+      "id": "T1",
+      "metric": "journey:level:2",
+      "kind": "exact",
+      "target": 120,
+      "primary": true,
+      "runs": [
+        113.39199999237061,
+        115.4680000743866,
+        124.31600000953676
+      ],
+      "median": 115.4680000743866,
+      "error": 0.03776666604677838,
+      "pass": true
+    },
+    {
+      "id": "T2",
+      "metric": "journey:land",
+      "kind": "exact",
+      "target": 150,
+      "primary": true,
+      "runs": [
+        365.3789999923706,
+        384.20100007438657,
+        379.39600000953675
+      ],
+      "median": 379.39600000953675,
+      "error": 1.529306666730245,
+      "pass": false
+    },
+    {
+      "id": "T3",
+      "metric": "journey:level:3",
+      "kind": "exact",
+      "target": 240,
+      "primary": true,
+      "runs": [
+        196.5699999923706,
+        203.38800007438658,
+        213.8340000095368
+      ],
+      "median": 203.38800007438658,
+      "error": 0.15254999969005592,
+      "pass": false
+    },
+    {
+      "id": "T4",
+      "metric": "journey:research",
+      "kind": "exact",
+      "target": 240,
+      "primary": true,
+      "runs": [
+        219.77899999237061,
+        255.27600007438662,
+        244.39100000953675
+      ],
+      "median": 244.39100000953675,
+      "error": 0.018295833373069805,
+      "pass": true
+    },
+    {
+      "id": "T5",
+      "metric": "journey:hire",
+      "kind": "exact",
+      "target": 270,
+      "primary": true,
+      "runs": [
+        162.53199999237063,
+        173.2480000743866,
+        183.14000000953678
+      ],
+      "median": 173.2480000743866,
+      "error": 0.35834074046523484,
+      "pass": false
+    },
+    {
+      "id": "T6",
+      "metric": "income_at:300",
+      "kind": "exact",
+      "target": 255,
+      "primary": true,
+      "runs": [
+        393,
+        320,
+        340
+      ],
+      "median": 340,
+      "error": 0.3333333333333333,
+      "pass": false
+    },
+    {
+      "id": "T7",
+      "metric": "income_at:600",
+      "kind": "exact",
+      "target": 1100,
+      "primary": true,
+      "runs": [
+        1136,
+        1560,
+        1370
+      ],
+      "median": 1370,
+      "error": 0.24545454545454545,
+      "pass": false
+    },
+    {
+      "id": "S10",
+      "metric": "income_at:10",
+      "kind": "min",
+      "target": 0,
+      "primary": false,
+      "runs": [
+        4,
+        3,
+        2
+      ],
+      "median": 3,
+      "pass": true
+    },
+    {
+      "id": "S30",
+      "metric": "income_at:30",
+      "kind": "min",
+      "target": 3,
+      "primary": false,
+      "runs": [
+        5,
+        5,
+        4
+      ],
+      "median": 5,
+      "pass": true
+    },
+    {
+      "id": "S60",
+      "metric": "income_at:60",
+      "kind": "min",
+      "target": 6,
+      "primary": false,
+      "runs": [
+        24,
+        22,
+        15
+      ],
+      "median": 22,
+      "pass": true
+    },
+    {
+      "id": "S120",
+      "metric": "income_at:120",
+      "kind": "exact",
+      "target": 40,
+      "primary": false,
+      "runs": [
+        76,
+        73,
+        66
+      ],
+      "median": 73,
+      "error": 0.825,
+      "pass": false
+    },
+    {
+      "id": "S180",
+      "metric": "income_at:180",
+      "kind": "exact",
+      "target": 95,
+      "primary": false,
+      "runs": [
+        136,
+        137,
+        127
+      ],
+      "median": 136,
+      "error": 0.43157894736842106,
+      "pass": false
+    },
+    {
+      "id": "S240",
+      "metric": "income_at:240",
+      "kind": "exact",
+      "target": 165,
+      "primary": false,
+      "runs": [
+        234,
+        196,
+        192
+      ],
+      "median": 196,
+      "error": 0.18787878787878787,
+      "pass": false
+    },
+    {
+      "id": "S360",
+      "metric": "income_at:360",
+      "kind": "exact",
+      "target": 365,
+      "primary": false,
+      "runs": [
+        560,
+        492,
+        492
+      ],
+      "median": 492,
+      "error": 0.34794520547945207,
+      "pass": false
+    },
+    {
+      "id": "S420",
+      "metric": "income_at:420",
+      "kind": "exact",
+      "target": 500,
+      "primary": false,
+      "runs": [
+        729,
+        677,
+        642
+      ],
+      "median": 677,
+      "error": 0.354,
+      "pass": false
+    },
+    {
+      "id": "S480",
+      "metric": "income_at:480",
+      "kind": "exact",
+      "target": 665,
+      "primary": false,
+      "runs": [
+        856,
+        874,
+        826
+      ],
+      "median": 856,
+      "error": 0.28721804511278193,
+      "pass": false
+    },
+    {
+      "id": "S540",
+      "metric": "income_at:540",
+      "kind": "exact",
+      "target": 865,
+      "primary": false,
+      "runs": [
+        975,
+        1173,
+        1036
+      ],
+      "median": 1036,
+      "error": 0.1976878612716763,
+      "pass": false
+    },
+    {
+      "id": "L4",
+      "metric": "journey:level:4",
+      "kind": "exact",
+      "target": 420,
+      "primary": false,
+      "runs": [
+        389.68799999237064,
+        420.7400000743866,
+        425.8560000095368
+      ],
+      "median": 420.7400000743866,
+      "error": 0.0017619049390157485,
+      "pass": true
+    }
+  ],
+  "aggregate": 0.44276226955052295,
+  "primary_failed": 5,
+  "pass": false
+}

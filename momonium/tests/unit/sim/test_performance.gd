@@ -113,12 +113,19 @@ func test_ids_after_loading_another_island() -> void:
 
 func test_a_big_island_runs_well_inside_its_ceiling() -> void:
 	var sim := StressIsland.build(20)
+	var events := [0]
+	sim.bus.emitted.connect(func(_t: StringName, _p: Dictionary) -> void: events[0] = int(events[0]) + 1)
 	var t0 := Time.get_ticks_usec()
 	sim.advance_ms(10 * 60000)
 	var ms := (Time.get_ticks_usec() - t0) / 1000.0
-	# About 0.4 s on the development machine; before Step 41 it was ~3.5 s.
-	# The ceiling is loose on purpose (CI machines vary) but not loose enough
-	# to let the old cost back in.
-	assert_true(ms < 2500.0, "ten simulated minutes of a 20x20 island: %.0f ms" % ms)
+	# The cost of one event, not of ten minutes: Step 50's five-second farm
+	# cycle made the same island live 15 times more events (about 57,000 in
+	# these ten minutes, ~2.3 s), each cheaper than before (44 us against
+	# 136 us at Step 49; before Step 41 the whole run was ~8x slower). The
+	# ceiling is loose on purpose (CI machines vary) but not loose enough to
+	# let the old cost back in.
+	var us := ms * 1000.0 / maxf(1.0, float(events[0]))
+	assert_true(us < 110.0, "ten simulated minutes of a 20x20 island: %.0f ms, %d events, %.0f us each" % [ms, events[0], us])
+	assert_true(ms < 8000.0, "and the whole run stays a few seconds (%.0f ms)" % ms)
 	assert_eq((sim.system(&"buildings") as BuildingSystem).ids().size(), 133, "with every building")
 	assert_eq((sim.system(&"momo") as MomoSystem).ids().size(), 44, "and every Momo")

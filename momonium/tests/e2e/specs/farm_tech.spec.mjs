@@ -1,8 +1,10 @@
-// Step 23: with farming research done, the player sows by tapping the farm, a
-// drip line does all three waterings by itself, the harvest still needs a
-// tap, and after it the farm's details let millet (two waterings) be chosen.
+// Step 23, Step 50: with farming research done, the player sows by tapping
+// the farm, a drip line does the watering by itself, the harvest still needs
+// a tap (and is money at once), and after it the farm's details let millet
+// (no watering) be chosen.
 import { test, expect } from '../lib/fixtures.mjs';
 import { clearPointOnCell } from '../lib/coords.mjs';
+import { settle } from '../lib/farm.mjs';
 
 const centre = async (game, rect, win) => {
   const box = await game.canvas.boundingBox();
@@ -30,13 +32,15 @@ test('a drip line waters, hands harvest, millet next', async ({ game }) => {
   let d = await game.query('details');
   expect(d.open).toBe(true);
   expect(d.varieties.millet.disabled).toBe(true);
-  await game.query('dev_advance_ms', 5000 + 1000);
+  const rules = await game.query('rules');
+  await game.query('dev_advance_ms', rules.farm_stages[0][1] + 100);
   d = await game.query('details');
   expect(d.workers[0]).toBe('auto');
-  // Three waterings and their waits (18 s each with mulch and drip).
-  await game.query('dev_advance_ms', 63000);
+  // The watering and the ripening after it.
+  await settle(game, id);
+  await settle(game, id);
   farm = (await game.state()).buildings.buildings.find((b) => b.id === id);
-  expect(farm.stage).toBe(4);
+  expect(farm.stage).toBe(2);
   expect(farm.state).toBe('idle');
   // Hands harvest: close the details, tap the farm.
   await game.page.keyboard.press('Escape').catch(() => {});
@@ -46,13 +50,15 @@ test('a drip line waters, hands harvest, millet next', async ({ game }) => {
     await game.tap(close.x, close.y);
   }
   await game.page.waitForTimeout(150);
+  const before = (await game.state()).economy.money;
   f = await farmAt();
   await game.tap(f.x, f.y);
-  await game.query('dev_advance_ms', 5000);
+  await game.query('dev_advance_ms', rules.farm_stages[2][1] + 100);
   let s = await game.state();
   farm = s.buildings.buildings.find((b) => b.id === id);
   expect(farm.stage).toBe(0);
-  expect(s.inventory.items.crop).toBe(3);
+  expect(s.inventory.items.crop ?? 0).toBe(0);
+  expect(s.economy.money - before, 'three crops (field expansion, soil care), sold as picked').toBe(3 * rules.crop_price);
   // Next cycle: millet.
   p = await game.query('panels');
   const t2 = await centre(game, p.context_title, p.window);

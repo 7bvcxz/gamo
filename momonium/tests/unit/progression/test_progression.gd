@@ -15,18 +15,26 @@ func before_each() -> void:
 
 
 func _farm_cycle(farm: int) -> void:
-	for i in 5:
+	for i in buildings.stages(buildings.get_building(farm)).size():
 		var b := buildings.get_building(farm)
 		if b["state"] != BuildingSystem.IDLE:
 			sim.advance_ms(buildings.remaining_ms(b))
 		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(5000)
+		sim.advance_ms(int(float(buildings.current_stage(b)["seconds"]) * 1000.0))
+	var b := buildings.get_building(farm)
+	if b["state"] != BuildingSystem.IDLE:
+		sim.advance_ms(buildings.remaining_ms(b))
+
+
+## EXP from Lv `lv` to the next, as the data gives it.
+func _need(lv: int) -> int:
+	return prog.exp_needed_for(lv)
 
 
 func test_starts_at_level_one_with_nothing() -> void:
 	assert_eq(prog.level, 1, "Lv 1")
 	assert_eq(prog.experience, 0, "0 EXP")
-	assert_eq(prog.next_level_exp(), 100, "100 to Lv 2")
+	assert_eq(prog.next_level_exp(), int(sim.data.get_value("balance", "progression.exp_to_next", [])[0]), "the data's first step to Lv 2")
 	assert_eq(prog.mastery_of("farm"), {"level": 1, "exp": 0, "next": 100}, "farm mastery Lv 1, 0 / 100")
 
 
@@ -55,19 +63,19 @@ func test_taps_earn_nothing_harvests_earn_exp() -> void:
 		assert_true(stage.has(String(g[0])), "%s is a finished stage, never a tap" % g[0])
 		total += int(g[1])
 	assert_eq(prog.experience, total, "and nothing else")
-	assert_eq(int(stage["farm.harvest"]["player"]), 20, "the harvest is the big one")
 	assert_true(int(stage["farm.sow"]["player"]) < int(stage["farm.harvest"]["player"]) and int(stage["farm.water"]["player"]) < int(stage["farm.harvest"]["player"]), "sowing and watering pay a little")
 	assert_eq(prog.mastery_of("mine")["exp"], 0, "other masteries untouched")
 
 
 func test_finished_buildings_and_land_pay_a_little() -> void:
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
+	var event: Dictionary = sim.data.get_value("balance", "progression.rewards.event", {})
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})
 	assert_eq(prog.experience, 0, "placing pays nothing")
-	sim.advance_ms(5000)
-	assert_eq(prog.experience, 5, "a finished building pays 5")
+	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
+	assert_eq(prog.experience, int(event["building_built"]["player"]), "a finished building pays its reward")
 	sim.execute({"type": "land.buy", "cell": [2, 0]})
-	assert_eq(prog.experience, 15, "land pays 10")
+	assert_eq(prog.experience, int(event["building_built"]["player"]) + int(event["land_bought"]["player"]), "and land its own")
 
 
 func test_level_up_carries_the_remainder_and_can_jump() -> void:
@@ -75,12 +83,12 @@ func test_level_up_carries_the_remainder_and_can_jump() -> void:
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
 		if t == &"level_up":
 			ups.append(p["level"]))
-	prog.add_exp(130, "test")
+	prog.add_exp(_need(1) + 30, "test")
 	assert_eq(prog.level, 2, "Lv 2")
 	assert_eq(prog.experience, 30, "30 carried over")
-	prog.add_exp(100 + 180 + 300, "test")
+	prog.add_exp(_need(2) + _need(3) + 5, "test")
 	assert_eq(prog.level, 4, "two more levels at once")
-	assert_eq(prog.experience, 30 + 580 - 180 - 300, "remainder")
+	assert_eq(prog.experience, 35, "remainder")
 	assert_eq(ups, [2, 3, 4], "one event per level")
 
 
@@ -102,26 +110,28 @@ func test_unlocks_come_from_data() -> void:
 	assert_eq(s2.execute({"type": "land.buy", "cell": [2, 0]})["reason"], "err.locked", "land needs Lv 2 in this table")
 	assert_eq(s2.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})["reason"], "err.locked", "farm needs farm mastery 2 here")
 	var p2: ProgressionSystem = s2.system(&"progression")
-	p2.add_exp(100, "test")
-	p2.add_mastery("farm", 100)
+	p2.add_exp(p2.exp_needed_for(1), "test")
+	p2.add_mastery("farm", p2.mastery_needed_for(1))
 	assert_true(s2.execute({"type": "land.buy", "cell": [2, 0]})["ok"], "Lv 2 opens land")
 	assert_true(s2.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})["ok"], "mastery 2 opens the farm")
 
 
-func test_balance_first_levels_take_a_handful_of_harvests() -> void:
+func test_balance_first_level_comes_from_a_minute_or_two_of_farming() -> void:
+	# By hand alone, nonstop (Step 50: five-second harvests; the pacing
+	# targets themselves are tools/balance_optimizer/targets.json).
 	var farm := buildings.place_instant("farm", Vector2i(0, 0))
-	var harvests_to := {}
-	for n in range(1, 40):
+	var reached := {}
+	for n in range(1, 120):
 		_farm_cycle(farm)
-		if not harvests_to.has(prog.level):
-			harvests_to[prog.level] = n
-	assert_between(harvests_to.get(2, 999), 4, 8, "Lv 2 after 4-8 harvests (%d)" % harvests_to.get(2, 999))
-	assert_between(harvests_to.get(3, 999), 10, 20, "Lv 3 after 10-20 harvests (%d)" % harvests_to.get(3, 999))
-	assert_true(prog.mastery_of("farm")["level"] >= 4, "farm mastery climbs with the work (Lv %d)" % prog.mastery_of("farm")["level"])
+		if not reached.has(prog.level):
+			reached[prog.level] = sim.now_ms()
+	assert_between(int(reached.get(2, 999999)) / 1000, 30, 180, "Lv 2 after 30 s to 3 min of farming (%d s)" % (int(reached.get(2, 999999)) / 1000))
+	assert_true(int(reached.get(3, 999999)) > int(reached.get(2, 0)) + 60000, "Lv 3 well after it")
+	assert_true(prog.mastery_of("farm")["level"] >= 3, "farm mastery climbs with the work (Lv %d)" % prog.mastery_of("farm")["level"])
 
 
 func test_progress_survives_a_save() -> void:
-	prog.add_exp(150, "test")
+	prog.add_exp(_need(1) + 50, "test")
 	prog.add_mastery("farm", 120)
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
 	var p2: ProgressionSystem = copy.system(&"progression")

@@ -60,14 +60,14 @@ func test_the_economy_tab_opens_the_sale() -> void:
 	assert_true((main.get("sale_frame") as PanelFrame).visible, "it opens the sale")
 	var view: SaleView = main.get("sale_view")
 	assert_true(view.sell_button.disabled, "a new island cannot be sold")
-	assert_eq(view.sell_button.text, "Can be sold from Lv 5", "and says when")
+	assert_eq(view.sell_button.text, "Can be sold from Lv %d" % sim.data.get_int("balance", "prestige.min_level", 5), "and says when")
 	assert_true(view.find_child("Fam_lumberyard", true, false) != null, "the worth by the four families")
 	assert_true(view.reset_label.text.contains("research levels"), "what starts over")
 	assert_true(view.keep_label.text.contains("Legacy points"), "what stays")
 
 
 func test_two_taps_sell_and_the_new_island_opens_on_points() -> void:
-	_to_level(6)
+	_to_level(sim.data.get_int("balance", "prestige.min_level", 5))
 	var rs: ResearchSystem = sim.system(&"research")
 	rs.bought["momo_training"] = 2
 	rs.completed["momo_training"] = 0
@@ -75,7 +75,7 @@ func test_two_taps_sell_and_the_new_island_opens_on_points() -> void:
 	main.call("open_sale")
 	await tree.process_frame
 	var view: SaleView = main.get("sale_view")
-	assert_false(view.sell_button.disabled, "Lv 6: it can be sold")
+	assert_false(view.sell_button.disabled, "at the level it asks for, it can be sold")
 	_tap(view.sell_button)
 	assert_true(view.confirming, "the first tap asks again")
 	assert_false(Engine.has_meta("momonium_handoff"), "nothing sold yet")

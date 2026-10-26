@@ -122,6 +122,17 @@ func show_momo(id: int) -> void:
 	refresh()
 
 
+## A short line in place of the status for a moment (why something was refused).
+func say(line: String) -> void:
+	_said = line
+	_said_until = Time.get_ticks_msec() + 2500
+	refresh()
+
+
+var _said := ""
+var _said_until := 0
+
+
 func hide_panel() -> void:
 	visible = false
 	assigning = false
@@ -140,9 +151,19 @@ func refresh() -> void:
 		return
 	name_label.text = tr(m["name"])
 	var b := int(m["assigned"])
-	if b != 0:
-		var buildings: BuildingSystem = sim.system(&"buildings")
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	if _said != "" and Time.get_ticks_msec() < _said_until:
+		status_label.text = _said
+	elif assigning:
+		# What Assign waits for (Step 50: blind players tapped it and saw nothing).
+		status_label.text = tr("momo.assign_hint")
+	elif b != 0 and momos.is_moving(momo_id):
+		status_label.text = tr("momo.heading_to") % tr(buildings.type_def(buildings.get_building(b)).get("name", ""))
+	elif b != 0:
 		status_label.text = tr("momo.working_at") % tr(buildings.type_def(buildings.get_building(b)).get("name", ""))
+	elif not (m.get("watch", []) as Array).is_empty():
+		# Between jobs on its rounds: it is not idle, it waits for a crop.
+		status_label.text = tr("momo.on_rounds")
 	else:
 		status_label.text = tr("momo.roaming")
 	assign_button.text = tr("momo.assign")
@@ -157,7 +178,9 @@ func refresh() -> void:
 		if int(ba["days_before"]) > 0 and int(ba["days_after"]) > 0:
 			compare_label.text = tr("route.compare").format({"before": AnalyticsView.n(ba["before"]), "after": AnalyticsView.n(ba["after"])})
 		else:
-			compare_label.text = tr("route.compare_wait")
+			# Nothing to compare yet: say nothing (Step 50: "a few days are
+			# needed on each side" meant nothing to any blind player).
+			compare_label.visible = false
 	_refresh_skill(m, b)
 
 

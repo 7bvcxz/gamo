@@ -6,6 +6,13 @@ extends Node2D
 ## be bought now), with its price on a tag above it and, when there is one, a
 ## short line under the price ("tap again", "not enough money"). Purely
 ## visual; LandBuyer decides which tile.
+##
+## And unasked (Step 50): once the island has grown up a little (the level
+## `balance.land.invite_level`) or has at most one tile free, and the next
+## tile is affordable, the tile the island would grow into glows with its
+## price -- blind players never found that the sea is for sale, found it
+## only once the island was full, or bought it in the first minute when told
+## as soon as they could afford it.
 
 const NONE := Vector2i(-99999, -99999)
 
@@ -17,9 +24,16 @@ var focus := NONE
 var affordable := true
 var hint := ""
 var _t := 0.0
+## The tile shown unasked, or NONE.
+var invite := NONE
+var _sim: Simulation
+var _poll := 0.0
 
 
 func setup(sim: Simulation, p_projection: IsoProjection) -> void:
+	_sim = sim
+	# Drawn over the buildings: a price tag hidden behind a lab is no tag.
+	z_index = 30
 	projection = p_projection
 	land = sim.system(&"land")
 	world = sim.system(&"world")
@@ -41,16 +55,70 @@ func clear() -> void:
 
 
 func _process(delta: float) -> void:
-	if focus != NONE:
+	_poll -= delta
+	if _poll <= 0.0:
+		_poll = 0.5
+		var want := invitation()
+		if want != invite:
+			invite = want
+			queue_redraw()
+	if focus != NONE or invite != NONE:
 		_t += delta
 		queue_redraw()
 
 
+## The tile to show unasked: the island's level (or at most one free tile
+## left), land open, and the next tile affordable. NONE otherwise.
+func invitation() -> Vector2i:
+	if not due():
+		return NONE
+	if not (_sim.system(&"economy") as EconomySystem).can_afford(land.next_cost()):
+		return NONE
+	return grow_spot()
+
+
+## Whether more land is the island's next step: it is (nearly) full -- one
+## free tile or none -- or it has grown to `land.invite_level`, and land is
+## for sale at all. (Step 50: offered while the first lab was still to be
+## built, the sea lost to it every time; offered once the lab stood, it was
+## the one thing left to do.)
+func due() -> bool:
+	if _sim == null:
+		return false
+	var progression: ProgressionSystem = _sim.system(&"progression")
+	var grown := progression.level >= _sim.data.get_int("balance", "land.invite_level", 1)
+	if world.buildable_cells().size() > 1 and not grown:
+		return false
+	return progression.is_unlocked("land")
+
+
+## The front-most of the tiles the island would grow into (largest x + y:
+## nearest the camera, its price tag on screen on a narrow phone), or NONE.
+func grow_spot() -> Vector2i:
+	var best := NONE
+	for c: Vector2i in land.suggested():
+		if best == NONE or c.x + c.y > best.x + best.y or (c.x + c.y == best.x + best.y and absi(c.x - c.y) < absi(best.x - best.y)):
+			best = c
+	return best
+
+
 func _draw() -> void:
-	if focus == NONE or projection == null:
+	if projection == null:
 		return
-	_draw_block(focus)
-	_draw_price(focus)
+	if focus != NONE:
+		_draw_block(focus)
+		_draw_price(focus)
+	elif invite != NONE:
+		var was := affordable
+		affordable = true
+		_draw_block(invite)
+		var h := hint
+		hint = ""
+		# Below the tile, over open sea: above it, the island in front would
+		# hide the tag (the tile the island grows into is its front-most).
+		_draw_price(invite, true)
+		hint = h
+		affordable = was
 
 
 func _draw_block(cell: Vector2i) -> void:
@@ -84,13 +152,15 @@ func _dashed(points: PackedVector2Array, color: Color, width: float) -> void:
 
 ## The price tag: it lives in the world (it points at its cell) but reads the
 ## same size at any zoom, so its measurements are divided by the camera's scale.
-func _draw_price(cell: Vector2i) -> void:
+func _draw_price(cell: Vector2i, below: bool = false) -> void:
 	if font == null:
 		return
 	var k := 1.0 / maxf(get_global_transform_with_canvas().get_scale().x, 0.01)
 	var font_size := maxi(int(round(24.0 * k)), 4)
 	var small := maxi(int(round(16.0 * k)), 4)
 	var p := projection.cell_center(cell) + Vector2(0, -projection.tile_height * 0.45 - 30.0 * k)
+	if below:
+		p = projection.cell_center(cell) + Vector2(0, projection.tile_height * 0.5 + projection.cliff_height * projection.height_scale + 34.0 * k)
 	var text := price_text()
 	var size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	var hint_size := font.get_string_size(hint, HORIZONTAL_ALIGNMENT_LEFT, -1, small) if hint != "" else Vector2.ZERO

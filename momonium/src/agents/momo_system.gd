@@ -62,6 +62,8 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 	if type == &"building_removed":
 		for id: int in workers_at(int(payload.get("id", 0))):
 			unassign(id, true)
+	elif type == &"building_built":
+		_auto_watch_building(int(payload.get("id", 0)))
 	elif type == &"task_completed":
 		var worker := int(payload.get("worker", 0))
 		if momos.has(worker):
@@ -260,6 +262,7 @@ func hire() -> Dictionary:
 	var cell: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
 	var id := add_momo(Vector2(cell) + Vector2(rng.randf_range(0.25, 0.75), rng.randf_range(0.25, 0.75)))
 	sim.bus.emit(&"momo_hired", {"id": id, "cost": cost})
+	_auto_watch_momo(id)
 	return SimResult.ok({"id": id, "cost": cost, "next_cost": hire_cost()})
 
 
@@ -270,6 +273,14 @@ func hire() -> Dictionary:
 ## JobSystem); otherwise the building's tiles become everything it watches.
 func assign(momo: int, building: int, by_player: bool = true, keep_watch: bool = false) -> Dictionary:
 	var check := can_assign(momo, building)
+	if not check["ok"] and by_player and not keep_watch and String(check["reason"]) == "err.slots_full":
+		# The player's choice wins over a Momo that only took the place by
+		# itself (a new building or a hire looked after automatically, the
+		# manager): that one leaves it and goes on with its other tiles.
+		var other := _displaceable(building)
+		if other != 0:
+			_give_up(other, building)
+			check = can_assign(momo, building)
 	if not check["ok"]:
 		return check
 	var m: Dictionary = momos[momo]
@@ -304,6 +315,40 @@ func assign(momo: int, building: int, by_player: bool = true, keep_watch: bool =
 	if not keep_watch:
 		sim.bus.emit(&"momo_watch_changed", {"id": momo})
 	return SimResult.ok()
+
+
+## A Momo at `building` the player did not put there (unpinned), or one that
+## is only passing on its rounds (it watches more than this building: it keeps
+## the rest), or 0. (Step 50: a hired Momo was refused every building -- the
+## first Momo, given its farm in the tutorial, was at each in turn.)
+func _displaceable(building: int) -> int:
+	for id: int in workers_at(building):
+		if not bool(momos[id].get("pinned", false)) or _watches_elsewhere(id, building):
+			return id
+	return 0
+
+
+func _watches_elsewhere(momo: int, building: int) -> bool:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var own := bs.cells_of(bs.get_building(building))
+	for c: Array in momos[momo]["watch"]:
+		if not own.has(Vector2i(int(c[0]), int(c[1]))):
+			return true
+	return false
+
+
+## `momo` stops looking after `building`: its tiles leave its rounds and it
+## lets the building go (a stage under way finishes by itself).
+func _give_up(momo: int, building: int) -> void:
+	var m: Dictionary = momos[momo]
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var watch: Array = m["watch"]
+	for c: Vector2i in bs.cells_of(bs.get_building(building)):
+		watch.erase([c.x, c.y])
+	_watch_sig = -1
+	if int(m["assigned"]) == building:
+		unassign(momo, true)
+	sim.bus.emit(&"momo_watch_changed", {"id": momo})
 
 
 ## Whether an assigned Momo has reached its building and can work.
@@ -461,6 +506,121 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 				unassign(momo, true)
 		sim.bus.emit(&"momo_watch_changed", {"id": momo})
 	return SimResult.ok({"changed": changed, "refused": refused, "count": watch.size(), "capacity": watch_capacity(momo)})
+
+
+# --- looking after new work by itself (Step 50) ---------------------------------------
+
+## With `balance.momo.watch.auto`, nobody has to be told twice: a building
+## finished on tiles nobody watches is taken by a Momo with nothing to do, or
+## else the nearest Momo with room for all its tiles (lowest id on a tie), and
+## a newly hired Momo takes the unwatched buildings nearest to it, as many as
+## it may watch. Until the player has put some Momo to work, none is (the
+## tutorial teaches it). (Step 50: nearest-with-room alone put a second
+## island's nine tiles on one Momo while the two that came with the sale
+## stood idle.)
+## Neither pins the Momo (the player's own edits do) -- the manager may still
+## move it.
+func _auto_watch_building(building: int) -> void:
+	if not bool(sim.data.get_value("balance", "momo.watch.auto", false)) or building == 0:
+		return
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var b := bs.get_building(building)
+	if b.is_empty() or slots_of(building) <= 0 or not watchers_of(building).is_empty():
+		return
+	var cells := bs.cells_of(b)
+	var spot := work_spot(building)
+	var anyone_working := false
+	for id: int in ids():
+		anyone_working = anyone_working or not (momos[id]["watch"] as Array).is_empty()
+	if not anyone_working:
+		return
+	# An idle Momo first; otherwise the nearest with room. (Spreading every
+	# building to whoever had least scattered each Momo's tiles across the
+	# island: income at 20:00 fell from $11,354 to $6,193, all of it walking.)
+	var best := 0
+	var best_idle := false
+	var best_d := INF
+	for id: int in ids():
+		var n := (momos[id]["watch"] as Array).size()
+		if n + cells.size() > watch_capacity(id):
+			continue
+		var idle := n == 0
+		var d := position_of(id).distance_to(spot)
+		if best == 0 or (idle and not best_idle) or (idle == best_idle and d < best_d):
+			best = id
+			best_idle = idle
+			best_d = d
+	if best != 0:
+		_watch_more(best, cells)
+
+
+func _auto_watch_momo(momo: int) -> void:
+	if not bool(sim.data.get_value("balance", "momo.watch.auto", false)) or not momos.has(momo):
+		return
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var here := position_of(momo)
+	var free: Array[int] = []
+	for id: int in bs.ids():
+		if slots_of(id) > 0 and bs.get_building(id)["state"] != BuildingSystem.CONSTRUCTING and watchers_of(id).is_empty():
+			free.append(id)
+	free.sort_custom(func(a: int, c: int) -> bool:
+		var da := here.distance_to(work_spot(a))
+		var dc := here.distance_to(work_spot(c))
+		return da < dc or (da == dc and a < c))
+	var cells: Array[Vector2i] = []
+	for id: int in free:
+		var more := bs.cells_of(bs.get_building(id))
+		if cells.size() + more.size() <= watch_capacity(momo):
+			cells.append_array(more)
+	if cells.is_empty():
+		cells = _share_of_busiest(momo)
+	if not cells.is_empty():
+		_watch_more(momo, cells)
+
+
+## Nothing left unwatched: the new Momo takes half of the buildings of the
+## Momo looking after the most (two or more) -- the newest ones, which came to
+## it by themselves; the one it is at stays. (Step 50: otherwise a hire stood
+## about while one Momo ran between three buildings.)
+func _share_of_busiest(momo: int) -> Array[Vector2i]:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var busiest := 0
+	var theirs: Array[int] = []
+	for id: int in ids():
+		if id == momo:
+			continue
+		var list: Array[int] = []
+		for c: Array in momos[id]["watch"]:
+			var b := bs.building_at(Vector2i(int(c[0]), int(c[1])))
+			if b != 0 and not list.has(b) and slots_of(b) > 0:
+				list.append(b)
+		if list.size() >= 2 and list.size() > theirs.size():
+			busiest = id
+			theirs = list
+	var out: Array[Vector2i] = []
+	if busiest == 0:
+		return out
+	theirs.erase(int(momos[busiest]["assigned"]))
+	theirs.sort()
+	theirs.reverse()
+	var take := ceili(theirs.size() / 2.0)
+	for b: int in theirs.slice(0, take):
+		var more := bs.cells_of(bs.get_building(b))
+		if out.size() + more.size() > watch_capacity(momo):
+			break
+		_give_up(busiest, b)
+		out.append_array(more)
+	return out
+
+
+func _watch_more(momo: int, cells: Array[Vector2i]) -> void:
+	var watch: Array = momos[momo]["watch"]
+	for c: Vector2i in cells:
+		if not watch.has([c.x, c.y]) and can_watch(momo, c)["ok"]:
+			watch.append([c.x, c.y])
+	watch.sort()
+	_watch_sig = -1
+	sim.bus.emit(&"momo_watch_changed", {"id": momo, "auto": true})
 
 
 # --- routes --------------------------------------------------------------------------

@@ -65,18 +65,25 @@ func test_happiness_stacks_with_less_each_copy_and_is_capped() -> void:
 	assert_eq((s2.system(&"community") as CommunitySystem).happiness(), 12.0, "capped at the maximum")
 
 
-func test_a_pub_needs_its_crops_each_day() -> void:
+func test_a_pub_buys_its_food_each_day() -> void:
+	# Crops are sold as they are picked (Step 50): the pub buys its food at
+	# the market, a daily upkeep in money.
+	var economy: EconomySystem = sim.system(&"economy")
+	var upkeep := int(sim.data.building_type("pub")["amenity"]["daily"]["money"])
+	economy.spend(economy.money, "test")
 	var pub := _built("pub", Vector2i(0, 0))
-	assert_false(community.is_open(pub), "no crops: shut")
+	assert_false(community.is_open(pub), "no money for food: shut")
 	assert_eq(community.happiness(), 0.0, "and adds nothing")
-	inv.add("crop", 5, "test")
+	economy.earn(upkeep + 5, "test")
 	sim.advance_to(sim.clock.next_day_start_ms() + 1)
-	assert_true(community.is_open(pub), "crops in the store: open for the day")
+	assert_true(community.is_open(pub), "the day's food bought: open for the day")
 	assert_eq(community.happiness(), 14.0, "+14")
-	var sold_or_eaten := inv.count("crop")
-	assert_eq(sold_or_eaten, 0, "three eaten at opening, the other two sold at the day's sale (%d left)" % sold_or_eaten)
+	assert_eq(economy.money, 5, "paid its upkeep at opening")
+	# (Paid at the boundary, before the closing day's book closes.)
+	assert_eq(int(economy.history[-1]["by"].get("upkeep", 0)), -upkeep, "booked as upkeep")
 	sim.advance_to(sim.clock.next_day_start_ms() + 1)
-	assert_false(community.is_open(pub), "the next day, with nothing left: shut again")
+	assert_false(community.is_open(pub), "the next day, short of money: shut again")
+	assert_eq(economy.money, 5, "and nothing taken")
 
 
 func test_a_hall_needs_power() -> void:

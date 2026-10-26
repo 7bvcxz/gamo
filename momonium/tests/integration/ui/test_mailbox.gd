@@ -45,7 +45,12 @@ func _tap(c: Control) -> void:
 func _first_letter() -> void:
 	var farm := (sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	# Until the first letter arrives (the Momo's first harvest), not longer:
+	# five-second cycles reach the next milestones within minutes.
+	var waited := 0
+	while mail.letters.is_empty() and waited < 250000:
+		sim.advance_ms(500)
+		waited += 500
 	await tree.process_frame
 
 

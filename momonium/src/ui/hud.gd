@@ -32,6 +32,9 @@ var burst_pill: Control
 ## Feedback gathered within this many seconds pops once (see _on_sim_event).
 const FEEDBACK_WINDOW := 0.3
 var _pending_money := 0
+## Money spent in the same moment, popped on its own: a $80 hire beside an
+## $8 harvest read "-$72" to the blind players (Step 50).
+var _pending_spent := 0
 var _pending_exp := 0
 var _pending_level := 0
 var _pending_research: Array = []
@@ -55,6 +58,20 @@ var _money_label: Label
 var _level_label: Label
 var _exp_label: Label
 var _shown := {}
+
+
+## What the store holds, at a glance: up to STOCK_MAX items the island has
+## now (wood, research notes, stone...), each its icon and count, under the
+## day panel (Step 50: blind players never found where the wood and the
+## flasks were counted -- only in Status > Store).
+var stock_row: HBoxContainer
+const STOCK_MAX := 4
+## The settlement's next step, met needs out of all ("City 2/4"); a tap opens
+## Status where they are listed (Step 50: every blind round found that goal
+## only after 6-9 minutes, then called it the clearest thing to play for).
+var goal_button: Button
+var _stock_lib: SpriteLibrary
+var _stock_shown := ""
 
 
 func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
@@ -134,6 +151,21 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	production_label.name = "Production"
 	production_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(production_label)
+	_stock_lib = lib
+	stock_row = HBoxContainer.new()
+	stock_row.name = "Stock"
+	stock_row.add_theme_constant_override("separation", 10)
+	stock_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stock_row.visible = false
+	add_child(stock_row)
+	goal_button = Button.new()
+	goal_button.name = "Goal"
+	goal_button.focus_mode = Control.FOCUS_NONE
+	goal_button.add_theme_font_size_override("font_size", 15)
+	goal_button.custom_minimum_size = Vector2(0, 40)
+	goal_button.pressed.connect(func() -> void: action.emit(&"status"))
+	goal_button.visible = false
+	add_child(goal_button)
 
 	for spec: Array in [[&"research", "hud.research", "ui_research"], [&"mailbox", "hud.mailbox", "ui_mail"],
 			[&"status", "hud.status", "ui_status"]]:
@@ -156,7 +188,11 @@ func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 		return
 	match type:
 		&"money_changed":
-			_pending_money += int(payload.get("delta", 0))
+			var d := int(payload.get("delta", 0))
+			if d >= 0:
+				_pending_money += d
+			else:
+				_pending_spent += d
 		&"exp_gained":
 			_pending_exp += int(payload.get("amount", 0))
 		&"level_up":
@@ -178,10 +214,12 @@ func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 func flush_feedback() -> void:
 	_feedback_queued = false
 	var money := _pending_money
+	var spent := _pending_spent
 	var exp_gain := _pending_exp
 	var level := _pending_level
 	var research := _pending_research.duplicate()
 	_pending_money = 0
+	_pending_spent = 0
 	_pending_exp = 0
 	_pending_level = 0
 	_pending_research.clear()
@@ -189,6 +227,8 @@ func flush_feedback() -> void:
 		return
 	if money != 0:
 		pop_money(money)
+	if spent != 0:
+		pop_money(spent)
 	if exp_gain > 0:
 		_pop_amount("exp", exp_pill, exp_gain, Color(1, 1, 1, 0.95))
 	if level > 0:
@@ -246,7 +286,7 @@ func _pop(anchor: Control, text: String, color: Color, delay: float = 0.0, side:
 ## A "+$5" (or "-$10") beside the money pill, and a little bounce of the
 ## pill: the number changed, here is by how much.
 func pop_money(delta: int) -> void:
-	_pop_amount("money", money_pill, delta, Color("#ffe27a") if delta > 0 else Color("#ffb3a8"))
+	_pop_amount("money" if delta > 0 else "spent", money_pill, delta, Color("#ffe27a") if delta > 0 else Color("#ffb3a8"))
 	if FxPrefs.moving():
 		money_pill.pivot_offset = money_pill.size * 0.5
 		var bump := create_tween()
@@ -275,12 +315,15 @@ func _pop_amount(key: String, anchor: Control, amount: int, color: Color) -> voi
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(l)
 	l.add_theme_color_override("font_color", color)
-	if key == "money":
+	if key == "money" or key == "spent":
 		l.text = ("+$%s" if total > 0 else "-$%s") % FxPrefs.compact(absi(total))
 	else:
 		l.text = "+%s EXP" % FxPrefs.compact(total)
 	l.reset_size()
 	l.position = anchor.position + Vector2(-l.size.x - 10.0, (anchor.size.y - l.size.y) * 0.5)
+	if key == "spent":
+		# Under the pill, apart from what came in.
+		l.position.y += anchor.size.y * 0.7
 	_log_pop(l.text)
 	_live[key] = {"label": l, "total": total, "at": now, "tween": _animate(l, -16.0, 1.1, 0.0)}
 
@@ -397,6 +440,17 @@ func refresh(force: bool = false) -> void:
 	var status_button: HudButton = buttons.get(&"status")
 	if tiers != null and status_button != null and status_button.badge != tiers.can_promote():
 		status_button.badge = tiers.can_promote()
+	# A dot on the shop when a Momo can be hired and there is work nobody
+	# looks after (Step 50: the blind players never found what to buy next).
+	var shop_button: HudButton = buttons.get(&"shop")
+	if shop_button != null and (force or Time.get_ticks_msec() >= _shop_check_at):
+		# Twice a second is plenty, and a large island has many buildings.
+		_shop_check_at = Time.get_ticks_msec() + 500
+		var want_hire := _hire_worth_it()
+		if shop_button.badge != want_hire:
+			shop_button.badge = want_hire
+	_refresh_stock()
+	_refresh_goal()
 	var production := production_summary()
 	var shown_before := production_label.text
 	_set_text(production_label, "prod", production, force)
@@ -413,17 +467,90 @@ func _set_text_button(b: Button, text: String) -> void:
 		b.reset_size()
 
 
-## One short line: crops waiting in the store and what they fetch at the next
-## day boundary. Empty when the store holds nothing to sell.
-func production_summary() -> String:
-	var economy: EconomySystem = sim.system(&"economy")
-	var inv: InventorySystem = sim.system(&"inventory")
-	var crops := 0
-	for item: String in inv.of_kind("crop"):
-		crops += inv.count(item)
-	if crops <= 0:
+## "City 2/4": the next tier and how many of its needs are met, or "".
+func goal_text() -> String:
+	var tiers: TierSystem = sim.system(&"tiers")
+	if tiers == null or tiers.is_top():
 		return ""
-	return tr("hud.store") % [crops, economy.pending_sale()]
+	var need := tiers.progress()
+	var met := need.filter(func(p: Dictionary) -> bool: return bool(p["met"])).size()
+	return tr("hud.goal").format({"tier": tr("tier." + tiers.tier_name(tiers.tier + 1)), "met": met, "of": need.size()})
+
+
+func _refresh_goal() -> void:
+	var text := goal_text()
+	if goal_button.text != text:
+		goal_button.text = text
+		goal_button.visible = text != ""
+		_layout.call_deferred()
+
+
+## The items the store holds now, in data order (never what is sold the
+## moment it is made), at most STOCK_MAX: [[item, count], ...].
+func stock() -> Array:
+	var inv: InventorySystem = sim.system(&"inventory")
+	var economy: EconomySystem = sim.system(&"economy")
+	var out: Array = []
+	for item: String in sim.data.table("items").get("items", {}):
+		if out.size() >= STOCK_MAX:
+			break
+		if inv.count(item) > 0 and not economy.sells_at_once(item):
+			out.append([item, inv.count(item)])
+	return out
+
+
+func _refresh_stock() -> void:
+	var items := stock()
+	var sig := str(items)
+	if sig == _stock_shown:
+		return
+	_stock_shown = sig
+	for c: Node in stock_row.get_children():
+		c.queue_free()
+	for e: Array in items:
+		var icon := TextureRect.new()
+		icon.texture = _stock_lib.atlas_texture(String(sim.data.item(String(e[0])).get("icon", "")))
+		icon.custom_minimum_size = Vector2(22, 22)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.name = "Icon_" + String(e[0])
+		stock_row.add_child(icon)
+		var l := _label(15)
+		l.name = "Count_" + String(e[0])
+		l.text = str(int(e[1]))
+		l.add_theme_color_override("font_outline_color", Color(0.05, 0.15, 0.3, 0.8))
+		l.add_theme_constant_override("outline_size", 5)
+		stock_row.add_child(l)
+	var was := stock_row.visible
+	stock_row.visible = not items.is_empty()
+	if was != stock_row.visible or stock_row.visible:
+		_layout.call_deferred()
+
+
+## One short line: what the island's work earned in the last minute
+## (finished work is money at once, Step 50). Empty before the first income.
+func production_summary() -> String:
+	var rate := (sim.system(&"economy") as EconomySystem).income_per_minute()
+	if rate <= 0:
+		return ""
+	return tr("hud.rate") % _format_money(rate)
+
+
+var _shop_check_at := 0
+
+
+## Whether hiring now would put a Momo to work: affordable, and a building
+## that nobody looks after.
+func _hire_worth_it() -> bool:
+	var momos: MomoSystem = sim.system(&"momo")
+	if momos == null or not (sim.system(&"economy") as EconomySystem).can_afford(momos.hire_cost()):
+		return false
+	var bs: BuildingSystem = sim.system(&"buildings")
+	for id: int in bs.ids():
+		if momos.slots_of(id) > 0 and momos.watchers_of(id).is_empty() and bs.get_building(id)["state"] != BuildingSystem.CONSTRUCTING:
+			return true
+	return false
 
 
 func _set_text(label: Label, key: String, text: String, force: bool) -> void:
@@ -491,6 +618,13 @@ func _layout() -> void:
 	power_pill.position = Vector2(m["left"], day_panel.position.y + day_panel.size.y + GAP)
 	var below := power_pill.position.y + (power_pill.size.y + GAP if power_pill.visible else 0.0)
 	burst_pill.position = Vector2(m["left"], below)
+	below += burst_pill.size.y + GAP if burst_pill.visible else 0.0
+	stock_row.reset_size()
+	stock_row.position = Vector2(m["left"] + 4.0, below)
+	if stock_row.visible:
+		below += stock_row.size.y + GAP
+	goal_button.reset_size()
+	goal_button.position = Vector2(m["left"], below)
 	production_label.reset_size()
 	production_label.position = Vector2(w - m["right"] - production_label.size.x, exp_pill.position.y + exp_pill.size.y + 4)
 	var y := exp_pill.position.y + exp_pill.size.y + 34
@@ -511,6 +645,8 @@ func occupied_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = [day_panel.get_rect(), money_pill.get_rect(), exp_pill.get_rect()]
 	for b: HudButton in side_buttons + corner_buttons:
 		out.append(b.get_rect())
+	if goal_button.visible:
+		out.append(goal_button.get_rect())
 	return out
 
 

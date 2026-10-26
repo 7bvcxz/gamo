@@ -52,8 +52,8 @@ func test_varieties_show_what_they_ask_and_give() -> void:
 	main.call("open_details", farm)
 	await tree.process_frame
 	assert_true(view.variety_box.visible, "a farm shows what it can grow")
-	assert_eq((_variety("base").find_child("Facts", true, false) as Label).text, "Water x3 · 1 a harvest", "the usual crop")
-	assert_eq((_variety("millet").find_child("Facts", true, false) as Label).text, "Water x2 · 1 a harvest", "millet")
+	assert_eq((_variety("base").find_child("Facts", true, false) as Label).text, "Water x1 · 1 a harvest", "the usual crop")
+	assert_eq((_variety("millet").find_child("Facts", true, false) as Label).text, "No watering · 2 a harvest", "millet, a grain for dry ground")
 	assert_true(_variety("hardy").disabled, "hardy is locked")
 	assert_true(_variety("base").size.y >= 52.0, "finger-sized")
 
@@ -70,8 +70,8 @@ func test_tap_a_variety_between_cycles() -> void:
 	await tree.process_frame
 	ctx._refresh()
 	var groups := buildings.action_groups(buildings.get_building(farm))
-	assert_eq(groups.map(func(g: Dictionary) -> int: return int(g["count"])), [1, 2, 1], "sow, water x2, harvest")
-	assert_eq(ctx.cards.size(), 3, "the stage cards follow the variety")
+	assert_eq(groups.map(func(g: Dictionary) -> String: return String(g["action"])), ["sow", "harvest"], "sow, harvest: no watering")
+	assert_eq(ctx.cards.size(), 2, "the stage cards follow the variety")
 	sim.execute({"type": "building.tap", "id": farm})
 	view.refresh()
 	assert_false(view.variety_hint.text == "" or not view.variety_hint.visible, "mid-cycle the hint says when it can change")
@@ -84,7 +84,7 @@ func test_the_drip_line_shows_as_the_worker() -> void:
 		research.completed[id] = 0
 	main.call("open_details", farm)
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(5000)
+	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * 1000.0) + 100)
 	view.refresh()
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "auto", "the drip line is watering")
 	assert_eq((view.workers_box.get_child(0).find_child("Status", true, false) as Label).text, "Working", "at work")

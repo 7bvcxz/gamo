@@ -90,7 +90,7 @@ func test_to_the_top_and_saved() -> void:
 func test_a_sold_island_starts_as_a_village() -> void:
 	tiers.tier = 2
 	var prog: ProgressionSystem = sim.system(&"progression")
-	while prog.level < 6:
+	while prog.level < sim.data.get_int("balance", "prestige.min_level", 5):
 		prog.add_exp(prog.next_level_exp() - prog.experience, "test")
 	var r := PrestigeSystem.sell(sim)
 	assert_true(r["ok"], "sold")

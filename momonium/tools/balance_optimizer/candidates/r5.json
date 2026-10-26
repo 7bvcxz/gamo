@@ -1,0 +1,10 @@
+{
+  "round": "R5",
+  "extends": ["r4.json"],
+  "_note": "Also in this round, rules for comprehension (blind round B2): the sea tip comes with the glowing tile (at most one free tile and affordable; it came as soon as a tile was affordable and split the players into first-minute and many-minute buyers); the corner button that hires says Hire (one player took Shop for a real-money store for six minutes); a refused assignment says why on the Momo's panel.",
+  "sets": [
+    {"set": "balance:progression/exp_to_next/0=90", "old": 77, "why": "B2 blind: Lv 2 at 1:43 against 2:00 (-14%)"},
+    {"set": "balance:progression/exp_to_next/1=130", "old": 143, "why": "Lv 3 on target in B1 and B2 (3:54, 3:46): keep its total (90+130 = 77+143)"},
+    {"set": "balance:momo/hire/base=60", "old": 50, "why": "B1+B2 blind: first hire 3:19-6:52, median of the six 3:58 against 4:30"}
+  ]
+}

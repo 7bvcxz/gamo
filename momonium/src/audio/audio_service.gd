@@ -180,7 +180,19 @@ func _process(delta: float) -> void:
 
 # --- effects --------------------------------------------------------------------------------
 
+## Effects that come in streams once work pays at once (Step 50): heard at
+## most once per this many milliseconds, so many Momo finishing together
+## ring one coin, not a cascade.
+const MIN_GAP_MS := {"coin": 250, "harvest": 250}
+var _last_ms := {}
+
+
 func play(effect: String) -> void:
+	if MIN_GAP_MS.has(effect):
+		var now := Time.get_ticks_msec()
+		if _last_ms.has(effect) and now - int(_last_ms[effect]) < int(MIN_GAP_MS[effect]):
+			return
+		_last_ms[effect] = now
 	played[effect] = int(played.get(effect, 0)) + 1
 	var s := _stream("sfx_" + effect, false)
 	if s == null:

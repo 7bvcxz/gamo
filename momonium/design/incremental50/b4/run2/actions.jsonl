@@ -1,0 +1,128 @@
+{"t":0.7,"at":"00:00","cmd":"look","issued":0,"shot":"001.png"}
+{"t":5.9,"at":"00:05","cmd":"note","text":"Cute little floating island, a bunny-like creature next to a tomato patch. Says Day 2, 10 coins, Lv1. Hint says tap the ripe crop - doing that.","issued":5.9}
+{"t":7.6,"at":"00:07","cmd":"tap","x":280,"y":740,"issued":6,"shot":"002.png"}
+{"t":13.2,"at":"00:13","cmd":"note","text":"Harvested! +4 coins, +3 xp. Suddenly it's night (a day is 30 sec?). Now it says tap farm to sow. Bottom has Sow/Water/Harvest buttons. Tapping the field.","issued":13.2}
+{"t":14.9,"at":"00:14","cmd":"tap","x":290,"y":760,"issued":13.2,"shot":"003.png"}
+{"t":20.6,"at":"00:20","cmd":"tap","x":290,"y":760,"issued":19,"shot":"004.png"}
+{"t":25.9,"at":"00:25","cmd":"note","text":"Watered, the crop is growing (Harvest 2s left). The bunny is called a Momo, it has a heart bubble. Tapping it.","issued":25.9}
+{"t":27.5,"at":"00:27","cmd":"tap","x":298,"y":665,"issued":25.9,"shot":"005.png"}
+{"t":33.4,"at":"00:33","cmd":"note","text":"Momo panel: 'Free time', Assign. Hint says tap the pencil to pick tiles this Momo looks after. Oh so I can make the bunny farm for me. Tomatoes ripe already.","issued":33.4}
+{"t":35.3,"at":"00:35","cmd":"tap","x":175,"y":1068,"issued":33.5,"shot":"006.png"}
+{"t":41.7,"at":"00:41","cmd":"tap","x":260,"y":770,"issued":39.8,"shot":"007.png"}
+{"t":48.4,"at":"00:48","cmd":"note","text":"Assigned the farm tile, Momo is now 'Working at Farm', coins went up to 18, +8/min. A long text popup: empty tiles can build farm/mine/lumberyard/lab. That's a lot of text at once. Pressing Got it, then I'll try the highlighted empty tile.","issued":48.4}
+{"t":50,"at":"00:49","cmd":"tap","x":313,"y":1013,"issued":48.5,"shot":"008.png"}
+{"t":55.5,"at":"00:55","cmd":"note","text":"Momo is farming by itself now, 6 jobs done, money climbing. Mailbox has a red dot and Momo has an envelope bubble. First I'll confirm the tile selection with the check mark.","issued":55.5}
+{"t":57.1,"at":"00:57","cmd":"tap","x":175,"y":1096,"issued":55.6,"shot":"009.png"}
+{"t":62.9,"at":"01:02","cmd":"tap","x":557,"y":228,"issued":61.3,"shot":"010.png"}
+{"t":68.6,"at":"01:08","cmd":"tap","x":260,"y":248,"issued":67,"shot":"011.png"}
+{"t":73.6,"at":"01:13","cmd":"note","text":"Cute letter from Momo proposing Field expansion research. Love that the worker writes me letters. Pressing Let's research it.","issued":73.6}
+{"t":75.4,"at":"01:15","cmd":"tap","x":420,"y":557,"issued":73.7,"shot":"012.png"}
+{"t":82.1,"at":"01:22","cmd":"tap","x":557,"y":165,"issued":80.2,"shot":"013.png"}
+{"t":88.7,"at":"01:28","cmd":"note","text":"Research tree with tabs Farm/Lumber/Mine/Smelting/Power/Games... Field expansion needs 3 flasks + 20 coins, and says Build a research lab. Big tree, a bit overwhelming. Tapping Build a research lab to see where it takes me.","issued":88.7}
+{"t":90.8,"at":"01:30","cmd":"tap","x":401,"y":428,"issued":88.8,"shot":"014.png"}
+{"t":97.5,"at":"01:37","cmd":"note","text":"The 'Build a research lab' button did nothing - it's a greyed label, not a shortcut. OK, the earlier popup said empty tiles can build a lab. Closing research and tapping an empty grass tile.","issued":97.5}
+{"t":99.1,"at":"01:39","cmd":"tap","x":469,"y":187,"issued":97.5,"shot":"015.png"}
+{"t":100.9,"at":"01:40","cmd":"tap","x":180,"y":850,"issued":99.3,"shot":"016.png"}
+{"t":107.5,"at":"01:47","cmd":"note","text":"Build menu appeared: Farm 10 coins, Mine (Lv3), Lumberyard (Lv2), Research lab (Lv2), Special 0/1. So lab needs level 2 - I'm at 69/90 xp. Building a second farm for 10.","issued":107.5}
+{"t":109.3,"at":"01:49","cmd":"tap","x":61,"y":990,"issued":107.6,"shot":"017.png"}
+{"t":115.2,"at":"01:55","cmd":"note","text":"Second farm under construction, 2 sec. Nice construction scaffolding. Another letter waiting - checking it.","issued":115.2}
+{"t":117,"at":"01:56","cmd":"tap","x":557,"y":228,"issued":115.3,"shot":"018.png"}
+{"t":124.2,"at":"02:04","cmd":"note","text":"Level 2 with confetti! Research lab and Lumberyard unlocked. Also a hint that I can buy sea tiles for 25. Lots popping up at once. Reading the new letter first.","issued":124.2}
+{"t":126.3,"at":"02:06","cmd":"tap","x":260,"y":248,"issued":124.3,"shot":"019.png"}
+{"t":135.5,"at":"02:15","cmd":"tap","x":420,"y":557,"issued":133.6,"shot":"020.png"}
+{"t":137.2,"at":"02:17","cmd":"tap","x":469,"y":187,"issued":135.6,"shot":"021.png"}
+{"t":138.8,"at":"02:18","cmd":"tap","x":522,"y":892,"issued":137.3,"shot":"022.png"}
+{"t":146.4,"at":"02:26","cmd":"note","text":"Hm, my Got it tap seems to have selected the sea tile instead (5, tap again to buy). Not buying yet. Want a research lab first - tapping the empty grass at the front of the island.","issued":146.4}
+{"t":148.1,"at":"02:28","cmd":"tap","x":340,"y":920,"issued":146.5,"shot":"023.png"}
+{"t":154.7,"at":"02:34","cmd":"note","text":"Build menu: Research lab is 0 now, Lumberyard 0. I have 104. Building the lab so I can do Momo's research ideas.","issued":154.7}
+{"t":156.4,"at":"02:36","cmd":"tap","x":394,"y":1068,"issued":154.8,"shot":"024.png"}
+{"t":163.8,"at":"02:43","cmd":"note","text":"Lab is being built. It says Research lab 0/1 - I guess it needs a Momo to staff it, but I only have one who's farming. Let me look at Hire.","issued":163.8}
+{"t":165.6,"at":"02:45","cmd":"tap","x":104,"y":1247,"issued":163.9,"shot":"025.png"}
+{"t":173.1,"at":"02:53","cmd":"note","text":"Lab is done - blue roof with a flask, very cute. Hire Momo costs 60, I have 84. Hiring a second Momo for the lab.","issued":173.1}
+{"t":174.7,"at":"02:54","cmd":"tap","x":86,"y":1120,"issued":173.2,"shot":"026.png"}
+{"t":182.7,"at":"03:02","cmd":"note","text":"Hired Mochi! Free time. A flask count '1' appeared under the day timer - the lab already makes flasks? Using pencil to assign Mochi to the lab.","issued":182.7}
+{"t":184.4,"at":"03:04","cmd":"tap","x":287,"y":1018,"issued":182.8,"shot":"027.png"}
+{"t":186.2,"at":"03:06","cmd":"tap","x":175,"y":1096,"issued":184.5,"shot":"028.png"}
+{"t":194.6,"at":"03:14","cmd":"tap","x":340,"y":870,"issued":193,"shot":"029.png"}
+{"t":196.3,"at":"03:16","cmd":"tap","x":175,"y":1096,"issued":194.8,"shot":"030.png"}
+{"t":206.3,"at":"03:26","cmd":"note","text":"Confused: I tapped the lab for Mochi but Mochi says 'On its rounds - the next crop is ripening', so maybe it picked a farm tile instead. The lab shows a ? bubble - maybe it wants a research chosen. Flasks now 2. Opening Research.","issued":206.3}
+{"t":208.1,"at":"03:28","cmd":"tap","x":557,"y":165,"issued":206.4,"shot":"031.png"}
+{"t":216.9,"at":"03:36","cmd":"note","text":"Level 3 now. Field expansion 2/3 flasks - 'Not enough materials'. Flasks seem to trickle in from the lab. Closing and reading the waiting letter while I wait.","issued":216.9}
+{"t":218.7,"at":"03:38","cmd":"tap","x":469,"y":187,"issued":217,"shot":"032.png"}
+{"t":220.4,"at":"03:40","cmd":"tap","x":557,"y":228,"issued":218.8,"shot":"033.png"}
+{"t":227.3,"at":"03:47","cmd":"note","text":"3 flasks now and Research got a red dot - ready! Going to start Field expansion.","issued":227.3}
+{"t":229.2,"at":"03:49","cmd":"tap","x":557,"y":165,"issued":227.4,"shot":"034.png"}
+{"t":237.1,"at":"03:57","cmd":"tap","x":401,"y":428,"issued":235.3,"shot":"035.png"}
+{"t":246.1,"at":"04:06","cmd":"note","text":"Research started, 20 sec timer. Mochi's panel says 'Since the change: 0 -> 0 jobs a day' - Mochi seems idle-ish. Let me tap Mochi's pencil again and see what tiles it has.","issued":246.1}
+{"t":247.8,"at":"04:07","cmd":"tap","x":469,"y":187,"issued":246.2,"shot":"036.png"}
+{"t":249.4,"at":"04:09","cmd":"tap","x":175,"y":1133,"issued":247.9,"shot":"037.png"}
+{"t":258.2,"at":"04:18","cmd":"note","text":"Looks like Mochi was given the empty grass tile on the right (blue outline), not the lab. The lab building overlaps the tiles so it's hard to tell where to tap. Trying to tap the lab's door.","issued":258.2}
+{"t":259.8,"at":"04:19","cmd":"tap","x":300,"y":950,"issued":258.3,"shot":"038.png"}
+{"t":267.8,"at":"04:27","cmd":"note","text":"Now the lab got a '1' marker, 2/4 tiles. Confirming.","issued":267.8}
+{"t":269.6,"at":"04:29","cmd":"tap","x":175,"y":1133,"issued":268,"shot":"039.png"}
+{"t":277.5,"at":"04:37","cmd":"note","text":"Mochi is finally 'Working at Research lab', walks to the lab door. 120 coins. Checking if field expansion finished.","issued":277.5}
+{"t":279.5,"at":"04:39","cmd":"tap","x":557,"y":165,"issued":277.6,"shot":"040.png"}
+{"t":287,"at":"04:47","cmd":"note","text":"Field expansion Lv1 done! Income jumped to 92/min. Watering efficiency unlocked. Field expansion Lv2 affordable (4 flasks, 36) - doing it.","issued":287}
+{"t":288.9,"at":"04:48","cmd":"tap","x":401,"y":443,"issued":287.1,"shot":"041.png"}
+{"t":297.1,"at":"04:57","cmd":"note","text":"Lv2 researching. Now I want to use the last empty tile on the right - Mine opened at Lv3. Tapping it.","issued":297.1}
+{"t":298.8,"at":"04:58","cmd":"tap","x":469,"y":187,"issued":297.2,"shot":"042.png"}
+{"t":300.5,"at":"05:00","cmd":"tap","x":460,"y":860,"issued":298.9,"shot":"043.png"}
+{"t":308.3,"at":"05:08","cmd":"note","text":"Mine needs 120 coins AND 10 wood (shown in red). So I need a lumberyard first - it's 80. Building the lumberyard here. Nice chain: wood -> mine.","issued":308.3}
+{"t":310,"at":"05:09","cmd":"tap","x":348,"y":985,"issued":308.4,"shot":"044.png"}
+{"t":318.2,"at":"05:18","cmd":"note","text":"Lumberyard building, says 0/1 worker. Mochi had that tile accidentally assigned too, so maybe Mochi will chop wood as well. Reading the unread letter meanwhile.","issued":318.2}
+{"t":320,"at":"05:20","cmd":"tap","x":557,"y":228,"issued":318.2,"shot":"045.png"}
+{"t":327.7,"at":"05:27","cmd":"note","text":"Yes! Mochi is chopping wood at the lumberyard, wood counter shows 2. The accidental assignment paid off. Opening letter 'Let's give the soil something back'.","issued":327.7}
+{"t":329.4,"at":"05:29","cmd":"tap","x":260,"y":248,"issued":327.8,"shot":"046.png"}
+{"t":338.4,"at":"05:38","cmd":"tap","x":420,"y":582,"issued":336.7,"shot":"047.png"}
+{"t":340.1,"at":"05:40","cmd":"tap","x":469,"y":187,"issued":338.4,"shot":"048.png"}
+{"t":341.9,"at":"05:41","cmd":"tap","x":557,"y":165,"issued":340.2,"shot":"049.png"}
+{"t":350.4,"at":"05:50","cmd":"note","text":"Field expansion Lv2 done, 172/min. Bigger harvests unlocked (thanks to the letter?). Watering efficiency is affordable 5/5 - checking it.","issued":350.4}
+{"t":352.8,"at":"05:52","cmd":"tap","x":109,"y":375,"issued":350.6,"shot":"050.png"}
+{"t":361.4,"at":"06:01","cmd":"note","text":"Watering efficiency takes 1m30s - long. Bigger harvests is 7/8 flasks, almost there. Peeking at it.","issued":361.4}
+{"t":363.2,"at":"06:03","cmd":"tap","x":238,"y":375,"issued":361.5,"shot":"051.png"}
+{"t":371.4,"at":"06:11","cmd":"tap","x":401,"y":428,"issued":369.5,"shot":"052.png"}
+{"t":376.6,"at":"06:16","cmd":"note","text":"Started Bigger harvests (2 min). Now I'm out of land - going to buy that dotted sea tile for 25 to grow the island.","issued":376.6}
+{"t":378.3,"at":"06:18","cmd":"tap","x":469,"y":187,"issued":376.7,"shot":"053.png"}
+{"t":380,"at":"06:19","cmd":"tap","x":420,"y":1050,"issued":378.4,"shot":"054.png"}
+{"t":387.7,"at":"06:27","cmd":"tap","x":420,"y":1050,"issued":386.1,"shot":"055.png"}
+{"t":396.2,"at":"06:36","cmd":"note","text":"Bought the sea tile - a new grassy piece rose with flowers on it, satisfying! Next tile is 35. Wood is 8, almost 10 for a mine. Tapping the new tile to see the build menu.","issued":396.2}
+{"t":397.8,"at":"06:37","cmd":"tap","x":470,"y":1060,"issued":396.3,"shot":"056.png"}
+{"t":407.2,"at":"06:47","cmd":"note","text":"Oops, that selected another sea tile for 35 instead. Hard to tell which diamond is which on this small isometric island. Trying the grass just in front of the lab instead.","issued":407.2}
+{"t":408.8,"at":"06:48","cmd":"tap","x":380,"y":1030,"issued":407.3,"shot":"057.png"}
+{"t":416.2,"at":"06:56","cmd":"note","text":"Build menu up and now wood is exactly 10 - Mine text is no longer red. Building a Mine!","issued":416.2}
+{"t":417.8,"at":"06:57","cmd":"tap","x":253,"y":875,"issued":416.3,"shot":"058.png"}
+{"t":425.3,"at":"07:05","cmd":"note","text":"Mine is going up (7 sec). It'll need a worker, 0/1. Both Momos are busy (Mochi has lab + lumberyard), so hiring a third.","issued":425.3}
+{"t":427,"at":"07:07","cmd":"tap","x":104,"y":1247,"issued":425.4,"shot":"059.png"}
+{"t":435.1,"at":"07:15","cmd":"note","text":"Level 4. Mine finished - a cute burrow with a lantern - and a Momo is already standing at it? Hire now costs 100 (went up from 60). Hiring anyway.","issued":435.1}
+{"t":436.9,"at":"07:16","cmd":"tap","x":86,"y":1120,"issued":435.2,"shot":"060.png"}
+{"t":444.7,"at":"07:24","cmd":"note","text":"New Momo named Pomu. A stone counter appeared (1). Assigning Pomu to the mine with the pencil.","issued":444.7}
+{"t":446.4,"at":"07:26","cmd":"tap","x":162,"y":1016,"issued":444.8,"shot":"061.png"}
+{"t":448.1,"at":"07:28","cmd":"tap","x":430,"y":950,"issued":446.5,"shot":"062.png"}
+{"t":456.3,"at":"07:36","cmd":"tap","x":162,"y":1016,"issued":454.6,"shot":"063.png"}
+{"t":464.6,"at":"07:44","cmd":"note","text":"Pomu is mining - stone +1 and money popping off every building, sunset sky. Island feels alive with three bunnies. Haven't looked at Status yet - checking.","issued":464.6}
+{"t":466.5,"at":"07:46","cmd":"tap","x":557,"y":292,"issued":464.7,"shot":"064.png"}
+{"t":475.3,"at":"07:55","cmd":"note","text":"Status shows a real goal: Village -> City. Need Land 5/9, Momo 3/3 done, Research levels 2/3, Value 832/1.5K. Finally a clear target! Going to buy more sea tiles and do another research.","issued":475.3}
+{"t":477.4,"at":"07:57","cmd":"tap","x":380,"y":470,"issued":475.4,"shot":"065.png"}
+{"t":479.1,"at":"07:59","cmd":"tap","x":469,"y":187,"issued":477.5,"shot":"066.png"}
+{"t":488.1,"at":"08:08","cmd":"note","text":"Pomu's panel is covering the buyable sea tile. Tapping open water to close it.","issued":488.1}
+{"t":489.8,"at":"08:09","cmd":"tap","x":80,"y":600,"issued":488.1,"shot":"067.png"}
+{"t":498.1,"at":"08:18","cmd":"tap","x":300,"y":1130,"issued":496.7,"shot":"068.png"}
+{"t":499.7,"at":"08:19","cmd":"tap","x":300,"y":1130,"issued":498.2,"shot":"069.png"}
+{"t":508.1,"at":"08:28","cmd":"note","text":"Bought another tile (land 6/9). Research has a red dot - Bigger harvests must be done. Starting another research to push research levels.","issued":508.1}
+{"t":509.8,"at":"08:29","cmd":"tap","x":557,"y":165,"issued":508.2,"shot":"070.png"}
+{"t":520.2,"at":"08:40","cmd":"tap","x":109,"y":375,"issued":518.4,"shot":"071.png"}
+{"t":521.9,"at":"08:41","cmd":"tap","x":401,"y":443,"issued":520.3,"shot":"072.png"}
+{"t":530.1,"at":"08:50","cmd":"note","text":"Watering efficiency researching (1m30). Using the new front tile for another farm since farms are my money maker.","issued":530.1}
+{"t":531.7,"at":"08:51","cmd":"tap","x":469,"y":187,"issued":530.1,"shot":"073.png"}
+{"t":533.4,"at":"08:53","cmd":"tap","x":250,"y":1110,"issued":531.8,"shot":"074.png"}
+{"t":541.3,"at":"09:01","cmd":"note","text":"Build menu again. I've been curious about the gold star 'Special 0/1' the whole time - peeking at it before building a farm.","issued":541.3}
+{"t":543.1,"at":"09:03","cmd":"tap","x":489,"y":960,"issued":541.4,"shot":"075.png"}
+{"t":552.2,"at":"09:12","cmd":"note","text":"Special = landmarks! Clock Tower (Lv5), School (400 + 30 wood + 20 stone), Momo Monument (Lv6). Now I see why wood and stone matter - something to save up for. Can't afford School yet, so going back and building a farm.","issued":552.2}
+{"t":553.9,"at":"09:13","cmd":"tap","x":280,"y":853,"issued":552.4,"shot":"076.png"}
+{"t":555.6,"at":"09:15","cmd":"tap","x":156,"y":960,"issued":554,"shot":"077.png"}
+{"t":563.8,"at":"09:23","cmd":"tap","x":109,"y":960,"issued":562.2,"shot":"078.png"}
+{"t":571.8,"at":"09:31","cmd":"note","text":"Third farm going up on the new land. 664 coins, 314/min. It'll need a worker - I'd hire a 4th Momo next, then save for the School and push toward City. Two letters still unread (Momo keeps writing!). Fun, calm loop.","issued":571.8}
+{"t":573.5,"at":"09:33","cmd":"tap","x":104,"y":1247,"issued":571.9,"shot":"079.png"}
+{"t":578.5,"at":"09:38","cmd":"tap","x":86,"y":1120,"issued":577,"shot":"080.png"}
+{"t":585.9,"at":"09:45","cmd":"note","text":"Hired Mugi (155 coins now - hire price keeps rising). Out of time; next I'd pencil Mugi onto the new farm.","issued":585.9}
+{"t":605,"at":"10:04","cmd":"wait","s":15,"issued":589.4,"shot":"081.png"}

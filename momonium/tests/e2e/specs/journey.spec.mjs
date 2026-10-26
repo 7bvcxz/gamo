@@ -3,6 +3,7 @@
 // played and the time since the island began, and time away counted apart:
 // the island catches up on an absence and the journey says how long it was.
 import { test, expect } from '../lib/fixtures.mjs';
+import { runStages } from '../lib/farm.mjs';
 
 const centre = async (game, rect, win) => {
   const box = await game.canvas.boundingBox();
@@ -17,10 +18,7 @@ test('the journey of an island', async ({ game }) => {
   expect((await game.command({ type: 'building.place', building: 'farm', anchor: [0, 0] })).ok).toBe(true);
   await game.query('dev_advance_ms', 6000);
   const id = (await game.state()).buildings.buildings.find((b) => b.type === 'farm').id;
-  for (const wait of [5000, 5000 + rules.farm_wait_ms, 5000 + rules.farm_wait_ms, 5000 + rules.farm_wait_ms, 5000]) {
-    expect((await game.command({ type: 'building.tap', id })).ok).toBe(true);
-    await game.query('dev_advance_ms', wait);
-  }
+  await runStages(game, id, rules.farm_stages.length);
   await game.query('dev_advance_ms', 30000);
   let j = await game.query('journey');
   const keys = j.timeline.map((e) => e.key);

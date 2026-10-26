@@ -255,10 +255,23 @@ func blocked(b: Dictionary) -> Dictionary:
 	var consumes: Dictionary = stage.get("consumes", {})
 	if not consumes.is_empty() and not inv.has_all(consumes):
 		return {"missing": inv.shortfall(consumes)}
-	var produces := whole_yield(b, stage)
+	var produces := _kept_output(b, stage)
 	if not produces.is_empty() and not inv.fits(produces):
 		return {"full": produces}
 	return {}
+
+
+## The part of a stage's output that must find room in the store: items
+## that cannot be sold (research notes, a furnace's charge...). Crops and
+## goods sold at once, and anything with a surplus price, never stop work.
+func _kept_output(b: Dictionary, stage: Dictionary) -> Dictionary:
+	var economy: EconomySystem = sim.system(&"economy")
+	var out := {}
+	var whole := whole_yield(b, stage)
+	for item: String in whole:
+		if economy == null or not economy.sellable(item):
+			out[item] = whole[item]
+	return out
 
 
 ## How much the island's manager should want workers here: high, normal,
@@ -426,6 +439,20 @@ func place_instant(type: String, anchor: Vector2i) -> int:
 	next_id += 1
 	sim.bus.emit(&"building_added", {"id": b["id"], "type": type})
 	return b["id"]
+
+
+## A finished building whose cycle waits at stage `stage_id` (a new
+## island's farm, ripe and ready to pick). Returns the id, or 0.
+func place_ready(type: String, anchor: Vector2i, stage_id: String) -> int:
+	var id := place_instant(type, anchor)
+	if id == 0:
+		return 0
+	var b: Dictionary = buildings[id]
+	var list := stages(b)
+	for i in list.size():
+		if String((list[i] as Dictionary).get("id", "")) == stage_id:
+			b["stage"] = i
+	return id
 
 
 func _record(type: String, anchor: Vector2i) -> Dictionary:
@@ -771,7 +798,12 @@ func place(type: String, anchor: Vector2i) -> Dictionary:
 	b["state"] = CONSTRUCTING
 	b["build_start"] = sim.now_ms()
 	b["build_end"] = sim.now_ms() + duration
-	b["paid"] = {"money": money, "items": items}
+	# Whole items, as a save keeps them (the data's JSON numbers are floats):
+	# the same island whether it was saved and loaded or not.
+	var paid_items := {}
+	for item: String in items:
+		paid_items[item] = int(items[item])
+	b["paid"] = {"money": money, "items": paid_items}
 	b["token"] = 1
 	buildings[b["id"]] = b
 	next_id += 1
@@ -861,8 +893,9 @@ func can_start(id: int) -> Dictionary:
 	if not consumes.is_empty() and not inv.has_all(consumes):
 		return SimResult.fail("err.missing_inputs", {"missing": inv.shortfall(consumes)})
 	# A stage that produces does not start unless its output has somewhere to
-	# go: a full store stops the harvest, it does not throw the crop away.
-	var produces := whole_yield(b, stage)
+	# go -- in the store, or sold: a full store of notes stops the lab, it
+	# does not throw them away; crops and stone are sold instead (Step 50).
+	var produces := _kept_output(b, stage)
 	if not produces.is_empty() and not inv.fits(produces):
 		return SimResult.fail("err.storage_full", {"items": produces.duplicate()})
 	return SimResult.ok()
@@ -1018,9 +1051,15 @@ func cycle_estimate(b: Dictionary, time_multiplier: float = 1.0) -> Dictionary:
 ## look of the stage it is waiting to do next. "" for none.
 func look(b: Dictionary) -> String:
 	var v := variety_def(String(b.get("type", "")), variety_of(b)) if variety_of(b) != BASE_VARIETY else {}
-	var looks: Array = v.get("looks", type_def(b).get("cycle", {}).get("looks", []))
+	var cycle: Dictionary = type_def(b).get("cycle", {})
+	var looks: Array = v.get("looks", cycle.get("looks", []))
 	if looks.is_empty():
 		return ""
+	# While the crop drinks and ripens (the wait after a stage) it shows that:
+	# `growing_looks[i]` is the look while waiting for stage i.
+	var growing: Array = v.get("growing_looks", cycle.get("growing_looks", []))
+	if b["state"] == COOLDOWN and not growing.is_empty() and String(growing[int(b["stage"]) % growing.size()]) != "":
+		return String(growing[int(b["stage"]) % growing.size()])
 	return String(looks[int(b["stage"]) % looks.size()])
 
 
@@ -1042,16 +1081,19 @@ func action_groups(b: Dictionary) -> Array[Dictionary]:
 func _complete_stage(b: Dictionary) -> void:
 	var stage := current_stage(b)
 	b["completed"] = int(b["completed"]) + 1
+	var worker := int(b.get("worker", 0))
 	var pay := revenue_of(b, stage)
-	if pay > 0:
+	# A studio's release is its own event (its revenue grows with releases);
+	# any other stage's revenue is the sale of what was dug or felled.
+	if pay > 0 and String(stage.get("action", "")) == "release":
 		b["releases"] = int(b.get("releases", 0)) + 1
 		(sim.system(&"economy") as EconomySystem).earn(pay, "release:" + String(b["type"]))
-		sim.bus.emit(&"released", {"id": b["id"], "type": b["type"], "money": pay, "releases": b["releases"]})
+		sim.bus.emit(&"released", {"id": b["id"], "type": b["type"], "money": pay, "releases": b["releases"], "worker": worker})
+		pay = 0
 	var produced := _take_yield(b, stage)
+	if not produced.is_empty() or pay > 0:
+		(sim.system(&"economy") as EconomySystem).cash_in(b, produced, pay, worker)
 	if not produced.is_empty():
-		var inv: InventorySystem = sim.system(&"inventory")
-		for item: String in produced:
-			inv.add(item, int(produced[item]), "yield:" + String(b["type"]))
 		sim.bus.emit(&"produced", {"id": b["id"], "type": b["type"], "items": produced.duplicate()})
 	b["stage"] = (int(b["stage"]) + 1) % maxi(stages(b).size(), 1)
 	var cooldown := int(round(stage_cooldown(b, stage) * 1000.0))
@@ -1062,7 +1104,6 @@ func _complete_stage(b: Dictionary) -> void:
 		sim.scheduler.schedule(int(b["ready_at"]), COOLDOWN_DONE, {"id": b["id"], "token": b["token"]})
 	else:
 		b["state"] = IDLE
-	var worker := int(b.get("worker", 0))
 	b["worker"] = 0
 	sim.bus.emit(&"task_completed", {"id": b["id"], "stage": stage.get("id", ""), "type": b["type"], "worker": worker})
 	if b["state"] == IDLE:

@@ -228,7 +228,7 @@ func test_the_route_button_and_its_preview() -> void:
 	panel.refresh()
 	assert_eq(momos.route_of(1), "rows", "a tap: the next way")
 	assert_eq(panel.route_button.text, "Route: Row by row", "")
-	assert_eq(panel.compare_label.text, "Comparing: a few days are needed on each side", "and it will compare before and after")
+	assert_false(panel.compare_label.visible, "nothing to compare yet: no line (Step 50: the waiting note meant nothing to blind players)")
 	for i in 3:
 		panel.next_route()
 	assert_eq(momos.route_of(1), "nearest", "zigzag, zone, and round again (smart needs its research)")

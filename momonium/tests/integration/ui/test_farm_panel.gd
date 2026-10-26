@@ -38,33 +38,40 @@ func _lit() -> Array[bool]:
 	return out
 
 
+## A farm stage's work and its wait, from the data (ms).
+func _work(i: int) -> int:
+	return int(float(sim.data.building_type("farm")["cycle"]["stages"][i]["seconds"]) * 1000.0)
+
+
+func _wait() -> int:
+	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0)
+
+
 func test_three_cards_and_the_lit_one_follows_the_cycle() -> void:
 	panel._refresh()
 	assert_eq(panel.cards.size(), 3, "Sow, Water, Harvest")
 	assert_eq(_lit(), [true, false, false] as Array[bool], "Sow is next")
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(5000)
+	sim.advance_ms(_work(0))
 	panel._refresh()
 	assert_eq(_lit(), [false, true, false] as Array[bool], "then Water")
-	for i in 3:
-		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(35000)
+	sim.execute({"type": "building.tap", "id": farm})
+	sim.advance_ms(_work(1) + _wait())
 	panel._refresh()
 	assert_eq(_lit(), [false, false, true] as Array[bool], "then Harvest")
 
 
-func test_cooldown_is_shown_on_the_water_card() -> void:
+func test_the_ripening_is_shown_on_the_harvest_card() -> void:
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(5000)
+	sim.advance_ms(_work(0))
 	sim.execute({"type": "building.tap", "id": farm})
-	var wait := int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]))
-	sim.advance_ms(5000 + 5000)
-	panel._refresh()
-	var time: Label = panel.cards[1].find_child("Time", true, false)
+	sim.advance_ms(_work(1) + _wait() / 2)
 	LocaleService.apply("en")
 	panel._refresh()
-	assert_eq(time.text, "%ds left" % (wait - 5), "%d seconds of the %d s wait remain" % [wait - 5, wait])
-	assert_true(panel.cards[1].disabled, "and the card cannot be pressed until then")
+	var time: Label = panel.cards[2].find_child("Time", true, false)
+	var left := int(ceil((_wait() - _wait() / 2) / 1000.0))
+	assert_eq(time.text, "%ds left" % left, "the rest of the ripening")
+	assert_true(panel.cards[2].disabled, "and the harvest cannot be pressed until then")
 
 
 func test_the_plot_shows_the_crop_growing() -> void:
@@ -73,12 +80,14 @@ func test_the_plot_shows_the_crop_growing() -> void:
 	assert_false(view.overlay.visible, "bare soil before sowing")
 	var looks: Array[String] = []
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(5000)
-	for i in 3:
-		await tree.process_frame
-		looks.append(view._look)
-		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(35000)
+	sim.advance_ms(_work(0))
 	await tree.process_frame
 	looks.append(view._look)
-	assert_eq(looks, ["crop_seeds", "crop_sprout", "crop_leafy", "crop_ripe"] as Array[String], "seeds, sprouts, leaves, ripe tomatoes")
+	sim.execute({"type": "building.tap", "id": farm})
+	sim.advance_ms(_work(1))
+	await tree.process_frame
+	looks.append(view._look)
+	sim.advance_ms(_wait())
+	await tree.process_frame
+	looks.append(view._look)
+	assert_eq(looks, ["crop_seeds", "crop_leafy", "crop_ripe"] as Array[String], "seeds, the watered crop growing, ripe tomatoes")

@@ -14,7 +14,7 @@ extends RefCounted
 
 ## Version of the save format (SaveService wraps it; SaveMigration upgrades
 ## older ones). 2: the envelope with time saved and checksum (Step 24).
-const SAVE_SCHEMA := 2
+const SAVE_SCHEMA := 3
 ## Events handled since this Simulation was made (not saved; for budgets).
 var events_processed := 0
 const DAY_EVENT := "sim.day"
@@ -60,10 +60,18 @@ static func new_game(p_data: GameData = null, systems: Array[SimSystem] = []) ->
 	return sim
 
 
-## A player's new island: the fresh world above, plus what `balance.start`
-## puts on it for a new player. Tests that want the bare rules use new_game.
+## A player's new island: the fresh world above, plus what
+## `balance.start.buildings` puts on it -- a farm whose crop is ripe, so the
+## first tap is a harvest and its money (Step 50). Tests that want the bare
+## rules use new_game.
 static func new_island(p_data: GameData = null) -> Simulation:
-	return new_game(p_data)
+	var sim := new_game(p_data)
+	var bs: BuildingSystem = sim.system(&"buildings")
+	for e: Variant in sim.data.get_value("balance", "start.buildings", []):
+		var d: Dictionary = e
+		var at: Array = d.get("anchor", [0, 0])
+		bs.place_ready(String(d.get("type", "")), Vector2i(int(at[0]), int(at[1])), String(d.get("stage", "")))
+	return sim
 
 
 static func from_save(state: Dictionary, p_data: GameData = null, systems: Array[SimSystem] = []) -> Simulation:

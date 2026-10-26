@@ -153,7 +153,11 @@ func test_trash_then_check_demolishes_for_half() -> void:
 	assert_eq(int((sim.system(&"momo") as MomoSystem).get_momo(1)["assigned"]), 0, "its Momo is free")
 	assert_eq((main.get("selection") as SelectionController).kind, "", "nothing selected")
 	assert_false(panel.trash_button.visible, "and the trash goes away")
+	# Its Momo may still stand there: the first tap is the Momo's, a second
+	# one on it reaches the tile beneath (Step 50, as for a building).
 	_tap_cell(Vector2i(1, 0))
+	if not strip.open:
+		_tap_cell(Vector2i(1, 0))
 	assert_true(strip.open, "the tile is empty again: tap it to build")
 
 

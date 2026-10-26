@@ -17,7 +17,7 @@ const tapRect = async (game, rect, win) => {
 test('place points with a preview, save and load a plan', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('set_language', 'en');
-  await game.query('dev_level', 6);
+  await game.query('dev_level', (await game.query('rules')).prestige_level);
   await game.query('dev_research_levels', { momo_training: 2, momo_reach: 1 });
   // Sell from the Money tab.
   const hud = await game.query('hud');

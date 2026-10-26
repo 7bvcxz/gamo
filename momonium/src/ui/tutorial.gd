@@ -2,10 +2,15 @@ class_name Tutorial
 extends Control
 
 ## The first-run tutorial: a pulsing ring on the next thing to touch and one
-## short line beside it -- an empty tile, the farm among the four choices that
-## open beside it, then the first sowing and watering -- and at the end where
-## the other buildings are (any empty tile) and how one comes down (trash, then
-## the check, half back).
+## short line beside it -- on a new island the ripe crop waiting on its farm
+## (the first tap is a harvest and its money, Step 50), then sowing and
+## watering it again; on an island without one, an empty tile and the farm
+## among the four choices first -- then a Momo and its tiles, and at the end
+## where the other buildings are (any empty tile) and how one comes down
+## (trash, then the check, half back). Between the Momo and that end, the
+## sea, once the island is nearly full: the tile it would grow into is ringed
+## with its price until it is affordable, then "tap the glowing sea" -- buying
+## land was the one core thing blind players found late or never (Step 50).
 ##
 ## It never takes over: the overlay ignores input (only its Skip / Got it
 ## buttons are buttons), nothing is opened or done for the player, and the
@@ -16,7 +21,7 @@ extends Control
 
 signal finished(skipped: bool)
 
-const STEPS: PackedStringArray = ["pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "momo_select", "momo_pencil", "momo_edit", "more"]
+const STEPS: PackedStringArray = ["harvest", "pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "momo_select", "momo_pencil", "momo_edit", "land", "more"]
 
 var sim: Simulation
 var hud: Hud
@@ -25,7 +30,10 @@ var strip: BuildStrip
 var selection: SelectionController
 var editor: WatchEditor
 var momo_views: MomoViews
+## The sea for sale: the tile it rings and whether it glows now.
+var land_preview: LandPreview
 var _momo_done := false
+var _land_done := false
 var _edited := false
 var cameras: CameraController
 var projection: IsoProjection
@@ -35,6 +43,8 @@ var running := false
 var step := ""
 ## The farm this run of the tutorial is about (0 until one is placed).
 var farm := 0
+## It began as the new island's ripe farm: harvest first, then sow and water.
+var ripe_start := false
 var _farms_at_start: Array[int] = []
 var _time := 0.0
 var bubble: PanelContainer
@@ -89,12 +99,22 @@ func setup(p_sim: Simulation, p_hud: Hud, p_strip: BuildStrip, p_cameras: Camera
 func start() -> void:
 	running = true
 	farm = 0
+	ripe_start = false
 	_momo_done = false
+	_land_done = false
 	_edited = false
 	_farms_at_start.clear()
 	var bs: BuildingSystem = sim.system(&"buildings")
 	for id: int in bs.ids():
-		if String(bs.get_building(id)["type"]) == "farm":
+		var b := bs.get_building(id)
+		if String(b["type"]) != "farm":
+			continue
+		# A farm nobody has worked yet, its crop ripe: the new island's. The
+		# tutorial starts on it. Any other farm is the island's past.
+		if farm == 0 and int(b["completed"]) == 0 and b["state"] == BuildingSystem.IDLE and String(bs.current_stage(b).get("action", "")) == "harvest":
+			farm = id
+			ripe_start = true
+		else:
 			_farms_at_start.append(id)
 	visible = true
 	_update()
@@ -104,6 +124,8 @@ func stop(skipped: bool) -> void:
 	if not running:
 		return
 	running = false
+	if selection != null:
+		selection.momo_slack = 0.0
 	visible = false
 	step = ""
 	finished.emit(skipped)
@@ -131,13 +153,24 @@ func current_step() -> String:
 	if b["state"] == BuildingSystem.CONSTRUCTING:
 		return "wait_build"
 	var done := int(b["completed"])
-	if done < 2 and b["state"] == BuildingSystem.WORKING:
+	var hands := 3 if ripe_start else 2
+	if done < hands and b["state"] == BuildingSystem.WORKING:
 		return "working"
+	if ripe_start:
+		done -= 1
+		if done < 0:
+			return "harvest"
 	if done == 0:
 		return "sow"
 	if done == 1:
 		return "water"
-	# Then the Momo: tap one, its pencil, a tile or a stroke.
+	# Then the Momo: tap one, its pencil, a tile or a stroke -- unless one is
+	# already looking after something (a new building is taken by itself).
+	if not _momo_done:
+		var momos: MomoSystem = sim.system(&"momo")
+		for m: int in momos.ids():
+			if not momos.watched(m).is_empty() and not (editor != null and editor.active):
+				_momo_done = true
 	if not _momo_done and editor != null and selection != null:
 		if editor.active and _edited:
 			_momo_done = true
@@ -147,17 +180,30 @@ func current_step() -> String:
 			return "momo_pencil"
 		else:
 			return "momo_select"
+	if not _land_done and land_preview != null:
+		var land: LandSystem = sim.system(&"land")
+		if not land.purchases.is_empty() or land_preview.grow_spot() == LandPreview.NONE:
+			_land_done = true
+		elif land_preview.due():
+			return "land"
+		else:
+			# Quiet until the island is nearly full (LandPreview.due): the
+			# player plays meanwhile, nothing on screen.
+			return "later"
 	return "more"
 
 
 func _update() -> void:
 	step = current_step()
+	if selection != null:
+		selection.momo_slack = 36.0 if step == "momo_select" else 0.0
 	target = Rect2()
 	target2 = Rect2()
 	ok_button.visible = step == "more"
 	ok_button.text = tr("tutorial.ok")
 	skip_button.text = tr("tutorial.skip")
 	skip_button.visible = step != "more"
+	bubble.visible = step != "later"
 	match step:
 		"pick_tile":
 			target = _cell_rect(suggested_tile())
@@ -169,6 +215,9 @@ func _update() -> void:
 		"wait_build":
 			target = _building_rect(farm)
 			text.text = tr("tutorial.wait_build")
+		"harvest":
+			target = _building_rect(farm)
+			text.text = tr("tutorial.harvest")
 		"sow":
 			target = _building_rect(farm)
 			target2 = _stage_card()
@@ -189,6 +238,11 @@ func _update() -> void:
 		"momo_edit":
 			target = _rect(editor.count_pill)
 			text.text = tr("tutorial.momo_edit") % [(sim.system(&"momo") as MomoSystem).watched(editor.momo).size(), (sim.system(&"momo") as MomoSystem).watch_capacity(editor.momo)]
+		"land":
+			var land: LandSystem = sim.system(&"land")
+			var glowing := land_preview.invitation()
+			target = _cell_rect(glowing if glowing != LandPreview.NONE else land_preview.grow_spot())
+			text.text = tr("tutorial.land_buy") if glowing != LandPreview.NONE else tr("tutorial.land_save") % land.next_cost()
 		"more":
 			text.text = tr("tutorial.wait_water") + "\n" + tr("tutorial.more")
 			if strip.open:

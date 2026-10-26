@@ -72,12 +72,12 @@ func awake_count() -> int:
 
 
 ## Front-most Momo whose body covers `world_pos`, or 0.
-func hit(world_pos: Vector2) -> int:
+func hit(world_pos: Vector2, slack: float = 0.0) -> int:
 	var best := 0
 	var best_y := -INF
 	for id: int in actors:
 		var a: MomoActor = actors[id]
-		if a.hit_rect().has_point(world_pos) and a.position.y > best_y:
+		if a.hit_rect().grow(slack).has_point(world_pos) and a.position.y > best_y:
 			best = id
 			best_y = a.position.y
 	return best

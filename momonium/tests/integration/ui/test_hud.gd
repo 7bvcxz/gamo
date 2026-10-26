@@ -73,7 +73,7 @@ func test_values_come_from_the_simulation() -> void:
 	hud.refresh(true)
 	assert_eq(hud._day_label.text, "Day 1", "day")
 	assert_eq(hud._money_label.text, "10", "money")
-	assert_eq(hud._exp_label.text, "0 / 100", "exact EXP")
+	assert_eq(hud._exp_label.text, "0 / %d" % (sim.system(&"progression") as ProgressionSystem).exp_needed_for(1), "exact EXP")
 	sim.time_scale = 0.0
 	sim.advance_ms(12500)
 	(sim.system(&"economy") as EconomySystem).earn(1234, "test")

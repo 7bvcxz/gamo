@@ -3,7 +3,7 @@ extends SimSystem
 
 ## The island's store: how many of each item it holds, up to each item's
 ## stack limit (items.json). Building costs take items from here, production
-## puts them here, the day's sale empties crops from here into money.
+## puts them here (crops and other goods sold at once never land here).
 ##
 ## Nothing is created or destroyed silently: `room_for` lets producers check
 ## before they start, and `add` reports what actually fitted.
@@ -69,6 +69,13 @@ func add(item: String, amount: int, reason: String = "") -> int:
 		produced[item] = int(produced.get(item, 0)) + stored
 	sim.bus.emit(&"inventory_changed", {"item": item, "count": items[item], "delta": stored, "reason": reason})
 	return stored
+
+
+## Counts `amount` of `item` as made without storing it (sold the moment it
+## was made): the "made" totals stay true when crops never reach the store.
+func count_made(item: String, amount: int) -> void:
+	if amount > 0:
+		produced[item] = int(produced.get(item, 0)) + amount
 
 
 ## Takes all of `wanted` or nothing.

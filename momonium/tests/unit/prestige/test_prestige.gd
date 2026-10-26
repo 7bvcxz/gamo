@@ -19,6 +19,11 @@ func _to_level(s: Simulation, lv: int) -> void:
 		prog.add_exp(prog.next_level_exp() - prog.experience, "test")
 
 
+## The level a sale needs (balance.prestige.min_level).
+func _min_level() -> int:
+	return int(GameData.load_default().get_value("balance", "prestige.min_level", 5))
+
+
 func _lab(s: Simulation) -> void:
 	(s.system(&"buildings") as BuildingSystem).place_instant("research", Vector2i(1, 1))
 	(s.system(&"economy") as EconomySystem).earn(20000, "test")
@@ -44,7 +49,7 @@ func _sell(s: Simulation) -> Simulation:
 
 
 func test_appraisal_lines() -> void:
-	_to_level(sim, 5)
+	_to_level(sim, _min_level())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	(sim.system(&"economy") as EconomySystem).earn(500, "test")
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 0]})
@@ -58,7 +63,7 @@ func test_appraisal_lines() -> void:
 	assert_true(a["experience"] > 0, "the levels climbed")
 	assert_eq(a["gross"], a["buildings"] + a["land"] + a["productivity"] + a["momo"] + a["research"] + a["experience"], "the total is the sum of its lines")
 	assert_eq(a["net"], a["gross"], "no head start to take off")
-	assert_true(bs.ids().size() == 2 and a["can_sell"], "Lv 5: it can be sold")
+	assert_true(bs.ids().size() == 2 and a["can_sell"], "at the selling level it can be sold")
 
 
 func test_a_level_first() -> void:
@@ -86,7 +91,7 @@ func test_selling_again_without_progress_pays_nothing() -> void:
 	var p: PrestigeSystem = next.system(&"prestige")
 	var points := p.points
 	# Spend the head start on buildings and sell: worth less than it was handed.
-	_to_level(next, 5)
+	_to_level(next, _min_level())
 	var gross := p.appraise()
 	var bs: BuildingSystem = next.system(&"buildings")
 	bs.place_instant("farm", Vector2i(1, 0))
@@ -143,10 +148,10 @@ func test_selling_again_mints_no_research_points() -> void:
 	_research(sim, "momo_training", 3)
 	var next := _sell(sim)
 	next.execute({"type": "research.allocate", "levels": {"momo_training": 3}})
-	_to_level(next, 6)
+	_to_level(next, _min_level())
 	var third := _sell(next)
 	assert_eq((third.system(&"research") as ResearchSystem).rp_earned, 3, "points placed and sold again: still 3")
-	_to_level(third, 6)
+	_to_level(third, _min_level())
 	_lab(third)
 	third.execute({"type": "research.allocate", "levels": {"momo_training": 3}})
 	_research(third, "momo_training", 1)
