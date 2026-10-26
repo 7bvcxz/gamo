@@ -1,12 +1,12 @@
 {
-  "_doc": "Momo Letters: improvement proposals an assigned Momo writes to the mailbox at real milestones. Each letter is written once. `industry` is a building type; the sender is a Momo assigned to a building of that type (the one who has done the most work there; ties to the lowest id). `trigger`: {work: {type: n}} = Momo (not the player) have finished n work stages at buildings of that type; {mastery: {type: level}} = that building mastery reached level. At most `balance.mail.letters_per_day` letters arrive on one day, so milestones met together come on following days. `research` is the improvement it proposes -- real agronomy and engineering, never magic. Text lives in data/i18n/ui.csv under the title/body keys.",
+  "_doc": "Momo Letters: improvement proposals an assigned Momo writes to the mailbox at real milestones. Each letter is written once. `industry` is a building type; the sender is a Momo assigned to a building of that type (the one who has done the most work there; ties to the lowest id). `trigger`: {work: {type: n}} = Momo (not the player) have finished n work stages at buildings of that type; {mastery: {type: level}} = that building mastery reached level. At most `balance.mail.letters_per_day` letters arrive on one day, and a research letter at least `balance.mail.research_gap_seconds` of game time after the previous one (Step 57: discoveries are slower; the work counts were raised -- the first farm letter from 3 Momo stages to 10, the first lumber and mine letters from 6 to 15, the smelter from 4 to 10). `research` is the improvement it proposes -- real agronomy and engineering, never magic -- and it is discovered (opened in Research) the moment the letter arrives, read or not (Step 57). A letter with no `research` is just a letter. Text lives in data/i18n/ui.csv under the title/body keys.",
   "letters": [
     {
       "id": "farm_first_harvest",
       "industry": "farm",
       "trigger": {
         "work": {
-          "farm": 3
+          "farm": 10
         }
       },
       "title": "letter.farm_first_harvest.title",
@@ -42,7 +42,7 @@
       "industry": "lumberyard",
       "trigger": {
         "work": {
-          "lumberyard": 6
+          "lumberyard": 15
         }
       },
       "title": "letter.lumber_first.title",
@@ -54,7 +54,7 @@
       "industry": "mine",
       "trigger": {
         "work": {
-          "mine": 6
+          "mine": 15
         }
       },
       "title": "letter.mine_first.title",
@@ -66,7 +66,7 @@
       "industry": "smelter",
       "trigger": {
         "work": {
-          "smelter": 4
+          "smelter": 10
         }
       },
       "title": "letter.smelter_first.title",

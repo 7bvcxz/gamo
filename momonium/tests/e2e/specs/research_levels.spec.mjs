@@ -26,6 +26,10 @@ test('place points with a preview, save and load a plan', async ({ game }) => {
   await tapRect(game, p.tabs.economy, p.window);
   let s = await game.query('sale');
   await tapRect(game, s.entry, s.window);
+  // A desktop's larger UI (Step 54) makes the sale panel scroll: Sell is at
+  // its foot, below the fold -- a player scrolls to it.
+  await game.query('dev_reveal', ['SaleFrame', 'Sell']);
+  await game.page.waitForTimeout(150);
   s = await game.query('sale');
   await tapRect(game, s.sell, s.window);
   await tapRect(game, s.sell, s.window);

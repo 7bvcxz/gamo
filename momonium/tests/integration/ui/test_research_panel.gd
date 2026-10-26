@@ -81,14 +81,19 @@ func test_start_by_tap_then_running_and_done() -> void:
 	buildings.place_instant("research", Vector2i(0, 1))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(250000)
-	sim.execute({"type": "mail.claim", "id": 1})
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
 	(sim.system(&"inventory") as InventorySystem).add("notes", 3, "test")
 	await tree.process_frame
-	assert_true((main.get("hud") as Hud).buttons[&"research"].badge, "a red dot: something can start")
+	var hud: Hud = main.get("hud")
+	assert_true(hud.buttons[&"research"].badge, "a red dot: the letter's topic is news (unread letter, Step 57)")
 	main.call("_on_hud_action", &"research")
 	await tree.process_frame
 	var view := _farm_view()
+	assert_eq((main.get("research_frame") as PanelFrame).current_view(), view, "Research opens on the branch with the news")
+	assert_true(view.fresh.has("farm_expansion"), "a dot on the new topic's card")
+	assert_true((main.get("research_frame") as PanelFrame).tab_dot(0), "and on its tab")
+	await tree.process_frame
+	assert_false(hud.buttons[&"research"].badge, "shown: the button's dot goes")
 	_tap(view.cards["farm_expansion"])
 	assert_false(view.start_button.disabled, "ready")
 	assert_eq(view.start_button.text, "Start research", "says so")
@@ -98,7 +103,7 @@ func test_start_by_tap_then_running_and_done() -> void:
 	assert_eq(research.state_of("farm_expansion"), "active", "the tap started it")
 	assert_true(view.start_button.text.begins_with("Researching"), "running (%s)" % view.start_button.text)
 	await tree.process_frame
-	assert_false((main.get("hud") as Hud).buttons[&"research"].badge, "nothing else can start: no dot")
+	assert_false((main.get("hud") as Hud).buttons[&"research"].badge, "nothing new: no dot")
 	sim.advance_ms(60000)
 	view.refresh()
 	assert_true(view.start_button.text.begins_with("Research Lv 2"), "done -- and the next level is offered (%s)" % view.start_button.text)
@@ -110,7 +115,6 @@ func test_lack_of_a_lab_is_named() -> void:
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(250000)
-	sim.execute({"type": "mail.claim", "id": 1})
 	main.call("_on_hud_action", &"research")
 	var view := _farm_view()
 	view.selected = "farm_expansion"

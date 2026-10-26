@@ -59,22 +59,27 @@ test('a gold bar as far as the level is, and a level-up you cannot miss', async 
   expect(h.level).toBe('Lv 2');
   expect(h.pops.filter((p) => p === 'Lv 2!').length, 'once').toBe(1);
   const t = h.level_up.title_rect;
-  // Polled: on a loaded machine the words can still be fading in at the
-  // first look (they show for two seconds). When they are not found, the
-  // screen and the HUD's own account are attached: it failed twice in long
-  // runs on a busy machine and passed every time alone (Step 56).
-  info.attachments.push({ name: 'hud at the level-up', contentType: 'application/json', body: Buffer.from(JSON.stringify(h)) });
+  // Polled, and on a small clip of the words only: a whole-canvas shot and
+  // its decoding took longer than the two seconds the words show on a busy
+  // machine, and the look came after they had gone (Step 57: the failure's
+  // own screenshot showed the words already faded). The first failing look
+  // is kept with the HUD's account.
+  const box = await game.canvas.boundingBox();
+  const k = box.width / h.window[0];
+  const clip = { x: box.x + t[0] * k, y: box.y + (t[1] + t[3] * 0.3) * k, width: t[2] * k, height: t[3] * 0.4 * k };
+  let last = null;
   const words = expect.poll(async () => {
-    s = await shot(game);
+    last = await game.page.screenshot({ clip });
+    const png = decodePng(last);
     let lit = 0;
-    for (let y = t[1] + t[3] * 0.3; y < t[1] + t[3] * 0.7; y += 2) {
-      for (let x = t[0]; x < t[0] + t[2]; x += 2) if (gold(pixel(s.png, x * s.sx, y * s.sy))) lit += 1;
+    for (let y = 0; y < png.height; y += 2) {
+      for (let x = 0; x < png.width; x += 2) if (gold(pixel(png, x, y))) lit += 1;
     }
     return lit;
-  }, { message: 'the gold words are on the screen', timeout: 1500, intervals: [100, 200, 300] }).toBeGreaterThan(20);
+  }, { message: 'the gold words are on the screen', timeout: 1500, intervals: [50, 100, 150] }).toBeGreaterThan(20);
   await words.catch(async (e) => {
-    await game.page.screenshot({ path: info.outputPath('level-up.png') });
-    info.attachments.push({ name: 'hud after', contentType: 'application/json', body: Buffer.from(JSON.stringify(await game.query('hud'))) });
+    if (last) info.attachments.push({ name: 'the words, last look', contentType: 'image/png', body: last });
+    info.attachments.push({ name: 'hud at the level-up', contentType: 'application/json', body: Buffer.from(JSON.stringify(h)) });
     throw e;
   });
   await game.page.waitForTimeout(2200);

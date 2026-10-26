@@ -4,6 +4,12 @@ extends SimSystem
 ## Momo Letters: an assigned Momo writes the player an improvement proposal
 ## when its industry reaches a real milestone (data/letters.json).
 ##
+## Step 57: a letter's research is discovered the moment the letter arrives --
+## reading it is for the story, never a gate. Research letters come slower: a
+## letter's own milestone, at most `balance.mail.letters_per_day` a day, and
+## at least `balance.mail.research_gap_seconds` of game time after the last
+## research letter. A letter without `research` is just a letter.
+##
 ## Milestones are counted, not timed: Momo-done work stages per building type
 ## (the player's own taps do not count -- these are the Momo's experience) and
 ## building mastery levels. Each letter is written once, ever; at most
@@ -15,7 +21,8 @@ extends SimSystem
 ## stage, a mastery level, an assignment, a new day -- never polled.
 
 ## Letters in the order written: {id, template, sender, sender_name, industry,
-## title, body, research, written_ms, day, read_ms (-1 unread), claimed_ms (-1)}.
+## title, body, research ("" for a plain letter), written_ms, day, read_ms (-1
+## unread), claimed_ms (-1; saves before Step 57 recorded an acceptance here)}.
 var letters: Array = []
 var next_id := 1
 ## template id -> letter id, so nothing is ever written twice.
@@ -26,6 +33,8 @@ var work: Dictionary = {}
 var work_by_momo: Dictionary = {}
 var last_day := 0
 var today_count := 0
+## When the last research letter was written (-1: none yet).
+var last_research_ms := -1
 
 
 func _init() -> void:
@@ -33,7 +42,7 @@ func _init() -> void:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["mail.read", "mail.claim"])
+	return PackedStringArray(["mail.read"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -49,6 +58,7 @@ func on_new_game() -> void:
 	work_by_momo.clear()
 	last_day = 0
 	today_count = 0
+	last_research_ms = -1
 
 
 func _on_event(type: StringName, payload: Dictionary) -> void:
@@ -72,7 +82,8 @@ func on_day_started(_day: int) -> void:
 
 
 ## Writes the first letter whose milestone is met and whose industry has an
-## assigned Momo, if today still has room. Returns the new letter id or 0.
+## assigned Momo, if today still has room (and, for a research letter, the
+## gap since the last one has passed). Returns the new letter id or 0.
 func consider() -> int:
 	var day := sim.clock.day_number()
 	if day != last_day:
@@ -82,6 +93,8 @@ func consider() -> int:
 		return 0
 	for l: Dictionary in sim.data.table("letters").get("letters", []):
 		if written.has(String(l["id"])) or not milestone_met(l):
+			continue
+		if String(l.get("research", "")) != "" and research_gap_left_ms() > 0:
 			continue
 		var sender := sender_for(String(l["industry"]))
 		if sender == 0:
@@ -120,6 +133,25 @@ func sender_for(industry: String) -> int:
 	return best
 
 
+## Game time until the next research letter may come (0: it may now).
+func research_gap_left_ms() -> int:
+	if last_research_ms < 0:
+		return 0
+	var gap := int(sim.data.get_float("balance", "mail.research_gap_seconds", 0.0) * 1000.0)
+	return maxi(last_research_ms + gap - sim.now_ms(), 0)
+
+
+## Every research the letters have brought, in the order they came (Step 57:
+## arriving is enough -- ResearchSystem reads this for `unlock.proposal`).
+func discovered_research() -> Array[String]:
+	var out: Array[String] = []
+	for l: Dictionary in letters:
+		var r := String(l.get("research", ""))
+		if r != "" and not out.has(r):
+			out.append(r)
+	return out
+
+
 func _write(l: Dictionary, sender: int) -> int:
 	var id := next_id
 	next_id += 1
@@ -127,12 +159,14 @@ func _write(l: Dictionary, sender: int) -> int:
 	letters.append({
 		"id": id, "template": String(l["id"]), "sender": sender, "sender_name": String(momo.get("name", "")),
 		"industry": String(l["industry"]), "title": String(l["title"]), "body": String(l["body"]),
-		"research": String(l["research"]), "written_ms": sim.now_ms(), "day": sim.clock.day_number(),
+		"research": String(l.get("research", "")), "written_ms": sim.now_ms(), "day": sim.clock.day_number(),
 		"read_ms": -1, "claimed_ms": -1,
 	})
 	written[String(l["id"])] = id
 	today_count += 1
-	sim.bus.emit(&"letter_written", {"id": id, "sender": sender, "template": String(l["id"])})
+	if String(l.get("research", "")) != "":
+		last_research_ms = sim.now_ms()
+	sim.bus.emit(&"letter_written", {"id": id, "sender": sender, "template": String(l["id"]), "research": String(l.get("research", ""))})
 	return id
 
 
@@ -151,17 +185,8 @@ func has_unread_from(momo: int) -> bool:
 	return letters.any(func(l: Dictionary) -> bool: return int(l["sender"]) == momo and int(l["read_ms"]) < 0)
 
 
-## Research the player said yes to, in the order accepted (Step 22 reads this).
-func accepted_research() -> Array[String]:
-	var out: Array[String] = []
-	var claimed := letters.filter(func(l: Dictionary) -> bool: return int(l["claimed_ms"]) >= 0)
-	claimed.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["claimed_ms"]) < int(b["claimed_ms"]) or (int(a["claimed_ms"]) == int(b["claimed_ms"]) and int(a["id"]) < int(b["id"])))
-	for l: Dictionary in claimed:
-		if not out.has(String(l["research"])):
-			out.append(String(l["research"]))
-	return out
-
-
+## Reading a letter only marks it read: what it proposes is already
+## discovered (Step 57 removed the "accept" step it used to need).
 func execute(command: Dictionary) -> Dictionary:
 	var l := get_letter(int(command.get("id", 0)))
 	if l.is_empty():
@@ -172,15 +197,6 @@ func execute(command: Dictionary) -> Dictionary:
 				l["read_ms"] = sim.now_ms()
 				sim.bus.emit(&"letter_read", {"id": l["id"]})
 			return SimResult.ok()
-		"mail.claim":
-			if int(l["claimed_ms"]) >= 0:
-				return SimResult.fail("err.already_claimed")
-			if int(l["read_ms"]) < 0:
-				l["read_ms"] = sim.now_ms()
-				sim.bus.emit(&"letter_read", {"id": l["id"]})
-			l["claimed_ms"] = sim.now_ms()
-			sim.bus.emit(&"letter_claimed", {"id": l["id"], "research": l["research"]})
-			return SimResult.ok({"research": l["research"]})
 	return SimResult.fail("err.unknown_command")
 
 
@@ -189,7 +205,8 @@ func save_state() -> Dictionary:
 	for id: int in work_by_momo:
 		by_momo[str(id)] = (work_by_momo[id] as Dictionary).duplicate()
 	return {"letters": letters.duplicate(true), "next_id": next_id, "written": written.duplicate(),
-		"work": work.duplicate(), "work_by_momo": by_momo, "last_day": last_day, "today_count": today_count}
+		"work": work.duplicate(), "work_by_momo": by_momo, "last_day": last_day, "today_count": today_count,
+		"last_research_ms": last_research_ms}
 
 
 func load_state(state: Dictionary) -> void:
@@ -214,3 +231,9 @@ func load_state(state: Dictionary) -> void:
 		work_by_momo[int(k)] = per
 	last_day = int(state.get("last_day", 0))
 	today_count = int(state.get("today_count", 0))
+	# Saves before Step 57: the last research letter written, if any.
+	last_research_ms = int(state.get("last_research_ms", -1))
+	if not state.has("last_research_ms"):
+		for l: Dictionary in letters:
+			if String(l.get("research", "")) != "":
+				last_research_ms = maxi(last_research_ms, int(l["written_ms"]))

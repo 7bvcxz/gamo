@@ -28,14 +28,10 @@ var _sit_until := 0.0
 var _next_sit := 0.0
 var _shake := 0.0
 var _pop := 0.0
-var mail: MailSystem
 ## How far below its feet this node sits for the depth sort (Step 55,
 ## MomoViews): everything it draws is lifted back by as much, so the Momo is
 ## seen -- and tapped -- exactly where it stands.
 var depth_lift := 0.0
-## A letter held up over the head while one this Momo wrote is unread -- the
-## mailbox's red dot, but on the island, at the Momo who is waiting.
-var envelope: Sprite2D
 var _marked := true
 ## The one mood over its head when it is not at work (Step 48).
 var mood_bubble: MoodBubble
@@ -54,18 +50,6 @@ func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProj
 	rig = MomoRig.new()
 	rig.setup(lib, id)
 	add_child(rig)
-	mail = sim.system(&"mail")
-	envelope = Sprite2D.new()
-	envelope.name = "Envelope"
-	lib.place(envelope, "ui_mail")
-	envelope.centered = true
-	envelope.offset = Vector2.ZERO
-	envelope.scale = Vector2.ONE * (26.0 / maxf(lib.region("ui_mail").size.x, 1.0))
-	envelope.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	# The HUD icon is drawn white for navy buttons; ink it for the white bubble.
-	envelope.modulate = Color(0.25, 0.45, 0.8)
-	envelope.visible = false
-	add_child(envelope)
 	mood_bubble = MoodBubble.new()
 	mood_bubble.setup(lib)
 	add_child(mood_bubble)
@@ -102,16 +86,7 @@ func work_pose() -> String:
 ## World-space box a tap or a drag can grab.
 func hit_rect() -> Rect2:
 	var r := Rect2(ground() + Vector2(-26, -76), Vector2(52, 80))
-	# Its letter's bubble belongs to it too (Step 50: a blind player's tap on
-	# the envelope bought the sea behind it instead).
-	return r.merge(envelope_rect()) if envelope != null and envelope.visible else r
-
-
-## The letter's bubble over its head (empty when there is no letter).
-func envelope_rect() -> Rect2:
-	if envelope == null or not envelope.visible:
-		return Rect2()
-	return Rect2(position + envelope.position - Vector2(22, 22), Vector2(44, 48))
+	return r
 
 
 ## Where it stands (its feet, in the layer), the sort's lift taken off.
@@ -166,29 +141,21 @@ func _process(delta: float) -> void:
 			if t >= _next_sit:
 				_sit_until = t + _rng.randf_range(3.0, 6.0)
 				_next_sit = _sit_until + _rng.randf_range(10.0, 20.0)
-	envelope.visible = mail != null and mail.has_unread_from(id) and not dragged
-	if envelope.visible:
-		envelope.position = rig.position + Vector2(-26, -96 + sin(t * 3.0) * 3.0)
-		envelope.rotation = sin(t * 2.2) * 0.12
+	# Step 57: no letter over its head -- a new letter is the mailbox's news
+	# alone; over a Momo there is only its mood.
 	if mood_bubble.due(delta):
 		_mood_reason = MomoMood.reason(momos.sim, id)
-	mood_bubble.step(delta, _mood_reason, envelope.visible or dragged, rig.position)
+	mood_bubble.step(delta, _mood_reason, dragged, rig.position)
 	rig.mood_pose = String(MOOD_POSE.get(mood_bubble.mood, ""))
-	# Its own drawing is the letter's bubble and the selection ring: redrawn
-	# while either shows, and once more to clear it.
-	var marks := envelope.visible or selected or dragged
+	# Its own drawing is the selection ring: redrawn while it shows, and once
+	# more to clear it.
+	var marks := selected or dragged
 	if marks or _marked:
 		queue_redraw()
 	_marked = marks
 
 
 func _draw() -> void:
-	if envelope != null and envelope.visible:
-		# A white speech bubble under the letter, so it reads on any ground.
-		var c := envelope.position
-		draw_circle(c, 19.0, Color(1, 1, 1, 0.92))
-		draw_colored_polygon(PackedVector2Array([c + Vector2(8, 14), c + Vector2(20, 26), c + Vector2(14, 10)]), Color(1, 1, 1, 0.92))
-		draw_arc(c, 19.0, 0, TAU, 32, Color(0.35, 0.55, 0.85, 0.6), 1.5, true)
 	if selected or dragged:
 		draw_set_transform(Vector2(0, 2 - depth_lift), 0.0, Vector2(1.0, 0.45))
 		draw_arc(Vector2.ZERO, 30.0, 0, TAU, 32, Color(1, 0.92, 0.45, 0.95), 4.0, true)

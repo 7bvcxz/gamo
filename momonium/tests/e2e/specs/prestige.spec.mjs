@@ -26,6 +26,11 @@ async function sellFromTheMoneyTab(game) {
   s = await game.query('sale');
   expect(s.open).toBe(true);
   expect(s.sell_disabled).toBe(false);
+  // A desktop's larger UI (Step 54) makes the sale panel scroll: Sell is at
+  // its foot, below the fold -- a player scrolls to it.
+  await game.query('dev_reveal', ['SaleFrame', 'Sell']);
+  await game.page.waitForTimeout(150);
+  s = await game.query('sale');
   await tapRect(game, s.sell, s.window);
   s = await game.query('sale');
   expect(s.confirming).toBe(true);

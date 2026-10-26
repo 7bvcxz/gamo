@@ -3,10 +3,18 @@ extends VBoxContainer
 
 ## The mailbox: every letter Momo have written, newest first -- the sender's
 ## face, the title, the day, a red dot while unread -- and, opened, the letter
-## itself on paper with its proposal and the button that accepts it. Opening a
-## letter marks it read through the simulation; nothing is stored here.
+## itself on paper. Opening a letter marks it read through the simulation;
+## nothing is stored here.
+##
+## Step 57: reading is for the story. A research letter's topic was already
+## discovered when the letter came, so there is nothing to accept: under the
+## letter a small footer says what that research needs -- the real rules,
+## with progress -- or that it is ready, running or done, and a button goes
+## to it in Research. A letter without research has no footer.
 
 signal letter_opened(id: int)
+## "See it in Research": the research the letter proposes.
+signal research_wanted(id: String)
 
 const INK := Color("#5a4632")
 const INK_SOFT := Color("#8a7158")
@@ -18,8 +26,10 @@ var list_box: VBoxContainer
 var letter_box: VBoxContainer
 var back_button: Button
 var card: LetterCard
-var proposal_label: Label
-var claim_button: Button
+var footer: VBoxContainer
+var footer_title: Label
+var footer_lines: VBoxContainer
+var research_button: Button
 var empty_label: Label
 var open_id := 0
 var last_result: Dictionary = {}
@@ -59,24 +69,34 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	card = LetterCard.new()
 	card.setup(lib)
 	letter_box.add_child(card)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	row.add_child(PanelViews.icon(lib, "ui_flask", 40.0))
-	proposal_label = PanelViews.label("", 18)
-	proposal_label.name = "Proposal"
-	proposal_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	proposal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	row.add_child(proposal_label)
-	claim_button = Button.new()
-	claim_button.name = "Claim"
-	claim_button.custom_minimum_size = Vector2(170, 56)
-	claim_button.focus_mode = Control.FOCUS_NONE
-	claim_button.add_theme_font_size_override("font_size", 19)
-	claim_button.pressed.connect(func() -> void:
-		last_result = sim.execute({"type": "mail.claim", "id": open_id})
-		refresh())
-	row.add_child(claim_button)
-	letter_box.add_child(row)
+	footer = VBoxContainer.new()
+	footer.name = "Footer"
+	footer.add_theme_constant_override("separation", 4)
+	letter_box.add_child(footer)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 8)
+	head.add_child(PanelViews.icon(lib, "ui_flask", 30.0))
+	footer_title = PanelViews.label("", 17)
+	footer_title.name = "FooterTitle"
+	footer_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	head.add_child(footer_title)
+	footer.add_child(head)
+	footer_lines = VBoxContainer.new()
+	footer_lines.name = "Conditions"
+	footer_lines.add_theme_constant_override("separation", 0)
+	footer.add_child(footer_lines)
+	research_button = Button.new()
+	research_button.name = "ToResearch"
+	research_button.custom_minimum_size = Vector2(0, 50)
+	research_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	research_button.focus_mode = Control.FOCUS_NONE
+	research_button.add_theme_font_size_override("font_size", 17)
+	research_button.pressed.connect(func() -> void:
+		var l := mail.get_letter(open_id)
+		if not l.is_empty() and String(l.get("research", "")) != "":
+			research_wanted.emit(String(l["research"])))
+	footer.add_child(research_button)
 
 
 func show_list() -> void:
@@ -108,7 +128,7 @@ func refresh() -> void:
 func _refresh_list() -> void:
 	var key := ""
 	for l: Dictionary in mail.letters:
-		key += "%d:%s:%s;" % [int(l["id"]), int(l["read_ms"]) >= 0, int(l["claimed_ms"]) >= 0]
+		key += "%d:%s;" % [int(l["id"]), int(l["read_ms"]) >= 0]
 	key += TranslationServer.get_locale()
 	if key == _shown_rows:
 		return
@@ -148,12 +168,16 @@ func _row(l: Dictionary) -> Button:
 	b.add_child(row)
 	var unread := int(l["read_ms"]) < 0
 	b.set_meta("unread", unread)
+	# Unread: a red dot and the title in gold; read: the row steps back.
+	if unread:
+		title.theme_type_variation = &"GoldLabel"
+	else:
+		row.modulate = Color(1, 1, 1, 0.72)
 	b.draw.connect(func() -> void:
-		var c := Vector2(b.size.x - 20, b.size.y * 0.5)
 		if unread:
-			b.draw_circle(c, 7.0, Color("#ff5a4f"))
-		elif int(mail.get_letter(id).get("claimed_ms", -1)) >= 0:
-			b.draw_polyline(PackedVector2Array([c + Vector2(-7, 0), c + Vector2(-2, 5), c + Vector2(8, -6)]), Color("#9be15d"), 3.0, true))
+			var c := Vector2(b.size.x - 20, b.size.y * 0.5)
+			b.draw_circle(c, 8.0, Color("#ff5a4f"))
+			b.draw_arc(c, 8.0, 0, TAU, 16, Color.WHITE, 1.6, true))
 	return b
 
 
@@ -163,10 +187,69 @@ func _refresh_letter() -> void:
 		show_list()
 		return
 	card.show_letter(tr("mail.from") % tr(String(l["sender_name"])), tr(String(l["title"])), tr(String(l["body"])), tr(String(l["sender_name"])))
-	proposal_label.text = "%s  ·  %s" % [tr("mail.proposal"), tr("research.%s.name" % l["research"])]
-	var claimed := int(l["claimed_ms"]) >= 0
-	claim_button.disabled = claimed
-	claim_button.text = tr("mail.claimed") if claimed else tr("mail.claim")
+	var research_id := String(l.get("research", ""))
+	footer.visible = research_id != ""
+	if research_id == "":
+		return
+	var research: ResearchSystem = sim.system(&"research")
+	footer_title.text = tr("mail.req.title").format({"name": tr(String(research.node(research_id).get("name", research_id)))})
+	PanelViews.clear(footer_lines)
+	for c: Dictionary in conditions(research_id):
+		var line := PanelViews.label(("✓ " if c["met"] else "· ") + String(c["text"]), 15)
+		line.name = "Condition"
+		line.theme_type_variation = &"GoodLabel" if c["met"] else &""
+		line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		footer_lines.add_child(line)
+	research_button.text = tr("mail.to_research")
+
+
+## What the letter's research needs, from the research rules themselves:
+## [{text, met}], first the state (done, running, ready), then each condition
+## with its progress. Nothing here is made up for the letter.
+func conditions(research_id: String) -> Array[Dictionary]:
+	var research: ResearchSystem = sim.system(&"research")
+	var out: Array[Dictionary] = []
+	var n := research.node(research_id)
+	if n.is_empty():
+		return out
+	match research.state_of(research_id):
+		"done", "levelup":
+			out.append({"text": tr("mail.req.done"), "met": true})
+			return out
+		"active":
+			out.append({"text": tr("mail.req.active"), "met": true})
+			return out
+	# The letter itself is what opened it.
+	out.append({"text": tr("mail.req.discovered"), "met": true})
+	for r: String in n.get("requires", []):
+		out.append({"text": tr("research.req.requires").format({"name": tr(String(research.node(r).get("name", r)))}), "met": research.is_done(r)})
+	if not research.unlocked.has(research_id):
+		var unlock: Dictionary = n.get("unlock", {})
+		var prog: ProgressionSystem = sim.system(&"progression")
+		if unlock.has("level"):
+			var need := int(unlock["level"])
+			out.append({"text": tr("research.req.level").format({"n": need}) + _progress(prog.level, need), "met": prog.level >= need})
+		for t: String in unlock.get("mastery", {}):
+			var need := int(unlock["mastery"][t])
+			var have := int(prog.mastery_of(t)["level"])
+			out.append({"text": tr("research.req.mastery").format({"type": tr("mastery." + t), "n": need}) + _progress(have, need), "met": have >= need})
+	out.append({"text": tr("mail.req.lab"), "met": research.has_lab()})
+	var cost := research.cost_of(research_id)
+	var inv: InventorySystem = sim.system(&"inventory")
+	for item: String in cost["items"]:
+		var need := int(cost["items"][item])
+		var have := inv.count(item)
+		out.append({"text": "%s %d / %d" % [tr("item." + item), mini(have, need), need], "met": have >= need})
+	if int(cost["money"]) > 0:
+		var money := (sim.system(&"economy") as EconomySystem).money
+		out.append({"text": "%s $%d / $%d" % [tr("mail.req.money"), mini(money, int(cost["money"])), int(cost["money"])], "met": money >= int(cost["money"])})
+	if research.state_of(research_id) == "available" and research.can_start(research_id)["ok"]:
+		out.push_front({"text": tr("mail.req.ready"), "met": true})
+	return out
+
+
+static func _progress(have: int, need: int) -> String:
+	return "" if have >= need else "  (%d / %d)" % [have, need]
 
 
 ## The letter on paper: cream sheet, airmail stripes round the edge, a stamp,

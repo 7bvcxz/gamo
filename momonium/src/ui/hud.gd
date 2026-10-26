@@ -218,6 +218,25 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 ## and a harvest in one frame, many Momo finishing together -- reads as one
 ## pop per kind, not a stack. Nothing pops while time away is being caught up
 ## (the welcome-back card sums it), and nothing at all with effects off.
+## Step 57: a letter's arrival is told by the mailbox button alone -- its dot
+## shows at once and swells twice, its icon wiggles once. Letters that come
+## close together (or a pile after a catch-up, which plays nothing) do not
+## replay it: one news at most every NEWS_GAP_MS.
+const NEWS_GAP_MS := 6000
+var _news_at := -NEWS_GAP_MS
+
+
+func letter_news() -> void:
+	var b: HudButton = buttons.get(&"mailbox")
+	if b == null:
+		return
+	b.badge = true
+	var now := Time.get_ticks_msec()
+	if now - _news_at >= NEWS_GAP_MS:
+		_news_at = now
+		b.pulse()
+
+
 func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 	if type == &"game_loaded":
 		# A loaded island's level is shown as it is, not slid to (Step 54).
@@ -239,6 +258,9 @@ func _on_sim_event(type: StringName, payload: Dictionary) -> void:
 			_pending_level = maxi(_pending_level, int(payload["level"]))
 		&"research_completed":
 			_pending_research.append(payload)
+		&"letter_written":
+			letter_news()
+			return
 		_:
 			return
 	if _feedback_queued:
@@ -473,7 +495,9 @@ func refresh(force: bool = false) -> void:
 	var research: ResearchSystem = sim.system(&"research")
 	var research_button: HudButton = buttons.get(&"research")
 	if research != null and research_button != null:
-		var want := research.something_to_start()
+		# Step 57: the dot is news -- a topic that became available and has
+		# not been shown yet; opening Research acknowledges it.
+		var want := not research.new_topics().is_empty()
 		if research_button.badge != want:
 			research_button.badge = want
 	var specials: SpecialSystem = sim.system(&"specials")

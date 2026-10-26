@@ -169,7 +169,7 @@ func act() -> bool:
 	# The player manages first and taps what is left. (Before Step 50 the
 	# hands came first until a hire; with five-second farms always ready that
 	# left no decision for anything else.)
-	var order: Array[Callable] = [_claim_letter, _promote, _sell, _research, _special, _refit, _hire, _give_tiles, _build, _buy_land, _work_by_hand]
+	var order: Array[Callable] = [_read_letter, _promote, _sell, _research, _special, _refit, _hire, _give_tiles, _build, _buy_land, _work_by_hand]
 	for try: Callable in order:
 		if bool(try.call()):
 			actions += 1
@@ -194,7 +194,7 @@ func _act_blind() -> bool:
 	# land only for room to build.
 	var order: Array[Callable] = []
 	if not strategy.get("no_letters", false):
-		order.append(_claim_letter)
+		order.append(_read_letter)
 	if not strategy.get("no_land", false):
 		order.append(_buy_land_blind)
 	if not strategy.get("no_hire", false) and not strategy.get("hands_only", false):
@@ -375,11 +375,14 @@ func _do(kind: String, command: Dictionary) -> bool:
 	return bool(r["ok"])
 
 
-func _claim_letter() -> bool:
+## Reads an unread letter: a decision spent on the screen (the mailbox's dot
+## asks for it). Since Step 57 nothing waits on it -- the letter's research was
+## discovered when it arrived.
+func _read_letter() -> bool:
 	var mail: MailSystem = sim.system(&"mail")
 	for l: Dictionary in mail.letters:
-		if int(l["claimed_ms"]) < 0:
-			return _do("accept letter", {"type": "mail.claim", "id": l["id"]})
+		if int(l["read_ms"]) < 0:
+			return _do("read letter", {"type": "mail.read", "id": l["id"]})
 	return false
 
 

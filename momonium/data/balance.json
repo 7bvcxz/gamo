@@ -185,8 +185,9 @@
     "starve_seconds": 8
   },
   "mail": {
-    "_doc": "Momo Letters (data/letters.json). At most letters_per_day new letters arrive on one in-game day.",
-    "letters_per_day": 1
+    "_doc": "Momo Letters (data/letters.json). At most letters_per_day new letters arrive on one in-game day. Step 57: a letter that brings research (it is discovered on arrival) comes at least research_gap_seconds of game time after the previous one -- discoveries are paced by work, by days and by this gap, never by a delay in the UI.",
+    "letters_per_day": 1,
+    "research_gap_seconds": 180
   },
   "offline": {
     "_doc": "Progress while the game is closed: the simulation runs the time away exactly as if open and untouched (assigned Momo, drip lines, waits, research, and the money finished work earns). Time away counts up to max_hours; at most max_events events are handled (the clock stops at the last one) -- a deterministic cost ceiling, never an estimate. A summary shows when at least report_seconds passed and something happened -- or, quietly, after quiet_report_seconds even if nothing did. autosave_seconds: how often the game saves while open (also when the window loses focus).",

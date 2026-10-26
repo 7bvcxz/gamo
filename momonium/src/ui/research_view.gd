@@ -35,6 +35,9 @@ var start_button: Button
 var last_result: Dictionary = {}
 ## Most nodes on one row: cards narrow to fit it.
 var _widest := 1
+## Step 57: topics that were news when the panel opened -- a red dot on their
+## card until it closes (Main.open_research).
+var fresh: Dictionary = {}
 
 
 func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_industry: String) -> void:
@@ -65,6 +68,13 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_industry: String) -> void:
 	for id: String in cards:
 		if selected == "" or research.state_of(id) in ["active", "available"] and research.state_of(selected) == "locked":
 			selected = id
+
+
+## Shows `id`'s details (a letter's "See it in Research", the news).
+func select(id: String) -> void:
+	if cards.has(id):
+		selected = id
+		refresh()
 
 
 func _depth(id: String) -> int:
@@ -134,6 +144,9 @@ func _draw_card(b: Button, id: String) -> void:
 	var state := research.state_of(id)
 	if id == selected:
 		b.draw_rect(Rect2(Vector2.ONE * 2, b.size - Vector2.ONE * 4), b.get_theme_color("font_color", "GoldLabel"), false, 3.0)
+	if fresh.has(id):
+		b.draw_circle(Vector2(14, 14), 7.0, Color("#ff5a4f"))
+		b.draw_arc(Vector2(14, 14), 7.0, 0, TAU, 16, Color.WHITE, 1.6, true)
 	var corner := Vector2(b.size.x - 16, 16)
 	match state:
 		"locked":

@@ -211,7 +211,6 @@ func _ready() -> void:
 	selection.name = "Selection"
 	add_child(selection)
 	selection.setup(sim, projection, building_views, marker, panel, router)
-	selection.envelope_tapped.connect(func(_m: int) -> void: _on_hud_action(&"mailbox"))
 	selection.momo_views = momo_views
 	momo_panel = MomoPanel.new()
 	ui.add_child(momo_panel)
@@ -286,6 +285,9 @@ func _ready() -> void:
 	mailbox_view.setup(sim, lib)
 	mail_frame.add_tab("hud.mailbox", mailbox_view)
 	mail_frame.closed.connect(mailbox_view.show_list)
+	mailbox_view.research_wanted.connect(func(id: String) -> void:
+		mail_frame.close()
+		open_research(id))
 	research_frame = _frame(ui, "ResearchFrame")
 	for industry: String in (sim.system(&"research") as ResearchSystem).industries():
 		var rv := ResearchView.new()
@@ -301,7 +303,11 @@ func _ready() -> void:
 		research_frame.close())
 	research_frame.closed.connect(func() -> void:
 		if (sim.system(&"prestige") as PrestigeSystem).welcome:
-			sim.execute({"type": "prestige.welcomed"}))
+			sim.execute({"type": "prestige.welcomed"})
+		# The news was told: no dots left in the panel for next time.
+		for i in research_views.size():
+			research_views[i].fresh = {}
+			research_frame.set_tab_dot(i, false))
 	research_frame.set_title(tr("hud.research"))
 	celebration = TierCelebration.new()
 	celebration.setup()
@@ -457,6 +463,16 @@ func _ready() -> void:
 		return {"timeline": j.timeline(), "totals": j.totals(), "rows": rows, "head": view.head.text, "totals_text": view.totals.text,
 			"shown": view.is_visible_in_tree()})
 	# Scrolls Settings to a row by its node name, as a player's scroll would.
+	# E2E: scrolls a panel to one of its controls -- [frame name, control
+	# name]. A long panel scrolls on a desktop's larger UI (Step 54), and a
+	# rectangle asked for out of sight is a tap on nothing.
+	bridge.register_query("dev_reveal", func(arg: Variant) -> Dictionary:
+		var f := ui.find_child(String(arg[0]), false, false) as PanelFrame
+		var c := f.find_child(String(arg[1]), true, false) as Control if f != null else null
+		if c == null:
+			return {"ok": false}
+		f.scroll.ensure_control_visible(c)
+		return {"ok": true})
 	bridge.register_query("dev_settings_reveal", func(node_name: Variant) -> Dictionary:
 		var c := settings_view.find_child(String(node_name), true, false) as Control
 		if c == null:
@@ -1242,13 +1258,41 @@ func _on_hud_action(action_name: StringName) -> void:
 			status_frame.close()
 			detail_frame.close()
 			mail_frame.close()
-			research_frame.toggle(0)
+			if research_frame.visible:
+				research_frame.close()
+			else:
+				open_research()
 		&"mailbox":
 			shop_menu.visible = false
 			status_frame.close()
 			detail_frame.close()
 			research_frame.close()
 			open_mailbox()
+
+
+## Step 57: Research opens where the news is -- the branch of `focus` (a
+## letter's research), else of the first new topic, else the first -- with a
+## dot on each new topic and on its branch's tab until the panel closes.
+## Opening is what acknowledges them: the Research button's dot goes out.
+func open_research(focus: String = "") -> void:
+	var rs: ResearchSystem = sim.system(&"research")
+	var fresh := rs.new_topics()
+	var want := focus if focus != "" else (fresh[0] if not fresh.is_empty() else "")
+	var tab := 0
+	for i in research_views.size():
+		var rv := research_views[i]
+		rv.fresh = {}
+		for id: String in fresh:
+			if rv.cards.has(id):
+				rv.fresh[id] = true
+		research_frame.set_tab_dot(i, not rv.fresh.is_empty())
+		if want != "" and rv.cards.has(want):
+			tab = i
+	research_frame.open(tab)
+	if want != "":
+		research_views[tab].select(want)
+	if not fresh.is_empty():
+		sim.execute({"type": "research.acknowledge", "ids": fresh})
 
 
 ## E2E: HUD texts, button rectangles (window pixels) and recent actions.
@@ -1516,7 +1560,11 @@ func _research_info(_arg: Variant) -> Dictionary:
 		"needs": view.need_lines(view.selected) if view and view.selected != "" else [],
 		"button": rect.call(view.start_button) if view else [], "button_text": view.start_button.text if view else "",
 		"button_disabled": view.start_button.disabled if view else true, "active": research.active, "completed": research.completed.keys(),
-		"badge": (hud.buttons[&"research"] as HudButton).badge, "window": [win.x, win.y]}
+		"badge": (hud.buttons[&"research"] as HudButton).badge, "window": [win.x, win.y],
+		# Step 57: the news -- topics not yet shown, the dots in the open panel.
+		"new_topics": research.new_topics(), "fresh": view.fresh.keys() if view else [],
+		"tab_dots": range(research_frame.tabs.size()).filter(func(i: int) -> bool: return research_frame.tab_dot(i)).map(func(i: int) -> String: return String(research_frame.tabs[i]["key"])),
+		"tab": String(research_frame.tabs[research_frame.current]["key"]) if research_frame.current >= 0 else ""}
 
 
 ## E2E: the mailbox as shown -- rows, the open letter, where to tap.
@@ -1535,10 +1583,14 @@ func _mail_info(_arg: Variant) -> Dictionary:
 	return {"open": mail_frame.visible, "reading": mailbox_view.open_id, "rows": rows,
 		"badge": (hud.buttons[&"mailbox"] as HudButton).badge, "unread": mail.unread_count(),
 		"title": mailbox_view.card.title_label.text, "body": mailbox_view.card.body_label.text,
-		"from": mailbox_view.card.from_label.text, "proposal": mailbox_view.proposal_label.text,
-		"claim": rect.call(mailbox_view.claim_button), "claim_text": mailbox_view.claim_button.text,
-		"claimed": mailbox_view.claim_button.disabled, "back": rect.call(mailbox_view.back_button),
-		"envelopes": momo_views.actors.keys().filter(func(k: int) -> bool: return (momo_views.actors[k] as MomoActor).envelope.visible),
+		"from": mailbox_view.card.from_label.text, "back": rect.call(mailbox_view.back_button),
+		# Step 57: the conditions under a research letter, and the way to it.
+		"footer": {"visible": mailbox_view.footer.is_visible_in_tree(), "title": mailbox_view.footer_title.text,
+			"lines": mailbox_view.footer_lines.get_children().map(func(c: Node) -> String: return (c as Label).text),
+			"button": rect.call(mailbox_view.research_button), "button_text": mailbox_view.research_button.text},
+		"pulses": (hud.buttons[&"mailbox"] as HudButton).pulse_count, "pulsing": (hud.buttons[&"mailbox"] as HudButton).pulsing(),
+		"research_badge": (hud.buttons[&"research"] as HudButton).badge,
+		"new_topics": (sim.system(&"research") as ResearchSystem).new_topics(),
 		"window": [win.x, win.y]}
 
 

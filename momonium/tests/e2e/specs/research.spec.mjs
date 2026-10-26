@@ -1,6 +1,7 @@
-// Step 22: a Momo proposal accepted, notes from the lab, then the research menu
-// by real taps: pick the node, start it, and it finishes on the clock with its
-// effect (two crops a harvest).
+// Step 22: a Momo's proposal (Step 57: discovered when its letter came, the
+// letter never opened), notes from the lab, then the research menu by real
+// taps: pick the node, start it, and it finishes on the clock with its effect
+// (two crops a harvest).
 import { test, expect } from '../lib/fixtures.mjs';
 import { settle } from '../lib/farm.mjs';
 
@@ -19,7 +20,7 @@ test('research field expansion', async ({ game }) => {
   const { id: lab } = await game.query('dev_place_building', ['research', 0, 1]);
   await game.command({ type: 'momo.assign', momo: 1, building: farm });
   await game.query('dev_advance_ms', 250000);
-  expect((await game.command({ type: 'mail.claim', id: 1 })).ok).toBe(true);
+  expect((await game.state()).mail.letters[0].read_ms, 'the letter is not even read').toBe(-1);
   for (let i = 0; i < 3; i++) {
     await settle(game, lab);
     expect((await game.command({ type: 'building.tap', id: lab })).ok).toBe(true);

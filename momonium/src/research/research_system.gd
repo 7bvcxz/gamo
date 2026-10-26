@@ -4,8 +4,8 @@ extends SimSystem
 ## The technology tree as simulation state (data/research.json).
 ##
 ## A node is locked until its prerequisites are finished and its unlock
-## conditions hold (player level, building mastery, an accepted Momo
-## proposal). Starting one pays its cost and needs a finished research lab;
+## conditions hold (player level, building mastery, a Momo's proposal -- since
+## Step 57 the letter arriving is enough, read or not). Starting one pays its cost and needs a finished research lab;
 ## it then completes on its own after its duration (a scheduled event, so it
 ## carries on offline and across saves). One research runs at a time.
 ##
@@ -43,6 +43,14 @@ const PROFILES := 3
 ## The running research: {id, start, end, token}, or empty.
 var active: Dictionary = {}
 var token := 0
+## Step 57: id -> true, topics the player has been shown since they became
+## available (opening Research acknowledges them). An available topic not in
+## here is new: the red dot on the Research button. Kept for good, like
+## `unlocked` -- a topic seen once is not news again after a Prestige.
+var seen: Dictionary = {}
+## A save from before Step 57 has no `seen`: filled once the whole save is in
+## (game_loaded) with what was available under the old rules.
+var _seed_seen := false
 
 
 func _init() -> void:
@@ -54,7 +62,7 @@ func handled_events() -> PackedStringArray:
 
 
 func handled_commands() -> PackedStringArray:
-	return PackedStringArray(["research.start", "research.allocate", "research.profile_save"])
+	return PackedStringArray(["research.start", "research.allocate", "research.profile_save", "research.acknowledge"])
 
 
 func setup(p_sim: Simulation) -> void:
@@ -62,6 +70,9 @@ func setup(p_sim: Simulation) -> void:
 	var buildings: BuildingSystem = p_sim.system(&"buildings")
 	if buildings != null and not buildings.modifiers.has(self):
 		buildings.modifiers.append(self)
+	p_sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
+		if type == &"game_loaded" and _seed_seen:
+			_seed_seen_from_old_save())
 
 
 func on_new_game() -> void:
@@ -75,6 +86,8 @@ func on_new_game() -> void:
 		profiles.append({})
 	active = {}
 	token = 0
+	seen.clear()
+	_seed_seen = false
 
 
 # --- the tree -----------------------------------------------------------------
@@ -257,9 +270,51 @@ func missing(id: String) -> Array[Dictionary]:
 			out.append({"kind": "mastery", "type": t, "need": int(unlock["mastery"][t]), "have": have})
 	if bool(unlock.get("proposal", false)):
 		var mail: MailSystem = sim.system(&"mail")
-		if mail == null or not mail.accepted_research().has(id):
+		if mail == null or not mail.discovered_research().has(id):
 			out.append({"kind": "proposal"})
 	return out
+
+
+## Step 57: topics that can be researched now (`available`: prerequisites
+## and unlock conditions met -- the cost is not asked) and have not been
+## shown to the player yet, in tree order.
+func new_topics(industry: String = "") -> Array[String]:
+	var out: Array[String] = []
+	for n: Dictionary in nodes(industry):
+		var id := String(n["id"])
+		if not seen.has(id) and state_of(id) == "available":
+			out.append(id)
+	return out
+
+
+## The player has been shown these topics (opening Research): no longer new.
+func acknowledge(ids: Array) -> void:
+	var any := false
+	for id: Variant in ids:
+		if not node(String(id)).is_empty() and not seen.has(String(id)):
+			seen[String(id)] = true
+			any = true
+	if any:
+		sim.bus.emit(&"research_seen", {"ids": ids})
+
+
+func _seed_seen_from_old_save() -> void:
+	_seed_seen = false
+	# Available before Step 57 = available now, except a proposal whose letter
+	# was never accepted: that one is news now (the letter alone opens it).
+	var mail: MailSystem = sim.system(&"mail")
+	var accepted: Array[String] = []
+	if mail != null:
+		for l: Dictionary in mail.letters:
+			if int(l.get("claimed_ms", -1)) >= 0:
+				accepted.append(String(l.get("research", "")))
+	for n: Dictionary in nodes():
+		var id := String(n["id"])
+		if state_of(id) != "available":
+			continue
+		if bool(n.get("unlock", {}).get("proposal", false)) and not unlocked.has(id) and not accepted.has(id):
+			continue
+		seen[id] = true
 
 
 ## done (top level) | levelup (researched, can go higher) | active |
@@ -335,6 +390,10 @@ func execute(command: Dictionary) -> Dictionary:
 	if String(command.get("type", "")) == "research.profile_save":
 		var levels: Variant = command.get("levels", {})
 		return save_profile(Cmd.integer(command, "slot"), levels if typeof(levels) == TYPE_DICTIONARY else {})
+	if String(command.get("type", "")) == "research.acknowledge":
+		var ids: Variant = command.get("ids", [])
+		acknowledge(ids if typeof(ids) == TYPE_ARRAY else [])
+		return SimResult.ok()
 	var id := String(command.get("id", ""))
 	var check := can_start(id)
 	if not check["ok"]:
@@ -375,16 +434,6 @@ func progress() -> float:
 
 func remaining_ms() -> int:
 	return 0 if active.is_empty() else maxi(int(active["end"]) - sim.now_ms(), 0)
-
-
-## Something the player could start right now (the HUD's red dot).
-func something_to_start() -> bool:
-	if not active.is_empty():
-		return false
-	for n: Dictionary in nodes():
-		if can_start(String(n["id"]))["ok"]:
-			return true
-	return false
 
 
 # --- effects --------------------------------------------------------------------
@@ -563,7 +612,8 @@ func yield_items(type: String, stage_id: String) -> Array[String]:
 ## every level goes back to 0 (to be allocated again), unlocks stay. Returns
 ## the RP issued.
 func carry_over() -> Dictionary:
-	return {"unlocked": unlocked.duplicate(), "rp_earned": rp_earned + rp_pending(), "issued": rp_pending(), "profiles": profiles.duplicate(true)}
+	return {"unlocked": unlocked.duplicate(), "rp_earned": rp_earned + rp_pending(), "issued": rp_pending(), "profiles": profiles.duplicate(true),
+		"seen": seen.keys()}
 
 
 func adopt(carry: Dictionary) -> void:
@@ -572,6 +622,9 @@ func adopt(carry: Dictionary) -> void:
 			unlocked[id] = true
 	rp_earned = maxi(int(carry.get("rp_earned", 0)), 0)
 	_read_profiles(carry.get("profiles", []))
+	for id: Variant in carry.get("seen", []):
+		if not node(String(id)).is_empty():
+			seen[String(id)] = true
 
 
 func _read_profiles(raw: Variant) -> void:
@@ -588,7 +641,7 @@ func _read_profiles(raw: Variant) -> void:
 func save_state() -> Dictionary:
 	return {"completed": completed.duplicate(), "active": active.duplicate(), "token": token,
 		"bought": bought.duplicate(), "allocated": allocated.duplicate(), "unlocked": unlocked.keys(), "rp_earned": rp_earned,
-		"profiles": profiles.duplicate(true)}
+		"profiles": profiles.duplicate(true), "seen": seen.keys()}
 
 
 func load_state(state: Dictionary) -> void:
@@ -605,6 +658,10 @@ func load_state(state: Dictionary) -> void:
 	for id: Variant in state.get("unlocked", []):
 		if not node(String(id)).is_empty():
 			unlocked[String(id)] = true
+	for id: Variant in state.get("seen", []):
+		if not node(String(id)).is_empty():
+			seen[String(id)] = true
+	_seed_seen = not state.has("seen")
 	var raw_bought: Dictionary = state.get("bought", {})
 	if not state.has("bought"):
 		# Before levels: everything finished was researched once.

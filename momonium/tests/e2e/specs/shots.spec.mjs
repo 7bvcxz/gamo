@@ -80,3 +80,35 @@ test('time of day: day, sunset, night', async ({ game }, info) => {
     await save(game, info, 'time', label);
   }
 });
+
+// Step 57: a letter arrives (the HUD, the Momo who wrote it), the mailbox,
+// the letter, and Research -- without accepting anything.
+test('mail: a letter arrives, the letter, research', async ({ game }, info) => {
+  await game.setTimeScale(0);
+  await game.query('set_language', 'en');
+  const momo = (await game.query('dev_add_momo', [0.55, 1.35])).id;
+  let farm = 0;
+  for (const c of [[1, 0], [0, 1], [1, 1]]) {
+    farm = (await game.query('dev_place_building', ['farm', ...c])).id;
+    if (farm) break;
+  }
+  await game.command({ type: 'momo.assign', momo, building: farm });
+  for (let i = 0; i < 80 && (await game.query('mail')).unread === 0; i++) await game.query('dev_advance_ms', 2500);
+  await game.page.waitForTimeout(350);
+  await save(game, info, 'mail', 'arrive');
+  const tap = async (r, win) => {
+    const box = await game.canvas.boundingBox();
+    await game.tap((r[0] + r[2] / 2) * (box.width / win[0]), (r[1] + r[3] / 2) * (box.height / win[1]));
+    await game.page.waitForTimeout(400);
+  };
+  let h = await game.query('hud');
+  await tap(h.buttons.mailbox, h.window);
+  await save(game, info, 'mail', 'list');
+  const m = await game.query('mail');
+  await tap(m.rows[0].rect, m.window);
+  await save(game, info, 'mail', 'letter');
+  await tap(h.buttons.mailbox, h.window);
+  h = await game.query('hud');
+  await tap(h.buttons.research, h.window);
+  await save(game, info, 'mail', 'research');
+});

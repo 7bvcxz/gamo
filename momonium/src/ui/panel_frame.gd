@@ -112,6 +112,11 @@ func add_tab(label_key: String, view: Control) -> void:
 	button.add_theme_font_size_override("font_size", 18)
 	var index := tabs.size()
 	button.pressed.connect(func() -> void: show_tab(index))
+	# A red dot on the tab when its body has news (set_tab_dot).
+	button.draw.connect(func() -> void:
+		if index < tabs.size() and bool(tabs[index].get("dot", false)):
+			button.draw_circle(Vector2(button.size.x - 10, 10), 6.0, Color("#ff5a4f"))
+			button.draw_arc(Vector2(button.size.x - 10, 10), 6.0, 0, TAU, 16, Color.WHITE, 1.5, true))
 	tab_bar.add_child(button)
 	view.visible = false
 	body.add_child(view)
@@ -121,6 +126,17 @@ func add_tab(label_key: String, view: Control) -> void:
 	title_label.visible = not tab_bar.visible
 	view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_relabel()
+
+
+func set_tab_dot(index: int, on: bool) -> void:
+	if index < 0 or index >= tabs.size() or bool(tabs[index].get("dot", false)) == on:
+		return
+	tabs[index]["dot"] = on
+	(tabs[index]["button"] as Button).queue_redraw()
+
+
+func tab_dot(index: int) -> bool:
+	return index >= 0 and index < tabs.size() and bool(tabs[index].get("dot", false))
 
 
 func show_tab(index: int) -> void:

@@ -142,11 +142,15 @@ research.watering_efficiency.name,Watering efficiency,물 주기 효율,水や�
 research.harvest_boost.name,Bigger harvests,수확량 늘리기,収穫量アップ,增加收成
 mail.empty,No letters yet,아직 편지가 없어요,まだ手紙はありません,还没有信
 mail.from,From %s,%s의 편지,%sより,来自%s
-mail.proposal,Proposal,제안,提案,提议
-mail.claim,Let's research it,연구해 볼게,研究してみる,研究看看
-mail.claimed,On the research list,연구 목록에 넣었어요,研究リストに入れました,已加入研究
+mail.req.title,To research {name},{name} 연구 조건,{name}の研究条件,研究{name}的条件
+mail.req.discovered,Now on the Research list,연구 목록에 올라왔어요,研究リストに載りました,已列入研究
+mail.req.ready,Ready to research now,지금 연구할 수 있어요,今すぐ研究できます,现在就能研究
+mail.req.done,Already researched,이미 연구했어요,研究済みです,已经研究过了
+mail.req.active,Being researched now,지금 연구 중이에요,いま研究中です,正在研究
+mail.req.lab,A research lab,연구소,研究所,研究所
+mail.req.money,Money,돈,お金,金钱
+mail.to_research,See it in Research,연구에서 보기,研究で見る,在研究中查看
 err.no_letter,No such letter,편지가 없어요,手紙がありません,没有这封信
-err.already_claimed,Already accepted,이미 받았어요,もう受け取りました,已经接受了
 building.research,Research lab,연구소,研究所,研究所
 stage.study,Experiment,실험,実験,实验
 item.notes,Research notes,연구 노트,研究ノート,研究笔记

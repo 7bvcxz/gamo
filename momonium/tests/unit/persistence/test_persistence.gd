@@ -25,7 +25,6 @@ func _busy_world() -> Simulation:
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.execute({"type": "momo.assign", "momo": 2, "building": lab})
 	sim.advance_ms(260000)
-	sim.execute({"type": "mail.claim", "id": 1})
 	sim.execute({"type": "research.start", "id": "farm_expansion"})
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [2, 0]})
 	sim.advance_ms(3000)

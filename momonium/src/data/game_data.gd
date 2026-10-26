@@ -202,7 +202,8 @@ func _validate_letters() -> void:
 			for t: String in trigger[kind]:
 				if not types.has(t) or float(trigger[kind][t]) < 1.0:
 					errors.append("letters: %s.trigger.%s.%s must name a building type and a count >= 1" % [id, kind, t])
-		for key: String in ["title", "body", "research"]:
+		# `research` is optional (Step 57): without it a letter is just a letter.
+		for key: String in ["title", "body"]:
 			if String(l.get(key, "")) == "":
 				errors.append("letters: %s.%s missing" % [id, key])
 
@@ -274,6 +275,8 @@ func _validate_research() -> void:
 	# proposal-gated node is proposed by some letter (or it could never open).
 	var proposed := {}
 	for l: Dictionary in table("letters").get("letters", []):
+		if String(l.get("research", "")) == "":
+			continue
 		proposed[String(l.get("research", ""))] = true
 		if not ids.has(String(l.get("research", ""))):
 			errors.append("letters: %s proposes unknown research %s" % [l.get("id", "?"), l.get("research", "")])

@@ -14,8 +14,6 @@ extends Node
 ## sees it. A building keeps working when something else is selected.
 
 signal selection_changed(kind: String)
-## A tap on a Momo's letter bubble: the letter should open.
-signal envelope_tapped(momo: int)
 ## World units a tap may miss a Momo by and still pick it -- set by the
 ## tutorial while it asks for one (Step 50: blind players needed three or four
 ## taps to catch a Momo walking away).
@@ -90,10 +88,6 @@ func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
 	# selected: that reaches what it stands on, a building or an empty tile.
 	# A working Momo stands on its farm, and the blind playtest (Step 45)
 	# kept getting the Momo.
-	if momo != 0 and momo_views.actor(momo).envelope_rect().has_point(world_pos):
-		select_momo(momo)
-		envelope_tapped.emit(momo)
-		return
 	if momo != 0 and not (kind == "momo" and selected_id == momo):
 		select_momo(momo)
 		return

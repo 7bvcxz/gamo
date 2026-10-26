@@ -22,12 +22,11 @@ func before_each() -> void:
 	mail = sim.system(&"mail")
 
 
-## Momo's first letter, accepted: farm_expansion opens.
+## Momo's first letter: farm_expansion opens the moment it arrives.
 func _accept_first_proposal() -> int:
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	sim.advance_ms(250000)
-	sim.execute({"type": "mail.claim", "id": 1})
 	return farm
 
 
@@ -129,8 +128,7 @@ func test_mulch_shortens_the_wait_but_keeps_the_watering() -> void:
 	research.completed["farm_expansion"] = 0
 	(sim.system(&"progression") as ProgressionSystem).add_mastery("farm", 100)
 	sim.advance_to(sim.clock.next_day_start_ms() + 1)
-	for l: Dictionary in mail.letters:
-		sim.execute({"type": "mail.claim", "id": l["id"]})
+	sim.advance_ms(mail.research_gap_left_ms() + sim.clock.day_ms)
 	assert_eq(research.state_of("watering_efficiency"), "available", "Momo proposed it and its parent is done")
 	sim.execute({"type": "research.start", "id": "watering_efficiency"})
 	sim.advance_ms(90000)
@@ -229,7 +227,6 @@ func test_same_outcome_whatever_the_step_size() -> void:
 			s.advance_ms(step)
 			t += step
 			if not started and not (s.system(&"mail") as MailSystem).letters.is_empty():
-				s.execute({"type": "mail.claim", "id": 1})
 				started = s.execute({"type": "research.start", "id": "farm_expansion"})["ok"]
 		var r: ResearchSystem = s.system(&"research")
 		out.append([r.completed, (s.system(&"inventory") as InventorySystem).count("crop"), (s.system(&"economy") as EconomySystem).money])
