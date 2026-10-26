@@ -21,6 +21,12 @@ extends SimSystem
 ## building -- dragged there, or by the manager -- makes that building's tiles
 ## the whole set, so nobody has to paint zones to play; the pencil adds and
 ## removes tiles one at a time, up to watch_capacity().
+##
+## Step 53: a new island has no Momo -- the player works alone and chooses to
+## hire the first. A Momo is never put to work by itself: a hire (or one of
+## the legacy's free hires) arrives idle and wanders until the player places
+## it. Only a Momo the player has placed, edited or let the manager move
+## (`opted_in`) is ever moved or given work by the island's own automation.
 
 const ROAM := "momo.roam"
 const ARRIVE := "momo.arrive"
@@ -32,10 +38,16 @@ const NEIGHBOURS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1
 const ROUTES: PackedStringArray = ["nearest", "rows", "zigzag", "zone", "auto"]
 
 ## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired,
-##        watch [[x,y]...] (sorted)}
+##        watch [[x,y]...] (sorted), pinned, opted_in}
 var momos: Dictionary = {}
 var next_id := 1
 var hired := 0
+## Hires the legacy pays for (Step 53: the head start a sale gives is no
+## longer Momo standing on the new island but hires the player makes).
+var free_hires := 0
+## Whether the island's first Momo was bought at `momo.hire.first`; later
+## hires then cost what they always did (the first is not one of them).
+var bought_first := false
 var rng := RandomNumberGenerator.new()
 
 
@@ -114,6 +126,8 @@ func on_new_game() -> void:
 	_watch_sig = -1
 	next_id = 1
 	hired = 0
+	free_hires = 0
+	bought_first = false
 	rng.seed = sim.data.get_int("balance", "momo.seed", 1)
 	var spots: Array[Vector2] = [Vector2(0.55, 1.35), Vector2(1.4, 0.6), Vector2(0.5, 0.5), Vector2(1.5, 1.5)]
 	for i in sim.data.get_int("balance", "start.momos", 1):
@@ -127,7 +141,7 @@ func add_momo(pos: Vector2) -> int:
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
 		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": [],
-		"route": "nearest", "route_since": now, "exp_carry": {}}
+		"route": "nearest", "route_since": now, "exp_carry": {}, "opted_in": false}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -200,11 +214,17 @@ func slots_of(building: int) -> int:
 	return int((sim.system(&"buildings") as BuildingSystem).type_def(b).get("workers", 0)) if not b.is_empty() else 0
 
 
+## The next hire's price: nothing while the legacy pays; the island's first
+## Momo at `first`; after that the old ladder, as if the first were free.
 func hire_cost() -> int:
+	if free_hires > 0:
+		return 0
+	if momos.is_empty() and hired == 0:
+		return sim.data.get_int("balance", "momo.hire.first", 15)
 	var base := sim.data.get_float("balance", "momo.hire.base", 30.0)
 	var growth := sim.data.get_float("balance", "momo.hire.growth", 1.6)
 	var step := maxi(sim.data.get_int("balance", "momo.hire.round_to", 5), 1)
-	return int(ceil(base * pow(growth, hired) / step)) * step
+	return int(ceil(base * pow(growth, hired - int(bought_first)) / step)) * step
 
 
 ## Whether `momo` could be assigned to `building` now, and why not.
@@ -255,14 +275,18 @@ func hire() -> Dictionary:
 	var economy: EconomySystem = sim.system(&"economy")
 	if not economy.can_afford(cost):
 		return SimResult.fail("err.not_enough_money", {"cost": cost})
-	economy.spend(cost, "hire")
-	hired += 1
+	if free_hires > 0:
+		free_hires -= 1
+	else:
+		bought_first = bought_first or (momos.is_empty() and hired == 0)
+		economy.spend(cost, "hire")
+		hired += 1
 	var world: WorldSystem = sim.system(&"world")
 	var cells := world.owned_cells()
 	var cell: Vector2i = cells[rng.randi_range(0, cells.size() - 1)]
 	var id := add_momo(Vector2(cell) + Vector2(rng.randf_range(0.25, 0.75), rng.randf_range(0.25, 0.75)))
+	# It arrives idle: the player decides where it works (Step 53).
 	sim.bus.emit(&"momo_hired", {"id": id, "cost": cost})
-	_auto_watch_momo(id)
 	return SimResult.ok({"id": id, "cost": cost, "next_cost": hire_cost()})
 
 
@@ -303,6 +327,7 @@ func assign(momo: int, building: int, by_player: bool = true, keep_watch: bool =
 		_close_history(m)
 	m["assigned"] = building
 	m["pinned"] = by_player
+	m["opted_in"] = bool(m.get("opted_in", false)) or by_player
 	var b := (sim.system(&"buildings") as BuildingSystem).get_building(building)
 	var hist: Array = m["history"]
 	hist.append({"building": building, "type": String(b.get("type", "")), "from": sim.now_ms(), "to": -1, "by": "player" if by_player else "manager"})
@@ -494,6 +519,7 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 		# Who watches what is read again before anyone hears of it.
 		_watch_sig = -1
 		m["pinned"] = true
+		m["opted_in"] = true
 		# Its building is no longer on its rounds: it goes (a stage under way
 		# finishes by itself), and JobSystem finds it the next job.
 		var at := int(m["assigned"])
@@ -512,14 +538,14 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 
 ## With `balance.momo.watch.auto`, nobody has to be told twice: a building
 ## finished on tiles nobody watches is taken by a Momo with nothing to do, or
-## else the nearest Momo with room for all its tiles (lowest id on a tie), and
-## a newly hired Momo takes the unwatched buildings nearest to it, as many as
-## it may watch. Until the player has put some Momo to work, none is (the
-## tutorial teaches it). (Step 50: nearest-with-room alone put a second
-## island's nine tiles on one Momo while the two that came with the sale
-## stood idle.)
-## Neither pins the Momo (the player's own edits do) -- the manager may still
-## move it.
+## else the nearest Momo with room for all its tiles (lowest id on a tie).
+## Only a Momo the player has put to work before (`opted_in`) is asked -- a
+## new hire is never placed by itself (Step 53; Step 50 had a hire take the
+## unwatched buildings near it, or half of the busiest Momo's). Until the
+## player has put some Momo to work, none is. (Step 50: nearest-with-room
+## alone put a second island's nine tiles on one Momo while two stood idle.)
+## It does not pin the Momo (the player's own edits do) -- the manager may
+## still move it.
 func _auto_watch_building(building: int) -> void:
 	if not bool(sim.data.get_value("balance", "momo.watch.auto", false)) or building == 0:
 		return
@@ -542,7 +568,7 @@ func _auto_watch_building(building: int) -> void:
 	var best_d := INF
 	for id: int in ids():
 		var n := (momos[id]["watch"] as Array).size()
-		if n + cells.size() > watch_capacity(id):
+		if not bool(momos[id].get("opted_in", false)) or n + cells.size() > watch_capacity(id):
 			continue
 		var idle := n == 0
 		var d := position_of(id).distance_to(spot)
@@ -552,65 +578,6 @@ func _auto_watch_building(building: int) -> void:
 			best_d = d
 	if best != 0:
 		_watch_more(best, cells)
-
-
-func _auto_watch_momo(momo: int) -> void:
-	if not bool(sim.data.get_value("balance", "momo.watch.auto", false)) or not momos.has(momo):
-		return
-	var bs: BuildingSystem = sim.system(&"buildings")
-	var here := position_of(momo)
-	var free: Array[int] = []
-	for id: int in bs.ids():
-		if slots_of(id) > 0 and bs.get_building(id)["state"] != BuildingSystem.CONSTRUCTING and watchers_of(id).is_empty():
-			free.append(id)
-	free.sort_custom(func(a: int, c: int) -> bool:
-		var da := here.distance_to(work_spot(a))
-		var dc := here.distance_to(work_spot(c))
-		return da < dc or (da == dc and a < c))
-	var cells: Array[Vector2i] = []
-	for id: int in free:
-		var more := bs.cells_of(bs.get_building(id))
-		if cells.size() + more.size() <= watch_capacity(momo):
-			cells.append_array(more)
-	if cells.is_empty():
-		cells = _share_of_busiest(momo)
-	if not cells.is_empty():
-		_watch_more(momo, cells)
-
-
-## Nothing left unwatched: the new Momo takes half of the buildings of the
-## Momo looking after the most (two or more) -- the newest ones, which came to
-## it by themselves; the one it is at stays. (Step 50: otherwise a hire stood
-## about while one Momo ran between three buildings.)
-func _share_of_busiest(momo: int) -> Array[Vector2i]:
-	var bs: BuildingSystem = sim.system(&"buildings")
-	var busiest := 0
-	var theirs: Array[int] = []
-	for id: int in ids():
-		if id == momo:
-			continue
-		var list: Array[int] = []
-		for c: Array in momos[id]["watch"]:
-			var b := bs.building_at(Vector2i(int(c[0]), int(c[1])))
-			if b != 0 and not list.has(b) and slots_of(b) > 0:
-				list.append(b)
-		if list.size() >= 2 and list.size() > theirs.size():
-			busiest = id
-			theirs = list
-	var out: Array[Vector2i] = []
-	if busiest == 0:
-		return out
-	theirs.erase(int(momos[busiest]["assigned"]))
-	theirs.sort()
-	theirs.reverse()
-	var take := ceili(theirs.size() / 2.0)
-	for b: int in theirs.slice(0, take):
-		var more := bs.cells_of(bs.get_building(b))
-		if out.size() + more.size() > watch_capacity(momo):
-			break
-		_give_up(busiest, b)
-		out.append_array(more)
-	return out
 
 
 func _watch_more(momo: int, cells: Array[Vector2i]) -> void:
@@ -663,6 +630,9 @@ func set_pinned(momo: int, pinned: bool) -> Dictionary:
 	if not momos.has(momo):
 		return SimResult.fail("err.no_momo")
 	momos[momo]["pinned"] = pinned
+	# Either way the player has decided about this Momo: letting the manager
+	# move it is a placement too.
+	momos[momo]["opted_in"] = true
 	sim.bus.emit(&"momo_pinned", {"id": momo, "pinned": pinned})
 	return SimResult.ok()
 
@@ -783,7 +753,8 @@ func save_state() -> Dictionary:
 		list.append(momos[id].duplicate(true))
 	# The RNG state is a 64-bit integer: as a JSON number it would lose its low
 	# bits and a loaded game would wander differently. Strings keep it exact.
-	return {"next_id": next_id, "hired": hired, "rng_seed": str(rng.seed), "rng_state": str(rng.state), "momos": list}
+	return {"next_id": next_id, "hired": hired, "free_hires": free_hires, "bought_first": bought_first,
+		"rng_seed": str(rng.seed), "rng_state": str(rng.state), "momos": list}
 
 
 func load_state(state: Dictionary) -> void:
@@ -792,6 +763,8 @@ func load_state(state: Dictionary) -> void:
 	_watch_sig = -1
 	next_id = int(state.get("next_id", 1))
 	hired = int(state.get("hired", 0))
+	free_hires = int(state.get("free_hires", 0))
+	bought_first = bool(state.get("bought_first", false))
 	rng.seed = int(str(state.get("rng_seed", "1")))
 	if state.has("rng_state"):
 		rng.state = int(str(state["rng_state"]))
@@ -813,6 +786,11 @@ func load_state(state: Dictionary) -> void:
 			hist.append({"building": int(h.get("building", 0)), "type": String(h.get("type", "")), "from": int(h.get("from", 0)), "to": int(h.get("to", -1)), "by": String(h.get("by", "player"))})
 		m["history"] = hist
 		m["pinned"] = bool(m.get("pinned", int(m["assigned"]) != 0))
+		# Before Step 53 nothing recorded it: a Momo already at work or with
+		# rounds was put there (by the player or for them) and stays theirs.
+		if not m.has("opted_in"):
+			m["opted_in"] = int(m["assigned"]) != 0 or not (m.get("watch", []) as Array).is_empty() or not hist.is_empty()
+		m["opted_in"] = bool(m["opted_in"])
 		# Before watched tiles, a Momo watched exactly its building.
 		if not m.has("watch"):
 			var cells: Array = []

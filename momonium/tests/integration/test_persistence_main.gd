@@ -38,7 +38,7 @@ func _open() -> void:
 
 
 func test_opens_the_saved_island_and_tells_what_happened_away() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var f := (sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": f})
 	var two_hours_ago := int(Time.get_unix_time_from_system()) - 7200
@@ -57,8 +57,8 @@ func test_opens_the_saved_island_and_tells_what_happened_away() -> void:
 
 
 func test_says_when_the_save_was_damaged() -> void:
-	SaveService.write(Simulation.new_game(), PATH, int(Time.get_unix_time_from_system()))
-	SaveService.write(Simulation.new_game(), PATH, int(Time.get_unix_time_from_system()))
+	SaveService.write(with_starter_momo(Simulation.new_game()), PATH, int(Time.get_unix_time_from_system()))
+	SaveService.write(with_starter_momo(Simulation.new_game()), PATH, int(Time.get_unix_time_from_system()))
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
 	f.store_string("{ broken")
 	f.close()
@@ -69,7 +69,7 @@ func test_says_when_the_save_was_damaged() -> void:
 
 
 func test_a_newer_save_is_never_overwritten() -> void:
-	SaveService.write(Simulation.new_game(), PATH)
+	SaveService.write(with_starter_momo(Simulation.new_game()), PATH)
 	var env: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	env["schema"] = Simulation.SAVE_SCHEMA + 5
 	var f := FileAccess.open(PATH, FileAccess.WRITE)

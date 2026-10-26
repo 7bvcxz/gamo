@@ -1,9 +1,11 @@
 extends "res://tests/framework/test_case.gd"
 
-func test_the_game_starts_with_one_momo_on_the_island() -> void:
+func test_the_game_starts_with_no_momo_and_the_first_hire_stands_idle() -> void:
 	var sim := Simulation.new_game()
 	var momos: MomoSystem = sim.system(&"momo")
-	assert_eq(momos.ids().size(), 1, "one Momo, as in the reference")
+	assert_eq(momos.ids().size(), 0, "Step 53: the player begins alone")
+	(sim.system(&"economy") as EconomySystem).earn(100, "test")
+	assert_true(sim.execute({"type": "momo.hire"})["ok"], "and chooses to hire the first")
 	var p := momos.position_of(1)
 	var world: WorldSystem = sim.system(&"world")
 	assert_true(world.is_owned(Vector2i(floori(p.x), floori(p.y))), "standing on the island")
@@ -12,7 +14,7 @@ func test_the_game_starts_with_one_momo_on_the_island() -> void:
 
 
 func test_momos_survive_a_save() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var momos: MomoSystem = sim.system(&"momo")
 	momos.add_momo(Vector2(1.5, 0.5))
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))

@@ -15,7 +15,7 @@ var bs: BuildingSystem
 
 func before_each() -> void:
 	FxPrefs.reset()
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	momos = sim.system(&"momo")
 	bs = sim.system(&"buildings")
 

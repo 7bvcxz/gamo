@@ -12,7 +12,7 @@ var research: ResearchSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	inv = sim.system(&"inventory")
 	economy = sim.system(&"economy")
@@ -94,7 +94,7 @@ func test_fractions_carry_across_a_save() -> void:
 func test_momo_run_industries_unattended_and_deterministically() -> void:
 	var out: Array = []
 	for chunk: int in [16, 1000, 9999]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var b2: BuildingSystem = s.system(&"buildings")
 		var yard := b2.place_instant("lumberyard", Vector2i(1, 0))
 		var mine := b2.place_instant("mine", Vector2i(0, 1))

@@ -9,7 +9,7 @@ const AutoPlayer := preload("res://tools/playtest/autoplayer.gd")
 
 
 func test_the_firsts_are_the_moments_a_player_sees() -> void:
-	var bot := AutoPlayer.new(Simulation.new_game())
+	var bot := AutoPlayer.new(with_starter_momo(Simulation.new_game()))
 	bot.sell_at_points = 99
 	bot.play(6 * 60.0)
 	var j: JourneySystem = bot.sim.system(&"journey")
@@ -25,7 +25,7 @@ func test_the_firsts_are_the_moments_a_player_sees() -> void:
 
 
 func test_time_away_is_counted_apart() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var farm := bs.place_instant("farm", Vector2i(0, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
@@ -50,7 +50,7 @@ func test_time_away_is_counted_apart() -> void:
 
 
 func test_kept_across_a_save_and_empty_for_older_saves() -> void:
-	var bot := AutoPlayer.new(Simulation.new_game())
+	var bot := AutoPlayer.new(with_starter_momo(Simulation.new_game()))
 	bot.play(3 * 60.0)
 	OfflineProgress.catch_up(bot.sim, 600000)
 	var j: JourneySystem = bot.sim.system(&"journey")

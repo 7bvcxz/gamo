@@ -10,7 +10,7 @@ var book: AnalyticsSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	book = sim.system(&"analytics")
 	(sim.system(&"progression") as ProgressionSystem).add_exp(1000, "test")

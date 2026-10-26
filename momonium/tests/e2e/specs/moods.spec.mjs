@@ -3,6 +3,9 @@
 // and then resting; it takes no taps (the Momo under it still selects).
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 const wait = (game, ms) => game.page.waitForTimeout(ms);
 
 test('a free Momo shows one heart, briefly', async ({ game }) => {

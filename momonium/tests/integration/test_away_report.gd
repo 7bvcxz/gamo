@@ -42,7 +42,7 @@ func _open() -> void:
 
 ## An island with a farm and a lumberyard worked by two Momo.
 func _working_island() -> Simulation:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	(sim.system(&"economy") as EconomySystem).earn(200, "test")
 	sim.execute({"type": "momo.hire"})
 	var bs: BuildingSystem = sim.system(&"buildings")
@@ -118,7 +118,7 @@ func test_rounding_and_the_threshold() -> void:
 
 
 func test_a_quiet_absence_gets_a_gentle_word_a_short_one_nothing() -> void:
-	_write(Simulation.new_game(), 3 * 3600)
+	_write(with_starter_momo(Simulation.new_game()), 3 * 3600)
 	await _open()
 	var view: AwayView = main.get("away_view")
 	assert_true((main.get("away_frame") as PanelFrame).visible, "three quiet hours: the card")
@@ -128,7 +128,7 @@ func test_a_quiet_absence_gets_a_gentle_word_a_short_one_nothing() -> void:
 	main.queue_free()
 	await tree.process_frame
 	main = null
-	_write(Simulation.new_game(), 10 * 60)
+	_write(with_starter_momo(Simulation.new_game()), 10 * 60)
 	await _open()
 	assert_false((main.get("away_frame") as PanelFrame).visible, "ten quiet minutes: nothing to say")
 

@@ -5,6 +5,9 @@
 // draws it, not an empty quad).
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 const momo = async (game) => (await game.query('momos')).momos['1'];
 
 test('Momo is drawn from the sprite sheet in every state', async ({ game }) => {

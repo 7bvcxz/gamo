@@ -15,6 +15,14 @@ var checks: int = 0
 var tree: SceneTree
 
 
+## Step 53: a new game starts with no Momo. A test written about what a Momo
+## does gets the old starter back explicitly -- id 1, where it used to stand,
+## added before anything else uses the Momo dice, so runs are as they were.
+func with_starter_momo(s: Simulation) -> Simulation:
+	(s.system(&"momo") as MomoSystem).add_momo(Vector2(0.55, 1.35))
+	return s
+
+
 func before_each() -> void:
 	pass
 

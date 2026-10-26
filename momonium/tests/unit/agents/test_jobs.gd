@@ -13,7 +13,7 @@ var farm := 0
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	buildings = sim.system(&"buildings")
 	momos = sim.system(&"momo")
 	inv = sim.system(&"inventory")
@@ -95,7 +95,7 @@ func test_assigned_momo_work_under_the_moon() -> void:
 func test_night_rest_is_a_data_switch() -> void:
 	var balance: Dictionary = GameData.load_default().table("balance").duplicate(true)
 	balance["momo"]["works_at_night"] = false
-	sim = Simulation.new_game(GameData.from_tables({"balance": balance}))
+	sim = with_starter_momo(Simulation.new_game(GameData.from_tables({"balance": balance})))
 	buildings = sim.system(&"buildings")
 	farm = buildings.place_instant("farm", Vector2i(1, 0))
 	# An array, not a bool: a GDScript lambda captures locals by value, so
@@ -126,7 +126,7 @@ func test_two_farms_two_momos_work_independently() -> void:
 func test_shared_building_takes_turns() -> void:
 	var b: Dictionary = GameData.load_default().table("buildings").duplicate(true)
 	b["types"]["farm"]["workers"] = 2
-	sim = Simulation.new_game(GameData.from_tables({"buildings": b}))
+	sim = with_starter_momo(Simulation.new_game(GameData.from_tables({"buildings": b})))
 	buildings = sim.system(&"buildings")
 	momos = sim.system(&"momo")
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
@@ -177,7 +177,7 @@ func test_a_full_store_makes_momo_wait_and_spending_frees_it() -> void:
 func test_unattended_runs_are_deterministic() -> void:
 	var results: Array = []
 	for chunk: int in [16, 1000, 7777]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var bs: BuildingSystem = s.system(&"buildings")
 		var f := bs.place_instant("farm", Vector2i(1, 0))
 		s.execute({"type": "momo.assign", "momo": 1, "building": f})

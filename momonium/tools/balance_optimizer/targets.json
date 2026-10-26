@@ -17,7 +17,7 @@
     {"id": "T2", "metric": "journey:land", "kind": "exact", "target": 150, "weight": 2, "primary": true, "sources": ["sim", "blind"]},
     {"id": "T3", "metric": "journey:level:3", "kind": "exact", "target": 240, "weight": 1, "primary": true, "sources": ["sim", "blind"]},
     {"id": "T4", "metric": "journey:research", "kind": "exact", "target": 240, "weight": 2, "primary": true, "sources": ["sim", "blind"]},
-    {"id": "T5", "metric": "journey:hire", "kind": "exact", "target": 270, "weight": 2, "primary": true, "sources": ["sim", "blind"]},
+    {"id": "T5", "metric": "journey:momos:2", "kind": "exact", "target": 270, "weight": 2, "primary": true, "sources": ["sim", "blind"], "why": "a second worker at about 4.5 min -- Step 53: the second Momo (was the first hire, which now buys the island's first Momo: new islands start with none)"},
     {"id": "T6", "metric": "income_at:300", "kind": "exact", "target": 255, "weight": 1.5, "primary": true, "sources": ["sim", "blind"]},
     {"id": "T7", "metric": "income_at:600", "kind": "exact", "target": 1100, "weight": 1.5, "primary": true, "sources": ["sim", "blind"]},
     {"id": "S10", "metric": "income_at:10", "kind": "min", "target": 0, "sources": ["sim", "blind"]},

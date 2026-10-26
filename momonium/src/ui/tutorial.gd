@@ -5,7 +5,10 @@ extends Control
 ## short line beside it -- on a new island the ripe crop waiting on its farm
 ## (the first tap is a harvest and its money, Step 50), then sowing and
 ## watering it again; on an island without one, an empty tile and the farm
-## among the four choices first -- then a Momo and its tiles, and at the end
+## among the four choices first -- then a Momo and its tiles (Step 53: a new
+## island has none, so first the farm by hand until the first hire is
+## affordable -- the money counted beside the farm -- then the Hire button and
+## its card; the hired Momo is selected, and its tiles follow), and at the end
 ## where the other buildings are (any empty tile) and how one comes down
 ## (trash, then the check, half back). Between the Momo and that end, the
 ## sea, once the island is nearly full: the tile it would grow into is ringed
@@ -21,7 +24,7 @@ extends Control
 
 signal finished(skipped: bool)
 
-const STEPS: PackedStringArray = ["harvest", "pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "momo_select", "momo_pencil", "momo_edit", "land", "more"]
+const STEPS: PackedStringArray = ["harvest", "pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "save_hire", "hire", "momo_select", "momo_pencil", "momo_edit", "land", "more"]
 
 var sim: Simulation
 var hud: Hud
@@ -32,6 +35,8 @@ var editor: WatchEditor
 var momo_views: MomoViews
 ## The sea for sale: the tile it rings and whether it glows now.
 var land_preview: LandPreview
+## The menu the first Momo is hired from (Step 53).
+var shop_menu: ShopMenu
 var _momo_done := false
 var _land_done := false
 var _edited := false
@@ -164,8 +169,13 @@ func current_step() -> String:
 		return "sow"
 	if done == 1:
 		return "water"
-	# Then the Momo: tap one, its pencil, a tile or a stroke -- unless one is
-	# already looking after something (a new building is taken by itself).
+	# Then the Momo: hire the first (Step 53: the island starts with none) --
+	# by hand until it is affordable -- then tap one, its pencil, a tile or a
+	# stroke -- unless one is already looking after something.
+	var momo_system: MomoSystem = sim.system(&"momo")
+	if not _momo_done and momo_system.ids().is_empty():
+		var economy: EconomySystem = sim.system(&"economy")
+		return "hire" if economy.can_afford(momo_system.hire_cost()) else "save_hire"
 	if not _momo_done:
 		var momos: MomoSystem = sim.system(&"momo")
 		for m: int in momos.ids():
@@ -229,6 +239,15 @@ func _update() -> void:
 			target = _building_rect(farm)
 			target2 = _stage_card()
 			text.text = tr("tutorial.water")
+		"save_hire":
+			# Keep farming by hand: the farm, and how far the first Momo is.
+			target = _building_rect(farm)
+			var economy: EconomySystem = sim.system(&"economy")
+			text.text = tr("tutorial.save_hire") % [economy.money, (sim.system(&"momo") as MomoSystem).hire_cost()]
+		"hire":
+			var card: Control = shop_menu.cards.get("momo") if shop_menu != null and shop_menu.visible else null
+			target = _rect(card) if card != null else _rect(hud.buttons.get(&"shop"))
+			text.text = tr("tutorial.hire") % (sim.system(&"momo") as MomoSystem).hire_cost()
 		"momo_select":
 			target = _momo_rect()
 			text.text = tr("tutorial.momo_select")

@@ -195,8 +195,10 @@ static func sell(old: Simulation) -> Dictionary:
 	return SimResult.ok({"sim": next, "appraisal": a, "gained": gained, "rp_issued": research["issued"]})
 
 
-## A new island takes over the legacy and its head start: money and Momo,
-## both recorded as seed so they are not counted as this island's worth.
+## A new island takes over the legacy and its head start: money and free
+## hires, both recorded as seed so they are not counted as this island's
+## worth. (Step 53: the new island starts with no Momo -- the legacy's Momo
+## are hires the player makes, for nothing, when they choose.)
 func adopt(legacy: Dictionary) -> void:
 	points = int(legacy.get("points", 0))
 	lifetime = int(legacy.get("lifetime", 0))
@@ -208,9 +210,7 @@ func adopt(legacy: Dictionary) -> void:
 		(sim.system(&"economy") as EconomySystem).earn(money, "legacy")
 	var momos: MomoSystem = sim.system(&"momo")
 	var extra := start_momo_bonus()
-	var spots: Array[Vector2] = [Vector2(1.45, 1.4), Vector2(0.4, 1.5), Vector2(1.5, 0.45), Vector2(0.6, 0.6)]
-	for i in extra:
-		momos.add_momo(spots[i % spots.size()])
+	momos.free_hires += extra
 	seed_money = money + int(_cfg("value.momo_base", 30.0)) * extra
 	welcome = true
 

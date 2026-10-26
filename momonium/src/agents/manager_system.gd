@@ -13,6 +13,9 @@ extends SimSystem
 ## Free Momo are left to play, except to fill a high-priority spot. A Momo the
 ## player placed (pinned) is never moved; neither is the manager. A move is an
 ## ordinary assignment: the Momo walks there -- nothing happens at once.
+## Step 53: only a Momo the player has ever placed or let go to the manager
+## (`opted_in`) is the manager's to move -- a new hire is never given its
+## first work by anyone but the player.
 
 const REVIEW := "manager.review"
 const PRIORITIES: PackedStringArray = ["high", "normal", "low", "off"]
@@ -86,7 +89,7 @@ func review() -> Array:
 	for m: int in momos.ids():
 		var rec := momos.get_momo(m)
 		var at := int(rec["assigned"])
-		if at == 0 or m == boss or bool(rec.get("pinned", false)):
+		if at == 0 or m == boss or bool(rec.get("pinned", false)) or not bool(rec.get("opted_in", false)):
 			continue
 		var b := buildings.get_building(at)
 		var off := String(b.get("priority", "normal")) == "off"
@@ -96,7 +99,8 @@ func review() -> Array:
 	# Free Momo only for high-priority spots.
 	var free: Array[int] = []
 	for m: int in momos.ids():
-		if int(momos.get_momo(m)["assigned"]) == 0 and not momos.is_moving(m):
+		var rec := momos.get_momo(m)
+		if int(rec["assigned"]) == 0 and not momos.is_moving(m) and bool(rec.get("opted_in", false)):
 			free.append(m)
 	var moves: Array = []
 	var limit := sim.data.get_int("balance", "manager.moves_per_review", 2)

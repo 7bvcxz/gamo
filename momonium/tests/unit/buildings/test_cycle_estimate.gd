@@ -4,7 +4,7 @@ extends "res://tests/framework/test_case.gd"
 ## simulation runs: a measured unattended cycle equals the estimate.
 
 func test_estimate_matches_the_rules() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	var b := buildings.get_building(farm)
@@ -25,7 +25,7 @@ func test_estimate_matches_the_rules() -> void:
 
 
 func test_a_momo_cycle_takes_what_the_estimate_says() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var momos: MomoSystem = sim.system(&"momo")
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
@@ -43,7 +43,7 @@ func test_a_momo_cycle_takes_what_the_estimate_says() -> void:
 
 
 func test_lifetime_ledgers_and_production_survive_a_save() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var eco: EconomySystem = sim.system(&"economy")
 	var inv: InventorySystem = sim.system(&"inventory")
 	eco.earn(50, "sale")
@@ -59,7 +59,7 @@ func test_lifetime_ledgers_and_production_survive_a_save() -> void:
 
 
 func test_old_saves_without_the_new_fields_load() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var state := sim.save_state()
 	(state["systems"]["economy"] as Dictionary).erase("lifetime")
 	(state["systems"]["inventory"] as Dictionary).erase("produced")

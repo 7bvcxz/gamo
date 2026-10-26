@@ -6,6 +6,9 @@
 import { test, expect } from '../lib/fixtures.mjs';
 import { cellToCanvas } from '../lib/coords.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 const toCss = async (game, p, win) => {
   const box = await game.canvas.boundingBox();
   return { x: p[0] * (box.width / win[0]), y: p[1] * (box.height / win[1]) };

@@ -409,6 +409,7 @@ func _ready() -> void:
 	tutorial.editor = watch_editor
 	tutorial.momo_views = momo_views
 	tutorial.land_preview = land_preview
+	tutorial.shop_menu = shop_menu
 	sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
 		if type == &"momo_watch_changed" and tutorial.running and watch_editor.active:
 			tutorial._edited = true)
@@ -486,6 +487,11 @@ func _ready() -> void:
 		var id := (sim.system(&"buildings") as BuildingSystem).place_instant(String(arg[0]), Vector2i(int(arg[1]), int(arg[2])))
 		return {"id": id})
 	bridge.register_query("selection", _selection_info)
+	# Step 53: a new island has no Momo; a browser test about a Momo's work
+	# puts the old starter back (id 1, where it stood).
+	bridge.register_query("dev_add_momo", func(at: Variant) -> Dictionary:
+		var p: Array = at if typeof(at) == TYPE_ARRAY else [0.55, 1.35]
+		return {"id": (sim.system(&"momo") as MomoSystem).add_momo(Vector2(float(p[0]), float(p[1])))})
 	bridge.register_query("dev_add_money", func(amount: Variant) -> Dictionary:
 		(sim.system(&"economy") as EconomySystem).earn(int(amount), "dev")
 		return {"money": (sim.system(&"economy") as EconomySystem).money})

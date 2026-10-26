@@ -10,7 +10,7 @@ var bs: BuildingSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	tiers = sim.system(&"tiers")
 	bs = sim.system(&"buildings")
 

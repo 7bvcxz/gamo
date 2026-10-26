@@ -5,7 +5,9 @@ extends "res://tests/framework/test_case.gd"
 ## then sowing and watering it; on an island without one it rings an empty
 ## tile, then the farm among the four choices beside it (price shown), waits
 ## for the farm, asks for the first sowing and watering. Then a Momo and its
-## tiles, then that any empty tile builds the others and how one comes down.
+## tiles -- Step 53: first hired, by hand until it is affordable (the money
+## counted beside the farm), then the Hire button and its card -- then that
+## any empty tile builds the others and how one comes down.
 ## It can be skipped, never blocks a tap, and replays from Settings.
 
 const MainScene := preload("res://scenes/main.tscn")
@@ -80,7 +82,7 @@ func test_a_new_island_starts_with_the_ripe_crop() -> void:
 	await _frame()
 	sim.advance_ms(_ms(1))
 	await _frame()
-	assert_eq(tut.step, "momo_select", "then a Momo")
+	assert_true(tut.step in ["save_hire", "hire"], "then the first Momo -- hired, since the island has none (Step 53): %s" % tut.step)
 	assert_eq(int(bs.get_building(farm)["completed"]), 3, "three stages by hand")
 
 
@@ -121,14 +123,31 @@ func test_the_whole_path_with_taps() -> void:
 	assert_eq(tut.step, "working", "watering")
 	sim.advance_ms(int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["seconds"]) * 1000.0))
 	await _frame()
-	# The Momo, its pencil, a tile: what each Momo looks after.
-	assert_eq(tut.step, "momo_select", "first watering done: now a Momo")
-	assert_eq(tut.text.text, "Tap a Momo", "")
-	assert_true(tut.target.size.x > 0.0, "a Momo is ringed")
+	# Step 53: no Momo yet -- the farm by hand until the first is affordable,
+	# then the Hire button, then its card; the hire is selected at once.
+	var economy: EconomySystem = sim.system(&"economy")
+	var momos: MomoSystem = sim.system(&"momo")
+	assert_eq(momos.ids().size(), 0, "the player has worked alone so far")
+	assert_eq(tut.step, "save_hire", "first watering done: keep farming for the first Momo")
+	assert_eq(tut.text.text, "Keep farming by hand · $%d / $%d for your first Momo" % [economy.money, momos.hire_cost()], "how far it is")
+	assert_eq(tut.target, tut._building_rect(tut.farm), "the farm is ringed")
+	economy.earn(momos.hire_cost(), "test")
+	await _frame()
+	assert_eq(tut.step, "hire", "affordable: hire it")
+	assert_eq(tut.text.text, "Hire your first Momo · $%d" % momos.hire_cost(), "with its price")
+	var hud: Hud = main.get("hud")
+	assert_eq(tut.target, (hud.buttons[&"shop"] as Control).get_global_rect(), "the Hire button is ringed")
 	(main.get("selection") as SelectionController).deselect()
 	_tap_at(tut.target.get_center())
 	await _frame()
-	assert_eq(tut.step, "momo_pencil", "a Momo selected: its pencil")
+	var menu: ShopMenu = main.get("shop_menu")
+	assert_true(menu.visible, "the menu is open")
+	assert_eq(tut.target, (menu.cards["momo"] as Control).get_global_rect(), "its Momo card is ringed")
+	_tap_at(tut.target.get_center())
+	await _frame()
+	assert_eq(momos.ids().size(), 1, "the first Momo, hired by the player")
+	assert_eq(int(momos.get_momo(1)["assigned"]), 0, "and idle until placed")
+	assert_eq(tut.step, "momo_pencil", "the new Momo is selected: its pencil")
 	assert_eq(tut.target, (main.get("watch_editor") as WatchEditor).pencil.get_global_rect(), "the pencil is ringed")
 	_tap_at(tut.target.get_center())
 	await _frame()
@@ -149,7 +168,6 @@ func test_the_whole_path_with_taps() -> void:
 	assert_eq(tut.step, "land", "one tile left: the sea")
 	assert_true(tut.bubble.visible, "said again")
 	var land: LandSystem = sim.system(&"land")
-	var economy: EconomySystem = sim.system(&"economy")
 	var preview: LandPreview = main.get("land_preview")
 	assert_eq(tut.target, tut._cell_rect(preview.grow_spot()), "the tile the island would grow into is ringed")
 	if not economy.can_afford(land.next_cost()):
@@ -204,6 +222,8 @@ func test_the_trash_is_shown_at_the_end() -> void:
 
 
 func test_the_ringed_tile_has_no_momo_on_it() -> void:
+	with_starter_momo(sim)
+	await tree.process_frame
 	var momos: MomoSystem = sim.system(&"momo")
 	var world: WorldSystem = sim.system(&"world")
 	for c: Vector2i in world.owned_cells():

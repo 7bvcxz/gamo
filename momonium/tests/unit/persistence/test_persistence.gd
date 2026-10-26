@@ -15,7 +15,7 @@ func after_each() -> void:
 
 ## An island with something in every system.
 func _busy_world() -> Simulation:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	(sim.system(&"economy") as EconomySystem).earn(2000, "test")
 	sim.execute({"type": "land.buy", "cell": [2, 0]})
@@ -37,7 +37,7 @@ func _json(v: Variant) -> String:
 
 
 func test_the_envelope() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var env: Dictionary = JSON.parse_string(SaveService.encode(sim, 1700000000))
 	assert_eq(env["format"], "momonium", "says what it is")
 	assert_eq(int(env["schema"]), Simulation.SAVE_SCHEMA, "and which version")
@@ -76,7 +76,7 @@ func test_a_damaged_save_falls_back_to_the_one_before() -> void:
 
 
 func test_an_edited_save_is_recognised() -> void:
-	SaveService.write(Simulation.new_game(), PATH)
+	SaveService.write(with_starter_momo(Simulation.new_game()), PATH)
 	var env: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	var edited := String(env["state"]).replace("\"money\":10", "\"money\":99999")
 	assert_ne(edited, String(env["state"]), "the edit really changed the money")
@@ -97,7 +97,7 @@ func test_nonsense_and_missing() -> void:
 
 
 func test_a_newer_save_is_left_alone() -> void:
-	SaveService.write(Simulation.new_game(), PATH)
+	SaveService.write(with_starter_momo(Simulation.new_game()), PATH)
 	var env: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
 	env["schema"] = Simulation.SAVE_SCHEMA + 1
 	var f := FileAccess.open(PATH, FileAccess.WRITE)
@@ -126,7 +126,7 @@ func test_a_save_from_before_the_envelope_opens() -> void:
 
 
 func test_a_crash_mid_write_leaves_a_save() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	SaveService.write(sim, PATH)
 	sim.advance_ms(2000)
 	SaveService.write(sim, PATH)
@@ -141,7 +141,7 @@ func test_a_crash_mid_write_leaves_a_save() -> void:
 # --- away ---------------------------------------------------------------------
 
 func _momo_farm() -> Simulation:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var f := (sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": f})
 	return sim
@@ -157,7 +157,7 @@ func test_away_runs_assigned_work_and_sales() -> void:
 
 
 func test_away_never_taps_for_the_player() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var f := bs.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "building.tap", "id": f})
@@ -202,7 +202,7 @@ func test_the_event_budget_stops_the_clock_where_it_stopped() -> void:
 	bal["offline"]["max_events"] = 50
 	var results: Array = []
 	for i in 2:
-		var sim := Simulation.new_game(GameData.from_tables({"balance": bal}))
+		var sim := with_starter_momo(Simulation.new_game(GameData.from_tables({"balance": bal})))
 		var f := (sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 		sim.execute({"type": "momo.assign", "momo": 1, "building": f})
 		var r := OfflineProgress.catch_up(sim, 3600000)

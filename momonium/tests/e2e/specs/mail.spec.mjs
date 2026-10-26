@@ -3,6 +3,9 @@
 // accepts the proposal, and the dot goes.
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 const centre = async (game, rect, win) => {
   const box = await game.canvas.boundingBox();
   return { x: (rect[0] + rect[2] / 2) * (box.width / win[0]), y: (rect[1] + rect[3] / 2) * (box.height / win[1]) };

@@ -4,6 +4,9 @@
 // opens on the caught-up island, with no card and no second credit.
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 async function openTab(context) {
   const page = await context.newPage();
   await page.addInitScript(() => { window.MOMONIUM_E2E = true; });

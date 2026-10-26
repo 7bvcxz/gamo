@@ -14,7 +14,7 @@
         2
       ]
     },
-    "momos": 1,
+    "momos": 0,
     "buildings": [
       {
         "type": "farm",
@@ -25,7 +25,7 @@
         "stage": "harvest"
       }
     ],
-    "_doc": "A player's new island (Simulation.new_island): money, level, the 2x2 island and its Momo, and `buildings` placed finished, each waiting at `stage` -- a ripe farm, so the first tap is a harvest and its money (Step 50). Tests start from the bare world (new_game)."
+    "_doc": "A player's new island (Simulation.new_island): money, level, the 2x2 island, its Momo (Step 53: none -- the player works alone and chooses to hire the first), and `buildings` placed finished, each waiting at `stage` -- a ripe farm, so the first tap is a harvest and its money (Step 50). Tests start from the bare world (new_game)."
   },
   "clock": {
     "day_seconds": 30,
@@ -143,9 +143,11 @@
     }
   },
   "momo": {
-    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order. Hiring price of the k-th hired Momo (k = 0 first) = round_to * ceil(base * growth^k / round_to). Unassigned Momo wander their island at walk_speed tiles/s, resting rest_seconds between strolls, and sleep at night. An assigned Momo does its building's work by itself, each stage taking work_time_multiplier times the player's time (Step 50: 1.0 -- a Momo works as fast as a person, so automation never costs speed) (cooldowns are world rules and stay as they are); with works_at_night true they keep at it under the moon, as in the reference night scene. starve_seconds (Step 50): a watched building ready this long while nearer ones kept its Momo busy is visited first.",
+    "_doc": "Momo agents. Names are translation keys momo.name.N, handed out in order. Hiring price of the k-th paid hire after the first Momo (k = 0 first) = round_to * ceil(base * growth^k / round_to); the first Momo costs hire.first (Step 53). Unassigned Momo wander their island at walk_speed tiles/s, resting rest_seconds between strolls, and sleep at night. An assigned Momo does its building's work by itself, each stage taking work_time_multiplier times the player's time (Step 50: 1.0 -- a Momo works as fast as a person, so automation never costs speed) (cooldowns are world rules and stay as they are); with works_at_night true they keep at it under the moon, as in the reference night scene. starve_seconds (Step 50): a watched building ready this long while nearer ones kept its Momo busy is visited first.",
     "names": 10,
     "hire": {
+      "_doc": "Step 53: the island's first Momo costs `first` (it used to come free) -- two or three harvests by hand, so the player earns first and then chooses; at 15 the pacing targets hold (design/INCREMENTAL_PACING.md, Step 53: 30 pushed a Momo's first earnings to 233 s against 90). Every later hire costs what it did before -- base * growth^k, k = 0 for the second Momo. Hires the legacy pays for (prestige rewards.momo_every) cost nothing and come first.",
+      "first": 15,
       "base": 90,
       "growth": 1.6,
       "round_to": 5
@@ -176,7 +178,7 @@
     },
     "history_kept": 12,
     "watch": {
-      "_doc": "Watched tiles: each Momo works the buildings on the tiles it watches, the nearest ready one first. A Momo assigned to a building (dragged, or by the manager) watches that building's tiles; the pencil edits the set. `base_tiles` is how many one Momo may watch before research (watch_tiles effects add). `auto` (Step 50): a building finished on tiles nobody watches is taken by the nearest Momo already at work with room, and a newly hired Momo takes the unwatched buildings nearest to it.",
+      "_doc": "Watched tiles: each Momo works the buildings on the tiles it watches, the nearest ready one first. A Momo assigned to a building (dragged, or by the manager) watches that building's tiles; the pencil edits the set. `base_tiles` is how many one Momo may watch before research (watch_tiles effects add). `auto` (Step 50): a building finished on tiles nobody watches is taken by the nearest Momo already at work with room. Step 53: only a Momo the player has placed (opted in); a newly hired Momo is never put to work by itself.",
       "base_tiles": 4,
       "auto": true
     },
@@ -230,7 +232,7 @@
     "demolish_refund": 0.5
   },
   "prestige": {
-    "_doc": "Selling the settlement (PrestigeSystem). Appraisal: every building's paid money x value.buildings (by family), land bought x value.land, daily sale+release income (last 7 days) x value.income_days, each Momo value.momo_base + value.momo_per_skill per skill level, completed research money cost x value.research, all experience gained x value.exp. Net value = appraisal - the head start the island was given. Legacy points ever earned = floor(sqrt(lifetime net / points_unit)); a sale adds what it lifts that by. Selling needs player level min_level. Points give, permanently: rewards.money_per_point starting money each, a starting Momo every rewards.momo_every (at most max_momos), and Momo work time x (1 - work_per_point per point, at most work_cap).",
+    "_doc": "Selling the settlement (PrestigeSystem). Appraisal: every building's paid money x value.buildings (by family), land bought x value.land, daily sale+release income (last 7 days) x value.income_days, each Momo value.momo_base + value.momo_per_skill per skill level, completed research money cost x value.research, all experience gained x value.exp. Net value = appraisal - the head start the island was given. Legacy points ever earned = floor(sqrt(lifetime net / points_unit)); a sale adds what it lifts that by. Selling needs player level min_level. Points give, permanently: rewards.money_per_point starting money each, a free hire every rewards.momo_every (at most max_momos; Step 53: hires the player makes on the new island, which starts with no Momo), and Momo work time x (1 - work_per_point per point, at most work_cap).",
     "min_level": 7,
     "points_unit": 100,
     "value": {

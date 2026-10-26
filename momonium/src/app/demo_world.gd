@@ -54,9 +54,10 @@ static func build(data: GameData = null) -> Simulation:
 	# Advanced industry: a game studio and a car factory, each with its crew of two.
 	var studio := bs.place_instant("game_studio", Vector2i(4, 2))
 	var cars := bs.place_instant("car_factory", Vector2i(2, 3))
-	for i in 11:
-		sim.execute({"type": "momo.hire"})
 	var jobs := [farm, farm2, lab, lumber, mine, smelter, steam, office, studio, studio, cars, cars]
+	# A new game has no Momo (Step 53): the demo hires its whole crew.
+	for i in jobs.size():
+		sim.execute({"type": "momo.hire"})
 	for i in jobs.size():
 		sim.execute({"type": "momo.assign", "momo": i + 1, "building": jobs[i]})
 	# Industry workers are left to the manager (the farms and lab stay put).

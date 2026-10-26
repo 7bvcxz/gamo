@@ -4,6 +4,9 @@
 // during Momo's work is refused.
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 test('Momo farms alone', async ({ game }) => {
   await game.setTimeScale(0);
   const rules = await game.query('rules');

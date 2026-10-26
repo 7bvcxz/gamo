@@ -11,7 +11,7 @@ var jobs: JobSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	momos = sim.system(&"momo")
 	jobs = sim.system(&"jobs")
@@ -132,22 +132,21 @@ func _hire() -> int:
 	return int(r.get("id", 0))
 
 
-func test_a_hire_takes_a_share_when_nothing_is_unwatched() -> void:
-	var farms: Array[int] = []
+## Step 53 (it replaces Step 50's "a hire takes a share"): a new hire is the
+## player's to place -- it takes nothing by itself, not even from a Momo
+## running between three farms.
+func test_a_hire_is_never_put_to_work_by_itself() -> void:
 	for x in [1, 2, 3]:
-		farms.append(bs.place_instant("farm", Vector2i(x, 0)))
+		bs.place_instant("farm", Vector2i(x, 0))
 	_watch(1, [[1, 0], [2, 0], [3, 0]], "add")
-	sim.advance_ms(3000)
-	var at := int(momos.get_momo(1)["assigned"])
-	assert_true(farms.has(at), "the first Momo is at one of its three farms")
 	var hired := _hire()
-	assert_eq(momos.watched(hired).size(), 1, "the new Momo is not left standing about (Step 50): it takes one")
-	assert_eq(momos.watched(1).size(), 2, "the first keeps two")
-	assert_true(momos.watched(1).has(_cells_of(at)[0]), "among them the one it is at")
-	var newest: int = farms.filter(func(f: int) -> bool: return f != at).max()
-	assert_eq(momos.watched(hired), _cells_of(newest), "the new one takes the newest of the others")
 	sim.advance_ms(20000)
-	assert_true(int(momos.get_momo(hired)["assigned"]) != 0, "and works")
+	assert_true(momos.watched(hired).is_empty(), "the new Momo watches nothing")
+	assert_eq(int(momos.get_momo(hired)["assigned"]), 0, "and works nowhere: it wanders until placed")
+	assert_eq(momos.watched(1).size(), 3, "the first keeps its three farms")
+	assert_false(momos.get_momo(hired)["opted_in"], "nobody has placed it")
+	_built("farm", Vector2i(0, 1))
+	assert_false(momos.watchers_of(bs.building_at(Vector2i(0, 1))).has(hired), "a new building is not handed to it either")
 
 
 func test_the_players_assign_wins_over_a_momo_on_its_rounds() -> void:
@@ -191,7 +190,12 @@ func test_a_new_building_goes_to_an_idle_momo_first() -> void:
 	var a := bs.place_instant("farm", Vector2i(1, 0))
 	_watch(1, [[1, 0]], "add")
 	var idle := momos.add_momo(Vector2(3.5, 3.5))
-	assert_true(momos.watched(idle).is_empty(), "a Momo that came with the island, given nothing yet")
+	assert_true(momos.watched(idle).is_empty(), "a Momo with nothing to do")
+	var never := _built("farm", Vector2i(0, 1))
+	assert_eq(momos.watchers_of(never), [1] as Array[int], "Step 53: one nobody has placed is passed over (the Momo at work takes it)")
+	_watch(1, [[0, 1]], "remove")
+	# The player lets it go to the island's own coordination: now it is in.
+	sim.execute({"type": "momo.pin", "momo": idle, "pinned": false})
 	var b := _built("farm", Vector2i(2, 0))
 	assert_eq(momos.watchers_of(b), [idle] as Array[int], "the new farm goes to the Momo with nothing to do (Step 50), not the nearest with room")
 	var c := _built("farm", Vector2i(3, 0))

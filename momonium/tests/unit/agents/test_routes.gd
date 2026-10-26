@@ -13,7 +13,7 @@ var rs: ResearchSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	momos = sim.system(&"momo")
 	jobs = sim.system(&"jobs")
@@ -91,7 +91,7 @@ func test_the_smart_route_sets_off_early() -> void:
 func test_routes_change_nothing_but_order() -> void:
 	var made := {}
 	for route: String in ["nearest", "rows", "zigzag", "zone"]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var w: WorldSystem = s.system(&"world")
 		for x in 4:
 			for y in 4:
@@ -110,7 +110,7 @@ func test_routes_change_nothing_but_order() -> void:
 func _again() -> Dictionary:
 	var made := {}
 	for route: String in ["nearest", "rows", "zigzag", "zone"]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var w: WorldSystem = s.system(&"world")
 		for x in 4:
 			for y in 4:

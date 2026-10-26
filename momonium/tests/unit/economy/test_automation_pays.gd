@@ -15,7 +15,7 @@ func _farm_cycle_s(sim: Simulation) -> float:
 
 
 func test_a_momo_is_as_quick_as_a_person() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	assert_true(sim.data.get_float("balance", "momo.work_time_multiplier", 4.0) <= 1.0, "a Momo's stage takes no longer than a person's")
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var eco: EconomySystem = sim.system(&"economy")
@@ -32,13 +32,13 @@ func test_a_momo_is_as_quick_as_a_person() -> void:
 func test_automation_beats_a_busy_player_many_times_over() -> void:
 	# The same farm for ten minutes: a player who taps it every ten seconds
 	# (as busy as the blind playtesters were), or its Momo.
-	var hands := Simulation.new_game()
+	var hands := with_starter_momo(Simulation.new_game())
 	var hb: BuildingSystem = hands.system(&"buildings")
 	var f1 := hb.place_instant("farm", Vector2i(1, 0))
 	for i in 60:
 		hands.execute({"type": "building.tap", "id": f1})
 		hands.advance_ms(10000)
-	var momo := Simulation.new_game()
+	var momo := with_starter_momo(Simulation.new_game())
 	var f2 := (momo.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 	momo.execute({"type": "momo.assign", "momo": 1, "building": f2})
 	momo.advance_ms(600000)
@@ -49,7 +49,7 @@ func test_automation_beats_a_busy_player_many_times_over() -> void:
 
 
 func test_a_momo_at_work_takes_new_buildings_by_itself() -> void:
-	var sim := Simulation.new_game()
+	var sim := with_starter_momo(Simulation.new_game())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var momos: MomoSystem = sim.system(&"momo")
 	(sim.system(&"economy") as EconomySystem).earn(500, "test")
@@ -65,13 +65,16 @@ func test_a_momo_at_work_takes_new_buildings_by_itself() -> void:
 	assert_true(int(bs.get_building(int(r2["id"]))["completed"]) > 0, "and works it")
 	var hire := sim.execute({"type": "momo.hire"})
 	assert_true(hire["ok"], "a hire")
-	assert_eq(momos.watchers_of(int(r["id"])), [int(hire["id"])] as Array[int], "the newcomer takes the farm nobody looked after")
+	sim.advance_ms(20000)
+	assert_true(momos.watched(int(hire["id"])).is_empty(), "Step 53: the newcomer waits to be placed -- it takes nothing by itself")
+	sim.execute({"type": "momo.assign", "momo": int(hire["id"]), "building": int(r["id"])})
+	assert_eq(momos.watchers_of(int(r["id"])), [int(hire["id"])] as Array[int], "the player puts it on the farm nobody looked after")
 
 
 func test_time_away_earns_what_the_same_time_open_would() -> void:
 	var states: Array = []
 	for away: bool in [false, true]:
-		var sim := Simulation.new_game()
+		var sim := with_starter_momo(Simulation.new_game())
 		var bs: BuildingSystem = sim.system(&"buildings")
 		(sim.system(&"economy") as EconomySystem).earn(200, "test")
 		sim.execute({"type": "momo.hire"})

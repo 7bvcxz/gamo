@@ -59,6 +59,9 @@ func test_appraisal_lines() -> void:
 	assert_eq(a["families"], {"farm": 6, "mine": 0, "lumberyard": 48, "research": 0, "special": 0}, "60% of what each family cost")
 	var tile := (sim.system(&"land") as LandSystem).cost_of(0)
 	assert_eq(a["land"], int(floor(tile * 0.8)), "80% of the tile's price")
+	assert_eq(a["momo"], 0, "Step 53: no Momo yet")
+	assert_true(sim.execute({"type": "momo.hire"})["ok"], "the player hires one")
+	a = (sim.system(&"prestige") as PrestigeSystem).appraise()
 	assert_eq(a["momo"], 30, "one Momo, no skill yet")
 	assert_true(a["experience"] > 0, "the levels climbed")
 	assert_eq(a["gross"], a["buildings"] + a["land"] + a["productivity"] + a["momo"] + a["research"] + a["experience"], "the total is the sum of its lines")
@@ -82,6 +85,15 @@ func test_a_new_island_with_a_head_start() -> void:
 	assert_eq(p.sales, 1, "one sale on record")
 	assert_eq(p.history.size(), 1, "")
 	assert_eq(p.seed_money, 15 * p.points + 30 * p.start_momo_bonus(), "the head start is not its worth")
+	var momos: MomoSystem = next.system(&"momo")
+	assert_eq(momos.ids().size(), 0, "Step 53: the new island starts with no Momo")
+	assert_eq(momos.free_hires, p.start_momo_bonus(), "the legacy's Momo are free hires")
+	if momos.free_hires > 0:
+		assert_eq(momos.hire_cost(), 0, "which cost nothing")
+		var money := (next.system(&"economy") as EconomySystem).money
+		assert_true(next.execute({"type": "momo.hire"})["ok"], "the player makes one")
+		assert_eq((next.system(&"economy") as EconomySystem).money, money, "for free")
+		assert_eq(int(momos.get_momo(momos.ids()[0])["assigned"]), 0, "and places it")
 	assert_true(p.welcome, "it opens on the research points")
 
 

@@ -102,7 +102,7 @@ func refresh() -> void:
 	if int(a.get("monument", 0)) > 0:
 		_line(reward_box, tr("sale.monument"), tr("sale.monument_line").format({"base": int(a["points_base"]), "bonus": int(a["monument"])}), "Monument")
 	_line(reward_box, tr("sale.rp"), "+%d (%d)" % [int(a["rp_new"]), int(a["rp_after"])], "RP")
-	_line(reward_box, tr("sale.next"), tr("sale.next_line").format({"money": p.start_money_bonus(after) + 10, "momo": 1 + p.start_momo_bonus(after),
+	_line(reward_box, tr("sale.next"), tr("sale.next_line").format({"money": p.start_money_bonus(after) + 10, "momo": p.start_momo_bonus(after),
 		"work": int(round((1.0 - p.work_factor(after)) * 100.0))}), "Next")
 	reset_label.text = tr("sale.resets_text")
 	keep_label.text = tr("sale.keeps_text")

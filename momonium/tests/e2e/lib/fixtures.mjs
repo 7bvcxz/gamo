@@ -3,7 +3,11 @@ import { test as base, expect } from '@playwright/test';
 import { decodePng, colorCount } from './png.mjs';
 
 export const test = base.extend({
-  game: async ({ page }, use, testInfo) => {
+  // Step 53: a new island has no Momo. A spec about what a Momo does says
+  // test.use({ starterMomo: true }) and gets the old starter back: id 1,
+  // where it used to stand.
+  starterMomo: [false, { option: true }],
+  game: async ({ page, starterMomo }, use, testInfo) => {
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.addInitScript(() => { window.MOMONIUM_E2E = true; });
@@ -11,6 +15,10 @@ export const test = base.extend({
     await page.waitForFunction(() => window.momonium && window.momonium.ready && typeof window.momonium.state === 'function', null, { timeout: 90_000 });
     const canvas = page.locator('canvas');
     await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+    if (starterMomo) {
+      await page.evaluate(() => window.momonium.call('dev_add_momo', [0.55, 1.35]));
+      await page.waitForTimeout(100);
+    }
     const game = {
       page,
       canvas,

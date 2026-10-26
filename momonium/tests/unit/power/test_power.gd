@@ -13,7 +13,7 @@ var inv: InventorySystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	power = sim.system(&"power")
 	research = sim.system(&"research")
@@ -166,7 +166,7 @@ func test_a_building_that_needs_power_waits_for_it() -> void:
 	for n: Dictionary in r["nodes"]:
 		if n["id"] == "electric_drill":
 			n["effects"][0]["required"] = true
-	sim = Simulation.new_game(GameData.from_tables({"research": r}))
+	sim = with_starter_momo(Simulation.new_game(GameData.from_tables({"research": r})))
 	bs = sim.system(&"buildings")
 	(sim.system(&"research") as ResearchSystem).completed["electric_drill"] = 0
 	var mine := bs.place_instant("mine", Vector2i(1, 0))
@@ -195,7 +195,7 @@ func test_power_state_survives_a_save() -> void:
 func test_same_power_whatever_the_step() -> void:
 	var out: Array = []
 	for chunk: int in [16, 1000, 7777]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var b2: BuildingSystem = s.system(&"buildings")
 		(s.system(&"research") as ResearchSystem).completed["electric_drill"] = 0
 		b2.place_instant("solar_panel", Vector2i(0, 0))

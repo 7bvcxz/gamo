@@ -12,7 +12,7 @@ var economy: EconomySystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	momos = sim.system(&"momo")
 	world = sim.system(&"world")
 	buildings = sim.system(&"buildings")

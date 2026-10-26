@@ -14,7 +14,7 @@ var mail: MailSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	research = sim.system(&"research")
 	buildings = sim.system(&"buildings")
 	inv = sim.system(&"inventory")
@@ -66,7 +66,7 @@ func test_starting_needs_a_finished_lab_and_the_cost() -> void:
 	_accept_first_proposal()
 	assert_eq(sim.execute({"type": "research.start", "id": "farm_expansion"})["reason"], "err.no_lab", "no lab")
 	economy.earn(200, "test")
-	var fresh := Simulation.new_game()
+	var fresh := with_starter_momo(Simulation.new_game())
 	(fresh.system(&"economy") as EconomySystem).earn(200, "test")
 	assert_eq(fresh.execute({"type": "building.place", "building": "research", "anchor": [0, 1]})["reason"], "err.locked", "the lab opens at Lv 2")
 	var lab := buildings.place_instant("research", Vector2i(0, 1))
@@ -147,7 +147,7 @@ func test_floors_hold_whatever_the_research() -> void:
 	var r: Dictionary = GameData.load_default().table("research").duplicate(true)
 	r["nodes"][1]["effects"][0]["multiply"] = 0.05
 	var data := GameData.from_tables({"research": r})
-	sim = Simulation.new_game(data)
+	sim = with_starter_momo(Simulation.new_game(data))
 	research = sim.system(&"research")
 	buildings = sim.system(&"buildings")
 	research.completed["watering_efficiency"] = 0
@@ -215,7 +215,7 @@ func test_bad_trees_are_refused() -> void:
 func test_same_outcome_whatever_the_step_size() -> void:
 	var out: Array = []
 	for chunk: int in [16, 1000, 7777]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var bs: BuildingSystem = s.system(&"buildings")
 		bs.place_instant("research", Vector2i(0, 1))
 		var f := bs.place_instant("farm", Vector2i(1, 0))

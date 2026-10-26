@@ -44,7 +44,9 @@ static func build(side: int, momos: int = -1, data: GameData = null) -> Simulati
 	var ms: MomoSystem = sim.system(&"momo")
 	var count := maxi(side * side / 9, 4) if momos < 0 else maxi(momos, 1)
 	for i in count:
-		var id := 1 if i == 0 else ms.add_momo(Vector2(float(i % side) + 0.5, float((i * 3) % side) + 0.5))
+		# The first stands where a new island's Momo used to (Step 53: a new
+		# game has none -- this island brings its own, every one of them).
+		var id := ms.add_momo(Vector2(0.55, 1.35) if i == 0 else Vector2(float(i % side) + 0.5, float((i * 3) % side) + 0.5))
 		var zone: Vector2i = ZONES[i % ZONES.size()]
 		# Origins walk the island at a stride that is not a multiple of the
 		# zone sizes, so zones overlap here and there.

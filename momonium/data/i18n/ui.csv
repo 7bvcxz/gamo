@@ -452,7 +452,7 @@ sale.gives,Selling gives,매각하면,売ると,出售后获得
 sale.legacy,Legacy points,유산 포인트,遺産ポイント,遗产点数
 sale.rp,Research points,연구 포인트,研究ポイント,研究点数
 sale.next,Next island,다음 섬,次の島,下一座岛
-sale.next_line,${money} · {momo} Momo · {work}% quicker,${money} · 모모 {momo}명 · 작업 {work}% 빠르게,${money} · モモ{momo}人 · 作業{work}%速く,${money} · 桃桃{momo}只 · 工作快{work}%
+sale.next_line,${money} · {momo} free hires · {work}% quicker,${money} · 무료 고용 {momo}명 · 작업 {work}% 빠르게,${money} · 無料で雇えるモモ{momo}人 · 作業{work}%速く,${money} · 免费雇用{momo}只 · 工作快{work}%
 sale.resets,Starts over,초기화돼요,リセット,会重置
 sale.resets_text,"Buildings, land, money, store, level, hired Momo and their tiles, research levels (they come back as points)",건물·땅·돈·창고·레벨·고용한 모모와 맡은 칸·연구 레벨(포인트로 돌려받아요),建物・土地・お金・倉庫・レベル・雇ったモモと受け持ち・研究レベル（ポイントで戻ります）,建筑、土地、资金、仓库、等级、雇用的桃桃及其照看格、研究等级（以点数返还）
 sale.keeps,Stays,남아요,残る,保留
@@ -549,6 +549,8 @@ tips.special,"Back here with the arrow. One of each landmark, {used}/{slots} slo
 tips.special_built,"A landmark built leaves the Special list; pulled down, it comes back","지은 랜드마크는 특별 목록에서 빠지고, 철거하면 돌아와요",建てたランドマークは特別リストから消え、取り壊すと戻ります,建好的地标会从特殊列表消失，拆除后会回来
 tips.tier,Meet these to grow into a City: one more landmark slot,"이 조건을 채우면 도시로 승급, 랜드마크 자리 +1",条件を満たすと町に昇格、ランドマーク枠+1,达成这些条件就能升级为城市：地标位置+1
 tips.rp,"Your research levels became points: place them again, e.g. 3/1/1 as 1/2/2",연구 레벨이 포인트가 됐어요. 3/1/1을 1/2/2처럼 다시 나눠요,研究レベルがポイントになりました。3/1/1を1/2/2のように配り直せます,研究等级变成了点数：可以重新分配，比如把 3/1/1 改成 1/2/2
+tutorial.save_hire,Keep farming by hand · $%d / $%d for your first Momo,손으로 농사를 이어가요 · 첫 모모까지 $%d / $%d,手で畑仕事を続けよう · 最初のモモまで $%d / $%d,继续亲手种田 · 雇第一只桃桃 $%d / $%d
+tutorial.hire,Hire your first Momo · $%d,첫 모모를 고용해요 · $%d,最初のモモを雇おう · $%d,雇佣第一只桃桃 · $%d
 tutorial.momo_select,Tap a Momo,모모를 눌러 보세요,モモをタップ,点一下桃桃
 tutorial.momo_pencil,Tap the pencil to pick the tiles this Momo looks after,연필을 눌러 이 모모가 맡을 칸을 골라요,鉛筆をタップして、このモモの受け持ちを選びます,点铅笔，选这只桃桃照看的格子
 tutorial.momo_edit,Tap tiles or drag across them: %d / %d,칸을 누르거나 그어 보세요: %d / %d칸,マスをタップかなぞる: %d / %dマス,点击或划过格子：%d / %d 格
@@ -569,6 +571,7 @@ journey.momo_income,A Momo's first earnings,모모가 처음 번 돈,モモが�
 journey.research_start,First research started,첫 연구 시작,はじめての研究開始,第一次开始研究
 journey.land,First land bought,첫 땅 구매,はじめての土地購入,第一次买地
 journey.hire,First Momo hired,첫 모모 고용,はじめてのモモ雇用,第一次雇佣桃桃
+journey.momos,A second Momo,두 번째 모모,2人目のモモ,第二只桃桃
 journey.research,First research done,첫 연구 완료,はじめての研究完了,第一次完成研究
 journey.letter,A Momo's first letter,모모의 첫 편지,モモからのはじめての手紙,桃桃的第一封信
 journey.level,Level {n},레벨 {n},レベル {n},等级 {n}

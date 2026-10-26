@@ -4,6 +4,9 @@
 // Godot frame detaches on reload and the read races it.)
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 async function openSecond(context) {
   const page = await context.newPage();
   await page.addInitScript(() => { window.MOMONIUM_E2E = true; });

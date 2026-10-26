@@ -9,7 +9,8 @@ extends "res://tests/framework/test_case.gd"
 ## A schema-2 island as v0.49 saved it: a farm part-way through its old
 ## cycle, crops and a car waiting for dawn, money booked.
 func _old_save(stage: int, state: String, variety: String = "base") -> Dictionary:
-	var sim := Simulation.new_game()
+	# A schema-3 island had its starting Momo (Step 53 removed it from new games).
+	var sim := with_starter_momo(Simulation.new_game())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	var s := sim.save_state()

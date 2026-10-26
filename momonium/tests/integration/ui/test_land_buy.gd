@@ -25,6 +25,9 @@ func before_each() -> void:
 	await tree.process_frame
 	sim = main.get("sim")
 	sim.time_scale = 0.0
+	# The Momo these cases are about (Step 53: a new island has none).
+	with_starter_momo(sim)
+	await tree.process_frame
 	cams = main.get("cameras")
 	proj = main.get("projection")
 	vp = main.get_viewport()

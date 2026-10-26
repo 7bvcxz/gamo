@@ -71,13 +71,25 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await tapRect(t.target2, t.window);
   await g.query('dev_advance_ms', 5000);
   await page.waitForTimeout(300);
-  // The Momo: tap it, its pencil, a tile.
+  // Step 53: no Momo yet -- farm by hand for the first, then the Hire
+  // button and its card (real taps); the hire is selected: its pencil.
   t = await g.query('tutorial');
-  expect(t.step).toBe('momo_select');
+  expect(t.step).toBe('save_hire');
+  expect((await g.state()).momo.momos.length).toBe(0);
+  await shot('6-save-for-a-momo');
+  await g.query('dev_add_money', 15);
+  await page.waitForTimeout(300);
+  t = await g.query('tutorial');
+  expect(t.step).toBe('hire');
+  await shot('7-hire');
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
+  expect(t.step, 'the menu is open: its Momo card is ringed').toBe('hire');
+  await tapRect(t.target, t.window);
+  expect((await g.state()).momo.momos.length, 'the first Momo, hired by the player').toBe(1);
+  t = await g.query('tutorial');
   expect(t.step).toBe('momo_pencil');
-  await shot('6-momo-pencil');
+  await shot('8-momo-pencil');
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
   expect(t.step).toBe('momo_edit');
@@ -100,7 +112,7 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   expect(t.step).toBe('land');
   expect(t.shown).toBe(true);
   expect(t.target.length).toBe(4);
-  await shot('6b-land');
+  await shot('9-land');
   const sea = t.target;
   await tapRect(sea, t.window);
   await tapRect(sea, t.window);
@@ -116,7 +128,7 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
   expect(near(t.target2, (await g.query('strip')).confirm)).toBe(true);
-  await shot('7-trash-and-check');
+  await shot('10-trash-and-check');
   const s = await g.state();
   const farm = s.buildings.buildings.find((b) => b.type === 'farm');
   expect(farm.completed).toBe(2);

@@ -129,6 +129,10 @@ var watch_editor: WatchEditor
 
 
 func select_momo(id: int) -> void:
+	# A Momo that is not there (any more) selects nothing -- Step 53 islands
+	# may have none at all.
+	if momo_views.actor(id) == null:
+		return
 	_unmark()
 	kind = "momo"
 	selected_id = id

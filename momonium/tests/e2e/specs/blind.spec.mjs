@@ -4,6 +4,9 @@
 // still by its card; a level that opens buildings says which.
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 test('the income line fits the screen and says per minute', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('set_language', 'en');

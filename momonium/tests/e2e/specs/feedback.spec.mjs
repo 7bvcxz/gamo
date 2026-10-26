@@ -7,6 +7,9 @@ import { test, expect } from '../lib/fixtures.mjs';
 import { clearPointOnCell } from '../lib/coords.mjs';
 import { runStages, settle } from '../lib/farm.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 async function farmReady(game) {
   await game.setTimeScale(0);
   const { id } = await game.query('dev_place_building', ['farm', 1, 0]);

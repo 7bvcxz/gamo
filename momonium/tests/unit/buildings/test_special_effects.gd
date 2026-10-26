@@ -12,7 +12,7 @@ var sp: SpecialSystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	sp = sim.system(&"specials")
 	var world: WorldSystem = sim.system(&"world")
@@ -79,7 +79,7 @@ func test_a_rebuild_or_a_reload_never_moves_the_cycle() -> void:
 
 func test_offline_is_the_same_as_playing() -> void:
 	var make := func() -> Simulation:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var w: WorldSystem = s.system(&"world")
 		for x in 3:
 			for y in 3:

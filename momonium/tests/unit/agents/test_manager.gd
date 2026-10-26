@@ -3,7 +3,8 @@ extends "res://tests/framework/test_case.gd"
 ## The manager: a Momo at an office moves stuck or switched-off workers to
 ## where there is work, by priority, a few per review, never the player's
 ## pinned Momo or itself, never instantly -- and leaves free Momo to play
-## unless a high-priority spot needs them.
+## unless a high-priority spot needs them. Step 53: a hire the player has
+## never placed or let go ("free to move") is never the manager's.
 
 var sim: Simulation
 var momos: MomoSystem
@@ -13,7 +14,7 @@ var office := 0
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	momos = sim.system(&"momo")
 	bs = sim.system(&"buildings")
 	manager = sim.system(&"manager")
@@ -32,7 +33,7 @@ func _stuck_smelter_worker(momo: int) -> int:
 
 
 func test_no_office_no_management() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	var m: ManagerSystem = sim.system(&"manager")
 	assert_eq(m.manager(), 0, "nobody manages")
 	sim.advance_ms(200000)
@@ -83,13 +84,23 @@ func test_off_sends_workers_elsewhere() -> void:
 	assert_eq(int(momos.get_momo(2)["assigned"]), farm2, "an 'off' farm loses its worker at the next review")
 
 
+func _let_go(ids: Array) -> void:
+	for m: int in ids:
+		sim.execute({"type": "momo.pin", "momo": m, "pinned": false})
+
+
 func test_free_momo_play_unless_a_high_spot_needs_them() -> void:
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
+	sim.execute({"type": "building.priority", "id": farm, "priority": "high"})
+	sim.advance_ms(60000)
+	assert_eq(momos.workers_at(farm).size(), 0, "hires nobody has placed are the player's to place, even for a high spot")
+	_let_go([2, 3, 4])
+	sim.execute({"type": "building.priority", "id": farm, "priority": "normal"})
 	sim.advance_ms(60000)
 	assert_eq(int(momos.get_momo(3)["assigned"]), 0, "a normal spot does not pull a playing Momo")
 	sim.execute({"type": "building.priority", "id": farm, "priority": "high"})
 	sim.advance_ms(25000)
-	assert_eq(momos.workers_at(farm).size(), 1, "a high-priority spot does")
+	assert_eq(momos.workers_at(farm).size(), 1, "once let go ('free to move'), a high-priority spot does")
 
 
 func test_priority_order_and_the_move_limit() -> void:
@@ -101,6 +112,7 @@ func test_priority_order_and_the_move_limit() -> void:
 	assert_eq(manager.openings(), [c, b, a] as Array[int], "high, then normal, then low (then by id)")
 	for x: int in [a, b, c]:
 		sim.execute({"type": "building.priority", "id": x, "priority": "high"})
+	_let_go([2, 3, 4])
 	var moves := manager.review()
 	assert_eq(moves.size(), 2, "at most two moves a review")
 	assert_true(momos.workers_at(a).size() + momos.workers_at(b).size() + momos.workers_at(c).size() == 2, "two spots filled")
@@ -109,6 +121,7 @@ func test_priority_order_and_the_move_limit() -> void:
 func test_capacity_and_the_manager_itself() -> void:
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "building.priority", "id": farm, "priority": "high"})
+	_let_go([2, 3, 4])
 	sim.advance_ms(120000)
 	assert_eq(momos.workers_at(farm).size(), 1, "never more than the farm's one spot")
 	assert_eq(int(momos.get_momo(1)["assigned"]), office, "the manager stays at the office")
@@ -117,7 +130,7 @@ func test_capacity_and_the_manager_itself() -> void:
 func test_same_moves_whatever_the_step() -> void:
 	var out: Array = []
 	for chunk: int in [16, 1000, 7777]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var b2: BuildingSystem = s.system(&"buildings")
 		(s.system(&"economy") as EconomySystem).earn(2000, "test")
 		for i in 3:
@@ -142,7 +155,7 @@ func test_same_moves_whatever_the_step() -> void:
 
 
 func test_a_review_is_cheap() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	var b2: BuildingSystem = sim.system(&"buildings")
 	var world: WorldSystem = sim.system(&"world")
 	for x in 10:

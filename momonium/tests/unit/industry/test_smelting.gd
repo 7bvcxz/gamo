@@ -13,7 +13,7 @@ var smelter := 0
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	inv = sim.system(&"inventory")
 	research = sim.system(&"research")
@@ -177,7 +177,7 @@ func test_bad_recipes_are_refused() -> void:
 func test_same_chain_whatever_the_step() -> void:
 	var out: Array = []
 	for chunk: int in [16, 1000, 7777]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var b2: BuildingSystem = s.system(&"buildings")
 		var sm := b2.place_instant("smelter", Vector2i(1, 0))
 		(s.system(&"inventory") as InventorySystem).add("copper_ore", 20, "test")

@@ -3,6 +3,7 @@ extends SimSystem
 
 ## The island's journey: when each first happened -- the first farm built,
 ## harvest, sale (the first income), a Momo's first earnings, Momo at work, land, hire,
+## the second Momo,
 ## research started and done, letter, the levels in
 ## `balance.journey.levels`, each tier -- kept three ways, because a player
 ## counts time three ways: played (the game open), offline (time away the
@@ -75,6 +76,10 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 			_mark("land")
 		&"momo_hired":
 			_mark("hire")
+			# Step 53: the first hire is the island's first Momo now; the
+			# pacing's "a second worker" is the second Momo, however it came.
+			if (sim.system(&"momo") as MomoSystem).ids().size() >= 2:
+				_mark("momos:2")
 		&"research_completed":
 			_mark("research")
 		&"letter_written":

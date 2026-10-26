@@ -11,7 +11,7 @@ var farm := 0
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	mail = sim.system(&"mail")
 	buildings = sim.system(&"buildings")
 	prog = sim.system(&"progression")
@@ -91,7 +91,7 @@ func test_at_most_one_letter_a_day() -> void:
 func test_the_most_experienced_assigned_momo_writes() -> void:
 	var b: Dictionary = GameData.load_default().table("buildings").duplicate(true)
 	b["types"]["farm"]["workers"] = 2
-	sim = Simulation.new_game(GameData.from_tables({"buildings": b}))
+	sim = with_starter_momo(Simulation.new_game(GameData.from_tables({"buildings": b})))
 	mail = sim.system(&"mail")
 	buildings = sim.system(&"buildings")
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
@@ -166,7 +166,7 @@ func test_an_old_save_without_mail_loads_and_does_not_flood() -> void:
 func test_same_letters_whatever_the_step_size() -> void:
 	var out: Array = []
 	for chunk: int in [16, 1000, 9999]:
-		var s := Simulation.new_game()
+		var s := with_starter_momo(Simulation.new_game())
 		var f := (s.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 		s.execute({"type": "momo.assign", "momo": 1, "building": f})
 		var t := 0

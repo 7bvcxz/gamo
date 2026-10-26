@@ -306,7 +306,32 @@ func _assign_new() -> bool:
 		for c: Vector2i in bs.cells_of(bs.get_building(id)):
 			if cells.size() < momos.watch_capacity(m):
 				cells.append([c.x, c.y])
-	return not cells.is_empty() and _do("give tiles", {"type": "momo.watch", "momo": m, "cells": cells, "op": "add"})
+	if cells.is_empty():
+		return _drag_onto_busiest(m)
+	return _do("give tiles", {"type": "momo.watch", "momo": m, "cells": cells, "op": "add"})
+
+
+## Nothing unwatched: the player drags the new Momo onto one of the buildings
+## of the Momo looking after the most (Step 53: a hire no longer takes that
+## share by itself; the player's Assign wins over a Momo on its rounds).
+func _drag_onto_busiest(m: int) -> bool:
+	var momos: MomoSystem = sim.system(&"momo")
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var best: Array = []
+	for other: int in momos.ids():
+		if other == m:
+			continue
+		var theirs: Array = []
+		for c: Vector2i in momos.watched(other):
+			var b := bs.building_at(c)
+			if b != 0 and not theirs.has(b) and momos.slots_of(b) > 0 and b != int(momos.get_momo(other)["assigned"]):
+				theirs.append(b)
+		if theirs.size() > best.size():
+			best = theirs
+	if best.is_empty():
+		return false
+	best.sort()
+	return _do("assign Momo", {"type": "momo.assign", "momo": m, "building": best.back()})
 
 
 ## A kind of building the player has not got yet (the lab, then the
@@ -551,6 +576,8 @@ func _give_tiles() -> bool:
 				break
 		if not cells.is_empty():
 			return _do("give tiles", {"type": "momo.watch", "momo": m, "cells": cells, "op": "add"})
+		if momos.watched(m).is_empty() and _drag_onto_busiest(m):
+			return true
 	return false
 
 

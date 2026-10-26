@@ -13,7 +13,7 @@ var inv: InventorySystem
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	bs = sim.system(&"buildings")
 	community = sim.system(&"community")
 	momos = sim.system(&"momo")
@@ -57,7 +57,7 @@ func test_happiness_stacks_with_less_each_copy_and_is_capped() -> void:
 	assert_eq(community.happiness(), 17.5, "a third +2.5, a fourth nothing")
 	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
 	bal["community"]["max_happiness"] = 12
-	var s2 := Simulation.new_game(GameData.from_tables({"balance": bal}))
+	var s2 := with_starter_momo(Simulation.new_game(GameData.from_tables({"balance": bal})))
 	var b2: BuildingSystem = s2.system(&"buildings")
 	for c: Vector2i in [Vector2i(0, 0), Vector2i(1, 0)]:
 		var id := b2.place_instant("park", c)
@@ -100,7 +100,7 @@ func test_work_factor_floor() -> void:
 	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
 	bal["community"]["happiness_effect"] = 0.9
 	bal["community"]["max_happiness"] = 10
-	var s2 := Simulation.new_game(GameData.from_tables({"balance": bal}))
+	var s2 := with_starter_momo(Simulation.new_game(GameData.from_tables({"balance": bal})))
 	var b2: BuildingSystem = s2.system(&"buildings")
 	for c: Vector2i in [Vector2i(0, 0), Vector2i(1, 0)]:
 		var id := b2.place_instant("park" if c.x == 0 else "villa", c)

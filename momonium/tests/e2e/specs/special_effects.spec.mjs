@@ -4,6 +4,9 @@
 // legacy a sale pays, shown on the sale screen.
 import { test, expect } from '../lib/fixtures.mjs';
 
+// Step 53: about what a Momo does -- the old starter Momo, explicitly.
+test.use({ starterMomo: true });
+
 test('the landmarks change the game', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('set_language', 'en');

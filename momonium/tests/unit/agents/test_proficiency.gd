@@ -11,7 +11,7 @@ var farm := 0
 
 
 func before_each() -> void:
-	sim = Simulation.new_game()
+	sim = with_starter_momo(Simulation.new_game())
 	momos = sim.system(&"momo")
 	bs = sim.system(&"buildings")
 	farm = bs.place_instant("farm", Vector2i(1, 0))

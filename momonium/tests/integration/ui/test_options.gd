@@ -88,6 +88,8 @@ func test_tips_once_and_again() -> void:
 	tips.dismiss()
 	main.call("_check_land_tip", 2.0)
 	assert_eq(tips.tip, "", "once only")
+	with_starter_momo(sim)
+	await tree.process_frame
 	(main.get("selection") as SelectionController).select_momo(1)
 	await tree.process_frame
 	await tree.process_frame
