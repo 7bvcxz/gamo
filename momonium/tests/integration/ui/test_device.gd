@@ -11,8 +11,16 @@ const SAVE := "user://test_device_save.json"
 var main: Node
 
 
+## The save and its backup: a backup left by an earlier run is read when the
+## save is missing, and a test then starts on yesterday's island (Step 50: a
+## stale backup passed this file locally while a clean CI folder failed it).
+func _clear_saves() -> void:
+	for path: String in [SAVE, SAVE + ".bak"]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
 func before_each() -> void:
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
+	_clear_saves()
 	Engine.set_meta("momonium_save_path", SAVE)
 	if Engine.has_meta("momonium_no_save"):
 		Engine.remove_meta("momonium_no_save")
@@ -24,7 +32,7 @@ func after_each() -> void:
 		await tree.process_frame
 	Engine.remove_meta("momonium_save_path")
 	Engine.set_meta("momonium_no_save", true)
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE))
+	_clear_saves()
 
 
 func _open() -> void:
@@ -63,7 +71,9 @@ func test_leaving_saves_and_coming_back_catches_up() -> void:
 func test_the_island_is_there_on_the_next_start() -> void:
 	await _open()
 	var sim: Simulation = main.get("sim")
-	(sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 1))
+	var bs: BuildingSystem = sim.system(&"buildings")
+	assert_true(bs.place_instant("farm", Vector2i(1, 1)) > 0, "a farm placed")
+	var buildings := bs.ids().size()
 	(sim.system(&"economy") as EconomySystem).earn(123, "test")
 	main.notification(Node.NOTIFICATION_WM_CLOSE_REQUEST)
 	var money := (sim.system(&"economy") as EconomySystem).money
@@ -72,7 +82,7 @@ func test_the_island_is_there_on_the_next_start() -> void:
 	await _open()
 	var again: Simulation = main.get("sim")
 	assert_eq(String(main.get("load_status")), "ok", "the save is read")
-	assert_eq((again.system(&"buildings") as BuildingSystem).ids().size(), 1, "the farm is back")
+	assert_eq((again.system(&"buildings") as BuildingSystem).ids().size(), buildings, "the farm is back, with the island's own")
 	assert_eq((again.system(&"economy") as EconomySystem).money, money, "and the money")
 
 
