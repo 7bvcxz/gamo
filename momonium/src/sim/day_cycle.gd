@@ -4,7 +4,7 @@ extends RefCounted
 ## Which part of the day it is, from the one clock.
 ##
 ## Phases are fractions of the day in data (balance.clock.phases). Anything
-## that behaves differently at night -- the sky, the light, later Momo going
+## that behaves differently at night -- the sea, the light, Momo going
 ## to sleep -- asks this, never its own timer, so they always agree.
 
 var _bounds: Array[float] = []

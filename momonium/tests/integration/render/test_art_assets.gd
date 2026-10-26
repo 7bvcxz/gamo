@@ -2,8 +2,9 @@ extends "res://tests/framework/test_case.gd"
 
 ## Step 46 art pass: the painted assets are working game assets -- props that
 ## dress the island but never stand on a building, painted sprites that keep
-## the frame their pivots were measured in, the painted sky, Momo's portrait
-## composed from the rig's parts, and panels that stay clear of the HUD.
+## the frame their pivots were measured in, Momo's portrait composed from the
+## rig's parts, and panels that stay clear of the HUD. (The painted sky went in
+## Step 56: there is no sky.)
 
 const MainScene := preload("res://scenes/main.tscn")
 const WindowLights := preload("res://tools/art/gen/window_lights.gd")
@@ -149,25 +150,6 @@ func test_lit_windows_lie_on_their_building() -> void:
 		assert_true(total > 0 and on == total, "%s lies on its building (%d of %d)" % [name, on, total])
 		checked += 1
 	assert_true(checked >= 8, "the houses have lit windows (%d)" % checked)
-
-
-func test_sky_draws_the_painted_cloud_band_that_wraps() -> void:
-	var sky: SkyRenderer = main.get("sky")
-	var mat := sky.material as ShaderMaterial
-	assert_eq(float(mat.get_shader_parameter("painted_clouds")), 1.0, "the sky uses the painted clouds")
-	var img: Image = (load(SkyRenderer.CLOUDS) as Texture2D).get_image()
-	img.decompress()
-	var inner := 0.0
-	var wrap := 0.0
-	var w := img.get_width()
-	for y in img.get_height():
-		var a := img.get_pixel(w / 2 - 1, y)
-		var b := img.get_pixel(w / 2, y)
-		var c := img.get_pixel(w - 1, y)
-		var d := img.get_pixel(0, y)
-		inner += absf(a.a - b.a) + absf(a.r - b.r)
-		wrap += absf(c.a - d.a) + absf(c.r - d.r)
-	assert_true(wrap < inner * 2.5 + 1.0, "the cloud band wraps left to right (wrap %.1f vs inner %.1f)" % [wrap, inner])
 
 
 ## Step 51: the panels' Momo is the island's Momo -- the portrait is cut from

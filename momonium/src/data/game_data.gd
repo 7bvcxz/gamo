@@ -497,7 +497,7 @@ func _validate_day_cycle() -> void:
 		if not (looks as Dictionary).has(k["look"]):
 			errors.append("art: day_cycle key uses unknown look %s" % k["look"])
 	for name: String in looks:
-		for field: String in ["sky", "sea", "ambient", "cloud", "glint", "stars"]:
+		for field: String in ["sea", "ambient", "glint", "glint_strength"]:
 			if not (looks[name] as Dictionary).has(field):
 				errors.append("art: day_cycle look %s lacks %s" % [name, field])
 

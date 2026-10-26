@@ -54,7 +54,9 @@ test('white glass panels and pastel job cards', async ({ game }) => {
     // The lit card is full colour; the others are dimmed over the sea, so
     // only the first is matched to its exact tint, all of them to "pastel".
     const near = share(png, r, scale, ([pr, pg, pb]) => Math.abs(pr - tr) + Math.abs(pg - tg) + Math.abs(pb - tb) < 40);
-    const pale = share(png, r, scale, ([pr, pg, pb]) => pr > 150 && pg > 150 && pb > 140);
+    // Pale = light, by luminance: a dimmed card lets the sea's own hue through
+    // (Step 56: a brighter, bluer sea there), but stays well lighter than it.
+    const pale = share(png, r, scale, ([pr, pg, pb]) => pr * 0.3 + pg * 0.59 + pb * 0.11 > 178);
     if (i === 0) expect(near, `card ${i} is its pastel (${(near * 100).toFixed(0)}%)`).toBeGreaterThan(0.3);
     expect(pale, `card ${i} is a pale card (${(pale * 100).toFixed(0)}%)`).toBeGreaterThan(0.4);
   });

@@ -57,8 +57,10 @@ test('large island demo with the performance readout', async ({ game }) => {
   const all = p.now.buildings_awake;
   expect(all).toBe(p.now.buildings);
   // Zoom in with the + button: most of the island is out of sight now.
+  // (Step 56: the island is framed nearer the middle of the screen, so the
+  // zoom centres on its busy middle -- eight taps left most of it in view.)
   o = await game.query('options');
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 14; i++) {
     const plus = await centre(game, o.pad.in, o.window);
     await game.tap(plus.x, plus.y);
     await game.page.waitForTimeout(120);

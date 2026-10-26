@@ -5,7 +5,7 @@ extends SimSystem
 ## now against what the buildings working right now draw.
 ##
 ## Generators (buildings with power.generate) differ in kind, not rank:
-##   solar  follows the sun -- the sky's own phases, zero at night
+##   solar  follows the sun -- the day's own phases, zero at night
 ##   wind   follows a smooth, deterministic gust curve, day and night
 ##   steam  steady while stoked with wood (its stoking is a work stage)
 ##   hydro  steady, but only on a tile beside the sea
@@ -82,7 +82,7 @@ func generators() -> Array[int]:
 
 
 ## 0..1 sunlight at a point of the day: rises at dawn, peaks halfway to the
-## start of night, gone at night -- the same phases the sky draws.
+## start of night, gone at night -- the same phases the sea shows.
 func sunlight(progress: float) -> float:
 	var rise := _phase_start("dawn", 0.92)
 	var set := _phase_start("night", 0.70)

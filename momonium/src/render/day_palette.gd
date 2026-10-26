@@ -1,9 +1,11 @@
-class_name SkyPalette
+class_name DayPalette
 extends RefCounted
 
-## Colours of the sky, sea and world light at any moment of the day,
+## Colours of the sea and the world's light at any moment of the day,
 ## interpolated between the keyframes in art.day_cycle. A pure function of
-## the day's progress, so the same instant always looks the same.
+## the day's progress, so the same instant always looks the same. (Step 56:
+## there is no sky; the sun and moon are only where their light falls on the
+## water.)
 
 var _keys: Array[float] = []
 var _looks: Array[Dictionary] = []
@@ -41,8 +43,9 @@ static func _parse(look: Dictionary) -> Dictionary:
 	return out
 
 
-## The look at `progress` (0..1): sky [top, mid, horizon], sea [horizon, mid,
-## deep, shallow], ambient, cloud, cloud_shade, glint, glint_strength, stars.
+## The look at `progress` (0..1): sea [far, mid, deep, shallow] (far: the
+## light the water reflects, towards the top of the screen), ambient, glint,
+## glint_strength.
 func at(progress: float) -> Dictionary:
 	var p := fposmod(progress, 1.0)
 	var i := 0
@@ -80,7 +83,8 @@ func moon_elevation(progress: float) -> float:
 	return _arc(progress, moon_rise, moon_set)
 
 
-## Sun position across the sky, 0 (left) .. 1 (right).
+## Sun position across the day, 0 (left) .. 1 (right) -- where its
+## reflection glows on the water.
 func sun_across(progress: float) -> float:
 	return _across(progress, sun_rise, sun_set)
 

@@ -13,21 +13,6 @@
     "sprite_texels_per_world_px": 2
   },
   "palette": {
-    "sky_day": [
-      "#2693f8",
-      "#45b0fd",
-      "#c0ddfc"
-    ],
-    "sky_sunset": [
-      "#8c6fb8",
-      "#dd8478",
-      "#fda35f"
-    ],
-    "sky_night": [
-      "#071a4f",
-      "#0e2f7c",
-      "#496dc3"
-    ],
     "sea_day": [
       "#68b7fc",
       "#2fb6f8",
@@ -79,7 +64,6 @@
   "layers": {
     "_doc": "Draw order, back to front. Entities inside `world_entities` are y-sorted by their origin pivot.",
     "order": [
-      "sky",
       "ocean",
       "island_ground",
       "ground_decals",
@@ -91,7 +75,7 @@
     ]
   },
   "day_cycle": {
-    "_doc": "Colour keyframes over one day (t = fraction of the day, 0 = morning). The sky, sea and world light are interpolated between neighbouring keys; t=1 meets t=0. The sun's arc wraps past midnight (rises before the day rolls over).",
+    "_doc": "Colour keyframes over one day (t = fraction of the day, 0 = morning). The sea and the world light are interpolated between neighbouring keys; t=1 meets t=0. Step 56: there is no sky -- sea is [far, mid, deep, shallow], far being the light the water reflects (the top of the screen leans towards it); the sun and moon are only a faint glow on the water, placed by their arcs (the sun's wraps past midnight: it rises before the day rolls over).",
     "sun": {
       "rise": 0.94,
       "set": 0.66
@@ -136,11 +120,6 @@
     ],
     "looks": {
       "day": {
-        "sky": [
-          "#2693f8",
-          "#45b0fd",
-          "#c0ddfc"
-        ],
         "sea": [
           "#68b7fc",
           "#2fb6f8",
@@ -148,37 +127,21 @@
           "#2cd6dc"
         ],
         "ambient": "#ffffff",
-        "cloud": "#ffffff",
-        "cloud_shade": "#c9dcf2",
         "glint": "#fffbe8",
-        "glint_strength": 1.0,
-        "stars": 0.0
+        "glint_strength": 1.0
       },
       "sunset": {
-        "sky": [
-          "#c97a72",
-          "#f4a25a",
-          "#ffd486"
-        ],
         "sea": [
-          "#f4b47c",
-          "#4b62ad",
-          "#2b3c84",
-          "#eaa27c"
+          "#ffc47e",
+          "#6f72bd",
+          "#3d4793",
+          "#f2ad86"
         ],
         "ambient": "#ffd8b8",
-        "cloud": "#ffd3a2",
-        "cloud_shade": "#c27c7e",
         "glint": "#ffd27a",
-        "glint_strength": 1.6,
-        "stars": 0.0
+        "glint_strength": 1.6
       },
       "night": {
-        "sky": [
-          "#06154a",
-          "#0e2f7c",
-          "#3d5fb5"
-        ],
         "sea": [
           "#163f96",
           "#124aad",
@@ -186,18 +149,10 @@
           "#2e5fc0"
         ],
         "ambient": "#7f8fd0",
-        "cloud": "#7b8cc4",
-        "cloud_shade": "#2b3d7a",
         "glint": "#fdecba",
-        "glint_strength": 0.85,
-        "stars": 1.0
+        "glint_strength": 0.85
       },
       "dawn": {
-        "sky": [
-          "#6d8fd6",
-          "#f2b7a6",
-          "#ffd9a8"
-        ],
         "sea": [
           "#9fb6e8",
           "#5aa6e6",
@@ -205,18 +160,10 @@
           "#7fd0d8"
         ],
         "ambient": "#f4dcc8",
-        "cloud": "#fff0e4",
-        "cloud_shade": "#c7a7b9",
         "glint": "#ffe2c0",
-        "glint_strength": 0.8,
-        "stars": 0.25
+        "glint_strength": 0.8
       },
       "morning": {
-        "sky": [
-          "#3a8ee6",
-          "#62b4f5",
-          "#d6e6f4"
-        ],
         "sea": [
           "#7cbdf4",
           "#3db3f2",
@@ -224,11 +171,8 @@
           "#45d2dc"
         ],
         "ambient": "#fff6ec",
-        "cloud": "#fffaf2",
-        "cloud_shade": "#d2d9ea",
         "glint": "#fff3dc",
-        "glint_strength": 0.9,
-        "stars": 0.0
+        "glint_strength": 0.9
       }
     }
   },

@@ -61,10 +61,12 @@ func _drag(index: int, from: Vector2, to: Vector2, steps: int = 6) -> void:
 		vp.push_input(e, true)
 
 
-func test_island_is_framed_below_the_sky() -> void:
+## Step 56: no sky band to stay under -- a little below the middle, under
+## the HUD's top cards (it was 0.68).
+func test_island_is_framed_a_little_below_the_middle() -> void:
 	var size := cams.viewport_size()
 	var centre := cams.world_to_screen(cams.island_rect().get_center())
-	assert_between(centre.y / size.y, 0.6, 0.76, "island centre sits in the lower part")
+	assert_between(centre.y / size.y, 0.55, 0.65, "island centre a little below the middle")
 	assert_between(centre.x / size.x, 0.4, 0.6, "and in the middle horizontally")
 
 

@@ -1,10 +1,11 @@
 // Step 06: the 2x2 island is actually drawn -- grass on the tops, cliff below
-// the near edges, sea around it and sky above -- on a phone and a desktop.
+// the near edges and sea all round it (Step 56: up to the top of the screen,
+// where the sky was) -- on a phone and a desktop.
 import { test, expect } from '../lib/fixtures.mjs';
 import { cellToCanvas, logicalToCanvas } from '../lib/coords.mjs';
 import { decodePng, pixel } from '../lib/png.mjs';
 
-test('grass tops, cliff faces, sea and sky are where they should be', async ({ game }) => {
+test('grass tops, cliff faces and the sea are where they should be', async ({ game }) => {
   await game.page.waitForTimeout(300);
   const png = decodePng(await game.canvas.screenshot());
   const box = await game.canvas.boundingBox();
@@ -33,7 +34,7 @@ test('grass tops, cliff faces, sea and sky are where they should be', async ({ g
   // Halfway down the cliff below the middle of the south-east face.
   const cliff = at(await logicalToCanvas(game, 2, 1.5, -0.3));
   expect(isGreen(cliff) || isBlue(cliff), `cliff colour ${cliff}`).toBe(false);
-  // Open sea at the left edge below the horizon, and sky at the top.
+  // Open sea at the left edge, and at the top of the screen too.
   expect(isBlue(at({ x: box.width * 0.04, y: box.height * 0.55 })), 'sea').toBe(true);
-  expect(isBlue(at({ x: box.width / 2, y: box.height * 0.1 })), 'sky').toBe(true);
+  expect(isBlue(at({ x: box.width / 2, y: box.height * 0.1 })), 'sea at the top').toBe(true);
 });

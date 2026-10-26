@@ -5,15 +5,15 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: **55** (#55). 다음: #56~#58(하늘 → 바다, 편지·연구, 속도). 모모는 발보다 0.5 깊이 앞에서 정렬된다(`art.momo_depth`, `design/ART_SPEC.md` §12) — 모모의 노드 위치는 정렬용이고, 서 있는 자리는 `MomoActor.ground()`다. 새 섬은 **모모 0**으로 시작한다 — 모모가 있다고 가정하는 테스트는 `with_starter_momo()`(unit/integration)·`test.use({ starterMomo: true })`(E2E)로 명시한다. 미술 예산은 Step 46부터 이어지는 총 40크레딧 상한을 함께 쓴다(46: 6.20, 51: 7.20, 52: 9.20, 남은 **17.40**)
+- 마지막 완료 step: **56** (#56). 다음: #57~#58(편지·연구, 속도). **하늘은 없다**(Step 56) — 화면 전체가 바다이고 하루는 물빛과 물에 비친 흐린 빛으로만 보인다(`design/ART_SPEC.md` §8). 하늘·구름·해·달·별을 다시 그리지 않고, 그런 그림에 미술 크레딧을 쓰지 않는다(주인 결정). 모모는 발보다 0.5 깊이 앞에서 정렬된다(`art.momo_depth`, `design/ART_SPEC.md` §12) — 모모의 노드 위치는 정렬용이고, 서 있는 자리는 `MomoActor.ground()`다. 새 섬은 **모모 0**으로 시작한다 — 모모가 있다고 가정하는 테스트는 `with_starter_momo()`(unit/integration)·`test.use({ starterMomo: true })`(E2E)로 명시한다. 미술 예산은 Step 46부터 이어지는 총 40크레딧 상한을 함께 쓴다(46: 6.20, 51: 7.20, 52: 9.20, 남은 **17.40**)
 - 현재 step: 없음
-- 버전: `0.55.0`
+- 버전: `0.56.0`
 - 페이스(Step 50): 목표·합격 기준은 `design/INCREMENTAL_PACING.md`(고정), 라운드 기록·증거는 `design/INCREMENTAL_BALANCE_REPORT.md`·`design/incremental50/`. 도구 `tools/balance_optimizer/`(`optimize.gd` 시뮬 표·후보, `score_blind.mjs` 블라인드 채점, `chart.mjs`·`grid.gd`). **블라인드형 봇은 최근 블라인드 라운드에 맞춰 둔 것**(B6 ±12%) — 게임 흐름을 바꾸면 다시 맞춘다. 허용 오차는 2026-10-26 소유자 결정으로 10% → **60%**(`targets.json`의 `tolerance`, 목표값은 그대로)
 - **알려진 제한(Step 50)**: 오프라인 따라잡기의 이벤트 천장(40,000)이 5초 밭에서는 8시간보다 먼저 닿는다(모모 4: 2.5 h, 모모 9: 0.7 h만 셈). 비용 상한이라 그대로 두었고, 추정으로 채울지·천장을 올릴지는 오프라인 설계의 결정(보고서 §발견한 문제)
 - 블라인드 플레이테스트(Step 45): 도구 `tools/blind_playtest/`(README에 절차·플레이어 프롬프트 원문), 가설 `design/PLAYTIME.md`, 결과 `design/BLIND_PLAYTEST.md`, 증거 `design/blind45/`. 같은 도구로 다시 돌려 지표를 비교한다
-- 테스트: unit+integration 629 통과 (`momonium/tools/test.sh`)
+- 테스트: unit+integration 630 통과 (`momonium/tools/test.sh`)
 - 피드백(Step 47): 모든 숫자·반짝임은 실제 이벤트에서, 모아서 한 번, 따라잡기(`Simulation.replaying`) 중에는 조용히. 규칙과 설정은 `design/FEEDBACK.md`, 설정은 `FxPrefs`
-- 아트(Step 46): 건물·작물·지형·하늘·소품은 **그린 원본**(`assets/src/png/`)이다. 다시 그리는 법과 도구는 `design/ART_SPEC.md` §11,
+- 아트(Step 46): 건물·작물·지형·소품은 **그린 원본**(`assets/src/png/`)이다. 다시 그리는 법과 도구는 `design/ART_SPEC.md` §11,
   대조표는 `design/art46/contact_sheet.jpg`. **Step 52에 건물 20동·아이콘·소품·패널·바다를 콘셉트대로 다시 했다** — `design/ART52.md`(차이·기준·크레딧·남은 차이),
   대조표 `design/art52/`. UI는 두 유리(HUD 남색, 읽는 패널 흰색)이고 뷰는 색 대신 의미를 부른다(`HudTheme`). 모모는 Step 51부터 5×5 스프라이트 시트(`assets/momo/momo_sheet.png`·`.json`, `design/MOMO_SPRITES.md`)이고, 패널의 `momo_front`는 시트의 앞 서기 칸에서 잘라 낸다
 - E2E: Step 50 체크포인트 전체 1회 실행(아래 표). 다음 전체 실행은 Step 60
@@ -103,4 +103,5 @@
 | 52 | #52 건물·섬·UI를 콘셉트대로: 핵심 넷(연구소 돔 천문대·벌목장 천막·광산 돌 동굴·밭 울타리)·특수 셋·개조 열셋을 콘셉트+새 핵심 넷을 기준으로 다시 그림(같은 발자국, `headroom`만큼 위로)·밤 창(그림에서 찾은 유리, `_lit` 스프라이트)·소품 여섯(소나무·상자·통·통나무·그루터기, 먼 가장자리)·아이콘 20개를 그린 PNG로·읽는 패널은 흰 유리+남색 글씨(이름 있는 색)·작업 카드는 크림/하늘/버터·바다 물결 그물과 반짝이(밤엔 잦아듦)·아틀라스 높이 128 배수·E2E에서 팁이 안 꺼지던 순서 버그 — TopView GPT Image 2 image_edit 23회 46장 9.20크레딧(누계 22.60/40) | 0.52.0 | `4e32c52b` / docs `ec8a16c1` | 602, E2E art52 신규 + 관련 22 | 스모크 + 공개 art52 |
 | 53 | #53 모모 없이 시작: 새 게임·매각 뒤 새 섬은 모모 0(`start.momos` 0)·첫 모모 $15(`momo.hire.first`, 그 뒤는 예전 사다리)·고용한 모모는 놓일 때까지 놀고(자동 배치 삭제) 섬의 자동화(새 건물 자동 맡기·매니저)는 플레이어가 놓은 모모(`opted_in`)만·유산의 모모는 무료 고용으로·튜토리얼에 '손으로 모으기 → 고용' 단계·예전 저장은 일하던 모모를 그대로·페이스 T5를 두 번째 모모로(`journey:momos:2`)·봇이 플레이어처럼 새 모모를 놓음·E2E 팁 꺼짐 | 0.53.0 | `d9210a0f` / docs `f44d42da` | 610, E2E zero_momo 신규 + 모모 관련 | 스모크 |
 | 54 | #54 돈과 레벨을 크게: 돈 32px·레벨 카드(금색 Lv·정확한 exp/필요량·쉼표·금색 막대 `ExpBar`, 레벨을 넘으면 한 바퀴씩 최대 3)·레벨 업 `LevelUpFx`(고리·광선·'LEVEL UP!'·'Lv 1 → 4' 한 번)·뜨는 숫자 바로·크게·오래(HUD 32/28px, 섬 34px, 테두리 10, 첫 이벤트에 바로 뜨고 이어지는 것은 더해짐)·가로 창 UI ×1.3(카메라가 같은 비율로 물러나 섬 크기는 그대로) | 0.54.0 | `0c808a1d` / docs `38c0441d` | 623, E2E hud54 신규 + 관련 15 | 스모크 + 공개 hud54·feedback |
-| 55 | #55 모모를 건물 앞에: 모모는 발보다 0.5 깊이 앞에서 정렬(`art.momo_depth.bias_tiles`, 노드를 24.5 px 내리고 그림을 같은 만큼 올림)·건물 앞·옆·자기 칸 앞 4분의 3은 앞, 뒤 모서리 너머·뒤 칸은 여전히 뒤·탭·컬링·감시 연필·E2E 위치는 발(`ground()`) 기준·증거 장면 `depth55`와 공개 빌드 웹 캡처 도구 `shots.spec`(MOMONIUM_SHOTS) | 0.55.0 | (이 커밋) | 629, E2E depth55 신규 + 관련 | 스모크 |
+| 55 | #55 모모를 건물 앞에: 모모는 발보다 0.5 깊이 앞에서 정렬(`art.momo_depth.bias_tiles`, 노드를 24.5 px 내리고 그림을 같은 만큼 올림)·건물 앞·옆·자기 칸 앞 4분의 3은 앞, 뒤 모서리 너머·뒤 칸은 여전히 뒤·탭·컬링·감시 연필·E2E 위치는 발(`ground()`) 기준·증거 장면 `depth55`와 공개 빌드 웹 캡처 도구 `shots.spec`(MOMONIUM_SHOTS) | 0.55.0 | `d1847471` / docs `8f53fed1` | 629, E2E depth55 신규 + 관련 15·설정 패널 6 | 스모크 + 공개 depth55·select |
+| 56 | #56 하늘 → 바다: 하늘·구름·해·달·별을 지우고 바다가 화면 전체(셰이더의 지평선 컷 삭제, 원근 흉내 `t`는 상수)·하루는 물빛으로(낮 청록, 노을 위쪽 복숭아·금빛 + 라벤더빛 물, 밤 남색: `far` 비친 빛이 화면 위로 갈수록 섞이는 한 비탈)·해·달은 물 위의 흐린 빛 번짐만(`DayNight.GLOW_Y`)·반짝이는 낮빛의 제곱만큼(밤에 별밭처럼 보이지 않게)·섬은 화면 높이 60%·`SkyRenderer`·`sky.gdshader`·구름 텍스처·`key_clouds`·팔레트 하늘·`day_cycle`의 하늘 항목 삭제, `SkyPalette` → `DayPalette`, E2E 질의 `sky` → `day_look` | 0.56.0 | (이 커밋) | 630, E2E ocean56·day 신규 + 관련 | 스모크 |

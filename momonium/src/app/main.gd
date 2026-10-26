@@ -14,7 +14,6 @@ var island: IslandRenderer
 var ocean: OceanRenderer
 ## An occasional fish jumping by the shore.
 var sea_life: SeaLife
-var sky: SkyRenderer
 var ambient: CanvasModulate
 var day_night: DayNight
 var hud: Hud
@@ -115,9 +114,6 @@ func _ready() -> void:
 	back.name = "Background"
 	back.layer = -10
 	add_child(back)
-	sky = SkyRenderer.new()
-	sky.name = "Sky"
-	back.add_child(sky)
 	ocean = OceanRenderer.new()
 	ocean.name = "Ocean"
 	back.add_child(ocean)
@@ -161,7 +157,7 @@ func _ready() -> void:
 	day_night = DayNight.new()
 	day_night.name = "DayNight"
 	add_child(day_night)
-	day_night.setup(sim, sky, ocean, ambient)
+	day_night.setup(sim, ocean, ambient)
 	router = InputRouter.new()
 	router.name = "InputRouter"
 	add_child(router)
@@ -481,7 +477,7 @@ func _ready() -> void:
 	bridge.register_query("logical_screen", _logical_screen)
 	bridge.register_query("camera", _camera_info)
 	bridge.register_query("dev_grow_island", _dev_grow_island)
-	bridge.register_query("sky", func(_a: Variant) -> Dictionary: return day_night.describe())
+	bridge.register_query("day_look", func(_a: Variant) -> Dictionary: return day_night.describe())
 	bridge.register_query("dev_advance_to", _dev_advance_to)
 	bridge.register_query("dev_advance_ms", func(ms: Variant) -> Dictionary:
 		sim.advance_ms(int(ms))
@@ -1138,7 +1134,8 @@ func _art_info(_arg: Variant) -> Dictionary:
 		"texture": [lib.texture.get_width(), lib.texture.get_height()] if lib.texture else [0, 0],
 		"momo_origin": [lib.pivot("momo_front").x, lib.pivot("momo_front").y],
 		"props": island_props.count() if island_props != null else 0,
-		"painted_clouds": float((sky.material as ShaderMaterial).get_shader_parameter("painted_clouds")) > 0.5,
+		# Step 56: no sky -- nothing in the backdrop but the sea.
+		"backdrop": (get_node("Background") as CanvasLayer).get_children().map(func(n: Node) -> String: return String(n.name)),
 		"research_card": _window_rect(research_frame.card_rect()) if research_frame.visible else [],
 		"status_card": _window_rect(status_frame.card_rect()) if status_frame.visible else [],
 		"side_reserved": research_frame.right_reserved * get_viewport().get_final_transform().get_scale().x,

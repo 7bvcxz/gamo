@@ -12,8 +12,10 @@ extends Node
 
 signal changed
 
-## Island centre on screen, as a fraction of height: below the sky band.
-const ISLAND_SCREEN_Y := 0.68
+## Island centre on screen, as a fraction of height: a little below the
+## middle, under the HUD's top cards (Step 56: no sky band to stay under --
+## it was 0.68).
+const ISLAND_SCREEN_Y := 0.6
 ## Default framing: the island takes this much of the width (phones) or height.
 const FIT_WIDTH := 0.74
 const FIT_HEIGHT := 0.46
@@ -51,7 +53,7 @@ func island_rect() -> Rect2:
 	return rect.grow_side(SIDE_BOTTOM, projection.cliff_height * projection.height_scale)
 
 
-## Frames the whole island below the sky band.
+## Frames the whole island, a little below the middle of the screen.
 func frame_island() -> void:
 	var size := viewport_size()
 	var rect := island_rect()
@@ -143,7 +145,7 @@ func zoom_at(factor: float, screen_point: Vector2) -> void:
 func _clamp() -> void:
 	var margin := projection.tile_width * MARGIN_TILES
 	var limit := island_rect().grow(margin)
-	# The island's centre is shown below the sky band, so the camera centre that
+	# The island's centre is shown below the middle, so the camera centre that
 	# frames it sits above it by that offset; allow for that in the limits.
 	var offset := (ISLAND_SCREEN_Y - 0.5) * viewport_size().y / camera.zoom.x
 	limit.position.y -= offset

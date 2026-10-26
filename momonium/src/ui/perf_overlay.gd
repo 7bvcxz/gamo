@@ -26,7 +26,7 @@ func setup(p_buildings: BuildingViews, p_momos: MomoViews) -> void:
 	momo_views = p_momos
 	add_theme_font_size_override("font_size", 15)
 	add_theme_color_override("font_color", Color("#eaf6ff"))
-	# A dark plate, so it reads over sky, sea and grass alike.
+	# A dark plate, so it reads over sea and grass alike.
 	var plate := StyleBoxFlat.new()
 	plate.bg_color = Color(0.04, 0.11, 0.2, 0.78)
 	plate.set_corner_radius_all(8)

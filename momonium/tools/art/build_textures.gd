@@ -12,8 +12,8 @@ extends SceneTree
 ## cliff.png  256x128  wraps horizontally: dirt, stone and wet line in one face
 ##
 ## A painted source in assets/src/png/textures/<name>.png (Step 46) takes the
-## place of the procedural grass or cliff, at 512 px, and adds clouds.png
-## (the sky's painted cloud band).
+## place of the procedural grass or cliff, at 512 px. (Its painted cloud band
+## went with the sky in Step 56.)
 
 const OUT := "res://assets/textures/"
 const SIZE := 256
@@ -26,13 +26,10 @@ func _init() -> void:
 	palette = art["palette"]
 	var painted_grass := _painted("grass")
 	var painted_cliff := _painted("cliff")
-	var painted_clouds := _painted("clouds")
 	_save(_painted_grass(painted_grass) if painted_grass != null else _grass(), "grass")
 	_save(_dirt(), "dirt")
 	_save(_stone(), "stone")
 	_save(_painted_cliff(painted_cliff) if painted_cliff != null else _cliff(), "cliff")
-	if painted_clouds != null:
-		_save(_painted_clouds(painted_clouds), "clouds")
 	quit(0)
 
 
@@ -75,14 +72,6 @@ func _painted_cliff(src: Image) -> Image:
 		for x in img.get_width():
 			img.set_pixel(x, y, img.get_pixel(x, y).lerp(Color(1, 1, 1), 0.55 if y >= hh - 3 else 0.3))
 	return img
-
-
-## Cloud band for the sky shader: already keyed (r = how sunlit, a = cover);
-## only made to tile left to right.
-func _painted_clouds(src: Image) -> Image:
-	var img := src.duplicate() as Image
-	img.resize(PAINTED_SIZE, int(float(PAINTED_SIZE) * src.get_height() / src.get_width()), Image.INTERPOLATE_LANCZOS)
-	return seamless(img, true)
 
 
 ## Takes out the painting's broad light (a vignette, a brighter corner) so

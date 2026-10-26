@@ -26,7 +26,7 @@ func after_each() -> void:
 
 func test_lights_only_after_dusk() -> void:
 	assert_eq(BuildingView.night_strength(Color.WHITE), 0.0, "noon: no lights")
-	var palette := SkyPalette.new(sim.data)
+	var palette := DayPalette.new(sim.data)
 	var start := float(sim.data.get_value("art", "night_lights", {}).get("start", 0.25))
 	var night: Color = palette.at(0.8)["ambient"]
 	var noon: Color = palette.at(0.4)["ambient"]
@@ -48,7 +48,7 @@ func test_windows_light_up_at_night() -> void:
 	assert_true(view.lit != null, "the office has lit windows")
 	assert_eq(view.lit.get_parent(), view.sprite, "laid on the building's own sprite (it bounces with it)")
 	assert_true(views.view(farm).lit == null, "a farm has no windows to light")
-	var palette := SkyPalette.new(sim.data)
+	var palette := DayPalette.new(sim.data)
 	var before := BuildingView.ambient
 	BuildingView.ambient = palette.at(0.8)["ambient"]
 	view._draw_lights(bs.get_building(office))

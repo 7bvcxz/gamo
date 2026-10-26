@@ -58,13 +58,25 @@ test('a gold bar as far as the level is, and a level-up you cannot miss', async 
   expect(h.level_up.line).toBe('Lv 2!');
   expect(h.level).toBe('Lv 2');
   expect(h.pops.filter((p) => p === 'Lv 2!').length, 'once').toBe(1);
-  s = await shot(game);
   const t = h.level_up.title_rect;
-  let lit = 0;
-  for (let y = t[1] + t[3] * 0.3; y < t[1] + t[3] * 0.7; y += 2) {
-    for (let x = t[0]; x < t[0] + t[2]; x += 2) if (gold(pixel(s.png, x * s.sx, y * s.sy))) lit += 1;
-  }
-  expect(lit, 'the gold words are on the screen').toBeGreaterThan(20);
+  // Polled: on a loaded machine the words can still be fading in at the
+  // first look (they show for two seconds). When they are not found, the
+  // screen and the HUD's own account are attached: it failed twice in long
+  // runs on a busy machine and passed every time alone (Step 56).
+  info.attachments.push({ name: 'hud at the level-up', contentType: 'application/json', body: Buffer.from(JSON.stringify(h)) });
+  const words = expect.poll(async () => {
+    s = await shot(game);
+    let lit = 0;
+    for (let y = t[1] + t[3] * 0.3; y < t[1] + t[3] * 0.7; y += 2) {
+      for (let x = t[0]; x < t[0] + t[2]; x += 2) if (gold(pixel(s.png, x * s.sx, y * s.sy))) lit += 1;
+    }
+    return lit;
+  }, { message: 'the gold words are on the screen', timeout: 1500, intervals: [100, 200, 300] }).toBeGreaterThan(20);
+  await words.catch(async (e) => {
+    await game.page.screenshot({ path: info.outputPath('level-up.png') });
+    info.attachments.push({ name: 'hud after', contentType: 'application/json', body: Buffer.from(JSON.stringify(await game.query('hud'))) });
+    throw e;
+  });
   await game.page.waitForTimeout(2200);
   h = await game.query('hud');
   expect(h.level_up.playing, 'then gone').toBe(false);

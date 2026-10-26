@@ -1,19 +1,20 @@
 class_name OceanRenderer
 extends ColorRect
 
-## Screen-space sea below the horizon (see assets/shaders/ocean.gdshader).
-## Lives in the background canvas layer; every frame it hands the shader the
-## inverse camera transform so the pattern is anchored to the world, and it
-## rebuilds the shore field when the coastline changes.
+## The screen-space sea (see assets/shaders/ocean.gdshader): since Step 56 the
+## whole backdrop, edge to edge -- there is no sky. Lives in the background
+## canvas layer; every frame it hands the shader the inverse camera transform
+## so the pattern is anchored to the world, and it rebuilds the shore field
+## when the coastline changes.
 
 const SHADER := preload("res://assets/shaders/ocean.gdshader")
-const HORIZON_FRACTION := 0.4
 
 var camera: Camera2D
 var projection: IsoProjection
 var shore := ShoreField.new()
-## Driven by the sky (Step 09); day defaults until then.
-var sun_screen_fraction := Vector2(0.62, 0.18)
+## Where the sun or moon's soft reflection glows (a fraction of the screen)
+## and how much: driven by the day (DayNight); day defaults until then.
+var sun_screen_fraction := Vector2(0.62, 0.22)
 var sun_strength := 1.0
 var quality := 1.0
 
@@ -33,7 +34,7 @@ func setup(sim: Simulation, p_camera: Camera2D, p_projection: IsoProjection) -> 
 	_mat.set_shader_parameter("deep_color", data.color("sea_day", 2))
 	_mat.set_shader_parameter("mid_color", data.color("sea_day", 1))
 	_mat.set_shader_parameter("shallow_color", data.color("sea_day", 3))
-	_mat.set_shader_parameter("horizon_color", data.color("sea_day", 0))
+	_mat.set_shader_parameter("far_color", data.color("sea_day", 0))
 	_mat.set_shader_parameter("foam_color", data.color("foam"))
 	_mat.set_shader_parameter("half_tile", Vector2(projection.tile_width, projection.tile_height) * 0.5)
 	_mat.set_shader_parameter("water_drop", projection.cliff_height * projection.height_scale)
@@ -41,11 +42,11 @@ func setup(sim: Simulation, p_camera: Camera2D, p_projection: IsoProjection) -> 
 	_rebuild_shore()
 
 
-func set_palette(deep: Color, mid: Color, shallow: Color, horizon: Color, glint: Color) -> void:
+func set_palette(deep: Color, mid: Color, shallow: Color, far: Color, glint: Color) -> void:
 	_mat.set_shader_parameter("deep_color", deep)
 	_mat.set_shader_parameter("mid_color", mid)
 	_mat.set_shader_parameter("shallow_color", shallow)
-	_mat.set_shader_parameter("horizon_color", horizon)
+	_mat.set_shader_parameter("far_color", far)
 	_mat.set_shader_parameter("glint_color", glint)
 
 
@@ -74,7 +75,6 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("inv_y", inv.y)
 	_mat.set_shader_parameter("inv_o", inv.origin)
 	_mat.set_shader_parameter("screen_size", size)
-	_mat.set_shader_parameter("horizon_y", size.y * HORIZON_FRACTION)
 	_mat.set_shader_parameter("sun_screen", size * sun_screen_fraction)
 	_mat.set_shader_parameter("sun_strength", sun_strength)
 	_mat.set_shader_parameter("quality", quality)

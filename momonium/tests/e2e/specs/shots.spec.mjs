@@ -70,3 +70,13 @@ test('depth: Momo around a lab', async ({ game }, info) => {
   await game.page.waitForTimeout(800);
   await save(game, info, 'depth', 'lab');
 });
+
+test('time of day: day, sunset, night', async ({ game }, info) => {
+  await game.setTimeScale(0);
+  await game.query('set_language', 'en');
+  for (const [label, t] of [['day', 0.3], ['sunset', 0.62], ['night', 0.86]]) {
+    await game.query('dev_advance_to', [1, t]);
+    await game.page.waitForTimeout(500);
+    await save(game, info, 'time', label);
+  }
+});

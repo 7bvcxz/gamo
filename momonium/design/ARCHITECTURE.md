@@ -28,7 +28,7 @@
 | `src/agents` | 로직 | 모모(에이전트)·작업 스케줄링(`JobSystem`)·모모 편지(`MailSystem`)·매니저 |
 | `src/persistence` | 로직 | 저장 형식·버전·이주·원자적 쓰기 |
 | `src/power` | 로직 | `PowerSystem` — 발전(태양·바람·증기·수력)·사용·공급 비율, `BuildingSystem.modifiers`로 작업 속도와 시작 차단 |
-| `src/render` | 표현 | 섬·바다·하늘·건물 그리기, 깊이 정렬 |
+| `src/render` | 표현 | 섬·바다(하늘 없음, Step 56)·건물 그리기, 깊이 정렬 |
 | `src/input` | 표현 | 카메라, 제스처, 입력 라우터 |
 | `src/ui` | 표현 | HUD, 패널, 문구 |
 | `src/actors` | 표현 | 모모 스프라이트·리그·애니메이션 |

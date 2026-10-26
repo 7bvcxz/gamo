@@ -43,7 +43,7 @@ func test_art_spec_is_in_data() -> void:
 	assert_between(data.get_float("art", "projection.elevation_deg"), 50.0, 60.0, "50-60 degree view")
 	for key: String in ["momo_fur", "momo_overall", "momo_cheek", "momo_eye", "momo_outline"]:
 		assert_ne(data.color(key), Color.MAGENTA, "palette has %s" % key)
-	assert_eq(data.color("sky_day", 0), Color("#2693f8"), "gradient entries are indexable")
+	assert_eq(data.color("sea_day", 0), Color("#68b7fc"), "gradient entries are indexable")
 
 
 func test_art_elevation_outside_spec_is_rejected() -> void:
