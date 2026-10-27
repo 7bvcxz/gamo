@@ -702,9 +702,19 @@ func _ready() -> void:
 			sl[key] = {"value": (settings_view.sliders[key] as HSlider).value, "rect": conv.call(settings_view.sliders[key]) if settings_view.is_visible_in_tree() else []}
 		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
 		return {"played": audio.played, "level": audio.level, "target": audio.target, "buses": buses, "master_mute": AudioServer.is_bus_mute(0),
+			"voices": audio.voices.map(func(v: AudioStreamPlayer) -> Dictionary: return {"playing": v.playing, "db": v.volume_db, "stream": v.stream.resource_path.get_file() if v.stream != null else ""}),
 			"music": audio.music.playing, "sliders": sl, "mute": conv.call(settings_view.mute_toggle) if settings_view.is_visible_in_tree() else [],
 			"settings": {"music_volume": settings.get_value("music_volume"), "ambience_volume": settings.get_value("ambience_volume"), "sfx_volume": settings.get_value("sfx_volume"), "muted": settings.get_value("muted")},
 			"window": [win.x, win.y]})
+	# Step 65: browser tests measure what is heard; these set a sound
+	# setting as the Settings panel does, and play effects at once.
+	bridge.register_query("dev_audio_setting", func(arg: Variant) -> Dictionary:
+		audio.set_setting(String(arg[0]), arg[1])
+		return {"master_mute": AudioServer.is_bus_mute(0)})
+	bridge.register_query("dev_play", func(names: Variant) -> Dictionary:
+		for n: Variant in names:
+			audio.play(String(n))
+		return {"played": audio.played})
 	bridge.register_query("options", func(_a: Variant) -> Dictionary:
 		var vp := get_viewport()
 		var conv := func(c: Control) -> Array:

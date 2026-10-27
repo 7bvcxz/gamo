@@ -76,6 +76,39 @@ func test_ambience_follows_the_island() -> void:
 	assert_near(float(audio.level["crickets"]), 0.25, 0.001, "easing in, not jumping")
 
 
+func test_a_burst_stays_under_full_scale() -> void:
+	# Step 65: eight effects at once measured 1.3 at the speakers -- clipping.
+	# The web's sample playback has no bus limiter, so the service holds it:
+	# each effect starts under every one already sounding, none left out.
+	audio.played.clear()
+	for v: AudioStreamPlayer in audio.voices:
+		v.stop()
+	var burst: Array[String] = ["build", "built", "research", "land", "momo", "promote"]
+	for e: String in burst:
+		audio.play(e)
+	for e: String in burst:
+		assert_eq(int(audio.played.get(e, 0)), 1, "%s is heard" % e)
+	var dbs: Array[float] = []
+	for v: AudioStreamPlayer in audio.voices:
+		if v.playing:
+			dbs.append(v.volume_db)
+	dbs.sort()
+	dbs.reverse()
+	assert_eq(dbs.size(), burst.size(), "all of them sounding")
+	for i in range(1, dbs.size()):
+		assert_true(dbs[i] < dbs[i - 1] - 5.0, "each under the one before it (%s)" % [dbs])
+	var total := 0.0
+	for d: float in dbs:
+		total += db_to_linear(d)
+	assert_true(total < 2.0, "the pile stays under two of one (%.2f)" % total)
+	for v: AudioStreamPlayer in audio.voices:
+		v.stop()
+	audio.play("click")
+	var lone := audio.voices.filter(func(v: AudioStreamPlayer) -> bool: return v.playing)
+	assert_eq(lone.size(), 1, "one click")
+	assert_near((lone[0] as AudioStreamPlayer).volume_db, 0.0, 0.01, "alone, at full level")
+
+
 func test_events_and_buttons_make_sounds() -> void:
 	audio.played.clear()
 	var bs: BuildingSystem = sim.system(&"buildings")

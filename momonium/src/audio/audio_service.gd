@@ -15,6 +15,13 @@ extends Node
 ## rising, a promotion, a demolition, a refusal), from a few players in turn.
 ##
 ## The sounds are made by tools/audio/build_audio.py (synthesised, Ogg).
+##
+## Step 65: the three buses are declared in res://default_bus_layout.tres,
+## not added here. On the web Godot plays sounds as browser "samples" by
+## default, and a bus added at run time never reaches that graph: every
+## player on Music, Ambience or Effects went nowhere and the published game
+## was silent while every play() and bus volume looked right. The add_bus
+## below only covers a project without the layout (and says so).
 
 const DIR := "res://assets/audio/"
 const BUSES: PackedStringArray = ["Music", "Ambience", "Effects"]
@@ -48,6 +55,7 @@ func setup(p_sim: Simulation, p_settings: SettingsStore) -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	for bus: String in BUSES:
 		if AudioServer.get_bus_index(bus) < 0:
+			push_warning("audio: the %s bus is not in default_bus_layout.tres -- on the web it will be silent" % bus)
 			AudioServer.add_bus()
 			var i := AudioServer.bus_count - 1
 			AudioServer.set_bus_name(i, bus)
@@ -185,6 +193,12 @@ func _process(delta: float) -> void:
 ## ring one coin, not a cascade.
 const MIN_GAP_MS := {"coin": 250, "harvest": 250}
 var _last_ms := {}
+## Step 65: what the island does all at once must not pile up past full scale
+## (a burst of eight measured 1.3 at the speakers -- clipping; the web's
+## sample playback has no bus limiter to catch it). Each effect sounds at
+## half the level of every one still sounding when it starts, so any pile
+## stays under twice one effect -- and nothing is left out.
+const PILE := 0.5
 
 
 func play(effect: String) -> void:
@@ -199,8 +213,13 @@ func play(effect: String) -> void:
 		return
 	var p := voices[_next]
 	_next = (_next + 1) % voices.size()
+	var others := 0
+	for v: AudioStreamPlayer in voices:
+		if v != p and v.playing:
+			others += 1
 	p.stream = s
 	p.pitch_scale = 1.0
+	p.volume_db = linear_to_db(pow(PILE, others))
 	p.play()
 
 
