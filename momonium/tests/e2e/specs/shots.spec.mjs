@@ -204,3 +204,30 @@ test.describe('order', () => {
     await save(game, info, 'order', 'numbers');
   });
 });
+
+// Step 64: the HUD's news -- unread letters, research not yet shown, a hire
+// worth it -- as dots (before) or numbers (after, and "99+").
+test.describe('badges', () => {
+  test.use({ starterMomo: true, viewport: { width: 360, height: 640 } });
+  test('badges: the HUD news, and 99+', async ({ game }, info) => {
+    if (!info.project.use.hasTouch) await game.page.setViewportSize({ width: 1280, height: 800 });
+    await game.setTimeScale(0);
+    await game.query('set_language', 'en');
+    let farm = 0;
+    for (const c of [[1, 0], [0, 1], [1, 1]]) {
+      farm = (await game.query('dev_place_building', ['farm', ...c])).id;
+      if (farm) break;
+    }
+    await game.command({ type: 'momo.assign', momo: 1, building: farm });
+    for (let i = 0; i < 80 && (await game.query('mail')).unread === 0; i++) await game.query('dev_advance_ms', 2500);
+    await game.query('dev_place_building', ['farm', 0, 1]);
+    await game.query('dev_add_money', 400);
+    if (await maybe(game, 'dev_news', [2, 2])) await game.page.waitForTimeout(100);
+    await game.page.waitForTimeout(700);
+    await save(game, info, 'badges', 'news');
+    if (await maybe(game, 'dev_badge', ['mailbox', 123])) {
+      await game.page.waitForTimeout(400);
+      await save(game, info, 'badges', '99plus');
+    }
+  });
+});

@@ -210,7 +210,12 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	for spec: Array in [[&"research", "hud.research", "ui_research"], [&"mailbox", "hud.mailbox", "ui_mail"],
 			[&"status", "hud.status", "ui_status"]]:
 		side_buttons.append(_button(spec, lib))
+	# What each count means, for a screen reader (Step 64).
+	(buttons[&"research"] as HudButton).count_words = "hud.count.research"
+	(buttons[&"mailbox"] as HudButton).count_words = "hud.count.mailbox"
+	(buttons[&"status"] as HudButton).count_words = "hud.count.status"
 	hire_button = _button([&"hire", "hud.hire", "ui_hire"], lib)
+	hire_button.count_words = "hud.count.hire"
 	for spec: Array in [[&"settings", "hud.settings", "ui_settings"], [&"shop", "hud.shop", "ui_shop"]]:
 		corner_buttons.append(_button(spec, lib))
 
@@ -236,7 +241,8 @@ func letter_news() -> void:
 	var b: HudButton = buttons.get(&"mailbox")
 	if b == null:
 		return
-	b.badge = true
+	# News is at least one letter (the frame's refresh then shows the count).
+	b.count = maxi(b.count, maxi((sim.system(&"mail") as MailSystem).unread_count() if sim != null else 0, 1))
 	var now := Time.get_ticks_msec()
 	if now - _news_at >= NEWS_GAP_MS:
 		_news_at = now
@@ -482,10 +488,13 @@ func refresh(force: bool = false) -> void:
 	_set_text(_exp_label, "exp", tr("hud.exp") % [_format_money(prog.experience), _format_money(prog.next_level_exp())], force)
 	# Forced (a load, a new language): set at once; otherwise it slides.
 	exp_bar.show_progress(prog.level, prog.experience, prog.next_level_exp(), not force)
+	# Step 64: numbers, not dots -- each from where it is kept, read again
+	# every frame, so a letter read, Research opened, a load or time away
+	# all show at once.
 	var mail: MailSystem = sim.system(&"mail")
 	var mail_button: HudButton = buttons.get(&"mailbox")
-	if mail != null and mail_button != null and mail_button.badge != (mail.unread_count() > 0):
-		mail_button.badge = mail.unread_count() > 0
+	if mail != null and mail_button != null:
+		mail_button.count = _shown_count(&"mailbox", mail.unread_count())
 	var power: PowerSystem = sim.system(&"power")
 	if power != null:
 		var show := power.in_use()
@@ -503,9 +512,7 @@ func refresh(force: bool = false) -> void:
 	if research != null and research_button != null:
 		# Step 57: the dot is news -- a topic that became available and has
 		# not been shown yet; opening Research acknowledges it.
-		var want := not research.new_topics().is_empty()
-		if research_button.badge != want:
-			research_button.badge = want
+		research_button.count = _shown_count(&"research", research.new_topics().size())
 	var specials: SpecialSystem = sim.system(&"specials")
 	if specials != null:
 		var b := specials.burst()
@@ -523,17 +530,15 @@ func refresh(force: bool = false) -> void:
 	# A red dot on Status when the settlement can be promoted.
 	var tiers: TierSystem = sim.system(&"tiers")
 	var status_button: HudButton = buttons.get(&"status")
-	if tiers != null and status_button != null and status_button.badge != tiers.can_promote():
-		status_button.badge = tiers.can_promote()
+	if tiers != null and status_button != null:
+		status_button.count = _shown_count(&"status", 1 if tiers.can_promote() else 0)
 	# A dot on Hire when a Momo can be hired and there is work nobody looks
 	# after (Step 50: the blind players never found what to buy next). Never
 	# on the Premium Shop (Step 59).
 	if hire_button != null and (force or Time.get_ticks_msec() >= _hire_check_at):
 		# Twice a second is plenty, and a large island has many buildings.
 		_hire_check_at = Time.get_ticks_msec() + 500
-		var want_hire := _hire_worth_it()
-		if hire_button.badge != want_hire:
-			hire_button.badge = want_hire
+		hire_button.count = _shown_count(&"hire", 1 if _hire_worth_it() else 0)
 	_refresh_stock()
 	_refresh_goal()
 	var production := production_summary()
@@ -623,6 +628,13 @@ func production_summary() -> String:
 
 
 var _hire_check_at := 0
+## Browser tests only: a count to show instead of the real one, by button
+## (to see "99+" without a hundred letters).
+var count_override: Dictionary = {}
+
+
+func _shown_count(key: StringName, real: int) -> int:
+	return int(count_override[key]) if count_override.has(key) else real
 
 
 ## Whether hiring now would put a Momo to work: affordable, and a building

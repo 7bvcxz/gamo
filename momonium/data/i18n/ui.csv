@@ -618,3 +618,7 @@ tutorial.momo_schedule,Tap Schedule under the Momo to pick its work tiles,모모
 panel.tab.momo,Momo,모모,モモ,桃桃
 momolist.empty,"No Momo yet. Hire one with Hire, on the right.",아직 모모가 없어요. 오른쪽 고용 버튼으로 고용해요.,まだモモがいません。右の雇用ボタンで雇いましょう。,还没有桃桃。用右侧的雇佣按钮雇一只吧。
 momolist.find,Find %s,%s 찾기,%sを探す,找到%s
+hud.count.mailbox,"{name}, {n} unread","{name}, 읽지 않은 편지 {n}통",{name}、未読 {n}通,{name}，{n} 封未读
+hud.count.research,"{name}, {n} new topics","{name}, 새 주제 {n}개",{name}、新しいテーマ {n}件,{name}，{n} 个新课题
+hud.count.status,"{name}, ready to grow","{name}, 승급할 수 있어요",{name}、昇格できます,{name}，可以升级
+hud.count.hire,"{name}, a Momo would have work","{name}, 모모가 일할 곳이 있어요",{name}、モモの仕事があります,{name}，有活给桃桃干

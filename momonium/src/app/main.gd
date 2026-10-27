@@ -525,6 +525,38 @@ func _ready() -> void:
 		return {"tier": (sim.system(&"tiers") as TierSystem).tier, "city": island.city, "city_t": island.city_t,
 			"bank_quads": island.bank_quads, "faces": island.visible_face_count(), "shore_apron": ocean.apron(),
 			"build_ms": island.last_build_ms})
+	# Step 64: a number shown on a HUD button whatever the count ([name, n];
+	# n < 0 gives the real count back), and some news to count: `letters`
+	# unread letters and exactly `topics` research topics not yet shown.
+	bridge.register_query("dev_badge", func(arg: Variant) -> Dictionary:
+		if int(arg[1]) < 0:
+			hud.count_override.erase(StringName(String(arg[0])))
+		else:
+			hud.count_override[StringName(String(arg[0]))] = int(arg[1])
+		hud.refresh(true)
+		return {"override": hud.count_override})
+	bridge.register_query("dev_news", func(arg: Variant) -> Dictionary:
+		var mail: MailSystem = sim.system(&"mail")
+		var ms: MomoSystem = sim.system(&"momo")
+		var templates: Array = sim.data.table("letters").get("letters", [])
+		var sender := ms.ids()[0] if not ms.ids().is_empty() else ms.add_momo(Vector2(0.5, 0.5))
+		for i in int(arg[0]):
+			mail._write(templates[i % templates.size()], sender)
+		var rs: ResearchSystem = sim.system(&"research")
+		var keep := int(arg[1])
+		# More of the tree open when the island has too few topics to show.
+		var prog: ProgressionSystem = sim.system(&"progression")
+		while rs.nodes().filter(func(n: Dictionary) -> bool: return rs.state_of(String(n["id"])) == "available").size() < keep and prog.level < 30:
+			prog.add_exp(prog.next_level_exp() - prog.experience, "dev")
+		var fresh := rs.new_topics()
+		for n: Dictionary in rs.nodes():
+			var id := String(n["id"])
+			if rs.state_of(id) == "available" and not fresh.has(id) and fresh.size() < keep:
+				rs.seen.erase(id)
+				fresh.append(id)
+		rs.acknowledge(fresh.slice(keep))
+		hud.refresh(true)
+		return {"unread": mail.unread_count(), "topics": rs.new_topics().size()})
 	bridge.register_query("dev_tier", func(t: Variant) -> Dictionary:
 		var tiers: TierSystem = sim.system(&"tiers")
 		tiers.tier = int(t)
@@ -1388,6 +1420,16 @@ func _hud_info(_arg: Variant) -> Dictionary:
 		"level": hud._level_label.text, "exp": hud._exp_label.text, "buttons": buttons,
 		"labels": hud.buttons.keys().map(func(k: StringName) -> String: return (hud.buttons[k] as HudButton)._label.text),
 		"badges": hud.buttons.keys().filter(func(k: StringName) -> bool: return (hud.buttons[k] as HudButton).badge).map(func(k: StringName) -> String: return String(k)),
+		# Step 64: the numbers, what they say, where they are, what a screen reader hears.
+		"counts": _hud_map(func(b: HudButton) -> Variant: return b.count),
+		"badge_texts": _hud_map(func(b: HudButton) -> Variant: return HudButton.badge_text(b.count)),
+		"badge_rects": _hud_map(func(b: HudButton) -> Variant:
+			var r := b.badge_rect()
+			return [] if r.size == Vector2.ZERO else to_window.call(Rect2(b.get_global_rect().position + r.position, r.size))),
+		"icon_rects": _hud_map(func(b: HudButton) -> Variant:
+			var r := b.icon_drawn_rect()
+			return to_window.call(Rect2(b.get_global_rect().position + r.position, r.size))),
+		"names": _hud_map(func(b: HudButton) -> Variant: return b.accessibility_name),
 		"actions": hud_actions, "window": [win.x, win.y], "locale": LocaleService.current(),
 		"burst": {"visible": hud.burst_pill.visible, "active": hud.burst_active, "text": hud.burst_text},
 		"pills": {"day": to_window.call(hud.day_panel.get_global_rect()), "money": to_window.call(hud.money_pill.get_global_rect()),
@@ -1421,6 +1463,14 @@ func _premium_shop_info(_arg: Variant) -> Dictionary:
 		"restore_disabled": shop_view.restore_button.disabled, "note": shop_view.note.text if shop_view.note.visible else "",
 		"close": rect.call(shop_frame.close_button) if shop_frame.visible else [], "storefront": premium.storefront.available(),
 		"last": shop_last, "window": [win.x, win.y]}
+
+
+## Every HUD button's `f(button)`, by its action name (E2E).
+func _hud_map(f: Callable) -> Dictionary:
+	var out := {}
+	for k: StringName in hud.buttons:
+		out[String(k)] = f.call(hud.buttons[k])
+	return out
 
 
 ## E2E: what is selected, the panel's cards (window pixels) and the last tap result.
