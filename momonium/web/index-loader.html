@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+  <meta name="theme-color" content="#2a9fd6">
+  <title>momonium</title>
+  <!--
+    Momonium's own index page (Step 62): the loading screen from the first
+    paint, then on to the runner, which shows the same screen until the island
+    has drawn. tools/deploy.sh copies web/shell.html's splash block in place of
+    the marker below and writes the build's pack name and size, as
+    deploy-web.sh does for the shared web-index-loader.html (whose comments say
+    why this page names the build instead of asking an API for it).
+  -->
+  <style>
+    html, body { height: 100%; margin: 0; background: #1d86c4; }
+  </style>
+  <!--SPLASH-STYLE-->
+</head>
+<body>
+  <!--SPLASH-MARKUP-->
+  <script>
+    const params = new URLSearchParams(location.search);
+    const target = new URL("__RUNNER_PAGE__", location.href);
+    target.searchParams.set("pack", "__PACK_NAME__");
+    target.searchParams.set("size", "__PACK_SIZE__");
+    target.searchParams.set("build", "__PACK_NAME__");
+    // Anything already on the address survives the hop, so a link with its own
+    // query string is not silently dropped on the way through.
+    for (const [key, value] of params) {
+      if (!target.searchParams.has(key)) target.searchParams.set(key, value);
+    }
+    location.replace(target);
+  </script>
+</body>
+</html>

@@ -19,6 +19,8 @@
    - 저장소의 `deploy-web.sh momonium`이 `docs/momonium/`에 Web export하고 팩·게임 페이지에 내용 해시를 붙인다.
    - 게시 중인 빌드와 새 빌드 둘만 남긴다(같은 빌드를 다시 내보내면 그 이전 빌드도 남긴다).
    - `version.json`에 버전·엔진·커밋을 적고, `web/launch.html`을 복사하고, `tools/check_release.py`로 검사한다.
+   - Step 62: 고정 `index.html`은 모모니움 것(`web/index-loader.html` + `web/shell.html`의 splash 블록)으로 다시 쓴다.
+     runner가 splash와 그 연결(`MomoSplash.started`, `PHASE.remove`)을 한 번씩 가졌는지 확인한다(없으면 배포가 멈춘다).
 3. `docs/`를 커밋하고 push한다. `tools/verify_release.sh`가 Pages 반영을 기다려 폰·데스크톱 스모크와 CI 결과를 본다.
 
 **재현성:** 같은 소스는 어느 체크아웃에서든 바이트까지 같은 팩을 낸다(팩 이름 = SHA-256 앞 12자리).

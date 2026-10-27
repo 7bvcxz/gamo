@@ -45,5 +45,28 @@ v.update({"version": sys.argv[1], "godot": sys.argv[2], "source": sys.argv[3]})
 open(path, "w").write(json.dumps(v, separators=(",", ":")))
 PY
 cp momonium/web/launch.html docs/momonium/launch.html
+# Step 62: Momonium's own index page -- the loading screen from the first
+# paint (the splash blocks of web/shell.html), then the same hop to the runner
+# with the build's pack written in, as deploy-web.sh writes it for every game.
+python3 - <<'PY'
+import json
+shell = open("momonium/web/shell.html").read()
+def block(name):
+    a, b = "<!--%s:begin-->" % name, "<!--%s:end-->" % name
+    assert shell.count(a) == 1 and shell.count(b) == 1, name
+    return shell[shell.index(a) + len(a):shell.index(b)].strip()
+v = json.load(open("docs/momonium/version.json"))
+page = open("momonium/web/index-loader.html").read()
+for key, value in {"<!--SPLASH-STYLE-->": block("splash"), "<!--SPLASH-MARKUP-->": block("splash-markup"),
+        "__RUNNER_PAGE__": v["page"], "__PACK_NAME__": v["pack"], "__PACK_SIZE__": str(v["packSize"])}.items():
+    assert key in page, key
+    page = page.replace(key, value)
+open("docs/momonium/index.html", "w").write(page)
+# The runner kept the splash and its hooks through deploy-web.sh's rewrite.
+runner = open("docs/momonium/" + v["page"]).read()
+for need in ['id="momo-splash"', "window.MomoSplash.started();", "PHASE.remove();", "const RUNNER_PARAMS"]:
+    assert runner.count(need) == 1, "runner: " + need
+assert 'id="momo-splash"' in page
+PY
 python3 momonium/tools/check_release.py "docs/momonium/$current" --site docs/momonium --version "$version" | tail -n 4
 echo "current: $current  previous: ${published:-(none)}"
