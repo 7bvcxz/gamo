@@ -519,6 +519,23 @@ func _ready() -> void:
 	bridge.register_query("logical_screen", _logical_screen)
 	bridge.register_query("camera", _camera_info)
 	bridge.register_query("dev_grow_island", _dev_grow_island)
+	# Step 63: the island's look by tier, and the means to reach a tier and
+	# a coastline for it in a browser test.
+	bridge.register_query("island", func(_a: Variant) -> Dictionary:
+		return {"tier": (sim.system(&"tiers") as TierSystem).tier, "city": island.city, "city_t": island.city_t,
+			"bank_quads": island.bank_quads, "faces": island.visible_face_count(), "shore_apron": ocean.apron(),
+			"build_ms": island.last_build_ms})
+	bridge.register_query("dev_tier", func(t: Variant) -> Dictionary:
+		var tiers: TierSystem = sim.system(&"tiers")
+		tiers.tier = int(t)
+		sim.bus.emit(&"tier_promoted", {"tier": tiers.tier, "name": tiers.tier_name(), "special_slots": tiers.special_slots()})
+		return {"tier": tiers.tier})
+	bridge.register_query("dev_add_land", func(cells: Variant) -> Dictionary:
+		var world: WorldSystem = sim.system(&"world")
+		for c: Variant in cells:
+			world.add_land(Vector2i(int(c[0]), int(c[1])))
+		cameras.frame_island()
+		return {"cells": world.owned_count()})
 	bridge.register_query("day_look", func(_a: Variant) -> Dictionary: return day_night.describe())
 	bridge.register_query("dev_advance_to", _dev_advance_to)
 	bridge.register_query("dev_advance_ms", func(ms: Variant) -> Dictionary:

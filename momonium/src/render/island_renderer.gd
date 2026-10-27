@@ -19,6 +19,18 @@ extends Node2D
 ## (3, 4) continues the grass on (2, 4) exactly, wherever the camera is.
 ## Decorations are derived from the cell and never enter the simulation, so a
 ## flower can never block a building.
+##
+## Step 63: a City (and a Nation) has grown up -- its grass a little warmer
+## (a tint on the tops, `art.island_tiers.city_grass_tint`) and, instead of
+## cliffs, a bank: a fourth mesh, drawn before the tops, sloping from the
+## land's height down to the waterline half a tile out into the water. Its
+## height and colour are a function of the distance to the owned land, so a
+## straight coast, an outer corner (rounded), an inner corner, a cove or a
+## one-tile inlet all come out of the same rule with nothing overlapping.
+## On promotion the cliffs fade out and the bank in (`fade_seconds`); a load,
+## a new island or a sale shows the tier's look at once. The bank is only
+## drawn: cells, ownership, taps and the ground the buildings stand on are
+## where they were.
 
 const GRASS_TILES_PER_TEXTURE := 2.0
 const CLIFF_TILES_PER_TEXTURE := 2.0
@@ -39,26 +51,74 @@ var _order: Array[Vector2i] = []
 var faces_mesh := ArrayMesh.new()
 var tops_mesh := ArrayMesh.new()
 var overlay_mesh := ArrayMesh.new()
+## The City's bank (empty for a Village): its colours, and its grass -- the
+## island's grass texture running on down the slope, fading out.
+var bank_mesh := ArrayMesh.new()
+var bank_grass_mesh := ArrayMesh.new()
 var last_build_ms := 0.0
+var _tiers: TierSystem
+var _data: GameData
+## Whether the island is drawn as a City now, and how far the change has come
+## (0 = Village's cliffs, 1 = the City's bank and grass).
+var city := false
+var city_t := 0.0
+## Sub-quads in the bank (tests, the perf budget), and where each starts.
+var bank_quads := 0
+var bank_origins: Array[Vector2] = []
 
 
 func setup(sim: Simulation, projection: IsoProjection) -> void:
 	_world = sim.system(&"world")
+	_tiers = sim.system(&"tiers")
+	_data = sim.data
 	_proj = projection
 	_grass_tex = load("res://assets/textures/grass.png")
 	_cliff_tex = load("res://assets/textures/cliff.png")
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	sim.bus.emitted.connect(_on_event)
+	city = is_city_tier()
+	city_t = 1.0 if city else 0.0
 	rebuild()
 
 
 ## Changes are coalesced: many cells bought or built in one frame (a load, a
 ## blueprint) cost one rebuild, at the start of the next frame.
 func _on_event(type: StringName, _payload: Dictionary) -> void:
-	if type in [&"land_added", &"game_loaded", &"occupancy_changed"] and not _dirty:
+	if type == &"tier_promoted" or type == &"game_loaded":
+		var was := city
+		city = is_city_tier()
+		if city != was:
+			# Promoted: the change plays; loaded: the tier's look at once.
+			city_t = (0.0 if city else 1.0) if type == &"tier_promoted" else (1.0 if city else 0.0)
+			set_process(true)
+	if type in [&"land_added", &"game_loaded", &"occupancy_changed", &"tier_promoted"] and not _dirty:
 		_dirty = true
 		rebuild.call_deferred()
+
+
+## Whether the island's tier draws it as a City (City, or Nation after it).
+func is_city_tier() -> bool:
+	return _tiers != null and _tiers.tier >= int(_data.get_float("art", "island_tiers.city_from_tier", 1.0))
+
+
+func _ready() -> void:
+	set_process(city_t != (1.0 if city else 0.0))
+
+
+func _process(delta: float) -> void:
+	var goal := 1.0 if city else 0.0
+	var seconds := maxf(_data.get_float("art", "island_tiers.fade_seconds", 0.9), 0.01) if _data != null else 0.9
+	city_t = move_toward(city_t, goal, delta / seconds)
+	queue_redraw()
+	if city_t == goal:
+		set_process(false)
+
+
+## The grass's tint now: none for a Village, the City's at full change.
+func grass_tint() -> Color:
+	var raw: Array = _data.get_value("art", "island_tiers.city_grass_tint", [1.0, 1.0, 1.0]) if _data != null else [1.0, 1.0, 1.0]
+	return Color.WHITE.lerp(Color(float(raw[0]), float(raw[1]), float(raw[2])), city_t)
 
 
 var _dirty := false
@@ -104,6 +164,9 @@ func rebuild() -> void:
 	var faces := _Batch.new()
 	var tops := _Batch.new()
 	var overlay := _Batch.new()
+	# A City has a bank instead of grass lips over cliffs (its cliffs are kept
+	# only to fade out on promotion).
+	var lips := not city
 	for cell: Vector2i in _order:
 		var east_open := is_face_visible(cell, Vector2i(1, 0))
 		var south_open := is_face_visible(cell, Vector2i(0, 1))
@@ -113,9 +176,9 @@ func rebuild() -> void:
 			_face(faces, Vector2(cell.x, cell.y + 1), Vector2(cell.x + 1, cell.y + 1), LEFT_FACE_LIGHT, float(cell.x))
 		_top(tops, cell)
 		var corners := _proj.cell_corners(cell)
-		if east_open:
+		if east_open and lips:
 			_lip(tops, corners[1], corners[2], cell)
-		if south_open:
+		if south_open and lips:
 			_lip(tops, corners[3], corners[2], cell)
 		_boundaries(overlay, cell, corners)
 		if not _world.is_occupied(cell):
@@ -123,14 +186,195 @@ func rebuild() -> void:
 	faces.commit(faces_mesh)
 	tops.commit(tops_mesh)
 	overlay.commit(overlay_mesh)
+	var bank := _Batch.new()
+	var bank_grass := _Batch.new()
+	bank_quads = 0
+	bank_origins.clear()
+	if city:
+		_bank(bank, bank_grass)
+	bank.commit(bank_mesh)
+	bank_grass.commit(bank_grass_mesh)
 	last_build_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	queue_redraw()
 
 
 func _draw() -> void:
-	draw_mesh(faces_mesh, _cliff_tex)
-	draw_mesh(tops_mesh, _grass_tex)
+	if city_t < 1.0:
+		draw_mesh(faces_mesh, _cliff_tex, Transform2D(), Color(1, 1, 1, 1.0 - city_t))
+	var tint := grass_tint()
+	if city_t > 0.0:
+		draw_mesh(bank_mesh, null, Transform2D(), Color(1, 1, 1, city_t))
+		draw_mesh(bank_grass_mesh, _grass_tex, Transform2D(), Color(tint, city_t))
+	draw_mesh(tops_mesh, _grass_tex, Transform2D(), tint)
 	draw_mesh(overlay_mesh, null)
+
+
+# --- the City's bank ----------------------------------------------------------------
+
+## Distance from a logical point to the owned land (0 on it), looking only at
+## the 3x3 cells round the point -- far enough for a bank half a tile wide.
+func land_distance(p: Vector2) -> float:
+	var c := Vector2i(floori(p.x), floori(p.y))
+	var best := INF
+	for dx in range(-1, 2):
+		for dy in range(-1, 2):
+			var n := c + Vector2i(dx, dy)
+			if not _world.is_owned(n):
+				continue
+			var q := Vector2(clampf(p.x, n.x, n.x + 1.0), clampf(p.y, n.y, n.y + 1.0))
+			best = minf(best, p.distance_to(q))
+	return best
+
+
+## Height of the bank (tile-edge units, 0 = the land, -cliff = the water) at
+## a distance `d` from the land: a soft shoulder, a slope, a flat beach.
+func bank_height(d: float) -> float:
+	var run := _data.get_float("art", "island_tiers.bank_run", 0.5) if _run <= 0.0 else _run
+	return -_proj.cliff_height * smoothstep(0.0, 1.0, clampf(d / run, 0.0, 1.0))
+
+
+## The bank's settings, read once a build (a build asks for them per vertex).
+var _run := 0.0
+var _stops: Array = []
+var _fade_from := 1.0
+
+
+func _read_bank_data() -> void:
+	_run = _data.get_float("art", "island_tiers.bank_run", 0.5)
+	_fade_from = _data.get_float("art", "island_tiers.bank_fade_from", 0.97)
+	_stops.clear()
+	for st: Array in _data.get_value("art", "island_tiers.bank_colors", [["#7fb236", 0.0], ["#86d6d4", 1.0]]):
+		_stops.append([Color.html(String(st[0])), float(st[1])])
+
+
+## The bank's colour at a share `s` of its run: the stops of `bank_colors`,
+## lit like the cliffs (the near-right faces darker), fading into the sea.
+func _bank_color(s: float, light: float) -> Color:
+	if _stops.is_empty():
+		_read_bank_data()
+	var col: Color = _stops[0][0]
+	for i in range(1, _stops.size()):
+		var s0: float = _stops[i - 1][1]
+		var s1: float = _stops[i][1]
+		if s <= s1:
+			col = (_stops[i - 1][0] as Color).lerp(_stops[i][0], clampf((s - s0) / maxf(s1 - s0, 0.0001), 0.0, 1.0))
+			break
+		col = _stops[i][0]
+	col.a = 1.0 - smoothstep(_fade_from, 1.0, s)
+	return Color(col.r * light, col.g * light, col.b * light, col.a)
+
+
+## How lit the bank is where it faces `g` -- the direction away from the
+## land (the distance's gradient), so the light turns smoothly round an outer
+## corner: facing +x (near right) as dark as the cliffs' right faces, facing
+## the light (up and left) a touch brighter.
+static func _light_facing(g: Vector2) -> float:
+	if g.length() < 0.0001:
+		return 1.0
+	g = g.normalized()
+	return 1.0 - (1.0 - RIGHT_FACE_LIGHT) * maxf(g.x, 0.0) + 0.04 * maxf(-g.x, 0.0) + 0.04 * maxf(-g.y, 0.0)
+
+
+## Distance from `p` to the nearest of these cells (INF with none).
+static func _distance_to(p: Vector2, cells: Array[Vector2i]) -> float:
+	var best := INF
+	for n: Vector2i in cells:
+		var q := Vector2(clampf(p.x, n.x, n.x + 1.0), clampf(p.y, n.y, n.y + 1.0))
+		best = minf(best, p.distance_squared_to(q))
+	return sqrt(best)
+
+
+## The water cells next to the land (8 neighbours), far to near.
+func bank_cells() -> Array[Vector2i]:
+	var out: Dictionary = {}
+	for cell: Vector2i in _order:
+		for dx in range(-1, 2):
+			for dy in range(-1, 2):
+				var n := cell + Vector2i(dx, dy)
+				if not _world.is_owned(n):
+					out[n] = true
+	var list: Array[Vector2i] = []
+	for c: Vector2i in out:
+		list.append(c)
+	list.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		var da := IsoProjection.depth(a)
+		var db := IsoProjection.depth(b)
+		return da < db or (da == db and a.x < b.x))
+	return list
+
+
+## Every bank sub-quad, far to near (the painter's order inside one mesh).
+## A vertex is shared by its neighbours exactly (it is a function of where it
+## is), so the bank has no seams between cells.
+func _bank(b: _Batch, grass: _Batch) -> void:
+	_read_bank_data()
+	var run := _run
+	var steps := maxi(int(_data.get_float("art", "island_tiers.bank_steps", 6.0)), 1)
+	var h := 1.0 / steps
+	var quads: Array = []
+	for cell: Vector2i in bank_cells():
+		# The land round this cell, read once (a vertex is at most a cell and
+		# a step from its cell); the grid has one step more on every side, so
+		# the slope's direction at a vertex comes from its neighbours.
+		var near: Array[Vector2i] = []
+		for dx in range(-2, 3):
+			for dy in range(-2, 3):
+				if _world.is_owned(cell + Vector2i(dx, dy)):
+					near.append(cell + Vector2i(dx, dy))
+		var dist: Array = []
+		for j in range(-1, steps + 2):
+			var row: Array = []
+			for i in range(-1, steps + 2):
+				row.append(_distance_to(Vector2(cell) + Vector2(i, j) * h, near))
+			dist.append(row)
+		var grid: Array = []
+		var lights: Array = []
+		for j in steps + 1:
+			var row: Array = []
+			var lrow: Array = []
+			for i in steps + 1:
+				var dp: float = dist[j + 1][i + 1]
+				row.append(dp)
+				var g := Vector2(float(dist[j + 1][i + 2]) - float(dist[j + 1][i]), float(dist[j + 2][i + 1]) - float(dist[j][i + 1]))
+				lrow.append(_light_facing(g) if dp < run else 1.0)
+			grid.append(row)
+			lights.append(lrow)
+		for j in steps:
+			for i in steps:
+				var d := [float(grid[j][i]), float(grid[j][i + 1]), float(grid[j + 1][i + 1]), float(grid[j + 1][i])]
+				if minf(minf(d[0], d[1]), minf(d[2], d[3])) >= run:
+					continue
+				var o := Vector2(cell) + Vector2(i, j) * h
+				var l := [float(lights[j][i]), float(lights[j][i + 1]), float(lights[j + 1][i + 1]), float(lights[j + 1][i])]
+				quads.append([o.x + o.y + h, o, d, l])
+	quads.sort_custom(func(a: Array, c: Array) -> bool: return float(a[0]) < float(c[0]))
+	bank_quads = quads.size()
+	bank_origins.clear()
+	for q: Array in quads:
+		bank_origins.append(q[1])
+	var grass_until := _data.get_float("art", "island_tiers.bank_grass_until", 0.42)
+	var gs := 1.0 / GRASS_TILES_PER_TEXTURE
+	for q: Array in quads:
+		var o: Vector2 = q[1]
+		var d: Array = q[2]
+		var pts := [o, o + Vector2(h, 0), o + Vector2(h, h), o + Vector2(0, h)]
+		var lv: Array = q[3]
+		var screen := PackedVector2Array()
+		var cols: Array = []
+		var turf: Array = []
+		var uvs := PackedVector2Array()
+		for k in 4:
+			var dk: float = d[k]
+			var light: float = lv[k]
+			screen.append(_proj.to_screen(pts[k], bank_height(dk)))
+			cols.append(_bank_color(clampf(dk / run, 0.0, 1.0), light))
+			var g_a := 1.0 - smoothstep(grass_until * 0.45, grass_until, clampf(dk / run, 0.0, 1.0))
+			turf.append(Color(light, light, light, g_a))
+			uvs.append(pts[k] * gs)
+		b.quad(screen, PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO]), cols)
+		# The turf over it, in the same logical texture space as the tops.
+		if float(turf[0].a) + float(turf[1].a) + float(turf[2].a) + float(turf[3].a) > 0.0:
+			grass.quad(screen, uvs, turf)
 
 
 # --- geometry ---------------------------------------------------------------------

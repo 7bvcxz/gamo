@@ -19,6 +19,8 @@ var sun_strength := 1.0
 var quality := 1.0
 
 var _world: WorldSystem
+var _tiers: TierSystem
+var _data: GameData
 var _mat: ShaderMaterial
 
 
@@ -26,6 +28,8 @@ func setup(sim: Simulation, p_camera: Camera2D, p_projection: IsoProjection) -> 
 	camera = p_camera
 	projection = p_projection
 	_world = sim.system(&"world")
+	_tiers = sim.system(&"tiers")
+	_data = sim.data
 	_mat = ShaderMaterial.new()
 	_mat.shader = SHADER
 	material = _mat
@@ -51,7 +55,7 @@ func set_palette(deep: Color, mid: Color, shallow: Color, far: Color, glint: Col
 
 
 func _on_event(type: StringName, _payload: Dictionary) -> void:
-	if type in [&"land_added", &"game_loaded"] and not _shore_dirty:
+	if type in [&"land_added", &"game_loaded", &"tier_promoted"] and not _shore_dirty:
 		_shore_dirty = true
 		_rebuild_shore.call_deferred()
 
@@ -61,9 +65,17 @@ var _shore_dirty := false
 
 func _rebuild_shore() -> void:
 	_shore_dirty = false
-	shore.build(_world)
+	# A City's coast is its bank's foot, half a tile out (Step 63).
+	shore.build(_world, apron())
 	_mat.set_shader_parameter("shore_field", shore.texture)
 	_mat.set_shader_parameter("field_rect", Vector4(shore.rect.position.x, shore.rect.position.y, shore.rect.size.x, shore.rect.size.y))
+
+
+## How far into the water the coast is drawn: a City's bank, else nothing.
+func apron() -> float:
+	if _tiers == null or _tiers.tier < int(_data.get_float("art", "island_tiers.city_from_tier", 1.0)):
+		return 0.0
+	return _data.get_float("art", "island_tiers.bank_run", 0.5)
 
 
 func _process(_delta: float) -> void:
