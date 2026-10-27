@@ -1,5 +1,5 @@
 // Step 53: a fresh island has no Momo. The player harvests by hand (paid at
-// once), hires the first Momo from the shop with real taps, and it stands
+// once), hires the first Momo with Hire with real taps, and it stands
 // idle -- however long the island runs -- until the player drags it onto a
 // farm. The choice is still there in a new tab of the same browser.
 import { test, expect } from '../lib/fixtures.mjs';
@@ -40,13 +40,13 @@ test('alone first, then the first Momo is the player\'s to hire and place', asyn
   }
   s = await game.state();
   expect(s.economy.money, 'the harvest pays, with no Momo').toBeGreaterThan(money0);
-  // The first hire, from the shop.
+  // The first hire, with Hire (the right edge, Step 59).
   const price = (await game.query('rules')).hire_price;
   expect(price, 'the first Momo has its own small price').toBe(15);
   if (s.economy.money < price) await game.query('dev_add_money', price - s.economy.money);
   const hud = await game.query('hud');
-  const shop = await toCss(game, hud.buttons.shop, hud.window);
-  await game.tap(shop.x, shop.y);
+  const hire = await toCss(game, hud.buttons.hire, hud.window);
+  await game.tap(hire.x, hire.y);
   await game.page.waitForTimeout(250);
   const ui = await game.query('build_ui');
   const card = await toCss(game, ui.cards.momo, ui.window);

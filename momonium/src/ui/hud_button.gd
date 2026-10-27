@@ -96,8 +96,10 @@ func _process(delta: float) -> void:
 
 func refresh_text() -> void:
 	_label.text = tr(label_key)
-	# A mouse resting on it (desktop) gets the name in a tooltip too.
+	# A mouse resting on it (desktop) gets the name in a tooltip too, and a
+	# screen reader the same name (Step 59).
 	tooltip_text = _label.text
+	accessibility_name = _label.text
 
 
 func _notification(what: int) -> void:

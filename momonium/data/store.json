@@ -1,0 +1,17 @@
+{
+  "_note": "The Premium Shop's catalog (Step 59): optional real-money products, no ads, nothing required. PROPOSED configuration until the platform storefront (Google Play) has the products and the owner approves them. The game never shows `proposed_price`: a price on screen comes from the storefront, and with no storefront connected the shop says 'Coming soon' and sells nothing. `steps` are what each purchase would make the island's speed (x2 each, five at most); nothing in the simulation reads them yet.",
+  "status": "proposed",
+  "products": [
+    {
+      "id": "accelerator",
+      "sku": "momonium_accelerator_x2",
+      "kind": "stepped_consumable",
+      "name": "store.accelerator.name",
+      "desc": "store.accelerator.desc",
+      "icon": "ui_boost",
+      "factor": 2,
+      "max_purchases": 5,
+      "proposed_price": {"currency": "KRW", "amount": 2000}
+    }
+  ]
+}

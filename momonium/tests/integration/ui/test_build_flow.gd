@@ -56,13 +56,13 @@ func _tap_cell(cell: Vector2i) -> void:
 	_tap(cams.world_to_screen(proj.cell_center(cell)))
 
 
-func test_no_build_button_and_the_shop_only_hires() -> void:
+func test_no_build_button_and_hire_only_hires() -> void:
 	var hud: Hud = main.get("hud")
 	assert_false(hud.buttons.has(&"build"), "no separate Build button: tap the ground")
-	main.call("_on_hud_action", &"shop")
-	var shop: ShopMenu = main.get("shop_menu")
-	assert_true(shop.visible, "the shop opens")
-	assert_eq(shop.cards.keys(), ["momo"], "with hiring only")
+	main.call("_on_hud_action", &"hire")
+	var menu: HireMenu = main.get("hire_menu")
+	assert_true(menu.visible, "the hire card opens")
+	assert_eq(menu.cards.keys(), ["momo"], "with hiring only")
 
 
 func test_an_empty_tile_opens_four_choices_beside_it() -> void:

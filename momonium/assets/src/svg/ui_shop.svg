@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- The Premium Shop (Step 59): a shopping bag with a small gem. -->
   <g fill="none" stroke="#ffffff" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-    <path d="M10 22 L14 10 H50 L54 22" />
-    <path d="M10 22 Q16 30 22 22 Q27 30 32 22 Q37 30 42 22 Q48 30 54 22" fill="#ffffff" fill-opacity="0.25"/>
-    <path d="M14 28 V54 H50 V28"/>
-    <rect x="26" y="38" width="12" height="16" rx="2" fill="#ffffff" fill-opacity="0.18"/>
+    <path d="M14 22 H50 L53 56 H11 Z" fill="#ffffff" fill-opacity="0.18"/>
+    <path d="M24 27 V18 A8 8 0 0 1 40 18 V27"/>
   </g>
+  <path d="M32 33 L39 40 L32 48 L25 40 Z" fill="#ffd45a" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
 </svg>

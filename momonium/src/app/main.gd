@@ -30,8 +30,15 @@ var selection: SelectionController
 var land_preview: LandPreview
 ## Buying the sea next to the island where it is (hover/click, tap twice).
 var land_buyer: LandBuyer
-## The shop (bottom-left): hiring.
-var shop_menu: ShopMenu
+## Hiring a Momo (the Hire button, right edge, Step 59).
+var hire_menu: HireMenu
+## The Premium Shop (the shopping bag, bottom-left, Step 59): optional
+## real-money products; with no storefront connected, all 'Coming soon'.
+var premium: PremiumStore
+var shop_frame: PanelFrame
+var shop_view: PremiumShopView
+## The last Buy or Restore tap and what the store answered (E2E).
+var shop_last := {}
 ## Four choices beside a tapped empty tile: the only way to build.
 var build_strip: BuildStrip
 var status_panel: StatusPanel
@@ -187,8 +194,8 @@ func _ready() -> void:
 	# The same Theme object: the HUD swaps its font when the language changes.
 	ui.theme = hud.theme
 	hud.action.connect(_on_hud_action)
-	hud.layout_changed.connect(func() -> void: panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin))
-	panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin)
+	hud.layout_changed.connect(func() -> void: panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin, hud.hire_button.get_rect()))
+	panel.set_reserved(hud.bottom_left_end + 8.0, hud.bottom_margin, hud.hire_button.get_rect())
 	building_views = BuildingViews.new()
 	building_views.name = "BuildingViews"
 	add_child(building_views)
@@ -247,11 +254,12 @@ func _ready() -> void:
 	build_strip.setup(sim, lib, cameras, projection)
 	build_strip.built.connect(func(id: int) -> void: selection.select_building(id))
 	selection.build_strip = build_strip
-	shop_menu = ShopMenu.new()
-	ui.add_child(shop_menu)
-	shop_menu.setup(sim, lib)
-	shop_menu.resized.connect(_place_shop_menu)
-	shop_menu.hire_requested.connect(func() -> void:
+	hire_menu = HireMenu.new()
+	ui.add_child(hire_menu)
+	hire_menu.setup(sim, lib)
+	hire_menu.resized.connect(_place_hire_menu)
+	hud.layout_changed.connect(_place_hire_menu)
+	hire_menu.hire_requested.connect(func() -> void:
 		var r := sim.execute({"type": "momo.hire"})
 		if r["ok"]:
 			selection.select_momo(int(r["id"])))
@@ -356,6 +364,17 @@ func _ready() -> void:
 	_last_wall = Time.get_unix_time_from_system()
 	_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
 	_tell_about_return.call_deferred(offline_report)
+	shop_frame = _frame(ui, "ShopFrame")
+	premium = PremiumStore.from_data(sim.data)
+	shop_view = PremiumShopView.new()
+	shop_view.setup(premium, lib)
+	shop_frame.add_tab("", shop_view)
+	shop_view.purchase_requested.connect(func(id: String) -> void:
+		shop_last = {"product": id, "result": premium.request_purchase(id)}
+		shop_view.refresh())
+	shop_view.restore_requested.connect(func() -> void:
+		shop_last = {"restore": true, "result": premium.storefront.restore() if premium.can_restore() else {"ok": false, "reason": "store.unavailable"}}
+		shop_view.refresh())
 	settings_frame = _frame(ui, "SettingsFrame")
 	audio = AudioService.new()
 	add_child(audio)
@@ -415,7 +434,7 @@ func _ready() -> void:
 	tutorial.editor = watch_editor
 	tutorial.momo_views = momo_views
 	tutorial.land_preview = land_preview
-	tutorial.shop_menu = shop_menu
+	tutorial.hire_menu = hire_menu
 	sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
 		if type == &"momo_watch_changed" and tutorial.running and watch_editor.active:
 			tutorial._edited = true)
@@ -502,6 +521,7 @@ func _ready() -> void:
 		sim.advance_ms(int(ms))
 		return {"now_ms": sim.now_ms(), "day": sim.clock.day_number()})
 	bridge.register_query("hud", _hud_info)
+	bridge.register_query("premium_shop", _premium_shop_info)
 	bridge.register_query("dev_place_building", func(arg: Variant) -> Dictionary:
 		var id := (sim.system(&"buildings") as BuildingSystem).place_instant(String(arg[0]), Vector2i(int(arg[1]), int(arg[2])))
 		return {"id": id})
@@ -1004,7 +1024,7 @@ func _check_land_tip(delta: float) -> void:
 func _busy() -> bool:
 	if build_strip.open:
 		return true
-	for f: PanelFrame in [status_frame, detail_frame, research_frame, sale_frame, power_frame, mail_frame, away_frame, settings_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, research_frame, sale_frame, power_frame, mail_frame, away_frame, settings_frame, shop_frame]:
 		if f != null and f.visible:
 			return true
 	return false
@@ -1232,32 +1252,43 @@ func _on_hud_action(action_name: StringName) -> void:
 		away_frame.close()
 	match action_name:
 		&"settings":
-			shop_menu.visible = false
+			hire_menu.visible = false
 			var was := settings_frame.visible
 			_close_frames()
 			if not was:
 				settings_view.refresh()
 				settings_frame.open()
-		&"shop":
+		&"hire":
 			selection.deselect()
 			_close_frames()
-			shop_menu.toggle()
-			_place_shop_menu()
+			hire_menu.toggle()
+			_place_hire_menu()
+		&"shop":
+			# The Premium Shop: never hiring, never the game's money.
+			hire_menu.visible = false
+			var was := shop_frame.visible
+			_close_frames()
+			if not was:
+				shop_frame.set_title(tr("hud.shop"))
+				shop_view.refresh()
+				shop_frame.open()
 		&"status":
-			shop_menu.visible = false
+			hire_menu.visible = false
+			shop_frame.close()
 			detail_frame.close()
 			mail_frame.close()
 			research_frame.close()
 			status_frame.toggle(0)
 		&"power":
-			shop_menu.visible = false
+			hire_menu.visible = false
 			var was := power_frame.visible
 			_close_frames()
 			if not was:
 				power_frame.set_title(tr("research.industry.power"))
 				power_frame.open()
 		&"research":
-			shop_menu.visible = false
+			hire_menu.visible = false
+			shop_frame.close()
 			status_frame.close()
 			detail_frame.close()
 			mail_frame.close()
@@ -1266,7 +1297,8 @@ func _on_hud_action(action_name: StringName) -> void:
 			else:
 				open_research()
 		&"mailbox":
-			shop_menu.visible = false
+			hire_menu.visible = false
+			shop_frame.close()
 			status_frame.close()
 			detail_frame.close()
 			research_frame.close()
@@ -1325,6 +1357,29 @@ func _hud_info(_arg: Variant) -> Dictionary:
 		"pops": hud.pops.slice(maxi(hud.pops.size() - 8, 0)), "content_scale": get_tree().root.content_scale_factor}
 
 
+## E2E: the Premium Shop -- open or not, each product as shown (its Buy
+## button in window pixels), the Restore button, the last tap's answer.
+func _premium_shop_info(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var rect := func(c: Control) -> Array:
+		var a: Vector2 = vp.get_final_transform() * c.get_global_rect().position
+		var b: Vector2 = vp.get_final_transform() * c.get_global_rect().end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var products := {}
+	for id: String in shop_view.cards:
+		var c: Dictionary = shop_view.cards[id]
+		var buy := c["buy"] as Button
+		products[id] = {"name": (c["name"] as Label).text, "desc": (c["desc"] as Label).text, "buy": rect.call(buy) if buy.is_visible_in_tree() else [],
+			"buy_text": buy.text, "buy_disabled": buy.disabled, "price": (c["price"] as Label).text, "owned": (c["owned"] as Label).text,
+			"steps": (c["steps"] as Array).map(func(b: Button) -> String: return b.text), "state": premium.state(id)}
+	var win := DisplayServer.window_get_size()
+	return {"open": shop_frame.visible, "title": shop_frame.title_label.text, "intro": shop_view.intro.text, "products": products,
+		"restore": rect.call(shop_view.restore_button) if shop_view.restore_button.is_visible_in_tree() else [],
+		"restore_disabled": shop_view.restore_button.disabled, "note": shop_view.note.text if shop_view.note.visible else "",
+		"close": rect.call(shop_frame.close_button) if shop_frame.visible else [], "storefront": premium.storefront.available(),
+		"last": shop_last, "window": [win.x, win.y]}
+
+
 ## E2E: what is selected, the panel's cards (window pixels) and the last tap result.
 func _selection_info(_arg: Variant) -> Dictionary:
 	var vp := get_viewport()
@@ -1350,15 +1405,19 @@ func _land_buy_info(_arg: Variant) -> Dictionary:
 		"invite": [] if land_preview.invite == LandPreview.NONE else [land_preview.invite.x, land_preview.invite.y]}
 
 
-func _place_shop_menu() -> void:
-	if shop_menu == null:
+## The hire card opens beside the Hire button: to its left, level with it,
+## inside the window.
+func _place_hire_menu() -> void:
+	if hire_menu == null:
 		return
-	shop_menu.reset_size()
+	hire_menu.reset_size()
 	var size := get_viewport_rect().size
-	shop_menu.position = Vector2(16.0, size.y - shop_menu.size.y - 104)
+	var b := hud.hire_button.get_rect()
+	hire_menu.position = Vector2(maxf(8.0, b.position.x - hire_menu.size.x - 10.0),
+		clampf(b.get_center().y - hire_menu.size.y * 0.5, 80.0, maxf(size.y - hire_menu.size.y - 8.0, 80.0)))
 
 
-## E2E: shop cards and the stage cards under a selected building (window pixels).
+## E2E: the hire card and the stage cards under a selected building (window pixels).
 func _build_ui_info(_arg: Variant) -> Dictionary:
 	var vp := get_viewport()
 	var rect := func(c: Control) -> Array:
@@ -1366,10 +1425,10 @@ func _build_ui_info(_arg: Variant) -> Dictionary:
 		var b: Vector2 = vp.get_final_transform() * c.get_global_rect().end
 		return [a.x, a.y, b.x - a.x, b.y - a.y]
 	var cards := {}
-	for type: String in shop_menu.cards:
-		cards[type] = rect.call(shop_menu.cards[type])
+	for type: String in hire_menu.cards:
+		cards[type] = rect.call(hire_menu.cards[type])
 	var win := DisplayServer.window_get_size()
-	return {"menu_open": shop_menu.visible, "cards": cards, "panel_cards": panel.card_rects().map(func(r: Rect2) -> Array:
+	return {"menu_open": hire_menu.visible, "cards": cards, "panel_cards": panel.card_rects().map(func(r: Rect2) -> Array:
 			var a: Vector2 = vp.get_final_transform() * r.position
 			var b: Vector2 = vp.get_final_transform() * r.end
 			return [a.x, a.y, b.x - a.x, b.y - a.y]), "window": [win.x, win.y]}
@@ -1399,6 +1458,8 @@ func _close_frames() -> void:
 	detail_frame.close()
 	mail_frame.close()
 	research_frame.close()
+	if shop_frame != null:
+		shop_frame.close()
 
 
 ## The mailbox, opening on the list of letters.
@@ -1415,7 +1476,7 @@ func _place_frames() -> void:
 	var size := get_viewport_rect().size
 	# Keep the side buttons free.
 	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
-	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame, power_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame, power_frame, shop_frame]:
 		if f == null:
 			continue
 		f.right_reserved = reserved
@@ -1429,7 +1490,7 @@ func open_details(id: int) -> void:
 	status_frame.close()
 	mail_frame.close()
 	research_frame.close()
-	shop_menu.visible = false
+	hire_menu.visible = false
 	detail_frame.set_title(BuildingDetailView.full_name(sim, String(b["type"])))
 	detail_view.show_building(id)
 	detail_frame.open()

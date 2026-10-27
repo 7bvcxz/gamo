@@ -78,8 +78,11 @@ func test_dismiss_by_close_scrim_and_corner_button() -> void:
 	_tap(outside)
 	assert_false(frame.visible, "a tap on the island around the card closes it")
 	main.call("_on_hud_action", &"status")
+	main.call("_on_hud_action", &"hire")
+	assert_false(frame.visible, "opening the hire card puts the panel away")
+	main.call("_on_hud_action", &"status")
 	main.call("_on_hud_action", &"shop")
-	assert_false(frame.visible, "opening the shop puts the panel away")
+	assert_false(frame.visible, "and so does the Premium Shop")
 
 
 func test_store_follows_the_inventory_live() -> void:

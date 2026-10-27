@@ -4,8 +4,10 @@ extends Control
 ## The always-visible UI, kept to the corners so the island stays the picture:
 ##   top-left     Day N, seconds of the day, a donut of the day's progress
 ##   top-right    money; level with exact EXP; one line of key production
-##   right edge   Research, Mailbox, Land, Status (small)
-##   bottom-left  Settings, Shop
+##   right edge   Research, Mailbox, Status (small); below them, a little
+##                under the screen's middle, Hire (Step 59)
+##   bottom-left  Settings, Shop (the Premium Shop, Step 59 -- real money,
+##                never hiring)
 ## Margins respect the device's safe area (notches, rounded corners). Values
 ## are read from the simulation each frame but labels change only when the
 ## number does. Buttons emit `action`; what they open arrives in later steps.
@@ -57,6 +59,9 @@ var burst_text := ""
 var burst_active := false
 var burst_fraction := 0.0
 var corner_buttons: Array[HudButton] = []
+## Step 59: hiring a Momo, on its own at the right edge a little below the
+## middle -- the island's growth, apart from the Premium Shop's purchases.
+var hire_button: HudButton
 var buttons: Dictionary = {}
 ## Right edge of the bottom-left buttons and the bottom margin, after layout.
 var bottom_left_end := 168.0
@@ -205,6 +210,7 @@ func setup(p_sim: Simulation, lib: SpriteLibrary) -> void:
 	for spec: Array in [[&"research", "hud.research", "ui_research"], [&"mailbox", "hud.mailbox", "ui_mail"],
 			[&"status", "hud.status", "ui_status"]]:
 		side_buttons.append(_button(spec, lib))
+	hire_button = _button([&"hire", "hud.hire", "ui_hire"], lib)
 	for spec: Array in [[&"settings", "hud.settings", "ui_settings"], [&"shop", "hud.shop", "ui_shop"]]:
 		corner_buttons.append(_button(spec, lib))
 
@@ -519,15 +525,15 @@ func refresh(force: bool = false) -> void:
 	var status_button: HudButton = buttons.get(&"status")
 	if tiers != null and status_button != null and status_button.badge != tiers.can_promote():
 		status_button.badge = tiers.can_promote()
-	# A dot on the shop when a Momo can be hired and there is work nobody
-	# looks after (Step 50: the blind players never found what to buy next).
-	var shop_button: HudButton = buttons.get(&"shop")
-	if shop_button != null and (force or Time.get_ticks_msec() >= _shop_check_at):
+	# A dot on Hire when a Momo can be hired and there is work nobody looks
+	# after (Step 50: the blind players never found what to buy next). Never
+	# on the Premium Shop (Step 59).
+	if hire_button != null and (force or Time.get_ticks_msec() >= _hire_check_at):
 		# Twice a second is plenty, and a large island has many buildings.
-		_shop_check_at = Time.get_ticks_msec() + 500
+		_hire_check_at = Time.get_ticks_msec() + 500
 		var want_hire := _hire_worth_it()
-		if shop_button.badge != want_hire:
-			shop_button.badge = want_hire
+		if hire_button.badge != want_hire:
+			hire_button.badge = want_hire
 	_refresh_stock()
 	_refresh_goal()
 	var production := production_summary()
@@ -616,7 +622,7 @@ func production_summary() -> String:
 	return tr("hud.rate") % _format_money(rate)
 
 
-var _shop_check_at := 0
+var _hire_check_at := 0
 
 
 ## Whether hiring now would put a Momo to work: affordable, and a building
@@ -711,6 +717,7 @@ func _layout() -> void:
 	for b: HudButton in side_buttons:
 		b.position = Vector2(w - m["right"] - b.size.x, y)
 		y += b.size.y + GAP
+	hire_button.position = Vector2(w - m["right"] - hire_button.size.x, hire_y(y, h, m["bottom"], hire_button.size.y))
 	var x: float = m["left"]
 	for b: HudButton in corner_buttons:
 		b.position = Vector2(x, h - m["bottom"] - b.size.y)
@@ -720,10 +727,26 @@ func _layout() -> void:
 	layout_changed.emit()
 
 
+## Where Hire stands (its top): a little below the middle of the screen
+## (HIRE_AT of the height, at its centre), never on the side buttons above it
+## (`below` is where they end) and clear of what a selected building shows
+## at the bottom right -- the stage cards and, above them, the check and the
+## bin (ContextPanel), which a short landscape window brings up to the
+## middle.
+const HIRE_AT := 0.56
+const BOTTOM_RIGHT_RESERVED := ContextPanel.CARD_SIZE.y + 8.0 + 2.0 * (52.0 + 8.0)
+
+
+static func hire_y(below: float, h: float, bottom: float, button_h: float) -> float:
+	var want := h * HIRE_AT - button_h * 0.5
+	var lowest := h - bottom - BOTTOM_RIGHT_RESERVED - GAP - button_h
+	return maxf(below + GAP, minf(want, lowest))
+
+
 ## Screen rectangles of everything the HUD draws (tests check overlaps).
 func occupied_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = [day_panel.get_rect(), money_pill.get_rect(), exp_pill.get_rect()]
-	for b: HudButton in side_buttons + corner_buttons:
+	for b: HudButton in side_buttons + corner_buttons + [hire_button]:
 		out.append(b.get_rect())
 	if goal_button.visible:
 		out.append(goal_button.get_rect())

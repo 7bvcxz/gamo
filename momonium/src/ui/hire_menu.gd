@@ -1,8 +1,11 @@
-class_name ShopMenu
+class_name HireMenu
 extends PanelContainer
 
-## The shop (bottom-left): hire another Momo. Buildings are not bought here --
-## tap an empty tile and the four choices appear beside it (BuildStrip).
+## Hiring (the Hire button at the right edge, Step 59; it was the bottom-left
+## "Shop" until then): another Momo for in-game money. Buildings are not
+## bought here -- tap an empty tile and the four choices appear beside it
+## (BuildStrip) -- and nothing here costs real money: that is the Premium
+## Shop, a separate panel.
 
 signal hire_requested
 
@@ -15,7 +18,7 @@ var cards: Dictionary = {}
 func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	sim = p_sim
 	lib = p_lib
-	name = "ShopMenu"
+	name = "HireMenu"
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	var head := HBoxContainer.new()
@@ -52,7 +55,7 @@ func toggle() -> void:
 
 
 func rebuild() -> void:
-	(find_child("Title", true, false) as Label).text = tr("hud.shop")
+	(find_child("Title", true, false) as Label).text = tr("hud.hire")
 	PanelViews.clear(list)
 	cards.clear()
 	_add_hire_card(sim.system(&"economy"))
@@ -84,6 +87,7 @@ func _add_hire_card(economy: EconomySystem) -> void:
 		price.modulate = Color("#ff9a8f")
 		card.disabled = true
 	box.add_child(price)
+	card.accessibility_name = "%s, $%d" % [tr("momo.hire"), cost]
 	card.pressed.connect(func() -> void:
 		visible = false
 		hire_requested.emit())

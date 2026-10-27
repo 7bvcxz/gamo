@@ -84,4 +84,4 @@ AAB는 Godot의 **Gradle 빌드**가 필요하다(prebuilt 템플릿은 APK만 �
 - 패키지 ID는 임시다. AAB와 Play 업로드는 절차만 있고 실행하지 않았다(디스크 여유 3.6 GB, Gradle 의존성).
 - 배터리 소모는 USB 충전 중이라 직접 재지 못했다. 대리 지표는 30 fps 모드, 화면 밖 정지(Step 41), 백그라운드 무음이다.
 - 기기 백업은 Android 정책(사용자 설정, 25 MB 한도)에 따른다. 세이브는 수십 KB다.
-- 결제(Accelerator)는 넣지 않았다 — `design/RELEASE_CHECKLIST.md`의 '수익화(계획)'.
+- 결제(Accelerator)는 넣지 않았다 — 상점 화면은 Step 59부터 있지만 모든 상품이 '준비 중'이다. 스토어 제약과 정할 것은 `design/RELEASE_CHECKLIST.md`의 '수익화'.

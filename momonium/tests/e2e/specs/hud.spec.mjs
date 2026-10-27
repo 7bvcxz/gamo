@@ -22,14 +22,14 @@ test('shows Day, money and exact EXP', async ({ game }) => {
 
 test('corner buttons take a real tap and leave the camera alone', async ({ game }) => {
   const before = await game.query('camera');
-  for (const name of ['research', 'status', 'shop']) {
+  for (const name of ['research', 'status', 'hire', 'shop']) {
     const info = await game.query('hud');
     const p = await toCss(game, info.buttons[name], info);
     await game.tap(p.x, p.y);
     await game.page.waitForTimeout(120);
   }
   const after = await game.query('hud');
-  expect(after.actions.slice(-3)).toEqual(['research', 'status', 'shop']);
+  expect(after.actions.slice(-4)).toEqual(['research', 'status', 'hire', 'shop']);
   const cam = await game.query('camera');
   expect(cam.x).toBeCloseTo(before.x, 3);
   expect(cam.y).toBeCloseTo(before.y, 3);

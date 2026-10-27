@@ -45,6 +45,7 @@ var _tile_label: Label
 ## island above.
 var _bottom_reserved := 16.0
 var _left_reserved := 168.0
+var _avoid := Rect2()
 
 
 func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
@@ -333,9 +334,11 @@ func _draw_card_progress(card: Button) -> void:
 		card.draw_rect(bar, Color("#7cc943"))
 
 
-func set_reserved(left: float, bottom: float) -> void:
+## `avoid`: a HUD button the bin and the check must not cover (Hire, Step 59).
+func set_reserved(left: float, bottom: float, avoid: Rect2 = Rect2()) -> void:
 	_left_reserved = left
 	_bottom_reserved = bottom
+	_avoid = avoid
 	_layout()
 
 
@@ -355,6 +358,10 @@ func _layout() -> void:
 	# Bottom right, just above the card row (never on a card), the check above it.
 	trash_button.position = Vector2(w - 16.0 - trash_button.size.x, y - trash_button.size.y - 8.0)
 	confirm_button.position = trash_button.position - Vector2(0, confirm_button.size.y + 8.0)
+	# A window too short to keep them apart: the pair steps left of the button.
+	if _avoid.size != Vector2.ZERO and Rect2(confirm_button.position, Vector2(trash_button.size.x, trash_button.position.y + trash_button.size.y - confirm_button.position.y)).intersects(_avoid):
+		trash_button.position.x = _avoid.position.x - GAP - trash_button.size.x
+		confirm_button.position.x = trash_button.position.x
 	_tile_pill.reset_size()
 	_tile_pill.position = Vector2(area_left + maxf((area_right - area_left - _tile_pill.size.x) * 0.5, 0.0), h - _bottom_reserved - _tile_pill.size.y)
 

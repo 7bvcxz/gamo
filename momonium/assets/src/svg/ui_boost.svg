@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- The Accelerator (Step 59, proposed): fast-forward. -->
+  <g fill="#ffd45a" stroke="#ffffff" stroke-width="3" stroke-linejoin="round">
+    <path d="M8 14 L32 32 L8 50 Z"/>
+    <path d="M30 14 L54 32 L30 50 Z"/>
+  </g>
+</svg>

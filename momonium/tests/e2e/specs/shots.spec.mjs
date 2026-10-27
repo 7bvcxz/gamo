@@ -112,3 +112,35 @@ test('mail: a letter arrives, the letter, research', async ({ game }, info) => {
   await tap(m.rows[0].rect, m.window);
   await save(game, info, 'mail', 'letter');
 });
+
+// Step 59: Hire and the Premium Shop. The phone is shot at 720x1280 (360x640
+// CSS at 2x), the issue's portrait baseline. A farm nobody looks after and the
+// money for a hire put the hiring dot up; then the hire card, and (from 0.59)
+// the Premium Shop. An old build has no 'hire' button: its shop is the hire.
+test.describe('shop', () => {
+  test.use({ viewport: { width: 360, height: 640 } });
+  test('shop: the hire dot, hiring, the premium shop', async ({ game }, info) => {
+    if (!info.project.use.hasTouch) await game.page.setViewportSize({ width: 1280, height: 800 });
+    await game.setTimeScale(0);
+    await game.query('set_language', 'en');
+    for (const c of [[1, 0], [0, 1], [1, 1]]) {
+      if ((await game.query('dev_place_building', ['farm', ...c])).id) break;
+    }
+    await game.query('dev_add_money', 400);
+    await game.page.waitForTimeout(900);
+    await save(game, info, 'shop', 'rest');
+    const tap = async (r, win) => {
+      const box = await game.canvas.boundingBox();
+      await game.tap((r[0] + r[2] / 2) * (box.width / win[0]), (r[1] + r[3] / 2) * (box.height / win[1]));
+      await game.page.waitForTimeout(500);
+    };
+    const h = await game.query('hud');
+    await tap(h.buttons.hire || h.buttons.shop, h.window);
+    await save(game, info, 'shop', 'hire');
+    if (h.buttons.hire) {
+      await tap(h.buttons.hire, h.window);
+      await tap(h.buttons.shop, h.window);
+      await save(game, info, 'shop', 'premium');
+    }
+  });
+});

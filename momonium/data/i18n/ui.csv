@@ -7,7 +7,8 @@ hud.research,Research,연구,研究,研究
 hud.mailbox,Mailbox,편지함,郵便箱,信箱
 hud.status,Status,스테이터스,ステータス,状态
 hud.settings,Settings,설정,設定,设置
-hud.shop,Hire,고용,雇用,雇佣
+hud.shop,Shop,상점,ショップ,商店
+hud.hire,Hire,고용,雇用,雇佣
 hud.per_day,+$%d / day,+$%d / 일,+$%d / 日,+$%d / 天
 lang.name,English,한국어,日本語,简体中文
 building.farm,Farm,밭,畑,农田
@@ -604,3 +605,14 @@ away.counted_all,Away {away}. Momo kept the island going the whole time.,{away} 
 away.counted_part,Away {away}. The island counts {t} of it.,{away} 동안 떠나 있었어요. 섬은 그중 {t}를 셌어요.,{away}のあいだ留守でした。島が数えたのはそのうち{t}です。,离开了{away}。岛屿计算了其中的{t}。
 away.quiet,The island rested while you were away. Momo keep working while you are gone when they have a building to look after.,섬이 조용히 쉬었어요. 돌볼 건물이 있으면 모모는 떠나 있는 동안에도 일해요.,島はのんびり休んでいました。世話をする建物があれば、モモは留守のあいだも働きます。,岛屿安静地休息了。只要有要照看的建筑，你离开时桃桃也会继续工作。
 away.counted_only,Away {away}.,{away} 동안 떠나 있었어요.,{away}のあいだ留守でした。,离开了{away}。
+store.intro,"Optional extras. No ads, and nothing you need to buy to play.","선택 상품이에요. 광고는 없고, 사지 않아도 끝까지 즐길 수 있어요.",おまけの商品です。広告はなく、買わなくても最後まで遊べます。,可选商品。没有广告，不购买也能玩到最后。
+store.accelerator.name,Accelerator,가속기,アクセラレーター,加速器
+store.accelerator.desc,"Each one makes your whole island work twice as fast, up to five.","하나마다 섬 전체의 일이 두 배 빨라져요. 최대 5개까지.",ひとつごとに島全体の仕事が2倍速くなります。最大5個まで。,每个让整座岛的工作快一倍，最多5个。
+store.owned,Owned %d / %d,보유 %d / %d,所持 %d / %d,已拥有 %d / %d
+store.coming_soon,Coming soon,준비 중,準備中,即将推出
+store.maxed,All owned,모두 보유,すべて所持,已全部拥有
+store.no_price,Not on sale,판매 안 함,販売なし,暂不出售
+store.buy,Buy,구매,購入,购买
+store.restore,Restore purchases,구매 복원,購入を復元,恢复购买
+store.unavailable,Purchases are not available,결제를 이용할 수 없어요,購入は利用できません,暂不支持购买
+store.unavailable_note,"Purchases are not open yet in this version: nothing here can be bought, and nothing is charged.","이 버전에서는 아직 결제가 열리지 않았어요. 여기서는 아무것도 살 수 없고, 요금도 나가지 않아요.",このバージョンではまだ購入できません。ここでは何も買えず、料金もかかりません。,此版本尚未开放购买：这里不能购买任何东西，也不会扣费。

@@ -1,5 +1,5 @@
 // Step 18: drag a Momo onto a farm (finger on phones, mouse on desktop) to
-// assign it; drop in the sea and it refuses; hire a second Momo from the shop.
+// assign it; drop in the sea and it refuses; hire a second Momo with Hire.
 import { test, expect } from '../lib/fixtures.mjs';
 import { cellToCanvas } from '../lib/coords.mjs';
 import { touchDrag } from '../lib/touch.mjs';
@@ -48,14 +48,14 @@ test('the sea refuses a Momo', async ({ game }, info) => {
   expect(after.to).toEqual(before.to);
 });
 
-test('hire a second Momo in the shop', async ({ game }) => {
+test('hire a second Momo with Hire', async ({ game }) => {
   await game.setTimeScale(0);
   const price = (await game.query('rules')).hire_price;
   const start = (await game.state()).economy.money;
   await game.query('dev_add_money', price);
   const hud = await game.query('hud');
-  const shop = await toCss(game, [hud.buttons.shop[0] + hud.buttons.shop[2] / 2, hud.buttons.shop[1] + hud.buttons.shop[3] / 2], hud.window);
-  await game.tap(shop.x, shop.y);
+  const hire = await toCss(game, [hud.buttons.hire[0] + hud.buttons.hire[2] / 2, hud.buttons.hire[1] + hud.buttons.hire[3] / 2], hud.window);
+  await game.tap(hire.x, hire.y);
   await game.page.waitForTimeout(200);
   const ui = await game.query('build_ui');
   const c = ui.cards.momo;

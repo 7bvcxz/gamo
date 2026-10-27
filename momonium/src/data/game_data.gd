@@ -13,7 +13,7 @@ extends RefCounted
 
 ## Tables the game loads. A file in data/ that is not listed here is an error
 ## (see test_data), so a new table cannot be silently ignored.
-const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters", "research", "recipes"]
+const TABLES: PackedStringArray = ["balance", "art", "buildings", "items", "letters", "research", "recipes", "store"]
 
 var tables: Dictionary = {}
 var errors: Array[String] = []

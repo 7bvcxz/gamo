@@ -2,7 +2,7 @@
 // with a ripe crop and the tutorial ringing it -- the first tap is a harvest
 // and its money within seconds; a full island with the next tile affordable
 // shows that tile glowing with its price, unasked; a building nobody looks
-// after and a hire affordable put a dot on the shop.
+// after and a hire affordable put a dot on Hire (Step 59: never on the Shop).
 import { test, expect } from '../lib/fixtures.mjs';
 import { clearPointOnCell } from '../lib/coords.mjs';
 
@@ -25,7 +25,7 @@ test.describe('a new player island', () => {
   });
 });
 
-test('a full island invites the next tile, and the shop shows a hire is worth it', async ({ game }) => {
+test('a full island invites the next tile, and Hire shows a hire is worth it', async ({ game }) => {
   await game.setTimeScale(0);
   for (const [x, y] of [[0, 0], [1, 0], [0, 1], [1, 1]]) await game.query('dev_place_building', ['farm', x, y]);
   await game.query('dev_sale', 200);
@@ -33,5 +33,6 @@ test('a full island invites the next tile, and the shop shows a hire is worth it
   const land = await game.query('land_buy');
   const s = await game.state();
   expect(s.world.land.some(([x, y]) => x === land.invite[0] && y === land.invite[1]), 'the invited tile is sea').toBe(false);
-  await expect.poll(async () => (await game.query('hud')).badges, { timeout: 5_000 }).toContain('shop');
+  await expect.poll(async () => (await game.query('hud')).badges, { timeout: 5_000 }).toContain('hire');
+  expect((await game.query('hud')).badges, 'no hiring dot on the Premium Shop').not.toContain('shop');
 });

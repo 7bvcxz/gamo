@@ -36,7 +36,7 @@ var momo_views: MomoViews
 ## The sea for sale: the tile it rings and whether it glows now.
 var land_preview: LandPreview
 ## The menu the first Momo is hired from (Step 53).
-var shop_menu: ShopMenu
+var hire_menu: HireMenu
 var _momo_done := false
 var _land_done := false
 var _edited := false
@@ -245,8 +245,8 @@ func _update() -> void:
 			var economy: EconomySystem = sim.system(&"economy")
 			text.text = tr("tutorial.save_hire") % [economy.money, (sim.system(&"momo") as MomoSystem).hire_cost()]
 		"hire":
-			var card: Control = shop_menu.cards.get("momo") if shop_menu != null and shop_menu.visible else null
-			target = _rect(card) if card != null else _rect(hud.buttons.get(&"shop"))
+			var card: Control = hire_menu.cards.get("momo") if hire_menu != null and hire_menu.visible else null
+			target = _rect(card) if card != null else _rect(hud.buttons.get(&"hire"))
 			text.text = tr("tutorial.hire") % (sim.system(&"momo") as MomoSystem).hire_cost()
 		"momo_select":
 			target = _momo_rect()
