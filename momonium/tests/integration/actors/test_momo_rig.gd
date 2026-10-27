@@ -85,7 +85,8 @@ func test_walking_faster_steps_faster() -> void:
 
 func test_jobs_moods_and_rest_have_their_own_cells() -> void:
 	for work: String in ["harvest", "water", "dig", "study", "sow", "chop", "replant", "hammer", "stoke", "write"]:
-		assert_eq(_cell_after("work", Vector2(-1, -0.4), work), work + "_0", "%s: its pose with its tool (Step 66 work atlas)" % work)
+		_cell_after("idle", Vector2(1, 0.5))
+		assert_eq(_cell_after("work", Vector2(-1, -0.4), work), work + "_0", "%s: starts its loop with its tool (Steps 66-67)" % work)
 	assert_eq(_cell_after("work", Vector2(-1, -0.4), "carry"), "carry", "a sheet pose with no work frames: the sheet's")
 	assert_eq(_cell_after("work", Vector2(-1, -0.4), ""), "back_work", "other work: back turned, busy")
 	assert_eq(_cell_after("sit", Vector2(1, 0.5)), "sit", "")
@@ -120,5 +121,87 @@ func test_same_size_in_every_state() -> void:
 	for st: String in ["idle", "walk", "sit", "sleep", "work"]:
 		rig.set_state(st)
 		rig.tick(0.2)
-		assert_near(absf(rig.body.scale.x), MomoRig.HEIGHT / sheet.stand_height, 0.01, "%s: the sheet's one size (a breath at most)" % st)
+		assert_near(absf(rig.body.scale.x), MomoRig.HEIGHT / sheet.stand_height_of(rig.cell_name()), 0.01, "%s: the one size on the island (a breath at most)" % st)
 	assert_near(MomoRig.HEIGHT, 72.0, 0.01, "as tall as before Step 51 (taps and the HUD's anchors)")
+
+
+## Step 67: a job is a loop -- wind-up, swing, strike, recover -- each frame
+## held its own time, then a pause that is not the same twice; going back to
+## work starts at the wind-up; reduced motion slows it; it runs on the real
+## seconds that pass, whatever the simulation does.
+func test_a_job_loops_through_its_frames_in_time() -> void:
+	var sheet := MomoSheet.shared()
+	for work: String in ["dig", "water", "study"]:
+		var anim := "work_" + work
+		var cells: Array = sheet.frames(anim)
+		var timed: Array = sheet.animations[anim]["durations"]
+		_cell_after("idle", Vector2(1, 0.5))
+		rig.set_state("work")
+		rig.work_pose = work
+		var seen: Array[String] = []
+		var held := {}
+		for i in 600:
+			rig.tick(1.0 / 60.0)
+			var c := rig.cell_name()
+			if seen.is_empty() or seen[-1] != c:
+				seen.append(c)
+			held[c] = int(held.get(c, 0)) + 1
+		assert_eq(seen.slice(0, cells.size()), cells, "%s: the frames in order" % work)
+		assert_true(seen.size() > cells.size(), "%s: and again (%d changes in 10 s)" % [work, seen.size()])
+		for c: String in cells:
+			assert_true(held.has(c), "%s: %s shows" % [work, c])
+		# The first pass: each frame for its own time.
+		var t0 := 0.0
+		_cell_after("idle", Vector2(1, 0.5))
+		rig.set_state("work")
+		rig.work_pose = work
+		for i in cells.size():
+			rig.tick(0.0 if i == 0 else float(timed[i - 1]))
+			assert_eq(rig.cell_name(), String(cells[i]), "%s: frame %d after %.2f s" % [work, i, t0])
+			t0 += float(timed[i])
+
+
+func test_the_pause_after_a_pass_varies() -> void:
+	_cell_after("idle", Vector2(1, 0.5))
+	rig.set_state("work")
+	rig.work_pose = "dig"
+	var last_frame := 0.0
+	var pauses: Array[float] = []
+	var on_last := false
+	var since := 0.0
+	var cells: Array = MomoSheet.shared().frames("work_dig")
+	for i in 60 * 30:
+		rig.tick(1.0 / 60.0)
+		var last := rig.cell_name() == String(cells[-1])
+		if last:
+			since += 1.0 / 60.0
+		elif on_last:
+			pauses.append(since)
+			since = 0.0
+		on_last = last
+	assert_true(pauses.size() >= 5, "many passes in 30 s (%d)" % pauses.size())
+	var lo: float = pauses.min()
+	var hi: float = pauses.max()
+	assert_true(hi - lo > 0.08, "the end of a pass is not held the same every time (%.2f..%.2f s)" % [lo, hi])
+
+
+func test_reduced_motion_slows_the_loop() -> void:
+	var count := func() -> int:
+		_cell_after("idle", Vector2(1, 0.5))
+		rig.set_state("work")
+		rig.work_pose = "hammer"
+		var changes := 0
+		var was := ""
+		for i in 600:
+			rig.tick(1.0 / 60.0)
+			if rig.cell_name() != was:
+				changes += 1
+				was = rig.cell_name()
+		return changes
+	FxPrefs.reduced_motion = false
+	var normal: int = count.call()
+	FxPrefs.reduced_motion = true
+	var reduced: int = count.call()
+	FxPrefs.reduced_motion = false
+	assert_true(reduced < normal * 0.8, "fewer swings with reduced motion (%d vs %d in 10 s)" % [reduced, normal])
+	assert_true(reduced > 4, "but still working")

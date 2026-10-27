@@ -1,114 +1,370 @@
 {
-  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Every frame is fitted by Momo's head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md.",
+  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Each job is four frames of one generated 2x2 sheet (Step 67, `strip`: one scale for the four), cut by tools/art/gen/split_frames.gd; every frame is fitted by Momo's eyes and head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md.",
   "anchor": "res://assets/src/png/momo/front_idle.webp",
   "stand_height": 200,
-  "atlas_width": 1024,
+  "atlas_width": 1536,
   "frames": [
     {
       "name": "sow_0",
-      "src": "sow.webp"
+      "src": "sow_0.webp",
+      "strip": "sow"
+    },
+    {
+      "name": "sow_1",
+      "src": "sow_1.webp",
+      "strip": "sow"
+    },
+    {
+      "name": "sow_2",
+      "src": "sow_2.webp",
+      "strip": "sow"
+    },
+    {
+      "name": "sow_3",
+      "src": "sow_3.webp",
+      "strip": "sow"
     },
     {
       "name": "water_0",
-      "src": "water.webp"
+      "src": "water_0.webp",
+      "strip": "water"
+    },
+    {
+      "name": "water_1",
+      "src": "water_1.webp",
+      "strip": "water"
+    },
+    {
+      "name": "water_2",
+      "src": "water_2.webp",
+      "strip": "water"
+    },
+    {
+      "name": "water_3",
+      "src": "water_3.webp",
+      "strip": "water"
     },
     {
       "name": "harvest_0",
-      "src": "harvest.webp"
+      "src": "harvest_0.webp",
+      "strip": "harvest"
+    },
+    {
+      "name": "harvest_1",
+      "src": "harvest_1.webp",
+      "strip": "harvest"
+    },
+    {
+      "name": "harvest_2",
+      "src": "harvest_2.webp",
+      "strip": "harvest"
+    },
+    {
+      "name": "harvest_3",
+      "src": "harvest_3.webp",
+      "strip": "harvest"
     },
     {
       "name": "dig_0",
-      "src": "dig.webp",
-      "adjust": 0.9,
-      "why": "its eyes are drawn small (leaning back): by the eyes alone the head came out 12% wider than the standing Momo"
+      "src": "dig_0.webp",
+      "strip": "dig"
+    },
+    {
+      "name": "dig_1",
+      "src": "dig_1.webp",
+      "strip": "dig"
+    },
+    {
+      "name": "dig_2",
+      "src": "dig_2.webp",
+      "strip": "dig"
+    },
+    {
+      "name": "dig_3",
+      "src": "dig_3.webp",
+      "strip": "dig"
     },
     {
       "name": "chop_0",
-      "src": "chop.webp"
+      "src": "chop_0.webp",
+      "strip": "chop"
+    },
+    {
+      "name": "chop_1",
+      "src": "chop_1.webp",
+      "strip": "chop"
+    },
+    {
+      "name": "chop_2",
+      "src": "chop_2.webp",
+      "strip": "chop"
+    },
+    {
+      "name": "chop_3",
+      "src": "chop_3.webp",
+      "strip": "chop"
     },
     {
       "name": "replant_0",
-      "src": "replant.webp"
+      "src": "replant_0.webp",
+      "strip": "replant"
+    },
+    {
+      "name": "replant_1",
+      "src": "replant_1.webp",
+      "strip": "replant"
+    },
+    {
+      "name": "replant_2",
+      "src": "replant_2.webp",
+      "strip": "replant"
+    },
+    {
+      "name": "replant_3",
+      "src": "replant_3.webp",
+      "strip": "replant"
     },
     {
       "name": "study_0",
-      "src": "study.webp"
+      "src": "study_0.webp",
+      "strip": "study"
+    },
+    {
+      "name": "study_1",
+      "src": "study_1.webp",
+      "strip": "study"
+    },
+    {
+      "name": "study_2",
+      "src": "study_2.webp",
+      "strip": "study"
+    },
+    {
+      "name": "study_3",
+      "src": "study_3.webp",
+      "strip": "study"
     },
     {
       "name": "hammer_0",
-      "src": "hammer.webp",
-      "adjust": 0.97,
-      "why": "by eye against the standing Momo"
+      "src": "hammer_0.webp",
+      "strip": "hammer"
+    },
+    {
+      "name": "hammer_1",
+      "src": "hammer_1.webp",
+      "strip": "hammer"
+    },
+    {
+      "name": "hammer_2",
+      "src": "hammer_2.webp",
+      "strip": "hammer"
+    },
+    {
+      "name": "hammer_3",
+      "src": "hammer_3.webp",
+      "strip": "hammer"
     },
     {
       "name": "stoke_0",
-      "src": "stoke.webp"
+      "src": "stoke_0.webp",
+      "strip": "stoke"
+    },
+    {
+      "name": "stoke_1",
+      "src": "stoke_1.webp",
+      "strip": "stoke"
+    },
+    {
+      "name": "stoke_2",
+      "src": "stoke_2.webp",
+      "strip": "stoke"
+    },
+    {
+      "name": "stoke_3",
+      "src": "stoke_3.webp",
+      "strip": "stoke"
     },
     {
       "name": "write_0",
-      "src": "write.webp"
+      "src": "write_0.webp",
+      "strip": "write"
+    },
+    {
+      "name": "write_1",
+      "src": "write_1.webp",
+      "strip": "write"
+    },
+    {
+      "name": "write_2",
+      "src": "write_2.webp",
+      "strip": "write"
+    },
+    {
+      "name": "write_3",
+      "src": "write_3.webp",
+      "strip": "write"
     }
   ],
   "animations": {
     "work_sow": {
       "cells": [
-        "sow_0"
+        "sow_0",
+        "sow_1",
+        "sow_2",
+        "sow_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.2,
+        0.3,
+        0.3
+      ],
+      "rest": 0.35
     },
     "work_water": {
       "cells": [
-        "water_0"
+        "water_0",
+        "water_1",
+        "water_2",
+        "water_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.25,
+        0.6,
+        0.3
+      ],
+      "rest": 0.4
     },
     "work_harvest": {
       "cells": [
-        "harvest_0"
+        "harvest_0",
+        "harvest_1",
+        "harvest_2",
+        "harvest_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.25,
+        0.3,
+        0.35
+      ],
+      "rest": 0.4
     },
     "work_dig": {
       "cells": [
-        "dig_0"
+        "dig_0",
+        "dig_1",
+        "dig_2",
+        "dig_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.32,
+        0.1,
+        0.26,
+        0.22
+      ],
+      "rest": 0.25
     },
     "work_chop": {
       "cells": [
-        "chop_0"
+        "chop_0",
+        "chop_1",
+        "chop_2",
+        "chop_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.32,
+        0.1,
+        0.26,
+        0.22
+      ],
+      "rest": 0.25
     },
     "work_replant": {
       "cells": [
-        "replant_0"
+        "replant_0",
+        "replant_1",
+        "replant_2",
+        "replant_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.3,
+        0.45,
+        0.5
+      ],
+      "rest": 0.5
     },
     "work_study": {
       "cells": [
-        "study_0"
+        "study_0",
+        "study_1",
+        "study_2",
+        "study_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.5,
+        0.45,
+        0.6,
+        0.45
+      ],
+      "rest": 0.6
     },
     "work_hammer": {
       "cells": [
-        "hammer_0"
+        "hammer_0",
+        "hammer_1",
+        "hammer_2",
+        "hammer_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.24,
+        0.08,
+        0.18,
+        0.16
+      ],
+      "rest": 0.15
     },
     "work_stoke": {
       "cells": [
-        "stoke_0"
+        "stoke_0",
+        "stoke_1",
+        "stoke_2",
+        "stoke_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.35,
+        0.3,
+        0.2,
+        0.45
+      ],
+      "rest": 0.5
     },
     "work_write": {
       "cells": [
-        "write_0"
+        "write_0",
+        "write_1",
+        "write_2",
+        "write_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.4,
+        0.4,
+        0.55,
+        0.45
+      ],
+      "rest": 0.5
     }
   },
   "actions": {
@@ -125,5 +381,7 @@
     "design": "write",
     "develop": "write",
     "release": "write"
-  }
+  },
+  "key_poses": "Step 66's one pose per job (<job>.webp) is each sheet's input, not a frame.",
+  "texel_scale": 0.8
 }

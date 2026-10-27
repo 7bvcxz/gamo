@@ -38,11 +38,12 @@ async function drawn(game, m) {
 test('every job shows its tool from the work atlas', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('dev_grow_island', 3);
+  // The job each stage shows (Step 67: its frames are <job>_0 .. _3).
   const want = {
-    farm: ['sow_0', 'water_0', 'harvest_0'],
-    mine: ['dig_0'],
-    lumberyard: ['chop_0', 'replant_0'],
-    research: ['study_0'],
+    farm: ['sow', 'water', 'harvest'],
+    mine: ['dig'],
+    lumberyard: ['chop', 'replant'],
+    research: ['study'],
   };
   const spots = { farm: [2, 0], mine: [2, 1], lumberyard: [2, 2], research: [1, 2] };
   for (const [type, cells] of Object.entries(want)) {
@@ -58,8 +59,10 @@ test('every job shows its tool from the work atlas', async ({ game }) => {
     for (let i = 0; i < 400 && seen.size < cells.length; i++) {
       await game.query('dev_advance_ms', 400);
       m = await momo(game);
-      if (m.state === 'work' && !seen.has(m.cell)) {
-        seen.add(m.cell);
+      const job = String(m.cell).replace(/_[0-3]$/, '');
+      if (m.state === 'work' && !seen.has(job)) {
+        expect(m.cell, 'a frame of the job').toMatch(/_[0-3]$/);
+        seen.add(job);
         await game.page.waitForTimeout(80);
         m = await momo(game);
         expect(m.sheet, `${m.cell}: drawn from the work atlas`).toEqual([1024, 720]);

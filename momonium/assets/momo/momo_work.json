@@ -1,44 +1,162 @@
 {
-  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot (the point between the feet, from the rect's top-left), at the sheet's texel scale (`stand_height` texels from feet to fur curl). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
-  "stand_height": 200.0,
+  "_doc": "Momo at work (Steps 66-67, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot (the point between the feet, from the rect's top-left); `stand_height` texels from feet to fur curl (`texel_scale` of the sheet's density -- the runtime draws by it, the same size on the island). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
+  "stand_height": 160.0,
+  "texel_scale": 0.8,
   "frames": [
     {
       "name": "sow_0",
       "rect": [
-        6,
-        497,
         218,
-        215
+        637,
+        159,
+        180
       ],
       "pivot": [
-        88.5,
-        208.0
+        82.5,
+        177.0
+      ]
+    },
+    {
+      "name": "sow_1",
+      "rect": [
+        1334,
+        440,
+        162,
+        181
+      ],
+      "pivot": [
+        73.0,
+        178.0
+      ]
+    },
+    {
+      "name": "sow_2",
+      "rect": [
+        1128,
+        830,
+        196,
+        172
+      ],
+      "pivot": [
+        68.0,
+        169.0
+      ]
+    },
+    {
+      "name": "sow_3",
+      "rect": [
+        389,
+        637,
+        171,
+        180
+      ],
+      "pivot": [
+        76.5,
+        169.0
       ]
     },
     {
       "name": "water_0",
       "rect": [
-        250,
-        6,
-        224,
-        232
+        572,
+        637,
+        158,
+        179
       ],
       "pivot": [
-        75.0,
-        214.0
+        76.0,
+        175.0
+      ]
+    },
+    {
+      "name": "water_1",
+      "rect": [
+        972,
+        637,
+        164,
+        178
+      ],
+      "pivot": [
+        71.0,
+        171.0
+      ]
+    },
+    {
+      "name": "water_2",
+      "rect": [
+        445,
+        6,
+        182,
+        210
+      ],
+      "pivot": [
+        139.5,
+        192.0
+      ]
+    },
+    {
+      "name": "water_3",
+      "rect": [
+        187,
+        830,
+        153,
+        177
+      ],
+      "pivot": [
+        73.0,
+        173.0
       ]
     },
     {
       "name": "harvest_0",
       "rect": [
         6,
-        265,
-        202,
-        220
+        1019,
+        176,
+        164
       ],
       "pivot": [
-        86.0,
-        217.0
+        80.0,
+        150.0
+      ]
+    },
+    {
+      "name": "harvest_1",
+      "rect": [
+        774,
+        440,
+        167,
+        182
+      ],
+      "pivot": [
+        71.0,
+        180.0
+      ]
+    },
+    {
+      "name": "harvest_2",
+      "rect": [
+        1333,
+        637,
+        167,
+        177
+      ],
+      "pivot": [
+        71.0,
+        175.0
+      ]
+    },
+    {
+      "name": "harvest_3",
+      "rect": [
+        1148,
+        637,
+        173,
+        177
+      ],
+      "pivot": [
+        70.5,
+        175.0
       ]
     },
     {
@@ -46,153 +164,526 @@
       "rect": [
         6,
         6,
-        232,
-        247
+        208,
+        222
       ],
       "pivot": [
-        93.0,
-        244.0
+        82.5,
+        220.0
+      ]
+    },
+    {
+      "name": "dig_1",
+      "rect": [
+        352,
+        830,
+        226,
+        176
+      ],
+      "pivot": [
+        59.0,
+        174.0
+      ]
+    },
+    {
+      "name": "dig_2",
+      "rect": [
+        742,
+        637,
+        218,
+        179
+      ],
+      "pivot": [
+        179.5,
+        175.0
+      ]
+    },
+    {
+      "name": "dig_3",
+      "rect": [
+        226,
+        6,
+        207,
+        218
+      ],
+      "pivot": [
+        81.5,
+        216.0
       ]
     },
     {
       "name": "chop_0",
       "rect": [
-        220,
-        265,
-        255,
-        219
+        639,
+        6,
+        191,
+        203
       ],
       "pivot": [
-        166.0,
-        216.0
+        120.5,
+        199.0
+      ]
+    },
+    {
+      "name": "chop_1",
+      "rect": [
+        196,
+        440,
+        217,
+        183
+      ],
+      "pivot": [
+        143.5,
+        179.0
+      ]
+    },
+    {
+      "name": "chop_2",
+      "rect": [
+        343,
+        240,
+        210,
+        188
+      ],
+      "pivot": [
+        153.5,
+        184.0
+      ]
+    },
+    {
+      "name": "chop_3",
+      "rect": [
+        953,
+        440,
+        202,
+        181
+      ],
+      "pivot": [
+        129.5,
+        177.0
       ]
     },
     {
       "name": "replant_0",
       "rect": [
-        712,
-        6,
-        187,
-        226
+        842,
+        240,
+        154,
+        187
       ],
       "pivot": [
-        59.0,
-        212.0
+        49.5,
+        174.0
+      ]
+    },
+    {
+      "name": "replant_1",
+      "rect": [
+        1167,
+        440,
+        155,
+        181
+      ],
+      "pivot": [
+        41.5,
+        167.0
+      ]
+    },
+    {
+      "name": "replant_2",
+      "rect": [
+        1336,
+        830,
+        157,
+        172
+      ],
+      "pivot": [
+        49.0,
+        170.0
+      ]
+    },
+    {
+      "name": "replant_3",
+      "rect": [
+        6,
+        440,
+        178,
+        185
+      ],
+      "pivot": [
+        66.0,
+        172.0
       ]
     },
     {
       "name": "study_0",
       "rect": [
-        236,
-        497,
-        203,
-        208
+        6,
+        830,
+        169,
+        177
       ],
       "pivot": [
-        106.0,
-        205.0
+        88.0,
+        173.0
+      ]
+    },
+    {
+      "name": "study_1",
+      "rect": [
+        926,
+        830,
+        190,
+        172
+      ],
+      "pivot": [
+        103.5,
+        168.0
+      ]
+    },
+    {
+      "name": "study_2",
+      "rect": [
+        773,
+        830,
+        141,
+        172
+      ],
+      "pivot": [
+        70.5,
+        169.0
+      ]
+    },
+    {
+      "name": "study_3",
+      "rect": [
+        1346,
+        240,
+        181,
+        185
+      ],
+      "pivot": [
+        101.5,
+        182.0
       ]
     },
     {
       "name": "hammer_0",
       "rect": [
-        486,
+        842,
         6,
-        214,
-        229
+        185,
+        199
       ],
       "pivot": [
-        90.0,
-        226.0
+        78.5,
+        195.0
+      ]
+    },
+    {
+      "name": "hammer_1",
+      "rect": [
+        590,
+        830,
+        171,
+        174
+      ],
+      "pivot": [
+        83.0,
+        166.0
+      ]
+    },
+    {
+      "name": "hammer_2",
+      "rect": [
+        425,
+        440,
+        174,
+        183
+      ],
+      "pivot": [
+        118.0,
+        178.0
+      ]
+    },
+    {
+      "name": "hammer_3",
+      "rect": [
+        6,
+        637,
+        200,
+        181
+      ],
+      "pivot": [
+        90.5,
+        177.0
       ]
     },
     {
       "name": "stoke_0",
       "rect": [
-        487,
-        265,
-        190,
-        218
+        1008,
+        240,
+        163,
+        186
       ],
       "pivot": [
-        93.0,
-        215.0
+        79.5,
+        182.0
+      ]
+    },
+    {
+      "name": "stoke_1",
+      "rect": [
+        1039,
+        6,
+        198,
+        195
+      ],
+      "pivot": [
+        89.0,
+        191.0
+      ]
+    },
+    {
+      "name": "stoke_2",
+      "rect": [
+        565,
+        240,
+        265,
+        187
+      ],
+      "pivot": [
+        73.0,
+        183.0
+      ]
+    },
+    {
+      "name": "stoke_3",
+      "rect": [
+        1249,
+        6,
+        171,
+        191
+      ],
+      "pivot": [
+        79.5,
+        187.0
       ]
     },
     {
       "name": "write_0",
       "rect": [
-        689,
-        265,
-        187,
-        216
+        6,
+        240,
+        157,
+        188
       ],
       "pivot": [
-        95.0,
-        213.0
+        80.5,
+        184.0
+      ]
+    },
+    {
+      "name": "write_1",
+      "rect": [
+        175,
+        240,
+        156,
+        188
+      ],
+      "pivot": [
+        80.0,
+        184.0
+      ]
+    },
+    {
+      "name": "write_2",
+      "rect": [
+        1183,
+        240,
+        151,
+        186
+      ],
+      "pivot": [
+        80.0,
+        182.0
+      ]
+    },
+    {
+      "name": "write_3",
+      "rect": [
+        611,
+        440,
+        151,
+        182
+      ],
+      "pivot": [
+        78.0,
+        178.0
       ]
     }
   ],
   "animations": {
     "work_sow": {
       "cells": [
-        "sow_0"
+        "sow_0",
+        "sow_1",
+        "sow_2",
+        "sow_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.2,
+        0.3,
+        0.3
+      ],
+      "rest": 0.35
     },
     "work_water": {
       "cells": [
-        "water_0"
+        "water_0",
+        "water_1",
+        "water_2",
+        "water_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.25,
+        0.6,
+        0.3
+      ],
+      "rest": 0.4
     },
     "work_harvest": {
       "cells": [
-        "harvest_0"
+        "harvest_0",
+        "harvest_1",
+        "harvest_2",
+        "harvest_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.25,
+        0.3,
+        0.35
+      ],
+      "rest": 0.4
     },
     "work_dig": {
       "cells": [
-        "dig_0"
+        "dig_0",
+        "dig_1",
+        "dig_2",
+        "dig_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.32,
+        0.1,
+        0.26,
+        0.22
+      ],
+      "rest": 0.25
     },
     "work_chop": {
       "cells": [
-        "chop_0"
+        "chop_0",
+        "chop_1",
+        "chop_2",
+        "chop_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.32,
+        0.1,
+        0.26,
+        0.22
+      ],
+      "rest": 0.25
     },
     "work_replant": {
       "cells": [
-        "replant_0"
+        "replant_0",
+        "replant_1",
+        "replant_2",
+        "replant_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.3,
+        0.3,
+        0.45,
+        0.5
+      ],
+      "rest": 0.5
     },
     "work_study": {
       "cells": [
-        "study_0"
+        "study_0",
+        "study_1",
+        "study_2",
+        "study_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.5,
+        0.45,
+        0.6,
+        0.45
+      ],
+      "rest": 0.6
     },
     "work_hammer": {
       "cells": [
-        "hammer_0"
+        "hammer_0",
+        "hammer_1",
+        "hammer_2",
+        "hammer_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.24,
+        0.08,
+        0.18,
+        0.16
+      ],
+      "rest": 0.15
     },
     "work_stoke": {
       "cells": [
-        "stoke_0"
+        "stoke_0",
+        "stoke_1",
+        "stoke_2",
+        "stoke_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.35,
+        0.3,
+        0.2,
+        0.45
+      ],
+      "rest": 0.5
     },
     "work_write": {
       "cells": [
-        "write_0"
+        "write_0",
+        "write_1",
+        "write_2",
+        "write_3"
       ],
-      "fps": 0.0
+      "fps": 4.0,
+      "durations": [
+        0.4,
+        0.4,
+        0.55,
+        0.45
+      ],
+      "rest": 0.5
     }
   },
   "actions": {

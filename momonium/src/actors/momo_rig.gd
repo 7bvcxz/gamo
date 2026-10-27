@@ -48,6 +48,14 @@ var _rng := RandomNumberGenerator.new()
 var _next_blink := 2.0
 var _blink_until := -1.0
 var _cell := ""
+## A job's loop (Step 67): the animation playing, the seconds into this pass
+## of it, and the pause this pass ends with (varied each pass, so a Momo at a
+## long stage does not swing like a metronome).
+var _loop_anim := ""
+var _loop_t := 0.0
+var _loop_rest := 0.0
+## Reduced motion slows a job's loop to this share of its speed.
+const REDUCED_PACE := 0.6
 
 
 func setup(_lib: SpriteLibrary = null, seed_value: int = 0) -> void:
@@ -144,7 +152,14 @@ func tick(delta: float) -> void:
 	var frames := sheet.frames(anim)
 	var name := String(frames[0]) if not frames.is_empty() else "front_idle"
 	var phase := 0.0
-	if frames.size() > 1:
+	var timed: Array = sheet.animations.get(anim, {}).get("durations", [])
+	var looped := frames.size() > 1 and timed.size() == frames.size()
+	if not looped:
+		# Out of the loop: going back to work starts at the wind-up.
+		_loop_anim = ""
+	if looped:
+		name = String(frames[_loop_frame(anim, timed, delta)])
+	elif frames.size() > 1:
 		phase = time * sheet.fps(anim) * walk_speed
 		name = String(frames[int(phase) % frames.size()])
 	elif anim == "idle_front" and blinking:
@@ -154,12 +169,57 @@ func tick(delta: float) -> void:
 		body.texture = sheet.texture_of(name)
 		body.region_rect = sheet.region(name)
 		body.offset = -sheet.pivot_of(name)
-	var s := HEIGHT / sheet.stand_height
+	var s := HEIGHT / sheet.stand_height_of(name)
 	var breathe := 0.0 if state == "walk" else sin(time * TAU * (0.22 if state == "sleep" else 0.45))
 	body.scale = Vector2(s * (1.0 - 0.006 * breathe), s * (1.0 + 0.012 * breathe))
 	# A bob in each step: highest as the feet pass (frames B).
 	body.position = Vector2(0, -absf(sin(phase * PI / 2.0)) * 1.6) if state == "walk" else Vector2.ZERO
 	queue_redraw()
+
+
+## The frame of a timed loop (a job's: wind-up, swing, strike, recover --
+## each frame held its own `durations` seconds, then the loop's `rest` on the
+## last, varied 0.6-1.6x every pass). A new animation starts at its first
+## frame. Presentation only: it reads the real seconds that passed, never the
+## simulation's clock, so a stage's length (or a time multiplier) does not
+## change how fast Momo swings -- and a frame never finishes any work.
+func _loop_frame(anim: String, timed: Array, delta: float) -> int:
+	var pace := REDUCED_PACE if FxPrefs.reduced_motion else 1.0
+	if anim != _loop_anim:
+		_loop_anim = anim
+		_loop_t = 0.0
+		_loop_rest = _next_rest(anim)
+	else:
+		_loop_t += delta * pace
+	var total := 0.0
+	for d: Variant in timed:
+		total += float(d)
+	if _loop_t >= total + _loop_rest:
+		_loop_t = fmod(_loop_t - total - _loop_rest, maxf(total, 0.001))
+		_loop_rest = _next_rest(anim)
+	var t := 0.0
+	for i in timed.size():
+		t += float(timed[i])
+		if _loop_t < t:
+			return i
+	return timed.size() - 1
+
+
+func _next_rest(anim: String) -> float:
+	return float(sheet.animations.get(anim, {}).get("rest", 0.0)) * _rng.randf_range(0.6, 1.6)
+
+
+## The job loop's frame index now (-1 when no timed loop plays), for tests.
+func loop_index() -> int:
+	var timed: Array = sheet.animations.get(_loop_anim, {}).get("durations", [])
+	if timed.is_empty() or animation() != _loop_anim:
+		return -1
+	var t := 0.0
+	for i in timed.size():
+		t += float(timed[i])
+		if _loop_t < t:
+			return i
+	return timed.size() - 1
 
 
 func _update_blink() -> void:

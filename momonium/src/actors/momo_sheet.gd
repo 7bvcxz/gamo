@@ -30,6 +30,9 @@ var cells: Dictionary = {}
 ## name -> {cells: [names], fps}
 var animations: Dictionary = {}
 var work_texture: Texture2D
+## The work atlas's texels from feet to fur curl (Step 67: stored at a share
+## of the sheet's density; drawn by it, the same size on the island).
+var work_stand_height := 200.0
 ## Work atlas frames: name -> {rect: Rect2, pivot: Vector2 (from the rect's top-left)}.
 var work_frames: Dictionary = {}
 ## A building stage's action (data/buildings.json) -> the work animation it plays.
@@ -58,6 +61,7 @@ func _load() -> void:
 		return
 	work_texture = load(WORK_TEXTURE)
 	var work: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(WORK_MAP))
+	work_stand_height = float(work["stand_height"])
 	for f: Dictionary in work["frames"]:
 		var r: Array = f["rect"]
 		work_frames[String(f["name"])] = {"rect": Rect2(r[0], r[1], r[2], r[3]), "pivot": Vector2(f["pivot"][0], f["pivot"][1])}
@@ -76,6 +80,11 @@ func region(name: String) -> Rect2:
 
 func texture_of(name: String) -> Texture2D:
 	return work_texture if work_frames.has(name) else texture
+
+
+## Texels from the feet to the fur curl in `name`'s texture.
+func stand_height_of(name: String) -> float:
+	return work_stand_height if work_frames.has(name) else stand_height
 
 
 ## Where the feet are, from the top-left of `name`'s rect.

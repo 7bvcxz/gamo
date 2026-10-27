@@ -15,6 +15,17 @@ extends SceneTree
 ## head (the model draws the eyes a little smaller than the anchor's), and
 ## where the head agrees within 8% the two are averaged. `adjust` corrects
 ## by eye what neither can see.
+## Step 67: frames with the same `strip` were drawn in one picture at one
+## size -- they share one scale, so a swing does not pulse with the
+## measuring's noise; each still stands on its own feet. A strip's scale is
+## the geometric mean of its frames' median by-eye and median by-head
+## scales: a closed eye (the strike) or a paw beside the head (the wind-up)
+## spoils one frame's measure, not the strip's, and a model that draws one
+## job's eyes small (the pickaxe, 12%) no longer decides the size alone.
+## `texel_scale` stores the atlas at that share of the sheet's density
+## (`stand_height` texels from feet to fur curl): the runtime draws each
+## frame at its texture's stand height, so the size on the island is the
+## same and the atlas is smaller.
 ## The feet are the lowest cream pixels; each frame keeps its own pivot (the
 ## point between the feet), so a frame packs into the atlas trimmed, and the
 ## renderer stands every one of them on the same ground point.
@@ -39,6 +50,8 @@ func _init() -> void:
 	var anchor := Image.load_from_file(ProjectSettings.globalize_path(String(cfg["anchor"])))
 	anchor.convert(Image.FORMAT_RGBA8)
 	# The anchor stands upright: its height is the sheet's stand height.
+	var texel := float(cfg.get("texel_scale", 1.0))
+	stand *= texel
 	var anchor_k := stand / float(cream_box(anchor).size.y)
 	var target_head := head_width(anchor) * anchor_k
 	var target_eye := float(eyes(anchor)[0]) * anchor_k
@@ -56,17 +69,42 @@ func _init() -> void:
 		sources.append({"f": f, "img": img, "head": by_head, "eye": by_eye})
 	ratios.sort()
 	var k := ratios[ratios.size() / 2] if not ratios.is_empty() else 1.0
+	var scales: Array[float] = []
+	for src: Dictionary in sources:
+		var by_head: float = src["head"]
+		var by_eye: float = float(src["eye"]) * k
+		var s0 := by_head
+		if by_eye > 0.0:
+			s0 = sqrt(by_eye * by_head) if absf(by_head / by_eye - 1.0) < 0.08 else by_eye
+		scales.append(s0)
+	var by_strip := {}
+	for i in sources.size():
+		var strip := String((sources[i]["f"] as Dictionary).get("strip", ""))
+		if strip == "":
+			continue
+		if not by_strip.has(strip):
+			by_strip[strip] = {"eye": [], "head": []}
+		(by_strip[strip]["head"] as Array).append(float(sources[i]["head"]))
+		if float(sources[i]["eye"]) > 0.0:
+			(by_strip[strip]["eye"] as Array).append(float(sources[i]["eye"]) * k)
+	var strips := {}
+	for strip: String in by_strip:
+		var head := _median(by_strip[strip]["head"])
+		var eye := _median(by_strip[strip]["eye"])
+		strips[strip] = sqrt(head * eye) if eye > 0.0 else head
+		print("strip %-10s head %.4f eye %.4f -> %.4f" % [strip, head, eye, strips[strip]])
 	var placed: Array = []
 	print("eye calibration %.3f" % k)
 	print("%-16s %7s %7s %7s %9s" % ["frame", "scale", "head", "eye", "size"])
-	for src: Dictionary in sources:
+	for n in sources.size():
+		var src: Dictionary = sources[n]
 		var f: Dictionary = src["f"]
 		var img: Image = src["img"]
 		var by_head: float = src["head"]
 		var by_eye: float = float(src["eye"]) * k
-		var s := by_head
-		if by_eye > 0.0:
-			s = sqrt(by_eye * by_head) if absf(by_head / by_eye - 1.0) < 0.08 else by_eye
+		var s: float = scales[n]
+		if f.has("strip"):
+			s = float(strips[String(f["strip"])])
 		s *= float(f.get("adjust", 1.0))
 		var w2 := maxi(1, roundi(img.get_width() * s))
 		var h2 := maxi(1, roundi(img.get_height() * s))
@@ -104,8 +142,8 @@ func _init() -> void:
 	var base := String(args["out"])
 	atlas.save_png(ProjectSettings.globalize_path(base + ".png"))
 	var meta := {
-		"_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot (the point between the feet, from the rect's top-left), at the sheet's texel scale (`stand_height` texels from feet to fur curl). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
-		"stand_height": stand, "frames": frames, "animations": cfg["animations"], "actions": cfg["actions"],
+		"_doc": "Momo at work (Steps 66-67, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot (the point between the feet, from the rect's top-left); `stand_height` texels from feet to fur curl (`texel_scale` of the sheet's density -- the runtime draws by it, the same size on the island). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
+		"stand_height": stand, "texel_scale": texel, "frames": frames, "animations": cfg["animations"], "actions": cfg["actions"],
 	}
 	var file := FileAccess.open(ProjectSettings.globalize_path(base + ".json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify(meta, "  ", false) + "\n")
@@ -222,6 +260,14 @@ static func eyes(img: Image) -> Array:
 
 static func _dark(c: Color) -> bool:
 	return c.a > 0.5 and c.get_luminance() < 0.22
+
+
+static func _median(list: Array) -> float:
+	if list.is_empty():
+		return 0.0
+	var l := list.duplicate()
+	l.sort()
+	return float(l[(l.size() - 1) / 2]) if l.size() % 2 == 1 else (float(l[l.size() / 2 - 1]) + float(l[l.size() / 2])) / 2.0
 
 
 static func opaque_box(img: Image) -> Rect2i:
