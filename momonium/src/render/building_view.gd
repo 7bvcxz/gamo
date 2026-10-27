@@ -117,10 +117,12 @@ func sparkle() -> void:
 
 
 ## Step 68: a Momo's job here is done (a real `task_completed`, BuildingViews,
-## never while time away is caught up) -- the THUNK: a crisp ring snaps out
-## from its foot and fades with six short rays, the building gives a squash,
-## the stars rise. Once per completion. Reduced motion: the ring flashes in
-## place, no squash. Effects off: nothing.
+## never while time away is caught up) -- the THUNK: the progress ring the eye
+## was following bursts -- a thick bright ring snaps out from it with six
+## rays and fades -- the building gives a squash, the stars rise. Over the
+## building, not at its foot, where the Momo stands in front of it. Once per
+## completion. Reduced motion: the ring flashes in place, no squash. Effects
+## off: nothing.
 var _impact := 0.0
 ## How many it showed (tests).
 var impacts := 0
@@ -308,16 +310,19 @@ func _draw_ring() -> void:
 
 func _draw_impact() -> void:
 	var k := _impact
-	var at := Vector2(0, -8)
-	var r := (10.0 + (1.0 - k) * 30.0) if FxPrefs.moving() else 22.0
-	var a := clampf(k * 1.4, 0.0, 1.0)
-	ring.draw_set_transform(at, 0.0, Vector2(1.0, 0.55))
-	ring.draw_arc(Vector2.ZERO, r, 0, TAU, 40, Color(0.06, 0.14, 0.3, 0.85 * a), 6.0, true)
-	ring.draw_arc(Vector2.ZERO, r, 0, TAU, 40, Color(1.0, 0.97, 0.78, a), 3.0, true)
+	var at := _top + Vector2(0, -18)
+	var r := (RING_RADIUS + (1.0 - k) * 26.0) if FxPrefs.moving() else RING_RADIUS + 8.0
+	var a := clampf(k * 1.5, 0.0, 1.0)
+	var dark := Color(0.06, 0.14, 0.3, 0.9 * a)
+	var light := Color(1.0, 0.95, 0.62, a)
+	ring.draw_arc(at, r, 0, TAU, 40, dark, 8.0, true)
+	ring.draw_arc(at, r, 0, TAU, 40, light, 4.5, true)
 	for i in 6:
 		var d := Vector2.from_angle(TAU * i / 6.0 + 0.3)
-		ring.draw_line(d * (r + 4.0), d * (r + 4.0 + 9.0 * k), Color(1.0, 0.92, 0.55, a), 3.0, true)
-	ring.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		var from := at + d * (r + 5.0)
+		var to := at + d * (r + 5.0 + 12.0 * k)
+		ring.draw_line(from, to, dark, 6.0, true)
+		ring.draw_line(from, to, light, 3.0, true)
 
 
 ## Generators move with what they give: blades turning with the wind, the

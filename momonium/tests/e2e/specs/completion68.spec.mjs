@@ -4,7 +4,7 @@
 // louder than the taps, with one ring at the mine and the money once; a job
 // cut short (the mine pulled down mid-dig) gives none of it.
 import { test, expect } from '@playwright/test';
-import { AUDIO_TAP, loudness } from '../lib/audio_tap.mjs';
+import { AUDIO_TAP, listen, loudness } from '../lib/audio_tap.mjs';
 
 async function open(page) {
   await page.addInitScript(AUDIO_TAP);
@@ -56,9 +56,9 @@ test('tap, tap, THUNK', async ({ page }) => {
   const t0 = await thunks(call);
   let heard = null;
   for (let i = 0; i < 400 && heard === null; i++) {
-    const listening = loudness(page, 450);
+    const listening = await listen(page);
     await call('dev_advance_ms', 250);
-    const l = await listening;
+    const l = await listening(450);
     if ((await thunks(call)) > t0) heard = l;
   }
   expect(heard, 'the dig finished').not.toBeNull();

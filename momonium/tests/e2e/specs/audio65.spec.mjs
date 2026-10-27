@@ -4,7 +4,7 @@
 // silence; mute silences and unmute brings it back; a saved mute survives a
 // reload and lifts again; the background falls silent; a burst never clips.
 import { test, expect } from '@playwright/test';
-import { AUDIO_TAP, loudness, states } from '../lib/audio_tap.mjs';
+import { AUDIO_TAP, listen, loudness, states } from '../lib/audio_tap.mjs';
 
 async function open(page, context) {
   await page.addInitScript(AUDIO_TAP);
@@ -52,17 +52,17 @@ test('an effect is heard over silence', async ({ page }, info) => {
   // A real tap on a HUD button: its click.
   const h = await call('hud');
   const clicks = (await call('audio')).played.click ?? 0;
-  const during = loudness(page, 900);
+  const during = await listen(page);
   await tapAt(page, info, h.buttons.status, h.window);
-  const click = await during;
+  const click = await during(900);
   const played = (await call('audio')).played.click ?? 0;
   expect(click.rms, `a button's click (rms ${click.rms.toFixed(4)}, clicks ${clicks} -> ${played})`).toBeGreaterThan(0.01);
   // The island's own sounds: a harvest, research, land, a Momo.
   for (const effect of ['harvest', 'research', 'land', 'momo', 'build']) {
     await page.waitForTimeout(700);
-    const during = loudness(page, 700);
+    const during = await listen(page);
     await call('dev_play', [effect]);
-    const e = await during;
+    const e = await during(700);
     expect(e.rms, `${effect} heard (rms ${e.rms.toFixed(4)})`).toBeGreaterThan(0.01);
   }
 });
@@ -117,8 +117,8 @@ test('quiet in the background, back in front; a burst never clips', async ({ pag
   await page.waitForTimeout(500);
   expect((await loudness(page, 600)).rms, 'heard again in front').toBeGreaterThan(0.02);
   // Many things at once: loud, never clipping.
-  const during = loudness(page, 1200);
+  const during = await listen(page);
   await call('dev_play', ['harvest', 'coin', 'build', 'built', 'research', 'land', 'momo', 'promote']);
-  const burst = await during;
+  const burst = await during(1200);
   expect(burst.peak, `the burst's peak ${burst.peak.toFixed(3)}`).toBeLessThan(0.99);
 });

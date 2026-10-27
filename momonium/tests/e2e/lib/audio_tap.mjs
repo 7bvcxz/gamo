@@ -62,15 +62,30 @@ export const AUDIO_TAP = () => {
   window.AudioContext.prototype = Orig.prototype;
 };
 
-// The loudest moment over the next `ms`: RMS (23 ms window) and peak.
-export async function loudness(page, ms) {
+// Start listening now: the meters are reset -- and the reset has reached the
+// audio thread -- before this returns; the returned function waits `ms` more
+// and gives the loudest moment since: RMS (23 ms window) and peak. Start it
+// BEFORE the action: a sound shorter than a late reset (the 0.14 s Momo
+// chirp under a busy machine) was otherwise measured as silence.
+export async function listen(page) {
   await page.waitForFunction(() => window.__audio.meters.length > 0, null, { timeout: 10_000 });
-  await page.evaluate(() => window.__audio.meters.forEach((m) => m.port.postMessage('reset')));
-  await page.waitForTimeout(ms);
-  return page.evaluate(() => Promise.all(window.__audio.meters.map((m) => new Promise((done) => {
+  await page.evaluate(() => Promise.all(window.__audio.meters.map((m) => new Promise((done) => {
     m.port.onmessage = (e) => done(e.data);
+    m.port.postMessage('reset');
     m.port.postMessage('read');
-  }))).then((all) => all.reduce((a, b) => ({ rms: Math.max(a.rms, b.rms), peak: Math.max(a.peak, b.peak) }), { rms: 0, peak: 0 })));
+  }))));
+  return async (ms) => {
+    await page.waitForTimeout(ms);
+    return page.evaluate(() => Promise.all(window.__audio.meters.map((m) => new Promise((done) => {
+      m.port.onmessage = (e) => done(e.data);
+      m.port.postMessage('read');
+    }))).then((all) => all.reduce((a, b) => ({ rms: Math.max(a.rms, b.rms), peak: Math.max(a.peak, b.peak) }), { rms: 0, peak: 0 })));
+  };
+}
+
+// The loudest moment over the next `ms` (nothing started in between).
+export async function loudness(page, ms) {
+  return (await listen(page))(ms);
 }
 
 export const states = (page) => page.evaluate(() => window.__audio.contexts.map((c) => c.state));
