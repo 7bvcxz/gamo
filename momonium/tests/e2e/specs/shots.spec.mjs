@@ -175,3 +175,32 @@ test.describe('schedule', () => {
     await save(game, info, 'schedule', 'mode');
   });
 });
+
+// Step 61: three farms tapped 3rd -> 1st -> 2nd in Schedule mode -- the
+// numbers on the island (before: by distance; after: as tapped).
+test.describe('order', () => {
+  test.use({ starterMomo: true, viewport: { width: 360, height: 640 } });
+  test('order: three farms scheduled 3rd, 1st, 2nd', async ({ game }, info) => {
+    if (!info.project.use.hasTouch) await game.page.setViewportSize({ width: 1280, height: 800 });
+    await game.setTimeScale(0);
+    await game.query('set_language', 'en');
+    await game.query('dev_grow_island', 3);
+    for (const c of [[0, 0], [1, 0], [2, 0]]) await game.query('dev_place_building', ['farm', ...c]);
+    await game.page.waitForTimeout(600);
+    const box = await game.canvas.boundingBox();
+    const tap = async (p, win) => {
+      await game.tap(p[0] * (box.width / win[0]), p[1] * (box.height / win[1]));
+      await game.page.waitForTimeout(400);
+    };
+    const m = await game.query('momos');
+    await tap(m.momos['1'].body, m.window);
+    const w = await game.query('watch');
+    const b = w.schedule || w.pencil;
+    await tap([b[0] + b[2] / 2, b[1] + b[3] / 2], w.window);
+    for (const c of [[2, 0], [0, 0], [1, 0]]) {
+      const p = await game.query('cell_screen', c);
+      await tap([p.x, p.y], p.window);
+    }
+    await save(game, info, 'order', 'numbers');
+  });
+});
