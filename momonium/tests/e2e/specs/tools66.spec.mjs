@@ -46,6 +46,10 @@ test('every job shows its tool from the work atlas', async ({ game }) => {
   };
   const spots = { farm: [2, 0], mine: [2, 1], lumberyard: [2, 2], research: [1, 2] };
   for (const [type, cells] of Object.entries(want)) {
+    // Each job from a morning: at night the island is tinted dark blue and
+    // the fur is not light enough to count.
+    const { day } = await game.query('dev_advance_ms', 0);
+    await game.query('dev_advance_to', [day + 1, 0.05]);
     const { id } = await game.query('dev_place_building', [type, ...spots[type]]);
     expect(id, `${type} placed`).toBeGreaterThan(0);
     expect((await game.command({ type: 'momo.assign', momo: 1, building: id })).ok).toBe(true);
