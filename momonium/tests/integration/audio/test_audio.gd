@@ -136,7 +136,8 @@ func test_loops_loop_and_effects_do_not() -> void:
 	for layer: String in AudioService.LAYERS:
 		var s: AudioStreamOggVorbis = (audio.layers[layer] as AudioStreamPlayer).stream
 		assert_true(s != null and s.loop, "%s loops" % layer)
-	for e: String in ["click", "build", "built", "harvest", "research", "letter", "momo", "coin", "land", "promote", "demolish", "refuse"]:
+	for e: String in ["click", "build", "built", "harvest", "research", "letter", "momo", "coin", "land", "promote", "demolish", "refuse",
+			"tap_pick", "tap_wood", "tap_metal", "tap_water", "tap_soft", "thunk"]:
 		var s: AudioStream = load("res://assets/audio/sfx_%s.ogg" % e)
 		assert_true(s != null and s.get_length() < 2.0, "%s: a short sound" % e)
 		assert_false((s as AudioStreamOggVorbis).loop, "%s does not loop" % e)

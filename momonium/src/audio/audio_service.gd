@@ -71,6 +71,8 @@ func setup(p_sim: Simulation, p_settings: SettingsStore) -> void:
 		target[layer] = 0.0
 	for i in VOICES:
 		voices.append(_player("Voice%d" % i, "Effects"))
+	for i in TAPS:
+		taps.append(_player("Tap%d" % i, "Effects"))
 	apply_settings()
 	sim.bus.emitted.connect(_on_event)
 	get_tree().node_added.connect(_watch_button)
@@ -191,7 +193,7 @@ func _process(delta: float) -> void:
 ## Effects that come in streams once work pays at once (Step 50): heard at
 ## most once per this many milliseconds, so many Momo finishing together
 ## ring one coin, not a cascade.
-const MIN_GAP_MS := {"coin": 250, "harvest": 250}
+const MIN_GAP_MS := {"coin": 250, "harvest": 250, "thunk": 180}
 var _last_ms := {}
 ## Step 65: what the island does all at once must not pile up past full scale
 ## (a burst of eight measured 1.3 at the speakers -- clipping; the web's
@@ -199,11 +201,28 @@ var _last_ms := {}
 ## half the level of every one still sounding when it starts, so any pile
 ## stays under twice one effect -- and nothing is left out.
 const PILE := 0.5
+## Step 68: the taps of work in progress -- a Momo's tool landing, heard only
+## from Momo on screen, at most one every TAP_GAP_MS across the island and
+## TAP_DB under the effects, from their own two players so a tap never cuts
+## a reward's sound. The rhythm is the work's; the THUNK is its end.
+const TAP_GAP_MS := 320
+const TAP_DB := -13.0
+const TAPS := 2
+var taps: Array[AudioStreamPlayer] = []
+var _next_tap := 0
+var _last_tap := -100000
+var _tap_rng := RandomNumberGenerator.new()
+## The clock the gaps are measured on: real milliseconds; a test sets its own.
+var clock_ms := -1
+
+
+func _now_ms() -> int:
+	return clock_ms if clock_ms >= 0 else Time.get_ticks_msec()
 
 
 func play(effect: String) -> void:
 	if MIN_GAP_MS.has(effect):
-		var now := Time.get_ticks_msec()
+		var now := _now_ms()
 		if _last_ms.has(effect) and now - int(_last_ms[effect]) < int(MIN_GAP_MS[effect]):
 			return
 		_last_ms[effect] = now
@@ -223,6 +242,28 @@ func play(effect: String) -> void:
 	p.play()
 
 
+## Step 68: a Momo's tool landed (`sound` from its job: tap_pick, tap_wood,
+## tap_metal, tap_water, tap_soft). Quiet, a touch of pitch so ten in a row
+## are not one sound, and dropped -- never queued -- inside TAP_GAP_MS.
+func tap(sound: String) -> void:
+	if sound == "" or sim.replaying:
+		return
+	var now := _now_ms()
+	if now - _last_tap < TAP_GAP_MS:
+		return
+	var s := _stream("sfx_" + sound, false)
+	if s == null:
+		return
+	_last_tap = now
+	played[sound] = int(played.get(sound, 0)) + 1
+	var p := taps[_next_tap]
+	_next_tap = (_next_tap + 1) % taps.size()
+	p.stream = s
+	p.pitch_scale = _tap_rng.randf_range(0.94, 1.06)
+	p.volume_db = TAP_DB
+	p.play()
+
+
 func _watch_button(n: Node) -> void:
 	if n is BaseButton and not n.has_meta("audio_click"):
 		n.set_meta("audio_click", true)
@@ -231,14 +272,23 @@ func _watch_button(n: Node) -> void:
 
 ## What happens on the island, heard.
 func _on_event(type: StringName, p: Dictionary) -> void:
+	# Time away being caught up: the island changes at once, nothing rings
+	# (the away card tells the sum). Without this every event of hours came
+	# out in one frame.
+	if sim.replaying:
+		return
 	match type:
 		&"building_added", &"building_refit":
 			play("build")
 		&"building_built":
 			play("built")
 		&"task_completed":
+			# Step 68: a Momo's job done -- the THUNK. A harvest has its own
+			# (the pick and the crop); work no Momo did ends quietly.
 			if String(p.get("stage", "")) == "harvest":
 				play("harvest")
+			elif int(p.get("worker", 0)) > 0:
+				play("thunk")
 		&"research_completed":
 			play("research")
 		&"letter_written":

@@ -7,6 +7,8 @@ extends Node2D
 ## shadow. Owns no game state.
 
 const LIFT := 26.0
+## Step 68: its tool landed (the rig's contact frame), while it was seen.
+signal struck(momo: int, pose: String)
 ## The pose a shown mood puts an idle Momo in (Step 51; the bubble stays).
 const MOOD_POSE := {"content": "happy", "thinking": "waiting", "confused": "confused", "worried": "confused"}
 
@@ -50,6 +52,7 @@ func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProj
 	rig = MomoRig.new()
 	rig.setup(lib, id)
 	add_child(rig)
+	rig.struck.connect(func(pose: String) -> void: struck.emit(id, pose))
 	mood_bubble = MoodBubble.new()
 	mood_bubble.setup(lib)
 	add_child(mood_bubble)

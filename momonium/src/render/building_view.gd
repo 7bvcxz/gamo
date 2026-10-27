@@ -116,6 +116,26 @@ func sparkle() -> void:
 		_sparkle = 1.0
 
 
+## Step 68: a Momo's job here is done (a real `task_completed`, BuildingViews,
+## never while time away is caught up) -- the THUNK: a crisp ring snaps out
+## from its foot and fades with six short rays, the building gives a squash,
+## the stars rise. Once per completion. Reduced motion: the ring flashes in
+## place, no squash. Effects off: nothing.
+var _impact := 0.0
+## How many it showed (tests).
+var impacts := 0
+
+
+func impact() -> void:
+	if not FxPrefs.enabled:
+		return
+	impacts += 1
+	_impact = 1.0
+	_sparkle = 1.0
+	if FxPrefs.moving():
+		_bounce = maxf(_bounce, 0.7)
+
+
 ## Zoomed far out (set by BuildingViews): small motions at a lower rate.
 var far := false
 ## Ring redraws so far (tests and the performance view).
@@ -137,6 +157,7 @@ func _process(delta: float) -> void:
 	_shake = maxf(0.0, _shake - delta * 3.5)
 	_celebrate = maxf(0.0, _celebrate - delta * 1.2)
 	_sparkle = maxf(0.0, _sparkle - delta * 1.6)
+	_impact = maxf(0.0, _impact - delta * 3.0)
 	var k := sin(_bounce * PI) * 0.08
 	sprite.position = Vector2(sin(_shake * 40.0) * 3.0 * _shake, -k * 20.0)
 	var b := buildings.get_building(id)
@@ -166,7 +187,7 @@ func _process(delta: float) -> void:
 ## Whether its ring moves frame to frame: a progress arc, a celebration or
 ## sparkle, turning blades, a landmark's glint.
 func _in_motion(b: Dictionary) -> bool:
-	if _celebrate > 0.0 or _sparkle > 0.0:
+	if _celebrate > 0.0 or _sparkle > 0.0 or _impact > 0.0:
 		return true
 	if b.is_empty():
 		return false
@@ -239,6 +260,8 @@ func _draw_ring() -> void:
 	_draw_lights(b)
 	_draw_pennant(b)
 	_draw_special(b)
+	if _impact > 0.0:
+		_draw_impact()
 	if _sparkle > 0.0:
 		for i in 5:
 			var a := TAU * i / 5.0 + _sparkle
@@ -267,6 +290,13 @@ func _draw_ring() -> void:
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.55))
 			ring.draw_arc(centre, RING_RADIUS, 0, TAU, 32, Color(1, 1, 1, 0.25), RING_WIDTH, true)
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * p, 32, Color("#9be15d"), RING_WIDTH, true)
+			# Step 68: the arc's leading end, a small bead that brightens and
+			# grows in the last part of the stage -- where the work is, how
+			# near the THUNK. From the stage's own progress; it never pulses.
+			var tip := centre + Vector2.from_angle(-PI / 2 + TAU * p) * RING_RADIUS
+			var near := clampf((p - 0.8) / 0.2, 0.0, 1.0)
+			ring.draw_circle(tip, 2.6 + near * 1.6, Color(0.09, 0.25, 0.47, 0.9))
+			ring.draw_circle(tip, 1.7 + near * 1.4, Color("#eaffcf").lerp(Color.WHITE, near))
 		BuildingSystem.IDLE:
 			_draw_blocked(b, centre)
 		BuildingSystem.COOLDOWN:
@@ -274,6 +304,20 @@ func _draw_ring() -> void:
 			var left := float(buildings.remaining_ms(b)) / total
 			ring.draw_circle(centre, RING_RADIUS + 3, Color(0.09, 0.25, 0.47, 0.45))
 			ring.draw_arc(centre, RING_RADIUS, -PI / 2, -PI / 2 + TAU * left, 32, Color(0.75, 0.85, 1.0, 0.8), RING_WIDTH, true)
+
+
+func _draw_impact() -> void:
+	var k := _impact
+	var at := Vector2(0, -8)
+	var r := (10.0 + (1.0 - k) * 30.0) if FxPrefs.moving() else 22.0
+	var a := clampf(k * 1.4, 0.0, 1.0)
+	ring.draw_set_transform(at, 0.0, Vector2(1.0, 0.55))
+	ring.draw_arc(Vector2.ZERO, r, 0, TAU, 40, Color(0.06, 0.14, 0.3, 0.85 * a), 6.0, true)
+	ring.draw_arc(Vector2.ZERO, r, 0, TAU, 40, Color(1.0, 0.97, 0.78, a), 3.0, true)
+	for i in 6:
+		var d := Vector2.from_angle(TAU * i / 6.0 + 0.3)
+		ring.draw_line(d * (r + 4.0), d * (r + 4.0 + 9.0 * k), Color(1.0, 0.92, 0.55, a), 3.0, true)
+	ring.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 ## Generators move with what they give: blades turning with the wind, the

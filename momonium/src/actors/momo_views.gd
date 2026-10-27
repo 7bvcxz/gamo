@@ -15,6 +15,9 @@ var momos: MomoSystem
 var layer: EntityLayer
 var lib: SpriteLibrary
 var actors: Dictionary = {}
+## Step 68: a Momo's tool landed -- only Momo on screen animate, so only they
+## are heard -- with the tap sound its job names (the work atlas's `tap`).
+signal struck(momo: int, sound: String)
 ## Set by the composition root: Momo out of sight stop animating (their place
 ## is still kept, for when the camera comes), and far out they move their
 ## limbs at half the rate.
@@ -52,6 +55,8 @@ func sync() -> void:
 			continue
 		var a := MomoActor.new()
 		a.setup(id, sim, lib, layer.projection)
+		a.struck.connect(func(m: int, pose: String) -> void:
+			struck.emit(m, String(MomoSheet.shared().animations.get("work_" + pose, {}).get("tap", ""))))
 		a.depth_lift = depth_lift
 		layer.add_entity(a, momos.position_of(id))
 		a.position.y += depth_lift

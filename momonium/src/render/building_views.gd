@@ -49,11 +49,12 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			if v:
 				v.celebrate()
 		&"task_completed":
-			# A Momo finished a job: a few stars.
+			# A Momo finished a job: the THUNK (Step 68) -- a ring, rays, the
+			# stars; once, from the real event.
 			if int(payload.get("worker", 0)) > 0:
 				var v: BuildingView = views.get(int(payload["id"]))
 				if v:
-					v.sparkle()
+					v.impact()
 		&"mastery_up", &"game_loaded":
 			for v: BuildingView in views.values():
 				v.refresh_pennant()

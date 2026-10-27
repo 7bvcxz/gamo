@@ -380,6 +380,7 @@ func _ready() -> void:
 	add_child(audio)
 	audio.setup(sim, settings)
 	audio.start()
+	momo_views.struck.connect(func(_momo: int, sound: String) -> void: audio.tap(sound))
 	settings_view = SettingsView.new()
 	settings_view.setup(sim, lib)
 	settings_view.audio = audio
@@ -1246,7 +1247,10 @@ func _moods_info(_arg: Variant) -> Dictionary:
 
 ## E2E: the shown feedback -- HUD pops and world pops -- and the effect settings.
 func _fx_info(_arg: Variant) -> Dictionary:
-	return {"hud": hud.pops.duplicate(), "world": feedback_fx.shown.duplicate(true), "active": feedback_fx.active_count(),
+	var impacts := {}
+	for id: int in building_views.views:
+		impacts[str(id)] = (building_views.views[id] as BuildingView).impacts
+	return {"hud": hud.pops.duplicate(), "world": feedback_fx.shown.duplicate(true), "active": feedback_fx.active_count(), "impacts": impacts,
 		"effects": FxPrefs.enabled, "reduce_motion": FxPrefs.reduced_motion,
 		"celebration": celebration.text, "celebration_sub": celebration.sub}
 

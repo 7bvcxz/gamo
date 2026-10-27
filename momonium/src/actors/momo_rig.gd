@@ -56,6 +56,11 @@ var _loop_t := 0.0
 var _loop_rest := 0.0
 ## Reduced motion slows a job's loop to this share of its speed.
 const REDUCED_PACE := 0.6
+## Step 68: the tool lands -- the loop entered its animation's `contact` frame
+## (the strike, the pour, the drop into the basket). Once per pass; the sound
+## of it is the listener's (MomoViews -> AudioService.tap), quiet and rare.
+signal struck(pose: String)
+var _loop_index := -1
 
 
 func setup(_lib: SpriteLibrary = null, seed_value: int = 0) -> void:
@@ -157,8 +162,14 @@ func tick(delta: float) -> void:
 	if not looped:
 		# Out of the loop: going back to work starts at the wind-up.
 		_loop_anim = ""
+		_loop_index = -1
 	if looped:
-		name = String(frames[_loop_frame(anim, timed, delta)])
+		var index := _loop_frame(anim, timed, delta)
+		name = String(frames[index])
+		if index != _loop_index:
+			_loop_index = index
+			if index == int(sheet.animations[anim].get("contact", -1)):
+				struck.emit(work_pose)
 	elif frames.size() > 1:
 		phase = time * sheet.fps(anim) * walk_speed
 		name = String(frames[int(phase) % frames.size()])

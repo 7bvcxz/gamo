@@ -1,5 +1,5 @@
 {
-  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Each job is four frames of one generated 2x2 sheet (Step 67, `strip`: one scale for the four), cut by tools/art/gen/split_frames.gd; every frame is fitted by Momo's eyes and head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md.",
+  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Each job is four frames of one generated 2x2 sheet (Step 67, `strip`: one scale for the four), cut by tools/art/gen/split_frames.gd; every frame is fitted by Momo's eyes and head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md. Step 68: `contact` is the frame the tool lands on (a quiet `tap` sound, assets/audio/sfx_<tap>.ogg).",
   "anchor": "res://assets/src/png/momo/front_idle.webp",
   "stand_height": 200,
   "atlas_width": 1536,
@@ -220,7 +220,9 @@
         0.3,
         0.3
       ],
-      "rest": 0.35
+      "rest": 0.35,
+      "contact": 2,
+      "tap": "tap_soft"
     },
     "work_water": {
       "cells": [
@@ -236,7 +238,9 @@
         0.6,
         0.3
       ],
-      "rest": 0.4
+      "rest": 0.4,
+      "contact": 2,
+      "tap": "tap_water"
     },
     "work_harvest": {
       "cells": [
@@ -252,7 +256,9 @@
         0.3,
         0.35
       ],
-      "rest": 0.4
+      "rest": 0.4,
+      "contact": 3,
+      "tap": "tap_soft"
     },
     "work_dig": {
       "cells": [
@@ -268,7 +274,9 @@
         0.26,
         0.22
       ],
-      "rest": 0.25
+      "rest": 0.25,
+      "contact": 2,
+      "tap": "tap_pick"
     },
     "work_chop": {
       "cells": [
@@ -284,7 +292,9 @@
         0.26,
         0.22
       ],
-      "rest": 0.25
+      "rest": 0.25,
+      "contact": 2,
+      "tap": "tap_wood"
     },
     "work_replant": {
       "cells": [
@@ -300,7 +310,9 @@
         0.45,
         0.5
       ],
-      "rest": 0.5
+      "rest": 0.5,
+      "contact": 2,
+      "tap": "tap_wood"
     },
     "work_study": {
       "cells": [
@@ -316,7 +328,9 @@
         0.6,
         0.45
       ],
-      "rest": 0.6
+      "rest": 0.6,
+      "contact": 1,
+      "tap": "tap_soft"
     },
     "work_hammer": {
       "cells": [
@@ -332,7 +346,9 @@
         0.18,
         0.16
       ],
-      "rest": 0.15
+      "rest": 0.15,
+      "contact": 2,
+      "tap": "tap_metal"
     },
     "work_stoke": {
       "cells": [
@@ -348,7 +364,9 @@
         0.2,
         0.45
       ],
-      "rest": 0.5
+      "rest": 0.5,
+      "contact": 2,
+      "tap": "tap_wood"
     },
     "work_write": {
       "cells": [
@@ -364,7 +382,9 @@
         0.55,
         0.45
       ],
-      "rest": 0.5
+      "rest": 0.5,
+      "contact": 0,
+      "tap": "tap_soft"
     }
   },
   "actions": {

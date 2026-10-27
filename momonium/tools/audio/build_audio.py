@@ -231,6 +231,32 @@ def sfx() -> dict:
     add(dm, 0.02, noise(0.5, 0.3, rng, lowpass=0.15, decay=8.0))
     out["demolish"] = dm
     out["refuse"] = glide(330, 220, 0.16, 0.35, decay=14.0)
+    # Step 68: the light taps of work in progress, one on each strike of a
+    # Momo's tool (played quietly, a few a second at most), and the THUNK
+    # that ends a job: a low drop, a soft thud and a small bell over it.
+    tp = empty(0.1)
+    add(tp, 0.0, tone(2600, 0.08, 0.5, attack=0.0008, decay=48.0, partials=((1, 1), (2.7, 0.35), (4.1, 0.15))))
+    add(tp, 0.0, noise(0.02, 0.35, rng, lowpass=0.6, decay=120.0))
+    out["tap_pick"] = tp
+    tw = empty(0.12)
+    add(tw, 0.0, tone(420, 0.1, 0.6, attack=0.001, decay=38.0, partials=((1, 1), (2.2, 0.4))))
+    add(tw, 0.0, noise(0.05, 0.4, rng, lowpass=0.25, decay=60.0))
+    out["tap_wood"] = tw
+    tm = empty(0.22)
+    add(tm, 0.0, tone(3150, 0.2, 0.45, attack=0.0008, decay=22.0, partials=((1, 1), (1.48, 0.5), (2.9, 0.2))))
+    add(tm, 0.0, noise(0.015, 0.3, rng, lowpass=0.7, decay=150.0))
+    out["tap_metal"] = tm
+    ta = empty(0.24)
+    add(ta, 0.0, noise(0.22, 0.4, rng, lowpass=0.3, decay=12.0))
+    for k in range(4):
+        add(ta, 0.02 + k * 0.045, tone(1500 + rng.random() * 1100, 0.05, 0.12, attack=0.002, decay=60.0))
+    out["tap_water"] = ta
+    out["tap_soft"] = noise(0.09, 0.5, rng, lowpass=0.18, decay=30.0)
+    th = empty(0.45)
+    add(th, 0.0, glide(150, 62, 0.22, 0.8, decay=9.0))
+    add(th, 0.0, noise(0.06, 0.45, rng, lowpass=0.12, decay=45.0))
+    add(th, 0.05, tone(note("C6"), 0.35, 0.16, attack=0.003, decay=10.0, partials=bell))
+    out["thunk"] = th
     return {k: normalise(v, 0.5) for k, v in out.items()}
 
 
@@ -251,16 +277,22 @@ def write_ogg(name: str, samples: list, quality: int) -> Path:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--only", default="", help="comma-separated names to (re)write, e.g. sfx_thunk,sfx_tap_pick")
     args = ap.parse_args()
+    only = set(n for n in args.only.split(",") if n)
     if args.check:
         for p in sorted(OUT.glob("*.ogg")):
             print(f"{p.name:24s} {p.stat().st_size / 1024:7.1f} KB")
         return 0
     tracks = {"music_calm": (music(), 3), "amb_ocean": (ocean(), 2), "amb_wind": (wind(), 2), "amb_crickets": (crickets(), 2), "amb_industry": (industry(), 2)}
     for name, (buf, q) in tracks.items():
+        if only and name not in only:
+            continue
         p = write_ogg(name, buf, q)
         print(f"{p.name:24s} {len(buf) / RATE:6.2f} s  {p.stat().st_size / 1024:7.1f} KB")
     for name, buf in sfx().items():
+        if only and "sfx_" + name not in only:
+            continue
         p = write_ogg("sfx_" + name, buf, 3)
         print(f"{p.name:24s} {len(buf) / RATE:6.2f} s  {p.stat().st_size / 1024:7.1f} KB")
     return 0

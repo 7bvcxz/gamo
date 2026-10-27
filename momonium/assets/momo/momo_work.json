@@ -539,7 +539,9 @@
         0.3,
         0.3
       ],
-      "rest": 0.35
+      "rest": 0.35,
+      "contact": 2.0,
+      "tap": "tap_soft"
     },
     "work_water": {
       "cells": [
@@ -555,7 +557,9 @@
         0.6,
         0.3
       ],
-      "rest": 0.4
+      "rest": 0.4,
+      "contact": 2.0,
+      "tap": "tap_water"
     },
     "work_harvest": {
       "cells": [
@@ -571,7 +575,9 @@
         0.3,
         0.35
       ],
-      "rest": 0.4
+      "rest": 0.4,
+      "contact": 3.0,
+      "tap": "tap_soft"
     },
     "work_dig": {
       "cells": [
@@ -587,7 +593,9 @@
         0.26,
         0.22
       ],
-      "rest": 0.25
+      "rest": 0.25,
+      "contact": 2.0,
+      "tap": "tap_pick"
     },
     "work_chop": {
       "cells": [
@@ -603,7 +611,9 @@
         0.26,
         0.22
       ],
-      "rest": 0.25
+      "rest": 0.25,
+      "contact": 2.0,
+      "tap": "tap_wood"
     },
     "work_replant": {
       "cells": [
@@ -619,7 +629,9 @@
         0.45,
         0.5
       ],
-      "rest": 0.5
+      "rest": 0.5,
+      "contact": 2.0,
+      "tap": "tap_wood"
     },
     "work_study": {
       "cells": [
@@ -635,7 +647,9 @@
         0.6,
         0.45
       ],
-      "rest": 0.6
+      "rest": 0.6,
+      "contact": 1.0,
+      "tap": "tap_soft"
     },
     "work_hammer": {
       "cells": [
@@ -651,7 +665,9 @@
         0.18,
         0.16
       ],
-      "rest": 0.15
+      "rest": 0.15,
+      "contact": 2.0,
+      "tap": "tap_metal"
     },
     "work_stoke": {
       "cells": [
@@ -667,7 +683,9 @@
         0.2,
         0.45
       ],
-      "rest": 0.5
+      "rest": 0.5,
+      "contact": 2.0,
+      "tap": "tap_wood"
     },
     "work_write": {
       "cells": [
@@ -683,7 +701,9 @@
         0.55,
         0.45
       ],
-      "rest": 0.5
+      "rest": 0.5,
+      "contact": 0.0,
+      "tap": "tap_soft"
     }
   },
   "actions": {

@@ -37,7 +37,7 @@ REQUIRED = [
 ]
 # Imported resources ship under .godot/imported with their source's name.
 REQUIRED_IMPORTED = [r"assets/atlas/", r"ui_ko\.otf", r"ui_ja\.otf", r"ui_zh\.otf", r"\.ogg"]
-MIN_SOUNDS = 17
+MIN_SOUNDS = 23
 
 
 def read_pack(path):
