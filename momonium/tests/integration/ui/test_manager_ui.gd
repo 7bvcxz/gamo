@@ -67,15 +67,19 @@ func test_the_office_says_who_manages() -> void:
 	assert_eq(view.manager_label.text, "Managing · 0 moves", "a Momo at the desk")
 
 
-func test_the_momo_card() -> void:
+func test_the_momo_row() -> void:
+	# Step 60: what the Momo card said is a row in Status > Momo.
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	(sim.system(&"momo") as MomoSystem).get_momo(1)["experience"]["farm"] = 12
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	(main.get("selection") as SelectionController).select_momo(1)
+	main.call("_on_hud_action", &"status")
+	var frame: PanelFrame = main.get("status_frame")
+	var list: MomoListView = main.get("momo_list")
+	frame.show_tab(frame.tabs.size() - 1)
 	await tree.process_frame
-	var card: MomoPanel = main.get("momo_panel")
-	assert_eq(card.skill_label.text, "Farm skill 1 · 12 jobs", "skill where it works")
-	assert_eq(card.pin_button.text, "Stays here", "placed by the player: stays")
-	_tap(card.pin_button)
+	var row: Dictionary = list.rows[1]
+	assert_eq((row["skill"] as Label).text, "Farm skill 1 · 12 jobs", "skill where it works")
+	assert_eq((row["pin"] as Button).text, "Stays here", "placed by the player: stays")
+	_tap(row["pin"])
 	assert_false((sim.system(&"momo") as MomoSystem).get_momo(1)["pinned"], "a tap hands it to the manager")
-	assert_eq(card.pin_button.text, "Manager may move", "and says so")
+	assert_eq((row["pin"] as Button).text, "Manager may move", "and says so")

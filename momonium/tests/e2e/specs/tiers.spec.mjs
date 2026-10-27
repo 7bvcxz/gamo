@@ -19,8 +19,8 @@ test('meet the milestones and become a City', async ({ game }) => {
   expect(t.badge).toBe(false);
   await game.query('dev_grow_island', 3);
   await game.query('dev_add_money', 400);
-  await game.command({ type: 'momo.hire' });
-  await game.command({ type: 'momo.hire' });
+  // Three Momo, as the City asks (Step 53: a new island starts with none).
+  for (let i = 0; i < 3; i++) expect((await game.command({ type: 'momo.hire' })).ok).toBe(true);
   await game.query('dev_research_levels', { momo_training: 3 });
   // As much produced value as the city asks for (data, Step 50 retuned it).
   await game.query('dev_sale', t.progress.find((p) => p.key === 'produced').need);

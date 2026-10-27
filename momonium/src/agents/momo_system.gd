@@ -19,8 +19,8 @@ extends SimSystem
 ## Each Momo also watches a set of tiles (`watch`): it works the buildings on
 ## them, going to whichever is ready (JobSystem decides). Being assigned to a
 ## building -- dragged there, or by the manager -- makes that building's tiles
-## the whole set, so nobody has to paint zones to play; the pencil adds and
-## removes tiles one at a time, up to watch_capacity().
+## the whole set, so nobody has to paint zones to play; Schedule (Step 60)
+## adds and removes tiles one at a time, up to watch_capacity().
 ##
 ## Step 53: a new island has no Momo -- the player works alone and chooses to
 ## hire the first. A Momo is never put to work by itself: a hire (or one of

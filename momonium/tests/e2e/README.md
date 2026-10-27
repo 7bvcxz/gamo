@@ -5,7 +5,7 @@
 | 무엇 | 명령 | 언제 |
 |---|---|---|
 | 배포 스모크 | `node smoke.mjs --url <URL> [--version x.y.z] [--pack game-*.pck]` | 배포마다 (E2E 아님) |
-| E2E 전체 | `npx playwright test` | **Step 10·20·30·40 완료 시에만** |
+| E2E 전체 | `npx playwright test` | **10 step마다(Step 10·20·…·60) 완료 시에만** |
 | 새 케이스 하나 | `npx playwright test specs/<file>.spec.mjs` | 케이스를 쓰는 동안 |
 
 - E2E는 저장소 `docs/`를 로컬 서버(기본 포트 18432, `MOMONIUM_E2E_PORT`)로 띄워 방금 export한 빌드를 연다.

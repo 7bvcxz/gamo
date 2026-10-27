@@ -72,7 +72,7 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await g.query('dev_advance_ms', 5000);
   await page.waitForTimeout(300);
   // Step 53: no Momo yet -- farm by hand for the first, then the Hire
-  // button and its card (real taps); the hire is selected: its pencil.
+  // button and its card (real taps); the hire is selected: Schedule under it.
   t = await g.query('tutorial');
   expect(t.step).toBe('save_hire');
   expect((await g.state()).momo.momos.length).toBe(0);
@@ -88,15 +88,15 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await tapRect(t.target, t.window);
   expect((await g.state()).momo.momos.length, 'the first Momo, hired by the player').toBe(1);
   t = await g.query('tutorial');
-  expect(t.step).toBe('momo_pencil');
-  await shot('8-momo-pencil');
+  expect(t.step).toBe('momo_schedule');
+  await shot('8-momo-schedule');
   await tapRect(t.target, t.window);
   t = await g.query('tutorial');
   expect(t.step).toBe('momo_edit');
   const tile = await page.evaluate(() => window.momonium.call('cell_screen', [0, 1]));
   await tapRect([tile.x - 2, tile.y - 2, 4, 4], tile.window);
   const w = await g.query('watch');
-  if (w.editing) await tapRect(w.pencil, w.window);
+  if (w.editing) await tapRect(w.schedule, w.window);
   // Quiet while the island has room (Step 50), then the sea once it is
   // nearly full: its price, and when affordable, two taps on the glow.
   t = await g.query('tutorial');

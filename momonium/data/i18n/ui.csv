@@ -64,9 +64,6 @@ momo.roaming,Free time,쉬는 중,おやすみ中,休息中
 momo.working_at,Working at %s,%s에서 일하는 중,%sで働いています,在%s工作
 momo.heading_to,On the way: %s,가는 중: %s,移動中: %s,正在前往：%s
 momo.on_rounds,Looking after its tiles,맡은 칸을 돌보는 중,受け持ちのマスを見回り中,照看负责的格子
-momo.assign_hint,Tap a building for this Momo,이 모모가 일할 건물을 눌러요,このモモが働く建物をタップ,点一座建筑让这只桃桃去工作
-momo.assign,Assign,배치,配置,分配
-momo.unassign,Release,해제,解除,解除
 err.slots_full,Another Momo works here,다른 모모가 일하고 있어요,別のモモが働いています,另一只桃桃在这里工作
 err.no_job,No work here,여기는 일이 없어요,ここに仕事はありません,这里没有工作
 panel.tab.status,Status,상태,ステータス,状态
@@ -545,13 +542,12 @@ settings.replay_tips,Show the tips again,도움말 다시 보기,ヒントをも
 settings.save_now,Save now,지금 저장,今すぐ保存,立即保存
 settings.saved,Saved,저장했어요,保存しました,已保存
 settings.save_auto,Saved by itself as you play,플레이하는 동안 자동으로 저장돼요,遊んでいる間、自動で保存されます,游戏时会自动保存
-watch.edit,Edit the tiles this Momo looks after,이 모모가 맡을 칸 고치기,このモモの受け持ちを編集,编辑这只桃桃照看的格子
 watch.done,Done,완료,完了,完成
 tip.trash,Pull down (half of the cost back),철거하기 (비용 절반 돌려받음),取り壊す（費用の半分が戻る）,拆除（返还一半费用）
 tip.confirm_demolish,"Yes, pull it down","네, 철거해요",はい、取り壊します,确定拆除
 tips.land_mouse,"The sea beside the island can be bought: point at it to see the price ($%d), click to buy","섬 옆 바다를 살 수 있어요. 마우스를 올리면 가격($%d), 클릭하면 구매",島の隣の海を買えます。マウスを乗せると値段（$%d）、クリックで購入,岛边的海可以买：鼠标移上去看价格（$%d），点击购买
 tips.land_touch,"The sea beside the island can be bought: tap it for the price ($%d), tap again to buy","섬 옆 바다를 살 수 있어요. 한 번 누르면 가격($%d), 한 번 더 누르면 구매",島の隣の海を買えます。タップで値段（$%d）、もう一度で購入,岛边的海可以买：点一下看价格（$%d），再点一下购买
-tips.watch,The pencil edits which tiles this Momo looks after: tap or drag over tiles,연필을 누르면 이 모모가 맡을 칸을 고쳐요. 칸을 누르거나 그어 보세요,鉛筆でこのモモの受け持ちを編集。マスをタップかなぞって,用铅笔编辑这只桃桃照看的格子：点击或划过格子
+tips.watch,Schedule plans this Momo's work: tap tiles or drag across them,스케줄로 이 모모가 일할 칸을 정해요. 칸을 누르거나 그어 보세요,スケジュールでこのモモの仕事を決めます。マスをタップかなぞって,用日程安排这只桃桃的工作：点击或划过格子
 tips.special,"Back here with the arrow. One of each landmark, {used}/{slots} slots in use","화살표로 돌아가요. 랜드마크는 종류마다 하나, 자리 {used}/{slots}",矢印で戻ります。ランドマークは種類ごとにひとつ、枠 {used}/{slots},用箭头返回。地标每种一座，位置 {used}/{slots}
 tips.special_built,"A landmark built leaves the Special list; pulled down, it comes back","지은 랜드마크는 특별 목록에서 빠지고, 철거하면 돌아와요",建てたランドマークは特別リストから消え、取り壊すと戻ります,建好的地标会从特殊列表消失，拆除后会回来
 tips.tier,Meet these to grow into a City: one more landmark slot,"이 조건을 채우면 도시로 승급, 랜드마크 자리 +1",条件を満たすと町に昇格、ランドマーク枠+1,达成这些条件就能升级为城市：地标位置+1
@@ -559,7 +555,6 @@ tips.rp,"Your research levels became points: place them again, e.g. 3/1/1 as 1/2
 tutorial.save_hire,Keep farming by hand · $%d / $%d for your first Momo,손으로 농사를 이어가요 · 첫 모모까지 $%d / $%d,手で畑仕事を続けよう · 最初のモモまで $%d / $%d,继续亲手种田 · 雇第一只桃桃 $%d / $%d
 tutorial.hire,Hire your first Momo · $%d,첫 모모를 고용해요 · $%d,最初のモモを雇おう · $%d,雇佣第一只桃桃 · $%d
 tutorial.momo_select,Tap a Momo,모모를 눌러 보세요,モモをタップ,点一下桃桃
-tutorial.momo_pencil,Tap the pencil to pick the tiles this Momo looks after,연필을 눌러 이 모모가 맡을 칸을 골라요,鉛筆をタップして、このモモの受け持ちを選びます,点铅笔，选这只桃桃照看的格子
 tutorial.momo_edit,Tap tiles or drag across them: %d / %d,칸을 누르거나 그어 보세요: %d / %d칸,マスをタップかなぞる: %d / %dマス,点击或划过格子：%d / %d 格
 settings.large_demo,Large island demo (performance),큰 섬 데모 (성능 확인),大きな島のデモ（性能確認）,大岛演示（性能测试）
 settings.perf_overlay,Show performance,성능 표시,パフォーマンス表示,显示性能
@@ -616,3 +611,9 @@ store.buy,Buy,구매,購入,购买
 store.restore,Restore purchases,구매 복원,購入を復元,恢复购买
 store.unavailable,Purchases are not available,결제를 이용할 수 없어요,購入は利用できません,暂不支持购买
 store.unavailable_note,"Purchases are not open yet in this version: nothing here can be bought, and nothing is charged.","이 버전에서는 아직 결제가 열리지 않았어요. 여기서는 아무것도 살 수 없고, 요금도 나가지 않아요.",このバージョンではまだ購入できません。ここでは何も買えず、料金もかかりません。,此版本尚未开放购买：这里不能购买任何东西，也不会扣费。
+watch.schedule,Schedule,스케줄,スケジュール,日程
+watch.schedule_hint,Schedule: pick the tiles this Momo works,스케줄: 이 모모가 일할 칸 고르기,スケジュール：このモモが働くマスを選ぶ,日程：选这只桃桃工作的格子
+tutorial.momo_schedule,Tap Schedule under the Momo to pick its work tiles,모모 아래의 스케줄을 눌러 일할 칸을 골라요,モモの下のスケジュールをタップして、働くマスを選びます,点桃桃下方的日程，选它工作的格子
+panel.tab.momo,Momo,모모,モモ,桃桃
+momolist.empty,"No Momo yet. Hire one with Hire, on the right.",아직 모모가 없어요. 오른쪽 고용 버튼으로 고용해요.,まだモモがいません。右の雇用ボタンで雇いましょう。,还没有桃桃。用右侧的雇佣按钮雇一只吧。
+momolist.find,Find %s,%s 찾기,%sを探す,找到%s

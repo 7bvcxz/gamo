@@ -1,8 +1,9 @@
-// Step 31: tap a Momo -- its watched tiles light up and a pencil appears
-// above it; pencil, then a stroke across tiles adds them all (the first tile
+// Step 31 (Step 60: the pencil is the Schedule button under the Momo): tap a
+// Momo -- its watched tiles light up and Schedule appears under its feet;
+// Schedule, then a stroke across tiles adds them all (the first tile
 // decides), a stroke starting on a watched tile removes, a tap edits one tile,
 // within the Momo's capacity; the Momo goes to work on a newly watched farm at
-// once; the check ends editing. Finger on phones, mouse on desktop.
+// once; Schedule again ends it. Finger on phones, mouse on desktop.
 import { test, expect } from '../lib/fixtures.mjs';
 import { cellToCanvas } from '../lib/coords.mjs';
 
@@ -43,7 +44,7 @@ async function stroke(game, cells, touch) {
 
 const watchOf = async (game) => (await game.state()).momo.momos.find((m) => m.id === 1).watch.map((c) => c.join(',')).sort();
 
-test('tap a Momo, pencil, paint its tiles', async ({ game }, info) => {
+test('tap a Momo, Schedule, paint its tiles', async ({ game }, info) => {
   const touch = info.project.use.hasTouch;
   await game.setTimeScale(0);
   await game.query('set_language', 'en');
@@ -57,11 +58,11 @@ test('tap a Momo, pencil, paint its tiles', async ({ game }, info) => {
   await game.page.waitForTimeout(250);
   let w = await game.query('watch');
   expect(w.momo).toBe(1);
-  expect(w.pencil.length).toBe(4);
+  expect(w.schedule.length).toBe(4);
   expect(w.editing).toBe(false);
   expect(w.capacity).toBe(4);
-  // Pencil.
-  let p = await toCss(game, centre(w.pencil), w.window);
+  // Schedule.
+  let p = await toCss(game, centre(w.schedule), w.window);
   await game.tap(p.x, p.y);
   await game.page.waitForTimeout(200);
   w = await game.query('watch');
@@ -94,9 +95,9 @@ test('tap a Momo, pencil, paint its tiles', async ({ game }, info) => {
   await stroke(game, [[0, 0], [0, 1], [0, 0]], touch);
   await game.page.waitForTimeout(250);
   expect(await watchOf(game)).toEqual(['1,1', '2,0']);
-  // The check ends editing; the farm gets worked.
+  // Schedule again ends it; the farm gets worked.
   w = await game.query('watch');
-  p = await toCss(game, centre(w.pencil), w.window);
+  p = await toCss(game, centre(w.schedule), w.window);
   await game.tap(p.x, p.y);
   await game.page.waitForTimeout(200);
   expect((await game.query('watch')).editing).toBe(false);

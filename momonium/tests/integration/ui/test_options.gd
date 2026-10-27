@@ -131,7 +131,7 @@ func test_tips_once_and_again() -> void:
 	(main.get("selection") as SelectionController).select_momo(1)
 	await tree.process_frame
 	await tree.process_frame
-	assert_eq(tips.tip, "watch", "a Momo selected: the pencil tip")
+	assert_eq(tips.tip, "watch", "a Momo selected: the Schedule tip")
 	tips.dismiss()
 	settings.set_value("tips", false)
 	tips.replay()

@@ -24,12 +24,12 @@ extends Control
 
 signal finished(skipped: bool)
 
-const STEPS: PackedStringArray = ["harvest", "pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "save_hire", "hire", "momo_select", "momo_pencil", "momo_edit", "land", "more"]
+const STEPS: PackedStringArray = ["harvest", "pick_tile", "pick_farm", "wait_build", "sow", "working", "water", "save_hire", "hire", "momo_select", "momo_schedule", "momo_edit", "land", "more"]
 
 var sim: Simulation
 var hud: Hud
 var strip: BuildStrip
-## For the Momo steps: what is selected, the pencil, where Momo stand.
+## For the Momo steps: what is selected, Schedule, where Momo stand.
 var selection: SelectionController
 var editor: WatchEditor
 var momo_views: MomoViews
@@ -170,8 +170,9 @@ func current_step() -> String:
 	if done == 1:
 		return "water"
 	# Then the Momo: hire the first (Step 53: the island starts with none) --
-	# by hand until it is affordable -- then tap one, its pencil, a tile or a
-	# stroke -- unless one is already looking after something.
+	# by hand until it is affordable -- then tap one, Schedule under it, a
+	# tile or a stroke (Step 60) -- unless one is already looking after
+	# something.
 	var momo_system: MomoSystem = sim.system(&"momo")
 	if not _momo_done and momo_system.ids().is_empty():
 		var economy: EconomySystem = sim.system(&"economy")
@@ -187,7 +188,7 @@ func current_step() -> String:
 		elif editor.active:
 			return "momo_edit"
 		elif selection.kind == "momo":
-			return "momo_pencil"
+			return "momo_schedule"
 		else:
 			return "momo_select"
 	if not _land_done and land_preview != null:
@@ -251,9 +252,9 @@ func _update() -> void:
 		"momo_select":
 			target = _momo_rect()
 			text.text = tr("tutorial.momo_select")
-		"momo_pencil":
-			target = _rect(editor.pencil)
-			text.text = tr("tutorial.momo_pencil")
+		"momo_schedule":
+			target = _rect(editor.schedule)
+			text.text = tr("tutorial.momo_schedule")
 		"momo_edit":
 			target = _rect(editor.count_pill)
 			text.text = tr("tutorial.momo_edit") % [(sim.system(&"momo") as MomoSystem).watched(editor.momo).size(), (sim.system(&"momo") as MomoSystem).watch_capacity(editor.momo)]

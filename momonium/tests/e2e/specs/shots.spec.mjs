@@ -144,3 +144,34 @@ test.describe('shop', () => {
     }
   });
 });
+
+// Step 60: a selected Momo -- before, its card (Assign / Release, details)
+// and the pencil; after, one Schedule button under it -- then the schedule
+// being edited (three tiles and the farm). Phone at 720x1280.
+test.describe('schedule', () => {
+  test.use({ starterMomo: true, viewport: { width: 360, height: 640 } });
+  test('schedule: a selected Momo, its tiles being planned', async ({ game }, info) => {
+    if (!info.project.use.hasTouch) await game.page.setViewportSize({ width: 1280, height: 800 });
+    await game.setTimeScale(0);
+    await game.query('set_language', 'en');
+    await game.query('dev_grow_island', 3);
+    await game.query('dev_place_building', ['farm', 2, 0]);
+    await game.page.waitForTimeout(600);
+    const box = await game.canvas.boundingBox();
+    const tap = async (p, win) => {
+      await game.tap(p[0] * (box.width / win[0]), p[1] * (box.height / win[1]));
+      await game.page.waitForTimeout(450);
+    };
+    const m = await game.query('momos');
+    await tap(m.momos['1'].body, m.window);
+    await save(game, info, 'schedule', 'selected');
+    const w = await game.query('watch');
+    const b = w.schedule || w.pencil;
+    await tap([b[0] + b[2] / 2, b[1] + b[3] / 2], w.window);
+    for (const c of [[0, 0], [0, 1], [1, 1], [2, 0]]) {
+      const p = await game.query('cell_screen', c);
+      await tap([p.x, p.y], p.window);
+    }
+    await save(game, info, 'schedule', 'mode');
+  });
+});

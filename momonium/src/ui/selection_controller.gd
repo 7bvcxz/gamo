@@ -7,7 +7,9 @@ extends Node
 ## drag the first say). A Momo under the finger wins (but tapped again while
 ## selected, it lets the tap through to its building), then the front-most
 ## building sprite, then the building on the tapped cell, then the cell
-## itself; open sea deselects.
+## itself; open sea deselects. A selected Momo shows only its Schedule button
+## (WatchEditor, Step 60); in Schedule mode taps are the brush -- except one
+## on another Momo, which selects that one instead.
 ## Tapping a ready building starts its work at once -- the tap is the action,
 ## not a request to open a menu -- and selects it so its cards show progress.
 ## Selection is presentation state: it is not saved and the simulation never
@@ -30,7 +32,6 @@ var panel: ContextPanel
 ## Sea next to the island: preview, then buy.
 var land_buyer: LandBuyer
 var momo_views: MomoViews
-var momo_panel: MomoPanel
 var kind := ""
 var selected_id := 0
 var selected_cell := Vector2i.ZERO
@@ -57,29 +58,20 @@ func setup(p_sim: Simulation, p_projection: IsoProjection, p_views: BuildingView
 
 
 func on_tap(_screen: Vector2, world_pos: Vector2) -> void:
-	# Editing a Momo's tiles: taps are the brush.
+	# Scheduling a Momo's tiles: taps are the brush -- but another Momo
+	# tapped is a change of mind: Schedule mode ends and that one is chosen.
 	if watch_editor != null and watch_editor.active:
+		var other := momo_views.hit(world_pos) if momo_views != null else 0
+		if other != 0 and other != selected_id:
+			watch_editor.end_edit()
+			select_momo(other)
+			return
 		watch_editor.on_tap(world_pos)
 		return
 	# A finger's land preview waits for a second tap on that tile; any other
 	# tap puts it away.
 	if land_buyer != null and land_buyer.pending != projection.cell_at(world_pos):
 		land_buyer.clear()
-	# Assign mode (the no-drag way): the next building tapped gets the Momo.
-	if kind == "momo" and momo_panel != null and momo_panel.assigning:
-		var target := views.hit(world_pos)
-		if target == 0:
-			target = buildings.building_at(projection.cell_at(world_pos))
-		if target != 0:
-			last_result = sim.execute({"type": "momo.assign", "momo": selected_id, "building": target})
-			momo_panel.assigning = false
-			if not last_result["ok"]:
-				# Why, in words (Step 50: a refused assignment only shook the
-				# Momo and blind players thought Assign did nothing).
-				momo_panel.say(tr(String(last_result.get("reason", ""))))
-				if momo_views.actor(selected_id) != null:
-					momo_views.actor(selected_id).refuse()
-			return
 	var id := views.hit(world_pos)
 	if id == 0:
 		id = buildings.building_at(projection.cell_at(world_pos))
@@ -118,7 +110,7 @@ func _act_on(id: int) -> void:
 
 ## The four choices beside an empty tile.
 var build_strip: BuildStrip
-## The selected Momo's tiles and their pencil.
+## The selected Momo's tiles and its Schedule button.
 var watch_editor: WatchEditor
 
 
@@ -133,7 +125,6 @@ func select_momo(id: int) -> void:
 	momo_views.actor(id).selected = true
 	marker.clear()
 	panel.hide_panel()
-	momo_panel.show_momo(id)
 	if watch_editor != null:
 		watch_editor.show_for(id)
 	selection_changed.emit(kind)
@@ -183,7 +174,6 @@ func _unmark() -> void:
 		var a := momo_views.actor(selected_id)
 		if a:
 			a.selected = false
-		momo_panel.hide_panel()
 		if watch_editor != null:
 			watch_editor.hide_editor()
 	selected_id = 0

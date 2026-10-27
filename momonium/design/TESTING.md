@@ -6,7 +6,7 @@
 |---|---|---|---|
 | unit | `tests/unit/**/test_*.gd` | 로직 규칙: 시계·스케줄러·데이터·시스템·저장 | 매 step 전체 |
 | integration | `tests/integration/**/test_*.gd` | 실제 씬을 SceneTree에 올리고 프레임·입력 이벤트로 조작 | 매 step 전체 |
-| E2E | `tests/e2e/specs/*.spec.mjs` | 웹 빌드를 Chromium(폰·데스크톱)에서 실제 터치·마우스로 | **Step 10·20·30·40에만 전체**. 새 케이스는 단독 |
+| E2E | `tests/e2e/specs/*.spec.mjs` | 웹 빌드를 Chromium(폰·데스크톱)에서 실제 터치·마우스로 | **Step 10·20·30·40·50·60(10 step마다)에만 전체**. 새 케이스는 단독 |
 | 스모크 | `tests/e2e/smoke.mjs` | 배포된 URL: 로드·프레임·버전·탭 한 번 | 배포마다 |
 | CI | `.github/workflows/momonium.yml` | import·로드 검사·unit+integration, main push에는 export+스모크 | `momonium/**` 변경 시 |
 

@@ -21,9 +21,8 @@ var panel: ContextPanel
 var marker: SelectionMarker
 var building_views: BuildingViews
 var momo_views: MomoViews
-var momo_panel: MomoPanel
 var momo_drag: MomoDrag
-## The selected Momo's watched tiles, and the pencil that edits them.
+## The selected Momo's watched tiles, and its Schedule button (Step 60).
 var watch_overlay: WatchOverlay
 var watch_editor: WatchEditor
 var selection: SelectionController
@@ -48,6 +47,9 @@ var inventory_view: InventoryView
 var economy_view: EconomyView
 var stats_view: StatsView
 var life_view: LifeView
+## Every Momo, one row each (Step 60): what the Momo card said, its route and
+## whether the manager may move it -- the last tab of Status.
+var momo_list: MomoListView
 var analytics_view: AnalyticsView
 ## Everything about one building, opened from its name.
 var detail_frame: PanelFrame
@@ -219,25 +221,19 @@ func _ready() -> void:
 	add_child(selection)
 	selection.setup(sim, projection, building_views, marker, panel, router)
 	selection.momo_views = momo_views
-	momo_panel = MomoPanel.new()
-	ui.add_child(momo_panel)
-	momo_panel.setup(sim, lib)
-	momo_panel.resized.connect(_place_momo_panel)
-	momo_panel.visibility_changed.connect(_place_momo_panel)
-	momo_panel.release_requested.connect(func(id: int) -> void:
-		selection.last_result = sim.execute({"type": "momo.unassign", "momo": id}))
-	selection.momo_panel = momo_panel
 	sea_life.setup(sim, projection)
 	watch_overlay.setup(sim, projection)
 	watch_editor = WatchEditor.new()
 	ui.add_child(watch_editor)
 	watch_editor.setup(sim, cameras, projection, momo_views, watch_overlay)
-	watch_editor.anchor = func() -> Rect2: return momo_panel.get_global_rect() if momo_panel.visible else Rect2()
-	watch_editor.editing_changed.connect(func(on: bool) -> void:
-		if on:
-			momo_panel.assigning = false)
+	# The Schedule button keeps off the HUD's own buttons.
+	watch_editor.avoid = func() -> Array[Rect2]: return hud.occupied_rects()
+	watch_editor.safe_area = func() -> Rect2:
+		var m := hud.safe_margins()
+		var screen := get_viewport_rect().size
+		return Rect2(Vector2(m["left"], m["top"]), screen - Vector2(m["left"] + m["right"], m["top"] + m["bottom"]))
 	selection.watch_editor = watch_editor
-	# Before the Momo drag: while editing, a stroke paints tiles.
+	# Before the Momo drag: in Schedule mode, a stroke paints tiles.
 	router.add_drag_handler(watch_editor)
 	momo_drag = MomoDrag.new()
 	momo_drag.setup(sim, projection, momo_views, building_views)
@@ -283,6 +279,10 @@ func _ready() -> void:
 	analytics_view.setup(sim, lib)
 	status_frame.add_tab("panel.tab.stats", analytics_view)
 	analytics_view.building_chosen.connect(func(id: int) -> void: open_details(id))
+	momo_list = MomoListView.new()
+	momo_list.setup(sim, lib)
+	status_frame.add_tab("panel.tab.momo", momo_list)
+	momo_list.find_requested.connect(find_momo)
 	detail_frame = _frame(ui, "DetailFrame")
 	detail_view = BuildingDetailView.new()
 	detail_view.setup(sim, lib)
@@ -493,7 +493,11 @@ func _ready() -> void:
 		var c := f.find_child(String(arg[1]), true, false) as Control if f != null else null
 		if c == null:
 			return {"ok": false}
-		f.scroll.ensure_control_visible(c)
+		# A tab (the tab bar scrolls sideways when the tabs outgrow the card).
+		if f.tab_scroll.is_ancestor_of(c):
+			f.tab_scroll.ensure_control_visible(c)
+		else:
+			f.scroll.ensure_control_visible(c)
 		return {"ok": true})
 	bridge.register_query("dev_settings_reveal", func(node_name: Variant) -> Dictionary:
 		var c := settings_view.find_child(String(node_name), true, false) as Control
@@ -582,16 +586,29 @@ func _ready() -> void:
 			"profiles": range(ResearchSystem.PROFILES).map(func(i: int) -> Dictionary: return {"text": rp_view.profile_buttons[i].text,
 				"load": conv.call(rp_view.profile_buttons[i]), "save": conv.call(rp_view.save_buttons[i]), "levels": rs.profiles[i]}),
 			"window": [win.x, win.y]})
-	bridge.register_query("route", func(_a: Variant) -> Dictionary:
+	# Step 60: a Momo's route is set in Status > Momo (`arg`: the Momo, else
+	# the selected one, else the first).
+	bridge.register_query("route", func(arg: Variant) -> Dictionary:
 		var vp := get_viewport()
-		var r := momo_panel.route_button.get_global_rect()
-		var a: Vector2 = vp.get_final_transform() * r.position
-		var b: Vector2 = vp.get_final_transform() * r.end
 		var win := vp.get_visible_rect().size * vp.get_final_transform().get_scale()
-		var momo := momo_panel.momo_id
-		return {"momo": momo, "route": (sim.system(&"momo") as MomoSystem).route_of(momo) if momo != 0 else "",
-			"label": momo_panel.route_button.text, "button": [a.x, a.y, b.x - a.x, b.y - a.y] if momo_panel.route_button.is_visible_in_tree() else [],
-			"compare": momo_panel.compare_label.text if momo_panel.compare_label.visible else "", "stops": watch_overlay.route(), "window": [win.x, win.y]})
+		var ms: MomoSystem = sim.system(&"momo")
+		var momo := int(arg) if arg != null and int(arg) != 0 else (selection.selected_id if selection.kind == "momo" else (ms.ids()[0] if not ms.ids().is_empty() else 0))
+		var row: Dictionary = momo_list.rows.get(momo, {})
+		var button := []
+		var label := ""
+		var compare := ""
+		if not row.is_empty():
+			var rb := row["route"] as Button
+			label = rb.text
+			if rb.is_visible_in_tree():
+				var r := rb.get_global_rect()
+				var a: Vector2 = vp.get_final_transform() * r.position
+				var b: Vector2 = vp.get_final_transform() * r.end
+				button = [a.x, a.y, b.x - a.x, b.y - a.y]
+			compare = (row["compare"] as Label).text if (row["compare"] as Label).visible else ""
+		return {"momo": momo, "route": ms.route_of(momo) if momo != 0 else "", "label": label, "button": button,
+			"compare": compare, "stops": watch_overlay.route(), "open": status_frame.visible and status_frame.current_view() == momo_list,
+			"window": [win.x, win.y]})
 	bridge.register_query("tier", func(_a: Variant) -> Dictionary:
 		var vp := get_viewport()
 		var tv := status_panel.tier_view
@@ -675,7 +692,10 @@ func _ready() -> void:
 		var m := watch_editor.momo
 		return {"momo": m, "editing": watch_editor.active, "tinted": cells,
 			"capacity": (sim.system(&"momo") as MomoSystem).watch_capacity(m) if m != 0 else 0,
-			"pencil": conv.call(watch_editor.pencil) if watch_editor.visible else [],
+			"schedule": conv.call(watch_editor.schedule) if watch_editor.visible else [], "side": watch_editor.side,
+			"pressed": watch_editor.schedule.button_pressed, "name": watch_editor.schedule.accessibility_name,
+			"eligible": watch_overlay.eligible().map(func(e: Array) -> Array: return [(e[0] as Vector2i).x, (e[0] as Vector2i).y]),
+			"count_rect": conv.call(watch_editor.count_pill) if watch_editor.count_pill.visible else [],
 			"count": watch_editor.count_label.text if watch_editor.count_label.visible else "",
 			"result": watch_editor.last_result, "window": [win.x, win.y]})
 	bridge.register_query("strip", func(_a: Variant) -> Dictionary:
@@ -974,7 +994,7 @@ func _tell_about_return(report: Dictionary) -> void:
 func _connect_tips() -> void:
 	selection.selection_changed.connect(func(kind: String) -> void:
 		if kind == "momo" and not tutorial.running:
-			(func() -> void: tips.offer("watch", tr("tips.watch"), func() -> Rect2: return watch_editor.pencil.get_global_rect() if watch_editor.visible else Rect2())).call_deferred())
+			(func() -> void: tips.offer("watch", tr("tips.watch"), func() -> Rect2: return watch_editor.schedule.get_global_rect() if watch_editor.visible else Rect2())).call_deferred())
 	build_strip.mode_changed.connect(func(mode: String) -> void:
 		if mode == "special" and not tutorial.running:
 			var bs: BuildingSystem = sim.system(&"buildings")
@@ -1686,15 +1706,16 @@ func _celebrate_level(level: int) -> void:
 	celebration.play(tr("fx.level_banner") % level, tr("fx.now_open") % " · ".join(names))
 
 
-func _place_momo_panel() -> void:
-	if momo_panel == null or not momo_panel.visible:
+## From Status > Momo: the panel goes, the view centres on that Momo and it
+## is selected -- its Schedule button under it.
+func find_momo(id: int) -> void:
+	var a := momo_views.actor(id)
+	if a == null:
 		return
-	momo_panel.reset_size()
-	var size := get_viewport_rect().size
-	momo_panel.position = Vector2(hud.bottom_left_end + 8.0, size.y - momo_panel.size.y - hud.bottom_margin)
-	if momo_panel.position.x + momo_panel.size.x > size.x - 8.0:
-		momo_panel.position.x = maxf(8.0, size.x - momo_panel.size.x - 8.0)
-		momo_panel.position.y -= 80.0
+	_close_frames()
+	var at := cameras.world_to_screen(a.global_position - Vector2(0, a.depth_lift))
+	cameras.pan_screen(get_viewport_rect().size * 0.5 - at)
+	selection.select_momo(id)
 
 
 ## E2E: Momo positions on screen (window pixels), their assignment, and the drag/selection state.
@@ -1711,4 +1732,4 @@ func _momo_info(_arg: Variant) -> Dictionary:
 			"cell": a.rig.cell_name(), "view": a.rig.view(), "mirrored": a.rig.scale.x < 0.0,
 			"sheet": [a.rig.body.texture.get_width(), a.rig.body.texture.get_height()] if a.rig.body.texture != null else []}
 	var win := DisplayServer.window_get_size()
-	return {"momos": out, "drag": momo_drag.last_result, "selected": selection.kind, "assigning": momo_panel.assigning, "window": [win.x, win.y]}
+	return {"momos": out, "drag": momo_drag.last_result, "selected": selection.kind, "selected_id": selection.selected_id if selection.kind == "momo" else 0, "window": [win.x, win.y]}

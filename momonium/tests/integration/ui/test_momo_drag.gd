@@ -1,6 +1,7 @@
 extends "res://tests/framework/test_case.gd"
 
-## Dragging Momo with a real finger (and a mouse), and the no-drag way.
+## Dragging Momo with a real finger (and a mouse), and the no-drag way
+## (Schedule, Step 60).
 
 const MainScene := preload("res://scenes/main.tscn")
 
@@ -113,26 +114,27 @@ func test_drop_hint_shows_while_carrying() -> void:
 	assert_eq(view.drop_hint, 0, "and clears when the carry ends")
 
 
-func test_tap_selects_and_the_panel_assigns_without_dragging() -> void:
-	var p := _momo_screen()
-	for pressed: bool in [true, false]:
-		var t := InputEventScreenTouch.new()
-		t.position = p
-		t.pressed = pressed
-		vp.push_input(t, true)
+func test_tap_selects_and_schedule_assigns_without_dragging() -> void:
+	# Step 60: the no-drag way is Schedule -- the Momo card's Assign and
+	# Release are gone.
+	var tap := func(p: Vector2) -> void:
+		for pressed: bool in [true, false]:
+			var t := InputEventScreenTouch.new()
+			t.position = p
+			t.pressed = pressed
+			vp.push_input(t, true)
+	tap.call(_momo_screen())
 	var sel: SelectionController = main.get("selection")
 	assert_eq(sel.kind, "momo", "a tap selects the Momo")
-	var panel: MomoPanel = main.get("momo_panel")
-	assert_true(panel.visible, "its card shows")
-	panel.assign_button.pressed.emit()
-	assert_true(panel.assigning, "assign mode")
+	var editor: WatchEditor = main.get("watch_editor")
+	assert_true(editor.schedule.is_visible_in_tree(), "its Schedule button shows")
+	await tree.process_frame
+	tap.call(editor.schedule.get_global_rect().get_center())
+	assert_true(editor.active, "Schedule mode")
 	var f := cams.world_to_screen(proj.cell_center(Vector2i(1, 0)))
-	for pressed: bool in [true, false]:
-		var t := InputEventScreenTouch.new()
-		t.position = f
-		t.pressed = pressed
-		vp.push_input(t, true)
-	assert_eq(momos.get_momo(1)["assigned"], farm, "tapping the farm assigned it")
+	tap.call(f)
+	assert_eq(momos.get_momo(1)["assigned"], farm, "tapping the farm's tile assigned it")
 	assert_eq(buildings.get_building(farm)["state"], BuildingSystem.IDLE, "and did not start the farm's work")
-	panel.release_button.pressed.emit()
-	assert_eq(momos.get_momo(1)["assigned"], 0, "Release lets it go")
+	tap.call(f)
+	assert_eq(momos.get_momo(1)["assigned"], 0, "tapping it again lets it go")
+	assert_eq(momos.watched(1), [] as Array[Vector2i], "with nothing left to look after")

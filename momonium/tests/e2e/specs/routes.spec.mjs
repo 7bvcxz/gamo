@@ -1,8 +1,8 @@
 // Step 34: tap a Momo watching several buildings -- its route shows (numbered
-// stops); the Route line in its card switches nearest -> row by row ->
-// zigzag -> zone with real taps, saved in the island; the smart route opens
-// once its research has a point; a few days later the card compares the jobs
-// a day before and after the change.
+// stops); the Route line (Step 60: in Status > Momo, the Momo card is gone)
+// switches nearest -> row by row -> zigzag -> zone with real taps, saved in
+// the island; the smart route opens once its research has a point; a few days
+// later the row compares the jobs a day before and after the change.
 import { test, expect } from '../lib/fixtures.mjs';
 
 // Step 53: about what a Momo does -- the old starter Momo, explicitly.
@@ -29,26 +29,40 @@ test('switch a Momo route and compare', async ({ game }) => {
   await game.page.waitForTimeout(250);
   let r = await game.query('route');
   expect(r.stops.length).toBe(4);
+  // Status, then its Momo tab (scrolled into view when the tabs outgrow the card).
+  const hud = await game.query('hud');
+  let p = await toCss(game, centre(hud.buttons.status), hud.window);
+  await game.tap(p.x, p.y);
+  await game.page.waitForTimeout(250);
+  await game.query('dev_reveal', ['StatusFrame', 'Tab_panel.tab.momo']);
+  await game.page.waitForTimeout(250);
+  const panels = await game.query('panels');
+  p = await toCss(game, centre(panels.tabs.momo), panels.window);
+  await game.tap(p.x, p.y);
+  await game.page.waitForTimeout(250);
+  r = await game.query('route', 1);
+  expect(r.open, 'Status > Momo').toBe(true);
   expect(r.label).toBe('Route: Nearest first');
   for (const want of ['rows', 'zigzag', 'zone']) {
-    const p = await toCss(game, centre(r.button), r.window);
-    await game.tap(p.x, p.y);
+    const q = await toCss(game, centre(r.button), r.window);
+    await game.tap(q.x, q.y);
     await game.page.waitForTimeout(200);
-    r = await game.query('route');
+    r = await game.query('route', 1);
     expect(r.route).toBe(want);
   }
   expect((await game.state()).momo.momos.find((x) => x.id === 1).route).toBe('zone');
   // Smart: one point placed on its research opens it.
   await game.query('dev_research_levels', { smart_schedule: 1 });
-  r = await game.query('route');
-  let p = await toCss(game, centre(r.button), r.window);
+  await game.page.waitForTimeout(300);
+  r = await game.query('route', 1);
+  p = await toCss(game, centre(r.button), r.window);
   await game.tap(p.x, p.y);
   await game.page.waitForTimeout(200);
-  r = await game.query('route');
+  r = await game.query('route', 1);
   expect(r.route).toBe('auto');
   // Days on both sides of the change: the card compares.
   await game.query('dev_advance_ms', 30000 * 4);
   await game.page.waitForTimeout(400);
-  r = await game.query('route');
+  r = await game.query('route', 1);
   expect(r.compare).toMatch(/jobs a day/);
 });
