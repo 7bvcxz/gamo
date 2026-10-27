@@ -696,6 +696,12 @@ func _ready() -> void:
 			"pressed": watch_editor.schedule.button_pressed, "name": watch_editor.schedule.accessibility_name,
 			"eligible": watch_overlay.eligible().map(func(e: Array) -> Array: return [(e[0] as Vector2i).x, (e[0] as Vector2i).y]),
 			"count_rect": conv.call(watch_editor.count_pill) if watch_editor.count_pill.visible else [],
+			# Step 61: the player's order -- each stop's number and tile, and the stop it is committed to.
+			"route": (sim.system(&"momo") as MomoSystem).route_of(m) if m != 0 else "",
+			"stops": (sim.system(&"jobs") as JobSystem).stops_of(m).map(func(id: int) -> Array:
+				var c: Array = (sim.system(&"buildings") as BuildingSystem).get_building(id)["anchor"]
+				return [id, int((sim.system(&"jobs") as JobSystem).stop_numbers(m).get(id, 0)), int(c[0]), int(c[1])]) if m != 0 else [],
+			"stop": int((sim.system(&"momo") as MomoSystem).get_momo(m).get("stop", 0)) if m != 0 else 0,
 			"count": watch_editor.count_label.text if watch_editor.count_label.visible else "",
 			"result": watch_editor.last_result, "window": [win.x, win.y]})
 	bridge.register_query("strip", func(_a: Variant) -> Dictionary:

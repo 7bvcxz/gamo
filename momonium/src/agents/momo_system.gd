@@ -22,6 +22,14 @@ extends SimSystem
 ## the whole set, so nobody has to paint zones to play; Schedule (Step 60)
 ## adds and removes tiles one at a time, up to watch_capacity().
 ##
+## Step 61: tiles added in Schedule mode are an ordered schedule -- the route
+## `order`: the watch list keeps the order of the player's taps (a stroke:
+## the order it crossed them; a tile taken away and added again goes last),
+## and JobSystem works its buildings one stage each, 1 -> 2 -> 3 -> 1, never
+## turning aside. `stop` is the building it is committed to now and `cursor`
+## where that stop stood in the list (so a stop taken away hands over to the
+## one after it). Every other route keeps its watch sorted, as before.
+##
 ## Step 53: a new island has no Momo -- the player works alone and chooses to
 ## hire the first. A Momo is never put to work by itself: a hire (or one of
 ## the legacy's free hires) arrives idle and wanders until the player places
@@ -31,14 +39,16 @@ extends SimSystem
 const ROAM := "momo.roam"
 const ARRIVE := "momo.arrive"
 const NEIGHBOURS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
-## How a Momo picks its next watched building (JobSystem): nearest ready one;
-## in reading order, row by row; rows alternating direction; only the
-## buildings nearer its own tiles than any other watcher's; and, once
-## researched, planning around waits (setting off for what will be ready).
-const ROUTES: PackedStringArray = ["nearest", "rows", "zigzag", "zone", "auto"]
+## How a Momo picks its next watched building (JobSystem): in the player's
+## own order (Step 61, set by Schedule); nearest ready one; in reading order,
+## row by row; rows alternating direction; only the buildings nearer its own
+## tiles than any other watcher's; and, once researched, planning around
+## waits (setting off for what will be ready).
+const ROUTES: PackedStringArray = ["order", "nearest", "rows", "zigzag", "zone", "auto"]
 
 ## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired,
-##        watch [[x,y]...] (sorted), pinned, opted_in}
+##        watch [[x,y]...] (sorted; in the player's order on the `order` route),
+##        pinned, opted_in, stop, cursor, wait (Step 61)}
 var momos: Dictionary = {}
 var next_id := 1
 var hired := 0
@@ -141,7 +151,7 @@ func add_momo(pos: Vector2) -> int:
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
 		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": [],
-		"route": "nearest", "route_since": now, "exp_carry": {}, "opted_in": false}
+		"route": "nearest", "route_since": now, "exp_carry": {}, "opted_in": false, "stop": 0, "cursor": 0, "wait": 0}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -261,7 +271,7 @@ func execute(command: Dictionary) -> Dictionary:
 			for c: Variant in command.get("cells", []):
 				if typeof(c) == TYPE_ARRAY and (c as Array).size() == 2:
 					cells.append(Vector2i(int(c[0]), int(c[1])))
-			return set_watch(Cmd.integer(command, "momo"), cells, Cmd.text(command, "op"))
+			return set_watch(Cmd.integer(command, "momo"), cells, Cmd.text(command, "op"), bool(command.get("schedule", false)))
 		"momo.route":
 			return set_route(Cmd.integer(command, "momo"), Cmd.text(command, "route"))
 		"momo.move":
@@ -491,15 +501,26 @@ func can_watch(momo: int, cell: Vector2i) -> Dictionary:
 ## the same operation for every tile, so a brush stroke never flips a tile
 ## twice. Each tile that cannot be added says why; the rest still go in. A
 ## Momo whose zone the player edits is theirs: the manager leaves it alone.
-func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
+## `schedule` (Schedule mode, Step 61): tiles added are appended in the order
+## given and the Momo follows them in that order (the `order` route).
+func set_watch(momo: int, cells: Array[Vector2i], op: String, schedule: bool = false) -> Dictionary:
 	if not momos.has(momo):
 		return SimResult.fail("err.no_momo")
+	if op == "set":
+		return _set_watch_exactly(momo, cells)
 	if op != "add" and op != "remove":
 		return SimResult.fail("err.bad_command")
 	var m: Dictionary = momos[momo]
 	var watch: Array = m["watch"]
 	var changed: Array = []
 	var refused := {}
+	var reordered := false
+	if schedule and op == "add" and String(m.get("route", "nearest")) != "order":
+		# The tiles it has keep their places (sorted, as they were); what the
+		# player adds now follows them.
+		m["route"] = "order"
+		m["route_since"] = sim.now_ms()
+		reordered = true
 	for c: Vector2i in cells:
 		var key := [c.x, c.y]
 		if op == "add":
@@ -514,7 +535,10 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 		elif watch.has(key):
 			watch.erase(key)
 			changed.append(key)
-	watch.sort()
+	if String(m.get("route", "nearest")) != "order":
+		watch.sort()
+	if reordered:
+		sim.bus.emit(&"momo_route_changed", {"id": momo, "route": "order"})
 	if not changed.is_empty():
 		# Who watches what is read again before anyone hears of it.
 		_watch_sig = -1
@@ -532,6 +556,38 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String) -> Dictionary:
 				unassign(momo, true)
 		sim.bus.emit(&"momo_watch_changed", {"id": momo})
 	return SimResult.ok({"changed": changed, "refused": refused, "count": watch.size(), "capacity": watch_capacity(momo)})
+
+
+## `op` "set": the watch becomes exactly `cells`, in that order (an undone
+## stroke puts a schedule back as it was). Tiles it may not take are left
+## out, as an add would.
+func _set_watch_exactly(momo: int, cells: Array[Vector2i]) -> Dictionary:
+	var m: Dictionary = momos[momo]
+	var old: Array = (m["watch"] as Array).duplicate()
+	m["watch"] = []
+	var refused := {}
+	for c: Vector2i in cells:
+		if (m["watch"] as Array).has([c.x, c.y]):
+			continue
+		var check := can_watch(momo, c)
+		if check["ok"]:
+			(m["watch"] as Array).append([c.x, c.y])
+		else:
+			refused["%d,%d" % [c.x, c.y]] = check["reason"]
+	if String(m.get("route", "nearest")) != "order":
+		(m["watch"] as Array).sort()
+	_watch_sig = -1
+	if m["watch"] != old:
+		var at := int(m["assigned"])
+		if at != 0:
+			var bs: BuildingSystem = sim.system(&"buildings")
+			var still := false
+			for c: Vector2i in bs.cells_of(bs.get_building(at)):
+				still = still or (m["watch"] as Array).has([c.x, c.y])
+			if not still:
+				unassign(momo, true)
+		sim.bus.emit(&"momo_watch_changed", {"id": momo})
+	return SimResult.ok({"changed": [], "refused": refused, "count": (m["watch"] as Array).size(), "capacity": watch_capacity(momo)})
 
 
 # --- looking after new work by itself (Step 50) ---------------------------------------
@@ -585,7 +641,9 @@ func _watch_more(momo: int, cells: Array[Vector2i]) -> void:
 	for c: Vector2i in cells:
 		if not watch.has([c.x, c.y]) and can_watch(momo, c)["ok"]:
 			watch.append([c.x, c.y])
-	watch.sort()
+	# A schedule takes the new building last; any other watch stays sorted.
+	if String(momos[momo].get("route", "nearest")) != "order":
+		watch.sort()
 	_watch_sig = -1
 	sim.bus.emit(&"momo_watch_changed", {"id": momo, "auto": true})
 
@@ -772,7 +830,7 @@ func load_state(state: Dictionary) -> void:
 		rng.state = int(str(state["rng_state"]))
 	for raw: Dictionary in state.get("momos", []):
 		var m := raw.duplicate(true)
-		for k: String in ["id", "assigned", "token", "start", "end"]:
+		for k: String in ["id", "assigned", "token", "start", "end", "stop", "cursor", "wait"]:
 			m[k] = int(m.get(k, 0))
 		var exp := {}
 		var raw_exp: Dictionary = m.get("experience", {})
@@ -806,7 +864,10 @@ func load_state(state: Dictionary) -> void:
 		var w: Array = []
 		for c: Variant in m["watch"]:
 			w.append([int(c[0]), int(c[1])])
-		w.sort()
+		# A schedule's order is the point of it (Step 61); a save from before
+		# it has no `order` route, and its sorted watch is the stable fallback.
+		if m["route"] != "order":
+			w.sort()
 		m["watch"] = w
 		if not m.has("from"):
 			var p: Array = m.get("pos", [0.5, 0.5])

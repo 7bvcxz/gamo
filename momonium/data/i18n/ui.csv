@@ -486,6 +486,7 @@ rp.at_one,At Lv 1: %s,Lv 1이면: %s,Lv 1なら: %s,Lv 1 时：%s
 research.smart_schedule.name,Smart rounds,똑똑한 순회,かしこい見回り,聪明的巡视
 research.smart_schedule.desc,"Momo learn to plan around waits: they set off to a building just as it will be ready, instead of idling.","모모가 기다림을 셈에 넣어, 건물이 준비될 즈음 맞춰 미리 출발해요.",モモが待ち時間を考えて、建物が空くころに合わせて先に向かいます。,桃桃学会把等待算进去，赶在建筑空出来时提前出发。
 effect.route,Opens the routing plan: {name},순회 방식 열림: {name},見回り方を解放: {name},解锁巡视方式：{name}
+route.order,In your order,정한 순서대로,決めた順に,按设定顺序
 route.nearest,Nearest first,가까운 곳부터,近い所から,最近优先
 route.rows,Row by row,줄마다,列ごと,逐行
 route.zigzag,Zigzag,지그재그,ジグザグ,之字形

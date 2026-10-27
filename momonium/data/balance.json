@@ -182,7 +182,11 @@
       "base_tiles": 4,
       "auto": true
     },
-    "starve_seconds": 8
+    "starve_seconds": 8,
+    "schedule": {
+      "_doc": "Step 61: a Momo on the player's own order (Schedule) works its stops strictly in turn, one stage each. At a stop that cannot start for a reason that does not end by itself (inputs, a full store, power, every place taken) it waits wait_seconds, then goes on to the next stop -- the stop keeps its place and is tried again when its turn comes round. Cooldowns, a stage under way and construction are always waited out.",
+      "wait_seconds": 15
+    }
   },
   "pace": {
     "_doc": "Step 58: the owner found the work and the Momo far too quick. work_scale multiplies the work time of every stage (the player's tap, a Momo's turn, a lab's study, a smelt -- buildings.json `seconds` and recipe seconds) and its floor, once, in BuildingSystem.stage_seconds; the waits after a stage (`cooldown`: crops drinking, ore settling) are world rules and stay. travel_scale divides a Momo's walking speed, once, in MomoSystem.walk_speed. Research, skills, the Clock Tower, legacy and offline time all multiply on top of these, as before. The game clock, the camera, UI and feedback animations and the day are not touched. Each action pays more to match (Step 58, the owner's 'keep the direct rewards'): every item's price and every stage's EXP and mastery doubled (x2 against the work's x2.5 -- money a minute stays a little lower than before, the frozen pacing targets hold; design/INCREMENTAL_BALANCE_REPORT.md 'Step 58').",

@@ -195,6 +195,9 @@ func _draw_route() -> void:
 	var order := route()
 	if order.is_empty():
 		return
+	# The player's order (Step 61): each stop keeps its own number, 1, 2, 3
+	# ..., the line going from the Momo to the stop it is committed to.
+	var numbers := jobs.stop_numbers(momo)
 	var pts := PackedVector2Array([projection.to_screen(momos.position_of(momo))])
 	for id: int in order:
 		pts.append(projection.to_screen(momos.work_spot(id)))
@@ -207,7 +210,7 @@ func _draw_route() -> void:
 	for i in range(1, pts.size()):
 		r.draw_circle(pts[i], 15.0, Color(0.06, 0.2, 0.26, 0.92))
 		r.draw_arc(pts[i], 15.0, 0.0, TAU, 20, Color(EDGE, 0.95), 2.5, true)
-		var t := str(i)
+		var t := str(numbers.get(order[i - 1], i))
 		var ts := font.get_string_size(t, HORIZONTAL_ALIGNMENT_LEFT, -1, 18)
 		r.draw_string(font, pts[i] + Vector2(-ts.x * 0.5, 7), t, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color.WHITE)
 

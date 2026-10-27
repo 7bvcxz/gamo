@@ -98,7 +98,11 @@ func test_the_route_button_and_its_preview() -> void:
 	assert_false((list.rows[1]["compare"] as Label).visible, "nothing to compare yet: no line (Step 50)")
 	for i in 3:
 		list.next_route(1)
-	assert_eq(momos.route_of(1), "nearest", "zigzag, zone, and round again (smart needs its research)")
+	assert_eq(momos.route_of(1), "order", "zigzag, zone, then the player's own order (Step 61)")
+	list.refresh()
+	assert_eq(route.text, "Route: In your order", "")
+	list.next_route(1)
+	assert_eq(momos.route_of(1), "nearest", "and round again (smart needs its research)")
 
 
 func test_its_name_finds_it_on_the_island() -> void:

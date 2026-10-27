@@ -337,3 +337,42 @@ func test_the_momo_starts_on_new_tiles_at_once() -> void:
 	assert_eq(int(momos.get_momo(1)["assigned"]), farm, "the farm on the new tile: it heads there now")
 	sim.advance_ms(40000)
 	assert_true(int(bs.get_building(farm)["completed"]) > 0, "and works it")
+
+
+func test_schedule_mode_keeps_the_tap_order_and_numbers_it() -> void:
+	# Step 61: tiles tapped in Schedule mode are an order: 3rd, 1st, 2nd.
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var first := bs.place_instant("farm", Vector2i(0, 0))
+	var second := bs.place_instant("farm", Vector2i(1, 0))
+	var third := bs.place_instant("farm", Vector2i(2, 0))
+	await _select_momo()
+	_schedule()
+	for c: Vector2i in [Vector2i(2, 0), Vector2i(0, 0), Vector2i(1, 0)]:
+		_tap(_cell(c))
+	var jobs: JobSystem = sim.system(&"jobs")
+	assert_eq(momos.route_of(1), "order", "the player's order")
+	assert_eq(jobs.stop_numbers(1), {third: 1, first: 2, second: 3}, "numbered as tapped")
+	assert_eq(overlay.route()[0], third, "the line goes to stop 1 first")
+
+
+func test_a_stroke_orders_its_tiles_as_it_crosses_them() -> void:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var ids: Array[int] = []
+	for x in 3:
+		ids.append(bs.place_instant("farm", Vector2i(x, 1)))
+	await _select_momo()
+	_schedule()
+	_stroke([_cell(Vector2i(2, 1)), _cell(Vector2i(1, 1)), _cell(Vector2i(0, 1))])
+	var jobs: JobSystem = sim.system(&"jobs")
+	assert_eq(jobs.stops_of(1), [ids[2], ids[1], ids[0]] as Array[int], "right to left, as the finger went")
+	# Two fingers undo a stroke: the order is put back exactly.
+	var before := momos.watched(1)
+	_touch(_cell(Vector2i(0, 1)), true, 0)
+	for k in range(1, 5):
+		_move(_cell(Vector2i(0, 1)).lerp(_cell(Vector2i(0, 2)), k / 4.0), 0)
+	_touch(_cell(Vector2i(2, 2)), true, 1)
+	for k in range(1, 5):
+		_move(_cell(Vector2i(2, 2)) + Vector2(30 * k, 30 * k), 1)
+	_touch(_cell(Vector2i(0, 2)), false, 0)
+	_touch(_cell(Vector2i(2, 2)) + Vector2(120, 120), false, 1)
+	assert_eq(momos.watched(1), before, "undone: the same tiles in the same order")

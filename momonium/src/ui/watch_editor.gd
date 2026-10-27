@@ -53,6 +53,9 @@ var last_result: Dictionary = {}
 var _op := ""
 var _touched: Dictionary = {}
 var _changed: Array[Vector2i] = []
+## The schedule as it was when the stroke began, in order (an undone stroke
+## puts it back exactly, Step 61).
+var _before: Array = []
 var _last_world := Vector2.ZERO
 var _stroking := false
 
@@ -192,10 +195,7 @@ func cancel_drag() -> void:
 		return
 	_stroking = false
 	if not _changed.is_empty():
-		var back: Array = []
-		for c: Vector2i in _changed:
-			back.append([c.x, c.y])
-		sim.execute({"type": "momo.watch", "momo": momo, "cells": back, "op": "remove" if _op == "add" else "add"})
+		sim.execute({"type": "momo.watch", "momo": momo, "cells": _before, "op": "set", "schedule": true})
 	_changed.clear()
 
 
@@ -203,6 +203,7 @@ func _begin_stroke(world: Vector2) -> void:
 	var cell := projection.cell_at(world)
 	_touched.clear()
 	_changed.clear()
+	_before = momos.watched(momo).map(func(c: Vector2i) -> Array: return [c.x, c.y])
 	_op = "remove" if momos.is_watching(momo, cell) else "add"
 	_stroking = true
 	_last_world = world
@@ -213,7 +214,8 @@ func _touch(cell: Vector2i) -> void:
 	if _touched.has(cell):
 		return
 	_touched[cell] = true
-	last_result = sim.execute({"type": "momo.watch", "momo": momo, "cells": [[cell.x, cell.y]], "op": _op})
+	# Schedule mode: in the order tapped (Step 61).
+	last_result = sim.execute({"type": "momo.watch", "momo": momo, "cells": [[cell.x, cell.y]], "op": _op, "schedule": true})
 	if not last_result["ok"]:
 		return
 	if not (last_result["changed"] as Array).is_empty():
