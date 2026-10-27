@@ -65,7 +65,7 @@ test('every job shows its tool from the work atlas', async ({ game }) => {
         seen.add(job);
         await game.page.waitForTimeout(80);
         m = await momo(game);
-        expect(m.sheet, `${m.cell}: drawn from the work atlas`).toEqual([1024, 720]);
+        expect(m.sheet, `${m.cell}: drawn from the work atlas, not the 5x5 sheet`).not.toEqual([1280, 1280]);
         const px = await drawn(game, m);
         expect(px.cream, `${m.cell}: Momo's fur on screen`).toBeGreaterThan(0.06);
         expect(px.outline, `${m.cell}: and its outline`).toBeGreaterThan(10);

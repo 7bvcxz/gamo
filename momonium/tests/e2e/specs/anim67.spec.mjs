@@ -23,18 +23,22 @@ test('a working Momo plays its job in four frames', async ({ game }) => {
   // The clock stopped: the simulation does nothing, Momo still swings.
   const before = await game.query('dev_advance_ms', 0);
   const order = [];
-  for (let i = 0; i < 60; i++) {
-    await game.page.waitForTimeout(50);
+  // The swing frame lasts a tenth of a second and a look through the bridge
+  // can take longer: look until all four have shown (at most eight seconds).
+  for (let i = 0; i < 160 && new Set(order).size < 4; i++) {
+    await game.page.waitForTimeout(40);
     const c = (await momo(game)).cell;
     if (order[order.length - 1] !== c) order.push(c);
   }
   const after = await game.query('dev_advance_ms', 0);
   expect(after.now_ms, 'the simulation stood still').toBe(before.now_ms);
-  const frames = new Set(order);
-  expect([...frames].sort(), `three seconds of digging: ${order.join(' ')}`).toEqual(['dig_0', 'dig_1', 'dig_2', 'dig_3']);
-  // In order: wind-up, swing, strike, recover.
-  const i0 = order.indexOf('dig_0');
-  expect(order.slice(i0, i0 + 4)).toEqual(['dig_0', 'dig_1', 'dig_2', 'dig_3']);
+  expect([...new Set(order)].sort(), `digging: ${order.join(' ')}`).toEqual(['dig_0', 'dig_1', 'dig_2', 'dig_3']);
+  // Always forward -- wind-up, swing, strike, recover, again -- never back
+  // and forth (a missed short frame is a step of two).
+  for (let i = 1; i < order.length; i++) {
+    const step = (Number(order[i].slice(-1)) - Number(order[i - 1].slice(-1)) + 4) % 4;
+    expect([1, 2], `${order[i - 1]} -> ${order[i]} goes forward`).toContain(step);
+  }
   expect((await game.command({ type: 'momo.unassign', momo: 1 })).ok).toBe(true);
   await game.query('dev_advance_ms', 200);
   await game.page.waitForTimeout(300);
