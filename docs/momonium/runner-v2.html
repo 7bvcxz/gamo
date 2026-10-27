@@ -3,7 +3,21 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-		<title>Momonium</title>
+		<meta name="theme-color" content="#2a9fd6">
+		<title>momonium</title>
+		<!--
+			Momonium's web shell (Step 62): Godot's own shell (godot.html of the
+			4.7 web templates) with a Momonium loading screen over it from the
+			first paint until the island has drawn its first frame. The script
+			lines deploy-web.sh rewrites for the runner -- where the engine is
+			created, where the game is started, the promise that follows and
+			the line that hides the status overlay -- are kept exactly as Godot
+			wrote them (and are named nowhere else in this file: its sed would
+			rewrite a comment that quoted them too).
+			The splash block between the splash markers is also copied into the
+			index page (web/index-loader.html) by tools/deploy.sh, so the page
+			before the runner looks the same.
+		-->
 		<style>
 html, body, #canvas {
 	margin: 0;
@@ -11,9 +25,13 @@ html, body, #canvas {
 	border: 0;
 }
 
+html {
+	background: #1d86c4;
+}
+
 body {
 	color: white;
-	background-color: black;
+	background-color: #1d86c4;
 	overflow: hidden;
 	touch-action: none;
 }
@@ -26,70 +44,227 @@ body {
 	outline: none;
 }
 
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
-
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
-
+/* Godot's own status overlay: its splash and bar give way to Momonium's. */
 #status {
-	background-color: #242424;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
+	position: absolute;
+	inset: 0;
 	visibility: hidden;
+	pointer-events: none;
 }
 
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
-
-#status-splash.show-image--false {
-	display: none;
-}
-
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
-
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
-	text-align: center;
-	z-index: 1;
+#status-splash, #status-progress, #status-notice {
+	display: none !important;
 }
 		</style>
+		<!--splash:begin-->
+		<style>
+#momo-splash {
+	position: fixed;
+	inset: 0;
+	z-index: 5;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	padding: 24px;
+	box-sizing: border-box;
+	overflow: hidden;
+	color: #ffffff;
+	text-align: center;
+	background: linear-gradient(180deg, #9be3f4 0%, #4cbde8 42%, #2a9fd6 72%, #1d86c4 100%);
+	font-family: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+	transition: opacity 0.45s ease;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+#momo-splash.done {
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Light on the water, drifting: two sheets of soft highlights. */
+#momo-splash .sea, #momo-splash .sea::after {
+	position: absolute;
+	inset: -20%;
+	content: "";
+	pointer-events: none;
+	background-image:
+		radial-gradient(ellipse 18px 3px at 20% 30%, rgba(255, 255, 255, 0.55), transparent 70%),
+		radial-gradient(ellipse 26px 4px at 70% 60%, rgba(255, 255, 255, 0.45), transparent 70%),
+		radial-gradient(ellipse 14px 2px at 45% 85%, rgba(255, 255, 255, 0.5), transparent 70%),
+		radial-gradient(ellipse 22px 3px at 85% 15%, rgba(255, 255, 255, 0.4), transparent 70%);
+	background-size: 180px 140px;
+	animation: momo-drift 18s linear infinite;
+	opacity: 0.8;
+}
+
+#momo-splash .sea::after {
+	inset: 0;
+	background-size: 260px 210px;
+	animation-duration: 27s;
+	animation-direction: reverse;
+	opacity: 0.6;
+}
+
+#momo-splash .float {
+	position: relative;
+	width: 132px;
+	height: 150px;
+}
+
+#momo-splash .momo {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 112px;
+	height: 132px;
+	margin-left: -56px;
+	background: /*momo:begin*/url(data:image/webp;base64,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)/*momo:end*/ center bottom / contain no-repeat;
+	filter: drop-shadow(0 6px 6px rgba(8, 54, 96, 0.25));
+	animation: momo-bob 3.2s ease-in-out infinite;
+}
+
+#momo-splash .ripple {
+	position: absolute;
+	left: 50%;
+	bottom: 4px;
+	width: 120px;
+	height: 18px;
+	margin-left: -60px;
+	border-radius: 50%;
+	background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.15) 62%, transparent 72%);
+	animation: momo-ripple 3.2s ease-in-out infinite;
+}
+
+#momo-splash .word {
+	font-size: clamp(30px, 8vw, 46px);
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	line-height: 1;
+	text-shadow: 0 2px 0 rgba(10, 60, 110, 0.22);
+}
+
+#momo-splash .line {
+	font-size: 15px;
+	opacity: 0.94;
+	min-height: 1.4em;
+	text-shadow: 0 1px 2px rgba(10, 60, 110, 0.35);
+}
+
+#momo-splash .dots i {
+	font-style: normal;
+	animation: momo-dot 1.4s ease-in-out infinite;
+}
+
+#momo-splash .dots i:nth-child(2) {
+	animation-delay: 0.2s;
+}
+
+#momo-splash .dots i:nth-child(3) {
+	animation-delay: 0.4s;
+}
+
+#momo-splash .bar {
+	position: relative;
+	width: min(56vw, 240px);
+	height: 4px;
+	border-radius: 2px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.3);
+}
+
+#momo-splash .bar i {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 0;
+	border-radius: 2px;
+	background: #ffffff;
+	transition: width 0.4s ease;
+}
+
+/* Nothing measured yet: a short light travelling, not a made-up percentage. */
+#momo-splash .bar.unknown i {
+	width: 32%;
+	animation: momo-travel 1.5s ease-in-out infinite;
+}
+
+#momo-splash .notice {
+	display: none;
+	max-width: 22rem;
+	margin: 0 auto;
+	padding: 14px 16px;
+	border-radius: 14px;
+	background: rgba(8, 40, 78, 0.78);
+	font-size: 14px;
+	line-height: 1.45;
+	white-space: pre-line;
+}
+
+#momo-splash.failed .notice, #momo-splash.slow .notice {
+	display: block;
+}
+
+#momo-splash.failed .bar, #momo-splash.failed .line {
+	display: none;
+}
+
+#momo-splash .retry {
+	margin-top: 12px;
+	min-width: 120px;
+	min-height: 44px;
+	padding: 0 18px;
+	border: 0;
+	border-radius: 22px;
+	background: #ffffff;
+	color: #1d6fa8;
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+@keyframes momo-bob {
+	0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+	50% { transform: translateY(-9px) rotate(1.5deg); }
+}
+
+@keyframes momo-ripple {
+	0%, 100% { transform: scaleX(1); opacity: 0.9; }
+	50% { transform: scaleX(0.82); opacity: 0.6; }
+}
+
+@keyframes momo-drift {
+	from { transform: translateX(0); }
+	to { transform: translateX(180px); }
+}
+
+@keyframes momo-dot {
+	0%, 60%, 100% { opacity: 0.25; }
+	30% { opacity: 1; }
+}
+
+@keyframes momo-travel {
+	0% { transform: translateX(-110%); }
+	100% { transform: translateX(330%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#momo-splash *, #momo-splash *::after {
+		animation: none !important;
+	}
+	#momo-splash .bar.unknown i {
+		width: 100%;
+		opacity: 0.45;
+	}
+	#momo-splash {
+		transition: none;
+	}
+}
+		</style>
+		<!--splash:end-->
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 
@@ -103,6 +278,146 @@ body {
 			Your browser does not support JavaScript.
 		</noscript>
 
+		<!--splash-markup:begin-->
+		<div id="momo-splash" role="status" aria-live="polite" aria-busy="true">
+			<div class="sea" aria-hidden="true"></div>
+			<div class="float" aria-hidden="true"><div class="ripple"></div><div class="momo"></div></div>
+			<div class="word">momonium</div>
+			<div class="line"><span class="text"></span><span class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></span></div>
+			<div class="bar unknown" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i></i></div>
+			<div class="notice"><span class="why"></span><br><button class="retry" type="button"></button></div>
+		</div>
+		<script>
+/* The loading screen's words in the player's language, and what it shows:
+   the stage reached (engine, game files, starting -- the runner reports
+   them), or bytes when Godot's own loader counts them; never a made-up
+   percentage. It goes once the island has drawn (window.momonium.ready, a
+   few frames later), fading into the game. */
+window.MomoSplash = (function () {
+	const words = {
+		en: { line: 'Getting the island ready', steps: ['Getting the island ready', 'Bringing the island', 'Waking the Momo'], fail: 'The island could not open.', slow: 'This is taking longer than usual.', retry: 'Try again' },
+		ko: { line: '섬을 준비하고 있어요', steps: ['섬을 준비하고 있어요', '섬을 가져오고 있어요', '모모를 깨우고 있어요'], fail: '섬을 열지 못했어요.', slow: '평소보다 오래 걸리고 있어요.', retry: '다시 시도' },
+		ja: { line: '島を準備しています', steps: ['島を準備しています', '島を運んでいます', 'モモを起こしています'], fail: '島を開けませんでした。', slow: 'いつもより時間がかかっています。', retry: 'もう一度' },
+		zh: { line: '正在准备岛屿', steps: ['正在准备岛屿', '正在运来岛屿', '正在叫醒桃桃'], fail: '无法打开岛屿。', slow: '加载时间比平时长。', retry: '重试' },
+	};
+	const lang = String(navigator.language || 'en').slice(0, 2).toLowerCase();
+	const w = words[lang] || words.en;
+	const root = document.getElementById('momo-splash');
+	if (!root) {
+		return null;
+	}
+	document.documentElement.lang = words[lang] ? lang : 'en';
+	const text = root.querySelector('.text');
+	const bar = root.querySelector('.bar');
+	const fill = bar.querySelector('i');
+	text.textContent = w.line;
+	root.querySelector('.retry').textContent = w.retry;
+	root.querySelector('.retry').addEventListener('click', function () { location.reload(); });
+	let gone = false;
+	const api = {
+		stage: 0,
+		state: 'loading',
+		/* Stage n of 3 reached (1 engine, 2 game files, 3 starting). */
+		step: function (n) {
+			api.stage = Math.max(api.stage, Math.min(n, 3));
+			text.textContent = w.steps[api.stage - 1] || w.line;
+			bar.classList.remove('unknown');
+			fill.style.width = Math.round(((api.stage - 1) / 3) * 100 + 4) + '%';
+			bar.setAttribute('aria-valuenow', String(Math.round(((api.stage - 1) / 3) * 100)));
+		},
+		/* Bytes Godot's own loader counted (current of total). */
+		bytes: function (current, total) {
+			if (current > 0 && total > 0) {
+				bar.classList.remove('unknown');
+				const p = Math.min(100, Math.round((current / total) * 100));
+				fill.style.width = p + '%';
+				bar.setAttribute('aria-valuenow', String(p));
+			}
+		},
+		fail: function (why) {
+			if (api.state === 'done' || api.state === 'failed') {
+				return;
+			}
+			api.state = 'failed';
+			root.classList.add('failed');
+			root.setAttribute('aria-busy', 'false');
+			root.querySelector('.why').textContent = w.fail + (why ? '\n' + why : '');
+		},
+		/* The engine started: wait for the island's first frame, then fade. */
+		started: function () {
+			if (api.state !== 'loading') {
+				return;
+			}
+			api.state = 'starting';
+			fill.style.width = '100%';
+			const t0 = Date.now();
+			const wait = function () {
+				const ready = window.momonium && window.momonium.ready;
+				if (!ready && Date.now() - t0 < 8000) {
+					requestAnimationFrame(wait);
+					return;
+				}
+				/* A few frames for the first picture to reach the screen. */
+				let frames = 3;
+				const settle = function () {
+					if (--frames > 0) {
+						requestAnimationFrame(settle);
+						return;
+					}
+					api.hide();
+				};
+				requestAnimationFrame(settle);
+			};
+			wait();
+		},
+		hide: function () {
+			if (gone) {
+				return;
+			}
+			gone = true;
+			api.state = 'done';
+			root.setAttribute('aria-busy', 'false');
+			root.classList.add('done');
+			const remove = function () {
+				if (root.parentNode) {
+					root.parentNode.removeChild(root);
+				}
+				const canvas = document.getElementById('canvas');
+				if (canvas) {
+					canvas.focus();
+				}
+			};
+			root.addEventListener('transitionend', remove, { once: true });
+			setTimeout(remove, 700);
+		},
+	};
+	/* Godot's loader retries a download, then throws where no promise of
+	   the shell's hears it (a failed engine fetch left the screen loading
+	   for good): while loading, an uncaught error is the failure. */
+	window.addEventListener('unhandledrejection', function (e) {
+		if (api.state === 'loading') {
+			const r = e.reason;
+			api.fail(r && r.message ? r.message : String(r || ''));
+		}
+	});
+	window.addEventListener('error', function (e) {
+		if (api.state === 'loading' && e.message) {
+			api.fail(e.message);
+		}
+	});
+	/* Still loading after a minute: say so, and offer to start over (the
+	   load goes on meanwhile). */
+	setTimeout(function () {
+		if (api.state === 'loading') {
+			root.classList.add('slow');
+			root.querySelector('.why').textContent = w.slow;
+		}
+	}, 60000);
+	return api;
+}());
+		</script>
+		<!--splash-markup:end-->
+
 		<div id="status">
 			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="index.png" alt="">
 			<progress id="status-progress"></progress>
@@ -111,7 +426,7 @@ body {
 
 		<script src="../engine/engine-7eda98958eb0.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"mainPack":"game-4d8b0a75c397.pck","canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"../engine/engine-7eda98958eb0","experimentalVK":false,"fileSizes":{"game-4d8b0a75c397.pck":8099336,"../engine/engine-7eda98958eb0.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"mainPack":"game-a18bb286f8a2.pck","canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"../engine/engine-7eda98958eb0","experimentalVK":false,"fileSizes":{"game-a18bb286f8a2.pck":8099336,"../engine/engine-7eda98958eb0.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const RUNNER_PARAMS = new URLSearchParams(location.search);
 const REQUESTED_PACK = RUNNER_PARAMS.get('pack') || GODOT_CONFIG.mainPack;
@@ -178,6 +493,18 @@ const engine = new Engine(GODOT_CONFIG);
 	let initializing = true;
 	let statusMode = '';
 
+	/* The runner (deploy-web.sh) reports its stages through setPhase: the
+	   loading screen counts them -- engine, game files, starting. */
+	if (typeof setPhase === 'function' && window.MomoSplash) {
+		const reportPhase = setPhase;
+		let phases = 0;
+		setPhase = function (label) {
+			reportPhase(label);
+			phases += 1;
+			window.MomoSplash.step(phases);
+		};
+	}
+
 	function setStatusMode(mode) {
 		if (statusMode === mode || !initializing) {
 			return;
@@ -215,6 +542,9 @@ const engine = new Engine(GODOT_CONFIG);
 		}
 		setStatusMode('notice');
 		initializing = false;
+		if (window.MomoSplash) {
+			window.MomoSplash.fail(statusNotice.textContent);
+		}
 	}
 
 	const missing = Engine.getMissingFeatures({
@@ -263,10 +593,16 @@ const engine = new Engine(GODOT_CONFIG);
 					statusProgress.removeAttribute('value');
 					statusProgress.removeAttribute('max');
 				}
+				if (window.MomoSplash) {
+					window.MomoSplash.bytes(current, total);
+				}
 			},
 		})).then(() => {
 			PHASE.remove();
 			setStatusMode('hidden');
+			if (window.MomoSplash) {
+				window.MomoSplash.started();
+			}
 		}, displayFailureNotice);
 	}
 }());
