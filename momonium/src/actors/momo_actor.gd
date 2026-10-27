@@ -64,23 +64,17 @@ func is_working() -> bool:
 	return not rec.is_empty() and rec["state"] == BuildingSystem.WORKING and int(rec.get("worker", 0)) == id
 
 
-## The sheet's pose for the stage it is doing: picking the crop, the watering
-## can, the pickaxe at a mine, a flask at a lab; "" works back turned (sowing,
-## felling, the factories).
+## The work animation for the stage it is doing (Step 66): the stage's
+## action -- sow, water, harvest, dig, chop, replant, study, smelt, stoke,
+## assemble, design... -- looked up in the work atlas's `actions`, each a
+## Momo holding that job's tool. "" works back turned.
 func work_pose() -> String:
 	var bs: BuildingSystem = momos.sim.system(&"buildings")
 	var rec := bs.get_building(int(momos.get_momo(id).get("assigned", 0)))
 	if rec.is_empty():
 		return ""
-	var stage := String(bs.current_stage(rec).get("id", ""))
-	match bs.family_of(String(rec["type"])):
-		"farm":
-			return stage if stage in ["harvest", "water"] else ""
-		"mine":
-			return "dig"
-		"research":
-			return "study"
-	return ""
+	var stage := bs.current_stage(rec)
+	return rig.sheet.work_animation(String(stage.get("action", stage.get("id", ""))))
 
 
 ## World-space box a tap or a drag can grab.

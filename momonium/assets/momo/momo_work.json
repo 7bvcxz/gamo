@@ -1,0 +1,213 @@
+{
+  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot (the point between the feet, from the rect's top-left), at the sheet's texel scale (`stand_height` texels from feet to fur curl). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
+  "stand_height": 200.0,
+  "frames": [
+    {
+      "name": "sow_0",
+      "rect": [
+        6,
+        497,
+        218,
+        215
+      ],
+      "pivot": [
+        88.5,
+        208.0
+      ]
+    },
+    {
+      "name": "water_0",
+      "rect": [
+        250,
+        6,
+        224,
+        232
+      ],
+      "pivot": [
+        75.0,
+        214.0
+      ]
+    },
+    {
+      "name": "harvest_0",
+      "rect": [
+        6,
+        265,
+        202,
+        220
+      ],
+      "pivot": [
+        86.0,
+        217.0
+      ]
+    },
+    {
+      "name": "dig_0",
+      "rect": [
+        6,
+        6,
+        232,
+        247
+      ],
+      "pivot": [
+        93.0,
+        244.0
+      ]
+    },
+    {
+      "name": "chop_0",
+      "rect": [
+        220,
+        265,
+        255,
+        219
+      ],
+      "pivot": [
+        166.0,
+        216.0
+      ]
+    },
+    {
+      "name": "replant_0",
+      "rect": [
+        712,
+        6,
+        187,
+        226
+      ],
+      "pivot": [
+        59.0,
+        212.0
+      ]
+    },
+    {
+      "name": "study_0",
+      "rect": [
+        236,
+        497,
+        203,
+        208
+      ],
+      "pivot": [
+        106.0,
+        205.0
+      ]
+    },
+    {
+      "name": "hammer_0",
+      "rect": [
+        486,
+        6,
+        214,
+        229
+      ],
+      "pivot": [
+        90.0,
+        226.0
+      ]
+    },
+    {
+      "name": "stoke_0",
+      "rect": [
+        487,
+        265,
+        190,
+        218
+      ],
+      "pivot": [
+        93.0,
+        215.0
+      ]
+    },
+    {
+      "name": "write_0",
+      "rect": [
+        689,
+        265,
+        187,
+        216
+      ],
+      "pivot": [
+        95.0,
+        213.0
+      ]
+    }
+  ],
+  "animations": {
+    "work_sow": {
+      "cells": [
+        "sow_0"
+      ],
+      "fps": 0.0
+    },
+    "work_water": {
+      "cells": [
+        "water_0"
+      ],
+      "fps": 0.0
+    },
+    "work_harvest": {
+      "cells": [
+        "harvest_0"
+      ],
+      "fps": 0.0
+    },
+    "work_dig": {
+      "cells": [
+        "dig_0"
+      ],
+      "fps": 0.0
+    },
+    "work_chop": {
+      "cells": [
+        "chop_0"
+      ],
+      "fps": 0.0
+    },
+    "work_replant": {
+      "cells": [
+        "replant_0"
+      ],
+      "fps": 0.0
+    },
+    "work_study": {
+      "cells": [
+        "study_0"
+      ],
+      "fps": 0.0
+    },
+    "work_hammer": {
+      "cells": [
+        "hammer_0"
+      ],
+      "fps": 0.0
+    },
+    "work_stoke": {
+      "cells": [
+        "stoke_0"
+      ],
+      "fps": 0.0
+    },
+    "work_write": {
+      "cells": [
+        "write_0"
+      ],
+      "fps": 0.0
+    }
+  },
+  "actions": {
+    "sow": "sow",
+    "water": "water",
+    "harvest": "harvest",
+    "dig": "dig",
+    "chop": "chop",
+    "replant": "replant",
+    "study": "study",
+    "smelt": "hammer",
+    "assemble": "hammer",
+    "stoke": "stoke",
+    "design": "write",
+    "develop": "write",
+    "release": "write"
+  }
+}

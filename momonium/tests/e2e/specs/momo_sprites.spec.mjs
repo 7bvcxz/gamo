@@ -63,7 +63,8 @@ test('Momo is drawn from the sprite sheet in every state', async ({ game }) => {
     if (m.state === 'work') break;
   }
   expect(m.state).toBe('work');
-  expect(m.cell).toBe('dig');
+  // Step 66: the pickaxe pose from the work atlas.
+  expect(m.cell).toBe('dig_0');
   // Night: a free Momo sleeps, on the sleeping cell (one at work keeps on).
   expect((await game.command({ type: 'momo.unassign', momo: 1 })).ok).toBe(true);
   await game.query('dev_advance_to', [3, 0.82]);

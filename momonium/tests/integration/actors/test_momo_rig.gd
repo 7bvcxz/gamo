@@ -84,8 +84,9 @@ func test_walking_faster_steps_faster() -> void:
 
 
 func test_jobs_moods_and_rest_have_their_own_cells() -> void:
-	for work: String in ["harvest", "water", "dig", "study"]:
-		assert_eq(_cell_after("work", Vector2(-1, -0.4), work), work, "%s: its own pose" % work)
+	for work: String in ["harvest", "water", "dig", "study", "sow", "chop", "replant", "hammer", "stoke", "write"]:
+		assert_eq(_cell_after("work", Vector2(-1, -0.4), work), work + "_0", "%s: its pose with its tool (Step 66 work atlas)" % work)
+	assert_eq(_cell_after("work", Vector2(-1, -0.4), "carry"), "carry", "a sheet pose with no work frames: the sheet's")
 	assert_eq(_cell_after("work", Vector2(-1, -0.4), ""), "back_work", "other work: back turned, busy")
 	assert_eq(_cell_after("sit", Vector2(1, 0.5)), "sit", "")
 	assert_eq(_cell_after("sleep", Vector2(1, 0.5)), "sleep", "")

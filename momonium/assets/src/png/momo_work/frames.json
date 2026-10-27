@@ -1,0 +1,129 @@
+{
+  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Every frame is fitted by Momo's head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md.",
+  "anchor": "res://assets/src/png/momo/front_idle.webp",
+  "stand_height": 200,
+  "atlas_width": 1024,
+  "frames": [
+    {
+      "name": "sow_0",
+      "src": "sow.webp"
+    },
+    {
+      "name": "water_0",
+      "src": "water.webp"
+    },
+    {
+      "name": "harvest_0",
+      "src": "harvest.webp"
+    },
+    {
+      "name": "dig_0",
+      "src": "dig.webp",
+      "adjust": 0.9,
+      "why": "its eyes are drawn small (leaning back): by the eyes alone the head came out 12% wider than the standing Momo"
+    },
+    {
+      "name": "chop_0",
+      "src": "chop.webp"
+    },
+    {
+      "name": "replant_0",
+      "src": "replant.webp"
+    },
+    {
+      "name": "study_0",
+      "src": "study.webp"
+    },
+    {
+      "name": "hammer_0",
+      "src": "hammer.webp",
+      "adjust": 0.97,
+      "why": "by eye against the standing Momo"
+    },
+    {
+      "name": "stoke_0",
+      "src": "stoke.webp"
+    },
+    {
+      "name": "write_0",
+      "src": "write.webp"
+    }
+  ],
+  "animations": {
+    "work_sow": {
+      "cells": [
+        "sow_0"
+      ],
+      "fps": 0.0
+    },
+    "work_water": {
+      "cells": [
+        "water_0"
+      ],
+      "fps": 0.0
+    },
+    "work_harvest": {
+      "cells": [
+        "harvest_0"
+      ],
+      "fps": 0.0
+    },
+    "work_dig": {
+      "cells": [
+        "dig_0"
+      ],
+      "fps": 0.0
+    },
+    "work_chop": {
+      "cells": [
+        "chop_0"
+      ],
+      "fps": 0.0
+    },
+    "work_replant": {
+      "cells": [
+        "replant_0"
+      ],
+      "fps": 0.0
+    },
+    "work_study": {
+      "cells": [
+        "study_0"
+      ],
+      "fps": 0.0
+    },
+    "work_hammer": {
+      "cells": [
+        "hammer_0"
+      ],
+      "fps": 0.0
+    },
+    "work_stoke": {
+      "cells": [
+        "stoke_0"
+      ],
+      "fps": 0.0
+    },
+    "work_write": {
+      "cells": [
+        "write_0"
+      ],
+      "fps": 0.0
+    }
+  },
+  "actions": {
+    "sow": "sow",
+    "water": "water",
+    "harvest": "harvest",
+    "dig": "dig",
+    "chop": "chop",
+    "replant": "replant",
+    "study": "study",
+    "smelt": "hammer",
+    "assemble": "hammer",
+    "stoke": "stoke",
+    "design": "write",
+    "develop": "write",
+    "release": "write"
+  }
+}

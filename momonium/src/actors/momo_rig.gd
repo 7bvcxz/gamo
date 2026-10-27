@@ -14,8 +14,9 @@ extends Node2D
 ##          mood's pose while a mood shows (`mood_pose`)
 ##   walk   four frames (A B C B) of the view, faster with `walk_speed`
 ##   sit    sitting with a clover, sleep  lying down with the ears spread
-##   work   the job's pose (`work_pose`: harvest, water, dig, study) or, for
-##          the rest, working with the back turned
+##   work   the job's animation from the work atlas (`work_pose`, Step 66:
+##          Momo with the tool of the job -- design/MOMO_TOOLS.md), else a
+##          sheet pose of that name, else working with the back turned
 ## `face` picks the view -- front, back (moving up the screen), side (moving
 ## across it) -- and mirrors for the left. A light breath and a bob in the
 ## step keep the still cells alive.
@@ -101,6 +102,8 @@ func animation() -> String:
 		"walk":
 			return "walk_" + _view
 		"work":
+			if work_pose != "" and sheet.animations.has("work_" + work_pose):
+				return "work_" + work_pose
 			return work_pose if WORK_POSES.has(work_pose) else "work_back"
 		"sit", "sleep":
 			return state
@@ -148,7 +151,9 @@ func tick(delta: float) -> void:
 		name = String(sheet.animations[anim].get("blink", name))
 	if name != _cell:
 		_cell = name
+		body.texture = sheet.texture_of(name)
 		body.region_rect = sheet.region(name)
+		body.offset = -sheet.pivot_of(name)
 	var s := HEIGHT / sheet.stand_height
 	var breathe := 0.0 if state == "walk" else sin(time * TAU * (0.22 if state == "sleep" else 0.45))
 	body.scale = Vector2(s * (1.0 - 0.006 * breathe), s * (1.0 + 0.012 * breathe))

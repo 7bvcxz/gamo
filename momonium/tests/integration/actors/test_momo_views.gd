@@ -58,8 +58,9 @@ func test_a_working_momo_shows_the_work_pose() -> void:
 	assert_ne(actor.rig.state, "work", "and stops the work pose")
 
 
-## Step 51: the sheet's job cells follow the stage the simulation has Momo
-## doing; the moods have poses.
+## Step 51: the job cells follow the stage the simulation has Momo doing
+## (Step 66: from the work atlas, each with its tool -- sowing too); the moods
+## have poses.
 func test_the_work_cell_follows_the_job() -> void:
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var momos: MomoSystem = sim.system(&"momo")
@@ -70,15 +71,15 @@ func test_the_work_cell_follows_the_job() -> void:
 	await tree.process_frame
 	var actor := (main.get("momo_views") as MomoViews).actor(1)
 	assert_true(actor.is_working(), "sowing")
-	assert_eq(actor.rig.cell_name(), "back_work", "sowing: busy, back turned (no seed in the sheet)")
+	assert_eq(actor.rig.cell_name(), "sow_0", "sowing: the seed pouch (Step 66)")
 	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
 	var x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
 	sim.advance_to(arrived + int(float(stages[0]["seconds"]) * work_scale(sim) * x * 1000.0) + 300)
 	await tree.process_frame
 	if actor.is_working():
 		assert_eq(actor.work_pose(), "water", "watering")
-		assert_eq(actor.rig.cell_name(), "water", "with the watering can")
-	for job: Array in [["mine", Vector2i(0, 1), "dig"], ["research", Vector2i(1, 1), "study"]]:
+		assert_eq(actor.rig.cell_name(), "water_0", "with the watering can")
+	for job: Array in [["mine", Vector2i(0, 1), "dig_0"], ["research", Vector2i(1, 1), "study_0"]]:
 		var id := buildings.place_instant(String(job[0]), job[1])
 		assert_true(id > 0, "%s placed on the island" % job[0])
 		assert_true(sim.execute({"type": "momo.assign", "momo": 1, "building": id})["ok"], "%s: assigned" % job[0])
