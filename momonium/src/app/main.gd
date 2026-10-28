@@ -302,8 +302,10 @@ func _ready() -> void:
 		rv.setup(sim, lib, industry)
 		rv.lab_wanted.connect(_offer_lab)
 		research_views.append(rv)
-		# A building industry is named as its mastery; other branches (power, general) by their own key.
-		research_frame.add_tab("mastery." + industry if not sim.data.building_type(industry).is_empty() else "research.industry." + industry, rv)
+		# A building industry is named as its mastery; other branches (power, general) by their own key;
+		# the lab's tab is the Lab (Step 71: its mastery is called Research, as is the whole panel).
+		var key := "mastery." + industry if not sim.data.building_type(industry).is_empty() else "research.industry." + industry
+		research_frame.add_tab("research.tab.research" if industry == "research" else key, rv)
 	rp_view = RpView.new()
 	rp_view.setup(sim, lib)
 	research_frame.add_tab("rp.tab", rp_view)
@@ -321,6 +323,10 @@ func _ready() -> void:
 	celebration.setup()
 	ui.add_child(celebration)
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
+		# Step 71: a tab shows once it has a topic to show (a level, a letter,
+		# research done can each open one while the panel is up).
+		if research_frame.visible:
+			_update_research_tabs()
 		if type == &"tier_promoted":
 			_close_frames()
 			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))}), _promotion_change(p))
@@ -826,6 +832,10 @@ func _ready() -> void:
 		for item: String in (arg as Dictionary):
 			inv.add(item, int(arg[item]), "dev")
 		return inv.save_state())
+	# Step 71: Research opened on a topic (its tab, its card scrolled into view).
+	bridge.register_query("dev_research_open", func(id: Variant) -> Dictionary:
+		open_research(String(id))
+		return {"ok": research_frame.visible})
 	bridge.register_query("dev_research_done", func(ids: Variant) -> Dictionary:
 		var research: ResearchSystem = sim.system(&"research")
 		for id: Variant in ids:
@@ -1407,11 +1417,19 @@ func _on_hud_action(action_name: StringName) -> void:
 			open_mailbox()
 
 
+## Step 71: a research tab shows only when its discipline has something to
+## show -- a beginner sees two tabs, not eight.
+func _update_research_tabs() -> void:
+	for i in research_views.size():
+		research_frame.set_tab_shown(i, research_views[i].has_shown())
+
+
 ## Step 57: Research opens where the news is -- the branch of `focus` (a
 ## letter's research), else of the first new topic, else the first -- with a
 ## dot on each new topic and on its branch's tab until the panel closes.
 ## Opening is what acknowledges them: the Research button's dot goes out.
 func open_research(focus: String = "") -> void:
+	_update_research_tabs()
 	var rs: ResearchSystem = sim.system(&"research")
 	var fresh := rs.new_topics()
 	var want := focus if focus != "" else (fresh[0] if not fresh.is_empty() else "")
@@ -1742,7 +1760,8 @@ func _research_info(_arg: Variant) -> Dictionary:
 	if view != null:
 		for id: String in view.cards:
 			var gate := view.cards[id].find_child("Gate", true, false) as Label
-			nodes[id] = {"state": research.state_of(id), "rect": rect.call(view.cards[id]), "gate": gate.text if gate.visible else ""}
+			nodes[id] = {"state": research.state_of(id), "rect": rect.call(view.cards[id]), "gate": gate.text if gate.visible else "",
+				"shown": (view.cards[id] as Button).visible, "tier": research.tier_of(id)}
 	var tabs := {}
 	for t: Dictionary in research_frame.tabs:
 		tabs[String(t["key"])] = rect.call(t["button"])
@@ -1753,6 +1772,9 @@ func _research_info(_arg: Variant) -> Dictionary:
 		"button_disabled": view.start_button.disabled if view else true, "active": research.active, "completed": research.completed.keys(),
 		"badge": (hud.buttons[&"research"] as HudButton).badge, "window": [win.x, win.y],
 		"close": rect.call(research_frame.close_button) if research_frame.visible else [],
+		# Step 71: the tabs shown now, and the tree's own scroll (what of it is in view).
+		"tabs_shown": range(research_frame.tabs.size()).filter(func(i: int) -> bool: return (research_frame.tabs[i]["button"] as Button).visible).map(func(i: int) -> String: return String(research_frame.tabs[i]["key"])),
+		"tree_view": rect.call(view.tree_scroll) if view else [],
 		"badge_count": (hud.buttons[&"research"] as HudButton).count,
 		# Step 57: the news -- topics not yet shown, the dots in the open panel.
 		"new_topics": research.new_topics(), "fresh": view.fresh.keys() if view else [],

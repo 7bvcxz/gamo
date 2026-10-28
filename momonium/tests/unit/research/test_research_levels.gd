@@ -76,7 +76,8 @@ func test_no_loop_passes_the_ceiling() -> void:
 	var top := 0
 	for n: Dictionary in rs.nodes():
 		top += rs.max_level(String(n["id"]))
-	assert_true(top < 200, "the most points there can ever be is a fixed sum (%d)" % top)
+	# Step 71 deepened the tree to 72 nodes: still a fixed sum, read from the data.
+	assert_true(top < 400, "the most points there can ever be is a fixed sum (%d)" % top)
 
 
 func test_levels_must_get_better() -> void:

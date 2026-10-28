@@ -49,11 +49,20 @@ func test_the_research_button_opens_the_tree() -> void:
 	main.call("_on_hud_action", &"research")
 	await tree.process_frame
 	assert_true(frame.visible, "the research menu opens")
-	assert_eq(frame.tabs.map(func(t: Dictionary) -> String: return (t["button"] as Button).text), ["Farm", "Lumber", "Mine", "Smelting", "Power", "Games", "Cars", "General", "Points"], "a tab per branch, general last, then the research points")
+	assert_eq(frame.tabs.map(func(t: Dictionary) -> String: return (t["button"] as Button).text), ["Farm", "Lumber", "Mine", "Lab", "Power", "General", "Points"], "a tab per discipline (Step 71: smelting and cars are Mine's, games the Lab's), general last, then the research points")
+	var shown_tabs := frame.tabs.filter(func(t: Dictionary) -> bool: return (t["button"] as Button).visible).map(func(t: Dictionary) -> String: return (t["button"] as Button).text)
+	assert_eq(shown_tabs, ["Farm", "Lab", "Points"], "a new island shows only what it can reach next")
 	var view := _farm_view()
 	assert_eq(view.cards.size(), (sim.system(&"research") as ResearchSystem).nodes("farm").size(), "every farm node has a card")
-	for id: String in view.cards:
-		for other: String in view.cards:
+	var prog: ProgressionSystem = sim.system(&"progression")
+	while prog.level < 6:
+		prog.add_exp(prog.next_level_exp() - prog.experience, "test")
+	view.refresh()
+	await tree.process_frame
+	var shown: Array = view.cards.keys().filter(func(id: String) -> bool: return (view.cards[id] as Button).visible)
+	assert_true(shown.size() >= 6, "Lv 6: much of the farm tree shows (%d)" % shown.size())
+	for id: String in shown:
+		for other: String in shown:
 			if id != other:
 				assert_false((view.cards[id] as Button).get_rect().intersects((view.cards[other] as Button).get_rect()), "%s and %s do not overlap" % [id, other])
 	var root: Button = view.cards["farm_expansion"]
@@ -66,9 +75,14 @@ func test_a_locked_node_says_what_it_needs() -> void:
 	main.call("_on_hud_action", &"research")
 	await tree.process_frame
 	var view := _farm_view()
-	_tap(view.cards["watering_efficiency"])
-	assert_eq(view.selected, "watering_efficiency", "tapping a node selects it")
-	assert_eq(view.need_lines("watering_efficiency"), ["After Field expansion", "Unlocks at Lv. 2"] as Array[String], "what is missing: the parent, then a plain level (Step 70)")
+	# Lv 2: field expansion is open, bigger harvests (Lv 3) shows as next.
+	var prog: ProgressionSystem = sim.system(&"progression")
+	prog.add_exp(prog.next_level_exp() - prog.experience, "test")
+	view.refresh()
+	await tree.process_frame
+	_tap(view.cards["harvest_boost"])
+	assert_eq(view.selected, "harvest_boost", "tapping a node selects it")
+	assert_eq(view.need_lines("harvest_boost"), ["After Field expansion", "Unlocks at Lv. 3"] as Array[String], "what is missing: the parent, then a plain level (Step 70)")
 	assert_eq(view.effect_lines("watering_efficiency"), ["Wait after Water -25%"] as Array[String], "the effect, from the data")
 	assert_eq(view.effect_lines("farm_expansion"), ["Harvest: Crops +1"] as Array[String], "field expansion")
 	assert_true(view.start_button.disabled, "cannot start")

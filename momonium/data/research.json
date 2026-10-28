@@ -1,5 +1,5 @@
 {
-  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions. Step 70: an ordinary node opens at a player `level` (and after its `requires`); a Momo's letter proposing a node brings it early, as a discovery, never as a gate. A few nodes are `special` (the field says why): they keep a building `mastery` {type: level} or `proposal`: true (the letter itself opens it) -- leaves of the tree, so nothing ordinary waits on them. A node whose gate was once met stays discovered for good (across Prestige). `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type. {kind: momo_work, multiply, type?} scales Momo work time (all types, or one). {kind: sale_price, multiply >= 1} raises what the daily sale pays (better market access); {kind: walk_speed, multiply >= 1} makes Momo walk faster. {kind: watch_tiles, add} lets every Momo watch `add` more tiles (4 -> 9 -> 16). An effect may list `per_level`: its multiply (or add) at levels 1, 2, ... exactly, instead of the balance.research.level_strength rule -- the numbers the points screen shows. {kind: route, strategy} opens a Momo routing strategy (auto: plan around waits).",
+  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions. Step 70: an ordinary node opens at a player `level` (and after its `requires`); a Momo's letter proposing a node brings it early, as a discovery, never as a gate. A few nodes are `special` (the field says why): they keep a building `mastery` {type: level} or `proposal`: true (the letter itself opens it) -- leaves of the tree, so nothing ordinary waits on them. A node whose gate was once met stays discovered for good (across Prestige). Step 71: `industry` is the node's tab -- a discipline (farm, lumberyard, mine, research = the lab, power, global); smelting and car topics are modules of Mine, the studio of the Lab. Every tab holds a chain of at least eight tiers (a tier is 1 + the longest chain of prerequisites in the same tab), its gates rising along the chain; the screen shows what is open and what opens at the next level, not the whole tree (ResearchSystem.is_shown). {kind: power_output, multiply >= 1, type?} raises what generators of that type (or all) give. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type. {kind: momo_work, multiply, type?} scales Momo work time (all types, or one). {kind: sale_price, multiply >= 1} raises what the daily sale pays (better market access); {kind: walk_speed, multiply >= 1} makes Momo walk faster. {kind: watch_tiles, add} lets every Momo watch `add` more tiles (4 -> 9 -> 16). An effect may list `per_level`: its multiply (or add) at levels 1, 2, ... exactly, instead of the balance.research.level_strength rule -- the numbers the points screen shows. {kind: route, strategy} opens a Momo routing strategy (auto: plan around waits).",
   "nodes": [
     {
       "id": "farm_expansion",
@@ -114,39 +114,6 @@
       ]
     },
     {
-      "id": "drip_irrigation",
-      "industry": "farm",
-      "name": "research.drip_irrigation.name",
-      "desc": "research.drip_irrigation.desc",
-      "icon": "ui_water",
-      "requires": [
-        "watering_can"
-      ],
-      "unlock": {
-        "level": 6
-      },
-      "cost": {
-        "money": 150,
-        "items": {
-          "notes": 12
-        }
-      },
-      "seconds": 180,
-      "effects": [
-        {
-          "kind": "auto",
-          "type": "farm",
-          "action": "water"
-        },
-        {
-          "kind": "cooldown",
-          "type": "farm",
-          "action": "water",
-          "multiply": 0.8
-        }
-      ]
-    },
-    {
       "id": "greenhouse",
       "industry": "farm",
       "name": "research.greenhouse.name",
@@ -202,6 +169,39 @@
       ]
     },
     {
+      "id": "drip_irrigation",
+      "industry": "farm",
+      "name": "research.drip_irrigation.name",
+      "desc": "research.drip_irrigation.desc",
+      "icon": "ui_water",
+      "requires": [
+        "watering_can"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 150,
+        "items": {
+          "notes": 12
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "auto",
+          "type": "farm",
+          "action": "water"
+        },
+        {
+          "kind": "cooldown",
+          "type": "farm",
+          "action": "water",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
       "id": "drought_millet",
       "industry": "farm",
       "name": "research.drought_millet.name",
@@ -232,6 +232,119 @@
       "special": "A crop found by farmers who know their soil: farm mastery 4. A leaf (a variety, not a step of progress)."
     },
     {
+      "id": "seed_drill",
+      "industry": "farm",
+      "name": "research.seed_drill.name",
+      "desc": "research.seed_drill.desc",
+      "icon": "ui_seed",
+      "requires": [
+        "drip_irrigation"
+      ],
+      "unlock": {
+        "level": 7
+      },
+      "cost": {
+        "money": 300,
+        "items": {
+          "notes": 14
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "farm",
+          "action": "sow",
+          "multiply": 0.6
+        }
+      ]
+    },
+    {
+      "id": "green_manure",
+      "industry": "farm",
+      "name": "research.green_manure.name",
+      "desc": "research.green_manure.desc",
+      "icon": "ui_sprout",
+      "requires": [
+        "seed_drill"
+      ],
+      "unlock": {
+        "level": 8
+      },
+      "cost": {
+        "money": 450,
+        "items": {
+          "notes": 16
+        }
+      },
+      "seconds": 210,
+      "effects": [
+        {
+          "kind": "yield",
+          "type": "farm",
+          "stage": "harvest",
+          "item": "crop",
+          "add": 1
+        }
+      ]
+    },
+    {
+      "id": "reaper",
+      "industry": "farm",
+      "name": "research.reaper.name",
+      "desc": "research.reaper.desc",
+      "icon": "ui_harvest",
+      "requires": [
+        "green_manure"
+      ],
+      "unlock": {
+        "level": 9
+      },
+      "cost": {
+        "money": 700,
+        "items": {
+          "notes": 18
+        }
+      },
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "farm",
+          "action": "harvest",
+          "multiply": 0.6
+        }
+      ]
+    },
+    {
+      "id": "combine_harvester",
+      "industry": "farm",
+      "name": "research.combine_harvester.name",
+      "desc": "research.combine_harvester.desc",
+      "icon": "ui_harvest",
+      "requires": [
+        "reaper"
+      ],
+      "unlock": {
+        "level": 11
+      },
+      "cost": {
+        "money": 1500,
+        "items": {
+          "notes": 25,
+          "iron_ingot": 6
+        }
+      },
+      "seconds": 300,
+      "effects": [
+        {
+          "kind": "auto",
+          "type": "farm",
+          "action": "harvest"
+        }
+      ]
+    },
+    {
       "id": "sharp_axes",
       "industry": "lumberyard",
       "name": "research.sharp_axes.name",
@@ -253,6 +366,34 @@
           "kind": "work",
           "type": "lumberyard",
           "action": "chop",
+          "multiply": 0.7
+        }
+      ]
+    },
+    {
+      "id": "seedling_beds",
+      "industry": "lumberyard",
+      "name": "research.seedling_beds.name",
+      "desc": "research.seedling_beds.desc",
+      "icon": "ui_sprout",
+      "requires": [
+        "sharp_axes"
+      ],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 70,
+        "items": {
+          "notes": 6
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "lumberyard",
+          "action": "replant",
           "multiply": 0.7
         }
       ]
@@ -285,6 +426,173 @@
         }
       ],
       "special": "A Momo's own idea: after fifteen fellings the lumberjack writes proposing a nursery. It stays a letter's discovery -- a leaf of the tree, nothing ordinary waits on it."
+    },
+    {
+      "id": "crosscut_saw",
+      "industry": "lumberyard",
+      "name": "research.crosscut_saw.name",
+      "desc": "research.crosscut_saw.desc",
+      "icon": "ui_lumber",
+      "requires": [
+        "seedling_beds"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8
+        }
+      },
+      "seconds": 120,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "lumberyard",
+          "action": "chop",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "forest_survey",
+      "industry": "lumberyard",
+      "name": "research.forest_survey.name",
+      "desc": "research.forest_survey.desc",
+      "icon": "ui_land",
+      "requires": [
+        "crosscut_saw"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 10
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "cooldown",
+          "type": "lumberyard",
+          "action": "replant",
+          "multiply": 0.85
+        }
+      ]
+    },
+    {
+      "id": "log_flume",
+      "industry": "lumberyard",
+      "name": "research.log_flume.name",
+      "desc": "research.log_flume.desc",
+      "icon": "ui_water",
+      "requires": [
+        "forest_survey"
+      ],
+      "unlock": {
+        "level": 7
+      },
+      "cost": {
+        "money": 320,
+        "items": {
+          "notes": 12
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "momo_work",
+          "multiply": 0.85,
+          "type": "lumberyard"
+        }
+      ]
+    },
+    {
+      "id": "selective_felling",
+      "industry": "lumberyard",
+      "name": "research.selective_felling.name",
+      "desc": "research.selective_felling.desc",
+      "icon": "ui_lumber",
+      "requires": [
+        "log_flume"
+      ],
+      "unlock": {
+        "level": 8
+      },
+      "cost": {
+        "money": 480,
+        "items": {
+          "notes": 15
+        }
+      },
+      "seconds": 210,
+      "effects": [
+        {
+          "kind": "cooldown",
+          "type": "lumberyard",
+          "action": "replant",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "frame_saw",
+      "industry": "lumberyard",
+      "name": "research.frame_saw.name",
+      "desc": "research.frame_saw.desc",
+      "icon": "ui_lumber",
+      "requires": [
+        "selective_felling"
+      ],
+      "unlock": {
+        "level": 9
+      },
+      "cost": {
+        "money": 700,
+        "items": {
+          "notes": 18,
+          "iron_ingot": 4
+        }
+      },
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "lumberyard",
+          "action": "chop",
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
+      "id": "coppice_woodland",
+      "industry": "lumberyard",
+      "name": "research.coppice_woodland.name",
+      "desc": "research.coppice_woodland.desc",
+      "icon": "ui_sprout",
+      "requires": [
+        "frame_saw"
+      ],
+      "unlock": {
+        "level": 10
+      },
+      "cost": {
+        "money": 1200,
+        "items": {
+          "notes": 24
+        }
+      },
+      "seconds": 300,
+      "effects": [
+        {
+          "kind": "auto",
+          "type": "lumberyard",
+          "action": "replant"
+        }
+      ]
     },
     {
       "id": "pickaxes",
@@ -340,6 +648,55 @@
       ]
     },
     {
+      "id": "bellows",
+      "industry": "mine",
+      "name": "research.bellows.name",
+      "desc": "research.bellows.desc",
+      "icon": "item_copper_ingot",
+      "requires": [],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 80,
+        "items": {
+          "notes": 6,
+          "copper_ingot": 2
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "smelter",
+          "action": "smelt",
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
+      "id": "automotive",
+      "industry": "mine",
+      "name": "research.automotive.name",
+      "desc": "research.automotive.desc",
+      "icon": "item_car",
+      "requires": [
+        "electric_furnace"
+      ],
+      "unlock": {
+        "level": 7
+      },
+      "cost": {
+        "money": 500,
+        "items": {
+          "notes": 20,
+          "iron_ingot": 8
+        }
+      },
+      "seconds": 240,
+      "effects": []
+    },
+    {
       "id": "iron_prospecting",
       "industry": "mine",
       "name": "research.iron_prospecting.name",
@@ -365,6 +722,122 @@
           "stage": "dig",
           "item": "iron_ore",
           "add": 0.2
+        }
+      ]
+    },
+    {
+      "id": "bloomery",
+      "industry": "mine",
+      "name": "research.bloomery.name",
+      "desc": "research.bloomery.desc",
+      "icon": "item_iron_ingot",
+      "requires": [
+        "bellows"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8,
+          "copper_ingot": 4
+        }
+      },
+      "seconds": 120,
+      "effects": [
+        {
+          "kind": "recipe",
+          "type": "smelter",
+          "recipe": "iron_ingot"
+        }
+      ]
+    },
+    {
+      "id": "delivery_vans",
+      "industry": "mine",
+      "name": "research.delivery_vans.name",
+      "desc": "research.delivery_vans.desc",
+      "icon": "item_car",
+      "requires": [
+        "automotive"
+      ],
+      "unlock": {
+        "level": 8
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "iron_ingot": 6,
+          "notes": 10
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "walk_speed",
+          "multiply": 1.5
+        },
+        {
+          "kind": "sale_price",
+          "multiply": 1.1
+        }
+      ]
+    },
+    {
+      "id": "timber_props",
+      "industry": "mine",
+      "name": "research.timber_props.name",
+      "desc": "research.timber_props.desc",
+      "icon": "item_wood",
+      "requires": [
+        "iron_prospecting"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 150,
+        "items": {
+          "notes": 9,
+          "wood": 10
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "cooldown",
+          "type": "mine",
+          "action": "dig",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "larger_crucible",
+      "industry": "mine",
+      "name": "research.larger_crucible.name",
+      "desc": "research.larger_crucible.desc",
+      "icon": "item_iron_ingot",
+      "requires": [
+        "bloomery"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 150,
+        "items": {
+          "notes": 10,
+          "iron_ingot": 4
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "batch",
+          "type": "smelter",
+          "add": 1
         }
       ]
     },
@@ -403,91 +876,8 @@
       "special": "Only a mine worked long enough can go deeper: mine mastery 4. A leaf."
     },
     {
-      "id": "bellows",
-      "industry": "smelter",
-      "name": "research.bellows.name",
-      "desc": "research.bellows.desc",
-      "icon": "item_copper_ingot",
-      "requires": [],
-      "unlock": {
-        "level": 5
-      },
-      "cost": {
-        "money": 80,
-        "items": {
-          "notes": 6,
-          "copper_ingot": 2
-        }
-      },
-      "seconds": 90,
-      "effects": [
-        {
-          "kind": "work",
-          "type": "smelter",
-          "action": "smelt",
-          "multiply": 0.75
-        }
-      ]
-    },
-    {
-      "id": "bloomery",
-      "industry": "smelter",
-      "name": "research.bloomery.name",
-      "desc": "research.bloomery.desc",
-      "icon": "item_iron_ingot",
-      "requires": [
-        "bellows"
-      ],
-      "unlock": {
-        "level": 5
-      },
-      "cost": {
-        "money": 120,
-        "items": {
-          "notes": 8,
-          "copper_ingot": 4
-        }
-      },
-      "seconds": 120,
-      "effects": [
-        {
-          "kind": "recipe",
-          "type": "smelter",
-          "recipe": "iron_ingot"
-        }
-      ]
-    },
-    {
-      "id": "larger_crucible",
-      "industry": "smelter",
-      "name": "research.larger_crucible.name",
-      "desc": "research.larger_crucible.desc",
-      "icon": "item_iron_ingot",
-      "requires": [
-        "bloomery"
-      ],
-      "unlock": {
-        "level": 6
-      },
-      "cost": {
-        "money": 150,
-        "items": {
-          "notes": 10,
-          "iron_ingot": 4
-        }
-      },
-      "seconds": 150,
-      "effects": [
-        {
-          "kind": "batch",
-          "type": "smelter",
-          "add": 1
-        }
-      ]
-    },
-    {
       "id": "fine_assay",
-      "industry": "smelter",
+      "industry": "mine",
       "name": "research.fine_assay.name",
       "desc": "research.fine_assay.desc",
       "icon": "item_gold_ingot",
@@ -515,6 +905,416 @@
         }
       ],
       "special": "A smelter's craft, learned at the furnace: smelter mastery 3. A leaf."
+    },
+    {
+      "id": "mine_rails",
+      "industry": "mine",
+      "name": "research.mine_rails.name",
+      "desc": "research.mine_rails.desc",
+      "icon": "ui_mine",
+      "requires": [
+        "timber_props"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 250,
+        "items": {
+          "notes": 11,
+          "iron_ingot": 2
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "momo_work",
+          "multiply": 0.85,
+          "type": "mine"
+        }
+      ]
+    },
+    {
+      "id": "blasting",
+      "industry": "mine",
+      "name": "research.blasting.name",
+      "desc": "research.blasting.desc",
+      "icon": "ui_boost",
+      "requires": [
+        "mine_rails"
+      ],
+      "unlock": {
+        "level": 7
+      },
+      "cost": {
+        "money": 380,
+        "items": {
+          "notes": 13
+        }
+      },
+      "seconds": 210,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "mine",
+          "action": "dig",
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
+      "id": "ventilation",
+      "industry": "mine",
+      "name": "research.ventilation.name",
+      "desc": "research.ventilation.desc",
+      "icon": "ui_mine",
+      "requires": [
+        "blasting"
+      ],
+      "unlock": {
+        "level": 8
+      },
+      "cost": {
+        "money": 520,
+        "items": {
+          "notes": 16
+        }
+      },
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "cooldown",
+          "type": "mine",
+          "action": "dig",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "steam_pump",
+      "industry": "mine",
+      "name": "research.steam_pump.name",
+      "desc": "research.steam_pump.desc",
+      "icon": "ui_water",
+      "requires": [
+        "ventilation"
+      ],
+      "unlock": {
+        "level": 9
+      },
+      "cost": {
+        "money": 750,
+        "items": {
+          "notes": 18,
+          "iron_ingot": 6
+        }
+      },
+      "seconds": 270,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "mine",
+          "action": "dig",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "rock_drill",
+      "industry": "mine",
+      "name": "research.rock_drill.name",
+      "desc": "research.rock_drill.desc",
+      "icon": "ui_mine",
+      "requires": [
+        "steam_pump"
+      ],
+      "unlock": {
+        "level": 11
+      },
+      "cost": {
+        "money": 1600,
+        "items": {
+          "notes": 26,
+          "iron_ingot": 10,
+          "copper_ingot": 6
+        }
+      },
+      "seconds": 300,
+      "effects": [
+        {
+          "kind": "auto",
+          "type": "mine",
+          "action": "dig"
+        }
+      ]
+    },
+    {
+      "id": "field_notebook",
+      "industry": "research",
+      "name": "research.field_notebook.name",
+      "desc": "research.field_notebook.desc",
+      "icon": "ui_research",
+      "requires": [],
+      "unlock": {
+        "level": 2
+      },
+      "cost": {
+        "money": 0,
+        "items": {
+          "notes": 4
+        }
+      },
+      "seconds": 60,
+      "effects": [
+        {
+          "kind": "research_time",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "lab_lighting",
+      "industry": "research",
+      "name": "research.lab_lighting.name",
+      "desc": "research.lab_lighting.desc",
+      "icon": "ui_flask",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 80,
+        "items": {
+          "notes": 6,
+          "copper_ingot": 1
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "power_use",
+          "type": "research",
+          "draw": 1,
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
+      "id": "index_cards",
+      "industry": "research",
+      "name": "research.index_cards.name",
+      "desc": "research.index_cards.desc",
+      "icon": "ui_research",
+      "requires": [
+        "field_notebook"
+      ],
+      "unlock": {
+        "level": 3
+      },
+      "cost": {
+        "money": 40,
+        "items": {
+          "notes": 5
+        }
+      },
+      "seconds": 60,
+      "effects": [
+        {
+          "kind": "cooldown",
+          "type": "research",
+          "action": "study",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "software",
+      "industry": "research",
+      "name": "research.software.name",
+      "desc": "research.software.desc",
+      "icon": "ui_research",
+      "requires": [
+        "lab_lighting"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 300,
+        "items": {
+          "notes": 15,
+          "copper_ingot": 4
+        }
+      },
+      "seconds": 180,
+      "effects": []
+    },
+    {
+      "id": "glassware",
+      "industry": "research",
+      "name": "research.glassware.name",
+      "desc": "research.glassware.desc",
+      "icon": "ui_flask",
+      "requires": [
+        "index_cards"
+      ],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 90,
+        "items": {
+          "notes": 7
+        }
+      },
+      "seconds": 90,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "research",
+          "action": "study",
+          "multiply": 0.8
+        }
+      ]
+    },
+    {
+      "id": "lab_assistants",
+      "industry": "research",
+      "name": "research.lab_assistants.name",
+      "desc": "research.lab_assistants.desc",
+      "icon": "ui_status",
+      "requires": [
+        "glassware"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 160,
+        "items": {
+          "notes": 9
+        }
+      },
+      "seconds": 120,
+      "effects": [
+        {
+          "kind": "momo_work",
+          "multiply": 0.85,
+          "type": "research"
+        }
+      ]
+    },
+    {
+      "id": "controlled_trials",
+      "industry": "research",
+      "name": "research.controlled_trials.name",
+      "desc": "research.controlled_trials.desc",
+      "icon": "ui_research",
+      "requires": [
+        "lab_assistants"
+      ],
+      "unlock": {
+        "level": 6
+      },
+      "cost": {
+        "money": 260,
+        "items": {
+          "notes": 11
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "yield",
+          "type": "research",
+          "stage": "study",
+          "item": "notes",
+          "add": 0.25
+        }
+      ]
+    },
+    {
+      "id": "reference_library",
+      "industry": "research",
+      "name": "research.reference_library.name",
+      "desc": "research.reference_library.desc",
+      "icon": "ui_research",
+      "requires": [
+        "controlled_trials"
+      ],
+      "unlock": {
+        "level": 7
+      },
+      "cost": {
+        "money": 400,
+        "items": {
+          "notes": 14
+        }
+      },
+      "seconds": 180,
+      "effects": [
+        {
+          "kind": "research_time",
+          "multiply": 0.85
+        }
+      ]
+    },
+    {
+      "id": "microscope",
+      "industry": "research",
+      "name": "research.microscope.name",
+      "desc": "research.microscope.desc",
+      "icon": "ui_flask",
+      "requires": [
+        "reference_library"
+      ],
+      "unlock": {
+        "level": 9
+      },
+      "cost": {
+        "money": 650,
+        "items": {
+          "notes": 18,
+          "copper_ingot": 4
+        }
+      },
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "work",
+          "type": "research",
+          "action": "study",
+          "multiply": 0.75
+        }
+      ]
+    },
+    {
+      "id": "recording_instruments",
+      "industry": "research",
+      "name": "research.recording_instruments.name",
+      "desc": "research.recording_instruments.desc",
+      "icon": "ui_flask",
+      "requires": [
+        "microscope"
+      ],
+      "unlock": {
+        "level": 11
+      },
+      "cost": {
+        "money": 1400,
+        "items": {
+          "notes": 26,
+          "copper_ingot": 8
+        }
+      },
+      "seconds": 300,
+      "effects": [
+        {
+          "kind": "auto",
+          "type": "research",
+          "action": "study"
+        }
+      ]
     },
     {
       "id": "photovoltaics",
@@ -577,28 +1377,6 @@
       "effects": []
     },
     {
-      "id": "hydropower",
-      "industry": "power",
-      "name": "research.hydropower.name",
-      "desc": "research.hydropower.desc",
-      "icon": "ui_power",
-      "requires": [
-        "wind_power"
-      ],
-      "unlock": {
-        "level": 5
-      },
-      "cost": {
-        "money": 200,
-        "items": {
-          "notes": 12,
-          "iron_ingot": 4
-        }
-      },
-      "seconds": 180,
-      "effects": []
-    },
-    {
       "id": "electric_drill",
       "industry": "power",
       "name": "research.electric_drill.name",
@@ -625,6 +1403,28 @@
           "multiply": 0.6
         }
       ]
+    },
+    {
+      "id": "hydropower",
+      "industry": "power",
+      "name": "research.hydropower.name",
+      "desc": "research.hydropower.desc",
+      "icon": "ui_power",
+      "requires": [
+        "wind_power"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 12,
+          "iron_ingot": 4
+        }
+      },
+      "seconds": 180,
+      "effects": []
     },
     {
       "id": "electric_furnace",
@@ -656,128 +1456,175 @@
       ]
     },
     {
-      "id": "lab_lighting",
+      "id": "turbine_gearing",
       "industry": "power",
-      "name": "research.lab_lighting.name",
-      "desc": "research.lab_lighting.desc",
-      "icon": "ui_flask",
-      "requires": [],
-      "unlock": {
-        "level": 4
-      },
-      "cost": {
-        "money": 80,
-        "items": {
-          "notes": 6,
-          "copper_ingot": 1
-        }
-      },
-      "seconds": 90,
-      "effects": [
-        {
-          "kind": "power_use",
-          "type": "research",
-          "draw": 1,
-          "multiply": 0.75
-        }
-      ]
-    },
-    {
-      "id": "software",
-      "industry": "game_studio",
-      "name": "research.software.name",
-      "desc": "research.software.desc",
-      "icon": "ui_research",
+      "name": "research.turbine_gearing.name",
+      "desc": "research.turbine_gearing.desc",
+      "icon": "ui_power",
       "requires": [
-        "lab_lighting"
+        "hydropower"
       ],
       "unlock": {
         "level": 6
       },
       "cost": {
-        "money": 300,
+        "money": 280,
         "items": {
-          "notes": 15,
-          "copper_ingot": 4
+          "notes": 11,
+          "iron_ingot": 3
         }
       },
       "seconds": 180,
-      "effects": []
+      "effects": [
+        {
+          "kind": "power_output",
+          "multiply": 1.2,
+          "type": "wind_turbine"
+        },
+        {
+          "kind": "power_output",
+          "multiply": 1.2,
+          "type": "water_wheel"
+        }
+      ]
     },
     {
-      "id": "automotive",
-      "industry": "car_factory",
-      "name": "research.automotive.name",
-      "desc": "research.automotive.desc",
-      "icon": "item_car",
+      "id": "transmission_lines",
+      "industry": "power",
+      "name": "research.transmission_lines.name",
+      "desc": "research.transmission_lines.desc",
+      "icon": "ui_power",
       "requires": [
-        "electric_furnace"
+        "turbine_gearing"
       ],
       "unlock": {
         "level": 7
       },
       "cost": {
-        "money": 500,
+        "money": 380,
         "items": {
-          "notes": 20,
-          "iron_ingot": 8
+          "notes": 13,
+          "copper_ingot": 6
         }
       },
-      "seconds": 240,
-      "effects": []
-    },
-    {
-      "id": "delivery_vans",
-      "industry": "car_factory",
-      "name": "research.delivery_vans.name",
-      "desc": "research.delivery_vans.desc",
-      "icon": "item_car",
-      "requires": [
-        "automotive"
-      ],
-      "unlock": {
-        "level": 8
-      },
-      "cost": {
-        "money": 200,
-        "items": {
-          "iron_ingot": 6,
-          "notes": 10
-        }
-      },
-      "seconds": 180,
+      "seconds": 210,
       "effects": [
         {
-          "kind": "walk_speed",
-          "multiply": 1.5
-        },
-        {
-          "kind": "sale_price",
+          "kind": "power_output",
           "multiply": 1.1
         }
       ]
     },
     {
-      "id": "field_notebook",
-      "industry": "global",
-      "name": "research.field_notebook.name",
-      "desc": "research.field_notebook.desc",
-      "icon": "ui_research",
-      "requires": [],
+      "id": "superheated_steam",
+      "industry": "power",
+      "name": "research.superheated_steam.name",
+      "desc": "research.superheated_steam.desc",
+      "icon": "ui_power",
+      "requires": [
+        "transmission_lines",
+        "steam_power"
+      ],
       "unlock": {
-        "level": 2
+        "level": 8
       },
       "cost": {
-        "money": 0,
+        "money": 500,
         "items": {
-          "notes": 4
+          "notes": 15,
+          "iron_ingot": 4
         }
       },
-      "seconds": 60,
+      "seconds": 240,
       "effects": [
         {
-          "kind": "research_time",
-          "multiply": 0.8
+          "kind": "power_output",
+          "multiply": 1.3,
+          "type": "steam_engine"
+        }
+      ]
+    },
+    {
+      "id": "sun_tracking",
+      "industry": "power",
+      "name": "research.sun_tracking.name",
+      "desc": "research.sun_tracking.desc",
+      "icon": "ui_power",
+      "requires": [
+        "superheated_steam",
+        "photovoltaics"
+      ],
+      "unlock": {
+        "level": 9
+      },
+      "cost": {
+        "money": 650,
+        "items": {
+          "notes": 17,
+          "copper_ingot": 4
+        }
+      },
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "power_output",
+          "multiply": 1.3,
+          "type": "solar_panel"
+        }
+      ]
+    },
+    {
+      "id": "battery_bank",
+      "industry": "power",
+      "name": "research.battery_bank.name",
+      "desc": "research.battery_bank.desc",
+      "icon": "ui_power",
+      "requires": [
+        "sun_tracking"
+      ],
+      "unlock": {
+        "level": 10
+      },
+      "cost": {
+        "money": 900,
+        "items": {
+          "notes": 20,
+          "copper_ingot": 6,
+          "iron_ingot": 4
+        }
+      },
+      "seconds": 270,
+      "effects": [
+        {
+          "kind": "power_output",
+          "multiply": 1.15
+        }
+      ]
+    },
+    {
+      "id": "smart_grid",
+      "industry": "power",
+      "name": "research.smart_grid.name",
+      "desc": "research.smart_grid.desc",
+      "icon": "ui_power",
+      "requires": [
+        "battery_bank"
+      ],
+      "unlock": {
+        "level": 11
+      },
+      "cost": {
+        "money": 1800,
+        "items": {
+          "notes": 28,
+          "copper_ingot": 10
+        }
+      },
+      "seconds": 300,
+      "effects": [
+        {
+          "kind": "power_output",
+          "multiply": 1.4
         }
       ]
     },
@@ -811,6 +1658,26 @@
           ]
         }
       ]
+    },
+    {
+      "id": "masonry",
+      "industry": "global",
+      "name": "research.masonry.name",
+      "desc": "research.masonry.desc",
+      "icon": "item_stone",
+      "requires": [],
+      "unlock": {
+        "level": 4
+      },
+      "cost": {
+        "money": 120,
+        "items": {
+          "notes": 8,
+          "stone": 10
+        }
+      },
+      "seconds": 120,
+      "effects": []
     },
     {
       "id": "momo_paths",
@@ -879,6 +1746,76 @@
       ]
     },
     {
+      "id": "management",
+      "industry": "global",
+      "name": "research.management.name",
+      "desc": "research.management.desc",
+      "icon": "ui_status",
+      "requires": [
+        "momo_training"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 150,
+        "items": {
+          "notes": 10
+        }
+      },
+      "seconds": 120,
+      "effects": []
+    },
+    {
+      "id": "civic_planning",
+      "industry": "global",
+      "name": "research.civic_planning.name",
+      "desc": "research.civic_planning.desc",
+      "icon": "ui_status",
+      "requires": [
+        "masonry"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 12,
+          "copper_ingot": 2
+        }
+      },
+      "seconds": 150,
+      "effects": []
+    },
+    {
+      "id": "smart_schedule",
+      "industry": "global",
+      "name": "research.smart_schedule.name",
+      "desc": "research.smart_schedule.desc",
+      "icon": "ui_status",
+      "requires": [
+        "momo_paths",
+        "momo_reach"
+      ],
+      "unlock": {
+        "level": 5
+      },
+      "cost": {
+        "money": 200,
+        "items": {
+          "notes": 12
+        }
+      },
+      "seconds": 150,
+      "effects": [
+        {
+          "kind": "route",
+          "strategy": "auto"
+        }
+      ]
+    },
+    {
       "id": "momo_wide_reach",
       "industry": "global",
       "name": "research.momo_wide_reach.name",
@@ -912,94 +1849,140 @@
       ]
     },
     {
-      "id": "smart_schedule",
+      "id": "packed_lunch",
       "industry": "global",
-      "name": "research.smart_schedule.name",
-      "desc": "research.smart_schedule.desc",
+      "name": "research.packed_lunch.name",
+      "desc": "research.packed_lunch.desc",
       "icon": "ui_status",
       "requires": [
-        "momo_paths",
-        "momo_reach"
+        "smart_schedule"
       ],
       "unlock": {
-        "level": 5
+        "level": 6
       },
       "cost": {
-        "money": 200,
+        "money": 300,
         "items": {
           "notes": 12
         }
       },
-      "seconds": 150,
+      "seconds": 180,
       "effects": [
         {
-          "kind": "route",
-          "strategy": "auto"
+          "kind": "momo_work",
+          "multiply": 0.92
         }
       ]
     },
     {
-      "id": "management",
+      "id": "market_days",
       "industry": "global",
-      "name": "research.management.name",
-      "desc": "research.management.desc",
-      "icon": "ui_status",
+      "name": "research.market_days.name",
+      "desc": "research.market_days.desc",
+      "icon": "icon_coin",
       "requires": [
-        "momo_training"
+        "packed_lunch"
       ],
       "unlock": {
-        "level": 5
+        "level": 7
       },
       "cost": {
-        "money": 150,
+        "money": 420,
         "items": {
-          "notes": 10
+          "notes": 14
         }
       },
-      "seconds": 120,
-      "effects": []
-    },
-    {
-      "id": "masonry",
-      "industry": "global",
-      "name": "research.masonry.name",
-      "desc": "research.masonry.desc",
-      "icon": "item_stone",
-      "requires": [],
-      "unlock": {
-        "level": 4
-      },
-      "cost": {
-        "money": 120,
-        "items": {
-          "notes": 8,
-          "stone": 10
+      "seconds": 210,
+      "effects": [
+        {
+          "kind": "sale_price",
+          "multiply": 1.05
         }
-      },
-      "seconds": 120,
-      "effects": []
+      ]
     },
     {
-      "id": "civic_planning",
+      "id": "bicycles",
       "industry": "global",
-      "name": "research.civic_planning.name",
-      "desc": "research.civic_planning.desc",
-      "icon": "ui_status",
+      "name": "research.bicycles.name",
+      "desc": "research.bicycles.desc",
+      "icon": "ui_land",
       "requires": [
-        "masonry"
+        "market_days"
       ],
       "unlock": {
-        "level": 5
+        "level": 8
       },
       "cost": {
-        "money": 200,
+        "money": 560,
         "items": {
-          "notes": 12,
-          "copper_ingot": 2
+          "notes": 16,
+          "iron_ingot": 4
         }
       },
-      "seconds": 150,
-      "effects": []
+      "seconds": 240,
+      "effects": [
+        {
+          "kind": "walk_speed",
+          "multiply": 1.2
+        }
+      ]
+    },
+    {
+      "id": "guilds",
+      "industry": "global",
+      "name": "research.guilds.name",
+      "desc": "research.guilds.desc",
+      "icon": "ui_status",
+      "requires": [
+        "bicycles"
+      ],
+      "unlock": {
+        "level": 9
+      },
+      "cost": {
+        "money": 800,
+        "items": {
+          "notes": 18
+        }
+      },
+      "seconds": 270,
+      "effects": [
+        {
+          "kind": "momo_work",
+          "multiply": 0.9
+        }
+      ]
+    },
+    {
+      "id": "island_railway",
+      "industry": "global",
+      "name": "research.island_railway.name",
+      "desc": "research.island_railway.desc",
+      "icon": "ui_land",
+      "requires": [
+        "guilds"
+      ],
+      "unlock": {
+        "level": 11
+      },
+      "cost": {
+        "money": 1800,
+        "items": {
+          "notes": 28,
+          "iron_ingot": 12
+        }
+      },
+      "seconds": 300,
+      "effects": [
+        {
+          "kind": "walk_speed",
+          "multiply": 1.5
+        },
+        {
+          "kind": "watch_tiles",
+          "add": 4
+        }
+      ]
     }
   ],
   "branches": [

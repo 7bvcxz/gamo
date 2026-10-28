@@ -139,8 +139,27 @@ func tab_dot(index: int) -> bool:
 	return index >= 0 and index < tabs.size() and bool(tabs[index].get("dot", false))
 
 
+## Step 71: hides or shows a tab's button (a research tab with nothing to show
+## yet). A hidden tab is never the current one while another is shown.
+func set_tab_shown(index: int, on: bool) -> void:
+	if index < 0 or index >= tabs.size():
+		return
+	var b: Button = tabs[index]["button"]
+	if b.visible == on:
+		return
+	b.visible = on
+	if not on and visible and current == index:
+		show_tab(index)
+
+
 func show_tab(index: int) -> void:
-	current = clampi(index, 0, tabs.size() - 1)
+	index = clampi(index, 0, tabs.size() - 1)
+	if not tabs.is_empty() and not (tabs[index]["button"] as Button).visible:
+		for i in tabs.size():
+			if (tabs[i]["button"] as Button).visible:
+				index = i
+				break
+	current = index
 	for i in tabs.size():
 		(tabs[i]["view"] as Control).visible = i == current
 		(tabs[i]["button"] as Button).theme_type_variation = &"SelectedButton" if i == current else &""

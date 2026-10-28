@@ -341,6 +341,11 @@ func _validate_effect(id: String, e: Dictionary, types: Dictionary, items: Dicti
 		"watch_tiles":
 			if int(e.get("add", 0)) < 1:
 				errors.append("research: %s watch_tiles needs add >= 1" % id)
+		"power_output":
+			var m := float(e.get("multiply", 0.0))
+			var gen_ok := not e.has("type") or (types.has(String(e["type"])) and not (types[String(e["type"])].get("power", {}).get("generate", {}) as Dictionary).is_empty())
+			if m < 1.0 or m > 2.0 or not gen_ok:
+				errors.append("research: %s power_output needs multiply in [1, 2] and a generator type if any" % id)
 		"route":
 			if not ["auto"].has(String(e.get("strategy", ""))):
 				errors.append("research: %s opens an unknown route strategy %s" % [id, e.get("strategy", "")])

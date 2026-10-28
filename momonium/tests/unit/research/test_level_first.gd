@@ -46,7 +46,7 @@ func test_every_ordinary_node_opens_at_one_level() -> void:
 			assert_false(unlock.has("level") and unlock.size() == 1, "%s: a special node has a gate of its own" % n["id"])
 			continue
 		assert_eq(unlock.keys(), ["level"], "%s: one plain gate, the player level" % n["id"])
-		assert_between(int(unlock.get("level", 0)), 2, 8, "%s: Lv %d" % [n["id"], int(unlock.get("level", 0))])
+		assert_between(int(unlock.get("level", 0)), 2, 11, "%s: Lv %d (Step 71: the eighth tiers open up to Lv 11)" % [n["id"], int(unlock.get("level", 0))])
 	assert_between(specials, 1, 6, "a few special nodes (%d), the rest ordinary" % specials)
 
 

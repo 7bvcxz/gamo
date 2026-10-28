@@ -622,3 +622,77 @@ hud.count.mailbox,"{name}, {n} unread","{name}, 읽지 않은 편지 {n}통",{na
 hud.count.research,"{name}, {n} new topics","{name}, 새 주제 {n}개",{name}、新しいテーマ {n}件,{name}，{n} 个新课题
 hud.count.status,"{name}, ready to grow","{name}, 승급할 수 있어요",{name}、昇格できます,{name}，可以升级
 hud.count.hire,"{name}, a Momo would have work","{name}, 모모가 일할 곳이 있어요",{name}、モモの仕事があります,{name}，有活给桃桃干
+research.seed_drill.name,Seed drill,파종기,播種機,播种机
+research.seed_drill.desc,A drill drops each seed at the right depth and spacing: a whole bed sown in one pass.,"씨를 알맞은 깊이와 간격으로 떨어뜨리는 파종기로, 한 번 지나가면 한 이랑이 다 심어져요.",種を適切な深さと間隔で落とす播種機で、一度通れば畝がまるごと播き終わります。,播种机按合适的深度和间距落下每粒种子，走一趟就播完一整垄。
+research.green_manure.name,Green manure,녹비 작물,緑肥,绿肥
+research.green_manure.desc,Clover sown between crops and ploughed back in feeds the soil nitrogen: every harvest is heavier.,"작물 사이에 클로버를 심었다가 갈아엎으면 흙에 질소가 쌓여, 거둘 때마다 더 묵직해요.",作物の間にクローバーを播いてすき込むと土に窒素がたまり、収穫がどれも重くなります。,在作物之间种三叶草再翻进土里，土壤得到氮肥，每次收成都更沉。
+research.reaper.name,Reaper,수확기,刈り取り機,收割机
+research.reaper.desc,A cutter bar on wheels mows the ripe stalks in one sweep instead of by sickle.,바퀴 달린 칼날이 익은 줄기를 낫 대신 한 번에 베어 넘겨요.,車輪付きの刃が、熟した茎を鎌の代わりにひと薙ぎで刈り取ります。,带轮子的割刀一扫而过，代替镰刀割下成熟的秸秆。
+research.combine_harvester.name,Combine harvester,콤바인,コンバイン,联合收割机
+research.combine_harvester.desc,"One machine cuts, threshes and bags the grain: a ripe field harvests itself, with nobody there.","베고, 털고, 자루에 담는 일을 기계 하나가 해요. 익은 밭은 아무도 없어도 저절로 거둬져요.",刈る・脱穀する・袋詰めするを一台でこなす機械。実った畑は誰もいなくても自分で収穫されます。,一台机器完成收割、脱粒和装袋：成熟的田地无人看管也会自己收获。
+research.seedling_beds.name,Seedling beds,묘목 모판,苗床,苗床
+research.seedling_beds.desc,Saplings raised in a sheltered bed come up with their roots in a ball: planting one takes a moment.,"바람 막힌 모판에서 기른 묘목은 뿌리째 흙덩이로 나와서, 옮겨 심는 데 잠깐이면 돼요.",風よけのある苗床で育てた苗は根鉢ごと抜けるので、植えるのはあっという間です。,在避风苗床里育的树苗连着土球起出，栽一棵只要片刻。
+research.crosscut_saw.name,Crosscut saw,가로톱,横挽き鋸,横切锯
+research.crosscut_saw.desc,A long two-handled saw with raker teeth cuts across the grain faster than any axe.,갈퀴날이 달린 긴 양손 톱은 결을 가로질러 어떤 도끼보다 빨리 잘라요.,かき出し刃のついた長い両手鋸は、木目を横切ってどんな斧よりも速く切ります。,带耙齿的长双人锯横着木纹锯，比任何斧头都快。
+research.forest_survey.name,Forest survey,산림 조사,森林調査,森林调查
+research.forest_survey.desc,"Soil, sun and slope on a map: each sapling goes where it takes root fastest.","흙과 햇빛과 비탈을 지도에 적어 두면, 묘목마다 가장 빨리 뿌리내릴 자리에 심겨요.",土と日当たりと斜面を地図にしておけば、苗はそれぞれ一番早く根づく場所に植えられます。,把土壤、日照和坡度画在地图上，每棵树苗都种在最快扎根的地方。
+research.log_flume.name,Log flume,통나무 수로,木材流し,运木水槽
+research.log_flume.desc,"A wooden water channel floats the logs down to the yard, so no one drags them by hand.","나무로 짠 물길이 통나무를 띄워 마당까지 실어 와서, 아무도 손으로 끌지 않아도 돼요.",木で組んだ水路が丸太を浮かべて置き場まで運ぶので、誰も手で引きずらなくてすみます。,木制水槽把原木漂到木场，没人需要用手拖。
+research.selective_felling.name,Selective felling,골라 베기,択伐,择伐
+research.selective_felling.desc,Take only the grown trees and leave the young: the wood is never bare and new saplings take sooner.,"다 자란 나무만 베고 어린 나무는 남겨 두면, 숲이 비지 않아 새 묘목이 더 빨리 자리 잡아요.",育った木だけを切り若い木は残せば、森が裸にならず新しい苗が早く根づきます。,只伐成材的树、留下幼树，林子不会光秃，新苗更快扎根。
+research.frame_saw.name,Frame saw,틀톱,枠鋸,框锯
+research.frame_saw.desc,"A blade held taut in a wooden frame cuts straight and true, log after log.",나무 틀에 팽팽하게 건 톱날이 통나무를 하나하나 곧고 바르게 잘라요.,木枠にぴんと張った刃が、丸太を一本ずつまっすぐ正確に切ります。,绷紧在木框里的锯条，一根接一根把原木锯得又直又准。
+research.coppice_woodland.name,Coppice woodland,맹아림,萌芽林,萌生林
+research.coppice_woodland.desc,"Cut low, and the stump sends up new shoots by itself: the wood grows back with no replanting at all.",밑동을 낮게 베면 그루터기에서 새순이 저절로 올라와요. 다시 심지 않아도 숲이 돌아와요.,低く切れば切り株から新しい芽が自然に伸びます。植え直さなくても森が戻ります。,贴地砍伐，树桩会自己冒出新枝：不用再栽，林子就长回来。
+research.timber_props.name,Timber props,갱목,坑木,坑木
+research.timber_props.desc,Props cut to length ahead of time: after each dig the shaft is shored up in moments.,"미리 길이를 맞춰 잘라 둔 갱목으로, 캘 때마다 갱도를 금세 받쳐요.",前もって長さをそろえた坑木で、掘るたびに坑道をすぐ支えられます。,预先截好长度的坑木，每次挖完都能很快把巷道撑好。
+research.mine_rails.name,Mine rails,광차 레일,トロッコの線路,矿车轨道
+research.mine_rails.desc,Iron rails and a little cart: the ore rolls out instead of being carried up in baskets.,"쇠 레일과 작은 광차로, 광석을 바구니에 지고 오르는 대신 굴려서 내보내요.",鉄のレールと小さなトロッコで、鉱石をかごで背負う代わりに転がして運び出します。,铁轨加小矿车，矿石滚着运出去，不用再用筐背上来。
+research.blasting.name,Blasting,발파,発破,爆破
+research.blasting.desc,"A drilled hole and a careful charge, and the rock face breaks in one go.","구멍을 뚫고 화약을 조심스레 채우면, 암벽이 한 번에 무너져요.",穴をあけて慎重に火薬を詰めれば、岩盤が一度に崩れます。,钻个孔、小心装药，岩壁一次就崩开。
+research.ventilation.name,Mine ventilation,갱내 환기,坑内換気,矿井通风
+research.ventilation.desc,A fan and a second shaft clear the dust after each dig: the next one starts sooner.,"환풍기와 둘째 갱도가 캘 때마다 먼지를 빼내서, 다음 채굴이 더 빨리 시작돼요.",送風機と二本目の坑道が掘るたびにほこりを抜くので、次の採掘が早く始まります。,风机和第二条竖井在每次挖掘后排出粉尘，下一次开挖更早开始。
+research.steam_pump.name,Steam pump,증기 양수기,蒸気ポンプ,蒸汽水泵
+research.steam_pump.desc,"A steam engine pumps the seeping water out, so the miners dig dry rock instead of mud.","증기 기관이 스며드는 물을 퍼내서, 광부들이 진흙 대신 마른 바위를 캐요.",蒸気機関がしみ出す水をくみ出すので、鉱夫は泥ではなく乾いた岩を掘れます。,蒸汽机把渗进来的水抽走，矿工挖的是干岩石而不是泥。
+research.rock_drill.name,Rock drill,착암기,削岩機,凿岩机
+research.rock_drill.desc,A compressed-air drill hammers the face by itself: the mine keeps digging with no one at the rock.,"압축 공기 착암기가 저절로 암벽을 두드려서, 바위 앞에 아무도 없어도 광산이 계속 캐요.",圧縮空気の削岩機がひとりでに岩盤をたたくので、誰もいなくても鉱山は掘り続けます。,压缩空气凿岩机自己敲击岩面，岩前无人，矿山照样不停开挖。
+research.index_cards.name,Index cards,색인 카드,索引カード,索引卡片
+research.index_cards.desc,"Every result on a card, filed by topic: the next experiment is set up in no time.","결과를 한 장씩 카드에 적어 주제별로 꽂아 두면, 다음 실험 준비가 금방 끝나요.",結果を一枚ずつカードに書きテーマ別に並べておけば、次の実験の準備がすぐ終わります。,每个结果写在一张卡片上、按主题归档，下一次实验很快就能准备好。
+research.glassware.name,Lab glassware,실험 유리 기구,実験ガラス器具,实验玻璃器皿
+research.glassware.desc,Graduated flasks and burettes: measuring takes one look instead of three tries.,"눈금 플라스크와 뷰렛이 있으면, 세 번 해 볼 일을 한 번 보고 재요.",目盛り付きフラスコとビュレットがあれば、三度試すところを一目で測れます。,有了刻度烧瓶和滴定管，三次才能量准的东西看一眼就行。
+research.lab_assistants.name,Lab assistants,실험 조수,実験助手,实验助手
+research.lab_assistants.desc,A Momo trained to keep the bench ready: no hunting for tools in the middle of an experiment.,"실험대를 늘 준비해 두도록 배운 모모 덕에, 실험 중에 도구를 찾아 헤매지 않아요.",実験台をいつも整えておくよう学んだモモのおかげで、実験の途中で道具を探し回りません。,学会随时备好实验台的桃桃，实验做到一半不用再到处找工具。
+research.controlled_trials.name,Controlled trials,대조 실험,対照実験,对照实验
+research.controlled_trials.desc,A control beside every test: one experiment answers more than one question.,"실험마다 대조군을 함께 두면, 한 번의 실험이 여러 질문에 답해요.",実験ごとに対照群を置けば、一度の実験で二つ以上の問いに答えが出ます。,每次试验都设对照组，一次实验能回答不止一个问题。
+research.reference_library.name,Reference library,참고 도서관,参考図書室,参考图书馆
+research.reference_library.desc,Shelves of handbooks and past papers: no one rediscovers what is already written down.,"안내서와 지난 논문이 꽂힌 서가가 있으면, 이미 적힌 것을 다시 알아낼 필요가 없어요.",手引書と過去の論文が並ぶ書架があれば、もう書かれていることを調べ直す必要はありません。,书架上摆满手册和旧论文，没人需要再去重新发现已经写下的东西。
+research.microscope.name,Microscope,현미경,顕微鏡,显微镜
+research.microscope.desc,Ground lenses in a brass tube show what the eye cannot: answers come at a glance.,"놋쇠 통에 갈아 넣은 렌즈가 눈으로 못 보는 것을 보여 줘서, 답이 한눈에 나와요.",真鍮の筒に収めた磨きレンズが目に見えないものを見せ、答えが一目で出ます。,黄铜镜筒里的磨制镜片能看见肉眼看不到的东西，答案一眼可得。
+research.recording_instruments.name,Recording instruments,자동 기록계,自記録装置,自动记录仪
+research.recording_instruments.desc,Instruments that trace their own readings on a turning drum: the lab keeps experimenting with no one there.,"도는 원통에 스스로 눈금을 그리는 기록계 덕분에, 아무도 없어도 연구소가 실험을 계속해요.",回る円筒に自分で読み取りを描く装置のおかげで、誰もいなくても研究所は実験を続けます。,仪器在转筒上自己画下读数：没人在场，研究所也照样做实验。
+research.turbine_gearing.name,Gearing up,증속 기어,増速ギア,增速齿轮
+research.turbine_gearing.desc,Gears between the slow wheel and the fast dynamo: the same wind and water turn out more current.,"느린 바퀴와 빠른 발전기 사이에 기어를 물리면, 같은 바람과 물로 더 많은 전기를 만들어요.",ゆっくり回る車輪と速い発電機の間にギアをかませれば、同じ風と水からもっと電気が取れます。,在慢转的轮子和快转的发电机之间加齿轮，同样的风和水发出更多电。
+research.transmission_lines.name,Transmission lines,송전선,送電線,输电线
+research.transmission_lines.desc,"Thick copper on tall poles, at a higher voltage: less of the power is lost on the way.","높은 기둥에 굵은 구리선을 걸고 전압을 올리면, 가는 길에 새는 전기가 줄어요.",高い柱に太い銅線を張り電圧を上げれば、途中で失われる電気が減ります。,高杆上架粗铜线、提高电压，路上损失的电就少了。
+research.superheated_steam.name,Superheated steam,과열 증기,過熱蒸気,过热蒸汽
+research.superheated_steam.desc,Steam heated past boiling in a second coil drives the piston harder on the same wood.,두 번째 관에서 끓는점 너머로 데운 증기가 같은 장작으로 피스톤을 더 세게 밀어요.,二本目の管で沸点より熱くした蒸気が、同じ薪でピストンをより強く押します。,在第二组盘管里加热到沸点以上的蒸汽，用同样的木柴把活塞推得更有力。
+research.sun_tracking.name,Sun tracking,태양 추적,太陽追尾,太阳跟踪
+research.sun_tracking.desc,Panels on a slowly turning mount follow the sun across the sky instead of facing one way all day.,천천히 도는 받침에 올린 판이 하루 내내 한쪽만 보지 않고 해를 따라 돌아요.,ゆっくり回る台に載せたパネルが、一日中同じ向きでなく太陽を追って回ります。,装在缓慢转动支架上的面板跟着太阳转，不再整天朝一个方向。
+research.battery_bank.name,Battery bank,축전지,蓄電池,蓄电池
+research.battery_bank.desc,"Rows of cells store the surplus in the windy, sunny hours and give it back when the island needs it.","바람 불고 해 좋은 때 남는 전기를 줄지은 전지에 모았다가, 섬이 필요할 때 돌려줘요.",風の強い時や晴れた時の余った電気を並んだ電池にため、島が必要な時に返します。,一排排电池在有风、晴朗的时候存下多余的电，岛上需要时再放出来。
+research.smart_grid.name,Smart grid,스마트 그리드,スマートグリッド,智能电网
+research.smart_grid.desc,"Every generator and every machine on one switchboard, balanced minute by minute: the island runs on far more power.","모든 발전기와 기계를 한 배전반에서 분 단위로 맞추면, 섬이 훨씬 많은 전기로 돌아가요.",すべての発電機と機械を一つの配電盤で分刻みに調整すれば、島ははるかに多くの電気で動きます。,所有发电机和机器接到同一块配电盘，按分钟平衡：岛上可用的电多得多。
+research.packed_lunch.name,Packed lunches,도시락,お弁当,便当
+research.packed_lunch.desc,"Lunch goes to work with them: no walking home at noon, more of the day at the job.","점심을 싸 들고 일하러 가면, 한낮에 집에 다녀오지 않아 일할 시간이 늘어요.",お昼を持って仕事に行けば、昼に家へ戻らずにすみ、働ける時間が増えます。,带着午饭去上工，中午不用走回家，干活的时间更多。
+research.market_days.name,Market days,장날,市の日,集市日
+research.market_days.desc,A fixed market day brings buyers from the next islands: the same goods fetch a better price.,"장날을 정해 두면 이웃 섬에서도 사러 와서, 같은 물건이 더 좋은 값에 팔려요.",市の日を決めておくと隣の島からも買い手が来て、同じ品がよい値で売れます。,定下集市日，邻岛的买家也会来，同样的货卖得更好的价钱。
+research.bicycles.name,Bicycles,자전거,自転車,自行车
+research.bicycles.desc,Two wheels and a basket: Momo ride between jobs faster than they walk.,"바퀴 둘에 바구니 하나면, 모모가 걷는 것보다 빨리 일터 사이를 오가요.",車輪二つとかご一つで、モモは歩くより速く仕事場の間を行き来します。,两个轮子加一个车筐，桃桃在活计之间来回比走路快。
+research.guilds.name,Craft guilds,동업 조합,職人組合,行会
+research.guilds.desc,Momo who share a trade meet to swap tricks: everyone works more like the best of them.,"같은 일을 하는 모모끼리 모여 요령을 나누면, 모두가 제일 잘하는 모모에 가깝게 일해요.",同じ仕事のモモが集まってコツを教え合えば、みんなが一番上手なモモに近い働きをします。,同行的桃桃聚在一起交流窍门，大家干活都更接近其中最好的那只。
+research.island_railway.name,Island railway,섬 철길,島の鉄道,环岛铁路
+research.island_railway.desc,A little railway rings the island: Momo cross it in moments and look after more ground.,"작은 철길이 섬을 한 바퀴 돌아서, 모모가 순식간에 건너다니며 더 넓은 땅을 맡아요.",小さな鉄道が島をぐるりと回り、モモはあっという間に行き来して、より広い土地を受け持ちます。,一条小铁路环绕全岛：桃桃转眼就能穿过，照看更大的地方。
+research.tab.research,Lab,연구소,研究所,研究所
+effect.power_output,{building} power +{pct}%,{building} 전력 +{pct}%,{building}の電力 +{pct}%,{building}发电 +{pct}%
+effect.power_output_all,All power +{pct}%,모든 전력 +{pct}%,すべての電力 +{pct}%,全部发电 +{pct}%
+effect.momo_work_type,{building}: Momo work time -{pct}%,{building}: 모모 작업 시간 -{pct}%,{building}：モモの作業時間 -{pct}%,{building}：桃桃作业时间 -{pct}%

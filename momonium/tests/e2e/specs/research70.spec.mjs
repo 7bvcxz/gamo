@@ -33,7 +33,7 @@ test('a research topic opens at its level, with a visible Lv cue', async ({ game
   expect(r.badge).toBe(false);
   expect(r.nodes.farm_expansion.state).toBe('locked');
   expect(r.nodes.farm_expansion.gate, 'the card says the level it opens at').toBe('Lv 2');
-  expect(r.nodes.harvest_boost.gate, 'a later one says its own').toBe('Lv 3');
+  expect(r.nodes.harvest_boost.shown, 'Step 71: a topic two levels away is not shown yet').toBe(false);
   const node = await centre(game, r.nodes.farm_expansion.rect, r.window);
   await game.tap(node.x, node.y);
   await game.page.waitForTimeout(250);

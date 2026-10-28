@@ -52,7 +52,14 @@ static func effect_line(sim: Simulation, e: Dictionary) -> String:
 		"sale_price":
 			return t.translate("effect.sale_price").format({"pct": int(round((float(e.get("multiply", 1.0)) - 1.0) * 100.0))})
 		"momo_work":
+			if type != "":
+				return t.translate("effect.momo_work_type").format({"building": t.translate("building." + type), "pct": pct})
 			return t.translate("effect.momo_work").format({"pct": pct})
+		"power_output":
+			var up := int(round((float(e.get("multiply", 1.0)) - 1.0) * 100.0))
+			if type != "":
+				return t.translate("effect.power_output").format({"building": t.translate("building." + type), "pct": up})
+			return t.translate("effect.power_output_all").format({"pct": up})
 		"research_time":
 			return t.translate("effect.research_time").format({"pct": pct})
 		"watch_tiles":

@@ -264,12 +264,13 @@
     }
   },
   "research": {
-    "_doc": "Research levels. A node can be researched again up to its max_level (5 unless its effects are switches -- auto, recipe, variety, power_use -- which stop at 1, or the node sets max_level). Level L costs money x level_cost_growth^(L-1) and items x level_item_growth^(L-1) -- never more of an item than the store can hold, so every level can be reached -- and takes seconds x level_time_growth^(L-1); its effects grow by level_strength per level past the first: a multiply m becomes m^(1 + level_strength x (L-1)), an add becomes add x (1 + level_strength x (L-1)). At Prestige every level researched in that run becomes one research point (RP) for good; RP are allocated to unlocked nodes as levels, freely re-allocated, never minted twice.",
+    "_doc": "Research levels. A node can be researched again up to its max_level (5 unless its effects are switches -- auto, recipe, variety, power_use -- which stop at 1, or the node sets max_level). Level L costs money x level_cost_growth^(L-1) and items x level_item_growth^(L-1) -- never more of an item than the store can hold, so every level can be reached -- and takes seconds x level_time_growth^(L-1); its effects grow by level_strength per level past the first: a multiply m becomes m^(1 + level_strength x (L-1)), an add becomes add x (1 + level_strength x (L-1)). At Prestige every level researched in that run becomes one research point (RP) for good; RP are allocated to unlocked nodes as levels, freely re-allocated, never minted twice. reveal_ahead (Step 71): the research screen shows a topic once it is open, ever opened or researched, or opens within this many player levels with its prerequisites known -- the tree grows with the level instead of showing everything at once.",
     "max_level": 5,
     "level_cost_growth": 1.9,
     "level_time_growth": 1.5,
     "level_strength": 0.25,
-    "level_item_growth": 1.3
+    "level_item_growth": 1.3,
+    "reveal_ahead": 1
   },
   "specials": {
     "_doc": "Special structures: how many may stand at once (`slots`, one village special until settlement tiers raise it).",

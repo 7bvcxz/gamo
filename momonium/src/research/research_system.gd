@@ -202,6 +202,64 @@ func is_done(id: String) -> bool:
 	return completed.has(id)
 
 
+# --- tiers and what the screen shows (Step 71) -----------------------------------
+
+## A node's tier in its own tab: 1 + the longest chain of prerequisites in the
+## same tab. A prerequisite in another tab (the electric furnace before cars)
+## does not count -- the chain is the discipline's own.
+func tier_of(id: String) -> int:
+	var n := node(id)
+	var t := 1
+	for r: String in n.get("requires", []):
+		if String(node(r).get("industry", "")) == String(n.get("industry", "")):
+			t = maxi(t, tier_of(r) + 1)
+	return t
+
+
+## The deepest tier in a tab: its longest progression chain.
+func depth_of(industry: String) -> int:
+	var d := 0
+	for n: Dictionary in nodes(industry):
+		d = maxi(d, tier_of(String(n["id"])))
+	return d
+
+
+## Whether the research screen shows a node. Not the whole tree: what is open
+## or was ever opened, what is researched, and what the next player level
+## opens (its prerequisites known) -- a beginner sees two or three topics and
+## the tree grows with the level. A special node shows once it opens or its
+## prerequisites are all researched (its own gate is then on the card).
+## `balance.research.reveal_ahead` is how many levels ahead are shown.
+func is_shown(id: String) -> bool:
+	var n := node(id)
+	if n.is_empty():
+		return false
+	if discovered.has(id) or is_unlocked_node(id) or level(id) > 0 or String(active.get("id", "")) == id:
+		return true
+	if gate_missing(n, n.get("unlock", {})).is_empty():
+		return true
+	for r: String in n.get("requires", []):
+		if not (discovered.has(r) or is_unlocked_node(r)):
+			return false
+	if n.has("special"):
+		for r: String in n.get("requires", []):
+			if not is_done(r):
+				return false
+		return not (n.get("requires", []) as Array).is_empty()
+	var prog: ProgressionSystem = sim.system(&"progression")
+	var ahead := sim.data.get_int("balance", "research.reveal_ahead", 1)
+	return int(n.get("unlock", {}).get("level", 1)) <= prog.level + ahead
+
+
+## The shown nodes of a tab, in data order.
+func shown(industry: String = "") -> Array[String]:
+	var out: Array[String] = []
+	for n: Dictionary in nodes(industry):
+		if is_shown(String(n["id"])):
+			out.append(String(n["id"]))
+	return out
+
+
 # --- levels ---------------------------------------------------------------------
 
 ## The highest level a node can reach: 1 for switches, else balance.research.max_level.
@@ -657,6 +715,16 @@ func opens_route(strategy: String) -> bool:
 		if String(e.get("strategy", "")) == strategy:
 			return true
 	return false
+
+
+## Step 71: what generators of `type` give, times research (>= 1): every
+## power_output effect for that type or for all.
+func power_multiplier(type: String) -> float:
+	var m := 1.0
+	for e: Dictionary in _effects("power_output"):
+		if not e.has("type") or String(e["type"]) == type:
+			m *= float(e.get("multiply", 1.0))
+	return m
 
 
 ## How much faster Momo walk, from transport research (>= 1).

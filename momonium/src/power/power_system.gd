@@ -116,7 +116,7 @@ func output_of(id: int, t_ms: int) -> float:
 	if b.is_empty() or b["state"] == BuildingSystem.CONSTRUCTING:
 		return 0.0
 	var gen := generator_def(String(b["type"]))
-	var kw := float(gen.get("kw", 0))
+	var kw := float(gen.get("kw", 0)) * _research_output(String(b["type"]))
 	match String(gen.get("kind", "")):
 		"solar":
 			return kw * sunlight(float(posmod(t_ms, sim.clock.day_ms)) / float(sim.clock.day_ms))
@@ -141,8 +141,14 @@ func capacity() -> float:
 	var total := 0.0
 	for id: int in generators():
 		var b := (sim.system(&"buildings") as BuildingSystem).get_building(id)
-		total += float(generator_def(String(b["type"])).get("kw", 0))
+		total += float(generator_def(String(b["type"])).get("kw", 0)) * _research_output(String(b["type"]))
 	return total
+
+
+## Step 71: research's power_output multiplier for a generator type.
+func _research_output(type: String) -> float:
+	var research: ResearchSystem = sim.system(&"research")
+	return research.power_multiplier(type) if research != null else 1.0
 
 
 # --- use --------------------------------------------------------------------------

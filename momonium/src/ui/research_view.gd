@@ -7,10 +7,21 @@ extends HBoxContainer
 ## right -- the technique, what it changes, what it still needs, its cost and
 ## time, and the button. Every value comes from the ResearchSystem; effects
 ## are described from the same data the simulation applies.
+##
+## Step 71: a tab is a discipline eight tiers deep, so the tree scrolls on its
+## own (the details stay put) and shows only what ResearchSystem.is_shown
+## allows -- the tree grows with the level. Cards sit in fixed slots: a tier
+## is a row, at most PER_LINE cards a line; a line with nothing shown takes no
+## room, and a card never moves sideways when a neighbour appears. A shown
+## card whose next tier is still hidden trails a short dashed stub: more
+## comes later.
 
 const CARD := Vector2(118, 104)
 const ROW := 134.0
 const GAP := 8.0
+const PER_LINE := 3
+## Room under the last line for the "more later" stub.
+const STUB := 26.0
 
 ## "Build a research lab" pressed: the island should offer the lab on a free
 ## tile (Step 50: four blind players tapped that line and nothing happened).
@@ -20,6 +31,7 @@ var sim: Simulation
 var lib: SpriteLibrary
 var research: ResearchSystem
 var industry := ""
+var tree_scroll: ScrollContainer
 var tree: Control
 var cards: Dictionary = {}
 var selected := ""
@@ -33,8 +45,13 @@ var cost_label: Label
 var time_label: Label
 var start_button: Button
 var last_result: Dictionary = {}
-## Most nodes on one row: cards narrow to fit it.
+## Most nodes on one line: cards narrow to fit it.
 var _widest := 1
+## The tree's lines, top to bottom: ids in their fixed slots (Step 71).
+var _lines: Array = []
+## id -> shown now; what the layout was last made for.
+var _shown: Dictionary = {}
+var _shown_sig := -1
 ## Step 57: topics that were news when the panel opened -- a red dot on their
 ## card until it closes (Main.open_research).
 var fresh: Dictionary = {}
@@ -47,60 +64,134 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_industry: String) -> void:
 	research = sim.system(&"research")
 	name = "Research_" + industry
 	add_theme_constant_override("separation", 12)
+	tree_scroll = ScrollContainer.new()
+	tree_scroll.name = "TreeScroll"
+	tree_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tree_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	add_child(tree_scroll)
 	tree = Control.new()
 	tree.name = "Tree"
 	tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tree.draw.connect(_draw_links)
 	tree.resized.connect(_place_cards)
-	add_child(tree)
+	tree_scroll.add_child(tree)
 	for n: Dictionary in research.nodes(industry):
 		var id := String(n["id"])
 		cards[id] = _card(n)
 		tree.add_child(cards[id])
-	var depth := 0
-	for id: String in cards:
-		depth = maxi(depth, _depth(id))
-	tree.custom_minimum_size = Vector2(2 * CARD.x + 24, (depth + 1) * ROW)
+	_lines = _make_lines()
 	_widest = 1
-	for d in depth + 1:
-		_widest = maxi(_widest, cards.keys().filter(func(id: String) -> bool: return _depth(id) == d).size())
+	for line: Array in _lines:
+		_widest = maxi(_widest, line.size())
+	tree.custom_minimum_size = Vector2(2 * CARD.x + 24, ROW)
 	_build_detail()
+	_update_shown()
+	_select_default()
+
+
+## The lines of the tree: a row per tier, each cut into lines of PER_LINE --
+## ordinary nodes first, by the level they open at, specials last.
+func _make_lines() -> Array:
+	var order: Array = cards.keys()
+	var by_tier: Dictionary = {}
 	for id: String in cards:
+		var t := research.tier_of(id)
+		if not by_tier.has(t):
+			by_tier[t] = []
+		(by_tier[t] as Array).append(id)
+	var tiers: Array = by_tier.keys()
+	tiers.sort()
+	var out: Array = []
+	for t: int in tiers:
+		var row: Array = by_tier[t]
+		row.sort_custom(func(a: String, b: String) -> bool:
+			var ka := [1 if research.node(a).has("special") else 0, int(research.node(a).get("unlock", {}).get("level", 99)), order.find(a)]
+			var kb := [1 if research.node(b).has("special") else 0, int(research.node(b).get("unlock", {}).get("level", 99)), order.find(b)]
+			return ka < kb)
+		for i in range(0, row.size(), PER_LINE):
+			out.append(row.slice(i, i + PER_LINE))
+	return out
+
+
+## Whether this tab shows anything (its tab button hides when not).
+func has_shown() -> bool:
+	_update_shown()
+	return _shown.values().has(true)
+
+
+## Reads what is shown now; lays the cards out again when that changed.
+func _update_shown() -> void:
+	var now := {}
+	for id: String in cards:
+		now[id] = research.is_shown(id)
+	var sig := now.hash()
+	if sig == _shown_sig:
+		return
+	_shown = now
+	_shown_sig = sig
+	if is_inside_tree():
+		_place_cards()
+
+
+func _select_default() -> void:
+	selected = ""
+	for id: String in cards:
+		if not bool(_shown.get(id, false)):
+			continue
 		if selected == "" or research.state_of(id) in ["active", "available"] and research.state_of(selected) == "locked":
 			selected = id
 
 
-## Shows `id`'s details (a letter's "See it in Research", the news).
+## Shows `id`'s details (a letter's "See it in Research", the news), and
+## scrolls the tree to its card.
 func select(id: String) -> void:
 	if cards.has(id):
 		selected = id
 		refresh()
+		reveal.call_deferred(id)
 
 
-func _depth(id: String) -> int:
-	var d := 0
-	for r: String in research.node(id).get("requires", []):
-		d = maxi(d, _depth(r) + 1)
-	return d
+## Scrolls the tree so `id`'s card is in view -- a frame later, once the
+## scroll knows how tall the tree has grown (a card just revealed is below
+## the old bottom).
+func reveal(id: String) -> void:
+	if not cards.has(id) or not tree_scroll.is_inside_tree():
+		return
+	await get_tree().process_frame
+	if is_instance_valid(tree_scroll) and tree_scroll.is_inside_tree():
+		tree_scroll.ensure_control_visible(cards[id])
 
 
 func _place_cards() -> void:
-	var by_depth: Dictionary = {}
-	for id: String in cards:
-		var d := _depth(id)
-		if not by_depth.has(d):
-			by_depth[d] = []
-		(by_depth[d] as Array).append(id)
 	var w := minf(CARD.x, tree.size.x / _widest - GAP)
-	for d: int in by_depth:
-		var row: Array = by_depth[d]
-		for i in row.size():
-			var card: Button = cards[row[i]]
+	var y := 0.0
+	for line: Array in _lines:
+		var any := false
+		for i in line.size():
+			var card: Button = cards[line[i]]
 			card.custom_minimum_size = Vector2(w, CARD.y)
 			card.size = Vector2(w, CARD.y)
 			(card.find_child("Name", true, false) as Label).custom_minimum_size.x = w - 10.0
-			card.position = Vector2(tree.size.x * (i + 0.5) / row.size() - w * 0.5, d * ROW + 6.0)
+			card.position = Vector2(tree.size.x * (i + 0.5) / line.size() - w * 0.5, y + 6.0)
+			card.visible = bool(_shown.get(line[i], false))
+			any = any or card.visible
+		if any:
+			y += ROW
+	tree.custom_minimum_size.y = maxf(y + STUB, ROW)
+	tree_scroll.custom_minimum_size.y = minf(tree.custom_minimum_size.y, _tree_room())
 	tree.queue_redraw()
+
+
+## How tall the tree may be before it scrolls on its own: the room the
+## panel gives its body (PanelFrame: two thirds of the window), so the
+## details beside it never scroll away.
+func _tree_room() -> float:
+	var n: Node = get_parent()
+	while n != null and not n is PanelFrame:
+		n = n.get_parent()
+	if n == null:
+		return 520.0
+	return maxf((n as PanelFrame).size.y * 0.66 - 8.0, 260.0)
 
 
 func _card(n: Dictionary) -> Button:
@@ -193,20 +284,42 @@ func _draw_card(b: Button, id: String) -> void:
 			b.draw_circle(corner, 6.0, b.get_theme_color("font_color", "GoldLabel"))
 
 
+## Step 71: shown cards with a next tier still hidden -- the ones that trail
+## the "more later" stub.
+func more_later() -> Array[String]:
+	var out: Array[String] = []
+	for id: String in cards:
+		if bool(_shown.get(id, false)):
+			continue
+		for r: String in research.node(id).get("requires", []):
+			if cards.has(r) and bool(_shown.get(r, false)) and not out.has(r):
+				out.append(r)
+	return out
+
+
 func _draw_links() -> void:
+	var line := tree.get_theme_color("line", "Ink")
 	for id: String in cards:
 		var child: Button = cards[id]
+		if not child.visible:
+			continue
 		for r: String in research.node(id).get("requires", []):
-			if not cards.has(r):
+			if not cards.has(r) or not (cards[r] as Button).visible:
 				continue
 			var parent: Button = cards[r]
 			var a := parent.position + Vector2(parent.size.x * 0.5, parent.size.y)
 			var b := child.position + Vector2(child.size.x * 0.5, 0)
 			var mid := (a.y + b.y) * 0.5
-			var line := tree.get_theme_color("line", "Ink")
 			var color := line if research.is_done(r) else Color(line, line.a * 0.45)
 			for seg: Array in [[a, Vector2(a.x, mid)], [Vector2(a.x, mid), Vector2(b.x, mid)], [Vector2(b.x, mid), b]]:
 				tree.draw_dashed_line(seg[0], seg[1], color, 2.0, 6.0)
+	# More comes later: a short fading stub under a card whose next tier is
+	# still hidden -- no card, no words.
+	for r: String in more_later():
+		var parent: Button = cards[r]
+		var a := parent.position + Vector2(parent.size.x * 0.5, parent.size.y)
+		tree.draw_dashed_line(a, a + Vector2(0, 12), Color(line, line.a * 0.4), 2.0, 4.0)
+		tree.draw_circle(a + Vector2(0, 18), 2.0, Color(line, line.a * 0.3))
 
 
 func _build_detail() -> void:
@@ -291,6 +404,9 @@ func need_lines(id: String) -> Array[String]:
 
 func refresh() -> void:
 	var inv: InventorySystem = sim.system(&"inventory")
+	_update_shown()
+	if selected == "" or not bool(_shown.get(selected, false)):
+		_select_default()
 	for id: String in cards:
 		var b: Button = cards[id]
 		var n := research.node(id)
