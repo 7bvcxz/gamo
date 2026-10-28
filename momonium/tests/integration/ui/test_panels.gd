@@ -158,7 +158,7 @@ func test_building_details_from_the_name() -> void:
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "empty", "an empty worker spot")
 	sim.execute({"type": "building.tap", "id": farm})
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "you", "you, while you sow")
-	assert_eq(view.state_label.text, "Sow · %s left" % BuildingDetailView.duration(float(stages[0]["seconds"]) * work_scale(sim)), "and the time left")
+	assert_eq(view.state_label.text, "Sow · %d s left" % ceili(float(stages[0]["seconds"]) * work_scale(sim)), "and the time left (rounded up, as a countdown)")
 	sim.advance_ms(int(float(stages[0]["seconds"]) * work_scale(sim) * 1000.0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	view.refresh()
@@ -189,7 +189,7 @@ func test_details_close_when_the_building_goes() -> void:
 	var id: int = sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 0]})["id"]
 	main.call("open_details", id)
 	assert_true(detail.visible, "details of a building under construction")
-	assert_eq((main.get("detail_view") as BuildingDetailView).state_label.text, "Building · %s left" % BuildingDetailView.duration(float(sim.data.building_type("farm")["build_seconds"])), "counting down")
+	assert_eq((main.get("detail_view") as BuildingDetailView).state_label.text, "Building · %d s left" % ceili(build_ms(sim, "farm") / 1000.0), "counting down")
 	sim.execute({"type": "building.cancel", "id": id})
 	assert_false(detail.visible, "cancelled: the details close instead of showing a ghost")
 

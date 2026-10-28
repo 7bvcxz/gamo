@@ -53,7 +53,7 @@ func test_idle_buildings_and_why() -> void:
 	(sim.system(&"inventory") as InventorySystem).add("wood", 10, "test")
 	(sim.system(&"progression") as ProgressionSystem).add_exp(5000, "test")
 	assert_true(sim.execute({"type": "building.refit", "id": mine, "building": "smelter"})["ok"], "a smelter with no ore")
-	sim.advance_ms(30000)
+	sim.advance_ms(build_ms(sim, "smelter") + 10000)
 	book.sample()
 	assert_true(int(book.today["blocked"].get("missing", 0)) > 0, "it stands idle for missing ore")
 	assert_true(int(book.today["blocked_by"].get(mine, 0)) > 0, "and the book says which building")

@@ -182,7 +182,7 @@ func _built(type: String, cell: Vector2i) -> int:
 	(sim.system(&"economy") as EconomySystem).earn(1000, "test")
 	var r := sim.execute({"type": "building.place", "building": type, "anchor": [cell.x, cell.y]})
 	assert_true(r["ok"], "%s placed (%s)" % [type, r.get("reason", "")])
-	sim.advance_ms(int(float(sim.data.building_type(type)["build_seconds"]) * 1000.0) + 10)
+	sim.advance_ms(build_ms(sim, type) + 10)
 	return bs.building_at(cell)
 
 

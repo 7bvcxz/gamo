@@ -68,8 +68,12 @@ func test_an_old_island_plays_on() -> void:
 	var farm: int = bs.ids()[0]
 	var before := eco.money
 	assert_true(sim.execute({"type": "building.tap", "id": farm})["ok"], "the waiting harvest")
-	sim.advance_ms(5000)
+	sim.advance_to(int(bs.get_building(farm)["task_end"]))
 	assert_eq(eco.money, before + eco.unit_price("crop"), "pays at once, in the new economy")
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
+	var done := int(bs.get_building(farm)["completed"])
 	sim.advance_ms(60000)
-	assert_true(int(bs.get_building(farm)["completed"]) >= 9, "and its Momo keeps the five-second cycle going")
+	# A cycle is three stages; its length is the game's (Step 69: 20.75 s).
+	var cycle := float(bs.cycle_estimate(bs.get_building(farm))["cycle_seconds"])
+	var want := int(60.0 / cycle * 3.0) - 2
+	assert_true(int(bs.get_building(farm)["completed"]) - done >= want, "and its Momo keeps the cycle going (%d stages in a minute, %d+ expected)" % [int(bs.get_building(farm)["completed"]) - done, want])

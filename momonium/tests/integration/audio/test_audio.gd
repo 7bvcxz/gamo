@@ -113,7 +113,7 @@ func test_events_and_buttons_make_sounds() -> void:
 	audio.played.clear()
 	var bs: BuildingSystem = sim.system(&"buildings")
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 0]})
-	sim.advance_ms(6000)
+	sim.advance_ms(build_ms(sim, "farm") + 100)
 	sim.bus.emit(&"task_completed", {"id": 1, "stage": "harvest", "type": "farm", "worker": 0})
 	sim.bus.emit(&"research_completed", {"id": "farm_expansion"})
 	sim.bus.emit(&"letter_written", {"id": "x"})

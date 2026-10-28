@@ -186,7 +186,8 @@ func test_same_chain_whatever_the_step() -> void:
 		(s.system(&"inventory") as InventorySystem).add("wood", 10, "test")
 		s.execute({"type": "momo.assign", "momo": 1, "building": sm})
 		var t := 0
-		var total := 30000 * 16
+		# Room for sixteen charges (each a smelt and its cooling, Step 69's pace).
+		var total := int(float(b2.cycle_estimate(b2.get_building(sm))["cycle_seconds"]) * 1000.0 * 16.0)
 		while t < total:
 			var step := mini(chunk, total - t)
 			s.advance_ms(step)

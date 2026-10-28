@@ -59,7 +59,8 @@ test('trash, then the check: pulled down for half of its cost', async ({ game })
   await game.query('dev_add_money', 70);
   const r = await game.command({ type: 'building.place', building: 'farm', anchor: [1, 0] });
   expect(r.ok).toBe(true);
-  await game.query('dev_advance_ms', 6000);
+  // Built (Step 69: the farm's 3 s x2.5).
+  await game.query('dev_advance_ms', (await game.query('rules')).build_ms.farm + 100);
   await game.query('dev_select_cell', [1, 0]);
   await game.page.waitForTimeout(250);
   let ui = await game.query('strip');

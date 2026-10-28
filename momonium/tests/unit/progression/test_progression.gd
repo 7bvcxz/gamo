@@ -72,7 +72,7 @@ func test_finished_buildings_and_land_pay_a_little() -> void:
 	var event: Dictionary = sim.data.get_value("balance", "progression.rewards.event", {})
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})
 	assert_eq(prog.experience, 0, "placing pays nothing")
-	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
+	sim.advance_ms(build_ms(sim, "farm"))
 	assert_eq(prog.experience, int(event["building_built"]["player"]), "a finished building pays its reward")
 	sim.execute({"type": "land.buy", "cell": [2, 0]})
 	assert_eq(prog.experience, int(event["building_built"]["player"]) + int(event["land_bought"]["player"]), "and land its own")
@@ -116,16 +116,18 @@ func test_unlocks_come_from_data() -> void:
 	assert_true(s2.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})["ok"], "mastery 2 opens the farm")
 
 
-func test_balance_first_level_comes_from_a_minute_or_two_of_farming() -> void:
+func test_balance_first_level_comes_from_a_few_minutes_of_farming() -> void:
 	# By hand alone, nonstop (Step 50: five-second harvests; the pacing
-	# targets themselves are tools/balance_optimizer/targets.json).
+	# targets themselves are tools/balance_optimizer/targets.json). Step 69
+	# slowed the work x2.5 and kept the EXP of each action (the owner wants
+	# a slower feel, not the old pace back): Lv 2 comes about 2.5 times later.
 	var farm := buildings.place_instant("farm", Vector2i(0, 0))
 	var reached := {}
 	for n in range(1, 120):
 		_farm_cycle(farm)
 		if not reached.has(prog.level):
 			reached[prog.level] = sim.now_ms()
-	assert_between(int(reached.get(2, 999999)) / 1000, 30, 180, "Lv 2 after 30 s to 3 min of farming (%d s)" % (int(reached.get(2, 999999)) / 1000))
+	assert_between(int(reached.get(2, 999999)) / 1000, 75, 450, "Lv 2 after 1.25 to 7.5 min of farming (%d s; Step 58: 30 s to 3 min)" % (int(reached.get(2, 999999)) / 1000))
 	assert_true(int(reached.get(3, 999999)) > int(reached.get(2, 0)) + 60000, "Lv 3 well after it")
 	assert_true(prog.mastery_of("farm")["level"] >= 3, "farm mastery climbs with the work (Lv %d)" % prog.mastery_of("farm")["level"])
 

@@ -90,7 +90,9 @@ func test_work_continues_when_something_else_is_selected() -> void:
 	assert_eq(sel.selected_id, b, "the second farm is selected now")
 	_tap_cell(Vector2i(0, 0))
 	assert_eq(sel.kind, "tile", "then a tile")
-	sim.advance_ms(3000)
+	# A sowing's time from the data (Step 69: 6.25 s), the first tapped 2 s earlier.
+	var sow := int(float(sim.data.building_type("farm")["cycle"]["stages"][0]["seconds"]) * work_scale(sim) * 1000.0)
+	sim.advance_ms(sow - 2000)
 	assert_eq(buildings.get_building(a)["completed"], 1, "the first farm finished while not selected")
 	sim.advance_ms(2000)
 	assert_eq(buildings.get_building(b)["completed"], 1, "and so did the second")

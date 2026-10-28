@@ -1,12 +1,14 @@
 extends "res://tests/framework/test_case.gd"
 
-## Step 58: the work and the Momo were far too quick. Every stage's work takes
-## balance.pace.work_scale (2.5) times its data seconds -- by hand, by a Momo,
-## at a lab, in a smelter -- and a Momo walks balance.pace.travel_scale (1.3)
-## times as long; each is applied once, in one place. The waits after a stage,
-## the day, research times and offline time are not touched; research, skills,
-## the Clock Tower and the legacy multiply on top as before; nothing doubles
-## across a save; offline earns what online earns.
+## Step 58: the work and the Momo were far too quick -- every stage's work x2.5
+## and a Momo's walk x1.3. Step 69: still too quick -- the work x2.5 again, so
+## balance.pace.work_scale is 6.25 (2.5 x 2.5 of the data seconds, ONE
+## multiplier applied once per stage: by hand, by a Momo, at a lab, in a
+## smelter -- never 2.5 x 2.5 x 2.5), and construction, a timer of its own,
+## x2.5 by balance.pace.build_scale. The walk stays x1.3; the waits after a
+## stage, the day, research times and offline time are not touched; research,
+## skills, the Clock Tower and the legacy multiply on top as before; nothing
+## doubles across a save; offline earns what online earns.
 
 var sim: Simulation
 var bs: BuildingSystem
@@ -22,14 +24,16 @@ func _stage(type: String, i: int) -> Dictionary:
 
 
 func test_the_scales_are_data_and_as_asked() -> void:
-	assert_near(sim.data.get_float("balance", "pace.work_scale", 0.0), 2.5, 0.0001, "work x2.5")
-	assert_near(sim.data.get_float("balance", "pace.travel_scale", 0.0), 1.3, 0.0001, "walking x1.3")
-	assert_near(bs.work_scale(), 2.5, 0.0001, "read by the buildings")
+	assert_near(sim.data.get_float("balance", "pace.work_scale", 0.0), 6.25, 0.0001, "work x6.25: Step 58's x2.5, x2.5 again (Step 69)")
+	assert_near(sim.data.get_float("balance", "pace.build_scale", 0.0), 2.5, 0.0001, "construction x2.5 (Step 69)")
+	assert_near(sim.data.get_float("balance", "pace.travel_scale", 0.0), 1.3, 0.0001, "walking still x1.3")
+	assert_near(bs.work_scale(), 6.25, 0.0001, "read by the buildings")
+	assert_near(bs.build_scale(), 2.5, 0.0001, "and the construction")
 
 
-func test_every_task_at_level_zero_takes_two_and_a_half_times_its_data() -> void:
-	# Before -> after, seconds of work (the waits stay).
-	var expect := {"farm": [[2.5, 0.0], [2.5, 2.0], [2.5, 0.0]], "mine": [[10.0, 6.0]], "lumberyard": [[10.0, 0.0], [5.0, 10.0]], "research": [[7.5, 6.0]], "smelter": [[25.0, 5.0]]}
+func test_every_task_at_level_zero_takes_six_and_a_quarter_times_its_data() -> void:
+	# Step 69's seconds of work, 2.5 times Step 58's (the waits stay).
+	var expect := {"farm": [[6.25, 0.0], [6.25, 2.0], [6.25, 0.0]], "mine": [[25.0, 6.0]], "lumberyard": [[25.0, 0.0], [12.5, 10.0]], "research": [[18.75, 6.0]], "smelter": [[62.5, 5.0]]}
 	for type: String in expect:
 		var id := bs.place_instant(type, Vector2i(1, 0))
 		assert_true(id > 0, "%s placed" % type)
@@ -44,8 +48,8 @@ func test_every_task_at_level_zero_takes_two_and_a_half_times_its_data() -> void
 func test_a_tap_and_a_momo_take_the_scaled_time_once() -> void:
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	var r := sim.execute({"type": "building.tap", "id": farm})
-	assert_eq(int(r["ends_ms"]) - sim.now_ms(), 2500, "a sowing by hand: 2.5 s (was 1 s)")
-	sim.advance_ms(2500)
+	assert_eq(int(r["ends_ms"]) - sim.now_ms(), 6250, "a sowing by hand: 6.25 s (Step 58: 2.5 s, Step 50: 1 s)")
+	sim.advance_ms(6250)
 	var momos: MomoSystem = sim.system(&"momo")
 	var x := momos.work_multiplier(1, "farm")
 	var started := [0, 0]
@@ -62,7 +66,7 @@ func test_a_tap_and_a_momo_take_the_scaled_time_once() -> void:
 		sim.advance_ms(100)
 		t += 100
 	assert_true(started[0] > 0, "the Momo started the watering")
-	assert_eq(started[1] - started[0], int(round(2.5 * x * 1000.0)), "a Momo's watering: the scaled time times its own multiplier (%.2f), once" % x)
+	assert_eq(started[1] - started[0], int(round(6.25 * x * 1000.0)), "a Momo's watering: the scaled time times its own multiplier (%.2f), once" % x)
 
 
 func test_research_and_the_clock_tower_multiply_on_top() -> void:
@@ -143,6 +147,48 @@ func test_offline_earns_what_online_earns() -> void:
 func test_the_job_cards_show_the_time_it_takes() -> void:
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	for g: Dictionary in bs.action_groups(bs.get_building(farm)):
-		assert_near(float(g["seconds"]), 2.5, 0.0001, "%s: 2.5 s on its card" % g["action"])
+		assert_near(float(g["seconds"]), 6.25, 0.0001, "%s: 6.25 s on its card" % g["action"])
 	assert_eq(ContextPanel.seconds_text(2.5), "2.5", "said with its half (it read '2 sec')")
+	assert_eq(ContextPanel.seconds_text(6.25), "6.3", "Step 69's 6.25 s: rounded up, never shorter than it takes")
 	assert_eq(ContextPanel.seconds_text(10.0), "10", "whole seconds as they are")
+
+
+## Step 69: once per stage -- the slowdown is one multiplier on the data's
+## seconds, whoever works and however it is reached; a stage is never timed
+## at 2.5 x 2.5 x 2.5 (15.6x), and a later speed-up is relative to it.
+func test_the_slowdown_is_applied_once() -> void:
+	for type: String in ["farm", "mine", "lumberyard", "research", "smelter", "steam_engine", "car_factory", "game_studio"]:
+		var id := bs.place_instant(type, Vector2i(1, 0))
+		var b := bs.get_building(id)
+		for st: Dictionary in bs.stages(b):
+			assert_near(bs.stage_seconds(b, st) / float(st["seconds"]), 6.25, 0.0001, "%s %s: x6.25 of its data, not x15.6" % [type, st.get("action", "")])
+		bs.demolish(id)
+	var farm := bs.place_instant("farm", Vector2i(1, 0))
+	var end := int(sim.execute({"type": "building.tap", "id": farm})["ends_ms"])
+	var est := bs.cycle_estimate(bs.get_building(farm))
+	assert_near(float(est["work_seconds"]), 3 * 6.25, 0.0001, "the panel's estimate counts it once too")
+	assert_eq(end - sim.now_ms(), 6250, "and the timer the tap starts")
+
+
+## Step 69: construction is a timer of its own, x2.5 by build_scale, once:
+## the timer the placing starts, the refit's, the build list and the card.
+func test_construction_takes_two_and_a_half_times_its_data_once() -> void:
+	var world: WorldSystem = sim.system(&"world")
+	for x in 3:
+		world.add_land(Vector2i(x, 2))
+	(sim.system(&"economy") as EconomySystem).earn(1000000, "test")
+	(sim.system(&"progression") as ProgressionSystem).add_exp(1000000, "test")
+	for type: String in ["farm", "mine", "lumberyard", "research"]:
+		var data_s := float(sim.data.building_type(type)["build_seconds"])
+		assert_near(bs.build_seconds_of(type), data_s * 2.5, 0.0001, "%s: %.1f s to build (data %.1f)" % [type, data_s * 2.5, data_s])
+	var r := sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 2]})
+	assert_true(r["ok"], "a farm placed")
+	var b := bs.get_building(bs.building_at(Vector2i(0, 2)))
+	assert_eq(int(b["build_end"]) - int(b["build_start"]), int(bs.build_seconds_of("farm") * 1000.0), "its timer: the scaled time, once")
+	var listed := bs.catalog().filter(func(o: Dictionary) -> bool: return String(o["type"]) == "farm")
+	if not listed.is_empty():
+		assert_near(float(listed[0]["build_seconds"]), bs.build_seconds_of("farm"), 0.0001, "the build list says the same")
+	sim.advance_ms(int(bs.build_seconds_of("farm") * 1000.0) - 1)
+	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "1 ms before: still building")
+	sim.advance_ms(1)
+	assert_eq(b["state"], BuildingSystem.IDLE, "built on time")

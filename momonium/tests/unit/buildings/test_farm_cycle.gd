@@ -1,9 +1,9 @@
 extends "res://tests/framework/test_case.gd"
 
 ## The farm as the rules describe it (Step 50): sow, water, a short wait while
-## the watered crop drinks and ripens, harvest -- one complete cycle in 9.5 s
-## by hand since Step 58 (the work x2.5: 2.5 + 2.5 + the 2 s wait + 2.5; it
-## was 5 s), every stage every time, in order, with nothing skipped. The harvest's
+## the watered crop drinks and ripens, harvest -- one complete cycle in 20.75 s
+## by hand since Step 69 (the work x6.25: 6.25 + 6.25 + the 2 s wait + 6.25;
+## Step 58: 9.5 s, Step 50: 5 s), every stage every time, in order, with nothing skipped. The harvest's
 ## crops are sold the moment they are picked. Durations are read from the data.
 
 var sim: Simulation
@@ -54,7 +54,7 @@ func _stage() -> String:
 	return String(buildings.current_stage(buildings.get_building(farm))["id"])
 
 
-func test_the_full_cycle_in_order_in_nine_and_a_half_seconds() -> void:
+func test_the_full_cycle_in_order_in_twenty_seconds_and_three_quarters() -> void:
 	var clock := sim.clock
 	var log: Array = []
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
@@ -70,7 +70,7 @@ func test_the_full_cycle_in_order_in_nine_and_a_half_seconds() -> void:
 			sim.advance_ms(buildings.remaining_ms(b))
 	var times: Array = log.map(func(e: Array) -> int: return e[1])
 	assert_eq(times, [_work_ms(0), _work_ms(0) + _work_ms(1), _work_ms(0) + _work_ms(1) + _wait_ms() + _work_ms(2)], "sow, water, wait, harvest")
-	assert_eq(int(times[-1]), 9500, "one complete cycle by hand is 9.5 s (Step 58; Step 50: 5 s)")
+	assert_eq(int(times[-1]), 20750, "one complete cycle by hand is 20.75 s (Step 69; Step 58: 9.5 s, Step 50: 5 s)")
 	assert_eq(_stage(), "sow", "and the plot is ready to sow again")
 	assert_eq(inv.count("crop"), 0, "the crop never sits in the store")
 	assert_eq(economy.money - money, economy.unit_price("crop"), "it was sold the moment it was picked")
@@ -169,7 +169,7 @@ func test_farm_data_keeps_the_rules() -> void:
 	for st: Dictionary in stages:
 		assert_true(bool(st.get("required", false)), "%s is required" % st["id"])
 		total += float(st["seconds"]) * work_scale(sim) + float(st.get("cooldown", 0.0))
-	assert_near(total, 9.5, 0.0001, "a complete cycle by hand is 9.5 s (Step 58; Step 50: 5 s)")
+	assert_near(total, 20.75, 0.0001, "a complete cycle by hand is 20.75 s (Step 69; Step 58: 9.5 s, Step 50: 5 s)")
 	assert_true(float(stages[1]["cooldown"]) > 0.0, "the watered crop needs time to ripen")
 	assert_true(float(stages[1]["cooldown_floor"]) < float(stages[1]["cooldown"]), "research can shorten that wait (floor below it)")
 	assert_eq(int(stages[2]["yield"]["crop"]), 1, "harvest gives one batch of crops")

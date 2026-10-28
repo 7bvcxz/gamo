@@ -474,7 +474,7 @@ func catalog() -> Array[Dictionary]:
 		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
 			"level_met": (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})),
 			"research": String(t.get("unlock", {}).get("research", "")), "research_met": research_met(type),
-			"cost": t.get("cost", {}), "build_seconds": float(t.get("build_seconds", 1))})
+			"cost": t.get("cost", {}), "build_seconds": build_seconds_of(type)})
 	return out
 
 
@@ -577,7 +577,7 @@ func refits(id: int) -> Array[Dictionary]:
 		out.append({"type": type, "unlocked": is_unlocked(type), "level": int(t.get("unlock", {}).get("level", 1)),
 			"level_met": (sim.system(&"progression") as ProgressionSystem).meets(t.get("unlock", {})),
 			"research": String(t.get("unlock", {}).get("research", "")), "research_met": research_met(type),
-			"cost": t.get("cost", {}), "build_seconds": float(t.get("build_seconds", 1))})
+			"cost": t.get("cost", {}), "build_seconds": build_seconds_of(type)})
 	return out
 
 
@@ -648,7 +648,7 @@ func refit(id: int, type: String) -> Dictionary:
 	var now := sim.now_ms()
 	b["state"] = CONSTRUCTING
 	b["build_start"] = now
-	b["build_end"] = now + int(float(t.get("build_seconds", 1)) * 1000.0)
+	b["build_end"] = now + int(build_seconds_of(type) * 1000.0)
 	sim.scheduler.schedule(int(b["build_end"]), BUILT, {"id": id, "token": b["token"]})
 	sim.bus.emit(&"building_refit", {"id": id, "from": from, "type": type})
 	return SimResult.ok()
@@ -794,7 +794,7 @@ func place(type: String, anchor: Vector2i) -> Dictionary:
 	(sim.system(&"world") as WorldSystem).occupy(cells_of(b), b["id"])
 	(sim.system(&"economy") as EconomySystem).spend(money, "build:" + type)
 	(sim.system(&"inventory") as InventorySystem).take_all(items, "build:" + type)
-	var duration := int(round(float(t.get("build_seconds", 1.0)) * 1000.0))
+	var duration := int(round(build_seconds_of(type) * 1000.0))
 	b["state"] = CONSTRUCTING
 	b["build_start"] = sim.now_ms()
 	b["build_end"] = sim.now_ms() + duration
@@ -961,6 +961,18 @@ func stage_seconds(b: Dictionary, stage: Dictionary) -> float:
 ## (`balance.pace.work_scale`). Waits after a stage are not scaled.
 func work_scale() -> float:
 	return maxf(sim.data.get_float("balance", "pace.work_scale", 1.0), 0.05)
+
+
+## Step 69: how much longer construction takes than its data says
+## (`balance.pace.build_scale`) -- a timer of its own, apart from the work's
+## `work_scale`, applied once here: the build timer, the build list and the
+## construction card all read build_seconds_of.
+func build_scale() -> float:
+	return maxf(sim.data.get_float("balance", "pace.build_scale", 1.0), 0.05)
+
+
+func build_seconds_of(type: String) -> float:
+	return float(sim.data.building_type(type).get("build_seconds", 1.0)) * build_scale()
 
 
 ## Wait after a stage after modifiers, never under its floor (a world rule:

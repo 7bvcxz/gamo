@@ -470,6 +470,10 @@ func _ready() -> void:
 			"farm_stages": (sim.data.building_type("farm")["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
 				return [String(st["id"]), int(float(st["seconds"]) * _work_scale() * 1000.0), int(float(st.get("cooldown", 0.0)) * 1000.0)]),
 			"work_scale": _work_scale(), "travel_scale": sim.data.get_float("balance", "pace.travel_scale", 1.0),
+			# Step 69: construction's own scale and a farm's build time as played.
+			"build_scale": (sim.system(&"buildings") as BuildingSystem).build_scale(),
+			"farm_build_ms": int((sim.system(&"buildings") as BuildingSystem).build_seconds_of("farm") * 1000.0),
+			"build_ms": _build_ms_all(),
 			"walk_speed": sim.data.get_float("balance", "momo.walk_speed", 1.0),
 			"crop_price": (sim.system(&"economy") as EconomySystem).unit_price("crop"),
 			"exp_to_next": sim.data.get_value("balance", "progression.exp_to_next", []),
@@ -1253,6 +1257,15 @@ func _fx_info(_arg: Variant) -> Dictionary:
 	return {"hud": hud.pops.duplicate(), "world": feedback_fx.shown.duplicate(true), "active": feedback_fx.active_count(), "impacts": impacts,
 		"effects": FxPrefs.enabled, "reduce_motion": FxPrefs.reduced_motion,
 		"celebration": celebration.text, "celebration_sub": celebration.sub}
+
+
+## E2E (Step 69): how long each building takes to build, in ms, as played.
+func _build_ms_all() -> Dictionary:
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var out := {}
+	for type: String in (sim.data.table("buildings")["types"] as Dictionary):
+		out[type] = int(bs.build_seconds_of(type) * 1000.0)
+	return out
 
 
 ## E2E: the exported build carries the atlas and its metadata.

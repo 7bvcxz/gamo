@@ -21,7 +21,7 @@ func test_a_new_island_has_no_momo_and_pays_for_work_by_hand() -> void:
 	var farm: int = bs.ids()[0]
 	var money := eco.money
 	assert_true(sim.execute({"type": "building.tap", "id": farm})["ok"], "the ripe crop, by hand")
-	sim.advance_ms(5000)
+	sim.advance_to(int(bs.get_building(farm)["task_end"]))
 	assert_true(eco.money > money, "pays at once (Step 50 kept)")
 
 
@@ -77,7 +77,7 @@ func test_the_players_first_placement_opts_in_and_new_work_follows() -> void:
 	assert_true(sim.execute({"type": "momo.assign", "momo": id, "building": farm})["ok"], "the player places it")
 	assert_true(momos.get_momo(id)["opted_in"], "now it is in")
 	var r := sim.execute({"type": "building.place", "building": "farm", "anchor": [1, 0]})
-	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
+	sim.advance_ms(build_ms(sim, "farm"))
 	assert_eq(momos.watchers_of(int(r["id"])), [id] as Array[int], "a Momo the player put to work takes new work into its rounds")
 
 

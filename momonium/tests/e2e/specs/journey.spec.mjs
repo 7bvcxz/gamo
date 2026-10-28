@@ -16,7 +16,7 @@ test('the journey of an island', async ({ game }) => {
   const rules = await game.query('rules');
   // A farm, worked by hand through one cycle.
   expect((await game.command({ type: 'building.place', building: 'farm', anchor: [0, 0] })).ok).toBe(true);
-  await game.query('dev_advance_ms', 6000);
+  await game.query('dev_advance_ms', rules.build_ms.farm + 100);
   const id = (await game.state()).buildings.buildings.find((b) => b.type === 'farm').id;
   await runStages(game, id, rules.farm_stages.length);
   await game.query('dev_advance_ms', 30000);

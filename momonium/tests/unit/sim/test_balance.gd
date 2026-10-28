@@ -11,6 +11,13 @@ extends "res://tests/framework/test_case.gd"
 ## worth selling in the 20-30 minute stretch, a second island that gets there
 ## faster, no dead ends, the same game across a save, and no loop that makes
 ## money from nothing. The longer two-day calendar is optimize.gd --schedule 48h.
+##
+## Step 69: the owner slowed the work x2.5 again (and construction x2.5) for a
+## slower feel, keeping every reward. The frozen Step 50 targets are history:
+## they are checked at the pace they were set for (Step 58's, `_step58_pace`),
+## so a change to the rules -- not the pace -- that would break them still
+## shows. The game as it is now keeps its own measured baseline
+## (baseline_step69.json) and has no dead end.
 
 const AutoPlayer := preload("res://tools/playtest/autoplayer.gd")
 const Optimizer := preload("res://tools/balance_optimizer/optimize.gd")
@@ -32,32 +39,85 @@ func _targets() -> Dictionary:
 	return JSON.parse_string(FileAccess.get_file_as_string("res://tools/balance_optimizer/targets.json"))
 
 
-func test_the_first_minutes_meet_the_pass_fail_targets() -> void:
-	# The reference player of the targets: every pass/fail target.
-	var r := Optimizer.run(GameData.load_default(), _profile("blind"), {}, 10.0)
+func _baseline() -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string("res://tools/balance_optimizer/baseline_step69.json"))
+
+
+## The game at the pace the Step 50 targets were set for: Step 58's work x2.5
+## and construction as written (Step 69 made them x6.25 and x2.5).
+func _step58_pace() -> GameData:
+	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
+	bal["pace"]["work_scale"] = 2.5
+	bal["pace"]["build_scale"] = 1.0
+	return GameData.from_tables({"balance": bal})
+
+
+func test_the_step_50_targets_hold_at_the_pace_they_were_set_for() -> void:
+	# The reference player of the targets: every pass/fail target, at Step 58's pace.
+	var r := Optimizer.run(_step58_pace(), _profile("blind"), {}, 10.0)
 	for row: Dictionary in Optimizer.score(r, _targets(), "sim")["rows"]:
 		if String(row["kind"]) != "exact" and String(row["id"]).begins_with("P"):
 			assert_true(bool(row["pass"]), "%s %s %s (%s)" % [row["id"], row["metric"], row["target"], str(row["observed"])])
 	# A quicker hand: money and a Momo's earnings at least as soon. (It taps
 	# more itself, so its Momo share is lower -- that is not a target for it.)
-	var h := Optimizer.run(GameData.load_default(), _profile("human"), {}, 10.0)
+	var h := Optimizer.run(_step58_pace(), _profile("human"), {}, 10.0)
 	for row: Dictionary in Optimizer.score(h, _targets(), "sim")["rows"]:
 		if String(row["id"]) in ["P1", "P2", "P3", "P4"]:
 			assert_true(bool(row["pass"]), "human: %s %s %s (%s)" % [row["id"], row["metric"], row["target"], str(row["observed"])])
 	# A slower one still earns all the way: no stall.
-	var slow := Optimizer.run(GameData.load_default(), _profile("blind_slow"), {}, 10.0)
+	var slow := Optimizer.run(_step58_pace(), _profile("blind_slow"), {}, 10.0)
 	var rows: Array = slow["series"]
 	for i in range(4, rows.size()):
 		assert_true(int(rows[i]["income_all"]) > int(rows[i - 1]["income_all"]), "slow player: income grows every minute (%d s)" % int(rows[i]["checkpoint_s"]))
 
 
-func test_a_sale_in_the_20_to_30_minute_stretch() -> void:
-	var r := Optimizer.run(GameData.load_default(), _profile("blind"), {}, 35.0)
+func test_a_sale_in_the_20_to_30_minute_stretch_at_step_58s_pace() -> void:
+	var r := Optimizer.run(_step58_pace(), _profile("blind"), {}, 35.0)
 	var ready := int(r["prestige_ready_ms"])
 	assert_between(ready / 60000.0, 18.0, 32.0, "the island can first be sold for a point after %.1f min" % (ready / 60000.0))
+
+
+## Step 69: the game as it is -- each journey mark, the money by 10 and 60
+## minutes and the first sale within the baseline's tolerance (it moved: a
+## change is either deliberate, and the baseline is re-measured, or a bug),
+## money coming in every five minutes, the island sellable, the attentive
+## player's firsts within the quarter hour.
+func test_the_step_69_game_keeps_its_baseline_and_has_no_dead_end() -> void:
+	var base := _baseline()
+	var tol := float(base["tolerance"])
+	assert_near(sim_scale("work_scale"), float(base["data"]["work_scale"]), 0.0001, "measured on this pace")
+	var r := Optimizer.run(GameData.load_default(), _profile(String(base["profile"])), {}, 75.0)
+	var journey: Dictionary = r["journey"]
+	for k: String in base["journey_s"]:
+		var want := float(base["journey_s"][k])
+		var got := float(journey.get(k, -1)) / 1000.0
+		if k == "income":
+			got = int(r["first_income_ms"]) / 1000.0
+		elif k == "momo_income":
+			got = int(r["first_momo_income_ms"]) / 1000.0
+		assert_true(got > 0.0, "%s is reached" % k)
+		assert_true(absf(got - want) <= want * tol, "%s at %.0f s (baseline %.0f s, +-%d%%)" % [k, got, want, int(tol * 100)])
+	var ready := int(r["prestige_ready_ms"]) / 1000.0
+	assert_true(ready > 0.0, "the island can be sold")
+	assert_true(absf(ready - float(base["prestige_ready_s"])) <= float(base["prestige_ready_s"]) * tol, "first sellable at %.1f min (baseline %.1f)" % [ready / 60.0, float(base["prestige_ready_s"]) / 60.0])
+	var by: Dictionary = {}
+	for row: Dictionary in r["series"]:
+		by[int(row["checkpoint_s"])] = int(row["income_all"])
+	for at: int in [600, 3600]:
+		var want := float(base["income_at_%d" % at])
+		assert_true(absf(by[at] - want) <= want * tol, "money by %d min: $%d (baseline $%d)" % [at / 60, by[at], int(want)])
+	var last := 0
+	for at: int in [300, 600, 900, 1200, 1800, 3600]:
+		assert_true(int(by[at]) > last, "money still coming in by %d min ($%d)" % [at / 60, by[at]])
+		last = int(by[at])
+	assert_true(int(r["stuck_s"]) <= 120, "nothing to do and nothing working: %d s" % int(r["stuck_s"]))
 	var bot := _played(30.0)
 	for k: String in ["first Momo work", "first research", "first hire", "first land", "built research"]:
-		assert_true(bot.first(k) >= 0 and bot.first(k) <= 10 * 60000, "attentive player: %s within 10 minutes (%d ms)" % [k, bot.first(k)])
+		assert_true(bot.first(k) >= 0 and bot.first(k) <= 15 * 60000, "attentive player: %s within 15 minutes (%d ms; Step 58: 10)" % [k, bot.first(k)])
+
+
+func sim_scale(key: String) -> float:
+	return GameData.load_default().get_float("balance", "pace." + key, 0.0)
 
 
 func test_a_sold_island_makes_the_next_one_faster() -> void:
@@ -104,7 +164,7 @@ func test_no_loop_makes_money_or_free_exp() -> void:
 	# Build and pull down, again and again (the moment it is finished, before
 	# the island's Momo, which takes new buildings by itself, works it).
 	var cost := int(sim.data.building_type("farm")["cost"]["money"])
-	var build_ms := int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0)
+	var build_ms := build_ms(sim, "farm")
 	for i in 10:
 		var r := sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})
 		sim.advance_ms(build_ms)

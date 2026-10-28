@@ -54,7 +54,7 @@ func test_pulled_down_half_back_and_a_wait() -> void:
 	var money := economy.money
 	var stone := inv.count("stone")
 	var r := _place("school", Vector2i(1, 1))
-	sim.advance_ms(30000)
+	sim.advance_ms(build_ms(sim, "school"))
 	var d := sim.execute({"type": "building.demolish", "id": r["id"]})
 	assert_true(d["ok"], "pulled down")
 	assert_eq(money - economy.money, 200, "half of $400 back")

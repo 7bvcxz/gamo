@@ -108,7 +108,7 @@ func test_the_whole_path_with_taps() -> void:
 	_tap_at(tut.target.get_center())
 	await _frame()
 	assert_eq(tut.step, "wait_build", "building")
-	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
+	sim.advance_ms(build_ms(sim, "farm"))
 	await _frame()
 	assert_eq(tut.step, "sow", "built: sow it")
 	assert_true(tut.target2.size.x > 0.0, "the lit Sow card is ringed too (a Momo may stand in front of the farm)")

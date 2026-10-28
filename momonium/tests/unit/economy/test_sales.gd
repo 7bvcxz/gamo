@@ -105,7 +105,7 @@ func test_a_mine_pays_as_it_digs_and_keeps_the_stone() -> void:
 	assert_true(economy.money > before, "money at once")
 	assert_eq(inv.count("stone"), int(dig["yield"]["stone"]), "the stone kept for building")
 	var cycle := float(dig["seconds"]) * work_scale(sim) + float(dig["cooldown"])
-	assert_near(cycle, 16.0, 0.0001, "sixteen seconds for each unit dug (Step 58: 4 s of digging x2.5 + the 6 s wait; Step 50: 10 s)")
+	assert_near(cycle, 31.0, 0.0001, "thirty-one seconds for each unit dug (Step 69: 4 s of digging x6.25 + the 6 s wait; Step 58: 16 s, Step 50: 10 s)")
 
 
 func test_a_full_store_sells_the_surplus_instead_of_stopping() -> void:
@@ -132,7 +132,7 @@ func test_every_dollar_is_booked_by_day() -> void:
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})
 	sim.execute({"type": "land.buy", "cell": [2, 0]})
 	var farm := buildings.building_at(Vector2i(0, 0))
-	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
+	sim.advance_ms(build_ms(sim, "farm"))
 	# The island's Momo took the new farm by itself (Step 50); here the
 	# player farms it, so the day holds exactly one harvest.
 	sim.execute({"type": "momo.watch", "momo": 1, "cells": [[0, 0]], "op": "remove"})
@@ -206,7 +206,7 @@ func test_no_dead_end_from_the_start() -> void:
 	# And steady play grows money: one farm earns its first land within minutes.
 	_start()
 	var f: int = sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})["id"]
-	sim.advance_ms(int(float(sim.data.building_type("farm")["build_seconds"]) * 1000.0))
+	sim.advance_ms(build_ms(sim, "farm"))
 	var land_cost := (sim.system(&"land") as LandSystem).next_cost()
 	var start := sim.now_ms()
 	while economy.money < land_cost and sim.now_ms() - start < 600000:

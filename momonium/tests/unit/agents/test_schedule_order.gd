@@ -80,6 +80,9 @@ func test_never_turned_aside_on_the_way() -> void:
 	var near := bs.place_instant("farm", Vector2i(1, 0))
 	# The near farm is busy: the player is sowing it by hand.
 	assert_true(sim.execute({"type": "building.tap", "id": near})["ok"], "the player sows the near farm")
+	# Near the end of the sowing (Step 69: 6.25 s, longer than the walk), the
+	# schedule: the near farm comes free while the Momo is still on its way.
+	sim.advance_to(int(bs.get_building(near)["task_end"]) - 1500)
 	_tap([Vector2i(3, 3), Vector2i(1, 0)])
 	assert_eq(int(momos.get_momo(momo)["assigned"]), far, "committed to stop 1, the far farm")
 	var to: Array = momos.get_momo(momo)["to"]

@@ -121,7 +121,7 @@ func show_building(id: int) -> void:
 	_shown_state = String(b["state"])
 	_shown_variety = buildings.variety_of(b)
 	if b["state"] == BuildingSystem.CONSTRUCTING:
-		var build_card := _make_card({"id": "construct", "label": "build.constructing", "icon": "ui_build", "seconds": float(buildings.type_def(b).get("build_seconds", 0))}, 0)
+		var build_card := _make_card({"id": "construct", "label": "build.constructing", "icon": "ui_build", "seconds": buildings.build_seconds_of(String(b["type"]))}, 0)
 		build_card.disabled = true
 		cards.append(build_card)
 		var cancel := _make_card({"id": "cancel", "label": "build.cancel", "icon": "ui_build", "seconds": 0}, 1)
@@ -288,8 +288,12 @@ func _refresh() -> void:
 
 ## A card's seconds: whole as they are, a half kept (Step 58: 2.5 s of work
 ## each on the farm -- the card said "2 sec").
+## Whole seconds as they are, else one decimal rounded half up (Step 69: a
+## 6.25 s stage reads 6.3, never shorter than it takes).
 static func seconds_text(secs: float) -> String:
-	return str(int(round(secs))) if is_equal_approx(secs, round(secs)) else "%.1f" % secs
+	if is_equal_approx(secs, round(secs)):
+		return str(int(round(secs)))
+	return "%.1f" % (floorf(secs * 10.0 + 0.5) / 10.0)
 
 
 ## Which group the building is in, for a card: -1 done, 0 current, 1 to come.

@@ -38,7 +38,7 @@ test('build a landmark from the Special choices', async ({ game }) => {
   let st = await game.state();
   const school = st.buildings.buildings.find((b) => b.type === 'school');
   expect(school.anchor).toEqual([1, 1]);
-  await game.query('dev_advance_ms', 30000);
+  await game.query('dev_advance_ms', (await game.query('rules')).build_ms.school + 1000);
   // Another tile: the school is not offered, the slot is full.
   const other = await cellToCanvas(game, [0, 1]);
   await game.tap(other.x, other.y);

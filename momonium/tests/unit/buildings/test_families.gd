@@ -42,7 +42,7 @@ func test_refit_in_place() -> void:
 	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "the refit takes the facility's build time")
 	assert_eq(economy.money, money - 200, "paid the facility's price")
 	assert_eq(int((sim.system(&"momo") as MomoSystem).get_momo(1)["assigned"]), 0, "its worker was let go (a new job)")
-	sim.advance_ms(20000)
+	sim.advance_ms(build_ms(sim, "smelter"))
 	assert_eq(b["state"], BuildingSystem.IDLE, "and it is ready")
 	assert_eq(sim.execute({"type": "building.refit", "id": mine, "building": "solar_panel"})["reason"], "err.wrong_family", "a mine cannot become a lab facility")
 
@@ -56,7 +56,7 @@ func test_a_busy_building_stops_and_gets_its_inputs_back() -> void:
 	# The player's hands here: the island's Momo would take the refitted
 	# building by itself (Step 50) and charge it first.
 	sim.data.tables["balance"]["momo"]["watch"]["auto"] = false
-	sim.advance_ms(30000)
+	sim.advance_ms(build_ms(sim, "smelter") + 1000)
 	var ore := inv.count("copper_ore")
 	var r := sim.execute({"type": "building.tap", "id": mine})
 	assert_true(r["ok"], "the smelter starts a charge")
@@ -84,9 +84,9 @@ func test_demolish_refunds_half_of_what_was_paid() -> void:
 	var r := sim.execute({"type": "building.place", "building": "mine", "anchor": [1, 0]})
 	assert_true(r["ok"], "a mine: $120 + wood 10")
 	var id := int(r["id"])
-	sim.advance_ms(16000)
+	sim.advance_ms(build_ms(sim, "mine") + 1000)
 	sim.execute({"type": "building.refit", "id": id, "building": "smelter"})
-	sim.advance_ms(21000)
+	sim.advance_ms(build_ms(sim, "smelter") + 1000)
 	var money := economy.money
 	var wood := inv.count("wood")
 	var stone := inv.count("stone")

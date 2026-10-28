@@ -19,7 +19,8 @@ test.describe('a new player island', () => {
     const money0 = s0.economy.money;
     const p = await clearPointOnCell(game, farm.anchor);
     await game.tap(p.x, p.y);
-    await expect.poll(async () => (await game.state()).economy.money, { timeout: 5_000 }).toBeGreaterThan(money0);
+    // A harvest's work as played (Step 69: 6.25 s), then its money at once.
+    await expect.poll(async () => (await game.state()).economy.money, { timeout: 10_000 }).toBeGreaterThan(money0);
     const s1 = await game.state();
     expect(s1.inventory.items.crop ?? 0, 'sold as it was picked').toBe(0);
   });

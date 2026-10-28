@@ -25,7 +25,7 @@ func _data() -> GameData:
 
 
 func _build_ms(type: String) -> int:
-	return int(float(sim.data.building_type(type)["build_seconds"]) * 1000.0)
+	return build_ms(sim, type)
 
 
 func before_each() -> void:
@@ -49,7 +49,7 @@ func test_first_farm_is_affordable_and_quick_to_build() -> void:
 	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "a moment before: still building")
 	sim.advance_ms(1)
 	assert_eq(b["state"], BuildingSystem.IDLE, "on time: built and ready")
-	assert_true(_build_ms("farm") <= 5000, "within five seconds")
+	assert_true(_build_ms("farm") <= 10000, "within ten seconds (Step 69: its 3 s x2.5)")
 	assert_true(sim.execute({"type": "building.tap", "id": id})["ok"], "and it works")
 
 
@@ -114,7 +114,7 @@ func test_cancel_refunds_and_frees_the_cells() -> void:
 
 func test_finished_buildings_cannot_be_cancelled() -> void:
 	var id: int = sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})["id"]
-	sim.advance_ms(5000)
+	sim.advance_ms(_build_ms("farm"))
 	assert_eq(sim.execute({"type": "building.cancel", "id": id})["reason"], "err.not_constructing", "only constructions cancel")
 
 

@@ -58,7 +58,7 @@ func test_only_while_it_stands_finished() -> void:
 	(sim.system(&"inventory") as InventorySystem).add("copper_ingot", 10, "test")
 	var r := sim.execute({"type": "building.place", "building": "clock_tower", "anchor": [2, 2]})
 	assert_false(sp.burst()["standing"], "rising: no burst yet")
-	sim.advance_ms(31000)
+	sim.advance_ms(build_ms(sim, "clock_tower") + 1000)
 	assert_true(sp.burst()["standing"], "finished: it rings")
 	sim.execute({"type": "building.demolish", "id": r["id"]})
 	assert_false(sp.burst()["standing"], "pulled down: gone")

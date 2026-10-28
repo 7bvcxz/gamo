@@ -55,7 +55,9 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   t = await g.query('tutorial');
   expect(t.step).toBe('wait_build');
   await shot('3-building');
-  await g.query('dev_advance_ms', 6000);
+  // The times as played (Step 69: a farm builds in 7.5 s, a stage is 6.25 s).
+  const rules = await g.query('rules');
+  await g.query('dev_advance_ms', rules.build_ms.farm + 100);
   await page.waitForTimeout(300);
   t = await g.query('tutorial');
   expect(t.step).toBe('sow');
@@ -63,13 +65,13 @@ test('first run: the tutorial leads from nothing to a watered farm', async ({ pa
   await tapRect(t.target2, t.window);
   t = await g.query('tutorial');
   expect(t.step).toBe('working');
-  await g.query('dev_advance_ms', 5000);
+  await g.query('dev_advance_ms', rules.farm_stages[0][1] + 100);
   await page.waitForTimeout(300);
   t = await g.query('tutorial');
   expect(t.step).toBe('water');
   await shot('5-water');
   await tapRect(t.target2, t.window);
-  await g.query('dev_advance_ms', 5000);
+  await g.query('dev_advance_ms', rules.farm_stages[1][1] + rules.farm_stages[1][2] + 100);
   await page.waitForTimeout(300);
   // Step 53: no Momo yet -- farm by hand for the first, then the Hire
   // button and its card (real taps); the hire is selected: Schedule under it.

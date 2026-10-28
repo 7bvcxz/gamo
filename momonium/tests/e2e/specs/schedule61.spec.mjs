@@ -72,6 +72,10 @@ test('walking to its stop, it is not turned aside by a farm coming free', async 
   await tapCell(game, [0, 1]);
   let s = await game.state();
   expect(s.buildings.buildings.find((b) => b.id === near).state).toBe('working');
+  // Near the end of the sowing (Step 69: 6.25 s, longer than the walk), the
+  // schedule: the near farm comes free while the Momo is on its way.
+  const now = (await game.query('dev_advance_ms', 0)).now_ms;
+  await game.query('dev_advance_ms', s.buildings.buildings.find((b) => b.id === near).task_end - now - 1500);
   await schedule(game, [[2, 2], [0, 1]]);
   expect((await momo1(game)).assigned, 'committed to stop 1, the far farm').toBe(far);
   let freed = false;

@@ -30,13 +30,22 @@ func work_scale(s: Simulation) -> float:
 	return (s.system(&"buildings") as BuildingSystem).work_scale()
 
 
+## Step 69: how long building `type` takes to build, in ms -- its data
+## `build_seconds` times balance.pace.build_scale, as the game times it
+## (BuildingSystem.build_seconds_of). A test that waits for a construction
+## waits this long.
+func build_ms(s: Simulation, type: String) -> int:
+	return int((s.system(&"buildings") as BuildingSystem).build_seconds_of(type) * 1000.0)
+
+
 ## The game's data at the pace its numbers are written in (Step 58's
-## work_scale and travel_scale at 1): for tests of an industry's own rules --
+## work_scale and travel_scale, Step 69's build_scale at 1): for tests of an industry's own rules --
 ## a smelt takes its recipe's seconds, bellows make it 0.75 of that -- that
 ## read the data's numbers as they stand. test_pace checks the scales.
 func unit_pace() -> GameData:
 	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
 	bal["pace"]["work_scale"] = 1.0
+	bal["pace"]["build_scale"] = 1.0
 	bal["pace"]["travel_scale"] = 1.0
 	return GameData.from_tables({"balance": bal})
 
