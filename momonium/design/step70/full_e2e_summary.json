@@ -1,0 +1,13 @@
+{
+ "started": "2026-10-28T06:23:10.731Z",
+ "duration_s": 1956,
+ "passed": 217,
+ "skipped": 23,
+ "failed": 2,
+ "build": "game-bbbf99644322.pck (0.70.0)",
+ "failed_tests": [
+  "mail.spec.mjs [phone]",
+  "mail.spec.mjs [desktop]"
+ ],
+ "fix": "mail.spec waited 60 s of game time for the first letter; Step 69 (work x6.25) made the ten farm stages about two minutes. The old spec fails the same way on the public 0.69.0. Raised the cap; 2/2 pass."
+}
