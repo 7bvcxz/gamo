@@ -183,7 +183,9 @@ body {
 	width: 0;
 	border-radius: 2px;
 	background: #ffffff;
-	transition: width 0.4s ease;
+	/* Step 74: no easing -- the bar is the number shown, at once (an easing
+	   bar was still sliding back from the last phase while the next phase's
+	   7% was already on the line). The loader reports every frame. */
 }
 
 /* Nothing measured yet: a short light travelling, not a made-up percentage. */
@@ -251,7 +253,32 @@ body {
 	100% { transform: translateX(330%); }
 }
 
+/* Step 74: after loading, a small note of how long it took, over the game:
+   taps go through it, and it leaves by itself. */
+#momo-loaded {
+	position: fixed;
+	left: 50%;
+	bottom: max(18px, env(safe-area-inset-bottom));
+	z-index: 6;
+	transform: translateX(-50%);
+	padding: 7px 14px;
+	border-radius: 16px;
+	background: rgba(8, 40, 78, 0.72);
+	color: #ffffff;
+	font: 600 14px ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+	pointer-events: none;
+	transition: opacity 0.5s ease;
+	white-space: nowrap;
+}
+
+#momo-loaded.gone {
+	opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
+	#momo-loaded {
+		transition: none;
+	}
 	#momo-splash *, #momo-splash *::after {
 		animation: none !important;
 	}
@@ -286,17 +313,26 @@ body {
 			<div class="notice"><span class="why"></span><br><button class="retry" type="button"></button></div>
 		</div>
 		<script>
-/* The loading screen's words in the player's language, and what it shows:
-   the stage reached (engine, game files, starting -- the runner reports
-   them), or bytes when Godot's own loader counts them; never a made-up
-   percentage. It goes once the island has drawn (window.momonium.ready, a
-   few frames later), fading into the game. */
+/* The loading screen's words in the player's language, and what it shows.
+   Step 74: the real share of the bytes of the download under way, phase by
+   phase -- the engine, then the island (the runner reports the phases) --
+   measured by Godot's own loader (`progress`); while a phase's size is not
+   known, or its download is done and the engine is busy with it, a phase
+   name and a travelling light instead of a number. Never a made-up
+   percentage, never 100% while the game is still blocked. Once the island
+   has drawn (window.momonium.ready, a few frames later) it fades into the
+   game, and a small note says how long it took -- measured with the
+   monotonic clock from the first page (the index passes its start, `t0`). */
 window.MomoSplash = (function () {
 	const words = {
-		en: { line: 'Getting the island ready', steps: ['Getting the island ready', 'Bringing the island', 'Waking the Momo'], fail: 'The island could not open.', slow: 'This is taking longer than usual.', retry: 'Try again' },
-		ko: { line: '섬을 준비하고 있어요', steps: ['섬을 준비하고 있어요', '섬을 가져오고 있어요', '모모를 깨우고 있어요'], fail: '섬을 열지 못했어요.', slow: '평소보다 오래 걸리고 있어요.', retry: '다시 시도' },
-		ja: { line: '島を準備しています', steps: ['島を準備しています', '島を運んでいます', 'モモを起こしています'], fail: '島を開けませんでした。', slow: 'いつもより時間がかかっています。', retry: 'もう一度' },
-		zh: { line: '正在准备岛屿', steps: ['正在准备岛屿', '正在运来岛屿', '正在叫醒桃桃'], fail: '无法打开岛屿。', slow: '加载时间比平时长。', retry: '重试' },
+		en: { line: 'Getting the island ready', load: ['Loading {p}%', 'Loading the engine {p}%', 'Loading the island {p}%'], busy: ['Getting the island ready', 'Preparing the engine', 'Opening the island', 'Waking the Momo'],
+			loaded: 'Loaded in {s} s', fail: 'The island could not open.', slow: 'This is taking longer than usual.', retry: 'Try again' },
+		ko: { line: '섬을 준비하고 있어요', load: ['불러오는 중 {p}%', '엔진을 불러오는 중 {p}%', '섬을 불러오는 중 {p}%'], busy: ['섬을 준비하고 있어요', '엔진을 준비하는 중', '섬을 여는 중', '모모를 깨우는 중'],
+			loaded: '{s}초 만에 열렸어요', fail: '섬을 열지 못했어요.', slow: '평소보다 오래 걸리고 있어요.', retry: '다시 시도' },
+		ja: { line: '島を準備しています', load: ['読み込み中 {p}%', 'エンジンを読み込み中 {p}%', '島を読み込み中 {p}%'], busy: ['島を準備しています', 'エンジンを準備中', '島を開いています', 'モモを起こしています'],
+			loaded: '{s}秒で読み込みました', fail: '島を開けませんでした。', slow: 'いつもより時間がかかっています。', retry: 'もう一度' },
+		zh: { line: '正在准备岛屿', load: ['正在加载 {p}%', '正在加载引擎 {p}%', '正在加载岛屿 {p}%'], busy: ['正在准备岛屿', '正在准备引擎', '正在打开岛屿', '正在叫醒桃桃'],
+			loaded: '加载用时 {s} 秒', fail: '无法打开岛屿。', slow: '加载时间比平时长。', retry: '重试' },
 	};
 	const lang = String(navigator.language || 'en').slice(0, 2).toLowerCase();
 	const w = words[lang] || words.en;
@@ -306,31 +342,112 @@ window.MomoSplash = (function () {
 	}
 	document.documentElement.lang = words[lang] ? lang : 'en';
 	const text = root.querySelector('.text');
+	const dots = root.querySelector('.dots');
 	const bar = root.querySelector('.bar');
 	const fill = bar.querySelector('i');
 	text.textContent = w.line;
 	root.querySelector('.retry').textContent = w.retry;
 	root.querySelector('.retry').addEventListener('click', function () { location.reload(); });
+	/* Where the clock starts: the first page's start when the index passed it
+	   (and it is plausible), else this page's own. */
+	const t0 = Number(new URLSearchParams(location.search).get('t0')) || 0;
+	const fromPage = t0 > 0 && t0 <= performance.timeOrigin && performance.timeOrigin - t0 < 120000 ? performance.timeOrigin - t0 : 0;
+	const now = function () { return fromPage + performance.now(); };
 	let gone = false;
+	/* The bytes Godot's loader has counted at the start of this phase, so a
+	   phase shows its own download only (the next file's size joins the
+	   total when it starts). */
+	let base = { loaded: 0, total: 0 };
+	let last = { loaded: 0, total: 0 };
+	/* The highest share shown in this phase: a number never goes back. */
+	let high = 0;
 	const api = {
 		stage: 0,
 		state: 'loading',
-		/* Stage n of 3 reached (1 engine, 2 game files, 3 starting). */
-		step: function (n) {
-			api.stage = Math.max(api.stage, Math.min(n, 3));
-			text.textContent = w.steps[api.stage - 1] || w.line;
-			bar.classList.remove('unknown');
-			fill.style.width = Math.round(((api.stage - 1) / 3) * 100 + 4) + '%';
-			bar.setAttribute('aria-valuenow', String(Math.round(((api.stage - 1) / 3) * 100)));
-		},
-		/* Bytes Godot's own loader counted (current of total). */
-		bytes: function (current, total) {
-			if (current > 0 && total > 0) {
-				bar.classList.remove('unknown');
-				const p = Math.min(100, Math.round((current / total) * 100));
-				fill.style.width = p + '%';
-				bar.setAttribute('aria-valuenow', String(p));
+		percent: -1,
+		label: w.line,
+		/* What the screen said, in order: [ms, label, percent or -1] (tests,
+		   and the evidence of a real load). */
+		history: [],
+		timings: { phases: [], total_ms: -1, from_first_page: fromPage > 0 },
+		show: function (label, percent) {
+			if (label === api.label && percent === api.percent) {
+				return;
 			}
+			api.label = label;
+			api.percent = percent;
+			text.textContent = label;
+			dots.style.display = percent >= 0 ? 'none' : '';
+			if (percent >= 0) {
+				bar.classList.remove('unknown');
+				fill.style.width = percent + '%';
+				bar.setAttribute('aria-valuenow', String(percent));
+			} else {
+				bar.classList.add('unknown');
+				fill.style.width = '';
+				bar.removeAttribute('aria-valuenow');
+			}
+			api.history.push([Math.round(now()), label, percent]);
+		},
+		/* Stage n of 3 reached (1 engine, 2 game files, 3 starting): the
+		   runner's own phases. */
+		step: function (n) {
+			const stage = Math.max(api.stage, Math.min(n, 3));
+			if (stage === api.stage) {
+				return;
+			}
+			const t = now();
+			const open = api.timings.phases[api.timings.phases.length - 1];
+			if (open && open.end_ms < 0) {
+				open.end_ms = Math.round(t);
+			}
+			api.stage = stage;
+			api.timings.phases.push({ phase: ['', 'engine', 'island', 'start'][stage], start_ms: Math.round(t), download_ms: -1, end_ms: -1, bytes: 0 });
+			base = { loaded: last.loaded, total: last.total };
+			high = 0;
+			api.show(w.busy[stage] || w.line, -1);
+		},
+		/* Bytes Godot's loader counted (all files so far, and their total
+		   when every size is known). */
+		progress: function (loaded, total) {
+			last = { loaded: loaded, total: total };
+			if (api.state !== 'loading' || api.stage >= 3) {
+				return;
+			}
+			api.phaseBytes(loaded - base.loaded, total > 0 ? total - base.total : 0);
+		},
+		/* The game files' own bytes, counted on their way in (below): the
+		   runner fetches them after the engine, when Godot's loader no
+		   longer reports. Only the game files' phase listens. */
+		fileBytes: function (loaded, size) {
+			if (api.stage === 2 && api.state === 'loading') {
+				api.phaseBytes(loaded, size);
+			}
+		},
+		/* This phase's bytes: a share, or its name while there is no size or
+		   the download is done and the engine is busy with it. */
+		phaseBytes: function (own, size) {
+			const phase = api.timings.phases[api.timings.phases.length - 1];
+			if (size <= 0) {
+				/* No size to measure against: the phase's name, no number. */
+				api.show(w.busy[api.stage] || w.line, -1);
+				return;
+			}
+			if (own >= size) {
+				/* Downloaded; the engine is busy with it -- not done yet. */
+				if (phase && phase.download_ms < 0) {
+					phase.download_ms = Math.round(now() - phase.start_ms);
+					phase.bytes = size;
+				}
+				api.show(w.busy[api.stage] || w.line, -1);
+				return;
+			}
+			high = Math.max(high, Math.max(0, Math.min(99, Math.floor((own / size) * 100))));
+			api.show(w.load[api.stage].replace('{p}', high), high);
+		},
+		/* Kept for Godot's own start callback (the plain export). */
+		bytes: function (current, total) {
+			api.progress(current, total);
 		},
 		fail: function (why) {
 			if (api.state === 'done' || api.state === 'failed') {
@@ -340,6 +457,7 @@ window.MomoSplash = (function () {
 			root.classList.add('failed');
 			root.setAttribute('aria-busy', 'false');
 			root.querySelector('.why').textContent = w.fail + (why ? '\n' + why : '');
+			api.history.push([Math.round(now()), 'failed', -1]);
 		},
 		/* The engine started: wait for the island's first frame, then fade. */
 		started: function () {
@@ -347,11 +465,13 @@ window.MomoSplash = (function () {
 				return;
 			}
 			api.state = 'starting';
-			fill.style.width = '100%';
-			const t0 = Date.now();
+			if (api.stage < 3) {
+				api.step(3);
+			}
+			const t1 = Date.now();
 			const wait = function () {
 				const ready = window.momonium && window.momonium.ready;
-				if (!ready && Date.now() - t0 < 8000) {
+				if (!ready && Date.now() - t1 < 8000) {
 					requestAnimationFrame(wait);
 					return;
 				}
@@ -362,11 +482,37 @@ window.MomoSplash = (function () {
 						requestAnimationFrame(settle);
 						return;
 					}
+					api.loaded();
 					api.hide();
 				};
 				requestAnimationFrame(settle);
 			};
 			wait();
+		},
+		/* The island is on the screen: how long that took, said once. */
+		loaded: function () {
+			const t = now();
+			const open = api.timings.phases[api.timings.phases.length - 1];
+			if (open && open.end_ms < 0) {
+				open.end_ms = Math.round(t);
+			}
+			api.timings.total_ms = Math.round(t);
+			const seconds = (t / 1000).toFixed(1);
+			console.info('[momonium] loaded in ' + seconds + ' s', JSON.stringify(api.timings));
+			const note = document.createElement('div');
+			note.id = 'momo-loaded';
+			note.setAttribute('role', 'status');
+			note.textContent = w.loaded.replace('{s}', seconds);
+			document.body.appendChild(note);
+			api.note = note.textContent;
+			setTimeout(function () {
+				note.classList.add('gone');
+				setTimeout(function () {
+					if (note.parentNode) {
+						note.parentNode.removeChild(note);
+					}
+				}, 600);
+			}, 1600);
 		},
 		hide: function () {
 			if (gone) {
@@ -403,6 +549,49 @@ window.MomoSplash = (function () {
 			api.fail(e.message);
 		}
 	});
+	/* The runner fetches the game files (.pck) after the engine, when
+	   Godot's own progress loop has already stopped (it runs only while the
+	   engine downloads): count that download's bytes on their way in, and
+	   hand the same bytes on to Godot. Nothing else is touched. */
+	if (window.fetch && window.ReadableStream) {
+		const plainFetch = window.fetch.bind(window);
+		window.fetch = function (input, init) {
+			const url = typeof input === 'string' ? input : String((input && input.url) || '');
+			const method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+			const pending = plainFetch(input, init);
+			if (method !== 'GET' || !/\.pck(\?|$)/.test(url)) {
+				return pending;
+			}
+			return pending.then(function (response) {
+				if (!response.ok || !response.body) {
+					return response;
+				}
+				const sizes = typeof GODOT_CONFIG !== 'undefined' && GODOT_CONFIG.fileSizes ? GODOT_CONFIG.fileSizes : {};
+				const name = url.split('/').pop().split('?')[0];
+				const plain = !response.headers.get('content-encoding');
+				const size = Number(sizes[url] || sizes[name] || (plain ? response.headers.get('content-length') : 0)) || 0;
+				const reader = response.body.getReader();
+				let loaded = 0;
+				const counted = new ReadableStream({
+					pull: function (controller) {
+						return reader.read().then(function (part) {
+							if (part.done) {
+								controller.close();
+								return;
+							}
+							loaded += part.value.byteLength;
+							api.fileBytes(loaded, size);
+							controller.enqueue(part.value);
+						});
+					},
+					cancel: function (reason) {
+						return reader.cancel(reason);
+					},
+				});
+				return new Response(counted, { status: response.status, statusText: response.statusText, headers: response.headers });
+			});
+		};
+	}
 	/* Still loading after a minute: say so, and offer to start over (the
 	   load goes on meanwhile). */
 	setTimeout(function () {
@@ -426,6 +615,11 @@ window.MomoSplash = (function () {
 		<script>
 const GODOT_CONFIG = $GODOT_CONFIG;
 const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+/* Step 74: the loader's byte counts from the very first download (the
+   engine's own init installs this before it fetches anything). */
+if (window.MomoSplash) {
+	GODOT_CONFIG.onProgress = function (current, total) { window.MomoSplash.progress(current, total); };
+}
 const engine = new Engine(GODOT_CONFIG);
 
 (function () {

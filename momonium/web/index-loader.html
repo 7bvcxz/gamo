@@ -26,6 +26,9 @@
     target.searchParams.set("pack", "__PACK_NAME__");
     target.searchParams.set("size", "__PACK_SIZE__");
     target.searchParams.set("build", "__PACK_NAME__");
+    // Step 74: when this page started, so the loading screen can say how long
+    // the whole start took, this page included (the monotonic clock's origin).
+    target.searchParams.set("t0", String(Math.round(performance.timeOrigin)));
     // Anything already on the address survives the hop, so a link with its own
     // query string is not silently dropped on the way through.
     for (const [key, value] of params) {
