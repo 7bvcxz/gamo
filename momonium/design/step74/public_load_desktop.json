@@ -1,0 +1,1056 @@
+{
+ "measured_ms": 14754,
+ "shots": 19,
+ "rec": {
+  "history": [
+   [
+    392,
+    "Preparing the engine",
+    -1
+   ],
+   [
+    393,
+    "Loading the engine 0%",
+    0
+   ],
+   [
+    615,
+    "Loading the engine 1%",
+    1
+   ],
+   [
+    698,
+    "Loading the engine 2%",
+    2
+   ],
+   [
+    764,
+    "Loading the engine 3%",
+    3
+   ],
+   [
+    831,
+    "Loading the engine 4%",
+    4
+   ],
+   [
+    914,
+    "Loading the engine 5%",
+    5
+   ],
+   [
+    998,
+    "Loading the engine 6%",
+    6
+   ],
+   [
+    1081,
+    "Loading the engine 7%",
+    7
+   ],
+   [
+    1164,
+    "Loading the engine 8%",
+    8
+   ],
+   [
+    1248,
+    "Loading the engine 9%",
+    9
+   ],
+   [
+    1298,
+    "Loading the engine 10%",
+    10
+   ],
+   [
+    1364,
+    "Loading the engine 11%",
+    11
+   ],
+   [
+    1431,
+    "Loading the engine 12%",
+    12
+   ],
+   [
+    1514,
+    "Loading the engine 13%",
+    13
+   ],
+   [
+    1598,
+    "Loading the engine 14%",
+    14
+   ],
+   [
+    1681,
+    "Loading the engine 15%",
+    15
+   ],
+   [
+    1731,
+    "Loading the engine 16%",
+    16
+   ],
+   [
+    1764,
+    "Loading the engine 17%",
+    17
+   ],
+   [
+    1848,
+    "Loading the engine 18%",
+    18
+   ],
+   [
+    1931,
+    "Loading the engine 19%",
+    19
+   ],
+   [
+    2014,
+    "Loading the engine 20%",
+    20
+   ],
+   [
+    2098,
+    "Loading the engine 21%",
+    21
+   ],
+   [
+    2181,
+    "Loading the engine 22%",
+    22
+   ],
+   [
+    2231,
+    "Loading the engine 23%",
+    23
+   ],
+   [
+    2314,
+    "Loading the engine 24%",
+    24
+   ],
+   [
+    2414,
+    "Loading the engine 25%",
+    25
+   ],
+   [
+    2498,
+    "Loading the engine 26%",
+    26
+   ],
+   [
+    2581,
+    "Loading the engine 27%",
+    27
+   ],
+   [
+    2631,
+    "Loading the engine 28%",
+    28
+   ],
+   [
+    2698,
+    "Loading the engine 29%",
+    29
+   ],
+   [
+    2764,
+    "Loading the engine 30%",
+    30
+   ],
+   [
+    2800,
+    "Loading the engine 31%",
+    31
+   ],
+   [
+    2848,
+    "Loading the engine 33%",
+    33
+   ],
+   [
+    2881,
+    "Loading the engine 34%",
+    34
+   ],
+   [
+    2914,
+    "Loading the engine 35%",
+    35
+   ],
+   [
+    2998,
+    "Loading the engine 36%",
+    36
+   ],
+   [
+    3081,
+    "Loading the engine 37%",
+    37
+   ],
+   [
+    3148,
+    "Loading the engine 38%",
+    38
+   ],
+   [
+    3231,
+    "Loading the engine 39%",
+    39
+   ],
+   [
+    3281,
+    "Loading the engine 40%",
+    40
+   ],
+   [
+    3348,
+    "Loading the engine 41%",
+    41
+   ],
+   [
+    3398,
+    "Loading the engine 42%",
+    42
+   ],
+   [
+    3414,
+    "Loading the engine 43%",
+    43
+   ],
+   [
+    3450,
+    "Loading the engine 44%",
+    44
+   ],
+   [
+    3464,
+    "Loading the engine 45%",
+    45
+   ],
+   [
+    3498,
+    "Loading the engine 46%",
+    46
+   ],
+   [
+    3531,
+    "Loading the engine 47%",
+    47
+   ],
+   [
+    3564,
+    "Loading the engine 48%",
+    48
+   ],
+   [
+    3631,
+    "Loading the engine 49%",
+    49
+   ],
+   [
+    3698,
+    "Loading the engine 50%",
+    50
+   ],
+   [
+    3764,
+    "Loading the engine 51%",
+    51
+   ],
+   [
+    3848,
+    "Loading the engine 52%",
+    52
+   ],
+   [
+    3931,
+    "Loading the engine 53%",
+    53
+   ],
+   [
+    3998,
+    "Loading the engine 54%",
+    54
+   ],
+   [
+    4081,
+    "Loading the engine 55%",
+    55
+   ],
+   [
+    4181,
+    "Loading the engine 56%",
+    56
+   ],
+   [
+    4264,
+    "Loading the engine 57%",
+    57
+   ],
+   [
+    4314,
+    "Loading the engine 58%",
+    58
+   ],
+   [
+    4364,
+    "Loading the engine 59%",
+    59
+   ],
+   [
+    4415,
+    "Loading the engine 60%",
+    60
+   ],
+   [
+    4448,
+    "Loading the engine 61%",
+    61
+   ],
+   [
+    4498,
+    "Loading the engine 62%",
+    62
+   ],
+   [
+    4531,
+    "Loading the engine 63%",
+    63
+   ],
+   [
+    4598,
+    "Loading the engine 64%",
+    64
+   ],
+   [
+    4648,
+    "Loading the engine 65%",
+    65
+   ],
+   [
+    4664,
+    "Loading the engine 66%",
+    66
+   ],
+   [
+    4714,
+    "Loading the engine 67%",
+    67
+   ],
+   [
+    4748,
+    "Loading the engine 68%",
+    68
+   ],
+   [
+    4781,
+    "Loading the engine 69%",
+    69
+   ],
+   [
+    4831,
+    "Loading the engine 70%",
+    70
+   ],
+   [
+    4898,
+    "Loading the engine 71%",
+    71
+   ],
+   [
+    4948,
+    "Loading the engine 72%",
+    72
+   ],
+   [
+    5014,
+    "Loading the engine 73%",
+    73
+   ],
+   [
+    5081,
+    "Loading the engine 74%",
+    74
+   ],
+   [
+    5148,
+    "Loading the engine 75%",
+    75
+   ],
+   [
+    5181,
+    "Loading the engine 76%",
+    76
+   ],
+   [
+    5248,
+    "Loading the engine 77%",
+    77
+   ],
+   [
+    5314,
+    "Loading the engine 78%",
+    78
+   ],
+   [
+    5381,
+    "Loading the engine 79%",
+    79
+   ],
+   [
+    5448,
+    "Loading the engine 80%",
+    80
+   ],
+   [
+    5531,
+    "Loading the engine 81%",
+    81
+   ],
+   [
+    5598,
+    "Loading the engine 82%",
+    82
+   ],
+   [
+    5648,
+    "Loading the engine 83%",
+    83
+   ],
+   [
+    5731,
+    "Loading the engine 84%",
+    84
+   ],
+   [
+    5798,
+    "Loading the engine 85%",
+    85
+   ],
+   [
+    5831,
+    "Loading the engine 86%",
+    86
+   ],
+   [
+    5898,
+    "Loading the engine 87%",
+    87
+   ],
+   [
+    5981,
+    "Loading the engine 88%",
+    88
+   ],
+   [
+    6048,
+    "Loading the engine 89%",
+    89
+   ],
+   [
+    6114,
+    "Loading the engine 90%",
+    90
+   ],
+   [
+    6181,
+    "Loading the engine 91%",
+    91
+   ],
+   [
+    6264,
+    "Loading the engine 92%",
+    92
+   ],
+   [
+    6398,
+    "Loading the engine 93%",
+    93
+   ],
+   [
+    6548,
+    "Loading the engine 94%",
+    94
+   ],
+   [
+    6648,
+    "Loading the engine 95%",
+    95
+   ],
+   [
+    6714,
+    "Loading the engine 96%",
+    96
+   ],
+   [
+    6814,
+    "Loading the engine 97%",
+    97
+   ],
+   [
+    6914,
+    "Loading the engine 98%",
+    98
+   ],
+   [
+    7031,
+    "Loading the engine 99%",
+    99
+   ],
+   [
+    7200,
+    "Preparing the engine",
+    -1
+   ],
+   [
+    7205,
+    "Opening the island",
+    -1
+   ],
+   [
+    7288,
+    "Loading the island 0%",
+    0
+   ],
+   [
+    7328,
+    "Loading the island 1%",
+    1
+   ],
+   [
+    7384,
+    "Loading the island 2%",
+    2
+   ],
+   [
+    7440,
+    "Loading the island 3%",
+    3
+   ],
+   [
+    7497,
+    "Loading the island 4%",
+    4
+   ],
+   [
+    7553,
+    "Loading the island 5%",
+    5
+   ],
+   [
+    7609,
+    "Loading the island 6%",
+    6
+   ],
+   [
+    7665,
+    "Loading the island 7%",
+    7
+   ],
+   [
+    7722,
+    "Loading the island 8%",
+    8
+   ],
+   [
+    7781,
+    "Loading the island 9%",
+    9
+   ],
+   [
+    7825,
+    "Loading the island 10%",
+    10
+   ],
+   [
+    7881,
+    "Loading the island 11%",
+    11
+   ],
+   [
+    7935,
+    "Loading the island 12%",
+    12
+   ],
+   [
+    7958,
+    "Loading the island 13%",
+    13
+   ],
+   [
+    7997,
+    "Loading the island 14%",
+    14
+   ],
+   [
+    8054,
+    "Loading the island 15%",
+    15
+   ],
+   [
+    8112,
+    "Loading the island 16%",
+    16
+   ],
+   [
+    8170,
+    "Loading the island 17%",
+    17
+   ],
+   [
+    8227,
+    "Loading the island 18%",
+    18
+   ],
+   [
+    8287,
+    "Loading the island 19%",
+    19
+   ],
+   [
+    8344,
+    "Loading the island 20%",
+    20
+   ],
+   [
+    8401,
+    "Loading the island 21%",
+    21
+   ],
+   [
+    8457,
+    "Loading the island 22%",
+    22
+   ],
+   [
+    8513,
+    "Loading the island 23%",
+    23
+   ],
+   [
+    8569,
+    "Loading the island 24%",
+    24
+   ],
+   [
+    8626,
+    "Loading the island 25%",
+    25
+   ],
+   [
+    8684,
+    "Loading the island 26%",
+    26
+   ],
+   [
+    8742,
+    "Loading the island 27%",
+    27
+   ],
+   [
+    8793,
+    "Loading the island 28%",
+    28
+   ],
+   [
+    8851,
+    "Loading the island 29%",
+    29
+   ],
+   [
+    8909,
+    "Loading the island 30%",
+    30
+   ],
+   [
+    8967,
+    "Loading the island 31%",
+    31
+   ],
+   [
+    9025,
+    "Loading the island 32%",
+    32
+   ],
+   [
+    9081,
+    "Loading the island 33%",
+    33
+   ],
+   [
+    9134,
+    "Loading the island 34%",
+    34
+   ],
+   [
+    9192,
+    "Loading the island 35%",
+    35
+   ],
+   [
+    9232,
+    "Loading the island 36%",
+    36
+   ],
+   [
+    9257,
+    "Loading the island 37%",
+    37
+   ],
+   [
+    9280,
+    "Loading the island 38%",
+    38
+   ],
+   [
+    9311,
+    "Loading the island 39%",
+    39
+   ],
+   [
+    9369,
+    "Loading the island 40%",
+    40
+   ],
+   [
+    9425,
+    "Loading the island 41%",
+    41
+   ],
+   [
+    9483,
+    "Loading the island 42%",
+    42
+   ],
+   [
+    9542,
+    "Loading the island 43%",
+    43
+   ],
+   [
+    9602,
+    "Loading the island 44%",
+    44
+   ],
+   [
+    9659,
+    "Loading the island 45%",
+    45
+   ],
+   [
+    9694,
+    "Loading the island 46%",
+    46
+   ],
+   [
+    9734,
+    "Loading the island 47%",
+    47
+   ],
+   [
+    9773,
+    "Loading the island 48%",
+    48
+   ],
+   [
+    9810,
+    "Loading the island 49%",
+    49
+   ],
+   [
+    9856,
+    "Loading the island 50%",
+    50
+   ],
+   [
+    9902,
+    "Loading the island 51%",
+    51
+   ],
+   [
+    9950,
+    "Loading the island 52%",
+    52
+   ],
+   [
+    9996,
+    "Loading the island 53%",
+    53
+   ],
+   [
+    10043,
+    "Loading the island 54%",
+    54
+   ],
+   [
+    10089,
+    "Loading the island 55%",
+    55
+   ],
+   [
+    10135,
+    "Loading the island 56%",
+    56
+   ],
+   [
+    10182,
+    "Loading the island 57%",
+    57
+   ],
+   [
+    10227,
+    "Loading the island 58%",
+    58
+   ],
+   [
+    10272,
+    "Loading the island 59%",
+    59
+   ],
+   [
+    10320,
+    "Loading the island 60%",
+    60
+   ],
+   [
+    10365,
+    "Loading the island 61%",
+    61
+   ],
+   [
+    10413,
+    "Loading the island 62%",
+    62
+   ],
+   [
+    10460,
+    "Loading the island 63%",
+    63
+   ],
+   [
+    10507,
+    "Loading the island 64%",
+    64
+   ],
+   [
+    10553,
+    "Loading the island 65%",
+    65
+   ],
+   [
+    10600,
+    "Loading the island 66%",
+    66
+   ],
+   [
+    10648,
+    "Loading the island 67%",
+    67
+   ],
+   [
+    10694,
+    "Loading the island 68%",
+    68
+   ],
+   [
+    10729,
+    "Loading the island 69%",
+    69
+   ],
+   [
+    10766,
+    "Loading the island 70%",
+    70
+   ],
+   [
+    10802,
+    "Loading the island 71%",
+    71
+   ],
+   [
+    10840,
+    "Loading the island 72%",
+    72
+   ],
+   [
+    10885,
+    "Loading the island 73%",
+    73
+   ],
+   [
+    10929,
+    "Loading the island 74%",
+    74
+   ],
+   [
+    10972,
+    "Loading the island 75%",
+    75
+   ],
+   [
+    11014,
+    "Loading the island 76%",
+    76
+   ],
+   [
+    11056,
+    "Loading the island 77%",
+    77
+   ],
+   [
+    11100,
+    "Loading the island 78%",
+    78
+   ],
+   [
+    11118,
+    "Loading the island 79%",
+    79
+   ],
+   [
+    11126,
+    "Loading the island 80%",
+    80
+   ],
+   [
+    11135,
+    "Loading the island 81%",
+    81
+   ],
+   [
+    11143,
+    "Loading the island 82%",
+    82
+   ],
+   [
+    11150,
+    "Loading the island 83%",
+    83
+   ],
+   [
+    11157,
+    "Loading the island 84%",
+    84
+   ],
+   [
+    11166,
+    "Loading the island 85%",
+    85
+   ],
+   [
+    11173,
+    "Loading the island 86%",
+    86
+   ],
+   [
+    11198,
+    "Loading the island 87%",
+    87
+   ],
+   [
+    11242,
+    "Loading the island 88%",
+    88
+   ],
+   [
+    11259,
+    "Loading the island 89%",
+    89
+   ],
+   [
+    11299,
+    "Loading the island 90%",
+    90
+   ],
+   [
+    11333,
+    "Loading the island 91%",
+    91
+   ],
+   [
+    11359,
+    "Loading the island 92%",
+    92
+   ],
+   [
+    11385,
+    "Loading the island 93%",
+    93
+   ],
+   [
+    11406,
+    "Loading the island 94%",
+    94
+   ],
+   [
+    11421,
+    "Loading the island 95%",
+    95
+   ],
+   [
+    11453,
+    "Loading the island 96%",
+    96
+   ],
+   [
+    11475,
+    "Loading the island 97%",
+    97
+   ],
+   [
+    11498,
+    "Loading the island 98%",
+    98
+   ],
+   [
+    11518,
+    "Loading the island 99%",
+    99
+   ],
+   [
+    11543,
+    "Opening the island",
+    -1
+   ],
+   [
+    11581,
+    "Waking the Momo",
+    -1
+   ]
+  ],
+  "timings": {
+   "phases": [
+    {
+     "phase": "engine",
+     "start_ms": 392,
+     "download_ms": 6808,
+     "end_ms": 7205,
+     "bytes": 39509339
+    },
+    {
+     "phase": "island",
+     "start_ms": 7205,
+     "download_ms": 4338,
+     "end_ms": 11581,
+     "bytes": 8895580
+    },
+    {
+     "phase": "start",
+     "start_ms": 11581,
+     "download_ms": -1,
+     "end_ms": 13393,
+     "bytes": 0
+    }
+   ],
+   "total_ms": 13393,
+   "from_first_page": true
+  },
+  "note": "Loaded in 13.4 s"
+ }
+}
