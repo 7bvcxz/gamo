@@ -1,6 +1,8 @@
 {
   "_note": "The Premium Shop's catalog (Step 59): optional real-money products, no ads, nothing required. PROPOSED configuration until the platform storefront (Google Play) has the products and the owner approves them. The game never shows `proposed_price`: a price on screen comes from the storefront, and with no storefront connected the shop says 'Coming soon' and sells nothing. `steps` are what each purchase would make the island's speed (x2 each, five at most); nothing in the simulation reads them yet.",
   "status": "proposed",
+  "_ads_note": "Step 75: the game shows no ads -- no ad SDK, no ad ID, nothing loaded from an ad network. `ads_shown` says so to the model; a product with `requires_ads` is never offered while it is false (selling the removal of something absent would mislead).",
+  "ads_shown": false,
   "products": [
     {
       "id": "accelerator",
@@ -12,6 +14,18 @@
       "factor": 2,
       "max_purchases": 5,
       "proposed_price": {"currency": "KRW", "amount": 2000}
+    },
+    {
+      "_note": "Step 75, a catalog entry only: a one-time, non-consumable entitlement for a possible future version that shows ads. Never sold before the game has ads and billing is a validated step; its SKU and price are chosen with the owner then, so there is neither here. See design/RELEASE_CHECKLIST.md (Remove Ads).",
+      "id": "remove_ads",
+      "status": "planned",
+      "sku": "",
+      "kind": "non_consumable",
+      "entitlement": "no_ads",
+      "requires_ads": true,
+      "name": "store.remove_ads.name",
+      "desc": "store.remove_ads.desc",
+      "icon": "ui_no_ads"
     }
   ]
 }

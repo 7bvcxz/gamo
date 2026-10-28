@@ -500,7 +500,6 @@ func _ready() -> void:
 				rows[String(r.name).trim_prefix("First_")] = [(r.get_child(0) as Label).text, (r.get_node("Value") as Label).text]
 		return {"timeline": j.timeline(), "totals": j.totals(), "rows": rows, "head": view.head.text, "totals_text": view.totals.text,
 			"shown": view.is_visible_in_tree()})
-	# Scrolls Settings to a row by its node name, as a player's scroll would.
 	# E2E: scrolls a panel to one of its controls -- [frame name, control
 	# name]. A long panel scrolls on a desktop's larger UI (Step 54), and a
 	# rectangle asked for out of sight is a tap on nothing.
@@ -515,6 +514,11 @@ func _ready() -> void:
 		else:
 			f.scroll.ensure_control_visible(c)
 		return {"ok": true})
+	# Step 75: an option as the settings panel would set it (the UI size).
+	bridge.register_query("dev_set_option", func(arg: Variant) -> Dictionary:
+		settings_view.option_changed.emit(String(arg[0]), arg[1])
+		return {"ok": true, "value": settings.get_value(String(arg[0]))})
+	# Scrolls Settings to a row by its node name, as a player's scroll would.
 	bridge.register_query("dev_settings_reveal", func(node_name: Variant) -> Dictionary:
 		var c := settings_view.find_child(String(node_name), true, false) as Control
 		if c == null:
@@ -1525,7 +1529,10 @@ func _premium_shop_info(_arg: Variant) -> Dictionary:
 	for id: String in shop_view.cards:
 		var c: Dictionary = shop_view.cards[id]
 		var buy := c["buy"] as Button
+		var card := c["card"] as Control
 		products[id] = {"name": (c["name"] as Label).text, "desc": (c["desc"] as Label).text, "buy": rect.call(buy) if buy.is_visible_in_tree() else [],
+			"card": rect.call(card) if card.is_visible_in_tree() else [], "icon": String(premium.product(id).get("icon", "")),
+			"steps_shown": (card.find_child("Steps", true, false) as Control).visible, "scroll": rect.call(shop_frame.scroll) if shop_frame.visible else [],
 			"buy_text": buy.text, "buy_disabled": buy.disabled, "price": (c["price"] as Label).text, "owned": (c["owned"] as Label).text,
 			"steps": (c["steps"] as Array).map(func(b: Button) -> String: return b.text), "state": premium.state(id)}
 	var win := DisplayServer.window_get_size()

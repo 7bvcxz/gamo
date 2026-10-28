@@ -604,6 +604,11 @@ away.counted_only,Away {away}.,{away} 동안 떠나 있었어요.,{away}のあ�
 store.intro,"Optional extras. No ads, and nothing you need to buy to play.","선택 상품이에요. 광고는 없고, 사지 않아도 끝까지 즐길 수 있어요.",おまけの商品です。広告はなく、買わなくても最後まで遊べます。,可选商品。没有广告，不购买也能玩到最后。
 store.accelerator.name,Accelerator,가속기,アクセラレーター,加速器
 store.accelerator.desc,"Each one makes your whole island work twice as fast, up to five.","하나마다 섬 전체의 일이 두 배 빨라져요. 최대 5개까지.",ひとつごとに島全体の仕事が2倍速くなります。最大5個まで。,每个让整座岛的工作快一倍，最多5个。
+store.remove_ads.name,Remove Ads,광고 제거,広告削除,移除广告
+store.remove_ads.desc,There are no ads in the game. This is planned only in case a future version ever shows them: one purchase would turn them off for good.,지금 게임에는 광고가 없어요. 나중 버전에 광고가 생길 경우를 위해 계획만 해 둔 항목이에요. 한 번 사면 광고가 계속 꺼지게 할 예정이에요.,今のゲームに広告はありません。将来のバージョンで広告が入る場合に備えて計画しているだけの項目です。一度買えば広告がずっと消える予定です。,目前游戏中没有广告。此项仅为将来可能出现广告的版本而计划：购买一次即可永久关闭广告。
+store.not_yet,Not available yet,아직 이용할 수 없어요,まだ利用できません,暂不可用
+store.one_time,One-time purchase,한 번만 구매,買い切り,一次性购买
+store.purchased,Purchased,구매함,購入済み,已购买
 store.owned,Owned %d / %d,보유 %d / %d,所持 %d / %d,已拥有 %d / %d
 store.coming_soon,Coming soon,준비 중,準備中,即将推出
 store.maxed,All owned,모두 보유,すべて所持,已全部拥有

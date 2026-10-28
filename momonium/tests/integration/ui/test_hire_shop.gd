@@ -134,17 +134,29 @@ func test_the_shop_opens_the_premium_shop_and_never_hires_or_charges() -> void:
 	assert_true(frame.visible, "the Premium Shop opens")
 	assert_false((main.get("hire_menu") as HireMenu).visible, "not the hire card")
 	assert_eq(frame.title_label.text, "Shop", "titled Shop")
-	assert_eq(view.cards.keys(), ["accelerator"], "the catalog's products")
+	assert_eq(view.cards.keys(), ["accelerator", "remove_ads"], "the catalog's products: the Accelerator and Remove Ads, apart")
 	var c: Dictionary = view.cards["accelerator"]
 	assert_eq((c["name"] as Label).text, "Accelerator", "by name")
 	assert_true((c["buy"] as Button).disabled, "it cannot be bought")
 	assert_eq((c["buy"] as Button).text, "Coming soon", "and says so")
 	assert_false((c["price"] as Label).visible, "no price without a storefront")
 	assert_eq((c["steps"] as Array).map(func(b: Button) -> String: return b.text), ["×2", "×4", "×8", "×16", "×32"], "the steps it would climb")
+	var r: Dictionary = view.cards["remove_ads"]
+	assert_eq((r["name"] as Label).text, "Remove Ads", "Remove Ads by name")
+	assert_true((r["desc"] as Label).text.begins_with("There are no ads in the game."), "and it says there are no ads now")
+	assert_true((r["buy"] as Button).disabled, "it cannot be bought")
+	assert_eq((r["buy"] as Button).text, "Not available yet", "and says so")
+	assert_false((r["price"] as Label).visible, "no price")
+	assert_eq((r["owned"] as Label).text, "One-time purchase", "one-time, unlike the Accelerator")
+	assert_false(((r["card"] as Control).find_child("Steps", true, false) as Control).visible, "no steps to climb")
 	assert_true(view.note.visible, "a line says purchases are not open")
 	assert_true(view.restore_button.disabled, "nothing to restore")
+	var before := JSON.stringify(sim.save_state())
 	view.purchase_requested.emit("accelerator")
 	assert_false(bool((main.get("shop_last") as Dictionary)["result"]["ok"]), "a Buy tap (were it possible) is refused")
+	view.purchase_requested.emit("remove_ads")
+	assert_eq((main.get("shop_last") as Dictionary)["result"], {"ok": false, "reason": "store.not_yet"}, "Remove Ads too: not yet")
+	assert_eq(JSON.stringify(sim.save_state()), before, "the island exactly as it was")
 	assert_eq(economy.money, money, "the game's money untouched")
 	assert_eq(momos.ids().size(), 0, "no Momo hired")
 	assert_true(frame.card_rect().end.x <= hud.hire_button.get_rect().position.x, "the card leaves Hire free")
@@ -172,7 +184,8 @@ func test_one_thing_open_at_a_time() -> void:
 
 func test_names_in_every_language_and_for_screen_readers() -> void:
 	await _open(Vector2i(720, 1280))
-	var want := {"en": ["Hire", "Shop", "Coming soon"], "ko": ["고용", "상점", "준비 중"], "ja": ["雇用", "ショップ", "準備中"], "zh_CN": ["雇佣", "商店", "即将推出"]}
+	var want := {"en": ["Hire", "Shop", "Coming soon", "Remove Ads", "Not available yet"], "ko": ["고용", "상점", "준비 중", "광고 제거", "아직 이용할 수 없어요"],
+		"ja": ["雇用", "ショップ", "準備中", "広告削除", "まだ利用できません"], "zh_CN": ["雇佣", "商店", "即将推出", "移除广告", "暂不可用"]}
 	var view: PremiumShopView = main.get("shop_view")
 	for lang: String in want:
 		LocaleService.apply(lang)
@@ -180,6 +193,9 @@ func test_names_in_every_language_and_for_screen_readers() -> void:
 		assert_eq(hud.hire_button._label.text, want[lang][0], "%s: Hire" % lang)
 		assert_eq((hud.buttons[&"shop"] as HudButton)._label.text, want[lang][1], "%s: Shop" % lang)
 		assert_eq((view.cards["accelerator"]["buy"] as Button).text, want[lang][2], "%s: Coming soon" % lang)
+		assert_eq((view.cards["remove_ads"]["name"] as Label).text, want[lang][3], "%s: Remove Ads" % lang)
+		assert_eq((view.cards["remove_ads"]["buy"] as Button).text, want[lang][4], "%s: Not available yet" % lang)
+		assert_eq((view.cards["remove_ads"]["buy"] as Button).accessibility_name, "%s: %s" % [want[lang][3], want[lang][4]], "%s: a screen reader hears both" % lang)
 		assert_eq(hud.hire_button.accessibility_name, want[lang][0], "%s: a screen reader hears Hire" % lang)
 		assert_eq((hud.buttons[&"shop"] as HudButton).accessibility_name, want[lang][1], "%s: and Shop" % lang)
 

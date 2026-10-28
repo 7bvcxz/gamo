@@ -9,6 +9,10 @@ extends VBoxContainer
 ## connected -- the web, and Android until billing is a validated step --
 ## every product reads 'Coming soon', its button is off, and nothing is ever
 ## charged or granted: a tap here never touches the island.
+##
+## Step 75: a one-time product (Remove Ads) has no steps and says
+## 'One-time purchase' where the Accelerator counts what is owned; while the
+## game shows no ads it reads 'Not available yet' and says there are none.
 
 signal purchase_requested(id: String)
 signal restore_requested
@@ -87,6 +91,7 @@ func _build() -> void:
 			chip.add_theme_font_size_override("font_size", 15)
 			chips.add_child(chip)
 			step_buttons.append(chip)
+		chips.visible = not step_buttons.is_empty()
 		col.add_child(chips)
 		var buy_row := HBoxContainer.new()
 		buy_row.add_theme_constant_override("separation", 10)
@@ -128,7 +133,7 @@ func refresh() -> void:
 		var steps: Array = c["steps"]
 		for i in steps.size():
 			(steps[i] as Button).theme_type_variation = &"SelectedButton" if i < int(st["owned"]) else &""
-		(c["owned"] as Label).text = tr("store.owned") % [int(st["owned"]), int(st["max"])]
+		(c["owned"] as Label).text = tr("store.one_time") if st["one_time"] else tr("store.owned") % [int(st["owned"]), int(st["max"])]
 		var price := c["price"] as Label
 		price.text = String(st["price"])
 		price.visible = st["price"] != ""

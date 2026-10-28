@@ -58,7 +58,7 @@
 
 ## 수익화 (계획만, 결제는 아직 넣지 않음)
 
-- 계획한 유일한 상품은 **Accelerator**다.
+- 계획한 상품은 **Accelerator**이고, 광고 제거(Step 75)는 광고가 생길 경우를 위한 자리일 뿐이다.
   - 1회 ₩2,000, 살 때마다 ×2로 겹친다(×2 → ×4 → ×8 → ×16 → ×32). 최대 5회까지다.
   - 광고 없음, 꼭 사야 하는 것 없음.
 - **Step 59에 있는 것**: 상점 화면(왼쪽 아래 쇼핑백, `PremiumShopView`)과 데이터 카탈로그(`data/store.json`,
@@ -78,6 +78,27 @@
   - 영수증(구매 토큰) 검증은 서버에서 Google Play Developer API로 하는 것이 권장이다.
   - Godot은 공식 Android 플러그인(GodotGooglePlayBilling)을 쓴다. 웹 빌드는 결제가 없는 것이 기본이다.
   - 가격은 스토어가 지역 통화로 정한다(₩2,000은 한국 가격의 계획일 뿐).
+- **광고 제거 (Step 75, 카탈로그만)**: 게임에는 광고가 없다. 광고 SDK·배너·보상형/전면 광고·광고 ID·추적 권한·외부 광고
+  서비스가 하나도 없고, 테스트(`test_no_ads`, E2E `shop75`의 네트워크 검사)가 그것을 지킨다. 상점에는 '광고 제거' 카드가
+  가속기와 따로 있고, **'아직 이용할 수 없어요'**와 '지금 게임에는 광고가 없어요'를 말한다. 가격·SKU·구매 버튼은 없다.
+  - 데이터: `store.json`의 `remove_ads` — `kind: non_consumable`(한 번 사서 계속 가짐), `entitlement: no_ads`,
+    `status: planned`, `sku: ""`, `requires_ads: true`. 카탈로그 맨 위 `ads_shown: false`. `planned`이거나 광고가 없는 동안은
+    결제 창구가 연결돼 있어도 팔지 않는다(`PremiumStore.state` → `store.not_yet`, 창구에 묻지도 않음).
+    `GameData`가 카탈로그를 검사한다: SKU 없는 상품은 `planned`만, 광고가 없으면 광고 제거는 `on_sale`이 될 수 없다.
+  - **SKU와 가격은 지금 정하지 않는다.** 결제를 붙이는 단계에서 소유자와 정한다.
+  - 앞으로의 흐름(결제 연동 단계에서 그때의 공식 문서로 다시 확인)
+    - **구매**: 창구가 Google Play의 Purchase(`products`/`productId`, `purchaseState`, `purchaseToken`)를 준다. 토큰을
+      우리 쪽에서 검증한 뒤에만 `verified: true`를 붙인다. `PremiumStore.parse_purchase`는 이미 그 규칙을 갖고 있다 —
+      `purchaseState`가 PURCHASED(1)이고, 토큰이 있고, 검증됐고, 카탈로그의 한 번 사는 상품 SKU와 맞을 때만
+      `no_ads`를 준다. 보류(PENDING)·모르는 상품·가속기·형식이 틀린 기록은 아무것도 주지 않는다. 지금은 아무것도
+      이 함수를 실제 구매로 부르지 않는다.
+    - **확인(acknowledge)**: 3일 안에 하지 않으면 자동 환불되므로, 권한을 준 직후 확인한다.
+    - **복원·다른 기기**: 비소모성은 같은 Google 계정이면 어느 기기에서든 `queryPurchasesAsync`에 나온다.
+      시작할 때마다 창구에 묻고(`entitlements(records)`), 세이브 파일을 권한의 원본으로 삼지 않는다(세이브는 복사·되돌리기가
+      되므로). 오프라인일 때 쓸 마지막 답 하나 정도만 따로 둔다.
+    - **환불·취소**: 다시 물었을 때 사라진 구매는 권한도 거둔다. 서버가 있으면 Voided Purchases API로 안다.
+    - 웹 데모에는 결제가 없다. 광고도 없으므로 광고 제거는 웹에서 영원히 '아직 이용할 수 없어요'다.
+  - 광고를 넣는 일이 생기면 그것은 별도 결정이다(이 문서·`ads_shown`·`test_no_ads`를 함께 바꾼다).
 - 넣기 전에 지킬 것
   - 플랫폼 결제(Google Play Billing)와 영수증 검증을 쓴다. 구매 복원(재설치·기기 변경)이 되어야 한다.
   - **프로덕션에서 가짜 구매를 켜지 않는다**(테스트 구매는 라이선스 테스터만).

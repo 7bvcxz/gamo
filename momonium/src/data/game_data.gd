@@ -82,9 +82,46 @@ func validate() -> void:
 	_validate_recipes()
 	_validate_research()
 	_validate_goals()
+	_validate_store()
 	_require_number({}, "balance", "land.base", 1)
 	_require_number({}, "balance", "land.growth", 1)
 	_require_number({}, "balance", "land.round_to", 1)
+
+
+## The Premium Shop's catalog (Steps 59, 75): unique ids, a known kind with
+## what that kind needs (steps for the Accelerator, an entitlement for a
+## one-time product), names and icons; a product with no SKU is only ever
+## planned, and one that removes ads is not on sale while the game has none.
+func _validate_store() -> void:
+	var ids := {}
+	var ads := bool(get_value("store", "ads_shown", false))
+	for v: Variant in get_value("store", "products", []):
+		var p: Dictionary = v if typeof(v) == TYPE_DICTIONARY else {}
+		var id := String(p.get("id", ""))
+		if id == "" or ids.has(id):
+			errors.append("store: products need unique ids (%s)" % id)
+		ids[id] = true
+		for k: String in ["name", "desc", "icon"]:
+			if String(p.get(k, "")) == "":
+				errors.append("store: %s needs %s" % [id, k])
+		var status := String(p.get("status", get_value("store", "status", "")))
+		if not ["proposed", "planned", "on_sale"].has(status):
+			errors.append("store: %s has an unknown status %s" % [id, status])
+		match String(p.get("kind", "")):
+			"stepped_consumable":
+				if int(p.get("factor", 0)) < 2 or int(p.get("max_purchases", 0)) < 1:
+					errors.append("store: %s needs a factor of 2+ and at least one purchase" % id)
+			"non_consumable":
+				if String(p.get("entitlement", "")) == "":
+					errors.append("store: %s (one-time) needs the entitlement it grants" % id)
+				if p.has("max_purchases") or p.has("factor"):
+					errors.append("store: %s (one-time) is bought once: no steps" % id)
+			_:
+				errors.append("store: %s has an unknown kind %s" % [id, p.get("kind", "")])
+		if String(p.get("sku", "")) == "" and status != "planned":
+			errors.append("store: %s has no SKU, so it can only be planned" % id)
+		if bool(p.get("requires_ads", false)) and not ads and status == "on_sale":
+			errors.append("store: %s removes ads, and the game shows none" % id)
 
 
 ## Step 72: the civilization milestones -- unique ids, known needs, each at

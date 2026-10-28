@@ -976,6 +976,16 @@
           32
         ]
       }
+    },
+    "ui_no_ads": {
+      "source": "svg/ui_no_ads.svg",
+      "scale": 1.0,
+      "pivots": {
+        "center": [
+          32,
+          32
+        ]
+      }
     }
   }
 }

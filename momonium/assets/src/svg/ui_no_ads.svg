@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Remove Ads (Step 75, planned): a shield over a small banner, struck through. -->
+  <path d="M32 4 L54 12 V30 C54 44 45 53 32 60 C19 53 10 44 10 30 V12 Z" fill="#6cc4ff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="19" y="22" width="26" height="18" rx="4" fill="#ffffff" fill-opacity="0.35" stroke="#ffffff" stroke-width="3"/>
+  <path d="M19 46 L45 16" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+  <path d="M19 46 L45 16" stroke="#ff7f7f" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
