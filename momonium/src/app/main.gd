@@ -540,7 +540,10 @@ func _ready() -> void:
 	bridge.register_query("island", func(_a: Variant) -> Dictionary:
 		return {"tier": (sim.system(&"tiers") as TierSystem).tier, "city": island.city, "city_t": island.city_t,
 			"bank_quads": island.bank_quads, "faces": island.visible_face_count(), "shore_apron": ocean.apron(),
-			"build_ms": island.last_build_ms})
+			"build_ms": island.last_build_ms,
+			# Step 73: the tier's look and how far its change has come; what it put on the island.
+			"look": island.look, "look_t": island.look_t, "path_quads": island.path_quads, "lamps": island.lamp_count,
+			"beds": island.bed_count, "cells": (sim.system(&"world") as WorldSystem).owned_count()})
 	# Step 64: a number shown on a HUD button whatever the count ([name, n];
 	# n < 0 gives the real count back), and some news to count: `letters`
 	# unread letters and exactly `topics` research topics not yet shown.

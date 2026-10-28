@@ -31,6 +31,15 @@ extends Node2D
 ## a new island or a sale shows the tier's look at once. The bank is only
 ## drawn: cells, ownership, taps and the ground the buildings stand on are
 ## where they were.
+##
+## Step 73: each tier has a look of its own (`art.island_tiers.city` and
+## `.nation`; a Village is drawn as it always was): the lawn mown in stripes
+## (City) or a checker (Nation), a sandy footpath (City) or a jointed stone
+## promenade with lamps (Nation) just inside every coast edge, flowerbeds and
+## low hedges (City) or topiary (Nation) on free cells, and for a Nation a
+## bank of dressed stone in courses instead of the City's sand. On promotion
+## the old look fades into the new one (`_prev`). All of it is baked into the
+## same meshes: still four or five draws, whatever the island's size.
 
 const GRASS_TILES_PER_TEXTURE := 2.0
 const CLIFF_TILES_PER_TEXTURE := 2.0
@@ -55,6 +64,10 @@ var overlay_mesh := ArrayMesh.new()
 ## island's grass texture running on down the slope, fading out.
 var bank_mesh := ArrayMesh.new()
 var bank_grass_mesh := ArrayMesh.new()
+## Step 73: the lamps' glow, drawn by a child (`glow`) whose modulate follows
+## the night -- warm and bright after dusk, gone by day -- like the windows.
+var glow_mesh := ArrayMesh.new()
+var glow: Node2D
 var last_build_ms := 0.0
 var _tiers: TierSystem
 var _data: GameData
@@ -62,6 +75,15 @@ var _data: GameData
 ## (0 = Village's cliffs, 1 = the City's bank and grass).
 var city := false
 var city_t := 0.0
+## Step 73: the look drawn (0 Village, 1 City, 2 Nation), how far a change to
+## it has come, and the look it is changing from (its meshes and tint).
+var look := 0
+var look_t := 1.0
+var _prev: Dictionary = {}
+## What the look put on the island (tests, the perf budget).
+var path_quads := 0
+var lamp_count := 0
+var bed_count := 0
 ## Sub-quads in the bank (tests, the perf budget), and where each starts.
 var bank_quads := 0
 var bank_origins: Array[Vector2] = []
@@ -76,9 +98,15 @@ func setup(sim: Simulation, projection: IsoProjection) -> void:
 	_cliff_tex = load("res://assets/textures/cliff.png")
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	glow = Node2D.new()
+	glow.name = "LampGlow"
+	glow.draw.connect(func() -> void: glow.draw_mesh(glow_mesh, null))
+	add_child(glow)
 	sim.bus.emitted.connect(_on_event)
-	city = is_city_tier()
+	look = tier_look()
+	city = look >= 1
 	city_t = 1.0 if city else 0.0
+	look_t = 1.0
 	rebuild()
 
 
@@ -86,12 +114,26 @@ func setup(sim: Simulation, projection: IsoProjection) -> void:
 ## blueprint) cost one rebuild, at the start of the next frame.
 func _on_event(type: StringName, _payload: Dictionary) -> void:
 	if type == &"tier_promoted" or type == &"game_loaded":
-		var was := city
-		city = is_city_tier()
-		if city != was:
-			# Promoted: the change plays; loaded: the tier's look at once.
-			city_t = (0.0 if city else 1.0) if type == &"tier_promoted" else (1.0 if city else 0.0)
-			set_process(true)
+		var now := tier_look()
+		if now != look:
+			# Promoted: the old look fades into the new one; loaded: the
+			# tier's look at once.
+			if type == &"tier_promoted":
+				_prev = {"look": look, "tint": grass_tint(), "faces": faces_mesh, "bank": bank_mesh, "bank_grass": bank_grass_mesh,
+					"tops": tops_mesh, "overlay": overlay_mesh}
+				faces_mesh = ArrayMesh.new()
+				tops_mesh = ArrayMesh.new()
+				overlay_mesh = ArrayMesh.new()
+				bank_mesh = ArrayMesh.new()
+				bank_grass_mesh = ArrayMesh.new()
+				look_t = 0.0
+			else:
+				_prev = {}
+				look_t = 1.0
+			look = now
+			city = look >= 1
+			city_t = _city_t()
+			set_process(look_t < 1.0)
 	if type in [&"land_added", &"game_loaded", &"occupancy_changed", &"tier_promoted"] and not _dirty:
 		_dirty = true
 		rebuild.call_deferred()
@@ -102,26 +144,72 @@ func is_city_tier() -> bool:
 	return _tiers != null and _tiers.tier >= int(_data.get_float("art", "island_tiers.city_from_tier", 1.0))
 
 
+## Step 73: the look the tier draws -- 0 Village, 1 City, 2 Nation.
+func tier_look() -> int:
+	if not is_city_tier():
+		return 0
+	return 2 if _tiers.tier >= 2 else 1
+
+
+## A look's settings (`art.island_tiers.city` / `.nation`), {} for a Village.
+func look_config(l: int = -1) -> Dictionary:
+	var which := look if l < 0 else l
+	if _data == null or which <= 0:
+		return {}
+	return _data.get_value("art", "island_tiers." + ("nation" if which >= 2 else "city"), {})
+
+
+## How far the Village's cliffs have given way to a bank (the Step 63 value):
+## only a change from a Village plays it; City to Nation keeps the bank.
+func _city_t() -> float:
+	if not city:
+		return 0.0
+	return look_t if not _prev.is_empty() and int(_prev["look"]) == 0 else 1.0
+
+
 func _ready() -> void:
-	set_process(city_t != (1.0 if city else 0.0))
+	set_process(look_t < 1.0 or lamp_count > 0)
 
 
 func _process(delta: float) -> void:
-	var goal := 1.0 if city else 0.0
+	if lamp_count > 0:
+		_light_lamps()
+	if look_t >= 1.0:
+		set_process(lamp_count > 0)
+		return
 	var seconds := maxf(_data.get_float("art", "island_tiers.fade_seconds", 0.9), 0.01) if _data != null else 0.9
-	city_t = move_toward(city_t, goal, delta / seconds)
+	look_t = move_toward(look_t, 1.0, delta / seconds)
+	city_t = _city_t()
 	queue_redraw()
-	if city_t == goal:
-		set_process(false)
+	if look_t >= 1.0:
+		_prev = {}
+		set_process(lamp_count > 0)
 
 
-## The grass's tint now: none for a Village, the City's at full change.
-func grass_tint() -> Color:
-	var raw: Array = _data.get_value("art", "island_tiers.city_grass_tint", [1.0, 1.0, 1.0]) if _data != null else [1.0, 1.0, 1.0]
-	return Color.WHITE.lerp(Color(float(raw[0]), float(raw[1]), float(raw[2])), city_t)
+## The lamps' glow under the night tint the world gets now (the windows' rule,
+## BuildingView.night_strength): its colour divided by the tint, so it stays
+## warm on the screen; nothing by day.
+func _light_lamps() -> void:
+	var cfg: Dictionary = _data.get_value("art", "night_lights", {}) if _data != null else {}
+	var amb := BuildingView.ambient
+	var night := BuildingView.night_strength(amb, float(cfg.get("start", 0.25)))
+	var warm := Color(String(cfg.get("color", "#ffd98a")))
+	glow.modulate = Color(minf(warm.r / maxf(amb.r, 0.2), 4.0), minf(warm.g / maxf(amb.g, 0.2), 4.0), minf(warm.b / maxf(amb.b, 0.2), 4.0), minf(1.0, night * 2.0) * look_t)
+	glow.visible = night > 0.01
+
+
+## The grass's tint for a look: none for a Village, the City's, or the
+## Nation's own (a deeper green).
+func grass_tint(l: int = -1) -> Color:
+	var which := look if l < 0 else l
+	if _data == null or which <= 0:
+		return Color.WHITE
+	var raw: Array = look_config(which).get("grass_tint", _data.get_value("art", "island_tiers.city_grass_tint", [1.0, 1.0, 1.0]))
+	return Color(float(raw[0]), float(raw[1]), float(raw[2]))
 
 
 var _dirty := false
+var _glow_batch: _Batch
 
 
 ## The order cells are painted in: farthest first.
@@ -164,9 +252,14 @@ func rebuild() -> void:
 	var faces := _Batch.new()
 	var tops := _Batch.new()
 	var overlay := _Batch.new()
+	_glow_batch = _Batch.new()
 	# A City has a bank instead of grass lips over cliffs (its cliffs are kept
 	# only to fade out on promotion).
 	var lips := not city
+	var cfg := look_config()
+	path_quads = 0
+	lamp_count = 0
+	bed_count = 0
 	for cell: Vector2i in _order:
 		var east_open := is_face_visible(cell, Vector2i(1, 0))
 		var south_open := is_face_visible(cell, Vector2i(0, 1))
@@ -174,18 +267,32 @@ func rebuild() -> void:
 			_face(faces, Vector2(cell.x + 1, cell.y), Vector2(cell.x + 1, cell.y + 1), RIGHT_FACE_LIGHT, float(cell.y))
 		if south_open:
 			_face(faces, Vector2(cell.x, cell.y + 1), Vector2(cell.x + 1, cell.y + 1), LEFT_FACE_LIGHT, float(cell.x))
-		_top(tops, cell)
+		_top(tops, cell, _lawn(cell, cfg))
 		var corners := _proj.cell_corners(cell)
 		if east_open and lips:
 			_lip(tops, corners[1], corners[2], cell)
 		if south_open and lips:
 			_lip(tops, corners[3], corners[2], cell)
 		_boundaries(overlay, cell, corners)
+		if not cfg.is_empty():
+			_coast_path(overlay, cell, cfg)
 		if not _world.is_occupied(cell):
-			_decals(overlay, cell)
+			if cfg.is_empty():
+				_decals(overlay, cell)
+			else:
+				_beds(overlay, cell, String(cfg.get("beds", "")))
+		if bool(cfg.get("lamps", false)):
+			_lamps(overlay, cell, cfg)
 	faces.commit(faces_mesh)
 	tops.commit(tops_mesh)
 	overlay.commit(overlay_mesh)
+	_glow_batch.commit(glow_mesh)
+	glow.queue_redraw()
+	set_process(look_t < 1.0 or lamp_count > 0)
+	if lamp_count > 0:
+		_light_lamps()
+	else:
+		glow.visible = false
 	var bank := _Batch.new()
 	var bank_grass := _Batch.new()
 	bank_quads = 0
@@ -198,15 +305,31 @@ func rebuild() -> void:
 	queue_redraw()
 
 
+## Layer by layer, far to near -- cliffs, bank, the bank's turf, tops,
+## overlay. While a promotion plays the old look is drawn with it: the old
+## cliffs or bank fading out as the new bank fades in, and the old tops under
+## the new ones (the same geometry: a cross-fade, never the sea through it).
 func _draw() -> void:
-	if city_t < 1.0:
-		draw_mesh(faces_mesh, _cliff_tex, Transform2D(), Color(1, 1, 1, 1.0 - city_t))
+	var t := look_t
+	var p := _prev
+	var had := not p.is_empty()
+	if look == 0:
+		draw_mesh(faces_mesh, _cliff_tex, Transform2D(), Color(1, 1, 1, t))
+	if had and int(p["look"]) == 0:
+		draw_mesh(p["faces"], _cliff_tex, Transform2D(), Color(1, 1, 1, 1.0 - t))
 	var tint := grass_tint()
-	if city_t > 0.0:
-		draw_mesh(bank_mesh, null, Transform2D(), Color(1, 1, 1, city_t))
-		draw_mesh(bank_grass_mesh, _grass_tex, Transform2D(), Color(tint, city_t))
-	draw_mesh(tops_mesh, _grass_tex, Transform2D(), tint)
-	draw_mesh(overlay_mesh, null)
+	if had and int(p["look"]) >= 1:
+		draw_mesh(p["bank"], null, Transform2D(), Color(1, 1, 1, 1.0 - t))
+		draw_mesh(p["bank_grass"], _grass_tex, Transform2D(), Color(p["tint"], 1.0 - t))
+	if look >= 1:
+		draw_mesh(bank_mesh, null, Transform2D(), Color(1, 1, 1, t))
+		draw_mesh(bank_grass_mesh, _grass_tex, Transform2D(), Color(tint, t))
+	if had:
+		draw_mesh(p["tops"], _grass_tex, Transform2D(), p["tint"])
+	draw_mesh(tops_mesh, _grass_tex, Transform2D(), Color(tint, t))
+	if had:
+		draw_mesh(p["overlay"], null, Transform2D(), Color(1, 1, 1, 1.0 - t))
+	draw_mesh(overlay_mesh, null, Transform2D(), Color(1, 1, 1, t))
 
 
 # --- the City's bank ----------------------------------------------------------------
@@ -243,7 +366,9 @@ func _read_bank_data() -> void:
 	_run = _data.get_float("art", "island_tiers.bank_run", 0.5)
 	_fade_from = _data.get_float("art", "island_tiers.bank_fade_from", 0.97)
 	_stops.clear()
-	for st: Array in _data.get_value("art", "island_tiers.bank_colors", [["#7fb236", 0.0], ["#86d6d4", 1.0]]):
+	# Step 73: a Nation's bank is its own (stone in courses).
+	var stops: Array = look_config().get("bank_colors", _data.get_value("art", "island_tiers.bank_colors", [["#7fb236", 0.0], ["#86d6d4", 1.0]]))
+	for st: Array in stops:
 		_stops.append([Color.html(String(st[0])), float(st[1])])
 
 
@@ -352,7 +477,7 @@ func _bank(b: _Batch, grass: _Batch) -> void:
 	bank_origins.clear()
 	for q: Array in quads:
 		bank_origins.append(q[1])
-	var grass_until := _data.get_float("art", "island_tiers.bank_grass_until", 0.42)
+	var grass_until := float(look_config().get("bank_grass_until", _data.get_float("art", "island_tiers.bank_grass_until", 0.42)))
 	var gs := 1.0 / GRASS_TILES_PER_TEXTURE
 	for q: Array in quads:
 		var o: Vector2 = q[1]
@@ -379,12 +504,125 @@ func _bank(b: _Batch, grass: _Batch) -> void:
 
 # --- geometry ---------------------------------------------------------------------
 
-func _top(b: _Batch, cell: Vector2i) -> void:
+func _top(b: _Batch, cell: Vector2i, shade: float = 1.0) -> void:
 	var corners := _proj.cell_corners(cell)
 	var c := Vector2(cell)
 	var s := 1.0 / GRASS_TILES_PER_TEXTURE
+	var col := Color(shade, shade, shade)
 	b.quad(corners, PackedVector2Array([c * s, (c + Vector2(1, 0)) * s, (c + Vector2(1, 1)) * s, (c + Vector2(0, 1)) * s]),
-		[Color.WHITE, Color.WHITE, Color.WHITE, Color.WHITE])
+		[col, col, col, col])
+
+
+## Step 73: how the lawn is mown on a cell -- a brightness, 1 for a Village:
+## rows of light and dark (a City's stripes) or a checker (a Nation's).
+static func _lawn(cell: Vector2i, cfg: Dictionary) -> float:
+	var lawn: Dictionary = cfg.get("lawn", {})
+	if lawn.is_empty():
+		return 1.0
+	var amp := float(lawn.get("amp", 0.0))
+	var odd := posmod(cell.y, 2) == 1 if String(lawn.get("pattern", "")) == "stripes" else posmod(cell.x + cell.y, 2) == 1
+	return 1.0 - amp if odd else 1.0 + amp
+
+
+## The coast edges of a cell: [outer a, outer b, inward] in logical space.
+func _coast_edges(cell: Vector2i) -> Array:
+	var x := float(cell.x)
+	var y := float(cell.y)
+	var out: Array = []
+	for e: Array in [[Vector2i(-1, 0), Vector2(x, y), Vector2(x, y + 1), Vector2(1, 0)], [Vector2i(1, 0), Vector2(x + 1, y), Vector2(x + 1, y + 1), Vector2(-1, 0)],
+			[Vector2i(0, -1), Vector2(x, y), Vector2(x + 1, y), Vector2(0, 1)], [Vector2i(0, 1), Vector2(x, y + 1), Vector2(x + 1, y + 1), Vector2(0, -1)]]:
+		if not _world.is_owned(cell + (e[0] as Vector2i)):
+			out.append([e[1], e[2], e[3]])
+	return out
+
+
+## Step 73: a footpath (City) or a stone promenade (Nation) just inside every
+## coast edge -- the tidy edge of a cared-for island. A stone one has its
+## joints across it and a kerb on its inner side.
+func _coast_path(b: _Batch, cell: Vector2i, cfg: Dictionary) -> void:
+	var path: Dictionary = cfg.get("path", {})
+	if path.is_empty():
+		return
+	var w := float(path.get("width", 0.1))
+	var col := Color.html(String(path.get("color", "#e6d6a6")))
+	var edge := Color.html(String(path.get("edge", "#c9b47e")))
+	var every := float(path.get("joint_every", 0.0))
+	var joint := Color.html(String(path.get("joint", "#b9b09a")))
+	for e: Array in _coast_edges(cell):
+		var a: Vector2 = e[0]
+		var c: Vector2 = e[1]
+		var inward: Vector2 = e[2]
+		var pts := PackedVector2Array([_proj.to_screen(a), _proj.to_screen(c), _proj.to_screen(c + inward * w), _proj.to_screen(a + inward * w)])
+		b.quad(pts, PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO]), [col, col, col, col])
+		path_quads += 1
+		b.line(pts[3], pts[2], 1.3, edge)
+		if path.has("coping"):
+			b.line(pts[0], pts[1], 2.0, Color.html(String(path["coping"])))
+		if every > 0.0:
+			var k := every
+			while k < 1.0 - 0.001:
+				var p0 := a.lerp(c, k)
+				b.line(_proj.to_screen(p0), _proj.to_screen(p0 + inward * w), 1.0, joint)
+				k += every
+
+
+## Step 73: lamps along a Nation's promenade, one on every other coast edge.
+func _lamps(b: _Batch, cell: Vector2i, cfg: Dictionary) -> void:
+	if posmod(cell.x + cell.y, 2) != 0:
+		return
+	var w := float((cfg.get("path", {}) as Dictionary).get("width", 0.15))
+	for e: Array in _coast_edges(cell):
+		var foot := _proj.to_screen((e[0] as Vector2).lerp(e[1], 0.5) + (e[2] as Vector2) * w * 0.5)
+		b.line(foot, foot + Vector2(0, -13), 1.8, Color("#4a4038"))
+		b.disc(foot + Vector2(0, -14), 6.0, Color(1.0, 0.9, 0.6, 0.3), 10)
+		b.disc(foot + Vector2(0, -14), 2.8, Color("#ffe7a0"), 8)
+		# Its night glow: a pool of light on the stones and a bright head.
+		_glow_batch.disc(foot + Vector2(0, -1), 9.0, Color(1, 1, 1, 0.22), 12)
+		_glow_batch.disc(foot + Vector2(0, -14), 7.5, Color(1, 1, 1, 0.45), 12)
+		_glow_batch.disc(foot + Vector2(0, -14), 3.0, Color(1, 1, 1, 1.0), 8)
+		lamp_count += 1
+
+
+## Step 73: what grows on a free cell of a City (flowerbeds in rows, a low
+## clipped hedge) or a Nation (round topiary, a stone-edged bed). Derived
+## from the cell like the Village's flowers, never entering the simulation.
+func _beds(b: _Batch, cell: Vector2i, kind: String) -> void:
+	var rng := _rng(cell, 11)
+	for i in rng.randi_range(1, 2):
+		var at := Vector2(cell) + Vector2(rng.randf_range(0.25, 0.7), rng.randf_range(0.25, 0.75))
+		var p := _proj.to_screen(at)
+		var pick := rng.randi_range(0, 1)
+		bed_count += 1
+		if kind == "topiary":
+			if pick == 0:
+				for dx: float in [-5.0, 5.0]:
+					b.disc(p + Vector2(dx, 2.5), 4.6, Color(0.1, 0.25, 0.08, 0.25), 8)
+					b.disc(p + Vector2(dx, 0), 4.2, Color("#3f7f2c"), 8)
+					b.disc(p + Vector2(dx - 1.2, -1.6), 2.2, Color("#6aab40"), 6)
+			else:
+				var stone := Color("#ddd7c8")
+				var r := [p + Vector2(-8, 0), p + Vector2(0, -4), p + Vector2(8, 0), p + Vector2(0, 4)]
+				for k in 4:
+					b.line(r[k], r[(k + 1) % 4], 1.6, stone)
+				for k in 3:
+					b.disc(p + Vector2(k * 3.5 - 3.5, 0), 1.6, [Color("#ff7aa2"), Color("#ffffff"), Color("#ffd34d")][k], 5)
+		else:
+			if pick == 0:
+				# A flowerbed: dark soil, a row of tulips on it.
+				var a := at - Vector2(0.12, 0)
+				var c := at + Vector2(0.12, 0)
+				b.line(_proj.to_screen(a), _proj.to_screen(c), 6.0, Color("#7d5e40"))
+				for k in 3:
+					var q := _proj.to_screen(a.lerp(c, (k + 0.5) / 3.0))
+					b.disc(q + Vector2(0, -2.0), 2.4, [Color("#ff6f7d"), Color("#ffd34d"), Color("#ff9ecf")][k], 6)
+			else:
+				# A low clipped hedge: a rounded bar, lit on top.
+				var a := at - Vector2(0, 0.11)
+				var c := at + Vector2(0, 0.11)
+				b.line(_proj.to_screen(a), _proj.to_screen(c), 6.4, Color("#4a8a2c"))
+				b.disc(_proj.to_screen(a), 3.2, Color("#4a8a2c"), 6)
+				b.disc(_proj.to_screen(c), 3.2, Color("#4a8a2c"), 6)
+				b.line(_proj.to_screen(a) + Vector2(0, -2.0), _proj.to_screen(c) + Vector2(0, -2.0), 2.0, Color("#7cbf45"))
 
 
 ## One vertical cliff face hanging below the logical edge a-b. `u0` is where

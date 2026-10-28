@@ -190,7 +190,7 @@
     ]
   },
   "island_tiers": {
-    "_doc": "Step 63: a City's island looks grown up. From tier `city_from_tier` (City, and so Nation too) the grass is tinted `city_grass_tint` (multiplied into the grass texture: a little warmer and richer) and the cliffs give way to a bank -- a soft slope from the land's height down to the waterline, `bank_run` tiles out into the water from every coast (half a tile, in logical x/y), shaped by distance to the land so corners, coves and inlets never overlap. `bank_steps` sub-quads a tile side; `bank_colors` [colour, distance as a share of the run] from the grass down to the wet sand at the waterline; the island's own grass texture runs on down the slope over them, fading out by `bank_grass_until` of the run, so the turf does not stop at the edge; past `bank_fade_from` the bank fades into the sea, where the ocean draws its foam line. `fade_seconds`: the change on promotion. A Village (and every island after a sale) keeps the cliffs. Visual only: cells, ownership, taps and the ground stay where they were.",
+    "_doc": "Step 63: a City's island looks grown up. From tier `city_from_tier` (City, and so Nation too) the grass is tinted `city_grass_tint` (multiplied into the grass texture: a little warmer and richer) and the cliffs give way to a bank -- a soft slope from the land's height down to the waterline, `bank_run` tiles out into the water from every coast (half a tile, in logical x/y), shaped by distance to the land so corners, coves and inlets never overlap. `bank_steps` sub-quads a tile side; `bank_colors` [colour, distance as a share of the run] from the grass down to the wet sand at the waterline; the island's own grass texture runs on down the slope over them, fading out by `bank_grass_until` of the run, so the turf does not stop at the edge; past `bank_fade_from` the bank fades into the sea, where the ocean draws its foam line. `fade_seconds`: the change on promotion. A Village (and every island after a sale) keeps the cliffs. Visual only: cells, ownership, taps and the ground stay where they were. Step 73: each tier has a look of its own -- `city` and `nation` below (a Village is drawn as it always was). `lawn`: how the turf is mown, a brightness `amp` in rows (stripes) or a checker; `path`: a band `width` (tiles) inside every coast edge, its colour and, for a stone path, `joint` lines every `joint_every` tiles and a light `coping` line along the coast (the top of the wall); `beds`: what grows on a free cell (flowerbeds and hedges, or topiary); `lamps`: a lamp every other coast edge; `grass_tint` and `bank_colors` override the City's (a Nation's bank is stone in courses). On promotion the old look fades into the new one (`fade_seconds`). Only drawn: no cell, tap, path or building moves.",
     "city_from_tier": 1,
     "city_grass_tint": [1.05, 1.04, 0.86],
     "bank_run": 0.5,
@@ -198,7 +198,22 @@
     "bank_colors": [["#86b93a", 0.0], ["#7a9f3a", 0.28], ["#9a7d54", 0.42], ["#c4a777", 0.57], ["#cdb684", 0.72], ["#a3b99a", 0.86], ["#62bccb", 1.0]],
     "bank_grass_until": 0.42,
     "bank_fade_from": 0.97,
-    "fade_seconds": 0.9
+    "fade_seconds": 0.9,
+    "city": {
+      "lawn": {"pattern": "stripes", "amp": 0.1},
+      "path": {"width": 0.1, "color": "#e6d6a6", "edge": "#c9b47e"},
+      "beds": "flowerbeds",
+      "lamps": false
+    },
+    "nation": {
+      "grass_tint": [0.93, 1.05, 0.88],
+      "lawn": {"pattern": "checker", "amp": 0.08},
+      "path": {"width": 0.17, "color": "#ddd7c8", "edge": "#a59c86", "joint": "#b9b09a", "joint_every": 0.25, "coping": "#f4f0e6"},
+      "beds": "topiary",
+      "lamps": true,
+      "bank_colors": [["#6f9e3a", 0.0], ["#f1ece0", 0.08], ["#d6cfbd", 0.18], ["#a99f8a", 0.26], ["#d3cbb8", 0.34], ["#9e957f", 0.46], ["#c6bda9", 0.55], ["#8d8574", 0.68], ["#7a8a84", 0.82], ["#5f9fa6", 0.92], ["#62bccb", 1.0]],
+      "bank_grass_until": 0.12
+    }
   },
   "momo_depth": {
     "_doc": "Step 55: how much nearer than its feet a Momo counts when the island is depth-sorted (tiles of depth, x + y). Buildings stand at their footprint's centre, so a Momo on a building's own tile or beside its front half was drawn behind it -- the owner saw Momo vanish into buildings on ordinary walks. With 0.5 a Momo is drawn in front of a building unless it stands in the back quarter of its tile or on a tile behind it: clearly behind, it stays hidden. Only the order changes -- the Momo is drawn, tapped and dropped where it stands. Momo among themselves keep their order (every Momo gets the same bias).",
