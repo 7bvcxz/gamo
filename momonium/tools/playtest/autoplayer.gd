@@ -23,7 +23,7 @@ const STEP_MS := 1000
 ## stage done -- the crop grows a step, a Momo sparkles.
 const FEEDBACK := [&"exp_gained", &"sold", &"level_up", &"building_built", &"land_bought", &"momo_hired",
 	&"research_completed", &"letter_written", &"tier_promoted", &"mastery_up", &"momo_skilled", &"settlement_sold", &"released",
-	&"task_completed"]
+	&"task_completed", &"goal_reached"]
 
 var sim: Simulation
 var island := 1
@@ -93,6 +93,7 @@ func _init(p_sim: Simulation = null) -> void:
 func attach(p_sim: Simulation) -> void:
 	sim = p_sim
 	sim.bus.emitted.connect(_on_event)
+	_nation_at = -1
 	# Swapped mid-step (a sale): the new island's clock starts here.
 	if _step_from >= 0:
 		_step_from = sim.now_ms()
@@ -169,7 +170,7 @@ func act() -> bool:
 	# The player manages first and taps what is left. (Before Step 50 the
 	# hands came first until a hire; with five-second farms always ready that
 	# left no decision for anything else.)
-	var order: Array[Callable] = [_read_letter, _promote, _sell, _research, _special, _refit, _hire, _give_tiles, _build, _buy_land, _work_by_hand]
+	var order: Array[Callable] = [_read_letter, _promote, _sell, _research, _special, _refit, _smelt_for_goal, _hire, _give_tiles, _build, _buy_land, _work_by_hand]
 	for try: Callable in order:
 		if bool(try.call()):
 			actions += 1
@@ -398,6 +399,8 @@ func _sell() -> bool:
 		_mark("prestige ready")
 	if not a["can_sell"] or int(a["points"]) < sell_at_points:
 		return false
+	if _holding_for_goal():
+		return false
 	var lv := (sim.system(&"progression") as ProgressionSystem).level
 	var r := PrestigeSystem.sell(sim)
 	if not r["ok"]:
@@ -468,6 +471,34 @@ func _research() -> bool:
 	var rs: ResearchSystem = sim.system(&"research")
 	if not rs.active.is_empty() or not rs.has_lab():
 		return false
+	# Step 72: working toward a milestone, a chain step that is open but not
+	# yet affordable is saved for -- the notes are not spent elsewhere.
+	if _civ_goal() != "":
+		var saving := false
+		for n: Dictionary in rs.nodes():
+			var cid := String(n["id"])
+			if rs.state_of(cid) not in ["available", "levelup"] or rs.level(cid) > 0 or not _toward_capstone(cid):
+				continue
+			var check := rs.can_start(cid)
+			if check["ok"]:
+				return _do("research", {"type": "research.start", "id": cid})
+			# Saved for only what comes by waiting: money, or notes while the
+			# store still has room for them (never an item the island does
+			# not make -- that would stop all research for good).
+			var reason := String(check.get("reason", ""))
+			if reason == "err.not_enough_money":
+				saving = true
+			elif reason == "err.not_enough_items":
+				var inv: InventorySystem = sim.system(&"inventory")
+				var short: Array = []
+				var need: Dictionary = rs.cost_of(cid)["items"]
+				for item: String in need:
+					if inv.count(item) < int(need[item]):
+						short.append(item)
+				if short == ["notes"] and inv.count("notes") < inv.capacity("notes"):
+					saving = true
+		if saving:
+			return false
 	var best := ""
 	for n: Dictionary in rs.nodes():
 		var id := String(n["id"])
@@ -478,9 +509,74 @@ func _research() -> bool:
 	return best != "" and _do("research", {"type": "research.start", "id": best})
 
 
-## Momo first (faster, reach), then the farm, then the rest.
+## Step 72: a player who sees the next goal plays toward it. At a Nation
+## working on a Golden Age the island is kept (up to GOAL_HOLD_MS of play
+## since it became one) instead of sold at the first points; and while any
+## civilization milestone is the goal, research goes down the chains that end
+## in an eighth tier. ("no_goal" in the strategy turns both off.)
+const GOAL_HOLD_MS := 3 * 3600000
+var _nation_at := -1
+
+
+func _civ_goal() -> String:
+	var goals: GoalSystem = sim.system(&"goals")
+	if goals == null or strategy.get("no_goal", false):
+		return ""
+	var cur := goals.current()
+	return String(cur["id"]) if String(cur["kind"]) == "civ" else ""
+
+
+func _holding_for_goal() -> bool:
+	if _civ_goal() != "golden_age":
+		return false
+	if _nation_at < 0:
+		_nation_at = active_ms
+	return active_ms - _nation_at < GOAL_HOLD_MS
+
+
+## Working toward a milestone: an idle smelter makes the ingot the island has
+## fewer of, iron once the bloomery allows it and there is ore for a batch.
+## (The default recipe is copper; a person aiming at the eighth tiers, which
+## ask for iron, switches it.)
+func _smelt_for_goal() -> bool:
+	if _civ_goal() == "":
+		return false
+	var bs: BuildingSystem = sim.system(&"buildings")
+	var inv: InventorySystem = sim.system(&"inventory")
+	for id: int in bs.ids():
+		var b := bs.get_building(id)
+		if String(b["type"]) != "smelter" or b["state"] != BuildingSystem.IDLE:
+			continue
+		var want := "copper_ingot"
+		if bs.recipe_unlocked("smelter", "iron_ingot") and inv.count("iron_ore") >= 2 and inv.count("iron_ingot") <= inv.count("copper_ingot"):
+			want = "iron_ingot"
+		if bs.recipe_of(b) != want:
+			return _do("smelt " + want, {"type": "building.recipe", "id": id, "recipe": want})
+	return false
+
+
+## Whether `id` is on a chain to an eighth tier not yet researched.
+func _toward_capstone(id: String) -> bool:
+	var rs: ResearchSystem = sim.system(&"research")
+	for n: Dictionary in rs.nodes(String(rs.node(id).get("industry", ""))):
+		var top := String(n["id"])
+		if rs.tier_of(top) < 8 or rs.is_unlocked_node(top):
+			continue
+		var stack: Array = [top]
+		while not stack.is_empty():
+			var cur := String(stack.pop_back())
+			if cur == id:
+				return true
+			stack.append_array(rs.node(cur).get("requires", []))
+	return false
+
+
+## Momo first (faster, reach), then the farm, then the rest -- and, with a
+## civilization milestone to reach, the chains to the eighth tiers before all.
 func _research_rank(id: String) -> int:
 	var rs: ResearchSystem = sim.system(&"research")
+	if _civ_goal() != "" and _toward_capstone(id):
+		return -1
 	var n := rs.node(id)
 	var kinds := []
 	for e: Dictionary in n.get("effects", []):
@@ -710,6 +806,9 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 			_mark("tier " + detail)
 		&"settlement_sold":
 			_mark("first sale of an island")
+		&"goal_reached":
+			detail = String(p.get("id", ""))
+			_mark("goal " + detail)
 		&"mastery_up":
 			# The pennant on the building changes at these levels: visible.
 			if int(p.get("level", 0)) in [3, 5, 8]:

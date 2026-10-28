@@ -696,3 +696,14 @@ research.tab.research,Lab,연구소,研究所,研究所
 effect.power_output,{building} power +{pct}%,{building} 전력 +{pct}%,{building}の電力 +{pct}%,{building}发电 +{pct}%
 effect.power_output_all,All power +{pct}%,모든 전력 +{pct}%,すべての電力 +{pct}%,全部发电 +{pct}%
 effect.momo_work_type,{building}: Momo work time -{pct}%,{building}: 모모 작업 시간 -{pct}%,{building}：モモの作業時間 -{pct}%,{building}：桃桃作业时间 -{pct}%
+goal.golden_age,Golden Age,황금기,黄金時代,黄金时代
+goal.civilization,Civilization,문명,文明,文明
+goal.need.tier,A Nation,국가,国,国家
+goal.need.eighth_tiers,Eighth tiers researched,8단 연구,8段目の研究,第八层研究
+goal.need.islands_sold,Islands sold,판 섬,売った島,售出的岛屿
+goal.reached,{name}!,{name}!,{name}!,{name}！
+goal.after.golden_age,Gold pennants over every building,모든 건물에 금빛 깃발이 올라요,すべての建物に金の旗,每座建筑都挂上金旗
+goal.after.civilization,A star on every pennant: a whole civilization,깃발마다 별이 떠요: 온전한 문명,どの旗にも星: ひとつの文明,每面旗上都有星：完整的文明
+goal.done,Every goal reached. Keep growing,모든 목표를 이뤘어요. 계속 키워 가요,すべての目標を達成。育て続けよう,所有目标都已达成。继续发展吧
+goal.estimate,About {t} at today's pace (estimate),지금 속도로 약 {t} (추정),今のペースで約{t}（推定）,按现在的速度约{t}（估计）
+hud.goal_done,★ {name},★ {name},★ {name},★ {name}

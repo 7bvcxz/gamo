@@ -91,6 +91,8 @@ func _on_event(type: StringName, p: Dictionary) -> void:
 					_mark("level:%d" % lv)
 		&"tier_promoted":
 			_mark("tier:%d" % int(p.get("tier", 0)))
+		&"goal_reached":
+			_mark("goal:" + String(p.get("id", "")))
 
 
 func _mark(k: String) -> void:

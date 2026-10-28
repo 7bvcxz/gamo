@@ -34,6 +34,9 @@ godot --headless --path momonium --script res://tools/balance_optimizer/optimize
 # 2일 일정(국가 승급 시각)
 ... --profile human48 --schedule 48h
 
+# 7일 일정(Step 72: 황금기·문명 시각 = goal_wall_h). 봇은 국가 뒤 목표를 향해 논다; --strategy no_goal로 끈다
+... --profile human48 --schedule 7d
+
 # 결정 하나하나 보기
 ... --profile blind --minutes 5 --trace
 

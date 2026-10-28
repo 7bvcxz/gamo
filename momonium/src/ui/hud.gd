@@ -557,14 +557,20 @@ func _set_text_button(b: Button, text: String) -> void:
 		b.reset_size()
 
 
-## "City 2/4": the next tier and how many of its needs are met, or "".
+## "City 2/4": the one goal (Step 72: GoalSystem -- the next tier, then the
+## civilization milestones) and how many of its needs are met; "★ Civilization"
+## once every goal is reached.
 func goal_text() -> String:
-	var tiers: TierSystem = sim.system(&"tiers")
-	if tiers == null or tiers.is_top():
+	var goals: GoalSystem = sim.system(&"goals")
+	if goals == null:
 		return ""
-	var need := tiers.progress()
+	var cur := goals.current()
+	var name_text := tr(GoalLadder._name_key(String(cur["id"])))
+	if String(cur["kind"]) == "done":
+		return tr("hud.goal_done").format({"name": name_text}) if String(cur["id"]) != "" else ""
+	var need: Array = cur["progress"]
 	var met := need.filter(func(p: Dictionary) -> bool: return bool(p["met"])).size()
-	return tr("hud.goal").format({"tier": tr("tier." + tiers.tier_name(tiers.tier + 1)), "met": met, "of": need.size()})
+	return tr("hud.goal").format({"tier": name_text, "met": met, "of": need.size()})
 
 
 func _refresh_goal() -> void:

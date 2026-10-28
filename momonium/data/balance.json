@@ -290,6 +290,13 @@
       20
     ]
   },
+  "goals": {
+    "_doc": "Step 72: the one distant goal (GoalSystem). While the island is not a Nation the goal is its next tier (tiers.levels); then these civilization milestones, in order, each reached for good (kept across Prestige) and announced once. needs: tier (the island's: 2 = Nation), momos (living on the island), eighth_tiers (disciplines whose eighth research tier was ever researched, on any island), islands_sold (Prestige sales, lifetime). Measured from the game itself, never a currency kept for the purpose.",
+    "ladder": [
+      {"id": "golden_age", "needs": {"tier": 2, "momos": 10, "eighth_tiers": 2}},
+      {"id": "civilization", "needs": {"tier": 2, "eighth_tiers": 6, "islands_sold": 3}}
+    ]
+  },
   "tiers": {
     "_doc": "Settlement tiers (TierSystem): village -> city -> nation. `special_slots` is how many special structures may stand at once at that tier (in total). `needs` are the milestones to promote INTO that tier: tiles owned, Momo living on the island, research levels active (sum), and produced value (lifetime money from sales and releases).",
     "levels": [

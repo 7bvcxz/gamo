@@ -331,7 +331,12 @@ func _ready() -> void:
 			_close_frames()
 			celebration.play(tr("tier.promoted").format({"name": tr("tier." + String(p["name"]))}), _promotion_change(p))
 		elif type == &"level_up" and not sim.replaying:
-			_celebrate_level(int(p["level"])))
+			_celebrate_level(int(p["level"]))
+		elif type == &"goal_reached" and not sim.replaying:
+			# Step 72: a civilization milestone -- brief, and what changed.
+			_close_frames()
+			var id := String(p["id"])
+			celebration.play(tr("goal.reached").format({"name": tr("goal." + id)}), tr("goal.after." + id)))
 	sale_frame = _frame(ui, "SaleFrame")
 	sale_view = SaleView.new()
 	sale_view.setup(sim, lib)
@@ -669,6 +674,24 @@ func _ready() -> void:
 		return {"momo": momo, "route": ms.route_of(momo) if momo != 0 else "", "label": label, "button": button,
 			"compare": compare, "stops": watch_overlay.route(), "open": status_frame.visible and status_frame.current_view() == momo_list,
 			"window": [win.x, win.y]})
+	# Step 72: the one goal -- what it is, its progress, the ladder, the chip,
+	# and where the Status tab draws it.
+	bridge.register_query("goal", func(_a: Variant) -> Dictionary:
+		var goals: GoalSystem = sim.system(&"goals")
+		var tv := status_panel.tier_view
+		var vp := get_viewport()
+		var r := func(c: Control) -> Array:
+			var g := c.get_global_rect()
+			var a: Vector2 = vp.get_final_transform() * g.position
+			var b: Vector2 = vp.get_final_transform() * g.end
+			return [a.x, a.y, b.x - a.x, b.y - a.y]
+		var rows := tv.list.get_children().map(func(c: Node) -> Array: return r.call(c as Control))
+		return {"current": goals.current(), "steps": goals.steps(), "reached": goals.reached.keys(), "chip": hud.goal_text(),
+			"chip_rect": r.call(hud.goal_button) if hud.goal_button.visible else [], "view": r.call(tv) if tv.is_visible_in_tree() else [],
+			"ladder": r.call(tv.ladder) if tv.is_visible_in_tree() else [], "rows": rows, "next": tv.next_label.text,
+			"celebrating": celebration.playing(),
+			"golden": building_views.views.values().filter(func(v: BuildingView) -> bool: return v.golden_age() > 0).size(),
+			"buildings": building_views.views.size()})
 	bridge.register_query("tier", func(_a: Variant) -> Dictionary:
 		var vp := get_viewport()
 		var tv := status_panel.tier_view

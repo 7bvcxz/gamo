@@ -448,14 +448,35 @@ func _draw_pennant(b: Dictionary) -> void:
 	if b["state"] == BuildingSystem.CONSTRUCTING or buildings.is_special(String(b["type"])):
 		return
 	var tier := _pennant
-	if tier < 0:
+	# Step 72: after a Golden Age every building flies a gold pennant, and after
+	# a Civilization each carries a star -- the milestone seen on the island.
+	var age := golden_age()
+	if tier < 0 and age == 0:
 		return
-	var col := Color(String((_evolution.get("colors", ["#ffd45a"]) as Array)[tier]))
+	var col := Color(String((_evolution.get("colors", ["#ffd45a"]) as Array)[tier])) if age == 0 else GOLDEN
 	var t := buildings.sim.now_ms() / 1000.0
 	var pole := _top + Vector2(20, 14)
 	ring.draw_line(pole, pole + Vector2(0, -18), Color(0.4, 0.28, 0.16), 2.0, true)
 	var wave := sin(t * 2.0 + id) * 1.5
 	ring.draw_colored_polygon(PackedVector2Array([pole + Vector2(0, -18), pole + Vector2(11, -14 + wave), pole + Vector2(0, -10)]), col)
+	if age >= 2:
+		var c := pole + Vector2(0, -22)
+		var pts := PackedVector2Array()
+		for k in 10:
+			var a := -PI / 2 + k * PI / 5
+			pts.append(c + Vector2(cos(a), sin(a)) * (3.6 if k % 2 == 0 else 1.6))
+		ring.draw_colored_polygon(pts, Color(1, 1, 0.92))
+
+
+const GOLDEN := Color("#ffc93c")
+
+
+## Step 72: 0 before a Golden Age, 1 after it, 2 after a whole Civilization.
+func golden_age() -> int:
+	var goals: GoalSystem = buildings.sim.system(&"goals")
+	if goals == null:
+		return 0
+	return 2 if goals.reached.has("civilization") else (1 if goals.reached.has("golden_age") else 0)
 
 
 ## The landmarks' own life: the Clock Tower's hands race and it glows gold

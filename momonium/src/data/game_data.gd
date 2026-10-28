@@ -81,9 +81,31 @@ func validate() -> void:
 	_validate_families()
 	_validate_recipes()
 	_validate_research()
+	_validate_goals()
 	_require_number({}, "balance", "land.base", 1)
 	_require_number({}, "balance", "land.growth", 1)
 	_require_number({}, "balance", "land.round_to", 1)
+
+
+## Step 72: the civilization milestones -- unique ids, known needs, each at
+## least 1, a tier need that a tier exists for.
+func _validate_goals() -> void:
+	var ids := {}
+	var tiers := (get_value("balance", "tiers.levels", []) as Array).size()
+	for g: Variant in get_value("balance", "goals.ladder", []):
+		var d: Dictionary = g if typeof(g) == TYPE_DICTIONARY else {}
+		var id := String(d.get("id", ""))
+		if id == "" or ids.has(id):
+			errors.append("balance: goals.ladder needs unique ids (%s)" % id)
+		ids[id] = true
+		var needs: Dictionary = d.get("needs", {})
+		if needs.is_empty():
+			errors.append("balance: goal %s needs something" % id)
+		for k: String in needs:
+			if not ["tier", "momos", "eighth_tiers", "islands_sold"].has(k) or int(needs[k]) < 1:
+				errors.append("balance: goal %s has an unknown or empty need %s" % [id, k])
+		if int(needs.get("tier", 0)) > tiers - 1:
+			errors.append("balance: goal %s needs a tier that does not exist" % id)
 
 
 ## Varieties: base is the type's cycle; another variety's own process must be

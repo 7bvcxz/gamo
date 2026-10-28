@@ -332,7 +332,7 @@
         "money": 1500,
         "items": {
           "notes": 25,
-          "iron_ingot": 6
+          "wood": 20
         }
       },
       "seconds": 300,
@@ -554,7 +554,7 @@
         "money": 700,
         "items": {
           "notes": 18,
-          "iron_ingot": 4
+          "wood": 15
         }
       },
       "seconds": 240,

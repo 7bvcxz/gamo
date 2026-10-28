@@ -58,6 +58,12 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 		&"mastery_up", &"game_loaded":
 			for v: BuildingView in views.values():
 				v.refresh_pennant()
+		&"goal_reached":
+			# Step 72: the milestone on the island -- every building sparkles
+			# and raises its gold pennant now, not at its next quiet redraw.
+			for v: BuildingView in views.values():
+				v.refresh_pennant()
+				v.sparkle()
 		&"momo_skilled":
 			# A Momo learned something: the School twinkles if there is one.
 			var school := buildings.special_built("school")

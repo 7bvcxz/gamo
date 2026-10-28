@@ -113,8 +113,9 @@ static func run(data: GameData, profile: Dictionary, strategy: Dictionary, minut
 	var watched := [bot.sim]
 	extra["_watched"] = watched
 	extra["_watcher"] = watcher
-	if schedule == "48h":
-		for day in 2:
+	if schedule in ["48h", "7d"]:
+		# Step 72: a week of the same days, for the far goals.
+		for day in (7 if schedule == "7d" else 2):
 			for session: Array in [[30.0, 3.5], [15.0, 4.0], [40.0, 15.0]]:
 				_play(bot, float(session[0]) * 60.0, extra)
 				bot.away(float(session[1]) * 3600.0)
@@ -151,6 +152,13 @@ static func run(data: GameData, profile: Dictionary, strategy: Dictionary, minut
 		var j: Dictionary = row.get("jobs", {})
 		var all := int(j.get("hand", 0)) + int(j.get("momo", 0)) + int(j.get("auto", 0))
 		row["momo_share"] = snappedf(float(int(j.get("momo", 0)) + int(j.get("auto", 0))) / all, 0.001) if all > 0 else 0.0
+	var goals := {}
+	for k: String in bot.milestones:
+		if k.begins_with("goal "):
+			var g := String(k.split(" ")[1])
+			var gw := float(bot.milestones[k]["wall_ms"]) / 3600000.0
+			if not goals.has(g) or gw < float(goals[g]):
+				goals[g] = gw
 	var tiers := {}
 	for k: String in bot.milestones:
 		if k.begins_with("tier "):
@@ -159,7 +167,7 @@ static func run(data: GameData, profile: Dictionary, strategy: Dictionary, minut
 			if not tiers.has(n) or wall < float(tiers[n]):
 				tiers[n] = wall
 	return {"minutes": bot.active_ms / 60000.0, "series": rows, "milestones": ms, "journey": marks,
-		"first_command_ms": bot.first_command_ms, "first_reward_ms": first_reward, "tier_wall_h": tiers,
+		"first_command_ms": bot.first_command_ms, "first_reward_ms": first_reward, "tier_wall_h": tiers, "goal_wall_h": goals,
 		"first_income_ms": first_income, "first_momo_income_ms": int(extra["first_momo_income_ms"]),
 		"prestige_ready_ms": int(extra["prestige_ready_ms"]),
 		"income_gap_s": _income_gap(bot.events, maxi(int(extra["first_momo_income_ms"]), 0), mini(bot.active_ms, 600000)),

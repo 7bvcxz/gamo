@@ -28,5 +28,7 @@ static func create_default() -> Array[SimSystem]:
 		TierSystem.new(),
 		SpecialSystem.new(),
 		JourneySystem.new(),
+		# Step 72: last -- it only reads the others and announces a milestone.
+		GoalSystem.new(),
 	]
 	return list

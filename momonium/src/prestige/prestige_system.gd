@@ -190,6 +190,10 @@ static func sell(old: Simulation) -> Dictionary:
 		(legacy["history"] as Array).pop_front()
 	var next := Simulation.new_island(old.data)
 	(next.system(&"research") as ResearchSystem).adopt(research)
+	# Step 72: the civilization milestones reached stay reached.
+	var goals: GoalSystem = old.system(&"goals")
+	if goals != null:
+		(next.system(&"goals") as GoalSystem).adopt(goals.carry_over())
 	(next.system(&"prestige") as PrestigeSystem).adopt(legacy)
 	next.bus.emit(&"settlement_sold", {"value": a["net"], "points": gained, "rp": research["issued"]})
 	return SimResult.ok({"sim": next, "appraisal": a, "gained": gained, "rp_issued": research["issued"]})
