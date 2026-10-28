@@ -162,7 +162,7 @@ research.start,Start research,연구 시작,研究を始める,开始研究
 research.running,Researching · {t},연구 중 · {t},研究中 · {t},研究中 · {t}
 research.done,Done,완료,完了,已完成
 research.time,Time {t},시간 {t},時間 {t},时间 {t}
-research.req.level,Player Lv {n},레벨 {n},レベル{n},等级 {n}
+research.req.level,Unlocks at Lv. {n},Lv {n}에 열려요,Lv{n}で解放,等级{n}解锁
 research.req.mastery,{type} mastery Lv {n},{type} 숙련도 {n},{type}熟練度 {n},{type}熟练度 {n}
 research.req.proposal,A Momo's proposal,모모의 제안,モモの提案,桃桃的提议
 research.req.requires,After {name},{name} 먼저,{name}のあと,先完成{name}

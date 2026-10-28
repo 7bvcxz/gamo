@@ -1,5 +1,5 @@
 {
-  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions -- player `level`, building `mastery` {type: level}, and `proposal`: true when a Momo letter proposing this research must have been accepted first. `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type. {kind: momo_work, multiply, type?} scales Momo work time (all types, or one). {kind: sale_price, multiply >= 1} raises what the daily sale pays (better market access); {kind: walk_speed, multiply >= 1} makes Momo walk faster. {kind: watch_tiles, add} lets every Momo watch `add` more tiles (4 -> 9 -> 16). An effect may list `per_level`: its multiply (or add) at levels 1, 2, ... exactly, instead of the balance.research.level_strength rule -- the numbers the points screen shows. {kind: route, strategy} opens a Momo routing strategy (auto: plan around waits).",
+  "_doc": "The technology tree. Each node: `industry` (a building type, or \"global\") picks its tab; `requires` lists nodes that must be finished first; `unlock` adds conditions. Step 70: an ordinary node opens at a player `level` (and after its `requires`); a Momo's letter proposing a node brings it early, as a discovery, never as a gate. A few nodes are `special` (the field says why): they keep a building `mastery` {type: level} or `proposal`: true (the letter itself opens it) -- leaves of the tree, so nothing ordinary waits on them. A node whose gate was once met stays discovered for good (across Prestige). `cost` is paid when research starts (money, and items -- research notes come from the lab); `seconds` is how long it then takes, at a finished lab. `effects` are what it changes, as data the simulation applies and the UI describes: {kind: work|cooldown, type, action, multiply} scales a stage's active work or the wait after it (floors in the stage data still hold -- research never removes a required stage); {kind: yield, type, stage, item, add} adds to what a stage yields (fractions are rates, carried over exactly); {kind: research_time, multiply} scales how long research takes; {kind: auto, type, action} makes stages with that action run by themselves (a drip line waters; the waits stay); {kind: variety, type, variety} opens a crop variety for that building type; {kind: recipe, type, recipe} opens a recipe; {kind: batch, type, add} lets one charge hold more batches. `name`/`desc` are translation keys; desc explains the real technique. {kind: power_use, type, draw, multiply, required} makes that building draw `draw` kW while it works and, fully powered, work `multiply` times as long (a partly powered one in between); with `required` it cannot start without power. `branches` are research tabs that are not a building type. {kind: momo_work, multiply, type?} scales Momo work time (all types, or one). {kind: sale_price, multiply >= 1} raises what the daily sale pays (better market access); {kind: walk_speed, multiply >= 1} makes Momo walk faster. {kind: watch_tiles, add} lets every Momo watch `add` more tiles (4 -> 9 -> 16). An effect may list `per_level`: its multiply (or add) at levels 1, 2, ... exactly, instead of the balance.research.level_strength rule -- the numbers the points screen shows. {kind: route, strategy} opens a Momo routing strategy (auto: plan around waits).",
   "nodes": [
     {
       "id": "farm_expansion",
@@ -9,7 +9,7 @@
       "icon": "ui_sprout",
       "requires": [],
       "unlock": {
-        "proposal": true
+        "level": 2
       },
       "cost": {
         "money": 20,
@@ -38,7 +38,7 @@
         "farm_expansion"
       ],
       "unlock": {
-        "proposal": true
+        "level": 2
       },
       "cost": {
         "money": 40,
@@ -66,7 +66,7 @@
         "farm_expansion"
       ],
       "unlock": {
-        "proposal": true
+        "level": 3
       },
       "cost": {
         "money": 60,
@@ -95,9 +95,7 @@
         "watering_efficiency"
       ],
       "unlock": {
-        "mastery": {
-          "farm": 3
-        }
+        "level": 4
       },
       "cost": {
         "money": 60,
@@ -125,9 +123,7 @@
         "watering_can"
       ],
       "unlock": {
-        "mastery": {
-          "farm": 4
-        }
+        "level": 6
       },
       "cost": {
         "money": 150,
@@ -160,9 +156,7 @@
         "harvest_boost"
       ],
       "unlock": {
-        "mastery": {
-          "farm": 4
-        }
+        "level": 6
       },
       "cost": {
         "money": 120,
@@ -190,9 +184,7 @@
         "harvest_boost"
       ],
       "unlock": {
-        "mastery": {
-          "farm": 3
-        }
+        "level": 4
       },
       "cost": {
         "money": 80,
@@ -236,7 +228,8 @@
           "type": "farm",
           "variety": "millet"
         }
-      ]
+      ],
+      "special": "A crop found by farmers who know their soil: farm mastery 4. A leaf (a variety, not a step of progress)."
     },
     {
       "id": "sharp_axes",
@@ -246,9 +239,7 @@
       "icon": "ui_lumber",
       "requires": [],
       "unlock": {
-        "mastery": {
-          "lumberyard": 2
-        }
+        "level": 3
       },
       "cost": {
         "money": 40,
@@ -292,7 +283,8 @@
           "action": "replant",
           "multiply": 0.7
         }
-      ]
+      ],
+      "special": "A Momo's own idea: after fifteen fellings the lumberjack writes proposing a nursery. It stays a letter's discovery -- a leaf of the tree, nothing ordinary waits on it."
     },
     {
       "id": "pickaxes",
@@ -302,9 +294,7 @@
       "icon": "ui_mine",
       "requires": [],
       "unlock": {
-        "mastery": {
-          "mine": 2
-        }
+        "level": 3
       },
       "cost": {
         "money": 50,
@@ -330,7 +320,7 @@
       "icon": "item_copper",
       "requires": [],
       "unlock": {
-        "proposal": true
+        "level": 4
       },
       "cost": {
         "money": 60,
@@ -359,9 +349,7 @@
         "copper_prospecting"
       ],
       "unlock": {
-        "mastery": {
-          "mine": 3
-        }
+        "level": 5
       },
       "cost": {
         "money": 100,
@@ -411,7 +399,8 @@
           "item": "gold_ore",
           "add": 0.05
         }
-      ]
+      ],
+      "special": "Only a mine worked long enough can go deeper: mine mastery 4. A leaf."
     },
     {
       "id": "bellows",
@@ -421,7 +410,7 @@
       "icon": "item_copper_ingot",
       "requires": [],
       "unlock": {
-        "proposal": true
+        "level": 5
       },
       "cost": {
         "money": 80,
@@ -450,9 +439,7 @@
         "bellows"
       ],
       "unlock": {
-        "mastery": {
-          "smelter": 2
-        }
+        "level": 5
       },
       "cost": {
         "money": 120,
@@ -480,9 +467,7 @@
         "bloomery"
       ],
       "unlock": {
-        "mastery": {
-          "smelter": 3
-        }
+        "level": 6
       },
       "cost": {
         "money": 150,
@@ -528,7 +513,8 @@
           "type": "smelter",
           "recipe": "gold_ingot"
         }
-      ]
+      ],
+      "special": "A smelter's craft, learned at the furnace: smelter mastery 3. A leaf."
     },
     {
       "id": "photovoltaics",
@@ -650,9 +636,7 @@
         "electric_drill"
       ],
       "unlock": {
-        "mastery": {
-          "smelter": 3
-        }
+        "level": 6
       },
       "cost": {
         "money": 180,
@@ -752,7 +736,7 @@
         "automotive"
       ],
       "unlock": {
-        "level": 7
+        "level": 8
       },
       "cost": {
         "money": 200,
@@ -781,9 +765,7 @@
       "icon": "ui_research",
       "requires": [],
       "unlock": {
-        "mastery": {
-          "research": 2
-        }
+        "level": 2
       },
       "cost": {
         "money": 0,

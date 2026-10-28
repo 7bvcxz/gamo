@@ -68,7 +68,7 @@ func test_a_locked_node_says_what_it_needs() -> void:
 	var view := _farm_view()
 	_tap(view.cards["watering_efficiency"])
 	assert_eq(view.selected, "watering_efficiency", "tapping a node selects it")
-	assert_eq(view.need_lines("watering_efficiency"), ["After Field expansion", "A Momo's proposal"] as Array[String], "what is missing")
+	assert_eq(view.need_lines("watering_efficiency"), ["After Field expansion", "Unlocks at Lv. 2"] as Array[String], "what is missing: the parent, then a plain level (Step 70)")
 	assert_eq(view.effect_lines("watering_efficiency"), ["Wait after Water -25%"] as Array[String], "the effect, from the data")
 	assert_eq(view.effect_lines("farm_expansion"), ["Harvest: Crops +1"] as Array[String], "field expansion")
 	assert_true(view.start_button.disabled, "cannot start")
@@ -128,3 +128,40 @@ func test_research_and_the_other_panels_take_turns() -> void:
 	assert_false(frame.visible, "the mailbox replaces research")
 	main.call("_on_hud_action", &"research")
 	assert_false((main.get("mail_frame") as PanelFrame).visible, "and the other way round")
+
+
+## Step 70: a card held back by the player level says "Lv N" on a pill in
+## its corner, unfaded and on the card; reaching the level opens it and the
+## pill goes.
+func test_a_level_gated_card_shows_its_level() -> void:
+	main.call("_on_hud_action", &"research")
+	await tree.process_frame
+	var view := _farm_view()
+	view.refresh()
+	await tree.process_frame
+	var card: Button = view.cards["farm_expansion"]
+	var gate := card.find_child("Gate", true, false) as Label
+	assert_true(gate.visible, "locked by the level: the cue shows")
+	assert_eq(gate.text, "Lv 2", "the level it opens at")
+	assert_eq(gate.modulate, Color.WHITE, "not faded with the card")
+	assert_eq(card.modulate, Color.WHITE, "the card fades its face, not its children")
+	assert_true((card.get_node("Body") as Control).modulate.a < 1.0, "its face fades")
+	var inside := Rect2(Vector2.ZERO, card.size)
+	assert_true(inside.encloses(Rect2(gate.position, gate.size)), "the pill is on the card (%s in %s)" % [Rect2(gate.position, gate.size), inside])
+	assert_true(gate.position.y < card.size.y * 0.3, "in its top corner")
+	assert_true((card.find_child("Notes", true, false) as Label).get_parent().visible, "the notes still show what it will cost")
+	var child: Button = view.cards["watering_efficiency"]
+	assert_eq(view.gate_level("watering_efficiency"), 2, "a child waiting for its parent and Lv 2 says Lv 2 too")
+	var prog: ProgressionSystem = sim.system(&"progression")
+	prog.add_exp(prog.exp_needed_for(1), "test")
+	view.refresh()
+	assert_false(gate.visible, "Lv 2: open, the cue goes")
+	assert_eq((card.get_node("Body") as Control).modulate, Color.WHITE, "and the card is no longer faded")
+	assert_false((child.find_child("Gate", true, false) as Label).visible, "the child now waits only for its parent: no level cue")
+	# A two-digit level still fits: the pill grows to the left.
+	var narrow := gate.size.x
+	gate.visible = true
+	gate.text = "Lv 10"
+	await tree.process_frame
+	assert_true(gate.size.x > narrow, "it grew (%.0f -> %.0f)" % [narrow, gate.size.x])
+	assert_true(inside.encloses(Rect2(gate.position, gate.size)), "'Lv 10' too (%s)" % Rect2(gate.position, gate.size))

@@ -22,6 +22,20 @@ extends SimSystem
 ## a permanent ledger, `rp_earned` -- and every level goes back to 0, to be
 ## allocated again (allocate_all). Allocating moves points around; only
 ## research actually done adds to the ledger, so no loop mints RP.
+##
+## Step 70 -- five things, kept apart:
+##   eligible    the node's gate holds now: an ordinary node's player `level`
+##               (data/research.json), a special node's mastery or letter;
+##               a Momo's letter proposing a node makes it eligible early
+##   discovered  the gate held once: kept for good, across Prestige (where
+##               the player level starts again), so nothing seen goes away
+##   unlocked    researched once (also for good, as before)
+##   level       ranks active now: `bought` this run + `allocated` RP --
+##               Prestige turns bought into RP and the ranks go to 0
+##   requires    the prerequisites, asked every time (a level 0 parent
+##               after Prestige holds its child back until it is allocated)
+## Discovering never pays, researches or ranks anything; it only stops the
+## gate being asked again. No RP comes from it.
 
 const DONE := "research.done"
 const LAB := "research"
@@ -48,6 +62,50 @@ var token := 0
 ## here is new: the red dot on the Research button. Kept for good, like
 ## `unlocked` -- a topic seen once is not news again after a Prestige.
 var seen: Dictionary = {}
+## Step 70: nodes whose gate has held once (see the header): kept for good.
+var discovered: Dictionary = {}
+## The gates before Step 70 (proposal letters, building mastery, levels), to
+## carry an old save's eligible topics over: what was open stays open.
+const OLD_UNLOCKS := {
+	"farm_expansion": {"proposal": true},
+	"watering_efficiency": {"proposal": true},
+	"harvest_boost": {"proposal": true},
+	"watering_can": {"mastery": {"farm": 3}},
+	"drip_irrigation": {"mastery": {"farm": 4}},
+	"greenhouse": {"mastery": {"farm": 4}},
+	"seed_selection": {"mastery": {"farm": 3}},
+	"drought_millet": {"mastery": {"farm": 4}},
+	"sharp_axes": {"mastery": {"lumberyard": 2}},
+	"tree_nursery": {"proposal": true},
+	"pickaxes": {"mastery": {"mine": 2}},
+	"copper_prospecting": {"proposal": true},
+	"iron_prospecting": {"mastery": {"mine": 3}},
+	"deep_shaft": {"mastery": {"mine": 4}},
+	"bellows": {"proposal": true},
+	"bloomery": {"mastery": {"smelter": 2}},
+	"larger_crucible": {"mastery": {"smelter": 3}},
+	"fine_assay": {"mastery": {"smelter": 3}},
+	"photovoltaics": {"level": 4},
+	"wind_power": {"level": 4},
+	"steam_power": {"level": 4},
+	"hydropower": {"level": 5},
+	"electric_drill": {"level": 4},
+	"electric_furnace": {"mastery": {"smelter": 3}},
+	"lab_lighting": {"level": 4},
+	"software": {"level": 6},
+	"automotive": {"level": 7},
+	"delivery_vans": {"level": 7},
+	"field_notebook": {"mastery": {"research": 2}},
+	"momo_training": {"level": 3},
+	"momo_paths": {"level": 3},
+	"momo_reach": {"level": 4},
+	"momo_wide_reach": {"level": 6},
+	"smart_schedule": {"level": 5},
+	"management": {"level": 5},
+	"masonry": {"level": 4},
+	"civic_planning": {"level": 5},
+}
+var _seed_discovered := false
 ## A save from before Step 57 has no `seen`: filled once the whole save is in
 ## (game_loaded) with what was available under the old rules.
 var _seed_seen := false
@@ -71,8 +129,12 @@ func setup(p_sim: Simulation) -> void:
 	if buildings != null and not buildings.modifiers.has(self):
 		buildings.modifiers.append(self)
 	p_sim.bus.emitted.connect(func(type: StringName, _p: Dictionary) -> void:
+		if type == &"game_loaded" and _seed_discovered:
+			_seed_discovered_from_old_save()
 		if type == &"game_loaded" and _seed_seen:
-			_seed_seen_from_old_save())
+			_seed_seen_from_old_save()
+		if type in [&"level_up", &"mastery_up", &"letter_written", &"game_loaded"]:
+			discover())
 
 
 func on_new_game() -> void:
@@ -88,6 +150,8 @@ func on_new_game() -> void:
 	token = 0
 	seen.clear()
 	_seed_seen = false
+	discovered.clear()
+	_seed_discovered = false
 
 
 # --- the tree -----------------------------------------------------------------
@@ -256,11 +320,24 @@ func missing(id: String) -> Array[Dictionary]:
 	for r: String in n.get("requires", []):
 		if not is_done(r):
 			out.append({"kind": "requires", "id": r})
-	# Unlocked once, unlocked for good: the level, mastery or letter that
-	# opened it is not asked for again (its prerequisites still are).
-	if unlocked.has(id):
+	# Unlocked or discovered once, for good: the level, mastery or letter
+	# that opened it is not asked for again (its prerequisites still are).
+	if unlocked.has(id) or discovered.has(id):
 		return out
-	var unlock: Dictionary = n.get("unlock", {})
+	out.append_array(gate_missing(n, n.get("unlock", {})))
+	return out
+
+
+## Step 70: what of a gate (`unlock`) does not hold now. A Momo's letter
+## proposing the node is a gate of its own for a special `proposal` node and
+## an early way in for an ordinary one.
+func gate_missing(n: Dictionary, unlock: Dictionary) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var id := String(n["id"])
+	var mail: MailSystem = sim.system(&"mail")
+	var lettered := mail != null and mail.discovered_research().has(id)
+	if lettered:
+		return out
 	var prog: ProgressionSystem = sim.system(&"progression")
 	if unlock.has("level") and prog.level < int(unlock["level"]):
 		out.append({"kind": "level", "need": int(unlock["level"]), "have": prog.level})
@@ -269,10 +346,33 @@ func missing(id: String) -> Array[Dictionary]:
 		if have < int(unlock["mastery"][t]):
 			out.append({"kind": "mastery", "type": t, "need": int(unlock["mastery"][t]), "have": have})
 	if bool(unlock.get("proposal", false)):
-		var mail: MailSystem = sim.system(&"mail")
-		if mail == null or not mail.discovered_research().has(id):
-			out.append({"kind": "proposal"})
+		out.append({"kind": "proposal"})
 	return out
+
+
+## Step 70: every node whose gate holds now becomes discovered, for good.
+## Called on what can open a gate (a level, a mastery, a letter, a load).
+func discover() -> void:
+	var found: Array[String] = []
+	for n: Dictionary in nodes():
+		var id := String(n["id"])
+		if discovered.has(id):
+			continue
+		if gate_missing(n, n.get("unlock", {})).is_empty():
+			discovered[id] = true
+			found.append(id)
+	if not found.is_empty():
+		sim.bus.emit(&"research_discovered", {"ids": found})
+
+
+## A save from before Step 70: whatever its old gate (OLD_UNLOCKS) let it see
+## stays discovered -- a raised level gate never hides a topic it had.
+func _seed_discovered_from_old_save() -> void:
+	_seed_discovered = false
+	for n: Dictionary in nodes():
+		var id := String(n["id"])
+		if OLD_UNLOCKS.has(id) and gate_missing(n, OLD_UNLOCKS[id]).is_empty():
+			discovered[id] = true
 
 
 ## Step 57: topics that can be researched now (`available`: prerequisites
@@ -312,7 +412,9 @@ func _seed_seen_from_old_save() -> void:
 		var id := String(n["id"])
 		if state_of(id) != "available":
 			continue
-		if bool(n.get("unlock", {}).get("proposal", false)) and not unlocked.has(id) and not accepted.has(id):
+		# A save this old played by the gates before Step 70 (OLD_UNLOCKS).
+		var gate: Dictionary = OLD_UNLOCKS.get(id, n.get("unlock", {}))
+		if bool(gate.get("proposal", false)) and not unlocked.has(id) and not accepted.has(id):
 			continue
 		seen[id] = true
 
@@ -613,7 +715,7 @@ func yield_items(type: String, stage_id: String) -> Array[String]:
 ## the RP issued.
 func carry_over() -> Dictionary:
 	return {"unlocked": unlocked.duplicate(), "rp_earned": rp_earned + rp_pending(), "issued": rp_pending(), "profiles": profiles.duplicate(true),
-		"seen": seen.keys()}
+		"seen": seen.keys(), "discovered": discovered.keys()}
 
 
 func adopt(carry: Dictionary) -> void:
@@ -625,6 +727,11 @@ func adopt(carry: Dictionary) -> void:
 	for id: Variant in carry.get("seen", []):
 		if not node(String(id)).is_empty():
 			seen[String(id)] = true
+	# Step 70: what was discovered stays discovered on the new island, where
+	# the player level starts again.
+	for id: Variant in carry.get("discovered", []):
+		if not node(String(id)).is_empty():
+			discovered[String(id)] = true
 
 
 func _read_profiles(raw: Variant) -> void:
@@ -641,7 +748,7 @@ func _read_profiles(raw: Variant) -> void:
 func save_state() -> Dictionary:
 	return {"completed": completed.duplicate(), "active": active.duplicate(), "token": token,
 		"bought": bought.duplicate(), "allocated": allocated.duplicate(), "unlocked": unlocked.keys(), "rp_earned": rp_earned,
-		"profiles": profiles.duplicate(true), "seen": seen.keys()}
+		"profiles": profiles.duplicate(true), "seen": seen.keys(), "discovered": discovered.keys()}
 
 
 func load_state(state: Dictionary) -> void:
@@ -662,6 +769,10 @@ func load_state(state: Dictionary) -> void:
 		if not node(String(id)).is_empty():
 			seen[String(id)] = true
 	_seed_seen = not state.has("seen")
+	for id: Variant in state.get("discovered", []):
+		if not node(String(id)).is_empty():
+			discovered[String(id)] = true
+	_seed_discovered = not state.has("discovered")
 	var raw_bought: Dictionary = state.get("bought", {})
 	if not state.has("bought"):
 		# Before levels: everything finished was researched once.

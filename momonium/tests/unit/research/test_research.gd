@@ -45,9 +45,13 @@ func test_the_tree_and_its_branches() -> void:
 
 
 func test_what_each_node_still_needs() -> void:
-	assert_eq(research.missing("farm_expansion"), [{"kind": "proposal"}] as Array[Dictionary], "a Momo's proposal")
-	assert_eq(research.missing("watering_efficiency"), [{"kind": "requires", "id": "farm_expansion"}, {"kind": "proposal"}] as Array[Dictionary], "field expansion first, and a proposal")
-	assert_eq(research.missing("field_notebook"), [{"kind": "mastery", "type": "research", "need": 2, "have": 1}] as Array[Dictionary], "research mastery 2")
+	# Step 70: an ordinary node asks for a player level (and its prerequisites);
+	# a special one keeps its own gate.
+	assert_eq(research.missing("farm_expansion"), [{"kind": "level", "need": 2, "have": 1}] as Array[Dictionary], "Lv 2")
+	assert_eq(research.missing("watering_efficiency"), [{"kind": "requires", "id": "farm_expansion"}, {"kind": "level", "need": 2, "have": 1}] as Array[Dictionary], "field expansion first, and Lv 2")
+	assert_eq(research.missing("field_notebook"), [{"kind": "level", "need": 2, "have": 1}] as Array[Dictionary], "Lv 2 (it was research mastery 2)")
+	assert_eq(research.missing("tree_nursery"), [{"kind": "requires", "id": "sharp_axes"}, {"kind": "proposal"}] as Array[Dictionary], "special: a lumberjack's letter")
+	assert_eq(research.missing("drought_millet"), [{"kind": "requires", "id": "seed_selection"}, {"kind": "mastery", "type": "farm", "need": 4, "have": 1}] as Array[Dictionary], "special: farm mastery 4")
 
 
 func test_an_accepted_proposal_unlocks() -> void:
@@ -56,9 +60,13 @@ func test_an_accepted_proposal_unlocks() -> void:
 	assert_eq(research.state_of("watering_efficiency"), "locked", "its children still wait")
 
 
-func test_mastery_unlocks_the_general_branch() -> void:
-	(sim.system(&"progression") as ProgressionSystem).add_mastery("research", 100)
-	assert_eq(research.state_of("field_notebook"), "available", "research mastery 2 opens the notebook")
+func test_the_player_level_unlocks_the_general_branch() -> void:
+	var prog: ProgressionSystem = sim.system(&"progression")
+	prog.add_mastery("research", 100)
+	assert_eq(research.state_of("field_notebook"), "locked", "research mastery no longer opens it (Step 70)")
+	prog.add_exp(prog.exp_needed_for(1), "test")
+	assert_eq(prog.level, 2, "Lv 2")
+	assert_eq(research.state_of("field_notebook"), "available", "the player level opens the notebook")
 
 
 func test_starting_needs_a_finished_lab_and_the_cost() -> void:

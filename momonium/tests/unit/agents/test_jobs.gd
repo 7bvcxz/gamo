@@ -168,7 +168,9 @@ func test_a_full_store_makes_momo_wait_and_spending_frees_it() -> void:
 	sim.execute({"type": "momo.assign", "momo": 1, "building": lab})
 	sim.advance_ms(6000)
 	assert_eq(b["state"], BuildingSystem.IDLE, "cannot study into a full store: Momo waits")
-	(sim.system(&"progression") as ProgressionSystem).add_mastery("research", 100)
+	# Step 70: the notebook opens at player Lv 2.
+	var prog: ProgressionSystem = sim.system(&"progression")
+	prog.add_exp(prog.exp_needed_for(1), "test")
 	var r := sim.execute({"type": "research.start", "id": "field_notebook"})
 	assert_true(r["ok"], "research spends notes (%s)" % [r])
 	assert_eq(b["state"], BuildingSystem.WORKING, "and the Momo studies again at once")

@@ -37,8 +37,9 @@ test('a letter from Momo: news on the buttons, its research found without openin
   await game.command({ type: 'momo.assign', momo: 1, building: id });
   let m = await game.query('mail');
   expect(m.research_badge, 'nothing new yet').toBe(false);
-  // Ten farm stages by the Momo (Step 57): well under a minute of play.
-  for (let i = 0; i < 30 && m.unread === 0; i++) {
+  // Ten farm stages by the Momo (Step 57). Step 69: a stage is 6.25 s of work
+  // now, so that is about two minutes of play -- the loop stops at the letter.
+  for (let i = 0; i < 120 && m.unread === 0; i++) {
     await game.query('dev_advance_ms', 2000);
     m = await game.query('mail');
   }

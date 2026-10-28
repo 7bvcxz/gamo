@@ -1741,7 +1741,8 @@ func _research_info(_arg: Variant) -> Dictionary:
 	var nodes := {}
 	if view != null:
 		for id: String in view.cards:
-			nodes[id] = {"state": research.state_of(id), "rect": rect.call(view.cards[id])}
+			var gate := view.cards[id].find_child("Gate", true, false) as Label
+			nodes[id] = {"state": research.state_of(id), "rect": rect.call(view.cards[id]), "gate": gate.text if gate.visible else ""}
 	var tabs := {}
 	for t: Dictionary in research_frame.tabs:
 		tabs[String(t["key"])] = rect.call(t["button"])
@@ -1751,6 +1752,8 @@ func _research_info(_arg: Variant) -> Dictionary:
 		"button": rect.call(view.start_button) if view else [], "button_text": view.start_button.text if view else "",
 		"button_disabled": view.start_button.disabled if view else true, "active": research.active, "completed": research.completed.keys(),
 		"badge": (hud.buttons[&"research"] as HudButton).badge, "window": [win.x, win.y],
+		"close": rect.call(research_frame.close_button) if research_frame.visible else [],
+		"badge_count": (hud.buttons[&"research"] as HudButton).count,
 		# Step 57: the news -- topics not yet shown, the dots in the open panel.
 		"new_topics": research.new_topics(), "fresh": view.fresh.keys() if view else [],
 		"tab_dots": range(research_frame.tabs.size()).filter(func(i: int) -> bool: return research_frame.tab_dot(i)).map(func(i: int) -> String: return String(research_frame.tabs[i]["key"])),

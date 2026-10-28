@@ -114,6 +114,7 @@ func _card(n: Dictionary) -> Button:
 		selected = id
 		refresh())
 	var col := VBoxContainer.new()
+	col.name = "Body"
 	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	col.add_theme_constant_override("separation", 0)
@@ -136,6 +137,24 @@ func _card(n: Dictionary) -> Button:
 	chip.add_child(notes)
 	col.add_child(chip)
 	b.add_child(col)
+	# Step 70: a node held back by the player level says which, where the
+	# padlock is: "Lv 5" on a dark pill -- the forward track, readable at a
+	# glance. It is not faded with the locked card (see refresh) and grows to
+	# the left from the corner, so "Lv 10" stays on the card.
+	var gate := PanelViews.label("", 14)
+	gate.name = "Gate"
+	gate.add_theme_color_override("font_color", Color("#ffd166"))
+	var pill := StyleBoxFlat.new()
+	pill.bg_color = Color(0.1, 0.18, 0.3, 0.92)
+	pill.set_corner_radius_all(11)
+	pill.content_margin_left = 8.0
+	pill.content_margin_right = 8.0
+	gate.add_theme_stylebox_override("normal", pill)
+	gate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	gate.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 4)
+	gate.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	gate.visible = false
+	b.add_child(gate)
 	b.draw.connect(_draw_card.bind(b, id))
 	return b
 
@@ -149,6 +168,8 @@ func _draw_card(b: Button, id: String) -> void:
 		b.draw_arc(Vector2(14, 14), 7.0, 0, TAU, 16, Color.WHITE, 1.6, true)
 	var corner := Vector2(b.size.x - 16, 16)
 	match state:
+		"locked" when gate_level(id) > 0:
+			pass # the "Lv N" pill stands where the padlock would
 		"locked":
 			# A padlock: shackle and body.
 			b.draw_circle(corner, 13.0, Color(0.1, 0.18, 0.3, 0.85))
@@ -243,6 +264,15 @@ func effect_lines(id: String) -> Array[String]:
 	return ResearchText.effect_lines(sim, research.node(id))
 
 
+## Step 70: the player level a locked node waits for (0 when it waits for
+## nothing of the kind -- open, or held back by a parent or a special gate).
+func gate_level(id: String) -> int:
+	for m: Dictionary in research.missing(id):
+		if String(m["kind"]) == "level":
+			return int(m["need"])
+	return 0
+
+
 ## What a locked node still needs, as lines.
 func need_lines(id: String) -> Array[String]:
 	var out: Array[String] = []
@@ -267,8 +297,15 @@ func refresh() -> void:
 		(b.find_child("Name", true, false) as Label).text = tr(String(n.get("name", id)))
 		var need := int(research.cost_of(id)["items"].get("notes", 0))
 		(b.find_child("Notes", true, false) as Label).text = "%d / %d" % [mini(inv.count("notes"), need), need]
+		var gate := gate_level(id)
 		(b.find_child("Notes", true, false) as Label).get_parent().visible = not research.is_done(id)
-		b.modulate = Color(1, 1, 1, 0.55) if research.state_of(id) == "locked" else Color.WHITE
+		var gate_label := b.find_child("Gate", true, false) as Label
+		gate_label.visible = gate > 0
+		gate_label.text = "Lv %d" % gate
+		# A locked card fades -- its face and its own drawing, not the Lv pill.
+		var fade := Color(1, 1, 1, 0.55) if research.state_of(id) == "locked" else Color.WHITE
+		b.self_modulate = fade
+		(b.get_node("Body") as Control).modulate = fade
 		b.queue_redraw()
 	tree.queue_redraw()
 	if selected == "":
