@@ -1,0 +1,83 @@
+{
+ "build": "0.76.0 (game-ffcc179ba71f.pck, local docs/)",
+ "spec": "tests/e2e/specs/anchor76.spec.mjs",
+ "unit": "island px from the Momo's ground point (x across, y down); tolerance 2.5",
+ "jobs": {
+  "phone": {
+   "mine": {
+    "dig_0": [
+     0.1,
+     0.2
+    ],
+    "dig_1": [
+     0.0,
+     0.2
+    ],
+    "dig_2": [
+     -0.1,
+     -0.0
+    ],
+    "dig_3": [
+     0.0,
+     0.2
+    ]
+   },
+   "lumberyard": {
+    "chop_0": [
+     0.2,
+     0.2
+    ],
+    "chop_1": [
+     0.1,
+     0.4
+    ],
+    "chop_2": [
+     0.2,
+     0.2
+    ],
+    "chop_3": [
+     0.2,
+     0.0
+    ]
+   }
+  },
+  "desktop": {
+   "mine": {
+    "dig_0": [
+     0.3,
+     0.3
+    ],
+    "dig_1": [
+     0.2,
+     0.3
+    ],
+    "dig_2": [
+     0.3,
+     0.3
+    ],
+    "dig_3": [
+     0.2,
+     0.3
+    ]
+   },
+   "lumberyard": {
+    "chop_0": [
+     -0.1,
+     -0.2
+    ],
+    "chop_1": [
+     -0.2,
+     0.3
+    ],
+    "chop_2": [
+     0.1,
+     -0.2
+    ],
+    "chop_3": [
+     -0.1,
+     -0.2
+    ]
+   }
+  }
+ }
+}
