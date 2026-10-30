@@ -1,5 +1,5 @@
 {
-  "_doc": "Momo's 5x5 sheet (Step 51, design/MOMO_SPRITES.md section 4): which keyed source goes in which cell. `fit` (tools/art/gen/build_momo_sheet.gd): upright poses by height (the default), `head` where something rises above the head or the body is not upright (matched to its `view`'s anchor), `width` for lying down -- 236 px gives the approved sheet's own ratio, the sleeping Momo 0.59x as tall as the standing one (the generated pose is a little flatter than the sheet's, so fitting its width to the sheet's 1.05x of the standing ears left the head visibly small). Sources are TopView image edits of the approved sheet, keyed by tools/art/gen/key_sprite.gd; the generation log is in design/MOMO_SPRITES.md section 6.",
+  "_doc": "Momo's 5x5 sheet (Step 51, design/MOMO_SPRITES.md section 4): which keyed source goes in which cell. `fit` (tools/art/gen/build_momo_sheet.gd): upright poses by height (the default), `head` where something rises above the head or the body is not upright (matched to its `view`'s anchor), `width` for lying down -- 236 px gives the approved sheet's own ratio, the sleeping Momo 0.59x as tall as the standing one (the generated pose is a little flatter than the sheet's, so fitting its width to the sheet's 1.05x of the standing ears left the head visibly small). Sources are TopView image edits of the approved sheet, keyed by tools/art/gen/key_sprite.gd; the generation log is in design/MOMO_SPRITES.md section 6. Step 76: a cell stands on its root (tools/art/gen/momo_anchor.gd, design/MOMO_ANCHORS.md): a standing pose between its feet, a walk with its head where the view's standing pose has it; `root` says where the drawing cannot.",
   "cell": 256,
   "cols": 5,
   "rows": 5,
@@ -103,7 +103,11 @@
       "col": 0,
       "view": "side",
       "state": "idle",
-      "src": "side_idle.webp"
+      "src": "side_idle.webp",
+      "root": {
+        "foot": "only",
+        "why": "a side view: the near foot hides the far one"
+      }
     },
     {
       "name": "side_walk_a",
@@ -188,7 +192,11 @@
       "view": "front",
       "state": "sit",
       "src": "sit.webp",
-      "fit": "head"
+      "fit": "head",
+      "root": {
+        "torso": "sitting",
+        "why": "sitting with the legs stretched out: the body stays over the spot it stood on"
+      }
     },
     {
       "name": "sleep",
@@ -199,7 +207,11 @@
       "src": "sleep.webp",
       "fit": "width",
       "width": 236,
-      "align": "box"
+      "align": "box",
+      "root": {
+        "box": "lying",
+        "why": "lying down: the whole body over the spot (the sleep marks are drawn from it)"
+      }
     },
     {
       "name": "happy",

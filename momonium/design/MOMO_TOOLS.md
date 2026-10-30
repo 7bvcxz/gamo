@@ -54,7 +54,7 @@
 | 생성 | TopView `image_edit`(GPT Image 2, 1:1, 1K, medium) | 도구 시트 1장, 포즈 10장(입력: 앞 서기 + 도구) |
 | 도구 자르기 | `tools/art/gen/split_props.gd --cols 5 --rows 2` | 도구 시트 → 도구 열 개 |
 | 키잉 | `tools/art/gen/key_sprite.gd` | 배경만 지운다. 물방울·씨앗처럼 작은 조각이 있는 포즈는 `--keep 0.0003` |
-| 정규화·묶기 | `tools/art/gen/build_momo_work.gd` | 크기를 맞추고, 다듬고, 발 사이에 피벗을 두고, 한 장에 채워 넣는다 |
+| 정규화·묶기 | `tools/art/gen/build_momo_work.gd` | 크기를 맞추고, 다듬고, 루트(두 발 사이, Step 76 `MOMO_ANCHORS.md`)에 피벗을 두고, 한 장에 채워 넣는다 |
 | 검사 | `tests/unit/art/test_momo_work.gd`, `tests/integration/actors/test_momo_tools.gd` | 아래 §5 |
 
 ### 크기 맞추기
@@ -71,6 +71,7 @@
 
 - 5×5 시트(칸 256, 1280²)에는 자리가 없다. 그래서 도구를 든 장은 **따로 묶은 아틀라스** `assets/momo/momo_work.png`에 둔다(Step 66: 10장 1024×720, Step 67부터 40장 1536×1192 — §8).
   - 장마다 그림에 맞게 다듬은 사각형과 **자기 피벗**(발 사이, 사각형의 왼쪽 위에서 잰 값)을 갖는다.
+  - **Step 76**: Step 66~67의 피벗(가장 낮은 크림 픽셀)은 돌가루·물줄기·불꽃·도끼날에 끌려가 모모를 최대 56 px 옮겼다. 지금은 두 발을 찾아 정한 루트이고, 발이 말하지 않는 장은 `frames.json`에 `root`가 있다(`design/MOMO_ANCHORS.md`).
   - 장 사이에 6 px 투명 여백을 두어 밉맵이 번지지 않는다.
 - Step 66의 텍셀 축척은 시트와 같았다(`stand_height` 200 텍셀 = 72 월드 px). Step 67부터는 0.8배(160)이고, 리그가 장의 텍스처 밀도로 그리므로 섬에서의 크기는 같다(§8).
 - import는 시트와 같다(손실 압축, 밉맵, linear+mipmap 필터).

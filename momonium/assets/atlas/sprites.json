@@ -585,16 +585,16 @@
       "meta": {},
       "pivots": {
         "hand_r": [
-          141.0,
-          146.0
+          146.0,
+          145.0
         ],
         "head": [
-          95.0,
-          24.0
+          100.0,
+          23.0
         ],
         "origin": [
-          95.0,
-          200.0
+          100.0,
+          199.0
         ]
       },
       "region": [
@@ -605,7 +605,7 @@
       ],
       "scale": 1.0,
       "source": "png/momo_front.png",
-      "source_sha": "37cefb20a64a2e0c",
+      "source_sha": "e2773ef434f9696c",
       "world_scale": 0.42
     },
     "momo_monument": {

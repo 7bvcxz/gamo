@@ -10,14 +10,20 @@ extends SceneTree
 ## it, matched to its view's standing anchor) or "width" (lying down: the
 ## whole pose fitted to `width`). `adjust` scales the result. (Fitting every
 ## pose by its head band made a walk pulse: a swinging ear or a raised paw
-## widens that band by up to 10%.) A cell is placed so its head is centred and its lowest point
-## touches the ground line, `foot` px above the cell's bottom -- the pivot,
-## the same for all 25.
+## widens that band by up to 10%.)
+## Step 76: a cell is placed with its root on the pivot (`foot` px above the
+## cell's bottom, the same for all 25; tools/art/gen/momo_anchor.gd,
+## design/MOMO_ANCHORS.md): a standing pose between its two feet (or where
+## its `root` in cells.json says), a walk with its head where its view's
+## standing pose has it, on the lowest foot. Step 51 centred every head:
+## the standing poses stood up to 5 px off their feet, and a pose that turned
+## (the work faces left, the sheet's mirror) stepped twice that.
 ##
 ##   godot --headless --path momonium --script res://tools/art/gen/build_momo_sheet.gd -- \
 ##     [--cells res://assets/src/png/momo/cells.json] [--out res://assets/momo/momo_sheet]
 
 const HEAD_BAND := Vector2(0.18, 0.45)
+const Anchor := preload("res://tools/art/gen/momo_anchor.gd")
 
 
 func _init() -> void:
@@ -44,6 +50,10 @@ func _init() -> void:
 		var s := stand / float(img.get_height())
 		head_target[view] = head(img).x * s
 	var out_cells: Array = []
+	# Every cell scaled first, and measured: the roots of a view's standing
+	# poses come from its cells together (a hidden foot is placed where the
+	# view's two-footed poses have it), and its walk from its standing anchor.
+	var scaled := {}
 	print("%-14s %-5s %7s %7s %7s" % ["cell", "fit", "scale", "head", "height"])
 	for c: Dictionary in cfg["cells"]:
 		var img := _load(dir, c)
@@ -59,30 +69,68 @@ func _init() -> void:
 		var w2 := maxi(1, roundi(img.get_width() * s))
 		var h2 := maxi(1, roundi(img.get_height() * s))
 		img.resize(w2, h2, Image.INTERPOLATE_LANCZOS)
-		# Upright: the head over the pivot (it stays put while the feet step).
-		# Lying down (`align: box`): the whole body over it.
+		# Step 51's placement (the head centred, the lowest point on the
+		# line), for the log.
 		var head_x := h.y * s if String(c.get("align", "head")) == "head" else w2 / 2.0
+		var old_at := Vector2i(roundi(cell / 2.0 - head_x), cell - foot - h2)
+		scaled[c["name"]] = {"img": img, "measure": Anchor.measure(img, stand), "old_at": old_at}
+		print("%-14s %-5s %7.4f %7.1f %7d" % [c["name"], fit, s, h.x * s, h2])
+	var roots := {}
+	var failed := false
+	for view: String in cfg["anchors"]:
+		var names: Array = []
+		for c: Dictionary in cfg["cells"]:
+			if String(c["view"]) == view and String(c["state"]) != "walk":
+				names.append(String(c["name"]))
+		var found := Anchor.roots(names.map(func(n: String) -> Dictionary: return scaled[n]["measure"]), stand,
+			names.map(func(n: String) -> Dictionary: return by_name[n].get("root", {})))
+		for i in names.size():
+			roots[names[i]] = found[i]
+		var anchor := String(cfg["anchors"][view])
+		var dx := (roots[anchor]["root"] as Vector2).x - float(scaled[anchor]["measure"]["head_x"])
+		for c: Dictionary in cfg["cells"]:
+			if String(c["view"]) == view and String(c["state"]) == "walk":
+				roots[c["name"]] = Anchor.roots([scaled[c["name"]]["measure"]], stand, [{"head": dx}])[0]
+	for c: Dictionary in cfg["cells"]:
+		var r: Dictionary = roots[c["name"]]
+		if r["method"] == "error":
+			push_error("build_momo_sheet: %s: %s -- say where it stands (`root` in cells.json)" % [c["name"], r["error"]])
+			failed = true
+	if failed:
+		quit(1)
+		return
+	for c: Dictionary in cfg["cells"]:
+		var img: Image = scaled[c["name"]]["img"]
+		var m: Dictionary = scaled[c["name"]]["measure"]
+		var root: Vector2 = roots[c["name"]]["root"]
 		var origin := Vector2i(int(c["col"]) * cell, int(c["row"]) * cell)
-		var at := Vector2i(roundi(cell / 2.0 - head_x), cell - foot - h2)
+		var at := Vector2i(roundi(cell / 2.0 - root.x), roundi(cell - foot - root.y))
+		var w2 := img.get_width()
+		var h2 := img.get_height()
 		if at.x < 0 or at.y < 0 or at.x + w2 > cell or at.y + h2 > cell:
 			push_error("cell %s does not fit: %dx%d at %s" % [c["name"], w2, h2, at])
-		var src := Rect2i(Vector2i.ZERO, Vector2i(w2, h2))
-		sheet.blend_rect(img, src, origin + at)
-		print("%-14s %-5s %7.4f %7.1f %7d" % [c["name"], fit, s, h.x * s, h2])
-		out_cells.append({"name": c["name"], "row": c["row"], "col": c["col"], "view": view,
-			"state": c["state"], "frame": int(c.get("frame", 0)), "box": [at.x, at.y, w2, h2]})
+		sheet.blend_rect(img, Rect2i(Vector2i.ZERO, Vector2i(w2, h2)), origin + at)
+		print("%-14s root %-6s %s at %s (Step 51: %s)" % [c["name"], roots[c["name"]]["method"], root, at, scaled[c["name"]]["old_at"]])
+		var entry := {"name": c["name"], "row": c["row"], "col": c["col"], "view": c["view"],
+			"state": c["state"], "frame": int(c.get("frame", 0)), "box": [at.x, at.y, w2, h2], "root": roots[c["name"]]["method"],
+			"torso": [snappedf((m["torso"] as Vector2).x + at.x, 0.5), snappedf((m["torso"] as Vector2).y + at.y, 0.5)]}
+		if (m["eyes"] as Vector2).x >= 0.0:
+			entry["eyes"] = [snappedf((m["eyes"] as Vector2).x + at.x, 0.5), snappedf((m["eyes"] as Vector2).y + at.y, 0.5)]
+		entry["feet"] = (m["contacts"] as Array).map(func(f: Vector2) -> Array: return [snappedf(f.x + at.x, 0.5), snappedf(f.y + at.y, 0.5)])
+		out_cells.append(entry)
 	var base := String(args["out"])
 	var png := ProjectSettings.globalize_path(base + ".png")
 	DirAccess.make_dir_recursive_absolute(png.get_base_dir())
 	sheet.save_png(png)
 	var meta := {
-		"_doc": "Momo's sprite sheet (Step 51, design/MOMO_SPRITES.md): equal cells, rows x cols; each cell holds one pose of the same Momo, its feet on the pivot (cell x, cell y from the cell's top-left). `animations` name the cells a state plays in order at `fps`; a left-facing view is the same cell mirrored. Built by tools/art/gen/build_momo_sheet.gd from assets/src/png/momo/.",
+		"_doc": "Momo's sprite sheet (Step 51, design/MOMO_SPRITES.md): equal cells, rows x cols; each cell holds one pose of the same Momo, its root -- the point on the ground between its feet (Step 76, design/MOMO_ANCHORS.md) -- on the pivot (cell x, cell y from the cell's top-left); a cell's `root` says how it was found; `feet` (each foot's contact), `torso` and `eyes` are measured marks in cell pixels (the calibration gallery's). `animations` name the cells a state plays in order at `fps`; a left-facing view is the same cell mirrored. Built by tools/art/gen/build_momo_sheet.gd from assets/src/png/momo/.",
 		"cell": [cell, cell], "cols": cols, "rows": rows, "pivot": [cell / 2, cell - foot], "stand_height": stand,
 		"cells": out_cells, "animations": cfg["animations"],
 	}
 	# The portrait the panels use (atlas sprite `momo_front`): the front
 	# standing cell in the 200x220 frame the old drawing had, feet at
-	# (100, 210), so every icon keeps its anchors.
+	# (100, 210) -- since Step 76 the middle of the two feet -- so every icon
+	# keeps its anchors.
 	var front: Dictionary = by_name[String(cfg["anchors"]["front"])]
 	var portrait := sheet.get_region(Rect2i(int(front["col"]) * cell + cell / 2 - 100, int(front["row"]) * cell + cell - foot - 210, 200, 220))
 	portrait.save_png(ProjectSettings.globalize_path(String(cfg.get("portrait", "res://assets/src/png/momo_front.png"))))

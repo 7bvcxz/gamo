@@ -61,6 +61,9 @@ const REDUCED_PACE := 0.6
 ## of it is the listener's (MomoViews -> AudioService.tap), quiet and rare.
 signal struck(pose: String)
 var _loop_index := -1
+## Step 76: holds the animation on its frame `held` (-1 plays on) -- how the
+## browser tests look at one frame exactly (main.gd `dev_hold_momo`).
+var held := -1
 
 
 func setup(_lib: SpriteLibrary = null, seed_value: int = 0) -> void:
@@ -163,7 +166,9 @@ func tick(delta: float) -> void:
 		# Out of the loop: going back to work starts at the wind-up.
 		_loop_anim = ""
 		_loop_index = -1
-	if looped:
+	if held >= 0 and not frames.is_empty():
+		name = String(frames[held % frames.size()])
+	elif looped:
 		var index := _loop_frame(anim, timed, delta)
 		name = String(frames[index])
 		if index != _loop_index:

@@ -26,13 +26,21 @@ extends SceneTree
 ## (`stand_height` texels from feet to fur curl): the runtime draws each
 ## frame at its texture's stand height, so the size on the island is the
 ## same and the atlas is smaller.
-## The feet are the lowest cream pixels; each frame keeps its own pivot (the
-## point between the feet), so a frame packs into the atlas trimmed, and the
-## renderer stands every one of them on the same ground point.
+## Step 76: each frame keeps its own pivot -- its root, the point on the
+## ground between the feet (tools/art/gen/momo_anchor.gd,
+## design/MOMO_ANCHORS.md) -- so a frame packs into the atlas trimmed, and
+## the renderer stands every one of them on the same ground point. The root
+## comes from Momo's two feet, or from the frame's `root` in frames.json
+## where the drawing cannot say (a foot hidden or set back, kneeling, a
+## hop); a frame with neither stops the build. (Steps 66-67 took the lowest
+## cream pixels for the feet: rock dust, a jet of water, a spark or an axe's
+## edge moved Momo up to 45 px between frames.) The map keeps each frame's
+## `root` method and, for the calibration gallery, its torso and eyes.
 ##
 ##   godot --headless --path momonium --script res://tools/art/gen/build_momo_work.gd -- \
 ##     [--frames res://assets/src/png/momo_work/frames.json] [--out res://assets/momo/momo_work]
 
+const Anchor := preload("res://tools/art/gen/momo_anchor.gd")
 const HEAD_BAND := Vector2(0.18, 0.45)
 ## Transparent texels around every frame in the atlas, so mipmaps of one
 ## frame never bleed into the next.
@@ -111,9 +119,34 @@ func _init() -> void:
 		img.resize(w2, h2, Image.INTERPOLATE_LANCZOS)
 		var box := opaque_box(img)
 		var cut := img.get_region(box)
-		var feet := feet_point(img) - Vector2(box.position)
-		placed.append({"name": f["name"], "img": cut, "pivot": feet})
+		var spec: Dictionary = (f.get("root", {}) as Dictionary).duplicate()
+		if spec.has("at"):
+			# Authored in the source picture's pixels.
+			spec["at"] = [float(spec["at"][0]) * s - box.position.x, float(spec["at"][1]) * s - box.position.y]
+		placed.append({"name": f["name"], "img": cut, "spec": spec, "measure": Anchor.measure(cut, stand)})
 		print("%-16s %7.4f %7.4f %7.4f %4dx%-4d" % [f["name"], s, by_head, by_eye, cut.get_width(), cut.get_height()])
+	# Each animation's roots, from its frames together (a hidden foot is
+	# placed where the animation's two-footed frames have it).
+	var by_name := {}
+	for p: Dictionary in placed:
+		by_name[p["name"]] = p
+	var failed := false
+	for a: String in cfg["animations"]:
+		var names: Array = cfg["animations"][a]["cells"]
+		var ms: Array = names.map(func(n: String) -> Dictionary: return by_name[n]["measure"])
+		var specs: Array = names.map(func(n: String) -> Dictionary: return by_name[n]["spec"])
+		var roots := Anchor.roots(ms, stand, specs)
+		for i in names.size():
+			var p: Dictionary = by_name[names[i]]
+			if roots[i]["method"] == "error":
+				push_error("build_momo_work: %s: %s -- say where it stands (`root` in frames.json)" % [names[i], roots[i]["error"]])
+				failed = true
+			p["pivot"] = roots[i]["root"]
+			p["method"] = roots[i]["method"]
+			print("%-16s root %-8s %s" % [names[i], p["method"], p["pivot"]])
+	if failed:
+		quit(1)
+		return
 	# Shelf packing, tallest first.
 	var order := range(placed.size())
 	order.sort_custom(func(a: int, b: int) -> bool: return (placed[a]["img"] as Image).get_height() > (placed[b]["img"] as Image).get_height())
@@ -138,11 +171,18 @@ func _init() -> void:
 		var at: Vector2i = p["at"]
 		atlas.blit_rect(im, Rect2i(Vector2i.ZERO, im.get_size()), at)
 		var pv: Vector2 = p["pivot"]
-		frames.append({"name": p["name"], "rect": [at.x, at.y, im.get_width(), im.get_height()], "pivot": [snappedf(pv.x, 0.5), snappedf(pv.y, 0.5)]})
+		var m: Dictionary = p["measure"]
+		var e: Vector2 = m["eyes"]
+		var entry := {"name": p["name"], "rect": [at.x, at.y, im.get_width(), im.get_height()], "pivot": [snappedf(pv.x, 0.5), snappedf(pv.y, 0.5)],
+			"root": p["method"], "torso": [snappedf((m["torso"] as Vector2).x, 0.5), snappedf((m["torso"] as Vector2).y, 0.5)]}
+		if e.x >= 0.0:
+			entry["eyes"] = [snappedf(e.x, 0.5), snappedf(e.y, 0.5)]
+		entry["feet"] = (m["contacts"] as Array).map(func(c: Vector2) -> Array: return [snappedf(c.x, 0.5), snappedf(c.y, 0.5)])
+		frames.append(entry)
 	var base := String(args["out"])
 	atlas.save_png(ProjectSettings.globalize_path(base + ".png"))
 	var meta := {
-		"_doc": "Momo at work (Steps 66-67, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot (the point between the feet, from the rect's top-left); `stand_height` texels from feet to fur curl (`texel_scale` of the sheet's density -- the runtime draws by it, the same size on the island). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
+		"_doc": "Momo at work (Steps 66-67, design/MOMO_TOOLS.md): a packed atlas beside the 5x5 sheet. Each frame is a trimmed rect with its own pivot -- its root, the point on the ground between the feet (Step 76, design/MOMO_ANCHORS.md), from the rect's top-left; `root` says how it was found; `feet` (each foot's contact), `torso` and `eyes` are measured marks (the calibration gallery's). `stand_height` texels from feet to fur curl (`texel_scale` of the sheet's density -- the runtime draws by it, the same size on the island). `animations` name the frames a job plays at `fps`; `actions` map each building stage's action (data/buildings.json) to its animation. Built by tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.",
 		"stand_height": stand, "texel_scale": texel, "frames": frames, "animations": cfg["animations"], "actions": cfg["actions"],
 	}
 	var file := FileAccess.open(ProjectSettings.globalize_path(base + ".json"), FileAccess.WRITE)
@@ -155,7 +195,7 @@ func _init() -> void:
 ## Momo's fur and overalls: light, warm and unsaturated (r >= b). Steel is
 ## blue-grey (b > r), wood and wicker are saturated, outlines are dark.
 static func is_cream(c: Color) -> bool:
-	return c.a > 0.5 and c.r8 > 200 and c.g8 > 180 and c.b8 > 150 and c.r8 >= c.b8 and c.r8 - c.b8 < 70
+	return Anchor.is_cream(c)
 
 
 static func cream_box(img: Image) -> Rect2i:
@@ -187,79 +227,17 @@ static func head_width(img: Image) -> float:
 	return best
 
 
-## Between the feet: the centre of the cream in the lowest 6% of the cream,
-## on the bottom edge of the lowest cream row.
-static func feet_point(img: Image) -> Vector2:
-	var b := cream_box(img)
-	var y0 := b.end.y - maxi(2, int(b.size.y * 0.06))
-	var sx := 0.0
-	var n := 0
-	for yy in range(y0, b.end.y):
-		for xx in range(b.position.x, b.end.x):
-			if is_cream(img.get_pixel(xx, yy)):
-				sx += xx + 0.5
-				n += 1
-	return Vector2(sx / maxi(n, 1), b.end.y)
-
-
 ## Momo's two eyes: the two largest solid dark blobs (the outline is a thin
 ## line, a blob is filled), side by side, the head maybe tilted. Returns
 ## [eye size, spacing] in px -- the size is the square root of an eye's
 ## area, which a tilted head does not change -- or [] when two are not found.
 static func eyes(img: Image) -> Array:
-	var w := img.get_width()
-	var h := img.get_height()
-	var seen := PackedByteArray()
-	seen.resize(w * h)
-	var blobs: Array = []
-	for start in w * h:
-		if seen[start] == 1:
-			continue
-		var c := img.get_pixel(start % w, start / w)
-		if not _dark(c):
-			continue
-		var lo := Vector2i(w, h)
-		var hi := Vector2i(-1, -1)
-		var n := 0
-		var stack: Array[int] = [start]
-		seen[start] = 1
-		while not stack.is_empty():
-			var i: int = stack.pop_back()
-			var x := i % w
-			var y := i / w
-			n += 1
-			lo = Vector2i(mini(lo.x, x), mini(lo.y, y))
-			hi = Vector2i(maxi(hi.x, x), maxi(hi.y, y))
-			for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-				var xx := x + d.x
-				var yy := y + d.y
-				if xx < 0 or yy < 0 or xx >= w or yy >= h:
-					continue
-				var j := yy * w + xx
-				if seen[j] == 0 and _dark(img.get_pixel(xx, yy)):
-					seen[j] = 1
-					stack.append(j)
-		var size := hi - lo + Vector2i.ONE
-		var fill := float(n) / float(size.x * size.y)
-		var aspect := float(size.y) / float(size.x)
-		if n >= 60 and fill > 0.5 and aspect > 0.8 and aspect < 2.2:
-			blobs.append({"n": n, "size": size, "c": (Vector2(lo) + Vector2(hi)) / 2.0})
-	blobs.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["n"]) > int(b["n"]))
-	for i in blobs.size():
-		for j in range(i + 1, mini(blobs.size(), 6)):
-			var a: Dictionary = blobs[i]
-			var b: Dictionary = blobs[j]
-			var dy := absf((a["c"] as Vector2).y - (b["c"] as Vector2).y)
-			var dx := absf((a["c"] as Vector2).x - (b["c"] as Vector2).x)
-			var ha := float((a["size"] as Vector2i).y)
-			var hb := float((b["size"] as Vector2i).y)
-			if dy < maxf(ha, hb) * 1.2 and dx > maxf(ha, hb) * 0.7 and absf(ha - hb) < maxf(ha, hb) * 0.4:
-				return [sqrt((float(a["n"]) + float(b["n"])) / 2.0), Vector2(dx, dy).length()]
-	return []
-
-
-static func _dark(c: Color) -> bool:
-	return c.a > 0.5 and c.get_luminance() < 0.22
+	var pair := Anchor.eye_pair(img)
+	if pair.is_empty():
+		return []
+	var a: Dictionary = pair[0]
+	var b: Dictionary = pair[1]
+	return [sqrt((float(a["n"]) + float(b["n"])) / 2.0), ((a["c"] as Vector2) - (b["c"] as Vector2)).length()]
 
 
 static func _median(list: Array) -> float:

@@ -1,5 +1,5 @@
 {
-  "_doc": "Momo's sprite sheet (Step 51, design/MOMO_SPRITES.md): equal cells, rows x cols; each cell holds one pose of the same Momo, its feet on the pivot (cell x, cell y from the cell's top-left). `animations` name the cells a state plays in order at `fps`; a left-facing view is the same cell mirrored. Built by tools/art/gen/build_momo_sheet.gd from assets/src/png/momo/.",
+  "_doc": "Momo's sprite sheet (Step 51, design/MOMO_SPRITES.md): equal cells, rows x cols; each cell holds one pose of the same Momo, its root -- the point on the ground between its feet (Step 76, design/MOMO_ANCHORS.md) -- on the pivot (cell x, cell y from the cell's top-left); a cell's `root` says how it was found; `feet` (each foot's contact), `torso` and `eyes` are measured marks in cell pixels (the calibration gallery's). `animations` name the cells a state plays in order at `fps`; a left-facing view is the same cell mirrored. Built by tools/art/gen/build_momo_sheet.gd from assets/src/png/momo/.",
   "cell": [
     256,
     256
@@ -20,10 +20,29 @@
       "state": "idle",
       "frame": 0,
       "box": [
-        33,
-        42,
+        28,
+        43,
         189,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        125.0,
+        168.0
+      ],
+      "eyes": [
+        135.5,
+        115.0
+      ],
+      "feet": [
+        [
+          106.0,
+          242.0
+        ],
+        [
+          149.5,
+          240.0
+        ]
       ]
     },
     {
@@ -34,10 +53,25 @@
       "state": "blink",
       "frame": 0,
       "box": [
-        33,
-        42,
+        28,
+        43,
         189,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        125.0,
+        168.0
+      ],
+      "feet": [
+        [
+          106.0,
+          242.0
+        ],
+        [
+          149.5,
+          240.0
+        ]
       ]
     },
     {
@@ -48,10 +82,25 @@
       "state": "walk",
       "frame": 0,
       "box": [
-        32,
-        42,
+        27,
+        43,
         191,
         200
+      ],
+      "root": "head",
+      "torso": [
+        123.5,
+        166.5
+      ],
+      "eyes": [
+        135.5,
+        115.0
+      ],
+      "feet": [
+        [
+          118.5,
+          242.0
+        ]
       ]
     },
     {
@@ -62,10 +111,29 @@
       "state": "walk",
       "frame": 1,
       "box": [
-        32,
-        42,
+        27,
+        43,
         191,
         200
+      ],
+      "root": "head",
+      "torso": [
+        125.0,
+        167.5
+      ],
+      "eyes": [
+        135.0,
+        114.5
+      ],
+      "feet": [
+        [
+          113.5,
+          242.0
+        ],
+        [
+          144.5,
+          241.0
+        ]
       ]
     },
     {
@@ -76,10 +144,29 @@
       "state": "walk",
       "frame": 2,
       "box": [
-        32,
-        42,
+        27,
+        43,
         191,
         200
+      ],
+      "root": "head",
+      "torso": [
+        124.5,
+        166.5
+      ],
+      "eyes": [
+        133.5,
+        113.0
+      ],
+      "feet": [
+        [
+          109.0,
+          235.0
+        ],
+        [
+          147.5,
+          242.0
+        ]
       ]
     },
     {
@@ -90,10 +177,25 @@
       "state": "idle",
       "frame": 0,
       "box": [
-        38,
-        42,
+        43,
+        43,
         179,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        132.5,
+        167.0
+      ],
+      "feet": [
+        [
+          109.0,
+          241.0
+        ],
+        [
+          146.5,
+          242.0
+        ]
       ]
     },
     {
@@ -104,10 +206,25 @@
       "state": "walk",
       "frame": 0,
       "box": [
-        39,
-        42,
+        44,
+        43,
         178,
         200
+      ],
+      "root": "head",
+      "torso": [
+        132.5,
+        167.5
+      ],
+      "feet": [
+        [
+          111.5,
+          241.0
+        ],
+        [
+          143.5,
+          242.0
+        ]
       ]
     },
     {
@@ -118,10 +235,21 @@
       "state": "walk",
       "frame": 1,
       "box": [
-        44,
-        42,
+        49,
+        43,
         168,
         200
+      ],
+      "root": "head",
+      "torso": [
+        132.5,
+        168.5
+      ],
+      "feet": [
+        [
+          139.5,
+          242.0
+        ]
       ]
     },
     {
@@ -132,10 +260,25 @@
       "state": "walk",
       "frame": 2,
       "box": [
-        41,
-        42,
+        46,
+        43,
         174,
         200
+      ],
+      "root": "head",
+      "torso": [
+        132.5,
+        167.5
+      ],
+      "feet": [
+        [
+          107.0,
+          242.0
+        ],
+        [
+          146.0,
+          240.0
+        ]
       ]
     },
     {
@@ -146,10 +289,25 @@
       "state": "work",
       "frame": 0,
       "box": [
-        42,
-        42,
+        46,
+        43,
         171,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        132.0,
+        165.5
+      ],
+      "feet": [
+        [
+          109.5,
+          241.0
+        ],
+        [
+          146.5,
+          242.0
+        ]
       ]
     },
     {
@@ -161,9 +319,20 @@
       "frame": 0,
       "box": [
         66,
-        42,
+        43,
         119,
         200
+      ],
+      "root": "foot",
+      "torso": [
+        116.0,
+        170.0
+      ],
+      "feet": [
+        [
+          128.0,
+          242.0
+        ]
       ]
     },
     {
@@ -174,10 +343,25 @@
       "state": "walk",
       "frame": 0,
       "box": [
-        63,
-        42,
+        62,
+        43,
         129,
         200
+      ],
+      "root": "head",
+      "torso": [
+        126.5,
+        170.0
+      ],
+      "feet": [
+        [
+          100.5,
+          242.0
+        ],
+        [
+          168.5,
+          241.0
+        ]
       ]
     },
     {
@@ -189,9 +373,20 @@
       "frame": 1,
       "box": [
         69,
-        42,
+        43,
         113,
         200
+      ],
+      "root": "head",
+      "torso": [
+        117.5,
+        171.0
+      ],
+      "feet": [
+        [
+          132.0,
+          242.0
+        ]
       ]
     },
     {
@@ -202,10 +397,25 @@
       "state": "walk",
       "frame": 2,
       "box": [
-        61,
-        42,
+        58,
+        43,
         135,
         200
+      ],
+      "root": "head",
+      "torso": [
+        123.0,
+        169.5
+      ],
+      "feet": [
+        [
+          97.0,
+          242.0
+        ],
+        [
+          173.5,
+          240.0
+        ]
       ]
     },
     {
@@ -216,10 +426,25 @@
       "state": "carry",
       "frame": 0,
       "box": [
-        67,
-        42,
+        60,
+        43,
         138,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        109.0,
+        169.5
+      ],
+      "feet": [
+        [
+          103.5,
+          242.0
+        ],
+        [
+          153.0,
+          241.0
+        ]
       ]
     },
     {
@@ -230,10 +455,29 @@
       "state": "harvest",
       "frame": 0,
       "box": [
-        34,
-        42,
+        32,
+        43,
         187,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        127.0,
+        166.0
+      ],
+      "eyes": [
+        133.5,
+        115.5
+      ],
+      "feet": [
+        [
+          106.5,
+          242.0
+        ],
+        [
+          150.5,
+          241.0
+        ]
       ]
     },
     {
@@ -244,10 +488,29 @@
       "state": "water",
       "frame": 0,
       "box": [
-        33,
-        42,
+        37,
+        43,
         207,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        119.5,
+        164.0
+      ],
+      "eyes": [
+        151.0,
+        114.0
+      ],
+      "feet": [
+        [
+          106.0,
+          242.0
+        ],
+        [
+          150.5,
+          240.0
+        ]
       ]
     },
     {
@@ -258,10 +521,29 @@
       "state": "dig",
       "frame": 0,
       "box": [
-        8,
-        41,
+        25,
+        42,
         211,
         201
+      ],
+      "root": "feet",
+      "torso": [
+        113.0,
+        166.0
+      ],
+      "eyes": [
+        125.0,
+        112.0
+      ],
+      "feet": [
+        [
+          95.0,
+          242.0
+        ],
+        [
+          161.5,
+          240.0
+        ]
       ]
     },
     {
@@ -272,10 +554,29 @@
       "state": "carry",
       "frame": 0,
       "box": [
-        33,
-        42,
+        29,
+        43,
         188,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        104.5,
+        163.5
+      ],
+      "eyes": [
+        137.0,
+        111.5
+      ],
+      "feet": [
+        [
+          106.5,
+          242.0
+        ],
+        [
+          150.0,
+          240.0
+        ]
       ]
     },
     {
@@ -286,10 +587,29 @@
       "state": "study",
       "frame": 0,
       "box": [
-        37,
-        42,
+        40,
+        43,
         179,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        124.0,
+        165.5
+      ],
+      "eyes": [
+        121.0,
+        122.5
+      ],
+      "feet": [
+        [
+          107.0,
+          240.0
+        ],
+        [
+          148.5,
+          242.0
+        ]
       ]
     },
     {
@@ -300,10 +620,21 @@
       "state": "sit",
       "frame": 0,
       "box": [
-        30,
-        44,
+        28,
+        45,
         196,
         198
+      ],
+      "root": "torso",
+      "torso": [
+        124.5,
+        131.5
+      ],
+      "feet": [
+        [
+          136.5,
+          203.0
+        ]
       ]
     },
     {
@@ -318,6 +649,17 @@
         120,
         236,
         122
+      ],
+      "root": "box",
+      "torso": [
+        136.0,
+        170.0
+      ],
+      "feet": [
+        [
+          89.0,
+          239.0
+        ]
       ]
     },
     {
@@ -328,10 +670,25 @@
       "state": "happy",
       "frame": 0,
       "box": [
-        29,
-        42,
+        25,
+        43,
         198,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        128.0,
+        165.0
+      ],
+      "feet": [
+        [
+          110.0,
+          242.0
+        ],
+        [
+          145.5,
+          242.0
+        ]
       ]
     },
     {
@@ -342,10 +699,25 @@
       "state": "confused",
       "frame": 0,
       "box": [
-        30,
-        42,
+        31,
+        43,
         185,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        112.0,
+        167.5
+      ],
+      "feet": [
+        [
+          107.0,
+          242.0
+        ],
+        [
+          149.0,
+          241.0
+        ]
       ]
     },
     {
@@ -357,9 +729,28 @@
       "frame": 0,
       "box": [
         41,
-        42,
+        43,
         173,
         200
+      ],
+      "root": "feet",
+      "torso": [
+        128.0,
+        166.5
+      ],
+      "eyes": [
+        139.0,
+        113.5
+      ],
+      "feet": [
+        [
+          107.5,
+          242.0
+        ],
+        [
+          148.0,
+          242.0
+        ]
       ]
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Each job is four frames of one generated 2x2 sheet (Step 67, `strip`: one scale for the four), cut by tools/art/gen/split_frames.gd; every frame is fitted by Momo's eyes and head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md. Step 68: `contact` is the frame the tool lands on (a quiet `tap` sound, assets/audio/sfx_<tap>.ogg).",
+  "_doc": "Momo at work (Step 66, design/MOMO_TOOLS.md): which keyed source is which frame of the work atlas. Each job is four frames of one generated 2x2 sheet (Step 67, `strip`: one scale for the four), cut by tools/art/gen/split_frames.gd; every frame is fitted by Momo's eyes and head to the front standing anchor (tools/art/gen/build_momo_work.gd); `adjust` scales one after that. `actions` maps each building stage's action (data/buildings.json) to the pose it plays -- a stage with no entry works back turned. Sources are TopView image edits of the front standing pose and the tool sheet (assets/src/png/tools/); the generation log is in design/MOMO_TOOLS.md. Step 68: `contact` is the frame the tool lands on (a quiet `tap` sound, assets/audio/sfx_<tap>.ogg). Step 76: every frame stands on its root (tools/art/gen/momo_anchor.gd, design/MOMO_ANCHORS.md) -- found from the feet, or written here as `root` where the drawing cannot say (a foot hidden or set back, kneeling), with a `why`.",
   "anchor": "res://assets/src/png/momo/front_idle.webp",
   "stand_height": 200,
   "atlas_width": 1536,
@@ -22,7 +22,11 @@
     {
       "name": "sow_3",
       "src": "sow_3.webp",
-      "strip": "sow"
+      "strip": "sow",
+      "root": {
+        "torso": "hop",
+        "why": "the little hop at the end: the left foot kicks up and the right one lands under the body -- the body stays put, no foot is planted"
+      }
     },
     {
       "name": "water_0",
@@ -47,7 +51,11 @@
     {
       "name": "harvest_0",
       "src": "harvest_0.webp",
-      "strip": "harvest"
+      "strip": "harvest",
+      "root": {
+        "foot": "left",
+        "why": "bending to the tomato: the right foot is behind the basket, the left one (seen) stands where it does in the other three"
+      }
     },
     {
       "name": "harvest_1",
@@ -107,22 +115,38 @@
     {
       "name": "replant_0",
       "src": "replant_0.webp",
-      "strip": "replant"
+      "strip": "replant",
+      "root": {
+        "feet": "both",
+        "why": "crouching with the right foot set back -- higher on the page because it is further away, not lifted"
+      }
     },
     {
       "name": "replant_1",
       "src": "replant_1.webp",
-      "strip": "replant"
+      "strip": "replant",
+      "root": {
+        "feet": "both",
+        "why": "crouching with the right foot set back, as in replant_0"
+      }
     },
     {
       "name": "replant_2",
       "src": "replant_2.webp",
-      "strip": "replant"
+      "strip": "replant",
+      "root": {
+        "torso": "kneeling",
+        "why": "kneeling to firm the soil: the feet are under the body, the knees on the ground"
+      }
     },
     {
       "name": "replant_3",
       "src": "replant_3.webp",
-      "strip": "replant"
+      "strip": "replant",
+      "root": {
+        "foot": "right",
+        "why": "the trowel covers the left foot; the right one (seen) stands where it does in the crouch"
+      }
     },
     {
       "name": "study_0",
@@ -157,7 +181,11 @@
     {
       "name": "hammer_2",
       "src": "hammer_2.webp",
-      "strip": "hammer"
+      "strip": "hammer",
+      "root": {
+        "foot": "left",
+        "why": "the strike: the hammer head covers the right foot, whose visible top is not its bottom"
+      }
     },
     {
       "name": "hammer_3",

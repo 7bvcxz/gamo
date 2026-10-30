@@ -917,6 +917,7 @@ func _ready() -> void:
 			out["priority"] = pr
 		return out)
 	bridge.register_query("momos", _momo_info)
+	bridge.register_query("dev_hold_momo", _dev_hold_momo)
 	bridge.register_query("momo_poses", func(_a: Variant) -> Dictionary:
 		var out := {}
 		for id: int in momo_views.actors:
@@ -1874,6 +1875,18 @@ func find_momo(id: int) -> void:
 	var at := cameras.world_to_screen(a.global_position - Vector2(0, a.depth_lift))
 	cameras.pan_screen(get_viewport_rect().size * 0.5 - at)
 	selection.select_momo(id)
+
+
+## E2E (browser test mode only): holds Momo `arg[0]`'s body on frame
+## `arg[1]` of the animation it plays (-1 plays on) -- a screenshot then sees
+## that frame and no other. Presentation only.
+func _dev_hold_momo(arg: Variant) -> Dictionary:
+	var a := momo_views.actor(int(arg[0]))
+	if a == null:
+		return {"ok": false}
+	a.rig.held = int(arg[1])
+	a.rig.tick(0.0)
+	return {"ok": true, "cell": a.rig.cell_name(), "frames": a.rig.sheet.frames(a.rig.animation()).size()}
 
 
 ## E2E: Momo positions on screen (window pixels), their assignment, and the drag/selection state.

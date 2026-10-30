@@ -4,7 +4,7 @@ extends "res://tests/framework/test_case.gd"
 ## with the tool of each job, beside the 5x5 sheet. Every stage the island
 ## has maps to a job; every job plays at least four visibly different frames
 ## with a time for each; every frame is in the atlas, trimmed, apart from the
-## others, stood on its own pivot between the feet, at the sheet's size; the
+## others, stood on its own pivot -- its root between the feet (Step 76) -- at the sheet's size; the
 ## import is drawn small like the sheet's. Built by
 ## tools/art/gen/build_momo_work.gd from assets/src/png/momo_work/.
 
@@ -92,9 +92,10 @@ func test_each_frame_stands_on_its_pivot_at_the_sheet_scale() -> void:
 	for f: Dictionary in map["frames"]:
 		var cut := img.get_region(_rect(f))
 		var pv := Vector2(f["pivot"][0], f["pivot"][1])
-		var feet := Build.feet_point(cut)
-		assert_near(pv.y, feet.y, 1.0, "%s: the pivot on the lowest of the feet" % f["name"])
-		assert_near(pv.x, feet.x, 1.0, "%s: between the feet" % f["name"])
+		# Step 76: the pivot is the root, between the feet (test_momo_anchors
+		# checks it against the measure): inside the frame, near its bottom.
+		assert_true(pv.x >= 0.0 and pv.x <= cut.get_width() and pv.y >= cut.get_height() * 0.6 and pv.y <= cut.get_height() + 6.0,
+			"%s: the pivot on the ground under Momo (%s in %s)" % [f["name"], pv, cut.get_size()])
 		assert_true(cut.get_height() <= float(map["stand_height"]) * 1.4, "%s: a tool raised, never a giant (%d)" % [f["name"], cut.get_height()])
 		# A strike squeezes the eyes shut: those frames show no eyes to
 		# measure, and every job has frames that do (below).
