@@ -11,7 +11,7 @@
 - 페이스(Step 50): 목표·합격 기준은 `design/INCREMENTAL_PACING.md`(고정), 라운드 기록·증거는 `design/INCREMENTAL_BALANCE_REPORT.md`·`design/incremental50/`. 도구 `tools/balance_optimizer/`(`optimize.gd` 시뮬 표·후보, `score_blind.mjs` 블라인드 채점, `chart.mjs`·`grid.gd`). **블라인드형 봇은 최근 블라인드 라운드에 맞춰 둔 것**(B6 ±12%) — 게임 흐름을 바꾸면 다시 맞춘다. 허용 오차는 2026-10-26 소유자 결정으로 10% → **60%**(`targets.json`의 `tolerance`, 목표값은 그대로)
 - **알려진 제한(Step 50)**: 오프라인 따라잡기의 이벤트 천장(40,000)이 5초 밭에서는 8시간보다 먼저 닿는다(모모 4: 2.5 h, 모모 9: 0.7 h만 셈). 비용 상한이라 그대로 두었고, 추정으로 채울지·천장을 올릴지는 오프라인 설계의 결정(보고서 §발견한 문제)
 - 블라인드 플레이테스트(Step 45): 도구 `tools/blind_playtest/`(README에 절차·플레이어 프롬프트 원문), 가설 `design/PLAYTIME.md`, 결과 `design/BLIND_PLAYTEST.md`, 증거 `design/blind45/`. 같은 도구로 다시 돌려 지표를 비교한다
-- 테스트: unit+integration 825 (`test_performance`의 '이벤트당 110µs'는 머신 부하에 흔들린다 — 2026-10-27 부하 평균 268에서 0.65 기준선도 같이 실패) (`momonium/tools/test.sh`)
+- 테스트: unit+integration 825 (`test_performance`는 Step 78부터 버스 알림이 아니라 시뮬레이션의 예약 이벤트당 비용을 잰다(상한 330µs, 이 머신 약 143µs) — 페이스가 바뀌면 알림의 섞임이 바뀐다. 머신 부하에 흔들린다 — 2026-10-27 부하 평균 268에서 0.65 기준선도 같이 실패) (`momonium/tools/test.sh`)
 - 피드백(Step 47): 모든 숫자·반짝임은 실제 이벤트에서, 모아서 한 번, 따라잡기(`Simulation.replaying`) 중에는 조용히. 규칙과 설정은 `design/FEEDBACK.md`, 설정은 `FxPrefs`
 - 아트(Step 46): 건물·작물·지형·소품은 **그린 원본**(`assets/src/png/`)이다. 다시 그리는 법과 도구는 `design/ART_SPEC.md` §11,
   대조표는 `design/art46/contact_sheet.jpg`. **Step 52에 건물 20동·아이콘·소품·패널·바다를 콘셉트대로 다시 했다** — `design/ART52.md`(차이·기준·크레딧·남은 차이),

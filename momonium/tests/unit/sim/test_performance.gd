@@ -113,8 +113,7 @@ func test_ids_after_loading_another_island() -> void:
 
 func test_a_big_island_runs_well_inside_its_ceiling() -> void:
 	var sim := StressIsland.build(20)
-	var events := [0]
-	sim.bus.emitted.connect(func(_t: StringName, _p: Dictionary) -> void: events[0] = int(events[0]) + 1)
+	var e0 := sim.events_processed
 	var t0 := Time.get_ticks_usec()
 	sim.advance_ms(10 * 60000)
 	var ms := (Time.get_ticks_usec() - t0) / 1000.0
@@ -124,8 +123,14 @@ func test_a_big_island_runs_well_inside_its_ceiling() -> void:
 	# 136 us at Step 49; before Step 41 the whole run was ~8x slower). The
 	# ceiling is loose on purpose (CI machines vary) but not loose enough to
 	# let the old cost back in.
-	var us := ms * 1000.0 / maxf(1.0, float(events[0]))
-	assert_true(us < 110.0, "ten simulated minutes of a 20x20 island: %.0f ms, %d events, %.0f us each" % [ms, events[0], us])
+	# Step 78: counted in the simulation's own events (what advance_ms
+	# handles), not in bus notices. Every building x5 slower left a mix with
+	# fewer completions -- which notify several times each -- so a notice
+	# looked twice as dear (47 -> 92 us here, 173 on CI) while an event costs
+	# what it did at either pace (about 143 us on this machine at x1 and x5).
+	var events := sim.events_processed - e0
+	var us := ms * 1000.0 / maxf(1.0, float(events))
+	assert_true(us < 330.0, "ten simulated minutes of a 20x20 island: %.0f ms, %d events, %.0f us each" % [ms, events, us])
 	assert_true(ms < 8000.0, "and the whole run stays a few seconds (%.0f ms)" % ms)
 	assert_eq((sim.system(&"buildings") as BuildingSystem).ids().size(), 133, "with every building")
 	assert_eq((sim.system(&"momo") as MomoSystem).ids().size(), 44, "and every Momo")
