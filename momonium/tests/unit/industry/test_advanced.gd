@@ -75,7 +75,7 @@ func test_a_whole_game_by_the_crew() -> void:
 		if t == &"released":
 			paid[0] += int(p["money"]))
 	_crew(studio)
-	sim.advance_ms(30000 * 20)
+	sim.advance_ms(30000 * 20 * 5)
 	assert_eq(paid[0], 150, "one game released, $150 (only three notes: one game)")
 	assert_eq(economy.money - money, 150 + 0, "and that is all the money that came in")
 	assert_eq(int(bs.get_building(studio)["releases"]), 1, "one release behind it")
@@ -94,7 +94,7 @@ func test_cars_from_ingots_sold_each_day() -> void:
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
 		if t == &"sold":
 			sold[0] += int((p["items"] as Dictionary).get("car", 0)))
-	sim.advance_ms(30000 * 8)
+	sim.advance_ms(30000 * 8 * 5)
 	assert_eq(sold[0], 1, "one car built, and sold the moment it rolled out")
 	assert_eq(inv.count("car"), 0, "none left in the store")
 
@@ -137,7 +137,7 @@ func test_no_money_from_nothing() -> void:
 			earned[0] += int(p["delta"])
 		elif t == &"released":
 			releases[0] += 1)
-	sim.advance_ms(30000 * 60)
+	sim.advance_ms(30000 * 60 * 5)
 	assert_true(releases[0] >= 1, "games came out (%d)" % releases[0])
 	assert_eq(notes_used[0], 3 * releases[0] + 3 * int(bs.get_building(studio)["stage"] != 0), "three notes per game, no game without them")
 	assert_true(notes_used[0] <= notes_in[0], "and never more notes than the lab wrote")

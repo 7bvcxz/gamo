@@ -19,7 +19,8 @@ test('research field expansion', async ({ game }) => {
   const { id: farm } = await game.query('dev_place_building', ['farm', 1, 0]);
   const { id: lab } = await game.query('dev_place_building', ['research', 0, 1]);
   await game.command({ type: 'momo.assign', momo: 1, building: farm });
-  await game.query('dev_advance_ms', 250000);
+  // The Momo's farming until its first letter (Step 78: five times as long).
+  await game.query('dev_advance_ms', 250000 * 5);
   expect((await game.state()).mail.letters[0].read_ms, 'the letter is not even read').toBe(-1);
   for (let i = 0; i < 3; i++) {
     await settle(game, lab);

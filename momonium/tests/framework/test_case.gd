@@ -24,8 +24,9 @@ func with_starter_momo(s: Simulation) -> Simulation:
 
 
 ## Step 58: how much longer a stage's work takes than its data `seconds`
-## (balance.pace.work_scale). A test that times a stage from the data
-## multiplies by this -- waits (`cooldown`) and research times are not scaled.
+## (balance.pace.work_scale, times Step 78's pace.production.work). A test
+## that times a stage from the data multiplies by this -- waits (`cooldown`)
+## by wait_scale (Step 78), research times are not scaled.
 func work_scale(s: Simulation) -> float:
 	return (s.system(&"buildings") as BuildingSystem).work_scale()
 
@@ -39,7 +40,8 @@ func build_ms(s: Simulation, type: String) -> int:
 
 
 ## The game's data at the pace its numbers are written in (Step 58's
-## work_scale and travel_scale, Step 69's build_scale at 1): for tests of an industry's own rules --
+## work_scale and travel_scale, Step 69's build_scale, Step 78's production
+## work, wait and build at 1): for tests of an industry's own rules --
 ## a smelt takes its recipe's seconds, bellows make it 0.75 of that -- that
 ## read the data's numbers as they stand. test_pace checks the scales.
 func unit_pace() -> GameData:
@@ -47,7 +49,16 @@ func unit_pace() -> GameData:
 	bal["pace"]["work_scale"] = 1.0
 	bal["pace"]["build_scale"] = 1.0
 	bal["pace"]["travel_scale"] = 1.0
+	for k: String in ["work", "wait", "build"]:
+		bal["pace"]["production"][k] = 1.0
 	return GameData.from_tables({"balance": bal})
+
+
+## Step 78: how much longer the wait after a stage takes than its data
+## `cooldown` (balance.pace.production.wait). A test that times a wait from
+## the data multiplies by this.
+func wait_scale(s: Simulation) -> float:
+	return (s.system(&"buildings") as BuildingSystem).wait_scale()
 
 
 func before_each() -> void:

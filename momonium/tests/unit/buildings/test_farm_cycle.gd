@@ -1,9 +1,10 @@
 extends "res://tests/framework/test_case.gd"
 
 ## The farm as the rules describe it (Step 50): sow, water, a short wait while
-## the watered crop drinks and ripens, harvest -- one complete cycle in 20.75 s
-## by hand since Step 69 (the work x6.25: 6.25 + 6.25 + the 2 s wait + 6.25;
-## Step 58: 9.5 s, Step 50: 5 s), every stage every time, in order, with nothing skipped. The harvest's
+## the watered crop drinks and ripens, harvest -- one complete cycle in
+## 103.75 s by hand since Step 78 (the work x31.25 and the wait x5: 31.25 +
+## 31.25 + the 10 s wait + 31.25; Step 69: 20.75 s, Step 58: 9.5 s, Step 50:
+## 5 s), every stage every time, in order, with nothing skipped. The harvest's
 ## crops are sold the moment they are picked. Durations are read from the data.
 
 var sim: Simulation
@@ -39,11 +40,11 @@ func _work_ms(i: int) -> int:
 
 ## The wait after watering, and its floor, as the data gives them (ms, s).
 func _wait_ms() -> int:
-	return int(float(_stages()[1]["cooldown"]) * 1000.0)
+	return int(float(_stages()[1]["cooldown"]) * wait_scale(sim) * 1000.0)
 
 
 func _floor_s() -> float:
-	return float(_stages()[1]["cooldown_floor"])
+	return float(_stages()[1]["cooldown_floor"]) * wait_scale(sim)
 
 
 func _tap() -> Dictionary:
@@ -54,7 +55,7 @@ func _stage() -> String:
 	return String(buildings.current_stage(buildings.get_building(farm))["id"])
 
 
-func test_the_full_cycle_in_order_in_twenty_seconds_and_three_quarters() -> void:
+func test_the_full_cycle_in_order_in_a_hundred_and_four_seconds() -> void:
 	var clock := sim.clock
 	var log: Array = []
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
@@ -70,7 +71,7 @@ func test_the_full_cycle_in_order_in_twenty_seconds_and_three_quarters() -> void
 			sim.advance_ms(buildings.remaining_ms(b))
 	var times: Array = log.map(func(e: Array) -> int: return e[1])
 	assert_eq(times, [_work_ms(0), _work_ms(0) + _work_ms(1), _work_ms(0) + _work_ms(1) + _wait_ms() + _work_ms(2)], "sow, water, wait, harvest")
-	assert_eq(int(times[-1]), 20750, "one complete cycle by hand is 20.75 s (Step 69; Step 58: 9.5 s, Step 50: 5 s)")
+	assert_eq(int(times[-1]), 103750, "one complete cycle by hand is 103.75 s (Step 78; Step 69: 20.75 s, Step 58: 9.5 s, Step 50: 5 s)")
 	assert_eq(_stage(), "sow", "and the plot is ready to sow again")
 	assert_eq(inv.count("crop"), 0, "the crop never sits in the store")
 	assert_eq(economy.money - money, economy.unit_price("crop"), "it was sold the moment it was picked")
@@ -168,8 +169,8 @@ func test_farm_data_keeps_the_rules() -> void:
 	var total := 0.0
 	for st: Dictionary in stages:
 		assert_true(bool(st.get("required", false)), "%s is required" % st["id"])
-		total += float(st["seconds"]) * work_scale(sim) + float(st.get("cooldown", 0.0))
-	assert_near(total, 20.75, 0.0001, "a complete cycle by hand is 20.75 s (Step 69; Step 58: 9.5 s, Step 50: 5 s)")
+		total += float(st["seconds"]) * work_scale(sim) + float(st.get("cooldown", 0.0)) * wait_scale(sim)
+	assert_near(total, 103.75, 0.0001, "a complete cycle by hand is 103.75 s (Step 78; Step 69: 20.75 s, Step 58: 9.5 s, Step 50: 5 s)")
 	assert_true(float(stages[1]["cooldown"]) > 0.0, "the watered crop needs time to ripen")
 	assert_true(float(stages[1]["cooldown_floor"]) < float(stages[1]["cooldown"]), "research can shorten that wait (floor below it)")
 	assert_eq(int(stages[2]["yield"]["crop"]), 1, "harvest gives one batch of crops")

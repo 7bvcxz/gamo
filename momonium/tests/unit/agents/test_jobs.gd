@@ -29,7 +29,7 @@ func _momo_stage_ms(i: int = 0) -> int:
 
 
 func _wait_ms() -> int:
-	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * 1000.0)
+	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * wait_scale(sim) * 1000.0)
 
 
 func _log() -> Array:
@@ -88,7 +88,7 @@ func test_assigned_momo_work_under_the_moon() -> void:
 		if t == &"task_started" and cycle.is_night(clock):
 			night_starts[0] += 1)
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(30000 * 12)
+	sim.advance_ms(30000 * 12 * 5)
 	assert_true(night_starts[0] > 0, "work starts at night too (%d times)" % night_starts[0])
 
 

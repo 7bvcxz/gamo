@@ -72,7 +72,7 @@ func test_rounds_between_two_lumberyards() -> void:
 	var b := bs.place_instant("lumberyard", Vector2i(1, 1))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": a})
 	_watch(1, [[1, 1]], "add")
-	sim.advance_ms(240000)
+	sim.advance_ms(240000 * 5)
 	assert_true(int(bs.get_building(a)["completed"]) >= 2, "it works the first (%d stages)" % int(bs.get_building(a)["completed"]))
 	assert_true(int(bs.get_building(b)["completed"]) >= 2, "and, while the first waits, the second (%d)" % int(bs.get_building(b)["completed"]))
 	var where := (momos.get_momo(1)["history"] as Array).map(func(h: Dictionary) -> int: return int(h["building"]))
@@ -103,7 +103,7 @@ func test_an_edit_takes_effect_at_once() -> void:
 	assert_ne(int(momos.get_momo(1)["assigned"]), a, "its building off its rounds: it goes")
 	_watch(1, [[1, 1]], "add")
 	assert_eq(int(momos.get_momo(1)["assigned"]), b, "a ready building added: it heads there straight away")
-	sim.advance_ms(60000)
+	sim.advance_ms(60000 * 5)
 	assert_true(int(bs.get_building(b)["completed"]) > 0, "and works it")
 
 

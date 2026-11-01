@@ -22,11 +22,12 @@ func before_each() -> void:
 	mail = sim.system(&"mail")
 
 
-## Momo's first letter: farm_expansion opens the moment it arrives.
+## Momo's first letter: farm_expansion opens the moment it arrives. The
+## farming it takes is five times as long since Step 78 (250 s before).
 func _accept_first_proposal() -> int:
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	sim.advance_ms(250000 * 5)
 	return farm
 
 
@@ -126,7 +127,7 @@ func test_field_expansion_brings_a_bigger_harvest() -> void:
 	sim.bus.emitted.connect(func(t: StringName, p: Dictionary) -> void:
 		if t == &"produced":
 			made[0] += int((p["items"] as Dictionary).get("crop", 0)))
-	sim.advance_ms(400000)
+	sim.advance_ms(400000 * 5)
 	assert_true(made[0] >= 2 and made[0] % 2 == 0, "real harvests give two crops each (%d)" % made[0])
 
 
@@ -145,7 +146,7 @@ func test_mulch_shortens_the_wait_but_keeps_the_watering() -> void:
 	assert_eq(stages.filter(func(st: Dictionary) -> bool: return st["action"] == "water").size(), 1, "still watered")
 	assert_eq(stages.size(), 3, "no stage removed")
 	var wait := float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"])
-	assert_eq(buildings.stage_cooldown(b, stages[1]), wait * 0.75, "the wait after watering is the data's wait x 0.75")
+	assert_eq(buildings.stage_cooldown(b, stages[1]), wait * 0.75 * wait_scale(sim), "the wait after watering is the data's wait x 0.75 (x the pace's wait)")
 	assert_eq(buildings.stage_cooldown(b, stages[0]), 0.0, "sowing still has no wait")
 
 
@@ -159,7 +160,7 @@ func test_floors_hold_whatever_the_research() -> void:
 	research.completed["watering_efficiency"] = 0
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	var b := buildings.get_building(farm)
-	assert_eq(buildings.stage_cooldown(b, buildings.stages(b)[1]), float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"]), "the plants' floor holds")
+	assert_eq(buildings.stage_cooldown(b, buildings.stages(b)[1]), float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"]) * wait_scale(sim), "the plants' floor holds (at the pace's wait)")
 
 
 func test_the_notebook_speeds_up_research() -> void:
@@ -171,7 +172,7 @@ func test_the_notebook_speeds_up_research() -> void:
 func test_the_lab_makes_notes_and_research_mastery() -> void:
 	var lab := buildings.place_instant("research", Vector2i(0, 1))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": lab})
-	sim.advance_ms(30000 * 12)
+	sim.advance_ms(30000 * 12 * 5)
 	assert_true(inv.count("notes") >= 10, "a Momo at the lab writes research notes (%d)" % inv.count("notes"))
 	assert_eq(research.state_of("field_notebook"), "available", "and the lab's experience opens the general branch")
 

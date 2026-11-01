@@ -16,8 +16,10 @@ extends "res://tests/framework/test_case.gd"
 ## slower feel, keeping every reward. The frozen Step 50 targets are history:
 ## they are checked at the pace they were set for (Step 58's, `_step58_pace`),
 ## so a change to the rules -- not the pace -- that would break them still
-## shows. The game as it is now keeps its own measured baseline
-## (baseline_step69.json) and has no dead end.
+## shows. The game as it is now keeps its own measured baseline and has no
+## dead end. Step 78: every building's production x5 slower again (the work,
+## the waits after a stage, construction -- balance.pace.production), every
+## reward kept: the baseline is baseline_step78.json (Step 69's is history).
 
 const AutoPlayer := preload("res://tools/playtest/autoplayer.gd")
 const Optimizer := preload("res://tools/balance_optimizer/optimize.gd")
@@ -40,15 +42,18 @@ func _targets() -> Dictionary:
 
 
 func _baseline() -> Dictionary:
-	return JSON.parse_string(FileAccess.get_file_as_string("res://tools/balance_optimizer/baseline_step69.json"))
+	return JSON.parse_string(FileAccess.get_file_as_string("res://tools/balance_optimizer/baseline_step78.json"))
 
 
-## The game at the pace the Step 50 targets were set for: Step 58's work x2.5
-## and construction as written (Step 69 made them x6.25 and x2.5).
+## The game at the pace the Step 50 targets were set for: Step 58's work x2.5,
+## the waits and construction as written (Step 69 made the work x6.25 and
+## construction x2.5; Step 78 all three x5 more).
 func _step58_pace() -> GameData:
 	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
 	bal["pace"]["work_scale"] = 2.5
 	bal["pace"]["build_scale"] = 1.0
+	for k: String in ["work", "wait", "build"]:
+		bal["pace"]["production"][k] = 1.0
 	return GameData.from_tables({"balance": bal})
 
 
@@ -77,16 +82,18 @@ func test_a_sale_in_the_20_to_30_minute_stretch_at_step_58s_pace() -> void:
 	assert_between(ready / 60000.0, 18.0, 32.0, "the island can first be sold for a point after %.1f min" % (ready / 60000.0))
 
 
-## Step 69: the game as it is -- each journey mark, the money by 10 and 60
-## minutes and the first sale within the baseline's tolerance (it moved: a
-## change is either deliberate, and the baseline is re-measured, or a bug),
-## money coming in every five minutes, the island sellable, the attentive
-## player's firsts within the quarter hour.
-func test_the_step_69_game_keeps_its_baseline_and_has_no_dead_end() -> void:
+## Step 69 (Step 78 since): the game as it is -- each journey mark, the
+## money by 10 and 60 minutes and the first sale within the baseline's
+## tolerance (it moved: a change is either deliberate, and the baseline is
+## re-measured, or a bug), money coming in every five minutes, the island
+## sellable, the attentive player's firsts in reach.
+func test_the_game_keeps_its_baseline_and_has_no_dead_end() -> void:
 	var base := _baseline()
 	var tol := float(base["tolerance"])
 	assert_near(sim_scale("work_scale"), float(base["data"]["work_scale"]), 0.0001, "measured on this pace")
-	var r := Optimizer.run(GameData.load_default(), _profile(String(base["profile"])), {}, 75.0)
+	for k: String in ["work", "wait", "build"]:
+		assert_near(sim_scale("production." + k), float(base["data"]["production"][k]), 0.0001, "and this production %s" % k)
+	var r := Optimizer.run(GameData.load_default(), _profile(String(base["profile"])), {}, float(base["minutes"]))
 	var journey: Dictionary = r["journey"]
 	for k: String in base["journey_s"]:
 		var want := float(base["journey_s"][k])
@@ -112,8 +119,10 @@ func test_the_step_69_game_keeps_its_baseline_and_has_no_dead_end() -> void:
 		last = int(by[at])
 	assert_true(int(r["stuck_s"]) <= 120, "nothing to do and nothing working: %d s" % int(r["stuck_s"]))
 	var bot := _played(30.0)
+	# Step 78 measured the first research at 17 minutes (Step 69: within 15,
+	# Step 58: 10); the hire, the land and the lab within 12.
 	for k: String in ["first Momo work", "first research", "first hire", "first land", "built research"]:
-		assert_true(bot.first(k) >= 0 and bot.first(k) <= 15 * 60000, "attentive player: %s within 15 minutes (%d ms; Step 58: 10)" % [k, bot.first(k)])
+		assert_true(bot.first(k) >= 0 and bot.first(k) <= 25 * 60000, "attentive player: %s within 25 minutes (%d ms; Step 69: 15, Step 58: 10)" % [k, bot.first(k)])
 
 
 func sim_scale(key: String) -> float:
@@ -121,9 +130,10 @@ func sim_scale(key: String) -> float:
 
 
 func test_a_sold_island_makes_the_next_one_faster() -> void:
-	# An hour (Steps 69-70: the first island sells later, about 38 minutes in,
-	# and the second needs room to show it is quicker).
-	var bot := _played(60.0, 2)
+	# Four hours (Steps 69-70: the first island sold about 38 minutes in; Step
+	# 78: about 177 minutes in, and the second needs room to show it is
+	# quicker -- its Lv 5 came 35 minutes after the sale, the first's at 61).
+	var bot := _played(240.0, 2)
 	assert_true(bot.sales.size() >= 1, "the island was sold for legacy points")
 	var first: int = bot.first("level 5")
 	var sold: int = int(bot.sales[0]["active_ms"])

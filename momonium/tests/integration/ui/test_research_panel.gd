@@ -94,7 +94,7 @@ func test_start_by_tap_then_running_and_done() -> void:
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	buildings.place_instant("research", Vector2i(0, 1))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	sim.advance_ms(250000 * 5)
 	(sim.system(&"economy") as EconomySystem).earn(100, "test")
 	(sim.system(&"inventory") as InventorySystem).add("notes", 3, "test")
 	await tree.process_frame
@@ -128,7 +128,7 @@ func test_lack_of_a_lab_is_named() -> void:
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var farm := buildings.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	sim.advance_ms(250000 * 5)
 	main.call("_on_hud_action", &"research")
 	var view := _farm_view()
 	view.selected = "farm_expansion"

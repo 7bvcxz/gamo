@@ -14,12 +14,14 @@ var farm := 0
 
 
 ## The wait after a watering and its floor, as the farm data gives them (s).
+## The wait after watering and its floor as played (the data's x the pace's
+## wait, Step 78).
 func _wait() -> float:
-	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"])
+	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * wait_scale(sim)
 
 
 func _floor() -> float:
-	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"])
+	return float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown_floor"]) * wait_scale(sim)
 
 
 func _work(i: int) -> float:
@@ -65,7 +67,7 @@ func test_the_usual_crop_always_gets_its_watering() -> void:
 			since_sow[0] += 1)
 	for i in 40:
 		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(1500)
+		sim.advance_ms(1500 * 5)
 	assert_true(per_harvest.size() >= 2, "several harvests (%d)" % per_harvest.size())
 	for n: int in per_harvest:
 		assert_eq(n, 1, "every harvest came after its watering")
@@ -89,7 +91,7 @@ func test_drip_irrigation_waters_by_itself_but_not_sows_or_harvests() -> void:
 		if t == &"task_started":
 			workers.append([p["stage"], p["worker"]]))
 	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(200000)
+	sim.advance_ms(200000 * 5)
 	assert_eq(workers, [["sow", 0], ["water", -1]], "you sow; the drip line waters")
 	assert_eq(int(b["stage"]), 2, "and the harvest waits for hands")
 	assert_eq(b["state"], BuildingSystem.IDLE, "nobody harvests by magic")
@@ -104,7 +106,7 @@ func test_irrigation_runs_at_night_and_is_not_momo_experience() -> void:
 	sim.execute({"type": "building.tap", "id": farm})
 	sim.advance_ms(int(_work(0) * 1000.0) + 100)
 	assert_eq(buildings.get_building(farm)["worker"], -1, "watering under the moon")
-	sim.advance_ms(100000)
+	sim.advance_ms(100000 * 5)
 	assert_eq(int((sim.system(&"mail") as MailSystem).work.get("farm", 0)), 0, "the drip line writes no letters")
 
 
@@ -160,7 +162,7 @@ func test_millet_is_a_different_crop_with_its_own_process() -> void:
 	sim.execute({"type": "building.tap", "id": farm})
 	sim.advance_ms(int(float(millet[0]["seconds"]) * work_scale(sim) * 1000.0))
 	assert_eq(buildings.look(b), "crop_sprout", "its own looks: growing")
-	sim.advance_ms(int(float(millet[0]["cooldown"]) * 1000.0))
+	sim.advance_ms(int(float(millet[0]["cooldown"]) * wait_scale(sim) * 1000.0))
 	assert_eq(buildings.look(b), "crop_ripe", "then ripe")
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
 	var b2 := (copy.system(&"buildings") as BuildingSystem).get_building(farm)

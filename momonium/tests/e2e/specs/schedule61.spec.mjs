@@ -49,8 +49,9 @@ test('tapped 3rd -> 1st -> 2nd: numbered and worked in that order', async ({ gam
   await game.page.screenshot({ path: test.info().outputPath('numbers.png') });
   // The stops it goes to, in order, as game time runs.
   const seq = [];
+  // Step 78: a stage is 31.25 s of work (6.25 before), so 3.75 s a look.
   for (let i = 0; i < 160 && seq.length < 7; i++) {
-    await game.query('dev_advance_ms', 750);
+    await game.query('dev_advance_ms', 3750);
     const s = await game.state();
     for (const b of s.buildings.buildings) {
       if (b.state === 'working' && b.worker === 1 && seq[seq.length - 1] !== b.id) seq.push(b.id);

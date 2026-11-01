@@ -70,7 +70,7 @@ func test_works_them_strictly_in_turn_one_stage_each() -> void:
 	var second := bs.place_instant("farm", Vector2i(1, 0))
 	var third := bs.place_instant("farm", Vector2i(2, 0))
 	_tap([Vector2i(2, 0), Vector2i(0, 0), Vector2i(1, 0)])
-	var seq := _starts(240000)
+	var seq := _starts(240000 * 5)
 	assert_true(seq.size() >= 9, "three rounds at least (%d stages)" % seq.size())
 	assert_true(_cycle(seq, [third, first, second]), "3 -> 1 -> 2 -> 3 ... one stage at each: %s" % [seq])
 
@@ -80,7 +80,7 @@ func test_never_turned_aside_on_the_way() -> void:
 	var near := bs.place_instant("farm", Vector2i(1, 0))
 	# The near farm is busy: the player is sowing it by hand.
 	assert_true(sim.execute({"type": "building.tap", "id": near})["ok"], "the player sows the near farm")
-	# Near the end of the sowing (Step 69: 6.25 s, longer than the walk), the
+	# Near the end of the sowing (Step 78: 31.25 s, longer than the walk), the
 	# schedule: the near farm comes free while the Momo is still on its way.
 	sim.advance_to(int(bs.get_building(near)["task_end"]) - 1500)
 	_tap([Vector2i(3, 3), Vector2i(1, 0)])
@@ -101,7 +101,7 @@ func test_never_turned_aside_on_the_way() -> void:
 	assert_eq(int(momos.get_momo(momo)["assigned"]), far, "and still going to stop 1")
 	assert_eq(momos.get_momo(momo)["to"], to, "the same destination")
 	assert_eq(redirects[0], 0, "never sent elsewhere")
-	var seq := _starts(60000)
+	var seq := _starts(60000 * 5)
 	assert_eq(seq.slice(0, 3), [far, near, far], "stop 1 first, then 2, then 1: %s" % [seq])
 
 
@@ -138,7 +138,7 @@ func test_a_stop_pulled_down_is_passed_over() -> void:
 		seq += _starts(100)
 	assert_eq(seq, [a], "at work at stop 1")
 	bs.demolish(b)
-	seq = _starts(120000)
+	seq = _starts(120000 * 5)
 	assert_true(seq.size() >= 4 and _cycle(seq, [c, a]), "stop 2 gone: 3, 1, 3, 1 ... %s" % [seq])
 
 
@@ -190,7 +190,7 @@ func test_two_momo_keep_their_own_orders() -> void:
 				seq1.append(int(p["id"]))
 			elif int(p.get("worker", 0)) == second:
 				seq2.append(int(p["id"])))
-	sim.advance_ms(200000)
+	sim.advance_ms(200000 * 5)
 	assert_true(seq1.size() >= 4 and _cycle(seq1, [b, a]), "the first: its order %s" % [seq1])
 	assert_true(seq2.size() >= 4 and _cycle(seq2, [d, c]), "the second: its own %s" % [seq2])
 
@@ -211,7 +211,7 @@ func test_save_and_offline_play_the_order_the_same() -> void:
 			if t == &"task_started" and int(p.get("worker", 0)) == who:
 				seq.append(int(p["id"])))
 		s.replaying = mode == 2
-		s.advance_ms(180000)
+		s.advance_ms(180000 * 5)
 		runs.append(seq)
 	var loaded := Simulation.from_save(JSON.parse_string(state))
 	assert_eq((loaded.system(&"momo") as MomoSystem).route_of(momo), "order", "saved: the order")

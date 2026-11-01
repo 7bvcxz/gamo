@@ -104,8 +104,8 @@ func test_a_mine_pays_as_it_digs_and_keeps_the_stone() -> void:
 	assert_eq(economy.money - before, buildings.revenue_of(buildings.get_building(mine), dig), "the ore at the face is sold as it comes out")
 	assert_true(economy.money > before, "money at once")
 	assert_eq(inv.count("stone"), int(dig["yield"]["stone"]), "the stone kept for building")
-	var cycle := float(dig["seconds"]) * work_scale(sim) + float(dig["cooldown"])
-	assert_near(cycle, 31.0, 0.0001, "thirty-one seconds for each unit dug (Step 69: 4 s of digging x6.25 + the 6 s wait; Step 58: 16 s, Step 50: 10 s)")
+	var cycle := float(dig["seconds"]) * work_scale(sim) + float(dig["cooldown"]) * wait_scale(sim)
+	assert_near(cycle, 155.0, 0.0001, "155 seconds for each unit dug (Step 78: 4 s of digging x31.25 + the 6 s wait x5; Step 69: 31 s, Step 58: 16 s, Step 50: 10 s)")
 
 
 func test_a_full_store_sells_the_surplus_instead_of_stopping() -> void:
@@ -128,6 +128,9 @@ func test_what_cannot_be_sold_still_needs_room() -> void:
 
 
 func test_every_dollar_is_booked_by_day() -> void:
+	# At the data's own pace: a farm built and a harvest picked inside one
+	# 30 s day (since Step 78 the farm alone takes 37.5 s to build).
+	_start(unit_pace())
 	economy.earn(200, "test")
 	sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 0]})
 	sim.execute({"type": "land.buy", "cell": [2, 0]})
@@ -170,6 +173,9 @@ func test_ledger_and_store_survive_a_save() -> void:
 
 
 func test_the_income_rate_is_the_last_minute() -> void:
+	# At the data's own pace: two harvests inside one minute (a cycle by hand
+	# is 104 s since Step 78).
+	_start(unit_pace())
 	var farm := buildings.place_instant("farm", Vector2i(0, 0))
 	assert_eq(economy.income_per_minute(), 0, "nothing earned yet")
 	_grow_one_batch(farm)
@@ -209,7 +215,7 @@ func test_no_dead_end_from_the_start() -> void:
 	sim.advance_ms(build_ms(sim, "farm"))
 	var land_cost := (sim.system(&"land") as LandSystem).next_cost()
 	var start := sim.now_ms()
-	while economy.money < land_cost and sim.now_ms() - start < 600000:
+	while economy.money < land_cost and sim.now_ms() - start < 3000000:
 		_grow_one_batch(f)
 	assert_true(economy.money >= land_cost, "one farm by hand pays for the first land (after %d s)" % ((sim.now_ms() - start) / 1000))
-	assert_true(sim.now_ms() - start <= 120000, "within two minutes of tapping")
+	assert_true(sim.now_ms() - start <= 600000, "within ten minutes of tapping (Step 78: the farm x5 slower; Step 69: two minutes)")

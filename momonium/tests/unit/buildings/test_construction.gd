@@ -49,7 +49,7 @@ func test_first_farm_is_affordable_and_quick_to_build() -> void:
 	assert_eq(b["state"], BuildingSystem.CONSTRUCTING, "a moment before: still building")
 	sim.advance_ms(1)
 	assert_eq(b["state"], BuildingSystem.IDLE, "on time: built and ready")
-	assert_true(_build_ms("farm") <= 10000, "within ten seconds (Step 69: its 3 s x2.5)")
+	assert_true(_build_ms("farm") <= 40000, "within forty seconds (Step 78: its 3 s x12.5; Step 69: x2.5, ten seconds)")
 	assert_true(sim.execute({"type": "building.tap", "id": id})["ok"], "and it works")
 
 

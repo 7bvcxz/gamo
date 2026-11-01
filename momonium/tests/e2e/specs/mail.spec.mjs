@@ -38,9 +38,10 @@ test('a letter from Momo: news on the buttons, its research found without openin
   let m = await game.query('mail');
   expect(m.research_badge, 'nothing new yet').toBe(false);
   // Ten farm stages by the Momo (Step 57). Step 69: a stage is 6.25 s of work
-  // now, so that is about two minutes of play -- the loop stops at the letter.
+  // now, so that is about two minutes of play; Step 78: 31.25 s and a 10 s
+  // ripening, about ten minutes -- the loop stops at the letter.
   for (let i = 0; i < 120 && m.unread === 0; i++) {
-    await game.query('dev_advance_ms', 2000);
+    await game.query('dev_advance_ms', 10000);
     m = await game.query('mail');
   }
   await game.page.waitForTimeout(250);

@@ -9,7 +9,7 @@
       ],
       "sprite": "farm",
       "cycle": {
-        "_doc": "Sow, water once, harvest (Step 50: one complete cycle was 5 s by hand -- 1 s of work each and 2 s for the watered crop to drink and ripen, a world rule research can shorten towards its floor. Step 58: the work is balance.pace.work_scale (2.5) times these seconds, the wait stays -- 9.5 s a cycle). The harvest's crops are sold the moment they are picked. `looks[i]` is the crop overlay while stage i is the next one to do; `growing_looks[i]` while waiting for it. Research may change how long a stage takes or the wait, never remove a `required` stage.",
+        "_doc": "Sow, water once, harvest (Step 50: one complete cycle was 5 s by hand -- 1 s of work each and 2 s for the watered crop to drink and ripen, a world rule research can shorten towards its floor. Step 58: the work is balance.pace.work_scale (2.5) times these seconds, the wait stays -- 9.5 s a cycle. Step 69: x6.25, 20.75 s. Step 78: the work x31.25 and the wait x5 (balance.pace.production) -- 103.75 s a cycle by hand, ripe 10 s after watering). The harvest's crops are sold the moment they are picked. `looks[i]` is the crop overlay while stage i is the next one to do; `growing_looks[i]` while waiting for it. Research may change how long a stage takes or the wait, never remove a `required` stage.",
         "stages": [
           {
             "id": "sow",

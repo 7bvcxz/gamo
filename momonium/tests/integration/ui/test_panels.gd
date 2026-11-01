@@ -149,7 +149,7 @@ func test_building_details_from_the_name() -> void:
 	assert_eq(detail.title_label.text, "Farm", "titled with the building")
 	assert_eq(view.state_label.text, "Next: Sow", "what comes next")
 	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
-	var wait := float(stages[1]["cooldown"])
+	var wait := float(stages[1]["cooldown"]) * wait_scale(sim)
 	var work := (float(stages[0]["seconds"]) + float(stages[1]["seconds"]) + float(stages[2]["seconds"])) * work_scale(sim)
 	var momo_x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
 	assert_eq((view.cycle_you.get_node("Value") as Label).text, BuildingDetailView.duration(work + wait), "a cycle by hand: the work + the wait")

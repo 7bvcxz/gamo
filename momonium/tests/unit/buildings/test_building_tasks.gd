@@ -3,7 +3,8 @@ extends "res://tests/framework/test_case.gd"
 ## The generic building task cycle: tap starts the next stage, it ends by
 ## itself at exactly its duration, cooldowns hold the next stage, and several
 ## buildings run independently and deterministically. At the data's own pace
-## (Step 58's work_scale set to 1 here; test_pace checks the scale itself).
+## (Step 58's work_scale and Step 78's production set to 1 here; test_pace
+## checks the scales themselves).
 
 var sim: Simulation
 var buildings: BuildingSystem
@@ -15,6 +16,8 @@ func _data_with_cycle(stages: Array) -> GameData:
 	b["types"]["farm"]["cycle"]["stages"] = stages
 	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
 	bal["pace"]["work_scale"] = 1.0
+	for k: String in ["work", "wait", "build"]:
+		bal["pace"]["production"][k] = 1.0
 	return GameData.from_tables({"buildings": b, "balance": bal})
 
 

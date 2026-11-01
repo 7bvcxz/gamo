@@ -54,6 +54,11 @@ test('tap, tap, THUNK', async ({ page }) => {
   const pops0 = fx0.world.filter((p) => p.kind === 'money').length;
   const imp0 = fx0.impacts[String(id)] ?? 0;
   const t0 = await thunks(call);
+  // Most of the dig at once, up to a second before its end (Step 78: 125 s
+  // of work; listening a quarter second at a time outran the test's time).
+  const s = await page.evaluate(() => window.momonium.state());
+  const dig = s.buildings.buildings.find((b) => b.id === id);
+  await call('dev_advance_ms', Math.max(dig.task_end - s.now_ms - 1000, 0));
   let heard = null;
   for (let i = 0; i < 400 && heard === null; i++) {
     const listening = await listen(page);

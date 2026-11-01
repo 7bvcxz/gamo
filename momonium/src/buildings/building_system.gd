@@ -957,18 +957,27 @@ func stage_seconds(b: Dictionary, stage: Dictionary) -> float:
 	return maxf(base * m, maxf(float(stage.get("seconds_floor", MIN_WORK_SECONDS)), MIN_WORK_SECONDS) * k)
 
 
-## Step 58: how much longer every stage's work takes than its data says
-## (`balance.pace.work_scale`). Waits after a stage are not scaled.
+## How much longer every stage's work takes than its data says:
+## `balance.pace.work_scale` (Step 58, 69) times `pace.production.work`
+## (Step 78) -- one factor, applied once, in stage_seconds.
 func work_scale() -> float:
-	return maxf(sim.data.get_float("balance", "pace.work_scale", 1.0), 0.05)
+	return maxf(sim.data.get_float("balance", "pace.work_scale", 1.0) * sim.data.get_float("balance", "pace.production.work", 1.0), 0.05)
+
+
+## Step 78: how much longer the wait after a stage takes than its data says
+## (`balance.pace.production.wait`) -- a crop drinking and ripening after
+## watering, ore settling. Applied once, in stage_cooldown, floor included.
+func wait_scale() -> float:
+	return maxf(sim.data.get_float("balance", "pace.production.wait", 1.0), 0.05)
 
 
 ## Step 69: how much longer construction takes than its data says
-## (`balance.pace.build_scale`) -- a timer of its own, apart from the work's
-## `work_scale`, applied once here: the build timer, the build list and the
-## construction card all read build_seconds_of.
+## (`balance.pace.build_scale`, times Step 78's `pace.production.build`) -- a
+## timer of its own, apart from the work's `work_scale`, applied once here:
+## the build timer, the build list and the construction card all read
+## build_seconds_of.
 func build_scale() -> float:
-	return maxf(sim.data.get_float("balance", "pace.build_scale", 1.0), 0.05)
+	return maxf(sim.data.get_float("balance", "pace.build_scale", 1.0) * sim.data.get_float("balance", "pace.production.build", 1.0), 0.05)
 
 
 func build_seconds_of(type: String) -> float:
@@ -976,13 +985,16 @@ func build_seconds_of(type: String) -> float:
 
 
 ## Wait after a stage after modifiers, never under its floor (a world rule:
-## plants need time to drink, however good the watering can).
+## plants need time to drink, however good the watering can). The data's
+## wait and floor are both times `wait_scale()` (Step 78) -- here, once:
+## everything that times a wait (the cooldown, the estimates, the cards)
+## comes through this.
 func stage_cooldown(b: Dictionary, stage: Dictionary) -> float:
 	var base := float(stage.get("cooldown", 0.0))
 	if base <= 0.0:
 		return 0.0
 	var m := _multiplier("cooldown", String(b["type"]), String(stage.get("action", "")))
-	return maxf(base * m, float(stage.get("cooldown_floor", 0.0)))
+	return maxf(base * m, float(stage.get("cooldown_floor", 0.0))) * wait_scale()
 
 
 ## What a stage gives per completion after modifiers, as rates (research can

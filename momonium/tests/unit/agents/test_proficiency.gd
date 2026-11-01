@@ -63,7 +63,7 @@ func test_skill_up_is_announced() -> void:
 		if t == &"momo_skilled":
 			ups.append([p["id"], p["type"], p["level"]]))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(30000)
+	sim.advance_ms(30000 * 5)
 	assert_eq(ups, [[1, "farm", 1]], "the 10th stage brings level 1")
 
 

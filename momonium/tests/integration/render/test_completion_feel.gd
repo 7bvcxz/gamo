@@ -120,7 +120,7 @@ func test_time_away_is_silent_and_still() -> void:
 	audio.played.clear()
 	var before := _view(b).impacts
 	sim.replaying = true
-	sim.advance_ms(120000)
+	sim.advance_ms(120000 * 5)
 	audio.tap("tap_pick")
 	sim.replaying = false
 	assert_true(int(bs.get_building(b).get("completed", 0)) > 0, "work was done meanwhile")

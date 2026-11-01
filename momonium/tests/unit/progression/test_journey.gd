@@ -11,7 +11,7 @@ const AutoPlayer := preload("res://tools/playtest/autoplayer.gd")
 func test_the_firsts_are_the_moments_a_player_sees() -> void:
 	var bot := AutoPlayer.new(with_starter_momo(Simulation.new_game()))
 	bot.sell_at_points = 99
-	bot.play(6 * 60.0)
+	bot.play(6 * 60.0 * 5)
 	var j: JourneySystem = bot.sim.system(&"journey")
 	for pair: Array in [["built:farm", "built farm"], ["harvest", "first harvest"], ["sale", "first sale"], ["level:2", "level 2"]]:
 		var e := j.when(String(pair[0]))

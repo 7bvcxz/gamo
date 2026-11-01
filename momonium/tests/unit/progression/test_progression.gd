@@ -121,13 +121,14 @@ func test_balance_first_level_comes_from_a_few_minutes_of_farming() -> void:
 	# targets themselves are tools/balance_optimizer/targets.json). Step 69
 	# slowed the work x2.5 and kept the EXP of each action (the owner wants
 	# a slower feel, not the old pace back): Lv 2 comes about 2.5 times later.
+	# Step 78 slowed the work and the wait x5 more, the same way: x5 later.
 	var farm := buildings.place_instant("farm", Vector2i(0, 0))
 	var reached := {}
 	for n in range(1, 120):
 		_farm_cycle(farm)
 		if not reached.has(prog.level):
 			reached[prog.level] = sim.now_ms()
-	assert_between(int(reached.get(2, 999999)) / 1000, 75, 450, "Lv 2 after 1.25 to 7.5 min of farming (%d s; Step 58: 30 s to 3 min)" % (int(reached.get(2, 999999)) / 1000))
+	assert_between(int(reached.get(2, 999999)) / 1000, 375, 2250, "Lv 2 after 6.25 to 37.5 min of farming (%d s; Step 69: 1.25 to 7.5 min, Step 58: 30 s to 3 min)" % (int(reached.get(2, 999999)) / 1000))
 	assert_true(int(reached.get(3, 999999)) > int(reached.get(2, 0)) + 60000, "Lv 3 well after it")
 	assert_true(prog.mastery_of("farm")["level"] >= 3, "farm mastery climbs with the work (Lv %d)" % prog.mastery_of("farm")["level"])
 

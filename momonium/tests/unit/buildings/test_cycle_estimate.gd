@@ -13,7 +13,7 @@ func test_estimate_matches_the_rules() -> void:
 	var wait := 0.0
 	for st: Dictionary in stages:
 		work += float(st["seconds"]) * work_scale(sim)
-		wait += float(st.get("cooldown", 0.0))
+		wait += float(st.get("cooldown", 0.0)) * wait_scale(sim)
 	var you := buildings.cycle_estimate(b, 1.0)
 	assert_eq(you["work_seconds"], work, "the stages' work")
 	assert_eq(you["wait_seconds"], wait, "the waits")

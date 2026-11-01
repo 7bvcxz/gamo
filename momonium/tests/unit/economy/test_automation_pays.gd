@@ -30,26 +30,29 @@ func test_a_momo_is_as_quick_as_a_person() -> void:
 
 
 func test_automation_beats_a_busy_player() -> void:
-	# The same farm for ten minutes: a player who taps it every ten seconds
-	# (as busy as the blind playtesters were), or its Momo.
+	# The same farm for fifty minutes (ten before Step 78 made a cycle five
+	# times as long): a player who taps it every ten seconds (as busy as the
+	# blind playtesters were), or its Momo.
 	var hands := with_starter_momo(Simulation.new_game())
 	var hb: BuildingSystem = hands.system(&"buildings")
 	var f1 := hb.place_instant("farm", Vector2i(1, 0))
-	for i in 60:
+	for i in 300:
 		hands.execute({"type": "building.tap", "id": f1})
 		hands.advance_ms(10000)
 	var momo := with_starter_momo(Simulation.new_game())
 	var f2 := (momo.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 	momo.execute({"type": "momo.assign", "momo": 1, "building": f2})
-	momo.advance_ms(600000)
+	momo.advance_ms(3000000)
 	var by_hand := int((hands.system(&"economy") as EconomySystem).lifetime.get("sale", 0))
 	var by_momo := int((momo.system(&"economy") as EconomySystem).lifetime.get("sale", 0))
 	assert_true(by_hand > 0, "the player earns something ($%d)" % by_hand)
 	# Step 69: a stage is 6.25 s of work now, so a hand on a ten-second beat
 	# nearly keeps up with one farm; the Momo's lead fell from over 3x to about
-	# 1.6x (design/INCREMENTAL_BALANCE_REPORT.md 'Step 69'). It still earns
+	# 1.6x (design/INCREMENTAL_BALANCE_REPORT.md 'Step 69'). Step 78: a stage
+	# is 31.25 s, the ten-second beat loses less of each, and over fifty
+	# minutes the Momo earns about 1.4x (design/PACE78.md). It still earns
 	# clearly more -- and it never stops.
-	assert_true(by_momo * 10 >= 15 * by_hand, "the Momo earns at least one and a half times as much ($%d against $%d)" % [by_momo, by_hand])
+	assert_true(by_momo * 10 >= 13 * by_hand, "the Momo earns at least 1.3 times as much ($%d against $%d)" % [by_momo, by_hand])
 
 
 func test_a_momo_at_work_takes_new_buildings_by_itself() -> void:
@@ -65,7 +68,7 @@ func test_a_momo_at_work_takes_new_buildings_by_itself() -> void:
 	var r2 := sim.execute({"type": "building.place", "building": "farm", "anchor": [0, 1]})
 	sim.advance_ms(build_ms(sim, "farm"))
 	assert_eq(momos.watchers_of(int(r2["id"])), [1] as Array[int], "once at work, it takes the new farm into its rounds")
-	sim.advance_ms(30000)
+	sim.advance_ms(30000 * 5)
 	assert_true(int(bs.get_building(int(r2["id"]))["completed"]) > 0, "and works it")
 	var hire := sim.execute({"type": "momo.hire"})
 	assert_true(hire["ok"], "a hire")

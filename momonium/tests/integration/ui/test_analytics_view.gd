@@ -34,7 +34,7 @@ func test_a_few_days_read_back() -> void:
 	var yard := bs.place_instant("lumberyard", Vector2i(1, 0))
 	bs.place_instant("smelter", Vector2i(0, 1))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": yard})
-	sim.advance_ms(sim.clock.day_ms * 3)
+	sim.advance_ms(sim.clock.day_ms * 3 * 5)
 	main.call("_on_hud_action", &"status")
 	(main.get("status_frame") as PanelFrame).show_tab(5)
 	view.refresh()

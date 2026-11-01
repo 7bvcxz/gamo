@@ -24,7 +24,8 @@ func _days(n: int) -> void:
 func test_a_day_of_work_is_written_down() -> void:
 	var yard := bs.place_instant("lumberyard", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": yard})
-	_days(3)
+	# Fifteen days (three before Step 78: a chop is 125 s, four days).
+	_days(15)
 	assert_true(book.days.size() >= 2, "closed days are kept (%d)" % book.days.size())
 	var made := AnalyticsSystem.total(book.days, "made")
 	assert_true(int(made.get("wood", 0)) > 0, "the wood it made is in the book")

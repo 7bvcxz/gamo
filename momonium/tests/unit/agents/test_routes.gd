@@ -101,7 +101,7 @@ func test_routes_change_nothing_but_order() -> void:
 			b.place_instant("lumberyard", c)
 		s.execute({"type": "momo.watch", "momo": 1, "cells": [[0, 0], [3, 0], [0, 3], [3, 3]], "op": "add"})
 		s.execute({"type": "momo.route", "momo": 1, "route": route})
-		s.advance_ms(s.clock.day_ms * 4)
+		s.advance_ms(s.clock.day_ms * 4 * 5)
 		made[route] = (s.system(&"inventory") as InventorySystem).count("wood")
 		assert_true(made[route] > 0, "%s: the yards are worked (%d wood)" % [route, made[route]])
 	assert_eq(made, _again(), "the same days give the same wood: deterministic")
@@ -120,7 +120,7 @@ func _again() -> Dictionary:
 			b.place_instant("lumberyard", c)
 		s.execute({"type": "momo.watch", "momo": 1, "cells": [[0, 0], [3, 0], [0, 3], [3, 3]], "op": "add"})
 		s.execute({"type": "momo.route", "momo": 1, "route": route})
-		s.advance_ms(s.clock.day_ms * 4)
+		s.advance_ms(s.clock.day_ms * 4 * 5)
 		made[route] = (s.system(&"inventory") as InventorySystem).count("wood")
 	return made
 
@@ -140,9 +140,9 @@ func test_saved_and_old_saves() -> void:
 func test_before_and_after_a_change() -> void:
 	var yard := bs.place_instant("lumberyard", Vector2i(0, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": yard})
-	sim.advance_ms(sim.clock.day_ms * 3)
+	sim.advance_ms(sim.clock.day_ms * 3 * 5)
 	sim.execute({"type": "momo.route", "momo": 1, "route": "rows"})
-	sim.advance_ms(sim.clock.day_ms * 3)
+	sim.advance_ms(sim.clock.day_ms * 3 * 5)
 	var ba := (sim.system(&"analytics") as AnalyticsSystem).momo_before_after(1, int(momos.get_momo(1)["route_since"]))
 	assert_true(int(ba["days_before"]) >= 1 and int(ba["days_after"]) >= 1, "days on both sides (%s)" % [ba])
 	assert_true(float(ba["before"]) > 0.0 and float(ba["after"]) > 0.0, "jobs a day, before and after")

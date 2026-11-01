@@ -52,7 +52,7 @@ func _first_letter() -> void:
 	# Until the first letter arrives (ten farm stages by the Momo), not
 	# longer: five-second cycles reach the next milestones within minutes.
 	var waited := 0
-	while mail.letters.is_empty() and waited < 250000:
+	while mail.letters.is_empty() and waited < 250000 * 5:
 		sim.advance_ms(500)
 		waited += 500
 	await tree.process_frame
@@ -98,7 +98,7 @@ func test_letters_close_together_pulse_once_and_a_catch_up_not_at_all() -> void:
 	sim.replaying = true
 	var farm := (sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	sim.advance_ms(250000 * 5)
 	sim.replaying = false
 	assert_true(mail.letters.size() >= 1, "letters came during the catch-up")
 	assert_eq(button.pulse_count, before, "no pulse for them")

@@ -44,7 +44,7 @@ func test_enough_unattended_farm_work_brings_one_letter() -> void:
 				reached[0] = clock.now_ms)
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var waited := 0
-	while mail.letters.is_empty() and waited < 250000:
+	while mail.letters.is_empty() and waited < 250000 * 5:
 		sim.advance_ms(100)
 		waited += 100
 	assert_eq(mail.letters.size(), 1, "one letter")
@@ -162,7 +162,7 @@ func test_a_letter_without_research_is_just_a_letter() -> void:
 
 func test_letters_survive_a_save_and_are_not_sent_again() -> void:
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
-	sim.advance_ms(250000)
+	sim.advance_ms(250000 * 5)
 	sim.execute({"type": "mail.read", "id": 1})
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(sim.save_state())))
 	var m2: MailSystem = copy.system(&"mail")

@@ -24,7 +24,7 @@ func before_each() -> void:
 func _first_letter() -> void:
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var waited := 0
-	while mail.letters.is_empty() and waited < 300000:
+	while mail.letters.is_empty() and waited < 300000 * 5:
 		sim.advance_ms(500)
 		waited += 500
 	assert_eq(mail.letters.size(), 1, "the first letter came")
@@ -77,7 +77,7 @@ func test_several_discoveries_are_each_news_once() -> void:
 	prog.add_mastery("farm", 100000)
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	var waited := 0
-	while not (mail.discovered_research().has("watering_efficiency") and mail.discovered_research().has("harvest_boost")) and waited < 1200000:
+	while not (mail.discovered_research().has("watering_efficiency") and mail.discovered_research().has("harvest_boost")) and waited < 1200000 * 5:
 		sim.advance_ms(1000)
 		waited += 1000
 	var news := research.new_topics()
@@ -102,7 +102,7 @@ func test_offline_catch_up_discovers_and_keeps_the_news() -> void:
 	var state := sim.save_state()
 	var copy := Simulation.from_save(JSON.parse_string(JSON.stringify(state)))
 	copy.replaying = true
-	copy.advance_ms(300000)
+	copy.advance_ms(300000 * 5)
 	copy.replaying = false
 	var m2: MailSystem = copy.system(&"mail")
 	var r2: ResearchSystem = copy.system(&"research")

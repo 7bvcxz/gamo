@@ -39,9 +39,14 @@ func _harvest_by_hand(farm: int) -> void:
 func test_the_rate_line_shows_the_last_minute() -> void:
 	hud.refresh(true)
 	assert_false(hud.production_label.visible, "nothing earned yet: no line")
-	var farm := (sim.system(&"buildings") as BuildingSystem).place_instant("farm", Vector2i(0, 0))
-	_harvest_by_hand(farm)
-	_harvest_by_hand(farm)
+	# Two ripe farms picked side by side: two harvests in one minute (one
+	# farm's cycle by hand is 104 s since Step 78).
+	var bs: BuildingSystem = sim.system(&"buildings")
+	for cell: Vector2i in [Vector2i(0, 0), Vector2i(1, 0)]:
+		var farm := bs.place_ready("farm", cell, "harvest")
+		assert_true(farm > 0, "a ripe farm at %s" % cell)
+		sim.execute({"type": "building.tap", "id": farm})
+	sim.advance_ms(int(bs.stage_seconds({"type": "farm"}, bs.stages({"type": "farm"})[2]) * 1000.0))
 	hud.refresh()
 	var price := (sim.system(&"economy") as EconomySystem).unit_price("crop")
 	assert_true(hud.production_label.visible, "money earned: the line appears")

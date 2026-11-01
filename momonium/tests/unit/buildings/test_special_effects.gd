@@ -147,11 +147,13 @@ func test_the_tower_makes_real_work_go_faster() -> void:
 	assert_true(not spans.is_empty(), "the Momo started chopping in the burst")
 	var in_burst := spans[0]
 	spans.clear()
-	sim.advance_to(180000 * 2 - 1)
+	# Three more cycles of the tower (one before Step 78: a chop is 125 s now
+	# and the first one after the burst can fall into the next burst).
+	sim.advance_to(180000 * 4 - 1)
 	var outside: Array[int] = spans.filter(func(x: int) -> bool: return x > in_burst)
 	assert_true(not outside.is_empty(), "stages started between bursts take longer (%d ms in a burst, %s after)" % [in_burst, spans])
 	sim.bus.emitted.disconnect(watch)
-	sim.advance_to(180000 * 2 + 40000)
+	sim.advance_to(180000 * 4 + 40000)
 	var b := bs.get_building(y1)
 	var chop: Dictionary = bs.stages(b)[0]
 	assert_eq(in_burst * 2, int(round(bs.stage_seconds(b, chop) * 1000.0 * float(pace[0]))), "exactly half of a chop outside a burst")

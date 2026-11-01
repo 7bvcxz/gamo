@@ -132,7 +132,7 @@ func test_trash_then_check_demolishes_for_half() -> void:
 	(sim.system(&"economy") as EconomySystem).earn(200, "test")
 	(sim.system(&"progression") as ProgressionSystem).add_exp(500, "test")
 	var r := sim.execute({"type": "building.place", "building": "lumberyard", "anchor": [1, 0]})
-	sim.advance_ms(20000)
+	sim.advance_ms(build_ms(sim, "lumberyard"))
 	var id := int(r["id"])
 	sim.execute({"type": "momo.assign", "momo": 1, "building": id})
 	(main.get("selection") as SelectionController).select_building(id)
