@@ -46,6 +46,8 @@ var _tile_label: Label
 var _bottom_reserved := 16.0
 var _left_reserved := 168.0
 var _avoid := Rect2()
+## Step 83: the player's hands at the corner of the job they can do.
+var manual_chip: ManualChip
 
 
 func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
@@ -55,6 +57,8 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	name = "ContextPanel"
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	manual_chip = ManualChip.new()
+	add_child(manual_chip)
 	_tile_pill = PanelContainer.new()
 	_tile_label = Label.new()
 	_tile_label.add_theme_font_size_override("font_size", 20)
@@ -151,6 +155,7 @@ func _title(b: Dictionary) -> String:
 
 func show_tile(text_key: String) -> void:
 	_clear_cards()
+	manual_chip.visible = false
 	building_id = 0
 	title.visible = false
 	trash_button.visible = false
@@ -162,6 +167,7 @@ func show_tile(text_key: String) -> void:
 
 func hide_panel() -> void:
 	_clear_cards()
+	manual_chip.visible = false
 	building_id = 0
 	title.visible = false
 	_tile_pill.visible = false
@@ -284,6 +290,27 @@ func _refresh() -> void:
 		else:
 			time_label.text = tr("panel.seconds") % ContextPanel.seconds_text(secs)
 		card.queue_redraw()
+	_show_hands(b)
+
+
+## Step 83: the hands' chip, shown at the lit card only when it is the
+## player's job -- theirs now, or theirs to start -- and a hand is busy
+## somewhere; all busy, the ready card dims and the chip warms (a tap says why).
+## A Momo's job is never labelled the player's.
+func _show_hands(b: Dictionary) -> void:
+	var card := current_card()
+	var used := buildings.manual_slots_used()
+	var limit := buildings.manual_limit()
+	var mine: bool = b["state"] == BuildingSystem.WORKING and int(b.get("worker", -1)) == BuildingSystem.PLAYER
+	var startable: bool = b["state"] == BuildingSystem.IDLE and buildings.can_start(building_id)["ok"]
+	if card == null or used == 0 or not (mine or startable):
+		manual_chip.visible = false
+		return
+	var waiting := startable and used >= limit
+	manual_chip.show_count(used, limit, waiting)
+	if waiting:
+		card.modulate = Color(1, 1, 1, 0.55)
+	manual_chip.position = card.position + Vector2(card.size.x - manual_chip.size.x * 0.75, -manual_chip.size.y * 0.55)
 
 
 ## A card's seconds: whole as they are, a half kept (Step 58: 2.5 s of work

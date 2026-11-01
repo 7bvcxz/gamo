@@ -205,6 +205,10 @@
     "letters_per_day": 1,
     "research_gap_seconds": 180
   },
+  "manual": {
+    "_doc": "Step 83: the player's own hands work at most `limit` buildings at once -- a building in WORKING whose stage the player started (worker 0). Cooldowns, growing, construction and Momo or automatic work take no slot (BuildingSystem.manual_jobs).",
+    "limit": 3
+  },
   "session": {
     "_doc": "Step 79: only the game on screen moves (PlaySession). A frame advances the island by its own time, at most max_frame_seconds (a stall or a hitch never jumps it); in the background no frame counts, and the first frame back counts nothing (a browser hands the whole hidden time over as one frame).",
     "max_frame_seconds": 0.5

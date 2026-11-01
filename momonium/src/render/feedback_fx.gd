@@ -90,6 +90,16 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			shown.append({"kind": "promoted", "key": "tier", "text": String(payload.get("name", "")), "amount": 0.0})
 
 
+## Step 83: a short word over a building -- why a tap started nothing (all
+## the player's hands busy). Shown with effects off too: it is an answer,
+## not decoration. A second tap within MERGE_SECONDS does not stack another.
+func note(building: int, text: String) -> void:
+	for a: Dictionary in _active:
+		if String(a.get("key", "")) == "note:%d" % building and float(a["age"]) < LIFE * 0.6:
+			return
+	_show("note:%d" % building, {"kind": "note", "building": building, "amount": 0.0, "icon": "", "color": Color("#ffd9c4"), "text": text})
+
+
 ## One pop per building and item: shown at once; what follows within
 ## MERGE_SECONDS adds to the pop on screen instead of making another.
 func _queue(key: String, kind: String, building: int, amount: float, icon: String, color: Color, text: String = "") -> void:

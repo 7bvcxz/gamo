@@ -130,10 +130,12 @@ func sim_scale(key: String) -> float:
 
 
 func test_a_sold_island_makes_the_next_one_faster() -> void:
-	# Four hours (Steps 69-70: the first island sold about 38 minutes in; Step
+	# Five hours (Steps 69-70: the first island sold about 38 minutes in; Step
 	# 78: about 177 minutes in, and the second needs room to show it is
-	# quicker -- its Lv 5 came 35 minutes after the sale, the first's at 61).
-	var bot := _played(240.0, 2)
+	# quicker -- its Lv 5 came 35 minutes after the sale, the first's at 61;
+	# Step 83: three hands at a time, the sale about 217 minutes in, the
+	# first Lv 5 at 68).
+	var bot := _played(300.0, 2)
 	assert_true(bot.sales.size() >= 1, "the island was sold for legacy points")
 	var first: int = bot.first("level 5")
 	var sold: int = int(bot.sales[0]["active_ms"])

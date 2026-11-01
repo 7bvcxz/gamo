@@ -16,6 +16,8 @@ extends Node
 ## sees it. A building keeps working when something else is selected.
 
 signal selection_changed(kind: String)
+## A tap on a building (or its card) that started nothing: why (Step 83).
+signal refused(id: int, result: Dictionary)
 ## World units a tap may miss a Momo by and still pick it -- set by the
 ## tutorial while it asks for one (Step 50: blind players needed three or four
 ## taps to catch a Momo walking away).
@@ -106,6 +108,7 @@ func _act_on(id: int) -> void:
 	var v := views.view(id)
 	if v != null and not last_result["ok"]:
 		v.refuse()
+		refused.emit(id, last_result)
 
 
 ## The four choices beside an empty tile.

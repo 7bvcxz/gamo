@@ -93,6 +93,19 @@ func top_point() -> Vector2:
 	return position + _top
 
 
+## Step 83: where the work is done -- the middle of its ground (the field of
+## a farm, not its sign; the player's hands go here, the progress ring stays
+## above at the top).
+func work_point() -> Vector2:
+	var cells := buildings.cells_of(buildings.get_building(id))
+	if cells.is_empty():
+		return position
+	var sum := Vector2.ZERO
+	for c: Vector2i in cells:
+		sum += projection.cell_center(c)
+	return sum / cells.size()
+
+
 func pulse() -> void:
 	if FxPrefs.moving():
 		_bounce = 1.0
@@ -256,7 +269,10 @@ func _draw_ring() -> void:
 			var r := 20.0 + (1.0 - _celebrate) * 34.0
 			ring.draw_circle(_top * 0.5 + Vector2(cos(a) * r, sin(a) * r * 0.6), 3.5 * _celebrate, Color(1, 0.93, 0.5, _celebrate))
 	if b["state"] == BuildingSystem.WORKING:
-		_draw_work_effect(String(buildings.current_stage(b).get("action", "")), buildings.progress(b))
+		# Step 83: the player's own work is shown by their hands (HandWorks),
+		# with its own drops and seeds; these are a Momo's or automation's.
+		if int(b.get("worker", 0)) != BuildingSystem.PLAYER:
+			_draw_work_effect(String(buildings.current_stage(b).get("action", "")), buildings.progress(b))
 		_draw_smoke(b)
 	_draw_power(b)
 	_draw_lights(b)

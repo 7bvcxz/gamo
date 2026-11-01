@@ -42,6 +42,11 @@ async function shot(g, name, info, shape) {
   if (process.env.MOMONIUM_SHOTS) await g.page.screenshot({ path: `${process.env.MOMONIUM_SHOTS}/reset80_${info.project.name}_${shape}_${name}.png` });
 }
 
+// Cancel erases nothing: every store there before is still there. (The game
+// autosaves every 15 s while on screen, and a save keeps the one before it as
+// its backup -- a `.bak` may appear during a slow run; none may go.)
+const kept = (before, now) => Object.fromEntries(Object.entries(before).filter(([, v]) => v).map(([k]) => [k, now[k]]));
+
 const fresh = (s) => ({ money: s.economy.money, level: s.progression.level, exp: s.progression.exp, momo: s.momo.momos.length,
   buildings: s.buildings.buildings.map((b) => b.type), research: Object.keys(s.research.completed).length, rp: s.research.rp_earned,
   points: s.prestige.points });
@@ -101,7 +106,7 @@ for (const shape of ['default', '720x1280']) {
       ui = await g.call('reset_ui');
       expect(ui.dialog, 'Cancel at step one').toBe(false);
       expect(fresh(await g.state()), 'the island as it was').toEqual(played);
-      expect((await g.call('local_data')).stores, 'every store as it was').toEqual(before.stores);
+      expect(kept(before.stores, (await g.call('local_data')).stores), 'every store as it was').toEqual(kept(before.stores, before.stores));
       // Step two, Cancel.
       ui = await ask();
       await tapRect(g, ui.continue, ui.window, info);
@@ -129,7 +134,7 @@ for (const shape of ['default', '720x1280']) {
       expect(fresh(await g.state()), 'the island as it was').toEqual(played);
       await tapRect(g, ui.cancel, ui.window, info);
       expect((await g.call('reset_ui')).dialog).toBe(false);
-      expect((await g.call('local_data')).stores, 'every store as it was').toEqual(before.stores);
+      expect(kept(before.stores, (await g.call('local_data')).stores), 'every store as it was').toEqual(kept(before.stores, before.stores));
       // Confirmed.
       ui = await ask();
       await tapRect(g, ui.continue, ui.window, info);

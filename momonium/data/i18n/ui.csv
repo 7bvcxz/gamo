@@ -18,6 +18,7 @@ tile.sea,Sea,바다,海,海
 panel.seconds,%s sec,%s sec,%s sec,%s 秒
 err.busy,Working,작업 중,作業中,工作中
 err.cooldown,%ds left,%d초 남음,あと%d秒,还需%d秒
+err.manual_limit,"Hands full: %d jobs at once","손이 모자라요: 동시에 %d개까지","手がいっぱい：同時に%d件まで","忙不过来：最多同时%d项"
 land.buy,Buy,구매,購入,购买
 land.next,Next plot,다음 땅,次の土地,下一块地
 err.not_enough_money,Not enough money,돈이 부족해요,お金が足りません,金钱不足

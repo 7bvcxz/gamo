@@ -234,7 +234,7 @@ func _tutorial() -> int:
 		return 1 if not free.is_empty() and _do("build farm", {"type": "building.place", "building": "farm", "anchor": [free[0].x, free[0].y]}) else 0
 	var b := bs.get_building(farm)
 	if int(b["completed"]) < tutorial_taps:
-		if b["state"] == BuildingSystem.IDLE and bs.can_start(farm)["ok"]:
+		if b["state"] == BuildingSystem.IDLE and bs.can_start_manual(farm)["ok"]:
 			return 1 if _do("tap", {"type": "building.tap", "id": farm}) else 0
 		return 0
 	var momos: MomoSystem = sim.system(&"momo")
@@ -444,14 +444,18 @@ func _place_points() -> void:
 
 
 ## A building whose next stage the player can do now, tapped -- farms first.
+## Step 83: as a player sees it on the card -- with every hand busy (the chip
+## warm, the card dimmed) nothing is tapped until one is free.
 func _work_by_hand() -> bool:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var momos: MomoSystem = sim.system(&"momo")
+	if bs.manual_slots_used() >= bs.manual_limit():
+		return false
 	var best := 0
 	var best_rank := 99
 	for id: int in bs.ids():
 		var b := bs.get_building(id)
-		if b["state"] != BuildingSystem.IDLE or not bs.can_start(id)["ok"]:
+		if b["state"] != BuildingSystem.IDLE or not bs.can_start_manual(id)["ok"]:
 			continue
 		# A Momo standing there takes it; the player taps the rest.
 		var staffed := false

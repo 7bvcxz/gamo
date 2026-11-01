@@ -7,7 +7,8 @@ extends RefCounted
 ##   1. BACKGROUND  the ocean (its own CanvasLayer).
 ##   2. WORLD       the island, buildings and Momo on the default canvas,
 ##                  sorted by depth among themselves (Step 55/76).
-##   3. world marks the selection, Schedule tiles, sea for sale, effects: in
+##   3. world marks the selection, Schedule tiles, sea for sale, the player's
+##                  hands at work (Step 83), effects: in
 ##                  the world, above the entities by the Z_* below -- never
 ##                  over any UI, which is a CanvasLayer above the world.
 ##   4. Context     controls about something in the world: the Schedule
@@ -37,6 +38,8 @@ const MODAL := 90
 
 ## z_index inside the world, above the depth-sorted entities (z 0).
 const Z_LAND_PREVIEW := 30
+## The player's hands at work (Step 83): over the buildings, under the pops.
+const Z_HANDS := 35
 const Z_FX := 40
 const Z_ROUTE := 50
 

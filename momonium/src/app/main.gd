@@ -10,6 +10,8 @@ var bridge := WebBridge.new()
 var camera: Camera2D
 var cameras: CameraController
 var router: InputRouter
+## Step 83: the player's hands over the buildings they are working.
+var hand_works: HandWorks
 ## Step 82: the UI's tiers by name (UiLayers), whether a panel or a modal is
 ## open, and a level banner waiting for it to close (-1: none).
 var tiers: Dictionary = {}
@@ -238,6 +240,9 @@ func _ready() -> void:
 	feedback_fx.name = "FeedbackFx"
 	world_root.add_child(feedback_fx)
 	feedback_fx.setup(sim, building_views, lib, cameras, hud.theme.default_font)
+	hand_works = HandWorks.new()
+	world_root.add_child(hand_works)
+	hand_works.setup(sim, building_views, cameras)
 	island_props = IslandProps.new()
 	island_props.name = "IslandProps"
 	add_child(island_props)
@@ -252,6 +257,10 @@ func _ready() -> void:
 	add_child(selection)
 	selection.setup(sim, projection, building_views, marker, panel, router)
 	selection.momo_views = momo_views
+	# Step 83: all the player's hands busy -- a word over the building tapped.
+	selection.refused.connect(func(id: int, r: Dictionary) -> void:
+		if String(r.get("reason", "")) == "err.manual_limit":
+			feedback_fx.note(id, tr("err.manual_limit") % int(r.get("limit", 3))))
 	sea_life.setup(sim, projection)
 	watch_overlay.setup(sim, projection)
 	watch_editor = WatchEditor.new()
@@ -426,6 +435,7 @@ func _ready() -> void:
 	audio.setup(sim, settings)
 	audio.start()
 	momo_views.struck.connect(func(_momo: int, sound: String) -> void: audio.tap(sound))
+	hand_works.struck.connect(func(_id: int, sound: String) -> void: audio.tap(sound))
 	settings_view = SettingsView.new()
 	settings_view.setup(sim, lib)
 	settings_view.audio = audio
@@ -913,6 +923,9 @@ func _ready() -> void:
 	bridge.register_query("panel_layout", _panel_layout)
 	# Step 82: the layer table as built (UiLayers).
 	bridge.register_query("layers", _layers_info)
+	# Step 83: the player's hands -- the slots in use, each hand drawn (its
+	# pose, tool and where, window pixels), the card's chip, the last words.
+	bridge.register_query("hands", _hands_info)
 	# Opens Status on its tab `arg` (as its tab button would): {ok, name}.
 	bridge.register_query("dev_status_tab", func(arg: Variant) -> Dictionary:
 		var i := int(arg)
@@ -2008,6 +2021,32 @@ func _layers_info(_a: Variant = null) -> Dictionary:
 		"fx_z": feedback_fx.z_index, "pending_banner": _pending_banner, "banner": celebration.playing(),
 		"tutorial_shown": tutorial.is_visible_in_tree(), "tips_shown": tips.is_visible_in_tree(),
 		"context_panel_shown": panel.is_visible_in_tree(), "strip_shown": build_strip.is_visible_in_tree()}
+
+
+func _hands_info(_a: Variant = null) -> Dictionary:
+	var vp := get_viewport()
+	var to_win := vp.get_final_transform() * vp.get_canvas_transform()
+	var bsys: BuildingSystem = sim.system(&"buildings")
+	var list := []
+	var shown := hand_works.shown()
+	for id: int in shown:
+		var h: Dictionary = shown[id]
+		var r: Rect2 = h["rect"]
+		var a: Vector2 = to_win * r.position
+		var b: Vector2 = to_win * r.end
+		var w: Vector2 = to_win * (h["work"] as Vector2)
+		list.append({"id": id, "pose": h["pose"], "tool": h["tool"], "rect": [a.x, a.y, b.x - a.x, b.y - a.y], "work": [w.x, w.y],
+			"type": bsys.get_building(id).get("type", "")})
+	var chip := panel.manual_chip
+	var chip_rect := []
+	if chip.is_visible_in_tree():
+		var cr := chip.get_global_rect()
+		var ca: Vector2 = vp.get_final_transform() * cr.position
+		var cb: Vector2 = vp.get_final_transform() * cr.end
+		chip_rect = [ca.x, ca.y, cb.x - ca.x, cb.y - ca.y]
+	return {"used": bsys.manual_slots_used(), "limit": bsys.manual_limit(), "jobs": bsys.manual_jobs(), "hands": list,
+		"drawn": hand_works.drawn, "chip": {"shown": chip.is_visible_in_tree(), "used": chip.used, "full": chip.full, "rect": chip_rect},
+		"notes": feedback_fx.shown.filter(func(n: Dictionary) -> bool: return n["kind"] == "note").map(func(n: Dictionary) -> String: return String(n["text"]))}
 
 
 ## E2E: the tutorial as shown -- step, what it rings, where its buttons are.

@@ -23,6 +23,9 @@ const CONSTRUCTING := "constructing"
 const IDLE := "idle"
 const WORKING := "working"
 const COOLDOWN := "cooldown"
+## Who works a stage: a Momo's id, PLAYER for the player's own hands (a
+## negative id is automation -- JobSystem.AUTO_WORKER).
+const PLAYER := 0
 
 ## id -> record (plain data, saved as-is):
 ##   id, type, anchor [x, y], state, stage (index of the stage being done or next),
@@ -861,7 +864,43 @@ func execute(command: Dictionary) -> Dictionary:
 
 ## Starts the building's current stage if it is ready (the player's hands).
 func tap(id: int) -> Dictionary:
-	return start_stage(id, 0, 1.0)
+	return start_stage(id, PLAYER, 1.0)
+
+
+## Step 83: the buildings the player's own hands are working -- in WORKING on
+## a stage the player started. The one count the rule, the card, the hands
+## drawn and the tests read; a cooldown, growing, construction, a Momo's or an
+## automatic stage is not one.
+func manual_jobs() -> Array[int]:
+	var out: Array[int] = []
+	for id: int in buildings:
+		var b: Dictionary = buildings[id]
+		if b["state"] == WORKING and int(b.get("worker", PLAYER)) == PLAYER:
+			out.append(id)
+	return out
+
+
+func manual_slots_used() -> int:
+	return manual_jobs().size()
+
+
+## How many buildings the player may work at once (balance `manual.limit`).
+func manual_limit() -> int:
+	return int(sim.data.get_float("balance", "manual.limit", 3.0))
+
+
+## Whether the player could start building `id` now: everything can_start
+## asks, then a free hand. A save from before the limit may hold more than the
+## limit already working -- those finish; nothing new starts until a hand is free.
+func can_start_manual(id: int) -> Dictionary:
+	var check := can_start(id)
+	if not check["ok"]:
+		return check
+	var used := manual_slots_used()
+	var limit := manual_limit()
+	if used >= limit:
+		return SimResult.fail("err.manual_limit", {"used": used, "limit": limit})
+	return check
 
 
 ## Whether a stage could start now, without starting it: the same checks
@@ -905,7 +944,8 @@ func can_start(id: int) -> Dictionary:
 ## taking `time_multiplier` times the stage's work time. Cooldowns that follow
 ## are world rules and do not scale with who did the work.
 func start_stage(id: int, worker: int, time_multiplier: float) -> Dictionary:
-	var check := can_start(id)
+	# The player's hands are counted here, on every path a start can take.
+	var check := can_start_manual(id) if worker == PLAYER else can_start(id)
 	if not check["ok"]:
 		return check
 	var b: Dictionary = buildings[id]
