@@ -100,7 +100,11 @@ func test_the_route_button_and_its_preview() -> void:
 		list.next_route(1)
 	assert_eq(momos.route_of(1), "order", "zigzag, zone, then the player's own order (Step 61)")
 	list.refresh()
-	assert_eq(route.text, "Route: In your order", "")
+	assert_eq(route.text, "Route: Your stops · smart", "the Schedule's stops, worked adaptively (Step 85)")
+	list.next_route(1)
+	assert_eq(momos.route_of(1), "strict", "then exactly in order (Step 85: Step 61's strict turn)")
+	list.refresh()
+	assert_eq(route.text, "Route: Exactly in order", "")
 	list.next_route(1)
 	assert_eq(momos.route_of(1), "nearest", "and round again (smart needs its research)")
 

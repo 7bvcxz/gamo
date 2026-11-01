@@ -2,6 +2,9 @@
 // 3rd -> 1st -> 2nd show 1, 2, 3 in that order and are worked in that order,
 // one stage each, round and round; a Momo walking to its stop is not turned
 // aside when another of its farms comes free. Real taps, phone and desktop.
+// Step 85: the Schedule's own route now works the stops adaptively
+// (routes85.spec); this strict turn by turn is the `strict` route, chosen
+// from the route control -- set here after scheduling.
 import { test, expect } from '../lib/fixtures.mjs';
 import { cellToCanvas } from '../lib/coords.mjs';
 
@@ -32,7 +35,9 @@ async function schedule(game, cells) {
   for (const c of cells) await tapCell(game, c);
   w = await game.query('watch');
   await tapAt(game, centre(w.schedule), w.window);
-  return w;
+  expect(w.route, 'Schedule mode: the Schedule\'s own route').toBe('order');
+  expect((await game.command({ type: 'momo.route', momo: 1, route: 'strict' })).ok, 'exactly in order (Step 85: the strict route)').toBe(true);
+  return game.query('watch');
 }
 
 test('tapped 3rd -> 1st -> 2nd: numbered and worked in that order', async ({ game }) => {
@@ -44,7 +49,7 @@ test('tapped 3rd -> 1st -> 2nd: numbered and worked in that order', async ({ gam
   const third = (await game.query('dev_place_building', ['farm', 2, 0])).id;
   await game.page.waitForTimeout(300);
   const w = await schedule(game, [[2, 0], [0, 0], [1, 0]]);
-  expect(w.route).toBe('order');
+  expect(w.route).toBe('strict');
   expect(w.stops.map(([id, n]) => [id, n]), 'the numbers follow the taps').toEqual([[third, 1], [first, 2], [second, 3]]);
   await game.page.screenshot({ path: test.info().outputPath('numbers.png') });
   // The stops it goes to, in order, as game time runs.

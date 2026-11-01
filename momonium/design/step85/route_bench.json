@@ -1,0 +1,222 @@
+{
+  "four farms, tapped crosswise": {
+    "A strict": {
+      "decisions": 163,
+      "distance": 422.90250909864,
+      "idle_pct": 0,
+      "max_stop": 18,
+      "min_stop": 17,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 70,
+      "stages_per_10": 35.0,
+      "us_per_decision": 102.78527607362,
+      "walk_pct": 46,
+      "worst_wait_s": 62.5
+    },
+    "B priority": {
+      "decisions": 93,
+      "distance": 422.90250909864,
+      "idle_pct": 0,
+      "max_stop": 18,
+      "min_stop": 17,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 70,
+      "stages_per_10": 35.0,
+      "us_per_decision": 154.258064516129,
+      "walk_pct": 46,
+      "worst_wait_s": 62.5
+    },
+    "C soonest": {
+      "decisions": 118,
+      "distance": 272.212055876851,
+      "idle_pct": 3,
+      "max_stop": 25,
+      "min_stop": 21,
+      "missed_s": 122.25,
+      "retargets": 0,
+      "stages": 89,
+      "stages_per_10": 44.5,
+      "us_per_decision": 167.364406779661,
+      "walk_pct": 30,
+      "worst_wait_s": 100.0
+    }
+  },
+  "large: four Momo, sixteen stops": {
+    "A strict": {
+      "decisions": 562,
+      "distance": 792.703154462855,
+      "idle_pct": 0,
+      "max_stop": 16,
+      "min_stop": 10,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 217,
+      "stages_per_10": 108.5,
+      "us_per_decision": 98.6975088967972,
+      "walk_pct": 21,
+      "worst_wait_s": 102.0
+    },
+    "B priority": {
+      "decisions": 341,
+      "distance": 792.703154462855,
+      "idle_pct": 0,
+      "max_stop": 16,
+      "min_stop": 10,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 217,
+      "stages_per_10": 108.5,
+      "us_per_decision": 137.58357771261,
+      "walk_pct": 21,
+      "worst_wait_s": 102.0
+    },
+    "C soonest": {
+      "decisions": 410,
+      "distance": 530.012697948143,
+      "idle_pct": 3,
+      "max_stop": 35,
+      "min_stop": 10,
+      "missed_s": 420.75,
+      "retargets": 0,
+      "stages": 270,
+      "stages_per_10": 135.0,
+      "us_per_decision": 143.151219512195,
+      "walk_pct": 14,
+      "worst_wait_s": 123.5
+    }
+  },
+  "mixed: farm, lab, mine, farm, lumberyard": {
+    "A strict": {
+      "decisions": 116,
+      "distance": 194.333580389619,
+      "idle_pct": 0,
+      "max_stop": 11,
+      "min_stop": 10,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 41,
+      "stages_per_10": 20.5,
+      "us_per_decision": 91.7413793103448,
+      "walk_pct": 21,
+      "worst_wait_s": 107.25
+    },
+    "B priority": {
+      "decisions": 74,
+      "distance": 194.333580389619,
+      "idle_pct": 0,
+      "max_stop": 11,
+      "min_stop": 10,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 41,
+      "stages_per_10": 20.5,
+      "us_per_decision": 121.067567567568,
+      "walk_pct": 21,
+      "worst_wait_s": 107.25
+    },
+    "C soonest": {
+      "decisions": 78,
+      "distance": 166.701023608446,
+      "idle_pct": 1,
+      "max_stop": 15,
+      "min_stop": 9,
+      "missed_s": 20.25,
+      "retargets": 0,
+      "stages": 44,
+      "stages_per_10": 22.0,
+      "us_per_decision": 126.794871794872,
+      "walk_pct": 18,
+      "worst_wait_s": 138.0
+    }
+  },
+  "three farms beside, a lab far away": {
+    "A strict": {
+      "decisions": 139,
+      "distance": 292.364027821925,
+      "idle_pct": 0,
+      "max_stop": 14,
+      "min_stop": 13,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 55,
+      "stages_per_10": 27.5,
+      "us_per_decision": 99.3381294964029,
+      "walk_pct": 32,
+      "worst_wait_s": 80.0
+    },
+    "B priority": {
+      "decisions": 83,
+      "distance": 292.364027821925,
+      "idle_pct": 0,
+      "max_stop": 14,
+      "min_stop": 13,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 55,
+      "stages_per_10": 27.5,
+      "us_per_decision": 137.349397590361,
+      "walk_pct": 32,
+      "worst_wait_s": 80.0
+    },
+    "C soonest": {
+      "decisions": 101,
+      "distance": 232.321044096723,
+      "idle_pct": 0,
+      "max_stop": 26,
+      "min_stop": 10,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 70,
+      "stages_per_10": 35.0,
+      "us_per_decision": 155.861386138614,
+      "walk_pct": 25,
+      "worst_wait_s": 104.25
+    }
+  },
+  "two Momo sharing six stops": {
+    "A strict": {
+      "decisions": 217,
+      "distance": 282.503384815529,
+      "idle_pct": 34,
+      "max_stop": 15,
+      "min_stop": 7,
+      "missed_s": 2539.75,
+      "retargets": 0,
+      "stages": 57,
+      "stages_per_10": 28.5,
+      "us_per_decision": 81.3963133640553,
+      "walk_pct": 15,
+      "worst_wait_s": 229.25
+    },
+    "B priority": {
+      "decisions": 148,
+      "distance": 508.870604769327,
+      "idle_pct": 0,
+      "max_stop": 23,
+      "min_stop": 11,
+      "missed_s": 0.0,
+      "retargets": 0,
+      "stages": 91,
+      "stages_per_10": 45.5,
+      "us_per_decision": 127.72972972973,
+      "walk_pct": 28,
+      "worst_wait_s": 175.0
+    },
+    "C soonest": {
+      "decisions": 167,
+      "distance": 410.653831429605,
+      "idle_pct": 1,
+      "max_stop": 37,
+      "min_stop": 9,
+      "missed_s": 55.25,
+      "retargets": 0,
+      "stages": 104,
+      "stages_per_10": 52.0,
+      "us_per_decision": 125.233532934132,
+      "walk_pct": 22,
+      "worst_wait_s": 121.75
+    }
+  }
+}

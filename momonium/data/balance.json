@@ -185,7 +185,10 @@
     "starve_seconds": 8,
     "schedule": {
       "_doc": "Step 61: a Momo on the player's own order (Schedule) works its stops strictly in turn, one stage each. At a stop that cannot start for a reason that does not end by itself (inputs, a full store, power, every place taken) it waits wait_seconds, then goes on to the next stop -- the stop keeps its place and is tried again when its turn comes round. Cooldowns, a stage under way and construction are always waited out.",
-      "wait_seconds": 15
+      "wait_seconds": 15,
+      "_doc85": "Step 85: the Schedule's own route (`order`) works its stops adaptively -- the stop where the next real stage can start soonest (the later of the walk and the stop being ready) goes, the tap order breaking ties and ageing turns (design/ROUTES85.md). strategy: `soonest` (that) or `priority` (the first stop in tap order ready on arrival, else the soonest) -- tools/route_bench.gd measures both against the strict order (`strict` route). starve_seconds: a stop not worked this long, and ready by the time the Momo would get there, goes first. wait_seconds is also how often a Momo with nothing it can tell looks again.",
+      "strategy": "soonest",
+      "starve_seconds": 60
     }
   },
   "pace": {

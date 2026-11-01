@@ -21,9 +21,23 @@ extends SimSystem
 ## longest goes next. Nothing is ever started twice: the building's own state
 ## machine refuses a second start, and completion events carry tokens.
 ##
-## The player's own order (Step 61, the `order` route Schedule sets): the
-## Momo works its stops -- the buildings on its tiles, in the order it was
-## given them, each once -- strictly in turn: one stage at stop 1, then 2,
+## The Schedule's stops, adaptively (Step 85, the `order` route Schedule
+## sets; design/ROUTES85.md): the Momo works only the buildings on its tiles,
+## and at each decision -- a stage done, arriving where it cannot start, its
+## tiles edited, nothing to do and something turning ready -- it goes where it
+## can do the next real stage soonest: each stop's start is predicted from the
+## building's own state (ready now, its cooldown's end, the stage under way's
+## end plus the wait after it, construction's end; a stop that cannot start
+## for a reason that does not end by itself is left out), the walk there is
+## timed, and the tap order breaks ties and ages turns so no stop is starved
+## (`_dispatch_adaptive`). Once it sets off it is committed: nothing turns it
+## aside on the way or while it waits for a stop that will be ready -- only
+## its stop's end, the player's edit or the stop turning impossible. The
+## numbers on the stops are a priority, not a promise of order.
+##
+## The player's strict order (Step 61, now the `strict` route, from the route
+## control): the Momo works its stops -- the buildings on its tiles, in the
+## order it was given them, each once -- strictly in turn: one stage at stop 1, then 2,
 ## then 3, then 1 again. It is committed to the stop it is walking to and
 ## nothing turns it aside -- not a nearer building coming free, a delivery,
 ## another Momo, the manager or automation; only the player editing its
@@ -72,7 +86,12 @@ func handle_event(type: String, data: Dictionary) -> void:
 	var momos: MomoSystem = sim.system(&"momo")
 	var id := int(data.get("id", 0))
 	var m := momos.get_momo(id)
-	if m.is_empty() or int(data.get("token", -1)) != int(m.get("wait", 0)) or momos.route_of(id) != "order":
+	if m.is_empty() or int(data.get("token", -1)) != int(m.get("wait", 0)) or not MomoSystem.scheduled(momos.route_of(id)):
+		return
+	if momos.route_of(id) == "order":
+		# The adaptive schedule had nothing to do: look again.
+		if not is_working(id) and not momos.is_moving(id):
+			dispatch(id)
 		return
 	var stop := int(data.get("stop", 0))
 	if int(m.get("stop", 0)) != stop or is_working(id) or (momos.at_work(id) and _open_for(id, stop)):
@@ -94,11 +113,20 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 					if momos.at_work(w):
 						dispatch(w, id)
 				_call_watchers(id)
+				_wake_idle(id)
 		&"momo_arrived":
 			var arrived := int(payload.get("building", 0))
-			if (sim.system(&"momo") as MomoSystem).route_of(int(payload.get("id", 0))) == "order":
+			var who := int(payload.get("id", 0))
+			var route := (sim.system(&"momo") as MomoSystem).route_of(who)
+			if route == "strict":
 				# At its stop: start, or wait there (never turn aside).
-				dispatch(int(payload.get("id", 0)))
+				dispatch(who)
+				return
+			if route == "order":
+				# At the stop it chose: start; wait for a stop that will be
+				# ready; one that turned impossible on the way: choose again.
+				if not try_start(arrived)["ok"] and ready_ms(who, arrived) < 0:
+					dispatch(who, arrived)
 				return
 			if not try_start(arrived)["ok"]:
 				# The smart route came early on purpose: it waits for the cooldown.
@@ -109,18 +137,45 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 					dispatch(int(payload.get("id", 0)), arrived)
 		&"momo_assigned":
 			try_start(int(payload.get("building", 0)))
+		&"building_removed":
+			# Step 85: a scheduled Momo whose stop is pulled down (on its way
+			# or there) decides again at once, among the stops it still has.
+			var gone := int(payload.get("id", 0))
+			var ms: MomoSystem = sim.system(&"momo")
+			for who: int in ms.ids():
+				var at := int(ms.get_momo(who).get("assigned", 0))
+				if ms.route_of(who) == "order" and (at == gone or at == 0) and not is_working(who):
+					dispatch(who)
 		&"momo_watch_changed", &"momo_route_changed":
-			dispatch(int(payload.get("id", 0)))
+			var who := int(payload.get("id", 0))
+			var ms: MomoSystem = sim.system(&"momo")
+			# Step 85: an edit on the way does not turn the adaptive schedule
+			# aside while the stop it is walking to is still on its tiles.
+			if type == &"momo_watch_changed" and ms.route_of(who) == "order" and ms.is_moving(who) \
+					and stops_of(who).has(int(ms.get_momo(who).get("assigned", 0))):
+				return
+			dispatch(who)
 		&"task_completed":
 			var worker := int(payload.get("worker", 0))
 			if worker > 0:
 				last_worked[worker] = sim.now_ms()
 				var ms: MomoSystem = sim.system(&"momo")
-				if ms.route_of(worker) == "order":
+				var done := int(payload.get("id", 0))
+				if ms.route_of(worker) == "strict":
 					# One stage done at this stop: on to the next one in order.
-					var done := int(payload.get("id", 0))
 					if int(ms.get_momo(worker).get("stop", 0)) == done:
 						_advance(worker, stops_of(worker), done)
+					dispatch(worker)
+					return
+				if ms.route_of(worker) == "order":
+					# One real stage done: its turn there is spent; choose again.
+					var m := ms.get_momo(worker)
+					if not m.has("done"):
+						m["done"] = {}
+					(m["done"] as Dictionary)[done] = sim.now_ms()
+					var stops := stops_of(worker)
+					if stops.has(done):
+						m["cursor"] = (stops.find(done) + 1) % stops.size()
 					dispatch(worker)
 					return
 				# A wait follows: meanwhile it may work elsewhere on its rounds.
@@ -135,12 +190,17 @@ func _on_event(type: StringName, payload: Dictionary) -> void:
 			# Inputs arriving can unblock a waiting furnace.
 			if int(payload.get("delta", 0)) > 0:
 				_try_waiting()
+				_wake_idle(0)
 
 
 func on_day_started(_day: int) -> void:
 	_try_all()
 	var momos: MomoSystem = sim.system(&"momo")
 	for id: int in momos.ids():
+		# Step 85: a new morning is not a reason to turn a scheduled Momo
+		# aside on its way (it decides again when it gets there).
+		if MomoSystem.scheduled(momos.route_of(id)) and momos.is_moving(id):
+			continue
 		dispatch(id)
 
 
@@ -220,13 +280,22 @@ func resting() -> bool:
 var _cycle: DayCycle
 
 
-## The worker who would take the building's next stage now, or 0.
+## The worker who would take the building's next stage now, or 0. A Momo on
+## a schedule takes a stage only at one of its stops -- on the strict order,
+## only at the stop whose turn it is (Step 85: standing on at the last stop
+## while the next was someone else's, it worked the last one again and again,
+## and two Momo each holding the other's next stop never moved on).
 func next_worker(building: int) -> int:
 	var momos: MomoSystem = sim.system(&"momo")
 	var best := 0
 	var best_since := 9223372036854775807
 	for id: int in momos.workers_at(building):
 		if not momos.at_work(id):
+			continue
+		var route := momos.route_of(id)
+		if route == "strict" and int(momos.get_momo(id).get("stop", 0)) != building:
+			continue
+		if route == "order" and not stops_of(id).has(building):
 			continue
 		var since := int(last_worked.get(id, -1))
 		if since < best_since:
@@ -250,14 +319,29 @@ func is_working(momo: int) -> bool:
 ## route it may also set off for a building that will be ready by the time it
 ## arrives. Returns the building it went to (or stays at), or 0.
 func dispatch(momo: int, skip: int = 0) -> int:
+	var t0 := Time.get_ticks_usec()
+	var r := _dispatch(momo, skip)
+	dispatch_calls += 1
+	dispatch_usec += Time.get_ticks_usec() - t0
+	return r
+
+
+## Step 85: how many decisions were made and their cost (route_bench, perf).
+var dispatch_calls := 0
+var dispatch_usec := 0
+
+
+func _dispatch(momo: int, skip: int) -> int:
 	var momos: MomoSystem = sim.system(&"momo")
 	var m := momos.get_momo(momo)
 	if m.is_empty() or (m.get("watch", []) as Array).is_empty() or resting() or is_working(momo):
 		return 0
 	if momos.route_of(momo) == "auto":
 		return _dispatch_auto(momo, skip)
-	if momos.route_of(momo) == "order":
+	if momos.route_of(momo) == "strict":
 		return _dispatch_order(momo)
+	if momos.route_of(momo) == "order":
+		return _dispatch_adaptive(momo, skip)
 	var at := int(m["assigned"])
 	for id: int in route_order(momo):
 		if id == skip or not _open_for(momo, id):
@@ -305,11 +389,130 @@ func _dispatch_order(momo: int) -> int:
 	return cur
 
 
+## Step 85: when `momo` could start a stage at `stop`, on the island's clock
+## (ms) -- now when it is ready, the end of its cooldown, the end of the
+## stage under way plus the wait after it, the end of construction; a stage
+## that runs by itself (a drip line) first takes its own time -- or -1 when it
+## cannot be told: a stop that is gone, has no place free for this Momo, or
+## cannot start for a reason that does not end by itself (inputs, a full
+## store, power, a crew still missing).
+func ready_ms(momo: int, stop: int) -> int:
+	var buildings: BuildingSystem = sim.system(&"buildings")
+	var momos: MomoSystem = sim.system(&"momo")
+	var b := buildings.get_building(stop)
+	if b.is_empty() or momos.slots_of(stop) <= 0:
+		return -1
+	var others := momos.workers_at(stop)
+	others.erase(momo)
+	if others.size() >= momos.slots_of(stop):
+		return -1
+	var now := sim.now_ms()
+	var stage := buildings.current_stage(b)
+	match String(b["state"]):
+		BuildingSystem.IDLE:
+			if not _job_for_momo(stop):
+				# A drip line starts it at once: its time, then the wait after it.
+				return now + int(round(buildings.stage_seconds(b, stage) * 1000.0)) + int(round(buildings.stage_cooldown(b, stage) * 1000.0))
+			return now if buildings.can_start(stop)["ok"] else -1
+		BuildingSystem.COOLDOWN:
+			return maxi(int(b.get("ready_at", now)), now)
+		BuildingSystem.WORKING:
+			return maxi(int(b.get("task_end", now)) + int(round(buildings.stage_cooldown(b, stage) * 1000.0)), now)
+		BuildingSystem.CONSTRUCTING:
+			return maxi(int(b.get("build_end", now)), now)
+	return -1
+
+
+## The Schedule's stops, adaptively (Step 85, design/ROUTES85.md): among the
+## Momo's stops (its tiles' buildings, nothing else), the one where its next
+## real stage can start soonest -- the later of the walk there and the stop
+## being ready (ready_ms) -- goes; ties go to the player's priority (tap
+## order, from the stop after the one it last worked), then the lower id. A
+## stop not worked for `balance.momo.schedule.starve_seconds` while ready by
+## the time the Momo would get there goes first (oldest first), so an
+## always-ready farm next door never starves a farther one. The strategy
+## (`balance.momo.schedule.strategy`) is what route_bench measured best;
+## "priority" -- the first stop in priority order that is ready on arrival --
+## is kept for the benchmark. With no stop that can be told, it stays where
+## it is and looks again after wait_seconds (and whenever a stop turns ready
+## or inputs arrive: _wake_idle). Returns the stop it went to, or 0.
+func _dispatch_adaptive(momo: int, skip: int = 0) -> int:
+	var momos: MomoSystem = sim.system(&"momo")
+	var m := momos.get_momo(momo)
+	var stops := stops_of(momo)
+	m["idle"] = false
+	if stops.is_empty():
+		m["stop"] = 0
+		return 0
+	var now := sim.now_ms()
+	var here := momos.position_of(momo)
+	var speed := maxf(momos.walk_speed(), 0.01)
+	var at := int(m["assigned"])
+	var cursor := int(m.get("cursor", 0)) % stops.size()
+	var starve := int(sim.data.get_float("balance", "momo.schedule.starve_seconds", 60.0) * 1000.0)
+	var strategy := String(sim.data.get_value("balance", "momo.schedule.strategy", "soonest"))
+	var done: Dictionary = m.get("done", {})
+	var since := int(m.get("route_since", 0))
+	var best := 0
+	var best_key := []
+	for i in stops.size():
+		var stop := stops[(cursor + i) % stops.size()]
+		if stop == skip:
+			continue
+		var ready := ready_ms(momo, stop)
+		if ready < 0:
+			continue
+		var walk := 0 if (stop == at and momos.at_work(momo)) else int(round(here.distance_to(momos.work_spot(stop)) / speed * 1000.0))
+		var start := maxi(now + walk, ready)
+		var waited := now - maxi(int(done.get(stop, since)), since)
+		var starving := 0 if (waited >= starve and ready <= now + walk) else 1
+		var key: Array
+		if strategy == "priority":
+			# The first in priority order ready by arrival; else the soonest.
+			var on_time := 0 if ready <= now + walk else 1
+			key = [starving, on_time, i if on_time == 0 else start, i]
+		else:
+			# Starving stops oldest first (soonest first let a near starving
+			# farm beat a far starving lab every time); the rest soonest first.
+			key = [0, -waited, start, i] if starving == 0 else [1, start, 0, i]
+		if best == 0 or key < best_key:
+			best = stop
+			best_key = key
+	if best == 0:
+		# Nothing that can be told: stay, and look again in a while.
+		m["idle"] = true
+		_wait_at(momo, 0)
+		return 0
+	m["stop"] = best
+	if best == at:
+		if momos.at_work(momo):
+			try_start(at)
+		return at
+	if momos.assign(momo, best, false, true)["ok"]:
+		return best
+	return 0
+
+
+## Step 85: Momo on the adaptive schedule with nothing to do look again when
+## one of their stops (`building`, or any with 0) may have turned ready.
+func _wake_idle(building: int) -> void:
+	if resting():
+		return
+	var momos: MomoSystem = sim.system(&"momo")
+	for id: int in momos.ids():
+		var m := momos.get_momo(id)
+		if not bool(m.get("idle", false)) or momos.route_of(id) != "order" or is_working(id) or momos.is_moving(id):
+			continue
+		if building != 0 and not stops_of(id).has(building):
+			continue
+		dispatch(id)
+
+
 ## The number each stop shows on the island (1, 2, 3 ... in the player's
 ## order), or {} for a Momo not on its own order.
 func stop_numbers(momo: int) -> Dictionary:
 	var out := {}
-	if (sim.system(&"momo") as MomoSystem).route_of(momo) != "order":
+	if not MomoSystem.scheduled((sim.system(&"momo") as MomoSystem).route_of(momo)):
 		return out
 	var stops := stops_of(momo)
 	for i in stops.size():
@@ -362,7 +565,7 @@ func _advance(momo: int, stops: Array[int], from: int) -> int:
 ## building going up ends by itself (its building_idle starts it here); any
 ## other hold-up is waited out for wait_seconds, then the next stop.
 func _wait_at(momo: int, stop: int) -> void:
-	var b := (sim.system(&"buildings") as BuildingSystem).get_building(stop)
+	var b := (sim.system(&"buildings") as BuildingSystem).get_building(stop) if stop != 0 else {}
 	if not b.is_empty() and String(b["state"]) in [BuildingSystem.COOLDOWN, BuildingSystem.WORKING, BuildingSystem.CONSTRUCTING] \
 			and (sim.system(&"momo") as MomoSystem).workers_at(stop).size() <= (sim.system(&"momo") as MomoSystem).slots_of(stop):
 		return
@@ -381,7 +584,7 @@ func route_order(momo: int) -> Array[int]:
 	var momos: MomoSystem = sim.system(&"momo")
 	var buildings: BuildingSystem = sim.system(&"buildings")
 	var route := momos.route_of(momo)
-	if route == "order":
+	if MomoSystem.scheduled(route):
 		# The player's order, from the stop it is committed to.
 		var stops := stops_of(momo)
 		if stops.is_empty():
@@ -543,7 +746,7 @@ func _call_watchers(building: int) -> void:
 	for id: int in free:
 		# The zone route: only the building's own Momo comes. A Momo on the
 		# player's order never turns aside for a building coming free.
-		if (momos.route_of(id) == "zone" and owner != id) or momos.route_of(id) == "order":
+		if (momos.route_of(id) == "zone" and owner != id) or MomoSystem.scheduled(momos.route_of(id)):
 			continue
 		# Only a Momo with nothing to start where it stands walks over.
 		var at := int(momos.get_momo(id)["assigned"])

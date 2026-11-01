@@ -44,7 +44,16 @@ const NEIGHBOURS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1
 ## row by row; rows alternating direction; only the buildings nearer its own
 ## tiles than any other watcher's; and, once researched, planning around
 ## waits (setting off for what will be ready).
-const ROUTES: PackedStringArray = ["order", "nearest", "rows", "zigzag", "zone", "auto"]
+const ROUTES: PackedStringArray = ["order", "strict", "nearest", "rows", "zigzag", "zone", "auto"]
+## Step 85: the routes that keep the player's tap order: `order` (the
+## Schedule's own -- those stops, worked adaptively, the numbers a priority)
+## and `strict` (exactly 1 -> 2 -> 3, Step 61's, from the route control).
+const SCHEDULED: PackedStringArray = ["order", "strict"]
+
+
+## Whether `route` keeps the player's tap order (Step 85).
+static func scheduled(route: String) -> bool:
+	return SCHEDULED.has(route)
 
 ## id -> {id, name, from [x,y], to [x,y], start, end (ms), assigned (building id), token, hired,
 ##        watch [[x,y]...] (sorted; in the player's order on the `order` route),
@@ -151,7 +160,7 @@ func add_momo(pos: Vector2) -> int:
 	var now := sim.now_ms()
 	momos[id] = {"id": id, "name": "momo.name.%d" % ((id - 1) % names), "from": [pos.x, pos.y], "to": [pos.x, pos.y],
 		"start": now, "end": now, "assigned": 0, "token": 0, "experience": {}, "history": [], "pinned": false, "watch": [],
-		"route": "nearest", "route_since": now, "exp_carry": {}, "opted_in": false, "stop": 0, "cursor": 0, "wait": 0}
+		"route": "nearest", "route_since": now, "exp_carry": {}, "opted_in": false, "stop": 0, "cursor": 0, "wait": 0, "done": {}}
 	sim.bus.emit(&"momo_added", {"id": id})
 	_schedule_roam(momos[id], _rest_ms())
 	return id
@@ -515,7 +524,7 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String, schedule: bool = f
 	var changed: Array = []
 	var refused := {}
 	var reordered := false
-	if schedule and op == "add" and String(m.get("route", "nearest")) != "order":
+	if schedule and op == "add" and not scheduled(String(m.get("route", "nearest"))):
 		# The tiles it has keep their places (sorted, as they were); what the
 		# player adds now follows them.
 		m["route"] = "order"
@@ -535,7 +544,7 @@ func set_watch(momo: int, cells: Array[Vector2i], op: String, schedule: bool = f
 		elif watch.has(key):
 			watch.erase(key)
 			changed.append(key)
-	if String(m.get("route", "nearest")) != "order":
+	if not scheduled(String(m.get("route", "nearest"))):
 		watch.sort()
 	if reordered:
 		sim.bus.emit(&"momo_route_changed", {"id": momo, "route": "order"})
@@ -574,7 +583,7 @@ func _set_watch_exactly(momo: int, cells: Array[Vector2i]) -> Dictionary:
 			(m["watch"] as Array).append([c.x, c.y])
 		else:
 			refused["%d,%d" % [c.x, c.y]] = check["reason"]
-	if String(m.get("route", "nearest")) != "order":
+	if not scheduled(String(m.get("route", "nearest"))):
 		(m["watch"] as Array).sort()
 	_watch_sig = -1
 	if m["watch"] != old:
@@ -642,7 +651,7 @@ func _watch_more(momo: int, cells: Array[Vector2i]) -> void:
 		if not watch.has([c.x, c.y]) and can_watch(momo, c)["ok"]:
 			watch.append([c.x, c.y])
 	# A schedule takes the new building last; any other watch stays sorted.
-	if String(momos[momo].get("route", "nearest")) != "order":
+	if not scheduled(String(momos[momo].get("route", "nearest"))):
 		watch.sort()
 	_watch_sig = -1
 	sim.bus.emit(&"momo_watch_changed", {"id": momo, "auto": true})
@@ -679,6 +688,10 @@ func set_route(momo: int, route: String) -> Dictionary:
 		return SimResult.ok()
 	m["route"] = route
 	m["route_since"] = sim.now_ms()
+	if route == "strict":
+		# Exactly in order (Step 85): from stop 1, wherever the smart route was.
+		m["stop"] = 0
+		m["cursor"] = 0
 	sim.bus.emit(&"momo_route_changed", {"id": momo, "route": route})
 	return SimResult.ok()
 
@@ -866,9 +879,14 @@ func load_state(state: Dictionary) -> void:
 			w.append([int(c[0]), int(c[1])])
 		# A schedule's order is the point of it (Step 61); a save from before
 		# it has no `order` route, and its sorted watch is the stable fallback.
-		if m["route"] != "order":
+		if not scheduled(String(m["route"])):
 			w.sort()
 		m["watch"] = w
+		# Step 85: when each stop last had a stage from this Momo (its turn).
+		var done := {}
+		for k: Variant in (m.get("done", {}) as Dictionary):
+			done[int(k)] = int(m["done"][k])
+		m["done"] = done
 		if not m.has("from"):
 			var p: Array = m.get("pos", [0.5, 0.5])
 			m["from"] = p

@@ -8,6 +8,10 @@ extends "res://tests/framework/test_case.gd"
 ## at its next stop, passes over a stop that is gone at once and one that
 ## cannot start (a full store) after balance.momo.schedule.wait_seconds. The
 ## order and the commitment are saved; offline plays it the same.
+##
+## Step 85: the Schedule's own route (`order`) now works those stops
+## adaptively (test_schedule_adaptive.gd); the strict turn by turn this file
+## describes is the `strict` route, chosen from the route control (`_strict`).
 
 var sim: Simulation
 var bs: BuildingSystem
@@ -37,6 +41,11 @@ func _tap(cells: Array) -> void:
 
 
 ## The buildings this Momo starts stages at, in order, over `ms`.
+## The strict order (Step 61's behaviour, the `strict` route since Step 85).
+func _strict(who: int = 0) -> void:
+	assert_true(sim.execute({"type": "momo.route", "momo": who if who != 0 else momo, "route": "strict"})["ok"], "the strict route")
+
+
 func _starts(ms: int, who: int = 0) -> Array:
 	var out: Array = []
 	var w := who if who != 0 else momo
@@ -70,6 +79,7 @@ func test_works_them_strictly_in_turn_one_stage_each() -> void:
 	var second := bs.place_instant("farm", Vector2i(1, 0))
 	var third := bs.place_instant("farm", Vector2i(2, 0))
 	_tap([Vector2i(2, 0), Vector2i(0, 0), Vector2i(1, 0)])
+	_strict()
 	var seq := _starts(240000 * 5)
 	assert_true(seq.size() >= 9, "three rounds at least (%d stages)" % seq.size())
 	assert_true(_cycle(seq, [third, first, second]), "3 -> 1 -> 2 -> 3 ... one stage at each: %s" % [seq])
@@ -84,6 +94,7 @@ func test_never_turned_aside_on_the_way() -> void:
 	# schedule: the near farm comes free while the Momo is still on its way.
 	sim.advance_to(int(bs.get_building(near)["task_end"]) - 1500)
 	_tap([Vector2i(3, 3), Vector2i(1, 0)])
+	_strict()
 	assert_eq(int(momos.get_momo(momo)["assigned"]), far, "committed to stop 1, the far farm")
 	var to: Array = momos.get_momo(momo)["to"]
 	var redirects := [0]
@@ -131,6 +142,7 @@ func test_a_stop_pulled_down_is_passed_over() -> void:
 	var b := bs.place_instant("farm", Vector2i(1, 0))
 	var c := bs.place_instant("farm", Vector2i(2, 0))
 	_tap([Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)])
+	_strict()
 	var seq := _starts(100)
 	for i in 300:
 		if not seq.is_empty():
@@ -150,6 +162,7 @@ func test_it_waits_for_a_cooldown_at_the_next_stop() -> void:
 	sim.advance_ms(ms(float(bs.current_stage(bs.get_building(mine))["seconds"]) * work_scale(sim)) + 10)
 	assert_eq(String(bs.get_building(mine)["state"]), BuildingSystem.COOLDOWN, "the mine is cooling down")
 	_tap([Vector2i(1, 0), Vector2i(0, 0)])
+	_strict()
 	var seq := _starts(60000)
 	assert_eq(seq[0], mine, "it waited at stop 1 for the cooldown -- not off to the ready farm: %s" % [seq])
 	assert_true(_cycle(seq, [mine, farm]), "then in turn: %s" % [seq])
@@ -161,6 +174,7 @@ func test_a_stop_that_cannot_start_is_passed_after_a_wait() -> void:
 	var inv: InventorySystem = sim.system(&"inventory")
 	inv.add("notes", inv.capacity("notes"))
 	_tap([Vector2i(0, 0), Vector2i(1, 0)])
+	_strict()
 	var wait := int(sim.data.get_float("balance", "momo.schedule.wait_seconds", 0.0) * 1000.0)
 	assert_true(wait > 0, "a wait in the data")
 	var seq := _starts(wait - 1000)
@@ -178,9 +192,11 @@ func test_two_momo_keep_their_own_orders() -> void:
 	var c := bs.place_instant("farm", Vector2i(0, 3))
 	var d := bs.place_instant("farm", Vector2i(3, 3))
 	_tap([Vector2i(3, 0), Vector2i(0, 0)])
+	_strict()
 	var first := momo
 	momo = momos.add_momo(Vector2(0.5, 3.5))
 	_tap([Vector2i(3, 3), Vector2i(0, 3)])
+	_strict()
 	var seq1: Array = []
 	var seq2: Array = []
 	var second := momo
