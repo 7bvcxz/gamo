@@ -1,0 +1,24 @@
+{
+ "_doc": "Step 78: the seven-day schedule (optimize.gd --profile human48 --schedule 7d) at the 0.77 pace (balance.pace.production 1) and at 0.78: hours of wall time to each tier and goal.",
+ "077": {
+  "goal_wall_h": {
+   "civilization": 144.0,
+   "golden_age": 28.1666666666667
+  },
+  "tier_wall_h": {
+   "1": 0.214166666666667,
+   "2": 24.2844444444444
+  },
+  "sales": 20
+ },
+ "078": {
+  "goal_wall_h": {
+   "golden_age": 99.7173508333333
+  },
+  "tier_wall_h": {
+   "1": 4.19888888888889,
+   "2": 75.9016666666667
+  },
+  "sales": 10
+ }
+}
