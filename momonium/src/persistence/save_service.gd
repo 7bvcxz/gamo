@@ -15,6 +15,9 @@ extends RefCounted
 ## left alone (`too_new`), so opening an old build cannot destroy it.
 
 const DEFAULT_PATH := "user://momonium_save.json"
+## localStorage key of the save's synchronous mirror on the web (main.gd
+## writes it; Reset All Data erases it, Step 80).
+const MIRROR_KEY := "momonium_save"
 const FORMAT := "momonium"
 
 

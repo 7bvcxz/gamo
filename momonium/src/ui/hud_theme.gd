@@ -90,6 +90,7 @@ static func build_card(data: GameData, font: Font) -> Theme:
 	var sel := _box(Color("#2f5f9e"), 16, 6)
 	sel.border_color = Color(1, 1, 1, 0.95)
 	_selected(t, sel, Color.WHITE)
+	_danger(t)
 	return t
 
 
@@ -118,6 +119,26 @@ static func _selected(t: Theme, box: StyleBoxFlat, text: Color) -> void:
 		t.set_stylebox(state, "SelectedButton", box)
 	for c: String in ["font_color", "font_hover_color", "font_pressed_color"]:
 		t.set_color(c, "SelectedButton", text)
+
+
+## Step 80: the one action that cannot be undone (Reset All Data's last
+## step): a filled red button with white type, apart from every other button.
+static func _danger(t: Theme) -> void:
+	t.set_type_variation("DangerButton", "Button")
+	var red := Color("#c8402f")
+	var normal := _box(red, 16, 6)
+	normal.border_color = Color(1, 1, 1, 0.95)
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = red.lightened(0.12)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = red.darkened(0.15)
+	var disabled := normal.duplicate() as StyleBoxFlat
+	disabled.bg_color = Color(red, 0.4)
+	for style: Array in [["normal", normal], ["hover", hover], ["pressed", pressed], ["disabled", disabled]]:
+		t.set_stylebox(style[0], "DangerButton", style[1])
+	for c: String in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		t.set_color(c, "DangerButton", Color.WHITE)
+	t.set_color("font_disabled_color", "DangerButton", Color(1, 1, 1, 0.7))
 
 
 ## Glass, not slabs (Step 46): a hairline of light around the edge and a

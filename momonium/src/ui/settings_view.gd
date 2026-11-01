@@ -14,6 +14,9 @@ signal large_demo_requested
 signal option_changed(key: String, value: Variant)
 signal save_requested
 signal replay_tips
+## Step 80: Reset All Data was tapped -- the first of its steps; the
+## composition root opens the confirmation (ResetDialog), nothing is erased here.
+signal reset_requested
 
 const LANGUAGES := [["en", "English"], ["ko", "한국어"], ["ja", "日本語"], ["zh_CN", "中文"]]
 
@@ -40,6 +43,12 @@ var motion_toggle: CheckButton
 var tips_button: Button
 var save_button: Button
 var save_note: Label
+## Step 80: Advanced / Debug, folded until tapped open, and inside it the
+## protected Reset All Data.
+var advanced_button: Button
+var advanced_box: VBoxContainer
+var reset_note: Label
+var reset_button: Button
 ## Where options are read from (the composition root's SettingsStore).
 var settings: SettingsStore
 const SOUND: PackedStringArray = ["music_volume", "ambience_volume", "sfx_volume"]
@@ -181,6 +190,27 @@ func setup(_sim: Simulation, _lib: SpriteLibrary) -> void:
 	version_label = PanelViews.label("v%s" % ProjectSettings.get_setting("application/config/version", "0"), 14, true)
 	version_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(version_label)
+	# Advanced / Debug, last and folded: a brand-new player's playtest starts
+	# here (Step 80). The reset only asks; ResetDialog confirms twice.
+	advanced_button = _wide("Advanced")
+	advanced_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	advanced_button.pressed.connect(func() -> void:
+		advanced_box.visible = not advanced_box.visible
+		refresh())
+	add_child(advanced_button)
+	advanced_box = VBoxContainer.new()
+	advanced_box.name = "AdvancedBox"
+	advanced_box.add_theme_constant_override("separation", 8)
+	advanced_box.visible = false
+	add_child(advanced_box)
+	reset_note = PanelViews.label("", 14, true)
+	reset_note.name = "ResetNote"
+	reset_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	advanced_box.add_child(reset_note)
+	reset_button = _wide("ResetAll")
+	reset_button.theme_type_variation = &"DangerButton"
+	reset_button.pressed.connect(func() -> void: reset_requested.emit())
+	advanced_box.add_child(reset_button)
 
 
 ## "web", "android", "ios" or "desktop" -- where this build runs.
@@ -249,6 +279,9 @@ func refresh() -> void:
 	perf_toggle.text = tr("settings.perf_overlay")
 	tips_button.text = tr("settings.replay_tips")
 	save_button.text = tr("settings.save_now")
+	advanced_button.text = ("-  " if advanced_box.visible else "+  ") + tr("settings.advanced")
+	reset_note.text = tr("settings.reset_note")
+	reset_button.text = tr("settings.reset")
 	(get_node("AboutTitle") as Label).text = tr("settings.about")
 	about_label.text = about_text()
 	version_label.text = tr("settings.about_build").format({"v": ProjectSettings.get_setting("application/config/version", "0"), "p": tr("settings.platform." + platform())})

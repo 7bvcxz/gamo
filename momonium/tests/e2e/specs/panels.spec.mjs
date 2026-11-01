@@ -67,7 +67,7 @@ test('a building name opens its details', async ({ game }) => {
   expect(p.detail.momo).toBe(fmt(Math.round(work * rules.momo_x + wait)));
   // The tap that selected the farm also sowed it: you work, the Momo spot is empty.
   expect(p.detail.workers).toEqual(['you', 'empty']);
-  expect(p.detail.state).toMatch(/^Sow · \d s left$/);
+  expect(p.detail.state).toMatch(/^Sow · \d+ s left$/);
   const close = await centre(game, p.close, p.window);
   await game.tap(close.x, close.y);
   await game.page.waitForTimeout(250);

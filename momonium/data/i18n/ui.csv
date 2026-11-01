@@ -581,6 +581,42 @@ journey.letter,A Momo's first letter,모모의 첫 편지,モモからのはじ�
 journey.level,Level {n},레벨 {n},レベル {n},等级 {n}
 journey.tier,Became a {name},{name} 승급,{name}に昇格,升为{name}
 settings.about,About,이 게임에 대해,このゲームについて,关于本游戏
+settings.advanced,Advanced / Debug,고급 / 디버그,詳細 / デバッグ,高级 / 调试
+settings.reset_note,For testing: start again as a brand-new player. Erases this game's data on this device.,테스트용: 처음 하는 플레이어로 다시 시작해요. 이 기기에 있는 이 게임의 데이터를 지워요.,テスト用：はじめてのプレイヤーとしてやり直します。この端末にあるこのゲームのデータを消します。,测试用：以全新玩家身份重新开始。会删除此设备上本游戏的数据。
+settings.reset,Reset All Data,완전 초기화,すべてのデータをリセット,重置所有数据
+reset.title,Reset all data?,모든 데이터를 지울까요?,すべてのデータをリセットしますか？,要重置所有数据吗？
+reset.lost,"This erases from this device:
+• your island, money and level
+• hired Momo and their schedules
+• buildings, research and research points
+• your progress history and records
+• the tutorial, tips and your settings
+• the demo and debug state","이 기기에서 지워지는 것:
+• 섬, 돈, 레벨
+• 고용한 모모와 스케줄
+• 건물, 연구, 연구 포인트
+• 진행 기록
+• 튜토리얼, 도움말, 설정
+• 데모와 디버그 상태","この端末から消えるもの：
+• 島、お金、レベル
+• 雇ったモモとスケジュール
+• 建物、研究、研究ポイント
+• これまでの記録
+• チュートリアル、ヒント、設定
+• デモとデバッグの状態","将从此设备删除：
+• 岛屿、金钱和等级
+• 雇用的桃桃及其日程
+• 建筑、研究和研究点数
+• 进度记录
+• 教程、提示和设置
+• 演示和调试状态"
+reset.kept,"Not affected: purchases from an app store, and other games.","지우지 않는 것: 앱 스토어에서 산 상품, 다른 게임.",消えないもの：アプリストアでの購入、ほかのゲーム。,不受影响：应用商店中的购买，以及其他游戏。
+reset.cancel,Cancel,취소,キャンセル,取消
+reset.continue,Continue,계속,続ける,继续
+reset.sure_title,This cannot be undone,되돌릴 수 없어요,元に戻せません,此操作无法撤销
+reset.sure_body,Everything above is erased and the game starts over from the very beginning.,위의 모든 것이 지워지고 게임이 맨 처음부터 다시 시작돼요.,上のすべてが消え、ゲームは最初からやり直しになります。,以上内容将全部删除，游戏将从头开始。
+reset.confirm,Erase everything,모두 지우기,すべて消去,全部删除
+reset.failed,Could not erase: {list}. Nothing was reset.,지우지 못했어요: {list}. 아무것도 초기화하지 않았어요.,消去できませんでした：{list}。何もリセットしていません。,无法删除：{list}。未进行任何重置。
 settings.about_build,v{v} · {p},v{v} · {p},v{v} · {p},v{v} · {p}
 settings.platform.web,Web,웹,Web,网页版
 settings.platform.android,Android,Android,Android,Android

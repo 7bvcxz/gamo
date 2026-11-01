@@ -49,7 +49,8 @@ test('the slower work and the slower ripening, on the screen and on the clock', 
   await game.query('dev_advance_ms', 31000);
   await game.page.waitForTimeout(200);
   expect((await farm()).completed, 'not before its time').toBe(0);
-  expect((await game.query('panels')).detail.state).toBe('Sow · 1 s left');
+  // The details re-read four times a second: wait for the line, not 200 ms.
+  await expect.poll(async () => (await game.query('panels')).detail.state).toBe('Sow · 1 s left');
   await game.query('dev_advance_ms', 260);
   await game.page.waitForTimeout(200);
   expect((await farm()).completed, 'done at 31.25 s').toBe(1);
@@ -59,12 +60,12 @@ test('the slower work and the slower ripening, on the screen and on the clock', 
   await game.query('dev_advance_ms', 31255);
   await game.page.waitForTimeout(200);
   expect((await farm()).state).toBe('cooldown');
-  expect((await game.query('panels')).detail.state).toBe('Harvest in 10 s');
+  await expect.poll(async () => (await game.query('panels')).detail.state).toBe('Harvest in 10 s');
   await shot(game, 'ripening_10s', info);
   const money = (await game.state()).economy.money;
   await game.query('dev_advance_ms', 5000);
   await game.page.waitForTimeout(200);
-  expect((await game.query('panels')).detail.state, 'the ripening counts down: not frozen').toBe('Harvest in 5 s');
+  await expect.poll(async () => (await game.query('panels')).detail.state, { message: 'the ripening counts down: not frozen' }).toBe('Harvest in 5 s');
   await shot(game, 'ripening_5s', info);
   expect((await game.command({ type: 'building.tap', id })).reason, 'not ripe yet').toBe('err.cooldown');
   await game.query('dev_advance_ms', 4990);

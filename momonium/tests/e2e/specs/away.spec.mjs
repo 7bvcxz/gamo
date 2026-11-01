@@ -1,7 +1,9 @@
 // Step 49: the welcome-back card in the real browser -- a saved island
-// opened two hours later says what the island ran (money, EXP, jobs and by
-// how many Momo, the time away and the time counted), once: the next tab
-// opens on the caught-up island, with no card and no second credit.
+// opened two hours later said what the island ran, once. Step 79 turned
+// offline progress off: the same island, its save marked two hours old,
+// opens exactly as it was saved -- nothing run, nothing earned, no card --
+// and the next tab too (offline79.spec has the background tab and a clock
+// moved on).
 import { test, expect } from '../lib/fixtures.mjs';
 
 // Step 53: about what a Momo does -- the old starter Momo, explicitly.
@@ -14,10 +16,11 @@ async function openTab(context) {
   await page.waitForFunction(() => window.momonium && window.momonium.ready && typeof window.momonium.state === 'function', null, { timeout: 90_000 });
   const query = (name, arg) => page.evaluate(([n, a]) => window.momonium.call(n, a), [name, arg]);
   await query('set_language', 'en');
+  await page.evaluate(() => window.momonium.setTimeScale(0));
   return { page, query, state: () => page.evaluate(() => window.momonium.state()) };
 }
 
-test('two hours away: the card once, then never again', async ({ game }) => {
+test('two hours away: the island as it was saved, no card, nothing credited', async ({ game }) => {
   await game.setTimeScale(0);
   await game.query('dev_add_money', 500);
   await game.command({ type: 'momo.hire' });
@@ -26,6 +29,7 @@ test('two hours away: the card once, then never again', async ({ game }) => {
   await game.command({ type: 'momo.assign', momo: 1, building: farm });
   await game.command({ type: 'momo.assign', momo: 2, building: yard });
   expect((await game.query('save_now')).err).toBe(0);
+  const saved = await game.state();
   // The save says it was written two hours ago (the checksum covers the
   // island, not the time it was written).
   await game.page.evaluate(() => {
@@ -35,27 +39,17 @@ test('two hours away: the card once, then never again', async ({ game }) => {
   });
   const context = game.page.context();
   await game.page.close();
-
-  const second = await openTab(context);
-  const p = await second.query('persistence');
-  expect(p.away_open, 'the welcome-back card').toBe(true);
-  const r = p.away_report;
-  expect(Math.abs(r.away_ms - 7200000), `away ${r.away_ms} ms`).toBeLessThan(15000);
-  expect(r.counted_ms).toBe(r.away_ms);
-  expect(r.workers, 'both Momo worked').toBe(2);
-  expect(r.income).toBeGreaterThan(0);
-  expect(r.exp).toBeGreaterThan(0);
-  expect(p.away_counted).toMatch(/^Away 2 h 0 min\. Momo kept the island going the whole time\.$/);
-  expect(p.away_lines.some((l) => l.startsWith('Earned|+$')), 'money earned').toBe(true);
-  expect(p.away_lines.some((l) => l.startsWith('Jobs done|') && l.endsWith('by 2 Momo')), 'jobs, and by whom').toBe(true);
-  const caughtUp = await second.state();
-  await second.page.close();
-
-  const third = await openTab(context);
-  const q = await third.query('persistence');
-  expect(q.away_open, 'no second welcome back').toBe(false);
-  const s = await third.state();
-  expect(s.now_ms - caughtUp.now_ms, 'the two hours were not run again').toBeLessThan(20000);
-  expect(s.economy.money, 'nor credited again').toBeLessThanOrEqual(caughtUp.economy.money + 50);
-  await third.page.close();
+  for (const tab of ['opened two hours later', 'opened again']) {
+    const t = await openTab(context);
+    const p = await t.query('persistence');
+    expect(p.status, `${tab}: the save opened`).toBe('ok');
+    expect(p.away_open, `${tab}: no welcome-back card`).toBe(false);
+    expect(p.report, `${tab}: nothing caught up`).toEqual({});
+    const s = await t.state();
+    expect(s.now_ms - saved.now_ms, `${tab}: the clock where it was saved (only the frames seen)`).toBeLessThan(3000);
+    expect(s.economy.money, `${tab}: no money for the time away`).toBe(saved.economy.money);
+    expect(s.progression.exp, `${tab}: no EXP`).toBe(saved.progression.exp);
+    expect(s.buildings.buildings.map((b) => b.completed), `${tab}: no jobs done`).toEqual(saved.buildings.buildings.map((b) => b.completed));
+    await t.page.close();
+  }
 });

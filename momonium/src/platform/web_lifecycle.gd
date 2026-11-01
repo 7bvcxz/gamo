@@ -10,6 +10,8 @@ extends RefCounted
 ## Callbacks must outlive this call or the JS side calls into freed memory.
 var _callbacks: Array[JavaScriptObject] = []
 var _document: JavaScriptObject
+## [target, event, callback] as added, for `detach`.
+var _listeners: Array = []
 
 
 func attach(on_hidden: Callable, on_visible: Callable) -> void:
@@ -27,12 +29,20 @@ func attach(on_hidden: Callable, on_visible: Callable) -> void:
 		if not hidden():
 			on_visible.call())
 	_callbacks.append_array([visibility, leaving, back])
-	_document.addEventListener("visibilitychange", visibility)
-	window.addEventListener("pagehide", leaving)
-	window.addEventListener("pageshow", back)
+	_listeners = [[_document, "visibilitychange", visibility], [window, "pagehide", leaving], [window, "pageshow", back]]
+	for l: Array in _listeners:
+		(l[0] as JavaScriptObject).addEventListener(String(l[1]), l[2])
 	# Opened in a background tab: it starts hidden.
 	if hidden():
 		on_hidden.call()
+
+
+## Takes the listeners off the page -- when the game scene is replaced (a
+## sale, the demo, a reset), so the page never calls into the old one.
+func detach() -> void:
+	for l: Array in _listeners:
+		(l[0] as JavaScriptObject).removeEventListener(String(l[1]), l[2])
+	_listeners.clear()
 
 
 ## Whether the page is hidden now (never on other platforms).

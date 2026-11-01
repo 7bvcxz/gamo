@@ -24,6 +24,25 @@ static func set_item(key: String, text: String) -> bool:
 	return true
 
 
+## Whether `key` is there (Step 80: LocalData reads before it erases).
+static func has_item(key: String) -> bool:
+	if not available():
+		return false
+	var storage: JavaScriptObject = JavaScriptBridge.get_interface("localStorage")
+	return storage != null and storage.getItem(key) != null
+
+
+## Removes `key` -- this key only (Step 80: LocalData.reset).
+static func remove_item(key: String) -> bool:
+	if not available():
+		return false
+	var storage: JavaScriptObject = JavaScriptBridge.get_interface("localStorage")
+	if storage == null:
+		return false
+	storage.removeItem(key)
+	return true
+
+
 static func get_item(key: String) -> String:
 	if not available():
 		return ""

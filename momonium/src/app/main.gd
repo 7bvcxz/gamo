@@ -74,7 +74,7 @@ var mailbox_view: MailboxView
 ## bridge's `dev_away` runs OfflineProgress, a test tool).
 var save_path := SaveService.DEFAULT_PATH
 ## localStorage key of the save's synchronous mirror on the web.
-const MIRROR_KEY := "momonium_save"
+const MIRROR_KEY := SaveService.MIRROR_KEY
 var persist := true
 var load_status := ""
 var save_blocked := false
@@ -85,6 +85,10 @@ var away_view: AwayView
 var settings: SettingsStore
 var settings_frame: PanelFrame
 var settings_view: SettingsView
+## Step 80: Reset All Data's two confirmations, above everything, and what
+## the last reset did (the browser bridge reads it).
+var reset_dialog: ResetDialog
+var last_reset: Dictionary = {}
 var tutorial: Tutorial
 ## The demo island (Settings) is never saved; Engine meta "momonium_demo"
 ## survives the scene reload that switches to it and back. Its value names
@@ -117,6 +121,11 @@ var entities: EntityLayer
 var island_props: IslandProps
 var feedback_fx: FeedbackFx
 var _version_label: Label
+
+
+## Replaced (a sale, the demo, a reset): the page stops calling this one.
+func _exit_tree() -> void:
+	lifecycle.detach()
 
 
 func _ready() -> void:
@@ -422,6 +431,14 @@ func _ready() -> void:
 	settings_view.save_requested.connect(func() -> void:
 		var err := save_now()
 		settings_view.save_note.text = tr("settings.saved") if err == OK else tr("settings.save_auto"))
+	reset_dialog = ResetDialog.new()
+	add_child(reset_dialog)
+	reset_dialog.setup(hud.card_theme)
+	settings_view.reset_requested.connect(reset_dialog.open)
+	reset_dialog.confirmed.connect(func() -> void:
+		var r := reset_all_data()
+		if not r["ok"]:
+			reset_dialog.show_failure(r["failed"]))
 	camera_pad = CameraPad.new()
 	ui.add_child(camera_pad)
 	camera_pad.setup(cameras)
@@ -866,6 +883,34 @@ func _ready() -> void:
 		var r := OfflineProgress.catch_up(sim, int(ms))
 		_tell_about_return(r)
 		return r)
+	# Step 80: Reset All Data as shown -- the Advanced fold, the button, the
+	# dialog's step and its buttons (window pixels) -- and which of
+	# LocalData's stores exist now, with the last reset's result.
+	bridge.register_query("reset_ui", func(_a: Variant) -> Dictionary:
+		var vp := get_viewport()
+		var conv := func(c: Control) -> Array:
+			if c == null or not c.is_visible_in_tree():
+				return []
+			var r := c.get_global_rect()
+			var p0: Vector2 = vp.get_final_transform() * r.position
+			var p1: Vector2 = vp.get_final_transform() * r.end
+			return [p0.x, p0.y, p1.x - p0.x, p1.y - p0.y]
+		var win := DisplayServer.window_get_size()
+		return {"settings_open": settings_frame.visible, "advanced": conv.call(settings_view.advanced_button),
+			"advanced_open": settings_view.advanced_box.visible, "reset": conv.call(settings_view.reset_button),
+			"dialog": reset_dialog.visible, "stage": reset_dialog.stage, "title": reset_dialog.title.text,
+			"cancel": conv.call(reset_dialog.cancel_button), "continue": conv.call(reset_dialog.continue_button),
+			"confirm": conv.call(reset_dialog.confirm_button), "confirm_disabled": reset_dialog.confirm_button.disabled,
+			"card": conv.call(reset_dialog.card), "failure": reset_dialog.failure.text if reset_dialog.failure.visible else "",
+			"last": last_reset, "window": [win.x, win.y]})
+	bridge.register_query("local_data", func(_a: Variant) -> Dictionary:
+		var io := LocalData.IO.new()
+		var present := {}
+		for st: Dictionary in LocalData.stores(save_path, settings.path):
+			present[String(st["name"])] = io.has(st)
+		return {"stores": present, "save_path": save_path, "settings_path": settings.path,
+			"tutorial_done": bool(settings.get_value("tutorial_done")), "language": String(settings.get_value("language")),
+			"load_status": load_status})
 	# Step 79: whether the island's time runs (on screen) and how often the
 	# page went to the background -- the island's clock beside it.
 	bridge.register_query("session", func(_a: Variant) -> Dictionary:
@@ -992,6 +1037,10 @@ func come_back() -> void:
 ## or, when the demo was asked for, the demo island (never saved).
 func _load_or_new() -> Simulation:
 	_read_launch_address()
+	# Where the island is saved, first: the demo never saves, but a reset from
+	# it erases the player's own save there (Step 80).
+	if Engine.has_meta("momonium_save_path"):
+		save_path = String(Engine.get_meta("momonium_save_path"))
 	in_demo = Engine.has_meta("momonium_demo")
 	persist = not Engine.has_meta("momonium_no_save") and not in_demo
 	# A sold island hands over the new one (already saved when saving is on).
@@ -1006,8 +1055,6 @@ func _load_or_new() -> Simulation:
 		if demo_kind == "large":
 			return StressIsland.build(StressIsland.DEMO_SIDE)
 		return DemoWorld.build()
-	if Engine.has_meta("momonium_save_path"):
-		save_path = String(Engine.get_meta("momonium_save_path"))
 	if not persist:
 		return Simulation.new_game()
 	var r := SaveService.load_save(save_path)
@@ -1103,6 +1150,40 @@ func enter_demo(kind: String = "full") -> void:
 func leave_demo() -> void:
 	Engine.remove_meta("momonium_demo")
 	get_tree().reload_current_scene.call_deferred()
+
+
+## Step 80: Reset All Data, after its two confirmations -- the one way to
+## start again as a brand-new player (design/RESET80.md). From the first line
+## the old island can no longer be written (autosave, focus, the background
+## and a sale all go through `persist`), so nothing writes it back after the
+## erase. Then every store LocalData lists goes, or none does (a failure puts
+## back what went, says what failed, and the island plays on as it was). On
+## success the demo and a pending sale are dropped and the game starts over:
+## no save, default settings -- a new island (Simulation.new_island: the ripe
+## farm, the starting money, no Momo), the tutorial as for a first launch.
+## Under tests (Engine meta "momonium_no_save") nothing on disk is touched.
+## `io` replaces the storage for a test.
+func reset_all_data(io: LocalData.IO = null) -> Dictionary:
+	var was := persist
+	persist = false
+	var r: Dictionary
+	if Engine.has_meta("momonium_no_save"):
+		r = {"ok": true, "cleared": [], "failed": [], "restored": [], "skipped": "saving is off"}
+	else:
+		r = LocalData.reset(save_path, settings.path, io)
+	last_reset = r
+	if not r["ok"]:
+		persist = was
+		return r
+	Engine.remove_meta("momonium_demo")
+	Engine.remove_meta("momonium_handoff")
+	FxPrefs.reset()
+	reset_dialog.visible = false
+	# The game starts again on nothing; a test that holds Main itself opens
+	# the next one (as after a sale).
+	if get_tree().current_scene == self:
+		get_tree().reload_current_scene.call_deferred()
+	return r
 
 
 func save_now() -> Error:
