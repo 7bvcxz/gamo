@@ -528,16 +528,17 @@ func _ready() -> void:
 	bridge.register_query("rules", func(_a: Variant) -> Dictionary:
 		return {"momo_x": sim.data.get_float("balance", "momo.work_time_multiplier", 4.0),
 			# Step 78: waits as played (times pace.production.wait).
-			"farm_wait_ms": int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * _wait_scale() * 1000.0),
+			"farm_wait_ms": int(round(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * _wait_scale() * 1000.0)),
 			"land_price": (sim.system(&"land") as LandSystem).next_cost(), "hire_price": (sim.system(&"momo") as MomoSystem).hire_cost(),
 			"farm_cycle_exp": _cycle_reward("player"), "farm_cycle_mastery": _cycle_reward("mastery"),
 			# Step 58: work times as played (times balance.pace.work_scale).
 			"farm_stages": (sim.data.building_type("farm")["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
-				return [String(st["id"]), int(float(st["seconds"]) * _work_scale() * 1000.0), int(float(st.get("cooldown", 0.0)) * _wait_scale() * 1000.0)]),
+				# Rounded as the timers are (Step 84: 10.4167 s is 10417 ms, not 10416).
+				return [String(st["id"]), int(round(float(st["seconds"]) * _work_scale() * 1000.0)), int(round(float(st.get("cooldown", 0.0)) * _wait_scale() * 1000.0))]),
 			"work_scale": _work_scale(), "wait_scale": _wait_scale(), "travel_scale": sim.data.get_float("balance", "pace.travel_scale", 1.0),
 			# Step 69: construction's own scale and a farm's build time as played.
 			"build_scale": (sim.system(&"buildings") as BuildingSystem).build_scale(),
-			"farm_build_ms": int((sim.system(&"buildings") as BuildingSystem).build_seconds_of("farm") * 1000.0),
+			"farm_build_ms": int(round((sim.system(&"buildings") as BuildingSystem).build_seconds_of("farm") * 1000.0)),
 			"build_ms": _build_ms_all(),
 			"walk_speed": sim.data.get_float("balance", "momo.walk_speed", 1.0),
 			"crop_price": (sim.system(&"economy") as EconomySystem).unit_price("crop"),
@@ -1472,7 +1473,7 @@ func _build_ms_all() -> Dictionary:
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var out := {}
 	for type: String in (sim.data.table("buildings")["types"] as Dictionary):
-		out[type] = int(bs.build_seconds_of(type) * 1000.0)
+		out[type] = int(round(bs.build_seconds_of(type) * 1000.0))
 	return out
 
 
@@ -2103,7 +2104,7 @@ func _stages_ms() -> Dictionary:
 	var out := {}
 	for type: String in ["farm", "lumberyard", "mine", "research"]:
 		out[type] = (sim.data.building_type(type)["cycle"]["stages"] as Array).map(func(st: Dictionary) -> Array:
-			return [String(st["id"]), int(float(st["seconds"]) * _work_scale() * 1000.0)])
+			return [String(st["id"]), int(round(float(st["seconds"]) * _work_scale() * 1000.0))])
 	return out
 
 

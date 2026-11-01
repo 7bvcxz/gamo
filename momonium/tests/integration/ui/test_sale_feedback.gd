@@ -46,7 +46,7 @@ func test_the_rate_line_shows_the_last_minute() -> void:
 		var farm := bs.place_ready("farm", cell, "harvest")
 		assert_true(farm > 0, "a ripe farm at %s" % cell)
 		sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(int(bs.stage_seconds({"type": "farm"}, bs.stages({"type": "farm"})[2]) * 1000.0))
+	sim.advance_ms(ms(bs.stage_seconds({"type": "farm"}, bs.stages({"type": "farm"})[2])))
 	hud.refresh()
 	var price := (sim.system(&"economy") as EconomySystem).unit_price("crop")
 	assert_true(hud.production_label.visible, "money earned: the line appears")

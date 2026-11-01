@@ -38,23 +38,28 @@ func _open() -> void:
 	LocaleService.apply("en")
 
 
-## A farm ripening after its watering and a Momo 40% through a dig, saved:
-## the player sows, the Momo is sent to the mine during the sowing, the
-## watering ends while the dig is under way.
+## A farm ripening after its watering and a Momo part way through a dig,
+## saved: the Momo is sent to the mine and digs; meanwhile the player sows and
+## waters, and the save is taken as the crop starts to ripen. (Step 84: the
+## farm's work is a third of Step 78's, the Momo's long dig still runs
+## through it -- the order no longer depends on how long a sowing is.)
 func _busy_island() -> Simulation:
 	var sim := with_starter_momo(Simulation.new_game())
 	var bs: BuildingSystem = sim.system(&"buildings")
 	var farm := bs.place_instant("farm", Vector2i(1, 0))
 	var mine := bs.place_instant("mine", Vector2i(0, 1))
-	sim.execute({"type": "building.tap", "id": farm})
-	sim.advance_ms(14000)
+	# Start just after a day begins, so the save falls mid-day: the second of
+	# frames after opening crosses no day's end (it closes the book, brings mail).
+	sim.advance_ms(sim.clock.day_ms - sim.clock.time_in_day_ms() + 500)
 	sim.execute({"type": "momo.assign", "momo": 1, "building": mine})
-	sim.advance_ms(bs.remaining_ms(bs.get_building(farm)))
-	sim.execute({"type": "building.tap", "id": farm})
 	var dig := bs.get_building(mine)
-	while dig["state"] != BuildingSystem.WORKING or bs.progress(dig) < 0.4:
+	while dig["state"] != BuildingSystem.WORKING:
 		sim.advance_ms(100)
+	for stage in 2:
+		sim.execute({"type": "building.tap", "id": farm})
+		sim.advance_ms(bs.remaining_ms(bs.get_building(farm)))
 	assert_eq(bs.get_building(farm)["state"], BuildingSystem.COOLDOWN, "the crop is ripening")
+	assert_eq(dig["state"], BuildingSystem.WORKING, "the dig under way")
 	return sim
 
 
@@ -78,7 +83,7 @@ func test_opens_the_saved_island_exactly_as_saved_however_long_ago() -> void:
 		for k: String in ["economy", "progression", "inventory", "mail", "research", "buildings", "momo", "journey", "prestige"]:
 			assert_true(JSON.stringify(now[k]) == JSON.stringify(saved[k]), "%d h: %s as saved" % [hours, k])
 		assert_eq(lb.remaining_ms(lb.get_building(lb.building_at(Vector2i(1, 0)))), farm_left - ran, "%d h: the crop has the same ripening left" % hours)
-		assert_eq(lb.remaining_ms(lb.get_building(lb.building_at(Vector2i(0, 1)))), dig_left - ran, "%d h: the dig the same 60%% left" % hours)
+		assert_eq(lb.remaining_ms(lb.get_building(lb.building_at(Vector2i(0, 1)))), dig_left - ran, "%d h: the dig the same time left" % hours)
 		assert_eq(main.get("offline_report"), {}, "%d h: nothing caught up" % hours)
 		assert_false((main.get("away_frame") as PanelFrame).visible, "%d h: no welcome-back card" % hours)
 		# On screen, the island goes on with its frames.

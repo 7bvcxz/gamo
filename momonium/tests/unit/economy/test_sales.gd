@@ -30,7 +30,7 @@ func _grow_one_batch(farm: int) -> void:
 		if b["state"] != BuildingSystem.IDLE:
 			sim.advance_ms(buildings.remaining_ms(b))
 		sim.execute({"type": "building.tap", "id": farm})
-		sim.advance_ms(int(float(buildings.current_stage(b)["seconds"]) * work_scale(sim) * 1000.0))
+		sim.advance_ms(ms(float(buildings.current_stage(b)["seconds"]) * work_scale(sim)))
 	var b := buildings.get_building(farm)
 	if b["state"] != BuildingSystem.IDLE:
 		sim.advance_ms(buildings.remaining_ms(b))
@@ -100,12 +100,12 @@ func test_a_mine_pays_as_it_digs_and_keeps_the_stone() -> void:
 	var dig: Dictionary = buildings.current_stage(buildings.get_building(mine))
 	var before := economy.money
 	sim.execute({"type": "building.tap", "id": mine})
-	sim.advance_ms(int(float(dig["seconds"]) * work_scale(sim) * 1000.0))
+	sim.advance_ms(ms(float(dig["seconds"]) * work_scale(sim)))
 	assert_eq(economy.money - before, buildings.revenue_of(buildings.get_building(mine), dig), "the ore at the face is sold as it comes out")
 	assert_true(economy.money > before, "money at once")
 	assert_eq(inv.count("stone"), int(dig["yield"]["stone"]), "the stone kept for building")
 	var cycle := float(dig["seconds"]) * work_scale(sim) + float(dig["cooldown"]) * wait_scale(sim)
-	assert_near(cycle, 155.0, 0.0001, "155 seconds for each unit dug (Step 78: 4 s of digging x31.25 + the 6 s wait x5; Step 69: 31 s, Step 58: 16 s, Step 50: 10 s)")
+	assert_near(cycle, 155.0 / 3.0, 0.0001, "51.7 seconds for each unit dug (Step 84: 4 s of digging x10.42 + the 6 s wait x1.67, a third of Step 78's 155 s; Step 69: 31 s, Step 58: 16 s, Step 50: 10 s)")
 
 
 func test_a_full_store_sells_the_surplus_instead_of_stopping() -> void:
@@ -114,7 +114,7 @@ func test_a_full_store_sells_the_surplus_instead_of_stopping() -> void:
 	var dig: Dictionary = buildings.current_stage(buildings.get_building(mine))
 	var before := economy.money
 	assert_true(sim.execute({"type": "building.tap", "id": mine})["ok"], "a full store of stone does not stop the mine")
-	sim.advance_ms(int(float(dig["seconds"]) * work_scale(sim) * 1000.0))
+	sim.advance_ms(ms(float(dig["seconds"]) * work_scale(sim)))
 	assert_eq(inv.count("stone"), inv.capacity("stone"), "the store stays full")
 	assert_eq(economy.money - before, buildings.revenue_of(buildings.get_building(mine), dig) + economy.unit_price("stone"), "the stone that did not fit was sold, not thrown away")
 

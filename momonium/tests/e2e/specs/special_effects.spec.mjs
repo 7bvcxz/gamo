@@ -26,7 +26,8 @@ test('the landmarks change the game', async ({ game }) => {
   const b = s.buildings.buildings.find((x) => x.id === yard);
   const rules = await game.query('rules');
   // Whichever stage it is on (chop or replant), half its time.
-  expect(b.task_end - b.task_start).toBe(rules.stages_ms.lumberyard[b.stage][1] * rules.momo_x * 0.5);
+  // (To the millisecond each timer is rounded to: Step 84's 41.667 s stage.)
+  expect(Math.abs(b.task_end - b.task_start - rules.stages_ms.lumberyard[b.stage][1] * rules.momo_x * 0.5)).toBeLessThanOrEqual(2);
   // School: skill points 1.2 per job.
   await game.query('dev_place_building', ['school', 1, 2]);
   const before = (await game.state()).momo.momos.find((m) => m.id === 1).experience.lumberyard ?? 0;

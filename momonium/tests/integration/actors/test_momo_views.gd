@@ -74,7 +74,7 @@ func test_the_work_cell_follows_the_job() -> void:
 	assert_eq(actor.rig.cell_name(), "sow_0", "sowing: the seed pouch (Step 66)")
 	var stages: Array = sim.data.building_type("farm")["cycle"]["stages"]
 	var x := sim.data.get_float("balance", "momo.work_time_multiplier", 4.0)
-	sim.advance_to(arrived + int(float(stages[0]["seconds"]) * work_scale(sim) * x * 1000.0) + 300)
+	sim.advance_to(arrived + ms(float(stages[0]["seconds"]) * work_scale(sim) * x) + 300)
 	await tree.process_frame
 	if actor.is_working():
 		assert_eq(actor.work_pose(), "water", "watering")

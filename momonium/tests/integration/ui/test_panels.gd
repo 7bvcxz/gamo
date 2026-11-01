@@ -161,7 +161,7 @@ func test_building_details_from_the_name() -> void:
 	sim.execute({"type": "building.tap", "id": farm})
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "you", "you, while you sow")
 	assert_eq(view.state_label.text, "Sow · %d s left" % ceili(float(stages[0]["seconds"]) * work_scale(sim)), "and the time left (rounded up, as a countdown)")
-	sim.advance_ms(int(float(stages[0]["seconds"]) * work_scale(sim) * 1000.0))
+	sim.advance_ms(ms(float(stages[0]["seconds"]) * work_scale(sim)))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": farm})
 	view.refresh()
 	assert_eq(view.workers_box.get_child(0).get_meta("who"), "momo:1", "the assigned Momo fills the spot")
@@ -170,7 +170,7 @@ func test_building_details_from_the_name() -> void:
 	view.refresh()
 	assert_eq((view.workers_box.get_child(0).find_child("Status", true, false) as Label).text, "Working", "and working")
 	sim.advance_ms(int(round(float(stages[1]["seconds"]) * work_scale(sim) * momo_x * 1000.0)))
-	assert_eq(view.state_label.text, "Harvest in %d s" % int(wait), "then the crop ripens before the harvest")
+	assert_eq(view.state_label.text, "Harvest in %d s" % ceili(wait), "then the crop ripens before the harvest (rounded up, as a countdown)")
 	assert_eq((view.done_row.get_node("Value") as Label).text, "2", "two jobs done")
 
 

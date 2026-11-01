@@ -11,7 +11,8 @@
 |---|---|
 | `targets.json` | 고정한 목표. 지표, 목표값, 종류(정확·상한·하한), 가중치, primary 여부, 어떤 증거로 재는지 |
 | `baseline_step69.json` | Step 69 게임(일 ×6.25, 건설 ×2.5)에서 잰 페이스 기준선. 목표가 아니라 회귀 방지(±30%)이며, Step 50 목표는 Step 58 속도에서 검사한다(`test_balance`) |
-| `baseline_step78.json` | Step 78 게임(일 ×31.25, 기다림 ×5, 건설 ×12.5, `balance.pace.production`)에서 잰 지금의 기준선. `test_balance`가 이것을 쓴다. `baseline_step69.json`은 이력이다(`design/PACE78.md`) |
+| `baseline_step78.json` | Step 78 게임(일 ×31.25, 기다림 ×5, 건설 ×12.5, `balance.pace.production`)에서 잰 기준선. Step 84부터 이력이다 |
+| `baseline_step84.json` | Step 84 게임(생산 세 값 5 → 5/3: 일 ×10.42, 기다림 ×1.67, 건설 ×4.17)에서 잰 지금의 기준선. `test_balance`가 이것을 쓴다(`design/PACE84.md`) |
 | `profiles.json` | 시뮬레이터 플레이어 프로필: `blind`(블라인드 AI 보정형), `blind_slow`·`blind_fast`, `human`, `human48`(2일 일정) |
 | `optimize.gd` | 결정적 시뮬레이터. 프로필로 새 섬을 플레이하고, 체크포인트(10초·30초·1분, 2–10분 매분, 15·20·30·60분)에서 시계열을 읽고, 목표 대비 오차를 낸다 |
 | `candidates/*.json` | 실험 라운드. `--set` 덮어쓰기 목록이며, 각 항목에 바꾸기 전 값(`old`)과 이유(`why`)를 적는다. `extends`로 앞 라운드 위에 쌓는다 |

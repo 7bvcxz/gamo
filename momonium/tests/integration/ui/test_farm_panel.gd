@@ -44,7 +44,7 @@ func _work(i: int) -> int:
 
 
 func _wait() -> int:
-	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * wait_scale(sim) * 1000.0)
+	return ms(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * wait_scale(sim))
 
 
 func test_three_cards_and_the_lit_one_follows_the_cycle() -> void:

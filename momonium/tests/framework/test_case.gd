@@ -36,7 +36,14 @@ func work_scale(s: Simulation) -> float:
 ## (BuildingSystem.build_seconds_of). A test that waits for a construction
 ## waits this long.
 func build_ms(s: Simulation, type: String) -> int:
-	return int((s.system(&"buildings") as BuildingSystem).build_seconds_of(type) * 1000.0)
+	return ms((s.system(&"buildings") as BuildingSystem).build_seconds_of(type))
+
+
+## Step 84: seconds as the game turns them into milliseconds -- rounded, the
+## way every timer of the buildings is (int() truncates: at Step 84's 10.4167 s
+## a wait timed with it stopped a millisecond short of the stage's end).
+func ms(seconds: float) -> int:
+	return int(round(seconds * 1000.0))
 
 
 ## The game's data at the pace its numbers are written in (Step 58's

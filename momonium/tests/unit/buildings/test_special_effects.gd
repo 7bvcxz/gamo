@@ -156,4 +156,5 @@ func test_the_tower_makes_real_work_go_faster() -> void:
 	sim.advance_to(180000 * 4 + 40000)
 	var b := bs.get_building(y1)
 	var chop: Dictionary = bs.stages(b)[0]
-	assert_eq(in_burst * 2, int(round(bs.stage_seconds(b, chop) * 1000.0 * float(pace[0]))), "exactly half of a chop outside a burst")
+	# Half, to the millisecond each timer is rounded to.
+	assert_true(absi(in_burst * 2 - int(round(bs.stage_seconds(b, chop) * 1000.0 * float(pace[0])))) <= 1, "exactly half of a chop outside a burst (%d ms in a burst)" % in_burst)

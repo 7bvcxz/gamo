@@ -147,7 +147,7 @@ func test_it_waits_for_a_cooldown_at_the_next_stop() -> void:
 	var mine := bs.place_instant("mine", Vector2i(1, 0))
 	# The mine was just dug by hand: it settles for its cooldown.
 	sim.execute({"type": "building.tap", "id": mine})
-	sim.advance_ms(int(float(bs.current_stage(bs.get_building(mine))["seconds"]) * work_scale(sim) * 1000.0) + 10)
+	sim.advance_ms(ms(float(bs.current_stage(bs.get_building(mine))["seconds"]) * work_scale(sim)) + 10)
 	assert_eq(String(bs.get_building(mine)["state"]), BuildingSystem.COOLDOWN, "the mine is cooling down")
 	_tap([Vector2i(1, 0), Vector2i(0, 0)])
 	var seq := _starts(60000)

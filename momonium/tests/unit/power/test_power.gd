@@ -159,7 +159,7 @@ func test_at_night_solar_power_goes_but_nothing_breaks() -> void:
 	assert_eq(power.supply(), 0.0, "no sun")
 	assert_true(sim.execute({"type": "building.tap", "id": mine})["ok"], "the mine still digs")
 	var m := bs.get_building(mine)
-	assert_eq(int(m["task_end"]) - int(m["task_start"]), int(float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"]) * work_scale(sim) * 1000.0), "at its unpowered pace")
+	assert_eq(int(m["task_end"]) - int(m["task_start"]), ms(float(sim.data.building_type("mine")["cycle"]["stages"][0]["seconds"]) * work_scale(sim)), "at its unpowered pace")
 	assert_eq(float(power.shares[mine]), 0.0, "with no share")
 
 

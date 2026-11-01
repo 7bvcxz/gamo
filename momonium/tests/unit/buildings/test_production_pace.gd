@@ -10,6 +10,18 @@ extends "res://tests/framework/test_case.gd"
 ## compose on top, once (never x25); floors move with their timer; rewards
 ## come once, at the new completion; a stage running in a save keeps the end
 ## it started with; walking, the day and research topics keep their times.
+##
+## History (Step 84): the game now runs a third of Step 78's times
+## (test_production_pace84.gd); this file keeps Step 78's own relation by
+## playing Step 78's data -- the three factors at 5 -- against 0.77's.
+
+## The Step 78 game: the same data with its three factors at 5.
+func _pace78() -> GameData:
+	var bal: Dictionary = GameData.load_default().table("balance").duplicate(true)
+	for k: String in ["work", "wait", "build"]:
+		bal["pace"]["production"][k] = 5.0
+	return GameData.from_tables({"balance": bal})
+
 
 ## The 0.77 game: the same data, Step 78's three factors at 1.
 func _pace77() -> GameData:
@@ -20,7 +32,7 @@ func _pace77() -> GameData:
 
 
 func _island(data: GameData = null) -> Simulation:
-	var sim := with_starter_momo(Simulation.new_game(data))
+	var sim := with_starter_momo(Simulation.new_game(data if data != null else _pace78()))
 	var world: WorldSystem = sim.system(&"world")
 	for x in 4:
 		for y in 4:
@@ -235,7 +247,8 @@ func test_research_and_the_clock_tower_compose_once_and_floors_move_with_their_t
 		for e: Dictionary in n.get("effects", []):
 			if e.has("multiply"):
 				e["multiply"] = 0.01
-	var strong := Simulation.new_game(GameData.from_tables({"research": r}))
+	var bal: Dictionary = (_pace78().table("balance") as Dictionary).duplicate(true)
+	var strong := Simulation.new_game(GameData.from_tables({"research": r, "balance": bal}))
 	var sr: ResearchSystem = strong.system(&"research")
 	for id: String in ["farm_expansion", "watering_efficiency", "watering_can", "drip_irrigation"]:
 		sr.completed[id] = 0
@@ -292,7 +305,7 @@ func test_a_stage_running_in_an_old_save_keeps_its_end_then_the_next_is_slower()
 	assert_eq(state["status"], "ok", "the save opens")
 	# Loaded into this game: the stages already running end when they would
 	# have (no jump, no sudden x5 of time already promised, nothing stuck).
-	var now := Simulation.from_save(state["state"])
+	var now := Simulation.from_save(state["state"], _pace78())
 	var nb: BuildingSystem = now.system(&"buildings")
 	assert_eq(int(nb.get_building(farm)["ready_at"]), ready_at, "the ripening keeps its end")
 	assert_eq(int(nb.get_building(mine)["task_end"]), dig_end, "the dig keeps its end")
@@ -319,7 +332,7 @@ func test_a_save_mid_ripening_resumes_the_same_remaining_time() -> void:
 	sim.advance_ms(4000)
 	var left := bs.remaining_ms(bs.get_building(farm))
 	assert_eq(left, 6000, "4 of the 10 s gone")
-	var copy := Simulation.from_save(SaveService.decode(SaveService.encode(sim))["state"])
+	var copy := Simulation.from_save(SaveService.decode(SaveService.encode(sim))["state"], _pace78())
 	var cb: BuildingSystem = copy.system(&"buildings")
 	assert_eq(cb.remaining_ms(cb.get_building(farm)), left, "loaded: the same 6 s to go")
 	copy.advance_ms(left - 1)

@@ -1,0 +1,34 @@
+{
+  "_doc": "Step 84 pacing baseline -- NOT a target. After Step 78 slowed every building's production x5, the owner played a reset island and found it far too slow: production now three times as fast as Step 78 (balance.pace.production work, wait and build 5 -> 5/3: the work of a stage x10.42 of the data seconds, the wait after it x1.67, construction x4.17), everything else as it was -- prices, EXP, walking, the 30 s day, research topics, letters; and Step 83's three hands. Measured by the deterministic simulator on 2026-11-01, 'blind' profile (tools/balance_optimizer/optimize.gd --profile blind --minutes 300), on this game. Against Step 78's game measured the same day with the same code (factors at 5): first income 39 -> 18 s, a Momo's first income 168 -> 95 s, Lv 2 663 -> 274 s, the first research 1200 -> 488 s, money by an hour $1001 -> $5834, the island sellable 218 -> 90 minutes -- about x2.4 faster, not x3, because walking, the day, research topics and letters keep their times. tests/unit/sim/test_balance.gd keeps the game within tolerance of it; baseline_step78.json and baseline_step69.json are history (design/PACE84.md).",
+  "measured": "2026-11-01",
+  "profile": "blind",
+  "data": {
+    "work_scale": 6.25,
+    "build_scale": 2.5,
+    "travel_scale": 1.3,
+    "production": {
+      "work": 1.6666666666666667,
+      "wait": 1.6666666666666667,
+      "build": 1.6666666666666667
+    }
+  },
+  "tolerance": 0.3,
+  "journey_s": {
+    "income": 18.4,
+    "momo_income": 95.3,
+    "level:2": 274.4,
+    "level:3": 556.8,
+    "research": 488.0,
+    "momos:2": 668.0,
+    "land": 400.0,
+    "level:4": 1120.0,
+    "level:5": 2074.7,
+    "level:6": 3962.7,
+    "tier:1": 1944.0
+  },
+  "income_at_600": 174,
+  "income_at_3600": 5834,
+  "prestige_ready_s": 5408.0,
+  "income_gap_s": 44,
+  "minutes": 300
+}

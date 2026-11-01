@@ -78,8 +78,8 @@ static func build(data: GameData = null) -> Simulation:
 	(sim.system(&"inventory") as InventorySystem).add("copper_ingot", 4, "demo")
 	# Let the staffed island run a while so its stores, mail and ledger are real:
 	# the mine's ore and the lumberyard's wood feed the smelter by the rules.
-	# Step 78 made every building's work and wait five times as long, so the
-	# same island (a studio's first release, cars rolled out) takes five times
-	# the hour it took.
-	sim.advance_ms(30000 * 60 * 5)
+	# The same island (a studio's first release, cars rolled out) takes the
+	# half hour it took at the data's own pace, times the production pace
+	# (Step 78 x5, Step 84 x5/3) -- read from the data, not copied.
+	sim.advance_ms(int(30000.0 * 60.0 * sim.data.get_float("balance", "pace.production.work", 1.0)))
 	return sim

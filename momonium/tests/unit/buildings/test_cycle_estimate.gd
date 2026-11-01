@@ -38,7 +38,8 @@ func test_a_momo_cycle_takes_what_the_estimate_says() -> void:
 	sim.advance_ms(400000)
 	assert_true(starts.size() >= 2, "two cycles began")
 	var est := buildings.cycle_estimate(buildings.get_building(farm), sim.data.get_float("balance", "momo.work_time_multiplier", 4.0))
-	assert_eq(starts[1] - starts[0], int(est["cycle_seconds"] * 1000.0), "measured cycle = estimate")
+	# The estimate in seconds; each stage's timer is rounded to whole ms.
+	assert_true(absi(int(starts[1] - starts[0]) - ms(float(est["cycle_seconds"]))) <= 2, "measured cycle = estimate (%d ms against %.1f s)" % [starts[1] - starts[0], est["cycle_seconds"]])
 	assert_eq(momos.ids().size(), 1, "")
 
 

@@ -73,7 +73,10 @@ async function leftOf(g, id) {
   return Math.max((x.state === 'working' ? x.task_end : x.state === 'cooldown' ? x.ready_at : s.now_ms) - s.now_ms, 0);
 }
 
-// A crop ripening after its watering and a Momo 40% through a dig.
+// A crop ripening after its watering and a Momo part way through a dig.
+// (Step 84: the Momo starts its long dig first and the farm is sown and
+// watered during it, so the order no longer depends on how long a sowing is;
+// the day is begun just before, so the ripening is not cut by a day's end.)
 async function busyIsland(g) {
   await g.scale(0);
   await g.call('set_language', 'en');
@@ -83,17 +86,14 @@ async function busyIsland(g) {
   const mine = (await g.call('dev_place_building', ['mine', 2, 2])).id;
   const b = async (id) => (await g.state()).buildings.buildings.find((x) => x.id === id);
   const left = (id) => leftOf(g, id);
-  expect((await g.command({ type: 'building.tap', id: farm })).ok, 'sowing').toBe(true);
-  await g.call('dev_advance_ms', 14000);
+  const s0 = await g.state();
+  await g.call('dev_advance_ms', s0.day_ms - s0.time_in_day_ms + 500);
   expect((await g.command({ type: 'momo.assign', momo, building: mine })).ok).toBe(true);
+  for (let i = 0; i < 400 && (await b(mine)).state !== 'working'; i++) await g.call('dev_advance_ms', 250);
+  expect((await g.command({ type: 'building.tap', id: farm })).ok, 'sowing').toBe(true);
   await g.call('dev_advance_ms', await left(farm));
   expect((await g.command({ type: 'building.tap', id: farm })).ok, 'watering').toBe(true);
-  for (let i = 0; i < 400; i++) {
-    const m = await b(mine);
-    const s = await g.state();
-    if (m.state === 'working' && (s.now_ms - m.task_start) / (m.task_end - m.task_start) >= 0.4) break;
-    await g.call('dev_advance_ms', 250);
-  }
+  await g.call('dev_advance_ms', await left(farm));
   expect((await b(farm)).state, 'the crop is ripening').toBe('cooldown');
   expect((await b(mine)).state, 'the Momo is digging').toBe('working');
   return { farm, mine, left };

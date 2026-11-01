@@ -29,7 +29,7 @@ func _momo_stage_ms(i: int = 0) -> int:
 
 
 func _wait_ms() -> int:
-	return int(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * wait_scale(sim) * 1000.0)
+	return ms(float(sim.data.building_type("farm")["cycle"]["stages"][1]["cooldown"]) * wait_scale(sim))
 
 
 func _log() -> Array:

@@ -651,7 +651,7 @@ func refit(id: int, type: String) -> Dictionary:
 	var now := sim.now_ms()
 	b["state"] = CONSTRUCTING
 	b["build_start"] = now
-	b["build_end"] = now + int(build_seconds_of(type) * 1000.0)
+	b["build_end"] = now + int(round(build_seconds_of(type) * 1000.0))
 	sim.scheduler.schedule(int(b["build_end"]), BUILT, {"id": id, "token": b["token"]})
 	sim.bus.emit(&"building_refit", {"id": id, "from": from, "type": type})
 	return SimResult.ok()

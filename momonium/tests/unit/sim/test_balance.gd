@@ -42,7 +42,9 @@ func _targets() -> Dictionary:
 
 
 func _baseline() -> Dictionary:
-	return JSON.parse_string(FileAccess.get_file_as_string("res://tools/balance_optimizer/baseline_step78.json"))
+	# Step 84: the game three times as fast as Step 78 (baseline_step78.json
+	# and baseline_step69.json are history).
+	return JSON.parse_string(FileAccess.get_file_as_string("res://tools/balance_optimizer/baseline_step84.json"))
 
 
 ## The game at the pace the Step 50 targets were set for: Step 58's work x2.5,
@@ -130,12 +132,13 @@ func sim_scale(key: String) -> float:
 
 
 func test_a_sold_island_makes_the_next_one_faster() -> void:
-	# Five hours (Steps 69-70: the first island sold about 38 minutes in; Step
+	# Two hours (Steps 69-70: the first island sold about 38 minutes in; Step
 	# 78: about 177 minutes in, and the second needs room to show it is
 	# quicker -- its Lv 5 came 35 minutes after the sale, the first's at 61;
 	# Step 83: three hands at a time, the sale about 217 minutes in, the
-	# first Lv 5 at 68).
-	var bot := _played(300.0, 2)
+	# first Lv 5 at 68; Step 84, three times as fast: the sale at 74 minutes,
+	# the second island's Lv 5 12 minutes after it, the first's at 24).
+	var bot := _played(120.0, 2)
 	assert_true(bot.sales.size() >= 1, "the island was sold for legacy points")
 	var first: int = bot.first("level 5")
 	var sold: int = int(bot.sales[0]["active_ms"])
