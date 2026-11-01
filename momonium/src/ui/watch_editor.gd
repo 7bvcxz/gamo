@@ -279,20 +279,21 @@ func target() -> Vector2:
 	var hud: Array[Rect2] = []
 	if avoid.is_valid():
 		hud = avoid.call()
-	var got := spot(feet, cameras.camera.zoom.y, safe_rect(), hud, side)
+	var got := spot(feet, cameras.camera.zoom.y, safe_rect(), hud, side, a.body())
 	side = got[1]
 	return got[0]
 
 
 ## The button's place for a Momo whose feet are at `feet` on screen, drawn
-## at `zoom`: under the feet, else above the head, else to its right or
-## left -- the first that is inside `safe` and on no `hud` rectangle. Away
+## at `zoom`, its body `body` from the feet (island pixels, MomoActor.body --
+## smaller since Step 77): under the feet, else above the head, else to its
+## right or left -- the first that is inside `safe` and on no `hud` rectangle. Away
 ## from under the feet (`prefer`, where it was), it stays where it is until
 ## there is clear room under the feet again (RETURN_ROOM more on every side),
 ## so a Momo walking along an edge does not make it flap. None fits: under
 ## the feet, pulled inside the screen. Returns [top-left, side].
-static func spot(feet: Vector2, zoom: float, safe: Rect2, hud: Array[Rect2], prefer: String) -> Array:
-	var body := Rect2(feet + Vector2(-26.0, -76.0) * zoom, Vector2(52.0, 80.0) * zoom)
+static func spot(feet: Vector2, zoom: float, safe: Rect2, hud: Array[Rect2], prefer: String, momo_body: Rect2 = MomoActor.BODY) -> Array:
+	var body := Rect2(feet + momo_body.position * zoom, momo_body.size * zoom)
 	var spots := {
 		"below": Vector2(feet.x - BUTTON.x * 0.5, body.end.y + GAP),
 		"above": Vector2(feet.x - BUTTON.x * 0.5, body.position.y - GAP - BUTTON.y),

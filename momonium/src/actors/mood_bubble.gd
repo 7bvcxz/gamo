@@ -22,7 +22,8 @@ const SETTLE := 1.5
 const SHOW := {"content": 3.0, "thinking": 4.0, "confused": 6.0, "worried": 6.0}
 const AGAIN := {"content": 30.0, "thinking": 16.0, "confused": 10.0, "worried": 10.0}
 const FADE_RATE := 4.0
-## Above the head, a little to the right (the letter goes on the left).
+## Above the head, a little to the right (the letter goes on the left): at
+## size 1, 22 right and 24 over the fur curl (MomoRig.HEIGHT up).
 const ANCHOR := Vector2(22, -96)
 
 ## The mood on show ("" when none) and why, for tests and the E2E bridge.
@@ -39,6 +40,9 @@ var _since := 0.0
 var _shown_for := 0.0
 var _next_ok := {}
 var _alpha := 0.0
+## Step 77: the Momo's size (MomoActor). The bubble keeps its own size and
+## its gap over the head; it follows the head down.
+var size := 1.0
 
 
 func setup(lib: SpriteLibrary) -> void:
@@ -84,7 +88,13 @@ func step(delta: float, reason: String, held: bool, head: Vector2) -> void:
 	var lift := 0.0
 	if FxPrefs.moving():
 		lift = (1.0 - _alpha) * 8.0 + sin(_t * 2.0) * 1.2
-	position = head + ANCHOR + Vector2(0, lift)
+	position = head + anchor() + Vector2(0, lift)
+
+
+## Where it sits from the feet (before the rise): beside and over the head
+## of a Momo of `size`, the same gap over the fur curl at any size.
+func anchor() -> Vector2:
+	return Vector2(ANCHOR.x * size, ANCHOR.y + MomoRig.HEIGHT * (1.0 - size))
 
 
 ## Whether the rules should be asked again this step.

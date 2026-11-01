@@ -97,7 +97,7 @@ func test_every_job_on_the_island_draws_its_tool_from_the_atlas() -> void:
 			assert_eq(a.rig.body.texture, sheet.work_texture, "%s: from the work atlas" % action)
 			assert_eq(a.rig.body.region_rect, sheet.region(frame), "%s: its frame" % action)
 			assert_eq(a.rig.body.offset, -sheet.pivot_of(frame), "%s: the feet on the ground point" % action)
-			assert_eq(a.rig.scale.x, -1.0, "%s: facing the building (left), mirrored" % action)
+			assert_eq(a.rig.scale, Vector2(-a.size, a.size), "%s: facing the building (left), mirrored, at its size" % action)
 			bs.demolish(b)
 			x -= 1
 

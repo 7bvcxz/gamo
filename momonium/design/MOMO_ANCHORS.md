@@ -95,6 +95,7 @@ Step 66~67의 `build_momo_work.gd`는 장마다 피벗(발이 놓일 점)을 이
 - `assets/momo/momo_work.json`: 장마다 `pivot`(루트, 사각형의 왼쪽 위에서), `root`(찾은 방법), 측정한 `feet`·`torso`·`eyes`.
 - `assets/momo/momo_sheet.json`: 25칸이 같은 피벗(128, 242)을 쓴다. 칸마다 그림을 루트가 그 점에 오게 놓는다. `root`·`feet`·`torso`·`eyes`는 칸 좌표다.
 - 크기는 하나다. 리그는 장의 텍스처 밀도(`stand_height`: 시트 200, 아틀라스 160 텍셀 = 섬 72 px)로 그린다.
+  - Step 77: 섬에서는 그 위에 리그 노드의 scale `art.momo_size.scale`(0.8)을 곱한다. 원점이 루트라 발은 그대로이고, 이 문서의 허용 오차(0.5 px)도 크기만큼 줄어든 채로 지켜진다(`test_momo_size`, `design/ART_SPEC.md` §12b).
 - 칸 크기는 바꾸지 않았다. 아틀라스는 이미 장마다 크기가 다른 사각형(가변 영역)이고 6 px 여백을 둔다. 곡괭이·도끼처럼 큰 장도 잘리지 않는다(`test_momo_anchors`).
 
 ## 4. 파이프라인

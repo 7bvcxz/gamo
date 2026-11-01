@@ -215,6 +215,11 @@
       "bank_grass_until": 0.12
     }
   },
+  "momo_size": {
+    "_doc": "Step 77: how big every Momo is drawn, as a share of its size from Step 51 to Step 76 (MomoRig.HEIGHT, 72 island pixels from the feet to the fur curl). The owner found Momo too big beside the buildings. It is applied once, as the rig's scale about its root (the point between the feet, Step 76), so the feet stay on the same map point and every frame -- idle, walks, jobs with their tools, sit, sleep, moods -- and the shadow and the sleeping Zs shrink together. MomoActor reads it for everything sized by the body: the tap box (the old 52 x 80 body box times this, grown by `hit_slack` island pixels at the sides and over the head -- not under the feet, where a tap is for the tile it stands on), the selection ring, the hop and the shake, the mood bubble's place over the head and the Schedule button's room (WatchEditor.spot). The mood bubble and the Schedule button keep their own size (they are read and tapped, not part of the body). Walking speed, timing and the depth sort do not change.",
+    "scale": 0.8,
+    "hit_slack": 4.0
+  },
   "momo_depth": {
     "_doc": "Step 55: how much nearer than its feet a Momo counts when the island is depth-sorted (tiles of depth, x + y). Buildings stand at their footprint's centre, so a Momo on a building's own tile or beside its front half was drawn behind it -- the owner saw Momo vanish into buildings on ordinary walks. With 0.5 a Momo is drawn in front of a building unless it stands in the back quarter of its tile or on a tile behind it: clearly behind, it stays hidden. Only the order changes -- the Momo is drawn, tapped and dropped where it stands. Momo among themselves keep their order (every Momo gets the same bias).",
     "bias_tiles": 0.5

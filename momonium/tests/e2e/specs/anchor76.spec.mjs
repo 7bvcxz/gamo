@@ -66,10 +66,18 @@ async function zoomIn(game, info) {
       await game.page.waitForTimeout(300);
     }
   } else {
+    // Until Momo stands 200 px tall on the page: no smaller than its
+    // pictures (200 texels a stand in the sheet, 160 in the work atlas), so
+    // no mipmap blurs a foot's outline. Step 77 made Momo 0.8 as big and six
+    // notches left it 127 px tall; between 125 and 140 px the feet ran into
+    // the legs or the lumberyard's pale chips on some frames, and passed or
+    // failed by the notch.
     await game.page.mouse.move(at.x, at.y);
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 14; i++) {
+      const n = await momo(game);
+      if (((n.feet[1] - n.body[1]) / 35) * 72 * css >= 200) break;
       await game.page.mouse.wheel(0, -240);
-      await game.page.waitForTimeout(120);
+      await game.page.waitForTimeout(150);
     }
   }
   await game.page.waitForTimeout(500);

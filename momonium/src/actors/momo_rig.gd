@@ -21,8 +21,8 @@ extends Node2D
 ## across it) -- and mirrors for the left. A light breath and a bob in the
 ## step keep the still cells alive.
 
-## World pixels from the feet to the fur curl of a standing Momo: a bit over
-## half a tile, as before Step 51 (hit areas and the HUD's anchors assume it).
+## World pixels from the feet to the fur curl of a standing Momo at `size`
+## 1: a bit over half a tile, as before Step 51.
 const HEIGHT := 72.0
 const STATES: PackedStringArray = ["idle", "walk", "sit", "sleep", "work"]
 ## Job poses with their own cells; anything else works back turned.
@@ -64,6 +64,14 @@ var _loop_index := -1
 ## Step 76: holds the animation on its frame `held` (-1 plays on) -- how the
 ## browser tests look at one frame exactly (main.gd `dev_hold_momo`).
 var held := -1
+## Step 77: how big Momo is drawn (`art.momo_size.scale`, set by MomoActor):
+## the node's scale about its origin, the root between the feet -- every
+## frame, the shadow and the sleeping Zs at once, the feet where they were.
+## `face` keeps it under the mirror.
+var size := 1.0:
+	set(value):
+		size = value
+		scale = Vector2(-size if scale.x < 0.0 else size, size)
 
 
 func setup(_lib: SpriteLibrary = null, seed_value: int = 0) -> void:
@@ -100,7 +108,7 @@ func face(direction: Vector2) -> void:
 		_view = "side"
 	else:
 		_view = "front"
-	scale.x = -1.0 if direction.x < 0.0 else 1.0
+	scale = Vector2(-size if direction.x < 0.0 else size, size)
 
 
 func is_back_view() -> bool:

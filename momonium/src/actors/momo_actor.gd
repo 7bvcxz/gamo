@@ -7,6 +7,10 @@ extends Node2D
 ## shadow. Owns no game state.
 
 const LIFT := 26.0
+## The body a tap finds and the HUD makes room for, from the feet, for a
+## Momo of size 1 (MomoRig.HEIGHT): a little past its sides, its fur curl and
+## its feet. Scaled by `size`.
+const BODY := Rect2(-26, -76, 52, 80)
 ## Step 68: its tool landed (the rig's contact frame), while it was seen.
 signal struck(momo: int, pose: String)
 ## The pose a shown mood puts an idle Momo in (Step 51; the bubble stays).
@@ -38,6 +42,12 @@ var _marked := true
 ## The one mood over its head when it is not at work (Step 48).
 var mood_bubble: MoodBubble
 var _mood_reason := ""
+## Step 77: how big it is drawn (`art.momo_size.scale`, 0.8): read once here,
+## handed to the rig (which scales about the feet) and the bubble, and used
+## for all that follows the body -- the tap box, the ring, the hop.
+var size := 1.0
+## Island pixels a tap may land outside the body and still find it.
+var hit_slack := 4.0
 
 
 func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProjection = null) -> void:
@@ -49,12 +59,16 @@ func setup(p_id: int, sim: Simulation, lib: SpriteLibrary, p_projection: IsoProj
 	projection = p_projection
 	_rng.seed = id * 7919
 	_next_sit = _rng.randf_range(8.0, 16.0)
+	size = sim.data.get_float("art", "momo_size.scale", 1.0)
+	hit_slack = sim.data.get_float("art", "momo_size.hit_slack", 4.0)
 	rig = MomoRig.new()
 	rig.setup(lib, id)
+	rig.size = size
 	add_child(rig)
 	rig.struck.connect(func(pose: String) -> void: struck.emit(id, pose))
 	mood_bubble = MoodBubble.new()
 	mood_bubble.setup(lib)
+	mood_bubble.size = size
 	add_child(mood_bubble)
 
 
@@ -80,10 +94,17 @@ func work_pose() -> String:
 	return rig.sheet.work_animation(String(stage.get("action", stage.get("id", ""))))
 
 
-## World-space box a tap or a drag can grab.
+## Its body as drawn, from its feet (island pixels): BODY at its size.
+func body() -> Rect2:
+	return Rect2(BODY.position * size, BODY.size * size)
+
+
+## World-space box a tap or a drag can grab: the body, `hit_slack` wider at
+## the sides and over the head. Not under the feet: there is only the shadow,
+## and the tile it stands on (a tap there is for the building).
 func hit_rect() -> Rect2:
-	var r := Rect2(ground() + Vector2(-26, -76), Vector2(52, 80))
-	return r
+	var b := body()
+	return Rect2(ground() + b.position, b.size).grow_individual(hit_slack, hit_slack, hit_slack, 0.0)
 
 
 ## Where it stands (its feet, in the layer), the sort's lift taken off.
@@ -117,7 +138,7 @@ func _process(delta: float) -> void:
 		rig.position = Vector2(0, -LIFT - depth_lift)
 	else:
 		rig.walk_speed = 1.0
-		rig.position = Vector2(sin(_shake * 40.0) * 4.0 * _shake, -sin(_pop * PI) * 18.0 - depth_lift)
+		rig.position = Vector2(sin(_shake * 40.0) * 4.0 * _shake * size, -sin(_pop * PI) * 18.0 * size - depth_lift)
 		if momos.is_moving(id):
 			rig.set_state("walk")
 			var h := momos.heading(id)
@@ -154,6 +175,6 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	if selected or dragged:
-		draw_set_transform(Vector2(0, 2 - depth_lift), 0.0, Vector2(1.0, 0.45))
-		draw_arc(Vector2.ZERO, 30.0, 0, TAU, 32, Color(1, 0.92, 0.45, 0.95), 4.0, true)
+		draw_set_transform(Vector2(0, 2.0 * size - depth_lift), 0.0, Vector2(1.0, 0.45))
+		draw_arc(Vector2.ZERO, 30.0 * size, 0, TAU, 32, Color(1, 0.92, 0.45, 0.95), 4.0, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

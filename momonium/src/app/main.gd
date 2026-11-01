@@ -1896,9 +1896,15 @@ func _momo_info(_arg: Variant) -> Dictionary:
 	var momos: MomoSystem = sim.system(&"momo")
 	for id: int in momo_views.actors:
 		var a: MomoActor = momo_views.actors[id]
-		var body: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * (a.ground() + Vector2(0, -35)))
+		# The middle of the body, as tall as it is drawn (Step 77: `size`), so
+		# (feet - body) / 35 is window pixels per pixel of the drawn Momo.
+		var body: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * (a.ground() + Vector2(0, -35.0 * a.size)))
 		var feet: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * a.ground())
+		var hr := a.hit_rect()
+		var h0: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * hr.position)
+		var h1: Vector2 = vp.get_final_transform() * (vp.get_canvas_transform() * hr.end)
 		out[str(id)] = {"body": [body.x, body.y], "feet": [feet.x, feet.y], "assigned": int(momos.get_momo(id)["assigned"]),
+			"size": a.size, "hit": [h0.x, h0.y, h1.x - h0.x, h1.y - h0.y], "ground": [a.ground().x, a.ground().y],
 			"moving": momos.is_moving(id), "state": a.rig.state,
 			"cell": a.rig.cell_name(), "view": a.rig.view(), "mirrored": a.rig.scale.x < 0.0,
 			"sheet": [a.rig.body.texture.get_width(), a.rig.body.texture.get_height()] if a.rig.body.texture != null else []}

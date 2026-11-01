@@ -120,7 +120,8 @@ func test_schedule_sits_under_the_feet_and_follows() -> void:
 	assert_eq(editor.side, "below", "below the Momo")
 	assert_near(r.get_center().x, feet.x, 1.0, "centred under it")
 	assert_between(r.position.y - feet.y, 0.0, 4.0 * z + WatchEditor.GAP + 1.0, "just under its feet (%.1f)" % (r.position.y - feet.y))
-	var body := Rect2(feet + Vector2(-26.0, -76.0) * z, Vector2(52.0, 80.0) * z)
+	var mb := (main.get("momo_views") as MomoViews).actor(1).body()
+	var body := Rect2(feet + mb.position * z, mb.size * z)
 	assert_false(r.intersects(body), "never over the Momo")
 	# The Momo walks (in the simulation: the actor follows it each frame).
 	momos.get_momo(1)["from"] = [1.2, 1.5]
@@ -168,7 +169,7 @@ func test_near_an_edge_or_a_button_it_moves_close_by() -> void:
 	# The real button, for the real Momo: where spot() says.
 	await _select_momo()
 	var hud: Hud = main.get("hud")
-	var want := WatchEditor.spot(_feet(), cams.camera.zoom.y, editor.safe_rect(), hud.occupied_rects(), editor.side)
+	var want := WatchEditor.spot(_feet(), cams.camera.zoom.y, editor.safe_rect(), hud.occupied_rects(), editor.side, (main.get("momo_views") as MomoViews).actor(1).body())
 	assert_eq(editor.schedule.position, want[0], "the button is where the rule puts it")
 
 
