@@ -55,6 +55,26 @@ static func close_button(px: float = 52.0) -> Button:
 	return b
 
 
+## Step 82: `act` runs when a press that began on `c` is let go on it -- a
+## touch, or the left or right mouse button; never a wheel. A finger makes
+## both a touch and a mouse press in the browser, so an overlay that
+## answered the press alone vanished under the finger and the rest of that
+## same tap reached the layer below it (Reset All Data's dim cancelled, then
+## the Settings scrim behind it took the release and closed Settings too).
+static func dismiss_on_tap(c: Control, act: Callable) -> void:
+	var down := [false]
+	c.gui_input.connect(func(e: InputEvent) -> void:
+		var primary: bool = e is InputEventScreenTouch or (e is InputEventMouseButton and (e as InputEventMouseButton).button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT])
+		if not primary:
+			return
+		if e.is_pressed():
+			down[0] = true
+		elif down[0]:
+			down[0] = false
+			act.call())
+	c.visibility_changed.connect(func() -> void: down[0] = false)
+
+
 ## Step 81: lets a finger's drag that starts on something inside `sc` reach
 ## the scroll. A ScrollContainer scrolls by touch only from the presses it
 ## sees, and a STOP control (a Button, a card, a plain Control) keeps them: on

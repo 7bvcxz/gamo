@@ -49,7 +49,7 @@ func setup(p_sim: Simulation, p_views: BuildingViews, p_lib: SpriteLibrary, p_ca
 	lib = p_lib
 	cameras = p_cameras
 	font = p_font
-	z_index = 40
+	z_index = UiLayers.Z_FX
 	sim.bus.emitted.connect(_on_event)
 	var sp: SpecialSystem = sim.system(&"specials")
 	_burst_was = sp != null and bool(sp.burst()["active"])

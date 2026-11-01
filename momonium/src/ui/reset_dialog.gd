@@ -17,7 +17,7 @@ extends CanvasLayer
 signal confirmed
 signal cancelled
 
-const LAYER := 90
+const LAYER := UiLayers.MODAL
 ## Seconds before the red button answers.
 const ARM_SECONDS := 0.8
 
@@ -50,9 +50,8 @@ func setup(card_theme: Theme) -> void:
 	dim.color = Color(0.03, 0.07, 0.15, 0.6)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
-	dim.gui_input.connect(func(e: InputEvent) -> void:
-		if (e is InputEventMouseButton and (e as InputEventMouseButton).pressed) or (e is InputEventScreenTouch and (e as InputEventScreenTouch).pressed):
-			cancel())
+	dim.mouse_force_pass_scroll_events = false
+	PanelViews.dismiss_on_tap(dim, cancel)
 	root.add_child(dim)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

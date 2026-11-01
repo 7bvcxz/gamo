@@ -51,7 +51,9 @@ func test_closed_panels_leave_the_island_alone() -> void:
 	assert_false(detail.visible, "nothing open at start")
 	assert_eq(frame.mouse_filter, Control.MOUSE_FILTER_IGNORE, "a closed frame takes no input")
 	var hud: Hud = main.get("hud")
-	assert_true(frame.get_index() < hud.get_index(), "frames sit under the HUD")
+	# Step 82: the Panels tier comes before the Hud tier (UiLayers), so the
+	# HUD draws over a frame -- tree order is draw order on one CanvasLayer.
+	assert_true(hud.is_greater_than(frame), "frames sit under the HUD")
 
 
 func test_tabs_switch_and_every_control_is_touch_sized() -> void:

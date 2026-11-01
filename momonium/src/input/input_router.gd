@@ -40,6 +40,11 @@ var _drag_handlers: Array[Object] = []
 var _drag_owner: Object = null
 ## Whether the last tap came from a mouse (a click) rather than a finger.
 var last_tap_mouse := false
+## Step 82: true while the game is busy (a panel or a modal open, Main): the
+## island takes no touch, drag, pinch, wheel or hover then -- whatever reached
+## past the UI is dropped here, in one place, not guarded widget by widget.
+var blocked: Callable
+var _was_blocked := false
 
 
 func setup(p_cameras: CameraController) -> void:
@@ -56,6 +61,14 @@ func add_drag_handler(handler: Object) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if blocked.is_valid() and blocked.call():
+		if not _was_blocked:
+			release_all()
+		_was_blocked = true
+		if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouse or event is InputEventGesture:
+			get_viewport().set_input_as_handled()
+		return
+	_was_blocked = false
 	if event is InputEventScreenTouch:
 		_last_touch_ms = Time.get_ticks_msec()
 		var t := event as InputEventScreenTouch
@@ -79,6 +92,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.device == InputEvent.DEVICE_ID_EMULATION or Time.get_ticks_msec() - _last_touch_ms < MOUSE_AFTER_TOUCH_MS:
 			return
 		_mouse(event as InputEventMouse)
+
+
+## Lets go of every finger and the mouse as if lifted and cancelled: a drag
+## in progress is undone (a Schedule stroke put back), a pinch or a pan stops.
+func release_all() -> void:
+	if mode == Mode.DRAGGING and _drag_owner != null:
+		_drag_owner.call("cancel_drag")
+	_drag_owner = null
+	_points.clear()
+	mode = Mode.IDLE
 
 
 func _mouse(event: InputEventMouse) -> void:

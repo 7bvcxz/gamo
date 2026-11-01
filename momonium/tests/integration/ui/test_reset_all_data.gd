@@ -134,10 +134,13 @@ func test_cancel_the_dim_and_escape_at_either_step_change_nothing() -> void:
 	d.cancel_button.pressed.emit()
 	assert_false(d.visible, "Cancel")
 	_ask()
-	var tap := InputEventMouseButton.new()
-	tap.button_index = MOUSE_BUTTON_LEFT
-	tap.pressed = true
-	d.dim.gui_input.emit(tap)
+	# A tap is a press and its release on the dim (Step 82: the press alone
+	# left the rest of the tap to the layer below).
+	for pressed: bool in [true, false]:
+		var tap := InputEventMouseButton.new()
+		tap.button_index = MOUSE_BUTTON_LEFT
+		tap.pressed = pressed
+		d.dim.gui_input.emit(tap)
 	assert_false(d.visible, "a tap on the dim")
 	_ask()
 	var esc := InputEventAction.new()

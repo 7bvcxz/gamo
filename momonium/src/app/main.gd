@@ -10,6 +10,11 @@ var bridge := WebBridge.new()
 var camera: Camera2D
 var cameras: CameraController
 var router: InputRouter
+## Step 82: the UI's tiers by name (UiLayers), whether a panel or a modal is
+## open, and a level banner waiting for it to close (-1: none).
+var tiers: Dictionary = {}
+var _busy_now := false
+var _pending_banner := -1
 var island: IslandRenderer
 var ocean: OceanRenderer
 ## An occasional fish jumping by the shore.
@@ -135,7 +140,7 @@ func _ready() -> void:
 
 	var back := CanvasLayer.new()
 	back.name = "Background"
-	back.layer = -10
+	back.layer = UiLayers.BACKGROUND
 	add_child(back)
 	ocean = OceanRenderer.new()
 	ocean.name = "Ocean"
@@ -185,11 +190,13 @@ func _ready() -> void:
 	router.name = "InputRouter"
 	add_child(router)
 	router.setup(cameras)
+	router.blocked = func() -> bool: return _busy_now
 
 	var chosen := String(settings.get_value("language"))
 	LocaleService.apply(chosen if chosen != "" else LocaleService.detect())
 	var layer := CanvasLayer.new()
 	layer.name = "UI"
+	layer.layer = UiLayers.UI
 	add_child(layer)
 	# One root Control for every piece of UI, so they all inherit the HUD's
 	# theme and font: a CanvasLayer does not pass a theme on, and without it
@@ -200,13 +207,23 @@ func _ready() -> void:
 	ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(ui)
+	# Step 82: every piece of UI goes into its tier (UiLayers); the order of
+	# the tiers is the order things draw and a finger reaches them.
+	tiers = UiLayers.build(ui)
+	var context: Control = tiers["Context"]
+	var announce: Control = tiers["Announce"]
+	var guide: Control = tiers["Guide"]
+	var hud_tier: Control = tiers["Hud"]
 	var lib := SpriteLibrary.load_atlas()
 	panel = ContextPanel.new()
-	ui.add_child(panel)
+	context.add_child(panel)
 	panel.setup(sim, lib)
 	hud = Hud.new()
-	ui.add_child(hud)
+	hud_tier.add_child(hud)
 	hud.setup(sim, lib)
+	# The level-up burst is passing news, not a button: it gives way to an
+	# open panel with the rest of Announce (it flew over the card's head).
+	hud.level_fx.reparent(announce)
 	# The same Theme object: the HUD swaps its font when the language changes.
 	ui.theme = hud.theme
 	hud.action.connect(_on_hud_action)
@@ -238,7 +255,7 @@ func _ready() -> void:
 	sea_life.setup(sim, projection)
 	watch_overlay.setup(sim, projection)
 	watch_editor = WatchEditor.new()
-	ui.add_child(watch_editor)
+	context.add_child(watch_editor)
 	watch_editor.setup(sim, cameras, projection, momo_views, watch_overlay)
 	# The Schedule button keeps off the HUD's own buttons.
 	watch_editor.avoid = func() -> Array[Rect2]: return hud.occupied_rects()
@@ -260,12 +277,12 @@ func _ready() -> void:
 		if not watch_editor.active:
 			land_buyer.on_hover(world_pos))
 	build_strip = BuildStrip.new()
-	ui.add_child(build_strip)
+	context.add_child(build_strip)
 	build_strip.setup(sim, lib, cameras, projection)
 	build_strip.built.connect(func(id: int) -> void: selection.select_building(id))
 	selection.build_strip = build_strip
 	hire_menu = HireMenu.new()
-	ui.add_child(hire_menu)
+	hud_tier.add_child(hire_menu)
 	hire_menu.setup(sim, lib)
 	hire_menu.resized.connect(_place_hire_menu)
 	hud.layout_changed.connect(_place_hire_menu)
@@ -337,7 +354,7 @@ func _ready() -> void:
 	research_frame.max_width = 760.0
 	celebration = TierCelebration.new()
 	celebration.setup()
-	ui.add_child(celebration)
+	announce.add_child(celebration)
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:
 		# Step 71: a tab shows once it has a topic to show (a level, a letter,
 		# research done can each open one while the panel is up).
@@ -375,7 +392,7 @@ func _ready() -> void:
 	_version_label.text = "v%s" % ProjectSettings.get_setting("application/config/version", "0")
 	_version_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.55))
 	_version_label.add_theme_font_size_override("font_size", 14)
-	ui.add_child(_version_label)
+	hud_tier.add_child(_version_label)
 	get_viewport().size_changed.connect(_layout)
 	# Turning a phone or resizing a window can cross into landscape.
 	get_tree().root.size_changed.connect(func() -> void:
@@ -436,16 +453,17 @@ func _ready() -> void:
 	reset_dialog = ResetDialog.new()
 	add_child(reset_dialog)
 	reset_dialog.setup(hud.card_theme)
+	reset_dialog.visibility_changed.connect(_apply_busy)
 	settings_view.reset_requested.connect(reset_dialog.open)
 	reset_dialog.confirmed.connect(func() -> void:
 		var r := reset_all_data()
 		if not r["ok"]:
 			reset_dialog.show_failure(r["failed"]))
 	camera_pad = CameraPad.new()
-	ui.add_child(camera_pad)
+	context.add_child(camera_pad)
 	camera_pad.setup(cameras)
 	tips = Tips.new()
-	ui.add_child(tips)
+	guide.add_child(tips)
 	tips.setup(settings)
 	settings_view.replay_tips.connect(func() -> void:
 		tips.replay()
@@ -456,16 +474,16 @@ func _ready() -> void:
 	_demo_badge.add_theme_font_size_override("font_size", 18)
 	_demo_badge.add_theme_color_override("font_color", Color("#ffe27a"))
 	_demo_badge.visible = in_demo
-	ui.add_child(_demo_badge)
+	hud_tier.add_child(_demo_badge)
 	perf_overlay = PerfOverlay.new()
-	ui.add_child(perf_overlay)
-	# Beneath every panel (they sit below the HUD): Settings opens over it.
-	ui.move_child(perf_overlay, 0)
+	context.add_child(perf_overlay)
+	# Beneath every panel: Settings opens over it.
+	context.move_child(perf_overlay, 0)
 	perf_overlay.setup(building_views, momo_views)
 	perf_overlay.show_overlay(bool(settings.get_value("perf_overlay")))
 	_layout()
 	tutorial = Tutorial.new()
-	ui.add_child(tutorial)
+	guide.add_child(tutorial)
 	tutorial.setup(sim, hud, build_strip, cameras, projection, building_views, panel)
 	tutorial.selection = selection
 	tutorial.editor = watch_editor
@@ -530,7 +548,7 @@ func _ready() -> void:
 	# name]. A long panel scrolls on a desktop's larger UI (Step 54), and a
 	# rectangle asked for out of sight is a tap on nothing.
 	bridge.register_query("dev_reveal", func(arg: Variant) -> Dictionary:
-		var f := ui.find_child(String(arg[0]), false, false) as PanelFrame
+		var f := (tiers["Panels"] as Control).find_child(String(arg[0]), false, false) as PanelFrame
 		var c := f.find_child(String(arg[1]), true, false) as Control if f != null else null
 		if c == null:
 			return {"ok": false}
@@ -819,6 +837,8 @@ func _ready() -> void:
 		return {"momo": m, "editing": watch_editor.active, "tinted": cells,
 			"capacity": (sim.system(&"momo") as MomoSystem).watch_capacity(m) if m != 0 else 0,
 			"schedule": conv.call(watch_editor.schedule) if watch_editor.visible else [], "side": watch_editor.side,
+			# Step 82: drawn now (its tier gives way to an open panel), and where it is either way.
+			"schedule_shown": watch_editor.schedule.is_visible_in_tree(),
 			"pressed": watch_editor.schedule.button_pressed, "name": watch_editor.schedule.accessibility_name,
 			"eligible": watch_overlay.eligible().map(func(e: Array) -> Array: return [(e[0] as Vector2i).x, (e[0] as Vector2i).y]),
 			"count_rect": conv.call(watch_editor.count_pill) if watch_editor.count_pill.visible else [],
@@ -891,6 +911,8 @@ func _ready() -> void:
 	# label or button that reaches under a visible scroll bar or out of its
 	# scroll's view sideways (`under_bar`), for the overlap tests.
 	bridge.register_query("panel_layout", _panel_layout)
+	# Step 82: the layer table as built (UiLayers).
+	bridge.register_query("layers", _layers_info)
 	# Opens Status on its tab `arg` (as its tab button would): {ok, name}.
 	bridge.register_query("dev_status_tab", func(arg: Variant) -> Dictionary:
 		var i := int(arg)
@@ -1017,6 +1039,10 @@ func _process(delta: float) -> void:
 		perf_overlay.sim_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	if tips != null:
 		_check_land_tip(delta)
+	# The panels say when they open and close; this catches anything shown
+	# another way.
+	if not tiers.is_empty():
+		_apply_busy()
 	if persist and session.foreground:
 		_autosave_left -= delta
 		if _autosave_left <= 0.0:
@@ -1264,7 +1290,7 @@ func _connect_tips() -> void:
 ## half not for minutes).
 func _check_land_tip(delta: float) -> void:
 	_tip_check -= delta
-	if _tip_check > 0.0 or tutorial.running or tips.tip != "" or tips.seen("land") or _busy():
+	if _tip_check > 0.0 or tutorial.running or tips.tip != "" or tips.seen("land") or _player_busy():
 		return
 	_tip_check = 1.0
 	var land: LandSystem = sim.system(&"land")
@@ -1281,13 +1307,8 @@ func _check_land_tip(delta: float) -> void:
 ## The player is in the middle of something: the build choices or a window
 ## are open. A tip waits (Step 50: the sea tip rose over the open choices and
 ## took the tap meant for Special).
-func _busy() -> bool:
-	if build_strip.open:
-		return true
-	for f: PanelFrame in [status_frame, detail_frame, research_frame, sale_frame, power_frame, mail_frame, away_frame, settings_frame, shop_frame]:
-		if f != null and f.visible:
-			return true
-	return false
+func _player_busy() -> bool:
+	return build_strip.open or ui_busy()
 
 
 ## "Build a research lab" from the research panel: the panel closes and the
@@ -1739,15 +1760,53 @@ func _build_ui_info(_arg: Variant) -> Dictionary:
 			return [a.x, a.y, b.x - a.x, b.y - a.y]), "window": [win.x, win.y]}
 
 
-## A frame under the HUD, so the corner buttons stay usable over its scrim.
-func _frame(ui: Control, frame_name: String) -> PanelFrame:
+## A frame in the Panels tier, under the HUD, so the corner buttons stay
+## usable over its scrim; while one is open the game is busy (UiLayers).
+func _frame(_ui: Control, frame_name: String) -> PanelFrame:
 	var f := PanelFrame.new()
 	f.name = frame_name
 	f.theme = hud.card_theme
-	ui.add_child(f)
-	ui.move_child(f, hud.get_index())
+	(tiers["Panels"] as Control).add_child(f)
 	f.watch(sim)
+	f.opened.connect(_apply_busy)
+	f.closed.connect(_apply_busy)
 	return f
+
+
+func _frames() -> Array[PanelFrame]:
+	var out: Array[PanelFrame] = []
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame, power_frame, shop_frame, sale_frame]:
+		if f != null:
+			out.append(f)
+	return out
+
+
+## Step 82: a panel or a modal (Reset All Data) is open.
+func ui_busy() -> bool:
+	if reset_dialog != null and reset_dialog.visible:
+		return true
+	for f: PanelFrame in _frames():
+		if f.visible:
+			return true
+	return false
+
+
+## Gives the busy state to the tiers and the island's input (UiLayers): the
+## world's controls, the passing news and the guide step aside while a panel
+## is open and come back when it closes. A level banner that came meanwhile
+## shows then.
+func _apply_busy() -> void:
+	var b := ui_busy()
+	if b == _busy_now:
+		return
+	_busy_now = b
+	UiLayers.set_busy(tiers, b)
+	if b:
+		router.release_all()
+	elif _pending_banner >= 0:
+		var level := _pending_banner
+		_pending_banner = -1
+		_celebrate_level(level)
 
 
 func _close_frames() -> void:
@@ -1932,6 +1991,25 @@ func _panel_layout(_arg: Variant) -> Dictionary:
 	return out
 
 
+## Step 82: the layer table as built -- the UI tiers in draw order and which
+## show, the busy state, what is open, the modal's CanvasLayer and the
+## world's (effects included) below the UI's.
+func _layers_info(_a: Variant = null) -> Dictionary:
+	var root: Control = (tiers["Context"] as Control).get_parent()
+	var order: Array = root.get_children().map(func(n: Node) -> String: return String(n.name))
+	var shown := {}
+	for t: String in tiers:
+		shown[t] = (tiers[t] as Control).is_visible_in_tree()
+	var open: Array = _frames().filter(func(f: PanelFrame) -> bool: return f.visible).map(func(f: PanelFrame) -> String: return String(f.name))
+	return {"order": order, "shown": shown, "busy": _busy_now, "open": open, "blocked": router.blocked.call(),
+		"ui_layer": (get_node("UI") as CanvasLayer).layer, "modal_layer": reset_dialog.layer, "modal_open": reset_dialog.visible,
+		"background_layer": (get_node("Background") as CanvasLayer).layer,
+		"fx_layer": feedback_fx.get_canvas_layer_node().layer if feedback_fx.get_canvas_layer_node() != null else 0,
+		"fx_z": feedback_fx.z_index, "pending_banner": _pending_banner, "banner": celebration.playing(),
+		"tutorial_shown": tutorial.is_visible_in_tree(), "tips_shown": tips.is_visible_in_tree(),
+		"context_panel_shown": panel.is_visible_in_tree(), "strip_shown": build_strip.is_visible_in_tree()}
+
+
 ## E2E: the tutorial as shown -- step, what it rings, where its buttons are.
 func _tutorial_info(_arg: Variant) -> Dictionary:
 	var vp := get_viewport()
@@ -2091,6 +2169,10 @@ func _status_info(_arg: Variant) -> Dictionary:
 func _celebrate_level(level: int) -> void:
 	var opened := (sim.system(&"buildings") as BuildingSystem).opened_at(level)
 	if opened.is_empty() or celebration.playing():
+		return
+	# Step 82: not over an open panel -- it shows when the panel closes.
+	if _busy_now:
+		_pending_banner = level
 		return
 	var names := PackedStringArray()
 	for type: String in opened:

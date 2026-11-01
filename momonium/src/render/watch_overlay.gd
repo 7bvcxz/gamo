@@ -56,7 +56,7 @@ func setup(sim: Simulation, p_projection: IsoProjection) -> void:
 	route_layer = Node2D.new()
 	route_layer.name = "Route"
 	route_layer.z_as_relative = false
-	route_layer.z_index = 50
+	route_layer.z_index = UiLayers.Z_ROUTE
 	route_layer.draw.connect(_draw_route)
 	add_child(route_layer)
 	sim.bus.emitted.connect(func(type: StringName, p: Dictionary) -> void:

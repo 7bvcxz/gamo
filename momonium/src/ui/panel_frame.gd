@@ -75,9 +75,10 @@ func _init() -> void:
 	scrim.color = Color(0.02, 0.08, 0.18, 0.18)
 	scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	scrim.mouse_filter = Control.MOUSE_FILTER_STOP
-	scrim.gui_input.connect(func(e: InputEvent) -> void:
-		if (e is InputEventMouseButton and not e.pressed) or (e is InputEventScreenTouch and not e.pressed):
-			close())
+	# Step 82: a wheel stops here too (it zoomed the island behind the panel)
+	# and does not close it; a tap that began on the scrim does.
+	scrim.mouse_force_pass_scroll_events = false
+	PanelViews.dismiss_on_tap(scrim, close)
 	add_child(scrim)
 	card = PanelContainer.new()
 	card.name = "Card"

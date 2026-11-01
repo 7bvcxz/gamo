@@ -33,7 +33,7 @@ var _poll := 0.0
 func setup(sim: Simulation, p_projection: IsoProjection) -> void:
 	_sim = sim
 	# Drawn over the buildings: a price tag hidden behind a lab is no tag.
-	z_index = 30
+	z_index = UiLayers.Z_LAND_PREVIEW
 	projection = p_projection
 	land = sim.system(&"land")
 	world = sim.system(&"world")

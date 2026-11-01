@@ -90,6 +90,10 @@ func replay() -> void:
 func _process(delta: float) -> void:
 	if tip == "":
 		return
+	# Step 82: hidden behind an open panel (the Guide tier gives way), a tip
+	# waits -- it is not used up unseen.
+	if not is_visible_in_tree():
+		return
 	_age += delta
 	_t += delta
 	if _age >= SHOWN_FOR:

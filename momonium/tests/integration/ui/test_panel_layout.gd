@@ -207,7 +207,6 @@ func test_nothing_on_the_card_reaches_the_island() -> void:
 	main.call("_on_hud_action", &"status")
 	await tree.process_frame
 	var frame: PanelFrame = main.get("status_frame")
-	var xf := main.get_viewport().get_final_transform()
 	var card := frame.card.get_global_rect()
 	var row := frame.tab_scroll.get_global_rect()
 	var body := frame.scroll.get_global_rect()
@@ -220,7 +219,7 @@ func test_nothing_on_the_card_reaches_the_island() -> void:
 		card.end - Vector2(3, 3),  # the card's last corner
 	]
 	for s: Vector2 in spots:
-		_tap(xf * s)
+		_tap(s)
 		await tree.process_frame
 		assert_true(frame.visible, "a touch at %s keeps the panel" % s)
 	assert_eq(taps[0], 0, "and none reached the island")
@@ -229,7 +228,7 @@ func test_nothing_on_the_card_reaches_the_island() -> void:
 	var zoom := cams.camera.zoom if cams.camera != null else Vector2.ONE
 	var wheel := InputEventMouseButton.new()
 	wheel.button_index = MOUSE_BUTTON_WHEEL_UP
-	wheel.position = xf * body.get_center()
+	wheel.position = body.get_center()
 	wheel.pressed = true
 	main.get_viewport().push_input(wheel, true)
 	await tree.process_frame
@@ -237,7 +236,7 @@ func test_nothing_on_the_card_reaches_the_island() -> void:
 		assert_eq(cams.camera.zoom, zoom, "a wheel on the card leaves the island's zoom")
 	# Outside the card, the scrim closes it.
 	var outside := Vector2(card.get_center().x, minf(card.end.y + 40.0, frame.size.y - 4.0))
-	_tap(xf * outside)
+	_tap(outside)
 	await tree.process_frame
 	assert_false(frame.visible, "the scrim closes it")
 
