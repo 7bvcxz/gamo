@@ -120,7 +120,7 @@ func test_hud_gathers_money_and_exp_into_one_pop_each() -> void:
 	assert_eq(hud.pops.size(), 2, "nothing shows twice")
 
 
-func test_time_away_caught_up_on_return_pops_nothing() -> void:
+func test_time_caught_up_by_the_test_tool_pops_nothing() -> void:
 	var f := bs.place_instant("farm", Vector2i(1, 0))
 	sim.execute({"type": "momo.assign", "momo": 1, "building": f})
 	await tree.process_frame
@@ -128,11 +128,10 @@ func test_time_away_caught_up_on_return_pops_nothing() -> void:
 	hud.flush_feedback()
 	hud.pops.clear()
 	var jobs_before := int(bs.get_building(f).get("completed", 0))
-	# The tab was hidden for ten minutes: the frame loop catches it up.
-	sim.time_scale = 1.0
-	main.set("_last_wall", Time.get_unix_time_from_system() - 600.0)
+	# Ten minutes run by the catch-up (Step 79: only the test tool does that
+	# now -- the bridge's `dev_away` -- but replayed time still shows nothing).
+	OfflineProgress.catch_up(sim, 600000)
 	await tree.process_frame
-	sim.time_scale = 0.0
 	assert_true(int(bs.get_building(f).get("completed", 0)) > jobs_before, "Momo worked while away")
 	assert_false(sim.replaying, "replaying ends with the catch-up")
 	hud.flush_feedback()

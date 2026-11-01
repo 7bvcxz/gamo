@@ -69,7 +69,9 @@ var mail_frame: PanelFrame
 var mailbox_view: MailboxView
 ## Persistence: where the island is saved, whether saving is on (tests turn it
 ## off with Engine meta "momonium_no_save" and may point it elsewhere with
-## "momonium_save_path"), what loading found, and what happened while away.
+## "momonium_save_path") and what loading found. Step 79: nothing happens
+## while away -- `offline_report` stays empty in play (only the browser
+## bridge's `dev_away` runs OfflineProgress, a test tool).
 var save_path := SaveService.DEFAULT_PATH
 ## localStorage key of the save's synchronous mirror on the web.
 const MIRROR_KEY := "momonium_save"
@@ -105,7 +107,10 @@ var _tip_check := 0.0
 var _demo_badge: Label
 var saves_written := 0
 var _autosave_left := 0.0
-var _last_wall := 0.0
+## Step 79: only the game on screen moves (PlaySession): the frame loop's
+## time, none in the background, and the page's lifecycle that says when.
+var session := PlaySession.new()
+var lifecycle := WebLifecycle.new()
 ## The last few HUD actions, newest last (for the browser bridge and tests).
 var hud_actions: Array[String] = []
 var entities: EntityLayer
@@ -372,7 +377,8 @@ func _ready() -> void:
 	away_view.setup(sim, lib)
 	away_frame.add_tab("", away_view)
 	away_frame.set_title(tr("away.title"))
-	_last_wall = Time.get_unix_time_from_system()
+	session.max_frame = sim.data.get_float("balance", "session.max_frame_seconds", 0.5)
+	lifecycle.attach(go_background, come_back)
 	_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
 	_tell_about_return.call_deferred(offline_report)
 	shop_frame = _frame(ui, "ShopFrame")
@@ -854,10 +860,18 @@ func _ready() -> void:
 		return {"status": load_status, "persist": persist, "blocked": save_blocked, "report": offline_report,
 			"away_open": away_frame.visible, "away_lines": away_view.lines().map(func(l: Array) -> String: return "%s|%s" % [l[0], l[1]]),
 			"away_counted": away_view.counted_label.text, "away_quiet": away_view.quiet.text, "away_report": away_view.report})
+	# A test tool only (the browser bridge exists only under tests): runs the
+	# old offline catch-up on purpose. Play never does since Step 79.
 	bridge.register_query("dev_away", func(ms: Variant) -> Dictionary:
 		var r := OfflineProgress.catch_up(sim, int(ms))
 		_tell_about_return(r)
 		return r)
+	# Step 79: whether the island's time runs (on screen) and how often the
+	# page went to the background -- the island's clock beside it.
+	bridge.register_query("session", func(_a: Variant) -> Dictionary:
+		return {"foreground": session.foreground, "pauses": session.pauses, "resumes": session.resumes,
+			"away_seconds": session.away_seconds, "now_ms": sim.now_ms(), "hidden": lifecycle.hidden(),
+			"saves": saves_written, "max_frame": session.max_frame})
 	bridge.register_query("dev_add_items", func(arg: Variant) -> Dictionary:
 		var inv: InventorySystem = sim.system(&"inventory")
 		for item: String in (arg as Dictionary):
@@ -931,20 +945,18 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	# Time the frame loop did not see (a hidden browser tab stops drawing) is
-	# caught up the same way as time with the game closed.
-	var wall := Time.get_unix_time_from_system()
-	var gap := wall - _last_wall - delta
-	_last_wall = wall
-	if gap > 5.0 and sim.time_scale > 0.0:
-		_tell_about_return(OfflineProgress.catch_up(sim, int(gap * 1000.0 * sim.time_scale)))
+	# Step 79: the island moves by the frames seen, and by nothing else. Time
+	# the frame loop did not see (a hidden tab draws no frames, then hands
+	# over the whole gap as one delta) is not caught up: PlaySession gives
+	# none in the background, none on the first frame back, and at most
+	# max_frame for any frame.
 	var t0 := Time.get_ticks_usec()
-	sim.advance_seconds(delta)
+	sim.advance_seconds(session.step(delta))
 	if perf_overlay != null:
 		perf_overlay.sim_ms = (Time.get_ticks_usec() - t0) / 1000.0
 	if tips != null:
 		_check_land_tip(delta)
-	if persist:
+	if persist and session.foreground:
 		_autosave_left -= delta
 		if _autosave_left <= 0.0:
 			_autosave_left = sim.data.get_float("balance", "offline.autosave_seconds", 15.0)
@@ -953,12 +965,30 @@ func _process(delta: float) -> void:
 
 func _notification(what: int) -> void:
 	match what:
-		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_CLOSE_REQUEST:
+		NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
 			if sim != null:
 				save_now()
+		NOTIFICATION_APPLICATION_PAUSED:
+			go_background()
+		NOTIFICATION_APPLICATION_RESUMED:
+			come_back()
 
 
-## Loads the island (with what happened while away) or starts a new one --
+## Step 79: gone to the background (a hidden tab, leaving the page, an app
+## paused): saved once, then the island stands still until it is back --
+## every running stage, walk, ripening, research and the day keep their time
+## left.
+func go_background() -> void:
+	if session.hide(Time.get_unix_time_from_system()) and sim != null:
+		save_now()
+
+
+## Back on screen: the island goes on from where it stood, nothing caught up.
+func come_back() -> void:
+	session.show(Time.get_unix_time_from_system())
+
+
+## Loads the island exactly as it was saved (Step 79: nothing is caught up) or starts a new one --
 ## or, when the demo was asked for, the demo island (never saved).
 func _load_or_new() -> Simulation:
 	_read_launch_address()
@@ -987,11 +1017,10 @@ func _load_or_new() -> Simulation:
 			r = SaveService.newest(r, SaveService.decode(mirror))
 	load_status = String(r["status"])
 	if load_status in ["ok", "backup"]:
-		var loaded := Simulation.from_save(r["state"])
-		var saved := int(r.get("saved_unix", 0))
-		if saved > 0:
-			offline_report = OfflineProgress.catch_up(loaded, int((Time.get_unix_time_from_system() - saved) * 1000.0))
-		return loaded
+		# Step 79: the island as it was saved -- the save's `saved_unix` says
+		# which copy is newest (SaveService.newest), never how long to catch
+		# up. No time away is credited.
+		return Simulation.from_save(r["state"])
 	save_blocked = load_status == "too_new"
 	return _fresh_island()
 
@@ -1087,7 +1116,9 @@ func save_now() -> Error:
 	return err
 
 
-## The welcome-back card, when there is something worth saying.
+## The card about loading: a damaged or newer save is said so. Since Step 79
+## play makes no report of time away (only the test tool `dev_away` does, and
+## then the card shows it as before).
 func _tell_about_return(report: Dictionary) -> void:
 	var notice := load_status in ["backup", "corrupt", "too_new"] and not away_frame.visible and saves_written == 0
 	# The time away is now in the island: save it at once, so a refresh or a

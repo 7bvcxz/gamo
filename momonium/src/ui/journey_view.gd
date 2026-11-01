@@ -37,8 +37,14 @@ func refresh() -> void:
 	if journey == null:
 		return
 	var t := journey.totals()
-	totals.text = tr("journey.totals").format({"p": AwayView.long_duration(int(t["played_ms"])),
-		"a": AwayView.long_duration(int(t["wall_ms"]) - int(t["played_ms"])), "o": AwayView.long_duration(int(t["offline_ms"]))})
+	# Step 79: time away is no longer caught up, so an island that never had
+	# any (a new one) says only what was played; an older one's record reads
+	# as before.
+	if int(t["wall_ms"]) - int(t["played_ms"]) <= 0:
+		totals.text = tr("journey.totals_played").format({"p": AwayView.long_duration(int(t["played_ms"]))})
+	else:
+		totals.text = tr("journey.totals").format({"p": AwayView.long_duration(int(t["played_ms"])),
+			"a": AwayView.long_duration(int(t["wall_ms"]) - int(t["played_ms"])), "o": AwayView.long_duration(int(t["offline_ms"]))})
 	PanelViews.clear(list)
 	var line := journey.timeline()
 	if line.is_empty():

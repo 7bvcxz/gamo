@@ -563,6 +563,7 @@ hud.demo_large,LARGE DEMO,큰 섬 체험 중,大きな島 体験中,大岛体验
 perf.buildings,Buildings,건물,建物,建筑
 journey.title,Journey,여정,旅のあゆみ,旅程
 journey.totals,"Played {p} · away {a} ({o} of it caught up)","플레이 {p} · 자리 비움 {a} (그중 {o} 따라잡음)","プレイ {p}・留守 {a}（うち {o} 進行）","游玩 {p} · 离开 {a}（其中补算 {o}）"
+journey.totals_played,Played {p},플레이 {p},プレイ {p},游玩 {p}
 journey.when,"{p} played · {w} since the start","플레이 {p} · 시작부터 {w}","プレイ {p}・開始から {w}","游玩 {p} · 开始后 {w}"
 journey.empty,The firsts of this island will appear here.,이 섬의 첫 기록이 여기에 쌓여요.,この島の「はじめて」がここに並びます。,这座岛的“第一次”会显示在这里。
 journey.built,First {name},첫 {name},はじめての{name},第一座{name}

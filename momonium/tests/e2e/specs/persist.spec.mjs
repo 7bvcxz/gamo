@@ -1,7 +1,8 @@
 // Step 24: the island is saved to the browser's storage and opens again in a
-// new tab of the same browser -- farm, Momo at work, money -- and the time away
-// is caught up with a welcome-back card. (A new page, not page.reload(): the
-// Godot frame detaches on reload and the read races it.)
+// new tab of the same browser -- farm, Momo at work, money. (A new page, not
+// page.reload(): the Godot frame detaches on reload and the read races it.)
+// Step 79: nothing is caught up any more (offline79.spec); the welcome-back
+// card shows only for the test tool `dev_away`.
 import { test, expect } from '../lib/fixtures.mjs';
 
 // Step 53: about what a Momo does -- the old starter Momo, explicitly.
@@ -41,7 +42,9 @@ test('the island comes back in a new tab', async ({ game }) => {
   expect(after.buildings.buildings.map((b) => b.type)).toEqual(['farm']);
   expect(after.momo.momos[0].assigned).toBe(id);
   expect(after.now_ms).toBeGreaterThanOrEqual(before.now_ms);
-  // An hour away: the card says what happened.
+  expect(p.report, 'nothing caught up on opening (Step 79)').toEqual({});
+  expect(p.away_open).toBe(false);
+  // The test tool's hour away: its card says what it ran.
   await again.page.evaluate(() => window.momonium.setTimeScale(0));
   const r = await again.query('dev_away', 3600000);
   expect(r.counted_ms).toBe(3600000);

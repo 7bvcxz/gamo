@@ -52,7 +52,7 @@ func test_the_hud_keeps_clear_of_the_cutout() -> void:
 	assert_eq(float(none["top"]), Hud.MARGIN, "no safe area reported: the plain margin")
 
 
-func test_leaving_saves_and_coming_back_catches_up() -> void:
+func test_leaving_saves_and_coming_back_catches_up_nothing() -> void:
 	await _open()
 	var sim: Simulation = main.get("sim")
 	assert_true(bool(main.get("persist")), "a real island, saved")
@@ -61,11 +61,16 @@ func test_leaving_saves_and_coming_back_catches_up() -> void:
 	main.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
 	assert_eq(int(main.get("saves_written")), before + 1, "the app paused: the island is saved at once")
 	assert_true(FileAccess.file_exists(SAVE), "on the device")
-	# Back after two minutes in another app: the frame loop sees the gap.
+	# Back after two minutes in another app (Step 79): nothing caught up --
+	# the first frame back carries the two minutes and none of it counts.
 	var j: JourneySystem = sim.system(&"journey")
-	main.set("_last_wall", float(main.get("_last_wall")) - 120.0)
-	main.call("_process", 0.016)
-	assert_true(int(j.totals()["offline_ms"]) >= 119000, "the two minutes away were caught up (%d ms)" % j.totals()["offline_ms"])
+	sim.time_scale = 1.0
+	var now := sim.now_ms()
+	main.notification(Node.NOTIFICATION_APPLICATION_RESUMED)
+	main.call("_process", 120.0)
+	sim.time_scale = 0.0
+	assert_eq(sim.now_ms(), now, "the island stood still while away")
+	assert_eq(int(j.totals()["offline_ms"]), 0, "and no time away is recorded")
 
 
 func test_the_island_is_there_on_the_next_start() -> void:

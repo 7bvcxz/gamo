@@ -205,8 +205,12 @@
     "letters_per_day": 1,
     "research_gap_seconds": 180
   },
+  "session": {
+    "_doc": "Step 79: only the game on screen moves (PlaySession). A frame advances the island by its own time, at most max_frame_seconds (a stall or a hitch never jumps it); in the background no frame counts, and the first frame back counts nothing (a browser hands the whole hidden time over as one frame).",
+    "max_frame_seconds": 0.5
+  },
   "offline": {
-    "_doc": "Progress while the game is closed: the simulation runs the time away exactly as if open and untouched (assigned Momo, drip lines, waits, research, and the money finished work earns). Time away counts up to max_hours; at most max_events events are handled (the clock stops at the last one) -- a deterministic cost ceiling, never an estimate. A summary shows when at least report_seconds passed and something happened -- or, quietly, after quiet_report_seconds even if nothing did. autosave_seconds: how often the game saves while open (also when the window loses focus).",
+    "_doc": "Step 79: OFF in play -- nothing happens while the game is closed, its tab hidden or the app in the background (design/OFFLINE79.md); the island goes on from where it was saved or left. What follows is the old catch-up (OfflineProgress), kept only for the tools that run it on purpose -- the simulation bench, the playtest bots, the capture scenarios and the browser tests' `dev_away` query: it runs the time away exactly as if open and untouched (assigned Momo, drip lines, waits, research, and the money finished work earns), counts up to max_hours, handles at most max_events events (the clock stops at the last one) -- a deterministic cost ceiling, never an estimate -- and its card shows when at least report_seconds passed and something happened, or quietly after quiet_report_seconds. autosave_seconds: how often the game saves while on screen (also when the window loses focus, and once when it goes to the background).",
     "max_hours": 8,
     "max_events": 40000,
     "report_seconds": 60,
