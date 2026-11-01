@@ -1,0 +1,101 @@
+{
+ "_doc": "Step 77: the same island, camera and zoom (new game, island grown to 4x4, a lab at (1,1), a farm, a mine and a lumberyard; time stopped; one Momo added at (2.05, 2.05)) on the public 0.76.0 and a local 0.77.0 build. tall/wide: the Momo drawn, measured on screen pixels (what changed when it was added; top from the columns left of its middle, width from the rows below its eyes), in window px and in island px (a tile is 128). before_after.mjs in the Step 77 scratch.",
+ "v076": {
+  "desktop": {
+   "version": "0.76.0",
+   "camera": {
+    "fit": 1.05805679894946,
+    "max": 9.8461540222168,
+    "min": 0.476125559527255,
+    "x": 0,
+    "y": 120.976493835449,
+    "zoom": 1.05805683135986
+   },
+   "window": [
+    1280,
+    800
+   ],
+   "feet": [
+    640,
+    468.725524902344
+   ],
+   "px": 0.8596711158752424,
+   "tall_window_px": 61.3704004287718,
+   "tall_island_px": 71.38823126131183,
+   "wide_island_px": 66.30442613157656
+  },
+  "phone": {
+   "version": "0.76.0",
+   "camera": {
+    "fit": 1.040625,
+    "max": 4.5,
+    "min": 0.46828125,
+    "x": 0,
+    "y": 64.317626953125,
+    "zoom": 1.04062497615814
+   },
+   "window": [
+    780,
+    1688
+   ],
+   "feet": [
+    390.000061035156,
+    998.013732910156
+   ],
+   "px": 1.1273436546325701,
+   "tall_window_px": 80.46092891693127,
+   "tall_island_px": 71.37213979632105,
+   "wide_island_px": 65.64103119391618
+  }
+ },
+ "v077": {
+  "desktop": {
+   "version": "0.77.0",
+   "camera": {
+    "fit": 1.05805679894946,
+    "max": 9.8461540222168,
+    "min": 0.476125559527255,
+    "x": 0,
+    "y": 120.976493835449,
+    "zoom": 1.05805683135986
+   },
+   "window": [
+    1280,
+    800
+   ],
+   "feet": [
+    640,
+    468.725524902344
+   ],
+   "px": 0.8596711158752424,
+   "tall_window_px": 48.3704004287718,
+   "tall_island_px": 56.266169161127706,
+   "wide_island_px": 51.18236403139243
+  },
+  "phone": {
+   "version": "0.77.0",
+   "camera": {
+    "fit": 1.040625,
+    "max": 4.5,
+    "min": 0.46828125,
+    "x": 0,
+    "y": 64.317626953125,
+    "zoom": 1.04062497615814
+   },
+   "window": [
+    780,
+    1688
+   ],
+   "feet": [
+    390.000061035156,
+    998.013732910156
+   ],
+   "px": 1.1273436546325701,
+   "tall_window_px": 64.46092891693127,
+   "tall_island_px": 57.17948440304187,
+   "wide_island_px": 53.2224577247969
+  }
+ },
+ "ratio_desktop": 0.7882,
+ "ratio_phone": 0.8011
+}
