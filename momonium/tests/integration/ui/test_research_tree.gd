@@ -80,7 +80,10 @@ func test_a_late_player_reaches_tier_8_and_the_details_stay() -> void:
 	var card: Button = farm.cards["combine_harvester"]
 	assert_true(card.visible, "the farm's eighth tier is on the screen")
 	assert_eq(farm.selected, "combine_harvester", "and picked")
-	assert_true(farm.tree.custom_minimum_size.y > farm.tree_scroll.size.y, "the tree is taller than its view: it scrolls (%.0f > %.0f)" % [farm.tree.custom_minimum_size.y, farm.tree_scroll.size.y])
+	# Step 81: the panel gives the body the room the HUD leaves; on a tall
+	# screen the whole eighth-tier tree may fit (then it is all in view), else
+	# it scrolls in its own view.
+	assert_true(farm.tree.custom_minimum_size.y > farm.tree_scroll.size.y or farm.tree.custom_minimum_size.y <= frame.room, "the tree scrolls, or fits the room (%.0f, view %.0f, room %.0f)" % [farm.tree.custom_minimum_size.y, farm.tree_scroll.size.y, frame.room])
 	await tree.process_frame
 	var view_rect := farm.tree_scroll.get_global_rect()
 	assert_true(view_rect.grow(1.0).encloses(card.get_global_rect()), "scrolled to it (%s in %s)" % [card.get_global_rect(), view_rect])

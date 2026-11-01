@@ -1,0 +1,266 @@
+p720 done
+p390 done
+a360 done
+land done
+desk done
+p720 en x0.85 research first :: under a bar: Node_greenhouse +1, Name "Greenhouse" +0
+p720 en x0.85 research momo_training :: under a bar: Node_management +1, Name "Management" +0
+p720 en x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "Greenhouse" +0
+p720 en x1 research first :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 research momo_training :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 research seed_drill :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status status :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status store :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status economy :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status records :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status life :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status stats :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1 status momo :: card over HUD 472,95,232,73 (1872 px²)
+p720 en x1.25 research first :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Points under close
+p720 en x1.25 research momo_training :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Points under close
+p720 en x1.25 research seed_drill :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Points under close
+p720 en x1.25 status status :: card over HUD 410,119,290,91 (14946 px²) | card over HUD 615,253,85,85 (5100 px²) | card over HUD 615,348,85,85 (5100 px²) | card over HUD 615,443,85,85 (5100 px²) | card over HUD 615,674,85,85 (5100 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Momo under close
+p720 en x1.25 status store :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Stats under close
+p720 en x1.25 status economy :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Stats under close
+p720 en x1.25 status records :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Stats under close
+p720 en x1.25 status life :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,131,50 (4778 px²) | tab Stats under close
+p720 en x1.25 status stats :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,131,50 (4778 px²)
+p720 en x1.25 status momo :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,131,50 (4778 px²)
+p720 ko x0.85 research first :: under a bar: Node_greenhouse +1, Name "온실" +0
+p720 ko x0.85 research momo_training :: under a bar: Node_management +1, Name "관리" +0
+p720 ko x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "온실" +0
+p720 ko x1 research first :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 research momo_training :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 research seed_drill :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status status :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status store :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status economy :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status records :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status life :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status stats :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1 status momo :: card over HUD 472,95,232,73 (1872 px²)
+p720 ko x1.25 research first :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 research momo_training :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 research seed_drill :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status status :: card over HUD 410,119,290,91 (14946 px²) | card over HUD 615,253,85,85 (5100 px²) | card over HUD 615,348,85,85 (5100 px²) | card over HUD 615,443,85,85 (5100 px²) | card over HUD 615,674,85,85 (5100 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status store :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status economy :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status records :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status life :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status stats :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ko x1.25 status momo :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,129,50 (4687 px²)
+p720 ja x0.85 research first :: under a bar: Node_greenhouse +1, Name "温室" +0
+p720 ja x0.85 research momo_training :: under a bar: Node_management +1, Name "管理" +0
+p720 ja x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +0
+p720 ja x1 research first :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 research momo_training :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 research seed_drill :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status status :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status store :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status economy :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status records :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status life :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status stats :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1 status momo :: card over HUD 472,95,232,73 (1872 px²)
+p720 ja x1.25 research first :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 research momo_training :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 research seed_drill :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status status :: card over HUD 410,119,290,91 (14946 px²) | card over HUD 615,253,85,85 (5100 px²) | card over HUD 615,348,85,85 (5100 px²) | card over HUD 615,443,85,85 (5100 px²) | card over HUD 615,674,85,85 (5100 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status store :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status economy :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status records :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status life :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status stats :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 ja x1.25 status momo :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,95,50 (3458 px²)
+p720 zh_CN x0.85 research first :: under a bar: Node_greenhouse +1, Name "温室" +0
+p720 zh_CN x0.85 research momo_training :: under a bar: Node_management +1, Name "管理" +0
+p720 zh_CN x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +0
+p720 zh_CN x1 research first :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 research momo_training :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 research seed_drill :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status status :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status store :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status economy :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status records :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status life :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status stats :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1 status momo :: card over HUD 472,95,232,73 (1872 px²)
+p720 zh_CN x1.25 research first :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 research momo_training :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 research seed_drill :: card over HUD 410,119,290,91 (14523 px²) | card over HUD 615,253,85,85 (4463 px²) | card over HUD 615,348,85,85 (4463 px²) | card over HUD 615,443,85,85 (4463 px²) | card over HUD 615,674,85,85 (4463 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status status :: card over HUD 410,119,290,91 (14946 px²) | card over HUD 615,253,85,85 (5100 px²) | card over HUD 615,348,85,85 (5100 px²) | card over HUD 615,443,85,85 (5100 px²) | card over HUD 615,674,85,85 (5100 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status store :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status economy :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status records :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status life :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status stats :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,160,50 (5824 px²)
+p720 zh_CN x1.25 status momo :: card over HUD 410,119,290,91 (10998 px²) | card over HUD 20,140,160,50 (5824 px²)
+p390 en x0.85 research momo_training :: under a bar: Node_management +0
+p390 en x1.25 research first :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,142,54 (468 px²) | tab Points under close
+p390 en x1.25 research momo_training :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,142,54 (468 px²) | tab Points under close
+p390 en x1.25 research seed_drill :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,142,54 (468 px²) | tab Points under close
+p390 en x1.25 status status :: card over HUD 444,129,314,99 (7166 px²) | card over HUD 666,274,92,92 (5986 px²) | card over HUD 666,376,92,92 (5986 px²) | card over HUD 666,479,92,92 (5986 px²) | card over HUD 666,899,92,92 (5986 px²) | card over HUD 22,152,142,54 (468 px²) | tab Momo under close
+p390 en x1.25 status store :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,142,54 (468 px²) | tab Stats under close
+p390 en x1.25 status economy :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,142,54 (468 px²) | tab Stats under close
+p390 en x1.25 status records :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,142,54 (468 px²) | tab Stats under close
+p390 en x1.25 status life :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,142,54 (468 px²) | tab Stats under close
+p390 en x1.25 status stats :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,142,54 (468 px²)
+p390 en x1.25 status momo :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,142,54 (468 px²)
+p390 ko x0.85 research momo_training :: under a bar: Node_management +0
+p390 ko x1.25 research first :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 research momo_training :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 research seed_drill :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status status :: card over HUD 444,129,314,99 (7166 px²) | card over HUD 666,274,92,92 (5986 px²) | card over HUD 666,376,92,92 (5986 px²) | card over HUD 666,479,92,92 (5986 px²) | card over HUD 666,899,92,92 (5986 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status store :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status economy :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status records :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status life :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status stats :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ko x1.25 status momo :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,139,54 (459 px²)
+p390 ja x0.85 research momo_training :: under a bar: Node_management +0
+p390 ja x1.25 research first :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 research momo_training :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 research seed_drill :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status status :: card over HUD 444,129,314,99 (7166 px²) | card over HUD 666,274,92,92 (5986 px²) | card over HUD 666,376,92,92 (5986 px²) | card over HUD 666,479,92,92 (5986 px²) | card over HUD 666,899,92,92 (5986 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status store :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status economy :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status records :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status life :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status stats :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 ja x1.25 status momo :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,103,54 (339 px²)
+p390 zh_CN x0.85 research momo_training :: under a bar: Node_management +0
+p390 zh_CN x1.25 research first :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 research momo_training :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 research seed_drill :: card over HUD 444,129,314,99 (6963 px²) | card over HUD 666,274,92,92 (5238 px²) | card over HUD 666,376,92,92 (5238 px²) | card over HUD 666,479,92,92 (5238 px²) | card over HUD 666,899,92,92 (5238 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status status :: card over HUD 444,129,314,99 (7166 px²) | card over HUD 666,274,92,92 (5986 px²) | card over HUD 666,376,92,92 (5986 px²) | card over HUD 666,479,92,92 (5986 px²) | card over HUD 666,899,92,92 (5986 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status store :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status economy :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status records :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status life :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status stats :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,173,54 (571 px²)
+p390 zh_CN x1.25 status momo :: card over HUD 444,129,314,99 (5273 px²) | card over HUD 22,152,173,54 (571 px²)
+a360 en x1.25 research first :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,197,75 (827 px²) | tab Points under close
+a360 en x1.25 research momo_training :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,197,75 (827 px²) | tab Points under close
+a360 en x1.25 research seed_drill :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,197,75 (827 px²) | tab Points under close
+a360 en x1.25 status status :: card over HUD 615,178,435,137 (13595 px²) | card over HUD 923,379,128,128 (11475 px²) | card over HUD 923,521,128,128 (11475 px²) | card over HUD 923,664,128,128 (11475 px²) | card over HUD 923,1247,128,128 (11475 px²) | card over HUD 30,210,197,75 (827 px²) | tab Momo under close
+a360 en x1.25 status store :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,197,75 (827 px²) | tab Stats under close
+a360 en x1.25 status economy :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,197,75 (827 px²) | tab Stats under close
+a360 en x1.25 status records :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,197,75 (827 px²) | tab Stats under close
+a360 en x1.25 status life :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,197,75 (827 px²) | tab Stats under close
+a360 en x1.25 status stats :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,197,75 (827 px²)
+a360 en x1.25 status momo :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,197,75 (827 px²)
+a360 ko x1.25 research first :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 research momo_training :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 research seed_drill :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status status :: card over HUD 615,178,435,137 (13595 px²) | card over HUD 923,379,128,128 (11475 px²) | card over HUD 923,521,128,128 (11475 px²) | card over HUD 923,664,128,128 (11475 px²) | card over HUD 923,1247,128,128 (11475 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status store :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status economy :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status records :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status life :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status stats :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ko x1.25 status momo :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,193,75 (811 px²)
+a360 ja x1.25 research first :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 research momo_training :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 research seed_drill :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status status :: card over HUD 615,178,435,137 (13595 px²) | card over HUD 923,379,128,128 (11475 px²) | card over HUD 923,521,128,128 (11475 px²) | card over HUD 923,664,128,128 (11475 px²) | card over HUD 923,1247,128,128 (11475 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status store :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status economy :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status records :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status life :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status stats :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 ja x1.25 status momo :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,143,75 (599 px²)
+a360 zh_CN x1.25 research first :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 research momo_training :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 research seed_drill :: card over HUD 615,178,435,137 (13210 px²) | card over HUD 923,379,128,128 (10041 px²) | card over HUD 923,521,128,128 (10041 px²) | card over HUD 923,664,128,128 (10041 px²) | card over HUD 923,1247,128,128 (10041 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status status :: card over HUD 615,178,435,137 (13595 px²) | card over HUD 923,379,128,128 (11475 px²) | card over HUD 923,521,128,128 (11475 px²) | card over HUD 923,664,128,128 (11475 px²) | card over HUD 923,1247,128,128 (11475 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status store :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status economy :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status records :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status life :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status stats :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,240,75 (1008 px²)
+a360 zh_CN x1.25 status momo :: card over HUD 615,178,435,137 (10004 px²) | card over HUD 30,210,240,75 (1008 px²)
+land en x0.85 research first :: under a bar: Node_greenhouse +1, Name "Greenhouse" +1
+land en x0.85 research momo_training :: under a bar: Node_management +1, Name "Management" +1
+land en x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "Greenhouse" +1
+land en x1 research first :: under a bar: Node_greenhouse +1, Name "Greenhouse" +0
+land en x1 research momo_training :: under a bar: Node_management +1, Name "Management" +0
+land en x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "Greenhouse" +0
+land en x1 status status :: under a bar: Title "Momonium" +4, Tagline "A small island, " +4, @Label@66 "0 / 198033 EXP" +4, Head "Village · Specia" +4 (+7)
+land en x1.25 research first :: under a bar: Node_greenhouse +0
+land en x1.25 research momo_training :: under a bar: Node_management +0
+land en x1.25 research seed_drill :: under a bar: Node_greenhouse +0
+land en x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "A small island, " +4, @Label@66 "0 / 198033 EXP" +4, Head "Village · Specia" +4 (+4)
+land en x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 0 working" +4 (+11)
+land ko x0.85 research first :: under a bar: Node_greenhouse +1, Name "온실" +1
+land ko x0.85 research momo_training :: under a bar: Node_management +1, Name "관리" +1
+land ko x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "온실" +1
+land ko x1 research first :: under a bar: Node_greenhouse +1, Name "온실" +0
+land ko x1 research momo_training :: under a bar: Node_management +1, Name "관리" +0
+land ko x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "온실" +0
+land ko x1 status status :: under a bar: Title "Momonium" +4, Tagline "작은 섬에서 큰 내일로." +4, @Label@66 "0 / 198033 EXP" +4, Head "마을 · 특별 건물 자리 1" +4 (+7)
+land ko x1.25 research first :: under a bar: Node_greenhouse +0
+land ko x1.25 research momo_training :: under a bar: Node_management +0
+land ko x1.25 research seed_drill :: under a bar: Node_greenhouse +0
+land ko x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "작은 섬에서 큰 내일로." +4, @Label@66 "0 / 198033 EXP" +4, Head "마을 · 특별 건물 자리 1" +4 (+4)
+land ko x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 일하는 중 0" +4 (+11)
+land ja x0.85 research first :: under a bar: Node_greenhouse +1, Name "温室" +1
+land ja x0.85 research momo_training :: under a bar: Node_management +1, Name "管理" +1
+land ja x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +1
+land ja x1 research first :: under a bar: Node_greenhouse +1, Name "温室" +0
+land ja x1 research momo_training :: under a bar: Node_management +1, Name "管理" +0
+land ja x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +0
+land ja x1 status status :: under a bar: Title "Momonium" +4, Tagline "小さな島から、大きな明日へ。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村 · 特別な建物の枠 1" +4 (+7)
+land ja x1.25 research first :: under a bar: Node_greenhouse +0
+land ja x1.25 research momo_training :: under a bar: Node_management +0
+land ja x1.25 research seed_drill :: under a bar: Node_greenhouse +0
+land ja x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "小さな島から、大きな明日へ。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村 · 特別な建物の枠 1" +4 (+4)
+land ja x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 仕事中 0" +4 (+11)
+land zh_CN x0.85 research first :: under a bar: Node_greenhouse +1, Name "温室" +1
+land zh_CN x0.85 research momo_training :: under a bar: Node_management +1, Name "管理" +1
+land zh_CN x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +1
+land zh_CN x1 research first :: under a bar: Node_greenhouse +1, Name "温室" +0
+land zh_CN x1 research momo_training :: under a bar: Node_management +1, Name "管理" +0
+land zh_CN x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +0
+land zh_CN x1 status status :: under a bar: Title "Momonium" +4, Tagline "小小的岛，大大的明天。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村庄 · 特殊建筑位置 1" +4 (+7)
+land zh_CN x1.25 research first :: under a bar: Node_greenhouse +0
+land zh_CN x1.25 research momo_training :: under a bar: Node_management +0
+land zh_CN x1.25 research seed_drill :: under a bar: Node_greenhouse +0
+land zh_CN x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "小小的岛，大大的明天。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村庄 · 特殊建筑位置 1" +4 (+4)
+land zh_CN x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 工作中 0" +4 (+11)
+desk en x0.85 research first :: under a bar: Node_greenhouse +1, Name "Greenhouse" +1
+desk en x0.85 research momo_training :: under a bar: Node_management +1, Name "Management" +1
+desk en x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "Greenhouse" +1
+desk en x1 research first :: under a bar: Node_greenhouse +1, Name "Greenhouse" +0
+desk en x1 research momo_training :: under a bar: Node_management +1, Name "Management" +0
+desk en x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "Greenhouse" +0
+desk en x1 status status :: under a bar: Title "Momonium" +4, Tagline "A small island, " +4, @Label@66 "0 / 198033 EXP" +4, Head "Village · Specia" +4 (+7)
+desk en x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "A small island, " +4, @Label@66 "0 / 198033 EXP" +4, Head "Village · Specia" +4 (+4)
+desk en x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 0 working" +4 (+11)
+desk ko x0.85 research first :: under a bar: Node_greenhouse +1, Name "온실" +1
+desk ko x0.85 research momo_training :: under a bar: Node_management +1, Name "관리" +1
+desk ko x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "온실" +1
+desk ko x1 research first :: under a bar: Node_greenhouse +1, Name "온실" +0
+desk ko x1 research momo_training :: under a bar: Node_management +1, Name "관리" +0
+desk ko x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "온실" +0
+desk ko x1 status status :: under a bar: Title "Momonium" +4, Tagline "작은 섬에서 큰 내일로." +4, @Label@66 "0 / 198033 EXP" +4, Head "마을 · 특별 건물 자리 1" +4 (+7)
+desk ko x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "작은 섬에서 큰 내일로." +4, @Label@66 "0 / 198033 EXP" +4, Head "마을 · 특별 건물 자리 1" +4 (+4)
+desk ko x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 일하는 중 0" +4 (+11)
+desk ja x0.85 research first :: under a bar: Node_greenhouse +1, Name "温室" +1
+desk ja x0.85 research momo_training :: under a bar: Node_management +1, Name "管理" +1
+desk ja x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +1
+desk ja x1 research first :: under a bar: Node_greenhouse +1, Name "温室" +0
+desk ja x1 research momo_training :: under a bar: Node_management +1, Name "管理" +0
+desk ja x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +0
+desk ja x1 status status :: under a bar: Title "Momonium" +4, Tagline "小さな島から、大きな明日へ。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村 · 特別な建物の枠 1" +4 (+7)
+desk ja x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "小さな島から、大きな明日へ。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村 · 特別な建物の枠 1" +4 (+4)
+desk ja x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 仕事中 0" +4 (+11)
+desk zh_CN x0.85 research first :: under a bar: Node_greenhouse +1, Name "温室" +1
+desk zh_CN x0.85 research momo_training :: under a bar: Node_management +1, Name "管理" +1
+desk zh_CN x0.85 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +1
+desk zh_CN x1 research first :: under a bar: Node_greenhouse +1, Name "温室" +0
+desk zh_CN x1 research momo_training :: under a bar: Node_management +1, Name "管理" +0
+desk zh_CN x1 research seed_drill :: under a bar: Node_greenhouse +1, Name "温室" +0
+desk zh_CN x1 status status :: under a bar: Title "Momonium" +4, Tagline "小小的岛，大大的明天。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村庄 · 特殊建筑位置 1" +4 (+7)
+desk zh_CN x1.25 status status :: under a bar: Title "Momonium" +4, Tagline "小小的岛，大大的明天。" +4, @Label@66 "0 / 198033 EXP" +4, Head "村庄 · 特殊建筑位置 1" +4 (+4)
+desk zh_CN x1.25 status records :: under a bar: Value "1" +4, Value "16" +4, Value "4" +4, Value "4 · 工作中 0" +4 (+11)
+260 of 600 states with issues

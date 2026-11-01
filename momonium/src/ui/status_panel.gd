@@ -58,11 +58,13 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	var tagline := _label(tr("status.tagline"), 17)
 	tagline.name = "Tagline"
 	tagline.modulate = Color(1, 1, 1, 0.8)
+	# Step 81: it wraps rather than widen the card past the side buttons.
+	tagline.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_child(tagline)
 	var exp_row := HBoxContainer.new()
 	exp_row.add_theme_constant_override("separation", 12)
 	exp_bar = Bar.new(Color("#ffe27a"))
-	exp_bar.custom_minimum_size = Vector2(220, 14)
+	exp_bar.custom_minimum_size = Vector2(96, 14)
 	exp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	exp_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	exp_row.add_child(exp_bar)
@@ -72,9 +74,11 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary) -> void:
 	top.add_child(text)
 	col.add_child(top)
 
-	# One card per building mastery, three to a row as industries are added.
-	var grid := GridContainer.new()
-	grid.columns = 3
+	# One card per building mastery, as many to a row as fit (three on a
+	# phone at the usual size, fewer when the text is larger -- Step 81: a
+	# fixed three made the card wider than the room beside the side buttons).
+	var grid := HFlowContainer.new()
+	grid.name = "Masteries"
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
 	col.add_child(grid)

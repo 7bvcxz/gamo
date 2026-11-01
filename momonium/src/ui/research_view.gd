@@ -1,5 +1,5 @@
 class_name ResearchView
-extends HBoxContainer
+extends BoxContainer
 
 ## One industry's branch of the technology tree, as in the reference: node
 ## cards joined by dashed lines on the left (lock, check or progress on each,
@@ -33,6 +33,17 @@ var research: ResearchSystem
 var industry := ""
 var tree_scroll: ScrollContainer
 var tree: Control
+## Step 81: the tree and the details scroll each in their own bounded view
+## (PanelFrame.room tall), so the panel's body does not scroll as well.
+var owns_scroll := true
+var detail_scroll: ScrollContainer
+## The details' width beside the tree, and the narrowest a tree card may be
+## and still read (three to a line); with less room than that for both, the
+## details go under the tree (fit_room).
+const DETAIL_W := 214.0
+const READABLE := 96.0
+var _room := 520.0
+var _narrow := false
 var cards: Dictionary = {}
 var selected := ""
 var detail: VBoxContainer
@@ -63,11 +74,13 @@ func setup(p_sim: Simulation, p_lib: SpriteLibrary, p_industry: String) -> void:
 	industry = p_industry
 	research = sim.system(&"research")
 	name = "Research_" + industry
+	vertical = false
 	add_theme_constant_override("separation", 12)
 	tree_scroll = ScrollContainer.new()
 	tree_scroll.name = "TreeScroll"
 	tree_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	tree_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	PanelViews.slim_bars(tree_scroll)
 	add_child(tree_scroll)
 	tree = Control.new()
 	tree.name = "Tree"
@@ -163,7 +176,10 @@ func reveal(id: String) -> void:
 
 
 func _place_cards() -> void:
-	var w := minf(CARD.x, tree.size.x / _widest - GAP)
+	# Step 81: the tree's right edge keeps the bar's gutter (a card never
+	# lies under the bar).
+	var usable := maxf(tree.size.x - PanelFrame.BAR - PanelFrame.GUTTER, CARD.x)
+	var w := minf(CARD.x, usable / _widest - GAP)
 	var y := 0.0
 	for line: Array in _lines:
 		var any := false
@@ -172,26 +188,51 @@ func _place_cards() -> void:
 			card.custom_minimum_size = Vector2(w, CARD.y)
 			card.size = Vector2(w, CARD.y)
 			(card.find_child("Name", true, false) as Label).custom_minimum_size.x = w - 10.0
-			card.position = Vector2(tree.size.x * (i + 0.5) / line.size() - w * 0.5, y + 6.0)
+			card.position = Vector2(usable * (i + 0.5) / line.size() - w * 0.5, y + 6.0)
 			card.visible = bool(_shown.get(line[i], false))
 			any = any or card.visible
 		if any:
 			y += ROW
 	tree.custom_minimum_size.y = maxf(y + STUB, ROW)
 	tree_scroll.custom_minimum_size.y = minf(tree.custom_minimum_size.y, _tree_room())
+	_size_detail()
 	tree.queue_redraw()
 
 
-## How tall the tree may be before it scrolls on its own: the room the
-## panel gives its body (PanelFrame: two thirds of the window), so the
-## details beside it never scroll away.
+## PanelFrame: the room the body has now (`room` tall, `width` wide) -- the
+## tree and the details take at most that and scroll within it; too narrow
+## for both side by side (a phone with large text), the details go under
+## the tree.
+func fit_room(room: float, width: float = 9999.0) -> void:
+	_room = room
+	var tree_needs := PER_LINE * (READABLE + GAP) + PanelFrame.BAR + PanelFrame.GUTTER
+	_narrow = width < tree_needs + 12.0 + DETAIL_W + PanelFrame.BAR + PanelFrame.GUTTER
+	vertical = _narrow
+	detail_scroll.custom_minimum_size.x = 0.0 if _narrow else DETAIL_W + PanelFrame.BAR + PanelFrame.GUTTER
+	tree_scroll.custom_minimum_size.y = minf(tree.custom_minimum_size.y, _tree_room())
+	_size_detail()
+
+
+## The details: as tall as they are, up to the room, then they scroll.
+func _size_detail() -> void:
+	if detail_scroll == null:
+		return
+	var want := (detail.get_parent() as Control).get_combined_minimum_size().y
+	var left := _room - tree_scroll.custom_minimum_size.y - 12.0 if _narrow else _room
+	detail_scroll.custom_minimum_size.y = minf(want, maxf(left, 120.0))
+
+
+## How tall the tree (and the details) may be before they scroll on their
+## own: the room the panel gives its body (PanelFrame.room, Step 81).
 func _tree_room() -> float:
 	var n: Node = get_parent()
 	while n != null and not n is PanelFrame:
 		n = n.get_parent()
 	if n == null:
 		return 520.0
-	return maxf((n as PanelFrame).size.y * 0.66 - 8.0, 260.0)
+	var room := maxf((n as PanelFrame).room, 200.0)
+	# Stacked, the tree takes a little over half and the details the rest.
+	return room * 0.55 if _narrow else room
 
 
 func _card(n: Dictionary) -> Button:
@@ -369,7 +410,20 @@ func _build_detail() -> void:
 		last_result = sim.execute({"type": "research.start", "id": selected})
 		refresh())
 	detail.add_child(start_button)
-	add_child(detail)
+	# Its own bounded view with the same slim bar and gutter as the body.
+	detail_scroll = ScrollContainer.new()
+	detail_scroll.name = "DetailScroll"
+	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	detail_scroll.custom_minimum_size.x = 214.0 + PanelFrame.BAR + PanelFrame.GUTTER
+	PanelViews.slim_bars(detail_scroll)
+	var gutter := MarginContainer.new()
+	gutter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gutter.add_theme_constant_override("margin_right", int(PanelFrame.BAR + PanelFrame.GUTTER))
+	detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gutter.add_child(detail)
+	detail_scroll.add_child(gutter)
+	add_child(detail_scroll)
+	detail.resized.connect(_size_detail)
 
 
 ## Effect lines for a node, from its data.

@@ -55,6 +55,37 @@ static func close_button(px: float = 52.0) -> Button:
 	return b
 
 
+## Step 81: lets a finger's drag that starts on something inside `sc` reach
+## the scroll. A ScrollContainer scrolls by touch only from the presses it
+## sees, and a STOP control (a Button, a card, a plain Control) keeps them: on
+## a phone the research tree, the tab row and the status body did not move
+## under a swipe. PASS still lets each of them have its tap. A slider keeps
+## its drag to itself (a sideways slide must not scroll the page too).
+static func let_swipes_through(sc: ScrollContainer) -> void:
+	for n: Node in sc.find_children("*", "Control", true, false):
+		var c := n as Control
+		if c.mouse_filter == Control.MOUSE_FILTER_STOP and not c is Range and not c is ScrollContainer:
+			c.mouse_filter = Control.MOUSE_FILTER_PASS
+
+
+## Step 81: a scroll's bars, slim and quiet -- a rounded navy grabber on a
+## faint track, PanelFrame.BAR wide -- instead of the engine's wide grey ones.
+static func slim_bars(sc: ScrollContainer) -> void:
+	for bar: ScrollBar in [sc.get_v_scroll_bar(), sc.get_h_scroll_bar()]:
+		var track := StyleBoxFlat.new()
+		track.bg_color = Color(0.12, 0.23, 0.38, 0.08)
+		track.set_corner_radius_all(3)
+		track.set_content_margin_all(PanelFrame.BAR * 0.5)
+		bar.add_theme_stylebox_override("scroll", track)
+		bar.add_theme_stylebox_override("scroll_focus", track)
+		for pair: Array in [["grabber", 0.38], ["grabber_highlight", 0.52], ["grabber_pressed", 0.62]]:
+			var g := StyleBoxFlat.new()
+			g.bg_color = Color(0.12, 0.23, 0.38, float(pair[1]))
+			g.set_corner_radius_all(3)
+			g.set_content_margin_all(PanelFrame.BAR * 0.5)
+			bar.add_theme_stylebox_override(String(pair[0]), g)
+
+
 static func clear(c: Node) -> void:
 	for child: Node in c.get_children():
 		c.remove_child(child)

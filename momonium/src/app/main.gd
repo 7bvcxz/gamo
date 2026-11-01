@@ -276,6 +276,7 @@ func _ready() -> void:
 	status_frame = _frame(ui, "StatusFrame")
 	status_panel = StatusPanel.new()
 	status_panel.setup(sim, lib)
+	status_frame.set_title_key("hud.status")
 	status_frame.add_tab("panel.tab.status", status_panel)
 	inventory_view = InventoryView.new()
 	inventory_view.setup(sim, lib)
@@ -332,7 +333,8 @@ func _ready() -> void:
 		for i in research_views.size():
 			research_views[i].fresh = {}
 			research_frame.set_tab_dot(i, false))
-	research_frame.set_title(tr("hud.research"))
+	research_frame.set_title_key("hud.research")
+	research_frame.max_width = 760.0
 	celebration = TierCelebration.new()
 	celebration.setup()
 	ui.add_child(celebration)
@@ -883,6 +885,20 @@ func _ready() -> void:
 		var r := OfflineProgress.catch_up(sim, int(ms))
 		_tell_about_return(r)
 		return r)
+	# Step 81: the open panel's layout as drawn (window pixels): the card, its
+	# head (tabs, close), the body's scroll and its bar, a research tree's
+	# own scroll and bar and the details beside it, the HUD -- and every
+	# label or button that reaches under a visible scroll bar or out of its
+	# scroll's view sideways (`under_bar`), for the overlap tests.
+	bridge.register_query("panel_layout", _panel_layout)
+	# Opens Status on its tab `arg` (as its tab button would): {ok, name}.
+	bridge.register_query("dev_status_tab", func(arg: Variant) -> Dictionary:
+		var i := int(arg)
+		if i < 0 or i >= status_frame.tabs.size():
+			return {"ok": false}
+		_close_frames()
+		status_frame.open(i)
+		return {"ok": true, "name": String(status_frame.tabs[i]["key"]).trim_prefix("panel.tab.")})
 	# Step 80: Reset All Data as shown -- the Advanced fold, the button, the
 	# dialog's step and its buttons (window pixels) -- and which of
 	# LocalData's stores exist now, with the last reset's result.
@@ -1343,6 +1359,10 @@ func _layout() -> void:
 		_place_camera_pad()
 	if perf_overlay != null and hud.day_panel != null:
 		perf_overlay.position = Vector2(12.0, hud.day_panel.get_global_rect().end.y + 8.0)
+	# Step 81: the HUD laid itself out again (a new size, a UI scale): the
+	# panels move clear of it.
+	if status_frame != null:
+		_place_frames()
 
 
 ## E2E: proves the platform's user:// (IndexedDB on the web) can hold a save and
@@ -1758,14 +1778,27 @@ func open_mailbox() -> void:
 
 
 func _place_frames() -> void:
-	var size := get_viewport_rect().size
-	# Keep the side buttons free.
-	var reserved := size.x - hud.side_buttons[0].position.x + 8.0 if not hud.side_buttons.is_empty() else 16.0
-	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame, power_frame, shop_frame]:
+	for f: PanelFrame in [status_frame, detail_frame, mail_frame, research_frame, away_frame, settings_frame, power_frame, shop_frame, sale_frame]:
 		if f == null:
 			continue
-		f.right_reserved = reserved
+		f.hud_space = _hud_space
 		f._layout()
+
+
+## Step 81: what a panel keeps clear of, in its own space, as the HUD is laid
+## out now -- the right column (the side buttons and Hire: from the leftmost
+## of them) and every HUD piece above or below the card.
+func _hud_space(f: PanelFrame) -> Dictionary:
+	var inv := f.get_global_transform().affine_inverse()
+	var left_edge := f.size.x
+	for b: Control in hud.side_buttons + [hud.hire_button]:
+		if b != null and b.is_visible_in_tree():
+			left_edge = minf(left_edge, (inv * b.get_global_rect().position).x)
+	var rects: Array[Rect2] = []
+	var to_global := hud.get_global_transform()
+	for r: Rect2 in hud.occupied_rects():
+		rects.append(Rect2(inv * (to_global * r.position), r.size))
+	return {"avoid": rects, "right": f.size.x - left_edge + PanelFrame.MARGIN if left_edge < f.size.x else 16.0}
 
 
 func open_details(id: int) -> void:
@@ -1814,6 +1847,89 @@ func _panels_info(_arg: Variant) -> Dictionary:
 			"you": (detail_view.cycle_you.get_node("Value") as Label).text, "momo": (detail_view.cycle_momo.get_node("Value") as Label).text,
 			"done": (detail_view.done_row.get_node("Value") as Label).text},
 		"window": [win.x, win.y]}
+
+
+func _panel_layout(_arg: Variant) -> Dictionary:
+	var vp := get_viewport()
+	var xf := vp.get_final_transform()
+	var conv := func(r: Rect2) -> Array:
+		var a: Vector2 = xf * r.position
+		var b: Vector2 = xf * r.end
+		return [a.x, a.y, b.x - a.x, b.y - a.y]
+	var frame: PanelFrame = null
+	for f: PanelFrame in [status_frame, research_frame, detail_frame, mail_frame, settings_frame, power_frame, shop_frame, sale_frame, away_frame]:
+		if f != null and f.visible:
+			frame = f
+			break
+	var hud_rects: Array = hud.occupied_rects().map(func(r: Rect2) -> Array: return conv.call(Rect2(hud.get_global_transform() * r.position, r.size)))
+	var win := DisplayServer.window_get_size()
+	if frame == null:
+		return {"open": false, "hud": hud_rects, "window": [win.x, win.y]}
+	var bar := frame.scroll.get_v_scroll_bar()
+	var tabs := []
+	for t: Dictionary in frame.tabs:
+		var b: Button = t["button"]
+		tabs.append({"key": String(t["key"]), "rect": conv.call(b.get_global_rect()), "visible": b.is_visible_in_tree(), "text": b.text,
+			"selected": b.theme_type_variation == &"SelectedButton", "dot": frame.tab_dot(tabs.size())})
+	var out := {"open": true, "name": String(frame.name), "card": conv.call(frame.card.get_global_rect()),
+		"tab_scroll": conv.call(frame.tab_scroll.get_global_rect()) if frame.tab_scroll.is_visible_in_tree() else [],
+		"title": conv.call(frame.title_label.get_global_rect()) if frame.title_label.is_visible_in_tree() else [],
+		"tabs": tabs, "close": conv.call(frame.close_button.get_global_rect()),
+		"scroll": conv.call(frame.scroll.get_global_rect()), "bar": conv.call(bar.get_global_rect()), "bar_visible": bar.is_visible_in_tree(),
+		"body": conv.call(frame.body.get_global_rect()), "hud": hud_rects, "window": [win.x, win.y],
+		"tab_overflow": frame.tab_scroll.get_h_scroll_bar().max_value > frame.tab_scroll.get_h_scroll_bar().page + 0.5,
+		"tab_scroll_x": frame.tab_scroll.scroll_horizontal, "body_scroll_y": frame.scroll.scroll_vertical,
+		"body_scrolls": bar.max_value > bar.page + 0.5 and frame.scroll.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED}
+	var view := frame.current_view()
+	var scrolls: Array[ScrollContainer] = [frame.scroll]
+	if view is ResearchView:
+		var rv := view as ResearchView
+		var tb: VScrollBar = rv.tree_scroll.get_v_scroll_bar()
+		out["tree_scroll"] = conv.call(rv.tree_scroll.get_global_rect())
+		out["tree_bar"] = conv.call(tb.get_global_rect())
+		out["tree_bar_visible"] = tb.is_visible_in_tree()
+		out["tree_scroll_y"] = rv.tree_scroll.scroll_vertical
+		out["tree_scrolls"] = tb.max_value > tb.page + 0.5
+		out["detail"] = conv.call(rv.detail_scroll.get_global_rect() if rv.detail_scroll != null else rv.detail.get_global_rect())
+		scrolls.append(rv.tree_scroll)
+		if rv.detail_scroll != null:
+			var db: VScrollBar = rv.detail_scroll.get_v_scroll_bar()
+			out["detail_bar_visible"] = db.is_visible_in_tree()
+			out["detail_scroll_y"] = rv.detail_scroll.scroll_vertical
+			out["detail_scrolls"] = db.max_value > db.page + 0.5
+			out["detail_name"] = rv.detail_name.text
+			scrolls.append(rv.detail_scroll)
+	# What reaches under a visible bar (or past its scroll's right edge).
+	var under: Array = []
+	if view != null:
+		for c: Node in view.find_children("*", "Control", true, false):
+			var ctl := c as Control
+			# What draws: a leaf (no Control children) or a button, seen.
+			if not ctl.is_visible_in_tree() or ctl is Container or ctl is ScrollBar or (ctl.get_child_count() > 0 and not ctl is Button):
+				continue
+			if ctl.size.x <= 0.0 or ctl.size.y <= 0.0:
+				continue
+			var owner_scroll: ScrollContainer = null
+			for sc: ScrollContainer in scrolls:
+				if sc.is_ancestor_of(ctl):
+					owner_scroll = sc
+			if owner_scroll == null:
+				continue
+			var sr := owner_scroll.get_global_rect()
+			var limit := sr.end.x
+			var vb := owner_scroll.get_v_scroll_bar()
+			if vb.is_visible_in_tree():
+				limit = vb.get_global_rect().position.x
+			var r := ctl.get_global_rect()
+			# Only what can be seen in that scroll's view.
+			if r.end.y < sr.position.y or r.position.y > sr.end.y:
+				continue
+			# A visible bar keeps a gutter: nothing within 4 px of it.
+			var gap := 4.0 / xf.get_scale().x if vb.is_visible_in_tree() else 0.0
+			if r.end.x > limit - gap + 0.01:
+				under.append({"node": String(ctl.name), "text": ctl.text if "text" in ctl else "", "over": (r.end.x - (limit - gap)) * xf.get_scale().x})
+	out["under_bar"] = under
+	return out
 
 
 ## E2E: the tutorial as shown -- step, what it rings, where its buttons are.
