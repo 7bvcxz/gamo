@@ -1,0 +1,10 @@
+Step 79: the same scene on the public 0.78.0 (offline catch-up) and on 0.79.0, desktop Chromium 1280x800,
+the island's clock in real time (time scale 1): a farm worked by a Momo; the tab sent to the background
+(document.visibilityState "hidden" + visibilitychange, no animation frame until it is visible again) for
+20 real seconds, back for 1.5 s; then saved, closed, and opened again with the page's clock 5 hours later.
+Script: s79_compare.mjs in the Step 79 scratch (the same tab emulation as tests/e2e/specs/offline79.spec.mjs).
+
+before (0.78.0): hidden 20 s -> the island ran 21582 ms, money 10 -> 10, jobs 0 -> 0
+before: reopened 5 h later -> the island ran 18003198 ms, money 10 -> 1360, welcome-back card true
+after (0.79.0): hidden 20 s -> the island ran 1518 ms, money 10 -> 10, jobs 0 -> 0
+after: reopened 5 h later -> the island ran 679 ms, money 10 -> 10, welcome-back card false
