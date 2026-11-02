@@ -9,10 +9,11 @@
 set -euo pipefail
 LAB="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$LAB/web/compare"
-RAW="$(mktemp -d)"
-trap 'rm -rf "$RAW"' EXIT
+RAW="${FUNLAB_COMPARE_RAW:-$(mktemp -d)}"
+[[ -n "${FUNLAB_COMPARE_RAW:-}" ]] || trap 'rm -rf "$RAW"' EXIT
 mkdir -p "$OUT"
-FUNLAB_COMPARE_OUT="$RAW" "$LAB/tools/e2e.sh" specs/compare93.spec.mjs --project p720 -g "fresh three minutes"
+# FUNLAB_COMPARE_GRID_ONLY=1 with FUNLAB_COMPARE_RAW: redo the grid from kept pictures.
+[[ -n "${FUNLAB_COMPARE_GRID_ONLY:-}" ]] || FUNLAB_COMPARE_OUT="$RAW" "$LAB/tools/e2e.sh" specs/compare93.spec.mjs --project p720 -g "fresh three minutes"
 xvfb-run -a -s "-screen 0 2000x1700x24" godot --path "$LAB" --audio-driver Dummy --script res://tools/compare_grid.gd -- "$RAW" "$RAW/grid.png" >/dev/null 2>&1
 godot --headless --path "$LAB" --script res://tools/compare_jpg.gd -- "$RAW" "$OUT" >/dev/null 2>&1
 godot --headless --path "$LAB" --script res://tools/selftest.gd -- --json "$OUT/selftest.json" >/dev/null 2>&1

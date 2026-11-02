@@ -218,7 +218,11 @@ fetch('compare/selftest.json', { cache: 'no-store' }).then((r) => r.json()).then
     const gaps = s.seconds_between_upgrades || [];
     const range = gaps.length ? `${Math.min(...gaps)}–${Math.max(...gaps)}` : '–';
     const m = s.metrics || {};
-    const stage = m.stage_name || m.stage || (m.rock !== undefined ? `바위 ${m.rock}, 곡괭이 ${m.pickaxe}` : m.level !== undefined ? `Lv ${m.level}` : '');
+    const stage = m.stage_name || m.stage
+      || (m.rocks_broken !== undefined ? `바위 ${m.rocks_broken}개 깸, 곡괭이 ${m.pickaxe}` : '')
+      || (m.harvests !== undefined ? `밭 ${m.level}, 수확 ${m.harvests}번(마지막 ${m.last_payout})` : '')
+      || (m.delivered !== undefined ? `Lv ${m.level}, 배달 ${m.delivered}` : '')
+      || (m.level !== undefined ? `Lv ${m.level}` : '');
     return `<tr><td>${e.letter} ${e.name}</td><td>${fmt(s.first_upgrade_s)}</td><td>${(s.upgrades || []).length}</td><td>${range}</td><td>${s.actions}</td><td>${s.idle_seconds}초</td><td>${s.longest_idle_s}초</td><td>${stage}</td></tr>`;
   }).join('');
 }).catch(() => { document.getElementById('objectiveTable').innerHTML = '<tr><td>자동 측정 파일을 읽지 못했다.</td></tr>'; });

@@ -11,6 +11,7 @@ const TAGS := [["0", "5 s"], ["1m", "1:00"], ["3m", "3:00"]]
 const CELL := Vector2(270, 480)
 
 var _frames := 0
+var _view: SubViewport
 
 
 func _init() -> void:
@@ -18,12 +19,16 @@ func _init() -> void:
 	var src := args[0]
 	var w := int(CELL.x * ORDER.size() + 10 * (ORDER.size() + 1) + 70)
 	var h := int(CELL.y * TAGS.size() + 10 * (TAGS.size() + 1) + 60)
-	root.size = Vector2i(w, h)
-	DisplayServer.window_set_size(Vector2i(w, h))
+	# Drawn in its own viewport: the Lab stretches its 720x1280 canvas to the
+	# window, and the root's stretch made the grid 1.2x and cropped.
+	_view = SubViewport.new()
+	_view.size = Vector2i(w, h)
+	_view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	root.add_child(_view)
 	var bg := ColorRect.new()
 	bg.color = Color("#e8f4fb")
 	bg.size = Vector2(w, h)
-	root.add_child(bg)
+	_view.add_child(bg)
 	var font: Font = load("res://shared/fonts/ui_ko.otf")
 	for c in ORDER.size():
 		var e := LabRegistry.find(ORDER[c])
@@ -33,7 +38,7 @@ func _init() -> void:
 		head.add_theme_font_size_override("font_size", 24)
 		head.add_theme_color_override("font_color", Color("#2b3a4a"))
 		head.position = Vector2(70 + 10 + c * (CELL.x + 10), 14)
-		root.add_child(head)
+		_view.add_child(head)
 		for r in TAGS.size():
 			var img := Image.load_from_file("%s/%s_%s.png" % [src, ORDER[c], TAGS[r][0]])
 			var tex := TextureRect.new()
@@ -42,7 +47,7 @@ func _init() -> void:
 			tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 			tex.position = Vector2(70 + 10 + c * (CELL.x + 10), 50 + 10 + r * (CELL.y + 10))
 			tex.size = CELL
-			root.add_child(tex)
+			_view.add_child(tex)
 	for r in TAGS.size():
 		var tag := Label.new()
 		tag.text = TAGS[r][1]
@@ -50,7 +55,7 @@ func _init() -> void:
 		tag.add_theme_font_size_override("font_size", 26)
 		tag.add_theme_color_override("font_color", Color("#2b3a4a"))
 		tag.position = Vector2(8, 50 + 10 + r * (CELL.y + 10) + CELL.y * 0.45)
-		root.add_child(tag)
+		_view.add_child(tag)
 	process_frame.connect(_tick)
 
 
@@ -60,5 +65,5 @@ func _tick() -> void:
 		return
 	process_frame.disconnect(_tick)
 	await RenderingServer.frame_post_draw
-	root.get_texture().get_image().save_png(OS.get_cmdline_user_args()[1])
+	_view.get_texture().get_image().save_png(OS.get_cmdline_user_args()[1])
 	quit()

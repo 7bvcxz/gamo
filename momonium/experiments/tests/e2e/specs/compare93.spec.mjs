@@ -47,8 +47,16 @@ test('the comparison page: six experiments, A C F first, every link opens its ex
   expect(titles, 'A, C, F first, then B, D, E').toEqual(['Island Growth', 'Break & Upgrade', 'Endless Growth', 'Momo Evolution', 'Harvest Burst', 'Production Tycoon']);
   expect(await page.locator('.card .prio').count(), 'three marked first').toBe(3);
   await expect.poll(async () => (await page.locator('#objectiveTable tr').count()), { timeout: 10_000 }).toBe(7);
-  for (const img of await page.locator('.thumbs img').all()) {
-    expect(await img.evaluate((el) => el.complete && el.naturalWidth > 0 ? el.naturalWidth : el.decode().then(() => el.naturalWidth)), 'a picture').toBeGreaterThan(100);
+  // Every picture is there (they load lazily: bring each into view first).
+  const imgs = await page.locator('.thumbs img').all();
+  expect(imgs.length, 'three pictures for each of six').toBe(18);
+  for (const img of imgs) {
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate((el) => el.complete ? el.naturalWidth : 0), { timeout: 10_000 }).toBeGreaterThan(100);
+  }
+  if (process.env.FUNLAB_SHOTS) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: `${process.env.FUNLAB_SHOTS}/compare93_page_${info.project.name}.png`, fullPage: true });
   }
   const hrefs = await page.locator('.card a.btn:not(.ghost)').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
   expect(hrefs).toEqual(['./#island', './#rock', './#tree', './#evolution', './#harvest', './#tycoon']);
@@ -85,6 +93,7 @@ test('scores: only tested experiments rank, blanks stay blank, kept in this brow
   expect(rows[2]).toContain('Break & Upgrade');
   expect(rows[2]).toContain('4.00');
   await expect(page.locator('#ranknote')).toContainText('A, B, D, E');
+  if (process.env.FUNLAB_SHOTS) await page.locator('#ranking').screenshot({ path: `${process.env.FUNLAB_SHOTS}/compare93_scores_${info.project.name}.png` }).catch(() => {});
   // Kept in this browser (its own key), and only there.
   await page.reload();
   expect((await page.locator('#ranking tr').allTextContents()).length, 'still there after a reload').toBe(3);
