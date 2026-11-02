@@ -6,7 +6,7 @@ extends SceneTree
 ##   xvfb-run -a -s "-screen 0 1280x1600x24" godot --path momonium/experiments \
 ##     --audio-driver Dummy --script res://tools/capture.gd -- \
 ##     --out /abs/shot.png [--size 720x1280] [--exp island] [--seconds 1.0] \
-##     [--advance 30] [--setup res://tools/scenarios/foo.gd]
+##     [--advance 30] [--call level:4] [--setup res://tools/scenarios/foo.gd]
 ##
 ## --exp opens an experiment as its direct link would; --advance skips that
 ## many seconds of play time before the wait; --setup runs a script's
@@ -50,6 +50,11 @@ func _tick() -> void:
 		if _args.has("setup"):
 			var setup: Script = load(_args["setup"])
 			await setup.new().call("setup", _app)
+		if _args.has("call") and _app.get("host") != null:
+			# --call name:arg[,name:arg] -> the experiment's dev hooks (e.g. level:4).
+			for part: String in String(_args["call"]).split(","):
+				var kv := part.split(":")
+				(_app.get("host") as LabHost).experiment.dev(kv[0], kv[1] if kv.size() > 1 else null)
 		if _args.has("advance") and _app.get("host") != null:
 			(_app.get("host") as LabHost).step(float(_args["advance"]))
 	_frames_left -= 1

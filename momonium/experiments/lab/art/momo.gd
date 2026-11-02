@@ -27,6 +27,14 @@ var _blink_until := -1.0
 var _face_until := -1.0
 var _face := ""
 var _hop := 0.0
+## Walking: from, to, how far along (1 = standing), pixels a second.
+var walk_speed := 38.0
+var _walk_from := Vector2.ZERO
+var _walk_to := Vector2.ZERO
+var _walk_t := 1.0
+var _walk_len := 0.0
+
+signal arrived
 
 
 static func sheet() -> Dictionary:
@@ -62,6 +70,19 @@ func look(name: String, seconds: float = 1.0) -> void:
 	_face_until = _time + seconds
 
 
+## Walks to `p` (the parent's coordinates) at walk_speed, the game's walk
+## cycle facing the way it goes; `arrived` when there.
+func walk_to(p: Vector2) -> void:
+	_walk_from = position
+	_walk_to = p
+	_walk_len = position.distance_to(p)
+	_walk_t = 0.0 if _walk_len > 1.0 else 1.0
+
+
+func walking() -> bool:
+	return _walk_t < 1.0
+
+
 ## Height on screen in local pixels (before the node's own scale).
 func height() -> float:
 	return HEIGHT * size
@@ -69,6 +90,17 @@ func height() -> float:
 
 func _process(delta: float) -> void:
 	_time += delta
+	if walking():
+		_walk_t = minf(1.0, _walk_t + delta * walk_speed / _walk_len)
+		position = _walk_from.lerp(_walk_to, _walk_t)
+		var d := _walk_to - _walk_from
+		var view := "side" if absf(d.x) > absf(d.y) * 1.2 else ("back" if d.y < 0.0 else "front")
+		flipped = view == "side" and d.x < 0.0
+		cell = "%s_walk_%s" % [view, ["a", "b", "c", "b"][int(_time * 8.0) % 4]]
+		if _walk_t >= 1.0:
+			cell = "front_idle"
+			flipped = false
+			arrived.emit()
 	if _time >= _next_blink:
 		_blink_until = _time + 0.14
 		_next_blink = _time + _rng.randf_range(1.5, 4.0)

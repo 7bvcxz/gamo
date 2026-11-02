@@ -148,6 +148,7 @@ func state() -> Dictionary:
 		"reduced_motion": reduced_motion,
 		"window": [_ui.size.x, _ui.size.y],
 		"tiles": launcher.rects() if launcher != null else {},
+		"playable": LabRegistry.ids().filter(func(id: String) -> bool: return LabRegistry.playable(id)),
 		"host": host.state() if host != null else {},
 		"history": history.size(),
 	}

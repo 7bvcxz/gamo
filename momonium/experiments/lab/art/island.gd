@@ -28,6 +28,18 @@ var iso := LabIso.new()
 ## cell -> how far it has risen (1 = in place).
 var cells: Dictionary = {}
 var reduced_motion := false
+## Cells drawn as a sandy path on the grass.
+var paths: Dictionary = {}
+## Cells that are not land yet, drawn as a pale outline (an upgrade's teaser).
+var ghost_cells: Dictionary = {}
+var ghost_alpha := 0.38:
+	set(v):
+		if not is_equal_approx(v, ghost_alpha):
+			ghost_alpha = v
+			if not ghost_cells.is_empty():
+				queue_redraw()
+const PATH := Color("#e2c992")
+const PATH_EDGE := Color("#c7a96b")
 
 signal changed
 
@@ -160,6 +172,29 @@ func _draw() -> void:
 			_lip(pts[1], pts[2], logical[1], logical[2])
 		if not _solid(c + Vector2i(0, 1)):
 			_lip(pts[3], pts[2], logical[3], logical[2])
+	_overlays()
+
+
+## The sandy path on a cell and the ghost of land to come.
+func _overlays() -> void:
+	for c: Vector2i in paths:
+		if not _solid(c):
+			continue
+		var pts := iso.cell_corners(c)
+		var mid := iso.cell_center(c)
+		var inset := PackedVector2Array()
+		for p: Vector2 in pts:
+			inset.append(mid + (p - mid) * 0.62)
+		draw_colored_polygon(inset, PATH)
+		inset.append(inset[0])
+		draw_polyline(inset, PATH_EDGE, 2.0, true)
+	for c: Vector2i in ghost_cells:
+		if cells.has(c):
+			continue
+		var pts := iso.cell_corners(c)
+		draw_colored_polygon(pts, Color(1, 1, 1, ghost_alpha * 0.45))
+		pts.append(pts[0])
+		draw_polyline(pts, Color(1, 1, 1, minf(1.0, ghost_alpha * 1.6)), 3.0, true)
 
 
 ## A lighter grass lip spilling over an exposed near edge.

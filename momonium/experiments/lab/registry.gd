@@ -10,7 +10,7 @@ extends RefCounted
 const STUB := "res://experiments/stub/stub.gd"
 
 const EXPERIMENTS: Array[Dictionary] = [
-	{"id": "island", "letter": "A", "title": "Island Growth", "icon": "villa", "color": Color("#4fb36b"), "script": ""},
+	{"id": "island", "letter": "A", "title": "Island Growth", "icon": "villa", "color": Color("#4fb36b"), "script": "res://experiments/island/island.gd"},
 	{"id": "evolution", "letter": "B", "title": "Momo Evolution", "icon": "momo_front", "color": Color("#e98fb1"), "script": ""},
 	{"id": "rock", "letter": "C", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": ""},
 	{"id": "harvest", "letter": "D", "title": "Harvest Burst", "icon": "crop_ripe", "color": Color("#f0a843"), "script": ""},
