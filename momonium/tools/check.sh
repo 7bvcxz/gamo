@@ -51,6 +51,9 @@ if [[ $EXPORT -eq 1 ]]; then
   echo "   pack $pck bytes (budget $budget)"
   (( pck <= budget )) || fail "pack over budget"
   if grep -qa 'res://tests/' "$WORK/site/momonium/index.pck"; then fail "tests leaked into the pack"; fi
+  # Step 86: the Fun Lab is a project of its own inside momonium/ (Godot skips
+  # it); nothing of it may reach the game's pack.
+  if grep -qa 'res://experiments/' "$WORK/site/momonium/index.pck"; then fail "the Fun Lab leaked into the pack"; fi
   echo "── what the pack ships"
   python3 "$HERE/tools/check_release.py" "$WORK/site/momonium/index.pck" --budget-mb "${MOMONIUM_PCK_BUDGET_MB:-20}" || fail "release check"
   # Reproducible: this source exports the very pack that is published for it

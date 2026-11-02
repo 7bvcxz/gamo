@@ -51,6 +51,9 @@ jobs:
       - run: godot --version
       - name: Import, load check, unit + integration
         run: momonium/tools/check.sh
+      # Step 86: the Fun Lab (momonium/experiments), a Godot project of its own.
+      - name: Fun Lab -- import, load check, unit + integration
+        run: momonium/experiments/tools/check.sh
 
   web-export-smoke:
     needs: test

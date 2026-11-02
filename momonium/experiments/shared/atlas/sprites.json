@@ -1,0 +1,1634 @@
+{
+  "generated_by": "tools/art/build_atlas.gd",
+  "size": [
+    2048,
+    1280
+  ],
+  "sprites": {
+    "apartment": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          310.0
+        ],
+        "top": [
+          109.0,
+          0.0
+        ]
+      },
+      "region": [
+        2,
+        2,
+        217,
+        389
+      ],
+      "scale": 2.0,
+      "source": "png/apartment.png",
+      "source_sha": "5d5adec9e6c93094",
+      "world_scale": 0.5
+    },
+    "apartment_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          62.0,
+          225.0
+        ]
+      },
+      "region": [
+        1526,
+        395,
+        133,
+        218
+      ],
+      "scale": 2.0,
+      "source": "png/lit/apartment.png",
+      "source_sha": "9c870417e8837e34",
+      "world_scale": 0.5
+    },
+    "car_factory": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          177.0
+        ],
+        "top": [
+          59.0,
+          3.0
+        ]
+      },
+      "region": [
+        451,
+        395,
+        220,
+        255
+      ],
+      "scale": 2.0,
+      "source": "png/car_factory.png",
+      "source_sha": "61fcfea5d10d891e",
+      "world_scale": 0.5
+    },
+    "car_factory_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          68.0,
+          109.0
+        ]
+      },
+      "region": [
+        1312,
+        673,
+        150,
+        143
+      ],
+      "scale": 2.0,
+      "source": "png/lit/car_factory.png",
+      "source_sha": "3f27cb0a960d27ec",
+      "world_scale": 0.5
+    },
+    "clock_tower": {
+      "meta": {},
+      "pivots": {
+        "face_l": [
+          84.0,
+          110.0
+        ],
+        "face_r": [
+          133.0,
+          110.0
+        ],
+        "origin": [
+          109.0,
+          215.0
+        ],
+        "top": [
+          109.0,
+          2.0
+        ]
+      },
+      "region": [
+        1117,
+        2,
+        218,
+        293
+      ],
+      "scale": 2.0,
+      "source": "png/clock_tower.png",
+      "source_sha": "252e4b5c413cac32",
+      "world_scale": 0.5
+    },
+    "community_center": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          205.0
+        ],
+        "top": [
+          105.0,
+          2.0
+        ]
+      },
+      "region": [
+        1576,
+        2,
+        218,
+        283
+      ],
+      "scale": 2.0,
+      "source": "png/community_center.png",
+      "source_sha": "7d276154898618dd",
+      "world_scale": 0.5
+    },
+    "community_center_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          68.0,
+          63.0
+        ]
+      },
+      "region": [
+        657,
+        1139,
+        142,
+        71
+      ],
+      "scale": 2.0,
+      "source": "png/lit/community_center.png",
+      "source_sha": "3d0b32f93e0d39e6",
+      "world_scale": 0.5
+    },
+    "crop_leafy": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          89.0,
+          86.0
+        ]
+      },
+      "region": [
+        133,
+        891,
+        166,
+        127
+      ],
+      "scale": 2.0,
+      "source": "png/crop_leafy.png",
+      "source_sha": "a95a90e2c363d3de",
+      "world_scale": 0.5
+    },
+    "crop_ripe": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          95.0,
+          93.0
+        ]
+      },
+      "region": [
+        1466,
+        673,
+        178,
+        136
+      ],
+      "scale": 2.0,
+      "source": "png/crop_ripe.png",
+      "source_sha": "b0ed065be92956ff",
+      "world_scale": 0.5
+    },
+    "crop_seeds": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          68.0,
+          55.0
+        ]
+      },
+      "region": [
+        1011,
+        1025,
+        124,
+        94
+      ],
+      "scale": 2.0,
+      "source": "png/crop_seeds.png",
+      "source_sha": "6e08d0538d3d5a94",
+      "world_scale": 0.5
+    },
+    "crop_sprout": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          77.0,
+          69.0
+        ]
+      },
+      "region": [
+        366,
+        1025,
+        142,
+        107
+      ],
+      "scale": 2.0,
+      "source": "png/crop_sprout.png",
+      "source_sha": "b00dc2e745e77680",
+      "world_scale": 0.5
+    },
+    "farm": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          125.0,
+          148.0
+        ],
+        "top": [
+          125.0,
+          2.0
+        ]
+      },
+      "region": [
+        896,
+        395,
+        249,
+        246
+      ],
+      "scale": 2.0,
+      "source": "png/farm.png",
+      "source_sha": "3000e51efa9c1b02",
+      "world_scale": 0.5
+    },
+    "game_studio": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          108.0,
+          223.0
+        ],
+        "top": [
+          108.0,
+          2.0
+        ]
+      },
+      "region": [
+        666,
+        2,
+        217,
+        301
+      ],
+      "scale": 2.0,
+      "source": "png/game_studio.png",
+      "source_sha": "8705fe023170d01c",
+      "world_scale": 0.5
+    },
+    "game_studio_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          66.0,
+          203.0
+        ]
+      },
+      "region": [
+        1149,
+        395,
+        153,
+        240
+      ],
+      "scale": 2.0,
+      "source": "png/lit/game_studio.png",
+      "source_sha": "4feadd597b1d9976",
+      "world_scale": 0.5
+    },
+    "icon_coin": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          58.0,
+          59.0
+        ]
+      },
+      "region": [
+        1107,
+        891,
+        115,
+        117
+      ],
+      "scale": 2.0,
+      "source": "png/icon_coin.png",
+      "source_sha": "cd20978b8aa3a0af",
+      "world_scale": 1.0
+    },
+    "icon_star": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          57.0
+        ]
+      },
+      "region": [
+        1875,
+        891,
+        116,
+        112
+      ],
+      "scale": 2.0,
+      "source": "png/icon_star.png",
+      "source_sha": "1e2ca34a2d7a2220",
+      "world_scale": 1.0
+    },
+    "item_car": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          60.0,
+          42.0
+        ]
+      },
+      "region": [
+        1741,
+        1025,
+        119,
+        82
+      ],
+      "scale": 2.0,
+      "source": "png/item_car.png",
+      "source_sha": "62d44edb8b9d37c0",
+      "world_scale": 1.0
+    },
+    "item_copper": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          59.0
+        ]
+      },
+      "region": [
+        1226,
+        891,
+        115,
+        116
+      ],
+      "scale": 2.0,
+      "source": "png/item_copper.png",
+      "source_sha": "3761be462321b121",
+      "world_scale": 1.0
+    },
+    "item_copper_ingot": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          60.0,
+          37.0
+        ]
+      },
+      "region": [
+        245,
+        1139,
+        120,
+        73
+      ],
+      "scale": 2.0,
+      "source": "png/item_copper_ingot.png",
+      "source_sha": "d2d23c010ba982e3",
+      "world_scale": 1.0
+    },
+    "item_gold": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          59.0
+        ]
+      },
+      "region": [
+        1345,
+        891,
+        115,
+        116
+      ],
+      "scale": 2.0,
+      "source": "png/item_gold.png",
+      "source_sha": "1d6ad92b57303695",
+      "world_scale": 1.0
+    },
+    "item_gold_ingot": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          60.0,
+          37.0
+        ]
+      },
+      "region": [
+        369,
+        1139,
+        120,
+        73
+      ],
+      "scale": 2.0,
+      "source": "png/item_gold_ingot.png",
+      "source_sha": "b154b0b92d64d5f3",
+      "world_scale": 1.0
+    },
+    "item_iron": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          59.0
+        ]
+      },
+      "region": [
+        1464,
+        891,
+        116,
+        116
+      ],
+      "scale": 2.0,
+      "source": "png/item_iron.png",
+      "source_sha": "d68f77b71e2f3098",
+      "world_scale": 1.0
+    },
+    "item_iron_ingot": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          60.0,
+          37.0
+        ]
+      },
+      "region": [
+        2,
+        1139,
+        120,
+        74
+      ],
+      "scale": 2.0,
+      "source": "png/item_iron_ingot.png",
+      "source_sha": "b1fdaadbfc246bc3",
+      "world_scale": 1.0
+    },
+    "item_stone": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          58.0,
+          55.0
+        ]
+      },
+      "region": [
+        2,
+        1025,
+        116,
+        110
+      ],
+      "scale": 2.0,
+      "source": "png/item_stone.png",
+      "source_sha": "6b3c8fd7d6ff1bf8",
+      "world_scale": 1.0
+    },
+    "item_wood": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          58.0,
+          52.0
+        ]
+      },
+      "region": [
+        512,
+        1025,
+        116,
+        104
+      ],
+      "scale": 2.0,
+      "source": "png/item_wood.png",
+      "source_sha": "1ff7fe3d8fdf4f44",
+      "world_scale": 1.0
+    },
+    "lab": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          113.0,
+          215.0
+        ],
+        "top": [
+          113.0,
+          3.0
+        ]
+      },
+      "region": [
+        887,
+        2,
+        226,
+        295
+      ],
+      "scale": 2.0,
+      "source": "png/lab.png",
+      "source_sha": "a7272b1f02ecce44",
+      "world_scale": 0.5
+    },
+    "lumberyard": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          133.0
+        ],
+        "top": [
+          109.0,
+          3.0
+        ]
+      },
+      "region": [
+        224,
+        673,
+        216,
+        212
+      ],
+      "scale": 2.0,
+      "source": "png/lumberyard.png",
+      "source_sha": "7b96142f99889bfc",
+      "world_scale": 0.5
+    },
+    "mine": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          137.0
+        ],
+        "top": [
+          109.0,
+          3.0
+        ]
+      },
+      "region": [
+        1663,
+        395,
+        216,
+        216
+      ],
+      "scale": 2.0,
+      "source": "png/mine.png",
+      "source_sha": "e802fbb453db779c",
+      "world_scale": 0.5
+    },
+    "momo_front": {
+      "meta": {},
+      "pivots": {
+        "hand_r": [
+          146.0,
+          145.0
+        ],
+        "head": [
+          100.0,
+          23.0
+        ],
+        "origin": [
+          100.0,
+          199.0
+        ]
+      },
+      "region": [
+        444,
+        673,
+        189,
+        200
+      ],
+      "scale": 1.0,
+      "source": "png/momo_front.png",
+      "source_sha": "e2773ef434f9696c",
+      "world_scale": 0.42
+    },
+    "momo_monument": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          135.0
+        ],
+        "top": [
+          109.0,
+          3.0
+        ]
+      },
+      "region": [
+        2,
+        673,
+        218,
+        214
+      ],
+      "scale": 2.0,
+      "source": "png/momo_monument.png",
+      "source_sha": "bf3740db80c27f3e",
+      "world_scale": 0.5
+    },
+    "mood_confused": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          67.0,
+          47.0
+        ],
+        "origin": [
+          27.0,
+          115.0
+        ]
+      },
+      "region": [
+        434,
+        891,
+        134,
+        118
+      ],
+      "scale": 2.0,
+      "source": "svg/mood_confused.svg",
+      "source_sha": "ab460d545aa5bd02",
+      "world_scale": 0.2
+    },
+    "mood_content": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          67.0,
+          47.0
+        ],
+        "origin": [
+          27.0,
+          115.0
+        ]
+      },
+      "region": [
+        572,
+        891,
+        134,
+        118
+      ],
+      "scale": 2.0,
+      "source": "svg/mood_content.svg",
+      "source_sha": "1cc5eab52a43a88b",
+      "world_scale": 0.2
+    },
+    "mood_thinking": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          67.0,
+          47.0
+        ],
+        "origin": [
+          27.0,
+          115.0
+        ]
+      },
+      "region": [
+        710,
+        891,
+        134,
+        118
+      ],
+      "scale": 2.0,
+      "source": "svg/mood_thinking.svg",
+      "source_sha": "0e434609e4ac0ff4",
+      "world_scale": 0.2
+    },
+    "mood_worried": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          67.0,
+          47.0
+        ],
+        "origin": [
+          27.0,
+          115.0
+        ]
+      },
+      "region": [
+        848,
+        891,
+        134,
+        118
+      ],
+      "scale": 2.0,
+      "source": "svg/mood_worried.svg",
+      "source_sha": "559ac5e6b7afd08c",
+      "world_scale": 0.2
+    },
+    "office": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          250.0
+        ],
+        "top": [
+          97.0,
+          3.0
+        ]
+      },
+      "region": [
+        444,
+        2,
+        218,
+        329
+      ],
+      "scale": 2.0,
+      "source": "png/office.png",
+      "source_sha": "509c693a73aad81a",
+      "world_scale": 0.5
+    },
+    "office_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          58.0,
+          118.0
+        ]
+      },
+      "region": [
+        1759,
+        891,
+        112,
+        115
+      ],
+      "scale": 2.0,
+      "source": "png/lit/office.png",
+      "source_sha": "fdc5bf70ceb67da1",
+      "world_scale": 0.5
+    },
+    "park": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          109.0
+        ],
+        "top": [
+          57.0,
+          3.0
+        ]
+      },
+      "region": [
+        858,
+        673,
+        217,
+        187
+      ],
+      "scale": 2.0,
+      "source": "png/park.png",
+      "source_sha": "651a0169de126042",
+      "world_scale": 0.5
+    },
+    "prop_barrel": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          34.0,
+          84.0
+        ]
+      },
+      "region": [
+        1545,
+        1025,
+        68,
+        87
+      ],
+      "scale": 1.0,
+      "source": "png/prop_barrel.png",
+      "source_sha": "b7e9e23f49f13c25",
+      "world_scale": 0.33
+    },
+    "prop_bush": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          69.0,
+          124.0
+        ]
+      },
+      "region": [
+        1791,
+        673,
+        137,
+        130
+      ],
+      "scale": 1.0,
+      "source": "png/prop_bush.png",
+      "source_sha": "81d45129cda7619c",
+      "world_scale": 0.34
+    },
+    "prop_bush_flowers": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          70.0,
+          125.0
+        ]
+      },
+      "region": [
+        1648,
+        673,
+        139,
+        131
+      ],
+      "scale": 1.0,
+      "source": "png/prop_bush_flowers.png",
+      "source_sha": "0aa828cb0cd2574e",
+      "world_scale": 0.34
+    },
+    "prop_crate": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          41.0,
+          91.0
+        ]
+      },
+      "region": [
+        1139,
+        1025,
+        82,
+        94
+      ],
+      "scale": 1.0,
+      "source": "png/prop_crate.png",
+      "source_sha": "8693c93c793cebd0",
+      "world_scale": 0.3
+    },
+    "prop_flowers": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          64.0,
+          124.0
+        ]
+      },
+      "region": [
+        2,
+        891,
+        127,
+        130
+      ],
+      "scale": 1.0,
+      "source": "png/prop_flowers.png",
+      "source_sha": "96197ba1a8cc2cdf",
+      "world_scale": 0.28
+    },
+    "prop_grass": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          64.0,
+          121.0
+        ]
+      },
+      "region": [
+        303,
+        891,
+        127,
+        127
+      ],
+      "scale": 1.0,
+      "source": "png/prop_grass.png",
+      "source_sha": "1a8b4fdb7d69f664",
+      "world_scale": 0.24
+    },
+    "prop_logs": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          43.0,
+          73.0
+        ]
+      },
+      "region": [
+        1864,
+        1025,
+        87,
+        76
+      ],
+      "scale": 1.0,
+      "source": "png/prop_logs.png",
+      "source_sha": "6e9e159bd84fa907",
+      "world_scale": 0.33
+    },
+    "prop_pine": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          48.0,
+          148.0
+        ]
+      },
+      "region": [
+        1211,
+        673,
+        97,
+        151
+      ],
+      "scale": 1.0,
+      "source": "png/prop_pine.png",
+      "source_sha": "123a97cd16cfb176",
+      "world_scale": 0.7
+    },
+    "prop_pine_small": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          36.0,
+          88.0
+        ]
+      },
+      "region": [
+        1347,
+        1025,
+        72,
+        91
+      ],
+      "scale": 1.0,
+      "source": "png/prop_pine_small.png",
+      "source_sha": "2e1ead26abf73a94",
+      "world_scale": 0.72
+    },
+    "prop_rocks": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          59.0,
+          86.0
+        ]
+      },
+      "region": [
+        1423,
+        1025,
+        118,
+        90
+      ],
+      "scale": 1.0,
+      "source": "png/prop_rocks.png",
+      "source_sha": "38692c55418948a4",
+      "world_scale": 0.26
+    },
+    "prop_stump": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          33.0,
+          65.0
+        ]
+      },
+      "region": [
+        803,
+        1139,
+        67,
+        68
+      ],
+      "scale": 1.0,
+      "source": "png/prop_stump.png",
+      "source_sha": "1bd8149bbed07db1",
+      "world_scale": 0.36
+    },
+    "prop_tree": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          64.0,
+          163.0
+        ]
+      },
+      "region": [
+        1079,
+        673,
+        128,
+        169
+      ],
+      "scale": 1.0,
+      "source": "png/prop_tree.png",
+      "source_sha": "8f1cf24d785af3f7",
+      "world_scale": 0.62
+    },
+    "pub": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          114.0,
+          213.0
+        ],
+        "top": [
+          106.0,
+          3.0
+        ]
+      },
+      "region": [
+        1339,
+        2,
+        233,
+        292
+      ],
+      "scale": 2.0,
+      "source": "png/pub.png",
+      "source_sha": "4de893239d80b1d3",
+      "world_scale": 0.5
+    },
+    "pub_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          63.0,
+          103.0
+        ]
+      },
+      "region": [
+        632,
+        1025,
+        132,
+        104
+      ],
+      "scale": 2.0,
+      "source": "png/lit/pub.png",
+      "source_sha": "9fe47e162a4f9533",
+      "world_scale": 0.5
+    },
+    "school": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          198.0
+        ],
+        "top": [
+          97.0,
+          2.0
+        ]
+      },
+      "region": [
+        1798,
+        2,
+        222,
+        277
+      ],
+      "scale": 2.0,
+      "source": "png/school.png",
+      "source_sha": "6f24f9272cab5f71",
+      "world_scale": 0.5
+    },
+    "school_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          93.0,
+          56.0
+        ]
+      },
+      "region": [
+        493,
+        1139,
+        160,
+        72
+      ],
+      "scale": 2.0,
+      "source": "png/lit/school.png",
+      "source_sha": "8300fb3895083dba",
+      "world_scale": 0.5
+    },
+    "smelter": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          196.0
+        ],
+        "top": [
+          109.0,
+          3.0
+        ]
+      },
+      "region": [
+        2,
+        395,
+        217,
+        274
+      ],
+      "scale": 2.0,
+      "source": "png/smelter.png",
+      "source_sha": "f4f3bd6bdd5875c4",
+      "world_scale": 0.5
+    },
+    "solar_panel": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          108.0,
+          109.0
+        ],
+        "top": [
+          112.0,
+          2.0
+        ]
+      },
+      "region": [
+        637,
+        673,
+        217,
+        188
+      ],
+      "scale": 2.0,
+      "source": "png/solar_panel.png",
+      "source_sha": "723f1b71598459b4",
+      "world_scale": 0.5
+    },
+    "steam_engine": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          185.0
+        ],
+        "stack": [
+          136.0,
+          3.0
+        ],
+        "top": [
+          136.0,
+          2.0
+        ]
+      },
+      "region": [
+        223,
+        395,
+        224,
+        264
+      ],
+      "scale": 2.0,
+      "source": "png/steam_engine.png",
+      "source_sha": "6cc90b724aa996f4",
+      "world_scale": 0.5
+    },
+    "ui_boost": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          26.0,
+          20.0
+        ]
+      },
+      "region": [
+        1321,
+        1139,
+        50,
+        40
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_boost.svg",
+      "source_sha": "c62eeab059ca09e2",
+      "world_scale": 1.0
+    },
+    "ui_build": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          22.0,
+          24.0
+        ]
+      },
+      "region": [
+        1179,
+        1139,
+        44,
+        50
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_build.svg",
+      "source_sha": "ba9fa234edcf9e35",
+      "world_scale": 1.0
+    },
+    "ui_flask": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          47.0,
+          58.0
+        ]
+      },
+      "region": [
+        1584,
+        891,
+        93,
+        116
+      ],
+      "scale": 2.0,
+      "source": "png/ui_flask.png",
+      "source_sha": "a01d2aa3abcde728",
+      "world_scale": 1.0
+    },
+    "ui_harvest": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          52.0
+        ]
+      },
+      "region": [
+        768,
+        1025,
+        119,
+        103
+      ],
+      "scale": 2.0,
+      "source": "png/ui_harvest.png",
+      "source_sha": "3cd59b1e8589e000",
+      "world_scale": 1.0
+    },
+    "ui_hire": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          30.0,
+          27.0
+        ]
+      },
+      "region": [
+        926,
+        1139,
+        61,
+        58
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_hire.svg",
+      "source_sha": "d8d7d9e31d613802",
+      "world_scale": 1.0
+    },
+    "ui_land": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          60.0,
+          54.0
+        ]
+      },
+      "region": [
+        242,
+        1025,
+        120,
+        108
+      ],
+      "scale": 2.0,
+      "source": "png/ui_land.png",
+      "source_sha": "4db10e62822fecde",
+      "world_scale": 1.0
+    },
+    "ui_lumber": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          46.0
+        ]
+      },
+      "region": [
+        1225,
+        1025,
+        118,
+        92
+      ],
+      "scale": 2.0,
+      "source": "png/ui_lumber.png",
+      "source_sha": "cd7cde17b6d2d283",
+      "world_scale": 1.0
+    },
+    "ui_mail": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          26.0,
+          18.0
+        ]
+      },
+      "region": [
+        1375,
+        1139,
+        52,
+        38
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_mail.svg",
+      "source_sha": "e02cc5e9e78d3b93",
+      "world_scale": 1.0
+    },
+    "ui_mine": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          58.0,
+          49.0
+        ]
+      },
+      "region": [
+        891,
+        1025,
+        116,
+        99
+      ],
+      "scale": 2.0,
+      "source": "png/ui_mine.png",
+      "source_sha": "91ed64731e2c792d",
+      "world_scale": 1.0
+    },
+    "ui_no_ads": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          24.0,
+          30.0
+        ]
+      },
+      "region": [
+        874,
+        1139,
+        48,
+        60
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_no_ads.svg",
+      "source_sha": "d059b62c7308c4ea",
+      "world_scale": 1.0
+    },
+    "ui_power": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          37.0,
+          58.0
+        ]
+      },
+      "region": [
+        1681,
+        891,
+        74,
+        116
+      ],
+      "scale": 2.0,
+      "source": "png/ui_power.png",
+      "source_sha": "5804e2fcffe40160",
+      "world_scale": 1.0
+    },
+    "ui_research": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          16.0,
+          26.0
+        ]
+      },
+      "region": [
+        1141,
+        1139,
+        34,
+        52
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_research.svg",
+      "source_sha": "c6fd331c9031acac",
+      "world_scale": 1.0
+    },
+    "ui_seed": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          59.0
+        ]
+      },
+      "region": [
+        986,
+        891,
+        117,
+        118
+      ],
+      "scale": 2.0,
+      "source": "png/ui_seed.png",
+      "source_sha": "ebf0be0b7d5c640b",
+      "world_scale": 1.0
+    },
+    "ui_settings": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          28.0,
+          26.0
+        ]
+      },
+      "region": [
+        1081,
+        1139,
+        56,
+        56
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_settings.svg",
+      "source_sha": "4fe029b4c4b8b2a4",
+      "world_scale": 1.0
+    },
+    "ui_shop": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          23.0,
+          24.0
+        ]
+      },
+      "region": [
+        1227,
+        1139,
+        46,
+        50
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_shop.svg",
+      "source_sha": "8feee3583fad3e13",
+      "world_scale": 1.0
+    },
+    "ui_sprout": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          59.0,
+          56.0
+        ]
+      },
+      "region": [
+        122,
+        1025,
+        116,
+        110
+      ],
+      "scale": 2.0,
+      "source": "png/ui_sprout.png",
+      "source_sha": "fcd22810d8c633c0",
+      "world_scale": 1.0
+    },
+    "ui_status": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          20.0,
+          21.0
+        ]
+      },
+      "region": [
+        1277,
+        1139,
+        40,
+        43
+      ],
+      "scale": 1.0,
+      "source": "svg/ui_status.svg",
+      "source_sha": "bceb4eee461fd294",
+      "world_scale": 1.0
+    },
+    "ui_water": {
+      "meta": {},
+      "pivots": {
+        "center": [
+          60.0,
+          44.0
+        ]
+      },
+      "region": [
+        1617,
+        1025,
+        120,
+        87
+      ],
+      "scale": 2.0,
+      "source": "png/ui_water.png",
+      "source_sha": "f109bf1919c57999",
+      "world_scale": 1.0
+    },
+    "villa": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          109.0,
+          172.0
+        ],
+        "top": [
+          101.0,
+          3.0
+        ]
+      },
+      "region": [
+        675,
+        395,
+        217,
+        251
+      ],
+      "scale": 2.0,
+      "source": "png/villa.png",
+      "source_sha": "16512a2d41fd6cf3",
+      "world_scale": 0.5
+    },
+    "villa_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          50.0,
+          41.0
+        ]
+      },
+      "region": [
+        126,
+        1139,
+        115,
+        74
+      ],
+      "scale": 2.0,
+      "source": "png/lit/villa.png",
+      "source_sha": "e4270939b7f0a135",
+      "world_scale": 0.5
+    },
+    "water_wheel": {
+      "meta": {},
+      "pivots": {
+        "hub": [
+          172.0,
+          141.0
+        ],
+        "origin": [
+          108.0,
+          159.0
+        ],
+        "top": [
+          92.0,
+          2.0
+        ]
+      },
+      "region": [
+        1306,
+        395,
+        216,
+        237
+      ],
+      "scale": 2.0,
+      "source": "png/water_wheel.png",
+      "source_sha": "c25921627fff5c21",
+      "world_scale": 0.5
+    },
+    "water_wheel_lit": {
+      "meta": {},
+      "pivots": {
+        "origin": [
+          46.0,
+          33.0
+        ]
+      },
+      "region": [
+        991,
+        1139,
+        86,
+        57
+      ],
+      "scale": 2.0,
+      "source": "png/lit/water_wheel.png",
+      "source_sha": "ebde9a7f5c738b2b",
+      "world_scale": 0.5
+    },
+    "wind_turbine": {
+      "meta": {},
+      "pivots": {
+        "hub": [
+          106.6,
+          9.0
+        ],
+        "origin": [
+          108.0,
+          291.0
+        ],
+        "top": [
+          108.0,
+          2.0
+        ]
+      },
+      "region": [
+        223,
+        2,
+        217,
+        369
+      ],
+      "scale": 2.0,
+      "source": "png/wind_turbine.png",
+      "source_sha": "c0e0960ab381e31d",
+      "world_scale": 0.5
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "_doc": "Copies of the game's own files (momonium/<source>), made by tools/sync_shared.sh; tests/unit/test_shared_assets.gd checks each is byte-identical to its source.",
+  "files": {
+    "shared/atlas/sprites.png": "assets/atlas/sprites.png",
+    "shared/atlas/sprites.json": "assets/atlas/sprites.json",
+    "shared/momo/momo_sheet.png": "assets/momo/momo_sheet.png",
+    "shared/momo/momo_sheet.json": "assets/momo/momo_sheet.json",
+    "shared/hands/hand_tools.png": "assets/hands/hand_tools.png",
+    "shared/hands/hand_tools.json": "assets/hands/hand_tools.json",
+    "shared/textures/grass.png": "assets/textures/grass.png",
+    "shared/textures/cliff.png": "assets/textures/cliff.png",
+    "shared/textures/dirt.png": "assets/textures/dirt.png",
+    "shared/textures/stone.png": "assets/textures/stone.png",
+    "shared/shaders/ocean.gdshader": "assets/shaders/ocean.gdshader",
+    "shared/fonts/ui_ko.otf": "assets/fonts/ui_ko.otf",
+    "shared/audio/music_calm.ogg": "assets/audio/music_calm.ogg",
+    "shared/audio/amb_ocean.ogg": "assets/audio/amb_ocean.ogg",
+    "shared/audio/sfx_coin.ogg": "assets/audio/sfx_coin.ogg",
+    "shared/audio/sfx_click.ogg": "assets/audio/sfx_click.ogg",
+    "shared/audio/sfx_refuse.ogg": "assets/audio/sfx_refuse.ogg",
+    "shared/audio/sfx_built.ogg": "assets/audio/sfx_built.ogg",
+    "shared/audio/sfx_promote.ogg": "assets/audio/sfx_promote.ogg",
+    "shared/audio/sfx_harvest.ogg": "assets/audio/sfx_harvest.ogg",
+    "shared/audio/sfx_tap_pick.ogg": "assets/audio/sfx_tap_pick.ogg",
+    "shared/audio/sfx_tap_metal.ogg": "assets/audio/sfx_tap_metal.ogg",
+    "shared/audio/sfx_thunk.ogg": "assets/audio/sfx_thunk.ogg",
+    "shared/audio/sfx_demolish.ogg": "assets/audio/sfx_demolish.ogg",
+    "shared/audio/sfx_land.ogg": "assets/audio/sfx_land.ogg",
+    "shared/audio/sfx_momo.ogg": "assets/audio/sfx_momo.ogg",
+    "shared/audio/sfx_tap_soft.ogg": "assets/audio/sfx_tap_soft.ogg",
+    "shared/audio/sfx_tap_wood.ogg": "assets/audio/sfx_tap_wood.ogg"
+  }
+}

@@ -1,0 +1,52 @@
+; Momonium Fun Lab -- six small playable experiments looking for a fun core
+; loop (Step 86). A Godot project of its own, nested inside momonium/: Godot
+; skips a folder that holds another project.godot, so the game never imports,
+; loads or exports anything here, and this project never sees the game's
+; res://. What it reuses from the game -- Momo, the atlas, textures, the sea
+; shader, sounds, the font -- is copied into shared/ by tools/sync_shared.sh
+; (byte for byte, checked by tests/unit/test_shared_assets.gd).
+;
+; Its own name, so its own user:// folder: the Lab writes nothing there
+; anyway, and never momonium_save or momonium_settings.
+
+config_version=5
+
+[application]
+
+config/name="Momonium Fun Lab"
+config/description="Six small playable experiments looking for a fun core loop."
+run/main_scene="res://lab/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.86.0"
+config/icon="res://icon.svg"
+; The sea's colour while the pack loads, no engine logo.
+boot_splash/bg_color=Color(0.137, 0.494, 0.808, 1)
+boot_splash/show_image=false
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=405
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[gui]
+
+theme/custom_font="res://shared/fonts/ui_ko.otf"
+
+[input_devices]
+
+; Buttons only understand mouse events and a phone only sends touches, so
+; touches are turned into mouse events -- and everything that counts a tap
+; listens to the mouse event alone, so one touch is one action (Step 88).
+pointing/emulate_mouse_from_touch=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.137, 0.494, 0.808, 1)
+textures/vram_compression/import_etc2_astc=true

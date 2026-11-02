@@ -1,0 +1,877 @@
+{
+  "_doc": "Momo's sprite sheet (Step 51, design/MOMO_SPRITES.md): equal cells, rows x cols; each cell holds one pose of the same Momo, its root -- the point on the ground between its feet (Step 76, design/MOMO_ANCHORS.md) -- on the pivot (cell x, cell y from the cell's top-left); a cell's `root` says how it was found; `feet` (each foot's contact), `torso` and `eyes` are measured marks in cell pixels (the calibration gallery's). `animations` name the cells a state plays in order at `fps`; a left-facing view is the same cell mirrored. Built by tools/art/gen/build_momo_sheet.gd from assets/src/png/momo/.",
+  "cell": [
+    256,
+    256
+  ],
+  "cols": 5,
+  "rows": 5,
+  "pivot": [
+    128,
+    242
+  ],
+  "stand_height": 200.0,
+  "cells": [
+    {
+      "name": "front_idle",
+      "row": 0.0,
+      "col": 0.0,
+      "view": "front",
+      "state": "idle",
+      "frame": 0,
+      "box": [
+        28,
+        43,
+        189,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        125.0,
+        168.0
+      ],
+      "eyes": [
+        135.5,
+        115.0
+      ],
+      "feet": [
+        [
+          106.0,
+          242.0
+        ],
+        [
+          149.5,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "front_blink",
+      "row": 0.0,
+      "col": 1.0,
+      "view": "front",
+      "state": "blink",
+      "frame": 0,
+      "box": [
+        28,
+        43,
+        189,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        125.0,
+        168.0
+      ],
+      "feet": [
+        [
+          106.0,
+          242.0
+        ],
+        [
+          149.5,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "front_walk_a",
+      "row": 0.0,
+      "col": 2.0,
+      "view": "front",
+      "state": "walk",
+      "frame": 0,
+      "box": [
+        27,
+        43,
+        191,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        123.5,
+        166.5
+      ],
+      "eyes": [
+        135.5,
+        115.0
+      ],
+      "feet": [
+        [
+          118.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "front_walk_b",
+      "row": 0.0,
+      "col": 3.0,
+      "view": "front",
+      "state": "walk",
+      "frame": 1,
+      "box": [
+        27,
+        43,
+        191,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        125.0,
+        167.5
+      ],
+      "eyes": [
+        135.0,
+        114.5
+      ],
+      "feet": [
+        [
+          113.5,
+          242.0
+        ],
+        [
+          144.5,
+          241.0
+        ]
+      ]
+    },
+    {
+      "name": "front_walk_c",
+      "row": 0.0,
+      "col": 4.0,
+      "view": "front",
+      "state": "walk",
+      "frame": 2,
+      "box": [
+        27,
+        43,
+        191,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        124.5,
+        166.5
+      ],
+      "eyes": [
+        133.5,
+        113.0
+      ],
+      "feet": [
+        [
+          109.0,
+          235.0
+        ],
+        [
+          147.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "back_idle",
+      "row": 1.0,
+      "col": 0.0,
+      "view": "back",
+      "state": "idle",
+      "frame": 0,
+      "box": [
+        43,
+        43,
+        179,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        132.5,
+        167.0
+      ],
+      "feet": [
+        [
+          109.0,
+          241.0
+        ],
+        [
+          146.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "back_walk_a",
+      "row": 1.0,
+      "col": 1.0,
+      "view": "back",
+      "state": "walk",
+      "frame": 0,
+      "box": [
+        44,
+        43,
+        178,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        132.5,
+        167.5
+      ],
+      "feet": [
+        [
+          111.5,
+          241.0
+        ],
+        [
+          143.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "back_walk_b",
+      "row": 1.0,
+      "col": 2.0,
+      "view": "back",
+      "state": "walk",
+      "frame": 1,
+      "box": [
+        49,
+        43,
+        168,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        132.5,
+        168.5
+      ],
+      "feet": [
+        [
+          139.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "back_walk_c",
+      "row": 1.0,
+      "col": 3.0,
+      "view": "back",
+      "state": "walk",
+      "frame": 2,
+      "box": [
+        46,
+        43,
+        174,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        132.5,
+        167.5
+      ],
+      "feet": [
+        [
+          107.0,
+          242.0
+        ],
+        [
+          146.0,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "back_work",
+      "row": 1.0,
+      "col": 4.0,
+      "view": "back",
+      "state": "work",
+      "frame": 0,
+      "box": [
+        46,
+        43,
+        171,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        132.0,
+        165.5
+      ],
+      "feet": [
+        [
+          109.5,
+          241.0
+        ],
+        [
+          146.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "side_idle",
+      "row": 2.0,
+      "col": 0.0,
+      "view": "side",
+      "state": "idle",
+      "frame": 0,
+      "box": [
+        66,
+        43,
+        119,
+        200
+      ],
+      "root": "foot",
+      "torso": [
+        116.0,
+        170.0
+      ],
+      "feet": [
+        [
+          128.0,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "side_walk_a",
+      "row": 2.0,
+      "col": 1.0,
+      "view": "side",
+      "state": "walk",
+      "frame": 0,
+      "box": [
+        62,
+        43,
+        129,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        126.5,
+        170.0
+      ],
+      "feet": [
+        [
+          100.5,
+          242.0
+        ],
+        [
+          168.5,
+          241.0
+        ]
+      ]
+    },
+    {
+      "name": "side_walk_b",
+      "row": 2.0,
+      "col": 2.0,
+      "view": "side",
+      "state": "walk",
+      "frame": 1,
+      "box": [
+        69,
+        43,
+        113,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        117.5,
+        171.0
+      ],
+      "feet": [
+        [
+          132.0,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "side_walk_c",
+      "row": 2.0,
+      "col": 3.0,
+      "view": "side",
+      "state": "walk",
+      "frame": 2,
+      "box": [
+        58,
+        43,
+        135,
+        200
+      ],
+      "root": "head",
+      "torso": [
+        123.0,
+        169.5
+      ],
+      "feet": [
+        [
+          97.0,
+          242.0
+        ],
+        [
+          173.5,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "side_carry",
+      "row": 2.0,
+      "col": 4.0,
+      "view": "side",
+      "state": "carry",
+      "frame": 0,
+      "box": [
+        60,
+        43,
+        138,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        109.0,
+        169.5
+      ],
+      "feet": [
+        [
+          103.5,
+          242.0
+        ],
+        [
+          153.0,
+          241.0
+        ]
+      ]
+    },
+    {
+      "name": "harvest",
+      "row": 3.0,
+      "col": 0.0,
+      "view": "front",
+      "state": "harvest",
+      "frame": 0,
+      "box": [
+        32,
+        43,
+        187,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        127.0,
+        166.0
+      ],
+      "eyes": [
+        133.5,
+        115.5
+      ],
+      "feet": [
+        [
+          106.5,
+          242.0
+        ],
+        [
+          150.5,
+          241.0
+        ]
+      ]
+    },
+    {
+      "name": "water",
+      "row": 3.0,
+      "col": 1.0,
+      "view": "front",
+      "state": "water",
+      "frame": 0,
+      "box": [
+        37,
+        43,
+        207,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        119.5,
+        164.0
+      ],
+      "eyes": [
+        151.0,
+        114.0
+      ],
+      "feet": [
+        [
+          106.0,
+          242.0
+        ],
+        [
+          150.5,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "dig",
+      "row": 3.0,
+      "col": 2.0,
+      "view": "front",
+      "state": "dig",
+      "frame": 0,
+      "box": [
+        25,
+        42,
+        211,
+        201
+      ],
+      "root": "feet",
+      "torso": [
+        113.0,
+        166.0
+      ],
+      "eyes": [
+        125.0,
+        112.0
+      ],
+      "feet": [
+        [
+          95.0,
+          242.0
+        ],
+        [
+          161.5,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "carry",
+      "row": 3.0,
+      "col": 3.0,
+      "view": "front",
+      "state": "carry",
+      "frame": 0,
+      "box": [
+        29,
+        43,
+        188,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        104.5,
+        163.5
+      ],
+      "eyes": [
+        137.0,
+        111.5
+      ],
+      "feet": [
+        [
+          106.5,
+          242.0
+        ],
+        [
+          150.0,
+          240.0
+        ]
+      ]
+    },
+    {
+      "name": "study",
+      "row": 3.0,
+      "col": 4.0,
+      "view": "front",
+      "state": "study",
+      "frame": 0,
+      "box": [
+        40,
+        43,
+        179,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        124.0,
+        165.5
+      ],
+      "eyes": [
+        121.0,
+        122.5
+      ],
+      "feet": [
+        [
+          107.0,
+          240.0
+        ],
+        [
+          148.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "sit",
+      "row": 4.0,
+      "col": 0.0,
+      "view": "front",
+      "state": "sit",
+      "frame": 0,
+      "box": [
+        28,
+        45,
+        196,
+        198
+      ],
+      "root": "torso",
+      "torso": [
+        124.5,
+        131.5
+      ],
+      "feet": [
+        [
+          136.5,
+          203.0
+        ]
+      ]
+    },
+    {
+      "name": "sleep",
+      "row": 4.0,
+      "col": 1.0,
+      "view": "front",
+      "state": "sleep",
+      "frame": 0,
+      "box": [
+        10,
+        120,
+        236,
+        122
+      ],
+      "root": "box",
+      "torso": [
+        136.0,
+        170.0
+      ],
+      "feet": [
+        [
+          89.0,
+          239.0
+        ]
+      ]
+    },
+    {
+      "name": "happy",
+      "row": 4.0,
+      "col": 2.0,
+      "view": "front",
+      "state": "happy",
+      "frame": 0,
+      "box": [
+        25,
+        43,
+        198,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        128.0,
+        165.0
+      ],
+      "feet": [
+        [
+          110.0,
+          242.0
+        ],
+        [
+          145.5,
+          242.0
+        ]
+      ]
+    },
+    {
+      "name": "confused",
+      "row": 4.0,
+      "col": 3.0,
+      "view": "front",
+      "state": "confused",
+      "frame": 0,
+      "box": [
+        31,
+        43,
+        185,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        112.0,
+        167.5
+      ],
+      "feet": [
+        [
+          107.0,
+          242.0
+        ],
+        [
+          149.0,
+          241.0
+        ]
+      ]
+    },
+    {
+      "name": "waiting",
+      "row": 4.0,
+      "col": 4.0,
+      "view": "front",
+      "state": "waiting",
+      "frame": 0,
+      "box": [
+        41,
+        43,
+        173,
+        200
+      ],
+      "root": "feet",
+      "torso": [
+        128.0,
+        166.5
+      ],
+      "eyes": [
+        139.0,
+        113.5
+      ],
+      "feet": [
+        [
+          107.5,
+          242.0
+        ],
+        [
+          148.0,
+          242.0
+        ]
+      ]
+    }
+  ],
+  "animations": {
+    "idle_front": {
+      "cells": [
+        "front_idle"
+      ],
+      "fps": 0.0,
+      "blink": "front_blink"
+    },
+    "walk_front": {
+      "cells": [
+        "front_walk_a",
+        "front_walk_b",
+        "front_walk_c",
+        "front_walk_b"
+      ],
+      "fps": 8.0
+    },
+    "idle_back": {
+      "cells": [
+        "back_idle"
+      ],
+      "fps": 0.0
+    },
+    "walk_back": {
+      "cells": [
+        "back_walk_a",
+        "back_walk_b",
+        "back_walk_c",
+        "back_walk_b"
+      ],
+      "fps": 8.0
+    },
+    "work_back": {
+      "cells": [
+        "back_work"
+      ],
+      "fps": 0.0
+    },
+    "idle_side": {
+      "cells": [
+        "side_idle"
+      ],
+      "fps": 0.0
+    },
+    "walk_side": {
+      "cells": [
+        "side_walk_a",
+        "side_walk_b",
+        "side_walk_c",
+        "side_walk_b"
+      ],
+      "fps": 8.0
+    },
+    "carry_side": {
+      "cells": [
+        "side_carry"
+      ],
+      "fps": 0.0
+    },
+    "harvest": {
+      "cells": [
+        "harvest"
+      ],
+      "fps": 0.0
+    },
+    "water": {
+      "cells": [
+        "water"
+      ],
+      "fps": 0.0
+    },
+    "dig": {
+      "cells": [
+        "dig"
+      ],
+      "fps": 0.0
+    },
+    "carry": {
+      "cells": [
+        "carry"
+      ],
+      "fps": 0.0
+    },
+    "study": {
+      "cells": [
+        "study"
+      ],
+      "fps": 0.0
+    },
+    "sit": {
+      "cells": [
+        "sit"
+      ],
+      "fps": 0.0
+    },
+    "sleep": {
+      "cells": [
+        "sleep"
+      ],
+      "fps": 0.0
+    },
+    "happy": {
+      "cells": [
+        "happy"
+      ],
+      "fps": 0.0
+    },
+    "confused": {
+      "cells": [
+        "confused"
+      ],
+      "fps": 0.0
+    },
+    "waiting": {
+      "cells": [
+        "waiting"
+      ],
+      "fps": 0.0
+    }
+  }
+}

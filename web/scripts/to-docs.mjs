@@ -11,6 +11,7 @@ import { cp, readdir, rm, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { keptDirs } from './kept-dirs.mjs';
 
 const web = dirname(dirname(fileURLToPath(import.meta.url)));
 const out = join(web, 'out');
@@ -28,14 +29,13 @@ const docs = join(dirname(web), 'docs');
 // removes something unrelated looks exactly like one that worked.
 //
 // A game is a top-level directory with a project.godot, which is the same thing
-// deploy-web.sh means by a game, so the two cannot disagree. Only `engine` is
-// named, and only because it is the one thing here that is neither a game nor
-// site output.
+// deploy-web.sh means by a game, so the two cannot disagree; a project nested
+// in a game (momonium/experiments, the Fun Lab) publishes to
+// docs/<game>-<folder>/ and is kept the same way. Only `engine` is named, and
+// only because it is the one thing here that is neither a game nor site
+// output. The rule lives in kept-dirs.mjs.
 const repo = dirname(web);
-const games = (await readdir(repo, { withFileTypes: true }))
-  .filter((entry) => entry.isDirectory() && existsSync(join(repo, entry.name, 'project.godot')))
-  .map((entry) => entry.name);
-const KEEP = new Set([...games, 'engine']);
+const KEEP = keptDirs(repo);
 
 if (!existsSync(out)) {
   console.error('to-docs: no out/ -- run with GAMO_TARGET=pages first');
