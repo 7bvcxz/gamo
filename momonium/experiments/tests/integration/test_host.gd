@@ -134,3 +134,10 @@ func test_the_three_minute_question() -> void:
 	host.step(181.0)
 	host.step(LabHost.INTENT_SECONDS + 1.0)
 	assert_eq(host.session.metrics.get("continue_intent"), "none", "unanswered is recorded as none, not as no")
+
+
+func test_the_question_never_covers_the_top_of_the_play() -> void:
+	host.step(180.5)
+	var card := host.intent_card.get_global_rect()
+	assert_true(card.end.y <= host.action_button.get_global_rect().position.y, "above the button")
+	assert_true(card.position.y > host.size.y * 0.55, "in the lower part of the screen (%s)" % card)

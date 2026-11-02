@@ -156,7 +156,9 @@ func _check_intent() -> void:
 		(intent_card.get_child(0).get_child(0) as Label).text = experiment.intent_question()
 		intent_card.visible = true
 		intent_card.reset_size()
-		intent_card.position = Vector2((size.x - intent_card.size.x) * 0.5, TOP_UI + 70.0)
+		# Just above the button: the top of the play area is where the
+		# experiments show what grows (a tree's crown), never covered.
+		intent_card.position = Vector2((size.x - intent_card.size.x) * 0.5, action_button.get_global_rect().position.y - get_global_rect().position.y - intent_card.size.y - 18.0)
 	elif _intent_at >= 0.0 and session.active_ms - _intent_at >= INTENT_SECONDS * 1000.0:
 		answer_intent("none")
 
