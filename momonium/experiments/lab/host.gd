@@ -28,6 +28,9 @@ var session: LabSession
 var finished: Array[Dictionary] = []
 var paused_reasons: Dictionary = {}
 var runs := 0
+## Play seconds a real second (dev hook `dev_time_scale`): 0 leaves the clock
+## to explicit steps, so a test can tap at an exact rate of play time.
+var time_scale := 1.0
 
 var stage: Control
 var fx: LabFx
@@ -133,7 +136,8 @@ func step(dt: float) -> void:
 func _process(delta: float) -> void:
 	if is_paused() or experiment == null:
 		return
-	step(minf(delta, MAX_STEP))
+	if time_scale > 0.0:
+		step(minf(delta, MAX_STEP) * time_scale)
 	_refresh()
 
 

@@ -17,15 +17,28 @@ test('three minutes of Break & Upgrade with real taps', async ({ lab }, info) =>
   await lab.tapRect(s.tiles.rock);
   s = await lab.state();
   expect(s.route).toBe('rock');
+  // Play time moves only by the test's steps: one real tap every 0.4 s of
+  // play, 2.5 taps a second, however long a tap takes in the browser.
+  await lab.call('dev_time_scale', 0);
   await lab.shot('rock88_start');
+  const box = await lab.canvas.boundingBox();
+  const k = box.width / s.window[0];
+  const tap = async (r) => {
+    const x = box.x + (r[0] + r[2] / 2) * k;
+    const y = box.y + (r[1] + r[3] / 2) * k;
+    if (info.project.use.hasTouch) await lab.page.touchscreen.tap(x, y);
+    else await lab.page.mouse.click(x, y);
+    // The engine takes the tap on its next frame: wait two before asking.
+    await lab.page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  };
   let taps = 0;
   let shotCracks = false;
   let shotUpgrade = false;
   while (s.host.session.active_seconds < 180) {
     const before = s.host.experiment;
-    await lab.tapRect(centre(before.rock_rect));
+    await tap(centre(before.rock_rect));
     taps++;
-    s = await lab.state();
+    s = (await lab.call('dev_advance', 0.4)).state;
     const e = s.host.experiment;
     const counted = (s.host.session.actions_by_kind.hit || 0) + (s.host.session.actions_by_kind.tap_wait || 0) + (s.host.session.actions_by_kind.tap_miss || 0);
     expect(counted, `tap ${taps}: one tap, one record`).toBe(taps);
@@ -35,13 +48,12 @@ test('three minutes of Break & Upgrade with real taps', async ({ lab }, info) =>
     if (!shotCracks && e.cracks > 0.6 && e.rock === 0) { shotCracks = true; await lab.shot('rock88_cracks'); }
     if (s.host.action.affordable) {
       if (!shotUpgrade && e.pick === 1) await lab.shot('rock88_pick_before');
-      await lab.tapRect(s.host.rects.action);
-      s = await lab.state();
-      if (!shotUpgrade && s.host.experiment.pick === 2) { shotUpgrade = true; await lab.page.waitForTimeout(250); await lab.shot('rock88_pick_after'); }
+      await tap(s.host.rects.action);
+      s = (await lab.call('dev_advance', 0)).state;
+      if (!shotUpgrade && s.host.experiment.pick === 2) { shotUpgrade = true; await lab.page.waitForTimeout(300); await lab.shot('rock88_pick_after'); }
     }
-    await lab.call('dev_advance', 0.12);
-    s = await lab.state();
   }
+  await lab.page.waitForTimeout(400);
   await lab.shot('rock88_late');
   const sum = s.host.session;
   const breaks = sum.milestones.filter((m) => m.name === 'break');
@@ -49,7 +61,8 @@ test('three minutes of Break & Upgrade with real taps', async ({ lab }, info) =>
   expect(sum.actions_by_kind.tap_miss || 0, 'every tap on the rock').toBe(0);
   expect(breaks.length, 'several rocks').toBeGreaterThanOrEqual(5);
   expect(sum.upgrades.length, 'several upgrades').toBeGreaterThanOrEqual(3);
-  expect(breaks[0].t_s, 'the first break at a natural pace').toBeLessThanOrEqual(35);
+  expect(breaks[0].t_s, 'the first break at 2.5 taps a second').toBeLessThanOrEqual(30);
+  expect(breaks[0].t_s).toBeGreaterThanOrEqual(15);
   expect(s.host.experiment.goal_visible, 'the Giant Crystal still ahead').toBe(true);
 });
 

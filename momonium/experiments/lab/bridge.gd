@@ -55,8 +55,15 @@ func query(name: String, arg: Variant) -> Variant:
 				host.restart()
 			return {"ok": host != null}
 		"dev_advance":
+			# Answers with the state after the step (one call where a test
+			# would make two).
 			if host != null:
 				host.step(float(arg))
+				host.call("_refresh")
+			return {"ok": host != null, "state": _app.call("state")}
+		"dev_time_scale":
+			if host != null:
+				host.time_scale = clampf(float(arg), 0.0, 10.0)
 			return {"ok": host != null}
 		"dev_pause":
 			if host != null:
