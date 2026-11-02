@@ -43,10 +43,10 @@
           ],
           [
             105.8,
-            123.1
+            123.2
           ],
           [
-            123.1,
+            123.2,
             140.3
           ],
           [
@@ -55,10 +55,10 @@
           ],
           [
             157.8,
-            175.3
+            175.4
           ]
         ],
-        "idle_seconds": 175.3,
+        "idle_seconds": 175.4,
         "longest_idle_s": 18.8,
         "metrics": {
           "coins": 153,
@@ -97,7 +97,7 @@
             "level": 10,
             "name": "Smith",
             "pose": "work_hammer",
-            "t_s": 175.3
+            "t_s": 175.4
           }
         ],
         "pauses": 0,
@@ -113,7 +113,7 @@
           17.5,
           17.6
         ],
-        "started": "2026-11-02 21:05:39",
+        "started": "2026-11-02 21:33:17",
         "upgrades": [
           {
             "cost": 10,
@@ -168,7 +168,7 @@
             "level": 7,
             "name": "Scarf",
             "pose": "work_chop",
-            "t_s": 123.1,
+            "t_s": 123.2,
             "tool": false
           },
           {
@@ -192,13 +192,13 @@
             "level": 10,
             "name": "Smith",
             "pose": "work_hammer",
-            "t_s": 175.3,
+            "t_s": 175.4,
             "tool": true
           }
         ],
         "version": "0.93.0"
       },
-      "engaged_seconds": 4.8,
+      "engaged_seconds": 4.7,
       "experiment": "evolution",
       "first_upgrade_s": 18.6,
       "idle_intervals": [
@@ -228,10 +228,10 @@
         ],
         [
           105.8,
-          123.1
+          123.2
         ],
         [
-          123.1,
+          123.2,
           140.3
         ],
         [
@@ -240,10 +240,10 @@
         ],
         [
           157.8,
-          175.3
+          175.4
         ]
       ],
-      "idle_seconds": 175.3,
+      "idle_seconds": 175.4,
       "longest_idle_s": 18.8,
       "metrics": {
         "coins": 153,
@@ -282,7 +282,7 @@
           "level": 10,
           "name": "Smith",
           "pose": "work_hammer",
-          "t_s": 175.3
+          "t_s": 175.4
         }
       ],
       "pauses": 0,
@@ -298,7 +298,7 @@
         17.5,
         17.6
       ],
-      "started": "2026-11-02 21:05:39",
+      "started": "2026-11-02 21:33:17",
       "upgrades": [
         {
           "cost": 10,
@@ -353,7 +353,7 @@
           "level": 7,
           "name": "Scarf",
           "pose": "work_chop",
-          "t_s": 123.1,
+          "t_s": 123.2,
           "tool": false
         },
         {
@@ -377,7 +377,7 @@
           "level": 10,
           "name": "Smith",
           "pose": "work_hammer",
-          "t_s": 175.3,
+          "t_s": 175.4,
           "tool": true
         }
       ],
@@ -561,7 +561,7 @@
           15.5,
           31.1
         ],
-        "started": "2026-11-02 21:05:40",
+        "started": "2026-11-02 21:33:17",
         "upgrades": [
           {
             "cost": 16,
@@ -796,7 +796,7 @@
         15.5,
         31.1
       ],
-      "started": "2026-11-02 21:05:40",
+      "started": "2026-11-02 21:33:17",
       "upgrades": [
         {
           "cost": 16,
@@ -955,7 +955,7 @@
           20.4,
           22.3
         ],
-        "started": "2026-11-02 21:05:39",
+        "started": "2026-11-02 21:33:16",
         "upgrades": [
           {
             "cost": 15,
@@ -1092,7 +1092,7 @@
         20.4,
         22.3
       ],
-      "started": "2026-11-02 21:05:39",
+      "started": "2026-11-02 21:33:16",
       "upgrades": [
         {
           "cost": 15,
@@ -1245,7 +1245,7 @@
           24.8,
           56.4
         ],
-        "started": "2026-11-02 21:05:40",
+        "started": "2026-11-02 21:33:17",
         "upgrades": [
           {
             "cost": 20,
@@ -1358,7 +1358,7 @@
         24.8,
         56.4
       ],
-      "started": "2026-11-02 21:05:40",
+      "started": "2026-11-02 21:33:17",
       "upgrades": [
         {
           "cost": 20,
@@ -1423,10 +1423,10 @@
           ],
           [
             43.7,
-            60.0
+            59.9
           ],
           [
-            60.0,
+            59.9,
             76.5
           ],
           [
@@ -1443,10 +1443,10 @@
           ],
           [
             131.0,
-            151.5
+            151.4
           ],
           [
-            151.5,
+            151.4,
             173.1
           ],
           [
@@ -1457,8 +1457,8 @@
         "idle_seconds": 180.0,
         "longest_idle_s": 21.6,
         "metrics": {
-          "coins": 596,
-          "earned": 3653,
+          "coins": 597,
+          "earned": 3654,
           "rate": 75.0,
           "stage": 10,
           "stage_name": "Crystal"
@@ -1485,15 +1485,15 @@
           13.5,
           14.6,
           15.7,
-          16.3,
+          16.2,
           16.6,
           17.1,
           18.1,
           19.3,
-          20.5,
+          20.4,
           21.6
         ],
-        "started": "2026-11-02 21:05:40",
+        "started": "2026-11-02 21:33:17",
         "upgrades": [
           {
             "cost": 12,
@@ -1517,7 +1517,7 @@
             "cost": 75,
             "level": 4,
             "shape": "Wide Canopy",
-            "t_s": 60.0
+            "t_s": 59.9
           },
           {
             "cost": 120,
@@ -1547,7 +1547,7 @@
             "cost": 720,
             "level": 9,
             "shape": "Spiral Pagoda",
-            "t_s": 151.5
+            "t_s": 151.4
           },
           {
             "cost": 1100,
@@ -1576,10 +1576,10 @@
         ],
         [
           43.7,
-          60.0
+          59.9
         ],
         [
-          60.0,
+          59.9,
           76.5
         ],
         [
@@ -1596,10 +1596,10 @@
         ],
         [
           131.0,
-          151.5
+          151.4
         ],
         [
-          151.5,
+          151.4,
           173.1
         ],
         [
@@ -1610,8 +1610,8 @@
       "idle_seconds": 180.1,
       "longest_idle_s": 21.6,
       "metrics": {
-        "coins": 607,
-        "earned": 3664,
+        "coins": 608,
+        "earned": 3665,
         "rate": 75.0,
         "stage": 10,
         "stage_name": "Crystal"
@@ -1638,15 +1638,15 @@
         13.5,
         14.6,
         15.7,
-        16.3,
+        16.2,
         16.6,
         17.1,
         18.1,
         19.3,
-        20.5,
+        20.4,
         21.6
       ],
-      "started": "2026-11-02 21:05:40",
+      "started": "2026-11-02 21:33:17",
       "upgrades": [
         {
           "cost": 12,
@@ -1670,7 +1670,7 @@
           "cost": 75,
           "level": 4,
           "shape": "Wide Canopy",
-          "t_s": 60.0
+          "t_s": 59.9
         },
         {
           "cost": 120,
@@ -1700,7 +1700,7 @@
           "cost": 720,
           "level": 9,
           "shape": "Spiral Pagoda",
-          "t_s": 151.5
+          "t_s": 151.4
         },
         {
           "cost": 1100,
@@ -1716,14 +1716,14 @@
       "actions_by_kind": {
         "button": 8
       },
-      "active_seconds": 180.1,
+      "active_seconds": 180.0,
       "at_3min": {
         "actions": 8,
         "actions_by_kind": {
           "button": 8
         },
         "active_seconds": 180.0,
-        "engaged_seconds": 3.5,
+        "engaged_seconds": 3.6,
         "experiment": "tycoon",
         "first_upgrade_s": 20.1,
         "idle_intervals": [
@@ -1782,7 +1782,7 @@
           21.5,
           17.6
         ],
-        "started": "2026-11-02 21:05:40",
+        "started": "2026-11-02 21:33:17",
         "upgrades": [
           {
             "cost": 12,
@@ -1843,7 +1843,7 @@
         ],
         "version": "0.93.0"
       },
-      "engaged_seconds": 3.5,
+      "engaged_seconds": 3.6,
       "experiment": "tycoon",
       "first_upgrade_s": 20.1,
       "idle_intervals": [
@@ -1902,7 +1902,7 @@
         21.5,
         17.6
       ],
-      "started": "2026-11-02 21:05:40",
+      "started": "2026-11-02 21:33:17",
       "upgrades": [
         {
           "cost": 12,
