@@ -61,6 +61,14 @@ func query(name: String, arg: Variant) -> Variant:
 				host.step(float(arg))
 				host.call("_refresh")
 			return {"ok": host != null, "state": _app.call("state")}
+		"dev_render_info":
+			# What the renderer did in the last frame (draw calls and objects):
+			# to tell 'more pixels' from 'more draw calls' when frames drop.
+			return {"ok": true,
+				"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+				"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+				"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
 		"dev_time_scale":
 			if host != null:
 				host.time_scale = clampf(float(arg), 0.0, 10.0)

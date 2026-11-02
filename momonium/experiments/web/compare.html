@@ -98,6 +98,8 @@
   <p class="note">아래 수치는 스크립트 플레이어가 각 실험을 3분 플레이한 기록이다(<code>tools/selftest.gd</code>: 살 수 있으면 1.5초 뒤에 사고, C는 초당 2.5번 탭하고, D는 익으면 1초 뒤에 수확한다).
     업그레이드가 언제 오고 얼마나 기다리는지를 보여 줄 뿐이고, <b>사람이 즐거웠는지는 말하지 않는다.</b></p>
   <div class="tablewrap"><table id="objectiveTable"></table></div>
+  <p class="muted">실제 브라우저(720×1280, 배포 빌드)에서 같은 방식으로 3분: 업그레이드·입력 수와 초당 프레임(헤드리스 Chromium의 소프트웨어 렌더라 실험끼리만 비교한다).</p>
+  <div class="tablewrap"><table id="browserTable"></table></div>
   <h2>한 화면 비교</h2>
   <p class="muted">같은 크기(720×1280, 실제 브라우저)로 찍은 각 실험의 시작 · 약 1분 · 약 3분.</p>
   <a href="compare/grid.jpg" target="_blank" rel="noopener"><img class="grid" src="compare/grid.jpg" alt="여섯 실험의 시작, 1분, 3분 장면을 나란히 놓은 격자" loading="lazy"></a>
@@ -212,11 +214,11 @@ ranking();
 fetch('compare/selftest.json', { cache: 'no-store' }).then((r) => r.json()).then((j) => {
   window.OBJECTIVE = j;
   const t = document.getElementById('objectiveTable');
-  const head = '<tr><th>실험</th><th>첫 업그레이드</th><th>3분 업그레이드</th><th>업그레이드 사이(초)</th><th>입력 수</th><th>5초 이상 입력 없음</th><th>가장 긴 무입력</th><th>3분 상태</th></tr>';
+  const head = '<tr><th>실험</th><th>첫 업그레이드</th><th>3분 업그레이드</th><th>업그레이드 사이(초)</th><th>입력 수</th><th>5초 이상 입력 없음</th><th>가장 긴 무입력</th><th>3분 상태</th><th>번 코인 · 끝의 속도</th></tr>';
   const fmt = (s) => s === null || s === undefined ? '–' : `${s}초`;
   t.innerHTML = head + EXPERIMENTS.map((e) => {
     const s = (j.runs || {})[e.id];
-    if (!s) return `<tr><td>${e.letter} ${e.name}</td><td colspan="7">기록 없음</td></tr>`;
+    if (!s) return `<tr><td>${e.letter} ${e.name}</td><td colspan="8">기록 없음</td></tr>`;
     const gaps = s.seconds_between_upgrades || [];
     const range = gaps.length ? `${Math.min(...gaps)}–${Math.max(...gaps)}` : '–';
     const m = s.metrics || {};
@@ -225,9 +227,24 @@ fetch('compare/selftest.json', { cache: 'no-store' }).then((r) => r.json()).then
       || (m.harvests !== undefined ? `밭 ${m.level}, 수확 ${m.harvests}번(마지막 ${m.last_payout})` : '')
       || (m.delivered !== undefined ? `Lv ${m.level}, 배달 ${m.delivered}` : '')
       || (m.level !== undefined ? `Lv ${m.level}` : '');
-    return `<tr><td>${e.letter} ${e.name}</td><td>${fmt(s.first_upgrade_s)}</td><td>${(s.upgrades || []).length}</td><td>${range}</td><td>${s.actions}</td><td>${s.idle_seconds}초</td><td>${s.longest_idle_s}초</td><td>${stage}</td></tr>`;
+    // Each experiment's own coins: compare how fast they grow, not their size.
+    const pace = m.rate !== undefined ? `초당 ${m.rate}`
+      : m.deliveries_per_min !== undefined ? `분당 배달 ${m.deliveries_per_min}`
+      : m.last_payout !== undefined ? `수확 한 번 ${m.last_payout}`
+      : m.damage_per_hit !== undefined ? `한 번 치기 ${m.damage_per_hit}` : '';
+    return `<tr><td>${e.letter} ${e.name}</td><td>${fmt(s.first_upgrade_s)}</td><td>${(s.upgrades || []).length}</td><td>${range}</td><td>${s.actions}</td><td>${s.idle_seconds}초</td><td>${s.longest_idle_s}초</td><td>${stage}</td><td>${m.earned ?? '–'} · ${pace}</td></tr>`;
   }).join('');
 }).catch(() => { document.getElementById('objectiveTable').innerHTML = '<tr><td>자동 측정 파일을 읽지 못했다.</td></tr>'; });
+
+fetch('compare/browser.json', { cache: 'no-store' }).then((r) => r.json()).then((j) => {
+  const t = document.getElementById('browserTable');
+  t.innerHTML = '<tr><th>실험</th><th>3분 업그레이드</th><th>입력 수</th><th>업그레이드 시각(초)</th><th>FPS 5초</th><th>FPS 1:00</th><th>FPS 3:00</th></tr>' + EXPERIMENTS.map((e) => {
+    const s = (j.runs || {})[e.id];
+    if (!s) return `<tr><td>${e.letter} ${e.name}</td><td colspan="6">기록 없음</td></tr>`;
+    const f = s.fps || {};
+    return `<tr><td>${e.letter} ${e.name}</td><td>${s.upgrades}</td><td>${s.actions}</td><td>${(s.upgrade_times_s || []).join(' · ')}</td><td>${f['0'] ?? '–'}</td><td>${f['1m'] ?? '–'}</td><td>${f['3m'] ?? '–'}</td></tr>`;
+  }).join('');
+}).catch(() => { document.getElementById('browserTable').innerHTML = '<tr><td>브라우저 측정 파일을 읽지 못했다.</td></tr>'; });
 </script>
 </body>
 </html>

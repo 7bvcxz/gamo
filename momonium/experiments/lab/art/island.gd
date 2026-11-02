@@ -181,6 +181,10 @@ func _draw() -> void:
 
 ## The sandy path on a cell, tilled soil, and the ghost of land to come.
 func _overlays() -> void:
+	# Every furrow in one command: an antialiased line each (four a cell) made a
+	# 5x5 field ~1,900 render objects and cost a third of the frame rate in a
+	# software-rendered browser (Step 93).
+	var furrows := PackedVector2Array()
 	for c: Vector2i in soil:
 		if not _solid(c):
 			continue
@@ -192,9 +196,10 @@ func _overlays() -> void:
 		draw_colored_polygon(inset, SOIL)
 		for k in 4:
 			var t := (float(k) + 0.5) / 4.0
-			var a := inset[0].lerp(inset[3], t)
-			var b := inset[1].lerp(inset[2], t)
-			draw_line(a, b, SOIL_DARK, 3.0, true)
+			furrows.append(inset[0].lerp(inset[3], t))
+			furrows.append(inset[1].lerp(inset[2], t))
+	if not furrows.is_empty():
+		draw_multiline(furrows, SOIL_DARK, 3.0)
 	for c: Vector2i in paths:
 		if not _solid(c):
 			continue

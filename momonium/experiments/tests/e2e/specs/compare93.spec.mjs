@@ -6,7 +6,17 @@
 //   FUNLAB_COMPARE_OUT=<dir> momonium/experiments/tools/e2e.sh specs/compare93.spec.mjs --project p720
 import { test, expect } from '../lib/lab.mjs';
 
+import { writeFileSync } from 'node:fs';
+
 const IDS = ['island', 'rock', 'tree', 'evolution', 'harvest', 'tycoon'];
+// Frames the browser draws in a second, counted over `ms` (headless Chromium
+// renders in software: compare the experiments with each other, not with a phone).
+const fps = (page, ms) => page.evaluate((d) => new Promise((resolve) => {
+  let n = 0;
+  const t0 = performance.now();
+  const tick = () => { n++; if (performance.now() - t0 < d) requestAnimationFrame(tick); else resolve(n / ((performance.now() - t0) / 1000)); };
+  requestAnimationFrame(tick);
+}), ms);
 const MARKS = [[5, '0'], [60, '1m'], [180, '3m']];
 
 for (const id of IDS) {
@@ -18,6 +28,7 @@ for (const id of IDS) {
     expect(s.route).toBe(id);
     expect(s.host.session.actions, 'fresh: nothing done yet').toBe(0);
     const marks = MARKS.slice();
+    const frames = {};
     let t = 0;
     while (marks.length) {
       // C is played by tapping: 2.5 hits a second of play.
@@ -29,11 +40,20 @@ for (const id of IDS) {
       if (t >= marks[0][0]) {
         const [, tag] = marks.shift();
         await lab.page.waitForTimeout(1200);
+        frames[tag] = Math.round((await fps(lab.page, 2000)) * 10) / 10;
         if (process.env.FUNLAB_COMPARE_OUT) await lab.canvas.screenshot({ path: `${process.env.FUNLAB_COMPARE_OUT}/${id}_${tag}.png` });
       }
     }
     s = await lab.state();
-    console.log(`compare93 ${id}: ${s.host.session.upgrades.length} upgrades, ${s.host.session.actions} actions in 180 s`);
+    console.log(`compare93 ${id}: ${s.host.session.upgrades.length} upgrades, ${s.host.session.actions} actions in 180 s, fps ${frames['0']} / ${frames['1m']} / ${frames['3m']}`);
+    if (process.env.FUNLAB_COMPARE_OUT) {
+      writeFileSync(`${process.env.FUNLAB_COMPARE_OUT}/${id}_browser.json`, JSON.stringify({
+        experiment: id, viewport: '720x1280', upgrades: s.host.session.upgrades.length, actions: s.host.session.actions,
+        idle_seconds: s.host.session.idle_seconds, longest_idle_s: s.host.session.longest_idle_s,
+        upgrade_times_s: s.host.session.upgrades.map((u) => u.t_s), fps: frames, metrics: s.host.session.metrics || null,
+      }));
+    }
+    expect(frames['3m'], `${id} still draws smoothly at three minutes`).toBeGreaterThanOrEqual(frames['0'] * 0.75);
     expect(s.host.session.upgrades.length, `${id} progresses in three minutes`).toBeGreaterThanOrEqual(5);
   });
 }
@@ -47,6 +67,8 @@ test('the comparison page: six experiments, A C F first, every link opens its ex
   expect(titles, 'A, C, F first, then B, D, E').toEqual(['Island Growth', 'Break & Upgrade', 'Endless Growth', 'Momo Evolution', 'Harvest Burst', 'Production Tycoon']);
   expect(await page.locator('.card .prio').count(), 'three marked first').toBe(3);
   await expect.poll(async () => (await page.locator('#objectiveTable tr').count()), { timeout: 10_000 }).toBe(7);
+  await expect.poll(async () => (await page.locator('#browserTable tr').count()), { timeout: 10_000 }).toBe(7);
+  expect(await page.locator('#browserTable').textContent(), 'every experiment has its browser run').not.toContain('기록 없음');
   // Every picture is there (they load lazily: bring each into view first).
   const imgs = await page.locator('.thumbs img').all();
   expect(imgs.length, 'three pictures for each of six').toBe(18);
