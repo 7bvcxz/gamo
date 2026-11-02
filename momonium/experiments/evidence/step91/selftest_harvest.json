@@ -1,0 +1,487 @@
+{
+  "_doc": "tools/selftest.gd: a scripted player, 180 s of play each (reaction 1.5 s). Objective numbers only.",
+  "runs": {
+    "harvest": {
+      "actions": 19,
+      "actions_by_kind": {
+        "button": 19
+      },
+      "active_seconds": 180.2,
+      "at_3min": {
+        "actions": 19,
+        "actions_by_kind": {
+          "button": 19
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 17.4,
+        "experiment": "harvest",
+        "first_upgrade_s": 17.7,
+        "idle_intervals": [
+          [
+            0.0,
+            15.6
+          ],
+          [
+            17.7,
+            31.1
+          ],
+          [
+            33.3,
+            46.7
+          ],
+          [
+            46.7,
+            62.3
+          ],
+          [
+            64.5,
+            77.9
+          ],
+          [
+            80.1,
+            93.5
+          ],
+          [
+            95.7,
+            109.1
+          ],
+          [
+            109.1,
+            124.7
+          ],
+          [
+            126.9,
+            140.3
+          ],
+          [
+            142.4,
+            155.8
+          ],
+          [
+            155.8,
+            171.3
+          ],
+          [
+            173.5,
+            180.0
+          ]
+        ],
+        "idle_seconds": 162.6,
+        "longest_idle_s": 15.6,
+        "metrics": {
+          "coins": 58,
+          "early_presses": 0,
+          "earned": 878,
+          "harvests": 11,
+          "last_payout": 160,
+          "level": 8,
+          "plants": 50,
+          "ready_wait_s": 16.8
+        },
+        "milestones": [
+          {
+            "coins": 16,
+            "n": 1,
+            "name": "harvest",
+            "plants": 8,
+            "t_s": 15.6,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 24,
+            "n": 2,
+            "name": "harvest",
+            "plants": 12,
+            "t_s": 31.1,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 36,
+            "n": 3,
+            "name": "harvest",
+            "plants": 18,
+            "t_s": 46.7,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 36,
+            "n": 4,
+            "name": "harvest",
+            "plants": 18,
+            "t_s": 62.3,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 54,
+            "n": 5,
+            "name": "harvest",
+            "plants": 18,
+            "t_s": 77.9,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 72,
+            "n": 6,
+            "name": "harvest",
+            "plants": 24,
+            "t_s": 93.5,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 96,
+            "n": 7,
+            "name": "harvest",
+            "plants": 32,
+            "t_s": 109.1,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 96,
+            "n": 8,
+            "name": "harvest",
+            "plants": 32,
+            "t_s": 124.7,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 128,
+            "n": 9,
+            "name": "harvest",
+            "plants": 32,
+            "t_s": 140.3,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 160,
+            "n": 10,
+            "name": "harvest",
+            "plants": 40,
+            "t_s": 155.8,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 160,
+            "n": 11,
+            "name": "harvest",
+            "plants": 40,
+            "t_s": 171.3,
+            "waited_s": 1.5
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          17.7,
+          15.6,
+          31.2,
+          15.6,
+          15.6,
+          31.2,
+          15.5,
+          31.1
+        ],
+        "started": "2026-11-02 19:34:57",
+        "upgrades": [
+          {
+            "cost": 16,
+            "level": 1,
+            "payout": 24,
+            "plants": 12,
+            "t_s": 17.7,
+            "yield": 2
+          },
+          {
+            "cost": 24,
+            "level": 2,
+            "payout": 36,
+            "plants": 18,
+            "t_s": 33.3,
+            "yield": 2
+          },
+          {
+            "cost": 40,
+            "level": 3,
+            "payout": 54,
+            "plants": 18,
+            "t_s": 64.5,
+            "yield": 3
+          },
+          {
+            "cost": 60,
+            "level": 4,
+            "payout": 72,
+            "plants": 24,
+            "t_s": 80.1,
+            "yield": 3
+          },
+          {
+            "cost": 90,
+            "level": 5,
+            "payout": 96,
+            "plants": 32,
+            "t_s": 95.7,
+            "yield": 3
+          },
+          {
+            "cost": 130,
+            "level": 6,
+            "payout": 128,
+            "plants": 32,
+            "t_s": 126.9,
+            "yield": 4
+          },
+          {
+            "cost": 190,
+            "level": 7,
+            "payout": 160,
+            "plants": 40,
+            "t_s": 142.4,
+            "yield": 4
+          },
+          {
+            "cost": 270,
+            "level": 8,
+            "payout": 200,
+            "plants": 50,
+            "t_s": 173.5,
+            "yield": 4
+          }
+        ],
+        "version": "0.90.0"
+      },
+      "engaged_seconds": 17.4,
+      "experiment": "harvest",
+      "first_upgrade_s": 17.7,
+      "idle_intervals": [
+        [
+          0.0,
+          15.6
+        ],
+        [
+          17.7,
+          31.1
+        ],
+        [
+          33.3,
+          46.7
+        ],
+        [
+          46.7,
+          62.3
+        ],
+        [
+          64.5,
+          77.9
+        ],
+        [
+          80.1,
+          93.5
+        ],
+        [
+          95.7,
+          109.1
+        ],
+        [
+          109.1,
+          124.7
+        ],
+        [
+          126.9,
+          140.3
+        ],
+        [
+          142.4,
+          155.8
+        ],
+        [
+          155.8,
+          171.3
+        ],
+        [
+          173.5,
+          180.2
+        ]
+      ],
+      "idle_seconds": 162.7,
+      "longest_idle_s": 15.6,
+      "metrics": {
+        "coins": 58,
+        "early_presses": 0,
+        "earned": 878,
+        "harvests": 11,
+        "last_payout": 160,
+        "level": 8,
+        "plants": 50,
+        "ready_wait_s": 16.8
+      },
+      "milestones": [
+        {
+          "coins": 16,
+          "n": 1,
+          "name": "harvest",
+          "plants": 8,
+          "t_s": 15.6,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 24,
+          "n": 2,
+          "name": "harvest",
+          "plants": 12,
+          "t_s": 31.1,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 36,
+          "n": 3,
+          "name": "harvest",
+          "plants": 18,
+          "t_s": 46.7,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 36,
+          "n": 4,
+          "name": "harvest",
+          "plants": 18,
+          "t_s": 62.3,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 54,
+          "n": 5,
+          "name": "harvest",
+          "plants": 18,
+          "t_s": 77.9,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 72,
+          "n": 6,
+          "name": "harvest",
+          "plants": 24,
+          "t_s": 93.5,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 96,
+          "n": 7,
+          "name": "harvest",
+          "plants": 32,
+          "t_s": 109.1,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 96,
+          "n": 8,
+          "name": "harvest",
+          "plants": 32,
+          "t_s": 124.7,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 128,
+          "n": 9,
+          "name": "harvest",
+          "plants": 32,
+          "t_s": 140.3,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 160,
+          "n": 10,
+          "name": "harvest",
+          "plants": 40,
+          "t_s": 155.8,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 160,
+          "n": 11,
+          "name": "harvest",
+          "plants": 40,
+          "t_s": 171.3,
+          "waited_s": 1.5
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        17.7,
+        15.6,
+        31.2,
+        15.6,
+        15.6,
+        31.2,
+        15.5,
+        31.1
+      ],
+      "started": "2026-11-02 19:34:57",
+      "upgrades": [
+        {
+          "cost": 16,
+          "level": 1,
+          "payout": 24,
+          "plants": 12,
+          "t_s": 17.7,
+          "yield": 2
+        },
+        {
+          "cost": 24,
+          "level": 2,
+          "payout": 36,
+          "plants": 18,
+          "t_s": 33.3,
+          "yield": 2
+        },
+        {
+          "cost": 40,
+          "level": 3,
+          "payout": 54,
+          "plants": 18,
+          "t_s": 64.5,
+          "yield": 3
+        },
+        {
+          "cost": 60,
+          "level": 4,
+          "payout": 72,
+          "plants": 24,
+          "t_s": 80.1,
+          "yield": 3
+        },
+        {
+          "cost": 90,
+          "level": 5,
+          "payout": 96,
+          "plants": 32,
+          "t_s": 95.7,
+          "yield": 3
+        },
+        {
+          "cost": 130,
+          "level": 6,
+          "payout": 128,
+          "plants": 32,
+          "t_s": 126.9,
+          "yield": 4
+        },
+        {
+          "cost": 190,
+          "level": 7,
+          "payout": 160,
+          "plants": 40,
+          "t_s": 142.4,
+          "yield": 4
+        },
+        {
+          "cost": 270,
+          "level": 8,
+          "payout": 200,
+          "plants": 50,
+          "t_s": 173.5,
+          "yield": 4
+        }
+      ],
+      "version": "0.90.0"
+    }
+  }
+}
