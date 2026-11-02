@@ -1,0 +1,291 @@
+{
+  "_doc": "tools/selftest.gd: a scripted player, 180 s of play each (reaction 1.5 s). Objective numbers only.",
+  "runs": {
+    "island": {
+      "actions": 9,
+      "actions_by_kind": {
+        "button": 9
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 9,
+        "actions_by_kind": {
+          "button": 9
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 0.0,
+        "experiment": "island",
+        "first_upgrade_s": 16.5,
+        "idle_intervals": [
+          [
+            0.0,
+            16.5
+          ],
+          [
+            16.5,
+            33.4
+          ],
+          [
+            33.4,
+            51.4
+          ],
+          [
+            51.4,
+            69.0
+          ],
+          [
+            69.0,
+            87.7
+          ],
+          [
+            87.7,
+            107.4
+          ],
+          [
+            107.4,
+            126.3
+          ],
+          [
+            126.3,
+            146.7
+          ],
+          [
+            146.7,
+            168.9
+          ],
+          [
+            168.9,
+            180.0
+          ]
+        ],
+        "idle_seconds": 180.0,
+        "longest_idle_s": 22.3,
+        "metrics": {
+          "coins": 340,
+          "earned": 1736,
+          "level": 9,
+          "rate": 28.0,
+          "stage": "town"
+        },
+        "milestones": [
+          {
+            "level": 3,
+            "name": "village",
+            "t_s": 51.4
+          },
+          {
+            "level": 6,
+            "name": "town",
+            "t_s": 107.4
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          16.5,
+          16.9,
+          18.1,
+          17.6,
+          18.6,
+          19.8,
+          18.9,
+          20.4,
+          22.3
+        ],
+        "started": "2026-11-02 18:28:18",
+        "upgrades": [
+          {
+            "cost": 15,
+            "level": 1,
+            "stage": "islet",
+            "t_s": 16.5
+          },
+          {
+            "cost": 26,
+            "level": 2,
+            "stage": "islet",
+            "t_s": 33.4
+          },
+          {
+            "cost": 42,
+            "level": 3,
+            "stage": "village",
+            "t_s": 51.4
+          },
+          {
+            "cost": 68,
+            "level": 4,
+            "stage": "village",
+            "t_s": 69.0
+          },
+          {
+            "cost": 100,
+            "level": 5,
+            "stage": "village",
+            "t_s": 87.7
+          },
+          {
+            "cost": 145,
+            "level": 6,
+            "stage": "town",
+            "t_s": 107.4
+          },
+          {
+            "cost": 220,
+            "level": 7,
+            "stage": "town",
+            "t_s": 126.3
+          },
+          {
+            "cost": 320,
+            "level": 8,
+            "stage": "town",
+            "t_s": 146.7
+          },
+          {
+            "cost": 460,
+            "level": 9,
+            "stage": "town",
+            "t_s": 168.9
+          }
+        ],
+        "version": "0.87.0"
+      },
+      "engaged_seconds": 0.0,
+      "experiment": "island",
+      "first_upgrade_s": 16.5,
+      "idle_intervals": [
+        [
+          0.0,
+          16.5
+        ],
+        [
+          16.5,
+          33.4
+        ],
+        [
+          33.4,
+          51.4
+        ],
+        [
+          51.4,
+          69.0
+        ],
+        [
+          69.0,
+          87.7
+        ],
+        [
+          87.7,
+          107.4
+        ],
+        [
+          107.4,
+          126.3
+        ],
+        [
+          126.3,
+          146.7
+        ],
+        [
+          146.7,
+          168.9
+        ],
+        [
+          168.9,
+          180.1
+        ]
+      ],
+      "idle_seconds": 180.1,
+      "longest_idle_s": 22.3,
+      "metrics": {
+        "coins": 345,
+        "earned": 1741,
+        "level": 9,
+        "rate": 28.0,
+        "stage": "town"
+      },
+      "milestones": [
+        {
+          "level": 3,
+          "name": "village",
+          "t_s": 51.4
+        },
+        {
+          "level": 6,
+          "name": "town",
+          "t_s": 107.4
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        16.5,
+        16.9,
+        18.1,
+        17.6,
+        18.6,
+        19.8,
+        18.9,
+        20.4,
+        22.3
+      ],
+      "started": "2026-11-02 18:28:18",
+      "upgrades": [
+        {
+          "cost": 15,
+          "level": 1,
+          "stage": "islet",
+          "t_s": 16.5
+        },
+        {
+          "cost": 26,
+          "level": 2,
+          "stage": "islet",
+          "t_s": 33.4
+        },
+        {
+          "cost": 42,
+          "level": 3,
+          "stage": "village",
+          "t_s": 51.4
+        },
+        {
+          "cost": 68,
+          "level": 4,
+          "stage": "village",
+          "t_s": 69.0
+        },
+        {
+          "cost": 100,
+          "level": 5,
+          "stage": "village",
+          "t_s": 87.7
+        },
+        {
+          "cost": 145,
+          "level": 6,
+          "stage": "town",
+          "t_s": 107.4
+        },
+        {
+          "cost": 220,
+          "level": 7,
+          "stage": "town",
+          "t_s": 126.3
+        },
+        {
+          "cost": 320,
+          "level": 8,
+          "stage": "town",
+          "t_s": 146.7
+        },
+        {
+          "cost": 460,
+          "level": 9,
+          "stage": "town",
+          "t_s": 168.9
+        }
+      ],
+      "version": "0.87.0"
+    }
+  }
+}

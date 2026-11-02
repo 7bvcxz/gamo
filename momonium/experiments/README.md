@@ -5,7 +5,7 @@
 
 | | 실험 | 키우는 것 | 한 가지 버튼 | 주소 |
 |---|---|---|---|---|
-| A | Island Growth | 섬 전체 | Upgrade Island | `#island` |
+| A | Island Growth (Step 87, 플레이 가능) | 섬 전체 | Upgrade Island | `#island` |
 | B | Momo Evolution | 모모 | (예정) | `#evolution` |
 | C | Break & Upgrade | 거대한 바위 · 곡괭이 | Pickaxe Power | `#rock` |
 | D | Harvest Burst | 수확 | (예정) | `#harvest` |
@@ -71,6 +71,7 @@ momonium/experiments/tools/deploy.sh                       # docs/momonium-exper
 momonium/experiments/tools/e2e.sh specs/funlab86.spec.mjs  # 브라우저 검사(로컬 docs/)
 FUNLAB_E2E_BASE=https://7bvcxz.github.io/gamo/momonium-experiments/ momonium/experiments/tools/e2e.sh
 momonium/experiments/tools/sync_shared.sh                  # 게임 그림이 바뀌었을 때
+godot --headless --path momonium/experiments --script res://tools/selftest.gd -- --exp island   # 스크립트 플레이어 3분(객관 수치만)
 ```
 
 배포 순서는 게임과 같다. 소스를 커밋한다 → `deploy.sh`(version.json에 소스 커밋이 찍힌다) →
