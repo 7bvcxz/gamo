@@ -52,7 +52,7 @@
   textarea, input[type=text] { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: var(--bg); color: var(--ink); font: inherit; }
   table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 14px; overflow: hidden; }
   th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; font-size: 0.92rem; }
-  th { background: var(--chip); }
+  th { background: var(--chip); white-space: nowrap; }
   .tablewrap { overflow-x: auto; }
   .note { border-left: 4px solid var(--warn); padding: 6px 12px; background: var(--card); border-radius: 8px; }
   .grid { width: 100%; border-radius: 14px; border: 1px solid var(--line); }
@@ -100,7 +100,8 @@
   <div class="tablewrap"><table id="objectiveTable"></table></div>
   <h2>한 화면 비교</h2>
   <p class="muted">같은 크기(720×1280, 실제 브라우저)로 찍은 각 실험의 시작 · 약 1분 · 약 3분.</p>
-  <img class="grid" src="compare/grid.jpg" alt="여섯 실험의 시작, 1분, 3분 장면을 나란히 놓은 격자" loading="lazy">
+  <a href="compare/grid.jpg" target="_blank" rel="noopener"><img class="grid" src="compare/grid.jpg" alt="여섯 실험의 시작, 1분, 3분 장면을 나란히 놓은 격자" loading="lazy"></a>
+  <p class="muted">그림을 누르면 원래 크기(1760×1540)로 열린다.</p>
 </main>
 <script>
 const EXPERIMENTS = [
@@ -112,10 +113,10 @@ const EXPERIMENTS = [
   { id: 'tycoon', letter: 'E', name: 'Production Tycoon', color: '#5a8fd8', prio: false, what: '생산 라인 하나가 점점 빨라지고 붐비는 것을 본다(살아 있는 공정).' },
 ];
 const DIMS = [
-  { key: 'intuitive', label: '직관', help: '설명 없이 무엇을 할지 알았나' },
-  { key: 'delight', label: '업그레이드의 기쁨', help: '업그레이드한 순간이 기분 좋았나' },
-  { key: 'curious', label: '다음이 궁금함', help: '다음에 무엇이 될지 보고 싶었나' },
-  { key: 'continue', label: '3분 뒤 계속', help: '3분에서 멈추면 아쉬운가' },
+  { key: 'intuitive', label: '직관', short: '직관', help: '설명 없이 무엇을 할지 알았나' },
+  { key: 'delight', label: '업그레이드의 기쁨', short: '기쁨', help: '업그레이드한 순간이 기분 좋았나' },
+  { key: 'curious', label: '다음이 궁금함', short: '궁금', help: '다음에 무엇이 될지 보고 싶었나' },
+  { key: 'continue', label: '3분 뒤 계속', short: '계속', help: '3분에서 멈추면 아쉬운가' },
 ];
 const KEY = 'funlab.compare.v1';
 let data = { tester: '', device: '', scores: {} };
@@ -164,7 +165,7 @@ function ranking() {
   if (!rows.length) {
     t.innerHTML = '<tr><td>아직 점수가 없다. 실험을 하고 위 카드에 점수를 매기면 여기에 순위가 생긴다.</td></tr>';
   } else {
-    t.innerHTML = `<tr><th>순위</th><th>실험</th>${DIMS.map((d) => `<th>${d.label}</th>`).join('')}<th>평균</th><th>메모</th></tr>` +
+    t.innerHTML = `<tr><th>순위</th><th>실험</th>${DIMS.map((d) => `<th title="${d.label}: ${d.help}">${d.short}</th>`).join('')}<th>평균</th><th>메모</th></tr>` +
       rows.map((r, i) => `<tr><td>${i + 1}</td><td>${r.e.letter} ${r.e.name}</td>${DIMS.map((d) => `<td>${r.s[d.key] ?? '–'}</td>`).join('')}<td><b>${avg(r.s).toFixed(2)}</b></td><td>${(r.s.note || '').replace(/</g, '&lt;')}</td></tr>`).join('');
   }
   const untested = EXPERIMENTS.filter((e) => !tested(scoreOf(e.id))).map((e) => e.letter);
