@@ -13,6 +13,9 @@
 | F | Endless Growth (Step 89, 플레이 가능) | 나무 한 그루 | Grow Tree | `#tree` |
 
 - 실험실: https://7bvcxz.github.io/gamo/momonium-experiments/
+- **비교 페이지(Step 93)**: https://7bvcxz.github.io/gamo/momonium-experiments/compare.html
+  여섯 실험을 같은 순서(A·C·F 먼저)와 같은 3분 절차로 해 보고, 네 질문에 1–5점을 매기고, JSON·CSV·Markdown으로 내보낸다.
+- 지금까지의 결과와 다음 실험 추천(잠정, 사람 점수 전): [`RESULTS.md`](RESULTS.md)
 - 한 실험의 직접 링크: `…/momonium-experiments/#island`. 새로고침해도 그 실험이 다시 열린다.
 - 틀 자체의 시연(스텁)은 숨은 링크 `#stub`으로 열린다(타일 없음, 실험실 테스트용).
 - 아직 만들지 않은 실험의 타일은 **SOON**이다. 누르면 공통 스텁(코인·자라는 식물·버튼 하나와 'COMING SOON' 카드)이 열린다.
@@ -40,6 +43,7 @@
   처음 clone한 상태에서 바로 열린다. 원본과 다르면 `test_shared_assets.gd`가 실패한다.
   게임 그림이 바뀌어 실험실도 따라가야 하면 sync를 다시 돌리고 커밋한다. 새 유료 그림은 쓰지 않았다.
 - 실험실은 **아무것도 저장하지 않는다.** 세이브·설정·localStorage·네트워크가 없다(`test_isolation.gd`가 소스를 검사한다).
+  예외는 Godot 밖의 **비교 페이지**(`compare.html`) 하나다. 사람이 매긴 점수를 그 브라우저의 localStorage `funlab.compare.v1` 키 하나에만 둔다(서버로 보내지 않음, E2E `compare93`이 다른 키가 없음을 확인).
   이름이 `Momonium Fun Lab`이라 Godot의 user:// 폴더도 게임(`Momonium`)과 다르다. 브라우저에서 게임 세이브(IndexedDB와
   localStorage 사본)가 그대로인지는 E2E `funlab86`이 실제로 잰다.
 - 실행마다 새로 시작한다. 다시 시작이나 뒤로를 누르면 그 실행의 실험·기록을 버리고 새로 만든다.
@@ -55,8 +59,12 @@ experiments/
   experiments/    실험 하나에 폴더 하나(stub = 아직 없는 실험의 자리)
   shared/         게임 파일의 사본 + MANIFEST.json
   tests/          unit · integration(헤드리스), e2e(Playwright)
-  tools/          test.sh check.sh capture.gd deploy.sh e2e.sh sync_shared.sh
+  tools/          test.sh check.sh capture.gd deploy.sh e2e.sh sync_shared.sh selftest.gd
+                  compare_assets.sh compare_grid.gd compare_jpg.gd (비교 페이지의 그림·숫자)
+  web/            비교 페이지 compare.html과 compare/(그림·selftest.json). 팩에는 들어가지 않는다
+  evidence/       step별 증거 그림·기록(팩에 들어가지 않는다)
   LOG.md          실험 기록(무엇을 만들었고, 무엇을 쟀나)
+  RESULTS.md      여섯 실험의 객관 수치와 다음 실험 추천(잠정)
 ```
 
 ## 명령 (저장소 루트에서)
@@ -73,6 +81,7 @@ momonium/experiments/tools/e2e.sh specs/funlab86.spec.mjs  # 브라우저 검사
 FUNLAB_E2E_BASE=https://7bvcxz.github.io/gamo/momonium-experiments/ momonium/experiments/tools/e2e.sh
 momonium/experiments/tools/sync_shared.sh                  # 게임 그림이 바뀌었을 때
 godot --headless --path momonium/experiments --script res://tools/selftest.gd -- --exp island   # 스크립트 플레이어 3분(객관 수치만)
+momonium/experiments/tools/compare_assets.sh               # 비교 페이지의 그림(배포 빌드에서 각 실험을 처음부터 3분)·격자·수치
 ```
 
 배포 순서는 게임과 같다. 소스를 커밋한다 → `deploy.sh`(version.json에 소스 커밋이 찍힌다) →
@@ -115,7 +124,7 @@ godot --headless --path momonium/experiments --script res://tools/selftest.gd --
 2. **첫 30초**: 손을 대기 전에 무엇을 하는 게임인지 짐작해 적는다. 30초 동안 무엇을 했는지, 처음 누른 것이 무엇인지 본다.
    기록의 첫 쉰 구간과 첫 업그레이드 시각이 이것을 숫자로 남긴다.
 3. **3분**: 틀의 시계가 3:00이 될 때까지 계속한다. 멈추고 싶어진 순간이 있으면 그 시각을 적는다.
-4. 3:00에 바로 아래 점수표를 매기고, 기록 창에서 JSON을 받는다.
+4. 3:00에 비교 페이지(또는 바로 아래 점수표)에서 점수를 매기고, 기록 창에서 JSON을 받는다. 해 보지 않은 실험은 '안 해 봄'으로 둔다(0점이 아니다).
 5. 다른 실험은 다시 시작한 상태에서 연다. 순서를 바꿔 가며 시험한다(먼저 한 실험이 기준이 되지 않게).
 
 ## 점수표 (1–5)

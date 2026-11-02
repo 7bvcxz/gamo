@@ -1,0 +1,1967 @@
+{
+  "_doc": "tools/selftest.gd: a scripted player, 180 s of play each (reaction 1.5 s). Objective numbers only.",
+  "runs": {
+    "evolution": {
+      "actions": 10,
+      "actions_by_kind": {
+        "button": 10
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 10,
+        "actions_by_kind": {
+          "button": 10
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 4.7,
+        "experiment": "evolution",
+        "first_upgrade_s": 18.6,
+        "idle_intervals": [
+          [
+            0.0,
+            18.6
+          ],
+          [
+            18.6,
+            33.4
+          ],
+          [
+            33.4,
+            51.4
+          ],
+          [
+            51.4,
+            69.5
+          ],
+          [
+            69.5,
+            87.0
+          ],
+          [
+            87.0,
+            105.8
+          ],
+          [
+            105.8,
+            123.1
+          ],
+          [
+            123.1,
+            140.3
+          ],
+          [
+            140.3,
+            157.8
+          ],
+          [
+            157.8,
+            175.3
+          ]
+        ],
+        "idle_seconds": 175.3,
+        "longest_idle_s": 18.8,
+        "metrics": {
+          "coins": 153,
+          "earned": 1492,
+          "level": 10,
+          "passes": 147,
+          "rate": 27.16,
+          "stage": "Smith"
+        },
+        "milestones": [
+          {
+            "level": 2,
+            "name": "Waterer",
+            "pose": "work_water",
+            "t_s": 33.4
+          },
+          {
+            "level": 4,
+            "name": "Harvester",
+            "pose": "work_harvest",
+            "t_s": 69.5
+          },
+          {
+            "level": 6,
+            "name": "Woodcutter",
+            "pose": "work_chop",
+            "t_s": 105.8
+          },
+          {
+            "level": 8,
+            "name": "Miner",
+            "pose": "work_dig",
+            "t_s": 140.3
+          },
+          {
+            "level": 10,
+            "name": "Smith",
+            "pose": "work_hammer",
+            "t_s": 175.3
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          18.6,
+          14.8,
+          18.1,
+          18.1,
+          17.4,
+          18.8,
+          17.4,
+          17.1,
+          17.5,
+          17.6
+        ],
+        "started": "2026-11-02 21:05:39",
+        "upgrades": [
+          {
+            "cost": 10,
+            "level": 1,
+            "name": "Satchel",
+            "pose": "work_sow",
+            "t_s": 18.6,
+            "tool": false
+          },
+          {
+            "cost": 20,
+            "level": 2,
+            "name": "Waterer",
+            "pose": "work_water",
+            "t_s": 33.4,
+            "tool": true
+          },
+          {
+            "cost": 36,
+            "level": 3,
+            "name": "Leaf Hat",
+            "pose": "work_water",
+            "t_s": 51.4,
+            "tool": false
+          },
+          {
+            "cost": 48,
+            "level": 4,
+            "name": "Harvester",
+            "pose": "work_harvest",
+            "t_s": 69.5,
+            "tool": true
+          },
+          {
+            "cost": 75,
+            "level": 5,
+            "name": "Apron",
+            "pose": "work_harvest",
+            "t_s": 87.0,
+            "tool": false
+          },
+          {
+            "cost": 100,
+            "level": 6,
+            "name": "Woodcutter",
+            "pose": "work_chop",
+            "t_s": 105.8,
+            "tool": true
+          },
+          {
+            "cost": 160,
+            "level": 7,
+            "name": "Scarf",
+            "pose": "work_chop",
+            "t_s": 123.1,
+            "tool": false
+          },
+          {
+            "cost": 210,
+            "level": 8,
+            "name": "Miner",
+            "pose": "work_dig",
+            "t_s": 140.3,
+            "tool": true
+          },
+          {
+            "cost": 300,
+            "level": 9,
+            "name": "Lamp Helmet",
+            "pose": "work_dig",
+            "t_s": 157.8,
+            "tool": false
+          },
+          {
+            "cost": 380,
+            "level": 10,
+            "name": "Smith",
+            "pose": "work_hammer",
+            "t_s": 175.3,
+            "tool": true
+          }
+        ],
+        "version": "0.93.0"
+      },
+      "engaged_seconds": 4.8,
+      "experiment": "evolution",
+      "first_upgrade_s": 18.6,
+      "idle_intervals": [
+        [
+          0.0,
+          18.6
+        ],
+        [
+          18.6,
+          33.4
+        ],
+        [
+          33.4,
+          51.4
+        ],
+        [
+          51.4,
+          69.5
+        ],
+        [
+          69.5,
+          87.0
+        ],
+        [
+          87.0,
+          105.8
+        ],
+        [
+          105.8,
+          123.1
+        ],
+        [
+          123.1,
+          140.3
+        ],
+        [
+          140.3,
+          157.8
+        ],
+        [
+          157.8,
+          175.3
+        ]
+      ],
+      "idle_seconds": 175.3,
+      "longest_idle_s": 18.8,
+      "metrics": {
+        "coins": 153,
+        "earned": 1492,
+        "level": 10,
+        "passes": 147,
+        "rate": 27.16,
+        "stage": "Smith"
+      },
+      "milestones": [
+        {
+          "level": 2,
+          "name": "Waterer",
+          "pose": "work_water",
+          "t_s": 33.4
+        },
+        {
+          "level": 4,
+          "name": "Harvester",
+          "pose": "work_harvest",
+          "t_s": 69.5
+        },
+        {
+          "level": 6,
+          "name": "Woodcutter",
+          "pose": "work_chop",
+          "t_s": 105.8
+        },
+        {
+          "level": 8,
+          "name": "Miner",
+          "pose": "work_dig",
+          "t_s": 140.3
+        },
+        {
+          "level": 10,
+          "name": "Smith",
+          "pose": "work_hammer",
+          "t_s": 175.3
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        18.6,
+        14.8,
+        18.1,
+        18.1,
+        17.4,
+        18.8,
+        17.4,
+        17.1,
+        17.5,
+        17.6
+      ],
+      "started": "2026-11-02 21:05:39",
+      "upgrades": [
+        {
+          "cost": 10,
+          "level": 1,
+          "name": "Satchel",
+          "pose": "work_sow",
+          "t_s": 18.6,
+          "tool": false
+        },
+        {
+          "cost": 20,
+          "level": 2,
+          "name": "Waterer",
+          "pose": "work_water",
+          "t_s": 33.4,
+          "tool": true
+        },
+        {
+          "cost": 36,
+          "level": 3,
+          "name": "Leaf Hat",
+          "pose": "work_water",
+          "t_s": 51.4,
+          "tool": false
+        },
+        {
+          "cost": 48,
+          "level": 4,
+          "name": "Harvester",
+          "pose": "work_harvest",
+          "t_s": 69.5,
+          "tool": true
+        },
+        {
+          "cost": 75,
+          "level": 5,
+          "name": "Apron",
+          "pose": "work_harvest",
+          "t_s": 87.0,
+          "tool": false
+        },
+        {
+          "cost": 100,
+          "level": 6,
+          "name": "Woodcutter",
+          "pose": "work_chop",
+          "t_s": 105.8,
+          "tool": true
+        },
+        {
+          "cost": 160,
+          "level": 7,
+          "name": "Scarf",
+          "pose": "work_chop",
+          "t_s": 123.1,
+          "tool": false
+        },
+        {
+          "cost": 210,
+          "level": 8,
+          "name": "Miner",
+          "pose": "work_dig",
+          "t_s": 140.3,
+          "tool": true
+        },
+        {
+          "cost": 300,
+          "level": 9,
+          "name": "Lamp Helmet",
+          "pose": "work_dig",
+          "t_s": 157.8,
+          "tool": false
+        },
+        {
+          "cost": 380,
+          "level": 10,
+          "name": "Smith",
+          "pose": "work_hammer",
+          "t_s": 175.3,
+          "tool": true
+        }
+      ],
+      "version": "0.93.0"
+    },
+    "harvest": {
+      "actions": 19,
+      "actions_by_kind": {
+        "button": 19
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 19,
+        "actions_by_kind": {
+          "button": 19
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 17.5,
+        "experiment": "harvest",
+        "first_upgrade_s": 17.7,
+        "idle_intervals": [
+          [
+            0.0,
+            15.5
+          ],
+          [
+            17.7,
+            31.1
+          ],
+          [
+            33.3,
+            46.7
+          ],
+          [
+            46.7,
+            62.3
+          ],
+          [
+            64.5,
+            77.9
+          ],
+          [
+            80.1,
+            93.5
+          ],
+          [
+            95.7,
+            109.1
+          ],
+          [
+            109.1,
+            124.7
+          ],
+          [
+            126.9,
+            140.2
+          ],
+          [
+            142.4,
+            155.8
+          ],
+          [
+            155.8,
+            171.3
+          ],
+          [
+            173.5,
+            180.0
+          ]
+        ],
+        "idle_seconds": 162.6,
+        "longest_idle_s": 15.6,
+        "metrics": {
+          "coins": 58,
+          "early_presses": 0,
+          "earned": 878,
+          "harvests": 11,
+          "last_payout": 160,
+          "level": 8,
+          "plants": 50,
+          "ready_wait_s": 16.8
+        },
+        "milestones": [
+          {
+            "coins": 16,
+            "n": 1,
+            "name": "harvest",
+            "plants": 8,
+            "t_s": 15.5,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 24,
+            "n": 2,
+            "name": "harvest",
+            "plants": 12,
+            "t_s": 31.1,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 36,
+            "n": 3,
+            "name": "harvest",
+            "plants": 18,
+            "t_s": 46.7,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 36,
+            "n": 4,
+            "name": "harvest",
+            "plants": 18,
+            "t_s": 62.3,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 54,
+            "n": 5,
+            "name": "harvest",
+            "plants": 18,
+            "t_s": 77.9,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 72,
+            "n": 6,
+            "name": "harvest",
+            "plants": 24,
+            "t_s": 93.5,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 96,
+            "n": 7,
+            "name": "harvest",
+            "plants": 32,
+            "t_s": 109.1,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 96,
+            "n": 8,
+            "name": "harvest",
+            "plants": 32,
+            "t_s": 124.7,
+            "waited_s": 1.6
+          },
+          {
+            "coins": 128,
+            "n": 9,
+            "name": "harvest",
+            "plants": 32,
+            "t_s": 140.2,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 160,
+            "n": 10,
+            "name": "harvest",
+            "plants": 40,
+            "t_s": 155.8,
+            "waited_s": 1.5
+          },
+          {
+            "coins": 160,
+            "n": 11,
+            "name": "harvest",
+            "plants": 40,
+            "t_s": 171.3,
+            "waited_s": 1.5
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          17.7,
+          15.6,
+          31.2,
+          15.6,
+          15.6,
+          31.2,
+          15.5,
+          31.1
+        ],
+        "started": "2026-11-02 21:05:40",
+        "upgrades": [
+          {
+            "cost": 16,
+            "level": 1,
+            "payout": 24,
+            "plants": 12,
+            "t_s": 17.7,
+            "yield": 2
+          },
+          {
+            "cost": 24,
+            "level": 2,
+            "payout": 36,
+            "plants": 18,
+            "t_s": 33.3,
+            "yield": 2
+          },
+          {
+            "cost": 40,
+            "level": 3,
+            "payout": 54,
+            "plants": 18,
+            "t_s": 64.5,
+            "yield": 3
+          },
+          {
+            "cost": 60,
+            "level": 4,
+            "payout": 72,
+            "plants": 24,
+            "t_s": 80.1,
+            "yield": 3
+          },
+          {
+            "cost": 90,
+            "level": 5,
+            "payout": 96,
+            "plants": 32,
+            "t_s": 95.7,
+            "yield": 3
+          },
+          {
+            "cost": 130,
+            "level": 6,
+            "payout": 128,
+            "plants": 32,
+            "t_s": 126.9,
+            "yield": 4
+          },
+          {
+            "cost": 190,
+            "level": 7,
+            "payout": 160,
+            "plants": 40,
+            "t_s": 142.4,
+            "yield": 4
+          },
+          {
+            "cost": 270,
+            "level": 8,
+            "payout": 200,
+            "plants": 50,
+            "t_s": 173.5,
+            "yield": 4
+          }
+        ],
+        "version": "0.93.0"
+      },
+      "engaged_seconds": 17.5,
+      "experiment": "harvest",
+      "first_upgrade_s": 17.7,
+      "idle_intervals": [
+        [
+          0.0,
+          15.5
+        ],
+        [
+          17.7,
+          31.1
+        ],
+        [
+          33.3,
+          46.7
+        ],
+        [
+          46.7,
+          62.3
+        ],
+        [
+          64.5,
+          77.9
+        ],
+        [
+          80.1,
+          93.5
+        ],
+        [
+          95.7,
+          109.1
+        ],
+        [
+          109.1,
+          124.7
+        ],
+        [
+          126.9,
+          140.2
+        ],
+        [
+          142.4,
+          155.8
+        ],
+        [
+          155.8,
+          171.3
+        ],
+        [
+          173.5,
+          180.1
+        ]
+      ],
+      "idle_seconds": 162.7,
+      "longest_idle_s": 15.6,
+      "metrics": {
+        "coins": 58,
+        "early_presses": 0,
+        "earned": 878,
+        "harvests": 11,
+        "last_payout": 160,
+        "level": 8,
+        "plants": 50,
+        "ready_wait_s": 16.8
+      },
+      "milestones": [
+        {
+          "coins": 16,
+          "n": 1,
+          "name": "harvest",
+          "plants": 8,
+          "t_s": 15.5,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 24,
+          "n": 2,
+          "name": "harvest",
+          "plants": 12,
+          "t_s": 31.1,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 36,
+          "n": 3,
+          "name": "harvest",
+          "plants": 18,
+          "t_s": 46.7,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 36,
+          "n": 4,
+          "name": "harvest",
+          "plants": 18,
+          "t_s": 62.3,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 54,
+          "n": 5,
+          "name": "harvest",
+          "plants": 18,
+          "t_s": 77.9,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 72,
+          "n": 6,
+          "name": "harvest",
+          "plants": 24,
+          "t_s": 93.5,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 96,
+          "n": 7,
+          "name": "harvest",
+          "plants": 32,
+          "t_s": 109.1,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 96,
+          "n": 8,
+          "name": "harvest",
+          "plants": 32,
+          "t_s": 124.7,
+          "waited_s": 1.6
+        },
+        {
+          "coins": 128,
+          "n": 9,
+          "name": "harvest",
+          "plants": 32,
+          "t_s": 140.2,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 160,
+          "n": 10,
+          "name": "harvest",
+          "plants": 40,
+          "t_s": 155.8,
+          "waited_s": 1.5
+        },
+        {
+          "coins": 160,
+          "n": 11,
+          "name": "harvest",
+          "plants": 40,
+          "t_s": 171.3,
+          "waited_s": 1.5
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        17.7,
+        15.6,
+        31.2,
+        15.6,
+        15.6,
+        31.2,
+        15.5,
+        31.1
+      ],
+      "started": "2026-11-02 21:05:40",
+      "upgrades": [
+        {
+          "cost": 16,
+          "level": 1,
+          "payout": 24,
+          "plants": 12,
+          "t_s": 17.7,
+          "yield": 2
+        },
+        {
+          "cost": 24,
+          "level": 2,
+          "payout": 36,
+          "plants": 18,
+          "t_s": 33.3,
+          "yield": 2
+        },
+        {
+          "cost": 40,
+          "level": 3,
+          "payout": 54,
+          "plants": 18,
+          "t_s": 64.5,
+          "yield": 3
+        },
+        {
+          "cost": 60,
+          "level": 4,
+          "payout": 72,
+          "plants": 24,
+          "t_s": 80.1,
+          "yield": 3
+        },
+        {
+          "cost": 90,
+          "level": 5,
+          "payout": 96,
+          "plants": 32,
+          "t_s": 95.7,
+          "yield": 3
+        },
+        {
+          "cost": 130,
+          "level": 6,
+          "payout": 128,
+          "plants": 32,
+          "t_s": 126.9,
+          "yield": 4
+        },
+        {
+          "cost": 190,
+          "level": 7,
+          "payout": 160,
+          "plants": 40,
+          "t_s": 142.4,
+          "yield": 4
+        },
+        {
+          "cost": 270,
+          "level": 8,
+          "payout": 200,
+          "plants": 50,
+          "t_s": 173.5,
+          "yield": 4
+        }
+      ],
+      "version": "0.93.0"
+    },
+    "island": {
+      "actions": 9,
+      "actions_by_kind": {
+        "button": 9
+      },
+      "active_seconds": 180.2,
+      "at_3min": {
+        "actions": 9,
+        "actions_by_kind": {
+          "button": 9
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 0.0,
+        "experiment": "island",
+        "first_upgrade_s": 16.5,
+        "idle_intervals": [
+          [
+            0.0,
+            16.5
+          ],
+          [
+            16.5,
+            33.4
+          ],
+          [
+            33.4,
+            51.4
+          ],
+          [
+            51.4,
+            69.0
+          ],
+          [
+            69.0,
+            87.7
+          ],
+          [
+            87.7,
+            107.4
+          ],
+          [
+            107.4,
+            126.3
+          ],
+          [
+            126.3,
+            146.7
+          ],
+          [
+            146.7,
+            168.9
+          ],
+          [
+            168.9,
+            180.0
+          ]
+        ],
+        "idle_seconds": 180.0,
+        "longest_idle_s": 22.3,
+        "metrics": {
+          "coins": 340,
+          "earned": 1736,
+          "level": 9,
+          "rate": 28.0,
+          "stage": "town"
+        },
+        "milestones": [
+          {
+            "level": 3,
+            "name": "village",
+            "t_s": 51.4
+          },
+          {
+            "level": 6,
+            "name": "town",
+            "t_s": 107.4
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          16.5,
+          16.9,
+          18.0,
+          17.6,
+          18.6,
+          19.8,
+          18.9,
+          20.4,
+          22.3
+        ],
+        "started": "2026-11-02 21:05:39",
+        "upgrades": [
+          {
+            "cost": 15,
+            "level": 1,
+            "stage": "islet",
+            "t_s": 16.5
+          },
+          {
+            "cost": 26,
+            "level": 2,
+            "stage": "islet",
+            "t_s": 33.4
+          },
+          {
+            "cost": 42,
+            "level": 3,
+            "stage": "village",
+            "t_s": 51.4
+          },
+          {
+            "cost": 68,
+            "level": 4,
+            "stage": "village",
+            "t_s": 69.0
+          },
+          {
+            "cost": 100,
+            "level": 5,
+            "stage": "village",
+            "t_s": 87.7
+          },
+          {
+            "cost": 145,
+            "level": 6,
+            "stage": "town",
+            "t_s": 107.4
+          },
+          {
+            "cost": 220,
+            "level": 7,
+            "stage": "town",
+            "t_s": 126.3
+          },
+          {
+            "cost": 320,
+            "level": 8,
+            "stage": "town",
+            "t_s": 146.7
+          },
+          {
+            "cost": 460,
+            "level": 9,
+            "stage": "town",
+            "t_s": 168.9
+          }
+        ],
+        "version": "0.93.0"
+      },
+      "engaged_seconds": 0.0,
+      "experiment": "island",
+      "first_upgrade_s": 16.5,
+      "idle_intervals": [
+        [
+          0.0,
+          16.5
+        ],
+        [
+          16.5,
+          33.4
+        ],
+        [
+          33.4,
+          51.4
+        ],
+        [
+          51.4,
+          69.0
+        ],
+        [
+          69.0,
+          87.7
+        ],
+        [
+          87.7,
+          107.4
+        ],
+        [
+          107.4,
+          126.3
+        ],
+        [
+          126.3,
+          146.7
+        ],
+        [
+          146.7,
+          168.9
+        ],
+        [
+          168.9,
+          180.2
+        ]
+      ],
+      "idle_seconds": 180.2,
+      "longest_idle_s": 22.3,
+      "metrics": {
+        "coins": 345,
+        "earned": 1741,
+        "level": 9,
+        "rate": 28.0,
+        "stage": "town"
+      },
+      "milestones": [
+        {
+          "level": 3,
+          "name": "village",
+          "t_s": 51.4
+        },
+        {
+          "level": 6,
+          "name": "town",
+          "t_s": 107.4
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        16.5,
+        16.9,
+        18.0,
+        17.6,
+        18.6,
+        19.8,
+        18.9,
+        20.4,
+        22.3
+      ],
+      "started": "2026-11-02 21:05:39",
+      "upgrades": [
+        {
+          "cost": 15,
+          "level": 1,
+          "stage": "islet",
+          "t_s": 16.5
+        },
+        {
+          "cost": 26,
+          "level": 2,
+          "stage": "islet",
+          "t_s": 33.4
+        },
+        {
+          "cost": 42,
+          "level": 3,
+          "stage": "village",
+          "t_s": 51.4
+        },
+        {
+          "cost": 68,
+          "level": 4,
+          "stage": "village",
+          "t_s": 69.0
+        },
+        {
+          "cost": 100,
+          "level": 5,
+          "stage": "village",
+          "t_s": 87.7
+        },
+        {
+          "cost": 145,
+          "level": 6,
+          "stage": "town",
+          "t_s": 107.4
+        },
+        {
+          "cost": 220,
+          "level": 7,
+          "stage": "town",
+          "t_s": 126.3
+        },
+        {
+          "cost": 320,
+          "level": 8,
+          "stage": "town",
+          "t_s": 146.7
+        },
+        {
+          "cost": 460,
+          "level": 9,
+          "stage": "town",
+          "t_s": 168.9
+        }
+      ],
+      "version": "0.93.0"
+    },
+    "rock": {
+      "actions": 454,
+      "actions_by_kind": {
+        "button": 5,
+        "hit": 442,
+        "tap_wait": 7
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 454,
+        "actions_by_kind": {
+          "button": 5,
+          "hit": 442,
+          "tap_wait": 7
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 180.0,
+        "experiment": "rock",
+        "first_upgrade_s": 21.7,
+        "idle_intervals": [],
+        "idle_seconds": 0.0,
+        "longest_idle_s": 0.0,
+        "metrics": {
+          "coins": 180,
+          "damage_per_hit": 12,
+          "damage_total": 2340,
+          "earned": 805,
+          "first_break_s": 20.2,
+          "hits": 442,
+          "misses": 0,
+          "pickaxe": 5,
+          "rock": 7,
+          "rocks_broken": 7,
+          "taps": 449
+        },
+        "milestones": [
+          {
+            "name": "break",
+            "pick": 0,
+            "reward": 25,
+            "rock": 0,
+            "t_s": 20.2
+          },
+          {
+            "name": "break",
+            "pick": 1,
+            "reward": 40,
+            "rock": 1,
+            "t_s": 37.0
+          },
+          {
+            "name": "break",
+            "pick": 2,
+            "reward": 60,
+            "rock": 2,
+            "t_s": 55.0
+          },
+          {
+            "name": "break",
+            "pick": 2,
+            "reward": 90,
+            "rock": 3,
+            "t_s": 82.2
+          },
+          {
+            "name": "break",
+            "pick": 3,
+            "reward": 130,
+            "rock": 4,
+            "t_s": 107.0
+          },
+          {
+            "name": "break",
+            "pick": 4,
+            "reward": 190,
+            "rock": 5,
+            "t_s": 130.2
+          },
+          {
+            "name": "break",
+            "pick": 4,
+            "reward": 270,
+            "rock": 6,
+            "t_s": 163.4
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          21.7,
+          16.9,
+          45.2,
+          24.8,
+          56.4
+        ],
+        "started": "2026-11-02 21:05:40",
+        "upgrades": [
+          {
+            "cost": 20,
+            "damage": 2,
+            "level": 1,
+            "t_s": 21.7
+          },
+          {
+            "cost": 45,
+            "damage": 3,
+            "level": 2,
+            "t_s": 38.5
+          },
+          {
+            "cost": 90,
+            "damage": 5,
+            "level": 3,
+            "t_s": 83.7
+          },
+          {
+            "cost": 170,
+            "damage": 8,
+            "level": 4,
+            "t_s": 108.5
+          },
+          {
+            "cost": 300,
+            "damage": 12,
+            "level": 5,
+            "t_s": 164.9
+          }
+        ],
+        "version": "0.93.0"
+      },
+      "engaged_seconds": 180.1,
+      "experiment": "rock",
+      "first_upgrade_s": 21.7,
+      "idle_intervals": [],
+      "idle_seconds": 0.0,
+      "longest_idle_s": 0.0,
+      "metrics": {
+        "coins": 180,
+        "damage_per_hit": 12,
+        "damage_total": 2340,
+        "earned": 805,
+        "first_break_s": 20.2,
+        "hits": 442,
+        "misses": 0,
+        "pickaxe": 5,
+        "rock": 7,
+        "rocks_broken": 7,
+        "taps": 449
+      },
+      "milestones": [
+        {
+          "name": "break",
+          "pick": 0,
+          "reward": 25,
+          "rock": 0,
+          "t_s": 20.2
+        },
+        {
+          "name": "break",
+          "pick": 1,
+          "reward": 40,
+          "rock": 1,
+          "t_s": 37.0
+        },
+        {
+          "name": "break",
+          "pick": 2,
+          "reward": 60,
+          "rock": 2,
+          "t_s": 55.0
+        },
+        {
+          "name": "break",
+          "pick": 2,
+          "reward": 90,
+          "rock": 3,
+          "t_s": 82.2
+        },
+        {
+          "name": "break",
+          "pick": 3,
+          "reward": 130,
+          "rock": 4,
+          "t_s": 107.0
+        },
+        {
+          "name": "break",
+          "pick": 4,
+          "reward": 190,
+          "rock": 5,
+          "t_s": 130.2
+        },
+        {
+          "name": "break",
+          "pick": 4,
+          "reward": 270,
+          "rock": 6,
+          "t_s": 163.4
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        21.7,
+        16.9,
+        45.2,
+        24.8,
+        56.4
+      ],
+      "started": "2026-11-02 21:05:40",
+      "upgrades": [
+        {
+          "cost": 20,
+          "damage": 2,
+          "level": 1,
+          "t_s": 21.7
+        },
+        {
+          "cost": 45,
+          "damage": 3,
+          "level": 2,
+          "t_s": 38.5
+        },
+        {
+          "cost": 90,
+          "damage": 5,
+          "level": 3,
+          "t_s": 83.7
+        },
+        {
+          "cost": 170,
+          "damage": 8,
+          "level": 4,
+          "t_s": 108.5
+        },
+        {
+          "cost": 300,
+          "damage": 12,
+          "level": 5,
+          "t_s": 164.9
+        }
+      ],
+      "version": "0.93.0"
+    },
+    "tree": {
+      "actions": 10,
+      "actions_by_kind": {
+        "button": 10
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 10,
+        "actions_by_kind": {
+          "button": 10
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 0.0,
+        "experiment": "tree",
+        "first_upgrade_s": 13.5,
+        "idle_intervals": [
+          [
+            0.0,
+            13.5
+          ],
+          [
+            13.5,
+            28.1
+          ],
+          [
+            28.1,
+            43.7
+          ],
+          [
+            43.7,
+            60.0
+          ],
+          [
+            60.0,
+            76.5
+          ],
+          [
+            76.5,
+            93.6
+          ],
+          [
+            93.6,
+            111.7
+          ],
+          [
+            111.7,
+            131.0
+          ],
+          [
+            131.0,
+            151.5
+          ],
+          [
+            151.5,
+            173.1
+          ],
+          [
+            173.1,
+            180.0
+          ]
+        ],
+        "idle_seconds": 180.0,
+        "longest_idle_s": 21.6,
+        "metrics": {
+          "coins": 596,
+          "earned": 3653,
+          "rate": 75.0,
+          "stage": 10,
+          "stage_name": "Crystal"
+        },
+        "milestones": [
+          {
+            "name": "Blossom",
+            "stage": 5,
+            "t_s": 76.5
+          },
+          {
+            "name": "Twin Heart",
+            "stage": 8,
+            "t_s": 131.0
+          },
+          {
+            "name": "Crystal",
+            "stage": 10,
+            "t_s": 173.1
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          13.5,
+          14.6,
+          15.7,
+          16.3,
+          16.6,
+          17.1,
+          18.1,
+          19.3,
+          20.5,
+          21.6
+        ],
+        "started": "2026-11-02 21:05:40",
+        "upgrades": [
+          {
+            "cost": 12,
+            "level": 1,
+            "shape": "Sapling",
+            "t_s": 13.5
+          },
+          {
+            "cost": 25,
+            "level": 2,
+            "shape": "Young Tree",
+            "t_s": 28.1
+          },
+          {
+            "cost": 45,
+            "level": 3,
+            "shape": "Branching",
+            "t_s": 43.7
+          },
+          {
+            "cost": 75,
+            "level": 4,
+            "shape": "Wide Canopy",
+            "t_s": 60.0
+          },
+          {
+            "cost": 120,
+            "level": 5,
+            "shape": "Blossom",
+            "t_s": 76.5
+          },
+          {
+            "cost": 190,
+            "level": 6,
+            "shape": "Fruit",
+            "t_s": 93.6
+          },
+          {
+            "cost": 300,
+            "level": 7,
+            "shape": "Glow",
+            "t_s": 111.7
+          },
+          {
+            "cost": 470,
+            "level": 8,
+            "shape": "Twin Heart",
+            "t_s": 131.0
+          },
+          {
+            "cost": 720,
+            "level": 9,
+            "shape": "Spiral Pagoda",
+            "t_s": 151.5
+          },
+          {
+            "cost": 1100,
+            "level": 10,
+            "shape": "Crystal",
+            "t_s": 173.1
+          }
+        ],
+        "version": "0.93.0"
+      },
+      "engaged_seconds": 0.0,
+      "experiment": "tree",
+      "first_upgrade_s": 13.5,
+      "idle_intervals": [
+        [
+          0.0,
+          13.5
+        ],
+        [
+          13.5,
+          28.1
+        ],
+        [
+          28.1,
+          43.7
+        ],
+        [
+          43.7,
+          60.0
+        ],
+        [
+          60.0,
+          76.5
+        ],
+        [
+          76.5,
+          93.6
+        ],
+        [
+          93.6,
+          111.7
+        ],
+        [
+          111.7,
+          131.0
+        ],
+        [
+          131.0,
+          151.5
+        ],
+        [
+          151.5,
+          173.1
+        ],
+        [
+          173.1,
+          180.1
+        ]
+      ],
+      "idle_seconds": 180.1,
+      "longest_idle_s": 21.6,
+      "metrics": {
+        "coins": 607,
+        "earned": 3664,
+        "rate": 75.0,
+        "stage": 10,
+        "stage_name": "Crystal"
+      },
+      "milestones": [
+        {
+          "name": "Blossom",
+          "stage": 5,
+          "t_s": 76.5
+        },
+        {
+          "name": "Twin Heart",
+          "stage": 8,
+          "t_s": 131.0
+        },
+        {
+          "name": "Crystal",
+          "stage": 10,
+          "t_s": 173.1
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        13.5,
+        14.6,
+        15.7,
+        16.3,
+        16.6,
+        17.1,
+        18.1,
+        19.3,
+        20.5,
+        21.6
+      ],
+      "started": "2026-11-02 21:05:40",
+      "upgrades": [
+        {
+          "cost": 12,
+          "level": 1,
+          "shape": "Sapling",
+          "t_s": 13.5
+        },
+        {
+          "cost": 25,
+          "level": 2,
+          "shape": "Young Tree",
+          "t_s": 28.1
+        },
+        {
+          "cost": 45,
+          "level": 3,
+          "shape": "Branching",
+          "t_s": 43.7
+        },
+        {
+          "cost": 75,
+          "level": 4,
+          "shape": "Wide Canopy",
+          "t_s": 60.0
+        },
+        {
+          "cost": 120,
+          "level": 5,
+          "shape": "Blossom",
+          "t_s": 76.5
+        },
+        {
+          "cost": 190,
+          "level": 6,
+          "shape": "Fruit",
+          "t_s": 93.6
+        },
+        {
+          "cost": 300,
+          "level": 7,
+          "shape": "Glow",
+          "t_s": 111.7
+        },
+        {
+          "cost": 470,
+          "level": 8,
+          "shape": "Twin Heart",
+          "t_s": 131.0
+        },
+        {
+          "cost": 720,
+          "level": 9,
+          "shape": "Spiral Pagoda",
+          "t_s": 151.5
+        },
+        {
+          "cost": 1100,
+          "level": 10,
+          "shape": "Crystal",
+          "t_s": 173.1
+        }
+      ],
+      "version": "0.93.0"
+    },
+    "tycoon": {
+      "actions": 8,
+      "actions_by_kind": {
+        "button": 8
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 8,
+        "actions_by_kind": {
+          "button": 8
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 3.5,
+        "experiment": "tycoon",
+        "first_upgrade_s": 20.1,
+        "idle_intervals": [
+          [
+            0.0,
+            20.1
+          ],
+          [
+            20.1,
+            41.5
+          ],
+          [
+            41.5,
+            63.3
+          ],
+          [
+            63.3,
+            87.3
+          ],
+          [
+            87.3,
+            113.2
+          ],
+          [
+            113.2,
+            137.4
+          ],
+          [
+            137.4,
+            158.9
+          ],
+          [
+            158.9,
+            176.5
+          ]
+        ],
+        "idle_seconds": 176.5,
+        "longest_idle_s": 25.9,
+        "metrics": {
+          "coins": 103,
+          "delivered": 182,
+          "deliveries_per_min": 150.0,
+          "earned": 1021,
+          "level": 8,
+          "units_made": 203
+        },
+        "milestones": [],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          20.1,
+          21.4,
+          21.8,
+          24.0,
+          25.9,
+          24.2,
+          21.5,
+          17.6
+        ],
+        "started": "2026-11-02 21:05:40",
+        "upgrades": [
+          {
+            "cost": 12,
+            "level": 1,
+            "name": "Bigger Hopper",
+            "show": "hopper",
+            "t_s": 20.1
+          },
+          {
+            "cost": 24,
+            "level": 2,
+            "name": "Second Arm",
+            "show": "arm",
+            "t_s": 41.5
+          },
+          {
+            "cost": 36,
+            "level": 3,
+            "name": "Steam Machine",
+            "show": "machine",
+            "t_s": 63.3
+          },
+          {
+            "cost": 56,
+            "level": 4,
+            "name": "Momo Loader",
+            "show": "helper",
+            "t_s": 87.3
+          },
+          {
+            "cost": 90,
+            "level": 5,
+            "name": "Fast Belt",
+            "show": "belt",
+            "t_s": 113.2
+          },
+          {
+            "cost": 140,
+            "level": 6,
+            "name": "Second Lane",
+            "show": "lane",
+            "t_s": 137.4
+          },
+          {
+            "cost": 220,
+            "level": 7,
+            "name": "Gold Bars",
+            "show": "product",
+            "t_s": 158.9
+          },
+          {
+            "cost": 340,
+            "level": 8,
+            "name": "Momo Crew",
+            "show": "helper",
+            "t_s": 176.5
+          }
+        ],
+        "version": "0.93.0"
+      },
+      "engaged_seconds": 3.5,
+      "experiment": "tycoon",
+      "first_upgrade_s": 20.1,
+      "idle_intervals": [
+        [
+          0.0,
+          20.1
+        ],
+        [
+          20.1,
+          41.5
+        ],
+        [
+          41.5,
+          63.3
+        ],
+        [
+          63.3,
+          87.3
+        ],
+        [
+          87.3,
+          113.2
+        ],
+        [
+          113.2,
+          137.4
+        ],
+        [
+          137.4,
+          158.9
+        ],
+        [
+          158.9,
+          176.5
+        ]
+      ],
+      "idle_seconds": 176.5,
+      "longest_idle_s": 25.9,
+      "metrics": {
+        "coins": 103,
+        "delivered": 182,
+        "deliveries_per_min": 150.0,
+        "earned": 1021,
+        "level": 8,
+        "units_made": 203
+      },
+      "milestones": [],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        20.1,
+        21.4,
+        21.8,
+        24.0,
+        25.9,
+        24.2,
+        21.5,
+        17.6
+      ],
+      "started": "2026-11-02 21:05:40",
+      "upgrades": [
+        {
+          "cost": 12,
+          "level": 1,
+          "name": "Bigger Hopper",
+          "show": "hopper",
+          "t_s": 20.1
+        },
+        {
+          "cost": 24,
+          "level": 2,
+          "name": "Second Arm",
+          "show": "arm",
+          "t_s": 41.5
+        },
+        {
+          "cost": 36,
+          "level": 3,
+          "name": "Steam Machine",
+          "show": "machine",
+          "t_s": 63.3
+        },
+        {
+          "cost": 56,
+          "level": 4,
+          "name": "Momo Loader",
+          "show": "helper",
+          "t_s": 87.3
+        },
+        {
+          "cost": 90,
+          "level": 5,
+          "name": "Fast Belt",
+          "show": "belt",
+          "t_s": 113.2
+        },
+        {
+          "cost": 140,
+          "level": 6,
+          "name": "Second Lane",
+          "show": "lane",
+          "t_s": 137.4
+        },
+        {
+          "cost": 220,
+          "level": 7,
+          "name": "Gold Bars",
+          "show": "product",
+          "t_s": 158.9
+        },
+        {
+          "cost": 340,
+          "level": 8,
+          "name": "Momo Crew",
+          "show": "helper",
+          "t_s": 176.5
+        }
+      ],
+      "version": "0.93.0"
+    }
+  }
+}
