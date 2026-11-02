@@ -43,11 +43,12 @@
   .btn { display: inline-block; text-decoration: none; background: var(--leaf); color: var(--leaf-ink); border-radius: 12px; padding: 8px 14px; font-weight: 600; border: 0; cursor: pointer; font-size: 0.95rem; }
   .btn.ghost { background: var(--chip); color: var(--ink); }
   .rate { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
-  .dim { display: flex; align-items: center; gap: 6px; margin: 6px 0; flex-wrap: wrap; }
-  .dim span.lab { width: 7.5em; font-size: 0.9rem; }
+  .dim { display: grid; grid-template-columns: repeat(5, 34px) auto; justify-content: start; align-items: center; gap: 4px 6px; margin: 8px 0; }
+  .dim span.lab { grid-column: 1 / -1; font-size: 0.9rem; }
   .dim button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); font-weight: 600; cursor: pointer; }
   .dim button.on { background: var(--leaf); color: var(--leaf-ink); border-color: var(--leaf); }
   .dim button.skip { width: auto; padding: 0 10px; font-weight: 400; font-size: 0.82rem; }
+  .dim button.skip.on { background: transparent; color: var(--muted); border: 1px dashed var(--muted); }
   textarea, input[type=text] { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: var(--bg); color: var(--ink); font: inherit; }
   table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 14px; overflow: hidden; }
   th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; font-size: 0.92rem; }
