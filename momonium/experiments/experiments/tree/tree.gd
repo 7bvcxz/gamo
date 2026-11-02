@@ -14,6 +14,7 @@ const POP_SECONDS := 1.3
 const MAX_ZOOM := 1.5
 const MIN_ZOOM := 0.42
 const GROW_SECONDS := 1.1
+const ZOOM_SECONDS := 0.5
 ## The big reveals: a fanfare and a milestone in the record.
 const BIG_STAGES: Array[int] = [5, 8, 10, 13]
 
@@ -176,8 +177,10 @@ func _frame(animate: bool) -> void:
 		_zoom_tween.kill()
 	if animate and not reduced_motion:
 		_zoom_tween = create_tween().set_parallel(true)
-		_zoom_tween.tween_property(world, "scale", Vector2(k, k), 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		_zoom_tween.tween_property(world, "position", pos, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		# Quicker than the tree grows in (GROW_SECONDS): the view is ready
+		# before the new shape reaches its full size.
+		_zoom_tween.tween_property(world, "scale", Vector2(k, k), ZOOM_SECONDS).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_zoom_tween.tween_property(world, "position", pos, ZOOM_SECONDS).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	else:
 		world.scale = Vector2(k, k)
 		world.position = pos
@@ -236,7 +239,8 @@ func state() -> Dictionary:
 		"next_name": TreeLevels.stage(stage + 1)["name"], "rate": TreeLevels.rate(stage), "next_cost": next_cost(),
 		"tree_rect": [r.position.x, r.position.y, r.size.x, r.size.y], "foot": [foot.x, foot.y], "zoom": world.scale.x,
 		"segments": (tree.geo["segs"] as Array).size(), "tips": (tree.geo["tips"] as Array).size(),
-		"crown": String(tree.shape.get("crown", "")), "preview": preview.visible and not preview.geo.is_empty()}
+		"crown": String(tree.shape.get("crown", "")), "preview": preview.visible and not preview.geo.is_empty(),
+		"settled": tree.grow >= 1.0 and (_zoom_tween == null or not _zoom_tween.is_running())}
 
 
 func intent_question() -> String:

@@ -17,6 +17,7 @@ test('three minutes of Endless Growth, tapping Grow Tree when it can pay', async
   expect(s.host.experiment.preview, 'the next shape stands behind the sprout').toBe(true);
   const shots = [[30, 'early'], [100, 'mid'], [178, 'late']];
   const seen = new Set([s.host.experiment.name]);
+  let checked = 0;
   while (s.host.session.active_seconds < 181) {
     s = (await lab.call('dev_advance', 1)).state;
     if (s.host.action.affordable) {
@@ -32,8 +33,13 @@ test('three minutes of Endless Growth, tapping Grow Tree when it can pay', async
       await lab.shot(`tree89_${label}`);
       s = await lab.state();
     }
-    const r = s.host.experiment.tree_rect;
-    expect(r[1] >= 199 && s.host.experiment.foot[1] <= s.host.rects.action[1] + 1, `the tree inside the frame at ${s.host.session.active_seconds}s: ${r}`).toBe(true);
+    // Between changes (a new shape grows in over a second while the view
+    // draws back): the whole tree inside the frame.
+    if (s.host.experiment.settled) {
+      checked++;
+      const r = s.host.experiment.tree_rect;
+      expect(r[1] >= 199 && s.host.experiment.foot[1] <= s.host.rects.action[1] + 1, `the tree inside the frame at ${s.host.session.active_seconds}s: ${r}`).toBe(true);
+    }
   }
   // The three-minute question, answered with a real tap.
   expect(s.host.rects.intent_yes, 'the card asks at three minutes').toBeTruthy();
@@ -46,6 +52,7 @@ test('three minutes of Endless Growth, tapping Grow Tree when it can pay', async
   expect(sum.first_upgrade_s, 'the first change within 10-30 s').toBeLessThanOrEqual(30);
   expect(sum.first_upgrade_s).toBeGreaterThanOrEqual(10);
   expect(seen.size, 'many different trees in three minutes').toBeGreaterThanOrEqual(8);
+  expect(checked, 'the frame was checked most of the time').toBeGreaterThan(80);
 });
 
 test('a reload of the direct link starts from the sprout; a hidden tab grows nothing', async ({ lab }) => {
