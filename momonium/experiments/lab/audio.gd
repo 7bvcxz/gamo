@@ -24,6 +24,7 @@ const EFFECTS := {
 	"momo": preload("res://shared/audio/sfx_momo.ogg"),
 	"soft": preload("res://shared/audio/sfx_tap_soft.ogg"),
 	"wood": preload("res://shared/audio/sfx_tap_wood.ogg"),
+	"water": preload("res://shared/audio/sfx_tap_water.ogg"),
 }
 const POOL := 8
 

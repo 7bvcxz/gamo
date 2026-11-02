@@ -41,3 +41,9 @@ func test_command_line() -> void:
 	assert_true(bool(r["dev"]), "--dev")
 	assert_eq(r["motion"], "reduce", "--motion")
 	assert_false(bool(r["sound"]), "--mute")
+
+
+func test_the_frame_demo_has_a_hidden_link() -> void:
+	assert_eq(LabRoute.parse("#stub", "")["exp"], "stub", "#stub opens the frame's own demo")
+	assert_false(LabRegistry.ids().has("stub"), "no tile for it")
+	assert_eq(LabRegistry.script_path("stub"), LabRegistry.STUB, "it is the stub")

@@ -49,7 +49,7 @@ func _ready() -> void:
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var col := VBoxContainer.new()
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var t := LabStyle.label("COMING SOON", 34, LabStyle.INK)
+	var t := LabStyle.label("FRAME DEMO" if String(get_meta("lab_id", "")) == "stub" else "COMING SOON", 34, LabStyle.INK)
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var s := LabStyle.label(LabRegistry.label(String(get_meta("lab_id", ""))), 28, Color("#5b6b7a"))
 	s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

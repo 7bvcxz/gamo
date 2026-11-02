@@ -11,7 +11,7 @@ const STUB := "res://experiments/stub/stub.gd"
 
 const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "island", "letter": "A", "title": "Island Growth", "icon": "villa", "color": Color("#4fb36b"), "script": "res://experiments/island/island.gd"},
-	{"id": "evolution", "letter": "B", "title": "Momo Evolution", "icon": "momo_front", "color": Color("#e98fb1"), "script": ""},
+	{"id": "evolution", "letter": "B", "title": "Momo Evolution", "icon": "momo_front", "color": Color("#e98fb1"), "script": "res://experiments/evolution/evolution.gd"},
 	{"id": "rock", "letter": "C", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": "res://experiments/rock/rock.gd"},
 	{"id": "harvest", "letter": "D", "title": "Harvest Burst", "icon": "crop_ripe", "color": Color("#f0a843"), "script": ""},
 	{"id": "tycoon", "letter": "E", "title": "Production Tycoon", "icon": "car_factory", "color": Color("#5a8fd8"), "script": ""},
@@ -28,6 +28,15 @@ static func ids() -> Array[String]:
 
 static func has(id: String) -> bool:
 	return ids().has(id)
+
+
+## The frame's own demonstration (the stub) answers `#stub` too, though no
+## tile shows it: the Lab's tests use it once every experiment is built.
+const HIDDEN: Array[String] = ["stub"]
+
+
+static func routable(id: String) -> bool:
+	return has(id) or HIDDEN.has(id)
 
 
 static func find(id: String) -> Dictionary:
@@ -48,5 +57,7 @@ static func script_path(id: String) -> String:
 
 
 static func label(id: String) -> String:
+	if id == "stub":
+		return "Lab · Frame demo"
 	var e := find(id)
 	return "%s · %s" % [e.get("letter", "?"), e.get("title", id)]

@@ -17,7 +17,7 @@ func before_each() -> void:
 	app = MainScene.instantiate() as LabApp
 	tree.root.add_child(app)
 	await tree.process_frame
-	app.open("evolution")
+	app.open("stub")
 	await tree.process_frame
 	await tree.process_frame
 	host = app.host

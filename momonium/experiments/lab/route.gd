@@ -35,7 +35,7 @@ static func parse(hash: String, search: String, args: PackedStringArray = Packed
 				out["sound"] = false
 		i += 2 if v != "" else 1
 	if want != "":
-		if LabRegistry.has(want):
+		if LabRegistry.routable(want):
 			out["exp"] = want
 		else:
 			out["unknown"] = want

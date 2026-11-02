@@ -5,6 +5,8 @@
     "shared/atlas/sprites.json": "assets/atlas/sprites.json",
     "shared/momo/momo_sheet.png": "assets/momo/momo_sheet.png",
     "shared/momo/momo_sheet.json": "assets/momo/momo_sheet.json",
+    "shared/momo/momo_work.png": "assets/momo/momo_work.png",
+    "shared/momo/momo_work.json": "assets/momo/momo_work.json",
     "shared/hands/hand_tools.png": "assets/hands/hand_tools.png",
     "shared/hands/hand_tools.json": "assets/hands/hand_tools.json",
     "shared/textures/grass.png": "assets/textures/grass.png",
@@ -28,6 +30,7 @@
     "shared/audio/sfx_land.ogg": "assets/audio/sfx_land.ogg",
     "shared/audio/sfx_momo.ogg": "assets/audio/sfx_momo.ogg",
     "shared/audio/sfx_tap_soft.ogg": "assets/audio/sfx_tap_soft.ogg",
-    "shared/audio/sfx_tap_wood.ogg": "assets/audio/sfx_tap_wood.ogg"
+    "shared/audio/sfx_tap_wood.ogg": "assets/audio/sfx_tap_wood.ogg",
+    "shared/audio/sfx_tap_water.ogg": "assets/audio/sfx_tap_water.ogg"
   }
 }

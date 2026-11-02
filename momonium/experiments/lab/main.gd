@@ -87,7 +87,7 @@ func show_route(id: String) -> void:
 
 ## Opens an experiment and puts its direct link in the address.
 func open(id: String) -> void:
-	if not LabRegistry.has(id):
+	if not LabRegistry.routable(id):
 		return
 	LabWeb.set_route(id)
 	show_route(id)

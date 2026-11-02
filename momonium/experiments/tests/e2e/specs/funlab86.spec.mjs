@@ -47,7 +47,7 @@ test('a tile opens its experiment, Back comes home, a direct link survives a rel
 });
 
 test('Restart starts from nothing; one finger or click is one press', async ({ lab }) => {
-  await lab.open('./#evolution');
+  await lab.open('./#stub');
   await lab.call('dev_advance', 30);
   let s = await lab.state();
   expect(s.host.experiment.coins).toBeGreaterThanOrEqual(30);
@@ -95,7 +95,7 @@ test('a hidden tab or an unfocused window stops play time; nothing is caught up'
 });
 
 test('dev mode: the play clock and the run report as a real download', async ({ lab }) => {
-  await lab.open('./?dev=1#evolution');
+  await lab.open('./?dev=1#stub');
   await lab.call('dev_advance', 12);
   let s = await lab.state();
   expect(s.dev).toBe(true);
@@ -105,9 +105,9 @@ test('dev mode: the play clock and the run report as a real download', async ({ 
   expect(s.host.rects.report_json, 'the report is open').toBeTruthy();
   await lab.shot('funlab86_report');
   const [json] = await Promise.all([lab.page.waitForEvent('download'), lab.tapRect(s.host.rects.report_json)]);
-  expect(json.suggestedFilename()).toMatch(/^funlab-evolution-.*\.json$/);
+  expect(json.suggestedFilename()).toMatch(/^funlab-stub-.*\.json$/);
   const data = JSON.parse(await (await json.createReadStream()).toArray().then((c) => Buffer.concat(c).toString()));
-  expect(data.experiment).toBe('evolution');
+  expect(data.experiment).toBe('stub');
   expect(data.active_seconds).toBeGreaterThanOrEqual(12);
   const [csv] = await Promise.all([lab.page.waitForEvent('download'), lab.tapRect(s.host.rects.report_csv)]);
   const text = await (await csv.createReadStream()).toArray().then((c) => Buffer.concat(c).toString());
@@ -116,7 +116,7 @@ test('dev mode: the play clock and the run report as a real download', async ({ 
 
 test('without dev mode the hooks that change a run are closed', async ({ page }, info) => {
   const lab = wrap(page, info);
-  await page.goto('./#evolution');
+  await page.goto('./#stub');
   await lab.ready();
   expect((await lab.state()).host.rects.report, 'no report button').toBeFalsy();
   const r = await lab.call('dev_advance', 30);

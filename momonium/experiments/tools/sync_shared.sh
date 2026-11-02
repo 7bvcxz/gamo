@@ -15,6 +15,7 @@ GAME="$(cd "$LAB/.." && pwd)"
 FILES=(
   assets/atlas/sprites.png assets/atlas/sprites.json
   assets/momo/momo_sheet.png assets/momo/momo_sheet.json
+  assets/momo/momo_work.png assets/momo/momo_work.json
   assets/hands/hand_tools.png assets/hands/hand_tools.json
   assets/textures/grass.png assets/textures/cliff.png assets/textures/dirt.png assets/textures/stone.png
   assets/shaders/ocean.gdshader
@@ -24,7 +25,7 @@ FILES=(
   assets/audio/sfx_built.ogg assets/audio/sfx_promote.ogg assets/audio/sfx_harvest.ogg
   assets/audio/sfx_tap_pick.ogg assets/audio/sfx_tap_metal.ogg assets/audio/sfx_thunk.ogg
   assets/audio/sfx_demolish.ogg assets/audio/sfx_land.ogg assets/audio/sfx_momo.ogg
-  assets/audio/sfx_tap_soft.ogg assets/audio/sfx_tap_wood.ogg
+  assets/audio/sfx_tap_soft.ogg assets/audio/sfx_tap_wood.ogg assets/audio/sfx_tap_water.ogg
 )
 manifest="{\n  \"_doc\": \"Copies of the game's own files (momonium/<source>), made by tools/sync_shared.sh; tests/unit/test_shared_assets.gd checks each is byte-identical to its source.\",\n  \"files\": {"
 sep=""
