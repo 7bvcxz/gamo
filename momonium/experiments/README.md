@@ -10,7 +10,7 @@
 | C | Break & Upgrade (Step 88, 플레이 가능) | 거대한 바위 · 곡괭이 | Pickaxe Power | `#rock` |
 | D | Harvest Burst | 수확 | (예정) | `#harvest` |
 | E | Production Tycoon | 생산 | (예정) | `#tycoon` |
-| F | Endless Growth | 나무 한 그루 | Grow Tree | `#tree` |
+| F | Endless Growth (Step 89, 플레이 가능) | 나무 한 그루 | Grow Tree | `#tree` |
 
 - 실험실: https://7bvcxz.github.io/gamo/momonium-experiments/
 - 한 실험의 직접 링크: `…/momonium-experiments/#island`. 새로고침해도 그 실험이 다시 열린다.
@@ -99,6 +99,8 @@ godot --headless --path momonium/experiments --script res://tools/selftest.gd --
 - **마일스톤**: 실험이 정한 큰 변화.
 - **쉰 구간**: 5초 이상 아무 입력이 없던 구간. 첫 입력 전과 마지막 입력 뒤도 센다. 합계와 가장 긴 구간.
 - **3분 시점 요약**: 플레이 3:00에 그때의 요약을 얼려 둔다(`at_3min`).
+- **계속할 마음**(Step 89): 플레이 3:00에 버튼 바로 위에 작은 카드가 뜬다("Keep playing?", F는 "See the next tree?").
+  Yes / Not now로 답하고, 20초 안에 답이 없으면 `none`이다. 답은 `metrics.continue_intent`에 남고 플레이를 멈추지 않는다. 답하는 탭은 행동으로 세지 않는다.
 - **실험의 숫자**(`metrics`): 레벨, 자원, 수입률 등.
 
 `?dev=1`의 기록 창에서 `funlab-<id>-<시각>.json`과 `.csv`를 받는다. CSV는 사건 한 줄에 한 행이고, 끝에 요약 행이 붙는다.
