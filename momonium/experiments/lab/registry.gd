@@ -12,7 +12,7 @@ const STUB := "res://experiments/stub/stub.gd"
 const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "island", "letter": "A", "title": "Island Growth", "icon": "villa", "color": Color("#4fb36b"), "script": "res://experiments/island/island.gd"},
 	{"id": "evolution", "letter": "B", "title": "Momo Evolution", "icon": "momo_front", "color": Color("#e98fb1"), "script": ""},
-	{"id": "rock", "letter": "C", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": ""},
+	{"id": "rock", "letter": "C", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": "res://experiments/rock/rock.gd"},
 	{"id": "harvest", "letter": "D", "title": "Harvest Burst", "icon": "crop_ripe", "color": Color("#f0a843"), "script": ""},
 	{"id": "tycoon", "letter": "E", "title": "Production Tycoon", "icon": "car_factory", "color": Color("#5a8fd8"), "script": ""},
 	{"id": "tree", "letter": "F", "title": "Endless Growth", "icon": "prop_tree", "color": Color("#3d9a5a"), "script": ""},

@@ -7,7 +7,8 @@ extends Control
 ##   tick(dt)       play-time seconds (stops while the page is hidden or
 ##                  unfocused; never more than LabHost.MAX_STEP at once)
 ##   hud()          the one visible resource: {value, rate, icon}
-##   action_info()  the one button: {label, cost, affordable, icon}; {} hides it
+##   action_info()  the one button: {label, cost, affordable, icon (an atlas
+##                  sprite) or texture, tint}; {} hides it
 ##   do_action()    the button was pressed (the host already recorded the press)
 ##   state()        what tests and window.funlab read
 ##   dev(name, arg) test hooks (window.funlab.call("dev_*") in dev or E2E runs)

@@ -389,7 +389,7 @@ func _refresh() -> void:
 	if clock_label.visible:
 		clock_label.text = _clock(session.active_ms / 1000.0)
 	var info := experiment.action_info()
-	if info.get("affordable") != _last_info.get("affordable") or info.get("cost") != _last_info.get("cost") or info.get("label") != _last_info.get("label"):
+	if info.get("affordable") != _last_info.get("affordable") or info.get("cost") != _last_info.get("cost") or info.get("label") != _last_info.get("label") or info.get("icon") != _last_info.get("icon") or info.get("tint") != _last_info.get("tint"):
 		_refresh_action()
 
 
@@ -407,9 +407,13 @@ func _refresh_action() -> void:
 	action_cost.visible = cost >= 0
 	action_cost.text = _short(cost)
 	var icon := String(info.get("icon", ""))
-	action_icon.visible = icon != "" and LabAtlas.has(icon)
-	if action_icon.visible:
+	var tex: Texture2D = info.get("texture")
+	action_icon.visible = tex != null or (icon != "" and LabAtlas.has(icon))
+	if tex != null:
+		action_icon.texture = tex
+	elif action_icon.visible:
 		action_icon.texture = LabAtlas.texture(icon)
+	action_icon.modulate = info.get("tint", Color.WHITE)
 	var ok := bool(info.get("affordable", true))
 	LabStyle.button(action_button, LabStyle.LEAF if ok else Color("#9aa7a0"), 40)
 	action_button.modulate = Color.WHITE
