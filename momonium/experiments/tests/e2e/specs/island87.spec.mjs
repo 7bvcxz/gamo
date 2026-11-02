@@ -42,7 +42,7 @@ test('three minutes of Island Growth, tapping Upgrade Island when it can pay', a
   expect(s.host.experiment.stage, 'the Town by 3:00').toBe('town');
   expect(sum.milestones.map((m) => m.name)).toEqual(['village', 'town']);
   expect(sum.upgrades.length, 'several upgrades').toBeGreaterThanOrEqual(7);
-  expect(s.host.experiment.milestone_ghost, 'the Monument waits as a ghost').toBe(true);
+  expect(s.host.experiment.monument_ghost, 'the Monument waits as a ghost').toBe(true);
   expect(sum.actions_by_kind.button, 'every tap was one press').toBe(taps);
 });
 
@@ -75,12 +75,14 @@ test('reduced motion still shows every change', async ({ lab }) => {
   await lab.open('./?motion=reduce#island');
   let s = await lab.state();
   expect(s.reduced_motion).toBe(true);
-  await lab.call('dev_advance', 50);
-  for (let i = 0; i < 3; i++) {
+  while (s.host.experiment.level < 3) {
+    await lab.call('dev_advance', 5);
     s = await lab.state();
-    await lab.tapRect(s.host.rects.action);
+    if (s.host.action.affordable) {
+      await lab.tapRect(s.host.rects.action);
+      s = await lab.state();
+    }
   }
-  s = await lab.state();
   expect(s.host.experiment.level).toBe(3);
   expect(s.host.experiment.cells, 'the Village coast at once').toBe(16);
   await lab.shot('island87_reduced');

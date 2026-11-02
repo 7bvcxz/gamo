@@ -76,7 +76,7 @@ func test_three_minutes_buying_at_once_reach_the_town() -> void:
 	var times := IslandLevels.instant_times(int(s["level"]))
 	for u: Dictionary in host.session.upgrades:
 		assert_near(float(u["t_ms"]) / 1000.0, times[int(u["level"])], 0.3, "level %d when the table says" % int(u["level"]))
-	assert_true(bool(s["milestone_ghost"]), "the Monument waits as a ghost")
+	assert_true(bool(s["monument_ghost"]), "the Monument waits as a ghost")
 	assert_true(int(s["momos"]) >= 3, "three Momo")
 
 

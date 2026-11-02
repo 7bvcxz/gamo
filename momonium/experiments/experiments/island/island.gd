@@ -406,7 +406,8 @@ func state() -> Dictionary:
 	return {"coins": coins, "earned": earned, "level": level, "stage": IslandLevels.stage(level),
 		"rate": IslandLevels.rate(level), "next_cost": next_cost(), "cells": island.cells.size(),
 		"props": props.size(), "momos": momos.size(), "ghost_cells": island.ghost_cells.size(),
-		"ghosts": ghosts.get_child_count(), "milestone_ghost": ghosts.get_children().any(func(g: Node) -> bool: return g.has_meta("milestone")),
+		"ghosts": ghosts.get_child_count(),
+		"monument_ghost": ghosts.get_children().any(func(g: Node) -> bool: return String(g.get_meta("sprite", "")) == "momo_monument"),
 		"island_rect": [gb.position.x, gb.position.y, gb.size.x, gb.size.y], "zoom": world.scale.x}
 
 
