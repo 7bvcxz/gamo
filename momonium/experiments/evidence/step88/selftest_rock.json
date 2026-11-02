@@ -1,0 +1,247 @@
+{
+  "_doc": "tools/selftest.gd: a scripted player, 180 s of play each (reaction 1.5 s). Objective numbers only.",
+  "runs": {
+    "rock": {
+      "actions": 454,
+      "actions_by_kind": {
+        "button": 5,
+        "hit": 442,
+        "tap_wait": 7
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 454,
+        "actions_by_kind": {
+          "button": 5,
+          "hit": 442,
+          "tap_wait": 7
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 180.0,
+        "experiment": "rock",
+        "first_upgrade_s": 21.7,
+        "idle_intervals": [],
+        "idle_seconds": 0.0,
+        "longest_idle_s": 0.0,
+        "metrics": {
+          "coins": 180,
+          "damage_per_hit": 12,
+          "damage_total": 2340,
+          "earned": 805,
+          "first_break_s": 20.2,
+          "hits": 442,
+          "misses": 0,
+          "pickaxe": 5,
+          "rock": 7,
+          "rocks_broken": 7,
+          "taps": 449
+        },
+        "milestones": [
+          {
+            "name": "break",
+            "pick": 0,
+            "reward": 25,
+            "rock": 0,
+            "t_s": 20.2
+          },
+          {
+            "name": "break",
+            "pick": 1,
+            "reward": 40,
+            "rock": 1,
+            "t_s": 37.0
+          },
+          {
+            "name": "break",
+            "pick": 2,
+            "reward": 60,
+            "rock": 2,
+            "t_s": 55.0
+          },
+          {
+            "name": "break",
+            "pick": 2,
+            "reward": 90,
+            "rock": 3,
+            "t_s": 82.2
+          },
+          {
+            "name": "break",
+            "pick": 3,
+            "reward": 130,
+            "rock": 4,
+            "t_s": 107.0
+          },
+          {
+            "name": "break",
+            "pick": 4,
+            "reward": 190,
+            "rock": 5,
+            "t_s": 130.2
+          },
+          {
+            "name": "break",
+            "pick": 4,
+            "reward": 270,
+            "rock": 6,
+            "t_s": 163.4
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          21.7,
+          16.9,
+          45.2,
+          24.8,
+          56.4
+        ],
+        "started": "2026-11-02 18:48:46",
+        "upgrades": [
+          {
+            "cost": 20,
+            "damage": 2,
+            "level": 1,
+            "t_s": 21.7
+          },
+          {
+            "cost": 45,
+            "damage": 3,
+            "level": 2,
+            "t_s": 38.5
+          },
+          {
+            "cost": 90,
+            "damage": 5,
+            "level": 3,
+            "t_s": 83.7
+          },
+          {
+            "cost": 170,
+            "damage": 8,
+            "level": 4,
+            "t_s": 108.5
+          },
+          {
+            "cost": 300,
+            "damage": 12,
+            "level": 5,
+            "t_s": 164.9
+          }
+        ],
+        "version": "0.88.0"
+      },
+      "engaged_seconds": 180.1,
+      "experiment": "rock",
+      "first_upgrade_s": 21.7,
+      "idle_intervals": [],
+      "idle_seconds": 0.0,
+      "longest_idle_s": 0.0,
+      "metrics": {
+        "coins": 180,
+        "damage_per_hit": 12,
+        "damage_total": 2340,
+        "earned": 805,
+        "first_break_s": 20.2,
+        "hits": 442,
+        "misses": 0,
+        "pickaxe": 5,
+        "rock": 7,
+        "rocks_broken": 7,
+        "taps": 449
+      },
+      "milestones": [
+        {
+          "name": "break",
+          "pick": 0,
+          "reward": 25,
+          "rock": 0,
+          "t_s": 20.2
+        },
+        {
+          "name": "break",
+          "pick": 1,
+          "reward": 40,
+          "rock": 1,
+          "t_s": 37.0
+        },
+        {
+          "name": "break",
+          "pick": 2,
+          "reward": 60,
+          "rock": 2,
+          "t_s": 55.0
+        },
+        {
+          "name": "break",
+          "pick": 2,
+          "reward": 90,
+          "rock": 3,
+          "t_s": 82.2
+        },
+        {
+          "name": "break",
+          "pick": 3,
+          "reward": 130,
+          "rock": 4,
+          "t_s": 107.0
+        },
+        {
+          "name": "break",
+          "pick": 4,
+          "reward": 190,
+          "rock": 5,
+          "t_s": 130.2
+        },
+        {
+          "name": "break",
+          "pick": 4,
+          "reward": 270,
+          "rock": 6,
+          "t_s": 163.4
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        21.7,
+        16.9,
+        45.2,
+        24.8,
+        56.4
+      ],
+      "started": "2026-11-02 18:48:46",
+      "upgrades": [
+        {
+          "cost": 20,
+          "damage": 2,
+          "level": 1,
+          "t_s": 21.7
+        },
+        {
+          "cost": 45,
+          "damage": 3,
+          "level": 2,
+          "t_s": 38.5
+        },
+        {
+          "cost": 90,
+          "damage": 5,
+          "level": 3,
+          "t_s": 83.7
+        },
+        {
+          "cost": 170,
+          "damage": 8,
+          "level": 4,
+          "t_s": 108.5
+        },
+        {
+          "cost": 300,
+          "damage": 12,
+          "level": 5,
+          "t_s": 164.9
+        }
+      ],
+      "version": "0.88.0"
+    }
+  }
+}

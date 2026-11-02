@@ -7,7 +7,7 @@
 |---|---|---|---|---|
 | A | Island Growth (Step 87, 플레이 가능) | 섬 전체 | Upgrade Island | `#island` |
 | B | Momo Evolution | 모모 | (예정) | `#evolution` |
-| C | Break & Upgrade | 거대한 바위 · 곡괭이 | Pickaxe Power | `#rock` |
+| C | Break & Upgrade (Step 88, 플레이 가능) | 거대한 바위 · 곡괭이 | Pickaxe Power | `#rock` |
 | D | Harvest Burst | 수확 | (예정) | `#harvest` |
 | E | Production Tycoon | 생산 | (예정) | `#tycoon` |
 | F | Endless Growth | 나무 한 그루 | Grow Tree | `#tree` |
