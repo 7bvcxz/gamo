@@ -10,6 +10,7 @@ extends SceneTree
 ##   island  buys Upgrade Island when it can pay
 ##   rock    taps the rock 2.5 times a second, buys Pickaxe Power when it can pay
 ##   tree    buys Grow Tree when it can pay
+##   harvest harvests when ripe and buys Bigger Field when it can pay
 ##   other   presses the one button when it can pay
 
 const SECONDS := 180.0
@@ -58,6 +59,10 @@ func _run() -> void:
 					var c := Vector2(float(rr[0]) + float(rr[2]) * 0.5, float(rr[1]) + float(rr[3]) * 0.5)
 					e.call("tap_at", e.get_global_transform().affine_inverse() * c)
 			var info := e.action_info()
+			# D's button rests a moment after a harvest: nothing to press then.
+			if String(info.get("kind", "")) == "rest":
+				ready_since = -1.0
+				continue
 			if not info.is_empty() and bool(info.get("affordable", false)):
 				if ready_since < 0.0:
 					ready_since = t
