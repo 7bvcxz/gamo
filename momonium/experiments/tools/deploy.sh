@@ -62,6 +62,14 @@ for old, new in [
 open(dst, "w").write(page)
 PY
 
+# Step 93: the comparison page beside the Lab, with its pictures and the
+# scripted player's numbers (web/compare/, made by tools/compare_assets.sh).
+if [[ -f "$LAB/web/compare.html" ]]; then
+  cp "$LAB/web/compare.html" "$OUT/compare.html"
+  mkdir -p "$OUT/compare"
+  cp "$LAB/web/compare/"* "$OUT/compare/"
+fi
+
 # Keep the new pack and the one published at HEAD.
 published="$(git show "HEAD:$SITE/version.json" 2>/dev/null | sed -E 's/.*"pack":"([^"]+)".*/\1/' || true)"
 for old in "$OUT"/lab-*.pck; do

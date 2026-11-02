@@ -6,7 +6,9 @@ extends LabExperiment
 ## a tree, a field, a house, another Momo, a town, a monument (IslandLevels).
 ## What the next upgrade adds stands on the island as a ghost before it is
 ## bought; from the Town on, the Monument's ghost waits in its corner.
-## No tapping is needed: passive growth is the variable under test.
+## No tapping is needed: passive growth is the variable under test. (Until
+## Step 93 the music joined at the Village; every experiment now plays the same
+## soft music from the start, so sound does not tip the comparison.)
 
 const POP_SECONDS := 1.4
 const MAX_ZOOM := 1.15
@@ -69,7 +71,8 @@ func _ready() -> void:
 	resized.connect(func() -> void: _frame(false))
 	_frame(false)
 	if audio != null:
-		audio.start_ambience(false)
+		# The same soft music in every experiment (Step 93: a fair comparison).
+		audio.start_ambience(true)
 
 
 # --- the economy ----------------------------------------------------------------------
@@ -305,8 +308,6 @@ func _show_income(amount: float) -> void:
 func _celebrate(stage: String) -> void:
 	if audio != null:
 		audio.play("promote")
-		if stage == "village":
-			audio.start_ambience(true)
 	if fx == null:
 		return
 	var centre := to_fx(island.get_global_transform() * island.screen_bounds().get_center())

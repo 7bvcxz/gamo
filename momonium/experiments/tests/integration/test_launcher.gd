@@ -56,6 +56,8 @@ func test_every_experiment_launches_in_the_frame() -> void:
 		assert_true(app.host.experiment != null and app.host.experiment.is_inside_tree(), id + " runs")
 		assert_true(app.host.back_button.is_visible_in_tree(), id + " has Back")
 		assert_true(app.host.restart_button.is_visible_in_tree(), id + " has Restart")
+		# Step 93: the same soft music in every experiment (a fair comparison).
+		assert_true((app.audio.get("_music") as AudioStreamPlayer).playing, id + " plays the music from the start")
 		var before := app.host.session.active_ms
 		app.host.step(1.0)
 		assert_near(app.host.session.active_ms - before, 1000.0, 0.01, id + "'s clock runs")

@@ -90,7 +90,8 @@ func _ready() -> void:
 	resized.connect(_layout)
 	_layout()
 	if audio != null:
-		audio.start_ambience(false)
+		# The same soft music in every experiment (Step 93: a fair comparison).
+		audio.start_ambience(true)
 
 
 # --- the hit ---------------------------------------------------------------------------
