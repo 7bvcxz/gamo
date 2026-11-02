@@ -9,7 +9,7 @@
 | B | Momo Evolution (Step 90, 플레이 가능) | 모모 한 마리 | Upgrade Momo | `#evolution` |
 | C | Break & Upgrade (Step 88, 플레이 가능) | 거대한 바위 · 곡괭이 | Pickaxe Power | `#rock` |
 | D | Harvest Burst (Step 91, 플레이 가능) | 밭 하나 | Harvest All / Bigger Field | `#harvest` |
-| E | Production Tycoon | 생산 | (예정) | `#tycoon` |
+| E | Production Tycoon (Step 92, 플레이 가능) | 생산 라인 하나 | Improve Line | `#tycoon` |
 | F | Endless Growth (Step 89, 플레이 가능) | 나무 한 그루 | Grow Tree | `#tree` |
 
 - 실험실: https://7bvcxz.github.io/gamo/momonium-experiments/

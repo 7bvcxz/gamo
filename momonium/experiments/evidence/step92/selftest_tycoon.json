@@ -1,0 +1,257 @@
+{
+  "_doc": "tools/selftest.gd: a scripted player, 180 s of play each (reaction 1.5 s). Objective numbers only.",
+  "runs": {
+    "tycoon": {
+      "actions": 8,
+      "actions_by_kind": {
+        "button": 8
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 8,
+        "actions_by_kind": {
+          "button": 8
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 3.6,
+        "experiment": "tycoon",
+        "first_upgrade_s": 20.1,
+        "idle_intervals": [
+          [
+            0.0,
+            20.1
+          ],
+          [
+            20.1,
+            41.5
+          ],
+          [
+            41.5,
+            63.3
+          ],
+          [
+            63.3,
+            87.3
+          ],
+          [
+            87.3,
+            113.2
+          ],
+          [
+            113.2,
+            137.4
+          ],
+          [
+            137.4,
+            158.9
+          ],
+          [
+            158.9,
+            176.5
+          ]
+        ],
+        "idle_seconds": 176.5,
+        "longest_idle_s": 25.9,
+        "metrics": {
+          "coins": 103,
+          "delivered": 182,
+          "deliveries_per_min": 150.0,
+          "earned": 1021,
+          "level": 8,
+          "units_made": 203
+        },
+        "milestones": [],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          20.1,
+          21.4,
+          21.8,
+          24.0,
+          25.9,
+          24.2,
+          21.5,
+          17.6
+        ],
+        "started": "2026-11-02 19:34:58",
+        "upgrades": [
+          {
+            "cost": 12,
+            "level": 1,
+            "name": "Bigger Hopper",
+            "show": "hopper",
+            "t_s": 20.1
+          },
+          {
+            "cost": 24,
+            "level": 2,
+            "name": "Second Arm",
+            "show": "arm",
+            "t_s": 41.5
+          },
+          {
+            "cost": 36,
+            "level": 3,
+            "name": "Steam Machine",
+            "show": "machine",
+            "t_s": 63.3
+          },
+          {
+            "cost": 56,
+            "level": 4,
+            "name": "Momo Loader",
+            "show": "helper",
+            "t_s": 87.3
+          },
+          {
+            "cost": 90,
+            "level": 5,
+            "name": "Fast Belt",
+            "show": "belt",
+            "t_s": 113.2
+          },
+          {
+            "cost": 140,
+            "level": 6,
+            "name": "Second Lane",
+            "show": "lane",
+            "t_s": 137.4
+          },
+          {
+            "cost": 220,
+            "level": 7,
+            "name": "Gold Bars",
+            "show": "product",
+            "t_s": 158.9
+          },
+          {
+            "cost": 340,
+            "level": 8,
+            "name": "Momo Crew",
+            "show": "helper",
+            "t_s": 176.5
+          }
+        ],
+        "version": "0.90.0"
+      },
+      "engaged_seconds": 3.7,
+      "experiment": "tycoon",
+      "first_upgrade_s": 20.1,
+      "idle_intervals": [
+        [
+          0.0,
+          20.1
+        ],
+        [
+          20.1,
+          41.5
+        ],
+        [
+          41.5,
+          63.3
+        ],
+        [
+          63.3,
+          87.3
+        ],
+        [
+          87.3,
+          113.2
+        ],
+        [
+          113.2,
+          137.4
+        ],
+        [
+          137.4,
+          158.9
+        ],
+        [
+          158.9,
+          176.5
+        ]
+      ],
+      "idle_seconds": 176.5,
+      "longest_idle_s": 25.9,
+      "metrics": {
+        "coins": 103,
+        "delivered": 182,
+        "deliveries_per_min": 150.0,
+        "earned": 1021,
+        "level": 8,
+        "units_made": 205
+      },
+      "milestones": [],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        20.1,
+        21.4,
+        21.8,
+        24.0,
+        25.9,
+        24.2,
+        21.5,
+        17.6
+      ],
+      "started": "2026-11-02 19:34:58",
+      "upgrades": [
+        {
+          "cost": 12,
+          "level": 1,
+          "name": "Bigger Hopper",
+          "show": "hopper",
+          "t_s": 20.1
+        },
+        {
+          "cost": 24,
+          "level": 2,
+          "name": "Second Arm",
+          "show": "arm",
+          "t_s": 41.5
+        },
+        {
+          "cost": 36,
+          "level": 3,
+          "name": "Steam Machine",
+          "show": "machine",
+          "t_s": 63.3
+        },
+        {
+          "cost": 56,
+          "level": 4,
+          "name": "Momo Loader",
+          "show": "helper",
+          "t_s": 87.3
+        },
+        {
+          "cost": 90,
+          "level": 5,
+          "name": "Fast Belt",
+          "show": "belt",
+          "t_s": 113.2
+        },
+        {
+          "cost": 140,
+          "level": 6,
+          "name": "Second Lane",
+          "show": "lane",
+          "t_s": 137.4
+        },
+        {
+          "cost": 220,
+          "level": 7,
+          "name": "Gold Bars",
+          "show": "product",
+          "t_s": 158.9
+        },
+        {
+          "cost": 340,
+          "level": 8,
+          "name": "Momo Crew",
+          "show": "helper",
+          "t_s": 176.5
+        }
+      ],
+      "version": "0.90.0"
+    }
+  }
+}
