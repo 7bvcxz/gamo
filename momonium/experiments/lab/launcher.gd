@@ -147,11 +147,18 @@ func _layout() -> void:
 	_sub.position = Vector2(0, 108)
 	_version.size = Vector2(240, 30)
 	_version.position = Vector2(w - 256, h - 40)
-	# The islet with its Momo between the title and the tiles.
-	var islet_y := (160.0 + _grid.position.y) * 0.5 - 20.0
-	var k := clampf((_grid.position.y - 170.0) / 260.0, 0.45, 1.0)
-	_island.scale = Vector2(k, k)
-	_island.position = Vector2(w * 0.5, islet_y - 49.0 * k)
+	# The islet with its Momo: between the title and the tiles on a phone,
+	# beside the title on a wide screen (no room between).
+	if wide:
+		var k := 0.42
+		_island.scale = Vector2(k, k)
+		var title_w := _title.get_theme_font("font").get_string_size(_title.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 52).x
+		_island.position = Vector2(w * 0.5 - title_w * 0.5 - 90.0, 54.0)
+	else:
+		var islet_y := (160.0 + _grid.position.y) * 0.5 - 20.0
+		var k := clampf((_grid.position.y - 170.0) / 260.0, 0.45, 1.0)
+		_island.scale = Vector2(k, k)
+		_island.position = Vector2(w * 0.5, islet_y - 49.0 * k)
 
 
 ## Where each tile is, in canvas pixels.
