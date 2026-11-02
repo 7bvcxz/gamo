@@ -15,7 +15,7 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "rock", "letter": "C", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": "res://experiments/rock/rock.gd"},
 	{"id": "harvest", "letter": "D", "title": "Harvest Burst", "icon": "crop_ripe", "color": Color("#f0a843"), "script": ""},
 	{"id": "tycoon", "letter": "E", "title": "Production Tycoon", "icon": "car_factory", "color": Color("#5a8fd8"), "script": ""},
-	{"id": "tree", "letter": "F", "title": "Endless Growth", "icon": "prop_tree", "color": Color("#3d9a5a"), "script": ""},
+	{"id": "tree", "letter": "F", "title": "Endless Growth", "icon": "prop_tree", "color": Color("#3d9a5a"), "script": "res://experiments/tree/tree.gd"},
 ]
 
 

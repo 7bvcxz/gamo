@@ -118,3 +118,19 @@ func test_sound_switch() -> void:
 	assert_true(AudioServer.is_bus_mute(AudioServer.get_bus_index("Master")), "the master bus is muted")
 	await H.touch(tree, H.centre(host.sound_button))
 	assert_false(app.audio.muted, "on again")
+
+
+func test_the_three_minute_question() -> void:
+	host.step(179.0)
+	assert_false(host.intent_card.visible, "not before three minutes")
+	host.step(1.5)
+	assert_true(host.intent_card.visible, "at three minutes the card asks")
+	await tree.process_frame
+	await H.touch(tree, H.centre(host.intent_buttons["intent_yes"]))
+	assert_false(host.intent_card.visible, "answered, it goes")
+	assert_eq(host.session.metrics.get("continue_intent"), "yes", "the answer is kept")
+	assert_eq(host.session.action_count(), 0, "answering is not play")
+	host.restart()
+	host.step(181.0)
+	host.step(LabHost.INTENT_SECONDS + 1.0)
+	assert_eq(host.session.metrics.get("continue_intent"), "none", "unanswered is recorded as none, not as no")

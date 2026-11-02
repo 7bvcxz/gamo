@@ -28,6 +28,16 @@ var session: LabSession
 var finished: Array[Dictionary] = []
 var paused_reasons: Dictionary = {}
 var runs := 0
+## At three minutes of play a small card asks whether to go on (the
+## experiment's own question); the answer -- or none within INTENT_SECONDS --
+## is kept as the run's `continue_intent`. It never stops the play.
+const INTENT_AT_MS := 180000.0
+const INTENT_SECONDS := 20.0
+var intent_card: PanelContainer
+var intent_buttons: Dictionary = {}
+var _intent_at := -1.0
+var _intent_done := false
+
 ## Play seconds a real second (dev hook `dev_time_scale`): 0 leaves the clock
 ## to explicit steps, so a test can tap at an exact rate of play time.
 var time_scale := 1.0
@@ -89,6 +99,10 @@ func _exit_tree() -> void:
 func start() -> void:
 	runs += 1
 	session = LabSession.new(exp_id, version, Time.get_unix_time_from_system())
+	_intent_at = -1.0
+	_intent_done = false
+	if intent_card != null:
+		intent_card.visible = false
 	var script: GDScript = load(LabRegistry.script_path(exp_id))
 	experiment = script.new() as LabExperiment
 	experiment.name = "Experiment"
@@ -131,6 +145,30 @@ func step(dt: float) -> void:
 		session.advance(d)
 		experiment.tick(d)
 		left -= d
+	_check_intent()
+
+
+func _check_intent() -> void:
+	if _intent_done or intent_card == null:
+		return
+	if _intent_at < 0.0 and session.active_ms >= INTENT_AT_MS:
+		_intent_at = session.active_ms
+		(intent_card.get_child(0).get_child(0) as Label).text = experiment.intent_question()
+		intent_card.visible = true
+		intent_card.reset_size()
+		intent_card.position = Vector2((size.x - intent_card.size.x) * 0.5, TOP_UI + 70.0)
+	elif _intent_at >= 0.0 and session.active_ms - _intent_at >= INTENT_SECONDS * 1000.0:
+		answer_intent("none")
+
+
+## The three-minute question answered: "yes", "no" or "none" (not answered).
+func answer_intent(answer: String) -> void:
+	if _intent_done:
+		return
+	_intent_done = true
+	intent_card.visible = false
+	session.metric("continue_intent", answer)
+	session.milestone("intent", {"answer": answer})
 
 
 func _process(delta: float) -> void:
@@ -296,8 +334,35 @@ func _build_chrome() -> void:
 	report_button.pressed.connect(toggle_report)
 	chrome.add_child(report_button)
 
+	_build_intent()
 	_build_pause()
 	_build_report()
+
+
+func _build_intent() -> void:
+	intent_card = PanelContainer.new()
+	intent_card.name = "Intent"
+	intent_card.add_theme_stylebox_override("panel", LabStyle.box(LabStyle.CREAM, 26))
+	intent_card.visible = false
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 10)
+	var q := LabStyle.label("", 30)
+	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(q)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 14)
+	for pair: Array in [["yes", "Yes!", LabStyle.LEAF], ["no", "Not now", LabStyle.MUTED]]:
+		var b := Button.new()
+		b.text = String(pair[1])
+		LabStyle.button(b, pair[2], 30)
+		b.custom_minimum_size = Vector2(170, 72)
+		b.pressed.connect(answer_intent.bind(String(pair[0])))
+		row.add_child(b)
+		intent_buttons["intent_" + String(pair[0])] = b
+	col.add_child(row)
+	intent_card.add_child(col)
+	chrome.add_child(intent_card)
 
 
 func _build_pause() -> void:
@@ -452,6 +517,8 @@ func rects() -> Dictionary:
 	var pairs: Array = [["back", back_button], ["restart", restart_button], ["sound", sound_button], ["action", action_button], ["report", report_button], ["resource", resource_box]]
 	for k: String in report_buttons:
 		pairs.append([k, report_buttons[k]])
+	for k: String in intent_buttons:
+		pairs.append([k, intent_buttons[k]])
 	for pair: Array in pairs:
 		var c: Control = pair[1]
 		if c.is_visible_in_tree():

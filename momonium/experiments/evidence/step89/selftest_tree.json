@@ -1,0 +1,323 @@
+{
+  "_doc": "tools/selftest.gd: a scripted player, 180 s of play each (reaction 1.5 s). Objective numbers only.",
+  "runs": {
+    "tree": {
+      "actions": 10,
+      "actions_by_kind": {
+        "button": 10
+      },
+      "active_seconds": 180.1,
+      "at_3min": {
+        "actions": 10,
+        "actions_by_kind": {
+          "button": 10
+        },
+        "active_seconds": 180.0,
+        "engaged_seconds": 0.0,
+        "experiment": "tree",
+        "first_upgrade_s": 13.5,
+        "idle_intervals": [
+          [
+            0.0,
+            13.5
+          ],
+          [
+            13.5,
+            28.1
+          ],
+          [
+            28.1,
+            43.7
+          ],
+          [
+            43.7,
+            59.9
+          ],
+          [
+            59.9,
+            76.5
+          ],
+          [
+            76.5,
+            93.6
+          ],
+          [
+            93.6,
+            111.7
+          ],
+          [
+            111.7,
+            131.0
+          ],
+          [
+            131.0,
+            151.4
+          ],
+          [
+            151.4,
+            173.1
+          ],
+          [
+            173.1,
+            180.0
+          ]
+        ],
+        "idle_seconds": 180.0,
+        "longest_idle_s": 21.6,
+        "metrics": {
+          "coins": 597,
+          "earned": 3654,
+          "rate": 75.0,
+          "stage": 10,
+          "stage_name": "Crystal"
+        },
+        "milestones": [
+          {
+            "name": "Blossom",
+            "stage": 5,
+            "t_s": 76.5
+          },
+          {
+            "name": "Twin Heart",
+            "stage": 8,
+            "t_s": 131.0
+          },
+          {
+            "name": "Crystal",
+            "stage": 10,
+            "t_s": 173.1
+          }
+        ],
+        "pauses": 0,
+        "seconds_between_upgrades": [
+          13.5,
+          14.6,
+          15.7,
+          16.2,
+          16.6,
+          17.1,
+          18.1,
+          19.3,
+          20.4,
+          21.6
+        ],
+        "started": "2026-11-02 18:50:20",
+        "upgrades": [
+          {
+            "cost": 12,
+            "level": 1,
+            "shape": "Sapling",
+            "t_s": 13.5
+          },
+          {
+            "cost": 25,
+            "level": 2,
+            "shape": "Young Tree",
+            "t_s": 28.1
+          },
+          {
+            "cost": 45,
+            "level": 3,
+            "shape": "Branching",
+            "t_s": 43.7
+          },
+          {
+            "cost": 75,
+            "level": 4,
+            "shape": "Wide Canopy",
+            "t_s": 59.9
+          },
+          {
+            "cost": 120,
+            "level": 5,
+            "shape": "Blossom",
+            "t_s": 76.5
+          },
+          {
+            "cost": 190,
+            "level": 6,
+            "shape": "Fruit",
+            "t_s": 93.6
+          },
+          {
+            "cost": 300,
+            "level": 7,
+            "shape": "Glow",
+            "t_s": 111.7
+          },
+          {
+            "cost": 470,
+            "level": 8,
+            "shape": "Twin Heart",
+            "t_s": 131.0
+          },
+          {
+            "cost": 720,
+            "level": 9,
+            "shape": "Spiral Pagoda",
+            "t_s": 151.4
+          },
+          {
+            "cost": 1100,
+            "level": 10,
+            "shape": "Crystal",
+            "t_s": 173.1
+          }
+        ],
+        "version": "0.88.0"
+      },
+      "engaged_seconds": 0.0,
+      "experiment": "tree",
+      "first_upgrade_s": 13.5,
+      "idle_intervals": [
+        [
+          0.0,
+          13.5
+        ],
+        [
+          13.5,
+          28.1
+        ],
+        [
+          28.1,
+          43.7
+        ],
+        [
+          43.7,
+          59.9
+        ],
+        [
+          59.9,
+          76.5
+        ],
+        [
+          76.5,
+          93.6
+        ],
+        [
+          93.6,
+          111.7
+        ],
+        [
+          111.7,
+          131.0
+        ],
+        [
+          131.0,
+          151.4
+        ],
+        [
+          151.4,
+          173.1
+        ],
+        [
+          173.1,
+          180.1
+        ]
+      ],
+      "idle_seconds": 180.1,
+      "longest_idle_s": 21.6,
+      "metrics": {
+        "coins": 608,
+        "earned": 3665,
+        "rate": 75.0,
+        "stage": 10,
+        "stage_name": "Crystal"
+      },
+      "milestones": [
+        {
+          "name": "Blossom",
+          "stage": 5,
+          "t_s": 76.5
+        },
+        {
+          "name": "Twin Heart",
+          "stage": 8,
+          "t_s": 131.0
+        },
+        {
+          "name": "Crystal",
+          "stage": 10,
+          "t_s": 173.1
+        }
+      ],
+      "pauses": 0,
+      "seconds_between_upgrades": [
+        13.5,
+        14.6,
+        15.7,
+        16.2,
+        16.6,
+        17.1,
+        18.1,
+        19.3,
+        20.4,
+        21.6
+      ],
+      "started": "2026-11-02 18:50:20",
+      "upgrades": [
+        {
+          "cost": 12,
+          "level": 1,
+          "shape": "Sapling",
+          "t_s": 13.5
+        },
+        {
+          "cost": 25,
+          "level": 2,
+          "shape": "Young Tree",
+          "t_s": 28.1
+        },
+        {
+          "cost": 45,
+          "level": 3,
+          "shape": "Branching",
+          "t_s": 43.7
+        },
+        {
+          "cost": 75,
+          "level": 4,
+          "shape": "Wide Canopy",
+          "t_s": 59.9
+        },
+        {
+          "cost": 120,
+          "level": 5,
+          "shape": "Blossom",
+          "t_s": 76.5
+        },
+        {
+          "cost": 190,
+          "level": 6,
+          "shape": "Fruit",
+          "t_s": 93.6
+        },
+        {
+          "cost": 300,
+          "level": 7,
+          "shape": "Glow",
+          "t_s": 111.7
+        },
+        {
+          "cost": 470,
+          "level": 8,
+          "shape": "Twin Heart",
+          "t_s": 131.0
+        },
+        {
+          "cost": 720,
+          "level": 9,
+          "shape": "Spiral Pagoda",
+          "t_s": 151.4
+        },
+        {
+          "cost": 1100,
+          "level": 10,
+          "shape": "Crystal",
+          "t_s": 173.1
+        }
+      ],
+      "version": "0.88.0"
+    }
+  }
+}

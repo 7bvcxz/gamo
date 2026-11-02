@@ -12,6 +12,7 @@ extends Control
 ##   do_action()    the button was pressed (the host already recorded the press)
 ##   state()        what tests and window.funlab read
 ##   dev(name, arg) test hooks (window.funlab.call("dev_*") in dev or E2E runs)
+##   intent_question()  what the card at three minutes of play asks
 ## An experiment keeps all its state in itself: Restart throws it away and
 ## builds a new one, so no two runs share anything.
 
@@ -45,6 +46,11 @@ func state() -> Dictionary:
 
 func dev(_name: String, _arg: Variant) -> Variant:
 	return null
+
+
+## What the three-minute card asks (LabHost.INTENT_AT_MS).
+func intent_question() -> String:
+	return "Keep playing?"
 
 
 ## A point of this experiment in the flourishes layer's coordinates.
