@@ -1,0 +1,198 @@
+{
+ "_doc": "specs/compare93.spec.mjs: each experiment fresh in the deployed build, 720x1280, a scripted player for 180 s of play; fps = frames a second drawn by headless Chromium (software rendering) at 5 s, 1:00 and 3:00. Objective numbers only.",
+ "runs": {
+  "evolution": {
+   "experiment": "evolution",
+   "viewport": "720x1280",
+   "upgrades": 10,
+   "actions": 10,
+   "idle_seconds": 181.2,
+   "longest_idle_s": 18,
+   "upgrade_times_s": [
+    17.2,
+    31.7,
+    48.7,
+    66.2,
+    83.7,
+    101.2,
+    118.2,
+    135.2,
+    153.2,
+    170.2
+   ],
+   "fps": {
+    "0": 32.3,
+    "1m": 32.6,
+    "3m": 30.1
+   },
+   "metrics": {
+    "coins": 294,
+    "earned": 1633,
+    "level": 10,
+    "passes": 151,
+    "rate": 27.16,
+    "stage": "Smith"
+   }
+  },
+  "harvest": {
+   "experiment": "harvest",
+   "viewport": "720x1280",
+   "upgrades": 8,
+   "actions": 20,
+   "idle_seconds": 173.3,
+   "longest_idle_s": 14.3,
+   "upgrade_times_s": [
+    15.3,
+    29.3,
+    57.3,
+    71.3,
+    85.3,
+    113.3,
+    127.3,
+    155.3
+   ],
+   "fps": {
+    "0": 32.1,
+    "1m": 30.2,
+    "3m": 26.4
+   },
+   "metrics": {
+    "coins": 258,
+    "early_presses": 0,
+    "earned": 1078,
+    "harvests": 12,
+    "last_payout": 200,
+    "level": 8,
+    "plants": 50,
+    "ready_wait_s": 0.3
+   }
+  },
+  "island": {
+   "experiment": "island",
+   "viewport": "720x1280",
+   "upgrades": 9,
+   "actions": 9,
+   "idle_seconds": 181.2,
+   "longest_idle_s": 22,
+   "upgrade_times_s": [
+    15.2,
+    31.7,
+    49.2,
+    66.2,
+    84.7,
+    104.2,
+    122.7,
+    142.7,
+    164.7
+   ],
+   "fps": {
+    "0": 33.8,
+    "1m": 31.7,
+    "3m": 28.7
+   },
+   "metrics": {
+    "coins": 469,
+    "earned": 1865,
+    "level": 9,
+    "rate": 28,
+    "stage": "town"
+   }
+  },
+  "rock": {
+   "experiment": "rock",
+   "viewport": "720x1280",
+   "upgrades": 5,
+   "actions": 455,
+   "idle_seconds": 0,
+   "longest_idle_s": 0,
+   "upgrade_times_s": [
+    21.2,
+    37.2,
+    81.6,
+    105.6,
+    161.2
+   ],
+   "fps": {
+    "0": 31.4,
+    "1m": 31.1,
+    "3m": 29.1
+   },
+   "metrics": {
+    "coins": 180,
+    "damage_per_hit": 12,
+    "damage_total": 2475,
+    "earned": 805,
+    "first_break_s": 20.8,
+    "hits": 450,
+    "misses": 0,
+    "pickaxe": 5,
+    "rock": 7,
+    "rocks_broken": 7,
+    "taps": 450
+   }
+  },
+  "tree": {
+   "experiment": "tree",
+   "viewport": "720x1280",
+   "upgrades": 10,
+   "actions": 10,
+   "idle_seconds": 181.2,
+   "longest_idle_s": 21.5,
+   "upgrade_times_s": [
+    12.2,
+    26.2,
+    41.2,
+    57.2,
+    73.2,
+    89.7,
+    107.7,
+    126.2,
+    146.2,
+    167.7
+   ],
+   "fps": {
+    "0": 31.8,
+    "1m": 28,
+    "3m": 27.1
+   },
+   "metrics": {
+    "coins": 1030,
+    "earned": 4087,
+    "rate": 75,
+    "stage": 10,
+    "stage_name": "Crystal"
+   }
+  },
+  "tycoon": {
+   "experiment": "tycoon",
+   "viewport": "720x1280",
+   "upgrades": 8,
+   "actions": 8,
+   "idle_seconds": 181.3,
+   "longest_idle_s": 25.5,
+   "upgrade_times_s": [
+    18.8,
+    40.3,
+    61.8,
+    85.8,
+    111.3,
+    134.8,
+    155.8,
+    173.3
+   ],
+   "fps": {
+    "0": 30.3,
+    "1m": 29.1,
+    "3m": 27.5
+   },
+   "metrics": {
+    "coins": 181,
+    "delivered": 191,
+    "deliveries_per_min": 162,
+    "earned": 1099,
+    "level": 8,
+    "units_made": 215
+   }
+  }
+ }
+}
