@@ -8,6 +8,8 @@ import { test, expect } from '../lib/fixtures.mjs';
 test.use({ starterMomo: true });
 
 const momo = async (game) => (await game.query('momos')).momos['1'];
+// balance.clock.day_seconds: sunset begins at 0.56 of it.
+const DAY_MS = 30000;
 
 async function drawn(game, m) {
   const box = await game.canvas.boundingBox();
@@ -57,10 +59,15 @@ test('every job shows its tool from the work atlas', async ({ game }) => {
     const seen = new Set();
     let m;
     for (let i = 0; i < 400 && seen.size < cells.length; i++) {
-      await game.query('dev_advance_ms', 400);
+      const { now_ms: now } = await game.query('dev_advance_ms', 400);
       m = await momo(game);
       const job = String(m.cell).replace(/_[0-3]$/, '');
-      if (m.state === 'work' && !seen.has(job)) {
+      // Pixels are judged in daylight only: since Step 84's pace a farm's
+      // harvest can fall in the evening of the day it was sown, and under the
+      // night tint the fur is not light enough to count -- wait for the job
+      // to come round again by day (the island keeps working the farm).
+      const daylight = ((now % DAY_MS) / DAY_MS) < 0.5;
+      if (m.state === 'work' && !seen.has(job) && daylight) {
         expect(m.cell, 'a frame of the job').toMatch(/_[0-3]$/);
         seen.add(job);
         await game.page.waitForTimeout(80);
