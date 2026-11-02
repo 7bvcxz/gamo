@@ -6,7 +6,7 @@
 | | 실험 | 키우는 것 | 한 가지 버튼 | 주소 |
 |---|---|---|---|---|
 | A | Island Growth (Step 87, 플레이 가능) | 섬 전체 | Upgrade Island | `#island` |
-| B | Momo Evolution | 모모 | (예정) | `#evolution` |
+| B | Momo Evolution (Step 90, 플레이 가능) | 모모 한 마리 | Upgrade Momo | `#evolution` |
 | C | Break & Upgrade (Step 88, 플레이 가능) | 거대한 바위 · 곡괭이 | Pickaxe Power | `#rock` |
 | D | Harvest Burst | 수확 | (예정) | `#harvest` |
 | E | Production Tycoon | 생산 | (예정) | `#tycoon` |
@@ -14,6 +14,7 @@
 
 - 실험실: https://7bvcxz.github.io/gamo/momonium-experiments/
 - 한 실험의 직접 링크: `…/momonium-experiments/#island`. 새로고침해도 그 실험이 다시 열린다.
+- 틀 자체의 시연(스텁)은 숨은 링크 `#stub`으로 열린다(타일 없음, 실험실 테스트용).
 - 아직 만들지 않은 실험의 타일은 **SOON**이다. 누르면 공통 스텁(코인·자라는 식물·버튼 하나와 'COMING SOON' 카드)이 열린다.
   스텁은 게임이 아니다. 실험이 실험실의 틀(뒤로·다시 시작·시계·기록)에서 뜬다는 것을 보여 준다.
 - 본 게임은 그대로다. https://7bvcxz.github.io/gamo/momonium/
