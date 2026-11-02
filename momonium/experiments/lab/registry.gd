@@ -14,7 +14,7 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "evolution", "letter": "B", "title": "Momo Evolution", "icon": "momo_front", "color": Color("#e98fb1"), "script": "res://experiments/evolution/evolution.gd"},
 	{"id": "rock", "letter": "C", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": "res://experiments/rock/rock.gd"},
 	{"id": "harvest", "letter": "D", "title": "Harvest Burst", "icon": "crop_ripe", "color": Color("#f0a843"), "script": "res://experiments/harvest/harvest.gd"},
-	{"id": "tycoon", "letter": "E", "title": "Production Tycoon", "icon": "car_factory", "color": Color("#5a8fd8"), "script": ""},
+	{"id": "tycoon", "letter": "E", "title": "Production Tycoon", "icon": "car_factory", "color": Color("#5a8fd8"), "script": "res://experiments/tycoon/tycoon.gd"},
 	{"id": "tree", "letter": "F", "title": "Endless Growth", "icon": "prop_tree", "color": Color("#3d9a5a"), "script": "res://experiments/tree/tree.gd"},
 ]
 
