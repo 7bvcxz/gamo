@@ -10,7 +10,7 @@ import { openGame, state, call, paintedColours, withinBudget } from '../lib/game
 // Pictures and numbers go to windup/evidence/ only when asked (WINDUP_EVIDENCE=1), so
 // a routine run cannot overwrite an earlier step's published-build evidence.
 const evidence = process.env.WINDUP_EVIDENCE
-  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step03')
+  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/' + (process.env.WINDUP_EVIDENCE_STEP || 'step03'))
   : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../test-results/evidence/step03');
 
 test('art loads, the doll wakes, frames hold', async ({ page }, info) => {

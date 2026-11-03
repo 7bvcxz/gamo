@@ -17,7 +17,7 @@ import { recordingContext, takeAudio, finishFootage } from '../lib/footage.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const evidence = process.env.WINDUP_EVIDENCE
-  ? path.resolve(here, '../../../evidence/step06')
+  ? path.resolve(here, '../../../evidence/' + (process.env.WINDUP_EVIDENCE_STEP || 'step06'))
   : path.resolve(here, '../test-results/evidence/step06');
 const VARIANTS = (process.env.WINDUP_VARIANTS || 'base,a,b,c').split(',');
 

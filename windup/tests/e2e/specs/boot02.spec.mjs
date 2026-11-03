@@ -10,7 +10,7 @@ import { openGame, state, call, events, keyPoint } from '../lib/game.mjs';
 // Pictures and numbers go to windup/evidence/ only when asked (WINDUP_EVIDENCE=1), so
 // a routine run cannot overwrite an earlier step's published-build evidence.
 const evidence = process.env.WINDUP_EVIDENCE
-  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step02')
+  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/' + (process.env.WINDUP_EVIDENCE_STEP || 'step02'))
   : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../test-results/evidence/step02');
 
 test('boots, keeps options, winds, pauses', async ({ page }, info) => {

@@ -10,7 +10,7 @@ import { openGame, state, call } from '../lib/game.mjs';
 import { AUDIO_TAP, loudness } from '../lib/audio_tap.mjs';
 
 const evidence = process.env.WINDUP_EVIDENCE
-  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step05')
+  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/' + (process.env.WINDUP_EVIDENCE_STEP || 'step05'))
   : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../test-results/evidence/step05');
 
 async function pointOf(page, name, arg) {
