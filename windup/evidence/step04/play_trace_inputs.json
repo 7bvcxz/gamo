@@ -1,0 +1,632 @@
+[
+ {
+  "wall": 2.56,
+  "game": 3.968,
+  "input": "click"
+ },
+ {
+  "wall": 2.989,
+  "game": 4.377,
+  "input": "click"
+ },
+ {
+  "wall": 3.403,
+  "game": 4.815,
+  "input": "click"
+ },
+ {
+  "wall": 3.934,
+  "game": 5.329,
+  "input": "down"
+ },
+ {
+  "wall": 5.236,
+  "game": 6.386,
+  "shot": 5,
+  "awake": 0,
+  "energy": 7,
+  "stage": 0,
+  "fps": 38
+ },
+ {
+  "wall": 16.4,
+  "game": 17.793,
+  "input": "up"
+ },
+ {
+  "wall": 19.012,
+  "game": 20.405,
+  "input": "click"
+ },
+ {
+  "wall": 19.365,
+  "game": 20.768,
+  "input": "click"
+ },
+ {
+  "wall": 19.706,
+  "game": 21.108,
+  "input": "click"
+ },
+ {
+  "wall": 20.057,
+  "game": 21.433,
+  "input": "click"
+ },
+ {
+  "wall": 20.393,
+  "game": 21.786,
+  "input": "click"
+ },
+ {
+  "wall": 20.729,
+  "game": 22.122,
+  "input": "click"
+ },
+ {
+  "wall": 21.057,
+  "game": 22.459,
+  "input": "click"
+ },
+ {
+  "wall": 21.385,
+  "game": 22.78,
+  "input": "click"
+ },
+ {
+  "wall": 23.76,
+  "game": 25.164,
+  "input": "click"
+ },
+ {
+  "wall": 24.183,
+  "game": 25.567,
+  "input": "click"
+ },
+ {
+  "wall": 24.608,
+  "game": 26,
+  "input": "click"
+ },
+ {
+  "wall": 25.028,
+  "game": 26.412,
+  "input": "down"
+ },
+ {
+  "wall": 29.396,
+  "game": 30.563,
+  "shot": 30,
+  "awake": 1,
+  "energy": 27.359,
+  "stage": 1,
+  "fps": 34
+ },
+ {
+  "wall": 37.56,
+  "game": 38.952,
+  "input": "up"
+ },
+ {
+  "wall": 40.119,
+  "game": 41.529,
+  "input": "click"
+ },
+ {
+  "wall": 40.481,
+  "game": 41.876,
+  "input": "click"
+ },
+ {
+  "wall": 40.842,
+  "game": 42.233,
+  "input": "click"
+ },
+ {
+  "wall": 41.174,
+  "game": 42.582,
+  "input": "click"
+ },
+ {
+  "wall": 41.537,
+  "game": 42.915,
+  "input": "click"
+ },
+ {
+  "wall": 41.869,
+  "game": 43.248,
+  "input": "click"
+ },
+ {
+  "wall": 42.2,
+  "game": 43.606,
+  "input": "click"
+ },
+ {
+  "wall": 42.556,
+  "game": 43.937,
+  "input": "click"
+ },
+ {
+  "wall": 44.931,
+  "game": 46.329,
+  "input": "click"
+ },
+ {
+  "wall": 45.37,
+  "game": 46.75,
+  "input": "click"
+ },
+ {
+  "wall": 45.787,
+  "game": 47.175,
+  "input": "click"
+ },
+ {
+  "wall": 46.197,
+  "game": 47.588,
+  "input": "down"
+ },
+ {
+  "wall": 58.465,
+  "game": 59.861,
+  "input": "up"
+ },
+ {
+  "wall": 61.272,
+  "game": 62.4,
+  "shot": 60,
+  "awake": 2,
+  "energy": 41.573,
+  "stage": 2,
+  "fps": 36
+ },
+ {
+  "wall": 61.272,
+  "game": 62.674,
+  "input": "click"
+ },
+ {
+  "wall": 61.637,
+  "game": 63.011,
+  "input": "click"
+ },
+ {
+  "wall": 61.979,
+  "game": 63.355,
+  "input": "click"
+ },
+ {
+  "wall": 62.314,
+  "game": 63.719,
+  "input": "click"
+ },
+ {
+  "wall": 62.666,
+  "game": 64.063,
+  "input": "click"
+ },
+ {
+  "wall": 63.012,
+  "game": 64.403,
+  "input": "click"
+ },
+ {
+  "wall": 63.362,
+  "game": 64.753,
+  "input": "click"
+ },
+ {
+  "wall": 63.719,
+  "game": 65.103,
+  "input": "click"
+ },
+ {
+  "wall": 66.094,
+  "game": 67.5,
+  "input": "click"
+ },
+ {
+  "wall": 66.532,
+  "game": 67.937,
+  "input": "click"
+ },
+ {
+  "wall": 66.986,
+  "game": 68.371,
+  "input": "click"
+ },
+ {
+  "wall": 67.438,
+  "game": 68.829,
+  "input": "down"
+ },
+ {
+  "wall": 79.783,
+  "game": 81.181,
+  "input": "up"
+ },
+ {
+  "wall": 82.355,
+  "game": 83.765,
+  "input": "click"
+ },
+ {
+  "wall": 82.707,
+  "game": 84.095,
+  "input": "click"
+ },
+ {
+  "wall": 83.056,
+  "game": 84.445,
+  "input": "click"
+ },
+ {
+  "wall": 83.413,
+  "game": 84.81,
+  "input": "click"
+ },
+ {
+  "wall": 83.755,
+  "game": 85.138,
+  "input": "click"
+ },
+ {
+  "wall": 84.102,
+  "game": 85.479,
+  "input": "click"
+ },
+ {
+  "wall": 84.435,
+  "game": 85.817,
+  "input": "click"
+ },
+ {
+  "wall": 84.771,
+  "game": 86.157,
+  "input": "click"
+ },
+ {
+  "wall": 87.183,
+  "game": 88.576,
+  "input": "click"
+ },
+ {
+  "wall": 87.621,
+  "game": 89.026,
+  "input": "click"
+ },
+ {
+  "wall": 88.064,
+  "game": 89.474,
+  "input": "click"
+ },
+ {
+  "wall": 88.503,
+  "game": 89.903,
+  "input": "down"
+ },
+ {
+  "wall": 100.811,
+  "game": 102.211,
+  "input": "up"
+ },
+ {
+  "wall": 103.391,
+  "game": 104.782,
+  "input": "click"
+ },
+ {
+  "wall": 103.742,
+  "game": 105.126,
+  "input": "click"
+ },
+ {
+  "wall": 104.083,
+  "game": 105.476,
+  "input": "click"
+ },
+ {
+  "wall": 104.428,
+  "game": 105.816,
+  "input": "click"
+ },
+ {
+  "wall": 104.767,
+  "game": 106.165,
+  "input": "click"
+ },
+ {
+  "wall": 105.125,
+  "game": 106.503,
+  "input": "click"
+ },
+ {
+  "wall": 105.47,
+  "game": 106.843,
+  "input": "click"
+ },
+ {
+  "wall": 105.809,
+  "game": 107.199,
+  "input": "click"
+ },
+ {
+  "wall": 108.216,
+  "game": 109.613,
+  "input": "click"
+ },
+ {
+  "wall": 108.653,
+  "game": 110.058,
+  "input": "click"
+ },
+ {
+  "wall": 109.083,
+  "game": 110.474,
+  "input": "click"
+ },
+ {
+  "wall": 109.515,
+  "game": 110.915,
+  "input": "down"
+ },
+ {
+  "wall": 118.975,
+  "game": 120.097,
+  "shot": 120,
+  "awake": 3,
+  "energy": 263.754,
+  "stage": 2,
+  "fps": 41
+ },
+ {
+  "wall": 122.039,
+  "game": 123.447,
+  "input": "up"
+ },
+ {
+  "wall": 124.62,
+  "game": 126.016,
+  "input": "click"
+ },
+ {
+  "wall": 124.979,
+  "game": 126.367,
+  "input": "click"
+ },
+ {
+  "wall": 125.338,
+  "game": 126.748,
+  "input": "click"
+ },
+ {
+  "wall": 125.701,
+  "game": 127.083,
+  "input": "click"
+ },
+ {
+  "wall": 126.062,
+  "game": 127.46,
+  "input": "click"
+ },
+ {
+  "wall": 126.43,
+  "game": 127.807,
+  "input": "click"
+ },
+ {
+  "wall": 126.781,
+  "game": 128.163,
+  "input": "click"
+ },
+ {
+  "wall": 127.113,
+  "game": 128.502,
+  "input": "click"
+ },
+ {
+  "wall": 129.506,
+  "game": 130.91,
+  "input": "click"
+ },
+ {
+  "wall": 129.943,
+  "game": 131.338,
+  "input": "click"
+ },
+ {
+  "wall": 130.383,
+  "game": 131.76,
+  "input": "click"
+ },
+ {
+  "wall": 130.802,
+  "game": 132.206,
+  "input": "down"
+ },
+ {
+  "wall": 143.096,
+  "game": 144.497,
+  "input": "up"
+ },
+ {
+  "wall": 145.682,
+  "game": 147.09,
+  "input": "click"
+ },
+ {
+  "wall": 146.051,
+  "game": 147.441,
+  "input": "click"
+ },
+ {
+  "wall": 146.399,
+  "game": 147.778,
+  "input": "click"
+ },
+ {
+  "wall": 146.752,
+  "game": 148.15,
+  "input": "click"
+ },
+ {
+  "wall": 147.107,
+  "game": 148.496,
+  "input": "click"
+ },
+ {
+  "wall": 147.44,
+  "game": 148.847,
+  "input": "click"
+ },
+ {
+  "wall": 147.794,
+  "game": 149.196,
+  "input": "click"
+ },
+ {
+  "wall": 148.144,
+  "game": 149.537,
+  "input": "click"
+ },
+ {
+  "wall": 150.525,
+  "game": 151.918,
+  "input": "click"
+ },
+ {
+  "wall": 150.966,
+  "game": 152.361,
+  "input": "click"
+ },
+ {
+  "wall": 151.406,
+  "game": 152.788,
+  "input": "click"
+ },
+ {
+  "wall": 151.831,
+  "game": 153.218,
+  "input": "down"
+ },
+ {
+  "wall": 164.118,
+  "game": 165.517,
+  "input": "up"
+ },
+ {
+  "wall": 166.692,
+  "game": 168.102,
+  "input": "click"
+ },
+ {
+  "wall": 167.053,
+  "game": 168.451,
+  "input": "click"
+ },
+ {
+  "wall": 167.419,
+  "game": 168.817,
+  "input": "click"
+ },
+ {
+  "wall": 167.787,
+  "game": 169.178,
+  "input": "click"
+ },
+ {
+  "wall": 168.129,
+  "game": 169.535,
+  "input": "click"
+ },
+ {
+  "wall": 168.477,
+  "game": 169.863,
+  "input": "click"
+ },
+ {
+  "wall": 168.817,
+  "game": 170.2,
+  "input": "click"
+ },
+ {
+  "wall": 169.16,
+  "game": 170.545,
+  "input": "click"
+ },
+ {
+  "wall": 171.537,
+  "game": 172.93,
+  "input": "click"
+ },
+ {
+  "wall": 171.983,
+  "game": 173.366,
+  "input": "click"
+ },
+ {
+  "wall": 172.406,
+  "game": 173.794,
+  "input": "click"
+ },
+ {
+  "wall": 172.838,
+  "game": 174.231,
+  "input": "down"
+ },
+ {
+  "wall": 179.296,
+  "game": 180.409,
+  "shot": 180,
+  "awake": 4,
+  "energy": 570.892,
+  "stage": 3,
+  "fps": 33
+ },
+ {
+  "wall": 185.43,
+  "game": 186.827,
+  "input": "up"
+ },
+ {
+  "wall": 188.017,
+  "game": 189.422,
+  "input": "click"
+ },
+ {
+  "wall": 188.376,
+  "game": 189.767,
+  "input": "click"
+ },
+ {
+  "wall": 188.727,
+  "game": 190.119,
+  "input": "click"
+ },
+ {
+  "wall": 189.083,
+  "game": 190.475,
+  "input": "click"
+ },
+ {
+  "wall": 189.422,
+  "game": 190.814,
+  "input": "click"
+ },
+ {
+  "wall": 189.765,
+  "game": 191.15,
+  "input": "click"
+ },
+ {
+  "wall": 190.11,
+  "game": 191.494,
+  "input": "click"
+ },
+ {
+  "wall": 190.467,
+  "game": 191.856,
+  "input": "click"
+ }
+]

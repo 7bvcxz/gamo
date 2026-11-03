@@ -1,0 +1,62 @@
+{
+  "build": "0.4.0",
+  "wall_seconds": 192.95,
+  "game_seconds": 194.315,
+  "first_wind": 3.991,
+  "awakenings": [
+    25.59,
+    55.885,
+    94.883,
+    137.493,
+    184.606
+  ],
+  "dolls_at": {
+    "30": 1,
+    "60": 2,
+    "120": 3,
+    "180": 4
+  },
+  "stages": [
+    [
+      27.203,
+      "first_light"
+    ],
+    [
+      57.488,
+      "humming"
+    ],
+    [
+      139.071,
+      "bustling"
+    ]
+  ],
+  "winds": 651,
+  "presses": 117,
+  "idle_over_5s": [],
+  "hints": 0,
+  "end": {
+    "blocked": 1,
+    "dolls": 5,
+    "energy": 126.127,
+    "inputs": 108,
+    "turns": 651
+  },
+  "audio_while_winding": {
+    "rms": 0.15929001251699984,
+    "peak": 0.7471049427986145
+  },
+  "sounds_started": {
+    "chime": 5,
+    "chirp": 5,
+    "tick": 651
+  },
+  "fps_end": 39,
+  "fps_at": {
+    "5": 38,
+    "30": 34,
+    "60": 36,
+    "120": 41,
+    "180": 33
+  },
+  "errors": []
+}
