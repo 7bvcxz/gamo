@@ -1,0 +1,298 @@
+{
+  "_doc": "tools/e_runs.gd: 1800 s of play per run, buying 1.5 s after it can pay. Objective throughput and pacing, never a measure of delight.",
+  "marks_s": [
+    180.0,
+    900.0,
+    1800.0
+  ],
+  "runs": [
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 9372.3,
+          "delivered": 3740,
+          "deliveries_a_min_in_span": 296.5,
+          "level": 19,
+          "name": "Golden Line 9",
+          "per_lane_a_min": 100.0,
+          "queued": 0,
+          "upgrades": 19
+        },
+        "3": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 340.3,
+          "delivered": 182,
+          "deliveries_a_min_in_span": 60.7,
+          "level": 8,
+          "name": "Momo Crew",
+          "per_lane_a_min": 100.0,
+          "queued": 0,
+          "upgrades": 8
+        },
+        "30": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 13562.0,
+          "delivered": 8240,
+          "deliveries_a_min_in_span": 300.0,
+          "level": 22,
+          "name": "Golden Line 12",
+          "per_lane_a_min": 100.0,
+          "queued": 0,
+          "upgrades": 22
+        }
+      },
+      "deliveries_by_minute": [
+        23,
+        39,
+        120,
+        258,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300,
+        300
+      ],
+      "final": {
+        "delivered": 8241,
+        "earned": 316968,
+        "lanes": 3,
+        "level": 22,
+        "name": "Golden Line 12"
+      },
+      "first_delivery_s": 9.3,
+      "first_upgrade_s": 20.1,
+      "id": "tycoon",
+      "label": "E",
+      "longest_reveal_wait_s": {
+        "0-15": 679.4,
+        "15-30": 1579.4
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 25.9,
+        "15-30": 441.6,
+        "3-15": 162.0
+      },
+      "reveals": 10,
+      "told": {
+        "lower": [],
+        "told": 0
+      },
+      "unique_deliveries": true
+    },
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 11355.2,
+          "delivered": 6667,
+          "deliveries_a_min_in_span": 540.4,
+          "level": 22,
+          "name": "Robot Arms",
+          "per_lane_a_min": 142.9,
+          "queued": 0,
+          "upgrades": 22
+        },
+        "3": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 340.3,
+          "delivered": 182,
+          "deliveries_a_min_in_span": 60.7,
+          "level": 8,
+          "name": "Momo Crew",
+          "per_lane_a_min": 100.0,
+          "queued": 0,
+          "upgrades": 8
+        },
+        "30": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 52058.8,
+          "delivered": 22655,
+          "deliveries_a_min_in_span": 1065.9,
+          "level": 32,
+          "name": "Grand Line 2",
+          "per_lane_a_min": 200.0,
+          "queued": 0,
+          "upgrades": 32
+        }
+      },
+      "deliveries_by_minute": [
+        23,
+        39,
+        120,
+        258,
+        301,
+        400,
+        420,
+        446,
+        539,
+        546,
+        667,
+        666,
+        674,
+        765,
+        803,
+        832,
+        900,
+        900,
+        990,
+        1041,
+        1031,
+        1028,
+        1028,
+        1038,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200,
+        1200
+      ],
+      "final": {
+        "delivered": 22657,
+        "earned": 918313,
+        "lanes": 6,
+        "level": 32,
+        "name": "Grand Line 2"
+      },
+      "first_delivery_s": 9.3,
+      "first_upgrade_s": 20.1,
+      "id": "tycoon-plus",
+      "label": "E+",
+      "longest_reveal_wait_s": {
+        "0-15": 70.3,
+        "15-30": 109.5
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 25.9,
+        "15-30": 109.5,
+        "3-15": 70.3
+      },
+      "reveals": 32,
+      "told": {
+        "lower": [],
+        "told": 11
+      },
+      "unique_deliveries": true
+    },
+    {
+      "alt": "grand",
+      "at": {
+        "15": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 7052.8,
+          "delivered": 5003,
+          "deliveries_a_min_in_span": 410.9,
+          "level": 20,
+          "name": "Second Crate",
+          "per_lane_a_min": 142.9,
+          "queued": 0,
+          "upgrades": 8
+        },
+        "3": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 104.0,
+          "delivered": 72,
+          "deliveries_a_min_in_span": 24.0,
+          "level": 3,
+          "name": "Steam Machine",
+          "per_lane_a_min": 30.0,
+          "queued": 0,
+          "upgrades": 1
+        },
+        "30": {
+          "bottleneck": "hopper",
+          "coins_a_min_in_span": 34121.1,
+          "delivered": 18785,
+          "deliveries_a_min_in_span": 918.8,
+          "level": 30,
+          "name": "Head Office",
+          "per_lane_a_min": 200.0,
+          "queued": 0,
+          "upgrades": 12
+        }
+      },
+      "deliveries_by_minute": [
+        17,
+        25,
+        30,
+        97,
+        186,
+        284,
+        300,
+        372,
+        412,
+        436,
+        438,
+        436,
+        630,
+        668,
+        672,
+        668,
+        666,
+        666,
+        715,
+        900,
+        900,
+        908,
+        1027,
+        1029,
+        1029,
+        1028,
+        1042,
+        1029,
+        1029,
+        1146
+      ],
+      "final": {
+        "delivered": 18786,
+        "earned": 596823,
+        "lanes": 6,
+        "level": 30,
+        "name": "Head Office"
+      },
+      "first_delivery_s": 9.3,
+      "first_upgrade_s": 81.1,
+      "id": "tycoon-plus",
+      "label": "E+ grand (?alt=grand)",
+      "longest_reveal_wait_s": {
+        "0-15": 195.9,
+        "15-30": 253.8
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 98.9,
+        "15-30": 253.8,
+        "3-15": 195.9
+      },
+      "reveals": 12,
+      "told": {
+        "lower": [],
+        "told": 10
+      },
+      "unique_deliveries": true
+    }
+  ]
+}
