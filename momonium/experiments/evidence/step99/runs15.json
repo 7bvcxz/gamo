@@ -1,0 +1,1047 @@
+{
+  "_doc": "tools/runs15.gd: a scripted player, 900 s of play per variant (C/C+ tapped 2.5 a second; every variant buys 1.5 s after it can pay), the 15-minute test's own checkpoints. Objective technical and pacing evidence, never a measure of fun, fatigue or boredom.",
+  "runs": [
+    {
+      "alt": "",
+      "at": {
+        "0": {
+          "actions": 0,
+          "actions_per_minute": [
+            0
+          ],
+          "active_s": 0.1,
+          "fps": 1.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "breaks": 0,
+            "coins": 0,
+            "damage": 1,
+            "damage_total": 0,
+            "earned": 0,
+            "hits": 0,
+            "misses": 0,
+            "pick": 0,
+            "rock": 0,
+            "taps": 0
+          },
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 0.1,
+            "median_gap_s": 0.1
+          },
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "10": {
+          "actions": 1509,
+          "actions_per_minute": [
+            151,
+            152,
+            151,
+            151,
+            150,
+            151,
+            151,
+            150,
+            151,
+            151
+          ],
+          "active_s": 600.0,
+          "fps": 1.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "breaks": 13,
+            "coins": 6290,
+            "damage": 90,
+            "damage_total": 40444,
+            "earned": 16535,
+            "hits": 1486,
+            "misses": 0,
+            "pick": 10,
+            "rock": 13,
+            "taps": 1499
+          },
+          "rewards": {
+            "count": 23,
+            "longest_gap_s": 97.7,
+            "median_gap_s": 15.9
+          },
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 2259,
+          "actions_per_minute": [
+            151,
+            152,
+            151,
+            151,
+            150,
+            151,
+            151,
+            150,
+            151,
+            151,
+            150,
+            150,
+            150,
+            150,
+            150
+          ],
+          "active_s": 900.0,
+          "fps": 1.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "breaks": 15,
+            "coins": 33553,
+            "damage": 90,
+            "damage_total": 107764,
+            "earned": 43798,
+            "hits": 2234,
+            "misses": 0,
+            "pick": 10,
+            "rock": 15,
+            "taps": 2249
+          },
+          "rewards": {
+            "count": 25,
+            "longest_gap_s": 168.4,
+            "median_gap_s": 20.9
+          },
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 454,
+          "actions_per_minute": [
+            151,
+            152,
+            151
+          ],
+          "active_s": 180.0,
+          "fps": 1.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "breaks": 7,
+            "coins": 180,
+            "damage": 12,
+            "damage_total": 2340,
+            "earned": 805,
+            "hits": 442,
+            "misses": 0,
+            "pick": 5,
+            "rock": 7,
+            "taps": 449
+          },
+          "rewards": {
+            "count": 12,
+            "longest_gap_s": 33.2,
+            "median_gap_s": 15.3
+          },
+          "upgrades": 5,
+          "visible_upgrades": 5
+        },
+        "7": {
+          "actions": 1057,
+          "actions_per_minute": [
+            151,
+            152,
+            151,
+            151,
+            150,
+            151,
+            151
+          ],
+          "active_s": 420.0,
+          "fps": 1.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "breaks": 11,
+            "coins": 2340,
+            "damage": 40,
+            "damage_total": 16084,
+            "earned": 5885,
+            "hits": 1038,
+            "misses": 0,
+            "pick": 8,
+            "rock": 11,
+            "taps": 1049
+          },
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 84.5,
+            "median_gap_s": 18.3
+          },
+          "upgrades": 8,
+          "visible_upgrades": 8
+        }
+      },
+      "base": "rock",
+      "id": "rock",
+      "key": "rock|1793735951|1",
+      "label": "C (baseline)",
+      "now": {
+        "actions": 2260,
+        "actions_per_minute": [
+          151,
+          152,
+          151,
+          151,
+          150,
+          151,
+          151,
+          150,
+          151,
+          151,
+          150,
+          150,
+          150,
+          150,
+          150,
+          1
+        ],
+        "active_s": 900.2,
+        "fps": 1.0,
+        "idle_count": 0,
+        "idle_s": 0.0,
+        "longest_idle_s": 0.0,
+        "probe": {
+          "breaks": 15,
+          "coins": 33553,
+          "damage": 90,
+          "damage_total": 107854,
+          "earned": 43798,
+          "hits": 2235,
+          "misses": 0,
+          "pick": 10,
+          "rock": 15,
+          "taps": 2250
+        },
+        "rewards": {
+          "count": 25,
+          "longest_gap_s": 168.4,
+          "median_gap_s": 20.9
+        },
+        "upgrades": 10,
+        "visible_upgrades": 10
+      },
+      "reveals": {
+        "count": 19,
+        "longest_without_s": 311.9,
+        "times_s": [
+          20.2,
+          21.7,
+          37.0,
+          38.5,
+          55.0,
+          82.2,
+          83.8,
+          107.0,
+          108.6,
+          130.2,
+          163.4,
+          164.9,
+          195.8,
+          197.3,
+          227.8,
+          309.7,
+          395.7,
+          488.9,
+          588.1
+        ]
+      },
+      "run": 1,
+      "started": "2026-11-03 19:59:11",
+      "taps_per_second": 2.5,
+      "version": "0.98.0"
+    },
+    {
+      "alt": "",
+      "at": {
+        "0": {
+          "actions": 0,
+          "actions_per_minute": [
+            0
+          ],
+          "active_s": 0.1,
+          "fps": 1.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "big_breaks": 0,
+            "breaks": 0,
+            "coins": 0,
+            "damage": 3,
+            "damage_total": 0,
+            "earned": 0,
+            "hits": 0,
+            "misses": 0,
+            "pick": 0,
+            "rock": 0,
+            "taps": 0,
+            "tier": "Wooden Pickaxe"
+          },
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 0.1,
+            "median_gap_s": 0.1
+          },
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "10": {
+          "actions": 1513,
+          "actions_per_minute": [
+            152,
+            152,
+            151,
+            152,
+            151,
+            151,
+            151,
+            151,
+            151,
+            151
+          ],
+          "active_s": 600.0,
+          "fps": 3.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "big_breaks": 6,
+            "breaks": 41,
+            "coins": 1069,
+            "damage": 39,
+            "damage_total": 25736,
+            "earned": 5911,
+            "hits": 1458,
+            "misses": 0,
+            "pick": 14,
+            "rock": 41,
+            "taps": 1499,
+            "tier": "Silver Pickaxe"
+          },
+          "rewards": {
+            "count": 55,
+            "longest_gap_s": 28.4,
+            "median_gap_s": 10.4
+          },
+          "upgrades": 14,
+          "visible_upgrades": 14
+        },
+        "15": {
+          "actions": 2269,
+          "actions_per_minute": [
+            152,
+            152,
+            151,
+            152,
+            151,
+            151,
+            151,
+            151,
+            151,
+            151,
+            152,
+            151,
+            151,
+            151,
+            151
+          ],
+          "active_s": 900.0,
+          "fps": 3.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "big_breaks": 9,
+            "breaks": 59,
+            "coins": 2434,
+            "damage": 115,
+            "damage_total": 81345,
+            "earned": 18751,
+            "hits": 2190,
+            "misses": 0,
+            "pick": 20,
+            "rock": 59,
+            "taps": 2249,
+            "tier": "Ruby Pickaxe"
+          },
+          "rewards": {
+            "count": 79,
+            "longest_gap_s": 33.2,
+            "median_gap_s": 11.1
+          },
+          "upgrades": 20,
+          "visible_upgrades": 20
+        },
+        "3": {
+          "actions": 455,
+          "actions_per_minute": [
+            152,
+            152,
+            151
+          ],
+          "active_s": 180.0,
+          "fps": 3.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "big_breaks": 2,
+            "breaks": 14,
+            "coins": 226,
+            "damage": 9,
+            "damage_total": 2859,
+            "earned": 701,
+            "hits": 436,
+            "misses": 0,
+            "pick": 6,
+            "rock": 14,
+            "taps": 449,
+            "tier": "Iron Pickaxe"
+          },
+          "rewards": {
+            "count": 20,
+            "longest_gap_s": 24.0,
+            "median_gap_s": 8.4
+          },
+          "upgrades": 6,
+          "visible_upgrades": 6
+        },
+        "7": {
+          "actions": 1060,
+          "actions_per_minute": [
+            152,
+            152,
+            151,
+            152,
+            151,
+            151,
+            151
+          ],
+          "active_s": 420.0,
+          "fps": 3.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "big_breaks": 5,
+            "breaks": 30,
+            "coins": 485,
+            "damage": 22,
+            "damage_total": 11886,
+            "earned": 2893,
+            "hits": 1019,
+            "misses": 0,
+            "pick": 11,
+            "rock": 30,
+            "taps": 1049,
+            "tier": "Steel Pickaxe"
+          },
+          "rewards": {
+            "count": 41,
+            "longest_gap_s": 28.4,
+            "median_gap_s": 10.2
+          },
+          "upgrades": 11,
+          "visible_upgrades": 11
+        }
+      },
+      "base": "rock",
+      "id": "rock-plus",
+      "key": "rock-plus|1793735954|1",
+      "label": "C+ (improved)",
+      "now": {
+        "actions": 2270,
+        "actions_per_minute": [
+          152,
+          152,
+          151,
+          152,
+          151,
+          151,
+          151,
+          151,
+          151,
+          151,
+          152,
+          151,
+          151,
+          151,
+          151,
+          1
+        ],
+        "active_s": 900.2,
+        "fps": 3.0,
+        "idle_count": 0,
+        "idle_s": 0.0,
+        "longest_idle_s": 0.0,
+        "probe": {
+          "big_breaks": 9,
+          "breaks": 59,
+          "coins": 2434,
+          "damage": 115,
+          "damage_total": 81460,
+          "earned": 18751,
+          "hits": 2191,
+          "misses": 0,
+          "pick": 20,
+          "rock": 59,
+          "taps": 2250,
+          "tier": "Ruby Pickaxe"
+        },
+        "rewards": {
+          "count": 79,
+          "longest_gap_s": 33.2,
+          "median_gap_s": 11.1
+        },
+        "upgrades": 20,
+        "visible_upgrades": 20
+      },
+      "reveals": {
+        "count": 15,
+        "longest_without_s": 98.9,
+        "times_s": [
+          51.0,
+          83.4,
+          152.1,
+          158.2,
+          238.2,
+          285.7,
+          324.2,
+          412.6,
+          440.5,
+          507.8,
+          605.0,
+          606.5,
+          705.4,
+          747.0,
+          804.6
+        ]
+      },
+      "run": 1,
+      "started": "2026-11-03 19:59:14",
+      "taps_per_second": 2.5,
+      "version": "0.98.0"
+    },
+    {
+      "alt": "",
+      "at": {
+        "0": {
+          "actions": 0,
+          "actions_per_minute": [
+            0
+          ],
+          "active_s": 0.1,
+          "fps": 3.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "coins": 0,
+            "delivered": 0,
+            "deliveries_per_min": 0.0,
+            "earned": 0,
+            "lanes": 1,
+            "level": 0,
+            "name": "Little Line",
+            "on_belt": 0
+          },
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 0.1,
+            "median_gap_s": 0.1
+          },
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "10": {
+          "actions": 17,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            3,
+            2,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0
+          ],
+          "active_s": 600.0,
+          "fps": 2.0,
+          "idle_count": 18,
+          "idle_s": 600.0,
+          "longest_idle_s": 85.8,
+          "probe": {
+            "coins": 14623,
+            "delivered": 2240,
+            "deliveries_per_min": 306.0,
+            "earned": 55468,
+            "lanes": 3,
+            "level": 17,
+            "name": "Golden Line 7",
+            "on_belt": 34
+          },
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 85.8,
+            "median_gap_s": 23.4
+          },
+          "upgrades": 17,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 19,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            3,
+            2,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0
+          ],
+          "active_s": 900.0,
+          "fps": 2.0,
+          "idle_count": 20,
+          "idle_s": 900.0,
+          "longest_idle_s": 162.0,
+          "probe": {
+            "coins": 21385,
+            "delivered": 3740,
+            "deliveries_per_min": 306.0,
+            "earned": 113488,
+            "lanes": 3,
+            "level": 19,
+            "name": "Golden Line 9",
+            "on_belt": 34
+          },
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 162.0,
+            "median_gap_s": 24.1
+          },
+          "upgrades": 19,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 8,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            0
+          ],
+          "active_s": 180.0,
+          "fps": 2.0,
+          "idle_count": 8,
+          "idle_s": 176.5,
+          "longest_idle_s": 25.9,
+          "probe": {
+            "coins": 103,
+            "delivered": 182,
+            "deliveries_per_min": 150.0,
+            "earned": 1021,
+            "lanes": 2,
+            "level": 8,
+            "name": "Momo Crew",
+            "on_belt": 21
+          },
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 25.9,
+            "median_gap_s": 21.5
+          },
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "7": {
+          "actions": 15,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            3,
+            2,
+            1,
+            1,
+            0
+          ],
+          "active_s": 420.0,
+          "fps": 2.0,
+          "idle_count": 16,
+          "idle_s": 420.0,
+          "longest_idle_s": 50.9,
+          "probe": {
+            "coins": 7558,
+            "delivered": 1340,
+            "deliveries_per_min": 300.0,
+            "earned": 25621,
+            "lanes": 3,
+            "level": 15,
+            "name": "Golden Line 5",
+            "on_belt": 34
+          },
+          "rewards": {
+            "count": 15,
+            "longest_gap_s": 50.9,
+            "median_gap_s": 22.3
+          },
+          "upgrades": 15,
+          "visible_upgrades": 10
+        }
+      },
+      "base": "tycoon",
+      "id": "tycoon",
+      "key": "tycoon|1793735956|1",
+      "label": "E (baseline)",
+      "now": {
+        "actions": 19,
+        "actions_per_minute": [
+          2,
+          3,
+          3,
+          3,
+          2,
+          1,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "active_s": 900.2,
+        "fps": 2.0,
+        "idle_count": 20,
+        "idle_s": 900.2,
+        "longest_idle_s": 162.0,
+        "probe": {
+          "coins": 21426,
+          "delivered": 3741,
+          "deliveries_per_min": 306.0,
+          "earned": 113529,
+          "lanes": 3,
+          "level": 19,
+          "name": "Golden Line 9",
+          "on_belt": 35
+        },
+        "rewards": {
+          "count": 19,
+          "longest_gap_s": 162.0,
+          "median_gap_s": 24.1
+        },
+        "upgrades": 19,
+        "visible_upgrades": 10
+      },
+      "reveals": {
+        "count": 10,
+        "longest_without_s": 679.4,
+        "times_s": [
+          20.1,
+          41.5,
+          63.3,
+          87.3,
+          113.2,
+          137.4,
+          158.9,
+          176.5,
+          197.8,
+          220.6
+        ]
+      },
+      "run": 1,
+      "started": "2026-11-03 19:59:16",
+      "taps_per_second": 0.0,
+      "version": "0.98.0"
+    },
+    {
+      "alt": "",
+      "at": {
+        "0": {
+          "actions": 0,
+          "actions_per_minute": [
+            0
+          ],
+          "active_s": 0.1,
+          "fps": 2.0,
+          "idle_count": 0,
+          "idle_s": 0.0,
+          "longest_idle_s": 0.0,
+          "probe": {
+            "coins": 0,
+            "delivered": 0,
+            "deliveries_per_min": 0.0,
+            "earned": 0,
+            "lanes": 1,
+            "level": 0,
+            "name": "Little Line",
+            "on_belt": 0
+          },
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 0.1,
+            "median_gap_s": 0.1
+          },
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "10": {
+          "actions": 18,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            2,
+            2,
+            1,
+            1,
+            2,
+            1,
+            1,
+            0
+          ],
+          "active_s": 600.0,
+          "fps": 2.0,
+          "idle_count": 19,
+          "idle_s": 600.0,
+          "longest_idle_s": 59.2,
+          "probe": {
+            "coins": 1119,
+            "delivered": 3090,
+            "deliveries_per_min": 544.4,
+            "earned": 49257,
+            "lanes": 5,
+            "level": 18,
+            "name": "Wind Power",
+            "on_belt": 61
+          },
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 59.2,
+            "median_gap_s": 24.1
+          },
+          "upgrades": 18,
+          "visible_upgrades": 18
+        },
+        "15": {
+          "actions": 22,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            2,
+            2,
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          "active_s": 900.0,
+          "fps": 2.0,
+          "idle_count": 23,
+          "idle_s": 900.0,
+          "longest_idle_s": 70.3,
+          "probe": {
+            "coins": 14093,
+            "delivered": 6665,
+            "deliveries_per_min": 803.0,
+            "earned": 137231,
+            "lanes": 6,
+            "level": 22,
+            "name": "Robot Arms",
+            "on_belt": 62
+          },
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 70.3,
+            "median_gap_s": 34.6
+          },
+          "upgrades": 22,
+          "visible_upgrades": 22
+        },
+        "3": {
+          "actions": 8,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            0
+          ],
+          "active_s": 180.0,
+          "fps": 2.0,
+          "idle_count": 8,
+          "idle_s": 176.5,
+          "longest_idle_s": 25.9,
+          "probe": {
+            "coins": 103,
+            "delivered": 182,
+            "deliveries_per_min": 151.2,
+            "earned": 1021,
+            "lanes": 2,
+            "level": 8,
+            "name": "Momo Crew",
+            "on_belt": 21
+          },
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 25.9,
+            "median_gap_s": 21.5
+          },
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "7": {
+          "actions": 14,
+          "actions_per_minute": [
+            2,
+            3,
+            3,
+            2,
+            2,
+            1,
+            1,
+            0
+          ],
+          "active_s": 420.0,
+          "fps": 2.0,
+          "idle_count": 15,
+          "idle_s": 420.0,
+          "longest_idle_s": 44.6,
+          "probe": {
+            "coins": 5497,
+            "delivered": 1561,
+            "deliveries_per_min": 436.4,
+            "earned": 21735,
+            "lanes": 4,
+            "level": 14,
+            "name": "Momo Packers",
+            "on_belt": 50
+          },
+          "rewards": {
+            "count": 14,
+            "longest_gap_s": 44.6,
+            "median_gap_s": 24.0
+          },
+          "upgrades": 14,
+          "visible_upgrades": 14
+        }
+      },
+      "base": "tycoon",
+      "id": "tycoon-plus",
+      "key": "tycoon-plus|1793735960|1",
+      "label": "E+ (improved)",
+      "now": {
+        "actions": 22,
+        "actions_per_minute": [
+          2,
+          3,
+          3,
+          2,
+          2,
+          1,
+          1,
+          2,
+          1,
+          1,
+          1,
+          0,
+          1,
+          1,
+          1,
+          0
+        ],
+        "active_s": 900.2,
+        "fps": 2.0,
+        "idle_count": 23,
+        "idle_s": 900.2,
+        "longest_idle_s": 70.3,
+        "probe": {
+          "coins": 14145,
+          "delivered": 6667,
+          "deliveries_per_min": 800.0,
+          "earned": 137283,
+          "lanes": 6,
+          "level": 22,
+          "name": "Robot Arms",
+          "on_belt": 64
+        },
+        "rewards": {
+          "count": 24,
+          "longest_gap_s": 70.3,
+          "median_gap_s": 34.6
+        },
+        "upgrades": 22,
+        "visible_upgrades": 22
+      },
+      "reveals": {
+        "count": 22,
+        "longest_without_s": 70.3,
+        "times_s": [
+          20.1,
+          41.5,
+          63.3,
+          87.3,
+          113.2,
+          137.4,
+          158.9,
+          176.5,
+          197.8,
+          220.6,
+          255.2,
+          293.7,
+          334.2,
+          378.8,
+          426.8,
+          479.1,
+          535.5,
+          594.7,
+          655.9,
+          722.2,
+          790.8,
+          861.1
+        ]
+      },
+      "run": 1,
+      "started": "2026-11-03 19:59:20",
+      "taps_per_second": 0.0,
+      "version": "0.98.0"
+    }
+  ]
+}
