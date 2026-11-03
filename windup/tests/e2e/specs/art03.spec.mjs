@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs';
-import { openGame, state, call, paintedColours } from '../lib/game.mjs';
+import { openGame, state, call, paintedColours, withinBudget } from '../lib/game.mjs';
 
 // Pictures and numbers go to windup/evidence/ only when asked (WINDUP_EVIDENCE=1), so
 // a routine run cannot overwrite an earlier step's published-build evidence.
@@ -34,6 +34,9 @@ test('art loads, the doll wakes, frames hold', async ({ page }, info) => {
   });
   fs.writeFileSync(path.join(evidence, `browser_${info.project.name}.json`),
     JSON.stringify({ project: info.project.name, version: s0.version, fps, pack }, null, 2) + '\n');
-  expect(Math.min(...fps.slice(2))).toBeGreaterThan(20);
+  // Render budget, not frames a second (see play04.spec.mjs); fps kept as evidence with a floor.
+  const budget = await withinBudget(page);
+  expect(budget.ok, JSON.stringify(budget)).toBe(true);
+  expect(Math.min(...fps.slice(2))).toBeGreaterThanOrEqual(8);
   expect(errors).toEqual([]);
 });

@@ -41,6 +41,17 @@ export const call = (page, name, arg) => page.evaluate(([n, a]) => window.windup
 export const events = async (page) =>
   (await page.evaluate(() => window.windup.events())).split('\n').filter(Boolean).map((l) => JSON.parse(l));
 
+/** Render budget (draw calls, render objects) -- deterministic, unlike frames a
+ *  second on a shared machine whose load the test cannot control. The two
+ *  real regressions so far were both visible here (Step 04: 180 draw calls
+ *  from one texture per doll part; Step 05: antialiased prop lines). */
+export const RENDER_BUDGET = { draw_calls: 150, objects: 420 };
+
+export async function withinBudget(page) {
+  const r = await page.evaluate(() => window.windup.call('dev_render_info'));
+  return { ...r, ok: r.draw_calls <= RENDER_BUDGET.draw_calls && r.objects <= RENDER_BUDGET.objects };
+}
+
 /** The key's position on the page, from the game's own answer. */
 export async function keyPoint(page) {
   const k = await call(page, 'key_point');
