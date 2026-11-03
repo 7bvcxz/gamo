@@ -30,6 +30,7 @@ var reduced_motion := false
 var ui: Control
 var chooser: PopChooser
 var frame: PopFrame
+var audio: PopAudio
 
 
 func _ready() -> void:
@@ -60,9 +61,15 @@ func _ready() -> void:
 	frame.back_pressed.connect(back)
 	frame.restart_pressed.connect(restart)
 	frame.buy_pressed.connect(buy)
+	frame.sound_pressed.connect(toggle_sound)
+	audio = PopAudio.new()
+	audio.name = "Audio"
+	add_child(audio)
 	route = PopRoute.parse(PopWeb.location_hash(), PopWeb.location_search(), OS.get_cmdline_user_args())
 	reduced_motion = String(route["motion"]) == "reduce"
 	frame.dev = bool(route["dev"])
+	audio.set_muted(not bool(route["sound"]))
+	frame.set_sound(not audio.muted)
 	if not economy.errors.is_empty():
 		push_error("economy.json: %s" % [economy.errors])
 	chooser.build(PopRegistry.listed())
@@ -107,6 +114,11 @@ func back() -> void:
 	_finish_run()
 	PopWeb.set_route("")
 	_show_chooser()
+
+
+func toggle_sound() -> void:
+	audio.set_muted(not audio.muted)
+	frame.set_sound(not audio.muted)
 
 
 func restart() -> void:
@@ -205,6 +217,8 @@ func _start(id: String) -> void:
 	var view_script: GDScript = load(String(entry["view"]))
 	var view: PopPlayView = view_script.new()
 	view.reduced_motion = reduced_motion
+	view.audio = audio
+	audio.stop_all()
 	view.command.connect(on_command)
 	frame.accent = entry["color"]
 	frame.set_play(view)
@@ -223,6 +237,8 @@ func _finish_run() -> void:
 
 
 func _show_chooser() -> void:
+	if audio != null:
+		audio.stop_all()
 	screen = "chooser"
 	exp_id = ""
 	rules = null
@@ -261,6 +277,7 @@ func state() -> Dictionary:
 		out["clock_ms"] = clock.now_ms
 		out["paused"] = clock.pause_reasons()
 		out["fx"] = {"alive": frame.play.fx.alive, "peak": frame.play.fx.peak, "cap": PopFx.CAP}
+	out["sound"] = {"muted": audio.muted, "played": audio.played.duplicate()}
 	return out
 
 
@@ -270,7 +287,7 @@ func _rects() -> Dictionary:
 	var named: Dictionary = {}
 	if screen == "play":
 		named = {"play": frame.play, "upgrade": frame.upgrade_button, "back": frame.back_button,
-			"restart": frame.restart_button, "money": frame.money_view}
+			"restart": frame.restart_button, "money": frame.money_view, "sound": frame.sound_button}
 	else:
 		for t: Dictionary in chooser.tiles:
 			named["tile_" + String(t["id"])] = t["button"]

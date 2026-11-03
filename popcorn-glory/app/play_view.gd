@@ -17,6 +17,8 @@ const HINT_HAND_MS := 20000
 
 var rules: PopRules
 var fx := PopFx.new()
+## Set by the app; null in tests that build a view alone.
+var audio: PopAudio
 ## Three layers, back to front. The machine has its own canvas item and is
 ## redrawn only when its look changes (level, size); breathing and the squash
 ## of a pop are its node's scale. Redrawing the whole machine every frame was
@@ -30,6 +32,7 @@ var reduced_motion := false
 var now_ms := 0
 var last_input_ms := -1
 var _t := 0.0
+var _jump := 0.0      # the upgrade's hop, 1 -> 0
 var _squash := 0.0
 var _held := false
 ## "+N" over the machine for each earning: [{text, age}]
@@ -116,9 +119,26 @@ func _draw_over(_ci: CanvasItem, _base: Vector2, _size_px: float) -> void:
 	pass
 
 
+## Every experiment's upgrade looks and sounds the same: the machine jumps,
+## gold popcorn and sparkles burst from it, a rising chime.
+func _upgraded() -> void:
+	_squash = 1.0
+	_jump = 1.0
+	var s := machine_size() / 900.0
+	fx.burst(machine_top(), 22 if not reduced_motion else 2, s, rng, PopPalette.GOLD, 1.2, 1.2)
+	if not reduced_motion:
+		fx.sparkle(machine_centre(), s, rng, 8, 220.0)
+	_sound("upgrade")
+
+
 ## Machine shake (C rattles as it fills).
 func _shake() -> Vector2:
 	return Vector2.ZERO
+
+
+func _sound(name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
+	if audio != null:
+		audio.play(name, pitch, volume_db)
 
 
 func _gain(amount: int) -> void:
@@ -135,17 +155,19 @@ func on_events(events: Array[Dictionary]) -> void:
 				_squash = 1.0
 				var n := int(e["data"].get("count", 1))
 				fx.burst(machine_top(), mini(n, 14) if not reduced_motion else 1, machine_size() / 900.0, rng)
+				_sound("pop_%d" % (1 + rng.randi() % 3), rng.randf_range(0.92, 1.08))
 			"earn":
 				fx.coin(machine_top(), machine_size() / 900.0)
 				_gain(int(e["data"].get("amount", 0)))
+				_sound("coin", 1.0, -6.0)
 			"upgrade":
-				_squash = 1.0
-				fx.burst(machine_top(), 18 if not reduced_motion else 2, machine_size() / 900.0, rng)
+				_upgraded()
 
 
 func _process(delta: float) -> void:
 	_t += delta
 	_squash = maxf(0.0, _squash - delta * 6.0)
+	_jump = maxf(0.0, _jump - delta * 2.2)
 	fx.step(delta)
 	for g: Dictionary in _gains:
 		g["age"] = float(g["age"]) + delta
@@ -156,8 +178,10 @@ func _process(delta: float) -> void:
 		var fill := 0.15 + 0.7 * float(rules.level) / maxf(1.0, float(rules.max_level()))
 		machine_node.set_look(rules.level, size_px, fill)
 		var breathe := 0.0 if reduced_motion else sin(_t * 2.4) * 0.012
-		machine_node.position = machine_base() + _shake()
-		machine_node.scale = Vector2((1.0 + 0.06 * _squash) * (1.0 + breathe), (1.0 - 0.08 * _squash) * (1.0 - breathe))
+		var hop := sin(_jump * PI) * machine_size() * 0.06 if not reduced_motion else 0.0
+		var grow := 1.0 + 0.08 * sin(_jump * PI) if not reduced_motion else 1.0
+		machine_node.position = machine_base() + _shake() - Vector2(0, hop)
+		machine_node.scale = Vector2((1.0 + 0.06 * _squash) * (1.0 + breathe) * grow, (1.0 - 0.08 * _squash) * (1.0 - breathe) * grow)
 	machine_node.visible = rules != null
 	under_layer.queue_redraw()
 	over_layer.queue_redraw()

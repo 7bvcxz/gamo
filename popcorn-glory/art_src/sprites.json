@@ -1,0 +1,13 @@
+{
+  "_doc": "Hand-written SVG sources (this folder, .gdignore: never in the pack) -> assets/atlas/sprites.png + .json by tools/build_atlas.gd. scale = pixels per SVG unit. Provenance: every source was written by hand for Popcorn & Glory in this repository; no third-party art, no generated image.",
+  "padding": 2,
+  "sprites": {
+    "piece_a": { "source": "piece_a.svg", "scale": 1.0 },
+    "piece_b": { "source": "piece_b.svg", "scale": 1.0 },
+    "piece_c": { "source": "piece_c.svg", "scale": 1.0 },
+    "kernel": { "source": "kernel.svg", "scale": 1.0 },
+    "coin": { "source": "coin.svg", "scale": 1.0 },
+    "sparkle": { "source": "sparkle.svg", "scale": 1.0 },
+    "smoke": { "source": "smoke.svg", "scale": 1.0 }
+  }
+}

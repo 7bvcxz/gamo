@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- A popped kernel, the butterfly shape: two wings and a hull. Hand-written. -->
+  <g stroke="#d9a441" stroke-width="2.5" fill="#fff8ec">
+    <circle cx="20" cy="26" r="13"/>
+    <circle cx="44" cy="26" r="13"/>
+    <circle cx="32" cy="38" r="15"/>
+  </g>
+  <g fill="#fff8ec"><circle cx="20" cy="26" r="11"/><circle cx="44" cy="26" r="11"/><circle cx="32" cy="38" r="13"/></g>
+  <path d="M27 45 q5 6 10 0 q-2 6 -5 7 q-3 -1 -5 -7z" fill="#c8862f"/>
+  <g fill="#ffd36b" opacity="0.85"><ellipse cx="32" cy="32" rx="5" ry="3.5"/></g>
+  <g fill="#ffffff" opacity="0.9"><circle cx="17" cy="21" r="3"/><circle cx="40" cy="20" r="2.5"/></g>
+</svg>

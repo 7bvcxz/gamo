@@ -25,6 +25,8 @@
 godot --path popcorn-glory                              # 실행 (선택 화면)
 godot --path popcorn-glory -- --exp perfect --dev       # 실험 하나를 바로, 개발 시계와 함께
 godot --headless --path popcorn-glory --script res://tools/selftest.gd   # 스크립트 플레이어 3분 (실제 규칙, 객관 수치)
+godot --headless --path popcorn-glory --script res://tools/build_atlas.gd # art_src/*.svg -> assets/atlas/ (그다음 --import)
+python3 popcorn-glory/tools/build_audio.py                                # 합성 소리 -> assets/audio/*.ogg
 popcorn-glory/tools/test.sh                             # 헤드리스 unit + integration (엔진 오류도 실패)
 popcorn-glory/tools/check.sh                            # import 두 번 + 에디터 로드 + 테스트
 popcorn-glory/tools/deploy.sh                           # docs/popcorn-glory/ 로 Web export (소스를 먼저 커밋)
@@ -34,7 +36,8 @@ xvfb-run -a -s "-screen 0 1280x1600x24" godot --path popcorn-glory --audio-drive
   --script res://tools/capture.gd -- --out /abs/shot.png --size 720x1280 --exp stub --presses 12 --buy 1
 ```
 
-주소 옵션: `#click`·`#perfect`·`#explosion`(직접 링크), `?dev=1`(활동 시계 + 개발용 브리지 호출), `?motion=reduce`.
+주소 옵션: `#click`·`#perfect`·`#explosion`(직접 링크), `?dev=1`(활동 시계 + 개발용 브리지 호출), `?motion=reduce`(효과 줄이기),
+`?sound=off`(음소거로 시작; 위쪽 스피커 버튼으로도 끄고 켠다). 그림·소리의 방향과 출처는 `design/ART_AUDIO.md`.
 느린 브라우저 검사 `specs/play180.spec.mjs`는 실험마다 실제 3분을 실제 입력으로 플레이한다(`--project p720`).
 
 **배포가 `deploy-web.sh`가 아닌 이유**: 공용 runner는 게임이 시작되기 전에 주소를 게임 폴더로 되돌리고
@@ -49,7 +52,10 @@ xvfb-run -a -s "-screen 0 1280x1600x24" godot --path popcorn-glory --audio-drive
 app/      main(주소·화면·한 곳에서 명령 실행), frame(뒤로·다시 시작·돈·업그레이드·3분), chooser,
           play_view(기계·입력·힌트), active_clock, session_log, bridge(window.popcorn), web, route, registry, ui/
 core/     rules(정수 ms 시계의 결정적 규칙: execute·advance·이벤트), economy(data/economy.json 읽기·검사)
-art/      palette, machine_art(도형으로 그린 기계 다섯 단계), pop_fx(풀 400개, 한 번의 _draw)
+art/      palette, machine_art(도형으로 그린 기계 12단계·네 외형), machine_node(모양이 바뀔 때만 다시 그림),
+          pop_fx(풀 400개, 아틀라스 스프라이트), atlas(아틀라스 읽기)
+art_src/  손으로 쓴 SVG 원본 (.gdignore, 팩에 안 들어감)
+assets/   atlas/(sprites.png + json, build_atlas.gd가 만듦), audio/(*.ogg, build_audio.py가 만듦)
 variants/ click/ perfect/ explosion/ (각각 *_rules.gd = 규칙, *_view.gd = 그림), stub/
 data/     economy.json — 가격·수확은 여기에만
 tests/    unit · integration(헤드리스), e2e(Playwright)

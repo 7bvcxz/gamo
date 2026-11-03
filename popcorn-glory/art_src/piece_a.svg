@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- A popped kernel: five puffs, a warm outline, butter in the folds. Hand-written for Popcorn & Glory (no source image). -->
+  <g stroke="#d9a441" stroke-width="2.5" fill="#fff8ec">
+    <circle cx="22" cy="34" r="14"/>
+    <circle cx="40" cy="30" r="15"/>
+    <circle cx="31" cy="18" r="12"/>
+    <circle cx="30" cy="44" r="12"/>
+    <circle cx="45" cy="45" r="10"/>
+  </g>
+  <g fill="#fff8ec">
+    <circle cx="22" cy="34" r="12"/><circle cx="40" cy="30" r="13"/><circle cx="31" cy="18" r="10"/>
+    <circle cx="30" cy="44" r="10"/><circle cx="45" cy="45" r="8"/>
+  </g>
+  <g fill="#ffd36b" opacity="0.85">
+    <ellipse cx="33" cy="33" rx="6" ry="4"/>
+    <circle cx="24" cy="40" r="2.5"/>
+  </g>
+  <g fill="#ffffff" opacity="0.9">
+    <circle cx="36" cy="22" r="3"/><circle cx="18" cy="29" r="2.5"/>
+  </g>
+</svg>

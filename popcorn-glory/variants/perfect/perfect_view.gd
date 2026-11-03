@@ -38,28 +38,41 @@ func on_events(events: Array[Dictionary]) -> void:
 				match String(d.get("outcome", "")):
 					"perfect":
 						fx.burst(machine_top(), shown + 6, s, rng, PopPalette.GOLD, 1.0, 1.25)
+						if not reduced_motion:
+							fx.sparkle(machine_top(), s, rng, 5, 140.0)
 						_flash = 1.0
 						_flash_col = PopPalette.GOLD
+						_sound("ding")
+						_sound("pop_2", 1.1)
 					"early":
 						fx.burst(machine_top(), maxi(1, shown / 2), s, rng, PopPalette.CREAM, 0.6, 0.7)
 						fx.kernels(machine_top(), 10, s, rng)
+						_sound("thud")
 					"late":
 						fx.burst(machine_top(), shown, s, rng, Color(0.85, 0.62, 0.36), 0.8, 0.9)
+						_sound("pop_1", 0.85)
 					"burnt":
 						fx.burst(machine_top(), maxi(1, shown / 3), s, rng, Color(0.35, 0.27, 0.22), 0.5, 0.6)
 						fx.smoke(machine_top(), 10, s, rng)
+						_sound("hiss")
 						_flash = 0.6
 						_flash_col = Color(0.3, 0.3, 0.3)
 			"earn":
 				fx.coin(machine_top(), machine_size() / 900.0)
 				_gain(int(d.get("amount", 0)))
+				_sound("coin", 1.0, -8.0)
 			"upgrade":
-				_squash = 1.0
-				fx.burst(machine_top(), 18 if not reduced_motion else 2, machine_size() / 900.0, rng, PopPalette.GOLD)
+				_upgraded()
 
 
 func _process(delta: float) -> void:
 	_flash = maxf(0.0, _flash - delta * 2.5)
+	# The sizzle while heating rises in pitch with the heat.
+	if audio != null and rules != null:
+		var st := _r()
+		var heating := bool(st["heating"])
+		var w: Array = st["window"]
+		audio.loop("sizzle", heating, 0.8 + 0.5 * clampf(float(st["heat_ms"]) / float(w[2]), 0.0, 1.0))
 	super(delta)
 
 
@@ -140,4 +153,11 @@ func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 		var col := Color(0.85, 0.6, 0.25).lerp(PopPalette.CREAM, swell)
 		if gold and int(_t * 12.0 + i) % 2 == 0:
 			col = PopPalette.GOLD.lightened(0.3)
-		ci.draw_circle(Vector2(x, y), rr, col)
+		if PopAtlas.has("kernel"):
+			# The kernel sprite whitens as it swells, and flashes inside the gold.
+			var m := Color(1, 1, 1).lerp(Color(1.25, 1.2, 1.1), swell)
+			if gold and int(_t * 12.0 + i) % 2 == 0:
+				m = Color(1.5, 1.4, 0.9)
+			PopAtlas.draw(ci, "kernel", Vector2(x, y), rr * 2.6, m)
+		else:
+			ci.draw_circle(Vector2(x, y), rr, col)

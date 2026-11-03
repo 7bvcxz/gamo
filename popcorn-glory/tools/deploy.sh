@@ -77,7 +77,10 @@ for old in "$OUT"/game-*.pck; do
 done
 
 version="$(sed -nE 's/^config\/version="([^"]+)"/\1/p' "$GAME/project.godot")"
-source="$(git rev-parse --short=12 HEAD)"
+# The last commit that changed the game, not HEAD: a docs commit or a rebase
+# onto another session's push moves HEAD, and the record pointed at commits
+# that held no game change or no longer existed (Steps 03 and 04).
+source="$(git log -1 --format=%h --abbrev=12 -- "$GAME")"
 [[ -n "$(git status --porcelain -- "$GAME" | head -n 1)" ]] && source="$source-dirty"
 printf '{"version":"%s","pack":"%s","packSize":%s,"engine":"%s","godot":"%s","source":"%s"}' \
   "$version" "$pack" "$(stat -c%s "$OUT/$pack")" "$engine" "$("$GODOT" --version | head -n 1)" "$source" > "$OUT/version.json"

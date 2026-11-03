@@ -31,12 +31,14 @@ func on_events(events: Array[Dictionary]) -> void:
 				var lift := 1.0 + 0.04 * mini(streak, 10)
 				fx.burst(machine_top(), mini(n, 16) if not reduced_motion else 1, machine_size() / 900.0, rng,
 					PopPalette.CREAM, 0.9 + 0.03 * mini(streak, 10), lift)
+				# A streak climbs a little in pitch: the hand hears its rhythm.
+				_sound("pop_%d" % (1 + rng.randi() % 3), 1.0 + 0.03 * mini(streak, 10) + rng.randf_range(-0.04, 0.04))
 			"earn":
 				fx.coin(machine_top(), machine_size() / 900.0)
 				_gain(int(e["data"].get("amount", 0)))
+				_sound("coin", 1.0, -8.0)
 			"upgrade":
-				_squash = 1.0
-				fx.burst(machine_top(), 18 if not reduced_motion else 2, machine_size() / 900.0, rng, PopPalette.GOLD)
+				_upgraded()
 
 
 func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:

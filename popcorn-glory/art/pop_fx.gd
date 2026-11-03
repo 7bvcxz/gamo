@@ -14,7 +14,7 @@ var vel := PackedVector2Array()
 var life := PackedFloat32Array()     # seconds left; <= 0 is a free slot
 var size := PackedFloat32Array()
 var rot := PackedFloat32Array()
-var kind := PackedByteArray()        # 0 popcorn, 1 coin, 2 smoke, 3 kernel
+var kind := PackedByteArray()        # 0 popcorn, 1 coin, 2 smoke, 3 kernel, 4 sparkle
 var tint := PackedColorArray()
 var target := Vector2.ZERO           # where coins fly (the money counter)
 var alive := 0
@@ -58,6 +58,13 @@ func kernels(from: Vector2, n: int, scale: float, rng: RandomNumberGenerator) ->
 			rng.randf_range(0.6, 0.9), rng.randf_range(7.0, 10.0) * scale, rng.randf() * TAU, Color(0.78, 0.52, 0.2))
 
 
+## A sparkle that grows and fades (a perfect pop, an upgrade).
+func sparkle(at: Vector2, scale: float, rng: RandomNumberGenerator, n: int = 6, spread: float = 160.0) -> void:
+	for i in n:
+		_spawn(4, at + Vector2(rng.randf_range(-spread, spread), rng.randf_range(-spread * 0.6, spread * 0.4)) * scale,
+			Vector2.ZERO, rng.randf_range(0.35, 0.6), rng.randf_range(18.0, 30.0) * scale, rng.randf() * 0.6, Color.WHITE)
+
+
 func coin(from: Vector2, scale: float) -> void:
 	_spawn(1, from, Vector2.ZERO, 0.55, 20.0 * scale, 0.0, PopPalette.GOLD)
 
@@ -76,6 +83,8 @@ func step(delta: float) -> void:
 		elif kind[i] == 2:
 			pos[i] += vel[i] * delta
 			size[i] += delta * 30.0
+		elif kind[i] == 4:
+			size[i] += delta * 20.0
 		else:
 			vel[i] += Vector2(0, GRAVITY) * delta
 			pos[i] += vel[i] * delta
@@ -85,7 +94,14 @@ func step(delta: float) -> void:
 	peak = maxi(peak, alive)
 
 
+## Pieces are atlas sprites (art_src/*.svg) rotated by a transform set on this
+## canvas item only and reset to identity at the end: draw() is called last on
+## its own layer, so no caller's transform is in play (AGENTS.md 2026-11-03).
+## Without the atlas it falls back to the shapes.
 func draw(ci: CanvasItem) -> void:
+	if PopAtlas.ready():
+		_draw_sprites(ci)
+		return
 	for i in CAP:
 		if life[i] <= 0.0:
 			continue
@@ -108,6 +124,48 @@ func random_piece(rng: RandomNumberGenerator, fallback: Vector2) -> Vector2:
 		if life[i] > 0.3 and kind[i] == 0:
 			return pos[i]
 	return fallback
+
+
+const PIECES := ["piece_a", "piece_b", "piece_c"]
+
+
+func _draw_sprites(ci: CanvasItem) -> void:
+	var tex := PopAtlas.texture()
+	var regs := {}
+	for n: String in ["piece_a", "piece_b", "piece_c", "coin", "smoke", "kernel", "sparkle"]:
+		regs[n] = PopAtlas.region(n)
+	for i in CAP:
+		if life[i] <= 0.0:
+			continue
+		var fade := clampf(life[i] / 0.25, 0.0, 1.0)
+		var name: String
+		var d := size[i] * 2.0
+		var col := Color(tint[i], fade)
+		match kind[i]:
+			1:
+				name = "coin"
+				col = Color.WHITE
+			2:
+				name = "smoke"
+				col = Color(1, 1, 1, fade)
+			3:
+				name = "kernel"
+				d = size[i] * 2.4
+				col = Color(1, 1, 1, fade)
+			4:
+				name = "sparkle"
+				col = Color(1, 1, 1, clampf(life[i] / 0.3, 0.0, 1.0))
+			_:
+				name = PIECES[i % 3]
+				d = size[i] * 2.3
+				# The source is cream: white keeps it, a tint (gold, brown) multiplies it.
+				col = Color(tint[i].r / PopPalette.CREAM.r, tint[i].g / PopPalette.CREAM.g, tint[i].b / PopPalette.CREAM.b, fade)
+		var r: Rect2 = regs[name]
+		var k := d / maxf(r.size.x, r.size.y)
+		var s := r.size * k
+		ci.draw_set_transform(pos[i], rot[i] if kind[i] != 1 else 0.0, Vector2.ONE)
+		ci.draw_texture_rect_region(tex, Rect2(-s / 2, s), r, col)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _spawn(k: int, p: Vector2, v: Vector2, t: float, s: float, r: float, col: Color = PopPalette.CREAM) -> void:

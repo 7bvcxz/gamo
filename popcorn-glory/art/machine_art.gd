@@ -51,6 +51,8 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 			ci.draw_circle(Vector2(x, base.y - wheel_r), wheel_r, c.call(PopPalette.WHEEL))
 			ci.draw_circle(Vector2(x, base.y - wheel_r), wheel_r * 0.45, c.call(wheel_col))
 	_round_rect(ci, body, h * 0.04, c.call(body_col))
+	if not flat:
+		_outline(ci, body, h * 0.04, maxf(2.0, h * 0.008))
 	# Side lamps (stage 9+): a lamp post on each side.
 	if st >= 9:
 		for sx: float in [-1.0, 1.0]:
@@ -59,6 +61,8 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 			ci.draw_circle(post - Vector2(0, h * 0.32), h * 0.04, c.call(PopPalette.GOLD))
 	if not flat:
 		ci.draw_rect(Rect2(body.position + Vector2(0, body_h * 0.72), Vector2(w, body_h * 0.28)), PopPalette.RED_DARK)
+		# Light from above: a pale band along the top of the cabinet.
+		ci.draw_rect(Rect2(body.position + Vector2(w * 0.03, body_h * 0.06), Vector2(w * 0.94, body_h * 0.07)), Color(1, 1, 1, 0.22))
 		# The stripe of the cabinet door.
 		ci.draw_rect(Rect2(body.position.x + w * 0.12, body.position.y + body_h * 0.18, w * 0.76, body_h * 0.1),
 			PopPalette.GOLD if st >= 6 else PopPalette.CREAM)
@@ -80,6 +84,14 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 		for i in bumps:
 			var x := pile.position.x + case_w * (float(i) + 0.5) / bumps
 			ci.draw_circle(Vector2(x, pile.position.y), case_w / bumps * 0.62, PopPalette.CREAM)
+		# Real popcorn on the heap (atlas pieces at fixed spots: the machine is
+		# redrawn only when it changes, so this costs nothing per frame).
+		if PopAtlas.ready():
+			var pieces := 9 + st
+			for i in pieces:
+				var fx_ := pile.position.x + case_w * fmod(float(i) * 0.618034 + 0.05, 0.9) + case_w * 0.05
+				var fy := pile.position.y + pile_h * 0.5 * fmod(float(i) * 0.381966, 1.0) - case_w * 0.02
+				PopAtlas.draw(ci, ["piece_a", "piece_b", "piece_c"][i % 3], Vector2(fx_, fy), case_w * 0.16)
 		# The kettle hanging in the case.
 		var kettles: Array[float] = []
 		if st < 7:
@@ -92,12 +104,17 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 			ci.draw_circle(k, kr, PopPalette.CHROME if st < 10 else PopPalette.GOLD)
 			ci.draw_rect(Rect2(k.x - case_w * 0.02, case_r.position.y, case_w * 0.04, case_h * 0.15), PopPalette.CHROME)
 		ci.draw_rect(Rect2(case_r.position, Vector2(case_w * 0.05, case_h)), PopPalette.GLASS_EDGE)
+		# A reflection across the glass.
+		ci.draw_colored_polygon(PackedVector2Array([case_r.position + Vector2(case_w * 0.62, 0), case_r.position + Vector2(case_w * 0.74, 0),
+			case_r.position + Vector2(case_w * 0.46, case_h), case_r.position + Vector2(case_w * 0.34, case_h)]), Color(1, 1, 1, 0.22))
 		ci.draw_rect(case_r, PopPalette.RED_DARK, false, maxf(2.0, h * 0.012))
 
 	# Roof.
 	var roof_h := h * 0.1
 	var roof := Rect2(base.x - w * 0.52, case_r.position.y - roof_h, w * 1.04, roof_h)
 	_round_rect(ci, roof, roof_h * 0.3, c.call(PopPalette.RED))
+	if not flat:
+		_outline(ci, roof, roof_h * 0.3, maxf(2.0, h * 0.008))
 	if st >= 1 and not flat:
 		ci.draw_rect(Rect2(roof.position.x, roof.position.y + roof_h * 0.35, roof.size.x, roof_h * 0.3), PopPalette.CREAM)
 	# Awning scallops (stage 1+): red and cream teeth under the roof.
@@ -169,6 +186,16 @@ static func round_rect_points(r: Rect2, radius: float) -> PackedVector2Array:
 	return pts
 
 
+## An ink outline around a rounded rectangle (one polyline, not antialiased:
+## a polyline per shape is one object, AGENTS.md 2026-11-02).
+static func _outline(ci: CanvasItem, r: Rect2, radius: float, width: float) -> void:
+	if minf(r.size.x, r.size.y) < 6.0:
+		return
+	var pts := round_rect_points(r, radius)
+	pts.append(pts[0])
+	ci.draw_polyline(pts, Color(PopPalette.INK, 0.75), width)
+
+
 static func ellipse(c: Vector2, radii: Vector2, n: int) -> PackedVector2Array:
 	var pts := PackedVector2Array()
 	for i in n:
@@ -196,6 +223,9 @@ static func draw_piece(ci: CanvasItem, p: Vector2, r: float, rot: float, col: Co
 
 
 static func draw_coin(ci: CanvasItem, p: Vector2, r: float) -> void:
+	if PopAtlas.has("coin"):
+		PopAtlas.draw(ci, "coin", p, r * 2.1)
+		return
 	ci.draw_circle(p, r, PopPalette.GOLD)
 	ci.draw_circle(p, r * 0.68, Color(1.0, 0.86, 0.38))
 	ci.draw_rect(Rect2(p.x - r * 0.12, p.y - r * 0.4, r * 0.24, r * 0.8), PopPalette.GOLD)

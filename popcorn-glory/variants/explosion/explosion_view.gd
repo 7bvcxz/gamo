@@ -35,6 +35,8 @@ func on_events(events: Array[Dictionary]) -> void:
 			"load":
 				_drops.append({"slot": int(d["loaded"]) - 1, "age": 0.0})
 				_squash = 0.4
+				# Each kernel a step higher: the chamber is audibly filling.
+				_sound("clink", 0.8 + 0.08 * float(d["loaded"]))
 			"erupt":
 				var n := int(d["count"])
 				_show_total = float(mini(n, VISUAL_MAX)) if not reduced_motion else 6.0
@@ -49,11 +51,13 @@ func on_events(events: Array[Dictionary]) -> void:
 				_show_drawn += first
 				for i in mini(12, 2 + n / 20):
 					fx.coin(machine_top() + Vector2(rng.randf_range(-80, 80), rng.randf_range(-40, 40)), s)
+				_sound("boom", 1.0 - 0.02 * mini(int(d["level"]), 10))
+				_sound("crackle")
 			"earn":
 				_gain(int(d.get("amount", 0)))
+				_sound("coin", 1.0, -4.0)
 			"upgrade":
-				_squash = 1.0
-				fx.burst(machine_top(), 18 if not reduced_motion else 2, machine_size() / 900.0, rng, PopPalette.GOLD)
+				_upgraded()
 
 
 ## Past the drawn maximum, pieces grow instead of multiplying.
@@ -105,8 +109,11 @@ func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 			for d: Dictionary in _drops:
 				if int(d["slot"]) == i:
 					drop_y = -size_px * 0.2 * (1.0 - float(d["age"]) / 0.25)
-			ci.draw_circle(p + Vector2(0, drop_y), r, Color(0.85, 0.55, 0.2))
-			ci.draw_circle(p + Vector2(-r * 0.3, drop_y - r * 0.3), r * 0.35, Color(1, 0.85, 0.5))
+			if PopAtlas.has("kernel"):
+				PopAtlas.draw(ci, "kernel", p + Vector2(0, drop_y), r * 2.6)
+			else:
+				ci.draw_circle(p + Vector2(0, drop_y), r, Color(0.85, 0.55, 0.2))
+				ci.draw_circle(p + Vector2(-r * 0.3, drop_y - r * 0.3), r * 0.35, Color(1, 0.85, 0.5))
 	if _boom > 0.0:
 		var c := machine_centre()
 		ci.draw_circle(c, size_px * (0.3 + 0.6 * (1.0 - _boom)), Color(1, 1, 0.85, 0.35 * _boom))

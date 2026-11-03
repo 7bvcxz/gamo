@@ -1,0 +1,79 @@
+{
+  "_doc": "Made by tools/build_atlas.gd from art_src/. Do not edit by hand.",
+  "size": [
+    256,
+    128
+  ],
+  "regions": {
+    "coin": {
+      "rect": [
+        2,
+        2,
+        58,
+        59
+      ],
+      "source": "coin.svg",
+      "sha": "a9e947328414b5f9"
+    },
+    "piece_a": {
+      "rect": [
+        64,
+        2,
+        51,
+        54
+      ],
+      "source": "piece_a.svg",
+      "sha": "bdd03518b34fc2dc"
+    },
+    "piece_b": {
+      "rect": [
+        119,
+        2,
+        54,
+        44
+      ],
+      "source": "piece_b.svg",
+      "sha": "e09b20c1b710b327"
+    },
+    "smoke": {
+      "rect": [
+        177,
+        2,
+        47,
+        44
+      ],
+      "source": "smoke.svg",
+      "sha": "1573481f6a0877c2"
+    },
+    "sparkle": {
+      "rect": [
+        2,
+        65,
+        44,
+        44
+      ],
+      "source": "sparkle.svg",
+      "sha": "3b3e7bc08cf2d5db"
+    },
+    "piece_c": {
+      "rect": [
+        50,
+        65,
+        46,
+        42
+      ],
+      "source": "piece_c.svg",
+      "sha": "824d6246269a9956"
+    },
+    "kernel": {
+      "rect": [
+        100,
+        65,
+        24,
+        37
+      ],
+      "source": "kernel.svg",
+      "sha": "0f747dc321beee0b"
+    }
+  }
+}

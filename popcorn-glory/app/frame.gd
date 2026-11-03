@@ -11,9 +11,11 @@ extends Control
 signal back_pressed
 signal restart_pressed
 signal buy_pressed
+signal sound_pressed
 
 var back_button := PopIconButton.new()
 var restart_button := PopIconButton.new()
+var sound_button := PopIconButton.new()
 var money_view := PopMoneyView.new()
 var upgrade_button := PopUpgradeButton.new()
 var play: PopPlayView
@@ -28,13 +30,21 @@ func _init() -> void:
 	restart_button.icon = "restart"
 	back_button.name = "Back"
 	restart_button.name = "Restart"
+	sound_button.name = "Sound"
+	sound_button.icon = "sound"
 	money_view.name = "Money"
 	upgrade_button.name = "Upgrade"
-	for c: Control in [money_view, upgrade_button, back_button, restart_button]:
+	for c: Control in [money_view, upgrade_button, back_button, restart_button, sound_button]:
 		add_child(c)
 	back_button.pressed.connect(func() -> void: back_pressed.emit())
 	restart_button.pressed.connect(func() -> void: restart_pressed.emit())
 	upgrade_button.pressed.connect(func() -> void: buy_pressed.emit())
+	sound_button.pressed.connect(func() -> void: sound_pressed.emit())
+
+
+func set_sound(on: bool) -> void:
+	sound_button.icon = "sound" if on else "mute"
+	sound_button.queue_redraw()
 
 
 func set_play(view: PopPlayView) -> void:
@@ -62,8 +72,10 @@ func _layout() -> void:
 	back_button.size = Vector2(84, 84)
 	restart_button.position = Vector2(x0 + col - 108, 28)
 	restart_button.size = Vector2(84, 84)
+	sound_button.position = Vector2(x0 + col - 200, 28)
+	sound_button.size = Vector2(84, 84)
 	money_view.position = Vector2(x0 + 120, 34)
-	money_view.size = Vector2(col - 240, 76)
+	money_view.size = Vector2(col - 330, 76)
 	var bh := clampf(h * 0.13, 120.0, 170.0)
 	upgrade_button.size = Vector2(minf(col - 80, 520.0), bh)
 	upgrade_button.position = Vector2((w - upgrade_button.size.x) / 2, h - bh - 48)

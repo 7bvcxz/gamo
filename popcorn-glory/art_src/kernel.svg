@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+  <!-- An unpopped kernel: a teardrop with a pale tip. Hand-written. -->
+  <path d="M16 3 C27 9 29 24 24 32 C20 38 12 38 8 32 C3 24 5 9 16 3z" fill="#d98e2b" stroke="#8a4d12" stroke-width="2"/>
+  <path d="M16 6 C22 11 23 19 21 24 C18 20 14 18 11 18 C11 12 13 8 16 6z" fill="#f2b552"/>
+  <path d="M10 31 C13 35 19 35 22 31 C19 33 13 33 10 31z" fill="#fff1cf"/>
+  <circle cx="13" cy="13" r="2" fill="#fff6dc"/>
+</svg>

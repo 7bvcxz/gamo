@@ -68,6 +68,7 @@ func query(name: String, arg: Variant) -> Variant:
 				"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
 				"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+				"static_mem": int(Performance.get_monitor(Performance.MEMORY_STATIC)),
 				"fps": Engine.get_frames_per_second()}
 	return null
 
