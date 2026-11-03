@@ -1,0 +1,10 @@
+ready 18681
+file:///home/merti/Workspace/gamo-windup/windup/tools/blind/server.mjs:71
+  fs.writeFileSync(path.join(OUT, 'game_events.jsonl'), events.map((e) => JSON.stringify(e)).join('\n') + '\n');
+                                                               ^
+
+TypeError: events.map is not a function
+    at finish (file:///home/merti/Workspace/gamo-windup/windup/tools/blind/server.mjs:71:64)
+    at async Server.<anonymous> (file:///home/merti/Workspace/gamo-windup/windup/tools/blind/server.mjs:88:5)
+
+Node.js v24.20.0

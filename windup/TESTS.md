@@ -13,6 +13,10 @@
 | `windup/tools/e2e.sh [spec] [--project desktop\|phone]` | 브라우저(로컬 `docs/` 또는 `WINDUP_E2E_BASE`). 실패하면 화면을 남긴다 | Playwright |
 | `windup/tools/verify.sh [--long]` | 위 전부를 차례로(--long은 3분 플레이·프로필·변형 비교 포함), 단계별 끝 코드 표 | 실패한 단계 수 |
 | `godot --headless --path windup --script res://tools/pace.gd -- --variant <v>` | 실제 규칙의 페이스 표(스크립트 플레이어 넷) | — |
+| `godot --headless --path windup --script res://tools/pacing_lab.gd -- [--variant v] [--seeds n] [--set json]` | 페이스 실험실: 프로필 6(+가설 2) × 시드, p10/p50/p90, 실패 모양 표시(`design/PACING.md`) | — |
+| `windup/tools/blind/run_session.sh <out> [url] [model]` | **블라인드 AI 플레이** 한 세션: 격리된 `claude -p`가 스크린샷만 보고 실제 마우스·키로 플레이, 영상·행동·게임 기록은 기록기가(`design/BLIND_PLAYTESTS.md`) | — |
+| `windup/tools/blind/isolation_check.sh <out.txt>` | 같은 플래그의 플레이어에게 저장소·홈·네트워크를 읽게 시켜 **전부 거부되는지** | 새면 1 |
+| `windup/tools/blind/selftest.sh` | AI 없이 기록기만: 응답에 스크린샷 경로·초 말고 아무것도 없는지, 행동·게임 기록·소리 있는 영상이 남는지 | 실패면 1 |
 
 시드와 시간: 규칙은 난수를 쓰지 않는다(시드는 기록용). 시간은 `GameClock.advance`/`Atelier.tick`으로만 흐르므로 테스트는 시계를 손으로 민다.
 브라우저의 FPS는 이 공용 머신의 부하에 흔들려 증거로만 남기고, 성능은 렌더 예산(≤150 호출, ≤420 객체)으로 검사한다.

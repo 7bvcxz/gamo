@@ -1,0 +1,89 @@
+{
+  "session": "session1",
+  "model": "claude-opus-5-5",
+  "build": "0.8.0+base",
+  "wall_seconds": 224.557,
+  "actions": 128,
+  "inputs": 119,
+  "first_input_wall_s": 12.437,
+  "first_key_input_wall_s": 12.437,
+  "first_wind_game_s": 11.545,
+  "first_doll_game_s": 99.89,
+  "second_doll_game_s": 155.091,
+  "first_help_game_s": 106.158,
+  "dolls_at": {
+    "30": 0,
+    "60": 0,
+    "180": 2
+  },
+  "dolls_end": 2,
+  "off_key_inputs": [
+    {
+      "wall": 25.808,
+      "cmd": "click",
+      "args": [
+        "490",
+        "290"
+      ]
+    },
+    {
+      "wall": 50.466,
+      "cmd": "click",
+      "args": [
+        "422",
+        "607"
+      ]
+    },
+    {
+      "wall": 164.028,
+      "cmd": "click",
+      "args": [
+        "876",
+        "610"
+      ]
+    },
+    {
+      "wall": 219.234,
+      "cmd": "click",
+      "args": [
+        "255",
+        "650"
+      ]
+    }
+  ],
+  "holds": 2,
+  "hints_shown": [
+    {
+      "t": 31.602,
+      "reason": "hold"
+    },
+    {
+      "t": 74.721,
+      "reason": "idle20"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 107.6,
+      "seconds": 8.1
+    },
+    {
+      "after_wall": 164.7,
+      "seconds": 6.2
+    },
+    {
+      "after_wall": 199.7,
+      "seconds": 6.1
+    }
+  ],
+  "played_past_180_s": true,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "## Summary\n\n**What I think the game is:** a cozy idle/incremental clicker set in a toymaker's workshop at night. You click a big brass wind-up key to earn spirals, the currency shown at the top. Spirals wake the sleeping wind-up dolls on the floor. Each awake doll walks over and helps wind the next sleeper, adds passive income and makes the workshop livelier. Waking dolls added small gears to the machine, lit a desk lamp and uncovered a red sewing machine.\n\n**What I understood:**\n- Each click on the key gives 1 spiral.\n- A thread runs from the key to the doll you're currently working toward, and a ring by that doll's own key fills as your spirals approach its price.\n- Clicking a full ring wakes the doll. The first cost about 50 and the second about 150, so prices seem to roughly triple.\n- Awake dolls earn spirals on their own, about 4–5 per second after the first one.\n\n**What confused me:**\n- I'm not sure what woke the first doll. It happened during a long hold on the key, but holding later did nothing. Most likely it woke automatically, or the hold registered as clicks after the ring had filled.\n- I never worked out the big ring that sometimes appeared around the gear. Its timing didn't match anything I saw.\n- The floating orb with a face followed my clicks around but didn't seem to do anything.\n- I didn't try the clock, the dress form, the icons at the top or the restart button.\n\n**Would I keep playing?** For a while, yes. It's charming, and it shows progress through the room changing instead of through menus, which made me curious what the next doll would unlock. Once passive income takes over, though, the click-wait-buy loop could get repetitive unless more mechanics show up later.",
+  "turns": 36,
+  "cost_usd": 0.4448359999999999
+}
