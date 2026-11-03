@@ -80,7 +80,7 @@ func show_route(id: String) -> void:
 	else:
 		host = LabHost.new()
 		host.name = "Host"
-		host.setup(id, version(), audio, bool(route["dev"]), reduced_motion, String(route["alt"]))
+		host.setup(id, version(), audio, bool(route["dev"]), reduced_motion, String(route["alt"]), bool(route["t15"]))
 		host.back_requested.connect(back)
 		_ui.add_child(host)
 
@@ -145,6 +145,7 @@ func state() -> Dictionary:
 		"route": host.exp_id if host != null else "",
 		"screen": "experiment" if host != null else "launcher",
 		"dev": bool(route["dev"]),
+		"t15": bool(route["t15"]),
 		"reduced_motion": reduced_motion,
 		"window": [_ui.size.x, _ui.size.y],
 		"tiles": launcher.rects() if launcher != null else {},

@@ -12,12 +12,17 @@ extends RefCounted
 ## including before the first one -- how long it took to start) and a copy
 ## of the summary taken when play time reaches three minutes -- and, for the
 ## C/E tracks' longer sessions (Step 94), at fifteen and thirty minutes too,
-## with the frame rate at that moment.
+## with the frame rate at that moment. Step 99 added the start, seven and
+## ten minutes (the 15-minute test's checkpoints), the experiment's own
+## picture at each (`probe`) and the spacing of meaningful rewards -- breaks
+## and upgrades in C, upgrades and eras in E.
 
 const THREE_MINUTES_MS := 180000
 const IDLE_MS := 5000
 ## The protocol's checkpoints (TRACKS.md): summary key -> play time.
-const MARKS: Dictionary = {"at_3min": 180000, "at_15min": 900000, "at_30min": 1800000}
+const MARKS: Dictionary = {"at_0min": 0, "at_3min": 180000, "at_7min": 420000, "at_10min": 600000, "at_15min": 900000, "at_30min": 1800000}
+## Milestones that are a reward in themselves (with every upgrade).
+const REWARD_MILESTONES: Array[String] = ["break", "era"]
 
 var experiment := ""
 var version := ""
@@ -39,6 +44,9 @@ var at_three: Dictionary = {}
 var at_marks: Dictionary = {}
 ## Actions in each minute of play: [minute 0, minute 1, ...].
 var per_minute: Array[int] = []
+## What the experiment looks like now, for the checkpoints (the host sets
+## it to the experiment's `probe()`; empty without one).
+var probe: Callable
 var pauses := 0
 
 var _last_action_ms := 0.0
@@ -58,6 +66,7 @@ func advance(dt_seconds: float) -> void:
 		if not at_marks.has(key) and active_ms >= float(MARKS[key]):
 			var snap := summary(false)
 			snap["fps"] = Engine.get_frames_per_second()
+			snap["probe"] = probe.call() if probe.is_valid() else {}
 			at_marks[key] = snap
 			if key == "at_3min":
 				at_three = snap
@@ -193,11 +202,40 @@ func summary(with_three: bool = true) -> Dictionary:
 		"longest_idle_s": _s(longest),
 		"metrics": metrics.duplicate(true),
 		"pauses": pauses,
+		"rewards": rewards(),
+		"visible_upgrades": upgrades.filter(func(u: Dictionary) -> bool: return String(u.get("show", "")) != "sparkle").size(),
 	}
 	if with_three:
 		for key: String in MARKS:
 			out[key] = (at_marks[key] as Dictionary).duplicate(true) if at_marks.has(key) else null
 	return out
+
+
+## Meaningful rewards so far (every upgrade, and breaks and eras): how many,
+## and the spacing between them in seconds -- the median and the longest,
+## the wait still open counting as the last.
+func rewards() -> Dictionary:
+	var times: Array[int] = []
+	for u: Dictionary in upgrades:
+		times.append(int(u["t_ms"]))
+	for m: Dictionary in milestones:
+		if String(m["name"]) in REWARD_MILESTONES:
+			times.append(int(m["t_ms"]))
+	times.sort()
+	var gaps: Array[int] = []
+	var prev := 0
+	for t: int in times:
+		gaps.append(t - prev)
+		prev = t
+	if int(active_ms) > prev:
+		gaps.append(int(active_ms) - prev)
+	var sorted := gaps.duplicate()
+	sorted.sort()
+	var median := 0.0
+	if not sorted.is_empty():
+		var n := sorted.size()
+		median = float(sorted[n / 2]) if n % 2 == 1 else (float(sorted[n / 2 - 1]) + float(sorted[n / 2])) * 0.5
+	return {"count": times.size(), "median_gap_s": _s(median), "longest_gap_s": _s(sorted.back() if not sorted.is_empty() else 0)}
 
 
 func to_json() -> String:

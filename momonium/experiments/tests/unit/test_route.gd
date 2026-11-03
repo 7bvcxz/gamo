@@ -35,6 +35,15 @@ func test_query_options() -> void:
 	assert_true(bool(LabRoute.parse("", "?dev")["dev"]), "a bare ?dev is on")
 
 
+func test_the_fifteen_minute_test() -> void:
+	# Step 99: ?t15=1 turns on the play-time bar and the local record.
+	assert_true(bool(LabRoute.parse("#rock", "?t15=1")["t15"]), "?t15=1")
+	assert_true(bool(LabRoute.parse("#rock", "?dev=1&t15=1")["t15"]), "with dev")
+	assert_false(bool(LabRoute.parse("#rock", "?t15=0")["t15"]), "?t15=0 is off")
+	assert_false(bool(LabRoute.parse("#rock", "")["t15"]), "off by default")
+	assert_true(bool(LabRoute.parse("", "", PackedStringArray(["--exp", "rock", "--t15"]))["t15"]), "--t15")
+
+
 func test_command_line() -> void:
 	var r := LabRoute.parse("", "", PackedStringArray(["--out", "/tmp/x.png", "--exp", "rock", "--dev", "--motion", "reduce", "--mute"]))
 	assert_eq(r["exp"], "rock", "--exp")

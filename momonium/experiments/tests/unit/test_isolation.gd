@@ -1,7 +1,9 @@
 extends "res://tests/framework/test_case.gd"
 
-## The Lab must never touch the game: not its saves or settings (it stores
-## nothing at all), not its project, not its published build.
+## The Lab must never touch the game: not its saves or settings, not its
+## project, not its published build. It stores one thing only: the 15-minute
+## test's own run record in this browser (Step 99, `?t15=1`, localStorage
+## `funlab.play15.runs.v1`, LabWeb.keep_run) -- and it sends nothing.
 
 const FORBIDDEN := ["momonium_save", "momonium_settings", "user://", "localStorage", "sessionStorage",
 	"indexedDB", "ConfigFile", "FileAccess.WRITE", "FileAccess.READ_WRITE", "DirAccess.make_dir", "save_png",
@@ -22,14 +24,22 @@ func test_its_own_name_so_its_own_user_folder() -> void:
 	assert_ne(name, "Momonium", "not the game's (that would be the game's user:// folder)")
 
 
-func test_the_lab_stores_and_sends_nothing() -> void:
+func test_the_lab_stores_only_its_own_test_record_and_sends_nothing() -> void:
 	var hits: Array[String] = []
 	for path: String in _sources("res://lab") + _sources("res://experiments"):
 		var text := FileAccess.get_file_as_string(path)
+		if path == "res://lab/web.gd":
+			# The one allowed store: keep_run's, under its own key.
+			text = text.replace("localStorage.getItem(K)", "").replace("localStorage.setItem(K,", "")
 		for word: String in FORBIDDEN:
 			if text.contains(word):
 				hits.append("%s: %s" % [path, word])
-	assert_eq(hits, [] as Array[String], "no storage, no network, no game save names")
+	assert_eq(hits, [] as Array[String], "no other storage, no network, no game save names")
+	var web := FileAccess.get_file_as_string("res://lab/web.gd")
+	assert_true(web.contains("const RUNS_KEY := \"funlab.play15.runs.v1\""), "the record's own key, not the game's")
+	assert_eq(web.count("localStorage"), 2, "read and written in one place")
+	var host := FileAccess.get_file_as_string("res://lab/host.gd")
+	assert_true(host.contains("if not t15 or session == null:\n\t\treturn"), "and only in the 15-minute test")
 
 
 func test_the_game_project_is_untouched() -> void:

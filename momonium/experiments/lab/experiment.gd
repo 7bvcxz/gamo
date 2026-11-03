@@ -51,6 +51,23 @@ func dev(_name: String, _arg: Variant) -> Variant:
 	return null
 
 
+## What the run's checkpoints keep of this experiment (LabSession.probe,
+## Step 99): the numbers of `state()` that say how far it has come -- coins,
+## level or pickaxe, breaks or deliveries, what is on the belt. Read from
+## state() so the frozen baselines need no change.
+const PROBE_KEYS: Array[String] = ["coins", "earned", "level", "name", "lanes", "delivered", "on_belt", "deliveries_per_min",
+	"pick", "damage", "rock", "breaks", "big_breaks", "taps", "hits", "misses", "damage_total", "tier"]
+
+
+func probe() -> Dictionary:
+	var st := state()
+	var out := {}
+	for k: String in PROBE_KEYS:
+		if st.has(k):
+			out[k] = st[k]
+	return out
+
+
 ## What the three-minute card asks (LabHost.INTENT_AT_MS).
 func intent_question() -> String:
 	return "Keep playing?"

@@ -49,6 +49,22 @@ static func reduced_motion() -> bool:
 	return v != null and bool(v)
 
 
+## Keeps a 15-minute test run's checkpoints in this browser (Step 99): the
+## page's local storage under RUNS_KEY, a list play15.html reads, the run
+## replacing its own earlier copy (`key`), the newest RUNS_KEPT kept. Only
+## this browser ever sees it. False off the web or if storage is refused.
+const RUNS_KEY := "funlab.play15.runs.v1"
+const RUNS_KEPT := 40
+
+
+static func keep_run(record: Dictionary) -> bool:
+	if not available():
+		return false
+	var js := "(function(r){try{var K=%s;var a=JSON.parse(localStorage.getItem(K)||'[]');if(!Array.isArray(a))a=[];a=a.filter(function(x){return x&&x.key!==r.key});a.push(r);while(a.length>%d)a.shift();localStorage.setItem(K,JSON.stringify(a));return true}catch(e){return false}})(%s)" % [JSON.stringify(RUNS_KEY), RUNS_KEPT, JSON.stringify(record)]
+	var v: Variant = eval(js)
+	return v != null and bool(v)
+
+
 ## Offers `text` to the player as a file download.
 static func download(text: String, file_name: String, mime: String) -> void:
 	if not available():

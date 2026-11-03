@@ -88,6 +88,50 @@ func test_fifteen_and_thirty_minute_snapshots() -> void:
 	assert_eq(s.summary()["at_15min"]["metrics"]["rock"], 12, "each kept as it was")
 
 
+func test_the_fifteen_minute_checkpoints_and_probe() -> void:
+	# Step 99: the 15-minute test's checkpoints (0, 3, 7, 10, 15 minutes),
+	# each with the experiment's own picture then.
+	var s := LabSession.new("tycoon")
+	var level := [0]
+	s.probe = func() -> Dictionary: return {"level": level[0]}
+	s.advance(0.05)
+	assert_true(s.at_marks.has("at_0min"), "the start")
+	assert_eq(s.at_marks["at_0min"]["probe"], {"level": 0}, "with the probe then")
+	for m: int in [3, 7, 10, 15]:
+		level[0] = m
+		while s.active_ms < float(m) * 60000.0:
+			s.advance(1.0)
+		var key := "at_%dmin" % m
+		assert_true(s.at_marks.has(key), key)
+		assert_eq(s.at_marks[key]["probe"]["level"], m, "%s keeps the probe then" % key)
+	assert_eq(s.summary()["at_7min"]["probe"]["level"], 7, "frozen: 7 stays 7")
+
+
+func test_reward_spacing() -> void:
+	# Meaningful rewards: every upgrade, and breaks and eras -- the median
+	# and the longest wait between them, the one still open counting.
+	var s := LabSession.new("rock")
+	s.advance(10.0)
+	s.milestone("break")
+	s.advance(10.0)
+	s.upgrade(1, 5)
+	s.advance(10.0)
+	s.milestone("chunk")
+	s.advance(30.0)
+	s.milestone("break")
+	s.advance(40.0)
+	var r := s.rewards()
+	assert_eq(int(r["count"]), 3, "two breaks and an upgrade (a chunk is not counted)")
+	# Gaps: 10, 10, 40, and 40 still open.
+	assert_eq(float(r["median_gap_s"]), 25.0, "median of 10, 10, 40, 40")
+	assert_eq(float(r["longest_gap_s"]), 40.0, "longest")
+	assert_eq(s.summary()["rewards"], r, "in the summary")
+	var e := LabSession.new("tycoon")
+	e.upgrade(1, 12, {"show": "hopper"})
+	e.upgrade(2, 24, {"show": "sparkle"})
+	assert_eq(e.summary()["visible_upgrades"], 1, "E's sparkle-only Golden Line is not a visible upgrade")
+
+
 func test_actions_per_minute_and_the_longest_wait() -> void:
 	var s := LabSession.new("rock", "", 0.0)
 	s.variant = "hold"

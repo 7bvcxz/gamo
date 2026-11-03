@@ -40,6 +40,23 @@ var intent_buttons: Dictionary = {}
 var _intent_at := -1.0
 var _intent_done := false
 
+## The 15-minute test (`?t15=1`, Step 99): a thin bar along the top fills
+## with play time and lights notches at 3 and 15 minutes, a short note says
+## each, and the run's checkpoints (LabSession.MARKS) are kept in this
+## browser for play15.html (LabWeb.keep_run) as each is reached and when the
+## run ends. It never stops the play.
+const T15_MS := 900000.0
+const T15_NOTES: Dictionary = {180000: "3 minutes", 900000: "15 minutes - rate it on the test page"}
+const T15_NOTE_SECONDS := 4.0
+var t15 := false
+var t15_bar: Control
+var t15_note: Label
+## Records written (tests read it; on the web each also went to the browser).
+var t15_saves := 0
+var _t15_noted: Dictionary = {}
+var _t15_marks := -1
+var _t15_note_left := 0.0
+
 ## Play seconds a real second (dev hook `dev_time_scale`): 0 leaves the clock
 ## to explicit steps, so a test can tap at an exact rate of play time.
 var time_scale := 1.0
@@ -71,8 +88,9 @@ var _shown_value := -1.0
 var _last_info: Dictionary = {}
 
 
-func setup(p_id: String, p_version: String, p_audio: LabAudio, p_dev: bool, p_reduced: bool, p_alt: String = "") -> void:
+func setup(p_id: String, p_version: String, p_audio: LabAudio, p_dev: bool, p_reduced: bool, p_alt: String = "", p_t15: bool = false) -> void:
 	exp_id = p_id
+	t15 = p_t15
 	alt = p_alt
 	version = p_version
 	audio = p_audio
@@ -94,6 +112,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	_t15_keep()
 	if get_tree() != null:
 		get_tree().paused = false
 
@@ -116,6 +135,9 @@ func start() -> void:
 	experiment.reduced_motion = reduced_motion
 	experiment.variant = alt
 	experiment.set_meta("lab_id", exp_id)
+	session.probe = experiment.probe
+	_t15_noted = {}
+	_t15_marks = -1
 	experiment.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fx = LabFx.new()
 	fx.name = "Fx"
@@ -133,6 +155,7 @@ func start() -> void:
 
 ## Throws the run away and starts again from nothing.
 func restart() -> void:
+	_t15_keep()
 	finished.append(session.summary())
 	for c: Node in stage.get_children():
 		stage.remove_child(c)
@@ -152,6 +175,7 @@ func step(dt: float) -> void:
 		experiment.tick(d)
 		left -= d
 	_check_intent()
+	_t15_check()
 
 
 func _check_intent() -> void:
@@ -180,6 +204,9 @@ func answer_intent(answer: String) -> void:
 
 
 func _process(delta: float) -> void:
+	if _t15_note_left > 0.0:
+		_t15_note_left -= delta
+		t15_note.visible = _t15_note_left > 0.0
 	if is_paused() or experiment == null:
 		return
 	if time_scale > 0.0:
@@ -342,9 +369,73 @@ func _build_chrome() -> void:
 	report_button.pressed.connect(toggle_report)
 	chrome.add_child(report_button)
 
+	_build_t15()
 	_build_intent()
 	_build_pause()
 	_build_report()
+
+
+func _build_t15() -> void:
+	t15_bar = _T15Bar.new()
+	t15_bar.name = "T15"
+	t15_bar.host = self
+	t15_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	place(t15_bar, Control.PRESET_TOP_WIDE, Rect2(24, 2, -48, 20))
+	t15_bar.visible = t15
+	chrome.add_child(t15_bar)
+	t15_note = LabStyle.label("", 30, Color.WHITE, 8)
+	t15_note.name = "T15Note"
+	t15_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	place(t15_note, Control.PRESET_CENTER_TOP, Rect2(-300, 252, 600, 44))
+	t15_note.visible = false
+	t15_note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chrome.add_child(t15_note)
+
+
+## A notch passed: say it; a checkpoint reached: keep the record.
+func _t15_check() -> void:
+	if not t15:
+		return
+	for at: int in T15_NOTES:
+		if not _t15_noted.has(at) and session.active_ms >= float(at):
+			_t15_noted[at] = true
+			t15_note.text = String(T15_NOTES[at])
+			t15_note.visible = true
+			_t15_note_left = T15_NOTE_SECONDS
+			if audio != null:
+				audio.play("promote", 1.0, -6.0)
+	if session.at_marks.size() != _t15_marks:
+		_t15_marks = session.at_marks.size()
+		_t15_keep()
+	t15_bar.queue_redraw()
+
+
+## This run's 15-minute test record: its checkpoints, compact, and how it
+## stands now.
+func t15_record() -> Dictionary:
+	var at := {}
+	for key: String in session.at_marks:
+		at[key.trim_prefix("at_").trim_suffix("min")] = _compact(session.at_marks[key])
+	var now := session.summary(false)
+	now["fps"] = Engine.get_frames_per_second()
+	now["probe"] = experiment.probe() if experiment != null else {}
+	return {"key": "%s|%d|%d" % [exp_id, int(session.started_unix), session.run], "id": exp_id, "base": LabRegistry.base_of(exp_id),
+		"alt": alt, "run": session.run, "version": version, "started": now["started"], "at": at, "now": _compact(now)}
+
+
+static func _compact(snap: Dictionary) -> Dictionary:
+	var idle: Array = snap["idle_intervals"]
+	return {"active_s": snap["active_seconds"], "actions": snap["actions"], "actions_per_minute": snap["actions_per_minute"],
+		"upgrades": (snap["upgrades"] as Array).size(), "visible_upgrades": snap["visible_upgrades"], "rewards": snap["rewards"],
+		"idle_count": idle.size(), "idle_s": snap["idle_seconds"], "longest_idle_s": snap["longest_idle_s"],
+		"fps": snappedf(float(snap.get("fps", 0.0)), 0.1), "probe": snap.get("probe", {})}
+
+
+func _t15_keep() -> void:
+	if not t15 or session == null:
+		return
+	t15_saves += 1
+	LabWeb.keep_run(t15_record())
 
 
 func _build_intent() -> void:
@@ -556,4 +647,28 @@ func state() -> Dictionary:
 		"muted": audio.muted if audio != null else false,
 		"reduced_motion": reduced_motion,
 		"rects": rects(),
+		"t15": {"on": t15, "saves": t15_saves, "note": t15_note.text if t15_note != null and t15_note.visible else ""},
 	}
+
+
+## The 15-minute bar: play time filling a thin track, notches at 3 and 15
+## minutes that turn green once passed, the time at its left end.
+class _T15Bar extends Control:
+	var host: LabHost
+
+	func _draw() -> void:
+		var ms := host.session.active_ms if host.session != null else 0.0
+		var r := Rect2(Vector2.ZERO, size)
+		draw_rect(r, Color(0.05, 0.1, 0.16, 0.45))
+		draw_rect(Rect2(r.position, Vector2(r.size.x * clampf(ms / T15_MS, 0.0, 1.0), r.size.y)), Color("#7ed957") if ms >= T15_MS else Color("#ffe27a"))
+		var font := ThemeDB.fallback_font
+		for at: int in T15_NOTES:
+			var x := r.size.x * float(at) / T15_MS
+			var passed := ms >= float(at)
+			draw_rect(Rect2(x - 3.0, -2.0, 6.0, r.size.y + 4.0), Color("#3fae49") if passed else Color.WHITE)
+			var tag := "%d" % (at / 60000)
+			draw_string_outline(font, Vector2(x - 26.0, r.size.y - 4.0), tag, HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 15, 4, Color(0.05, 0.1, 0.16))
+			draw_string(font, Vector2(x - 26.0, r.size.y - 4.0), tag, HORIZONTAL_ALIGNMENT_RIGHT, 20.0, 15, Color.WHITE)
+		var clock := LabHost._clock(ms / 1000.0)
+		draw_string_outline(font, Vector2(6.0, r.size.y - 4.0), clock, HORIZONTAL_ALIGNMENT_LEFT, 64.0, 15, 4, Color(0.05, 0.1, 0.16))
+		draw_string(font, Vector2(6.0, r.size.y - 4.0), clock, HORIZONTAL_ALIGNMENT_LEFT, 64.0, 15, Color.WHITE)
