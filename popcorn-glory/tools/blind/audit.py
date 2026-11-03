@@ -59,10 +59,18 @@ def audit(run, path):
         except ValueError:
             flagged.append("unparseable: " + cmd[:160])
             continue
-        out, skip, after_pipe, standalone = [], False, False, False
+        out, skip, after_pipe, standalone, filter_args, filter_files = [], False, False, False, False, []
         for t in toks:
             if skip:
                 skip = False
+                continue
+            if t in ("|", ";", "&&", "||"):
+                filter_args = False
+            elif filter_args:
+                # A piped filter's own pattern and flags (`grep -v screenshot`):
+                # not programs; a path here would be a file read.
+                if "/" in t:
+                    filter_files.append(t)
                 continue
             if t == "note":
                 skip = True
@@ -70,6 +78,7 @@ def audit(run, path):
             if t in FILTERS:
                 if after_pipe:
                     filters.add(t)
+                    filter_args = True
                 else:
                     standalone = True  # `tail somefile` reads a file
             after_pipe = t == "|"
@@ -79,9 +88,10 @@ def audit(run, path):
         paths = [re.sub(r"^\d?>>?|^&>", "", t.split("=", 1)[-1]) for t in out if "/" in t]
         paths = [p for p in paths if p and p != "/dev/null"]
         paths = [p for p in paths if not own.search(p)]
-        files_to_filters = [t for i, t in enumerate(out) if i > 0 and out[i - 1] in FILTERS and "/" in t]
+        files_to_filters = filter_files
         if progs or paths or files_to_filters or standalone:
-            flagged.append(cmd[:200].replace("\n", " "))
+            why = sorted(progs) + paths + files_to_filters + (["filter on a file"] if standalone else [])
+            flagged.append("%s  <- %s" % (cmd[:160].replace("\n", " "), why))
     return counts, flagged, filters
 
 

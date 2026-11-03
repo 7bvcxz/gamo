@@ -4,11 +4,17 @@ extends RefCounted
 ## Active play time: it moves only while the game is visible and running.
 ##
 ## A frame never counts for more than MAX_STEP seconds, so the first frame
-## after a hidden tab (the browser stops drawing it) or a stall does not pour
-## minutes into the run at once. Pauses have reasons ("hidden", "dev") so one
-## cause ending does not unpause another.
+## after a hidden tab (the browser stops drawing it) does not pour minutes into
+## the run at once. Pauses have reasons ("hidden", "dev") so one cause ending
+## does not unpause another.
+##
+## 1 s, not 0.25 s (Step 09): a hidden tab is already paused by "hidden", so the
+## cap mostly met hitches -- and a hitch while B's finger was down vanished from
+## the heat. A blind player held 1.98 s and was judged 1.16 s ("early"), right
+## after an upgrade: "it felt like being punished for upgrading".
+## tests/e2e/specs/stall09.spec.mjs blocks the page for 0.8 s during a hold.
 
-const MAX_STEP := 0.25
+const MAX_STEP := 1.0
 
 var now_ms: int = 0
 var _ms_f: float = 0.0

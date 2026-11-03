@@ -15,7 +15,8 @@ func test_frames_add_whole_milliseconds_without_drift() -> void:
 
 func test_a_long_frame_counts_for_a_quarter_second() -> void:
 	var c := PopClock.new()
-	assert_eq(c.step(30.0), 250, "a 30 s gap (a hidden tab's first frame) is 250 ms")
+	assert_eq(c.step(30.0), 1000, "a 30 s gap (a hidden tab's first frame) is 1 s")
+	assert_eq(c.step(0.8), 800, "a 0.8 s hitch counts in full (B's heat follows the finger)")
 
 
 func test_pauses_have_reasons() -> void:
