@@ -232,7 +232,7 @@ func wind(source: String) -> void:
 
 func _on_awakening(i: int) -> void:
 	view.on_awakening(i)
-	hud.spend(balance.costs[i], balance.awaken_seconds)
+	hud.spend(balance.costs[i], maxf(AtelierView.SPEND_MIN_SECONDS, balance.awaken_seconds))
 	sfx.chime()
 	telemetry.emit("doll_awake", {"index": i, "cost": balance.costs[i],
 		"energy_rate": snappedf(atelier.auto_rate(), 0.001), "awake_before": atelier.awake})

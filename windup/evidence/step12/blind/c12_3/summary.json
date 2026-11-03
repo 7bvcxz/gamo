@@ -1,0 +1,85 @@
+{
+  "session": "c12_3",
+  "model": "claude-opus-5-5",
+  "build": "0.12.0+c",
+  "wall_seconds": 189.021,
+  "actions": 55,
+  "inputs": 49,
+  "first_input_wall_s": 9.079,
+  "first_key_input_wall_s": 9.079,
+  "first_wind_game_s": 10.796,
+  "first_doll_game_s": 45.266,
+  "second_doll_game_s": 79.862,
+  "first_help_game_s": 51.255,
+  "dolls_at": {
+    "30": 0,
+    "60": 1,
+    "180": 4
+  },
+  "dolls_end": 4,
+  "off_key_inputs": [
+    {
+      "wall": 21.54,
+      "cmd": "click",
+      "args": [
+        "450",
+        "600"
+      ]
+    },
+    {
+      "wall": 25.582,
+      "cmd": "click",
+      "args": [
+        "422",
+        "605"
+      ]
+    },
+    {
+      "wall": 102.902,
+      "cmd": "click",
+      "args": [
+        "410",
+        "380"
+      ]
+    },
+    {
+      "wall": 106.455,
+      "cmd": "click",
+      "args": [
+        "490",
+        "290"
+      ]
+    }
+  ],
+  "holds": 9,
+  "hints_shown": [
+    {
+      "t": 30.817,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 3.8,
+      "seconds": 5.3
+    },
+    {
+      "after_wall": 46,
+      "seconds": 5.2
+    },
+    {
+      "after_wall": 16.8,
+      "seconds": 4.7
+    }
+  ],
+  "played_past_180_s": false,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes 9 seconds, woke 4 of the 15 dolls, and ended with 435 spirals.\n\n**What I think the game is:** a calm incremental/idle game set in a moonlit tailor's workshop. You turn a big brass wind-up key to earn \"spirals.\" A glowing thread links the key to one sleeping wind-up doll at a time. Once enough winding goes down the thread, that doll wakes up. Woken dolls earn spirals passively and walk over to help wind the next doll. Each wake also restores part of the room: a desk lamp, a red sewing machine, more gears around the key, and finally a finished tailcoat on the mannequin.\n\n**What I understood:**\n- Each click earns 1 spiral. Holding the key winds continuously and is much faster.\n- The spiral count drops when a doll wakes (36 → 33, 124 → 70, 215 → 83), so waking a doll seems to cost spirals automatically.\n- Income grows with each doll you wake, and each wake appears to cost more than the last.\n\n**What confused me:**\n- I never found a way to choose what to spend spirals on. Spending seemed automatic, so I'm not sure whether spirals have any other use.\n- Clicking the sleeping dolls, their keys, the sewing machine and the floating wisp did nothing I could see.\n- The grandfather clock moves forward as you progress, which may be a timer or a night-long goal, but I couldn't tell.\n- The hand pointing at the key appeared late (about 40 seconds in), after I'd already been clicking.\n\n**Would I keep playing?** For a while, yes. It's charming: watching the dolls wake up one by one and the workshop come back to life is a satisfying reward, and the art is lovely. But the only real input I found was \"hold the key.\" Unless more choices open up later, such as upgrades or a reason to pick which doll to wake, I'd probably let it run in the background rather than play it actively.",
+  "turns": 38,
+  "cost_usd": 0.4123924000000001
+}

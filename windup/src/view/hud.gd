@@ -122,6 +122,9 @@ func _draw_hud() -> void:
 		c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(1.0, 0.85, 0.55, 0.14 * flash))
 	var font := ThemeDB.fallback_font
 	var text := str(int(floorf(shown())))
+	# While a price is leaving, the number glows warm (a state you can see in a still picture).
+	if _pending > 0.5:
+		c.draw_rect(Rect2(c.size.x * 0.5 - 70.0, 14.0, 140.0, 56.0), Color(1.0, 0.6, 0.25, 0.28))
 	var size := 34
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	var centre := Vector2(c.size.x * 0.5, 44.0)

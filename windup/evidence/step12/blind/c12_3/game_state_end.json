@@ -1,0 +1,48 @@
+{
+  "art": true,
+  "auto_energy": 694.469,
+  "awake": 4,
+  "build_id": "0.12.0+c",
+  "config": {
+    "dev": false,
+    "fresh": true,
+    "seed": 1,
+    "smoke": false,
+    "variant": "c"
+  },
+  "counter_shown": 453.719,
+  "doll": "stand",
+  "energy": 453.719,
+  "events": 458,
+  "fill": 0.709,
+  "fps": 35,
+  "gears": 4,
+  "hint": false,
+  "hold_hint": false,
+  "inputs": 45,
+  "key_angle": 662.876,
+  "manual_energy": 669.25,
+  "music_notes": 189,
+  "pause_reasons": [],
+  "paused": false,
+  "rate": 7.3,
+  "session": 1,
+  "settings": {
+    "reduced_motion": false,
+    "volume": 1
+  },
+  "sounds": {
+    "chime": 4,
+    "chirp": 4,
+    "ping": 4,
+    "tick": 422
+  },
+  "spends_in_flight": 0,
+  "spring": 0,
+  "stage": 3,
+  "t": 190.7,
+  "target": 4,
+  "version": "0.12.0",
+  "waking": -1,
+  "winds": 422
+}

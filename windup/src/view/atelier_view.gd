@@ -68,6 +68,14 @@ const C_MOON := Color(0.78, 0.84, 0.95)
 const C_BRASS := Color(0.85, 0.64, 0.25)
 const C_BRASS_DARK := Color(0.55, 0.38, 0.14)
 const C_SPIRIT := Color(1.0, 0.92, 0.66)
+## A price takes at least this long to leave the number and reach its doll
+## (0.12.0 used the awakening's length -- 0.9 s in C -- and 2-3 of 3 blind
+## players still saw "the counter dropped suddenly").
+const SPEND_MIN_SECONDS := 2.2
+## How long a touched sleeper stirs / the touched spirit's trip to the key lasts
+## (0.12.0: 0.7 s and a 4-degree wiggle; all 3 blind players wrote "did nothing").
+const STIR_SECONDS := 1.6
+const SPIRIT_TRIP_SECONDS := 1.6
 const C_DOLL := Color(0.24, 0.2, 0.22)
 
 var key_angle: float = 0.0
@@ -335,7 +343,7 @@ func gears_shown() -> int:
 func on_awakening(i: int) -> void:
 	# Its price flows out of the number, down to the key and along the thread
 	# into this doll, for as long as the number takes to drain (Step 12).
-	_spends.append([i, 0.0, maxf(0.6, atelier.b.awaken_seconds if atelier != null else 1.0)])
+	_spends.append([i, 0.0, maxf(SPEND_MIN_SECONDS, atelier.b.awaken_seconds if atelier != null else 1.0)])
 	if i < dolls.size():
 		dolls[i].start_wake()
 		dolls[i].rotation = 0.0
@@ -512,10 +520,10 @@ func _advance_life(dt: float) -> void:
 		pk[1] = float(pk[1]) + dt / 0.8
 	_pokes = _pokes.filter(func(pk: Array) -> bool: return float(pk[1]) < 1.0)
 	for k: int in _stir.keys():
-		_stir[k] = float(_stir[k]) - dt / 0.7
+		_stir[k] = float(_stir[k]) - dt / STIR_SECONDS
 		if float(_stir[k]) <= 0.0:
 			_stir.erase(k)
-	_spirit_poke = maxf(0.0, _spirit_poke - dt / 0.8)
+	_spirit_poke = maxf(0.0, _spirit_poke - dt / SPIRIT_TRIP_SECONDS)
 	_clock_hand = lerp_angle(_clock_hand, _hand_for(atelier.awake), 1.0 - exp(-dt * 2.0))
 	_dust = move_toward(_dust, _dust_for(atelier.awake), dt * 0.3)
 
@@ -550,11 +558,11 @@ func _anticipate() -> void:
 		if i == tgt and atelier.waking < 0 and d.pose_name == "asleep":
 			var f := atelier.target_fill()
 			var k := clampf((f - 0.55) / 0.45, 0.0, 1.0)
-			d.rotation = sin(_anim * 38.0) * 0.035 * k + sin(_anim * 24.0) * 0.07 * stir
-			d.flutter = maxf(clampf((f - 0.8) / 0.2, 0.0, 1.0), stir)
+			d.rotation = sin(_anim * 38.0) * 0.035 * k + _stir_tilt(stir)
+			d.flutter = maxf(clampf((f - 0.8) / 0.2, 0.0, 1.0), minf(1.0, stir * 2.0))
 		elif d.pose_name == "asleep":
-			d.rotation = sin(_anim * 24.0) * 0.07 * stir
-			d.flutter = stir
+			d.rotation = _stir_tilt(stir)
+			d.flutter = minf(1.0, stir * 2.0)
 
 
 ## Where helper k stands for target doll `tgt` (design coordinates): behind
@@ -656,6 +664,15 @@ func poke(p: Vector2) -> void:
 	else:
 		dolls[best].play_quirk("look", 0.8)
 	poked.emit("doll", best, st)
+
+
+## A touched sleeper half-rises (tilts up towards the key) and settles back,
+## with a shiver while it is up: big enough to see in a still picture.
+func _stir_tilt(stir: float) -> float:
+	if stir <= 0.0:
+		return 0.0
+	var up := sin(PI * clampf(stir, 0.0, 1.0))
+	return -0.28 * up + sin(_anim * 22.0) * 0.05 * up
 
 
 func spends_in_flight() -> int:
@@ -960,7 +977,10 @@ func _draw_fx() -> void:
 		_fx.draw_circle(c, 30.0 * (1.0 - t), Color(1.0, 0.9, 0.6, 0.25 * (1.0 - t)))
 	var s := _spirit_home(k)
 	if _spirit_poke > 0.0:
-		s = s.lerp(k + Vector2(-24, -70), sin(PI * (1.0 - _spirit_poke)))
+		# To the key, once round it, and back.
+		var trip := 1.0 - _spirit_poke
+		var round_key := k + Vector2.from_angle(-PI / 2.0 + TAU * clampf((trip - 0.3) / 0.4, 0.0, 1.0)) * 70.0
+		s = s.lerp(round_key, sin(PI * trip))
 	if hold_hint:
 		# Without words (Step 10): a hand presses the key and STAYS down while a
 		# small ring fills round its fingertip -- the long-press glyph -- then
