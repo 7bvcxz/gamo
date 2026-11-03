@@ -11,8 +11,9 @@
   },
   "c": {
     "_why": "C - dolls wake dolls: an awakening is short and, when it ends, the new doll at once turns the next sleeper's key (an instant kick of its rate x kick_seconds), so awakenings run into each other like dominoes.",
+    "_step12": "Owner-approved candidate (2026-11-03). Tuned by the pacing lab against criteria written before measuring (design/EXPANSION_PROPOSAL.md): first doll 55 -> 40 so a casual player meets it in ~19 s; the x1.25 rate bonus removed so an engaged player does not wake all twelve before 10 minutes and clicking still matters there (x1.4). The kick stays. The tournament's C (x1.25, 55) is frozen in docs/windup/ref/step11/.",
     "awaken_seconds": 0.9,
     "kick_seconds": 10.0,
-    "dolls_rate_scale": 1.25
+    "first_cost": 40
   }
 }

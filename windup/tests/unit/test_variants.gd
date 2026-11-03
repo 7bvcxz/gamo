@@ -15,9 +15,15 @@ func test_overrides_come_from_data_and_base_is_untouched() -> void:
 	var c := Balance.load_variant("c")
 	assert_eq(c.kick_seconds, 10.0, "C: the kick")
 	assert_eq(c.awaken_seconds, 0.9, "C: a short awakening")
-	assert_near(c.rates[0], base.rates[0] * 1.25, 1e-9, "C: dolls work harder")
-	for v: Balance in [a, b, c]:
+	# Step 12 (owner-approved candidate): C's own first price, no rate bonus;
+	# every other doll's price is the base's. The tournament's C is frozen in
+	# docs/windup/ref/step11/ (x1.25, 55).
+	assert_eq(Array(c.rates), Array(base.rates), "C: base rates (the x1.25 bonus removed in Step 12)")
+	assert_eq(c.costs[0], 40.0, "C: first doll 40")
+	assert_eq(Array(c.costs).slice(1), Array(base.costs).slice(1), "C: the rest at base prices")
+	for v: Balance in [a, b]:
 		assert_eq(Array(v.costs), Array(base.costs), "%s keeps the base costs" % v.variant)
+	for v: Balance in [a, b, c]:
 		assert_eq(v.problems(), [] as Array[String], "%s data usable" % v.variant)
 
 

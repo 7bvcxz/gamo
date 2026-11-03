@@ -63,6 +63,9 @@ func _ready() -> void:
 	add_child(view)
 	view.key_pressed.connect(press)
 	view.key_released.connect(release.bind("click"))
+	# Step 12: what a click away from the key touched (a reaction, never energy).
+	view.poked.connect(func(target: String, index: int, state: String) -> void:
+		telemetry.emit("poke", {"target": target, "index": index, "state": state}))
 	hud = Hud.new()
 	add_child(hud)
 	hud.restart_requested.connect(func() -> void:
@@ -155,6 +158,7 @@ func new_game(seed: int, saved: Dictionary = {}) -> void:
 	view.bind(atelier)
 	view.set_variant(config.variant)
 	view.reset()
+	hud.clear_spend()
 	hud.set_energy(atelier.energy)
 	telemetry.emit("session_start", {"variant": config.variant, "build": version(), "build_id": build_id(), "seed": seed,
 		"session": session, "resumed": not saved.is_empty(), "dolls": atelier.awake})
@@ -228,6 +232,7 @@ func wind(source: String) -> void:
 
 func _on_awakening(i: int) -> void:
 	view.on_awakening(i)
+	hud.spend(balance.costs[i], balance.awaken_seconds)
 	sfx.chime()
 	telemetry.emit("doll_awake", {"index": i, "cost": balance.costs[i],
 		"energy_rate": snappedf(atelier.auto_rate(), 0.001), "awake_before": atelier.awake})
@@ -256,6 +261,7 @@ func advance(seconds: float) -> void:
 
 
 func _step(dt: float) -> void:
+	hud.step(dt)
 	# Holding: after the delay, one turn per 1/hold_rate seconds.
 	for i in input.advance(dt):
 		wind("hold")
@@ -370,6 +376,8 @@ func state() -> Dictionary:
 		"rate": snappedf(atelier.auto_rate(), 0.001),
 		"hint": view.hint,
 		"hold_hint": view.hold_hint,
+		"counter_shown": snappedf(hud.shown(), 0.001),
+		"spends_in_flight": view.spends_in_flight(),
 		"sounds": sfx.played.duplicate(),
 		"music_notes": music.notes_played,
 		"gears": view.gears_shown(),

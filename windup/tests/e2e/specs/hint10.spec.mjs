@@ -58,7 +58,7 @@ test('a slow clicker is shown a long press on the key', async ({ page }, info) =
   if (process.env.WINDUP_EVIDENCE) {
     const dir = path.join(path.dirname(new URL(import.meta.url).pathname), '../../../evidence', process.env.WINDUP_EVIDENCE_STEP || 'step10');
     fs.mkdirSync(dir, { recursive: true });
-    await page.screenshot({ path: path.join(dir, 'hold_hint_0.10.0.png') });
+    await page.screenshot({ path: path.join(dir, `hold_hint_${(await state(page)).build_id}.png`) });
   }
   // Holding the key clears it.
   await page.mouse.move(k.x, k.y);

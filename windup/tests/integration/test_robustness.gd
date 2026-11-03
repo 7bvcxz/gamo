@@ -126,3 +126,53 @@ func test_a_slow_clicker_is_shown_holding_once() -> void:
 	assert_false(m.view.hold_hint, "holding the key clears it")
 	m.queue_free()
 	await tree.process_frame
+
+
+func test_a_price_drains_out_of_the_number_into_the_doll() -> void:
+	# Step 12: the number does not drop in one frame when a doll starts waking;
+	# it drains over the awakening while the price flows to that doll.
+	var m := _start({"fresh": "1"})
+	await tree.process_frame
+	m.set_process(false)
+	m.press("key")
+	var guard := 0
+	while m.atelier.waking < 0 and m.atelier.awake == 0 and guard < 6000:
+		m.advance(1.0 / 60.0)
+		guard += 1
+	m.release("key")
+	assert_true(m.atelier.waking == 0, "the first doll started waking")
+	var before := m.hud.shown()
+	assert_true(before > m.atelier.energy + 10.0, "right after: the number still shows most of the price (%.1f vs %.1f)" % [before, m.atelier.energy])
+	assert_eq(m.view.spends_in_flight(), 1, "its price is on its way to the doll")
+	m.hud.step(m.balance.awaken_seconds * 0.5)
+	var mid := m.hud.shown()
+	assert_true(mid < before and mid > m.atelier.energy, "half way: draining (%.1f)" % mid)
+	m.hud.step(m.balance.awaken_seconds)
+	assert_near(m.hud.shown(), m.atelier.energy, 0.001, "then it shows what is left")
+	m.advance(2.0)
+	assert_eq(m.view.spends_in_flight(), 0, "the light has arrived")
+	assert_near(m.hud.shown(), m.atelier.energy, 0.001, "and the number is the energy again")
+	m.queue_free()
+	await tree.process_frame
+
+
+func test_clicking_a_sleeper_or_the_spirit_answers_but_never_winds() -> void:
+	var m := _start({"fresh": "1"})
+	await tree.process_frame
+	m.set_process(false)
+	var e0 := m.atelier.energy
+	var sleeper := m.view.to_local(m.view.dolls[3].global_position) + Vector2(0, -38)
+	m.view.poke(sleeper)
+	var target := m.view.to_local(m.view.dolls[m.atelier.target()].global_position) + Vector2(0, -38)
+	m.view.poke(target)
+	m.view.poke(m.view._spirit_home(m.view.key_center()))
+	m.view.poke(Vector2(5, 5))
+	var pokes := m.telemetry.events.filter(func(e: Dictionary) -> bool: return e["ev"] == "poke")
+	assert_eq(pokes.map(func(e: Dictionary) -> String: return "%s:%d" % [e["target"], e["index"]]),
+		["doll:3", "doll:%d" % m.atelier.target(), "spirit:-1", "none:-1"], "what each click touched")
+	assert_eq(m.atelier.energy, e0, "no click away from the key winds")
+	assert_eq(m.view._pokes.size(), 1, "only the doll the key is feeding answers up its thread")
+	m.advance(0.2)
+	assert_true(absf(m.view.dolls[3].rotation) > 0.0 or m.view.dolls[3].flutter > 0.0, "the touched sleeper stirs")
+	m.queue_free()
+	await tree.process_frame

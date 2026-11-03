@@ -73,6 +73,9 @@ static func from_dict(d: Dictionary) -> Balance:
 		b.rates.append(float(doll["rate"]) * rate_scale)
 		var p: Array = doll["pos"]
 		b.positions.append(Vector2(float(p[0]), float(p[1])))
+	# A variant may set its own first price without restating every doll.
+	if d.has("first_cost") and not b.costs.is_empty():
+		b.costs[0] = float(d["first_cost"])
 	for s: Dictionary in d["stages"]:
 		b.stages.append([int(s["dolls"]), String(s["name"])])
 	var sp: Dictionary = d.get("spring", {})

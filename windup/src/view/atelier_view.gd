@@ -16,6 +16,9 @@ signal key_pressed(source: String)
 signal key_released
 ## A working doll arrived at the doll being filled and started turning its key.
 signal helping(helper: int, target: int)
+## Step 12: a click away from the key touched a doll or the spirit (it reacts;
+## no energy). target is "doll", "spirit" or "none".
+signal poked(target: String, index: int, state: String)
 
 const DESIGN := Vector2(1280, 720)
 const KEY_CENTER := Vector2(640, 380)
@@ -118,6 +121,10 @@ var _chain: int = 0              # C: awakenings in a row (each within 5 s of th
 var _last_wake: float = -99.0
 var _chain_of: Dictionary = {}   # C: doll index -> its place in the chain
 var _motes: Array = []           # [from, t]: a working doll's energy drifting to the key
+var _spends: Array = []          # [doll, t 0..1, seconds]: a price leaving the number for the doll it woke
+var _pokes: Array = []           # [doll, t]: a touched sleeper's thread answers back to the key
+var _stir: Dictionary = {}       # doll -> 0..1, a touched sleeper stirs
+var _spirit_poke: float = 0.0    # the touched spirit darts to the key and back
 var _mote_clock: PackedFloat32Array = PackedFloat32Array()
 var _ready_at: Dictionary = {}   # doll index -> _anim when it started working
 var _helping: Dictionary = {}    # doll index -> the target it is turning
@@ -262,6 +269,10 @@ func sync() -> void:
 	_bursts.clear()
 	_sparks.clear()
 	_motes.clear()
+	_spends.clear()
+	_pokes.clear()
+	_stir.clear()
+	_spirit_poke = 0.0
 	_ready_at.clear()
 	_helping.clear()
 	_mote_clock.resize(dolls.size())
@@ -322,6 +333,9 @@ func gears_shown() -> int:
 
 ## The rules started waking doll `i`: its wake-up and a burst of light.
 func on_awakening(i: int) -> void:
+	# Its price flows out of the number, down to the key and along the thread
+	# into this doll, for as long as the number takes to drain (Step 12).
+	_spends.append([i, 0.0, maxf(0.6, atelier.b.awaken_seconds if atelier != null else 1.0)])
 	if i < dolls.size():
 		dolls[i].start_wake()
 		dolls[i].rotation = 0.0
@@ -491,6 +505,17 @@ func _advance_life(dt: float) -> void:
 	for m: Array in _motes:
 		m[1] = float(m[1]) + dt / 1.1
 	_motes = _motes.filter(func(m: Array) -> bool: return float(m[1]) < 1.0)
+	for sp: Array in _spends:
+		sp[1] = float(sp[1]) + dt / float(sp[2])
+	_spends = _spends.filter(func(sp: Array) -> bool: return float(sp[1]) < 1.0)
+	for pk: Array in _pokes:
+		pk[1] = float(pk[1]) + dt / 0.8
+	_pokes = _pokes.filter(func(pk: Array) -> bool: return float(pk[1]) < 1.0)
+	for k: int in _stir.keys():
+		_stir[k] = float(_stir[k]) - dt / 0.7
+		if float(_stir[k]) <= 0.0:
+			_stir.erase(k)
+	_spirit_poke = maxf(0.0, _spirit_poke - dt / 0.8)
 	_clock_hand = lerp_angle(_clock_hand, _hand_for(atelier.awake), 1.0 - exp(-dt * 2.0))
 	_dust = move_toward(_dust, _dust_for(atelier.awake), dt * 0.3)
 
@@ -521,14 +546,15 @@ func _anticipate() -> void:
 		if sheeted(i):
 			d.visible = false
 			continue
+		var stir := float(_stir.get(i, 0.0))
 		if i == tgt and atelier.waking < 0 and d.pose_name == "asleep":
 			var f := atelier.target_fill()
 			var k := clampf((f - 0.55) / 0.45, 0.0, 1.0)
-			d.rotation = sin(_anim * 38.0) * 0.035 * k
-			d.flutter = clampf((f - 0.8) / 0.2, 0.0, 1.0)
+			d.rotation = sin(_anim * 38.0) * 0.035 * k + sin(_anim * 24.0) * 0.07 * stir
+			d.flutter = maxf(clampf((f - 0.8) / 0.2, 0.0, 1.0), stir)
 		elif d.pose_name == "asleep":
-			d.rotation = 0.0
-			d.flutter = 0.0
+			d.rotation = sin(_anim * 24.0) * 0.07 * stir
+			d.flutter = stir
 
 
 ## Where helper k stands for target doll `tgt` (design coordinates): behind
@@ -595,8 +621,50 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mb.pressed and key_hit(to_local(mb.position)):
 			key_pressed.emit("click")
 			get_viewport().set_input_as_handled()
+		elif mb.pressed:
+			poke(to_local(mb.position))
 		elif not mb.pressed:
 			key_released.emit()
+
+
+## A click away from the key (Step 12): 15 of 16 blind players clicked a
+## sleeping doll and 14 the spirit, and every one wrote "nothing happened".
+## Now the thing answers -- a sleeper stirs (and if the key is feeding it, a
+## pulse runs back up its thread to the key), an awake doll looks round, the
+## spirit darts to the key and back -- but no click away from the key winds.
+func poke(p: Vector2) -> void:
+	if p.distance_to(_spirit_home(key_center())) <= 42.0:
+		_spirit_poke = 1.0
+		poked.emit("spirit", -1, "")
+		return
+	var best := -1
+	var best_d := 58.0
+	for i in dolls.size():
+		var c := to_local(dolls[i].global_position) + Vector2(0, -38)
+		var dd := p.distance_to(c)
+		if dd < best_d:
+			best = i
+			best_d = dd
+	if best < 0:
+		poked.emit("none", -1, "")
+		return
+	var st := atelier.doll_state(best) if atelier != null else "DORMANT"
+	if st == "DORMANT" or st == "WINDING":
+		_stir[best] = 1.0
+		if atelier != null and best == atelier.target():
+			_pokes.append([best, 0.0])
+	else:
+		dolls[best].play_quirk("look", 0.8)
+	poked.emit("doll", best, st)
+
+
+func spends_in_flight() -> int:
+	return _spends.size()
+
+
+## Where the spirit floats when nothing calls it (this node's space).
+func _spirit_home(k: Vector2) -> Vector2:
+	return k + Vector2(-150, -96 + sin(_anim * 1.7) * 9.0)
 
 
 ## Whether a point (in this node's space) is on the key.
@@ -823,8 +891,7 @@ func _draw_fx() -> void:
 			var t := float(f[0])
 			var mid := (k + to) * 0.5 + Vector2(0, -120)
 			var p := k.lerp(mid, t).lerp(mid.lerp(to, t), t)
-			_fx.draw_circle(p, 9.0, Color(1.0, 0.8, 0.4, 0.25))
-			_fx.draw_circle(p, 4.0, Color(1.0, 0.93, 0.7, 0.9))
+			_dot(p, 11.0, Color(1.0, 0.9, 0.62, 1.0))
 		var fill := atelier.target_fill()
 		_fx.draw_arc(to, 16.0, 0.0, TAU, 32, Color(1, 0.85, 0.5, 0.18), 4.0, true)
 		if fill > 0.0:
@@ -834,29 +901,66 @@ func _draw_fx() -> void:
 		var from := _fx.to_local(m[0] as Vector2)
 		var mid := (from + k) * 0.5 + Vector2(0, -70)
 		var q := from.lerp(mid, t).lerp(mid.lerp(k, t), t)
-		_fx.draw_circle(q, 5.0, Color(1.0, 0.8, 0.45, 0.25 * (1.0 - t * 0.5)))
-		_fx.draw_circle(q, 2.2, Color(1.0, 0.92, 0.7, 0.85))
+		_dot(q, 7.0, Color(1.0, 0.9, 0.62, 1.0 - t * 0.4))
+	# A price on its way: from the number, down to the key, along the thread
+	# into the doll it woke (Step 12).
+	if not _spends.is_empty():
+		var hud_at := _fx.get_global_transform_with_canvas().affine_inverse() * Vector2(get_viewport_rect().size.x * 0.5, 44.0)
+		for sp: Array in _spends:
+			var i: int = sp[0]
+			if i >= dolls.size():
+				continue
+			var t := float(sp[1])
+			var to2 := _fx.to_local(dolls[i].back_key_global())
+			var mid2 := (k + to2) * 0.5 + Vector2(0, -120)
+			for j in 10:
+				var u := clampf(t * 1.5 - j * 0.05, 0.0, 1.0)
+				if u <= 0.0 or u >= 1.0:
+					continue
+				var q: Vector2
+				if u < 0.35:
+					q = hud_at.lerp(k, u / 0.35)
+				else:
+					var v := (u - 0.35) / 0.65
+					q = k.lerp(mid2, v).lerp(mid2.lerp(to2, v), v)
+				_dot(q, 10.0, Color(1.0, 0.92, 0.66, 1.0))
+	# A touched sleeper's thread answers back up to the key.
+	for pk: Array in _pokes:
+		var i2: int = pk[0]
+		if i2 >= dolls.size():
+			continue
+		var tp := float(pk[1])
+		var fr := _fx.to_local(dolls[i2].back_key_global())
+		var md := (k + fr) * 0.5 + Vector2(0, -120)
+		var q2 := fr.lerp(md, tp).lerp(md.lerp(k, tp), tp)
+		_fx.draw_arc(q2, 9.0 + 6.0 * tp, 0.0, TAU, 20, Color(1.0, 0.85, 0.5, 0.8 * (1.0 - tp)), 2.5)
 	if variant == "c":
 		_draw_chains(tgt)
 	if variant == "a":
 		_draw_spring(k)
+	# Sparks: a little cross each, all of them in one call (two polygons per
+	# spark cost ~18 draw calls at every awakening -- Step 12 budget).
+	var twinkles := PackedVector2Array()
+	var twinkle_colors := PackedColorArray()
 	for sp: Array in _sparks:
 		var life := 1.0 - float(sp[2]) / 0.9
 		var c0: Vector2 = sp[0]
 		var r0 := 4.0 * life
 		if r0 < 0.5:
-			continue   # a vanishing spark: its polygon would be degenerate (an engine error per frame)
-		_fx.draw_colored_polygon(PackedVector2Array([c0 + Vector2(0, -r0 * 2), c0 + Vector2(r0 * 0.5, 0),
-			c0 + Vector2(0, r0 * 2), c0 + Vector2(-r0 * 0.5, 0)]), Color(1.0, 0.9, 0.55, life))
-		_fx.draw_colored_polygon(PackedVector2Array([c0 + Vector2(-r0 * 2, 0), c0 + Vector2(0, r0 * 0.5),
-			c0 + Vector2(r0 * 2, 0), c0 + Vector2(0, -r0 * 0.5)]), Color(1.0, 0.9, 0.55, life))
+			continue
+		twinkles.append_array([c0 + Vector2(0, -r0 * 2), c0 + Vector2(0, r0 * 2), c0 + Vector2(-r0 * 2, 0), c0 + Vector2(r0 * 2, 0)])
+		twinkle_colors.append_array([Color(1.0, 0.9, 0.55, life), Color(1.0, 0.9, 0.55, life)])
+	if not twinkles.is_empty():
+		_fx.draw_multiline_colors(twinkles, twinkle_colors, 2.5)
 	for b: Array in _bursts:
 		var t := float(b[1]) / 1.6
 		var c: Vector2 = o + b[0]
 		var grow := 1.0 + 0.6 * (float(b[2]) - 1.0) if b.size() > 2 else 1.0
 		_fx.draw_arc(c, (20.0 + t * 90.0) * grow, 0.0, TAU, 40, Color(1.0, 0.86, 0.5, 0.7 * (1.0 - t)), 3.0 if grow <= 1.0 else 5.0, true)
 		_fx.draw_circle(c, 30.0 * (1.0 - t), Color(1.0, 0.9, 0.6, 0.25 * (1.0 - t)))
-	var s := k + Vector2(-150, -96 + sin(_anim * 1.7) * 9.0)
+	var s := _spirit_home(k)
+	if _spirit_poke > 0.0:
+		s = s.lerp(k + Vector2(-24, -70), sin(PI * (1.0 - _spirit_poke)))
 	if hold_hint:
 		# Without words (Step 10): a hand presses the key and STAYS down while a
 		# small ring fills round its fingertip -- the long-press glyph -- then
@@ -903,6 +1007,7 @@ func _draw_sheets(tgt: int) -> void:
 				var f := atelier.target_fill()
 				sway = sin(_anim * 20.0) * 3.0 * clampf((f - 0.5) * 2.0, 0.0, 1.0)
 				lift = 6.0 * f
+			sway += sin(_anim * 24.0) * 5.0 * float(_stir.get(i, 0.0))
 			_draw_sheet(p, sway, lift, 1.0, 0.0)
 		elif _sheet_t.has(i):
 			var t := float(_sheet_t[i])
@@ -939,12 +1044,21 @@ func _draw_chains(tgt: int) -> void:
 		return
 	if tgt < dolls.size():
 		var to := _fx.to_local(dolls[tgt].back_key_global())
-		for i in mini(atelier.awake, dolls.size()):
-			var from := _fx.to_local(dolls[i].global_position) + Vector2(0, -44)
-			_fx.draw_line(from, to, Color(1.0, 0.75, 0.4, 0.18), 2.0)
+		# The lines first, then all the beads (same texture, one batch): bead
+		# circles between the lines cost ~3 draw calls per awake doll (Step 12).
+		# (draw_multiline is no saving here: this renderer counts its segments as objects.)
+		var lines := PackedVector2Array()
+		var n_awake := mini(atelier.awake, dolls.size())
+		for i in n_awake:
+			lines.append(_fx.to_local(dolls[i].global_position) + Vector2(0, -44))
+			lines.append(to)
+		for i in n_awake:
+			_fx.draw_line(lines[i * 2], to, Color(1.0, 0.75, 0.4, 0.18), 2.0)
+		for i in n_awake:
+			var from := lines[i * 2]
 			for n in 3:
 				var u := fmod(_anim * 0.8 + n / 3.0 + i * 0.13, 1.0)
-				_fx.draw_circle(from.lerp(to, u), 3.0, Color(1.0, 0.85, 0.5, 0.75))
+				_dot(from.lerp(to, u), 5.5, Color(1.0, 0.87, 0.55, 0.9))
 	for kk: Array in _kicks:
 		var t := float(kk[2]) / 0.7
 		var a: int = kk[0]
@@ -955,8 +1069,8 @@ func _draw_chains(tgt: int) -> void:
 		var to := _fx.to_local(dolls[b].back_key_global())
 		var mid := (from + to) * 0.5 + Vector2(0, -90)
 		var q := from.lerp(mid, t).lerp(mid.lerp(to, t), t)
-		_fx.draw_circle(q, 10.0 * (1.0 - t) + 4.0, Color(1.0, 0.9, 0.55, 0.9))
-		_fx.draw_circle(q, 20.0 * (1.0 - t) + 6.0, Color(1.0, 0.8, 0.4, 0.25))
+		_dot(q, 20.0 * (1.0 - t) + 6.0, Color(1.0, 0.8, 0.4, 0.45))
+		_dot(q, 10.0 * (1.0 - t) + 4.0, Color(1.0, 0.92, 0.6, 1.0))
 
 
 ## A: the mainspring coiled around the key -- more turns and hotter as it fills;
@@ -1027,9 +1141,14 @@ func _draw_hold_hand(tip: Vector2, down: bool, held: float) -> void:
 		_fx.draw_line(at + Vector2(x, 34.0) * sz, at + Vector2(x, 44.0) * sz, Color(0.22, 0.15, 0.1, 0.8), 2.0)
 
 
+## A soft round light: the shared glow texture, so a crowd of them is one
+## batch, not one draw call each as draw_circle is (Step 12 render budget).
+func _dot(at: Vector2, r: float, c: Color) -> void:
+	_fx.draw_texture_rect(_glow_tex, Rect2(at - Vector2(r, r), Vector2(r, r) * 2.0), false, c)
+
+
 func _draw_spirit(at: Vector2) -> void:
-	for i in 4:
-		_fx.draw_circle(at, 30.0 - i * 6.0, Color(C_SPIRIT, 0.06 + i * 0.05))
+	_dot(at, 32.0, Color(C_SPIRIT, 0.42))
 	_fx.draw_circle(at, 10.0, C_SPIRIT)
 	_fx.draw_circle(at + Vector2(-3, -1), 1.6, Color(0.25, 0.18, 0.1))
 	_fx.draw_circle(at + Vector2(3, -1), 1.6, Color(0.25, 0.18, 0.1))

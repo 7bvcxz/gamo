@@ -24,7 +24,7 @@ func test_boot_logs_one_session() -> void:
 	assert_eq(main.telemetry.count("session_start"), 1, "session_start")
 	var e := main.telemetry.first("session_start")
 	assert_eq(e["seed"], 5, "seed")
-	assert_eq(e["variant"], "base", "variant")
+	assert_eq(e["variant"], RunConfig.DEFAULT_VARIANT, "variant: the default (C since Step 12)")
 	assert_eq(e["build"], main.version(), "build")
 	assert_true(main.view.is_inside_tree(), "view in tree")
 

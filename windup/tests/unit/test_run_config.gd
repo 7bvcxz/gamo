@@ -26,9 +26,9 @@ func test_args_parse_like_the_query() -> void:
 func test_defaults_and_unknown_values_are_safe() -> void:
 	var c := RunConfig.from_pairs(RunConfig.parse_query(""))
 	assert_eq(c.seed, RunConfig.DEFAULT_SEED, "default seed")
-	assert_eq(c.variant, "base", "default variant")
+	assert_eq(c.variant, "c", "default variant: the owner-approved candidate (Step 12)")
 	assert_false(c.fresh or c.dev or c.smoke, "flags off")
 	var bad := RunConfig.from_pairs({"seed": "abc", "variant": "zzz", "fresh": "0"})
 	assert_eq(bad.seed, RunConfig.DEFAULT_SEED, "non-numeric seed ignored")
-	assert_eq(bad.variant, "base", "unknown variant falls back")
+	assert_eq(bad.variant, "c", "unknown variant falls back to the default")
 	assert_false(bad.fresh, "0 is false")

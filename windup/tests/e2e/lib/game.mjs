@@ -45,7 +45,14 @@ export const events = async (page) =>
  *  second on a shared machine whose load the test cannot control. The two
  *  real regressions so far were both visible here (Step 04: 180 draw calls
  *  from one texture per doll part; Step 05: antialiased prop lines). */
-export const RENDER_BUDGET = { draw_calls: 150, objects: 420 };
+// Step 12 re-measured every stage up to all twelve dolls (dev_advance with the
+// key held): 'objects' grows with what the room shows -- props, dolls, threads --
+// and the frozen 0.10.0 base itself reached 447 at stage 5, so 420 only ever
+// held for the first stages. Draw calls stay at 150 (the guard that caught both
+// real regressions); 0.12.0 batched its lights and is now at or under 146 at
+// every stage in base and C (0.10.0 base: up to 162). Objects: 500, above the
+// highest measured (479, C with ten awake).
+export const RENDER_BUDGET = { draw_calls: 150, objects: 500 };
 
 export async function withinBudget(page) {
   const r = await page.evaluate(() => window.windup.call('dev_render_info'));

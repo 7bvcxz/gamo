@@ -44,6 +44,10 @@
 | 그림 import 크기·아틀라스·예산 | `unit/test_art`, `unit/test_budgets` | `art03`(렌더 예산) |
 | 애니메이션 발 고정·NaN | `integration/test_animation_qc` | — |
 | 깨어남 애니메이션은 인형마다 한 번 | `test_robustness`(`wake_count`) | — |
+| 몫이 숫자에서 빠져나가 실을 따라 인형에게 감(Step 12, 숫자가 깨어남 동안 줄어듦, 게임 시간으로) | `integration/test_robustness`(`a_price_drains…`) | `long12`(멈춘 뒤 숫자 = 힘) |
+| 열쇠 밖 클릭에 반응(잠든 인형이 움찔, 먹이는 인형이면 실을 따라 열쇠로 신호, 정령이 열쇠로 다녀옴) — 감기지는 않음 | `integration/test_robustness`(`clicking_a_sleeper…`) | — |
+| 후보(C)가 주소의 기본, 10분 플레이(노드·메모리 그대로, 계속 깨어남, 10분 전에 끝나지 않음) | `unit/test_run_config`, `unit/test_variants`, `integration/test_boot` | `long12`(10분) |
+| 렌더 예산(호출 ≤150, 객체 ≤500 — Step 12에 단계별로 다시 잼) | `unit/test_budgets` | `art03`, `play04`, `hint10`, `long12` |
 | 느린 클릭에 말 없는 '누르고 있기' 힌트(20초 뒤 한 번, 누르면 사라짐; 0.10.0부터 손이 열쇠를 누른 채 손끝 고리가 참) | `unit/test_wind_input`, `unit/test_feel`(손 타이밍), `integration/test_robustness` | `hint10`(손의 픽셀·렌더 예산·오류 없음; 0.8.0 힌트에서는 실패함을 확인) |
 | 노드·소리 플레이어가 늘지 않음, 고아 노드 0, 늦은 판의 프레임 비용 | `test_robustness` | — |
 | 손맛·톱니·소품·떨림, 흔들림·섬광 없음 | `test_feel`, `test_feel_view` | `feel05` |

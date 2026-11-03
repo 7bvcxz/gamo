@@ -15,6 +15,11 @@ const ARM_SECONDS := 3.0
 const BUTTON_RADIUS := 22.0
 
 var energy: float = 0.0
+## Step 12: a doll's price leaves the number over its awakening, not in one
+## frame (11 of 16 blind players saw "the counter suddenly dropped" and could
+## not tell what it paid for). Shown = energy + what is still on its way.
+var _pending: float = 0.0
+var _pending_rate: float = 0.0
 var armed: float = 0.0
 var volume_step: int = 0
 var reduced_motion: bool = false
@@ -37,6 +42,28 @@ func set_energy(value: float) -> void:
 	if floorf(value) > floorf(energy):
 		_flash = 1.0
 	energy = value
+
+
+## The price of a doll that started waking: it drains out of the number over `seconds`.
+func spend(amount: float, seconds: float) -> void:
+	_pending += amount
+	_pending_rate = _pending / maxf(0.1, seconds)
+
+
+func clear_spend() -> void:
+	_pending = 0.0
+	_pending_rate = 0.0
+
+
+## The number on screen.
+func shown() -> float:
+	return energy + _pending
+
+
+## Game time: the price drains with the game (and stops when it is paused),
+## in step with the light carrying it to the doll.
+func step(dt: float) -> void:
+	_pending = maxf(0.0, _pending - _pending_rate * dt)
 
 
 ## Spends one frame of real time on the HUD's own little motions.
@@ -94,7 +121,7 @@ func _draw_hud() -> void:
 	if flash > 0.0:
 		c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(1.0, 0.85, 0.55, 0.14 * flash))
 	var font := ThemeDB.fallback_font
-	var text := str(int(floorf(energy)))
+	var text := str(int(floorf(shown())))
 	var size := 34
 	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	var centre := Vector2(c.size.x * 0.5, 44.0)
