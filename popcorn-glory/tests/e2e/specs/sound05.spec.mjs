@@ -54,10 +54,16 @@ test('C: kernels clink and the eruption booms', async ({ pop }) => {
   expect((await pop.state()).sound.played.boom ?? 0).toBeGreaterThan(0);
 });
 
-test('the mute button silences the game, and turns it back on', async ({ pop }) => {
+test('the speaker button steps loud -> soft -> off, and back on', async ({ pop }) => {
   await pop.open('./#click');
   await pop.tap('play');
   await pop.page.waitForTimeout(300);
+  await pop.tap('sound');
+  await expect.poll(async () => (await pop.state()).sound.level).toBe('soft');
+  let soft = await listen(pop.page);
+  await pop.tap('play');
+  const s = await soft(500);
+  expect(s.rms, `soft rms ${s.rms.toFixed(4)}`).toBeGreaterThan(0.002);
   await pop.tap('sound');
   await expect.poll(async () => (await pop.state()).sound.muted).toBe(true);
   await pop.page.waitForTimeout(600);
@@ -66,7 +72,7 @@ test('the mute button silences the game, and turns it back on', async ({ pop }) 
   let m = await heard(500);
   expect(m.rms, `muted rms ${m.rms.toFixed(5)}`).toBeLessThan(0.001);
   await pop.tap('sound');
-  await expect.poll(async () => (await pop.state()).sound.muted).toBe(false);
+  await expect.poll(async () => (await pop.state()).sound.level).toBe('loud');
   heard = await listen(pop.page);
   await pop.tap('play');
   m = await heard(500);

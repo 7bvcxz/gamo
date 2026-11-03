@@ -8,11 +8,21 @@ extends Node
 ## in one eruption are one boom and a crackle, not a hundred pops).
 ## Muting mutes the bus; `?sound=off` starts muted.
 
-const NAMES := ["pop_1", "pop_2", "pop_3", "coin", "upgrade", "sizzle", "ding", "thud", "hiss", "clink", "boom", "crackle"]
+const NAMES := ["pop_1", "pop_2", "pop_3", "coin", "upgrade", "sizzle", "ding", "thud", "hiss", "clink", "boom", "crackle", "fanfare"]
+## The speaker button steps through these (Step 05 addendum: a volume setting,
+## not only mute): loud, soft, off.
+const LEVELS := [{"name": "loud", "db": 0.0}, {"name": "soft", "db": -12.0}, {"name": "off", "db": -80.0}]
+## Big sounds duck the small ones for DUCK_MS, so a boom or a fanfare is not
+## buried under a hundred pops (controlled polyphony, with the pool and the gap).
+const DUCKERS := ["boom", "fanfare"]
+const DUCK_DB := -8.0
+const DUCK_MS := 450
 const POOL := 10
 const MIN_GAP_MS := 45
 
 var muted := false
+var level := 0          # index into LEVELS
+var _duck_until := 0
 var played: Dictionary = {}       # name -> times played (for tests)
 var _streams: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
@@ -38,10 +48,25 @@ func _ready() -> void:
 
 
 func set_muted(on: bool) -> void:
-	muted = on
+	set_level(2 if on else 0)
+
+
+## 0 loud, 1 soft, 2 off.
+func set_level(i: int) -> void:
+	level = clampi(i, 0, LEVELS.size() - 1)
+	muted = String(LEVELS[level]["name"]) == "off"
 	var bus := AudioServer.get_bus_index(&"SFX")
 	if bus >= 0:
-		AudioServer.set_bus_mute(bus, on)
+		AudioServer.set_bus_mute(bus, muted)
+		AudioServer.set_bus_volume_db(bus, float(LEVELS[level]["db"]) if not muted else 0.0)
+
+
+func next_level() -> void:
+	set_level((level + 1) % LEVELS.size())
+
+
+func level_name() -> String:
+	return String(LEVELS[level]["name"])
 
 
 func play(name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
@@ -52,6 +77,10 @@ func play(name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
 		return
 	_last_ms[name] = now
 	played[name] = int(played.get(name, 0)) + 1
+	if name in DUCKERS:
+		_duck_until = now + DUCK_MS
+	elif now < _duck_until:
+		volume_db += DUCK_DB
 	var p := _players[_next]
 	_next = (_next + 1) % POOL
 	p.stream = _streams[name]

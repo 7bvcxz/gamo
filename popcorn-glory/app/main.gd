@@ -70,7 +70,7 @@ func _ready() -> void:
 	reduced_motion = String(route["motion"]) == "reduce"
 	frame.dev = bool(route["dev"])
 	audio.set_muted(not bool(route["sound"]))
-	frame.set_sound(not audio.muted)
+	frame.set_sound(audio.level_name())
 	if not economy.errors.is_empty():
 		push_error("economy.json: %s" % [economy.errors])
 	chooser.build(PopRegistry.listed())
@@ -132,9 +132,10 @@ func download_log() -> void:
 	PopWeb.download(JSON.stringify(log_document(), "  "), "popcorn-%s-%d.json" % [exp_id, clock.now_ms], "application/json")
 
 
+## The speaker button: loud -> soft -> off -> loud.
 func toggle_sound() -> void:
-	audio.set_muted(not audio.muted)
-	frame.set_sound(not audio.muted)
+	audio.next_level()
+	frame.set_sound(audio.level_name())
 
 
 func restart() -> void:
@@ -293,7 +294,7 @@ func state() -> Dictionary:
 		out["clock_ms"] = clock.now_ms
 		out["paused"] = clock.pause_reasons()
 		out["fx"] = {"alive": frame.play.fx.alive, "peak": frame.play.fx.peak, "cap": PopFx.CAP}
-	out["sound"] = {"muted": audio.muted, "played": audio.played.duplicate()}
+	out["sound"] = {"muted": audio.muted, "level": audio.level_name(), "played": audio.played.duplicate()}
 	return out
 
 

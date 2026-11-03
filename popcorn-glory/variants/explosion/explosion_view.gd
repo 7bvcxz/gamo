@@ -67,7 +67,7 @@ func on_events(events: Array[Dictionary]) -> void:
 				_gain(int(d.get("amount", 0)))
 				_sound("coin", 1.0, -4.0)
 			"upgrade":
-				_upgraded()
+				_on_upgrade(int(d.get("level", 0)))
 
 
 ## Past the drawn maximum, pieces grow instead of multiplying.

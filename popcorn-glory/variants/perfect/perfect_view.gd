@@ -80,7 +80,7 @@ func on_events(events: Array[Dictionary]) -> void:
 				_gain(int(d.get("amount", 0)))
 				_sound("coin", 1.0, -8.0)
 			"upgrade":
-				_upgraded()
+				_on_upgrade(int(d.get("level", 0)))
 
 
 func _process(delta: float) -> void:

@@ -123,6 +123,9 @@ SOUNDS = {
     "clink": lambda: normalise(mix(tone(1800, 1700, 0.07, 0.001, 4), noise(0.02, 11, 0.001, 3, 0.9)), 0.6),
     "boom": lambda: normalise(mix(tone(90, 40, 0.7, 0.003, 2), noise(0.6, 13, 0.002, 2.5, 0.08)), 0.85),
     "crackle": lambda: normalise(crackle(1.4, 17, 38), 0.6),
+    # The rare milestone (a new machine look): a rising run and a held chord.
+    "fanfare": lambda: normalise(mix(*[at(bell(f, 0.35), 0.06 * i) for i, f in enumerate([523.3, 659.3, 784.0, 1046.5, 1318.5, 1568.0])],
+                                    at(mix(bell(1046.5, 1.2), bell(1318.5, 1.2), bell(1568.0, 1.2), bell(2093.0, 1.0)), 0.36)), 0.8),
 }
 
 

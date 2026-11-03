@@ -127,6 +127,43 @@ func _draw_over(_ci: CanvasItem, _base: Vector2, _size_px: float) -> void:
 	pass
 
 
+## The effect hierarchy (Step 05): (1) a press -- squash and spring, (2) a pop
+## -- burst, coin, +N, (3) an upgrade -- the jump, gold popcorn, sparkles, a
+## chime, (4) RARE: the machine entering a new look (MILESTONES) -- a ring of
+## sparkles, gold popcorn raining from above, a fanfare. 4 replaces 3, so the
+## screen never stacks both.
+const MILESTONES := [3, 6, 9, 12]
+var milestones_shown := 0
+
+
+static func is_milestone(level: int) -> bool:
+	return level in MILESTONES
+
+
+## Every experiment's views route an upgrade here: a milestone or an ordinary one.
+func _on_upgrade(level: int) -> void:
+	if is_milestone(level):
+		_milestone()
+	else:
+		_upgraded()
+
+
+func _milestone() -> void:
+	milestones_shown += 1
+	squash(0.0, 14.0)
+	_jump = 1.0
+	var s := machine_size() / 900.0
+	if not reduced_motion:
+		var c := machine_centre()
+		for i in 12:
+			var a := TAU * i / 12.0
+			fx.sparkle(c + Vector2(cos(a), sin(a)) * machine_size() * 0.55, s, rng, 1, 10.0, 2.2)
+		# Gold popcorn raining from the top of the play area, all around the machine.
+		fx.rain(size.x * 0.05, size.x * 0.95, 10.0, 36, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.3))
+	fx.burst(machine_top(), 26 if not reduced_motion else 3, s, rng, PopPalette.GOLD, 1.4, 1.35)
+	_sound("fanfare")
+
+
 ## Every experiment's upgrade looks and sounds the same: the machine jumps,
 ## gold popcorn and sparkles burst from it, a rising chime.
 func _upgraded() -> void:
@@ -185,7 +222,7 @@ func on_events(events: Array[Dictionary]) -> void:
 				_gain(int(e["data"].get("amount", 0)))
 				_sound("coin", 1.0, -6.0)
 			"upgrade":
-				_upgraded()
+				_on_upgrade(int(e["data"].get("level", 0)))
 
 
 func _process(delta: float) -> void:

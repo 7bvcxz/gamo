@@ -68,13 +68,36 @@ func test_an_upgrade_chimes() -> void:
 	assert_eq(_played("upgrade"), 1, "upgrade chime")
 
 
-func test_the_sound_button_mutes_the_bus() -> void:
+func test_the_sound_button_steps_loud_soft_off() -> void:
 	app.open("click")
 	await tree.process_frame
 	var bus := AudioServer.get_bus_index(&"SFX")
-	assert_false(AudioServer.is_bus_mute(bus), "on at start")
+	assert_false(AudioServer.is_bus_mute(bus), "loud at start")
+	assert_near(AudioServer.get_bus_volume_db(bus), 0.0, 0.01, "0 dB")
 	app.toggle_sound()
-	assert_true(AudioServer.is_bus_mute(bus), "muted")
-	assert_eq(app.frame.sound_button.icon, "mute", "the icon says so")
+	assert_false(AudioServer.is_bus_mute(bus), "soft is not muted")
+	assert_near(AudioServer.get_bus_volume_db(bus), -12.0, 0.01, "-12 dB")
+	assert_eq(app.frame.sound_button.icon, "soft", "one wave")
 	app.toggle_sound()
-	assert_false(AudioServer.is_bus_mute(bus), "on again")
+	assert_true(AudioServer.is_bus_mute(bus), "off")
+	assert_eq(app.frame.sound_button.icon, "mute", "the cross")
+	app.toggle_sound()
+	assert_false(AudioServer.is_bus_mute(bus), "loud again")
+	assert_near(AudioServer.get_bus_volume_db(bus), 0.0, 0.01, "0 dB again")
+
+
+func test_a_new_machine_look_is_a_milestone_with_a_fanfare() -> void:
+	app.open("click")
+	await tree.process_frame
+	app.rules.money = 100000
+	app.buy()
+	app.audio._last_ms.clear()   # two buys in one millisecond would be merged by the 45 ms gap
+	app.buy()
+	assert_eq(_played("upgrade"), 2, "levels 1 and 2: the ordinary chime")
+	assert_eq(_played("fanfare"), 0, "no fanfare yet")
+	app.audio._last_ms.clear()
+	app.buy()
+	assert_eq(app.rules.level, 3, "level 3: the carnival look")
+	assert_eq(_played("fanfare"), 1, "the milestone fanfare")
+	assert_eq(_played("upgrade"), 2, "instead of, not on top of, the chime")
+	assert_eq(app.frame.play.milestones_shown, 1, "one milestone shown")

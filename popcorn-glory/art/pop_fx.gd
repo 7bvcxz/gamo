@@ -58,11 +58,19 @@ func kernels(from: Vector2, n: int, scale: float, rng: RandomNumberGenerator) ->
 			rng.randf_range(0.6, 0.9), rng.randf_range(7.0, 10.0) * scale, rng.randf() * TAU, Color(0.78, 0.52, 0.2))
 
 
-## A sparkle that grows and fades (a perfect pop, an upgrade).
-func sparkle(at: Vector2, scale: float, rng: RandomNumberGenerator, n: int = 6, spread: float = 160.0) -> void:
+## A sparkle that grows and fades (a perfect pop, an upgrade; `big` for a milestone).
+func sparkle(at: Vector2, scale: float, rng: RandomNumberGenerator, n: int = 6, spread: float = 160.0, big: float = 1.0) -> void:
 	for i in n:
 		_spawn(4, at + Vector2(rng.randf_range(-spread, spread), rng.randf_range(-spread * 0.6, spread * 0.4)) * scale,
-			Vector2.ZERO, rng.randf_range(0.35, 0.6), rng.randf_range(18.0, 30.0) * scale, rng.randf() * 0.6, Color.WHITE)
+			Vector2.ZERO, rng.randf_range(0.35, 0.6) * (1.0 + 0.6 * (big - 1.0)), rng.randf_range(18.0, 30.0) * scale * big, rng.randf() * 0.6, Color.WHITE)
+
+
+## Pieces falling from a line across the top (a milestone's popcorn rain).
+func rain(left: float, right: float, top: float, n: int, scale: float, rng: RandomNumberGenerator, col: Color) -> void:
+	for i in n:
+		_spawn(0, Vector2(rng.randf_range(left, right), top - rng.randf_range(0.0, 120.0) * scale),
+			Vector2(rng.randf_range(-60.0, 60.0), rng.randf_range(80.0, 260.0)) * scale,
+			rng.randf_range(1.4, 2.0), rng.randf_range(15.0, 22.0) * scale, rng.randf() * TAU, col)
 
 
 func coin(from: Vector2, scale: float) -> void:

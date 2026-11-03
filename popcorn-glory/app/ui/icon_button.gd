@@ -23,13 +23,14 @@ func _draw() -> void:
 		"back":
 			draw_colored_polygon(PackedVector2Array([c + Vector2(-k, 0), c + Vector2(k * 0.2, -k * 0.85), c + Vector2(k * 0.2, k * 0.85)]), PopPalette.INK)
 			draw_rect(Rect2(c + Vector2(0, -k * 0.3), Vector2(k * 0.95, k * 0.6)), PopPalette.INK)
-		"sound", "mute":
+		"sound", "soft", "mute":
 			# A speaker; waves when on, a cross when muted.
 			var body := PackedVector2Array([c + Vector2(-k, -k * 0.38), c + Vector2(-k * 0.45, -k * 0.38), c + Vector2(k * 0.15, -k * 0.9),
 				c + Vector2(k * 0.15, k * 0.9), c + Vector2(-k * 0.45, k * 0.38), c + Vector2(-k, k * 0.38)])
 			draw_colored_polygon(body, PopPalette.INK)
-			if icon == "sound":
+			if icon == "sound" or icon == "soft":
 				draw_arc(c + Vector2(k * 0.2, 0), k * 0.5, -0.9, 0.9, 10, PopPalette.INK, k * 0.16)
+			if icon == "sound":
 				draw_arc(c + Vector2(k * 0.2, 0), k * 0.85, -0.9, 0.9, 12, PopPalette.INK, k * 0.16)
 			else:
 				draw_line(c + Vector2(k * 0.4, -k * 0.4), c + Vector2(k * 1.05, k * 0.4), PopPalette.RED, k * 0.2)

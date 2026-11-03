@@ -39,7 +39,7 @@ func on_events(events: Array[Dictionary]) -> void:
 				if not _pending.is_empty():
 					_pending[_pending.size() - 1]["amount"] = int(e["data"].get("amount", 0))
 			"upgrade":
-				_upgraded()
+				_on_upgrade(int(e["data"].get("level", 0)))
 
 
 func _process(delta: float) -> void:

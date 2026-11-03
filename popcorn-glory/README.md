@@ -37,7 +37,7 @@ xvfb-run -a -s "-screen 0 1280x1600x24" godot --path popcorn-glory --audio-drive
 ```
 
 주소 옵션: `#click`·`#perfect`·`#explosion`(직접 링크), `?dev=1`(활동 시계 + 개발용 브리지 호출), `?motion=reduce`(효과 줄이기),
-`?sound=off`(음소거로 시작; 위쪽 스피커 버튼으로도 끄고 켠다). 그림·소리의 방향과 출처는 `design/ART_AUDIO.md`.
+`?sound=off`(소리 끈 채 시작; 위쪽 스피커 버튼이 크게 → 작게 → 끔으로 돈다). `?dev=1`에서는 왼쪽 기록 버튼이 이번 실행의 JSON을 내려받는다. 그림·소리의 방향과 출처는 `design/ART_AUDIO.md`.
 느린 브라우저 검사 `specs/play180.spec.mjs`는 실험마다 실제 3분을 실제 입력으로 플레이한다(`--project p720`).
 
 **배포가 `deploy-web.sh`가 아닌 이유**: 공용 runner는 게임이 시작되기 전에 주소를 게임 폴더로 되돌리고
