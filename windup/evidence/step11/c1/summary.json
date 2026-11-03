@@ -1,0 +1,77 @@
+{
+  "session": "c1",
+  "model": "claude-opus-5-5",
+  "build": "0.10.0+c",
+  "wall_seconds": 192.078,
+  "actions": 40,
+  "inputs": 36,
+  "first_input_wall_s": 10.898,
+  "first_key_input_wall_s": 10.898,
+  "first_wind_game_s": 12.668,
+  "first_doll_game_s": 53.505,
+  "second_doll_game_s": 78.195,
+  "first_help_game_s": 59.549,
+  "dolls_at": {
+    "30": 0,
+    "60": 1,
+    "180": 5
+  },
+  "dolls_end": 5,
+  "off_key_inputs": [
+    {
+      "wall": 26.56,
+      "cmd": "click",
+      "args": [
+        "450",
+        "605"
+      ]
+    },
+    {
+      "wall": 30.281,
+      "cmd": "click",
+      "args": [
+        "422",
+        "605"
+      ]
+    },
+    {
+      "wall": 33.572,
+      "cmd": "click",
+      "args": [
+        "490",
+        "275"
+      ]
+    }
+  ],
+  "holds": 12,
+  "hints_shown": [
+    {
+      "t": 32.703,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 5.2,
+      "seconds": 5.7
+    },
+    {
+      "after_wall": 58.2,
+      "seconds": 4.3
+    },
+    {
+      "after_wall": 138.9,
+      "seconds": 4.2
+    }
+  ],
+  "played_past_180_s": false,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": false,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes 12 seconds and stopped there.\n\n**What the game is:** A small, cozy idle/clicker game set in a tailor's workshop at night. A large golden wind-up key sits on a gear in the middle of the room, and wind-up dolls lie asleep on the floor. Turning the key earns \"winds\" (the spiral counter at the top). A glowing thread carries that energy to one sleeping doll, and a ring around that doll's own key fills up. When the ring is full, the doll wakes up.\n\n**What I understood:**\n- Clicking turns the key once (+1 wind). After a tutorial hand appeared, I found that holding the mouse down keeps turning it, which is much faster.\n- Each doll that wakes adds a small gear around the key, so winds come in faster. It also changes the room: a desk lamp turned on, a red sewing machine appeared, and the dress form ended up wearing a finished jacket.\n- The awake dolls then help. They line up holding the thread, or wind the next sleeper's key themselves. By the end, five dolls were awake and the counter was going up quickly.\n- The wind count dropped right after some wake-ups (151→104, 226→119). My guess is that waking a doll spends winds, but I never saw a price shown, so I can't be sure.\n\n**What confused me:**\n- I couldn't tell how the next doll is chosen or whether I could pick it myself. Clicking a sleeping doll or its key did nothing.\n- The glowing orb near the shelves only brought up the tutorial hand, as far as I could tell.\n- I never found anything to spend winds on directly, and I didn't try the sparkle icon or the restart button in the corners. I'm not sure whether the dolls drive the counter changes or something else does.\n- The clock jumped forward after the first doll woke and kept moving. It may be a timer for the night, but I didn't learn what it does.\n\n**Would I keep playing?** Probably for a bit longer. The art is charming, and it's satisfying to watch the workshop come alive as each doll wakes and the room changes. Since all I did was hold one button, though, it would need more decisions (choosing upgrades, choosing which doll to wake) to hold my interest for long.",
+  "turns": 34,
+  "cost_usd": 0.36527999999999994
+}

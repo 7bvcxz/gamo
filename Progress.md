@@ -525,6 +525,8 @@ GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양�
 - Step 10 (#111, 0.10.0): 4×5 평가표로 6세션 채점(개발자 + 빌드를 모르는 독립 채점자 `windup/tools/blind/rate_sessions.sh`), 마찰 분류,
   고침 하나(힌트를 '열쇠를 누른 채 머무는 손'으로)와 블라인드 재검사 3번: 기다림 3/3 → 0/3, 첫 인형 빨라짐, 누르고 있기는 배우지 못함(2/3 → 1/3).
   보고 `windup/design/FUN_SCORES.md`, 증거 `windup/evidence/step10/`. 사람 결과 없음.
+- Step 11 (#112): A/B/C 토너먼트 — 0.10.0을 `docs/windup/ref/step11/`에 보존, 변형마다 블라인드 AI 3세션(순서 돌림), 빌드를 모르는 독립 채점,
+  같은 입력 스크립트 3분. **검증된 승자 없음**, 다음 후보 C(낮은 확신), ITERATE, 소유자 승인 요청. `windup/design/TOURNAMENT.md`.
 
 ## 공용 도구
 

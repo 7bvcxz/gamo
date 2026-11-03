@@ -1,0 +1,69 @@
+{
+  "session": "a3",
+  "model": "claude-opus-5-5",
+  "build": "0.10.0+a",
+  "wall_seconds": 195.938,
+  "actions": 82,
+  "inputs": 76,
+  "first_input_wall_s": 10.781,
+  "first_key_input_wall_s": 10.781,
+  "first_wind_game_s": 12.426,
+  "first_doll_game_s": 64.429,
+  "second_doll_game_s": 123.891,
+  "first_help_game_s": 70.771,
+  "dolls_at": {
+    "30": 0,
+    "60": 0,
+    "180": 3
+  },
+  "dolls_end": 3,
+  "off_key_inputs": [
+    {
+      "wall": 27.252,
+      "cmd": "click",
+      "args": [
+        "425",
+        "605"
+      ]
+    },
+    {
+      "wall": 31.653,
+      "cmd": "click",
+      "args": [
+        "490",
+        "278"
+      ]
+    }
+  ],
+  "holds": 8,
+  "hints_shown": [
+    {
+      "t": 32.454,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 4.6,
+      "seconds": 6.2
+    },
+    {
+      "after_wall": 152.7,
+      "seconds": 5.4
+    },
+    {
+      "after_wall": 74.1,
+      "seconds": 4.7
+    }
+  ],
+  "played_past_180_s": true,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3¼ minutes and woke 3 of the roughly 15 dolls.\n\n**What I think the game is:** a calm, moody idle/clicker set in a toymaker's workshop at night. You turn a large brass wind-up key. Each turn gives you \"spirals,\" the currency shown at the top. A thread links the key to one sleeping doll, and your winding slowly fills a ring around that doll's key. When the ring is full, the doll wakes up, a fixed amount of spirals is spent, and a new small gear attaches to the machine. Each doll that wakes adds passive income and then walks over to help wind the next sleeper, so progress speeds up the more dolls you wake. The workshop also changes as you go: a desk lamp lit up, and a covered shape became a glowing red sewing machine.\n\n**What I understood:** clicking or holding the key earns spirals. Holding seems to work as a steady stream of clicks. Dolls wake on their own once their ring fills, and the game picks which doll comes next. Spirals kept going up between wake-ups even when I wasn't touching anything.\n\n**What confused me:**\n- The tutorial hand stayed pointed at the key even while I was clicking it, and it never told me whether holding or spinning was better.\n- At first I couldn't tell how waking worked. My spirals dropped suddenly from 41 to 4, and only later did I figure out the doll had woken and the cost was taken automatically.\n- I couldn't work out what the glowing face-orb near the shelf is, what the restart/settings buttons do, or whether the moving grandfather clock is a timer, like night ending at dawn.\n- I didn't see a shop or any upgrade choices. Your only real choice seems to be how hard you wind.\n\n**Would I keep playing?** For a bit longer, yes. The art is charming, and seeing the room come to life and the dolls gather to help each other is satisfying. I'd want to know what happens when every doll is awake or when the clock runs out. But there are no decisions to make, so I'd likely lose interest unless more mechanics show up later.",
+  "turns": 28,
+  "cost_usd": 0.3333808
+}

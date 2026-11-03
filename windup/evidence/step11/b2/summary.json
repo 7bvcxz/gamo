@@ -1,0 +1,61 @@
+{
+  "session": "b2",
+  "model": "claude-opus-5-5",
+  "build": "0.10.0+b",
+  "wall_seconds": 194.194,
+  "actions": 141,
+  "inputs": 132,
+  "first_input_wall_s": 17.108,
+  "first_key_input_wall_s": 21.563,
+  "first_wind_game_s": 22.719,
+  "first_doll_game_s": 71.344,
+  "second_doll_game_s": 135.033,
+  "first_help_game_s": 79.383,
+  "dolls_at": {
+    "30": 0,
+    "60": 0,
+    "180": 2
+  },
+  "dolls_end": 2,
+  "off_key_inputs": [
+    {
+      "wall": 17.108,
+      "cmd": "click",
+      "args": [
+        "489",
+        "274"
+      ]
+    }
+  ],
+  "holds": 0,
+  "hints_shown": [
+    {
+      "t": 20.039,
+      "reason": "idle20"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 8.9,
+      "seconds": 8.3
+    },
+    {
+      "after_wall": 71.5,
+      "seconds": 5.5
+    },
+    {
+      "after_wall": 142.6,
+      "seconds": 4.9
+    }
+  ],
+  "played_past_180_s": true,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes and 14 seconds.\n\n**What I think the game is:** a cozy idle/clicker set in a moonlit tailor's workshop. Clicking the big brass gear earns spirals (+1 per click), and a curved line from the gear points at the current goal. The pale shapes on the floor are dust sheets over sleeping wind-up dolls. When enough spirals reach the targeted sheet, its ring fills, the spirals are spent, and a doll wakes up. Each unveiling also changes the room: a new small gear on the machine, a desk lamp, a sewing machine uncovered on the chair, the clock moving. Awake dolls earn spirals passively (roughly 1–2 per second) and walk over to help pull at the next sheet.\n\n**What happened:** I woke two dolls, one in a top hat and one in a blue beret. The third unveiling was almost done when I stopped, at 229 spirals. Each one seemed to cost more than the last: around 40 for the first, around 130 for the second.\n\n**What confused me:**\n- Clicking the glowing orb with a face near the shelves did nothing I could see. It might be a guide character or something that matters later.\n- My first move was a drag, and it gave a burst of 12 spirals instead of the usual 1, so maybe dragging or spinning the gear pays more. I didn't test it again.\n- I never found a shop or upgrade menu. The reset button (top right) and the sparkle button (top left) were left alone.\n\n**Would I keep playing?** For a while, yes. The art and atmosphere are charming, and it's satisfying when each unveiling makes the room a little brighter and fuller. With about 18 sheets left, I'd want to see whether new mechanics show up, such as upgrades or the orb doing something. If it stays at \"click until the ring fills,\" the novelty would probably wear off quickly.",
+  "turns": 24,
+  "cost_usd": 0.2609692
+}

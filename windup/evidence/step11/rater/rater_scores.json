@@ -1,0 +1,236 @@
+{
+ "model": [
+  "claude-opus-5-5"
+ ],
+ "cost_usd": 0.3880504,
+ "scores": {
+  "retest1": {
+   "label": "P1",
+   "i": {
+    "score": 4,
+    "why": "Observed: the first click at 10.4 s landed on the key and produced a wind at 12.1 s. There were 2 off-key clicks (wisp at 26.7 s, doll's key at 30.8 s), after which a hint hand appeared, and the player never tried press-and-hold. The player read the ring as a wake-up meter by 49.3 s."
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 61.9 s, second at 116.9 s, three by 180 s. The player noted the lamp lighting, the sewing machine revealed and new gears appearing. Opinion: called the room coming back to life 'charming'."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 49.3 s the player predicted the ring was a wake-up meter, and at 105.8 s predicted the next wake would cost more; both matched later events. The player also named the clock and dummy as likely future unlocks. Friction: no prices are shown, so costs were inferred only from counter drops."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a while, yes', but the player said they would 'mostly leave it running in the background' unless choices or upgrades appear. Observed: the player ended the session at 186 s, right after the third wake."
+   }
+  },
+  "c2": {
+   "label": "P2",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 13.8 s and first wind at 15.4 s. After 5 off-key clicks (soldier, orb, small gear, sparkle button, sewing machine), the player tried hold at 55.2 s in response to the hint hand and confirmed '+10 in 3 seconds' at 62.3 s. Opinion: 'No text explains anything.'"
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 69.6 s, second at 101.5 s, four by 180 s. The player listed extra gears, a lamp, the sewing machine and a finished jacket. Opinion: called it 'charming' and liked that progress shows on screen instead of in menus."
+   },
+   "iii": {
+    "score": 3,
+    "why": "Observed: at 31.8 s the player correctly predicted the ring fills with winding. They then looked for a shop at 95.4 s and clicked the small gear and sparkle button expecting upgrades, which did not exist, and could not explain the counter drop from 156 to 24."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a little while, yes', and only longer if choices or new mechanics appear. Observed: the last ~60 s were unbroken 10 s holds with no new exploration."
+   }
+  },
+  "b1": {
+   "label": "P3",
+   "i": {
+    "score": 3,
+    "why": "Observed: the first click at 10.7 s hit a floor shell with no effect, and the session logged 19 off-key clicks (ring at 39.5 s, toggle at 68.0 s, orb at 71.9 s). The player found the drag crank at 78.7 s (+9). Opinion: 'Hard to start: I couldn't tell what to do at first.'"
+   },
+   "ii": {
+    "score": 3,
+    "why": "Observed: the first doll did not wake until 85.1 s; two dolls were awake at 180 s and three at end. Between 53.9 s and 71.9 s the ring looked full but nothing triggered. Opinion: called the room lighting up and dolls emerging 'a satisfying reward'."
+   },
+   "iii": {
+    "score": 3,
+    "why": "Observed: at 53.9 s the player expected 'one more click' to trigger something, and nothing did. At 71.9 s they thought the ring was 'cycling'. Counter drops (91→77, 239→0) went unexplained, and the player inferred costs only after the fact."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'Probably yes, for a while', and wants to know what the clock and mannequin do, but expects the novelty to fade in 10–15 minutes without decisions. Observed: the player spent the last 8 s waiting before ending at 190 s."
+   }
+  },
+  "c3": {
+   "label": "P4",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 9.4 s and first wind at 11.1 s. By 50.8 s the player had concluded that winding charges the doll. There were 4 off-key clicks (doll at 29.3 s, its key at 33.9 s and 65.2 s, face at 155.3 s). The player used only one hold and said they could not tell whether it mattered."
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 72.7 s, second at 112.9 s, three by 180 s, with passive income of about 4/s noted at 155.3 s. The player noted the lamp, sewing machine and room brightening. Opinion: called the growing group of dolls 'satisfying'."
+   },
+   "iii": {
+    "score": 3,
+    "why": "Observed: at 60.9 s the ring looked complete, but the player had to click the key and then hold (65.2 s) before the wake at 72.7 s. Afterward they could not tell what each automatic upgrade cost or did."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a little while, yes', but expects to stop once every doll is awake unless choices appear. Observed: the player wound mechanically from 73 s to 178 s, with one exploratory click at 155 s."
+   }
+  },
+  "a1": {
+   "label": "P5",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 15.7 s and first wind at 17.4 s. There were 3 off-key clicks (doll at 30.6 s, orb at 33.9 s, sewing machine at 148.2 s), and the player switched to hold at 58.2 s. Opinion: the core loop 'was clear within about a minute and a half, without any text.'"
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 82.3 s, second at 118.2 s, three by 180 s. The player noted the lamp, the sewing machine, three helper gears and the counter reaching 330. Opinion: the room changing is 'a nicer reward than a bigger number'."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 33.9 s the player predicted that the ring fills with winding and the doll wakes when it is full, which matched the first wake at 82.3 s. They named still-asleep objects (clock, dress form, jars) they wanted to see. Friction: unclear whether a wake costs a set price."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'Yes, for a while', but expects the novelty to wear off in 10–15 minutes without choices. Observed: the final ~70 s were repeated 10 s holds."
+   }
+  },
+  "a2": {
+   "label": "P6",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 13.2 s, first wind at 15.0 s, and only 2 off-key clicks (toy at 28.2 s, orb at 31.5 s). The player tried hold at 51.4 s after the hint hand, but at 89.5 s wrongly believed a hold was needed to wake a toy, and later corrected this."
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 60.0 s, second at 109.1 s, three by 180 s. The player noted the lamp, the sewing machine starting to run, and the last fill taking about 20 s. Opinion: called toys gathering to wind each other 'satisfying'."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 31.5 s the player predicted that winding charges the ring, and at 51.4 s saw it nearly full at 41. They tracked rising wake costs (~40, ~120, ~200+). Friction: the hold-to-wake theory at 89.5 s was wrong."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a while, yes', and curious about the clock and orb, but said it 'could get repetitive'. Observed: the player stopped at 190.8 s citing rising wake costs."
+   }
+  },
+  "a3": {
+   "label": "P7",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 10.8 s, first wind at 12.4 s, and 2 off-key clicks (doll at 27.8 s, orb at 32.2 s) before the hint hand redirected the player. Hold was used from 54.4 s. Opinion: the hand 'never told me whether holding or spinning was better'."
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 64.4 s, then a ~59 s gap to the second at 123.9 s, three by 180 s. The player noted the lamp and the glowing sewing machine. Opinion: 'charming' and 'satisfying' to see the dolls help each other."
+   },
+   "iii": {
+    "score": 3,
+    "why": "Observed: at 101.5 s the player guessed that holding is what spends spirals to finish a wake, which was incorrect. They said the 41→4 drop was understood only later. They named the clock as a possible timer."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a bit longer, yes', but 'likely lose interest unless more mechanics show up'. Observed: the final ~70 s were chained 10 s holds."
+   }
+  },
+  "b2": {
+   "label": "P8",
+   "i": {
+    "score": 3,
+    "why": "Observed: the first input came late, at 21.6 s, and was a click on the orb. The player then misread the arc as slingshot aim and dragged at 25.6 s. The longest pause was 8.3 s. The click-to-wind loop was clear by 48.3 s, but hold was never discovered."
+   },
+   "ii": {
+    "score": 3,
+    "why": "Observed: first doll awake at 71.3 s and second at 135.0 s; the session ended with 2 dolls and the third 'almost full'. Opinion: called each unveiling brightening the room 'satisfying'."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 48.3 s the player identified the ring as a progress meter. At 119.9 s they correctly inferred the second wake cost more because no reset happened at 40. At 176.5 s they predicted the third was close, but it had not completed by 191.3 s."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a while, yes', but 'the novelty would probably wear off quickly' if the game stays click-until-full. Observed: the player stopped at 191.3 s with the third ring almost full."
+   }
+  },
+  "b3": {
+   "label": "P9",
+   "i": {
+    "score": 3,
+    "why": "Observed: first wind at 12.7 s. At 11.6 s the player thought the gear 'shoots buttons' and clicked a floor shape to aim (18.5 s). Hold was found at 52.9 s after the hint hand. At 109.5 s they clicked a full-looking ring, which had no effect (4 off-key clicks total)."
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 71.8 s, second at 111.2 s, third seen at 162.2 s. The player noted the lamp, sewing machine and four gears. Opinion: called the room filling up and glowing 'charming'."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 105.8 s the player wrongly expected an unlock from a ring that still had a gap, but corrected to an escalating-cost model at 109.5 s. At 149.4 s they correctly anticipated the third doll, which woke by 162.2 s."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: would keep going 'for a little while', but 'doubt it would hold me for very long' without real decisions. Observed: the player ended at 180 s with the fourth ring about half full."
+   }
+  },
+  "retest3": {
+   "label": "P10",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 14.4 s, first wind at 16.2 s, and 3 off-key clicks (doll at 27.5 s, orb at 31.5 s, sewing machine at 150.8 s). Hold was used from 53.7 s and estimated at about 4/s."
+   },
+   "ii": {
+    "score": 3,
+    "why": "Observed: first doll awake at 67.8 s, second at 105.7 s, three by 180 s, with the lamp and sewing machine reported. Narration during play was sparse, mostly counter readings such as 'Up to 136' at 98.1 s. Opinion: 'charming', but noted 'the wake-ups are getting slower'."
+   },
+   "iii": {
+    "score": 3,
+    "why": "Observed: at 31.5 s the player predicted that gear clicks feed the ring, and at 98.1 s tracked the right-hand ring. Friction: they said the game 'never shows how much the next doll costs' and that spending was visible only as sudden drops."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'Yes, for a while', but would keep going 'only if' the clock, orb or unused icons add choices. Observed: after 98 s the session was repeated holds plus one non-responsive click at 145.1 s."
+   }
+  },
+  "retest2": {
+   "label": "P11",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 14.2 s and first wind at 15.8 s. There were 4 off-key clicks (doll at 29.0 s, red corner disc at 32.9 s, ring at 36.6 s, face at 106.9 s). The hint hand appeared at 36.6 s and the loop was clear by 50.4 s. The player never tried press-and-hold across 173 inputs."
+   },
+   "ii": {
+    "score": 4,
+    "why": "Observed: first doll awake at 67.6 s, second at 123.1 s, two at 180 s and three by about 192 s. The player measured faster passive income (0→52 in about 10 s with three dolls). Opinion: called the 'snowballing doll procession' satisfying."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 36.6 s the player expected an unlock at a threshold, and at 50.4 s predicted the doll wakes when the ring fills, which matched 67.6 s. The player tracked the second ring at 102.8 s. Friction: unsure whether a wake takes a fixed cost or everything."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'For a while, yes', and wants to see what waking all dolls unlocks, but expects it to 'get repetitive unless new mechanics show up soon'. Observed: the player ended at 195 s after confirming the third wake."
+   }
+  },
+  "c1": {
+   "label": "P12",
+   "i": {
+    "score": 4,
+    "why": "Observed: first input at 10.9 s and first wind at 12.7 s. There were 3 off-key clicks between 26.8 s and 33.9 s (doll, its key, orb). The player watched the hint hand at 38.5 s, tried hold, and confirmed '21→35' at 44.6 s, then used hold for the rest of the session."
+   },
+   "ii": {
+    "score": 5,
+    "why": "Observed: first doll awake at 53.5 s, one awake at 60 s and five by 180 s. At 72.9 s the player noted the rate 'roughly doubled', and later the dress form's finished jacket and a sixth gear. Opinion: called watching the workshop come alive 'satisfying'."
+   },
+   "iii": {
+    "score": 4,
+    "why": "Observed: at 44.6 s the player read the thread as carrying energy to wake the doll. At 72.9 s they anticipated the next ring finishing with a helper doll beside it, and the second doll woke at 78.2 s. Friction: they could not tell how the next doll is chosen or see prices."
+   },
+   "iv": {
+    "score": 3,
+    "why": "Opinion: 'Probably for a bit longer', but said it 'would need more decisions' to hold interest because 'all I did was hold one button'. Observed: the last ~75 s were chained 10 s holds before ending at 192 s."
+   }
+  }
+ }
+}

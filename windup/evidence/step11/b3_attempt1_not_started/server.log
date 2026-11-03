@@ -1,0 +1,11 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 120000ms exceeded.
+    at /home/merti/Workspace/gamo-windup/windup/tools/blind/server.mjs:31:12 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v24.20.0

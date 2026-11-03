@@ -1,0 +1,33 @@
+{
+  "variant": "base",
+  "build_id": "0.10.0+base",
+  "game_seconds": 189.833,
+  "first_input": 5.317,
+  "first_reward": 26.117,
+  "awakenings": [
+    26.117,
+    58.496,
+    98.662,
+    138.283,
+    179.99
+  ],
+  "dolls_at_180": 5,
+  "presses": 286,
+  "turns": 584,
+  "refused": 75,
+  "auto_share": 0.444,
+  "idle_total_s": 0,
+  "doll_actions": {
+    "helps": 12,
+    "kicks": 0,
+    "releases": 0,
+    "ready": 5
+  },
+  "errors": [],
+  "machine_load_1min": 39,
+  "footage": {
+    "file": "footage_0.10.0+base.mp4",
+    "audio_bytes": 4387560,
+    "audio_offset_s": 3.3382001953125
+  }
+}

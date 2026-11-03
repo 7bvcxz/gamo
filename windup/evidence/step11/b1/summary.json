@@ -1,0 +1,244 @@
+{
+  "session": "b1",
+  "model": "claude-opus-5-5",
+  "build": "0.10.0+b",
+  "wall_seconds": 190.231,
+  "actions": 84,
+  "inputs": 75,
+  "first_input_wall_s": 10.185,
+  "first_key_input_wall_s": 15.316,
+  "first_wind_game_s": 16.98,
+  "first_doll_game_s": 85.059,
+  "second_doll_game_s": 130.041,
+  "first_help_game_s": 92.926,
+  "dolls_at": {
+    "30": 0,
+    "60": 0,
+    "180": 2
+  },
+  "dolls_end": 3,
+  "off_key_inputs": [
+    {
+      "wall": 10.185,
+      "cmd": "click",
+      "args": [
+        "578",
+        "670"
+      ]
+    },
+    {
+      "wall": 38.97,
+      "cmd": "click",
+      "args": [
+        "422",
+        "605"
+      ]
+    },
+    {
+      "wall": 63.03,
+      "cmd": "click",
+      "args": [
+        "430",
+        "630"
+      ]
+    },
+    {
+      "wall": 67.638,
+      "cmd": "click",
+      "args": [
+        "92",
+        "40"
+      ]
+    },
+    {
+      "wall": 71.009,
+      "cmd": "click",
+      "args": [
+        "92",
+        "40"
+      ]
+    },
+    {
+      "wall": 71.51,
+      "cmd": "click",
+      "args": [
+        "489",
+        "280"
+      ]
+    },
+    {
+      "wall": 85.79,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 91.997,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 99.003,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 105.909,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 117.361,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 124.505,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 131.285,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 138.867,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 152.873,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 157.59,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 162.223,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 166.753,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    },
+    {
+      "wall": 171.453,
+      "cmd": "drag",
+      "args": [
+        "520",
+        "470",
+        "760",
+        "300",
+        "0.8"
+      ]
+    }
+  ],
+  "holds": 0,
+  "hints_shown": [
+    {
+      "t": 37.79,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 4,
+      "seconds": 6.2
+    },
+    {
+      "after_wall": 143.8,
+      "seconds": 6
+    },
+    {
+      "after_wall": 109.4,
+      "seconds": 4.7
+    }
+  ],
+  "played_past_180_s": false,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": false
+  },
+  "final_words": "I played for about 3 minutes 10 seconds. It's a calm clicker/idle game set in a moonlit tailor's workshop.\n\n**What I understood:**\n- **Earning:** Turning the big brass gear in the center earns gold spirals, the counter at the top. A single click gives 1 spiral. Dragging across it like a crank earns much more; my first drag gave 9 in one motion. Later, income sped up a lot (from 77 to 239 over five cranking drags), which suggests the new parts add to production or earn on their own. I never confirmed passive income, though, because spending happened during my one wait.\n- **Spending:** I never bought anything myself. Spirals flow along a glowing arc to the next target, and unlocks happen automatically when enough has built up. That arc is what I first mistook for an aiming line.\n- **Unlocks:** In order, I saw two extra small gears, a desk lamp, a red sewing machine, and three wind-up dolls in costume: one in a top hat, one in a blue cap, and a girl with a flower.\n- **The shells:** The grey shapes on the floor seem to be dust sheets over sleeping dolls. The goal looks like waking every doll and bringing the whole workshop back to life. The camera even zoomed in a little as things grew.\n\n**What confused me:**\n- **Hard to start:** I couldn't tell what to do at first. My first click was on a floor shell and nothing happened, and the progress ring on a shell looked like something to click.\n- **Some controls unclear:** The glowing face-orb did nothing when clicked. The top-left icon only toggled effects.\n- **Spending is invisible:** The counter suddenly dropped (91 → 77, then 239 → 0) with no prices or explanation shown. I worked out the cost of each unlock only from the drops.\n\n**Would I keep playing?** Probably yes, for a while. The art and mood are lovely. Watching the dark room light up and the dolls climb out from under their sheets is a satisfying reward, and I want to know what the clock, the mannequin and the rest of the dolls do. The downside is that there are almost no decisions: so far it's just cranking and watching. Unless upgrades or choices show up later, I'd expect the novelty to fade within about 10–15 minutes.",
+  "turns": 34,
+  "cost_usd": 0.3886894
+}

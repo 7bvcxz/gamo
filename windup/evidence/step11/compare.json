@@ -1,0 +1,646 @@
+{
+ "base": [
+  {
+   "session": "retest1",
+   "build": "0.10.0+base",
+   "first_input_wall_s": 10.395,
+   "first_wind_s": 12.092,
+   "first_doll_s": 61.915,
+   "first_change_s": 61.915,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 28,
+   "inputs_180": 199,
+   "holds": 0,
+   "spring_releases_180": 0,
+   "kicks_180": 0,
+   "off_key_clicks": 2,
+   "idle20_hints": 0,
+   "played_until_wall_s": 181.8,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/retest1_0.jpg",
+     "game_t": 6.2
+    },
+    "30": {
+     "file": "frames/retest1_30.jpg",
+     "game_t": 28.4
+    },
+    "60": {
+     "file": "frames/retest1_60.jpg",
+     "game_t": 59.8
+    },
+    "180": {
+     "file": "frames/retest1_180.jpg",
+     "game_t": 177.7
+    }
+   }
+  },
+  {
+   "session": "retest2",
+   "build": "0.10.0+base",
+   "first_input_wall_s": 14.162,
+   "first_wind_s": 15.756,
+   "first_doll_s": 67.556,
+   "first_change_s": 67.556,
+   "awakenings_180": 2,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 2
+   },
+   "change_bins_pct_0_180": 22,
+   "inputs_180": 172,
+   "holds": 0,
+   "spring_releases_180": 0,
+   "kicks_180": 0,
+   "off_key_clicks": 4,
+   "idle20_hints": 0,
+   "played_until_wall_s": 192.1,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/retest2_0.jpg",
+     "game_t": 9.4
+    },
+    "30": {
+     "file": "frames/retest2_30.jpg",
+     "game_t": 30.5
+    },
+    "60": {
+     "file": "frames/retest2_60.jpg",
+     "game_t": 60
+    },
+    "180": {
+     "file": "frames/retest2_180.jpg",
+     "game_t": 180.3
+    }
+   }
+  },
+  {
+   "session": "retest3",
+   "build": "0.10.0+base",
+   "first_input_wall_s": 14.444,
+   "first_wind_s": 16.177,
+   "first_doll_s": 67.788,
+   "first_change_s": 67.788,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 33,
+   "inputs_180": 53,
+   "holds": 9,
+   "spring_releases_180": 0,
+   "kicks_180": 0,
+   "off_key_clicks": 3,
+   "idle20_hints": 0,
+   "played_until_wall_s": 192,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/retest3_0.jpg",
+     "game_t": 9.1
+    },
+    "30": {
+     "file": "frames/retest3_30.jpg",
+     "game_t": 29.1
+    },
+    "60": {
+     "file": "frames/retest3_60.jpg",
+     "game_t": 63.1
+    },
+    "180": {
+     "file": "frames/retest3_180.jpg",
+     "game_t": 180.5
+    }
+   }
+  }
+ ],
+ "a": [
+  {
+   "session": "a1",
+   "build": "0.10.0+a",
+   "first_input_wall_s": 15.689,
+   "first_wind_s": 17.4,
+   "first_doll_s": 82.348,
+   "first_change_s": 67.064,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 44,
+   "inputs_180": 54,
+   "holds": 8,
+   "spring_releases_180": 7,
+   "kicks_180": 0,
+   "off_key_clicks": 3,
+   "idle20_hints": 0,
+   "played_until_wall_s": 184.8,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/a1_0.jpg",
+     "game_t": 9.6
+    },
+    "30": {
+     "file": "frames/a1_30.jpg",
+     "game_t": 32.3
+    },
+    "60": {
+     "file": "frames/a1_60.jpg",
+     "game_t": 59.8
+    },
+    "180": {
+     "file": "frames/a1_180.jpg",
+     "game_t": 175.6
+    }
+   }
+  },
+  {
+   "session": "a2",
+   "build": "0.10.0+a",
+   "first_input_wall_s": 13.231,
+   "first_wind_s": 14.958,
+   "first_doll_s": 60.009,
+   "first_change_s": 60.009,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 50,
+   "inputs_180": 72,
+   "holds": 9,
+   "spring_releases_180": 8,
+   "kicks_180": 0,
+   "off_key_clicks": 2,
+   "idle20_hints": 0,
+   "played_until_wall_s": 190.8,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/a2_0.jpg",
+     "game_t": 8.4
+    },
+    "30": {
+     "file": "frames/a2_30.jpg",
+     "game_t": 29.9
+    },
+    "60": {
+     "file": "frames/a2_60.jpg",
+     "game_t": 60.4
+    },
+    "180": {
+     "file": "frames/a2_180.jpg",
+     "game_t": 182.1
+    }
+   }
+  },
+  {
+   "session": "a3",
+   "build": "0.10.0+a",
+   "first_input_wall_s": 10.781,
+   "first_wind_s": 12.426,
+   "first_doll_s": 64.429,
+   "first_change_s": 64.429,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 50,
+   "inputs_180": 76,
+   "holds": 8,
+   "spring_releases_180": 8,
+   "kicks_180": 0,
+   "off_key_clicks": 2,
+   "idle20_hints": 0,
+   "played_until_wall_s": 193.1,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/a3_0.jpg",
+     "game_t": 6.2
+    },
+    "30": {
+     "file": "frames/a3_30.jpg",
+     "game_t": 29.4
+    },
+    "60": {
+     "file": "frames/a3_60.jpg",
+     "game_t": 55.9
+    },
+    "180": {
+     "file": "frames/a3_180.jpg",
+     "game_t": 175.8
+    }
+   }
+  }
+ ],
+ "b": [
+  {
+   "session": "b1",
+   "build": "0.10.0+b",
+   "first_input_wall_s": 15.316,
+   "first_wind_s": 16.98,
+   "first_doll_s": 85.059,
+   "first_change_s": 85.059,
+   "awakenings_180": 2,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 2
+   },
+   "change_bins_pct_0_180": 22,
+   "inputs_180": 75,
+   "holds": 0,
+   "spring_releases_180": 0,
+   "kicks_180": 0,
+   "off_key_clicks": 19,
+   "idle20_hints": 0,
+   "played_until_wall_s": 186.6,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": false
+   },
+   "frames": {
+    "0": {
+     "file": "frames/b1_0.jpg",
+     "game_t": 5.6
+    },
+    "30": {
+     "file": "frames/b1_30.jpg",
+     "game_t": 30.1
+    },
+    "60": {
+     "file": "frames/b1_60.jpg",
+     "game_t": 60.5
+    },
+    "180": {
+     "file": "frames/b1_180.jpg",
+     "game_t": 175.6
+    }
+   }
+  },
+  {
+   "session": "b2",
+   "build": "0.10.0+b",
+   "first_input_wall_s": 21.563,
+   "first_wind_s": 22.719,
+   "first_doll_s": 71.344,
+   "first_change_s": 71.344,
+   "awakenings_180": 2,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 2
+   },
+   "change_bins_pct_0_180": 17,
+   "inputs_180": 125,
+   "holds": 0,
+   "spring_releases_180": 0,
+   "kicks_180": 0,
+   "off_key_clicks": 1,
+   "idle20_hints": 1,
+   "played_until_wall_s": 191.3,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/b2_0.jpg",
+     "game_t": 10.4
+    },
+    "30": {
+     "file": "frames/b2_30.jpg",
+     "game_t": 31.9
+    },
+    "60": {
+     "file": "frames/b2_60.jpg",
+     "game_t": 60
+    },
+    "180": {
+     "file": "frames/b2_180.jpg",
+     "game_t": 180
+    }
+   }
+  },
+  {
+   "session": "b3",
+   "build": "0.10.0+b",
+   "first_input_wall_s": 11.003,
+   "first_wind_s": 12.717,
+   "first_doll_s": 71.778,
+   "first_change_s": 71.778,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 28,
+   "inputs_180": 34,
+   "holds": 9,
+   "spring_releases_180": 0,
+   "kicks_180": 0,
+   "off_key_clicks": 4,
+   "idle20_hints": 0,
+   "played_until_wall_s": 177.4,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": false
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/b3_0.jpg",
+     "game_t": 5.5
+    },
+    "30": {
+     "file": "frames/b3_30.jpg",
+     "game_t": 29
+    },
+    "60": {
+     "file": "frames/b3_60.jpg",
+     "game_t": 58.9
+    },
+    "180": {
+     "file": "frames/b3_180.jpg",
+     "game_t": 172.9
+    }
+   }
+  }
+ ],
+ "c": [
+  {
+   "session": "c1",
+   "build": "0.10.0+c",
+   "first_input_wall_s": 10.898,
+   "first_wind_s": 12.668,
+   "first_doll_s": 53.505,
+   "first_change_s": 53.505,
+   "awakenings_180": 5,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 1,
+    "180": 5
+   },
+   "change_bins_pct_0_180": 44,
+   "inputs_180": 35,
+   "holds": 12,
+   "spring_releases_180": 0,
+   "kicks_180": 5,
+   "off_key_clicks": 3,
+   "idle20_hints": 0,
+   "played_until_wall_s": 189.6,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": true,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": false,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/c1_0.jpg",
+     "game_t": 6.9
+    },
+    "30": {
+     "file": "frames/c1_30.jpg",
+     "game_t": 28.5
+    },
+    "60": {
+     "file": "frames/c1_60.jpg",
+     "game_t": 59.9
+    },
+    "180": {
+     "file": "frames/c1_180.jpg",
+     "game_t": 180.7
+    }
+   }
+  },
+  {
+   "session": "c2",
+   "build": "0.10.0+c",
+   "first_input_wall_s": 13.838,
+   "first_wind_s": 15.422,
+   "first_doll_s": 69.584,
+   "first_change_s": 69.584,
+   "awakenings_180": 4,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 4
+   },
+   "change_bins_pct_0_180": 39,
+   "inputs_180": 51,
+   "holds": 9,
+   "spring_releases_180": 0,
+   "kicks_180": 4,
+   "off_key_clicks": 5,
+   "idle20_hints": 0,
+   "played_until_wall_s": 182.6,
+   "milestones": {
+    "input_by_10": false,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/c2_0.jpg",
+     "game_t": 8.8
+    },
+    "30": {
+     "file": "frames/c2_30.jpg",
+     "game_t": 29.9
+    },
+    "60": {
+     "file": "frames/c2_60.jpg",
+     "game_t": 56.5
+    },
+    "180": {
+     "file": "frames/c2_180.jpg",
+     "game_t": 183.6
+    }
+   }
+  },
+  {
+   "session": "c3",
+   "build": "0.10.0+c",
+   "first_input_wall_s": 9.401,
+   "first_wind_s": 11.123,
+   "first_doll_s": 72.7,
+   "first_change_s": 72.7,
+   "awakenings_180": 3,
+   "dolls_at": {
+    "10": 0,
+    "30": 0,
+    "60": 0,
+    "180": 3
+   },
+   "change_bins_pct_0_180": 28,
+   "inputs_180": 146,
+   "holds": 1,
+   "spring_releases_180": 0,
+   "kicks_180": 3,
+   "off_key_clicks": 4,
+   "idle20_hints": 0,
+   "played_until_wall_s": 190.2,
+   "milestones": {
+    "input_by_10": true,
+    "doll_by_30": false,
+    "change_by_60": false,
+    "past_180": true
+   },
+   "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+   },
+   "frames": {
+    "0": {
+     "file": "frames/c3_0.jpg",
+     "game_t": 5
+    },
+    "30": {
+     "file": "frames/c3_30.jpg",
+     "game_t": 31
+    },
+    "60": {
+     "file": "frames/c3_60.jpg",
+     "game_t": 59.8
+    },
+    "180": {
+     "file": "frames/c3_180.jpg",
+     "game_t": 179.3
+    }
+   }
+  }
+ ]
+}
