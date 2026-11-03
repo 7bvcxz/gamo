@@ -1,0 +1,75 @@
+{"t":0.4,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":8.4,"issued":8.4,"cmd":"note","args":{"text":"A popcorn machine in a circle, 8 empty circles above it (slots to fill?), coin counter 0 at top. A hand/finger icon on the machine suggests tap it. Bottom card: a bucket, 25 coins, up arrow - probably an upgrade costing 25, greyed out. Back, sound, restart buttons on top. I expect tapping the machine pops popcorn and fills the circles, earning coins."}}
+{"t":11,"issued":9.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"002.png"}
+{"t":16.9,"issued":15.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"003.png"}
+{"t":18.3,"issued":17,"cmd":"tap","args":{"x":300,"y":820},"shot":"004.png"}
+{"t":19.7,"issued":18.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"005.png"}
+{"t":25,"issued":25,"cmd":"note","args":{"text":"Each tap adds a kernel to a slot - 4 of 8 now. No coins yet. I guess filling all 8 pops a batch. Tapping more."}}
+{"t":26.3,"issued":25.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"006.png"}
+{"t":27.4,"issued":26.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"007.png"}
+{"t":28.5,"issued":27.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"008.png"}
+{"t":29.9,"issued":28.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"009.png"}
+{"t":36.4,"issued":36.4,"cmd":"note","args":{"text":"8 kernels = a pop! +10 coins, popcorn pieces scattered on the floor, and the upgrade card started filling with yellow (progress to 25?). Satisfying little payoff. Are the floor popcorns collectible? Trying to tap one."}}
+{"t":37.6,"issued":36.5,"cmd":"tap","args":{"x":563,"y":972},"shot":"010.png"}
+{"t":43.6,"issued":43.6,"cmd":"note","args":{"text":"Tapping the floor popcorn just added a kernel too - seems any tap anywhere counts, and the floor bits just faded. Coins still 10. Let me try holding the finger down on the machine instead of tapping - maybe it fills faster."}}
+{"t":48.1,"issued":43.8,"cmd":"hold","args":{"x":300,"y":820,"s":3},"shot":"011.png"}
+{"t":55.2,"issued":55.2,"cmd":"note","args":{"text":"Holding = just one kernel, no bonus. So it's tap-tap-tap. The yellow bar in the bucket card looks like progress toward 25 coins (10/25). Tapping 6 more for the next pop."}}
+{"t":56.4,"issued":55.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"012.png"}
+{"t":57.9,"issued":56.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"013.png"}
+{"t":59.5,"issued":58.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"014.png"}
+{"t":61.1,"issued":59.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"015.png"}
+{"t":62.8,"issued":61.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"016.png"}
+{"t":64.3,"issued":63,"cmd":"tap","args":{"x":300,"y":820},"shot":"017.png"}
+{"t":70.6,"issued":70.6,"cmd":"note","args":{"text":"20 coins, card is 80% yellow - confirmed it's a progress fill to 25. One more batch and I can buy the bucket upgrade. A bit repetitive already, 8 taps per 10 coins."}}
+{"t":72.1,"issued":70.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"018.png"}
+{"t":73.6,"issued":72.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"019.png"}
+{"t":75.2,"issued":73.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"020.png"}
+{"t":76.8,"issued":75.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"021.png"}
+{"t":78.2,"issued":76.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"022.png"}
+{"t":79.6,"issued":78.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"023.png"}
+{"t":81.3,"issued":79.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"024.png"}
+{"t":82.8,"issued":81.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"025.png"}
+{"t":88.9,"issued":88.9,"cmd":"note","args":{"text":"30 coins - the card turned bright gold, bucket went dark brown and the arrow turned red. Clearly says 'buy me now'. Nice clear signal. Tapping it, expecting a bucket to appear or a bigger payout."}}
+{"t":90.3,"issued":89,"cmd":"tap","args":{"x":300,"y":1180},"shot":"026.png"}
+{"t":96.9,"issued":96.9,"cmd":"note","args":{"text":"Bought it: 30->5 coins. The machine got bigger with a striped awning and bunting - a stand now. Next upgrade is a cart on wheels for 64. Still 8 slots. Curious whether a batch now pays more than 10. Tapping 8."}}
+{"t":98.1,"issued":97,"cmd":"tap","args":{"x":300,"y":800},"shot":"027.png"}
+{"t":99.4,"issued":98.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"028.png"}
+{"t":100.5,"issued":99.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"029.png"}
+{"t":101.9,"issued":100.7,"cmd":"tap","args":{"x":300,"y":800},"shot":"030.png"}
+{"t":103.1,"issued":102.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"031.png"}
+{"t":104.3,"issued":103.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"032.png"}
+{"t":105.5,"issued":104.4,"cmd":"tap","args":{"x":300,"y":800},"shot":"033.png"}
+{"t":106.9,"issued":105.7,"cmd":"tap","args":{"x":300,"y":800},"shot":"034.png"}
+{"t":114.5,"issued":114.5,"cmd":"note","args":{"text":"5 -> 27: a batch now pays 22 instead of 10! Upgrade more than doubled it, and the pop throws way more popcorn around. That felt good. Does anything happen if I just wait? Checking idle for 5 s."}}
+{"t":120,"issued":114.6,"cmd":"wait","args":{"s":5},"shot":"035.png"}
+{"t":126.5,"issued":126.5,"cmd":"note","args":{"text":"No idle income - waiting does nothing, but the circle ring came back around the machine as a gentle 'tap here' hint. OK, back to tapping. Two more batches should reach 64 for the cart."}}
+{"t":127.7,"issued":126.6,"cmd":"tap","args":{"x":300,"y":800},"shot":"036.png"}
+{"t":128.7,"issued":127.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"037.png"}
+{"t":129.8,"issued":128.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"038.png"}
+{"t":131.1,"issued":129.9,"cmd":"tap","args":{"x":300,"y":800},"shot":"039.png"}
+{"t":132.2,"issued":131.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"040.png"}
+{"t":133.3,"issued":132.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"041.png"}
+{"t":134.5,"issued":133.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"042.png"}
+{"t":135.6,"issued":134.6,"cmd":"tap","args":{"x":300,"y":800},"shot":"043.png"}
+{"t":136.8,"issued":135.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"044.png"}
+{"t":138.1,"issued":137,"cmd":"tap","args":{"x":300,"y":800},"shot":"045.png"}
+{"t":139.4,"issued":138.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"046.png"}
+{"t":140.7,"issued":139.6,"cmd":"tap","args":{"x":300,"y":800},"shot":"047.png"}
+{"t":141.9,"issued":140.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"048.png"}
+{"t":143.1,"issued":142,"cmd":"tap","args":{"x":300,"y":800},"shot":"049.png"}
+{"t":144.3,"issued":143.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"050.png"}
+{"t":145.6,"issued":144.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"051.png"}
+{"t":151.2,"issued":151.2,"cmd":"note","args":{"text":"71 coins, the cart card is gold with the red arrow again. Buying the cart - expecting the stand to grow wheels and pay more per pop."}}
+{"t":152.6,"issued":151.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"052.png"}
+{"t":159.2,"issued":159.2,"cmd":"note","args":{"text":"Cart bought (71->7): it's on wheels now, bigger, golden kernels sprinkled around. Next is 163 for a bigger cart. Let me see what one batch pays now - tapping 8."}}
+{"t":160.4,"issued":159.3,"cmd":"tap","args":{"x":300,"y":760},"shot":"053.png"}
+{"t":161.6,"issued":160.6,"cmd":"tap","args":{"x":300,"y":760},"shot":"054.png"}
+{"t":162.7,"issued":161.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"055.png"}
+{"t":163.9,"issued":162.9,"cmd":"tap","args":{"x":300,"y":760},"shot":"056.png"}
+{"t":165.2,"issued":164.1,"cmd":"tap","args":{"x":300,"y":760},"shot":"057.png"}
+{"t":166.4,"issued":165.4,"cmd":"tap","args":{"x":300,"y":760},"shot":"058.png"}
+{"t":167.6,"issued":166.6,"cmd":"tap","args":{"x":300,"y":760},"shot":"059.png"}
+{"t":169.1,"issued":167.8,"cmd":"tap","args":{"x":300,"y":760},"shot":"060.png"}
+{"t":174.8,"issued":174.8,"cmd":"note","args":{"text":"7 -> 55: one batch now pays 48! Doubling again, and a big popcorn shower. Each upgrade roughly doubles the payout. Need about 3 batches for 163."}}
+{"t":175.7,"issued":174.9,"cmd":"tap","args":{"x":300,"y":760},"shot":"061.png"}
+{"t":179.5,"issued":178.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"062.png"}

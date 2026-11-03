@@ -1,0 +1,29 @@
+{
+  "run": "s2",
+  "url_variant": "perfect",
+  "version": "0.8.0",
+  "seconds": 181,
+  "commands": 25,
+  "taps": 3,
+  "holds": 11,
+  "drags": 0,
+  "waits": 0,
+  "notes": 9,
+  "looks": 2,
+  "first_action_s": 11.8,
+  "game_inputs": 12,
+  "first_earn_s": 11.8,
+  "first_upgrade_s": 122.7,
+  "upgrades": 2,
+  "level": 2,
+  "earned": 94,
+  "longest_gap_between_commands_s": 18.3,
+  "page_errors": 0,
+  "outcomes": {
+    "early": 1,
+    "late": 2,
+    "burnt": 3,
+    "perfect": 6
+  },
+  "refused": 3
+}

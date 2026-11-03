@@ -1,0 +1,83 @@
+{"t":0.5,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":9.1,"issued":9.1,"cmd":"note","args":{"text":"I see a red popcorn machine in the middle inside a faint circle, a coin counter at 0 on top, back arrow, sound and restart buttons. A finger icon points at the machine so I think I should tap it to pop popcorn and earn coins. Bottom card shows a grey bucket/bag, price 24 coins and an up arrow - probably an upgrade I can buy once I have 24 coins. I'll tap the machine first."}}
+{"t":11.5,"issued":10.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"002.png"}
+{"t":17.1,"issued":17.1,"cmd":"note","args":{"text":"Tapping gave +1 coin, popcorn kernels flew out of the machine. The finger hint disappeared. A thin yellow bar started filling at the bottom of the upgrade card - progress toward 24. Let me tap fast several times."}}
+{"t":18.2,"issued":17.3,"cmd":"tap","args":{"x":300,"y":830},"shot":"003.png"}
+{"t":19.4,"issued":18.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"004.png"}
+{"t":20.6,"issued":19.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"005.png"}
+{"t":21.8,"issued":20.8,"cmd":"tap","args":{"x":300,"y":830},"shot":"006.png"}
+{"t":22.9,"issued":22,"cmd":"tap","args":{"x":300,"y":830},"shot":"007.png"}
+{"t":24.1,"issued":23,"cmd":"tap","args":{"x":300,"y":830},"shot":"008.png"}
+{"t":30,"issued":30,"cmd":"note","args":{"text":"7 coins after 7 taps. The upgrade card is filling with yellow from the bottom like the bucket is filling - nice, I can see how close I am. Curious whether holding my finger on the machine keeps popping. Trying a 3 second hold."}}
+{"t":34.3,"issued":30.2,"cmd":"hold","args":{"x":300,"y":830,"s":3},"shot":"009.png"}
+{"t":39.8,"issued":39.8,"cmd":"note","args":{"text":"Holding only gave one coin (8 now). So it's tap-tap. Does tapping the empty background count too? Trying the sky area."}}
+{"t":40.8,"issued":39.9,"cmd":"tap","args":{"x":300,"y":350},"shot":"010.png"}
+{"t":46.6,"issued":46.6,"cmd":"note","args":{"text":"Tapping the empty sky also gave +1 (9 now). So anywhere works. Grinding toward 24 for the bucket upgrade."}}
+{"t":47.8,"issued":46.8,"cmd":"tap","args":{"x":300,"y":830},"shot":"011.png"}
+{"t":48.9,"issued":47.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"012.png"}
+{"t":50.3,"issued":49.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"013.png"}
+{"t":51.8,"issued":50.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"014.png"}
+{"t":53.1,"issued":51.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"015.png"}
+{"t":54.5,"issued":53.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"016.png"}
+{"t":55.8,"issued":54.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"017.png"}
+{"t":56.9,"issued":55.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"018.png"}
+{"t":58.1,"issued":57.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"019.png"}
+{"t":59.4,"issued":58.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"020.png"}
+{"t":60.6,"issued":59.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"021.png"}
+{"t":61.9,"issued":60.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"022.png"}
+{"t":63,"issued":62,"cmd":"tap","args":{"x":300,"y":830},"shot":"023.png"}
+{"t":64.2,"issued":63.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"024.png"}
+{"t":65.8,"issued":64.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"025.png"}
+{"t":71.4,"issued":71.4,"cmd":"note","args":{"text":"24 coins! The card turned bright gold and the arrow went red - clearly says 'buy me now'. Satisfying signal. Tapping it, expecting a bucket to appear or the machine to pop more per tap."}}
+{"t":72.7,"issued":71.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"026.png"}
+{"t":79.1,"issued":79.1,"cmd":"note","args":{"text":"Bought it! The machine grew: now wider with a red-white striped awning and pennants. Coins back to 0. Next upgrade costs 41 and the icon is the same box but with wheels - a cart? Does a tap now give more than +1? Testing."}}
+{"t":80.7,"issued":79.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"027.png"}
+{"t":86.5,"issued":86.5,"cmd":"note","args":{"text":"One tap -> 2 coins. So the upgrade doubled the tap value? Or does it make coins by itself now? I'll wait 5 seconds without touching to check."}}
+{"t":92.4,"issued":86.7,"cmd":"wait","args":{"s":5},"shot":"028.png"}
+{"t":99.7,"issued":99.7,"cmd":"note","args":{"text":"No coins while idle - still 2. So the upgrade made each tap worth +2, nothing automatic yet. Maybe the wheeled cart will be automatic? Tapping ~20 more times to reach 41."}}
+{"t":101.2,"issued":99.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"029.png"}
+{"t":102.8,"issued":101.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"030.png"}
+{"t":104.5,"issued":103,"cmd":"tap","args":{"x":300,"y":820},"shot":"031.png"}
+{"t":105.8,"issued":104.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"032.png"}
+{"t":107.5,"issued":106,"cmd":"tap","args":{"x":300,"y":820},"shot":"033.png"}
+{"t":108.9,"issued":107.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"034.png"}
+{"t":110.3,"issued":109,"cmd":"tap","args":{"x":300,"y":820},"shot":"035.png"}
+{"t":111.7,"issued":110.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"036.png"}
+{"t":113.1,"issued":111.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"037.png"}
+{"t":114.4,"issued":113.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"038.png"}
+{"t":115.6,"issued":114.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"039.png"}
+{"t":116.9,"issued":115.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"040.png"}
+{"t":118.1,"issued":117.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"041.png"}
+{"t":119.2,"issued":118.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"042.png"}
+{"t":120.5,"issued":119.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"043.png"}
+{"t":121.8,"issued":120.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"044.png"}
+{"t":123.2,"issued":122.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"045.png"}
+{"t":124.5,"issued":123.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"046.png"}
+{"t":125.7,"issued":124.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"047.png"}
+{"t":127.1,"issued":125.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"048.png"}
+{"t":132.7,"issued":132.7,"cmd":"note","args":{"text":"42 coins - hmm, 20 taps at +2 should be ~42, yes. Card is gold again. Buying the wheeled cart. Tapping got a bit repetitive in that stretch - just watching a number climb."}}
+{"t":134.3,"issued":132.8,"cmd":"tap","args":{"x":300,"y":1180},"shot":"049.png"}
+{"t":141.4,"issued":141.4,"cmd":"note","args":{"text":"The machine is now a popcorn cart on wheels with a bigger awning - nice visible growth. 1 coin left over. Next costs 69 and the icon looks like a taller cart. The faint ring around it came back - same ring as at the very start, maybe it means 'tap me'. Tapping to see the new value."}}
+{"t":142.4,"issued":141.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"050.png"}
+{"t":148.4,"issued":148.4,"cmd":"note","args":{"text":"+3 per tap now - the pattern is clear: each upgrade = +1 per tap and a bigger machine. Next is 69 = ~22 taps again. I won't touch the restart button (scared it wipes progress). Quick check of the speaker button."}}
+{"t":149.5,"issued":148.5,"cmd":"tap","args":{"x":467,"y":58},"shot":"051.png"}
+{"t":156,"issued":156,"cmd":"note","args":{"text":"Speaker is a mute toggle (red x now). Didn't cost a coin. Turning sound back on and tapping for the rest of my time."}}
+{"t":157.2,"issued":156.1,"cmd":"tap","args":{"x":467,"y":58},"shot":"052.png"}
+{"t":158.3,"issued":157.3,"cmd":"tap","args":{"x":300,"y":760},"shot":"053.png"}
+{"t":159.6,"issued":158.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"054.png"}
+{"t":160.7,"issued":159.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"055.png"}
+{"t":161.9,"issued":160.9,"cmd":"tap","args":{"x":300,"y":760},"shot":"056.png"}
+{"t":163.3,"issued":162.1,"cmd":"tap","args":{"x":300,"y":760},"shot":"057.png"}
+{"t":164.6,"issued":163.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"058.png"}
+{"t":165.9,"issued":164.8,"cmd":"tap","args":{"x":300,"y":760},"shot":"059.png"}
+{"t":167.1,"issued":166,"cmd":"tap","args":{"x":300,"y":760},"shot":"060.png"}
+{"t":168.4,"issued":167.2,"cmd":"tap","args":{"x":300,"y":760},"shot":"061.png"}
+{"t":169.6,"issued":168.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"062.png"}
+{"t":171.1,"issued":169.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"063.png"}
+{"t":172.5,"issued":171.3,"cmd":"tap","args":{"x":300,"y":760},"shot":"064.png"}
+{"t":173.7,"issued":172.6,"cmd":"tap","args":{"x":300,"y":760},"shot":"065.png"}
+{"t":175,"issued":173.9,"cmd":"tap","args":{"x":300,"y":760},"shot":"066.png"}
+{"t":176.5,"issued":175.1,"cmd":"tap","args":{"x":300,"y":760},"shot":"067.png"}
+{"t":177.7,"issued":176.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"068.png"}
+{"t":179,"issued":177.8,"cmd":"tap","args":{"x":300,"y":760},"shot":"069.png"}
+{"t":180.3,"issued":179.2,"cmd":"tap","args":{"x":300,"y":760},"shot":"070.png"}
