@@ -91,6 +91,29 @@ func test_c_erupts_and_draws_under_the_cap() -> void:
 	assert_true(app.frame.play.fx.peak >= 100, "and plenty of them (%d)" % app.frame.play.fx.peak)
 
 
+func test_a_shows_every_press_even_when_fast() -> void:
+	app.open("click")
+	await tree.process_frame
+	for i in 30:
+		_mouse(app.frame.play, true)
+		_mouse(app.frame.play, false)
+	assert_eq(app.rules.presses, 30, "30 presses counted at once")
+	await tree.create_timer(0.2).timeout
+	assert_eq(app.frame.play.shown_pops, 30, "and 30 pops shown -- none dropped")
+
+
+func test_a_full_effect_pool_replaces_rather_than_swallows() -> void:
+	var fx := PopFx.new()
+	var rng := RandomNumberGenerator.new()
+	fx.burst(Vector2.ZERO, PopFx.CAP, 1.0, rng)
+	fx.step(0.0)
+	assert_eq(fx.alive, PopFx.CAP, "full")
+	fx.burst(Vector2(5, 5), 10, 1.0, rng)
+	fx.step(0.0)
+	assert_eq(fx.alive, PopFx.CAP, "still full")
+	assert_eq(fx.dropped, 10, "ten old pieces gave their slots to the new ones")
+
+
 func test_runs_are_isolated_between_experiments() -> void:
 	app.open("click")
 	await tree.process_frame

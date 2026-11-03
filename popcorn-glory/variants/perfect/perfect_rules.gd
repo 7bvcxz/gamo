@@ -2,7 +2,12 @@ extends PopRules
 
 ## B Perfect Pop: press to start heating, release to pop. The release time
 ## since the press decides the batch:
-##   before the gold window  early    x mult.early
+##   before the gold window  early    x mult.early x (held / gold start): only
+##                                    the kernels the heat reached pop, so a
+##                                    quick tap pays little (it out-earned
+##                                    aiming at the gold when it paid a flat
+##                                    x0.3 -- Step 04's tap-only player)
+##   within near_ms of it    near     x mult.near  (a near miss: fair, not a fail)
 ##   inside it               perfect  x mult.perfect
 ##   after it                late     x mult.late
 ##   held burn_after_ms past it: burnt by itself (x mult.burnt) -- holding on
@@ -11,6 +16,7 @@ extends PopRules
 ## a press then is refused (err.cooling).
 
 const EARLY := "early"
+const NEAR := "near"
 const PERFECT := "perfect"
 const LATE := "late"
 const BURNT := "burnt"
@@ -18,7 +24,7 @@ const BURNT := "burnt"
 var heating := false
 var heat_ms := 0
 var cooldown_left := 0
-var outcomes := {EARLY: 0, PERFECT: 0, LATE: 0, BURNT: 0}
+var outcomes := {EARLY: 0, NEAR: 0, PERFECT: 0, LATE: 0, BURNT: 0}
 
 
 func _init(p_economy: PopEconomy = null) -> void:
@@ -83,22 +89,28 @@ func _tick(ms: int) -> void:
 	now_ms = start
 
 
+func near_ms() -> int:
+	return int(economy.table(variant).get("near_ms", 0))
+
+
 func _judge(ms: int) -> String:
 	if ms < window_start():
-		return EARLY
+		return NEAR if window_start() - ms <= near_ms() else EARLY
 	if ms <= window_end():
 		return PERFECT
 	if ms < burn_at():
-		return LATE
+		return NEAR if ms - window_end() <= near_ms() else LATE
 	return BURNT
 
 
 func _resolve(kind: String) -> Dictionary:
 	var t := economy.table(variant)
+	var held := heat_ms
 	var mult := float((t["mult"] as Dictionary)[kind])
+	if kind == EARLY:
+		mult *= clampf(float(held) / float(window_start()), 0.0, 1.0)
 	var batch := economy.at(variant, "batch", level)
 	var n := maxi(1, int(floor(batch * mult)))
-	var held := heat_ms
 	heating = false
 	heat_ms = 0
 	cooldown_left = int(t["cooldown_ms"])
@@ -116,5 +128,6 @@ func state() -> Dictionary:
 	s["heat_ms"] = heat_ms
 	s["cooldown_left"] = cooldown_left
 	s["window"] = [window_start(), window_end(), burn_at()]
+	s["near_ms"] = near_ms()
 	s["outcomes"] = outcomes.duplicate()
 	return s

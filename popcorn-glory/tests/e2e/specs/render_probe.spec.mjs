@@ -20,7 +20,7 @@ test('render cost by level', async ({ pop }) => {
   loads.sort((a, b) => a - b);
   const heap = await pop.page.evaluate(() => (performance.memory ? performance.memory.usedJSHeapSize : null));
   const rows = [];
-  for (const [id, top] of [['click', 11], ['perfect', 14], ['explosion', 9]]) {
+  for (const [id, top] of [['click', 11], ['perfect', 14], ['explosion', 11]]) {
     await pop.open(`./#${id}`);
     for (const level of [0, top]) {
       await pop.call('dev_level', level);

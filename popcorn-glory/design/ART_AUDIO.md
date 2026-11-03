@@ -75,3 +75,15 @@ Step 05에서 더한 것: 잉크 외곽선(몸통·지붕, 도형마다 polyline
 ## 덜 움직이기
 
 `?motion=reduce`: 팝콘은 한 번에 하나, 반짝임·업그레이드의 뛰어오름·C의 흔들림 없음, 폭발은 조각 6개. 기계는 숨쉬지 않는다.
+
+## 산출물 목록 (원본 → 변환 → 결과 → 출처 → 명령 → 검토 그림)
+
+| 결과 | 원본 | 변환 | 출처·권리 | 명령 | 검토 그림 |
+|---|---|---|---|---|---|
+| `assets/atlas/sprites.png` (+ `.json`) | `art_src/{piece_a,piece_b,piece_c,kernel,coin,sparkle,smoke}.svg` | Godot SVG 래스터화(scale 1) → 투명 잘라내기 → 선반 포장 256×128 → 가장자리 2px 복제, 밉맵 import | 이 저장소에서 손으로 씀(생성 이미지·외부 그림 없음) | `godot --headless --path popcorn-glory --script res://tools/build_atlas.gd` → `--import` | 아틀라스를 갈색 바탕에 4배로 본 그림(Step 05 작업 중 확인), 게임 안: `evidence/step05/` |
+| `assets/audio/*.ogg` (12개) | `tools/build_audio.py` 안의 수식(사인·노이즈·종 부분음, 고정 시드) | 22,050Hz 16비트 WAV → ffmpeg libvorbis q4 | 합성(녹음·샘플 없음) | `python3 popcorn-glory/tools/build_audio.py` (`--check`로 길이 확인) | `evidence/step05/waveforms.png` |
+| 기계 12단계 | `art/machine_art.gd` (도형) | 실행 중에 그림, 모양이 바뀔 때만 다시 그림 | 이 저장소의 코드 | — | `evidence/step04/`의 캡처, 업그레이드 버튼 실루엣 |
+| 아이콘(뒤로·다시 시작·소리·기록) | `app/ui/icon_button.gd` (도형) | 실행 중에 그림 | 이 저장소의 코드 | — | 위쪽 바 캡처 |
+
+원본(`art_src/`, `build_audio.py`)과 실행용 결과(`assets/`)는 폴더가 다르고, 원본은 팩에 들어가지 않는다(`.gdignore`). 쓰지 않는 자산은 두지 않는다
+(`test_assets.gd`가 아틀라스의 모든 그림이 원본과 맞는지, 모든 소리가 실린 것인지 본다).

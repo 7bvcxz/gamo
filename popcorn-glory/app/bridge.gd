@@ -41,6 +41,8 @@ func query(name: String, arg: Variant) -> Variant:
 			return _app.call("summary")
 		"log":
 			return _app.call("log_lines")
+		"log_document":
+			return _app.call("log_document")
 	if name.begins_with("dev_") and not dev_allowed():
 		return {"ok": false, "error": "dev hooks need ?dev=1"}
 	match name:

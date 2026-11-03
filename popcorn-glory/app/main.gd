@@ -62,6 +62,7 @@ func _ready() -> void:
 	frame.restart_pressed.connect(restart)
 	frame.buy_pressed.connect(buy)
 	frame.sound_pressed.connect(toggle_sound)
+	frame.log_pressed.connect(download_log)
 	audio = PopAudio.new()
 	audio.name = "Audio"
 	add_child(audio)
@@ -114,6 +115,21 @@ func back() -> void:
 	_finish_run()
 	PopWeb.set_route("")
 	_show_chooser()
+
+
+## The run's local log with what it was played on (dev mode's log button):
+## build, variant, viewport, active time, every line. Nothing is sent anywhere.
+func log_document() -> Dictionary:
+	var win := get_window()
+	return {"game": "popcorn-glory", "version": version(), "variant": exp_id,
+		"viewport": [win.size.x, win.size.y] if win else [0, 0], "active_ms": clock.now_ms,
+		"summary": summary(), "lines": session.lines}
+
+
+func download_log() -> void:
+	if rules == null:
+		return
+	PopWeb.download(JSON.stringify(log_document(), "  "), "popcorn-%s-%d.json" % [exp_id, clock.now_ms], "application/json")
 
 
 func toggle_sound() -> void:

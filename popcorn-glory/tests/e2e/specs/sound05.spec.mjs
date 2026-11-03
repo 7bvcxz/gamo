@@ -2,7 +2,7 @@
 // thread (lib/audio_tap.mjs), not as 'play() was called' (AGENTS.md
 // 2026-10-27: a game passed such checks for 26 versions while silent).
 // Each experiment's main action makes sound; the mute button and ?sound=off
-// silence it. Desktop only: the audio path is the same on every viewport.
+// silence it.
 import { test as base, expect } from '../lib/pop.mjs';
 import { AUDIO_TAP, listen } from '../lib/audio_tap.mjs';
 
@@ -13,7 +13,9 @@ const test = base.extend({
   },
 });
 
-test.skip(({ isMobile }) => isMobile, 'one viewport is enough for the audio path');
+// Every project: a phone's first touch must unlock audio as a desktop click
+// does (Step 05 addendum: 'Web audio actually plays after a user gesture
+// across desktop and mobile').
 
 const LOUD = 0.01;    // RMS over 23 ms; the synthesised pops peak at 0.8
 

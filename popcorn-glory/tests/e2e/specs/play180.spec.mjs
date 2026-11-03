@@ -41,6 +41,9 @@ for (const id of ['click', 'perfect', 'explosion']) {
     const done = new Set();
     while (true) {
       const s = await pop.state();
+      // The Step 04 addendum's checkpoints: first action, first upgrade, ~60 s, ~180 s.
+      if (s.run.presses >= 1 && !done.has('first_action')) { done.add('first_action'); await pop.page.waitForTimeout(150); await at('first_action'); }
+      if (s.run.level >= 1 && !done.has('first_upgrade')) { done.add('first_upgrade'); await pop.page.waitForTimeout(400); await at('first_upgrade'); }
       if (s.clock_ms >= 5000 && !done.has('5s')) { done.add('5s'); await at('5s'); }
       if (s.clock_ms >= 60000 && !done.has('60s')) { done.add('60s'); await at('60s'); }
       if (s.clock_ms >= 181000) { await at('180s'); break; }
@@ -57,7 +60,14 @@ for (const id of ['click', 'perfect', 'explosion']) {
       }
     }
     const sum = await pop.call('summary');
-    const result = { id, project: test.info().project.name, marks, buys, summary: sum };
+    const doc = await pop.call('log_document');
+    // A reproducible reset: Restart after the three minutes starts from nothing.
+    await pop.tap('restart');
+    await expect.poll(async () => (await pop.state()).run.money).toBe(0);
+    const fresh = await pop.state();
+    expect(fresh.run.level, 'restart: level 0').toBe(0);
+    expect(fresh.clock_ms, 'restart: the clock from zero').toBeLessThan(3000);
+    const result = { id, project: test.info().project.name, marks, buys, summary: sum, log: doc };
     test.info().annotations.push({ type: 'result', description: JSON.stringify({ marks, level: sum.level, inputs: sum.inputs }) });
     if (OUT) fs.writeFileSync(`${OUT}/play180_${id}_${test.info().project.name}.json`, JSON.stringify(result, null, 2));
     expect(sum.milestones.three_minutes, 'reached three minutes of play').toBeGreaterThanOrEqual(180000);

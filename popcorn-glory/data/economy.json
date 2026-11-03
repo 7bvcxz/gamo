@@ -12,7 +12,7 @@
     "max_level": 11
   },
   "perfect": {
-    "_doc": "B Perfect Pop: hold to heat, release to pop. The gold window opens window_start_ms after the press and lasts window_ms + window_step_ms * L (at most window_max_ms); burn_after_ms after it closes the batch burns by itself. The batch pays batch[L] * the outcome's multiplier, at least $1.",
+    "_doc": "B Perfect Pop: hold to heat, release to pop. The gold window opens window_start_ms after the press and lasts window_ms + window_step_ms * L (at most window_max_ms); a release within near_ms of either edge is a near miss; an early release pays mult.early x held / window_start_ms (the heat reached); burn_after_ms after it closes the batch burns by itself. The batch pays batch[L] * the outcome's multiplier, at least $1.",
     "batch": [5, 8, 13, 20, 33, 52, 84, 134, 215, 344, 550, 880, 1400, 2240, 3580],
     "cost": { "base": 30, "growth": 1.8 },
     "max_level": 14,
@@ -22,13 +22,14 @@
     "window_max_ms": 800,
     "burn_after_ms": 600,
     "cooldown_ms": 400,
-    "mult": { "early": 0.3, "perfect": 2.0, "late": 0.6, "burnt": 0.25 }
+    "near_ms": 150,
+    "mult": { "early": 0.6, "near": 1.0, "perfect": 2.0, "late": 0.6, "burnt": 0.25 }
   },
   "explosion": {
     "_doc": "C Pop Explosion: each press drops a kernel into one of `slots`; a full chamber erupts for burst[L] popcorn = $burst[L] (paid when it erupts). The show lasts show_ms + show_step_ms * L (at most show_max_ms); presses during it fill the next chamber, which erupts when the show ends if it is full.",
-    "burst": [10, 22, 48, 106, 234, 515, 1134, 2494, 5488, 12073],
+    "burst": [10, 22, 48, 106, 234, 515, 1134, 2494, 5488, 12073, 26561, 58434],
     "cost": { "base": 30, "growth": 2.6 },
-    "max_level": 9,
+    "max_level": 11,
     "slots": 8,
     "show_ms": 1200,
     "show_step_ms": 300,

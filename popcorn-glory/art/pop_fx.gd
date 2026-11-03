@@ -168,9 +168,19 @@ func _draw_sprites(ci: CanvasItem) -> void:
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
+## A full pool never swallows a new piece: the piece closest to its end gives
+## its slot up (fast taps must always show, Step 04 addendum). `dropped`
+## counts those replacements.
 func _spawn(k: int, p: Vector2, v: Vector2, t: float, s: float, r: float, col: Color = PopPalette.CREAM) -> void:
+	var slot := -1
+	var oldest := INF
 	for i in CAP:
 		if life[i] <= 0.0:
-			pos[i] = p; vel[i] = v; life[i] = t; size[i] = s; rot[i] = r; kind[i] = k; tint[i] = col
-			return
-	dropped += 1
+			slot = i
+			break
+		if life[i] < oldest:
+			oldest = life[i]
+			slot = i
+	if life[slot] > 0.0:
+		dropped += 1
+	pos[slot] = p; vel[slot] = v; life[slot] = t; size[slot] = s; rot[slot] = r; kind[slot] = k; tint[slot] = col

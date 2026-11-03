@@ -15,10 +15,13 @@ const FIRST_INPUT := 2000
 const REACT := 1500
 
 const MODELS := [
+	{"name": "A fast 4 taps/s", "exp": "click", "kind": "taps", "rate": 4.0},
 	{"name": "A steady 2.5 taps/s", "exp": "click", "kind": "taps", "rate": 2.5},
 	{"name": "A slow 1.2 taps/s", "exp": "click", "kind": "taps", "rate": 1.2},
 	{"name": "B skilled (aims at the gold's middle)", "exp": "perfect", "kind": "hold", "mix": {"perfect": 0.8, "late": 0.15, "early": 0.05}},
 	{"name": "B novice (35% gold, 10% burnt)", "exp": "perfect", "kind": "hold", "mix": {"early": 0.2, "perfect": 0.35, "late": 0.35, "burnt": 0.1}},
+	{"name": "B tapper (never holds: 0.15 s taps)", "exp": "perfect", "kind": "hold", "mix": {"tap": 1.0}},
+	{"name": "C fast 4 taps/s", "exp": "explosion", "kind": "taps", "rate": 4.0},
 	{"name": "C steady 2.5 taps/s", "exp": "explosion", "kind": "taps", "rate": 2.5},
 	{"name": "C slow 1.2 taps/s", "exp": "explosion", "kind": "taps", "rate": 1.2},
 ]
@@ -78,6 +81,7 @@ func _play(m: Dictionary) -> Dictionary:
 				var kind := _pick(m["mix"], rng)
 				var hold := 0
 				match kind:
+					"tap": hold = 150
 					"early": hold = int(int(w[0]) * 0.7)
 					"perfect": hold = (int(w[0]) + int(w[1])) / 2 + rng.randi_range(-40, 40)
 					"late": hold = (int(w[1]) + int(w[2])) / 2

@@ -10,6 +10,13 @@ extends PopPlayView
 var _flash := 0.0
 var _flash_col := PopPalette.GOLD
 var _last_outcome := ""
+## Where the last release fell on the ring, shown for MARK_S: a tap that
+## let go too soon leaves a mark short of the gold -- the picture of "hold
+## longer" (Step 04 addendum: a novice must infer the skill without words).
+const MARK_S := 1.6
+var _mark_ms := -1.0
+var _mark_age := 99.0
+var _mark_kind := ""
 
 
 func _release() -> void:
@@ -30,8 +37,11 @@ func on_events(events: Array[Dictionary]) -> void:
 		match String(e["type"]):
 			"outcome":
 				_last_outcome = String(d["kind"])
+				_mark_ms = float(d["held_ms"])
+				_mark_age = 0.0
+				_mark_kind = _last_outcome
 			"pop":
-				_squash = 1.0
+				squash(0.0, 9.0 if String(d.get("outcome", "")) == "perfect" else 6.0)
 				var n := int(d.get("count", 1))
 				var s := machine_size() / 900.0
 				var shown := mini(n, 18) if not reduced_motion else 1
@@ -44,6 +54,14 @@ func on_events(events: Array[Dictionary]) -> void:
 						_flash_col = PopPalette.GOLD
 						_sound("ding")
 						_sound("pop_2", 1.1)
+					"near":
+						# So close: silver popcorn, a small sparkle, the chime lower.
+						fx.burst(machine_top(), shown, s, rng, Color(0.86, 0.9, 0.98), 0.9, 1.05)
+						if not reduced_motion:
+							fx.sparkle(machine_top(), s, rng, 2, 90.0)
+						_flash = 0.5
+						_flash_col = Color(0.8, 0.85, 0.95)
+						_sound("ding", 0.84, -6.0)
 					"early":
 						fx.burst(machine_top(), maxi(1, shown / 2), s, rng, PopPalette.CREAM, 0.6, 0.7)
 						fx.kernels(machine_top(), 10, s, rng)
@@ -67,6 +85,7 @@ func on_events(events: Array[Dictionary]) -> void:
 
 func _process(delta: float) -> void:
 	_flash = maxf(0.0, _flash - delta * 2.5)
+	_mark_age += delta
 	# The sizzle while heating rises in pitch with the heat.
 	if audio != null and rules != null:
 		var st := _r()
@@ -135,6 +154,14 @@ func _draw_ring(ci: CanvasItem, _base: Vector2, size_px: float) -> void:
 		ci.draw_circle(c + Vector2(cos(a), sin(a)) * r, width * 0.9, col)
 	if _flash > 0.0:
 		ci.draw_arc(c, r * (1.0 + 0.4 * (1.0 - _flash)), 0, TAU, 64, Color(_flash_col, _flash), width * 2.0)
+	if not heating and _mark_age < MARK_S and _mark_ms >= 0.0:
+		# The last release: a tick across the ring where the finger let go.
+		var ma: float = to_angle.call(_mark_ms)
+		var dir := Vector2(cos(ma), sin(ma))
+		var mcol: Color = {"perfect": PopPalette.GOLD, "near": Color(0.8, 0.85, 0.95)}.get(_mark_kind, Color(0.3, 0.3, 0.35))
+		var fade := clampf(1.0 - _mark_age / MARK_S, 0.0, 1.0)
+		ci.draw_line(c + dir * (r - width * 2.2), c + dir * (r + width * 2.2), Color(Color.WHITE, fade), width * 0.9)
+		ci.draw_line(c + dir * (r - width * 1.8), c + dir * (r + width * 1.8), Color(mcol, fade), width * 0.5)
 
 
 func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:

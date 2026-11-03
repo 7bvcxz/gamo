@@ -12,14 +12,20 @@ signal back_pressed
 signal restart_pressed
 signal buy_pressed
 signal sound_pressed
+## Dev mode only (?dev=1): download this run's local log as JSON.
+signal log_pressed
 
 var back_button := PopIconButton.new()
 var restart_button := PopIconButton.new()
 var sound_button := PopIconButton.new()
+var log_button := PopIconButton.new()
 var money_view := PopMoneyView.new()
 var upgrade_button := PopUpgradeButton.new()
 var play: PopPlayView
-var dev := false
+var dev := false:
+	set(v):
+		dev = v
+		log_button.visible = v
 var clock_ms := 0
 var accent := PopPalette.RED
 
@@ -31,15 +37,19 @@ func _init() -> void:
 	back_button.name = "Back"
 	restart_button.name = "Restart"
 	sound_button.name = "Sound"
+	log_button.name = "Log"
+	log_button.icon = "log"
+	log_button.visible = false
 	sound_button.icon = "sound"
 	money_view.name = "Money"
 	upgrade_button.name = "Upgrade"
-	for c: Control in [money_view, upgrade_button, back_button, restart_button, sound_button]:
+	for c: Control in [money_view, upgrade_button, back_button, restart_button, sound_button, log_button]:
 		add_child(c)
 	back_button.pressed.connect(func() -> void: back_pressed.emit())
 	restart_button.pressed.connect(func() -> void: restart_pressed.emit())
 	upgrade_button.pressed.connect(func() -> void: buy_pressed.emit())
 	sound_button.pressed.connect(func() -> void: sound_pressed.emit())
+	log_button.pressed.connect(func() -> void: log_pressed.emit())
 
 
 func set_sound(on: bool) -> void:
@@ -74,6 +84,9 @@ func _layout() -> void:
 	restart_button.size = Vector2(84, 84)
 	sound_button.position = Vector2(x0 + col - 200, 28)
 	sound_button.size = Vector2(84, 84)
+	log_button.position = Vector2(x0 + 24, 160)
+	log_button.size = Vector2(72, 72)
+	log_button.visible = dev
 	money_view.position = Vector2(x0 + 120, 34)
 	money_view.size = Vector2(col - 330, 76)
 	var bh := clampf(h * 0.13, 120.0, 170.0)

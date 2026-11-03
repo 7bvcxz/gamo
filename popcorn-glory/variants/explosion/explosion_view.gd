@@ -2,9 +2,13 @@ extends PopPlayView
 
 ## C Pop Explosion's picture. Eight slots in a row over the machine: each press
 ## drops a kernel into the next. The fuller the chamber, the more the machine
-## rattles. A full chamber erupts: popcorn bursts from the machine and then
-## from popcorn already in the air -- a chain -- for the length of the show,
-## and coins shower to the counter. At most VISUAL_MAX pieces are drawn per
+## rattles. A full chamber erupts, and how it erupts is the production stage
+## (Step 04 addendum: three recognisable stages by about three minutes):
+##   levels 0-2  SINGLE POP  one burst from the machine's top
+##   levels 3-5  CLUSTER     bursts chaining off popcorn already in the air
+##   levels 6+   FOUNTAIN    a steady column straight up for the whole show,
+##                           and the chain around it
+## Coins shower to the counter. At most VISUAL_MAX pieces are drawn per
 ## eruption; past that the pieces get bigger instead of more (PopFx.CAP).
 
 const VISUAL_MAX := 300
@@ -15,6 +19,11 @@ var _show_len := 1.0
 var _show_age := 0.0
 var _boom := 0.0
 var _drops: Array[Dictionary] = []   # kernels falling into slots: {slot, age}
+var _tier := 0
+
+
+static func tier_of(level: int) -> int:
+	return 0 if level < 3 else (1 if level < 6 else 2)
 
 
 func _st() -> Dictionary:
@@ -34,7 +43,7 @@ func on_events(events: Array[Dictionary]) -> void:
 		match String(e["type"]):
 			"load":
 				_drops.append({"slot": int(d["loaded"]) - 1, "age": 0.0})
-				_squash = 0.4
+				squash(0.35)
 				# Each kernel a step higher: the chamber is audibly filling.
 				_sound("clink", 0.8 + 0.08 * float(d["loaded"]))
 			"erupt":
@@ -44,10 +53,11 @@ func on_events(events: Array[Dictionary]) -> void:
 				_show_len = maxf(0.2, float(d["show_ms"]) / 1000.0)
 				_show_age = 0.0
 				_boom = 1.0
-				_squash = 1.0
+				squash(0.0, 12.0)
+				_tier = tier_of(int(d["level"]))
 				var s := machine_size() / 900.0
-				var first := mini(int(_show_total), 24)
-				fx.burst(machine_top(), first, s, rng, PopPalette.CREAM, 1.3, 1.4, _big(n), 1.6)
+				var first := mini(int(_show_total), 24 if _tier > 0 else int(_show_total))
+				fx.burst(machine_top(), first, s, rng, PopPalette.CREAM, 1.3 if _tier > 0 else 1.0, 1.4, _big(n), 1.6)
 				_show_drawn += first
 				for i in mini(12, 2 + n / 20):
 					fx.coin(machine_top() + Vector2(rng.randf_range(-80, 80), rng.randf_range(-40, 40)), s)
@@ -80,8 +90,12 @@ func _process(delta: float) -> void:
 		var s := machine_size() / 900.0
 		var big := _big(int(_st()["earned"]))
 		for i in k:
-			var from := fx.random_piece(rng, machine_top()) if i % 2 == 0 else machine_top()
-			fx.burst(from, 1, s, rng, PopPalette.CREAM, PI, 0.7, big, 1.3)
+			if _tier == 2 and i % 2 == 0:
+				# The fountain: straight up from the top, gold-tinged.
+				fx.burst(machine_top(), 1, s, rng, PopPalette.CREAM.lerp(PopPalette.GOLD, 0.35), 0.18, 1.45, big, 1.5)
+			else:
+				var from := fx.random_piece(rng, machine_top()) if i % 2 == 0 else machine_top()
+				fx.burst(from, 1, s, rng, PopPalette.CREAM, PI, 0.7, big, 1.3)
 		_show_drawn += k
 	super(delta)
 

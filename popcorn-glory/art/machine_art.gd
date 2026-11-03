@@ -6,14 +6,15 @@ extends RefCounted
 ## the machine itself. Stage 0 is a small cart; up to stage 4 each stage is
 ## visibly bigger and adds something to the outline (awning, wheels, lights,
 ## a star). Past 4 the growth slows and every stage still adds one thing --
-## bunting, gold trim, a second kettle, gold wheels, side lamps, a big crown --
-## so no upgrade leaves the machine looking the same (Step 04: the
-## experiments reach level 8-11 in three minutes).
+## bunting, gold trim, a second kettle, gold wheels, side lamps, a big crown,
+## then rocket posts, gold stripes, a glowing crown -- so no upgrade leaves the
+## machine looking the same (Step 04: the experiments reach level 8-14 in three
+## minutes; every level any experiment can buy has its own picture).
 ##
 ## `size` is the machine's height in canvas pixels at stage 4; smaller stages
 ## are drawn smaller. `squash` (0..1) presses it down for a moment after a pop.
 
-const STAGES := 12
+const STAGES := 15
 
 
 static func height_at(stage: int, size: float) -> float:
@@ -53,6 +54,11 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 	_round_rect(ci, body, h * 0.04, c.call(body_col))
 	if not flat:
 		_outline(ci, body, h * 0.04, maxf(2.0, h * 0.008))
+	# Gold stripes down the cabinet (stage 13+).
+	if st >= 13 and not flat:
+		for i in 5:
+			var sx := body.position.x + w * (0.1 + 0.2 * i)
+			ci.draw_rect(Rect2(sx, body.position.y + body_h * 0.32, w * 0.05, body_h * 0.4), PopPalette.GOLD)
 	# Side lamps (stage 9+): a lamp post on each side.
 	if st >= 9:
 		for sx: float in [-1.0, 1.0]:
@@ -139,10 +145,25 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 			var fy := roof.position.y - h * 0.03 - sin(PI * (float(i) + 0.5) / flags) * h * 0.05
 			var col: Color = [PopPalette.GOLD, PopPalette.CREAM, PopPalette.RED_DARK][i % 3]
 			ci.draw_colored_polygon(PackedVector2Array([Vector2(fx - h * 0.025, fy), Vector2(fx + h * 0.025, fy), Vector2(fx, fy + h * 0.05)]), c.call(col))
-	# Crown sign (stage 4+): a gold star on top, bigger at 11.
+	# Rockets (stage 12+): a striped rocket standing on each end of the roof --
+	# inside the machine's width, so a 720-wide screen never cuts them.
+	if st >= 12:
+		for sx: float in [-1.0, 1.0]:
+			var x := base.x + sx * w * 0.44
+			var y0 := roof.position.y
+			var rh := h * 0.2
+			ci.draw_rect(Rect2(x - w * 0.025, y0 - rh, w * 0.05, rh), c.call(PopPalette.CREAM))
+			for k in 3:
+				ci.draw_rect(Rect2(x - w * 0.025, y0 - rh + k * rh * 0.33, w * 0.05, rh * 0.12), c.call(PopPalette.RED))
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(x - w * 0.035, y0 - rh), Vector2(x + w * 0.035, y0 - rh),
+				Vector2(x, y0 - rh - h * 0.07)]), c.call(PopPalette.GOLD))
+	# Crown sign (stage 4+): a gold star on top, bigger at 11, glowing at 14.
 	if st >= 4:
 		var big := 1.6 if st >= 11 else 1.0
 		var top := Vector2(base.x, roof.position.y - h * 0.08 * big)
+		if st >= 14 and not flat:
+			ci.draw_circle(top, h * 0.16, Color(PopPalette.GOLD, 0.25))
+			ci.draw_circle(top, h * 0.11, Color(PopPalette.GOLD, 0.35))
 		ci.draw_colored_polygon(_star(top, h * 0.085 * big, h * 0.04 * big), c.call(PopPalette.GOLD))
 	# Chimney popcorn sign (stage 0..3: a small bucket on the roof).
 	if st < 4:

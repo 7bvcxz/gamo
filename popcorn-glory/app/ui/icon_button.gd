@@ -11,7 +11,13 @@ func _draw() -> void:
 	var c := size / 2
 	var r := minf(size.x, size.y) / 2
 	draw_circle(c + Vector2(0, 3), r, PopPalette.SHADOW)
-	draw_circle(c, r, Color(1, 1, 1, 0.85) if not held else PopPalette.CREAM.darkened(0.08))
+	var face := Color(1, 1, 1, 0.85)
+	if held:
+		face = PopPalette.CREAM.darkened(0.08)
+	elif hovered:
+		face = Color(1, 1, 1, 1.0)
+		draw_arc(c, r + 3.0, 0, TAU, 32, Color(PopPalette.GOLD, 0.9), 4.0)
+	draw_circle(c, r, face)
 	var k := r * 0.42
 	match icon:
 		"back":
@@ -28,6 +34,12 @@ func _draw() -> void:
 			else:
 				draw_line(c + Vector2(k * 0.4, -k * 0.4), c + Vector2(k * 1.05, k * 0.4), PopPalette.RED, k * 0.2)
 				draw_line(c + Vector2(k * 0.4, k * 0.4), c + Vector2(k * 1.05, -k * 0.4), PopPalette.RED, k * 0.2)
+		"log":
+			# A sheet with lines and a down arrow: save the log.
+			draw_rect(Rect2(c + Vector2(-k * 0.7, -k * 0.95), Vector2(k * 1.4, k * 1.6)), PopPalette.INK, false, k * 0.14)
+			for i in 3:
+				draw_line(c + Vector2(-k * 0.4, -k * 0.55 + i * k * 0.35), c + Vector2(k * 0.4, -k * 0.55 + i * k * 0.35), PopPalette.INK, k * 0.12)
+			draw_colored_polygon(PackedVector2Array([c + Vector2(-k * 0.45, k * 0.55), c + Vector2(k * 0.45, k * 0.55), c + Vector2(0, k * 1.05)]), PopPalette.RED)
 		"restart":
 			draw_arc(c, k, deg_to_rad(-60), deg_to_rad(230), 24, PopPalette.INK, k * 0.38)
 			var tip := c + Vector2(cos(deg_to_rad(-60)), sin(deg_to_rad(-60))) * k

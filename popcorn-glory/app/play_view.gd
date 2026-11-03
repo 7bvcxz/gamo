@@ -33,7 +33,13 @@ var now_ms := 0
 var last_input_ms := -1
 var _t := 0.0
 var _jump := 0.0      # the upgrade's hop, 1 -> 0
+## The machine's squash is a damped spring: x > 0 pressed down and wide,
+## x < 0 stretched up (the recoil overshoot). A press sets it, it rings and
+## settles -- anticipation, impact, recoil, settle (Step 04 addendum).
 var _squash := 0.0
+var _squash_v := 0.0
+const SPRING_K := 520.0
+const SPRING_DAMP := 16.0
 var _held := false
 ## "+N" over the machine for each earning: [{text, age}]
 var _gains: Array[Dictionary] = []
@@ -42,6 +48,7 @@ var _gains: Array[Dictionary] = []
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	focus_mode = Control.FOCUS_NONE
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	rng.seed = 1
 	under_layer.name = "Under"
 	machine_node.name = "Machine"
@@ -56,6 +63,7 @@ func setup(p_rules: PopRules) -> void:
 	rules = p_rules
 	fx.clear()
 	_squash = 0.0
+	_squash_v = 0.0
 	_held = false
 	_gains.clear()
 
@@ -122,13 +130,29 @@ func _draw_over(_ci: CanvasItem, _base: Vector2, _size_px: float) -> void:
 ## Every experiment's upgrade looks and sounds the same: the machine jumps,
 ## gold popcorn and sparkles burst from it, a rising chime.
 func _upgraded() -> void:
-	_squash = 1.0
+	squash(0.0, 9.0)
 	_jump = 1.0
 	var s := machine_size() / 900.0
 	fx.burst(machine_top(), 22 if not reduced_motion else 2, s, rng, PopPalette.GOLD, 1.2, 1.2)
 	if not reduced_motion:
 		fx.sparkle(machine_centre(), s, rng, 8, 220.0)
 	_sound("upgrade")
+
+
+## Press the machine down (anticipation) or kick it (an impact rings).
+func squash(amount: float, kick: float = 0.0) -> void:
+	_squash = maxf(_squash, amount) if kick == 0.0 else _squash
+	_squash_v += kick
+
+
+func _step_spring(delta: float) -> void:
+	var dt := minf(delta, 1.0 / 30.0)
+	var a := -SPRING_K * _squash - SPRING_DAMP * _squash_v
+	_squash_v += a * dt
+	_squash = clampf(_squash + _squash_v * dt, -0.6, 1.2)
+	if absf(_squash) < 0.002 and absf(_squash_v) < 0.02:
+		_squash = 0.0
+		_squash_v = 0.0
 
 
 ## Machine shake (C rattles as it fills).
@@ -152,7 +176,7 @@ func on_events(events: Array[Dictionary]) -> void:
 	for e: Dictionary in events:
 		match String(e["type"]):
 			"pop":
-				_squash = 1.0
+				squash(0.0, 9.0)
 				var n := int(e["data"].get("count", 1))
 				fx.burst(machine_top(), mini(n, 14) if not reduced_motion else 1, machine_size() / 900.0, rng)
 				_sound("pop_%d" % (1 + rng.randi() % 3), rng.randf_range(0.92, 1.08))
@@ -166,7 +190,7 @@ func on_events(events: Array[Dictionary]) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
-	_squash = maxf(0.0, _squash - delta * 6.0)
+	_step_spring(delta)
 	_jump = maxf(0.0, _jump - delta * 2.2)
 	fx.step(delta)
 	for g: Dictionary in _gains:

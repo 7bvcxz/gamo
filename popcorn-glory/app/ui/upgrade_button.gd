@@ -52,7 +52,7 @@ func _draw() -> void:
 		var fh := (r.size.y - 12.0) * p
 		_round(Rect2(r.position.x + 6, r.end.y - 6 - fh, r.size.x - 12, fh), rad * 0.8,
 			PopPalette.GOLD.lerp(Color(1, 0.93, 0.6), 0.5 - 0.5 * _shine))
-	_outline(r, rad, PopPalette.GOLD if enabled else PopPalette.DISABLED, 5.0)
+	_outline(r, rad, PopPalette.GOLD if enabled else PopPalette.DISABLED, 7.0 if hovered and enabled else 5.0)
 	# The next machine, as a silhouette (bright when affordable).
 	var sil := Color(PopPalette.INK, 0.35 + 0.5 * _shine)
 	# Sized so the tallest stage (with its star) stays inside the button.

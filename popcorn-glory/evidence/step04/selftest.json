@@ -2,6 +2,34 @@
   "_doc": "Scripted players on the real rules (tools/selftest.gd). Objective measurements, not human fun.",
   "rows": [
     {
+      "earned": 11930,
+      "exp": "click",
+      "first_affordable_ms": 9250,
+      "first_earn_ms": 2000,
+      "first_upgrade_ms": 10750,
+      "inputs": 712,
+      "level": 10,
+      "longest_gap_between_earnings_ms": 250,
+      "model": "A fast 4 taps/s",
+      "money": 3332,
+      "next_upgrade_s_at_180": 20.2083333333333,
+      "outcomes": {},
+      "upgrade_times_ms": [
+        10750,
+        18000,
+        25750,
+        35250,
+        46250,
+        60000,
+        77000,
+        98000,
+        124500,
+        157750
+      ],
+      "upgrades_by_180": 10,
+      "upgrades_by_60": 6
+    },
+    {
       "earned": 4401,
       "exp": "click",
       "first_affordable_ms": 13600,
@@ -51,7 +79,7 @@
       "upgrades_by_60": 2
     },
     {
-      "earned": 26377,
+      "earned": 26659,
       "exp": "perfect",
       "first_affordable_ms": 10245,
       "first_earn_ms": 4150,
@@ -60,12 +88,13 @@
       "level": 11,
       "longest_gap_between_earnings_ms": 2900,
       "model": "B skilled (aims at the gold's middle)",
-      "money": 2314,
-      "next_upgrade_s_at_180": 43.3273748723187,
+      "money": 2596,
+      "next_upgrade_s_at_180": 42.6072522982635,
       "outcomes": {
         "burnt": 0,
         "early": 3,
         "late": 13,
+        "near": 0,
         "perfect": 63
       },
       "upgrade_times_ms": [
@@ -77,7 +106,7 @@
         70187,
         91080,
         107930,
-        128528,
+        126290,
         148955,
         174505
       ],
@@ -85,7 +114,7 @@
       "upgrades_by_60": 5
     },
     {
-      "earned": 2891,
+      "earned": 2976,
       "exp": "perfect",
       "first_affordable_ms": 14732,
       "first_earn_ms": 4150,
@@ -94,25 +123,80 @@
       "level": 7,
       "longest_gap_between_earnings_ms": 3200,
       "model": "B novice (35% gold, 10% burnt)",
-      "money": 633,
-      "next_upgrade_s_at_180": 36.6700507614213,
+      "money": 718,
+      "next_upgrade_s_at_180": 32.6874391431353,
       "outcomes": {
         "burnt": 8,
         "early": 12,
         "late": 34,
+        "near": 0,
         "perfect": 21
       },
       "upgrade_times_ms": [
         16232,
         34608,
         53378,
-        80851,
-        118943,
-        133860,
-        164040
+        78151,
+        116243,
+        133935,
+        162736
       ],
       "upgrades_by_180": 7,
       "upgrades_by_60": 3
+    },
+    {
+      "earned": 324,
+      "exp": "perfect",
+      "first_affordable_ms": 18100,
+      "first_earn_ms": 2150,
+      "first_upgrade_ms": 19600,
+      "inputs": 324,
+      "level": 3,
+      "longest_gap_between_earnings_ms": 550,
+      "model": "B tapper (never holds: 0.15 s taps)",
+      "money": 143,
+      "next_upgrade_s_at_180": 17.4545454545455,
+      "outcomes": {
+        "burnt": 0,
+        "early": 324,
+        "late": 0,
+        "near": 0,
+        "perfect": 0
+      },
+      "upgrade_times_ms": [
+        19600,
+        49300,
+        102650
+      ],
+      "upgrades_by_180": 3,
+      "upgrades_by_60": 2
+    },
+    {
+      "earned": 179337,
+      "exp": "explosion",
+      "first_affordable_ms": 7750,
+      "first_earn_ms": 3750,
+      "first_upgrade_ms": 9250,
+      "inputs": 712,
+      "level": 9,
+      "longest_gap_between_earnings_ms": 3000,
+      "model": "C fast 4 taps/s",
+      "money": 77554,
+      "next_upgrade_s_at_180": 27.1207755058799,
+      "outcomes": {},
+      "upgrade_times_ms": [
+        9250,
+        17250,
+        27250,
+        37650,
+        51750,
+        70350,
+        97050,
+        127050,
+        163050
+      ],
+      "upgrades_by_180": 9,
+      "upgrades_by_60": 5
     },
     {
       "earned": 73971,

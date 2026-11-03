@@ -39,13 +39,24 @@ func test_b_outcomes_by_how_long_it_was_held() -> void:
 	var r: PopRules = Perfect.new()
 	# level 0: batch 5; gold 1400..1850, burns at 2450.
 	assert_eq(String(_hold(r, 500)["outcome"]), "early", "0.5 s early")
-	assert_eq(r.money, 1, "5 * 0.3 = 1")
+	assert_eq(r.money, 1, "5 * 0.6 * 500/1400 = 1.07 -> 1")
 	assert_eq(String(_hold(r, 1400)["outcome"]), "perfect", "gold opens at 1.4 s")
 	assert_eq(String(_hold(r, 1850)["outcome"]), "perfect", "and closes at 1.85 s")
 	assert_eq(r.money, 1 + 10 + 10, "5 * 2 twice")
-	assert_eq(String(_hold(r, 2000)["outcome"]), "late", "after the gold")
+	assert_eq(String(_hold(r, 2100)["outcome"]), "late", "after the gold (and past the near miss)")
 	assert_eq(r.money, 21 + 3, "5 * 0.6 = 3")
 	assert_eq(int(r.outcomes["perfect"]), 2, "counted")
+
+
+func test_b_a_near_miss_is_fair() -> void:
+	# The gold is 1400..1850 at level 0; a near miss is within 150 ms of it.
+	var r: PopRules = Perfect.new()
+	assert_eq(String(_hold(r, 1249)["outcome"]), "early", "151 ms short is early")
+	assert_eq(String(_hold(r, 1250)["outcome"]), "near", "150 ms short is near")
+	assert_eq(String(_hold(r, 2000)["outcome"]), "near", "150 ms over is near")
+	assert_eq(String(_hold(r, 2001)["outcome"]), "late", "151 ms over is late")
+	assert_eq(int(r.outcomes["near"]), 2, "two near misses")
+	assert_eq(r.money, 2 + 5 + 5 + 3, "early 5 * 0.6 * 1249/1400 = 2, near 5 twice (x1.0), late 3")
 
 
 func test_b_holding_on_burns_by_itself_at_the_exact_millisecond() -> void:

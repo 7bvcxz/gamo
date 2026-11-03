@@ -28,7 +28,9 @@ func test_a_press_pops_and_pays_audibly() -> void:
 	app.open("click")
 	await tree.process_frame
 	app.on_command("press", {"type": "press"})
-	assert_eq(_played("pop_1") + _played("pop_2") + _played("pop_3"), 1, "one pop sound")
+	assert_eq(_played("pop_1") + _played("pop_2") + _played("pop_3"), 0, "not yet: the machine is still pressing down")
+	await tree.create_timer(0.15).timeout
+	assert_eq(_played("pop_1") + _played("pop_2") + _played("pop_3"), 1, "the pop at the impact")
 	assert_eq(_played("coin"), 1, "the coin")
 
 

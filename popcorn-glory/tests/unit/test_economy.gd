@@ -34,3 +34,11 @@ func test_bad_costs_are_refused() -> void:
 	var e := PopEconomy.new()
 	assert_false(e.load_dict({"x": {"pops": [1, 2], "cost": {"base": 10, "growth": 1.0}, "max_level": 1}}), "growth 1 refused")
 	assert_false(e.load_dict({"x": {"pops": [1, 2], "cost": {"base": 0, "growth": 2}, "max_level": 1}}), "base 0 refused")
+
+
+func test_every_level_any_experiment_can_buy_has_its_own_picture() -> void:
+	# An upgrade that leaves the machine looking the same is a price-only change
+	# (Step 04 addendum). The machine art has PopMachineArt.STAGES stages.
+	var e := PopEconomy.load_default()
+	for v: String in ["click", "perfect", "explosion"]:
+		assert_true(e.max_level(v) <= PopMachineArt.STAGES - 1, "%s: max level %d has a stage (0..%d)" % [v, e.max_level(v), PopMachineArt.STAGES - 1])

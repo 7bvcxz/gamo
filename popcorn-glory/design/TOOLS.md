@@ -59,3 +59,52 @@
 | 영상 생성(TopView) | 쓰지 않는다. 움직임은 코드(트윈·파티클)로 | 아니오 |
 | 사람 플레이테스터 | 비교 페이지와 점수표를 주고 사용자가 직접 한다. AI 플레이는 객관 관찰로만 | 아니오 — 결론만 '잠정'이 된다 |
 | HeyDive 등록 권한 | 정적 배포까지 하고, 등록은 미완료로 보고 + 사용자에게 필요한 값 전달 | 등록만 |
+
+## 상태 라벨 (Step 01 추가 요구, 2026-11-03 오후 다시 확인)
+
+**시험함** = 이 저장소 작업 중 실제로 실행해 결과를 봄 · **설치됨, 시험 안 함** = 있으나 돌려 보지 않음(이유 적음) · **없음**.
+
+| 영역 | 도구 | 상태 | 근거·명령 |
+|---|---|---|---|
+| 엔진 | Godot 4.7.stable | 시험함 | `godot --version`, 헤드리스 테스트·export·캡처 매 Step |
+| Web export | 단일 스레드 템플릿 | 시험함 | `popcorn-glory/tools/deploy.sh` (팩 60–217KB) |
+| 브라우저 | Playwright 1.64.1 + Chromium 156 (headless shell 1228) | 시험함 | `popcorn-glory/tools/e2e.sh`, 720×1280 터치·390×844 폰·1280×800 |
+| 화면 캡처(게임) | Xvfb + Godot `tools/capture.gd` | 시험함 | Step 03–05 캡처 |
+| 화면 캡처(브라우저) | Playwright screenshot | 시험함 | `POPCORN_SHOTS=…` |
+| 영상 녹화(브라우저) | Playwright `recordVideo` | 시험함 | 360×640 webm 2.04초 생성(11/3) |
+| 영상 녹화(X 화면) | ffmpeg `x11grab` | 설치됨, 시험 안 함 | `ffmpeg -devices`에 있음. 브라우저 녹화로 충분해서 |
+| 소리 신호 | AudioWorklet 미터(`tests/e2e/lib/audio_tap.mjs`) | 시험함 | `sound05.spec.mjs` 세 화면 15/15 |
+| 데스크톱 창 자동화 | xdotool · xwd · scrot | **없음** | `command -v` 실패. 네이티브 Godot 창을 밖에서 클릭할 길이 없다 → 브라우저 빌드로 시험 |
+| Android 에뮬레이터 | SDK emulator + AVD 5개 | 설치됨, 시험 안 함 | AVD는 모두 다른 프로젝트 것(mado·mouv), 다른 세션의 에뮬레이터 2대가 이미 돌고 있고 메모리 여유 7–11GB라 띄우지 않음(K12 메모리 사고 이력) |
+| 실기기 | Galaxy S23 (`coordination/resources/s23.md`) | 설치됨, 시험 안 함 | AVAILABLE이지만 이 게임은 Web 우선이라 쓰지 않음. 쓸 때는 조정 파일로 점유 |
+| 모바일 UI 자동화 | adb 1.0.41 · Maestro(+MCP) | 설치됨, 시험 안 함 | 에뮬레이터·실기기를 안 쓰므로 |
+| 빌드 서빙 | `python3 -m http.server` (루트 `docs/`) | 시험함 | e2e의 webServer |
+| 빌드 서빙(자체 호스팅) | `deploy/` nginx 컨테이너 | 설치됨, 시험 안 함 | 이 게임은 Pages로 충분 |
+| 공개 | GitHub Pages | 시험함 | Step 03·04 공개 URL에서 E2E |
+
+## 게임 하나를 더하는 지도 — 무엇이 누구 것인가
+
+| 경로 | 주인 | 이 게임이 바꾸나 |
+|---|---|---|
+| `popcorn-glory/**` | 이 게임 | 예 — 소스·문서·도구·증거 |
+| `docs/popcorn-glory/**` | 이 게임의 **생성물** | `tools/deploy.sh`만 쓴다. 손으로 고치지 않는다 |
+| `docs/engine/*` | 모든 게임이 공유 | 같은 Godot이면 같은 파일 — 새로 생기면 deploy가 멈추지 않지만 diff로 보인다 |
+| `web/app/page.jsx`, `web/app/doc/page.jsx`, `web/components/content/WhatIsGamo.jsx`, `web/vercel.json` | 사이트(공유) | 한 줄씩 등록만 |
+| `web/app/popcorn-glory/doc/page.jsx`, `web/components/content/PopcornDoc.jsx` | 이 게임 | 예 |
+| `docs/` 의 사이트 파일(`_next`, `index.html`, `<게임>/doc/` …) | 사이트 **생성물** | `cd web && npm run build:pages`만 쓴다 |
+| `deploy-web.sh`, `web-index-loader.html`, `web/scripts/*` | 공유 도구 | **아니오** (자체 deploy를 쓰는 이유는 README) |
+| 다른 게임 폴더·`docs/<다른 게임>` | 그 게임 | 아니오 — deploy가 `docs/popcorn-glory/`·`docs/engine/` 밖의 변화를 보면 실패한다 |
+
+회귀 확인: `git status --short docs` 에 `docs/popcorn-glory/`·사이트 파일 말고 다른 게임 폴더의 **게임 파일**이 보이면 멈춘다.
+
+## AI가 실제 화면으로 이 게임을 할 수 있는가
+
+세 가지를 구분한다.
+
+| 종류 | 무엇 | 이 게임에서 |
+|---|---|---|
+| 코드 시험 | 헤드리스 GDScript(`tools/test.sh`), 규칙 스크립트 플레이어(`tools/selftest.gd`) | 화면이 없다. 재미·발견 가능성은 말하지 못한다 |
+| 스크립트 브라우저 자동화 | Playwright가 정해진 좌표를 누름(`specs/*.spec.mjs`) | 실제 Web 빌드·실제 입력. 하지만 어디를 누를지 **이미 안다** — 블라인드가 아니다 |
+| 시각으로 하는 초보 플레이 | 새 컨텍스트 에이전트가 스크린샷을 **보고** 탭할 곳을 정함 | **가능**: momonium `tools/blind_playtest/`가 같은 머신에서 이미 했다(에이전트 = Agent 도구의 새 세션, 손 = Playwright `look/tap/hold/wait`, 눈 = 스크린샷 Read). **한계**: 에이전트 도구는 기술적으로 저장소를 읽을 수 있어 블라인드는 지시로만 지켜지고, 데스크톱 창 자동화 도구가 없으며(위 표), 원격 데스크톱·인증 장벽은 없다 |
+
+따라서 Step 08은 브라우저 빌드 + 시각 에이전트로 하고, "기술적으로 강제되지 않은 블라인드"라고 표시한다.

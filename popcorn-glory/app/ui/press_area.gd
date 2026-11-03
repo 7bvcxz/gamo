@@ -10,11 +10,14 @@ signal pressed
 
 var enabled := true
 var held := false
+## The mouse is over it (desktop): drawn a little lifted.
+var hovered := false
 
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	focus_mode = Control.FOCUS_NONE
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -32,6 +35,11 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_MOUSE_EXIT and held:
-		held = false
-		queue_redraw()
+	match what:
+		NOTIFICATION_MOUSE_ENTER:
+			hovered = true
+			queue_redraw()
+		NOTIFICATION_MOUSE_EXIT:
+			hovered = false
+			held = false
+			queue_redraw()
