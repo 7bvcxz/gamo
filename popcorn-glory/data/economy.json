@@ -1,8 +1,37 @@
 {
-  "_doc": "Per-variant economy. Every number is a hypothesis (design/EXPERIMENTS.md); Step 06 tunes them with the real rules. cost(L) = round(base * growth^L). pops[L] is what one press yields at level L; max_level is the last level that can be bought (pops must have max_level + 1 entries).",
+  "_doc": "Per-variant economy. Every number is a hypothesis (design/EXPERIMENTS.md, design/model/pace_model.py); Step 06 tunes them with the real rules. cost(L) = round(base * growth^L) is the price of going from level L to L+1. A list (pops, batch, burst) gives what one action yields at level L and must rise strictly; it needs max_level + 1 entries. Times are milliseconds.",
   "stub": {
     "pops": [1, 2, 3, 5, 8],
     "cost": { "base": 10, "growth": 2.0 },
     "max_level": 4
+  },
+  "click": {
+    "_doc": "A Click & Pop: one press = pops[L] popcorn = $pops[L].",
+    "pops": [1, 2, 3, 4, 6, 8, 11, 15, 20, 27, 36, 48],
+    "cost": { "base": 30, "growth": 1.7 },
+    "max_level": 11
+  },
+  "perfect": {
+    "_doc": "B Perfect Pop: hold to heat, release to pop. The gold window opens window_start_ms after the press and lasts window_ms + window_step_ms * L (at most window_max_ms); burn_after_ms after it closes the batch burns by itself. The batch pays batch[L] * the outcome's multiplier, at least $1.",
+    "batch": [5, 8, 13, 20, 33, 52, 84, 134, 215, 344, 550, 880, 1400, 2240, 3580],
+    "cost": { "base": 30, "growth": 1.8 },
+    "max_level": 14,
+    "window_start_ms": 1400,
+    "window_ms": 450,
+    "window_step_ms": 50,
+    "window_max_ms": 800,
+    "burn_after_ms": 600,
+    "cooldown_ms": 400,
+    "mult": { "early": 0.3, "perfect": 2.0, "late": 0.6, "burnt": 0.25 }
+  },
+  "explosion": {
+    "_doc": "C Pop Explosion: each press drops a kernel into one of `slots`; a full chamber erupts for burst[L] popcorn = $burst[L] (paid when it erupts). The show lasts show_ms + show_step_ms * L (at most show_max_ms); presses during it fill the next chamber, which erupts when the show ends if it is full.",
+    "burst": [10, 22, 48, 106, 234, 515, 1134, 2494, 5488, 12073],
+    "cost": { "base": 30, "growth": 2.6 },
+    "max_level": 9,
+    "slots": 8,
+    "show_ms": 1200,
+    "show_step_ms": 300,
+    "show_max_ms": 3000
   }
 }

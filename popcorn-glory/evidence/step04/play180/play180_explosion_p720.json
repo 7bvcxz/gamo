@@ -1,0 +1,77 @@
+{
+  "id": "explosion",
+  "project": "p720",
+  "marks": {
+    "5s": {
+      "clock_ms": 5332,
+      "level": 0,
+      "money": 10,
+      "earned": 10,
+      "fps": 59.1599289635817,
+      "fps_samples": [
+        53.59801488833747,
+        59.1599289635817,
+        61.1379548138031
+      ],
+      "fx_peak": 12,
+      "draw_calls": 69,
+      "primitives": 2462
+    },
+    "60s": {
+      "clock_ms": 60549,
+      "level": 3,
+      "money": 153,
+      "earned": 464,
+      "fps": 26.972353352695986,
+      "fps_samples": [
+        26.93535513227002,
+        26.972353352695986,
+        35.13223379837634
+      ],
+      "fx_peak": 74,
+      "draw_calls": 94,
+      "primitives": 3254
+    },
+    "180s": {
+      "clock_ms": 181205,
+      "level": 6,
+      "money": 3526,
+      "earned": 9299,
+      "fps": 26.711515651344747,
+      "fps_samples": [
+        21.58767539178192,
+        26.711515651344747,
+        27.237354085603112
+      ],
+      "fx_peak": 182,
+      "draw_calls": 131,
+      "primitives": 4196
+    }
+  },
+  "buys": 6,
+  "summary": {
+    "earned": 9299,
+    "idle_longest_ms": 0,
+    "idle_total_ms": 0,
+    "inputs": 269,
+    "level": 6,
+    "milestones": {
+      "first_affordable": 15027,
+      "first_earn": 4089,
+      "first_input": 899,
+      "first_upgrade": 15719,
+      "three_minutes": 180008
+    },
+    "money": 3526,
+    "t_ms": 184685,
+    "upgrades": [
+      15719,
+      34006,
+      55833,
+      83064,
+      116385,
+      156206
+    ],
+    "variant": "explosion"
+  }
+}

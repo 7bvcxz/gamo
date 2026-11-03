@@ -64,6 +64,40 @@ export function wrap(page, testInfo) {
       if (!r) throw new Error(`no rect ${name} on screen ${s.screen}`);
       await pop.tapWin(r[0] + r[2] / 2, r[1] + r[3] / 2);
     },
+    // Press, keep holding `ms` real milliseconds, let go -- a finger through
+    // CDP touch events on touch projects (touchscreen.tap() cannot hold;
+    // AGENTS.md 2026-08-13), the mouse on desktop.
+    hold: async (name, ms) => {
+      const s = await pop.state();
+      const r = s.rects[name];
+      const box = await canvas.boundingBox();
+      const k = box.width / s.window[0];
+      const x = box.x + (r[0] + r[2] / 2) * k;
+      const y = box.y + (r[1] + r[3] / 2) * k;
+      if (testInfo.project.use.hasTouch) {
+        const cdp = await pop.cdp();
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+        await page.waitForTimeout(ms);
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      } else {
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.waitForTimeout(ms);
+        await page.mouse.up();
+      }
+    },
+    _cdp: null,
+    cdp: async () => {
+      if (!pop._cdp) pop._cdp = await page.context().newCDPSession(page);
+      return pop._cdp;
+    },
+    // Frames the page draws in `ms` real milliseconds, per second.
+    fps: (ms = 2000) => page.evaluate((d) => new Promise((done) => {
+      let n = 0;
+      const t0 = performance.now();
+      const tick = () => { n++; if (performance.now() - t0 < d) requestAnimationFrame(tick); else done((n * 1000) / (performance.now() - t0)); };
+      requestAnimationFrame(tick);
+    }), ms),
     shot: async (name) => {
       if (process.env.POPCORN_SHOTS) await page.screenshot({ path: `${process.env.POPCORN_SHOTS}/${name}_${testInfo.project.name}.png` });
     },

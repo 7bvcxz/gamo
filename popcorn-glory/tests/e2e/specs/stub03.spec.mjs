@@ -1,21 +1,16 @@
 // Step 03: the foundation in a real browser, on a 720x1280 touch screen, a
-// phone and a desktop -- the chooser, the stub's press, upgrade, restart, back
-// (the game's button and the browser's), a hidden tab, one finger = one press,
-// and no browser storage.
+// phone and a desktop -- the stub's press, upgrade, restart, back (the game's
+// button and the browser's), a hidden tab, one finger = one press, and no
+// browser storage. Since Step 04 the stub is off the chooser (A, B, C are on
+// it) and opens from its address, #stub.
 import { test, expect } from '../lib/pop.mjs';
 
-test('chooser opens the stub; press, upgrade, restart, back', async ({ pop }) => {
-  await pop.open('./');
-  let s = await pop.state();
-  expect(s.screen).toBe('chooser');
-  expect(s.listed).toContain('stub');
-  await pop.shot('chooser');
+test('the stub: press, upgrade, restart, back', async ({ pop }) => {
+  await pop.open('./#stub');
   test.info().annotations.push({ type: 'load', description: `${pop.loadMs} ms to the first drawn frame` });
-
-  await pop.tap('tile_stub');
   await expect.poll(async () => (await pop.state()).screen).toBe('play');
   expect(await pop.hash()).toBe('#stub');
-  s = await pop.state();
+  let s = await pop.state();
   expect(s.run.money).toBe(0);
 
   // Ten real presses on the machine.
@@ -56,7 +51,7 @@ test('a direct link opens the stub, and the browser back button returns', async 
   expect((await pop.state()).screen).toBe('play');
   await pop.tap('back');
   await expect.poll(async () => (await pop.state()).screen).toBe('chooser');
-  await pop.tap('tile_stub');
+  await pop.tap('tile_click');
   await expect.poll(async () => (await pop.state()).screen).toBe('play');
   await pop.page.goBack();
   await expect.poll(async () => (await pop.state()).screen).toBe('chooser');

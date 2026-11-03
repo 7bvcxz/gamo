@@ -32,9 +32,10 @@ export function PopcornDoc() {
 
       <h2>지금의 답</h2>
       <p>
-        <b>아직 없습니다.</b> 지금 열리는 것은 공통 토대(기계·누르기·돈·업그레이드 하나)이고, 세 실험은
-        다음 단계에서 같은 틀 위에 만들어집니다. 개발은 GitHub 이슈 &ldquo;Popcorn Step NN&rdquo;으로
-        진행하며 단계마다의 상태는 진행 기록(왼쪽 링크)에 있습니다. 재미의 판단은 사람이 직접 해 본
+        <b>아직 없습니다.</b> 세 실험을 모두 해 볼 수 있습니다(선택 화면의 A·B·C, 또는 주소 끝에
+        <code>#click</code>·<code>#perfect</code>·<code>#explosion</code>). 그림은 아직 도형이고 소리는 없습니다.
+        개발은 GitHub 이슈 &ldquo;Popcorn Step NN&rdquo;으로 진행하며 단계마다의 상태는 진행 기록(왼쪽 링크)에
+        있습니다. 스크립트 플레이어의 수치는 무엇이 일어나는지를 말할 뿐이고, 재미의 판단은 사람이 직접 해 본
         점수로만 합니다.
       </p>
     </article>

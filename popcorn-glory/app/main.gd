@@ -128,10 +128,23 @@ func buy() -> void:
 func on_command(kind: String, cmd: Dictionary) -> void:
 	if rules == null:
 		return
-	session.record_input(clock.now_ms, kind)
-	frame.play.last_input_ms = clock.now_ms
-	rules.execute(cmd)
+	if kind == "release":
+		# Letting go is part of B's action, not a second input: the input count
+		# stays one per press in every experiment.
+		session.record(clock.now_ms, "release", {})
+	else:
+		session.record_input(clock.now_ms, kind)
+		frame.play.last_input_ms = clock.now_ms
+	var r := rules.execute(cmd)
+	if not bool(r["ok"]):
+		session.record(clock.now_ms, "refused", {"kind": kind, "reason": String(r.get("reason", ""))})
 	_flush()
+
+
+func dev_level(level: int) -> void:
+	if rules != null:
+		rules.level = clampi(level, 0, rules.max_level())
+		_flush()
 
 
 func dev_advance(ms: int) -> void:
@@ -162,9 +175,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if k == null or k.echo:
 		return
 	if screen == "play" and (k.keycode == KEY_SPACE or k.keycode == KEY_ENTER):
-		if k.pressed:
-			session.record_input(clock.now_ms, "key")
-			frame.play.last_input_ms = clock.now_ms
+		# The view turns it into its own commands (logged in on_command).
 		frame.play.key(k.pressed)
 		get_viewport().set_input_as_handled()
 	elif screen == "play" and k.pressed and k.keycode == KEY_ESCAPE:

@@ -11,7 +11,10 @@ extends SceneTree
 ##
 ## --presses taps the machine that many times (through the app, as a press
 ## would), --buy buys that many upgrades when affordable, --advance skips play
-## seconds before the final wait.
+## seconds before the final wait. --steps runs a list first, comma separated:
+## p (press), r (release), b (buy), w<ms> (play time), e.g. p,w1600,r,w500
+## (B: hold into the gold). --level N starts the run at level N (a picture
+## of a later machine; not a play).
 
 var _args := {}
 var _frames_left := 0
@@ -50,6 +53,20 @@ func _tick() -> void:
 		_setup_done = true
 		if _args.has("exp"):
 			_app.open(String(_args["exp"]))
+		if _app.rules != null and _args.has("level"):
+			_app.rules.level = int(_args["level"])
+			_app.dev_advance(1)
+		if _app.rules != null and _args.has("steps"):
+			for step: String in String(_args["steps"]).split(",", false):
+				match step.substr(0, 1):
+					"p":
+						_app.on_command("press", {"type": "press"})
+					"r":
+						_app.on_command("release", {"type": "release"})
+					"b":
+						_app.buy()
+					"w":
+						_app.dev_advance(int(step.substr(1)))
 		if _app.rules != null:
 			var buys := int(_args.get("buy", "0"))
 			for i in int(_args.get("presses", "0")):

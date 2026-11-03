@@ -3,18 +3,22 @@ extends RefCounted
 
 ## The popcorn machine, drawn from shapes. One function draws every stage, so
 ## the upgrade button's silhouette of the next machine is the same drawing as
-## the machine itself. Stage 0 is a small cart; each stage is visibly bigger,
-## and every second stage adds something to the outline (awning, wheels,
-## lights, a crown) so two stages are told apart even as a silhouette.
+## the machine itself. Stage 0 is a small cart; up to stage 4 each stage is
+## visibly bigger and adds something to the outline (awning, wheels, lights,
+## a star). Past 4 the growth slows and every stage still adds one thing --
+## bunting, gold trim, a second kettle, gold wheels, side lamps, a big crown --
+## so no upgrade leaves the machine looking the same (Step 04: the
+## experiments reach level 8-11 in three minutes).
 ##
 ## `size` is the machine's height in canvas pixels at stage 4; smaller stages
 ## are drawn smaller. `squash` (0..1) presses it down for a moment after a pop.
 
-const STAGES := 5
+const STAGES := 12
 
 
 static func height_at(stage: int, size: float) -> float:
-	return size * (0.62 + 0.095 * clampi(stage, 0, STAGES - 1))
+	var st := clampi(stage, 0, STAGES - 1)
+	return size * (0.62 + 0.095 * mini(st, 4) + 0.025 * clampi(st - 4, 0, 4))
 
 
 ## `fill` (0..1): how much popcorn is in the glass case.
@@ -27,7 +31,9 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 		fill: float = 0.3, silhouette: Color = Color(0, 0, 0, 0), breathe: float = 0.0) -> void:
 	var st := clampi(stage, 0, STAGES - 1)
 	var h := height_at(st, size) * (1.0 - 0.08 * squash) * (1.0 - breathe)
-	var w := h * (0.78 + 0.03 * st) * (1.0 + 0.06 * squash) * (1.0 + breathe) / (1.0 - breathe)
+	var w := h * (0.78 + 0.03 * mini(st, 6)) * (1.0 + 0.06 * squash) * (1.0 + breathe) / (1.0 - breathe)
+	var body_col := PopPalette.RED if st < 9 else PopPalette.RED.lerp(Color(0.62, 0.1, 0.3), 0.6)
+	var wheel_col := PopPalette.CHROME if st < 8 else PopPalette.GOLD
 	var flat := silhouette.a > 0.0
 	var c := func(col: Color) -> Color: return silhouette if flat else col
 
@@ -43,12 +49,21 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 	if st >= 2:
 		for x: float in [body.position.x + w * 0.2, body.end.x - w * 0.2]:
 			ci.draw_circle(Vector2(x, base.y - wheel_r), wheel_r, c.call(PopPalette.WHEEL))
-			ci.draw_circle(Vector2(x, base.y - wheel_r), wheel_r * 0.45, c.call(PopPalette.CHROME))
-	_round_rect(ci, body, h * 0.04, c.call(PopPalette.RED))
+			ci.draw_circle(Vector2(x, base.y - wheel_r), wheel_r * 0.45, c.call(wheel_col))
+	_round_rect(ci, body, h * 0.04, c.call(body_col))
+	# Side lamps (stage 9+): a lamp post on each side.
+	if st >= 9:
+		for sx: float in [-1.0, 1.0]:
+			var post := Vector2(base.x + sx * w * 0.53, body.position.y)
+			ci.draw_rect(Rect2(post.x - w * 0.012, post.y - h * 0.3, w * 0.024, h * 0.3 + body_h), c.call(PopPalette.INK))
+			ci.draw_circle(post - Vector2(0, h * 0.32), h * 0.04, c.call(PopPalette.GOLD))
 	if not flat:
 		ci.draw_rect(Rect2(body.position + Vector2(0, body_h * 0.72), Vector2(w, body_h * 0.28)), PopPalette.RED_DARK)
 		# The stripe of the cabinet door.
-		ci.draw_rect(Rect2(body.position.x + w * 0.12, body.position.y + body_h * 0.18, w * 0.76, body_h * 0.1), PopPalette.CREAM)
+		ci.draw_rect(Rect2(body.position.x + w * 0.12, body.position.y + body_h * 0.18, w * 0.76, body_h * 0.1),
+			PopPalette.GOLD if st >= 6 else PopPalette.CREAM)
+		if st >= 6:
+			ci.draw_rect(Rect2(body.position.x, body.position.y, w, body_h * 0.05), PopPalette.GOLD)
 
 	# Glass case with popcorn inside.
 	var case_h := h * 0.42
@@ -66,9 +81,16 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 			var x := pile.position.x + case_w * (float(i) + 0.5) / bumps
 			ci.draw_circle(Vector2(x, pile.position.y), case_w / bumps * 0.62, PopPalette.CREAM)
 		# The kettle hanging in the case.
-		var k := Vector2(base.x, case_r.position.y + case_h * 0.3)
-		ci.draw_circle(k, case_w * 0.16, PopPalette.CHROME)
-		ci.draw_rect(Rect2(k.x - case_w * 0.02, case_r.position.y, case_w * 0.04, case_h * 0.15), PopPalette.CHROME)
+		var kettles: Array[float] = []
+		if st < 7:
+			kettles.append(0.0)
+		else:
+			kettles.append_array([-0.22, 0.22])
+		for kx: float in kettles:
+			var k := Vector2(base.x + kx * case_w, case_r.position.y + case_h * 0.3)
+			var kr := case_w * (0.16 if st < 7 else 0.13)
+			ci.draw_circle(k, kr, PopPalette.CHROME if st < 10 else PopPalette.GOLD)
+			ci.draw_rect(Rect2(k.x - case_w * 0.02, case_r.position.y, case_w * 0.04, case_h * 0.15), PopPalette.CHROME)
 		ci.draw_rect(Rect2(case_r.position, Vector2(case_w * 0.05, case_h)), PopPalette.GLASS_EDGE)
 		ci.draw_rect(case_r, PopPalette.RED_DARK, false, maxf(2.0, h * 0.012))
 
@@ -92,10 +114,19 @@ static func draw(ci: CanvasItem, base: Vector2, size: float, stage: int, squash:
 		for i in n:
 			var x := roof.position.x + roof.size.x * (float(i) + 0.5) / n
 			ci.draw_circle(Vector2(x, roof.position.y + roof_h * 0.5), roof_h * 0.16, PopPalette.GOLD)
-	# Crown sign (stage 4): a gold star on top.
+	# Bunting (stage 5+): little flags strung over the roof.
+	if st >= 5:
+		var flags := 7
+		for i in flags:
+			var fx := roof.position.x + roof.size.x * (float(i) + 0.5) / flags
+			var fy := roof.position.y - h * 0.03 - sin(PI * (float(i) + 0.5) / flags) * h * 0.05
+			var col: Color = [PopPalette.GOLD, PopPalette.CREAM, PopPalette.RED_DARK][i % 3]
+			ci.draw_colored_polygon(PackedVector2Array([Vector2(fx - h * 0.025, fy), Vector2(fx + h * 0.025, fy), Vector2(fx, fy + h * 0.05)]), c.call(col))
+	# Crown sign (stage 4+): a gold star on top, bigger at 11.
 	if st >= 4:
-		var top := Vector2(base.x, roof.position.y - h * 0.08)
-		ci.draw_colored_polygon(_star(top, h * 0.085, h * 0.04), c.call(PopPalette.GOLD))
+		var big := 1.6 if st >= 11 else 1.0
+		var top := Vector2(base.x, roof.position.y - h * 0.08 * big)
+		ci.draw_colored_polygon(_star(top, h * 0.085 * big, h * 0.04 * big), c.call(PopPalette.GOLD))
 	# Chimney popcorn sign (stage 0..3: a small bucket on the roof).
 	if st < 4:
 		var b := Rect2(base.x - w * 0.08, roof.position.y - h * 0.09, w * 0.16, h * 0.09)

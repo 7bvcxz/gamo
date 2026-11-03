@@ -1,7 +1,8 @@
 extends "res://tests/framework/test_case.gd"
 
 ## The real scene with real input events (Viewport.push_input, canvas
-## coordinates): the chooser opens the stub, a press pops and pays on the same
+## coordinates): the chooser shows A, B, C and a tile opens its experiment; on
+## the stub (#stub, the shared foundation) a press pops and pays on the same
 ## frame, one finger (a touch and its mouse copy) is one press, the upgrade
 ## button buys, restart starts from nothing, back returns to the chooser.
 
@@ -46,25 +47,30 @@ func _click(c: Control, touch_too: bool = false) -> void:
 
 
 func _open_stub() -> void:
-	var tile: Control = app.chooser.tiles[0]["button"]
-	_click(tile)
+	app.open("stub")
 	await tree.process_frame
 
 
-func test_starts_on_the_chooser_with_the_stub_tile() -> void:
+func test_starts_on_the_chooser_with_a_b_c() -> void:
 	assert_eq(app.screen, "chooser", "chooser first")
-	assert_eq(app.chooser.tiles.size(), 1, "one tile")
-	assert_eq(String(app.chooser.tiles[0]["id"]), "stub", "the stub")
+	var ids: Array = app.chooser.tiles.map(func(t: Dictionary) -> String: return String(t["id"]))
+	assert_eq(ids, ["click", "perfect", "explosion"], "A, B, C in order; the stub is not listed")
 	assert_true(app.chooser.visible, "visible")
 	assert_false(app.frame.visible, "frame hidden")
 
 
-func test_the_tile_opens_the_stub() -> void:
-	await _open_stub()
-	assert_eq(app.screen, "play", "playing")
-	assert_eq(app.exp_id, "stub", "the stub")
-	assert_true(app.frame.visible, "frame shown")
-	assert_eq(app.rules.money, 0, "from nothing")
+func test_each_tile_opens_its_experiment_from_nothing() -> void:
+	for i in 3:
+		var t: Dictionary = app.chooser.tiles[i]
+		_click(t["button"])
+		await tree.process_frame
+		assert_eq(app.screen, "play", "playing %s" % t["id"])
+		assert_eq(app.exp_id, String(t["id"]), "the tile's experiment")
+		assert_eq(app.rules.variant, String(t["id"]), "its rules")
+		assert_eq(app.rules.money, 0, "from nothing")
+		assert_true(app.frame.visible, "frame shown")
+		app.back()
+		await tree.process_frame
 
 
 func test_a_press_pops_and_pays_on_the_same_frame() -> void:

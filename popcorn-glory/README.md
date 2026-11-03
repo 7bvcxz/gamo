@@ -11,12 +11,20 @@
 
 ## 지금 상태와 명령
 
-Step 03부터 플레이할 수 있는 Godot 프로젝트다(Godot 4.7, Compatibility, 세로 720×1280 `expand`).
-지금은 공통 토대와 스텁(`#stub`)뿐이고, 세 실험 A/B/C는 Step 04에서 같은 틀 위에 생긴다.
+플레이할 수 있는 Godot 프로젝트다(Godot 4.7, Compatibility, 세로 720×1280 `expand`). 선택 화면에 세 실험이 있다:
+
+| | 실험 | 주소 | 손이 하는 일 |
+|---|---|---|---|
+| A | Click & Pop | `#click` | 기계를 탭 — 누를 때마다 바로 터진다 |
+| B | Perfect Pop | `#perfect` | 누르고 있다가 금색 구간에서 뗀다 (끝까지 누르면 저절로 탄다) |
+| C | Pop Explosion | `#explosion` | 탭으로 낟알 8개를 채우면 연쇄 폭발 |
+
+`#stub`은 Step 03의 토대(목록에 없음, 테스트용).
 
 ```bash
 godot --path popcorn-glory                              # 실행 (선택 화면)
-godot --path popcorn-glory -- --exp stub --dev          # 스텁을 바로, 개발 시계와 함께
+godot --path popcorn-glory -- --exp perfect --dev       # 실험 하나를 바로, 개발 시계와 함께
+godot --headless --path popcorn-glory --script res://tools/selftest.gd   # 스크립트 플레이어 3분 (실제 규칙, 객관 수치)
 popcorn-glory/tools/test.sh                             # 헤드리스 unit + integration (엔진 오류도 실패)
 popcorn-glory/tools/check.sh                            # import 두 번 + 에디터 로드 + 테스트
 popcorn-glory/tools/deploy.sh                           # docs/popcorn-glory/ 로 Web export (소스를 먼저 커밋)
@@ -26,7 +34,8 @@ xvfb-run -a -s "-screen 0 1280x1600x24" godot --path popcorn-glory --audio-drive
   --script res://tools/capture.gd -- --out /abs/shot.png --size 720x1280 --exp stub --presses 12 --buy 1
 ```
 
-주소 옵션: `#stub`(실험 직접 링크), `?dev=1`(활동 시계 + 개발용 브리지 호출), `?motion=reduce`.
+주소 옵션: `#click`·`#perfect`·`#explosion`(직접 링크), `?dev=1`(활동 시계 + 개발용 브리지 호출), `?motion=reduce`.
+느린 브라우저 검사 `specs/play180.spec.mjs`는 실험마다 실제 3분을 실제 입력으로 플레이한다(`--project p720`).
 
 **배포가 `deploy-web.sh`가 아닌 이유**: 공용 runner는 게임이 시작되기 전에 주소를 게임 폴더로 되돌리고
 (`history.replaceState('./')`) 로더는 해시를 넘기지 않으므로, 실험 하나로 가는 직접 링크(`#click`)가 살아남지
@@ -41,10 +50,10 @@ app/      main(주소·화면·한 곳에서 명령 실행), frame(뒤로·다�
           play_view(기계·입력·힌트), active_clock, session_log, bridge(window.popcorn), web, route, registry, ui/
 core/     rules(정수 ms 시계의 결정적 규칙: execute·advance·이벤트), economy(data/economy.json 읽기·검사)
 art/      palette, machine_art(도형으로 그린 기계 다섯 단계), pop_fx(풀 400개, 한 번의 _draw)
-variants/ stub/ (Step 04: 세 실험)
+variants/ click/ perfect/ explosion/ (각각 *_rules.gd = 규칙, *_view.gd = 그림), stub/
 data/     economy.json — 가격·수확은 여기에만
 tests/    unit · integration(헤드리스), e2e(Playwright)
-tools/    test.sh check.sh deploy.sh e2e.sh capture.gd
+tools/    test.sh check.sh deploy.sh e2e.sh capture.gd(--steps p,w1600,r) selftest.gd
 ```
 
 - 바꾸는 길은 하나다: 화면이 명령을 내면 `PopApp`이 활동 시간을 찍고, 기록하고, 규칙에 실행하고, 그 이벤트를

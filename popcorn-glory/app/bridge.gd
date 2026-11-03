@@ -57,10 +57,16 @@ func query(name: String, arg: Variant) -> Variant:
 			# Answers with the state after the step: one call where a test would make two.
 			_app.call("dev_advance", int(arg))
 			return {"ok": true, "state": _app.call("state")}
+		"dev_level":
+			# A picture of a later machine for render checks -- not a play
+			# (the play tests never call it).
+			_app.call("dev_level", int(arg))
+			return {"ok": true}
 		"dev_render_info":
 			return {"ok": true,
 				"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 				"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+				"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 				"fps": Engine.get_frames_per_second()}
 	return null

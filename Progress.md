@@ -458,6 +458,7 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
   `project.godot`은 Step 03에서 생긴다. Godot Web의 `user://`는 도메인 전체가 공유하는 `/userfs`라 이 게임은 저장하지 않는다.
 - Step 02 (#99): 세 실험 설계(`design/EXPERIMENTS.md`)·3분 절차와 점수표(`design/PLAYTEST.md`)·손 모델. 수치는 가설.
 - Step 03 (#100): Godot 토대 + 스텁(`#stub`), 헤드리스·브라우저 테스트, 자체 deploy(`docs/popcorn-glory/`, 해시 직접 링크 때문), 사이트 등록. HeyDive 미등록(소유자 확인 필요).
+- Step 04 (#101): 세 실험 A `#click`·B `#perfect`·C `#explosion` 플레이 가능(0.4.0), 실제 규칙 스크립트 플레이어 표, 실제 3분 브라우저 플레이.
 
 ## 다음 작업
 
