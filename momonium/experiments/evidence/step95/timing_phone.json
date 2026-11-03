@@ -1,0 +1,42 @@
+{
+  "rock": {
+    "taps": 25,
+    "register_ms": {
+      "median": 200.5,
+      "max": 362.30000019073486
+    },
+    "register_frames": {
+      "median": 1,
+      "max": 1
+    },
+    "sound_ms": {
+      "median": 38.280922902500606,
+      "max": 66.12919066692848,
+      "heard": 25,
+      "of": 25
+    },
+    "rock": 4,
+    "breaks": 1,
+    "chunks": null
+  },
+  "rock-plus": {
+    "taps": 25,
+    "register_ms": {
+      "median": 294.30000019073486,
+      "max": 1358.9000005722046
+    },
+    "register_frames": {
+      "median": 1,
+      "max": 1
+    },
+    "sound_ms": {
+      "median": 38.09592309322761,
+      "max": 45.68124981458823,
+      "heard": 25,
+      "of": 25
+    },
+    "rock": 4,
+    "breaks": 1,
+    "chunks": 2
+  }
+}

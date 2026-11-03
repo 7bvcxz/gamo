@@ -19,7 +19,7 @@
   | 판 | 주소 | |
   |---|---|---|
   | C 기준판 | `#rock` | Step 88 그대로 고정(`test_baselines.gd`) |
-  | C+ 개선판 | `#rock-plus` | `experiments/rock_plus/`, Step 95·96에서 고친다 |
+  | C+ 개선판 | `#rock-plus` | `experiments/rock_plus/`. Step 95 손맛(접촉·패임·조각·깨짐 정지·무게·곡괭이 단계), Step 96 30분 성장 |
   | E 기준판 | `#tycoon` | Step 92 그대로 고정 |
   | E+ 개선판 | `#tycoon-plus` | `experiments/tycoon_plus/`, Step 97·98에서 고친다 |
 
@@ -96,6 +96,7 @@ momonium/experiments/tools/e2e.sh specs/funlab86.spec.mjs  # 브라우저 검사
 FUNLAB_E2E_BASE=https://7bvcxz.github.io/gamo/momonium-experiments/ momonium/experiments/tools/e2e.sh
 momonium/experiments/tools/sync_shared.sh                  # 게임 그림이 바뀌었을 때
 godot --headless --path momonium/experiments --script res://tools/selftest.gd -- --exp island   # 스크립트 플레이어 3분(객관 수치만)
+godot --headless --path momonium/experiments --script res://tools/selftest.gd -- --exp rock-plus --seconds 900 --taps 1.5   # 트랙도, 15분, 느린 탭
 momonium/experiments/tools/compare_assets.sh               # 비교 페이지의 그림(배포 빌드에서 각 실험을 처음부터 3분)·격자·수치
 ```
 
