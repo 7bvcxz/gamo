@@ -527,6 +527,7 @@ GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양�
   보고 `windup/design/FUN_SCORES.md`, 증거 `windup/evidence/step10/`. 사람 결과 없음.
 - Step 11 (#112): A/B/C 토너먼트 — 0.10.0을 `docs/windup/ref/step11/`에 보존, 변형마다 블라인드 AI 3세션(순서 돌림), 빌드를 모르는 독립 채점,
   같은 입력 스크립트 3분. **검증된 승자 없음**, 다음 후보 C(낮은 확신), ITERATE, 소유자 승인 요청. `windup/design/TOURNAMENT.md`.
+- Step 12 (#113): **구현 차단**(승자 미검증·승인 없음). 다듬기 순서와 확장 사다리 제안 `windup/design/EXPANSION_PROPOSAL.md`. 이슈는 열어 둠.
 
 ## 공용 도구
 
