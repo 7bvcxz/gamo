@@ -21,7 +21,7 @@
   | C 기준판 | `#rock` | Step 88 그대로 고정(`test_baselines.gd`) |
   | C+ 개선판 | `#rock-plus` | `experiments/rock_plus/`. Step 95 손맛(접촉·패임·조각·깨짐 정지·무게·곡괭이 단계), Step 96 30분 성장 |
   | E 기준판 | `#tycoon` | Step 92 그대로 고정 |
-  | E+ 개선판 | `#tycoon-plus` | `experiments/tycoon_plus/`, Step 97·98에서 고친다 |
+  | E+ 개선판 | `#tycoon-plus` | `experiments/tycoon_plus/`. Step 97 폰에서 큰 라인(화면 모양대로, 라인만 비춤, 물건 2–5배), Step 98 30분 성장 |
 
   실험실 첫 화면 위쪽의 C·E 카드가 Baseline / Improved 버튼으로 넷을 연다. 여섯 타일은 그 아래에 그대로 있다.
 - **비교 페이지(Step 93)**: https://7bvcxz.github.io/gamo/momonium-experiments/compare.html

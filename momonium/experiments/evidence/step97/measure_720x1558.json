@@ -1,0 +1,95 @@
+{
+  "rows": [
+    {
+      "box": 0.18,
+      "id": "tycoon",
+      "item_px": 21.8,
+      "lanes": 1,
+      "level": 0,
+      "path_px": 396.0,
+      "zoom": 0.82
+    },
+    {
+      "box": 0.18,
+      "id": "tycoon",
+      "item_px": 21.5,
+      "lanes": 1,
+      "level": 3,
+      "path_px": 396.0,
+      "zoom": 0.82
+    },
+    {
+      "box": 0.18,
+      "id": "tycoon",
+      "item_px": 21.5,
+      "lanes": 1,
+      "level": 5,
+      "path_px": 396.0,
+      "zoom": 0.82
+    },
+    {
+      "box": 0.18,
+      "id": "tycoon",
+      "item_px": 21.5,
+      "lanes": 2,
+      "level": 7,
+      "path_px": 396.0,
+      "zoom": 0.82
+    },
+    {
+      "box": 0.18,
+      "id": "tycoon",
+      "item_px": 24.2,
+      "lanes": 3,
+      "level": 10,
+      "path_px": 396.0,
+      "zoom": 0.82
+    },
+    {
+      "box": 0.35,
+      "id": "tycoon-plus",
+      "item_px": 68.1,
+      "lanes": 1,
+      "level": 0,
+      "path_px": 699.0,
+      "zoom": 1.68
+    },
+    {
+      "box": 0.35,
+      "id": "tycoon-plus",
+      "item_px": 67.0,
+      "lanes": 1,
+      "level": 3,
+      "path_px": 687.0,
+      "zoom": 1.65
+    },
+    {
+      "box": 0.31,
+      "id": "tycoon-plus",
+      "item_px": 63.3,
+      "lanes": 1,
+      "level": 5,
+      "path_px": 649.0,
+      "zoom": 1.56
+    },
+    {
+      "box": 0.37,
+      "id": "tycoon-plus",
+      "item_px": 63.3,
+      "lanes": 2,
+      "level": 7,
+      "path_px": 649.0,
+      "zoom": 1.56
+    },
+    {
+      "box": 0.48,
+      "id": "tycoon-plus",
+      "item_px": 63.3,
+      "lanes": 3,
+      "level": 10,
+      "path_px": 649.0,
+      "zoom": 1.56
+    }
+  ],
+  "size": "720x1558"
+}
