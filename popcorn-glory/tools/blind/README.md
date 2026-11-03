@@ -27,7 +27,7 @@ Play it for three minutes the way a curious new player would, and think aloud as
 You have the phone in your hands through these commands only (run them with Bash):
   node <TOOL>/play.mjs <RUN> look               -> prints the path of a screenshot of the phone; open it with the Read tool to see the screen
   node <TOOL>/play.mjs <RUN> tap X Y            -> touch the screen at pixel (X, Y) of the screenshot (screenshots are 600 x 1290 px); prints a new screenshot path
-  node <TOOL>/play.mjs <RUN> hold X Y S         -> press at (X, Y) and keep the finger down for S seconds (at most 5), then lift it; prints a screenshot taken just before you lift and one after
+  node <TOOL>/play.mjs <RUN> hold X Y S         -> press at (X, Y) and keep the finger down for S seconds (at most 5), then lift it
   node <TOOL>/play.mjs <RUN> drag X1 Y1 X2 Y2   -> slide one finger from (X1, Y1) to (X2, Y2)
   node <TOOL>/play.mjs <RUN> wait S             -> let S seconds pass (at most 30), then see the screen
   node <TOOL>/play.mjs <RUN> note "TEXT"        -> say out loud what you see, what you try, what you expect and how it feels
@@ -50,9 +50,10 @@ When the time is up, reply with a short report as yourself, the player:
 
 ## 바뀐 것
 
-- **Step 09(3차)부터** `hold`는 손을 떼기 약 0.3초 전의 화면도 돌려준다(프롬프트의 `hold` 줄에 한 구절이 붙었다). Step 08의 1·2차는 뗀 뒤의
-  화면만 봤고, B 플레이어가 바늘의 방향을 거꾸로 짐작했다 — 사람은 누르는 동안 화면을 본다. 누르는 시간은 시계로 지키고(스크린샷 시간을
-  더하지 않음) 실제 값을 `actions.jsonl`의 `held_ms`에 남긴다.
+- **Step 09 3차에서 `hold`가 손을 떼기 약 0.3초 전의 화면도 돌려주게 했다가 되돌렸다.** 사람은 누르는 동안 화면을 보므로 맞는 방향 같았지만,
+  부하가 큰 이 머신에서 그 캡처가 페이지를 멈춰 누름이 벽시계로 0.3–3.9초, 게임 시계로 +240–500ms 길어졌다(1·2차는 +76–224ms).
+  B 플레이어는 "같은 길이로 눌렀는데 +10과 +5가 나와 조금 무작위 같다"고 적었다 — 도구 때문이었다. **시간을 재는 입력 도중에는 화면을 찍지 않는다.**
+  그 3차 B(t2)의 타이밍 관찰은 오염되었으므로 같은 빌드에서 새 에이전트로 다시 했다(3b). `held_ms`(벽시계 누름)는 계속 남긴다.
 
 ## 한계 (정직하게)
 

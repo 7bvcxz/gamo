@@ -111,19 +111,16 @@ async function handle(cmd, a) {
     await page.touchscreen.tap(p.x, p.y);
     await page.waitForTimeout(500);
   } else if (cmd === 'hold') {
-    // Step 09: a person sees the screen WHILE the finger is down (B's needle
-    // running round the ring); Step 08's players saw only the screen after
-    // lifting and guessed the needle's direction backwards. So the hold also
-    // returns a picture taken about 0.3 s before the lift, and the hold time
-    // is kept by the clock, not by adding the screenshot's own time.
+    // No screenshot while the finger is down. Step 09 (round 3) tried one ~0.3 s
+    // before the lift so the player could see B's needle move: on this loaded
+    // machine the capture stalled the page, the holds ran 0.3-3.9 s long by the
+    // wall clock and +240..+500 ms by the game's own clock (rounds 1-2:
+    // +76..+224), and the B player called the timing 'a bit random' -- it was
+    // the tool. held_ms records the wall-clock hold; the game logs its own.
     const p = toCss(a.x, a.y);
     const ms = Math.round(Math.min(5, Math.max(0.1, a.s)) * 1000);
     const t0 = Date.now();
     await touch('touchStart', p);
-    if (ms >= 500) {
-      await page.waitForTimeout(Math.max(0, ms - 300 - (Date.now() - t0)));
-      out.held_screen = await screenshot();
-    }
     await page.waitForTimeout(Math.max(0, ms - (Date.now() - t0)));
     await touch('touchEnd', null);
     out.held_ms = Date.now() - t0;
