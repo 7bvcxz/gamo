@@ -14,7 +14,7 @@
 set -uo pipefail
 GAME="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(cd "$GAME/.." && pwd)"
-OUT="$GAME/tests/results/step07"
+OUT="${POPCORN_REPORT_DIR:-$GAME/tests/results/step07}"   # POPCORN_REPORT_DIR: another folder (e.g. a public run)
 mkdir -p "$OUT"
 slow=0; public=0
 for a in "$@"; do [[ "$a" == "--slow" ]] && slow=1; [[ "$a" == "--public" ]] && public=1; done
@@ -55,5 +55,6 @@ else
 fi
 echo "browser: $browser ${browser_why}"
 
+(( public )) && export POPCORN_E2E_BASE=https://7bvcxz.github.io/gamo/popcorn-glory/
 node "$GAME/tools/summarize.mjs" "$OUT" "$headless" "$deploy" "$deploy_why" "$browser" "$browser_why"
 [[ "$headless" == "PASSED" && "$browser" != "FAILED" && "$deploy" != "FAILED" ]]

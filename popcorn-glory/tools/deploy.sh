@@ -82,7 +82,7 @@ version="$(sed -nE 's/^config\/version="([^"]+)"/\1/p' "$GAME/project.godot")"
 # that held no game change or no longer existed (Steps 03 and 04).
 source="$(git log -1 --format=%h --abbrev=12 -- "$GAME")"
 # Evidence (screenshots, logs) is not game source: it may be uncommitted while a step is checked.
-[[ -n "$(git status --porcelain -- "$GAME" ":(exclude)$GAME/evidence" | head -n 1)" ]] && source="$source-dirty"
+[[ -n "$(git status --porcelain -- "$GAME" ":(exclude)$GAME/evidence" ":(exclude)$GAME/tests/results" | head -n 1)" ]] && source="$source-dirty"
 printf '{"version":"%s","pack":"%s","packSize":%s,"engine":"%s","godot":"%s","source":"%s"}' \
   "$version" "$pack" "$(stat -c%s "$OUT/$pack")" "$engine" "$("$GODOT" --version | head -n 1)" "$source" > "$OUT/version.json"
 

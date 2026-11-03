@@ -10,7 +10,7 @@ popcorn-glory/tools/test_all.sh --slow     # + 실험마다 실제 3분(play180)
 popcorn-glory/tools/test_all.sh --public   # 공개 URL을 대상으로(배포 없음)
 ```
 
-보고서는 `tests/results/step07/report.md`·`report.json`이다. 검사마다 PASSED, FAILED, SKIPPED(이유와 함께) 중 하나이고, git SHA, 빌드, 실패한 검사의 오류가 함께 남는다. 돌릴 수 없었던 검사는 PASSED가 아니라 SKIPPED다.
+보고서는 `tests/results/step07/report.md`·`report.json`이다(`POPCORN_REPORT_DIR`로 다른 폴더에). 공개 URL 대상 실행만 실패한 검사를 한 번 재시도하고, 재시도로 통과하면 `PASSED (on retry)`와 첫 시도의 오류를 남긴다(K12에서는 다른 세션의 도커 인터페이스 변동으로 `net::ERR_NETWORK_CHANGED`가 난다). 검사마다 PASSED, FAILED, SKIPPED(이유와 함께) 중 하나이고, git SHA, 빌드, 실패한 검사의 오류가 함께 남는다. 돌릴 수 없었던 검사는 PASSED가 아니라 SKIPPED다.
 
 메모리가 5GB 미만이면 브라우저 단계를 기다린다. 10분이 지나도 그대로면 SKIPPED(memory)로 남긴다. K12는 메모리 고갈로 네트워크가 끊긴 적이 있다.
 

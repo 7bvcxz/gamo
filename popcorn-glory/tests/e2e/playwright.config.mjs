@@ -19,7 +19,11 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   fullyParallel: false,
   workers: 1,
-  retries: 0,
+  // One retry against the published URL only: on K12 other sessions' docker
+  // interfaces go up and down and Chromium aborts loads with
+  // net::ERR_NETWORK_CHANGED (36 such events in 15 minutes, Step 07). The
+  // report marks a check that passed on its retry as such -- never silently.
+  retries: process.env.POPCORN_E2E_BASE ? 1 : 0,
   reporter: [['list']],
   use: { baseURL: process.env.POPCORN_E2E_BASE || `http://127.0.0.1:${port}/popcorn-glory/` },
   webServer: process.env.POPCORN_E2E_BASE ? undefined : {
