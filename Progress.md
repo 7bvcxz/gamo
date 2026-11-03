@@ -456,6 +456,7 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
 
 - Step 01 (#98): 문서만 — 도구 실측(`design/TOOLS.md`), 절차(`design/WORKFLOW.md`), 10·30·60·180초 기준(`FUN_FIRST.md`).
   `project.godot`은 Step 03에서 생긴다. Godot Web의 `user://`는 도메인 전체가 공유하는 `/userfs`라 이 게임은 저장하지 않는다.
+- Step 02 (#99): 세 실험 설계(`design/EXPERIMENTS.md`)·3분 절차와 점수표(`design/PLAYTEST.md`)·손 모델. 수치는 가설.
 
 ## 다음 작업
 
