@@ -1,13 +1,14 @@
 extends "res://tests/framework/test_case.gd"
 
-## E+ (Step 97) in the Lab's frame: the same line as E delivery for delivery
-## (the same TycoonLine and TycoonLevels, the same purchases, the same coins),
+## E+ (Steps 97-98) in the Lab's frame: for E's three minutes the same line
+## as E delivery for delivery (the same TycoonLine, E's ten levels, the same
+## purchases, the same coins; Step 98 adds twenty levels after them),
 ## drawn big -- the line takes the play area's shape (straight down on a
 ## phone, an L on a nearly square one, straight across on a wide screen), stays
 ## between the counter and the button, and draws a product at least 1.8 times
 ## as big as E does. A delivery pays once and only a delivery pays; an upgrade
-## is measured ten seconds later (deliveries a minute before -> after); a
-## paused line does not move.
+## is measured once its goods reach the crate (deliveries a minute before ->
+## after); a paused line does not move.
 
 const MainScene := preload("res://lab/main.tscn")
 
@@ -39,10 +40,11 @@ func _open(id: String) -> LabExperiment:
 
 
 func test_the_same_line_as_e_delivery_for_delivery() -> void:
+	# E's three minutes: E+ keeps E's first ten levels (Step 98 adds the rest).
 	var results: Array[Dictionary] = []
 	for id: String in ["tycoon", "tycoon-plus"]:
 		var e := await _open(id)
-		for i in 600:
+		for i in 360:
 			app.host.step(0.5)
 			if bool(e.action_info().get("affordable", false)):
 				app.host.press_action()
@@ -51,7 +53,7 @@ func test_the_same_line_as_e_delivery_for_delivery() -> void:
 		app.back()
 		await tree.process_frame
 	assert_eq(results[1], results[0], "E+ makes what E makes: %s" % str(results[0]))
-	assert_true(int(results[0]["level"]) >= 8, "five minutes in, well up the line (Lv%d)" % int(results[0]["level"]))
+	assert_true(int(results[0]["level"]) >= 7, "three minutes in, well up the line (Lv%d)" % int(results[0]["level"]))
 
 
 func test_a_delivery_pays_once_and_only_deliveries_pay() -> void:
@@ -114,19 +116,48 @@ func test_a_product_is_drawn_much_bigger_than_in_e() -> void:
 			"Lv%d: a product %.0f px in E+, %.0f px in E" % [lv, float(sizes["tycoon-plus%d" % lv]), float(sizes["tycoon%d" % lv])])
 
 
-func test_an_upgrade_is_measured_ten_seconds_later() -> void:
+func test_an_upgrade_is_measured_once_it_reaches_the_crate() -> void:
 	var e := await _open("tycoon-plus")
 	for i in 60:
 		app.host.step(0.5)
+	var before := float(e.state()["deliveries_per_min"])
+	assert_near(before, 60.0 * TycoonPlusLevels.capacity(0), 0.6, "a steady line reads its real rate, not a window's count (%.1f)" % before)
 	e.dev("coins", 12)
 	app.host.press_action()
 	assert_true(bool(e.state()["measuring"]), "measuring what the Bigger Hopper does")
-	app.host.step(10.5)
-	var out := app.host.session.milestones.filter(func(m: Dictionary) -> bool: return String(m["name"]) == "output")
+	# The goods already on the belt arrive first; then the first one made
+	# after the upgrade; then fifteen seconds of the new line.
+	for i in 30:
+		app.host.step(0.5)
+	assert_true(bool(e.state()["measuring"]) or not _outputs().is_empty(), "still watching or told")
+	for i in 30:
+		app.host.step(0.5)
+	var out := _outputs()
 	assert_eq(out.size(), 1, "one measurement")
 	assert_eq(String(out[0]["upgrade"]), "Bigger Hopper", "of that upgrade")
-	assert_true(float(out[0]["after_per_min"]) > 0.0, "deliveries a minute after (%s)" % str(out[0]["after_per_min"]))
+	assert_true(float(out[0]["after_per_min"]) > float(out[0]["before_per_min"]),
+		"a faster hopper is told as faster: %s -> %s" % [str(out[0]["before_per_min"]), str(out[0]["after_per_min"])])
+	assert_near(float(out[0]["after_per_min"]), 60.0 * TycoonPlusLevels.capacity(1), 1.0, "what the line can now make")
 	assert_false(bool(e.state()["measuring"]), "done")
+
+
+func test_an_upgrade_that_makes_no_more_is_not_measured() -> void:
+	var e := await _open("tycoon-plus")
+	e.dev("level", 12)
+	for i in 40:
+		app.host.step(0.5)
+	var before := _outputs().size()
+	e.dev("coins", TycoonPlusLevels.cost(13))
+	app.host.press_action()
+	assert_eq(int(e.state()["level"]), 13, "the Paint Arch")
+	assert_false(bool(e.state()["measuring"]), "paint changes the goods, not how many: nothing to measure")
+	for i in 80:
+		app.host.step(0.5)
+	assert_eq(_outputs().size(), before, "and nothing told")
+
+
+func _outputs() -> Array:
+	return app.host.session.milestones.filter(func(m: Dictionary) -> bool: return String(m["name"]) == "output")
 
 
 func test_a_paused_line_does_not_move() -> void:
@@ -143,3 +174,39 @@ func test_a_paused_line_does_not_move() -> void:
 	assert_eq(JSON.stringify(line.items), before, "the items stay where they were")
 	assert_eq(line.delivered, delivered, "and nothing is delivered")
 	app.host.set_pause("hidden", false)
+
+
+func test_thirty_minutes_bring_eras_buildings_and_a_branch() -> void:
+	var e := await _open("tycoon-plus")
+	e.dev("level", 30)
+	var st := e.state()
+	assert_eq(st["eras"], ["Express Era", "Golden Era", "Festival Era", "Grand Era"], "four eras celebrated")
+	assert_eq((st["decor"] as Array).size(), 5, "five buildings beside the line")
+	assert_true(bool(st["branch"]), "two crates")
+	assert_true(bool(st["painted"]) and bool(st["wrapped"]), "painted and wrapped goods")
+	assert_eq(int(st["lanes"]), 6, "six lanes")
+	var eras := app.host.session.milestones.filter(func(m: Dictionary) -> bool: return String(m["name"]) == "era")
+	assert_eq(eras.size(), 4, "each era recorded")
+
+
+func test_the_next_change_shows_where_it_will_be() -> void:
+	var e := await _open("tycoon-plus")
+	var shown := {}
+	for lv in range(11, 30):
+		e.dev("level", lv)
+		shown[String(e.state()["ghost"])] = true
+	for kind: String in ["decor", "lane", "branch", "arch", "helper"]:
+		assert_true(shown.has(kind), "a %s ghost before its upgrade" % kind)
+
+
+func test_the_grand_alternative_buys_a_bundle() -> void:
+	app.route["alt"] = "grand"
+	var e := await _open("tycoon-plus")
+	assert_eq(int(e.call("target")), 3, "the first press buys up to level 3")
+	e.dev("coins", 72)
+	app.host.press_action()
+	assert_eq(int(e.state()["level"]), 3, "three levels at once")
+	assert_eq(int(e.state()["coins"]), 0, "for 12 + 24 + 36")
+	assert_eq(int(app.host.session.upgrades.size()), 1, "one purchase")
+	assert_eq(app.host.session.variant, "grand", "the run says which")
+	app.route["alt"] = ""

@@ -69,7 +69,7 @@
   <p class="muted">2026-11-03, 소유자가 여섯 실험을 직접 해 보고 <b>C(Break &amp; Upgrade)</b>와 <b>E(Production Tycoon)</b>가 재미있다고 골랐다.
     Step 93의 자동 추천(D)보다 이 판단이 우선한다. 두 실험은 각각 그대로 둔 <b>기준판</b>과 앞으로 고쳐 나갈 <b>개선판</b>(C+, E+)을 갖는다.
     점수는 <b>이 브라우저에만</b> 저장되고 어디에도 보내지 않는다.</p>
-  <div class="row"><a class="btn ghost" href="./">실험실 열기</a><a class="btn ghost" href="#protocol">3·15·30분 절차</a><a class="btn ghost" href="#scores">점수 요약</a><a class="btn ghost" href="#guide15">15분 해 보기</a><a class="btn ghost" href="#runs30">30분 수치</a><a class="btn ghost" href="#objective">기준 기록</a><a class="btn ghost" href="compare.html">여섯 실험 비교(Step 93)</a></div>
+  <div class="row"><a class="btn ghost" href="./">실험실 열기</a><a class="btn ghost" href="#protocol">3·15·30분 절차</a><a class="btn ghost" href="#scores">점수 요약</a><a class="btn ghost" href="#guide15">15분 해 보기</a><a class="btn ghost" href="#runs30">C 30분</a><a class="btn ghost" href="#eruns30">E 30분</a><a class="btn ghost" href="#objective">기준 기록</a><a class="btn ghost" href="compare.html">여섯 실험 비교(Step 93)</a></div>
 
   <h2>네 가지 판 <span class="muted">— 매번 처음부터 열린다</span></h2>
   <div class="cards" id="cards"></div>
@@ -125,6 +125,12 @@
     언제 오고 얼마나 기다리는지를 보여 준다. <b>사람의 손이 지치는지, 재미있는지는 말하지 않는다.</b></p>
   <div class="tablewrap"><table id="runsTable"></table></div>
 
+  <h2 id="eruns30">E와 E+ 30분 <span class="muted">— 스크립트 플레이어, 객관 수치</span></h2>
+  <p class="note">살 수 있으면 1.5초 뒤에 사는 로봇이 30분 돌린 기록(<code>tools/e_runs.gd</code>). 라인이 얼마나 만들고(분당 배달), 업그레이드와 새로 보이는 변화가
+    얼마나 자주 오는지 보여 준다. E의 10단계 뒤 'Golden Line'은 반짝임만 바뀌므로 새로 보이는 변화로 세지 않았다.
+    병목은 호퍼·기계·벨트 중 줄당 가장 느린 단계이고, '기계 앞 대기'는 그 순간 기계 앞에 맞붙어 멈춘 재료 수다. <b>지켜보는 즐거움은 말하지 않는다.</b></p>
+  <div class="tablewrap"><table id="eRunsTable"></table></div>
+
   <h2 id="objective">기준 기록 <span class="muted">— Step 93에서 잰 기준판, 지난 기록</span></h2>
   <p class="note">2026-11-02 Step 93 측정(기준판, 3분). 스크립트 플레이어(<code>tools/selftest.gd</code>: C는 초당 2.5번 탭, 살 수 있으면 1.5초 뒤에 산다)와
     실제 브라우저(720×1280 배포 빌드, 헤드리스 Chromium) 기록이다. 업그레이드가 언제 오는지를 보여 줄 뿐, <b>재미를 말하지 않는다.</b></p>
@@ -140,10 +146,13 @@ const VARIANTS = [
 // What each improved track is right now (the step that last changed it).
 const STATUS = {
   'rock-plus': 'Step 96: 30분 성장 — 바위 18종(종류마다 모양·색, 6번째는 큰 바위), 약 세 바위마다 곡괭이 한 단계(3단계마다 새 곡괭이), 조각이 떨어질 때도 코인, 먼 섬에 다음 큰 바위. Step 95: 치는 손맛(탭한 그 프레임에 닿는 곡괭이, 패임·금·조각, 깨지는 순간의 정지와 파편).',
-  'tycoon-plus': 'Step 97: 폰에서 크게 — 라인이 화면 모양대로 선다(폰은 위에서 아래로, 넓은 화면은 가로), 카메라는 라인만 비추고, 물건은 E의 약 2–3배(데스크톱 5배). 호퍼에서 떨어지고 기계에서 튀어나오고 통에 들어가는 순간마다 보이며, 업그레이드는 바뀐 장비에서 알리고 10초 뒤 분당 배달 전 → 후를 잰다. 경제는 E와 같다.',
+  'tycoon-plus': 'Step 98: 30분 성장 — E의 10단계 뒤 20단계(쌍둥이 프레스·로봇 팔, 6줄까지, 제품 색을 바꾸는 도색 아치, 선물 포장, 두 통으로 갈라지는 끝, 일하는 모모, 라인 옆에 서는 풍차·태양광·시계탑·물레방아·본사), 다음 변화의 흐린 모습, 시대마다 짧은 축하. Step 97: 폰에서 크게(라인이 화면 모양대로, 물건은 E의 2–5배).',
 };
 // Experiment-only alternatives of a track (dev links; the run records which).
 const ALTS = {
+  'tycoon-plus': [
+    { alt: 'grand', name: '크게 바뀌기', what: '버튼이 다음 묶음 끝까지 한 번에 산다(값은 그 합). 업그레이드가 드물지만 한 번에 크게 바뀐다.' },
+  ],
   'rock-plus': [
     { alt: 'light', name: '가벼운 바위', what: '바위의 체력이 60%, 코인은 같다. 깨짐 한 번에 탭이 40% 적다(손의 피로 시험).' },
     { alt: 'hold', name: '누르고 있기', what: '누른 채로 있으면 0.45초마다 한 번 친다(자연 탭보다 느림, 자동 채굴 아님).' },
@@ -254,7 +263,7 @@ document.getElementById('exportJson').addEventListener('click', () => {
     tester: data.tester, device: data.device, exported: new Date().toISOString(),
     scale: '1-5, null = not scored; pending = no human answer yet',
     protocol: LENGTHS.map((m) => `${m} min`), rows: r, pending: r.filter((x) => !x.entered).map((x) => `${x.id}|${x.minutes}`),
-    objective_historical: OBJECTIVE, objective_runs_30min: window.C_RUNS || null,
+    objective_historical: OBJECTIVE, objective_runs_30min: window.C_RUNS || null, objective_e_runs_30min: window.E_RUNS || null,
   }, null, 2));
 });
 document.getElementById('exportCsv').addEventListener('click', () => {
@@ -299,6 +308,14 @@ fetch('tracks/c_runs.json', { cache: 'no-store' }).then((r) => r.json()).then((j
   t.innerHTML = '<tr><th>판 · 탭 속도</th><th>3분<br><span class="muted">업그레이드 · 바위</span></th><th>15분</th><th>30분</th><th>가장 긴 업그레이드 대기<br><span class="muted">3–15분 / 15–30분</span></th><th>가장 긴 깨짐 대기</th><th>새로 보이는 것 사이 최장<br><span class="muted">0–15 / 15–30분</span></th><th>30분 탭</th></tr>' +
     j.runs.map((r) => `<tr><td>${r.label}<br><span class="muted">초당 ${r.taps_per_second}</span></td><td>${cell(r.at['3'])}</td><td>${cell(r.at['15'])}</td><td>${cell(r.at['30'])}</td><td>${r.longest_upgrade_wait_s['3-15']}초 / ${r.longest_upgrade_wait_s['15-30']}초</td><td>${r.longest_break_wait_s}초</td><td>${r.longest_reveal_wait_s['0-15']}초 / ${r.longest_reveal_wait_s['15-30']}초</td><td>${r.taps}</td></tr>`).join('');
 }).catch(() => { document.getElementById('runsTable').innerHTML = '<tr><td>30분 기록 파일을 읽지 못했다.</td></tr>'; });
+
+fetch('tracks/e_runs.json', { cache: 'no-store' }).then((r) => r.json()).then((j) => {
+  window.E_RUNS = j;
+  const t = document.getElementById('eRunsTable');
+  const cell = (a) => `Lv${a.level} · 분당 ${a.deliveries_a_min_in_span}<br><span class="muted">${String(a.name).replace(/</g, '&lt;')} · 병목 ${a.bottleneck}(줄당 분당 ${a.per_lane_a_min}) · 기계 앞 대기 ${a.queued}</span>`;
+  t.innerHTML = '<tr><th>판</th><th>3분<br><span class="muted">레벨 · 그동안 분당 배달</span></th><th>15분</th><th>30분</th><th>첫 배달</th><th>가장 긴 업그레이드 대기<br><span class="muted">3–15분 / 15–30분</span></th><th>새로 보이는 변화 사이 최장<br><span class="muted">0–15 / 15–30분</span></th><th>새로 보이는 변화</th></tr>' +
+    j.runs.map((r) => `<tr><td>${r.label}</td><td>${cell(r.at['3'])}</td><td>${cell(r.at['15'])}</td><td>${cell(r.at['30'])}</td><td>${r.first_delivery_s}초</td><td>${r.longest_upgrade_wait_s['3-15']}초 / ${r.longest_upgrade_wait_s['15-30']}초</td><td>${r.longest_reveal_wait_s['0-15']}초 / ${r.longest_reveal_wait_s['15-30']}초</td><td>${r.reveals}</td></tr>`).join('');
+}).catch(() => { document.getElementById('eRunsTable').innerHTML = '<tr><td>E 30분 기록 파일을 읽지 못했다.</td></tr>'; });
 
 const cards = document.getElementById('cards');
 for (const v of VARIANTS) cards.appendChild(card(v));

@@ -7,8 +7,8 @@
 //     page through its state), with pictures of both (FUNLAB_SHOTS);
 //   - a timed production run: the same play time on E and E+ makes the same
 //     deliveries and coins, every delivery paid once;
-//   - an upgrade is measured ten seconds later (deliveries a minute before ->
-//     after); a hidden tab holds the line still;
+//   - an upgrade is measured once its goods reach the crate (deliveries a
+//     minute before -> after); a hidden tab holds the line still;
 //   - the render load at level 10 stays light.
 import { test, expect } from '../lib/lab.mjs';
 
@@ -69,17 +69,24 @@ test('a timed production run: E and E+ deliver the same, every delivery paid onc
   expect(out.tycoon.level, 'well up the line').toBeGreaterThanOrEqual(6);
 });
 
-test('an upgrade is measured ten seconds later; a hidden tab holds the line still', async ({ lab }, info) => {
+test('an upgrade is measured once its goods reach the crate; a hidden tab holds the line still', async ({ lab }, info) => {
   test.skip(info.project.name === 'p720', 'phone and desktop');
   await go(lab, 'tycoon-plus');
   await lab.call('dev_time_scale', 0);
   await lab.call('dev_advance', 30);
   await lab.call('dev_coins', 20);
   await lab.call('dev_action');
-  let s = (await lab.call('dev_advance', 11)).state;
-  const out = s.host.session.milestones.filter((m) => m.name === 'output');
+  // The goods already on the belt first, then the first made after the
+  // upgrade, then fifteen seconds of the new line (Step 98).
+  let s;
+  let out = [];
+  for (let i = 0; i < 12 && out.length === 0; i++) {
+    s = (await lab.call('dev_advance', 5)).state;
+    out = s.host.session.milestones.filter((m) => m.name === 'output');
+  }
   expect(out.length, 'one measurement').toBe(1);
   expect(out[0].upgrade).toBe('Bigger Hopper');
+  expect(out[0].after_per_min, 'a faster hopper is told as faster').toBeGreaterThan(out[0].before_per_min);
   console.log(`eplus97 ${info.project.name}: Bigger Hopper ${out[0].before_per_min} -> ${out[0].after_per_min} deliveries a minute`);
   await lab.shot('eplus97_measured');
   await lab.call('dev_time_scale', 1);
