@@ -34,6 +34,13 @@ export function WhatIsGamo() {
             넓어지며, 일을 배운 모모들이 손을 대신합니다.
           </span>
         </a>
+        <a className="card" href={game('/windup/')}>
+          <b>Windup</b>
+          <span>
+            태엽 공방. 행동 하나(감기)·통화 하나(태엽 힘)·자라는 것 하나(공방)로, 죽은 공방을
+            살려 내는 것 자체가 즐거운지 확인하는 게임입니다.
+          </span>
+        </a>
         <a className="card" href={game('/gunslinger/')}>
           <b>Gunslinger</b>
           <span>

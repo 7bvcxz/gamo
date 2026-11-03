@@ -1,0 +1,95 @@
+# Windup only. The path filter means a change outside windup/ never starts this
+# workflow, and nothing here touches another game.
+#
+# Every change: import, editor load, unit + integration tests, and a headless
+# smoke run of the real scene (windup/tools/check.sh). Pushes to main also make
+# a Web export and check nothing but the game is in its pack (--export).
+name: windup
+
+on:
+  push:
+    branches: [main]
+    paths: ['windup/**', '.github/workflows/windup.yml']
+  pull_request:
+    paths: ['windup/**', '.github/workflows/windup.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: windup-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7-stable
+  GODOT_TEMPLATES_DIR: 4.7.stable
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            windup
+            .github
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux
+      - name: Download Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - run: echo "$HOME/godot" >> "$GITHUB_PATH"
+      - name: Import, load check, unit + integration, smoke
+        run: windup/tools/check.sh
+
+  web-export:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            windup
+            .github
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux
+      - name: Download Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o /tmp/godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v${GODOT_VERSION}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+      - run: echo "$HOME/godot" >> "$GITHUB_PATH"
+      # Same cache key as the momonium workflow: the two web zips only.
+      - name: Cache web export templates
+        id: templates-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/godot/export_templates/${{ env.GODOT_TEMPLATES_DIR }}
+          key: godot-${{ env.GODOT_VERSION }}-web-templates
+      - name: Download web export templates
+        if: steps.templates-cache.outputs.cache-hit != 'true'
+        run: |
+          dir=~/.local/share/godot/export_templates/${GODOT_TEMPLATES_DIR}
+          mkdir -p "$dir"
+          curl -sSL -o /tmp/templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q -j /tmp/templates.tpz 'templates/web_nothreads_*' 'templates/version.txt' -d "$dir"
+          rm /tmp/templates.tpz
+      - name: Web export
+        run: windup/tools/check.sh --export

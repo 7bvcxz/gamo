@@ -497,6 +497,9 @@ GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양�
 설계는 `windup/design/CORE_LOOP.md`·`PLAYTEST_3MIN.md`.
 
 - Step 01 (#94): 핵심 루프·시간표(0–10/30/60/180초)·초기 수치 가설·계측 사건·4×5 평가표·제외 목록·MVP 끝. 게임 코드 없음.
+- Step 02 (#95, 0.2.0): 루트의 독립 Godot 프로젝트 `windup/`(1280×720 PC 우선), 게임 시계(포커스·숨김 시 멈춤, 오프라인 진행 없음),
+  계측(`{t, ev}` JSON 줄), 주소 옵션(`?fresh` `?seed` `?variant` `?dev`), `window.windup` 브리지, 검사 `windup/tools/check.sh`·`smoke.sh`·`e2e.sh`,
+  CI `.github/workflows/windup.yml`, Web 배포 `docs/windup/`, 사이트 네 곳과 `/windup/doc/`. HeyDive 등록은 사용자 승인 대기.
 
 ## 공용 도구
 

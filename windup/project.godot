@@ -1,0 +1,42 @@
+; The Wind-Up Atelier (windup) -- wind one brass key, wake clockwork dolls,
+; and bring a forgotten tailoring workshop back to life. One action, one
+; currency, one growing object: windup/design/CORE_LOOP.md.
+;
+; A game of its own at the repository root, like every Gamo game: its own
+; user:// folder (from config/name), nothing shared with the other games.
+; PC first: a 1280x720 landscape canvas that expands to any window.
+
+config_version=5
+
+[application]
+
+config/name="Windup"
+config/description="The Wind-Up Atelier: wind the key, wake the dolls, bring the workshop to life."
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.2.0"
+config/icon="res://icon.svg"
+; The dormant atelier's night colour while the pack loads, no engine logo.
+boot_splash/bg_color=Color(0.07, 0.066, 0.09, 1)
+boot_splash/show_image=false
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input_devices]
+
+; A touch becomes a mouse event and only the mouse event is counted, so one
+; touch is one press (the Momonium lesson of 2026-11-02: a button that listens
+; to both presses twice).
+pointing/emulate_mouse_from_touch=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.07, 0.066, 0.09, 1)
+textures/vram_compression/import_etc2_astc=true

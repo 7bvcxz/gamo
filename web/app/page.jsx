@@ -23,6 +23,13 @@ const GAMES = [
     extra: [{ href: site('/momonium/doc/'), label: '문서' }],
   },
   {
+    name: 'Windup',
+    path: game('/windup/'),
+    blurb:
+      '잊힌 양복점 공방에서 놋쇠 태엽을 감습니다. 감은 힘이 잠든 태엽 인형을 깨우고, 깨어난 인형이 다음 인형을 함께 감아 공방이 살아납니다.',
+    extra: [{ href: site('/windup/doc/'), label: '문서' }],
+  },
+  {
     name: 'Gunslinger',
     path: game('/gunslinger/'),
     blurb:

@@ -1,0 +1,5 @@
+.godot/
+build/
+# no trailing slash: tools/e2e.sh may make this a symlink, which a dir pattern does not match
+tests/e2e/node_modules
+tests/e2e/test-results/

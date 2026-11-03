@@ -5,8 +5,13 @@
 
 ## 현재 상태
 
-- 마지막 완료 step: 01 (#94) — 설계만. 게임 코드 없음
-- 다음: Step 02 (#95) — 독립 Godot 프로젝트와 배포 기반
+- 마지막 완료 step: 02 (#95) — 독립 Godot 프로젝트·Web 배포·사이트 등록. 아직 경제 없음(열쇠만 돈다)
+- 다음: Step 03 (#96) — 그림·애니메이션 파이프라인
+- 버전 규칙: `config/version` = `0.<step>.<재배포 횟수>` (Momonium과 같은 방식)
+- 배포: 소스 커밋 → `./deploy-web.sh windup` → (사이트 변경 시) `cd web && npm run build:pages` → docs 커밋 → rebase·push →
+  공개 URL 확인(`WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh`)
+- HeyDive 등록: **보류** — 운영 서버(heydive-server, 다른 프로젝트)의 시드와 재빌드가 필요해 사용자 승인 대기(Momonium과 같은 상태)
+- 검사: `windup/tools/check.sh [--export]`(CI와 같음), 브라우저 `windup/tools/e2e.sh`
 - 설계: `design/CORE_LOOP.md`(루프·시간표·가설·계측·제외·MVP 끝), `design/PLAYTEST_3MIN.md`(3분 측정과 4×5 평가표)
 
 ## 작업 방식
@@ -21,4 +26,5 @@
 
 | step | 이슈 | 내용 | 커밋 |
 |---|---|---|---|
-| 01 | #94 | 핵심 루프·3분 명세 | (다음 step에서 채움) |
+| 01 | #94 | 핵심 루프·3분 명세 | `a57c3120` |
+| 02 | #95 | 프로젝트·시계·계측·브리지·검사·CI·Web·사이트 등록 (0.2.0) | (다음 step에서 채움) |
