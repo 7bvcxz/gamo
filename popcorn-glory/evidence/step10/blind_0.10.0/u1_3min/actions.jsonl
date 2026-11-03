@@ -1,0 +1,33 @@
+{"t":0.2,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":9.8,"issued":9.8,"cmd":"note","args":{"text":"First look: a red popcorn machine in the middle with a ring around it (red, yellow, then blue/white arrows going clockwise). Coins 0 at top. Back, sound, restart buttons. A person standing on a red shelf at top right - maybe a customer? Bottom card: a bucket icon, 30 coins, +10 > +16, up arrow - looks like an upgrade I can't afford yet. I think I can press the machine itself (to make popcorn?) and the bottom card (upgrade). I expect tapping the machine pops corn and earns coins, maybe timing matters with the colored ring - yellow zone might be the sweet spot."}}
+{"t":13.2,"issued":12.3,"cmd":"tap","args":{"x":300,"y":780},"shot":"002.png"}
+{"t":19,"issued":18.2,"cmd":"tap","args":{"x":300,"y":780},"shot":"003.png"}
+{"t":26,"issued":26,"cmd":"note","args":{"text":"Each tap = +1 coin and a popcorn bucket flies up toward the shelf. The marker sits at 12 o'clock on the ring and didn't move. Ring goes blue (cold?) -> yellow -> red with smoke at top - like heat. Maybe I should HOLD to heat the machine and let go in the yellow zone. Trying a hold."}}
+{"t":30.2,"issued":27.5,"cmd":"hold","args":{"x":300,"y":780,"s":2},"shot":"004.png","held_ms":2099}
+{"t":40.5,"issued":38.1,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"005.png","held_ms":1723}
+{"t":47,"issued":47,"cmd":"note","args":{"text":"Got it! Holding moves the marker clockwise around the ring; releasing in the yellow gives +10 with a golden burst of popcorn. Released in red gave +3, a tap only +1. Card at bottom fills yellow as my coins approach 30 - and +10 > +16 must mean the upgrade raises the yellow payout. Satisfying. Doing it again."}}
+{"t":50.7,"issued":48.4,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"006.png","held_ms":1687}
+{"t":57.9,"issued":55.6,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"007.png","held_ms":1652}
+{"t":63,"issued":62.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"008.png"}
+{"t":69,"issued":69,"cmd":"note","args":{"text":"Bought the upgrade for 30: machine grew a striped awning and is bigger. Next upgrade costs 54 for +16 -> +26. The popcorn bucket under the shelf never seems to reach the customer at the top right - not sure what that person is for. Keep holding for yellow."}}
+{"t":72.8,"issued":70.4,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"009.png","held_ms":1670}
+{"t":80,"issued":77.6,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"010.png","held_ms":1663}
+{"t":85.3,"issued":83,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"011.png","held_ms":1677}
+{"t":90.9,"issued":90.9,"cmd":"note","args":{"text":"53 coins, upgrade costs 54 - one short, ha. A quick tap gave +1 earlier, so I'll tap once instead of a full hold. Also curious about the customer on the shelf - nothing has happened with them yet."}}
+{"t":93.2,"issued":92.3,"cmd":"tap","args":{"x":300,"y":780},"shot":"012.png"}
+{"t":98.9,"issued":98,"cmd":"tap","args":{"x":300,"y":1180},"shot":"013.png"}
+{"t":104.7,"issued":104.7,"cmd":"note","args":{"text":"Second upgrade: now it's a popcorn cart on wheels, bigger again. Next: 97 for +26 -> +40. Yellow band looks a bit wider. I'll poke the customer at top right to see if they do anything."}}
+{"t":107.4,"issued":106.7,"cmd":"tap","args":{"x":549,"y":185},"shot":"014.png"}
+{"t":115.5,"issued":115.5,"cmd":"note","args":{"text":"Tapping the customer just counted as a normal tap (+1) - the whole screen seems to be the button. The customer seems to be just decoration, or maybe the cup on the shelf slides to them eventually. Back to holding for yellow."}}
+{"t":119.8,"issued":117.3,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"015.png","held_ms":1737}
+{"t":128,"issued":125.9,"cmd":"hold","args":{"x":300,"y":780,"s":1.35},"shot":"016.png","held_ms":1434}
+{"t":133.7,"issued":133.7,"cmd":"note","args":{"text":"Released early, right at the start of the yellow: still +26, so anywhere in yellow pays the same - no 'perfect' spot that I can see. The yellow got wider after the upgrades, which makes it easier. 53 coins, two more holds to afford 97."}}
+{"t":138,"issued":135.7,"cmd":"hold","args":{"x":300,"y":780,"s":1.5},"shot":"017.png","held_ms":1616}
+{"t":142.6,"issued":140.4,"cmd":"hold","args":{"x":300,"y":780,"s":1.5},"shot":"018.png","held_ms":1574}
+{"t":148,"issued":147.1,"cmd":"tap","args":{"x":300,"y":1180},"shot":"019.png"}
+{"t":154.5,"issued":154.5,"cmd":"note","args":{"text":"Third upgrade was a big moment: sparkles, popcorn everywhere, a second (green) customer joined the line, and the cart got a gauge with a red knob on its side. Next costs 175 for +40 -> +66. The card icon now has a star. Want to see what one yellow release pays now."}}
+{"t":159,"issued":156.7,"cmd":"hold","args":{"x":300,"y":780,"s":1.5},"shot":"020.png","held_ms":1612}
+{"t":166.8,"issued":164.5,"cmd":"hold","args":{"x":300,"y":780,"s":1.5},"shot":"021.png","held_ms":1557}
+{"t":170.4,"issued":170.4,"cmd":"note","args":{"text":"+40 per yellow release now. Loop is clear: hold, release in yellow, buy the next machine. I never figured out what the gauge on the cart, the cup under the shelf or the customers in line actually do - they don't seem to react to me. Would like to know if serving them matters."}}
+{"t":175.8,"issued":173.5,"cmd":"hold","args":{"x":300,"y":780,"s":1.5},"shot":"022.png","held_ms":1612}
+{"t":178.4,"issued":178.2,"cmd":"look","args":{},"shot":"023.png"}

@@ -1,0 +1,30 @@
+{
+  "run": "u2",
+  "url_variant": "stand",
+  "version": "0.10.0",
+  "seconds": 601,
+  "commands": 100,
+  "taps": 16,
+  "holds": 42,
+  "drags": 2,
+  "waits": 2,
+  "notes": 35,
+  "looks": 3,
+  "first_action_s": 13.5,
+  "game_inputs": 50,
+  "first_earn_s": 13.6,
+  "first_upgrade_s": 67.7,
+  "upgrades": 7,
+  "level": 7,
+  "earned": 6964,
+  "game_clock_rate": 1.04,
+  "longest_gap_between_commands_s": 11.4,
+  "page_errors": 0,
+  "outcomes": {
+    "early": 6,
+    "late": 2,
+    "perfect": 37,
+    "near": 3
+  },
+  "refused": 0
+}
