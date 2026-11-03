@@ -20,5 +20,13 @@ test('picker links start each variant fresh; the Step 04 build still runs', asyn
   await page.waitForFunction(() => window.windup && window.windup.ready === true, null, { timeout: 120_000 });
   const ref = await page.evaluate(() => window.windup.state());
   expect(ref.version).toBe('0.4.0');
+  // Step 11: the tournament build, frozen, still runs each variant.
+  for (const v of ['A', 'C']) {
+    await page.goto('variants.html');
+    await page.getByText(`0.10.0 ${v}`, { exact: true }).click();
+    await page.waitForFunction(() => window.windup && window.windup.ready === true, null, { timeout: 120_000 });
+    const t = await page.evaluate(() => window.windup.state());
+    expect(t.build_id).toBe(`0.10.0+${v.toLowerCase()}`);
+  }
   expect(errors).toEqual([]);
 });

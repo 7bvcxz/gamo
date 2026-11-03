@@ -1,0 +1,18 @@
+{
+  "_doc": "Step 06 Fun Lab variants: overrides on top of balance.json (the base, kept unchanged as the reference). Same action, same currency, same atelier; each variant makes a different reward the main one. design/VARIANTS.md has the hypotheses.",
+  "a": {
+    "_why": "A - the feel of winding: holding coils a visible mainspring (no energy yet); letting go releases it all at once. A tap still winds and releases in one.",
+    "spring": {"enabled": true, "capacity_of_next_cost": 1.0}
+  },
+  "b": {
+    "_why": "B - the awakening itself: every sleeping doll is hidden under a dust sheet, and each wakes in a longer reveal with its own look and gesture.",
+    "awaken_seconds": 3.2,
+    "reveal": true
+  },
+  "c": {
+    "_why": "C - dolls wake dolls: an awakening is short and, when it ends, the new doll at once turns the next sleeper's key (an instant kick of its rate x kick_seconds), so awakenings run into each other like dominoes.",
+    "awaken_seconds": 0.9,
+    "kick_seconds": 10.0,
+    "dolls_rate_scale": 1.25
+  }
+}
