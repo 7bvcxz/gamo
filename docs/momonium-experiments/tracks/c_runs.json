@@ -1,0 +1,388 @@
+{
+  "_doc": "tools/c_runs.gd: a scripted player, 1800 s of play per run (buys 1.5 s after it can pay). Objective pacing, never a measure of fun or of a person's hand.",
+  "marks_s": [
+    180.0,
+    900.0,
+    1800.0
+  ],
+  "runs": [
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "earned": 43798,
+          "pickaxe": 10,
+          "rock": "Giant Crystal",
+          "rocks": 15,
+          "taps": 2249,
+          "upgrades": 10
+        },
+        "3": {
+          "earned": 805,
+          "pickaxe": 5,
+          "rock": "Amethyst Geode",
+          "rocks": 7,
+          "taps": 449,
+          "upgrades": 5
+        },
+        "30": {
+          "earned": 113592,
+          "pickaxe": 10,
+          "rock": "Giant Crystal",
+          "rocks": 17,
+          "taps": 4499,
+          "upgrades": 10
+        }
+      },
+      "final": {
+        "damage": 90,
+        "hp": 154619,
+        "pickaxe": 10,
+        "rock": "Giant Crystal"
+      },
+      "first_break_s": 20.2,
+      "first_upgrade_s": 21.7,
+      "id": "rock",
+      "label": "C, natural tapping",
+      "longest_break_wait_s": 430.0,
+      "longest_reveal_wait_s": {
+        "0-15": 311.9,
+        "15-30": 1211.9
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 56.4,
+        "15-30": 1211.9,
+        "3-15": 311.9
+      },
+      "reveals": 19,
+      "taps": 4499,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 2.5,
+      "waits": 17
+    },
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "earned": 9981,
+          "pickaxe": 9,
+          "rock": "Giant Crystal",
+          "rocks": 12,
+          "taps": 1349,
+          "upgrades": 9
+        },
+        "3": {
+          "earned": 345,
+          "pickaxe": 4,
+          "rock": "Silver Seam",
+          "rocks": 5,
+          "taps": 269,
+          "upgrades": 4
+        },
+        "30": {
+          "earned": 43798,
+          "pickaxe": 10,
+          "rock": "Giant Crystal",
+          "rocks": 15,
+          "taps": 2699,
+          "upgrades": 10
+        }
+      },
+      "final": {
+        "damage": 90,
+        "hp": 60398,
+        "pickaxe": 10,
+        "rock": "Giant Crystal"
+      },
+      "first_break_s": 33.5,
+      "first_upgrade_s": 35.0,
+      "id": "rock",
+      "label": "C, a tired hand",
+      "longest_break_wait_s": 375.2,
+      "longest_reveal_wait_s": {
+        "0-15": 154.7,
+        "15-30": 829.0
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 73.9,
+        "15-30": 829.0,
+        "3-15": 186.0
+      },
+      "reveals": 19,
+      "taps": 2700,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 1.5,
+      "waits": 0
+    },
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "earned": 18751,
+          "pickaxe": 20,
+          "rock": "Great Gold Nugget Rock",
+          "rocks": 59,
+          "taps": 2249,
+          "upgrades": 20
+        },
+        "3": {
+          "earned": 701,
+          "pickaxe": 6,
+          "rock": "Sandstone",
+          "rocks": 14,
+          "taps": 449,
+          "upgrades": 6
+        },
+        "30": {
+          "earned": 502617,
+          "pickaxe": 38,
+          "rock": "Deep Great Pebble Boulder",
+          "rocks": 113,
+          "taps": 4499,
+          "upgrades": 38
+        }
+      },
+      "final": {
+        "damage": 3062,
+        "hp": 248959,
+        "pickaxe": 38,
+        "rock": "Deep Great Pebble Boulder"
+      },
+      "first_break_s": 14.6,
+      "first_upgrade_s": 16.1,
+      "id": "rock-plus",
+      "label": "C+, natural tapping",
+      "longest_break_wait_s": 33.2,
+      "longest_reveal_wait_s": {
+        "0-15": 98.9,
+        "15-30": 102.0
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 47.5,
+        "15-30": 55.2,
+        "3-15": 66.0
+      },
+      "reveals": 30,
+      "taps": 4499,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 2.5,
+      "waits": 113
+    },
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "earned": 5168,
+          "pickaxe": 14,
+          "rock": "Rose Granite",
+          "rocks": 39,
+          "taps": 1349,
+          "upgrades": 14
+        },
+        "3": {
+          "earned": 330,
+          "pickaxe": 5,
+          "rock": "Mossy Rock",
+          "rocks": 8,
+          "taps": 269,
+          "upgrades": 5
+        },
+        "30": {
+          "earned": 43404,
+          "pickaxe": 25,
+          "rock": "Ruby Heart",
+          "rocks": 72,
+          "taps": 2699,
+          "upgrades": 25
+        }
+      },
+      "final": {
+        "damage": 286,
+        "hp": 8586,
+        "pickaxe": 25,
+        "rock": "Ruby Heart"
+      },
+      "first_break_s": 24.1,
+      "first_upgrade_s": 25.6,
+      "id": "rock-plus",
+      "label": "C+, a tired hand",
+      "longest_break_wait_s": 54.7,
+      "longest_reveal_wait_s": {
+        "0-15": 143.4,
+        "15-30": 162.7
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 55.3,
+        "15-30": 108.0,
+        "3-15": 96.7
+      },
+      "reveals": 20,
+      "taps": 2700,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 1.5,
+      "waits": 0
+    },
+    {
+      "alt": "",
+      "at": {
+        "15": {
+          "earned": 118977,
+          "pickaxe": 30,
+          "rock": "Great Sapphire Geode",
+          "rocks": 89,
+          "taps": 3599,
+          "upgrades": 30
+        },
+        "3": {
+          "earned": 1351,
+          "pickaxe": 8,
+          "rock": "Copper Vein",
+          "rocks": 21,
+          "taps": 719,
+          "upgrades": 8
+        },
+        "30": {
+          "earned": 18875768,
+          "pickaxe": 58,
+          "rock": "Deep Great Amethyst Geode",
+          "rocks": 173,
+          "taps": 7199,
+          "upgrades": 58
+        }
+      },
+      "final": {
+        "damage": 117391,
+        "hp": 9544507,
+        "pickaxe": 58,
+        "rock": "Deep Great Amethyst Geode"
+      },
+      "first_break_s": 9.1,
+      "first_upgrade_s": 10.6,
+      "id": "rock-plus",
+      "label": "C+, eager tapping",
+      "longest_break_wait_s": 21.0,
+      "longest_reveal_wait_s": {
+        "0-15": 65.2,
+        "15-30": 65.3
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 37.4,
+        "15-30": 35.5,
+        "3-15": 42.3
+      },
+      "reveals": 40,
+      "taps": 7200,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 4.0,
+      "waits": 346
+    },
+    {
+      "alt": "light",
+      "at": {
+        "15": {
+          "earned": 20933,
+          "pickaxe": 21,
+          "rock": "Amethyst Geode",
+          "rocks": 60,
+          "taps": 1349,
+          "upgrades": 21
+        },
+        "3": {
+          "earned": 701,
+          "pickaxe": 7,
+          "rock": "Sandstone",
+          "rocks": 14,
+          "taps": 269,
+          "upgrades": 7
+        },
+        "30": {
+          "earned": 563848,
+          "pickaxe": 39,
+          "rock": "Deep Mossy Rock",
+          "rocks": 114,
+          "taps": 2699,
+          "upgrades": 39
+        }
+      },
+      "final": {
+        "damage": 3674,
+        "hp": 66140,
+        "pickaxe": 39,
+        "rock": "Deep Mossy Rock"
+      },
+      "first_break_s": 14.8,
+      "first_upgrade_s": 16.3,
+      "id": "rock-plus",
+      "label": "C+ light (?alt=light), a tired hand",
+      "longest_break_wait_s": 33.4,
+      "longest_reveal_wait_s": {
+        "0-15": 99.3,
+        "15-30": 100.7
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 45.9,
+        "15-30": 54.7,
+        "3-15": 65.3
+      },
+      "reveals": 31,
+      "taps": 2700,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 1.5,
+      "waits": 0
+    },
+    {
+      "alt": "light",
+      "at": {
+        "15": {
+          "earned": 149645,
+          "pickaxe": 31,
+          "rock": "Obsidian",
+          "rocks": 93,
+          "taps": 2249,
+          "upgrades": 31
+        },
+        "3": {
+          "earned": 1441,
+          "pickaxe": 9,
+          "rock": "Copper Vein",
+          "rocks": 22,
+          "taps": 449,
+          "upgrades": 9
+        },
+        "30": {
+          "earned": 27181353,
+          "pickaxe": 60,
+          "rock": "Deep Great Ice Crag",
+          "rocks": 179,
+          "taps": 4499,
+          "upgrades": 60
+        }
+      },
+      "final": {
+        "damage": 169043,
+        "hp": 8246455,
+        "pickaxe": 60,
+        "rock": "Deep Great Ice Crag"
+      },
+      "first_break_s": 9.0,
+      "first_upgrade_s": 10.5,
+      "id": "rock-plus",
+      "label": "C+ light (?alt=light), natural tapping",
+      "longest_break_wait_s": 20.4,
+      "longest_reveal_wait_s": {
+        "0-15": 62.8,
+        "15-30": 62.8
+      },
+      "longest_upgrade_wait_s": {
+        "0-3": 36.0,
+        "15-30": 34.4,
+        "3-15": 40.4
+      },
+      "reveals": 41,
+      "taps": 4499,
+      "taps_a_minute_at_the_end": 1,
+      "taps_per_second": 2.5,
+      "waits": 179
+    }
+  ]
+}
