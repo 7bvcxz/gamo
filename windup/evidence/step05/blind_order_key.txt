@@ -1,0 +1,3 @@
+blindA (before, Step 04 build): a=180 b=005 c=060 d=030  -> correct order b,d,c,a
+blindB (after, Step 05 build): a=060 b=180 c=005 d=030  -> correct order c,d,a,b
+blindC (final Step 05 build, with stage props): a=030 b=180 c=005 d=060  -> correct order c,a,d,b

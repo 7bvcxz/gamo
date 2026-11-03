@@ -1,0 +1,18 @@
+{
+  "silent_asleep": {
+    "rms": 0,
+    "peak": 0
+  },
+  "music_one_doll": {
+    "rms": 0.09226731097067932,
+    "peak": 0.11653675884008408
+  },
+  "muted": {
+    "rms": 0,
+    "peak": 0
+  },
+  "settings_after_reload": {
+    "reduced_motion": true,
+    "volume": 0
+  }
+}
