@@ -49,6 +49,16 @@ func cost() -> int:
 	return economy.cost(variant, level)
 
 
+## What one action pays at a level when it goes as intended (A: a press,
+## B: a perfect batch, C: an eruption). The upgrade button shows now -> next
+## (Step 09: two blind players could not tell what an upgrade gives before
+## buying it). -1 past the last level.
+func payout(at_level: int) -> int:
+	if at_level < 0 or at_level > max_level():
+		return -1
+	return economy.at(variant, "pops", at_level)
+
+
 func max_level() -> int:
 	return economy.max_level(variant)
 

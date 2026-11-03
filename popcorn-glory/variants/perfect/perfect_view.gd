@@ -133,10 +133,28 @@ func _draw_ring(ci: CanvasItem, _base: Vector2, size_px: float) -> void:
 	var top := -PI / 2
 	var to_angle := func(ms: float) -> float: return top + TAU * clampf(ms / burn, 0.0, 1.0)
 	var width := size_px * 0.045
-	# The track: blue, GOLD, red -- always visible.
-	ci.draw_arc(c, r, top, to_angle.call(float(w[0])), 48, Color(0.45, 0.65, 0.95, 0.35), width)
+	# The track: blue, GOLD, red -- always visible. Step 09: at 0.35 alpha on
+	# the butter floor the blue read as grey and the red as orange, and a blind
+	# player took the orange for 'warming up' and held longer and longer. Now
+	# the colours are solid enough to be blue and red, chevrons say which way
+	# the heat runs, and a puff of smoke sits where it burns.
+	ci.draw_arc(c, r, top, to_angle.call(float(w[0])), 48, Color(0.35, 0.6, 0.95, 0.6), width)
 	ci.draw_arc(c, r, to_angle.call(float(w[0])), to_angle.call(float(w[1])), 24, Color(PopPalette.GOLD, 0.95), width * 1.6)
-	ci.draw_arc(c, r, to_angle.call(float(w[1])), top + TAU, 32, Color(0.9, 0.25, 0.2, 0.35), width)
+	ci.draw_arc(c, r, to_angle.call(float(w[1])), top + TAU, 32, Color(0.82, 0.14, 0.1, 0.8), width)
+	var chev_a := 0.55 if heating else 0.9
+	for i in 3:
+		var ca: float = to_angle.call(float(w[0]) * (0.25 + 0.25 * float(i)))
+		var along := Vector2(-sin(ca), cos(ca))     # clockwise on screen
+		var out := Vector2(cos(ca), sin(ca))
+		var tip := c + out * r + along * width * 0.45
+		var back := c + out * r - along * width * 0.35
+		ci.draw_polyline(PackedVector2Array([back + out * width * 0.5, tip, back - out * width * 0.5]), Color(1, 1, 1, chev_a), width * 0.22)
+	var end := top + TAU - 0.12
+	var sp := c + Vector2(cos(end), sin(end)) * (r + width * 1.9)
+	if PopAtlas.has("smoke"):
+		PopAtlas.draw(ci, "smoke", sp, width * 2.6, Color(0.3, 0.27, 0.27, 0.85))
+	else:
+		ci.draw_circle(sp, width * 0.9, Color(0.3, 0.27, 0.27, 0.85))
 	if heating:
 		# The heat so far, each part in its zone's colour, and a bright head.
 		var a: float = to_angle.call(heat)

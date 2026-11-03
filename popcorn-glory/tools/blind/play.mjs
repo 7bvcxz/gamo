@@ -23,7 +23,8 @@ const req = http.request({ host: '127.0.0.1', port, method: 'POST', path: '/' },
     if (o.over) { console.log(o.message); return; }
     if (o.error) { console.log(`error: ${o.error}`); return; }
     if (cmd === 'status') { console.log(`time ${o.time}, left ${o.left}`); return; }
-    console.log(`time ${o.time}, left ${o.left}${o.screen ? `\nscreenshot: ${o.screen}` : ''}`);
+    const held = o.held_screen ? `\nscreenshot while your finger was still down: ${o.held_screen}` : '';
+    console.log(`time ${o.time}, left ${o.left}${held}${o.screen ? `\nscreenshot: ${o.screen}` : ''}`);
   });
 });
 req.on('error', () => console.log('Time is up: the session has closed.'));

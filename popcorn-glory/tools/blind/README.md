@@ -27,7 +27,7 @@ Play it for three minutes the way a curious new player would, and think aloud as
 You have the phone in your hands through these commands only (run them with Bash):
   node <TOOL>/play.mjs <RUN> look               -> prints the path of a screenshot of the phone; open it with the Read tool to see the screen
   node <TOOL>/play.mjs <RUN> tap X Y            -> touch the screen at pixel (X, Y) of the screenshot (screenshots are 600 x 1290 px); prints a new screenshot path
-  node <TOOL>/play.mjs <RUN> hold X Y S         -> press at (X, Y) and keep the finger down for S seconds (at most 5), then lift it
+  node <TOOL>/play.mjs <RUN> hold X Y S         -> press at (X, Y) and keep the finger down for S seconds (at most 5), then lift it; prints a screenshot taken just before you lift and one after
   node <TOOL>/play.mjs <RUN> drag X1 Y1 X2 Y2   -> slide one finger from (X1, Y1) to (X2, Y2)
   node <TOOL>/play.mjs <RUN> wait S             -> let S seconds pass (at most 30), then see the screen
   node <TOOL>/play.mjs <RUN> note "TEXT"        -> say out loud what you see, what you try, what you expect and how it feels
@@ -47,6 +47,12 @@ When the time is up, reply with a short report as yourself, the player:
 4. Would you keep playing past three minutes? Why or why not?
 5. Confirm that you used only the play commands and their screenshots.
 ```
+
+## 바뀐 것
+
+- **Step 09(3차)부터** `hold`는 손을 떼기 약 0.3초 전의 화면도 돌려준다(프롬프트의 `hold` 줄에 한 구절이 붙었다). Step 08의 1·2차는 뗀 뒤의
+  화면만 봤고, B 플레이어가 바늘의 방향을 거꾸로 짐작했다 — 사람은 누르는 동안 화면을 본다. 누르는 시간은 시계로 지키고(스크린샷 시간을
+  더하지 않음) 실제 값을 `actions.jsonl`의 `held_ms`에 남긴다.
 
 ## 한계 (정직하게)
 

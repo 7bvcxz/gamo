@@ -159,6 +159,9 @@ func test_three_minutes_is_logged_and_shown() -> void:
 	assert_true(app.session.milestones.has("three_minutes"), "milestone")
 	assert_true(app.frame.clock_ms >= 180000, "the frame knows the time")
 	assert_false(app.frame.shows_clock(), "but a player sees no clock (Step 08: it read as a deadline)")
+	var ub: PopUpgradeButton = app.frame.upgrade_button
+	assert_eq(ub.gain_now, app.rules.payout(app.rules.level), "the button shows what an action pays now")
+	assert_eq(ub.gain_next, app.rules.payout(app.rules.level + 1), "and after the purchase")
 	app.frame.trial = true
 	assert_true(app.frame.shows_clock(), "the trial protocol (?trial=1) shows 3:00")
 

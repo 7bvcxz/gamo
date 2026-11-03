@@ -105,6 +105,7 @@ func _layout() -> void:
 func refresh(rules: PopRules, p_clock_ms: int) -> void:
 	money_view.set_money(rules.money)
 	upgrade_button.set_offer(rules.level + 1, rules.cost(), rules.money)
+	upgrade_button.set_gain(rules.payout(rules.level), rules.payout(rules.level + 1))
 	if play != null:
 		play.fx.target = money_view.coin_point() - play.global_position
 	if p_clock_ms / 1000 != clock_ms / 1000 or (p_clock_ms >= PopSession.THREE_MINUTES_MS) != (clock_ms >= PopSession.THREE_MINUTES_MS):

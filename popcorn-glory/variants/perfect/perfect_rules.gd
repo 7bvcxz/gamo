@@ -103,6 +103,13 @@ func _judge(ms: int) -> String:
 	return BURNT
 
 
+func payout(at_level: int) -> int:
+	if at_level < 0 or at_level > max_level():
+		return -1
+	var mult := float((economy.table(variant)["mult"] as Dictionary)[PERFECT])
+	return maxi(1, int(floor(economy.at(variant, "batch", at_level) * mult)))
+
+
 func _resolve(kind: String) -> Dictionary:
 	var t := economy.table(variant)
 	var held := heat_ms

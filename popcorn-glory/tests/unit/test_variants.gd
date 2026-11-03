@@ -162,3 +162,30 @@ func test_frame_cuts_do_not_change_any_run() -> void:
 			results.append(JSON.stringify([r.state(), log]))
 		for i in range(1, results.size()):
 			assert_eq(results[i], results[0], "%s: chunking %d gives the same run" % [script.resource_path.get_file(), i])
+
+
+## Step 09: the upgrade button previews "+now > +next" from payout(). It must
+## be what the action really pays -- measured by doing it, not by re-reading
+## the table -- at every level, or the preview lies.
+func test_payout_is_what_one_intended_action_really_pays_at_every_level() -> void:
+	for v: String in ["click", "perfect", "explosion"]:
+		var probe: PopRules = {"click": Click, "perfect": Perfect, "explosion": Explosion}[v].new()
+		for lv in probe.max_level() + 1:
+			var r: PopRules = {"click": Click, "perfect": Perfect, "explosion": Explosion}[v].new()
+			r.level = lv
+			var before := r.money
+			match v:
+				"click":
+					r.execute({"type": "press"})
+				"perfect":
+					var ws: int = r.window_start()
+					var we: int = r.window_end()
+					assert_true(bool(r.execute({"type": "press"})["ok"]), "press")
+					r.advance((ws + we) / 2)
+					assert_eq(String(r.execute({"type": "release"})["outcome"]), "perfect", "%s L%d centre is perfect" % [v, lv])
+				"explosion":
+					for i in r.slots():
+						r.execute({"type": "press"})
+			assert_eq(r.money - before, r.payout(lv), "%s L%d: payout() is what the action paid" % [v, lv])
+		assert_eq(probe.payout(probe.max_level() + 1), -1, "%s: nothing past the last level" % v)
+		assert_true(probe.payout(1) > probe.payout(0), "%s: the next level pays more" % v)

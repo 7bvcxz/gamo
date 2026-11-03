@@ -111,10 +111,22 @@ async function handle(cmd, a) {
     await page.touchscreen.tap(p.x, p.y);
     await page.waitForTimeout(500);
   } else if (cmd === 'hold') {
+    // Step 09: a person sees the screen WHILE the finger is down (B's needle
+    // running round the ring); Step 08's players saw only the screen after
+    // lifting and guessed the needle's direction backwards. So the hold also
+    // returns a picture taken about 0.3 s before the lift, and the hold time
+    // is kept by the clock, not by adding the screenshot's own time.
     const p = toCss(a.x, a.y);
+    const ms = Math.round(Math.min(5, Math.max(0.1, a.s)) * 1000);
+    const t0 = Date.now();
     await touch('touchStart', p);
-    await page.waitForTimeout(Math.round(Math.min(5, Math.max(0.1, a.s)) * 1000));
+    if (ms >= 500) {
+      await page.waitForTimeout(Math.max(0, ms - 300 - (Date.now() - t0)));
+      out.held_screen = await screenshot();
+    }
+    await page.waitForTimeout(Math.max(0, ms - (Date.now() - t0)));
     await touch('touchEnd', null);
+    out.held_ms = Date.now() - t0;
     await page.waitForTimeout(400);
   } else if (cmd === 'drag') {
     const p1 = toCss(a.x1, a.y1); const p2 = toCss(a.x2, a.y2);
@@ -126,7 +138,8 @@ async function handle(cmd, a) {
     await page.waitForTimeout(Math.round(Math.min(30, Math.max(0, a.s)) * 1000));
   }
   if (cmd !== 'note') out.screen = await screenshot();
-  fs.appendFileSync(actions, JSON.stringify({ t: Math.round(elapsed() * 10) / 10, issued, cmd, args: a, shot: out.screen ? path.basename(out.screen) : undefined }) + '\n');
+  fs.appendFileSync(actions, JSON.stringify({ t: Math.round(elapsed() * 10) / 10, issued, cmd, args: a, shot: out.screen ? path.basename(out.screen) : undefined,
+    held_shot: out.held_screen ? path.basename(out.held_screen) : undefined, held_ms: out.held_ms }) + '\n');
   return { ...out, time: clock(elapsed()), left: clock(Math.max(0, SECONDS - elapsed())) };
 }
 

@@ -57,6 +57,12 @@ func _tick(ms: int) -> void:
 	now_ms = start
 
 
+func payout(at_level: int) -> int:
+	if at_level < 0 or at_level > max_level():
+		return -1
+	return economy.at(variant, "burst", at_level)
+
+
 func _erupt() -> void:
 	loaded = 0
 	eruptions += 1

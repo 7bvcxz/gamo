@@ -8,6 +8,8 @@ extends PopPressArea
 var stage := 1          # the stage this purchase leads to
 var price := 0          # -1: nothing left to buy
 var money := 0
+var gain_now := -1     # what one action pays now and after this purchase
+var gain_next := -1
 var _shine := 0.0
 var _t := 0.0
 
@@ -18,6 +20,13 @@ func set_offer(next_stage: int, p_price: int, p_money: int) -> void:
 		price = p_price
 		money = p_money
 		enabled = price >= 0 and money >= price
+		queue_redraw()
+
+
+func set_gain(now: int, next: int) -> void:
+	if now != gain_now or next != gain_next:
+		gain_now = now
+		gain_next = next
 		queue_redraw()
 
 
@@ -63,9 +72,26 @@ func _draw() -> void:
 	var fs := int(size.y * 0.3)
 	var text := PopMoneyView._format(price)
 	var cx := r.position.x + r.size.y * 1.25
-	PopMachineArt.draw_coin(self, Vector2(cx + fs * 0.45, r.get_center().y), fs * 0.42)
-	draw_string(font, Vector2(cx + fs * 1.05, r.get_center().y + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs,
+	var showing_gain := gain_now > 0 and gain_next > 0
+	var py := r.get_center().y - (fs * 0.42 if showing_gain else 0.0)
+	PopMachineArt.draw_coin(self, Vector2(cx + fs * 0.45, py), fs * 0.42)
+	draw_string(font, Vector2(cx + fs * 1.05, py + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs,
 		PopPalette.INK if enabled else PopPalette.DISABLED.darkened(0.25))
+	if showing_gain:
+		# What it gives, in the same "+N" that floats over the machine when it
+		# pays: +now, a small arrow, +next (next in the arrow's red).
+		var gs := int(fs * 0.72)
+		var gy := r.get_center().y + fs * 0.98
+		var ink := Color(PopPalette.INK, 0.7) if enabled else PopPalette.DISABLED.darkened(0.2)
+		var now_s := "+" + PopMoneyView._format(gain_now)
+		var gx := cx + fs * 0.1
+		draw_string(font, Vector2(gx, gy), now_s, HORIZONTAL_ALIGNMENT_LEFT, -1, gs, ink)
+		gx += font.get_string_size(now_s, HORIZONTAL_ALIGNMENT_LEFT, -1, gs).x + gs * 0.3
+		var ay := gy - gs * 0.33
+		draw_colored_polygon(PackedVector2Array([Vector2(gx, ay - gs * 0.3), Vector2(gx + gs * 0.45, ay), Vector2(gx, ay + gs * 0.3)]), ink)
+		gx += gs * 0.75
+		draw_string(font, Vector2(gx, gy), "+" + PopMoneyView._format(gain_next), HORIZONTAL_ALIGNMENT_LEFT, -1, gs,
+			PopPalette.RED if enabled else PopPalette.DISABLED.darkened(0.25))
 	# An up-arrow: "this makes the machine bigger".
 	var a := Vector2(r.end.x - r.size.y * 0.42, r.get_center().y)
 	var k := r.size.y * 0.16
