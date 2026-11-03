@@ -30,6 +30,13 @@ const GAMES = [
     extra: [{ href: site('/windup/doc/'), label: '문서' }],
   },
   {
+    name: 'Popcorn & Glory',
+    path: game('/popcorn-glory/'),
+    blurb:
+      '팝콘 기계 하나, 돈 하나, 누르는 행동 하나. 서로 다른 3분짜리 실험을 해 보고, 재미가 확인된 쪽만 키웁니다.',
+    extra: [{ href: site('/popcorn-glory/doc/'), label: '문서' }],
+  },
+  {
     name: 'Gunslinger',
     path: game('/gunslinger/'),
     blurb:

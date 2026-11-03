@@ -1,0 +1,12 @@
+{
+  "name": "popcorn-glory-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser checks for the Popcorn & Glory web build (docs/popcorn-glory/).",
+  "scripts": {
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  }
+}

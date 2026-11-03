@@ -1,0 +1,6 @@
+# Godot's import cache and local builds.
+.godot/
+build/
+# Browser test tooling and its output (npm ci recreates node_modules from the lock file).
+tests/e2e/node_modules/
+tests/e2e/test-results/

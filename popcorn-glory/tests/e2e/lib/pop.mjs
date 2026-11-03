@@ -1,0 +1,85 @@
+// The `pop` fixture: a page with the game's test hooks on (window.POPCORN_E2E),
+// a background tab faked the way a browser makes one (Playwright's Chromium
+// never hides a page -- AGENTS.md 2026-11-01: visibilityState says hidden, a
+// visibilitychange event, no animation frame until shown again), and real
+// input: a finger on touch projects, the mouse on desktop.
+import { test as base, expect } from '@playwright/test';
+import { decodePng, colorCount } from './png.mjs';
+
+export const INIT = () => {
+  window.POPCORN_E2E = true;
+  let hidden = false;
+  const waiting = [];
+  const raf = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = (cb) => {
+    if (hidden) { waiting.push(cb); return 0; }
+    return raf(cb);
+  };
+  Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (hidden ? 'hidden' : 'visible') });
+  Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+  window.__tab = (h) => {
+    hidden = h;
+    document.dispatchEvent(new Event('visibilitychange'));
+    if (!h) for (const cb of waiting.splice(0)) raf(cb);
+  };
+};
+
+export function wrap(page, testInfo) {
+  const canvas = page.locator('canvas');
+  const pop = {
+    page,
+    canvas,
+    errors: [],
+    loadMs: 0,
+    open: async (url = './') => {
+      const t0 = Date.now();
+      await page.goto(url);
+      await pop.ready();
+      pop.loadMs = Date.now() - t0;
+    },
+    // Ready = the bridge answers and the canvas shows more than one colour
+    // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).
+    ready: async () => {
+      await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });
+      await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+    },
+    state: () => page.evaluate(() => window.popcorn.state()),
+    call: (name, arg) => page.evaluate(([n, a]) => window.popcorn.call(n, a), [name, arg]),
+    hash: () => page.evaluate(() => location.hash),
+    tab: (h) => page.evaluate((v) => window.__tab(v), h),
+    // Real input at a point in window pixels of the game.
+    tapWin: async (x, y) => {
+      const s = await pop.state();
+      const box = await canvas.boundingBox();
+      const k = box.width / s.window[0];
+      const px = box.x + x * k;
+      const py = box.y + y * k;
+      if (testInfo.project.use.hasTouch) await page.touchscreen.tap(px, py);
+      else await page.mouse.click(px, py);
+    },
+    // A rect [x, y, w, h] from state().rects, tapped in its centre.
+    tap: async (name) => {
+      const s = await pop.state();
+      const r = s.rects[name];
+      if (!r) throw new Error(`no rect ${name} on screen ${s.screen}`);
+      await pop.tapWin(r[0] + r[2] / 2, r[1] + r[3] / 2);
+    },
+    shot: async (name) => {
+      if (process.env.POPCORN_SHOTS) await page.screenshot({ path: `${process.env.POPCORN_SHOTS}/${name}_${testInfo.project.name}.png` });
+    },
+  };
+  page.on('pageerror', (e) => pop.errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error') pop.errors.push(m.text()); });
+  return pop;
+}
+
+export const test = base.extend({
+  pop: async ({ page }, use, testInfo) => {
+    await page.addInitScript(INIT);
+    const pop = wrap(page, testInfo);
+    await use(pop);
+    expect(pop.errors, 'no page errors during the test').toEqual([]);
+  },
+});
+
+export { expect };

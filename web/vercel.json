@@ -20,6 +20,11 @@
       "permanent": false
     },
     {
+      "source": "/popcorn-glory",
+      "destination": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+      "permanent": false
+    },
+    {
       "source": "/gunslinger",
       "destination": "https://7bvcxz.github.io/gamo/gunslinger/",
       "permanent": false

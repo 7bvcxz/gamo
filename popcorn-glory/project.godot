@@ -1,0 +1,49 @@
+; Popcorn & Glory -- one popcorn machine, one money, one action (Popcorn Step 03).
+;
+; Its own name, so its own desktop user:// folder. On the web every Godot game
+; on this origin shares one user:// (/userfs), so this game writes nothing
+; there at all: every run starts fresh (popcorn-glory/README.md).
+
+config_version=5
+
+[application]
+
+config/name="Popcorn Glory"
+config/description="One popcorn machine, one money, one action: three small experiments."
+run/main_scene="res://app/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/version="0.3.0"
+config/icon="res://icon.svg"
+boot_splash/bg_color=Color(0.996, 0.882, 0.6, 1)
+boot_splash/show_image=false
+
+[audio]
+
+; Buses are declared, never added at run time: on the web a bus added with
+; AudioServer.add_bus() is missing from the Web Audio graph and plays nothing
+; (AGENTS.md, 2026-10-27).
+buses/default_bus_layout="res://default_bus_layout.tres"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=405
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[input_devices]
+
+; A phone only sends touches and buttons only understand the mouse, so touches
+; become mouse events -- and everything that counts a press listens to the
+; mouse event alone, so one finger is one action.
+pointing/emulate_mouse_from_touch=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.996, 0.882, 0.6, 1)
+textures/vram_compression/import_etc2_astc=true

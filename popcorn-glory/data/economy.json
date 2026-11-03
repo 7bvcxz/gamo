@@ -1,0 +1,8 @@
+{
+  "_doc": "Per-variant economy. Every number is a hypothesis (design/EXPERIMENTS.md); Step 06 tunes them with the real rules. cost(L) = round(base * growth^L). pops[L] is what one press yields at level L; max_level is the last level that can be bought (pops must have max_level + 1 entries).",
+  "stub": {
+    "pops": [1, 2, 3, 5, 8],
+    "cost": { "base": 10, "growth": 2.0 },
+    "max_level": 4
+  }
+}
