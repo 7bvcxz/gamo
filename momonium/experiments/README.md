@@ -13,6 +13,17 @@
 | F | Endless Growth (Step 89, 플레이 가능) | 나무 한 그루 | Grow Tree | `#tree` |
 
 - 실험실: https://7bvcxz.github.io/gamo/momonium-experiments/
+- **C·E 두 트랙(Step 94부터)**: 소유자가 여섯을 해 보고 C와 E를 골랐다. 각각 그대로 둔 기준판과 고쳐 나갈 개선판이 있다.
+  계획·규칙·3/15/30분 절차는 [`TRACKS.md`](TRACKS.md)에, 점수표는 https://7bvcxz.github.io/gamo/momonium-experiments/tracks.html 에 있다.
+
+  | 판 | 주소 | |
+  |---|---|---|
+  | C 기준판 | `#rock` | Step 88 그대로 고정(`test_baselines.gd`) |
+  | C+ 개선판 | `#rock-plus` | `experiments/rock_plus/`, Step 95·96에서 고친다 |
+  | E 기준판 | `#tycoon` | Step 92 그대로 고정 |
+  | E+ 개선판 | `#tycoon-plus` | `experiments/tycoon_plus/`, Step 97·98에서 고친다 |
+
+  실험실 첫 화면 위쪽의 C·E 카드가 Baseline / Improved 버튼으로 넷을 연다. 여섯 타일은 그 아래에 그대로 있다.
 - **비교 페이지(Step 93)**: https://7bvcxz.github.io/gamo/momonium-experiments/compare.html
   여섯 실험을 같은 순서(A·C·F 먼저)와 같은 3분 절차로 해 보고, 네 질문에 1–5점을 매기고, JSON·CSV·Markdown으로 내보낸다.
 - 지금까지의 결과와 다음 실험 추천(잠정, 사람 점수 전): [`RESULTS.md`](RESULTS.md)
@@ -29,6 +40,7 @@
 | `?dev=1` | 틀에 플레이 시계와 **기록** 버튼이 보인다. 기록 창에서 JSON·CSV 다운로드 |
 | `?motion=reduce` | 움직임 줄이기. 시스템 설정 `prefers-reduced-motion`도 따른다 |
 | `?sound=off` | 소리 끈 채로 시작. 틀의 스피커 버튼으로도 끄고 켠다 |
+| `?alt=<이름>` | 트랙의 실험용 대안(Step 96·98). 기록의 `variant`에 남는다. 모르는 이름은 기본 |
 
 예: `https://7bvcxz.github.io/gamo/momonium-experiments/?dev=1#rock`
 
@@ -43,7 +55,9 @@
   처음 clone한 상태에서 바로 열린다. 원본과 다르면 `test_shared_assets.gd`가 실패한다.
   게임 그림이 바뀌어 실험실도 따라가야 하면 sync를 다시 돌리고 커밋한다. 새 유료 그림은 쓰지 않았다.
 - 실험실은 **아무것도 저장하지 않는다.** 세이브·설정·localStorage·네트워크가 없다(`test_isolation.gd`가 소스를 검사한다).
-  예외는 Godot 밖의 **비교 페이지**(`compare.html`) 하나다. 사람이 매긴 점수를 그 브라우저의 localStorage `funlab.compare.v1` 키 하나에만 둔다(서버로 보내지 않음, E2E `compare93`이 다른 키가 없음을 확인).
+  예외는 Godot 밖의 페이지 둘이다. 사람이 매긴 점수를 그 브라우저의 localStorage에만 둔다(서버로 보내지 않음).
+  비교 페이지(`compare.html`)는 `funlab.compare.v1`, C·E 트랙 페이지(`tracks.html`)는 `funlab.tracks.v1`을 쓴다.
+  E2E `compare93`·`tracks94`가 `funlab.` 밖의 키가 없음을 확인한다.
   이름이 `Momonium Fun Lab`이라 Godot의 user:// 폴더도 게임(`Momonium`)과 다르다. 브라우저에서 게임 세이브(IndexedDB와
   localStorage 사본)가 그대로인지는 E2E `funlab86`이 실제로 잰다.
 - 실행마다 새로 시작한다. 다시 시작이나 뒤로를 누르면 그 실행의 실험·기록을 버리고 새로 만든다.
@@ -61,9 +75,10 @@ experiments/
   tests/          unit · integration(헤드리스), e2e(Playwright)
   tools/          test.sh check.sh capture.gd deploy.sh e2e.sh sync_shared.sh selftest.gd
                   compare_assets.sh compare_grid.gd compare_jpg.gd (비교 페이지의 그림·숫자)
-  web/            비교 페이지 compare.html과 compare/(그림·selftest.json). 팩에는 들어가지 않는다
+  web/            비교 페이지 compare.html과 compare/(그림·selftest.json), C·E 트랙 페이지 tracks.html. 팩에는 들어가지 않는다
   evidence/       step별 증거 그림·기록(팩에 들어가지 않는다)
   LOG.md          실험 기록(무엇을 만들었고, 무엇을 쟀나)
+  TRACKS.md       C·E 두 트랙의 결정·규칙·3/15/30분 절차·의존 관계(Step 94부터)
   RESULTS.md      여섯 실험의 객관 수치와 다음 실험 추천(잠정)
 ```
 
@@ -108,7 +123,8 @@ momonium/experiments/tools/compare_assets.sh               # 비교 페이지의
 - **업그레이드**: 시각·레벨·비용, 첫 업그레이드까지의 시간, 업그레이드 사이 간격.
 - **마일스톤**: 실험이 정한 큰 변화.
 - **쉰 구간**: 5초 이상 아무 입력이 없던 구간. 첫 입력 전과 마지막 입력 뒤도 센다. 합계와 가장 긴 구간.
-- **3분 시점 요약**: 플레이 3:00에 그때의 요약을 얼려 둔다(`at_3min`).
+- **3·15·30분 시점 요약**: 플레이 3:00·15:00·30:00에 그때의 요약과 FPS를 얼려 둔다(`at_3min`·`at_15min`·`at_30min`, 뒤의 둘은 Step 94).
+- **분당 행동 수와 가장 긴 업그레이드 대기**(Step 94): `actions_per_minute`, `longest_upgrade_wait_s`(아직 열린 대기 포함). 실행 번호 `run`과 대안 `variant`.
 - **계속할 마음**(Step 89): 플레이 3:00에 버튼 바로 위에 작은 카드가 뜬다("Keep playing?", F는 "See the next tree?").
   Yes / Not now로 답하고, 20초 안에 답이 없으면 `none`이다. 답은 `metrics.continue_intent`에 남고 플레이를 멈추지 않는다. 답하는 탭은 행동으로 세지 않는다.
 - **실험의 숫자**(`metrics`): 레벨, 자원, 수입률 등.

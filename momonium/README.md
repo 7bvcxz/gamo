@@ -1,5 +1,8 @@
 # Momonium
 
+> **2026-11-03 — 긴 로드맵 일시 정지(동결, 지우지 않음).** 소유자가 Fun Lab의 여섯 실험을 해 보고 C(Break & Upgrade)와 E(Production Tycoon)에 집중하기로 했다.
+> 이 게임·세이브·공개 URL·기록은 그대로 두고, 새 실험은 `experiments/`(Fun Lab)에서만 한다. 계획은 [`experiments/TRACKS.md`](experiments/TRACKS.md).
+
 바다 한가운데 2×2 섬에서 $10로 시작하는 세로형 섬 경영 게임. 모모(Momo)들이 일을 배워
 섬을 마을로, 마을을 문명으로 키운다.
 
