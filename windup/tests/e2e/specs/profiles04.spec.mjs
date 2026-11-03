@@ -76,6 +76,16 @@ for (const [name, prof] of Object.entries(PROFILES)) {
     await page.addInitScript(AUDIO_TAP);
     const { errors } = await openGame(page, '?fresh=1');
     const k = await keyPoint(page);
+    // Every input with wall and game time, so a profile's pattern can be checked against its trace.
+    const inputs = [];
+    const t0 = Date.now();
+    const realMouse = page.mouse;
+    const logged = {
+      click: async (x, y) => { inputs.push({ wall: (Date.now() - t0) / 1000, game: (await state(page)).t, input: 'click', x: Math.round(x), y: Math.round(y) }); return realMouse.click(x, y); },
+      down: async () => { inputs.push({ wall: (Date.now() - t0) / 1000, game: (await state(page)).t, input: 'down' }); return realMouse.down(); },
+      up: async () => { inputs.push({ wall: (Date.now() - t0) / 1000, game: (await state(page)).t, input: 'up' }); return realMouse.up(); },
+      move: (x, y) => realMouse.move(x, y),
+    };
     const shots = new Set();
     const until = async () => {
       const s = await state(page);
@@ -85,7 +95,7 @@ for (const [name, prof] of Object.entries(PROFILES)) {
       return s.t >= 185;
     };
     await until();
-    await prof.play(page, k, until);
+    await prof.play({ mouse: logged, waitForTimeout: (ms) => page.waitForTimeout(ms), locator: (q) => page.locator(q) }, k, until);
     const end = await call(page, 'end');
     const ev = await events(page);
     const s = await state(page);
@@ -101,6 +111,7 @@ for (const [name, prof] of Object.entries(PROFILES)) {
       pauses: ev.filter((e) => e.ev === 'pause').length, errors, machine_load_1min: os.loadavg()[0],
     };
     fs.writeFileSync(path.join(evidence, `${name}_events.jsonl`), ev.map((e) => JSON.stringify(e)).join('\n') + '\n');
+    fs.writeFileSync(path.join(evidence, `${name}_inputs.json`), JSON.stringify(inputs) + '\n');
     if (rec) {
       const audio = await takeAudio(page);
       summary.footage = await finishFootage(rec, audio, path.join(evidence, `${name}_footage_${s.build_id}.mp4`));

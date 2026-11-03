@@ -1,0 +1,1 @@
+x = 3 awake (active_a3), y = 0 awake (active_a0), z = 1 awake (active_a1)

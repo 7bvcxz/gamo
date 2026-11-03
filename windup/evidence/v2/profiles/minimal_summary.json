@@ -1,0 +1,25 @@
+{
+  "profile": "minimal",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "build_id": "0.5.1+base",
+  "game_seconds": 187.517,
+  "first_input": 4.199,
+  "first_doll": null,
+  "second_doll": null,
+  "first_help": null,
+  "awakenings": [],
+  "dolls_end": 0,
+  "energy_end": 59,
+  "presses": 59,
+  "turns": 59,
+  "refused_by_cap": 0,
+  "dead_time_s": 0,
+  "idle_gaps_over_5s": [],
+  "hints": 0,
+  "pauses": 0,
+  "errors": [],
+  "machine_load_1min": 53.61
+}

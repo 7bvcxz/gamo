@@ -1,0 +1,29 @@
+{
+  "profile": "novice",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "build_id": "0.5.1+base",
+  "game_seconds": 186.3,
+  "first_input": 16.24,
+  "first_doll": 62.85,
+  "second_doll": 121.927,
+  "first_help": 69.367,
+  "awakenings": [
+    62.85,
+    121.927,
+    181.267
+  ],
+  "dolls_end": 3,
+  "energy_end": 34.754,
+  "presses": 181,
+  "turns": 269,
+  "refused_by_cap": 33,
+  "dead_time_s": 0,
+  "idle_gaps_over_5s": [],
+  "hints": 0,
+  "pauses": 0,
+  "errors": [],
+  "machine_load_1min": 47.53
+}

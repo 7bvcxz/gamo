@@ -1,0 +1,37 @@
+{
+  "profile": "enthusiastic",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "build_id": "0.5.1+base",
+  "game_seconds": 186.377,
+  "first_input": 3.4,
+  "first_doll": 24.174,
+  "second_doll": 52.739,
+  "first_help": 30.443,
+  "awakenings": [
+    24.174,
+    52.739,
+    86.95,
+    124.881,
+    170.255
+  ],
+  "dolls_end": 5,
+  "energy_end": 279.048,
+  "presses": 286,
+  "turns": 716,
+  "refused_by_cap": 41,
+  "dead_time_s": 0,
+  "idle_gaps_over_5s": [],
+  "hints": 0,
+  "pauses": 0,
+  "errors": [],
+  "machine_load_1min": 31.63,
+  "footage": {
+    "video": "page@36b035c9090f63f61212d3b5d2ced702.webm",
+    "out": "enthusiastic_footage_0.5.1+base.mp4",
+    "audio_bytes": 3008913,
+    "audio_offset_s": 1.176199951171875
+  }
+}
