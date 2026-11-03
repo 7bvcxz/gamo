@@ -369,6 +369,7 @@ func state() -> Dictionary:
 		"stage": atelier.stage,
 		"rate": snappedf(atelier.auto_rate(), 0.001),
 		"hint": view.hint,
+		"hold_hint": view.hold_hint,
 		"sounds": sfx.played.duplicate(),
 		"music_notes": music.notes_played,
 		"gears": view.gears_shown(),

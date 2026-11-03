@@ -47,3 +47,23 @@ func test_gear_slots_mesh_and_do_not_overlap() -> void:
 		for b in range(a + 1, 12):
 			assert_true(AtelierView.gear_slot(a).distance_to(AtelierView.gear_slot(b)) >= 2.0 * AtelierView.SMALL_PITCH - 1.0,
 				"slots %d and %d do not overlap" % [a, b])
+
+
+func test_hold_hint_hand_stays_down_while_its_ring_fills() -> void:
+	# Step 10: the hint shows a long press -- down for 2 s of every 3, the
+	# fingertip ring filling only while down -- not a ring that fills by itself.
+	var down := 0
+	var last_fill := -1.0
+	var monotonic := true
+	for i in 300:
+		var p := AtelierView.hold_hint_phase(i * 0.01)
+		if p.x > 0.5:
+			down += 1
+			if p.y < last_fill:
+				monotonic = false
+			last_fill = p.y
+		else:
+			assert_eq(p.y, 0.0, "no ring while the hand is up (t=%.2f)" % (i * 0.01))
+	assert_true(down >= 195 and down <= 205, "down about 2 s of each 3 s (%d of 300)" % down)
+	assert_true(monotonic, "the ring only fills while held")
+	assert_true(AtelierView.hold_hint_phase(2.34).y > 0.98, "full just before the hand lifts")

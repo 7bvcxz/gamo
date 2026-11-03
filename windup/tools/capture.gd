@@ -5,7 +5,7 @@ extends SceneTree
 ##
 ##   xvfb-run -a -s "-screen 0 1600x1000x24" godot --path windup --audio-driver Dummy \
 ##     --resolution 1280x720 --script res://tools/capture.gd -- --out /abs/shot.png \
-##     [--wait 1.0] [--winds 0] [--seed 1]
+##     [--wait 1.0] [--winds 0] [--seed 1] [--slow-clicks 12 --then 1.0]
 ##
 ## Boots the real main scene, optionally presses the key `--winds` times, waits
 ## `--wait` seconds of frames at 60 fps and saves what the window shows.
@@ -46,6 +46,19 @@ func _run() -> void:
 		while t < after:
 			main.advance(1.0 / 60.0)
 			t += 1.0 / 60.0
+	# --slow-clicks N: N presses 2 s apart through the real input path (the way
+	# a slow clicker plays -- after 20 s the hold hint shows), then --then S
+	# more seconds; stepped at 1/60 s.
+	if args.has("slow-clicks"):
+		for i in int(args["slow-clicks"]):
+			main.press("click")
+			main.release("click")
+			for f in 120:
+				main.advance(1.0 / 60.0)
+		for f in int(float(args.get("then", "0")) * 60.0):
+			main.advance(1.0 / 60.0)
+		main.set_process(false)
+		main.hud.advance(5.0)   # the counter eases in _process only; settle it for the picture
 	for i in int(args.get("winds", "0")):
 		main.wind("dev")
 		await create_timer(0.12).timeout

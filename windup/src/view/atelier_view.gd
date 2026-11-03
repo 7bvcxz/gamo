@@ -858,12 +858,13 @@ func _draw_fx() -> void:
 		_fx.draw_circle(c, 30.0 * (1.0 - t), Color(1.0, 0.9, 0.6, 0.25 * (1.0 - t)))
 	var s := k + Vector2(-150, -96 + sin(_anim * 1.7) * 9.0)
 	if hold_hint:
-		# Without words: the spirit sits on the key and keeps pressing; a ring
-		# fills around the key for as long as it holds, then it lets go.
-		var cycle := fmod(_anim, 2.4)
-		var held := clampf(cycle / 1.8, 0.0, 1.0)
-		s = k + Vector2(0, -52 + (3.0 if cycle < 1.8 else -6.0))
-		_fx.draw_arc(k, 128.0, -PI / 2.0, -PI / 2.0 + TAU * held, 48, Color(1.0, 0.85, 0.5, 0.7 * (1.0 - maxf(0.0, cycle - 1.8) / 0.6)), 5.0)
+		# Without words (Step 10): a hand presses the key and STAYS down while a
+		# small ring fills round its fingertip -- the long-press glyph -- then
+		# lifts and comes again. 0.8.0 put the spirit on the key with a big ring
+		# round the gear, and four blind players out of four read that ring as a
+		# timer and waited (design/BLIND_PLAYTESTS.md). The spirit keeps its place.
+		var phase := hold_hint_phase(_anim)
+		_draw_hold_hand(k + HOLD_HINT_TIP, phase.x > 0.5, phase.y)
 	elif hint:
 		# Without words: the spirit goes to the key and pushes it.
 		var push := (sin(_anim * 6.0) * 0.5 + 0.5)
@@ -980,6 +981,50 @@ func _draw_spring(k: Vector2) -> void:
 	_fx.draw_polyline(pts, Color(hot, 0.85), 3.0 + 2.0 * f)
 	if f >= 0.999:
 		_fx.draw_arc(k, 160.0, 0.0, TAU, 48, Color(1.0, 0.6, 0.3, 0.35 + 0.25 * sin(_anim * 12.0)), 4.0)
+
+
+## The hold hint's timing: x = 1 while the hand is down, y = how full the
+## fingertip ring is (0..1). Down 0.35 s into each cycle for 2 s, then up.
+const HOLD_HINT_CYCLE := 3.0
+const HOLD_HINT_TIP := Vector2(14, 4)
+const HAND := [Vector2(0, -2), Vector2(4, -1), Vector2(6.5, 2), Vector2(7, 6), Vector2(7, 30),
+	Vector2(9, 27.5), Vector2(12.5, 27), Vector2(15.5, 28.5), Vector2(16.5, 31),
+	Vector2(18.5, 29.5), Vector2(22, 29.5), Vector2(24.5, 31.5), Vector2(25.5, 34),
+	Vector2(27.5, 33), Vector2(30.5, 33.5), Vector2(32, 36), Vector2(32.5, 39),
+	Vector2(32.5, 56), Vector2(30, 64), Vector2(25, 70), Vector2(8, 71),
+	Vector2(3, 68), Vector2(-4, 61), Vector2(-12, 50), Vector2(-16.5, 43), Vector2(-16.5, 39.5),
+	Vector2(-14, 37.5), Vector2(-10, 38.5), Vector2(-7, 42), Vector2(-7, 6), Vector2(-6.5, 2), Vector2(-4, -1)]
+
+
+static func hold_hint_phase(anim: float) -> Vector2:
+	var cycle := fmod(anim, HOLD_HINT_CYCLE)
+	var down := cycle >= 0.35 and cycle < 2.35
+	return Vector2(1.0 if down else 0.0, clampf((cycle - 0.35) / 2.0, 0.0, 1.0) if down else 0.0)
+
+
+## A pointing hand, fingertip at `tip`: pressed it sits on the key with a ring
+## filling round the fingertip; lifted it hovers a little up and to the side.
+func _draw_hold_hand(tip: Vector2, down: bool, held: float) -> void:
+	var sz := 1.5 if down else 1.62
+	var at := tip if down else tip + Vector2(10, 14)
+	var pts := PackedVector2Array()
+	for q: Vector2 in HAND:
+		pts.append(at + q * sz)
+	var shadow := PackedVector2Array()
+	var drop := Vector2(3, 4) if down else Vector2(9, 13)
+	for q in pts:
+		shadow.append(q + drop)
+	_fx.draw_colored_polygon(shadow, Color(0.0, 0.0, 0.0, 0.28))
+	if down:
+		_fx.draw_circle(tip, 26.0, Color(1.0, 0.85, 0.5, 0.16))
+		_fx.draw_arc(tip, 26.0, 0.0, TAU, 36, Color(0.2, 0.14, 0.1, 0.55), 6.0)
+		_fx.draw_arc(tip, 26.0, -PI / 2.0, -PI / 2.0 + TAU * maxf(held, 0.02), 36, Color(1.0, 0.82, 0.4, 0.95), 4.0)
+	_fx.draw_colored_polygon(pts, Color(1.0, 0.96, 0.88, 0.94))
+	var outline := pts.duplicate()
+	outline.append(pts[0])
+	_fx.draw_polyline(outline, Color(0.22, 0.15, 0.1, 0.95), 2.5)
+	for x: float in [7.0, 16.5, 25.5]:
+		_fx.draw_line(at + Vector2(x, 34.0) * sz, at + Vector2(x, 44.0) * sz, Color(0.22, 0.15, 0.1, 0.8), 2.0)
 
 
 func _draw_spirit(at: Vector2) -> void:

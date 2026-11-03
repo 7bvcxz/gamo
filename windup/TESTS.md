@@ -42,6 +42,7 @@
 | 그림 import 크기·아틀라스·예산 | `unit/test_art`, `unit/test_budgets` | `art03`(렌더 예산) |
 | 애니메이션 발 고정·NaN | `integration/test_animation_qc` | — |
 | 깨어남 애니메이션은 인형마다 한 번 | `test_robustness`(`wake_count`) | — |
+| 느린 클릭에 말 없는 '누르고 있기' 힌트(20초 뒤 한 번, 누르면 사라짐; 0.10.0부터 손이 열쇠를 누른 채 손끝 고리가 참) | `unit/test_wind_input`, `unit/test_feel`(손 타이밍), `integration/test_robustness` | `hint10`(손의 픽셀·렌더 예산·오류 없음; 0.8.0 힌트에서는 실패함을 확인) |
 | 노드·소리 플레이어가 늘지 않음, 고아 노드 0, 늦은 판의 프레임 비용 | `test_robustness` | — |
 | 손맛·톱니·소품·떨림, 흔들림·섬광 없음 | `test_feel`, `test_feel_view` | `feel05` |
 | 소리(신호로 잼): 잠든 동안 침묵, 오르골, 끄기 | `test_feel` | `feel05`(RMS) |
