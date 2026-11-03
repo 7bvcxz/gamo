@@ -1,0 +1,3 @@
+# Raw run output: the report (report.md / report.json) is what is kept.
+e2e.json
+*.log
