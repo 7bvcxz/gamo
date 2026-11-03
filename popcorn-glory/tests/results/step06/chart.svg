@@ -1,0 +1,73 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='900' height='940' viewBox='0 0 900 940' font-family='sans-serif' font-size='12'>
+<rect width='100%' height='100%' fill='#fffaf0'/>
+<text x='10' y='20' font-size='14'>Upgrades over 0-180 s (AUTOMATED simulation, real rules)</text>
+<text x='10' y='54' font-size='13'>A Click & Pop</text>
+<line x1='60' y1='310' x2='880' y2='310' stroke='#444'/>
+<line x1='60' y1='60' x2='60' y2='310' stroke='#ddd'/><text x='52' y='326'>0s</text>
+<line x1='196' y1='60' x2='196' y2='310' stroke='#ddd'/><text x='188' y='326'>30s</text>
+<line x1='333' y1='60' x2='333' y2='310' stroke='#ddd'/><text x='325' y='326'>60s</text>
+<line x1='470' y1='60' x2='470' y2='310' stroke='#ddd'/><text x='462' y='326'>90s</text>
+<line x1='606' y1='60' x2='606' y2='310' stroke='#ddd'/><text x='598' y='326'>120s</text>
+<line x1='743' y1='60' x2='743' y2='310' stroke='#ddd'/><text x='735' y='326'>150s</text>
+<line x1='880' y1='60' x2='880' y2='310' stroke='#ddd'/><text x='872' y='326'>180s</text>
+<polyline fill='none' stroke='#e8443a' stroke-width='2' points='60,310 96,310 96,294 119,294 119,278 146,278 146,262 180,262 180,246 220,246 220,230 269,230 269,214 330,214 330,198 404,198 404,182 498,182 498,166 619,166 619,150 772,150 772,134 880,134'/>
+<text x='570' y='70' fill='#e8443a'>A active (4 taps/s, buys at once) (Lv11)</text>
+<polyline fill='none' stroke='#2a7de1' stroke-width='2' points='60,310 117,310 117,294 156,294 156,278 200,278 200,262 256,262 256,246 319,246 319,230 399,230 399,214 497,214 497,198 617,198 617,182 768,182 768,166 880,166'/>
+<text x='570' y='84' fill='#2a7de1'>A steady (2.5 taps/s) (Lv9)</text>
+<polyline fill='none' stroke='#8a8a8a' stroke-width='2' points='60,310 196,310 196,294 280,294 280,278 371,278 371,262 488,262 488,246 616,246 616,230 782,230 782,214 880,214'/>
+<text x='570' y='98' fill='#8a8a8a'>A newcomer (first tap 8 s, 1.2/s, pauses (Lv6)</text>
+<polyline fill='none' stroke='#d99a00' stroke-width='2' points='60,310 160,310 160,294 216,294 216,278 277,278 277,262 355,262 355,246 444,246 444,230 554,230 554,214 689,214 689,198 860,198 860,182 880,182'/>
+<text x='570' y='112' fill='#d99a00'>A late buyer (saves 2x the price) (Lv8)</text>
+<polyline fill='none' stroke='#6a3fb0' stroke-width='2' points='60,310 117,310 117,294 156,294 156,278 200,278 200,262 256,262 256,246 319,246 319,230 536,230 536,214 633,214 633,198 754,198 754,182 880,182'/>
+<text x='570' y='126' fill='#6a3fb0'>A idle 30 s (60-90 s) (Lv8)</text>
+<polyline fill='none' stroke='#2f9e44' stroke-width='2' points='60,310 880,310'/>
+<text x='570' y='140' fill='#2f9e44'>A ignores the upgrade (Lv0)</text>
+<text x='10' y='354' font-size='13'>B Perfect Pop</text>
+<line x1='60' y1='610' x2='880' y2='610' stroke='#444'/>
+<line x1='60' y1='360' x2='60' y2='610' stroke='#ddd'/><text x='52' y='626'>0s</text>
+<line x1='196' y1='360' x2='196' y2='610' stroke='#ddd'/><text x='188' y='626'>30s</text>
+<line x1='333' y1='360' x2='333' y2='610' stroke='#ddd'/><text x='325' y='626'>60s</text>
+<line x1='470' y1='360' x2='470' y2='610' stroke='#ddd'/><text x='462' y='626'>90s</text>
+<line x1='606' y1='360' x2='606' y2='610' stroke='#ddd'/><text x='598' y='626'>120s</text>
+<line x1='743' y1='360' x2='743' y2='610' stroke='#ddd'/><text x='735' y='626'>150s</text>
+<line x1='880' y1='360' x2='880' y2='610' stroke='#ddd'/><text x='872' y='626'>180s</text>
+<polyline fill='none' stroke='#e8443a' stroke-width='2' points='60,610 102,610 102,594 139,594 139,578 176,578 176,562 214,562 214,546 262,546 262,530 321,530 321,514 380,514 380,498 449,498 449,482 529,482 529,466 620,466 620,450 720,450 720,434 830,434 830,418 880,418'/>
+<text x='570' y='370' fill='#e8443a'>B skilled (gold's middle) (Lv12)</text>
+<polyline fill='none' stroke='#2a7de1' stroke-width='2' points='60,610 187,610 187,594 242,594 242,578 308,578 308,562 425,562 425,546 495,546 495,530 591,530 591,514 757,514 757,498 880,498'/>
+<text x='570' y='384' fill='#2a7de1'>B novice (mixed) (Lv7)</text>
+<polyline fill='none' stroke='#8a8a8a' stroke-width='2' points='60,610 139,610 139,594 219,594 219,578 292,578 292,562 393,562 393,546 494,546 494,530 617,530 617,514 760,514 760,498 880,498'/>
+<text x='570' y='398' fill='#8a8a8a'>B early reactions (100-300 ms before gol (Lv7)</text>
+<polyline fill='none' stroke='#d99a00' stroke-width='2' points='60,610 163,610 163,594 265,594 265,578 369,578 369,562 512,562 512,546 670,546 670,530 842,530 842,514 880,514'/>
+<text x='570' y='412' fill='#d99a00'>B late reactions (100-300 ms after gold) (Lv6)</text>
+<polyline fill='none' stroke='#6a3fb0' stroke-width='2' points='60,610 149,610 149,594 284,594 284,578 527,578 527,562 880,562'/>
+<text x='570' y='426' fill='#6a3fb0'>B tapper (never holds) (Lv3)</text>
+<polyline fill='none' stroke='#2f9e44' stroke-width='2' points='60,610 129,610 129,594 176,594 176,578 232,578 232,562 289,562 289,546 356,546 356,530 434,530 434,514 523,514 523,498 623,498 623,482 733,482 733,466 864,466 864,450 880,450'/>
+<text x='570' y='440' fill='#2f9e44'>B late buyer (saves 2x) (Lv10)</text>
+<polyline fill='none' stroke='#000000' stroke-width='2' points='60,610 102,610 102,594 139,594 139,578 176,578 176,562 214,562 214,546 262,546 262,530 321,530 321,514 514,514 514,498 584,498 584,482 664,482 664,466 754,466 754,450 854,450 854,434 880,434'/>
+<text x='570' y='454' fill='#000000'>B idle 30 s (60-90 s) (Lv11)</text>
+<polyline fill='none' stroke='#c2185b' stroke-width='2' points='60,610 880,610'/>
+<text x='570' y='468' fill='#c2185b'>B ignores the upgrade (Lv0)</text>
+<text x='10' y='654' font-size='13'>C Pop Explosion</text>
+<line x1='60' y1='910' x2='880' y2='910' stroke='#444'/>
+<line x1='60' y1='660' x2='60' y2='910' stroke='#ddd'/><text x='52' y='926'>0s</text>
+<line x1='196' y1='660' x2='196' y2='910' stroke='#ddd'/><text x='188' y='926'>30s</text>
+<line x1='333' y1='660' x2='333' y2='910' stroke='#ddd'/><text x='325' y='926'>60s</text>
+<line x1='470' y1='660' x2='470' y2='910' stroke='#ddd'/><text x='462' y='926'>90s</text>
+<line x1='606' y1='660' x2='606' y2='910' stroke='#ddd'/><text x='598' y='926'>120s</text>
+<line x1='743' y1='660' x2='743' y2='910' stroke='#ddd'/><text x='735' y='926'>150s</text>
+<line x1='880' y1='660' x2='880' y2='910' stroke='#ddd'/><text x='872' y='926'>180s</text>
+<polyline fill='none' stroke='#e8443a' stroke-width='2' points='60,910 96,910 96,894 122,894 122,878 158,878 158,862 196,862 196,846 250,846 250,830 310,830 310,814 404,814 404,798 500,798 500,782 609,782 609,766 746,766 746,750 880,750'/>
+<text x='570' y='670' fill='#e8443a'>C active (4 taps/s, buys at once) (Lv10)</text>
+<polyline fill='none' stroke='#2a7de1' stroke-width='2' points='60,910 117,910 117,894 160,894 160,878 218,878 218,862 277,862 277,846 350,846 350,830 424,830 424,814 525,814 525,798 626,798 626,782 741,782 741,766 880,766'/>
+<text x='570' y='684' fill='#2a7de1'>C steady (2.5 taps/s) (Lv9)</text>
+<polyline fill='none' stroke='#8a8a8a' stroke-width='2' points='60,910 196,910 196,894 287,894 287,878 409,878 409,862 529,862 529,846 680,846 680,830 832,830 832,814 880,814'/>
+<text x='570' y='698' fill='#8a8a8a'>C newcomer (first tap 8 s, 1.2/s, pauses (Lv6)</text>
+<polyline fill='none' stroke='#d99a00' stroke-width='2' points='60,910 93,910 93,894 122,894 122,878 166,878 166,862 214,862 214,846 271,846 271,830 336,830 336,814 435,814 435,798 532,798 532,782 641,782 641,766 778,766 778,750 880,750'/>
+<text x='570' y='712' fill='#d99a00'>C burst-heavy (6/s for 4 s, rest 2 s) (Lv10)</text>
+<polyline fill='none' stroke='#6a3fb0' stroke-width='2' points='60,910 145,910 145,894 218,894 218,878 306,878 306,862 394,862 394,846 511,846 511,830 640,830 640,814 785,814 785,798 880,798'/>
+<text x='570' y='726' fill='#6a3fb0'>C late buyer (saves 2x) (Lv7)</text>
+<polyline fill='none' stroke='#2f9e44' stroke-width='2' points='60,910 117,910 117,894 160,894 160,878 218,878 218,862 277,862 277,846 487,846 487,830 560,830 560,814 662,814 662,798 763,798 763,782 878,782 878,766 880,766'/>
+<text x='570' y='740' fill='#2f9e44'>C idle 30 s (60-90 s) (Lv9)</text>
+<polyline fill='none' stroke='#000000' stroke-width='2' points='60,910 880,910'/>
+<text x='570' y='754' fill='#000000'>C ignores the upgrade (Lv0)</text>
+</svg>

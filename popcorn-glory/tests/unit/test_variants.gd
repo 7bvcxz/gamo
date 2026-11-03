@@ -20,11 +20,12 @@ func test_economy_has_all_three_and_every_upgrade_changes_the_yield() -> void:
 func test_a_press_pays_pops_at_once() -> void:
 	var r: PopRules = Click.new()
 	r.execute({"type": "press"})
-	assert_eq(r.money, 1, "1 at level 0")
-	r.money = 30
-	assert_true(bool(r.execute({"type": "buy"})["ok"]), "bought for 30")
+	assert_eq(r.money, r.economy.at("click", "pops", 0), "pops[0] at level 0")
+	r.money = r.cost()
+	assert_true(bool(r.execute({"type": "buy"})["ok"]), "bought for exactly the price")
+	assert_eq(r.money, 0, "paid it all")
 	r.execute({"type": "press"})
-	assert_eq(r.money, 2, "2 at level 1")
+	assert_eq(r.money, r.economy.at("click", "pops", 1), "pops[1] at level 1")
 
 
 func _hold(r: PopRules, ms: int) -> Dictionary:
@@ -49,14 +50,25 @@ func test_b_outcomes_by_how_long_it_was_held() -> void:
 
 
 func test_b_a_near_miss_is_fair() -> void:
-	# The gold is 1400..1850 at level 0; a near miss is within 150 ms of it.
+	# Read from the data: the gold [w0, w1] and the near-miss width.
 	var r: PopRules = Perfect.new()
-	assert_eq(String(_hold(r, 1249)["outcome"]), "early", "151 ms short is early")
-	assert_eq(String(_hold(r, 1250)["outcome"]), "near", "150 ms short is near")
-	assert_eq(String(_hold(r, 2000)["outcome"]), "near", "150 ms over is near")
-	assert_eq(String(_hold(r, 2001)["outcome"]), "late", "151 ms over is late")
+	var w: Array = r.state()["window"]
+	var near := int(r.state()["near_ms"])
+	var w0 := int(w[0])
+	var w1 := int(w[1])
+	assert_true(near > 0, "a near miss exists")
+	var batch := r.economy.at("perfect", "batch", 0)
+	var mult: Dictionary = r.economy.table("perfect")["mult"]
+	var early_held := w0 - near - 1
+	assert_eq(String(_hold(r, early_held)["outcome"]), "early", "one ms beyond the near miss before the gold is early")
+	assert_eq(String(_hold(r, w0 - near)["outcome"]), "near", "the near miss's first ms")
+	assert_eq(String(_hold(r, w1 + near)["outcome"]), "near", "the near miss's last ms after the gold")
+	assert_eq(String(_hold(r, w1 + near + 1)["outcome"]), "late", "one ms beyond it is late")
 	assert_eq(int(r.outcomes["near"]), 2, "two near misses")
-	assert_eq(r.money, 2 + 5 + 5 + 3, "early 5 * 0.6 * 1249/1400 = 2, near 5 twice (x1.0), late 3")
+	var expected := maxi(1, int(floor(batch * float(mult["early"]) * float(early_held) / float(w0))))
+	expected += 2 * maxi(1, int(floor(batch * float(mult["near"]))))
+	expected += maxi(1, int(floor(batch * float(mult["late"]))))
+	assert_eq(r.money, expected, "early by heat, near twice, late")
 
 
 func test_b_holding_on_burns_by_itself_at_the_exact_millisecond() -> void:
