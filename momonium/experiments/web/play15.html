@@ -131,7 +131,8 @@ const DIMS = [
 ];
 const KEY = 'funlab.play15.v1';
 const RUNS_KEY = 'funlab.play15.runs.v1';
-const MINUTES = ['0', '3', '7', '10', '15'];
+// 20 and 30 appear when a run went on that long (the 30-minute checklist, Step 100).
+const MINUTES = ['0', '3', '7', '10', '15', '20', '30'];
 const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 let data = { tester: '', device: '', ratings: {} };

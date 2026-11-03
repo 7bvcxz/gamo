@@ -90,14 +90,14 @@ func test_fifteen_and_thirty_minute_snapshots() -> void:
 
 func test_the_fifteen_minute_checkpoints_and_probe() -> void:
 	# Step 99: the 15-minute test's checkpoints (0, 3, 7, 10, 15 minutes),
-	# each with the experiment's own picture then.
+	# each with the experiment's own picture then; Step 100: and 20.
 	var s := LabSession.new("tycoon")
 	var level := [0]
 	s.probe = func() -> Dictionary: return {"level": level[0]}
 	s.advance(0.05)
 	assert_true(s.at_marks.has("at_0min"), "the start")
 	assert_eq(s.at_marks["at_0min"]["probe"], {"level": 0}, "with the probe then")
-	for m: int in [3, 7, 10, 15]:
+	for m: int in [3, 7, 10, 15, 20]:
 		level[0] = m
 		while s.active_ms < float(m) * 60000.0:
 			s.advance(1.0)

@@ -187,6 +187,8 @@ func test_thirty_minutes_bring_eras_buildings_and_a_branch() -> void:
 	assert_eq(int(st["lanes"]), 6, "six lanes")
 	var eras := app.host.session.milestones.filter(func(m: Dictionary) -> bool: return String(m["name"]) == "era")
 	assert_eq(eras.size(), 4, "each era recorded")
+	# By name (Step 100: a "name" in the detail lost to the milestone's own).
+	assert_eq(eras.map(func(m: Dictionary) -> String: return String(m.get("era", ""))), ["Express Era", "Golden Era", "Festival Era", "Grand Era"], "with its name")
 
 
 func test_the_next_change_shows_where_it_will_be() -> void:

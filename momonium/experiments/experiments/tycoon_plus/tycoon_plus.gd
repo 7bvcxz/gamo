@@ -512,7 +512,8 @@ func _say(at: Vector2, text: String, color: Color, size: int) -> void:
 ## A new era opens: a big ring over the line, its name, every Momo cheering.
 func _celebrate(name: String) -> void:
 	eras.append(name)
-	session.milestone("era", {"name": name, "level": level})
+	# "era", not "name": a milestone's own name would win the merge.
+	session.milestone("era", {"era": name, "level": level})
 	for m: LabMomo in helpers:
 		m.cheer(1.2)
 	if audio != null:

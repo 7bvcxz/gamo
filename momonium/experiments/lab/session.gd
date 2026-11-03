@@ -13,14 +13,15 @@ extends RefCounted
 ## of the summary taken when play time reaches three minutes -- and, for the
 ## C/E tracks' longer sessions (Step 94), at fifteen and thirty minutes too,
 ## with the frame rate at that moment. Step 99 added the start, seven and
-## ten minutes (the 15-minute test's checkpoints), the experiment's own
+## ten minutes (the 15-minute test's checkpoints) and Step 100 twenty (the
+## 30-minute study's 3/10/15/20/30), the experiment's own
 ## picture at each (`probe`) and the spacing of meaningful rewards -- breaks
 ## and upgrades in C, upgrades and eras in E.
 
 const THREE_MINUTES_MS := 180000
 const IDLE_MS := 5000
 ## The protocol's checkpoints (TRACKS.md): summary key -> play time.
-const MARKS: Dictionary = {"at_0min": 0, "at_3min": 180000, "at_7min": 420000, "at_10min": 600000, "at_15min": 900000, "at_30min": 1800000}
+const MARKS: Dictionary = {"at_0min": 0, "at_3min": 180000, "at_7min": 420000, "at_10min": 600000, "at_15min": 900000, "at_20min": 1200000, "at_30min": 1800000}
 ## Milestones that are a reward in themselves (with every upgrade).
 const REWARD_MILESTONES: Array[String] = ["break", "era"]
 
