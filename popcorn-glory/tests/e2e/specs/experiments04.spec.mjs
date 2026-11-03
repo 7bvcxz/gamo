@@ -3,6 +3,7 @@
 // its main action works the way it is meant to, it restarts from nothing, and
 // one run never leaks into another.
 import { test, expect } from '../lib/pop.mjs';
+import { decodePng } from '../lib/png.mjs';
 
 test('the chooser lists A, B, C and each tile opens its experiment', async ({ pop }) => {
   await pop.open('./');
@@ -17,6 +18,25 @@ test('the chooser lists A, B, C and each tile opens its experiment', async ({ po
     await pop.tap('back');
     await expect.poll(async () => (await pop.state()).screen).toBe('chooser');
   }
+});
+
+test('the atlas draws: the money coin is gold, not a white square', async ({ pop }) => {
+  // A texture nobody held was freed after its draw call and every sprite came
+  // out as a white square -- invisible to headless tests (Step 04).
+  await pop.open('./#click');
+  const s = await pop.state();
+  const r = s.rects.money;
+  const box = await pop.canvas.boundingBox();
+  const k = box.width / s.window[0];
+  // The coin sits at the left of the counter's text: sample a strip of it.
+  const shot = decodePng(await pop.page.screenshot({ clip: { x: box.x + r[0] * k, y: box.y + r[1] * k, width: r[2] * k, height: r[3] * k } }));
+  let gold = 0, white = 0;
+  for (let i = 0; i < shot.width * shot.height; i++) {
+    const [R, G, B] = [shot.data[i * 4], shot.data[i * 4 + 1], shot.data[i * 4 + 2]];
+    if (R > 200 && G > 140 && G < 230 && B < 110) gold++;
+    if (R > 245 && G > 245 && B > 245) white++;
+  }
+  expect(gold, `gold pixels ${gold}, pure white ${white}`).toBeGreaterThan(150);
 });
 
 test('A Click & Pop: every press pays at once', async ({ pop }) => {

@@ -84,4 +84,12 @@ func _tick() -> void:
 	var image: Image = root.get_texture().get_image()
 	var err := image.save_png(_args["out"])
 	print("capture: %s %dx%d err=%d" % [_args["out"], image.get_width(), image.get_height(), err])
+	# Sounds still playing are let go on the audio thread's next mix: quitting
+	# now reported them as resources in use (momonium's runner, Step 50).
+	if _app.audio != null:
+		_app.audio.stop_all()
+	_app.queue_free()
+	for i in 3:
+		await process_frame
+	await create_timer(0.25).timeout
 	quit(0 if err == OK else 1)

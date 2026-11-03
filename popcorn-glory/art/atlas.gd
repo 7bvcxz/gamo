@@ -9,9 +9,13 @@ extends RefCounted
 const PNG := "res://assets/atlas/sprites.png"
 const JSON_PATH := "res://assets/atlas/sprites.json"
 
-## Only plain data is kept statically: a texture held in a static var outlives
-## the scene tree and is reported 'still in use at exit'. The texture comes from
-## Godot's resource cache each time (a lookup by path).
+## The texture is held here. A version that called load() at each draw, with
+## nothing holding the result, drew every sprite as a WHITE SQUARE: the texture
+## was freed as soon as the draw command was queued, and the canvas drew a
+## dead texture (Step 04, caught in a capture; the 'resources still in use at
+## exit' it was meant to fix came from sounds still playing in the capture
+## tool, not from this).
+static var _texture: Texture2D
 static var _regions: Dictionary = {}
 static var _loaded := false
 static var _has_png := false
@@ -21,18 +25,19 @@ static func ready() -> bool:
 	if not _loaded:
 		_loaded = true
 		_has_png = ResourceLoader.exists(PNG)
+		if _has_png:
+			_texture = load(PNG)
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(JSON_PATH))
 		if typeof(parsed) == TYPE_DICTIONARY:
 			for name: String in parsed["regions"]:
 				var r: Array = parsed["regions"][name]["rect"]
 				_regions[name] = Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3]))
-	return _has_png and not _regions.is_empty()
+	return _texture != null and not _regions.is_empty()
 
 
 static func texture() -> Texture2D:
-	if not ready():
-		return null
-	return load(PNG)
+	ready()
+	return _texture
 
 
 static func region(name: String) -> Rect2:
