@@ -1,0 +1,3221 @@
+{
+  "id": "perfect",
+  "project": "p720",
+  "marks": {
+    "first_action": {
+      "clock_ms": 4126,
+      "level": 0,
+      "money": 10,
+      "earned": 10,
+      "fps": 28.05727555732827,
+      "fps_samples": [
+        27.513019559052463,
+        28.05727555732827,
+        28.087167070217916
+      ],
+      "fx_peak": 22,
+      "draw_calls": 57,
+      "primitives": 1656,
+      "load_avg": 33.25
+    },
+    "5s": {
+      "clock_ms": 7816,
+      "level": 0,
+      "money": 10,
+      "earned": 10,
+      "fps": 25.75277339019003,
+      "fps_samples": [
+        24.49594875574191,
+        25.75277339019003,
+        26.50957290132548
+      ],
+      "fx_peak": 22,
+      "draw_calls": 59,
+      "primitives": 1750,
+      "load_avg": 32.99
+    },
+    "first_upgrade": {
+      "clock_ms": 16999,
+      "level": 1,
+      "money": 0,
+      "earned": 30,
+      "fps": 32.69916766373055,
+      "fps_samples": [
+        30.81204653377477,
+        32.69916766373055,
+        33.75024817636956
+      ],
+      "fx_peak": 46,
+      "draw_calls": 69,
+      "primitives": 1896,
+      "load_avg": 30.79
+    },
+    "60s": {
+      "clock_ms": 62091,
+      "level": 4,
+      "money": 266,
+      "earned": 622,
+      "fps": 28.403525954946133,
+      "fps_samples": [
+        27.635215165091786,
+        28.403525954946133,
+        30
+      ],
+      "fx_peak": 98,
+      "draw_calls": 96,
+      "primitives": 2789,
+      "load_avg": 28.23
+    },
+    "180s": {
+      "clock_ms": 181926,
+      "level": 10,
+      "money": 3776,
+      "earned": 17128,
+      "fps": 26.480972920653503,
+      "fps_samples": [
+        18.98101898101898,
+        26.480972920653503,
+        28.574243751748632
+      ],
+      "fx_peak": 98,
+      "draw_calls": 135,
+      "primitives": 3622,
+      "load_avg": 33.22
+    }
+  },
+  "buys": 10,
+  "summary": {
+    "earned": 17128,
+    "idle_longest_ms": 9846,
+    "idle_total_ms": 28337,
+    "inputs": 59,
+    "level": 10,
+    "milestones": {
+      "first_affordable": 15678,
+      "first_earn": 3378,
+      "first_input": 1690,
+      "first_upgrade": 16318,
+      "three_minutes": 180021
+    },
+    "money": 3776,
+    "t_ms": 185204,
+    "upgrades": [
+      16318,
+      30059,
+      40421,
+      51466,
+      68165,
+      84331,
+      101684,
+      123170,
+      146069,
+      172905
+    ],
+    "variant": "perfect"
+  },
+  "log": {
+    "active_ms": 185244,
+    "game": "popcorn-glory",
+    "lines": [
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 1690,
+        "type": "input"
+      },
+      {
+        "data": {
+          "name": "first_input"
+        },
+        "t": 1690,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "burn_at": 2450,
+          "window_end": 1850,
+          "window_start": 1400
+        },
+        "t": 1690,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 3378,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 63,
+          "held_ms": 1688,
+          "kind": "perfect"
+        },
+        "t": 3378,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0,
+          "outcome": "perfect"
+        },
+        "t": 3378,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 10,
+          "from": "perfect",
+          "money": 10
+        },
+        "t": 3378,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "name": "first_earn"
+        },
+        "t": 3378,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "ms": 9846,
+          "start": 1690
+        },
+        "t": 11536,
+        "type": "idle"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 11536,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2450,
+          "window_end": 1850,
+          "window_start": 1400
+        },
+        "t": 11536,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 13248,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 87,
+          "held_ms": 1712,
+          "kind": "perfect"
+        },
+        "t": 13248,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0,
+          "outcome": "perfect"
+        },
+        "t": 13248,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 10,
+          "from": "perfect",
+          "money": 20
+        },
+        "t": 13248,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 13952,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2450,
+          "window_end": 1850,
+          "window_start": 1400
+        },
+        "t": 13952,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 15678,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 101,
+          "held_ms": 1726,
+          "kind": "perfect"
+        },
+        "t": 15678,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0,
+          "outcome": "perfect"
+        },
+        "t": 15678,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 10,
+          "from": "perfect",
+          "money": 30
+        },
+        "t": 15678,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "name": "first_affordable"
+        },
+        "t": 15678,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 16318,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 30,
+          "level": 1,
+          "money": 0
+        },
+        "t": 16318,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "name": "first_upgrade"
+        },
+        "t": 16318,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "ms": 6523,
+          "start": 13952
+        },
+        "t": 20475,
+        "type": "idle"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 20475,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2500,
+          "window_end": 1900,
+          "window_start": 1400
+        },
+        "t": 20475,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 22205,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 80,
+          "held_ms": 1730,
+          "kind": "perfect"
+        },
+        "t": 22205,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 16,
+          "level": 1,
+          "outcome": "perfect"
+        },
+        "t": 22205,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 16,
+          "from": "perfect",
+          "money": 16
+        },
+        "t": 22205,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 22895,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2500,
+          "window_end": 1900,
+          "window_start": 1400
+        },
+        "t": 22895,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 24590,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 45,
+          "held_ms": 1695,
+          "kind": "perfect"
+        },
+        "t": 24590,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 16,
+          "level": 1,
+          "outcome": "perfect"
+        },
+        "t": 24590,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 16,
+          "from": "perfect",
+          "money": 32
+        },
+        "t": 24590,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 25358,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2500,
+          "window_end": 1900,
+          "window_start": 1400
+        },
+        "t": 25358,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 27060,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 52,
+          "held_ms": 1702,
+          "kind": "perfect"
+        },
+        "t": 27060,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 16,
+          "level": 1,
+          "outcome": "perfect"
+        },
+        "t": 27060,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 16,
+          "from": "perfect",
+          "money": 48
+        },
+        "t": 27060,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 27783,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2500,
+          "window_end": 1900,
+          "window_start": 1400
+        },
+        "t": 27783,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 29468,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 35,
+          "held_ms": 1685,
+          "kind": "perfect"
+        },
+        "t": 29468,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 16,
+          "level": 1,
+          "outcome": "perfect"
+        },
+        "t": 29468,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 16,
+          "from": "perfect",
+          "money": 64
+        },
+        "t": 29468,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 30059,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 54,
+          "level": 2,
+          "money": 10
+        },
+        "t": 30059,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 30443,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2550,
+          "window_end": 1950,
+          "window_start": 1400
+        },
+        "t": 30443,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 32143,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 25,
+          "held_ms": 1700,
+          "kind": "perfect"
+        },
+        "t": 32143,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 26,
+          "level": 2,
+          "outcome": "perfect"
+        },
+        "t": 32143,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 26,
+          "from": "perfect",
+          "money": 36
+        },
+        "t": 32143,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 32833,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2550,
+          "window_end": 1950,
+          "window_start": 1400
+        },
+        "t": 32833,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 34564,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 56,
+          "held_ms": 1731,
+          "kind": "perfect"
+        },
+        "t": 34564,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 26,
+          "level": 2,
+          "outcome": "perfect"
+        },
+        "t": 34564,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 26,
+          "from": "perfect",
+          "money": 62
+        },
+        "t": 34564,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 35253,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2550,
+          "window_end": 1950,
+          "window_start": 1400
+        },
+        "t": 35253,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 36967,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 39,
+          "held_ms": 1714,
+          "kind": "perfect"
+        },
+        "t": 36967,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 26,
+          "level": 2,
+          "outcome": "perfect"
+        },
+        "t": 36967,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 26,
+          "from": "perfect",
+          "money": 88
+        },
+        "t": 36967,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 37905,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2550,
+          "window_end": 1950,
+          "window_start": 1400
+        },
+        "t": 37905,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 39683,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 103,
+          "held_ms": 1778,
+          "kind": "perfect"
+        },
+        "t": 39683,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 26,
+          "level": 2,
+          "outcome": "perfect"
+        },
+        "t": 39683,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 26,
+          "from": "perfect",
+          "money": 114
+        },
+        "t": 39683,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 40421,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 97,
+          "level": 3,
+          "money": 17
+        },
+        "t": 40421,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 40874,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2600,
+          "window_end": 2000,
+          "window_start": 1400
+        },
+        "t": 40874,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 42733,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 159,
+          "held_ms": 1859,
+          "kind": "perfect"
+        },
+        "t": 42733,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 40,
+          "level": 3,
+          "outcome": "perfect"
+        },
+        "t": 42733,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 40,
+          "from": "perfect",
+          "money": 57
+        },
+        "t": 42733,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 43648,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2600,
+          "window_end": 2000,
+          "window_start": 1400
+        },
+        "t": 43648,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 45481,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 133,
+          "held_ms": 1833,
+          "kind": "perfect"
+        },
+        "t": 45481,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 40,
+          "level": 3,
+          "outcome": "perfect"
+        },
+        "t": 45481,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 40,
+          "from": "perfect",
+          "money": 97
+        },
+        "t": 45481,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 46257,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2600,
+          "window_end": 2000,
+          "window_start": 1400
+        },
+        "t": 46257,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 48030,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 73,
+          "held_ms": 1773,
+          "kind": "perfect"
+        },
+        "t": 48030,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 40,
+          "level": 3,
+          "outcome": "perfect"
+        },
+        "t": 48030,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 40,
+          "from": "perfect",
+          "money": 137
+        },
+        "t": 48030,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 48891,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2600,
+          "window_end": 2000,
+          "window_start": 1400
+        },
+        "t": 48891,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 50675,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 84,
+          "held_ms": 1784,
+          "kind": "perfect"
+        },
+        "t": 50675,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 40,
+          "level": 3,
+          "outcome": "perfect"
+        },
+        "t": 50675,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 40,
+          "from": "perfect",
+          "money": 177
+        },
+        "t": 50675,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 51466,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 175,
+          "level": 4,
+          "money": 2
+        },
+        "t": 51466,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 51826,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2650,
+          "window_end": 2050,
+          "window_start": 1400
+        },
+        "t": 51826,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 53621,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 70,
+          "held_ms": 1795,
+          "kind": "perfect"
+        },
+        "t": 53621,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 66,
+          "level": 4,
+          "outcome": "perfect"
+        },
+        "t": 53621,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 66,
+          "from": "perfect",
+          "money": 68
+        },
+        "t": 53621,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 54401,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2650,
+          "window_end": 2050,
+          "window_start": 1400
+        },
+        "t": 54401,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 56186,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 60,
+          "held_ms": 1785,
+          "kind": "perfect"
+        },
+        "t": 56186,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 66,
+          "level": 4,
+          "outcome": "perfect"
+        },
+        "t": 56186,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 66,
+          "from": "perfect",
+          "money": 134
+        },
+        "t": 56186,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 56988,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2650,
+          "window_end": 2050,
+          "window_start": 1400
+        },
+        "t": 56988,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 58771,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 58,
+          "held_ms": 1783,
+          "kind": "perfect"
+        },
+        "t": 58771,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 66,
+          "level": 4,
+          "outcome": "perfect"
+        },
+        "t": 58771,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 66,
+          "from": "perfect",
+          "money": 200
+        },
+        "t": 58771,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 59561,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2650,
+          "window_end": 2050,
+          "window_start": 1400
+        },
+        "t": 59561,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 61444,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 158,
+          "held_ms": 1883,
+          "kind": "perfect"
+        },
+        "t": 61444,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 66,
+          "level": 4,
+          "outcome": "perfect"
+        },
+        "t": 61444,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 66,
+          "from": "perfect",
+          "money": 266
+        },
+        "t": 61444,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ms": 6133,
+          "start": 59561
+        },
+        "t": 65694,
+        "type": "idle"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 65694,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2650,
+          "window_end": 2050,
+          "window_start": 1400
+        },
+        "t": 65694,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 67463,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 44,
+          "held_ms": 1769,
+          "kind": "perfect"
+        },
+        "t": 67463,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 66,
+          "level": 4,
+          "outcome": "perfect"
+        },
+        "t": 67463,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 66,
+          "from": "perfect",
+          "money": 332
+        },
+        "t": 67463,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 68165,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 315,
+          "level": 5,
+          "money": 17
+        },
+        "t": 68165,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 68499,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2700,
+          "window_end": 2100,
+          "window_start": 1400
+        },
+        "t": 68499,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 70312,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 63,
+          "held_ms": 1813,
+          "kind": "perfect"
+        },
+        "t": 70312,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 104,
+          "level": 5,
+          "outcome": "perfect"
+        },
+        "t": 70312,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 104,
+          "from": "perfect",
+          "money": 121
+        },
+        "t": 70312,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 71063,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2700,
+          "window_end": 2100,
+          "window_start": 1400
+        },
+        "t": 71063,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 72912,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 99,
+          "held_ms": 1849,
+          "kind": "perfect"
+        },
+        "t": 72912,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 104,
+          "level": 5,
+          "outcome": "perfect"
+        },
+        "t": 72912,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 104,
+          "from": "perfect",
+          "money": 225
+        },
+        "t": 72912,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 73669,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2700,
+          "window_end": 2100,
+          "window_start": 1400
+        },
+        "t": 73669,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 75500,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 81,
+          "held_ms": 1831,
+          "kind": "perfect"
+        },
+        "t": 75500,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 104,
+          "level": 5,
+          "outcome": "perfect"
+        },
+        "t": 75500,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 104,
+          "from": "perfect",
+          "money": 329
+        },
+        "t": 75500,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 76246,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2700,
+          "window_end": 2100,
+          "window_start": 1400
+        },
+        "t": 76246,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 78039,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 43,
+          "held_ms": 1793,
+          "kind": "perfect"
+        },
+        "t": 78039,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 104,
+          "level": 5,
+          "outcome": "perfect"
+        },
+        "t": 78039,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 104,
+          "from": "perfect",
+          "money": 433
+        },
+        "t": 78039,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 78782,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2700,
+          "window_end": 2100,
+          "window_start": 1400
+        },
+        "t": 78782,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 80582,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 50,
+          "held_ms": 1800,
+          "kind": "perfect"
+        },
+        "t": 80582,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 104,
+          "level": 5,
+          "outcome": "perfect"
+        },
+        "t": 80582,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 104,
+          "from": "perfect",
+          "money": 537
+        },
+        "t": 80582,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 81525,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2700,
+          "window_end": 2100,
+          "window_start": 1400
+        },
+        "t": 81525,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 83391,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 116,
+          "held_ms": 1866,
+          "kind": "perfect"
+        },
+        "t": 83391,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 104,
+          "level": 5,
+          "outcome": "perfect"
+        },
+        "t": 83391,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 104,
+          "from": "perfect",
+          "money": 641
+        },
+        "t": 83391,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 84331,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 567,
+          "level": 6,
+          "money": 74
+        },
+        "t": 84331,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 85094,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2750,
+          "window_end": 2150,
+          "window_start": 1400
+        },
+        "t": 85094,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 87005,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 136,
+          "held_ms": 1911,
+          "kind": "perfect"
+        },
+        "t": 87005,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 168,
+          "level": 6,
+          "outcome": "perfect"
+        },
+        "t": 87005,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 168,
+          "from": "perfect",
+          "money": 242
+        },
+        "t": 87005,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 87732,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2750,
+          "window_end": 2150,
+          "window_start": 1400
+        },
+        "t": 87732,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 89605,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 98,
+          "held_ms": 1873,
+          "kind": "perfect"
+        },
+        "t": 89605,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 168,
+          "level": 6,
+          "outcome": "perfect"
+        },
+        "t": 89605,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 168,
+          "from": "perfect",
+          "money": 410
+        },
+        "t": 89605,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 90836,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2750,
+          "window_end": 2150,
+          "window_start": 1400
+        },
+        "t": 90836,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 92715,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 104,
+          "held_ms": 1879,
+          "kind": "perfect"
+        },
+        "t": 92715,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 168,
+          "level": 6,
+          "outcome": "perfect"
+        },
+        "t": 92715,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 168,
+          "from": "perfect",
+          "money": 578
+        },
+        "t": 92715,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 93567,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2750,
+          "window_end": 2150,
+          "window_start": 1400
+        },
+        "t": 93567,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 95429,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 87,
+          "held_ms": 1862,
+          "kind": "perfect"
+        },
+        "t": 95429,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 168,
+          "level": 6,
+          "outcome": "perfect"
+        },
+        "t": 95429,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 168,
+          "from": "perfect",
+          "money": 746
+        },
+        "t": 95429,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 96250,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2750,
+          "window_end": 2150,
+          "window_start": 1400
+        },
+        "t": 96250,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 98094,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 69,
+          "held_ms": 1844,
+          "kind": "perfect"
+        },
+        "t": 98094,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 168,
+          "level": 6,
+          "outcome": "perfect"
+        },
+        "t": 98094,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 168,
+          "from": "perfect",
+          "money": 914
+        },
+        "t": 98094,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 98973,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2750,
+          "window_end": 2150,
+          "window_start": 1400
+        },
+        "t": 98973,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 100866,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 118,
+          "held_ms": 1893,
+          "kind": "perfect"
+        },
+        "t": 100866,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 168,
+          "level": 6,
+          "outcome": "perfect"
+        },
+        "t": 100866,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 168,
+          "from": "perfect",
+          "money": 1082
+        },
+        "t": 100866,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 101684,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 1020,
+          "level": 7,
+          "money": 62
+        },
+        "t": 101684,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 102126,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 102126,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 104018,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 92,
+          "held_ms": 1892,
+          "kind": "perfect"
+        },
+        "t": 104018,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 104018,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 330
+        },
+        "t": 104018,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 104899,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 104899,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 106789,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 90,
+          "held_ms": 1890,
+          "kind": "perfect"
+        },
+        "t": 106789,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 106789,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 598
+        },
+        "t": 106789,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 107628,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 107628,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 109526,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 98,
+          "held_ms": 1898,
+          "kind": "perfect"
+        },
+        "t": 109526,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 109526,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 866
+        },
+        "t": 109526,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 110668,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 110668,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 112733,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 265,
+          "held_ms": 2065,
+          "kind": "perfect"
+        },
+        "t": 112733,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 112733,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 1134
+        },
+        "t": 112733,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 113735,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 113735,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 115670,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 135,
+          "held_ms": 1935,
+          "kind": "perfect"
+        },
+        "t": 115670,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 115670,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 1402
+        },
+        "t": 115670,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 116960,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 116960,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 118949,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 189,
+          "held_ms": 1989,
+          "kind": "perfect"
+        },
+        "t": 118949,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 118949,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 1670
+        },
+        "t": 118949,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 120333,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 120333,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 122295,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 162,
+          "held_ms": 1962,
+          "kind": "perfect"
+        },
+        "t": 122295,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 268,
+          "level": 7,
+          "outcome": "perfect"
+        },
+        "t": 122295,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 268,
+          "from": "perfect",
+          "money": 1938
+        },
+        "t": 122295,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 123170,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 1837,
+          "level": 8,
+          "money": 101
+        },
+        "t": 123170,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 123618,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 123618,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 125510,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 92,
+          "held_ms": 1892,
+          "kind": "perfect"
+        },
+        "t": 125510,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 125510,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 531
+        },
+        "t": 125510,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 126327,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 126327,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 128220,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 93,
+          "held_ms": 1893,
+          "kind": "perfect"
+        },
+        "t": 128220,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 128220,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 961
+        },
+        "t": 128220,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 129095,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 129095,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 130956,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 61,
+          "held_ms": 1861,
+          "kind": "perfect"
+        },
+        "t": 130956,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 130956,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 1391
+        },
+        "t": 130956,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 131886,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 131886,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 133774,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 88,
+          "held_ms": 1888,
+          "kind": "perfect"
+        },
+        "t": 133774,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 133774,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 1821
+        },
+        "t": 133774,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 134695,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 134695,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 136545,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 50,
+          "held_ms": 1850,
+          "kind": "perfect"
+        },
+        "t": 136545,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 136545,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 2251
+        },
+        "t": 136545,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 137336,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 137336,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 139250,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 114,
+          "held_ms": 1914,
+          "kind": "perfect"
+        },
+        "t": 139250,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 139250,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 2681
+        },
+        "t": 139250,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 140146,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 140146,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 142133,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 187,
+          "held_ms": 1987,
+          "kind": "perfect"
+        },
+        "t": 142133,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 142133,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 3111
+        },
+        "t": 142133,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 143190,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 143190,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 145107,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 117,
+          "held_ms": 1917,
+          "kind": "perfect"
+        },
+        "t": 145107,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 430,
+          "level": 8,
+          "outcome": "perfect"
+        },
+        "t": 145107,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 430,
+          "from": "perfect",
+          "money": 3541
+        },
+        "t": 145107,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 146069,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 3306,
+          "level": 9,
+          "money": 235
+        },
+        "t": 146069,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 146684,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 146684,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 148642,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 158,
+          "held_ms": 1958,
+          "kind": "perfect"
+        },
+        "t": 148642,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 148642,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 923
+        },
+        "t": 148642,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 149606,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 149606,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 151526,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 120,
+          "held_ms": 1920,
+          "kind": "perfect"
+        },
+        "t": 151526,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 151526,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 1611
+        },
+        "t": 151526,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 152422,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 152422,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 154321,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 99,
+          "held_ms": 1899,
+          "kind": "perfect"
+        },
+        "t": 154321,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 154321,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 2299
+        },
+        "t": 154321,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 155291,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 155291,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 157225,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 134,
+          "held_ms": 1934,
+          "kind": "perfect"
+        },
+        "t": 157225,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 157225,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 2987
+        },
+        "t": 157225,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 158389,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 158389,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 160330,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 141,
+          "held_ms": 1941,
+          "kind": "perfect"
+        },
+        "t": 160330,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 160330,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 3675
+        },
+        "t": 160330,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 161375,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 161375,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 163266,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 91,
+          "held_ms": 1891,
+          "kind": "perfect"
+        },
+        "t": 163266,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 163266,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 4363
+        },
+        "t": 163266,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 164333,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 164333,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 166265,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 132,
+          "held_ms": 1932,
+          "kind": "perfect"
+        },
+        "t": 166265,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 166265,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 5051
+        },
+        "t": 166265,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 167130,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 167130,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 169106,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 176,
+          "held_ms": 1976,
+          "kind": "perfect"
+        },
+        "t": 169106,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 169106,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 5739
+        },
+        "t": 169106,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 169982,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 169982,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 171877,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 95,
+          "held_ms": 1895,
+          "kind": "perfect"
+        },
+        "t": 171877,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 688,
+          "level": 9,
+          "outcome": "perfect"
+        },
+        "t": 171877,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 688,
+          "from": "perfect",
+          "money": 6427
+        },
+        "t": 171877,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 172905,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 5951,
+          "level": 10,
+          "money": 476
+        },
+        "t": 172905,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 173601,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 173601,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 175516,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 115,
+          "held_ms": 1915,
+          "kind": "perfect"
+        },
+        "t": 175516,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 1100,
+          "level": 10,
+          "outcome": "perfect"
+        },
+        "t": 175516,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1100,
+          "from": "perfect",
+          "money": 1576
+        },
+        "t": 175516,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 176554,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 176554,
+        "type": "heat_start"
+      },
+      {
+        "data": {},
+        "t": 178476,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 122,
+          "held_ms": 1922,
+          "kind": "perfect"
+        },
+        "t": 178476,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 1100,
+          "level": 10,
+          "outcome": "perfect"
+        },
+        "t": 178476,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1100,
+          "from": "perfect",
+          "money": 2676
+        },
+        "t": 178476,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 179369,
+        "type": "input"
+      },
+      {
+        "data": {
+          "burn_at": 2800,
+          "window_end": 2200,
+          "window_start": 1400
+        },
+        "t": 179369,
+        "type": "heat_start"
+      },
+      {
+        "data": {
+          "earned": 16028,
+          "level": 10,
+          "money": 2676,
+          "name": "three_minutes"
+        },
+        "t": 180021,
+        "type": "milestone"
+      },
+      {
+        "data": {},
+        "t": 181257,
+        "type": "release"
+      },
+      {
+        "data": {
+          "from_centre_ms": 88,
+          "held_ms": 1888,
+          "kind": "perfect"
+        },
+        "t": 181257,
+        "type": "outcome"
+      },
+      {
+        "data": {
+          "count": 1100,
+          "level": 10,
+          "outcome": "perfect"
+        },
+        "t": 181257,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1100,
+          "from": "perfect",
+          "money": 3776
+        },
+        "t": 181257,
+        "type": "earn"
+      }
+    ],
+    "summary": {
+      "earned": 17128,
+      "idle_longest_ms": 9846,
+      "idle_total_ms": 28377,
+      "inputs": 59,
+      "level": 10,
+      "milestones": {
+        "first_affordable": 15678,
+        "first_earn": 3378,
+        "first_input": 1690,
+        "first_upgrade": 16318,
+        "three_minutes": 180021
+      },
+      "money": 3776,
+      "t_ms": 185244,
+      "upgrades": [
+        16318,
+        30059,
+        40421,
+        51466,
+        68165,
+        84331,
+        101684,
+        123170,
+        146069,
+        172905
+      ],
+      "variant": "perfect"
+    },
+    "variant": "perfect",
+    "version": "0.5.0",
+    "viewport": [
+      720,
+      1280
+    ]
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "base": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+  "version": "0.5.0",
+  "load_ms_median": 2691,
+  "load_ms": [
+    2263,
+    2691,
+    2784
+  ],
+  "js_heap": 68000000,
+  "load_avg": 19.77,
+  "rows": [
+    {
+      "id": "click",
+      "level": 0,
+      "fps": [
+        40.9,
+        45.1,
+        31.3
+      ],
+      "draw_calls": 53,
+      "objects": 70,
+      "primitives": 1412,
+      "nodes": 32,
+      "static_mem": 0
+    },
+    {
+      "id": "click",
+      "level": 11,
+      "fps": [
+        33.6,
+        31.8,
+        32
+      ],
+      "draw_calls": 90,
+      "objects": 117,
+      "primitives": 2918,
+      "nodes": 32,
+      "static_mem": 0
+    },
+    {
+      "id": "perfect",
+      "level": 0,
+      "fps": [
+        40.5,
+        44.6,
+        48.1
+      ],
+      "draw_calls": 56,
+      "objects": 80,
+      "primitives": 1628,
+      "nodes": 32,
+      "static_mem": 0
+    },
+    {
+      "id": "perfect",
+      "level": 14,
+      "fps": [
+        38.2,
+        37.9,
+        36
+      ],
+      "draw_calls": 106,
+      "objects": 153,
+      "primitives": 3491,
+      "nodes": 32,
+      "static_mem": 0
+    },
+    {
+      "id": "explosion",
+      "level": 0,
+      "fps": [
+        43.3,
+        46.1,
+        50
+      ],
+      "draw_calls": 69,
+      "objects": 86,
+      "primitives": 2228,
+      "nodes": 32,
+      "static_mem": 0
+    },
+    {
+      "id": "explosion",
+      "level": 11,
+      "fps": [
+        45.9,
+        43.2,
+        44.8
+      ],
+      "draw_calls": 106,
+      "objects": 133,
+      "primitives": 3734,
+      "nodes": 32,
+      "static_mem": 0
+    }
+  ]
+}

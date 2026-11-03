@@ -30,13 +30,15 @@ for (const id of ['click', 'perfect', 'explosion']) {
     const t0 = Date.now();
     let buys = 0;
     const at = async (label) => {
+      // The picture first: measuring the frame rate takes three idle seconds,
+      // and a shot taken after them showed a machine with nothing flying.
+      await pop.shot(`${id}_${label}`);
       const s = await pop.state();
       // The median of three one-second samples: a single sample in a software-
       // rendered browser swings too much to compare (AGENTS.md 2026-07-31).
       const samples = [await pop.fps(1000), await pop.fps(1000), await pop.fps(1000)].sort((a, b) => a - b);
       const info = await pop.call('dev_render_info');
       marks[label] = { clock_ms: s.clock_ms, level: s.run.level, money: s.run.money, earned: s.run.earned, fps: samples[1], fps_samples: samples, fx_peak: s.fx.peak, draw_calls: info.draw_calls, primitives: info.primitives, load_avg: os.loadavg()[0] };
-      await pop.shot(`${id}_${label}`);
     };
     const done = new Set();
     while (true) {
