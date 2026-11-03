@@ -104,17 +104,22 @@ func show_route(id: String) -> void:
 		_show_chooser()
 
 
+## The screen changes first, the address second: set_route() dispatches a
+## hashchange that comes straight back into _on_hash(), and if the screen had
+## not changed yet it finished the same run a second time (Step 07: the back
+## button recorded every run twice in the browser; headless has no address).
 func open(id: String) -> void:
 	if PopRegistry.find(id).is_empty():
 		return
-	PopWeb.set_route(id)
+	_finish_run()
 	_start(id)
+	PopWeb.set_route(id)
 
 
 func back() -> void:
 	_finish_run()
-	PopWeb.set_route("")
 	_show_chooser()
+	PopWeb.set_route("")
 
 
 ## The run's local log with what it was played on (dev mode's log button):

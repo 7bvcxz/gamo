@@ -1,0 +1,105 @@
+# Popcorn test report (AUTOMATED)
+
+- git 0bb301a51501 (uncommitted changes) · build 0.6.0 game-377be030ffaf.pck
+- 2026-11-03T14:17:33.775Z
+- headless: **PASSED** (72 passed, 0 failed, 2103 checks, 14 files, 3.1s)
+- deploy: **PASSED**
+- browser: **FAILED** — passed 82, failed 3, skipped 10
+
+| spec | check | project | status | cause / notes |
+|---|---|---|---|---|
+| experiments04.spec.mjs | the chooser lists A, B, C and each tile opens its experiment | p720 | PASSED |  |
+| experiments04.spec.mjs | the atlas draws: the money coin is gold, not a white square | p720 | PASSED |  |
+| experiments04.spec.mjs | A Click & Pop: every press pays at once | p720 | PASSED |  |
+| experiments04.spec.mjs | B Perfect Pop: holding into the gold pays double; a quick tap is early | p720 | PASSED |  |
+| experiments04.spec.mjs | B Perfect Pop: holding on burns by itself and never locks | p720 | PASSED |  |
+| experiments04.spec.mjs | C Pop Explosion: eight presses erupt, drawn pieces stay under the cap | p720 | PASSED |  |
+| experiments04.spec.mjs | runs never leak between experiments | p720 | PASSED |  |
+| experiments04.spec.mjs | the chooser lists A, B, C and each tile opens its experiment | phone | PASSED |  |
+| experiments04.spec.mjs | the atlas draws: the money coin is gold, not a white square | phone | PASSED |  |
+| experiments04.spec.mjs | A Click & Pop: every press pays at once | phone | PASSED |  |
+| experiments04.spec.mjs | B Perfect Pop: holding into the gold pays double; a quick tap is early | phone | PASSED |  |
+| experiments04.spec.mjs | B Perfect Pop: holding on burns by itself and never locks | phone | PASSED |  |
+| experiments04.spec.mjs | C Pop Explosion: eight presses erupt, drawn pieces stay under the cap | phone | PASSED |  |
+| experiments04.spec.mjs | runs never leak between experiments | phone | PASSED |  |
+| experiments04.spec.mjs | the chooser lists A, B, C and each tile opens its experiment | desktop | PASSED |  |
+| experiments04.spec.mjs | the atlas draws: the money coin is gold, not a white square | desktop | PASSED |  |
+| experiments04.spec.mjs | A Click & Pop: every press pays at once | desktop | PASSED |  |
+| experiments04.spec.mjs | B Perfect Pop: holding into the gold pays double; a quick tap is early | desktop | PASSED |  |
+| experiments04.spec.mjs | B Perfect Pop: holding on burns by itself and never locks | desktop | PASSED |  |
+| experiments04.spec.mjs | C Pop Explosion: eight presses erupt, drawn pieces stay under the cap | desktop | PASSED |  |
+| experiments04.spec.mjs | runs never leak between experiments | desktop | PASSED |  |
+| input07.spec.mjs | slide off the upgrade before letting go: no purchase | p720 | SKIPPED | mouse paths on the desktop project |
+| input07.spec.mjs | a double click buys once | p720 | SKIPPED | mouse paths on the desktop project |
+| input07.spec.mjs | the keyboard plays: space presses, escape goes back | p720 | SKIPPED | mouse paths on the desktop project |
+| input07.spec.mjs | slide off the upgrade before letting go: no purchase | phone | SKIPPED | mouse paths on the desktop project |
+| input07.spec.mjs | a double click buys once | phone | SKIPPED | mouse paths on the desktop project |
+| input07.spec.mjs | the keyboard plays: space presses, escape goes back | phone | SKIPPED | mouse paths on the desktop project |
+| input07.spec.mjs | slide off the upgrade before letting go: no purchase | desktop | PASSED |  |
+| input07.spec.mjs | a double click buys once | desktop | PASSED |  |
+| input07.spec.mjs | the keyboard plays: space presses, escape goes back | desktop | PASSED |  |
+| input07.spec.mjs | a cancelled touch never locks B | p720 | PASSED |  |
+| input07.spec.mjs | dragging on the game never scrolls the page | p720 | PASSED |  |
+| input07.spec.mjs | a cancelled touch never locks B | phone | PASSED |  |
+| input07.spec.mjs | dragging on the game never scrolls the page | phone | PASSED |  |
+| input07.spec.mjs | a cancelled touch never locks B | desktop | SKIPPED | touch paths on touch projects |
+| input07.spec.mjs | dragging on the game never scrolls the page | desktop | SKIPPED | touch paths on touch projects |
+| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | p720 | SKIPPED | one project measures (desktop) |
+| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | phone | SKIPPED | one project measures (desktop) |
+| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | desktop | PASSED | perf: {"load_ms":4233,"heap_start":53500000,"heap_after_60s":53500000,"burst":{"fps":11.033468182963466,"draw_calls":117,"primitives":4285,"fx_peak":146,"fx_cap":400},"sleep":{"before":8345,"hidden_5s":8416,"after_wake": |
+| progression07.spec.mjs | FAST-FORWARD: milestones in order through 3:00 | p720 | PASSED | mode: fast-forward with dev_advance (not real-time play) |
+| progression07.spec.mjs | ten restarts in a row: each from nothing, no errors | p720 | PASSED |  |
+| progression07.spec.mjs | an unusual order: A, C, B, A again, by tiles, links and the back button | p720 | FAILED | Error: three finished runs this visit  [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m  Expected: [32m3[39m Received: [31m4[39m |
+| progression07.spec.mjs | FAST-FORWARD: milestones in order through 3:00 | phone | PASSED | mode: fast-forward with dev_advance (not real-time play) |
+| progression07.spec.mjs | ten restarts in a row: each from nothing, no errors | phone | PASSED |  |
+| progression07.spec.mjs | an unusual order: A, C, B, A again, by tiles, links and the back button | phone | FAILED | Error: three finished runs this visit  [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m  Expected: [32m3[39m Received: [31m4[39m |
+| progression07.spec.mjs | FAST-FORWARD: milestones in order through 3:00 | desktop | PASSED | mode: fast-forward with dev_advance (not real-time play) |
+| progression07.spec.mjs | ten restarts in a row: each from nothing, no errors | desktop | PASSED |  |
+| progression07.spec.mjs | an unusual order: A, C, B, A again, by tiles, links and the back button | desktop | FAILED | Error: three finished runs this visit  [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m  Expected: [32m3[39m Received: [31m4[39m |
+| sound05.spec.mjs | A: a press is heard | p720 | PASSED |  |
+| sound05.spec.mjs | B: the sizzle while held, and a perfect pop | p720 | PASSED |  |
+| sound05.spec.mjs | C: kernels clink and the eruption booms | p720 | PASSED |  |
+| sound05.spec.mjs | the speaker button steps loud -> soft -> off, and back on | p720 | PASSED |  |
+| sound05.spec.mjs | ?sound=off starts muted | p720 | PASSED |  |
+| sound05.spec.mjs | A: a press is heard | phone | PASSED |  |
+| sound05.spec.mjs | B: the sizzle while held, and a perfect pop | phone | PASSED |  |
+| sound05.spec.mjs | C: kernels clink and the eruption booms | phone | PASSED |  |
+| sound05.spec.mjs | the speaker button steps loud -> soft -> off, and back on | phone | PASSED |  |
+| sound05.spec.mjs | ?sound=off starts muted | phone | PASSED |  |
+| sound05.spec.mjs | A: a press is heard | desktop | PASSED |  |
+| sound05.spec.mjs | B: the sizzle while held, and a perfect pop | desktop | PASSED |  |
+| sound05.spec.mjs | C: kernels clink and the eruption booms | desktop | PASSED |  |
+| sound05.spec.mjs | the speaker button steps loud -> soft -> off, and back on | desktop | PASSED |  |
+| sound05.spec.mjs | ?sound=off starts muted | desktop | PASSED |  |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | p720 | PASSED | load: 1830 ms to the first drawn frame |
+| stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | p720 | PASSED |  |
+| stub03.spec.mjs | a hidden tab stops the play clock | p720 | PASSED |  |
+| stub03.spec.mjs | three minutes shows the clock and is logged | p720 | PASSED |  |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | phone | PASSED | load: 2434 ms to the first drawn frame |
+| stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | phone | PASSED |  |
+| stub03.spec.mjs | a hidden tab stops the play clock | phone | PASSED |  |
+| stub03.spec.mjs | three minutes shows the clock and is logged | phone | PASSED |  |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | desktop | PASSED | load: 4795 ms to the first drawn frame |
+| stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | desktop | PASSED |  |
+| stub03.spec.mjs | a hidden tab stops the play clock | desktop | PASSED |  |
+| stub03.spec.mjs | three minutes shows the clock and is logged | desktop | PASSED |  |
+| responsive07.spec.mjs | click: fits, no overlaps, readable | m-p720 | PASSED | sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS) |
+| responsive07.spec.mjs | perfect: fits, no overlaps, readable | m-p720 | PASSED | sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS) |
+| responsive07.spec.mjs | explosion: fits, no overlaps, readable | m-p720 | PASSED | sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS) |
+| responsive07.spec.mjs | reduced motion and sound off still play | m-p720 | PASSED |  |
+| responsive07.spec.mjs | click: fits, no overlaps, readable | m-hd | PASSED | sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS) |
+| responsive07.spec.mjs | perfect: fits, no overlaps, readable | m-hd | PASSED | sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS) |
+| responsive07.spec.mjs | explosion: fits, no overlaps, readable | m-hd | PASSED | sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS) |
+| responsive07.spec.mjs | reduced motion and sound off still play | m-hd | PASSED |  |
+| responsive07.spec.mjs | click: fits, no overlaps, readable | m-small | PASSED | sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS) |
+| responsive07.spec.mjs | perfect: fits, no overlaps, readable | m-small | PASSED | sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS) |
+| responsive07.spec.mjs | explosion: fits, no overlaps, readable | m-small | PASSED | sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS) |
+| responsive07.spec.mjs | reduced motion and sound off still play | m-small | PASSED |  |
+| responsive07.spec.mjs | click: fits, no overlaps, readable | m-tablet | PASSED | sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS) |
+| responsive07.spec.mjs | perfect: fits, no overlaps, readable | m-tablet | PASSED | sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS) |
+| responsive07.spec.mjs | explosion: fits, no overlaps, readable | m-tablet | PASSED | sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS) |
+| responsive07.spec.mjs | reduced motion and sound off still play | m-tablet | PASSED |  |
+| responsive07.spec.mjs | click: fits, no overlaps, readable | m-landscape | PASSED | sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS) |
+| responsive07.spec.mjs | perfect: fits, no overlaps, readable | m-landscape | PASSED | sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS) |
+| responsive07.spec.mjs | explosion: fits, no overlaps, readable | m-landscape | PASSED | sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS) |
+| responsive07.spec.mjs | reduced motion and sound off still play | m-landscape | PASSED |  |

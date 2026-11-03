@@ -30,6 +30,7 @@ python3 popcorn-glory/tools/build_audio.py                                # 합�
 popcorn-glory/tools/test.sh                             # 헤드리스 unit + integration (엔진 오류도 실패)
 popcorn-glory/tools/check.sh                            # import 두 번 + 에디터 로드 + 테스트
 popcorn-glory/tools/deploy.sh                           # docs/popcorn-glory/ 로 Web export (소스를 먼저 커밋)
+popcorn-glory/tools/test_all.sh                         # 전부 한 번에(헤드리스 → 배포 → 브라우저 → 보고서), 목록은 TESTS.md
 popcorn-glory/tools/e2e.sh                              # 실제 브라우저(720×1280 터치·폰·데스크톱), 로컬 docs/
 POPCORN_E2E_BASE=https://7bvcxz.github.io/gamo/popcorn-glory/ popcorn-glory/tools/e2e.sh   # 공개 빌드
 xvfb-run -a -s "-screen 0 1280x1600x24" godot --path popcorn-glory --audio-driver Dummy \

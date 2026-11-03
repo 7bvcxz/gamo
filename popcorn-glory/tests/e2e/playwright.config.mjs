@@ -28,9 +28,16 @@ export default defineConfig({
     reuseExistingServer: false,
     timeout: 20_000,
   },
+  // The three everyday projects run every spec; the matrix projects (Step 07)
+  // run only the responsive spec: one more size each, not every check again.
   projects: [
-    { name: 'p720', use: { viewport: { width: 720, height: 1280 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true } },
-    { name: 'phone', use: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } },
-    { name: 'desktop', use: { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 } },
+    { name: 'p720', testIgnore: /responsive07/, use: { viewport: { width: 720, height: 1280 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true } },
+    { name: 'phone', testIgnore: /responsive07/, use: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } },
+    { name: 'desktop', testIgnore: /responsive07/, use: { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 } },
+    { name: 'm-p720', testMatch: /responsive07/, use: { viewport: { width: 720, height: 1280 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true } },
+    { name: 'm-hd', testMatch: /responsive07/, use: { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 } },
+    { name: 'm-small', testMatch: /responsive07/, use: { viewport: { width: 360, height: 640 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true } },
+    { name: 'm-tablet', testMatch: /responsive07/, use: { viewport: { width: 768, height: 1024 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } },
+    { name: 'm-landscape', testMatch: /responsive07/, use: { viewport: { width: 844, height: 390 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true } },
   ],
 });

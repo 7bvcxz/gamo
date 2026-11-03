@@ -1,0 +1,6 @@
+── Popcorn: import
+── Popcorn: editor load
+── Popcorn: unit + integration
+72 passed, 0 failed, 2103 checks, 14 files, 3.1s
+── test.sh: OK
+── check.sh (Popcorn): OK
