@@ -11,6 +11,8 @@ extends Control
 signal back_pressed
 signal restart_pressed
 signal buy_pressed
+## The Popcorn Stand's automation card (Step 10).
+signal auto_pressed
 signal sound_pressed
 ## Dev mode only (?dev=1): download this run's local log as JSON.
 signal log_pressed
@@ -21,6 +23,14 @@ var sound_button := PopIconButton.new()
 var log_button := PopIconButton.new()
 var money_view := PopMoneyView.new()
 var upgrade_button := PopUpgradeButton.new()
+var auto_button := PopAutoButton.new()
+## The run has an automation ladder (the stand): its card has a place above the
+## upgrade, kept from the start so nothing moves when it appears.
+var has_auto := false:
+	set(v):
+		has_auto = v
+		auto_button.visible = false
+		_layout()
 var play: PopPlayView
 ## ?trial=1: the three-minute playtest protocol (design/PLAYTEST.md) -- the
 ## 3:00 clock appears for the tester. Without it a player never sees a clock:
@@ -47,11 +57,14 @@ func _init() -> void:
 	sound_button.icon = "sound"
 	money_view.name = "Money"
 	upgrade_button.name = "Upgrade"
-	for c: Control in [money_view, upgrade_button, back_button, restart_button, sound_button, log_button]:
+	auto_button.name = "Auto"
+	auto_button.visible = false
+	for c: Control in [money_view, upgrade_button, auto_button, back_button, restart_button, sound_button, log_button]:
 		add_child(c)
 	back_button.pressed.connect(func() -> void: back_pressed.emit())
 	restart_button.pressed.connect(func() -> void: restart_pressed.emit())
 	upgrade_button.pressed.connect(func() -> void: buy_pressed.emit())
+	auto_button.pressed.connect(func() -> void: auto_pressed.emit())
 	sound_button.pressed.connect(func() -> void: sound_pressed.emit())
 	log_button.pressed.connect(func() -> void: log_pressed.emit())
 
@@ -97,21 +110,43 @@ func _layout() -> void:
 	var bh := clampf(h * 0.13, 120.0, 170.0)
 	upgrade_button.size = Vector2(minf(col - 80, 520.0), bh)
 	upgrade_button.position = Vector2((w - upgrade_button.size.x) / 2, h - bh - 48)
+	var play_bottom := upgrade_button.position.y - 16
+	if has_auto:
+		auto_button.size = Vector2(upgrade_button.size.x, bh * 0.72)
+		auto_button.position = Vector2(upgrade_button.position.x, upgrade_button.position.y - auto_button.size.y - 14)
+		play_bottom = auto_button.position.y - 12
 	if play != null:
 		play.position = Vector2(x0, bar)
-		play.size = Vector2(col, upgrade_button.position.y - bar - 16)
+		play.size = Vector2(col, play_bottom - bar)
 
 
 func refresh(rules: PopRules, p_clock_ms: int) -> void:
 	money_view.set_money(rules.money)
 	upgrade_button.set_offer(rules.level + 1, rules.cost(), rules.money)
 	upgrade_button.set_gain(rules.payout(rules.level), rules.payout(rules.level + 1))
+	if has_auto:
+		_refresh_auto(rules)
 	if play != null:
 		play.fx.target = money_view.coin_point() - play.global_position
 	if p_clock_ms / 1000 != clock_ms / 1000 or (p_clock_ms >= PopSession.THREE_MINUTES_MS) != (clock_ms >= PopSession.THREE_MINUTES_MS):
 		clock_ms = p_clock_ms
 		queue_redraw()
 	clock_ms = p_clock_ms
+
+
+func _refresh_auto(rules: PopRules) -> void:
+	var st := rules.state()
+	auto_button.visible = bool((st["unlocked"] as Dictionary)["auto"])
+	if not auto_button.visible:
+		return
+	var rung := int(st["auto_level"])
+	var kind := String(st["auto_next"])
+	var stand := rules.economy.table("stand")
+	var ladder: Array = stand["auto"]
+	var c_now := float(st["helper_cycle_ms"]) / 1000.0
+	var c_next := float((ladder[rung] as Dictionary).get("cycle_ms", 0)) / 1000.0 if rung < ladder.size() else 0.0
+	auto_button.set_offer(kind, int(st["auto_cost"]), rules.money, rung + 1, int(st["helper_pays"]),
+		int(rules.call("helper_pays_for", rung + 1)), c_now, c_next, float((stand["shake"] as Dictionary)["mult"]))
 
 
 ## Dev mode always; the trial protocol once three minutes have passed; else never.

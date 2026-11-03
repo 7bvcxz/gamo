@@ -59,6 +59,10 @@ func query(name: String, arg: Variant) -> Variant:
 			# Answers with the state after the step: one call where a test would make two.
 			_app.call("dev_advance", int(arg))
 			return {"ok": true, "state": _app.call("state")}
+		"dev_money":
+			# Setup for a test of a later moment (the stand's machines): money, not play.
+			_app.call("dev_money", int(arg))
+			return {"ok": true}
 		"dev_level":
 			# A picture of a later machine for render checks -- not a play
 			# (the play tests never call it).

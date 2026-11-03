@@ -117,16 +117,26 @@ func _resolve(kind: String) -> Dictionary:
 	if kind == EARLY:
 		mult *= clampf(float(held) / float(window_start()), 0.0, 1.0)
 	var batch := economy.at(variant, "batch", level)
-	var n := maxi(1, int(floor(batch * mult)))
+	var n := _scale_batch(maxi(1, int(floor(batch * mult))), kind)
 	heating = false
 	heat_ms = 0
-	cooldown_left = int(t["cooldown_ms"])
+	cooldown_left = _cooldown_ms()
 	outcomes[kind] = int(outcomes[kind]) + 1
 	var centre := (window_start() + window_end()) / 2
 	_emit("outcome", {"kind": kind, "held_ms": held, "from_centre_ms": held - centre})
 	_emit("pop", {"count": n, "level": level, "outcome": kind})
 	_earn(n, {"from": kind})
 	return {"ok": true, "outcome": kind, "pops": n}
+
+
+## Hooks for the Step 10 shop (variants/stand): what a batch is worth after
+## the pop and how long the machine cools. B itself changes nothing here.
+func _scale_batch(n: int, _kind: String) -> int:
+	return n
+
+
+func _cooldown_ms() -> int:
+	return int(economy.table(variant)["cooldown_ms"])
 
 
 func state() -> Dictionary:

@@ -54,6 +54,10 @@ func cost(variant: String, level: int) -> int:
 	var t := table(variant)
 	if level < 0 or level >= max_level(variant):
 		return -1
+	# An explicit list (the Step 10 shop: B's first prices, then stretched for a
+	# longer session) wins over base x growth^level.
+	if t.has("costs"):
+		return int((t["costs"] as Array)[level])
 	var c: Dictionary = t["cost"]
 	return int(round(float(c["base"]) * pow(float(c["growth"]), level)))
 
@@ -74,9 +78,19 @@ func _check(key: String, t: Dictionary) -> void:
 	var top := int(t.get("max_level", -1))
 	if top < 1:
 		errors.append("%s: max_level must be at least 1" % key)
-	var c: Variant = t.get("cost")
-	if typeof(c) != TYPE_DICTIONARY or float(c.get("base", 0)) < 1.0 or float(c.get("growth", 0)) <= 1.0:
-		errors.append("%s: cost needs base >= 1 and growth > 1" % key)
+	if t.has("costs"):
+		var costs: Array = t["costs"]
+		if costs.size() != top:
+			errors.append("%s.costs: needs max_level = %d prices, has %d" % [key, top, costs.size()])
+		var prev := 0
+		for v: Variant in costs:
+			if int(v) <= prev:
+				errors.append("%s.costs: must rise strictly, %d after %d" % [key, int(v), prev])
+			prev = int(v)
+	else:
+		var c: Variant = t.get("cost")
+		if typeof(c) != TYPE_DICTIONARY or float(c.get("base", 0)) < 1.0 or float(c.get("growth", 0)) <= 1.0:
+			errors.append("%s: cost needs base >= 1 and growth > 1" % key)
 	for list_key: String in ["pops", "batch", "burst"]:
 		if not t.has(list_key):
 			continue

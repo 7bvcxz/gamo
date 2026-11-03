@@ -61,6 +61,7 @@ func _ready() -> void:
 	frame.back_pressed.connect(back)
 	frame.restart_pressed.connect(restart)
 	frame.buy_pressed.connect(buy)
+	frame.auto_pressed.connect(buy_auto)
 	frame.sound_pressed.connect(toggle_sound)
 	frame.log_pressed.connect(download_log)
 	audio = PopAudio.new()
@@ -161,14 +162,23 @@ func buy() -> void:
 	_flush()
 
 
+## The stand's automation card (Step 10).
+func buy_auto() -> void:
+	if rules == null:
+		return
+	var r := rules.execute({"type": "buy_auto"})
+	session.record(clock.now_ms, "buy_auto", {"ok": bool(r["ok"]), "reason": String(r.get("reason", ""))})
+	_flush()
+
+
 ## A view's request: stamped, logged, executed, shown -- all in this frame.
 func on_command(kind: String, cmd: Dictionary) -> void:
 	if rules == null:
 		return
-	if kind == "release":
-		# Letting go is part of B's action, not a second input: the input count
-		# stays one per press in every experiment.
-		session.record(clock.now_ms, "release", {})
+	if kind == "release" or kind == "shake":
+		# Letting go is part of B's action, not a second input (and so is the
+		# stand's shaking while held): the input count stays one per press.
+		session.record(clock.now_ms, kind, {})
 	else:
 		session.record_input(clock.now_ms, kind)
 		frame.play.last_input_ms = clock.now_ms
@@ -176,6 +186,13 @@ func on_command(kind: String, cmd: Dictionary) -> void:
 	if not bool(r["ok"]):
 		session.record(clock.now_ms, "refused", {"kind": kind, "reason": String(r.get("reason", ""))})
 	_flush()
+
+
+func dev_money(amount: int) -> void:
+	if rules != null and amount > 0:
+		rules.money += amount
+		rules.earned += amount
+		_flush()
 
 
 func dev_level(level: int) -> void:
@@ -261,6 +278,7 @@ func _start(id: String) -> void:
 	audio.stop_all()
 	view.command.connect(on_command)
 	frame.accent = entry["color"]
+	frame.has_auto = rules.has_method("auto_offer")
 	frame.set_play(view)
 	view.setup(rules)
 	chooser.visible = false
@@ -332,8 +350,17 @@ func _rects() -> Dictionary:
 		for t: Dictionary in chooser.tiles:
 			named["tile_" + String(t["id"])] = t["button"]
 	var xf := get_viewport().get_final_transform()
+	if screen == "play" and frame.auto_button.visible:
+		named["auto"] = frame.auto_button
 	for key: String in named.keys():
 		var c: Control = named[key]
 		var r := xf * c.get_global_rect()
 		out[key] = [r.position.x, r.position.y, r.size.x, r.size.y]
+	# What the experiment's own picture lets you tap (the stand's shakers).
+	if screen == "play" and frame.play.has_method("extra_rects"):
+		var extra: Dictionary = frame.play.call("extra_rects")
+		for key: String in extra.keys():
+			var lr: Rect2 = extra[key]
+			var r := xf * Rect2(frame.play.get_global_transform() * lr.position, lr.size)
+			out[key] = [r.position.x, r.position.y, r.size.x, r.size.y]
 	return out

@@ -268,8 +268,9 @@ func _draw_gains(ci: CanvasItem) -> void:
 	for g: Dictionary in _gains:
 		var age := float(g["age"])
 		var a := clampf(1.0 - age / 0.9, 0.0, 1.0)
-		var p := top + Vector2(machine_size() * 0.3, -40.0 - age * 120.0)
-		var fs := 44
+		var anchor: Vector2 = g.get("at", top + Vector2(machine_size() * 0.3, 0))
+		var p := anchor + Vector2(0, -40.0 - age * 120.0)
+		var fs := 44 if not g.has("at") else 34
 		ci.draw_string_outline(font, p, String(g["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 8, Color(1, 1, 1, a))
 		ci.draw_string(font, p, String(g["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, a))
 

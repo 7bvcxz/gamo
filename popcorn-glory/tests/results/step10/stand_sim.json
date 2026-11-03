@@ -1,0 +1,2202 @@
+{
+  "_doc": "AUTOMATED SIMULATION on the real stand rules (tools/sim/stand.gd), seed 7, 20 minutes. Not human play.",
+  "runs": [
+    {
+      "all_bought_s": 692.14,
+      "buys": 21,
+      "events": {
+        "auto_1": 39170,
+        "auto_2": 69690,
+        "auto_3": 99690,
+        "auto_4": 149520,
+        "auto_5": 255670,
+        "auto_6": 367960,
+        "auto_7": 588640,
+        "recipe": 50180,
+        "unlock_auto": 33020,
+        "unlock_recipes": 50180,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 6444883,
+        "even_pops": 533,
+        "helper": 2032578,
+        "level": 14,
+        "manual": 4412305,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 5,
+          "perfect": 539
+        }
+      },
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 50170,
+        "6": 60940,
+        "7": 85330,
+        "8": 120530,
+        "9": 180180,
+        "10": 226320,
+        "11": 313150,
+        "12": 439960,
+        "13": 529120,
+        "14": 692140
+      },
+      "longest_no_buy_after_3min_s": 103.5,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 6444883,
+          "helper": 2032578,
+          "level": 14,
+          "manual": 4412305,
+          "money": 4786687
+        },
+        "180": {
+          "auto": 4,
+          "earned": 40549,
+          "helper": 5135,
+          "level": 8,
+          "manual": 35414,
+          "money": 13353
+        },
+        "300": {
+          "auto": 5,
+          "earned": 161315,
+          "helper": 28129,
+          "level": 10,
+          "manual": 133186,
+          "money": 53119
+        },
+        "600": {
+          "auto": 7,
+          "earned": 1126219,
+          "helper": 278982,
+          "level": 13,
+          "manual": 847237,
+          "money": 68023
+        },
+        "900": {
+          "auto": 7,
+          "earned": 3629213,
+          "helper": 1101778,
+          "level": 14,
+          "manual": 2527435,
+          "money": 1971017
+        }
+      },
+      "name": "skilled (gold's middle, shakes, buys at once, caramel)",
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          39170,
+          "auto1"
+        ],
+        [
+          50170,
+          "main"
+        ],
+        [
+          60940,
+          "main"
+        ],
+        [
+          69690,
+          "auto2"
+        ],
+        [
+          85330,
+          "main"
+        ],
+        [
+          99690,
+          "auto3"
+        ],
+        [
+          120530,
+          "main"
+        ],
+        [
+          149520,
+          "auto4"
+        ],
+        [
+          180180,
+          "main"
+        ],
+        [
+          226320,
+          "main"
+        ],
+        [
+          255670,
+          "auto5"
+        ],
+        [
+          313150,
+          "main"
+        ],
+        [
+          367960,
+          "auto6"
+        ],
+        [
+          439960,
+          "main"
+        ],
+        [
+          529120,
+          "main"
+        ],
+        [
+          588640,
+          "auto7"
+        ],
+        [
+          692140,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": 911.56,
+      "buys": 21,
+      "events": {
+        "auto_1": 39170,
+        "auto_2": 80860,
+        "auto_3": 122400,
+        "auto_4": 192600,
+        "auto_5": 336980,
+        "auto_6": 490280,
+        "auto_7": 780080,
+        "unlock_auto": 33020,
+        "unlock_recipes": 50180,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 3774781,
+        "even_pops": 534,
+        "helper": 1491534,
+        "level": 14,
+        "manual": 2283247,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 0,
+          "perfect": 545
+        }
+      },
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 50170,
+        "6": 67440,
+        "7": 102550,
+        "8": 153620,
+        "9": 235470,
+        "10": 295800,
+        "11": 414040,
+        "12": 584030,
+        "13": 702680,
+        "14": 911560
+      },
+      "longest_no_buy_after_3min_s": 131.48,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 3774781,
+          "helper": 1491534,
+          "level": 14,
+          "manual": 2283247,
+          "money": 2116585
+        },
+        "180": {
+          "auto": 3,
+          "earned": 23719,
+          "helper": 3353,
+          "level": 8,
+          "manual": 20366,
+          "money": 8523
+        },
+        "300": {
+          "auto": 4,
+          "earned": 76595,
+          "helper": 15256,
+          "level": 10,
+          "manual": 61339,
+          "money": 3399
+        },
+        "600": {
+          "auto": 6,
+          "earned": 477887,
+          "helper": 140532,
+          "level": 12,
+          "manual": 337355,
+          "money": 39691
+        },
+        "900": {
+          "auto": 7,
+          "earned": 1603625,
+          "helper": 574670,
+          "level": 13,
+          "manual": 1028955,
+          "money": 545429
+        }
+      },
+      "name": "skilled, butter",
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          39170,
+          "auto1"
+        ],
+        [
+          50170,
+          "main"
+        ],
+        [
+          67440,
+          "main"
+        ],
+        [
+          80860,
+          "auto2"
+        ],
+        [
+          102550,
+          "main"
+        ],
+        [
+          122400,
+          "auto3"
+        ],
+        [
+          153620,
+          "main"
+        ],
+        [
+          192600,
+          "auto4"
+        ],
+        [
+          235470,
+          "main"
+        ],
+        [
+          295800,
+          "main"
+        ],
+        [
+          336980,
+          "auto5"
+        ],
+        [
+          414040,
+          "main"
+        ],
+        [
+          490280,
+          "auto6"
+        ],
+        [
+          584030,
+          "main"
+        ],
+        [
+          702680,
+          "main"
+        ],
+        [
+          780080,
+          "auto7"
+        ],
+        [
+          911560,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": 937.65,
+      "buys": 21,
+      "events": {
+        "auto_1": 39170,
+        "auto_2": 79920,
+        "auto_3": 123460,
+        "auto_4": 195230,
+        "auto_5": 347810,
+        "auto_6": 505310,
+        "auto_7": 804110,
+        "recipe": 50180,
+        "unlock_auto": 33020,
+        "unlock_recipes": 50180,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 3530029,
+        "even_pops": 382,
+        "helper": 1425278,
+        "level": 14,
+        "manual": 2104751,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 0,
+          "perfect": 393
+        }
+      },
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 50170,
+        "6": 67620,
+        "7": 103920,
+        "8": 154450,
+        "9": 240830,
+        "10": 304330,
+        "11": 425510,
+        "12": 600710,
+        "13": 723110,
+        "14": 937650
+      },
+      "longest_no_buy_after_3min_s": 133.54,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 3530029,
+          "helper": 1425278,
+          "level": 14,
+          "manual": 2104751,
+          "money": 1871833
+        },
+        "180": {
+          "auto": 3,
+          "earned": 22687,
+          "helper": 3253,
+          "level": 8,
+          "manual": 19434,
+          "money": 7491
+        },
+        "300": {
+          "auto": 4,
+          "earned": 71312,
+          "helper": 14619,
+          "level": 9,
+          "manual": 56693,
+          "money": 30116
+        },
+        "600": {
+          "auto": 6,
+          "earned": 437276,
+          "helper": 129971,
+          "level": 11,
+          "manual": 307305,
+          "money": 149080
+        },
+        "900": {
+          "auto": 7,
+          "earned": 1486855,
+          "helper": 539770,
+          "level": 13,
+          "manual": 947085,
+          "money": 428659
+        }
+      },
+      "name": "skilled, cheese",
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          39170,
+          "auto1"
+        ],
+        [
+          50170,
+          "main"
+        ],
+        [
+          67620,
+          "main"
+        ],
+        [
+          79920,
+          "auto2"
+        ],
+        [
+          103920,
+          "main"
+        ],
+        [
+          123460,
+          "auto3"
+        ],
+        [
+          154450,
+          "main"
+        ],
+        [
+          195230,
+          "auto4"
+        ],
+        [
+          240830,
+          "main"
+        ],
+        [
+          304330,
+          "main"
+        ],
+        [
+          347810,
+          "auto5"
+        ],
+        [
+          425510,
+          "main"
+        ],
+        [
+          505310,
+          "auto6"
+        ],
+        [
+          600710,
+          "main"
+        ],
+        [
+          723110,
+          "main"
+        ],
+        [
+          804110,
+          "auto7"
+        ],
+        [
+          937650,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 19,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 155790,
+        "auto_3": 230750,
+        "auto_4": 366270,
+        "auto_5": 616150,
+        "auto_6": 861300,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 6,
+        "earned": 783562,
+        "even_pops": 408,
+        "helper": 390228,
+        "level": 13,
+        "manual": 393334,
+        "outcomes": {
+          "burnt": 34,
+          "early": 88,
+          "late": 59,
+          "near": 57,
+          "perfect": 188
+        }
+      },
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 134340,
+        "7": 192000,
+        "8": 292350,
+        "9": 440550,
+        "10": 541660,
+        "11": 725860,
+        "12": 995780,
+        "13": 1187330
+      },
+      "longest_no_buy_after_3min_s": 191.55,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 783562,
+          "helper": 390228,
+          "level": 13,
+          "manual": 393334,
+          "money": 45366
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5207,
+          "helper": 400,
+          "level": 6,
+          "manual": 4807,
+          "money": 1911
+        },
+        "300": {
+          "auto": 3,
+          "earned": 16223,
+          "helper": 4056,
+          "level": 8,
+          "manual": 12167,
+          "money": 1027
+        },
+        "600": {
+          "auto": 4,
+          "earned": 101838,
+          "helper": 37030,
+          "level": 10,
+          "manual": 64808,
+          "money": 28642
+        },
+        "900": {
+          "auto": 6,
+          "earned": 342989,
+          "helper": 146450,
+          "level": 11,
+          "manual": 196539,
+          "money": 54793
+        }
+      },
+      "name": "casual (mixed timing, shakes half the time, slow to buy, butter)",
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          134340,
+          "main"
+        ],
+        [
+          155790,
+          "auto2"
+        ],
+        [
+          192000,
+          "main"
+        ],
+        [
+          230750,
+          "auto3"
+        ],
+        [
+          292350,
+          "main"
+        ],
+        [
+          366270,
+          "auto4"
+        ],
+        [
+          440550,
+          "main"
+        ],
+        [
+          541660,
+          "main"
+        ],
+        [
+          616150,
+          "auto5"
+        ],
+        [
+          725860,
+          "main"
+        ],
+        [
+          861300,
+          "auto6"
+        ],
+        [
+          995780,
+          "main"
+        ],
+        [
+          1187330,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 20,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 147190,
+        "auto_3": 203410,
+        "auto_4": 312170,
+        "auto_5": 520270,
+        "auto_6": 725680,
+        "auto_7": 1121810,
+        "recipe": 97230,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1344083,
+        "even_pops": 408,
+        "helper": 624874,
+        "level": 13,
+        "manual": 719209,
+        "outcomes": {
+          "burnt": 94,
+          "early": 75,
+          "late": 16,
+          "near": 91,
+          "perfect": 150
+        }
+      },
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 132090,
+        "7": 173130,
+        "8": 255920,
+        "9": 368990,
+        "10": 457440,
+        "11": 638070,
+        "12": 863270,
+        "13": 1002660
+      },
+      "longest_no_buy_after_3min_s": 139.39,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1344083,
+          "helper": 624874,
+          "level": 13,
+          "manual": 719209,
+          "money": 285887
+        },
+        "180": {
+          "auto": 2,
+          "earned": 6919,
+          "helper": 560,
+          "level": 7,
+          "manual": 6359,
+          "money": 1123
+        },
+        "300": {
+          "auto": 3,
+          "earned": 25375,
+          "helper": 5367,
+          "level": 8,
+          "manual": 20008,
+          "money": 10179
+        },
+        "600": {
+          "auto": 5,
+          "earned": 156934,
+          "helper": 53599,
+          "level": 10,
+          "manual": 103335,
+          "money": 48738
+        },
+        "900": {
+          "auto": 6,
+          "earned": 540402,
+          "helper": 209145,
+          "level": 12,
+          "manual": 331257,
+          "money": 102206
+        }
+      },
+      "name": "casual, caramel",
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          132090,
+          "main"
+        ],
+        [
+          147190,
+          "auto2"
+        ],
+        [
+          173130,
+          "main"
+        ],
+        [
+          203410,
+          "auto3"
+        ],
+        [
+          255920,
+          "main"
+        ],
+        [
+          312170,
+          "auto4"
+        ],
+        [
+          368990,
+          "main"
+        ],
+        [
+          457440,
+          "main"
+        ],
+        [
+          520270,
+          "auto5"
+        ],
+        [
+          638070,
+          "main"
+        ],
+        [
+          725680,
+          "auto6"
+        ],
+        [
+          863270,
+          "main"
+        ],
+        [
+          1002660,
+          "main"
+        ],
+        [
+          1121810,
+          "auto7"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 20,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 149420,
+        "auto_3": 213960,
+        "auto_4": 326980,
+        "auto_5": 543700,
+        "auto_6": 768570,
+        "auto_7": 1163710,
+        "recipe": 97230,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1185629,
+        "even_pops": 364,
+        "helper": 542359,
+        "level": 13,
+        "manual": 643270,
+        "outcomes": {
+          "burnt": 33,
+          "early": 72,
+          "late": 46,
+          "near": 50,
+          "perfect": 181
+        }
+      },
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 127830,
+        "7": 182890,
+        "8": 258290,
+        "9": 390010,
+        "10": 480130,
+        "11": 671530,
+        "12": 907260,
+        "13": 1056770
+      },
+      "longest_no_buy_after_3min_s": 149.51,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1185629,
+          "helper": 542359,
+          "level": 13,
+          "manual": 643270,
+          "money": 127433
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5733,
+          "helper": 500,
+          "level": 6,
+          "manual": 5233,
+          "money": 2437
+        },
+        "300": {
+          "auto": 3,
+          "earned": 21681,
+          "helper": 5088,
+          "level": 8,
+          "manual": 16593,
+          "money": 6485
+        },
+        "600": {
+          "auto": 5,
+          "earned": 137173,
+          "helper": 49033,
+          "level": 10,
+          "manual": 88140,
+          "money": 28977
+        },
+        "900": {
+          "auto": 6,
+          "earned": 434553,
+          "helper": 182896,
+          "level": 11,
+          "manual": 251657,
+          "money": 146357
+        }
+      },
+      "name": "casual, cheese",
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          127830,
+          "main"
+        ],
+        [
+          149420,
+          "auto2"
+        ],
+        [
+          182890,
+          "main"
+        ],
+        [
+          213960,
+          "auto3"
+        ],
+        [
+          258290,
+          "main"
+        ],
+        [
+          326980,
+          "auto4"
+        ],
+        [
+          390010,
+          "main"
+        ],
+        [
+          480130,
+          "main"
+        ],
+        [
+          543700,
+          "auto5"
+        ],
+        [
+          671530,
+          "main"
+        ],
+        [
+          768570,
+          "auto6"
+        ],
+        [
+          907260,
+          "main"
+        ],
+        [
+          1056770,
+          "main"
+        ],
+        [
+          1163710,
+          "auto7"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 20,
+      "events": {
+        "auto_1": 82420,
+        "auto_2": 155330,
+        "auto_3": 226700,
+        "auto_4": 330990,
+        "auto_5": 560050,
+        "auto_6": 771590,
+        "auto_7": 1167060,
+        "unlock_auto": 65570,
+        "unlock_recipes": 100390,
+        "unlock_shake": 49470
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1169756,
+        "even_pops": 415,
+        "helper": 536675,
+        "level": 13,
+        "manual": 633081,
+        "outcomes": {
+          "burnt": 31,
+          "early": 80,
+          "late": 10,
+          "near": 54,
+          "perfect": 268
+        }
+      },
+      "level_at": {
+        "1": 14090,
+        "2": 36680,
+        "3": 49460,
+        "4": 65560,
+        "5": 100380,
+        "6": 132750,
+        "7": 190620,
+        "8": 269600,
+        "9": 399850,
+        "10": 491160,
+        "11": 666900,
+        "12": 900590,
+        "13": 1058120
+      },
+      "longest_no_buy_after_3min_s": 157.53,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1169756,
+          "helper": 536675,
+          "level": 13,
+          "manual": 633081,
+          "money": 111560
+        },
+        "180": {
+          "auto": 2,
+          "earned": 4981,
+          "helper": 400,
+          "level": 6,
+          "manual": 4581,
+          "money": 1685
+        },
+        "300": {
+          "auto": 3,
+          "earned": 21748,
+          "helper": 4705,
+          "level": 8,
+          "manual": 17043,
+          "money": 6552
+        },
+        "600": {
+          "auto": 5,
+          "earned": 135234,
+          "helper": 46540,
+          "level": 10,
+          "manual": 88694,
+          "money": 27038
+        },
+        "900": {
+          "auto": 6,
+          "earned": 443885,
+          "helper": 179371,
+          "level": 11,
+          "manual": 264514,
+          "money": 155689
+        }
+      },
+      "name": "novice (wild timing, never shakes, slow, butter)",
+      "timeline": [
+        [
+          14090,
+          "main"
+        ],
+        [
+          36680,
+          "main"
+        ],
+        [
+          49460,
+          "main"
+        ],
+        [
+          65560,
+          "main"
+        ],
+        [
+          82420,
+          "auto1"
+        ],
+        [
+          100380,
+          "main"
+        ],
+        [
+          132750,
+          "main"
+        ],
+        [
+          155330,
+          "auto2"
+        ],
+        [
+          190620,
+          "main"
+        ],
+        [
+          226700,
+          "auto3"
+        ],
+        [
+          269600,
+          "main"
+        ],
+        [
+          330990,
+          "auto4"
+        ],
+        [
+          399850,
+          "main"
+        ],
+        [
+          491160,
+          "main"
+        ],
+        [
+          560050,
+          "auto5"
+        ],
+        [
+          666900,
+          "main"
+        ],
+        [
+          771590,
+          "auto6"
+        ],
+        [
+          900590,
+          "main"
+        ],
+        [
+          1058120,
+          "main"
+        ],
+        [
+          1167060,
+          "auto7"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 20,
+      "events": {
+        "auto_1": 82420,
+        "auto_2": 144250,
+        "auto_3": 217130,
+        "auto_4": 313220,
+        "auto_5": 502110,
+        "auto_6": 699150,
+        "auto_7": 1077510,
+        "recipe": 100390,
+        "unlock_auto": 65570,
+        "unlock_recipes": 100390,
+        "unlock_shake": 49470
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1521847,
+        "even_pops": 417,
+        "helper": 678218,
+        "level": 13,
+        "manual": 843629,
+        "outcomes": {
+          "burnt": 63,
+          "early": 86,
+          "late": 6,
+          "near": 133,
+          "perfect": 157
+        }
+      },
+      "level_at": {
+        "1": 14090,
+        "2": 36680,
+        "3": 49460,
+        "4": 65560,
+        "5": 100380,
+        "6": 132780,
+        "7": 180980,
+        "8": 253890,
+        "9": 371170,
+        "10": 449230,
+        "11": 609980,
+        "12": 826530,
+        "13": 982340
+      },
+      "longest_no_buy_after_3min_s": 155.81,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1521847,
+          "helper": 678218,
+          "level": 13,
+          "manual": 843629,
+          "money": 463651
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5876,
+          "helper": 550,
+          "level": 6,
+          "manual": 5326,
+          "money": 2580
+        },
+        "300": {
+          "auto": 3,
+          "earned": 24073,
+          "helper": 5319,
+          "level": 8,
+          "manual": 18754,
+          "money": 8877
+        },
+        "600": {
+          "auto": 5,
+          "earned": 173360,
+          "helper": 55355,
+          "level": 10,
+          "manual": 118005,
+          "money": 65164
+        },
+        "900": {
+          "auto": 6,
+          "earned": 590035,
+          "helper": 231804,
+          "level": 12,
+          "manual": 358231,
+          "money": 151839
+        }
+      },
+      "name": "novice, caramel",
+      "timeline": [
+        [
+          14090,
+          "main"
+        ],
+        [
+          36680,
+          "main"
+        ],
+        [
+          49460,
+          "main"
+        ],
+        [
+          65560,
+          "main"
+        ],
+        [
+          82420,
+          "auto1"
+        ],
+        [
+          100380,
+          "main"
+        ],
+        [
+          132780,
+          "main"
+        ],
+        [
+          144250,
+          "auto2"
+        ],
+        [
+          180980,
+          "main"
+        ],
+        [
+          217130,
+          "auto3"
+        ],
+        [
+          253890,
+          "main"
+        ],
+        [
+          313220,
+          "auto4"
+        ],
+        [
+          371170,
+          "main"
+        ],
+        [
+          449230,
+          "main"
+        ],
+        [
+          502110,
+          "auto5"
+        ],
+        [
+          609980,
+          "main"
+        ],
+        [
+          699150,
+          "auto6"
+        ],
+        [
+          826530,
+          "main"
+        ],
+        [
+          982340,
+          "main"
+        ],
+        [
+          1077510,
+          "auto7"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": 1140.33,
+      "buys": 21,
+      "events": {
+        "auto_1": 82420,
+        "auto_2": 139760,
+        "auto_3": 193560,
+        "auto_4": 281810,
+        "auto_5": 462050,
+        "auto_6": 643400,
+        "auto_7": 989340,
+        "recipe": 100390,
+        "unlock_auto": 65570,
+        "unlock_recipes": 100390,
+        "unlock_shake": 49470
+      },
+      "final": {
+        "auto": 7,
+        "earned": 2068274,
+        "even_pops": 369,
+        "helper": 894157,
+        "level": 14,
+        "manual": 1174117,
+        "outcomes": {
+          "burnt": 29,
+          "early": 50,
+          "late": 2,
+          "near": 31,
+          "perfect": 285
+        }
+      },
+      "level_at": {
+        "1": 14090,
+        "2": 36680,
+        "3": 49460,
+        "4": 65560,
+        "5": 100380,
+        "6": 128350,
+        "7": 167140,
+        "8": 231070,
+        "9": 332960,
+        "10": 411580,
+        "11": 549580,
+        "12": 752590,
+        "13": 891270,
+        "14": 1140330
+      },
+      "longest_no_buy_after_3min_s": 150.99,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 2068274,
+          "helper": 894157,
+          "level": 14,
+          "manual": 1174117,
+          "money": 410078
+        },
+        "180": {
+          "auto": 2,
+          "earned": 8064,
+          "helper": 770,
+          "level": 7,
+          "manual": 7294,
+          "money": 2268
+        },
+        "300": {
+          "auto": 4,
+          "earned": 32119,
+          "helper": 6423,
+          "level": 8,
+          "manual": 25696,
+          "money": 4923
+        },
+        "600": {
+          "auto": 5,
+          "earned": 247247,
+          "helper": 72084,
+          "level": 11,
+          "manual": 175163,
+          "money": 69051
+        },
+        "900": {
+          "auto": 6,
+          "earned": 780877,
+          "helper": 287997,
+          "level": 13,
+          "manual": 492880,
+          "money": 42681
+        }
+      },
+      "name": "novice, cheese",
+      "timeline": [
+        [
+          14090,
+          "main"
+        ],
+        [
+          36680,
+          "main"
+        ],
+        [
+          49460,
+          "main"
+        ],
+        [
+          65560,
+          "main"
+        ],
+        [
+          82420,
+          "auto1"
+        ],
+        [
+          100380,
+          "main"
+        ],
+        [
+          128350,
+          "main"
+        ],
+        [
+          139760,
+          "auto2"
+        ],
+        [
+          167140,
+          "main"
+        ],
+        [
+          193560,
+          "auto3"
+        ],
+        [
+          231070,
+          "main"
+        ],
+        [
+          281810,
+          "auto4"
+        ],
+        [
+          332960,
+          "main"
+        ],
+        [
+          411580,
+          "main"
+        ],
+        [
+          462050,
+          "auto5"
+        ],
+        [
+          549580,
+          "main"
+        ],
+        [
+          643400,
+          "auto6"
+        ],
+        [
+          752590,
+          "main"
+        ],
+        [
+          891270,
+          "main"
+        ],
+        [
+          989340,
+          "auto7"
+        ],
+        [
+          1140330,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 19,
+      "events": {
+        "auto_1": 73870,
+        "auto_2": 155490,
+        "auto_3": 230450,
+        "auto_4": 365040,
+        "auto_5": 618370,
+        "auto_6": 872760,
+        "unlock_auto": 57570,
+        "unlock_recipes": 96240,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 6,
+        "earned": 750748,
+        "even_pops": 399,
+        "helper": 374978,
+        "level": 13,
+        "manual": 375770,
+        "outcomes": {
+          "burnt": 38,
+          "early": 87,
+          "late": 57,
+          "near": 56,
+          "perfect": 186
+        }
+      },
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57560,
+        "5": 96230,
+        "6": 134040,
+        "7": 191700,
+        "8": 291560,
+        "9": 441220,
+        "10": 542830,
+        "11": 738960,
+        "12": 1007240,
+        "13": 1198900
+      },
+      "longest_no_buy_after_3min_s": 191.66,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 750748,
+          "helper": 374978,
+          "level": 13,
+          "manual": 375770,
+          "money": 12552
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5275,
+          "helper": 400,
+          "level": 6,
+          "manual": 4875,
+          "money": 1979
+        },
+        "300": {
+          "auto": 3,
+          "earned": 16241,
+          "helper": 4056,
+          "level": 8,
+          "manual": 12185,
+          "money": 1045
+        },
+        "600": {
+          "auto": 4,
+          "earned": 100885,
+          "helper": 36595,
+          "level": 10,
+          "manual": 64290,
+          "money": 27689
+        },
+        "900": {
+          "auto": 6,
+          "earned": 328709,
+          "helper": 143166,
+          "level": 11,
+          "manual": 185543,
+          "money": 40513
+        }
+      },
+      "name": "never shakes (casual, butter)",
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57560,
+          "main"
+        ],
+        [
+          73870,
+          "auto1"
+        ],
+        [
+          96230,
+          "main"
+        ],
+        [
+          134040,
+          "main"
+        ],
+        [
+          155490,
+          "auto2"
+        ],
+        [
+          191700,
+          "main"
+        ],
+        [
+          230450,
+          "auto3"
+        ],
+        [
+          291560,
+          "main"
+        ],
+        [
+          365040,
+          "auto4"
+        ],
+        [
+          441220,
+          "main"
+        ],
+        [
+          542830,
+          "main"
+        ],
+        [
+          618370,
+          "auto5"
+        ],
+        [
+          738960,
+          "main"
+        ],
+        [
+          872760,
+          "auto6"
+        ],
+        [
+          1007240,
+          "main"
+        ],
+        [
+          1198900,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 13,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 155790,
+        "auto_3": 436720,
+        "auto_4": 820790,
+        "stopped_pressing": 820790,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 4,
+        "earned": 65017,
+        "even_pops": 39,
+        "helper": 61519,
+        "level": 9,
+        "manual": 3498,
+        "outcomes": {
+          "burnt": 2,
+          "early": 11,
+          "late": 6,
+          "near": 8,
+          "perfect": 30
+        }
+      },
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 134340,
+        "7": 298450,
+        "8": 603750,
+        "9": 1007670
+      },
+      "longest_no_buy_after_3min_s": 217.04,
+      "marks": {
+        "1200": {
+          "auto": 4,
+          "earned": 65017,
+          "helper": 61519,
+          "level": 9,
+          "manual": 3498,
+          "money": 23821
+        },
+        "180": {
+          "auto": 2,
+          "earned": 3898,
+          "helper": 400,
+          "level": 6,
+          "manual": 3498,
+          "money": 602
+        },
+        "300": {
+          "auto": 2,
+          "earned": 5928,
+          "helper": 2430,
+          "level": 7,
+          "manual": 3498,
+          "money": 132
+        },
+        "600": {
+          "auto": 3,
+          "earned": 15108,
+          "helper": 11610,
+          "level": 7,
+          "manual": 3498,
+          "money": 5712
+        },
+        "900": {
+          "auto": 4,
+          "earned": 33357,
+          "helper": 29859,
+          "level": 8,
+          "manual": 3498,
+          "money": 6161
+        }
+      },
+      "name": "low interaction (casual until the helper, then only buys)",
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          134340,
+          "main"
+        ],
+        [
+          155790,
+          "auto2"
+        ],
+        [
+          298450,
+          "main"
+        ],
+        [
+          436720,
+          "auto3"
+        ],
+        [
+          603750,
+          "main"
+        ],
+        [
+          820790,
+          "auto4"
+        ],
+        [
+          1007670,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 14,
+      "events": {
+        "recipe": 43450,
+        "unlock_auto": 33020,
+        "unlock_recipes": 43450,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 0,
+        "earned": 4757835,
+        "even_pops": 534,
+        "helper": 0,
+        "level": 14,
+        "manual": 4757835,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 5,
+          "perfect": 540
+        }
+      },
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 43440,
+        "6": 54400,
+        "7": 72020,
+        "8": 96470,
+        "9": 136240,
+        "10": 189710,
+        "11": 261970,
+        "12": 358600,
+        "13": 480430,
+        "14": 634190
+      },
+      "longest_no_buy_after_3min_s": 565.81,
+      "marks": {
+        "1200": {
+          "auto": 0,
+          "earned": 4757835,
+          "helper": 0,
+          "level": 14,
+          "manual": 4757835,
+          "money": 3581699
+        },
+        "180": {
+          "auto": 0,
+          "earned": 50343,
+          "helper": 0,
+          "level": 9,
+          "manual": 50343,
+          "money": 26207
+        },
+        "300": {
+          "auto": 0,
+          "earned": 186177,
+          "helper": 0,
+          "level": 11,
+          "manual": 186177,
+          "money": 60041
+        },
+        "600": {
+          "auto": 0,
+          "earned": 1048155,
+          "helper": 0,
+          "level": 13,
+          "manual": 1048155,
+          "money": 472019
+        },
+        "900": {
+          "auto": 0,
+          "earned": 2865984,
+          "helper": 0,
+          "level": 14,
+          "manual": 2865984,
+          "money": 1689848
+        }
+      },
+      "name": "never automates (skilled, caramel)",
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          54400,
+          "main"
+        ],
+        [
+          72020,
+          "main"
+        ],
+        [
+          96470,
+          "main"
+        ],
+        [
+          136240,
+          "main"
+        ],
+        [
+          189710,
+          "main"
+        ],
+        [
+          261970,
+          "main"
+        ],
+        [
+          358600,
+          "main"
+        ],
+        [
+          480430,
+          "main"
+        ],
+        [
+          634190,
+          "main"
+        ]
+      ],
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "buys": 19,
+      "events": {
+        "auto_1": 98590,
+        "auto_2": 177200,
+        "auto_3": 250060,
+        "auto_4": 382480,
+        "auto_5": 634480,
+        "auto_6": 873450,
+        "unlock_auto": 74180,
+        "unlock_recipes": 124050,
+        "unlock_shake": 50770
+      },
+      "final": {
+        "auto": 6,
+        "earned": 747479,
+        "even_pops": 395,
+        "helper": 369110,
+        "level": 13,
+        "manual": 378369,
+        "outcomes": {
+          "burnt": 42,
+          "early": 82,
+          "late": 50,
+          "near": 63,
+          "perfect": 183
+        }
+      },
+      "level_at": {
+        "1": 12170,
+        "2": 35580,
+        "3": 50760,
+        "4": 74170,
+        "5": 124040,
+        "6": 154690,
+        "7": 215260,
+        "8": 316650,
+        "9": 456880,
+        "10": 553520,
+        "11": 747950,
+        "12": 1010250,
+        "13": 1197450
+      },
+      "longest_no_buy_after_3min_s": 187.2,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 747479,
+          "helper": 369110,
+          "level": 13,
+          "manual": 378369,
+          "money": 9283
+        },
+        "180": {
+          "auto": 2,
+          "earned": 3650,
+          "helper": 0,
+          "level": 6,
+          "manual": 3650,
+          "money": 354
+        },
+        "300": {
+          "auto": 3,
+          "earned": 13387,
+          "helper": 3234,
+          "level": 7,
+          "manual": 10153,
+          "money": 3991
+        },
+        "600": {
+          "auto": 4,
+          "earned": 93153,
+          "helper": 33737,
+          "level": 10,
+          "manual": 59416,
+          "money": 19957
+        },
+        "900": {
+          "auto": 6,
+          "earned": 314872,
+          "helper": 136516,
+          "level": 11,
+          "manual": 178356,
+          "money": 26676
+        }
+      },
+      "name": "automation first (casual, buys the ladder before the machine)",
+      "timeline": [
+        [
+          12170,
+          "main"
+        ],
+        [
+          35580,
+          "main"
+        ],
+        [
+          50760,
+          "main"
+        ],
+        [
+          74170,
+          "main"
+        ],
+        [
+          98590,
+          "auto1"
+        ],
+        [
+          124040,
+          "main"
+        ],
+        [
+          154690,
+          "main"
+        ],
+        [
+          177200,
+          "auto2"
+        ],
+        [
+          215260,
+          "main"
+        ],
+        [
+          250060,
+          "auto3"
+        ],
+        [
+          316650,
+          "main"
+        ],
+        [
+          382480,
+          "auto4"
+        ],
+        [
+          456880,
+          "main"
+        ],
+        [
+          553520,
+          "main"
+        ],
+        [
+          634480,
+          "auto5"
+        ],
+        [
+          747950,
+          "main"
+        ],
+        [
+          873450,
+          "auto6"
+        ],
+        [
+          1010250,
+          "main"
+        ],
+        [
+          1197450,
+          "main"
+        ]
+      ],
+      "violations": []
+    }
+  ]
+}

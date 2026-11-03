@@ -13,6 +13,8 @@ extends SceneTree
 ## would), --buy buys that many upgrades when affordable, --advance skips play
 ## seconds before the final wait. --steps runs a list first, comma separated:
 ## p (press), r (release), b (buy), w<ms> (play time), e.g. p,w1600,r,w500
+## (the stand: a (buy automation), s (shake), k<recipe> (choose it), m<N> (add
+## money to buy what the picture shows -- setup, not play))
 ## (B: hold into the gold). --level N starts the run at level N (a picture
 ## of a later machine; not a play).
 
@@ -65,6 +67,16 @@ func _tick() -> void:
 						_app.on_command("release", {"type": "release"})
 					"b":
 						_app.buy()
+					"a":
+						_app.buy_auto()
+					"s":
+						_app.on_command("shake", {"type": "shake"})
+					"k":
+						_app.on_command("recipe", {"type": "recipe", "id": step.substr(1)})
+					"m":
+						# Picture setup (not a play): money to buy what is shown.
+						_app.rules.money += int(step.substr(1))
+						_app.rules.earned += int(step.substr(1))
 					"w":
 						_app.dev_advance(int(step.substr(1)))
 		if _app.rules != null:

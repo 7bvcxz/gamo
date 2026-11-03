@@ -54,7 +54,7 @@ func _open_stub() -> void:
 func test_starts_on_the_chooser_with_a_b_c() -> void:
 	assert_eq(app.screen, "chooser", "chooser first")
 	var ids: Array = app.chooser.tiles.map(func(t: Dictionary) -> String: return String(t["id"]))
-	assert_eq(ids, ["click", "perfect", "explosion"], "A, B, C in order; the stub is not listed")
+	assert_eq(ids, ["stand", "click", "perfect", "explosion"], "the stand (Step 10) first, then A, B, C in order; the stub is not listed")
 	assert_true(app.chooser.visible, "visible")
 	assert_false(app.frame.visible, "frame hidden")
 
@@ -195,3 +195,77 @@ func test_a_hitch_counts_by_the_wall_clock() -> void:
 	before = app.clock.now_ms
 	app._process(0.016)
 	assert_eq(app.clock.now_ms - before, 16, "with no previous frame, Godot's delta")
+
+
+## Step 10, the stand through the app with real input events: the first
+## minutes are B's hold and release; from its level a side-to-side drag while
+## holding shakes (three swings = an even pop); a shaker tap chooses a recipe
+## without pressing the machine; the automation card buys the motor, then the
+## helper, which pays by itself.
+func _mouse(p: Vector2, pressed: bool) -> void:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = pressed
+	e.position = p
+	e.global_position = p
+	app.frame.play._gui_input(e)
+
+
+func _move(p: Vector2) -> void:
+	var e := InputEventMouseMotion.new()
+	e.position = p
+	e.global_position = p
+	app.frame.play._gui_input(e)
+
+
+func test_the_stand_with_real_input() -> void:
+	app.open("stand")
+	await tree.process_frame
+	assert_true(app.frame.has_auto, "the stand has the automation card's place")
+	assert_false(app.frame.auto_button.visible, "hidden at level 0")
+	var play: PopPlayView = app.frame.play
+	var c := play.size / 2
+	# B's hold and release, at level 0.
+	_mouse(c, true)
+	app.dev_advance(1600)
+	_mouse(c, false)
+	assert_eq(String(app.rules.state()["outcomes"].keys().filter(func(k: String) -> bool: return int(app.rules.state()["outcomes"][k]) > 0)[0]), "perfect", "B's hold into the gold")
+	app.dev_advance(1000)
+	# Shaking, from its level: three swings while holding.
+	app.dev_level(3)
+	_mouse(c, true)
+	for x: float in [c.x + 40, c.x - 40, c.x + 40]:
+		_move(Vector2(x, c.y))
+	assert_eq(int(app.rules.state()["shakes"]), 3, "three swings, three shakes")
+	app.dev_advance(1600)
+	_mouse(c, false)
+	assert_eq(int(app.rules.state()["even_pops"]), 1, "an even pop")
+	var shakes_logged := app.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "shake").size()
+	assert_eq(shakes_logged, 3, "logged")
+	assert_eq(int(app.summary()["inputs"]), 2, "shaking is not an input: two presses")
+	app.dev_advance(1000)
+	# A recipe: tapping its shaker chooses it and does not press the machine.
+	app.dev_level(5)
+	await tree.process_frame
+	var rects: Dictionary = play.call("extra_rects")
+	assert_true(rects.has("recipe_caramel"), "the shakers are there at their level")
+	var presses_before := int(app.rules.presses)
+	var sr: Rect2 = rects["recipe_caramel"]
+	_mouse(sr.get_center(), true)
+	_mouse(sr.get_center(), false)
+	assert_eq(String(app.rules.state()["recipe"]), "caramel", "chosen")
+	assert_eq(int(app.rules.presses), presses_before, "not a press")
+	assert_true((app.state()["rects"] as Dictionary).has("recipe_cheese"), "the test hooks see the shakers")
+	# Automation: the card appears at its level, buys the motor, then the helper.
+	app.frame.refresh(app.rules, app.clock.now_ms)
+	assert_true(app.frame.auto_button.visible, "the card at its level")
+	app.dev_money(1000000)
+	app.buy_auto()
+	assert_true(bool(app.rules.state()["motor"]), "the motor")
+	app.buy_auto()
+	assert_eq(int(app.rules.state()["helper_level"]), 1, "the helper")
+	var money := app.rules.money
+	app.dev_advance(int(app.rules.state()["helper_cycle_ms"]) * 2 + 10)
+	assert_eq(int(app.rules.state()["helper_batches"]), 2, "two helper batches by themselves")
+	assert_true(app.rules.money > money, "paid")
+	assert_true((app.state()["rects"] as Dictionary).has("auto"), "the card is tappable")

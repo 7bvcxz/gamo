@@ -52,7 +52,7 @@ func _layout() -> void:
 
 ## What you do, as a picture behind the machine: a ring with its gold arc (B).
 func _draw_mechanic(b: CanvasItem, id: String, base: Vector2, size: float, _color: Color) -> void:
-	if id == "perfect":
+	if id == "perfect" or id == "stand":
 		var c := base - Vector2(0, size * 0.45)
 		b.draw_arc(c, size * 0.62, -PI / 2, PI * 0.6, 32, Color(0.3, 0.55, 0.95, 0.6), size * 0.06)
 		b.draw_arc(c, size * 0.62, PI * 0.6, PI * 1.05, 16, PopPalette.GOLD, size * 0.11)
@@ -72,6 +72,14 @@ func _draw_mechanic_over(b: CanvasItem, id: String, base: Vector2, size: float, 
 			b.draw_circle(p, size * 0.07, PopPalette.CREAM)
 			b.draw_rect(Rect2(p.x - size * 0.07, p.y, size * 0.14, size * 0.22), PopPalette.CREAM)
 			b.draw_arc(p, size * 0.07, PI, TAU, 12, PopPalette.INK, 3.0)
+		"stand":
+			# A helper kettle at its side and a striped bag: the stand.
+			PopMachineArt.draw(b, base + Vector2(size * 0.72, 0), size * 0.36, 4, 0.0, 0.4)
+			var bag := Rect2(base + Vector2(-size * 0.95, -size * 0.42), Vector2(size * 0.2, size * 0.28))
+			b.draw_rect(bag, PopPalette.CREAM)
+			for k in 3:
+				b.draw_rect(Rect2(bag.position + Vector2(bag.size.x * (0.1 + 0.3 * float(k)), 0), Vector2(bag.size.x * 0.14, bag.size.y)), PopPalette.RED)
+			b.draw_rect(bag, PopPalette.INK, false, 2.0)
 		"explosion":
 			for i in 8:
 				var q := top + Vector2((float(i) - 3.5) * size * 0.11, -size * 0.12)
@@ -89,8 +97,12 @@ func _draw_tile(b: PopPressArea, e: Dictionary) -> void:
 	PopMachineArt._round_rect(b, Rect2(r.position, Vector2(r.size.y, r.size.y)), 36, color)
 	var font := ThemeDB.fallback_font
 	var fs := int(r.size.y * 0.55)
-	b.draw_string(font, Vector2(r.position.x, r.position.y + r.size.y * 0.5 + fs * 0.36), String(e["letter"]),
-		HORIZONTAL_ALIGNMENT_CENTER, r.size.y, fs, Color.WHITE)
+	if String(e["letter"]) == "":
+		# The stand (the game itself): a star, not a letter.
+		b.draw_colored_polygon(PopMachineArt._star(r.position + Vector2(r.size.y, r.size.y) * 0.5, r.size.y * 0.3, r.size.y * 0.13), Color.WHITE)
+	else:
+		b.draw_string(font, Vector2(r.position.x, r.position.y + r.size.y * 0.5 + fs * 0.36), String(e["letter"]),
+			HORIZONTAL_ALIGNMENT_CENTER, r.size.y, fs, Color.WHITE)
 	var mbase := Vector2(r.position.x + r.size.y + (r.size.x - r.size.y) / 2 - 20, r.end.y - r.size.y * 0.12)
 	var msize := r.size.y * 0.72
 	_draw_mechanic(b, String(e["id"]), mbase, msize, color)

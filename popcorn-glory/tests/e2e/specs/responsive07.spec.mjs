@@ -48,3 +48,33 @@ test('reduced motion and sound off still play', async ({ pop }) => {
   expect(s.fx.peak, 'reduced motion draws few pieces').toBeLessThanOrEqual(40);
   await pop.shot('reduced');
 });
+
+// Step 10: the stand at a later moment -- automation card, shakers and helper on screen --
+// still fits every shape of the matrix: inside the window, nothing over the bars or the cards.
+test('stand: card, shakers and helper fit', async ({ pop }) => {
+  await pop.open('./#stand');
+  await pop.call('dev_level', 9);
+  await pop.call('dev_money', 1000000);
+  await expect.poll(async () => !!(await pop.state()).rects.auto).toBe(true);
+  await pop.tap('auto');
+  await pop.page.waitForTimeout(250);
+  await pop.tap('auto');
+  await expect.poll(async () => !!(await pop.state()).rects.helper).toBe(true);
+  const s = await pop.state();
+  const [w, h] = s.window;
+  const all = [...CONTROLS, 'auto', 'recipe_butter', 'recipe_caramel', 'recipe_cheese', 'helper'];
+  for (const name of all) {
+    const r = s.rects[name];
+    expect(r, `${name} on screen`).toBeTruthy();
+    expect(r[0] >= -1 && r[1] >= -1 && r[0] + r[2] <= w + 1 && r[1] + r[3] <= h + 1, `${name} inside ${w}x${h}: ${r}`).toBe(true);
+  }
+  const bars = [...CONTROLS, 'auto'];
+  for (let i = 0; i < bars.length; i++) for (let j = i + 1; j < bars.length; j++) {
+    expect(overlap(s.rects[bars[i]], s.rects[bars[j]]), `${bars[i]} and ${bars[j]} do not overlap`).toBe(false);
+  }
+  for (const name of ['recipe_butter', 'recipe_caramel', 'recipe_cheese', 'helper']) {
+    for (const bar of bars) expect(overlap(s.rects[name], s.rects[bar]), `${name} clear of ${bar}`).toBe(false);
+  }
+  await pop.shot('stand_matrix');
+  expect(pop.errors).toEqual([]);
+});

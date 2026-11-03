@@ -8,6 +8,10 @@ extends RefCounted
 ## in it) and the colour of its tile and frame.
 
 const EXPERIMENTS: Array[Dictionary] = [
+	# Step 10: the owner-approved vertical slice on B's hold and release (#114).
+	{"id": "stand", "letter": "", "listed": true,
+		"rules": "res://variants/stand/stand_rules.gd", "view": "res://variants/stand/stand_view.gd",
+		"color": Color(0.85, 0.2, 0.32)},
 	{"id": "click", "letter": "A", "listed": true,
 		"rules": "res://variants/click/click_rules.gd", "view": "res://variants/click/click_view.gd",
 		"color": Color(0.91, 0.27, 0.23)},

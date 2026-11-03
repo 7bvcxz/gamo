@@ -34,5 +34,35 @@
     "show_ms": 1200,
     "show_step_ms": 300,
     "show_max_ms": 3000
+  },
+  "stand": {
+    "_doc": "Step 10, the Popcorn Stand (design/SLICE.md): B's hold and release, plus shake (unlock.shake: `turns` direction changes in one heat = an even pop x shake.mult), recipes (unlock.recipes: mult x the batch, window_scale x the gold, burn_scale x the time from the gold to the burn, cooldown_add_ms after a pop) and the automation ladder (unlock.auto: a motor that shakes every batch, then a helper kettle paying share x batch[L] every cycle_ms). costs: the main machine's prices, level by level -- B's first four, then stretched for a 10-20 minute session.",
+    "batch": [5, 8, 13, 20, 33, 52, 84, 134, 215, 344, 550, 880, 1400, 2240, 3580],
+    "max_level": 14,
+    "window_start_ms": 1400,
+    "window_ms": 450,
+    "window_step_ms": 50,
+    "window_max_ms": 800,
+    "burn_after_ms": 600,
+    "cooldown_ms": 400,
+    "near_ms": 200,
+    "mult": { "early": 0.6, "near": 1.0, "perfect": 2.0, "late": 0.6, "burnt": 0.25 },
+    "costs": [30, 54, 97, 175, 430, 1050, 2500, 5800, 14000, 32000, 70000, 150000, 300000, 600000],
+    "unlock": { "shake": 3, "auto": 4, "recipes": 5 },
+    "shake": { "turns": 3, "mult": 1.3 },
+    "recipes": {
+      "butter": { "mult": 1.0, "window_scale": 1.0, "burn_scale": 1.0, "cooldown_add_ms": 0 },
+      "caramel": { "mult": 1.5, "window_scale": 0.45, "burn_scale": 0.4, "cooldown_add_ms": 0 },
+      "cheese": { "mult": 1.35, "window_scale": 1.3, "burn_scale": 1.0, "cooldown_add_ms": 900 }
+    },
+    "auto": [
+      { "kind": "motor", "cost": 260 },
+      { "kind": "helper", "cost": 1200, "cycle_ms": 3000, "share": 0.6 },
+      { "kind": "helper", "cost": 3600, "cycle_ms": 2700, "share": 0.7 },
+      { "kind": "helper", "cost": 12000, "cycle_ms": 2400, "share": 0.85 },
+      { "kind": "helper", "cost": 35000, "cycle_ms": 2100, "share": 1.0 },
+      { "kind": "helper", "cost": 110000, "cycle_ms": 1800, "share": 1.15 },
+      { "kind": "helper", "cost": 320000, "cycle_ms": 1500, "share": 1.3 }
+    ]
   }
 }

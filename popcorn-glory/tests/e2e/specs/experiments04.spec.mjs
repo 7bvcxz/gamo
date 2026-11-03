@@ -8,7 +8,7 @@ import { decodePng } from '../lib/png.mjs';
 test('the chooser lists A, B, C and each tile opens its experiment', async ({ pop }) => {
   await pop.open('./');
   const s = await pop.state();
-  expect(s.listed).toEqual(['click', 'perfect', 'explosion']);
+  expect(s.listed).toEqual(['stand', 'click', 'perfect', 'explosion']);
   await pop.shot('chooser04');
   for (const id of ['click', 'perfect', 'explosion']) {
     await pop.tap(`tile_${id}`);
