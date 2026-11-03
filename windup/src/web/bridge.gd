@@ -51,6 +51,13 @@ func query(name: String, arg: Variant) -> Variant:
 			return telemetry.to_jsonl()
 		"end":
 			return _main.call("end_session")
+		"icon_point":
+			var hh: Hud = _main.get("hud")
+			var vp3 := (_main as Node).get_viewport()
+			var at: Vector2 = hh.volume_center() if String(arg) == "volume" else hh.motion_center()
+			var q3: Vector2 = vp3.get_final_transform() * at
+			var sz3 := Vector2(vp3.get_window().size)
+			return {"x": q3.x / sz3.x, "y": q3.y / sz3.y}
 		"restart_point":
 			var h: Hud = _main.get("hud")
 			var vp2 := (_main as Node).get_viewport()

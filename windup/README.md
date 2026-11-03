@@ -46,6 +46,8 @@ WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh   # �
 | `?seed=N` | 새 게임의 시드 |
 | `?variant=a\|b\|c` | Fun Lab 변형 (Step 06) |
 | `?dev=1` | 개발 훅(`window.windup.call('dev_…')`)과 F5 새 게임 |
+| `?sound=off` | 소리 끔으로 시작(왼쪽 위 스피커 아이콘과 같다) |
+| `?motion=reduce` | 섬광·흔들림 없이(왼쪽 위 별 아이콘, 시스템의 '동작 줄이기'와 같다) |
 
 ## 구조
 
@@ -58,7 +60,8 @@ WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh   # �
 | `art/` | 래스터 생성 경로의 원본 자리(`.gdignore`, 원본 PNG는 커밋 안 함) |
 | `src/web/` | 브라우저: 주소 옵션·보임/포커스(`WindupWeb`), `window.windup` 브리지(`WindupBridge`) |
 | `src/game/` | 규칙: `Atelier`(순수 — 힘·감기 상한·깨어남·단계·저장 사전), `Balance`(데이터 읽기·검사) |
-| `src/audio/` | 합성 효과음(`Sfx`: 딸깍·종소리·짹) |
+| `src/audio/` | 합성 효과음(`Sfx`: 딸깍·종소리·짹), 단계마다 자라는 오르골(`MusicBox`) |
+| `src/core/settings.gd` | 소리 크기·동작 줄이기(`user://windup_settings.json`, 저장과 따로) |
 | `data/balance.json` | 모든 수치(감기·인형 12명의 몫과 초당 힘·자리·단계) |
 | `tests/` | `unit`·`integration`(헤드리스), `e2e`(Playwright, `.gdignore`) |
 | `tools/` | 검사·캡처 도구 (export 제외) |

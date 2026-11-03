@@ -20,6 +20,8 @@ var view: AtelierView
 var hud: Hud
 var sfx: Sfx
 var store := SaveStore.new()
+var settings := Settings.new()
+var music: MusicBox
 var session: int = 0
 var winds: int = 0
 ## Presses (not held repeats), for the session summary.
@@ -55,6 +57,25 @@ func _ready() -> void:
 		new_game(config.seed))
 	sfx = Sfx.new()
 	add_child(sfx)
+	music = MusicBox.new()
+	add_child(music)
+	settings.load_saved()
+	var q := RunConfig.parse_query(WindupWeb.query_string()) if OS.has_feature("web") else RunConfig.parse_args(OS.get_cmdline_user_args())
+	if String(q.get("sound", "")) == "off":
+		settings.volume_step = Settings.VOLUMES.size() - 1
+	if String(q.get("motion", "")) == "reduce" or WindupWeb.prefers_reduced_motion():
+		settings.reduced_motion = true
+	_apply_settings()
+	hud.volume_pressed.connect(func() -> void:
+		settings.cycle_volume()
+		_apply_settings()
+		settings.save()
+		telemetry.emit("setting", {"volume": settings.volume()}))
+	hud.motion_pressed.connect(func() -> void:
+		settings.reduced_motion = not settings.reduced_motion
+		_apply_settings()
+		settings.save()
+		telemetry.emit("setting", {"reduced_motion": settings.reduced_motion}))
 	var saved := {} if config.fresh or config.smoke else store.load_atelier()
 	new_game(config.seed, saved)
 	_web.attach(func(hidden: bool) -> void: set_pause("hidden", hidden),
@@ -62,6 +83,13 @@ func _ready() -> void:
 	_bridge.attach(self)
 	if config.smoke:
 		_run_smoke.call_deferred()
+
+
+func _apply_settings() -> void:
+	settings.apply_audio()
+	hud.volume_step = settings.volume_step
+	hud.reduced_motion = settings.reduced_motion
+	view.reduced_motion = settings.reduced_motion
 
 
 func version() -> String:
@@ -90,7 +118,9 @@ func new_game(seed: int, saved: Dictionary = {}) -> void:
 	atelier.awakening.connect(_on_awakening)
 	atelier.awake_changed.connect(_on_awake)
 	atelier.stage_changed.connect(func(stage: int, name: String) -> void:
+		music.stage = stage
 		telemetry.emit("stage", {"stage": stage, "name": name}))
+	music.stage = atelier.stage
 	view.bind(atelier)
 	view.reset()
 	hud.set_energy(atelier.energy)
@@ -127,7 +157,7 @@ func wind(source: String) -> void:
 	winds += 1
 	view.turn()
 	view.on_wind()
-	sfx.tick()
+	sfx.tick(atelier.target_fill())
 	hud.set_energy(atelier.energy)
 	telemetry.emit("wind", {"source": source, "energy_added": snappedf(added, 0.001),
 		"energy": snappedf(atelier.energy, 0.001)})
@@ -135,6 +165,7 @@ func wind(source: String) -> void:
 
 func _on_awakening(i: int) -> void:
 	view.on_awakening(i)
+	hud.flash_now()
 	sfx.chime()
 	telemetry.emit("doll_awake", {"index": i, "cost": balance.costs[i],
 		"energy_rate": snappedf(atelier.auto_rate(), 0.001), "awake_before": atelier.awake})
@@ -172,6 +203,7 @@ func _step(dt: float) -> void:
 			wind("hold")
 	atelier.tick(dt)
 	view.advance(dt)
+	music.advance(dt)
 	hud.set_energy(atelier.energy)
 	var idle_for := clock.time - maxf(_last_input, 0.0)
 	if not _hinted and _held.is_empty() and idle_for >= balance.hint_idle_seconds and atelier.target() < atelier.doll_count():
@@ -256,6 +288,9 @@ func state() -> Dictionary:
 		"rate": snappedf(atelier.auto_rate(), 0.001),
 		"hint": view.hint,
 		"sounds": sfx.played.duplicate(),
+		"music_notes": music.notes_played,
+		"gears": view.gears_shown(),
+		"settings": {"volume": settings.volume(), "reduced_motion": settings.reduced_motion},
 	}
 
 

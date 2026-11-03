@@ -29,6 +29,14 @@ static func query_string() -> String:
 	return String(v) if v != null else ""
 
 
+## The system asks for less motion (prefers-reduced-motion).
+static func prefers_reduced_motion() -> bool:
+	if not available():
+		return false
+	var v: Variant = JavaScriptBridge.eval("!!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)", true)
+	return v != null and bool(v)
+
+
 ## Calls on_hidden(bool) when the page is hidden or shown, and on_focus(bool)
 ## when the window loses or gains focus.
 func attach(on_hidden: Callable, on_focus: Callable) -> void:

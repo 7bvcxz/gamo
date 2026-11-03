@@ -2,17 +2,24 @@ class_name Hud
 extends CanvasLayer
 
 ## The only numbers on screen: the wind-up energy, beside a coiled spring
-## (top centre). And one control without words: the circular arrow (top right)
-## starts over -- the first press arms it (it turns red and shakes), a second
-## press within three seconds restarts.
+## (top centre). Controls without words: the circular arrow (top right) starts
+## over -- the first press arms it (it turns red and shakes), a second press
+## within three seconds restarts; the speaker (top left) steps the volume
+## full / half / off; the star beside it turns off flashes and shaking.
 
 signal restart_requested
+signal volume_pressed
+signal motion_pressed
 
 const ARM_SECONDS := 3.0
 const BUTTON_RADIUS := 22.0
 
 var energy: float = 0.0
 var armed: float = 0.0
+var volume_step: int = 0
+var reduced_motion: bool = false
+## A warm flash over the whole screen (an awakening); 0 when motion is reduced.
+var flash: float = 0.0
 var _flash: float = 0.0
 var _canvas: Control
 
@@ -35,6 +42,7 @@ func set_energy(value: float) -> void:
 ## Spends one frame of real time on the HUD's own little motions.
 func advance(dt: float) -> void:
 	_flash = maxf(0.0, _flash - dt * 4.0)
+	flash = maxf(0.0, flash - dt * 3.0)
 	armed = maxf(0.0, armed - dt)
 	_canvas.queue_redraw()
 
@@ -43,11 +51,33 @@ func restart_center() -> Vector2:
 	return Vector2(_canvas.size.x - 40.0, 40.0)
 
 
+## Top left, over the wall: the floor along the bottom is where dolls sleep.
+func volume_center() -> Vector2:
+	return Vector2(40.0, 40.0)
+
+
+func motion_center() -> Vector2:
+	return Vector2(92.0, 40.0)
+
+
+func flash_now() -> void:
+	if not reduced_motion:
+		flash = 1.0
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT and mb.position.distance_to(restart_center()) <= BUTTON_RADIUS + 6.0:
+		if not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
+			return
+		if mb.position.distance_to(restart_center()) <= BUTTON_RADIUS + 6.0:
 			press_restart()
+			get_viewport().set_input_as_handled()
+		elif mb.position.distance_to(volume_center()) <= BUTTON_RADIUS + 4.0:
+			volume_pressed.emit()
+			get_viewport().set_input_as_handled()
+		elif mb.position.distance_to(motion_center()) <= BUTTON_RADIUS + 4.0:
+			motion_pressed.emit()
 			get_viewport().set_input_as_handled()
 
 
@@ -61,6 +91,8 @@ func press_restart() -> void:
 
 func _draw_hud() -> void:
 	var c := _canvas
+	if flash > 0.0:
+		c.draw_rect(Rect2(Vector2.ZERO, c.size), Color(1.0, 0.85, 0.55, 0.14 * flash))
 	var font := ThemeDB.fallback_font
 	var text := str(int(floorf(energy)))
 	var size := 34
@@ -89,3 +121,31 @@ func _draw_hud() -> void:
 	c.draw_arc(rc, 11.0, 0.5, TAU - 0.4, 24, col, 3.0, true)
 	var tip := rc + Vector2.from_angle(0.5) * 11.0
 	c.draw_colored_polygon(PackedVector2Array([tip + Vector2(-6, -3), tip + Vector2(5, -6), tip + Vector2(2, 5)]), col)
+	_draw_volume(volume_center())
+	_draw_motion(motion_center())
+
+
+## A speaker with as many waves as the volume step allows; crossed out at off.
+func _draw_volume(at: Vector2) -> void:
+	var c := _canvas
+	var col := Color(1, 1, 1, 0.5)
+	c.draw_circle(at, BUTTON_RADIUS, Color(0.06, 0.05, 0.08, 0.5))
+	c.draw_colored_polygon(PackedVector2Array([at + Vector2(-10, -4), at + Vector2(-5, -4), at + Vector2(1, -10),
+		at + Vector2(1, 10), at + Vector2(-5, 4), at + Vector2(-10, 4)]), col)
+	var waves: int = [2, 1, 0][clampi(volume_step, 0, 2)]
+	for w in waves:
+		c.draw_arc(at + Vector2(2, 0), 6.0 + w * 5.0, -0.8, 0.8, 8, col, 2.0, true)
+	if waves == 0:
+		c.draw_line(at + Vector2(5, -6), at + Vector2(13, 6), Color(0.95, 0.4, 0.35, 0.8), 2.5, true)
+
+
+## A small burst (motion on), crossed out when motion is reduced.
+func _draw_motion(at: Vector2) -> void:
+	var c := _canvas
+	var col := Color(1, 1, 1, 0.5)
+	c.draw_circle(at, BUTTON_RADIUS, Color(0.06, 0.05, 0.08, 0.5))
+	for i in 8:
+		var a := TAU * i / 8.0
+		c.draw_line(at + Vector2.from_angle(a) * 4.0, at + Vector2.from_angle(a) * (10.0 if i % 2 == 0 else 7.0), col, 2.0, true)
+	if reduced_motion:
+		c.draw_line(at + Vector2(-11, 11), at + Vector2(11, -11), Color(0.95, 0.4, 0.35, 0.85), 2.5, true)

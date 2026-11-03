@@ -15,8 +15,10 @@ import { AUDIO_TAP, listen } from '../lib/audio_tap.mjs';
 // Pictures and numbers go to windup/evidence/ only when asked (WINDUP_EVIDENCE=1), so
 // a routine run cannot overwrite an earlier step's published-build evidence.
 const evidence = process.env.WINDUP_EVIDENCE
-  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step04')
+  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/' + (process.env.WINDUP_EVIDENCE_STEP || 'step04'))
   : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../test-results/evidence/step04');
+
+const median = (v) => { if (!v.length) return 0; const a = [...v].sort((x, y) => x - y); return a[Math.floor(a.length / 2)]; };
 
 test('three minutes of real play from a fresh start', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'one long play, on the PC layout');
@@ -29,10 +31,12 @@ test('three minutes of real play from a fresh start', async ({ page }, info) => 
   const log = [];
   const now = () => (Date.now() - t0) / 1000;
   const shots = { 5: false, 30: false, 60: false, 120: false, 180: false };
+  const fpsSamples = [];   // [game t, fps] about once a second
   let audio = null;
   const act = async (what, fn) => { log.push({ wall: now(), game: (await state(page)).t, input: what }); await fn(); };
   const shoot = async () => {
     const s = await state(page);
+    if (!fpsSamples.length || s.t - fpsSamples[fpsSamples.length - 1][0] >= 0.9) fpsSamples.push([s.t, s.fps]);
     for (const mark of Object.keys(shots)) {
       if (!shots[mark] && s.t >= Number(mark)) {
         shots[mark] = true;
@@ -71,7 +75,10 @@ test('three minutes of real play from a fresh start', async ({ page }, info) => 
     winds: ev.filter((e) => e.ev === 'wind').length, presses: log.filter((l) => l.input).length,
     idle_over_5s: idle, hints: ev.filter((e) => e.ev === 'hint').length,
     end, audio_while_winding: audio, sounds_started: s.sounds, fps_end: s.fps,
-    fps_at: Object.fromEntries(log.filter((l) => l.shot).map((l) => [l.shot, l.fps])), errors,
+    fps_at: Object.fromEntries(log.filter((l) => l.shot).map((l) => [l.shot, l.fps])),
+    fps_median_first20: median(fpsSamples.filter(([t]) => t >= 3 && t <= 23).map(([, f]) => f)),
+    fps_median_last20: median(fpsSamples.filter(([t]) => t >= 160 && t <= 180).map(([, f]) => f)),
+    fps_samples: fpsSamples, errors,
   };
   fs.writeFileSync(path.join(evidence, 'play_summary.json'), JSON.stringify(summary, null, 2) + '\n');
   expect(s.t).toBeGreaterThan(180);
@@ -83,7 +90,9 @@ test('three minutes of real play from a fresh start', async ({ page }, info) => 
   expect(audio.rms).toBeGreaterThan(0.005);             // the clicks reach the speakers
   // The frame rate holds as the atelier fills (software-rendered headless
   // Chromium: compare the run with itself, the Momonium Fun Lab's rule).
-  expect(summary.fps_at[180]).toBeGreaterThanOrEqual(0.75 * summary.fps_at[5]);
+  // Medians of ~20 one-second samples: a single sample can land on an
+  // awakening's flash and read as a trend (Step 05 measurement).
+  expect(summary.fps_median_last20).toBeGreaterThanOrEqual(0.75 * summary.fps_median_first20);
   expect(errors).toEqual([]);
 });
 

@@ -35,9 +35,11 @@ func _ready() -> void:
 		_players.append(p)
 
 
-func tick() -> void:
+## One ratchet click. `tension` 0..1 (how full the next doll is) raises the
+## pitch, so the winding sounds tighter as an awakening comes near.
+func tick(tension: float = 0.0) -> void:
 	_tick_i = (_tick_i + 1) % _tick_pitch.size()
-	_play("tick", _tick, float(_tick_pitch[_tick_i]))
+	_play("tick", _tick, float(_tick_pitch[_tick_i]) * (1.0 + 0.32 * clampf(tension, 0.0, 1.0)))
 
 
 func chime() -> void:

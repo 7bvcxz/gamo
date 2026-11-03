@@ -58,6 +58,8 @@ var facing: int = 1:
 		facing = 1 if v >= 0 else -1
 		scale.x = absf(scale.x) * facing
 var vest_tint: Color = Color.WHITE
+## 0..1 while asleep: how close it is to waking -- its eyes flutter open.
+var flutter: float = 0.0
 var _phase: float = 0.0
 
 var _parts: Dictionary = {}
@@ -246,6 +248,8 @@ func _apply() -> void:
 	_arm_far.rotation_degrees = float(pose["arm_far"])
 	_back_key.rotation = key_spin
 	var o := float(pose["eyes"])
+	if pose_name == "asleep" and not waking and flutter > 0.0 and sin(_phase * 9.0) > 1.0 - flutter * 0.7:
+		o = 0.45
 	var frame := 0 if o < 0.2 else (1 if o < 0.75 else 2)
 	for holder in _eyes.get_children():
 		for i in holder.get_child_count():

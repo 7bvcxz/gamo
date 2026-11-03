@@ -38,6 +38,14 @@ const C_LAMP := Color(1.0, 0.72, 0.38)
 
 const BACKDROP := "res://assets/art/backdrop.svg"
 const KEY := "res://assets/art/key.svg"
+const GEAR_BIG := "res://assets/art/gear_big.svg"
+const GEAR_SMALL := "res://assets/art/gear_small.svg"
+## The gear train around the key: one small gear per awake doll. Slot k is at
+## angle GEAR_ANGLES[k % 6] (degrees), on the first ring (meshing with the big
+## gear) for k < 6 and on the second ring (meshing with the first) after.
+const GEAR_ANGLES := [-80.0, -35.0, -125.0, 10.0, -170.0, 145.0]
+const BIG_PITCH := 88.0
+const SMALL_PITCH := 26.0
 ## Where the design rectangle's centre is in the backdrop picture.
 const BACKDROP_CENTER := Vector2(720, 480)
 
@@ -75,6 +83,17 @@ var _glow: Node2D
 var _fx: Node2D
 var _modulate: CanvasModulate
 var _glow_tex: GradientTexture2D
+var _gear_big: Texture2D
+var _gear_small: Texture2D
+var gear_angle: float = 0.0
+var _gear_target: float = 0.0
+var _gear_pop: PackedFloat32Array = PackedFloat32Array()
+var _key_vel: float = 0.0
+var _pawl: float = 0.0
+var _sparks: Array = []         # [pos, vel, t]
+var _shake: float = 0.0
+## True: no shake (the HUD's motion icon, ?motion=reduce, the system setting).
+var reduced_motion: bool = false
 
 
 func _ready() -> void:
@@ -82,6 +101,9 @@ func _ready() -> void:
 	if use_art:
 		_backdrop = load(BACKDROP)
 		_key = load(KEY)
+		if ResourceLoader.exists(GEAR_BIG) and ResourceLoader.exists(GEAR_SMALL):
+			_gear_big = load(GEAR_BIG)
+			_gear_small = load(GEAR_SMALL)
 	_modulate = CanvasModulate.new()
 	_modulate.color = _tint
 	add_child(_modulate)
@@ -120,10 +142,14 @@ func set_layers(flags: Dictionary) -> void:
 	for d in dolls:
 		d.visible = bool(flags.get("dolls", true))
 	_hide_backdrop = not bool(flags.get("backdrop", true))
+	_hide_props = not bool(flags.get("props", true))
+	_hide_gears = not bool(flags.get("gears", true))
 	queue_redraw()
 
 
 var _hide_backdrop := false
+var _hide_props := false
+var _hide_gears := false
 
 
 ## Gives the view the rules it shows; makes one doll per doll in the data.
@@ -169,6 +195,10 @@ func sync() -> void:
 		d.facing = 1 if _homes[i].x < DESIGN.x * 0.5 else -1
 	_flows.clear()
 	_bursts.clear()
+	_sparks.clear()
+	_gear_pop.resize(12)
+	for g in 12:
+		_gear_pop[g] = 1.0 if atelier != null and g < atelier.awake else 0.0
 	if atelier != null:
 		var st := atelier.stage
 		for k in LIGHTS.size():
@@ -182,20 +212,52 @@ func sync() -> void:
 func reset() -> void:
 	key_angle = 0.0
 	_target_angle = 0.0
+	_key_vel = 0.0
+	gear_angle = 0.0
+	_gear_target = 0.0
+	_shake = 0.0
 	hint = false
 	sync()
+
+
+## The centre of gear-train slot `k`, relative to the key's centre.
+static func gear_slot(k: int) -> Vector2:
+	var a := deg_to_rad(float(GEAR_ANGLES[k % GEAR_ANGLES.size()]))
+	var r := BIG_PITCH + SMALL_PITCH + (2.0 * SMALL_PITCH if k >= GEAR_ANGLES.size() else 0.0)
+	return Vector2.from_angle(a) * r
+
+
+## How many gears of the train are showing (popping in counts as showing).
+func gears_shown() -> int:
+	var n := 0
+	for v in _gear_pop:
+		if v > 0.0:
+			n += 1
+	return n
 
 
 ## The rules started waking doll `i`: its wake-up and a burst of light.
 func on_awakening(i: int) -> void:
 	if i < dolls.size():
 		dolls[i].start_wake()
+		dolls[i].rotation = 0.0
+		dolls[i].flutter = 0.0
 		_bursts.append([_homes[i] + Vector2(0, -50), 0.0])
+		var from := _layout_offset() + _homes[i] + Vector2(-8.0 * dolls[i].facing, -40)
+		for k in 9:
+			var a := -PI / 2.0 + (float(k) - 4.0) * 0.32
+			_sparks.append([from, Vector2.from_angle(a) * (140.0 + 25.0 * (k % 3)), 0.0])
+	if i < _gear_pop.size():
+		_gear_pop[i] = 0.01
+	if not reduced_motion:
+		_shake = 1.0
 
 
 ## A flow of light from the key to the doll being filled, one per turn.
 func on_wind() -> void:
 	_press_kick = 1.0
+	_pawl = 1.0
+	_gear_target += 0.22
 	if _flows.size() < 32:
 		_flows.append([0.0])
 
@@ -224,8 +286,29 @@ func _layout() -> void:
 ## runs on the real clock, so a paused game is a still picture).
 func advance(dt: float) -> void:
 	_anim += dt
-	key_angle = lerpf(key_angle, _target_angle, 1.0 - exp(-dt * 18.0))
+	# The key is a spring: it snaps past the quarter and settles (the click you feel).
+	var sub := 4
+	for i in sub:
+		var h := dt / sub
+		_key_vel += ((_target_angle - key_angle) * 520.0 - _key_vel * 24.0) * h
+		key_angle += _key_vel * h
 	_press_kick = maxf(0.0, _press_kick - dt * 5.0)
+	_pawl = maxf(0.0, _pawl - dt * 9.0)
+	# The gear train: winding kicks it, the awake dolls keep it turning.
+	if atelier != null:
+		_gear_target += atelier.auto_rate() * 0.03 * dt
+	gear_angle = lerpf(gear_angle, _gear_target, 1.0 - exp(-dt * 6.0))
+	for g in _gear_pop.size():
+		if _gear_pop[g] > 0.0 and _gear_pop[g] < 1.0:
+			_gear_pop[g] = minf(1.0, _gear_pop[g] + dt * 1.6)
+	for sp: Array in _sparks:
+		sp[2] = float(sp[2]) + dt
+		sp[1] = (sp[1] as Vector2) + Vector2(0, 260.0) * dt
+		sp[0] = (sp[0] as Vector2) + (sp[1] as Vector2) * dt
+	_sparks = _sparks.filter(func(sp: Array) -> bool: return float(sp[2]) < 0.9)
+	_shake = maxf(0.0, _shake - dt * 4.0)
+	position = Vector2(sin(_anim * 71.0), cos(_anim * 53.0)) * 3.0 * _shake if not reduced_motion else Vector2.ZERO
+	_anticipate()
 	_move_dolls(dt)
 	for d in dolls:
 		d.advance(dt)
@@ -245,6 +328,23 @@ func advance(dt: float) -> void:
 	queue_redraw()
 	_glow.queue_redraw()
 	_fx.queue_redraw()
+
+
+## The doll being filled shivers as it nears its cost, and its eyes flutter.
+func _anticipate() -> void:
+	if atelier == null:
+		return
+	var tgt := atelier.target()
+	for i in dolls.size():
+		var d := dolls[i]
+		if i == tgt and atelier.waking < 0 and d.pose_name == "asleep":
+			var f := atelier.target_fill()
+			var k := clampf((f - 0.55) / 0.45, 0.0, 1.0)
+			d.rotation = sin(_anim * 38.0) * 0.035 * k
+			d.flutter = clampf((f - 0.8) / 0.2, 0.0, 1.0)
+		elif d.pose_name == "asleep":
+			d.rotation = 0.0
+			d.flutter = 0.0
 
 
 ## Awake dolls walk: up to HELPERS of them, the nearest, go to the doll being
@@ -332,14 +432,118 @@ func _draw_art() -> void:
 	var centre := _layout_offset() + DESIGN * 0.5
 	if not _hide_backdrop:
 		draw_texture_rect(_backdrop, Rect2(centre - BACKDROP_CENTER * s, tex * s), false)
-	if atelier != null and atelier.stage >= 1:
+	var stage := atelier.stage if atelier != null else 0
+	if not _hide_props:
+		_draw_props(_layout_offset(), stage)
+	if stage >= 1:
 		_draw_lamp(_layout_offset() + Vector2(500, 492))
-	var wobble := sin(_anim * 2.4) * (0.12 if hint else 0.04)
 	var k := key_center()
+	if not _hide_gears:
+		_draw_gears(k)
+	var wobble := sin(_anim * 2.4) * (0.12 if hint else 0.04)
 	var grow := 1.0 + _press_kick * 0.04
 	draw_set_transform(k, key_angle + wobble, Vector2(grow, grow))
 	draw_texture_rect(_key, Rect2(Vector2(-KEY_DRAW, -KEY_DRAW) * 0.5, Vector2(KEY_DRAW, KEY_DRAW)), false)
 	draw_set_transform(Vector2.ZERO, 0.0)
+	# The ratchet pawl at the top right of the housing: it flicks on every turn.
+	var pv := k + Vector2(78, -86)
+	draw_set_transform(pv, -0.5 * _pawl)
+	draw_colored_polygon(PackedVector2Array([Vector2(-5, -5), Vector2(5, -5), Vector2(-14, 26), Vector2(-20, 22)]), Color(0.72, 0.52, 0.2))
+	draw_circle(Vector2.ZERO, 6.0, Color(0.45, 0.31, 0.12))
+	draw_set_transform(Vector2.ZERO, 0.0)
+
+
+func _draw_gears(k: Vector2) -> void:
+	if _gear_big == null:
+		return
+	var ratio := BIG_PITCH / SMALL_PITCH
+	for g in _gear_pop.size():
+		var pop := _gear_pop[g]
+		if pop <= 0.0:
+			continue
+		var s := _pop_scale(pop)
+		var spin := -gear_angle * ratio if g < GEAR_ANGLES.size() else gear_angle * ratio
+		draw_set_transform(k + gear_slot(g), spin + g * 0.4, Vector2(s, s))
+		draw_texture_rect(_gear_small, Rect2(Vector2(-38, -38), Vector2(76, 76)), false)
+	draw_set_transform(k, gear_angle)
+	draw_texture_rect(_gear_big, Rect2(Vector2(-104, -104), Vector2(208, 208)), false)
+	draw_set_transform(Vector2.ZERO, 0.0)
+
+
+## 0..1 -> a scale that grows past 1 and settles (a gear clicking into place).
+static func _pop_scale(t: float) -> float:
+	if t >= 1.0:
+		return 1.0
+	return t * (1.0 + 0.35 * sin(t * PI))
+
+
+## Room props that answer the stage (no new rules, only pictures): the sewing
+## machine's cover comes off at stage 2, the jacket on the dress form gets
+## finished at stage 3, the grandfather clock starts at stage 5. Coordinates
+## are the backdrop's minus its design offset (80, 120).
+func _draw_props(o: Vector2, stage: int) -> void:
+	if not use_art:
+		return
+	var turn := gear_angle * 2.0
+	if stage < 2:
+		# The dust cover over the machine.
+		var pts := PackedVector2Array()
+		for i in 21:
+			var u := float(i) / 20.0
+			pts.append(_bez(Vector2(350, 428), Vector2(352, 380), Vector2(390, 350), Vector2(440, 348), u))
+		for i in 21:
+			var u := float(i) / 20.0
+			pts.append(_bez(Vector2(440, 348), Vector2(486, 348), Vector2(510, 380), Vector2(504, 428), u))
+		draw_colored_polygon(pts, Color(0.29, 0.25, 0.32))
+		draw_polyline(pts, Color(0.11, 0.09, 0.12), 2.0)
+	else:
+		# The machine itself (burgundy enamel, brass trim), its wheel turning
+		# with the gear train; the cover folded beside it.
+		var body := Color(0.5, 0.18, 0.22)
+		var edge := Color(0.78, 0.42, 0.38)
+		var gold := Color(0.95, 0.75, 0.38)
+		var shapes := [Rect2(340, 404, 132, 22), Rect2(436, 350, 30, 58), Rect2(352, 348, 114, 26), Rect2(356, 372, 14, 26)]
+		for r: Rect2 in shapes:
+			var rr := Rect2(o + r.position, r.size)
+			draw_rect(rr, body)
+			draw_rect(rr, edge, false, 2.0)
+		draw_line(o + Vector2(363, 398), o + Vector2(363, 410), Color(0.9, 0.9, 0.95), 2.0)
+		draw_line(o + Vector2(364, 360), o + Vector2(432, 360), gold, 3.0)
+		draw_rect(Rect2(o + Vector2(392, 330), Vector2(16, 18)), Color(0.94, 0.9, 0.8))
+		draw_line(o + Vector2(400, 330), o + Vector2(400, 348), gold, 2.0)
+		var wc := o + Vector2(474, 378)
+		draw_circle(wc, 17.0, Color(0.78, 0.58, 0.28))
+		draw_circle(wc, 12.0, Color(0.35, 0.22, 0.12))
+		for n in 3:
+			var a := turn + TAU * n / 3.0
+			draw_line(wc, wc + Vector2.from_angle(a) * 12.0, gold, 3.0)
+		draw_colored_polygon(PackedVector2Array([o + Vector2(476, 428), o + Vector2(484, 410), o + Vector2(500, 414), o + Vector2(498, 428)]), Color(0.29, 0.25, 0.32))
+	if stage >= 3:
+		# The jacket on the dress form: sleeves, collar and buttons.
+		var jc := Color(0.24, 0.29, 0.37)
+		draw_colored_polygon(PackedVector2Array([o + Vector2(918, 286), o + Vector2(904, 300), o + Vector2(898, 380), o + Vector2(912, 382), o + Vector2(920, 306)]), jc)
+		draw_colored_polygon(PackedVector2Array([o + Vector2(1002, 286), o + Vector2(1016, 300), o + Vector2(1022, 380), o + Vector2(1008, 382), o + Vector2(1000, 306)]), jc)
+		draw_colored_polygon(PackedVector2Array([o + Vector2(944, 262), o + Vector2(960, 300), o + Vector2(976, 262)]), Color(0.85, 0.8, 0.7))
+		for i in 4:
+			draw_circle(o + Vector2(960, 310 + i * 22), 3.0, Color(0.9, 0.72, 0.35))
+	if stage >= 5:
+		# The grandfather clock runs: the pendulum swings, the hands move.
+		var face := o + Vector2(1155, 198)
+		draw_circle(face, 36.0, Color(0.85, 0.81, 0.7))
+		var minute := _anim * 0.5
+		draw_line(face, face + Vector2.from_angle(minute - PI / 2.0) * 28.0, Color(0.16, 0.11, 0.08), 3.0)
+		draw_line(face, face + Vector2.from_angle(minute / 12.0 - PI / 2.0 + 2.0) * 18.0, Color(0.16, 0.11, 0.08), 4.0)
+		draw_rect(Rect2(o + Vector2(1128, 266), Vector2(54, 186)), Color(0.12, 0.08, 0.09))
+		var top := o + Vector2(1155, 270)
+		var swing := sin(_anim * PI) * 0.32
+		var bob := top + Vector2.from_angle(PI / 2.0 + swing) * 136.0
+		draw_line(top, bob, Color(0.43, 0.29, 0.13), 3.0)
+		draw_circle(bob, 15.0, Color(0.6, 0.42, 0.16))
+
+
+static func _bez(a: Vector2, b: Vector2, c: Vector2, d: Vector2, t: float) -> Vector2:
+	var u := 1.0 - t
+	return a * u * u * u + b * 3.0 * u * u * t + c * 3.0 * u * t * t + d * t * t * t
 
 
 ## The desk lamp that lights at the first awakening.
@@ -372,6 +576,14 @@ func _draw_fx() -> void:
 	var tgt := atelier.target() if atelier != null else dolls.size()
 	if tgt < dolls.size():
 		var to := _fx.to_local(dolls[tgt].back_key_global())
+		# A faint brass thread from the big key to the doll it is filling: the
+		# picture says which key feeds which doll.
+		var mid0 := (k + to) * 0.5 + Vector2(0, -120)
+		var pts := PackedVector2Array()
+		for i in 25:
+			var u := float(i) / 24.0
+			pts.append(k.lerp(mid0, u).lerp(mid0.lerp(to, u), u))
+		_fx.draw_polyline(pts, Color(1.0, 0.8, 0.45, 0.16), 2.0)
 		for f: Array in _flows:
 			var t := float(f[0])
 			var mid := (k + to) * 0.5 + Vector2(0, -120)
@@ -382,6 +594,16 @@ func _draw_fx() -> void:
 		_fx.draw_arc(to, 16.0, 0.0, TAU, 32, Color(1, 0.85, 0.5, 0.18), 4.0, true)
 		if fill > 0.0:
 			_fx.draw_arc(to, 16.0, -PI / 2.0, -PI / 2.0 + TAU * fill, 32, Color(1.0, 0.82, 0.42, 0.95), 4.0, true)
+	for sp: Array in _sparks:
+		var life := 1.0 - float(sp[2]) / 0.9
+		var c0: Vector2 = sp[0]
+		var r0 := 4.0 * life
+		if r0 < 0.5:
+			continue   # a vanishing spark: its polygon would be degenerate (an engine error per frame)
+		_fx.draw_colored_polygon(PackedVector2Array([c0 + Vector2(0, -r0 * 2), c0 + Vector2(r0 * 0.5, 0),
+			c0 + Vector2(0, r0 * 2), c0 + Vector2(-r0 * 0.5, 0)]), Color(1.0, 0.9, 0.55, life))
+		_fx.draw_colored_polygon(PackedVector2Array([c0 + Vector2(-r0 * 2, 0), c0 + Vector2(0, r0 * 0.5),
+			c0 + Vector2(r0 * 2, 0), c0 + Vector2(0, -r0 * 0.5)]), Color(1.0, 0.9, 0.55, life))
 	for b: Array in _bursts:
 		var t := float(b[1]) / 1.6
 		var c: Vector2 = o + b[0]

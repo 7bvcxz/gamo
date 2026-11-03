@@ -125,9 +125,7 @@
     <rect x="410" y="546" width="190" height="14" rx="3" fill="url(#wood)"/>
     <rect x="422" y="560" width="12" height="130" fill="#2c2019"/>
     <rect x="576" y="560" width="12" height="130" fill="#2c2019"/>
-    <path d="M430 548 C 432 500, 470 470, 520 468 C 566 468, 590 500, 584 548 Z" fill="#4a3f52" stroke="#1c1620" stroke-width="2"/>
-    <path d="M452 548 C 458 512, 480 496, 506 494" fill="none" stroke="#5c506a" stroke-width="3"/>
-    <path d="M540 548 L 548 520 L 560 548" fill="none" stroke="#3a3142" stroke-width="2"/>
+    <!-- The sewing machine (covered while the atelier sleeps, uncovered from stage 2) is drawn by the game. -->
   </g>
 
   <!-- dress form with a half-finished jacket -->
@@ -159,16 +157,9 @@
   <rect x="1306" y="30" width="134" height="12" rx="4" fill="#5a4022"/>
   <path d="M1316 600 C 1340 584, 1380 584, 1440 600 L1440 616 L1316 616 Z" fill="#2a1420"/>
 
-  <!-- workbench, the key's mount and the gear behind the key -->
+  <!-- workbench and the key's mount -->
   <g>
-    <circle cx="720" cy="500" r="92" fill="#3d2a17" stroke="#21160b" stroke-width="4"/>
-    <g fill="#3d2a17" stroke="#21160b" stroke-width="3">
-      <rect x="708" y="396" width="24" height="18" rx="3"/><rect x="708" y="586" width="24" height="18" rx="3"/>
-      <rect x="616" y="488" width="18" height="24" rx="3"/><rect x="806" y="488" width="18" height="24" rx="3"/>
-      <rect x="640" y="420" width="20" height="20" rx="3" transform="rotate(45 650 430)"/><rect x="780" y="420" width="20" height="20" rx="3" transform="rotate(45 790 430)"/>
-      <rect x="640" y="560" width="20" height="20" rx="3" transform="rotate(45 650 570)"/><rect x="780" y="560" width="20" height="20" rx="3" transform="rotate(45 790 570)"/>
-    </g>
-    <circle cx="720" cy="500" r="56" fill="#4a3320" stroke="#21160b" stroke-width="3"/>
+    <!-- The big gear behind the key is drawn by the game (assets/art/gear_big.svg) so it can turn. -->
     <rect x="708" y="540" width="24" height="76" fill="#6e4b22" stroke="#2a1a0c" stroke-width="2"/>
     <rect x="530" y="610" width="380" height="26" rx="4" fill="url(#wood)" stroke="#1e140e" stroke-width="2"/>
     <rect x="530" y="610" width="380" height="5" fill="#6e5038"/>
