@@ -96,8 +96,10 @@ test('an upgrade is measured once its goods reach the crate; a hidden tab holds 
   const before = s.host.experiment.delivered;
   const spawned = s.host.experiment.spawned;
   await lab.page.waitForTimeout(2500);
-  await lab.tab(false);
+  // Read while still hidden: the first frame after showing again runs the
+  // line (it once delivered one item between showing and reading, 0.98.0).
   s = await lab.state();
+  await lab.tab(false);
   expect(s.host.experiment.delivered, 'nothing delivered while hidden').toBe(before);
   expect(s.host.experiment.spawned, 'nothing made while hidden').toBe(spawned);
 });
