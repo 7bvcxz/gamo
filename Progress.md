@@ -464,8 +464,8 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
 - Step 08 (#110): 블라인드 AI 플레이테스트 두 차례(실험마다 새 에이전트, 실제 화면·터치 3분, 감사로 블라인드 확인).
   1차에서 나온 UI 장애 넷을 고쳐 0.8.0(플레이어에게 3:00 시계 숨김, B의 '누르고 있기' 힌트, B의 탐 3초 표시, A의 첫 팝 보이게).
   보고서 `popcorn-glory/evidence/step08/REPORT.md`. 점수는 AI 대리 판단이며 사람 점수는 비어 있다.
-- Step 09 (#114): 비교·추천 완료, **소유자 결정 대기**(0.9.1). `popcorn-glory/experiments/RESULTS.md`·`DECISION.md`, 점수표 `docs/popcorn-glory/scorecard.html`.
-  잠정 B > C > A. Step 10–12(#115–#117)는 소유자가 선택지를 명시하기 전에는 시작하지 않는다.
+- Step 09 (#114): 비교·추천(0.9.1), `popcorn-glory/experiments/RESULTS.md`·`DECISION.md`, 점수표 `docs/popcorn-glory/scorecard.html`.
+  잠정 B > C > A. **소유자 결정(2026-11-03, 대화): B 승인 + 최소 범위** — Step 10(#115)을 그 가설로 시작한다(사람 점수 없이 내린 결정).
 
 ## 다음 작업
 
