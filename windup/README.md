@@ -31,6 +31,8 @@ xvfb-run -a -s "-screen 0 1600x1000x24" godot --path windup --audio-driver Dummy
 xvfb-run … --script res://tools/capture.gd -- --out /abs/wake.png --storyboard 0,0.35,0.7,1.1,1.6   # 깨어남 스토리보드
 windup/tools/art/gen_art.sh [--go]                   # 래스터 생성(기본 dry run). 처리: tools/art/build_art.gd
 windup/tools/deploy.sh                               # Web export → docs/windup/ (새 팩 + 공개된 팩만 남김)
+windup/tools/desktop_play.sh <out> [1920x1080]       # 진짜 데스크톱 창: Xvfb + OS 입력(XTEST) + x11grab 녹화 + --trace-out
+WINDUP_EVIDENCE=1 windup/tools/e2e.sh specs/profiles04.spec.mjs --project desktop   # 3분 플레이 셋(열중·최소·처음) + 소리 있는 영상
 windup/tools/e2e.sh                                  # 브라우저 검사 (로컬 docs/, 처음엔 tests/e2e에서 npm install)
 WINDUP_EVIDENCE=1 windup/tools/e2e.sh specs/play04.spec.mjs   # 증거를 evidence/stepNN/에 (기본은 test-results/)
 godot --headless --path windup --script res://tools/pace.gd   # 실제 규칙으로 스크립트 플레이어 넷의 페이스 표
@@ -47,6 +49,7 @@ WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh   # �
 | `?variant=a\|b\|c` | Fun Lab 변형 (Step 06) |
 | `?dev=1` | 개발 훅(`window.windup.call('dev_…')`)과 F5 새 게임 |
 | `?sound=off` | 소리 끔으로 시작(왼쪽 위 스피커 아이콘과 같다) |
+| `--trace-out /abs/x.jsonl` | (네이티브만) 계측을 2초마다 파일로. 개발 모드에서는 E 키·`dev_export`로 내려받기 |
 | `?motion=reduce` | 섬광·흔들림 없이(왼쪽 위 별 아이콘, 시스템의 '동작 줄이기'와 같다) |
 
 ## 구조

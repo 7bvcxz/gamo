@@ -43,6 +43,19 @@ const POSES := {
 }
 ## The wake-up: [time, pose]. Holds and moves, ~1.6 s in all (H7: 1.5 s).
 const WAKE := [[0.0, "asleep"], [0.35, "stirring"], [0.7, "awake"], [1.1, "stretch"], [1.6, "stand"]]
+## Variant B's reveal (3.2 s): wakes, looks out at the player, then its own gesture.
+const GESTURE_POSES := {
+	"look": {"hip": SIT_HIP, "legs": -84.0, "torso": -6.0, "head": -22.0, "arm_near": -20.0, "arm_far": -10.0, "eyes": 1.0},
+	"wave_up": {"hip": LEG_LENGTH, "legs": 0.0, "torso": -4.0, "head": -12.0, "arm_near": -165.0, "arm_far": 6.0, "eyes": 1.0},
+	"wave_down": {"hip": LEG_LENGTH, "legs": 0.0, "torso": -4.0, "head": -12.0, "arm_near": -125.0, "arm_far": 6.0, "eyes": 1.0},
+	"bow": {"hip": LEG_LENGTH, "legs": 0.0, "torso": 38.0, "head": 18.0, "arm_near": 30.0, "arm_far": 20.0, "eyes": 0.45},
+	"cheer": {"hip": LEG_LENGTH, "legs": 0.0, "torso": -10.0, "head": -22.0, "arm_near": -150.0, "arm_far": -150.0, "eyes": 1.0},
+	"hop": {"hip": LEG_LENGTH + 16.0, "legs": 12.0, "torso": -6.0, "head": -14.0, "arm_near": -60.0, "arm_far": -60.0, "eyes": 1.0},
+	"salute": {"hip": LEG_LENGTH, "legs": 0.0, "torso": -3.0, "head": -8.0, "arm_near": -158.0, "arm_far": 4.0, "eyes": 1.0},
+}
+const GESTURES := [["wave_up", "wave_down"], ["bow", "stand"], ["cheer", "stand"], ["hop", "stand"], ["salute", "stand"]]
+## Variant B's hats, one per doll (cycled): drawn on the head in head.svg pixels.
+const HATS := ["top_hat", "beret", "flower", "bow", "crown", "cap"]
 
 var pose: Dictionary = POSES["asleep"].duplicate()
 var pose_name: String = "asleep"
@@ -58,6 +71,13 @@ var facing: int = 1:
 		facing = 1 if v >= 0 else -1
 		scale.x = absf(scale.x) * facing
 var vest_tint: Color = Color.WHITE
+## B: a hat on the head ("" none) and the reveal gesture (index into GESTURES, -1 plain wake).
+var hat: String = ""
+var gesture: int = -1
+var _timeline: Array = WAKE
+var _quirk_name: String = ""
+var _quirk_t: float = 0.0
+var _quirk_len: float = 1.0
 ## 0..1 while asleep: how close it is to waking -- its eyes flutter open.
 var flutter: float = 0.0
 var _phase: float = 0.0
@@ -101,6 +121,7 @@ func _ready() -> void:
 	_torso.move_child(_arm_far, 0)
 	_torso.move_child(_back_key, 0)
 	_head = _joint(_torso, "head", _local(PIVOT["torso_neck"] - PIVOT["torso_hip"]), Color.WHITE)
+	_attach_hat()
 	_eyes = Node2D.new()
 	_head.add_child(_eyes)
 	_eyes.position = _local(-PIVOT["head"])
@@ -161,24 +182,52 @@ func start_wake() -> void:
 	set_pose("asleep")
 	waking = true
 	wake_time = 0.0
+	_timeline = WAKE if gesture < 0 else reveal_timeline(gesture)
+
+
+## B: asleep -> stirring -> awake -> looks at the player -> its gesture twice -> stands.
+static func reveal_timeline(g: int) -> Array:
+	var pair: Array = GESTURES[g % GESTURES.size()]
+	return [[0.0, "asleep"], [0.6, "stirring"], [1.1, "awake"], [1.5, "look"], [1.95, pair[0]],
+		[2.35, pair[1]], [2.75, pair[0]], [3.2, "stand"]]
+
+
+func wake_length() -> float:
+	return float(_timeline[_timeline.size() - 1][0])
 
 
 func advance(dt: float) -> void:
 	_phase += dt
 	if waking:
 		wake_time += dt
-		pose = _wake_pose(wake_time)
-		if wake_time >= WAKE[WAKE.size() - 1][0]:
+		pose = _timeline_pose(_timeline, wake_time)
+		if wake_time >= wake_length():
 			waking = false
 			pose_name = "stand"
 			pose = POSES["stand"].duplicate()
 	elif pose_name == "stand":
 		pose = _activity_pose(activity, _phase)
+		if _quirk_t > 0.0:
+			_quirk_t = maxf(0.0, _quirk_t - dt)
+			var env := sin(PI * (1.0 - _quirk_t / _quirk_len))
+			var q: Dictionary = _named(_quirk_name)
+			# Upper body only: a standing doll stays on its feet.
+			for key: String in ["torso", "head", "arm_near", "arm_far"]:
+				pose[key] = lerpf(float(pose[key]), float(q[key]), env * 0.9)
 	key_spin += dt * (6.0 if pose_name == "stand" or waking else 0.0)
 	_apply()
 	if pose_name == "asleep" and _hip != null:
 		# Sleeping, it breathes: the slump rises and falls a little.
 		_torso.rotation_degrees = float(pose["torso"]) + sin(_phase * 1.6) * 2.0
+
+
+## A short temperament gesture over whatever the doll is doing (upper body).
+func play_quirk(name: String, seconds: float) -> void:
+	if not (POSES.has(name) or GESTURE_POSES.has(name)):
+		return
+	_quirk_name = name
+	_quirk_len = maxf(0.1, seconds)
+	_quirk_t = _quirk_len
 
 
 func awake_now() -> bool:
@@ -211,6 +260,54 @@ static func _activity_pose(what: String, t: float) -> Dictionary:
 	return p
 
 
+var _hat_node: Node2D
+
+
+## B: puts a hat on (or takes it off with ""), before or after the rig is built.
+func set_hat(name: String) -> void:
+	hat = name
+	if _head != null:
+		_attach_hat()
+
+
+func _attach_hat() -> void:
+	if _hat_node != null:
+		_hat_node.queue_free()
+		_hat_node = null
+	if hat == "":
+		return
+	_hat_node = Node2D.new()
+	_hat_node.position = _local(-PIVOT["head"])
+	_hat_node.draw.connect(_draw_hat.bind(_hat_node))
+	_head.add_child(_hat_node)
+
+
+## B's hats, in head.svg pixels (the face looks right; the crown of the head is near (32, 10)).
+func _draw_hat(c: Node2D) -> void:
+	var tint := vest_tint
+	match hat:
+		"top_hat":
+			c.draw_rect(Rect2(14, 6, 36, 5), Color(0.12, 0.1, 0.12))
+			c.draw_rect(Rect2(20, -16, 24, 23), Color(0.15, 0.12, 0.15))
+			c.draw_rect(Rect2(20, -2, 24, 4), Color(0.6, 0.2, 0.25))
+		"beret":
+			c.draw_colored_polygon(PackedVector2Array([Vector2(12, 12), Vector2(20, 2), Vector2(38, -1), Vector2(52, 6), Vector2(50, 12)]), Color(0.25, 0.3, 0.55) * tint)
+			c.draw_circle(Vector2(34, -2), 2.5, Color(0.25, 0.3, 0.55))
+		"flower":
+			for k in 5:
+				c.draw_circle(Vector2(46, 10) + Vector2.from_angle(TAU * k / 5.0) * 4.5, 3.4, Color(1.0, 0.75, 0.85))
+			c.draw_circle(Vector2(46, 10), 2.6, Color(1.0, 0.85, 0.3))
+		"bow":
+			c.draw_colored_polygon(PackedVector2Array([Vector2(26, 6), Vector2(16, 0), Vector2(16, 12)]), Color(0.9, 0.3, 0.35))
+			c.draw_colored_polygon(PackedVector2Array([Vector2(26, 6), Vector2(36, 0), Vector2(36, 12)]), Color(0.9, 0.3, 0.35))
+			c.draw_circle(Vector2(26, 6), 3.0, Color(0.75, 0.2, 0.25))
+		"crown":
+			c.draw_colored_polygon(PackedVector2Array([Vector2(18, 10), Vector2(18, -2), Vector2(24, 4), Vector2(31, -6), Vector2(38, 4), Vector2(44, -2), Vector2(44, 10)]), Color(0.98, 0.78, 0.3))
+			c.draw_circle(Vector2(31, 4), 2.2, Color(0.8, 0.2, 0.3))
+		"cap":
+			c.draw_colored_polygon(PackedVector2Array([Vector2(12, 12), Vector2(16, 0), Vector2(34, -3), Vector2(50, 4), Vector2(62, 10), Vector2(48, 12)]), Color(0.75, 0.55, 0.3) * tint)
+
+
 ## Where the doll's own wind-up key is (for the fill ring).
 func back_key_global() -> Vector2:
 	if _back_key == null:
@@ -220,13 +317,21 @@ func back_key_global() -> Vector2:
 
 ## The pose at time `t` of the wake-up timeline (smoothstep between keys).
 static func _wake_pose(t: float) -> Dictionary:
-	for i in WAKE.size() - 1:
-		var a: Array = WAKE[i]
-		var b: Array = WAKE[i + 1]
+	return _timeline_pose(WAKE, t)
+
+
+static func _named(name: String) -> Dictionary:
+	return POSES[name] if POSES.has(name) else GESTURE_POSES[name]
+
+
+static func _timeline_pose(tl: Array, t: float) -> Dictionary:
+	for i in tl.size() - 1:
+		var a: Array = tl[i]
+		var b: Array = tl[i + 1]
 		if t <= float(b[0]):
 			var k := smoothstep(float(a[0]), float(b[0]), t)
-			return _blend(POSES[a[1]], POSES[b[1]], k)
-	return POSES[WAKE[WAKE.size() - 1][1]].duplicate()
+			return _blend(_named(a[1]), _named(b[1]), k)
+	return _named(tl[tl.size() - 1][1]).duplicate()
 
 
 static func _blend(a: Dictionary, b: Dictionary, k: float) -> Dictionary:

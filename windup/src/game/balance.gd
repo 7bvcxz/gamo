@@ -5,6 +5,7 @@ extends RefCounted
 ## from here; tests read the same file, so a tuning change is one edit.
 
 const PATH := "res://data/balance.json"
+const VARIANTS_PATH := "res://data/variants.json"
 
 var energy_per_turn: float
 var gear_bonus_per_doll: float
@@ -20,6 +21,15 @@ var rates: PackedFloat64Array = PackedFloat64Array()
 var positions: Array[Vector2] = []
 ## [[min dolls, name], ...] ascending.
 var stages: Array = []
+## Step 06 variants ("base" is balance.json alone).
+var variant: String = "base"
+## A: turns coil a spring that is released on letting go.
+var spring_enabled: bool = false
+var spring_capacity_of_next_cost: float = 1.0
+## B: sleepers under sheets, longer reveals (presentation only).
+var reveal: bool = false
+## C: a doll that finishes waking gives the next one rate x kick_seconds at once.
+var kick_seconds: float = 0.0
 
 
 static func load_default() -> Balance:
@@ -27,6 +37,22 @@ static func load_default() -> Balance:
 	var data: Variant = JSON.parse_string(text)
 	assert(data is Dictionary, "balance.json does not parse")
 	return from_dict(data)
+
+
+## balance.json with a variant's overrides from variants.json on top.
+static func load_variant(id: String) -> Balance:
+	var base: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PATH))
+	if id == "base":
+		var b0 := from_dict(base)
+		return b0
+	var all: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(VARIANTS_PATH))
+	var over: Dictionary = all.get(id, {})
+	for k: String in over:
+		if not k.begins_with("_"):
+			base[k] = over[k]
+	var b := from_dict(base)
+	b.variant = id
+	return b
 
 
 static func from_dict(d: Dictionary) -> Balance:
@@ -41,13 +67,19 @@ static func from_dict(d: Dictionary) -> Balance:
 	b.hint_idle_seconds = float(d["hint_idle_seconds"])
 	b.idle_report_seconds = float(d["idle_report_seconds"])
 	b.autosave_seconds = float(d["autosave_seconds"])
+	var rate_scale := float(d.get("dolls_rate_scale", 1.0))
 	for doll: Dictionary in d["dolls"]:
 		b.costs.append(float(doll["cost"]))
-		b.rates.append(float(doll["rate"]))
+		b.rates.append(float(doll["rate"]) * rate_scale)
 		var p: Array = doll["pos"]
 		b.positions.append(Vector2(float(p[0]), float(p[1])))
 	for s: Dictionary in d["stages"]:
 		b.stages.append([int(s["dolls"]), String(s["name"])])
+	var sp: Dictionary = d.get("spring", {})
+	b.spring_enabled = bool(sp.get("enabled", false))
+	b.spring_capacity_of_next_cost = float(sp.get("capacity_of_next_cost", 1.0))
+	b.reveal = bool(d.get("reveal", false))
+	b.kick_seconds = float(d.get("kick_seconds", 0.0))
 	return b
 
 

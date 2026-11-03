@@ -14,6 +14,7 @@ extends RefCounted
 signal awakening(index: int)        ## the cost is paid, the doll starts to wake
 signal awake_changed(index: int)    ## that doll is fully awake and working
 signal stage_changed(stage: int, name: String)
+signal kicked(index: int, energy: float)  ## C: a new doll turned the next one's key
 
 var b: Balance
 var energy: float = 0.0
@@ -30,6 +31,10 @@ var turns: int = 0
 var blocked: int = 0
 var stage: int = 0
 var time: float = 0.0
+## A: energy coiled in the mainspring, not yet delivered (not part of `energy`).
+var spring: float = 0.0
+## A: turns refused because the spring was already full.
+var spring_full_refusals: int = 0
 
 var _last_turn: float = -INF
 
@@ -72,6 +77,27 @@ func auto_rate() -> float:
 	return r
 
 
+## A: how much the spring can hold now (the next doll's cost).
+func spring_capacity() -> float:
+	return target_cost() * b.spring_capacity_of_next_cost if target() < doll_count() else b.energy_per_turn * 50.0
+
+
+func spring_fill() -> float:
+	return clampf(spring / spring_capacity(), 0.0, 1.0) if spring_capacity() > 0.0 else 0.0
+
+
+## A: lets the spring go -- everything coiled becomes energy at once.
+func release() -> float:
+	var e := spring
+	if e <= 0.0:
+		return 0.0
+	spring = 0.0
+	energy += e
+	manual_energy += e
+	_check()
+	return e
+
+
 func can_turn() -> bool:
 	return time - _last_turn >= 1.0 / b.max_turns_per_second - 1e-6
 
@@ -81,8 +107,16 @@ func wind() -> float:
 	if not can_turn():
 		blocked += 1
 		return 0.0
-	_last_turn = time
 	var e := wind_power()
+	if b.spring_enabled:
+		if spring >= spring_capacity() - 1e-9:
+			spring_full_refusals += 1
+			return 0.0
+		_last_turn = time
+		spring = minf(spring + e, spring_capacity())
+		turns += 1
+		return e
+	_last_turn = time
 	energy += e
 	manual_energy += e
 	turns += 1
@@ -105,6 +139,12 @@ func tick(dt: float) -> void:
 			awake += 1
 			awake_changed.emit(done)
 			_update_stage()
+			if b.kick_seconds > 0.0:
+				# C: the new doll turns the next sleeper's key at once.
+				var k := b.rates[done] * b.kick_seconds
+				energy += k
+				auto_energy += k
+				kicked.emit(done, k)
 	_check()
 
 
@@ -139,6 +179,22 @@ func stage_name() -> String:
 	return String(b.stages[stage][1])
 
 
+## Doll i's state in the one loop every doll goes through:
+##   DORMANT    asleep, not yet the one being filled
+##   WINDING    asleep, the one the energy is filling now (its key is being wound)
+##   AWAKENING  its cost is paid, it is waking (no contribution yet)
+##   WORKING    awake, adding its rate every second
+## Transitions only go forward, once each (tests check it).
+func doll_state(i: int) -> String:
+	if i < awake:
+		return "WORKING"
+	if i == waking:
+		return "AWAKENING"
+	if i == target():
+		return "WINDING"
+	return "DORMANT"
+
+
 ## Where the accounting says energy should be (tests compare it to `energy`).
 func accounted_energy() -> float:
 	return manual_energy + auto_energy - spent
@@ -147,7 +203,7 @@ func accounted_energy() -> float:
 func to_dict() -> Dictionary:
 	return {"energy": energy, "awake": awake, "waking": waking, "wake_left": wake_left,
 		"manual_energy": manual_energy, "auto_energy": auto_energy, "spent": spent,
-		"turns": turns, "blocked": blocked, "time": time}
+		"turns": turns, "blocked": blocked, "time": time, "spring": spring}
 
 
 ## Restores a saved atelier. Anything that does not fit the current data
@@ -165,6 +221,11 @@ func from_dict(d: Dictionary) -> void:
 	turns = maxi(0, int(d.get("turns", 0)))
 	blocked = maxi(0, int(d.get("blocked", 0)))
 	time = maxf(0.0, float(d.get("time", 0.0)))
+	# A save's coiled spring is released into energy on load (it was the player's).
+	var coiled := maxf(0.0, float(d.get("spring", 0.0)))
+	if coiled > 0.0:
+		energy += coiled
+		manual_energy += coiled
 	_last_turn = -INF
 	stage = stage_for(awake)
 	# A save whose numbers disagree is repaired to the energy it shows.

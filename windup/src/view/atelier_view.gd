@@ -14,6 +14,8 @@ extends Node2D
 
 signal key_pressed(source: String)
 signal key_released
+## A working doll arrived at the doll being filled and started turning its key.
+signal helping(helper: int, target: int)
 
 const DESIGN := Vector2(1280, 720)
 const KEY_CENTER := Vector2(640, 380)
@@ -26,7 +28,8 @@ const TINTS := [Color(1, 1, 1), Color(0.75, 0.85, 1.1), Color(1.1, 0.95, 0.7), C
 	Color(1.1, 0.8, 0.95), Color(0.8, 0.8, 0.8), Color(1.0, 0.9, 0.8), Color(0.9, 0.9, 1.15),
 	Color(1.15, 1.0, 0.85), Color(0.85, 0.95, 1.0), Color(1.0, 0.85, 0.85), Color(0.95, 1.05, 0.9)]
 const HELPERS := 3
-const HELPER_OFFSETS := [-40.0, 40.0, -72.0]
+## Helpers queue behind the sleeper's back (its key is there), a body apart.
+const HELPER_GAPS := [44.0, 94.0, 144.0]
 const WALK_SPEED := 110.0
 ## Warm light by stage: [design position, radius, first stage it shows in].
 const LIGHTS := [[Vector2(512, 452), 250.0, 1], [Vector2(640, 380), 200.0, 2], [Vector2(430, 420), 180.0, 2],
@@ -35,6 +38,12 @@ const LIGHTS := [[Vector2(512, 452), 250.0, 1], [Vector2(640, 380), 200.0, 2], [
 const TINT_BY_STAGE := [Color(0.74, 0.78, 0.95), Color(0.84, 0.84, 0.94), Color(0.9, 0.89, 0.92),
 	Color(0.97, 0.94, 0.9), Color(1, 0.98, 0.94), Color(1, 1, 0.97)]
 const C_LAMP := Color(1.0, 0.72, 0.38)
+## Asleep dolls are drawn cold and dim, the one being wound a little brighter,
+## awake dolls in full warm colour: 0, 1 or 3 awake dolls read at a glance.
+const TINT_ASLEEP := Color(0.56, 0.6, 0.8)
+const TINT_WINDING := Color(0.74, 0.76, 0.92)
+## Personality through behaviour only (no stats): doll i is TEMPERAMENTS[i % 3].
+const TEMPERAMENTS := ["curious", "timid", "proud"]
 
 const BACKDROP := "res://assets/art/backdrop.svg"
 const KEY := "res://assets/art/key.svg"
@@ -94,6 +103,25 @@ var _sparks: Array = []         # [pos, vel, t]
 var _shake: float = 0.0
 ## True: no shake (the HUD's motion icon, ?motion=reduce, the system setting).
 var reduced_motion: bool = false
+## Step 06 variant ("base", "a", "b", "c"): what extra the picture shows.
+var variant: String = "base"
+var _release_t: float = -1.0     # A: seconds since the spring was let go
+var _release_fill: float = 0.0   # A: how full it was
+var _full_t: float = 0.0         # A: the key strains when the spring is full
+var _sheet_t: Dictionary = {}    # B: doll index -> seconds since its sheet flew off
+var _zoom: float = 0.0           # B: the camera leaning in on a reveal
+var _zoom_at: Vector2 = Vector2.ZERO
+var _kicks: Array = []           # C: [from doll, to doll, t]
+var _chain: int = 0              # C: awakenings in a row (each within 5 s of the last)
+var _last_wake: float = -99.0
+var _chain_of: Dictionary = {}   # C: doll index -> its place in the chain
+var _motes: Array = []           # [from, t]: a working doll's energy drifting to the key
+var _mote_clock: PackedFloat32Array = PackedFloat32Array()
+var _ready_at: Dictionary = {}   # doll index -> _anim when it started working
+var _helping: Dictionary = {}    # doll index -> the target it is turning
+var _quirk_clock: PackedFloat32Array = PackedFloat32Array()
+var _clock_hand: float = 0.0     # the grandfather clock's hour hand (advances per awakening)
+var _dust: float = 1.0           # dust in the corners: 1 asleep -> 0 bustling
 
 
 func _ready() -> void:
@@ -132,6 +160,41 @@ func _ready() -> void:
 	add_child(_fx)
 	_layout()
 	get_viewport().size_changed.connect(_layout)
+
+
+## Applies a Step 06 variant to the dolls: B gives each a hat and a gesture
+## and hides the sleepers under dust sheets.
+func set_variant(id: String) -> void:
+	variant = id
+	for i in dolls.size():
+		dolls[i].set_hat(DollRig.HATS[i % DollRig.HATS.size()] if id == "b" else "")
+		dolls[i].gesture = i if id == "b" else -1
+
+
+## B: is doll i still under its sheet?
+func sheeted(i: int) -> bool:
+	return variant == "b" and atelier != null and i >= atelier.awake and i != atelier.waking
+
+
+## A: the spring was let go -- a rush of light down the thread, the train spins.
+func on_release(e: float) -> void:
+	_release_t = 0.0
+	_release_fill = 1.0
+	_gear_target += 0.25 + minf(e, 400.0) * 0.004
+	for i in mini(12, 2 + int(e / 15.0)):
+		if _flows.size() < 32:
+			_flows.append([-0.04 * i])
+
+
+## A: a turn refused because the spring is full: the key strains.
+func on_spring_full() -> void:
+	_full_t = 0.35
+
+
+## C: doll i, just awake, turned the next sleeper's key.
+func on_kick(i: int, _energy: float) -> void:
+	if atelier != null and atelier.target() < dolls.size():
+		_kicks.append([i, atelier.target(), 0.0])
 
 
 ## Diagnosis only (the bridge's dev_layers): turns layers of the picture off.
@@ -196,9 +259,28 @@ func sync() -> void:
 	_flows.clear()
 	_bursts.clear()
 	_sparks.clear()
+	_motes.clear()
+	_ready_at.clear()
+	_helping.clear()
+	_mote_clock.resize(dolls.size())
+	_quirk_clock.resize(dolls.size())
+	for i in dolls.size():
+		_mote_clock[i] = 0.37 * i
+		_quirk_clock[i] = 2.0 + 1.3 * i
+		dolls[i].modulate = _doll_tint(i)
+	_clock_hand = _hand_for(atelier.awake) if atelier != null else _hand_for(0)
+	_dust = _dust_for(atelier.awake) if atelier != null else 1.0
 	_gear_pop.resize(12)
 	for g in 12:
 		_gear_pop[g] = 1.0 if atelier != null and g < atelier.awake else 0.0
+	_sheet_t.clear()
+	_kicks.clear()
+	_chain = 0
+	_chain_of.clear()
+	_zoom = 0.0
+	_release_t = -1.0
+	for i in dolls.size():
+		dolls[i].visible = not sheeted(i)
 	if atelier != null:
 		var st := atelier.stage
 		for k in LIGHTS.size():
@@ -249,8 +331,16 @@ func on_awakening(i: int) -> void:
 			_sparks.append([from, Vector2.from_angle(a) * (140.0 + 25.0 * (k % 3)), 0.0])
 	if i < _gear_pop.size():
 		_gear_pop[i] = 0.01
-	if not reduced_motion:
-		_shake = 1.0
+	if variant == "b" and i < dolls.size():
+		dolls[i].visible = true
+		_sheet_t[i] = 0.0
+		_zoom_at = _layout_offset() + _homes[i] + Vector2(0, -50)
+	if variant == "c":
+		_chain = _chain + 1 if _anim - _last_wake < 5.0 else 1
+		_last_wake = _anim
+		_chain_of[i] = _chain
+		if not _bursts.is_empty():
+			_bursts[_bursts.size() - 1].append(_chain)
 
 
 ## A flow of light from the key to the doll being filled, one per turn.
@@ -306,8 +396,14 @@ func advance(dt: float) -> void:
 		sp[1] = (sp[1] as Vector2) + Vector2(0, 260.0) * dt
 		sp[0] = (sp[0] as Vector2) + (sp[1] as Vector2) * dt
 	_sparks = _sparks.filter(func(sp: Array) -> bool: return float(sp[2]) < 0.9)
-	_shake = maxf(0.0, _shake - dt * 4.0)
-	position = Vector2(sin(_anim * 71.0), cos(_anim * 53.0)) * 3.0 * _shake if not reduced_motion else Vector2.ZERO
+	_advance_variant(dt)
+	_advance_life(dt)
+	# No camera shake (Step 05 V2). Variant B's gentle lean is the only camera motion.
+	var shake := Vector2.ZERO
+	# B: the camera leans in on a reveal (not with reduced motion).
+	var z := 1.0 + 0.09 * _zoom if not reduced_motion else 1.0
+	scale = Vector2(z, z)
+	position = _zoom_at * (1.0 - z) + shake
 	_anticipate()
 	_move_dolls(dt)
 	for d in dolls:
@@ -330,6 +426,87 @@ func advance(dt: float) -> void:
 	_fx.queue_redraw()
 
 
+func _advance_variant(dt: float) -> void:
+	if _release_t >= 0.0:
+		_release_t += dt
+		_release_fill = maxf(0.0, 1.0 - _release_t / 0.35)
+		if _release_t > 0.6:
+			_release_t = -1.0
+	_full_t = maxf(0.0, _full_t - dt)
+	for i: int in _sheet_t.keys():
+		_sheet_t[i] = float(_sheet_t[i]) + dt
+		if float(_sheet_t[i]) > 1.0:
+			_sheet_t.erase(i)
+	var revealing := variant == "b" and atelier != null and atelier.waking >= 0
+	_zoom = move_toward(_zoom, 1.0 if revealing else 0.0, dt * (2.5 if revealing else 1.2))
+	for kk: Array in _kicks:
+		kk[2] = float(kk[2]) + dt
+	_kicks = _kicks.filter(func(kk: Array) -> bool: return float(kk[2]) < 0.7)
+
+
+func _doll_tint(i: int) -> Color:
+	if atelier == null:
+		return Color.WHITE
+	match atelier.doll_state(i):
+		"DORMANT":
+			return TINT_ASLEEP
+		"WINDING":
+			return TINT_WINDING
+	return Color.WHITE
+
+
+static func _hand_for(awake_count: int) -> float:
+	return -PI / 2.0 + awake_count * TAU / 12.0 + 0.6
+
+
+static func _dust_for(awake_count: int) -> float:
+	return clampf(1.0 - awake_count / 6.0, 0.0, 1.0)
+
+
+## The atelier's life that follows the rules' state: doll colours, the motes a
+## working doll sends to the key, temperaments, the clock and the dust.
+func _advance_life(dt: float) -> void:
+	if atelier == null:
+		return
+	for i in dolls.size():
+		var d := dolls[i]
+		d.modulate = d.modulate.lerp(_doll_tint(i), 1.0 - exp(-dt * 3.0))
+		var st := atelier.doll_state(i)
+		if st == "WORKING" and not _ready_at.has(i):
+			_ready_at[i] = _anim
+		if st == "WORKING" and d.awake_now() and not _helping.has(i) and d.activity == "work":
+			_mote_clock[i] += dt
+			var every := maxf(0.6, 2.4 - atelier.b.rates[i] * 0.2)
+			if _mote_clock[i] >= every and _motes.size() < 40:
+				_mote_clock[i] = 0.0
+				_motes.append([d.position + Vector2(0, -46), 0.0])
+		if st == "WORKING" and d.awake_now() and d.activity != "walk":
+			_quirk_clock[i] -= dt
+			if _quirk_clock[i] <= 0.0:
+				_quirk(i)
+	for m: Array in _motes:
+		m[1] = float(m[1]) + dt / 1.1
+	_motes = _motes.filter(func(m: Array) -> bool: return float(m[1]) < 1.0)
+	_clock_hand = lerp_angle(_clock_hand, _hand_for(atelier.awake), 1.0 - exp(-dt * 2.0))
+	_dust = move_toward(_dust, _dust_for(atelier.awake), dt * 0.3)
+
+
+## A temperament shows itself now and then: the curious one looks over at the
+## key, the timid one pauses and looks down, the proud one strikes a pose.
+func _quirk(i: int) -> void:
+	var d := dolls[i]
+	match TEMPERAMENTS[i % TEMPERAMENTS.size()]:
+		"curious":
+			d.play_quirk("look", 1.0)
+			_quirk_clock[i] = 5.0 + fmod(i * 1.7, 2.0)
+		"timid":
+			d.play_quirk("bow", 0.9)
+			_quirk_clock[i] = 6.5 + fmod(i * 1.3, 2.0)
+		"proud":
+			d.play_quirk("cheer", 0.8)
+			_quirk_clock[i] = 7.0 + fmod(i * 1.1, 2.0)
+
+
 ## The doll being filled shivers as it nears its cost, and its eyes flutter.
 func _anticipate() -> void:
 	if atelier == null:
@@ -337,6 +514,9 @@ func _anticipate() -> void:
 	var tgt := atelier.target()
 	for i in dolls.size():
 		var d := dolls[i]
+		if sheeted(i):
+			d.visible = false
+			continue
 		if i == tgt and atelier.waking < 0 and d.pose_name == "asleep":
 			var f := atelier.target_fill()
 			var k := clampf((f - 0.55) / 0.45, 0.0, 1.0)
@@ -345,6 +525,17 @@ func _anticipate() -> void:
 		elif d.pose_name == "asleep":
 			d.rotation = 0.0
 			d.flutter = 0.0
+
+
+## Where helper k stands for target doll `tgt` (design coordinates): behind
+## its back, a body apart; on the other side if that would leave the room.
+func helper_spot(tgt: int, k: int) -> Vector2:
+	var home: Vector2 = _homes[tgt]
+	var back := -1.0 if home.x < DESIGN.x * 0.5 else 1.0   # sleepers face the room's middle
+	var x: float = home.x + back * float(HELPER_GAPS[k])
+	if x < 40.0 or x > DESIGN.x - 40.0:
+		x = home.x - back * float(HELPER_GAPS[k])
+	return Vector2(x, home.y + 2.0 + k * 3.0)
 
 
 ## Awake dolls walk: up to HELPERS of them, the nearest, go to the doll being
@@ -370,10 +561,13 @@ func _move_dolls(dt: float) -> void:
 		var goal: Vector2 = o + _homes[i]
 		var face_to := 0.0
 		if k >= 0:
-			var side := float(HELPER_OFFSETS[k])
-			goal = o + _homes[tgt] + Vector2(side, 2.0 + k * 3.0)
+			goal = o + helper_spot(tgt, k)
 			face_to = (o + _homes[tgt]).x
 		var delta := goal - d.position
+		var settle := 1.5 if TEMPERAMENTS[i % TEMPERAMENTS.size()] == "timid" else 0.3
+		if _ready_at.has(i) and _anim - float(_ready_at[i]) < settle:
+			d.activity = "idle"
+			continue
 		if delta.length() > 3.0:
 			d.position += delta.limit_length(WALK_SPEED * dt)
 			d.activity = "walk"
@@ -382,6 +576,11 @@ func _move_dolls(dt: float) -> void:
 			d.activity = "wind" if k >= 0 else "work"
 			if k >= 0:
 				d.facing = 1 if face_to >= d.position.x else -1
+				if int(_helping.get(i, -1)) != tgt:
+					_helping[i] = tgt
+					helping.emit(i, tgt)
+			else:
+				_helping.erase(i)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -435,12 +634,14 @@ func _draw_art() -> void:
 	var stage := atelier.stage if atelier != null else 0
 	if not _hide_props:
 		_draw_props(_layout_offset(), stage)
+		_draw_clock(_layout_offset(), stage)
+		_draw_dust()
 	if stage >= 1:
 		_draw_lamp(_layout_offset() + Vector2(500, 492))
 	var k := key_center()
 	if not _hide_gears:
 		_draw_gears(k)
-	var wobble := sin(_anim * 2.4) * (0.12 if hint else 0.04)
+	var wobble := sin(_anim * 2.4) * (0.12 if hint else 0.04) + sin(_anim * 60.0) * 0.05 * (_full_t / 0.35)
 	var grow := 1.0 + _press_kick * 0.04
 	draw_set_transform(k, key_angle + wobble, Vector2(grow, grow))
 	draw_texture_rect(_key, Rect2(Vector2(-KEY_DRAW, -KEY_DRAW) * 0.5, Vector2(KEY_DRAW, KEY_DRAW)), false)
@@ -526,19 +727,41 @@ func _draw_props(o: Vector2, stage: int) -> void:
 		draw_colored_polygon(PackedVector2Array([o + Vector2(944, 262), o + Vector2(960, 300), o + Vector2(976, 262)]), Color(0.85, 0.8, 0.7))
 		for i in 4:
 			draw_circle(o + Vector2(960, 310 + i * 22), 3.0, Color(0.9, 0.72, 0.35))
+	pass
+
+
+## The grandfather clock follows the dolls: its hour hand moves one hour per
+## awakening (state, not time), and from stage 5 the pendulum swings.
+func _draw_clock(o: Vector2, stage: int) -> void:
+	if not use_art:
+		return
+	var face := o + Vector2(1155, 198)
+	draw_circle(face, 36.0, Color(0.79, 0.75, 0.64))
+	for n in 12:
+		var a := TAU * n / 12.0
+		draw_line(face + Vector2.from_angle(a) * 30.0, face + Vector2.from_angle(a) * 34.0, Color(0.3, 0.22, 0.15), 2.0)
+	var ink := Color(0.16, 0.11, 0.08)
+	draw_line(face, face + Vector2.from_angle(_clock_hand) * 20.0, ink, 4.0)
+	var minute := _clock_hand * 12.0 if stage < 5 else _anim * 0.6
+	draw_line(face, face + Vector2.from_angle(minute) * 29.0, ink, 2.5)
+	draw_circle(face, 3.0, ink)
 	if stage >= 5:
-		# The grandfather clock runs: the pendulum swings, the hands move.
-		var face := o + Vector2(1155, 198)
-		draw_circle(face, 36.0, Color(0.85, 0.81, 0.7))
-		var minute := _anim * 0.5
-		draw_line(face, face + Vector2.from_angle(minute - PI / 2.0) * 28.0, Color(0.16, 0.11, 0.08), 3.0)
-		draw_line(face, face + Vector2.from_angle(minute / 12.0 - PI / 2.0 + 2.0) * 18.0, Color(0.16, 0.11, 0.08), 4.0)
 		draw_rect(Rect2(o + Vector2(1128, 266), Vector2(54, 186)), Color(0.12, 0.08, 0.09))
 		var top := o + Vector2(1155, 270)
 		var swing := sin(_anim * PI) * 0.32
 		var bob := top + Vector2.from_angle(PI / 2.0 + swing) * 136.0
 		draw_line(top, bob, Color(0.43, 0.29, 0.13), 3.0)
 		draw_circle(bob, 15.0, Color(0.6, 0.42, 0.16))
+
+
+## Dust in the corners while the atelier sleeps; it clears as dolls wake.
+func _draw_dust() -> void:
+	if _dust <= 0.01:
+		return
+	var size := get_viewport_rect().size
+	var c := Color(0.42, 0.4, 0.5, 0.42 * _dust)
+	for corner: Vector2 in [Vector2(0, 0), Vector2(size.x, 0), Vector2(0, size.y), Vector2(size.x, size.y)]:
+		draw_texture_rect(_glow_tex, Rect2(corner - Vector2(260, 260), Vector2(520, 520)), false, c)
 
 
 static func _bez(a: Vector2, b: Vector2, c: Vector2, d: Vector2, t: float) -> Vector2:
@@ -566,6 +789,10 @@ func _draw_glow() -> void:
 		var c: Vector2 = o + LIGHTS[k][0]
 		_glow.draw_texture_rect(_glow_tex, Rect2(c - Vector2(r, r), Vector2(r, r) * 2.0), false,
 			Color(C_LAMP, 0.4 * a))
+	if atelier != null:
+		for i in mini(atelier.awake, dolls.size()):
+			var f := _glow.to_local(dolls[i].global_position) + Vector2(0, -20)
+			_glow.draw_texture_rect(_glow_tex, Rect2(f - Vector2(44, 30), Vector2(88, 60)), false, Color(C_LAMP, 0.35))
 
 
 ## Light flowing to the doll being filled, its fill ring, awakening bursts,
@@ -574,6 +801,10 @@ func _draw_fx() -> void:
 	var o := _layout_offset()
 	var k := key_center()
 	var tgt := atelier.target() if atelier != null else dolls.size()
+	if use_art:
+		_draw_foreground()
+	if variant == "b":
+		_draw_sheets(tgt)
 	if tgt < dolls.size():
 		var to := _fx.to_local(dolls[tgt].back_key_global())
 		# A faint brass thread from the big key to the doll it is filling: the
@@ -594,6 +825,17 @@ func _draw_fx() -> void:
 		_fx.draw_arc(to, 16.0, 0.0, TAU, 32, Color(1, 0.85, 0.5, 0.18), 4.0, true)
 		if fill > 0.0:
 			_fx.draw_arc(to, 16.0, -PI / 2.0, -PI / 2.0 + TAU * fill, 32, Color(1.0, 0.82, 0.42, 0.95), 4.0, true)
+	for m: Array in _motes:
+		var t := float(m[1])
+		var from := _fx.to_local(m[0] as Vector2)
+		var mid := (from + k) * 0.5 + Vector2(0, -70)
+		var q := from.lerp(mid, t).lerp(mid.lerp(k, t), t)
+		_fx.draw_circle(q, 5.0, Color(1.0, 0.8, 0.45, 0.25 * (1.0 - t * 0.5)))
+		_fx.draw_circle(q, 2.2, Color(1.0, 0.92, 0.7, 0.85))
+	if variant == "c":
+		_draw_chains(tgt)
+	if variant == "a":
+		_draw_spring(k)
 	for sp: Array in _sparks:
 		var life := 1.0 - float(sp[2]) / 0.9
 		var c0: Vector2 = sp[0]
@@ -607,7 +849,8 @@ func _draw_fx() -> void:
 	for b: Array in _bursts:
 		var t := float(b[1]) / 1.6
 		var c: Vector2 = o + b[0]
-		_fx.draw_arc(c, 20.0 + t * 90.0, 0.0, TAU, 40, Color(1.0, 0.86, 0.5, 0.7 * (1.0 - t)), 3.0, true)
+		var grow := 1.0 + 0.6 * (float(b[2]) - 1.0) if b.size() > 2 else 1.0
+		_fx.draw_arc(c, (20.0 + t * 90.0) * grow, 0.0, TAU, 40, Color(1.0, 0.86, 0.5, 0.7 * (1.0 - t)), 3.0 if grow <= 1.0 else 5.0, true)
 		_fx.draw_circle(c, 30.0 * (1.0 - t), Color(1.0, 0.9, 0.6, 0.25 * (1.0 - t)))
 	var s := k + Vector2(-150, -96 + sin(_anim * 1.7) * 9.0)
 	if hint:
@@ -616,6 +859,116 @@ func _draw_fx() -> void:
 		s = k + Vector2(-104 + push * 14.0, -40)
 	s.y -= _press_kick * 8.0
 	_draw_spirit(s)
+
+
+## The foreground, for depth (Step 03 V2): a big thread spool close to the
+## eye at the bottom right and the edge of a draped cloth at the top left,
+## dark and soft, outside the band where dolls stand.
+func _draw_foreground() -> void:
+	var size := get_viewport_rect().size
+	var sp := Vector2(size.x + 30.0, size.y + 40.0)
+	_fx.draw_circle(sp, 120.0, Color(0.05, 0.035, 0.04, 0.92))
+	_fx.draw_circle(sp, 96.0, Color(0.25, 0.09, 0.12, 0.9))
+	for n in 7:
+		_fx.draw_arc(sp, 100.0 + n * 3.0, PI, PI * 1.5, 24, Color(0.35, 0.13, 0.17, 0.6), 1.5)
+	_fx.draw_circle(sp, 30.0, Color(0.05, 0.035, 0.04, 0.95))
+	var cloth := PackedVector2Array([Vector2(0, 0), Vector2(150, 0), Vector2(128, 26), Vector2(96, 18), Vector2(70, 44),
+		Vector2(38, 36), Vector2(16, 70), Vector2(0, 66)])
+	_fx.draw_colored_polygon(cloth, Color(0.09, 0.05, 0.08, 0.9))
+	_fx.draw_polyline(PackedVector2Array([Vector2(150, 0), Vector2(128, 26), Vector2(96, 18), Vector2(70, 44), Vector2(38, 36), Vector2(16, 70)]),
+		Color(0.3, 0.16, 0.2, 0.7), 2.0)
+
+
+## B: dust sheets over the sleepers; the next one's sheet trembles as it fills;
+## a woken doll's sheet flies up and fades.
+func _draw_sheets(tgt: int) -> void:
+	for i in dolls.size():
+		var p := _fx.to_local(dolls[i].global_position)
+		if sheeted(i):
+			var sway := 0.0
+			var lift := 0.0
+			if i == tgt and atelier != null:
+				var f := atelier.target_fill()
+				sway = sin(_anim * 20.0) * 3.0 * clampf((f - 0.5) * 2.0, 0.0, 1.0)
+				lift = 6.0 * f
+			_draw_sheet(p, sway, lift, 1.0, 0.0)
+		elif _sheet_t.has(i):
+			var t := float(_sheet_t[i])
+			_draw_sheet(p + Vector2(10.0 * t, -170.0 * t), 0.0, 10.0, 1.0 - t, t * 1.4)
+
+
+func _draw_sheet(p: Vector2, sway: float, lift: float, alpha: float, turn: float) -> void:
+	if alpha <= 0.02:
+		return
+	var pts := PackedVector2Array()
+	for n in 13:
+		var u := float(n) / 12.0
+		var x := lerpf(-34.0, 34.0, u)
+		var y := -lift * (0.5 - absf(u - 0.5)) * 2.0
+		pts.append(Vector2(x, y))
+	for n in 13:
+		var u := float(n) / 12.0
+		var a := PI * u
+		pts.append(Vector2(cos(a) * 34.0 + sway * sin(a), -lift - sin(a) * 52.0 - 4.0))
+	var rot := Transform2D(turn, p)
+	var poly := PackedVector2Array()
+	for q in pts:
+		poly.append(rot * q)
+	_fx.draw_colored_polygon(poly, Color(0.66, 0.62, 0.58, 0.96 * alpha))
+	_fx.draw_polyline(poly, Color(0.32, 0.28, 0.27, 0.8 * alpha), 2.0)
+	_fx.draw_line(rot * Vector2(-12, -lift - 8), rot * Vector2(-6, -lift - 44), Color(0.5, 0.46, 0.43, 0.7 * alpha), 2.0)
+	_fx.draw_line(rot * Vector2(10, -lift - 6), rot * Vector2(14, -lift - 40), Color(0.5, 0.46, 0.43, 0.7 * alpha), 2.0)
+
+
+## C: every awake doll sends light along a line to the next sleeper; a doll
+## that has just woken throws an arc of sparks to it (its kick).
+func _draw_chains(tgt: int) -> void:
+	if atelier == null:
+		return
+	if tgt < dolls.size():
+		var to := _fx.to_local(dolls[tgt].back_key_global())
+		for i in mini(atelier.awake, dolls.size()):
+			var from := _fx.to_local(dolls[i].global_position) + Vector2(0, -44)
+			_fx.draw_line(from, to, Color(1.0, 0.75, 0.4, 0.18), 2.0)
+			for n in 3:
+				var u := fmod(_anim * 0.8 + n / 3.0 + i * 0.13, 1.0)
+				_fx.draw_circle(from.lerp(to, u), 3.0, Color(1.0, 0.85, 0.5, 0.75))
+	for kk: Array in _kicks:
+		var t := float(kk[2]) / 0.7
+		var a: int = kk[0]
+		var b: int = kk[1]
+		if a >= dolls.size() or b >= dolls.size():
+			continue
+		var from := _fx.to_local(dolls[a].global_position) + Vector2(0, -50)
+		var to := _fx.to_local(dolls[b].back_key_global())
+		var mid := (from + to) * 0.5 + Vector2(0, -90)
+		var q := from.lerp(mid, t).lerp(mid.lerp(to, t), t)
+		_fx.draw_circle(q, 10.0 * (1.0 - t) + 4.0, Color(1.0, 0.9, 0.55, 0.9))
+		_fx.draw_circle(q, 20.0 * (1.0 - t) + 6.0, Color(1.0, 0.8, 0.4, 0.25))
+
+
+## A: the mainspring coiled around the key -- more turns and hotter as it fills;
+## it unwinds in a flash when let go.
+func _draw_spring(k: Vector2) -> void:
+	if atelier == null:
+		return
+	var f := atelier.spring_fill()
+	if _release_t >= 0.0:
+		f = maxf(f, _release_fill)
+	if f <= 0.0:
+		_fx.draw_arc(k, 136.0, 0.0, TAU, 48, Color(0.85, 0.65, 0.3, 0.18), 2.0)
+		return
+	var turns := 0.8 + 5.2 * f
+	var pts := PackedVector2Array()
+	var steps := int(24 * turns)
+	for n in steps + 1:
+		var u := float(n) / steps
+		var a := -PI / 2.0 + u * TAU * turns - gear_angle
+		pts.append(k + Vector2.from_angle(a) * lerpf(154.0, 118.0, u * f + (1.0 - f) * 0.0))
+	var hot := Color(0.85, 0.62, 0.28).lerp(Color(1.0, 0.45, 0.25), f)
+	_fx.draw_polyline(pts, Color(hot, 0.85), 3.0 + 2.0 * f)
+	if f >= 0.999:
+		_fx.draw_arc(k, 160.0, 0.0, TAU, 48, Color(1.0, 0.6, 0.3, 0.35 + 0.25 * sin(_anim * 12.0)), 4.0)
 
 
 func _draw_spirit(at: Vector2) -> void:

@@ -99,6 +99,17 @@ func query(name: String, arg: Variant) -> Variant:
 				return {"ok": false, "error": "no doll (art missing)"}
 			view.doll.start_wake()
 			return {"ok": true, "state": _main.call("state")}
+		"dev_export":
+			var file := "windup_%s_trace.jsonl" % String(_main.call("build_id"))
+			if OS.has_feature("web"):
+				JavaScriptBridge.download_buffer(telemetry.to_jsonl().to_utf8_buffer(), file, "application/x-ndjson")
+			return {"ok": true, "file": file, "events": telemetry.events.size()}
+		"dev_memory":
+			return {"ok": true, "texture_bytes": int(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED)),
+				"video_bytes": int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED)),
+				"static_bytes": int(Performance.get_monitor(Performance.MEMORY_STATIC)),
+				"objects": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
 		"dev_render_info":
 			# What the renderer did last frame -- to tell 'more pixels' from
 			# 'more draw calls' when the frame rate drops (the Fun Lab's hook).

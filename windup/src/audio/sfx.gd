@@ -13,6 +13,8 @@ var _next := 0
 var _tick: AudioStreamWAV
 var _chime: AudioStreamWAV
 var _chirp: AudioStreamWAV
+var _whoosh: AudioStreamWAV
+var _ping: AudioStreamWAV
 var _tick_pitch := [1.0, 1.06, 0.97, 1.03]
 var _tick_i := 0
 ## How many sounds were started, by name (tests and the browser bridge).
@@ -28,6 +30,8 @@ func _ready() -> void:
 	_tick = _make(_tick_samples())
 	_chime = _make(_chime_samples())
 	_chirp = _make(_chirp_samples())
+	_whoosh = _make(_whoosh_samples())
+	_ping = _make(_ping_samples())
 	for i in 8:
 		var p := AudioStreamPlayer.new()
 		p.bus = &"Effects"
@@ -48,6 +52,44 @@ func chime() -> void:
 
 func chirp() -> void:
 	_play("chirp", _chirp, 1.0)
+
+
+## A: the spring let go.
+func whoosh() -> void:
+	_play("whoosh", _whoosh, 1.0)
+
+
+## C: a doll turned the next one's key; later dolls ring higher.
+func ping(index: int) -> void:
+	_play("ping", _ping, 1.0 + 0.06 * index)
+
+
+## A rushing unwind: noise swept from low to high, 0.5 s.
+static func _whoosh_samples() -> PackedFloat32Array:
+	var n := int(RATE * 0.5)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var seed := 777
+	var lp := 0.0
+	for i in n:
+		var t := float(i) / RATE
+		seed = (seed * 1103515245 + 12345) & 0x7fffffff
+		var noise := float(seed % 2000) / 1000.0 - 1.0
+		var k := lerpf(0.04, 0.5, t / 0.5)
+		lp += (noise - lp) * k
+		out[i] = lp * sin(PI * t / 0.5) * 0.5 + sin(TAU * lerpf(220.0, 660.0, t / 0.5) * t) * 0.08 * sin(PI * t / 0.5)
+	return out
+
+
+## A small bright bell.
+static func _ping_samples() -> PackedFloat32Array:
+	var n := int(RATE * 0.45)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in n:
+		var t := float(i) / RATE
+		out[i] = (sin(TAU * 1318.5 * t) * 0.18 + sin(TAU * 2637.0 * t) * 0.05) * exp(-t * 7.0) * minf(1.0, t * 300.0)
+	return out
 
 
 func _play(name: String, stream: AudioStream, pitch: float) -> void:

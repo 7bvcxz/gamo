@@ -51,6 +51,17 @@ export const AUDIO_TAP = () => {
           connect.call(sink, dest);
           window.__audio.meters.push(m);
         });
+        // Footage: what reaches the speakers is also recorded (lib/footage.mjs).
+        try {
+          const rec = ctx.createMediaStreamDestination();
+          connect.call(ctx.__tap, rec);
+          const mr = new MediaRecorder(rec.stream, { mimeType: 'audio/webm' });
+          window.__audio.chunks = [];
+          window.__audio.recStart = performance.timeOrigin + performance.now();
+          mr.ondataavailable = (e) => { if (e.data.size) window.__audio.chunks.push(e.data); };
+          mr.start(1000);
+          window.__audio.recorder = mr;
+        } catch (e) { window.__audio.recError = String(e); }
       }
       return connect.call(this, ctx.__tap, ...rest);
     }

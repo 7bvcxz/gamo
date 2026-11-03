@@ -47,20 +47,15 @@ func test_the_next_doll_shivers_near_its_cost() -> void:
 	assert_eq(d.rotation, 0.0, "still when far from it")
 
 
-func test_reduced_motion_has_no_shake_and_no_flash() -> void:
-	main.settings.reduced_motion = true
-	main._apply_settings()
-	_wind_until_awake(1)
-	main.view.advance(0.05)
-	assert_eq(main.view.position, Vector2.ZERO, "no shake")
-	assert_eq(main.hud.flash, 0.0, "no flash")
-	main.settings.reduced_motion = false
-	main._apply_settings()
-	main.view.on_awakening(1)
-	main.hud.flash_now()
-	main.view.advance(0.05)
-	assert_true(main.view.position != Vector2.ZERO, "shake when allowed")
-	assert_true(main.hud.flash > 0.0, "flash when allowed")
+func test_no_camera_shake_and_no_flash_on_awakening() -> void:
+	# Step 05 V2: no camera shake, no flashing -- with or without reduced motion.
+	for reduced: bool in [false, true]:
+		main.settings.reduced_motion = reduced
+		main._apply_settings()
+		main.view.on_awakening(1)
+		main.view.advance(0.05)
+		assert_eq(main.view.position, Vector2.ZERO, "no shake (reduced %s)" % reduced)
+		assert_eq(main.hud.flash, 0.0, "no flash (reduced %s)" % reduced)
 
 
 func test_music_plays_only_after_the_first_awakening() -> void:
@@ -70,3 +65,25 @@ func test_music_plays_only_after_the_first_awakening() -> void:
 	var before := main.music.notes_played
 	main.advance(10.0)
 	assert_true(main.music.notes_played > before, "the music box plays once the first doll is up")
+
+
+func test_life_follows_the_rules() -> void:
+	main.view.advance(0.1)
+	assert_eq(main.view.dolls[5].modulate, AtelierView.TINT_ASLEEP, "a dormant doll is cold and dim")
+	_wind_until_awake(2)
+	for i in 120:
+		main.advance(0.1)
+	assert_true(main.view.dolls[0].modulate.is_equal_approx(Color.WHITE), "an awake doll is in full colour")
+	assert_true(main.view._dust < 0.9, "the dust starts to clear")
+	assert_near(main.view._clock_hand, AtelierView._hand_for(main.atelier.awake), 0.05, "the clock shows how many are up")
+	assert_true(main.telemetry.count("help") >= 1, "a doll went to help another (help event)")
+
+
+func test_room_tone_goes_from_hush_to_hum() -> void:
+	var cold := AmbientBed.levels(0)
+	var warm := AmbientBed.levels(3)
+	assert_true(cold.x > cold.y + 20.0, "asleep: the hush, no hum")
+	assert_true(warm.y > warm.x, "bustling: the hum over the hush")
+	_wind_until_awake(1)
+	main.advance(20.0)
+	assert_true(main.ambient.beats > 0, "the mechanical heartbeat runs once a doll works")

@@ -22,6 +22,7 @@ var sfx: Sfx
 var store := SaveStore.new()
 var settings := Settings.new()
 var music: MusicBox
+var ambient: AmbientBed
 var session: int = 0
 var winds: int = 0
 ## Presses (not held repeats), for the session summary.
@@ -29,12 +30,18 @@ var inputs: int = 0
 
 var _web := WindupWeb.new()
 var _bridge := WindupBridge.new()
-var _held: Dictionary = {}          # source -> true while held
-var _hold_t: float = 0.0
+var input: WindInput
 var _last_input: float = -1.0
 var _hinted: bool = false
 var _since_save: float = 0.0
 var _reported_end: bool = false
+var _trace_t: float = 0.0
+
+
+func _write_trace() -> void:
+	var f := FileAccess.open(config.trace_out, FileAccess.WRITE)
+	if f != null:
+		f.store_string(telemetry.to_jsonl() + "\n")
 
 
 func _ready() -> void:
@@ -42,7 +49,10 @@ func _ready() -> void:
 		config = RunConfig.from_environment()
 	clock = GameClock.new()
 	telemetry = Telemetry.new(clock)
-	balance = Balance.load_default()
+	balance = Balance.load_variant(config.variant)
+	# Each variant keeps its own save, so trying A does not continue B.
+	if config.variant != "base":
+		store.path = "user://windup_save_%s.json" % config.variant
 	var bad := balance.problems()
 	assert(bad.is_empty(), "balance.json: %s" % [bad])
 	view = AtelierView.new()
@@ -59,6 +69,10 @@ func _ready() -> void:
 	add_child(sfx)
 	music = MusicBox.new()
 	add_child(music)
+	ambient = AmbientBed.new()
+	add_child(ambient)
+	view.helping.connect(func(helper: int, target: int) -> void:
+		telemetry.emit("help", {"helper": helper, "target": target}))
 	settings.load_saved()
 	var q := RunConfig.parse_query(WindupWeb.query_string()) if OS.has_feature("web") else RunConfig.parse_args(OS.get_cmdline_user_args())
 	if String(q.get("sound", "")) == "off":
@@ -96,6 +110,11 @@ func version() -> String:
 	return str(ProjectSettings.get_setting("application/config/version", "0"))
 
 
+## The version with the variant: what a playtest record names its build by.
+func build_id() -> String:
+	return "%s+%s" % [version(), config.variant]
+
+
 ## The one way a game starts: fresh, or from a saved atelier.
 func new_game(seed: int, saved: Dictionary = {}) -> void:
 	session += 1
@@ -105,26 +124,33 @@ func new_game(seed: int, saved: Dictionary = {}) -> void:
 	clock.reset()
 	telemetry.clear()
 	sfx.played.clear()
-	_held.clear()
 	_last_input = -1.0
 	_hinted = false
 	_since_save = 0.0
 	_reported_end = false
 	atelier = Atelier.new(balance)
+	input = WindInput.new(balance)
 	if not saved.is_empty():
 		atelier.from_dict(saved)
 	else:
 		store.clear()
 	atelier.awakening.connect(_on_awakening)
 	atelier.awake_changed.connect(_on_awake)
+	atelier.kicked.connect(func(i: int, k: float) -> void:
+		view.on_kick(i, k)
+		sfx.ping(i)
+		telemetry.emit("kick", {"index": i, "energy_added": snappedf(k, 0.001)}))
 	atelier.stage_changed.connect(func(stage: int, name: String) -> void:
 		music.stage = stage
+		ambient.stage = stage
 		telemetry.emit("stage", {"stage": stage, "name": name}))
 	music.stage = atelier.stage
+	ambient.stage = atelier.stage
 	view.bind(atelier)
+	view.set_variant(config.variant)
 	view.reset()
 	hud.set_energy(atelier.energy)
-	telemetry.emit("session_start", {"variant": config.variant, "build": version(), "seed": seed,
+	telemetry.emit("session_start", {"variant": config.variant, "build": version(), "build_id": build_id(), "seed": seed,
 		"session": session, "resumed": not saved.is_empty(), "dolls": atelier.awake})
 
 
@@ -132,14 +158,28 @@ func new_game(seed: int, saved: Dictionary = {}) -> void:
 ## and more while it is held.
 func press(source: String) -> void:
 	inputs += 1
-	if source != "dev":
-		_held[source] = true
-		_hold_t = -balance.hold_delay
+	input.press(source)
 	wind(source)
+	if source == "dev":
+		_let_go()
 
 
 func release(source: String) -> void:
-	_held.erase(source)
+	if input.release(source):
+		_let_go()
+
+
+## A: letting go of the key releases the coiled spring into energy.
+func _let_go() -> void:
+	if not balance.spring_enabled:
+		return
+	var e := atelier.release()
+	if e <= 0.0:
+		return
+	view.on_release(e)
+	sfx.whoosh()
+	hud.set_energy(atelier.energy)
+	telemetry.emit("release", {"energy_added": snappedf(e, 0.001), "energy": snappedf(atelier.energy, 0.001)})
 
 
 ## One quarter turn, from any source. Refused turns (faster than the cap)
@@ -151,21 +191,26 @@ func wind(source: String) -> void:
 	_last_input = t
 	_hinted = false
 	view.hint = false
+	var full_before := atelier.spring_full_refusals
 	var added := atelier.wind()
 	if added <= 0.0:
+		if atelier.spring_full_refusals > full_before:
+			view.on_spring_full()
 		return
 	winds += 1
 	view.turn()
 	view.on_wind()
-	sfx.tick(atelier.target_fill())
+	var tension := atelier.spring_fill() if balance.spring_enabled else atelier.target_fill()
+	sfx.tick(tension)
 	hud.set_energy(atelier.energy)
-	telemetry.emit("wind", {"source": source, "energy_added": snappedf(added, 0.001),
-		"energy": snappedf(atelier.energy, 0.001)})
+	var e := {"source": source, "energy_added": snappedf(added, 0.001), "energy": snappedf(atelier.energy, 0.001)}
+	if balance.spring_enabled:
+		e["spring"] = snappedf(atelier.spring, 0.001)
+	telemetry.emit("wind", e)
 
 
 func _on_awakening(i: int) -> void:
 	view.on_awakening(i)
-	hud.flash_now()
 	sfx.chime()
 	telemetry.emit("doll_awake", {"index": i, "cost": balance.costs[i],
 		"energy_rate": snappedf(atelier.auto_rate(), 0.001), "awake_before": atelier.awake})
@@ -195,24 +240,27 @@ func advance(seconds: float) -> void:
 
 func _step(dt: float) -> void:
 	# Holding: after the delay, one turn per 1/hold_rate seconds.
-	if not _held.is_empty():
-		_hold_t += dt
-		var every := 1.0 / balance.hold_turns_per_second
-		while _hold_t >= every:
-			_hold_t -= every
-			wind("hold")
+	for i in input.advance(dt):
+		wind("hold")
 	atelier.tick(dt)
 	view.advance(dt)
 	music.advance(dt)
+	ambient.rate = atelier.auto_rate()
+	ambient.advance(dt)
 	hud.set_energy(atelier.energy)
 	var idle_for := clock.time - maxf(_last_input, 0.0)
-	if not _hinted and _held.is_empty() and idle_for >= balance.hint_idle_seconds and atelier.target() < atelier.doll_count():
+	if not _hinted and not input.holding() and idle_for >= balance.hint_idle_seconds and atelier.target() < atelier.doll_count():
 		_hinted = true
 		view.hint = true
 		telemetry.emit("hint", {"reason": "idle20", "idle": snappedf(idle_for, 0.01)})
 	_since_save += dt
 	if _since_save >= balance.autosave_seconds:
 		save()
+	if config.trace_out != "" and not OS.has_feature("web"):
+		_trace_t += dt
+		if _trace_t >= 2.0:
+			_trace_t = 0.0
+			_write_trace()
 
 
 func save() -> void:
@@ -224,7 +272,8 @@ func set_pause(reason: String, on: bool) -> void:
 	if clock.set_paused(reason, on):
 		telemetry.emit("pause" if clock.paused else "resume", {"why": reason})
 		if clock.paused:
-			_held.clear()
+			if input.release_all():
+				_let_go()
 			save()
 
 
@@ -263,6 +312,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif key == KEY_F5 and event.pressed and config.dev:
 			new_game(config.seed)
 			get_viewport().set_input_as_handled()
+		elif key == KEY_E and event.pressed and config.dev:
+			_bridge.query("dev_export", null)
+			get_viewport().set_input_as_handled()
 
 
 func state() -> Dictionary:
@@ -280,6 +332,8 @@ func state() -> Dictionary:
 		"doll": view.doll.pose_name if view.doll != null else "",
 		"fps": Engine.get_frames_per_second(),
 		"energy": snappedf(atelier.energy, 0.001),
+		"spring": snappedf(atelier.spring, 0.001),
+		"build_id": build_id(),
 		"awake": atelier.awake,
 		"waking": atelier.waking,
 		"target": atelier.target(),

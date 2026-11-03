@@ -17,6 +17,8 @@ var variant: String = "base"
 var dev: bool = false
 ## Headless smoke run: play a few scripted presses, print a summary, quit.
 var smoke: bool = false
+## Native runs only: write the event log to this file every few seconds (desktop tests, blind harness).
+var trace_out: String = ""
 
 
 static func from_pairs(pairs: Dictionary) -> RunConfig:
@@ -27,6 +29,7 @@ static func from_pairs(pairs: Dictionary) -> RunConfig:
 	var s: String = str(pairs.get("seed", ""))
 	if s.is_valid_int():
 		c.seed = int(s)
+	c.trace_out = str(pairs.get("trace-out", ""))
 	var v: String = str(pairs.get("variant", "base")).to_lower()
 	c.variant = v if VARIANTS.has(v) else "base"
 	return c
