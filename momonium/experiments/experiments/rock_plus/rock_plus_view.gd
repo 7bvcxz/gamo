@@ -13,10 +13,16 @@ extends RockView
 ## The same taps on the same rock leave the same marks (its own seeded
 ## random), and all the hit cracks are drawn in one call (an antialiased
 ## line per crack would cost a render object each: Step 93's lesson).
+## Since Step 96 each kind of rock has a shape (RockPlusLevels.KINDS): round,
+## slab (wide and low), tall, layered (bands of its vein colour), spiky,
+## geode (crystals breaking through instead of ore spots) or crystal; and
+## the glowing kinds' cracks shine in their vein colour.
 
 const MAX_MARKS := 28
 const MAX_HIT_CRACKS := 36
 
+var shape := "round"
+var glow := false
 var marks: Array[Dictionary] = []
 var hit_cracks: Array[PackedVector2Array] = []
 var stage := 0:
@@ -39,6 +45,8 @@ var _rng := RandomNumberGenerator.new()
 
 
 func setup(r: Dictionary, seed_value: int) -> void:
+	shape = String(r.get("shape", "crystal" if bool(r["goal"]) else "round"))
+	glow = bool(r.get("glow", false))
 	marks.clear()
 	hit_cracks.clear()
 	stage = 0
@@ -47,6 +55,36 @@ func setup(r: Dictionary, seed_value: int) -> void:
 	_rng.seed = seed_value * 31 + 7
 	super.setup(r, seed_value)
 	_build_stages(seed_value)
+
+
+## RockView's boulder, reshaped by kind: everything it built (outline, cracks,
+## veins, centre) goes through the same change, so the cracks stay inside.
+func _build(seed_value: int) -> void:
+	super._build(seed_value)
+	if crystal:
+		return
+	var k := Vector2.ONE
+	match shape:
+		"slab":
+			k = Vector2(1.22, 0.72)
+		"tall":
+			k = Vector2(0.84, 1.22)
+	# About the foot (y = 0) so the rock still stands on the ground.
+	var reshape := func(p: Vector2) -> Vector2: return Vector2(p.x * k.x, p.y * k.y)
+	if shape == "spiky":
+		for i in outline.size():
+			outline[i] = centre + (outline[i] - centre) * (1.16 if i % 2 == 0 else 0.86)
+	if k != Vector2.ONE:
+		for i in outline.size():
+			outline[i] = reshape.call(outline[i])
+		for c: Dictionary in cracks:
+			var line: PackedVector2Array = c["line"]
+			for i in line.size():
+				line[i] = reshape.call(line[i])
+			c["line"] = line
+		for v: Dictionary in veins:
+			v["at"] = reshape.call(v["at"])
+		centre = reshape.call(centre)
 
 
 func _build_stages(seed_value: int) -> void:
@@ -186,19 +224,37 @@ func _draw_boulder_plus() -> void:
 	for p: Vector2 in poly:
 		lit.append(centre + (p - centre) * 0.62 + Vector2(-radius * 0.16, -radius * 0.14))
 	draw_colored_polygon(lit, Color(1, 1, 1, 0.12))
-	# The veins, their glints and the dents: one draw command (a shape per
-	# draw call costs a render object each).
+	# The bands, veins, their glints and the dents: one draw command (a shape
+	# per draw call costs a render object each).
 	var tri := _Tris.new()
+	if shape == "layered":
+		for i in 3:
+			var y := centre.y + radius * (-0.45 + 0.42 * i)
+			var band := PackedVector2Array([Vector2(-radius * 2.0, y - radius * 0.07), Vector2(radius * 2.0, y - radius * 0.11),
+				Vector2(radius * 2.0, y + radius * 0.06), Vector2(-radius * 2.0, y + radius * 0.1)])
+			for part: PackedVector2Array in Geometry2D.intersect_polygons(poly, band):
+				tri.poly(part, Color(vein, 0.4))
 	for v: Dictionary in veins:
 		if not Geometry2D.is_point_in_polygon(v["at"], poly):
 			continue
-		var pts := PackedVector2Array()
+		var at: Vector2 = v["at"]
 		var r := float(v["r"])
+		if shape == "geode":
+			# Crystals breaking out of the stone, pointing away from its middle.
+			var out := (at - centre).normalized() if at.distance_to(centre) > 2.0 else Vector2.UP
+			for j in 3:
+				var dir := out.rotated(-0.5 + 0.5 * j)
+				var tip := at + dir * r * (3.2 if j == 1 else 2.3)
+				var side := dir.orthogonal() * r * 0.6
+				tri.fan(PackedVector2Array([at - side, tip, at + side]), vein.darkened(0.15) if j != 1 else vein)
+			tri.disc(at + out * r * 0.9, r * 0.22, Color(1, 1, 1, 0.75))
+			continue
+		var pts := PackedVector2Array()
 		for k in 6:
 			var a := float(v["turn"]) + TAU * k / 6.0
-			pts.append((v["at"] as Vector2) + Vector2(cos(a) * r * (1.3 if k % 3 == 0 else 0.8), sin(a) * r * 0.7))
+			pts.append(at + Vector2(cos(a) * r * (1.3 if k % 3 == 0 else 0.8), sin(a) * r * 0.7))
 		tri.fan(pts, vein)
-		tri.disc((v["at"] as Vector2) + Vector2(-r * 0.3, -r * 0.3), r * 0.25, Color(1, 1, 1, 0.7))
+		tri.disc(at + Vector2(-r * 0.3, -r * 0.3), r * 0.25, Color(1, 1, 1, 0.7))
 	_draw_marks(tri)
 	_draw_all_cracks(poly)
 	# The broken faces where the chunks came off: a darker rim inside the bite.
@@ -276,6 +332,19 @@ class _Tris extends RefCounted:
 		for k in poly.size():
 			idx.append_array([base, base + 1 + k, base + 1 + (k + 1) % poly.size()])
 
+	## Any simple polygon (triangulated; a fan if that fails).
+	func poly(points: PackedVector2Array, col: Color) -> void:
+		var tris := Geometry2D.triangulate_polygon(points)
+		if tris.is_empty():
+			fan(points, col)
+			return
+		var base := pts.size()
+		for p: Vector2 in points:
+			pts.append(p)
+			cols.append(col)
+		for t: int in tris:
+			idx.append(base + t)
+
 	func disc(c: Vector2, r: float, col: Color, n: int = 8) -> void:
 		var poly := PackedVector2Array()
 		for k in n:
@@ -310,7 +379,8 @@ func _draw_all_cracks(poly: PackedVector2Array) -> void:
 		_segments(line, poly, thin)
 	if not dark.is_empty():
 		draw_multiline(dark, INK, 4.5)
-		draw_multiline(_offset(dark, Vector2(1.5, 1.5)), Color(1, 1, 1, 0.3), 1.5)
+		# A glowing kind's cracks shine in its vein colour (lava, obsidian).
+		draw_multiline(_offset(dark, Vector2(1.5, 1.5)) if not glow else dark, Color(1, 1, 1, 0.3) if not glow else vein, 1.5 if not glow else 2.2)
 	if not thin.is_empty():
 		draw_multiline(thin, INK.lerp(body, 0.25), 2.5)
 		draw_multiline(_offset(thin, Vector2(1.2, 1.2)), Color(1, 1, 1, 0.28), 1.2)

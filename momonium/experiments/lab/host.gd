@@ -437,6 +437,10 @@ func report_lines() -> String:
 		"actions %d  ·  upgrades %d  ·  first upgrade %s" % [int(s["actions"]), (s["upgrades"] as Array).size(), "-" if s["first_upgrade_s"] == null else "%ss" % str(s["first_upgrade_s"])],
 		"idle %ss (longest %ss)  ·  pauses %d" % [str(s["idle_seconds"]), str(s["longest_idle_s"]), int(s["pauses"])],
 	]
+	# How hard the hands work (Step 96): actions in each of the last minutes.
+	var per: Array = s["actions_per_minute"]
+	if not per.is_empty():
+		lines.append("actions a minute (last %d): %s" % [mini(per.size(), 6), " ".join(per.slice(maxi(0, per.size() - 6)).map(func(v: Variant) -> String: return str(v)))])
 	for k: String in s["metrics"]:
 		lines.append("%s: %s" % [k, str(s["metrics"][k])])
 	if finished.size() > 0:

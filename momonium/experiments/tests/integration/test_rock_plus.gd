@@ -1,11 +1,12 @@
 extends "res://tests/framework/test_case.gd"
 
-## C+ (Step 95) in the Lab's frame with real input. The feel is new -- the
-## pickaxe on the rock on the frame of the tap, dents and chunks, the held
-## breaking moment, pieces on the ground -- and the economy is C's exactly:
-## the same hits and purchases on C and C+ end with the same coins, rocks
-## and pickaxe. One press is one hit; a miss or a tap while the next rock
-## rises pays nothing; a break pays once; `?alt=hold` repeats only while held.
+## C+ in the Lab's frame with real input. The feel (Step 95) -- the pickaxe
+## on the rock on the frame of the tap, dents and chunks, the held breaking
+## moment, pieces on the ground -- and the thirty-minute progression (Step
+## 96, RockPlusLevels): every coin earned is a rock's reward, paid once,
+## part as its chunks break off and the rest at the break. One press is one
+## hit; a miss or a tap while the next rock rises pays nothing;
+## `?alt=hold` repeats only while held; `?alt=light` takes fewer hits.
 
 const MainScene := preload("res://lab/main.tscn")
 const H := preload("res://tests/integration/lab_helpers.gd")
@@ -51,7 +52,7 @@ func test_one_finger_one_hit_and_the_pickaxe_lands_on_that_frame() -> void:
 	var sounds_before := int(app.audio.played.get("pick", 0))
 	await H.touch(tree, _rock_centre())
 	assert_eq(int(_s()["hits"]), 1, "one touch: one hit")
-	assert_eq(int(_s()["hp"]), 49, "one hit of 1")
+	assert_eq(int(_s()["hp"]), 105, "one hit of 3 on the first boulder (108)")
 	assert_eq(int(host.session.counts.get("hit", 0)), 1, "recorded once")
 	assert_eq(int(app.audio.played.get("pick", 0)) - sounds_before, 1, "one hit sound")
 	assert_true(bool(_s()["touch"]), "a finger: the number rises clear of it")
@@ -69,12 +70,13 @@ func test_a_miss_and_a_tap_while_the_next_rises_pay_nothing() -> void:
 	assert_eq(int(_s()["hits"]), 0, "a tap on the water hits nothing")
 	assert_eq(int(_s()["misses"]), 1, "it is a miss")
 	assert_eq(int(_s()["coins"]), 0, "and pays nothing")
-	rock.dev("hits", 49)
+	rock.dev("hits", 35)
 	var hp_before := int(_s()["hp"])
-	assert_eq(hp_before, 1, "one hit left")
+	assert_eq(hp_before, 3, "one hit left")
+	assert_eq(int(_s()["coins"]), 8, "its two chunks paid 4 each on the way")
 	rock.call("tap_at", rock.get_global_transform().affine_inverse() * _rock_centre())
 	assert_eq(int(_s()["breaks"]), 1, "broken")
-	assert_eq(int(_s()["coins"]), 25, "paid once, at the hit")
+	assert_eq(int(_s()["coins"]), 25, "the break paid the rest: the rock's 25, once")
 	assert_true(bool(_s()["breaking"]), "the breaking moment holds")
 	for i in 5:
 		rock.call("tap_at", rock.get_global_transform().affine_inverse() * _rock_centre())
@@ -83,19 +85,19 @@ func test_a_miss_and_a_tap_while_the_next_rises_pay_nothing() -> void:
 	assert_eq(int(host.session.counts.get("tap_wait", 0)), 5, "they are recorded as waits")
 	host.step(1.0)
 	assert_false(bool(_s()["rising"]), "the next rock is up")
-	assert_eq(int(_s()["hp"]), 80, "the Grey Stone, untouched")
+	assert_eq(int(_s()["hp"]), 115, "the second boulder, untouched")
 	assert_eq(int(_s()["coins"]), 25, "still paid exactly once")
 
 
 func test_two_chunks_then_the_break() -> void:
-	# The first rock: 50 hits of 1, chunks at 17 (0.34) and 34 (0.68).
-	rock.dev("hits", 16)
-	assert_eq(int(_s()["stage"]), 0, "whole at 16/50")
+	# The first rock: 36 hits of 3 on 108, chunks at 13 (0.36) and 25 (0.69).
+	rock.dev("hits", 12)
+	assert_eq(int(_s()["stage"]), 0, "whole at 36/108")
 	rock.dev("hits", 1)
 	assert_eq(int(_s()["stage"]), 1, "a chunk off at a third")
-	rock.dev("hits", 17)
+	rock.dev("hits", 12)
 	assert_eq(int(_s()["stage"]), 2, "another at two thirds")
-	rock.dev("hits", 16)
+	rock.dev("hits", 11)
 	assert_eq(int(_s()["breaks"]), 1, "then it breaks")
 	var chunk_ms := host.session.milestones.filter(func(m: Dictionary) -> bool: return String(m["name"]) == "chunk")
 	assert_eq(chunk_ms.size(), 2, "two chunk moments recorded")
@@ -105,22 +107,28 @@ func test_two_chunks_then_the_break() -> void:
 	assert_eq(int(_s()["marks"]), 0, "and unmarked")
 
 
-func test_the_economy_is_c_exactly() -> void:
-	# The same hits and purchases on C and C+: the same coins, rocks, pickaxe.
-	var results: Array[Dictionary] = []
-	for id: String in ["rock", "rock-plus"]:
-		app.back()
-		await tree.process_frame
-		await _open(id, "")
-		for round in 60:
-			rock.dev("hits", 12)
-			while host.experiment.action_info().get("affordable", false):
-				host.press_action()
-		var st := _s()
-		results.append({"coins": st["coins"], "earned": st["earned"], "pick": st["pick"], "rock": st["rock"], "breaks": st["breaks"],
-			"damage_total": st["damage_total"], "hits": st["hits"]})
-	assert_eq(results[1], results[0], "C+ pays what C pays: %s" % str(results[0]))
-	assert_true(int(results[0]["breaks"]) >= 6, "several rocks broken on the way (%d)" % int(results[0]["breaks"]))
+func test_every_coin_is_a_rocks_reward_paid_once() -> void:
+	# Hits and purchases for a long while: what was earned is exactly the
+	# rewards of the rocks broken plus the chunks of the rock in play.
+	for round in 120:
+		rock.dev("hits", 12)
+		while host.experiment.action_info().get("affordable", false):
+			host.press_action()
+	var st := _s()
+	var paid := 0
+	for n in int(st["rock"]):
+		paid += int(RockPlusLevels.rock(n)["reward"])
+	var in_play := 0
+	for k in int(st["stage"]):
+		in_play += RockPlusLevels.chunk_pay(RockPlusLevels.rock(int(st["rock"])))
+	assert_eq(int(st["earned"]), paid + in_play, "earned = the broken rocks' rewards + the chunks so far (%d rocks)" % int(st["rock"]))
+	var spent := 0
+	for p in range(1, int(st["pick"]) + 1):
+		spent += RockPlusLevels.cost(p)
+	assert_eq(int(st["coins"]), int(st["earned"]) - spent, "coins = earned - the levels bought")
+	assert_true(int(st["breaks"]) >= 20, "a long way in (%d rocks)" % int(st["breaks"]))
+	assert_true(int(st["big_breaks"]) >= 3, "past big rocks (%d)" % int(st["big_breaks"]))
+	assert_true(int(st["pick"]) >= 8, "and many levels (%d)" % int(st["pick"]))
 
 
 func test_marks_and_bits_stay_bounded() -> void:
@@ -145,12 +153,12 @@ func test_two_hits_in_one_moment_are_one_sound() -> void:
 func test_the_pickaxe_milestones() -> void:
 	rock.dev("coins", 2000)
 	var tiers: Array[String] = []
-	for i in 5:
+	for i in 6:
 		host.press_action()
 		var u: Dictionary = host.session.upgrades.back()
 		tiers.append("%d:%s:%s" % [int(u["level"]), String(u["tier"]), str(u["milestone"])])
-	assert_eq(tiers, ["1:Wooden Pickaxe:false", "2:Wooden Pickaxe:false", "3:Copper Pickaxe:true", "4:Copper Pickaxe:false", "5:Steel Pickaxe:true"] as Array[String],
-		"Copper at 3 and Steel at 5 are new pickaxes; the others a stronger one")
+	assert_eq(tiers, ["1:Wooden Pickaxe:false", "2:Wooden Pickaxe:false", "3:Copper Pickaxe:true", "4:Copper Pickaxe:false", "5:Copper Pickaxe:false", "6:Iron Pickaxe:true"] as Array[String],
+		"Copper at 3 and Iron at 6 are new pickaxes; the others a stronger one")
 	assert_eq(int(app.audio.played.get("promote", 0)), 2, "a milestone sounds like one")
 
 
@@ -191,9 +199,34 @@ func test_reduced_motion_keeps_the_information_and_drops_the_flying() -> void:
 	await tree.process_frame
 	app.reduced_motion = true
 	await _open("rock-plus", "")
-	rock.dev("hits", 50)
+	rock.dev("hits", 36)
 	assert_eq(int(_s()["breaks"]), 1, "broken")
 	assert_false(bool(_s()["breaking"]), "no held moment")
 	assert_eq(int(_s()["bits"]), 0, "nothing flies")
 	assert_eq(int(_s()["coins"]), 25, "paid")
 	assert_eq(int(_s()["chunks"]), 2, "the chunks still count (the rock still shows them)")
+
+
+func test_the_light_experiment_takes_fewer_hits_for_the_same_coins() -> void:
+	for alt: String in ["", "light"]:
+		app.back()
+		await tree.process_frame
+		await _open("rock-plus", alt)
+		var hits := 0
+		while int(_s()["breaks"]) == 0:
+			rock.dev("hits", 1)
+			hits += 1
+		if alt == "light":
+			assert_eq(hits, 22, "light: 65 of the first boulder's 108 hit points, 22 hits")
+			assert_true(String(rock.call("action_info")["label"]) != "", "the same one button")
+		else:
+			assert_eq(hits, 36, "default: 36 hits")
+		assert_eq(int(_s()["coins"]), 25, "and the same 25 coins")
+	assert_eq(host.session.variant, "light", "the run says which")
+
+
+func test_the_far_islet_shows_the_next_big_rock() -> void:
+	assert_eq(String(_s()["next_big"]), "Great Pebble Boulder", "the first kind's big one ahead")
+	rock.dev("rock", 6)
+	assert_eq(String(_s()["next_big"]), "Great Mossy Rock", "then the next kind's")
+	assert_eq(String(_s()["kind"]), "Mossy Rock", "a new kind of rock")

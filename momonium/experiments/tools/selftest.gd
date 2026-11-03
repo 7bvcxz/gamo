@@ -5,11 +5,12 @@ extends SceneTree
 ## (when the upgrades come, how long the waits are), never a measure of fun.
 ##
 ##   godot --headless --path momonium/experiments --script res://tools/selftest.gd -- [--exp island] [--json out.json]
-##     [--seconds 900] [--taps 1.5]
+##     [--seconds 900] [--taps 1.5] [--alt light]
 ##
 ## Without --exp it plays the six; --exp also names a track (rock-plus,
 ## tycoon-plus), which plays as its baseline is played. --seconds sets the
-## play time (default three minutes); --taps the rock's tapping rate.
+## play time (default three minutes); --taps the rock's tapping rate; --alt
+## one of a track's experiment-only alternatives (?alt=).
 ##
 ## The scripted player reacts after REACTION seconds; per experiment:
 ##   island  buys Upgrade Island when it can pay
@@ -24,6 +25,7 @@ const REACTION := 1.5
 var _out := {}
 var _seconds := 180.0
 var _taps := 2.5
+var _alt := ""
 
 
 func _init() -> void:
@@ -43,10 +45,13 @@ func _run() -> void:
 			_seconds = float(args[i + 1])
 		if args[i] == "--taps" and i + 1 < args.size():
 			_taps = float(args[i + 1])
+		if args[i] == "--alt" and i + 1 < args.size():
+			_alt = args[i + 1]
 	root.size = Vector2i(720, 1280)
 	var app: LabApp = (load("res://lab/main.tscn") as PackedScene).instantiate()
 	root.add_child(app)
 	await process_frame
+	app.route["alt"] = _alt
 	var ids: Array[String] = LabRegistry.ids() if only == "" else ([only] as Array[String])
 	for id: String in ids:
 		if not LabRegistry.playable(id):

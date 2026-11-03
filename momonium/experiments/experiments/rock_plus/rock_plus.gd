@@ -1,9 +1,12 @@
 extends LabExperiment
 
-## C+ -- the improved track of Break & Upgrade (Step 94). The same game as C
-## number for number -- RockLevels' rocks, damage, prices and rewards, so the
-## same taps pay the same (tests/integration/test_rock_plus.gd plays C and C+
-## side by side) -- with the hit made tactile (Step 95, RockPlusFeel):
+## C+ -- the improved track of Break & Upgrade (Step 94): one rock at a time,
+## one currency, one pickaxe, one tap, like C. Step 96 gave it thirty minutes
+## (RockPlusLevels: eighteen kinds of rock with their shapes, a big one every
+## sixth, a level about every three rocks with no wall, chunks that pay as
+## they break off, the next big rock on the far islet as the next goal); in
+## Step 95 it still ran on C's numbers. Step 95 made the hit tactile
+## (RockPlusFeel):
 ##   - the pickaxe waits raised beside the rock and lands on the frame of the
 ##     tap (C swung in for 0.06 s after the chips had already flown), holds
 ##     the contact for an instant, recoils and comes back;
@@ -16,9 +19,14 @@ extends LabExperiment
 ##     pickaxe looks and sounds new at its milestones (Copper, Steel, Golden,
 ##     Crystal), not only a bigger number.
 ## One press is one hit; a press off the rock, or while the next one rises,
-## does nothing and pays nothing. `?alt=hold` (dev only, Step 95's control
-## experiment): a press held on the rock repeats a hit every HOLD_PERIOD.
+## does nothing and pays nothing. Two experiment-only alternatives (dev, the
+## run records which): `?alt=hold` (Step 95) -- a press held on the rock
+## repeats a hit every HOLD_PERIOD; `?alt=light` (Step 96) -- every rock has
+## LIGHT_HP of its hit points, the same coins: fewer taps for each break.
 ## The baseline C (experiments/rock/) is never changed for any of this.
+
+## `?alt=light`: the share of a rock's hit points.
+const LIGHT_HP := 0.6
 
 const RISE_SECONDS := 0.5
 
@@ -34,7 +42,9 @@ var hold_hits := 0
 var misses := 0
 var damage_total := 0
 var breaks := 0
+var big_breaks := 0
 var chunks := 0
+var chunk_coins := 0
 var first_break_ms := -1
 var rise_left := 0.0
 var last_impact := 0.0
@@ -66,6 +76,9 @@ var _touch := false
 var _holding := false
 var _hold_t := 0.0
 var _hold_at := Vector2.ZERO
+## Coins already paid for the rock in play (its chunks); the break pays the rest.
+var _rock_paid := 0
+var _goal_shown := -1
 
 
 func _ready() -> void:
@@ -78,8 +91,7 @@ func _ready() -> void:
 	var far := LabIsland.new()
 	far.set_cells([Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)])
 	goal_world.add_child(far)
-	goal_view = RockView.new()
-	goal_view.setup(RockLevels.rock(RockLevels.GOAL), 9)
+	goal_view = RockPlusView.new()
 	goal_view.position = far.iso.cell_center(Vector2i(1, 1)) + Vector2(0, -49)
 	far.add_child(goal_view)
 	world = Node2D.new()
@@ -166,7 +178,7 @@ func _on_rock(local: Vector2) -> bool:
 ## One hit of the pickaxe at `local`; `kind` is the action it records ("hit",
 ## or "hold_hit" for a repeat of the press-and-hold experiment).
 func hit(local: Vector2, kind: String = "hit") -> void:
-	var dmg := RockLevels.damage(pick)
+	var dmg := RockPlusLevels.damage(pick)
 	hits += 1
 	if kind == "hold_hit":
 		hold_hits += 1
@@ -177,7 +189,7 @@ func hit(local: Vector2, kind: String = "hit") -> void:
 	hp = maxi(0, hp - dmg)
 	var frac := float(max_hp - hp) / float(max_hp)
 	session.action(kind, {"damage": dmg, "rock": rock_index})
-	var r := RockLevels.rock(rock_index)
+	var r := RockPlusLevels.rock(rock_index)
 	var imp := RockPlusFeel.impact(dmg, max_hp)
 	var w := RockPlusFeel.weight(r)
 	last_impact = imp
@@ -190,7 +202,7 @@ func hit(local: Vector2, kind: String = "hit") -> void:
 	swing.strike(at_world, imp)
 	if not reduced_motion:
 		var tier := RockPlusFeel.tier(pick)
-		bits.impact(at_world, rock_view.body, int(r["index"]) >= 4 or bool(r["goal"]), imp, int(tier["sparks"]), _floor_y())
+		bits.impact(at_world, rock_view.body, String(r["sound"]) != "stone", imp, int(tier["sparks"]), _floor_y())
 		rock_view.squash = clampf(imp / w * 1.3, 0.25, 1.0)
 		var tw := rock_view.create_tween()
 		tw.tween_property(rock_view, "squash", 0.0, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -216,7 +228,7 @@ func hit(local: Vector2, kind: String = "hit") -> void:
 	for k in RockPlusFeel.STAGES.size():
 		var at := RockPlusFeel.STAGES[k]
 		if before < at and frac >= at:
-			_chunk(k, w)
+			_chunk(k, w, r)
 
 
 func _hit_sound(r: Dictionary, imp: float) -> void:
@@ -234,11 +246,25 @@ func _hit_sound(r: Dictionary, imp: float) -> void:
 		audio.play(String(s["layer"]), float(s["layer_pitch"]), float(s["layer_db"]), 0.02)
 
 
-## A chunk breaks off the rim (stage `k` + 1 of the rock).
-func _chunk(k: int, w: float) -> void:
+## A chunk breaks off the rim (stage `k` + 1 of the rock) and pays its share.
+func _chunk(k: int, w: float, r: Dictionary) -> void:
 	chunks += 1
 	rock_view.stage = k + 1
-	session.milestone("chunk", {"rock": rock_index, "stage": k + 1})
+	var pay := RockPlusLevels.chunk_pay(r)
+	coins += pay
+	earned += pay
+	chunk_coins += pay
+	_rock_paid += pay
+	session.milestone("chunk", {"rock": rock_index, "stage": k + 1, "coins": pay})
+	if fx != null and k < rock_view.notches.size():
+		var mid := Vector2.ZERO
+		for p: Vector2 in rock_view.notches[k]:
+			mid += p
+		mid /= maxf(1.0, rock_view.notches[k].size())
+		var at := to_fx(rock_view.get_global_transform() * mid)
+		fx.float_text(at + Vector2(0, -30), "+%d" % pay, Color("#ffe27a"), 34)
+		fx.coins(at, 3)
+	action_changed.emit()
 	if not reduced_motion and k < rock_view.notches.size():
 		bits.chunk(rock_view, world, rock_view.notches[k], _floor_y())
 	if audio != null:
@@ -246,17 +272,20 @@ func _chunk(k: int, w: float) -> void:
 
 
 func _break() -> void:
-	var r := RockLevels.rock(rock_index)
-	var reward := int(r["reward"])
+	var r := RockPlusLevels.rock(rock_index)
+	# What the chunks have not paid yet: a rock pays its reward, once.
+	var reward := int(r["reward"]) - _rock_paid
 	coins += reward
 	earned += reward
 	breaks += 1
+	if bool(r["big"]):
+		big_breaks += 1
 	if first_break_ms < 0:
 		first_break_ms = int(session.active_ms)
-	session.milestone("break", {"rock": rock_index, "name": r["name"], "reward": reward, "pick": pick})
+	session.milestone("break", {"rock": rock_index, "name": r["name"], "reward": int(r["reward"]), "pick": pick, "big": bool(r["big"])})
 	# Paid now; shown after the breaking moment. The next rock's numbers are
 	# in place already, and a tap before it has risen does nothing.
-	_burst_reward = reward
+	_burst_reward = int(r["reward"])
 	_burst_rock = r
 	_hold_left = 0.0 if reduced_motion else RockPlusFeel.break_hold(r)
 	rock_view.flash = 1.0
@@ -295,20 +324,25 @@ func _burst() -> void:
 ## and the chip say so at once).
 func _set_rock_state(n: int, shown: bool = true) -> void:
 	rock_index = n
-	var r := RockLevels.rock(n)
-	max_hp = int(r["hp"])
+	var r := RockPlusLevels.rock(n)
+	max_hp = maxi(1, int(round(float(r["hp"]) * (LIGHT_HP if variant == "light" else 1.0))))
 	hp = max_hp
+	_rock_paid = 0
 	if shown:
 		if bar != null:
 			bar.set_hp(hp, max_hp, false)
 		_update_chip()
 
 
-## The look of rock `n`.
+## The look of rock `n`, and on the far islet the next big rock (the next
+## goal: this kind's, or the next kind's once this one is broken).
 func _show_rock(n: int) -> void:
-	rock_view.setup(RockLevels.rock(n), 100 + n)
+	rock_view.setup(RockPlusLevels.rock(n), 100 + n)
 	rock_view.damage_frac = 0.0
-	goal_world.visible = n < RockLevels.GOAL
+	var next_big := (n / RockPlusLevels.KIND_SIZE + 1) * RockPlusLevels.KIND_SIZE - 1
+	if next_big != _goal_shown:
+		_goal_shown = next_big
+		goal_view.setup(RockPlusLevels.rock(next_big), 9)
 
 
 ## The island's ground under the rock, in the world's coordinates: where
@@ -334,10 +368,13 @@ func tick(dt: float) -> void:
 			if rise_left <= 0.0 and hp > 0 and _on_rock(_hold_at):
 				hit(_hold_at, "hold_hit")
 	session.metric("rock", rock_index)
+	session.metric("kind", String(RockPlusLevels.rock(rock_index)["kind"]))
 	session.metric("rocks_broken", breaks)
+	session.metric("big_rocks_broken", big_breaks)
 	session.metric("chunks", chunks)
+	session.metric("chunk_coins", chunk_coins)
 	session.metric("pickaxe", pick)
-	session.metric("damage_per_hit", RockLevels.damage(pick))
+	session.metric("damage_per_hit", RockPlusLevels.damage(pick))
 	session.metric("taps", taps)
 	session.metric("hits", hits)
 	session.metric("hold_hits", hold_hits)
@@ -364,32 +401,33 @@ func hud() -> Dictionary:
 	return {"value": coins, "rate": 0.0, "icon": "icon_coin"}
 
 
+## The pickaxe's colour at `level`: its tier's.
+static func tint(level: int) -> Color:
+	return RockPlusFeel.tier(level)["tint"]
+
+
 func action_info() -> Dictionary:
-	if pick >= RockLevels.max_pick():
-		return {"label": "Pickaxe max", "cost": -1, "affordable": false, "texture": _pick_tex, "tint": RockLevels.tint(pick)}
-	var c := RockLevels.cost(pick + 1)
-	return {"label": "Pickaxe Power", "cost": c, "affordable": coins >= c, "texture": _pick_tex, "tint": RockLevels.tint(pick + 1), "icon": "pick%d" % (pick + 1)}
+	var c := RockPlusLevels.cost(pick + 1)
+	return {"label": "Pickaxe Power", "cost": c, "affordable": coins >= c, "texture": _pick_tex, "tint": tint(pick + 1)}
 
 
 func do_action() -> void:
-	if pick >= RockLevels.max_pick():
-		return
-	var c := RockLevels.cost(pick + 1)
+	var c := RockPlusLevels.cost(pick + 1)
 	if coins < c:
 		return
 	coins -= c
 	pick += 1
 	var milestone := RockPlusFeel.is_milestone(pick)
 	var tier := RockPlusFeel.tier(pick)
-	session.upgrade(pick, c, {"damage": RockLevels.damage(pick), "tier": String(tier["name"]), "milestone": milestone})
+	session.upgrade(pick, c, {"damage": RockPlusLevels.damage(pick), "tier": String(tier["name"]), "milestone": milestone})
 	swing.set_pick(pick)
 	swing.show_off(milestone)
 	if fx != null:
 		var at := to_fx(get_global_transform() * Vector2(size.x * 0.5, size.y - LabHost.BOTTOM_UI - 60))
 		if milestone:
 			fx.float_text(at + Vector2(0, -50), String(tier["name"]) + "!", Color.WHITE, 50)
-			fx.ring(to_fx(swing.get_global_transform() * swing.ready_tip), RockLevels.tint(pick).lightened(0.3), 220.0 * _scale)
-		fx.float_text(at, "x%d per hit" % RockLevels.damage(pick), Color("#ffe27a"), 44)
+			fx.ring(to_fx(swing.get_global_transform() * swing.ready_tip), tint(pick).lightened(0.3), 220.0 * _scale)
+		fx.float_text(at, "%s per hit" % LabHost._short(RockPlusLevels.damage(pick)), Color("#ffe27a"), 44)
 	if audio != null:
 		audio.play("promote" if milestone else "built", 1.0, -3.0 if milestone else -6.0)
 	momo.look("happy", 1.0)
@@ -446,9 +484,9 @@ func _build_chip() -> void:
 func _update_chip() -> void:
 	if chip_label == null:
 		return
-	var r := RockLevels.rock(rock_index)
-	chip_label.text = "Rock %d/%d · %s · hit %d%s" % [mini(rock_index + 1, RockLevels.rock_count()), RockLevels.rock_count(), r["name"], RockLevels.damage(pick),
-		" · hold test" if variant == "hold" else ""]
+	var r := RockPlusLevels.rock(rock_index)
+	var alt := " · hold test" if variant == "hold" else (" · light test" if variant == "light" else "")
+	chip_label.text = "%s · %d/%d · hit %s%s" % [r["name"], int(r["step"]) + 1, RockPlusLevels.KIND_SIZE, LabHost._short(RockPlusLevels.damage(pick)), alt]
 	chip.reset_size()
 	chip.position = Vector2((size.x - chip.size.x) * 0.5, LabHost.TOP_UI)
 
@@ -486,8 +524,8 @@ class _Swing extends Node2D:
 		texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 	func set_pick(level: int) -> void:
-		tint = RockLevels.tint(level)
 		tier = RockPlusFeel.tier(level)
+		tint = tier["tint"]
 		queue_redraw()
 
 	func strike(p: Vector2, p_impact: float) -> void:
@@ -561,6 +599,15 @@ class _Swing extends Node2D:
 			var head := grip + along * 0.8
 			draw_circle(head, 34.0 * k * big, Color(tint, 0.22))
 		_draw_tool(grip, deg_to_rad(deg), s * big)
+		if bool(tier["ring"]):
+			# Starmetal on: a ring around the head, two sparks riding it.
+			var head := grip + along * 0.8
+			draw_set_transform(head, 0.0, Vector2(1.0, 0.42))
+			draw_arc(Vector2.ZERO, 46.0 * k * big, 0.0, TAU, 28, Color(tint.lightened(0.3), 0.8), 3.0)
+			for i in 2:
+				var a := (0.0 if reduced_motion else _time * 3.0) + PI * i
+				draw_circle(Vector2(cos(a), sin(a)) * 46.0 * k * big, 5.0, Color.WHITE)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if bool(tier["shards"]) and not reduced_motion:
 			var c := grip + along * 0.7
 			for i in 3:
@@ -807,10 +854,12 @@ func rock_rect() -> Rect2:
 
 func state() -> Dictionary:
 	var rr := rock_rect()
-	return {"coins": coins, "earned": earned, "pick": pick, "damage": RockLevels.damage(pick), "rock": rock_index,
-		"rock_name": RockLevels.rock(rock_index)["name"], "hp": hp, "max_hp": max_hp, "taps": taps, "hits": hits, "hold_hits": hold_hits,
+	var r := RockPlusLevels.rock(rock_index)
+	return {"coins": coins, "earned": earned, "pick": pick, "damage": RockPlusLevels.damage(pick), "rock": rock_index,
+		"rock_name": r["name"], "kind": r["kind"], "kind_step": r["step"], "big": r["big"], "big_breaks": big_breaks,
+		"next_big": RockPlusLevels.rock(_goal_shown)["name"], "chunk_coins": chunk_coins, "hp": hp, "max_hp": max_hp, "taps": taps, "hits": hits, "hold_hits": hold_hits,
 		"misses": misses, "damage_total": damage_total, "breaks": breaks, "chunks": chunks, "first_break_ms": first_break_ms,
-		"rising": rise_left > 0.0, "breaking": _hold_left > 0.0, "next_cost": RockLevels.cost(pick + 1), "cracks": rock_view.damage_frac,
+		"rising": rise_left > 0.0, "breaking": _hold_left > 0.0, "next_cost": RockPlusLevels.cost(pick + 1), "cracks": rock_view.damage_frac,
 		"stage": rock_view.stage, "marks": rock_view.marks.size(), "bits": bits.items.size(), "impact": snappedf(last_impact, 0.01),
 		"tier": String(RockPlusFeel.tier(pick)["name"]), "contact": swing.in_contact(), "hit_sounds": hit_sounds, "holding": _holding, "touch": _touch,
 		"variant": variant, "rock_rect": [rr.position.x, rr.position.y, rr.size.x, rr.size.y], "goal_visible": goal_world.visible}
@@ -829,7 +878,7 @@ func dev(name: String, arg: Variant) -> Variant:
 			_place_rock()
 			return {"ok": true, "rock": rock_index}
 		"pick":
-			pick = clampi(int(arg), 0, RockLevels.max_pick())
+			pick = maxi(0, int(arg))
 			swing.set_pick(pick)
 			_update_chip()
 			action_changed.emit()

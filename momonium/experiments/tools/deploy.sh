@@ -64,14 +64,17 @@ PY
 
 # The pages beside the Lab: the six-way comparison (Step 93, with its
 # pictures and the scripted player's numbers in web/compare/, made by
-# tools/compare_assets.sh) and the C/E tracks' protocol and scorecard (Step 94).
+# tools/compare_assets.sh) and the C/E tracks' protocol and scorecard (Step 94,
+# its numbers in web/tracks/, made by tools/c_runs.gd).
 for page in "$LAB"/web/*.html; do
   cp "$page" "$OUT/$(basename "$page")"
 done
-if [[ -d "$LAB/web/compare" ]]; then
-  mkdir -p "$OUT/compare"
-  cp "$LAB/web/compare/"* "$OUT/compare/"
-fi
+# Their data folders (web/compare/, web/tracks/): every folder in web/.
+for dir in "$LAB"/web/*/; do
+  name="$(basename "$dir")"
+  mkdir -p "$OUT/$name"
+  cp "$dir"* "$OUT/$name/"
+done
 
 # Keep the new pack and the one published at HEAD.
 published="$(git show "HEAD:$SITE/version.json" 2>/dev/null | sed -E 's/.*"pack":"([^"]+)".*/\1/' || true)"
@@ -85,6 +88,9 @@ done
 version="$(sed -nE 's/^config\/version="([^"]+)"/\1/p' "$LAB/project.godot")"
 source="$(git rev-parse --short=12 HEAD)"
 [[ -n "$(git status --porcelain -- "$LAB" | grep -v '^??' | head -n 1)" ]] && source="$source-dirty"
+# A new file not yet committed in a folder that goes into the pack is in the
+# pack too (Step 95: the next step's script went in and changed the pack).
+[[ "$source" != *-dirty && -n "$(git status --porcelain --untracked-files=all -- "$LAB/lab" "$LAB/experiments" "$LAB/shared" | grep '^??' | head -n 1)" ]] && source="$source-dirty"
 printf '{"version":"%s","pack":"%s","packSize":%s,"engine":"%s","godot":"%s","source":"%s"}' \
   "$version" "$pack" "$(stat -c%s "$OUT/$pack")" "$engine" "$("$GODOT" --version | head -n 1)" "$source" > "$OUT/version.json"
 

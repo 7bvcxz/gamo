@@ -142,9 +142,10 @@ test('a C+ break pays once; taps while it breaks and rises do nothing; the piece
   await expect.poll(async () => (await lab.state()).host.experiment.bits, { timeout: 8000, message: 'and are gone' }).toBe(0);
   s = await lab.state();
   expect(s.host.experiment.rising, 'the next rock has risen').toBe(false);
-  expect(s.host.experiment.hp, 'untouched').toBe(80);
+  // Step 96 numbers: the second boulder has 115, the pickaxe at level 6 hits 9.
+  expect(s.host.experiment.hp, 'untouched').toBe(115);
   await press(lab, info, ...centre(s.host.experiment.rock_rect));
-  expect((await lab.state()).host.experiment.hp, 'and takes the next press').toBe(62);
+  expect((await lab.state()).host.experiment.hp, 'and takes the next press').toBe(106);
 });
 
 // Frames a second on this machine swing four to six times between runs of
@@ -160,7 +161,8 @@ test('a stream of breaks keeps the render load and frame rate (C and C+ alternat
   for (let round = 0; round < 3; round++) {
     for (const id of ['rock', 'rock-plus']) {
       await go(lab, id);
-      await lab.call('dev_pick', 10);
+      // A pickaxe that breaks every rock in one hit (C's last level; C+ has no last).
+      await lab.call('dev_pick', id === 'rock' ? 10 : 40);
       await lab.page.waitForTimeout(500);
       const s = await lab.state();
       const [x, y] = centre(s.host.experiment.rock_rect);
