@@ -7,6 +7,10 @@ extends Control
 ## copy, so listening to both would count one finger twice.
 
 signal pressed
+## A press released on it while it is disabled (Step 10: a blind player tapped
+## an unaffordable card and thought the tap had not registered). Nothing is
+## bought; whoever listens shows a 'no' -- see deny().
+signal denied
 
 var enabled := true
 var held := false
@@ -29,9 +33,32 @@ func _gui_input(event: InputEvent) -> void:
 		held = true
 	elif held:
 		held = false
-		if enabled and Rect2(Vector2.ZERO, size).has_point(mb.position):
-			pressed.emit()
+		if Rect2(Vector2.ZERO, size).has_point(mb.position):
+			if enabled:
+				pressed.emit()
+			else:
+				denied.emit()
 	queue_redraw()
+
+
+var _deny := 0.0
+
+
+## A short sideways shake: 'not yet'.
+func deny() -> void:
+	_deny = 1.0
+	set_process(true)
+	queue_redraw()
+
+
+func deny_offset() -> float:
+	return sin(_deny * 30.0) * 10.0 * _deny
+
+
+func _step_deny(delta: float) -> void:
+	if _deny > 0.0:
+		_deny = maxf(0.0, _deny - delta * 2.5)
+		queue_redraw()
 
 
 func _notification(what: int) -> void:

@@ -26,6 +26,8 @@ var _crank := 0.0
 var _even_glow := 0.0
 var _shaken_ever := false
 var _bags: Array[Dictionary] = []
+var _served := 0
+var _react: Array[float] = [0, 0, 0, 0, 0, 0, 0]
 var _loads: Array[float] = []
 var _helper_kick := 0.0
 var _recipe_flash := 0.0
@@ -70,7 +72,7 @@ func helper_size() -> float:
 
 
 func counter_y() -> float:
-	return size.y * 0.13
+	return size.y * 0.15
 
 
 func _s() -> Dictionary:
@@ -191,10 +193,23 @@ func _gain_at(amount: int, at: Vector2) -> void:
 		_gains[-1]["at"] = at
 
 
+## Each bag goes to a customer in turn (Step 10: two blind players saw bags
+## stop on the counter and the customers never react). On arrival the customer
+## hops and a coin shows over their head.
 func _bag_from(from: Vector2, kind: String) -> void:
-	_bags.append({"age": 0.0, "from": from, "kind": kind})
+	var n := _customers()
+	_bags.append({"age": 0.0, "from": from, "kind": kind, "to": _served % n, "arrived": false})
+	_served += 1
 	if _bags.size() > 12:
 		_bags.pop_front()
+
+
+func _customers() -> int:
+	return mini(1 + rules.level / 3 + int(_s()["helper_level"]) / 2, 7)
+
+
+func _customer_pos(i: int) -> Vector2:
+	return Vector2(size.x - 60.0 - float(i) * 62.0, counter_y())
 
 
 func _helper_top() -> Vector2:
@@ -215,7 +230,12 @@ func _process(delta: float) -> void:
 	_auto_flash = maxf(0.0, _auto_flash - delta * 1.5)
 	for b: Dictionary in _bags:
 		b["age"] = float(b["age"]) + delta
-	while not _bags.is_empty() and float(_bags[0]["age"]) > 2.2:
+		if not bool(b["arrived"]) and float(b["age"]) >= 1.0:
+			b["arrived"] = true
+			_react[int(b["to"])] = 1.0
+	for i in _react.size():
+		_react[i] = maxf(0.0, _react[i] - delta * 1.6)
+	while not _bags.is_empty() and float(_bags[0]["age"]) > 1.05:
 		_bags.pop_front()
 	for i in _loads.size():
 		_loads[i] += delta
@@ -268,31 +288,32 @@ func _draw_counter(ci: CanvasItem) -> void:
 	var y := counter_y()
 	ci.draw_rect(Rect2(Vector2(24, y), Vector2(size.x - 48, 16)), PopPalette.RED.darkened(0.25))
 	ci.draw_rect(Rect2(Vector2(24, y - 4), Vector2(size.x - 48, 6)), PopPalette.CREAM)
-	var n := 1 + rules.level / 3 + int(_s()["helper_level"]) / 2
-	for i in mini(n, 7):
-		var x := size.x - 60.0 - float(i) * 62.0
+	for i in _customers():
+		var x := _customer_pos(i).x
 		var bob := sin(_t * 3.0 + float(i)) * 3.0 if not reduced_motion else 0.0
+		var hop := sin(_react[i] * PI) * 16.0 if not reduced_motion else 0.0
+		bob -= hop
 		var col := Color.from_hsv(fmod(0.08 + float(i) * 0.17, 1.0), 0.35, 0.85)
 		ci.draw_circle(Vector2(x, y - 74 + bob), 20, col.lightened(0.3))                       # head
 		ci.draw_colored_polygon(PopMachineArt.ellipse(Vector2(x, y - 26 + bob), Vector2(26, 30), 16), col)  # body
 		ci.draw_arc(Vector2(x, y - 74 + bob), 20, 0, TAU, 16, PopPalette.INK, 3.0)
+		if _react[i] > 0.0:
+			# Paid: the bag in their hands, and a coin rising beside the head.
+			var bag := Rect2(Vector2(x - 13, y - 44 + bob), Vector2(26, 32))
+			ci.draw_rect(bag, PopPalette.CREAM)
+			ci.draw_rect(Rect2(bag.position + Vector2(9, 0), Vector2(8, bag.size.y)), PopPalette.RED)
+			ci.draw_rect(bag, PopPalette.INK, false, 2.0)
+			PopMachineArt.draw_coin(ci, Vector2(x + 30, y - 80 + bob - (1.0 - _react[i]) * 24.0), 13)
 
 
 ## A striped bag rises from the machine, sails to the counter and slides to
 ## the customer -- the pack-and-serve moment of every batch.
 func _draw_bags(ci: CanvasItem) -> void:
-	var y := counter_y()
 	for b: Dictionary in _bags:
-		var a := float(b["age"])
+		var a := clampf(float(b["age"]), 0.0, 1.0)
 		var from: Vector2 = b["from"]
-		var to := Vector2(size.x * 0.45, y - 22)
-		var end := Vector2(size.x - 60, y - 22)
-		var p: Vector2
-		if a < 1.0:
-			var k := a
-			p = from.lerp(to, k) + Vector2(0, -sin(k * PI) * 120.0)
-		else:
-			p = to.lerp(end, clampf((a - 1.0) / 1.0, 0.0, 1.0))
+		var to := _customer_pos(int(b["to"])) + Vector2(0, -40)
+		var p := from.lerp(to, a) + Vector2(0, -sin(a * PI) * 140.0)
 		var s := 0.7 if String(b["kind"]) == "helper" else 1.0
 		var r := Rect2(p - Vector2(16, 22) * s, Vector2(32, 44) * s)
 		ci.draw_rect(r, PopPalette.CREAM)
@@ -412,3 +433,26 @@ func _draw_helper_ring(ci: CanvasItem, st: Dictionary) -> void:
 	ci.draw_circle(c + Vector2(cos(a), sin(a)) * r, 8, Color.WHITE)
 	if _auto_flash > 0.0:
 		ci.draw_arc(c, r * (1.0 + 0.4 * (1.0 - _auto_flash)), 0, TAU, 32, Color(PopPalette.GOLD, _auto_flash), 10.0)
+
+
+## The idle hint (Step 10): once shaking has unlocked and has never been done,
+## the finger held on the machine also slides side to side, with an arrow each
+## way -- the gesture itself, seen while waiting (the crank's arrows show only
+## mid-hold).
+func _draw_hint_gesture(ci: CanvasItem, size_px: float, finger: bool) -> void:
+	var st := _s()
+	if not bool(st["unlocked"]["shake"]) or _shaken_ever or bool(st["motor"]):
+		super(ci, size_px, finger)
+		return
+	super(ci, size_px, false)
+	var c := machine_centre()
+	var sw := sin(_t * 9.0) * size_px * 0.08 if not reduced_motion else 0.0
+	var p := c + Vector2(size_px * 0.04 + sw, size_px * 0.1)
+	ci.draw_circle(p, 22, PopPalette.CREAM)
+	ci.draw_rect(Rect2(p.x - 22, p.y, 44, 70), PopPalette.CREAM)
+	ci.draw_circle(p + Vector2(0, -6), 10, Color(1, 0.85, 0.8))
+	ci.draw_arc(p, 22, PI, TAU, 16, PopPalette.INK, 4.0)
+	for sgn: float in [-1.0, 1.0]:
+		var tip := c + Vector2(sgn * size_px * 0.26, size_px * 0.13)
+		ci.draw_colored_polygon(PackedVector2Array([tip, tip - Vector2(sgn * 22, 15), tip - Vector2(sgn * 22, -15)]), Color(PopPalette.INK, 0.55))
+		ci.draw_line(tip - Vector2(sgn * 18, 0), tip - Vector2(sgn * 56, 0), Color(PopPalette.INK, 0.55), 7.0)

@@ -43,6 +43,7 @@ func progress() -> float:
 
 func _process(delta: float) -> void:
 	_t += delta
+	_step_deny(delta)
 	var target := 1.0 if enabled else 0.0
 	if not is_equal_approx(_shine, target) or enabled:
 		_shine = move_toward(_shine, target, delta * 4.0)
@@ -52,6 +53,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var r := Rect2(Vector2.ZERO, size)
 	r.position.y += sin(_t * 6.0) * 3.0 * _shine - (3.0 if held else 0.0)
+	r.position.x += deny_offset()
 	var rad := size.y * 0.24
 	PopMachineArt._round_rect(self, Rect2(r.position + Vector2(0, 6), r.size), rad, PopPalette.SHADOW)
 	PopMachineArt._round_rect(self, r, rad, Color(0.93, 0.96, 1.0, 0.95))

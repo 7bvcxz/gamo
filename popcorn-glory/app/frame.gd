@@ -13,6 +13,8 @@ signal restart_pressed
 signal buy_pressed
 ## The Popcorn Stand's automation card (Step 10).
 signal auto_pressed
+## A card tapped while it cannot be paid for (the stand): the app logs it and makes a low 'no'.
+signal denied(which: String)
 signal sound_pressed
 ## Dev mode only (?dev=1): download this run's local log as JSON.
 signal log_pressed
@@ -65,6 +67,10 @@ func _init() -> void:
 	restart_button.pressed.connect(func() -> void: restart_pressed.emit())
 	upgrade_button.pressed.connect(func() -> void: buy_pressed.emit())
 	auto_button.pressed.connect(func() -> void: auto_pressed.emit())
+	# The stand answers a tap on a card it cannot pay for (Step 10); the
+	# experiments A/B/C are kept as they were compared.
+	upgrade_button.denied.connect(_on_denied.bind(upgrade_button))
+	auto_button.denied.connect(_on_denied.bind(auto_button))
 	sound_button.pressed.connect(func() -> void: sound_pressed.emit())
 	log_button.pressed.connect(func() -> void: log_pressed.emit())
 
@@ -132,6 +138,16 @@ func refresh(rules: PopRules, p_clock_ms: int) -> void:
 		clock_ms = p_clock_ms
 		queue_redraw()
 	clock_ms = p_clock_ms
+
+
+func _on_denied(b: PopPressArea) -> void:
+	if has_auto:
+		_deny(b)
+
+
+func _deny(b: PopPressArea) -> void:
+	b.deny()
+	denied.emit("upgrade" if b == upgrade_button else "auto")
 
 
 func _refresh_auto(rules: PopRules) -> void:

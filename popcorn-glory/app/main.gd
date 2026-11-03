@@ -62,6 +62,10 @@ func _ready() -> void:
 	frame.restart_pressed.connect(restart)
 	frame.buy_pressed.connect(buy)
 	frame.auto_pressed.connect(buy_auto)
+	frame.denied.connect(func(which: String) -> void:
+		if rules != null:
+			session.record(clock.now_ms, "denied", {"card": which, "money": rules.money})
+			audio.play("thud", 1.25, -8.0))
 	frame.sound_pressed.connect(toggle_sound)
 	frame.log_pressed.connect(download_log)
 	audio = PopAudio.new()
@@ -219,8 +223,11 @@ func dev_advance(ms: int) -> void:
 ## Godot hands _process a delta capped at max_physics_steps_per_frame physics
 ## steps (8 / 60 s = 0.133 s): a browser hitch longer than that vanished from
 ## the run, and from B's heat while the finger stayed down (Step 09: a blind
-## player held 1.98 s, the game judged 1.16 s). The clock now takes the larger
-## of the two; PopClock still caps one frame at MAX_STEP.
+## player held 1.98 s, the game judged 1.16 s). The wall time is used only when
+## it is clearly longer (HITCH_S): taking the larger of two noisy measures on
+## EVERY frame made the game clock run 4% fast (Step 10's blind runs: 1.04x).
+## PopClock still caps one frame at MAX_STEP.
+const HITCH_S := 0.05
 var _last_us := 0
 var _has_last := false
 
@@ -233,7 +240,7 @@ func _process(delta: float) -> void:
 	var wall := float(now_us - _last_us) / 1000000.0 if _has_last else delta
 	_last_us = now_us
 	_has_last = true
-	var added := clock.step(maxf(delta, wall))
+	var added := clock.step(wall if wall - delta > HITCH_S else delta)
 	if added > 0:
 		rules.advance(added)
 	_flush()

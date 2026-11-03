@@ -195,6 +195,13 @@ func test_a_hitch_counts_by_the_wall_clock() -> void:
 	before = app.clock.now_ms
 	app._process(0.016)
 	assert_eq(app.clock.now_ms - before, 16, "with no previous frame, Godot's delta")
+	# An ordinary frame whose wall time is a little longer: Godot's delta, not
+	# the larger of the two (that ran the clock 4% fast in Step 10's blind runs).
+	app._last_us = Time.get_ticks_usec() - 30000
+	app._has_last = true
+	before = app.clock.now_ms
+	app._process(0.016)
+	assert_eq(app.clock.now_ms - before, 16, "a 30 ms wall frame with a 16 ms delta adds 16")
 
 
 ## Step 10, the stand through the app with real input events: the first
@@ -259,6 +266,14 @@ func test_the_stand_with_real_input() -> void:
 	# Automation: the card appears at its level, buys the motor, then the helper.
 	app.frame.refresh(app.rules, app.clock.now_ms)
 	assert_true(app.frame.auto_button.visible, "the card at its level")
+	# A tap on a card it cannot pay for: nothing bought, a 'no' logged and shown.
+	app.rules.money = 0
+	app.frame.refresh(app.rules, app.clock.now_ms)
+	var level_before := app.rules.level
+	_click(app.frame.upgrade_button)
+	assert_eq(app.rules.level, level_before, "not bought")
+	assert_eq(app.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "denied").size(), 1, "denied once")
+	assert_true(app.frame.upgrade_button.deny_offset() != 0.0 or app.frame.upgrade_button._deny > 0.0, "the card shakes")
 	app.dev_money(1000000)
 	app.buy_auto()
 	assert_true(bool(app.rules.state()["motor"]), "the motor")

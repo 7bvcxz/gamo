@@ -67,6 +67,17 @@ func burn_at() -> int:
 	return window_end() + int(round(int(_t()["burn_after_ms"]) * float(_recipe().get("burn_scale", 1.0))))
 
 
+## The gold as judged is a little wider than the gold as drawn (edge_grace_ms
+## each side): a release that looks inside the yellow pays as inside. Step 10's
+## blind player let go 4 ms before a gold edge -- half a degree on the ring --
+## and was paid a near miss. The drawn window is window_start..window_end.
+func _judge(ms: int) -> String:
+	var g := int(_t().get("edge_grace_ms", 0))
+	if ms >= window_start() - g and ms <= window_end() + g:
+		return PERFECT
+	return super(ms)
+
+
 func motor() -> bool:
 	return auto_level >= 1
 

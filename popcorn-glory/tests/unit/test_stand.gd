@@ -181,3 +181,28 @@ func test_economy_table_is_valid() -> void:
 	var bad := PopEconomy.new()
 	bad.load_dict({"x": {"max_level": 2, "costs": [5, 5], "batch": [1, 2, 3]}})
 	assert_true(bad.errors.size() > 0, "costs must rise")
+
+
+## A release that looks inside the gold pays as inside: edge_grace_ms past
+## either drawn edge is still perfect in the stand, and B is not changed.
+func test_gold_edges_forgive_in_the_stand_only() -> void:
+	var g := int(PopEconomy.load_default().table("stand")["edge_grace_ms"])
+	assert_true(g > 0, "a grace")
+	for lv in [0, 6]:
+		var s: PopRules = Stand.new()
+		s.level = lv
+		var ws: int = s.window_start()
+		var we: int = s.window_end()
+		for at: int in [ws - g, we + g]:
+			s.execute({"type": "press"})
+			s.advance(at)
+			assert_eq(String(s.execute({"type": "release"})["outcome"]), "perfect", "L%d %d ms (edge %+d) is perfect" % [lv, at, at - (ws if at < ws else we)])
+			s.advance(2000)
+		s.execute({"type": "press"})
+		s.advance(ws - g - 1)
+		assert_eq(String(s.execute({"type": "release"})["outcome"]), "near", "L%d one ms more is a near miss" % lv)
+		s.advance(2000)
+	var b: PopRules = Perfect.new()
+	b.execute({"type": "press"})
+	b.advance(b.window_start() - g)
+	assert_eq(String(b.execute({"type": "release"})["outcome"]), "near", "B's edges stay as compared")
