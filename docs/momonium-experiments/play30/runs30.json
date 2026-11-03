@@ -1,0 +1,2578 @@
+{
+  "_doc": "tools/runs30.gd: 1800 s of play per run in the real frame at several interaction profiles. Objective technical and pacing evidence, never a measure of fun, fatigue or boredom.",
+  "marks_s": [
+    180.0,
+    600.0,
+    900.0,
+    1200.0,
+    1800.0
+  ],
+  "runs": [
+    {
+      "at": {
+        "10": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Pebble Boulder",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 600.1,
+            "median_gap_s": 600.1
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "15": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 900.2,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 900.2,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Pebble Boulder",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 900.2,
+            "median_gap_s": 900.2
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "20": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1200.2,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 1200.2,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Pebble Boulder",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1200.2,
+            "median_gap_s": 1200.2
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "3": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 180.2,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 180.2,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Pebble Boulder",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 180.2,
+            "median_gap_s": 180.2
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "30": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1800.2,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 1800.2,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Pebble Boulder",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1800.2,
+            "median_gap_s": 1800.2
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 0,
+        "coins": 0,
+        "earned": 0,
+        "upgrades": 0
+      },
+      "id": "rock",
+      "most_on_screen": 0,
+      "profile": "passive",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 0.0,
+        "stalled": false,
+        "where_s": 0.0
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 606,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": 9,
+          "coins": 580,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 1725,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 561.1,
+            "what": "broke Ruby Heart"
+          },
+          "level": 6,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 15,
+            "longest_gap_s": 82.0,
+            "median_gap_s": 41.0
+          },
+          "taps": 600,
+          "upgrades": 6,
+          "visible_upgrades": 6
+        },
+        "15": {
+          "actions": 907,
+          "actions_last_minute": 1,
+          "active_s": 900.2,
+          "breaks": 10,
+          "coins": 1280,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 3325,
+          "engaged_s": 900.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 762.7,
+            "what": "pickaxe 7"
+          },
+          "level": 7,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 200.0,
+            "median_gap_s": 46.3
+          },
+          "taps": 900,
+          "upgrades": 7,
+          "visible_upgrades": 7
+        },
+        "20": {
+          "actions": 1208,
+          "actions_last_minute": 1,
+          "active_s": 1200.2,
+          "breaks": 11,
+          "coins": 2340,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 5885,
+          "engaged_s": 1200.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 976.7,
+            "what": "pickaxe 8"
+          },
+          "level": 8,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 223.4,
+            "median_gap_s": 46.3
+          },
+          "taps": 1200,
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "3": {
+          "actions": 182,
+          "actions_last_minute": 1,
+          "active_s": 180.2,
+          "breaks": 3,
+          "coins": 60,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 125,
+          "engaged_s": 180.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 135.2,
+            "what": "broke Mossy Rock"
+          },
+          "level": 2,
+          "name": "Copper Vein",
+          "rewards": {
+            "count": 5,
+            "longest_gap_s": 50.1,
+            "median_gap_s": 41.0
+          },
+          "taps": 180,
+          "upgrades": 2,
+          "visible_upgrades": 2
+        },
+        "30": {
+          "actions": 1810,
+          "actions_last_minute": 1,
+          "active_s": 1800.2,
+          "breaks": 14,
+          "coins": 16776,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 27021,
+          "engaged_s": 1800.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1454.7,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 261.4,
+            "median_gap_s": 50.1
+          },
+          "taps": 1800,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 1810,
+        "coins": 16776,
+        "earned": 27021,
+        "upgrades": 10
+      },
+      "id": "rock",
+      "most_on_screen": 0,
+      "profile": "slow",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 261.5,
+        "stalled": false,
+        "where_s": 1454.7
+      },
+      "taps_per_second": 1.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 907,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": 10,
+          "coins": 1280,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 3325,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 509.0,
+            "what": "pickaxe 7"
+          },
+          "level": 7,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 133.3,
+            "median_gap_s": 30.6
+          },
+          "taps": 900,
+          "upgrades": 7,
+          "visible_upgrades": 7
+        },
+        "15": {
+          "actions": 1359,
+          "actions_last_minute": 1,
+          "active_s": 900.1,
+          "breaks": 12,
+          "coins": 3936,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 9981,
+          "engaged_s": 900.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 806.4,
+            "what": "pickaxe 9"
+          },
+          "level": 9,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 21,
+            "longest_gap_s": 153.2,
+            "median_gap_s": 30.6
+          },
+          "taps": 1350,
+          "upgrades": 9,
+          "visible_upgrades": 9
+        },
+        "20": {
+          "actions": 1810,
+          "actions_last_minute": 1,
+          "active_s": 1200.1,
+          "breaks": 14,
+          "coins": 16776,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 27021,
+          "engaged_s": 1200.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 971.0,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 173.8,
+            "median_gap_s": 33.5
+          },
+          "taps": 1800,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 274,
+          "actions_last_minute": 1,
+          "active_s": 180.1,
+          "breaks": 5,
+          "coins": 20,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 345,
+          "engaged_s": 180.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 177.0,
+            "what": "pickaxe 4"
+          },
+          "level": 4,
+          "name": "Silver Seam",
+          "rewards": {
+            "count": 9,
+            "longest_gap_s": 44.7,
+            "median_gap_s": 14.5
+          },
+          "taps": 270,
+          "upgrades": 4,
+          "visible_upgrades": 4
+        },
+        "30": {
+          "actions": 2710,
+          "actions_last_minute": 1,
+          "active_s": 1800.1,
+          "breaks": 15,
+          "coins": 33553,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 43798,
+          "engaged_s": 1800.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 971.0,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 25,
+            "longest_gap_s": 375.3,
+            "median_gap_s": 35.0
+          },
+          "taps": 2700,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 2710,
+        "coins": 33553,
+        "earned": 43798,
+        "upgrades": 10
+      },
+      "id": "rock",
+      "most_on_screen": 0,
+      "profile": "tired",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 375.2,
+        "stalled": true,
+        "where_s": 1424.8
+      },
+      "taps_per_second": 1.5,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 1509,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": 13,
+          "coins": 6290,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 16535,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 588.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 23,
+            "longest_gap_s": 97.7,
+            "median_gap_s": 15.9
+          },
+          "taps": 1499,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 2259,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": 15,
+          "coins": 33553,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 43798,
+          "engaged_s": 900.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 588.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 25,
+            "longest_gap_s": 168.4,
+            "median_gap_s": 20.9
+          },
+          "taps": 2249,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "20": {
+          "actions": 3009,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": 16,
+          "coins": 60397,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 70642,
+          "engaged_s": 1200.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 588.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 26,
+            "longest_gap_s": 269.2,
+            "median_gap_s": 21.6
+          },
+          "taps": 2999,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 454,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": 7,
+          "coins": 180,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 805,
+          "engaged_s": 180.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 164.9,
+            "what": "pickaxe 5"
+          },
+          "level": 5,
+          "name": "Amethyst Geode",
+          "rewards": {
+            "count": 12,
+            "longest_gap_s": 33.2,
+            "median_gap_s": 15.3
+          },
+          "taps": 449,
+          "upgrades": 5,
+          "visible_upgrades": 5
+        },
+        "30": {
+          "actions": 4509,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": 17,
+          "coins": 103347,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 113592,
+          "engaged_s": 1800.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 588.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 27,
+            "longest_gap_s": 430.0,
+            "median_gap_s": 22.4
+          },
+          "taps": 4499,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 4510,
+        "coins": 103347,
+        "earned": 113592,
+        "upgrades": 10
+      },
+      "id": "rock",
+      "most_on_screen": 0,
+      "profile": "natural",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 430.0,
+        "stalled": true,
+        "where_s": 1129.8
+      },
+      "taps_per_second": 2.5,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 2410,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": 15,
+          "coins": 33553,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 43798,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 373.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 25,
+            "longest_gap_s": 105.5,
+            "median_gap_s": 13.1
+          },
+          "taps": 2400,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 3610,
+          "actions_last_minute": 1,
+          "active_s": 900.2,
+          "breaks": 16,
+          "coins": 60397,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 70642,
+          "engaged_s": 900.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 373.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 26,
+            "longest_gap_s": 188.0,
+            "median_gap_s": 13.4
+          },
+          "taps": 3600,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "20": {
+          "actions": 4810,
+          "actions_last_minute": 1,
+          "active_s": 1200.2,
+          "breaks": 17,
+          "coins": 103347,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 113592,
+          "engaged_s": 1200.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 373.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 27,
+            "longest_gap_s": 269.0,
+            "median_gap_s": 13.9
+          },
+          "taps": 4800,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 726,
+          "actions_last_minute": 1,
+          "active_s": 180.2,
+          "breaks": 9,
+          "coins": 580,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 1725,
+          "engaged_s": 180.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 145.9,
+            "what": "broke Ruby Heart"
+          },
+          "level": 6,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 15,
+            "longest_gap_s": 34.3,
+            "median_gap_s": 11.4
+          },
+          "taps": 720,
+          "upgrades": 6,
+          "visible_upgrades": 6
+        },
+        "30": {
+          "actions": 7210,
+          "actions_last_minute": 1,
+          "active_s": 1800.2,
+          "breaks": 18,
+          "coins": 172066,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 182311,
+          "engaged_s": 1800.2,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 373.1,
+            "what": "pickaxe 10"
+          },
+          "level": 10,
+          "name": "Giant Crystal",
+          "rewards": {
+            "count": 28,
+            "longest_gap_s": 430.0,
+            "median_gap_s": 14.4
+          },
+          "taps": 7200,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 7210,
+        "coins": 172066,
+        "earned": 182311,
+        "upgrades": 10
+      },
+      "id": "rock",
+      "most_on_screen": 0,
+      "profile": "eager",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 430.0,
+        "stalled": true,
+        "where_s": 981.2
+      },
+      "taps_per_second": 4.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Wooden Pickaxe",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 600.1,
+            "median_gap_s": 600.1
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "15": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Wooden Pickaxe",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 900.1,
+            "median_gap_s": 900.1
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "20": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Wooden Pickaxe",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1200.1,
+            "median_gap_s": 1200.1
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "3": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 180.1,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Wooden Pickaxe",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 180.1,
+            "median_gap_s": 180.1
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "30": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": 0,
+          "coins": 0,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 0,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 0.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Wooden Pickaxe",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1800.1,
+            "median_gap_s": 1800.1
+          },
+          "taps": 0,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 0,
+        "coins": 0,
+        "earned": 0,
+        "upgrades": 0
+      },
+      "id": "rock-plus",
+      "most_on_screen": 0,
+      "profile": "passive",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 0.0,
+        "stalled": false,
+        "where_s": 0.0
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 608,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": 18,
+          "coins": 121,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 1121,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 576.1,
+            "what": "broke Great Sandstone"
+          },
+          "level": 8,
+          "name": "Iron Pickaxe",
+          "rewards": {
+            "count": 26,
+            "longest_gap_s": 67.0,
+            "median_gap_s": 22.5
+          },
+          "taps": 600,
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "15": {
+          "actions": 910,
+          "actions_last_minute": 1,
+          "active_s": 900.1,
+          "breaks": 28,
+          "coins": 445,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 2296,
+          "engaged_s": 900.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 784.1,
+            "what": "broke Great Copper Vein"
+          },
+          "level": 10,
+          "name": "Steel Pickaxe",
+          "rewards": {
+            "count": 38,
+            "longest_gap_s": 70.0,
+            "median_gap_s": 24.0
+          },
+          "taps": 900,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "20": {
+          "actions": 1212,
+          "actions_last_minute": 1,
+          "active_s": 1200.1,
+          "breaks": 35,
+          "coins": 764,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 3841,
+          "engaged_s": 1200.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1064.7,
+            "what": "Silver Pickaxe"
+          },
+          "level": 12,
+          "name": "Silver Pickaxe",
+          "rewards": {
+            "count": 47,
+            "longest_gap_s": 70.0,
+            "median_gap_s": 25.5
+          },
+          "taps": 1200,
+          "upgrades": 12,
+          "visible_upgrades": 12
+        },
+        "3": {
+          "actions": 183,
+          "actions_last_minute": 1,
+          "active_s": 180.1,
+          "breaks": 5,
+          "coins": 47,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 157,
+          "engaged_s": 180.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 119.7,
+            "what": "Copper Pickaxe"
+          },
+          "level": 3,
+          "name": "Copper Pickaxe",
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 38.0,
+            "median_gap_s": 22.4
+          },
+          "taps": 180,
+          "upgrades": 3,
+          "visible_upgrades": 3
+        },
+        "30": {
+          "actions": 1817,
+          "actions_last_minute": 1,
+          "active_s": 1800.1,
+          "breaks": 50,
+          "coins": 1728,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 10777,
+          "engaged_s": 1800.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1713.1,
+            "what": "broke Great Silver Seam"
+          },
+          "level": 17,
+          "name": "Golden Pickaxe",
+          "rewards": {
+            "count": 67,
+            "longest_gap_s": 82.0,
+            "median_gap_s": 26.2
+          },
+          "taps": 1800,
+          "upgrades": 17,
+          "visible_upgrades": 17
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 1817,
+        "coins": 1728,
+        "earned": 10777,
+        "upgrades": 17
+      },
+      "id": "rock-plus",
+      "most_on_screen": 140,
+      "profile": "slow",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 82.0,
+        "stalled": false,
+        "where_s": 1631.1
+      },
+      "taps_per_second": 1.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 910,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": 28,
+          "coins": 445,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 2296,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 524.1,
+            "what": "broke Great Copper Vein"
+          },
+          "level": 10,
+          "name": "Steel Pickaxe",
+          "rewards": {
+            "count": 38,
+            "longest_gap_s": 46.6,
+            "median_gap_s": 16.3
+          },
+          "taps": 900,
+          "upgrades": 10,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 1364,
+          "actions_last_minute": 1,
+          "active_s": 900.1,
+          "breaks": 39,
+          "coins": 326,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 5168,
+          "engaged_s": 900.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 822.1,
+            "what": "broke Great Iron Lump"
+          },
+          "level": 14,
+          "name": "Silver Pickaxe",
+          "rewards": {
+            "count": 53,
+            "longest_gap_s": 46.6,
+            "median_gap_s": 16.7
+          },
+          "taps": 1350,
+          "upgrades": 14,
+          "visible_upgrades": 14
+        },
+        "20": {
+          "actions": 1817,
+          "actions_last_minute": 1,
+          "active_s": 1200.1,
+          "breaks": 50,
+          "coins": 1650,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 10699,
+          "engaged_s": 1200.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1143.5,
+            "what": "broke Great Silver Seam"
+          },
+          "level": 17,
+          "name": "Golden Pickaxe",
+          "rewards": {
+            "count": 67,
+            "longest_gap_s": 54.7,
+            "median_gap_s": 17.4
+          },
+          "taps": 1800,
+          "upgrades": 17,
+          "visible_upgrades": 17
+        },
+        "3": {
+          "actions": 275,
+          "actions_last_minute": 1,
+          "active_s": 180.1,
+          "breaks": 8,
+          "coins": 19,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 330,
+          "engaged_s": 180.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 134.8,
+            "what": "broke Great Pebble Boulder"
+          },
+          "level": 5,
+          "name": "Copper Pickaxe",
+          "rewards": {
+            "count": 13,
+            "longest_gap_s": 39.4,
+            "median_gap_s": 13.2
+          },
+          "taps": 270,
+          "upgrades": 5,
+          "visible_upgrades": 5
+        },
+        "30": {
+          "actions": 2725,
+          "actions_last_minute": 1,
+          "active_s": 1800.1,
+          "breaks": 72,
+          "coins": 1411,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 43404,
+          "engaged_s": 1800.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1795.5,
+            "what": "broke Great Ice Crag"
+          },
+          "level": 25,
+          "name": "Crystal Pickaxe",
+          "rewards": {
+            "count": 97,
+            "longest_gap_s": 54.7,
+            "median_gap_s": 18.4
+          },
+          "taps": 2700,
+          "upgrades": 25,
+          "visible_upgrades": 25
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 2725,
+        "coins": 1411,
+        "earned": 43404,
+        "upgrades": 25
+      },
+      "id": "rock-plus",
+      "most_on_screen": 140,
+      "profile": "tired",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 54.7,
+        "stalled": false,
+        "where_s": 1088.8
+      },
+      "taps_per_second": 1.5,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 1513,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": 41,
+          "coins": 1069,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 5911,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 507.8,
+            "what": "broke Great Iron Lump"
+          },
+          "level": 14,
+          "name": "Silver Pickaxe",
+          "rewards": {
+            "count": 55,
+            "longest_gap_s": 28.4,
+            "median_gap_s": 10.4
+          },
+          "taps": 1499,
+          "upgrades": 14,
+          "visible_upgrades": 14
+        },
+        "15": {
+          "actions": 2269,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": 59,
+          "coins": 2434,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 18751,
+          "engaged_s": 900.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 804.6,
+            "what": "broke Great Jade Rock"
+          },
+          "level": 20,
+          "name": "Ruby Pickaxe",
+          "rewards": {
+            "count": 79,
+            "longest_gap_s": 33.2,
+            "median_gap_s": 11.1
+          },
+          "taps": 2249,
+          "upgrades": 20,
+          "visible_upgrades": 20
+        },
+        "20": {
+          "actions": 3025,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": 77,
+          "coins": 6511,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 57090,
+          "engaged_s": 1200.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1106.2,
+            "what": "broke Great Ice Crag"
+          },
+          "level": 26,
+          "name": "Crystal Pickaxe",
+          "rewards": {
+            "count": 103,
+            "longest_gap_s": 33.2,
+            "median_gap_s": 11.3
+          },
+          "taps": 2999,
+          "upgrades": 26,
+          "visible_upgrades": 26
+        },
+        "3": {
+          "actions": 455,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": 14,
+          "coins": 226,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 701,
+          "engaged_s": 180.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 158.2,
+            "what": "broke Great Mossy Rock"
+          },
+          "level": 6,
+          "name": "Iron Pickaxe",
+          "rewards": {
+            "count": 20,
+            "longest_gap_s": 24.0,
+            "median_gap_s": 8.4
+          },
+          "taps": 449,
+          "upgrades": 6,
+          "visible_upgrades": 6
+        },
+        "30": {
+          "actions": 4537,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": 113,
+          "coins": 44248,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 502617,
+          "engaged_s": 1800.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1717.0,
+            "what": "broke Great Giant Crystal"
+          },
+          "level": 38,
+          "name": "Mythic Pickaxe",
+          "rewards": {
+            "count": 151,
+            "longest_gap_s": 33.2,
+            "median_gap_s": 11.8
+          },
+          "taps": 4499,
+          "upgrades": 38,
+          "visible_upgrades": 38
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 4538,
+        "coins": 44248,
+        "earned": 502617,
+        "upgrades": 38
+      },
+      "id": "rock-plus",
+      "most_on_screen": 140,
+      "profile": "natural",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 33.2,
+        "stalled": false,
+        "where_s": 672.2
+      },
+      "taps_per_second": 2.5,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 2421,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": 62,
+          "coins": 2854,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 22621,
+          "engaged_s": 600.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 582.9,
+            "what": "Jade Pickaxe"
+          },
+          "level": 21,
+          "name": "Jade Pickaxe",
+          "rewards": {
+            "count": 83,
+            "longest_gap_s": 21.0,
+            "median_gap_s": 6.8
+          },
+          "taps": 2400,
+          "upgrades": 21,
+          "visible_upgrades": 21
+        },
+        "15": {
+          "actions": 3630,
+          "actions_last_minute": 1,
+          "active_s": 900.1,
+          "breaks": 89,
+          "coins": 13093,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 118977,
+          "engaged_s": 900.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 878.4,
+            "what": "Starmetal Pickaxe"
+          },
+          "level": 30,
+          "name": "Starmetal Pickaxe",
+          "rewards": {
+            "count": 119,
+            "longest_gap_s": 21.0,
+            "median_gap_s": 7.2
+          },
+          "taps": 3600,
+          "upgrades": 30,
+          "visible_upgrades": 30
+        },
+        "20": {
+          "actions": 4839,
+          "actions_last_minute": 1,
+          "active_s": 1200.1,
+          "breaks": 117,
+          "coins": 104252,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 654482,
+          "engaged_s": 1200.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1166.6,
+            "what": "broke Deep Great Pebble Boulder"
+          },
+          "level": 39,
+          "name": "Mythic Pickaxe",
+          "rewards": {
+            "count": 156,
+            "longest_gap_s": 21.0,
+            "median_gap_s": 7.2
+          },
+          "taps": 4800,
+          "upgrades": 39,
+          "visible_upgrades": 39
+        },
+        "3": {
+          "actions": 728,
+          "actions_last_minute": 1,
+          "active_s": 180.1,
+          "breaks": 21,
+          "coins": 351,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 1351,
+          "engaged_s": 180.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 153.1,
+            "what": "broke Great Sandstone"
+          },
+          "level": 8,
+          "name": "Iron Pickaxe",
+          "rewards": {
+            "count": 29,
+            "longest_gap_s": 17.3,
+            "median_gap_s": 6.0
+          },
+          "taps": 720,
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "30": {
+          "actions": 7258,
+          "actions_last_minute": 1,
+          "active_s": 1800.1,
+          "breaks": 173,
+          "coins": 1268106,
+          "delivered": null,
+          "deliveries_per_min": null,
+          "earned": 18875768,
+          "engaged_s": 1800.1,
+          "idle_s": 0.0,
+          "income_per_s": 0.0,
+          "last_reveal": {
+            "t_s": 1753.1,
+            "what": "broke Deep Great Gold Nugget Rock"
+          },
+          "level": 58,
+          "name": "Mythic Pickaxe",
+          "rewards": {
+            "count": 231,
+            "longest_gap_s": 21.0,
+            "median_gap_s": 7.2
+          },
+          "taps": 7200,
+          "upgrades": 58,
+          "visible_upgrades": 58
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 7258,
+        "coins": 1268106,
+        "earned": 18875768,
+        "upgrades": 58
+      },
+      "id": "rock-plus",
+      "most_on_screen": 140,
+      "profile": "eager",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 21.0,
+        "stalled": false,
+        "where_s": 1015.6
+      },
+      "taps_per_second": 4.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 17,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": null,
+          "coins": 14623,
+          "delivered": 2240,
+          "deliveries_per_min": 300.0,
+          "earned": 55468,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 175.0,
+          "last_reveal": {
+            "t_s": 220.6,
+            "what": "Car Factory"
+          },
+          "level": 17,
+          "name": "Golden Line 7",
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 85.8,
+            "median_gap_s": 23.4
+          },
+          "taps": null,
+          "upgrades": 17,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 19,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": null,
+          "coins": 21385,
+          "delivered": 3740,
+          "deliveries_per_min": 300.0,
+          "earned": 113488,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 205.0,
+          "last_reveal": {
+            "t_s": 220.6,
+            "what": "Car Factory"
+          },
+          "level": 19,
+          "name": "Golden Line 9",
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 162.0,
+            "median_gap_s": 24.1
+          },
+          "taps": null,
+          "upgrades": 19,
+          "visible_upgrades": 10
+        },
+        "20": {
+          "actions": 20,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": null,
+          "coins": 39417,
+          "delivered": 5240,
+          "deliveries_per_min": 300.0,
+          "earned": 177652,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 220.0,
+          "last_reveal": {
+            "t_s": 220.6,
+            "what": "Car Factory"
+          },
+          "level": 20,
+          "name": "Golden Line 10",
+          "rewards": {
+            "count": 20,
+            "longest_gap_s": 225.3,
+            "median_gap_s": 24.2
+          },
+          "taps": null,
+          "upgrades": 20,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 8,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": null,
+          "coins": 103,
+          "delivered": 182,
+          "deliveries_per_min": 150.0,
+          "earned": 1021,
+          "engaged_s": 3.7,
+          "idle_s": 176.5,
+          "income_per_s": 20.0,
+          "last_reveal": {
+            "t_s": 176.5,
+            "what": "Momo Crew"
+          },
+          "level": 8,
+          "name": "Momo Crew",
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 25.9,
+            "median_gap_s": 21.5
+          },
+          "taps": null,
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "30": {
+          "actions": 22,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": null,
+          "coins": 5688,
+          "delivered": 8240,
+          "deliveries_per_min": 300.0,
+          "earned": 316918,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 250.0,
+          "last_reveal": {
+            "t_s": 220.6,
+            "what": "Car Factory"
+          },
+          "level": 22,
+          "name": "Golden Line 12",
+          "rewards": {
+            "count": 22,
+            "longest_gap_s": 441.6,
+            "median_gap_s": 24.2
+          },
+          "taps": null,
+          "upgrades": 22,
+          "visible_upgrades": 10
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": 1779.0,
+        "limit_s": 600.0,
+        "seconds_over": 13
+      },
+      "final": {
+        "actions": 22,
+        "coins": 5738,
+        "earned": 316968,
+        "upgrades": 22
+      },
+      "id": "tycoon",
+      "most_on_screen": 36,
+      "profile": "prompt",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 441.6,
+        "stalled": true,
+        "where_s": 1337.0
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 17,
+          "actions_last_minute": 1,
+          "active_s": 600.1,
+          "breaks": null,
+          "coins": 94,
+          "delivered": 1985,
+          "deliveries_per_min": 306.0,
+          "earned": 40939,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 178.5,
+          "last_reveal": {
+            "t_s": 300.1,
+            "what": "Car Factory"
+          },
+          "level": 17,
+          "name": "Golden Line 7",
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 90.0,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 17,
+          "visible_upgrades": 10
+        },
+        "15": {
+          "actions": 18,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": null,
+          "coins": 34791,
+          "delivered": 3485,
+          "deliveries_per_min": 306.0,
+          "earned": 96139,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 193.8,
+          "last_reveal": {
+            "t_s": 300.1,
+            "what": "Car Factory"
+          },
+          "level": 18,
+          "name": "Golden Line 8",
+          "rewards": {
+            "count": 18,
+            "longest_gap_s": 179.9,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 18,
+          "visible_upgrades": 10
+        },
+        "20": {
+          "actions": 20,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": null,
+          "coins": 20754,
+          "delivered": 4985,
+          "deliveries_per_min": 306.0,
+          "earned": 158989,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 224.4,
+          "last_reveal": {
+            "t_s": 300.1,
+            "what": "Car Factory"
+          },
+          "level": 20,
+          "name": "Golden Line 10",
+          "rewards": {
+            "count": 20,
+            "longest_gap_s": 210.0,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 20,
+          "visible_upgrades": 10
+        },
+        "3": {
+          "actions": 6,
+          "actions_last_minute": 1,
+          "active_s": 180.1,
+          "breaks": null,
+          "coins": 110,
+          "delivered": 108,
+          "deliveries_per_min": 72.0,
+          "earned": 468,
+          "engaged_s": 0.0,
+          "idle_s": 180.1,
+          "income_per_s": 6.0,
+          "last_reveal": {
+            "t_s": 180.1,
+            "what": "Second Lane"
+          },
+          "level": 6,
+          "name": "Second Lane",
+          "rewards": {
+            "count": 6,
+            "longest_gap_s": 30.1,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 6,
+          "visible_upgrades": 6
+        },
+        "30": {
+          "actions": 21,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": null,
+          "coins": 88956,
+          "delivered": 7985,
+          "deliveries_per_min": 306.0,
+          "earned": 296389,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 239.7,
+          "last_reveal": {
+            "t_s": 300.1,
+            "what": "Car Factory"
+          },
+          "level": 21,
+          "name": "Golden Line 11",
+          "rewards": {
+            "count": 21,
+            "longest_gap_s": 359.9,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 21,
+          "visible_upgrades": 10
+        }
+      },
+      "books_balance": true,
+      "buys": "every30",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 21,
+        "coins": 88956,
+        "earned": 296389,
+        "upgrades": 21
+      },
+      "id": "tycoon",
+      "most_on_screen": 36,
+      "profile": "every30",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 359.8,
+        "stalled": true,
+        "where_s": 1440.2
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": null,
+          "coins": 582,
+          "delivered": 194,
+          "deliveries_per_min": 18.0,
+          "earned": 582,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 0.9,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 600.1,
+            "median_gap_s": 600.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "15": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": null,
+          "coins": 879,
+          "delivered": 293,
+          "deliveries_per_min": 24.0,
+          "earned": 879,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 1.2,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 900.1,
+            "median_gap_s": 900.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "20": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": null,
+          "coins": 1173,
+          "delivered": 391,
+          "deliveries_per_min": 18.0,
+          "earned": 1173,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 0.9,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1200.1,
+            "median_gap_s": 1200.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "3": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": null,
+          "coins": 168,
+          "delivered": 56,
+          "deliveries_per_min": 18.0,
+          "earned": 168,
+          "engaged_s": 0.0,
+          "idle_s": 180.1,
+          "income_per_s": 0.9,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 180.1,
+            "median_gap_s": 180.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "30": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": null,
+          "coins": 1764,
+          "delivered": 588,
+          "deliveries_per_min": 24.0,
+          "earned": 1764,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 1.2,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1800.1,
+            "median_gap_s": 1800.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        }
+      },
+      "books_balance": true,
+      "buys": "never",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 0,
+        "coins": 1764,
+        "earned": 1764,
+        "upgrades": 0
+      },
+      "id": "tycoon",
+      "most_on_screen": 4,
+      "profile": "passive",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 0.0,
+        "stalled": false,
+        "where_s": 0.0
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 18,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": null,
+          "coins": 1155,
+          "delivered": 3092,
+          "deliveries_per_min": 547.4,
+          "earned": 49293,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 164.2,
+          "last_reveal": {
+            "t_s": 594.7,
+            "what": "Wind Power"
+          },
+          "level": 18,
+          "name": "Wind Power",
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 59.2,
+            "median_gap_s": 24.1
+          },
+          "taps": null,
+          "upgrades": 18,
+          "visible_upgrades": 18
+        },
+        "15": {
+          "actions": 22,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": null,
+          "coins": 14145,
+          "delivered": 6667,
+          "deliveries_per_min": 800.0,
+          "earned": 137283,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 346.7,
+          "last_reveal": {
+            "t_s": 861.1,
+            "what": "Robot Arms"
+          },
+          "level": 22,
+          "name": "Robot Arms",
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 70.3,
+            "median_gap_s": 34.6
+          },
+          "taps": null,
+          "upgrades": 22,
+          "visible_upgrades": 22
+        },
+        "20": {
+          "actions": 26,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": null,
+          "coins": 17683,
+          "delivered": 11330,
+          "deliveries_per_min": 1028.6,
+          "earned": 288821,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 617.2,
+          "last_reveal": {
+            "t_s": 1173.7,
+            "what": "Hyper Belt"
+          },
+          "level": 26,
+          "name": "Hyper Belt",
+          "rewards": {
+            "count": 29,
+            "longest_gap_s": 80.2,
+            "median_gap_s": 36.5
+          },
+          "taps": null,
+          "upgrades": 26,
+          "visible_upgrades": 26
+        },
+        "3": {
+          "actions": 8,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": null,
+          "coins": 103,
+          "delivered": 182,
+          "deliveries_per_min": 151.2,
+          "earned": 1021,
+          "engaged_s": 3.7,
+          "idle_s": 176.5,
+          "income_per_s": 20.2,
+          "last_reveal": {
+            "t_s": 176.5,
+            "what": "Momo Crew"
+          },
+          "level": 8,
+          "name": "Momo Crew",
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 25.9,
+            "median_gap_s": 21.5
+          },
+          "taps": null,
+          "upgrades": 8,
+          "visible_upgrades": 8
+        },
+        "30": {
+          "actions": 32,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": null,
+          "coins": 114907,
+          "delivered": 22655,
+          "deliveries_per_min": 1203.0,
+          "earned": 918165,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 1483.7,
+          "last_reveal": {
+            "t_s": 1723.9,
+            "what": "Grand Line 2"
+          },
+          "level": 32,
+          "name": "Grand Line 2",
+          "rewards": {
+            "count": 36,
+            "longest_gap_s": 109.5,
+            "median_gap_s": 48.0
+          },
+          "taps": null,
+          "upgrades": 32,
+          "visible_upgrades": 32
+        }
+      },
+      "books_balance": true,
+      "buys": "prompt",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 32,
+        "coins": 115055,
+        "earned": 918313,
+        "upgrades": 32
+      },
+      "id": "tycoon-plus",
+      "most_on_screen": 82,
+      "profile": "prompt",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 109.5,
+        "stalled": false,
+        "where_s": 1614.4
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 16,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": null,
+          "coins": 7635,
+          "delivered": 2515,
+          "deliveries_per_min": 547.4,
+          "earned": 37073,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 164.2,
+          "last_reveal": {
+            "t_s": 570.1,
+            "what": "Fifth Lane"
+          },
+          "level": 16,
+          "name": "Fifth Lane",
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 60.0,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 16,
+          "visible_upgrades": 16
+        },
+        "15": {
+          "actions": 20,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": null,
+          "coins": 28009,
+          "delivered": 5664,
+          "deliveries_per_min": 666.3,
+          "earned": 107147,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 288.7,
+          "last_reveal": {
+            "t_s": 810.2,
+            "what": "Golden Era"
+          },
+          "level": 20,
+          "name": "Second Crate",
+          "rewards": {
+            "count": 22,
+            "longest_gap_s": 90.0,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 20,
+          "visible_upgrades": 20
+        },
+        "20": {
+          "actions": 24,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": null,
+          "coins": 51567,
+          "delivered": 9897,
+          "deliveries_per_min": 902.3,
+          "earned": 230705,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 541.4,
+          "last_reveal": {
+            "t_s": 1110.2,
+            "what": "Gift Wrap"
+          },
+          "level": 24,
+          "name": "Gift Wrap",
+          "rewards": {
+            "count": 26,
+            "longest_gap_s": 90.0,
+            "median_gap_s": 30.1
+          },
+          "taps": null,
+          "upgrades": 24,
+          "visible_upgrades": 24
+        },
+        "3": {
+          "actions": 6,
+          "actions_last_minute": 1,
+          "active_s": 180.1,
+          "breaks": null,
+          "coins": 110,
+          "delivered": 108,
+          "deliveries_per_min": 76.5,
+          "earned": 468,
+          "engaged_s": 0.0,
+          "idle_s": 180.1,
+          "income_per_s": 6.4,
+          "last_reveal": {
+            "t_s": 180.1,
+            "what": "Second Lane"
+          },
+          "level": 6,
+          "name": "Second Lane",
+          "rewards": {
+            "count": 6,
+            "longest_gap_s": 30.1,
+            "median_gap_s": 30.0
+          },
+          "taps": null,
+          "upgrades": 6,
+          "visible_upgrades": 6
+        },
+        "30": {
+          "actions": 31,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": null,
+          "coins": 125033,
+          "delivered": 20948,
+          "deliveries_per_min": 1200.0,
+          "earned": 779571,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 1360.0,
+          "last_reveal": {
+            "t_s": 1710.2,
+            "what": "Grand Line 1"
+          },
+          "level": 31,
+          "name": "Grand Line 1",
+          "rewards": {
+            "count": 35,
+            "longest_gap_s": 90.0,
+            "median_gap_s": 60.0
+          },
+          "taps": null,
+          "upgrades": 31,
+          "visible_upgrades": 31
+        }
+      },
+      "books_balance": true,
+      "buys": "every30",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 31,
+        "coins": 125101,
+        "earned": 779639,
+        "upgrades": 31
+      },
+      "id": "tycoon-plus",
+      "most_on_screen": 83,
+      "profile": "every30",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 90.0,
+        "stalled": false,
+        "where_s": 810.2
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    },
+    {
+      "at": {
+        "10": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 600.1,
+          "breaks": null,
+          "coins": 582,
+          "delivered": 194,
+          "deliveries_per_min": 19.7,
+          "earned": 582,
+          "engaged_s": 0.0,
+          "idle_s": 600.1,
+          "income_per_s": 1.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 600.1,
+            "median_gap_s": 600.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "15": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 900.1,
+          "breaks": null,
+          "coins": 879,
+          "delivered": 293,
+          "deliveries_per_min": 19.7,
+          "earned": 879,
+          "engaged_s": 0.0,
+          "idle_s": 900.1,
+          "income_per_s": 1.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 900.1,
+            "median_gap_s": 900.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "20": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1200.1,
+          "breaks": null,
+          "coins": 1173,
+          "delivered": 391,
+          "deliveries_per_min": 19.7,
+          "earned": 1173,
+          "engaged_s": 0.0,
+          "idle_s": 1200.1,
+          "income_per_s": 1.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1200.1,
+            "median_gap_s": 1200.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "3": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 180.1,
+          "breaks": null,
+          "coins": 168,
+          "delivered": 56,
+          "deliveries_per_min": 19.7,
+          "earned": 168,
+          "engaged_s": 0.0,
+          "idle_s": 180.1,
+          "income_per_s": 1.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 180.1,
+            "median_gap_s": 180.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        },
+        "30": {
+          "actions": 0,
+          "actions_last_minute": 0,
+          "active_s": 1800.1,
+          "breaks": null,
+          "coins": 1764,
+          "delivered": 588,
+          "deliveries_per_min": 19.7,
+          "earned": 1764,
+          "engaged_s": 0.0,
+          "idle_s": 1800.1,
+          "income_per_s": 1.0,
+          "last_reveal": null,
+          "level": 0,
+          "name": "Little Line",
+          "rewards": {
+            "count": 0,
+            "longest_gap_s": 1800.1,
+            "median_gap_s": 1800.1
+          },
+          "taps": null,
+          "upgrades": 0,
+          "visible_upgrades": 0
+        }
+      },
+      "books_balance": true,
+      "buys": "never",
+      "coins_whole": true,
+      "cost_wall": {
+        "first_s": null,
+        "limit_s": 600.0,
+        "seconds_over": 0
+      },
+      "final": {
+        "actions": 0,
+        "coins": 1764,
+        "earned": 1764,
+        "upgrades": 0
+      },
+      "id": "tycoon-plus",
+      "most_on_screen": 4,
+      "profile": "passive",
+      "stall": {
+        "limit_s": 300.0,
+        "longest_reward_gap_s": 0.0,
+        "stalled": false,
+        "where_s": 0.0
+      },
+      "taps_per_second": 0.0,
+      "unique_deliveries": true
+    }
+  ],
+  "stall_s": 300.0,
+  "wall_s": 600.0
+}
