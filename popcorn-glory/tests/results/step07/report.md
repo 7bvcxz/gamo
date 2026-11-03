@@ -1,9 +1,9 @@
 # Popcorn test report (AUTOMATED)
 
-- git d650c896341c (uncommitted changes) · build 0.9.0 game-480caa2dee6c.pck
-- 2026-11-03T16:18:19.376Z
+- git 7eaab2173b2f · build 0.9.1 game-df9c8dddb8d8.pck
+- 2026-11-03T16:50:33.956Z
 - target: local docs/ (http://127.0.0.1)
-- headless: **PASSED** (74 passed, 0 failed, 2190 checks, 14 files, 3.9s)
+- headless: **PASSED** (74 passed, 0 failed, 2191 checks, 14 files, 3.9s)
 - deploy: **PASSED**
 - browser: **PASSED** — passed 85 (on retry 0), failed 0, skipped 10
 
@@ -47,7 +47,7 @@
 | input07.spec.mjs | dragging on the game never scrolls the page | desktop | SKIPPED | touch paths on touch projects |
 | perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | p720 | SKIPPED | one project measures (desktop) |
 | perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | phone | SKIPPED | one project measures (desktop) |
-| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | desktop | PASSED | perf: {"load_ms":1702,"heap_start":53500000,"heap_after_60s":53500000,"burst":{"fps":36.52156748682046,"draw_calls":117,"primitives":4291,"fx_peak":151,"fx_cap":400},"sleep":{"before":3677,"hidden_5s":3713,"after_wake":4 |
+| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | desktop | PASSED | perf: {"load_ms":3755,"heap_start":53500000,"heap_after_60s":53500000,"burst":{"fps":23.703703703703702,"draw_calls":117,"primitives":4295,"fx_peak":148,"fx_cap":400},"sleep":{"before":5403,"hidden_5s":5447,"after_wake": |
 | progression07.spec.mjs | FAST-FORWARD: milestones in order through 3:00 | p720 | PASSED | mode: fast-forward with dev_advance (not real-time play) |
 | progression07.spec.mjs | ten restarts in a row: each from nothing, no errors | p720 | PASSED |  |
 | progression07.spec.mjs | an unusual order: A, C, B, A again, by tiles, links and the back button | p720 | PASSED |  |
@@ -72,15 +72,15 @@
 | sound05.spec.mjs | C: kernels clink and the eruption booms | desktop | PASSED |  |
 | sound05.spec.mjs | the speaker button steps loud -> soft -> off, and back on | desktop | PASSED |  |
 | sound05.spec.mjs | ?sound=off starts muted | desktop | PASSED |  |
-| stub03.spec.mjs | the stub: press, upgrade, restart, back | p720 | PASSED | load: 2453 ms to the first drawn frame |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | p720 | PASSED | load: 6037 ms to the first drawn frame |
 | stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | p720 | PASSED |  |
 | stub03.spec.mjs | a hidden tab stops the play clock | p720 | PASSED |  |
 | stub03.spec.mjs | three minutes shows the clock and is logged | p720 | PASSED |  |
-| stub03.spec.mjs | the stub: press, upgrade, restart, back | phone | PASSED | load: 2098 ms to the first drawn frame |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | phone | PASSED | load: 4023 ms to the first drawn frame |
 | stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | phone | PASSED |  |
 | stub03.spec.mjs | a hidden tab stops the play clock | phone | PASSED |  |
 | stub03.spec.mjs | three minutes shows the clock and is logged | phone | PASSED |  |
-| stub03.spec.mjs | the stub: press, upgrade, restart, back | desktop | PASSED | load: 1957 ms to the first drawn frame |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | desktop | PASSED | load: 2434 ms to the first drawn frame |
 | stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | desktop | PASSED |  |
 | stub03.spec.mjs | a hidden tab stops the play clock | desktop | PASSED |  |
 | stub03.spec.mjs | three minutes shows the clock and is logged | desktop | PASSED |  |

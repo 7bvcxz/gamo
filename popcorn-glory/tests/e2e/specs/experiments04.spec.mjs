@@ -51,8 +51,8 @@ test('A Click & Pop: every press pays at once', async ({ pop }) => {
 
 test('B Perfect Pop: holding into the gold pays double; a quick tap is early', async ({ pop }) => {
   await pop.open('./#perfect');
-  // The gold is 1400-1850 ms after the press at level 0: hold for 1625.
-  await pop.hold('play', 1625);
+  // The gold is 1400-1850 ms after the press at level 0 (holdGold aims early in it).
+  await pop.holdGold();
   await expect.poll(async () => (await pop.state()).run.outcomes.perfect, { message: 'released in the gold' }).toBe(1);
   expect((await pop.state()).run.money).toBe(10);
   await pop.page.waitForTimeout(500);
@@ -68,7 +68,7 @@ test('B Perfect Pop: holding on burns by itself and never locks', async ({ pop }
   await pop.hold('play', 3200);
   await expect.poll(async () => (await pop.state()).run.outcomes.burnt).toBe(1);
   await pop.page.waitForTimeout(500);
-  await pop.hold('play', 1625);
+  await pop.holdGold();
   await expect.poll(async () => (await pop.state()).run.outcomes.perfect, { message: 'the next hold works' }).toBe(1);
 });
 

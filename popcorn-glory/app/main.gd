@@ -75,7 +75,9 @@ func _ready() -> void:
 	if not economy.errors.is_empty():
 		push_error("economy.json: %s" % [economy.errors])
 	chooser.build(PopRegistry.listed())
-	web.attach(_on_hash, func(hidden: bool) -> void: clock.set_pause("hidden", hidden))
+	web.attach(_on_hash, func(hidden: bool) -> void:
+		clock.set_pause("hidden", hidden)
+		_has_last = false)   # the time away is not a hitch
 	bridge.attach(self)
 	get_viewport().size_changed.connect(_fit)
 	_fit()
@@ -196,10 +198,25 @@ func dev_advance(ms: int) -> void:
 		left -= step
 
 
+## The wall time of the last played frame (Time.get_ticks_usec), -1 when none.
+## Godot hands _process a delta capped at max_physics_steps_per_frame physics
+## steps (8 / 60 s = 0.133 s): a browser hitch longer than that vanished from
+## the run, and from B's heat while the finger stayed down (Step 09: a blind
+## player held 1.98 s, the game judged 1.16 s). The clock now takes the larger
+## of the two; PopClock still caps one frame at MAX_STEP.
+var _last_us := 0
+var _has_last := false
+
+
 func _process(delta: float) -> void:
 	if screen != "play" or rules == null:
+		_has_last = false
 		return
-	var added := clock.step(delta)
+	var now_us := Time.get_ticks_usec()
+	var wall := float(now_us - _last_us) / 1000000.0 if _has_last else delta
+	_last_us = now_us
+	_has_last = true
+	var added := clock.step(maxf(delta, wall))
 	if added > 0:
 		rules.advance(added)
 	_flush()

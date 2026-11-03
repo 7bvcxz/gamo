@@ -1,0 +1,31 @@
+{
+  "run": "t4",
+  "url_variant": "perfect",
+  "version": "0.9.0",
+  "seconds": 181,
+  "commands": 29,
+  "taps": 3,
+  "holds": 13,
+  "drags": 0,
+  "waits": 0,
+  "notes": 11,
+  "looks": 2,
+  "first_action_s": 10.8,
+  "game_inputs": 14,
+  "first_earn_s": 10.9,
+  "first_upgrade_s": 72.2,
+  "upgrades": 2,
+  "level": 2,
+  "earned": 163,
+  "game_clock_rate": 0.99,
+  "longest_gap_between_commands_s": 10,
+  "page_errors": 0,
+  "outcomes": {
+    "early": 2,
+    "near": 2,
+    "perfect": 8,
+    "burnt": 1,
+    "late": 1
+  },
+  "refused": 1
+}

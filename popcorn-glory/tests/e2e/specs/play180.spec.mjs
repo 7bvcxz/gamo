@@ -54,7 +54,7 @@ for (const id of ['click', 'perfect', 'explosion']) {
       if (id === 'perfect') {
         const w = s.run.window;
         if (s.run.cooldown_left > 0 || s.run.heating) { await pop.page.waitForTimeout(100); continue; }
-        await pop.hold('play', Math.round((w[0] + w[1]) / 2));
+        await pop.hold('play', Math.round(w[0] + (w[1] - w[0]) * 0.25));   // see pop.holdGold
         await pop.page.waitForTimeout(250);
       } else {
         await pop.tap('play');

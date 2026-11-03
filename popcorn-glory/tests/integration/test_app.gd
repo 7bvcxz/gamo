@@ -174,3 +174,24 @@ func test_state_reports_rects_inside_the_window() -> void:
 		var r: Array = s["rects"][key]
 		assert_true(float(r[2]) > 0 and float(r[3]) > 0, "%s has a size %s" % [key, r])
 		assert_true(float(r[0]) >= -1 and float(r[0]) + float(r[2]) <= float(win[0]) + 1, "%s inside the window %s %s" % [key, r, win])
+
+
+## Step 09: a 0.8 s hitch counts in full. Godot's delta for that frame is
+## capped near 0.133 s; the app measures the frame with the wall clock.
+func test_a_hitch_counts_by_the_wall_clock() -> void:
+	app.open("perfect")
+	app._process(0.016)
+	var before: int = app.clock.now_ms
+	app._last_us = Time.get_ticks_usec() - 800000
+	app._has_last = true
+	app._process(0.133)
+	assert_true(app.clock.now_ms - before >= 790, "a 0.8 s frame adds 0.8 s, not Godot's 0.133 (added %d)" % (app.clock.now_ms - before))
+	app._last_us = Time.get_ticks_usec() - 30000000
+	app._has_last = true
+	before = app.clock.now_ms
+	app._process(0.133)
+	assert_eq(app.clock.now_ms - before, 1000, "a 30 s gap still counts at most 1 s")
+	app._has_last = false
+	before = app.clock.now_ms
+	app._process(0.016)
+	assert_eq(app.clock.now_ms - before, 16, "with no previous frame, Godot's delta")

@@ -1,0 +1,25 @@
+{"t":1.2,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":8.5,"issued":8.5,"cmd":"note","args":{"text":"First look: a red popcorn machine in the middle with a big ring around it. The ring is red on the left top, then a bright white segment on the lower left, the rest pale blue with arrows going clockwise. Looks like a timing ring - maybe tap when something hits the white zone? A hand/finger icon on the machine suggests tapping it. Coin counter 0 at the top. Bottom card: a pot icon, 30 coins, +10 > +16 with an up arrow - an upgrade I can't afford yet. Top: back, sound, restart. A smoke puff above the machine - burning? I expect tapping the machine pops popcorn and earns coins, maybe better if timed with the white zone."}}
+{"t":13.5,"issued":10.2,"cmd":"tap","args":{"x":300,"y":850},"shot":"002.png"}
+{"t":23,"issued":21.1,"cmd":"look","args":{},"shot":"003.png"}
+{"t":32.7,"issued":32.7,"cmd":"note","args":{"text":"One tap gave 1 coin, a gray needle appeared at the top of the ring then vanished. Nothing moves on its own. The ring colors: blue (with clockwise arrows), then yellow zone lower-left, then red to the top, smoke at top. Guess: holding heats the machine and the needle travels clockwise; let go in the yellow zone for a good pop, red = burnt. Trying a hold."}}
+{"t":38.4,"issued":34.1,"cmd":"hold","args":{"x":300,"y":850,"s":2},"shot":"005.png","held_shot":"004.png","held_ms":3169}
+{"t":48.6,"issued":48.6,"cmd":"note","args":{"text":"Yes! Holding makes a yellow dot run clockwise around the ring and kernels heat up (flames under the machine). Held 2 s: dot was at the yellow/red edge, release mark landed in red, got +3 coins (1->4). So I should let go a bit earlier, in the yellow. Trying 1.6 s."}}
+{"t":57.8,"issued":49.9,"cmd":"hold","args":{"x":300,"y":850,"s":1.6},"shot":"007.png","held_shot":"006.png","held_ms":5503}
+{"t":75.1,"issued":68.1,"cmd":"hold","args":{"x":300,"y":850,"s":1.3},"shot":"009.png","held_shot":"008.png","held_ms":4187}
+{"t":84.5,"issued":84.5,"cmd":"note","args":{"text":"Got it! 1.3 s hold landed the release mark right in the middle of the yellow: +10 coins (9->19). 1.6 s = edge, +5. 2 s = red, +3. The bottom card is filling with yellow - it's showing how close I am to the 30-coin upgrade, which probably raises +10 to +16 per perfect pop. Nice feedback. Doing it again."}}
+{"t":91.4,"issued":86.2,"cmd":"hold","args":{"x":300,"y":850,"s":1.3},"shot":"011.png","held_shot":"010.png","held_ms":3687}
+{"t":102,"issued":98.5,"cmd":"hold","args":{"x":300,"y":850,"s":1.15},"shot":"013.png","held_shot":"012.png","held_ms":2167}
+{"t":108.5,"issued":108.5,"cmd":"note","args":{"text":"34 coins. The bottom card lit up solid yellow, the arrow and +16 turned red - clearly saying 'you can buy now'. Same 1.3 s hold earlier only gave +5, so my timing (or the phone's) wobbles; 1.15 s landed at the start of yellow for +10. Buying the upgrade now."}}
+{"t":113.6,"issued":110.4,"cmd":"tap","args":{"x":300,"y":1180},"shot":"014.png"}
+{"t":121.5,"issued":121.5,"cmd":"note","args":{"text":"Bought it: coins 34->4, the machine got a striped awning with bunting and grew bigger - satisfying visual reward. Next upgrade: 54 coins, +16 -> +26, icon is now a cart on wheels. The ring flashes white when idle, I guess that's the 'ready' hint. Let's see if a perfect pop now gives 16."}}
+{"t":128.5,"issued":123.2,"cmd":"hold","args":{"x":300,"y":850,"s":1.15},"shot":"016.png","held_shot":"015.png","held_ms":3179}
+{"t":136.4,"issued":136.4,"cmd":"note","args":{"text":"Perfect pop now gives +16 (4->20), confirmed. Release marks stay on the ring so I can see where I let go - helpful for correcting. Loop is clear now: hold, release in yellow, save up, upgrade. Racing to 54."}}
+{"t":141.6,"issued":138.6,"cmd":"hold","args":{"x":300,"y":850,"s":1.2},"shot":"018.png","held_shot":"017.png","held_ms":2022}
+{"t":147.5,"issued":144.6,"cmd":"hold","args":{"x":300,"y":850,"s":1.2},"shot":"020.png","held_shot":"019.png","held_ms":1935}
+{"t":154.1,"issued":154.1,"cmd":"note","args":{"text":"Two perfect pops in a row, 52 coins - argh, 2 short of 54. Popcorn is now spilling out all over the floor around the machine, which looks great. One more pop then upgrade."}}
+{"t":158.7,"issued":155.9,"cmd":"hold","args":{"x":300,"y":850,"s":1.2},"shot":"022.png","held_shot":"021.png","held_ms":1797}
+{"t":162.8,"issued":161.7,"cmd":"tap","args":{"x":300,"y":1180},"shot":"023.png"}
+{"t":168.5,"issued":168.5,"cmd":"note","args":{"text":"Upgraded again (68->14): the machine is now a cart on wheels, bigger, popcorn overflowing. Next: 97 coins, +26 -> +40. Each step looks a little grander. One last pop before time runs out."}}
+{"t":172.8,"issued":170.4,"cmd":"hold","args":{"x":300,"y":800,"s":1.2},"shot":"025.png","held_shot":"024.png","held_ms":1528}
+{"t":177.7,"issued":175.3,"cmd":"hold","args":{"x":300,"y":800,"s":1.2},"shot":"027.png","held_shot":"026.png","held_ms":1528}

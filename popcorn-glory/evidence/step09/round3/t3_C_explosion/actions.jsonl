@@ -1,0 +1,50 @@
+{"t":1.7,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":9,"issued":9,"cmd":"note","args":{"text":"First look: a red popcorn machine in a big faint circle, 8 empty white dots above it, a coin counter at 0 on top, back/sound/restart buttons. A pointing finger icon sits on the machine - looks like it wants me to tap the machine. Bottom card shows a bucket, cost 25 coins, +10 -> +22 with an up arrow - an upgrade I can't afford yet (greyed). I expect tapping the machine pops popcorn, fills the 8 dots, and gives coins."}}
+{"t":15.1,"issued":12.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"002.png"}
+{"t":22.5,"issued":20.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"003.png"}
+{"t":24.2,"issued":22.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"004.png"}
+{"t":25.8,"issued":24.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"005.png"}
+{"t":27.6,"issued":26,"cmd":"tap","args":{"x":300,"y":820},"shot":"006.png"}
+{"t":29.6,"issued":27.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"007.png"}
+{"t":32.3,"issued":29.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"008.png"}
+{"t":36.3,"issued":33.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"009.png"}
+{"t":44,"issued":44,"cmd":"note","args":{"text":"Each tap drops one kernel into a dot. After 8 taps the row emptied, popcorn flew out and I got 10 coins. The bottom card is now filling with yellow like a progress bar toward 25. So: 8 taps = one batch = +10. The upgrade turns a batch into +22. I need 3 batches. Tapping on."}}
+{"t":48.9,"issued":45.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"010.png"}
+{"t":53.9,"issued":49.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"011.png"}
+{"t":58.1,"issued":54.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"012.png"}
+{"t":61.7,"issued":58.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"013.png"}
+{"t":66,"issued":62.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"014.png"}
+{"t":70.6,"issued":66.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"015.png"}
+{"t":73.9,"issued":70.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"016.png"}
+{"t":76.7,"issued":74.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"017.png"}
+{"t":80.5,"issued":77.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"018.png"}
+{"t":83.6,"issued":81.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"019.png"}
+{"t":85.8,"issued":83.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"020.png"}
+{"t":87.4,"issued":86,"cmd":"tap","args":{"x":300,"y":820},"shot":"021.png"}
+{"t":90.3,"issued":87.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"022.png"}
+{"t":93.7,"issued":90.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"023.png"}
+{"t":96.1,"issued":94.3,"cmd":"tap","args":{"x":300,"y":820},"shot":"024.png"}
+{"t":100.2,"issued":96.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"025.png"}
+{"t":106.9,"issued":106.9,"cmd":"note","args":{"text":"30 coins now. The upgrade card turned bright yellow with a red arrow and red +22 - it's clearly saying 'buy me'. Tapping felt a bit slow and repetitive (taps each feel like a separate beat). Buying the bucket upgrade now."}}
+{"t":109.9,"issued":108.4,"cmd":"tap","args":{"x":300,"y":1180},"shot":"026.png"}
+{"t":116.6,"issued":116.6,"cmd":"note","args":{"text":"Bought it! 30->5 coins. The machine grew bigger and got a striped awning with bunting - nice visible reward. Next upgrade is a cart for 64, +22 -> +48. Each batch should now pay 22. Let's see if that's true."}}
+{"t":121.2,"issued":119.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"027.png"}
+{"t":122.9,"issued":121.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"028.png"}
+{"t":124.7,"issued":123.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"029.png"}
+{"t":126.3,"issued":124.9,"cmd":"tap","args":{"x":300,"y":800},"shot":"030.png"}
+{"t":127.8,"issued":126.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"031.png"}
+{"t":129,"issued":127.9,"cmd":"tap","args":{"x":300,"y":800},"shot":"032.png"}
+{"t":130.8,"issued":129.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"033.png"}
+{"t":132.6,"issued":131,"cmd":"tap","args":{"x":300,"y":800},"shot":"034.png"}
+{"t":138.4,"issued":138.4,"cmd":"note","args":{"text":"Yes: 5 + 22 = 27. The upgrade worked as advertised. Popcorn rains down more now. Curious whether holding my finger on the machine does something different (auto-pop?). Trying a 3-second hold."}}
+{"t":144.2,"issued":140,"cmd":"hold","args":{"x":300,"y":800,"s":3},"shot":"036.png","held_shot":"035.png","held_ms":3358}
+{"t":150.8,"issued":150.8,"cmd":"note","args":{"text":"Holding for 3 s only counted as one kernel - no auto-fill, no charge-up. So it's purely tap-tap-tap. A little disappointing; I hoped holding would do something. Will the machine do anything on its own if I wait? Waiting 10 s to check for idle income."}}
+{"t":162.6,"issued":152.2,"cmd":"wait","args":{"s":10},"shot":"037.png"}
+{"t":168.1,"issued":168.1,"cmd":"note","args":{"text":"Nothing happens while idle - still 27, one kernel. The faint circle around the machine came back after I stopped tapping, like a 'tap here' reminder. So progress is 100% my taps. Next goal: 64 for the cart, about 2 more batches. Tapping again."}}
+{"t":170.4,"issued":169.4,"cmd":"tap","args":{"x":300,"y":800},"shot":"038.png"}
+{"t":172,"issued":170.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"039.png"}
+{"t":173.4,"issued":172.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"040.png"}
+{"t":174.6,"issued":173.6,"cmd":"tap","args":{"x":300,"y":800},"shot":"041.png"}
+{"t":175.7,"issued":174.7,"cmd":"tap","args":{"x":300,"y":800},"shot":"042.png"}
+{"t":176.9,"issued":175.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"043.png"}
+{"t":178.2,"issued":177,"cmd":"tap","args":{"x":300,"y":800},"shot":"044.png"}

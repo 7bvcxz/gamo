@@ -13,6 +13,8 @@ extends RefCounted
 ## the heat. A blind player held 1.98 s and was judged 1.16 s ("early"), right
 ## after an upgrade: "it felt like being punished for upgrading".
 ## tests/e2e/specs/stall09.spec.mjs blocks the page for 0.8 s during a hold.
+## (Godot's own _process delta is capped near 0.133 s; PopApp measures the
+## frame with the wall clock -- app/main.gd _process.)
 
 const MAX_STEP := 1.0
 

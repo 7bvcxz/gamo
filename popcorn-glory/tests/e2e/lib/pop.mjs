@@ -86,6 +86,13 @@ export function wrap(page, testInfo) {
         await page.mouse.up();
       }
     },
+    // B: hold into the gold, a quarter of the way in. Real input latency only
+    // ever adds to a hold (a loaded machine measured +100..+210 ms) and since
+    // 0.9.1 the game counts it -- aiming at the middle landed past the gold.
+    holdGold: async () => {
+      const w = (await pop.state()).run.window;
+      await pop.hold('play', Math.round(w[0] + (w[1] - w[0]) * 0.25));
+    },
     _cdp: null,
     cdp: async () => {
       if (!pop._cdp) pop._cdp = await page.context().newCDPSession(page);

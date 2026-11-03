@@ -1,0 +1,49 @@
+{"t":1.6,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":7.9,"issued":7.9,"cmd":"note","args":{"text":"First look: a red popcorn machine in a circle in the middle, coin counter 0 at top, back arrow, sound, restart buttons. Bottom card: a grey bucket/bag icon, 24 coins, '+1 > +2', and an up arrow - looks like an upgrade that costs 24 and makes each pop worth 2 instead of 1. I expect tapping the machine pops popcorn and gives coins. The circle around it suggests 'tap here'. The upgrade looks greyed out since I have 0."}}
+{"t":12.7,"issued":11.2,"cmd":"tap","args":{"x":300,"y":810},"shot":"002.png"}
+{"t":19.5,"issued":19.5,"cmd":"note","args":{"text":"Tapped machine: coin went 0 -> 1, the hint circle vanished, and a thin yellow progress bar appeared at the bottom of the upgrade card. So 1 coin per tap, upgrade at 24. Wonder if holding the finger does something - let me try holding."}}
+{"t":28.3,"issued":21.5,"cmd":"hold","args":{"x":300,"y":810,"s":3},"shot":"004.png","held_shot":"003.png","held_ms":4945}
+{"t":38,"issued":38,"cmd":"note","args":{"text":"Holding 3s only gave +1 (2 coins now), so holding isn't auto-fire. Back to tapping, rapid taps on the machine."}}
+{"t":40.8,"issued":38.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"005.png"}
+{"t":42.4,"issued":41.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"006.png"}
+{"t":44.6,"issued":42.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"007.png"}
+{"t":46.3,"issued":44.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"008.png"}
+{"t":47.9,"issued":46.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"009.png"}
+{"t":49.4,"issued":48.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"010.png"}
+{"t":57.5,"issued":57.5,"cmd":"note","args":{"text":"8 coins. Nice touch: the upgrade card fills up with yellow like the bucket is filling, and a little popcorn piece flies toward it. The bucket icon is turning gold from the bottom. Feels like a 'fill the bucket' meter. Keep tapping to 24."}}
+{"t":62.2,"issued":58,"cmd":"tap","args":{"x":300,"y":820},"shot":"011.png"}
+{"t":66.9,"issued":62.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"012.png"}
+{"t":70.6,"issued":67.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"013.png"}
+{"t":74.4,"issued":71,"cmd":"tap","args":{"x":300,"y":820},"shot":"014.png"}
+{"t":77.9,"issued":75.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"015.png"}
+{"t":80.8,"issued":78.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"016.png"}
+{"t":84,"issued":81,"cmd":"tap","args":{"x":300,"y":820},"shot":"017.png"}
+{"t":89.4,"issued":84.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"018.png"}
+{"t":93,"issued":89.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"019.png"}
+{"t":96.7,"issued":93.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"020.png"}
+{"t":100.7,"issued":97.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"021.png"}
+{"t":104.1,"issued":101.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"022.png"}
+{"t":107.8,"issued":104.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"023.png"}
+{"t":110.6,"issued":108.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"024.png"}
+{"t":112.6,"issued":111,"cmd":"tap","args":{"x":300,"y":820},"shot":"025.png"}
+{"t":115.5,"issued":112.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"026.png"}
+{"t":120.2,"issued":119.1,"cmd":"look","args":{},"shot":"027.png"}
+{"t":126.3,"issued":126.3,"cmd":"note","args":{"text":"24 coins! The card turned fully gold, arrow went red and '+2' turned red - very clear 'buy me now' signal without words. Tapping the card to buy."}}
+{"t":128.1,"issued":126.6,"cmd":"tap","args":{"x":300,"y":1180},"shot":"028.png"}
+{"t":134.1,"issued":134.1,"cmd":"note","args":{"text":"Bought it! The machine got bigger and fancier - striped awning with bunting flags. Coins back to 0. Next upgrade: 41 coins for +2 > +3, a cart with wheels icon. The tap circle is back, inviting me to tap again. Checking each tap now gives 2."}}
+{"t":136.2,"issued":134.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"029.png"}
+{"t":139.7,"issued":136.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"030.png"}
+{"t":146.9,"issued":146.9,"cmd":"note","args":{"text":"Two taps = 4 coins, so the upgrade worked: +2 per tap. Lots of empty space above the machine - wonder if something will appear there later. Curious whether tapping the empty sky does anything."}}
+{"t":148.7,"issued":147.1,"cmd":"tap","args":{"x":300,"y":350},"shot":"031.png"}
+{"t":155.4,"issued":155.4,"cmd":"note","args":{"text":"Huh, tapping the empty space also gave +2 (4 -> 6). So anywhere on the screen pops. Didn't see any popcorn fly out of the machine though, so it's a bit unclear where the coin came from. Going to keep tapping for the cart upgrade."}}
+{"t":157.1,"issued":155.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"032.png"}
+{"t":158.9,"issued":157.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"033.png"}
+{"t":160.7,"issued":159.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"034.png"}
+{"t":162.6,"issued":160.9,"cmd":"tap","args":{"x":300,"y":820},"shot":"035.png"}
+{"t":163.8,"issued":162.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"036.png"}
+{"t":165.1,"issued":164,"cmd":"tap","args":{"x":300,"y":820},"shot":"037.png"}
+{"t":166.5,"issued":165.2,"cmd":"tap","args":{"x":300,"y":820},"shot":"038.png"}
+{"t":167.8,"issued":166.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"039.png"}
+{"t":171.2,"issued":170.7,"cmd":"look","args":{},"shot":"040.png"}
+{"t":176.4,"issued":176.4,"cmd":"note","args":{"text":"22 of 41, the cart is half filled. The loop is clear but it's just tapping one spot - I want to know what comes after the cart."}}
+{"t":177.8,"issued":176.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"041.png"}

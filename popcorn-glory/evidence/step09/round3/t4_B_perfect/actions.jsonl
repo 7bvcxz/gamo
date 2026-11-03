@@ -1,0 +1,29 @@
+{"t":0.7,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":8.1,"issued":8.1,"cmd":"note","args":{"text":"I see a red popcorn machine inside a big ring. The ring has a red part on the left (looks like danger/heat), a pale white wedge at lower-left (maybe the sweet spot), and a blue part with clockwise arrows. A dark smoke puff sits on top of the ring - burnt? Coins: 0 at top. Bottom card: a pot icon, 30 coins, +10 -> +16 with up arrow - an upgrade I can't afford yet. Top buttons: back, sound, restart. I expect tapping the machine pops popcorn and gives coins; maybe timing the tap when something is in the white zone matters."}}
+{"t":12.1,"issued":10.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"002.png"}
+{"t":19.6,"issued":19.1,"cmd":"look","args":{},"shot":"003.png"}
+{"t":29.6,"issued":29.6,"cmd":"note","args":{"text":"Tapping the machine gave 1 coin. A grey marker flashed at the top of the ring and the blue part darkened, then went light again. The white wedge is now solid yellow. I think a fill travels clockwise from the top: blue -> yellow (good) -> red (burnt, smoke). Maybe I should hold to heat and let go in the yellow. Trying a hold."}}
+{"t":34.5,"issued":31.3,"cmd":"hold","args":{"x":300,"y":820,"s":2},"shot":"004.png","held_ms":2138}
+{"t":43.3,"issued":43.3,"cmd":"note","args":{"text":"Holding 2s gave +5 coins (now 6). The marker ended up at ~10 o'clock in the red, just past the yellow. So holding sweeps the needle clockwise and letting go scores where it stops. I overshot. Popcorn bits flew out. The upgrade card now has a yellow bar filling at its bottom - progress toward 30. Next: hold ~1.6s to land in yellow."}}
+{"t":47.6,"issued":44.8,"cmd":"hold","args":{"x":300,"y":820,"s":1.6},"shot":"005.png","held_ms":1740}
+{"t":56.7,"issued":53.7,"cmd":"hold","args":{"x":300,"y":820,"s":1.7},"shot":"006.png","held_ms":1854}
+{"t":63.1,"issued":63.1,"cmd":"note","args":{"text":"Got it! Holding ~1.6-1.7s lands the needle in the yellow: +10 each time (16, then 26). Popcorn sprays out, satisfying. The +10 matches the upgrade card's '+10 -> +16', so the upgrade raises the yellow payout. Card is almost fully yellow now. One more good pop and I'll buy it."}}
+{"t":67.4,"issued":64.6,"cmd":"hold","args":{"x":300,"y":820,"s":1.7},"shot":"007.png","held_ms":1804}
+{"t":73.2,"issued":72.1,"cmd":"tap","args":{"x":300,"y":1180},"shot":"008.png"}
+{"t":80.3,"issued":80.3,"cmd":"note","args":{"text":"Bought the upgrade at 36 -> 6 coins. The machine got bigger and fancier (striped awning with bunting), more popcorn inside. The cart icon on the card changed too, now a cart with wheels. Next upgrade 54 coins, +16 -> +26. Nice visible reward. Back to popping - expect +16 per good pop now."}}
+{"t":85.5,"issued":82,"cmd":"hold","args":{"x":300,"y":820,"s":1.7},"shot":"009.png","held_ms":1978}
+{"t":93.4,"issued":93.4,"cmd":"note","args":{"text":"Hm, same 1.7s hold only gave +3 - needle stopped around 5 o'clock in the blue. The bigger machine heats slower! Sneaky - my learned rhythm broke. Trying a longer hold, ~2.5s."}}
+{"t":98.3,"issued":94.9,"cmd":"hold","args":{"x":300,"y":820,"s":2.5},"shot":"010.png","held_ms":2635}
+{"t":109.3,"issued":106.2,"cmd":"hold","args":{"x":300,"y":820,"s":2.05},"shot":"011.png","held_ms":2239}
+{"t":116.5,"issued":116.5,"cmd":"note","args":{"text":"Frustrating stretch: 2.5s burnt it completely (big black smoke cloud, +2), 2.05s still landed in the red at 10 o'clock (+4, brown burnt kernels). 1.7s was short. The window seems narrow and the needle seems fast near the end - or my thumb timing is just inconsistent. Trying 1.85s."}}
+{"t":121.1,"issued":118.3,"cmd":"hold","args":{"x":300,"y":820,"s":1.85},"shot":"012.png","held_ms":1994}
+{"t":129.3,"issued":126.8,"cmd":"hold","args":{"x":300,"y":820,"s":1.78},"shot":"013.png","held_ms":1899}
+{"t":135.7,"issued":135.7,"cmd":"note","args":{"text":"1.85s gave +8 (needle right on the yellow/red border, pale bluish popcorn), then 1.78s landed in the yellow: +16 and a big golden popcorn burst. Now I notice the popcorn color tells me how good it was: golden = perfect, pale = early/edge, brown = burnt. 39 coins, 15 more for the next upgrade."}}
+{"t":140.1,"issued":137.6,"cmd":"hold","args":{"x":300,"y":820,"s":1.78},"shot":"014.png","held_ms":1901}
+{"t":145.9,"issued":145,"cmd":"tap","args":{"x":300,"y":1180},"shot":"015.png"}
+{"t":154,"issued":154,"cmd":"note","args":{"text":"Second upgrade bought (55 -> 1). Now it's a wheeled popcorn cart, bigger, popcorn overflowing. Next: 97 coins for +26 -> +40. The good zone on the ring looks a little wider/shifted. Last upgrade slowed the needle, so I'll guess a slightly longer hold, 1.85s."}}
+{"t":158.5,"issued":156,"cmd":"hold","args":{"x":300,"y":820,"s":1.85},"shot":"016.png","held_ms":1916}
+{"t":164.2,"issued":164.2,"cmd":"note","args":{"text":"+26 on the first try with the cart - just inside the top edge of the yellow. 27 coins. The rhythm is clicking now. One more at 1.8s."}}
+{"t":168.5,"issued":166,"cmd":"hold","args":{"x":300,"y":820,"s":1.8},"shot":"017.png","held_ms":1862}
+{"t":174.3,"issued":174.3,"cmd":"note","args":{"text":"Another +26, 53 coins, about halfway to the 97 upgrade. Feels good when I hit it - golden spray. I'd keep going to see what the cart turns into next."}}
+{"t":180.3,"issued":177.8,"cmd":"hold","args":{"x":300,"y":820,"s":1.8},"shot":"018.png","held_ms":1858}
