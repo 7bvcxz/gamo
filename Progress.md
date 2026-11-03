@@ -481,6 +481,14 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
   프로젝트와 이름공간을 공유하고 있었다.
 - 페이지: `/motorio/decisions`.
 
+## windup — 태엽 공방 (2026-11-03~)
+
+GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양복점 공방에서 태엽을 감아 인형을 깨우고 공방을 살린다.
+행동 하나(감기)·통화 하나(태엽 힘)·자라는 것 하나(공방). 진행 기록과 재개 지점은 `windup/PROGRESS.md`,
+설계는 `windup/design/CORE_LOOP.md`·`PLAYTEST_3MIN.md`.
+
+- Step 01 (#94): 핵심 루프·시간표(0–10/30/60/180초)·초기 수치 가설·계측 사건·4×5 평가표·제외 목록·MVP 끝. 게임 코드 없음.
+
 ## 공용 도구
 
 - **이미지 생성**: `~/Workspace/tools/imagegen/` (`imagegen`이 PATH에 있다). `~/Workspace`의
