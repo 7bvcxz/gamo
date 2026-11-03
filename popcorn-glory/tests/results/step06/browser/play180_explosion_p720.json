@@ -1,0 +1,4064 @@
+{
+  "id": "explosion",
+  "project": "p720",
+  "marks": {
+    "first_action": {
+      "clock_ms": 1950,
+      "level": 0,
+      "money": 0,
+      "earned": 0,
+      "fps": 38.98635477582846,
+      "fps_samples": [
+        38.7905311098109,
+        38.98635477582846,
+        39.88831271678491
+      ],
+      "fx_peak": 0,
+      "draw_calls": 70,
+      "primitives": 2230,
+      "load_avg": 28.52
+    },
+    "5s": {
+      "clock_ms": 5820,
+      "level": 0,
+      "money": 0,
+      "earned": 0,
+      "fps": 34.629464733951764,
+      "fps_samples": [
+        30.42198233562316,
+        34.629464733951764,
+        39.30045194783261
+      ],
+      "fx_peak": 0,
+      "draw_calls": 71,
+      "primitives": 2232,
+      "load_avg": 26.8
+    },
+    "first_upgrade": {
+      "clock_ms": 23457,
+      "level": 1,
+      "money": 5,
+      "earned": 30,
+      "fps": 36.0027245371869,
+      "fps_samples": [
+        31.381778960464448,
+        36.0027245371869,
+        37.01178533852093
+      ],
+      "fx_peak": 40,
+      "draw_calls": 83,
+      "primitives": 2522,
+      "load_avg": 24.75
+    },
+    "60s": {
+      "clock_ms": 60879,
+      "level": 2,
+      "money": 151,
+      "earned": 240,
+      "fps": 26.359464995579742,
+      "fps_samples": [
+        24.203698311695742,
+        26.359464995579742,
+        27.35443534159079
+      ],
+      "fx_peak": 52,
+      "draw_calls": 90,
+      "primitives": 2790,
+      "load_avg": 26.96
+    },
+    "180s": {
+      "clock_ms": 181994,
+      "level": 6,
+      "money": 1171,
+      "earned": 5591,
+      "fps": 12.3071097203944,
+      "fps_samples": [
+        11.363636363636363,
+        12.3071097203944,
+        13.073116075251656
+      ],
+      "fx_peak": 228,
+      "draw_calls": 126,
+      "primitives": 3664,
+      "load_avg": 39.52
+    }
+  },
+  "buys": 6,
+  "summary": {
+    "earned": 5591,
+    "idle_longest_ms": 0,
+    "idle_total_ms": 0,
+    "inputs": 200,
+    "level": 6,
+    "milestones": {
+      "first_affordable": 22138,
+      "first_earn": 12460,
+      "first_input": 1309,
+      "first_upgrade": 22773,
+      "three_minutes": 180016
+    },
+    "money": 1171,
+    "t_ms": 185500,
+    "upgrades": [
+      22773,
+      41463,
+      69124,
+      93299,
+      121102,
+      172832
+    ],
+    "variant": "explosion"
+  },
+  "log": {
+    "active_ms": 185549,
+    "game": "popcorn-glory",
+    "lines": [
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 1309,
+        "type": "input"
+      },
+      {
+        "data": {
+          "name": "first_input"
+        },
+        "t": 1309,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 1309,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 5345,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 5345,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 9382,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 9382,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 10006,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 10006,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 10632,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 10632,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 11245,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 11245,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 11909,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 11909,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 12460,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 12460,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0,
+          "show_ms": 1200
+        },
+        "t": 12460,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0
+        },
+        "t": 12460,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 10,
+          "from": "erupt",
+          "money": 10
+        },
+        "t": 12460,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "name": "first_earn"
+        },
+        "t": 12460,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 13088,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 13088,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 13652,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 13652,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 13660,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 14278,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 14278,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 14870,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 14870,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 15430,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 15430,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 16069,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 16069,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 16693,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 16693,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 17308,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 17308,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0,
+          "show_ms": 1200
+        },
+        "t": 17308,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0
+        },
+        "t": 17308,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 10,
+          "from": "erupt",
+          "money": 20
+        },
+        "t": 17308,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 17973,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 17973,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 18508,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 18579,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 18579,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 19176,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 19176,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 19750,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 19750,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 20424,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 20424,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 20986,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 20986,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 21551,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 21551,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 22138,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 22138,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0,
+          "show_ms": 1200
+        },
+        "t": 22138,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 10,
+          "level": 0
+        },
+        "t": 22138,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 10,
+          "from": "erupt",
+          "money": 30
+        },
+        "t": 22138,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "name": "first_affordable"
+        },
+        "t": 22138,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 22773,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 25,
+          "level": 1,
+          "money": 5
+        },
+        "t": 22773,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "name": "first_upgrade"
+        },
+        "t": 22773,
+        "type": "milestone"
+      },
+      {
+        "data": {},
+        "t": 23338,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 26950,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 26950,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 27580,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 27580,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 28164,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 28164,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 28776,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 28776,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 29500,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 29500,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 30088,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 30088,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 30743,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 30743,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 31383,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 31383,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 22,
+          "level": 1,
+          "show_ms": 1500
+        },
+        "t": 31383,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 22,
+          "level": 1
+        },
+        "t": 31383,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 22,
+          "from": "erupt",
+          "money": 27
+        },
+        "t": 31383,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 32048,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 32048,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 32668,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 32668,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 32883,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 33250,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 33250,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 33822,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 33822,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 34430,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 34430,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 35040,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 35040,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 35597,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 35597,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 36191,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 36191,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 22,
+          "level": 1,
+          "show_ms": 1500
+        },
+        "t": 36191,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 22,
+          "level": 1
+        },
+        "t": 36191,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 22,
+          "from": "erupt",
+          "money": 49
+        },
+        "t": 36191,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 36830,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 36830,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 37395,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 37395,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 37691,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 37966,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 37966,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 38537,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 38537,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 39090,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 39090,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 39689,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 39689,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 40256,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 40256,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 40852,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 40852,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 22,
+          "level": 1,
+          "show_ms": 1500
+        },
+        "t": 40852,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 22,
+          "level": 1
+        },
+        "t": 40852,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 22,
+          "from": "erupt",
+          "money": 71
+        },
+        "t": 40852,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 41463,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 64,
+          "level": 2,
+          "money": 7
+        },
+        "t": 41463,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 41897,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 41897,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 42352,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 42597,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 42597,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 43399,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 43399,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 44233,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 44233,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 45056,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 45056,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 45786,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 45786,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 46481,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 46481,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 47133,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 47133,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2,
+          "show_ms": 1800
+        },
+        "t": 47133,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2
+        },
+        "t": 47133,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 48,
+          "from": "erupt",
+          "money": 55
+        },
+        "t": 47133,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 47856,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 47856,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 48490,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 48490,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 48933,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 49102,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 49102,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 49842,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 49842,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 50549,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 50549,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 51549,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 51549,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 52619,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 52619,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 53366,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 53366,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2,
+          "show_ms": 1800
+        },
+        "t": 53366,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2
+        },
+        "t": 53366,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 48,
+          "from": "erupt",
+          "money": 103
+        },
+        "t": 53366,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 54132,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 54132,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 54878,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 54878,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 55166,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 55560,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 55560,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 56223,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 56223,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 56920,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 56920,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 57691,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 57691,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 58579,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 58579,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 59407,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 59407,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2,
+          "show_ms": 1800
+        },
+        "t": 59407,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2
+        },
+        "t": 59407,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 48,
+          "from": "erupt",
+          "money": 151
+        },
+        "t": 59407,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 60227,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 60227,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 61207,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 64557,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 64557,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 65264,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 65264,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 65952,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 65952,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 66577,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 66577,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 67205,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 67205,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 67845,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 67845,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 68487,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 68487,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2,
+          "show_ms": 1800
+        },
+        "t": 68487,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 48,
+          "level": 2
+        },
+        "t": 68487,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 48,
+          "from": "erupt",
+          "money": 199
+        },
+        "t": 68487,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 69124,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 163,
+          "level": 3,
+          "money": 36
+        },
+        "t": 69124,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 69508,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 69508,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 70089,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 70089,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 70287,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 70685,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 70685,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 71292,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 71292,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 71842,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 71842,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 72410,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 72410,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 72934,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 72934,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 73571,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 73571,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3,
+          "show_ms": 2100
+        },
+        "t": 73571,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3
+        },
+        "t": 73571,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 106,
+          "from": "erupt",
+          "money": 142
+        },
+        "t": 73571,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 74219,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 74219,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 74954,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 74954,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 75671,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 75709,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 75709,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 76326,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 76326,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 77079,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 77079,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 77850,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 77850,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 78635,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 78635,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 79504,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 79504,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3,
+          "show_ms": 2100
+        },
+        "t": 79504,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3
+        },
+        "t": 79504,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 106,
+          "from": "erupt",
+          "money": 248
+        },
+        "t": 79504,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 80399,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 80399,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 81148,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 81148,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 81604,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 81988,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 81988,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 82889,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 82889,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 83793,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 83793,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 84681,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 84681,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 85373,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 85373,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 86207,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 86207,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3,
+          "show_ms": 2100
+        },
+        "t": 86207,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3
+        },
+        "t": 86207,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 106,
+          "from": "erupt",
+          "money": 354
+        },
+        "t": 86207,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 87179,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 87179,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 87947,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 87947,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 88307,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 88659,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 88659,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 89391,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 89391,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 90107,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 90107,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 90834,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 90834,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 91612,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 91612,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 92432,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 92432,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3,
+          "show_ms": 2100
+        },
+        "t": 92432,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 106,
+          "level": 3
+        },
+        "t": 92432,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 106,
+          "from": "erupt",
+          "money": 460
+        },
+        "t": 92432,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 93299,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 415,
+          "level": 4,
+          "money": 45
+        },
+        "t": 93299,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 93752,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 93752,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 94461,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 94461,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 94532,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 95224,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 95224,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 95873,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 95873,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 96670,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 96670,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 97621,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 97621,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 98733,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 98733,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 99492,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 99492,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4,
+          "show_ms": 2400
+        },
+        "t": 99492,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4
+        },
+        "t": 99492,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 234,
+          "from": "erupt",
+          "money": 279
+        },
+        "t": 99492,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 100424,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 100424,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 101215,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 101215,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 101892,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 101899,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 101899,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 102457,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 102457,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 103024,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 103024,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 103588,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 103588,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 104185,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 104185,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 104788,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 104788,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4,
+          "show_ms": 2400
+        },
+        "t": 104788,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4
+        },
+        "t": 104788,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 234,
+          "from": "erupt",
+          "money": 513
+        },
+        "t": 104788,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 105441,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 105441,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 106061,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 106061,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 106677,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 106677,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 107188,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 107283,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 107283,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 107856,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 107856,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 108442,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 108442,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 109030,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 109030,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 109606,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 109606,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4,
+          "show_ms": 2400
+        },
+        "t": 109606,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4
+        },
+        "t": 109606,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 234,
+          "from": "erupt",
+          "money": 747
+        },
+        "t": 109606,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 110295,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 110295,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 110994,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 110994,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 111613,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 111613,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 112006,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 112277,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 112277,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 112867,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 112867,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 113468,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 113468,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 114073,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 114073,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 114663,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 114663,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4,
+          "show_ms": 2400
+        },
+        "t": 114663,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4
+        },
+        "t": 114663,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 234,
+          "from": "erupt",
+          "money": 981
+        },
+        "t": 114663,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 115337,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 115337,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 115950,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 115950,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 116599,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 116599,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 117063,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 117270,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 117270,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 117949,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 117949,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 118774,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 118774,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 119563,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 119563,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 120345,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 120345,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4,
+          "show_ms": 2400
+        },
+        "t": 120345,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 234,
+          "level": 4
+        },
+        "t": 120345,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 234,
+          "from": "erupt",
+          "money": 1215
+        },
+        "t": 120345,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 121102,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 1057,
+          "level": 5,
+          "money": 158
+        },
+        "t": 121102,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 121574,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 121574,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 122484,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 122484,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 122745,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 123583,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 123583,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 124838,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 124838,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 125909,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 125909,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 127176,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 127176,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 128340,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 128340,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 129855,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 129855,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5,
+          "show_ms": 2700
+        },
+        "t": 129855,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5
+        },
+        "t": 129855,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 515,
+          "from": "erupt",
+          "money": 673
+        },
+        "t": 129855,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 131383,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 131383,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 132555,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 132916,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 132916,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 134350,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 134350,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 135666,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 135666,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 136845,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 136845,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 137960,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 137960,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 139092,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 139092,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 140141,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 140141,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5,
+          "show_ms": 2700
+        },
+        "t": 140141,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5
+        },
+        "t": 140141,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 515,
+          "from": "erupt",
+          "money": 1188
+        },
+        "t": 140141,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 141413,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 141413,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 142612,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 142612,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 142841,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 144083,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 144083,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 145605,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 145605,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 146860,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 146860,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 148172,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 148172,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 149621,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 149621,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 150949,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 150949,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5,
+          "show_ms": 2700
+        },
+        "t": 150949,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5
+        },
+        "t": 150949,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 515,
+          "from": "erupt",
+          "money": 1703
+        },
+        "t": 150949,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 152185,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 152185,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 153599,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 153599,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 153649,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 155011,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 155011,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 156142,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 156142,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 157371,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 157371,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 158782,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 158782,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 159968,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 159968,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 161299,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 161299,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5,
+          "show_ms": 2700
+        },
+        "t": 161299,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5
+        },
+        "t": 161299,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 515,
+          "from": "erupt",
+          "money": 2218
+        },
+        "t": 161299,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 162794,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 162794,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 163999,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 164311,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 164311,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 165503,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 165503,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 166746,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 166746,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 167883,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 167883,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 169048,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 169048,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 170149,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 170149,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 171499,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 171499,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5,
+          "show_ms": 2700
+        },
+        "t": 171499,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 515,
+          "level": 5
+        },
+        "t": 171499,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 515,
+          "from": "erupt",
+          "money": 2733
+        },
+        "t": 171499,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 172832,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 2696,
+          "level": 6,
+          "money": 37
+        },
+        "t": 172832,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 174164,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 1,
+          "slots": 8
+        },
+        "t": 174164,
+        "type": "load"
+      },
+      {
+        "data": {},
+        "t": 174199,
+        "type": "show_end"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 175247,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 2,
+          "slots": 8
+        },
+        "t": 175247,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 176326,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 3,
+          "slots": 8
+        },
+        "t": 176326,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 177420,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 4,
+          "slots": 8
+        },
+        "t": 177420,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 178258,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 5,
+          "slots": 8
+        },
+        "t": 178258,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 179196,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 6,
+          "slots": 8
+        },
+        "t": 179196,
+        "type": "load"
+      },
+      {
+        "data": {
+          "earned": 4457,
+          "level": 6,
+          "money": 37,
+          "name": "three_minutes"
+        },
+        "t": 180016,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 180249,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 7,
+          "slots": 8
+        },
+        "t": 180249,
+        "type": "load"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 181221,
+        "type": "input"
+      },
+      {
+        "data": {
+          "loaded": 8,
+          "slots": 8
+        },
+        "t": 181221,
+        "type": "load"
+      },
+      {
+        "data": {
+          "count": 1134,
+          "level": 6,
+          "show_ms": 3000
+        },
+        "t": 181221,
+        "type": "erupt"
+      },
+      {
+        "data": {
+          "count": 1134,
+          "level": 6
+        },
+        "t": 181221,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1134,
+          "from": "erupt",
+          "money": 1171
+        },
+        "t": 181221,
+        "type": "earn"
+      },
+      {
+        "data": {},
+        "t": 184221,
+        "type": "show_end"
+      }
+    ],
+    "summary": {
+      "earned": 5591,
+      "idle_longest_ms": 0,
+      "idle_total_ms": 0,
+      "inputs": 200,
+      "level": 6,
+      "milestones": {
+        "first_affordable": 22138,
+        "first_earn": 12460,
+        "first_input": 1309,
+        "first_upgrade": 22773,
+        "three_minutes": 180016
+      },
+      "money": 1171,
+      "t_ms": 185549,
+      "upgrades": [
+        22773,
+        41463,
+        69124,
+        93299,
+        121102,
+        172832
+      ],
+      "variant": "explosion"
+    },
+    "variant": "explosion",
+    "version": "0.6.0",
+    "viewport": [
+      720,
+      1280
+    ]
+  }
+}
