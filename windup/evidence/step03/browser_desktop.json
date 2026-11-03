@@ -1,0 +1,21 @@
+{
+  "project": "desktop",
+  "version": "0.3.0",
+  "fps": [
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60,
+    60
+  ],
+  "pack": {
+    "page": "runner-v2.html",
+    "pack": "game-caf830361cd6.pck",
+    "packSize": 150972
+  }
+}

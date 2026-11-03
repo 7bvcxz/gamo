@@ -1,0 +1,21 @@
+{
+  "project": "phone",
+  "version": "0.3.0",
+  "fps": [
+    59,
+    58,
+    53,
+    56,
+    55,
+    55,
+    54,
+    55,
+    54,
+    54
+  ],
+  "pack": {
+    "page": "runner-v2.html",
+    "pack": "game-caf830361cd6.pck",
+    "packSize": 150972
+  }
+}

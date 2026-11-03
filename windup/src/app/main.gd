@@ -108,6 +108,9 @@ func state() -> Dictionary:
 		"winds": winds,
 		"events": telemetry.events.size(),
 		"config": config.to_dict(),
+		"art": view.use_art,
+		"doll": view.doll.pose_name if view.doll != null else "",
+		"fps": Engine.get_frames_per_second(),
 	}
 
 

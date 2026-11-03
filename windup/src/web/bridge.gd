@@ -70,6 +70,12 @@ func query(name: String, arg: Variant) -> Variant:
 		"dev_advance":
 			_main.call("advance", float(arg))
 			return {"ok": true, "state": _main.call("state")}
+		"dev_wake":
+			var view: AtelierView = _main.get("view")
+			if view.doll == null:
+				return {"ok": false, "error": "no doll (art missing)"}
+			view.doll.start_wake()
+			return {"ok": true, "state": _main.call("state")}
 		"dev_pause":
 			var a: Array = arg
 			_main.call("set_pause", String(a[0]), bool(a[1]))

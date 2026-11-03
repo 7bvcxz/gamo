@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- The bow of the atelier's wind-up key, seen from the front (its shaft goes
+       into the wall, so it turns in the picture plane). Centre (128,128) is the
+       turning axis. Original art for windup (2026-11-03). -->
+  <defs>
+    <radialGradient id="brass" cx="0.38" cy="0.32" r="0.8">
+      <stop offset="0" stop-color="#ffe7a3"/>
+      <stop offset="0.35" stop-color="#e2b04f"/>
+      <stop offset="0.75" stop-color="#b57d2c"/>
+      <stop offset="1" stop-color="#7a4f1c"/>
+    </radialGradient>
+    <radialGradient id="boss" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#fff0c4"/>
+      <stop offset="0.5" stop-color="#d9a441"/>
+      <stop offset="1" stop-color="#6e4515"/>
+    </radialGradient>
+  </defs>
+  <g stroke="#4a2e10" stroke-width="5" stroke-linejoin="round">
+    <path d="M128 128 C 96 64, 22 48, 22 104 C 22 152, 84 160, 128 128 Z" fill="url(#brass)"/>
+    <path d="M128 128 C 160 192, 234 208, 234 152 C 234 104, 172 96, 128 128 Z" fill="url(#brass)"/>
+  </g>
+  <!-- the two lobes' cut-outs, so the bow reads as a key, not a disc -->
+  <g fill="#2a1d14" opacity="0.85">
+    <ellipse cx="66" cy="104" rx="20" ry="14" transform="rotate(-22 66 104)"/>
+    <ellipse cx="190" cy="152" rx="20" ry="14" transform="rotate(-22 190 152)"/>
+  </g>
+  <!-- engraving -->
+  <g fill="none" stroke="#7a4f1c" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
+    <path d="M44 128 C 52 140, 80 146, 104 136"/>
+    <path d="M212 128 C 204 116, 176 110, 152 120"/>
+  </g>
+  <circle cx="128" cy="128" r="30" fill="url(#boss)" stroke="#4a2e10" stroke-width="5"/>
+  <circle cx="128" cy="128" r="9" fill="#5a3812"/>
+  <path d="M110 112 A 24 24 0 0 1 140 104" fill="none" stroke="#fff6d8" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+</svg>

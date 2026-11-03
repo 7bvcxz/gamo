@@ -32,6 +32,26 @@ func _run() -> void:
 	for i in int(args.get("winds", "0")):
 		main.wind("dev")
 		await create_timer(0.12).timeout
+	# --storyboard t1,t2,...: the doll's wake-up stepped to exact times, one
+	# picture each (out.png -> out_t1.png ...), the doll's clock held still.
+	if args.has("storyboard") and main.view.doll != null:
+		main.view.set_process(false)
+		var base := out.get_basename()
+		var done := 0.0
+		main.view.doll.start_wake()
+		for t: String in String(args["storyboard"]).split(","):
+			main.view.doll.advance(float(t) - done)
+			done = float(t)
+			main.view.queue_redraw()
+			for i in 3:
+				await process_frame
+			await RenderingServer.frame_post_draw
+			var shot := root.get_texture().get_image()
+			var path := "%s_t%s.png" % [base, t]
+			print("capture: %s pose=%s" % [path, JSON.stringify(main.view.doll.pose)])
+			shot.save_png(path)
+		quit(0)
+		return
 	var frames := int(float(args.get("wait", "1.0")) * 60.0)
 	for i in maxi(frames, 2):
 		await process_frame

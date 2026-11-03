@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="60" viewBox="0 0 30 60">
+  <!-- Leg standing. Hip pivot at (11,4). Trouser, knee joint dot, shoe pointing right. -->
+  <path d="M4 4 C 4 0, 18 0, 18 4 L 17 48 L 5 48 Z" fill="#4a3428" stroke="#2a1c14" stroke-width="2.2"/>
+  <circle cx="11" cy="27" r="2.4" fill="#2a1c14" opacity="0.6"/>
+  <path d="M3 47 C 3 44, 18 44, 19 47 C 26 48, 29 52, 28 56 L 3 57 Z" fill="#2b1f2a" stroke="#140d12" stroke-width="2"/>
+  <path d="M8 49 C 14 48, 20 49, 24 51" fill="none" stroke="#56404f" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

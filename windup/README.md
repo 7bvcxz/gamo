@@ -28,6 +28,8 @@ windup/tools/smoke.sh                                # 실제 씬을 헤드리�
 windup/tools/check.sh [--export]                     # CI와 같은 검사 (+ Web export·팩 내용)
 xvfb-run -a -s "-screen 0 1600x1000x24" godot --path windup --audio-driver Dummy \
   --resolution 1280x720 --script res://tools/capture.gd -- --out /abs/shot.png   # 실제 렌더러 화면
+xvfb-run … --script res://tools/capture.gd -- --out /abs/wake.png --storyboard 0,0.35,0.7,1.1,1.6   # 깨어남 스토리보드
+windup/tools/art/gen_art.sh [--go]                   # 래스터 생성(기본 dry run). 처리: tools/art/build_art.gd
 ./deploy-web.sh windup                               # Web export → docs/windup/
 windup/tools/e2e.sh                                  # 브라우저 검사 (로컬 docs/, 처음엔 tests/e2e에서 npm install)
 WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh   # 공개 빌드에
@@ -48,7 +50,9 @@ WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh   # �
 |---|---|
 | `scenes/main.tscn` | 진입점 (`src/app/main.gd`) |
 | `src/core/` | 시계(`GameClock`, 멈춤), 계측(`Telemetry`, `{t, ev}` JSON 줄), 실행 옵션(`RunConfig`) |
-| `src/view/` | 공방 화면 |
+| `src/view/` | 공방 화면(`AtelierView`, 그림이 없으면 도형으로 대체), 인형 컷아웃 리그(`DollRig`) |
+| `assets/art/` | 그림 — 손으로 쓴 SVG(배경·열쇠·인형 부품). 방향·도구·출처는 `design/ART_GUIDE.md` |
+| `art/` | 래스터 생성 경로의 원본 자리(`.gdignore`, 원본 PNG는 커밋 안 함) |
 | `src/web/` | 브라우저: 주소 옵션·보임/포커스(`WindupWeb`), `window.windup` 브리지(`WindupBridge`) |
 | `data/` | 밸런스 데이터 (Step 04부터) |
 | `tests/` | `unit`·`integration`(헤드리스), `e2e`(Playwright, `.gdignore`) |

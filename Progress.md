@@ -500,6 +500,8 @@ GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양�
 - Step 02 (#95, 0.2.0): 루트의 독립 Godot 프로젝트 `windup/`(1280×720 PC 우선), 게임 시계(포커스·숨김 시 멈춤, 오프라인 진행 없음),
   계측(`{t, ev}` JSON 줄), 주소 옵션(`?fresh` `?seed` `?variant` `?dev`), `window.windup` 브리지, 검사 `windup/tools/check.sh`·`smoke.sh`·`e2e.sh`,
   CI `.github/workflows/windup.yml`, Web 배포 `docs/windup/`, 사이트 네 곳과 `/windup/doc/`. HeyDive 등록은 사용자 승인 대기.
+- Step 03 (#96, 0.3.0): 그림 — 손으로 쓴 SVG(잠든 공방 배경·놋쇠 열쇠·인형 부품)와 인형 깨어남 컷아웃 리그(`DollRig`, 1.6초),
+  그림이 없으면 도형으로 대체. 도구 조사와 방향은 `windup/design/ART_GUIDE.md`. 이미지 생성은 OpenAI 크레딧 소진으로 막혀 래스터 경로는 준비만.
 
 ## 공용 도구
 

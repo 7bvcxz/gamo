@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Doll head, facing right. Pivot (neck) at (30,60). Eyes are drawn by the
+       game (closed / half / open), so the face is left without them. -->
+  <defs>
+    <radialGradient id="porcelain" cx="0.62" cy="0.4" r="0.7">
+      <stop offset="0" stop-color="#fffaf0"/>
+      <stop offset="0.7" stop-color="#f1e2cf"/>
+      <stop offset="1" stop-color="#cdb59c"/>
+    </radialGradient>
+  </defs>
+  <rect x="25" y="46" width="10" height="16" rx="3" fill="#8a6446" stroke="#3a2618" stroke-width="2"/>
+  <circle cx="32" cy="32" r="22" fill="url(#porcelain)" stroke="#3a2618" stroke-width="2.5"/>
+  <!-- painted bob: dark cap over the back and top -->
+  <path d="M10 36 C 6 14, 26 4, 42 8 C 52 11, 56 18, 55 24 C 44 18, 30 18, 22 26 C 20 32, 20 40, 22 48 C 16 46, 11 42, 10 36 Z"
+        fill="#2b1f2a" stroke="#1a1218" stroke-width="2"/>
+  <path d="M18 18 C 24 12, 34 10, 42 12" fill="none" stroke="#56404f" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- cheek and the hint of a nose -->
+  <ellipse cx="44" cy="40" rx="6" ry="4" fill="#e9877c" opacity="0.55"/>
+  <path d="M54 34 C 56 36, 56 38, 53 39" fill="none" stroke="#b08a70" stroke-width="2" stroke-linecap="round"/>
+</svg>
