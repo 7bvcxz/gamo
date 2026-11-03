@@ -39,6 +39,13 @@ func test_wind_from_space_and_click() -> void:
 	Input.parse_input_event(up)
 	await tree.process_frame
 	assert_eq(main.winds, 1, "space winds once")
+	# A press faster than the cap (6 a second) is refused and changes nothing.
+	Input.parse_input_event(key)
+	Input.parse_input_event(up)
+	await tree.process_frame
+	assert_eq(main.winds, 1, "a press inside the cap is refused")
+	assert_eq(main.atelier.blocked, 1, "and counted as blocked")
+	main.advance(0.2)
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
 	click.pressed = true
@@ -51,6 +58,7 @@ func test_wind_from_space_and_click() -> void:
 	tree.root.push_input(release, true)
 	await tree.process_frame
 	assert_eq(main.winds, 2, "click on the key winds once")
+	main.advance(0.2)
 	var miss := click.duplicate()
 	miss.position = Vector2(5, 5)
 	tree.root.push_input(miss, true)
@@ -71,8 +79,9 @@ func test_new_game_is_the_same_game() -> void:
 	assert_eq(a["t"], 0.0, "clock reset")
 	assert_eq(a["winds"], 0, "winds reset")
 	assert_eq(a["events"], 1, "only session_start")
-	a.erase("session")
-	b.erase("session")
+	for k: String in ["session", "fps"]:
+		a.erase(k)
+		b.erase(k)
 	assert_eq(JSON.stringify(a), JSON.stringify(b), "two resets give the same state")
 
 

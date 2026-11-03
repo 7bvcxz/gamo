@@ -2,22 +2,37 @@ class_name WindupMain
 extends Node
 
 ## The game's entry point (scenes/main.tscn). It reads how the run was asked
-## to start, owns the one clock and the event log, and makes every new game
-## through `new_game` -- the debug reset, `?fresh=1` and a restart are the
-## same path, so a fresh game is always the same game for the same seed.
+## to start, owns the one clock, the rules (Atelier), the event log and the
+## save, and makes every new game through `new_game` -- the restart button,
+## `?fresh=1` and the debug reset (F5 with ?dev=1) are the same path, so a fresh
+## game is always the same game for the same seed.
 ##
-## Step 02: the foundation only. Pressing the key turns it and logs a `wind`
-## event; there is no energy, no doll and no save yet (Step 04).
+## Input: the key is pressed with the mouse/touch or Space. A press is one
+## quarter turn; holding keeps turning at the hold rate after a short delay.
+## The rules refuse turns faster than the cap (data/balance.json).
 
 var config: RunConfig
 var clock: GameClock
 var telemetry: Telemetry
+var balance: Balance
+var atelier: Atelier
 var view: AtelierView
+var hud: Hud
+var sfx: Sfx
+var store := SaveStore.new()
 var session: int = 0
 var winds: int = 0
+## Presses (not held repeats), for the session summary.
+var inputs: int = 0
 
 var _web := WindupWeb.new()
 var _bridge := WindupBridge.new()
+var _held: Dictionary = {}          # source -> true while held
+var _hold_t: float = 0.0
+var _last_input: float = -1.0
+var _hinted: bool = false
+var _since_save: float = 0.0
+var _reported_end: bool = false
 
 
 func _ready() -> void:
@@ -25,11 +40,23 @@ func _ready() -> void:
 		config = RunConfig.from_environment()
 	clock = GameClock.new()
 	telemetry = Telemetry.new(clock)
+	balance = Balance.load_default()
+	var bad := balance.problems()
+	assert(bad.is_empty(), "balance.json: %s" % [bad])
 	view = AtelierView.new()
 	view.version_text = "v" + version()
 	add_child(view)
-	view.wind_pressed.connect(wind)
-	new_game(config.seed)
+	view.key_pressed.connect(press)
+	view.key_released.connect(release.bind("click"))
+	hud = Hud.new()
+	add_child(hud)
+	hud.restart_requested.connect(func() -> void:
+		telemetry.emit("restart", {"dolls": atelier.awake})
+		new_game(config.seed))
+	sfx = Sfx.new()
+	add_child(sfx)
+	var saved := {} if config.fresh or config.smoke else store.load_atelier()
+	new_game(config.seed, saved)
 	_web.attach(func(hidden: bool) -> void: set_pause("hidden", hidden),
 		func(focused: bool) -> void: set_pause("focus", not focused))
 	_bridge.attach(self)
@@ -41,40 +68,132 @@ func version() -> String:
 	return str(ProjectSettings.get_setting("application/config/version", "0"))
 
 
-## The one way a game starts.
-func new_game(seed: int) -> void:
+## The one way a game starts: fresh, or from a saved atelier.
+func new_game(seed: int, saved: Dictionary = {}) -> void:
 	session += 1
 	winds = 0
+	inputs = 0
 	config.seed = seed
 	clock.reset()
 	telemetry.clear()
+	sfx.played.clear()
+	_held.clear()
+	_last_input = -1.0
+	_hinted = false
+	_since_save = 0.0
+	_reported_end = false
+	atelier = Atelier.new(balance)
+	if not saved.is_empty():
+		atelier.from_dict(saved)
+	else:
+		store.clear()
+	atelier.awakening.connect(_on_awakening)
+	atelier.awake_changed.connect(_on_awake)
+	atelier.stage_changed.connect(func(stage: int, name: String) -> void:
+		telemetry.emit("stage", {"stage": stage, "name": name}))
+	view.bind(atelier)
 	view.reset()
-	telemetry.emit("session_start", {"variant": config.variant, "build": version(), "seed": seed, "session": session})
+	hud.set_energy(atelier.energy)
+	telemetry.emit("session_start", {"variant": config.variant, "build": version(), "seed": seed,
+		"session": session, "resumed": not saved.is_empty(), "dolls": atelier.awake})
 
 
-## One quarter turn of the key, from any source ("click", "hold", "key", "dev").
+## A press of the key from `source` ("click", "key", "dev"): one turn now,
+## and more while it is held.
+func press(source: String) -> void:
+	inputs += 1
+	if source != "dev":
+		_held[source] = true
+		_hold_t = -balance.hold_delay
+	wind(source)
+
+
+func release(source: String) -> void:
+	_held.erase(source)
+
+
+## One quarter turn, from any source. Refused turns (faster than the cap)
+## change nothing and log nothing.
 func wind(source: String) -> void:
+	var t := clock.time
+	if _last_input >= 0.0 and t - _last_input >= balance.idle_report_seconds:
+		telemetry.emit("idle", {"seconds": snappedf(t - _last_input, 0.01)})
+	_last_input = t
+	_hinted = false
+	view.hint = false
+	var added := atelier.wind()
+	if added <= 0.0:
+		return
 	winds += 1
 	view.turn()
-	telemetry.emit("wind", {"source": source})
+	view.on_wind()
+	sfx.tick()
+	hud.set_energy(atelier.energy)
+	telemetry.emit("wind", {"source": source, "energy_added": snappedf(added, 0.001),
+		"energy": snappedf(atelier.energy, 0.001)})
+
+
+func _on_awakening(i: int) -> void:
+	view.on_awakening(i)
+	sfx.chime()
+	telemetry.emit("doll_awake", {"index": i, "cost": balance.costs[i],
+		"energy_rate": snappedf(atelier.auto_rate(), 0.001), "awake_before": atelier.awake})
+
+
+func _on_awake(i: int) -> void:
+	sfx.chirp()
+	telemetry.emit("doll_ready", {"index": i, "energy_rate": snappedf(atelier.auto_rate(), 0.001)})
 
 
 func _process(delta: float) -> void:
 	advance(delta)
+	hud.advance(delta)
 
 
-## Moves the game by `seconds` of game time (the clock ignores it while paused).
+## Moves the game by `seconds` of game time (nothing moves while paused).
 func advance(seconds: float) -> void:
 	var left := seconds
 	while left > 0.0:
 		var step := minf(left, GameClock.MAX_STEP)
-		clock.advance(step)
 		left -= step
+		var used := clock.advance(step)
+		if used <= 0.0:
+			continue
+		_step(used)
+
+
+func _step(dt: float) -> void:
+	# Holding: after the delay, one turn per 1/hold_rate seconds.
+	if not _held.is_empty():
+		_hold_t += dt
+		var every := 1.0 / balance.hold_turns_per_second
+		while _hold_t >= every:
+			_hold_t -= every
+			wind("hold")
+	atelier.tick(dt)
+	view.advance(dt)
+	hud.set_energy(atelier.energy)
+	var idle_for := clock.time - maxf(_last_input, 0.0)
+	if not _hinted and _held.is_empty() and idle_for >= balance.hint_idle_seconds and atelier.target() < atelier.doll_count():
+		_hinted = true
+		view.hint = true
+		telemetry.emit("hint", {"reason": "idle20", "idle": snappedf(idle_for, 0.01)})
+	_since_save += dt
+	if _since_save >= balance.autosave_seconds:
+		save()
+
+
+func save() -> void:
+	_since_save = 0.0
+	store.save(atelier, version())
 
 
 func set_pause(reason: String, on: bool) -> void:
 	if clock.set_paused(reason, on):
 		telemetry.emit("pause" if clock.paused else "resume", {"why": reason})
+		if clock.paused:
+			_held.clear()
+			save()
 
 
 func _notification(what: int) -> void:
@@ -85,15 +204,31 @@ func _notification(what: int) -> void:
 			set_pause("focus", true)
 		NOTIFICATION_APPLICATION_FOCUS_IN:
 			set_pause("focus", false)
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			end_session()
+
+
+## The session summary event (also asked for by the browser bridge).
+func end_session() -> Dictionary:
+	var e := {"dolls": atelier.awake, "energy": snappedf(atelier.energy, 0.001), "inputs": inputs,
+		"turns": atelier.turns, "blocked": atelier.blocked}
+	if not _reported_end:
+		_reported_end = true
+		telemetry.emit("session_end", e)
+		save()
+	return e
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
+	if event is InputEventKey and not event.echo:
 		var key := (event as InputEventKey).physical_keycode
 		if key == KEY_SPACE:
-			wind("key")
+			if event.pressed:
+				press("key")
+			else:
+				release("key")
 			get_viewport().set_input_as_handled()
-		elif key == KEY_F5 and config.dev:
+		elif key == KEY_F5 and event.pressed and config.dev:
 			new_game(config.seed)
 			get_viewport().set_input_as_handled()
 
@@ -106,28 +241,42 @@ func state() -> Dictionary:
 		"paused": clock.paused,
 		"pause_reasons": clock.reasons(),
 		"winds": winds,
+		"inputs": inputs,
 		"events": telemetry.events.size(),
 		"config": config.to_dict(),
 		"art": view.use_art,
 		"doll": view.doll.pose_name if view.doll != null else "",
 		"fps": Engine.get_frames_per_second(),
+		"energy": snappedf(atelier.energy, 0.001),
+		"awake": atelier.awake,
+		"waking": atelier.waking,
+		"target": atelier.target(),
+		"fill": snappedf(atelier.target_fill(), 0.001),
+		"stage": atelier.stage,
+		"rate": snappedf(atelier.auto_rate(), 0.001),
+		"hint": view.hint,
+		"sounds": sfx.played.duplicate(),
 	}
 
 
-## `godot --headless --path windup -- --smoke`: a few presses over a few game
-## seconds through the real scene, then one summary line, then quit with the
-## number of problems found.
+## `godot --headless --path windup -- --smoke`: presses over game seconds
+## through the real scene, then one summary line, then quit with the number of
+## problems found.
 func _run_smoke() -> void:
-	for i in 8:
-		wind("dev")
-		advance(0.5)
-		await get_tree().process_frame
-	var problems := 0
+	for i in 100:
+		press("dev")
+		advance(0.2)
+		if i % 10 == 0:
+			await get_tree().process_frame
+	advance(3.0)
+	var problems: Array[String] = []
 	if telemetry.count("session_start") != 1:
-		problems += 1
-	if telemetry.count("wind") != 8:
-		problems += 1
-	if clock.time < 3.9:
-		problems += 1
-	print("WINDUP_SMOKE " + JSON.stringify({"ok": problems == 0, "state": state()}))
-	get_tree().quit(problems)
+		problems.append("session_start")
+	if telemetry.count("wind") != 100:
+		problems.append("wind %d" % telemetry.count("wind"))
+	if atelier.awake < 1:
+		problems.append("no doll awake")
+	if absf(atelier.accounted_energy() - atelier.energy) > 1e-6:
+		problems.append("energy accounting")
+	print("WINDUP_SMOKE " + JSON.stringify({"ok": problems.is_empty(), "problems": problems, "state": state()}))
+	get_tree().quit(problems.size())

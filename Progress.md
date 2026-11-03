@@ -503,6 +503,8 @@ GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양�
   CI `.github/workflows/windup.yml`, Web 배포 `docs/windup/`, 사이트 네 곳과 `/windup/doc/`. HeyDive 등록은 사용자 승인 대기.
 - Step 03 (#96, 0.3.0): 그림 — 손으로 쓴 SVG(잠든 공방 배경·놋쇠 열쇠·인형 부품)와 인형 깨어남 컷아웃 리그(`DollRig`, 1.6초),
   그림이 없으면 도형으로 대체. 도구 조사와 방향은 `windup/design/ART_GUIDE.md`. 이미지 생성은 OpenAI 크레딧 소진으로 막혀 래스터 경로는 준비만.
+- Step 04 (#97, 0.4.0): 플레이 가능한 첫 3분 — 규칙(`Atelier`, 데이터 `data/balance.json`), 누르고 있기·상한, 인형 12명의 자동 깨어남과
+  도우미, 단계별 빛, 합성 효과음, 저장·두 번 눌러 다시 시작·포커스 잃으면 멈춤, 브라우저 실제 3분 플레이 기록(`windup/evidence/step04/`).
 
 ## 공용 도구
 

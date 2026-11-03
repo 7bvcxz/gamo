@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2h55ubxu5kic"
-path="res://.godot/imported/arm.svg-27ef268befa1cbac4173cf8ef3bc92a0.ctex"
+uid="uid://dc5utptcf8exq"
+path="res://.godot/imported/atlas.svg-2deef1f98679aa957bce9643a7c9abcc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/doll/arm.svg"
-dest_files=["res://.godot/imported/arm.svg-27ef268befa1cbac4173cf8ef3bc92a0.ctex"]
+source_file="res://assets/art/doll/atlas.svg"
+dest_files=["res://.godot/imported/atlas.svg-2deef1f98679aa957bce9643a7c9abcc.ctex"]
 
 [params]
 

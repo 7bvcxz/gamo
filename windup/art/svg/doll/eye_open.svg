@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="12" viewBox="0 0 16 12">
+  <!-- Open eye with a highlight. Centre (8,6). -->
+  <ellipse cx="8" cy="6" rx="3" ry="4.4" fill="#291a1f"/>
+  <circle cx="8.9" cy="4.6" r="0.95" fill="#ffffff" opacity="0.9"/>
+</svg>

@@ -49,6 +49,14 @@ func query(name: String, arg: Variant) -> Variant:
 			return _main.call("state")
 		"events":
 			return telemetry.to_jsonl()
+		"end":
+			return _main.call("end_session")
+		"restart_point":
+			var h: Hud = _main.get("hud")
+			var vp2 := (_main as Node).get_viewport()
+			var q: Vector2 = vp2.get_final_transform() * h.restart_center()
+			var sz := Vector2(vp2.get_window().size)
+			return {"x": q.x / sz.x, "y": q.y / sz.y}
 		"key_point":
 			# Where the key is, as a fraction of the window: a browser test
 			# clicks it without knowing the canvas scale or the device ratio.
@@ -64,8 +72,16 @@ func query(name: String, arg: Variant) -> Variant:
 			_main.call("new_game", int(arg) if arg != null else RunConfig.DEFAULT_SEED)
 			return {"ok": true, "state": _main.call("state")}
 		"dev_wind":
+			# n turns, each 1/cap apart in game time: the rules' cap holds here too.
+			var balance: Balance = _main.get("balance")
 			for i in maxi(1, int(arg) if arg != null else 1):
 				_main.call("wind", "dev")
+				_main.call("advance", 1.0 / balance.max_turns_per_second + 0.001)
+			return {"ok": true, "state": _main.call("state")}
+		"dev_restart":
+			var hud: Hud = _main.get("hud")
+			hud.press_restart()
+			hud.press_restart()
 			return {"ok": true, "state": _main.call("state")}
 		"dev_advance":
 			_main.call("advance", float(arg))
@@ -76,6 +92,19 @@ func query(name: String, arg: Variant) -> Variant:
 				return {"ok": false, "error": "no doll (art missing)"}
 			view.doll.start_wake()
 			return {"ok": true, "state": _main.call("state")}
+		"dev_render_info":
+			# What the renderer did last frame -- to tell 'more pixels' from
+			# 'more draw calls' when the frame rate drops (the Fun Lab's hook).
+			return {"ok": true,
+				"draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+				"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+				"primitives": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
+		"dev_layers":
+			# Hide parts of the picture to find what costs frames: {glow, tint, fx, dolls, backdrop}.
+			var v: AtelierView = _main.get("view")
+			v.set_layers(arg if arg is Dictionary else {})
+			return {"ok": true}
 		"dev_pause":
 			var a: Array = arg
 			_main.call("set_pause", String(a[0]), bool(a[1]))

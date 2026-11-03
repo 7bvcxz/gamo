@@ -29,13 +29,29 @@ func _run() -> void:
 	main.config = RunConfig.from_pairs({"seed": args.get("seed", "1"), "fresh": "1"})
 	root.add_child(main)
 	await process_frame
+	# --hold S: hold the key for S game seconds (the real hold path), then
+	# --after S more seconds without input. Stepped at 1/60 s, so the dolls
+	# walk and the lights fade as they would.
+	if args.has("hold"):
+		main.press("key")
+		var held := float(args["hold"])
+		var t := 0.0
+		while t < held:
+			main.advance(1.0 / 60.0)
+			t += 1.0 / 60.0
+		main.release("key")
+		var after := float(args.get("after", "0"))
+		t = 0.0
+		while t < after:
+			main.advance(1.0 / 60.0)
+			t += 1.0 / 60.0
 	for i in int(args.get("winds", "0")):
 		main.wind("dev")
 		await create_timer(0.12).timeout
 	# --storyboard t1,t2,...: the doll's wake-up stepped to exact times, one
 	# picture each (out.png -> out_t1.png ...), the doll's clock held still.
 	if args.has("storyboard") and main.view.doll != null:
-		main.view.set_process(false)
+		main.set_process(false)
 		var base := out.get_basename()
 		var done := 0.0
 		main.view.doll.start_wake()

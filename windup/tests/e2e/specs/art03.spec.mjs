@@ -7,7 +7,11 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { openGame, state, call, paintedColours } from '../lib/game.mjs';
 
-const evidence = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step03');
+// Pictures and numbers go to windup/evidence/ only when asked (WINDUP_EVIDENCE=1), so
+// a routine run cannot overwrite an earlier step's published-build evidence.
+const evidence = process.env.WINDUP_EVIDENCE
+  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step03')
+  : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../test-results/evidence/step03');
 
 test('art loads, the doll wakes, frames hold', async ({ page }, info) => {
   const { errors } = await openGame(page, '?fresh=1');

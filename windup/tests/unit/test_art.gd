@@ -11,18 +11,34 @@ func test_every_art_file_imports_at_its_size() -> void:
 	var expect := {
 		"res://assets/art/backdrop.svg": Vector2i(1440, 960),
 		"res://assets/art/key.svg": Vector2i(256, 256),
-		"res://assets/art/doll/head.svg": Vector2i(128, 128),
-		"res://assets/art/doll/torso.svg": Vector2i(104, 128),
-		"res://assets/art/doll/arm.svg": Vector2i(40, 104),
-		"res://assets/art/doll/leg.svg": Vector2i(60, 120),
-		"res://assets/art/doll/back_key.svg": Vector2i(56, 56),
+		"res://assets/art/doll/atlas.svg": Vector2i(556, 144),
 	}
 	for path: String in expect:
 		var tex: Texture2D = load(path)
 		assert_true(tex != null, "loads " + path)
 		if tex != null:
 			assert_eq(Vector2i(tex.get_size()), expect[path], "size of " + path)
-	assert_true(DollRig.art_present(), "doll parts present")
+	assert_true(DollRig.art_present(), "doll atlas present")
+	var parts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DollRig.ATLAS_JSON))["parts"]
+	for p: String in ["head", "torso", "arm", "leg", "back_key", "eye_closed", "eye_half", "eye_open"]:
+		assert_true(parts.has(p), "atlas has " + p)
+
+
+func test_atlas_is_built_from_the_sources() -> void:
+	# The atlas is generated from art/svg/doll/ (node windup/tools/art/build_doll_atlas.mjs):
+	# a source added or removed without rebuilding shows up here.
+	assert_true(FileAccess.get_file_as_string(DollRig.ATLAS).contains("GENERATED"), "atlas.svg is the generated file")
+	var parts: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(DollRig.ATLAS_JSON))["parts"]
+	var sources: Array[String] = []
+	for f: String in DirAccess.get_files_at("res://art/svg/doll"):
+		if f.ends_with(".svg"):
+			sources.append(f.get_basename())
+	sources.sort()
+	var names: Array[String] = []
+	for k: String in parts:
+		names.append(k)
+	names.sort()
+	assert_eq(names, sources, "atlas parts == source files")
 
 
 func test_green_keys_out_and_figure_stays() -> void:

@@ -7,10 +7,14 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { openGame, state, call, events, keyPoint } from '../lib/game.mjs';
 
-const evidence = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step02');
+// Pictures and numbers go to windup/evidence/ only when asked (WINDUP_EVIDENCE=1), so
+// a routine run cannot overwrite an earlier step's published-build evidence.
+const evidence = process.env.WINDUP_EVIDENCE
+  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../evidence/step02')
+  : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../test-results/evidence/step02');
 
 test('boots, keeps options, winds, pauses', async ({ page }, info) => {
-  const version = fs.readFileSync(path.resolve(evidence, '../../project.godot'), 'utf8').match(/config\/version="([^"]+)"/)[1];
+  const version = fs.readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../project.godot'), 'utf8').match(/config\/version="([^"]+)"/)[1];
   const { errors } = await openGame(page, '?fresh=1&seed=7');
   const s0 = await state(page);
   expect(s0.version).toBe(version);
@@ -26,6 +30,7 @@ test('boots, keeps options, winds, pauses', async ({ page }, info) => {
   else await page.mouse.click(k.x, k.y);
   await expect.poll(async () => (await state(page)).winds).toBe(1);
   await page.mouse.click(5, 5);                 // off the key: nothing
+  await page.waitForTimeout(250);               // the rules refuse turns faster than 6 a second (Step 04)
   await page.keyboard.press('Space');
   await expect.poll(async () => (await state(page)).winds).toBe(2);
   const ev = await events(page);

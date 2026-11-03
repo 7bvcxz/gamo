@@ -1,8 +1,10 @@
 class_name DollRig
 extends Node2D
 
-## One clockwork doll as a cut-out rig: SVG parts (assets/art/doll/) on
-## pivots, posed by a handful of angles. The wake-up is a timeline through four
+## One clockwork doll as a cut-out rig: SVG parts on pivots, posed by a
+## handful of angles. The parts are one atlas (assets/art/doll/atlas.svg, built
+## from art/svg/doll/ by tools/art/build_doll_atlas.mjs) so a doll's sprites
+## batch into a few draw calls. The wake-up is a timeline through four
 ## key poses -- asleep, stirring, awake, stretch -- interpolated here, frame by
 ## frame, from `advance(dt)`; nothing runs on its own clock, so a test or a
 ## capture steps it exactly.
@@ -11,8 +13,15 @@ extends Node2D
 ## twice their SVG size (crisp when the window is larger than 1280x720) and
 ## drawn at half scale.
 
-const ART := "res://assets/art/doll/"
+const ATLAS := "res://assets/art/doll/atlas.svg"
+const ATLAS_JSON := "res://assets/art/doll/atlas.json"
 const TEX_SCALE := 2.0
+## Eye places in head.svg pixels: [centre, scale] (near eye, far eye).
+const EYES := [[Vector2(40, 31), 1.0], [Vector2(51, 30), 0.75]]
+const EYE_PIVOT := Vector2(8, 6)
+
+static var _atlas: Texture2D
+static var _rects: Dictionary = {}
 
 ## Pivots in SVG (1x) pixels -- the numbers written in each SVG's comment.
 const PIVOT := {
@@ -40,6 +49,16 @@ var pose_name: String = "asleep"
 var waking: bool = false
 var wake_time: float = 0.0
 var key_spin: float = 0.0
+## What an awake doll is doing: "idle", "walk", "wind" (turning another doll's
+## key), "work" (at its own place). Layered on the "stand" pose.
+var activity: String = "idle"
+## 1 faces right, -1 faces left (the whole rig is mirrored).
+var facing: int = 1:
+	set(v):
+		facing = 1 if v >= 0 else -1
+		scale.x = absf(scale.x) * facing
+var vest_tint: Color = Color.WHITE
+var _phase: float = 0.0
 
 var _parts: Dictionary = {}
 var _hip: Node2D
@@ -54,13 +73,22 @@ var _back_key: Node2D
 
 
 static func art_present() -> bool:
-	for p: String in ["head", "torso", "arm", "leg", "back_key"]:
-		if not ResourceLoader.exists(ART + p + ".svg"):
-			return false
-	return true
+	return ResourceLoader.exists(ATLAS) and FileAccess.file_exists(ATLAS_JSON)
+
+
+static func _load_atlas() -> void:
+	if _atlas != null:
+		return
+	_atlas = load(ATLAS)
+	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ATLAS_JSON))
+	var parts: Dictionary = data["parts"]
+	for name: String in parts:
+		var r: Array = parts[name]
+		_rects[name] = Rect2(float(r[0]), float(r[1]), float(r[2]), float(r[3]))
 
 
 func _ready() -> void:
+	_load_atlas()
 	_hip = Node2D.new()
 	add_child(_hip)
 	_leg_far = _joint(_hip, "leg", Vector2(-3, 0), Color(0.72, 0.72, 0.78))
@@ -71,11 +99,21 @@ func _ready() -> void:
 	_torso.move_child(_arm_far, 0)
 	_torso.move_child(_back_key, 0)
 	_head = _joint(_torso, "head", _local(PIVOT["torso_neck"] - PIVOT["torso_hip"]), Color.WHITE)
-	_eyes = DollEyes.new()
+	_eyes = Node2D.new()
 	_head.add_child(_eyes)
 	_eyes.position = _local(-PIVOT["head"])
+	for e: Array in EYES:
+		var holder := Node2D.new()
+		holder.position = e[0]
+		holder.scale = Vector2.ONE * float(e[1])
+		_eyes.add_child(holder)
+		for frame: String in ["eye_closed", "eye_half", "eye_open"]:
+			holder.add_child(_sprite(frame, EYE_PIVOT, Color.WHITE))
 	_leg_near = _joint(_hip, "leg", Vector2(3, 0), Color.WHITE)
 	_arm_near = _joint(_torso, "arm", _local(PIVOT["torso_shoulder"] - PIVOT["torso_hip"]) + Vector2(2, 0), Color.WHITE)
+	for c in _torso.get_children():
+		if c is Sprite2D:
+			(c as Sprite2D).modulate = vest_tint
 	_apply()
 
 
@@ -85,15 +123,24 @@ func _joint(parent: Node, part: String, at: Vector2, tint: Color, pivot: Vector2
 	var joint := Node2D.new()
 	joint.position = at
 	parent.add_child(joint)
-	var sprite := Sprite2D.new()
-	sprite.texture = load(ART + part + ".svg")
-	sprite.centered = false
-	sprite.scale = Vector2.ONE / TEX_SCALE
-	sprite.offset = -(pivot if pivot != Vector2.INF else PIVOT[part]) * TEX_SCALE
-	sprite.modulate = tint
+	var sprite := _sprite(part, pivot if pivot != Vector2.INF else PIVOT[part], tint)
 	joint.add_child(sprite)
 	_parts[part + str(_parts.size())] = sprite
 	return joint
+
+
+## A sprite of one atlas part with `pivot` (SVG pixels) on its origin.
+func _sprite(part: String, pivot: Vector2, tint: Color) -> Sprite2D:
+	var sprite := Sprite2D.new()
+	sprite.texture = _atlas
+	sprite.region_enabled = true
+	var r: Rect2 = _rects[part]
+	sprite.region_rect = Rect2(r.position * TEX_SCALE, r.size * TEX_SCALE)
+	sprite.centered = false
+	sprite.scale = Vector2.ONE / TEX_SCALE
+	sprite.offset = -pivot * TEX_SCALE
+	sprite.modulate = tint
+	return sprite
 
 
 ## SVG pixels -> this rig's units (the same at 1x).
@@ -115,14 +162,58 @@ func start_wake() -> void:
 
 
 func advance(dt: float) -> void:
+	_phase += dt
 	if waking:
 		wake_time += dt
 		pose = _wake_pose(wake_time)
 		if wake_time >= WAKE[WAKE.size() - 1][0]:
 			waking = false
 			pose_name = "stand"
+			pose = POSES["stand"].duplicate()
+	elif pose_name == "stand":
+		pose = _activity_pose(activity, _phase)
 	key_spin += dt * (6.0 if pose_name == "stand" or waking else 0.0)
 	_apply()
+	if pose_name == "asleep" and _hip != null:
+		# Sleeping, it breathes: the slump rises and falls a little.
+		_torso.rotation_degrees = float(pose["torso"]) + sin(_phase * 1.6) * 2.0
+
+
+func awake_now() -> bool:
+	return pose_name == "stand" and not waking
+
+
+## The stand pose with the activity's motion on top.
+static func _activity_pose(what: String, t: float) -> Dictionary:
+	var p: Dictionary = POSES["stand"].duplicate()
+	match what:
+		"walk":
+			var sw := sin(t * 9.0)
+			p["legs"] = sw * 22.0
+			p["arm_near"] = -sw * 18.0
+			p["arm_far"] = sw * 18.0
+			p["torso"] = 4.0
+		"wind":
+			# Both hands forward on another doll's key, turning it.
+			p["arm_near"] = -88.0 + sin(t * 7.0) * 26.0
+			p["arm_far"] = -80.0 + sin(t * 7.0 + 1.2) * 20.0
+			p["torso"] = 8.0
+			p["head"] = 6.0
+		"work":
+			p["arm_near"] = -50.0 + sin(t * 5.0) * 30.0
+			p["torso"] = 4.0 + sin(t * 2.5) * 3.0
+			p["head"] = 8.0 + sin(t * 2.5) * 4.0
+		_:
+			p["torso"] = sin(t * 1.3) * 2.0
+			p["head"] = -4.0 + sin(t * 0.9) * 5.0
+	return p
+
+
+## Where the doll's own wind-up key is (for the fill ring).
+func back_key_global() -> Vector2:
+	if _back_key == null:
+		return global_position
+	return _back_key.get_global_transform() * Vector2(-6, 0)
 
 
 ## The pose at time `t` of the wake-up timeline (smoothstep between keys).
@@ -154,34 +245,13 @@ func _apply() -> void:
 	_arm_near.rotation_degrees = float(pose["arm_near"])
 	_arm_far.rotation_degrees = float(pose["arm_far"])
 	_back_key.rotation = key_spin
-	(_eyes as DollEyes).openness = float(pose["eyes"])
-	_eyes.queue_redraw()
+	var o := float(pose["eyes"])
+	var frame := 0 if o < 0.2 else (1 if o < 0.75 else 2)
+	for holder in _eyes.get_children():
+		for i in holder.get_child_count():
+			(holder.get_child(i) as Sprite2D).visible = i == frame
 
 
 ## Where the top of the head is now (for tests: asleep is lower than standing).
 func head_top() -> Vector2:
 	return _head.get_global_transform() * Vector2(0, -50)
-
-
-class DollEyes extends Node2D:
-	## Eyes in the head SVG's own pixels: closed is a lid line, open an oval
-	## with a highlight. Two eyes in three-quarter view, the far one smaller.
-	var openness: float = 0.0
-	const EYES := [[Vector2(40, 31), 1.0], [Vector2(51, 30), 0.75]]
-	const INK := Color(0.16, 0.1, 0.12)
-
-	func _draw() -> void:
-		for e: Array in EYES:
-			var c: Vector2 = e[0]
-			var s: float = e[1]
-			if openness < 0.2:
-				draw_arc(c + Vector2(0, -1.5) * s, 3.6 * s, deg_to_rad(20), deg_to_rad(160), 8, INK, 1.6, true)
-			else:
-				var h := lerpf(1.2, 4.4, clampf(openness, 0.0, 1.0)) * s
-				var pts := PackedVector2Array()
-				for i in 12:
-					var a := TAU * i / 12.0
-					pts.append(c + Vector2(cos(a) * 3.0 * s, sin(a) * h))
-				draw_colored_polygon(pts, INK)
-				if openness > 0.7:
-					draw_circle(c + Vector2(0.9, -1.4) * s, 0.9 * s, Color(1, 1, 1, 0.9))
