@@ -41,6 +41,10 @@ func query(name: String, arg: Variant) -> Variant:
 			return host.session.to_csv() if host != null else ""
 		"history":
 			return _app.get("history")
+		"count":
+			# One of the running experiment's own numbers, cheaply (a test
+			# polls it every frame to time a hit; state() is the whole run).
+			return host.experiment.get(String(arg)) if host != null and host.experiment != null else null
 	if name.begins_with("dev_") and not (e2e or bool((_app.get("route") as Dictionary).get("dev", false)) or not OS.has_feature("web")):
 		return {"ok": false, "error": "dev hooks need ?dev=1"}
 	match name:
@@ -82,6 +86,11 @@ func query(name: String, arg: Variant) -> Variant:
 			if host != null:
 				host.press_action()
 			return {"ok": host != null}
+		"dev_quiet":
+			# The music and the sea off for this visit (a test listening for
+			# one effect's first sample).
+			(_app.get("audio") as LabAudio).stop_ambience()
+			return {"ok": true}
 	if host != null and name.begins_with("dev_"):
 		return host.experiment.dev(name.trim_prefix("dev_"), arg)
 	return null
