@@ -1,0 +1,69 @@
+{
+  "session": "retest1",
+  "model": "claude-opus-5-5",
+  "build": "0.10.0+base",
+  "wall_seconds": 186.418,
+  "actions": 209,
+  "inputs": 199,
+  "first_input_wall_s": 10.395,
+  "first_key_input_wall_s": 10.395,
+  "first_wind_game_s": 12.092,
+  "first_doll_game_s": 61.915,
+  "second_doll_game_s": 116.857,
+  "first_help_game_s": 68.284,
+  "dolls_at": {
+    "30": 0,
+    "60": 0,
+    "180": 3
+  },
+  "dolls_end": 3,
+  "off_key_inputs": [
+    {
+      "wall": 26.331,
+      "cmd": "click",
+      "args": [
+        "489",
+        "285"
+      ]
+    },
+    {
+      "wall": 30.429,
+      "cmd": "click",
+      "args": [
+        "422",
+        "605"
+      ]
+    }
+  ],
+  "holds": 0,
+  "hints_shown": [
+    {
+      "t": 32.117,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 66.5,
+      "seconds": 6.6
+    },
+    {
+      "after_wall": 126.9,
+      "seconds": 6.1
+    },
+    {
+      "after_wall": 4.6,
+      "seconds": 5.8
+    }
+  ],
+  "played_past_180_s": false,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes (186 seconds) and woke 3 dolls.\n\n**What the game is:** a calm idle/clicker game set in a toymaker's workshop at night. You turn a big golden wind-up key to earn spiral \"winds.\" A dozen sleeping clockwork dolls lie on the floor. Spirals are spent automatically to wind the next doll's key, shown as a ring that fills up around it. When a doll wakes, it stands up, starts making spirals on its own and helps wind the next sleeper. Each wake-up also brings something back to the room: first the desk lamp lit up, then the covered object was revealed as a red sewing machine, and each time a new small gear joined the key mechanism.\n\n**What I understood:**\n- Each click gives 1 spiral.\n- Awake dolls earn spirals over time; one doll made about 1.6 per second.\n- Each wake-up costs more than the last. The first took about 46 spirals and the third about 150.\n- The game nudged me with a pointing-hand hint when I clicked the wrong things.\n\n**What confused me:**\n- The glowing wisp near the shelf did nothing when I clicked it. It might be the thing that carries the thread to the next doll, or a feature that unlocks later.\n- There are no visible prices or upgrade buttons, so I worked out the costs only from the counter suddenly dropping.\n- I didn't try the grandfather clock, the dressmaker's dummy or the sparkle button in the top-left.\n\n**Would I keep playing?** For a while, yes. Watching the room come back to life one doll at a time is charming, and I'd like to see what wakes up next (the clock and the dummy look like future unlocks). But the only thing to do is click, so I'd mostly leave it running in the background unless real choices or upgrades show up later.",
+  "turns": 28,
+  "cost_usd": 0.3301334000000001
+}

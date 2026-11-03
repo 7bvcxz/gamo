@@ -36,6 +36,7 @@ cp "$HERE/PROMPT.txt" "$OUT/prompt.txt"
   echo "game: $URL"
   echo "repo commit: $(git -C "$HERE" rev-parse HEAD)"
   echo "claude: $(claude --version)"
+  echo "machine load at start: $(cat /proc/loadavg)"
   echo "flags: -p --restricted --safe-mode --strict-mcp-config --no-session-persistence --tools Bash,Read --allowedTools 'Bash(node ./act.mjs:*)' --output-format stream-json --verbose --max-turns 200 ${MODEL:+--model $MODEL}"
 } > "$OUT/setup.txt"
 ( cd "$BOX" && timeout 1500 claude -p --restricted --safe-mode --strict-mcp-config --no-session-persistence \

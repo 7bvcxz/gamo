@@ -518,6 +518,9 @@ GitHub 이슈 "Windup Step NN"(#94~)으로 진행하는 새 게임. 잊힌 양�
 - Step 09 (#109): 블라인드 AI 플레이 — 격리된 `claude -p`(샌드박스·safe mode·조작 CLI와 스크린샷만)가 공개 0.8.0을 처음부터 3분 이상 세 번(+pilot).
   하네스 `windup/tools/blind/`, 격리 검사(밖을 읽는 시도 7/7 거부), 보고 `windup/design/BLIND_PLAYTESTS.md`, 증거 `windup/evidence/step09/`.
   첫 인형 78–100초(목표 30초), 힌트 고리를 타이머로 읽음 4/4. 사람 플레이테스트 결과 없음.
+- Step 10 (#111, 0.10.0): 4×5 평가표로 6세션 채점(개발자 + 빌드를 모르는 독립 채점자 `windup/tools/blind/rate_sessions.sh`), 마찰 분류,
+  고침 하나(힌트를 '열쇠를 누른 채 머무는 손'으로)와 블라인드 재검사 3번: 기다림 3/3 → 0/3, 첫 인형 빨라짐, 누르고 있기는 배우지 못함(2/3 → 1/3).
+  보고 `windup/design/FUN_SCORES.md`, 증거 `windup/evidence/step10/`. 사람 결과 없음.
 
 ## 공용 도구
 

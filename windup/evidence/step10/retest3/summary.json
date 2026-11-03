@@ -1,0 +1,77 @@
+{
+  "session": "retest3",
+  "model": "claude-opus-5-5",
+  "build": "0.10.0+base",
+  "wall_seconds": 194.306,
+  "actions": 58,
+  "inputs": 53,
+  "first_input_wall_s": 14.444,
+  "first_key_input_wall_s": 14.444,
+  "first_wind_game_s": 16.177,
+  "first_doll_game_s": 67.788,
+  "second_doll_game_s": 105.65,
+  "first_help_game_s": 74.177,
+  "dolls_at": {
+    "30": 0,
+    "60": 0,
+    "180": 3
+  },
+  "dolls_end": 3,
+  "off_key_inputs": [
+    {
+      "wall": 27.046,
+      "cmd": "click",
+      "args": [
+        "450",
+        "605"
+      ]
+    },
+    {
+      "wall": 31.006,
+      "cmd": "click",
+      "args": [
+        "490",
+        "278"
+      ]
+    },
+    {
+      "wall": 149.24,
+      "cmd": "click",
+      "args": [
+        "410",
+        "380"
+      ]
+    }
+  ],
+  "holds": 9,
+  "hints_shown": [
+    {
+      "t": 36.183,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 7.4,
+      "seconds": 7.1
+    },
+    {
+      "after_wall": 72.5,
+      "seconds": 5.2
+    },
+    {
+      "after_wall": 112.5,
+      "seconds": 4.9
+    }
+  ],
+  "played_past_180_s": true,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes and 14 seconds. It's an incremental clicker game set in a toymaker's workshop at night.\n\n**What I understood**\n- **Earning:** clicking the brass gear gives 1 spiral. Holding it down earns faster, about 4 per second.\n- **Goal:** a thread runs from the gear to one sleeping wind-up doll at a time, and a ring around that doll's key shows its progress.\n- **Waking dolls:** when the ring fills, the spirals are spent automatically and the doll wakes up in color. There was no shop or upgrade menu.\n- **What each wake-up adds:** another gear on the main machine, which seems to add passive income (about 2 per second after the first one), and sometimes a workshop item: first the desk lamp, then the sewing machine under the dust sheet.\n- **Awake dolls help:** they walk over to the next doll and wind it with you, which makes the room feel alive.\n- **Progress:** I woke 3 of roughly 14 dolls and ended with four gears and 272 spirals.\n\n**What confused me**\n- **Hidden costs:** the game never shows how much the next doll costs. I could only tell spirals had been spent when the counter suddenly dropped.\n- **Things that did nothing:** clicking the dolls, the sewing machine and the glowing face-orb had no visible effect. The orb might be a companion or a later feature.\n- **Unknown icons:** I didn't try the sparkle icon at the top left (maybe settings or a prestige option) or the circular-arrow icon at the top right (probably restart).\n- **The clock:** the grandfather clock's hands moved between screenshots, which might be a hidden timer for the night.\n\n**Would I keep playing?**\nYes, for a while. The art and the slow lighting-up of the workshop are charming, and watching the dolls help each other is a nice touch. But the only real decision so far is \"hold the gear,\" and the wake-ups are getting slower. I'd keep going only if the clock, the orb or the unused icons turn out to add real choices.",
+  "turns": 34,
+  "cost_usd": 0.3706754
+}
