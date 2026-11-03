@@ -333,6 +333,8 @@ func state() -> Dictionary:
 		"fps": Engine.get_frames_per_second(),
 		"energy": snappedf(atelier.energy, 0.001),
 		"spring": snappedf(atelier.spring, 0.001),
+		"manual_energy": snappedf(atelier.manual_energy, 0.001),
+		"auto_energy": snappedf(atelier.auto_energy, 0.001),
 		"build_id": build_id(),
 		"awake": atelier.awake,
 		"waking": atelier.waking,

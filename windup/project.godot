@@ -14,7 +14,7 @@ config/name="Windup"
 config/description="The Wind-Up Atelier: wind the key, wake the dolls, bring the workshop to life."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/version="0.5.1"
+config/version="0.6.0"
 config/icon="res://icon.svg"
 ; The dormant atelier's night colour while the pack loads, no engine logo.
 boot_splash/bg_color=Color(0.07, 0.066, 0.09, 1)

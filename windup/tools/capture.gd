@@ -26,7 +26,7 @@ func _run() -> void:
 		quit(2)
 		return
 	var main: WindupMain = MainScene.instantiate()
-	main.config = RunConfig.from_pairs({"seed": args.get("seed", "1"), "fresh": "1"})
+	main.config = RunConfig.from_pairs({"seed": args.get("seed", "1"), "fresh": "1", "variant": args.get("variant", "base")})
 	root.add_child(main)
 	await process_frame
 	# --hold S: hold the key for S game seconds (the real hold path), then
@@ -39,7 +39,8 @@ func _run() -> void:
 		while t < held:
 			main.advance(1.0 / 60.0)
 			t += 1.0 / 60.0
-		main.release("key")
+		if not args.has("keep-holding"):
+			main.release("key")
 		var after := float(args.get("after", "0"))
 		t = 0.0
 		while t < after:

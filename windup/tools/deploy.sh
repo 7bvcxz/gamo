@@ -23,4 +23,6 @@ for f in "$SITE"/game-*.pck; do
   unlink "$f"; unlink "${f%.pck}.html" 2>/dev/null || true
   echo "  · removed unpublished pack $name"
 done
+# The variant picker page beside the game (Step 06); the game itself serves all variants.
+cp "$REPO/windup/web/variants.html" "$SITE/variants.html"
 ls "$SITE"/game-*.pck
