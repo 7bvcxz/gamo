@@ -1,0 +1,77 @@
+{
+  "session": "c121_1",
+  "model": "claude-opus-5-5",
+  "build": "0.12.1+c",
+  "wall_seconds": 191.344,
+  "actions": 193,
+  "inputs": 182,
+  "first_input_wall_s": 9.403,
+  "first_key_input_wall_s": 9.403,
+  "first_wind_game_s": 11.15,
+  "first_doll_game_s": 49.246,
+  "second_doll_game_s": 84.09,
+  "first_help_game_s": 55.252,
+  "dolls_at": {
+    "30": 0,
+    "60": 1,
+    "180": 4
+  },
+  "dolls_end": 4,
+  "off_key_inputs": [
+    {
+      "wall": 35.364,
+      "cmd": "click",
+      "args": [
+        "450",
+        "610"
+      ]
+    },
+    {
+      "wall": 39.917,
+      "cmd": "click",
+      "args": [
+        "1260",
+        "700"
+      ]
+    },
+    {
+      "wall": 130.066,
+      "cmd": "click",
+      "args": [
+        "410",
+        "385"
+      ]
+    }
+  ],
+  "holds": 5,
+  "hints_shown": [
+    {
+      "t": 41.705,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 120.6,
+      "seconds": 9.5
+    },
+    {
+      "after_wall": 86.3,
+      "seconds": 6.6
+    },
+    {
+      "after_wall": 52.6,
+      "seconds": 6.1
+    }
+  ],
+  "played_past_180_s": true,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes 10 seconds.\n\n**What I think the game is:** A cozy idle/clicker game set in a moonlit tailor's workshop. You wind a big brass key, which earns spirals (the currency) and gradually winds up sleeping clockwork dolls on the floor. When a doll's ring fills, it wakes up and some spirals are spent. Awake dolls walk to the next sleeping doll and help wind it, and they also seem to bring in spirals on their own. Each awakening adds something to the room: a desk lamp, the sewing machine, more gears on the main mechanism, and the jacket on the dress form getting finished. I woke four dolls in total.\n\n**What I understood:**\n- Clicking or holding the key earns spirals. Holding worked better than single clicks.\n- Waking a doll costs spirals. The counter dropped twice, from 111 to 37 and from 268 to 74.\n- Awake dolls work like automation and speed up the next wake-up.\n- The room fills with light and objects as you go, which is nice to watch.\n\n**What confused me:**\n- I never found anywhere to spend spirals myself. Clicking dolls, the sewing machine and the corner object did nothing, so the spending seems to happen automatically.\n- The idle hint showed up but never explained the rules.\n- I'm not sure what the clock means. It moved from about 11:40 to 11:55, so maybe the game ends or changes at midnight.\n- I don't know what the glowing face orb near the shelf or the red shape in the corner do.\n\n**Would I keep playing?** For a while, yes. Watching dolls wake up in a chain and the workshop come to life is charming, and I'd like to see what happens at midnight. It doesn't give me much to decide, though, so unless choices or upgrades show up later, I'd probably play it as a short ambient toy and not for long sessions.",
+  "turns": 32,
+  "cost_usd": 0.3927754
+}

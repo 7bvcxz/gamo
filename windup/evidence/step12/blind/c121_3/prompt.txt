@@ -1,0 +1,7 @@
+Here is a game. Play naturally for at least three minutes and narrate what you think is happening.
+
+How you see and control it (this is the whole interface): run `node ./act.mjs <command>`. Each command returns the path of a fresh screenshot of the game window (1280x720 pixels) and the seconds since the game started; open that screenshot with the Read tool to see it.
+Commands: look | click X Y | double_click X Y | hold X Y SECONDS | drag X1 Y1 X2 Y2 [SECONDS] | key NAME (e.g. Space, Enter, ArrowLeft) | hold_key NAME SECONDS | wait SECONDS (at most 10) | end
+X and Y are pixel positions in the screenshot.
+
+As you play, narrate briefly after each screenshot: what you see, what you think is happening, and why you do what you do next. When at least three minutes have passed and you are ready to stop, run `node ./act.mjs end`, then give a short summary: what you think the game is, what you understood and what confused you, and whether you would keep playing and why.

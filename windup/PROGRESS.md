@@ -11,8 +11,9 @@
 - Step 09 (#109): 블라인드 AI 하네스 `tools/blind/`, 세션 3(+pilot), `design/BLIND_PLAYTESTS.md`
 - Step 11 (#112): A/B/C 토너먼트 — 보존 빌드 `docs/windup/ref/step11/`(0.10.0), 변형마다 블라인드 3세션(순서 돌림), 독립 채점, 스크립트 입력 3분.
   결론 **검증된 승자 없음**, 다음 후보 C(낮은 확신), ITERATE. `design/TOURNAMENT.md`. **소유자 승인 대기**
-- Step 12 (#113): **구현 차단** — 검증된 승자 없음 + 소유자 승인 없음. 제안서 `design/EXPANSION_PROPOSAL.md`(다듬기 순서, 확장 사다리 4칸과 죽이는 조건, 출시 빈 곳). 이슈는 열어 둠
-- 다음: 소유자가 (가) C 승인 / (나) 사람 테스트 뒤 결정 / (다) 다른 변형 중 하나를 고르면 Step 12 다듬기를 시작
+- Step 12 (#113): 소유자가 C 승인(2026-11-03) → 0.12.0·0.12.1로 C를 다듬음(기본 변형 C, C 데이터 40/×1.0, 몫이 보이게, 열쇠 밖 반응, 렌더 비용).
+  블라인드 재검사 두 번, 10분 플레이, 데스크톱 창. 후보 문서 `design/RELEASE_CANDIDATE.md`(점검표·판정·남은 문제·go/no-go)
+- 다음 (모두 소유자 결정): 사람 플레이테스트(`design/HUMAN_PLAYTEST.md`), 확장 사다리 1칸 '다음에 깨울 인형 고르기'(`design/EXPANSION_PROPOSAL.md`) 승인 여부, HeyDive 등록
 - 변형: 기준·A(스프링)·B(깨어남)·C(연쇄), `?variant=a|b|c`, 고르는 페이지 `docs/windup/variants.html`(`design/VARIANTS.md`)
 - 페이스: `tools/pacing_lab.gd`, 0.8.0 튜닝(첫 몫 55·첫 인형 1.8/초·둘째 160), `design/PACING.md`
 - 규칙은 `src/game/atelier.gd`(순수), 수치는 `data/balance.json`만. 실제 규칙 페이스 표: `godot --headless --path windup --script res://tools/pace.gd`
@@ -48,4 +49,4 @@
 | 09 | #109 | 블라인드 AI 플레이 하네스·격리 검사·세션 3(+pilot) | `731ea2b8` |
 | 10 | #111 | 채점·마찰 분류·힌트를 누르는 손으로(0.10.0)·블라인드 재검사 3 | `901fb212` `ffde8165` |
 | 11 | #112 | A/B/C 토너먼트(보존 빌드, 변형마다 블라인드 3, 독립 채점), 승자 없음·C 후보·승인 요청 | `6d6fd505` `c49ea3fa` |
-| 12 | #113 | 차단 — 제안서만(승인 대기) | (이 커밋) |
+| 12 | #113 | 제안서(`f0455b20`) → 승인 → C 다듬기 0.12.0(`a5007801`)·0.12.1(`6d8dddd5`) + 후보 문서 | (보고 커밋은 다음) |

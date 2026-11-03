@@ -1,0 +1,61 @@
+sleep 3
+click 960 570
+sleep 0.4
+click 960 570
+sleep 0.4
+click 960 570
+sleep 0.4
+click 960 570
+sleep 0.4
+click 960 570
+sleep 0.4
+click 960 570
+sleep 0.4
+down 960 570
+sleep 10
+up
+sleep 1
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+key space
+sleep 0.3
+down 960 570
+sleep 30
+up
+sleep 3

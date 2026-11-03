@@ -1,0 +1,109 @@
+{
+  "session": "c121_2",
+  "model": "claude-opus-5-5",
+  "build": "0.12.1+c",
+  "wall_seconds": 190.277,
+  "actions": 305,
+  "inputs": 294,
+  "first_input_wall_s": 8.124,
+  "first_key_input_wall_s": 8.124,
+  "first_wind_game_s": 9.883,
+  "first_doll_game_s": 43.439,
+  "second_doll_game_s": 80.786,
+  "first_help_game_s": 49.419,
+  "dolls_at": {
+    "30": 0,
+    "60": 1,
+    "180": 4
+  },
+  "dolls_end": 4,
+  "off_key_inputs": [
+    {
+      "wall": 24.01,
+      "cmd": "click",
+      "args": [
+        "490",
+        "280"
+      ]
+    },
+    {
+      "wall": 28.125,
+      "cmd": "click",
+      "args": [
+        "450",
+        "605"
+      ]
+    },
+    {
+      "wall": 119.14,
+      "cmd": "click",
+      "args": [
+        "165",
+        "610"
+      ]
+    },
+    {
+      "wall": 119.587,
+      "cmd": "click",
+      "args": [
+        "165",
+        "610"
+      ]
+    },
+    {
+      "wall": 119.944,
+      "cmd": "click",
+      "args": [
+        "165",
+        "610"
+      ]
+    },
+    {
+      "wall": 120.305,
+      "cmd": "click",
+      "args": [
+        "165",
+        "610"
+      ]
+    },
+    {
+      "wall": 120.704,
+      "cmd": "click",
+      "args": [
+        "165",
+        "610"
+      ]
+    }
+  ],
+  "holds": 0,
+  "hints_shown": [
+    {
+      "t": 29.902,
+      "reason": "hold"
+    }
+  ],
+  "longest_gaps_s": [
+    {
+      "after_wall": 60.1,
+      "seconds": 6.4
+    },
+    {
+      "after_wall": 44,
+      "seconds": 6
+    },
+    {
+      "after_wall": 84.7,
+      "seconds": 5.8
+    }
+  ],
+  "played_past_180_s": true,
+  "narration_mentions": {
+    "key_or_winding": true,
+    "dolls_or_figures": true,
+    "automatic_work": true,
+    "helping_each_other": true
+  },
+  "final_words": "I played for about 3 minutes 10 seconds.\n\n**What I think the game is:** a calm idle/clicker game set in a toymaker's or tailor's workshop at night. You click a big brass wind-up key to earn spirals. Sleeping wind-up dolls lie on the floor. Once you've built up enough spirals, the game spends them by itself to wake the doll that the glowing thread points to. Awake dolls make spirals on their own and walk over to help wind the next sleeper. Every so often the workshop also upgrades: a desk lamp lit up, then a red sewing machine appeared, extra gears were added to the key mechanism (five by the end), and the half-made garment on the dress form became a finished jacket.\n\n**What I understood:**\n- Clicking the key gives spirals.\n- Waking dolls and unlocking objects costs spirals. I could tell because the counter dropped sharply each time (for example 220 → 174 and 393 → 104), even though I never pressed a buy button.\n- Awake dolls earn spirals while you're not clicking: the counter went up about 24 in 7 seconds while I wasn't winding.\n- The extra gears seem to increase how much each wind earns.\n\n**What confused me:**\n- There's no shop, prices or progress bar, so I couldn't tell how much the next unlock would cost or when it would happen.\n- The floating little face (a wisp or ghost) near the shelf moved when I clicked it but did nothing I could see.\n- I never worked out whether clicking a sleeping doll does anything, or what the top-left icons and the top-right reset arrow do. I didn't try the reset arrow, in case it erased my progress.\n\n**Would I keep playing?** For a while, yes. Watching the dark room fill with light, machines and dolls is satisfying, and it's clearly working toward waking all of them, maybe finishing the whole workshop. Since you don't make any real choices, I'd probably let it run in the background rather than click actively for long. A visible goal or the cost of the next unlock would give me more reason to stay engaged.",
+  "turns": 30,
+  "cost_usd": 0.36954420000000004
+}
