@@ -1,0 +1,267 @@
+── check (import, load, unit+integration, smoke, export)
+── windup: import
+── windup: editor load
+── windup: unit + integration
+70 passed, 0 failed, 541 checks, 19 files, 51.7s
+── test.sh: OK
+── windup: smoke
+WINDUP_SMOKE {"ok":true,"problems":[],"state":{"art":true,"auto_energy":6.606,"awake":1,"build_id":"0.7.0+base","config":{"dev":false,"fresh":true,"seed":1,"smoke":true,"variant":"base"},"doll":"stand","energy":36.106,"events":105,"fill":0.212,"fps":1.0,"gears":1,"hint":false,"inputs":100,"key_angle":157.08,"manual_energy":104.5,"music_notes":4,"pause_reasons":[],"paused":false,"rate":1.0,"session":1,"settings":{"reduced_motion":false,"volume":1.0},"sounds":{"chime":1,"chirp":1,"tick":100},"spring":0.0,"stage":1,"t":23.194,"target":1,"version":"0.7.0","waking":-1,"winds":100}}
+── smoke.sh: OK
+── windup: web export
+   pack 237896 bytes
+── check.sh (windup): OK
+── deploy to docs/windup
+▶ export: windup
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1msavepack[22m | Started Packing (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | Storing File: res://assets/art/doll/atlas.json[39m[0m
+[   4% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/atlas.svg-2deef1f98679aa957bce9643a7c9abcc.ctex[39m[0m
+[   4% ] [90m[1msavepack[22m | Storing File: res://assets/art/doll/atlas.svg.import[39m[0m
+[   8% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/backdrop.svg-fabef37f1fb2874f077ec0aebb846421.ctex[39m[0m
+[   8% ] [90m[1msavepack[22m | Storing File: res://assets/art/backdrop.svg.import[39m[0m
+[  11% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/gear_big.svg-c8494dee8e35e78f6d85d494fc433f1c.ctex[39m[0m
+[  11% ] [90m[1msavepack[22m | Storing File: res://assets/art/gear_big.svg.import[39m[0m
+[  15% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/gear_small.svg-73f1921f887c8ae12870862d35d86396.ctex[39m[0m
+[  15% ] [90m[1msavepack[22m | Storing File: res://assets/art/gear_small.svg.import[39m[0m
+[  18% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/key.svg-4ef06cfe138b279dd88a6729976a615f.ctex[39m[0m
+[  18% ] [90m[1msavepack[22m | Storing File: res://assets/art/key.svg.import[39m[0m
+[  22% ] [90m[1msavepack[22m | Storing File: res://data/balance.json[39m[0m
+[  26% ] [90m[1msavepack[22m | Storing File: res://data/variants.json[39m[0m
+[  29% ] [90m[1msavepack[22m | Storing File: res://.godot/exported/133200997/export-3ad5c15c4f3250da0cc7c1af1770d85f-main.scn[39m[0m
+[  33% ] [90m[1msavepack[22m | Storing File: res://src/app/main.gdc[39m[0m
+[  35% ] [90m[1msavepack[22m | Storing File: res://src/audio/ambient_bed.gdc[39m[0m
+[  39% ] [90m[1msavepack[22m | Storing File: res://src/audio/music_box.gdc[39m[0m
+[  42% ] [90m[1msavepack[22m | Storing File: res://src/audio/sfx.gdc[39m[0m
+[  46% ] [90m[1msavepack[22m | Storing File: res://src/core/game_clock.gdc[39m[0m
+[  50% ] [90m[1msavepack[22m | Storing File: res://src/core/run_config.gdc[39m[0m
+[  53% ] [90m[1msavepack[22m | Storing File: res://src/core/save_store.gdc[39m[0m
+[  57% ] [90m[1msavepack[22m | Storing File: res://src/core/settings.gdc[39m[0m
+[  60% ] [90m[1msavepack[22m | Storing File: res://src/core/telemetry.gdc[39m[0m
+[  64% ] [90m[1msavepack[22m | Storing File: res://src/game/atelier.gdc[39m[0m
+[  66% ] [90m[1msavepack[22m | Storing File: res://src/game/balance.gdc[39m[0m
+[  70% ] [90m[1msavepack[22m | Storing File: res://src/game/wind_input.gdc[39m[0m
+[  74% ] [90m[1msavepack[22m | Storing File: res://src/view/atelier_view.gdc[39m[0m
+[  77% ] [90m[1msavepack[22m | Storing File: res://src/view/doll_rig.gdc[39m[0m
+[  81% ] [90m[1msavepack[22m | Storing File: res://src/view/hud.gdc[39m[0m
+[  84% ] [90m[1msavepack[22m | Storing File: res://src/web/bridge.gdc[39m[0m
+[  88% ] [90m[1msavepack[22m | Storing File: res://src/web/web.gdc[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex[39m[0m
+[  91% ] [90m[1msavepack[22m | Storing File: res://icon.svg.import[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://.godot/exported/133200997/export-19246414aa9fb561ced4b8dce477acec-default_bus_layout.res[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://scenes/main.tscn.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/app/main.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/audio/ambient_bed.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/audio/music_box.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/audio/sfx.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/core/game_clock.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/core/run_config.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/core/save_store.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/core/settings.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/core/telemetry.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/game/atelier.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/game/balance.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/game/wind_input.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/view/atelier_view.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/view/doll_rig.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/view/hud.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/web/bridge.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://src/web/web.gd.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://default_bus_layout.tres.remap[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://.godot/global_script_class_cache.cfg[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://icon.svg[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://.godot/uid_cache.bin[39m[0m
+[  95% ] [90m[1msavepack[22m | Storing File: res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+
+✅ 배포 완료: windup  → docs/
+   커밋/푸시 후 GitHub Pages(main /docs)가 서빙합니다:
+   https://7bvcxz.github.io/gamo/windup/
+docs/windup/game-2b2e547bd960.pck
+docs/windup/game-5c0ac1387251.pck
+── desktop window 1920x1080 (OS input)
+key at 960,570 on 1920x1080; video /tmp/tmp.ALnmkz7BXR/desktop.mp4; trace 233 events
+engine errors: 0
+── browser: boot, art, feel, restart/save/pause, picker, correctness
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:03] "GET /windup/version.json HTTP/1.1" 200 -
+
+Running 12 tests using 1 worker
+
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:04] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:06] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:07] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "GET /windup/version.json HTTP/1.1" 200 -
+  ✓   1 [desktop] › specs/art03.spec.mjs:16:1 › art loads, the doll wakes, frames hold (19.5s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "GET /windup/index.html?fresh=1&seed=7 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1&seed=7 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:23] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:24] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:26] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:26] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   2 [desktop] › specs/boot02.spec.mjs:16:1 › boots, keeps options, winds, pauses (7.4s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:31] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:33] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:56:33] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+  ✓   3 [desktop] › specs/correct07.spec.mjs:8:1 › click, awaken, help, resize (35.4s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:06] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:06] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:06] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:06] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:06] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:06] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:07] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:10] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:10] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:31] "GET /windup/index.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:31] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:31] "GET /windup/index.png HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:31] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 304 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:31] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:42] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   4 [desktop] › specs/feel05.spec.mjs:22:1 › icons, music box and gears (42.5s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:49] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:52] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:52] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:57] "GET /windup/index.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:57] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:57:57] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓   5 [desktop] › specs/play04.spec.mjs:108:1 › restart, save and the pause policy (13.1s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "GET /windup/variants.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "GET /windup/index.html?variant=base&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=base&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:02] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:03] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:04] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:04] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:04] "GET /windup/index.html?variant=a&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:04] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=a&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:04] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:06] "GET /windup/index.html?variant=b&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:06] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=b&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:06] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:07] "GET /windup/index.html?variant=c&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:07] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=c&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:07] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:08] "GET /windup/ref/step04/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:08] code 404, message File not found
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:08] "GET /windup/ref/step04/index.png HTTP/1.1" 404 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:08] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:08] "GET /windup/ref/step04/game-7bdd3c38bfed.pck HTTP/1.1" 200 -
+  ✓   6 [desktop] › specs/select06.spec.mjs:5:1 › picker links start each variant fresh; the Step 04 build still runs (7.2s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:10] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:11] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:11] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "GET /windup/version.json HTTP/1.1" 200 -
+  ✓   7 [phone] › specs/art03.spec.mjs:16:1 › art loads, the doll wakes, frames hold (16.6s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "GET /windup/index.html?fresh=1&seed=7 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1&seed=7 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:26] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:27] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:28] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:28] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+  ✓   8 [phone] › specs/boot02.spec.mjs:16:1 › boots, keeps options, winds, pauses (7.6s)
+  -   9 [phone] › specs/correct07.spec.mjs:8:1 › click, awaken, help, resize
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:34] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:34] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:34] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:34] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:34] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:34] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:35] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:37] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:37] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:54] "GET /windup/index.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:54] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:54] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  10 [phone] › specs/feel05.spec.mjs:22:1 › icons, music box and gears (24.6s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "GET /windup/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:58:59] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:01] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:01] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:07] "GET /windup/index.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:08] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:08] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+  ✓  11 [phone] › specs/play04.spec.mjs:108:1 › restart, save and the pause policy (19.4s)
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:18] "GET /windup/variants.html HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "GET /windup/index.html?variant=base&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=base&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "GET /windup/index.png HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "GET /engine/engine-7eda98958eb0.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "HEAD /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:19] "GET /windup/game-2b2e547bd960.pck HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:22] "GET /engine/engine-7eda98958eb0.audio.position.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:22] "GET /engine/engine-7eda98958eb0.audio.worklet.js HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:22] "GET /windup/index.html?variant=a&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:22] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=a&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:22] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:25] "GET /windup/index.html?variant=b&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:25] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=b&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:25] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:27] "GET /windup/index.html?variant=c&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:27] "GET /windup/runner-v2.html?pack=game-2b2e547bd960.pck&size=237896&build=game-2b2e547bd960.pck&variant=c&fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:27] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:30] "GET /windup/ref/step04/index.html?fresh=1 HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:30] code 404, message File not found
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:30] "GET /windup/ref/step04/index.png HTTP/1.1" 404 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:30] "GET /engine/engine-7eda98958eb0.wasm HTTP/1.1" 200 -
+[WebServer] 127.0.0.1 - - [03/Nov/2026 13:59:30] "GET /windup/ref/step04/game-7bdd3c38bfed.pck HTTP/1.1" 200 -
+  ✓  12 [phone] › specs/select06.spec.mjs:5:1 › picker links start each variant fresh; the Step 04 build still runs (15.3s)
+
+  1 skipped
+  11 passed (3.5m)
+
+stage                                                                  exit
+check (import, load, unit+integration, smoke, export)                  0
+deploy to docs/windup                                                  0
+desktop window 1920x1080 (OS input)                                    0
+browser: boot, art, feel, restart/save/pause, picker, correctness      0
+failed stages: 0

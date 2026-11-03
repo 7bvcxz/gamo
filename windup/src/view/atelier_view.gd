@@ -377,7 +377,9 @@ func _layout() -> void:
 func advance(dt: float) -> void:
 	_anim += dt
 	# The key is a spring: it snaps past the quarter and settles (the click you feel).
-	var sub := 4
+	# Explicit steps are only stable when short: a long frame (a hitch, a tab
+	# coming back) is cut into steps of at most 1/240 s, or the key flies off.
+	var sub := maxi(1, ceili(dt * 240.0))
 	for i in sub:
 		var h := dt / sub
 		_key_vel += ((_target_angle - key_angle) * 520.0 - _key_vel * 24.0) * h

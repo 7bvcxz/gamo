@@ -20,7 +20,7 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [['list']],
-  use: { baseURL: process.env.WINDUP_E2E_BASE || `http://127.0.0.1:${port}/windup/` },
+  use: { baseURL: process.env.WINDUP_E2E_BASE || `http://127.0.0.1:${port}/windup/`, screenshot: 'only-on-failure' },
   webServer: process.env.WINDUP_E2E_BASE ? undefined : {
     command: `python3 -m http.server ${port} --bind 127.0.0.1 --directory ${docs}`,
     url: `http://127.0.0.1:${port}/windup/version.json`,

@@ -55,13 +55,20 @@ test('icons, music box and gears', async ({ page: first }, info) => {
   await expect.poll(async () => (await state(page)).settings.reduced_motion).toBe(true);
   await page.screenshot({ path: path.join(evidence, `icons_${info.project.name}.png`) });
   expect((await state(page)).awake).toBe(1);       // the icons did not wind or restart
-  await page.waitForTimeout(2000);                 // user:// reaches IndexedDB
-  const again = await page.context().newPage();
-  await again.goto('index.html');
-  await again.waitForFunction(() => window.windup && window.windup.ready === true, null, { timeout: 120_000 });
-  await page.close();
-  page = again;
-  const s = await state(page);
+  // user:// reaches IndexedDB asynchronously (slower on a loaded machine): look
+  // from new pages until the last change has arrived, up to ~20 s.
+  let s = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await page.waitForTimeout(2000 + attempt * 2000);
+    const again = await page.context().newPage();
+    await again.goto('index.html');
+    await again.waitForFunction(() => window.windup && window.windup.ready === true, null, { timeout: 120_000 });
+    s = await state(again);
+    if (attempt < 4 && !(s.settings.reduced_motion && s.settings.volume === 0)) { await again.close(); continue; }
+    await page.close();
+    page = again;
+    break;
+  }
   expect(s.settings.volume).toBe(0);
   expect(s.settings.reduced_motion).toBe(true);
   fs.writeFileSync(path.join(evidence, `feel_${info.project.name}.json`), JSON.stringify({

@@ -110,6 +110,14 @@ func query(name: String, arg: Variant) -> Variant:
 				"static_bytes": int(Performance.get_monitor(Performance.MEMORY_STATIC)),
 				"objects": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
 				"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
+		"dev_dolls_on_screen":
+			var vv: AtelierView = _main.get("view")
+			var vis := vv.get_viewport_rect()
+			var off := 0
+			for d in vv.dolls:
+				if not vis.grow(2.0).has_point(d.global_position):
+					off += 1
+			return {"ok": true, "dolls": vv.dolls.size(), "off_screen": off, "visible_rect": [vis.size.x, vis.size.y]}
 		"dev_render_info":
 			# What the renderer did last frame -- to tell 'more pixels' from
 			# 'more draw calls' when the frame rate drops (the Fun Lab's hook).

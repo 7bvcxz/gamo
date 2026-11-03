@@ -27,7 +27,12 @@ func save(atelier: Atelier, build: String) -> bool:
 func load_atelier() -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
-	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	# JSON.new().parse reports a broken file by its return code without
+	# logging an engine error (JSON.parse_string logs one).
+	var json := JSON.new()
+	if json.parse(FileAccess.get_file_as_string(path)) != OK:
+		return {}
+	var parsed: Variant = json.data
 	if not (parsed is Dictionary) or int((parsed as Dictionary).get("schema", -1)) != SCHEMA:
 		return {}
 	var a: Variant = (parsed as Dictionary).get("atelier", {})

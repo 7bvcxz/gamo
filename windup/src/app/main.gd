@@ -157,6 +157,13 @@ func new_game(seed: int, saved: Dictionary = {}) -> void:
 ## A press of the key from `source` ("click", "key", "dev"): one turn now,
 ## and more while it is held.
 func press(source: String) -> void:
+	# While paused nothing changes. A press when the only reason is lost focus
+	# means the player is back: resume, then take the press.
+	if clock.paused:
+		if clock.reasons() == ["focus"]:
+			set_pause("focus", false)
+		else:
+			return
 	inputs += 1
 	input.press(source)
 	wind(source)
@@ -334,6 +341,7 @@ func state() -> Dictionary:
 		"energy": snappedf(atelier.energy, 0.001),
 		"spring": snappedf(atelier.spring, 0.001),
 		"manual_energy": snappedf(atelier.manual_energy, 0.001),
+		"key_angle": snappedf(view.key_angle, 0.001),
 		"auto_energy": snappedf(atelier.auto_energy, 0.001),
 		"build_id": build_id(),
 		"awake": atelier.awake,

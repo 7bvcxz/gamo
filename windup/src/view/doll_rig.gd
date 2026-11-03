@@ -178,7 +178,12 @@ func set_pose(name: String) -> void:
 	_apply()
 
 
+## How many wake-ups this rig has started (tests: exactly one per doll per game).
+var wake_count: int = 0
+
+
 func start_wake() -> void:
+	wake_count += 1
 	set_pose("asleep")
 	waking = true
 	wake_time = 0.0

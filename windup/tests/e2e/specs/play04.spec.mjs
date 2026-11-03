@@ -140,9 +140,9 @@ test('restart, save and the pause policy', async ({ page: first }, info) => {
   await tap(at);
   await page.waitForTimeout(300);
   expect((await state(page)).awake).toBe(1);              // armed, not yet
-  await page.screenshot({ path: path.join(evidence, `restart_armed_${info.project.name}.png`) });
-  await tap(at);
+  await tap(at);                                          // within the 3 s arm window (no screenshot in between)
   await expect.poll(async () => (await state(page)).awake).toBe(0);
   expect((await state(page)).energy).toBe(0);
+  await page.screenshot({ path: path.join(evidence, `restart_done_${info.project.name}.png`) });
   expect(errors).toEqual([]);
 });

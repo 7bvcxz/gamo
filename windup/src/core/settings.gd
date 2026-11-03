@@ -26,7 +26,10 @@ func cycle_volume() -> void:
 func load_saved() -> void:
 	if not FileAccess.file_exists(path):
 		return
-	var d: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	var json := JSON.new()
+	if json.parse(FileAccess.get_file_as_string(path)) != OK:
+		return
+	var d: Variant = json.data
 	if d is Dictionary:
 		volume_step = clampi(int((d as Dictionary).get("volume_step", 0)), 0, VOLUMES.size() - 1)
 		reduced_motion = bool((d as Dictionary).get("reduced_motion", false))

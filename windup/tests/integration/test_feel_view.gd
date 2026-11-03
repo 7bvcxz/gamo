@@ -87,3 +87,13 @@ func test_room_tone_goes_from_hush_to_hum() -> void:
 	_wind_until_awake(1)
 	main.advance(20.0)
 	assert_true(main.ambient.beats > 0, "the mechanical heartbeat runs once a doll works")
+
+
+func test_long_frames_do_not_throw_the_key() -> void:
+	# A 0.25 s frame (the clock's cap) right after a turn: the key settles near its target.
+	main.press("dev")
+	for i in 20:
+		main.view.advance(0.25)
+	var err := absf(main.view.key_angle - AtelierView.QUARTER)
+	assert_true(err < 0.05, "the key settles (off by %.4f rad)" % err)
+	assert_false(is_nan(main.view.key_angle) or is_inf(main.view.key_angle), "and stays a number")

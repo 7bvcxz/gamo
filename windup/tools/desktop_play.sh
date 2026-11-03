@@ -41,4 +41,6 @@ sleep 2.5
 kill $GPID 2>/dev/null || true
 wait $GPID 2>/dev/null || true
 echo "key at $KX,$KY on ${W}x${H}; video $OUT/desktop.mp4; trace $(wc -l < "$OUT/trace.jsonl") events"
-grep -cE 'SCRIPT ERROR|ERROR:' "$OUT/game.log" | sed 's/^/engine errors: /'
+errors="$(grep -cE 'SCRIPT ERROR|ERROR:' "$OUT/game.log" || true)"
+echo "engine errors: $errors"
+[[ "$errors" == "0" && -s "$OUT/trace.jsonl" ]]
