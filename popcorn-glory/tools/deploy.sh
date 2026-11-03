@@ -50,6 +50,11 @@ cp "$WORK/index.pck" "$OUT/$pack"
 for icon in index.icon.png index.apple-touch-icon.png index.png; do
   [[ -f "$WORK/$icon" ]] && cp "$WORK/$icon" "$OUT/$icon"
 done
+# Plain pages beside the game (Step 09: the owner's scorecard). web/ has a
+# .gdignore, so none of it is in the pack.
+for pagefile in "$GAME"/web/*.html; do
+  [[ -f "$pagefile" ]] && cp "$pagefile" "$OUT/$(basename "$pagefile")"
+done
 
 python3 - "$WORK/index.html" "$OUT/index.html" "$engine" "$pack" <<'PY'
 import sys
