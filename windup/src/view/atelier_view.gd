@@ -76,6 +76,8 @@ var doll: DollRig
 var dolls: Array[DollRig] = []
 ## True while the game shows its wordless hint (the spirit pushes the key).
 var hint: bool = false
+## True while it shows a slow clicker that the key can be held (Step 08).
+var hold_hint: bool = false
 var atelier: Atelier
 
 var _target_angle: float = 0.0
@@ -855,7 +857,14 @@ func _draw_fx() -> void:
 		_fx.draw_arc(c, (20.0 + t * 90.0) * grow, 0.0, TAU, 40, Color(1.0, 0.86, 0.5, 0.7 * (1.0 - t)), 3.0 if grow <= 1.0 else 5.0, true)
 		_fx.draw_circle(c, 30.0 * (1.0 - t), Color(1.0, 0.9, 0.6, 0.25 * (1.0 - t)))
 	var s := k + Vector2(-150, -96 + sin(_anim * 1.7) * 9.0)
-	if hint:
+	if hold_hint:
+		# Without words: the spirit sits on the key and keeps pressing; a ring
+		# fills around the key for as long as it holds, then it lets go.
+		var cycle := fmod(_anim, 2.4)
+		var held := clampf(cycle / 1.8, 0.0, 1.0)
+		s = k + Vector2(0, -52 + (3.0 if cycle < 1.8 else -6.0))
+		_fx.draw_arc(k, 128.0, -PI / 2.0, -PI / 2.0 + TAU * held, 48, Color(1.0, 0.85, 0.5, 0.7 * (1.0 - maxf(0.0, cycle - 1.8) / 0.6)), 5.0)
+	elif hint:
 		# Without words: the spirit goes to the key and pushes it.
 		var push := (sin(_anim * 6.0) * 0.5 + 0.5)
 		s = k + Vector2(-104 + push * 14.0, -40)

@@ -108,3 +108,21 @@ func test_a_press_after_losing_focus_brings_the_game_back() -> void:
 	assert_eq(m.winds, 1, "a hidden page takes no presses")
 	m.queue_free()
 	await tree.process_frame
+
+
+func test_a_slow_clicker_is_shown_holding_once() -> void:
+	var m := _start({"fresh": "1"})
+	await tree.process_frame
+	m.set_process(false)
+	for i in 14:
+		m.press("click")
+		m.release("click")
+		m.advance(2.0)
+	assert_true(m.view.hold_hint, "the spirit shows holding")
+	assert_eq(m.telemetry.events.filter(func(e: Dictionary) -> bool: return e["ev"] == "hint" and e["reason"] == "hold").size(), 1, "once")
+	m.press("click")
+	m.advance(1.0)
+	m.release("click")
+	assert_false(m.view.hold_hint, "holding the key clears it")
+	m.queue_free()
+	await tree.process_frame

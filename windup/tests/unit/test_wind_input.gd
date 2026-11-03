@@ -32,3 +32,17 @@ func test_dev_presses_are_taps() -> void:
 	w.press("click")
 	assert_true(w.release_all(), "release_all reports a hold")
 	assert_false(w.release_all(), "and only once")
+
+
+func test_hold_hint_only_for_slow_clickers_who_never_held() -> void:
+	var slow: Array = []
+	for i in 12:
+		slow.append(2.0 + i * 2.0)              # a press every 2 s
+	assert_true(WindInput.wants_hold_hint(slow, 24.0, false, false), "slow, never held, 20 s in: show it")
+	assert_false(WindInput.wants_hold_hint(slow, 15.0, false, false), "not before 20 s")
+	assert_false(WindInput.wants_hold_hint(slow, 24.0, true, false), "not after they have held")
+	assert_false(WindInput.wants_hold_hint(slow, 24.0, false, true), "not once the first doll is up")
+	var fast: Array = []
+	for i in 100:
+		fast.append(2.0 + i * 0.25)             # 4 a second
+	assert_false(WindInput.wants_hold_hint(fast, 26.0, false, false), "not for someone clicking fast")

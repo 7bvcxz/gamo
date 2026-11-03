@@ -12,8 +12,8 @@
   "idle_report_seconds": 5.0,
   "autosave_seconds": 10.0,
   "dolls": [
-    {"cost": 75, "rate": 1.0, "pos": [430, 648]},
-    {"cost": 170, "rate": 1.4, "pos": [868, 652]},
+    {"cost": 55, "rate": 1.8, "pos": [430, 648]},
+    {"cost": 160, "rate": 1.4, "pos": [868, 652]},
     {"cost": 280, "rate": 1.8, "pos": [262, 690]},
     {"cost": 430, "rate": 2.3, "pos": [1012, 688]},
     {"cost": 640, "rate": 2.8, "pos": [578, 700]},

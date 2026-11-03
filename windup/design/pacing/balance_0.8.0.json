@@ -1,0 +1,36 @@
+{
+  "_doc": "Windup balance. Every number the rules use lives here (design/CORE_LOOP.md, hypotheses H1-H7). Times in seconds, positions in the 1280x720 design rectangle (feet on the floor).",
+  "wind": {
+    "energy_per_turn": 1.0,
+    "gear_bonus_per_doll": 0.25,
+    "max_turns_per_second": 6.0,
+    "hold_turns_per_second": 5.0,
+    "hold_delay": 0.25
+  },
+  "awaken_seconds": 1.6,
+  "hint_idle_seconds": 20.0,
+  "idle_report_seconds": 5.0,
+  "autosave_seconds": 10.0,
+  "dolls": [
+    {"cost": 55, "rate": 1.8, "pos": [430, 648]},
+    {"cost": 160, "rate": 1.4, "pos": [868, 652]},
+    {"cost": 280, "rate": 1.8, "pos": [262, 690]},
+    {"cost": 430, "rate": 2.3, "pos": [1012, 688]},
+    {"cost": 640, "rate": 2.8, "pos": [578, 700]},
+    {"cost": 920, "rate": 3.4, "pos": [1146, 650]},
+    {"cost": 1300, "rate": 4.0, "pos": [338, 612]},
+    {"cost": 1800, "rate": 4.7, "pos": [770, 702]},
+    {"cost": 2500, "rate": 5.4, "pos": [1222, 702]},
+    {"cost": 3400, "rate": 6.2, "pos": [138, 652]},
+    {"cost": 4600, "rate": 7.0, "pos": [940, 616]},
+    {"cost": 6200, "rate": 8.0, "pos": [70, 702]}
+  ],
+  "stages": [
+    {"dolls": 0, "name": "dormant"},
+    {"dolls": 1, "name": "first_light"},
+    {"dolls": 2, "name": "humming"},
+    {"dolls": 4, "name": "bustling"},
+    {"dolls": 7, "name": "festival"},
+    {"dolls": 10, "name": "grand_clock"}
+  ]
+}

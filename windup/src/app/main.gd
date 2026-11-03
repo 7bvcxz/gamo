@@ -36,6 +36,9 @@ var _hinted: bool = false
 var _since_save: float = 0.0
 var _reported_end: bool = false
 var _trace_t: float = 0.0
+var _press_times: Array[float] = []
+var _ever_held: bool = false
+var _hold_hinted: bool = false
 
 
 func _write_trace() -> void:
@@ -126,6 +129,9 @@ func new_game(seed: int, saved: Dictionary = {}) -> void:
 	sfx.played.clear()
 	_last_input = -1.0
 	_hinted = false
+	_press_times.clear()
+	_ever_held = false
+	_hold_hinted = false
 	_since_save = 0.0
 	_reported_end = false
 	atelier = Atelier.new(balance)
@@ -165,6 +171,10 @@ func press(source: String) -> void:
 		else:
 			return
 	inputs += 1
+	if source != "dev":
+		_press_times.append(clock.time)
+		if _press_times.size() > 64:
+			_press_times.pop_front()
 	input.press(source)
 	wind(source)
 	if source == "dev":
@@ -249,6 +259,14 @@ func _step(dt: float) -> void:
 	# Holding: after the delay, one turn per 1/hold_rate seconds.
 	for i in input.advance(dt):
 		wind("hold")
+		_ever_held = true
+		view.hold_hint = false
+	if not _hold_hinted and WindInput.wants_hold_hint(_press_times, clock.time, _ever_held, atelier.awake > 0 or atelier.waking >= 0):
+		_hold_hinted = true
+		view.hold_hint = true
+		telemetry.emit("hint", {"reason": "hold"})
+	if view.hold_hint and (atelier.awake > 0 or atelier.waking >= 0):
+		view.hold_hint = false
 	atelier.tick(dt)
 	view.advance(dt)
 	music.advance(dt)

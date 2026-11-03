@@ -34,7 +34,7 @@ const PROFILES = {
     },
   },
   minimal: {
-    viewport: { width: 1280, height: 720 },
+    viewport: { width: 1280, height: 720 }, footage: true,
     async play(page, k, until) {
       await page.waitForTimeout(2000);
       while (!(await until())) { await page.mouse.click(k.x, k.y); await page.waitForTimeout(3000); }
@@ -63,11 +63,8 @@ const PROFILES = {
 for (const [name, prof] of Object.entries(PROFILES)) {
   test(`profile ${name}: three minutes from a fresh start`, async ({ browser }, info) => {
     test.skip(info.project.name !== 'desktop', 'profiles run once, on the PC layout');
-    // Known failure (0.5.1): one click every 3 s is 60 turns in 3 minutes, under
-    // the first doll's cost of 75 -- the minimal player sees the ring fill and
-    // the doll stir, but nothing wakes. Recorded for Step 08's pacing; when the
-    // tuning fixes it, this test starts passing and Playwright flags it.
-    test.fail(name === 'minimal', 'minimal clicker does not wake the first doll within 3 minutes (0.5.1)');
+    // (0.5.1-0.7.0 the minimal player woke nothing in 3 minutes -- a known
+    // failure marked test.fail; Step 08's tuning, first cost 75 -> 55, fixed it.)
     test.setTimeout(360_000);
     fs.mkdirSync(evidence, { recursive: true });
     const rec = prof.footage ? await recordingContext(browser, prof.viewport, path.join(evidence, 'video_tmp')) : null;
@@ -75,6 +72,8 @@ for (const [name, prof] of Object.entries(PROFILES)) {
     const page = rec ? rec.page : await context.newPage();
     await page.addInitScript(AUDIO_TAP);
     const { errors } = await openGame(page, '?fresh=1');
+    // Game time 0 in video time (for milestone captions): now minus the game's clock.
+    const videoAtGameZero = rec ? (Date.now() - rec.startedAt) / 1000 - (await state(page)).t : 0;
     const k = await keyPoint(page);
     // Every input with wall and game time, so a profile's pattern can be checked against its trace.
     const inputs = [];
@@ -117,6 +116,14 @@ for (const [name, prof] of Object.entries(PROFILES)) {
       summary.footage = await finishFootage(rec, audio, path.join(evidence, `${name}_footage_${s.build_id}.mp4`));
       summary.footage.video = path.basename(summary.footage.video);
       summary.footage.out = path.basename(summary.footage.out);
+      summary.footage.video_at_game_zero_s = videoAtGameZero;
+      // Milestones as captions on the video (WebVTT beside the mp4).
+      const cue = (t) => { const s = Math.max(0, t); const h = String(Math.floor(s / 3600)).padStart(2, '0'); const m = String(Math.floor(s / 60) % 60).padStart(2, '0'); return `${h}:${m}:${(s % 60).toFixed(3).padStart(6, '0')}`; };
+      const label = { doll_awake: (e) => `doll ${e.index + 1} wakes (game ${e.t.toFixed(1)} s)`, help: (e) => `doll ${e.helper + 1} starts winding doll ${e.target + 1}`,
+        stage: (e) => `the atelier: ${e.name}`, hint: (e) => `wordless hint: ${e.reason}` };
+      const vtt = ['WEBVTT', ''];
+      for (const e of ev.filter((x) => label[x.ev])) { const at = videoAtGameZero + e.t; vtt.push(`${cue(at)} --> ${cue(at + 3)}`, label[e.ev](e), ''); }
+      fs.writeFileSync(path.join(evidence, summary.footage.out.replace(/\.mp4$/, '.vtt')), vtt.join('\n'));
     } else {
       await context.close();
     }
