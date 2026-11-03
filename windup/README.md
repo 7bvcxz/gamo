@@ -30,7 +30,7 @@ xvfb-run -a -s "-screen 0 1600x1000x24" godot --path windup --audio-driver Dummy
   --resolution 1280x720 --script res://tools/capture.gd -- --out /abs/shot.png   # 실제 렌더러 화면
 xvfb-run … --script res://tools/capture.gd -- --out /abs/wake.png --storyboard 0,0.35,0.7,1.1,1.6   # 깨어남 스토리보드
 windup/tools/art/gen_art.sh [--go]                   # 래스터 생성(기본 dry run). 처리: tools/art/build_art.gd
-./deploy-web.sh windup                               # Web export → docs/windup/
+windup/tools/deploy.sh                               # Web export → docs/windup/ (새 팩 + 공개된 팩만 남김)
 windup/tools/e2e.sh                                  # 브라우저 검사 (로컬 docs/, 처음엔 tests/e2e에서 npm install)
 WINDUP_EVIDENCE=1 windup/tools/e2e.sh specs/play04.spec.mjs   # 증거를 evidence/stepNN/에 (기본은 test-results/)
 godot --headless --path windup --script res://tools/pace.gd   # 실제 규칙으로 스크립트 플레이어 넷의 페이스 표

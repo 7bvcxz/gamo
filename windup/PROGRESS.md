@@ -12,7 +12,7 @@
 - 규칙은 `src/game/atelier.gd`(순수), 수치는 `data/balance.json`만. 실제 규칙 페이스 표: `godot --headless --path windup --script res://tools/pace.gd`
 - 그림 생성: OpenAI 크레딧 소진(2026-11-03 HTTP 429), TopView는 매 호출 사용자 승인 필요 → 래스터 경로는 준비만 됨(`design/ART_GUIDE.md`)
 - 버전 규칙: `config/version` = `0.<step>.<재배포 횟수>` (Momonium과 같은 방식)
-- 배포: 소스 커밋 → `./deploy-web.sh windup` → (사이트 변경 시) `cd web && npm run build:pages` → docs 커밋 → rebase·push →
+- 배포: 소스 커밋 → `windup/tools/deploy.sh`(공용 `deploy-web.sh` + 새 팩과 공개된 팩만 남김) → (사이트 변경 시) `cd web && npm run build:pages` → docs 커밋 → rebase·push →
   공개 URL 확인(`WINDUP_E2E_BASE=https://7bvcxz.github.io/gamo/windup/ windup/tools/e2e.sh`)
 - HeyDive 등록: **보류** — 운영 서버(heydive-server, 다른 프로젝트)의 시드와 재빌드가 필요해 사용자 승인 대기(Momonium과 같은 상태)
 - 검사: `windup/tools/check.sh [--export]`(CI와 같음), 브라우저 `windup/tools/e2e.sh`
