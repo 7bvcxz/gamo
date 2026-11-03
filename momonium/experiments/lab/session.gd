@@ -10,13 +10,21 @@ extends RefCounted
 ## Records every player action, each upgrade, milestones, the experiment's
 ## own numbers (`metric`), idle intervals (IDLE_MS or more between actions,
 ## including before the first one -- how long it took to start) and a copy
-## of the summary taken when play time reaches three minutes.
+## of the summary taken when play time reaches three minutes -- and, for the
+## C/E tracks' longer sessions (Step 94), at fifteen and thirty minutes too,
+## with the frame rate at that moment.
 
 const THREE_MINUTES_MS := 180000
 const IDLE_MS := 5000
+## The protocol's checkpoints (TRACKS.md): summary key -> play time.
+const MARKS: Dictionary = {"at_3min": 180000, "at_15min": 900000, "at_30min": 1800000}
 
 var experiment := ""
 var version := ""
+## The track's alternative (`?alt=`), "" for its default.
+var variant := ""
+## Which run of this experiment in the visit (Restart counts up from 1).
+var run := 1
 ## Wall clock at the start (names the download; not part of any timing).
 var started_unix := 0.0
 var active_ms := 0.0
@@ -27,6 +35,10 @@ var milestones: Array[Dictionary] = []
 var idle: Array = []
 var metrics: Dictionary = {}
 var at_three: Dictionary = {}
+## Summaries frozen at each of MARKS (the three-minute one is `at_three`).
+var at_marks: Dictionary = {}
+## Actions in each minute of play: [minute 0, minute 1, ...].
+var per_minute: Array[int] = []
 var pauses := 0
 
 var _last_action_ms := 0.0
@@ -42,14 +54,23 @@ func advance(dt_seconds: float) -> void:
 	if dt_seconds <= 0.0:
 		return
 	active_ms += dt_seconds * 1000.0
-	if at_three.is_empty() and active_ms >= THREE_MINUTES_MS:
-		at_three = summary(false)
+	for key: String in MARKS:
+		if not at_marks.has(key) and active_ms >= float(MARKS[key]):
+			var snap := summary(false)
+			snap["fps"] = Engine.get_frames_per_second()
+			at_marks[key] = snap
+			if key == "at_3min":
+				at_three = snap
 
 
 ## A player action: a tap, a button. `kind` names it; `detail` is kept as is.
 func action(kind: String, detail: Dictionary = {}) -> void:
 	_close_idle()
 	counts[kind] = int(counts.get(kind, 0)) + 1
+	var minute := int(active_ms / 60000.0)
+	while per_minute.size() <= minute:
+		per_minute.append(0)
+	per_minute[minute] += 1
 	_event(kind, detail)
 	_last_action_ms = active_ms
 
@@ -127,13 +148,24 @@ func summary(with_three: bool = true) -> Dictionary:
 	var ups: Array = []
 	var between: Array = []
 	var prev := 0
+	var longest_wait := 0
 	for u: Dictionary in upgrades:
 		var row := u.duplicate()
 		row["t_s"] = _s(u["t_ms"])
 		row.erase("t_ms")
 		ups.append(row)
 		between.append(_s(int(u["t_ms"]) - prev))
+		longest_wait = maxi(longest_wait, int(u["t_ms"]) - prev)
 		prev = int(u["t_ms"])
+	# The wait still open counts too: a run whose next upgrade never comes
+	# has its longest wait at the end.
+	longest_wait = maxi(longest_wait, int(active_ms) - prev)
+	var minutes: Array = []
+	for n: int in per_minute:
+		minutes.append(n)
+	var played_minutes := int(ceil(active_ms / 60000.0))
+	while minutes.size() < played_minutes:
+		minutes.append(0)
 	var ms: Array = []
 	for m: Dictionary in milestones:
 		var row := m.duplicate()
@@ -142,6 +174,8 @@ func summary(with_three: bool = true) -> Dictionary:
 		ms.append(row)
 	var out := {
 		"experiment": experiment,
+		"variant": variant,
+		"run": run,
 		"version": version,
 		"started": Time.get_datetime_string_from_unix_time(int(started_unix), true) if started_unix > 0.0 else "",
 		"active_seconds": _s(active_ms),
@@ -152,6 +186,8 @@ func summary(with_three: bool = true) -> Dictionary:
 		"upgrades": ups,
 		"first_upgrade_s": ups[0]["t_s"] if not ups.is_empty() else null,
 		"seconds_between_upgrades": between,
+		"longest_upgrade_wait_s": _s(longest_wait),
+		"actions_per_minute": minutes,
 		"milestones": ms,
 		"idle_intervals": intervals,
 		"longest_idle_s": _s(longest),
@@ -159,7 +195,8 @@ func summary(with_three: bool = true) -> Dictionary:
 		"pauses": pauses,
 	}
 	if with_three:
-		out["at_3min"] = at_three.duplicate(true) if not at_three.is_empty() else null
+		for key: String in MARKS:
+			out[key] = (at_marks[key] as Dictionary).duplicate(true) if at_marks.has(key) else null
 	return out
 
 

@@ -47,3 +47,11 @@ func test_the_frame_demo_has_a_hidden_link() -> void:
 	assert_eq(LabRoute.parse("#stub", "")["exp"], "stub", "#stub opens the frame's own demo")
 	assert_false(LabRegistry.ids().has("stub"), "no tile for it")
 	assert_eq(LabRegistry.script_path("stub"), LabRegistry.STUB, "it is the stub")
+
+
+func test_the_tracks_have_direct_links_and_alternatives() -> void:
+	assert_eq(LabRoute.parse("#rock-plus", "")["exp"], "rock-plus", "#rock-plus")
+	assert_eq(LabRoute.parse("#tycoon-plus", "?dev=1")["exp"], "tycoon-plus", "#tycoon-plus")
+	assert_eq(LabRoute.parse("#rock-plus", "")["alt"], "", "no alternative: the track's default")
+	assert_eq(LabRoute.parse("#rock-plus", "?alt=Hold&dev=1")["alt"], "hold", "?alt= names one, any case")
+	assert_eq(LabRoute.parse("", "", PackedStringArray(["--exp", "rock-plus", "--alt", "b"]))["alt"], "b", "--alt off the web")

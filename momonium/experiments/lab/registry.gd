@@ -30,20 +30,57 @@ static func has(id: String) -> bool:
 	return ids().has(id)
 
 
+## Step 94: the owner played the six and chose two -- C and E. Each now has
+## an improved track beside its frozen baseline: `#rock` and `#tycoon` stay
+## exactly the Step 88 and Step 92 experiments (tests/unit/test_baselines.gd
+## pins their files), `#rock-plus` and `#tycoon-plus` are where Steps 95-98
+## improve them. A track has its own id, so its link, its records and its
+## scores never mix with the baseline's; `base` names the experiment it grew
+## from. Only the launcher's chooser says which is the baseline and which the
+## improved one; a run shows the letter (C or C+) and nothing else.
+const TRACKS: Array[Dictionary] = [
+	{"id": "rock-plus", "base": "rock", "letter": "C+", "title": "Break & Upgrade", "icon": "prop_rocks", "color": Color("#8d8fa8"), "script": "res://experiments/rock_plus/rock_plus.gd"},
+	{"id": "tycoon-plus", "base": "tycoon", "letter": "E+", "title": "Production Tycoon", "icon": "car_factory", "color": Color("#5a8fd8"), "script": "res://experiments/tycoon_plus/tycoon_plus.gd"},
+]
+
 ## The frame's own demonstration (the stub) answers `#stub` too, though no
 ## tile shows it: the Lab's tests use it once every experiment is built.
 const HIDDEN: Array[String] = ["stub"]
 
 
 static func routable(id: String) -> bool:
-	return has(id) or HIDDEN.has(id)
+	return has(id) or is_track(id) or HIDDEN.has(id)
 
 
 static func find(id: String) -> Dictionary:
-	for e: Dictionary in EXPERIMENTS:
+	for e: Dictionary in EXPERIMENTS + TRACKS:
 		if String(e["id"]) == id:
 			return e
 	return {}
+
+
+static func track_ids() -> Array[String]:
+	var out: Array[String] = []
+	for e: Dictionary in TRACKS:
+		out.append(String(e["id"]))
+	return out
+
+
+static func is_track(id: String) -> bool:
+	return track_ids().has(id)
+
+
+## The improved track grown from `base` ("" if it has none).
+static func track_of(base: String) -> String:
+	for e: Dictionary in TRACKS:
+		if String(e["base"]) == base:
+			return String(e["id"])
+	return ""
+
+
+## The baseline a track grew from; an experiment is its own baseline.
+static func base_of(id: String) -> String:
+	return String(find(id).get("base", id))
 
 
 static func playable(id: String) -> bool:

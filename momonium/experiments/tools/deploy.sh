@@ -62,10 +62,13 @@ for old, new in [
 open(dst, "w").write(page)
 PY
 
-# Step 93: the comparison page beside the Lab, with its pictures and the
-# scripted player's numbers (web/compare/, made by tools/compare_assets.sh).
-if [[ -f "$LAB/web/compare.html" ]]; then
-  cp "$LAB/web/compare.html" "$OUT/compare.html"
+# The pages beside the Lab: the six-way comparison (Step 93, with its
+# pictures and the scripted player's numbers in web/compare/, made by
+# tools/compare_assets.sh) and the C/E tracks' protocol and scorecard (Step 94).
+for page in "$LAB"/web/*.html; do
+  cp "$page" "$OUT/$(basename "$page")"
+done
+if [[ -d "$LAB/web/compare" ]]; then
   mkdir -p "$OUT/compare"
   cp "$LAB/web/compare/"* "$OUT/compare/"
 fi

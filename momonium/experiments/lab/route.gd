@@ -7,12 +7,15 @@ extends RefCounted
 ##   ?dev=1           the frame shows the play clock and the run report
 ##   ?motion=reduce   reduced motion even if the system does not ask for it
 ##   ?sound=off       start muted
+##   ?alt=<name>      one of a track's experiment-only alternatives (Steps
+##                    96 and 98); the experiment decides what it means, an
+##                    unknown name is its default
 ## `?exp=<id>` is accepted as a direct link too. Off the web the same options
-## come from the command line: `-- --exp island --dev --motion reduce`.
+## come from the command line: `-- --exp island --dev --motion reduce --alt x`.
 
 
 static func parse(hash: String, search: String, args: PackedStringArray = PackedStringArray()) -> Dictionary:
-	var out := {"exp": "", "unknown": "", "dev": false, "motion": "", "sound": true}
+	var out := {"exp": "", "unknown": "", "dev": false, "motion": "", "sound": true, "alt": ""}
 	var want := hash.trim_prefix("#").trim_prefix("/").strip_edges().to_lower()
 	var q := _query(search)
 	if want == "" and q.has("exp"):
@@ -20,6 +23,7 @@ static func parse(hash: String, search: String, args: PackedStringArray = Packed
 	out["dev"] = q.has("dev") and String(q["dev"]) not in ["0", "false", "no"]
 	out["motion"] = String(q.get("motion", ""))
 	out["sound"] = String(q.get("sound", "on")) != "off"
+	out["alt"] = String(q.get("alt", "")).to_lower()
 	var i := 0
 	while i < args.size():
 		var a := args[i]
@@ -33,6 +37,8 @@ static func parse(hash: String, search: String, args: PackedStringArray = Packed
 				out["motion"] = v
 			"--mute":
 				out["sound"] = false
+			"--alt":
+				out["alt"] = v.to_lower()
 		i += 2 if v != "" else 1
 	if want != "":
 		if LabRegistry.routable(want):

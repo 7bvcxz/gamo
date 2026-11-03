@@ -11,6 +11,11 @@ import { test, expect } from '../lib/lab.mjs';
 const centre = (r) => [r[0] + r[2] / 2, r[1] + r[3] / 2, 4, 4];
 
 test('three minutes of Break & Upgrade with real taps', async ({ lab }, info) => {
+  // 450 real taps, each followed by a round trip to the page: three minutes of
+  // play take 2-6 minutes of wall clock with the machine's load (Step 94: the
+  // published 0.93.0 and the new build both took 5.3 min at load 56 and gave
+  // the same taps, hits and rocks), longer than the config's three.
+  test.setTimeout(600_000);
   await lab.open('./');
   let s = await lab.state();
   expect(s.playable, 'tile C says PLAY').toContain('rock');

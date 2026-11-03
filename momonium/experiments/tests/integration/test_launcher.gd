@@ -35,6 +35,22 @@ func test_six_tiles_with_their_badges() -> void:
 		assert_true(view.encloses(tile.get_global_rect()), "%s's tile is on screen: %s" % [id, tile.get_global_rect()])
 
 
+func test_the_two_picks_open_baseline_and_improved() -> void:
+	var view := Rect2(Vector2.ZERO, app.launcher.size)
+	assert_eq(app.launcher.focus.keys(), ["rock", "rock-plus", "tycoon", "tycoon-plus"], "C, C+, E, E+")
+	for id: String in app.launcher.focus:
+		var b: Button = app.launcher.focus[id]
+		assert_true(view.encloses(b.get_global_rect()), "%s's button is on screen: %s" % [id, b.get_global_rect()])
+		assert_true(b.get_global_rect().size.y >= 60.0, "%s's button is a finger high" % id)
+	await H.touch(tree, H.centre(app.launcher.focus["rock-plus"]))
+	assert_eq(app.host.exp_id, "rock-plus", "the improved C opened")
+	assert_eq(app.host.title_label.text, "C+ · Break & Upgrade", "its title says C+")
+	await H.touch(tree, H.centre(app.host.back_button))
+	await tree.process_frame
+	await H.touch(tree, H.centre(app.launcher.focus["tycoon"]))
+	assert_eq(app.host.exp_id, "tycoon", "Baseline opens the original E")
+
+
 func test_a_finger_on_a_tile_opens_it_and_back_comes_home() -> void:
 	await H.touch(tree, H.centre(app.launcher.tiles["rock"]))
 	assert_true(app.host != null, "an experiment opened")
@@ -48,7 +64,7 @@ func test_a_finger_on_a_tile_opens_it_and_back_comes_home() -> void:
 
 
 func test_every_experiment_launches_in_the_frame() -> void:
-	for id: String in LabRegistry.ids():
+	for id: String in LabRegistry.ids() + LabRegistry.track_ids():
 		app.open(id)
 		await tree.process_frame
 		await tree.process_frame
@@ -64,4 +80,4 @@ func test_every_experiment_launches_in_the_frame() -> void:
 		app.back()
 		await tree.process_frame
 	assert_true(app.launcher != null, "home again")
-	assert_eq(app.history.size(), LabRegistry.ids().size(), "one record per run")
+	assert_eq(app.history.size(), LabRegistry.ids().size() + LabRegistry.track_ids().size(), "one record per run")

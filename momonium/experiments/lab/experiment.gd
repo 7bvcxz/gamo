@@ -20,6 +20,9 @@ var session: LabSession
 var audio: LabAudio
 var fx: LabFx
 var reduced_motion := false
+## The track's alternative this run plays (`?alt=`, Steps 96 and 98), "" for
+## its default. Set before the experiment enters the tree.
+var variant := ""
 ## Tells the host the button's label or cost changed (it reads action_info()).
 signal action_changed
 

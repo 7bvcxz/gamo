@@ -69,6 +69,42 @@ func test_three_minute_snapshot_is_frozen() -> void:
 	assert_eq(s.summary()["metrics"]["level"], 9, "while the run goes on")
 
 
+func test_fifteen_and_thirty_minute_snapshots() -> void:
+	# Step 94: the C/E tracks' longer sessions keep the protocol's checkpoints.
+	var s := LabSession.new("rock-plus")
+	s.metric("rock", 1)
+	for i in 899:
+		s.advance(1.0)
+	assert_true(s.summary()["at_3min"] != null, "3:00 is in")
+	assert_eq(s.summary()["at_15min"], null, "15:00 not yet")
+	s.metric("rock", 12)
+	s.advance(1.0)
+	var at: Dictionary = s.summary()["at_15min"]
+	assert_eq(at["active_seconds"], 900.0, "taken at 15:00")
+	assert_eq(at["metrics"]["rock"], 12, "the numbers then")
+	assert_true(at.has("fps"), "with the frame rate then")
+	s.advance(900.0)
+	assert_eq(s.summary()["at_30min"]["active_seconds"], 1800.0, "and at 30:00")
+	assert_eq(s.summary()["at_15min"]["metrics"]["rock"], 12, "each kept as it was")
+
+
+func test_actions_per_minute_and_the_longest_wait() -> void:
+	var s := LabSession.new("rock", "", 0.0)
+	s.variant = "hold"
+	s.run = 2
+	for i in 3:
+		s.action("hit")
+	s.advance(61.0)
+	s.action("hit")
+	s.upgrade(1, 20)
+	s.advance(130.0)
+	var sum := s.summary()
+	assert_eq(sum["actions_per_minute"], [3, 1, 0, 0], "three in minute 0, one in minute 1, none since (up to 3:11)")
+	assert_eq(sum["longest_upgrade_wait_s"], 130.0, "the wait still open is the longest (130 s > the first 61 s)")
+	assert_eq(sum["variant"], "hold", "which alternative")
+	assert_eq(sum["run"], 2, "which run of the visit")
+
+
 func test_pauses_are_recorded() -> void:
 	var s := LabSession.new("island")
 	s.paused("hidden")

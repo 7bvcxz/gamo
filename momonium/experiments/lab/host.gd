@@ -20,6 +20,8 @@ signal back_requested
 
 var exp_id := ""
 var version := ""
+## The track's alternative (`?alt=`, LabRoute), "" for its default.
+var alt := ""
 var dev := false
 var reduced_motion := false
 var audio: LabAudio
@@ -69,8 +71,9 @@ var _shown_value := -1.0
 var _last_info: Dictionary = {}
 
 
-func setup(p_id: String, p_version: String, p_audio: LabAudio, p_dev: bool, p_reduced: bool) -> void:
+func setup(p_id: String, p_version: String, p_audio: LabAudio, p_dev: bool, p_reduced: bool, p_alt: String = "") -> void:
 	exp_id = p_id
+	alt = p_alt
 	version = p_version
 	audio = p_audio
 	dev = p_dev
@@ -99,6 +102,8 @@ func _exit_tree() -> void:
 func start() -> void:
 	runs += 1
 	session = LabSession.new(exp_id, version, Time.get_unix_time_from_system())
+	session.variant = alt
+	session.run = runs
 	_intent_at = -1.0
 	_intent_done = false
 	if intent_card != null:
@@ -109,6 +114,7 @@ func start() -> void:
 	experiment.session = session
 	experiment.audio = audio
 	experiment.reduced_motion = reduced_motion
+	experiment.variant = alt
 	experiment.set_meta("lab_id", exp_id)
 	experiment.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fx = LabFx.new()
@@ -532,6 +538,8 @@ func rects() -> Dictionary:
 func state() -> Dictionary:
 	return {
 		"id": exp_id,
+		"base": LabRegistry.base_of(exp_id),
+		"alt": alt,
 		"playable": LabRegistry.playable(exp_id),
 		"runs": runs,
 		"paused": is_paused(),

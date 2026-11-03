@@ -80,7 +80,7 @@ func show_route(id: String) -> void:
 	else:
 		host = LabHost.new()
 		host.name = "Host"
-		host.setup(id, version(), audio, bool(route["dev"]), reduced_motion)
+		host.setup(id, version(), audio, bool(route["dev"]), reduced_motion, String(route["alt"]))
 		host.back_requested.connect(back)
 		_ui.add_child(host)
 
@@ -148,6 +148,8 @@ func state() -> Dictionary:
 		"reduced_motion": reduced_motion,
 		"window": [_ui.size.x, _ui.size.y],
 		"tiles": launcher.rects() if launcher != null else {},
+		"picks": launcher.focus_rects() if launcher != null else {},
+		"tracks": LabRegistry.track_ids(),
 		"playable": LabRegistry.ids().filter(func(id: String) -> bool: return LabRegistry.playable(id)),
 		"host": host.state() if host != null else {},
 		"history": history.size(),

@@ -36,3 +36,20 @@ func test_unknown_ids_are_not_experiments() -> void:
 	assert_false(LabRegistry.has("momonium"), "not an experiment")
 	assert_false(LabRegistry.has(""), "empty is the launcher")
 	assert_eq(LabRegistry.find("nope"), {}, "nothing found")
+
+
+func test_two_tracks_beside_their_baselines() -> void:
+	assert_eq(LabRegistry.track_ids(), ["rock-plus", "tycoon-plus"] as Array[String], "C+ and E+")
+	assert_eq(LabRegistry.base_of("rock-plus"), "rock", "C+ grows from C")
+	assert_eq(LabRegistry.base_of("tycoon-plus"), "tycoon", "E+ grows from E")
+	assert_eq(LabRegistry.base_of("rock"), "rock", "an experiment is its own baseline")
+	assert_eq(LabRegistry.track_of("rock"), "rock-plus", "C's track")
+	assert_eq(LabRegistry.track_of("island"), "", "A has none")
+	assert_eq(LabRegistry.ids().size(), 6, "the six are still six: a track is not a seventh tile")
+	for id: String in LabRegistry.track_ids():
+		assert_true(LabRegistry.routable(id), "%s has a direct link" % id)
+		assert_true(LabRegistry.playable(id), "%s plays" % id)
+		assert_false(LabRegistry.has(id), "%s is not one of the six" % id)
+		assert_ne(LabRegistry.script_path(id), LabRegistry.script_path(LabRegistry.base_of(id)), "%s runs its own script, so the baseline's never changes for it" % id)
+	assert_eq(LabRegistry.label("rock-plus"), "C+ · Break & Upgrade", "the run's title says C+")
+	assert_eq(LabRegistry.label("rock"), "C · Break & Upgrade", "and the baseline's says C")
