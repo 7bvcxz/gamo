@@ -111,4 +111,4 @@ Step 05에서 더한 것: 잉크 외곽선(몸통·지붕, 도형마다 polyline
 | B | 작은 한 판(5–13), 좁은 금색 | 큰 한 판(20–52), 금색이 넓어짐 | 84 이상, 금색 최대 800ms, 금빛 팝콘이 화면을 덮음 | 맞추면 더 크게, 맞추기 쉬워진다 |
 | C | **한 번 팡** | **연쇄**: 공중의 팝콘에서 다시 터짐 | **분수**: 위로 곧게 솟는 금빛 줄기 + 연쇄 | 같은 8탭이 다른 모양의 폭발이 된다 |
 
-캡처: `evidence/step04/`의 C 세 단계(Step 04 작업 중 확인한 그림), Step 05 이전·이후 비교는 `evidence/step05/compare/`.
+캡처: `evidence/step05/states/production_states.png`(행 A·B·C × 상태 1·2·3, 720×1280에서 같은 카메라), 이정표 `evidence/step05/states/milestone_level3.png`, 이전·이후 비교는 `evidence/step05/compare/`(`before_0.4.0_p720.png`·`after_0.5.0_p720.png`, 렌더 측정 JSON).
