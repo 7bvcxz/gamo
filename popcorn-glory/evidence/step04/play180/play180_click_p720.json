@@ -2,77 +2,7123 @@
   "id": "click",
   "project": "p720",
   "marks": {
-    "5s": {
-      "clock_ms": 5267,
+    "first_action": {
+      "clock_ms": 1416,
       "level": 0,
-      "money": 11,
-      "earned": 11,
-      "fps": 60.981705476725644,
+      "money": 1,
+      "earned": 1,
+      "fps": 52.86783042394015,
       "fps_samples": [
-        60.90255594533618,
-        60.981705476725644,
-        61.18018547956623
+        51.50554678038006,
+        52.86783042394015,
+        55.84920715134376
       ],
-      "fx_peak": 6,
-      "draw_calls": 49,
-      "primitives": 1390
+      "fx_peak": 2,
+      "draw_calls": 54,
+      "primitives": 1414,
+      "load_avg": 24.12
+    },
+    "5s": {
+      "clock_ms": 5111,
+      "level": 0,
+      "money": 2,
+      "earned": 2,
+      "fps": 42.93988417853032,
+      "fps_samples": [
+        36.948272397501526,
+        42.93988417853032,
+        43.92386530014641
+      ],
+      "fx_peak": 2,
+      "draw_calls": 54,
+      "primitives": 1438,
+      "load_avg": 24.12
+    },
+    "first_upgrade": {
+      "clock_ms": 25822,
+      "level": 1,
+      "money": 0,
+      "earned": 30,
+      "fps": 36.974118089128595,
+      "fps_samples": [
+        34.75670307845085,
+        36.974118089128595,
+        38.894983551828695
+      ],
+      "fx_peak": 32,
+      "draw_calls": 66,
+      "primitives": 1680,
+      "load_avg": 24.61
     },
     "60s": {
-      "clock_ms": 60287,
-      "level": 4,
-      "money": 14,
-      "earned": 329,
-      "fps": 54.73726113610638,
+      "clock_ms": 60091,
+      "level": 2,
+      "money": 79,
+      "earned": 160,
+      "fps": 37.27682948662942,
       "fps_samples": [
-        46.99892293257189,
-        54.73726113610638,
-        54.91762356465302
+        36.54681945272768,
+        37.27682948662942,
+        37.45687530803352
       ],
       "fx_peak": 33,
-      "draw_calls": 88,
-      "primitives": 2513
+      "draw_calls": 73,
+      "primitives": 1968,
+      "load_avg": 22.72
     },
     "180s": {
-      "clock_ms": 181238,
+      "clock_ms": 181733,
       "level": 7,
-      "money": 648,
-      "earned": 2364,
-      "fps": 45.974762781210025,
+      "money": 18,
+      "earned": 1734,
+      "fps": 13.187641291417968,
       "fps_samples": [
-        41.95804195804196,
-        45.974762781210025,
-        47.18372160719593
+        10.731707317073171,
+        13.187641291417968,
+        13.901300772469853
       ],
-      "fx_peak": 49,
-      "draw_calls": 110,
-      "primitives": 2868
+      "fx_peak": 47,
+      "draw_calls": 115,
+      "primitives": 2906,
+      "load_avg": 25
     }
   },
   "buys": 7,
   "summary": {
-    "earned": 2364,
+    "earned": 1734,
     "idle_longest_ms": 0,
     "idle_total_ms": 0,
-    "inputs": 326,
+    "inputs": 284,
     "level": 7,
     "milestones": {
-      "first_affordable": 16091,
-      "first_earn": 734,
-      "first_input": 734,
-      "first_upgrade": 16475,
-      "three_minutes": 180017
+      "first_affordable": 24777,
+      "first_earn": 1001,
+      "first_input": 1001,
+      "first_upgrade": 25344,
+      "three_minutes": 180030
     },
-    "money": 648,
-    "t_ms": 184556,
+    "money": 18,
+    "t_ms": 185757,
     "upgrades": [
-      16475,
-      28338,
-      41818,
-      59253,
-      93506,
-      125698,
-      159337
+      25344,
+      44736,
+      65532,
+      86307,
+      106753,
+      133305,
+      180689
     ],
     "variant": "click"
+  },
+  "log": {
+    "active_ms": 185857,
+    "game": "popcorn-glory",
+    "lines": [
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 1001,
+        "type": "input"
+      },
+      {
+        "data": {
+          "name": "first_input"
+        },
+        "t": 1001,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 1001,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 1
+        },
+        "t": 1001,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "name": "first_earn"
+        },
+        "t": 1001,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 4841,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 4841,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 2
+        },
+        "t": 4841,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 8738,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 8738,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 3
+        },
+        "t": 8738,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 9351,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 9351,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 4
+        },
+        "t": 9351,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 9947,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 9947,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 5
+        },
+        "t": 9947,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 10564,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 10564,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 6
+        },
+        "t": 10564,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 11195,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 11195,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 7
+        },
+        "t": 11195,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 11831,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 11831,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 8
+        },
+        "t": 11831,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 12456,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 12456,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 9
+        },
+        "t": 12456,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 13037,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 13037,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 10
+        },
+        "t": 13037,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 13591,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 13591,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 11
+        },
+        "t": 13591,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 14169,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 14169,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 12
+        },
+        "t": 14169,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 14680,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 14680,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 13
+        },
+        "t": 14680,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 15258,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 15258,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 14
+        },
+        "t": 15258,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 15886,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 15886,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 15
+        },
+        "t": 15886,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 16527,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 16527,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 16
+        },
+        "t": 16527,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 17114,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 17114,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 17
+        },
+        "t": 17114,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 17656,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 17656,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 18
+        },
+        "t": 17656,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 18245,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 18245,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 19
+        },
+        "t": 18245,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 18802,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 18802,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 20
+        },
+        "t": 18802,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 19347,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 19347,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 21
+        },
+        "t": 19347,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 19933,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 19933,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 22
+        },
+        "t": 19933,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 20591,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 20591,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 23
+        },
+        "t": 20591,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 21239,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 21239,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 24
+        },
+        "t": 21239,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 21766,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 21766,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 25
+        },
+        "t": 21766,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 22369,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 22369,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 26
+        },
+        "t": 22369,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 22984,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 22984,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 27
+        },
+        "t": 22984,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 23613,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 23613,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 28
+        },
+        "t": 23613,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 24232,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 24232,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 29
+        },
+        "t": 24232,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 24777,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 1,
+          "level": 0
+        },
+        "t": 24777,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 1,
+          "from": "pop",
+          "money": 30
+        },
+        "t": 24777,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "name": "first_affordable"
+        },
+        "t": 24777,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 25344,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 30,
+          "level": 1,
+          "money": 0
+        },
+        "t": 25344,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "name": "first_upgrade"
+        },
+        "t": 25344,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 29440,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 29440,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 2
+        },
+        "t": 29440,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 29940,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 29940,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 4
+        },
+        "t": 29940,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 30535,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 30535,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 6
+        },
+        "t": 30535,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 31051,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 31051,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 8
+        },
+        "t": 31051,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 31669,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 31669,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 10
+        },
+        "t": 31669,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 32315,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 32315,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 12
+        },
+        "t": 32315,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 32877,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 32877,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 14
+        },
+        "t": 32877,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 33511,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 33511,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 16
+        },
+        "t": 33511,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 34159,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 34159,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 18
+        },
+        "t": 34159,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 34796,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 34796,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 20
+        },
+        "t": 34796,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 35449,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 35449,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 22
+        },
+        "t": 35449,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 36101,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 36101,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 24
+        },
+        "t": 36101,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 36719,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 36719,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 26
+        },
+        "t": 36719,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 37287,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 37287,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 28
+        },
+        "t": 37287,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 37846,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 37846,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 30
+        },
+        "t": 37846,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 38377,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 38377,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 32
+        },
+        "t": 38377,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 38954,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 38954,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 34
+        },
+        "t": 38954,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 39590,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 39590,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 36
+        },
+        "t": 39590,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 40139,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 40139,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 38
+        },
+        "t": 40139,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 40673,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 40673,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 40
+        },
+        "t": 40673,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 41246,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 41246,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 42
+        },
+        "t": 41246,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 41794,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 41794,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 44
+        },
+        "t": 41794,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 42321,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 42321,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 46
+        },
+        "t": 42321,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 42905,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 42905,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 48
+        },
+        "t": 42905,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 43446,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 43446,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 50
+        },
+        "t": 43446,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 44109,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 2,
+          "level": 1
+        },
+        "t": 44109,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 2,
+          "from": "pop",
+          "money": 52
+        },
+        "t": 44109,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 44736,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 51,
+          "level": 2,
+          "money": 1
+        },
+        "t": 44736,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 45058,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 45058,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 4
+        },
+        "t": 45058,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 45613,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 45613,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 7
+        },
+        "t": 45613,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 46301,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 46301,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 10
+        },
+        "t": 46301,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 46990,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 46990,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 13
+        },
+        "t": 46990,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 47618,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 47618,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 16
+        },
+        "t": 47618,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 48301,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 48301,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 19
+        },
+        "t": 48301,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 48873,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 48873,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 22
+        },
+        "t": 48873,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 49496,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 49496,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 25
+        },
+        "t": 49496,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 50102,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 50102,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 28
+        },
+        "t": 50102,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 50691,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 50691,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 31
+        },
+        "t": 50691,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 51242,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 51242,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 34
+        },
+        "t": 51242,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 51863,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 51863,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 37
+        },
+        "t": 51863,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 52409,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 52409,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 40
+        },
+        "t": 52409,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 53003,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 53003,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 43
+        },
+        "t": 53003,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 53591,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 53591,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 46
+        },
+        "t": 53591,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 54147,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 54147,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 49
+        },
+        "t": 54147,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 54740,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 54740,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 52
+        },
+        "t": 54740,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 55283,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 55283,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 55
+        },
+        "t": 55283,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 55830,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 55830,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 58
+        },
+        "t": 55830,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 56390,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 56390,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 61
+        },
+        "t": 56390,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 56945,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 56945,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 64
+        },
+        "t": 56945,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 57476,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 57476,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 67
+        },
+        "t": 57476,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 58070,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 58070,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 70
+        },
+        "t": 58070,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 58653,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 58653,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 73
+        },
+        "t": 58653,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 59239,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 59239,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 76
+        },
+        "t": 59239,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 59807,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 59807,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 79
+        },
+        "t": 59807,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 63766,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 63766,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 82
+        },
+        "t": 63766,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 64334,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 64334,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 85
+        },
+        "t": 64334,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 64943,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 3,
+          "level": 2
+        },
+        "t": 64943,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 3,
+          "from": "pop",
+          "money": 88
+        },
+        "t": 64943,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 65532,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 87,
+          "level": 3,
+          "money": 1
+        },
+        "t": 65532,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 65865,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 65865,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 5
+        },
+        "t": 65865,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 66440,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 66440,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 9
+        },
+        "t": 66440,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 67002,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 67002,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 13
+        },
+        "t": 67002,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 67625,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 67625,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 17
+        },
+        "t": 67625,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 68187,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 68187,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 21
+        },
+        "t": 68187,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 68779,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 68779,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 25
+        },
+        "t": 68779,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 69394,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 69394,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 29
+        },
+        "t": 69394,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 69985,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 69985,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 33
+        },
+        "t": 69985,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 70530,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 70530,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 37
+        },
+        "t": 70530,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 71156,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 71156,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 41
+        },
+        "t": 71156,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 71735,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 71735,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 45
+        },
+        "t": 71735,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 72302,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 72302,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 49
+        },
+        "t": 72302,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 72886,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 72886,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 53
+        },
+        "t": 72886,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 73444,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 73444,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 57
+        },
+        "t": 73444,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 74030,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 74030,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 61
+        },
+        "t": 74030,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 74632,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 74632,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 65
+        },
+        "t": 74632,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 75232,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 75232,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 69
+        },
+        "t": 75232,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 75773,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 75773,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 73
+        },
+        "t": 75773,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 76342,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 76342,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 77
+        },
+        "t": 76342,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 76930,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 76930,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 81
+        },
+        "t": 76930,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 77508,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 77508,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 85
+        },
+        "t": 77508,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 78081,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 78081,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 89
+        },
+        "t": 78081,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 78669,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 78669,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 93
+        },
+        "t": 78669,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 79247,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 79247,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 97
+        },
+        "t": 79247,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 79820,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 79820,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 101
+        },
+        "t": 79820,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 80448,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 80448,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 105
+        },
+        "t": 80448,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 80935,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 80935,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 109
+        },
+        "t": 80935,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 81410,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 81410,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 113
+        },
+        "t": 81410,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 81926,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 81926,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 117
+        },
+        "t": 81926,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 82411,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 82411,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 121
+        },
+        "t": 82411,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 82891,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 82891,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 125
+        },
+        "t": 82891,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 83358,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 83358,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 129
+        },
+        "t": 83358,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 83861,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 83861,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 133
+        },
+        "t": 83861,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 84374,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 84374,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 137
+        },
+        "t": 84374,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 84844,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 84844,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 141
+        },
+        "t": 84844,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 85341,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 85341,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 145
+        },
+        "t": 85341,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 85855,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 4,
+          "level": 3
+        },
+        "t": 85855,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 4,
+          "from": "pop",
+          "money": 149
+        },
+        "t": 85855,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 86307,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 147,
+          "level": 4,
+          "money": 2
+        },
+        "t": 86307,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 86543,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 86543,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 8
+        },
+        "t": 86543,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 87038,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 87038,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 14
+        },
+        "t": 87038,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 87521,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 87521,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 20
+        },
+        "t": 87521,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 88024,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 88024,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 26
+        },
+        "t": 88024,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 88524,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 88524,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 32
+        },
+        "t": 88524,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 88985,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 88985,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 38
+        },
+        "t": 88985,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 89482,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 89482,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 44
+        },
+        "t": 89482,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 89980,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 89980,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 50
+        },
+        "t": 89980,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 90459,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 90459,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 56
+        },
+        "t": 90459,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 90981,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 90981,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 62
+        },
+        "t": 90981,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 91462,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 91462,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 68
+        },
+        "t": 91462,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 91920,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 91920,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 74
+        },
+        "t": 91920,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 92383,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 92383,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 80
+        },
+        "t": 92383,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 92883,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 92883,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 86
+        },
+        "t": 92883,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 93380,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 93380,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 92
+        },
+        "t": 93380,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 93880,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 93880,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 98
+        },
+        "t": 93880,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 94382,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 94382,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 104
+        },
+        "t": 94382,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 94886,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 94886,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 110
+        },
+        "t": 94886,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 95380,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 95380,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 116
+        },
+        "t": 95380,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 95881,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 95881,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 122
+        },
+        "t": 95881,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 96359,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 96359,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 128
+        },
+        "t": 96359,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 96859,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 96859,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 134
+        },
+        "t": 96859,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 97341,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 97341,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 140
+        },
+        "t": 97341,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 97835,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 97835,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 146
+        },
+        "t": 97835,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 98289,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 98289,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 152
+        },
+        "t": 98289,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 98776,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 98776,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 158
+        },
+        "t": 98776,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 99236,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 99236,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 164
+        },
+        "t": 99236,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 99693,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 99693,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 170
+        },
+        "t": 99693,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 100164,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 100164,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 176
+        },
+        "t": 100164,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 100638,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 100638,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 182
+        },
+        "t": 100638,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 101099,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 101099,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 188
+        },
+        "t": 101099,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 101564,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 101564,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 194
+        },
+        "t": 101564,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 102057,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 102057,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 200
+        },
+        "t": 102057,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 102543,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 102543,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 206
+        },
+        "t": 102543,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 102995,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 102995,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 212
+        },
+        "t": 102995,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 103433,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 103433,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 218
+        },
+        "t": 103433,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 103930,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 103930,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 224
+        },
+        "t": 103930,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 104403,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 104403,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 230
+        },
+        "t": 104403,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 104842,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 104842,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 236
+        },
+        "t": 104842,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 105315,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 105315,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 242
+        },
+        "t": 105315,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 105788,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 105788,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 248
+        },
+        "t": 105788,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 106258,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 6,
+          "level": 4
+        },
+        "t": 106258,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 6,
+          "from": "pop",
+          "money": 254
+        },
+        "t": 106258,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 106753,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 251,
+          "level": 5,
+          "money": 3
+        },
+        "t": 106753,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 107001,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 107001,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 11
+        },
+        "t": 107001,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 107505,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 107505,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 19
+        },
+        "t": 107505,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 108026,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 108026,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 27
+        },
+        "t": 108026,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 108505,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 108505,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 35
+        },
+        "t": 108505,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 108984,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 108984,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 43
+        },
+        "t": 108984,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 109464,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 109464,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 51
+        },
+        "t": 109464,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 109964,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 109964,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 59
+        },
+        "t": 109964,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 110422,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 110422,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 67
+        },
+        "t": 110422,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 110901,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 110901,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 75
+        },
+        "t": 110901,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 111390,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 111390,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 83
+        },
+        "t": 111390,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 111897,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 111897,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 91
+        },
+        "t": 111897,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 112388,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 112388,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 99
+        },
+        "t": 112388,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 112864,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 112864,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 107
+        },
+        "t": 112864,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 113385,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 113385,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 115
+        },
+        "t": 113385,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 113856,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 113856,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 123
+        },
+        "t": 113856,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 114319,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 114319,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 131
+        },
+        "t": 114319,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 114820,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 114820,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 139
+        },
+        "t": 114820,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 115283,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 115283,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 147
+        },
+        "t": 115283,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 115804,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 115804,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 155
+        },
+        "t": 115804,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 116274,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 116274,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 163
+        },
+        "t": 116274,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 116787,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 116787,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 171
+        },
+        "t": 116787,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 117291,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 117291,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 179
+        },
+        "t": 117291,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 117799,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 117799,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 187
+        },
+        "t": 117799,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 118286,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 118286,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 195
+        },
+        "t": 118286,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 118767,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 118767,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 203
+        },
+        "t": 118767,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 119229,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 119229,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 211
+        },
+        "t": 119229,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 119749,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 119749,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 219
+        },
+        "t": 119749,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 120249,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 120249,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 227
+        },
+        "t": 120249,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 120742,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 120742,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 235
+        },
+        "t": 120742,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 121205,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 121205,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 243
+        },
+        "t": 121205,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 121656,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 121656,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 251
+        },
+        "t": 121656,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 122144,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 122144,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 259
+        },
+        "t": 122144,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 122664,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 122664,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 267
+        },
+        "t": 122664,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 123172,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 123172,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 275
+        },
+        "t": 123172,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 123651,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 123651,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 283
+        },
+        "t": 123651,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 124151,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 124151,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 291
+        },
+        "t": 124151,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 124630,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 124630,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 299
+        },
+        "t": 124630,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 125130,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 125130,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 307
+        },
+        "t": 125130,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 125609,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 125609,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 315
+        },
+        "t": 125609,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 126109,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 126109,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 323
+        },
+        "t": 126109,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 126609,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 126609,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 331
+        },
+        "t": 126609,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 127089,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 127089,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 339
+        },
+        "t": 127089,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 127609,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 127609,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 347
+        },
+        "t": 127609,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 128093,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 128093,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 355
+        },
+        "t": 128093,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 128621,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 128621,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 363
+        },
+        "t": 128621,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 129163,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 129163,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 371
+        },
+        "t": 129163,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 129696,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 129696,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 379
+        },
+        "t": 129696,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 130235,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 130235,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 387
+        },
+        "t": 130235,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 130728,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 130728,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 395
+        },
+        "t": 130728,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 131219,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 131219,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 403
+        },
+        "t": 131219,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 131719,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 131719,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 411
+        },
+        "t": 131719,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 132227,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 132227,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 419
+        },
+        "t": 132227,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 132726,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 8,
+          "level": 5
+        },
+        "t": 132726,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 8,
+          "from": "pop",
+          "money": 427
+        },
+        "t": 132726,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 133305,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 426,
+          "level": 6,
+          "money": 1
+        },
+        "t": 133305,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 133635,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 133635,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 12
+        },
+        "t": 133635,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 134157,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 134157,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 23
+        },
+        "t": 134157,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 134681,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 134681,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 34
+        },
+        "t": 134681,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 135318,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 135318,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 45
+        },
+        "t": 135318,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 135892,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 135892,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 56
+        },
+        "t": 135892,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 136483,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 136483,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 67
+        },
+        "t": 136483,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 136998,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 136998,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 78
+        },
+        "t": 136998,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 137544,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 137544,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 89
+        },
+        "t": 137544,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 138111,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 138111,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 100
+        },
+        "t": 138111,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 138601,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 138601,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 111
+        },
+        "t": 138601,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 139222,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 139222,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 122
+        },
+        "t": 139222,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 139867,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 139867,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 133
+        },
+        "t": 139867,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 140433,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 140433,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 144
+        },
+        "t": 140433,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 140971,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 140971,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 155
+        },
+        "t": 140971,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 141526,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 141526,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 166
+        },
+        "t": 141526,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 142064,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 142064,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 177
+        },
+        "t": 142064,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 142593,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 142593,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 188
+        },
+        "t": 142593,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 143114,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 143114,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 199
+        },
+        "t": 143114,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 143703,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 143703,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 210
+        },
+        "t": 143703,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 144456,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 144456,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 221
+        },
+        "t": 144456,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 145066,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 145066,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 232
+        },
+        "t": 145066,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 145688,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 145688,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 243
+        },
+        "t": 145688,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 146329,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 146329,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 254
+        },
+        "t": 146329,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 146946,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 146946,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 265
+        },
+        "t": 146946,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 147555,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 147555,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 276
+        },
+        "t": 147555,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 148266,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 148266,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 287
+        },
+        "t": 148266,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 148941,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 148941,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 298
+        },
+        "t": 148941,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 149592,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 149592,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 309
+        },
+        "t": 149592,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 150190,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 150190,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 320
+        },
+        "t": 150190,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 150849,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 150849,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 331
+        },
+        "t": 150849,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 151481,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 151481,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 342
+        },
+        "t": 151481,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 152093,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 152093,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 353
+        },
+        "t": 152093,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 152717,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 152717,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 364
+        },
+        "t": 152717,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 153318,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 153318,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 375
+        },
+        "t": 153318,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 153893,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 153893,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 386
+        },
+        "t": 153893,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 154466,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 154466,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 397
+        },
+        "t": 154466,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 155209,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 155209,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 408
+        },
+        "t": 155209,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 155821,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 155821,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 419
+        },
+        "t": 155821,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 156440,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 156440,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 430
+        },
+        "t": 156440,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 157099,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 157099,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 441
+        },
+        "t": 157099,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 157647,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 157647,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 452
+        },
+        "t": 157647,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 158199,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 158199,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 463
+        },
+        "t": 158199,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 158766,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 158766,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 474
+        },
+        "t": 158766,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 159363,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 159363,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 485
+        },
+        "t": 159363,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 159980,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 159980,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 496
+        },
+        "t": 159980,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 160884,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 160884,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 507
+        },
+        "t": 160884,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 161583,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 161583,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 518
+        },
+        "t": 161583,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 162524,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 162524,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 529
+        },
+        "t": 162524,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 163233,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 163233,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 540
+        },
+        "t": 163233,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 164233,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 164233,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 551
+        },
+        "t": 164233,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 165129,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 165129,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 562
+        },
+        "t": 165129,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 166230,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 166230,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 573
+        },
+        "t": 166230,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 167319,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 167319,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 584
+        },
+        "t": 167319,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 168181,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 168181,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 595
+        },
+        "t": 168181,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 169059,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 169059,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 606
+        },
+        "t": 169059,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 169947,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 169947,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 617
+        },
+        "t": 169947,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 170909,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 170909,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 628
+        },
+        "t": 170909,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 172038,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 172038,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 639
+        },
+        "t": 172038,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 172841,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 172841,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 650
+        },
+        "t": 172841,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 173753,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 173753,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 661
+        },
+        "t": 173753,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 174799,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 174799,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 672
+        },
+        "t": 174799,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 175965,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 175965,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 683
+        },
+        "t": 175965,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 176984,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 176984,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 694
+        },
+        "t": 176984,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 177879,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 177879,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 705
+        },
+        "t": 177879,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 178737,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 178737,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 716
+        },
+        "t": 178737,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 179756,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 11,
+          "level": 6
+        },
+        "t": 179756,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 11,
+          "from": "pop",
+          "money": 727
+        },
+        "t": 179756,
+        "type": "earn"
+      },
+      {
+        "data": {
+          "earned": 1719,
+          "level": 6,
+          "money": 727,
+          "name": "three_minutes"
+        },
+        "t": 180030,
+        "type": "milestone"
+      },
+      {
+        "data": {
+          "ok": true,
+          "reason": ""
+        },
+        "t": 180689,
+        "type": "buy"
+      },
+      {
+        "data": {
+          "cost": 724,
+          "level": 7,
+          "money": 3
+        },
+        "t": 180689,
+        "type": "upgrade"
+      },
+      {
+        "data": {
+          "kind": "press"
+        },
+        "t": 181361,
+        "type": "input"
+      },
+      {
+        "data": {
+          "count": 15,
+          "level": 7
+        },
+        "t": 181361,
+        "type": "pop"
+      },
+      {
+        "data": {
+          "amount": 15,
+          "from": "pop",
+          "money": 18
+        },
+        "t": 181361,
+        "type": "earn"
+      }
+    ],
+    "summary": {
+      "earned": 1734,
+      "idle_longest_ms": 0,
+      "idle_total_ms": 0,
+      "inputs": 284,
+      "level": 7,
+      "milestones": {
+        "first_affordable": 24777,
+        "first_earn": 1001,
+        "first_input": 1001,
+        "first_upgrade": 25344,
+        "three_minutes": 180030
+      },
+      "money": 18,
+      "t_ms": 185857,
+      "upgrades": [
+        25344,
+        44736,
+        65532,
+        86307,
+        106753,
+        133305,
+        180689
+      ],
+      "variant": "click"
+    },
+    "variant": "click",
+    "version": "0.5.0",
+    "viewport": [
+      720,
+      1280
+    ]
   }
 }

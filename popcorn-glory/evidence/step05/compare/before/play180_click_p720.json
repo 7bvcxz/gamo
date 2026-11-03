@@ -1,0 +1,112 @@
+{
+  "id": "click",
+  "project": "p720",
+  "marks": {
+    "first_action": {
+      "clock_ms": 2429,
+      "level": 0,
+      "money": 1,
+      "earned": 1,
+      "fps": 21.270424457341242,
+      "fps_samples": [
+        20.211742059672762,
+        21.270424457341242,
+        23.74591867470978
+      ],
+      "fx_peak": 2,
+      "draw_calls": 49,
+      "primitives": 1364,
+      "load_avg": 39.44
+    },
+    "5s": {
+      "clock_ms": 7001,
+      "level": 0,
+      "money": 2,
+      "earned": 2,
+      "fps": 22.27818673697435,
+      "fps_samples": [
+        21.615248571307937,
+        22.27818673697435,
+        24.48100274644475
+      ],
+      "fx_peak": 2,
+      "draw_calls": 49,
+      "primitives": 1388,
+      "load_avg": 39.56
+    },
+    "first_upgrade": {
+      "clock_ms": 29669,
+      "level": 1,
+      "money": 0,
+      "earned": 30,
+      "fps": 30.138051709608444,
+      "fps_samples": [
+        28.738479822651016,
+        30.138051709608444,
+        30.490803585930617
+      ],
+      "fx_peak": 19,
+      "draw_calls": 61,
+      "primitives": 1628,
+      "load_avg": 36.49
+    },
+    "60s": {
+      "clock_ms": 60234,
+      "level": 2,
+      "money": 13,
+      "earned": 94,
+      "fps": 14.878184853530438,
+      "fps_samples": [
+        14.652730281157423,
+        14.878184853530438,
+        15.805591224918821
+      ],
+      "fx_peak": 22,
+      "draw_calls": 68,
+      "primitives": 1914,
+      "load_avg": 43.68
+    },
+    "180s": {
+      "clock_ms": 181819,
+      "level": 5,
+      "money": 83,
+      "earned": 649,
+      "fps": 19.27710843373494,
+      "fps_samples": [
+        16.97114904985224,
+        19.27710843373494,
+        19.659884002998304
+      ],
+      "fx_peak": 26,
+      "draw_calls": 102,
+      "primitives": 2662,
+      "load_avg": 54.62
+    }
+  },
+  "buys": 5,
+  "summary": {
+    "earned": 649,
+    "idle_longest_ms": 0,
+    "idle_total_ms": 0,
+    "inputs": 174,
+    "level": 5,
+    "milestones": {
+      "first_affordable": 28485,
+      "first_earn": 1950,
+      "first_input": 1950,
+      "first_upgrade": 29201,
+      "three_minutes": 180033
+    },
+    "money": 83,
+    "t_ms": 185748,
+    "upgrades": [
+      29201,
+      56079,
+      88360,
+      126938,
+      169655
+    ],
+    "variant": "click"
+  },
+  "log": null
+}
