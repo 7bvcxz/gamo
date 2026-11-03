@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popcorn 점수표</title>
+<!--
+  Popcorn & Glory -- the owner's three-minute scorecard (Step 02 promised it, Step 09 builds it).
+  Only a person's scores go here; the AI-proxy scores live apart in experiments/RESULTS.md.
+  Saved only in this browser's localStorage (popcorn-glory.scorecard.v1); nothing is sent anywhere.
+-->
+<style>
+  :root { --bg: #fff8e6; --card: #ffffff; --ink: #4d291a; --soft: #8a6a58; --line: #ecd9b0; --gold: #f2b705; --red: #e64a3b; --chip: #fff3cc; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #1f1712; --card: #2a201a; --ink: #f6e7d2; --soft: #c2a892; --line: #4a3a2e; --gold: #f2c230; --red: #ff6f5e; --chip: #3a2c20; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 0 0 10px; }
+  p, li { color: var(--ink); }
+  .sub { color: var(--soft); margin: 0 0 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 0 0 16px; }
+  ol.guide { margin: 0; padding-left: 1.2em; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .links a { display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--chip); color: var(--ink); text-decoration: none; font-weight: 600; border: 1px solid var(--line); }
+  .exp-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .exp-head a { color: var(--red); font-weight: 600; }
+  .q { padding: 10px 0; border-top: 1px dashed var(--line); }
+  .q:first-of-type { border-top: 0; }
+  .q label.qt { display: block; font-weight: 600; margin-bottom: 6px; }
+  .scale { display: flex; flex-wrap: wrap; gap: 6px; }
+  .scale input { position: absolute; opacity: 0; pointer-events: none; }
+  .scale span { display: inline-block; min-width: 44px; text-align: center; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; user-select: none; }
+  .scale input:checked + span { background: var(--gold); border-color: var(--gold); color: #3a2410; font-weight: 700; }
+  .scale input:focus-visible + span { outline: 2px solid var(--red); outline-offset: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+  select, textarea, input[type="text"] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  textarea { width: 100%; min-height: 64px; resize: vertical; }
+  button { font: inherit; font-weight: 600; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--gold); border-color: var(--gold); color: #3a2410; }
+  #out { width: 100%; min-height: 180px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; margin-top: 10px; }
+  .note { font-size: 0.9rem; color: var(--soft); }
+  .status { font-size: 0.9rem; color: var(--soft); min-height: 1.4em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Popcorn &amp; Glory — 3분 점수표</h1>
+  <p class="sub">사람(소유자)의 점수만 적는 곳입니다. AI 대리 점수는 <code>experiments/RESULTS.md</code>에 따로 있습니다.
+    여기 적은 것은 이 브라우저에만 저장되고 어디로도 보내지지 않습니다.</p>
+
+  <section class="card">
+    <h2>공정한 3분, 이렇게</h2>
+    <ol class="guide">
+      <li>세로 화면(휴대폰이 가장 좋음), 소리 설정은 셋 다 같게. 설명은 읽지 않고 시작합니다.</li>
+      <li>순서를 돌립니다 — 첫 번째가 가장 새롭게 느껴지므로. 아래 '한 순서'에 실제로 한 순서를 적어 주세요(예: A→B→C, B→C→A, C→A→B).</li>
+      <li>아래 링크로 엽니다(<code>?trial=1</code>). 화면 위에 <b>3:00 시계가 나타나면</b> 3분입니다. 더 하고 싶으면 계속해도 되고, 그 사실이 질문 4의 답입니다.</li>
+      <li>하나 끝날 때마다 바로 네 질문에 1–5. 해 보지 않았거나 답하기 어려우면 '건너뛰기'(0점이 아닙니다).</li>
+      <li>다 끝나면 '내보내기'를 눌러 Markdown을 이슈 #114의 댓글에 붙여 주세요.</li>
+    </ol>
+    <div class="links" id="links"></div>
+  </section>
+
+  <div id="exps"></div>
+
+  <section class="card">
+    <h2>순서와 내보내기</h2>
+    <div class="row">
+      <label for="order">한 순서</label>
+      <input type="text" id="order" placeholder="예: B→C→A" size="14">
+      <label for="device">기기</label>
+      <input type="text" id="device" placeholder="예: iPhone 13, 소리 켬" size="20">
+    </div>
+    <div class="row">
+      <button class="primary" id="md">내보내기 (Markdown)</button>
+      <button id="json">JSON</button>
+      <button id="copy">복사</button>
+      <button id="clear">모두 지우기</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+    <textarea id="out" readonly aria-label="내보낸 점수표"></textarea>
+  </section>
+  <p class="note">질문은 <code>design/PLAYTEST.md</code>의 네 질문 그대로입니다. 평균은 답한 질문만으로 내고 답한 수를 함께 적습니다.</p>
+</main>
+<script>
+(() => {
+  const KEY = 'popcorn-glory.scorecard.v1';
+  const EXPS = [
+    { id: 'click', name: 'A 클릭 & 팝', route: '#click' },
+    { id: 'perfect', name: 'B 완벽한 팝', route: '#perfect' },
+    { id: 'explosion', name: 'C 팝콘 폭발', route: '#explosion' },
+  ];
+  const QS = [
+    ['q1', '1. 설명 없이 무엇을 할지 알았나'],
+    ['q2', '2. 업그레이드할 때 짜릿했나'],
+    ['q3', '3. 다음 변화가 궁금했나'],
+    ['q4', '4. 3분 뒤에도 계속하고 싶었나'],
+  ];
+  const game = (route) => './?trial=1' + route;
+
+  let data = { version: 1, order: '', device: '', rows: {} };
+  try { const raw = localStorage.getItem(KEY); if (raw) data = Object.assign(data, JSON.parse(raw)); } catch (e) { /* private mode: works without saving */ }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* not saved */ } };
+  const row = (id) => (data.rows[id] = data.rows[id] || { q1: null, q2: null, q3: null, q4: null, memo: '', date: '' });
+
+  const links = document.getElementById('links');
+  const exps = document.getElementById('exps');
+  for (const e of EXPS) {
+    const a = document.createElement('a'); a.href = game(e.route); a.textContent = e.name + ' 열기'; a.target = '_blank'; a.rel = 'noopener'; links.appendChild(a);
+    const r = row(e.id);
+    const card = document.createElement('section'); card.className = 'card'; card.dataset.exp = e.id;
+    card.innerHTML = `<div class="exp-head"><h2>${e.name}</h2><a href="${game(e.route)}" target="_blank" rel="noopener">열기 ↗</a></div>`;
+    for (const [qid, qtext] of QS) {
+      const q = document.createElement('div'); q.className = 'q';
+      const name = `${e.id}-${qid}`;
+      q.innerHTML = `<label class="qt">${qtext}</label><div class="scale" role="radiogroup" aria-label="${qtext}"></div>`;
+      const scale = q.querySelector('.scale');
+      for (const v of [1, 2, 3, 4, 5, 'skip']) {
+        const lab = document.createElement('label');
+        const inp = document.createElement('input'); inp.type = 'radio'; inp.name = name; inp.value = String(v);
+        inp.checked = r[qid] === v;
+        inp.addEventListener('change', () => { r[qid] = v; r.date = new Date().toISOString().slice(0, 10); save(); });
+        const sp = document.createElement('span'); sp.textContent = v === 'skip' ? '건너뛰기' : String(v);
+        lab.append(inp, sp); scale.appendChild(lab);
+      }
+      card.appendChild(q);
+    }
+    const memo = document.createElement('div'); memo.className = 'q';
+    memo.innerHTML = `<label class="qt" for="${e.id}-memo">한 줄 메모 — 처음 무엇을 했는지, 어디서 멈칫했는지, 무엇이 기분 좋았는지</label>`;
+    const ta = document.createElement('textarea'); ta.id = `${e.id}-memo`; ta.value = r.memo || '';
+    ta.addEventListener('input', () => { r.memo = ta.value; save(); });
+    memo.appendChild(ta); card.appendChild(memo);
+    exps.appendChild(card);
+  }
+
+  const order = document.getElementById('order'); order.value = data.order || '';
+  order.addEventListener('input', () => { data.order = order.value; save(); });
+  const device = document.getElementById('device'); device.value = data.device || '';
+  device.addEventListener('input', () => { data.device = device.value; save(); });
+
+  const out = document.getElementById('out');
+  const status = document.getElementById('status');
+  const score = (v) => (v === null || v === undefined ? '—' : v === 'skip' ? '건너뜀' : String(v));
+  const markdown = () => {
+    const lines = ['## 소유자(사람) 3분 점수 — popcorn-glory', '',
+      `- 순서: ${data.order || '(적지 않음)'} · 기기: ${data.device || '(적지 않음)'}`, '',
+      '| 실험 | Q1 설명 없이 | Q2 업그레이드 | Q3 다음이 궁금 | Q4 계속 | 평균(답한 수) | 메모 |', '|---|---|---|---|---|---|---|'];
+    for (const e of EXPS) {
+      const r = row(e.id);
+      const nums = QS.map(([q]) => r[q]).filter((v) => typeof v === 'number');
+      const avg = nums.length ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) + ` (${nums.length})` : '—';
+      lines.push(`| ${e.name} | ${QS.map(([q]) => score(r[q])).join(' | ')} | ${avg} | ${(r.memo || '').replace(/\|/g, '/').replace(/\n/g, ' ')} |`);
+    }
+    lines.push('', '평가자: 사람(소유자). AI 대리 점수와 섞지 않습니다.');
+    return lines.join('\n');
+  };
+  document.getElementById('md').addEventListener('click', () => { out.value = markdown(); status.textContent = 'Markdown을 만들었습니다.'; });
+  document.getElementById('json').addEventListener('click', () => { out.value = JSON.stringify({ ...data, rater: 'human-owner' }, null, 2); status.textContent = 'JSON을 만들었습니다.'; });
+  document.getElementById('copy').addEventListener('click', async () => {
+    if (!out.value) out.value = markdown();
+    try { await navigator.clipboard.writeText(out.value); status.textContent = '복사했습니다.'; }
+    catch (e) { out.select(); status.textContent = '선택해 두었습니다 — 직접 복사해 주세요.'; }
+  });
+  document.getElementById('clear').addEventListener('click', () => {
+    if (!confirm('이 브라우저에 저장된 점수를 모두 지울까요?')) return;
+    try { localStorage.removeItem(KEY); } catch (e) { /* nothing saved */ }
+    location.reload();
+  });
+})();
+</script>
+</body>
+</html>

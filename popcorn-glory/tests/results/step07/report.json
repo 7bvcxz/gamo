@@ -1,23 +1,23 @@
 {
   "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
-  "sha": "c83c1b0e407c",
-  "dirty": false,
+  "sha": "d650c896341c",
+  "dirty": true,
   "build": {
-    "version": "0.8.0",
-    "pack": "game-d6811e0cf16f.pck",
-    "packSize": 231456,
+    "version": "0.9.0",
+    "pack": "game-480caa2dee6c.pck",
+    "packSize": 233184,
     "engine": "engine-7eda98958eb0",
     "godot": "4.7.stable.official.5b4e0cb0f",
-    "source": "c83c1b0e407c"
+    "source": "d650c896341c"
   },
   "target": "local docs/ (http://127.0.0.1)",
-  "when": "2026-11-03T15:45:28.596Z",
+  "when": "2026-11-03T16:18:19.376Z",
   "stages": {
     "headless": "PASSED",
     "deploy": "PASSED",
     "browser": "PASSED"
   },
-  "headless_summary": "73 passed, 0 failed, 2107 checks, 14 files, 3.4s",
+  "headless_summary": "74 passed, 0 failed, 2190 checks, 14 files, 3.9s",
   "browser_checks": [
     {
       "spec": "experiments04.spec.mjs",
@@ -25,7 +25,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 13779
+      "ms": 25154
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -33,7 +33,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 6165
+      "ms": 8286
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -41,7 +41,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 17595
+      "ms": 20246
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -49,7 +49,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 8905
+      "ms": 7865
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -57,7 +57,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 11927
+      "ms": 12137
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -65,7 +65,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 10402
+      "ms": 10212
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -73,7 +73,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 8996
+      "ms": 9430
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -81,7 +81,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 6458
+      "ms": 6221
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -89,7 +89,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 2988
+      "ms": 2878
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -97,7 +97,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 7842
+      "ms": 8092
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -105,7 +105,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 5818
+      "ms": 5553
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -113,7 +113,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 8812
+      "ms": 8851
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -121,7 +121,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 7262
+      "ms": 7679
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -129,7 +129,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 6069
+      "ms": 4962
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -137,495 +137,495 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
+      "ms": 4295
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "the atlas draws: the money coin is gold, not a white square",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2452
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "A Click & Pop: every press pays at once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5337
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4095
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "B Perfect Pop: holding on burns by itself and never locks",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7454
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3697
+    },
+    {
+      "spec": "experiments04.spec.mjs",
+      "title": "runs never leak between experiments",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3421
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 1
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 2
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 1
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 2
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 4
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 9526
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8393
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4007
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7731
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3981
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6141
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3885
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a cancelled touch never locks B",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "touch paths on touch projects",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "dragging on the game never scrolls the page",
+      "project": "desktop",
+      "status": "SKIPPED",
+      "cause": "touch paths on touch projects",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "load, heap over a minute, worst burst, sleep and wake",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "perf: {\"load_ms\":1702,\"heap_start\":53500000,\"heap_after_60s\":53500000,\"burst\":{\"fps\":36.52156748682046,\"draw_calls\":117,\"primitives\":4291,\"fx_peak\":151,\"fx_cap\":400},\"sleep\":{\"before\":3677,\"hidden_5s\":3713,\"after_wake\":4657},\"load_avg\":24.2}"
+      ],
+      "ms": 71473
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 21038
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 42106
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5243
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 22192
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 66671
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8137
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "FAST-FORWARD: milestones in order through 3:00",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "mode: fast-forward with dev_advance (not real-time play)"
+      ],
+      "ms": 23434
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "ten restarts in a row: each from nothing, no errors",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 34820
+    },
+    {
+      "spec": "progression07.spec.mjs",
+      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4987
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3919
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5777
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5924
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> off, and back on",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8257
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5404
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4937
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8549
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 8468
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> off, and back on",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 11803
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6917
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "A: a press is heard",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 3709
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "B: the sizzle while held, and a perfect pop",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5844
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "C: kernels clink and the eruption booms",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 5633
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "the speaker button steps loud -> soft -> off, and back on",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7543
+    },
+    {
+      "spec": "sound05.spec.mjs",
+      "title": "?sound=off starts muted",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 4374
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [
+        "load: 2453 ms to the first drawn frame"
+      ],
+      "ms": 8211
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2923
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6660
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "p720",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2448
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [
+        "load: 2098 ms to the first drawn frame"
+      ],
+      "ms": 8046
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a direct link opens the stub, and the browser back button returns",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 6782
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "a hidden tab stops the play clock",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 7266
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "three minutes shows the clock and is logged",
+      "project": "phone",
+      "status": "PASSED",
+      "notes": [],
+      "ms": 2920
+    },
+    {
+      "spec": "stub03.spec.mjs",
+      "title": "the stub: press, upgrade, restart, back",
+      "project": "desktop",
+      "status": "PASSED",
+      "notes": [
+        "load: 1957 ms to the first drawn frame"
+      ],
       "ms": 6398
     },
     {
-      "spec": "experiments04.spec.mjs",
-      "title": "the atlas draws: the money coin is gold, not a white square",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 3260
-    },
-    {
-      "spec": "experiments04.spec.mjs",
-      "title": "A Click & Pop: every press pays at once",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7982
-    },
-    {
-      "spec": "experiments04.spec.mjs",
-      "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6113
-    },
-    {
-      "spec": "experiments04.spec.mjs",
-      "title": "B Perfect Pop: holding on burns by itself and never locks",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 9160
-    },
-    {
-      "spec": "experiments04.spec.mjs",
-      "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6179
-    },
-    {
-      "spec": "experiments04.spec.mjs",
-      "title": "runs never leak between experiments",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6001
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "slide off the upgrade before letting go: no purchase",
-      "project": "p720",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 2
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "a double click buys once",
-      "project": "p720",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 2
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "the keyboard plays: space presses, escape goes back",
-      "project": "p720",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 1
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "slide off the upgrade before letting go: no purchase",
-      "project": "phone",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 1
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "a double click buys once",
-      "project": "phone",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 0
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "the keyboard plays: space presses, escape goes back",
-      "project": "phone",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 0
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "slide off the upgrade before letting go: no purchase",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 18714
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "a double click buys once",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 14604
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "the keyboard plays: space presses, escape goes back",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 5339
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "a cancelled touch never locks B",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 8708
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "dragging on the game never scrolls the page",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 5906
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "a cancelled touch never locks B",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6060
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "dragging on the game never scrolls the page",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 3927
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "a cancelled touch never locks B",
-      "project": "desktop",
-      "status": "SKIPPED",
-      "cause": "touch paths on touch projects",
-      "notes": [],
-      "ms": 2
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "dragging on the game never scrolls the page",
-      "project": "desktop",
-      "status": "SKIPPED",
-      "cause": "touch paths on touch projects",
-      "notes": [],
-      "ms": 0
-    },
-    {
-      "spec": "perf07.spec.mjs",
-      "title": "load, heap over a minute, worst burst, sleep and wake",
-      "project": "p720",
-      "status": "SKIPPED",
-      "cause": "one project measures (desktop)",
-      "notes": [],
-      "ms": 0
-    },
-    {
-      "spec": "perf07.spec.mjs",
-      "title": "load, heap over a minute, worst burst, sleep and wake",
-      "project": "phone",
-      "status": "SKIPPED",
-      "cause": "one project measures (desktop)",
-      "notes": [],
-      "ms": 0
-    },
-    {
-      "spec": "perf07.spec.mjs",
-      "title": "load, heap over a minute, worst burst, sleep and wake",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [
-        "perf: {\"load_ms\":2622,\"heap_start\":53500000,\"heap_after_60s\":53500000,\"burst\":{\"fps\":16.597510373443985,\"draw_calls\":117,\"primitives\":4289,\"fx_peak\":148,\"fx_cap\":400},\"sleep\":{\"before\":5914,\"hidden_5s\":5968,\"after_wake\":6924},\"load_avg\":35.8}"
-      ],
-      "ms": 74765
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "FAST-FORWARD: milestones in order through 3:00",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [
-        "mode: fast-forward with dev_advance (not real-time play)"
-      ],
-      "ms": 38298
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "ten restarts in a row: each from nothing, no errors",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 56279
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 10844
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "FAST-FORWARD: milestones in order through 3:00",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [
-        "mode: fast-forward with dev_advance (not real-time play)"
-      ],
-      "ms": 17526
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "ten restarts in a row: each from nothing, no errors",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 52130
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 9405
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "FAST-FORWARD: milestones in order through 3:00",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [
-        "mode: fast-forward with dev_advance (not real-time play)"
-      ],
-      "ms": 20687
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "ten restarts in a row: each from nothing, no errors",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 47688
-    },
-    {
-      "spec": "progression07.spec.mjs",
-      "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7090
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "A: a press is heard",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6085
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "B: the sizzle while held, and a perfect pop",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6440
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "C: kernels clink and the eruption booms",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6739
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "the speaker button steps loud -> soft -> off, and back on",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 10139
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "?sound=off starts muted",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 8003
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "A: a press is heard",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 6430
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "B: the sizzle while held, and a perfect pop",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 8820
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "C: kernels clink and the eruption booms",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 9474
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "the speaker button steps loud -> soft -> off, and back on",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 14499
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "?sound=off starts muted",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7123
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "A: a press is heard",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 5092
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "B: the sizzle while held, and a perfect pop",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7795
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "C: kernels clink and the eruption booms",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7763
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "the speaker button steps loud -> soft -> off, and back on",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7769
-    },
-    {
-      "spec": "sound05.spec.mjs",
-      "title": "?sound=off starts muted",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 4444
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "the stub: press, upgrade, restart, back",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [
-        "load: 3607 ms to the first drawn frame"
-      ],
-      "ms": 11387
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "a direct link opens the stub, and the browser back button returns",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 4196
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "a hidden tab stops the play clock",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7129
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "three minutes shows the clock and is logged",
-      "project": "p720",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 2540
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "the stub: press, upgrade, restart, back",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [
-        "load: 2870 ms to the first drawn frame"
-      ],
-      "ms": 10799
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "a direct link opens the stub, and the browser back button returns",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 4427
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "a hidden tab stops the play clock",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 7700
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "three minutes shows the clock and is logged",
-      "project": "phone",
-      "status": "PASSED",
-      "notes": [],
-      "ms": 3492
-    },
-    {
-      "spec": "stub03.spec.mjs",
-      "title": "the stub: press, upgrade, restart, back",
-      "project": "desktop",
-      "status": "PASSED",
-      "notes": [
-        "load: 1975 ms to the first drawn frame"
-      ],
-      "ms": 6183
-    },
-    {
       "spec": "stub03.spec.mjs",
       "title": "a direct link opens the stub, and the browser back button returns",
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 2771
+      "ms": 2972
     },
     {
       "spec": "stub03.spec.mjs",
@@ -633,7 +633,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 6585
+      "ms": 6845
     },
     {
       "spec": "stub03.spec.mjs",
@@ -641,7 +641,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 2353
+      "ms": 2328
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -651,7 +651,7 @@
       "notes": [
         "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
       ],
-      "ms": 3145
+      "ms": 3293
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -661,7 +661,7 @@
       "notes": [
         "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
       ],
-      "ms": 3039
+      "ms": 3375
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -671,7 +671,7 @@
       "notes": [
         "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
       ],
-      "ms": 2754
+      "ms": 3707
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -679,7 +679,7 @@
       "project": "m-p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 4777
+      "ms": 8662
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -689,7 +689,7 @@
       "notes": [
         "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
       ],
-      "ms": 3145
+      "ms": 5317
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -699,7 +699,7 @@
       "notes": [
         "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
       ],
-      "ms": 2841
+      "ms": 5726
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -709,7 +709,7 @@
       "notes": [
         "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
       ],
-      "ms": 3549
+      "ms": 6014
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -717,7 +717,7 @@
       "project": "m-hd",
       "status": "PASSED",
       "notes": [],
-      "ms": 8776
+      "ms": 12036
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -727,7 +727,7 @@
       "notes": [
         "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
       ],
-      "ms": 4960
+      "ms": 6703
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -737,7 +737,7 @@
       "notes": [
         "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
       ],
-      "ms": 5106
+      "ms": 5721
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -747,7 +747,7 @@
       "notes": [
         "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
       ],
-      "ms": 4995
+      "ms": 5257
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -755,7 +755,7 @@
       "project": "m-small",
       "status": "PASSED",
       "notes": [],
-      "ms": 8315
+      "ms": 10579
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -765,7 +765,7 @@
       "notes": [
         "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
       ],
-      "ms": 5286
+      "ms": 6394
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -775,7 +775,7 @@
       "notes": [
         "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
       ],
-      "ms": 4983
+      "ms": 7429
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -785,7 +785,7 @@
       "notes": [
         "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
       ],
-      "ms": 5430
+      "ms": 7154
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -793,7 +793,7 @@
       "project": "m-tablet",
       "status": "PASSED",
       "notes": [],
-      "ms": 13440
+      "ms": 14393
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -803,7 +803,7 @@
       "notes": [
         "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
       ],
-      "ms": 6899
+      "ms": 6528
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -813,7 +813,7 @@
       "notes": [
         "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
       ],
-      "ms": 5982
+      "ms": 5632
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -823,7 +823,7 @@
       "notes": [
         "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
       ],
-      "ms": 6374
+      "ms": 6642
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -831,7 +831,7 @@
       "project": "m-landscape",
       "status": "PASSED",
       "notes": [],
-      "ms": 14004
+      "ms": 16964
     }
   ],
   "browser_totals": {
