@@ -1,0 +1,79 @@
+{"t":0.6,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":7.6,"issued":7.6,"cmd":"note","args":{"text":"A popcorn machine in a big circle, coin counter 0 at top, 8 empty circles above the machine, and a bottom panel: grey bucket, 25 coins, up arrow (an upgrade I can't afford yet?). Back, sound, restart buttons. I think tapping the machine (or the big circle) makes popcorn, which fills the 8 circles and earns coins. Going to tap the machine."}}
+{"t":10.5,"issued":9.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"002.png"}
+{"t":16.4,"issued":16.4,"cmd":"note","args":{"text":"One tap put a corn kernel in the first circle; the hint circle and finger vanished. So taps load kernels. Filling all 8 should pop something. Tapping more."}}
+{"t":18,"issued":16.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"003.png"}
+{"t":19.4,"issued":18.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"004.png"}
+{"t":21,"issued":19.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"005.png"}
+{"t":22.6,"issued":21.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"006.png"}
+{"t":24.1,"issued":22.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"007.png"}
+{"t":25.4,"issued":24.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"008.png"}
+{"t":27.3,"issued":25.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"009.png"}
+{"t":37.2,"issued":37.2,"cmd":"note","args":{"text":"8 kernels filled the row, it emptied and I got 10 coins. The bottom panel now has a yellow bar filling it - maybe progress toward the 25-coin bucket upgrade. I'll do two more rounds of 8 taps to afford it."}}
+{"t":38.8,"issued":37.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"010.png"}
+{"t":40.7,"issued":39.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"011.png"}
+{"t":42.7,"issued":40.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"012.png"}
+{"t":45,"issued":43,"cmd":"tap","args":{"x":300,"y":830},"shot":"013.png"}
+{"t":47,"issued":45.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"014.png"}
+{"t":48.7,"issued":47.3,"cmd":"tap","args":{"x":300,"y":830},"shot":"015.png"}
+{"t":50.6,"issued":48.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"016.png"}
+{"t":52.8,"issued":51,"cmd":"tap","args":{"x":300,"y":830},"shot":"017.png"}
+{"t":54.7,"issued":53.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"018.png"}
+{"t":56.5,"issued":54.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"019.png"}
+{"t":58.4,"issued":56.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"020.png"}
+{"t":60.6,"issued":58.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"021.png"}
+{"t":62.4,"issued":60.8,"cmd":"tap","args":{"x":300,"y":830},"shot":"022.png"}
+{"t":64.2,"issued":62.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"023.png"}
+{"t":66,"issued":64.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"024.png"}
+{"t":67.9,"issued":66.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"025.png"}
+{"t":71.8,"issued":70.8,"cmd":"look","args":{},"shot":"026.png"}
+{"t":78.8,"issued":78.8,"cmd":"note","args":{"text":"30 coins now and the bottom panel turned bright yellow with a red up arrow - clearly says 'you can buy this'. The fill bar was showing progress toward affording it, nice. Buying the bucket thing for 25."}}
+{"t":80.8,"issued":78.9,"cmd":"tap","args":{"x":300,"y":1180},"shot":"027.png"}
+{"t":87.9,"issued":87.9,"cmd":"note","args":{"text":"Bought it: machine grew a striped awning with bunting, looks fancier. 5 coins left. Next upgrade is a cart on wheels for 64. The circle hint is back around the machine. Does the upgrade pay more per batch? Tapping 8 to find out."}}
+{"t":89.8,"issued":88.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"028.png"}
+{"t":91.5,"issued":90.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"029.png"}
+{"t":93,"issued":91.7,"cmd":"tap","args":{"x":300,"y":800},"shot":"030.png"}
+{"t":94.5,"issued":93.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"031.png"}
+{"t":96,"issued":94.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"032.png"}
+{"t":97.6,"issued":96.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"033.png"}
+{"t":99.1,"issued":97.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"034.png"}
+{"t":100.6,"issued":99.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"035.png"}
+{"t":108.1,"issued":108.1,"cmd":"note","args":{"text":"Batch after upgrade gave 22 coins (5 -> 27), more than double the old 10. Popcorn pieces are flying out across the floor now, cute. Tapping one by one is slow though - I wonder if holding my finger down keeps feeding kernels. Trying a 3 second hold."}}
+{"t":112.6,"issued":108.3,"cmd":"hold","args":{"x":300,"y":800,"s":3},"shot":"036.png"}
+{"t":118.8,"issued":118.8,"cmd":"note","args":{"text":"Holding only loaded one kernel, same as a tap - no auto-feed. Back to tapping. Need 64 for the cart; two more batches should do it."}}
+{"t":120,"issued":118.9,"cmd":"tap","args":{"x":300,"y":800},"shot":"037.png"}
+{"t":121.3,"issued":120.2,"cmd":"tap","args":{"x":300,"y":800},"shot":"038.png"}
+{"t":122.5,"issued":121.4,"cmd":"tap","args":{"x":300,"y":800},"shot":"039.png"}
+{"t":123.8,"issued":122.7,"cmd":"tap","args":{"x":300,"y":800},"shot":"040.png"}
+{"t":124.8,"issued":123.9,"cmd":"tap","args":{"x":300,"y":800},"shot":"041.png"}
+{"t":126,"issued":125,"cmd":"tap","args":{"x":300,"y":800},"shot":"042.png"}
+{"t":127.2,"issued":126.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"043.png"}
+{"t":128.4,"issued":127.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"044.png"}
+{"t":129.4,"issued":128.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"045.png"}
+{"t":130.6,"issued":129.6,"cmd":"tap","args":{"x":300,"y":800},"shot":"046.png"}
+{"t":131.9,"issued":130.8,"cmd":"tap","args":{"x":300,"y":800},"shot":"047.png"}
+{"t":133.1,"issued":132.1,"cmd":"tap","args":{"x":300,"y":800},"shot":"048.png"}
+{"t":134.3,"issued":133.3,"cmd":"tap","args":{"x":300,"y":800},"shot":"049.png"}
+{"t":135.6,"issued":134.5,"cmd":"tap","args":{"x":300,"y":800},"shot":"050.png"}
+{"t":137,"issued":135.7,"cmd":"tap","args":{"x":300,"y":800},"shot":"051.png"}
+{"t":140,"issued":139.6,"cmd":"look","args":{},"shot":"052.png"}
+{"t":144.7,"issued":144.7,"cmd":"note","args":{"text":"71 coins, panel lit up again. Buying the cart for 64."}}
+{"t":145.8,"issued":144.8,"cmd":"tap","args":{"x":300,"y":1180},"shot":"053.png"}
+{"t":152.8,"issued":152.8,"cmd":"note","args":{"text":"Cart bought - machine now on wheels with yellow popcorn flying everywhere, very satisfying burst. NEW: a timer badge appeared under the coins, 3:03. Is it counting down? A time limit? Next upgrade is a bigger cart for 163. Tapping a batch while watching the timer."}}
+{"t":154.6,"issued":153,"cmd":"tap","args":{"x":300,"y":760},"shot":"054.png"}
+{"t":155.9,"issued":154.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"055.png"}
+{"t":157.2,"issued":156,"cmd":"tap","args":{"x":300,"y":760},"shot":"056.png"}
+{"t":158.7,"issued":157.4,"cmd":"tap","args":{"x":300,"y":760},"shot":"057.png"}
+{"t":160.1,"issued":159,"cmd":"tap","args":{"x":300,"y":760},"shot":"058.png"}
+{"t":161.7,"issued":160.3,"cmd":"tap","args":{"x":300,"y":760},"shot":"059.png"}
+{"t":163.3,"issued":162,"cmd":"tap","args":{"x":300,"y":760},"shot":"060.png"}
+{"t":164.9,"issued":163.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"061.png"}
+{"t":172.6,"issued":172.6,"cmd":"note","args":{"text":"Batch with the cart gave 48 coins (7 -> 55). Payouts roughly double each upgrade: 10, 22, 48. The timer went 3:03 -> 3:21 so it counts UP, not down - a run clock? A speedrun? Not sure what it's for, and it showed up at 3:03 not 0:00. Keep tapping toward 163."}}
+{"t":173.6,"issued":172.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"062.png"}
+{"t":174.7,"issued":173.8,"cmd":"tap","args":{"x":300,"y":760},"shot":"063.png"}
+{"t":175.6,"issued":174.8,"cmd":"tap","args":{"x":300,"y":760},"shot":"064.png"}
+{"t":176.5,"issued":175.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"065.png"}
+{"t":177.5,"issued":176.6,"cmd":"tap","args":{"x":300,"y":760},"shot":"066.png"}
+{"t":178.6,"issued":177.6,"cmd":"tap","args":{"x":300,"y":760},"shot":"067.png"}
+{"t":179.6,"issued":178.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"068.png"}
+{"t":180.6,"issued":179.7,"cmd":"tap","args":{"x":300,"y":760},"shot":"069.png"}

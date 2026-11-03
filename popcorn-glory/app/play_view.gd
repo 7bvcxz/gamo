@@ -278,11 +278,17 @@ func _draw_hints(ci: CanvasItem, _base: Vector2, size_px: float) -> void:
 	var idle := now_ms - maxi(last_input_ms, 0)
 	if idle < HINT_RING_MS:
 		return
+	_draw_hint_gesture(ci, size_px, last_input_ms < 0 and now_ms >= HINT_HAND_MS)
+
+
+## The idle hint for a TAP: a ring pulsing out from the machine, and (if the
+## player has never pressed) a finger tapping it. B overrides it with a hold.
+func _draw_hint_gesture(ci: CanvasItem, size_px: float, finger: bool) -> void:
 	var c := machine_centre()
 	var phase := fmod(_t, 1.2) / 1.2
 	var r := size_px * (0.35 + 0.15 * phase)
 	ci.draw_arc(c, r, 0.0, TAU, 48, Color(PopPalette.INK, 0.45 * (1.0 - phase)), 6.0)
-	if last_input_ms < 0 and now_ms >= HINT_HAND_MS:
+	if finger:
 		var tap := 0.5 + 0.5 * sin(_t * 6.0)
 		var p := c + Vector2(size_px * 0.12, size_px * 0.05 + tap * 18.0)
 		# A finger: a rounded stub with a nail, pointing up-left at the machine.

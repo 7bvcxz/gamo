@@ -23,3 +23,8 @@ func test_command_line() -> void:
 	var r := PopRoute.parse("", "", PackedStringArray(["--suite", "all", "--exp", "stub", "--dev"]))
 	assert_eq(String(r["exp"]), "stub", "exp from args")
 	assert_true(bool(r["dev"]), "dev from args")
+
+
+func test_trial_mode() -> void:
+	assert_true(bool(PopRoute.parse("#click", "?trial=1", PackedStringArray())["trial"]), "?trial=1")
+	assert_false(bool(PopRoute.parse("#click", "", PackedStringArray())["trial"]), "off by default")

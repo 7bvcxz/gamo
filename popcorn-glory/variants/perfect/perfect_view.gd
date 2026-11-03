@@ -13,7 +13,7 @@ var _last_outcome := ""
 ## Where the last release fell on the ring, shown for MARK_S: a tap that
 ## let go too soon leaves a mark short of the gold -- the picture of "hold
 ## longer" (Step 04 addendum: a novice must infer the skill without words).
-const MARK_S := 1.6
+const MARK_S := 3.0   # 1.6 s was gone before Step 08's blind player looked again
 var _mark_ms := -1.0
 var _mark_age := 99.0
 var _mark_kind := ""
@@ -162,6 +162,35 @@ func _draw_ring(ci: CanvasItem, _base: Vector2, size_px: float) -> void:
 		var fade := clampf(1.0 - _mark_age / MARK_S, 0.0, 1.0)
 		ci.draw_line(c + dir * (r - width * 2.2), c + dir * (r + width * 2.2), Color(Color.WHITE, fade), width * 0.9)
 		ci.draw_line(c + dir * (r - width * 1.8), c + dir * (r + width * 1.8), Color(mcol, fade), width * 0.5)
+
+
+## B's idle hint is a HOLD, not a tap (a tapping finger and a pulsing ring
+## told Step 08's blind player 'tap in rhythm'): a finger pressed down on the
+## machine while a ghost of the heat runs round the ring to the gold and flashes
+## there, over and over.
+func _draw_hint_gesture(ci: CanvasItem, size_px: float, finger: bool) -> void:
+	var st := _r()
+	var w: Array = st["window"]
+	var burn := float(w[2])
+	var c := machine_centre()
+	var r := ring_radius()
+	var top := -PI / 2
+	var loop := fmod(_t, 2.4) / 2.4
+	var gold_mid := (float(w[0]) + float(w[1])) / 2.0
+	var heat := gold_mid * clampf(loop / 0.8, 0.0, 1.0)
+	var a := top + TAU * heat / burn
+	var width := size_px * 0.045
+	ci.draw_arc(c, r, top, a, 48, Color(1, 1, 1, 0.75), width * 0.8)
+	if loop > 0.8:
+		ci.draw_arc(c, r, top + TAU * float(w[0]) / burn, top + TAU * float(w[1]) / burn, 24, Color(1, 1, 1, 0.9), width * 2.0)
+	if finger:
+		var p := c + Vector2(size_px * 0.06, size_px * 0.08)
+		ci.draw_circle(p, 22, PopPalette.CREAM)
+		ci.draw_rect(Rect2(p.x - 22, p.y, 44, 70), PopPalette.CREAM)
+		ci.draw_circle(p + Vector2(0, -6), 10, Color(1, 0.85, 0.8))
+		ci.draw_arc(p, 22, PI, TAU, 16, PopPalette.INK, 4.0)
+		# Pressed: rings under the fingertip, still, not tapping.
+		ci.draw_arc(p + Vector2(0, -22), 30, 0, TAU, 24, Color(PopPalette.INK, 0.35), 3.0)
 
 
 func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:

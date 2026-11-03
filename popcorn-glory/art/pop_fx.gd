@@ -47,7 +47,7 @@ func burst(from: Vector2, n: int, scale: float, rng: RandomNumberGenerator, col:
 func smoke(from: Vector2, n: int, scale: float, rng: RandomNumberGenerator) -> void:
 	for i in n:
 		_spawn(2, from + Vector2(rng.randf_range(-60, 60), 0) * scale, Vector2(rng.randf_range(-40, 40), rng.randf_range(-260, -160)) * scale,
-			rng.randf_range(0.9, 1.4), rng.randf_range(22.0, 34.0) * scale, 0.0, Color(0.25, 0.22, 0.22, 0.75))
+			rng.randf_range(2.0, 2.8), rng.randf_range(22.0, 34.0) * scale, 0.0, Color(0.25, 0.22, 0.22, 0.75))
 
 
 ## Unpopped kernels tumbling out (an early release).

@@ -69,6 +69,7 @@ func _ready() -> void:
 	route = PopRoute.parse(PopWeb.location_hash(), PopWeb.location_search(), OS.get_cmdline_user_args())
 	reduced_motion = String(route["motion"]) == "reduce"
 	frame.dev = bool(route["dev"])
+	frame.trial = bool(route["trial"])
 	audio.set_muted(not bool(route["sound"]))
 	frame.set_sound(audio.level_name())
 	if not economy.errors.is_empty():

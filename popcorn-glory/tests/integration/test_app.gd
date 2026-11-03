@@ -157,7 +157,10 @@ func test_three_minutes_is_logged_and_shown() -> void:
 	await _open_stub()
 	app.dev_advance(180000)
 	assert_true(app.session.milestones.has("three_minutes"), "milestone")
-	assert_true(app.frame.clock_ms >= 180000, "the frame knows (draws the 3:00 pill)")
+	assert_true(app.frame.clock_ms >= 180000, "the frame knows the time")
+	assert_false(app.frame.shows_clock(), "but a player sees no clock (Step 08: it read as a deadline)")
+	app.frame.trial = true
+	assert_true(app.frame.shows_clock(), "the trial protocol (?trial=1) shows 3:00")
 
 
 func test_state_reports_rects_inside_the_window() -> void:

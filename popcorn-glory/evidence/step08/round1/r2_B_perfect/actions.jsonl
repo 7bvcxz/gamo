@@ -1,0 +1,28 @@
+{"t":0.7,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":9.5,"issued":9.5,"cmd":"note","args":{"text":"A red popcorn machine in the middle with popcorn inside and a white finger icon pointing at it - looks like 'tap the machine'. A big ring around it: an orange arc on top-left, a thicker yellow arc lower-left, grey rest. Maybe a timing/heat ring - tap when something hits the yellow zone? Top: back arrow, coin counter 0, sound, restart. Bottom card: a greyed bucket costing 30 coins with an up arrow - an upgrade I can't afford yet. I expect tapping the machine pops popcorn and earns coins."}}
+{"t":13.9,"issued":12.5,"cmd":"tap","args":{"x":300,"y":830},"shot":"002.png"}
+{"t":20.8,"issued":19.1,"cmd":"tap","args":{"x":300,"y":830},"shot":"003.png"}
+{"t":27.9,"issued":27.9,"cmd":"note","args":{"text":"Each tap on the machine gives +1 coin (now 2). A small marker/needle appeared at the top of the ring (12 o'clock) and a thin yellow bar is filling under the upgrade card (progress to 30). The ring arcs didn't move. Is the ring a dial I can spin? Trying to press and hold the machine to see if holding does something different."}}
+{"t":33.7,"issued":29.4,"cmd":"hold","args":{"x":300,"y":830,"s":3},"shot":"004.png"}
+{"t":41.3,"issued":41.3,"cmd":"note","args":{"text":"Holding 3 s only gave +1, same as a tap. The needle vanished again. Maybe the ring is a crank or dial - trying to drag my finger along the ring from the top towards the yellow part on the left."}}
+{"t":46.8,"issued":43,"cmd":"drag","args":{"x1":300,"y1":578,"x2":70,"y2":860},"shot":"005.png"}
+{"t":55.8,"issued":55.8,"cmd":"note","args":{"text":"Whoa - a dark grey smoke puff at the top of the ring right where the needle sits. Coin 4. Smoke looks like something burned - did my drag do it wrong? Maybe the needle is a heat marker and I'm supposed to keep it in the yellow zone. Waiting a moment to see if the needle moves on its own."}}
+{"t":59.9,"issued":56.9,"cmd":"wait","args":{"s":2},"shot":"006.png"}
+{"t":69.2,"issued":67.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"007.png"}
+{"t":77.5,"issued":77.5,"cmd":"note","args":{"text":"Coin 5. Every tap puts the needle at 12 o'clock and +1 coin. Then an inner brown circle appeared while idle - maybe a hint ring. I suspect the needle travels around the ring and I should tap when it is in the yellow arc, but my screenshots are too slow to catch it. Going to tap then wait 1 second to see where the needle goes."}}
+{"t":81.3,"issued":79.3,"cmd":"wait","args":{"s":1},"shot":"008.png"}
+{"t":91.3,"issued":91.3,"cmd":"note","args":{"text":"The inner brown ring is growing outward from the machine - a pulse expanding toward the big ring. Feels like a rhythm cue: maybe tap when it reaches the outer ring? Needle gone again. Trying a tap directly on the yellow arc on the left to see if the ring itself is a button."}}
+{"t":94.4,"issued":93,"cmd":"tap","args":{"x":65,"y":910},"shot":"009.png"}
+{"t":101.8,"issued":101.8,"cmd":"note","args":{"text":"Tapping the yellow arc also gave +1 (saw a faint '+1' float up on the right). So the whole screen seems to count as a tap, the ring is not a separate button. 6 coins. Curious what the locked bucket card says - tapping it even though I can't afford it."}}
+{"t":104.8,"issued":103.5,"cmd":"tap","args":{"x":300,"y":1178},"shot":"010.png"}
+{"t":112.7,"issued":111.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"011.png"}
+{"t":121.8,"issued":121.8,"cmd":"note","args":{"text":"Tapping as the inner ring neared the outer ring: still just +1 (7 coins). Nothing special. The bucket icon on the bottom card is now partly filled with gold, so it shows my progress to 30. Slow going at one coin per tap. Trying to tap the little needle at the top of the ring - the smoke appeared there before, maybe it's a steam valve."}}
+{"t":125.1,"issued":123.9,"cmd":"tap","args":{"x":300,"y":578},"shot":"012.png"}
+{"t":133.5,"issued":131.1,"cmd":"drag","args":{"x1":120,"y1":830,"x2":480,"y2":830},"shot":"013.png"}
+{"t":142.4,"issued":142.4,"cmd":"note","args":{"text":"WOW: a swipe across the machine gave +10 and a burst of popcorn flew out! 18 coins. The needle now sits at the end of the yellow arc - so the needle travels around the ring while my finger is down, and letting go inside the yellow zone is a big pop. The smoke earlier must have been overshooting (burnt). That's the trick! Repeating the same swipe."}}
+{"t":146.9,"issued":144.3,"cmd":"drag","args":{"x1":120,"y1":830,"x2":480,"y2":830},"shot":"014.png"}
+{"t":154.7,"issued":152.1,"cmd":"drag","args":{"x1":120,"y1":830,"x2":480,"y2":830},"shot":"015.png"}
+{"t":158.2,"issued":157.2,"cmd":"tap","args":{"x":300,"y":1178},"shot":"016.png"}
+{"t":165.4,"issued":165.4,"cmd":"note","args":{"text":"Bought the upgrade with 38 coins -> 8 left. The machine grew: bigger, striped awning with bunting, yellow zone looks a bit wider. A yellow clock '3:05' appeared under the coins - a run timer? Next upgrade is a cart on wheels for 54. Very satisfying moment. Swiping again."}}
+{"t":170.6,"issued":167.2,"cmd":"drag","args":{"x1":120,"y1":830,"x2":480,"y2":830},"shot":"017.png"}
+{"t":177.5,"issued":177.5,"cmd":"note","args":{"text":"Same swipe after the upgrade only gave +4 (12 coins): the needle stopped in the orange part, too early. The bigger machine seems to heat slower, so I need to hold longer now. Timer says 3:17 and is counting up. I'd keep going to learn the new timing."}}

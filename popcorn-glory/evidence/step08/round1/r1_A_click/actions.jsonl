@@ -1,0 +1,67 @@
+{"t":0.8,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":8.6,"issued":8.6,"cmd":"note","args":{"text":"I see a red popcorn machine inside a circle, a coin counter at 0, back/sound/restart buttons at top, and a bottom card with a greyed bucket, a 24-coin price and an up arrow. The machine has a pointing finger icon on its front, so I think tapping the machine makes popcorn. The bottom card looks like an upgrade (bucket?) costing 24 coins, greyed out because I have 0. I'll tap the machine first."}}
+{"t":11.7,"issued":10,"cmd":"tap","args":{"x":300,"y":820},"shot":"002.png"}
+{"t":17.6,"issued":17.6,"cmd":"note","args":{"text":"One tap gave 1 coin, the hint circle vanished. A thin yellow bar appeared at the bottom of the upgrade card - probably progress toward 24. Let me tap a bunch more."}}
+{"t":19.5,"issued":18,"cmd":"tap","args":{"x":300,"y":820},"shot":"003.png"}
+{"t":21.1,"issued":19.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"004.png"}
+{"t":22.5,"issued":21.4,"cmd":"tap","args":{"x":300,"y":820},"shot":"005.png"}
+{"t":23.9,"issued":22.6,"cmd":"tap","args":{"x":300,"y":820},"shot":"006.png"}
+{"t":25.3,"issued":24.1,"cmd":"tap","args":{"x":300,"y":820},"shot":"007.png"}
+{"t":32.6,"issued":32.6,"cmd":"note","args":{"text":"6 coins after 6 taps. The bucket icon is filling with gold from the bottom and the yellow bar grows - nice wordless progress. I wonder if holding the finger down pops faster. Trying a 3 second hold."}}
+{"t":37.2,"issued":33,"cmd":"hold","args":{"x":300,"y":820,"s":3},"shot":"008.png"}
+{"t":44,"issued":44,"cmd":"note","args":{"text":"Holding only gave 1 coin (machine squished a bit). So it's tap-tap-tap. Going to tap it a lot to reach 24 and see what the bucket does."}}
+{"t":45.5,"issued":44.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"009.png"}
+{"t":46.9,"issued":45.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"010.png"}
+{"t":48.2,"issued":47,"cmd":"tap","args":{"x":300,"y":830},"shot":"011.png"}
+{"t":49.5,"issued":48.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"012.png"}
+{"t":50.9,"issued":49.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"013.png"}
+{"t":52,"issued":51,"cmd":"tap","args":{"x":300,"y":830},"shot":"014.png"}
+{"t":53.5,"issued":52.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"015.png"}
+{"t":55,"issued":53.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"016.png"}
+{"t":56.6,"issued":55.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"017.png"}
+{"t":63.2,"issued":63.2,"cmd":"note","args":{"text":"16 coins. The whole card is filling with yellow like a liquid level - I like that, I can see I'm about two thirds there. No passive income so far, it's purely tapping. 8 more."}}
+{"t":65,"issued":63.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"018.png"}
+{"t":67.1,"issued":65.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"019.png"}
+{"t":69.1,"issued":67.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"020.png"}
+{"t":70.9,"issued":69.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"021.png"}
+{"t":73.1,"issued":71.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"022.png"}
+{"t":75.1,"issued":73.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"023.png"}
+{"t":77,"issued":75.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"024.png"}
+{"t":78.9,"issued":77.3,"cmd":"tap","args":{"x":300,"y":830},"shot":"025.png"}
+{"t":84.7,"issued":84.7,"cmd":"note","args":{"text":"24 coins! The card lit up bright yellow, the bucket turned dark brown and the arrow turned red - clearly 'you can buy this now'. Tapping the card."}}
+{"t":86.8,"issued":84.9,"cmd":"tap","args":{"x":300,"y":1178},"shot":"026.png"}
+{"t":94.5,"issued":94.5,"cmd":"note","args":{"text":"Bought it! The machine grew bigger and got a striped awning with bunting - looks fancier. Coins reset to 0, next card is a cart with wheels for 41. A popcorn kernel is lying on the floor to the left. Does a tap give more now? Let me tap and see."}}
+{"t":96.6,"issued":94.7,"cmd":"tap","args":{"x":300,"y":820},"shot":"027.png"}
+{"t":103.8,"issued":103.8,"cmd":"note","args":{"text":"One tap = 2 coins now, so the upgrade doubled my tap. The floor kernel is gone. Quick check: does anything happen if I just wait?"}}
+{"t":108.8,"issued":104,"cmd":"wait","args":{"s":4},"shot":"028.png"}
+{"t":116.6,"issued":116.6,"cmd":"note","args":{"text":"Nothing passive - still 2 after waiting, and the soft circle came back around the machine like a 'tap me' reminder when idle. OK, tapping toward the 41-coin cart. I'll try the glass kettle part too, in case it's different."}}
+{"t":117.9,"issued":116.8,"cmd":"tap","args":{"x":300,"y":730},"shot":"029.png"}
+{"t":119.2,"issued":118.1,"cmd":"tap","args":{"x":300,"y":860},"shot":"030.png"}
+{"t":120.8,"issued":119.5,"cmd":"tap","args":{"x":300,"y":860},"shot":"031.png"}
+{"t":122.5,"issued":121,"cmd":"tap","args":{"x":300,"y":860},"shot":"032.png"}
+{"t":123.8,"issued":122.7,"cmd":"tap","args":{"x":300,"y":860},"shot":"033.png"}
+{"t":125.1,"issued":124,"cmd":"tap","args":{"x":300,"y":860},"shot":"034.png"}
+{"t":126.3,"issued":125.3,"cmd":"tap","args":{"x":300,"y":860},"shot":"035.png"}
+{"t":127.8,"issued":126.5,"cmd":"tap","args":{"x":300,"y":860},"shot":"036.png"}
+{"t":129.2,"issued":127.9,"cmd":"tap","args":{"x":300,"y":860},"shot":"037.png"}
+{"t":130.7,"issued":129.4,"cmd":"tap","args":{"x":300,"y":860},"shot":"038.png"}
+{"t":132.2,"issued":131,"cmd":"tap","args":{"x":300,"y":860},"shot":"039.png"}
+{"t":138.6,"issued":138.6,"cmd":"note","args":{"text":"24 of 41, steady 2 per tap, anywhere on the machine works. I'm not seeing popcorn fly out in my screenshots, so the tap feels a bit invisible except for the number ticking. 9 more taps to the cart."}}
+{"t":139.9,"issued":138.8,"cmd":"tap","args":{"x":300,"y":860},"shot":"040.png"}
+{"t":141.1,"issued":140,"cmd":"tap","args":{"x":300,"y":860},"shot":"041.png"}
+{"t":142.3,"issued":141.2,"cmd":"tap","args":{"x":300,"y":860},"shot":"042.png"}
+{"t":143.4,"issued":142.4,"cmd":"tap","args":{"x":300,"y":860},"shot":"043.png"}
+{"t":144.7,"issued":143.6,"cmd":"tap","args":{"x":300,"y":860},"shot":"044.png"}
+{"t":145.9,"issued":144.8,"cmd":"tap","args":{"x":300,"y":860},"shot":"045.png"}
+{"t":147.1,"issued":146.1,"cmd":"tap","args":{"x":300,"y":860},"shot":"046.png"}
+{"t":148.3,"issued":147.3,"cmd":"tap","args":{"x":300,"y":860},"shot":"047.png"}
+{"t":149.5,"issued":148.5,"cmd":"tap","args":{"x":300,"y":860},"shot":"048.png"}
+{"t":152.4,"issued":152.4,"cmd":"note","args":{"text":"That should be 42 coins - buying the wheeled cart now."}}
+{"t":153.5,"issued":152.5,"cmd":"tap","args":{"x":300,"y":1178},"shot":"049.png"}
+{"t":159.8,"issued":159.8,"cmd":"note","args":{"text":"Wow - now it's a cart on wheels and there was a burst of golden popcorn confetti all around it. That felt like a real reward! Leftover 1 coin, next upgrade 69 (looks like a bigger stand). Let me see what a tap gives now."}}
+{"t":160.9,"issued":159.9,"cmd":"tap","args":{"x":300,"y":760},"shot":"050.png"}
+{"t":168.2,"issued":168.2,"cmd":"note","args":{"text":"Now +3 per tap (a faint +3 floated up) and popcorn pieces bounce out. NEW: a yellow clock badge saying 3:00 appeared under my coins. Is it a countdown? A round timer? Tapping more to see if it moves."}}
+{"t":169.4,"issued":168.4,"cmd":"tap","args":{"x":300,"y":760},"shot":"051.png"}
+{"t":170.6,"issued":169.5,"cmd":"tap","args":{"x":300,"y":760},"shot":"052.png"}
+{"t":171.9,"issued":170.8,"cmd":"tap","args":{"x":300,"y":760},"shot":"053.png"}
+{"t":179.2,"issued":179.2,"cmd":"note","args":{"text":"13 coins. The clock badge went UP from 3:00 to 3:11 - so it's not a countdown, it seems to be how long I've been playing. Not sure why it only showed up after the cart. Still curious what the 69 stand looks like."}}

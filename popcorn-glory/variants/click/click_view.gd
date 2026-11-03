@@ -53,7 +53,9 @@ func _impact(p: Dictionary) -> void:
 	squash(0.0, 9.0)
 	var n := int(p["count"])
 	var lift := 1.0 + 0.04 * mini(streak, 10)
-	fx.burst(machine_top(), mini(n, 16) if not reduced_motion else 1, machine_size() / 900.0, rng,
+	# At least four pieces fly: one piece was invisible in a still frame (Step 08,
+	# blind player: 'a tap mostly felt like a number ticking up'). Money is unchanged.
+	fx.burst(machine_top(), clampi(n, 4, 16) if not reduced_motion else 1, machine_size() / 900.0, rng,
 		PopPalette.CREAM, 0.9 + 0.03 * mini(streak, 10), lift)
 	# A streak climbs a little in pitch: the hand hears its rhythm.
 	_sound("pop_%d" % (1 + rng.randi() % 3), 1.0 + 0.03 * mini(streak, 10) + rng.randf_range(-0.04, 0.04))

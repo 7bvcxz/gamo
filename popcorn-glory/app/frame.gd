@@ -22,6 +22,10 @@ var log_button := PopIconButton.new()
 var money_view := PopMoneyView.new()
 var upgrade_button := PopUpgradeButton.new()
 var play: PopPlayView
+## ?trial=1: the three-minute playtest protocol (design/PLAYTEST.md) -- the
+## 3:00 clock appears for the tester. Without it a player never sees a clock:
+## all three blind players of Step 08 read it as a deadline or a mystery.
+var trial := false
 var dev := false:
 	set(v):
 		dev = v
@@ -109,6 +113,11 @@ func refresh(rules: PopRules, p_clock_ms: int) -> void:
 	clock_ms = p_clock_ms
 
 
+## Dev mode always; the trial protocol once three minutes have passed; else never.
+func shows_clock() -> bool:
+	return dev or (trial and clock_ms >= PopSession.THREE_MINUTES_MS)
+
+
 func _draw() -> void:
 	var w := size.x
 	var col := minf(w, 720.0)
@@ -117,7 +126,7 @@ func _draw() -> void:
 	draw_rect(Rect2(0, 0, w, 140), Color(1, 1, 1, 0.18))
 	draw_rect(Rect2(0, size.y * 0.62, w, size.y * 0.38), Color(PopPalette.BG_DEEP, 0.35))
 	var three := clock_ms >= PopSession.THREE_MINUTES_MS
-	if dev or three:
+	if shows_clock():
 		# The clock: dev mode always; for everyone once three minutes have passed.
 		var font := ThemeDB.fallback_font
 		var s := clock_ms / 1000
