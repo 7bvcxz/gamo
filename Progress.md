@@ -449,6 +449,14 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
   Web Ctrl 줌은 1.0.45 export에서 Chromium으로 확인했다(브라우저 확대가 아니라 게임이 받는다).
 - **다음**: 사람의 플레이, 벨트 드래그 설치, 병목 한 곳만 말하는 막힘 표시.
 
+## popcorn-glory
+
+팝콘 기계 하나·돈 하나·행동 하나로 시작하는 새 게임(2026-11-03~, GitHub Issues `Popcorn Step NN`).
+진행 기록의 원본은 `popcorn-glory/PROGRESS.md`이고 여기에는 단계만 적는다.
+
+- Step 01 (#98): 문서만 — 도구 실측(`design/TOOLS.md`), 절차(`design/WORKFLOW.md`), 10·30·60·180초 기준(`FUN_FIRST.md`).
+  `project.godot`은 Step 03에서 생긴다. Godot Web의 `user://`는 도메인 전체가 공유하는 `/userfs`라 이 게임은 저장하지 않는다.
+
 ## 다음 작업
 
 - 다음 기능 방향은 사용자와 함께 정한다. (기존에 적혀 있던 자원 설계·인벤토리·운송 항목은 0.2.x~0.4.x에서 모두 구현 완료되어 2026-07-26에 정리)
