@@ -47,6 +47,41 @@ test('B: the sizzle while held, and a perfect pop', async ({ pop }) => {
   expect(outcome, `an outcome sound (${JSON.stringify(s.run.outcomes)})`).toBeGreaterThan(0);
 });
 
+// Step 12: the mix leaves headroom. A perfect pop starts three sounds at once (pop, ding, coin);
+// until 0.12.2 their sum peaked at 1.91 -- the browser hard-clips above 1.0 -- on every perfect,
+// on the desktop and on a real S23. Now every sound plays HEADROOM_DB under full scale.
+test('stand: a perfect pop, and the busy top stand, do not clip', async ({ pop }, testInfo) => {
+  test.setTimeout(120_000);
+  await pop.open('./#stand');
+  await pop.tap('play');
+  await pop.page.waitForTimeout(1500);
+  let worst = { rms: 0, peak: 0 };
+  for (let i = 0; i < 3; i++) {
+    const heard = await listen(pop.page);
+    await pop.holdGold();
+    const m = await heard(900);
+    worst = { rms: Math.max(worst.rms, m.rms), peak: Math.max(worst.peak, m.peak) };
+    await pop.page.waitForTimeout(400);
+  }
+  expect(worst.rms, `heard: rms ${worst.rms.toFixed(3)}`).toBeGreaterThan(LOUD);
+  expect(worst.peak, `a fresh perfect: peak ${worst.peak.toFixed(3)} (1.0 = full scale)`).toBeLessThan(1.0);
+  await pop.call('dev_level', 14);
+  await pop.call('dev_money', 1e9);
+  for (let i = 0; i < 7; i++) { await pop.tap('auto'); await pop.page.waitForTimeout(150); }
+  await pop.tap('recipe_caramel');
+  await pop.page.waitForTimeout(500);
+  let busy = { rms: 0, peak: 0 };
+  for (let i = 0; i < 4; i++) {
+    const heard = await listen(pop.page);
+    await pop.holdGold();
+    const m = await heard(1500);
+    busy = { rms: Math.max(busy.rms, m.rms), peak: Math.max(busy.peak, m.peak) };
+  }
+  testInfo.annotations.push({ type: 'mix', description: `fresh perfect rms ${worst.rms.toFixed(3)} peak ${worst.peak.toFixed(3)}; top stand rms ${busy.rms.toFixed(3)} peak ${busy.peak.toFixed(3)}` });
+  expect(busy.peak, `the top stand with the helper: peak ${busy.peak.toFixed(3)}`).toBeLessThan(1.0);
+  expect(pop.errors).toEqual([]);
+});
+
 // Step 10: the stand -- shaking clinks, and the helper is heard popping by itself while the
 // hands are off the screen.
 test('stand: the shake clinks and the helper pops on its own', async ({ pop }, testInfo) => {

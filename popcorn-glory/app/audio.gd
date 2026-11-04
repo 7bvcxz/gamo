@@ -18,6 +18,13 @@ const DUCKERS := ["boom", "fanfare"]
 const DUCK_DB := -8.0
 const DUCK_MS := 450
 const POOL := 10
+## Every sound plays this far under full scale. The files are normalised to
+## about -2 dBFS each, and a perfect pop starts three of them at once (pop,
+## ding, coin): the sum peaked at 1.91 -- nearly twice full scale -- and the
+## browser hard-clips above 1.0, on every perfect, since Step 05 (measured on
+## the page's output in Step 12, on the desktop and on a real S23). -8 dB keeps
+## that moment near 0.76. The volume button's steps are on top of this.
+const HEADROOM_DB := -8.0
 const MIN_GAP_MS := 45
 
 var muted := false
@@ -44,6 +51,7 @@ func _ready() -> void:
 		_players.append(p)
 	_loop = AudioStreamPlayer.new()
 	_loop.bus = &"SFX"
+	_loop.volume_db = HEADROOM_DB
 	add_child(_loop)
 	set_muted(muted)
 
@@ -86,7 +94,7 @@ func play(name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
 	_next = (_next + 1) % POOL
 	p.stream = _streams[name]
 	p.pitch_scale = clampf(pitch, 0.5, 2.0)
-	p.volume_db = volume_db
+	p.volume_db = volume_db + HEADROOM_DB
 	p.play()
 
 
