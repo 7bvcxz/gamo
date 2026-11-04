@@ -32,6 +32,9 @@ var _loads: Array[float] = []
 var _helper_kick := 0.0
 var _recipe_flash := 0.0
 var _auto_flash := 0.0
+## A press while the machine cools: a puff and a soft thud (Step 11: a blind
+## player lost presses 'silently' during cheese's 1.3 s cooling).
+var _cool_deny := 0.0
 ## The helper kettle is drawn once into its own texture and shown as one
 ## sprite (Step 11: as a live machine it cost ~65 draw calls a frame, and the
 ## stand's peak measured 269 against the budget of 200). The viewport renders
@@ -134,6 +137,15 @@ func _gui_input(event: InputEvent) -> void:
 
 
 ## Side to side while heating: each swing past SHAKE_PX is one shake.
+func _press() -> void:
+	if rules != null and int(_s()["cooldown_left"]) > 0 and not bool(_s()["heating"]):
+		_cool_deny = 1.0
+		_sound("thud", 1.4, -12.0)
+		if not reduced_motion:
+			fx.smoke(machine_top(), 3, machine_size() / 900.0, rng)
+	super()
+
+
 func _track_shake(x: float) -> void:
 	if rules == null:
 		return
@@ -248,6 +260,7 @@ func _process(delta: float) -> void:
 	_helper_kick = maxf(0.0, _helper_kick - delta * 3.0)
 	_recipe_flash = maxf(0.0, _recipe_flash - delta * 2.0)
 	_auto_flash = maxf(0.0, _auto_flash - delta * 1.5)
+	_cool_deny = maxf(0.0, _cool_deny - delta * 3.0)
 	for b: Dictionary in _bags:
 		b["age"] = float(b["age"]) + delta
 		if not bool(b["arrived"]) and float(b["age"]) >= 1.0:
@@ -286,7 +299,7 @@ func _shake() -> Vector2:
 	var s := super()
 	if reduced_motion:
 		return s
-	return s + Vector2(sin(_t * 45.0) * 9.0 * _wobble, 0)
+	return s + Vector2(sin(_t * 45.0) * 9.0 * _wobble + sin(_t * 60.0) * 6.0 * _cool_deny, 0)
 
 
 # -- drawing ---------------------------------------------------------------
@@ -299,6 +312,7 @@ func _draw_under(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 	super(ci, base, size_px)
 	var st := _s()
+	_draw_cooling(ci, st)
 	if bool(st["unlocked"]["shake"]):
 		_draw_crank(ci, base, size_px, st)
 	if bool(st["unlocked"]["recipes"]):
@@ -438,6 +452,22 @@ func _draw_shakers(ci: CanvasItem, st: Dictionary) -> void:
 			ci.draw_arc(cc, 9, 0, TAU, 12, PopPalette.INK, 2.0)
 			ci.draw_line(cc, cc + Vector2(0, -6), PopPalette.INK, 2.0)
 			ci.draw_line(cc, cc + Vector2(5, 0), PopPalette.INK, 2.0)
+
+
+## While the machine cools, a grey arc over the ring drains away from the top:
+## 'wait, then press' -- the same seconds the cheese jar's clock promises.
+func _draw_cooling(ci: CanvasItem, st: Dictionary) -> void:
+	var left := float(st["cooldown_left"])
+	if left <= 0.0 or bool(st["heating"]):
+		return
+	var total := maxf(1.0, float(st["cooldown_ms"]))
+	var k := clampf(left / total, 0.0, 1.0)
+	var c := machine_centre()
+	var r := ring_radius()
+	var top := -PI / 2
+	var width := machine_size() * 0.045
+	var a := Color(0.35, 0.33, 0.33, 0.55 + 0.35 * _cool_deny)
+	ci.draw_arc(c, r, top, top + TAU * k, 48, a, width * (1.25 + 0.6 * _cool_deny))
 
 
 ## The helper's own small ring: its batch filling round the clock, the same

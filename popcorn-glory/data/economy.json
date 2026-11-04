@@ -36,7 +36,7 @@
     "show_max_ms": 3000
   },
   "stand": {
-    "_doc": "Step 10, the Popcorn Stand (design/SLICE.md): B's hold and release, plus shake (unlock.shake: `turns` direction changes in one heat = an even pop x shake.mult; the motor gives motor_mult to every batch, so the hand's shake stays worth more), recipes (unlock.recipes: mult x the batch, window_scale x the gold, burn_scale x the time from the gold to the burn, cooldown_add_ms after a pop), edge_grace_ms (a release this close outside the drawn gold still counts as perfect) and the automation ladder (unlock.auto: a motor that shakes every batch, then a helper kettle paying share x batch[L] every cycle_ms). costs: the main machine's prices, level by level -- B's first four, then stretched for a 10-20 minute session.",
+    "_doc": "Step 10, the Popcorn Stand (design/SLICE.md): B's hold and release, plus shake (unlock.shake: `turns` direction changes in one heat = an even pop x shake.mult; the motor gives motor_mult to every batch and the hand's shake multiplies on top), recipes (unlock.recipes: mult x the batch, window_scale x the gold, burn_scale x the time from the gold to the burn, cooldown_add_ms after a pop), edge_grace_ms (a release this close outside the drawn gold still counts as perfect) and the automation ladder (unlock.auto: a motor that shakes every batch, then a helper kettle paying share x batch[L] every cycle_ms). costs: the main machine's prices, level by level -- B's first four, then stretched for a 10-20 minute session.",
     "batch": [5, 8, 13, 20, 33, 52, 84, 134, 215, 344, 550, 880, 1400, 2240, 3580],
     "max_level": 14,
     "window_start_ms": 1400,

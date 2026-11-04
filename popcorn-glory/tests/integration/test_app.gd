@@ -319,3 +319,23 @@ func test_the_stand_resumes_after_back_and_restart_starts_over() -> void:
 	app.back()
 	app.open("stand")
 	assert_eq(app.rules.level, 0, "and nothing old comes back after a restart")
+
+
+## Step 11: a press while the stand cools is answered (a puff, a thud, the
+## machine twitches) and logged as refused -- not silently dropped.
+func test_a_press_while_cooling_is_answered() -> void:
+	app.open("stand")
+	await tree.process_frame
+	app.dev_level(5)
+	app.on_command("recipe", {"type": "recipe", "id": "cheese"})
+	var play: PopPlayView = app.frame.play
+	var c := play.size / 2
+	_mouse(c, true)
+	app.dev_advance(1600)
+	_mouse(c, false)
+	assert_true(int(app.rules.state()["cooldown_left"]) > 0, "cooling (cheese: longer)")
+	_mouse(c, true)
+	_mouse(c, false)
+	assert_true(float(play.get("_cool_deny")) > 0.0, "the view answers the press")
+	var refused := app.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "refused" and String(l["data"].get("reason", "")) == "err.cooling")
+	assert_eq(refused.size(), 1, "and the log says why")

@@ -163,19 +163,21 @@ func even_now() -> bool:
 	return motor() or shakes >= _turns()
 
 
-## The shake's factor for this batch: the hand's three swings x shake.mult, or
-## else the motor's x motor_mult (Step 11: a blind player found the motor
-## "quietly removed the crank skill, the most hands-on part" -- the hand now
-## stays worth more than the machine, as the issue asks of every automation).
+## The shake's factor for this batch: the motor's x motor_mult on every batch,
+## and the hand's three swings x shake.mult on top. Step 11 tried both ways:
+## when the motor replaced the hand, a blind player said it "quietly removed
+## the crank skill"; when the hand replaced the motor, the next said the motor
+## "gave me nothing... a wasted 260". Stacked, each is worth something.
 func _shake_mult() -> float:
 	var sh: Dictionary = _t()["shake"]
 	if not unlocked("shake"):
 		return 1.0
-	if shakes >= _turns():
-		return float(sh["mult"])
+	var m := 1.0
 	if motor():
-		return float(sh.get("motor_mult", sh["mult"]))
-	return 1.0
+		m *= float(sh.get("motor_mult", sh["mult"]))
+	if shakes >= _turns():
+		m *= float(sh["mult"])
+	return m
 
 
 func _scale_batch(n: int, kind: String) -> int:
@@ -277,4 +279,5 @@ func state() -> Dictionary:
 	s["helper_earned"] = helper_earned
 	s["even_pops"] = even_pops
 	s["hand_even_pops"] = hand_even_pops
+	s["cooldown_ms"] = _cooldown_ms()
 	return s

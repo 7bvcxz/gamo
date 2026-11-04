@@ -1,0 +1,154 @@
+{"t":0.1,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":8.9,"issued":8.9,"cmd":"note","args":{"text":"First look: a red popcorn machine in the middle with a colored ring around it (red, yellow, blue, pale segments) - looks like a timing/heat gauge. A white hand-ish thing sits on the machine, suggesting 'tap here'. Top: back arrow, coin counter 0, sound, restart. A little person stands on a red line top-right - maybe a customer walking in. Bottom card: a bucket icon, 30 coins, '+10 > +16' and an up arrow - an upgrade for popcorn value, I can't afford it. I expect tapping the machine pops popcorn, and the ring tells me when to tap (maybe hit the yellow zone)."}}
+{"t":11.8,"issued":11.1,"cmd":"tap","args":{"x":300,"y":780},"shot":"002.png"}
+{"t":17.2,"issued":16.5,"cmd":"tap","args":{"x":300,"y":780},"shot":"003.png"}
+{"t":23.2,"issued":23.2,"cmd":"note","args":{"text":"Each tap gives +1 coin and a popcorn box flies up toward the customer line. There's a needle at 12 o'clock on the ring, and arrows on the blue part point clockwise. My guess: holding heats the machine and the needle travels blue -> yellow -> red; yellow is the sweet spot, red burns. Trying a 2-second hold."}}
+{"t":25.8,"issued":23.3,"cmd":"hold","args":{"x":300,"y":780,"s":2},"shot":"004.png","held_ms":2051}
+{"t":34.1,"issued":34.1,"cmd":"note","args":{"text":"Hold 2s gave +5 and the needle swept clockwise all the way round into the red zone at ~10 o'clock. The bottom card is filling with yellow, like a progress bar toward the 30-coin upgrade. So holding = cooking longer. Red might be burning. Try shorter: 1.5s to land in yellow."}}
+{"t":36.2,"issued":34.1,"cmd":"hold","args":{"x":300,"y":780,"s":1.5},"shot":"005.png","held_ms":1528}
+{"t":43.1,"issued":43.1,"cmd":"note","args":{"text":"Yes! 1.5s landed right at the start of the yellow arc and paid +10 with a golden burst of popcorn. That matches the upgrade '+10 > +16' - the upgrade raises the perfect-release payout. Satisfying. Going for another, a touch longer (1.6s) to hit the middle of yellow."}}
+{"t":45.3,"issued":43.1,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"006.png","held_ms":1637}
+{"t":50.8,"issued":50.8,"cmd":"note","args":{"text":"Another +10 in the middle of yellow, 27 coins. The card is nearly full of yellow. Odd: the little person on the top line hasn't moved, and a striped popcorn box floats just below the line - is it delivering? Not sure what that top strip is. One more perfect hold then buy."}}
+{"t":53,"issued":50.9,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"007.png","held_ms":1630}
+{"t":57.7,"issued":57.7,"cmd":"note","args":{"text":"37 coins. The upgrade card lit up bright yellow with a red arrow and red +16 - clearly 'you can buy this now'. Nice clear signal. Buying it."}}
+{"t":58.4,"issued":57.8,"cmd":"tap","args":{"x":300,"y":1180},"shot":"008.png"}
+{"t":64.5,"issued":64.5,"cmd":"note","args":{"text":"Bought it: the machine got a striped awning and grew a little, coins 37->7. Next upgrade: 54 coins, +16 > +26, and the icon is now a cart on wheels. Simple loop so far: hold, release in yellow, buy. Let's see if a perfect release now pays 16."}}
+{"t":66.7,"issued":64.5,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"009.png","held_ms":1637}
+{"t":72.8,"issued":72.8,"cmd":"note","args":{"text":"+16 confirmed. Feels good - the payoff grows visibly. I'm wondering about the person on the top line and the floating popcorn box. And what does a tap (+1) or burnt (red) do vs perfect? Doing two more perfect holds, then I'll experiment with letting it go into red on purpose."}}
+{"t":75,"issued":72.8,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"010.png","held_ms":1629}
+{"t":77.3,"issued":75.1,"cmd":"hold","args":{"x":300,"y":780,"s":1.6},"shot":"011.png","held_ms":1644}
+{"t":82.3,"issued":82.3,"cmd":"note","args":{"text":"55 coins, can buy the cart (54). Before buying, curiosity: what happens if I hold way too long - does it burn, lose coins, smoke? Holding 3.5s."}}
+{"t":86.4,"issued":82.4,"cmd":"hold","args":{"x":300,"y":780,"s":3.5},"shot":"012.png","held_ms":3539}
+{"t":92.6,"issued":92.6,"cmd":"note","args":{"text":"Burnt it! Big black smoke cloud over the machine, no payout from the cook. But coins went 55->57 and the person on the top line is now holding a striped popcorn box with a coin above their head - so the floating box did finally reach the customer and they paid. So the top strip is a delivery/customer lane, slow. Waiting a second to see if the smoke blocks the machine."}}
+{"t":94.8,"issued":92.7,"cmd":"wait","args":{"s":2},"shot":"013.png"}
+{"t":101.2,"issued":101.2,"cmd":"note","args":{"text":"Smoke cleared. The ring now looks washed out - the yellow arc is white. Maybe a penalty/cooldown after burning? Buying the cart upgrade (54) anyway."}}
+{"t":102,"issued":101.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"014.png"}
+{"t":107.7,"issued":107.7,"cmd":"note","args":{"text":"Machine became a popcorn cart on wheels - nice visible growth. Next: 97 coins for +26 > +40. Ring's yellow is still white/washed. Holding 1.6s to see if perfect still works."}}
+{"t":109.9,"issued":107.7,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"015.png","held_ms":1639}
+{"t":116.3,"issued":116.3,"cmd":"note","args":{"text":"+26, perfect works. The pale ring was just the idle look; it colors in while cooking. I'm getting a rhythm: press, count to about one-and-a-half, let go. Grinding three more for the next upgrade."}}
+{"t":118.5,"issued":116.3,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"016.png","held_ms":1628}
+{"t":120.8,"issued":118.6,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"017.png","held_ms":1660}
+{"t":123.2,"issued":120.9,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"018.png","held_ms":1688}
+{"t":128.1,"issued":128.1,"cmd":"note","args":{"text":"107 coins, buying the +40 upgrade. Wondering whether the yellow zone moves or shrinks later - so far it hasn't, which makes it a bit easy."}}
+{"t":128.9,"issued":128.1,"cmd":"tap","args":{"x":300,"y":1180},"shot":"019.png"}
+{"t":135.6,"issued":135.6,"cmd":"note","args":{"text":"Big celebration this time - sparkles and a popcorn shower across the screen! A second customer (green) appeared on the top line. The cart grew lights and a round dial/knob with a red tip on its right side - new part? Maybe something I can tap or turn. Next upgrade 175 for +66, with a star icon. Let me wait a moment and look."}}
+{"t":136.8,"issued":135.6,"cmd":"wait","args":{"s":1},"shot":"020.png"}
+{"t":142.5,"issued":142.5,"cmd":"note","args":{"text":"A hand hint is back on the cart, now with left and right arrows - telling me to swipe sideways. Probably related to the new dial. Trying a left-to-right swipe across the cart."}}
+{"t":143.9,"issued":142.6,"cmd":"drag","args":{"x1":200,"y1":770,"x2":420,"y2":770},"shot":"021.png"}
+{"t":153.5,"issued":153.5,"cmd":"note","args":{"text":"The swipe counted as a short cook: needle stopped in blue at ~2 o'clock, +5. And the red knob on the dial rotated from pointing right to pointing down - so the dial is a crank that turns when I swipe. Maybe I'm supposed to stir back and forth while cooking? Trying a back-and-forth wiggle for ~1.6s."}}
+{"t":156,"issued":153.6,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"022.png","held_ms":1657}
+{"t":162.3,"issued":162.3,"cmd":"note","args":{"text":"Whoa, +52! The wiggle landed in yellow and paid 52, more than the +40 the card promised. So cranking while cooking adds a bonus. To be sure, comparing with a plain still hold of 1.6s now (expect +40)."}}
+{"t":164.8,"issued":162.4,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"023.png","held_ms":1693}
+{"t":171.3,"issued":171.3,"cmd":"note","args":{"text":"Plain hold = +40, wiggle = +52. Confirmed: stirring/cranking adds ~30%. The hint was right there with the arrows but I only got why by trying. Does more wiggling give more? Trying a faster wiggle - 8 passes in 1.6s."}}
+{"t":173.6,"issued":171.4,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"024.png","held_ms":1631}
+{"t":179.8,"issued":179.8,"cmd":"note","args":{"text":"Faster wiggle still +52 - so the stir bonus is fixed, not 'more is better'. Fine. 159 coins, one more stirred cook then buy the star upgrade."}}
+{"t":182.1,"issued":179.9,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"025.png","held_ms":1669}
+{"t":182.9,"issued":182.2,"cmd":"tap","args":{"x":300,"y":1180},"shot":"026.png"}
+{"t":190.5,"issued":190.5,"cmd":"note","args":{"text":"Bought the star level: a star sits on top now. A NEW card appeared above the upgrade: a blue gear card, 260 coins, 'x1.15' - a multiplier upgrade, I guess. Main upgrade is now 430 for +66 > +104. The beige customer just got a box and paid again (coin over their head). Grinding stirred cooks."}}
+{"t":192.7,"issued":190.5,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"027.png","held_ms":1631}
+{"t":195,"issued":192.8,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"028.png","held_ms":1626}
+{"t":197.2,"issued":195,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"029.png","held_ms":1626}
+{"t":204,"issued":204,"cmd":"note","args":{"text":"291 coins, +85 per stirred cook. The gear card lit up bright blue = affordable. Decision: gear (260, x1.15) or save for the 430 main upgrade? x1.15 is unclear - multiplier on payout? on speed? Buying the gear to find out."}}
+{"t":204.7,"issued":204,"cmd":"tap","args":{"x":300,"y":1045},"shot":"030.png"}
+{"t":213.2,"issued":213.2,"cmd":"note","args":{"text":"Gear bought: a little motor box got bolted onto the crank, and the main card jumped from +66 to +75 (that's the x1.15). A new blue card replaced it: 1,200 coins, a small cart icon, '+0 > +19  3.0s' - looks like an automatic second cart earning 19 every 3 seconds without me. That's a big goal. Main upgrade 430 first."}}
+{"t":215.7,"issued":213.3,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"031.png","held_ms":1700}
+{"t":218.2,"issued":215.8,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"032.png","held_ms":1689}
+{"t":220.7,"issued":218.3,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"033.png","held_ms":1699}
+{"t":223.2,"issued":220.8,"cmd":"path","args":{"s":1.6,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"034.png","held_ms":1702}
+{"t":233.4,"issued":233.4,"cmd":"note","args":{"text":"Hmm, 371 coins. My stirred cooks still pay +85, same as before the gear. The card says base is now +75, so I expected ~97 with stirring. Suspicion: the motor does the cranking for me now, so my wiggle adds nothing extra. Testing a plain still hold."}}
+{"t":235.8,"issued":233.5,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"035.png","held_ms":1644}
+{"t":243.7,"issued":243.7,"cmd":"note","args":{"text":"Plain hold = +75, stirred = +85. So after the gear, stirring only adds 10 instead of ~20 - my stirred total didn't change at all (85 before, 85 after). The gear basically paid me for stirring automatically. Slightly deflating: 260 coins for nothing, as a stirrer. Buying the 430 main upgrade now."}}
+{"t":244.5,"issued":243.8,"cmd":"tap","args":{"x":300,"y":1180},"shot":"036.png"}
+{"t":253.4,"issued":253.4,"cmd":"note","args":{"text":"New thing! Three jars on the left: yellow x1.0 (selected), brown x1.5, orange x1.35 with a clock. Looks like flavors/kernels with multipliers. Each has a little arc under it - wide for x1.0, tiny for x1.5 - I bet that's the size of the sweet spot: richer flavor = narrower yellow zone. Main upgrade now 1,050 (+119 > +193). Tapping the brown x1.5 jar to see the ring change."}}
+{"t":254.2,"issued":253.5,"cmd":"tap","args":{"x":52,"y":580},"shot":"037.png"}
+{"t":265.4,"issued":265.4,"cmd":"note","args":{"text":"Brown jar selected: the ring changed - the yellow arc moved later (about 9 to 10:30 o'clock) and got narrower; blue covers more. Main card now shows +179 for a perfect, x1.5 of 119. So: riskier timing, bigger payout. Yellow is later so I need a longer hold - guessing 1.9s."}}
+{"t":267.9,"issued":265.4,"cmd":"hold","args":{"x":300,"y":760,"s":1.9},"shot":"038.png","held_ms":1948}
+{"t":274.5,"issued":274.5,"cmd":"note","args":{"text":"+179 with brown at 1.9s! Needle landed near the late end of the yellow arc, close to burning - tense. That's more than double the old +85. Next: 1.8s with stirring for a safer middle plus the stir bonus."}}
+{"t":276.9,"issued":274.5,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"039.png","held_ms":1846}
+{"t":283.6,"issued":283.6,"cmd":"note","args":{"text":"+202 stirred with brown. Brown is clearly the better jar if I can hit the timing. 397 coins. Three more stirred brown cooks toward the 1,050 main upgrade."}}
+{"t":286.1,"issued":283.7,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"040.png","held_ms":1842}
+{"t":288.6,"issued":286.2,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"041.png","held_ms":1839}
+{"t":291,"issued":288.6,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"042.png","held_ms":1829}
+{"t":297.7,"issued":297.7,"cmd":"note","args":{"text":"1,003 coins, consistent +202s. It's getting a bit repetitive - same gesture every time. One more cook, then buy the main upgrade (1,050), then I want to try the orange x1.35 jar with the clock."}}
+{"t":300.2,"issued":297.8,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"043.png","held_ms":1838}
+{"t":301,"issued":300.2,"cmd":"tap","args":{"x":300,"y":1180},"shot":"044.png"}
+{"t":308.2,"issued":308.2,"cmd":"note","args":{"text":"Another big sparkle celebration, the cart widened, and a THIRD customer (teal) joined the line. The customers seem to be decoration/level markers - they slowly take boxes and pay small amounts. Main is 2,500 now (+289 > +462); auto cart 1,200 for +50/3s. Now trying the orange x1.35 jar with the clock."}}
+{"t":309,"issued":308.3,"cmd":"tap","args":{"x":52,"y":695},"shot":"045.png"}
+{"t":317.6,"issued":317.6,"cmd":"note","args":{"text":"Orange jar: the yellow arc is huge now - from about 5 o'clock to 9:30 - and blue is short. So the clock means 'quick' - forgiving and fast but x1.35 instead of x1.5 (card shows +260 vs +289). Trying a stirred 1.3s cook."}}
+{"t":319.6,"issued":317.7,"cmd":"path","args":{"s":1.3,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"046.png","held_ms":1350}
+{"t":329,"issued":329,"cmd":"note","args":{"text":"+294 from orange at just 1.3s - the needle only reached about 5:30 and it already counted as perfect, and the crank knob glowed yellow. Orange is faster AND paid well. This is the best jar for speed. Three more orange cooks at 1.4s, then buy the auto cart at 1,200."}}
+{"t":331.1,"issued":329,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"047.png","held_ms":1432}
+{"t":333.1,"issued":331.1,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"048.png","held_ms":1432}
+{"t":335.2,"issued":333.2,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"049.png","held_ms":1446}
+{"t":342.2,"issued":342.2,"cmd":"note","args":{"text":"1,037 coins, steady +294s from orange. One more and I'll buy the auto cart (1,200) - curious whether a second cart appears on screen and earns on its own while I idle."}}
+{"t":344.3,"issued":342.3,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"050.png","held_ms":1447}
+{"t":345,"issued":344.4,"cmd":"tap","args":{"x":300,"y":1045},"shot":"051.png"}
+{"t":351.9,"issued":351.9,"cmd":"note","args":{"text":"Bought the helper: a mini cart appeared on the right in a bubble with its own blue progress ring filling up - an automatic cooker. Its next upgrade is 3,600 (+50 > +58, 3.0s > 2.7s). Coins 131. Letting 4 seconds pass hands-off to see it pay."}}
+{"t":356.1,"issued":351.9,"cmd":"wait","args":{"s":4},"shot":"052.png"}
+{"t":364.1,"issued":364.1,"cmd":"note","args":{"text":"Helper works: 131 -> 281 in about 5s hands-off (three +50s). Satisfying to see coins rise while idle. Curious if tapping the mini cart bubble does anything (speed boost? open it?). Tapping it."}}
+{"t":364.9,"issued":364.2,"cmd":"tap","args":{"x":535,"y":385},"shot":"053.png"}
+{"t":371.7,"issued":371.7,"cmd":"note","args":{"text":"Tapping the mini cart just counted as a quick tap on my main machine (+1) - so the whole play area is the cook button. The mini cart is hands-off only. 432 coins. Back to orange stirred cooks toward 2,500."}}
+{"t":373.9,"issued":371.8,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"054.png","held_ms":1447}
+{"t":376,"issued":373.9,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"055.png","held_ms":1475}
+{"t":378.1,"issued":376.1,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"056.png","held_ms":1445}
+{"t":380.2,"issued":378.2,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"057.png","held_ms":1453}
+{"t":405,"issued":405,"cmd":"note","args":{"text":"Wait - 432 -> 1,270 over four cooks is too little. Looking back, only every other cook paid +294; the others show a faded needle and nothing. So right after a cook there's a cooldown and my next press is swallowed, OR the orange jar's clock means it needs to recharge. Nothing on screen told me my press was ignored. Testing: one cook, wait 1.5s, another cook."}}
+{"t":407.1,"issued":405.1,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"058.png","held_ms":1436}
+{"t":408.9,"issued":407.2,"cmd":"wait","args":{"s":1.5},"shot":"059.png"}
+{"t":411,"issued":409,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"060.png","held_ms":1437}
+{"t":420.9,"issued":420.9,"cmd":"note","args":{"text":"With a short pause between cooks both counted (+294 each). So there IS a brief cooldown after each cook, and presses during it vanish silently - I wasted maybe 4 cooks before noticing. Also the helper kept earning while I was thinking: 1,270 -> 2,014. Now 2,408; waiting 2s for the helper then buying the 2,500 main upgrade."}}
+{"t":423.2,"issued":421,"cmd":"wait","args":{"s":2},"shot":"061.png"}
+{"t":424,"issued":423.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"062.png"}
+{"t":431.5,"issued":431.5,"cmd":"note","args":{"text":"Upgrade bought - the cart now has TWO kettle globes inside. Perfect cook is +416, and the helper went up to +80 too (its card says +80 > +93). Next main 5,800, helper 3,600. Cooking with a pause between each so none are swallowed."}}
+{"t":433.7,"issued":431.6,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"063.png","held_ms":1442}
+{"t":435.1,"issued":433.7,"cmd":"wait","args":{"s":1.2},"shot":"064.png"}
+{"t":437.2,"issued":435.2,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"065.png","held_ms":1436}
+{"t":438.6,"issued":437.3,"cmd":"wait","args":{"s":1.2},"shot":"066.png"}
+{"t":440.7,"issued":438.7,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"067.png","held_ms":1434}
+{"t":442.2,"issued":440.8,"cmd":"wait","args":{"s":1.2},"shot":"068.png"}
+{"t":450.8,"issued":450.8,"cmd":"note","args":{"text":"+470 per stirred orange cook, all three counted with pauses. 1,998 coins. I notice the helper's '+80' floats up by the customers - the helper sells straight to the line. Saving for the helper upgrade (3,600)."}}
+{"t":452.9,"issued":450.9,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"069.png","held_ms":1440}
+{"t":454.4,"issued":453,"cmd":"wait","args":{"s":1.2},"shot":"070.png"}
+{"t":456.5,"issued":454.4,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"071.png","held_ms":1437}
+{"t":457.9,"issued":456.5,"cmd":"wait","args":{"s":1.2},"shot":"072.png"}
+{"t":460,"issued":458,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"073.png","held_ms":1431}
+{"t":461.5,"issued":460.1,"cmd":"wait","args":{"s":1.2},"shot":"074.png"}
+{"t":470.1,"issued":470.1,"cmd":"note","args":{"text":"3,968 - helper upgrade is lit up blue. But it only adds +13 per helper cycle; the main upgrade (+416 > +667) is a way bigger jump for my active cooks. Skipping the helper, saving for 5,800. A little decision moment - I like that."}}
+{"t":472.1,"issued":470.1,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"075.png","held_ms":1452}
+{"t":473.6,"issued":472.2,"cmd":"wait","args":{"s":1.2},"shot":"076.png"}
+{"t":475.7,"issued":473.6,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"077.png","held_ms":1430}
+{"t":477.1,"issued":475.7,"cmd":"wait","args":{"s":1.2},"shot":"078.png"}
+{"t":479.2,"issued":477.2,"cmd":"path","args":{"s":1.4,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"079.png","held_ms":1441}
+{"t":480.7,"issued":479.3,"cmd":"wait","args":{"s":1.2},"shot":"080.png"}
+{"t":486,"issued":486,"cmd":"note","args":{"text":"5,858! Main upgrade glowing. Buying it - excited to see what the cart turns into next."}}
+{"t":486.8,"issued":486,"cmd":"tap","args":{"x":300,"y":1180},"shot":"081.png"}
+{"t":494.4,"issued":494.4,"cmd":"note","args":{"text":"Bought. This time the visual change is subtle - the cart looks a little wider, no new part I can spot. Next main jumps to 14,000 (+667 > +1,068); helper now +129. Costs are ramping fast. Trying the brown jar again to compare payout vs orange at this level."}}
+{"t":495.1,"issued":494.4,"cmd":"tap","args":{"x":52,"y":580},"shot":"082.png"}
+{"t":497.6,"issued":495.2,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"083.png","held_ms":1835}
+{"t":505.8,"issued":505.8,"cmd":"note","args":{"text":"Brown stirred = +838 (orange would be ~750 but quicker). Roughly a wash per second; brown is just more nerve-wracking near the red. The cart wheels turned gold now too. With ~1.5 min left I'll grab the helper upgrade (3,600) to see if the mini cart changes."}}
+{"t":508.3,"issued":505.9,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"084.png","held_ms":1848}
+{"t":509.8,"issued":508.4,"cmd":"wait","args":{"s":1.2},"shot":"085.png"}
+{"t":512.3,"issued":509.9,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"086.png","held_ms":1847}
+{"t":513.7,"issued":512.4,"cmd":"wait","args":{"s":1.2},"shot":"087.png"}
+{"t":519.9,"issued":519.9,"cmd":"note","args":{"text":"3,893. Buying the helper upgrade now (3,600)."}}
+{"t":520.7,"issued":520,"cmd":"tap","args":{"x":300,"y":1045},"shot":"088.png"}
+{"t":528.2,"issued":528.2,"cmd":"note","args":{"text":"Helper upgraded: the mini cart grew an awning and star like mine did, and a FOURTH customer (blue) joined the line. So customers seem to count my total upgrade level. Next helper is 11,000. A couple more brown cooks, then I'll peek at the back arrow before time runs out."}}
+{"t":530.7,"issued":528.3,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"089.png","held_ms":1843}
+{"t":532.2,"issued":530.8,"cmd":"wait","args":{"s":1.2},"shot":"090.png"}
+{"t":534.7,"issued":532.2,"cmd":"path","args":{"s":1.8,"points":[[200,770],[420,770],[200,770],[420,770],[200,770]]},"shot":"091.png","held_ms":1847}
+{"t":536.1,"issued":534.7,"cmd":"wait","args":{"s":1.2},"shot":"092.png"}
+{"t":542.7,"issued":542.7,"cmd":"note","args":{"text":"2,977 coins, 14,000 is out of reach in the last minute. Satisfying climb but it's become 'repeat the same gesture'. Peeking at the back arrow (top-left) to see if there's a menu or other places."}}
+{"t":543.5,"issued":542.8,"cmd":"tap","args":{"x":55,"y":58},"shot":"093.png"}
+{"t":564.4,"issued":564.4,"cmd":"note","args":{"text":"Surprise: the back arrow opens a list of four modes - a red Star card (ring + mini helper cart, looks like the one I was playing), A (tap with popcorn bursting), B (ring only), C (a row of dots and a star). So this is a set of popcorn-cart variations. With under a minute left, peeking into C."}}
+{"t":565.2,"issued":564.4,"cmd":"tap","args":{"x":300,"y":1060},"shot":"094.png"}
+{"t":576.2,"issued":576.2,"cmd":"note","args":{"text":"Mode C starts fresh at 0 coins: a plain machine with a row of 8 empty circles above it - a combo meter? Tapping a few times to see."}}
+{"t":576.9,"issued":576.3,"cmd":"tap","args":{"x":300,"y":830},"shot":"095.png"}
+{"t":577.6,"issued":576.9,"cmd":"tap","args":{"x":300,"y":830},"shot":"096.png"}
+{"t":578.2,"issued":577.6,"cmd":"tap","args":{"x":300,"y":830},"shot":"097.png"}
+{"t":588.4,"issued":588.4,"cmd":"note","args":{"text":"In C each tap drops a corn kernel into one of the 8 circles, no coins yet - so you fill the 8 kernels and then something pops. A different rhythm: loading the machine instead of timing heat. Filling the rest."}}
+{"t":589.1,"issued":588.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"098.png"}
+{"t":589.9,"issued":589.2,"cmd":"tap","args":{"x":300,"y":830},"shot":"099.png"}
+{"t":590.6,"issued":590,"cmd":"tap","args":{"x":300,"y":830},"shot":"100.png"}
+{"t":591.4,"issued":590.7,"cmd":"tap","args":{"x":300,"y":830},"shot":"101.png"}
+{"t":592.1,"issued":591.4,"cmd":"tap","args":{"x":300,"y":830},"shot":"102.png"}
+{"t":592.4,"issued":592.2,"cmd":"look","args":{},"shot":"103.png"}

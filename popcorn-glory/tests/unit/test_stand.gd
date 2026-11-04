@@ -262,26 +262,30 @@ func test_buying_a_rung_mid_heat_leaves_the_heat_alone() -> void:
 	assert_eq(String(s.execute({"type": "release"})["outcome"]), "perfect", "and the release is judged as before")
 
 
-## Step 11: the motor shakes every batch a little (x motor_mult); the hand's
-## three swings still beat it (x mult) -- they replace the motor's, they do not stack.
-func test_the_hand_still_beats_the_motor_and_they_do_not_stack() -> void:
+## Step 11: the motor shakes every batch a little (x motor_mult) and the hand's
+## three swings multiply on top (x mult) -- so the motor is worth buying for a
+## player who shakes, and shaking is still worth doing with the motor. (Each
+## other way round, a blind player found one of the two worthless.)
+func test_the_hand_and_the_motor_stack() -> void:
 	var s: PopRules = Stand.new()
 	s.level = 4
 	var sh: Dictionary = s.economy.table("stand")["shake"]
-	assert_true(float(sh["motor_mult"]) > 1.0 and float(sh["motor_mult"]) < float(sh["mult"]), "the hand is worth more than the machine")
+	var plain := int(floor(s.economy.at("stand", "batch", 4) * 2.0))
+	var a0 := s.money
+	_hold_mid(s, 3)
+	assert_eq(s.money - a0, int(floor(plain * float(sh["mult"]))), "the hand alone: x mult")
 	s.money = int((s.economy.table("stand")["auto"] as Array)[0]["cost"])
 	s.execute({"type": "buy_auto"})
-	var plain := int(floor(s.economy.at("stand", "batch", 4) * 2.0))
 	var a := s.money
 	_hold_mid(s, 0)
 	assert_eq(s.money - a, int(floor(plain * float(sh["motor_mult"]))), "the motor alone: x motor_mult")
 	var b := s.money
 	_hold_mid(s, 3)
-	assert_eq(s.money - b, int(floor(plain * float(sh["mult"]))), "the hand's swings with the motor: x mult, not both")
-	assert_eq(int(s.state()["hand_even_pops"]), 1, "counted as the hand's")
+	assert_eq(s.money - b, int(floor(plain * float(sh["motor_mult"]) * float(sh["mult"]))), "the hand with the motor: both")
+	assert_true(s.money - b > int(floor(plain * float(sh["mult"]))), "so the motor adds something for a player who shakes")
+	assert_eq(int(s.state()["hand_even_pops"]), 2, "counted as the hand's")
 
 
-## A whole scripted session (presses, shakes, recipes, both cards, a helper)
 ## run with time cut three ways ends in exactly the same state.
 func _session(cut: int) -> Dictionary:
 	var s: PopRules = Stand.new()

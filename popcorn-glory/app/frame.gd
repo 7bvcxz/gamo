@@ -161,8 +161,14 @@ func _refresh_auto(rules: PopRules) -> void:
 	var ladder: Array = stand["auto"]
 	var c_now := float(st["helper_cycle_ms"]) / 1000.0
 	var c_next := float((ladder[rung] as Dictionary).get("cycle_ms", 0)) / 1000.0 if rung < ladder.size() else 0.0
-	auto_button.set_offer(kind, int(st["auto_cost"]), rules.money, rung + 1, int(st["helper_pays"]),
-		int(rules.call("helper_pays_for", rung + 1)), c_now, c_next, float((stand["shake"] as Dictionary).get("motor_mult", (stand["shake"] as Dictionary)["mult"])))
+	var mm := float((stand["shake"] as Dictionary).get("motor_mult", (stand["shake"] as Dictionary)["mult"]))
+	var now := int(st["helper_pays"])
+	var next := int(rules.call("helper_pays_for", rung + 1))
+	if kind == "motor":
+		# In money, like the main card (Step 11: 'x1.15 didn't say what it multiplies').
+		now = rules.payout(rules.level)
+		next = int(floor(now * mm))
+	auto_button.set_offer(kind, int(st["auto_cost"]), rules.money, rung + 1, now, next, c_now, c_next, mm)
 
 
 ## Dev mode always; the trial protocol once three minutes have passed; else never.

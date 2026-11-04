@@ -97,7 +97,7 @@ func _draw() -> void:
 	var gy := cy + fs * 0.92
 	var line := ""
 	if kind == "motor":
-		line = "x%s" % str(snappedf(mult, 0.01))
+		line = "+%s > +%s" % [PopMoneyView._format(gain_now), PopMoneyView._format(gain_next)] if gain_next > 0 else "x%s" % str(snappedf(mult, 0.01))
 	else:
 		line = "+%s > +%s   %.1fs" % [PopMoneyView._format(gain_now), PopMoneyView._format(gain_next), cycle_next]
 		if cycle_now > 0.0:
