@@ -83,6 +83,13 @@ async function touch(type, p) {
 async function snapshot() {
   const s = await page.evaluate(() => window.popcorn.state()).catch(() => null);
   if (s) fs.appendFileSync(states, JSON.stringify({ t: Math.round(elapsed() * 10) / 10, screen: s.screen, exp: s.exp, run: s.run, clock_ms: s.clock_ms, sound: s.sound }) + '\n');
+  // Each experiment's own log, kept as it grows (Step 10: a player went back to the chooser
+  // and opened A at 9:09, and the final game_log.json held only A's four inputs -- the stand
+  // run's lines were gone).
+  if (s && s.screen === 'play' && s.exp) {
+    const log = await page.evaluate(() => window.popcorn.call('log_document')).catch(() => null);
+    if (log) fs.writeFileSync(path.join(ctl, `game_log_${s.exp}.json`), JSON.stringify(log));
+  }
 }
 async function finish(reason) {
   if (finished) return;

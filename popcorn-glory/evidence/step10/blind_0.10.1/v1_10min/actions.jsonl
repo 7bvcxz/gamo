@@ -1,0 +1,106 @@
+{"t":0.3,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":13.3,"issued":13.3,"cmd":"note","args":{"text":"First look: a cute red popcorn machine in the middle with a ring around it (red, yellow, blue arc with arrows - looks like a timing/heat gauge). A little person stands on a red line at the top right, maybe a customer waiting. Coin counter 0 at top. Bottom card: a pot/hopper icon, 30 coins, +10 > +16, up arrow - an upgrade I can't afford yet. Back, sound, restart buttons on top. I think I tap the machine to make popcorn, maybe timing the tap when the marker is in the yellow zone. Going to tap the machine."}}
+{"t":16.7,"issued":15.7,"cmd":"tap","args":{"x":300,"y":770},"shot":"002.png"}
+{"t":24.7,"issued":24.7,"cmd":"note","args":{"text":"Tapped the machine: got +1 coin and a striped popcorn box slid onto the counter line toward the customer. A grey needle sits at the top of the ring next to the smoke icon. I'm guessing the needle runs clockwise: blue = cooking, yellow = perfect, red = burning, smoke = burnt. Tapping in the yellow should pay more. Let me watch where the needle goes."}}
+{"t":26.3,"issued":26,"cmd":"look","args":{},"shot":"003.png"}
+{"t":33.4,"issued":33.4,"cmd":"note","args":{"text":"Now the ring looks washed out: the blue arc is pale and the yellow is white, no needle. The box is gone and the customer is still there. Maybe the ring is a hold-to-heat gauge? I'll try holding my finger on the machine for 2 seconds to see if something fills."}}
+{"t":37.8,"issued":34.9,"cmd":"hold","args":{"x":300,"y":770,"s":2},"shot":"004.png","held_ms":2126}
+{"t":46,"issued":46,"cmd":"note","args":{"text":"Holding works! Held 2s, got +5 (now 6 coins). The needle had gone clockwise past the yellow into the red (about 10 o'clock). So holding heats the popcorn, the needle sweeps around and letting go pops it. Yellow should be the sweet spot, around 1.6-1.8 s. Also a yellow bar is filling along the bottom of the upgrade card. Trying a 1.6 s hold."}}
+{"t":50.2,"issued":47.6,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"005.png","held_ms":1763}
+{"t":56.2,"issued":56.2,"cmd":"note","args":{"text":"Nailed it: released in the yellow, +10 and golden popcorn sprayed everywhere - very satisfying! 16 coins. The upgrade card's yellow fill is like a progress bar toward 30. The upgrade says +10 > +16, so it raises the perfect payout. Going to do a few more 1.6 s holds."}}
+{"t":60.5,"issued":57.8,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"006.png","held_ms":1768}
+{"t":67.5,"issued":65,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"007.png","held_ms":1758}
+{"t":72.8,"issued":72.8,"cmd":"note","args":{"text":"36 coins. The upgrade card lit up bright yellow with a red arrow and red +16 - clearly saying 'buy me now'. Nice clear signal. Tapping it."}}
+{"t":75.3,"issued":74.4,"cmd":"tap","args":{"x":300,"y":1180},"shot":"008.png"}
+{"t":81.7,"issued":81.7,"cmd":"note","args":{"text":"Bought it: the machine grew a striped awning with bunting, the ring got a bit bigger, and the hopper icon now has wheels. Next upgrade 54 coins for +16 > +26. 6 coins left. The yellow zone looks a little wider now. Keep popping with 1.6 s holds."}}
+{"t":85.8,"issued":83.3,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"009.png","held_ms":1767}
+{"t":92.7,"issued":90.3,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"010.png","held_ms":1698}
+{"t":93,"issued":93,"cmd":"note","args":{"text":"+16 per perfect pop now. The customer keeps waiting at the right end of the counter and each box slides to them. Feels rhythmic: press, watch the needle sweep, let go in the yellow. Doing another."}}
+{"t":98.1,"issued":95.5,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"011.png","held_ms":1721}
+{"t":103,"issued":102.2,"cmd":"tap","args":{"x":300,"y":1180},"shot":"012.png"}
+{"t":109.6,"issued":109.6,"cmd":"note","args":{"text":"Second upgrade: now it's a popcorn cart on wheels, bigger, more popcorn inside. Next costs 97 for +26 > +40. Yellow zone grew again (now from about 6:30 to 8 o'clock). It seems upgrades are just 'bigger payout'. I wonder if there's more to do than hold and release - the back button, maybe other things. For now keep popping."}}
+{"t":113.8,"issued":111.5,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"013.png","held_ms":1656}
+{"t":120.9,"issued":118.7,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"014.png","held_ms":1640}
+{"t":121.6,"issued":121.6,"cmd":"note","args":{"text":"+26 on that one. I notice a little grey scoop/hopper appears at the top of the ring while it's cooking, and kernels show in the glass. Popping is fun for a while but so far it's the same move each time. Wondering if the yellow zone moves or the needle speeds up later."}}
+{"t":126.7,"issued":124.4,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"015.png","held_ms":1658}
+{"t":134.2,"issued":131.9,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"016.png","held_ms":1651}
+{"t":134.5,"issued":134.5,"cmd":"note","args":{"text":"78 coins after another +26. Odd: the popcorn box appears hanging just under the counter line rather than on top of it, sliding toward the customer. Maybe it flies up to the counter. Next pop should afford the 97 upgrade."}}
+{"t":137.9,"issued":137.2,"cmd":"tap","args":{"x":300,"y":1180},"shot":"017.png"}
+{"t":145.7,"issued":145.7,"cmd":"note","args":{"text":"Big moment! Third upgrade: sparkles everywhere, lights on the awning, popcorn rained across the screen, AND a second customer (green) showed up at the counter. Also a new thing: a round grey knob with a red handle stuck on the right side of the machine - looks like a crank or a gauge. Next upgrade 175 for +40 > +66 with a little star. I want to know what the knob does. I'll tap it."}}
+{"t":148.2,"issued":147.4,"cmd":"tap","args":{"x":438,"y":768},"shot":"018.png"}
+{"t":156,"issued":156,"cmd":"note","args":{"text":"Tapping the knob just counted as a quick tap on the machine: +1, a burnt-ish pop. So the knob isn't its own button, or it wants something else. It has a red handle like a crank. Let me try dragging the red handle downward like turning a crank."}}
+{"t":159.3,"issued":158,"cmd":"drag","args":{"x1":472,"y1":768,"x2":440,"y2":830},"shot":"019.png"}
+{"t":167.9,"issued":167.9,"cmd":"note","args":{"text":"Dragging the handle: the red handle turned and now points down, and I got +5 - but the needle was early in the blue, so I think the drag just counted as a short hold. Not sure the crank does anything on its own. Going back to the 1.6 s hold to see if the yellow still lines up after the ring grew."}}
+{"t":172.4,"issued":170.1,"cmd":"hold","args":{"x":300,"y":740,"s":1.6},"shot":"020.png","held_ms":1660}
+{"t":181.6,"issued":179.3,"cmd":"hold","args":{"x":300,"y":740,"s":1.6},"shot":"021.png","held_ms":1644}
+{"t":182.9,"issued":182.9,"cmd":"note","args":{"text":"+40 with the same 1.6 s hold. The two customers just stand at the end of the counter; boxes slide over to them. I don't see them leave or get impatient, so I'm not sure they matter beyond decoration. Grinding toward 175."}}
+{"t":189,"issued":187,"cmd":"hold","args":{"x":300,"y":740,"s":1.35},"shot":"022.png","held_ms":1398}
+{"t":197.2,"issued":197.2,"cmd":"note","args":{"text":"Experiment: let go a bit early (1.35 s). The needle stopped just short of the yellow, in the blue, and I got +20 instead of +40 with pale little bits instead of golden ones. So early = half pay, late (red) = small pay, smoke = 1. Clear enough from the colors. Back to 1.6 s."}}
+{"t":202.2,"issued":199.9,"cmd":"hold","args":{"x":300,"y":740,"s":1.6},"shot":"023.png","held_ms":1651}
+{"t":207.1,"issued":204.8,"cmd":"hold","args":{"x":300,"y":740,"s":1.6},"shot":"024.png","held_ms":1662}
+{"t":213.3,"issued":212.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"025.png"}
+{"t":222.5,"issued":222.5,"cmd":"note","args":{"text":"Fourth upgrade (175): machine is wider still, a gold star popped up on top, and a NEW card appeared above the old one: a gear icon, 260 coins, 'x1.3', in light blue. Main upgrade is now 430 for +66 > +104. I'm guessing the gear makes the machine faster (x1.3 speed) or multiplies coins. Blue color might connect to the blue part of the ring = cooking speed? Saving up. Interesting that a choice appeared."}}
+{"t":227.5,"issued":225.2,"cmd":"hold","args":{"x":300,"y":720,"s":1.6},"shot":"026.png","held_ms":1654}
+{"t":235.6,"issued":233.3,"cmd":"hold","args":{"x":300,"y":720,"s":1.6},"shot":"027.png","held_ms":1664}
+{"t":236.6,"issued":236.6,"cmd":"note","args":{"text":"+66 per perfect now. Both cards fill with color as I save (blue for the gear, yellow for the machine) - I like seeing two progress bars race. Going for the gear first since it's cheaper."}}
+{"t":242.4,"issued":240.1,"cmd":"hold","args":{"x":300,"y":720,"s":1.6},"shot":"028.png","held_ms":1688}
+{"t":250.2,"issued":247.8,"cmd":"hold","args":{"x":300,"y":720,"s":1.6},"shot":"029.png","held_ms":1689}
+{"t":255.6,"issued":255.6,"cmd":"note","args":{"text":"282 coins, the gear card is fully blue and outlined - buyable. Buying it to find out what x1.3 means."}}
+{"t":259.2,"issued":258.3,"cmd":"tap","args":{"x":300,"y":1045},"shot":"030.png"}
+{"t":267.7,"issued":267.7,"cmd":"note","args":{"text":"Bought the gear: a little blue motor box got attached under the knob, and the main card's payout jumped from +66 to +85 - so x1.3 was a coin multiplier. The top card changed into something new: a small cart icon, 1,200 coins, '+0 > +19  3.0s'. That reads like an automatic helper that earns +19 every 3 seconds without me. Expensive though. Main upgrade still 430 for +85 > +135."}}
+{"t":272.6,"issued":270.3,"cmd":"hold","args":{"x":300,"y":720,"s":1.6},"shot":"031.png","held_ms":1652}
+{"t":282.6,"issued":280.2,"cmd":"hold","args":{"x":300,"y":720,"s":1.65},"shot":"032.png","held_ms":1740}
+{"t":284.1,"issued":284.1,"cmd":"note","args":{"text":"+85 a pop now. The needle landed nearer the start of the yellow this time, so I'm nudging my hold to 1.65 s to stay centered. The crank handle seems to turn a bit with each pop. Saving for the 430 machine upgrade before the 1,200 helper."}}
+{"t":289.8,"issued":287.5,"cmd":"hold","args":{"x":300,"y":720,"s":1.65},"shot":"033.png","held_ms":1694}
+{"t":297.7,"issued":295.4,"cmd":"hold","args":{"x":300,"y":720,"s":1.65},"shot":"034.png","held_ms":1718}
+{"t":299.3,"issued":299.3,"cmd":"note","args":{"text":"277 then another pop. Honest feeling: the golden burst is still nice but the loop is getting repetitive - same hold every time and the needle speed hasn't changed. I'm motivated mainly by watching what the next upgrade turns the cart into."}}
+{"t":305.2,"issued":302.8,"cmd":"hold","args":{"x":300,"y":720,"s":1.65},"shot":"035.png","held_ms":1721}
+{"t":311.2,"issued":310.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"036.png"}
+{"t":321.2,"issued":321.2,"cmd":"note","args":{"text":"Fifth upgrade (430): flags along the awning, and a whole new column on the left: three jars. Yellow x1.0 (selected), brown x1.5 with a tiny arc under it, orange x1.35 with a clock and a wider arc. I read these as popcorn kinds/flavors: richer ones pay more, and the little arc probably shows how wide the sweet spot is (x1.5 = narrow, harder). The clock one might cook slower. Main upgrade now 1,050 for +135 > +218; the helper card now says +31 every 3 s. Trying the x1.5 jar."}}
+{"t":324.5,"issued":323.7,"cmd":"tap","args":{"x":52,"y":585},"shot":"037.png"}
+{"t":333.8,"issued":333.8,"cmd":"note","args":{"text":"Picked the brown x1.5 jar: the ring rearranged - blue now runs most of the way round, the yellow moved up to about 9-11 o'clock, and the red is just a short bit before the top. So caramel takes longer to cook and the burn comes quickly after. Payout shows +202. Earlier a 2 s hold reached about 10 o'clock, so I'll try 2.0 s."}}
+{"t":339.1,"issued":336.4,"cmd":"hold","args":{"x":300,"y":720,"s":2},"shot":"038.png","held_ms":2061}
+{"t":347.3,"issued":347.3,"cmd":"note","args":{"text":"Overshot: needle ended at 11 o'clock in the red, +101 (half of 202) and darker brown bits. Still more than a perfect butter pop (+135)? No, less. Yellow looks like it spans about 8 to 10:30. Trying 1.8 s."}}
+{"t":352.4,"issued":350,"cmd":"hold","args":{"x":300,"y":720,"s":1.8},"shot":"039.png","held_ms":1833}
+{"t":360.3,"issued":360.3,"cmd":"note","args":{"text":"1.8 s = +202 perfect caramel pop, needle just inside the yellow near 9:45. That's 50% more per pop for ~0.15 s more holding - a good trade. This new layer (choosing a flavor = choosing timing and risk) made the game feel fresh again. Continuing with caramel."}}
+{"t":365.2,"issued":362.8,"cmd":"hold","args":{"x":300,"y":720,"s":1.8},"shot":"040.png","held_ms":1854}
+{"t":370.5,"issued":367.9,"cmd":"hold","args":{"x":300,"y":720,"s":1.8},"shot":"041.png","held_ms":1867}
+{"t":377.5,"issued":377.5,"cmd":"note","args":{"text":"724 coins. Both cards are filling nicely. I'll buy the 1,050 machine upgrade first since the helper's payout seems to grow with the machine level (+19 became +31 when I upgraded). Two more pops."}}
+{"t":382.6,"issued":380.1,"cmd":"hold","args":{"x":300,"y":720,"s":1.8},"shot":"042.png","held_ms":1910}
+{"t":388,"issued":385.4,"cmd":"hold","args":{"x":300,"y":720,"s":1.8},"shot":"043.png","held_ms":1910}
+{"t":394.8,"issued":393.9,"cmd":"tap","args":{"x":300,"y":1180},"shot":"044.png"}
+{"t":404.9,"issued":404.9,"cmd":"note","args":{"text":"Sixth upgrade (1,050): sparkles again, a third customer (teal) joined the line, and the cart has a gold stripe. Caramel perfect pop now +327 (next upgrade 2,500 for +522). The helper card now promises +50 every 3 s for 1,200. I'll get the helper next - I'm curious to see a second machine appear. Meanwhile keep popping at 1.8 s."}}
+{"t":409.9,"issued":407.4,"cmd":"hold","args":{"x":300,"y":720,"s":1.8},"shot":"045.png","held_ms":1864}
+{"t":416.5,"issued":416.5,"cmd":"note","args":{"text":"+327 again, 405 coins. Curious about the orange x1.35 jar with the clock - let me tap it and see how the ring changes before committing."}}
+{"t":420.2,"issued":419.2,"cmd":"tap","args":{"x":52,"y":695},"shot":"046.png"}
+{"t":428.9,"issued":428.9,"cmd":"note","args":{"text":"Orange x1.35: the yellow became huge - from about 5 o'clock all the way to 10. Blue is short now. Payout +294 (a bit less than caramel's +327) but way more forgiving and you can let go earlier. So the clock probably means 'quick'. Trying an early 1.2 s release to see if it counts."}}
+{"t":433.7,"issued":431.7,"cmd":"hold","args":{"x":300,"y":720,"s":1.2},"shot":"047.png","held_ms":1298}
+{"t":442.8,"issued":442.8,"cmd":"note","args":{"text":"1.2 s with orange = perfect +294, needle just past the start of the yellow. So orange pays a little less per pop but each pop is much quicker and safer - more coins per second overall. That's a neat trade-off and I figured it out from the ring alone. Sticking with orange, 1.25 s holds."}}
+{"t":447.6,"issued":445.5,"cmd":"hold","args":{"x":300,"y":720,"s":1.25},"shot":"048.png","held_ms":1326}
+{"t":452.2,"issued":450.2,"cmd":"hold","args":{"x":300,"y":720,"s":1.25},"shot":"049.png","held_ms":1305}
+{"t":460.1,"issued":460.1,"cmd":"note","args":{"text":"Oops, +147: the needle stopped just before the yellow even though I held about as long. My release timing isn't that precise, so cutting it close at the edge is risky. Going for the middle of the big yellow instead (1.5 s). 1,140 coins - one more pop and the helper is mine."}}
+{"t":464.9,"issued":462.6,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"050.png","held_ms":1563}
+{"t":468.3,"issued":467.5,"cmd":"tap","args":{"x":300,"y":1045},"shot":"051.png"}
+{"t":475.3,"issued":475.3,"cmd":"note","args":{"text":"Bought the helper: a mini popcorn cart appeared in a bubble at the right, with its own blue ring filling up - it cooks by itself. Its next upgrade is 3,600 for +50 > +58 and 3.0 > 2.7 s. Let me just wait 6 seconds hands-off to watch the mini cart earn."}}
+{"t":484.3,"issued":478,"cmd":"wait","args":{"s":6},"shot":"052.png"}
+{"t":492.2,"issued":492.2,"cmd":"note","args":{"text":"Hands off for a bit and coins went 234 -> 484: the mini cart is quietly adding +50 every ~3 s. Nice to have, though I didn't see a +50 popup on the screenshot - it's a bit easy to miss. The big ring goes pale when I'm not touching it. Back to popping at 1.5 s, saving for 2,500."}}
+{"t":497.1,"issued":494.9,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"053.png","held_ms":1545}
+{"t":502.3,"issued":500,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"054.png","held_ms":1650}
+{"t":510.7,"issued":508.4,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"055.png","held_ms":1588}
+{"t":511.5,"issued":511.5,"cmd":"note","args":{"text":"1.5 s lands right in the middle of the orange's yellow for a safe +294 every time. 1,372 coins and climbing with the helper. Pushing for the 2,500 upgrade before time runs out."}}
+{"t":517.4,"issued":515.1,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"056.png","held_ms":1618}
+{"t":522.2,"issued":519.9,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"057.png","held_ms":1575}
+{"t":528.9,"issued":528.1,"cmd":"tap","args":{"x":300,"y":1180},"shot":"058.png"}
+{"t":536.2,"issued":536.2,"cmd":"note","args":{"text":"Seventh upgrade (2,500): the glass now has TWO kettles inside - cute visual growth. Pops are worth +470 and the helper went to +80 automatically. Next is 5,800 for +754. I can see the first customer holding a popcorn box with a coin over her head - so they do pay. About a minute left, popping away."}}
+{"t":541.2,"issued":539,"cmd":"hold","args":{"x":300,"y":720,"s":1.5},"shot":"059.png","held_ms":1547}
+{"t":546.6,"issued":546.6,"cmd":"note","args":{"text":"One minute left. I never touched the back arrow at top-left - curious whether there's a menu or other games behind it. Tapping it now."}}
+{"t":549.9,"issued":549,"cmd":"tap","args":{"x":55,"y":58},"shot":"060.png"}
+{"t":557.2,"issued":557.2,"cmd":"note","args":{"text":"Surprise! The back arrow opens a menu of four popcorn-cart cards: a red Star one (looks like the mode I was playing - ring plus mini cart), A (popcorn bursting, a bag on the side), B (a ring like mine), C (a row of dots and a star). So there are several versions of the game. With under a minute left, I'll peek at A."}}
+{"t":560.5,"issued":559.7,"cmd":"tap","args":{"x":300,"y":505},"shot":"061.png"}
+{"t":566.6,"issued":565.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"062.png"}
+{"t":573.1,"issued":573.1,"cmd":"note","args":{"text":"Mode A is a plain tapper: no ring, no customers, one tap = +1, first upgrade 24 for +1 > +2. Feels much simpler and less interesting than the ring mode after what I've seen. It's a fresh start at 0 coins too. Tapping a few times to the end."}}
+{"t":576.5,"issued":575.8,"cmd":"tap","args":{"x":300,"y":820},"shot":"063.png"}
+{"t":582,"issued":579.3,"cmd":"hold","args":{"x":300,"y":820,"s":2},"shot":"064.png","held_ms":2063}
+{"t":587.9,"issued":587.9,"cmd":"note","args":{"text":"In A, holding for 2 s just gave +1 like a tap - no heat gauge. 3 coins. It's the bare-bones version. I'd rather go back to the Star mode with the ring, flavors and helper."}}
+{"t":592.2,"issued":591.5,"cmd":"tap","args":{"x":300,"y":820},"shot":"065.png"}
+{"t":604.5,"issued":598.3,"cmd":"wait","args":{"s":6},"shot":"066.png"}

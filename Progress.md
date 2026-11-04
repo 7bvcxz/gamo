@@ -466,6 +466,7 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
   보고서 `popcorn-glory/evidence/step08/REPORT.md`. 점수는 AI 대리 판단이며 사람 점수는 비어 있다.
 - Step 09 (#114): 비교·추천(0.9.1), `popcorn-glory/experiments/RESULTS.md`·`DECISION.md`, 점수표 `docs/popcorn-glory/scorecard.html`.
   잠정 B > C > A. **소유자 결정(2026-11-03, 대화): B 승인 + 최소 범위** — Step 10(#115)을 그 가설로 시작한다(사람 점수 없이 내린 결정).
+- Step 10 (#115): 팝콘 가게 `#stand`(0.10.1) — B 위에 흔들기·양념·자동화(모터, 조수 냄비)가 단계적으로 열리는 vertical slice. 설계 `popcorn-glory/design/SLICE.md`, 보고서 `popcorn-glory/evidence/step10/REPORT.md`.
 
 ## 다음 작업
 

@@ -1,0 +1,153 @@
+{
+  "active_ms": 45078,
+  "game": "popcorn-glory",
+  "lines": [
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 6067,
+      "type": "input"
+    },
+    {
+      "data": {
+        "name": "first_input"
+      },
+      "t": 6067,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "count": 1,
+        "level": 0
+      },
+      "t": 6067,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "amount": 1,
+        "from": "pop",
+        "money": 1
+      },
+      "t": 6067,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "name": "first_earn"
+      },
+      "t": 6067,
+      "type": "milestone"
+    },
+    {
+      "data": {
+        "ms": 10018,
+        "start": 6067
+      },
+      "t": 16085,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 16085,
+      "type": "input"
+    },
+    {
+      "data": {
+        "count": 1,
+        "level": 0
+      },
+      "t": 16085,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "amount": 1,
+        "from": "pop",
+        "money": 2
+      },
+      "t": 16085,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 19631,
+      "type": "input"
+    },
+    {
+      "data": {
+        "count": 1,
+        "level": 0
+      },
+      "t": 19631,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "amount": 1,
+        "from": "pop",
+        "money": 3
+      },
+      "t": 19631,
+      "type": "earn"
+    },
+    {
+      "data": {
+        "ms": 12135,
+        "start": 19631
+      },
+      "t": 31766,
+      "type": "idle"
+    },
+    {
+      "data": {
+        "kind": "press"
+      },
+      "t": 31766,
+      "type": "input"
+    },
+    {
+      "data": {
+        "count": 1,
+        "level": 0
+      },
+      "t": 31766,
+      "type": "pop"
+    },
+    {
+      "data": {
+        "amount": 1,
+        "from": "pop",
+        "money": 4
+      },
+      "t": 31766,
+      "type": "earn"
+    }
+  ],
+  "summary": {
+    "earned": 4,
+    "idle_longest_ms": 13312,
+    "idle_total_ms": 35465,
+    "inputs": 4,
+    "level": 0,
+    "milestones": {
+      "first_earn": 6067,
+      "first_input": 6067
+    },
+    "money": 4,
+    "t_ms": 45078,
+    "upgrades": [],
+    "variant": "click"
+  },
+  "variant": "click",
+  "version": "0.10.1",
+  "viewport": [
+    600,
+    1290
+  ]
+}
