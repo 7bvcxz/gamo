@@ -88,7 +88,11 @@ func _draw() -> void:
 	var fs := int(size.y * 0.3)
 	var cx := r.position.x + r.size.y * 1.2
 	PopMachineArt.draw_coin(self, Vector2(cx + fs * 0.45, cy - fs * 0.42), fs * 0.42)
-	draw_string(font, Vector2(cx + fs * 1.05, cy - fs * 0.06), PopMoneyView._format(price), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, ink)
+	var ptext := PopMoneyView._format(price)
+	var pfs := fs
+	while pfs > 14 and font.get_string_size(ptext, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x > r.end.x - (cx + fs * 1.05) - 16:
+		pfs -= 2
+	draw_string(font, Vector2(cx + fs * 1.05, cy - fs * 0.06), ptext, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs, ink)
 	var gs := int(fs * 0.72)
 	var gy := cy + fs * 0.92
 	var line := ""
@@ -98,5 +102,7 @@ func _draw() -> void:
 		line = "+%s > +%s   %.1fs" % [PopMoneyView._format(gain_now), PopMoneyView._format(gain_next), cycle_next]
 		if cycle_now > 0.0:
 			line = "+%s > +%s   %.1f > %.1fs" % [PopMoneyView._format(gain_now), PopMoneyView._format(gain_next), cycle_now, cycle_next]
-	draw_string(font, Vector2(cx + fs * 0.1, gy), line, HORIZONTAL_ALIGNMENT_LEFT, r.end.x - cx - 20, gs,
+	while gs > 12 and font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, gs).x > r.end.x - cx - 24:
+		gs -= 2
+	draw_string(font, Vector2(cx + fs * 0.1, gy), line, HORIZONTAL_ALIGNMENT_LEFT, -1, gs,
 		Color(PopPalette.INK, 0.75) if enabled else PopPalette.DISABLED.darkened(0.2))

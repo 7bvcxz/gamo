@@ -22,7 +22,7 @@ import shlex
 import sys
 
 GLUE = {"node", "sleep", "for", "do", "done", "in", "seq", "echo", "true", "if", "then", "fi",
-        "while", "break", "printf", "look", "tap", "hold", "drag", "wait", "status"}
+        "while", "break", "printf", "look", "tap", "hold", "drag", "path", "wait", "status"}
 FILTERS = {"tail", "head", "grep"}
 
 

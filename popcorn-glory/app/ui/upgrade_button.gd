@@ -77,7 +77,12 @@ func _draw() -> void:
 	var showing_gain := gain_now > 0 and gain_next > 0
 	var py := r.get_center().y - (fs * 0.42 if showing_gain else 0.0)
 	PopMachineArt.draw_coin(self, Vector2(cx + fs * 0.45, py), fs * 0.42)
-	draw_string(font, Vector2(cx + fs * 1.05, py + fs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs,
+	# A long price shrinks to fit before the arrow (Step 11: '14,000' ran into it).
+	var pfs := fs
+	var avail := (r.end.x - r.size.y * 0.42 - r.size.y * 0.24) - (cx + fs * 1.05)
+	while pfs > 14 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs).x > avail:
+		pfs -= 2
+	draw_string(font, Vector2(cx + fs * 1.05, py + pfs * 0.36), text, HORIZONTAL_ALIGNMENT_LEFT, -1, pfs,
 		PopPalette.INK if enabled else PopPalette.DISABLED.darkened(0.25))
 	if showing_gain:
 		# What it gives, in the same "+N" that floats over the machine when it
@@ -86,13 +91,18 @@ func _draw() -> void:
 		var gy := r.get_center().y + fs * 0.98
 		var ink := Color(PopPalette.INK, 0.7) if enabled else PopPalette.DISABLED.darkened(0.2)
 		var now_s := "+" + PopMoneyView._format(gain_now)
+		var next_s := "+" + PopMoneyView._format(gain_next)
 		var gx := cx + fs * 0.1
+		# The whole line fits before the arrow (Step 11: large numbers ran under it).
+		var room := (r.end.x - r.size.y * 0.42 - r.size.y * 0.24) - gx
+		while gs > 12 and font.get_string_size(now_s + next_s, HORIZONTAL_ALIGNMENT_LEFT, -1, gs).x + gs * 1.05 > room:
+			gs -= 2
 		draw_string(font, Vector2(gx, gy), now_s, HORIZONTAL_ALIGNMENT_LEFT, -1, gs, ink)
 		gx += font.get_string_size(now_s, HORIZONTAL_ALIGNMENT_LEFT, -1, gs).x + gs * 0.3
 		var ay := gy - gs * 0.33
 		draw_colored_polygon(PackedVector2Array([Vector2(gx, ay - gs * 0.3), Vector2(gx + gs * 0.45, ay), Vector2(gx, ay + gs * 0.3)]), ink)
 		gx += gs * 0.75
-		draw_string(font, Vector2(gx, gy), "+" + PopMoneyView._format(gain_next), HORIZONTAL_ALIGNMENT_LEFT, -1, gs,
+		draw_string(font, Vector2(gx, gy), next_s, HORIZONTAL_ALIGNMENT_LEFT, -1, gs,
 			PopPalette.RED if enabled else PopPalette.DISABLED.darkened(0.25))
 	# An up-arrow: "this makes the machine bigger".
 	var a := Vector2(r.end.x - r.size.y * 0.42, r.get_center().y)

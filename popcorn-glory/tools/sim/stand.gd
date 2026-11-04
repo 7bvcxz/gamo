@@ -30,6 +30,21 @@ const PLAYERS := [
 	{"name": "low interaction (casual until the helper, then only buys)", "aim": "casual", "shake": 0.5, "buy": "slow", "recipe": "butter", "stop_after_helper": true},
 	{"name": "never automates (skilled, caramel)", "aim": "skilled", "shake": 1.0, "buy": "main_only", "recipe": "caramel"},
 	{"name": "automation first (casual, buys the ladder before the machine)", "aim": "casual", "shake": 0.5, "buy": "auto_first", "recipe": "butter"},
+	# Step 11
+	{"name": "delayed automation (skilled, caramel, no automation before Lv8)", "aim": "skilled", "shake": 1.0, "buy": "cheapest", "recipe": "caramel", "auto_from": 8},
+	{"name": "diversified recipes (casual, changes recipe every 2 min)", "aim": "casual", "shake": 0.5, "buy": "slow", "recipe": "rotate"},
+	{"name": "idle break (casual, butter, no input 5:00-8:00)", "aim": "casual", "shake": 0.5, "buy": "slow", "recipe": "butter", "idle": [300000, 480000]},
+	{"name": "slow novice (3-6 s between presses, wild timing, cheese)", "aim": "novice", "shake": 0.0, "buy": "slow", "recipe": "cheese", "gap": [3000, 6000]},
+	{"name": "stops at 3:00 without the helper (casual)", "aim": "casual", "shake": 0.5, "buy": "slow", "recipe": "butter", "stop_at": 180000, "auto_from": 99},
+]
+const ASSUMPTIONS := [
+	"Every player is a script on the real rules (variants/stand/stand_rules.gd, data/economy.json), seed 7, 10 ms steps, 20 minutes of active time.",
+	"skilled: releases at the gold's middle +- N(0, 70 ms); 300 ms between presses; buys the moment it can.",
+	"casual: 45% at the middle +- 160 ms, 25% 100-500 ms early, 20% 80-400 ms late, 10% held on to the burn; 0.5-1.5 s between presses; waits 1.5-5 s before buying.",
+	"novice: 75% at the middle +- 300 ms, 10% burnt, 15% far too early; otherwise as casual.",
+	"shake: the share of heats with three swings (until the motor makes it automatic).",
+	"buying: the cheaper of the two cards when affordable ('cheapest'/'slow'), the machine only ('main_only'), the ladder whenever affordable ('auto_first'), or no automation before a level ('auto_from').",
+	"Not modelled: a human's attention, learning, fatigue, curiosity; reading the screen; tab switches.",
 ]
 
 var _args := {}
@@ -100,10 +115,19 @@ func run(p: Dictionary, econ: PopEconomy, seed: int) -> Dictionary:
 	var marks := {}
 	var stop_pressing := false
 	var buy_wait_until := -1
+	var heating_ms := 0
+	var batches := 0
+	var per_min: Array = []
+	var gap: Array = p.get("gap", [500, 1500])
+	var recipe_ids := ["butter", "caramel", "cheese"]
 	while t < HORIZON:
 		var st := rules.state()
 		# The hand.
-		if not stop_pressing:
+		var idle_win: Array = p.get("idle", [])
+		var away := (not idle_win.is_empty() and t >= int(idle_win[0]) and t < int(idle_win[1])) or (p.has("stop_at") and t >= int(p["stop_at"]))
+		if bool(st["heating"]):
+			heating_ms += STEP
+		if not stop_pressing and not away:
 			if holding:
 				if shake_left > 0 and t >= next_shake and bool(st["heating"]):
 					rules.execute({"type": "shake"})
@@ -113,23 +137,27 @@ func run(p: Dictionary, econ: PopEconomy, seed: int) -> Dictionary:
 					if bool(st["heating"]):
 						rules.execute({"type": "release"})
 					holding = false
-					next_input = t + (300 if aim == "skilled" else rng.randi_range(500, 1500))
+					next_input = t + (300 if aim == "skilled" else rng.randi_range(int(gap[0]), int(gap[1])))
 			elif t >= next_input and int(st["cooldown_left"]) == 0 and not bool(st["heating"]):
 				if bool(rules.execute({"type": "press"})["ok"]):
 					holding = true
 					press_at = t
 					release_at = t + _hold_ms(aim, rules.state(), rng)
-					var wants_shake := bool(st["unlocked"]["shake"]) and not bool(st["motor"]) and rng.randf() < float(p["shake"])
+					# The hand's shake beats the motor (x1.3 vs x1.15), so a player who shakes keeps shaking.
+					var wants_shake := bool(st["unlocked"]["shake"]) and rng.randf() < float(p["shake"])
 					shake_left = int((econ.table("stand")["shake"] as Dictionary)["turns"]) if wants_shake else 0
 					next_shake = t + 200
-		# The recipe, once it unlocks.
-		if bool(st["unlocked"]["recipes"]) and String(st["recipe"]) != String(p["recipe"]) and not bool(st["heating"]):
-			if bool(rules.execute({"type": "recipe", "id": String(p["recipe"])})["ok"]):
+		# The recipe, once it unlocks ('rotate': a different one every two minutes).
+		var want_recipe := String(p["recipe"])
+		if want_recipe == "rotate":
+			want_recipe = String(recipe_ids[(t / 120000) % recipe_ids.size()])
+		if bool(st["unlocked"]["recipes"]) and String(st["recipe"]) != want_recipe and not bool(st["heating"]):
+			if bool(rules.execute({"type": "recipe", "id": want_recipe})["ok"]):
 				events["recipe"] = t
 		# Buying.
 		var mode := String(p["buy"])
 		var main_cost: int = rules.cost()
-		var auto_cost: int = rules.auto_cost() if bool(st["unlocked"]["auto"]) else -1
+		var auto_cost: int = rules.auto_cost() if bool(st["unlocked"]["auto"]) and rules.level >= int(p.get("auto_from", 0)) else -1
 		var choice := ""
 		match mode:
 			"cheapest", "slow":
@@ -171,7 +199,13 @@ func run(p: Dictionary, econ: PopEconomy, seed: int) -> Dictionary:
 				events["unlock_" + k] = t
 		rules.advance(STEP)
 		t += STEP
-		rules.drain_events()
+		for ev: Dictionary in rules.drain_events():
+			if String(ev["type"]) == "outcome":
+				batches += 1
+		if t % 60000 == 0:
+			var sm := rules.state()
+			per_min.append({"min": t / 60000, "level": rules.level, "auto": int(sm["auto_level"]), "earned": rules.earned,
+				"manual": int(sm["manual_earned"]), "helper": int(sm["helper_earned"]), "batches": batches, "heating_ms": heating_ms})
 		if rules.money < 0:
 			violations.append("%d: money %d" % [t, rules.money])
 		if rules.money != rules.earned - spent:
@@ -195,7 +229,15 @@ func run(p: Dictionary, econ: PopEconomy, seed: int) -> Dictionary:
 	else:
 		longest = maxi(longest, HORIZON - prev)
 	var fs := rules.state()
+	# Time from each level to the next (a dead zone is a long one).
+	var to_next := {}
+	var prev_t := 0
+	for lv in range(1, 15):
+		if level_at.has(lv):
+			to_next[str(lv - 1)] = (int(level_at[lv]) - prev_t) / 1000.0
+			prev_t = int(level_at[lv])
 	return {"name": String(p["name"]), "events": events, "level_at": level_at, "marks": marks, "buys": buys.size(), "timeline": buys,
+		"per_minute": per_min, "to_next_level_s": to_next, "batches": batches, "hand_heating_share": float(heating_ms) / float(HORIZON),
 		"longest_no_buy_after_3min_s": longest / 1000.0, "all_bought_s": all_done / 1000.0 if all_done >= 0 else -1.0,
 		"final": {"level": rules.level, "auto": int(fs["auto_level"]), "earned": rules.earned, "manual": int(fs["manual_earned"]),
 			"helper": int(fs["helper_earned"]), "even_pops": int(fs["even_pops"]), "outcomes": fs["outcomes"]},
@@ -243,7 +285,36 @@ func markdown(rows: Array[Dictionary], econ: PopEconomy) -> String:
 		var pays := maxi(1, int(floor(econ.at("stand", "batch", lv) * float(rg["share"]))))
 		var be := float(rg["cost"]) / (float(pays) / (float(rg["cycle_ms"]) / 1000.0))
 		out += "| %d helper | %d | %.1fs | %.2f | %d (Lv%d) | %ds |\n" % [i + 1, int(rg["cost"]), float(rg["cycle_ms"]) / 1000.0, float(rg["share"]), pays, lv, int(be)]
+	out += "\n## Assumptions (the player models -- not measurements)\n\n"
+	for a: String in ASSUMPTIONS:
+		out += "- %s\n" % a
+	out += "\n## Throughput and the hand (outcomes)\n\n| player | batches by the hand | hand heating share | earned at 5 / 10 / 20 min | helper share at 10 / 20 min |\n|---|---|---|---|---|\n"
+	for r: Dictionary in rows:
+		var pm: Array = r["per_minute"]
+		var at := func(m: int, key: String) -> int: return int((pm[m - 1] as Dictionary)[key]) if pm.size() >= m else 0
+		var hs := func(m: int) -> String: return "%d%%" % int(100.0 * float(at.call(m, "helper")) / maxf(1.0, float(at.call(m, "earned"))))
+		out += "| %s | %d | %d%% | %s / %s / %s | %s / %s |\n" % [r["name"], int(r["batches"]), int(100.0 * float(r["hand_heating_share"])),
+			_k(at.call(5, "earned")), _k(at.call(10, "earned")), _k(at.call(20, "earned")), hs.call(10), hs.call(20)]
+	out += "\n## Seconds from each machine level to the next (dead zones over 120 s in bold)\n\n| player | " + " | ".join(range(14).map(func(i: int) -> String: return "L%d" % i)) + " |\n|---|" + "---|".repeat(14) + "\n"
+	for r: Dictionary in rows:
+		var tn: Dictionary = r["to_next_level_s"]
+		var cells := []
+		for i in 14:
+			if not tn.has(str(i)):
+				cells.append("–")
+			else:
+				var v := float(tn[str(i)])
+				cells.append(("**%d**" % int(v)) if v > 120.0 else "%d" % int(v))
+		out += "| %s | %s |\n" % [r["name"], " | ".join(cells)]
 	return out
+
+
+func _k(v: int) -> String:
+	if v >= 1000000:
+		return "%.2fM" % (v / 1000000.0)
+	if v >= 1000:
+		return "%dk" % (v / 1000)
+	return str(v)
 
 
 func _write(path: String, text: String) -> void:

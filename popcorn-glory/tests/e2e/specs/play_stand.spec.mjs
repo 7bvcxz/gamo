@@ -55,7 +55,7 @@ test(`stand: ${MIN} real minutes`, async ({ pop }, testInfo) => {
     const box = await pop.canvas.boundingBox();
     const k = box.width / s.window[0];
     const x = box.x + (r[0] + r[2] / 2) * k; const y = box.y + (r[1] + r[3] * 0.6) * k;
-    const shake = run.unlocked.shake && !run.motor;
+    const shake = run.unlocked.shake;   // the hand's shake beats the motor (Step 11)
     const start = Date.now();
     if (touch) await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
     else { await pop.page.mouse.move(x, y); await pop.page.mouse.down(); }

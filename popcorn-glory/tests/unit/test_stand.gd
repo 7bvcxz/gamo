@@ -112,7 +112,8 @@ func test_the_ladder_takes_over_one_action_at_a_time() -> void:
 	assert_true(bool(s.state()["motor"]), "motor on")
 	var before := s.money
 	_hold_mid(s, 0)
-	assert_eq(s.money - before, int(floor(int(floor(s.economy.at("stand", "batch", 4) * 2.0)) * 1.3)), "the motor shakes every batch")
+	var mm := float(s.economy.table("stand")["shake"]["motor_mult"])
+	assert_eq(s.money - before, int(floor(int(floor(s.economy.at("stand", "batch", 4) * 2.0)) * mm)), "the motor shakes every batch (x motor_mult)")
 	assert_eq(int(s.state()["helper_level"]), 0, "no helper yet")
 	for i in range(1, ladder.size()):
 		s.money = int(ladder[i]["cost"])
@@ -206,3 +207,130 @@ func test_gold_edges_forgive_in_the_stand_only() -> void:
 	b.execute({"type": "press"})
 	b.advance(b.window_start() - g)
 	assert_eq(String(b.execute({"type": "release"})["outcome"]), "near", "B's edges stay as compared")
+
+
+# -- Step 11: where the moments meet ------------------------------------------
+
+func test_a_recipe_change_while_cooling_counts_from_the_next_batch() -> void:
+	var s: PopRules = Stand.new()
+	s.level = 5
+	s.execute({"type": "press"})
+	s.advance((s.window_start() + s.window_end()) / 2)
+	s.execute({"type": "release"})
+	var paid_butter := s.money
+	assert_true(int(s.state()["cooldown_left"]) > 0, "cooling")
+	assert_true(bool(s.execute({"type": "recipe", "id": "caramel"})["ok"]), "a change while cooling is allowed")
+	assert_eq(s.money, paid_butter, "the batch already paid is not re-priced")
+	s.advance(2000)
+	var before := s.money
+	_hold_mid(s)
+	assert_eq(s.money - before, s.payout(5), "the next batch is caramel's")
+
+
+func test_the_helper_ignores_the_recipe_and_keeps_going_through_a_heat() -> void:
+	var stamps := {}
+	for rec: String in ["butter", "caramel", "cheese"]:
+		var s: PopRules = Stand.new()
+		s.level = 6
+		var ladder: Array = s.economy.table("stand")["auto"]
+		s.money = int(ladder[0]["cost"]) + int(ladder[1]["cost"])
+		s.execute({"type": "buy_auto"})
+		s.execute({"type": "buy_auto"})
+		s.execute({"type": "recipe", "id": rec})
+		s.execute({"type": "press"})          # a long heat across a helper batch
+		s.advance(int(s.state()["helper_cycle_ms"]) + 10)
+		var helper_events := s.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "helper_pop")
+		stamps[rec] = [helper_events.size(), int(s.state()["helper_earned"])]
+	assert_eq(stamps["butter"], stamps["caramel"], "same helper with caramel")
+	assert_eq(stamps["butter"], stamps["cheese"], "same helper with cheese")
+	assert_eq(int((stamps["butter"] as Array)[0]), 1, "it popped while the hand was heating")
+
+
+func test_buying_a_rung_mid_heat_leaves_the_heat_alone() -> void:
+	var s: PopRules = Stand.new()
+	s.level = 6
+	s.money = 100000
+	s.execute({"type": "buy_auto"})
+	s.execute({"type": "buy_auto"})
+	s.execute({"type": "press"})
+	s.advance(700)
+	var heat_before := int(s.state()["heat_ms"])
+	assert_true(bool(s.execute({"type": "buy_auto"})["ok"]), "a rung while heating")
+	assert_eq(int(s.state()["heat_ms"]), heat_before, "the heat is untouched")
+	assert_eq(int(s.state()["helper_ms"]), 0, "the helper starts its new, faster cycle from the top (its ring restarts)")
+	s.advance((s.window_start() + s.window_end()) / 2 - 700)
+	assert_eq(String(s.execute({"type": "release"})["outcome"]), "perfect", "and the release is judged as before")
+
+
+## Step 11: the motor shakes every batch a little (x motor_mult); the hand's
+## three swings still beat it (x mult) -- they replace the motor's, they do not stack.
+func test_the_hand_still_beats_the_motor_and_they_do_not_stack() -> void:
+	var s: PopRules = Stand.new()
+	s.level = 4
+	var sh: Dictionary = s.economy.table("stand")["shake"]
+	assert_true(float(sh["motor_mult"]) > 1.0 and float(sh["motor_mult"]) < float(sh["mult"]), "the hand is worth more than the machine")
+	s.money = int((s.economy.table("stand")["auto"] as Array)[0]["cost"])
+	s.execute({"type": "buy_auto"})
+	var plain := int(floor(s.economy.at("stand", "batch", 4) * 2.0))
+	var a := s.money
+	_hold_mid(s, 0)
+	assert_eq(s.money - a, int(floor(plain * float(sh["motor_mult"]))), "the motor alone: x motor_mult")
+	var b := s.money
+	_hold_mid(s, 3)
+	assert_eq(s.money - b, int(floor(plain * float(sh["mult"]))), "the hand's swings with the motor: x mult, not both")
+	assert_eq(int(s.state()["hand_even_pops"]), 1, "counted as the hand's")
+
+
+## A whole scripted session (presses, shakes, recipes, both cards, a helper)
+## run with time cut three ways ends in exactly the same state.
+func _session(cut: int) -> Dictionary:
+	var s: PopRules = Stand.new()
+	var t := 0
+	var next := 500
+	var holding := false
+	var release_at := 0
+	var shakes_due: Array = []
+	while t < 240000:
+		var st := s.state()
+		if holding and shakes_due.size() > 0 and t >= int(shakes_due[0]):
+			shakes_due.pop_front()
+			s.execute({"type": "shake"})
+		if holding and t >= release_at:
+			s.execute({"type": "release"})
+			holding = false
+			next = t + 300
+		elif not holding and t >= next and not bool(st["heating"]) and int(st["cooldown_left"]) == 0:
+			s.execute({"type": "press"})
+			holding = true
+			var w: Array = s.state()["window"]
+			release_at = t + (int(w[0]) + int(w[1])) / 2 + ((t / 997) % 3 - 1) * 260
+			shakes_due = [t + 200, t + 320, t + 440] if bool(st["unlocked"]["shake"]) else []
+		if bool(st["unlocked"]["recipes"]) and String(st["recipe"]) == "butter":
+			s.execute({"type": "recipe", "id": "cheese" if t < 150000 else "caramel"})
+		if bool(st["unlocked"]["recipes"]) and t >= 150000 and String(st["recipe"]) == "cheese":
+			s.execute({"type": "recipe", "id": "caramel"})
+		var c: int = s.cost()
+		var ac: int = s.auto_cost() if bool(st["unlocked"]["auto"]) else -1
+		if c >= 0 and s.money >= c and (ac < 0 or c <= ac):
+			s.execute({"type": "buy"})
+		elif ac >= 0 and s.money >= ac:
+			s.execute({"type": "buy_auto"})
+		# Decisions on a fixed 40 ms grid; only the time between them is cut
+		# differently -- so the commands are the same and only the rules' own
+		# slicing of time (helper batches, the burn) is under test.
+		var left := 40
+		while left > 0:
+			s.advance(mini(cut, left))
+			left -= cut
+		t += 40
+	var f := s.state()
+	return {"money": s.money, "earned": s.earned, "level": s.level, "auto": f["auto_level"], "outcomes": f["outcomes"],
+		"helper": f["helper_earned"], "even": f["even_pops"], "recipe": f["recipe"]}
+
+
+func test_a_whole_session_is_the_same_however_time_is_cut() -> void:
+	var a := _session(10)
+	assert_true(int(a["level"]) >= 6 and int(a["auto"]) >= 2, "the session got somewhere: %s" % [a])
+	assert_eq(_session(20), a, "10 ms vs 20 ms slices")
+	assert_eq(_session(40), a, "10 ms vs 40 ms slices")
+	assert_eq(_session(7), a, "10 ms vs 7 ms slices (not a divisor of anything)")

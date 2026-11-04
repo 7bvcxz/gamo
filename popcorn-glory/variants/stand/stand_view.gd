@@ -144,13 +144,15 @@ func on_events(events: Array[Dictionary]) -> void:
 		var d: Dictionary = e["data"]
 		match String(e["type"]):
 			"earn":
+				# The +N shows where the batch popped; the coin flies to the money from
+				# the customer who takes the bag (Step 11: 'the customers seemed to be
+				# decoration' -- now they visibly pay).
 				if String(d.get("from", "")) == "helper":
-					var hs := helper_size() / 900.0
-					fx.coin(_helper_top(), hs)
 					_gain_at(int(d.get("amount", 0)), _helper_top() + Vector2(-110, -20))
 					_sound("coin", 1.15, -14.0)
-					continue
-				rest.append(e)
+				else:
+					_gain(int(d.get("amount", 0)))
+					_sound("coin", 1.0, -8.0)
 			"helper_pop":
 				_helper_kick = 1.0
 				var n := int(d.get("count", 1))
@@ -233,6 +235,7 @@ func _process(delta: float) -> void:
 		if not bool(b["arrived"]) and float(b["age"]) >= 1.0:
 			b["arrived"] = true
 			_react[int(b["to"])] = 1.0
+			fx.coin(_customer_pos(int(b["to"])) + Vector2(0, -90), machine_size() / 900.0)
 	for i in _react.size():
 		_react[i] = maxf(0.0, _react[i] - delta * 1.6)
 	while not _bags.is_empty() and float(_bags[0]["age"]) > 1.05:
@@ -369,7 +372,7 @@ func _draw_crank(ci: CanvasItem, base: Vector2, size_px: float, st: Dictionary) 
 		ci.draw_line(c + Vector2(-r * 0.6, r * 0.8), m.position + Vector2(10, 4), PopPalette.INK, 4.0)
 		ci.draw_line(c + Vector2(r * 0.6, r * 0.8), m.position + Vector2(42, 4), PopPalette.INK, 4.0)
 		ci.draw_circle(m.get_center(), 9, Color(0.9, 0.9, 0.95) if int(_t * 8.0) % 2 == 0 or not bool(st["heating"]) else PopPalette.GOLD)
-	elif not _shaken_ever and bool(st["heating"]):
+	if not _shaken_ever and bool(st["heating"]):
 		# The first time: arrows either side of the crank, swinging -- "shake me".
 		var sw := sin(_t * 10.0) * 10.0 if not reduced_motion else 0.0
 		for sgn: float in [-1.0, 1.0]:
@@ -441,7 +444,7 @@ func _draw_helper_ring(ci: CanvasItem, st: Dictionary) -> void:
 ## mid-hold).
 func _draw_hint_gesture(ci: CanvasItem, size_px: float, finger: bool) -> void:
 	var st := _s()
-	if not bool(st["unlocked"]["shake"]) or _shaken_ever or bool(st["motor"]):
+	if not bool(st["unlocked"]["shake"]) or _shaken_ever:
 		super(ci, size_px, finger)
 		return
 	super(ci, size_px, false)

@@ -1,0 +1,150 @@
+{"t":0.3,"issued":0,"cmd":"look","args":{},"shot":"001.png"}
+{"t":11.1,"issued":11.1,"cmd":"note","args":{"text":"First look: a red popcorn machine in the middle with a ring around it (red arc top-left, a white segment on the left, light blue rest with small sparkles). A smoke puff above it. Coin counter 0 at top. A little person standing on a red shelf/counter top right - maybe a customer. Bottom card: a pot icon, 30 coins, +10 -> +16, up arrow = an upgrade I cannot afford yet. Top buttons: back, sound, restart. I think I can tap the machine (to pop corn?) - maybe tap when the ring is in the white zone. I expect tapping the machine makes popcorn and coins."}}
+{"t":14.5,"issued":13.6,"cmd":"tap","args":{"x":300,"y":770},"shot":"002.png"}
+{"t":21.6,"issued":21.6,"cmd":"note","args":{"text":"Tapped machine: got +1 coin, a striped popcorn box slid onto the shelf toward the customer. A needle appeared at 12 o'clock on the ring. Ring now has a yellow zone on the left, red above it, blue on the right with clockwise arrows. Guess: needle travels around, tapping in yellow = good pop (+10?). Tapping again to see the needle move."}}
+{"t":23.1,"issued":22.8,"cmd":"look","args":{},"shot":"003.png"}
+{"t":32,"issued":32,"cmd":"note","args":{"text":"The blue ring seems to be changing on its own: upper-right now pale, lower part darker - like a fill that sweeps clockwise. The box on the shelf is gone (customer took it?). Coins still 1. Maybe it's a hold-and-release thing: hold to heat and let go when in the yellow zone. Trying a 2-second hold on the machine."}}
+{"t":36.2,"issued":33.4,"cmd":"hold","args":{"x":300,"y":770,"s":2},"shot":"004.png","held_ms":2050}
+{"t":43.7,"issued":43.7,"cmd":"note","args":{"text":"Holding 2s gave +5 (coins 6)! The needle ended around 10 o'clock in the red arc - so holding moves the needle counter-clockwise from 12 through red toward yellow. Upgrade card got a yellow progress bar along its bottom (6/30). A box fell off the shelf? Next: hold a bit longer (3s) to land in the yellow zone."}}
+{"t":48.9,"issued":45.1,"cmd":"hold","args":{"x":300,"y":770,"s":3},"shot":"005.png","held_ms":3074}
+{"t":62,"issued":62,"cmd":"note","args":{"text":"Oops - 3s hold made big black smoke: burnt! Only +1. Customer at top right got a box and a coin popped over them. Rethink: the arrows on the blue go CLOCKWISE, so the needle probably runs clockwise from 12: blue = raw, yellow (7-9 o'clock) = perfect, red = burning. My 2s hold ended at 10 o'clock = a bit overdone (+5). So ~1.5s should be in the yellow. Trying hold 1.6s."}}
+{"t":65.7,"issued":63.5,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"006.png","held_ms":1651}
+{"t":72.1,"issued":72.1,"cmd":"note","args":{"text":"YES! 1.6s hold landed the needle in the yellow: +10, golden popcorn burst everywhere, coins 17. That felt great. Figured it out: hold to cook, needle sweeps clockwise, let go in the yellow. Upgrade bar now more than half full. Going to repeat the 1.6s hold to reach 30."}}
+{"t":75.9,"issued":73.6,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"007.png","held_ms":1680}
+{"t":83,"issued":80.7,"cmd":"hold","args":{"x":300,"y":770,"s":1.6},"shot":"008.png","held_ms":1699}
+{"t":88.2,"issued":88.2,"cmd":"note","args":{"text":"37 coins, the upgrade card turned bright yellow with a red arrow and red +16 - clearly 'you can buy this now'. Nice clear signal. Tapping it: expect perfect pops to give +16 instead of +10. I notice boxes keep dropping below the shelf instead of going to the customer - not sure what that means."}}
+{"t":90.4,"issued":89.6,"cmd":"tap","args":{"x":300,"y":1180},"shot":"009.png"}
+{"t":100,"issued":97.4,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"010.png","held_ms":1733}
+{"t":108,"issued":108,"cmd":"note","args":{"text":"Upgrade bought: the machine got bigger with red-white bunting, perfect pop now +16 (23 coins). Next upgrade 54 for +26. This time the box reached the customer on the shelf. The loop is clear: hold ~1.6s, release in yellow, save up, upgrade. Wondering whether the pale part of the blue ring is a cooldown. Holding again immediately."}}
+{"t":112.5,"issued":109.9,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"011.png","held_ms":1758}
+{"t":120.2,"issued":117.8,"cmd":"hold","args":{"x":300,"y":760,"s":1.6},"shot":"012.png","held_ms":1670}
+{"t":125.6,"issued":125.6,"cmd":"note","args":{"text":"Two more perfects, 55 coins, card glows again. Buying second upgrade (cart icon, +16 -> +26). The rhythm is satisfying but I'm starting to feel it's the same move every time; curious what changes after upgrades."}}
+{"t":128.4,"issued":127.5,"cmd":"tap","args":{"x":300,"y":1180},"shot":"013.png"}
+{"t":136.5,"issued":134.2,"cmd":"hold","args":{"x":300,"y":740,"s":1.6},"shot":"014.png","held_ms":1695}
+{"t":143.5,"issued":143.5,"cmd":"note","args":{"text":"Machine is now a cart on wheels, perfect = +26 (27 coins). Next upgrade 97 for +40. The top shelf with the customer is a mystery: boxes slide right toward the person, sometimes they get it, sometimes the box drops below the shelf. Going to try tapping the customer / a box to see if serving is something I do."}}
+{"t":146.1,"issued":145.3,"cmd":"tap","args":{"x":548,"y":200},"shot":"015.png"}
+{"t":152.9,"issued":152.9,"cmd":"note","args":{"text":"Tapping the customer just counted as a quick tap on the machine: +1 raw pop. So the whole screen is the button; the customer is decoration (or a delivery indicator). OK - back to perfect holds. I'll try to hold with my thumb lower on the screen, it seems to work anywhere."}}
+{"t":157.1,"issued":154.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"016.png","held_ms":1647}
+{"t":164.7,"issued":162.3,"cmd":"hold","args":{"x":300,"y":980,"s":1.75},"shot":"017.png","held_ms":1794}
+{"t":170.9,"issued":170.9,"cmd":"note","args":{"text":"80 coins. 1.75s landed mid-yellow, still +26 - so anywhere in yellow pays the same, no extra for dead center as far as I can tell. One more and I can buy the 97 upgrade."}}
+{"t":175.5,"issued":173.1,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"018.png","held_ms":1771}
+{"t":181.4,"issued":180.6,"cmd":"tap","args":{"x":300,"y":1180},"shot":"019.png"}
+{"t":189.8,"issued":189.8,"cmd":"note","args":{"text":"Big upgrade moment: confetti of popcorn, a SECOND customer (green) joined the shelf, and something new: a hand icon with left/right arrows on the cart and a round knob with a red handle sticking out on the right edge of the ring. Looks like a hint to swipe left/right or turn a crank. Next upgrade 175 (+40 -> +66), card has a star now. Let me look once more before touching."}}
+{"t":192.5,"issued":192.3,"cmd":"look","args":{},"shot":"020.png"}
+{"t":200.3,"issued":200.3,"cmd":"note","args":{"text":"The ring went pale and the hand-with-arrows is pulsing, same as the very first screen showed a hand when it wanted me to press. So it's telling me to SLIDE left/right now. Trying a left-to-right swipe across the cart."}}
+{"t":204,"issued":202.8,"cmd":"drag","args":{"x1":150,"y1":770,"x2":450,"y2":770},"shot":"021.png"}
+{"t":213.3,"issued":213.3,"cmd":"note","args":{"text":"One swipe = +4, needle only got to 2 o'clock (blue = undercooked) and the crank handle on the right rotated. So sliding turns a crank which moves the needle. One swipe moved it ~60 degrees. To reach the yellow I probably need to slide back and forth several times in one go. Trying a back-and-forth path."}}
+{"t":219,"issued":216,"cmd":"path","args":{"s":2,"points":[[150,900],[450,900],[150,900],[450,900]]},"shot":"022.png","held_ms":2135}
+{"t":227.6,"issued":227.6,"cmd":"note","args":{"text":"Back-and-forth cranking 4 strokes over 2s got the needle to the yellow: +52! More than the +40 the card promised. Maybe cranking gives a bonus, or the second customer pays extra. Box went to the green customer. Now testing: does the old plain hold still work, and what does it give?"}}
+{"t":232.8,"issued":230.3,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"023.png","held_ms":1771}
+{"t":240.7,"issued":240.7,"cmd":"note","args":{"text":"Plain hold still works: +40 exactly (105 coins). So cranking gave +52 = a 30% bonus over just holding. Cranking is the better move. Trying 4 strokes faster (1.5s) to see if speed matters."}}
+{"t":245.7,"issued":243.5,"cmd":"path","args":{"s":1.5,"points":[[150,900],[450,900],[150,900],[450,900]]},"shot":"024.png","held_ms":1587}
+{"t":252.8,"issued":252.8,"cmd":"note","args":{"text":"Faster crank: +52 again, needle just entered yellow at 7 o'clock, and the crank knob glowed yellow. So the needle moves with the amount I crank, not time - 4 strokes = about yellow. 157 coins, one more for the 175 upgrade."}}
+{"t":258,"issued":255.9,"cmd":"path","args":{"s":1.5,"points":[[150,900],[450,900],[150,900],[450,900],[300,900]]},"shot":"025.png","held_ms":1536}
+{"t":264.4,"issued":263.7,"cmd":"tap","args":{"x":300,"y":1180},"shot":"026.png"}
+{"t":273.1,"issued":273.1,"cmd":"note","args":{"text":"Bought the star upgrade (34 left). Cart is wider with a star on top, perfect = +66 now. A NEW card appeared above: a blue one with a gear, 260 coins, 'x1.3'. Not sure what x1.3 means - maybe makes the crank bonus bigger, or a multiplier on everything. Main upgrade is now 430 for +104. Prices are climbing fast. Cranking to save up."}}
+{"t":278.4,"issued":276,"cmd":"path","args":{"s":1.5,"points":[[150,900],[450,900],[150,900],[450,900],[300,900]]},"shot":"027.png","held_ms":1566}
+{"t":287.4,"issued":287.4,"cmd":"note","args":{"text":"+85 = 66 x 1.3, so the crank bonus is x1.3. The gear card also says x1.3 - so maybe the gear card is what I'd buy to make another 1.3 multiplier? Unclear whether it's 'current' or 'what you'll get'. 119 coins. The needle landed right at the start of the yellow - 4.5 strokes is a bit short now? Ring might be bigger. Trying 5 strokes."}}
+{"t":292.3,"issued":290.2,"cmd":"path","args":{"s":1.5,"points":[[150,900],[450,900],[150,900],[450,900],[150,900]]},"shot":"028.png","held_ms":1529}
+{"t":300,"issued":300,"cmd":"note","args":{"text":"204 coins, +85 again. Needle again stopped just inside yellow at 7 o'clock even with 5 strokes - so it seems tied to time more than number of strokes. Fine, it works. Next crank gets the gear card (260)."}}
+{"t":305.4,"issued":303,"cmd":"path","args":{"s":1.7,"points":[[150,900],[450,900],[150,900],[450,900],[150,900]]},"shot":"029.png","held_ms":1760}
+{"t":311.8,"issued":311.8,"cmd":"note","args":{"text":"289 coins, the gear card lit up bright blue. Dilemma: buy gear now (260) or save for the 430 cart upgrade? Curiosity wins - buying the gear to find out what x1.3 does."}}
+{"t":315.5,"issued":314.8,"cmd":"tap","args":{"x":300,"y":1045},"shot":"030.png"}
+{"t":324.5,"issued":324.5,"cmd":"note","args":{"text":"Gear bought: a little motor box got bolted under the crank. The main card now says +85 -> +135, so the x1.3 seems permanently applied. And a new card replaced the gear: a small second cart, 1,200 coins, '+0 > +19  3.0s' - looks like an automatic helper that earns 19 every 3 seconds (idle income!). That's a big price. Testing if a plain hold now gives 85 (motor cranks for me?)."}}
+{"t":329.5,"issued":327.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"031.png","held_ms":1755}
+{"t":337.1,"issued":337.1,"cmd":"note","args":{"text":"Plain hold now gives +85 and the crank handle turned by itself - the motor does the cranking for me. So the gear = 'automate the crank bonus'. Good, less work for my thumb. Quick test: does manually cranking on top give even more now?"}}
+{"t":342.1,"issued":339.7,"cmd":"path","args":{"s":1.7,"points":[[150,900],[450,900],[150,900],[450,900],[150,900]]},"shot":"032.png","held_ms":1758}
+{"t":349.3,"issued":349.3,"cmd":"note","args":{"text":"Cranking by hand now gives the same +85 as holding. So after the gear, the crank skill is gone - I'm back to just holding. A little sad, the crank was the most fun part. 199 coins; saving for 430."}}
+{"t":354.1,"issued":351.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"033.png","held_ms":1748}
+{"t":359.1,"issued":356.7,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"034.png","held_ms":1744}
+{"t":365.9,"issued":365.9,"cmd":"note","args":{"text":"369 coins after two holds. It's steady +85 per hold. One more and I buy the 430 cart upgrade. Thinking about whether 1,200 for an auto-cart earning 19/3s (~6/s) is worth it vs me earning 85 every ~5s (~17/s). Seems weak unless it stacks."}}
+{"t":370.9,"issued":368.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"035.png","held_ms":1742}
+{"t":374.4,"issued":373.7,"cmd":"tap","args":{"x":300,"y":1180},"shot":"036.png"}
+{"t":383.6,"issued":383.6,"cmd":"note","args":{"text":"Bought the 430 upgrade: perfect = +135, and THREE jars appeared on the left: yellow x1.0 (selected, little wide arc under it), brown x1.5 (a tiny dash under it), orange x1.35 (arc + clock icon). I read these as flavors: butter = normal, caramel = 1.5x but a narrow sweet spot, orange = 1.35x with some timer. Bunting got fancier. Next cart 1,050 for +218, auto-cart now +31/3s. Trying brown x1.5."}}
+{"t":387.8,"issued":386.1,"cmd":"tap","args":{"x":52,"y":585},"shot":"037.png"}
+{"t":399.4,"issued":399.4,"cmd":"note","args":{"text":"Picked brown x1.5. The ring changed: the yellow window moved later (about 9 to 10:30 o'clock) and the red burn part got very short, right before 12. Card says +202 now. So caramel needs a longer cook and burns soon after. Trying a 2.0s hold."}}
+{"t":404.8,"issued":401.8,"cmd":"hold","args":{"x":300,"y":980,"s":2},"shot":"038.png","held_ms":2110}
+{"t":411.8,"issued":411.8,"cmd":"note","args":{"text":"2.0s overshot: needle at 11 o'clock in the red, +101 (half), brown bits on the floor. Caramel is touchy - the needle seems to move faster near the end. Trying 1.85s."}}
+{"t":416.8,"issued":414.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.85},"shot":"039.png","held_ms":1920}
+{"t":424.6,"issued":424.6,"cmd":"note","args":{"text":"1.85s = perfect caramel, +202! (327 coins). That's a 50% jump over butter for just 0.15s longer hold. Needle was near the top of the window though; I'll use 1.8s to be safer."}}
+{"t":429.8,"issued":427.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"040.png","held_ms":1897}
+{"t":438.2,"issued":435.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"041.png","held_ms":1873}
+{"t":444.8,"issued":444.8,"cmd":"note","args":{"text":"731 coins, caramel at 1.8s is reliable. Two more pops and I'll have 1,050 for the cart upgrade. The ever-growing numbers are pleasant, though the action itself is the same hold. Curious what the orange clock jar does - will try it after the upgrade."}}
+{"t":449.8,"issued":447.4,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"042.png","held_ms":1849}
+{"t":454.6,"issued":452.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"043.png","held_ms":1835}
+{"t":460.8,"issued":460,"cmd":"tap","args":{"x":300,"y":1180},"shot":"044.png"}
+{"t":467.3,"issued":467.3,"cmd":"note","args":{"text":"Upgrade burst again: a third customer (teal) joined the queue, cart got wider, perfect caramel = +327. Next one is 2,500 for +522; auto-cart is now +50/3s for 1,200. Now trying the orange x1.35 jar with the clock to see what the clock means."}}
+{"t":470.4,"issued":469.7,"cmd":"tap","args":{"x":52,"y":698},"shot":"045.png"}
+{"t":477.8,"issued":477.8,"cmd":"note","args":{"text":"Orange x1.35 has a HUGE yellow window (about 5 to 10 o'clock), card shows +294. So it's the easy-but-medium-pay option. The clock icon maybe means it's slower to cook. Trying a 1.7s hold."}}
+{"t":482.5,"issued":480.1,"cmd":"hold","args":{"x":300,"y":980,"s":1.7},"shot":"046.png","held_ms":1774}
+{"t":489.4,"issued":489.4,"cmd":"note","args":{"text":"Orange at 1.7s: +294, needle around 7:30 well inside the window. Since its window starts at ~5 o'clock maybe I can release early and pop faster - maybe that's what the clock means (quick). Trying 1.2s."}}
+{"t":493.6,"issued":491.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.2},"shot":"047.png","held_ms":1240}
+{"t":503.1,"issued":503.1,"cmd":"note","args":{"text":"1.2s was too early - needle just short of the yellow, +147 (half) with pale undercooked bits. So orange still takes the normal time, it's just forgiving; it pays less than caramel (294 vs 327). Switching back to caramel. Plan: save to 1,200 for the auto-cart to see what idle income looks like."}}
+{"t":506.3,"issued":505.5,"cmd":"tap","args":{"x":52,"y":585},"shot":"048.png"}
+{"t":511.6,"issued":509.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"049.png","held_ms":1874}
+{"t":519.3,"issued":516.9,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"050.png","held_ms":1829}
+{"t":525.3,"issued":525.3,"cmd":"note","args":{"text":"1,180 - just 20 short of the auto-cart, argh. One more caramel pop then I buy the helper cart."}}
+{"t":530.2,"issued":527.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"051.png","held_ms":1828}
+{"t":533.3,"issued":532.6,"cmd":"tap","args":{"x":300,"y":1045},"shot":"052.png"}
+{"t":540.2,"issued":540.2,"cmd":"note","args":{"text":"Bought the helper: a little mini-cart floats on the right with its own blue timer ring filling up. Coins 307. Its upgrade is 3,600 (+50 > +58, 3.0 > 2.7s) - that's poor value. Let me just wait 6 seconds hands-off to watch the helper earn on its own."}}
+{"t":548.7,"issued":542.5,"cmd":"wait","args":{"s":6},"shot":"053.png"}
+{"t":557.2,"issued":557.2,"cmd":"note","args":{"text":"Hands off for ~8s: coins went 307 -> 557, so the helper earns ~250 per 8s, better than I expected (maybe the caramel bonus applies to it too). The main ring went pale - the game's 'idle, press me' look. Back to popping for the 2,500 upgrade."}}
+{"t":562.3,"issued":559.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"054.png","held_ms":1850}
+{"t":570.4,"issued":568,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"055.png","held_ms":1854}
+{"t":573.9,"issued":573.9,"cmd":"note","args":{"text":"Popping caramel steadily with the helper ticking alongside. It's a pleasant rhythm, but my mind is wandering - the only decisions are which card to buy next. Wondering if anything new unlocks at 2,500."}}
+{"t":578.7,"issued":576.3,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"056.png","held_ms":1835}
+{"t":586.5,"issued":584.1,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"057.png","held_ms":1830}
+{"t":595.5,"issued":593.3,"cmd":"wait","args":{"s":2},"shot":"058.png"}
+{"t":599.1,"issued":598.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"059.png"}
+{"t":606.1,"issued":606.1,"cmd":"note","args":{"text":"Bought 2,500: the cart now has TWO kettles inside, perfect caramel should be +522. Helper went up to +80 per pop (I see a '+80' under the shelf where the helper's box reaches a customer). Next main upgrade 5,800 for +838. No new customer this time. Prices more than double each time while gains grow ~60%."}}
+{"t":610.9,"issued":608.5,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"060.png","held_ms":1848}
+{"t":618,"issued":618,"cmd":"note","args":{"text":"+522 per caramel pop, 1,087 coins. Curious whether the floating helper cart does anything when touched - tapping it."}}
+{"t":621.3,"issued":620.5,"cmd":"tap","args":{"x":535,"y":380},"shot":"061.png"}
+{"t":628.3,"issued":628.3,"cmd":"note","args":{"text":"Tapping the helper cart just made a wasted +1 raw pop on the main machine - helper isn't touchable. Lesson: any touch anywhere is a press on the main machine, so careless taps cost a cooking cycle. Back to holds."}}
+{"t":633.2,"issued":630.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"062.png","held_ms":1866}
+{"t":638.2,"issued":635.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"063.png","held_ms":1850}
+{"t":645.9,"issued":645.9,"cmd":"note","args":{"text":"2,852. Skipping the helper upgrade (3,600 for only +13 per pop feels like a bad deal) and going straight for the 5,800 cart upgrade (+316 per pop for me)."}}
+{"t":650.6,"issued":648.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"064.png","held_ms":1874}
+{"t":655.6,"issued":653.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"065.png","held_ms":1835}
+{"t":663.4,"issued":660.9,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"066.png","held_ms":1862}
+{"t":666.9,"issued":666.9,"cmd":"note","args":{"text":"4,296 then another caramel pop. Feels like I'm on autopilot now - hold, release, glance at coins. The helper card glows blue but I'm ignoring it. Two more pops for 5,800."}}
+{"t":671.8,"issued":669.3,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"067.png","held_ms":1866}
+{"t":678.2,"issued":677.3,"cmd":"tap","args":{"x":300,"y":1180},"shot":"068.png"}
+{"t":686,"issued":686,"cmd":"note","args":{"text":"Bought 5,800: cart got golden wheels, perfect caramel +838 now; helper automatically rose to +129. Next is 14,000 for +1,341 - the '14,000' text now runs into the up arrow on the card, a bit cramped. No new customer or mechanic this time, just bigger numbers."}}
+{"t":691,"issued":688.4,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"069.png","held_ms":1887}
+{"t":700.6,"issued":698.1,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"070.png","held_ms":1842}
+{"t":704.3,"issued":704.3,"cmd":"note","args":{"text":"Grinding toward 14,000 at +838 a pop plus the helper. Each upgrade now needs ~12 pops instead of 3 at the start - the pace is slowing down noticeably."}}
+{"t":709.5,"issued":706.7,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"071.png","held_ms":1976}
+{"t":714.7,"issued":712.1,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"072.png","held_ms":1860}
+{"t":723.1,"issued":720.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"073.png","held_ms":1846}
+{"t":726.7,"issued":726.7,"cmd":"note","args":{"text":"5,080 -> still holding. The burst of popcorn each perfect is still nice to look at. Wondering what the queue of customers on the top shelf means; three people, they take boxes and coins pop - pure decoration as far as I can tell."}}
+{"t":731.8,"issued":729.4,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"074.png","held_ms":1842}
+{"t":737.1,"issued":734.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"075.png","held_ms":1874}
+{"t":745.6,"issued":743.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"076.png","held_ms":1837}
+{"t":749.1,"issued":749.1,"cmd":"note","args":{"text":"~9,500 now. A few more pops to 14,000. I'm curious what visual the next cart tier brings - the cart transformations are the main reward I look forward to."}}
+{"t":754.3,"issued":751.7,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"077.png","held_ms":1861}
+{"t":759.4,"issued":756.9,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"078.png","held_ms":1842}
+{"t":767.3,"issued":764.8,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"079.png","held_ms":1847}
+{"t":772.6,"issued":770.2,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"080.png","held_ms":1851}
+{"t":778.7,"issued":777.9,"cmd":"tap","args":{"x":300,"y":1180},"shot":"081.png"}
+{"t":786.4,"issued":786.4,"cmd":"note","args":{"text":"Bought 14,000! Big sparkle, a FOURTH customer (blue) joined, cart got lamp posts and a darker red body. Perfect caramel should be +1,341 now; helper +206. Next cart 32,000. With 2 min left, I'm curious what the back arrow (top left) leads to - maybe a menu or other stalls. Going to pop a couple more first."}}
+{"t":791.4,"issued":788.9,"cmd":"hold","args":{"x":300,"y":980,"s":1.8},"shot":"082.png","held_ms":1842}
+{"t":797.4,"issued":797.4,"cmd":"note","args":{"text":"+1,341 per pop now. OK, curiosity time: tapping the back arrow top-left. I expect a menu or a map; I hope it doesn't wipe my progress."}}
+{"t":800.5,"issued":799.8,"cmd":"tap","args":{"x":55,"y":58},"shot":"083.png"}
+{"t":808.3,"issued":808.3,"cmd":"note","args":{"text":"Whoa - the back arrow opens a menu of FOUR versions: a red Star card (looks like the one I played: ring with yellow window plus the little helper cart), A (popcorn bursting over the cart, a bag/hand on the side), B (the ring with yellow window, no helper), C (a row of brown dots and a star). No words anywhere. I had no idea these existed. Trying A with my last 1.5 minutes."}}
+{"t":811.5,"issued":810.8,"cmd":"tap","args":{"x":300,"y":505},"shot":"084.png"}
+{"t":817.8,"issued":817.8,"cmd":"note","args":{"text":"Mode A: fresh start at 0 coins, just the machine, no ring, no customers. Upgrade 24 for +1 -> +2. Looks like a plain tapper. Tapping a few times."}}
+{"t":820.8,"issued":820,"cmd":"tap","args":{"x":300,"y":850},"shot":"085.png"}
+{"t":830.4,"issued":827.4,"cmd":"hold","args":{"x":300,"y":850,"s":2},"shot":"086.png","held_ms":2037}
+{"t":837.8,"issued":837.8,"cmd":"note","args":{"text":"Mode A is a bare tapper: a hold just counts as one tap, +1. Much flatter than the Star version - no timing, no ring. With a minute left, going back to check my Star save is still there."}}
+{"t":841.8,"issued":840.1,"cmd":"tap","args":{"x":55,"y":58},"shot":"087.png"}
+{"t":846.1,"issued":844.8,"cmd":"tap","args":{"x":300,"y":230},"shot":"088.png"}
+{"t":853.4,"issued":853.4,"cmd":"note","args":{"text":"Ouch! Going back into the Star card started over from 0 coins and the plain little machine - all 13 minutes of upgrades (4 customers, lamp-post cart, helper, flavors) are gone. Nothing warned me that leaving would wipe it. That stings. Doing one perfect pop for old times' sake."}}
+{"t":858.7,"issued":855.7,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"089.png","held_ms":1960}
+{"t":864.5,"issued":861.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"090.png","held_ms":1707}
+{"t":871.1,"issued":871.1,"cmd":"note","args":{"text":"Two perfects back-to-back on the fresh start (20 coins) - the second time through, the opening is trivial because I already know the timing. Wrapping up."}}
+{"t":875.6,"issued":873.3,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"091.png","held_ms":1640}
+{"t":879,"issued":878.2,"cmd":"tap","args":{"x":300,"y":1180},"shot":"092.png"}
+{"t":884,"issued":881.7,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"093.png","held_ms":1657}
+{"t":889,"issued":886.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"094.png","held_ms":1638}
+{"t":894.3,"issued":891.6,"cmd":"hold","args":{"x":300,"y":980,"s":1.6},"shot":"095.png","held_ms":1761}

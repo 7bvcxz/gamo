@@ -29,6 +29,7 @@ You have the phone in your hands through these commands only (run them with Bash
   node <TOOL>/play.mjs <RUN> tap X Y            -> touch the screen at pixel (X, Y) of the screenshot (screenshots are 600 x 1290 px); prints a new screenshot path
   node <TOOL>/play.mjs <RUN> hold X Y S         -> press at (X, Y) and keep the finger down for S seconds (at most 5), then lift it
   node <TOOL>/play.mjs <RUN> drag X1 Y1 X2 Y2   -> slide one finger from (X1, Y1) to (X2, Y2)
+  node <TOOL>/play.mjs <RUN> path S X1 Y1 X2 Y2 [X3 Y3 ...] -> put a finger down at (X1, Y1), keep it on the screen while it moves through the other points over S seconds (at most 5), then lift it
   node <TOOL>/play.mjs <RUN> wait S             -> let S seconds pass (at most 30), then see the screen
   node <TOOL>/play.mjs <RUN> note "TEXT"        -> say out loud what you see, what you try, what you expect and how it feels
   node <TOOL>/play.mjs <RUN> status             -> how much of the three minutes is left
@@ -57,6 +58,9 @@ When the time is up, reply with a short report as yourself, the player:
 
 - **세션은 하나씩 띄운다.** Step 10에서 두 세션을 동시에 띄웠더니 둘 다 엔진(39MB)을 받는 중에 150초 대기를 넘겨 죽었다. 하나씩 띄우면 3–5초에 준비됐다. 띄운 뒤 `ready`를 보고 다음 것을 띄운다.
 - `--seconds 600`이면 10분 세션이다(Step 10의 긴 플레이). 프롬프트의 'three minutes'를 'ten minutes'로 바꿔 준다.
+- **Step 11부터** `path` 명령이 있다(손가락을 댄 채 여러 점을 지나 움직이고 뗀다). 사람은 누른 채 움직일 수 있는데, AI의 `drag`는 0.2초라
+  그것이 불가능했다(가게의 흔들기를 아무도 찾지 못한 이유 중 하나). 이 명령은 무엇을 하라고 말하지 않는다. 시간은 시계로 지킨다(1.6초 요청 →
+  1.64–1.69초, 게임 판정 1,550–1,616ms). Step 11의 긴 세션은 보고에 '6. What do you think the goal of the game is?'를 더한다.
 
 ## 한계 (정직하게)
 

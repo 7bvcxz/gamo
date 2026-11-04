@@ -154,7 +154,7 @@ func toggle_sound() -> void:
 func restart() -> void:
 	if screen != "play":
 		return
-	_finish_run()
+	_finish_run(false)
 	_start(exp_id)
 
 
@@ -273,11 +273,18 @@ func _start(id: String) -> void:
 	var entry := PopRegistry.find(id)
 	exp_id = id
 	screen = "play"
-	rules = PopRegistry.make_rules(id, economy)
-	clock = PopClock.new()
-	if web.hidden():
-		clock.set_pause("hidden", true)
-	session = PopSession.new(id)
+	if _parked.has(id):
+		var p: Dictionary = _parked[id]
+		_parked.erase(id)
+		rules = p["rules"]
+		clock = p["clock"]
+		session = p["session"]
+		session.record(clock.now_ms, "resumed", {})
+	else:
+		rules = PopRegistry.make_rules(id, economy)
+		clock = PopClock.new()
+		session = PopSession.new(id)
+	clock.set_pause("hidden", web.hidden())
 	var view_script: GDScript = load(String(entry["view"]))
 	var view: PopPlayView = view_script.new()
 	view.reduced_motion = reduced_motion
@@ -293,7 +300,20 @@ func _start(id: String) -> void:
 	_flush()
 
 
-func _finish_run() -> void:
+## Runs parked by leaving (experiment id -> rules, session, clock): an entry
+## with `keep` (the stand) is set aside, not finished, when the player goes
+## back or opens another, and picked up again when it is reopened. Step 11: a
+## blind player pressed back at 13:20 of the stand, came back, and found
+## everything gone -- "the worst moment". Only the restart button starts it
+## over. In memory only: a page reload still starts fresh (no save yet).
+var _parked: Dictionary = {}
+
+
+func _finish_run(keep: bool = true) -> void:
+	if screen == "play" and rules != null and keep and bool(PopRegistry.find(exp_id).get("keep", false)):
+		_parked[exp_id] = {"rules": rules, "session": session, "clock": clock}
+		return
+	_parked.erase(exp_id)
 	if screen == "play" and rules != null:
 		session.reset(clock.now_ms)
 		history.append(summary())

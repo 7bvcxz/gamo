@@ -1,0 +1,6920 @@
+{
+  "_doc": "AUTOMATED SIMULATION on the real stand rules (tools/sim/stand.gd), seed 7, 20 minutes. Not human play.",
+  "runs": [
+    {
+      "all_bought_s": 689.56,
+      "batches": 544,
+      "buys": 21,
+      "events": {
+        "auto_1": 39170,
+        "auto_2": 69690,
+        "auto_3": 99690,
+        "auto_4": 149520,
+        "auto_5": 255670,
+        "auto_6": 367960,
+        "auto_7": 587560,
+        "recipe": 50180,
+        "unlock_auto": 33020,
+        "unlock_recipes": 50180,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 6474610,
+        "even_pops": 533,
+        "helper": 2040077,
+        "level": 14,
+        "manual": 4434533,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 1,
+          "perfect": 543
+        }
+      },
+      "hand_heating_share": 0.816575,
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 50170,
+        "6": 60940,
+        "7": 85330,
+        "8": 120530,
+        "9": 180180,
+        "10": 224830,
+        "11": 311020,
+        "12": 438570,
+        "13": 528160,
+        "14": 689560
+      },
+      "longest_no_buy_after_3min_s": 102.0,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 6474610,
+          "helper": 2040077,
+          "level": 14,
+          "manual": 4434533,
+          "money": 4816414
+        },
+        "180": {
+          "auto": 4,
+          "earned": 40968,
+          "helper": 5135,
+          "level": 8,
+          "manual": 35833,
+          "money": 13772
+        },
+        "300": {
+          "auto": 5,
+          "earned": 162580,
+          "helper": 28304,
+          "level": 10,
+          "manual": 134276,
+          "money": 54384
+        },
+        "600": {
+          "auto": 7,
+          "earned": 1135887,
+          "helper": 282997,
+          "level": 13,
+          "manual": 852890,
+          "money": 77691
+        },
+        "900": {
+          "auto": 7,
+          "earned": 3651959,
+          "helper": 1109277,
+          "level": 14,
+          "manual": 2542682,
+          "money": 1993763
+        }
+      },
+      "name": "skilled (gold's middle, shakes, buys at once, caramel)",
+      "per_minute": [
+        {
+          "auto": 1,
+          "batches": 27,
+          "earned": 1894,
+          "heating_ms": 46690,
+          "helper": 0,
+          "level": 5,
+          "manual": 1894,
+          "min": 1
+        },
+        {
+          "auto": 3,
+          "batches": 54,
+          "earned": 14824,
+          "heating_ms": 95890,
+          "helper": 1301,
+          "level": 7,
+          "manual": 13523,
+          "min": 2
+        },
+        {
+          "auto": 4,
+          "batches": 81,
+          "earned": 40968,
+          "heating_ms": 145090,
+          "helper": 5135,
+          "level": 8,
+          "manual": 35833,
+          "min": 3
+        },
+        {
+          "auto": 4,
+          "batches": 108,
+          "earned": 89846,
+          "heating_ms": 194290,
+          "helper": 13485,
+          "level": 10,
+          "manual": 76361,
+          "min": 4
+        },
+        {
+          "auto": 5,
+          "batches": 135,
+          "earned": 162580,
+          "heating_ms": 243490,
+          "helper": 28304,
+          "level": 10,
+          "manual": 134276,
+          "min": 5
+        },
+        {
+          "auto": 5,
+          "batches": 163,
+          "earned": 273944,
+          "heating_ms": 292290,
+          "helper": 51294,
+          "level": 11,
+          "manual": 222650,
+          "min": 6
+        },
+        {
+          "auto": 6,
+          "batches": 190,
+          "earned": 398436,
+          "heating_ms": 341490,
+          "helper": 83122,
+          "level": 11,
+          "manual": 315314,
+          "min": 7
+        },
+        {
+          "auto": 6,
+          "batches": 217,
+          "earned": 575732,
+          "heating_ms": 390690,
+          "helper": 131250,
+          "level": 12,
+          "manual": 444482,
+          "min": 8
+        },
+        {
+          "auto": 6,
+          "batches": 244,
+          "earned": 798431,
+          "heating_ms": 439890,
+          "helper": 190149,
+          "level": 13,
+          "manual": 608282,
+          "min": 9
+        },
+        {
+          "auto": 7,
+          "batches": 272,
+          "earned": 1135887,
+          "heating_ms": 488800,
+          "helper": 282997,
+          "level": 13,
+          "manual": 852890,
+          "min": 10
+        },
+        {
+          "auto": 7,
+          "batches": 299,
+          "earned": 1488239,
+          "heating_ms": 537890,
+          "helper": 399477,
+          "level": 13,
+          "manual": 1088762,
+          "min": 11
+        },
+        {
+          "auto": 7,
+          "batches": 326,
+          "earned": 1948595,
+          "heating_ms": 587090,
+          "helper": 550797,
+          "level": 14,
+          "manual": 1397798,
+          "min": 12
+        },
+        {
+          "auto": 7,
+          "batches": 353,
+          "earned": 2511729,
+          "heating_ms": 636290,
+          "helper": 736957,
+          "level": 14,
+          "manual": 1774772,
+          "min": 13
+        },
+        {
+          "auto": 7,
+          "batches": 380,
+          "earned": 3074863,
+          "heating_ms": 685490,
+          "helper": 923117,
+          "level": 14,
+          "manual": 2151746,
+          "min": 14
+        },
+        {
+          "auto": 7,
+          "batches": 408,
+          "earned": 3651959,
+          "heating_ms": 734290,
+          "helper": 1109277,
+          "level": 14,
+          "manual": 2542682,
+          "min": 15
+        },
+        {
+          "auto": 7,
+          "batches": 435,
+          "earned": 4215093,
+          "heating_ms": 783490,
+          "helper": 1295437,
+          "level": 14,
+          "manual": 2919656,
+          "min": 16
+        },
+        {
+          "auto": 7,
+          "batches": 463,
+          "earned": 4785208,
+          "heating_ms": 832550,
+          "helper": 1481597,
+          "level": 14,
+          "manual": 3303611,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 490,
+          "earned": 5348342,
+          "heating_ms": 881490,
+          "helper": 1667757,
+          "level": 14,
+          "manual": 3680585,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 517,
+          "earned": 5911476,
+          "heating_ms": 930690,
+          "helper": 1853917,
+          "level": 14,
+          "manual": 4057559,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 544,
+          "earned": 6474610,
+          "heating_ms": 979890,
+          "helper": 2040077,
+          "level": 14,
+          "manual": 4434533,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          39170,
+          "auto1"
+        ],
+        [
+          50170,
+          "main"
+        ],
+        [
+          60940,
+          "main"
+        ],
+        [
+          69690,
+          "auto2"
+        ],
+        [
+          85330,
+          "main"
+        ],
+        [
+          99690,
+          "auto3"
+        ],
+        [
+          120530,
+          "main"
+        ],
+        [
+          149520,
+          "auto4"
+        ],
+        [
+          180180,
+          "main"
+        ],
+        [
+          224830,
+          "main"
+        ],
+        [
+          255670,
+          "auto5"
+        ],
+        [
+          311020,
+          "main"
+        ],
+        [
+          367960,
+          "auto6"
+        ],
+        [
+          438570,
+          "main"
+        ],
+        [
+          528160,
+          "main"
+        ],
+        [
+          587560,
+          "auto7"
+        ],
+        [
+          689560,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 8.14,
+        "1": 8.04,
+        "10": 86.19,
+        "11": 127.55,
+        "12": 89.59,
+        "13": 161.4,
+        "2": 8.3,
+        "3": 8.53,
+        "4": 17.16,
+        "5": 10.77,
+        "6": 24.39,
+        "7": 35.2,
+        "8": 59.65,
+        "9": 44.65
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": 911.56,
+      "batches": 545,
+      "buys": 21,
+      "events": {
+        "auto_1": 39170,
+        "auto_2": 80860,
+        "auto_3": 122400,
+        "auto_4": 192600,
+        "auto_5": 336980,
+        "auto_6": 490280,
+        "auto_7": 780080,
+        "unlock_auto": 33020,
+        "unlock_recipes": 50180,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 3774781,
+        "even_pops": 534,
+        "helper": 1491534,
+        "level": 14,
+        "manual": 2283247,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 0,
+          "perfect": 545
+        }
+      },
+      "hand_heating_share": 0.816416666666667,
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 50170,
+        "6": 67440,
+        "7": 102550,
+        "8": 153620,
+        "9": 235470,
+        "10": 295800,
+        "11": 414040,
+        "12": 584030,
+        "13": 702680,
+        "14": 911560
+      },
+      "longest_no_buy_after_3min_s": 131.48,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 3774781,
+          "helper": 1491534,
+          "level": 14,
+          "manual": 2283247,
+          "money": 2116585
+        },
+        "180": {
+          "auto": 3,
+          "earned": 23719,
+          "helper": 3353,
+          "level": 8,
+          "manual": 20366,
+          "money": 8523
+        },
+        "300": {
+          "auto": 4,
+          "earned": 76595,
+          "helper": 15256,
+          "level": 10,
+          "manual": 61339,
+          "money": 3399
+        },
+        "600": {
+          "auto": 6,
+          "earned": 477887,
+          "helper": 140532,
+          "level": 12,
+          "manual": 337355,
+          "money": 39691
+        },
+        "900": {
+          "auto": 7,
+          "earned": 1603625,
+          "helper": 574670,
+          "level": 13,
+          "manual": 1028955,
+          "money": 545429
+        }
+      },
+      "name": "skilled, butter",
+      "per_minute": [
+        {
+          "auto": 1,
+          "batches": 27,
+          "earned": 1626,
+          "heating_ms": 46690,
+          "helper": 0,
+          "level": 5,
+          "manual": 1626,
+          "min": 1
+        },
+        {
+          "auto": 2,
+          "batches": 54,
+          "earned": 8920,
+          "heating_ms": 95890,
+          "helper": 830,
+          "level": 7,
+          "manual": 8090,
+          "min": 2
+        },
+        {
+          "auto": 3,
+          "batches": 82,
+          "earned": 23719,
+          "heating_ms": 145000,
+          "helper": 3353,
+          "level": 8,
+          "manual": 20366,
+          "min": 3
+        },
+        {
+          "auto": 4,
+          "batches": 109,
+          "earned": 43910,
+          "heating_ms": 194040,
+          "helper": 7781,
+          "level": 9,
+          "manual": 36129,
+          "min": 4
+        },
+        {
+          "auto": 4,
+          "batches": 136,
+          "earned": 76595,
+          "heating_ms": 243440,
+          "helper": 15256,
+          "level": 10,
+          "manual": 61339,
+          "min": 5
+        },
+        {
+          "auto": 5,
+          "batches": 163,
+          "earned": 128177,
+          "heating_ms": 292290,
+          "helper": 28228,
+          "level": 10,
+          "manual": 99949,
+          "min": 6
+        },
+        {
+          "auto": 5,
+          "batches": 190,
+          "earned": 185443,
+          "heating_ms": 341490,
+          "helper": 45168,
+          "level": 11,
+          "manual": 140275,
+          "min": 7
+        },
+        {
+          "auto": 5,
+          "batches": 217,
+          "earned": 272739,
+          "heating_ms": 390690,
+          "helper": 70688,
+          "level": 11,
+          "manual": 202051,
+          "min": 8
+        },
+        {
+          "auto": 6,
+          "batches": 245,
+          "earned": 368500,
+          "heating_ms": 439700,
+          "helper": 102385,
+          "level": 11,
+          "manual": 266115,
+          "min": 9
+        },
+        {
+          "auto": 6,
+          "batches": 272,
+          "earned": 477887,
+          "heating_ms": 488690,
+          "helper": 140532,
+          "level": 12,
+          "manual": 337355,
+          "min": 10
+        },
+        {
+          "auto": 6,
+          "batches": 299,
+          "earned": 630873,
+          "heating_ms": 537890,
+          "helper": 195238,
+          "level": 12,
+          "manual": 435635,
+          "min": 11
+        },
+        {
+          "auto": 6,
+          "batches": 326,
+          "earned": 808425,
+          "heating_ms": 587090,
+          "helper": 257038,
+          "level": 13,
+          "manual": 551387,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 354,
+          "earned": 1056505,
+          "heating_ms": 636280,
+          "helper": 342046,
+          "level": 13,
+          "manual": 714459,
+          "min": 13
+        },
+        {
+          "auto": 7,
+          "batches": 381,
+          "earned": 1329897,
+          "heating_ms": 685230,
+          "helper": 458190,
+          "level": 13,
+          "manual": 871707,
+          "min": 14
+        },
+        {
+          "auto": 7,
+          "batches": 408,
+          "earned": 1603625,
+          "heating_ms": 734290,
+          "helper": 574670,
+          "level": 13,
+          "manual": 1028955,
+          "min": 15
+        },
+        {
+          "auto": 7,
+          "batches": 435,
+          "earned": 2006261,
+          "heating_ms": 783490,
+          "helper": 746894,
+          "level": 14,
+          "manual": 1259367,
+          "min": 16
+        },
+        {
+          "auto": 7,
+          "batches": 463,
+          "earned": 2453045,
+          "heating_ms": 832290,
+          "helper": 933054,
+          "level": 14,
+          "manual": 1519991,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 490,
+          "earned": 2890521,
+          "heating_ms": 881490,
+          "helper": 1119214,
+          "level": 14,
+          "manual": 1771307,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 517,
+          "earned": 3327997,
+          "heating_ms": 930690,
+          "helper": 1305374,
+          "level": 14,
+          "manual": 2022623,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 545,
+          "earned": 3774781,
+          "heating_ms": 979700,
+          "helper": 1491534,
+          "level": 14,
+          "manual": 2283247,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          39170,
+          "auto1"
+        ],
+        [
+          50170,
+          "main"
+        ],
+        [
+          67440,
+          "main"
+        ],
+        [
+          80860,
+          "auto2"
+        ],
+        [
+          102550,
+          "main"
+        ],
+        [
+          122400,
+          "auto3"
+        ],
+        [
+          153620,
+          "main"
+        ],
+        [
+          192600,
+          "auto4"
+        ],
+        [
+          235470,
+          "main"
+        ],
+        [
+          295800,
+          "main"
+        ],
+        [
+          336980,
+          "auto5"
+        ],
+        [
+          414040,
+          "main"
+        ],
+        [
+          490280,
+          "auto6"
+        ],
+        [
+          584030,
+          "main"
+        ],
+        [
+          702680,
+          "main"
+        ],
+        [
+          780080,
+          "auto7"
+        ],
+        [
+          911560,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 8.14,
+        "1": 8.04,
+        "10": 118.24,
+        "11": 169.99,
+        "12": 118.65,
+        "13": 208.88,
+        "2": 8.3,
+        "3": 8.53,
+        "4": 17.16,
+        "5": 17.27,
+        "6": 35.11,
+        "7": 51.07,
+        "8": 81.85,
+        "9": 60.33
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": 937.65,
+      "batches": 393,
+      "buys": 21,
+      "events": {
+        "auto_1": 39170,
+        "auto_2": 79920,
+        "auto_3": 123460,
+        "auto_4": 195230,
+        "auto_5": 347810,
+        "auto_6": 505310,
+        "auto_7": 804110,
+        "recipe": 50180,
+        "unlock_auto": 33020,
+        "unlock_recipes": 50180,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 3530029,
+        "even_pops": 382,
+        "helper": 1425278,
+        "level": 14,
+        "manual": 2104751,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 0,
+          "perfect": 393
+        }
+      },
+      "hand_heating_share": 0.589408333333333,
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 50170,
+        "6": 67620,
+        "7": 103920,
+        "8": 154450,
+        "9": 240830,
+        "10": 304330,
+        "11": 425510,
+        "12": 600710,
+        "13": 723110,
+        "14": 937650
+      },
+      "longest_no_buy_after_3min_s": 133.54,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 3530029,
+          "helper": 1425278,
+          "level": 14,
+          "manual": 2104751,
+          "money": 1871833
+        },
+        "180": {
+          "auto": 3,
+          "earned": 22687,
+          "helper": 3253,
+          "level": 8,
+          "manual": 19434,
+          "money": 7491
+        },
+        "300": {
+          "auto": 4,
+          "earned": 71312,
+          "helper": 14619,
+          "level": 9,
+          "manual": 56693,
+          "money": 30116
+        },
+        "600": {
+          "auto": 6,
+          "earned": 437276,
+          "helper": 129971,
+          "level": 11,
+          "manual": 307305,
+          "money": 149080
+        },
+        "900": {
+          "auto": 7,
+          "earned": 1486855,
+          "helper": 539770,
+          "level": 13,
+          "manual": 947085,
+          "money": 428659
+        }
+      },
+      "name": "skilled, cheese",
+      "per_minute": [
+        {
+          "auto": 1,
+          "batches": 26,
+          "earned": 1632,
+          "heating_ms": 44390,
+          "helper": 0,
+          "level": 5,
+          "manual": 1632,
+          "min": 1
+        },
+        {
+          "auto": 2,
+          "batches": 45,
+          "earned": 8562,
+          "heating_ms": 79690,
+          "helper": 800,
+          "level": 7,
+          "manual": 7762,
+          "min": 2
+        },
+        {
+          "auto": 3,
+          "batches": 65,
+          "earned": 22687,
+          "heating_ms": 114760,
+          "helper": 3253,
+          "level": 8,
+          "manual": 19434,
+          "min": 3
+        },
+        {
+          "auto": 4,
+          "batches": 84,
+          "earned": 41189,
+          "heating_ms": 149100,
+          "helper": 7429,
+          "level": 8,
+          "manual": 33760,
+          "min": 4
+        },
+        {
+          "auto": 4,
+          "batches": 103,
+          "earned": 71312,
+          "heating_ms": 184290,
+          "helper": 14619,
+          "level": 9,
+          "manual": 56693,
+          "min": 5
+        },
+        {
+          "auto": 5,
+          "batches": 122,
+          "earned": 118276,
+          "heating_ms": 219590,
+          "helper": 26359,
+          "level": 10,
+          "manual": 91917,
+          "min": 6
+        },
+        {
+          "auto": 5,
+          "batches": 142,
+          "earned": 172826,
+          "heating_ms": 254180,
+          "helper": 42309,
+          "level": 10,
+          "manual": 130517,
+          "min": 7
+        },
+        {
+          "auto": 5,
+          "batches": 161,
+          "earned": 252832,
+          "heating_ms": 288890,
+          "helper": 65959,
+          "level": 11,
+          "manual": 186873,
+          "min": 8
+        },
+        {
+          "auto": 6,
+          "batches": 181,
+          "earned": 345241,
+          "heating_ms": 324160,
+          "helper": 96608,
+          "level": 11,
+          "manual": 248633,
+          "min": 9
+        },
+        {
+          "auto": 6,
+          "batches": 200,
+          "earned": 437276,
+          "heating_ms": 358650,
+          "helper": 129971,
+          "level": 11,
+          "manual": 307305,
+          "min": 10
+        },
+        {
+          "auto": 6,
+          "batches": 219,
+          "earned": 583141,
+          "heating_ms": 393490,
+          "helper": 182470,
+          "level": 12,
+          "manual": 400671,
+          "min": 11
+        },
+        {
+          "auto": 6,
+          "batches": 238,
+          "earned": 731213,
+          "heating_ms": 428790,
+          "helper": 237176,
+          "level": 12,
+          "manual": 494037,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 258,
+          "earned": 968579,
+          "heating_ms": 463550,
+          "helper": 320250,
+          "level": 13,
+          "manual": 648329,
+          "min": 13
+        },
+        {
+          "auto": 7,
+          "batches": 277,
+          "earned": 1220997,
+          "heating_ms": 498090,
+          "helper": 423290,
+          "level": 13,
+          "manual": 797707,
+          "min": 14
+        },
+        {
+          "auto": 7,
+          "batches": 296,
+          "earned": 1486855,
+          "heating_ms": 533390,
+          "helper": 539770,
+          "level": 13,
+          "manual": 947085,
+          "min": 15
+        },
+        {
+          "auto": 7,
+          "batches": 316,
+          "earned": 1817884,
+          "heating_ms": 568390,
+          "helper": 680638,
+          "level": 14,
+          "manual": 1137246,
+          "min": 16
+        },
+        {
+          "auto": 7,
+          "batches": 335,
+          "earned": 2242779,
+          "heating_ms": 602690,
+          "helper": 866798,
+          "level": 14,
+          "manual": 1375981,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 354,
+          "earned": 2667674,
+          "heating_ms": 637990,
+          "helper": 1052958,
+          "level": 14,
+          "manual": 1614716,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 374,
+          "earned": 3105134,
+          "heating_ms": 672680,
+          "helper": 1239118,
+          "level": 14,
+          "manual": 1866016,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 393,
+          "earned": 3530029,
+          "heating_ms": 707290,
+          "helper": 1425278,
+          "level": 14,
+          "manual": 2104751,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          39170,
+          "auto1"
+        ],
+        [
+          50170,
+          "main"
+        ],
+        [
+          67620,
+          "main"
+        ],
+        [
+          79920,
+          "auto2"
+        ],
+        [
+          103920,
+          "main"
+        ],
+        [
+          123460,
+          "auto3"
+        ],
+        [
+          154450,
+          "main"
+        ],
+        [
+          195230,
+          "auto4"
+        ],
+        [
+          240830,
+          "main"
+        ],
+        [
+          304330,
+          "main"
+        ],
+        [
+          347810,
+          "auto5"
+        ],
+        [
+          425510,
+          "main"
+        ],
+        [
+          505310,
+          "auto6"
+        ],
+        [
+          600710,
+          "main"
+        ],
+        [
+          723110,
+          "main"
+        ],
+        [
+          804110,
+          "auto7"
+        ],
+        [
+          937650,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 8.14,
+        "1": 8.04,
+        "10": 121.18,
+        "11": 175.2,
+        "12": 122.4,
+        "13": 214.54,
+        "2": 8.3,
+        "3": 8.53,
+        "4": 17.16,
+        "5": 17.45,
+        "6": 36.3,
+        "7": 50.53,
+        "8": 86.38,
+        "9": 63.5
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 422,
+      "buys": 19,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 155790,
+        "auto_3": 227050,
+        "auto_4": 364910,
+        "auto_5": 616580,
+        "auto_6": 851990,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 6,
+        "earned": 784854,
+        "even_pops": 404,
+        "helper": 396582,
+        "level": 13,
+        "manual": 388272,
+        "outcomes": {
+          "burnt": 35,
+          "early": 83,
+          "late": 56,
+          "near": 58,
+          "perfect": 190
+        }
+      },
+      "hand_heating_share": 0.64385,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 134340,
+        "7": 192000,
+        "8": 289410,
+        "9": 436420,
+        "10": 531960,
+        "11": 729690,
+        "12": 987540,
+        "13": 1183190
+      },
+      "longest_no_buy_after_3min_s": 195.65,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 784854,
+          "helper": 396582,
+          "level": 13,
+          "manual": 388272,
+          "money": 46658
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5324,
+          "helper": 400,
+          "level": 6,
+          "manual": 4924,
+          "money": 2028
+        },
+        "300": {
+          "auto": 3,
+          "earned": 16660,
+          "helper": 4219,
+          "level": 8,
+          "manual": 12441,
+          "money": 1464
+        },
+        "600": {
+          "auto": 4,
+          "earned": 103758,
+          "helper": 37853,
+          "level": 10,
+          "manual": 65905,
+          "money": 30562
+        },
+        "900": {
+          "auto": 6,
+          "earned": 350711,
+          "helper": 148478,
+          "level": 11,
+          "manual": 202233,
+          "money": 62515
+        }
+      },
+      "name": "casual (mixed timing, shakes half the time, slow to buy, butter)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1778,
+          "heating_ms": 74030,
+          "helper": 0,
+          "level": 5,
+          "manual": 1778,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 65,
+          "earned": 5324,
+          "heating_ms": 110990,
+          "helper": 400,
+          "level": 6,
+          "manual": 4924,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 85,
+          "earned": 10956,
+          "heating_ms": 148170,
+          "helper": 1852,
+          "level": 7,
+          "manual": 9104,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 105,
+          "earned": 16660,
+          "heating_ms": 186320,
+          "helper": 4219,
+          "level": 8,
+          "manual": 12441,
+          "min": 5
+        },
+        {
+          "auto": 3,
+          "batches": 125,
+          "earned": 27091,
+          "heating_ms": 228450,
+          "helper": 7519,
+          "level": 8,
+          "manual": 19572,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 146,
+          "earned": 38770,
+          "heating_ms": 266250,
+          "helper": 11823,
+          "level": 8,
+          "manual": 26947,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 168,
+          "earned": 57946,
+          "heating_ms": 307520,
+          "helper": 18353,
+          "level": 9,
+          "manual": 39593,
+          "min": 8
+        },
+        {
+          "auto": 4,
+          "batches": 188,
+          "earned": 75754,
+          "heating_ms": 347530,
+          "helper": 26178,
+          "level": 10,
+          "manual": 49576,
+          "min": 9
+        },
+        {
+          "auto": 4,
+          "batches": 208,
+          "earned": 103758,
+          "heating_ms": 386420,
+          "helper": 37853,
+          "level": 10,
+          "manual": 65905,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 229,
+          "earned": 135536,
+          "heating_ms": 424370,
+          "helper": 52122,
+          "level": 10,
+          "manual": 83414,
+          "min": 11
+        },
+        {
+          "auto": 5,
+          "batches": 251,
+          "earned": 174077,
+          "heating_ms": 461790,
+          "helper": 68072,
+          "level": 10,
+          "manual": 106005,
+          "min": 12
+        },
+        {
+          "auto": 5,
+          "batches": 272,
+          "earned": 223369,
+          "heating_ms": 500530,
+          "helper": 91392,
+          "level": 11,
+          "manual": 131977,
+          "min": 13
+        },
+        {
+          "auto": 5,
+          "batches": 292,
+          "earned": 275612,
+          "heating_ms": 543100,
+          "helper": 116912,
+          "level": 11,
+          "manual": 158700,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 315,
+          "earned": 350711,
+          "heating_ms": 579870,
+          "helper": 148478,
+          "level": 11,
+          "manual": 202233,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 338,
+          "earned": 415260,
+          "heating_ms": 617390,
+          "helper": 182852,
+          "level": 11,
+          "manual": 232408,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 359,
+          "earned": 490022,
+          "heating_ms": 657650,
+          "helper": 226979,
+          "level": 12,
+          "manual": 263043,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 381,
+          "earned": 590779,
+          "heating_ms": 696480,
+          "helper": 280076,
+          "level": 12,
+          "manual": 310703,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 402,
+          "earned": 681299,
+          "heating_ms": 734170,
+          "helper": 334782,
+          "level": 12,
+          "manual": 346517,
+          "min": 19
+        },
+        {
+          "auto": 6,
+          "batches": 422,
+          "earned": 784854,
+          "heating_ms": 772620,
+          "helper": 396582,
+          "level": 13,
+          "manual": 388272,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          134340,
+          "main"
+        ],
+        [
+          155790,
+          "auto2"
+        ],
+        [
+          192000,
+          "main"
+        ],
+        [
+          227050,
+          "auto3"
+        ],
+        [
+          289410,
+          "main"
+        ],
+        [
+          364910,
+          "auto4"
+        ],
+        [
+          436420,
+          "main"
+        ],
+        [
+          531960,
+          "main"
+        ],
+        [
+          616580,
+          "auto5"
+        ],
+        [
+          729690,
+          "main"
+        ],
+        [
+          851990,
+          "auto6"
+        ],
+        [
+          987540,
+          "main"
+        ],
+        [
+          1183190,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "10": 197.73,
+        "11": 257.85,
+        "12": 195.65,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 39.06,
+        "5": 37.81,
+        "6": 57.66,
+        "7": 97.41,
+        "8": 147.01,
+        "9": 95.54
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 429,
+      "buys": 20,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 147190,
+        "auto_3": 203410,
+        "auto_4": 312170,
+        "auto_5": 505480,
+        "auto_6": 711770,
+        "auto_7": 1079660,
+        "recipe": 97230,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1478277,
+        "even_pops": 411,
+        "helper": 669251,
+        "level": 13,
+        "manual": 809026,
+        "outcomes": {
+          "burnt": 81,
+          "early": 80,
+          "late": 14,
+          "near": 89,
+          "perfect": 165
+        }
+      },
+      "hand_heating_share": 0.6383,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 132090,
+        "7": 173130,
+        "8": 255920,
+        "9": 362860,
+        "10": 454060,
+        "11": 620670,
+        "12": 840750,
+        "13": 984920
+      },
+      "longest_no_buy_after_3min_s": 144.17,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1478277,
+          "helper": 669251,
+          "level": 13,
+          "manual": 809026,
+          "money": 420081
+        },
+        "180": {
+          "auto": 2,
+          "earned": 6927,
+          "helper": 560,
+          "level": 7,
+          "manual": 6367,
+          "money": 1131
+        },
+        "300": {
+          "auto": 3,
+          "earned": 25383,
+          "helper": 5367,
+          "level": 8,
+          "manual": 20016,
+          "money": 10187
+        },
+        "600": {
+          "auto": 5,
+          "earned": 168627,
+          "helper": 55592,
+          "level": 10,
+          "manual": 113035,
+          "money": 60431
+        },
+        "900": {
+          "auto": 6,
+          "earned": 580597,
+          "helper": 224140,
+          "level": 12,
+          "manual": 356457,
+          "money": 142401
+        }
+      },
+      "name": "casual, caramel",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1869,
+          "heating_ms": 74010,
+          "helper": 0,
+          "level": 5,
+          "manual": 1869,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 65,
+          "earned": 6927,
+          "heating_ms": 113210,
+          "helper": 560,
+          "level": 7,
+          "manual": 6367,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 85,
+          "earned": 13859,
+          "heating_ms": 151620,
+          "helper": 2409,
+          "level": 7,
+          "manual": 11450,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 106,
+          "earned": 25383,
+          "heating_ms": 187980,
+          "helper": 5367,
+          "level": 8,
+          "manual": 20016,
+          "min": 5
+        },
+        {
+          "auto": 4,
+          "batches": 128,
+          "earned": 41179,
+          "heating_ms": 227140,
+          "helper": 9575,
+          "level": 8,
+          "manual": 31604,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 149,
+          "earned": 61951,
+          "heating_ms": 266140,
+          "helper": 16655,
+          "level": 9,
+          "manual": 45296,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 172,
+          "earned": 92121,
+          "heating_ms": 306460,
+          "helper": 25705,
+          "level": 10,
+          "manual": 66416,
+          "min": 8
+        },
+        {
+          "auto": 5,
+          "batches": 192,
+          "earned": 129949,
+          "heating_ms": 345610,
+          "helper": 39642,
+          "level": 10,
+          "manual": 90307,
+          "min": 9
+        },
+        {
+          "auto": 5,
+          "batches": 212,
+          "earned": 168627,
+          "heating_ms": 383000,
+          "helper": 55592,
+          "level": 10,
+          "manual": 113035,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 234,
+          "earned": 230201,
+          "heating_ms": 421850,
+          "helper": 77262,
+          "level": 11,
+          "manual": 152939,
+          "min": 11
+        },
+        {
+          "auto": 6,
+          "batches": 255,
+          "earned": 301262,
+          "heating_ms": 458930,
+          "helper": 103306,
+          "level": 11,
+          "manual": 197956,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 276,
+          "earned": 369452,
+          "heating_ms": 497340,
+          "helper": 136669,
+          "level": 11,
+          "manual": 232783,
+          "min": 13
+        },
+        {
+          "auto": 6,
+          "batches": 297,
+          "earned": 441493,
+          "heating_ms": 538940,
+          "helper": 171043,
+          "level": 11,
+          "manual": 270450,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 320,
+          "earned": 580597,
+          "heating_ms": 577110,
+          "helper": 224140,
+          "level": 12,
+          "manual": 356457,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 342,
+          "earned": 693297,
+          "heating_ms": 614410,
+          "helper": 277237,
+          "level": 12,
+          "manual": 416060,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 363,
+          "earned": 877474,
+          "heating_ms": 653170,
+          "helper": 351283,
+          "level": 13,
+          "manual": 526191,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 385,
+          "earned": 1062568,
+          "heating_ms": 692020,
+          "helper": 436291,
+          "level": 13,
+          "manual": 626277,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 407,
+          "earned": 1259807,
+          "heating_ms": 729460,
+          "helper": 552771,
+          "level": 13,
+          "manual": 707036,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 429,
+          "earned": 1478277,
+          "heating_ms": 765960,
+          "helper": 669251,
+          "level": 13,
+          "manual": 809026,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          132090,
+          "main"
+        ],
+        [
+          147190,
+          "auto2"
+        ],
+        [
+          173130,
+          "main"
+        ],
+        [
+          203410,
+          "auto3"
+        ],
+        [
+          255920,
+          "main"
+        ],
+        [
+          312170,
+          "auto4"
+        ],
+        [
+          362860,
+          "main"
+        ],
+        [
+          454060,
+          "main"
+        ],
+        [
+          505480,
+          "auto5"
+        ],
+        [
+          620670,
+          "main"
+        ],
+        [
+          711770,
+          "auto6"
+        ],
+        [
+          840750,
+          "main"
+        ],
+        [
+          984920,
+          "main"
+        ],
+        [
+          1079660,
+          "auto7"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "10": 166.61,
+        "11": 220.08,
+        "12": 144.17,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 39.06,
+        "5": 35.56,
+        "6": 41.04,
+        "7": 82.79,
+        "8": 106.94,
+        "9": 91.2
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 382,
+      "buys": 20,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 149420,
+        "auto_3": 213960,
+        "auto_4": 326980,
+        "auto_5": 543700,
+        "auto_6": 767640,
+        "auto_7": 1163380,
+        "recipe": 97230,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1184241,
+        "even_pops": 364,
+        "helper": 540512,
+        "level": 13,
+        "manual": 643729,
+        "outcomes": {
+          "burnt": 33,
+          "early": 73,
+          "late": 43,
+          "near": 51,
+          "perfect": 182
+        }
+      },
+      "hand_heating_share": 0.584058333333333,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 127830,
+        "7": 182890,
+        "8": 258290,
+        "9": 390010,
+        "10": 480130,
+        "11": 671530,
+        "12": 907520,
+        "13": 1057530
+      },
+      "longest_no_buy_after_3min_s": 150.01,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1184241,
+          "helper": 540512,
+          "level": 13,
+          "manual": 643729,
+          "money": 126045
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5741,
+          "helper": 500,
+          "level": 6,
+          "manual": 5241,
+          "money": 2445
+        },
+        "300": {
+          "auto": 3,
+          "earned": 21689,
+          "helper": 5088,
+          "level": 8,
+          "manual": 16601,
+          "money": 6493
+        },
+        "600": {
+          "auto": 5,
+          "earned": 137181,
+          "helper": 49033,
+          "level": 10,
+          "manual": 88148,
+          "money": 28985
+        },
+        "900": {
+          "auto": 6,
+          "earned": 433681,
+          "helper": 182016,
+          "level": 11,
+          "manual": 251665,
+          "money": 145485
+        }
+      },
+      "name": "casual, cheese",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 42,
+          "earned": 2031,
+          "heating_ms": 71130,
+          "helper": 0,
+          "level": 5,
+          "manual": 2031,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 61,
+          "earned": 5741,
+          "heating_ms": 106400,
+          "helper": 500,
+          "level": 6,
+          "manual": 5241,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 80,
+          "earned": 13081,
+          "heating_ms": 141310,
+          "helper": 2187,
+          "level": 7,
+          "manual": 10894,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 100,
+          "earned": 21689,
+          "heating_ms": 175410,
+          "helper": 5088,
+          "level": 8,
+          "manual": 16601,
+          "min": 5
+        },
+        {
+          "auto": 4,
+          "batches": 119,
+          "earned": 35548,
+          "heating_ms": 209390,
+          "helper": 8954,
+          "level": 8,
+          "manual": 26594,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 139,
+          "earned": 51592,
+          "heating_ms": 242860,
+          "helper": 14824,
+          "level": 9,
+          "manual": 36768,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 159,
+          "earned": 74709,
+          "heating_ms": 276750,
+          "helper": 22124,
+          "level": 9,
+          "manual": 52585,
+          "min": 8
+        },
+        {
+          "auto": 4,
+          "batches": 178,
+          "earned": 107926,
+          "heating_ms": 312630,
+          "helper": 33799,
+          "level": 10,
+          "manual": 74127,
+          "min": 9
+        },
+        {
+          "auto": 5,
+          "batches": 194,
+          "earned": 137181,
+          "heating_ms": 350370,
+          "helper": 49033,
+          "level": 10,
+          "manual": 88148,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 213,
+          "earned": 173720,
+          "heating_ms": 386250,
+          "helper": 64983,
+          "level": 10,
+          "manual": 108737,
+          "min": 11
+        },
+        {
+          "auto": 5,
+          "batches": 232,
+          "earned": 233745,
+          "heating_ms": 420350,
+          "helper": 87973,
+          "level": 11,
+          "manual": 145772,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 251,
+          "earned": 303255,
+          "heating_ms": 456170,
+          "helper": 114279,
+          "level": 11,
+          "manual": 188976,
+          "min": 13
+        },
+        {
+          "auto": 6,
+          "batches": 268,
+          "earned": 368271,
+          "heating_ms": 492760,
+          "helper": 148653,
+          "level": 11,
+          "manual": 219618,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 286,
+          "earned": 433681,
+          "heating_ms": 529040,
+          "helper": 182016,
+          "level": 11,
+          "manual": 251665,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 306,
+          "earned": 547148,
+          "heating_ms": 562860,
+          "helper": 232721,
+          "level": 12,
+          "manual": 314427,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 326,
+          "earned": 672996,
+          "heating_ms": 595980,
+          "helper": 287427,
+          "level": 12,
+          "manual": 385569,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 346,
+          "earned": 813009,
+          "heating_ms": 628910,
+          "helper": 352128,
+          "level": 13,
+          "manual": 460881,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 365,
+          "earned": 995475,
+          "heating_ms": 663620,
+          "helper": 437136,
+          "level": 13,
+          "manual": 558339,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 382,
+          "earned": 1184241,
+          "heating_ms": 700870,
+          "helper": 540512,
+          "level": 13,
+          "manual": 643729,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          127830,
+          "main"
+        ],
+        [
+          149420,
+          "auto2"
+        ],
+        [
+          182890,
+          "main"
+        ],
+        [
+          213960,
+          "auto3"
+        ],
+        [
+          258290,
+          "main"
+        ],
+        [
+          326980,
+          "auto4"
+        ],
+        [
+          390010,
+          "main"
+        ],
+        [
+          480130,
+          "main"
+        ],
+        [
+          543700,
+          "auto5"
+        ],
+        [
+          671530,
+          "main"
+        ],
+        [
+          767640,
+          "auto6"
+        ],
+        [
+          907520,
+          "main"
+        ],
+        [
+          1057530,
+          "main"
+        ],
+        [
+          1163380,
+          "auto7"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "10": 191.4,
+        "11": 235.99,
+        "12": 150.01,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 39.06,
+        "5": 31.3,
+        "6": 55.06,
+        "7": 75.4,
+        "8": 131.72,
+        "9": 90.12
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 446,
+      "buys": 20,
+      "events": {
+        "auto_1": 82440,
+        "auto_2": 159130,
+        "auto_3": 227000,
+        "auto_4": 334280,
+        "auto_5": 541780,
+        "auto_6": 760790,
+        "auto_7": 1158170,
+        "unlock_auto": 63290,
+        "unlock_recipes": 101970,
+        "unlock_shake": 48170
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1217591,
+        "even_pops": 418,
+        "helper": 558061,
+        "level": 13,
+        "manual": 659530,
+        "outcomes": {
+          "burnt": 37,
+          "early": 80,
+          "late": 9,
+          "near": 38,
+          "perfect": 282
+        }
+      },
+      "hand_heating_share": 0.625666666666667,
+      "level_at": {
+        "1": 14090,
+        "2": 34550,
+        "3": 48160,
+        "4": 63280,
+        "5": 101960,
+        "6": 137040,
+        "7": 192360,
+        "8": 273000,
+        "9": 392930,
+        "10": 478480,
+        "11": 654360,
+        "12": 887790,
+        "13": 1045410
+      },
+      "longest_no_buy_after_3min_s": 157.62,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1217591,
+          "helper": 558061,
+          "level": 13,
+          "manual": 659530,
+          "money": 159395
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5356,
+          "helper": 300,
+          "level": 6,
+          "manual": 5056,
+          "money": 2060
+        },
+        "300": {
+          "auto": 3,
+          "earned": 21284,
+          "helper": 4511,
+          "level": 8,
+          "manual": 16773,
+          "money": 6088
+        },
+        "600": {
+          "auto": 5,
+          "earned": 144316,
+          "helper": 48183,
+          "level": 10,
+          "manual": 96133,
+          "money": 36120
+        },
+        "900": {
+          "auto": 6,
+          "earned": 470357,
+          "helper": 189396,
+          "level": 12,
+          "manual": 280961,
+          "money": 32161
+        }
+      },
+      "name": "novice (wild timing, never shakes, slow, butter)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 19,
+          "earned": 349,
+          "heating_ms": 34930,
+          "helper": 0,
+          "level": 3,
+          "manual": 349,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 42,
+          "earned": 1651,
+          "heating_ms": 73420,
+          "helper": 0,
+          "level": 5,
+          "manual": 1651,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 66,
+          "earned": 5356,
+          "heating_ms": 112520,
+          "helper": 300,
+          "level": 6,
+          "manual": 5056,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 89,
+          "earned": 11595,
+          "heating_ms": 148150,
+          "helper": 1802,
+          "level": 7,
+          "manual": 9793,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 111,
+          "earned": 21284,
+          "heating_ms": 187530,
+          "helper": 4511,
+          "level": 8,
+          "manual": 16773,
+          "min": 5
+        },
+        {
+          "auto": 4,
+          "batches": 134,
+          "earned": 33658,
+          "heating_ms": 224670,
+          "helper": 8131,
+          "level": 8,
+          "manual": 25527,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 158,
+          "earned": 53057,
+          "heating_ms": 260460,
+          "helper": 13891,
+          "level": 9,
+          "manual": 39166,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 179,
+          "earned": 74557,
+          "heating_ms": 296450,
+          "helper": 21191,
+          "level": 10,
+          "manual": 53366,
+          "min": 8
+        },
+        {
+          "auto": 4,
+          "batches": 203,
+          "earned": 108499,
+          "heating_ms": 333850,
+          "helper": 32866,
+          "level": 10,
+          "manual": 75633,
+          "min": 9
+        },
+        {
+          "auto": 5,
+          "batches": 225,
+          "earned": 144316,
+          "heating_ms": 373900,
+          "helper": 48183,
+          "level": 10,
+          "manual": 96133,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 246,
+          "earned": 187193,
+          "heating_ms": 411380,
+          "helper": 65123,
+          "level": 11,
+          "manual": 122070,
+          "min": 11
+        },
+        {
+          "auto": 5,
+          "batches": 270,
+          "earned": 247671,
+          "heating_ms": 449240,
+          "helper": 89763,
+          "level": 11,
+          "manual": 157908,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 293,
+          "earned": 315279,
+          "heating_ms": 483810,
+          "helper": 117473,
+          "level": 11,
+          "manual": 197806,
+          "min": 13
+        },
+        {
+          "auto": 6,
+          "batches": 317,
+          "earned": 388914,
+          "heating_ms": 518910,
+          "helper": 151847,
+          "level": 11,
+          "manual": 237067,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 340,
+          "earned": 470357,
+          "heating_ms": 555190,
+          "helper": 189396,
+          "level": 12,
+          "manual": 280961,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 362,
+          "earned": 586576,
+          "heating_ms": 592860,
+          "helper": 242493,
+          "level": 12,
+          "manual": 344083,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 383,
+          "earned": 696909,
+          "heating_ms": 632050,
+          "helper": 297199,
+          "level": 12,
+          "manual": 399710,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 403,
+          "earned": 844876,
+          "heating_ms": 671550,
+          "helper": 368669,
+          "level": 13,
+          "manual": 476207,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 424,
+          "earned": 1003010,
+          "heating_ms": 711180,
+          "helper": 453677,
+          "level": 13,
+          "manual": 549333,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 446,
+          "earned": 1217591,
+          "heating_ms": 750800,
+          "helper": 558061,
+          "level": 13,
+          "manual": 659530,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14090,
+          "main"
+        ],
+        [
+          34550,
+          "main"
+        ],
+        [
+          48160,
+          "main"
+        ],
+        [
+          63280,
+          "main"
+        ],
+        [
+          82440,
+          "auto1"
+        ],
+        [
+          101960,
+          "main"
+        ],
+        [
+          137040,
+          "main"
+        ],
+        [
+          159130,
+          "auto2"
+        ],
+        [
+          192360,
+          "main"
+        ],
+        [
+          227000,
+          "auto3"
+        ],
+        [
+          273000,
+          "main"
+        ],
+        [
+          334280,
+          "auto4"
+        ],
+        [
+          392930,
+          "main"
+        ],
+        [
+          478480,
+          "main"
+        ],
+        [
+          541780,
+          "auto5"
+        ],
+        [
+          654360,
+          "main"
+        ],
+        [
+          760790,
+          "auto6"
+        ],
+        [
+          887790,
+          "main"
+        ],
+        [
+          1045410,
+          "main"
+        ],
+        [
+          1158170,
+          "auto7"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.09,
+        "1": 20.46,
+        "10": 175.88,
+        "11": 233.43,
+        "12": 157.62,
+        "2": 13.61,
+        "3": 15.12,
+        "4": 38.68,
+        "5": 35.08,
+        "6": 55.32,
+        "7": 80.64,
+        "8": 119.93,
+        "9": 85.55
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 450,
+      "buys": 20,
+      "events": {
+        "auto_1": 82440,
+        "auto_2": 149600,
+        "auto_3": 216170,
+        "auto_4": 316310,
+        "auto_5": 496930,
+        "auto_6": 704980,
+        "auto_7": 1065630,
+        "recipe": 103060,
+        "unlock_auto": 63290,
+        "unlock_recipes": 101970,
+        "unlock_shake": 48170
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1569362,
+        "even_pops": 422,
+        "helper": 691700,
+        "level": 13,
+        "manual": 877662,
+        "outcomes": {
+          "burnt": 65,
+          "early": 114,
+          "late": 4,
+          "near": 90,
+          "perfect": 177
+        }
+      },
+      "hand_heating_share": 0.6238,
+      "level_at": {
+        "1": 14090,
+        "2": 34550,
+        "3": 48160,
+        "4": 63280,
+        "5": 101960,
+        "6": 131230,
+        "7": 182010,
+        "8": 256430,
+        "9": 371660,
+        "10": 446740,
+        "11": 604140,
+        "12": 826720,
+        "13": 970910
+      },
+      "longest_no_buy_after_3min_s": 144.19,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1569362,
+          "helper": 691700,
+          "level": 13,
+          "manual": 877662,
+          "money": 511166
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5818,
+          "helper": 500,
+          "level": 6,
+          "manual": 5318,
+          "money": 2522
+        },
+        "300": {
+          "auto": 3,
+          "earned": 24642,
+          "helper": 5312,
+          "level": 8,
+          "manual": 19330,
+          "money": 9446
+        },
+        "600": {
+          "auto": 5,
+          "earned": 177970,
+          "helper": 56207,
+          "level": 10,
+          "manual": 121763,
+          "money": 69774
+        },
+        "900": {
+          "auto": 6,
+          "earned": 597409,
+          "helper": 233253,
+          "level": 12,
+          "manual": 364156,
+          "money": 159213
+        }
+      },
+      "name": "novice, caramel",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 19,
+          "earned": 349,
+          "heating_ms": 34930,
+          "helper": 0,
+          "level": 3,
+          "manual": 349,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1833,
+          "heating_ms": 73220,
+          "helper": 0,
+          "level": 5,
+          "manual": 1833,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 65,
+          "earned": 5818,
+          "heating_ms": 112670,
+          "helper": 500,
+          "level": 6,
+          "manual": 5318,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 87,
+          "earned": 13522,
+          "heating_ms": 148530,
+          "helper": 2204,
+          "level": 7,
+          "manual": 11318,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 108,
+          "earned": 24642,
+          "heating_ms": 185900,
+          "helper": 5312,
+          "level": 8,
+          "manual": 19330,
+          "min": 5
+        },
+        {
+          "auto": 4,
+          "batches": 132,
+          "earned": 38712,
+          "heating_ms": 224410,
+          "helper": 9488,
+          "level": 8,
+          "manual": 29224,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 155,
+          "earned": 62418,
+          "heating_ms": 262310,
+          "helper": 16238,
+          "level": 9,
+          "manual": 46180,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 177,
+          "earned": 97235,
+          "heating_ms": 298830,
+          "helper": 25988,
+          "level": 10,
+          "manual": 71247,
+          "min": 8
+        },
+        {
+          "auto": 5,
+          "batches": 200,
+          "earned": 137307,
+          "heating_ms": 337100,
+          "helper": 40257,
+          "level": 10,
+          "manual": 97050,
+          "min": 9
+        },
+        {
+          "auto": 5,
+          "batches": 224,
+          "earned": 177970,
+          "heating_ms": 374630,
+          "helper": 56207,
+          "level": 10,
+          "manual": 121763,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 247,
+          "earned": 245134,
+          "heating_ms": 414350,
+          "helper": 80187,
+          "level": 11,
+          "manual": 164947,
+          "min": 11
+        },
+        {
+          "auto": 6,
+          "batches": 271,
+          "earned": 308452,
+          "heating_ms": 449600,
+          "helper": 107635,
+          "level": 11,
+          "manual": 200817,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 293,
+          "earned": 389516,
+          "heating_ms": 486590,
+          "helper": 140998,
+          "level": 11,
+          "manual": 248518,
+          "min": 13
+        },
+        {
+          "auto": 6,
+          "batches": 315,
+          "earned": 471728,
+          "heating_ms": 522180,
+          "helper": 180156,
+          "level": 12,
+          "manual": 291572,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 339,
+          "earned": 597409,
+          "heating_ms": 557820,
+          "helper": 233253,
+          "level": 12,
+          "manual": 364156,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 361,
+          "earned": 720502,
+          "heating_ms": 595100,
+          "helper": 286350,
+          "level": 12,
+          "manual": 434152,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 383,
+          "earned": 935267,
+          "heating_ms": 633820,
+          "helper": 368132,
+          "level": 13,
+          "manual": 567135,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 405,
+          "earned": 1127285,
+          "heating_ms": 671700,
+          "helper": 458740,
+          "level": 13,
+          "manual": 668545,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 428,
+          "earned": 1344520,
+          "heating_ms": 708840,
+          "helper": 575220,
+          "level": 13,
+          "manual": 769300,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 450,
+          "earned": 1569362,
+          "heating_ms": 748560,
+          "helper": 691700,
+          "level": 13,
+          "manual": 877662,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14090,
+          "main"
+        ],
+        [
+          34550,
+          "main"
+        ],
+        [
+          48160,
+          "main"
+        ],
+        [
+          63280,
+          "main"
+        ],
+        [
+          82440,
+          "auto1"
+        ],
+        [
+          101960,
+          "main"
+        ],
+        [
+          131230,
+          "main"
+        ],
+        [
+          149600,
+          "auto2"
+        ],
+        [
+          182010,
+          "main"
+        ],
+        [
+          216170,
+          "auto3"
+        ],
+        [
+          256430,
+          "main"
+        ],
+        [
+          316310,
+          "auto4"
+        ],
+        [
+          371660,
+          "main"
+        ],
+        [
+          446740,
+          "main"
+        ],
+        [
+          496930,
+          "auto5"
+        ],
+        [
+          604140,
+          "main"
+        ],
+        [
+          704980,
+          "auto6"
+        ],
+        [
+          826720,
+          "main"
+        ],
+        [
+          970910,
+          "main"
+        ],
+        [
+          1065630,
+          "auto7"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.09,
+        "1": 20.46,
+        "10": 157.4,
+        "11": 222.58,
+        "12": 144.19,
+        "2": 13.61,
+        "3": 15.12,
+        "4": 38.68,
+        "5": 29.27,
+        "6": 50.78,
+        "7": 74.42,
+        "8": 115.23,
+        "9": 75.08
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": 1158.36,
+      "batches": 393,
+      "buys": 21,
+      "events": {
+        "auto_1": 82440,
+        "auto_2": 147440,
+        "auto_3": 215570,
+        "auto_4": 308190,
+        "auto_5": 487060,
+        "auto_6": 667700,
+        "auto_7": 1010180,
+        "recipe": 103060,
+        "unlock_auto": 63290,
+        "unlock_recipes": 101970,
+        "unlock_shake": 48170
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1928034,
+        "even_pops": 365,
+        "helper": 827788,
+        "level": 14,
+        "manual": 1100246,
+        "outcomes": {
+          "burnt": 36,
+          "early": 50,
+          "late": 5,
+          "near": 22,
+          "perfect": 280
+        }
+      },
+      "hand_heating_share": 0.57365,
+      "level_at": {
+        "1": 14090,
+        "2": 34550,
+        "3": 48160,
+        "4": 63280,
+        "5": 101960,
+        "6": 130120,
+        "7": 183550,
+        "8": 254320,
+        "9": 359340,
+        "10": 437960,
+        "11": 574960,
+        "12": 778320,
+        "13": 914230,
+        "14": 1158360
+      },
+      "longest_no_buy_after_3min_s": 148.18,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1928034,
+          "helper": 827788,
+          "level": 14,
+          "manual": 1100246,
+          "money": 269838
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5719,
+          "helper": 500,
+          "level": 6,
+          "manual": 5219,
+          "money": 2423
+        },
+        "300": {
+          "auto": 3,
+          "earned": 26887,
+          "helper": 5252,
+          "level": 8,
+          "manual": 21635,
+          "money": 11691
+        },
+        "600": {
+          "auto": 5,
+          "earned": 213261,
+          "helper": 61610,
+          "level": 11,
+          "manual": 151651,
+          "money": 35065
+        },
+        "900": {
+          "auto": 6,
+          "earned": 714633,
+          "helper": 261733,
+          "level": 12,
+          "manual": 452900,
+          "money": 276437
+        }
+      },
+      "name": "novice, cheese",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 19,
+          "earned": 349,
+          "heating_ms": 34930,
+          "helper": 0,
+          "level": 3,
+          "manual": 349,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 42,
+          "earned": 1813,
+          "heating_ms": 71740,
+          "helper": 0,
+          "level": 5,
+          "manual": 1813,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 60,
+          "earned": 5719,
+          "heating_ms": 107390,
+          "helper": 500,
+          "level": 6,
+          "manual": 5219,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 80,
+          "earned": 13777,
+          "heating_ms": 142400,
+          "helper": 2237,
+          "level": 7,
+          "manual": 11540,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 99,
+          "earned": 26887,
+          "heating_ms": 176370,
+          "helper": 5252,
+          "level": 8,
+          "manual": 21635,
+          "min": 5
+        },
+        {
+          "auto": 4,
+          "batches": 118,
+          "earned": 41987,
+          "heating_ms": 210840,
+          "helper": 9524,
+          "level": 9,
+          "manual": 32463,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 139,
+          "earned": 67014,
+          "heating_ms": 243210,
+          "helper": 16824,
+          "level": 9,
+          "manual": 50190,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 158,
+          "earned": 103529,
+          "heating_ms": 278090,
+          "helper": 27099,
+          "level": 10,
+          "manual": 76430,
+          "min": 8
+        },
+        {
+          "auto": 5,
+          "batches": 178,
+          "earned": 152333,
+          "heating_ms": 311850,
+          "helper": 42250,
+          "level": 10,
+          "manual": 110083,
+          "min": 9
+        },
+        {
+          "auto": 5,
+          "batches": 197,
+          "earned": 213261,
+          "heating_ms": 346600,
+          "helper": 61610,
+          "level": 11,
+          "manual": 151651,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 217,
+          "earned": 285214,
+          "heating_ms": 380460,
+          "helper": 87130,
+          "level": 11,
+          "manual": 198084,
+          "min": 11
+        },
+        {
+          "auto": 6,
+          "batches": 235,
+          "earned": 357744,
+          "heating_ms": 416840,
+          "helper": 119969,
+          "level": 11,
+          "manual": 237775,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 254,
+          "earned": 449501,
+          "heating_ms": 451910,
+          "helper": 153930,
+          "level": 12,
+          "manual": 295571,
+          "min": 13
+        },
+        {
+          "auto": 6,
+          "batches": 274,
+          "earned": 583789,
+          "heating_ms": 485120,
+          "helper": 207027,
+          "level": 12,
+          "manual": 376762,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 293,
+          "earned": 714633,
+          "heating_ms": 519720,
+          "helper": 261733,
+          "level": 12,
+          "manual": 452900,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 314,
+          "earned": 891925,
+          "heating_ms": 552720,
+          "helper": 339972,
+          "level": 13,
+          "manual": 551953,
+          "min": 16
+        },
+        {
+          "auto": 7,
+          "batches": 334,
+          "earned": 1102159,
+          "heating_ms": 585740,
+          "helper": 429572,
+          "level": 13,
+          "manual": 672587,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 354,
+          "earned": 1348260,
+          "heating_ms": 619380,
+          "helper": 546052,
+          "level": 13,
+          "manual": 802208,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 373,
+          "earned": 1594430,
+          "heating_ms": 654360,
+          "helper": 662532,
+          "level": 13,
+          "manual": 931898,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 393,
+          "earned": 1928034,
+          "heating_ms": 688380,
+          "helper": 827788,
+          "level": 14,
+          "manual": 1100246,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14090,
+          "main"
+        ],
+        [
+          34550,
+          "main"
+        ],
+        [
+          48160,
+          "main"
+        ],
+        [
+          63280,
+          "main"
+        ],
+        [
+          82440,
+          "auto1"
+        ],
+        [
+          101960,
+          "main"
+        ],
+        [
+          130120,
+          "main"
+        ],
+        [
+          147440,
+          "auto2"
+        ],
+        [
+          183550,
+          "main"
+        ],
+        [
+          215570,
+          "auto3"
+        ],
+        [
+          254320,
+          "main"
+        ],
+        [
+          308190,
+          "auto4"
+        ],
+        [
+          359340,
+          "main"
+        ],
+        [
+          437960,
+          "main"
+        ],
+        [
+          487060,
+          "auto5"
+        ],
+        [
+          574960,
+          "main"
+        ],
+        [
+          667700,
+          "auto6"
+        ],
+        [
+          778320,
+          "main"
+        ],
+        [
+          914230,
+          "main"
+        ],
+        [
+          1010180,
+          "auto7"
+        ],
+        [
+          1158360,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.09,
+        "1": 20.46,
+        "10": 137.0,
+        "11": 203.36,
+        "12": 135.91,
+        "13": 244.13,
+        "2": 13.61,
+        "3": 15.12,
+        "4": 38.68,
+        "5": 28.16,
+        "6": 53.43,
+        "7": 70.77,
+        "8": 105.02,
+        "9": 78.62
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 423,
+      "buys": 19,
+      "events": {
+        "auto_1": 73870,
+        "auto_2": 155490,
+        "auto_3": 226750,
+        "auto_4": 364610,
+        "auto_5": 616280,
+        "auto_6": 851690,
+        "unlock_auto": 57570,
+        "unlock_recipes": 96240,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 6,
+        "earned": 790696,
+        "even_pops": 398,
+        "helper": 396582,
+        "level": 13,
+        "manual": 394114,
+        "outcomes": {
+          "burnt": 36,
+          "early": 83,
+          "late": 53,
+          "near": 58,
+          "perfect": 193
+        }
+      },
+      "hand_heating_share": 0.6432,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57560,
+        "5": 96230,
+        "6": 134040,
+        "7": 191700,
+        "8": 289110,
+        "9": 436120,
+        "10": 531660,
+        "11": 729390,
+        "12": 987240,
+        "13": 1182890
+      },
+      "longest_no_buy_after_3min_s": 195.65,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 790696,
+          "helper": 396582,
+          "level": 13,
+          "manual": 394114,
+          "money": 52500
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5392,
+          "helper": 400,
+          "level": 6,
+          "manual": 4992,
+          "money": 2096
+        },
+        "300": {
+          "auto": 3,
+          "earned": 16678,
+          "helper": 4219,
+          "level": 8,
+          "manual": 12459,
+          "money": 1482
+        },
+        "600": {
+          "auto": 4,
+          "earned": 104243,
+          "helper": 38320,
+          "level": 10,
+          "manual": 65923,
+          "money": 31047
+        },
+        "900": {
+          "auto": 6,
+          "earned": 350729,
+          "helper": 148478,
+          "level": 11,
+          "manual": 202251,
+          "money": 62533
+        }
+      },
+      "name": "never shakes (casual, butter)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 459,
+          "heating_ms": 34300,
+          "helper": 0,
+          "level": 4,
+          "manual": 459,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1796,
+          "heating_ms": 73410,
+          "helper": 0,
+          "level": 5,
+          "manual": 1796,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 66,
+          "earned": 5392,
+          "heating_ms": 110290,
+          "helper": 400,
+          "level": 6,
+          "manual": 4992,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 85,
+          "earned": 10974,
+          "heating_ms": 147550,
+          "helper": 1852,
+          "level": 7,
+          "manual": 9122,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 105,
+          "earned": 16678,
+          "heating_ms": 185700,
+          "helper": 4219,
+          "level": 8,
+          "manual": 12459,
+          "min": 5
+        },
+        {
+          "auto": 3,
+          "batches": 125,
+          "earned": 27109,
+          "heating_ms": 227830,
+          "helper": 7519,
+          "level": 8,
+          "manual": 19590,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 146,
+          "earned": 38970,
+          "heating_ms": 265600,
+          "helper": 12005,
+          "level": 8,
+          "manual": 26965,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 168,
+          "earned": 58256,
+          "heating_ms": 306890,
+          "helper": 18645,
+          "level": 9,
+          "manual": 39611,
+          "min": 8
+        },
+        {
+          "auto": 4,
+          "batches": 189,
+          "earned": 76417,
+          "heating_ms": 346810,
+          "helper": 26645,
+          "level": 10,
+          "manual": 49772,
+          "min": 9
+        },
+        {
+          "auto": 4,
+          "batches": 208,
+          "earned": 104243,
+          "heating_ms": 385500,
+          "helper": 38320,
+          "level": 10,
+          "manual": 65923,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 229,
+          "earned": 135554,
+          "heating_ms": 423750,
+          "helper": 52122,
+          "level": 10,
+          "manual": 83432,
+          "min": 11
+        },
+        {
+          "auto": 5,
+          "batches": 251,
+          "earned": 174095,
+          "heating_ms": 461170,
+          "helper": 68072,
+          "level": 10,
+          "manual": 106023,
+          "min": 12
+        },
+        {
+          "auto": 5,
+          "batches": 272,
+          "earned": 223387,
+          "heating_ms": 499910,
+          "helper": 91392,
+          "level": 11,
+          "manual": 131995,
+          "min": 13
+        },
+        {
+          "auto": 5,
+          "batches": 292,
+          "earned": 275630,
+          "heating_ms": 542480,
+          "helper": 116912,
+          "level": 11,
+          "manual": 158718,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 315,
+          "earned": 350729,
+          "heating_ms": 579070,
+          "helper": 148478,
+          "level": 11,
+          "manual": 202251,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 338,
+          "earned": 415278,
+          "heating_ms": 616770,
+          "helper": 182852,
+          "level": 11,
+          "manual": 232426,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 360,
+          "earned": 493680,
+          "heating_ms": 657010,
+          "helper": 226979,
+          "level": 12,
+          "manual": 266701,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 381,
+          "earned": 590797,
+          "heating_ms": 695860,
+          "helper": 280076,
+          "level": 12,
+          "manual": 310721,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 402,
+          "earned": 681317,
+          "heating_ms": 733550,
+          "helper": 334782,
+          "level": 12,
+          "manual": 346535,
+          "min": 19
+        },
+        {
+          "auto": 6,
+          "batches": 423,
+          "earned": 790696,
+          "heating_ms": 771840,
+          "helper": 396582,
+          "level": 13,
+          "manual": 394114,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57560,
+          "main"
+        ],
+        [
+          73870,
+          "auto1"
+        ],
+        [
+          96230,
+          "main"
+        ],
+        [
+          134040,
+          "main"
+        ],
+        [
+          155490,
+          "auto2"
+        ],
+        [
+          191700,
+          "main"
+        ],
+        [
+          226750,
+          "auto3"
+        ],
+        [
+          289110,
+          "main"
+        ],
+        [
+          364610,
+          "auto4"
+        ],
+        [
+          436120,
+          "main"
+        ],
+        [
+          531660,
+          "main"
+        ],
+        [
+          616280,
+          "auto5"
+        ],
+        [
+          729390,
+          "main"
+        ],
+        [
+          851690,
+          "auto6"
+        ],
+        [
+          987240,
+          "main"
+        ],
+        [
+          1182890,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "10": 197.73,
+        "11": 257.85,
+        "12": 195.65,
+        "2": 9.54,
+        "3": 14.12,
+        "4": 38.67,
+        "5": 37.81,
+        "6": 57.66,
+        "7": 97.41,
+        "8": 147.01,
+        "9": 95.54
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 57,
+      "buys": 13,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 155790,
+        "auto_3": 436720,
+        "auto_4": 820790,
+        "stopped_pressing": 820790,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 4,
+        "earned": 65025,
+        "even_pops": 39,
+        "helper": 61519,
+        "level": 9,
+        "manual": 3506,
+        "outcomes": {
+          "burnt": 2,
+          "early": 11,
+          "late": 6,
+          "near": 7,
+          "perfect": 31
+        }
+      },
+      "hand_heating_share": 0.0797916666666667,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 134340,
+        "7": 298450,
+        "8": 603750,
+        "9": 1007670
+      },
+      "longest_no_buy_after_3min_s": 217.04,
+      "marks": {
+        "1200": {
+          "auto": 4,
+          "earned": 65025,
+          "helper": 61519,
+          "level": 9,
+          "manual": 3506,
+          "money": 23829
+        },
+        "180": {
+          "auto": 2,
+          "earned": 3906,
+          "helper": 400,
+          "level": 6,
+          "manual": 3506,
+          "money": 610
+        },
+        "300": {
+          "auto": 2,
+          "earned": 5936,
+          "helper": 2430,
+          "level": 7,
+          "manual": 3506,
+          "money": 140
+        },
+        "600": {
+          "auto": 3,
+          "earned": 15116,
+          "helper": 11610,
+          "level": 7,
+          "manual": 3506,
+          "money": 5720
+        },
+        "900": {
+          "auto": 4,
+          "earned": 33365,
+          "helper": 29859,
+          "level": 8,
+          "manual": 3506,
+          "money": 6169
+        }
+      },
+      "name": "low interaction (casual until the helper, then only buys)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1778,
+          "heating_ms": 74030,
+          "helper": 0,
+          "level": 5,
+          "manual": 1778,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 57,
+          "earned": 3906,
+          "heating_ms": 95750,
+          "helper": 400,
+          "level": 6,
+          "manual": 3506,
+          "min": 3
+        },
+        {
+          "auto": 2,
+          "batches": 57,
+          "earned": 4906,
+          "heating_ms": 95750,
+          "helper": 1400,
+          "level": 6,
+          "manual": 3506,
+          "min": 4
+        },
+        {
+          "auto": 2,
+          "batches": 57,
+          "earned": 5936,
+          "heating_ms": 95750,
+          "helper": 2430,
+          "level": 7,
+          "manual": 3506,
+          "min": 5
+        },
+        {
+          "auto": 2,
+          "batches": 57,
+          "earned": 7536,
+          "heating_ms": 95750,
+          "helper": 4030,
+          "level": 7,
+          "manual": 3506,
+          "min": 6
+        },
+        {
+          "auto": 2,
+          "batches": 57,
+          "earned": 9136,
+          "heating_ms": 95750,
+          "helper": 5630,
+          "level": 7,
+          "manual": 3506,
+          "min": 7
+        },
+        {
+          "auto": 3,
+          "batches": 57,
+          "earned": 11024,
+          "heating_ms": 95750,
+          "helper": 7518,
+          "level": 7,
+          "manual": 3506,
+          "min": 8
+        },
+        {
+          "auto": 3,
+          "batches": 57,
+          "earned": 13070,
+          "heating_ms": 95750,
+          "helper": 9564,
+          "level": 7,
+          "manual": 3506,
+          "min": 9
+        },
+        {
+          "auto": 3,
+          "batches": 57,
+          "earned": 15116,
+          "heating_ms": 95750,
+          "helper": 11610,
+          "level": 7,
+          "manual": 3506,
+          "min": 10
+        },
+        {
+          "auto": 3,
+          "batches": 57,
+          "earned": 18359,
+          "heating_ms": 95750,
+          "helper": 14853,
+          "level": 8,
+          "manual": 3506,
+          "min": 11
+        },
+        {
+          "auto": 3,
+          "batches": 57,
+          "earned": 21659,
+          "heating_ms": 95750,
+          "helper": 18153,
+          "level": 8,
+          "manual": 3506,
+          "min": 12
+        },
+        {
+          "auto": 3,
+          "batches": 57,
+          "earned": 25109,
+          "heating_ms": 95750,
+          "helper": 21603,
+          "level": 8,
+          "manual": 3506,
+          "min": 13
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 28815,
+          "heating_ms": 95750,
+          "helper": 25309,
+          "level": 8,
+          "manual": 3506,
+          "min": 14
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 33365,
+          "heating_ms": 95750,
+          "helper": 29859,
+          "level": 8,
+          "manual": 3506,
+          "min": 15
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 37915,
+          "heating_ms": 95750,
+          "helper": 34409,
+          "level": 8,
+          "manual": 3506,
+          "min": 16
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 43125,
+          "heating_ms": 95750,
+          "helper": 39619,
+          "level": 9,
+          "manual": 3506,
+          "min": 17
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 50425,
+          "heating_ms": 95750,
+          "helper": 46919,
+          "level": 9,
+          "manual": 3506,
+          "min": 18
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 57725,
+          "heating_ms": 95750,
+          "helper": 54219,
+          "level": 9,
+          "manual": 3506,
+          "min": 19
+        },
+        {
+          "auto": 4,
+          "batches": 57,
+          "earned": 65025,
+          "heating_ms": 95750,
+          "helper": 61519,
+          "level": 9,
+          "manual": 3506,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          134340,
+          "main"
+        ],
+        [
+          155790,
+          "auto2"
+        ],
+        [
+          298450,
+          "main"
+        ],
+        [
+          436720,
+          "auto3"
+        ],
+        [
+          603750,
+          "main"
+        ],
+        [
+          820790,
+          "auto4"
+        ],
+        [
+          1007670,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 39.06,
+        "5": 37.81,
+        "6": 164.11,
+        "7": 305.3,
+        "8": 403.92
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 545,
+      "buys": 14,
+      "events": {
+        "recipe": 43450,
+        "unlock_auto": 33020,
+        "unlock_recipes": 43450,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 0,
+        "earned": 4790683,
+        "even_pops": 534,
+        "helper": 0,
+        "level": 14,
+        "manual": 4790683,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 1,
+          "perfect": 544
+        }
+      },
+      "hand_heating_share": 0.816241666666667,
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 43440,
+        "6": 54400,
+        "7": 72020,
+        "8": 96470,
+        "9": 134020,
+        "10": 187590,
+        "11": 259640,
+        "12": 356310,
+        "13": 478130,
+        "14": 629740
+      },
+      "longest_no_buy_after_3min_s": 570.26,
+      "marks": {
+        "1200": {
+          "auto": 0,
+          "earned": 4790683,
+          "helper": 0,
+          "level": 14,
+          "manual": 4790683,
+          "money": 3614547
+        },
+        "180": {
+          "auto": 0,
+          "earned": 51265,
+          "helper": 0,
+          "level": 9,
+          "manual": 51265,
+          "money": 27129
+        },
+        "300": {
+          "auto": 0,
+          "earned": 189190,
+          "helper": 0,
+          "level": 11,
+          "manual": 189190,
+          "money": 63054
+        },
+        "600": {
+          "auto": 0,
+          "earned": 1059202,
+          "helper": 0,
+          "level": 13,
+          "manual": 1059202,
+          "money": 483066
+        },
+        "900": {
+          "auto": 0,
+          "earned": 2891851,
+          "helper": 0,
+          "level": 14,
+          "manual": 2891851,
+          "money": 1715715
+        }
+      },
+      "name": "never automates (skilled, caramel)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 27,
+          "earned": 2495,
+          "heating_ms": 46690,
+          "helper": 0,
+          "level": 6,
+          "manual": 2495,
+          "min": 1
+        },
+        {
+          "auto": 0,
+          "batches": 54,
+          "earned": 18579,
+          "heating_ms": 95890,
+          "helper": 0,
+          "level": 8,
+          "manual": 18579,
+          "min": 2
+        },
+        {
+          "auto": 0,
+          "batches": 81,
+          "earned": 51265,
+          "heating_ms": 145090,
+          "helper": 0,
+          "level": 9,
+          "manual": 51265,
+          "min": 3
+        },
+        {
+          "auto": 0,
+          "batches": 108,
+          "earned": 105964,
+          "heating_ms": 194290,
+          "helper": 0,
+          "level": 10,
+          "manual": 105964,
+          "min": 4
+        },
+        {
+          "auto": 0,
+          "batches": 136,
+          "earned": 189190,
+          "heating_ms": 243090,
+          "helper": 0,
+          "level": 11,
+          "manual": 189190,
+          "min": 5
+        },
+        {
+          "auto": 0,
+          "batches": 163,
+          "earned": 283882,
+          "heating_ms": 292290,
+          "helper": 0,
+          "level": 12,
+          "manual": 283882,
+          "min": 6
+        },
+        {
+          "auto": 0,
+          "batches": 190,
+          "earned": 431302,
+          "heating_ms": 341490,
+          "helper": 0,
+          "level": 12,
+          "manual": 431302,
+          "min": 7
+        },
+        {
+          "auto": 0,
+          "batches": 217,
+          "earned": 578722,
+          "heating_ms": 390690,
+          "helper": 0,
+          "level": 13,
+          "manual": 578722,
+          "min": 8
+        },
+        {
+          "auto": 0,
+          "batches": 245,
+          "earned": 823330,
+          "heating_ms": 439500,
+          "helper": 0,
+          "level": 13,
+          "manual": 823330,
+          "min": 9
+        },
+        {
+          "auto": 0,
+          "batches": 272,
+          "earned": 1059202,
+          "heating_ms": 488690,
+          "helper": 0,
+          "level": 13,
+          "manual": 1059202,
+          "min": 10
+        },
+        {
+          "auto": 0,
+          "batches": 299,
+          "earned": 1363012,
+          "heating_ms": 537890,
+          "helper": 0,
+          "level": 14,
+          "manual": 1363012,
+          "min": 11
+        },
+        {
+          "auto": 0,
+          "batches": 327,
+          "earned": 1746967,
+          "heating_ms": 586690,
+          "helper": 0,
+          "level": 14,
+          "manual": 1746967,
+          "min": 12
+        },
+        {
+          "auto": 0,
+          "batches": 354,
+          "earned": 2123941,
+          "heating_ms": 635890,
+          "helper": 0,
+          "level": 14,
+          "manual": 2123941,
+          "min": 13
+        },
+        {
+          "auto": 0,
+          "batches": 382,
+          "earned": 2514877,
+          "heating_ms": 684830,
+          "helper": 0,
+          "level": 14,
+          "manual": 2514877,
+          "min": 14
+        },
+        {
+          "auto": 0,
+          "batches": 409,
+          "earned": 2891851,
+          "heating_ms": 733890,
+          "helper": 0,
+          "level": 14,
+          "manual": 2891851,
+          "min": 15
+        },
+        {
+          "auto": 0,
+          "batches": 436,
+          "earned": 3268825,
+          "heating_ms": 783090,
+          "helper": 0,
+          "level": 14,
+          "manual": 3268825,
+          "min": 16
+        },
+        {
+          "auto": 0,
+          "batches": 464,
+          "earned": 3659761,
+          "heating_ms": 832200,
+          "helper": 0,
+          "level": 14,
+          "manual": 3659761,
+          "min": 17
+        },
+        {
+          "auto": 0,
+          "batches": 491,
+          "earned": 4036735,
+          "heating_ms": 881090,
+          "helper": 0,
+          "level": 14,
+          "manual": 4036735,
+          "min": 18
+        },
+        {
+          "auto": 0,
+          "batches": 518,
+          "earned": 4413709,
+          "heating_ms": 930290,
+          "helper": 0,
+          "level": 14,
+          "manual": 4413709,
+          "min": 19
+        },
+        {
+          "auto": 0,
+          "batches": 545,
+          "earned": 4790683,
+          "heating_ms": 979490,
+          "helper": 0,
+          "level": 14,
+          "manual": 4790683,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          54400,
+          "main"
+        ],
+        [
+          72020,
+          "main"
+        ],
+        [
+          96470,
+          "main"
+        ],
+        [
+          134020,
+          "main"
+        ],
+        [
+          187590,
+          "main"
+        ],
+        [
+          259640,
+          "main"
+        ],
+        [
+          356310,
+          "main"
+        ],
+        [
+          478130,
+          "main"
+        ],
+        [
+          629740,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 8.14,
+        "1": 8.04,
+        "10": 72.05,
+        "11": 96.67,
+        "12": 121.82,
+        "13": 151.61,
+        "2": 8.3,
+        "3": 8.53,
+        "4": 10.43,
+        "5": 10.96,
+        "6": 17.62,
+        "7": 24.45,
+        "8": 37.55,
+        "9": 53.57
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 420,
+      "buys": 19,
+      "events": {
+        "auto_1": 98590,
+        "auto_2": 177200,
+        "auto_3": 250060,
+        "auto_4": 382480,
+        "auto_5": 634480,
+        "auto_6": 873450,
+        "unlock_auto": 74180,
+        "unlock_recipes": 124050,
+        "unlock_shake": 50770
+      },
+      "final": {
+        "auto": 6,
+        "earned": 747479,
+        "even_pops": 395,
+        "helper": 369110,
+        "level": 13,
+        "manual": 378369,
+        "outcomes": {
+          "burnt": 42,
+          "early": 82,
+          "late": 50,
+          "near": 63,
+          "perfect": 183
+        }
+      },
+      "hand_heating_share": 0.642075,
+      "level_at": {
+        "1": 12170,
+        "2": 35580,
+        "3": 50760,
+        "4": 74170,
+        "5": 124040,
+        "6": 154690,
+        "7": 215260,
+        "8": 316650,
+        "9": 456880,
+        "10": 553520,
+        "11": 747950,
+        "12": 1010250,
+        "13": 1197450
+      },
+      "longest_no_buy_after_3min_s": 187.2,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 747479,
+          "helper": 369110,
+          "level": 13,
+          "manual": 378369,
+          "money": 9283
+        },
+        "180": {
+          "auto": 2,
+          "earned": 3650,
+          "helper": 0,
+          "level": 6,
+          "manual": 3650,
+          "money": 354
+        },
+        "300": {
+          "auto": 3,
+          "earned": 13387,
+          "helper": 3234,
+          "level": 7,
+          "manual": 10153,
+          "money": 3991
+        },
+        "600": {
+          "auto": 4,
+          "earned": 93153,
+          "helper": 33737,
+          "level": 10,
+          "manual": 59416,
+          "money": 19957
+        },
+        "900": {
+          "auto": 6,
+          "earned": 314872,
+          "helper": 136516,
+          "level": 11,
+          "manual": 178356,
+          "money": 26676
+        }
+      },
+      "name": "automation first (casual, buys the ladder before the machine)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 19,
+          "earned": 207,
+          "heating_ms": 33330,
+          "helper": 0,
+          "level": 3,
+          "manual": 207,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 41,
+          "earned": 957,
+          "heating_ms": 70700,
+          "helper": 0,
+          "level": 4,
+          "manual": 957,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 64,
+          "earned": 3650,
+          "heating_ms": 110260,
+          "helper": 0,
+          "level": 6,
+          "manual": 3650,
+          "min": 3
+        },
+        {
+          "auto": 2,
+          "batches": 84,
+          "earned": 8149,
+          "heating_ms": 148000,
+          "helper": 1240,
+          "level": 7,
+          "manual": 6909,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 104,
+          "earned": 13387,
+          "heating_ms": 185480,
+          "helper": 3234,
+          "level": 7,
+          "manual": 10153,
+          "min": 5
+        },
+        {
+          "auto": 3,
+          "batches": 123,
+          "earned": 22893,
+          "heating_ms": 225310,
+          "helper": 6192,
+          "level": 8,
+          "manual": 16701,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 145,
+          "earned": 34312,
+          "heating_ms": 263160,
+          "helper": 10272,
+          "level": 8,
+          "manual": 24040,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 166,
+          "earned": 48160,
+          "heating_ms": 302920,
+          "helper": 15812,
+          "level": 9,
+          "manual": 32348,
+          "min": 8
+        },
+        {
+          "auto": 4,
+          "batches": 188,
+          "earned": 67717,
+          "heating_ms": 343950,
+          "helper": 23112,
+          "level": 9,
+          "manual": 44605,
+          "min": 9
+        },
+        {
+          "auto": 4,
+          "batches": 207,
+          "earned": 93153,
+          "heating_ms": 381720,
+          "helper": 33737,
+          "level": 10,
+          "manual": 59416,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 227,
+          "earned": 123341,
+          "heating_ms": 421400,
+          "helper": 47342,
+          "level": 10,
+          "manual": 75999,
+          "min": 11
+        },
+        {
+          "auto": 5,
+          "batches": 248,
+          "earned": 158667,
+          "heating_ms": 461230,
+          "helper": 62742,
+          "level": 10,
+          "manual": 95925,
+          "min": 12
+        },
+        {
+          "auto": 5,
+          "batches": 270,
+          "earned": 205246,
+          "heating_ms": 500240,
+          "helper": 83642,
+          "level": 11,
+          "manual": 121604,
+          "min": 13
+        },
+        {
+          "auto": 5,
+          "batches": 291,
+          "earned": 258239,
+          "heating_ms": 540190,
+          "helper": 108282,
+          "level": 11,
+          "manual": 149957,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 312,
+          "earned": 314872,
+          "heating_ms": 579300,
+          "helper": 136516,
+          "level": 11,
+          "manual": 178356,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 336,
+          "earned": 386237,
+          "heating_ms": 616670,
+          "helper": 170890,
+          "level": 11,
+          "manual": 215347,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 357,
+          "earned": 453049,
+          "heating_ms": 655870,
+          "helper": 207243,
+          "level": 12,
+          "manual": 245806,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 377,
+          "earned": 558181,
+          "heating_ms": 693600,
+          "helper": 260340,
+          "level": 12,
+          "manual": 297841,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 398,
+          "earned": 647973,
+          "heating_ms": 732700,
+          "helper": 315046,
+          "level": 12,
+          "manual": 332927,
+          "min": 19
+        },
+        {
+          "auto": 6,
+          "batches": 420,
+          "earned": 747479,
+          "heating_ms": 770490,
+          "helper": 369110,
+          "level": 13,
+          "manual": 378369,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          12170,
+          "main"
+        ],
+        [
+          35580,
+          "main"
+        ],
+        [
+          50760,
+          "main"
+        ],
+        [
+          74170,
+          "main"
+        ],
+        [
+          98590,
+          "auto1"
+        ],
+        [
+          124040,
+          "main"
+        ],
+        [
+          154690,
+          "main"
+        ],
+        [
+          177200,
+          "auto2"
+        ],
+        [
+          215260,
+          "main"
+        ],
+        [
+          250060,
+          "auto3"
+        ],
+        [
+          316650,
+          "main"
+        ],
+        [
+          382480,
+          "auto4"
+        ],
+        [
+          456880,
+          "main"
+        ],
+        [
+          553520,
+          "main"
+        ],
+        [
+          634480,
+          "auto5"
+        ],
+        [
+          747950,
+          "main"
+        ],
+        [
+          873450,
+          "auto6"
+        ],
+        [
+          1010250,
+          "main"
+        ],
+        [
+          1197450,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 12.17,
+        "1": 23.41,
+        "10": 194.43,
+        "11": 262.3,
+        "12": 187.2,
+        "2": 15.18,
+        "3": 23.41,
+        "4": 49.87,
+        "5": 30.65,
+        "6": 60.57,
+        "7": 101.39,
+        "8": 140.23,
+        "9": 96.64
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": 678.38,
+      "batches": 546,
+      "buys": 21,
+      "events": {
+        "auto_1": 98700,
+        "auto_2": 100820,
+        "auto_3": 110100,
+        "auto_4": 139020,
+        "auto_5": 242790,
+        "auto_6": 356950,
+        "auto_7": 576550,
+        "recipe": 43450,
+        "unlock_auto": 33020,
+        "unlock_recipes": 43450,
+        "unlock_shake": 24490
+      },
+      "final": {
+        "auto": 7,
+        "earned": 6601763,
+        "even_pops": 535,
+        "helper": 2073306,
+        "level": 14,
+        "manual": 4528457,
+        "outcomes": {
+          "burnt": 0,
+          "early": 0,
+          "late": 0,
+          "near": 2,
+          "perfect": 544
+        }
+      },
+      "hand_heating_share": 0.816191666666667,
+      "level_at": {
+        "1": 8140,
+        "2": 16180,
+        "3": 24480,
+        "4": 33010,
+        "5": 43440,
+        "6": 54400,
+        "7": 72020,
+        "8": 96470,
+        "9": 170220,
+        "10": 213420,
+        "11": 299920,
+        "12": 427500,
+        "13": 517150,
+        "14": 678380
+      },
+      "longest_no_buy_after_3min_s": 101.83,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 6601763,
+          "helper": 2073306,
+          "level": 14,
+          "manual": 4528457,
+          "money": 4943567
+        },
+        "180": {
+          "auto": 4,
+          "earned": 49141,
+          "helper": 5421,
+          "level": 9,
+          "manual": 43720,
+          "money": 7945
+        },
+        "300": {
+          "auto": 5,
+          "earned": 178525,
+          "helper": 29963,
+          "level": 11,
+          "manual": 148562,
+          "money": 329
+        },
+        "600": {
+          "auto": 7,
+          "earned": 1200276,
+          "helper": 302290,
+          "level": 13,
+          "manual": 897986,
+          "money": 142080
+        },
+        "900": {
+          "auto": 7,
+          "earned": 3751188,
+          "helper": 1142506,
+          "level": 14,
+          "manual": 2608682,
+          "money": 2092992
+        }
+      },
+      "name": "delayed automation (skilled, caramel, no automation before Lv8)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 27,
+          "earned": 2495,
+          "heating_ms": 46690,
+          "helper": 0,
+          "level": 6,
+          "manual": 2495,
+          "min": 1
+        },
+        {
+          "auto": 3,
+          "batches": 54,
+          "earned": 19416,
+          "heating_ms": 95890,
+          "helper": 837,
+          "level": 8,
+          "manual": 18579,
+          "min": 2
+        },
+        {
+          "auto": 4,
+          "batches": 81,
+          "earned": 49141,
+          "heating_ms": 145090,
+          "helper": 5421,
+          "level": 9,
+          "manual": 43720,
+          "min": 3
+        },
+        {
+          "auto": 4,
+          "batches": 108,
+          "earned": 104221,
+          "heating_ms": 194290,
+          "helper": 14646,
+          "level": 10,
+          "manual": 89575,
+          "min": 4
+        },
+        {
+          "auto": 5,
+          "batches": 136,
+          "earned": 178525,
+          "heating_ms": 243420,
+          "helper": 29963,
+          "level": 11,
+          "manual": 148562,
+          "min": 5
+        },
+        {
+          "auto": 6,
+          "batches": 163,
+          "earned": 295960,
+          "heating_ms": 292290,
+          "helper": 54734,
+          "level": 11,
+          "manual": 241226,
+          "min": 6
+        },
+        {
+          "auto": 6,
+          "batches": 190,
+          "earned": 422998,
+          "heating_ms": 341490,
+          "helper": 89108,
+          "level": 11,
+          "manual": 333890,
+          "min": 7
+        },
+        {
+          "auto": 6,
+          "batches": 217,
+          "earned": 613011,
+          "heating_ms": 390690,
+          "helper": 139813,
+          "level": 12,
+          "manual": 473198,
+          "min": 8
+        },
+        {
+          "auto": 6,
+          "batches": 245,
+          "earned": 866628,
+          "heating_ms": 439490,
+          "helper": 204514,
+          "level": 13,
+          "manual": 662114,
+          "min": 9
+        },
+        {
+          "auto": 7,
+          "batches": 272,
+          "earned": 1200276,
+          "heating_ms": 488690,
+          "helper": 302290,
+          "level": 13,
+          "manual": 897986,
+          "min": 10
+        },
+        {
+          "auto": 7,
+          "batches": 299,
+          "earned": 1552628,
+          "heating_ms": 537890,
+          "helper": 418770,
+          "level": 13,
+          "manual": 1133858,
+          "min": 11
+        },
+        {
+          "auto": 7,
+          "batches": 326,
+          "earned": 2047824,
+          "heating_ms": 587090,
+          "helper": 584026,
+          "level": 14,
+          "manual": 1463798,
+          "min": 12
+        },
+        {
+          "auto": 7,
+          "batches": 353,
+          "earned": 2610958,
+          "heating_ms": 636290,
+          "helper": 770186,
+          "level": 14,
+          "manual": 1840772,
+          "min": 13
+        },
+        {
+          "auto": 7,
+          "batches": 381,
+          "earned": 3188054,
+          "heating_ms": 685090,
+          "helper": 956346,
+          "level": 14,
+          "manual": 2231708,
+          "min": 14
+        },
+        {
+          "auto": 7,
+          "batches": 408,
+          "earned": 3751188,
+          "heating_ms": 734290,
+          "helper": 1142506,
+          "level": 14,
+          "manual": 2608682,
+          "min": 15
+        },
+        {
+          "auto": 7,
+          "batches": 436,
+          "earned": 4328284,
+          "heating_ms": 783090,
+          "helper": 1328666,
+          "level": 14,
+          "manual": 2999618,
+          "min": 16
+        },
+        {
+          "auto": 7,
+          "batches": 463,
+          "earned": 4884437,
+          "heating_ms": 832290,
+          "helper": 1514826,
+          "level": 14,
+          "manual": 3369611,
+          "min": 17
+        },
+        {
+          "auto": 7,
+          "batches": 491,
+          "earned": 5461533,
+          "heating_ms": 881090,
+          "helper": 1700986,
+          "level": 14,
+          "manual": 3760547,
+          "min": 18
+        },
+        {
+          "auto": 7,
+          "batches": 518,
+          "earned": 6024667,
+          "heating_ms": 930290,
+          "helper": 1887146,
+          "level": 14,
+          "manual": 4137521,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 546,
+          "earned": 6601763,
+          "heating_ms": 979430,
+          "helper": 2073306,
+          "level": 14,
+          "manual": 4528457,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          8140,
+          "main"
+        ],
+        [
+          16180,
+          "main"
+        ],
+        [
+          24480,
+          "main"
+        ],
+        [
+          33010,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          54400,
+          "main"
+        ],
+        [
+          72020,
+          "main"
+        ],
+        [
+          96470,
+          "main"
+        ],
+        [
+          98700,
+          "auto1"
+        ],
+        [
+          100820,
+          "auto2"
+        ],
+        [
+          110100,
+          "auto3"
+        ],
+        [
+          139020,
+          "auto4"
+        ],
+        [
+          170220,
+          "main"
+        ],
+        [
+          213420,
+          "main"
+        ],
+        [
+          242790,
+          "auto5"
+        ],
+        [
+          299920,
+          "main"
+        ],
+        [
+          356950,
+          "auto6"
+        ],
+        [
+          427500,
+          "main"
+        ],
+        [
+          517150,
+          "main"
+        ],
+        [
+          576550,
+          "auto7"
+        ],
+        [
+          678380,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 8.14,
+        "1": 8.04,
+        "10": 86.5,
+        "11": 127.58,
+        "12": 89.65,
+        "13": 161.23,
+        "2": 8.3,
+        "3": 8.53,
+        "4": 10.43,
+        "5": 10.96,
+        "6": 17.62,
+        "7": 24.45,
+        "8": 73.75,
+        "9": 43.2
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 410,
+      "buys": 20,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 147140,
+        "auto_3": 205230,
+        "auto_4": 322450,
+        "auto_5": 537880,
+        "auto_6": 755130,
+        "auto_7": 1182060,
+        "recipe": 1082770,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 7,
+        "earned": 1125908,
+        "even_pops": 392,
+        "helper": 540974,
+        "level": 13,
+        "manual": 584934,
+        "outcomes": {
+          "burnt": 48,
+          "early": 77,
+          "late": 46,
+          "near": 63,
+          "perfect": 176
+        }
+      },
+      "hand_heating_share": 0.621383333333333,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 132040,
+        "7": 173580,
+        "8": 260720,
+        "9": 386480,
+        "10": 481350,
+        "11": 652150,
+        "12": 896360,
+        "13": 1055980
+      },
+      "longest_no_buy_after_3min_s": 159.62,
+      "marks": {
+        "1200": {
+          "auto": 7,
+          "earned": 1125908,
+          "helper": 540974,
+          "level": 13,
+          "manual": 584934,
+          "money": 67712
+        },
+        "180": {
+          "auto": 2,
+          "earned": 6791,
+          "helper": 560,
+          "level": 7,
+          "manual": 6231,
+          "money": 995
+        },
+        "300": {
+          "auto": 3,
+          "earned": 23153,
+          "helper": 5390,
+          "level": 8,
+          "manual": 17763,
+          "money": 7957
+        },
+        "600": {
+          "auto": 5,
+          "earned": 149504,
+          "helper": 49693,
+          "level": 10,
+          "manual": 99811,
+          "money": 41308
+        },
+        "900": {
+          "auto": 6,
+          "earned": 459038,
+          "helper": 188639,
+          "level": 12,
+          "manual": 270399,
+          "money": 20842
+        }
+      },
+      "name": "diversified recipes (casual, changes recipe every 2 min)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1778,
+          "heating_ms": 74030,
+          "helper": 0,
+          "level": 5,
+          "manual": 1778,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 65,
+          "earned": 6791,
+          "heating_ms": 112900,
+          "helper": 560,
+          "level": 7,
+          "manual": 6231,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 86,
+          "earned": 13504,
+          "heating_ms": 150510,
+          "helper": 2396,
+          "level": 7,
+          "manual": 11108,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 104,
+          "earned": 23153,
+          "heating_ms": 185480,
+          "helper": 5390,
+          "level": 8,
+          "manual": 17763,
+          "min": 5
+        },
+        {
+          "auto": 4,
+          "batches": 123,
+          "earned": 37138,
+          "heating_ms": 221800,
+          "helper": 9320,
+          "level": 8,
+          "manual": 27818,
+          "min": 6
+        },
+        {
+          "auto": 4,
+          "batches": 144,
+          "earned": 52948,
+          "heating_ms": 259130,
+          "helper": 15410,
+          "level": 9,
+          "manual": 37538,
+          "min": 7
+        },
+        {
+          "auto": 4,
+          "batches": 166,
+          "earned": 73582,
+          "heating_ms": 298490,
+          "helper": 22710,
+          "level": 9,
+          "manual": 50872,
+          "min": 8
+        },
+        {
+          "auto": 5,
+          "batches": 186,
+          "earned": 111183,
+          "heating_ms": 335920,
+          "helper": 34293,
+          "level": 10,
+          "manual": 76890,
+          "min": 9
+        },
+        {
+          "auto": 5,
+          "batches": 206,
+          "earned": 149504,
+          "heating_ms": 373270,
+          "helper": 49693,
+          "level": 10,
+          "manual": 99811,
+          "min": 10
+        },
+        {
+          "auto": 5,
+          "batches": 225,
+          "earned": 189030,
+          "heating_ms": 408030,
+          "helper": 66963,
+          "level": 11,
+          "manual": 122067,
+          "min": 11
+        },
+        {
+          "auto": 5,
+          "batches": 245,
+          "earned": 258718,
+          "heating_ms": 441940,
+          "helper": 91603,
+          "level": 11,
+          "manual": 167115,
+          "min": 12
+        },
+        {
+          "auto": 6,
+          "batches": 265,
+          "earned": 316248,
+          "heating_ms": 481680,
+          "helper": 119706,
+          "level": 11,
+          "manual": 196542,
+          "min": 13
+        },
+        {
+          "auto": 6,
+          "batches": 286,
+          "earned": 373594,
+          "heating_ms": 523450,
+          "helper": 154080,
+          "level": 11,
+          "manual": 219514,
+          "min": 14
+        },
+        {
+          "auto": 6,
+          "batches": 308,
+          "earned": 459038,
+          "heating_ms": 562800,
+          "helper": 188639,
+          "level": 12,
+          "manual": 270399,
+          "min": 15
+        },
+        {
+          "auto": 6,
+          "batches": 330,
+          "earned": 563881,
+          "heating_ms": 599020,
+          "helper": 241736,
+          "level": 12,
+          "manual": 322145,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 349,
+          "earned": 672623,
+          "heating_ms": 634780,
+          "helper": 296442,
+          "level": 12,
+          "manual": 376181,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 369,
+          "earned": 821223,
+          "heating_ms": 668330,
+          "helper": 362110,
+          "level": 13,
+          "manual": 459113,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 388,
+          "earned": 959494,
+          "heating_ms": 707490,
+          "helper": 447118,
+          "level": 13,
+          "manual": 512376,
+          "min": 19
+        },
+        {
+          "auto": 7,
+          "batches": 410,
+          "earned": 1125908,
+          "heating_ms": 745660,
+          "helper": 540974,
+          "level": 13,
+          "manual": 584934,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          132040,
+          "main"
+        ],
+        [
+          147140,
+          "auto2"
+        ],
+        [
+          173580,
+          "main"
+        ],
+        [
+          205230,
+          "auto3"
+        ],
+        [
+          260720,
+          "main"
+        ],
+        [
+          322450,
+          "auto4"
+        ],
+        [
+          386480,
+          "main"
+        ],
+        [
+          481350,
+          "main"
+        ],
+        [
+          537880,
+          "auto5"
+        ],
+        [
+          652150,
+          "main"
+        ],
+        [
+          755130,
+          "auto6"
+        ],
+        [
+          896360,
+          "main"
+        ],
+        [
+          1055980,
+          "main"
+        ],
+        [
+          1182060,
+          "auto7"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "10": 170.8,
+        "11": 244.21,
+        "12": 159.62,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 39.06,
+        "5": 35.51,
+        "6": 41.54,
+        "7": 87.14,
+        "8": 125.76,
+        "9": 94.87
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 359,
+      "buys": 18,
+      "events": {
+        "auto_1": 81440,
+        "auto_2": 155790,
+        "auto_3": 227050,
+        "auto_4": 489180,
+        "auto_5": 728560,
+        "auto_6": 980140,
+        "unlock_auto": 57480,
+        "unlock_recipes": 96540,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 6,
+        "earned": 583892,
+        "even_pops": 341,
+        "helper": 280546,
+        "level": 12,
+        "manual": 303346,
+        "outcomes": {
+          "burnt": 32,
+          "early": 62,
+          "late": 45,
+          "near": 52,
+          "perfect": 168
+        }
+      },
+      "hand_heating_share": 0.549316666666667,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 96530,
+        "6": 134340,
+        "7": 192000,
+        "8": 289410,
+        "9": 558370,
+        "10": 653910,
+        "11": 854670,
+        "12": 1120540
+      },
+      "longest_no_buy_after_3min_s": 199.77,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 583892,
+          "helper": 280546,
+          "level": 12,
+          "manual": 303346,
+          "money": 145696
+        },
+        "180": {
+          "auto": 2,
+          "earned": 5324,
+          "helper": 400,
+          "level": 6,
+          "manual": 4924,
+          "money": 2028
+        },
+        "300": {
+          "auto": 3,
+          "earned": 16660,
+          "helper": 4219,
+          "level": 8,
+          "manual": 12441,
+          "money": 1464
+        },
+        "600": {
+          "auto": 4,
+          "earned": 56036,
+          "helper": 25071,
+          "level": 9,
+          "manual": 30965,
+          "money": 14840
+        },
+        "900": {
+          "auto": 5,
+          "earned": 221441,
+          "helper": 97452,
+          "level": 11,
+          "manual": 123989,
+          "money": 43245
+        }
+      },
+      "name": "idle break (casual, butter, no input 5:00-8:00)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 1,
+          "batches": 43,
+          "earned": 1778,
+          "heating_ms": 74030,
+          "helper": 0,
+          "level": 5,
+          "manual": 1778,
+          "min": 2
+        },
+        {
+          "auto": 2,
+          "batches": 65,
+          "earned": 5324,
+          "heating_ms": 110990,
+          "helper": 400,
+          "level": 6,
+          "manual": 4924,
+          "min": 3
+        },
+        {
+          "auto": 3,
+          "batches": 85,
+          "earned": 10956,
+          "heating_ms": 148170,
+          "helper": 1852,
+          "level": 7,
+          "manual": 9104,
+          "min": 4
+        },
+        {
+          "auto": 3,
+          "batches": 105,
+          "earned": 16660,
+          "heating_ms": 186320,
+          "helper": 4219,
+          "level": 8,
+          "manual": 12441,
+          "min": 5
+        },
+        {
+          "auto": 3,
+          "batches": 106,
+          "earned": 20028,
+          "heating_ms": 188050,
+          "helper": 7519,
+          "level": 8,
+          "manual": 12509,
+          "min": 6
+        },
+        {
+          "auto": 3,
+          "batches": 106,
+          "earned": 23328,
+          "heating_ms": 188050,
+          "helper": 10819,
+          "level": 8,
+          "manual": 12509,
+          "min": 7
+        },
+        {
+          "auto": 3,
+          "batches": 106,
+          "earned": 26628,
+          "heating_ms": 188050,
+          "helper": 14119,
+          "level": 8,
+          "manual": 12509,
+          "min": 8
+        },
+        {
+          "auto": 4,
+          "batches": 127,
+          "earned": 38353,
+          "heating_ms": 227920,
+          "helper": 18541,
+          "level": 8,
+          "manual": 19812,
+          "min": 9
+        },
+        {
+          "auto": 4,
+          "batches": 149,
+          "earned": 56036,
+          "heating_ms": 264690,
+          "helper": 25071,
+          "level": 9,
+          "manual": 30965,
+          "min": 10
+        },
+        {
+          "auto": 4,
+          "batches": 170,
+          "earned": 77208,
+          "heating_ms": 305710,
+          "helper": 32896,
+          "level": 10,
+          "manual": 44312,
+          "min": 11
+        },
+        {
+          "auto": 4,
+          "batches": 189,
+          "earned": 106863,
+          "heating_ms": 344550,
+          "helper": 44571,
+          "level": 10,
+          "manual": 62292,
+          "min": 12
+        },
+        {
+          "auto": 5,
+          "batches": 208,
+          "earned": 137232,
+          "heating_ms": 384720,
+          "helper": 59172,
+          "level": 10,
+          "manual": 78060,
+          "min": 13
+        },
+        {
+          "auto": 5,
+          "batches": 230,
+          "earned": 171854,
+          "heating_ms": 424020,
+          "helper": 75122,
+          "level": 10,
+          "manual": 96732,
+          "min": 14
+        },
+        {
+          "auto": 5,
+          "batches": 252,
+          "earned": 221441,
+          "heating_ms": 462680,
+          "helper": 97452,
+          "level": 11,
+          "manual": 123989,
+          "min": 15
+        },
+        {
+          "auto": 5,
+          "batches": 272,
+          "earned": 274120,
+          "heating_ms": 502420,
+          "helper": 122972,
+          "level": 11,
+          "manual": 151148,
+          "min": 16
+        },
+        {
+          "auto": 6,
+          "batches": 293,
+          "earned": 327850,
+          "heating_ms": 543900,
+          "helper": 153134,
+          "level": 11,
+          "manual": 174716,
+          "min": 17
+        },
+        {
+          "auto": 6,
+          "batches": 315,
+          "earned": 399095,
+          "heating_ms": 582690,
+          "helper": 186497,
+          "level": 11,
+          "manual": 212598,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 338,
+          "earned": 480892,
+          "heating_ms": 619990,
+          "helper": 225840,
+          "level": 12,
+          "manual": 255052,
+          "min": 19
+        },
+        {
+          "auto": 6,
+          "batches": 359,
+          "earned": 583892,
+          "heating_ms": 659180,
+          "helper": 280546,
+          "level": 12,
+          "manual": 303346,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          81440,
+          "auto1"
+        ],
+        [
+          96530,
+          "main"
+        ],
+        [
+          134340,
+          "main"
+        ],
+        [
+          155790,
+          "auto2"
+        ],
+        [
+          192000,
+          "main"
+        ],
+        [
+          227050,
+          "auto3"
+        ],
+        [
+          289410,
+          "main"
+        ],
+        [
+          489180,
+          "auto4"
+        ],
+        [
+          558370,
+          "main"
+        ],
+        [
+          653910,
+          "main"
+        ],
+        [
+          728560,
+          "auto5"
+        ],
+        [
+          854670,
+          "main"
+        ],
+        [
+          980140,
+          "auto6"
+        ],
+        [
+          1120540,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "10": 200.76,
+        "11": 265.87,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 39.06,
+        "5": 37.81,
+        "6": 57.66,
+        "7": 97.41,
+        "8": 268.96,
+        "9": 95.54
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 194,
+      "buys": 17,
+      "events": {
+        "auto_1": 182140,
+        "auto_2": 303780,
+        "auto_3": 399020,
+        "auto_4": 549890,
+        "auto_5": 825250,
+        "auto_6": 1095440,
+        "recipe": 220620,
+        "unlock_auto": 135060,
+        "unlock_recipes": 220620,
+        "unlock_shake": 94020
+      },
+      "final": {
+        "auto": 6,
+        "earned": 387747,
+        "even_pops": 165,
+        "helper": 193538,
+        "level": 11,
+        "manual": 194209,
+        "outcomes": {
+          "burnt": 16,
+          "early": 29,
+          "late": 3,
+          "near": 10,
+          "perfect": 136
+        }
+      },
+      "hand_heating_share": 0.277683333333333,
+      "level_at": {
+        "1": 20730,
+        "2": 64420,
+        "3": 94010,
+        "4": 135050,
+        "5": 220610,
+        "6": 283160,
+        "7": 351660,
+        "8": 477930,
+        "9": 630150,
+        "10": 751080,
+        "11": 963360
+      },
+      "longest_no_buy_after_3min_s": 138.11,
+      "marks": {
+        "1200": {
+          "auto": 6,
+          "earned": 387747,
+          "helper": 193538,
+          "level": 11,
+          "manual": 194209,
+          "money": 99551
+        },
+        "180": {
+          "auto": 0,
+          "earned": 670,
+          "helper": 0,
+          "level": 4,
+          "manual": 670,
+          "money": 314
+        },
+        "300": {
+          "auto": 1,
+          "earned": 3418,
+          "helper": 0,
+          "level": 6,
+          "manual": 3418,
+          "money": 1322
+        },
+        "600": {
+          "auto": 4,
+          "earned": 36226,
+          "helper": 12267,
+          "level": 8,
+          "manual": 23959,
+          "money": 9030
+        },
+        "900": {
+          "auto": 5,
+          "earned": 146029,
+          "helper": 62960,
+          "level": 10,
+          "manual": 83069,
+          "money": 37833
+        }
+      },
+      "name": "slow novice (3-6 s between presses, wild timing, cheese)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 9,
+          "earned": 79,
+          "heating_ms": 15300,
+          "helper": 0,
+          "level": 1,
+          "manual": 79,
+          "min": 1
+        },
+        {
+          "auto": 0,
+          "batches": 18,
+          "earned": 252,
+          "heating_ms": 29870,
+          "helper": 0,
+          "level": 3,
+          "manual": 252,
+          "min": 2
+        },
+        {
+          "auto": 0,
+          "batches": 29,
+          "earned": 670,
+          "heating_ms": 45480,
+          "helper": 0,
+          "level": 4,
+          "manual": 670,
+          "min": 3
+        },
+        {
+          "auto": 1,
+          "batches": 38,
+          "earned": 1459,
+          "heating_ms": 61400,
+          "helper": 0,
+          "level": 5,
+          "manual": 1459,
+          "min": 4
+        },
+        {
+          "auto": 1,
+          "batches": 48,
+          "earned": 3418,
+          "heating_ms": 79000,
+          "helper": 0,
+          "level": 6,
+          "manual": 3418,
+          "min": 5
+        },
+        {
+          "auto": 2,
+          "batches": 57,
+          "earned": 6618,
+          "heating_ms": 95960,
+          "helper": 990,
+          "level": 7,
+          "manual": 5628,
+          "min": 6
+        },
+        {
+          "auto": 3,
+          "batches": 66,
+          "earned": 10723,
+          "heating_ms": 111410,
+          "helper": 2681,
+          "level": 7,
+          "manual": 8042,
+          "min": 7
+        },
+        {
+          "auto": 3,
+          "batches": 76,
+          "earned": 15876,
+          "heating_ms": 128540,
+          "helper": 4727,
+          "level": 8,
+          "manual": 11149,
+          "min": 8
+        },
+        {
+          "auto": 3,
+          "batches": 85,
+          "earned": 25512,
+          "heating_ms": 144320,
+          "helper": 8177,
+          "level": 8,
+          "manual": 17335,
+          "min": 9
+        },
+        {
+          "auto": 4,
+          "batches": 96,
+          "earned": 36226,
+          "heating_ms": 163970,
+          "helper": 12267,
+          "level": 8,
+          "manual": 23959,
+          "min": 10
+        },
+        {
+          "auto": 4,
+          "batches": 106,
+          "earned": 49228,
+          "heating_ms": 179550,
+          "helper": 18137,
+          "level": 9,
+          "manual": 31091,
+          "min": 11
+        },
+        {
+          "auto": 4,
+          "batches": 116,
+          "earned": 64419,
+          "heating_ms": 197170,
+          "helper": 25437,
+          "level": 9,
+          "manual": 38982,
+          "min": 12
+        },
+        {
+          "auto": 4,
+          "batches": 126,
+          "earned": 85581,
+          "heating_ms": 215640,
+          "helper": 34837,
+          "level": 10,
+          "manual": 50744,
+          "min": 13
+        },
+        {
+          "auto": 5,
+          "batches": 136,
+          "earned": 116639,
+          "heating_ms": 232050,
+          "helper": 47560,
+          "level": 10,
+          "manual": 69079,
+          "min": 14
+        },
+        {
+          "auto": 5,
+          "batches": 145,
+          "earned": 146029,
+          "heating_ms": 250400,
+          "helper": 62960,
+          "level": 10,
+          "manual": 83069,
+          "min": 15
+        },
+        {
+          "auto": 5,
+          "batches": 156,
+          "earned": 179827,
+          "heating_ms": 267130,
+          "helper": 78910,
+          "level": 10,
+          "manual": 100917,
+          "min": 16
+        },
+        {
+          "auto": 5,
+          "batches": 165,
+          "earned": 229288,
+          "heating_ms": 284820,
+          "helper": 103220,
+          "level": 11,
+          "manual": 126068,
+          "min": 17
+        },
+        {
+          "auto": 5,
+          "batches": 175,
+          "earned": 280417,
+          "heating_ms": 300700,
+          "helper": 128740,
+          "level": 11,
+          "manual": 151677,
+          "min": 18
+        },
+        {
+          "auto": 6,
+          "batches": 184,
+          "earned": 327875,
+          "heating_ms": 317160,
+          "helper": 159164,
+          "level": 11,
+          "manual": 168711,
+          "min": 19
+        },
+        {
+          "auto": 6,
+          "batches": 194,
+          "earned": 387747,
+          "heating_ms": 333220,
+          "helper": 193538,
+          "level": 11,
+          "manual": 194209,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          20730,
+          "main"
+        ],
+        [
+          64420,
+          "main"
+        ],
+        [
+          94010,
+          "main"
+        ],
+        [
+          135050,
+          "main"
+        ],
+        [
+          182140,
+          "auto1"
+        ],
+        [
+          220610,
+          "main"
+        ],
+        [
+          283160,
+          "main"
+        ],
+        [
+          303780,
+          "auto2"
+        ],
+        [
+          351660,
+          "main"
+        ],
+        [
+          399020,
+          "auto3"
+        ],
+        [
+          477930,
+          "main"
+        ],
+        [
+          549890,
+          "auto4"
+        ],
+        [
+          630150,
+          "main"
+        ],
+        [
+          751080,
+          "main"
+        ],
+        [
+          825250,
+          "auto5"
+        ],
+        [
+          963360,
+          "main"
+        ],
+        [
+          1095440,
+          "auto6"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 20.73,
+        "1": 43.69,
+        "10": 212.28,
+        "2": 29.59,
+        "3": 41.04,
+        "4": 85.56,
+        "5": 62.55,
+        "6": 68.5,
+        "7": 126.27,
+        "8": 152.22,
+        "9": 120.93
+      },
+      "violations": []
+    },
+    {
+      "all_bought_s": -1.0,
+      "batches": 63,
+      "buys": 7,
+      "events": {
+        "unlock_auto": 57480,
+        "unlock_recipes": 85300,
+        "unlock_shake": 43450
+      },
+      "final": {
+        "auto": 0,
+        "earned": 4685,
+        "even_pops": 29,
+        "helper": 0,
+        "level": 7,
+        "manual": 4685,
+        "outcomes": {
+          "burnt": 4,
+          "early": 7,
+          "late": 8,
+          "near": 9,
+          "perfect": 35
+        }
+      },
+      "hand_heating_share": 0.0956333333333333,
+      "level_at": {
+        "1": 14130,
+        "2": 33900,
+        "3": 43440,
+        "4": 57470,
+        "5": 85290,
+        "6": 122550,
+        "7": 177300
+      },
+      "longest_no_buy_after_3min_s": 1020.0,
+      "marks": {
+        "1200": {
+          "auto": 0,
+          "earned": 4685,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "money": 349
+        },
+        "180": {
+          "auto": 0,
+          "earned": 4643,
+          "helper": 0,
+          "level": 7,
+          "manual": 4643,
+          "money": 307
+        },
+        "300": {
+          "auto": 0,
+          "earned": 4685,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "money": 349
+        },
+        "600": {
+          "auto": 0,
+          "earned": 4685,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "money": 349
+        },
+        "900": {
+          "auto": 0,
+          "earned": 4685,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "money": 349
+        }
+      },
+      "name": "stops at 3:00 without the helper (casual)",
+      "per_minute": [
+        {
+          "auto": 0,
+          "batches": 20,
+          "earned": 434,
+          "heating_ms": 33790,
+          "helper": 0,
+          "level": 4,
+          "manual": 434,
+          "min": 1
+        },
+        {
+          "auto": 0,
+          "batches": 41,
+          "earned": 1758,
+          "heating_ms": 74250,
+          "helper": 0,
+          "level": 5,
+          "manual": 1758,
+          "min": 2
+        },
+        {
+          "auto": 0,
+          "batches": 62,
+          "earned": 4643,
+          "heating_ms": 112820,
+          "helper": 0,
+          "level": 7,
+          "manual": 4643,
+          "min": 3
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 4
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 5
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 6
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 7
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 8
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 9
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 10
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 11
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 12
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 13
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 14
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 15
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 16
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 17
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 18
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 19
+        },
+        {
+          "auto": 0,
+          "batches": 63,
+          "earned": 4685,
+          "heating_ms": 114760,
+          "helper": 0,
+          "level": 7,
+          "manual": 4685,
+          "min": 20
+        }
+      ],
+      "timeline": [
+        [
+          14130,
+          "main"
+        ],
+        [
+          33900,
+          "main"
+        ],
+        [
+          43440,
+          "main"
+        ],
+        [
+          57470,
+          "main"
+        ],
+        [
+          85290,
+          "main"
+        ],
+        [
+          122550,
+          "main"
+        ],
+        [
+          177300,
+          "main"
+        ]
+      ],
+      "to_next_level_s": {
+        "0": 14.13,
+        "1": 19.77,
+        "2": 9.54,
+        "3": 14.03,
+        "4": 27.82,
+        "5": 37.26,
+        "6": 54.75
+      },
+      "violations": []
+    }
+  ]
+}

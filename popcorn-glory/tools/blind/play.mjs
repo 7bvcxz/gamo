@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The blind player's only hands and eyes (Popcorn Step 08).
-//   node play.mjs RUN look | tap X Y | hold X Y S | drag X1 Y1 X2 Y2 | wait S | note "TEXT" | status
+//   node play.mjs RUN look | tap X Y | hold X Y S | drag X1 Y1 X2 Y2 | path S X1 Y1 X2 Y2 [X3 Y3 ...] | wait S | note "TEXT" | status
 // Coordinates are pixels of the screenshot (600 x 1290). Prints the result and,
 // for actions, the path of the new screenshot to open with the Read tool.
 import fs from 'node:fs';
@@ -8,11 +8,13 @@ import path from 'node:path';
 import http from 'node:http';
 
 const [run, cmd, ...rest] = process.argv.slice(2);
-const usage = 'usage: play.mjs RUN look | tap X Y | hold X Y S | drag X1 Y1 X2 Y2 | wait S | note "TEXT" | status';
+const usage = 'usage: play.mjs RUN look | tap X Y | hold X Y S | drag X1 Y1 X2 Y2 | path S X1 Y1 X2 Y2 [X3 Y3 ...] | wait S | note "TEXT" | status';
 if (!run || !cmd) { console.error(usage); process.exit(2); }
 const n = (v) => Number(v);
 const args = { look: {}, status: {}, tap: { x: n(rest[0]), y: n(rest[1]) }, hold: { x: n(rest[0]), y: n(rest[1]), s: n(rest[2]) },
-  drag: { x1: n(rest[0]), y1: n(rest[1]), x2: n(rest[2]), y2: n(rest[3]) }, wait: { s: n(rest[0]) }, note: { text: rest.join(' ') } }[cmd];
+  drag: { x1: n(rest[0]), y1: n(rest[1]), x2: n(rest[2]), y2: n(rest[3]) }, wait: { s: n(rest[0]) }, note: { text: rest.join(' ') },
+  path: { s: n(rest[0]), points: rest.slice(1).reduce((acc, v, i) => (i % 2 ? acc[acc.length - 1].push(n(v)) : acc.push([n(v)]), acc), []) } }[cmd];
+if (cmd === 'path' && (!(args.s > 0) || args.points.length < 2 || args.points.some((p) => p.length !== 2 || p.some((v) => !Number.isFinite(v))))) { console.error(usage); process.exit(2); }
 if (!args) { console.error(usage); process.exit(2); }
 const port = Number(fs.readFileSync(path.join(path.resolve(run), 'port'), 'utf8'));
 const req = http.request({ host: '127.0.0.1', port, method: 'POST', path: '/' }, (res) => {

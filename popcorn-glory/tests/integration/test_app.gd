@@ -284,3 +284,38 @@ func test_the_stand_with_real_input() -> void:
 	assert_eq(int(app.rules.state()["helper_batches"]), 2, "two helper batches by themselves")
 	assert_true(app.rules.money > money, "paid")
 	assert_true((app.state()["rects"] as Dictionary).has("auto"), "the card is tappable")
+
+
+## Step 11: leaving the stand parks the run and reopening resumes it (a blind
+## player lost 13 minutes to the back arrow); the restart button starts over;
+## the experiments A/B/C still start fresh each time.
+func test_the_stand_resumes_after_back_and_restart_starts_over() -> void:
+	app.open("stand")
+	await tree.process_frame
+	app.dev_level(4)
+	app.dev_money(5000)
+	app.buy_auto()
+	var money := app.rules.money
+	app.back()
+	assert_eq(app.screen, "chooser", "back to the chooser")
+	app.open("click")
+	app.dev_money(77)
+	app.back()
+	app.open("stand")
+	await tree.process_frame
+	assert_eq(app.rules.level, 4, "the stand's level kept")
+	assert_eq(app.rules.money, money, "its money kept")
+	assert_true(bool(app.rules.state()["motor"]), "its motor kept")
+	assert_eq(app.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "resumed").size(), 1, "the log says it resumed")
+	app.back()
+	app.open("click")
+	assert_eq(app.rules.money, 0, "A starts fresh (as compared)")
+	app.back()
+	app.open("stand")
+	app.restart()
+	assert_eq(app.rules.level, 0, "restart: level 0")
+	assert_eq(app.rules.money, 0, "restart: no money")
+	assert_false(bool(app.rules.state()["motor"]), "restart: no motor")
+	app.back()
+	app.open("stand")
+	assert_eq(app.rules.level, 0, "and nothing old comes back after a restart")

@@ -48,3 +48,57 @@ test('load, heap over a minute, worst burst, sleep and wake', async ({ pop }) =>
   expect(c1 - c0, 'no play time while hidden').toBeLessThanOrEqual(300);
   expect(c2 - c1, 'time runs again after waking').toBeGreaterThan(0);
 });
+
+// Step 11: the stand at its peak -- the top machine, every rung of the ladder (the helper
+// popping every 1.5 s), caramel, golden batches popping and bags flying -- for a minute of
+// real holds: draw calls, pieces, heap, sound voices, and the frame rate (with the load
+// average beside it); then a hidden tab must not earn (no helper batches while hidden) and
+// the restart button must give a fresh stand.
+test('stand: peak load for a minute, hidden tab, restart', async ({ pop }) => {
+  test.setTimeout(240_000);
+  await pop.open('./#stand');
+  await pop.call('dev_level', 14);
+  await pop.call('dev_money', 50000000);
+  for (let i = 0; i < 7; i++) { await pop.tap('auto'); await pop.page.waitForTimeout(150); }
+  await expect.poll(async () => (await pop.state()).run.auto_level).toBe(7);
+  await pop.tap('recipe_caramel');
+  const heap0 = await pop.page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
+  let worst = { draw_calls: 0, primitives: 0, fx: 0 };
+  const fps = [];
+  const t0 = Date.now();
+  while (Date.now() - t0 < 60_000) {
+    await pop.holdGold();
+    await pop.page.waitForTimeout(450);
+    const info = await pop.call('dev_render_info');
+    const s = await pop.state();
+    worst = { draw_calls: Math.max(worst.draw_calls, info.draw_calls), primitives: Math.max(worst.primitives, info.primitives), fx: Math.max(worst.fx, s.fx.alive) };
+    if (fps.length < 6 && (Date.now() - t0) > fps.length * 10_000) fps.push(await pop.fps(1000));
+  }
+  const heap1 = await pop.page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
+  const s1 = await pop.state();
+  // Hidden: no time, no helper batches.
+  const h0 = s1.run.helper_batches;
+  await pop.tab(true);
+  await pop.page.waitForTimeout(5000);
+  const h1 = (await pop.state()).run.helper_batches;
+  await pop.tab(false);
+  await expect.poll(async () => (await pop.state()).run.helper_batches, { message: 'the helper works again after waking', timeout: 10_000 }).toBeGreaterThan(h1);
+  // Restart: a fresh stand.
+  await pop.tap('restart');
+  await expect.poll(async () => (await pop.state()).run.level).toBe(0);
+  const s2 = await pop.state();
+  const median = [...fps].sort((a, b) => a - b)[Math.floor(fps.length / 2)];
+  const rec = { worst, fps, median_fps: median, heap_start: heap0, heap_after_60s: heap1, batches: s1.run.outcomes, helper_batches: s1.run.helper_batches,
+    sound_played: s1.sound.played, load_avg: os.loadavg()[0], hidden: { helper_before: h0, helper_after_5s_hidden: h1 },
+    after_restart: { money: s2.run.money, auto: s2.run.auto_level, recipe: s2.run.recipe, helper: s2.run.helper_level } };
+  test.info().annotations.push({ type: 'perf', description: JSON.stringify(rec) });
+  expect(worst.draw_calls, 'draw calls within the budget at the stand peak').toBeLessThanOrEqual(200);
+  expect(worst.fx, 'pieces under the cap').toBeLessThanOrEqual(s1.fx.cap);
+  expect(median, 'no collapse at the stand peak').toBeGreaterThanOrEqual(10);
+  expect(heap1 - heap0, 'JS heap grows less than 30 MB over a minute at the peak').toBeLessThan(30e6);
+  expect(h1 - h0, 'no helper batch while the tab is hidden').toBeLessThanOrEqual(1);
+  expect(s2.run.money, 'restart: no money').toBe(0);
+  expect(s2.run.auto_level, 'restart: no machines').toBe(0);
+  expect(s2.run.recipe, 'restart: butter').toBe('butter');
+  expect(pop.errors).toEqual([]);
+});

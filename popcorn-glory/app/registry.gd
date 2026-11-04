@@ -9,7 +9,8 @@ extends RefCounted
 
 const EXPERIMENTS: Array[Dictionary] = [
 	# Step 10: the owner-approved vertical slice on B's hold and release (#114).
-	{"id": "stand", "letter": "", "listed": true,
+	# `keep`: leaving parks the run and reopening resumes it (Step 11); restart starts over.
+	{"id": "stand", "letter": "", "listed": true, "keep": true,
 		"rules": "res://variants/stand/stand_rules.gd", "view": "res://variants/stand/stand_view.gd",
 		"color": Color(0.85, 0.2, 0.32)},
 	{"id": "click", "letter": "A", "listed": true,

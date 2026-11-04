@@ -29,6 +29,7 @@ var helper_batches := 0
 var manual_earned := 0
 var helper_earned := 0
 var even_pops := 0
+var hand_even_pops := 0
 
 
 func _init(p_economy: PopEconomy = null) -> void:
@@ -162,16 +163,31 @@ func even_now() -> bool:
 	return motor() or shakes >= _turns()
 
 
+## The shake's factor for this batch: the hand's three swings x shake.mult, or
+## else the motor's x motor_mult (Step 11: a blind player found the motor
+## "quietly removed the crank skill, the most hands-on part" -- the hand now
+## stays worth more than the machine, as the issue asks of every automation).
+func _shake_mult() -> float:
+	var sh: Dictionary = _t()["shake"]
+	if not unlocked("shake"):
+		return 1.0
+	if shakes >= _turns():
+		return float(sh["mult"])
+	if motor():
+		return float(sh.get("motor_mult", sh["mult"]))
+	return 1.0
+
+
 func _scale_batch(n: int, kind: String) -> int:
-	var m := float(_recipe()["mult"])
-	var even := unlocked("shake") and even_now()
-	if even:
-		m *= float((_t()["shake"] as Dictionary)["mult"])
-		even_pops += 1
-	var out := maxi(1, int(floor(n * m)))
+	var sm := _shake_mult()
+	var by_hand := unlocked("shake") and shakes >= _turns()
+	var out := maxi(1, int(floor(n * float(_recipe()["mult"]) * sm)))
 	manual_earned += out
-	if even:
-		_emit("even", {"kind": kind, "motor": motor()})
+	if sm > 1.0:
+		even_pops += 1
+		if by_hand:
+			hand_even_pops += 1
+		_emit("even", {"kind": kind, "by": "hand" if by_hand else "motor"})
 	return out
 
 
@@ -237,7 +253,7 @@ func payout(at_level: int) -> int:
 	var n := maxi(1, int(floor(economy.at(variant, "batch", at_level) * float((t["mult"] as Dictionary)[PERFECT]))))
 	var m := float(_recipe()["mult"])
 	if motor() and at_level >= int((t["unlock"] as Dictionary)["shake"]):
-		m *= float((t["shake"] as Dictionary)["mult"])
+		m *= float((t["shake"] as Dictionary).get("motor_mult", (t["shake"] as Dictionary)["mult"]))
 	return maxi(1, int(floor(n * m)))
 
 
@@ -246,7 +262,7 @@ func state() -> Dictionary:
 	s["recipe"] = recipe
 	s["recipes"] = (_t()["recipes"] as Dictionary).keys()
 	s["shakes"] = shakes
-	s["even"] = unlocked("shake") and even_now()
+	s["even"] = unlocked("shake") and shakes >= _turns()   # the hand's own even pop (the crank's gold)
 	s["unlocked"] = {"shake": unlocked("shake"), "auto": unlocked("auto"), "recipes": unlocked("recipes")}
 	s["auto_level"] = auto_level
 	s["auto_next"] = auto_offer().get("kind", "")
@@ -260,4 +276,5 @@ func state() -> Dictionary:
 	s["manual_earned"] = manual_earned
 	s["helper_earned"] = helper_earned
 	s["even_pops"] = even_pops
+	s["hand_even_pops"] = hand_even_pops
 	return s

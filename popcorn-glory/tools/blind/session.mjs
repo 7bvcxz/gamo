@@ -80,15 +80,28 @@ async function touch(type, p) {
   if (!cdp) cdp = await context.newCDPSession(page);
   await cdp.send('Input.dispatchTouchEvent', { type, touchPoints: p ? [{ x: p.x, y: p.y, id: 0, radiusX: 2, radiusY: 2, force: 1 }] : [] });
 }
+const lastLogLen = {};
+const runsSeen = {};
 async function snapshot() {
   const s = await page.evaluate(() => window.popcorn.state()).catch(() => null);
   if (s) fs.appendFileSync(states, JSON.stringify({ t: Math.round(elapsed() * 10) / 10, screen: s.screen, exp: s.exp, run: s.run, clock_ms: s.clock_ms, sound: s.sound }) + '\n');
   // Each experiment's own log, kept as it grows (Step 10: a player went back to the chooser
   // and opened A at 9:09, and the final game_log.json held only A's four inputs -- the stand
   // run's lines were gone).
+  // A run that starts over (restart, or a fresh open) gets a new file: the old one is kept
+  // as game_log_<exp>_<n>.json (Step 11: a restart overwrote 13 minutes of the stand's log).
   if (s && s.screen === 'play' && s.exp) {
     const log = await page.evaluate(() => window.popcorn.call('log_document')).catch(() => null);
-    if (log) fs.writeFileSync(path.join(ctl, `game_log_${s.exp}.json`), JSON.stringify(log));
+    if (log) {
+      const file = path.join(ctl, `game_log_${s.exp}.json`);
+      const n = (log.lines || []).length;
+      if (fs.existsSync(file) && (lastLogLen[s.exp] ?? 0) > n) {
+        runsSeen[s.exp] = (runsSeen[s.exp] ?? 0) + 1;
+        fs.renameSync(file, path.join(ctl, `game_log_${s.exp}_${runsSeen[s.exp]}.json`));
+      }
+      lastLogLen[s.exp] = n;
+      fs.writeFileSync(file, JSON.stringify(log));
+    }
   }
 }
 async function finish(reason) {
@@ -107,7 +120,7 @@ async function finish(reason) {
 }
 
 async function handle(cmd, a) {
-  if (finished || over()) { setTimeout(() => finish('time'), 0); return { over: true, message: 'Time is up: the three minutes are over.' }; }
+  if (finished || over()) { setTimeout(() => finish('time'), 0); return { over: true, message: `Time is up: the ${SECONDS % 60 === 0 ? `${SECONDS / 60} minute${SECONDS === 60 ? '' : 's'}` : `${SECONDS} seconds`} are over.` }; }
   if (cmd === 'status') return { time: clock(elapsed()), left: clock(Math.max(0, SECONDS - elapsed())), started: startedAt > 0 };
   if (!startedAt) startedAt = Date.now();
   counts[cmd] = (counts[cmd] || 0) + 1;
@@ -137,6 +150,31 @@ async function handle(cmd, a) {
     await touch('touchStart', p1);
     for (let i = 1; i <= 10; i++) { await touch('touchMove', { x: p1.x + (p2.x - p1.x) * i / 10, y: p1.y + (p2.y - p1.y) * i / 10 }); await page.waitForTimeout(20); }
     await touch('touchEnd', null);
+    await page.waitForTimeout(400);
+  } else if (cmd === 'path') {
+    // Step 11: a finger can also stay down while it moves (a human can; the AI's 'drag'
+    // was 0.2 s, so 'hold and move' was out of its reach). Press at the first point, move
+    // through the rest evenly over S seconds (at most 5), lift.
+    const pts = a.points.map(([px, py]) => toCss(px, py));
+    const ms = Math.round(Math.min(5, Math.max(0.2, a.s)) * 1000);
+    const t0 = Date.now();
+    await touch('touchStart', pts[0]);
+    // Few moves, and the clock keeps the time: each move is a round trip that can take tens
+    // of ms on this machine (a first version with a move every 40 ms held 1.6 s for 3.2 s).
+    const steps = Math.max(pts.length - 1, Math.min(4 * (pts.length - 1), Math.round(ms / 100)));
+    for (let i = 1; i <= steps; i++) {
+      const f = (i / steps) * (pts.length - 1);
+      const k = Math.min(pts.length - 2, Math.floor(f));
+      const u = f - k;
+      const p = { x: pts[k].x + (pts[k + 1].x - pts[k].x) * u, y: pts[k].y + (pts[k + 1].y - pts[k].y) * u };
+      const due = Math.round((i * ms) / steps) - 60;
+      if (Date.now() - t0 >= ms - 60) break;
+      await page.waitForTimeout(Math.max(0, due - (Date.now() - t0)));
+      await touch('touchMove', p);
+    }
+    await page.waitForTimeout(Math.max(0, ms - (Date.now() - t0)));
+    await touch('touchEnd', null);
+    out.held_ms = Date.now() - t0;
     await page.waitForTimeout(400);
   } else if (cmd === 'wait') {
     await page.waitForTimeout(Math.round(Math.min(30, Math.max(0, a.s)) * 1000));
