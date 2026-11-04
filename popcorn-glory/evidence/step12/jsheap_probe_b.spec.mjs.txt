@@ -1,0 +1,35 @@
+// One-off (Step 12 memory probe, deleted after): which of idle / sound / the test bridge grows the JS heap?
+import { test } from '@playwright/test';
+const BASE = process.env.POPCORN_E2E_BASE;
+async function gcHeap(cdp) {
+  await cdp.send('HeapProfiler.collectGarbage'); await cdp.send('HeapProfiler.collectGarbage');
+  return (await cdp.send('Runtime.getHeapUsage')).usedSize / 1e6;
+}
+async function run(browser, label, url, marker, setup) {
+  const ctx = await browser.newContext({ viewport: { width: 720, height: 1280 }, hasTouch: true });
+  const page = await ctx.newPage();
+  if (marker) await page.addInitScript(() => { window.POPCORN_E2E = true; });
+  await page.goto(BASE + url);
+  await page.waitForFunction(() => { const c = document.querySelector('canvas'); return c && c.width > 0; }, null, { timeout: 90_000 });
+  await page.waitForTimeout(8000);
+  if (setup) await setup(page);
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send('HeapProfiler.enable');
+  const a = await gcHeap(cdp);
+  await page.waitForTimeout(120000);
+  const b = await gcHeap(cdp);
+  console.log(label, `${a.toFixed(2)} -> ${b.toFixed(2)} MB in 120 s (${((b - a) / 2).toFixed(2)} MB/min)`);
+  await ctx.close();
+}
+const top = async (page) => {
+  await page.waitForFunction(() => window.popcorn && window.popcorn.ready, null, { timeout: 60_000 });
+  await page.evaluate(() => { window.popcorn.call('dev_level', 14); window.popcorn.call('dev_money', 1e9); });
+  for (let i = 0; i < 7; i++) await page.evaluate(() => window.popcorn.call('dev_buy_auto'));
+};
+test('which', async ({ browser }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720');
+  test.setTimeout(900_000);
+  await run(browser, 'A. #stand level 0, idle, no test bridge', '#stand', false);
+  await run(browser, 'B. chooser, idle, no test bridge', '', false);
+  await run(browser, 'C. #stand level 0 idle, test bridge on', '#stand', true);
+});

@@ -1,0 +1,38 @@
+// One-off (Step 12 rollback check, deleted after): the same origin serves 0.12.0, then the
+// rolled-back 0.11.1, then 0.12.0 again (a symlink switched between phases).
+import { test, expect } from '../lib/pop.mjs';
+import fs from 'node:fs';
+const LINK = process.env.RB_LINK, HEAD = process.env.RB_HEAD, OLD = process.env.RB_OLD;
+const serve = (dir) => { fs.unlinkSync(LINK); fs.symlinkSync(dir, LINK); };
+const saved = (pop) => pop.page.evaluate(() => localStorage.getItem('popcorn-glory.stand.v1'));
+test('rollback to 0.11.1 keeps the save; 0.12.0 picks it up again', async ({ pop }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720');
+  test.setTimeout(240_000);
+  pop.page.on('response', (r) => { const u = r.url(); if (/\.(pck|html)|version\.json|\/$/.test(u.split('#')[0])) console.log('resp', r.status(), r.fromServiceWorker ? r.fromServiceWorker() : '', u); });
+  const cdp = await pop.page.context().newCDPSession(pop.page);
+  await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
+  serve(HEAD);
+  await pop.open('./#stand');
+  expect((await pop.state()).version).toBe('0.12.0');
+  await pop.call('dev_level', 6);
+  expect((await pop.call('dev_save')).ok).toBe(true);
+  const save = await saved(pop);
+  expect(JSON.parse(save).rules.level).toBe(6);
+  serve(OLD);
+  await pop.page.reload(); await pop.ready();
+  const old = await pop.state();
+  console.log('rolled back:', old.version, 'exp', old.exp, 'level', old.run && old.run.level);
+  expect(old.version).toBe('0.11.1');
+  await pop.page.waitForTimeout(6000);
+  await pop.call('dev_back');
+  expect(await saved(pop), '0.11.1 leaves the save alone').toBe(save);
+  serve(HEAD);
+  console.log('--- forward; served', fs.readlinkSync(LINK), 'sw', await pop.page.evaluate(async () => (navigator.serviceWorker ? (await navigator.serviceWorker.getRegistrations()).length : -1)));
+  // A new URL: python's server answers by file mtime, and the rollback files are newer than 0.12.0's.
+  await pop.page.goto('./?rb=2#stand'); await pop.ready();
+  const back = await pop.state();
+  console.log('forward again:', back.version, 'level', back.run.level);
+  expect(back.version).toBe('0.12.0');
+  expect(back.run.level, 'the save picked up again').toBe(6);
+  expect(pop.errors).toEqual([]);
+});

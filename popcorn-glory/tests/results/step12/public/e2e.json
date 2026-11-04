@@ -1,0 +1,5669 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/stub03.spec.mjs",
+      "specs/experiments04.spec.mjs",
+      "specs/sound05.spec.mjs",
+      "specs/responsive07.spec.mjs",
+      "specs/input07.spec.mjs",
+      "specs/progression07.spec.mjs",
+      "specs/perf07.spec.mjs",
+      "specs/scorecard09.spec.mjs",
+      "specs/stall09.spec.mjs",
+      "specs/stand10.spec.mjs",
+      "specs/release12.spec.mjs",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "experiments04.spec.mjs",
+      "file": "experiments04.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the chooser lists A, B, C and each tile opens its experiment",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5634,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:37:43.251Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-97506376780027300bd3",
+          "file": "experiments04.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "the atlas draws: the money coin is gold, not a white square",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2283,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:37:48.940Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-223a6a19b0ad0f9d2d03",
+          "file": "experiments04.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "A Click & Pop: every press pays at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4571,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:37:51.232Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-715bab7f6e159586cda9",
+          "file": "experiments04.spec.mjs",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4570,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:37:55.812Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-23c029d54ea489574d5b",
+          "file": "experiments04.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "B Perfect Pop: holding on burns by itself and never locks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7736,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:00.392Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-b25af4948f9d28bf5f68",
+          "file": "experiments04.spec.mjs",
+          "line": 66,
+          "column": 1
+        },
+        {
+          "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4228,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:08.144Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-404303b7a3916d5e5dfb",
+          "file": "experiments04.spec.mjs",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "runs never leak between experiments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3770,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:12.384Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-8ae24dc4f7ac4f2fc7ca",
+          "file": "experiments04.spec.mjs",
+          "line": 89,
+          "column": 1
+        },
+        {
+          "title": "the chooser lists A, B, C and each tile opens its experiment",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5455,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:21.044Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-34451055c343a61dedbf",
+          "file": "experiments04.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "the atlas draws: the money coin is gold, not a white square",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2622,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:26.554Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-91100fffa8e6c24363ea",
+          "file": "experiments04.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "A Click & Pop: every press pays at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5282,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:29.189Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-4b04f2ff1b9f7853b922",
+          "file": "experiments04.spec.mjs",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4885,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:34.486Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-872c1c655b1e87218691",
+          "file": "experiments04.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "B Perfect Pop: holding on burns by itself and never locks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8063,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:39.379Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-dbc1be3fc24c937280c5",
+          "file": "experiments04.spec.mjs",
+          "line": 66,
+          "column": 1
+        },
+        {
+          "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5329,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:47.452Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-5cc4c900348dd5717b02",
+          "file": "experiments04.spec.mjs",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "runs never leak between experiments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4526,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:52.792Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-60d904031caafc95fd23",
+          "file": "experiments04.spec.mjs",
+          "line": 89,
+          "column": 1
+        },
+        {
+          "title": "the chooser lists A, B, C and each tile opens its experiment",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3569,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:10.678Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-03884998002005ba9abb",
+          "file": "experiments04.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "the atlas draws: the money coin is gold, not a white square",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2292,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:14.305Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-80237e9a4c3b40d3681d",
+          "file": "experiments04.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "A Click & Pop: every press pays at once",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4169,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:16.606Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-76e528db4754e763d79d",
+          "file": "experiments04.spec.mjs",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "B Perfect Pop: holding into the gold pays double; a quick tap is early",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4577,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:20.784Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-e97f51ffccf1e1997c68",
+          "file": "experiments04.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "B Perfect Pop: holding on burns by itself and never locks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7669,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:25.371Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-13165bc63238037a0594",
+          "file": "experiments04.spec.mjs",
+          "line": 66,
+          "column": 1
+        },
+        {
+          "title": "C Pop Explosion: eight presses erupt, drawn pieces stay under the cap",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3845,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:33.049Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-391622a6b48cd2e393dd",
+          "file": "experiments04.spec.mjs",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "runs never leak between experiments",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3548,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:36.908Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "36ebfd24eb230a9d8cbf-c99b3e35c6656accbda9",
+          "file": "experiments04.spec.mjs",
+          "line": 89,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "input07.spec.mjs",
+      "file": "input07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "mouse",
+          "file": "input07.spec.mjs",
+          "line": 15,
+          "column": 6,
+          "specs": [
+            {
+              "title": "slide off the upgrade before letting go: no purchase",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "mouse paths on the desktop project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 16,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "p720",
+                  "projectName": "p720",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:38:16.173Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "mouse paths on the desktop project",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 16,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-ebed19051b3159065a7c",
+              "file": "input07.spec.mjs",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "a double click buys once",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "mouse paths on the desktop project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 16,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "p720",
+                  "projectName": "p720",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:38:16.183Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "mouse paths on the desktop project",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 16,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-3678b7f97e25b2475f82",
+              "file": "input07.spec.mjs",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "the keyboard plays: space presses, escape goes back",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "mouse paths on the desktop project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 16,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "p720",
+                  "projectName": "p720",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:38:16.191Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "mouse paths on the desktop project",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 16,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-559d9114b08c16e582ef",
+              "file": "input07.spec.mjs",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "slide off the upgrade before letting go: no purchase",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "mouse paths on the desktop project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 16,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "phone",
+                  "projectName": "phone",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:40:57.335Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "mouse paths on the desktop project",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 16,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-86b0874d3ec5cdb9cd2d",
+              "file": "input07.spec.mjs",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "a double click buys once",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "mouse paths on the desktop project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 16,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "phone",
+                  "projectName": "phone",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:40:57.341Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "mouse paths on the desktop project",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 16,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-1fd6084531978936f093",
+              "file": "input07.spec.mjs",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "the keyboard plays: space presses, escape goes back",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "mouse paths on the desktop project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 16,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "phone",
+                  "projectName": "phone",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:40:57.346Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "mouse paths on the desktop project",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 16,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-6cffdc3172c8459c6ad2",
+              "file": "input07.spec.mjs",
+              "line": 51,
+              "column": 3
+            },
+            {
+              "title": "slide off the upgrade before letting go: no purchase",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 8383,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:43:40.475Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-cd87cfe01e9ea40b7c94",
+              "file": "input07.spec.mjs",
+              "line": 18,
+              "column": 3
+            },
+            {
+              "title": "a double click buys once",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7542,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:43:48.870Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-731c4c66620b5f369706",
+              "file": "input07.spec.mjs",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "the keyboard plays: space presses, escape goes back",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4657,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:43:56.423Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-86d72c6d2d3644d0b8e0",
+              "file": "input07.spec.mjs",
+              "line": 51,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "touch",
+          "file": "input07.spec.mjs",
+          "line": 65,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a cancelled touch never locks B",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "p720",
+                  "projectName": "p720",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5765,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:38:16.199Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-e385ffda610e6ef5dcc2",
+              "file": "input07.spec.mjs",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "dragging on the game never scrolls the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "p720",
+                  "projectName": "p720",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2854,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:38:21.972Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-f763988d8ed20a27b2e1",
+              "file": "input07.spec.mjs",
+              "line": 82,
+              "column": 3
+            },
+            {
+              "title": "a cancelled touch never locks B",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "phone",
+                  "projectName": "phone",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5436,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:40:57.350Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-a2b046fc0e6a360d55e8",
+              "file": "input07.spec.mjs",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "dragging on the game never scrolls the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "phone",
+                  "projectName": "phone",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3569,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:41:02.794Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "47d72aedfd865337c459-0af7addd960170942439",
+              "file": "input07.spec.mjs",
+              "line": 82,
+              "column": 3
+            },
+            {
+              "title": "a cancelled touch never locks B",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "touch paths on touch projects",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 66,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:44:01.091Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "touch paths on touch projects",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 66,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-4f74e226199fb2fdd799",
+              "file": "input07.spec.mjs",
+              "line": 68,
+              "column": 3
+            },
+            {
+              "title": "dragging on the game never scrolls the page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "touch paths on touch projects",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                        "line": 66,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T03:44:01.100Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "touch paths on touch projects",
+                          "location": {
+                            "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/input07.spec.mjs",
+                            "line": 66,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "47d72aedfd865337c459-eca60f402402dbc40e08",
+              "file": "input07.spec.mjs",
+              "line": 82,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "perf07.spec.mjs",
+      "file": "perf07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:24.840Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-347db056e9f516015cbf",
+          "file": "perf07.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:24.845Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-35aec5bc4c9999c5742f",
+          "file": "perf07.spec.mjs",
+          "line": 70,
+          "column": 1
+        },
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:06.381Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-849d16b8fc0d8250c161",
+          "file": "perf07.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:06.387Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-37a7edbf92126dfa5620",
+          "file": "perf07.spec.mjs",
+          "line": 70,
+          "column": 1
+        },
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"load_ms\":2026,\"heap_start\":9942685,\"heap_after_60s\":11669633,\"burst\":{\"fps\":36.12575669487448,\"draw_calls\":117,\"primitives\":4295,\"fx_peak\":154,\"fx_cap\":400},\"sleep\":{\"before\":3676,\"hidden_5s\":3710,\"after_wake\":4640},\"load_avg\":14.14}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 72013,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:44:01.113Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"load_ms\":2026,\"heap_start\":9942685,\"heap_after_60s\":11669633,\"burst\":{\"fps\":36.12575669487448,\"draw_calls\":117,\"primitives\":4295,\"fx_peak\":154,\"fx_cap\":400},\"sleep\":{\"before\":3676,\"hidden_5s\":3710,\"after_wake\":4640},\"load_avg\":14.14}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-ad609c016ac86464b1bc",
+          "file": "perf07.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"worst\":{\"draw_calls\":179,\"primitives\":5345,\"fx\":44},\"fps\":[46.40142167805384,48.21410999783911,48.17618718083005,48.611111111111114,47.27666698609543,47.52004750210132],\"median_fps\":48.17618718083005,\"heap_start\":11586841,\"heap_after_60s\":19012757,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":23},\"helper_batches\":41,\"sound_played\":{\"clink\":1,\"coin\":63,\"ding\":23,\"fanfare\":1,\"pop_1\":41,\"pop_2\":23,\"sizzle\":23,\"upgrade\":7},\"load_avg\":13.8,\"hidden\":{\"helper_before\":41,\"helper_after_5s_hidden\":41},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 72949,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:45:13.134Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"worst\":{\"draw_calls\":179,\"primitives\":5345,\"fx\":44},\"fps\":[46.40142167805384,48.21410999783911,48.17618718083005,48.611111111111114,47.27666698609543,47.52004750210132],\"median_fps\":48.17618718083005,\"heap_start\":11586841,\"heap_after_60s\":19012757,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":23},\"helper_batches\":41,\"sound_played\":{\"clink\":1,\"coin\":63,\"ding\":23,\"fanfare\":1,\"pop_1\":41,\"pop_2\":23,\"sizzle\":23,\"upgrade\":7},\"load_avg\":13.8,\"hidden\":{\"helper_before\":41,\"helper_after_5s_hidden\":41},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-583e0b25393363690b06",
+          "file": "perf07.spec.mjs",
+          "line": 70,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "progression07.spec.mjs",
+      "file": "progression07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "FAST-FORWARD: milestones in order through 3:00",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "mode",
+                  "description": "fast-forward with dev_advance (not real-time play)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9665,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:24.852Z",
+                  "annotations": [
+                    {
+                      "type": "mode",
+                      "description": "fast-forward with dev_advance (not real-time play)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-8beeb1d24f48a89971a2",
+          "file": "progression07.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "ten restarts in a row: each from nothing, no errors",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 21022,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:34.525Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-d5c386ef05f85b1f0181",
+          "file": "progression07.spec.mjs",
+          "line": 24,
+          "column": 1
+        },
+        {
+          "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3916,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:55.558Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-c7bd7c8b86fa565adfa3",
+          "file": "progression07.spec.mjs",
+          "line": 37,
+          "column": 1
+        },
+        {
+          "title": "FAST-FORWARD: milestones in order through 3:00",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "mode",
+                  "description": "fast-forward with dev_advance (not real-time play)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11938,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:06.395Z",
+                  "annotations": [
+                    {
+                      "type": "mode",
+                      "description": "fast-forward with dev_advance (not real-time play)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-b33b0d01c176ddd3a14a",
+          "file": "progression07.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "ten restarts in a row: each from nothing, no errors",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 26761,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:18.339Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-1d8f3098c39ef7ea2960",
+          "file": "progression07.spec.mjs",
+          "line": 24,
+          "column": 1
+        },
+        {
+          "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4649,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:45.109Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-870aa4c94535ee604e43",
+          "file": "progression07.spec.mjs",
+          "line": 37,
+          "column": 1
+        },
+        {
+          "title": "FAST-FORWARD: milestones in order through 3:00",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "mode",
+                  "description": "fast-forward with dev_advance (not real-time play)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9006,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:46:26.102Z",
+                  "annotations": [
+                    {
+                      "type": "mode",
+                      "description": "fast-forward with dev_advance (not real-time play)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-0509d79799fd4e58c534",
+          "file": "progression07.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "ten restarts in a row: each from nothing, no errors",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 18687,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:46:35.119Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-04f9076e03a747dd8407",
+          "file": "progression07.spec.mjs",
+          "line": 24,
+          "column": 1
+        },
+        {
+          "title": "an unusual order: A, C, B, A again, by tiles, links and the back button",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5533,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:46:53.815Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "45715486582ddd12a046-5a280aed4d36eb4c3165",
+          "file": "progression07.spec.mjs",
+          "line": 37,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "release12.spec.mjs",
+      "file": "release12.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5441,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:38:59.489Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-8082304957aa8aeeaaad",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6071,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:04.938Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-55176e4ca8caec62d299",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 74,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 24,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:11.018Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 74,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-7046a9157c7d6aab70ae",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 468,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:11.052Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-be3da9580863d462fe9a",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6261,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:49.770Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-0fcb6da64fe4f996f543",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 56,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 25,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:56.040Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 56,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-6cd0e0737587645b58e8",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 74,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 21,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:56.071Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 74,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-a513aabdedb0bd771281",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 93,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 20,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:56.097Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 93,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-2d29893c06fb51238562",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5423,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:46:59.363Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-f16c93c03b321600db90",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 56,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 26,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:47:04.793Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 56,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-118a1eda2730846dab58",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 400000,
+              "annotations": [
+                {
+                  "type": "slow_load",
+                  "description": "Fast 3G emulation: first drawn frame after 60896 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 60919,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:47:04.826Z",
+                  "annotations": [
+                    {
+                      "type": "slow_load",
+                      "description": "Fast 3G emulation: first drawn frame after 60896 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-542426bf00c07c575630",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 93,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 25,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:05.751Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 93,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-c075b2e40a7c4ec098ac",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "scorecard09.spec.mjs",
+      "file": "scorecard09.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 567,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:11.527Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "66d656215a84dd817e54-57412a22b454a5b7d11b",
+          "file": "scorecard09.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 578,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:56.126Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "66d656215a84dd817e54-32b99cbc5f75b5ad856c",
+          "file": "scorecard09.spec.mjs",
+          "line": 7,
+          "column": 1
+        },
+        {
+          "title": "scorecard: trial links, saved across a reload, exported as entered, nothing sent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 616,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:05.787Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "66d656215a84dd817e54-6fa02f404731a6747a24",
+          "file": "scorecard09.spec.mjs",
+          "line": 7,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "sound05.spec.mjs",
+      "file": "sound05.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3184,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:12.103Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-2987b295aa6bba5e35a6",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5291,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:15.294Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-62052ddb3d14afb6b404",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9526,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:20.594Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-4af0a10747e897c91746",
+          "file": "sound05.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4605,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:30.128Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f9b6d4cb8f4728782c70",
+          "file": "sound05.spec.mjs",
+          "line": 90,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6355,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:34.742Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-5b1cb20492eb82ee1bea",
+          "file": "sound05.spec.mjs",
+          "line": 102,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3965,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:41.109Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f2ca6e9bc96af487b500",
+          "file": "sound05.spec.mjs",
+          "line": 127,
+          "column": 1
+        },
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3624,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:41:56.713Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-7a1782977f8c6ffbec34",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5581,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:00.343Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-cbd148cfd53651e42634",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9973,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:05.940Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-b2818d78599024cf35aa",
+          "file": "sound05.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5238,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:15.919Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-4ab441764f33b305e57d",
+          "file": "sound05.spec.mjs",
+          "line": 90,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7429,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:21.165Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f8cb964d06fbb1b7f065",
+          "file": "sound05.spec.mjs",
+          "line": 102,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4480,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:28.603Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3d45fceb40aed66188ee",
+          "file": "sound05.spec.mjs",
+          "line": 127,
+          "column": 1
+        },
+        {
+          "title": "A: a press is heard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3445,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:06.414Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-3dede72a1da916dd88c2",
+          "file": "sound05.spec.mjs",
+          "line": 22,
+          "column": 1
+        },
+        {
+          "title": "B: the sizzle while held, and a perfect pop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5200,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:09.866Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-300494eb8b1555f2af07",
+          "file": "sound05.spec.mjs",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "stand: the shake clinks and the helper pops on its own",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 9805,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:15.074Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-8f94b5e2f95bd5cc7ae1",
+          "file": "sound05.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "C: kernels clink and the eruption booms",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6378,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:24.889Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-f810a8e7bfcd6172ea13",
+          "file": "sound05.spec.mjs",
+          "line": 90,
+          "column": 1
+        },
+        {
+          "title": "the speaker button steps loud -> soft -> off, and back on",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6194,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:31.282Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-6adc0c225d548922627b",
+          "file": "sound05.spec.mjs",
+          "line": 102,
+          "column": 1
+        },
+        {
+          "title": "?sound=off starts muted",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3903,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:37.486Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2eb5140bbfbf9f55350c-41b1b0b40c54a429fdd8",
+          "file": "sound05.spec.mjs",
+          "line": 127,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stall09.spec.mjs",
+      "file": "stall09.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1551 ms, game judged 1592 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3868,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:45.089Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1551 ms, game judged 1592 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-185831e6f9c23dc2a083",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        },
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1552 ms, game judged 1568 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4103,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:33.095Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1552 ms, game judged 1568 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-283959435ee4656b7fe7",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        },
+        {
+          "title": "B: a 0.8 s stall during a hold still counts toward the heat",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "hold",
+                  "description": "finger 1551 ms, game judged 1549 ms (perfect)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3992,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:41.407Z",
+                  "annotations": [
+                    {
+                      "type": "hold",
+                      "description": "finger 1551 ms, game judged 1549 ms (perfect)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "0b0b470e3b71983625b5-4a8a7f2cae264e936874",
+          "file": "stall09.spec.mjs",
+          "line": 9,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stand10.spec.mjs",
+      "file": "stand10.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 10827,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:48.967Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-7d8a1dc81b7a514698bf",
+          "file": "stand10.spec.mjs",
+          "line": 17,
+          "column": 1
+        },
+        {
+          "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2881,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:39:59.801Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-d415adb6ecdadfbb318c",
+          "file": "stand10.spec.mjs",
+          "line": 71,
+          "column": 1
+        },
+        {
+          "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11585,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:37.211Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-5febd5e43c44ce7113d5",
+          "file": "stand10.spec.mjs",
+          "line": 17,
+          "column": 1
+        },
+        {
+          "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3233,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:48.805Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-2aa350c007da2dd821e4",
+          "file": "stand10.spec.mjs",
+          "line": 71,
+          "column": 1
+        },
+        {
+          "title": "the stand: B first, shake by dragging, a shaker chooses, the card buys the machines",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11764,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:45.410Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-4067d5125f596a1e238b",
+          "file": "stand10.spec.mjs",
+          "line": 17,
+          "column": 1
+        },
+        {
+          "title": "the stand fits: shakers, helper, card and machine do not overlap the bars",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3134,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:48:57.185Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "972d123be4d846d12bb4-b33b4b4420e0e7d8ccb6",
+          "file": "stand10.spec.mjs",
+          "line": 71,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "stub03.spec.mjs",
+      "file": "stub03.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "the stub: press, upgrade, restart, back",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "load",
+                  "description": "1963 ms to the first drawn frame"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4776,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:02.695Z",
+                  "annotations": [
+                    {
+                      "type": "load",
+                      "description": "1963 ms to the first drawn frame"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-4c2e4c6b28e87dee30ca",
+          "file": "stub03.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "a direct link opens the stub, and the browser back button returns",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2664,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:07.480Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-23ea207353757ee01a56",
+          "file": "stub03.spec.mjs",
+          "line": 49,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab stops the play clock",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8204,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:10.154Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-3fefca660b480bff0fa1",
+          "file": "stub03.spec.mjs",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "three minutes shows the clock and is logged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2356,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:40:18.367Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-15bf425628f5422555cd",
+          "file": "stub03.spec.mjs",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "the stub: press, upgrade, restart, back",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "load",
+                  "description": "2194 ms to the first drawn frame"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5881,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:52.049Z",
+                  "annotations": [
+                    {
+                      "type": "load",
+                      "description": "2194 ms to the first drawn frame"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-d426de5de973061b3e78",
+          "file": "stub03.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "a direct link opens the stub, and the browser back button returns",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3103,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:42:57.939Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-7c0f0edf7223fa3b7349",
+          "file": "stub03.spec.mjs",
+          "line": 49,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab stops the play clock",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6740,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:01.050Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-b9612c1dd208c5262e14",
+          "file": "stub03.spec.mjs",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "three minutes shows the clock and is logged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2554,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:43:07.798Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-ff0554c7930d2dbf915d",
+          "file": "stub03.spec.mjs",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "the stub: press, upgrade, restart, back",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "load",
+                  "description": "2179 ms to the first drawn frame"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5325,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:49:00.332Z",
+                  "annotations": [
+                    {
+                      "type": "load",
+                      "description": "2179 ms to the first drawn frame"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-9cc368fb65ddf8fe379a",
+          "file": "stub03.spec.mjs",
+          "line": 8,
+          "column": 1
+        },
+        {
+          "title": "a direct link opens the stub, and the browser back button returns",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 90105,
+                  "error": {
+                    "message": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.",
+                    "stack": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.\n    at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)\n    at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/stub03.spec.mjs:50:3",
+                    "location": {
+                      "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs",
+                      "column": 18,
+                      "line": 43
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m../lib/pop.mjs:43\n\n  41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).\n  42 |     ready: async () => {\n> 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });\n     |                  ^\n  44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);\n  45 |     },\n  46 |     state: () => page.evaluate(() => window.popcorn.state()),"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs",
+                        "column": 18,
+                        "line": 43
+                      },
+                      "message": "TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.\n\n   at ../lib/pop.mjs:43\n\n  41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).\n  42 |     ready: async () => {\n> 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });\n     |                  ^\n  44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);\n  45 |     },\n  46 |     state: () => page.evaluate(() => window.popcorn.state()),\n    at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)\n    at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)\n    at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/stub03.spec.mjs:50:3"
+                    },
+                    {
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs",
+                        "column": 58,
+                        "line": 122
+                      },
+                      "message": "Error: no page errors during the test\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to load resource: net::ERR_NETWORK_CHANGED\",\u001b[39m\n\u001b[31m+   \"network error\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n   at ../lib/pop.mjs:122\n\n  120 |     const pop = wrap(page, testInfo);\n  121 |     await use(pop);\n> 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);\n      |                                                          ^\n  123 |   },\n  124 | });\n  125 |\n    at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:49:05.666Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results/stub03-a-direct-link-opens-0314b-browser-back-button-returns-desktop/error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs",
+                    "column": 18,
+                    "line": 43
+                  }
+                },
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2599,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 1,
+                  "startTime": "2026-11-04T03:50:36.079Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "flaky"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-6282b18a75866d3dbed9",
+          "file": "stub03.spec.mjs",
+          "line": 49,
+          "column": 1
+        },
+        {
+          "title": "a hidden tab stops the play clock",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6600,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:50:38.737Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-789f80fb9e55f8e385f5",
+          "file": "stub03.spec.mjs",
+          "line": 60,
+          "column": 1
+        },
+        {
+          "title": "three minutes shows the clock and is logged",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2418,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:50:45.351Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f527c4a220d63fb3e812-0dba40c8632a20f4f7da",
+          "file": "stub03.spec.mjs",
+          "line": 75,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "responsive07.spec.mjs",
+      "file": "responsive07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3472,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:50:48.075Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-1444432be00b6ce1b722",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2779,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:50:51.607Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2f744804bc10eb239c43",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2785,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:50:54.396Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-5d8c414fc68382c4610f",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4077,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:50:57.189Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-708679552f93b0ea7739",
+          "file": "responsive07.spec.mjs",
+          "line": 40,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-p720",
+              "projectName": "m-p720",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3037,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:01.276Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-295b8d1a95cbb979382e",
+          "file": "responsive07.spec.mjs",
+          "line": 54,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3463,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:04.638Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-487405d238d9b7bcf3df",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3328,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:08.162Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-7798ccdb4a009d48e1b4",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3278,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:11.503Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-c9f4ea4252d815627a5a",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5173,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:14.792Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-072b528f6c509ad93607",
+          "file": "responsive07.spec.mjs",
+          "line": 40,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-hd",
+              "projectName": "m-hd",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3571,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:19.975Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-f2c13cd6b73215374470",
+          "file": "responsive07.spec.mjs",
+          "line": 54,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3656,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:23.892Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2afb9e3a722eafb76db1",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3575,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:27.607Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-d40e74b5e20e60f8c9b7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3586,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:31.191Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-6473b25f6efc7130c33b",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5765,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:34.795Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-a82ef9c0b97b8e697b8a",
+          "file": "responsive07.spec.mjs",
+          "line": 40,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-small",
+              "projectName": "m-small",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3964,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:40.572Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-dfc386cd4901268a6c91",
+          "file": "responsive07.spec.mjs",
+          "line": 54,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4353,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:44.873Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-ba19dd8d627f47a166d6",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4243,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:49.284Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-91b9ab428be3da2fe824",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4157,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:53.536Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-93e691da6283a3195fd0",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7693,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:51:57.706Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-2d9ff859918f70bb5b36",
+          "file": "responsive07.spec.mjs",
+          "line": 40,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-tablet",
+              "projectName": "m-tablet",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4803,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:52:05.406Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-88aafda8a6e89bc06950",
+          "file": "responsive07.spec.mjs",
+          "line": 54,
+          "column": 1
+        },
+        {
+          "title": "click: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4106,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:52:10.547Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-13bb3a8233e47a614ae0",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "perfect: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4114,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:52:14.711Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-56db4fe6d972b56a2bd7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "explosion: fits, no overlaps, readable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "sizes",
+                  "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3984,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:52:18.838Z",
+                  "annotations": [
+                    {
+                      "type": "sizes",
+                      "description": "money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-fcd7f88621fab0a3bda7",
+          "file": "responsive07.spec.mjs",
+          "line": 12,
+          "column": 3
+        },
+        {
+          "title": "reduced motion and sound off still play",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7123,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:52:22.834Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-f8d398b4b6612ccfd1f6",
+          "file": "responsive07.spec.mjs",
+          "line": 40,
+          "column": 1
+        },
+        {
+          "title": "stand: card, shakers and helper fit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "m-landscape",
+              "projectName": "m-landscape",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4490,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:52:29.967Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6dee33051d53a21ae7bb-d3f59f7271843f7d6498",
+          "file": "responsive07.spec.mjs",
+          "line": 54,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T03:37:42.943Z",
+    "duration": 891624.215,
+    "expected": 111,
+    "skipped": 18,
+    "unexpected": 0,
+    "flaky": 1
+  }
+}

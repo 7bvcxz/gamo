@@ -1,0 +1,31 @@
+// One-off (Step 12 memory probe, deleted after): does the JS heap keep growing, and with what?
+import { test } from '../lib/pop.mjs';
+test('jsheap', async ({ pop }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720');
+  test.setTimeout(600_000);
+  let consoleMsgs = 0;
+  pop.page.on('console', () => { consoleMsgs++; });
+  await pop.open('./#stand');
+  const cdp = await pop.page.context().newCDPSession(pop.page);
+  await cdp.send('HeapProfiler.enable');
+  const meas = async (label) => {
+    await cdp.send('HeapProfiler.collectGarbage');
+    await cdp.send('HeapProfiler.collectGarbage');
+    const b = await cdp.send('Runtime.getHeapUsage');
+    console.log(label, JSON.stringify({ used_after_gc_mb: (b.usedSize / 1e6).toFixed(2), backing_mb: (b.backingStorageSize / 1e6).toFixed(1), console: consoleMsgs }));
+  };
+  await pop.call('dev_level', 14); await pop.call('dev_money', 1e9);
+  for (let i = 0; i < 7; i++) { await pop.tap('auto'); await pop.page.waitForTimeout(150); }
+  await pop.page.waitForTimeout(5000);
+  await meas('top stand ready');
+  await pop.page.waitForTimeout(90000);
+  await meas('90 s idle, helper popping (no polling)');
+  await pop.page.waitForTimeout(90000);
+  await meas('180 s idle');
+  const t0 = Date.now(); let n = 0;
+  while (Date.now() - t0 < 60000) { await pop.state(); n++; }
+  await meas(`60 s polling state() x${n}`);
+  const t1 = Date.now(); let h = 0;
+  while (Date.now() - t1 < 60000) { await pop.hold('play', 900); h++; await pop.page.waitForTimeout(250); }
+  await meas(`${h} holds in 60 s`);
+});

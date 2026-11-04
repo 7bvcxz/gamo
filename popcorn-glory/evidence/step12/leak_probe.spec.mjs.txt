@@ -1,0 +1,36 @@
+// One-off (Step 12 memory probe, deleted after): does backing storage grow, and with what?
+import { test } from '../lib/pop.mjs';
+test('leak', async ({ pop }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720');
+  test.setTimeout(400_000);
+  await pop.open('./' + (process.env.LEAK_ROUTE || '#stand'));
+  const cdp = await pop.page.context().newCDPSession(pop.page);
+  await cdp.send('HeapProfiler.enable');
+  const meas = async (label) => {
+    const a = await cdp.send('Runtime.getHeapUsage');
+    await cdp.send('HeapProfiler.collectGarbage');
+    const b = await cdp.send('Runtime.getHeapUsage');
+    const wasm = await pop.page.evaluate(() => {
+      // Godot keeps its module on the engine; look for any WebAssembly.Memory reachable from window.
+      for (const k of Object.keys(window)) { try { const v = window[k]; if (v && v.HEAP8) return v.HEAP8.length; } catch (e) {} }
+      return null;
+    });
+    console.log(label, JSON.stringify({ used: (a.usedSize / 1e6).toFixed(1), backing_before_gc: (a.backingStorageSize / 1e6).toFixed(0), backing_after_gc: (b.backingStorageSize / 1e6).toFixed(0), wasm_heap: wasm && (wasm / 1e6).toFixed(0) }));
+  };
+  await meas('start');
+  await pop.page.waitForTimeout(30000);
+  await meas('idle 30s');
+  // Polling only (the test harness's own calls), 30 s.
+  const t0 = Date.now(); let n = 0;
+  while (Date.now() - t0 < 30000) { await pop.state(); n++; }
+  await meas(`polled state ${n}x in 30s`);
+  // Holding and releasing, 30 s.
+  const t1 = Date.now(); let h = 0;
+  while (Date.now() - t1 < 30000) { await pop.holdGold(); h++; await pop.page.waitForTimeout(300); }
+  await meas(`${h} holds in 30s`);
+  // The top stand idle with the helper popping (sounds, no input), 30 s.
+  await pop.call('dev_level', 14); await pop.call('dev_money', 1e9);
+  for (let i = 0; i < 7; i++) { await pop.tap('auto'); await pop.page.waitForTimeout(150); }
+  await pop.page.waitForTimeout(30000);
+  await meas('top stand idle 30s (helper pops)');
+});

@@ -1,0 +1,10 @@
+resp 200 false http://127.0.0.1:18631/docs/popcorn-glory/
+resp 200 false http://127.0.0.1:18631/docs/popcorn-glory/game-634c754f0c92.pck
+resp 200 false http://127.0.0.1:18631/docs/popcorn-glory/
+resp 200 false http://127.0.0.1:18631/docs/popcorn-glory/game-c69017d0353e.pck
+rolled back: 0.11.1 exp stand level 0
+--- forward; served /home/merti/Workspace/gamo-popcorn/docs sw 0
+resp 200 false http://127.0.0.1:18631/docs/popcorn-glory/game-634c754f0c92.pck
+forward again: 0.12.0 level 6
+  ✓  1 [p720] › specs/zz_rollback12.spec.mjs:8:1 › rollback to 0.11.1 keeps the save; 0.12.0 picks it up again (9.7s)
+  1 passed (10.1s)

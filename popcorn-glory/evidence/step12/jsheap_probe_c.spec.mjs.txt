@@ -1,0 +1,32 @@
+// One-off (Step 12 memory probe, deleted after): who allocates the JS memory that stays alive on the idle stand?
+import { test } from '@playwright/test';
+test('sampling', async ({ browser }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720');
+  test.setTimeout(300_000);
+  const ctx = await browser.newContext({ viewport: { width: 720, height: 1280 }, hasTouch: true });
+  const page = await ctx.newPage();
+  await page.goto(process.env.POPCORN_E2E_BASE + '#stand');
+  await page.waitForFunction(() => { const c = document.querySelector('canvas'); return c && c.width > 0; }, null, { timeout: 90_000 });
+  await page.waitForTimeout(8000);
+  const cdp = await ctx.newCDPSession(page);
+  await cdp.send('HeapProfiler.enable');
+  await cdp.send('HeapProfiler.collectGarbage');
+  await cdp.send('HeapProfiler.startSampling', { samplingInterval: 4096 });
+  await page.waitForTimeout(60000);
+  await cdp.send('HeapProfiler.collectGarbage');
+  const { profile } = await cdp.send('HeapProfiler.getSamplingProfile');
+  await cdp.send('HeapProfiler.stopSampling');
+  const rows = [];
+  const walk = (n, stack) => {
+    const f = n.callFrame; const name = `${f.functionName || '(anon)'}@${(f.url || '').split('/').pop()}:${f.lineNumber}`;
+    const st = [...stack, name];
+    if (n.selfSize > 0) rows.push([n.selfSize, st.slice(-4).join(' < ')]);
+    for (const c of n.children) walk(c, st);
+  };
+  walk(profile.head, []);
+  rows.sort((a, b) => b[0] - a[0]);
+  const total = rows.reduce((s, r) => s + r[0], 0);
+  console.log('retained sampled total', (total / 1e6).toFixed(2), 'MB');
+  for (const r of rows.slice(0, 8)) console.log((r[0] / 1e3).toFixed(0) + ' KB', r[1].slice(-300));
+  await ctx.close();
+});

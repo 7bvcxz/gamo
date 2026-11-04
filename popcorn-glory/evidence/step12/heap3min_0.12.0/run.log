@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [phone] › specs/play_stand.spec.mjs:17:1 › stand: 3 real minutes (3.0m)
+
+  1 passed (3.0m)

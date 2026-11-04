@@ -1,0 +1,183 @@
+
+Running 130 tests using 1 worker
+
+  ✓    1 [p720] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (5.6s)
+  ✓    2 [p720] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.3s)
+  ✓    3 [p720] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (4.6s)
+  ✓    4 [p720] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (4.6s)
+  ✓    5 [p720] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (7.7s)
+  ✓    6 [p720] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (4.2s)
+  ✓    7 [p720] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (3.8s)
+  -    8 [p720] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase
+  -    9 [p720] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once
+  -   10 [p720] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back
+  ✓   11 [p720] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B (5.8s)
+  ✓   12 [p720] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page (2.9s)
+  -   13 [p720] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake
+  -   14 [p720] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   15 [p720] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (9.7s)
+  ✓   16 [p720] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (21.0s)
+  ✓   17 [p720] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (3.9s)
+  ✓   18 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.4s)
+  ✓   19 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (6.1s)
+  -   20 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  ✓   21 [p720] › specs/release12.spec.mjs:92:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (468ms)
+  ✓   22 [p720] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (567ms)
+  ✓   23 [p720] › specs/sound05.spec.mjs:22:1 › A: a press is heard (3.2s)
+  ✓   24 [p720] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.3s)
+  ✓   25 [p720] › specs/sound05.spec.mjs:52:1 › stand: the shake clinks and the helper pops on its own (9.5s)
+  ✓   26 [p720] › specs/sound05.spec.mjs:90:1 › C: kernels clink and the eruption booms (4.6s)
+  ✓   27 [p720] › specs/sound05.spec.mjs:102:1 › the speaker button steps loud -> soft -> off, and back on (6.4s)
+  ✓   28 [p720] › specs/sound05.spec.mjs:127:1 › ?sound=off starts muted (4.0s)
+  ✓   29 [p720] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (3.9s)
+  ✓   30 [p720] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (10.8s)
+  ✓   31 [p720] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (2.9s)
+  ✓   32 [p720] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (4.8s)
+  ✓   33 [p720] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (2.7s)
+  ✓   34 [p720] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (8.2s)
+  ✓   35 [p720] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.4s)
+  ✓   36 [phone] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (5.5s)
+  ✓   37 [phone] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.6s)
+  ✓   38 [phone] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (5.3s)
+  ✓   39 [phone] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (4.9s)
+  ✓   40 [phone] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (8.1s)
+  ✓   41 [phone] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (5.3s)
+  ✓   42 [phone] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (4.5s)
+  -   43 [phone] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase
+  -   44 [phone] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once
+  -   45 [phone] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back
+  ✓   46 [phone] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B (5.4s)
+  ✓   47 [phone] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page (3.6s)
+  -   48 [phone] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake
+  -   49 [phone] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   50 [phone] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (11.9s)
+  ✓   51 [phone] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (26.8s)
+  ✓   52 [phone] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (4.6s)
+  ✓   53 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (6.3s)
+  -   54 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -   55 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -   56 [phone] › specs/release12.spec.mjs:92:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓   57 [phone] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (578ms)
+  ✓   58 [phone] › specs/sound05.spec.mjs:22:1 › A: a press is heard (3.6s)
+  ✓   59 [phone] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.6s)
+  ✓   60 [phone] › specs/sound05.spec.mjs:52:1 › stand: the shake clinks and the helper pops on its own (10.0s)
+  ✓   61 [phone] › specs/sound05.spec.mjs:90:1 › C: kernels clink and the eruption booms (5.2s)
+  ✓   62 [phone] › specs/sound05.spec.mjs:102:1 › the speaker button steps loud -> soft -> off, and back on (7.4s)
+  ✓   63 [phone] › specs/sound05.spec.mjs:127:1 › ?sound=off starts muted (4.5s)
+  ✓   64 [phone] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (4.1s)
+  ✓   65 [phone] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (11.6s)
+  ✓   66 [phone] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (3.2s)
+  ✓   67 [phone] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (5.9s)
+  ✓   68 [phone] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (3.1s)
+  ✓   69 [phone] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.7s)
+  ✓   70 [phone] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.6s)
+  ✓   71 [desktop] › specs/experiments04.spec.mjs:8:1 › the chooser lists A, B, C and each tile opens its experiment (3.6s)
+  ✓   72 [desktop] › specs/experiments04.spec.mjs:23:1 › the atlas draws: the money coin is gold, not a white square (2.3s)
+  ✓   73 [desktop] › specs/experiments04.spec.mjs:42:1 › A Click & Pop: every press pays at once (4.2s)
+  ✓   74 [desktop] › specs/experiments04.spec.mjs:52:1 › B Perfect Pop: holding into the gold pays double; a quick tap is early (4.6s)
+  ✓   75 [desktop] › specs/experiments04.spec.mjs:66:1 › B Perfect Pop: holding on burns by itself and never locks (7.7s)
+  ✓   76 [desktop] › specs/experiments04.spec.mjs:75:1 › C Pop Explosion: eight presses erupt, drawn pieces stay under the cap (3.8s)
+  ✓   77 [desktop] › specs/experiments04.spec.mjs:89:1 › runs never leak between experiments (3.5s)
+  ✓   78 [desktop] › specs/input07.spec.mjs:18:3 › mouse › slide off the upgrade before letting go: no purchase (8.4s)
+  ✓   79 [desktop] › specs/input07.spec.mjs:40:3 › mouse › a double click buys once (7.5s)
+  ✓   80 [desktop] › specs/input07.spec.mjs:51:3 › mouse › the keyboard plays: space presses, escape goes back (4.7s)
+  -   81 [desktop] › specs/input07.spec.mjs:68:3 › touch › a cancelled touch never locks B
+  -   82 [desktop] › specs/input07.spec.mjs:82:3 › touch › dragging on the game never scrolls the page
+  ✓   83 [desktop] › specs/perf07.spec.mjs:23:1 › load, heap over a minute, worst burst, sleep and wake (1.2m)
+  ✓   84 [desktop] › specs/perf07.spec.mjs:70:1 › stand: peak load for a minute, hidden tab, restart (1.2m)
+  ✓   85 [desktop] › specs/progression07.spec.mjs:7:1 › FAST-FORWARD: milestones in order through 3:00 (9.0s)
+  ✓   86 [desktop] › specs/progression07.spec.mjs:24:1 › ten restarts in a row: each from nothing, no errors (18.7s)
+  ✓   87 [desktop] › specs/progression07.spec.mjs:37:1 › an unusual order: A, C, B, A again, by tiles, links and the back button (5.5s)
+  ✓   88 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (5.4s)
+  -   89 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  ✓   90 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (1.0m)
+  -   91 [desktop] › specs/release12.spec.mjs:92:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓   92 [desktop] › specs/scorecard09.spec.mjs:7:1 › scorecard: trial links, saved across a reload, exported as entered, nothing sent (616ms)
+  ✓   93 [desktop] › specs/sound05.spec.mjs:22:1 › A: a press is heard (3.4s)
+  ✓   94 [desktop] › specs/sound05.spec.mjs:32:1 › B: the sizzle while held, and a perfect pop (5.2s)
+  ✓   95 [desktop] › specs/sound05.spec.mjs:52:1 › stand: the shake clinks and the helper pops on its own (9.8s)
+  ✓   96 [desktop] › specs/sound05.spec.mjs:90:1 › C: kernels clink and the eruption booms (6.4s)
+  ✓   97 [desktop] › specs/sound05.spec.mjs:102:1 › the speaker button steps loud -> soft -> off, and back on (6.2s)
+  ✓   98 [desktop] › specs/sound05.spec.mjs:127:1 › ?sound=off starts muted (3.9s)
+  ✓   99 [desktop] › specs/stall09.spec.mjs:9:1 › B: a 0.8 s stall during a hold still counts toward the heat (4.0s)
+  ✓  100 [desktop] › specs/stand10.spec.mjs:17:1 › the stand: B first, shake by dragging, a shaker chooses, the card buys the machines (11.8s)
+  ✓  101 [desktop] › specs/stand10.spec.mjs:71:1 › the stand fits: shakers, helper, card and machine do not overlap the bars (3.1s)
+  ✓  102 [desktop] › specs/stub03.spec.mjs:8:1 › the stub: press, upgrade, restart, back (5.3s)
+  ✘  103 [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (1.5m)
+  ✓  104 [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns (retry #1) (2.6s)
+  ✓  105 [desktop] › specs/stub03.spec.mjs:60:1 › a hidden tab stops the play clock (6.6s)
+  ✓  106 [desktop] › specs/stub03.spec.mjs:75:1 › three minutes shows the clock and is logged (2.4s)
+  ✓  107 [m-p720] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.5s)
+  ✓  108 [m-p720] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (2.8s)
+  ✓  109 [m-p720] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (2.8s)
+  ✓  110 [m-p720] › specs/responsive07.spec.mjs:40:1 › reduced motion and sound off still play (4.1s)
+  ✓  111 [m-p720] › specs/responsive07.spec.mjs:54:1 › stand: card, shakers and helper fit (3.0s)
+  ✓  112 [m-hd] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.5s)
+  ✓  113 [m-hd] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (3.3s)
+  ✓  114 [m-hd] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (3.3s)
+  ✓  115 [m-hd] › specs/responsive07.spec.mjs:40:1 › reduced motion and sound off still play (5.2s)
+  ✓  116 [m-hd] › specs/responsive07.spec.mjs:54:1 › stand: card, shakers and helper fit (3.6s)
+  ✓  117 [m-small] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (3.7s)
+  ✓  118 [m-small] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (3.6s)
+  ✓  119 [m-small] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (3.6s)
+  ✓  120 [m-small] › specs/responsive07.spec.mjs:40:1 › reduced motion and sound off still play (5.8s)
+  ✓  121 [m-small] › specs/responsive07.spec.mjs:54:1 › stand: card, shakers and helper fit (4.0s)
+  ✓  122 [m-tablet] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (4.4s)
+  ✓  123 [m-tablet] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (4.2s)
+  ✓  124 [m-tablet] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (4.2s)
+  ✓  125 [m-tablet] › specs/responsive07.spec.mjs:40:1 › reduced motion and sound off still play (7.7s)
+  ✓  126 [m-tablet] › specs/responsive07.spec.mjs:54:1 › stand: card, shakers and helper fit (4.8s)
+  ✓  127 [m-landscape] › specs/responsive07.spec.mjs:12:3 › click: fits, no overlaps, readable (4.1s)
+  ✓  128 [m-landscape] › specs/responsive07.spec.mjs:12:3 › perfect: fits, no overlaps, readable (4.1s)
+  ✓  129 [m-landscape] › specs/responsive07.spec.mjs:12:3 › explosion: fits, no overlaps, readable (4.0s)
+  ✓  130 [m-landscape] › specs/responsive07.spec.mjs:40:1 › reduced motion and sound off still play (7.1s)
+  ✓  131 [m-landscape] › specs/responsive07.spec.mjs:54:1 › stand: card, shakers and helper fit (4.5s)
+
+
+  1) [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns 
+
+    TimeoutError: page.waitForFunction: Timeout 90000ms exceeded.
+
+       at ../lib/pop.mjs:43
+
+      41 |     // (the canvas exists long before the game draws -- AGENTS.md 2026-08-08).
+      42 |     ready: async () => {
+    > 43 |       await page.waitForFunction(() => window.popcorn && window.popcorn.ready && typeof window.popcorn.state === 'function', null, { timeout: 90_000 });
+         |                  ^
+      44 |       await expect.poll(async () => colorCount(decodePng(await canvas.screenshot())), { timeout: 30_000 }).toBeGreaterThan(8);
+      45 |     },
+      46 |     state: () => page.evaluate(() => window.popcorn.state()),
+        at Object.ready (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:43:18)
+        at Object.open (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:37:17)
+        at /home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/stub03.spec.mjs:50:3
+
+    Error: no page errors during the test
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "Failed to load resource: net::ERR_NETWORK_CHANGED",
+    +   "network error",
+    + ]
+
+       at ../lib/pop.mjs:122
+
+      120 |     const pop = wrap(page, testInfo);
+      121 |     await use(pop);
+    > 122 |     expect(pop.errors, 'no page errors during the test').toEqual([]);
+          |                                                          ^
+      123 |   },
+      124 | });
+      125 |
+        at Object.pop (/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/pop.mjs:122:58)
+
+    Error Context: test-results/stub03-a-direct-link-opens-0314b-browser-back-button-returns-desktop/error-context.md
+
+  1 flaky
+    [desktop] › specs/stub03.spec.mjs:49:1 › a direct link opens the stub, and the browser back button returns 
+  18 skipped
+  111 passed (14.9m)

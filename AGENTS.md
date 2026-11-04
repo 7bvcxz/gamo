@@ -156,6 +156,11 @@ Playwright가 함께 받는 `ffmpeg-1011`은 **답이 아니다.** 녹화용 빌
 (`-decoders | grep h264`로 확인). 파일이 멀쩡한 mp4인데 "Invalid data"가 나오면 이것이다.
 
 ## 실수와 교훈
+- 2026-11-04: **Godot 4.7 Web(호환 렌더러)에서 매 프레임 다시 그리는 다각형은 JS 힙을 조금씩 영구히 늘린다.**
+  - popcorn-glory Step 12에서 GC 뒤 JS 힙을 재자, 가게 화면이 가만히 있어도 1.5MB/분(꼭대기에서 약 5.5MB/분) 늘었다. 다시 그리지 않는 선택 화면은 0.04MB/분이었다.
+  - CDP 힙 샘플링(`HeapProfiler.startSampling` → GC → `getSamplingProfile`)에서 남은 할당은 `_emscripten_glGenBuffers`·`glGenVertexArrays`·`glFenceSync`였다. Emscripten은 GL 객체 번호를 다시 쓰지 않아 번호표 배열이 계속 길어진다.
+  - 시험 브리지·소리·입력과는 관계없었다(셋을 하나씩 빼고 쟀다).
+  - **매 프레임 `queue_redraw()`하는 화면은 웹에서 시간에 비례해 메모리를 쌓는다. 움직이지 않는 그림은 따로 떼어 바뀔 때만 다시 그린다(2026-11-03 교훈과 같은 처방). 오래 켜 두는 화면이면 GC 뒤 JS 힙을 몇 분 재서 기울기를 적는다.**
 - 2026-11-04: **`performance.memory`로 잰 '힙이 늘지 않는다'는, 오디오 샘플로 새는 메모리를 보지 못한다.**
   - popcorn-glory는 Step 07부터 '1분 동안 힙이 30 MB 넘게 늘지 않는다'를 검사했다. Step 12에서 12분 플레이의 분당 힙이 553으로 평평했다.
     `performance.memory`는 이 Chromium에서 버킷 값이었다(모든 페이지가 놀 때 정확히 53.5 MB). 그리고 JS 힙만 센다.

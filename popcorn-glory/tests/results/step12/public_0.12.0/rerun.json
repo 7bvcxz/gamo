@@ -1,0 +1,1312 @@
+{
+  "config": {
+    "argv": [
+      "/home/merti/.nvm/versions/node/v24.20.0/bin/node",
+      "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "specs/release12.spec.mjs",
+      "specs/perf07.spec.mjs",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/playwright.config.mjs",
+    "rootDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "p720",
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "phone",
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [
+          "/responsive07/"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-p720",
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-hd",
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-small",
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-tablet",
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "m-landscape",
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": [
+          "/responsive07/"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "phone",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "phone"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "desktop",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": {},
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 1280,
+            "height": 800
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "desktop"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-p720",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 720,
+            "height": 1280
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-p720"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-hd",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-hd"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-small",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 360,
+            "height": 640
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-small"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-tablet",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 768,
+            "height": 1024
+          },
+          "deviceScaleFactor": 2,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-tablet"
+      },
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "m-landscape",
+        "testDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "snapshotDir": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 180000,
+        "use": {
+          "baseURL": "https://7bvcxz.github.io/gamo/popcorn-glory/",
+          "viewport": {
+            "width": 844,
+            "height": 390
+          },
+          "deviceScaleFactor": 3,
+          "isMobile": true,
+          "hasTouch": true
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": "m-landscape"
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "perf07.spec.mjs",
+      "file": "perf07.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:26.911Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-347db056e9f516015cbf",
+          "file": "perf07.spec.mjs",
+          "line": 10,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:26.936Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-35aec5bc4c9999c5742f",
+          "file": "perf07.spec.mjs",
+          "line": 57,
+          "column": 1
+        },
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 1,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:42.348Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-849d16b8fc0d8250c161",
+          "file": "perf07.spec.mjs",
+          "line": 10,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project measures (desktop)",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:42.373Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project measures (desktop)",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/perf07.spec.mjs",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-37a7edbf92126dfa5620",
+          "file": "perf07.spec.mjs",
+          "line": 57,
+          "column": 1
+        },
+        {
+          "title": "load, heap over a minute, worst burst, sleep and wake",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"load_ms\":2452,\"heap_start\":53500000,\"heap_after_60s\":53500000,\"burst\":{\"fps\":44.66501240694789,\"draw_calls\":117,\"primitives\":4305,\"fx_peak\":151,\"fx_cap\":400},\"sleep\":{\"before\":3625,\"hidden_5s\":3652,\"after_wake\":4605},\"load_avg\":13.24}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 72378,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:50.802Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"load_ms\":2452,\"heap_start\":53500000,\"heap_after_60s\":53500000,\"burst\":{\"fps\":44.66501240694789,\"draw_calls\":117,\"primitives\":4305,\"fx_peak\":151,\"fx_cap\":400},\"sleep\":{\"before\":3625,\"hidden_5s\":3652,\"after_wake\":4605},\"load_avg\":13.24}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-ad609c016ac86464b1bc",
+          "file": "perf07.spec.mjs",
+          "line": 10,
+          "column": 1
+        },
+        {
+          "title": "stand: peak load for a minute, hidden tab, restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [
+                {
+                  "type": "perf",
+                  "description": "{\"worst\":{\"draw_calls\":179,\"primitives\":5343,\"fx\":43},\"fps\":[42.293695296613436,41.96223396542014,42.37288134796809,41.083830570443006,42.95704295704296,42.41886160411439],\"median_fps\":42.37288134796809,\"heap_start\":19300000,\"heap_after_60s\":19300000,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":22},\"helper_batches\":40,\"sound_played\":{\"clink\":1,\"coin\":62,\"ding\":22,\"fanfare\":1,\"pop_1\":40,\"pop_2\":22,\"sizzle\":1408,\"upgrade\":7},\"load_avg\":11.33,\"hidden\":{\"helper_before\":40,\"helper_after_5s_hidden\":40},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 72677,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:05:03.248Z",
+                  "annotations": [
+                    {
+                      "type": "perf",
+                      "description": "{\"worst\":{\"draw_calls\":179,\"primitives\":5343,\"fx\":43},\"fps\":[42.293695296613436,41.96223396542014,42.37288134796809,41.083830570443006,42.95704295704296,42.41886160411439],\"median_fps\":42.37288134796809,\"heap_start\":19300000,\"heap_after_60s\":19300000,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":22},\"helper_batches\":40,\"sound_played\":{\"clink\":1,\"coin\":62,\"ding\":22,\"fanfare\":1,\"pop_1\":40,\"pop_2\":22,\"sizzle\":1408,\"upgrade\":7},\"load_avg\":11.33,\"hidden\":{\"helper_before\":40,\"helper_after_5s_hidden\":40},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "046aa3bd0e9190e65b43-583e0b25393363690b06",
+          "file": "perf07.spec.mjs",
+          "line": 57,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "release12.spec.mjs",
+      "file": "release12.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7701,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:26.950Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "p720 chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-8082304957aa8aeeaaad",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6672,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:34.692Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-55176e4ca8caec62d299",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 74,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 33,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:41.379Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 74,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-7046a9157c7d6aab70ae",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "p720",
+              "projectName": "p720",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 505,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:41.433Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-be3da9580863d462fe9a",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7883,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:42.393Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "phone chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-0fcb6da64fe4f996f543",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 56,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 34,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:50.329Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 56,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-6cd0e0737587645b58e8",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "desktop measures",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 74,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 30,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:50.377Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "desktop measures",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 74,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-a513aabdedb0bd771281",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 93,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "phone",
+              "projectName": "phone",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 25,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:03:50.413Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 93,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-2d29893c06fb51238562",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        },
+        {
+          "title": "stand: saved across a reload, written when hidden, two taps to restart",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 150000,
+              "annotations": [
+                {
+                  "type": "device",
+                  "description": "desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7887,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:06:15.940Z",
+                  "annotations": [
+                    {
+                      "type": "device",
+                      "description": "desktop chromium Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-f16c93c03b321600db90",
+          "file": "release12.spec.mjs",
+          "line": 11,
+          "column": 1
+        },
+        {
+          "title": "plays on offline once loaded; follows reduce motion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 56,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 23,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:06:23.834Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 56,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-118a1eda2730846dab58",
+          "file": "release12.spec.mjs",
+          "line": 55,
+          "column": 1
+        },
+        {
+          "title": "first load on a slow connection (recorded)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 400000,
+              "annotations": [
+                {
+                  "type": "slow_load",
+                  "description": "Fast 3G emulation: first drawn frame after 60905 ms"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 60930,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:06:23.865Z",
+                  "annotations": [
+                    {
+                      "type": "slow_load",
+                      "description": "Fast 3G emulation: first drawn frame after 60905 ms"
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-542426bf00c07c575630",
+          "file": "release12.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "the about page: links to the game, privacy and licences, nothing loaded from elsewhere",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 180000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "one project",
+                  "location": {
+                    "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                    "line": 93,
+                    "column": 8
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "skipped",
+                  "duration": 26,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T03:07:24.802Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "one project",
+                      "location": {
+                        "file": "/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/specs/release12.spec.mjs",
+                        "line": 93,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "e6c50d15aa69bbed7270-c075b2e40a7c4ec098ac",
+          "file": "release12.spec.mjs",
+          "line": 92,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T03:03:26.575Z",
+    "duration": 238306.28600000002,
+    "expected": 8,
+    "skipped": 10,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

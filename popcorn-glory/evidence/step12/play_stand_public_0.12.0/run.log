@@ -1,0 +1,9 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [phone] › specs/play_stand.spec.mjs:17:1 › stand: 12 real minutes (12.1m)
+
+  Slow test file: [phone] › specs/play_stand.spec.mjs (12.1m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 passed (12.1m)
+exit 0

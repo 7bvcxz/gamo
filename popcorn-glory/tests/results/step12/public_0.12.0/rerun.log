@@ -1,0 +1,24 @@
+
+Running 18 tests using 1 worker
+
+  -   1 [p720] › specs/perf07.spec.mjs:10:1 › load, heap over a minute, worst burst, sleep and wake
+  -   2 [p720] › specs/perf07.spec.mjs:57:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   3 [p720] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (7.7s)
+  ✓   4 [p720] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion (6.7s)
+  -   5 [p720] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  ✓   6 [p720] › specs/release12.spec.mjs:92:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere (505ms)
+  -   7 [phone] › specs/perf07.spec.mjs:10:1 › load, heap over a minute, worst burst, sleep and wake
+  -   8 [phone] › specs/perf07.spec.mjs:57:1 › stand: peak load for a minute, hidden tab, restart
+  ✓   9 [phone] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (7.9s)
+  -  10 [phone] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  -  11 [phone] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded)
+  -  12 [phone] › specs/release12.spec.mjs:92:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+  ✓  13 [desktop] › specs/perf07.spec.mjs:10:1 › load, heap over a minute, worst burst, sleep and wake (1.2m)
+  ✓  14 [desktop] › specs/perf07.spec.mjs:57:1 › stand: peak load for a minute, hidden tab, restart (1.2m)
+  ✓  15 [desktop] › specs/release12.spec.mjs:11:1 › stand: saved across a reload, written when hidden, two taps to restart (7.9s)
+  -  16 [desktop] › specs/release12.spec.mjs:55:1 › plays on offline once loaded; follows reduce motion
+  ✓  17 [desktop] › specs/release12.spec.mjs:73:1 › first load on a slow connection (recorded) (1.0m)
+  -  18 [desktop] › specs/release12.spec.mjs:92:1 › the about page: links to the game, privacy and licences, nothing loaded from elsewhere
+
+  10 skipped
+  8 passed (4.0m)
