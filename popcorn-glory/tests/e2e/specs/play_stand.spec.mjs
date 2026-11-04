@@ -19,6 +19,7 @@ test(`stand: ${MIN} real minutes`, async ({ pop }, testInfo) => {
   const touch = testInfo.project.use.hasTouch;
   await pop.open('./#stand');
   const cdp = touch ? await pop.cdp() : null;
+  const heapCdp = await pop.page.context().newCDPSession(pop.page);
   const t0 = Date.now();
   const minutes = [];
   const shots = new Set();
@@ -35,10 +36,14 @@ test(`stand: ${MIN} real minutes`, async ({ pop }, testInfo) => {
     const run = s.run;
     const mins = s.clock_ms / 60000;
     if (minutes.length < Math.floor(mins)) {
-      const heap = await pop.page.evaluate(() => (performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1e5) / 10 : null));
+      // CDP's precise numbers: performance.memory is bucketed in this Chromium (every page read 53.5 MB
+      // idle, and a 12-minute run read a flat 553 -- buckets, not measurements). Step 12.
+      const hu = await heapCdp.send('Runtime.getHeapUsage');
+      const heap = Math.round(hu.usedSize / 1e5) / 10;
+      const backing = Math.round(hu.backingStorageSize / 1e5) / 10;
       minutes.push({ minute: Math.floor(mins), level: run.level, auto: run.auto_level, money: run.money, earned: run.earned,
         manual: run.manual_earned, helper: run.helper_earned, recipe: run.recipe, even_pops: run.even_pops, outcomes: run.outcomes,
-        heap_mb: heap, load: os.loadavg()[0] });
+        heap_mb: heap, backing_mb: backing, load: os.loadavg()[0] });
     }
     if (mins >= 3) await snap('3min');
     if (mins >= 10) await snap('10min');

@@ -29,6 +29,7 @@ var _players: Array[AudioStreamPlayer] = []
 var _next := 0
 var _last_ms: Dictionary = {}
 var _loop: AudioStreamPlayer
+var _loop_streams := {}   # name -> its looping copy, made once
 
 
 func _ready() -> void:
@@ -97,10 +98,17 @@ func loop(name: String, on: bool, pitch: float = 1.0) -> void:
 		return
 	if not _streams.has(name):
 		return
-	if _loop.stream != _streams[name]:
+	# The looping copy is made once per sound and kept. (Until Step 12 this compared
+	# the player's copy with the original -- never equal -- so every frame of
+	# heating made a new copy and restarted it: 1,400 'plays' a minute, and on
+	# the web each new stream was a newly decoded sample that stayed alive,
+	# about 27 MB a hold.)
+	if not _loop_streams.has(name):
 		var s: AudioStreamOggVorbis = (_streams[name] as AudioStreamOggVorbis).duplicate()
 		s.loop = true
-		_loop.stream = s
+		_loop_streams[name] = s
+	if _loop.stream != _loop_streams[name]:
+		_loop.stream = _loop_streams[name]
 	_loop.pitch_scale = clampf(pitch, 0.5, 2.0)
 	if not _loop.playing:
 		played[name] = int(played.get(name, 0)) + 1

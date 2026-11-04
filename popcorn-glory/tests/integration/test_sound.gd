@@ -101,3 +101,28 @@ func test_a_new_machine_look_is_a_milestone_with_a_fanfare() -> void:
 	assert_eq(_played("fanfare"), 1, "the milestone fanfare")
 	assert_eq(_played("upgrade"), 2, "instead of, not on top of, the chime")
 	assert_eq(app.frame.play.milestones_shown, 1, "one milestone shown")
+
+
+## Step 12: holding keeps ONE looping sizzle. Until 0.12.0 every frame of
+## heating made a new copy of the stream and restarted it (1,400 plays a minute
+## at the stand's peak); on the web each copy was a newly decoded sample that
+## stayed alive -- about 27 MB a hold, 404 MB after fifteen holds.
+func test_holding_keeps_one_sizzle_stream() -> void:
+	app.open("stand")
+	await tree.process_frame
+	app.on_command("press", {"type": "press"})
+	await tree.process_frame
+	var first: AudioStream = app.audio._loop.stream
+	for i in 20:
+		await tree.process_frame
+	assert_eq(_played("sizzle"), 1, "started once for one hold, not once a frame")
+	assert_true(app.audio._loop.stream == first, "the same stream the whole hold")
+	assert_true(app.audio._loop.playing, "still sizzling")
+	app.on_command("release", {"type": "release"})
+	await tree.process_frame
+	app.dev_advance(2000)
+	app.on_command("press", {"type": "press"})
+	for i in 5:
+		await tree.process_frame
+	assert_eq(_played("sizzle"), 2, "the next hold starts it once more")
+	assert_true(app.audio._loop.stream == first, "and reuses the same copy")

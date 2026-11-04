@@ -156,6 +156,14 @@ Playwright가 함께 받는 `ffmpeg-1011`은 **답이 아니다.** 녹화용 빌
 (`-decoders | grep h264`로 확인). 파일이 멀쩡한 mp4인데 "Invalid data"가 나오면 이것이다.
 
 ## 실수와 교훈
+- 2026-11-04: **`performance.memory`로 잰 '힙이 늘지 않는다'는, 오디오 샘플로 새는 메모리를 보지 못한다.**
+  - popcorn-glory는 Step 07부터 '1분 동안 힙이 30 MB 넘게 늘지 않는다'를 검사했다. Step 12에서 12분 플레이의 분당 힙이 553으로 평평했다.
+    `performance.memory`는 이 Chromium에서 버킷 값이었다(모든 페이지가 놀 때 정확히 53.5 MB). 그리고 JS 힙만 센다.
+  - CDP `Runtime.getHeapUsage`의 `backingStorageSize`(버퍼)를 강제 GC 뒤에 재자 누를 때마다 약 27 MB씩 남았다(누름 15번에 404 MB). 놀거나 조수가 팝만 할 때는 늘지 않았다.
+  - 원인은 `app/audio.gd`의 `loop()`였다. 플레이어가 든 **복사본**을 **원본**과 비교했으니 늘 달랐다. 그래서 가열하는 프레임마다 새 복사본을 만들어 다시 틀었다(꼭대기에서 분당 1,400번 '재생').
+    웹에서는 새 스트림마다 새로 디코드한 샘플이 살아 남았다. Step 05부터 있던 버그다. 기록의 '지글 1,406'을 Step 11 보고서에 적고도 그것이 프레임 수라는 것을 묻지 않았다.
+  - **메모리 검사는 강제 GC 뒤 JS 힙 + `backingStorageSize`를 CDP로 잰다(`perf07`의 `memory()`). 바꾼 검사는 옛 빌드에서 실패하는지 본다(0.12.0: 1분에 +580 MB).
+    재생 횟수가 행동 횟수보다 훨씬 많으면 프레임마다 다시 트는 것을 먼저 의심한다. 무언가를 복사해 두는 코드는 '이미 만들었나'를 복사본에 묻는다.**
 - 2026-11-04: **`JavaScriptBridge.eval`이 돌려준 JS 불리언은 GDScript에서 `== true`가 아니다.**
   - popcorn-glory Step 12에서 시스템의 '동작 줄이기'를 `eval("…matches") == true`로 읽었다. 브라우저 검사(`release12`)에서 `matchMedia`는 true인데 게임은 false였다.
   - 같은 비교를 쓴 저장 쓰기(`localStorage.setItem` 성공 여부)도 성공을 늘 실패로 답하고 있었다. 결과를 보는 곳이 없어 조용했다.

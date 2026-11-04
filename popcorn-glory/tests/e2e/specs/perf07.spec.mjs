@@ -1,17 +1,30 @@
 // Step 07: performance smoke on the real build, thresholds measured on this
 // machine (recorded beside the load average): load to the first drawn frame,
-// JS heap growth over a minute of real play, the worst burst (C at its top
+// Kept memory (JS heap + buffers, after GC) over a minute of real play, the worst burst (C at its top
 // level), and a background tab that sleeps and wakes. Desktop only.
 import { test, expect } from '../lib/pop.mjs';
 import os from 'node:os';
 
 test.skip(({ hasTouch }) => hasTouch, 'one project measures (desktop)');
 
+// Memory the page keeps, measured precisely: after a forced garbage collection, the JS heap PLUS
+// the buffers behind it (audio samples, ArrayBuffers). Step 12: performance.memory is bucketed in
+// this Chromium (every page read 53.5 MB) and counts only the JS heap, so these checks passed while
+// every hold kept a newly decoded sizzle -- about 27 MB a hold (app/audio.gd, fixed in 0.12.1).
+async function memory(pop) {
+  const cdp = await pop.page.context().newCDPSession(pop.page);
+  await cdp.send('HeapProfiler.enable');
+  await cdp.send('HeapProfiler.collectGarbage');
+  const h = await cdp.send('Runtime.getHeapUsage');
+  await cdp.detach();
+  return h.usedSize + h.backingStorageSize;
+}
+
 test('load, heap over a minute, worst burst, sleep and wake', async ({ pop }) => {
   test.setTimeout(240_000);
   await pop.open('./#click');
   const load = pop.loadMs;
-  const heap0 = await pop.page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
+  const heap0 = await memory(pop);
   const t0 = Date.now();
   while (Date.now() - t0 < 60_000) {
     const s = await pop.state();
@@ -19,7 +32,7 @@ test('load, heap over a minute, worst burst, sleep and wake', async ({ pop }) =>
     else await pop.tap('play');
     await pop.page.waitForTimeout(200);
   }
-  const heap1 = await pop.page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
+  const heap1 = await memory(pop);
   // The worst burst: C at its top level.
   await pop.page.evaluate(() => { location.hash = '#explosion'; });
   await expect.poll(async () => (await pop.state()).exp).toBe('explosion');
@@ -41,7 +54,7 @@ test('load, heap over a minute, worst burst, sleep and wake', async ({ pop }) =>
     sleep: { before: c0, hidden_5s: c1, after_wake: c2 }, load_avg: os.loadavg()[0] };
   test.info().annotations.push({ type: 'perf', description: JSON.stringify(rec) });
   expect(load, 'first drawn frame within 20 s even on a loaded machine').toBeLessThan(20000);
-  expect(heap1 - heap0, 'JS heap grows less than 30 MB over a minute of play').toBeLessThan(30e6);
+  expect(heap1 - heap0, 'kept memory (JS heap + buffers, after GC) grows less than 30 MB over a minute of play').toBeLessThan(30e6);
   expect(sb.fx.peak, 'pieces under the cap').toBeLessThanOrEqual(sb.fx.cap);
   expect(info.draw_calls, 'draw calls within the budget at the worst burst').toBeLessThanOrEqual(200);
   expect(burstFps, 'no collapse at the worst burst').toBeGreaterThanOrEqual(10);
@@ -62,7 +75,7 @@ test('stand: peak load for a minute, hidden tab, restart', async ({ pop }) => {
   for (let i = 0; i < 7; i++) { await pop.tap('auto'); await pop.page.waitForTimeout(150); }
   await expect.poll(async () => (await pop.state()).run.auto_level).toBe(7);
   await pop.tap('recipe_caramel');
-  const heap0 = await pop.page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
+  const heap0 = await memory(pop);
   let worst = { draw_calls: 0, primitives: 0, fx: 0 };
   const fps = [];
   const t0 = Date.now();
@@ -74,7 +87,7 @@ test('stand: peak load for a minute, hidden tab, restart', async ({ pop }) => {
     worst = { draw_calls: Math.max(worst.draw_calls, info.draw_calls), primitives: Math.max(worst.primitives, info.primitives), fx: Math.max(worst.fx, s.fx.alive) };
     if (fps.length < 6 && (Date.now() - t0) > fps.length * 10_000) fps.push(await pop.fps(1000));
   }
-  const heap1 = await pop.page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
+  const heap1 = await memory(pop);
   const s1 = await pop.state();
   // Hidden: no time, no helper batches.
   const h0 = s1.run.helper_batches;
@@ -96,7 +109,7 @@ test('stand: peak load for a minute, hidden tab, restart', async ({ pop }) => {
   expect(worst.draw_calls, 'draw calls within the budget at the stand peak').toBeLessThanOrEqual(200);
   expect(worst.fx, 'pieces under the cap').toBeLessThanOrEqual(s1.fx.cap);
   expect(median, 'no collapse at the stand peak').toBeGreaterThanOrEqual(10);
-  expect(heap1 - heap0, 'JS heap grows less than 30 MB over a minute at the peak').toBeLessThan(30e6);
+  expect(heap1 - heap0, 'kept memory (JS heap + buffers, after GC) grows less than 30 MB over a minute at the peak').toBeLessThan(30e6);
   expect(h1 - h0, 'no helper batch while the tab is hidden').toBeLessThanOrEqual(1);
   expect(s2.run.money, 'restart: no money').toBe(0);
   expect(s2.run.auto_level, 'restart: no machines').toBe(0);
