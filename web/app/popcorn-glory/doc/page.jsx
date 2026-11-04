@@ -20,6 +20,7 @@ const NAV = [
       { href: game('/popcorn-glory/#stand'), label: '팝콘 가게 플레이 →' },
       { href: game('/popcorn-glory/'), label: '세 실험과 가게 (선택 화면) →' },
       { href: game('/popcorn-glory/scorecard.html'), label: '3분 점수표 →' },
+      { href: game('/popcorn-glory/about.html'), label: '정보·개인정보·라이선스 →' },
       { href: `${BLOB}/design/SLICE.md`, label: '가게 설계 (GitHub) →' },
       { href: `${BLOB}/experiments/RESULTS.md`, label: '실험 비교와 결정 (GitHub) →' },
       { href: `${BLOB}/qa/READINESS.md`, label: '출시 준비도 (GitHub) →' },
