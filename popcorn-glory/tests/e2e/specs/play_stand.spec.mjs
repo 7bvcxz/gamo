@@ -5,7 +5,8 @@
 // does it), picks caramel once recipes unlock, and buys whichever of the two cards is cheaper
 // when it can. It records the state every minute and screenshots at 0, 3 and 10 minutes and
 // at the end, so the 10-20 minute shape of the slice can be seen and checked: everything
-// unlocks, the helper earns by itself, nothing locks up, no page error.
+// unlocks, the helper earns by itself, nothing locks up, no page error. Step 12: the JS heap
+// every minute, and the save holds the run at the end.
 import { test, expect } from '../lib/pop.mjs';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -34,8 +35,10 @@ test(`stand: ${MIN} real minutes`, async ({ pop }, testInfo) => {
     const run = s.run;
     const mins = s.clock_ms / 60000;
     if (minutes.length < Math.floor(mins)) {
+      const heap = await pop.page.evaluate(() => (performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1e5) / 10 : null));
       minutes.push({ minute: Math.floor(mins), level: run.level, auto: run.auto_level, money: run.money, earned: run.earned,
-        manual: run.manual_earned, helper: run.helper_earned, recipe: run.recipe, even_pops: run.even_pops, outcomes: run.outcomes, load: os.loadavg()[0] });
+        manual: run.manual_earned, helper: run.helper_earned, recipe: run.recipe, even_pops: run.even_pops, outcomes: run.outcomes,
+        heap_mb: heap, load: os.loadavg()[0] });
     }
     if (mins >= 3) await snap('3min');
     if (mins >= 10) await snap('10min');
@@ -81,5 +84,8 @@ test(`stand: ${MIN} real minutes`, async ({ pop }, testInfo) => {
   expect(s.run.motor, 'the motor bought').toBe(true);
   expect(s.run.helper_earned, 'the helper earned by itself').toBeGreaterThan(0);
   expect(s.run.even_pops, 'even pops happened').toBeGreaterThan(0);
+  // Step 12: the long run is in the save (written at most 5 s of play ago).
+  const saved = await pop.page.evaluate(() => JSON.parse(localStorage.getItem('popcorn-glory.stand.v1') || 'null'));
+  expect(saved?.rules?.level, 'the save holds the level').toBe(s.run.level);
   expect(pop.errors).toEqual([]);
 });

@@ -83,7 +83,8 @@ test('stand: peak load for a minute, hidden tab, restart', async ({ pop }) => {
   const h1 = (await pop.state()).run.helper_batches;
   await pop.tab(false);
   await expect.poll(async () => (await pop.state()).run.helper_batches, { message: 'the helper works again after waking', timeout: 10_000 }).toBeGreaterThan(h1);
-  // Restart: a fresh stand.
+  // Restart: a fresh stand. On the stand it takes two taps (Step 12: the first arms the button).
+  await pop.tap('restart');
   await pop.tap('restart');
   await expect.poll(async () => (await pop.state()).run.level).toBe(0);
   const s2 = await pop.state();

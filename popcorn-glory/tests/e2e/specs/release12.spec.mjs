@@ -88,3 +88,20 @@ test('first load on a slow connection (recorded)', async ({ pop }, testInfo) => 
   testInfo.annotations.push({ type: 'slow_load', description: `Fast 3G emulation: first drawn frame after ${ms} ms` });
   expect(ms, 'opens on Fast 3G within 5 minutes').toBeLessThan(300_000);
 });
+
+test('the about page: links to the game, privacy and licences, nothing loaded from elsewhere', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720', 'one project');
+  const foreign = [];
+  page.on('request', (r) => { if (!r.url().startsWith(new URL(baseURL).origin)) foreign.push(r.url()); });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto('about.html');
+  await expect(page.locator('a[href="./#stand"]')).toHaveCount(1);
+  await expect(page.locator('body')).toContainText('popcorn-glory.stand.v1');
+  await expect(page.locator('pre')).toContainText('Permission is hereby granted');
+  await expect(page.locator('#ver'), 'the build version from version.json').toContainText(/\d+\.\d+\.\d+/);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow, 'no sideways scroll').toBeLessThanOrEqual(0);
+  expect(foreign).toEqual([]);
+  expect(errors).toEqual([]);
+});
