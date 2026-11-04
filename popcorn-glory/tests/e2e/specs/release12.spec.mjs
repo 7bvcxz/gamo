@@ -89,6 +89,14 @@ test('first load on a slow connection (recorded)', async ({ pop }, testInfo) => 
   expect(ms, 'opens on Fast 3G within 5 minutes').toBeLessThan(300_000);
 });
 
+test('the game page asks browsers not to translate it (a Korean phone offered to, over the coins)', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'p720', 'one project');
+  const r = await page.request.get(new URL('index.html', baseURL).href);
+  const html = await r.text();
+  expect(html).toContain('<html lang="en" translate="no">');
+  expect(html).toContain('<meta name="google" content="notranslate">');
+});
+
 test('the about page: links to the game, privacy and licences, nothing loaded from elsewhere', async ({ page, baseURL }, testInfo) => {
   test.skip(testInfo.project.name !== 'p720', 'one project');
   const foreign = [];

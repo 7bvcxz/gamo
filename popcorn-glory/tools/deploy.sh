@@ -67,6 +67,11 @@ for old, new in [
     ('"index.pck":', '"%s":' % pack),
     ('"index.wasm":', '"../engine/%s.wasm":' % engine),
     ('<title>Popcorn Glory</title>', '<title>Popcorn &amp; Glory</title>'),
+    # Step 12, found on a real S23: Chrome offered to translate the page (lang="en" on a Korean
+    # phone) and its prompt covered the back button and the coins for the first seconds. The game
+    # has no words to translate -- only numbers and pictures.
+    ('<html lang="en">', '<html lang="en" translate="no">'),
+    ('<meta charset="utf-8">', '<meta charset="utf-8">\n\t\t<meta name="google" content="notranslate">'),
 ]:
     assert page.count(old) == 1, "shell: %s appears %d times" % (old, page.count(old))
     page = page.replace(old, new)
