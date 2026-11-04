@@ -58,7 +58,8 @@
       <li>순서를 돌립니다 — 첫 번째가 가장 새롭게 느껴지므로. 아래 '한 순서'에 실제로 한 순서를 적어 주세요(예: A→B→C, B→C→A, C→A→B).</li>
       <li>아래 링크로 엽니다(<code>?trial=1</code>). 화면 위에 <b>3:00 시계가 나타나면</b> 3분입니다. 더 하고 싶으면 계속해도 되고, 그 사실이 질문 4의 답입니다.</li>
       <li>하나 끝날 때마다 바로 네 질문에 1–5. 해 보지 않았거나 답하기 어려우면 '건너뛰기'(0점이 아닙니다).</li>
-      <li>다 끝나면 '내보내기'를 눌러 Markdown을 이슈 #114의 댓글에 붙여 주세요.</li>
+      <li>다 끝나면 '내보내기'를 눌러 Markdown을 이슈(#114, 또는 가장 최근의 Popcorn Step 이슈) 댓글에 붙여 주세요.</li>
+      <li>★ 팝콘 가게는 세 실험 뒤에 만든 게임입니다. 점수표에서 열면 저장된 가게와 상관없이 처음부터 시작하고, 저장된 가게도 건드리지 않습니다.</li>
     </ol>
     <div class="links" id="links"></div>
   </section>
@@ -91,6 +92,8 @@
     { id: 'click', name: 'A 클릭 & 팝', route: '#click' },
     { id: 'perfect', name: 'B 완벽한 팝', route: '#perfect' },
     { id: 'explosion', name: 'C 팝콘 폭발', route: '#explosion' },
+    // Step 12: the approved slice. ?trial=1 starts it fresh and leaves the saved stand alone.
+    { id: 'stand', name: '★ 팝콘 가게', route: '#stand' },
   ];
   const QS = [
     ['q1', '1. 설명 없이 무엇을 할지 알았나'],
