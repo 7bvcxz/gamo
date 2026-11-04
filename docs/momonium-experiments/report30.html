@@ -106,7 +106,7 @@ function side(runs) {
       ['보상 사이 중앙 / 최장(초)', (x) => `${x.rewards.median_gap_s} / ${x.rewards.longest_gap_s}`],
       ['업그레이드(보이는 것)', (x) => `${x.upgrades} (${x.visible_upgrades})`],
       [a === 'rock' ? '깬 바위' : '배달 · 분당', (x) => (a === 'rock' ? fmt(x.breaks) : `${fmt(x.delivered)} · ${x.deliveries_per_min}`)],
-      ['초당 수입', (x) => fmt(x.income_per_s)],
+      ['저절로 들어오는 수입(초당, C는 없음)', (x) => fmt(x.income_per_s)],
     ];
     const head = `<tr><th></th>${['3', '15', '30'].map((m) => `<th>${NAMES[a]} ${m}분</th><th>${NAMES[b]} ${m}분</th>`).join('')}</tr>`;
     return `<h3>${NAMES[a]} 와 ${NAMES[b]}</h3><div class="tablewrap"><table>${head}${rows.map(([label, f]) => `<tr><th>${label}</th>${['3', '15', '30'].map((m) => `<td>${f(A.at[m])}</td><td>${f(B.at[m])}</td>`).join('')}</tr>`).join('')}</table></div>`;
@@ -170,7 +170,7 @@ fetch('play30/browser100.json', { cache: 'no-store' }).then((r) => r.json()).the
   document.getElementById('browserTables').innerHTML = j.runs.map((r) => {
     const head = '<tr><th>분</th><th>레벨·곡괭이</th><th>마지막으로 새로 보인 것</th><th>행동</th><th>쉰 시간(초)</th><th>보상 수 · 중앙/최장(초)</th><th>FPS</th></tr>';
     const rows = Object.entries(r.marks).map(([m, a]) => `<tr><td>${m}</td><td>${fmt(a.level)}</td><td>${reveal(a.last_reveal)}</td><td>${fmt(a.actions)}</td><td>${a.idle_s}</td><td>${a.rewards.count} · ${a.rewards.median_gap_s}/${a.rewards.longest_gap_s}</td><td>${a.fps}</td></tr>`).join('');
-    return `<h3>${NAMES[r.id]} <span class="muted">— ${esc(r.project)} · 처음 3분 실제 입력: ${esc(r.real_input)}</span></h3><div class="tablewrap"><table>${head}${rows}</table></div>`;
+    return `<h3>${NAMES[r.id]} <span class="muted">— ${esc(r.project)} · 처음 3분 실제 입력: ${esc(r.real_input)}${r.rerun ? ' · 다시 돌린 결과' : ''}</span></h3><div class="tablewrap"><table>${head}${rows}</table></div>`;
   }).join('') + `<p class="muted">${esc(j._doc || '')}</p>`;
 }).catch(() => { document.getElementById('browserTables').innerHTML = '<p class="pending">브라우저 기록이 아직 없다.</p>'; });
 

@@ -1,0 +1,548 @@
+{
+  "_doc": "specs/durability100.spec.mjs on the public 0.100.0 build (https://7bvcxz.github.io/gamo/momonium-experiments/, source c051e1f8) during the full Fun Lab run; phone C+ from its rerun: the first three minutes by real taps and presses through the canvas in real time, then time-stepped by a script to thirty minutes; FPS a median of three real-frame windows at each mark. Technical and pacing evidence, not thirty minutes of human play.",
+  "runs": [
+    {
+      "project": "phone",
+      "id": "rock",
+      "real_input": "109 taps, 2 presses",
+      "marks": {
+        "3": {
+          "level": 2,
+          "last_reveal": {
+            "t_s": 160.2,
+            "what": "pickaxe 2"
+          },
+          "actions": 111,
+          "idle_s": 5.6,
+          "rewards": {
+            "count": 4,
+            "longest_gap_s": 85.3,
+            "median_gap_s": 21.3
+          },
+          "fps": 11.6,
+          "breaks": 2
+        },
+        "10": {
+          "level": 8,
+          "last_reveal": {
+            "t_s": 541.5,
+            "what": "pickaxe 8"
+          },
+          "actions": 1167,
+          "idle_s": 428.1,
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 85.3,
+            "median_gap_s": 20
+          },
+          "fps": 12.2,
+          "breaks": 11
+        },
+        "15": {
+          "level": 10,
+          "last_reveal": {
+            "t_s": 734.1,
+            "what": "pickaxe 10"
+          },
+          "actions": 1919,
+          "idle_s": 727.9,
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 100,
+            "median_gap_s": 20
+          },
+          "fps": 11.7,
+          "breaks": 14
+        },
+        "20": {
+          "level": 10,
+          "last_reveal": {
+            "t_s": 734.1,
+            "what": "pickaxe 10"
+          },
+          "actions": 2669,
+          "idle_s": 1028.1,
+          "rewards": {
+            "count": 25,
+            "longest_gap_s": 200.2,
+            "median_gap_s": 20
+          },
+          "fps": 12.1,
+          "breaks": 15
+        },
+        "30": {
+          "level": 10,
+          "last_reveal": {
+            "t_s": 734.1,
+            "what": "pickaxe 10"
+          },
+          "actions": 4169,
+          "idle_s": 1628,
+          "rewards": {
+            "count": 27,
+            "longest_gap_s": 420,
+            "median_gap_s": 20
+          },
+          "fps": 11.8,
+          "breaks": 17
+        }
+      },
+      "rerun": false
+    },
+    {
+      "project": "phone",
+      "id": "rock-plus",
+      "real_input": "131 taps, 3 presses",
+      "marks": {
+        "3": {
+          "level": 3,
+          "last_reveal": {
+            "t_s": 164.8,
+            "what": "Copper Pickaxe"
+          },
+          "actions": 134,
+          "idle_s": 0,
+          "rewards": {
+            "count": 7,
+            "longest_gap_s": 46.8,
+            "median_gap_s": 18.9
+          },
+          "fps": 13.6,
+          "breaks": 4
+        },
+        "10": {
+          "level": 12,
+          "last_reveal": {
+            "t_s": 561.3,
+            "what": "Silver Pickaxe"
+          },
+          "actions": 1193,
+          "idle_s": 422.5,
+          "rewards": {
+            "count": 47,
+            "longest_gap_s": 46.8,
+            "median_gap_s": 10
+          },
+          "fps": 13.3,
+          "breaks": 35
+        },
+        "15": {
+          "level": 18,
+          "last_reveal": {
+            "t_s": 873.9,
+            "what": "Ruby Pickaxe"
+          },
+          "actions": 1949,
+          "idle_s": 722.4,
+          "rewards": {
+            "count": 71,
+            "longest_gap_s": 46.8,
+            "median_gap_s": 10
+          },
+          "fps": 6.8,
+          "breaks": 53
+        },
+        "20": {
+          "level": 24,
+          "last_reveal": {
+            "t_s": 1173.9,
+            "what": "Crystal Pickaxe"
+          },
+          "actions": 2705,
+          "idle_s": 1021.5,
+          "rewards": {
+            "count": 95,
+            "longest_gap_s": 46.8,
+            "median_gap_s": 10
+          },
+          "fps": 5.9,
+          "breaks": 71
+        },
+        "30": {
+          "level": 36,
+          "last_reveal": {
+            "t_s": 1783,
+            "what": "Mythic Pickaxe"
+          },
+          "actions": 4217,
+          "idle_s": 1622.5,
+          "rewards": {
+            "count": 143,
+            "longest_gap_s": 46.8,
+            "median_gap_s": 10
+          },
+          "fps": 13,
+          "breaks": 107
+        }
+      },
+      "rerun": true
+    },
+    {
+      "project": "phone",
+      "id": "tycoon",
+      "real_input": "8 presses",
+      "marks": {
+        "3": {
+          "level": 8,
+          "last_reveal": {
+            "t_s": 179.9,
+            "what": "Momo Crew"
+          },
+          "actions": 8,
+          "idle_s": 179.9,
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 26.9,
+            "median_gap_s": 22.2
+          },
+          "fps": 11.7,
+          "delivered": 176,
+          "deliveries_per_min": 144
+        },
+        "10": {
+          "level": 17,
+          "last_reveal": {
+            "t_s": 230.3,
+            "what": "Car Factory"
+          },
+          "actions": 17,
+          "idle_s": 603.9,
+          "rewards": {
+            "count": 17,
+            "longest_gap_s": 90,
+            "median_gap_s": 23.6
+          },
+          "fps": 10.6,
+          "delivered": 2246,
+          "deliveries_per_min": 306
+        },
+        "15": {
+          "level": 19,
+          "last_reveal": {
+            "t_s": 230.3,
+            "what": "Car Factory"
+          },
+          "actions": 19,
+          "idle_s": 903.9,
+          "rewards": {
+            "count": 19,
+            "longest_gap_s": 170,
+            "median_gap_s": 25.5
+          },
+          "fps": 11.8,
+          "delivered": 3744,
+          "deliveries_per_min": 306
+        },
+        "20": {
+          "level": 20,
+          "last_reveal": {
+            "t_s": 230.3,
+            "what": "Car Factory"
+          },
+          "actions": 20,
+          "idle_s": 1203.8,
+          "rewards": {
+            "count": 20,
+            "longest_gap_s": 220,
+            "median_gap_s": 26.9
+          },
+          "fps": 12.1,
+          "delivered": 5243,
+          "deliveries_per_min": 306
+        },
+        "30": {
+          "level": 22,
+          "last_reveal": {
+            "t_s": 230.3,
+            "what": "Car Factory"
+          },
+          "actions": 22,
+          "idle_s": 1804,
+          "rewards": {
+            "count": 22,
+            "longest_gap_s": 440,
+            "median_gap_s": 26.9
+          },
+          "fps": 10.1,
+          "delivered": 8243,
+          "deliveries_per_min": 306
+        }
+      },
+      "rerun": false
+    },
+    {
+      "project": "phone",
+      "id": "tycoon-plus",
+      "real_input": "8 presses",
+      "marks": {
+        "3": {
+          "level": 8,
+          "last_reveal": {
+            "t_s": 179.1,
+            "what": "Momo Crew"
+          },
+          "actions": 8,
+          "idle_s": 179.1,
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 26.4,
+            "median_gap_s": 22.3
+          },
+          "fps": 14.1,
+          "delivered": 178,
+          "deliveries_per_min": 147.3
+        },
+        "10": {
+          "level": 17,
+          "last_reveal": {
+            "t_s": 550.9,
+            "what": "Night Shift"
+          },
+          "actions": 17,
+          "idle_s": 603.9,
+          "rewards": {
+            "count": 18,
+            "longest_gap_s": 60,
+            "median_gap_s": 26.4
+          },
+          "fps": 12.9,
+          "delivered": 3071,
+          "deliveries_per_min": 550
+        },
+        "15": {
+          "level": 22,
+          "last_reveal": {
+            "t_s": 873.9,
+            "what": "Robot Arms"
+          },
+          "actions": 22,
+          "idle_s": 903.9,
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 70,
+            "median_gap_s": 30
+          },
+          "fps": 13.5,
+          "delivered": 6595,
+          "deliveries_per_min": 799.4
+        },
+        "20": {
+          "level": 26,
+          "last_reveal": {
+            "t_s": 1194,
+            "what": "Hyper Belt"
+          },
+          "actions": 26,
+          "idle_s": 1203.8,
+          "rewards": {
+            "count": 29,
+            "longest_gap_s": 80.1,
+            "median_gap_s": 35
+          },
+          "fps": 13.6,
+          "delivered": 11197,
+          "deliveries_per_min": 1061.1
+        },
+        "30": {
+          "level": 32,
+          "last_reveal": {
+            "t_s": 1743.9,
+            "what": "Grand Line 2"
+          },
+          "actions": 32,
+          "idle_s": 1803.9,
+          "rewards": {
+            "count": 36,
+            "longest_gap_s": 110,
+            "median_gap_s": 50
+          },
+          "fps": 13.2,
+          "delivered": 22477,
+          "deliveries_per_min": 1202.7
+        }
+      },
+      "rerun": false
+    },
+    {
+      "project": "desktop",
+      "id": "rock-plus",
+      "real_input": "178 taps, 3 presses",
+      "marks": {
+        "3": {
+          "level": 3,
+          "last_reveal": {
+            "t_s": 123,
+            "what": "Copper Pickaxe"
+          },
+          "actions": 181,
+          "idle_s": 0,
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 38.5,
+            "median_gap_s": 23.2
+          },
+          "fps": 25.5,
+          "breaks": 5
+        },
+        "10": {
+          "level": 13,
+          "last_reveal": {
+            "t_s": 540.7,
+            "what": "Silver Pickaxe"
+          },
+          "actions": 1241,
+          "idle_s": 419.4,
+          "rewards": {
+            "count": 48,
+            "longest_gap_s": 38.5,
+            "median_gap_s": 10
+          },
+          "fps": 25.3,
+          "breaks": 35
+        },
+        "15": {
+          "level": 18,
+          "last_reveal": {
+            "t_s": 853.8,
+            "what": "Ruby Pickaxe"
+          },
+          "actions": 1996,
+          "idle_s": 719.2,
+          "rewards": {
+            "count": 71,
+            "longest_gap_s": 40,
+            "median_gap_s": 10
+          },
+          "fps": 25.1,
+          "breaks": 53
+        },
+        "20": {
+          "level": 24,
+          "last_reveal": {
+            "t_s": 1163.8,
+            "what": "Crystal Pickaxe"
+          },
+          "actions": 2752,
+          "idle_s": 1019.1,
+          "rewards": {
+            "count": 95,
+            "longest_gap_s": 40,
+            "median_gap_s": 10
+          },
+          "fps": 25.5,
+          "breaks": 71
+        },
+        "30": {
+          "level": 36,
+          "last_reveal": {
+            "t_s": 1763.7,
+            "what": "Mythic Pickaxe"
+          },
+          "actions": 4264,
+          "idle_s": 1619.2,
+          "rewards": {
+            "count": 143,
+            "longest_gap_s": 40,
+            "median_gap_s": 10
+          },
+          "fps": 25.5,
+          "breaks": 107
+        }
+      },
+      "rerun": false
+    },
+    {
+      "project": "desktop",
+      "id": "tycoon-plus",
+      "real_input": "8 presses",
+      "marks": {
+        "3": {
+          "level": 8,
+          "last_reveal": {
+            "t_s": 178.7,
+            "what": "Momo Crew"
+          },
+          "actions": 8,
+          "idle_s": 178.7,
+          "rewards": {
+            "count": 8,
+            "longest_gap_s": 25.3,
+            "median_gap_s": 22.2
+          },
+          "fps": 11.9,
+          "delivered": 179,
+          "deliveries_per_min": 145.3
+        },
+        "10": {
+          "level": 17,
+          "last_reveal": {
+            "t_s": 550.5,
+            "what": "Night Shift"
+          },
+          "actions": 17,
+          "idle_s": 603.9,
+          "rewards": {
+            "count": 18,
+            "longest_gap_s": 60,
+            "median_gap_s": 25.3
+          },
+          "fps": 9.6,
+          "delivered": 3075,
+          "deliveries_per_min": 550.1
+        },
+        "15": {
+          "level": 22,
+          "last_reveal": {
+            "t_s": 874,
+            "what": "Robot Arms"
+          },
+          "actions": 22,
+          "idle_s": 903.9,
+          "rewards": {
+            "count": 24,
+            "longest_gap_s": 70,
+            "median_gap_s": 30
+          },
+          "fps": 14.3,
+          "delivered": 6599,
+          "deliveries_per_min": 799.7
+        },
+        "20": {
+          "level": 26,
+          "last_reveal": {
+            "t_s": 1184,
+            "what": "Hyper Belt"
+          },
+          "actions": 26,
+          "idle_s": 1203.7,
+          "rewards": {
+            "count": 29,
+            "longest_gap_s": 80,
+            "median_gap_s": 35
+          },
+          "fps": 14.3,
+          "delivered": 11241,
+          "deliveries_per_min": 1068.4
+        },
+        "30": {
+          "level": 32,
+          "last_reveal": {
+            "t_s": 1743.8,
+            "what": "Grand Line 2"
+          },
+          "actions": 32,
+          "idle_s": 1803.8,
+          "rewards": {
+            "count": 36,
+            "longest_gap_s": 110,
+            "median_gap_s": 50
+          },
+          "fps": 15.8,
+          "delivered": 22545,
+          "deliveries_per_min": 1196.9
+        }
+      },
+      "rerun": false
+    }
+  ]
+}
