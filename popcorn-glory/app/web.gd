@@ -19,6 +19,17 @@ static func eval(js: String) -> Variant:
 	return JavaScriptBridge.eval(js, true)
 
 
+## The system's 'reduce motion' setting (Step 12: accessibility without a
+## settings screen). False off the web.
+static func prefers_reduced_motion() -> bool:
+	if not available():
+		return false
+	# A number, not a boolean: compared as a Variant, the JS true did not come
+	# back equal to true (a browser test caught it: matchMedia true, game false).
+	var v: Variant = eval("(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 1 : 0")
+	return v != null and int(v) == 1
+
+
 static func location_hash() -> String:
 	var v: Variant = eval("location.hash")
 	return String(v) if v != null else ""

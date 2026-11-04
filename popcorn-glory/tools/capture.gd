@@ -45,6 +45,9 @@ func _init() -> void:
 	DisplayServer.window_set_size(size)
 	var packed: PackedScene = load("res://app/main.tscn")
 	_app = packed.instantiate()
+	# Pictures never read or write a player's save (Step 12).
+	_app.set("save_prefix", "capture.")
+	PopSaveStore.clear("capture.stand.v1")
 	root.add_child(_app)
 	_frames_left = int(float(_args.get("seconds", "1.0")) * 60.0)
 	process_frame.connect(_tick)

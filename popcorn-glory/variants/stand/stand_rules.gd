@@ -30,6 +30,9 @@ var manual_earned := 0
 var helper_earned := 0
 var even_pops := 0
 var hand_even_pops := 0
+## Rules time (= active play) when the last machine and the last rung were
+## bought; -1 until then (Step 12: the ending, shown on the finished card).
+var completed_ms := -1
 
 
 func _init(p_economy: PopEconomy = null) -> void:
@@ -197,6 +200,22 @@ func _cooldown_ms() -> int:
 	return super() + int(_recipe().get("cooldown_add_ms", 0))
 
 
+func done() -> bool:
+	return cost() < 0 and auto_cost() < 0
+
+
+func _buy() -> Dictionary:
+	var r := super()
+	_check_done(r)
+	return r
+
+
+func _check_done(r: Dictionary) -> void:
+	if bool(r.get("ok", false)) and completed_ms < 0 and done():
+		completed_ms = now_ms
+		_emit("complete", {"active_ms": now_ms})
+
+
 func _buy_auto() -> Dictionary:
 	if not unlocked("auto"):
 		return {"ok": false, "reason": "err.locked"}
@@ -210,7 +229,9 @@ func _buy_auto() -> Dictionary:
 	auto_level += 1
 	helper_ms = 0
 	_emit("auto", {"rung": auto_level, "kind": String(r["kind"]), "cost": c, "money": money})
-	return {"ok": true, "rung": auto_level, "cost": c}
+	var out := {"ok": true, "rung": auto_level, "cost": c}
+	_check_done(out)
+	return out
 
 
 ## Time: the hand's heat (B, with its burn at the exact millisecond) and the
@@ -259,6 +280,56 @@ func payout(at_level: int) -> int:
 	return maxi(1, int(floor(n * m)))
 
 
+## The stand's progress for the save (Step 12). A heat in progress is not
+## kept (a reload drops that one batch); the cooldown starts over.
+const SAVE_FIELDS := ["level", "money", "earned", "presses", "recipe", "auto_level", "helper_ms", "helper_batches",
+	"manual_earned", "helper_earned", "even_pops", "hand_even_pops"]
+
+
+func to_save() -> Dictionary:
+	var d := {}
+	for k: String in SAVE_FIELDS:
+		d[k] = get(k)
+	d["outcomes"] = outcomes.duplicate()
+	d["completed_ms"] = completed_ms
+	return d
+
+
+## Restores from a save if every field is in range; otherwise changes nothing
+## and answers false (a broken or foreign save starts a fresh stand).
+func from_save(d: Dictionary) -> bool:
+	for k: String in SAVE_FIELDS:
+		if not d.has(k):
+			return false
+	var nums := ["level", "money", "earned", "presses", "auto_level", "helper_ms", "helper_batches", "manual_earned", "helper_earned", "even_pops", "hand_even_pops"]
+	for k: String in nums:
+		var v: Variant = d[k]
+		if not (typeof(v) == TYPE_INT or typeof(v) == TYPE_FLOAT) or float(v) < 0.0 or float(v) > 1e15 or float(v) != floor(float(v)):
+			return false
+	var ladder: Array = _t()["auto"]
+	if int(d["level"]) > max_level() or int(d["auto_level"]) > ladder.size() or int(d["money"]) > int(d["earned"]):
+		return false
+	if typeof(d["recipe"]) != TYPE_STRING or not (_t()["recipes"] as Dictionary).has(String(d["recipe"])):
+		return false
+	var oc: Variant = d.get("outcomes", {})
+	if typeof(oc) != TYPE_DICTIONARY:
+		return false
+	for k: String in nums:
+		set(k, int(d[k]))
+	recipe = String(d["recipe"])
+	var cm: Variant = d.get("completed_ms", -1)
+	completed_ms = int(cm) if (typeof(cm) == TYPE_INT or typeof(cm) == TYPE_FLOAT) and float(cm) >= -1.0 else -1
+	for k: String in outcomes.keys():
+		outcomes[k] = int((oc as Dictionary).get(k, 0))
+	var cyc := helper_cycle_ms()
+	helper_ms = clampi(helper_ms, 0, maxi(0, cyc - 1))
+	heating = false
+	heat_ms = 0
+	shakes = 0
+	cooldown_left = 0
+	return true
+
+
 func state() -> Dictionary:
 	var s := super()
 	s["recipe"] = recipe
@@ -280,4 +351,5 @@ func state() -> Dictionary:
 	s["even_pops"] = even_pops
 	s["hand_even_pops"] = hand_even_pops
 	s["cooldown_ms"] = _cooldown_ms()
+	s["completed_ms"] = completed_ms
 	return s

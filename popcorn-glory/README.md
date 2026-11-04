@@ -16,6 +16,10 @@
 **게임: 팝콘 가게 `#stand`**(선택 화면 맨 위의 별 타일, Step 10). 소유자가 Step 09에서 승인한 B의 손맛 위에
 흔들기(3단계)·자동화 카드(4단계: 모터, 그다음 조수 냄비)·양념 셋(5단계)이 하나씩 열린다. 설계는 `design/SLICE.md`,
 비교와 결정은 `experiments/RESULTS.md`·`DECISION.md`, 소유자 점수표는 `docs/popcorn-glory/scorecard.html`.
+가게의 진행은 이 브라우저에 저장되어 새로고침·탭 종료 뒤에 이어진다(Step 12). 다 사면 카드에 걸린 시간이 남는다.
+
+**출시 상태: 출시 후보(0.12.0), 소유자의 Go를 기다림.** 체크리스트·출시 노트·되돌리는 법은 [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md).
+설치는 필요 없다 — 브라우저로 https://7bvcxz.github.io/gamo/popcorn-glory/#stand 를 연다. 계정·결제·광고·네트워크 전송이 없다.
 
 선택 화면에는 비교의 기준선인 세 실험도 그대로 있다:
 
@@ -79,8 +83,9 @@ tools/    test.sh check.sh deploy.sh e2e.sh capture.gd(--steps p,w1600,r) selfte
 |---|---|---|
 | 폴더 | `popcorn-glory/` | 루트 바로 아래의 독립 게임(AGENTS.md) |
 | Godot `config/name` | `Popcorn Glory` | 데스크톱 `user://`(app_userdata) 폴더 이름이 된다. `&`는 경로에 넣지 않는다 |
-| Web `user://` | **저장하지 않는다** (프로토타입은 매 실행 새로 시작) | Godot Web은 `user://`를 `persistentPaths: ['/userfs']` 하나에 둔다 — 같은 도메인(7bvcxz.github.io)의 **모든 Godot 게임이 같은 IndexedDB 폴더**를 쓴다(`docs/engine/engine-*.js`에서 확인). 저장이 필요해지면 파일 이름을 `user://popcorn_glory_*`로만 쓴다 |
-| localStorage | `popcorn-glory.*` 키만 | 비교 점수표 같은 Godot 밖 페이지용. 다른 키를 읽거나 지우지 않는다 |
+| Web `user://` | **쓰지 않는다** | Godot Web은 `user://`를 `persistentPaths: ['/userfs']` 하나에 둔다 — 같은 도메인(7bvcxz.github.io)의 **모든 Godot 게임이 같은 IndexedDB 폴더**를 쓰고, 동기화가 늦다(`docs/engine/engine-*.js`에서 확인) |
+| 가게의 저장(Step 12) | Web: localStorage `popcorn-glory.stand.v1` · 그 밖: `user://popcorn_glory_stand.v1.json` | 저장하는 곳은 `app/save_store.gd` 하나(`test_isolation`이 지킨다). 동기식이라 숨은 탭이 죽기 전에 써진다. 문서 `schema` 1, 게임·실험 이름을 확인하고, 깨졌거나 범위를 벗어난 값이면 새 가게로 시작한다. 실험 A·B·C와 `?trial=1`은 저장하지 않는다 |
+| localStorage | `popcorn-glory.*` 키만 | 가게의 저장과 비교 점수표(`popcorn-glory.scorecard.v1`). 다른 키를 읽거나 지우지 않는다 |
 | 배포 경로 | `docs/popcorn-glory/` → `https://7bvcxz.github.io/gamo/popcorn-glory/` | `deploy-web.sh`의 규칙 그대로. 해시 PCK·공유 엔진 `docs/engine/` |
 | 사이트 | `web/app/popcorn-glory/doc/`, Vercel 리다이렉트 `/popcorn-glory` | 새 게임 등록 네 곳 + 문서 페이지(AGENTS.md) |
 | 테스트 브리지 | `window.popcorn` (테스트 표지가 있을 때만) | E2E가 상태를 묻는 유일한 길 |

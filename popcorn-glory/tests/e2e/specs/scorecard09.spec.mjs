@@ -17,7 +17,7 @@ test('scorecard: trial links, saved across a reload, exported as entered, nothin
 
   // Links: the three experiments, each with ?trial=1 so the 3:00 clock shows.
   const hrefs = await page.locator('#links a').evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-  expect(hrefs).toEqual(['./?trial=1#click', './?trial=1#perfect', './?trial=1#explosion']);
+  expect(hrefs).toEqual(['./?trial=1#click', './?trial=1#perfect', './?trial=1#explosion', './?trial=1#stand']);
 
   // Enter: B gets 4/5/3/skip and a memo; A gets Q1 = 2; the order.
   const pick = (exp, q, v) => page.locator(`[data-exp="${exp}"] input[name="${exp}-${q}"][value="${v}"] + span`).click();
@@ -40,6 +40,7 @@ test('scorecard: trial links, saved across a reload, exported as entered, nothin
   expect(md).toContain('| B 완벽한 팝 | 4 | 5 | 3 | 건너뜀 | 4.00 (3) | 금색에 떼는 순간이 좋았다 |');
   expect(md).toContain('| A 클릭 & 팝 | 2 | — | — | — | 2.00 (1) |');
   expect(md).toContain('| C 팝콘 폭발 | — | — | — | — | — |');
+  expect(md).toContain('| ★ 팝콘 가게 | — | — | — | — | — |');
 
   await page.click('#json');
   const j = JSON.parse(await page.locator('#out').inputValue());

@@ -11,7 +11,9 @@ extends Node
 ## the resulting events to the session log and back to the view in the same
 ## frame -- a press shows its pop on the frame it was made.
 ##
-## Nothing is stored: no save, no settings, no browser storage.
+## One thing is stored (Step 12): the stand's progress, through PopSaveStore
+## (this page's browser storage under popcorn-glory.*). The experiments A/B/C and
+## the settings are never stored.
 
 const VERSION_SETTING := "application/config/version"
 
@@ -72,7 +74,8 @@ func _ready() -> void:
 	audio.name = "Audio"
 	add_child(audio)
 	route = PopRoute.parse(PopWeb.location_hash(), PopWeb.location_search(), OS.get_cmdline_user_args())
-	reduced_motion = String(route["motion"]) == "reduce"
+	# ?motion=reduce forces it, ?motion=full overrides the system's setting.
+	reduced_motion = String(route["motion"]) == "reduce" or (String(route["motion"]) != "full" and PopWeb.prefers_reduced_motion())
 	frame.dev = bool(route["dev"])
 	frame.trial = bool(route["trial"])
 	audio.set_muted(not bool(route["sound"]))
@@ -81,6 +84,8 @@ func _ready() -> void:
 		push_error("economy.json: %s" % [economy.errors])
 	chooser.build(PopRegistry.listed())
 	web.attach(_on_hash, func(hidden: bool) -> void:
+		if hidden:
+			save_now()   # a phone may kill a hidden tab: write first
 		clock.set_pause("hidden", hidden)
 		_has_last = false)   # the time away is not a hitch
 	bridge.attach(self)
@@ -164,6 +169,8 @@ func buy() -> void:
 	var r := rules.execute({"type": "buy"})
 	session.record(clock.now_ms, "buy", {"ok": bool(r["ok"]), "reason": String(r.get("reason", ""))})
 	_flush()
+	if bool(r["ok"]):
+		save_now()
 
 
 ## The stand's automation card (Step 10).
@@ -173,6 +180,8 @@ func buy_auto() -> void:
 	var r := rules.execute({"type": "buy_auto"})
 	session.record(clock.now_ms, "buy_auto", {"ok": bool(r["ok"]), "reason": String(r.get("reason", ""))})
 	_flush()
+	if bool(r["ok"]):
+		save_now()
 
 
 ## A view's request: stamped, logged, executed, shown -- all in this frame.
@@ -190,6 +199,8 @@ func on_command(kind: String, cmd: Dictionary) -> void:
 	if not bool(r["ok"]):
 		session.record(clock.now_ms, "refused", {"kind": kind, "reason": String(r.get("reason", ""))})
 	_flush()
+	if kind == "recipe" and bool(r["ok"]):
+		save_now()
 
 
 func dev_money(amount: int) -> void:
@@ -244,6 +255,58 @@ func _process(delta: float) -> void:
 	if added > 0:
 		rules.advance(added)
 	_flush()
+	if _saves() and clock.now_ms - _saved_at_ms >= SAVE_EVERY_MS:
+		save_now()
+
+
+# -- the stand's save (Step 12) ---------------------------------------------
+
+const SAVE_SCHEMA := 1
+const SAVE_EVERY_MS := 5000
+## Tests use their own names so they never touch a player's save.
+var save_prefix := ""
+var _saved_at_ms := 0
+
+
+## A 3-minute trial (?trial=1, the owner's scorecard) neither reads nor writes
+## the save: a score is taken from a fresh start, and the real run is untouched.
+func _saves() -> bool:
+	return screen == "play" and rules != null and not frame.trial and bool(PopRegistry.find(exp_id).get("save", false)) and rules.has_method("to_save")
+
+
+func _save_name(id: String) -> String:
+	return save_prefix + id + ".v1"
+
+
+## Writes the run now: every SAVE_EVERY_MS of play, after a purchase or a
+## recipe, when the tab hides and when the player leaves.
+func save_now() -> bool:
+	if not _saves():
+		return false
+	_saved_at_ms = clock.now_ms
+	var doc := {"schema": SAVE_SCHEMA, "game": "popcorn-glory", "exp": exp_id, "version": version(),
+		"active_ms": clock.now_ms, "rules": rules.call("to_save")}
+	return PopSaveStore.write(_save_name(exp_id), JSON.stringify(doc))
+
+
+## Picks a saved run up if there is one and it is whole; a broken, foreign or
+## older-schema save is left alone and a fresh run starts (and overwrites it).
+func _load_saved(id: String) -> void:
+	var text := PopSaveStore.read(_save_name(id))
+	if text == "":
+		return
+	# JSON.parse (not parse_string): a broken save must not print an engine error.
+	var json := JSON.new()
+	var doc: Variant = json.data if json.parse(text) == OK else null
+	var ok := typeof(doc) == TYPE_DICTIONARY and int((doc as Dictionary).get("schema", -1)) == SAVE_SCHEMA \
+		and String((doc as Dictionary).get("game", "")) == "popcorn-glory" and String((doc as Dictionary).get("exp", "")) == id \
+		and typeof((doc as Dictionary).get("rules")) == TYPE_DICTIONARY and bool(rules.call("from_save", (doc as Dictionary)["rules"]))
+	if not ok:
+		session.record(0, "save_rejected", {"bytes": text.length()})
+		return
+	clock.add_ms(maxi(0, int((doc as Dictionary).get("active_ms", 0))))
+	_saved_at_ms = clock.now_ms
+	session.record(clock.now_ms, "restored", {"level": rules.level, "money": rules.money, "from": String((doc as Dictionary).get("version", ""))})
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -284,6 +347,9 @@ func _start(id: String) -> void:
 		rules = PopRegistry.make_rules(id, economy)
 		clock = PopClock.new()
 		session = PopSession.new(id)
+		_saved_at_ms = 0
+		if bool(entry.get("save", false)) and not frame.trial:
+			_load_saved(id)
 	clock.set_pause("hidden", web.hidden())
 	var view_script: GDScript = load(String(entry["view"]))
 	var view: PopPlayView = view_script.new()
@@ -311,9 +377,12 @@ var _parked: Dictionary = {}
 
 func _finish_run(keep: bool = true) -> void:
 	if screen == "play" and rules != null and keep and bool(PopRegistry.find(exp_id).get("keep", false)):
+		save_now()
 		_parked[exp_id] = {"rules": rules, "session": session, "clock": clock}
 		return
 	_parked.erase(exp_id)
+	if not keep and _saves():
+		PopSaveStore.clear(_save_name(exp_id))   # restart: the saved run goes too
 	if screen == "play" and rules != null:
 		session.reset(clock.now_ms)
 		history.append(summary())
@@ -356,7 +425,7 @@ func state() -> Dictionary:
 	var out := {"version": version(), "screen": screen, "exp": exp_id,
 		"window": [get_window().size.x, get_window().size.y] if get_window() else [0, 0],
 		"listed": PopRegistry.listed().map(func(e: Dictionary) -> String: return String(e["id"])),
-		"history": history.size(), "rects": _rects()}
+		"history": history.size(), "rects": _rects(), "reduced_motion": reduced_motion}
 	if rules != null:
 		out["run"] = rules.state()
 		out["clock_ms"] = clock.now_ms

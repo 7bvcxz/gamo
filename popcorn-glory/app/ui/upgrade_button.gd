@@ -8,6 +8,9 @@ extends PopPressArea
 var stage := 1          # the stage this purchase leads to
 var price := 0          # -1: nothing left to buy
 var money := 0
+## Set when the run is finished (the stand, Step 12): the active time it took,
+## shown under the star -- the ending, in numbers.
+var done_label := ""
 var gain_now := -1     # what one action pays now and after this purchase
 var gain_next := -1
 var _shine := 0.0
@@ -55,7 +58,14 @@ func _draw() -> void:
 	_round(r, rad, Color(1, 1, 1, 0.92))
 	if price < 0:
 		# Nothing more to buy: a gold star where the next machine would be.
-		draw_colored_polygon(PopMachineArt._star(r.get_center(), size.y * 0.32, size.y * 0.14), PopPalette.GOLD)
+		if done_label == "":
+			draw_colored_polygon(PopMachineArt._star(r.get_center(), size.y * 0.32, size.y * 0.14), PopPalette.GOLD)
+			return
+		var sc := r.get_center() - Vector2(size.y * 0.75, 0)
+		draw_colored_polygon(PopMachineArt._star(sc, size.y * 0.32, size.y * 0.14), PopPalette.GOLD)
+		var f := ThemeDB.fallback_font
+		var tfs := int(size.y * 0.36)
+		draw_string(f, Vector2(sc.x + size.y * 0.5, r.get_center().y + tfs * 0.36), done_label, HORIZONTAL_ALIGNMENT_LEFT, -1, tfs, PopPalette.INK)
 		return
 	# The fill: money's share of the price, rising from the bottom.
 	var p := progress()

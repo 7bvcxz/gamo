@@ -206,6 +206,11 @@ func on_events(events: Array[Dictionary]) -> void:
 			"auto":
 				_auto_flash = 1.0
 				_upgraded()
+			"complete":
+				# The end of the slice: the big celebration once more, twice the rain.
+				_milestone()
+				if not reduced_motion:
+					fx.rain(size.x * 0.05, size.x * 0.95, 10.0, 40, machine_size() / 900.0, rng, PopPalette.GOLD)
 			"pop":
 				rest.append(e)
 				_loads.append(0.0)
@@ -418,7 +423,8 @@ func _draw_crank(ci: CanvasItem, base: Vector2, size_px: float, st: Dictionary) 
 
 
 ## The three recipes: a shaker each, its colour, and what it does in numbers --
-## x the batch, the width of its gold, and a clock if it cools longer.
+## x the batch, the width of its gold, and -- if it cools longer -- a small
+## grey ring: the same grey that drains over the machine while it cools.
 func _draw_shakers(ci: CanvasItem, st: Dictionary) -> void:
 	var recipes: Dictionary = rules.economy.table("stand")["recipes"]
 	var font := ThemeDB.fallback_font
@@ -442,20 +448,22 @@ func _draw_shakers(ci: CanvasItem, st: Dictionary) -> void:
 		var fs := int(r.size.y * 0.2)
 		var label := "x%s" % str(snappedf(float(rd["mult"]), 0.01))
 		ci.draw_string(font, Vector2(r.position.x, r.position.y + r.size.y * 0.74), label, HORIZONTAL_ALIGNMENT_CENTER, r.size.x, fs, PopPalette.INK)
-		# The gold's width, a short arc; a clock if it cools longer.
+		# The gold's width, a short arc; the cooling grey if it cools longer.
 		var ac := Vector2(r.position.x + r.size.x * (0.4 if int(rd.get("cooldown_add_ms", 0)) > 0 else 0.5), r.end.y - 12)
 		var span := 0.9 * float(rd.get("window_scale", 1.0))
 		ci.draw_arc(ac + Vector2(0, 14), 22, -PI / 2 - span / 2, -PI / 2 + span / 2, 10, PopPalette.GOLD, 6.0)
 		if int(rd.get("cooldown_add_ms", 0)) > 0:
+			# (Step 12: was a clock face, which two blind players could not read.
+			# Now the jar shows the very thing it adds -- a longer grey wait.)
 			var cc := Vector2(r.position.x + r.size.x * 0.76, r.end.y - 14)
-			ci.draw_circle(cc, 9, Color(1, 1, 1))
-			ci.draw_arc(cc, 9, 0, TAU, 12, PopPalette.INK, 2.0)
-			ci.draw_line(cc, cc + Vector2(0, -6), PopPalette.INK, 2.0)
-			ci.draw_line(cc, cc + Vector2(5, 0), PopPalette.INK, 2.0)
+			ci.draw_arc(cc, 10, -PI / 2, -PI / 2 + TAU * 0.8, 16, COOL_GREY, 6.0)
+
+
+const COOL_GREY := Color(0.35, 0.33, 0.33, 0.9)
 
 
 ## While the machine cools, a grey arc over the ring drains away from the top:
-## 'wait, then press' -- the same seconds the cheese jar's clock promises.
+## 'wait, then press' -- the grey the cheese jar shows (it adds to this wait).
 func _draw_cooling(ci: CanvasItem, st: Dictionary) -> void:
 	var left := float(st["cooldown_left"])
 	if left <= 0.0 or bool(st["heating"]):
@@ -466,7 +474,7 @@ func _draw_cooling(ci: CanvasItem, st: Dictionary) -> void:
 	var r := ring_radius()
 	var top := -PI / 2
 	var width := machine_size() * 0.045
-	var a := Color(0.35, 0.33, 0.33, 0.55 + 0.35 * _cool_deny)
+	var a := Color(COOL_GREY, 0.55 + 0.35 * _cool_deny)
 	ci.draw_arc(c, r, top, top + TAU * k, 48, a, width * (1.25 + 0.6 * _cool_deny))
 
 

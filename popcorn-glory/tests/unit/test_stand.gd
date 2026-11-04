@@ -338,3 +338,54 @@ func test_a_whole_session_is_the_same_however_time_is_cut() -> void:
 	assert_eq(_session(20), a, "10 ms vs 20 ms slices")
 	assert_eq(_session(40), a, "10 ms vs 40 ms slices")
 	assert_eq(_session(7), a, "10 ms vs 7 ms slices (not a divisor of anything)")
+
+
+# -- Step 12: the save ----------------------------------------------------------
+
+func test_a_save_round_trips_and_a_broken_one_changes_nothing() -> void:
+	var a: PopRules = Stand.new()
+	a.level = 7
+	a.money = 1234
+	a.earned = 9999
+	a.recipe = "cheese"
+	a.auto_level = 3
+	a.helper_ms = 500
+	a.outcomes["perfect"] = 42
+	var d: Dictionary = a.to_save()
+	var b: PopRules = Stand.new()
+	assert_true(bool(b.from_save(JSON.parse_string(JSON.stringify(d)))), "a save read back through JSON (numbers come back as floats)")
+	assert_eq(b.to_save(), a.to_save(), "the same stand")
+	assert_false(bool(b.state()["heating"]), "no heat in progress after loading")
+	for bad: Dictionary in [
+		{"level": 99}, {"money": -5}, {"money": 1e9, "earned": 1}, {"recipe": "truffle"}, {"auto_level": 99},
+		{"level": "7"}, {"helper_ms": 1.5}]:
+		var broken := d.duplicate()
+		for k: String in bad.keys():
+			broken[k] = bad[k]
+		var c: PopRules = Stand.new()
+		assert_false(bool(c.from_save(broken)), "rejected: %s" % [bad])
+		assert_eq(c.level, 0, "and nothing changed (%s)" % [bad])
+	var e: PopRules = Stand.new()
+	var missing := d.duplicate()
+	missing.erase("recipe")
+	assert_false(bool(e.from_save(missing)), "a missing field is rejected")
+
+
+func test_buying_the_last_thing_completes_the_stand_once() -> void:
+	var s: PopRules = Stand.new()
+	s.level = s.max_level() - 1
+	var ladder: Array = s.economy.table("stand")["auto"]
+	s.money = 100000000
+	s.earned = s.money   # a save requires money <= earned
+	for i in ladder.size():
+		s.execute({"type": "buy_auto"})
+	assert_eq(int(s.state()["completed_ms"]), -1, "the machine is not done yet")
+	s.advance(1234)
+	s.drain_events()
+	assert_true(bool(s.execute({"type": "buy"})["ok"]), "the last machine")
+	var complete := s.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "complete")
+	assert_eq(complete.size(), 1, "one 'complete'")
+	assert_eq(int(s.state()["completed_ms"]), 1234, "at the active time")
+	var b: PopRules = Stand.new()
+	b.from_save(JSON.parse_string(JSON.stringify(s.to_save())))
+	assert_eq(int(b.state()["completed_ms"]), 1234, "kept in the save")

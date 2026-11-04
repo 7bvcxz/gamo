@@ -5,6 +5,9 @@ extends PopPressArea
 ## arrow). Icons, not words.
 
 var icon := "back"
+## The restart button's first tap on a run that is saved (Step 12): red and
+## ringing -- tap again to really start over. No words.
+var armed := false
 
 
 func _draw() -> void:
@@ -18,6 +21,9 @@ func _draw() -> void:
 		face = Color(1, 1, 1, 1.0)
 		draw_arc(c, r + 3.0, 0, TAU, 32, Color(PopPalette.GOLD, 0.9), 4.0)
 	draw_circle(c, r, face)
+	if armed:
+		draw_circle(c, r, Color(PopPalette.RED, 0.9))
+		draw_arc(c, r + 6.0, 0, TAU, 32, PopPalette.RED, 5.0)
 	var k := r * 0.42
 	match icon:
 		"back":
@@ -42,6 +48,7 @@ func _draw() -> void:
 				draw_line(c + Vector2(-k * 0.4, -k * 0.55 + i * k * 0.35), c + Vector2(k * 0.4, -k * 0.55 + i * k * 0.35), PopPalette.INK, k * 0.12)
 			draw_colored_polygon(PackedVector2Array([c + Vector2(-k * 0.45, k * 0.55), c + Vector2(k * 0.45, k * 0.55), c + Vector2(0, k * 1.05)]), PopPalette.RED)
 		"restart":
-			draw_arc(c, k, deg_to_rad(-60), deg_to_rad(230), 24, PopPalette.INK, k * 0.38)
+			var ink := Color.WHITE if armed else PopPalette.INK
+			draw_arc(c, k, deg_to_rad(-60), deg_to_rad(230), 24, ink, k * 0.38)
 			var tip := c + Vector2(cos(deg_to_rad(-60)), sin(deg_to_rad(-60))) * k
-			draw_colored_polygon(PackedVector2Array([tip + Vector2(-k * 0.55, -k * 0.2), tip + Vector2(k * 0.35, -k * 0.55), tip + Vector2(k * 0.2, k * 0.45)]), PopPalette.INK)
+			draw_colored_polygon(PackedVector2Array([tip + Vector2(-k * 0.55, -k * 0.2), tip + Vector2(k * 0.35, -k * 0.55), tip + Vector2(k * 0.2, k * 0.45)]), ink)

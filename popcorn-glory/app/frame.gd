@@ -64,7 +64,7 @@ func _init() -> void:
 	for c: Control in [money_view, upgrade_button, auto_button, back_button, restart_button, sound_button, log_button]:
 		add_child(c)
 	back_button.pressed.connect(func() -> void: back_pressed.emit())
-	restart_button.pressed.connect(func() -> void: restart_pressed.emit())
+	restart_button.pressed.connect(_on_restart)
 	upgrade_button.pressed.connect(func() -> void: buy_pressed.emit())
 	auto_button.pressed.connect(func() -> void: auto_pressed.emit())
 	# The stand answers a tap on a card it cannot pay for (Step 10); the
@@ -132,12 +132,47 @@ func refresh(rules: PopRules, p_clock_ms: int) -> void:
 	upgrade_button.set_gain(rules.payout(rules.level), rules.payout(rules.level + 1))
 	if has_auto:
 		_refresh_auto(rules)
+		var cm := int(rules.state().get("completed_ms", -1))
+		var label := "" if cm < 0 else "%d:%02d" % [cm / 60000, (cm / 1000) % 60]
+		if label != upgrade_button.done_label:
+			upgrade_button.done_label = label
+			upgrade_button.queue_redraw()
 	if play != null:
 		play.fx.target = money_view.coin_point() - play.global_position
 	if p_clock_ms / 1000 != clock_ms / 1000 or (p_clock_ms >= PopSession.THREE_MINUTES_MS) != (clock_ms >= PopSession.THREE_MINUTES_MS):
 		clock_ms = p_clock_ms
 		queue_redraw()
 	clock_ms = p_clock_ms
+
+
+## On the stand (saved progress) the first tap arms the restart button and a
+## second within ARM_MS restarts; elsewhere one tap restarts as before.
+const ARM_MS := 2500
+var _armed_at := -1
+
+
+func _on_restart() -> void:
+	if not has_auto:
+		restart_pressed.emit()
+		return
+	var now := Time.get_ticks_msec()
+	if _armed_at >= 0 and now - _armed_at <= ARM_MS:
+		_disarm()
+		restart_pressed.emit()
+		return
+	_armed_at = now
+	restart_button.armed = true
+	restart_button.deny()
+	restart_button.queue_redraw()
+	get_tree().create_timer(ARM_MS / 1000.0).timeout.connect(func() -> void:
+		if _armed_at >= 0 and Time.get_ticks_msec() - _armed_at >= ARM_MS - 50:
+			_disarm())
+
+
+func _disarm() -> void:
+	_armed_at = -1
+	restart_button.armed = false
+	restart_button.queue_redraw()
 
 
 func _on_denied(b: PopPressArea) -> void:

@@ -13,6 +13,10 @@ var app: PopApp
 
 func before_each() -> void:
 	app = Main.instantiate()
+	# Never a player's save: tests use their own names and start clean
+	# (AGENTS.md 2026-10-26: a leftover save made tests pass or fail by history).
+	app.save_prefix = "test."
+	PopSaveStore.clear("test.stand.v1")
 	tree.root.add_child(app)
 	await tree.process_frame
 	await tree.process_frame
@@ -20,6 +24,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	app.queue_free()
+	PopSaveStore.clear("test.stand.v1")
 	await tree.process_frame
 
 
@@ -339,3 +344,83 @@ func test_a_press_while_cooling_is_answered() -> void:
 	assert_true(float(play.get("_cool_deny")) > 0.0, "the view answers the press")
 	var refused := app.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "refused" and String(l["data"].get("reason", "")) == "err.cooling")
 	assert_eq(refused.size(), 1, "and the log says why")
+
+
+## Step 12: the stand is saved and picked up again by a new page (a new app
+## instance here); a restart (two taps on the stand) clears it; a broken save
+## starts fresh; a hidden tab writes the save first.
+func test_the_stand_is_saved_and_restored() -> void:
+	app.open("stand")
+	await tree.process_frame
+	app.dev_level(6)
+	app.dev_money(5000)
+	app.buy_auto()
+	app.on_command("recipe", {"type": "recipe", "id": "caramel"})
+	var level: int = app.rules.level
+	var money: int = app.rules.money
+	assert_true(app.save_now(), "written")
+	# A new page: a new app reads it.
+	var app2: PopApp = Main.instantiate()
+	app2.save_prefix = "test."
+	tree.root.add_child(app2)
+	await tree.process_frame
+	app2.open("stand")
+	assert_eq(app2.rules.level, level, "level restored")
+	assert_eq(app2.rules.money, money, "money restored")
+	assert_eq(String(app2.rules.state()["recipe"]), "caramel", "recipe restored")
+	assert_true(bool(app2.rules.state()["motor"]), "machines restored")
+	assert_eq(app2.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "restored").size(), 1, "the log says restored")
+	app2.queue_free()
+	await tree.process_frame
+	# Restart: the first tap arms, the second restarts and clears the save.
+	_click(app.frame.restart_button)
+	assert_eq(app.rules.level, level, "one tap does not restart the stand")
+	assert_true(app.frame.restart_button.armed, "it arms")
+	_click(app.frame.restart_button)
+	assert_eq(app.rules.level, 0, "the second tap restarts")
+	assert_eq(PopSaveStore.read("test.stand.v1"), "", "and the save is gone")
+	# A broken save: a fresh stand, and the log says so.
+	app.back()   # (leaving saves the fresh run -- the broken save is written after)
+	PopSaveStore.write("test.stand.v1", "{not json")
+	var app3: PopApp = Main.instantiate()
+	app3.save_prefix = "test."
+	tree.root.add_child(app3)
+	await tree.process_frame
+	app3.open("stand")
+	assert_eq(app3.rules.level, 0, "fresh")
+	assert_eq(app3.log_lines().filter(func(l: Dictionary) -> bool: return String(l["type"]) == "save_rejected").size(), 1, "rejected, logged")
+	app3.queue_free()
+	await tree.process_frame
+
+
+func test_the_experiments_are_never_saved() -> void:
+	app.open("click")
+	await tree.process_frame
+	app.dev_money(50)
+	assert_false(app.save_now(), "A is not saved")
+	assert_eq(PopSaveStore.read("test.click.v1"), "", "nothing written")
+
+
+## The scorecard's 3-minute trial of the stand starts fresh and leaves the real
+## saved stand alone (Step 12).
+func test_a_trial_of_the_stand_neither_reads_nor_writes_the_save() -> void:
+	app.open("stand")
+	await tree.process_frame
+	app.dev_level(5)
+	assert_true(app.save_now(), "a real run saved")
+	var saved := PopSaveStore.read("test.stand.v1")
+	app.back()
+	var trial: PopApp = Main.instantiate()
+	trial.save_prefix = "test."
+	tree.root.add_child(trial)
+	await tree.process_frame
+	trial.frame.trial = true
+	trial.open("stand")
+	assert_eq(trial.rules.level, 0, "the trial starts fresh")
+	trial.dev_level(9)
+	assert_false(trial.save_now(), "the trial does not save")
+	trial.restart()
+	trial.back()
+	assert_eq(PopSaveStore.read("test.stand.v1"), saved, "the real save is untouched (restart and leaving included)")
+	trial.queue_free()
+	await tree.process_frame

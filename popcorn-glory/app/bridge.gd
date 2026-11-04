@@ -59,6 +59,9 @@ func query(name: String, arg: Variant) -> Variant:
 			# Answers with the state after the step: one call where a test would make two.
 			_app.call("dev_advance", int(arg))
 			return {"ok": true, "state": _app.call("state")}
+		"dev_save":
+			# Writes the stand's save now and answers whether the store said it worked.
+			return {"ok": bool(_app.call("save_now"))}
 		"dev_money":
 			# Setup for a test of a later moment (the stand's machines): money, not play.
 			_app.call("dev_money", int(arg))
