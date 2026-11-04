@@ -10,7 +10,7 @@
 |---|---|
 | 게임 | 팝콘 가게(`#stand`). 선택 화면에는 비교의 기준선인 실험 A·B·C도 남아 있다 |
 | 버전 | **0.12.2** (`project.godot`의 `config/version`). 같은 날 0.12.0(저장·끝) → 0.12.1(지글 소리 메모리 누수) → 0.12.2(소리가 넘침)로 이어졌다(6절) |
-| 소스 | 게임 `f2941053`(0.12.2; 0.12.1 `c30bf694`, 0.12.0 `13fba9a6`), 페이지 `8ea2e94f`. 배포 커밋 `ed0bd718`(0.12.0)·`c54458a7`(about 페이지, 사이트)·`6f67e4be`(0.12.1)·`835b0d1e`(0.12.2) |
+| 소스 | 게임 `f2941053`(0.12.2; 0.12.1 `c30bf694`, 0.12.0 `13fba9a6`), 페이지 `8ea2e94f`(about)·`05b1d372`(번역 막기). 배포 커밋 `ed0bd718`(0.12.0)·`c54458a7`(about 페이지, 사이트)·`6f67e4be`(0.12.1)·`835b0d1e`(0.12.2)·`e7f6ed5e`(0.12.2 페이지) |
 | Web 주소 | https://7bvcxz.github.io/gamo/popcorn-glory/#stand · 선택 화면 https://7bvcxz.github.io/gamo/popcorn-glory/ |
 | 팩·엔진 | `game-f1c8f83af3c5.pck`(273,544바이트; 이전 팩들은 git 기록에 있다, 8절) · 공유 엔진 `docs/engine/engine-7eda98958eb0.*`(바뀌지 않음) · Godot `4.7.stable.official.5b4e0cb0f` |
 | 함께 있는 페이지 | [정보·개인정보·라이선스](https://7bvcxz.github.io/gamo/popcorn-glory/about.html) · [3분 점수표](https://7bvcxz.github.io/gamo/popcorn-glory/scorecard.html) · [문서](https://7bvcxz.github.io/gamo/popcorn-glory/doc/) |
@@ -36,7 +36,7 @@ popcorn-glory/tools/test_all.sh  # 헤드리스 -> 배포 -> 브라우저 -> 보
 | 대상 | 상태 |
 |---|---|
 | **Web (GitHub Pages)** | **출시 후보.** 공개 주소에서 아래 매트릭스로 검증했다 |
-| Android | **디버그 APK만 만들었다.** S23에 설치해 실행했다(8절 아래 '실제 폰'): Godot 4.7, Adreno 740 OpenGL ES 3.2, 선택 화면·가게·실제 누름 셋 = 완벽 셋(30 동전)·강제 종료 뒤 다시 열면 30 그대로(앱 폴더의 `popcorn_glory_stand.v1.json`)·logcat 오류 0, 그 뒤 지웠다. `com.heydive.popcornglory`, versionName 0.12.2(소스 `f2941053`), versionCode 1, minSdk 24, targetSdk 36, arm64-v8a, 28,644,248바이트, sha256 `dee22e8ef81bf5c1563d095d3f8ad65291bb97059d9c1fb3231ecaafff7a3d85`. Godot 디버그 인증서(CN=Godot)로 서명했으며 배포용이 아니다. 저장소에 넣지 않았다(다시 만들기: `godot --headless --path popcorn-glory --export-debug "Android (debug)" <파일>.apk`). **릴리스 빌드는 없다** — 출시 서명 키와 스토어 계정은 소유자의 것이다 |
+| Android | **디버그 APK만 만들었다.** S23에 설치해 실행했다(4절의 '실제 폰'): Godot 4.7, Adreno 740 OpenGL ES 3.2, 선택 화면·가게·실제 누름 셋 = 완벽 셋(30 동전)·강제 종료 뒤 다시 열면 30 그대로(앱 폴더의 `popcorn_glory_stand.v1.json`)·logcat 오류 0, 그 뒤 지웠다. `com.heydive.popcornglory`, versionName 0.12.2(소스 `f2941053`), versionCode 1, minSdk 24, targetSdk 36, arm64-v8a, 28,644,248바이트, sha256 `dee22e8ef81bf5c1563d095d3f8ad65291bb97059d9c1fb3231ecaafff7a3d85`. Godot 디버그 인증서(CN=Godot)로 서명했으며 배포용이 아니다. 저장소에 넣지 않았다(다시 만들기: `godot --headless --path popcorn-glory --export-debug "Android (debug)" <파일>.apk`). **릴리스 빌드는 없다** — 출시 서명 키와 스토어 계정은 소유자의 것이다 |
 | PC (Windows·Linux·macOS) | **없음.** 이 머신의 Godot export 템플릿은 Web과 Android뿐이다 |
 | iOS | **없음.** macOS·Xcode 없음 |
 
@@ -112,7 +112,7 @@ popcorn-glory/tools/test_all.sh  # 헤드리스 -> 배포 -> 브라우저 -> 보
 | 높음(고침) | **긴 플레이의 메모리 누수**: 누를 때마다 지글 소리를 새로 복사해 다시 틀었고, 웹에서는 그 복사본마다 디코드한 샘플이 남았다(누름 하나에 약 27 MB, 꼭대기 1분에 +580 MB). Step 05부터 있던 `app/audio.gd`의 버그. 12분 플레이가 탭을 죽이지는 않았지만 휴대폰에서는 위험했다 | **0.12.1 고침.** 헤드리스 시험(한 번 누름 = 한 번 시작)과 브라우저 시험(강제 GC 뒤 JS 힙 + 버퍼, 1분 30 MB 미만)이 0.12.0에서 실패하고 0.12.1에서 통과한다 |
 | 중간(알려짐) | **화면을 켜 둔 채 오래 두면 JS 힙이 조금씩 는다.** 강제 GC 뒤에도 남는다: 선택 화면 0.04MB/분, 가게 0단계에서 가만히 1.5MB/분, 꼭대기 가게에서 조수만 팝 할 때 약 5.5MB/분. 20분이면 30–110MB, 한 시간이면 최대 약 330MB. 숨은 탭은 그리지 않으므로 늘지 않고, 새로고침하면 처음으로 돌아간다(저장은 남는다). 원인은 엔진 쪽이다: 힙 샘플링에서 남은 할당이 `glGenBuffers`·`glGenVertexArrays`·`glFenceSync`(Emscripten)였다. Emscripten은 GL 객체 번호를 다시 쓰지 않고, Godot 호환 렌더러는 다각형을 다시 그릴 때마다 버퍼를 새로 만든다. 놀이 화면은 두 그리기 층을 매 프레임 다시 그린다(`app/play_view.gd`) | 10–20분 판에는 문제가 되지 않는다고 본다(재서 확인한 것은 12분까지). 고치는 길: 움직이지 않는 그림(양념통·계산대·손님·카드)을 따로 떼어 바뀔 때만 다시 그리기. 출시 뒤 첫 다듬기 후보다. 증거 `evidence/step12/jsheap_probe*.txt` |
 | 높음 | **사람의 점수가 없다.** 재미의 판단은 블라인드 AI의 대리 관찰뿐이다 | 소유자 점수표에 ★ 가게 줄을 더했다(`?trial=1`은 저장을 건드리지 않고 처음부터 시작) |
-| 높음(고침) | **소리가 넘쳤다**: 완벽한 팝은 팝·띵·동전을 한꺼번에 틀고, 저마다 약 -2 dBFS로 만든 소리의 합이 1.91–2.15(S23 1.94)였다. 브라우저는 1.0 위를 잘라 낸다. 완벽한 팝마다, Step 05부터 | **0.12.2 고침**: 모든 소리에 -8 dB 여유. 데스크톱·S23에서 피크 0.68–0.86. `sound05`의 피크 검사가 0.12.1에서 실패, 0.12.2에서 통과 |
+| 높음(고침) | **소리가 넘쳤다**: 완벽한 팝은 팝·띵·동전을 한꺼번에 틀고, 저마다 약 -2 dBFS로 만든 소리의 합이 1.91–2.15(S23 1.94)였다. 브라우저는 1.0 위를 잘라 낸다. 완벽한 팝마다, Step 05부터 | **0.12.2 고침**: 모든 소리에 -8 dB 여유. 잰 피크: 데스크톱 0.76–0.84(세 화면), S23 0.68–0.77. `sound05`의 피크 검사가 0.12.1에서 실패, 0.12.2에서 통과 |
 | 중간 | 실제 폰은 S23 한 대만, 3분만 해 봤다. iPhone(Safari)·저사양 Android는 해 보지 않았다 | 다른 기기가 생기면 |
 | 중간 | 느린 연결의 첫 로딩 약 61초 | 엔진 크기는 Godot 템플릿의 값이라 이 저장소에서 줄일 수 없다. 두 번째부터는 캐시 |
 | 중간 | 20분 근처에서 끝나고 그 뒤에 할 일이 없다 | 의도된 slice의 끝. 끝이 보이게 했다(축하 + 걸린 시간) |
@@ -188,7 +188,9 @@ git push origin main             # Pages가 1–3분 뒤 반영, 브라우저 �
 
 ## 12. 증거
 
-- 공개 보고서: `tests/results/step12/public/report.md`(전체), `rerun.json`·`rerun.log`(고친 스펙과 출시 검사 재실행), `load.txt`(그때의 부하)
-- 긴 플레이: `evidence/step12/play_stand_public/`
-- 그림: `evidence/step12/`
+- 공개 보고서: `tests/results/step12/public/`(0.12.2), `public_0.12.1/`, `public_0.12.0/`(그 안의 `rerun.json`·`rerun.log`는 고친 스펙과 출시 검사의 재실행). 각 폴더의 `load.txt`가 그때의 부하다
+- 긴 플레이: `evidence/step12/play_stand_public/`(0.12.1, 720×1280), `play_stand_public_0.12.0/`, `heap3min_0.12.0/`
+- 실제 폰: `evidence/step12/s23/`(README, 로그, 화면, 스크립트 사본)
+- 메모리: `evidence/step12/MEMORY.md`와 탐침 스펙 사본. 되돌리기: `rollback_test.log`
+- 그림: `evidence/step12/grid_0_3_10_12min_0.12.1.png`, `s23_strip.png`
 - 준비도(Step 11): `qa/READINESS.md`
