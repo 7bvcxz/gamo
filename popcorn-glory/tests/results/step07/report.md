@@ -1,11 +1,11 @@
 # Popcorn test report (AUTOMATED)
 
-- git 8050313494a0 (uncommitted changes) · build 0.11.0 game-405b2e189c34.pck
-- 2026-11-04T01:09:04.245Z
+- git 0dd8b1b41d3d · build 0.11.0 game-28108e5000bb.pck
+- 2026-11-04T01:26:57.115Z
 - target: local docs/ (http://127.0.0.1)
 - headless: **PASSED** (91 passed, 0 failed, 2369 checks, 15 files, 4.2s)
 - deploy: **PASSED**
-- browser: **FAILED** — passed 105 (on retry 0), failed 1, skipped 12
+- browser: **PASSED** — passed 106 (on retry 0), failed 0, skipped 12
 
 | spec | check | project | status | cause / notes |
 |---|---|---|---|---|
@@ -49,8 +49,8 @@
 | perf07.spec.mjs | stand: peak load for a minute, hidden tab, restart | p720 | SKIPPED | one project measures (desktop) |
 | perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | phone | SKIPPED | one project measures (desktop) |
 | perf07.spec.mjs | stand: peak load for a minute, hidden tab, restart | phone | SKIPPED | one project measures (desktop) |
-| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | desktop | PASSED | perf: {"load_ms":2613,"heap_start":53500000,"heap_after_60s":53500000,"burst":{"fps":41.53891799441614,"draw_calls":117,"primitives":4297,"fx_peak":154,"fx_cap":400},"sleep":{"before":3406,"hidden_5s":3429,"after_wake":4 |
-| perf07.spec.mjs | stand: peak load for a minute, hidden tab, restart | desktop | FAILED | Error: draw calls within the budget at the stand peak  expect(received).toBeLessThanOrEqual(expected)  Expected: <= 200 Received:    269 |
+| perf07.spec.mjs | load, heap over a minute, worst burst, sleep and wake | desktop | PASSED | perf: {"load_ms":1239,"heap_start":53500000,"heap_after_60s":53500000,"burst":{"fps":48.960831325600985,"draw_calls":117,"primitives":4303,"fx_peak":154,"fx_cap":400},"sleep":{"before":3152,"hidden_5s":3173,"after_wake": |
+| perf07.spec.mjs | stand: peak load for a minute, hidden tab, restart | desktop | PASSED | perf: {"worst":{"draw_calls":178,"primitives":5385,"fx":44},"fps":[47.94246904628876,46.92492015460329,45.9036024174126,44.25213886997822,48.79992030812101,38.8523610207108],"median_fps":46.92492015460329,"heap_start":17 |
 | progression07.spec.mjs | FAST-FORWARD: milestones in order through 3:00 | p720 | PASSED | mode: fast-forward with dev_advance (not real-time play) |
 | progression07.spec.mjs | ten restarts in a row: each from nothing, no errors | p720 | PASSED |  |
 | progression07.spec.mjs | an unusual order: A, C, B, A again, by tiles, links and the back button | p720 | PASSED |  |
@@ -81,24 +81,24 @@
 | sound05.spec.mjs | C: kernels clink and the eruption booms | desktop | PASSED |  |
 | sound05.spec.mjs | the speaker button steps loud -> soft -> off, and back on | desktop | PASSED |  |
 | sound05.spec.mjs | ?sound=off starts muted | desktop | PASSED |  |
-| stall09.spec.mjs | B: a 0.8 s stall during a hold still counts toward the heat | p720 | PASSED | hold: finger 1551 ms, game judged 1631 ms (perfect) |
-| stall09.spec.mjs | B: a 0.8 s stall during a hold still counts toward the heat | phone | PASSED | hold: finger 1552 ms, game judged 1581 ms (perfect) |
-| stall09.spec.mjs | B: a 0.8 s stall during a hold still counts toward the heat | desktop | PASSED | hold: finger 1551 ms, game judged 1557 ms (perfect) |
+| stall09.spec.mjs | B: a 0.8 s stall during a hold still counts toward the heat | p720 | PASSED | hold: finger 1552 ms, game judged 1584 ms (perfect) |
+| stall09.spec.mjs | B: a 0.8 s stall during a hold still counts toward the heat | phone | PASSED | hold: finger 1551 ms, game judged 1595 ms (perfect) |
+| stall09.spec.mjs | B: a 0.8 s stall during a hold still counts toward the heat | desktop | PASSED | hold: finger 1550 ms, game judged 1559 ms (perfect) |
 | stand10.spec.mjs | the stand: B first, shake by dragging, a shaker chooses, the card buys the machines | p720 | PASSED |  |
 | stand10.spec.mjs | the stand fits: shakers, helper, card and machine do not overlap the bars | p720 | PASSED |  |
 | stand10.spec.mjs | the stand: B first, shake by dragging, a shaker chooses, the card buys the machines | phone | PASSED |  |
 | stand10.spec.mjs | the stand fits: shakers, helper, card and machine do not overlap the bars | phone | PASSED |  |
 | stand10.spec.mjs | the stand: B first, shake by dragging, a shaker chooses, the card buys the machines | desktop | PASSED |  |
 | stand10.spec.mjs | the stand fits: shakers, helper, card and machine do not overlap the bars | desktop | PASSED |  |
-| stub03.spec.mjs | the stub: press, upgrade, restart, back | p720 | PASSED | load: 1284 ms to the first drawn frame |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | p720 | PASSED | load: 1243 ms to the first drawn frame |
 | stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | p720 | PASSED |  |
 | stub03.spec.mjs | a hidden tab stops the play clock | p720 | PASSED |  |
 | stub03.spec.mjs | three minutes shows the clock and is logged | p720 | PASSED |  |
-| stub03.spec.mjs | the stub: press, upgrade, restart, back | phone | PASSED | load: 1436 ms to the first drawn frame |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | phone | PASSED | load: 2765 ms to the first drawn frame |
 | stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | phone | PASSED |  |
 | stub03.spec.mjs | a hidden tab stops the play clock | phone | PASSED |  |
 | stub03.spec.mjs | three minutes shows the clock and is logged | phone | PASSED |  |
-| stub03.spec.mjs | the stub: press, upgrade, restart, back | desktop | PASSED | load: 1289 ms to the first drawn frame |
+| stub03.spec.mjs | the stub: press, upgrade, restart, back | desktop | PASSED | load: 1270 ms to the first drawn frame |
 | stub03.spec.mjs | a direct link opens the stub, and the browser back button returns | desktop | PASSED |  |
 | stub03.spec.mjs | a hidden tab stops the play clock | desktop | PASSED |  |
 | stub03.spec.mjs | three minutes shows the clock and is logged | desktop | PASSED |  |
