@@ -17,7 +17,13 @@ const NAV = [
   {
     group: '링크',
     links: [
-      { href: game('/popcorn-glory/'), label: '플레이 →' },
+      { href: game('/popcorn-glory/#stand'), label: '팝콘 가게 플레이 →' },
+      { href: game('/popcorn-glory/'), label: '세 실험과 가게 (선택 화면) →' },
+      { href: game('/popcorn-glory/scorecard.html'), label: '3분 점수표 →' },
+      { href: `${BLOB}/design/SLICE.md`, label: '가게 설계 (GitHub) →' },
+      { href: `${BLOB}/experiments/RESULTS.md`, label: '실험 비교와 결정 (GitHub) →' },
+      { href: `${BLOB}/qa/READINESS.md`, label: '출시 준비도 (GitHub) →' },
+      { href: `${BLOB}/RELEASE_CHECKLIST.md`, label: '출시 후보 체크리스트 (GitHub) →' },
       { href: `${BLOB}/design/EXPERIMENTS.md`, label: '세 실험 (GitHub) →' },
       { href: `${BLOB}/design/PLAYTEST.md`, label: '3분 절차·점수표 (GitHub) →' },
       { href: `${BLOB}/FUN_FIRST.md`, label: '10·30·60·180초 기준 (GitHub) →' },

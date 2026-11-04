@@ -41,11 +41,11 @@ export function WhatIsGamo() {
             살려 내는 것 자체가 즐거운지 확인하는 게임입니다.
           </span>
         </a>
-        <a className="card" href={game('/popcorn-glory/')}>
+        <a className="card" href={game('/popcorn-glory/#stand')}>
           <b>Popcorn &amp; Glory</b>
           <span>
-            팝콘 기계. 기계 하나·돈 하나·행동 하나로 시작해, 누르면 바로 터지는 손맛·딱 맞춘 순간·쌓였다
-            터지는 폭발 중 무엇이 재미있는지 3분 실험으로 가립니다.
+            팝콘 가게. 세 실험(바로 터지는 손맛·딱 맞춘 순간·쌓였다 터지는 폭발)으로 고른 &lsquo;금색에서 떼기&rsquo;
+            위에, 흔들기·양념·자동화가 하나씩 열리는 가게를 키웁니다.
           </span>
         </a>
         <a className="card" href={game('/gunslinger/')}>

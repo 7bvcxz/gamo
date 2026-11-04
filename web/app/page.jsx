@@ -31,9 +31,9 @@ const GAMES = [
   },
   {
     name: 'Popcorn & Glory',
-    path: game('/popcorn-glory/'),
+    path: game('/popcorn-glory/#stand'),
     blurb:
-      '팝콘 기계 하나, 돈 하나, 누르는 행동 하나. 서로 다른 3분짜리 실험을 해 보고, 재미가 확인된 쪽만 키웁니다.',
+      '팝콘 가게. 누르고 있다가 금색에서 떼면 팝콘이 터집니다. 가게가 자라면 흔들기·양념·자동화가 하나씩 열립니다. 세 실험으로 고른 손맛 위에 만들었습니다.',
     extra: [{ href: site('/popcorn-glory/doc/'), label: '문서' }],
   },
   {
