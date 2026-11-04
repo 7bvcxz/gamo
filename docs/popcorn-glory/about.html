@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popcorn 정보</title>
+<!--
+  Popcorn & Glory -- about, privacy, support and licences (Step 12, the release candidate).
+  A plain page beside the game (deploy.sh copies web/*.html; web/ has a .gdignore, so none of it is in the pack).
+  It loads nothing from anywhere else (only version.json beside it) and stores nothing.
+-->
+<style>
+  :root { --bg: #fff8e6; --card: #ffffff; --ink: #4d291a; --soft: #8a6a58; --line: #ecd9b0; --gold: #f2b705; --red: #e64a3b; --chip: #fff3cc; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #1f1712; --card: #2a201a; --ink: #f6e7d2; --soft: #c2a892; --line: #4a3a2e; --gold: #f2c230; --red: #ff6f5e; --chip: #3a2c20; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  h2 { font-size: 1.15rem; margin: 0 0 10px; }
+  .sub { color: var(--soft); margin: 0 0 18px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin: 0 0 16px; }
+  .card p:first-of-type { margin-top: 0; }
+  .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .links a { display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--chip); color: var(--ink); text-decoration: none; font-weight: 600; border: 1px solid var(--line); }
+  a { color: var(--red); }
+  code { background: var(--chip); padding: 1px 5px; border-radius: 6px; font-size: 0.92em; overflow-wrap: anywhere; }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin: 8px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Popcorn &amp; Glory</h1>
+  <p class="sub">팝콘 가게. 누르고 있다가 금색에서 떼면 팝콘이 터집니다. 설치 없이 브라우저에서 합니다.</p>
+
+  <section class="card">
+    <div class="links">
+      <a href="./#stand">팝콘 가게 플레이</a>
+      <a href="./">선택 화면 (세 실험과 가게)</a>
+      <a href="scorecard.html">3분 점수표</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>하는 법</h2>
+    <p>기계를 누르고 있으면 고리가 찹니다. 금색에서 떼면 완벽한 팝, 너무 오래 누르면 탑니다. 돈이 모이면 아래 카드로 가게를 키웁니다.
+      가게가 자라면 흔들기(누른 채 좌우로), 자동화(모터, 조수 냄비), 양념 셋이 하나씩 열립니다. 휴대폰은 세로로 두는 것이 가장 좋습니다.</p>
+  </section>
+
+  <section class="card">
+    <h2>개인정보</h2>
+    <ul>
+      <li>계정, 결제, 광고, 분석 도구가 없습니다. 게임 파일을 받는 것 말고는 어디로도 요청을 보내지 않습니다.</li>
+      <li>가게의 진행은 <b>이 브라우저</b>의 저장소(localStorage, 키 <code>popcorn-glory.stand.v1</code>)에만 남습니다. 점수표는 <code>popcorn-glory.scorecard.v1</code>입니다.
+        다른 기기로 옮겨지지 않고, 브라우저의 사이트 데이터를 지우면 함께 지워집니다.</li>
+      <li>게임 안에서 처음부터 다시 하려면 오른쪽 위의 다시 시작 버튼을 두 번 누릅니다(첫 번째는 버튼이 빨개지기만 합니다). 저장도 함께 지워집니다.</li>
+      <li>개발용 기록 내려받기(<code>?dev=1</code>)는 이 기기에 파일을 만들 뿐 보내지 않습니다.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>문의</h2>
+    <p>문제나 의견은 GitHub 저장소의 이슈로 남겨 주세요: <a href="https://github.com/7bvcxz/gamo/issues">github.com/7bvcxz/gamo/issues</a>.
+      이 게임은 아직 <b>출시 후보</b>입니다<span id="ver"></span>.</p>
+  </section>
+
+  <section class="card">
+    <h2>그림, 소리, 라이선스</h2>
+    <ul>
+      <li>그림은 이 저장소에서 손으로 쓴 도형과 SVG이고, 소리는 스크립트로 합성했습니다. 생성 이미지, 녹음, 외부 그림이나 소리는 없습니다
+        (목록: <a href="https://github.com/7bvcxz/gamo/blob/main/popcorn-glory/design/ART_AUDIO.md">design/ART_AUDIO.md</a>).</li>
+      <li>엔진은 <a href="https://godotengine.org/license">Godot Engine</a> 4.7(MIT 라이선스)입니다. 엔진이 쓰는 제3자 구성 요소의 고지는 그 페이지에 있습니다.</li>
+      <li>글자는 엔진에 들어 있는 기본 글꼴 Open Sans(Copyright 2020 The Open Sans Project Authors, SIL Open Font License 1.1)입니다.</li>
+    </ul>
+    <pre>Godot Engine
+Copyright (c) 2014-present Godot Engine contributors.
+Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+  </section>
+</main>
+<script>
+  // The published build's version, from the file the deploy writes beside the game (same origin).
+  fetch('version.json', { cache: 'no-store' }).then((r) => r.json()).then((v) => {
+    if (v && v.version) document.getElementById('ver').textContent = ` (지금 이 주소의 빌드: ${v.version})`;
+  }).catch(() => {});
+</script>
+</body>
+</html>
