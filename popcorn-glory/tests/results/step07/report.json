@@ -1,23 +1,23 @@
 {
   "_doc": "AUTOMATED test report (popcorn-glory/tools/test_all.sh). PASSED / FAILED / SKIPPED (with cause).",
-  "sha": "5b23dbb7ae4a",
-  "dirty": false,
+  "sha": "8050313494a0",
+  "dirty": true,
   "build": {
-    "version": "0.10.1",
-    "pack": "game-f0aa6ef16ff6.pck",
-    "packSize": 263596,
+    "version": "0.11.0",
+    "pack": "game-405b2e189c34.pck",
+    "packSize": 264988,
     "engine": "engine-7eda98958eb0",
     "godot": "4.7.stable.official.5b4e0cb0f",
-    "source": "5b23dbb7ae4a"
+    "source": "8050313494a0-dirty"
   },
   "target": "local docs/ (http://127.0.0.1)",
-  "when": "2026-11-03T23:30:40.450Z",
+  "when": "2026-11-04T01:09:04.245Z",
   "stages": {
     "headless": "PASSED",
     "deploy": "PASSED",
-    "browser": "PASSED"
+    "browser": "FAILED"
   },
-  "headless_summary": "85 passed, 0 failed, 2337 checks, 15 files, 3.3s",
+  "headless_summary": "91 passed, 0 failed, 2369 checks, 15 files, 4.2s",
   "browser_checks": [
     {
       "spec": "experiments04.spec.mjs",
@@ -25,7 +25,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3345
+      "ms": 3325
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -33,7 +33,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 1489
+      "ms": 1444
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -41,7 +41,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3858
+      "ms": 3684
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -49,7 +49,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3808
+      "ms": 3850
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -57,7 +57,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 7054
+      "ms": 7648
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -65,7 +65,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3590
+      "ms": 4460
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -73,7 +73,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3680
+      "ms": 4074
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -81,7 +81,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 8570
+      "ms": 4227
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -89,7 +89,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 3770
+      "ms": 1963
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -97,7 +97,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 10569
+      "ms": 5125
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -105,7 +105,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 6677
+      "ms": 4229
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -113,7 +113,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 9624
+      "ms": 7557
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -121,7 +121,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 8283
+      "ms": 4044
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -129,7 +129,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 8174
+      "ms": 4937
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -137,7 +137,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 6176
+      "ms": 2905
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -145,7 +145,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 3095
+      "ms": 1574
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -153,7 +153,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 7306
+      "ms": 3683
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -161,7 +161,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 5877
+      "ms": 3834
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -169,7 +169,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 8743
+      "ms": 6921
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -177,7 +177,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 6419
+      "ms": 3190
     },
     {
       "spec": "experiments04.spec.mjs",
@@ -185,7 +185,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 6103
+      "ms": 2874
     },
     {
       "spec": "input07.spec.mjs",
@@ -200,24 +200,6 @@
       "spec": "input07.spec.mjs",
       "title": "a double click buys once",
       "project": "p720",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 1
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "the keyboard plays: space presses, escape goes back",
-      "project": "p720",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 0
-    },
-    {
-      "spec": "input07.spec.mjs",
-      "title": "slide off the upgrade before letting go: no purchase",
-      "project": "phone",
       "status": "SKIPPED",
       "cause": "mouse paths on the desktop project",
       "notes": [],
@@ -225,17 +207,8 @@
     },
     {
       "spec": "input07.spec.mjs",
-      "title": "a double click buys once",
-      "project": "phone",
-      "status": "SKIPPED",
-      "cause": "mouse paths on the desktop project",
-      "notes": [],
-      "ms": 1
-    },
-    {
-      "spec": "input07.spec.mjs",
       "title": "the keyboard plays: space presses, escape goes back",
-      "project": "phone",
+      "project": "p720",
       "status": "SKIPPED",
       "cause": "mouse paths on the desktop project",
       "notes": [],
@@ -244,10 +217,37 @@
     {
       "spec": "input07.spec.mjs",
       "title": "slide off the upgrade before letting go: no purchase",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 1
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "a double click buys once",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "the keyboard plays: space presses, escape goes back",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "mouse paths on the desktop project",
+      "notes": [],
+      "ms": 0
+    },
+    {
+      "spec": "input07.spec.mjs",
+      "title": "slide off the upgrade before letting go: no purchase",
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 16057
+      "ms": 9690
     },
     {
       "spec": "input07.spec.mjs",
@@ -255,7 +255,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 14045
+      "ms": 20775
     },
     {
       "spec": "input07.spec.mjs",
@@ -263,7 +263,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 5569
+      "ms": 4881
     },
     {
       "spec": "input07.spec.mjs",
@@ -271,7 +271,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 5260
+      "ms": 4560
     },
     {
       "spec": "input07.spec.mjs",
@@ -279,7 +279,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 2743
+      "ms": 6683
     },
     {
       "spec": "input07.spec.mjs",
@@ -287,7 +287,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 6940
+      "ms": 4925
     },
     {
       "spec": "input07.spec.mjs",
@@ -295,7 +295,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 4835
+      "ms": 2563
     },
     {
       "spec": "input07.spec.mjs",
@@ -304,7 +304,7 @@
       "status": "SKIPPED",
       "cause": "touch paths on touch projects",
       "notes": [],
-      "ms": 0
+      "ms": 1
     },
     {
       "spec": "input07.spec.mjs",
@@ -322,7 +322,16 @@
       "status": "SKIPPED",
       "cause": "one project measures (desktop)",
       "notes": [],
-      "ms": 0
+      "ms": 1
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "p720",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 1
     },
     {
       "spec": "perf07.spec.mjs",
@@ -331,7 +340,16 @@
       "status": "SKIPPED",
       "cause": "one project measures (desktop)",
       "notes": [],
-      "ms": 2
+      "ms": 0
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "phone",
+      "status": "SKIPPED",
+      "cause": "one project measures (desktop)",
+      "notes": [],
+      "ms": 0
     },
     {
       "spec": "perf07.spec.mjs",
@@ -339,9 +357,20 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [
-        "perf: {\"load_ms\":2393,\"heap_start\":53500000,\"heap_after_60s\":53500000,\"burst\":{\"fps\":17.162471392759837,\"draw_calls\":117,\"primitives\":4291,\"fx_peak\":147,\"fx_cap\":400},\"sleep\":{\"before\":5681,\"hidden_5s\":5736,\"after_wake\":6647},\"load_avg\":34.31}"
+        "perf: {\"load_ms\":2613,\"heap_start\":53500000,\"heap_after_60s\":53500000,\"burst\":{\"fps\":41.53891799441614,\"draw_calls\":117,\"primitives\":4297,\"fx_peak\":154,\"fx_cap\":400},\"sleep\":{\"before\":3406,\"hidden_5s\":3429,\"after_wake\":4344},\"load_avg\":18.85}"
       ],
-      "ms": 74552
+      "ms": 72317
+    },
+    {
+      "spec": "perf07.spec.mjs",
+      "title": "stand: peak load for a minute, hidden tab, restart",
+      "project": "desktop",
+      "status": "FAILED",
+      "error": "Error: draw calls within the budget at the stand peak\n\nexpect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 200\nReceived:    269",
+      "notes": [
+        "perf: {\"worst\":{\"draw_calls\":269,\"primitives\":8548,\"fx\":44},\"fps\":[41.2573673870334,43.46966999292163,42.11969828180911,43.78980890888511,42,42.97421549529287],\"median_fps\":42.97421549529287,\"heap_start\":18200000,\"heap_after_60s\":18200000,\"batches\":{\"burnt\":0,\"early\":0,\"late\":0,\"near\":0,\"perfect\":22},\"helper_batches\":40,\"sound_played\":{\"clink\":1,\"coin\":61,\"ding\":22,\"pop_1\":40,\"pop_2\":22,\"sizzle\":1406,\"upgrade\":7},\"load_avg\":11.9,\"hidden\":{\"helper_before\":40,\"helper_after_5s_hidden\":40},\"after_restart\":{\"money\":0,\"auto\":0,\"recipe\":\"butter\",\"helper\":0}}"
+      ],
+      "ms": 70910
     },
     {
       "spec": "progression07.spec.mjs",
@@ -351,7 +380,7 @@
       "notes": [
         "mode: fast-forward with dev_advance (not real-time play)"
       ],
-      "ms": 14956
+      "ms": 17299
     },
     {
       "spec": "progression07.spec.mjs",
@@ -359,7 +388,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 47375
+      "ms": 30010
     },
     {
       "spec": "progression07.spec.mjs",
@@ -367,7 +396,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 7245
+      "ms": 4588
     },
     {
       "spec": "progression07.spec.mjs",
@@ -377,7 +406,7 @@
       "notes": [
         "mode: fast-forward with dev_advance (not real-time play)"
       ],
-      "ms": 24043
+      "ms": 11866
     },
     {
       "spec": "progression07.spec.mjs",
@@ -385,7 +414,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 54874
+      "ms": 27995
     },
     {
       "spec": "progression07.spec.mjs",
@@ -393,7 +422,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 8699
+      "ms": 4065
     },
     {
       "spec": "progression07.spec.mjs",
@@ -403,7 +432,7 @@
       "notes": [
         "mode: fast-forward with dev_advance (not real-time play)"
       ],
-      "ms": 18343
+      "ms": 8664
     },
     {
       "spec": "progression07.spec.mjs",
@@ -411,7 +440,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 59348
+      "ms": 18804
     },
     {
       "spec": "progression07.spec.mjs",
@@ -419,7 +448,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 6293
+      "ms": 2868
     },
     {
       "spec": "scorecard09.spec.mjs",
@@ -427,7 +456,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 622
+      "ms": 515
     },
     {
       "spec": "scorecard09.spec.mjs",
@@ -435,7 +464,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 583
+      "ms": 346
     },
     {
       "spec": "scorecard09.spec.mjs",
@@ -443,7 +472,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 643
+      "ms": 349
     },
     {
       "spec": "sound05.spec.mjs",
@@ -451,7 +480,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 4499
+      "ms": 2653
     },
     {
       "spec": "sound05.spec.mjs",
@@ -459,7 +488,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 6655
+      "ms": 5482
     },
     {
       "spec": "sound05.spec.mjs",
@@ -467,7 +496,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 12451
+      "ms": 15571
     },
     {
       "spec": "sound05.spec.mjs",
@@ -475,7 +504,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 8185
+      "ms": 4026
     },
     {
       "spec": "sound05.spec.mjs",
@@ -483,7 +512,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 10171
+      "ms": 6324
     },
     {
       "spec": "sound05.spec.mjs",
@@ -491,7 +520,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 6081
+      "ms": 3442
     },
     {
       "spec": "sound05.spec.mjs",
@@ -499,7 +528,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 5213
+      "ms": 2937
     },
     {
       "spec": "sound05.spec.mjs",
@@ -507,7 +536,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 7261
+      "ms": 4934
     },
     {
       "spec": "sound05.spec.mjs",
@@ -515,7 +544,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 13104
+      "ms": 9364
     },
     {
       "spec": "sound05.spec.mjs",
@@ -523,7 +552,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 8780
+      "ms": 4638
     },
     {
       "spec": "sound05.spec.mjs",
@@ -531,7 +560,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 11599
+      "ms": 6776
     },
     {
       "spec": "sound05.spec.mjs",
@@ -539,7 +568,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 7195
+      "ms": 3794
     },
     {
       "spec": "sound05.spec.mjs",
@@ -547,7 +576,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 4661
+      "ms": 2528
     },
     {
       "spec": "sound05.spec.mjs",
@@ -555,7 +584,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 6817
+      "ms": 4519
     },
     {
       "spec": "sound05.spec.mjs",
@@ -563,7 +592,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 13809
+      "ms": 9308
     },
     {
       "spec": "sound05.spec.mjs",
@@ -571,7 +600,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 8179
+      "ms": 3835
     },
     {
       "spec": "sound05.spec.mjs",
@@ -579,7 +608,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 10552
+      "ms": 5776
     },
     {
       "spec": "sound05.spec.mjs",
@@ -587,7 +616,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 5903
+      "ms": 3194
     },
     {
       "spec": "stall09.spec.mjs",
@@ -595,9 +624,9 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [
-        "hold: finger 1556 ms, game judged 1665 ms (perfect)"
+        "hold: finger 1551 ms, game judged 1631 ms (perfect)"
       ],
-      "ms": 4877
+      "ms": 3500
     },
     {
       "spec": "stall09.spec.mjs",
@@ -605,9 +634,9 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [
-        "hold: finger 1551 ms, game judged 1639 ms (perfect)"
+        "hold: finger 1552 ms, game judged 1581 ms (perfect)"
       ],
-      "ms": 5514
+      "ms": 3419
     },
     {
       "spec": "stall09.spec.mjs",
@@ -615,9 +644,9 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [
-        "hold: finger 1552 ms, game judged 1591 ms (perfect)"
+        "hold: finger 1551 ms, game judged 1557 ms (perfect)"
       ],
-      "ms": 5232
+      "ms": 3143
     },
     {
       "spec": "stand10.spec.mjs",
@@ -625,7 +654,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 14351
+      "ms": 10651
     },
     {
       "spec": "stand10.spec.mjs",
@@ -633,7 +662,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 4421
+      "ms": 2257
     },
     {
       "spec": "stand10.spec.mjs",
@@ -641,7 +670,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 14704
+      "ms": 11823
     },
     {
       "spec": "stand10.spec.mjs",
@@ -649,7 +678,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 4462
+      "ms": 2487
     },
     {
       "spec": "stand10.spec.mjs",
@@ -657,7 +686,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 15493
+      "ms": 11763
     },
     {
       "spec": "stand10.spec.mjs",
@@ -665,7 +694,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 4333
+      "ms": 2075
     },
     {
       "spec": "stub03.spec.mjs",
@@ -673,9 +702,9 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [
-        "load: 2548 ms to the first drawn frame"
+        "load: 1284 ms to the first drawn frame"
       ],
-      "ms": 9415
+      "ms": 5477
     },
     {
       "spec": "stub03.spec.mjs",
@@ -683,7 +712,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3892
+      "ms": 2056
     },
     {
       "spec": "stub03.spec.mjs",
@@ -691,7 +720,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 7269
+      "ms": 5970
     },
     {
       "spec": "stub03.spec.mjs",
@@ -699,7 +728,7 @@
       "project": "p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 3039
+      "ms": 1660
     },
     {
       "spec": "stub03.spec.mjs",
@@ -707,9 +736,9 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [
-        "load: 2708 ms to the first drawn frame"
+        "load: 1436 ms to the first drawn frame"
       ],
-      "ms": 12056
+      "ms": 5258
     },
     {
       "spec": "stub03.spec.mjs",
@@ -717,7 +746,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 4572
+      "ms": 2318
     },
     {
       "spec": "stub03.spec.mjs",
@@ -725,7 +754,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 7684
+      "ms": 6057
     },
     {
       "spec": "stub03.spec.mjs",
@@ -733,7 +762,7 @@
       "project": "phone",
       "status": "PASSED",
       "notes": [],
-      "ms": 3410
+      "ms": 1834
     },
     {
       "spec": "stub03.spec.mjs",
@@ -741,9 +770,9 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [
-        "load: 2521 ms to the first drawn frame"
+        "load: 1289 ms to the first drawn frame"
       ],
-      "ms": 9604
+      "ms": 4010
     },
     {
       "spec": "stub03.spec.mjs",
@@ -751,7 +780,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 5386
+      "ms": 1755
     },
     {
       "spec": "stub03.spec.mjs",
@@ -759,7 +788,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 7745
+      "ms": 5819
     },
     {
       "spec": "stub03.spec.mjs",
@@ -767,7 +796,7 @@
       "project": "desktop",
       "status": "PASSED",
       "notes": [],
-      "ms": 2967
+      "ms": 1664
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -777,7 +806,7 @@
       "notes": [
         "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
       ],
-      "ms": 4842
+      "ms": 2138
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -787,7 +816,7 @@
       "notes": [
         "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
       ],
-      "ms": 4155
+      "ms": 2075
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -797,7 +826,7 @@
       "notes": [
         "sizes: money 76 px tall, icon buttons 84 px, upgrade 520x166 px (CSS)"
       ],
-      "ms": 4060
+      "ms": 2052
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -805,7 +834,7 @@
       "project": "m-p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 6109
+      "ms": 3269
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -813,7 +842,7 @@
       "project": "m-p720",
       "status": "PASSED",
       "notes": [],
-      "ms": 4539
+      "ms": 2239
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -823,7 +852,7 @@
       "notes": [
         "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
       ],
-      "ms": 4850
+      "ms": 2773
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -833,7 +862,7 @@
       "notes": [
         "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
       ],
-      "ms": 4941
+      "ms": 2597
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -843,7 +872,7 @@
       "notes": [
         "sizes: money 83 px tall, icon buttons 92 px, upgrade 571x140 px (CSS)"
       ],
-      "ms": 5571
+      "ms": 2657
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -851,7 +880,7 @@
       "project": "m-hd",
       "status": "PASSED",
       "notes": [],
-      "ms": 9268
+      "ms": 4480
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -859,7 +888,7 @@
       "project": "m-hd",
       "status": "PASSED",
       "notes": [],
-      "ms": 5146
+      "ms": 2926
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -869,7 +898,7 @@
       "notes": [
         "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
       ],
-      "ms": 6034
+      "ms": 2983
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -879,7 +908,7 @@
       "notes": [
         "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
       ],
-      "ms": 5682
+      "ms": 2850
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -889,7 +918,7 @@
       "notes": [
         "sizes: money 38 px tall, icon buttons 42 px, upgrade 260x83 px (CSS)"
       ],
-      "ms": 5660
+      "ms": 2778
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -897,7 +926,7 @@
       "project": "m-small",
       "status": "PASSED",
       "notes": [],
-      "ms": 11250
+      "ms": 5179
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -905,7 +934,7 @@
       "project": "m-small",
       "status": "PASSED",
       "notes": [],
-      "ms": 7184
+      "ms": 3311
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -915,7 +944,7 @@
       "notes": [
         "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
       ],
-      "ms": 7275
+      "ms": 3645
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -925,7 +954,7 @@
       "notes": [
         "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
       ],
-      "ms": 6868
+      "ms": 3543
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -935,7 +964,7 @@
       "notes": [
         "sizes: money 61 px tall, icon buttons 67 px, upgrade 416x133 px (CSS)"
       ],
-      "ms": 6737
+      "ms": 3529
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -943,7 +972,7 @@
       "project": "m-tablet",
       "status": "PASSED",
       "notes": [],
-      "ms": 13895
+      "ms": 7157
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -951,7 +980,7 @@
       "project": "m-tablet",
       "status": "PASSED",
       "notes": [],
-      "ms": 8092
+      "ms": 4214
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -961,7 +990,7 @@
       "notes": [
         "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
       ],
-      "ms": 6664
+      "ms": 3477
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -971,7 +1000,7 @@
       "notes": [
         "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
       ],
-      "ms": 6139
+      "ms": 3353
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -981,7 +1010,7 @@
       "notes": [
         "sizes: money 30 px tall, icon buttons 33 px, upgrade 206x51 px (CSS)"
       ],
-      "ms": 6164
+      "ms": 3313
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -989,7 +1018,7 @@
       "project": "m-landscape",
       "status": "PASSED",
       "notes": [],
-      "ms": 12748
+      "ms": 6618
     },
     {
       "spec": "responsive07.spec.mjs",
@@ -997,13 +1026,13 @@
       "project": "m-landscape",
       "status": "PASSED",
       "notes": [],
-      "ms": 7339
+      "ms": 3819
     }
   ],
   "browser_totals": {
     "passed": 105,
     "passed_on_retry": 0,
-    "failed": 0,
-    "skipped": 10
+    "failed": 1,
+    "skipped": 12
   }
 }

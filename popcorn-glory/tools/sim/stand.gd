@@ -68,6 +68,7 @@ func _init() -> void:
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out))
 		_write(out + "/stand_sim.md", md)
 		_write(out + "/stand_sim.json", JSON.stringify({"_doc": "AUTOMATED SIMULATION on the real stand rules (tools/sim/stand.gd), seed 7, 20 minutes. Not human play.", "runs": rows}, "  "))
+		_write(out + "/stand_progress.svg", chart(rows))
 	var bad := rows.filter(func(r: Dictionary) -> bool: return not (r["violations"] as Array).is_empty())
 	quit(1 if bad.size() > 0 else 0)
 
@@ -307,6 +308,57 @@ func markdown(rows: Array[Dictionary], econ: PopEconomy) -> String:
 				cells.append(("**%d**" % int(v)) if v > 120.0 else "%d" % int(v))
 		out += "| %s | %s |\n" % [r["name"], " | ".join(cells)]
 	return out
+
+
+## Machine level over the 20 minutes for six players (a step line each), and
+## the helper rungs as dots -- the progression graph of the QA report.
+func chart(rows: Array[Dictionary]) -> String:
+	var pick := ["skilled (gold's middle", "casual (mixed timing", "novice, cheese", "slow novice", "low interaction", "never automates"]
+	var cols := ["#c0392b", "#2471a3", "#239b56", "#b9770e", "#7d3c98", "#566573"]
+	var w := 900.0
+	var h := 420.0
+	var l := 60.0
+	var b := 50.0
+	var x := func(t_ms: float) -> float: return l + (w - l - 20.0) * t_ms / float(HORIZON)
+	var y := func(lv: float) -> float: return h - b - (h - b - 20.0) * lv / 14.0
+	var svg := '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" font-family="sans-serif" font-size="12">' % [int(w), int(h) + 110]
+	svg += '<rect width="100%%" height="100%%" fill="#fffaf0"/>'
+	for lv in range(0, 15, 2):
+		svg += '<line x1="%d" y1="%.1f" x2="%d" y2="%.1f" stroke="#ddd"/><text x="%d" y="%.1f" text-anchor="end">Lv%d</text>' % [int(l), y.call(lv), int(w - 20), y.call(lv), int(l - 6), y.call(lv) + 4, lv]
+	for m in range(0, 21, 2):
+		svg += '<line x1="%.1f" y1="20" x2="%.1f" y2="%d" stroke="#eee"/><text x="%.1f" y="%d" text-anchor="middle">%d:00</text>' % [x.call(m * 60000), x.call(m * 60000), int(h - b), x.call(m * 60000), int(h - b + 18), m]
+	var k := 0
+	for r: Dictionary in rows:
+		var hit := false
+		for pfx: String in pick:
+			if String(r["name"]).begins_with(pfx):
+				hit = true
+		if not hit:
+			continue
+		var col: String = cols[k % cols.size()]
+		var pts := "%.1f,%.1f" % [x.call(0), y.call(0)]
+		var lv_prev := 0
+		var la: Dictionary = r["level_at"]
+		var keys := la.keys()
+		keys.sort()
+		for lv: Variant in keys:
+			var tx: float = x.call(float(la[lv]))
+			pts += " %.1f,%.1f %.1f,%.1f" % [tx, y.call(lv_prev), tx, y.call(int(lv))]
+			lv_prev = int(lv)
+		pts += " %.1f,%.1f" % [x.call(HORIZON), y.call(lv_prev)]
+		svg += '<polyline points="%s" fill="none" stroke="%s" stroke-width="2.5"/>' % [pts, col]
+		for e: String in (r["events"] as Dictionary).keys():
+			if e.begins_with("auto_"):
+				var et: float = float((r["events"] as Dictionary)[e])
+				var lv_then := 0
+				for lv: Variant in keys:
+					if float(la[lv]) <= et:
+						lv_then = int(lv)
+				svg += '<circle cx="%.1f" cy="%.1f" r="4" fill="%s"/>' % [x.call(et), y.call(lv_then), col]
+		svg += '<rect x="%d" y="%d" width="14" height="4" fill="%s"/><text x="%d" y="%d">%s</text>' % [int(l), int(h) + 10 + k * 16, col, int(l) + 20, int(h) + 15 + k * 16, String(r["name"]).xml_escape()]
+		k += 1
+	svg += '<text x="%d" y="14">Machine level over 20 minutes (lines); dots = an automation rung bought. AUTOMATED SIMULATION, not human play.</text></svg>' % int(l)
+	return svg
 
 
 func _k(v: int) -> String:

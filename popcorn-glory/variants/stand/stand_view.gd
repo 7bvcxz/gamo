@@ -32,12 +32,30 @@ var _loads: Array[float] = []
 var _helper_kick := 0.0
 var _recipe_flash := 0.0
 var _auto_flash := 0.0
-var helper_node := PopMachineNode.new()
+## The helper kettle is drawn once into its own texture and shown as one
+## sprite (Step 11: as a live machine it cost ~65 draw calls a frame, and the
+## stand's peak measured 269 against the budget of 200). The viewport renders
+## again only when the helper's look changes.
+const HELPER_ART := 180.0
+var helper_vp := SubViewport.new()
+var helper_art := PopMachineNode.new()
+var helper_node := Sprite2D.new()
+var _helper_look := Vector2i(-1, -1)
 
 
 func _init() -> void:
 	super()
+	helper_vp.name = "HelperArt"
+	helper_vp.transparent_bg = true
+	helper_vp.size = Vector2i(256, 256)
+	helper_vp.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	helper_art.position = Vector2(128, 250)
+	helper_vp.add_child(helper_art)
+	add_child(helper_vp)
 	helper_node.name = "Helper"
+	helper_node.texture = helper_vp.get_texture()
+	helper_node.centered = false
+	helper_node.visible = false
 	add_child(helper_node)
 	move_child(helper_node, 1)   # behind the main machine's front layer
 
@@ -251,10 +269,16 @@ func _process(delta: float) -> void:
 		var hl := int(st["helper_level"])
 		helper_node.visible = hl > 0
 		if hl > 0:
-			helper_node.set_look(_helper_stage(), helper_size(), 0.5)
+			var look := Vector2i(_helper_stage(), 1)
+			if look != _helper_look:
+				_helper_look = look
+				helper_art.set_look(_helper_stage(), HELPER_ART, 0.5)
+				helper_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 			var k := sin(_helper_kick * PI) * 0.08 if not reduced_motion else 0.0
-			helper_node.position = helper_base()
-			helper_node.scale = Vector2(1.0 + k, 1.0 - k)
+			var sc := helper_size() / HELPER_ART
+			helper_node.scale = Vector2(sc * (1.0 + k), sc * (1.0 - k))
+			# The texture's base point (128, 250) sits on helper_base().
+			helper_node.position = helper_base() - Vector2(128.0 * helper_node.scale.x, 250.0 * helper_node.scale.y)
 	super(delta)
 
 
@@ -320,9 +344,7 @@ func _draw_bags(ci: CanvasItem) -> void:
 		var s := 0.7 if String(b["kind"]) == "helper" else 1.0
 		var r := Rect2(p - Vector2(16, 22) * s, Vector2(32, 44) * s)
 		ci.draw_rect(r, PopPalette.CREAM)
-		for i in 3:
-			ci.draw_rect(Rect2(r.position + Vector2(r.size.x * (0.1 + 0.3 * float(i)), 0), Vector2(r.size.x * 0.14, r.size.y)), PopPalette.RED)
-		ci.draw_circle(r.position + Vector2(r.size.x * 0.5, 2), 9.0 * s, PopPalette.CREAM)
+		ci.draw_rect(Rect2(r.position + Vector2(r.size.x * 0.36, 0), Vector2(r.size.x * 0.28, r.size.y)), PopPalette.RED)
 		ci.draw_rect(r, PopPalette.INK, false, 2.0)
 
 
@@ -393,7 +415,6 @@ func _draw_shakers(ci: CanvasItem, st: Dictionary) -> void:
 		var chosen := String(st["recipe"]) == id
 		var lift := (6.0 + 6.0 * _recipe_flash) if chosen else 0.0
 		r.position.y -= lift
-		PopMachineArt._round_rect(ci, Rect2(r.position + Vector2(0, 6), r.size), 16, PopPalette.SHADOW)
 		PopMachineArt._round_rect(ci, r, 16, Color(1, 1, 1, 0.95) if chosen else Color(1, 1, 1, 0.6))
 		if chosen:
 			var pts := PopMachineArt.round_rect_points(r, 16)
@@ -403,8 +424,6 @@ func _draw_shakers(ci: CanvasItem, st: Dictionary) -> void:
 		var jar := Rect2(r.position + Vector2(r.size.x * 0.3, r.size.y * 0.12), Vector2(r.size.x * 0.4, r.size.y * 0.42))
 		PopMachineArt._round_rect(ci, jar, 8, RECIPE_COLORS[id])
 		ci.draw_rect(Rect2(jar.position - Vector2(2, 10), Vector2(jar.size.x + 4, 12)), PopPalette.CHROME)
-		for k in 3:
-			ci.draw_circle(jar.position + Vector2(jar.size.x * (0.25 + 0.25 * float(k)), -4), 2.5, PopPalette.INK)
 		# x mult
 		var fs := int(r.size.y * 0.2)
 		var label := "x%s" % str(snappedf(float(rd["mult"]), 0.01))
