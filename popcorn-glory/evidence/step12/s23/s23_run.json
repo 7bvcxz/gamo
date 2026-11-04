@@ -1,0 +1,357 @@
+{
+  "log": [
+    {
+      "t": "2026-11-04T04:32:39.108Z",
+      "k": "device",
+      "v": {
+        "model": "SM-S911N",
+        "android": "15",
+        "chrome": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Mobile Safari/537.36"
+      }
+    },
+    {
+      "t": "2026-11-04T04:32:42.727Z",
+      "k": "cold_load_ms (cache off, phone Wi-Fi: navigation start -> the game answering, page clock)",
+      "v": 3501
+    },
+    {
+      "t": "2026-11-04T04:32:44.236Z",
+      "k": "opened",
+      "v": {
+        "version": "0.12.1",
+        "exp": "stand",
+        "level": 0,
+        "window": [
+          1080,
+          1947
+        ]
+      }
+    },
+    {
+      "t": "2026-11-04T04:32:45.202Z",
+      "k": "geometry",
+      "v": {
+        "dpr": 3,
+        "iw": 360,
+        "ih": 649,
+        "sw": 360,
+        "sh": 780,
+        "touch_client": [
+          180,
+          350.3333435058594
+        ],
+        "screen_offset_px": [
+          0,
+          248.99996948242188
+        ]
+      }
+    },
+    {
+      "t": "2026-11-04T04:32:45.210Z",
+      "k": "after the calibration tap",
+      "v": {
+        "presses": 1,
+        "outcomes": {
+          "burnt": 0,
+          "early": 1,
+          "late": 0,
+          "near": 0,
+          "perfect": 0
+        }
+      }
+    },
+    {
+      "t": "2026-11-04T04:32:50.016Z",
+      "k": "one real hold into the gold",
+      "v": {
+        "hold_ms": 1513,
+        "outcomes": {
+          "burnt": 0,
+          "early": 1,
+          "late": 0,
+          "near": 0,
+          "perfect": 1
+        },
+        "money": 11,
+        "audio_contexts": [],
+        "audio_out": {
+          "rms": 0,
+          "peak": 0
+        }
+      }
+    },
+    {
+      "t": "2026-11-04T04:32:50.055Z",
+      "k": "memory at start (after GC)",
+      "v": {
+        "js_mb": 17.2,
+        "buffers_mb": 1.7
+      }
+    },
+    {
+      "t": "2026-11-04T04:33:11.731Z",
+      "k": "one real shake (motion events)",
+      "v": {
+        "shakes_seen": 3,
+        "even_pops": 1,
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 11
+        }
+      }
+    },
+    {
+      "t": "2026-11-04T04:33:21.656Z",
+      "k": "mark",
+      "v": {
+        "at_s": 30,
+        "level": 4,
+        "auto": 0,
+        "money": 4,
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 15
+        },
+        "fps": 60.1,
+        "js_mb": 25.3,
+        "buffers_mb": 11.4
+      }
+    },
+    {
+      "t": "2026-11-04T04:33:52.980Z",
+      "k": "mark",
+      "v": {
+        "at_s": 61,
+        "level": 5,
+        "auto": 1,
+        "money": 744,
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 29
+        },
+        "fps": 59.9,
+        "js_mb": 26.7,
+        "buffers_mb": 10.2
+      }
+    },
+    {
+      "t": "2026-11-04T04:34:23.185Z",
+      "k": "mark",
+      "v": {
+        "at_s": 92,
+        "level": 6,
+        "auto": 2,
+        "money": 2281,
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 42
+        },
+        "fps": 60,
+        "js_mb": 30.9,
+        "buffers_mb": 8.1
+      }
+    },
+    {
+      "t": "2026-11-04T04:34:51.648Z",
+      "k": "mark",
+      "v": {
+        "at_s": 120,
+        "level": 7,
+        "auto": 3,
+        "money": 2281,
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 54
+        },
+        "fps": 60.1,
+        "js_mb": 33.2,
+        "buffers_mb": 4.6
+      }
+    },
+    {
+      "t": "2026-11-04T04:35:21.801Z",
+      "k": "mark",
+      "v": {
+        "at_s": 150,
+        "level": 8,
+        "auto": 3,
+        "money": 5469,
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 67
+        },
+        "fps": 59,
+        "js_mb": 37.8,
+        "buffers_mb": 3.2
+      }
+    },
+    {
+      "t": "2026-11-04T04:35:50.567Z",
+      "k": "after play",
+      "v": {
+        "minutes": 3,
+        "holds": 79,
+        "buys": 12,
+        "level": 8,
+        "auto": 4,
+        "recipe": "caramel",
+        "outcomes": {
+          "burnt": 0,
+          "early": 2,
+          "late": 0,
+          "near": 0,
+          "perfect": 80
+        },
+        "clock_ms": 251134
+      }
+    },
+    {
+      "t": "2026-11-04T04:35:50.628Z",
+      "k": "memory at end (after GC)",
+      "v": {
+        "js_mb": 36.1,
+        "buffers_mb": 2.6
+      }
+    },
+    {
+      "t": "2026-11-04T04:35:53.848Z",
+      "k": "reload resume",
+      "v": {
+        "saved_level": 8,
+        "before": {
+          "level": 8,
+          "money": 5912,
+          "recipe": "caramel",
+          "auto": 4
+        },
+        "after": {
+          "level": 8,
+          "money": 6094,
+          "recipe": "caramel",
+          "auto": 4
+        }
+      }
+    },
+    {
+      "t": "2026-11-04T04:35:59.391Z",
+      "k": "home and back",
+      "v": {
+        "while_hidden": [
+          "hidden",
+          10415
+        ],
+        "visible_again": "visible",
+        "money": 10779,
+        "level": 8
+      }
+    },
+    {
+      "t": "2026-11-04T04:35:59.391Z",
+      "k": "page errors",
+      "v": [
+        "Uncaught",
+        "Uncaught"
+      ]
+    }
+  ],
+  "minutes": [
+    {
+      "at_s": 30,
+      "level": 4,
+      "auto": 0,
+      "money": 4,
+      "outcomes": {
+        "burnt": 0,
+        "early": 2,
+        "late": 0,
+        "near": 0,
+        "perfect": 15
+      },
+      "fps": 60.1,
+      "js_mb": 25.3,
+      "buffers_mb": 11.4
+    },
+    {
+      "at_s": 61,
+      "level": 5,
+      "auto": 1,
+      "money": 744,
+      "outcomes": {
+        "burnt": 0,
+        "early": 2,
+        "late": 0,
+        "near": 0,
+        "perfect": 29
+      },
+      "fps": 59.9,
+      "js_mb": 26.7,
+      "buffers_mb": 10.2
+    },
+    {
+      "at_s": 92,
+      "level": 6,
+      "auto": 2,
+      "money": 2281,
+      "outcomes": {
+        "burnt": 0,
+        "early": 2,
+        "late": 0,
+        "near": 0,
+        "perfect": 42
+      },
+      "fps": 60,
+      "js_mb": 30.9,
+      "buffers_mb": 8.1
+    },
+    {
+      "at_s": 120,
+      "level": 7,
+      "auto": 3,
+      "money": 2281,
+      "outcomes": {
+        "burnt": 0,
+        "early": 2,
+        "late": 0,
+        "near": 0,
+        "perfect": 54
+      },
+      "fps": 60.1,
+      "js_mb": 33.2,
+      "buffers_mb": 4.6
+    },
+    {
+      "at_s": 150,
+      "level": 8,
+      "auto": 3,
+      "money": 5469,
+      "outcomes": {
+        "burnt": 0,
+        "early": 2,
+        "late": 0,
+        "near": 0,
+        "perfect": 67
+      },
+      "fps": 59,
+      "js_mb": 37.8,
+      "buffers_mb": 3.2
+    }
+  ]
+}

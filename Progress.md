@@ -468,8 +468,8 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
   잠정 B > C > A. **소유자 결정(2026-11-03, 대화): B 승인 + 최소 범위** — Step 10(#115)을 그 가설로 시작한다(사람 점수 없이 내린 결정).
 - Step 10 (#115): 팝콘 가게 `#stand`(0.10.1) — B 위에 흔들기·양념·자동화(모터, 조수 냄비)가 단계적으로 열리는 vertical slice. 설계 `popcorn-glory/design/SLICE.md`, 보고서 `popcorn-glory/evidence/step10/REPORT.md`.
 - Step 11 (#116): 진행·난이도 시뮬레이터 v2, 블라인드 15·10분, 높음·중간 결함 수정(0.11.1). 출시 준비도 `popcorn-glory/qa/READINESS.md` — Step 12로 조건부 Go, 그대로 출시는 No-go(저장 없음). Step 12는 소유자 승인 뒤.
-- Step 12 (#117, 소유자 승인 2026-11-04): **출시 후보 0.12.1 — 소유자의 Go 대기.** 가게의 저장과 이어하기(localStorage `popcorn-glory.stand.v1`, `popcorn-glory/app/save_store.gd` 한 곳), 두 번 눌러 다시 시작, 끝(축하 + 걸린 시간), 시스템의 '동작 줄이기', 정보·개인정보·라이선스 페이지 `docs/popcorn-glory/about.html`, 사이트 문서 갱신.
-  0.12.1은 Step 05부터 있던 지글 소리 누수(누름마다 약 27MB)를 고쳤다. 체크리스트·출시 노트·되돌리는 법 `popcorn-glory/RELEASE_CHECKLIST.md`. 공개 0.12.1 묶음 헤드리스 99/99, 브라우저 112/0/18. Android는 디버그 APK만(실제 기기 미실행, S23 사용 중), PC는 템플릿 없음. HeyDive·스토어·결제·광고 없음.
+- Step 12 (#117, 소유자 승인 2026-11-04): **출시 후보 0.12.2 — 소유자의 Go 대기.** 가게의 저장과 이어하기(localStorage `popcorn-glory.stand.v1`, `popcorn-glory/app/save_store.gd` 한 곳), 두 번 눌러 다시 시작, 끝(축하 + 걸린 시간), 시스템의 '동작 줄이기', 정보·개인정보·라이선스 페이지 `docs/popcorn-glory/about.html`, 사이트 문서 갱신.
+  0.12.1은 Step 05부터 있던 지글 소리 누수(누름마다 약 27MB), 0.12.2는 완벽한 팝마다 넘치던 소리(피크 1.9–2.2)와 한국어 폰의 번역 제안을 고쳤다. 체크리스트·출시 노트·되돌리는 법 `popcorn-glory/RELEASE_CHECKLIST.md`. 공개 0.12.2 묶음 헤드리스 99/99, 브라우저 115/0/18. 실제 S23(Chrome·디버그 APK)에서 확인. PC는 템플릿 없음. HeyDive·스토어·결제·광고 없음.
 
 ## 다음 작업
 

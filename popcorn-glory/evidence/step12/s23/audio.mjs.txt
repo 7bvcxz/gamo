@@ -1,0 +1,49 @@
+// The real phone's audio output during one real hold (the meter sits on the page's audio thread).
+import { connect } from './cdp.mjs';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+const D = 'R3CW900QYZD';
+const adb = (...a) => execFileSync('adb', ['-s', D, ...a], { encoding: 'utf8' });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const SRC = fs.readFileSync('/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/audio_tap.mjs', 'utf8');
+const a0 = SRC.indexOf('export const AUDIO_TAP = () =>') + 'export const AUDIO_TAP = '.length;
+const tapFn = SRC.slice(a0, SRC.indexOf('\n};\n', a0) + 2);   // up to the function's own closing brace
+new Function(`(${tapFn})`);
+adb('shell', 'svc', 'power', 'stayon', 'usb'); adb('shell', 'wm', 'user-rotation', 'lock', '0');
+adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP'); await sleep(800); adb('shell', 'wm', 'dismiss-keyguard'); await sleep(800);
+adb('shell', 'input', 'swipe', '540', '1900', '540', '700', '250'); await sleep(800);
+adb('shell', 'am', 'start', '-n', 'com.android.chrome/com.google.android.apps.chrome.Main'); await sleep(2000);
+const c = await connect(9333, 'popcorn-glory');
+await c.send('Runtime.enable'); await c.send('Page.enable'); await c.send('Page.bringToFront');
+const ex = []; c.on((d) => { if (d.method === 'Runtime.exceptionThrown') ex.push(d.params.exceptionDetails.exception?.description?.slice(0, 160)); });
+await c.send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.POPCORN_E2E = true;' });
+await c.send('Page.addScriptToEvaluateOnNewDocument', { source: `(${tapFn})();` });
+await c.evaluate('window.__old = 1');
+await c.send('Page.navigate', { url: `https://7bvcxz.github.io/gamo/popcorn-glory/?s23=${Date.now()}#stand` });
+for (let i = 0; i < 100; i++) { try { if (!(await c.evaluate('!!window.__old'))) break; } catch (e) {} await sleep(100); }
+for (let i = 0; i < 150; i++) { try { if (await c.evaluate('!!(window.popcorn && window.popcorn.ready && typeof window.popcorn.state === "function")')) break; } catch (e) {} await sleep(100); }
+await sleep(1500);
+const s = await c.evaluate('window.popcorn.state()');
+const geo = await c.evaluate('({dpr: devicePixelRatio, iw: innerWidth})');
+const k = geo.iw / s.window[0];
+const r = s.rects.play; const offY = 249, offX = 0;   // measured in the run (touch clientY 350.33 at screen y 1300)
+const x = Math.round(offX + (r[0] + r[2] * 0.5) * k * geo.dpr), y = Math.round(offY + (r[1] + r[3] * 0.6) * k * geo.dpr);
+adb('shell', 'input', 'tap', `${x}`, `${y}`); await sleep(2500);   // a first touch: the browser lets the page start sound
+const ctxBefore = await c.evaluate('window.__audio.contexts.map((x) => x.state)');
+await c.evaluate("Promise.all(window.__audio.meters.map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('reset');m.port.postMessage('read');})))");
+const quiet = await c.evaluate("new Promise(r=>setTimeout(r,1500)).then(()=>Promise.all(window.__audio.meters.map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('read');}))))");
+await c.evaluate("Promise.all(window.__audio.meters.map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('reset');m.port.postMessage('read');})))");
+const w = s.run.window; const hold = Math.round(w[0] + (w[1] - w[0]) * 0.25);
+const holds = [];
+for (let i = 0; i < 3; i++) {
+  await c.evaluate("Promise.all(window.__audio.meters.map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('reset');m.port.postMessage('read');})))");
+  adb('shell', 'input', 'swipe', `${x}`, `${y}`, `${x}`, `${y}`, `${hold}`);
+  await sleep(700);
+  holds.push(await c.evaluate("Promise.all(window.__audio.meters.map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('read');})))"));
+  await sleep(500);
+}
+const loud = holds;
+const st = await c.evaluate('window.popcorn.state()');
+console.log(JSON.stringify({ version: s.version, contexts: ctxBefore, quiet_1500ms: quiet, during_three_real_holds: loud, hold_ms: hold, outcomes: st.run.outcomes, played: st.sound && st.sound.played, exceptions: ex }));
+await c.evaluate("localStorage.removeItem('popcorn-glory.stand.v1')");
+c.close();

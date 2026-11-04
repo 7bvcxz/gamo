@@ -1,0 +1,132 @@
+// Popcorn Step 12 on the real S23: the public build in the phone's Chrome; touches through Android's
+// own input (adb shell input), state through the game's test bridge over CDP.
+import { connect } from './cdp.mjs';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+const D = 'R3CW900QYZD', OUT = process.argv[2], MIN = Number(process.argv[3] || 3);
+const adb = (...a) => execFileSync('adb', ['-s', D, ...a], { encoding: 'utf8' });
+const shot = (name) => fs.writeFileSync(`${OUT}/${name}.png`, execFileSync('adb', ['-s', D, 'exec-out', 'screencap', '-p'], { maxBuffer: 64e6 }));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const log = []; const note = (k, v) => { log.push({ t: new Date().toISOString(), k, v }); console.log(k, JSON.stringify(v)); };
+const AUDIO_TAP_SRC = fs.readFileSync('/home/merti/Workspace/gamo-popcorn/popcorn-glory/tests/e2e/lib/audio_tap.mjs', 'utf8');
+const tapFn = AUDIO_TAP_SRC.slice(AUDIO_TAP_SRC.indexOf('export const AUDIO_TAP = () =>') + 'export const AUDIO_TAP = '.length, AUDIO_TAP_SRC.indexOf('\nexport async function listen'));
+
+// Awake and unlocked for the test (stay_on_while_plugged_in was 0; the caller restores it).
+adb('shell', 'svc', 'power', 'stayon', 'usb');
+adb('shell', 'wm', 'user-rotation', 'lock', '0');   // portrait for the test; the caller restores 'free'
+adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP'); await sleep(800);
+adb('shell', 'wm', 'dismiss-keyguard'); await sleep(800);
+adb('shell', 'input', 'swipe', '540', '1900', '540', '700', '250'); await sleep(800);
+adb('shell', 'am', 'start', '-n', 'com.android.chrome/com.google.android.apps.chrome.Main'); await sleep(2000);
+const c = await connect(9333, 'popcorn-glory');
+await c.send('Page.bringToFront');
+note('device', { model: adb('shell', 'getprop', 'ro.product.model').trim(), android: adb('shell', 'getprop', 'ro.build.version.release').trim(), chrome: (await c.evaluate('navigator.userAgent')) });
+await c.send('Page.enable'); await c.send('Runtime.enable'); await c.send('Network.enable');
+const errors = [];
+c.on((d) => { if (d.method === 'Runtime.exceptionThrown') errors.push(d.params.exceptionDetails.text); if (d.method === 'Runtime.consoleAPICalled' && d.params.type === 'error') errors.push(d.params.args.map((a) => a.value).join(' ')); });
+await c.send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.POPCORN_E2E = true;' });
+await c.send('Page.addScriptToEvaluateOnNewDocument', { source: `(${tapFn})();` });
+const state = () => c.evaluate('window.popcorn && window.popcorn.ready && typeof window.popcorn.state === "function" ? window.popcorn.state() : null');
+const call = (n, a) => c.evaluate(`window.popcorn.call(${JSON.stringify(n)}, ${JSON.stringify(a ?? null)})`);
+async function ready(timeout = 120000) { const t0 = Date.now(); let woke = t0; while (Date.now() - t0 < timeout) { try { if (await state()) return Date.now() - t0; } catch (e) {} if (Date.now() - woke > 10000) { adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP'); woke = Date.now(); } await sleep(100); } throw new Error('not ready'); }
+
+// 1. A cold load over the phone's own connection (cache off for this tab only; nothing cleared).
+await c.evaluate("localStorage.removeItem('popcorn-glory.stand.v1')");
+await c.send('Network.setCacheDisabled', { cacheDisabled: true });
+const t0 = Date.now();
+await c.evaluate('window.__old = 1');
+await c.send('Page.navigate', { url: `https://7bvcxz.github.io/gamo/popcorn-glory/?s23=${Date.now()}#stand` });
+for (let i = 0; i < 100; i++) { try { if (!(await c.evaluate('!!window.__old'))) break; } catch (e) {} await sleep(100); }
+await ready();
+const coldMs = await c.evaluate('Math.round(performance.now())');
+note('cold_load_ms (cache off, phone Wi-Fi: navigation start -> the game answering, page clock)', coldMs);
+await c.send('Network.setCacheDisabled', { cacheDisabled: false });
+await sleep(1500);
+let s = await state();
+note('opened', { version: s.version, exp: s.exp, level: s.run.level, window: s.window });
+shot('s23_00_first');
+
+// 2. Where the page sits on the screen: one real tap on the machine, read back as clientX/Y.
+const geo = await c.evaluate('({dpr: devicePixelRatio, iw: innerWidth, ih: innerHeight, sw: screen.width, sh: screen.height})');
+await c.evaluate("window.__lt = null; addEventListener('touchstart', (e) => { window.__lt = [e.touches[0].clientX, e.touches[0].clientY]; }, { capture: true, once: true });");
+adb('shell', 'input', 'tap', '540', '1300');
+await sleep(600);
+const lt = await c.evaluate('window.__lt');
+const offY = 1300 - lt[1] * geo.dpr, offX = 540 - lt[0] * geo.dpr;
+note('geometry', { ...geo, touch_client: lt, screen_offset_px: [offX, offY] });
+s = await state();
+const k = geo.iw / s.window[0];   // CSS px per game px
+const toScreen = (r, fx = 0.5, fy = 0.5) => [Math.round(offX + (r[0] + r[2] * fx) * k * geo.dpr), Math.round(offY + (r[1] + r[3] * fy) * k * geo.dpr)];
+note('after the calibration tap', { presses: s.run.presses, outcomes: s.run.outcomes });
+await sleep(2500);
+
+// 3. Sound on the real phone: the meter on the page's audio output during one real hold.
+const listenStart = await c.evaluate("Promise.all((window.__audio?.meters||[]).map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('reset');m.port.postMessage('read');}))).then(()=> (window.__audio?.contexts||[]).map(c=>c.state))");
+s = await state();
+const [px, py] = toScreen(s.rects.play, 0.5, 0.6);
+const w = s.run.window; const hold = Math.round(w[0] + (w[1] - w[0]) * 0.25);
+adb('shell', 'input', 'swipe', `${px}`, `${py}`, `${px}`, `${py}`, `${hold}`);
+await sleep(700);
+const loud = await c.evaluate("Promise.all((window.__audio?.meters||[]).map((m)=>new Promise((d)=>{m.port.onmessage=(e)=>d(e.data);m.port.postMessage('read');}))).then(a=>a.reduce((x,y)=>({rms:Math.max(x.rms,y.rms),peak:Math.max(x.peak,y.peak)}),{rms:0,peak:0}))");
+s = await state();
+note('one real hold into the gold', { hold_ms: hold, outcomes: s.run.outcomes, money: s.run.money, audio_contexts: listenStart, audio_out: loud });
+
+// 4. MIN minutes of play with real touches: hold into the gold, buy the cheaper card, caramel once unlocked.
+await c.send('HeapProfiler.enable');
+const heap = async (gc) => { if (gc) await c.send('HeapProfiler.collectGarbage'); const h = await c.send('Runtime.getHeapUsage'); return { js_mb: +(h.usedSize / 1e6).toFixed(1), buffers_mb: +(h.backingStorageSize / 1e6).toFixed(1) }; };
+const fps = () => c.evaluate('new Promise((done)=>{let n=0;const t0=performance.now();const f=()=>{n++; if(performance.now()-t0<1500) requestAnimationFrame(f); else done(n*1000/(performance.now()-t0));};requestAnimationFrame(f);})');
+note('memory at start (after GC)', await heap(true));
+const playStart = Date.now(); const minutes = []; let buys = 0, holds = 0, shook = false;
+let nextMark = 30000;
+while (Date.now() - playStart < MIN * 60000) {
+  s = await state(); const run = s.run;
+  if (Date.now() - playStart >= nextMark) {
+    nextMark += 30000;
+    minutes.push({ at_s: Math.round((Date.now() - playStart) / 1000), level: run.level, auto: run.auto_level, money: run.money, outcomes: { ...run.outcomes }, fps: +(await fps()).toFixed(1), ...(await heap(false)) });
+    note('mark', minutes[minutes.length - 1]);
+  }
+  if (run.unlocked.recipes && run.recipe !== 'caramel' && !run.heating && s.rects.recipe_caramel) { const [x, y] = toScreen(s.rects.recipe_caramel); adb('shell', 'input', 'tap', `${x}`, `${y}`); await sleep(400); continue; }
+  const main = run.cost; const au = run.unlocked.auto ? run.auto_cost : -1;
+  const pick = main >= 0 && (au < 0 || main <= au) ? ['upgrade', main] : (au >= 0 ? ['auto', au] : null);
+  if (pick && run.money >= pick[1] && !run.heating && s.rects[pick[0]]) { const [x, y] = toScreen(s.rects[pick[0]]); adb('shell', 'input', 'tap', `${x}`, `${y}`); buys++; await sleep(400); continue; }
+  if (run.heating || run.cooldown_left > 0) { await sleep(80); continue; }
+  const [hx, hy] = toScreen(s.rects.play, 0.5, 0.6);
+  const ww = run.window; const hh = Math.round(ww[0] + (ww[1] - ww[0]) * 0.25);
+  if (run.unlocked.shake && !shook) {
+    // One real shake: finger down, three swings, up -- Android's own motion events, one shell.
+    const dx = Math.round(70 * k * geo.dpr);
+    adb('shell', `input motionevent DOWN ${hx} ${hy}; input motionevent MOVE ${hx + dx} ${hy}; input motionevent MOVE ${hx - dx} ${hy}; input motionevent MOVE ${hx + dx} ${hy}; input motionevent UP ${hx + dx} ${hy}`);
+    await sleep(600); const a = await state();
+    note('one real shake (motion events)', { shakes_seen: a.run.shakes, even_pops: a.run.even_pops, outcomes: a.run.outcomes });
+    shook = true; continue;
+  }
+  adb('shell', 'input', 'swipe', `${hx}`, `${hy}`, `${hx}`, `${hy}`, `${hh}`); holds++;
+  await sleep(150);
+}
+s = await state();
+note('after play', { minutes: MIN, holds, buys, level: s.run.level, auto: s.run.auto_level, recipe: s.run.recipe, outcomes: s.run.outcomes, clock_ms: s.clock_ms });
+note('memory at end (after GC)', await heap(true));
+shot('s23_01_after_play');
+
+// 5. Save and resume: a reload of the tab.
+const before = (await state()).run;
+const savedLevel = await c.evaluate("JSON.parse(localStorage.getItem('popcorn-glory.stand.v1')||'null')?.rules?.level");
+await c.send('Page.reload');
+await sleep(1000); await ready();
+await sleep(1500);
+const after = (await state()).run;
+note('reload resume', { saved_level: savedLevel, before: { level: before.level, money: before.money, recipe: before.recipe, auto: before.auto_level }, after: { level: after.level, money: after.money, recipe: after.recipe, auto: after.auto_level } });
+shot('s23_02_after_reload');
+
+// 6. Home button (the tab hidden), then back to Chrome.
+await call('dev_money', 4321);
+adb('shell', 'input', 'keyevent', 'KEYCODE_HOME');
+await sleep(2500);
+const hiddenSave = await c.evaluate("[document.visibilityState, JSON.parse(localStorage.getItem('popcorn-glory.stand.v1')||'null')?.rules?.money]");
+adb('shell', 'am', 'start', '-n', 'com.android.chrome/com.google.android.apps.chrome.Main');
+await sleep(2500);
+const back = await state();
+note('home and back', { while_hidden: hiddenSave, visible_again: await c.evaluate('document.visibilityState'), money: back.run.money, level: back.run.level });
+note('page errors', errors);
+fs.writeFileSync(`${OUT}/s23_run.json`, JSON.stringify({ log, minutes }, null, 2));
+c.close();

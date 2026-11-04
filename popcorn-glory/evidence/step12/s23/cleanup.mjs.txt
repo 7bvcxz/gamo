@@ -1,0 +1,10 @@
+import { connect } from './cdp.mjs';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const c = await connect(9333, 'popcorn-glory');
+await c.send('Page.enable');
+await c.send('Page.navigate', { url: 'https://7bvcxz.github.io/gamo/popcorn-glory/about.html' });
+await sleep(3000);
+const left = await c.evaluate("localStorage.removeItem('popcorn-glory.stand.v1'); localStorage.removeItem('popcorn-glory.scorecard.v1'); Object.keys(localStorage).filter(k => k.startsWith('popcorn-glory'))");
+console.log('popcorn keys left on the phone:', JSON.stringify(left), 'page', await c.evaluate('location.pathname'));
+await c.send('Page.close');
+c.close();

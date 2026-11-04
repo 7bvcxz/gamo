@@ -1,0 +1,2 @@
+Warning: Activity not started, intent has been delivered to currently running top-most instance.
+{"contexts":["running"],"quiet_1500ms":[{"rms":0.1377781361026125,"peak":0.38625583052635193}],"during_a_real_hold":[{"rms":0.5714211612712856,"peak":1.9398443698883057}],"hold_ms":1710,"outcomes":{"burnt":0,"early":3,"late":0,"near":0,"perfect":81},"played":{"coin":6,"ding":1,"pop_1":4,"pop_2":1,"sizzle":1,"thud":1},"exceptions":[]}
