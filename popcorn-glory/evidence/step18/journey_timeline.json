@@ -1,0 +1,34 @@
+[
+  {
+    "t_ms": 1508,
+    "what": "open"
+  },
+  {
+    "t_ms": 3303,
+    "what": "released"
+  },
+  {
+    "t_ms": 3328,
+    "what": "bin 0 packing false shelf 0 queue 1 serving false sold 0"
+  },
+  {
+    "t_ms": 4169,
+    "what": "bin 2 packing true shelf 0 queue 1 serving false sold 0"
+  },
+  {
+    "t_ms": 6170,
+    "what": "bin 2 packing true shelf 0 queue 2 serving false sold 0"
+  },
+  {
+    "t_ms": 7175,
+    "what": "bin 2 packing false shelf 0 queue 1 serving true sold 0"
+  },
+  {
+    "t_ms": 7336,
+    "what": "bin 0 packing true shelf 0 queue 1 serving true sold 0"
+  },
+  {
+    "t_ms": 8370,
+    "what": "bin 0 packing true shelf 0 queue 1 serving false sold 1"
+  }
+]
