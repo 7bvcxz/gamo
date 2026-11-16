@@ -28,6 +28,8 @@ var clock := PopClock.new()
 var session := PopSession.new()
 var history: Array[Dictionary] = []
 var reduced_motion := false
+## Step 14: ?burst=1 turns on the stand's crescendo (off = the stand as it was).
+var burst := false
 
 var ui: Control
 var chooser: PopChooser
@@ -78,6 +80,7 @@ func _ready() -> void:
 	reduced_motion = String(route["motion"]) == "reduce" or (String(route["motion"]) != "full" and PopWeb.prefers_reduced_motion())
 	frame.dev = bool(route["dev"])
 	frame.trial = bool(route["trial"])
+	burst = bool(route["burst"])
 	audio.set_muted(not bool(route["sound"]))
 	frame.set_sound(audio.level_name())
 	if not economy.errors.is_empty():
@@ -350,6 +353,9 @@ func _start(id: String) -> void:
 		_saved_at_ms = 0
 		if bool(entry.get("save", false)) and not frame.trial:
 			_load_saved(id)
+	# Step 14: the crescendo is a mode of the address, not of the save.
+	if "burst_mode" in rules:
+		rules.set("burst_mode", burst)
 	clock.set_pause("hidden", web.hidden())
 	var view_script: GDScript = load(String(entry["view"]))
 	var view: PopPlayView = view_script.new()

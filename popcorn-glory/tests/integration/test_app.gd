@@ -424,3 +424,61 @@ func test_a_trial_of_the_stand_neither_reads_nor_writes_the_save() -> void:
 	assert_eq(PopSaveStore.read("test.stand.v1"), saved, "the real save is untouched (restart and leaving included)")
 	trial.queue_free()
 	await tree.process_frame
+
+
+## Step 14: the crescendo with real mouse input, a tab hidden mid-hold, leaving
+## and coming back, and a level change. Off unless the address asks for it.
+func test_the_crescendo_with_real_input_and_interruptions() -> void:
+	app.open("stand")
+	await tree.process_frame
+	assert_false(bool(app.rules.state()["burst_mode"]), "off by default: the stand is B")
+	app.back()
+	app.burst = true
+	app.open("stand")
+	await tree.process_frame
+	assert_true(bool(app.rules.state()["burst_mode"]), "?burst=1 turns it on")
+	var play: PopPlayView = app.frame.play
+	var c := play.size / 2
+	var ws: int = app.rules.window_start()
+	# Two real perfect holds: down, the gold, up.
+	for i in 2:
+		_mouse(c, true)
+		app.dev_advance(ws + 60)
+		_mouse(c, false)
+		app.dev_advance(1500)
+	assert_eq(int(app.rules.state()["crescendo"]), 4, "two perfect holds = 4 kernels")
+	# A tab hidden mid-hold: the hidden time is not heat (the clock pauses).
+	_mouse(c, true)
+	app.dev_advance(ws / 2)
+	# (Real frames with the clock paused, as a hidden tab does -- dev_advance would
+	# move time regardless.)
+	app.clock.set_pause("hidden", true)
+	var heat0: int = int(app.rules.state()["heat_ms"])
+	await tree.create_timer(0.6).timeout
+	assert_eq(int(app.rules.state()["heat_ms"]), heat0, "no heat while hidden")
+	app.clock.set_pause("hidden", false)
+	assert_true(bool(app.rules.state()["heating"]), "still heating, not burnt by the hidden time")
+	app.dev_advance(ws - int(app.rules.state()["heat_ms"]) + 60)
+	_mouse(c, false)
+	app.dev_advance(1500)
+	assert_eq(int(app.rules.state()["crescendo"]), 6, "the interrupted hold still judged perfect (%s)" % [app.rules.state()["outcomes"]])
+	# Leave and come back: the meter waits (the stand is kept).
+	app.back()
+	await tree.process_frame
+	app.open("stand")
+	await tree.process_frame
+	assert_eq(int(app.rules.state()["crescendo"]), 6, "kept across leaving")
+	# A level change on the way: the burst is a chain from level 5.
+	app.dev_level(5)
+	ws = app.rules.window_start()
+	var money0: int = app.rules.money
+	var pays: int = app.rules.payout(5)
+	_mouse(c, true)
+	app.dev_advance(ws + 60)
+	_mouse(c, false)
+	var st: Dictionary = app.rules.state()
+	assert_eq(int(st["bursts"]), 1, "the fourth perfect is a burst")
+	assert_eq(int(st["burst_tier"]), 1, "a chain at level 5")
+	assert_eq(int(st["crescendo"]), 0, "the meter empties")
+	assert_eq(app.rules.money - money0, int(floor(pays * 1.5)), "worth 1.5 x the batch")
+	app.dev_advance(800)   # the chain plays out without errors

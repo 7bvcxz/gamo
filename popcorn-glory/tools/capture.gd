@@ -56,6 +56,8 @@ func _init() -> void:
 func _tick() -> void:
 	if not _setup_done:
 		_setup_done = true
+		if _args.has("burst"):
+			_app.set("burst", true)   # Step 14: the stand's crescendo
 		if _args.has("exp"):
 			_app.open(String(_args["exp"]))
 		if _app.rules != null and _args.has("level"):

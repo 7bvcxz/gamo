@@ -389,3 +389,98 @@ func test_buying_the_last_thing_completes_the_stand_once() -> void:
 	var b: PopRules = Stand.new()
 	b.from_save(JSON.parse_string(JSON.stringify(s.to_save())))
 	assert_eq(int(b.state()["completed_ms"]), 1234, "kept in the save")
+
+
+# -- Step 14: the crescendo (a reversible mode) --------------------------------
+
+func _release_at(r: PopRules, ms: int) -> Dictionary:
+	r.execute({"type": "press"})
+	r.advance(ms)
+	var out := r.execute({"type": "release"})
+	r.advance(2000)   # past the cooldown
+	return out
+
+
+func test_with_the_mode_off_the_stand_is_b_as_it_was() -> void:
+	var a: PopRules = Stand.new()
+	var b: PopRules = Stand.new()
+	b.burst_mode = false
+	for i in 12:
+		var ra := _hold_mid(a)
+		var rb := _hold_mid(b)
+		assert_eq(int(ra["pops"]), int(rb["pops"]), "same pops")
+	assert_eq(a.money, b.money, "same money")
+	assert_eq(int(a.state()["crescendo"]), 0, "the meter stays empty")
+	assert_eq(int(a.state()["bursts"]), 0, "no bursts")
+
+
+func test_perfect_and_near_fill_the_crescendo_and_misses_neither_add_nor_take() -> void:
+	var s: PopRules = Stand.new()
+	s.burst_mode = true
+	var w0: int = s.window_start()
+	_release_at(s, w0 + 10)              # perfect +2
+	assert_eq(s.crescendo, 2, "perfect = 2 kernels")
+	_release_at(s, w0 - 100)             # near (within near_ms before the gold) +1
+	assert_eq(s.crescendo, 3, "near = 1 kernel")
+	_release_at(s, 200)                  # early: nothing
+	assert_eq(s.crescendo, 3, "an early pop adds and takes nothing")
+	s.execute({"type": "press"})
+	s.advance(s.burn_at() + 10)          # burnt by itself
+	s.advance(2000)
+	assert_eq(s.crescendo, 3, "a burnt batch adds and takes nothing")
+
+
+func test_the_pop_that_fills_it_is_one_burst_worth_one_and_a_half() -> void:
+	var s: PopRules = Stand.new()
+	s.burst_mode = true
+	var plain: PopRules = Stand.new()
+	var w0: int = s.window_start()
+	var pays: Array[int] = []
+	for i in 4:
+		s.drain_events()
+		pays.append(int(_release_at(s, w0 + 10)["pops"]))
+		_release_at(plain, w0 + 10)
+	var bursts := s.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "burst")
+	assert_eq(bursts.size(), 1, "the fourth perfect is one burst")
+	var base := int(plain.payout(0))
+	assert_eq(pays[0], base, "an ordinary pop pays as before")
+	assert_eq(pays[3], int(floor(base * 1.5)), "the burst pays 1.5 x (floor)")
+	assert_eq(s.crescendo, 0, "the meter empties")
+	assert_eq(s.money - plain.money, int(floor(base * 1.5)) - base, "the only difference is the burst's extra")
+	assert_eq(int(bursts[0]["data"]["extra"]), int(floor(base * 1.5)) - base, "the event says the extra")
+
+
+func test_the_burst_grows_with_the_stand_and_the_helper_does_not_fill_it() -> void:
+	var s: PopRules = Stand.new()
+	s.burst_mode = true
+	assert_eq(s.burst_tier(0), 0, "a big pop")
+	assert_eq(s.burst_tier(5), 1, "a chain")
+	assert_eq(s.burst_tier(10), 2, "a fountain")
+	s.level = 6
+	s.money = 100000
+	s.earned = 100000
+	s.execute({"type": "buy_auto"})
+	s.execute({"type": "buy_auto"})
+	assert_true(s.helper_level() > 0, "a helper")
+	s.advance(20000)
+	assert_true(int(s.helper_batches) > 0, "the helper popped")
+	assert_eq(s.crescendo, 0, "the helper's pops fill nothing (the crescendo is the hand's)")
+
+
+func test_the_crescendo_is_saved_and_clamped() -> void:
+	var s: PopRules = Stand.new()
+	s.burst_mode = true
+	_release_at(s, s.window_start() + 10)
+	_release_at(s, s.window_start() + 10)
+	var d: Dictionary = JSON.parse_string(JSON.stringify(s.to_save()))
+	var b: PopRules = Stand.new()
+	assert_true(bool(b.from_save(d)), "loads")
+	assert_eq(b.crescendo, 4, "the meter comes back")
+	d["crescendo"] = 999
+	var c: PopRules = Stand.new()
+	c.from_save(d)
+	assert_eq(c.crescendo, c.crescendo_full() - 1, "clamped below a burst (a save cannot fire one)")
+	d.erase("crescendo")
+	var e: PopRules = Stand.new()
+	assert_true(bool(e.from_save(d)), "an older save without it loads")
+	assert_eq(e.crescendo, 0, "empty")

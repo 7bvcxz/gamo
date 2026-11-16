@@ -51,6 +51,7 @@
     "unlock": { "shake": 3, "auto": 4, "recipes": 5 },
     "shake": { "turns": 3, "mult": 1.3, "motor_mult": 1.15 },
     "edge_grace_ms": 40,
+    "crescendo": { "_doc": "Step 14, a reversible mode (?burst=1): a perfect pop adds `perfect` kernels to the crescendo, a near pop `near`; nothing else adds or takes. The pop that fills it to `full` is a burst worth (1 + bonus) x its batch. `tiers`: the level from which the burst is a chain, then a fountain.", "full": 8, "perfect": 2, "near": 1, "bonus": 0.5, "tiers": [5, 10] },
     "recipes": {
       "butter": { "mult": 1.0, "window_scale": 1.0, "burn_scale": 1.0, "cooldown_add_ms": 0 },
       "caramel": { "mult": 1.5, "window_scale": 0.45, "burn_scale": 0.4, "cooldown_add_ms": 0 },

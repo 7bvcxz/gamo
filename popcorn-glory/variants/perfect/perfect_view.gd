@@ -122,6 +122,27 @@ func _draw_under(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 
 ## The gauge, in front of the machine: a wide machine at a high level must
 ## never hide the gold (it did when this was drawn behind it).
+## A small square on the middle of the gold arc (for the tests' pixel checks).
+func gold_mid_rect() -> Rect2:
+	var w: Array = _r()["window"]
+	var burn := float(w[2])
+	var a := -PI / 2 + TAU * clampf((float(w[0]) + float(w[1])) * 0.5 / burn, 0.0, 1.0)
+	var p := machine_centre() + Vector2(cos(a), sin(a)) * ring_radius()
+	var h := machine_size() * 0.03
+	return Rect2(p - Vector2(h, h), Vector2(h * 2.0, h * 2.0))
+
+
+## The gold arc alone, as the ring draws it (Step 14 strokes it again over the
+## burst's pieces).
+func _draw_gold_arc(ci: CanvasItem, size_px: float) -> void:
+	var w: Array = _r()["window"]
+	var burn := float(w[2])
+	var top := -PI / 2
+	var a0 := top + TAU * clampf(float(w[0]) / burn, 0.0, 1.0)
+	var a1 := top + TAU * clampf(float(w[1]) / burn, 0.0, 1.0)
+	ci.draw_arc(machine_centre(), ring_radius(), a0, a1, 24, Color(PopPalette.GOLD, 0.95), size_px * 0.045 * 1.6)
+
+
 func _draw_ring(ci: CanvasItem, _base: Vector2, size_px: float) -> void:
 	var st := _r()
 	var w: Array = st["window"]

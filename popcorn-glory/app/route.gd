@@ -6,7 +6,7 @@ extends RefCounted
 ## (`godot --path popcorn-glory -- --exp stub --dev`).
 
 static func parse(hash: String, search: String, args: PackedStringArray) -> Dictionary:
-	var out := {"exp": "", "dev": false, "sound": true, "motion": "", "trial": false}
+	var out := {"exp": "", "dev": false, "sound": true, "motion": "", "trial": false, "burst": false}
 	var h := hash.trim_prefix("#").strip_edges()
 	if h != "":
 		out["exp"] = h.uri_decode()
@@ -23,6 +23,8 @@ static func parse(hash: String, search: String, args: PackedStringArray) -> Dict
 				out["motion"] = v
 			"trial":
 				out["trial"] = v != "0"
+			"burst":
+				out["burst"] = v != "0"   # Step 14: the stand's crescendo (a reversible mode)
 	var i := 0
 	while i < args.size():
 		match args[i]:
@@ -34,5 +36,7 @@ static func parse(hash: String, search: String, args: PackedStringArray) -> Dict
 				out["dev"] = true
 			"--mute":
 				out["sound"] = false
+			"--burst":
+				out["burst"] = true
 		i += 1
 	return out

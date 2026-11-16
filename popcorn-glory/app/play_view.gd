@@ -259,7 +259,14 @@ func _layer_draw(ci: CanvasItem, under: bool) -> void:
 	_draw_over(ci, base, size_px)
 	_draw_hints(ci, base, size_px)
 	fx.draw(ci)
+	_draw_after_fx(ci, size_px)
 	_draw_gains(ci)
+
+
+## Drawn over the effects (Step 14: the stand's gold arc in burst mode, so no
+## piece of a burst ever covers where to let go).
+func _draw_after_fx(_ci: CanvasItem, _size_px: float) -> void:
+	pass
 
 
 func _draw_gains(ci: CanvasItem) -> void:

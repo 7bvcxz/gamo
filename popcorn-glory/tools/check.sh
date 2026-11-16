@@ -19,4 +19,13 @@ timeout 300 "$GODOT" --headless --path "$HERE" --editor --quit >"$LOG" 2>&1
 [[ -z "$(problems "$LOG")" ]] || { problems "$LOG" | head; fail "editor load"; }
 echo "── Popcorn: unit + integration"
 "$HERE/tools/test.sh" all || fail "tests"
+# Render checks need a renderer (the headless dummy draws nothing): under Xvfb when it exists.
+if command -v xvfb-run >/dev/null; then
+  echo "── Popcorn: render (gold on top of a burst)"
+  timeout 180 xvfb-run -a -s "-screen 0 1280x1600x24" "$GODOT" --path "$HERE" --audio-driver Dummy \
+    --script res://tools/check_gold_on_top.gd >"$LOG" 2>&1 || { grep -E 'gold on|FAIL' "$LOG"; fail "render: gold on top"; }
+  grep -E 'gold on' "$LOG"
+else
+  echo "── Popcorn: render SKIPPED (no xvfb-run)"
+fi
 echo "── check.sh (Popcorn): OK"

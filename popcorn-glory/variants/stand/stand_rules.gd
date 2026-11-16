@@ -33,6 +33,12 @@ var hand_even_pops := 0
 ## Rules time (= active play) when the last machine and the last rung were
 ## bought; -1 until then (Step 12: the ending, shown on the finished card).
 var completed_ms := -1
+## Step 14, the crescendo (a reversible mode, off by default -- `#stand` stays
+## B): successful pops fill it, and the pop that fills it is a burst worth more.
+## Set by the app from ?burst=1; not part of the save's choice, only its count.
+var burst_mode := false
+var crescendo := 0
+var bursts := 0
 
 
 func _init(p_economy: PopEconomy = null) -> void:
@@ -187,6 +193,7 @@ func _scale_batch(n: int, kind: String) -> int:
 	var sm := _shake_mult()
 	var by_hand := unlocked("shake") and shakes >= _turns()
 	var out := maxi(1, int(floor(n * float(_recipe()["mult"]) * sm)))
+	out = _crescendo(out, kind)
 	manual_earned += out
 	if sm > 1.0:
 		even_pops += 1
@@ -198,6 +205,44 @@ func _scale_batch(n: int, kind: String) -> int:
 
 func _cooldown_ms() -> int:
 	return super() + int(_recipe().get("cooldown_add_ms", 0))
+
+
+func _burst_table() -> Dictionary:
+	return _t().get("crescendo", {})
+
+
+func crescendo_full() -> int:
+	return int(_burst_table().get("full", 8))
+
+
+## The burst's look grows with the stand: 0 a big pop, 1 a chain, 2 a fountain.
+func burst_tier(at_level: int = -1) -> int:
+	var lv := level if at_level < 0 else at_level
+	var tier := 0
+	for t: Variant in _burst_table().get("tiers", []):
+		if lv >= int(t):
+			tier += 1
+	return tier
+
+
+## A hand pop's batch after the crescendo: fills the meter by the outcome, and
+## the pop that fills it pays (1 + bonus) x. Misses add nothing and take nothing.
+func _crescendo(n: int, kind: String) -> int:
+	if not burst_mode:
+		return n
+	var bt := _burst_table()
+	var add := int(bt.get(kind, 0)) if kind == PERFECT or kind == NEAR else 0
+	if add <= 0:
+		return n
+	crescendo += add
+	if crescendo < crescendo_full():
+		_emit("crescendo", {"kernels": crescendo, "full": crescendo_full()})
+		return n
+	crescendo = 0
+	bursts += 1
+	var out := int(floor(n * (1.0 + float(bt.get("bonus", 0.5)))))
+	_emit("burst", {"tier": burst_tier(), "count": out, "extra": out - n, "outcome": kind})
+	return out
 
 
 func done() -> bool:
@@ -292,6 +337,8 @@ func to_save() -> Dictionary:
 		d[k] = get(k)
 	d["outcomes"] = outcomes.duplicate()
 	d["completed_ms"] = completed_ms
+	d["crescendo"] = crescendo
+	d["bursts"] = bursts
 	return d
 
 
@@ -319,6 +366,11 @@ func from_save(d: Dictionary) -> bool:
 	recipe = String(d["recipe"])
 	var cm: Variant = d.get("completed_ms", -1)
 	completed_ms = int(cm) if (typeof(cm) == TYPE_INT or typeof(cm) == TYPE_FLOAT) and float(cm) >= -1.0 else -1
+	# Step 14 fields: optional (older saves have none), clamped to the meter.
+	var cr: Variant = d.get("crescendo", 0)
+	crescendo = clampi(int(cr), 0, crescendo_full() - 1) if (typeof(cr) == TYPE_INT or typeof(cr) == TYPE_FLOAT) else 0
+	var bs: Variant = d.get("bursts", 0)
+	bursts = maxi(0, int(bs)) if (typeof(bs) == TYPE_INT or typeof(bs) == TYPE_FLOAT) else 0
 	for k: String in outcomes.keys():
 		outcomes[k] = int((oc as Dictionary).get(k, 0))
 	var cyc := helper_cycle_ms()
@@ -352,4 +404,9 @@ func state() -> Dictionary:
 	s["hand_even_pops"] = hand_even_pops
 	s["cooldown_ms"] = _cooldown_ms()
 	s["completed_ms"] = completed_ms
+	s["burst_mode"] = burst_mode
+	s["crescendo"] = crescendo
+	s["crescendo_full"] = crescendo_full()
+	s["bursts"] = bursts
+	s["burst_tier"] = burst_tier()
 	return s
