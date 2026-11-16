@@ -1,0 +1,108 @@
+# MACHINES — 기계 40종 카탈로그 (Step 27, 생성 문서)
+
+`data/machines.json`이 단일 원본이다(생성: `tools/catalog/build_catalog.py`, 이 문서: `tools/catalog/catalog_doc.py`). 그림은 게임 안 `#machines`(실제 자리 크기, 다섯 묶음 × 8, 그 아래 40대가 층에 접힌 배치). 수치는 [proposal].
+
+**가짜 효과 없음**: 모델에서 돌지 않는 기계(`runtime` 없음)나 아직 없는 체계(`requires`)가 필요한 기계는 지을 수 없고 아무것도 약속하지 않는다(`err.not_yet`, 시험 `test_no_machine_is_sold_that_would_do_nothing`). 지금 있는 체계: portions, packs, customers, sizes, lanes, upkeep.
+
+## 해금 지도 (간판 단계 → 열리는 기계)
+
+| 간판 | 열리는 기계 |
+|---|---|
+| 0 | P01, P02, P03 ●, P04, P05, P06, P07, P08 |
+| 2 | M06, M08 |
+| 3 | M01, M02, M04, M07 ●, S01, S07 ●, U04 |
+| 4 | M03, M05, M09, M12, S02, S03, S06, U01, U02, U03 |
+| 5 | M10, M11, M13, M14, M15, S05, U05, U06 |
+| 6 | M16, S04, S08, U07, U08 |
+
+● = 지금 돈다(Step 26: M07 자동 냄비, P03 부피 충전기, S07 셀프 키오스크).
+
+## 제조 기초 (M01–M08, Step 28)
+
+| ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| M01 | Kernel Hopper Loader | kitchen · 1 | kernels trickle down a funnel into the kettles | feed (resource=kernels, to=auto kettles, buffer=40) | kernels (bought by the sack) → kernels in each kettle's hopper | one hopper feeds up to 4 kettles | 간판 3 · +M07 | kernels | 250 / 1분 | buffer 40 / buffer 80 / buffer 160 | without kernels an auto kettle starves; with the hopper it never waits for a refill | 체계 대기: kernels |
+| M02 | Precision Oil Doser | kitchen · 1 | a drop of oil falls with each cycle | dose (resource=oil, grade_shift={'late': 'near'}, oil_per_lot=1) | oil, an auto lot starting → the lot's grade odds: late becomes near | one doser per kettle row | 간판 3 · +M07 | oil | 300 / 2분 | shift 0.5 / shift 0.75 / shift 1.0 | quality 60 -> 80 on the late share of auto lots | 체계 대기: oil |
+| M03 | Heat Controller | kitchen · 1 | a needle steadies on a gauge | regulate (removes_grade=burnt, applies_to=auto kettles) | the kettles' heat → no burnt auto lots | covers the kettles on its row | 간판 4 · +M07 | heat_model | 350 / 2분 | — / — / — | burnt auto lots (yield 0.25) disappear once auto heat can vary | 체계 대기: heat_model |
+| M04 | Agitation Motor | kitchen · 1 | a shaft turns inside the kettle | agitate (portions_bonus=1, applies_to=auto lots) | an auto lot cooking → one more portion per lot | one motor per kettle | 간판 3 · +M07 | — | 280 / 2분 | bonus 1 / bonus 1 / bonus 2 | an auto lot of ~2.1 portions makes ~3.1 (+48% from the same kernels) | Step 28 |
+| M05 | Pop Detector | kitchen · 1 | an eye blinks when the popping slows | detect (removes_grade=late, applies_to=auto lots) | the popping sound → no late auto lots (they come out near) | one detector per kettle | 간판 4 · +M07 | — | 320 / 1분 | — / — / — | late share (30%) becomes near: +0.6 portion and +20 quality per such lot | Step 28 |
+| M06 | Batch Ejector | kitchen · 1 | an arm tips the kettle into the tube | eject (lift_ms_minus=600, applies_to=the hand kettle and auto kettles) | a lot in a glass → the lot in the lift sooner | one per floor | 간판 2 | — | 220 / 1분 | minus 600 / minus 700 / minus 800 | the kettle's glass frees 0.6 s sooner each lot (the hand pops more often when the bin is the limit) | Step 28 |
+| M07 | Dual Kettle Sequencer | kitchen · 1 | a second kettle cooks while the first pours | produce (makes=lots, portions=4 x 0.7 x grade, cycle_ms=6000) | — → a lot of popcorn (real portions) | holds its lot when the bin is full | 간판 3 | — | 300 / 4분 | cycle_ms 6000 / cycle_ms 4800 / cycle_ms 3800 | ~21 portions a minute (tier 0) | 돈다 |
+| M08 | Cooling/Recovery Fan | kitchen · 1 | fan blades spin after each pop | cool (recovery_ms_minus=150, applies_to=the hand kettle and auto kettles' turnaround) | a kettle cooling → shorter cooldown | one per floor | 간판 2 | — | 200 / 1분 | minus 150 / minus 200 / minus 250 | a fast hand pops ~5% more often | Step 28 |
+
+## 제조 고급 (M09–M16, Step 29)
+
+| ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| M09 | Kernel Sorter | kitchen · 1 | a sieve shakes out unpopped kernels | sort (regrade={'early': 'near', 'late': 'near'}, portion_loss=1) | early/late lots → the same lot at near grade, one portion fewer | between the kettles and the lift | 간판 4 · +M07 | — | 600 / 3분 | — / — / — | quality 50/60 -> 80 for a portion each | Step 29 |
+| M10 | Multi-Pot Distributor | kitchen · 2 | pipes branch to several pots | capacity (kitchen_slots_plus=2) | — → two more kettle places | two places wide | 간판 5 · +M07 | — | 1200 / 2분 | plus 2 / plus 3 / plus 4 | more kettles where 4 places were the limit | Step 29 |
+| M11 | Quality Sensor | kitchen · 1 | a light sorts lots left and right | grade_split (threshold=90, premium_price=1.2) | lots of quality >= 90 → premium packs (price x1.2) | a second bin of 12 | 간판 5 · 포장대 2 | premium_sku | 900 / 2분 | — / — / — | perfect hand lots sell for 20% more once a premium shelf exists | 체계 대기: premium_sku |
+| M12 | Flavor Base Mixer | kitchen · 1 | a whisk turns in a bowl | premix (for=flavored lots, time_saved_ms=1000) | flavor base → flavored lots without the coating wait | asleep until flavors open | 간판 4 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| M13 | Vent Stabilizer | kitchen · 1 | vents breathe in turn | stabilize (prevents=overheat stops, when_kettles_at_least=3) | the kitchen's heat → no overheat stops | covers the floor | 간판 5 · +M07 | heat_model | 800 / 2분 | — / — / — | none until kettles can overheat (Step 32) | 체계 대기: heat_model |
+| M14 | Heat Recycler | kitchen · 1 | a coil glows while kettles run | recycle (kettle_upkeep_minus=1, only_while=a kettle is cooking) | the kettles' waste heat → 1 coin a minute less upkeep per cooking kettle | covers the floor | 간판 5 · +M07 | — | 900 / 0분 | minus 1 / minus 2 / minus 3 | -25% kettle upkeep at tier 0 | Step 29 |
+| M15 | Smart Job Dispatcher | kitchen · 1 | a screen points kettles at jobs | dispatch (chooses=flavor per lot) | the shelf's counts → kettles make what is missing | needs two flavors to choose between | 간판 5 | flavors | 1000 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| M16 | Rotary Popper | kitchen · 2 | a drum turns and pours a steady stream | produce (makes=lots, portions=2, cycle_ms=2500) | — → a small lot every 2.5 s | two places wide; holds when the bin is full | 간판 6 · +M07 | — | 2500 / 6분 | cycle_ms 2500 / cycle_ms 2000 / cycle_ms 1600 | ~48 portions a minute | Step 29 |
+
+## 포장 (P01–P08, Step 30)
+
+| ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| P01 | Cup Feeder | packing · 1 | a stack of cups lowers one at a time | container (container=cup) | cups → cup packs (a new SKU) | one per station | 포장대 1 | cup_sku | 300 / 1분 | — / — / — | none until cups are a product | 체계 대기: cup_sku |
+| P02 | Bag Dispenser | packing · 1 | a flat bag opens and drops | container (container=large bag, opens_size=4) | flat bags → large bags can be packed at station tier 1 | one per station | 포장대 1 | — | 400 / 1분 | — / — / — | the large bag (+80% per customer who wants it) one tier earlier | Step 30 |
+| P03 | Volumetric Filler | packing · 1 | a nozzle fills a bag by volume | pack (makes=packs, cycle_ms=5000) | portions in the bin → a sealed pack on the shelf | holds a sealed pack while the shelf is full | 포장대 1 | — | 350 / 3분 | cycle_ms 5000 / cycle_ms 4000 / cycle_ms 3200 | +12 packs a minute (tier 0) | 돈다 |
+| P04 | Portion Weigher | packing · 1 | a scale pan dips and settles | weigh (returns_overfill=True, slower_ms=500) | the station's packs → exact packs; overfill back to the bin | on the station | 포장대 2 | portion_variance | 500 / 2분 | — / — / — | none until packs can be overfilled (P03 volume variance, Step 30) | 체계 대기: portion_variance |
+| P05 | Seasoning Sprayer | packing · 1 | a fine mist puffs over the popcorn | season (makes=flavored portions) | plain portions, seasoning → cheese/spicy portions | one flavor at a time | 포장대 2 | flavors | 700 / 2분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| P06 | Caramel Coater | packing · 1 | caramel drips into a tumbling drum | coat (makes=caramel portions, slow=True) | plain portions, caramel → caramel portions | slow; one batch at a time | 포장대 2 | flavors | 900 / 3분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| P07 | Auto Sealer | packing · 1 | two hot jaws press a bag shut | seal (station_cycle_minus=0.25) | filled packs → sealed packs, the heads free sooner | on the station | 포장대 2 | — | 600 / 2분 | minus 0.25 / minus 0.3 / minus 0.35 | the station packs ~33% more | Step 30 |
+| P08 | Package Conveyor Diverter | packing · 2 | a gate swings packs onto lanes | divert (shelf_lanes=per SKU) | sealed packs → packs on their own lanes | two places wide | 포장대 3 | flavors | 1200 / 2분 | — / — / — | none until two flavors share the shelf | 체계 대기: flavors |
+
+## 가게 (S01–S08, Step 31)
+
+| ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| S01 | Pickup Belt | shop · 1 | a belt carries packs to the counter | convey (service_ms_minus=600) | packs on the shelf → packs at the counter | covers the counter | 간판 3 | — | 400 / 1분 | minus 600 / minus 800 / minus 1000 | a lane hands over in 1.8 s instead of 2.4 (+33%) | Step 31 |
+| S02 | Order Ticket Printer | shop · 1 | a ticket curls out of a slot | ticket (patience_paused_while=their pack is being made) | waiting customers → fewer leave while their bag is made | covers the queue | 간판 4 | — | 500 / 1분 | — / — / — | customers who wait for a pack in progress do not leave | Step 31 |
+| S03 | Auto Cashier | shop · 1 | a till flashes and drops change | cashier (lane_concurrent=2) | a customer at a lane → that lane serves two at once | one per lane | 간판 4 | — | 600 / 2분 | — / — / — | a lane's capacity doubles | Step 31 |
+| S04 | Queue Router | shop · 1 | ropes swing to open a second line | route (needs_lanes=2) | the queue → customers to the shortest lane | only with two or more lanes | 간판 6 | multi_queue | 700 / 1분 | — / — / — | none until lanes have their own queues (Step 31) | 체계 대기: multi_queue |
+| S05 | Express Window | shop · 1 | a small window slides open | express (serves=small bag orders) | small-bag orders → served at the window, out of turn | one window | 간판 5 | — | 800 / 2분 | — / — / — | small-bag customers stop waiting behind large orders | Step 31 |
+| S06 | Menu Display Board | shop · 1 | the board lights the flavors in stock | menu (substitution=customer's choice among stocked flavors) | the shelf's flavors → fewer leave for a missing flavor | covers the shop | 간판 4 | flavors | 500 / 1분 | — / — / — | none until flavors (Step 34) | 체계 대기: flavors |
+| S07 | Self-Service Kiosk | shop · 1 | a screen lights and a bag drops | serve (service_ms=3000) | the next customer, their pack → a sale | takes the next customer only when the lanes are busy | 간판 3 | — | 500 / 3분 | service_ms 3000 / service_ms 2400 / service_ms 1900 | +20 customers a minute when the counter is the limit | 돈다 |
+| S08 | Multi-Lane Serving Robot | shop · 2 | a robot slides along a rail between lanes | float_lane (needs_lanes=4) | busy lanes → an extra hand-over at the busiest lane | two places wide | 간판 6 | four_lanes | 2000 / 4분 | — / — / — | none until four lanes (Step 31) | 체계 대기: four_lanes |
+
+## 보조 (U01–U08, Step 32)
+
+| ID | 이름 | 층·자리 | 보이는 움직임 | 동작 계약 | 입력 → 출력 | 줄·제약 | 선행 | 필요한 체계 | 값 / 유지비 | 단계 | 한계 이익 | 상태 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| U01 | Maintenance Robot | support · 1 | a robot rolls to a stopped machine | repair (fixes=faults (not unpaid)) | a faulted machine → the machine running again | one per factory | 간판 4 | faults | 600 / 2분 | — / — / — | none until machines can fault (Step 32) | 체계 대기: faults |
+| U02 | Lubrication Station | support · 1 | an oil can tips over a neighbour | neighbor_speed (cycle_minus=0.1, range=adjacent places) | oil → neighbours' cycles 10% shorter | affects only adjacent places | 간판 4 | oil | 500 / 1분 | — / — / — | neighbours 10% faster once oil exists | 체계 대기: oil |
+| U03 | Energy Saver | support · 1 | a leaf lamp dims | upkeep (upkeep_per_coin_plus=0.25, applies_to=working machines on its floor) | coins → 25% less upkeep | one per floor | 간판 4 | — | 700 / 0분 | cut 0.25 / cut 0.35 / cut 0.45 | a floor of 4 kettles saves ~4 coins a minute | Step 32 |
+| U04 | Buffer Lift | support · 1 | a crate rises between floors | buffer (bin_plus=12, shelf_plus=4) | — → bin +12 portions, shelf +4 packs | one per factory | 간판 3 | — | 500 / 1분 | bin 12, shelf 4 / bin 24, shelf 6 / bin 36, shelf 8 | fewer stalls when a stage pauses | Step 32 |
+| U05 | Quality Inspector | support · 1 | a magnifier sweeps the shelf | inspect (threshold=60, for=price-minded customers) | packs below quality 60 → bargain packs | covers the shelf | 간판 5 | customer_preferences | 600 / 1분 | — / — / — | none until customers prefer price or quality (Step 36) | 체계 대기: customer_preferences |
+| U06 | Sanitation Bot | support · 1 | a bot leaves a trail of bubbles | freshness (prevents=quality loss of aged stock) | stock in the bin → no aging | covers the floor | 간판 5 | aging | 600 / 2분 | — / — / — | none until stock ages | 체계 대기: aging |
+| U07 | Demand Scheduler | support · 1 | a calendar flips to the next rush | schedule (reads=['news', 'preferences']) | news, preferences → the right flavor first | one per factory | 간판 6 | news, flavors | 1200 / 2분 | — / — / — | none until news and flavors (Steps 34, 37) | 체계 대기: news, flavors |
+| U08 | Route Balancer | support · 1 | arrows swap between two lines | balance (needs_lines=2) | goods in a blocked line → the same goods in an idle line | needs two parallel lines | 간판 6 | parallel_lines | 1500 / 2분 | — / — / — | none until parallel lines (Step 33) | 체계 대기: parallel_lines |
+
+## 다른 체계와의 고리 (아직 없는 것)
+
+| 체계 | 기다리는 기계 | 생기는 Step |
+|---|---|---|
+| aging | U06 | 32 |
+| cup_sku | P01 | 30 |
+| customer_preferences | U05 | 36 |
+| faults | U01 | 32 |
+| flavors | M12, M15, P05, P06, P08, S06, U07 | 34 |
+| four_lanes | S08 | 31 |
+| heat_model | M03, M13 | 28–29 |
+| kernels | M01 | 28 |
+| multi_queue | S04 | 31 |
+| news | U07 | 37 |
+| oil | M02, U02 | 28 |
+| parallel_lines | U08 | 33 |
+| portion_variance | P04 | 30 |
+| premium_sku | M11 | 29 |
+
+## 40대가 함께 (Step 33)
+
+- 층마다 자리가 늘어난다(지금 부엌 4·가운데층 3·가게 2 → M10이 부엌 +2–4, Step 33에서 층마다 줄을 더해 40 자리). 기계 40대는 같은 크기의 작은 그림으로 층마다 줄지어 접히고(`#machines` 아래 배치), 고르면 펼쳐진다.
+- 같은 종류를 여러 대 둘 수 있다(값은 대수마다 ×1.25). 40대는 실행기의 상한(`auto_cooker.max`)이고, 수요가 상한일 때 남는 기계는 막혀 쉬고 유지비를 내지 않는다(Step 25 시뮬레이션).
+

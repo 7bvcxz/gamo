@@ -1124,3 +1124,71 @@ func test_the_hand_tunes_a_selected_cooker_for_a_few_lots_only() -> void:
 				grades.append(String(e["data"]["grade"]))
 	assert_eq(grades.slice(0, 3), ["perfect", "perfect", "perfect"], "three perfect lots")
 	assert_false(grades.slice(3).has("perfect"), "then back to the machine's own odds")
+
+
+# -- Step 27: the 40-machine catalog and its no-fake-effects matrix ----------------
+
+const CONTRACT_KINDS := ["feed", "dose", "regulate", "agitate", "detect", "eject", "produce", "cool", "sort", "capacity", "grade_split",
+	"premix", "stabilize", "recycle", "dispatch", "container", "pack", "weigh", "season", "coat", "seal", "divert", "convey", "ticket",
+	"cashier", "route", "express", "menu", "serve", "float_lane", "repair", "neighbor_speed", "upkeep", "buffer", "inspect",
+	"freshness", "schedule", "balance"]
+## The model's behaviour tests for each machine that runs today.
+const RUNTIME_TESTS := {"cooker": "test_upkeep_is_paid_a_coin_at_a_time_and_never_becomes_a_debt",
+	"bagger": "test_the_bagger_packs_real_portions_and_waits_or_holds_honestly",
+	"kiosk": "test_the_kiosk_serves_real_customers_and_pays_while_it_serves"}
+
+
+func test_forty_stable_ids_in_five_groups_of_eight_with_distinct_contracts() -> void:
+	var all: Dictionary = Factory.new().forty()
+	var ids := all.keys().filter(func(k: String) -> bool: return not k.begins_with("_"))
+	assert_eq(ids.size(), 40, "forty machines")
+	for prefix in ["M", "P", "S", "U"]:
+		var n := ids.filter(func(k: String) -> bool: return k.begins_with(prefix)).size()
+		assert_eq(n, 16 if prefix == "M" else 8, "%s group size" % prefix)
+	for i in range(1, 17):
+		assert_true(all.has("M%02d" % i), "M%02d exists" % i)
+	var seen := {}
+	for id: String in ids:
+		var e: Dictionary = all[id]
+		var c: Dictionary = e["contract"]
+		assert_true(String(c["kind"]) in CONTRACT_KINDS, "%s: a named behaviour (%s), not a bare bonus" % [id, c["kind"]])
+		var key := JSON.stringify(c)
+		assert_false(seen.has(key), "%s: its contract is not a copy of %s" % [id, seen.get(key, "")])
+		seen[key] = id
+		for f in ["name", "floor", "slots", "parts", "motion", "operation", "inputs", "outputs", "queue", "prereq", "requires", "cost", "upkeep_per_min", "tiers", "marginal", "step"]:
+			assert_true(e.has(f), "%s has %s" % [id, f])
+		assert_eq((e["tiers"] as Array).size(), 3, "%s: three tiers" % id)
+		assert_true(int(e["cost"]) > 0, "%s: a price" % id)
+	# The same kind may appear twice only with different parameters (two producers, two containers).
+	var kinds := {}
+	for id: String in ids:
+		kinds[String(all[id]["contract"]["kind"])] = int(kinds.get(String(all[id]["contract"]["kind"]), 0)) + 1
+	assert_true(kinds.size() >= 36, "at least 36 different behaviours among 40 (%d)" % kinds.size())
+
+
+func test_no_machine_is_sold_that_would_do_nothing() -> void:
+	var f: PopRules = Factory.new()
+	f.sign_tier = 6
+	f.packer_tier = 3
+	f.money = 1 << 30
+	_open(f)
+	_open_sign(f)
+	var all: Dictionary = f.forty()
+	var have: Array = all["_systems"]
+	var runs := 0
+	for id: String in all.keys():
+		if id.begins_with("_"):
+			continue
+		var e: Dictionary = all[id]
+		var missing: Array = (e["requires"] as Array).filter(func(s: String) -> bool: return not have.has(s))
+		var r: Dictionary = f.execute({"type": "build", "machine": id})
+		if e.get("runtime") == null or not missing.is_empty():
+			assert_false(bool(r["ok"]), "%s: not built (it does not run yet%s)" % [id, ", needs %s" % [missing] if not missing.is_empty() else ""])
+			assert_eq(String(r["reason"]), "err.not_yet", "%s: with the honest reason" % id)
+		else:
+			runs += 1
+			assert_true(bool(r["ok"]) or String(r["reason"]) in ["err.no_slot", "err.slot_taken"], "%s: a running machine is built (%s)" % [id, r.get("reason", "")])
+			assert_true(RUNTIME_TESTS.has(String(e["runtime"])), "%s: its behaviour has a test" % id)
+			assert_true(has_method(RUNTIME_TESTS[String(e["runtime"])]), "%s: that test exists (%s)" % [id, RUNTIME_TESTS[String(e["runtime"])]])
+	assert_eq(runs, 3, "today: M07, P03 and S07 run")
+	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing invented")

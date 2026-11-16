@@ -34,6 +34,10 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "artboard", "letter": "", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/artboard/artboard_view.gd",
 		"color": Color(0.84, 0.21, 0.17)},
+	# Step 27: the forty machines of data/machines.json, at real place size (a design sheet).
+	{"id": "machines", "letter": "", "listed": false,
+		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/catalog/catalog_view.gd",
+		"color": Color(0.84, 0.21, 0.17)},
 	{"id": "stub", "letter": "S", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/stub/stub_view.gd",
 		"color": Color(0.5, 0.5, 0.5)},

@@ -300,3 +300,184 @@ static func state_badge(ci: CanvasItem, at: Vector2, s: float, state: String) ->
 				ci.draw_arc(at, s, a0, a0 + TAU / 16.0, 4, PopTokens.SKY, 2.5)
 		"run":
 			ci.draw_circle(at, s * 0.6, PopTokens.OK)
+
+
+# -- Step 27: the forty machines' icons, composed from parts -----------------------
+## Every machine is a body in its group's colour (manufacturing red, advanced deep
+## red, packaging steel, storefront cream and gold, support teal) plus the parts
+## that show what it does (data/machines.json `parts`). Same language as the floors.
+
+static func group_colour(group: String) -> Color:
+	match group:
+		"manufacturing":
+			return PopTokens.MACHINE
+		"advanced":
+			return PopTokens.MACHINE_DEEP
+		"packaging":
+			return PopTokens.STEEL_DEEP
+		"storefront":
+			return PopPalette.GOLD.darkened(0.15)
+		"support":
+			return Color(0.25, 0.62, 0.6)
+	return PopTokens.STEEL
+
+
+static func catalog_icon(ci: CanvasItem, r: Rect2, parts: Array, group: String, mono: Color = Color(0, 0, 0, 0)) -> void:
+	var m := mono.a > 0.0
+	var body := group_colour(group)
+	var w := r.size.x
+	var h := r.size.y
+	var o := r.position
+	var ink := mono if m else PopPalette.INK
+	var c := func(col: Color) -> Color: return mono if m else col
+	for part: String in parts:
+		match part:
+			"box":
+				vgrad(ci, Rect2(o + Vector2(w * 0.15, h * 0.35), Vector2(w * 0.7, h * 0.55)), c.call(body.lightened(0.15)), c.call(body), 6, c.call(body.darkened(0.3)), 2.0)
+			"drum":
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.55), w * 0.32, c.call(body))
+				ci.draw_arc(o + Vector2(w * 0.5, h * 0.55), w * 0.22, 0, TAU, 20, c.call(Color.WHITE), 3.0)
+			"kettle", "kettle_small":
+				var k := 1.0 if part == "kettle" else 0.6
+				var at := o + Vector2(w * (0.38 if part == "kettle" else 0.75), h * 0.9)
+				PopMachineArt._round_rect(ci, Rect2(at - Vector2(w * 0.22 * k, h * 0.62 * k), Vector2(w * 0.44 * k, h * 0.1 * k)), 3, c.call(PopTokens.MACHINE))
+				PopMachineArt._round_rect(ci, Rect2(at - Vector2(w * 0.2 * k, h * 0.52 * k), Vector2(w * 0.4 * k, h * 0.3 * k)), 3, c.call(Color(0.9, 0.96, 1.0)))
+				PopMachineArt._round_rect(ci, Rect2(at - Vector2(w * 0.22 * k, h * 0.22 * k), Vector2(w * 0.44 * k, h * 0.22 * k)), 3, c.call(PopTokens.MACHINE_DEEP))
+			"funnel":
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.25, h * 0.05), o + Vector2(w * 0.75, h * 0.05), o + Vector2(w * 0.56, h * 0.33), o + Vector2(w * 0.44, h * 0.33)]), c.call(PopTokens.STEEL))
+			"kernels":
+				for q in 4:
+					ci.draw_circle(o + Vector2(w * (0.4 + 0.07 * q), h * 0.12), w * 0.04, c.call(Color(0.85, 0.62, 0.25)))
+			"drop":
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.24), w * 0.07, c.call(PopPalette.GOLD))
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.45, h * 0.22), o + Vector2(w * 0.55, h * 0.22), o + Vector2(w * 0.5, h * 0.1)]), c.call(PopPalette.GOLD))
+			"dial", "thermometer":
+				var dc := o + Vector2(w * 0.5, h * 0.6)
+				ci.draw_circle(dc, w * 0.15, c.call(Color.WHITE))
+				ci.draw_arc(dc, w * 0.15, 0, TAU, 20, ink, 2.0)
+				ci.draw_line(dc, dc + Vector2(w * 0.1, -w * 0.06), c.call(PopTokens.WARN), 2.5)
+				if part == "thermometer":
+					ci.draw_rect(Rect2(o + Vector2(w * 0.47, h * 0.08), Vector2(w * 0.06, h * 0.3)), c.call(PopTokens.WARN))
+			"gear":
+				var gc := o + Vector2(w * 0.5, h * 0.62)
+				for q in 8:
+					var a := TAU * q / 8.0
+					ci.draw_circle(gc + Vector2(cos(a), sin(a)) * w * 0.16, w * 0.05, c.call(PopTokens.STEEL))
+				ci.draw_circle(gc, w * 0.14, c.call(PopTokens.STEEL))
+				ci.draw_circle(gc, w * 0.05, c.call(body))
+			"shaft":
+				ci.draw_rect(Rect2(o + Vector2(w * 0.47, h * 0.05), Vector2(w * 0.06, h * 0.32)), c.call(PopTokens.STEEL_DEEP))
+			"eye", "magnifier":
+				var ec := o + Vector2(w * 0.5, h * 0.6)
+				ci.draw_circle(ec, w * 0.14, c.call(Color.WHITE))
+				ci.draw_circle(ec, w * 0.06, ink)
+				if part == "magnifier":
+					ci.draw_line(ec + Vector2(w * 0.1, h * 0.08), ec + Vector2(w * 0.24, h * 0.2), ink, 3.0)
+			"arm":
+				ci.draw_line(o + Vector2(w * 0.3, h * 0.4), o + Vector2(w * 0.7, h * 0.12), c.call(PopTokens.STEEL_DEEP), 4.0)
+				ci.draw_circle(o + Vector2(w * 0.7, h * 0.12), w * 0.06, c.call(PopTokens.STEEL))
+			"fan":
+				var fc := o + Vector2(w * 0.5, h * 0.62)
+				for q in 3:
+					var a := TAU * q / 3.0
+					ci.draw_colored_polygon(PackedVector2Array([fc, fc + Vector2(cos(a), sin(a)) * w * 0.2, fc + Vector2(cos(a + 0.6), sin(a + 0.6)) * w * 0.2]), c.call(Color.WHITE))
+			"sieve":
+				for q in 4:
+					ci.draw_line(o + Vector2(w * 0.25, h * (0.12 + 0.06 * q)), o + Vector2(w * 0.75, h * (0.12 + 0.06 * q)), c.call(PopTokens.STEEL_DEEP), 2.0)
+			"pipes":
+				ci.draw_line(o + Vector2(w * 0.5, h * 0.05), o + Vector2(w * 0.5, h * 0.3), c.call(PopTokens.STEEL), 4.0)
+				ci.draw_line(o + Vector2(w * 0.5, h * 0.3), o + Vector2(w * 0.2, h * 0.45), c.call(PopTokens.STEEL), 4.0)
+				ci.draw_line(o + Vector2(w * 0.5, h * 0.3), o + Vector2(w * 0.8, h * 0.45), c.call(PopTokens.STEEL), 4.0)
+			"split", "arrows_cross":
+				ci.draw_line(o + Vector2(w * 0.3, h * 0.12), o + Vector2(w * 0.7, h * 0.32), ink, 3.0)
+				ci.draw_line(o + Vector2(w * 0.7, h * 0.12), o + Vector2(w * 0.3, h * 0.32), ink if part == "arrows_cross" else c.call(PopPalette.GOLD), 3.0)
+			"whisk", "bowl":
+				if part == "bowl":
+					ci.draw_arc(o + Vector2(w * 0.5, h * 0.62), w * 0.2, 0, PI, 12, c.call(Color.WHITE), 5.0)
+				else:
+					ci.draw_line(o + Vector2(w * 0.5, h * 0.05), o + Vector2(w * 0.5, h * 0.5), c.call(PopTokens.STEEL_DEEP), 3.0)
+			"vent":
+				for q in 3:
+					ci.draw_rect(Rect2(o + Vector2(w * 0.3, h * (0.48 + 0.12 * q)), Vector2(w * 0.4, h * 0.05)), c.call(Color(1, 1, 1, 0.85)))
+			"coil":
+				for q in 4:
+					ci.draw_arc(o + Vector2(w * (0.3 + 0.13 * q), h * 0.62), w * 0.07, PI, TAU, 8, c.call(PopTokens.WARN), 3.0)
+			"screen", "ticket", "calendar", "board":
+				var sr := Rect2(o + Vector2(w * 0.28, h * 0.45), Vector2(w * 0.44, h * 0.25))
+				ci.draw_rect(sr, c.call(Color(0.75, 0.92, 1.0) if part != "board" else Color(0.24, 0.27, 0.25)))
+				if part == "ticket":
+					ci.draw_rect(Rect2(o + Vector2(w * 0.4, h * 0.15), Vector2(w * 0.2, h * 0.28)), c.call(Color.WHITE))
+				if part == "calendar":
+					ci.draw_rect(Rect2(sr.position, Vector2(sr.size.x, sr.size.y * 0.3)), c.call(PopTokens.WARN))
+			"arrows", "gate":
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.35, h * 0.12), o + Vector2(w * 0.65, h * 0.22), o + Vector2(w * 0.35, h * 0.32)]), c.call(PopTokens.OK))
+			"chute":
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.75, h * 0.6), o + Vector2(w * 0.95, h * 0.85), o + Vector2(w * 0.85, h * 0.9), o + Vector2(w * 0.68, h * 0.68)]), c.call(PopTokens.STEEL))
+			"cups":
+				for q in 3:
+					ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.38, h * (0.06 + 0.08 * q)), o + Vector2(w * 0.62, h * (0.06 + 0.08 * q)), o + Vector2(w * 0.58, h * (0.16 + 0.08 * q)), o + Vector2(w * 0.42, h * (0.16 + 0.08 * q))]), c.call(Color.WHITE))
+			"bags_flat":
+				for q in 3:
+					ci.draw_rect(Rect2(o + Vector2(w * (0.3 + 0.05 * q), h * (0.08 + 0.06 * q)), Vector2(w * 0.35, h * 0.08)), c.call(Color.WHITE))
+			"nozzle":
+				if m:
+					ci.draw_rect(Rect2(o + Vector2(w * 0.44, h * 0.1), Vector2(w * 0.12, h * 0.25)), mono)
+				else:
+					nozzle(ci, w * 0.3, false, o + Vector2(w * 0.5, h * 0.36))
+			"bag":
+				if m:
+					ci.draw_rect(Rect2(o + Vector2(w * 0.72, h * 0.62), Vector2(w * 0.2, h * 0.28)), mono)
+				else:
+					bag(ci, o + Vector2(w * 0.82, h * 0.92), w * 0.2)
+			"scale":
+				ci.draw_line(o + Vector2(w * 0.25, h * 0.3), o + Vector2(w * 0.75, h * 0.3), ink, 3.0)
+				ci.draw_arc(o + Vector2(w * 0.3, h * 0.3), w * 0.1, 0, PI, 8, ink, 2.0)
+				ci.draw_arc(o + Vector2(w * 0.7, h * 0.3), w * 0.1, 0, PI, 8, ink, 2.0)
+			"spray":
+				for q in 5:
+					ci.draw_circle(o + Vector2(w * (0.35 + 0.07 * q), h * (0.2 + 0.03 * (q % 2))), w * 0.025, c.call(PopTokens.WARN))
+			"drip":
+				ci.draw_line(o + Vector2(w * 0.5, h * 0.05), o + Vector2(w * 0.5, h * 0.25), c.call(Color(0.7, 0.42, 0.16)), 5.0)
+			"jaws":
+				ci.draw_rect(Rect2(o + Vector2(w * 0.25, h * 0.12), Vector2(w * 0.5, h * 0.07)), c.call(PopTokens.WARN))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.25, h * 0.25), Vector2(w * 0.5, h * 0.07)), c.call(PopTokens.WARN))
+			"belt", "rail":
+				vgrad(ci, Rect2(o + Vector2(w * 0.05, h * 0.75), Vector2(w * 0.9, h * 0.12)), c.call(PopTokens.STEEL), c.call(PopTokens.STEEL_DEEP), 4)
+			"coin":
+				PopMachineArt.draw_coin(ci, o + Vector2(w * 0.5, h * 0.2), w * 0.1)
+			"post", "rope":
+				if part == "post":
+					ci.draw_rect(Rect2(o + Vector2(w * 0.2, h * 0.35), Vector2(w * 0.08, h * 0.55)), c.call(PopPalette.GOLD))
+					ci.draw_rect(Rect2(o + Vector2(w * 0.72, h * 0.35), Vector2(w * 0.08, h * 0.55)), c.call(PopPalette.GOLD))
+				else:
+					ci.draw_arc(o + Vector2(w * 0.5, h * 0.35), w * 0.27, 0.2, PI - 0.2, 10, c.call(PopTokens.WARN), 4.0)
+			"window":
+				PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.15, h * 0.2), Vector2(w * 0.7, h * 0.7)), 6, c.call(body))
+				ci.draw_rect(Rect2(o + Vector2(w * 0.28, h * 0.32), Vector2(w * 0.44, h * 0.3)), c.call(Color(0.75, 0.92, 1.0)))
+			"lights":
+				for q in 4:
+					ci.draw_circle(o + Vector2(w * (0.3 + 0.13 * q), h * 0.4), w * 0.04, c.call(PopTokens.BRASS))
+			"kiosk":
+				machine_icon(ci, r, "kiosk", 0, mono)
+			"robot":
+				PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.3, h * 0.35), Vector2(w * 0.4, h * 0.35)), 6, c.call(body))
+				ci.draw_circle(o + Vector2(w * 0.5, h * 0.25), w * 0.12, c.call(Color.WHITE))
+				ci.draw_circle(o + Vector2(w * 0.46, h * 0.24), w * 0.025, ink)
+				ci.draw_circle(o + Vector2(w * 0.54, h * 0.24), w * 0.025, ink)
+				ci.draw_circle(o + Vector2(w * 0.38, h * 0.76), w * 0.06, ink)
+				ci.draw_circle(o + Vector2(w * 0.62, h * 0.76), w * 0.06, ink)
+			"wrench", "oilcan":
+				ci.draw_line(o + Vector2(w * 0.65, h * 0.12), o + Vector2(w * 0.85, h * 0.4), c.call(PopTokens.STEEL_DEEP), 4.0)
+				if part == "oilcan":
+					ci.draw_circle(o + Vector2(w * 0.62, h * 0.12), w * 0.05, c.call(PopPalette.GOLD))
+			"leaf":
+				ci.draw_colored_polygon(PackedVector2Array([o + Vector2(w * 0.5, h * 0.08), o + Vector2(w * 0.68, h * 0.2), o + Vector2(w * 0.5, h * 0.32), o + Vector2(w * 0.32, h * 0.2)]), c.call(PopTokens.OK))
+			"lift", "crate":
+				if part == "lift":
+					ci.draw_rect(Rect2(o + Vector2(w * 0.15, h * 0.05), Vector2(w * 0.06, h * 0.85)), c.call(PopTokens.STEEL_DEEP))
+					ci.draw_rect(Rect2(o + Vector2(w * 0.79, h * 0.05), Vector2(w * 0.06, h * 0.85)), c.call(PopTokens.STEEL_DEEP))
+				else:
+					PopMachineArt._round_rect(ci, Rect2(o + Vector2(w * 0.28, h * 0.35), Vector2(w * 0.44, h * 0.35)), 3, c.call(Color(0.74, 0.52, 0.34)))
+			"bubbles":
+				for q in 3:
+					ci.draw_arc(o + Vector2(w * (0.65 + 0.08 * q), h * (0.2 - 0.04 * q)), w * 0.05, 0, TAU, 10, c.call(PopTokens.SKY), 2.0)

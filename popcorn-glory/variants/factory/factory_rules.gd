@@ -671,6 +671,34 @@ func _buy_sign() -> Dictionary:
 ## others; `slots` how many places each floor has.
 
 const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop"}
+const CATALOG_PATH := "res://data/machines.json"
+var _forty: Dictionary = {}
+
+
+## Step 27: the canonical 40-machine catalog (data/machines.json), by id (read once
+## per run; a static cache leaked at exit in the test runner).
+func forty() -> Dictionary:
+	if _forty.is_empty():
+		var text := FileAccess.get_file_as_string(CATALOG_PATH)
+		var doc: Variant = JSON.parse_string(text)
+		if typeof(doc) == TYPE_DICTIONARY:
+			for m: Dictionary in doc["machines"]:
+				_forty[String(m["id"])] = m
+			_forty["_systems"] = doc.get("systems_present", [])
+	return _forty
+
+
+## Whether a catalog machine can be built now: it runs in the model (a runtime type)
+## and every system it needs exists -- otherwise it does nothing, so it is not sold.
+func catalog_buildable(id: String) -> bool:
+	var e: Dictionary = forty().get(id, {})
+	if e.is_empty() or e.get("runtime") == null:
+		return false
+	var have: Array = forty()["_systems"]
+	for need: String in e.get("requires", []):
+		if not have.has(need):
+			return false
+	return true
 
 
 func catalog(type: String) -> Dictionary:
@@ -735,6 +763,11 @@ func _free_slot(floor: String) -> int:
 
 
 func _build(type: String, slot: int) -> Dictionary:
+	# A catalog id (Step 27): only the ones that run are built (no invented benefit).
+	if forty().has(type):
+		if not catalog_buildable(type):
+			return {"ok": false, "reason": "err.not_yet"}
+		type = String(forty()[type]["runtime"])
 	var c := catalog(type)
 	if c.is_empty():
 		return {"ok": false, "reason": "err.unknown"}
