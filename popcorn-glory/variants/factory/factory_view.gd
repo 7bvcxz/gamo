@@ -43,6 +43,14 @@ var _nozzle_key := ""
 var status_node := Node2D.new()
 var _status := ""
 var _clock := 0.0
+## The idle hint as nodes drawn once and moved (an R-01 regression fixed in
+## 0.20.0: the hint redrew the whole ring layer every frame for as long as nobody
+## touched the factory; 0.19.0's meter and knob made each redraw heavier).
+var hint_node := Node2D.new()
+var hint_dot := Node2D.new()
+var hint_gold := Node2D.new()
+var hint_finger := Node2D.new()
+var _hint_key := ""
 var _cooking := false            ## this press started on the bottom floor
 var _floors_key := ""
 
@@ -77,6 +85,14 @@ func setup(p_rules: PopRules) -> void:
 		add_child(status_node)
 		move_child(status_node, 3)
 		status_node.draw.connect(func() -> void: _draw_status(status_node))
+		hint_node.name = "Hint"
+		add_child(hint_node)
+		for n: Node2D in [hint_dot, hint_gold, hint_finger]:
+			hint_node.add_child(n)
+		hint_dot.draw.connect(func() -> void: hint_dot.draw_circle(Vector2.ZERO, machine_size() * 0.03, Color(1, 1, 1, 0.9)))
+		hint_gold.draw.connect(func() -> void: _draw_hint_gold(hint_gold))
+		hint_finger.draw.connect(func() -> void: _draw_hint_finger(hint_finger))
+		hint_node.visible = false
 		detail_layer.name = "Detail"
 		add_child(detail_layer)
 		detail_layer.draw.connect(func() -> void:
@@ -245,7 +261,7 @@ func _needs_redraw() -> bool:
 	if rules == null:
 		return false
 	return bool(_r()["heating"]) or fx.alive > 0 or not _gains.is_empty() or _flash > 0.0 or _mark_age < MARK_S \
-		or _hint_visible() or _squash != 0.0 or _jump > 0.0 or _redraw_once \
+		or _squash != 0.0 or _jump > 0.0 or _redraw_once \
 		or not _chain.is_empty() or _fountain > 0.0 or _meter_flash > 0.0 or _burst_glow > 0.0
 
 
@@ -271,6 +287,7 @@ func _process(delta: float) -> void:
 	_step_actors(delta)
 	_clock += delta
 	_step_station(delta)
+	_step_hint()
 
 
 ## Step 19: the heat knob at the kettle's right foot turns with the heat (and
@@ -291,9 +308,52 @@ func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 	ci.draw_circle(c + Vector2(cos(a), sin(a)) * r * 0.85, r * 0.22, col if bool(st["heating"]) else PopTokens.STEEL_DEEP)
 
 
-func _draw_hints(ci: CanvasItem, base: Vector2, size_px: float) -> void:
-	if _hint_visible():
-		_draw_hint_gesture(ci, size_px, last_input_ms < 0 and now_ms >= HINT_HAND_MS)
+func _draw_hints(_ci: CanvasItem, _base: Vector2, _size_px: float) -> void:
+	pass   # the factory's hint is its own nodes (_step_hint)
+
+
+## The hint: a dot runs round the ring from the top to the gold (the heat of a
+## good hold), the gold flashes, and a finger rests pressed on the kettle for a
+## newcomer -- the same gesture as B's, but nothing is redrawn while it plays.
+func _step_hint() -> void:
+	if rules == null:
+		return
+	var show := _hint_visible()
+	hint_node.visible = show
+	if not show:
+		return
+	var w: Array = _r()["window"]
+	var key := "%s|%s|%d" % [size, w, rules.level]
+	if key != _hint_key:
+		_hint_key = key
+		for n: Node2D in [hint_dot, hint_gold, hint_finger]:
+			n.queue_redraw()
+	var burn := float(w[2])
+	var loop := fmod(_t, 2.4) / 2.4
+	var gold_mid := (float(w[0]) + float(w[1])) / 2.0
+	var heat := gold_mid * clampf(loop / 0.8, 0.0, 1.0)
+	var a := -PI / 2 + TAU * heat / burn
+	hint_dot.position = machine_centre() + Vector2(cos(a), sin(a)) * ring_radius()
+	hint_gold.visible = loop > 0.8
+	hint_finger.visible = last_input_ms < 0 and now_ms >= HINT_HAND_MS
+
+
+func _draw_hint_gold(ci: CanvasItem) -> void:
+	if rules == null:
+		return
+	var w: Array = _r()["window"]
+	var burn := float(w[2])
+	var top := -PI / 2
+	ci.draw_arc(machine_centre(), ring_radius(), top + TAU * float(w[0]) / burn, top + TAU * float(w[1]) / burn, 24, Color(1, 1, 1, 0.9), machine_size() * 0.09)
+
+
+func _draw_hint_finger(ci: CanvasItem) -> void:
+	var p := machine_centre() + Vector2(machine_size() * 0.06, machine_size() * 0.08)
+	ci.draw_circle(p, 22, PopPalette.CREAM)
+	ci.draw_rect(Rect2(p.x - 22, p.y, 44, 70), PopPalette.CREAM)
+	ci.draw_circle(p + Vector2(0, -6), 10, Color(1, 0.85, 0.8))
+	ci.draw_arc(p, 22, PI, TAU, 16, PopPalette.INK, 4.0)
+	ci.draw_arc(p + Vector2(0, -22), 30, 0, TAU, 24, Color(PopPalette.INK, 0.35), 3.0)
 
 
 func on_events(events: Array[Dictionary]) -> void:

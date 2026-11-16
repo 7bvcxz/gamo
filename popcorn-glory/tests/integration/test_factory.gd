@@ -120,9 +120,32 @@ func test_the_layers_redraw_only_while_something_moves() -> void:
 	assert_false(bool(v._needs_redraw()), "idle after a cook: no redraw (heating %s fx %d gains %d flash %.2f mark %.1f hint %s squash %.3f jump %.2f once %s)" % [
 		app.rules.state()["heating"], v.fx.alive, v._gains.size(), v._flash, v._mark_age, v._hint_visible(), v._squash, v._jump, v._redraw_once])
 	app.dev_advance(21000)   # past 20 s idle: the hint's burst
-	assert_true(bool(v._needs_redraw()), "the idle hint's burst redraws")
+	await tree.process_frame   # (process_frame fires before the nodes' _process: two frames)
+	await tree.process_frame
+	assert_true(v.hint_node.visible, "the idle hint shows")
+	assert_false(bool(v._needs_redraw()), "and redraws nothing (Step 21: its dot moves by position, R-01)")
+	var p0: Vector2 = v.hint_dot.position
+	await tree.create_timer(0.3).timeout
+	assert_true(v.hint_dot.position != p0, "the dot runs round the ring")
 	app.dev_advance(7000)
-	assert_false(bool(v._needs_redraw()), "and stops after its burst")
+	await tree.process_frame
+	await tree.process_frame
+	assert_false(v.hint_node.visible, "and hides after its burst")
+
+
+func test_an_untouched_factory_hints_without_redrawing() -> void:
+	# The newcomer's case that grew memory in 0.19.0: nobody touches it.
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	app.rules.queue.clear()
+	app.rules.next_arrival_ms = 1 << 40
+	app.dev_advance(21000)
+	await tree.create_timer(3.3).timeout
+	await tree.process_frame
+	assert_true(v.hint_node.visible, "after 8 s the hint shows")
+	assert_true(v.hint_finger.visible, "with the resting finger (after 20 s untouched)")
+	assert_false(bool(v._needs_redraw()), "and the ring's layers are not redrawn every frame")
 
 
 func test_the_stand_is_unchanged() -> void:
