@@ -34,7 +34,7 @@ test('the factory: the kettle cooks, a floor opens its detail without cooking', 
   await expect.poll(async () => (await pop.state()).run.presses).toBe(1);
   await expect.poll(async () => (await pop.state()).run.heating).toBe(false);
   s = await pop.state();
-  expect(s.run.money, 'the pop paid (as #stand; Step 17 moves pay to the sale)').toBeGreaterThan(0);
+  expect(s.run.stats.lots, 'the pop made a lot (Step 17: money comes from the sale)').toBe(1);
   await pop.page.waitForTimeout(500);
   await pop.tap('floor_mid');
   await expect.poll(async () => !!(await pop.state()).rects.detail, { message: 'the packing detail opens' }).toBe(true);
