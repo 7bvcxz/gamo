@@ -36,9 +36,9 @@ def line_chart(name, key, title, ylab):
 
 def strip_chart():
     W, rowh, L = 760, 22, 130
-    cols = {"production": "#d6352a", "packaging": "#e8a93a", "demand": "#3a8fd6", "": "#e8e8e8"}
+    cols = {"production": "#d6352a", "packaging": "#e8a93a", "demand": "#3a8fd6", "service": "#8e5bd6", "": "#e8e8e8"}
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{40+rowh*len(runs)+30}" font-family="sans-serif" font-size="12">',
-           '<rect width="100%" height="100%" fill="white"/><text x="10" y="18" font-size="14">The bottleneck at each minute (red production, amber packaging, blue demand, grey none)</text>']
+           '<rect width="100%" height="100%" fill="white"/><text x="10" y="18" font-size="14">The bottleneck at each minute (red production, amber packaging, blue demand, purple service, grey none)</text>']
     for i, r in enumerate(runs):
         ms = [x for x in rows if x["run"] == r]
         w = (W - L - 10) / max(1, len(ms))
@@ -72,7 +72,7 @@ by = {}
 for b in buys:
     by.setdefault(b["what"], []).append(b)
 L.insert(len(L) - 2, "")
-own = {"buy": "production", "buy_packer": "packaging", "buy_sign": "demand", "buy_auto": "production"}
+own = {"buy": "production", "buy_packer": "packaging", "buy_sign": "demand", "buy_auto": "production", "build_kiosk": "service"}
 for w, bs in sorted(by.items()):
     mine = [b for b in bs if b["bottleneck"] == own[w] or (w == "buy_sign" and b["bottleneck"] == "")]
     pm = [float(b["payback_min"]) for b in mine if float(b["payback_min"]) > 0]

@@ -245,3 +245,58 @@ static func order_bubble(ci: CanvasItem, tail: Vector2, head: float, size: int) 
 	bag(ci, Vector2(r.get_center().x, r.end.y - head * 0.14), bw)
 	if big:
 		popcorn(ci, Vector2(r.get_center().x, r.end.y - head * 0.14 - bw * 1.55), bw * 0.28)
+
+
+## Step 26: the three machines, in a slot `r` (bottom-centre on the slot's floor).
+## `mono` (alpha > 0) draws the silhouette (a ghost in an empty slot, the card).
+static func machine_icon(ci: CanvasItem, r: Rect2, type: String, tier: int, mono: Color = Color(0, 0, 0, 0)) -> void:
+	var m := mono.a > 0.0
+	var c := r.get_center()
+	match type:
+		"cooker":   # a small kettle on legs
+			var body := Rect2(Vector2(c.x - r.size.x * 0.32, r.position.y + r.size.y * 0.22), Vector2(r.size.x * 0.64, r.size.y * 0.5))
+			PopMachineArt._round_rect(ci, Rect2(body.position - Vector2(4, r.size.y * 0.1), Vector2(body.size.x + 8, r.size.y * 0.12)), 4, mono if m else PopTokens.MACHINE)
+			PopMachineArt._round_rect(ci, body, 6, mono if m else Color(0.9, 0.96, 1.0, 0.95))
+			if not m:
+				popcorn(ci, body.get_center() + Vector2(0, body.size.y * 0.15), body.size.x * 0.14)
+			PopMachineArt._round_rect(ci, Rect2(Vector2(body.position.x, body.end.y), Vector2(body.size.x, r.size.y * 0.14)), 4, mono if m else PopTokens.MACHINE_DEEP)
+		"bagger":   # a box with a nozzle over a bag
+			var body := Rect2(Vector2(c.x - r.size.x * 0.34, r.position.y + r.size.y * 0.12), Vector2(r.size.x * 0.68, r.size.y * 0.38))
+			PopMachineArt._round_rect(ci, body, 6, mono if m else PopTokens.MACHINE)
+			if not m:
+				nozzle(ci, r.size.x * 0.22, false, Vector2(c.x, body.end.y + r.size.y * 0.12))
+				bag(ci, Vector2(c.x, r.end.y - 2), r.size.x * 0.24)
+			else:
+				ci.draw_rect(Rect2(Vector2(c.x - r.size.x * 0.12, body.end.y), Vector2(r.size.x * 0.24, r.size.y * 0.42)), mono)
+		"kiosk":   # a tall box with a screen and a bag slot
+			var body := Rect2(Vector2(c.x - r.size.x * 0.3, r.position.y + r.size.y * 0.06), Vector2(r.size.x * 0.6, r.size.y * 0.92))
+			PopMachineArt._round_rect(ci, body, 8, mono if m else PopTokens.MACHINE)
+			if not m:
+				PopMachineArt._round_rect(ci, Rect2(body.position + Vector2(body.size.x * 0.14, body.size.y * 0.1), Vector2(body.size.x * 0.72, body.size.y * 0.3)), 4, Color(0.75, 0.92, 1.0))
+				ci.draw_rect(Rect2(body.position + Vector2(body.size.x * 0.25, body.size.y * 0.62), Vector2(body.size.x * 0.5, body.size.y * 0.1)), PopTokens.MACHINE_DEEP)
+	if not m:
+		for k in tier:   # a gold dot per tier
+			ci.draw_circle(Vector2(r.position.x + 8 + k * 11, r.position.y + 8), 4.0, PopPalette.GOLD)
+
+
+## A machine's state, as a small badge (no words): paused (two bars), unpaid
+## (a coin with a slash), blocked (no-entry), starved (a dashed ring), working (green).
+static func state_badge(ci: CanvasItem, at: Vector2, s: float, state: String) -> void:
+	match state:
+		"paused":
+			ci.draw_circle(at, s, Color.WHITE)
+			ci.draw_rect(Rect2(at + Vector2(-s * 0.45, -s * 0.5), Vector2(s * 0.3, s)), PopPalette.INK)
+			ci.draw_rect(Rect2(at + Vector2(s * 0.15, -s * 0.5), Vector2(s * 0.3, s)), PopPalette.INK)
+		"unpaid":
+			ci.draw_circle(at, s, PopPalette.GOLD)
+			ci.draw_line(at + Vector2(-s * 0.7, s * 0.7), at + Vector2(s * 0.7, -s * 0.7), PopTokens.WARN, s * 0.3)
+		"blocked":
+			ci.draw_circle(at, s, PopTokens.WARN)
+			ci.draw_rect(Rect2(at + Vector2(-s * 0.6, -s * 0.15), Vector2(s * 1.2, s * 0.3)), Color.WHITE)
+		"starved":
+			ci.draw_circle(at, s, Color(1, 1, 1, 0.9))
+			for q in 8:
+				var a0 := TAU * q / 8.0
+				ci.draw_arc(at, s, a0, a0 + TAU / 16.0, 4, PopTokens.SKY, 2.5)
+		"run":
+			ci.draw_circle(at, s * 0.6, PopTokens.OK)

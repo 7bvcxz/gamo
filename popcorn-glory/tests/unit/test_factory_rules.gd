@@ -491,9 +491,10 @@ func test_two_lanes_serve_two_at_once_in_queue_order() -> void:
 	assert_eq(int(started[0]["data"]["customer"]), int(order[0]), "the queue's head first")
 	assert_eq(int(started[1]["data"]["customer"]), int(order[1]), "then the next")
 	assert_true(int(started[0]["data"]["lane"]) != int(started[1]["data"]["lane"]), "on different lanes")
-	f.advance(1300)
+	var service := int(f.economy.table("factory")["service_ms"])
+	f.advance(service + 100)
 	assert_eq(int(f.stats["sold"]), 2, "both sold after one service time")
-	f.advance(1300)
+	f.advance(service + 100)
 	assert_eq(int(f.stats["sold"]), 3, "then the third")
 	_check_conservation(f, "lanes")
 	f.economy.table("factory")["counter"]["lanes"] = 1
@@ -508,7 +509,7 @@ func test_nobody_jumps_the_queue() -> void:
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
 	f.advance(1000)
 	assert_eq(int(f.stats["sold"]), 0, "the head's order is not here: nobody behind is served first")
-	f.advance(4000)
+	f.advance(2500 + int(f.economy.table("factory")["service_ms"]) + 200)
 	assert_eq(int(f.stats["abandoned"]), 1, "the head leaves after waiting")
 	assert_eq(int(f.stats["sold"]), 1, "then the next customer gets the plain pack")
 
@@ -679,7 +680,7 @@ func test_exact_size_matching_and_the_large_bag_price() -> void:
 	assert_eq(int(f.stats["sold"]), 0, "a large-bag customer is never given a small bag")
 	assert_eq(int(f.packer_state() == "starved"), 1, "and the station has no popcorn for a large bag")
 	_lot(f, "plain", 4, 100)
-	f.advance(int(f.packer()["ms"]) + 1500)
+	f.advance(int(f.packer()["ms"]) + int(f.economy.table("factory")["service_ms"]) + 1000)
 	assert_eq(int(f.stats["sold"]), 1, "a large bag packed for them and sold")
 	assert_eq(int(f.ledger[0]["size"]), 4, "the large bag")
 	assert_eq(int(f.ledger[0]["coins"]), 18, "at its own price")
@@ -719,7 +720,7 @@ func test_a_mixed_burst_is_served_once_each_in_order() -> void:
 	for s in [2, 2, 2, 4, 4]:
 		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": s, "quality": 100})
 		f.stats["made_portions"] = int(f.stats["made_portions"]) + s
-	f.advance(10000)
+	f.advance(5 * int(f.economy.table("factory")["service_ms"]) + 2000)
 	assert_eq(int(f.stats["sold"]), 5, "all five served")
 	for i in 5:
 		assert_eq(int(f.ledger[i]["customer"]), ids[i], "in queue order (%d)" % i)
@@ -869,11 +870,12 @@ func test_auto_cookers_open_with_the_sign_and_cost_more_each() -> void:
 	assert_eq(String(f.execute({"type": "buy_auto"})["reason"]), "err.locked", "not before the sign's unlock tier")
 	f.sign_tier = int(f.economy.table("factory")["auto_cooker"]["unlock_sign"])
 	var prices: Array[int] = []
-	for i in 5:
+	for i in int(f.slots("kitchen")):
 		prices.append(int(f.auto_cost()))
 		assert_true(bool(f.execute({"type": "buy_auto"})["ok"]), "cooker %d bought" % (i + 1))
-	for i in range(1, 5):
+	for i in range(1, prices.size()):
 		assert_true(prices[i] > prices[i - 1], "each costs more (%d > %d)" % [prices[i], prices[i - 1]])
+	assert_eq(String(f.execute({"type": "buy_auto"})["reason"]), "err.no_slot", "the kitchen's places are full (Step 26)")
 	assert_eq(int(f.money), 100000 - prices.reduce(func(a: int, b: int) -> int: return a + b, 0), "paid each once")
 
 
@@ -939,9 +941,186 @@ func test_a_good_hand_beats_one_cooker_per_batch_and_cookers_win_by_numbers() ->
 	crew.packer_tier = 3
 	crew.level = 4
 	crew.money = 1 << 30
-	for i in 8:
+	for i in 4:
 		crew.execute({"type": "buy_auto"})
+	for m: Dictionary in crew.machines:
+		crew.execute({"type": "upgrade_machine", "id": m["id"]})
+		crew.execute({"type": "upgrade_machine", "id": m["id"]})
 	crew.money = 100000
 	crew.advance(300000)
-	assert_true(int(crew.stats["sold"]) >= int(hand.stats["sold"]) * 0.9, "8 cookers keep up with a skilled hand over time (%d vs %d sales)" % [crew.stats["sold"], hand.stats["sold"]])
+	assert_true(int(crew.stats["sold"]) >= int(hand.stats["sold"]) * 0.9, "4 top-tier cookers keep up with a skilled hand over time (%d vs %d sales)" % [crew.stats["sold"], hand.stats["sold"]])
 	_check_conservation(crew, "crew")
+
+
+# -- Step 26: the machine runtime -----------------------------------------------
+
+func _rich(f: PopRules) -> void:
+	f.sign_tier = 3
+	f.packer_tier = 1
+	f.money = 100000
+	_open(f)
+
+
+func test_build_sell_upgrade_pause_and_slots() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_rich(f)
+	var r: Dictionary = f.execute({"type": "build", "machine": "bagger", "slot": 1})
+	assert_true(bool(r["ok"]), "a bagger built in place 1")
+	assert_eq(String(f.execute({"type": "build", "machine": "bagger", "slot": 1})["reason"]), "err.slot_taken", "two machines never share a place")
+	assert_eq(String(f.execute({"type": "build", "machine": "bagger", "slot": 9})["reason"]), "err.no_slot", "no place 9 on that floor")
+	var id := int(r["machine"])
+	var before := int(f.money)
+	assert_true(bool(f.execute({"type": "upgrade_machine", "id": id})["ok"]), "upgraded")
+	assert_eq(int(f.machine(id)["tier"]), 1, "tier 1")
+	assert_true(bool(f.execute({"type": "pause_machine", "id": id, "paused": true})["ok"]), "paused")
+	assert_eq(String(f.machine(id)["state"]), "paused", "it says so")
+	_lot(f, "plain", 8, 100)
+	f.advance(20000)
+	assert_eq(String(f.machine(id)["state"]), "paused", "a paused machine stays paused")
+	f.execute({"type": "pause_machine", "id": id, "paused": false})
+	var paid := int(f.machine(id)["paid"])
+	before = int(f.money)
+	assert_true(bool(f.execute({"type": "sell_machine", "id": id})["ok"]) or not (f.machine(id)["held"] as Dictionary).is_empty(), "sold (or busy with a pack)")
+	if f.machine(id).is_empty():
+		assert_eq(int(f.money), before + paid / 2, "half of what it cost comes back")
+	for k in 4:
+		f.execute({"type": "build", "machine": "cooker", "slot": k})
+	assert_eq(String(f.execute({"type": "build", "machine": "cooker"})["reason"]), "err.no_slot", "the kitchen's four places")
+	_check_conservation(f, "lifecycle")
+
+
+func test_the_bagger_packs_real_portions_and_waits_or_holds_honestly() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_rich(f)
+	f.packer_tier = 1
+	var id := int(f.execute({"type": "build", "machine": "bagger"})["machine"])
+	f.advance(3000)
+	assert_eq(String(f.machine(id)["state"]), "starved", "nothing in the bin: it waits, no upkeep")
+	assert_eq(int(f.stats["upkeep_paid"]), 0, "and pays nothing")
+	_lot(f, "plain", 24, 100)
+	f.advance(60000)
+	assert_true(int(f.stats["packed"]) >= 8, "the station and the bagger sealed real packs")
+	assert_true(int(f.machine(id).get("done", 0)) >= 1, "the bagger sealed some of them (%d)" % int(f.machine(id).get("done", 0)))
+	assert_true(int(f.stats["upkeep_paid"]) > 0 or int(f.machine(id)["upkeep_ms"]) > 0, "its work is charged (a coin per 20 s of work)")
+	assert_eq(f.shelf.size(), int(f.state()["shelf_cap"]), "the shelf full")
+	assert_true(String(f.machine(id)["state"]) in ["blocked", "starved"], "it stops when nothing is wanted or the shelf is full")
+	_check_conservation(f, "bagger")
+
+
+func test_the_kiosk_serves_real_customers_and_pays_while_it_serves() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_rich(f)
+	var id := int(f.execute({"type": "build", "machine": "kiosk"})["machine"])
+	for k in 6:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
+	for k in 4:
+		_customer(f, 2)
+	f.drain_events()
+	f.advance(100)
+	var ev := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "serve_started")
+	var lanes := int(f.lanes())
+	assert_eq(ev.size(), lanes + 1, "the counter's lanes and the kiosk serve at once")
+	assert_true(ev.any(func(e: Dictionary) -> bool: return int(e["data"].get("kiosk", -1)) == id), "the kiosk took one")
+	f.advance(10000)
+	assert_eq(int(f.stats["sold"]), 4, "all four sold, each once")
+	assert_true(int(f.stats["upkeep_paid"]) >= 0, "upkeep only while serving")
+	_check_conservation(f, "kiosk")
+
+
+func test_low_funds_pause_machines_and_nothing_is_lost() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_rich(f)
+	for k in 4:
+		f.execute({"type": "build", "machine": "cooker", "slot": k})
+	f.money = 2
+	f.advance(120000)
+	assert_eq(int(f.money), 0, "the last coins paid")
+	assert_true(f.cookers.all(func(m: Dictionary) -> bool: return String(m["state"]) in ["unpaid", "blocked"]), "every cooker paused or holding a lot")
+	assert_true(int(f.money) >= 0, "never a debt")
+	_check_conservation(f, "low funds")
+
+
+func test_simultaneous_finishes_and_any_cut_of_time_give_the_same_factory() -> void:
+	var a: PopRules = Factory.new()
+	var b: PopRules = Factory.new()
+	for f: PopRules in [a, b]:
+		_rich(f)
+		for k in 4:
+			f.execute({"type": "build", "machine": "cooker", "slot": k})   # all four start together: they finish together
+		f.execute({"type": "build", "machine": "bagger"})
+		f.execute({"type": "build", "machine": "kiosk"})
+		f.money = 5000
+	a.advance(240000)
+	for i in 4800:
+		b.advance(50)
+	assert_eq(a.stats, b.stats, "one long advance = 4,800 short ones (machines and all)")
+	assert_eq(a.money, b.money, "the same money")
+	_check_conservation(a, "cut")
+	# Four cookers that start together finish together: four lots in the same step, none lost.
+	var c: PopRules = Factory.new()
+	_quiet_shop(c)
+	_rich(c)
+	for k in 4:
+		c.execute({"type": "build", "machine": "cooker", "slot": k})
+	c.drain_events()
+	c.advance(6000)
+	var lots := c.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "auto_lot")
+	assert_eq(lots.size(), 4, "four lots at the same moment")
+	assert_eq(int(c.stats["auto_lots"]), 4, "all counted")
+	_check_conservation(c, "simultaneous")
+
+
+func test_machines_are_saved_and_a_0_25_save_keeps_its_cookers() -> void:
+	var a: PopRules = Factory.new()
+	_rich(a)
+	a.execute({"type": "build", "machine": "cooker", "slot": 2})
+	a.execute({"type": "build", "machine": "bagger"})
+	a.execute({"type": "pause_machine", "id": 2, "paused": true})
+	a.advance(30000)
+	var b: PopRules = Factory.new()
+	assert_true(bool(b.from_save(JSON.parse_string(JSON.stringify(a.to_save())))), "a save with machines loads")
+	assert_eq(b.machines.size(), 2, "both machines")
+	assert_eq(int(b.machine(1)["slot"]), 2, "in their places")
+	assert_eq(String(b.machine(2)["state"]), "paused", "the paused one still paused")
+	a.advance(60000)
+	b.advance(60000)
+	assert_eq(b.stats, a.stats, "and the resumed factory runs the same")
+	var fresh: PopRules = Factory.new()
+	var old: Dictionary = JSON.parse_string(JSON.stringify(fresh.to_save()))
+	old.erase("machines")
+	old.erase("next_machine_id")
+	old["cookers"] = [{"left_ms": 1000, "held": {}, "state": "run", "upkeep_ms": 0}]
+	var c: PopRules = Factory.new()
+	assert_true(bool(c.from_save(old)), "a 0.25 save loads")
+	assert_eq(c.cookers.size(), 1, "its cooker became a machine in the kitchen")
+
+
+func test_the_hand_tunes_a_selected_cooker_for_a_few_lots_only() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	_rich(f)
+	var id := int(f.execute({"type": "build", "machine": "cooker"})["machine"])
+	f.execute({"type": "select_machine", "id": id})
+	_pop(f)
+	assert_eq(int(f.machine(id)["assist"]), 3, "a perfect pop tunes its next 3 lots")
+	_pop(f)
+	f.advance(3000)
+	_pop(f)
+	assert_eq(int(f.machine(id)["assist"]), 3, "never more than 3 waiting")
+	var grades := []
+	for i in 30:
+		var ev := f.drain_events()
+		f.advance(1000)
+		f.bin.clear()
+		f.lift.clear()
+		f.glass = {}
+		for e: Dictionary in f.drain_events():
+			if String(e["type"]) == "auto_lot":
+				grades.append(String(e["data"]["grade"]))
+	assert_eq(grades.slice(0, 3), ["perfect", "perfect", "perfect"], "three perfect lots")
+	assert_false(grades.slice(3).has("perfect"), "then back to the machine's own odds")

@@ -24,6 +24,13 @@ const HINT_BURST_MS := 6000
 const HINT_IDLE_MS := 20000
 
 var selected := -1               ## the floor whose detail is open, -1 none
+## Step 26: a chosen machine (by id) or an empty place ({floor, k}); the card and the detail follow it.
+var sel_machine := -1
+var sel_slot := {}
+const FLOOR_NAME := ["shop", "packing", "kitchen"]
+const MACHINE_OF := {"kitchen": "cooker", "packing": "bagger", "shop": "kiosk"}
+const FLOOR_INDEX := {"shop": 0, "packing": 1, "kitchen": 2}
+const FLOOR_OF_TYPE := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop"}
 var floor_layer := Node2D.new()
 var customer_node := Node2D.new()
 var detail_layer := Node2D.new()   ## above everything: the open floor's detail
@@ -166,6 +173,10 @@ func detail_rect() -> Rect2:
 	# floor (Steps 20, 22: the floor being chosen for stays in view).
 	var r := floor_rect(LOW)
 	var x := machine_centre().x + ring_radius() + machine_size() * 0.09
+	if sel_machine >= 0 or not sel_slot.is_empty():
+		# Step 26: a machine's detail sits under the kitchen's machine places, so they stay in view.
+		var top := slot_rect("kitchen", 2).end.y + 12
+		return Rect2(Vector2(x, top), Vector2(r.end.x - 12 - x, r.end.y - 12 - top))
 	return Rect2(Vector2(x, r.position.y + 12), Vector2(r.end.x - 12 - x, r.size.y - 24))
 
 
@@ -198,6 +209,14 @@ func extra_rects() -> Dictionary:
 	out["ring"] = Rect2(c - Vector2(r, r), Vector2(r * 2.0, r * 2.0))
 	if selected >= 0:
 		out["detail"] = detail_rect()
+	# Step 26: every machine place, and the chosen machine's two buttons.
+	for f: String in FLOOR_NAME:
+		for k in (int(rules.slots(f)) if rules else 0):
+			out["slot_%s_%d" % [f, k]] = slot_rect(f, k)
+	if sel_machine >= 0:
+		var b := _machine_buttons()
+		out["m_pause"] = b["pause"]
+		out["m_sell"] = b["sell"]
 	return out
 
 
@@ -222,9 +241,13 @@ func _gui_input(event: InputEvent) -> void:
 		return
 	if mb.pressed:
 		var f := _floor_at(mb.position)
+		if _machine_press(mb.position):
+			accept_event()
+			return
 		for i in 3:
 			if badge_rect(i).has_point(mb.position):
 				accept_event()
+				_clear_machine_selection()
 				toggle_floor(i)
 				return
 		if f == LOW and not detail_rect().has_point(mb.position):
@@ -232,9 +255,11 @@ func _gui_input(event: InputEvent) -> void:
 			super(event)
 			return
 		accept_event()
-		if f >= 0:
+		if f >= 0 and not detail_rect().has_point(mb.position):
+			_clear_machine_selection()
 			toggle_floor(f)
 		elif selected >= 0 and not detail_rect().has_point(mb.position):
+			_clear_machine_selection()
 			toggle_floor(-1)
 		return
 	if _cooking:
@@ -393,12 +418,20 @@ func on_events(events: Array[Dictionary]) -> void:
 			_gain(int(e["data"].get("amount", 0)))
 			_gains[-1]["at"] = at
 			_sound("coin", 1.0, -6.0)
+		elif String(e["type"]) in ["auto_lot", "machine_assisted", "machine_upgraded", "machine_sold", "machine_paused"]:
+			_machine_event(e)
 		elif String(e["type"]) == "station_upgrade":
 			# Each floor's own flourish (Step 24): the station sparkles where it
 			# stands with a rising chime and a clink of its new heads; the sign
 			# lights up with a fanfare and a burst of gold over the shop.
 			var tier := int(e["data"].get("tier", 1))
-			if String(e["data"].get("station", "")) == "sign":
+			var st_name := String(e["data"].get("station", ""))
+			if st_name in ["cooker", "bagger", "kiosk"]:
+				# Step 26: a new machine sparkles in its place.
+				_sound("upgrade", 1.15)
+				if not reduced_motion:
+					fx.sparkle(slot_rect(String(FLOOR_OF_TYPE[st_name]), int(e["data"].get("slot", 0))).get_center(), machine_size() / 900.0, rng, 6, 100.0)
+			elif st_name == "sign":
 				_sound("fanfare", 1.0 + 0.04 * tier, -6.0)
 				if not reduced_motion:
 					fx.burst(_sign_rect().get_center(), 10 + tier * 2, machine_size() / 900.0, rng, PopPalette.GOLD, 0.8, 1.0)
@@ -424,6 +457,7 @@ func _draw_floors(ci: CanvasItem) -> void:
 	_draw_shop(ci, floor_rect(TOP))
 	_draw_packing(ci, floor_rect(MID))
 	_draw_kitchen(ci, floor_rect(LOW))
+	_draw_machines(ci)
 	var tube := tube_rect()
 	PopFactoryArt.glass(ci, tube, tube.size.x * 0.5)
 	for i in 3:
@@ -521,11 +555,8 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
 
 
-func _draw_kitchen(ci: CanvasItem, r: Rect2) -> void:
-	var sh := r.size.y * 0.26
-	for j in 2:
-		var slot := Rect2(Vector2(r.end.x - sh * 0.82 - 70, r.position.y + r.size.y * 0.12 + j * sh * 1.15), Vector2(sh * 0.82, sh))
-		PopFactoryArt.dashed_slot(ci, slot)
+func _draw_kitchen(_ci: CanvasItem, _r: Rect2) -> void:
+	pass   # its machine places are drawn with the others (_draw_machines, Step 26)
 
 
 func _draw_badge(ci: CanvasItem, i: int) -> void:
@@ -572,6 +603,9 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	var pts := PopMachineArt.round_rect_points(d, PopTokens.R_BUTTON)
 	pts.append(pts[0])
 	ci.draw_polyline(pts, PopPalette.GOLD, 5.0, true)
+	if sel_machine >= 0 or not sel_slot.is_empty():
+		_draw_machine_detail(ci, d)   # Step 26: a machine's own numbers, not the floor's forms
+		return
 	var vertical := d.size.y > d.size.x * 1.15
 	var h: float
 	var a: Vector2
@@ -593,7 +627,9 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	ci.draw_line(m - dir * h * 0.18, m + dir * h * 0.14, PopPalette.INK, 6.0)
 	ci.draw_colored_polygon(PackedVector2Array([m + dir * h * 0.22, m + dir * h * 0.08 - side * h * 0.1, m + dir * h * 0.08 + side * h * 0.1]), PopPalette.INK)
 	# The lock on the next form -- except the kitchen's, which can be bought now.
-	if i == TOP:
+	if sel_machine >= 0 or not sel_slot.is_empty():
+		_draw_machine_detail(ci, d)
+	elif i == TOP:
 		_draw_sign_numbers(ci, d)
 	elif i == MID:
 		_draw_packer_numbers(ci, d)
@@ -666,7 +702,8 @@ func _inventory_key() -> String:
 	if rules == null:
 		return ""
 	return "%d|%d|%d|%d|%s|%s" % [rules.bin_portions(), (rules.get("shelf") as Array).size(), (rules.get("queue") as Array).size(),
-		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()]
+		(rules.get("lift") as Array).size(), (rules.get("packing") as Array).size(), not (rules.get("serving") as Dictionary).is_empty()] + "|%d|%s" % [rules.get("packer_tier"), rules.packer_state()] \
+		+ "|%d|%s|%s" % [sel_machine, sel_slot, ",".join((rules.get("machines") as Array).map(func(m: Dictionary) -> String: return "%d:%s:%d" % [m["id"], m["state"], m["tier"]]))]
 
 
 ## The kettle's glass shows its waiting lot (the backpressure is visible).
@@ -735,6 +772,8 @@ func _queue_spot(i: int) -> Vector2:
 	var x0 := maxf(c.position.x + c.size.x * 0.42, _handoff_spot(lanes - 1).x + _head_px() * 2.5)
 	var cap := maxi(1, int(rules.queue_cap())) if rules else 5
 	var room := floor_rect(TOP).end.x - _head_px() * 1.6 - x0
+	if rules and rules.station_open("kiosk"):
+		room -= _head_px() * 2.6 * int(rules.slots("shop"))   # Step 26: the kiosks' places by the door
 	var per_row := clampi(int(room / (_head_px() * 2.3)), 1, cap)
 	var gap := minf(_head_px() * 2.7, room / float(per_row))
 	var row := i / per_row
@@ -746,6 +785,8 @@ func _queue_spot(i: int) -> Vector2:
 ## (a bigger shop reveals more of them; Step 22).
 func _handoff_spot(lane: int = 0) -> Vector2:
 	var c := counter_rect()
+	if lane >= 100:   # Step 26: a kiosk's customer stands in front of it
+		return Vector2(slot_rect("shop", lane - 100).get_center().x, c.position.y + 2)
 	return Vector2(c.position.x + c.size.x * 0.26 + _head_px() * 2.5 * lane, c.position.y + 2)
 
 
@@ -799,6 +840,9 @@ func _flow_events(events: Array[Dictionary]) -> void:
 				var a := _new_actor(Actor.LOT, int(d["lot"]))
 				a.size_px = _bag_px() * 0.85
 				var top := machine_top()
+				if d.has("machine") and rules and not (rules.machine(int(d["machine"])) as Dictionary).is_empty():
+					var mm: Dictionary = rules.machine(int(d["machine"]))
+					top = slot_rect(String(mm["floor"]), int(mm["slot"])).get_center()
 				var bin := _bin_top()
 				a.start(PackedVector2Array([top, Vector2(tube_x, top.y), Vector2(tube_x, bin.y - 40), bin]), _seconds("lift"), reduced_motion)
 				cargo[int(d["lot"])] = a
@@ -819,6 +863,10 @@ func _flow_events(events: Array[Dictionary]) -> void:
 			"pack_shelved":
 				var pid := int(d["pack"])
 				var from := _packer_out()
+				if d.has("machine") and rules and not (rules.machine(int(d["machine"])) as Dictionary).is_empty():
+					var bm: Dictionary = rules.machine(int(d["machine"]))
+					var br := slot_rect(String(bm["floor"]), int(bm["slot"]))
+					from = Vector2(br.get_center().x, br.end.y)
 				var b: Node2D
 				if filling.has(pid):
 					# The same bag, sealed, slides from under its head to its place on the shelf.
@@ -1022,6 +1070,16 @@ func _station_picture(ci: CanvasItem, foot: Vector2, h: float, look: int, heads:
 ## The upgrade card follows the open floor: the middle floor's detail sells the
 ## next packing station (its picture, price and packs a minute now > next).
 func card_offer() -> Dictionary:
+	# Step 26: a chosen machine place sells its machine; a chosen machine, its next tier.
+	if rules != null and not sel_slot.is_empty():
+		var type := String(MACHINE_OF[String(sel_slot["floor"])])
+		return {"key": "build_" + type, "stage": 0, "price": int(rules.build_cost(type)), "now": 0, "next": _per_min(type, 0), "prefix": "+",
+			"art": Callable(self, "_card_machine").bind(type)}
+	if rules != null and sel_machine >= 0 and not (rules.machine(sel_machine) as Dictionary).is_empty():
+		var m: Dictionary = rules.machine(sel_machine)
+		var c := int(rules.machine_upgrade_cost(m))
+		return {"key": "machine_up", "stage": int(m["tier"]) + 1, "price": c, "now": _per_min(String(m["type"]), int(m["tier"])),
+			"next": _per_min(String(m["type"]), int(m["tier"]) + 1) if c >= 0 else -1, "prefix": "+", "art": Callable(self, "_card_machine").bind(String(m["type"]))}
 	if rules != null and selected == TOP and rules.station_open("sign"):
 		# Step 22: the shop's card sells the next sign -- visitors in ten minutes, now > next.
 		var st := int(rules.get("sign_tier"))
@@ -1039,7 +1097,12 @@ func card_offer() -> Dictionary:
 
 
 func card_command() -> Dictionary:
-	match String(card_offer().get("key", "")):
+	var key := String(card_offer().get("key", ""))
+	if key.begins_with("build_"):
+		return {"type": "build", "machine": key.trim_prefix("build_"), "slot": int(sel_slot["k"])}
+	if key == "machine_up":
+		return {"type": "upgrade_machine", "id": sel_machine}
+	match key:
 		"packer":
 			return {"type": "buy_packer"}
 		"sign":
@@ -1290,7 +1353,7 @@ func _draw_sign_numbers(ci: CanvasItem, d: Rect2) -> void:
 
 # -- Step 23: seeing the bottleneck without a spreadsheet ------------------------
 
-const CUE_FLOOR := {"production": LOW, "packaging": MID, "demand": TOP}
+const CUE_FLOOR := {"production": LOW, "packaging": MID, "demand": TOP, "service": TOP}
 
 
 func _step_cues() -> void:
@@ -1353,3 +1416,234 @@ func _draw_stage_numbers(ci: CanvasItem) -> void:
 func _sign_rect() -> Rect2:
 	var r := floor_rect(TOP)
 	return Rect2(Vector2(r.position.x + r.size.x * 0.08, r.position.y + r.size.y * 0.3), Vector2(r.size.y * 0.42, r.size.y * 0.32))
+
+
+# -- Step 26: machine places, machines, choosing and controlling them -----------
+
+## A floor's k-th machine place: the kitchen's beside the ring (two columns), the
+## packing floor's above the shelf, the shop's by the door.
+func slot_rect(floor: String, k: int) -> Rect2:
+	match floor:
+		"kitchen":
+			var r := floor_rect(LOW)
+			var left := machine_centre().x + ring_radius() + machine_size() * 0.09
+			var right := r.end.x - 12
+			var w := minf(r.size.y * 0.2 * 0.82, (right - left - 12) / 2.0)
+			var h := w / 0.82
+			return Rect2(Vector2(left + (k % 2) * (w + 12), r.position.y + 14 + (k / 2) * (h + 10)), Vector2(w, h))
+		"packing":
+			var r := floor_rect(MID)
+			var x0 := r.position.x + r.size.x * 0.62
+			var x1 := tube_rect().position.x - 16
+			var w := (x1 - x0) / 3.0 - 6.0
+			return Rect2(Vector2(x0 + k * (w + 6.0), r.position.y + r.size.y * 0.06), Vector2(w, r.size.y * 0.28))
+		"shop":
+			var r := floor_rect(TOP)
+			var hp := _head_px()
+			var w := hp * 2.3
+			var x := r.end.x - hp * 1.6 - (k + 1) * hp * 2.6
+			var bottom := counter_rect().position.y
+			return Rect2(Vector2(x, bottom - w * 1.2), Vector2(w, w * 1.2))
+	return Rect2()
+
+
+func _machine_buttons() -> Dictionary:
+	var m: Dictionary = rules.machine(sel_machine) if rules else {}
+	if m.is_empty():
+		return {"pause": Rect2(), "sell": Rect2()}
+	var r := slot_rect(String(m["floor"]), int(m["slot"]))
+	var s := clampf(r.size.x * 0.42, 28.0, 44.0)
+	return {"pause": Rect2(Vector2(r.position.x - s * 0.2, r.end.y - s * 0.6), Vector2(s, s)),
+		"sell": Rect2(Vector2(r.end.x - s * 0.8, r.end.y - s * 0.6), Vector2(s, s))}
+
+
+func _clear_machine_selection() -> void:
+	if sel_machine >= 0 or not sel_slot.is_empty():
+		sel_machine = -1
+		sel_slot = {}
+		command.emit("select_machine", {"type": "select_machine", "id": -1})
+		detail_layer.queue_redraw()
+
+
+## A press on a machine place, a machine or its buttons; true when it was one.
+func _machine_press(p: Vector2) -> bool:
+	if rules == null:
+		return false
+	if sel_machine >= 0:
+		var b := _machine_buttons()
+		var m: Dictionary = rules.machine(sel_machine)
+		if _group_rect(detail_rect()).has_point(p) and not m.is_empty():
+			var f := String(m["floor"])
+			var any_on := (rules.get("machines") as Array).any(func(x: Dictionary) -> bool: return String(x["floor"]) == f and String(x["state"]) != "paused")
+			command.emit("pause_floor", {"type": "pause_floor", "floor": f, "paused": any_on})
+			return true
+		if (b["pause"] as Rect2).has_point(p):
+			command.emit("pause_machine", {"type": "pause_machine", "id": sel_machine, "paused": String(m["state"]) != "paused"})
+			return true
+		if (b["sell"] as Rect2).has_point(p):
+			command.emit("sell_machine", {"type": "sell_machine", "id": sel_machine})
+			if rules.machine(sel_machine).is_empty():
+				_clear_machine_selection()
+			return true
+	for f: String in FLOOR_NAME:
+		for k in int(rules.slots(f)):
+			if not slot_rect(f, k).has_point(p):
+				continue
+			var m: Dictionary = rules.machine_at(f, k)
+			if m.is_empty() and not rules.station_open(String(MACHINE_OF[f])):
+				return false   # a locked place is part of the floor
+			selected = int(FLOOR_INDEX[f])
+			if m.is_empty():
+				sel_slot = {"floor": f, "k": k}
+				sel_machine = -1
+			else:
+				sel_machine = int(m["id"])
+				sel_slot = {}
+			command.emit("select_machine", {"type": "select_machine", "id": sel_machine})
+			_redraw_once = true
+			detail_layer.queue_redraw()
+			return true
+	return false
+
+
+func _per_min(type: String, tier: int) -> int:
+	var t: Dictionary = rules._machine_tier_of(type, tier)
+	match type:
+		"cooker":
+			var a: Dictionary = rules.catalog("cooker")
+			return int(round(60000.0 / float(t.get("cycle_ms", 6000)) * float(rules.auto_attempt()["portions"])))
+		"bagger":
+			return int(round(60000.0 / float(t.get("cycle_ms", 5000))))
+		"kiosk":
+			return int(round(60000.0 / float(t.get("service_ms", 2500))))
+	return 0
+
+
+func _draw_machines(ci: CanvasItem) -> void:
+	if rules == null:
+		return
+	for f: String in FLOOR_NAME:
+		var type := String(MACHINE_OF[f])
+		var open: bool = rules.station_open(type)
+		for k in int(rules.slots(f)):
+			var r := slot_rect(f, k)
+			var m: Dictionary = rules.machine_at(f, k)
+			if m.is_empty():
+				if not open and f != "kitchen":
+					continue   # one choice at a time: a floor's places appear when its machine opens
+				PopFactoryArt.dashed_slot(ci, r)
+				if open:
+					PopFactoryArt.machine_icon(ci, r.grow(-6), type, 0, Color(1, 1, 1, 0.55))
+				else:
+					var lk := r.get_center()
+					PopMachineArt._round_rect(ci, Rect2(lk - Vector2(10, 4), Vector2(20, 16)), 3, Color(PopPalette.INK, 0.35))
+					ci.draw_arc(lk + Vector2(0, -5), 7, PI, TAU, 10, Color(PopPalette.INK, 0.35), 3.0)
+				if sel_slot.get("floor", "") == f and int(sel_slot.get("k", -1)) == k:
+					var pts := PopMachineArt.round_rect_points(r.grow(3), PopTokens.R_MACHINE)
+					pts.append(pts[0])
+					ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
+				continue
+			PopMachineArt._round_rect(ci, r, PopTokens.R_MACHINE, Color(1, 1, 1, 0.45))
+			PopFactoryArt.machine_icon(ci, r.grow(-4), type, int(m["tier"]))
+			PopFactoryArt.state_badge(ci, Vector2(r.end.x - 9, r.position.y + 9), 8.0, String(m["state"]))
+			if int(m["id"]) == sel_machine:
+				var pts := PopMachineArt.round_rect_points(r.grow(3), PopTokens.R_MACHINE)
+				pts.append(pts[0])
+				ci.draw_polyline(pts, PopPalette.GOLD, 4.0, true)
+				var b := _machine_buttons()
+				var pr: Rect2 = b["pause"]
+				ci.draw_circle(pr.get_center(), pr.size.x * 0.5, Color.WHITE)
+				ci.draw_arc(pr.get_center(), pr.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
+				if String(m["state"]) == "paused":   # a play triangle resumes
+					var c := pr.get_center()
+					var q := pr.size.x * 0.22
+					ci.draw_colored_polygon(PackedVector2Array([c + Vector2(-q * 0.7, -q), c + Vector2(q, 0), c + Vector2(-q * 0.7, q)]), PopTokens.OK)
+				else:
+					PopFactoryArt.state_badge(ci, pr.get_center(), pr.size.x * 0.32, "paused")
+				var sr: Rect2 = b["sell"]
+				ci.draw_circle(sr.get_center(), sr.size.x * 0.5, Color.WHITE)
+				ci.draw_arc(sr.get_center(), sr.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
+				PopMachineArt.draw_coin(ci, sr.get_center() + Vector2(0, 2), sr.size.x * 0.22)
+				ci.draw_line(sr.get_center() + Vector2(-sr.size.x * 0.22, -sr.size.x * 0.24), sr.get_center() + Vector2(0, -sr.size.x * 0.36), PopPalette.INK, 2.5)
+				ci.draw_line(sr.get_center() + Vector2(sr.size.x * 0.22, -sr.size.x * 0.24), sr.get_center() + Vector2(0, -sr.size.x * 0.36), PopPalette.INK, 2.5)
+
+
+## The machine's detail: what it makes a minute (now > next tier), what it costs
+## a minute to run, and whether its floor is what holds the factory back now
+## (a green tick: it will help; grey: it will mostly wait) -- the cost against
+## the gain before buying. Plus the floor's group pause.
+func _draw_machine_detail(ci: CanvasItem, d: Rect2) -> void:
+	var type := ""
+	var tier := 0
+	var m: Dictionary = {}
+	if sel_machine >= 0:
+		m = rules.machine(sel_machine)
+		if m.is_empty():
+			return
+		type = String(m["type"])
+		tier = int(m["tier"])
+	else:
+		type = String(MACHINE_OF[String(sel_slot["floor"])])
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(d.size.x * 0.1, 16.0, 28.0))
+	var y := d.position.y + fs * 1.3
+	var now := _per_min(type, tier) if not m.is_empty() else 0
+	var nxt := _per_min(type, tier + 1 if not m.is_empty() else 0)
+	var x := d.position.x + fs * 2.0
+	PopFactoryArt.machine_icon(ci, Rect2(Vector2(d.position.x + 4, y - fs), Vector2(fs * 1.6, fs * 1.4)), type, 0)
+	ci.draw_string(font, Vector2(x, y), str(now), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
+	if nxt != now:
+		ci.draw_string(font, Vector2(x + fs * 2.0, y), ">", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.5))
+		ci.draw_string(font, Vector2(x + fs * 2.9, y), str(nxt), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK)
+	y += fs * 1.4
+	PopMachineArt.draw_coin(ci, Vector2(d.position.x + fs * 0.9, y - fs * 0.35), fs * 0.38)
+	ci.draw_string(font, Vector2(x, y), "-%d" % int(rules.catalog(type)["upkeep_per_min"]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.WARN)
+	y += fs * 1.4
+	var helps: bool = String(rules.bottleneck()) == String({"cooker": "production", "bagger": "packaging", "kiosk": "service"}[type])
+	var c := Vector2(d.position.x + fs * 0.9, y - fs * 0.35)
+	ci.draw_circle(c, fs * 0.42, PopTokens.OK if helps else Color(0.75, 0.75, 0.78))
+	ci.draw_polyline(PackedVector2Array([c + Vector2(-fs * 0.2, 0), c + Vector2(-fs * 0.04, fs * 0.16), c + Vector2(fs * 0.22, -fs * 0.16)]), Color.WHITE, 3.0)
+	if not m.is_empty():
+		PopFactoryArt.state_badge(ci, Vector2(x + fs * 0.5, y - fs * 0.35), fs * 0.4, String(m["state"]))
+		# The floor's group control: pause (or resume) every machine on this floor.
+		var g := _group_rect(d)
+		ci.draw_circle(g.get_center(), g.size.x * 0.5, Color.WHITE)
+		ci.draw_arc(g.get_center(), g.size.x * 0.5, 0, TAU, 20, PopPalette.INK, 2.0)
+		PopFactoryArt.state_badge(ci, g.get_center() + Vector2(-3, -3), g.size.x * 0.24, "paused")
+		PopFactoryArt.state_badge(ci, g.get_center() + Vector2(4, 4), g.size.x * 0.24, "paused")
+
+
+func _group_rect(d: Rect2) -> Rect2:
+	var s := clampf(d.size.x * 0.22, 30.0, 46.0)
+	return Rect2(Vector2(d.end.x - s - 8, d.position.y + 8), Vector2(s, s))
+
+
+func _card_machine(ci: CanvasItem, foot: Vector2, h: float, _stage: int, sil: Color, type: String) -> void:
+	PopFactoryArt.machine_icon(ci, Rect2(foot - Vector2(h * 0.45, h * 0.9), Vector2(h * 0.9, h * 0.9)), type, 0, sil)
+
+
+## A machine's moment, seen where it stands: a cooker's lot puffs out of it, a
+## tuned cooker sparkles gold, an upgrade or a sale rings, a pause clicks.
+func _machine_event(e: Dictionary) -> void:
+	var d: Dictionary = e["data"]
+	var m: Dictionary = rules.machine(int(d.get("machine", -1))) if rules else {}
+	var at := slot_rect(String(m["floor"]), int(m["slot"])).get_center() if not m.is_empty() else machine_top()
+	var s := machine_size() / 1500.0
+	match String(e["type"]):
+		"auto_lot":
+			if not reduced_motion:
+				fx.burst(at, 3, s, rng, PopPalette.CREAM if String(d.get("grade", "")) != "perfect" else PopPalette.GOLD, 0.6, 0.7)
+			_sound("pop_1", 1.3, -18.0)
+		"machine_assisted":
+			if not reduced_motion:
+				fx.sparkle(at, s * 1.6, rng, 4, 80.0)
+			_sound("ding", 1.5, -10.0)
+		"machine_upgraded":
+			_sound("upgrade", 1.25)
+			if not reduced_motion:
+				fx.sparkle(at, s * 1.6, rng, 5, 90.0)
+		"machine_sold":
+			_sound("coin", 0.9, -6.0)
+		"machine_paused":
+			_sound("clink", 0.8 if bool(d.get("paused", true)) else 1.2, -10.0)
+	_redraw_once = true

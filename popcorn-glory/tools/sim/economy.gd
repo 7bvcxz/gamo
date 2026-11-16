@@ -75,12 +75,20 @@ func _shop(f: PopRules, policy: String, log: Array, t: int) -> void:
 			want = "buy_packer"
 		"demand", "":
 			want = "buy_sign"
+		"service":
+			want = "build_kiosk"
 	if policy == "supply" and want == "buy_sign":
 		want = "buy"
 	if policy == "demand" and want in ["buy", "buy_packer", "buy_auto"]:
 		want = "buy_sign"
 	if policy == "auto" and f.station_open("auto") and _affordable(f, "buy_auto", 1.5):
 		want = "buy_auto"
+	if want == "build_kiosk":
+		if f.station_open("kiosk") and f.build_cost("kiosk") >= 0 and float(f.money) >= float(f.build_cost("kiosk")) * factor and f._free_slot("shop") >= 0:
+			var price := int(f.build_cost("kiosk"))
+			if bool(f.execute({"type": "build", "machine": "kiosk"})["ok"]):
+				log.append({"t": t, "what": "build_kiosk", "cost": price, "sales_before": 0, "rev_at": 0, "bottleneck": "service"})
+		return
 	if want != "" and _affordable(f, want, factor):
 		_buy(f, want, log, t)
 
@@ -93,7 +101,7 @@ func _run(hand: String, policy: String, minutes: int, seed_value: int, rows: Arr
 	var free_since := 0
 	var log: Array = []
 	var spent := 0
-	var shares := {"production": 0, "packaging": 0, "demand": 0, "": 0}
+	var shares := {"production": 0, "packaging": 0, "demand": 0, "service": 0, "": 0}
 	var last_min := {"made": 0, "packed": 0, "served": 0}
 	var marks := {}
 	while t < minutes * 60000:
@@ -145,7 +153,7 @@ func _run(hand: String, policy: String, minutes: int, seed_value: int, rows: Arr
 		buys.append({"run": "%s/%s" % [hand, policy], "t_s": int(b["t"]) / 1000, "what": b["what"], "cost": b["cost"], "bottleneck": b["bottleneck"],
 			"rev_per_min_before": before / 2.0, "rev_per_min_after": after / 2.0, "payback_min": (float(b["cost"]) / gain) if gain > 0.0 else -1.0})
 	var total := float(t)
-	return {"marks": marks, "shares": {"production": shares["production"] / total, "packaging": shares["packaging"] / total, "demand": shares["demand"] / total}}
+	return {"marks": marks, "shares": {"production": shares["production"] / total, "packaging": shares["packaging"] / total, "demand": shares["demand"] / total, "service": shares["service"] / total}}
 
 
 func _rev_between(rows: Array, a: int, b: int) -> float:

@@ -210,8 +210,8 @@ func on_command(kind: String, cmd: Dictionary) -> void:
 	if not bool(r["ok"]):
 		session.record(clock.now_ms, "refused", {"kind": kind, "reason": String(r.get("reason", ""))})
 	_flush()
-	if kind == "recipe" and bool(r["ok"]):
-		save_now()
+	if kind in ["recipe", "build", "sell_machine", "upgrade_machine", "pause_machine", "pause_floor"] and bool(r["ok"]):
+		save_now()   # (Step 26: a machine's lifecycle is kept at once)
 
 
 func dev_money(amount: int) -> void:

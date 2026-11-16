@@ -83,6 +83,17 @@ func _tick() -> void:
 						# Picture setup (not a play): money to buy what is shown.
 						_app.rules.money += int(step.substr(1))
 						_app.rules.earned += int(step.substr(1))
+					"c":
+						# Step 26: build a machine, `c<type>@<slot>` (e.g. ccooker@0).
+						var bits := step.substr(1).split("@")
+						_app.on_command("build", {"type": "build", "machine": bits[0], "slot": int(bits[1]) if bits.size() > 1 else -1})
+					"S":
+						# Step 26: choose machine id N on screen (its buttons and detail).
+						var v = _app.frame.play
+						v.sel_machine = int(step.substr(1))
+						var mm: Dictionary = _app.rules.machine(v.sel_machine)
+						if not mm.is_empty():
+							v.selected = int(v.FLOOR_INDEX[String(mm["floor"])])
 					"x":
 						# Picture setup (Step 20): a factory with no customers (to show a full shelf).
 						if "queue" in _app.rules:

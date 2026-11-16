@@ -36,8 +36,17 @@ var sign_tier := 0          ## Step 22: the shop's sign (data: factory.sign) -- 
 var arrival_log: Array = [] ## Step 22: when each customer came in (flow ms), for the statistics
 var first_sale_ms := -1     ## flow ms of the first sale (-1: none yet)
 var glass_held_ms := 0      ## Step 24: how long the glass has been holding back the kettle, now
-## Step 25: the basic auto cookers -- {left_ms, held: lot or {}, state: run|blocked|unpaid, upkeep_ms}.
-var cookers: Array = []
+## Step 26: every automation machine, one instance each -- {id, type, floor, slot,
+## tier, state (run|idle|paused|unpaid|blocked|starved), left_ms, held (a lot or a
+## pack in its hands, or {}), upkeep_ms (work not yet paid for), paid (what it cost),
+## assist (lots the hand tuned)}. Processed in the fixed flow steps, in id order.
+var machines: Array = []
+var next_machine_id := 1
+var assist_target := -1    ## the machine the player has selected (a perfect pop tunes it)
+## The cookers among them (Step 25's name; the same dictionaries).
+var cookers: Array:
+	get:
+		return machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == "cooker")
 var auto_rng_state := 0
 var _arng := RandomNumberGenerator.new()
 var order_rng_state := 0    ## Step 23: the orders' own generator (so orders never move arrival times)
@@ -148,8 +157,11 @@ func station_open(station: String) -> bool:
 			return int(stats["packed"]) >= 1 or packer_tier > 0
 		"sign":
 			return int(stats["sold"]) >= 1 or sign_tier > 0
-		"auto":
-			return sign_tier >= int(_auto().get("unlock_sign", 2)) or not cookers.is_empty()
+		"auto", "cooker":
+			return sign_tier >= int(_auto().get("unlock_sign", 2)) or _count("cooker") > 0
+		"bagger", "kiosk":
+			var need: Dictionary = catalog(station).get("unlock", {})
+			return (packer_tier >= int(need.get("packer", 0)) and sign_tier >= int(need.get("sign", 0))) or _count(station) > 0
 	return true
 
 
@@ -242,9 +254,10 @@ func portions_everywhere() -> int:
 		n += int(p["size"])
 	for sv: Dictionary in serves:
 		n += int(sv["pack"]["size"])
-	for ck: Dictionary in cookers:
-		if not (ck["held"] as Dictionary).is_empty():
-			n += int(ck["held"]["portions"])
+	for m: Dictionary in machines:
+		var h: Dictionary = m["held"]
+		if not h.is_empty():
+			n += int(h.get("portions", h.get("size", 0)))
 	return n + int(stats["sold_portions"])
 
 
@@ -257,6 +270,20 @@ func _act(kind: String, cmd: Dictionary) -> Dictionary:
 		return _buy_sign()
 	if kind == "buy_auto":
 		return _buy_auto()
+	match kind:   # Step 26: the machines' lifecycle
+		"build":
+			return _build(String(cmd.get("machine", "")), int(cmd.get("slot", -1)))
+		"sell_machine":
+			return _sell_machine(int(cmd.get("id", -1)))
+		"upgrade_machine":
+			return _upgrade_machine(int(cmd.get("id", -1)))
+		"pause_machine":
+			return _pause(int(cmd.get("id", -1)), bool(cmd.get("paused", true)))
+		"pause_floor":
+			return _pause_floor(String(cmd.get("floor", "")), bool(cmd.get("paused", true)))
+		"select_machine":
+			assist_target = int(cmd.get("id", -1))
+			return {"ok": true}
 	if kind == "press" and not glass.is_empty():
 		# The glass still holds a lot (the bin is full): no heat until it pours.
 		return {"ok": false, "reason": "err.kettle_full"}
@@ -275,6 +302,13 @@ func _resolve(kind: String) -> Dictionary:
 	heat_ms = 0
 	cooldown_left = _cooldown_ms()
 	outcomes[kind] = int(outcomes[kind]) + 1
+	# Step 26, the hand's assist: a perfect pop while a cooker is selected tunes its next
+	# lots (bounded: assist_lots, never more) -- a temporary edge the hand gives a line.
+	if kind == PERFECT and assist_target >= 0:
+		var am := machine(assist_target)
+		if not am.is_empty() and String(am["type"]) == "cooker":
+			am["assist"] = mini(int(_auto().get("assist_lots", 3)), int(am["assist"]) + int(_auto().get("assist_lots", 3)))
+			_emit("machine_assisted", {"machine": assist_target, "lots": am["assist"]})
 	var lot := {"id": _new_id(), "recipe": "plain", "quality": int(GRADE_QUALITY[kind]), "portions": portions}
 	glass = lot
 	stats["made_portions"] = int(stats["made_portions"]) + portions
@@ -329,8 +363,8 @@ func _flow_step(dt: int) -> void:
 		bn_ring.append(instant_bottleneck())
 		if bn_ring.size() > BN_SAMPLES:
 			bn_ring.pop_front()
-	# 1b. The auto cookers (Step 25).
-	_cookers_step(dt)
+	# 1b. The machines (Steps 25-26).
+	_machines_step(dt)
 	# 2. The lift lands lots in the bin.
 	var still: Array = []
 	for x: Dictionary in lift:
@@ -403,7 +437,7 @@ func _flow_step(dt: int) -> void:
 	serves = going
 	if serves.is_empty() and queue.is_empty():
 		stats["counter_empty_ms"] = int(stats["counter_empty_ms"]) + dt
-	while serves.size() < lanes() and not queue.is_empty():
+	while _counter_serving() < lanes() and not queue.is_empty():
 		var head: Dictionary = queue[0]
 		var idx := _matching_pack(head["order"])
 		if idx < 0:
@@ -414,6 +448,23 @@ func _flow_step(dt: int) -> void:
 		var lane := _free_lane()
 		serves.append({"customer": head, "pack": pack, "left_ms": int(t["service_ms"]), "lane": lane})
 		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": lane})
+	# Step 26: self-serve kiosks take the next customer when the counter's lanes are busy.
+	for m: Dictionary in machines:
+		if queue.is_empty():
+			break
+		if String(m["type"]) != "kiosk" or String(m["state"]) in ["paused", "unpaid"] or _kiosk_busy(int(m["id"])):
+			continue
+		var head: Dictionary = queue[0]
+		var idx := _matching_pack(head["order"])
+		if idx < 0:
+			break
+		var pack: Dictionary = shelf[idx]
+		shelf.remove_at(idx)
+		queue.remove_at(0)
+		var ms := int(_machine_tier(m).get("service_ms", 2500))
+		serves.append({"customer": head, "pack": pack, "left_ms": ms, "lane": 100 + int(m["slot"]), "kiosk": int(m["id"])})
+		m["state"] = "run"
+		_emit("serve_started", {"customer": head["id"], "pack": pack["id"], "lane": 100 + int(m["slot"]), "kiosk": int(m["id"])})
 
 
 ## The oldest recipe in the bin with a whole pack's portions ("" = none): a
@@ -445,7 +496,11 @@ func sizes_open() -> Array:
 ## Packs of an SKU and size on the shelf or being filled.
 func on_hand(sku: String, size: int) -> int:
 	var n := 0
-	for p: Dictionary in shelf + packing:
+	var bagged: Array = []
+	for m: Dictionary in machines:
+		if String(m["type"]) == "bagger" and not (m["held"] as Dictionary).is_empty():
+			bagged.append(m["held"])
+	for p: Dictionary in shelf + packing + bagged:
 		if String(p["recipe"]) == sku and int(p["size"]) == size:
 			n += 1
 	return n
@@ -532,6 +587,17 @@ func pack_sku(recipe: String) -> String:
 ## Takes `size` portions of `recipe` from the bin's oldest lots of it (FIFO)
 ## into a new pack; its quality is the portions' average (nothing lost).
 func _start_pack(size: int, recipe: String) -> void:
+	var pack := _take_pack(size, recipe)
+	var ms := int(packer()["ms"])
+	pack["left_ms"] = ms
+	pack["ms"] = ms
+	packing.append(pack)
+	_emit("pack_started", {"pack": pack["id"], "lots": pack["lots"], "size": size, "head": packing.size() - 1, "ms": ms, "recipe": pack["recipe"]})
+
+
+## Takes `size` portions of `recipe` from the bin's oldest lots of it into a new
+## pack (shared by the station and the baggers, Step 26).
+func _take_pack(size: int, recipe: String) -> Dictionary:
 	var need := size
 	var q_sum := 0
 	var used: Array = []
@@ -548,10 +614,7 @@ func _start_pack(size: int, recipe: String) -> void:
 		used.append(lot["id"])
 		if int(lot["portions"]) <= 0:
 			bin.remove_at(i)
-	var ms := int(packer()["ms"])
-	var pack := {"id": _new_id(), "recipe": pack_sku(recipe), "size": size, "quality": q_sum / size, "left_ms": ms, "ms": ms}
-	packing.append(pack)
-	_emit("pack_started", {"pack": pack["id"], "lots": used, "size": size, "head": packing.size() - 1, "ms": ms, "recipe": pack["recipe"]})
+	return {"id": _new_id(), "recipe": pack_sku(recipe), "size": size, "quality": q_sum / size, "lots": used}
 
 
 func _matching_pack(order: Dictionary) -> int:
@@ -603,74 +666,279 @@ func _buy_sign() -> Dictionary:
 	return {"ok": true, "tier": sign_tier, "cost": c}
 
 
-# -- Step 25: the basic auto cooker ---------------------------------------------
+# -- Steps 25-26: the machines --------------------------------------------------
+## The catalog: `auto_cooker` is the cooker's entry (Step 25); `machines` holds the
+## others; `slots` how many places each floor has.
+
+const FLOOR_OF := {"cooker": "kitchen", "bagger": "packing", "kiosk": "shop"}
+
+
+func catalog(type: String) -> Dictionary:
+	if type == "cooker":
+		return _t()["auto_cooker"]
+	return (_t().get("machines", {}) as Dictionary).get(type, {})
+
 
 func _auto() -> Dictionary:
-	return _t()["auto_cooker"]
+	return catalog("cooker")
+
+
+func slots(floor: String) -> int:
+	return int((_t().get("slots", {}) as Dictionary).get(floor, 0))
+
+
+func machine(id: int) -> Dictionary:
+	for m: Dictionary in machines:
+		if int(m["id"]) == id:
+			return m
+	return {}
+
+
+func machine_at(floor: String, slot: int) -> Dictionary:
+	for m: Dictionary in machines:
+		if String(m["floor"]) == floor and int(m["slot"]) == slot:
+			return m
+	return {}
+
+
+func _count(type: String) -> int:
+	return machines.filter(func(m: Dictionary) -> bool: return String(m["type"]) == type).size()
+
+
+## The next one of a type: cost x growth^(how many there are), or -1 (none left to build).
+func build_cost(type: String) -> int:
+	var c := catalog(type)
+	if c.is_empty() or machines.size() >= int(_auto().get("max", 40)):
+		return -1
+	return int(round(float(c["cost"]) * pow(float(c["growth"]), _count(type))))
 
 
 func auto_cost() -> int:
-	var a := _auto()
-	if cookers.size() >= int(a.get("max", 40)):
-		return -1
-	return int(round(float(a["cost"]) * pow(float(a["growth"]), cookers.size())))
+	return build_cost("cooker")
+
+
+func _machine_tier(m: Dictionary) -> Dictionary:
+	var tiers: Array = catalog(String(m["type"])).get("tiers", [{}])
+	return tiers[clampi(int(m["tier"]), 0, tiers.size() - 1)]
+
+
+func machine_upgrade_cost(m: Dictionary) -> int:
+	var tiers: Array = catalog(String(m["type"])).get("tiers", [{}])
+	return int(tiers[int(m["tier"]) + 1]["cost"]) if int(m["tier"]) + 1 < tiers.size() else -1
+
+
+func _free_slot(floor: String) -> int:
+	for k in slots(floor):
+		if machine_at(floor, k).is_empty():
+			return k
+	return -1
+
+
+func _build(type: String, slot: int) -> Dictionary:
+	var c := catalog(type)
+	if c.is_empty():
+		return {"ok": false, "reason": "err.unknown"}
+	if not station_open(type):
+		return {"ok": false, "reason": "err.locked"}
+	var floor := String(FLOOR_OF[type])
+	if slot < 0:
+		slot = _free_slot(floor)
+	if slot < 0 or slot >= slots(floor):
+		return {"ok": false, "reason": "err.no_slot"}
+	if not machine_at(floor, slot).is_empty():
+		return {"ok": false, "reason": "err.slot_taken"}
+	var cost := build_cost(type)
+	if cost < 0:
+		return {"ok": false, "reason": "err.max_level"}
+	if money < cost:
+		return {"ok": false, "reason": "err.not_enough_money"}
+	money -= cost
+	var m := {"id": next_machine_id, "type": type, "floor": floor, "slot": slot, "tier": 0, "state": "idle",
+		"left_ms": int(_machine_tier_of(type, 0).get("cycle_ms", c.get("cycle_ms", 6000))), "held": {}, "upkeep_ms": 0, "paid": cost, "assist": 0}
+	next_machine_id += 1
+	machines.append(m)
+	_emit("station_upgrade", {"station": type, "tier": _count(type), "cost": cost, "money": money, "machine": m["id"], "slot": slot})
+	_emit("machine_built", {"machine": m["id"], "type": type, "slot": slot})
+	return {"ok": true, "machine": m["id"], "cost": cost}
+
+
+func _machine_tier_of(type: String, tier: int) -> Dictionary:
+	var tiers: Array = catalog(type).get("tiers", [{}])
+	return tiers[clampi(tier, 0, tiers.size() - 1)]
 
 
 func _buy_auto() -> Dictionary:
-	if not station_open("auto"):
-		return {"ok": false, "reason": "err.locked"}
-	var c := auto_cost()
+	return _build("cooker", -1)
+
+
+## Selling gives half of what it cost back; a machine holding goods finishes
+## with them first (it cannot drop popcorn on the floor).
+func _sell_machine(id: int) -> Dictionary:
+	var m := machine(id)
+	if m.is_empty():
+		return {"ok": false, "reason": "err.unknown"}
+	if not (m["held"] as Dictionary).is_empty() or _kiosk_busy(id):
+		return {"ok": false, "reason": "err.busy"}
+	var refund := int(m["paid"]) / 2
+	money += refund
+	machines.erase(m)
+	if assist_target == id:
+		assist_target = -1
+	_emit("machine_sold", {"machine": id, "refund": refund, "money": money})
+	return {"ok": true, "refund": refund}
+
+
+func _upgrade_machine(id: int) -> Dictionary:
+	var m := machine(id)
+	if m.is_empty():
+		return {"ok": false, "reason": "err.unknown"}
+	var c := machine_upgrade_cost(m)
 	if c < 0:
 		return {"ok": false, "reason": "err.max_level"}
 	if money < c:
 		return {"ok": false, "reason": "err.not_enough_money"}
 	money -= c
-	cookers.append({"left_ms": int(_auto()["cycle_ms"]), "held": {}, "state": "run", "upkeep_ms": 0})
-	_emit("station_upgrade", {"station": "auto", "tier": cookers.size(), "cost": c, "money": money})
-	return {"ok": true, "cookers": cookers.size(), "cost": c}
+	m["tier"] = int(m["tier"]) + 1
+	m["paid"] = int(m["paid"]) + c
+	_emit("machine_upgraded", {"machine": id, "tier": m["tier"], "cost": c, "money": money})
+	return {"ok": true, "tier": m["tier"], "cost": c}
 
 
-## Each cooker: while it runs it pays upkeep (a coin per 60000/upkeep_per_min ms
-## of work; with no coin it pauses -- never a debt) and finishes a lot every
-## cycle; the lot goes up when the bin has room for it, else the cooker holds it.
-func _cookers_step(dt: int) -> void:
-	if cookers.is_empty():
+## Pausing keeps what it was doing (its lot, its pack, its timer); resuming continues.
+func _pause(id: int, paused: bool) -> Dictionary:
+	var m := machine(id)
+	if m.is_empty():
+		return {"ok": false, "reason": "err.unknown"}
+	m["state"] = "paused" if paused else "idle"
+	_emit("machine_paused", {"machine": id, "paused": paused})
+	return {"ok": true}
+
+
+func _pause_floor(floor: String, paused: bool) -> Dictionary:
+	var n := 0
+	for m: Dictionary in machines:
+		if String(m["floor"]) == floor:
+			_pause(int(m["id"]), paused)
+			n += 1
+	return {"ok": n > 0, "machines": n}
+
+
+func _kiosk_busy(id: int) -> bool:
+	for sv: Dictionary in serves:
+		if int(sv.get("kiosk", -1)) == id:
+			return true
+	return false
+
+
+func _counter_serving() -> int:
+	var n := 0
+	for sv: Dictionary in serves:
+		if not sv.has("kiosk"):
+			n += 1
+	return n
+
+
+## Upkeep for `dt` of work, a whole coin at a time; false (and the machine
+## pauses as "unpaid") when a coin is due and there is none -- never a debt.
+func _pay(m: Dictionary, dt: int) -> bool:
+	var per_coin := maxi(1, 60000 / maxi(1, int(catalog(String(m["type"]))["upkeep_per_min"])))
+	var owed := int(m["upkeep_ms"]) + dt
+	if owed >= per_coin:
+		if money < 1:
+			m["state"] = "unpaid"
+			stats["auto_unpaid_ms"] = int(stats["auto_unpaid_ms"]) + dt
+			return false
+		money -= 1
+		stats["upkeep_paid"] = int(stats["upkeep_paid"]) + 1
+		owed -= per_coin
+	m["upkeep_ms"] = owed
+	return true
+
+
+func _machines_step(dt: int) -> void:
+	for m: Dictionary in machines:
+		if String(m["state"]) == "paused":
+			continue
+		match String(m["type"]):
+			"cooker":
+				_cooker_step(m, dt)
+			"bagger":
+				_bagger_step(m, dt)
+			"kiosk":
+				_kiosk_step(m, dt)
+
+
+## A cooker finishes a lot every cycle; the lot goes up when the bin has room for it,
+## else the cooker holds it (blocked, no upkeep).
+func _cooker_step(m: Dictionary, dt: int) -> void:
+	if not (m["held"] as Dictionary).is_empty():
+		var lot: Dictionary = m["held"]
+		var room := int(_t()["bin_portions"]) - bin_portions() - lift_portions()
+		if room < int(lot["portions"]):
+			m["state"] = "blocked"
+			stats["auto_blocked_ms"] = int(stats["auto_blocked_ms"]) + dt
+			return
+		lift.append({"lot": lot, "left_ms": int(_t()["lift_ms"])})
+		_emit("lot_lifted", {"lot": lot["id"], "from": "auto", "machine": m["id"]})
+		m["held"] = {}
+	if not _pay(m, dt):
 		return
-	var a := _auto()
-	var per_coin := maxi(1, 60000 / maxi(1, int(a["upkeep_per_min"])))
-	var full := int(_t()["bin_portions"])
-	for ck: Dictionary in cookers:
-		if not (ck["held"] as Dictionary).is_empty():
-			var lot: Dictionary = ck["held"]
-			var room := full - bin_portions() - lift_portions()
-			if room >= int(lot["portions"]):
-				lift.append({"lot": lot, "left_ms": int(_t()["lift_ms"])})
-				_emit("lot_lifted", {"lot": lot["id"], "from": "auto"})
-				ck["held"] = {}
-				ck["state"] = "run"
-			else:
-				ck["state"] = "blocked"
-				stats["auto_blocked_ms"] = int(stats.get("auto_blocked_ms", 0)) + dt
-				continue
-		# Upkeep for this step's work, a whole coin at a time.
-		var owed := int(ck["upkeep_ms"]) + dt
-		if owed >= per_coin:
-			if money < 1:
-				ck["state"] = "unpaid"
-				stats["auto_unpaid_ms"] = int(stats.get("auto_unpaid_ms", 0)) + dt
-				continue
-			money -= 1
-			stats["upkeep_paid"] = int(stats.get("upkeep_paid", 0)) + 1
-			owed -= per_coin
-		ck["upkeep_ms"] = owed
-		ck["state"] = "run"
-		ck["left_ms"] = int(ck["left_ms"]) - dt
-		if int(ck["left_ms"]) <= 0:
-			ck["left_ms"] = int(a["cycle_ms"])
-			ck["held"] = _auto_lot()
+	m["state"] = "run"
+	m["left_ms"] = int(m["left_ms"]) - dt
+	if int(m["left_ms"]) <= 0:
+		m["left_ms"] = int(_machine_tier(m).get("cycle_ms", _auto()["cycle_ms"]))
+		m["held"] = _auto_lot(m)
+		m["done"] = int(m.get("done", 0)) + 1
 
 
-func _auto_lot() -> Dictionary:
+## A bagger fills one pack at a time with what is wanted (the same rule as the
+## station), from real portions in the bin; it waits (starved) with nothing to
+## pack and holds a sealed pack (blocked) while the shelf is full.
+func _bagger_step(m: Dictionary, dt: int) -> void:
+	var h: Dictionary = m["held"]
+	if h.is_empty():
+		var room := int(_t()["shelf_packs"]) - shelf.size() - packing.size()
+		var want := _next_pack() if room > 0 else {}
+		if want.is_empty():
+			m["state"] = "starved" if room > 0 else "blocked"
+			return
+		var pack := _take_pack(int(want["size"]), String(want["recipe"]))
+		pack["left_ms"] = int(_machine_tier(m).get("cycle_ms", 5000))
+		m["held"] = pack
+		_emit("bagger_started", {"machine": m["id"], "pack": pack["id"], "size": pack["size"], "ms": pack["left_ms"]})
+		return
+	if int(h["left_ms"]) > 0:
+		if not _pay(m, dt):
+			return
+		m["state"] = "run"
+		h["left_ms"] = int(h["left_ms"]) - dt
+		return
+	if shelf.size() >= int(_t()["shelf_packs"]):
+		m["state"] = "blocked"
+		return
+	shelf.append({"id": h["id"], "recipe": h["recipe"], "size": h["size"], "quality": h["quality"]})
+	stats["packed"] = int(stats["packed"]) + 1
+	_note("packs")
+	m["held"] = {}
+	m["done"] = int(m.get("done", 0)) + 1
+	_emit("pack_shelved", {"pack": h["id"], "machine": m["id"]})
+
+
+## A kiosk pays only while it hands a pack over (the counter loop gives it customers).
+func _kiosk_step(m: Dictionary, dt: int) -> void:
+	if _kiosk_busy(int(m["id"])):
+		if not _pay(m, dt):
+			# No coin: the hand-over in progress stops where it is (its time does not run).
+			for sv: Dictionary in serves:
+				if int(sv.get("kiosk", -1)) == int(m["id"]):
+					sv["left_ms"] = int(sv["left_ms"]) + dt
+			return
+		m["state"] = "run"
+	elif String(m["state"]) != "unpaid" or money >= 1:
+		m["state"] = "idle"
+
+
+func _auto_lot(m: Dictionary = {}) -> Dictionary:
 	var a := _auto()
 	_arng.state = auto_rng_state
 	var u := _arng.randf()
@@ -682,14 +950,18 @@ func _auto_lot() -> Dictionary:
 		if u < acc:
 			grade = g
 			break
+	# Step 26: lots the hand tuned (a perfect pop while this cooker was selected) come out perfect.
+	if not m.is_empty() and int(m.get("assist", 0)) > 0:
+		grade = PERFECT
+		m["assist"] = int(m["assist"]) - 1
 	var cap := float(a.get("portions", kettle_capacity())) * float(a["capacity_share"])
 	var portions := maxi(1, int(floor(cap * float((_t()["yield"] as Dictionary)[grade]))))
 	var lot := {"id": _new_id(), "recipe": "plain", "quality": int(GRADE_QUALITY[grade]), "portions": portions}
 	stats["made_portions"] = int(stats["made_portions"]) + portions
-	stats["auto_lots"] = int(stats.get("auto_lots", 0)) + 1
-	stats["auto_portions"] = int(stats.get("auto_portions", 0)) + portions
+	stats["auto_lots"] = int(stats["auto_lots"]) + 1
+	stats["auto_portions"] = int(stats["auto_portions"]) + portions
 	_note("lots")
-	_emit("auto_lot", {"lot": lot["id"], "grade": grade, "portions": portions})
+	_emit("auto_lot", {"lot": lot["id"], "grade": grade, "portions": portions, "machine": m.get("id", -1)})
 	return lot
 
 
@@ -728,6 +1000,10 @@ func _free_lane() -> int:
 func _sell(sv: Dictionary) -> void:
 	var c: Dictionary = sv["customer"]
 	var p: Dictionary = sv["pack"]
+	if sv.has("kiosk"):
+		var km := machine(int(sv["kiosk"]))
+		if not km.is_empty():
+			km["done"] = int(km.get("done", 0)) + 1
 	var coins := pack_price(String(p["recipe"]), int(p["size"]), int(p["quality"]))
 	if first_sale_ms < 0:
 		first_sale_ms = flow_ms
@@ -787,13 +1063,13 @@ const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo"
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
 ## Step 23 fields: optional (a 0.22 save has none).
-const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "cookers", "auto_rng_state", "bn_ring"]
+const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "machines", "next_machine_id", "auto_rng_state", "bn_ring"]
 
 
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
 		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
-		"cookers": cookers.duplicate(true), "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate()}
+		"machines": machines.duplicate(true), "next_machine_id": next_machine_id, "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate()}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -859,7 +1135,15 @@ func _apply_save(d: Dictionary) -> void:
 		order_rng_state = String(d["order_rng_state"]).to_int()
 		_orng.state = order_rng_state
 	glass_held_ms = maxi(0, int(d.get("glass_held_ms", 0))) if typeof(d.get("glass_held_ms", 0)) == TYPE_INT else 0
-	cookers = (d.get("cookers", []) as Array).duplicate(true) if typeof(d.get("cookers", [])) == TYPE_ARRAY else []
+	machines = (d.get("machines", []) as Array).duplicate(true) if typeof(d.get("machines", [])) == TYPE_ARRAY else []
+	# A 0.25 save kept its cookers apart: they become cooker machines in the kitchen's slots.
+	if typeof(d.get("cookers")) == TYPE_ARRAY:
+		var k := 0
+		for c: Dictionary in d["cookers"]:
+			machines.append({"id": machines.size() + 1, "type": "cooker", "floor": "kitchen", "slot": k, "tier": 0, "state": String(c.get("state", "idle")),
+				"left_ms": int(c.get("left_ms", 6000)), "held": c.get("held", {}), "upkeep_ms": int(c.get("upkeep_ms", 0)), "paid": 300, "assist": 0})
+			k += 1
+	next_machine_id = maxi(int(d.get("next_machine_id", 1)), machines.size() + 1)
 	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
 	if String(d.get("auto_rng_state", "")).is_valid_int():
 		auto_rng_state = String(d["auto_rng_state"]).to_int()
@@ -890,8 +1174,12 @@ func state() -> Dictionary:
 	s["queue_cap"] = queue_cap()
 	s["sign_tier"] = sign_tier
 	s["cookers"] = cookers.map(func(c: Dictionary) -> String: return String(c["state"]))
+	s["machines"] = machines.map(func(m: Dictionary) -> Dictionary: return {"id": m["id"], "type": m["type"], "floor": m["floor"], "slot": m["slot"],
+		"tier": m["tier"], "state": m["state"], "assist": m["assist"], "done": int(m.get("done", 0)), "held": int((m["held"] as Dictionary).get("portions", (m["held"] as Dictionary).get("size", 0)))})
+	s["build_cost"] = {"cooker": build_cost("cooker"), "bagger": build_cost("bagger"), "kiosk": build_cost("kiosk")}
 	s["auto_cost"] = auto_cost()
-	s["open"] = {"packer": station_open("packer"), "sign": station_open("sign")}
+	s["open"] = {"packer": station_open("packer"), "sign": station_open("sign"), "cooker": station_open("cooker"),
+		"bagger": station_open("bagger"), "kiosk": station_open("kiosk")}
 	s["sign_max"] = (_t()["sign"] as Array).size() - 1
 	s["sign_cost"] = sign_cost()
 	s["mean_wait_ms"] = mean_wait_ms(sign_tier)
@@ -933,13 +1221,22 @@ var bn_ring: Array = []
 func bottleneck() -> String:
 	if bn_ring.is_empty():
 		return instant_bottleneck()
+	# When more than half of the last 30 s had a bottleneck, show the most frequent
+	# one (Step 26: two stages that both nearly bind split the samples, and a strict
+	# majority of one showed nothing while customers were being lost).
 	var count := {}
+	var any := 0
 	for b: String in bn_ring:
-		count[b] = int(count.get(b, 0)) + 1
+		if b != "":
+			count[b] = int(count.get(b, 0)) + 1
+			any += 1
+	if any * 2 <= bn_ring.size():
+		return ""
+	var best := ""
 	for b: String in count.keys():
-		if b != "" and int(count[b]) * 2 > bn_ring.size():
-			return b
-	return ""
+		if best == "" or int(count[b]) > int(count[best]):
+			best = b
+	return best
 
 
 func instant_bottleneck() -> String:
@@ -948,12 +1245,20 @@ func instant_bottleneck() -> String:
 	# "packaging" (someone has waited 6 s while the station works, or the kettle
 	# has waited 3 s for room), "demand" (packs wait, nobody in the queue), "".
 	var patience := int((_t()["customers"] as Dictionary)["patience_ms"])
-	if not queue.is_empty() and serves.size() < lanes():
+	# The head of the queue has waited 6 s: why? Their pack is on the shelf but every
+	# lane and kiosk is busy -> "service" (Step 26); no pack and nothing to make it
+	# from -> "production"; no pack but the station is on it -> "packaging".
+	if not queue.is_empty():
 		var head: Dictionary = queue[0]
-		if _matching_pack(head["order"]) < 0 and patience - int(head["patience_ms"]) >= REAL_WAIT_MS:
-			if packing.is_empty() and _next_pack().is_empty():
+		if patience - int(head["patience_ms"]) >= REAL_WAIT_MS:
+			if _matching_pack(head["order"]) >= 0:
+				var kiosk_free := machines.any(func(m: Dictionary) -> bool: return String(m["type"]) == "kiosk" and not _kiosk_busy(int(m["id"])) and String(m["state"]) not in ["paused", "unpaid"])
+				if _counter_serving() >= lanes() and not kiosk_free:
+					return "service"
+			elif packing.is_empty() and _next_pack().is_empty():
 				return "production"
-			return "packaging"
+			else:
+				return "packaging"
 	if glass_held_ms >= REAL_HOLD_MS:
 		# The kettle waits for room: the station is the cause only if it is still
 		# working; a station blocked by a full shelf means packs wait for people.

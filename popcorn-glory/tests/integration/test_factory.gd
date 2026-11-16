@@ -342,7 +342,7 @@ func test_faces_follow_patience_the_sale_and_leaving() -> void:
 	f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
 	var actor: Node2D = v.customers[first]
-	await _frames(20, 100)
+	await _frames(40, 100)
 	assert_eq(String(actor.mood), "happy", "served: happy, carrying the bag")
 	assert_true(actor.carrying, "with the bag")
 	# The others, with no more stock, leave sad.
@@ -479,3 +479,77 @@ func test_bubbles_show_each_order_and_the_cue_follows_the_bottleneck() -> void:
 	await tree.process_frame
 	await tree.process_frame
 	assert_true(String(v._stats_key).begins_with("1|"), "hovering the middle badge shows its numbers")
+
+
+# -- Step 26: machines on screen ------------------------------------------------
+
+func test_a_machine_place_is_chosen_built_paused_and_sold_from_the_screen() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var f = app.rules
+	f.sign_tier = 3
+	f.money = 5000
+	await tree.process_frame
+	var r: Rect2 = v.slot_rect("kitchen", 1)
+	var presses := int(f.presses)
+	_mouse(r.get_center(), true)
+	_mouse(r.get_center(), false)
+	await tree.process_frame
+	assert_eq(int(f.presses), presses, "a tap on a machine place does not cook")
+	assert_eq(String(v.sel_slot.get("floor", "")), "kitchen", "it chooses the place")
+	await tree.process_frame
+	assert_eq(String(app.frame.upgrade_button.art_key), "build_cooker", "the card sells a cooker for it")
+	assert_eq(int(app.frame.upgrade_button.price), int(f.build_cost("cooker")), "at its price")
+	var money := int(f.money)
+	app.buy()
+	assert_eq(f.machines.size(), 1, "built")
+	assert_eq(int(f.machines[0]["slot"]), 1, "in the chosen place")
+	assert_eq(int(f.money), money - int(f.machines[0]["paid"]), "paid")
+	_mouse(r.get_center(), true)
+	_mouse(r.get_center(), false)
+	await tree.process_frame
+	var id := int(f.machines[0]["id"])
+	assert_eq(int(v.sel_machine), id, "a tap on the machine chooses it")
+	await tree.process_frame
+	assert_eq(String(app.frame.upgrade_button.art_key), "machine_up", "the card sells its next tier")
+	var b: Dictionary = v._machine_buttons()
+	_mouse((b["pause"] as Rect2).get_center(), true)
+	_mouse((b["pause"] as Rect2).get_center(), false)
+	assert_eq(String(f.machine(id)["state"]), "paused", "its pause button pauses it")
+	_mouse((b["pause"] as Rect2).get_center(), true)
+	_mouse((b["pause"] as Rect2).get_center(), false)
+	assert_true(String(f.machine(id)["state"]) != "paused", "and resumes it")
+	var g: Rect2 = v._group_rect(v.detail_rect())
+	_mouse(g.get_center(), true)
+	_mouse(g.get_center(), false)
+	assert_true(f.machines.all(func(m: Dictionary) -> bool: return String(m["state"]) == "paused"), "the group button pauses the floor")
+	_mouse(g.get_center(), true)
+	_mouse(g.get_center(), false)
+	app.dev_advance(3000)
+	_mouse((b["sell"] as Rect2).get_center(), true)
+	_mouse((b["sell"] as Rect2).get_center(), false)
+	if f.machines.is_empty():
+		assert_eq(int(v.sel_machine), -1, "sold: nothing chosen any more")
+	else:
+		assert_true(not (f.machines[0]["held"] as Dictionary).is_empty(), "or it waits to finish the lot it holds")
+	assert_eq(int(f.portions_everywhere()), int(f.stats["made_portions"]), "nothing made or lost")
+
+
+func test_a_perfect_pop_with_a_cooker_chosen_tunes_it() -> void:
+	app.open("factory")
+	await tree.process_frame
+	var v := _view()
+	var f = app.rules
+	f.sign_tier = 3
+	f.money = 5000
+	app.on_command("build", {"type": "build", "machine": "cooker", "slot": 0})
+	var r: Rect2 = v.slot_rect("kitchen", 0)
+	_mouse(r.get_center(), true)
+	_mouse(r.get_center(), false)
+	await tree.process_frame
+	var c: Vector2 = v.machine_centre()
+	_mouse(c, true)
+	app.dev_advance(f.window_start() + 60)
+	_mouse(c, false)
+	assert_eq(int(f.machines[0]["assist"]), 3, "the hand tuned the chosen cooker's next 3 lots")
