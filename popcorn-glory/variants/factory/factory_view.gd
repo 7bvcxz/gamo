@@ -223,13 +223,14 @@ func _process(delta: float) -> void:
 		_wide_default = false
 		if selected < 0:
 			selected = LOW
-	var key := "%s|%d|%d" % [size, selected, rules.level if rules else 0]
+	var key := "%s|%d|%d|%s" % [size, selected, rules.level if rules else 0, _inventory_key()]
 	if key != _floors_key:
 		_floors_key = key
 		floor_layer.queue_redraw()
 		customer_node.queue_redraw()
 		detail_layer.queue_redraw()
 		_redraw_once = true
+	_process_glass()
 	# The waiting customer breathes by moving, not by redrawing (R-01).
 	customer_node.position = Vector2(0, 0 if reduced_motion else sin(_t * 2.2) * 2.5)
 
@@ -242,7 +243,18 @@ func _draw_hints(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 func on_events(events: Array[Dictionary]) -> void:
 	if not events.is_empty():   # (called every frame, mostly with nothing)
 		_redraw_once = true
-	super(events)
+	var rest: Array[Dictionary] = []
+	for e: Dictionary in events:
+		if String(e["type"]) == "earn":
+			# A sale: the coin and the +N at the counter, where the pack met the customer.
+			var at := _counter_point()
+			fx.coin(at, machine_size() / 900.0)
+			_gain(int(e["data"].get("amount", 0)))
+			_gains[-1]["at"] = at
+			_sound("coin", 1.0, -6.0)
+		else:
+			rest.append(e)
+	super(rest)
 
 
 # -- the floors (drawn once per change) ----------------------------------------
@@ -277,10 +289,28 @@ func counter_rect() -> Rect2:
 	return Rect2(Vector2(r.position.x + r.size.x * 0.06, r.end.y - r.size.y * 0.3), Vector2(r.size.x * 0.8, r.size.y * 0.14))
 
 
+const CUSTOMER_COLOURS := [Color(0.435, 0.714, 0.91), Color(0.561, 0.878, 0.769), Color(1.0, 0.7, 0.42), Color(0.78, 0.6, 0.88), Color(0.95, 0.55, 0.6)]
+const SKIN := [Color(0.96, 0.82, 0.68), Color(0.85, 0.63, 0.48), Color(0.97, 0.88, 0.78), Color(0.72, 0.54, 0.4), Color(0.9, 0.72, 0.58)]
+
+
+## The queue at the counter, head first from the left (only real customers --
+## the model's queue; Step 17), the one being served at the hand-over spot.
 func _draw_customer(ci: CanvasItem) -> void:
+	if rules == null:
+		return
 	var c := counter_rect()
 	var head := clampf(floor_rect(TOP).size.y * 0.1, 14.0, 26.0)
-	PopFactoryArt.customer(ci, Vector2(c.position.x + c.size.x * 0.62, c.position.y + 2), head, PopTokens.SKY, Color(0.96, 0.82, 0.68))
+	var gap := head * 2.7
+	var x0 := c.position.x + c.size.x * 0.42
+	var queue: Array = rules.get("queue")
+	if not (rules.get("serving") as Dictionary).is_empty():
+		var sv: Dictionary = rules.get("serving")
+		var id := int(sv["customer"]["id"])
+		PopFactoryArt.customer(ci, Vector2(c.position.x + c.size.x * 0.28, c.position.y + 2), head, CUSTOMER_COLOURS[id % 5], SKIN[id % 5])
+		PopFactoryArt.bag(ci, Vector2(c.position.x + c.size.x * 0.2, c.position.y + 2), head * 1.1)
+	for i in queue.size():
+		var id := int(queue[i]["id"])
+		PopFactoryArt.customer(ci, Vector2(x0 + gap * i, c.position.y + 2), head, CUSTOMER_COLOURS[id % 5], SKIN[id % 5])
 
 
 func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
@@ -289,15 +319,33 @@ func _draw_packing(ci: CanvasItem, r: Rect2) -> void:
 	var hs := r.size.y * 0.46
 	var hop := Rect2(Vector2(r.position.x + r.size.x * 0.14, r.position.y + r.size.y * 0.16), Vector2(hs * 0.9, hs))
 	PopFactoryArt.glass(ci, hop, PopTokens.R_PART)
+	# The raw bin's real portions: one puff per portion, piled from the bottom.
+	var portions := int(rules.bin_portions()) if rules else 0
+	var cap := int(rules.state()["bin_cap"]) if rules else 1
+	var per_row := 4
+	var pr := hop.size.x / float(per_row + 1) * 0.55
+	for k in mini(portions, cap):
+		var col := k % per_row
+		var row := k / per_row
+		PopFactoryArt.popcorn(ci, Vector2(hop.position.x + hop.size.x * (0.2 + 0.2 * col) + (row % 2) * pr * 0.4, hop.end.y - pr * 1.1 - row * pr * 1.2), pr)
 	var pk := Rect2(Vector2(r.position.x + r.size.x * 0.38, r.position.y + r.size.y * 0.14), Vector2(r.size.y * 0.8, r.size.y * 0.58))
 	PopFactoryArt.machine(ci, pk)
 	ci.draw_circle(pk.get_center(), pk.size.y * 0.28, Color(1, 1, 1, 0.7))
-	# The shelf: empty places for bags (dashed -- nothing is made yet).
-	for k in 3:
-		var foot := Vector2(r.position.x + r.size.x * (0.7 + 0.075 * k), belt.position.y)
-		var w := r.size.y * 0.16
-		var slot := Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5))
-		PopMachineArt._round_rect(ci, slot, 4, Color(1, 1, 1, 0.35))
+	if rules and not (rules.get("packing") as Dictionary).is_empty():
+		PopFactoryArt.bag(ci, Vector2(pk.get_center().x, pk.end.y + 4), r.size.y * 0.15)   # the pack being filled
+	# The shelf: one bag per real sealed pack, empty places dashed.
+	var shelf_n := int(rules.state()["shelf"]) if rules else 0
+	var shelf_cap := int(rules.state()["shelf_cap"]) if rules else 0
+	# Two rows of places, right of the packer and left of the tube.
+	var per := maxi(1, (shelf_cap + 1) / 2)
+	var span := tube_rect().position.x - 16 - (r.position.x + r.size.x * 0.62)
+	var w := minf(r.size.y * 0.14, span / (float(per) * 1.2))
+	for k in shelf_cap:
+		var foot := Vector2(r.position.x + r.size.x * 0.62 + (k % per) * w * 1.2 + w * 0.6, belt.position.y - (k / per) * w * 1.65)
+		if k < shelf_n:
+			PopFactoryArt.bag(ci, foot, w)
+		else:
+			PopMachineArt._round_rect(ci, Rect2(foot - Vector2(w * 0.5, w * 1.5), Vector2(w, w * 1.5)), 4, Color(1, 1, 1, 0.35))
 
 
 func _draw_kitchen(ci: CanvasItem, r: Rect2) -> void:
@@ -395,3 +443,43 @@ func _form(ci: CanvasItem, floor_i: int, k: int, foot: Vector2, h: float, dim: b
 				PopMachineArt._round_rect(ci, m, PopTokens.R_PART, Color(0.35, 0.1, 0.16) if not dim else PopPalette.DISABLED)
 				for q in 6:
 					ci.draw_circle(Vector2(m.position.x + m.size.x * (0.1 + 0.16 * q), m.position.y + 8), 5, PopTokens.BRASS if not dim else Color(1, 1, 1, 0.5))
+
+
+# -- Step 17: the truth of the model on screen --------------------------------
+
+## What the static floors show: changes only when the stock does (so they
+## redraw only then, R-01).
+func _inventory_key() -> String:
+	if rules == null:
+		return ""
+	return "%d|%d|%d|%d|%s|%s" % [rules.bin_portions(), (rules.get("shelf") as Array).size(), (rules.get("queue") as Array).size(),
+		(rules.get("lift") as Array).size(), not (rules.get("packing") as Dictionary).is_empty(), not (rules.get("serving") as Dictionary).is_empty()]
+
+
+## The kettle's glass shows its waiting lot (the backpressure is visible).
+func _process_glass() -> void:
+	if rules == null:
+		return
+	var g: Dictionary = rules.get("glass")
+	var fill := 0.15
+	if not g.is_empty():
+		fill = 0.25 + 0.65 * clampf(float(g["portions"]) / maxf(1.0, float(rules.kettle_capacity())), 0.0, 1.0)
+	machine_node.set_look(rules.level, machine_size(), fill)
+
+
+## A press while the glass is full: the kettle shakes and puffs (the model refuses it).
+func _press() -> void:
+	if rules != null and not (rules.get("glass") as Dictionary).is_empty() and not bool(_r()["heating"]):
+		squash(0.0, 6.0)
+		_sound("thud", 1.4, -12.0)
+		_redraw_once = true
+		if not reduced_motion:
+			fx.smoke(machine_top(), 3, machine_size() / 900.0, rng)
+	super()
+
+
+## Money appears at the counter, when the pack reaches the customer -- not at the kettle.
+func _counter_point() -> Vector2:
+	var c := counter_rect()
+	return Vector2(c.position.x + c.size.x * 0.28, c.position.y - 40)
+

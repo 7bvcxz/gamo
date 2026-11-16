@@ -48,7 +48,17 @@
     "near_ms": 200,
     "mult": { "early": 0.6, "near": 1.0, "perfect": 2.0, "late": 0.6, "burnt": 0.25 },
     "costs": [30, 54, 97, 175, 430, 1050, 2500, 5800, 14000, 27000, 53000, 103000, 200000, 390000],
-    "edge_grace_ms": 40
+    "edge_grace_ms": 40,
+    "_flow": "Step 17 (design/FACTORY_FLOW.md): a release makes a lot of kettle_portions[level] x yield[grade] portions (at least 1) in the glass; the lift takes lift_ms to the bin (bin_portions); the packer takes pack.size portions per pack.ms onto the shelf (shelf_packs); customers arrive by a triangular wait (min_ms, mode_ms, max_ms; the first is waiting at the start, the second in second_ms), queue up to queue_cap, wait patience_ms; the counter hands a matching pack over in service_ms and only then earns price[recipe] x (0.6 + 0.4 x quality/100). Starting values, to be tuned by the simulator (Steps 22, 25).",
+    "kettle_portions": [4, 6, 8, 11, 14, 18, 23, 29, 36, 45, 56, 70, 87, 108, 134],
+    "yield": { "perfect": 1.0, "near": 0.75, "late": 0.75, "early": 0.5, "burnt": 0.25 },
+    "lift_ms": 900,
+    "bin_portions": 24,
+    "pack": { "size": 2, "ms": 3000 },
+    "shelf_packs": 8,
+    "price": { "plain": 10 },
+    "service_ms": 1200,
+    "customers": { "second_ms": [4000, 8000], "min_ms": 10000, "mode_ms": 15000, "max_ms": 20000, "min_gap_ms": 1000, "drought_ms": 25000, "queue_cap": 5, "patience_ms": 60000 }
   },
   "stand": {
     "_doc": "Step 10, the Popcorn Stand (design/SLICE.md): B's hold and release, plus shake (unlock.shake: `turns` direction changes in one heat = an even pop x shake.mult; the motor gives motor_mult to every batch and the hand's shake multiplies on top), recipes (unlock.recipes: mult x the batch, window_scale x the gold, burn_scale x the time from the gold to the burn, cooldown_add_ms after a pop), edge_grace_ms (a release this close outside the drawn gold still counts as perfect) and the automation ladder (unlock.auto: a motor that shakes every batch, then a helper kettle paying share x batch[L] every cycle_ms). costs: the main machine's prices, level by level -- B's first four, then stretched for a 10-20 minute session.",

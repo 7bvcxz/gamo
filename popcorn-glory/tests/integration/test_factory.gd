@@ -88,7 +88,8 @@ func test_cooking_only_on_the_bottom_floor_and_floors_open_details() -> void:
 	_mouse(c, false)
 	assert_eq(int(app.rules.presses), 1, "the kettle cooks")
 	assert_eq(int(app.rules.outcomes["perfect"]), 1, "B's hold into the gold")
-	assert_eq(app.rules.money, 10, "and pays as #stand does (Step 17 moves pay to the sale)")
+	assert_eq(app.rules.money, 0, "the pop pays nothing (Step 17: money only from a sale)")
+	assert_eq(int(app.rules.stats["lots"]), 1, "it made a lot")
 	for k: int in [KEY_2, KEY_3, KEY_1]:
 		var e := InputEventKey.new()
 		e.keycode = k
@@ -104,12 +105,15 @@ func test_the_layers_redraw_only_while_something_moves() -> void:
 	app.open("factory")
 	await tree.process_frame
 	var v := _view()
+	app.rules.queue.clear()               # a quiet shop: nothing moves but what the hand starts
+	app.rules.next_arrival_ms = 1 << 40
 	var c: Vector2 = v.machine_centre()
 	_mouse(c, true)
 	app.dev_advance(200)
 	assert_true(bool(v._needs_redraw()), "heating redraws")
 	app.dev_advance(app.rules.window_start())
 	_mouse(c, false)
+	app.dev_advance(8000)                 # the lot lifts and is packed (events: a redraw each)
 	v.last_input_ms = app.clock.now_ms   # (the app records input this way; the test sends to the view)
 	# Pieces, the gain and the release mark fade on real frame time (MARK_S = 3 s).
 	await tree.create_timer(3.3).timeout
