@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+  <!-- Mood board C, "storybook confectionery workshop": paper cream, muted crayon colours, thick soft
+       ink outlines, round wobbly shapes, flat colour with a paper-grain feel from a few dots.
+       Hand-written for Popcorn & Glory (Step 15). No source image, no brand. -->
+  <rect width="720" height="1280" fill="#f4ead6"/>
+  <g fill="#e6d8bc"><circle cx="80" cy="140" r="3"/><circle cx="410" cy="260" r="2"/><circle cx="620" cy="520" r="3"/><circle cx="160" cy="720" r="2"/><circle cx="520" cy="1060" r="3"/><circle cx="300" cy="610" r="2"/><circle cx="660" cy="190" r="2"/></g>
+  <!-- top bar drawn like a paper strip -->
+  <path d="M0 0 h720 v86 q-180 10 -360 0 q-180 -10 -360 0 z" fill="#e9dcc0" stroke="#5b4636" stroke-width="4"/>
+  <circle cx="54" cy="44" r="27" fill="#f4ead6" stroke="#5b4636" stroke-width="4"/><path d="M62 33 L46 44 L62 55" stroke="#5b4636" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="292" cy="44" r="21" fill="#e8b84a" stroke="#5b4636" stroke-width="4"/><text x="324" y="58" font-family="serif" font-size="38" font-weight="700" fill="#5b4636">1,240</text>
+  <circle cx="590" cy="44" r="27" fill="#f4ead6" stroke="#5b4636" stroke-width="4"/>
+  <circle cx="662" cy="44" r="27" fill="#f4ead6" stroke="#5b4636" stroke-width="4"/><path d="M648 34 h28 v22 h-28 z" fill="#fff" stroke="#5b4636" stroke-width="3"/><circle cx="682" cy="28" r="8" fill="#c8553d"/>
+  <!-- TOP: a little shop drawn as a house front -->
+  <path d="M30 120 q340 -26 660 0 v250 h-660 z" fill="#d9e6c8" stroke="#5b4636" stroke-width="5"/>
+  <path d="M120 112 l60 -40 l60 40" fill="#c8553d" stroke="#5b4636" stroke-width="5"/>
+  <rect x="140" y="112" width="80" height="60" rx="10" fill="#f4ead6" stroke="#5b4636" stroke-width="4"/><path d="M164 126 h32 l-4 32 h-24 z" fill="#c8553d" stroke="#5b4636" stroke-width="3"/>
+  <path d="M40 300 q320 -14 640 0 v30 h-640 z" fill="#a8774f" stroke="#5b4636" stroke-width="5"/>
+  <g stroke="#5b4636" stroke-width="4.5">
+    <circle cx="320" cy="228" r="26" fill="#f1cfa8"/><path d="M286 300 q34 -70 68 0" fill="#6f9fc4"/>
+    <circle cx="404" cy="232" r="24" fill="#d8a37b"/><path d="M372 300 q32 -64 64 0" fill="#9cc48a"/>
+    <circle cx="484" cy="234" r="23" fill="#f3dcc1"/><path d="M454 300 q30 -62 60 0" fill="#e4a95b"/>
+    <circle cx="560" cy="236" r="22" fill="#b48963"/><path d="M532 300 q28 -60 56 0" fill="#b892c8"/>
+  </g>
+  <path d="M250 262 h26 l-3 36 h-20 z" fill="#fff" stroke="#c8553d" stroke-width="4"/>
+  <!-- the way up: a wooden ladder-lift on the right -->
+  <path d="M640 330 v620 M680 330 v620" stroke="#a8774f" stroke-width="8"/>
+  <g stroke="#a8774f" stroke-width="6"><path d="M640 400 h40 M640 480 h40 M640 560 h40 M640 640 h40 M640 720 h40 M640 800 h40 M640 880 h40"/></g>
+  <path d="M648 520 h24 l-3 30 h-18 z" fill="#fff" stroke="#c8553d" stroke-width="3"/>
+  <!-- MIDDLE: a workbench -->
+  <path d="M30 380 q340 12 660 0 v270 h-660 z" fill="#efe1c4" stroke="#5b4636" stroke-width="5"/>
+  <path d="M60 590 q280 10 560 0 v24 q-280 10 -560 0 z" fill="#a8774f" stroke="#5b4636" stroke-width="4"/>
+  <path d="M70 440 q60 -10 120 0 l-22 140 h-76 z" fill="#f8f2e4" stroke="#5b4636" stroke-width="5"/>
+  <g fill="#fffaf0" stroke="#c99a4a" stroke-width="2.5"><circle cx="112" cy="560" r="13"/><circle cx="140" cy="556" r="13"/><circle cx="126" cy="536" r="12"/><circle cx="104" cy="530" r="10"/><circle cx="150" cy="528" r="10"/></g>
+  <path d="M250 450 q100 -20 200 0 v130 q-100 14 -200 0 z" fill="#c8553d" stroke="#5b4636" stroke-width="5"/>
+  <circle cx="350" cy="504" r="40" fill="#f8f2e4" stroke="#5b4636" stroke-width="4"/>
+  <path d="M336 566 h30 l-4 26 h-22 z" fill="#fff" stroke="#c8553d" stroke-width="4"/>
+  <g fill="#fff" stroke="#c8553d" stroke-width="3.5"><path d="M484 540 h26 l-3 46 h-20 z"/><path d="M520 540 h26 l-3 46 h-20 z"/><path d="M556 540 h26 l-3 46 h-20 z"/></g>
+  <!-- BOTTOM: the kettle as a round storybook pot -->
+  <path d="M30 670 q340 -12 660 0 v450 h-660 z" fill="#ead8b4" stroke="#5b4636" stroke-width="5"/>
+  <circle cx="330" cy="890" r="172" fill="none" stroke="#7ea6c8" stroke-width="22" stroke-dasharray="560 1200" transform="rotate(-90 330 890)" stroke-linecap="round"/>
+  <circle cx="330" cy="890" r="172" fill="none" stroke="#e8b84a" stroke-width="36" stroke-dasharray="180 1200" stroke-dashoffset="-560" transform="rotate(-90 330 890)" stroke-linecap="round"/>
+  <circle cx="330" cy="890" r="172" fill="none" stroke="#c8553d" stroke-width="22" stroke-dasharray="360 1200" stroke-dashoffset="-740" transform="rotate(-90 330 890)" stroke-linecap="round"/>
+  <path d="M234 780 q96 -24 192 0 v20 h-192 z" fill="#c8553d" stroke="#5b4636" stroke-width="5"/>
+  <path d="M244 800 q86 -10 172 0 v124 q-86 10 -172 0 z" fill="#f8f2e4" stroke="#5b4636" stroke-width="5"/>
+  <g fill="#fffaf0" stroke="#c99a4a" stroke-width="2.5"><circle cx="284" cy="904" r="14"/><circle cx="314" cy="898" r="15"/><circle cx="346" cy="904" r="14"/><circle cx="374" cy="900" r="14"/><circle cx="300" cy="876" r="12"/><circle cx="332" cy="874" r="13"/><circle cx="362" cy="878" r="12"/></g>
+  <path d="M230 924 q100 14 200 0 v66 q-100 12 -200 0 z" fill="#c8553d" stroke="#5b4636" stroke-width="5"/>
+  <g fill="none" stroke="#5b4636" stroke-width="4" stroke-dasharray="6 10" opacity="0.5"><path d="M540 780 q42 -10 84 0 v96 q-42 8 -84 0 z"/><path d="M540 910 q42 -10 84 0 v96 q-42 8 -84 0 z"/></g>
+  <!-- card -->
+  <path d="M40 1142 q320 -14 640 0 v116 q-320 12 -640 0 z" fill="#f8f2e4" stroke="#5b4636" stroke-width="5"/>
+  <circle cx="300" cy="1196" r="18" fill="#e8b84a" stroke="#5b4636" stroke-width="3"/><text x="326" y="1210" font-family="serif" font-size="40" font-weight="700" fill="#5b4636">30</text>
+  <path d="M600 1226 l0 -48 m-18 18 l18 -18 l18 18" stroke="#5b4636" stroke-width="7" fill="none" stroke-linecap="round"/>
+</svg>

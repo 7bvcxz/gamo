@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+  <!-- Direction B (chosen), desktop 1280x800: the three floors stacked on the left at full height,
+       the floor's upgrade and the machine slots on the right; the news paper top right.
+       Hand-written for Popcorn & Glory (Step 15). No source image, no brand. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1c9"/><stop offset="1" stop-color="#fde3a4"/></linearGradient>
+    <linearGradient id="fT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6b0"/><stop offset="1" stop-color="#fbd68a"/></linearGradient>
+    <linearGradient id="fM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdebc4"/><stop offset="1" stop-color="#f7d99e"/></linearGradient>
+    <linearGradient id="fB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe0a8"/><stop offset="1" stop-color="#f3c978"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a55"/><stop offset="1" stop-color="#d6352a"/></linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7edf2"/><stop offset="1" stop-color="#a9b6c2"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/><stop offset="1" stop-color="#dff4ff" stop-opacity="0.4"/></linearGradient>
+    <radialGradient id="gold" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#ffe27a" stop-opacity="0.8"/><stop offset="1" stop-color="#ffe27a" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1280" height="800" fill="url(#bg)"/>
+  <!-- top bar -->
+  <circle cx="44" cy="40" r="26" fill="#fff" stroke="#4d291a" stroke-width="3"/><path d="M51 30 L37 40 L51 50" stroke="#4d291a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <circle cx="560" cy="40" r="20" fill="#ffc83a" stroke="#4d291a" stroke-width="4"/>
+  <rect x="590" y="26" width="120" height="28" rx="6" fill="#4d291a" opacity="0.12"/>
+  <circle cx="1150" cy="40" r="26" fill="#fff" stroke="#4d291a" stroke-width="3"/>
+  <circle cx="1220" cy="40" r="26" fill="#fff" stroke="#4d291a" stroke-width="3"/><rect x="1206" y="30" width="28" height="21" rx="4" fill="#fff" stroke="#4d291a" stroke-width="3"/><circle cx="1240" cy="22" r="8" fill="#ff5a4a" stroke="#fff" stroke-width="3"/>
+  <!-- left: three floors -->
+  <rect x="20" y="80" width="760" height="190" rx="26" fill="url(#fT)" stroke="#e8b85a" stroke-width="4"/>
+  <path d="M60 90 h680 v30 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 q-34 18 -68 0 z" fill="#ff6a55"/>
+  <rect x="60" y="214" width="640" height="28" rx="12" fill="url(#red)" stroke="#8a2318" stroke-width="3"/>
+  <g stroke="#4d291a" stroke-width="3.5">
+    <circle cx="330" cy="168" r="22" fill="#f6d2ae"/><rect x="308" y="188" width="44" height="26" rx="12" fill="#6fb6e8"/>
+    <circle cx="410" cy="170" r="21" fill="#d9a07a"/><rect x="389" y="189" width="42" height="25" rx="12" fill="#8fe0c4"/>
+    <circle cx="488" cy="172" r="20" fill="#f8e0c8"/><rect x="468" y="190" width="40" height="24" rx="12" fill="#ffb36b"/>
+    <circle cx="564" cy="174" r="19" fill="#b98a66"/><rect x="545" y="191" width="38" height="23" rx="11" fill="#c79ae0"/>
+  </g>
+  <path d="M244 178 h26 l-3 34 h-20 z" fill="#fff" stroke="#ff6a55" stroke-width="3"/>
+  <rect x="20" y="282" width="760" height="190" rx="26" fill="url(#fM)" stroke="#e8b85a" stroke-width="4"/>
+  <rect x="60" y="430" width="640" height="18" rx="9" fill="url(#steel)" stroke="#7d8b97" stroke-width="3"/>
+  <path d="M70 310 h100 l-26 80 h-48 z" fill="url(#glass)" stroke="#9fb3c4" stroke-width="4"/>
+  <rect x="260" y="300" width="170" height="120" rx="30" fill="url(#red)" stroke="#8a2318" stroke-width="4"/><circle cx="345" cy="356" r="36" fill="url(#glass)" stroke="#8a2318" stroke-width="4"/>
+  <g fill="#fff" stroke="#ff6a55" stroke-width="3"><path d="M500 390 h24 l-3 38 h-18 z"/><path d="M534 390 h24 l-3 38 h-18 z"/><path d="M568 390 h24 l-3 38 h-18 z"/></g>
+  <rect x="20" y="484" width="760" height="300" rx="26" fill="url(#fB)" stroke="#e8b85a" stroke-width="4"/>
+  <circle cx="330" cy="634" r="160" fill="url(#gold)"/>
+  <circle cx="330" cy="634" r="128" fill="none" stroke="#6fb6e8" stroke-width="22" stroke-dasharray="420 900" transform="rotate(-90 330 634)"/>
+  <circle cx="330" cy="634" r="128" fill="none" stroke="#ffc83a" stroke-width="36" stroke-dasharray="130 900" stroke-dashoffset="-420" transform="rotate(-90 330 634)"/>
+  <circle cx="330" cy="634" r="128" fill="none" stroke="#e8483a" stroke-width="22" stroke-dasharray="254 900" stroke-dashoffset="-550" transform="rotate(-90 330 634)"/>
+  <rect x="258" y="560" width="144" height="28" rx="12" fill="url(#red)" stroke="#8a2318" stroke-width="4"/>
+  <rect x="266" y="588" width="128" height="84" rx="12" fill="url(#glass)" stroke="#8a2318" stroke-width="4"/>
+  <rect x="254" y="672" width="152" height="52" rx="14" fill="url(#red)" stroke="#8a2318" stroke-width="4"/>
+  <g fill="#ffffff" fill-opacity="0.35" stroke="#6fb6e8" stroke-width="4" stroke-dasharray="10 8"><rect x="540" y="520" width="80" height="100" rx="16"/><rect x="640" y="520" width="80" height="100" rx="16"/><rect x="540" y="650" width="80" height="100" rx="16"/><rect x="640" y="650" width="80" height="100" rx="16"/></g>
+  <rect x="746" y="200" width="30" height="460" rx="15" fill="url(#glass)" stroke="#9fb3c4" stroke-width="3"/>
+  <!-- right: the selected floor's upgrade, then its machine slots -->
+  <rect x="810" y="80" width="450" height="190" rx="26" fill="#fff" stroke="#e8b85a" stroke-width="4"/>
+  <rect x="840" y="110" width="110" height="130" rx="16" fill="url(#red)" stroke="#8a2318" stroke-width="3"/>
+  <circle cx="1000" cy="150" r="18" fill="#ffc83a" stroke="#4d291a" stroke-width="3"/><rect x="1028" y="138" width="120" height="26" rx="6" fill="#4d291a" opacity="0.15"/>
+  <rect x="980" y="190" width="200" height="20" rx="6" fill="#4d291a" opacity="0.1"/>
+  <path d="M1220 214 l0 -44 m-16 16 l16 -16 l16 16" stroke="#e8483a" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <rect x="810" y="290" width="450" height="494" rx="26" fill="#fff" fill-opacity="0.6" stroke="#e8b85a" stroke-width="4"/>
+  <g fill="#ffffff" stroke="#6fb6e8" stroke-width="3"><rect x="840" y="320" width="120" height="120" rx="18"/><rect x="975" y="320" width="120" height="120" rx="18"/><rect x="1110" y="320" width="120" height="120" rx="18"/>
+  <rect x="840" y="460" width="120" height="120" rx="18"/><rect x="975" y="460" width="120" height="120" rx="18" stroke-dasharray="10 8"/><rect x="1110" y="460" width="120" height="120" rx="18" stroke-dasharray="10 8"/></g>
+  <g fill="#8fe0c4" stroke="#4fa489" stroke-width="3"><rect x="870" y="345" width="60" height="70" rx="12"/><rect x="1005" y="345" width="60" height="70" rx="12"/><rect x="1140" y="345" width="60" height="70" rx="12"/><rect x="870" y="485" width="60" height="70" rx="12"/></g>
+</svg>

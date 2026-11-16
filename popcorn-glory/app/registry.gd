@@ -23,6 +23,10 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "explosion", "letter": "C", "listed": true,
 		"rules": "res://variants/explosion/explosion_rules.gd", "view": "res://variants/explosion/explosion_view.gd",
 		"color": Color(0.55, 0.3, 0.75)},
+	# Step 15: the art direction drawn in the engine from art/tokens.gd (a preview, nothing plays).
+	{"id": "artboard", "letter": "", "listed": false,
+		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/artboard/artboard_view.gd",
+		"color": Color(0.84, 0.21, 0.17)},
 	{"id": "stub", "letter": "S", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/stub/stub_view.gd",
 		"color": Color(0.5, 0.5, 0.5)},
