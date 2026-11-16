@@ -17,6 +17,12 @@ const MARK_S := 3.0   # 1.6 s was gone before Step 08's blind player looked agai
 var _mark_ms := -1.0
 var _mark_age := 99.0
 var _mark_kind := ""
+## Step 14 (shared from Step 19): queued chain bursts, the fountain's remaining
+## time, the crescendo meter's flash -- only when the rules' burst_mode is on.
+var _chain: Array[Dictionary] = []
+var _fountain := 0.0
+var _meter_flash := 0.0
+var _burst_glow := 0.0
 
 
 func _release() -> void:
@@ -35,6 +41,10 @@ func on_events(events: Array[Dictionary]) -> void:
 	for e: Dictionary in events:
 		var d: Dictionary = e["data"]
 		match String(e["type"]):
+			"crescendo":
+				_meter_flash = 1.0
+			"burst":
+				_on_burst(int(d.get("tier", 0)))
 			"outcome":
 				_last_outcome = String(d["kind"])
 				_mark_ms = float(d["held_ms"])
@@ -84,6 +94,7 @@ func on_events(events: Array[Dictionary]) -> void:
 
 
 func _process(delta: float) -> void:
+	_step_bursts(delta)
 	_flash = maxf(0.0, _flash - delta * 2.5)
 	_mark_age += delta
 	# The sizzle while heating rises in pitch with the heat.
@@ -256,3 +267,108 @@ func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
 			PopAtlas.draw(ci, "kernel", Vector2(x, y), rr * 2.6, m)
 		else:
 			ci.draw_circle(Vector2(x, y), rr, col)
+	if _burst_on():
+		_draw_crescendo(ci, _r())
+
+
+# -- Step 14: the crescendo and its burst (?burst=1) ------------------------
+
+func _burst_on() -> bool:
+	return rules != null and bool(_r().get("burst_mode", false))
+
+
+## The pop that fills the crescendo: a big pop (tier 0), a chain of three
+## (tier 1) or a fountain (tier 2). Pieces fly up from the machine's top and
+## the gold arc is stroked again over them (_draw_after_fx).
+func _on_burst(tier: int) -> void:
+	_burst_glow = 1.0
+	squash(0.0, 16.0)
+	_jump = 1.0
+	var s := machine_size() / 900.0
+	var top := machine_top()
+	if reduced_motion:
+		fx.burst(top, 3, s, rng, PopPalette.GOLD, 0.6, 1.0, 1.3)
+		_sound("crackle", 1.1, -8.0)
+		return
+	match tier:
+		0:
+			fx.burst(top, 30, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.4), 1.15, 1.35, 1.3)
+			fx.sparkle(top, s, rng, 8, 180.0)
+			_sound("crackle", 1.0, -6.0)
+		1:
+			for i in 3:
+				_chain.append({"t": 0.16 * float(i), "x": [-0.22, 0.22, 0.0][i]})
+			_sound("crackle", 0.95, -5.0)
+		_:
+			_fountain = 1.3
+			fx.rain(size.x * 0.08, size.x * 0.92, 10.0, 30, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.3))
+			_sound("boom", 1.15, -9.0)
+			_sound("crackle", 1.05, -6.0)
+
+
+func _step_bursts(delta: float) -> void:
+	_meter_flash = maxf(0.0, _meter_flash - delta * 2.5)
+	_burst_glow = maxf(0.0, _burst_glow - delta * 1.2)
+	if _chain.is_empty() and _fountain <= 0.0:
+		return
+	var s := machine_size() / 900.0
+	var top := machine_top()
+	var keep: Array[Dictionary] = []
+	for c: Dictionary in _chain:
+		c["t"] = float(c["t"]) - delta
+		if float(c["t"]) <= 0.0:
+			fx.burst(top + Vector2(float(c["x"]) * machine_size(), 0), 18, s, rng, PopPalette.GOLD.lerp(PopPalette.CREAM, 0.35), 0.8, 1.25, 1.2)
+			fx.sparkle(top + Vector2(float(c["x"]) * machine_size(), -40), s, rng, 3, 90.0)
+			_sound("pop_2", 1.1 + float(c["x"]), -8.0)
+		else:
+			keep.append(c)
+	_chain = keep
+	if _fountain > 0.0:
+		_fountain -= delta
+		# A tall column: a few strong pieces every frame, narrow, gold and cream.
+		fx.burst(top, 2, s, rng, PopPalette.GOLD if rng.randf() < 0.5 else PopPalette.CREAM, 0.3, 1.85, 1.15, 1.4)
+
+
+## The crescendo: a row of kernels under the ring, gold when filled, with the
+## next burst's shape faint at its end; it pulses when one more perfect fills it.
+func _draw_crescendo(ci: CanvasItem, st: Dictionary) -> void:
+	var full := int(st["crescendo_full"])
+	var have := int(st["crescendo"])
+	var c := machine_centre()
+	# Below the ring: the one band that stays clear at every level (the machine's
+	# roof reaches above the ring from level 3, and the burst flies upward).
+	var y := c.y + ring_radius() + machine_size() * 0.1
+	var gap := clampf(machine_size() * 0.085, 28.0, 42.0)
+	var r := gap * 0.36
+	var x0 := c.x - gap * float(full - 1) * 0.5
+	var ready := have + 2 >= full
+	var pulse := 0.5 + 0.5 * sin(_t * 8.0) if ready and not reduced_motion else 0.0
+	for i in full:
+		var p := Vector2(x0 + gap * float(i), y)
+		var filled := i < have
+		var rr := r * (1.0 + 0.25 * _meter_flash * float(filled) + 0.12 * pulse)
+		if filled:
+			ci.draw_circle(p, rr + 3.0, PopPalette.INK)
+			ci.draw_circle(p, rr, PopPalette.GOLD)
+			ci.draw_circle(p + Vector2(-rr * 0.3, -rr * 0.3), rr * 0.32, Color(1, 1, 1, 0.7))
+		else:
+			ci.draw_circle(p, rr, Color(1, 1, 1, 0.55))
+			ci.draw_arc(p, rr, 0, TAU, 16, Color(PopPalette.INK, 0.45), 2.5)
+	# The next burst's shape: one puff, three puffs, or a column.
+	var tp := Vector2(x0 + gap * float(full) + gap * 0.4, y)
+	var a := 0.35 + 0.65 * pulse
+	match int(st["burst_tier"]):
+		0:
+			ci.draw_circle(tp, r * 1.3, Color(PopPalette.GOLD, a))
+		1:
+			for k in 3:
+				ci.draw_circle(tp + Vector2((float(k) - 1.0) * r * 0.9, -absf(float(k) - 1.0) * -r * 0.5), r * 0.75, Color(PopPalette.GOLD, a))
+		_:
+			for k in 3:
+				ci.draw_circle(tp + Vector2(0, -float(k) * r * 0.9), r * (0.95 - 0.15 * float(k)), Color(PopPalette.GOLD, a))
+
+
+func _draw_after_fx(ci: CanvasItem, size_px: float) -> void:
+	if _burst_on():
+		_draw_gold_arc(ci, size_px)
+

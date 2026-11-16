@@ -353,8 +353,9 @@ func _start(id: String) -> void:
 		_saved_at_ms = 0
 		if bool(entry.get("save", false)) and not frame.trial:
 			_load_saved(id)
-	# Step 14: the crescendo is a mode of the address, not of the save.
-	if "burst_mode" in rules:
+	# Step 14: the stand's crescendo is a mode of the address (not of the save);
+	# the factory has it always (Step 19), so only entries marked burst_route follow ?burst=1.
+	if bool(entry.get("burst_route", false)) and "burst_mode" in rules:
 		rules.set("burst_mode", burst)
 	clock.set_pause("hidden", web.hidden())
 	var view_script: GDScript = load(String(entry["view"]))

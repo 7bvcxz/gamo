@@ -227,7 +227,8 @@ func _needs_redraw() -> bool:
 	if rules == null:
 		return false
 	return bool(_r()["heating"]) or fx.alive > 0 or not _gains.is_empty() or _flash > 0.0 or _mark_age < MARK_S \
-		or _hint_visible() or _squash != 0.0 or _jump > 0.0 or _redraw_once
+		or _hint_visible() or _squash != 0.0 or _jump > 0.0 or _redraw_once \
+		or not _chain.is_empty() or _fountain > 0.0 or _meter_flash > 0.0 or _burst_glow > 0.0
 
 
 var _redraw_once := true
@@ -250,6 +251,24 @@ func _process(delta: float) -> void:
 		_redraw_once = true
 	_process_glass()
 	_step_actors(delta)
+
+
+## Step 19: the heat knob at the kettle's right foot turns with the heat (and
+## springs back on release) -- the hand's action has a part that moves with it.
+func _draw_over(ci: CanvasItem, base: Vector2, size_px: float) -> void:
+	super(ci, base, size_px)
+	var st := _r()
+	var heat := float(st["heat_ms"]) if bool(st["heating"]) else 0.0
+	var burn := float((st["window"] as Array)[2])
+	var k := clampf(heat / maxf(1.0, burn), 0.0, 1.0)
+	var c := base + Vector2(size_px * 0.42, -size_px * 0.12)
+	var r := size_px * 0.06
+	ci.draw_circle(c, r + 3.0, PopTokens.MACHINE_LINE)
+	ci.draw_circle(c, r, PopTokens.STEEL)
+	var a := -PI * 0.75 + k * PI * 1.5
+	ci.draw_line(c, c + Vector2(cos(a), sin(a)) * r * 0.85, PopTokens.MACHINE_DEEP, r * 0.35)
+	var col := PopTokens.SKY if k < 0.57 else (PopPalette.GOLD if k < 0.8 else PopTokens.WARN)
+	ci.draw_circle(c + Vector2(cos(a), sin(a)) * r * 0.85, r * 0.22, col if bool(st["heating"]) else PopTokens.STEEL_DEEP)
 
 
 func _draw_hints(ci: CanvasItem, base: Vector2, size_px: float) -> void:
@@ -420,25 +439,60 @@ func _draw_detail(ci: CanvasItem, i: int, d: Rect2) -> void:
 	var h: float
 	var a: Vector2
 	var b: Vector2
-	if vertical:   # now above, next below, the arrow pointing down
-		h = minf(d.size.x * 0.6, d.size.y * 0.3)
-		a = Vector2(d.get_center().x, d.position.y + d.size.y * 0.42)
-		b = Vector2(d.get_center().x, d.position.y + d.size.y * 0.92)
+	if vertical:   # now above, next below, the arrow pointing down (the kitchen's numbers on top)
+		var top := 0.36 if i == LOW else 0.0
+		h = minf(d.size.x * 0.55, d.size.y * (0.3 - top * 0.3))
+		a = Vector2(d.get_center().x, d.position.y + d.size.y * (0.42 + top * 0.5))
+		b = Vector2(d.get_center().x, d.position.y + d.size.y * 0.94)
 	else:
 		h = minf(d.size.y * 0.7, d.size.x * 0.32)
 		a = Vector2(d.position.x + d.size.x * 0.25, d.get_center().y + h * 0.4)
 		b = Vector2(d.position.x + d.size.x * 0.75, d.get_center().y + h * 0.4)
 	_form(ci, i, 0, a, h, false)
 	_form(ci, i, 1, b, h * 1.1, true)
-	var m := d.get_center() + (Vector2(0, h * 0.0) if not vertical else Vector2(0, d.size.y * 0.05))
+	var m := (a + b) * 0.5 + (Vector2(0, -h * 0.35) if vertical else Vector2(0, -h * 0.4))
 	var dir := Vector2(0, 1) if vertical else Vector2(1, 0)
 	var side := Vector2(-dir.y, dir.x)
 	ci.draw_line(m - dir * h * 0.18, m + dir * h * 0.14, PopPalette.INK, 6.0)
 	ci.draw_colored_polygon(PackedVector2Array([m + dir * h * 0.22, m + dir * h * 0.08 - side * h * 0.1, m + dir * h * 0.08 + side * h * 0.1]), PopPalette.INK)
-	# The lock on the next form.
-	var lk := b + Vector2(0, -h * 0.55)
-	PopMachineArt._round_rect(ci, Rect2(lk - Vector2(14, 8), Vector2(28, 22)), 4, PopPalette.INK)
-	ci.draw_arc(lk + Vector2(0, -8), 9, PI, TAU, 12, PopPalette.INK, 4.0)
+	# The lock on the next form -- except the kitchen's, which can be bought now.
+	if i != LOW:
+		var lk := b + Vector2(0, -h * 0.55)
+		PopMachineArt._round_rect(ci, Rect2(lk - Vector2(14, 8), Vector2(28, 22)), 4, PopPalette.INK)
+		ci.draw_arc(lk + Vector2(0, -8), 9, PI, TAU, 12, PopPalette.INK, 4.0)
+	else:
+		_draw_kettle_numbers(ci, d)
+
+
+## Step 19: what the next kettle level changes, now -> next, by icon and number
+## (no words): popcorn per perfect pop, the gold's width, the cooling time.
+## A row that improves shows its next number in green with a chevron.
+func _draw_kettle_numbers(ci: CanvasItem, d: Rect2) -> void:
+	if rules == null or not rules.has_method("kettle_stats"):
+		return
+	var now: Dictionary = rules.kettle_stats(rules.level)
+	var nxt: Dictionary = rules.kettle_stats(rules.level + 1)
+	var font := ThemeDB.fallback_font
+	var fs := int(clampf(d.size.x * 0.1, 18.0, 30.0))
+	var rows := [["portions", now["portions"], nxt["portions"], true], ["gold_ms", now["gold_ms"], nxt["gold_ms"], true],
+		["recovery_ms", now["recovery_ms"], nxt["recovery_ms"], false]]
+	var y := d.position.y + fs * 1.3
+	for row: Array in rows:
+		var ic := Vector2(d.position.x + fs * 1.1, y - fs * 0.35)
+		match String(row[0]):
+			"portions":
+				PopFactoryArt.popcorn(ci, ic, fs * 0.42)
+			"gold_ms":
+				ci.draw_arc(ic, fs * 0.42, -PI * 0.8, -PI * 0.2, 12, PopPalette.GOLD, fs * 0.22)
+			"recovery_ms":
+				ci.draw_arc(ic, fs * 0.42, -PI / 2, PI, 14, Color(0.35, 0.33, 0.33, 0.9), fs * 0.16)
+		var better: bool = (int(row[2]) > int(row[1])) if bool(row[3]) else (int(row[2]) < int(row[1]))
+		var x := d.position.x + fs * 2.0
+		ci.draw_string(font, Vector2(x, y), str(row[1]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopPalette.INK)
+		var x2 := x + fs * 2.4
+		ci.draw_string(font, Vector2(x2, y), ">", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.5))
+		ci.draw_string(font, Vector2(x2 + fs * 0.9, y), str(row[2]), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, PopTokens.OK if better else Color(PopPalette.INK, 0.45))
+		y += fs * 1.35
 
 
 ## Form `k` (0 = now, 1 = next) of a floor's station, bottom-centre at `foot`.

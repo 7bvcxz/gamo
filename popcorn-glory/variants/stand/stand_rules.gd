@@ -33,12 +33,6 @@ var hand_even_pops := 0
 ## Rules time (= active play) when the last machine and the last rung were
 ## bought; -1 until then (Step 12: the ending, shown on the finished card).
 var completed_ms := -1
-## Step 14, the crescendo (a reversible mode, off by default -- `#stand` stays
-## B): successful pops fill it, and the pop that fills it is a burst worth more.
-## Set by the app from ?burst=1; not part of the save's choice, only its count.
-var burst_mode := false
-var crescendo := 0
-var bursts := 0
 
 
 func _init(p_economy: PopEconomy = null) -> void:
@@ -81,11 +75,6 @@ func burn_at() -> int:
 ## each side): a release that looks inside the yellow pays as inside. Step 10's
 ## blind player let go 4 ms before a gold edge -- half a degree on the ring --
 ## and was paid a near miss. The drawn window is window_start..window_end.
-func _judge(ms: int) -> String:
-	var g := int(_t().get("edge_grace_ms", 0))
-	if ms >= window_start() - g and ms <= window_end() + g:
-		return PERFECT
-	return super(ms)
 
 
 func motor() -> bool:
@@ -207,42 +196,6 @@ func _cooldown_ms() -> int:
 	return super() + int(_recipe().get("cooldown_add_ms", 0))
 
 
-func _burst_table() -> Dictionary:
-	return _t().get("crescendo", {})
-
-
-func crescendo_full() -> int:
-	return int(_burst_table().get("full", 8))
-
-
-## The burst's look grows with the stand: 0 a big pop, 1 a chain, 2 a fountain.
-func burst_tier(at_level: int = -1) -> int:
-	var lv := level if at_level < 0 else at_level
-	var tier := 0
-	for t: Variant in _burst_table().get("tiers", []):
-		if lv >= int(t):
-			tier += 1
-	return tier
-
-
-## A hand pop's batch after the crescendo: fills the meter by the outcome, and
-## the pop that fills it pays (1 + bonus) x. Misses add nothing and take nothing.
-func _crescendo(n: int, kind: String) -> int:
-	if not burst_mode:
-		return n
-	var bt := _burst_table()
-	var add := int(bt.get(kind, 0)) if kind == PERFECT or kind == NEAR else 0
-	if add <= 0:
-		return n
-	crescendo += add
-	if crescendo < crescendo_full():
-		_emit("crescendo", {"kernels": crescendo, "full": crescendo_full()})
-		return n
-	crescendo = 0
-	bursts += 1
-	var out := int(floor(n * (1.0 + float(bt.get("bonus", 0.5)))))
-	_emit("burst", {"tier": burst_tier(), "count": out, "extra": out - n, "outcome": kind})
-	return out
 
 
 func done() -> bool:

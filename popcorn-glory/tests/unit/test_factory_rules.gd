@@ -194,3 +194,66 @@ func test_random_play_never_breaks_conservation_or_sells_from_nothing() -> void:
 	_check_conservation(f, "end")
 	assert_true(int(f.stats["sold"]) <= int(f.stats["packed"]), "sold <= packed")
 	assert_eq(f.earned, int(f.stats["revenue"]), "every coin earned came from a sale")
+
+
+# -- Step 19: the hand's kettle, its upgrades, the crescendo, hand vs auto ----
+
+func test_every_kettle_level_changes_something_real() -> void:
+	var f: PopRules = Factory.new()
+	for lv in f.max_level():
+		var a: Dictionary = f.kettle_stats(lv)
+		var b: Dictionary = f.kettle_stats(lv + 1)
+		assert_true(int(b["portions"]) > int(a["portions"]), "level %d -> %d: more popcorn per perfect pop" % [lv, lv + 1])
+		var better := int(b["gold_ms"]) > int(a["gold_ms"]) or int(b["recovery_ms"]) < int(a["recovery_ms"])
+		assert_true(better or lv + 1 >= 7, "level %d -> %d: a wider gold or a faster recovery too (early levels)" % [lv, lv + 1])
+	assert_true(int(f.kettle_stats(f.max_level())["recovery_ms"]) < int(f.kettle_stats(0)["recovery_ms"]), "recovery gets faster")
+
+
+func test_buying_a_level_really_changes_the_next_lot() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.money = 1000
+	f.earned = 1000
+	_pop(f)
+	var first := int(f.glass["portions"]) if not f.glass.is_empty() else int(f.kettle_capacity())
+	f.advance(3000)
+	assert_true(bool(f.execute({"type": "buy"})["ok"]), "bought level 1")
+	_pop(f)
+	var lots := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "lot_popped")
+	assert_eq(int(lots[-1]["data"]["portions"]), int(f.kettle_capacity(1)), "the next perfect lot has level 1's portions")
+	assert_true(int(lots[-1]["data"]["portions"]) > first, "more than before")
+
+
+func test_the_factory_crescendo_makes_a_bigger_real_lot() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	var sizes: Array[int] = []
+	for i in 4:
+		f.drain_events()
+		_pop(f)
+		var lot := f.drain_events().filter(func(e: Dictionary) -> bool: return String(e["type"]) == "lot_popped")
+		sizes.append(int(lot[0]["data"]["portions"]))
+		f.advance(3000)
+	var cap := int(f.kettle_capacity())
+	assert_eq(sizes[0], cap, "an ordinary perfect lot")
+	assert_eq(sizes[3], int(floor(cap * 1.5)), "the fourth perfect fills the crescendo: 1.5 x real portions")
+	assert_eq(int(f.bursts), 1, "one burst")
+	_check_conservation(f, "after a burst")
+
+
+func test_the_hand_beats_one_basic_auto_cooker_per_attempt_and_parallel_cookers_win_over_time() -> void:
+	var f: PopRules = Factory.new()
+	for lv in f.max_level() + 1:
+		var hand: Dictionary = f.hand_attempt(lv, "perfect")
+		var near: Dictionary = f.hand_attempt(lv, "near")
+		var auto: Dictionary = f.auto_attempt(lv)
+		assert_true(float(hand["portions"]) > float(auto["portions"]), "level %d: a perfect hand makes more per attempt (%.1f vs %.1f)" % [lv, hand["portions"], auto["portions"]])
+		assert_true(float(hand["quality"]) > float(auto["quality"]), "level %d: and better popcorn" % lv)
+		assert_true(float(near["portions"]) >= float(auto["portions"]), "level %d: even a near hand matches it" % lv)
+		# Per minute: a skilled hand pops about every (gold start + 100 ms + recovery + 300 ms of human).
+		var t := f.economy.table("factory")
+		var hand_cycle := int(t["window_start_ms"]) + 100 + int(f.kettle_stats(lv)["recovery_ms"]) + 300
+		var hand_per_min := 60000.0 / hand_cycle * float(hand["portions"])
+		var auto_per_min := 60000.0 / int(auto["cycle_ms"]) * float(auto["portions"])
+		var n := ceili(hand_per_min / auto_per_min + 0.001)
+		assert_true(n >= 2 and n <= 8, "level %d: %d basic cookers in parallel out-produce a skilled hand per minute (hand %.0f, one cooker %.0f)" % [lv, n, hand_per_min, auto_per_min])

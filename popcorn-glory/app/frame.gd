@@ -212,7 +212,9 @@ func _disarm() -> void:
 
 
 func _on_denied(b: PopPressArea) -> void:
-	if has_auto:
+	# The stand (Step 10) and the factory (Step 19) answer an unaffordable card;
+	# the experiments stay as they were compared.
+	if has_auto or wide:
 		_deny(b)
 
 

@@ -47,6 +47,7 @@ var _rng := RandomNumberGenerator.new()
 func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	super(p_economy)
 	variant = "factory"
+	burst_mode = true   # the crescendo is the factory's (Step 19: B -> C as real extra portions)
 	_rng.seed = seed_value
 	rng_state = int(_rng.state)
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
@@ -60,11 +61,6 @@ func _t() -> Dictionary:
 	return economy.table(variant)
 
 
-func _judge(ms: int) -> String:
-	var g := int(_t().get("edge_grace_ms", 0))
-	if ms >= window_start() - g and ms <= window_end() + g:
-		return PERFECT
-	return super(ms)
 
 
 func _new_id() -> int:
@@ -78,6 +74,43 @@ func kettle_capacity(at_level: int = -1) -> int:
 	var lv := level if at_level < 0 else at_level
 	var caps: Array = _t()["kettle_portions"]
 	return int(caps[clampi(lv, 0, caps.size() - 1)])
+
+
+## Recovery: the kettle cools faster at some levels (an upgrade's second effect).
+func _cooldown_ms() -> int:
+	var r: Array = _t()["recovery_ms"]
+	return int(r[clampi(level, 0, r.size() - 1)])
+
+
+## What a kettle level gives (Step 19: every level changes at least one of
+## these, shown now -> next before buying): a perfect pop's portions, the gold's
+## width, the cooling time.
+func kettle_stats(at_level: int) -> Dictionary:
+	var t := _t()
+	var lv := clampi(at_level, 0, max_level())
+	var r: Array = t["recovery_ms"]
+	return {"portions": kettle_capacity(lv),
+		"gold_ms": mini(int(t["window_ms"]) + int(t["window_step_ms"]) * lv, int(t["window_max_ms"])),
+		"recovery_ms": int(r[clampi(lv, 0, r.size() - 1)])}
+
+
+## Expected result of ONE attempt (Step 19's balance, design/PROGRESSION.md 4):
+## the hand's grade vs the basic auto cooker's odds, in portions and quality.
+func hand_attempt(at_level: int, grade: String = PERFECT) -> Dictionary:
+	var y := float((_t()["yield"] as Dictionary)[grade])
+	return {"portions": float(maxi(1, int(floor(kettle_capacity(at_level) * y)))), "quality": float(GRADE_QUALITY[grade])}
+
+
+func auto_attempt(at_level: int) -> Dictionary:
+	var a := _t()["auto_cooker"] as Dictionary
+	var cap := kettle_capacity(at_level) * float(a["capacity_share"])
+	var portions := 0.0
+	var quality := 0.0
+	for g: String in (a["grades"] as Dictionary).keys():
+		var p := float(a["grades"][g])
+		portions += p * maxf(1.0, floor(cap * float((_t()["yield"] as Dictionary)[g])))
+		quality += p * float(GRADE_QUALITY[g])
+	return {"portions": portions, "quality": quality, "cycle_ms": int(a["cycle_ms"])}
 
 
 ## What the upgrade card shows as '+now > +next': portions of a perfect pop.
@@ -139,6 +172,8 @@ func _resolve(kind: String) -> Dictionary:
 	var held := heat_ms
 	var yields := t["yield"] as Dictionary
 	var portions := maxi(1, int(floor(kettle_capacity() * float(yields[kind]))))
+	# The crescendo: the pop that fills it makes a bigger lot -- real popcorn, counted as made.
+	portions = _crescendo(portions, kind)
 	heating = false
 	heat_ms = 0
 	cooldown_left = _cooldown_ms()
