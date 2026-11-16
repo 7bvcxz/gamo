@@ -1,0 +1,733 @@
+{
+ "_scenarios": {
+  "cookers_10": {
+   "bin": 24,
+   "blocked_ms": 8366050,
+   "glass": 0,
+   "lost": 0,
+   "made": 3206,
+   "minutes": 30.0,
+   "money": 12718,
+   "net_per_min": 423.933333333333,
+   "presses_refused": 0,
+   "revenue": 13358,
+   "shelf": 5,
+   "sold": 1181,
+   "stock_portions": 52,
+   "unpaid_ms": 0,
+   "upkeep": 640
+  },
+  "cookers_20": {
+   "bin": 24,
+   "blocked_ms": 26306050,
+   "glass": 0,
+   "lost": 0,
+   "made": 3226,
+   "minutes": 30.0,
+   "money": 12725,
+   "net_per_min": 424.166666666667,
+   "presses_refused": 0,
+   "revenue": 13360,
+   "shelf": 5,
+   "sold": 1181,
+   "stock_portions": 72,
+   "unpaid_ms": 0,
+   "upkeep": 635
+  },
+  "cookers_40": {
+   "bin": 24,
+   "blocked_ms": 62186050,
+   "glass": 0,
+   "lost": 0,
+   "made": 3266,
+   "minutes": 30.0,
+   "money": 12725,
+   "net_per_min": 424.166666666667,
+   "presses_refused": 0,
+   "revenue": 13358,
+   "shelf": 5,
+   "sold": 1181,
+   "stock_portions": 112,
+   "unpaid_ms": 0,
+   "upkeep": 633
+  },
+  "max_customers": {
+   "bin": 24,
+   "blocked_ms": 0,
+   "glass": 30,
+   "lost": 0,
+   "made": 1206,
+   "minutes": 10.9,
+   "money": 5394,
+   "net_per_min": 494.862385321101,
+   "presses_refused": 595700,
+   "revenue": 5394,
+   "shelf": 6,
+   "sold": 425,
+   "stock_portions": 70,
+   "unpaid_ms": 0,
+   "upkeep": 0
+  },
+  "overproduction": {
+   "bin": 24,
+   "blocked_ms": 0,
+   "glass": 4,
+   "lost": 0,
+   "made": 44,
+   "minutes": 10.2708333333333,
+   "money": 0,
+   "net_per_min": 0.0,
+   "presses_refused": 596000,
+   "revenue": 0,
+   "shelf": 8,
+   "sold": 0,
+   "stock_portions": 44,
+   "unpaid_ms": 0,
+   "upkeep": 0
+  },
+  "sales_burst": {
+   "bin": 22,
+   "blocked_ms": 0,
+   "glass": 4,
+   "lost": 0,
+   "made": 368,
+   "minutes": 12.2208333333333,
+   "money": 1620,
+   "net_per_min": 132.560518240709,
+   "presses_refused": 585950,
+   "revenue": 1620,
+   "shelf": 7,
+   "sold": 162,
+   "stock_portions": 44,
+   "unpaid_ms": 0,
+   "upkeep": 0
+  },
+  "zero_customers": {
+   "bin": 24,
+   "blocked_ms": 0,
+   "glass": 4,
+   "lost": 0,
+   "made": 44,
+   "minutes": 10.2708333333333,
+   "money": 0,
+   "net_per_min": 0.0,
+   "presses_refused": 596000,
+   "revenue": 0,
+   "shelf": 8,
+   "sold": 0,
+   "stock_portions": 44,
+   "unpaid_ms": 0,
+   "upkeep": 0
+  }
+ },
+ "average/auto": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 0,
+    "money": 25,
+    "purchases": 2,
+    "revenue": 165,
+    "sign": 2,
+    "sold": 17,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 1,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 0,
+    "money": 158,
+    "purchases": 4,
+    "revenue": 818,
+    "sign": 3,
+    "sold": 85,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 3,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 12,
+    "money": 508,
+    "purchases": 9,
+    "revenue": 3508,
+    "sign": 4,
+    "sold": 369,
+    "station": 2,
+    "upkeep": 98
+   },
+   "60": {
+    "cookers": 9,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 12,
+    "money": 2034,
+    "purchases": 16,
+    "revenue": 11462,
+    "sign": 5,
+    "sold": 1052,
+    "station": 2,
+    "upkeep": 279
+   }
+  },
+  "shares": {
+   "demand": 0.409766625372894,
+   "packaging": 0.391712173144974,
+   "production": 0.0
+  }
+ },
+ "average/demand": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 0,
+    "money": 25,
+    "purchases": 2,
+    "revenue": 165,
+    "sign": 2,
+    "sold": 17,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 0,
+    "money": 458,
+    "purchases": 3,
+    "revenue": 818,
+    "sign": 3,
+    "sold": 85,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 145,
+    "money": 1717,
+    "purchases": 5,
+    "revenue": 3677,
+    "sign": 5,
+    "sold": 386,
+    "station": 0,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 824,
+    "money": 3567,
+    "purchases": 6,
+    "revenue": 7927,
+    "sign": 6,
+    "sold": 830,
+    "station": 0,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.165,
+   "packaging": 0.577430555555556,
+   "production": 0.0
+  }
+ },
+ "average/early": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 0,
+    "money": 25,
+    "purchases": 2,
+    "revenue": 165,
+    "sign": 2,
+    "sold": 17,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 0,
+    "money": 458,
+    "purchases": 3,
+    "revenue": 818,
+    "sign": 3,
+    "sold": 85,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 10,
+    "money": 2259,
+    "purchases": 7,
+    "revenue": 5169,
+    "sign": 5,
+    "sold": 493,
+    "station": 2,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 51.45,
+    "kettle": 0,
+    "lost": 301,
+    "money": 8882,
+    "purchases": 9,
+    "revenue": 15792,
+    "sign": 6,
+    "sold": 1373,
+    "station": 3,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.307835250851356,
+   "packaging": 0.228116128817213,
+   "production": 0.0
+  }
+ },
+ "average/late": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 105.825,
+    "kettle": 0,
+    "lost": 0,
+    "money": 105,
+    "purchases": 1,
+    "revenue": 145,
+    "sign": 1,
+    "sold": 15,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 105.825,
+    "kettle": 0,
+    "lost": 0,
+    "money": 274,
+    "purchases": 3,
+    "revenue": 634,
+    "sign": 3,
+    "sold": 66,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 105.825,
+    "kettle": 0,
+    "lost": 0,
+    "money": 1278,
+    "purchases": 6,
+    "revenue": 3488,
+    "sign": 5,
+    "sold": 366,
+    "station": 1,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 105.825,
+    "kettle": 0,
+    "lost": 153,
+    "money": 6916,
+    "purchases": 9,
+    "revenue": 13826,
+    "sign": 6,
+    "sold": 1230,
+    "station": 3,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.421514312737232,
+   "packaging": 0.120898915729081,
+   "production": 0.0
+  }
+ },
+ "average/supply": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 38.575,
+    "kettle": 2,
+    "lost": 0,
+    "money": 51,
+    "purchases": 2,
+    "revenue": 135,
+    "sign": 0,
+    "sold": 14,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 38.575,
+    "kettle": 4,
+    "lost": 0,
+    "money": 50,
+    "purchases": 4,
+    "revenue": 406,
+    "sign": 0,
+    "sold": 42,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 38.575,
+    "kettle": 5,
+    "lost": 0,
+    "money": 373,
+    "purchases": 5,
+    "revenue": 1159,
+    "sign": 0,
+    "sold": 122,
+    "station": 0,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 38.575,
+    "kettle": 6,
+    "lost": 0,
+    "money": 485,
+    "purchases": 6,
+    "revenue": 2321,
+    "sign": 0,
+    "sold": 242,
+    "station": 0,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.966137616105951,
+   "packaging": 0.0,
+   "production": 0.0
+  }
+ },
+ "fast/early": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 37.325,
+    "kettle": 0,
+    "lost": 0,
+    "money": 29,
+    "purchases": 2,
+    "revenue": 169,
+    "sign": 2,
+    "sold": 17,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 37.325,
+    "kettle": 0,
+    "lost": 0,
+    "money": 242,
+    "purchases": 4,
+    "revenue": 852,
+    "sign": 3,
+    "sold": 86,
+    "station": 1,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 37.325,
+    "kettle": 0,
+    "lost": 9,
+    "money": 316,
+    "purchases": 8,
+    "revenue": 5626,
+    "sign": 6,
+    "sold": 514,
+    "station": 2,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 37.325,
+    "kettle": 0,
+    "lost": 23,
+    "money": 13311,
+    "purchases": 9,
+    "revenue": 20221,
+    "sign": 6,
+    "sold": 1683,
+    "station": 3,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.376041666666667,
+   "packaging": 0.0469444444444444,
+   "production": 0.0
+  }
+ },
+ "idle/auto": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 102.275,
+    "kettle": 2,
+    "lost": 1,
+    "money": 33,
+    "purchases": 2,
+    "revenue": 117,
+    "sign": 0,
+    "sold": 12,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 102.275,
+    "kettle": 3,
+    "lost": 1,
+    "money": 71,
+    "purchases": 6,
+    "revenue": 612,
+    "sign": 3,
+    "sold": 63,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 3,
+    "first_purchase_s": 102.275,
+    "kettle": 4,
+    "lost": 11,
+    "money": 372,
+    "purchases": 12,
+    "revenue": 2987,
+    "sign": 4,
+    "sold": 321,
+    "station": 1,
+    "upkeep": 57
+   },
+   "60": {
+    "cookers": 7,
+    "first_purchase_s": 102.275,
+    "kettle": 4,
+    "lost": 23,
+    "money": 598,
+    "purchases": 18,
+    "revenue": 8555,
+    "sign": 4,
+    "sold": 821,
+    "station": 3,
+    "upkeep": 317
+   }
+  },
+  "shares": {
+   "demand": 0.110065622721433,
+   "packaging": 0.634144647755286,
+   "production": 0.081941599250026
+  }
+ },
+ "idle/early": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 102.275,
+    "kettle": 2,
+    "lost": 1,
+    "money": 33,
+    "purchases": 2,
+    "revenue": 117,
+    "sign": 0,
+    "sold": 12,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 102.275,
+    "kettle": 3,
+    "lost": 1,
+    "money": 71,
+    "purchases": 6,
+    "revenue": 612,
+    "sign": 3,
+    "sold": 63,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 102.275,
+    "kettle": 5,
+    "lost": 40,
+    "money": 416,
+    "purchases": 11,
+    "revenue": 3012,
+    "sign": 4,
+    "sold": 305,
+    "station": 2,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 102.275,
+    "kettle": 6,
+    "lost": 324,
+    "money": 1882,
+    "purchases": 14,
+    "revenue": 8228,
+    "sign": 5,
+    "sold": 730,
+    "station": 3,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.0367922694582512,
+   "packaging": 0.15008469163913,
+   "production": 0.446921944853247
+  }
+ },
+ "slow/early": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 51.36,
+    "kettle": 0,
+    "lost": 0,
+    "money": 18,
+    "purchases": 2,
+    "revenue": 158,
+    "sign": 2,
+    "sold": 17,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 51.36,
+    "kettle": 0,
+    "lost": 0,
+    "money": 400,
+    "purchases": 3,
+    "revenue": 760,
+    "sign": 3,
+    "sold": 84,
+    "station": 0,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 51.36,
+    "kettle": 3,
+    "lost": 45,
+    "money": 1210,
+    "purchases": 10,
+    "revenue": 4301,
+    "sign": 5,
+    "sold": 444,
+    "station": 2,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 51.36,
+    "kettle": 7,
+    "lost": 129,
+    "money": 5086,
+    "purchases": 16,
+    "revenue": 16332,
+    "sign": 6,
+    "sold": 1479,
+    "station": 3,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.360122383279655,
+   "packaging": 0.229642252507871,
+   "production": 0.0230544988910231
+  }
+ },
+ "specialist/early": {
+  "marks": {
+   "3": {
+    "cookers": 0,
+    "first_purchase_s": 37.25,
+    "kettle": 0,
+    "lost": 0,
+    "money": 40,
+    "purchases": 2,
+    "revenue": 180,
+    "sign": 2,
+    "sold": 18,
+    "station": 0,
+    "upkeep": 0
+   },
+   "10": {
+    "cookers": 0,
+    "first_purchase_s": 37.25,
+    "kettle": 0,
+    "lost": 0,
+    "money": 260,
+    "purchases": 4,
+    "revenue": 870,
+    "sign": 3,
+    "sold": 87,
+    "station": 1,
+    "upkeep": 0
+   },
+   "30": {
+    "cookers": 0,
+    "first_purchase_s": 37.25,
+    "kettle": 0,
+    "lost": 8,
+    "money": 483,
+    "purchases": 8,
+    "revenue": 5793,
+    "sign": 6,
+    "sold": 522,
+    "station": 2,
+    "upkeep": 0
+   },
+   "60": {
+    "cookers": 0,
+    "first_purchase_s": 37.25,
+    "kettle": 0,
+    "lost": 21,
+    "money": 13697,
+    "purchases": 9,
+    "revenue": 20607,
+    "sign": 6,
+    "sold": 1696,
+    "station": 3,
+    "upkeep": 0
+   }
+  },
+  "shares": {
+   "demand": 0.464639871114691,
+   "packaging": 0.0465264853754062,
+   "production": 0.0
+  }
+ }
+}
