@@ -1,0 +1,98 @@
+[
+  {
+    "t_ms": 1376,
+    "what": "open",
+    "crescendo": 0,
+    "bursts": 0,
+    "money": 0,
+    "level": 0
+  },
+  {
+    "t_ms": 3660,
+    "what": "hold",
+    "crescendo": 2,
+    "bursts": 0,
+    "money": 10,
+    "level": 0
+  },
+  {
+    "t_ms": 5866,
+    "what": "hold",
+    "crescendo": 4,
+    "bursts": 0,
+    "money": 20,
+    "level": 0
+  },
+  {
+    "t_ms": 8067,
+    "what": "hold",
+    "crescendo": 6,
+    "bursts": 0,
+    "money": 30,
+    "level": 0
+  },
+  {
+    "t_ms": 10292,
+    "what": "hold",
+    "crescendo": 0,
+    "bursts": 1,
+    "money": 45,
+    "level": 0
+  },
+  {
+    "t_ms": 11929,
+    "what": "after burst",
+    "crescendo": 0,
+    "bursts": 1,
+    "money": 45,
+    "level": 0
+  },
+  {
+    "t_ms": 11978,
+    "what": "level 11",
+    "crescendo": 0,
+    "bursts": 1,
+    "money": 45,
+    "level": 11
+  },
+  {
+    "t_ms": 14391,
+    "what": "hold",
+    "crescendo": 2,
+    "bursts": 1,
+    "money": 1805,
+    "level": 11
+  },
+  {
+    "t_ms": 16735,
+    "what": "hold",
+    "crescendo": 4,
+    "bursts": 1,
+    "money": 3565,
+    "level": 11
+  },
+  {
+    "t_ms": 19134,
+    "what": "hold",
+    "crescendo": 6,
+    "bursts": 1,
+    "money": 5325,
+    "level": 11
+  },
+  {
+    "t_ms": 21555,
+    "what": "hold",
+    "crescendo": 0,
+    "bursts": 2,
+    "money": 7965,
+    "level": 11
+  },
+  {
+    "t_ms": 23199,
+    "what": "after burst",
+    "crescendo": 0,
+    "bursts": 2,
+    "money": 7965,
+    "level": 11
+  }
+]
