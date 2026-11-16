@@ -15,6 +15,15 @@ func _pop(f: PopRules, offset: int = 10) -> Dictionary:
 	return f.execute({"type": "release"})
 
 
+func _open(f: PopRules) -> void:
+	# Step 24: the station opens after its first sealed pack (the sign after the first sale: _open_sign).
+	f.stats["packed"] = maxi(1, int(f.stats["packed"]))
+
+
+func _open_sign(f: PopRules) -> void:
+	f.stats["sold"] = maxi(1, int(f.stats["sold"]))
+
+
 func _quiet_shop(f: PopRules) -> void:
 	# No customers (for the tests that need the shop empty).
 	f.queue.clear()
@@ -89,6 +98,10 @@ func test_backpressure_a_full_bin_holds_the_glass_and_stops_the_kettle() -> void
 			assert_eq(String(r["reason"]), "err.kettle_full", "refused because the glass holds a lot")
 			break
 	assert_true(refused, "the kettle stops when nothing downstream has room")
+	# Keep cooking whenever the kettle lets you, until the shelf and the bin are full.
+	for i in 60:
+		_pop(f)
+		f.advance(3000)
 	assert_eq(f.shelf.size(), int(f.state()["shelf_cap"]), "the shelf is full")
 	assert_false(f.glass.is_empty(), "the glass holds the last lot")
 	assert_eq(String(f.bottleneck()), "demand", "demand is the bottleneck (packs wait for customers)")
@@ -333,6 +346,7 @@ func test_a_full_shelf_blocks_the_station_measurably() -> void:
 
 func test_packer_upgrades_change_throughput_and_the_station() -> void:
 	var f: PopRules = Factory.new()
+	_open(f)
 	_quiet_shop(f)
 	var tiers: Array = f.economy.table("factory")["packer"]
 	for k in range(1, tiers.size()):
@@ -341,10 +355,10 @@ func test_packer_upgrades_change_throughput_and_the_station() -> void:
 	var r: Dictionary = f.execute({"type": "buy_packer"})
 	assert_false(bool(r["ok"]), "no money: refused")
 	assert_eq(String(r["reason"]), "err.not_enough_money", "with the reason")
-	f.money = 1000
+	f.money = 10000
 	assert_true(bool(f.execute({"type": "buy_packer"})["ok"]), "tier 1 bought")
 	assert_true(bool(f.execute({"type": "buy_packer"})["ok"]), "tier 2 bought (two heads)")
-	assert_eq(f.money, 1000 - int(tiers[1]["cost"]) - int(tiers[2]["cost"]), "paid the prices, once")
+	assert_eq(f.money, 10000 - int(tiers[1]["cost"]) - int(tiers[2]["cost"]), "paid the prices, once")
 	assert_eq(int(f.level), 0, "the kettle untouched (an independent upgrade)")
 	_lot(f, "plain", 8, 100)
 	f.advance(60)
@@ -356,6 +370,7 @@ func test_packer_upgrades_change_throughput_and_the_station() -> void:
 
 func test_an_upgrade_mid_cycle_keeps_the_packs_in_progress() -> void:
 	var f: PopRules = Factory.new()
+	_open(f)
 	_quiet_shop(f)
 	f.money = 1000
 	_lot(f, "plain", 4, 100)
@@ -387,9 +402,10 @@ func test_a_paused_cycle_resumes_exactly() -> void:
 
 func test_recipes_convert_to_their_sku_never_mix_and_orders_get_their_own() -> void:
 	var f: PopRules = Factory.new()
+	_open(f)
 	_quiet_shop(f)
 	f.economy.table("factory")["pack_recipes"]["caramel"] = "caramel"
-	f.money = 1000
+	f.money = 5000
 	f.execute({"type": "buy_packer"})
 	f.execute({"type": "buy_packer"})   # two heads: the mix test sees both at once
 	_lot(f, "caramel", 1, 100)
@@ -520,7 +536,7 @@ func test_arrivals_follow_the_sign_never_fixed_never_bursts_never_droughts() -> 
 		assert_true(gaps.max() <= int(s["max_ms"]) + 100, "tier %d: no drought (longest %d <= %d)" % [tier, gaps.max(), s["max_ms"]])
 		var distinct := {}
 		for g in gaps:
-			distinct[g / 250] = true
+			distinct[g / 100] = true
 		assert_true(distinct.size() > 8, "tier %d: not a fixed timer (%d different waits)" % [tier, distinct.size()])
 	var t0 := _traffic(0, 99, 10)
 	var t1 := _traffic(0, 99, 10)
@@ -533,6 +549,8 @@ func test_arrivals_follow_the_sign_never_fixed_never_bursts_never_droughts() -> 
 
 func test_the_sign_buys_shorter_waits_and_a_bigger_shop() -> void:
 	var f: PopRules = Factory.new()
+	_open(f)
+	_open_sign(f)
 	var tiers: Array = f.economy.table("factory")["sign"]
 	for k in range(1, tiers.size()):
 		assert_true(f.mean_wait_ms(k) < f.mean_wait_ms(k - 1), "tier %d: customers come more often" % k)
@@ -581,7 +599,9 @@ func test_a_long_advance_equals_many_short_ones_with_a_bigger_shop() -> void:
 
 func test_save_and_resume_continue_the_same_factory() -> void:
 	var a: PopRules = Factory.new(null, 777)
-	a.money = 500
+	_open(a)
+	_open_sign(a)
+	a.money = 1000
 	a.execute({"type": "buy_packer"})
 	a.execute({"type": "buy_sign"})
 	for i in 6:
@@ -722,15 +742,111 @@ func test_an_impatient_exit_costs_nothing_and_the_station_waits_for_the_right_po
 
 func test_the_bottleneck_names_the_stage_that_holds_the_next_one_back() -> void:
 	var f: PopRules = Factory.new()
-	assert_eq(String(f.bottleneck()), "production", "a customer waits, no popcorn: production")
+	assert_eq(String(f.bottleneck()), "", "a customer who just came in is not a shortage yet")
+	f.advance(6500)
+	assert_eq(String(f.bottleneck()), "production", "a customer has waited 6 s, no popcorn: production")
 	_pop(f)
 	f.advance(1500)
-	assert_eq(String(f.bottleneck()), "packaging", "popcorn there, packing under way: packaging")
+	assert_eq(String(f.bottleneck()), "packaging", "popcorn there, packing under way while they wait: packaging")
 	var g: PopRules = Factory.new()
 	_quiet_shop(g)
 	_lot(g, "plain", 24, 100)
 	g.advance(30000)
 	assert_eq(String(g.bottleneck()), "demand", "a full shelf, nobody waiting: demand")
-	assert_true(int(g.per_min("packs")) >= 8, "the station's last minute counted (%d packs)" % int(g.per_min("packs")))
-	g.advance(61000)
+	assert_true(int(g.per_min("packs")) >= 6, "the station's last minute counted (%d packs)" % int(g.per_min("packs")))
+	g.advance(90000)
 	assert_eq(int(g.per_min("packs")), 0, "a minute later, the count is of the last minute only")
+
+
+# -- Step 24: a lot bigger than the bin, the unlock policy, truthful upgrades ----
+
+func test_a_lot_bigger_than_the_bin_flows_through_in_parts() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.level = 9   # 45 portions a perfect pop: almost twice the bin (24)
+	_pop(f)
+	assert_eq(int(f.glass["portions"]), int(f.kettle_capacity()), "the lot is in the glass")
+	var made := int(f.stats["made_portions"])
+	for i in 60:
+		f.advance(1000)
+		f.shelf.clear()   # (sold off-screen: keep the shelf from blocking, to test the glass)
+		f.stats["made_portions"] = made
+	assert_true(f.glass.is_empty(), "the whole lot left the glass, in parts (before the fix it waited forever)")
+	assert_true(bool(f.execute({"type": "press"})["ok"]), "and the kettle cooks again")
+
+
+func test_the_station_and_the_sign_open_one_at_a_time() -> void:
+	var f: PopRules = Factory.new()
+	f.money = 10000
+	assert_eq(String(f.execute({"type": "buy_packer"})["reason"]), "err.locked", "the station: not before its first sealed pack")
+	assert_eq(String(f.execute({"type": "buy_sign"})["reason"]), "err.locked", "the sign: not before the first sale")
+	assert_true(bool(f.execute({"type": "buy"})["ok"]), "the kettle from the start")
+	_pop(f)
+	f.advance(6000)
+	assert_true(bool(f.station_open("packer")), "a pack sealed: the station opens")
+	assert_true(bool(f.execute({"type": "buy_packer"})["ok"]), "and can be bought")
+	f.advance(10000)
+	assert_true(int(f.stats["sold"]) >= 1, "a sale")
+	assert_true(bool(f.execute({"type": "buy_sign"})["ok"]), "then the sign")
+
+
+## A hand that pops whenever the kettle is free, at most every `every_ms`, for `minutes`.
+func _played(sign: int, packer: int, level: int, every_ms: int, minutes: int) -> PopRules:
+	var f: PopRules = Factory.new(null, 20261116)
+	f.sign_tier = sign
+	f.packer_tier = packer
+	f.level = level
+	var t := 0
+	var next_pop := 0
+	while t < minutes * 60000:
+		if t >= next_pop and f.glass.is_empty() and int(f.cooldown_left) <= 0:
+			f.execute({"type": "press"})
+			var hold: int = (int(f.window_start()) + int(f.window_end())) / 2
+			f.advance(hold)
+			t += hold
+			f.execute({"type": "release"})
+			next_pop = t + every_ms
+		f.advance(250)
+		t += 250
+	return f
+
+
+func test_every_upgrade_relieves_the_bottleneck_it_is_bought_for() -> void:
+	var cases := [
+		["the sign, when customers are the limit", [0, 0, 0, 2000], [3, 0, 0, 2000]],
+		["the station's 1st tier, when sign 4 brings more than it packs", [4, 0, 0, 2000], [4, 1, 0, 2000]],
+		["the station's 2nd tier, at sign 5", [5, 1, 0, 2000], [5, 2, 0, 2000]],
+		["the kettle, when the hand cannot keep up with sign 6", [6, 3, 0, 2000], [6, 3, 4, 2000]],
+		["the kettle, for a slow hand", [3, 0, 0, 20000], [3, 0, 4, 20000]],
+	]
+	for c: Array in cases:
+		var a: Array = c[1]
+		var b: Array = c[2]
+		var before := _played(a[0], a[1], a[2], a[3], 5)
+		var after := _played(b[0], b[1], b[2], b[3], 5)
+		var s0 := int(before.stats["sold"])
+		var s1 := int(after.stats["sold"])
+		assert_true(s1 > s0 * 1.15, "%s: sales %d -> %d" % [c[0], s0, s1])
+		_check_conservation(after, c[0])
+	# The station's last tier only pays off once the kettle keeps up (bought alone at sign 6, the kettle is the limit).
+	var alone := _played(6, 3, 0, 2000, 5)
+	assert_eq(String(alone.bottleneck()) in ["production", "packaging", ""], true, "the next limit is named")
+
+
+func test_the_sign_brings_people_never_goods_or_money() -> void:
+	var a := _played(0, 0, 0, 2000, 5)
+	var b := _played(3, 0, 0, 2000, 5)
+	assert_true(int(b.stats["visitors"]) > int(a.stats["visitors"]) * 2, "more customers come (%d vs %d)" % [b.stats["visitors"], a.stats["visitors"]])
+	for f: PopRules in [a, b]:
+		assert_true(int(f.stats["sold"]) <= int(f.stats["packed"]), "never more sales than packs sealed")
+		var coins := 0
+		for l: Dictionary in f.ledger:
+			coins += int(l["coins"])
+		assert_eq(coins, int(f.stats["revenue"]), "all money from sales of real packs")
+		_check_conservation(f, "sign")
+	# With nobody cooking, the best sign brings a crowd and still makes nothing.
+	var idle: PopRules = Factory.new()
+	idle.sign_tier = 6
+	idle.advance(600000)
+	assert_true(int(idle.stats["visitors"]) > 300, "the landmark brings people (%d)" % int(idle.stats["visitors"]))
+	assert_eq(int(idle.stats["made_portions"]) + int(idle.stats["packed"]) + int(idle.stats["sold"]) + int(idle.money), 0, "and no popcorn, no packs, no sales, no money")

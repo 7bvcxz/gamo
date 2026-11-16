@@ -64,12 +64,10 @@
     ],
     "pack_recipes": { "_doc": "Step 20: the SKU each recipe's popcorn is packed as (the seasoning of a later Step maps here); a pack never mixes recipes.", "plain": "plain" },
     "packer": [
-      { "_doc": "Step 20, the packing station's tiers: a pack per head every ms (per_cycle heads), its look (0 scoop and paper bag, 1 bag feeder, 2 twin filling heads, 3 rotary head, 4 mini conveyor, 5 multihead packer); cost to reach the tier.", "ms": 3000, "per_cycle": 1, "cost": 0, "look": 0 },
-      { "ms": 2400, "per_cycle": 1, "cost": 60, "look": 1 },
-      { "ms": 2400, "per_cycle": 2, "cost": 220, "look": 2 },
-      { "ms": 1800, "per_cycle": 2, "cost": 700, "look": 3 },
-      { "ms": 1800, "per_cycle": 3, "cost": 2200, "look": 4 },
-      { "ms": 1400, "per_cycle": 4, "cost": 6500, "look": 5 }
+      { "_doc": "Step 20 (rebalanced in Step 24 so every tier relieves a bottleneck the shop reaches): a pack per head every ms (per_cycle heads), its look (0 scoop and paper bag, 1 bag feeder, 2 twin filling heads, 5 multihead packer); cost to reach the tier. Packs a minute 15, 20, 33, 75 -- just above what signs 3, 4, 5 and 6 bring (11, 17, 27, 40 customers a minute).", "ms": 4000, "per_cycle": 1, "cost": 0, "look": 0 },
+      { "ms": 3000, "per_cycle": 1, "cost": 500, "look": 1 },
+      { "ms": 3600, "per_cycle": 2, "cost": 1800, "look": 2 },
+      { "ms": 2400, "per_cycle": 3, "cost": 7000, "look": 5 }
     ],
     "shelf_packs": 8,
     "price": { "plain": 10 },
@@ -77,13 +75,13 @@
     "counter": { "_doc": "Step 21: the counter's lanes -- packs handed over at once (the queue still goes in order). Step 24's shop tree adds lanes.", "lanes": 1 },
     "customers": { "second_ms": [4000, 8000], "min_gap_ms": 1000, "drought_ms": 25000, "patience_ms": 60000 },
     "sign": [
-      { "_doc": "Step 22, the shop's sign: each tier sets the next customer's wait -- triangular between min_ms and max_ms around mode_ms (its mean is (min+mode+max)/3), never a fixed timer -- and the shop's size (lanes at the counter, queue_cap places). Tier 0: a chalkboard, ~15 s. The sign never makes money itself (STATIONS 3).", "mode_ms": 15000, "min_ms": 10000, "max_ms": 20000, "lanes": 1, "queue_cap": 5, "cost": 0, "look": 0 },
-      { "mode_ms": 12500, "min_ms": 8500, "max_ms": 17000, "lanes": 1, "queue_cap": 5, "cost": 80, "look": 1 },
-      { "mode_ms": 10000, "min_ms": 7000, "max_ms": 13500, "lanes": 1, "queue_cap": 6, "cost": 260, "look": 2 },
-      { "mode_ms": 8000, "min_ms": 5500, "max_ms": 11000, "lanes": 2, "queue_cap": 6, "cost": 800, "look": 3 },
-      { "mode_ms": 6500, "min_ms": 4500, "max_ms": 9000, "lanes": 2, "queue_cap": 7, "cost": 2400, "look": 4 },
-      { "mode_ms": 5200, "min_ms": 3600, "max_ms": 7200, "lanes": 3, "queue_cap": 8, "cost": 7000, "look": 5 },
-      { "mode_ms": 4200, "min_ms": 2900, "max_ms": 5800, "lanes": 4, "queue_cap": 8, "cost": 20000, "look": 6 }
+      { "_doc": "Step 22 (rebalanced in Step 24): each tier sets the next customer's wait -- triangular between min_ms and max_ms around mode_ms (mean (min+mode+max)/3), never a fixed timer -- and the shop's size (lanes, queue_cap). Means 15, 11, 8, 5.5, 3.5, 2.2, 1.5 s: about 4, 5.5, 7.5, 11, 17, 27, 40 customers a minute. The sign never makes money itself (STATIONS 3).", "mode_ms": 15000, "min_ms": 10000, "max_ms": 20000, "lanes": 1, "queue_cap": 5, "cost": 0, "look": 0 },
+      { "mode_ms": 11000, "min_ms": 7500, "max_ms": 14500, "lanes": 1, "queue_cap": 5, "cost": 80, "look": 1 },
+      { "mode_ms": 8000, "min_ms": 5500, "max_ms": 10500, "lanes": 1, "queue_cap": 6, "cost": 260, "look": 2 },
+      { "mode_ms": 5500, "min_ms": 3800, "max_ms": 7200, "lanes": 2, "queue_cap": 6, "cost": 800, "look": 3 },
+      { "mode_ms": 3500, "min_ms": 2400, "max_ms": 4600, "lanes": 2, "queue_cap": 7, "cost": 2400, "look": 4 },
+      { "mode_ms": 2200, "min_ms": 1500, "max_ms": 2900, "lanes": 3, "queue_cap": 8, "cost": 7000, "look": 5 },
+      { "mode_ms": 1500, "min_ms": 1000, "max_ms": 2000, "lanes": 4, "queue_cap": 8, "cost": 20000, "look": 6 }
     ]
   },
   "stand": {

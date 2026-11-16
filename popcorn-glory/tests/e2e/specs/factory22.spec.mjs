@@ -11,13 +11,18 @@ test('the shop card sells the sign; the factory is saved across a reload', async
   test.setTimeout(120_000);
   await pop.open('./#factory');
   await pop.page.evaluate((k) => localStorage.removeItem(k), KEY);
+  // Step 24: the sign is for sale after the first sale.
+  let s0 = await pop.state();
+  expect(s0.run.open.sign, 'the sign is not for sale before the first sale').toBe(false);
+  await pop.hold('ring', Math.round((s0.run.window[0] + s0.run.window[1]) / 2));
+  await expect.poll(async () => (await pop.state()).run.open.sign, { timeout: 20_000 }).toBe(true);
   await pop.tap('floor_top');
   await expect.poll(async () => !!(await pop.state()).rects.detail).toBe(true);
   await pop.tap('upgrade');
   await expect.poll(async () => (await pop.call('log')).some((l) => l.type === 'denied' && l.data.offer === 'sign'), { message: 'the sign card answers' }).toBe(true);
   let s = await pop.state();
   const wait0 = s.run.mean_wait_ms;
-  await pop.call('dev_money', 100);
+  await pop.call('dev_money', 80 - (await pop.state()).run.money + 5);
   await pop.tap('upgrade');
   await expect.poll(async () => (await pop.state()).run.sign_tier).toBe(1);
   s = await pop.state();

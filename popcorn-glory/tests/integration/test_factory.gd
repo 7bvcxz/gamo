@@ -289,24 +289,29 @@ func test_the_middle_floor_card_sells_the_station_and_the_status_shows_backpress
 	assert_eq(String(app.frame.upgrade_button.art_key), "", "the card sells the kettle")
 	v.toggle_floor(1)
 	await tree.process_frame
+	assert_eq(String(app.frame.upgrade_button.art_key), "", "before its first sealed pack the station is not for sale (Step 24)")
+	f.stats["packed"] = 1
+	await tree.process_frame
 	assert_eq(String(app.frame.upgrade_button.art_key), "packer", "the middle floor's card sells the station")
-	assert_eq(int(app.frame.upgrade_button.price), 60, "at the next tier's price")
-	assert_eq(int(app.frame.upgrade_button.gain_now), 20, "packs a minute now")
-	assert_eq(int(app.frame.upgrade_button.gain_next), 25, "and next")
+	var tiers: Array = f.economy.table("factory")["packer"]
+	assert_eq(int(app.frame.upgrade_button.price), int(tiers[1]["cost"]), "at the next tier's price")
+	assert_eq(int(app.frame.upgrade_button.gain_now), int(round(f.packs_per_min(0))), "packs a minute now")
+	assert_eq(int(app.frame.upgrade_button.gain_next), int(round(f.packs_per_min(1))), "and next")
 	app.buy()
 	assert_eq(int(f.packer_tier), 0, "no money: nothing bought")
-	f.money = 300
+	var both := int(tiers[1]["cost"]) + int(tiers[2]["cost"])
+	f.money = both + 20
 	app.buy()
 	assert_eq(int(f.packer_tier), 1, "bought tier 1")
 	assert_eq(int(f.level), 0, "not the kettle")
 	app.buy()
 	assert_eq(int(f.packer_tier), 2, "tier 2")
-	assert_eq(int(f.money), 300 - 60 - 220, "paid each price once")
+	assert_eq(int(f.money), 20, "paid each price once")
 	await tree.process_frame
 	assert_eq(v.nozzles.size(), 2, "two heads on screen")
 	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 100, "portions": 24})
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 24
-	await _frames(30, 400)
+	await _frames(60, 600)
 	assert_eq(String(f.packer_state()), "blocked", "the shelf filled")
 	assert_eq(String(v._status), "blocked", "and the station shows it")
 	v.toggle_floor(2)

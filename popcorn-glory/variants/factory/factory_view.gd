@@ -394,10 +394,20 @@ func on_events(events: Array[Dictionary]) -> void:
 			_gains[-1]["at"] = at
 			_sound("coin", 1.0, -6.0)
 		elif String(e["type"]) == "station_upgrade":
-			# Step 20: the new station appears with a sparkle and the upgrade sound.
-			_sound("upgrade")
-			if not reduced_motion:
-				fx.sparkle(_station_rect().get_center(), machine_size() / 900.0, rng, 6, 120.0)
+			# Each floor's own flourish (Step 24): the station sparkles where it
+			# stands with a rising chime and a clink of its new heads; the sign
+			# lights up with a fanfare and a burst of gold over the shop.
+			var tier := int(e["data"].get("tier", 1))
+			if String(e["data"].get("station", "")) == "sign":
+				_sound("fanfare", 1.0 + 0.04 * tier, -6.0)
+				if not reduced_motion:
+					fx.burst(_sign_rect().get_center(), 10 + tier * 2, machine_size() / 900.0, rng, PopPalette.GOLD, 0.8, 1.0)
+					fx.sparkle(_sign_rect().get_center(), machine_size() / 900.0, rng, 6, 120.0)
+			else:
+				_sound("upgrade", 1.0 + 0.06 * tier)
+				_sound("clink", 1.1 + 0.05 * tier, -8.0)
+				if not reduced_motion:
+					fx.sparkle(_station_rect().get_center(), machine_size() / 900.0, rng, 6, 120.0)
 			_nozzle_key = ""
 		else:
 			rest.append(e)
@@ -1012,13 +1022,13 @@ func _station_picture(ci: CanvasItem, foot: Vector2, h: float, look: int, heads:
 ## The upgrade card follows the open floor: the middle floor's detail sells the
 ## next packing station (its picture, price and packs a minute now > next).
 func card_offer() -> Dictionary:
-	if rules != null and selected == TOP:
+	if rules != null and selected == TOP and rules.station_open("sign"):
 		# Step 22: the shop's card sells the next sign -- visitors in ten minutes, now > next.
 		var st := int(rules.get("sign_tier"))
 		var sc := int(rules.sign_cost())
 		return {"key": "sign", "stage": st + 1, "price": sc, "now": int(round(600000.0 / rules.mean_wait_ms(st))),
 			"next": int(round(600000.0 / rules.mean_wait_ms(st + 1))) if sc >= 0 else -1, "prefix": "", "art": Callable(self, "_card_sign")}
-	if rules == null or selected != MID:
+	if rules == null or selected != MID or not rules.station_open("packer"):
 		return {}
 	var tier := int(rules.get("packer_tier"))
 	var cost := int(rules.packer_cost())
@@ -1337,3 +1347,9 @@ func _draw_stage_numbers(ci: CanvasItem) -> void:
 	for k in 3:
 		ci.draw_rect(Rect2(s + Vector2(-fs * 0.35, fs * 0.25 - k * fs * 0.22), Vector2(fs * 0.7, fs * 0.16)), Color(PopPalette.INK, 0.6))
 	ci.draw_string(font, s + Vector2(fs * 0.5, fs * 0.36), str(backlog), HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(PopPalette.INK, 0.8))
+
+
+## The shop's sign on the top floor (where its upgrade flourishes).
+func _sign_rect() -> Rect2:
+	var r := floor_rect(TOP)
+	return Rect2(Vector2(r.position.x + r.size.x * 0.08, r.position.y + r.size.y * 0.3), Vector2(r.size.y * 0.42, r.size.y * 0.32))

@@ -35,6 +35,7 @@ var packer_tier := 0        ## Step 20: the packing station's upgrade (data: fac
 var sign_tier := 0          ## Step 22: the shop's sign (data: factory.sign) -- the foot traffic
 var arrival_log: Array = [] ## Step 22: when each customer came in (flow ms), for the statistics
 var first_sale_ms := -1     ## flow ms of the first sale (-1: none yet)
+var glass_held_ms := 0      ## Step 24: how long the glass has been holding back the kettle, now
 var order_rng_state := 0    ## Step 23: the orders' own generator (so orders never move arrival times)
 ## Step 23: what each stage finished in the last minute (flow ms), for the bottleneck cues.
 var recent := {"lots": [], "packs": [], "sales": []}
@@ -131,7 +132,21 @@ func packer_state() -> String:
 	return "idle"
 
 
+## Step 24's unlock policy (one new choice at a time, when it means something):
+## the kettle from the start, the packing station once it has sealed a pack,
+## the sign once a pack has been sold.
+func station_open(station: String) -> bool:
+	match station:
+		"packer":
+			return int(stats["packed"]) >= 1 or packer_tier > 0
+		"sign":
+			return int(stats["sold"]) >= 1 or sign_tier > 0
+	return true
+
+
 func _buy_packer() -> Dictionary:
+	if not station_open("packer"):
+		return {"ok": false, "reason": "err.locked"}
 	var c := packer_cost()
 	if c < 0:
 		return {"ok": false, "reason": "err.max_level"}
@@ -274,15 +289,27 @@ func _tick(ms: int) -> void:
 
 func _flow_step(dt: int) -> void:
 	var t := _t()
-	# 1. The glass pours into the lift when the bin will have room for the lot.
+	# 1. The glass pours into the lift what the bin will have room for: the whole
+	# lot, or (Step 24 fix) a part of it when the lot is bigger than the room --
+	# a lot bigger than the whole bin (kettle level 7+, or a burst at 6) used to
+	# wait for room that could never come, and stopped the factory for good.
 	if not glass.is_empty():
 		var room := int(t["bin_portions"]) - bin_portions() - lift_portions()
-		if room >= int(glass["portions"]):
+		var want := int(glass["portions"])
+		var full_bin := int(t["bin_portions"])
+		if room >= want:
 			lift.append({"lot": glass, "left_ms": int(t["lift_ms"])})
 			_emit("lot_lifted", {"lot": glass["id"]})
 			glass = {}
+		elif room > 0 and (want > full_bin or room >= full_bin / 2):
+			var part := {"id": _new_id(), "recipe": glass["recipe"], "quality": glass["quality"], "portions": room}
+			glass["portions"] = want - room
+			lift.append({"lot": part, "left_ms": int(t["lift_ms"])})
+			_emit("lot_lifted", {"lot": part["id"], "part_of": glass["id"]})
+			stats["glass_wait_ms"] = int(stats["glass_wait_ms"]) + dt
 		else:
 			stats["glass_wait_ms"] = int(stats["glass_wait_ms"]) + dt
+	glass_held_ms = glass_held_ms + dt if not glass.is_empty() else 0
 	# 2. The lift lands lots in the bin.
 	var still: Array = []
 	for x: Dictionary in lift:
@@ -542,6 +569,8 @@ func mean_wait_ms(at_tier: int) -> int:
 
 
 func _buy_sign() -> Dictionary:
+	if not station_open("sign"):
+		return {"ok": false, "reason": "err.locked"}
 	var c := sign_cost()
 	if c < 0:
 		return {"ok": false, "reason": "err.max_level"}
@@ -645,12 +674,12 @@ const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo"
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
 ## Step 23 fields: optional (a 0.22 save has none).
-const SAVE_OPTIONAL := ["order_rng_state", "recent"]
+const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms"]
 
 
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
-		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true)}
+		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -715,6 +744,7 @@ func _apply_save(d: Dictionary) -> void:
 	if String(d.get("order_rng_state", "")).is_valid_int():
 		order_rng_state = String(d["order_rng_state"]).to_int()
 		_orng.state = order_rng_state
+	glass_held_ms = maxi(0, int(d.get("glass_held_ms", 0))) if typeof(d.get("glass_held_ms", 0)) == TYPE_INT else 0
 	if typeof(d.get("recent")) == TYPE_DICTIONARY:
 		for k: String in recent.keys():
 			recent[k] = (d["recent"] as Dictionary).get(k, []) if typeof((d["recent"] as Dictionary).get(k)) == TYPE_ARRAY else []
@@ -740,6 +770,7 @@ func state() -> Dictionary:
 	s["queue"] = queue.size()
 	s["queue_cap"] = queue_cap()
 	s["sign_tier"] = sign_tier
+	s["open"] = {"packer": station_open("packer"), "sign": station_open("sign")}
 	s["sign_max"] = (_t()["sign"] as Array).size() - 1
 	s["sign_cost"] = sign_cost()
 	s["mean_wait_ms"] = mean_wait_ms(sign_tier)
@@ -764,18 +795,25 @@ func state() -> Dictionary:
 ## Which stage holds the line back right now (no spreadsheet: the view turns
 ## it into a picture, Step 23): 'kitchen' (the packer is starved), 'packing'
 ## (customers wait for packs), 'shop' (packs wait for customers), or '' (flowing).
+## Step 24: only a real wait names a bottleneck (a customer served a second
+## after their pack is sealed is the flow working, not a shortage).
+const REAL_WAIT_MS := 6000
+const REAL_HOLD_MS := 3000
+
+
 func bottleneck() -> String:
-	# Step 23: which stage holds the next one back, in the player's terms --
-	# "production" (the station waits for popcorn while someone waits),
-	# "packaging" (customers wait for the station, or the kettle waits for room),
-	# "demand" (packs wait for customers), "" (nothing waits).
+	# Which stage holds the next one back, in the player's terms --
+	# "production" (someone has waited 6 s and the station has no popcorn for them),
+	# "packaging" (someone has waited 6 s while the station works, or the kettle
+	# has waited 3 s for room), "demand" (packs wait, nobody in the queue), "".
+	var patience := int((_t()["customers"] as Dictionary)["patience_ms"])
 	if not queue.is_empty() and serves.size() < lanes():
-		var head: Dictionary = queue[0]["order"]
-		if _matching_pack(head) < 0:
+		var head: Dictionary = queue[0]
+		if _matching_pack(head["order"]) < 0 and patience - int(head["patience_ms"]) >= REAL_WAIT_MS:
 			if packing.is_empty() and _next_pack().is_empty():
 				return "production"
 			return "packaging"
-	if not glass.is_empty():
+	if glass_held_ms >= REAL_HOLD_MS:
 		return "demand" if shelf.size() >= int(_t()["shelf_packs"]) and queue.is_empty() else "packaging"
 	if queue.is_empty() and shelf.size() >= int(_t()["shelf_packs"]) / 2:
 		return "demand"

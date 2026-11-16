@@ -7,7 +7,11 @@ import { test, expect } from '../lib/pop.mjs';
 test('two products: each customer gets the bag they ordered, once; the cue names the bottleneck', async ({ pop }) => {
   test.setTimeout(150_000);
   await pop.open('./#factory');
-  await pop.call('dev_money', 400);
+  // Step 24: the station is for sale after its first sealed pack.
+  const s0 = await pop.state();
+  await pop.hold('ring', Math.round((s0.run.window[0] + s0.run.window[1]) / 2));
+  await expect.poll(async () => (await pop.state()).run.open.packer, { timeout: 20_000 }).toBe(true);
+  await pop.call('dev_money', 2400);
   await pop.tap('floor_mid');
   await expect.poll(async () => !!(await pop.state()).rects.detail).toBe(true);
   await pop.tap('upgrade');

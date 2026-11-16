@@ -48,6 +48,7 @@ CI(`.github/workflows/popcorn-glory.yml`)는 `popcorn-glory/**`가 바뀔 때만
 | `integration/test_factory.gd`의 Step 22 | 앱에서 공장이 이어짐, 시드 판은 새로이고 저장 안 됨, 숨은 탭은 흐름·도착을 멈춤, 모든 간판 단계에서 줄·줄 자리가 겹치지 않고 가게 안 |
 | `unit/test_factory_rules.gd`의 Step 23 | 큰 봉지는 포장대와 함께 열리고 주문은 도착 시각을 바꾸지 않음(약 35%), 크기 정확히 맞춤·큰 봉지 값, 머리 주문 먼저·큰 봉지가 선반을 채우지 않음(주문 + 2 이하), 섞인 손님 다섯이 순서대로 한 번씩, 떠남은 벌 없음·큰 봉지용 팝콘을 작은 봉지에 쓰지 않음, 병목 이름(생산·포장·수요)과 지난 1분 처리량 |
 | `integration/test_factory.gd`의 Step 23 | 말풍선이 주문을 보임, 테두리가 병목을 따름(부엌 → 가게), 배지를 가리키면 그 층의 숫자 |
+| `unit/test_factory_rules.gd`의 Step 24 | 원료 통보다 큰 묶음이 나눠 흘러감, 포장대·간판은 차례로 열림(err.locked), 모든 강화가 제 병목을 풀어 판매를 15% 넘게 늘림(간판·포장대 1·2단계·냄비 두 경우), 간판은 사람만 데려오고 팝콘·봉지·판매·돈은 만들지 않음 |
 | `unit/test_isolation.gd` | 저장은 `app/save_store.gd` 한 곳에서만, 그것도 이 게임의 이름(`popcorn-glory.*`, `user://popcorn_glory_*`)으로만. 네트워크·다른 게임 경로 없음, 오토로드 없음 |
 | `unit/test_shapes.gd` | 둥근 사각형이 늘 삼각분할됨(몇 픽셀짜리 채움이 브라우저에서 깨졌다) |
 | `unit/test_assets.gd` | 아틀라스가 SVG 원본과 맞음, 소리 13개 로드, SFX 버스 선언, export 필터와 `.gdignore` |
@@ -80,6 +81,7 @@ CI(`.github/workflows/popcorn-glory.yml`)는 `popcorn-glory/**`가 바뀔 때만
 | `scorecard09.spec.mjs` | 소유자 점수표 페이지(`scorecard.html`): 세 실험과 ★ 가게(Step 12) 링크가 `?trial=1`, 새로고침해도 입력이 남음, 내보내기가 입력 그대로(답한 질문만의 평균과 답한 수), 다른 출처로 요청 0, 콘솔 오류 0 |
 | `stand10.spec.mjs` | 가게를 실제 입력(p720·폰은 터치, 데스크톱은 마우스)으로: 처음은 B의 누르기·떼기, 누른 채 좌우로 세 번 문지르면 고르게 팝, 양념통 탭은 누름이 아님, 자동화 카드로 모터·조수를 사고 조수가 혼자 팜, 양념·조수·카드가 막대와 겹치지 않음. `responsive07`의 'stand' 줄이 같은 것을 다섯 화면 모양에서 본다 |
 | `factory23.spec.mjs` | 주문(Step 23): 포장대 2단계에서 큰 봉지가 열리고, 아무것도 만들지 않으면 부엌 테두리(생산), 말풍선 = 기다리는 손님 수, 50초 요리 뒤 두 봉지 모두 팔리고 판매마다 주문한 크기, 봉지·손님 중복 없음, 장부 = 매출, 모든 인분의 자리 |
+| (도구) `tools/sim/bottleneck.gd`, `tools/progress24.gd` | 단계 짝 시뮬레이션, 사는 순서 두 가지의 10분 빨리감기와 0·3·10분 화면 (`evidence/step24/`) |
 | `factory22.spec.mjs` | 손님 흐름(Step 22): 위층 카드가 간판을 팔고(돈 없으면 denied offer=sign, 사면 평균 기다림이 줄고 다른 것은 그대로), 공장이 새로고침 뒤에도 그대로(단계·만든 인분·모든 인분의 자리), `?seed=N`은 새 판이고 저장되지 않음 |
 | `sessions22.spec.mjs` | (평소 묶음 밖, 증거용) 시드별 실제 3분 판: 도착 시각·평균 간격·줄 길이·첫 판매 → `evidence/step22/sessions22.json` |
 | `factory21.spec.mjs` | 가게(Step 21): 처음 손님 하나(차분한 얼굴) → 첫 봉지가 한 번 팔림(장부 한 줄 = 돈), 재고가 있을 때 손님 사이의 빈 가게(지어낸 손님 없음, 봉지·손님 중복 없음) / 재고 없이: 줄이 차고 표정이 바뀌고 떠나며 돈 0 — 화면 0·1·여러 명 |
