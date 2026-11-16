@@ -5,16 +5,13 @@
 
 ## 현재 상태
 
-- **체크포인트 2026-11-04 (Step 12)**: #98–#101·#106–#108·#110·#114–#116 닫힘, #117은 보고 뒤 닫는다. 공개 **0.12.2 = 출시 후보, 소유자의 Go 대기.**
-  체크리스트·출시 노트·되돌리는 법·승인 대기 목록: `RELEASE_CHECKLIST.md`.
-- 소유자 승인(2026-11-04, 대화): Step 10 slice + Step 11 품질 게이트 → Step 12. **외부 출시·결제·광고·HeyDive 등록 승인은 아니다.**
-- 남은 빈칸: 사람의 점수(점수표에 ★ 가게 줄), 사람의 귀(0.12.2에서 전체 -8 dB), iPhone·저사양 Android, Android 출시 서명, 게임 라이선스, HeyDive 등록(값은 체크리스트 10절).
-- 작업 위치: 이 세션은 `/home/merti/Workspace/gamo-popcorn`(브랜치 `popcorn-work`) worktree에서 일하고
-  `git fetch && git rebase origin/main && git push origin popcorn-work:main`으로 올린다. 메인 체크아웃에서는 git을 쓰지 않는다
-  (다른 세션이 거기서 momonium을 작업 중; `--autostash`가 그쪽 변경을 잠깐 치운 일이 있었다).
-  사이트 빌드(`npm run build:pages`)는 이 worktree의 `web/node_modules`(`npm ci`)로 한다.
-- K12: 메모리 5GB 미만이면 브라우저 검사 대기. 긴 묶음 전후로 `uptime`·`free -m`을 적는다. 다른 세션의 도커 인터페이스 변동으로
-  `net::ERR_NETWORK_CHANGED`가 난다(공개 대상 재시도 1회, 보고서에 표시).
+- **2026-11-16: 3층 공장 로드맵(Step 13–48, #126–#161) 시작.** 소유자가 로드맵 구현을 승인했다(유료 서비스·외부 상업 출시·파괴적 작업·다른 게임 변경은 제외).
+  설계 원본은 `design/VISION.md`부터 아홉 문서. 결정 기록 `design/DECISIONS.md`(소유자 질문: D-07 옛 가게 가져오기, D-15).
+- 살아 있는 빌드: 공개 **0.12.2**(`#stand`, 출시 후보, 소유자 Go 대기 — `RELEASE_CHECKLIST.md`). 공장은 새 경로 `#factory`로 그 옆에 만든다.
+- 작업 위치: `/home/merti/Workspace/gamo-popcorn`(브랜치 `popcorn-work`), `git fetch && git rebase origin/main && git push origin popcorn-work:main`. 메인 체크아웃에서는 git을 쓰지 않는다.
+  사이트 빌드(`npm run build:pages`)는 이 worktree의 `web/node_modules`로 한다.
+- 유료 그림 도구는 쓰지 않는다(D-08). 그림은 SVG·도형, 소리는 합성.
+- K12: 긴 묶음 전후로 `uptime`·`free -m`을 적는다. 공유 S23은 조정 파일로 빌리고 기본 상태로 돌려준다.
 
 ## 작업 방식
 
@@ -173,3 +170,9 @@
 - 시험: 헤드리스 99/99. **공개 0.12.2 묶음 브라우저 115/0/18, 재시도 0**(0.12.1 112/0/18, 0.12.0 110/1/16 — 실패 1은 다시 시작을 한 번만 누른 스펙). 새 `release12`(새로고침 이어하기·숨은 탭 저장·두 번 다시 시작·오프라인·동작 줄이기·Fast 3G 60.9초·정보 페이지).
   공개 12분 플레이(0.12.1, 720×1280 터치): 8:45에 다 삼, 완벽 309, 버퍼 2.6–12.7MB, 오류 0.
 - 남은 것: 사람 점수, 실제 폰, 소유자의 Go.
+
+### Step 13 — 공장 설계 묶음과 품질 기준 (#126, 2026-11-16)
+
+- `design/`에 아홉 문서: VISION(재사용 지도, 기능→이슈 지도), CORE_LOOP, FACTORY_FLOW(단위·버퍼·돈이 생기는 때·막힘·유지비·시간·저장·이벤트·불변식), STATIONS, AUTOMATION_PLAN(40종 각각의 다른 동작), ART_DIRECTION_BRIEF(도구의 사실, 배치), PROGRESSION(가설 H-1–H-4), QUALITY_GATES(측정 기준 G-01–G-35, 위험 R-01–R-08), DECISIONS(D-01–D-16).
+- 가장 큰 가설 위험 H-1: 손 냄비가 분당 80–100인분을 만들고 손님은 분당 8인분을 산다 → 첫 1분 안에 수요 병목. 대응 후보 넷을 Step 17·22·25의 시뮬레이터로 비교한다.
+- 코드·빌드 변경 없음(문서는 `.gdignore` 폴더).

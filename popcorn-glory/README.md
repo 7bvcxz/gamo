@@ -8,6 +8,7 @@
 - 도구 실측: [`design/TOOLS.md`](design/TOOLS.md) · 작업 절차: [`design/WORKFLOW.md`](design/WORKFLOW.md)
 - 개발 단계: GitHub Issues `Popcorn Step NN` (7bvcxz/gamo)
 - 저장소 공통 규칙: 루트 [`AGENTS.md`](../AGENTS.md)
+- **3층 공장 설계(Step 13–48의 원본)**: [`design/VISION.md`](design/VISION.md) · [`CORE_LOOP`](design/CORE_LOOP.md) · [`FACTORY_FLOW`](design/FACTORY_FLOW.md) · [`STATIONS`](design/STATIONS.md) · [`AUTOMATION_PLAN`](design/AUTOMATION_PLAN.md) · [`ART_DIRECTION_BRIEF`](design/ART_DIRECTION_BRIEF.md) · [`PROGRESSION`](design/PROGRESSION.md) · [`QUALITY_GATES`](design/QUALITY_GATES.md) · [`DECISIONS`](design/DECISIONS.md)
 
 ## 지금 상태와 명령
 

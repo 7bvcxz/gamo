@@ -470,6 +470,7 @@ Step 1 "Grid v2 Foundation". **1.0.43으로 배포했다**(2026-09-27, Quality P
 - Step 11 (#116): 진행·난이도 시뮬레이터 v2, 블라인드 15·10분, 높음·중간 결함 수정(0.11.1). 출시 준비도 `popcorn-glory/qa/READINESS.md` — Step 12로 조건부 Go, 그대로 출시는 No-go(저장 없음). Step 12는 소유자 승인 뒤.
 - Step 12 (#117, 소유자 승인 2026-11-04): **출시 후보 0.12.2 — 소유자의 Go 대기.** 가게의 저장과 이어하기(localStorage `popcorn-glory.stand.v1`, `popcorn-glory/app/save_store.gd` 한 곳), 두 번 눌러 다시 시작, 끝(축하 + 걸린 시간), 시스템의 '동작 줄이기', 정보·개인정보·라이선스 페이지 `docs/popcorn-glory/about.html`, 사이트 문서 갱신.
   0.12.1은 Step 05부터 있던 지글 소리 누수(누름마다 약 27MB), 0.12.2는 완벽한 팝마다 넘치던 소리(피크 1.9–2.2)와 한국어 폰의 번역 제안을 고쳤다. 체크리스트·출시 노트·되돌리는 법 `popcorn-glory/RELEASE_CHECKLIST.md`. 공개 0.12.2 묶음 헤드리스 99/99, 브라우저 115/0/18. 실제 S23(Chrome·디버그 APK)에서 확인. PC는 템플릿 없음. HeyDive·스토어·결제·광고 없음.
+- Step 13 (#126, 2026-11-16): 3층 공장 로드맵(Step 13–48) 시작 — 설계 묶음 `popcorn-glory/design/VISION.md` 외 8개(흐름 규칙, 기계 40종, 품질 기준 G-01–G-35, 결정 기록). 공장은 새 경로 `#factory`, `#stand` 0.12.2는 그대로.
 
 ## 다음 작업
 
