@@ -36,6 +36,10 @@ var sign_tier := 0          ## Step 22: the shop's sign (data: factory.sign) -- 
 var arrival_log: Array = [] ## Step 22: when each customer came in (flow ms), for the statistics
 var first_sale_ms := -1     ## flow ms of the first sale (-1: none yet)
 var glass_held_ms := 0      ## Step 24: how long the glass has been holding back the kettle, now
+## Step 25: the basic auto cookers -- {left_ms, held: lot or {}, state: run|blocked|unpaid, upkeep_ms}.
+var cookers: Array = []
+var auto_rng_state := 0
+var _arng := RandomNumberGenerator.new()
 var order_rng_state := 0    ## Step 23: the orders' own generator (so orders never move arrival times)
 ## Step 23: what each stage finished in the last minute (flow ms), for the bottleneck cues.
 var recent := {"lots": [], "packs": [], "sales": []}
@@ -56,7 +60,8 @@ var rng_state := 0          ## the arrival generator's state (saved)
 var next_id := 1
 ## What happened, for the invariants, the statistics and the tests.
 var stats := {"made_portions": 0, "lots": 0, "packed": 0, "sold": 0, "sold_portions": 0, "revenue": 0, "abandoned": 0,
-	"passed_by": 0, "arrived": 0, "glass_wait_ms": 0, "packer_starved_ms": 0, "packer_blocked_ms": 0, "counter_empty_ms": 0}
+	"passed_by": 0, "arrived": 0, "glass_wait_ms": 0, "packer_starved_ms": 0, "packer_blocked_ms": 0, "counter_empty_ms": 0,
+	"visitors": 0, "upkeep_paid": 0, "auto_lots": 0, "auto_portions": 0, "auto_blocked_ms": 0, "auto_unpaid_ms": 0}
 var _rng := RandomNumberGenerator.new()
 
 
@@ -68,6 +73,8 @@ func _init(p_economy: PopEconomy = null, seed_value: int = 20261116) -> void:
 	rng_state = int(_rng.state)
 	_orng.seed = seed_value + 7919
 	order_rng_state = int(_orng.state)
+	_arng.seed = seed_value + 104729
+	auto_rng_state = int(_arng.state)
 	# The first customer is already waiting when the shop opens (design/FACTORY_FLOW.md 5).
 	_arrive()
 	var f := _t()["customers"] as Dictionary
@@ -141,6 +148,8 @@ func station_open(station: String) -> bool:
 			return int(stats["packed"]) >= 1 or packer_tier > 0
 		"sign":
 			return int(stats["sold"]) >= 1 or sign_tier > 0
+		"auto":
+			return sign_tier >= int(_auto().get("unlock_sign", 2)) or not cookers.is_empty()
 	return true
 
 
@@ -177,9 +186,9 @@ func hand_attempt(at_level: int, grade: String = PERFECT) -> Dictionary:
 	return {"portions": float(maxi(1, int(floor(kettle_capacity(at_level) * y)))), "quality": float(GRADE_QUALITY[grade])}
 
 
-func auto_attempt(at_level: int) -> Dictionary:
+func auto_attempt(_at_level: int = 0) -> Dictionary:
 	var a := _t()["auto_cooker"] as Dictionary
-	var cap := kettle_capacity(at_level) * float(a["capacity_share"])
+	var cap := float(a.get("portions", 4)) * float(a["capacity_share"])
 	var portions := 0.0
 	var quality := 0.0
 	for g: String in (a["grades"] as Dictionary).keys():
@@ -233,6 +242,9 @@ func portions_everywhere() -> int:
 		n += int(p["size"])
 	for sv: Dictionary in serves:
 		n += int(sv["pack"]["size"])
+	for ck: Dictionary in cookers:
+		if not (ck["held"] as Dictionary).is_empty():
+			n += int(ck["held"]["portions"])
 	return n + int(stats["sold_portions"])
 
 
@@ -243,6 +255,8 @@ func _act(kind: String, cmd: Dictionary) -> Dictionary:
 		return _buy_packer()
 	if kind == "buy_sign":
 		return _buy_sign()
+	if kind == "buy_auto":
+		return _buy_auto()
 	if kind == "press" and not glass.is_empty():
 		# The glass still holds a lot (the bin is full): no heat until it pours.
 		return {"ok": false, "reason": "err.kettle_full"}
@@ -310,6 +324,13 @@ func _flow_step(dt: int) -> void:
 		else:
 			stats["glass_wait_ms"] = int(stats["glass_wait_ms"]) + dt
 	glass_held_ms = glass_held_ms + dt if not glass.is_empty() else 0
+	# Step 25: sample the instant's bottleneck once a second (the shown one is the 30 s majority).
+	if (flow_ms + dt) % 1000 == 0:
+		bn_ring.append(instant_bottleneck())
+		if bn_ring.size() > BN_SAMPLES:
+			bn_ring.pop_front()
+	# 1b. The auto cookers (Step 25).
+	_cookers_step(dt)
 	# 2. The lift lands lots in the bin.
 	var still: Array = []
 	for x: Dictionary in lift:
@@ -582,12 +603,104 @@ func _buy_sign() -> Dictionary:
 	return {"ok": true, "tier": sign_tier, "cost": c}
 
 
+# -- Step 25: the basic auto cooker ---------------------------------------------
+
+func _auto() -> Dictionary:
+	return _t()["auto_cooker"]
+
+
+func auto_cost() -> int:
+	var a := _auto()
+	if cookers.size() >= int(a.get("max", 40)):
+		return -1
+	return int(round(float(a["cost"]) * pow(float(a["growth"]), cookers.size())))
+
+
+func _buy_auto() -> Dictionary:
+	if not station_open("auto"):
+		return {"ok": false, "reason": "err.locked"}
+	var c := auto_cost()
+	if c < 0:
+		return {"ok": false, "reason": "err.max_level"}
+	if money < c:
+		return {"ok": false, "reason": "err.not_enough_money"}
+	money -= c
+	cookers.append({"left_ms": int(_auto()["cycle_ms"]), "held": {}, "state": "run", "upkeep_ms": 0})
+	_emit("station_upgrade", {"station": "auto", "tier": cookers.size(), "cost": c, "money": money})
+	return {"ok": true, "cookers": cookers.size(), "cost": c}
+
+
+## Each cooker: while it runs it pays upkeep (a coin per 60000/upkeep_per_min ms
+## of work; with no coin it pauses -- never a debt) and finishes a lot every
+## cycle; the lot goes up when the bin has room for it, else the cooker holds it.
+func _cookers_step(dt: int) -> void:
+	if cookers.is_empty():
+		return
+	var a := _auto()
+	var per_coin := maxi(1, 60000 / maxi(1, int(a["upkeep_per_min"])))
+	var full := int(_t()["bin_portions"])
+	for ck: Dictionary in cookers:
+		if not (ck["held"] as Dictionary).is_empty():
+			var lot: Dictionary = ck["held"]
+			var room := full - bin_portions() - lift_portions()
+			if room >= int(lot["portions"]):
+				lift.append({"lot": lot, "left_ms": int(_t()["lift_ms"])})
+				_emit("lot_lifted", {"lot": lot["id"], "from": "auto"})
+				ck["held"] = {}
+				ck["state"] = "run"
+			else:
+				ck["state"] = "blocked"
+				stats["auto_blocked_ms"] = int(stats.get("auto_blocked_ms", 0)) + dt
+				continue
+		# Upkeep for this step's work, a whole coin at a time.
+		var owed := int(ck["upkeep_ms"]) + dt
+		if owed >= per_coin:
+			if money < 1:
+				ck["state"] = "unpaid"
+				stats["auto_unpaid_ms"] = int(stats.get("auto_unpaid_ms", 0)) + dt
+				continue
+			money -= 1
+			stats["upkeep_paid"] = int(stats.get("upkeep_paid", 0)) + 1
+			owed -= per_coin
+		ck["upkeep_ms"] = owed
+		ck["state"] = "run"
+		ck["left_ms"] = int(ck["left_ms"]) - dt
+		if int(ck["left_ms"]) <= 0:
+			ck["left_ms"] = int(a["cycle_ms"])
+			ck["held"] = _auto_lot()
+
+
+func _auto_lot() -> Dictionary:
+	var a := _auto()
+	_arng.state = auto_rng_state
+	var u := _arng.randf()
+	auto_rng_state = int(_arng.state)
+	var grade := LATE
+	var acc := 0.0
+	for g: String in (a["grades"] as Dictionary).keys():
+		acc += float(a["grades"][g])
+		if u < acc:
+			grade = g
+			break
+	var cap := float(a.get("portions", kettle_capacity())) * float(a["capacity_share"])
+	var portions := maxi(1, int(floor(cap * float((_t()["yield"] as Dictionary)[grade]))))
+	var lot := {"id": _new_id(), "recipe": "plain", "quality": int(GRADE_QUALITY[grade]), "portions": portions}
+	stats["made_portions"] = int(stats["made_portions"]) + portions
+	stats["auto_lots"] = int(stats.get("auto_lots", 0)) + 1
+	stats["auto_portions"] = int(stats.get("auto_portions", 0)) + portions
+	_note("lots")
+	_emit("auto_lot", {"lot": lot["id"], "grade": grade, "portions": portions})
+	return lot
+
+
 ## A fresh run from another seed (a measured session, ?seed=N): the same model,
 ## its arrivals drawn from that seed. Only before anything has happened.
 func reseed(seed_value: int) -> void:
 	_rng.seed = seed_value
 	_orng.seed = seed_value + 7919
 	order_rng_state = int(_orng.state)
+	_arng.seed = seed_value + 104729
+	auto_rng_state = int(_arng.state)
 	queue.clear()
 	arrival_log.clear()
 	stats["arrived"] = 0
@@ -674,12 +787,13 @@ const SAVE_INTS := ["now_ms", "level", "money", "earned", "presses", "crescendo"
 	"next_arrival_ms", "flow_ms", "next_id", "first_sale_ms"]
 const SAVE_GOODS := ["glass", "lift", "bin", "packing", "shelf", "queue", "serves", "ledger", "arrival_log"]
 ## Step 23 fields: optional (a 0.22 save has none).
-const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms"]
+const SAVE_OPTIONAL := ["order_rng_state", "recent", "glass_held_ms", "cookers", "auto_rng_state", "bn_ring"]
 
 
 func to_save() -> Dictionary:
 	var d := {"rng_state": str(rng_state), "stats": stats.duplicate(true), "outcomes": outcomes.duplicate(),
-		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms}
+		"order_rng_state": str(order_rng_state), "recent": recent.duplicate(true), "glass_held_ms": glass_held_ms,
+		"cookers": cookers.duplicate(true), "auto_rng_state": str(auto_rng_state), "bn_ring": bn_ring.duplicate()}
 	for k: String in SAVE_INTS:
 		d[k] = get(k)
 	for k: String in SAVE_GOODS:
@@ -745,6 +859,11 @@ func _apply_save(d: Dictionary) -> void:
 		order_rng_state = String(d["order_rng_state"]).to_int()
 		_orng.state = order_rng_state
 	glass_held_ms = maxi(0, int(d.get("glass_held_ms", 0))) if typeof(d.get("glass_held_ms", 0)) == TYPE_INT else 0
+	cookers = (d.get("cookers", []) as Array).duplicate(true) if typeof(d.get("cookers", [])) == TYPE_ARRAY else []
+	bn_ring = (d.get("bn_ring", []) as Array).duplicate() if typeof(d.get("bn_ring", [])) == TYPE_ARRAY else []
+	if String(d.get("auto_rng_state", "")).is_valid_int():
+		auto_rng_state = String(d["auto_rng_state"]).to_int()
+		_arng.state = auto_rng_state
 	if typeof(d.get("recent")) == TYPE_DICTIONARY:
 		for k: String in recent.keys():
 			recent[k] = (d["recent"] as Dictionary).get(k, []) if typeof((d["recent"] as Dictionary).get(k)) == TYPE_ARRAY else []
@@ -770,6 +889,8 @@ func state() -> Dictionary:
 	s["queue"] = queue.size()
 	s["queue_cap"] = queue_cap()
 	s["sign_tier"] = sign_tier
+	s["cookers"] = cookers.map(func(c: Dictionary) -> String: return String(c["state"]))
+	s["auto_cost"] = auto_cost()
 	s["open"] = {"packer": station_open("packer"), "sign": station_open("sign")}
 	s["sign_max"] = (_t()["sign"] as Array).size() - 1
 	s["sign_cost"] = sign_cost()
@@ -801,7 +922,27 @@ const REAL_WAIT_MS := 6000
 const REAL_HOLD_MS := 3000
 
 
+## Step 25: the bottleneck the player is shown is the one that held for most of
+## the last 30 s (sampled each second) -- an instant's queue from a lucky burst
+## of customers is not a reason to buy a station (the simulator bought on such
+## instants and never earned the price back).
+const BN_SAMPLES := 30
+var bn_ring: Array = []
+
+
 func bottleneck() -> String:
+	if bn_ring.is_empty():
+		return instant_bottleneck()
+	var count := {}
+	for b: String in bn_ring:
+		count[b] = int(count.get(b, 0)) + 1
+	for b: String in count.keys():
+		if b != "" and int(count[b]) * 2 > bn_ring.size():
+			return b
+	return ""
+
+
+func instant_bottleneck() -> String:
 	# Which stage holds the next one back, in the player's terms --
 	# "production" (someone has waited 6 s and the station has no popcorn for them),
 	# "packaging" (someone has waited 6 s while the station works, or the kettle
@@ -814,7 +955,9 @@ func bottleneck() -> String:
 				return "production"
 			return "packaging"
 	if glass_held_ms >= REAL_HOLD_MS:
-		return "demand" if shelf.size() >= int(_t()["shelf_packs"]) and queue.is_empty() else "packaging"
+		# The kettle waits for room: the station is the cause only if it is still
+		# working; a station blocked by a full shelf means packs wait for people.
+		return "demand" if packer_state() == "blocked" else "packaging"
 	if queue.is_empty() and shelf.size() >= int(_t()["shelf_packs"]) / 2:
 		return "demand"
 	return ""

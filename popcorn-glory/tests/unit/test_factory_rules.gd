@@ -269,7 +269,12 @@ func test_the_hand_beats_one_basic_auto_cooker_per_attempt_and_parallel_cookers_
 		var hand_per_min := 60000.0 / hand_cycle * float(hand["portions"])
 		var auto_per_min := 60000.0 / int(auto["cycle_ms"]) * float(auto["portions"])
 		var n := ceili(hand_per_min / auto_per_min + 0.001)
-		assert_true(n >= 2 and n <= 8, "level %d: %d basic cookers in parallel out-produce a skilled hand per minute (hand %.0f, one cooker %.0f)" % [lv, n, hand_per_min, auto_per_min])
+		# Step 25: a basic cooker is a fixed basic machine, so the count grows with the hand's kettle;
+		# early on a few out-produce a skilled hand, and within the 40-machine ceiling up to level 6.
+		if lv <= 2:
+			assert_true(n >= 2 and n <= 12, "level %d: %d basic cookers out-produce a skilled hand per minute (hand %.0f, one cooker %.0f)" % [lv, n, hand_per_min, auto_per_min])
+		if lv <= 6:
+			assert_true(n <= 40, "level %d: within the 40-machine ceiling (%d)" % [lv, n])
 
 
 # -- Step 20: the packing station ---------------------------------------------
@@ -742,18 +747,22 @@ func test_an_impatient_exit_costs_nothing_and_the_station_waits_for_the_right_po
 
 func test_the_bottleneck_names_the_stage_that_holds_the_next_one_back() -> void:
 	var f: PopRules = Factory.new()
-	assert_eq(String(f.bottleneck()), "", "a customer who just came in is not a shortage yet")
+	assert_eq(String(f.instant_bottleneck()), "", "a customer who just came in is not a shortage yet")
 	f.advance(6500)
-	assert_eq(String(f.bottleneck()), "production", "a customer has waited 6 s, no popcorn: production")
+	assert_eq(String(f.instant_bottleneck()), "production", "a customer has waited 6 s, no popcorn: production (now)")
+	assert_eq(String(f.bottleneck()), "", "but not yet for most of the last 30 s: nothing shown")
+	f.advance(20000)
+	assert_eq(String(f.bottleneck()), "production", "held for most of the last 30 s: shown")
 	_pop(f)
 	f.advance(1500)
-	assert_eq(String(f.bottleneck()), "packaging", "popcorn there, packing under way while they wait: packaging")
+	assert_eq(String(f.instant_bottleneck()), "packaging", "popcorn there, packing under way while they wait: packaging (now)")
+	assert_eq(String(f.bottleneck()), "production", "a moment does not change what is shown")
 	var g: PopRules = Factory.new()
 	_quiet_shop(g)
 	_lot(g, "plain", 24, 100)
-	g.advance(30000)
+	g.advance(60000)
 	assert_eq(String(g.bottleneck()), "demand", "a full shelf, nobody waiting: demand")
-	assert_true(int(g.per_min("packs")) >= 6, "the station's last minute counted (%d packs)" % int(g.per_min("packs")))
+	assert_true(int(g.per_min("packs")) >= 4, "the station's last minute counted (%d packs)" % int(g.per_min("packs")))
 	g.advance(90000)
 	assert_eq(int(g.per_min("packs")), 0, "a minute later, the count is of the last minute only")
 
@@ -850,3 +859,89 @@ func test_the_sign_brings_people_never_goods_or_money() -> void:
 	idle.advance(600000)
 	assert_true(int(idle.stats["visitors"]) > 300, "the landmark brings people (%d)" % int(idle.stats["visitors"]))
 	assert_eq(int(idle.stats["made_portions"]) + int(idle.stats["packed"]) + int(idle.stats["sold"]) + int(idle.money), 0, "and no popcorn, no packs, no sales, no money")
+
+
+# -- Step 25: the basic auto cooker and its upkeep ------------------------------
+
+func test_auto_cookers_open_with_the_sign_and_cost_more_each() -> void:
+	var f: PopRules = Factory.new()
+	f.money = 100000
+	assert_eq(String(f.execute({"type": "buy_auto"})["reason"]), "err.locked", "not before the sign's unlock tier")
+	f.sign_tier = int(f.economy.table("factory")["auto_cooker"]["unlock_sign"])
+	var prices: Array[int] = []
+	for i in 5:
+		prices.append(int(f.auto_cost()))
+		assert_true(bool(f.execute({"type": "buy_auto"})["ok"]), "cooker %d bought" % (i + 1))
+	for i in range(1, 5):
+		assert_true(prices[i] > prices[i - 1], "each costs more (%d > %d)" % [prices[i], prices[i - 1]])
+	assert_eq(int(f.money), 100000 - prices.reduce(func(a: int, b: int) -> int: return a + b, 0), "paid each once")
+
+
+func test_upkeep_is_paid_a_coin_at_a_time_and_never_becomes_a_debt() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.sign_tier = int(f.economy.table("factory")["auto_cooker"]["unlock_sign"])
+	f.money = int(f.auto_cost())
+	f.execute({"type": "buy_auto"})
+	assert_eq(int(f.money), 0, "the cooker took the last coin")
+	f.money = 3
+	f.advance(60000)
+	assert_eq(int(f.money), 0, "it paid what there was")
+	assert_eq(int(f.stats["upkeep_paid"]), 3, "three coins")
+	assert_eq(String(f.cookers[0]["state"]), "unpaid", "then it paused (never below zero)")
+	var lots := int(f.stats["auto_lots"])
+	f.advance(30000)
+	assert_eq(int(f.stats["auto_lots"]), lots, "paused: no lots, no debt")
+	assert_true(int(f.money) >= 0, "money never negative")
+	f.money = 10
+	f.advance(20000)
+	assert_true(int(f.stats["auto_lots"]) > lots, "a coin there: it resumes")
+	_check_conservation(f, "upkeep")
+
+
+func test_a_blocked_cooker_holds_its_lot_and_pays_nothing() -> void:
+	var f: PopRules = Factory.new()
+	_quiet_shop(f)
+	f.sign_tier = int(f.economy.table("factory")["auto_cooker"]["unlock_sign"])
+	f.money = int(f.auto_cost()) + 1000
+	f.execute({"type": "buy_auto"})
+	_lot(f, "plain", 24, 100)   # a full bin, and a full shelf so nothing drains it
+	for k in 8:
+		f.shelf.append({"id": f._new_id(), "recipe": "plain", "size": 2, "quality": 100})
+		f.stats["made_portions"] = int(f.stats["made_portions"]) + 2
+	var paid := int(f.stats.get("upkeep_paid", 0))
+	f.advance(6100)
+	assert_eq(String(f.cookers[0]["state"]), "blocked", "its lot waits for room")
+	f.advance(10000)
+	assert_true(int(f.stats["upkeep_paid"]) - paid <= 1, "no upkeep while blocked")
+	_check_conservation(f, "blocked cooker")
+
+
+func test_a_good_hand_beats_one_cooker_per_batch_and_cookers_win_by_numbers() -> void:
+	var f: PopRules = Factory.new()
+	f.sign_tier = int(f.economy.table("factory")["auto_cooker"]["unlock_sign"])
+	f.money = 1 << 30
+	f.execute({"type": "buy_auto"})
+	_quiet_shop(f)
+	var t := 0
+	assert_eq(f.cookers.size(), 1, "a cooker bought")
+	while int(f.stats.get("auto_lots", 0)) < 50 and t < 3600000:
+		f.advance(1000)
+		f.bin.clear()   # (an endless sink, to measure the cooker alone)
+		f.lift.clear()
+		t += 1000
+	var auto_avg := float(f.stats["auto_portions"]) / float(f.stats["auto_lots"])
+	assert_true(float(f.kettle_capacity()) > auto_avg * 1.4, "a perfect hand batch (%d) beats a cooker's batch (%.1f)" % [f.kettle_capacity(), auto_avg])
+	# Over five minutes at sign 6: the hand alone vs the hand resting while 8 cookers work.
+	var hand := _played(6, 3, 4, 2000, 5)
+	var crew: PopRules = Factory.new(null, 20261116)
+	crew.sign_tier = 6
+	crew.packer_tier = 3
+	crew.level = 4
+	crew.money = 1 << 30
+	for i in 8:
+		crew.execute({"type": "buy_auto"})
+	crew.money = 100000
+	crew.advance(300000)
+	assert_true(int(crew.stats["sold"]) >= int(hand.stats["sold"]) * 0.9, "8 cookers keep up with a skilled hand over time (%d vs %d sales)" % [crew.stats["sold"], hand.stats["sold"]])
+	_check_conservation(crew, "crew")

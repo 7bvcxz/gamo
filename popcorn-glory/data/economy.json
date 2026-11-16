@@ -52,7 +52,10 @@
     "_flow": "Step 17 (design/FACTORY_FLOW.md): a release makes a lot of kettle_portions[level] x yield[grade] portions (at least 1) in the glass; the lift takes lift_ms to the bin (bin_portions); the packer takes pack.size portions per pack.ms onto the shelf (shelf_packs); customers arrive by a triangular wait (min_ms, mode_ms, max_ms; the first is waiting at the start, the second in second_ms), queue up to queue_cap, wait patience_ms; the counter hands a matching pack over in service_ms and only then earns price[recipe] x (0.6 + 0.4 x quality/100). Starting values, to be tuned by the simulator (Steps 22, 25).",
     "kettle_portions": [4, 6, 8, 11, 14, 18, 23, 29, 36, 45, 56, 70, 87, 108, 134],
     "recovery_ms": [400, 400, 400, 350, 350, 300, 300, 260, 260, 220, 220, 200, 180, 160, 150],
-    "auto_cooker": { "_doc": "Step 19: the basic auto cooker's numbers, the reference the hand is balanced against (Steps 26 and 28 build it): a lot every cycle_ms, of capacity_share x the kettle's portions, with these grade odds (it never judges perfect, never burns).", "cycle_ms": 6000, "capacity_share": 0.7, "grades": { "near": 0.7, "late": 0.3 } },
+    "auto_cooker": { "_doc": "Step 19: the basic auto cooker's numbers, the reference the hand is balanced against (Steps 26 and 28 build it): a lot every cycle_ms, of capacity_share x the kettle's portions, with these grade odds (it never judges perfect, never burns).", "cycle_ms": 6000, "capacity_share": 0.7, "grades": { "near": 0.7, "late": 0.3 },
+      "_doc_runtime": "Step 25: the cooker runs in the model (Step 26 places it on screen). A cooker costs cost x growth^n for the n-th; while it works it pays upkeep_per_min coins, a whole coin at a time; with no coin to pay it pauses (never a debt) and resumes when a coin is there. Its lot goes up the lift when the bin has room for it, else it holds it (blocked, no upkeep). Opens with the sign's tier unlock_sign. max: the 40-machine ceiling.",
+      "cost": 300, "growth": 1.2, "upkeep_per_min": 4, "unlock_sign": 3, "max": 40,
+      "portions": 4, "_doc_portions": "Step 25: a basic cooker is a basic machine -- capacity_share x 4 portions (a level-0 kettle), whatever the hand's kettle level (at kettle 8 one cooker used to cover the landmark's whole demand). Stronger machines are Steps 28-29." },
     "crescendo": { "_doc": "Step 19: as the stand's (Step 14) -- a perfect pop adds 2 kernels, a near 1, misses nothing; the pop that fills 8 makes a lot of 1.5 x portions (real popcorn).", "full": 8, "perfect": 2, "near": 1, "bonus": 0.5, "tiers": [5, 10] },
     "yield": { "perfect": 1.0, "near": 0.75, "late": 0.75, "early": 0.5, "burnt": 0.25 },
     "lift_ms": 900,
@@ -65,9 +68,9 @@
     "pack_recipes": { "_doc": "Step 20: the SKU each recipe's popcorn is packed as (the seasoning of a later Step maps here); a pack never mixes recipes.", "plain": "plain" },
     "packer": [
       { "_doc": "Step 20 (rebalanced in Step 24 so every tier relieves a bottleneck the shop reaches): a pack per head every ms (per_cycle heads), its look (0 scoop and paper bag, 1 bag feeder, 2 twin filling heads, 5 multihead packer); cost to reach the tier. Packs a minute 15, 20, 33, 75 -- just above what signs 3, 4, 5 and 6 bring (11, 17, 27, 40 customers a minute).", "ms": 4000, "per_cycle": 1, "cost": 0, "look": 0 },
-      { "ms": 3000, "per_cycle": 1, "cost": 500, "look": 1 },
-      { "ms": 3600, "per_cycle": 2, "cost": 1800, "look": 2 },
-      { "ms": 2400, "per_cycle": 3, "cost": 7000, "look": 5 }
+      { "ms": 3000, "per_cycle": 1, "cost": 250, "look": 1 },
+      { "ms": 3600, "per_cycle": 2, "cost": 700, "look": 2 },
+      { "ms": 2400, "per_cycle": 3, "cost": 1600, "look": 5 }
     ],
     "shelf_packs": 8,
     "price": { "plain": 10 },
@@ -76,12 +79,12 @@
     "customers": { "second_ms": [4000, 8000], "min_gap_ms": 1000, "drought_ms": 25000, "patience_ms": 60000 },
     "sign": [
       { "_doc": "Step 22 (rebalanced in Step 24): each tier sets the next customer's wait -- triangular between min_ms and max_ms around mode_ms (mean (min+mode+max)/3), never a fixed timer -- and the shop's size (lanes, queue_cap). Means 15, 11, 8, 5.5, 3.5, 2.2, 1.5 s: about 4, 5.5, 7.5, 11, 17, 27, 40 customers a minute. The sign never makes money itself (STATIONS 3).", "mode_ms": 15000, "min_ms": 10000, "max_ms": 20000, "lanes": 1, "queue_cap": 5, "cost": 0, "look": 0 },
-      { "mode_ms": 11000, "min_ms": 7500, "max_ms": 14500, "lanes": 1, "queue_cap": 5, "cost": 80, "look": 1 },
-      { "mode_ms": 8000, "min_ms": 5500, "max_ms": 10500, "lanes": 1, "queue_cap": 6, "cost": 260, "look": 2 },
-      { "mode_ms": 5500, "min_ms": 3800, "max_ms": 7200, "lanes": 2, "queue_cap": 6, "cost": 800, "look": 3 },
-      { "mode_ms": 3500, "min_ms": 2400, "max_ms": 4600, "lanes": 2, "queue_cap": 7, "cost": 2400, "look": 4 },
-      { "mode_ms": 2200, "min_ms": 1500, "max_ms": 2900, "lanes": 3, "queue_cap": 8, "cost": 7000, "look": 5 },
-      { "mode_ms": 1500, "min_ms": 1000, "max_ms": 2000, "lanes": 4, "queue_cap": 8, "cost": 20000, "look": 6 }
+      { "mode_ms": 11000, "min_ms": 7500, "max_ms": 14500, "lanes": 1, "queue_cap": 5, "cost": 40, "look": 1 },
+      { "mode_ms": 8000, "min_ms": 5500, "max_ms": 10500, "lanes": 1, "queue_cap": 6, "cost": 100, "look": 2 },
+      { "mode_ms": 5500, "min_ms": 3800, "max_ms": 7200, "lanes": 2, "queue_cap": 6, "cost": 220, "look": 3 },
+      { "mode_ms": 3500, "min_ms": 2400, "max_ms": 4600, "lanes": 2, "queue_cap": 7, "cost": 500, "look": 4 },
+      { "mode_ms": 2200, "min_ms": 1500, "max_ms": 2900, "lanes": 3, "queue_cap": 8, "cost": 1100, "look": 5 },
+      { "mode_ms": 1500, "min_ms": 1000, "max_ms": 2000, "lanes": 4, "queue_cap": 8, "cost": 2400, "look": 6 }
     ]
   },
   "stand": {

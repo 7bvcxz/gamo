@@ -472,7 +472,7 @@ func test_bubbles_show_each_order_and_the_cue_follows_the_bottleneck() -> void:
 	f.next_arrival_ms = 1 << 40
 	f.bin.append({"id": f._new_id(), "recipe": "plain", "quality": 100, "portions": 24})
 	f.stats["made_portions"] = int(f.stats["made_portions"]) + 24
-	await _frames(40, 500)
+	await _frames(60, 1000)
 	assert_eq(String(f.bottleneck()), "demand", "packs wait, nobody comes")
 	assert_eq(String(v._cue), "demand", "the shop is outlined")
 	v._hover = 1
