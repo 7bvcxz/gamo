@@ -37,6 +37,31 @@ for (const id of ['click', 'perfect', 'explosion']) {
   });
 }
 
+// Step 16: the factory on the same five screens -- its floors stack inside the window
+// without overlapping, the ring stays in the kitchen, the card and the top bar's controls
+// cover no floor, and every floor (a tap target: it opens its detail) is at least 44 CSS px tall.
+test('factory: floors fit, ring in the kitchen, nothing overlaps', async ({ pop }) => {
+  await pop.open('./#factory');
+  const s = await pop.state();
+  const [w, h] = s.window;
+  const box = await pop.canvas.boundingBox();
+  const css = box.width / w;
+  const r = s.rects;
+  const inside = (a, b) => a[0] >= b[0] - 1 && a[1] >= b[1] - 1 && a[0] + a[2] <= b[0] + b[2] + 1 && a[1] + a[3] <= b[1] + b[3] + 1;
+  for (const name of [...CONTROLS, 'floor_top', 'floor_mid', 'floor_low', 'ring', 'news']) {
+    expect(inside(r[name], [0, 0, w, h]), `${name} inside the window`).toBe(true);
+  }
+  const floors = ['floor_top', 'floor_mid', 'floor_low'];
+  expect(overlap(r.floor_top, r.floor_mid) || overlap(r.floor_mid, r.floor_low), 'floors do not overlap').toBe(false);
+  expect(inside(r.ring, r.floor_low), 'the ring inside the kitchen').toBe(true);
+  for (const c of CONTROLS) for (const f of [...floors, 'ring']) expect(overlap(r[c], r[f]), `${c} clear of ${f}`).toBe(false);
+  for (const f of floors) expect(r[f][3] * css, `${f} at least 44 CSS px tall`).toBeGreaterThanOrEqual(44);
+  expect(r.money[3] * css, 'the money at least 24 CSS px tall').toBeGreaterThanOrEqual(24);
+  test.info().annotations.push({ type: 'sizes', description: `ring ${(r.ring[2] * css).toFixed(0)} CSS px, floors ${floors.map((f) => (r[f][3] * css).toFixed(0)).join('/')} CSS px tall` });
+  await pop.shot('responsive_factory');
+  expect(pop.errors).toEqual([]);
+});
+
 test('reduced motion and sound off still play', async ({ pop }) => {
   await pop.open('./?motion=reduce&sound=off#explosion');
   const s0 = await pop.state();

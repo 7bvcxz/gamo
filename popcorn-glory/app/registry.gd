@@ -23,6 +23,11 @@ const EXPERIMENTS: Array[Dictionary] = [
 	{"id": "explosion", "letter": "C", "listed": true,
 		"rules": "res://variants/explosion/explosion_rules.gd", "view": "res://variants/explosion/explosion_view.gd",
 		"color": Color(0.55, 0.3, 0.75)},
+	# Step 16: the three-floor factory (not on the chooser until its flow is real, Step 17+).
+	# `wide`: on a landscape screen it takes the whole width (floors left, cards right).
+	{"id": "factory", "letter": "", "listed": false, "wide": true,
+		"rules": "res://variants/factory/factory_rules.gd", "view": "res://variants/factory/factory_view.gd",
+		"color": Color(0.84, 0.21, 0.17)},
 	# Step 15: the art direction drawn in the engine from art/tokens.gd (a preview, nothing plays).
 	{"id": "artboard", "letter": "", "listed": false,
 		"rules": "res://variants/stub/stub_rules.gd", "view": "res://variants/artboard/artboard_view.gd",

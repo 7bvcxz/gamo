@@ -244,8 +244,17 @@ func _process(delta: float) -> void:
 		machine_node.position = machine_base() + _shake() - Vector2(0, hop)
 		machine_node.scale = Vector2((1.0 + 0.06 * _squash) * (1.0 + breathe) * grow, (1.0 - 0.08 * _squash) * (1.0 - breathe) * grow)
 	machine_node.visible = rules != null
-	under_layer.queue_redraw()
-	over_layer.queue_redraw()
+	if _needs_redraw():
+		under_layer.queue_redraw()
+		over_layer.queue_redraw()
+
+
+## Whether the drawn layers change this frame. Every frame for the experiments
+## and the stand (as before). Step 16: the factory redraws only while something
+## moves -- a redrawn polygon grows the engine's GL id tables on the web
+## (QUALITY_GATES R-01, about 1.5 MB a minute idle on the stand).
+func _needs_redraw() -> bool:
+	return true
 
 
 func _layer_draw(ci: CanvasItem, under: bool) -> void:

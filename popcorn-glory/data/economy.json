@@ -35,6 +35,21 @@
     "show_step_ms": 300,
     "show_max_ms": 3000
   },
+  "factory": {
+    "_doc": "Step 16, the three-floor factory's hand kettle (design/FACTORY_FLOW.md): the stand's B numbers for now; Step 17 replaces paying on the pop with the conserved flow and moves the rest of the factory's numbers here.",
+    "batch": [5, 8, 13, 20, 33, 52, 84, 134, 215, 344, 550, 880, 1400, 2240, 3580],
+    "max_level": 14,
+    "window_start_ms": 1400,
+    "window_ms": 450,
+    "window_step_ms": 50,
+    "window_max_ms": 800,
+    "burn_after_ms": 600,
+    "cooldown_ms": 400,
+    "near_ms": 200,
+    "mult": { "early": 0.6, "near": 1.0, "perfect": 2.0, "late": 0.6, "burnt": 0.25 },
+    "costs": [30, 54, 97, 175, 430, 1050, 2500, 5800, 14000, 27000, 53000, 103000, 200000, 390000],
+    "edge_grace_ms": 40
+  },
   "stand": {
     "_doc": "Step 10, the Popcorn Stand (design/SLICE.md): B's hold and release, plus shake (unlock.shake: `turns` direction changes in one heat = an even pop x shake.mult; the motor gives motor_mult to every batch and the hand's shake multiplies on top), recipes (unlock.recipes: mult x the batch, window_scale x the gold, burn_scale x the time from the gold to the burn, cooldown_add_ms after a pop), edge_grace_ms (a release this close outside the drawn gold still counts as perfect) and the automation ladder (unlock.auto: a motor that shakes every batch, then a helper kettle paying share x batch[L] every cycle_ms). costs: the main machine's prices, level by level -- B's first four, then stretched for a 10-20 minute session.",
     "batch": [5, 8, 13, 20, 33, 52, 84, 134, 215, 344, 550, 880, 1400, 2240, 3580],

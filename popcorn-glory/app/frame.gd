@@ -96,9 +96,21 @@ func _notification(what: int) -> void:
 		_layout()
 
 
+## Step 16: a screen that takes the whole width on landscape (the factory:
+## floors on the left, the cards in a column on the right).
+var wide := false
+
+
+func is_wide_layout() -> bool:
+	return wide and size.x > size.y * 1.15
+
+
 func _layout() -> void:
 	var w := size.x
 	var h := size.y
+	if is_wide_layout():
+		_layout_wide(w, h)
+		return
 	var col := minf(w, 720.0)
 	var x0 := (w - col) / 2
 	var bar := 128.0
@@ -124,6 +136,30 @@ func _layout() -> void:
 	if play != null:
 		play.position = Vector2(x0, bar)
 		play.size = Vector2(col, play_bottom - bar)
+
+
+func _layout_wide(w: float, h: float) -> void:
+	var bar := 110.0
+	back_button.position = Vector2(24, 20)
+	back_button.size = Vector2(80, 80)
+	restart_button.position = Vector2(w - 104, 20)
+	restart_button.size = Vector2(80, 80)
+	sound_button.position = Vector2(w - 194, 20)
+	sound_button.size = Vector2(80, 80)
+	log_button.position = Vector2(24, 120)
+	log_button.size = Vector2(72, 72)
+	log_button.visible = dev
+	money_view.position = Vector2(w * 0.5 - 200, 26)
+	money_view.size = Vector2(400, 72)
+	# The right column: the selected floor's card at the top (the play view
+	# draws the floor's details under it).
+	var right := w * 0.62
+	var cw := minf(w - right - 32, 520.0)
+	upgrade_button.size = Vector2(cw, clampf(h * 0.2, 120.0, 170.0))
+	upgrade_button.position = Vector2(right + (w - right - cw) * 0.5, bar + 10)
+	if play != null:
+		play.position = Vector2(0, bar)
+		play.size = Vector2(w, h - bar - 10)
 
 
 func refresh(rules: PopRules, p_clock_ms: int) -> void:

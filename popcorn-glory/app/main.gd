@@ -365,6 +365,7 @@ func _start(id: String) -> void:
 	view.command.connect(on_command)
 	frame.accent = entry["color"]
 	frame.has_auto = rules.has_method("auto_offer")
+	frame.wide = bool(entry.get("wide", false))
 	frame.set_play(view)
 	view.setup(rules)
 	chooser.visible = false

@@ -84,6 +84,10 @@ func _tick() -> void:
 						_app.rules.earned += int(step.substr(1))
 					"w":
 						_app.dev_advance(int(step.substr(1)))
+					"f":
+						# Step 16: open a floor's detail (0 top, 1 middle, 2 bottom).
+						if _app.frame.play.has_method("toggle_floor"):
+							_app.frame.play.toggle_floor(int(step.substr(1)))
 		if _app.rules != null:
 			var buys := int(_args.get("buy", "0"))
 			for i in int(_args.get("presses", "0")):
