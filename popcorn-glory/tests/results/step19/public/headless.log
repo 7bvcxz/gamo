@@ -1,0 +1,8 @@
+── Popcorn: import
+── Popcorn: editor load
+── Popcorn: unit + integration
+127 passed, 0 failed, 3250 checks, 18 files, 11.3s
+── test.sh: OK
+── Popcorn: render (gold on top of a burst)
+gold on the arc under burst pieces: without the mode 0.00, with the crescendo mode 1.00
+── check.sh (Popcorn): OK
